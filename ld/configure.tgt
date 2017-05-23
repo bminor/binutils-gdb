@@ -56,6 +56,14 @@ aarch64-*-freebsd*)	targ_emul=aarch64fbsd
 			targ_extra_emuls="aarch64fbsdb aarch64elf" ;;
 aarch64-*-fuchsia*)	targ_emul=aarch64elf
 			targ_extra_emuls="aarch64elfb armelf armelfb" ;;
+aarch64_be-*-linux-gnu_ilp32)
+			targ_emul=aarch64linux32b
+			targ_extra_libpath="aarch64linuxb aarch64linux aarch64linux32 armelfb_linux_eabi armelf_linux_eabi"
+			targ_extra_emuls="aarch64elfb aarch64elf aarch64elf32 aarch64elf32b armelfb armelf $targ_extra_libpath" ;;
+aarch64-*-linux-gnu_ilp32)
+			targ_emul=aarch64linux32
+			targ_extra_libpath="aarch64linux aarch64linuxb aarch64linux32b armelfb_linux_eabi armelf_linux_eabi"
+			targ_extra_emuls="aarch64elf aarch64elf32 aarch64elf32b aarch64elfb armelf armelfb $targ_extra_libpath" ;;
 aarch64_be-*-linux*)	targ_emul=aarch64linuxb
 			targ_extra_libpath="aarch64linux aarch64linux32 aarch64linux32b armelfb_linux_eabi armelf_linux_eabi"
 			targ_extra_emuls="aarch64elfb aarch64elf aarch64elf32 aarch64elf32b armelfb armelf $targ_extra_libpath" ;;
@@ -408,6 +416,7 @@ i960-*-coff)		targ_emul=gld960coff ;;
 i960-intel-nindy)	targ_emul=gld960 ;;
 i960-*-elf*)		targ_emul=elf32_i960
 			;;
+ia16-*-elf*)		targ_emul=elf_i386 targ_extra_emuls=i386msdos ;;
 ia64-*-elf*)		targ_emul=elf64_ia64 ;;
 ia64-*-freebsd* | ia64-*-kfreebsd*-gnu)
 		        targ_emul=elf64_ia64_fbsd

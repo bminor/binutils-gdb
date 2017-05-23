@@ -111,7 +111,7 @@ run_cc_link_tests [list \
 	 tmpdir/no-plt-func1.o tmpdir/no-plt-extern1.o" \
 	"" \
 	{dummy.s} \
-	{{readelf -Wr no-plt-1e.rd} {objdump -dwrj.text no-plt-1e.dd}} \
+	{{readelf -Wr no-plt-1e.rd} {nm -gD no-plt-1e.nd} {objdump -dwrj.text no-plt-1e.dd}} \
 	"no-plt-1e" \
     ] \
     [list \

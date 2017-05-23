@@ -7959,17 +7959,13 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 	{
 	  if (thumb_p)
 	    {
-	      /* This can be encoded only for a low register.  */
-	      if ((v & ~0xFF) == 0 && (inst.operands[i].reg < 8))
-		{
-		  /* This can be done with a mov(1) instruction.  */
-		  inst.instruction = T_OPCODE_MOV_I8 | (inst.operands[i].reg << 8);
-		  inst.instruction |= v;
-		  return TRUE;
-		}
+	      /* LDR should not use lead in a flag-setting instruction being
+		 chosen so we do not check whether movs can be used.  */
 
-	      if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2)
+	      if ((ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2)
 		  || ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2_v8m))
+		  && inst.operands[i].reg != 13
+		  && inst.operands[i].reg != 15)
 		{
 		  /* Check if on thumb2 it can be done with a mov.w, mvn or
 		     movw instruction.  */
@@ -8355,6 +8351,12 @@ do_adr (void)
   inst.reloc.type = BFD_RELOC_ARM_IMMEDIATE;
   inst.reloc.pc_rel = 1;
   inst.reloc.exp.X_add_number -= 8;
+
+  if (inst.reloc.exp.X_op == O_symbol
+      && inst.reloc.exp.X_add_symbol != NULL
+      && S_IS_DEFINED (inst.reloc.exp.X_add_symbol)
+      && THUMB_IS_FUNC (inst.reloc.exp.X_add_symbol))
+    inst.reloc.exp.X_add_number += 1;  
 }
 
 /* This is a pseudo-op of the form "adrl rd, label" to be converted
@@ -8373,6 +8375,12 @@ do_adrl (void)
   inst.reloc.pc_rel	       = 1;
   inst.size		       = INSN_SIZE * 2;
   inst.reloc.exp.X_add_number -= 8;
+
+  if (inst.reloc.exp.X_op == O_symbol
+      && inst.reloc.exp.X_add_symbol != NULL
+      && S_IS_DEFINED (inst.reloc.exp.X_add_symbol)
+      && THUMB_IS_FUNC (inst.reloc.exp.X_add_symbol))
+    inst.reloc.exp.X_add_number += 1;  
 }
 
 static void
@@ -10738,9 +10746,14 @@ do_t_adr (void)
       inst.reloc.type = BFD_RELOC_ARM_THUMB_ADD;
       inst.reloc.exp.X_add_number -= 4; /* PC relative adjust.  */
       inst.reloc.pc_rel = 1;
-
       inst.instruction |= Rd << 4;
     }
+
+  if (inst.reloc.exp.X_op == O_symbol
+      && inst.reloc.exp.X_add_symbol != NULL
+      && S_IS_DEFINED (inst.reloc.exp.X_add_symbol)
+      && THUMB_IS_FUNC (inst.reloc.exp.X_add_symbol))
+    inst.reloc.exp.X_add_number += 1;
 }
 
 /* Arithmetic instructions for which there is just one 16-bit
@@ -22113,7 +22126,8 @@ start_unwind_section (const segT text_seg, int idx)
       linkonce = 1;
     }
 
-  obj_elf_change_section (sec_name, type, flags, 0, group_name, linkonce, 0);
+  obj_elf_change_section (sec_name, type, 0, flags, 0, group_name,
+			  linkonce, 0);
 
   /* Set the section link for index tables.  */
   if (idx)
@@ -25040,8 +25054,8 @@ md_begin (void)
       mcpu_cpu_opt = &cpu_default;
       selected_cpu = cpu_default;
     }
-  else if (no_cpu_selected ())
-    selected_cpu = cpu_default;
+  else
+    selected_cpu = *mcpu_cpu_opt;
 #else
   if (mcpu_cpu_opt)
     selected_cpu = *mcpu_cpu_opt;
@@ -25781,7 +25795,7 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
   {"softvfp+vfp",	FPU_ARCH_VFP_V2},
   {"vfp",		FPU_ARCH_VFP_V2},
   {"vfp9",		FPU_ARCH_VFP_V2},
-  {"vfp3",              FPU_ARCH_VFP_V3}, /* For backwards compatibility.  */
+  {"vfp3",		FPU_ARCH_VFP_V3}, /* Undocumented, use vfpv3.  */
   {"vfp10",		FPU_ARCH_VFP_V2},
   {"vfp10-r0",		FPU_ARCH_VFP_V1},
   {"vfpxd",		FPU_ARCH_VFP_V1xD},
@@ -25794,10 +25808,11 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
   {"vfpv3xd-fp16",	FPU_ARCH_VFP_V3xD_FP16},
   {"arm1020t",		FPU_ARCH_VFP_V1},
   {"arm1020e",		FPU_ARCH_VFP_V2},
-  {"arm1136jfs",	FPU_ARCH_VFP_V2},
+  {"arm1136jfs",	FPU_ARCH_VFP_V2}, /* Undocumented, use arm1136jf-s.  */
   {"arm1136jf-s",	FPU_ARCH_VFP_V2},
   {"maverick",		FPU_ARCH_MAVERICK},
-  {"neon",              FPU_ARCH_VFP_V3_PLUS_NEON_V1},
+  {"neon",		FPU_ARCH_VFP_V3_PLUS_NEON_V1},
+  {"neon-vfpv3",	FPU_ARCH_VFP_V3_PLUS_NEON_V1},
   {"neon-fp16",		FPU_ARCH_NEON_FP16},
   {"vfpv4",		FPU_ARCH_VFP_V4},
   {"vfpv4-d16",		FPU_ARCH_VFP_V4D16},

@@ -44,6 +44,16 @@ tui_file::puts (const char *linebuffer)
 }
 
 void
+tui_file::write (const char *buf, long length_buf)
+{
+  tui_write (buf, length_buf);
+  /* gdb_stdout is buffered, and the caller must gdb_flush it at
+     appropriate times.  Other streams are not so buffered.  */
+  if (this != gdb_stdout)
+    tui_refresh_cmd_win ();
+}
+
+void
 tui_file::flush ()
 {
   /* gdb_stdout is buffered.  Other files are always flushed on

@@ -141,8 +141,8 @@ static void remote_thread_events (struct target_ops *ops, int enable);
 
 static void interrupt_query (void);
 
-static void set_general_thread (struct ptid ptid);
-static void set_continue_thread (struct ptid ptid);
+static void set_general_thread (ptid_t ptid);
+static void set_continue_thread (ptid_t ptid);
 
 static void get_offsets (void);
 
@@ -1025,7 +1025,7 @@ static int remote_async_terminal_ours_p;
 
 struct memory_packet_config
 {
-  char *name;
+  const char *name;
   long size;
   int fixed_p;
 };
@@ -1242,7 +1242,7 @@ static enum packet_support packet_support (int packet);
 static void
 show_packet_config_cmd (struct packet_config *config)
 {
-  char *support = "internal-error";
+  const char *support = "internal-error";
 
   switch (packet_config_support (config))
     {
@@ -2187,7 +2187,7 @@ remote_program_signals (struct target_ops *self,
    thread.  If GEN is set, set the general thread, if not, then set
    the step/continue thread.  */
 static void
-set_thread (struct ptid ptid, int gen)
+set_thread (ptid_t ptid, int gen)
 {
   struct remote_state *rs = get_remote_state ();
   ptid_t state = gen ? rs->general_thread : rs->continue_thread;
@@ -2216,13 +2216,13 @@ set_thread (struct ptid ptid, int gen)
 }
 
 static void
-set_general_thread (struct ptid ptid)
+set_general_thread (ptid_t ptid)
 {
   set_thread (ptid, 1);
 }
 
 static void
-set_continue_thread (struct ptid ptid)
+set_continue_thread (ptid_t ptid)
 {
   set_thread (ptid, 0);
 }
@@ -3354,7 +3354,7 @@ remote_update_thread_list (struct target_ops *ops)
  * Optional: targets are not required to implement this function.
  */
 
-static char *
+static const char *
 remote_threads_extra_info (struct target_ops *self, struct thread_info *tp)
 {
   struct remote_state *rs = get_remote_state ();
@@ -4142,7 +4142,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   /* On OSs where the list of libraries is global to all
      processes, we fetch them early.  */
   if (gdbarch_has_global_solist (target_gdbarch ()))
-    solib_add (NULL, from_tty, target, auto_solib_add);
+    solib_add (NULL, from_tty, auto_solib_add);
 
   if (target_is_non_stop_p ())
     {
@@ -7711,7 +7711,7 @@ remote_fetch_registers (struct target_ops *ops,
   int i;
 
   set_remote_traceframe ();
-  set_general_thread (inferior_ptid);
+  set_general_thread (regcache_get_ptid (regcache));
 
   if (regnum >= 0)
     {
@@ -7759,7 +7759,6 @@ remote_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
   struct remote_arch_state *rsa = get_remote_arch_state ();
   int i;
-  gdb_byte buf[MAX_REGISTER_SIZE];
 
   /* Make sure the entire registers array is valid.  */
   switch (packet_support (PACKET_P))
@@ -7769,7 +7768,7 @@ remote_prepare_to_store (struct target_ops *self, struct regcache *regcache)
       /* Make sure all the necessary registers are cached.  */
       for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
 	if (rsa->regs[i].in_g_packet)
-	  regcache_raw_read (regcache, rsa->regs[i].regnum, buf);
+	  regcache_raw_update (regcache, rsa->regs[i].regnum);
       break;
     case PACKET_ENABLE:
       break;
@@ -7869,7 +7868,7 @@ remote_store_registers (struct target_ops *ops,
   int i;
 
   set_remote_traceframe ();
-  set_general_thread (inferior_ptid);
+  set_general_thread (regcache_get_ptid (regcache));
 
   if (regnum >= 0)
     {
@@ -8240,7 +8239,7 @@ static enum target_xfer_status
 remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len,
 		    int unit_size, ULONGEST *xfered_len)
 {
-  char *packet_format = 0;
+  const char *packet_format = NULL;
 
   /* Check whether the target supports binary download.  */
   check_binary_download (memaddr);
@@ -9527,7 +9526,7 @@ extended_remote_disable_randomization (int val)
 }
 
 static int
-extended_remote_run (char *args)
+extended_remote_run (const std::string &args)
 {
   struct remote_state *rs = get_remote_state ();
   int len;
@@ -9546,14 +9545,13 @@ extended_remote_run (char *args)
   len += 2 * bin2hex ((gdb_byte *) remote_exec_file, rs->buf + len,
 		      strlen (remote_exec_file));
 
-  gdb_assert (args != NULL);
-  if (*args)
+  if (!args.empty ())
     {
       struct cleanup *back_to;
       int i;
       char **argv;
 
-      argv = gdb_buildargv (args);
+      argv = gdb_buildargv (args.c_str ());
       back_to = make_cleanup_freeargv (argv);
       for (i = 0; argv[i] != NULL; i++)
 	{
@@ -9598,7 +9596,8 @@ extended_remote_run (char *args)
 
 static void
 extended_remote_create_inferior (struct target_ops *ops,
-				 char *exec_file, char *args,
+				 const char *exec_file,
+				 const std::string &args,
 				 char **env, int from_tty)
 {
   int run_worked;
@@ -9623,7 +9622,7 @@ extended_remote_create_inferior (struct target_ops *ops,
 	 user requested.  */
       if (remote_exec_file[0])
 	error (_("Remote target does not support \"set remote exec-file\""));
-      if (args[0])
+      if (!args.empty ())
 	error (_("Remote target does not support \"set args\" or run <ARGS>"));
 
       /* Fall back to "R".  */
@@ -9665,11 +9664,9 @@ remote_add_target_side_condition (struct gdbarch *gdbarch,
   xsnprintf (buf, buf_end - buf, "%s", ";");
   buf++;
 
-  /* Send conditions to the target and free the vector.  */
-  for (int ix = 0; ix < bp_tgt->conditions.size (); ix++)
+  /* Send conditions to the target.  */
+  for (agent_expr *aexpr : bp_tgt->conditions)
     {
-      struct agent_expr *aexpr = bp_tgt->conditions[ix];
-
       xsnprintf (buf, buf_end - buf, "X%x,", aexpr->len);
       buf += strlen (buf);
       for (int i = 0; i < aexpr->len; ++i)
@@ -9693,10 +9690,8 @@ remote_add_target_side_commands (struct gdbarch *gdbarch,
 
   /* Concatenate all the agent expressions that are commands into the
      cmds parameter.  */
-  for (int ix = 0; ix < bp_tgt->tcommands.size (); ix++)
+  for (agent_expr *aexpr : bp_tgt->tcommands)
     {
-      struct agent_expr *aexpr = bp_tgt->tcommands[ix];
-
       sprintf (buf, "X%x,", aexpr->len);
       buf += strlen (buf);
       for (int i = 0; i < aexpr->len; ++i)
@@ -10951,7 +10946,7 @@ init_remote_threadtests (void)
 /* Convert a thread ID to a string.  Returns the string in a static
    buffer.  */
 
-static char *
+static const char *
 remote_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];
@@ -11195,7 +11190,7 @@ remote_read_description (struct target_ops *target)
    decrease *LEFT.  Otherwise raise an error.  */
 
 static void
-remote_buffer_add_string (char **buffer, int *left, char *string)
+remote_buffer_add_string (char **buffer, int *left, const char *string)
 {
   int len = strlen (string);
 
@@ -12421,7 +12416,7 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
 	{
 	  strcpy (buf, "QTDPsrc:");
 	  encode_source_string (b->number, loc->address, "at",
-				event_location_to_string (b->location),
+				event_location_to_string (b->location.get ()),
 				buf + strlen (buf), 2048 - strlen (buf));
 	  putpkt (buf);
 	  remote_get_noisy_reply (&target_buf, &target_buf_size);
@@ -13215,12 +13210,12 @@ static void
 remote_btrace_maybe_reopen (void)
 {
   struct remote_state *rs = get_remote_state ();
-  struct cleanup *cleanup;
   struct thread_info *tp;
   int btrace_target_pushed = 0;
   int warned = 0;
 
-  cleanup = make_cleanup_restore_current_thread ();
+  scoped_restore_current_thread restore_thread;
+
   ALL_NON_EXITED_THREADS (tp)
     {
       set_general_thread (tp->ptid);
@@ -13260,7 +13255,6 @@ remote_btrace_maybe_reopen (void)
       tp->btrace.target->ptid = tp->ptid;
       tp->btrace.target->conf = rs->btrace_config;
     }
-  do_cleanups (cleanup);
 }
 
 /* Enable branch tracing.  */
@@ -13804,11 +13798,10 @@ show_remote_cmd (char *args, int from_tty)
 {
   /* We can't just use cmd_show_list here, because we want to skip
      the redundant "show remote Z-packet" and the legacy aliases.  */
-  struct cleanup *showlist_chain;
   struct cmd_list_element *list = remote_show_cmdlist;
   struct ui_out *uiout = current_uiout;
 
-  showlist_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "showlist");
+  ui_out_emit_tuple tuple_emitter (uiout, "showlist");
   for (; list != NULL; list = list->next)
     if (strcmp (list->name, "Z-packet") == 0)
       continue;
@@ -13818,8 +13811,7 @@ show_remote_cmd (char *args, int from_tty)
       continue;
     else
       {
-	struct cleanup *option_chain
-	  = make_cleanup_ui_out_tuple_begin_end (uiout, "option");
+	ui_out_emit_tuple option_emitter (uiout, "option");
 
 	uiout->field_string ("name", list->name);
 	uiout->text (":  ");
@@ -13827,12 +13819,7 @@ show_remote_cmd (char *args, int from_tty)
 	  do_show_command (NULL, from_tty, list);
 	else
 	  cmd_func (list, NULL, from_tty);
-	/* Close the tuple.  */
-	do_cleanups (option_chain);
       }
-
-  /* Close the tuple.  */
-  do_cleanups (showlist_chain);
 }
 
 

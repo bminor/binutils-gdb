@@ -827,7 +827,7 @@ prefixify_expression (struct expression *expr)
 /* Return the number of exp_elements in the postfix subexpression 
    of EXPR whose operator is at index ENDPOS - 1 in EXPR.  */
 
-int
+static int
 length_of_subexp (struct expression *expr, int endpos)
 {
   int oplen, args;
@@ -1461,10 +1461,10 @@ insert_into_type_stack (int slot, union type_stack_elt element)
 }
 
 /* Insert a new type, TP, at the bottom of the type stack.  If TP is
-   tp_pointer or tp_reference, it is inserted at the bottom.  If TP is
-   a qualifier, it is inserted at slot 1 (just above a previous
-   tp_pointer) if there is anything on the stack, or simply pushed if
-   the stack is empty.  Other values for TP are invalid.  */
+   tp_pointer, tp_reference or tp_rvalue_reference, it is inserted at the
+   bottom.  If TP is a qualifier, it is inserted at slot 1 (just above a
+   previous tp_pointer) if there is anything on the stack, or simply pushed
+   if the stack is empty.  Other values for TP are invalid.  */
 
 void
 insert_type (enum type_pieces tp)
@@ -1473,7 +1473,8 @@ insert_type (enum type_pieces tp)
   int slot;
 
   gdb_assert (tp == tp_pointer || tp == tp_reference
-	      || tp == tp_const || tp == tp_volatile);
+	      || tp == tp_rvalue_reference || tp == tp_const
+	      || tp == tp_volatile);
 
   /* If there is anything on the stack (we know it will be a
      tp_pointer), insert the qualifier above it.  Otherwise, simply
@@ -1686,18 +1687,22 @@ follow_types (struct type *follow_type)
 	make_addr_space = 0;
 	break;
       case tp_reference:
-	follow_type = lookup_reference_type (follow_type);
-	if (make_const)
-	  follow_type = make_cv_type (make_const, 
-				      TYPE_VOLATILE (follow_type), 
-				      follow_type, 0);
-	if (make_volatile)
-	  follow_type = make_cv_type (TYPE_CONST (follow_type), 
-				      make_volatile, 
-				      follow_type, 0);
-	if (make_addr_space)
-	  follow_type = make_type_with_address_space (follow_type, 
-						      make_addr_space);
+	 follow_type = lookup_lvalue_reference_type (follow_type);
+	 goto process_reference;
+	case tp_rvalue_reference:
+	 follow_type = lookup_rvalue_reference_type (follow_type);
+	process_reference:
+	 if (make_const)
+	   follow_type = make_cv_type (make_const,
+				       TYPE_VOLATILE (follow_type),
+				       follow_type, 0);
+	 if (make_volatile)
+	   follow_type = make_cv_type (TYPE_CONST (follow_type),
+				       make_volatile,
+				       follow_type, 0);
+	 if (make_addr_space)
+	   follow_type = make_type_with_address_space (follow_type,
+						       make_addr_space);
 	make_const = make_volatile = 0;
 	make_addr_space = 0;
 	break;

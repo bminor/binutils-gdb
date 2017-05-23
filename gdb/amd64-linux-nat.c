@@ -73,6 +73,7 @@ static int amd64_linux_gregset32_reg_offset[] =
   -1, -1,			  /* MPX registers BNDCFGU, BNDSTATUS.  */
   -1, -1, -1, -1, -1, -1, -1, -1, /* k0 ... k7 (AVX512)  */
   -1, -1, -1, -1, -1, -1, -1, -1, /* zmm0 ... zmm7 (AVX512)  */
+  -1,				  /* PKEYS register PKRU  */
   ORIG_RAX * 8			  /* "orig_eax"  */
 };
 
@@ -137,9 +138,9 @@ amd64_linux_fetch_inferior_registers (struct target_ops *ops,
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (regcache_get_ptid (regcache));
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (regcache_get_ptid (regcache)); /* Not a threaded program.  */
 
   if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
@@ -216,9 +217,9 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (regcache_get_ptid (regcache));
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (regcache_get_ptid (regcache)); /* Not a threaded program.  */
 
   if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {

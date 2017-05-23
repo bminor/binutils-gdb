@@ -23,6 +23,7 @@
 #include "ui-out.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
+#include "common/gdb_optional.h"
 
 /* Prototypes for local functions.  */
 
@@ -283,16 +284,10 @@ deprecate_cmd (struct cmd_list_element *cmd, const char *replacement)
 }
 
 struct cmd_list_element *
-add_alias_cmd (const char *name, const char *oldname, enum command_class theclass,
-	       int abbrev_flag, struct cmd_list_element **list)
+add_alias_cmd (const char *name, cmd_list_element *old,
+	       enum command_class theclass, int abbrev_flag,
+	       struct cmd_list_element **list)
 {
-  const char *tmp;
-  struct cmd_list_element *old;
-  struct cmd_list_element *c;
-
-  tmp = oldname;
-  old = lookup_cmd (&tmp, *list, "", 1, 1);
-
   if (old == 0)
     {
       struct cmd_list_element *prehook, *prehookee, *posthook, *posthookee;
@@ -306,7 +301,7 @@ add_alias_cmd (const char *name, const char *oldname, enum command_class theclas
       return 0;
     }
 
-  c = add_cmd (name, theclass, NULL, old->doc, list);
+  struct cmd_list_element *c = add_cmd (name, theclass, NULL, old->doc, list);
 
   /* If OLD->DOC can be freed, we should make another copy.  */
   if (old->doc_allocated)
@@ -328,6 +323,21 @@ add_alias_cmd (const char *name, const char *oldname, enum command_class theclas
   set_cmd_prefix (c, list);
   return c;
 }
+
+struct cmd_list_element *
+add_alias_cmd (const char *name, const char *oldname,
+	       enum command_class theclass, int abbrev_flag,
+	       struct cmd_list_element **list)
+{
+  const char *tmp;
+  struct cmd_list_element *old;
+
+  tmp = oldname;
+  old = lookup_cmd (&tmp, *list, "", 1, 1);
+
+  return add_alias_cmd (name, old, theclass, abbrev_flag, list);
+}
+
 
 /* Like add_cmd but adds an element for a command prefix: a name that
    should be followed by a subcommand to be looked up in another
@@ -1479,7 +1489,8 @@ undef_cmd_error (const char *cmdtype, const char *q)
    the function field of the struct cmd_list_element is 0).  */
 
 struct cmd_list_element *
-lookup_cmd (const char **line, struct cmd_list_element *list, char *cmdtype,
+lookup_cmd (const char **line, struct cmd_list_element *list,
+	    const char *cmdtype,
 	    int allow_unknown, int ignore_help_classes)
 {
   struct cmd_list_element *last_list = 0;
@@ -1877,17 +1888,12 @@ cmd_func (struct cmd_list_element *cmd, char *args, int from_tty)
 {
   if (cmd_func_p (cmd))
     {
-      struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+      gdb::optional<scoped_restore_tmpl<int>> restore_suppress;
 
       if (cmd->suppress_notification != NULL)
-	{
-	  make_cleanup_restore_integer (cmd->suppress_notification);
-	  *cmd->suppress_notification = 1;
-	}
+	restore_suppress.emplace (cmd->suppress_notification, 1);
 
       (*cmd->func) (cmd, args, from_tty);
-
-      do_cleanups (cleanups);
     }
   else
     error (_("Invalid command"));

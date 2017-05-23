@@ -493,20 +493,20 @@ extern int bfd_stat (bfd *, struct stat *);
 /* Deprecated old routines.  */
 #if __GNUC__
 #define bfd_read(BUF, ELTSIZE, NITEMS, ABFD)				\
-  (warn_deprecated ("bfd_read", __FILE__, __LINE__, __FUNCTION__),	\
+  (_bfd_warn_deprecated ("bfd_read", __FILE__, __LINE__, __FUNCTION__),	\
    bfd_bread ((BUF), (ELTSIZE) * (NITEMS), (ABFD)))
 #define bfd_write(BUF, ELTSIZE, NITEMS, ABFD)				\
-  (warn_deprecated ("bfd_write", __FILE__, __LINE__, __FUNCTION__),	\
+  (_bfd_warn_deprecated ("bfd_write", __FILE__, __LINE__, __FUNCTION__),	\
    bfd_bwrite ((BUF), (ELTSIZE) * (NITEMS), (ABFD)))
 #else
 #define bfd_read(BUF, ELTSIZE, NITEMS, ABFD)				\
-  (warn_deprecated ("bfd_read", (const char *) 0, 0, (const char *) 0), \
+  (_bfd_warn_deprecated ("bfd_read", (const char *) 0, 0, (const char *) 0), \
    bfd_bread ((BUF), (ELTSIZE) * (NITEMS), (ABFD)))
 #define bfd_write(BUF, ELTSIZE, NITEMS, ABFD)				\
-  (warn_deprecated ("bfd_write", (const char *) 0, 0, (const char *) 0),\
+  (_bfd_warn_deprecated ("bfd_write", (const char *) 0, 0, (const char *) 0),\
    bfd_bwrite ((BUF), (ELTSIZE) * (NITEMS), (ABFD)))
 #endif
-extern void warn_deprecated (const char *, const char *, int, const char *);
+extern void _bfd_warn_deprecated (const char *, const char *, int, const char *);
 
 /* Cast from const char * to char * so that caller can assign to
    a char * without a warning.  */
@@ -1069,7 +1069,8 @@ bfd *bfd_openr (const char *filename, const char *target);
 
 bfd *bfd_fdopenr (const char *filename, const char *target, int fd);
 
-bfd *bfd_openstreamr (const char * filename, const char * target, void * stream);
+bfd *bfd_openstreamr (const char * filename, const char * target,
+    void * stream);
 
 bfd *bfd_openr_iovec (const char *filename, const char *target,
     void *(*open_func) (struct bfd *nbfd,
@@ -1838,6 +1839,18 @@ extern asection _bfd_std_section[4];
      { NULL }, { NULL }                                                \
     }
 
+/* We use a macro to initialize the static asymbol structures because
+   traditional C does not permit us to initialize a union member while
+   gcc warns if we don't initialize it.
+   the_bfd, name, value, attr, section [, udata]  */
+#ifdef __STDC__
+#define GLOBAL_SYM_INIT(NAME, SECTION) \
+  { 0, NAME, 0, BSF_SECTION_SYM, SECTION, { 0 }}
+#else
+#define GLOBAL_SYM_INIT(NAME, SECTION) \
+  { 0, NAME, 0, BSF_SECTION_SYM, SECTION }
+#endif
+
 void bfd_section_list_clear (bfd *);
 
 asection *bfd_get_section_by_name (bfd *abfd, const char *name);
@@ -1991,9 +2004,11 @@ enum bfd_architecture
 #define bfd_mach_sparc_v9v             18 /* with OSA2011 and T4 and IMA and FJMAU add'ns.  */
 #define bfd_mach_sparc_v8plusm         19 /* with OSA2015 and M7 add'ns.  */
 #define bfd_mach_sparc_v9m             20 /* with OSA2015 and M7 add'ns.  */
+#define bfd_mach_sparc_v8plusm8        21 /* with OSA2017 and M8 add'ns.  */
+#define bfd_mach_sparc_v9m8            22 /* with OSA2017 and M8 add'ns.  */
 /* Nonzero if MACH has the v9 instruction set.  */
 #define bfd_mach_sparc_v9_p(mach) \
-  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9m \
+  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9m8 \
    && (mach) != bfd_mach_sparc_sparclite_le)
 /* Nonzero if MACH is a 64 bit sparc architecture.  */
 #define bfd_mach_sparc_64bit_p(mach) \
@@ -2003,7 +2018,8 @@ enum bfd_architecture
    && (mach) != bfd_mach_sparc_v8plusd \
    && (mach) != bfd_mach_sparc_v8pluse \
    && (mach) != bfd_mach_sparc_v8plusv \
-   && (mach) != bfd_mach_sparc_v8plusm)
+   && (mach) != bfd_mach_sparc_v8plusm \
+   && (mach) != bfd_mach_sparc_v8plusm8)
   bfd_arch_spu,       /* PowerPC SPU */
 #define bfd_mach_spu           256
   bfd_arch_mips,      /* MIPS Rxxxx */
@@ -2372,6 +2388,8 @@ enum bfd_architecture
 #define bfd_mach_nios2r2       2
   bfd_arch_visium,     /* Visium */
 #define bfd_mach_visium        1
+  bfd_arch_wasm32,     /* WebAssembly */
+#define bfd_mach_wasm32        1
   bfd_arch_pru,        /* PRU */
 #define bfd_mach_pru   0
   bfd_arch_last
@@ -3362,6 +3380,7 @@ instruction.  */
   BFD_RELOC_PPC_VLE_SDAREL_HI16D,
   BFD_RELOC_PPC_VLE_SDAREL_HA16A,
   BFD_RELOC_PPC_VLE_SDAREL_HA16D,
+  BFD_RELOC_PPC_16DX_HA,
   BFD_RELOC_PPC_REL16DX_HA,
   BFD_RELOC_PPC64_HIGHER,
   BFD_RELOC_PPC64_HIGHER_S,
@@ -6155,13 +6174,13 @@ instructions.  */
   BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21,
 
 /* AArch64 TLS DESC relocation.  */
-  BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC,
+  BFD_RELOC_AARCH64_TLSDESC_LD64_LO12,
 
 /* AArch64 TLS DESC relocation.  */
   BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC,
 
 /* AArch64 TLS DESC relocation.  */
-  BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC,
+  BFD_RELOC_AARCH64_TLSDESC_ADD_LO12,
 
 /* AArch64 TLS DESC relocation.  */
   BFD_RELOC_AARCH64_TLSDESC_OFF_G1,
@@ -6461,6 +6480,18 @@ assembler and not (currently) written to any object files.  */
   BFD_RELOC_VISIUM_HI16_PCREL,
   BFD_RELOC_VISIUM_LO16_PCREL,
   BFD_RELOC_VISIUM_IM16_PCREL,
+
+/* WebAssembly relocations.  */
+  BFD_RELOC_WASM32_LEB128,
+  BFD_RELOC_WASM32_LEB128_GOT,
+  BFD_RELOC_WASM32_LEB128_GOT_CODE,
+  BFD_RELOC_WASM32_LEB128_PLT,
+  BFD_RELOC_WASM32_PLT_INDEX,
+  BFD_RELOC_WASM32_ABS32_CODE,
+  BFD_RELOC_WASM32_COPY,
+  BFD_RELOC_WASM32_CODE_POINTER,
+  BFD_RELOC_WASM32_INDEX,
+  BFD_RELOC_WASM32_PLT_SIG,
   BFD_RELOC_UNUSED };
 
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
@@ -6806,8 +6837,9 @@ struct bfd
 
   /* Flags bits to be saved in bfd_preserve_save.  */
 #define BFD_FLAGS_SAVED \
-  (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_PLUGIN \
-   | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON | BFD_USE_ELF_STT_COMMON)
+  (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_LINKER_CREATED \
+   | BFD_PLUGIN | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON \
+   | BFD_USE_ELF_STT_COMMON)
 
   /* Flags bits which are for BFD use only.  */
 #define BFD_FLAGS_FOR_BFD_USE_MASK \
@@ -7046,6 +7078,8 @@ long bfd_canonicalize_reloc
 void bfd_set_reloc
    (bfd *abfd, asection *sec, arelent **rel, unsigned int count);
 
+#define bfd_set_reloc(abfd, asect, location, count) \
+     BFD_SEND (abfd, _bfd_set_reloc, (abfd, asect, location, count))
 bfd_boolean bfd_set_file_flags (bfd *abfd, flagword flags);
 
 int bfd_get_arch_size (bfd *abfd);
@@ -7513,12 +7547,15 @@ typedef struct bfd_target
 #define BFD_JUMP_TABLE_RELOCS(NAME) \
   NAME##_get_reloc_upper_bound, \
   NAME##_canonicalize_reloc, \
+  NAME##_set_reloc, \
   NAME##_bfd_reloc_type_lookup, \
   NAME##_bfd_reloc_name_lookup
 
   long        (*_get_reloc_upper_bound) (bfd *, sec_ptr);
   long        (*_bfd_canonicalize_reloc)
     (bfd *, sec_ptr, arelent **, struct bfd_symbol **);
+  void        (*_bfd_set_reloc)
+    (bfd *, sec_ptr, arelent **, unsigned int);
   /* See documentation on reloc types.  */
   reloc_howto_type *
               (*reloc_type_lookup) (bfd *, bfd_reloc_code_real_type);

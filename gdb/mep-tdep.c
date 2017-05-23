@@ -305,7 +305,7 @@ register_set_keyword_table (const CGEN_HW_ENTRY *hw)
 /* Given a keyword table KEYWORD and a register number REGNUM, return
    the name of the register, or "" if KEYWORD contains no register
    whose number is REGNUM.  */
-static char *
+static const char *
 register_name_from_keyword (CGEN_KEYWORD *keyword_table, int regnum)
 {
   const CGEN_KEYWORD_ENTRY *entry

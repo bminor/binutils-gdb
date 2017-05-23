@@ -204,7 +204,7 @@ unwind_infopy_str (PyObject *self)
   stb.puts ("Frame ID: ");
   fprint_frame_id (&stb, unwind_info->frame_id);
   {
-    char *sep = "";
+    const char *sep = "";
     int i;
     struct value_print_options opts;
     saved_reg *reg;

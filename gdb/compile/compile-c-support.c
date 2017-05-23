@@ -25,6 +25,7 @@
 #include "macrotab.h"
 #include "macroscope.h"
 #include "regcache.h"
+#include "common/function-view.h"
 
 /* See compile-internal.h.  */
 
@@ -74,12 +75,11 @@ c_get_range_decl_name (const struct dynamic_prop *prop)
 static gcc_c_fe_context_function *
 load_libcc (void)
 {
-  void *handle;
   gcc_c_fe_context_function *func;
 
    /* gdb_dlopen will call error () on an error, so no need to check
       value.  */
-  handle = gdb_dlopen (STRINGIFY (GCC_C_FE_LIBCC));
+  gdb_dlhandle_up handle = gdb_dlopen (STRINGIFY (GCC_C_FE_LIBCC));
   func = (gcc_c_fe_context_function *) gdb_dlsym (handle,
 						  STRINGIFY (GCC_C_FE_CONTEXT));
 
@@ -87,6 +87,9 @@ load_libcc (void)
     error (_("could not find symbol %s in library %s"),
 	   STRINGIFY (GCC_C_FE_CONTEXT),
 	   STRINGIFY (GCC_C_FE_LIBCC));
+
+  /* Leave the library open.  */
+  handle.release ();
   return func;
 }
 
@@ -122,10 +125,8 @@ c_get_compile_context (void)
 static void
 print_one_macro (const char *name, const struct macro_definition *macro,
 		 struct macro_source_file *source, int line,
-		 void *user_data)
+		 ui_file *file)
 {
-  struct ui_file *file = (struct ui_file *) user_data;
-
   /* Don't print command-line defines.  They will be supplied another
      way.  */
   if (line == 0)
@@ -168,7 +169,16 @@ write_macro_definitions (const struct block *block, CORE_ADDR pc,
     scope = user_macro_scope ();
 
   if (scope != NULL && scope->file != NULL && scope->file->table != NULL)
-    macro_for_each_in_scope (scope->file, scope->line, print_one_macro, file);
+    {
+      macro_for_each_in_scope (scope->file, scope->line,
+			       [&] (const char *name,
+				    const macro_definition *macro,
+				    macro_source_file *source,
+				    int line)
+	{
+	  print_one_macro (name, macro, source, line, file);
+	});
+    }
 }
 
 /* Helper function to construct a header scope for a block of code.

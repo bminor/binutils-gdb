@@ -67,9 +67,9 @@ vaxbsd_fetch_inferior_registers (struct target_ops *ops,
 				 struct regcache *regcache, int regnum)
 {
   struct reg regs;
+  pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
-  if (ptrace (PT_GETREGS, ptid_get_pid (inferior_ptid),
-	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+  if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't get registers"));
 
   vaxbsd_supply_gregset (regcache, &regs);
@@ -83,15 +83,14 @@ vaxbsd_store_inferior_registers (struct target_ops *ops,
 				 struct regcache *regcache, int regnum)
 {
   struct reg regs;
+  pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
-  if (ptrace (PT_GETREGS, ptid_get_pid (inferior_ptid),
-	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+  if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't get registers"));
 
   vaxbsd_collect_gregset (regcache, &regs, regnum);
 
-  if (ptrace (PT_SETREGS, ptid_get_pid (inferior_ptid),
-	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+  if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't write registers"));
 }
 

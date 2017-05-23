@@ -925,11 +925,10 @@ arm_arch_setup (void)
 
 /* Fetch the next possible PCs after the current instruction executes.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 arm_gdbserver_get_next_pcs (struct regcache *regcache)
 {
   struct arm_get_next_pcs next_pcs_ctx;
-  VEC (CORE_ADDR) *next_pcs = NULL;
 
   arm_get_next_pcs_ctor (&next_pcs_ctx,
 			 &get_next_pcs_ops,
@@ -939,9 +938,7 @@ arm_gdbserver_get_next_pcs (struct regcache *regcache)
 			 1,
 			 regcache);
 
-  next_pcs = arm_get_next_pcs (&next_pcs_ctx);
-
-  return next_pcs;
+  return arm_get_next_pcs (&next_pcs_ctx);
 }
 
 /* Support for hardware single step.  */

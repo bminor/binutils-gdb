@@ -220,7 +220,7 @@ static int found_ecoff_debugging_info;
 /* Forward declarations.  */
 
 static int upgrade_type (int, struct type **, int, union aux_ext *,
-			 int, char *);
+			 int, const char *);
 
 static void parse_partial_symbols (minimal_symbol_reader &,
 				   struct objfile *);
@@ -228,9 +228,9 @@ static void parse_partial_symbols (minimal_symbol_reader &,
 static int has_opaque_xref (FDR *, SYMR *);
 
 static int cross_ref (int, union aux_ext *, struct type **, enum type_code,
-		      char **, int, char *);
+		      const char **, int, const char *);
 
-static struct symbol *new_symbol (char *);
+static struct symbol *new_symbol (const char *);
 
 static struct type *new_type (char *);
 
@@ -245,14 +245,14 @@ static struct linetable *new_linetable (int);
 static struct blockvector *new_bvect (int);
 
 static struct type *parse_type (int, union aux_ext *, unsigned int, int *,
-				int, char *);
+				int, const char *);
 
-static struct symbol *mylookup_symbol (char *, const struct block *,
+static struct symbol *mylookup_symbol (const char *, const struct block *,
 				       domain_enum, enum address_class);
 
 static void sort_blocks (struct symtab *);
 
-static struct partial_symtab *new_psymtab (char *, struct objfile *);
+static struct partial_symtab *new_psymtab (const char *, struct objfile *);
 
 static void psymtab_to_symtab_1 (struct objfile *objfile,
 				 struct partial_symtab *, const char *);
@@ -268,7 +268,7 @@ static struct linetable *shrink_linetable (struct linetable *);
 static void handle_psymbol_enumerators (struct objfile *, FDR *, int,
 					CORE_ADDR);
 
-static char *mdebug_next_symbol_text (struct objfile *);
+static const char *mdebug_next_symbol_text (struct objfile *);
 
 /* Exported procedure: Builds a symtab from the partial symtab SELF.
    Restores the environment in effect when SELF was created, delegates
@@ -322,7 +322,7 @@ get_rfd (int cf, int rf)
 
 /* Return a safer print NAME for a file descriptor.  */
 
-static char *
+static const char *
 fdr_name (FDR *f)
 {
   if (f->rss == -1)
@@ -574,7 +574,7 @@ static int mdebug_regparm_index;
 static void
 add_data_symbol (SYMR *sh, union aux_ext *ax, int bigend,
 		 struct symbol *s, int aclass_index, struct block *b,
-		 struct objfile *objfile, char *name)
+		 struct objfile *objfile, const char *name)
 {
   SYMBOL_DOMAIN (s) = VAR_DOMAIN;
   SYMBOL_ACLASS_INDEX (s) = aclass_index;
@@ -596,7 +596,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
   void (*const swap_sym_in) (bfd *, void *, SYMR *) = debug_swap->swap_sym_in;
-  char *name;
+  const char *name;
   struct symbol *s;
   struct block *b;
   struct mdebug_pending *pend;
@@ -1530,7 +1530,7 @@ basic_type (int bt, struct objfile *objfile)
 
 static struct type *
 parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
-	    int bigend, char *sym_name)
+	    int bigend, const char *sym_name)
 {
   TIR t[1];
   struct type *tp = 0;
@@ -1658,7 +1658,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
      name.  This apparently is a MIPS extension for C sets.  */
       t->bt == btSet)
     {
-      char *name;
+      const char *name;
 
       /* Try to cross reference this type, build new type on failure.  */
       ax += cross_ref (fd, ax, &tp, type_code, &name, bigend, sym_name);
@@ -1718,7 +1718,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
      FIXME: We are not doing any guessing on range types.  */
   if (t->bt == btRange)
     {
-      char *name;
+      const char *name;
 
       /* Try to cross reference this type, build new type on failure.  */
       ax += cross_ref (fd, ax, &tp, type_code, &name, bigend, sym_name);
@@ -1751,7 +1751,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
     }
   if (t->bt == btTypedef)
     {
-      char *name;
+      const char *name;
 
       /* Try to cross reference this type, it should succeed.  */
       ax += cross_ref (fd, ax, &tp, type_code, &name, bigend, sym_name);
@@ -1819,7 +1819,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 
 static int
 upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
-	      char *sym_name)
+	      const char *sym_name)
 {
   int off;
   struct type *t;
@@ -2110,7 +2110,7 @@ parse_external (EXTR *es, int bigend, struct section_offsets *section_offsets,
   /* Reading .o files */
   if (SC_IS_UNDEF (es->asym.sc) || es->asym.sc == scNil)
     {
-      char *what;
+      const char *what;
       switch (es->asym.st)
 	{
 	case stNil:
@@ -2851,7 +2851,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 
 		switch (type_code)
 		  {
-		    char *p;
+		    const char *p;
 
 		    /* Standard, external, non-debugger, symbols.  */
 
@@ -3205,7 +3205,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			       Accept either.  */
 			    while (*p && *p != ';' && *p != ',')
 			      {
-				char *q;
+				const char *q;
 
 				/* Check for and handle cretinous dbx
 				   symbol name continuation!  */
@@ -3887,7 +3887,7 @@ handle_psymbol_enumerators (struct objfile *objfile, FDR *fh, int stype,
 
 /* Get the next symbol.  OBJFILE is unused.  */
 
-static char *
+static const char *
 mdebug_next_symbol_text (struct objfile *objfile)
 {
   SYMR sh;
@@ -4360,7 +4360,7 @@ static int
 cross_ref (int fd, union aux_ext *ax, struct type **tpp,
 	   enum type_code type_code,
 	   /* Use to alloc new type if none is found.  */
-	   char **pname, int bigend, char *sym_name)
+	   const char **pname, int bigend, const char *sym_name)
 {
   RNDXR rn[1];
   unsigned int rf;
@@ -4556,7 +4556,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
    keeping the symtab sorted.  */
 
 static struct symbol *
-mylookup_symbol (char *name, const struct block *block,
+mylookup_symbol (const char *name, const struct block *block,
 		 domain_enum domain, enum address_class theclass)
 {
   struct block_iterator iter;
@@ -4742,7 +4742,7 @@ new_symtab (const char *name, int maxlines, struct objfile *objfile)
 /* Allocate a new partial_symtab NAME.  */
 
 static struct partial_symtab *
-new_psymtab (char *name, struct objfile *objfile)
+new_psymtab (const char *name, struct objfile *objfile)
 {
   struct partial_symtab *psymtab;
 
@@ -4836,7 +4836,7 @@ new_block (enum block_type type)
 /* Create a new symbol with printname NAME.  */
 
 static struct symbol *
-new_symbol (char *name)
+new_symbol (const char *name)
 {
   struct symbol *s = allocate_symbol (mdebugread_objfile);
 

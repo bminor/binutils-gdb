@@ -50,7 +50,7 @@ show_varobjdebug (struct ui_file *file, int from_tty,
 }
 
 /* String representations of gdb's format codes.  */
-char *varobj_format_string[] =
+const char *varobj_format_string[] =
   { "natural", "binary", "decimal", "hexadecimal", "octal", "zero-hexadecimal" };
 
 /* True if we want to allow Python-based pretty-printing.  */
@@ -724,7 +724,7 @@ varobj_clear_saved_item (struct varobj_dynamic *var)
   if (var->saved_item != NULL)
     {
       value_free (var->saved_item->value);
-      xfree (var->saved_item);
+      delete var->saved_item;
       var->saved_item = NULL;
     }
 }
@@ -799,7 +799,7 @@ update_dynamic_varobj_children (struct varobj *var,
 				 can_mention ? cchanged : NULL, i,
 				 item);
 
-	  xfree (item);
+	  delete item;
 	}
       else
 	{
@@ -2136,7 +2136,7 @@ varobj_get_value_type (const struct varobj *var)
 
   type = check_typedef (type);
 
-  if (TYPE_CODE (type) == TYPE_CODE_REF)
+  if (TYPE_IS_REFERENCE (type))
     type = get_target_type (type);
 
   type = check_typedef (type);
@@ -2218,14 +2218,13 @@ value_of_root_1 (struct varobj **var_handle)
   struct value *new_val = NULL;
   struct varobj *var = *var_handle;
   int within_scope = 0;
-  struct cleanup *back_to;
 								 
   /*  Only root variables can be updated...  */
   if (!is_root_p (var))
     /* Not a root var.  */
     return NULL;
 
-  back_to = make_cleanup_restore_current_thread ();
+  scoped_restore_current_thread restore_thread;
 
   /* Determine whether the variable is still around.  */
   if (var->root->valid_block == NULL || var->root->floating)
@@ -2263,8 +2262,6 @@ value_of_root_1 (struct varobj **var_handle)
 	}
       END_CATCH
     }
-
-  do_cleanups (back_to);
 
   return new_val;
 }

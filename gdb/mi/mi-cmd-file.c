@@ -20,17 +20,21 @@
 #include "defs.h"
 #include "mi-cmds.h"
 #include "mi-getopt.h"
+#include "mi-interp.h"
 #include "ui-out.h"
 #include "symtab.h"
 #include "source.h"
 #include "objfiles.h"
 #include "psymtab.h"
+#include "solib.h"
+#include "solist.h"
+#include "gdb_regex.h"
 
 /* Return to the client the absolute path and line number of the 
    current file being executed.  */
 
 void
-mi_cmd_file_list_exec_source_file (char *command, char **argv, int argc)
+mi_cmd_file_list_exec_source_file (const char *command, char **argv, int argc)
 {
   struct symtab_and_line st;
   struct ui_out *uiout = current_uiout;
@@ -77,7 +81,7 @@ print_partial_file_name (const char *filename, const char *fullname,
 }
 
 void
-mi_cmd_file_list_exec_source_files (char *command, char **argv, int argc)
+mi_cmd_file_list_exec_source_files (const char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
   struct compunit_symtab *cu;
@@ -105,4 +109,54 @@ mi_cmd_file_list_exec_source_files (char *command, char **argv, int argc)
 			1 /*need_fullname*/);
 
   uiout->end (ui_out_type_list);
+}
+
+/* See mi-cmds.h.  */
+
+void
+mi_cmd_file_list_shared_libraries (const char *command, char **argv, int argc)
+{
+  struct ui_out *uiout = current_uiout;
+  const char *pattern;
+  struct so_list *so = NULL;
+  struct gdbarch *gdbarch = target_gdbarch ();
+
+  switch (argc)
+    {
+    case 0:
+      pattern = NULL;
+      break;
+    case 1:
+      pattern = argv[0];
+      break;
+    default:
+      error (_("Usage: -file-list-shared-libraries [REGEXP]"));
+    }
+
+  if (pattern != NULL)
+    {
+      const char *re_err = re_comp (pattern);
+
+      if (re_err != NULL)
+	error (_("Invalid regexp: %s"), re_err);
+    }
+
+  update_solib_list (1);
+
+  /* Print the table header.  */
+  ui_out_emit_list list_emitter (uiout, "shared-libraries");
+
+  ALL_SO_LIBS (so)
+    {
+      if (so->so_name[0] == '\0')
+	continue;
+      if (pattern != NULL && !re_exec (so->so_name))
+	continue;
+
+      struct cleanup *tuple_clean_up
+        = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      mi_output_solib_attribs (uiout, so);
+
+      do_cleanups (tuple_clean_up);
+    }
 }

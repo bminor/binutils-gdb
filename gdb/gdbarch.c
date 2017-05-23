@@ -84,10 +84,18 @@ pstring (const char *string)
   return string;
 }
 
+static const char *
+pstring_ptr (char **string)
+{
+  if (string == NULL || *string == NULL)
+    return "(null)";
+  return *string;
+}
+
 /* Helper function to print a list of strings, represented as "const
    char *const *".  The list is printed comma-separated.  */
 
-static char *
+static const char *
 pstring_list (const char *const *list)
 {
   static char ret[100];
@@ -176,6 +184,8 @@ struct gdbarch
   const struct floatformat ** double_format;
   int long_double_bit;
   const struct floatformat ** long_double_format;
+  int wchar_bit;
+  int wchar_signed;
   gdbarch_floatformat_for_type_ftype *floatformat_for_type;
   int ptr_bit;
   int addr_bit;
@@ -265,6 +275,7 @@ struct gdbarch
   int have_nonsteppable_watchpoint;
   gdbarch_address_class_type_flags_ftype *address_class_type_flags;
   gdbarch_address_class_type_flags_to_name_ftype *address_class_type_flags_to_name;
+  gdbarch_execute_dwarf_cfa_vendor_op_ftype *execute_dwarf_cfa_vendor_op;
   gdbarch_address_class_name_to_type_flags_ftype *address_class_name_to_type_flags;
   gdbarch_register_reggroup_p_ftype *register_reggroup_p;
   gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument;
@@ -339,6 +350,8 @@ struct gdbarch
   gdbarch_gcc_target_options_ftype *gcc_target_options;
   gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp;
   gdbarch_addressable_memory_unit_size_ftype *addressable_memory_unit_size;
+  char ** disassembler_options;
+  const disasm_options_t * valid_disassembler_options;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -379,6 +392,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->float_bit = 4*TARGET_CHAR_BIT;
   gdbarch->double_bit = 8*TARGET_CHAR_BIT;
   gdbarch->long_double_bit = 8*TARGET_CHAR_BIT;
+  gdbarch->wchar_bit = 4*TARGET_CHAR_BIT;
+  gdbarch->wchar_signed = -1;
   gdbarch->floatformat_for_type = default_floatformat_for_type;
   gdbarch->ptr_bit = gdbarch->int_bit;
   gdbarch->char_signed = -1;
@@ -422,6 +437,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->make_symbol_special = default_make_symbol_special;
   gdbarch->adjust_dwarf2_addr = default_adjust_dwarf2_addr;
   gdbarch->adjust_dwarf2_line = default_adjust_dwarf2_line;
+  gdbarch->execute_dwarf_cfa_vendor_op = default_execute_dwarf_cfa_vendor_op;
   gdbarch->register_reggroup_p = default_register_reggroup_p;
   gdbarch->skip_permanent_breakpoint = default_skip_permanent_breakpoint;
   gdbarch->displaced_step_hw_singlestep = default_displaced_step_hw_singlestep;
@@ -523,6 +539,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of long_double_bit, invalid_p == 0 */
   if (gdbarch->long_double_format == 0)
     gdbarch->long_double_format = floatformats_ieee_double;
+  /* Skip verify of wchar_bit, invalid_p == 0 */
+  if (gdbarch->wchar_signed == -1)
+    gdbarch->wchar_signed = 1;
   /* Skip verify of floatformat_for_type, invalid_p == 0 */
   /* Skip verify of ptr_bit, invalid_p == 0 */
   if (gdbarch->addr_bit == 0)
@@ -617,6 +636,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of have_nonsteppable_watchpoint, invalid_p == 0 */
   /* Skip verify of address_class_type_flags, has predicate.  */
   /* Skip verify of address_class_type_flags_to_name, has predicate.  */
+  /* Skip verify of execute_dwarf_cfa_vendor_op, invalid_p == 0 */
   /* Skip verify of address_class_name_to_type_flags, has predicate.  */
   /* Skip verify of register_reggroup_p, invalid_p == 0 */
   /* Skip verify of fetch_pointer_argument, has predicate.  */
@@ -692,6 +712,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of gcc_target_options, invalid_p == 0 */
   /* Skip verify of gnu_triplet_regexp, invalid_p == 0 */
   /* Skip verify of addressable_memory_unit_size, invalid_p == 0 */
+  /* Skip verify of disassembler_options, invalid_p == 0 */
+  /* Skip verify of valid_disassembler_options, invalid_p == 0 */
   if (!log.empty ())
     internal_error (__FILE__, __LINE__,
                     _("verify_gdbarch: the following are invalid ...%s"),
@@ -875,6 +897,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: deprecated_function_start_offset = %s\n",
                       core_addr_to_string_nz (gdbarch->deprecated_function_start_offset));
   fprintf_unfiltered (file,
+                      "gdbarch_dump: disassembler_options = %s\n",
+                      pstring_ptr (gdbarch->disassembler_options));
+  fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_displaced_step_copy_insn_p() = %d\n",
                       gdbarch_displaced_step_copy_insn_p (gdbarch));
   fprintf_unfiltered (file,
@@ -952,6 +977,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: elfcore_write_linux_prpsinfo = <%s>\n",
                       host_address_to_string (gdbarch->elfcore_write_linux_prpsinfo));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: execute_dwarf_cfa_vendor_op = <%s>\n",
+                      host_address_to_string (gdbarch->execute_dwarf_cfa_vendor_op));
   fprintf_unfiltered (file,
                       "gdbarch_dump: fast_tracepoint_valid_at = <%s>\n",
                       host_address_to_string (gdbarch->fast_tracepoint_valid_at));
@@ -1421,6 +1449,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: unwind_sp = <%s>\n",
                       host_address_to_string (gdbarch->unwind_sp));
   fprintf_unfiltered (file,
+                      "gdbarch_dump: valid_disassembler_options = %s\n",
+                      host_address_to_string (gdbarch->valid_disassembler_options));
+  fprintf_unfiltered (file,
                       "gdbarch_dump: value_from_register = <%s>\n",
                       host_address_to_string (gdbarch->value_from_register));
   fprintf_unfiltered (file,
@@ -1438,6 +1469,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: vtable_function_descriptors = %s\n",
                       plongest (gdbarch->vtable_function_descriptors));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: wchar_bit = %s\n",
+                      plongest (gdbarch->wchar_bit));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: wchar_signed = %s\n",
+                      plongest (gdbarch->wchar_signed));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_write_pc_p() = %d\n",
                       gdbarch_write_pc_p (gdbarch));
@@ -1737,6 +1774,41 @@ set_gdbarch_long_double_format (struct gdbarch *gdbarch,
                                 const struct floatformat ** long_double_format)
 {
   gdbarch->long_double_format = long_double_format;
+}
+
+int
+gdbarch_wchar_bit (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of wchar_bit, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_wchar_bit called\n");
+  return gdbarch->wchar_bit;
+}
+
+void
+set_gdbarch_wchar_bit (struct gdbarch *gdbarch,
+                       int wchar_bit)
+{
+  gdbarch->wchar_bit = wchar_bit;
+}
+
+int
+gdbarch_wchar_signed (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Check variable changed from pre-default.  */
+  gdb_assert (gdbarch->wchar_signed != -1);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_wchar_signed called\n");
+  return gdbarch->wchar_signed;
+}
+
+void
+set_gdbarch_wchar_signed (struct gdbarch *gdbarch,
+                          int wchar_signed)
+{
+  gdbarch->wchar_signed = wchar_signed;
 }
 
 const struct floatformat **
@@ -3157,7 +3229,7 @@ gdbarch_software_single_step_p (struct gdbarch *gdbarch)
   return gdbarch->software_single_step != NULL;
 }
 
-VEC (CORE_ADDR) *
+std::vector<CORE_ADDR>
 gdbarch_software_single_step (struct gdbarch *gdbarch, struct regcache *regcache)
 {
   gdb_assert (gdbarch != NULL);
@@ -3457,6 +3529,23 @@ set_gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch,
   gdbarch->address_class_type_flags_to_name = address_class_type_flags_to_name;
 }
 
+bool
+gdbarch_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op, struct dwarf2_frame_state *fs)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->execute_dwarf_cfa_vendor_op != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_execute_dwarf_cfa_vendor_op called\n");
+  return gdbarch->execute_dwarf_cfa_vendor_op (gdbarch, op, fs);
+}
+
+void
+set_gdbarch_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch,
+                                         gdbarch_execute_dwarf_cfa_vendor_op_ftype execute_dwarf_cfa_vendor_op)
+{
+  gdbarch->execute_dwarf_cfa_vendor_op = execute_dwarf_cfa_vendor_op;
+}
+
 int
 gdbarch_address_class_name_to_type_flags_p (struct gdbarch *gdbarch)
 {
@@ -3673,7 +3762,7 @@ gdbarch_core_pid_to_str_p (struct gdbarch *gdbarch)
   return gdbarch->core_pid_to_str != NULL;
 }
 
-char *
+const char *
 gdbarch_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 {
   gdb_assert (gdbarch != NULL);
@@ -4954,6 +5043,40 @@ set_gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch,
                                           gdbarch_addressable_memory_unit_size_ftype addressable_memory_unit_size)
 {
   gdbarch->addressable_memory_unit_size = addressable_memory_unit_size;
+}
+
+char **
+gdbarch_disassembler_options (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of disassembler_options, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_disassembler_options called\n");
+  return gdbarch->disassembler_options;
+}
+
+void
+set_gdbarch_disassembler_options (struct gdbarch *gdbarch,
+                                  char ** disassembler_options)
+{
+  gdbarch->disassembler_options = disassembler_options;
+}
+
+const disasm_options_t *
+gdbarch_valid_disassembler_options (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of valid_disassembler_options, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_valid_disassembler_options called\n");
+  return gdbarch->valid_disassembler_options;
+}
+
+void
+set_gdbarch_valid_disassembler_options (struct gdbarch *gdbarch,
+                                        const disasm_options_t * valid_disassembler_options)
+{
+  gdbarch->valid_disassembler_options = valid_disassembler_options;
 }
 
 

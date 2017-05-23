@@ -46,7 +46,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile1}" executable {d
 
 clean_restart ${binfile1}
 
-with_test_prefix "${binfile1}" {
+with_test_prefix "${testfile1}" {
 
     gdb_test "break *main" \
         "Breakpoint.*at.* file .*$srcfile1, line .*" \
@@ -73,7 +73,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable {d
 # start a new debugging session with a different executable.
 gdb_load ${binfile2}
 
-with_test_prefix "${binfile2}" {
+with_test_prefix "${testfile2}" {
 
     gdb_run_cmd
     gdb_test "" \

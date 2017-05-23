@@ -664,32 +664,27 @@ do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
 void
 cmd_show_list (struct cmd_list_element *list, int from_tty, const char *prefix)
 {
-  struct cleanup *showlist_chain;
   struct ui_out *uiout = current_uiout;
 
-  showlist_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "showlist");
+  ui_out_emit_tuple tuple_emitter (uiout, "showlist");
   for (; list != NULL; list = list->next)
     {
       /* If we find a prefix, run its list, prefixing our output by its
          prefix (with "show " skipped).  */
       if (list->prefixlist && !list->abbrev_flag)
 	{
-	  struct cleanup *optionlist_chain
-	    = make_cleanup_ui_out_tuple_begin_end (uiout, "optionlist");
+	  ui_out_emit_tuple optionlist_emitter (uiout, "optionlist");
 	  const char *new_prefix = strstr (list->prefixname, "show ") + 5;
 
 	  if (uiout->is_mi_like_p ())
 	    uiout->field_string ("prefix", new_prefix);
 	  cmd_show_list (*list->prefixlist, from_tty, new_prefix);
-	  /* Close the tuple.  */
-	  do_cleanups (optionlist_chain);
 	}
       else
 	{
 	  if (list->theclass != no_set_class)
 	    {
-	      struct cleanup *option_chain
-		= make_cleanup_ui_out_tuple_begin_end (uiout, "option");
+	      ui_out_emit_tuple option_emitter (uiout, "option");
 
 	      uiout->text (prefix);
 	      uiout->field_string ("name", list->name);
@@ -698,12 +693,8 @@ cmd_show_list (struct cmd_list_element *list, int from_tty, const char *prefix)
 		do_show_command ((char *) NULL, from_tty, list);
 	      else
 		cmd_func (list, NULL, from_tty);
-	      /* Close the tuple.  */
-	      do_cleanups (option_chain);
 	    }
 	}
     }
-  /* Close the tuple.  */
-  do_cleanups (showlist_chain);
 }
 

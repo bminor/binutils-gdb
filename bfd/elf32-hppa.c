@@ -1171,7 +1171,7 @@ elf32_hppa_check_relocs (bfd *abfd,
 
 	  /* PR15323, ref flags aren't set for references in the same
 	     object.  */
-	  hh->eh.root.non_ir_ref = 1;
+	  hh->eh.root.non_ir_ref_regular = 1;
 	}
 
       r_type = ELF32_R_TYPE (rela->r_info);
@@ -1976,6 +1976,8 @@ allocate_plt_static (struct elf_link_hash_entry *eh, void *inf)
 	  sec = htab->etab.splt;
 	  eh->plt.offset = sec->size;
 	  sec->size += PLT_ENTRY_SIZE;
+	  if (bfd_link_pic (info))
+	    htab->etab.srelplt->size += sizeof (Elf32_External_Rela);
 	}
       else
 	{
@@ -4430,7 +4432,7 @@ elf32_hppa_finish_dynamic_symbol (bfd *output_bfd,
 		      + eh->root.u.def.section->output_section->vma);
       rela.r_addend = 0;
       rela.r_info = ELF32_R_INFO (eh->dynindx, R_PARISC_COPY);
-      if ((eh->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (eh->root.u.def.section == htab->etab.sdynrelro)
 	sec = htab->etab.sreldynrelro;
       else
 	sec = htab->etab.srelbss;
@@ -4644,6 +4646,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define elf_backend_want_dynrelro	     1
 #define elf_backend_rela_normal		     1
 #define elf_backend_dtrel_excludes_plt	     1
+#define elf_backend_no_page_alias	     1
 
 #define TARGET_BIG_SYM		hppa_elf32_vec
 #define TARGET_BIG_NAME		"elf32-hppa"

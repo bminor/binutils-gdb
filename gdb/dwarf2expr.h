@@ -164,7 +164,7 @@ struct dwarf_expr_context
   /* Return the PC for the frame.  */
   virtual CORE_ADDR get_frame_pc ()
   {
-    error (_("%s is invalid in this context"), "DW_OP_GNU_implicit_pointer");
+    error (_("%s is invalid in this context"), "DW_OP_implicit_pointer");
   }
 
   /* Return the thread-local storage address for
@@ -172,25 +172,25 @@ struct dwarf_expr_context
   virtual CORE_ADDR get_tls_address (CORE_ADDR offset) = 0;
 
   /* Execute DW_AT_location expression for the DWARF expression
-     subroutine in the DIE at DIE_OFFSET in the CU.  Do not touch
+     subroutine in the DIE at DIE_CU_OFF in the CU.  Do not touch
      STACK while it being passed to and returned from the called DWARF
      subroutine.  */
-  virtual void dwarf_call (cu_offset die_offset) = 0;
+  virtual void dwarf_call (cu_offset die_cu_off) = 0;
 
-  /* Return the base type given by the indicated DIE.  This can throw
-     an exception if the DIE is invalid or does not represent a base
-     type.  SIZE is non-zero if this function should verify that the
-     resulting type has the correct size.  */
-  virtual struct type *get_base_type (cu_offset die, int size)
+  /* Return the base type given by the indicated DIE at DIE_CU_OFF.
+     This can throw an exception if the DIE is invalid or does not
+     represent a base type.  SIZE is non-zero if this function should
+     verify that the resulting type has the correct size.  */
+  virtual struct type *get_base_type (cu_offset die_cu_off, int size)
   {
     /* Anything will do.  */
     return builtin_type (this->gdbarch)->builtin_int;
   }
 
-  /* Push on DWARF stack an entry evaluated for DW_TAG_GNU_call_site's
+  /* Push on DWARF stack an entry evaluated for DW_TAG_call_site's
      parameter matching KIND and KIND_U at the caller of specified BATON.
-     If DEREF_SIZE is not -1 then use DW_AT_GNU_call_site_data_value instead of
-     DW_AT_GNU_call_site_value.  */
+     If DEREF_SIZE is not -1 then use DW_AT_call_data_value instead of
+     DW_AT_call_value.  */
   virtual void push_dwarf_reg_entry_value (enum call_site_parameter_kind kind,
 					   union call_site_parameter_u kind_u,
 					   int deref_size) = 0;
@@ -248,8 +248,8 @@ struct dwarf_expr_piece
     /* Used for DWARF_VALUE_IMPLICIT_POINTER.  */
     struct
     {
-      /* The referent DIE from DW_OP_GNU_implicit_pointer.  */
-      sect_offset die;
+      /* The referent DIE from DW_OP_implicit_pointer.  */
+      sect_offset die_sect_off;
       /* The byte offset into the resulting data.  */
       LONGEST offset;
     } ptr;

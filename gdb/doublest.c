@@ -360,8 +360,7 @@ convert_doublest_to_floatformat (const struct floatformat *fmt,
     uto = newto;
 
   memcpy (&dfrom, from, sizeof (dfrom));
-  memset (uto, 0, (fmt->totalsize + FLOATFORMAT_CHAR_BIT - 1) 
-                    / FLOATFORMAT_CHAR_BIT);
+  memset (uto, 0, floatformat_totalsize_bytes (fmt));
 
   if (fmt->split_half)
     {

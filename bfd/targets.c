@@ -418,12 +418,15 @@ BFD_JUMP_TABLE macros.
 .#define BFD_JUMP_TABLE_RELOCS(NAME) \
 .  NAME##_get_reloc_upper_bound, \
 .  NAME##_canonicalize_reloc, \
+.  NAME##_set_reloc, \
 .  NAME##_bfd_reloc_type_lookup, \
 .  NAME##_bfd_reloc_name_lookup
 .
 .  long        (*_get_reloc_upper_bound) (bfd *, sec_ptr);
 .  long        (*_bfd_canonicalize_reloc)
 .    (bfd *, sec_ptr, arelent **, struct bfd_symbol **);
+.  void	       (*_bfd_set_reloc)
+.    (bfd *, sec_ptr, arelent **, unsigned int);
 .  {* See documentation on reloc types.  *}
 .  reloc_howto_type *
 .              (*reloc_type_lookup) (bfd *, bfd_reloc_code_real_type);
@@ -893,6 +896,8 @@ extern const bfd_target vax_aout_nbsd_vec;
 extern const bfd_target vax_elf32_vec;
 extern const bfd_target visium_elf32_vec;
 extern const bfd_target w65_coff_vec;
+extern const bfd_target wasm_vec;
+extern const bfd_target wasm32_elf32_vec;
 extern const bfd_target we32k_coff_vec;
 extern const bfd_target x86_64_coff_vec;
 extern const bfd_target x86_64_elf32_vec;
@@ -1420,6 +1425,9 @@ static const bfd_target * const _bfd_target_vector[] =
 	&visium_elf32_vec,
 
 	&w65_coff_vec,
+
+        &wasm_vec,
+        &wasm32_elf32_vec,
 
 	&we32k_coff_vec,
 

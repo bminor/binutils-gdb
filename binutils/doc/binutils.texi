@@ -761,7 +761,8 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}] [@option{-a}|@option{--d
    [@option{-B}|@option{--format=bsd}] [@option{-C}|@option{--demangle}[=@var{style}]]
    [@option{-D}|@option{--dynamic}] [@option{-f}@var{format}|@option{--format=}@var{format}]
    [@option{-g}|@option{--extern-only}] [@option{-h}|@option{--help}]
-   [@option{-l}|@option{--line-numbers}] [@option{-n}|@option{-v}|@option{--numeric-sort}]
+   [@option{-l}|@option{--line-numbers}] [@option{--inlines}]
+   [@option{-n}|@option{-v}|@option{--numeric-sort}]
    [@option{-P}|@option{--portability}] [@option{-p}|@option{--no-sort}]
    [@option{-r}|@option{--reverse-sort}] [@option{-S}|@option{--print-size}]
    [@option{-s}|@option{--print-armap}] [@option{-t} @var{radix}|@option{--radix=}@var{radix}]
@@ -967,6 +968,16 @@ line number.  For a defined symbol, look for the line number of the
 address of the symbol.  For an undefined symbol, look for the line
 number of a relocation entry which refers to the symbol.  If line number
 information can be found, print it after the other symbol information.
+
+@item --inlines
+@cindex objdump inlines
+When option @option{-l} is active, if the address belongs to a
+function that was inlined, then this option causes the source 
+information for all enclosing scopes back to the first non-inlined
+function to be printed as well.  For example, if @code{main} inlines
+@code{callee1} which inlines @code{callee2}, and address is from
+@code{callee2}, the source information for @code{callee1} and @code{main}
+will also be printed.
 
 @item -n
 @itemx -v
@@ -1179,6 +1190,8 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--compress-debug-sections}]
         [@option{--decompress-debug-sections}]
         [@option{--elf-stt-common=@var{val}}]
+        [@option{--merge-notes}]
+        [@option{--no-merge-notes}]
         [@option{-v}|@option{--verbose}]
         [@option{-V}|@option{--version}]
         [@option{--help}] [@option{--info}]
@@ -1995,6 +2008,11 @@ converted to the @code{STT_COMMON} or @code{STT_OBJECT} type.
 @code{STT_COMMON}. @option{--elf-stt-common=no} converts common symbol
 type to @code{STT_OBJECT}.
 
+@item --merge-notes
+@itemx --no-merge-notes
+For ELF files, attempt (or do not attempt) to reduce the size of any
+SHT_NOTE type sections by removing duplicate notes.
+
 @item -V
 @itemx --version
 Show the version number of @command{objcopy}.
@@ -2353,12 +2371,34 @@ When in AT&T mode, instructs the disassembler to print a mnemonic
 suffix even when the suffix could be inferred by the operands.
 @end table
 
-For PowerPC, @option{booke} controls the disassembly of BookE
-instructions.  @option{32} and @option{64} select PowerPC and
-PowerPC64 disassembly, respectively.  @option{e300} selects
-disassembly for the e300 family.  @option{440} selects disassembly for
-the PowerPC 440.  @option{ppcps} selects disassembly for the paired
-single instructions of the PPC750CL.
+For PowerPC, the @option{-M} argument @option{raw} selects
+disasssembly of hardware insns rather than aliases.  For example, you
+will see @code{rlwinm} rather than @code{clrlwi}, and @code{addi}
+rather than @code{li}.  All of the @option{-m} arguments for
+@command{gas} that select a CPU are supported.  These are:
+@option{403}, @option{405}, @option{440}, @option{464}, @option{476},
+@option{601}, @option{603}, @option{604}, @option{620}, @option{7400},
+@option{7410}, @option{7450}, @option{7455}, @option{750cl},
+@option{821}, @option{850}, @option{860}, @option{a2}, @option{booke},
+@option{booke32}, @option{cell}, @option{com}, @option{e200z4},
+@option{e300}, @option{e500}, @option{e500mc}, @option{e500mc64},
+@option{e500x2}, @option{e5500}, @option{e6500}, @option{efs},
+@option{power4}, @option{power5}, @option{power6}, @option{power7},
+@option{power8}, @option{power9}, @option{ppc}, @option{ppc32},
+@option{ppc64}, @option{ppc64bridge}, @option{ppcps}, @option{pwr},
+@option{pwr2}, @option{pwr4}, @option{pwr5}, @option{pwr5x},
+@option{pwr6}, @option{pwr7}, @option{pwr8}, @option{pwr9},
+@option{pwrx}, @option{titan}, and @option{vle}.
+@option{32} and @option{64} modify the default or a prior CPU
+selection, disabling and enabling 64-bit insns respectively.  In
+addition, @option{altivec}, @option{any}, @option{htm}, @option{vsx},
+and @option{spe} add capabilities to a previous @emph{or later} CPU
+selection.  @option{any} will disassemble any opcode known to
+binutils, but in cases where an opcode has two different meanings or
+different arguments, you may not see the disassembly you expect.
+If you disassemble without giving a CPU selection, a default will be
+chosen from information gleaned by BFD from the object files headers,
+but the result again may not be as you expect.
 
 For MIPS, this option controls the printing of instruction mnemonic
 names and register names in disassembled instructions.  Multiple
@@ -3076,7 +3116,8 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{-s}|@option{--strip-all}]
       [@option{-S}|@option{-g}|@option{-d}|@option{--strip-debug}]
       [@option{--strip-dwo}]
-      [@option{-K} @var{symbolname} |@option{--keep-symbol=}@var{symbolname}]
+      [@option{-K} @var{symbolname}|@option{--keep-symbol=}@var{symbolname}]
+      [@option{-M}|@option{--merge-notes}][@option{--no-merge-notes}]
       [@option{-N} @var{symbolname} |@option{--strip-symbol=}@var{symbolname}]
       [@option{-w}|@option{--wildcard}]
       [@option{-x}|@option{--discard-all}] [@option{-X} |@option{--discard-locals}]
@@ -3202,6 +3243,13 @@ Remove all symbols that are not needed for relocation processing.
 @itemx --keep-symbol=@var{symbolname}
 When stripping symbols, keep symbol @var{symbolname} even if it would
 normally be stripped.  This option may be given more than once.
+
+@item -M
+@itemx --merge-notes
+@itemx --no-merge-notes
+For ELF files, attempt (or do not attempt) to reduce the size of any
+SHT_NOTE type sections by removing duplicate notes.  The default is to
+attempt this reduction.
 
 @item -N @var{symbolname}
 @itemx --strip-symbol=@var{symbolname}

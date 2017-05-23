@@ -114,7 +114,7 @@ static struct cmd_list_element *infospucmdlist = NULL;
 static const char *
 spu_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
-  static char *register_names[] = 
+  static const char *register_names[] =
     {
       "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
       "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -1339,6 +1339,7 @@ spu_scalar_value_p (struct type *type)
     case TYPE_CODE_BOOL:
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
       return TYPE_LENGTH (type) <= 16;
 
     default:
@@ -1611,7 +1612,7 @@ spu_memory_remove_breakpoint (struct gdbarch *gdbarch,
 
 /* Software single-stepping support.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 spu_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -1621,7 +1622,7 @@ spu_software_single_step (struct regcache *regcache)
   int offset, reg;
   gdb_byte buf[4];
   ULONGEST lslr;
-  VEC (CORE_ADDR) *next_pcs = NULL;
+  std::vector<CORE_ADDR> next_pcs;
 
   pc = regcache_read_pc (regcache);
 
@@ -1644,7 +1645,7 @@ spu_software_single_step (struct regcache *regcache)
   else
     next_pc = (SPUADDR_ADDR (pc) + 4) & lslr;
 
-  VEC_safe_push (CORE_ADDR, next_pcs, SPUADDR (SPUADDR_SPU (pc), next_pc));
+  next_pcs.push_back (SPUADDR (SPUADDR_SPU (pc), next_pc));
 
   if (is_branch (insn, &offset, &reg))
     {
@@ -1657,8 +1658,7 @@ spu_software_single_step (struct regcache *regcache)
 
       target = target & lslr;
       if (target != next_pc)
-	VEC_safe_push (CORE_ADDR, next_pcs, SPUADDR (SPUADDR_SPU (pc),
-						     target));
+	next_pcs.push_back (SPUADDR (SPUADDR_SPU (pc), target));
     }
 
   return next_pcs;
@@ -1933,8 +1933,6 @@ spu_catch_start (struct objfile *objfile)
   struct bound_minimal_symbol minsym;
   struct compunit_symtab *cust;
   CORE_ADDR pc;
-  struct event_location *location;
-  struct cleanup *back_to;
 
   /* Do this only if requested by "set spu stop-on-load on".  */
   if (!spu_stop_on_load_p)
@@ -1978,9 +1976,8 @@ spu_catch_start (struct objfile *objfile)
 
   /* Use a numerical address for the set_breakpoint command to avoid having
      the breakpoint re-set incorrectly.  */
-  location = new_address_location (pc, NULL, 0);
-  back_to = make_cleanup_delete_event_location (location);
-  create_breakpoint (get_objfile_arch (objfile), location,
+  event_location_up location = new_address_location (pc, NULL, 0);
+  create_breakpoint (get_objfile_arch (objfile), location.get (),
 		     NULL /* cond_string */, -1 /* thread */,
 		     NULL /* extra_string */,
 		     0 /* parse_condition_and_thread */, 1 /* tempflag */,
@@ -1989,7 +1986,6 @@ spu_catch_start (struct objfile *objfile)
 		     AUTO_BOOLEAN_FALSE /* pending_break_support */,
 		     &bkpt_breakpoint_ops /* ops */, 0 /* from_tty */,
 		     1 /* enabled */, 0 /* internal  */, 0);
-  do_cleanups (back_to);
 }
 
 
@@ -2299,7 +2295,7 @@ spu_mfc_get_bitfield (ULONGEST word, int first, int last)
 static void
 info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
 {
-  static char *spu_mfc_opcode[256] =
+  static const char *spu_mfc_opcode[256] =
     {
     /* 00 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
              NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,

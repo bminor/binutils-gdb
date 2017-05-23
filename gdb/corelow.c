@@ -129,7 +129,7 @@ sniff_core_bfd (bfd *abfd)
 {
   struct core_fns *cf;
   struct core_fns *yummy = NULL;
-  int matches = 0;;
+  int matches = 0;
 
   /* Don't sniff if we have support for register sets in
      CORE_GDBARCH.  */
@@ -485,15 +485,60 @@ core_detach (struct target_ops *ops, const char *args, int from_tty)
     printf_filtered (_("No core file now.\n"));
 }
 
+/* Build either a single-thread or multi-threaded section name for
+   PTID.
+
+   If ptid's lwp member is zero, we want to do the single-threaded
+   thing: look for a section named NAME (as passed to the
+   constructor).  If ptid's lwp member is non-zero, we'll want do the
+   multi-threaded thing: look for a section named "NAME/LWP", where
+   LWP is the shortest ASCII decimal representation of ptid's lwp
+   member.  */
+
+class thread_section_name
+{
+public:
+  /* NAME is the single-threaded section name.  If PTID represents an
+     LWP, then the build section name is "NAME/LWP", otherwise it's
+     just "NAME" unmodified.  */
+  thread_section_name (const char *name, ptid_t ptid)
+  {
+    if (ptid.lwp_p ())
+      {
+	m_storage = string_printf ("%s/%ld", name, ptid.lwp ());
+	m_section_name = m_storage.c_str ();
+      }
+    else
+      m_section_name = name;
+  }
+
+  /* Return the computed section name.  The result is valid as long as
+     this thread_section_name object is live.  */
+  const char *c_str () const
+  { return m_section_name; }
+
+  /* Disable copy.  */
+  thread_section_name (const thread_section_name &) = delete;
+  void operator= (const thread_section_name &) = delete;
+
+private:
+  /* Either a pointer into M_STORAGE, or a pointer to the name passed
+     as parameter to the constructor.  */
+  const char *m_section_name;
+  /* If we need to build a new section name, this is where we store
+     it.  */
+  std::string m_storage;
+};
+
 /* Try to retrieve registers from a section in core_bfd, and supply
    them to core_vec->core_read_registers, as the register set numbered
    WHICH.
 
-   If inferior_ptid's lwp member is zero, do the single-threaded
-   thing: look for a section named NAME.  If inferior_ptid's lwp
+   If ptid's lwp member is zero, do the single-threaded
+   thing: look for a section named NAME.  If ptid's lwp
    member is non-zero, do the multi-threaded thing: look for a section
    named "NAME/LWP", where LWP is the shortest ASCII decimal
-   representation of inferior_ptid's lwp member.
+   representation of ptid's lwp member.
 
    HUMAN_NAME is a human-readable name for the kind of registers the
    NAME section contains, for use in error messages.
@@ -511,22 +556,15 @@ get_core_register_section (struct regcache *regcache,
 			   const char *human_name,
 			   int required)
 {
-  static char *section_name = NULL;
   struct bfd_section *section;
   bfd_size_type size;
   char *contents;
   bool variable_size_section = (regset != NULL
 				&& regset->flags & REGSET_VARIABLE_SIZE);
 
-  xfree (section_name);
+  thread_section_name section_name (name, regcache->ptid ());
 
-  if (ptid_get_lwp (inferior_ptid))
-    section_name = xstrprintf ("%s/%ld", name,
-			       ptid_get_lwp (inferior_ptid));
-  else
-    section_name = xstrdup (name);
-
-  section = bfd_get_section_by_name (core_bfd, section_name);
+  section = bfd_get_section_by_name (core_bfd, section_name.c_str ());
   if (! section)
     {
       if (required)
@@ -538,13 +576,14 @@ get_core_register_section (struct regcache *regcache,
   size = bfd_section_size (core_bfd, section);
   if (size < min_size)
     {
-      warning (_("Section `%s' in core file too small."), section_name);
+      warning (_("Section `%s' in core file too small."),
+	       section_name.c_str ());
       return;
     }
   if (size != min_size && !variable_size_section)
     {
       warning (_("Unexpected size of section `%s' in core file."),
-	       section_name);
+	       section_name.c_str ());
     }
 
   contents = (char *) alloca (size);
@@ -552,7 +591,7 @@ get_core_register_section (struct regcache *regcache,
 				  (file_ptr) 0, size))
     {
       warning (_("Couldn't read %s registers from `%s' section in core file."),
-	       human_name, name);
+	       human_name, section_name.c_str ());
       return;
     }
 
@@ -682,18 +721,8 @@ add_to_spuid_list (bfd *abfd, asection *asect, void *list_p)
 static LONGEST
 get_core_siginfo (bfd *abfd, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
 {
-  asection *section;
-  char *section_name;
-  const char *name = ".note.linuxcore.siginfo";
-
-  if (ptid_get_lwp (inferior_ptid))
-    section_name = xstrprintf ("%s/%ld", name,
-			       ptid_get_lwp (inferior_ptid));
-  else
-    section_name = xstrdup (name);
-
-  section = bfd_get_section_by_name (abfd, section_name);
-  xfree (section_name);
+  thread_section_name section_name (".note.linuxcore.siginfo", inferior_ptid);
+  asection *section = bfd_get_section_by_name (abfd, section_name.c_str ());
   if (section == NULL)
     return -1;
 
@@ -964,7 +993,7 @@ core_read_description (struct target_ops *target)
   return target->beneath->to_read_description (target->beneath);
 }
 
-static char *
+static const char *
 core_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];

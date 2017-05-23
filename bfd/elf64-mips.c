@@ -88,12 +88,8 @@ static void mips_elf64_info_to_howto_rela
   (bfd *, arelent *, Elf_Internal_Rela *);
 static long mips_elf64_get_reloc_upper_bound
   (bfd *, asection *);
-static long mips_elf64_canonicalize_reloc
-  (bfd *, asection *, arelent **, asymbol **);
 static long mips_elf64_get_dynamic_reloc_upper_bound
   (bfd *);
-static long mips_elf64_canonicalize_dynamic_reloc
-  (bfd *, arelent **, asymbol **);
 static bfd_boolean mips_elf64_slurp_one_reloc_table
   (bfd *, asection *, Elf_Internal_Shdr *, bfd_size_type, arelent *,
    asymbol **, bfd_boolean);
@@ -3663,76 +3659,14 @@ mips_elf64_get_dynamic_reloc_upper_bound (bfd *abfd)
   return _bfd_elf_get_dynamic_reloc_upper_bound (abfd) * 3;
 }
 
-/* We must also copy more relocations than the corresponding functions
-   in elf.c would, so the two following functions are slightly
-   modified from elf.c, that multiply the external relocation count by
-   3 to obtain the internal relocation count.  */
-
-static long
-mips_elf64_canonicalize_reloc (bfd *abfd, sec_ptr section,
-			       arelent **relptr, asymbol **symbols)
-{
-  arelent *tblptr;
-  unsigned int i;
-  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-
-  if (! bed->s->slurp_reloc_table (abfd, section, symbols, FALSE))
-    return -1;
-
-  tblptr = section->relocation;
-  for (i = 0; i < section->reloc_count * 3; i++)
-    *relptr++ = tblptr++;
-
-  *relptr = NULL;
-
-  return section->reloc_count * 3;
-}
-
-static long
-mips_elf64_canonicalize_dynamic_reloc (bfd *abfd, arelent **storage,
-				       asymbol **syms)
-{
-  bfd_boolean (*slurp_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
-  asection *s;
-  long ret;
-
-  if (elf_dynsymtab (abfd) == 0)
-    {
-      bfd_set_error (bfd_error_invalid_operation);
-      return -1;
-    }
-
-  slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
-  ret = 0;
-  for (s = abfd->sections; s != NULL; s = s->next)
-    {
-      if (elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
-	  && (elf_section_data (s)->this_hdr.sh_type == SHT_REL
-	      || elf_section_data (s)->this_hdr.sh_type == SHT_RELA))
-	{
-	  arelent *p;
-	  long count, i;
-
-	  if (! (*slurp_relocs) (abfd, s, syms, TRUE))
-	    return -1;
-	  count = s->size / elf_section_data (s)->this_hdr.sh_entsize * 3;
-	  p = s->relocation;
-	  for (i = 0; i < count; i++)
-	    *storage++ = p++;
-	  ret += count;
-	}
-    }
-
-  *storage = NULL;
-
-  return ret;
-}
-
 /* Read the relocations from one reloc section.  This is mostly copied
    from elfcode.h, except for the changes to expand one external
-   relocation to 3 internal ones.  We must unfortunately set
-   reloc_count to the number of external relocations, because a lot of
-   generic code seems to depend on this.  */
+   relocation to 3 internal ones.  To reduce processing effort we
+   could discard those R_MIPS_NONE relocations that occupy the second
+   and the third entry of a triplet, as `mips_elf64_write_rel' and
+   `mips_elf64_write_rela' recreate them in output automagically,
+   however that would also remove them from `objdump -r' output,
+   breaking a long-established tradition and likely confusing people.  */
 
 static bfd_boolean
 mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
@@ -3885,7 +3819,7 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 	}
     }
 
-  asect->reloc_count += (relent - relents) / 3;
+  asect->reloc_count += relent - relents;
 
   if (allocated != NULL)
     free (allocated);
@@ -4504,10 +4438,7 @@ const struct elf_size_info mips_elf64_size_info =
 				_bfd_mips_elf_print_private_bfd_data
 
 #define bfd_elf64_get_reloc_upper_bound mips_elf64_get_reloc_upper_bound
-#define bfd_elf64_canonicalize_reloc mips_elf64_canonicalize_reloc
 #define bfd_elf64_get_dynamic_reloc_upper_bound mips_elf64_get_dynamic_reloc_upper_bound
-#define bfd_elf64_canonicalize_dynamic_reloc mips_elf64_canonicalize_dynamic_reloc
-#define bfd_elf64_bfd_relax_section     _bfd_mips_relax_section
 #define bfd_elf64_mkobject		_bfd_mips_elf_mkobject
 
 /* The SGI style (n)64 NewABI.  */

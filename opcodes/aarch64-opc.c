@@ -290,6 +290,7 @@ const aarch64_field fields[] =
     {  5,  5 }, /* SVE_Zn: SVE vector register, bits [9,5].  */
     {  0,  5 }, /* SVE_Zt: SVE vector register, bits [4,0].  */
     {  5,  1 }, /* SVE_i1: single-bit immediate.  */
+    { 22,  1 }, /* SVE_i3h: high bit of 3-bit immediate.  */
     { 16,  3 }, /* SVE_imm3: 3-bit immediate field.  */
     { 16,  4 }, /* SVE_imm4: 4-bit immediate field.  */
     {  5,  5 }, /* SVE_imm5: 5-bit immediate field.  */
@@ -303,6 +304,8 @@ const aarch64_field fields[] =
     { 10,  2 }, /* SVE_msz: 2-bit shift amount for ADR.  */
     {  5,  5 }, /* SVE_pattern: vector pattern enumeration.  */
     {  0,  4 }, /* SVE_prfop: prefetch operation for SVE PRF[BHWD].  */
+    { 16,  1 }, /* SVE_rot1: 1-bit rotation amount.  */
+    { 10,  2 }, /* SVE_rot2: 2-bit rotation amount.  */
     { 22,  1 }, /* SVE_sz: 1-bit element size select.  */
     { 16,  4 }, /* SVE_tsz: triangular size select.  */
     { 22,  2 }, /* SVE_tszh: triangular size select high, bits [23,22].  */
@@ -1201,10 +1204,10 @@ aarch64_logical_immediate_p (uint64_t value, int esize, aarch64_insn *encoding)
   uint64_t upper;
   int i;
 
-  DEBUG_TRACE ("enter with 0x%" PRIx64 "(%" PRIi64 "), is32: %d", value,
-	       value, is32);
+  DEBUG_TRACE ("enter with 0x%" PRIx64 "(%" PRIi64 "), esize: %d", value,
+	       value, esize);
 
-  if (initialized == FALSE)
+  if (!initialized)
     {
       build_immediate_table ();
       initialized = TRUE;
@@ -1474,6 +1477,29 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
     case AARCH64_OPND_CLASS_SVE_REG:
       switch (type)
 	{
+	case AARCH64_OPND_SVE_Zm3_INDEX:
+	case AARCH64_OPND_SVE_Zm3_22_INDEX:
+	case AARCH64_OPND_SVE_Zm4_INDEX:
+	  size = get_operand_fields_width (get_operand_from_code (type));
+	  shift = get_operand_specific_data (&aarch64_operands[type]);
+	  mask = (1 << shift) - 1;
+	  if (opnd->reg.regno > mask)
+	    {
+	      assert (mask == 7 || mask == 15);
+	      set_other_error (mismatch_detail, idx,
+			       mask == 15
+			       ? _("z0-z15 expected")
+			       : _("z0-z7 expected"));
+	      return 0;
+	    }
+	  mask = (1 << (size - shift)) - 1;
+	  if (!value_in_range_p (opnd->reglane.index, 0, mask))
+	    {
+	      set_elem_idx_out_of_range_error (mismatch_detail, idx, 0, mask);
+	      return 0;
+	    }
+	  break;
+
 	case AARCH64_OPND_SVE_Zn_INDEX:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  if (!value_in_range_p (opnd->reglane.index, 0, 64 / size - 1))
@@ -1798,6 +1824,11 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_SVE_ADDR_RI_S4x16:
+	  min_value = -8;
+	  max_value = 7;
+	  goto sve_imm_offset;
+
 	case AARCH64_OPND_SVE_ADDR_RR:
 	case AARCH64_OPND_SVE_ADDR_RR_LSL1:
 	case AARCH64_OPND_SVE_ADDR_RR_LSL2:
@@ -2082,7 +2113,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    uint64_t uimm = opnd->imm.value;
 	    if (opcode->op == OP_BIC)
 	      uimm = ~uimm;
-	    if (aarch64_logical_immediate_p (uimm, esize, NULL) == FALSE)
+	    if (!aarch64_logical_immediate_p (uimm, esize, NULL))
 	      {
 		set_other_error (mismatch_detail, idx,
 				 _("immediate out of range"));
@@ -2103,6 +2134,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 
 	case AARCH64_OPND_IMM_ROT1:
 	case AARCH64_OPND_IMM_ROT2:
+	case AARCH64_OPND_SVE_IMM_ROT2:
 	  if (opnd->imm.value != 0
 	      && opnd->imm.value != 90
 	      && opnd->imm.value != 180
@@ -2115,6 +2147,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  break;
 
 	case AARCH64_OPND_IMM_ROT3:
+	case AARCH64_OPND_SVE_IMM_ROT1:
 	  if (opnd->imm.value != 90 && opnd->imm.value != 270)
 	    {
 	      set_other_error (mismatch_detail, idx,
@@ -2488,7 +2521,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
       switch (type)
 	{
 	case AARCH64_OPND_Rm_EXT:
-	  if (aarch64_extend_operator_p (opnd->shifter.kind) == FALSE
+	  if (!aarch64_extend_operator_p (opnd->shifter.kind)
 	      && opnd->shifter.kind != AARCH64_MOD_LSL)
 	    {
 	      set_other_error (mismatch_detail, idx,
@@ -2540,7 +2573,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_Rm_SFT:
 	  /* ROR is not available to the shifted register operand in
 	     arithmetic instructions.  */
-	  if (aarch64_shift_operator_p (opnd->shifter.kind) == FALSE)
+	  if (!aarch64_shift_operator_p (opnd->shifter.kind))
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("shift operator expected"));
@@ -3174,6 +3207,9 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       print_register_list (buf, size, opnd, "z");
       break;
 
+    case AARCH64_OPND_SVE_Zm3_INDEX:
+    case AARCH64_OPND_SVE_Zm3_22_INDEX:
+    case AARCH64_OPND_SVE_Zm4_INDEX:
     case AARCH64_OPND_SVE_Zn_INDEX:
       snprintf (buf, size, "z%d.%s[%" PRIi64 "]", opnd->reglane.regno,
 		aarch64_get_qualifier_name (opnd->qualifier),
@@ -3214,6 +3250,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_IMM_ROT1:
     case AARCH64_OPND_IMM_ROT2:
     case AARCH64_OPND_IMM_ROT3:
+    case AARCH64_OPND_SVE_IMM_ROT1:
+    case AARCH64_OPND_SVE_IMM_ROT2:
       snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
       break;
 
@@ -3461,6 +3499,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_ADDR_SIMM9:
     case AARCH64_OPND_ADDR_SIMM9_2:
     case AARCH64_OPND_ADDR_SIMM10:
+    case AARCH64_OPND_SVE_ADDR_RI_S4x16:
     case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
     case AARCH64_OPND_SVE_ADDR_RI_S4x2xVL:
     case AARCH64_OPND_SVE_ADDR_RI_S4x3xVL:
@@ -3670,6 +3709,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "id_aa64mmfr2_el1", CPENC (3, 0, C0, C7, 2), F_ARCHEXT }, /* RO */
   { "id_aa64afr0_el1",  CPENC(3,0,C0,C5,4),	0 }, /* RO */
   { "id_aa64afr1_el1",  CPENC(3,0,C0,C5,5),	0 }, /* RO */
+  { "id_aa64zfr0_el1",  CPENC (3, 0, C0, C4, 4), F_ARCHEXT }, /* RO */
   { "clidr_el1",        CPENC(3,1,C0,C0,1),	0 }, /* RO */
   { "csselr_el1",       CPENC(3,2,C0,C0,0),	0 }, /* RO */
   { "vpidr_el2",        CPENC(3,4,C0,C0,0),	0 },
@@ -3691,6 +3731,11 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "mdcr_el3",         CPENC(3,6,C1,C3,1),	0 },
   { "hstr_el2",         CPENC(3,4,C1,C1,3),	0 },
   { "hacr_el2",         CPENC(3,4,C1,C1,7),	0 },
+  { "zcr_el1",          CPENC (3, 0, C1, C2, 0), F_ARCHEXT },
+  { "zcr_el12",         CPENC (3, 5, C1, C2, 0), F_ARCHEXT },
+  { "zcr_el2",          CPENC (3, 4, C1, C2, 0), F_ARCHEXT },
+  { "zcr_el3",          CPENC (3, 6, C1, C2, 0), F_ARCHEXT },
+  { "zidr_el1",         CPENC (3, 0, C0, C0, 7), F_ARCHEXT },
   { "ttbr0_el1",        CPENC(3,0,C2,C0,0),	0 },
   { "ttbr1_el1",        CPENC(3,0,C2,C0,1),	0 },
   { "ttbr0_el2",        CPENC(3,4,C2,C0,0),	0 },
@@ -4102,6 +4147,16 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
        || reg->value == CPENC (3, 0, C2, C3, 0)
        || reg->value == CPENC (3, 0, C2, C3, 1))
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_3))
+    return FALSE;
+
+  /* SVE.  */
+  if ((reg->value == CPENC (3, 0, C0, C4, 4)
+       || reg->value == CPENC (3, 0, C1, C2, 0)
+       || reg->value == CPENC (3, 4, C1, C2, 0)
+       || reg->value == CPENC (3, 6, C1, C2, 0)
+       || reg->value == CPENC (3, 5, C1, C2, 0)
+       || reg->value == CPENC (3, 0, C0, C0, 7))
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_SVE))
     return FALSE;
 
   return TRUE;

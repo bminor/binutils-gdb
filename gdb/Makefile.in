@@ -453,6 +453,7 @@ SUBDIR_PYTHON_OBS = \
 	py-inferior.o \
 	py-infevents.o \
 	py-infthread.o \
+	py-instruction.o \
 	py-lazy-string.o \
 	py-linetable.o \
 	py-newobjfileevent.o \
@@ -496,6 +497,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-inferior.c \
 	python/py-infevents.c \
 	python/py-infthread.c \
+	python/py-instruction.c \
 	python/py-lazy-string.c \
 	python/py-linetable.c \
 	python/py-newobjfileevent.c \
@@ -522,6 +524,20 @@ SUBDIR_PYTHON_SRCS = \
 SUBDIR_PYTHON_DEPS =
 SUBDIR_PYTHON_LDFLAGS =
 SUBDIR_PYTHON_CFLAGS =
+
+SUBDIR_UNITTESTS_SRCS = \
+	unittests/function-view-selftests.c \
+	unittests/offset-type-selftests.c \
+	unittests/optional-selftests.c \
+	unittests/ptid-selftests.c \
+	unittests/scoped_restore-selftests.c
+
+SUBDIR_UNITTESTS_OBS = \
+	function-view-selftests.o \
+	offset-type-selftests.o \
+	optional-selftests.o \
+	ptid-selftests.o \
+	scoped_restore-selftests.o
 
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
@@ -738,7 +754,6 @@ ALL_64_TARGET_OBS = \
 	aarch64-newlib-tdep.o \
 	aarch64-tdep.o \
 	alpha-bsd-tdep.o \
-	alpha-fbsd-tdep.o \
 	alpha-linux-tdep.o \
 	alpha-mdebug-tdep.o \
 	alpha-nbsd-tdep.o \
@@ -801,6 +816,7 @@ ALL_TARGET_OBS = \
 	i386-dicos-tdep.o \
 	i386-fbsd-tdep.o \
 	i386-gnu-tdep.o \
+	i386-go32-tdep.o \
 	i386-linux-tdep.o \
 	i386-nbsd-tdep.o \
 	i386-nto-tdep.o \
@@ -888,9 +904,21 @@ ALL_TARGET_OBS = \
 	xtensa-linux-tdep.o \
 	xtensa-tdep.o
 
-# Host-dependent makefile fragment comes in here.
-@host_makefile_frag@
-# End of host-dependent makefile fragment
+# The following native-target dependent variables are defined on
+# configure.nat.
+NAT_FILE = @NAT_FILE@
+NATDEPFILES = @NATDEPFILES@
+NAT_CDEPS = @NAT_CDEPS@
+LOADLIBES = @LOADLIBES@
+MH_CFLAGS = @MH_CFLAGS@
+XM_CLIBS = @XM_CLIBS@
+NAT_GENERATED_FILES = @NAT_GENERATED_FILES@
+HAVE_NATIVE_GCORE_HOST = @HAVE_NATIVE_GCORE_HOST@
+
+# Native-target dependent makefile fragment comes in here.
+@nat_makefile_frag@
+
+# End of native-target dependent variables.
 
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
@@ -1055,7 +1083,6 @@ SFILES = \
 	dwarf2loc.c \
 	dwarf2read.c \
 	elfread.c \
-	environ.c \
 	eval.c \
 	event-loop.c \
 	event-top.c \
@@ -1133,6 +1160,7 @@ SFILES = \
 	probe.c \
 	proc-service.list \
 	progspace.c \
+	progspace-and-thread.c \
 	prologue-value.c \
 	psymtab.c \
 	record.c \
@@ -1201,6 +1229,7 @@ SFILES = \
 	common/common-regcache.c \
 	common/common-utils.c \
 	common/errors.c \
+	common/environ.c \
 	common/fileio.c \
 	common/filestuff.c \
 	common/format.c \
@@ -1279,7 +1308,6 @@ HFILES_NO_SRCDIR = \
 	dwarf2-frame-tailcall.h \
 	dwarf2expr.h \
 	dwarf2loc.h \
-	environ.h \
 	event-loop.h \
 	event-top.h \
 	exceptions.h \
@@ -1388,6 +1416,7 @@ HFILES_NO_SRCDIR = \
 	proc-utils.h \
 	procfs.h \
 	progspace.h \
+	progspace-and-thread.h \
 	prologue-value.h \
 	psympriv.h \
 	psymtab.h \
@@ -1480,6 +1509,7 @@ HFILES_NO_SRCDIR = \
 	common/common-types.h \
 	common/common-utils.h \
 	common/errors.h \
+	common/environ.h \
 	common/fileio.h \
 	common/format.h \
 	common/gdb_assert.h \
@@ -1487,6 +1517,7 @@ HFILES_NO_SRCDIR = \
 	common/gdb_setjmp.h \
 	common/gdb_signals.h \
 	common/gdb_sys_time.h \
+	common/gdb_termios.h \
 	common/gdb_vecs.h \
 	common/gdb_wait.h \
 	common/host-defs.h \
@@ -1740,6 +1771,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	printcmd.o \
 	probe.o \
 	progspace.o \
+	progspace-and-thread.o \
 	prologue-value.o \
 	psymtab.o \
 	ptid.o \
@@ -1906,6 +1938,10 @@ all: gdb$(EXEEXT) $(CONFIG_ALL)
 	$(POSTCOMPILE)
 
 %.o: $(srcdir)/tui/%.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+%.o: ${srcdir}/unittests/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
@@ -2296,21 +2332,21 @@ subdir_do: force
 		else true ; fi ; \
 	done
 
-Makefile: Makefile.in config.status @frags@
+Makefile: Makefile.in config.status
 	# Regenerate the Makefile and the tm.h / nm.h links.
 	CONFIG_FILES="Makefile" \
 	  CONFIG_COMMANDS= \
 	  CONFIG_HEADERS= \
 	  $(SHELL) config.status
 
-$(GNULIB_BUILDDIR)/Makefile: gnulib/Makefile.in config.status @frags@
+$(GNULIB_BUILDDIR)/Makefile: gnulib/Makefile.in config.status
 	@cd $(GNULIB_BUILDDIR); CONFIG_FILES="Makefile" \
 	  CONFIG_COMMANDS="depfiles" \
 	  CONFIG_HEADERS= \
 	  CONFIG_LINKS= \
 	  $(SHELL) config.status
 
-data-directory/Makefile: data-directory/Makefile.in config.status @frags@
+data-directory/Makefile: data-directory/Makefile.in config.status
 	CONFIG_FILES="data-directory/Makefile" \
 	  CONFIG_COMMANDS="depfiles" \
 	  CONFIG_HEADERS= \
@@ -2448,7 +2484,6 @@ ALLDEPFILES = \
 	aix-thread.c \
 	alpha-bsd-nat.c \
 	alpha-bsd-tdep.c \
-	alpha-fbsd-tdep.c \
 	alpha-linux-nat.c \
 	alpha-linux-tdep.c \
 	alpha-mdebug-tdep.c \

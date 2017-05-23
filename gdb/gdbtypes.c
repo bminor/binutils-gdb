@@ -51,6 +51,7 @@ const struct rank EXACT_MATCH_BADNESS = {0,0};
 const struct rank INTEGER_PROMOTION_BADNESS = {1,0};
 const struct rank FLOAT_PROMOTION_BADNESS = {1,0};
 const struct rank BASE_PTR_CONVERSION_BADNESS = {1,0};
+const struct rank CV_CONVERSION_BADNESS = {1, 0};
 const struct rank INTEGER_CONVERSION_BADNESS = {2,0};
 const struct rank FLOAT_CONVERSION_BADNESS = {2,0};
 const struct rank INT_FLOAT_CONVERSION_BADNESS = {2,0};
@@ -384,15 +385,21 @@ lookup_pointer_type (struct type *type)
 /* Lookup a C++ `reference' to a type TYPE.  TYPEPTR, if nonzero,
    points to a pointer to memory where the reference type should be
    stored.  If *TYPEPTR is zero, update it to point to the reference
-   type we return.  We allocate new memory if needed.  */
+   type we return.  We allocate new memory if needed. REFCODE denotes
+   the kind of reference type to lookup (lvalue or rvalue reference).  */
 
 struct type *
-make_reference_type (struct type *type, struct type **typeptr)
+make_reference_type (struct type *type, struct type **typeptr,
+                      enum type_code refcode)
 {
   struct type *ntype;	/* New type */
+  struct type **reftype;
   struct type *chain;
 
-  ntype = TYPE_REFERENCE_TYPE (type);
+  gdb_assert (refcode == TYPE_CODE_REF || refcode == TYPE_CODE_RVALUE_REF);
+
+  ntype = (refcode == TYPE_CODE_REF ? TYPE_REFERENCE_TYPE (type)
+           : TYPE_RVALUE_REFERENCE_TYPE (type));
 
   if (ntype)
     {
@@ -421,7 +428,10 @@ make_reference_type (struct type *type, struct type **typeptr)
     }
 
   TYPE_TARGET_TYPE (ntype) = type;
-  TYPE_REFERENCE_TYPE (type) = ntype;
+  reftype = (refcode == TYPE_CODE_REF ? &TYPE_REFERENCE_TYPE (type)
+             : &TYPE_RVALUE_REFERENCE_TYPE (type));
+
+  *reftype = ntype;
 
   /* FIXME!  Assume the machine has only one representation for
      references, and that it matches the (only) representation for
@@ -429,10 +439,9 @@ make_reference_type (struct type *type, struct type **typeptr)
 
   TYPE_LENGTH (ntype) =
     gdbarch_ptr_bit (get_type_arch (type)) / TARGET_CHAR_BIT;
-  TYPE_CODE (ntype) = TYPE_CODE_REF;
+  TYPE_CODE (ntype) = refcode;
 
-  if (!TYPE_REFERENCE_TYPE (type))	/* Remember it, if don't have one.  */
-    TYPE_REFERENCE_TYPE (type) = ntype;
+  *reftype = ntype;
 
   /* Update the length of all the other variants of this type.  */
   chain = TYPE_CHAIN (ntype);
@@ -449,9 +458,25 @@ make_reference_type (struct type *type, struct type **typeptr)
    details.  */
 
 struct type *
-lookup_reference_type (struct type *type)
+lookup_reference_type (struct type *type, enum type_code refcode)
 {
-  return make_reference_type (type, (struct type **) 0);
+  return make_reference_type (type, (struct type **) 0, refcode);
+}
+
+/* Lookup the lvalue reference type for the type TYPE.  */
+
+struct type *
+lookup_lvalue_reference_type (struct type *type)
+{
+  return lookup_reference_type (type, TYPE_CODE_REF);
+}
+
+/* Lookup the rvalue reference type for the type TYPE.  */
+
+struct type *
+lookup_rvalue_reference_type (struct type *type)
+{
+  return lookup_reference_type (type, TYPE_CODE_RVALUE_REF);
 }
 
 /* Lookup a function type that returns type TYPE.  TYPEPTR, if
@@ -3587,21 +3612,66 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 {
   struct rank rank = {0,0};
 
-  if (types_equal (parm, arg))
-    return EXACT_MATCH_BADNESS;
-
   /* Resolve typedefs */
   if (TYPE_CODE (parm) == TYPE_CODE_TYPEDEF)
     parm = check_typedef (parm);
   if (TYPE_CODE (arg) == TYPE_CODE_TYPEDEF)
     arg = check_typedef (arg);
 
+  if (TYPE_IS_REFERENCE (parm) && value != NULL)
+    {
+      if (VALUE_LVAL (value) == not_lval)
+	{
+	  /* Rvalues should preferably bind to rvalue references or const
+	     lvalue references.  */
+	  if (TYPE_CODE (parm) == TYPE_CODE_RVALUE_REF)
+	    rank.subrank = REFERENCE_CONVERSION_RVALUE;
+	  else if (TYPE_CONST (TYPE_TARGET_TYPE (parm)))
+	    rank.subrank = REFERENCE_CONVERSION_CONST_LVALUE;
+	  else
+	    return INCOMPATIBLE_TYPE_BADNESS;
+	  return sum_ranks (rank, REFERENCE_CONVERSION_BADNESS);
+	}
+      else
+	{
+	  /* Lvalues should prefer lvalue overloads.  */
+	  if (TYPE_CODE (parm) == TYPE_CODE_RVALUE_REF)
+	    {
+	      rank.subrank = REFERENCE_CONVERSION_RVALUE;
+	      return sum_ranks (rank, REFERENCE_CONVERSION_BADNESS);
+	    }
+	}
+    }
+
+  if (types_equal (parm, arg))
+    {
+      struct type *t1 = parm;
+      struct type *t2 = arg;
+
+      /* For pointers and references, compare target type.  */
+      if (TYPE_CODE (parm) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (parm))
+	{
+	  t1 = TYPE_TARGET_TYPE (parm);
+	  t2 = TYPE_TARGET_TYPE (arg);
+	}
+
+      /* Make sure they are CV equal, too.  */
+      if (TYPE_CONST (t1) != TYPE_CONST (t2))
+	rank.subrank |= CV_CONVERSION_CONST;
+      if (TYPE_VOLATILE (t1) != TYPE_VOLATILE (t2))
+	rank.subrank |= CV_CONVERSION_VOLATILE;
+      if (rank.subrank != 0)
+	return sum_ranks (CV_CONVERSION_BADNESS, rank);
+      return EXACT_MATCH_BADNESS;
+    }
+
   /* See through references, since we can almost make non-references
      references.  */
-  if (TYPE_CODE (arg) == TYPE_CODE_REF)
+
+  if (TYPE_IS_REFERENCE (arg))
     return (sum_ranks (rank_one_type (parm, TYPE_TARGET_TYPE (arg), NULL),
                        REFERENCE_CONVERSION_BADNESS));
-  if (TYPE_CODE (parm) == TYPE_CODE_REF)
+  if (TYPE_IS_REFERENCE (parm))
     return (sum_ranks (rank_one_type (TYPE_TARGET_TYPE (parm), arg, NULL),
                        REFERENCE_CONVERSION_BADNESS));
   if (overload_debug)
@@ -3634,10 +3704,23 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 
 	  return INCOMPATIBLE_TYPE_BADNESS;
 	case TYPE_CODE_ARRAY:
-	  if (types_equal (TYPE_TARGET_TYPE (parm),
-	                   TYPE_TARGET_TYPE (arg)))
-	    return EXACT_MATCH_BADNESS;
-	  return INCOMPATIBLE_TYPE_BADNESS;
+	  {
+	    struct type *t1 = TYPE_TARGET_TYPE (parm);
+	    struct type *t2 = TYPE_TARGET_TYPE (arg);
+
+	    if (types_equal (t1, t2))
+	      {
+		/* Make sure they are CV equal.  */
+		if (TYPE_CONST (t1) != TYPE_CONST (t2))
+		  rank.subrank |= CV_CONVERSION_CONST;
+		if (TYPE_VOLATILE (t1) != TYPE_VOLATILE (t2))
+		  rank.subrank |= CV_CONVERSION_VOLATILE;
+		if (rank.subrank != 0)
+		  return sum_ranks (CV_CONVERSION_BADNESS, rank);
+		return EXACT_MATCH_BADNESS;
+	      }
+	    return INCOMPATIBLE_TYPE_BADNESS;
+	  }
 	case TYPE_CODE_FUNC:
 	  return rank_one_type (TYPE_TARGET_TYPE (parm), arg, NULL);
 	case TYPE_CODE_INT:
@@ -5127,10 +5210,12 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 
   /* Wide character types.  */
   builtin_type->builtin_char16
-    = arch_integer_type (gdbarch, 16, 0, "char16_t");
+    = arch_integer_type (gdbarch, 16, 1, "char16_t");
   builtin_type->builtin_char32
-    = arch_integer_type (gdbarch, 32, 0, "char32_t");
-	
+    = arch_integer_type (gdbarch, 32, 1, "char32_t");
+  builtin_type->builtin_wchar
+    = arch_integer_type (gdbarch, gdbarch_wchar_bit (gdbarch),
+			 !gdbarch_wchar_signed (gdbarch), "wchar_t");
 
   /* Default data/code pointer types.  */
   builtin_type->builtin_data_ptr

@@ -20,6 +20,7 @@
 
 #include "sysdep.h"
 #include "dis-asm.h"
+#include "safe-ctype.h"
 
 #ifdef ARCH_all
 #define ARCH_aarch64
@@ -93,6 +94,7 @@
 #define ARCH_vax
 #define ARCH_visium
 #define ARCH_w65
+#define ARCH_wasm32
 #define ARCH_xstormy16
 #define ARCH_xc16x
 #define ARCH_xgate
@@ -473,6 +475,11 @@ disassembler (bfd *abfd)
       disassemble = print_insn_w65;
       break;
 #endif
+#ifdef ARCH_wasm32
+    case bfd_arch_wasm32:
+      disassemble = print_insn_wasm32;
+      break;
+#endif
 #ifdef ARCH_xgate
     case bfd_arch_xgate:
       disassemble = print_insn_xgate;
@@ -579,6 +586,9 @@ disassembler_usage (FILE *stream ATTRIBUTE_UNUSED)
 #ifdef ARCH_s390
   print_s390_disassembler_options (stream);
 #endif
+#ifdef ARCH_wasm32
+  print_wasm32_disassembler_options (stream);
+#endif
 
   return;
 }
@@ -649,7 +659,81 @@ disassemble_init_for_target (struct disassemble_info * info)
       disassemble_init_powerpc (info);
       break;
 #endif
+#ifdef ARCH_wasm32
+    case bfd_arch_wasm32:
+      disassemble_init_wasm32 (info);
+      break;
+#endif
+#ifdef ARCH_s390
+    case bfd_arch_s390:
+      disassemble_init_s390 (info);
+      break;
+#endif
     default:
       break;
     }
+}
+
+/* Remove whitespace and consecutive commas from OPTIONS.  */
+
+char *
+remove_whitespace_and_extra_commas (char *options)
+{
+  char *str;
+  size_t i, len;
+
+  if (options == NULL)
+    return NULL;
+
+  /* Strip off all trailing whitespace and commas.  */
+  for (len = strlen (options); len > 0; len--)
+    {
+      if (!ISSPACE (options[len - 1]) && options[len - 1] != ',')
+	break;
+      options[len - 1] = '\0';
+    }
+
+  /* Convert all remaining whitespace to commas.  */
+  for (i = 0; options[i] != '\0'; i++)
+    if (ISSPACE (options[i]))
+      options[i] = ',';
+
+  /* Remove consecutive commas.  */
+  for (str = options; *str != '\0'; str++)
+    if (*str == ',' && (*(str + 1) == ',' || str == options))
+      {
+	char *next = str + 1;
+	while (*next == ',')
+	  next++;
+	len = strlen (next);
+	if (str != options)
+	  str++;
+	memmove (str, next, len);
+	next[len - (size_t)(next - str)] = '\0';
+      }
+  return (strlen (options) != 0) ? options : NULL;
+}
+
+/* Like STRCMP, but treat ',' the same as '\0' so that we match
+   strings like "foobar" against "foobar,xxyyzz,...".  */
+
+int
+disassembler_options_cmp (const char *s1, const char *s2)
+{
+  unsigned char c1, c2;
+
+  do
+    {
+      c1 = (unsigned char) *s1++;
+      if (c1 == ',')
+	c1 = '\0';
+      c2 = (unsigned char) *s2++;
+      if (c2 == ',')
+	c2 = '\0';
+      if (c1 == '\0')
+	return c1 - c2;
+    }
+  while (c1 == c2);
+
+  return c1 - c2;
 }

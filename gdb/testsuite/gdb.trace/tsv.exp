@@ -26,6 +26,10 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 }
 gdb_load $binfile
 
+# PR gdb/21352: Command tsave does not support -r argument
+gdb_test "tsave -r" "Argument required \\\(file in which to save trace data\\\)\." \
+    "tsave command properly supports -r argument"
+
 gdb_test "tvariable \$tvar1" \
   "Trace state variable \\\$tvar1 created, with initial value 0." \
   "create a trace state variable"

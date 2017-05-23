@@ -40,5 +40,5 @@ gdb_test "p g(f(g(f(300) + f(40))) + f(5))" ".* = 345" \
 gdb_test "p getb(makeb(), 789)" ".* = 789" "getb(makeb(), ...)"
 gdb_test "p *c" ".* = {a = 5678}" "*c"
 gdb_test "p *c + *c" ".* = {a = 11356}" "*c + *c"
-gdb_test "P q(*c + *c)" ".* = {a = 11356}" "q(*c + *c)"
+gdb_test "p q(*c + *c)" ".* = {a = 11356}" "q(*c + *c)"
 gdb_test "p make_int().get_type ()" ".* = INT" "make_int().get_type ()"

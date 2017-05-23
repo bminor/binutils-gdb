@@ -43,8 +43,8 @@
 
 struct trans {
   int value;                    /* The numeric value */
-  char *name;                   /* The equivalent symbolic value */
-  char *desc;                   /* Short description of value */
+  const char *name;             /* The equivalent symbolic value */
+  const char *desc;             /* Short description of value */
 };
 
 /* Translate bits in the pr_flags member of the prstatus structure,

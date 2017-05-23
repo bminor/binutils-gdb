@@ -295,6 +295,6 @@ extern void do_restore_instream_cleanup (void *stream);
 
 extern char *handle_line_of_input (struct buffer *cmd_line_buffer,
 				   char *rl, int repeat,
-				   char *annotation_suffix);
+				   const char *annotation_suffix);
 
 #endif

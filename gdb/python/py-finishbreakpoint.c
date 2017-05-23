@@ -33,7 +33,7 @@
 #include "py-ref.h"
 
 /* Function that is called when a Python finish bp is found out of scope.  */
-static char * const outofscope_func = "out_of_scope";
+static const char outofscope_func[] = "out_of_scope";
 
 /* struct implementing the gdb.FinishBreakpoint object by extending
    the gdb.Breakpoint class.  */
@@ -156,7 +156,7 @@ bpfinishpy_post_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
 static int
 bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 {
-  static char *keywords[] = { "frame", "internal", NULL };
+  static const char *keywords[] = { "frame", "internal", NULL };
   struct finish_breakpoint_object *self_bpfinish =
       (struct finish_breakpoint_object *) self;
   PyObject *frame_obj = NULL;
@@ -169,8 +169,8 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   CORE_ADDR pc;
   struct symbol *function;
 
-  if (!PyArg_ParseTupleAndKeywords (args, kwargs, "|OO", keywords,
-                                    &frame_obj, &internal))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "|OO", keywords,
+					&frame_obj, &internal))
     return -1;
 
   TRY
@@ -293,14 +293,11 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 
   TRY
     {
-      struct event_location *location;
-      struct cleanup *back_to;
-
       /* Set a breakpoint on the return address.  */
-      location = new_address_location (get_frame_pc (prev_frame), NULL, 0);
-      back_to = make_cleanup_delete_event_location (location);
+      event_location_up location
+	= new_address_location (get_frame_pc (prev_frame), NULL, 0);
       create_breakpoint (python_gdbarch,
-                         location, NULL, thread, NULL,
+                         location.get (), NULL, thread, NULL,
                          0,
                          1 /*temp_flag*/,
                          bp_breakpoint,
@@ -308,7 +305,6 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
                          AUTO_BOOLEAN_TRUE,
                          &bkpt_breakpoint_ops,
                          0, 1, internal_bp, 0);
-      do_cleanups (back_to);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -426,7 +422,7 @@ gdbpy_initialize_finishbreakpoints (void)
   return 0;
 }
 
-static PyGetSetDef finish_breakpoint_object_getset[] = {
+static gdb_PyGetSetDef finish_breakpoint_object_getset[] = {
   { "return_value", bpfinishpy_get_returnvalue, NULL,
   "gdb.Value object representing the return value, if any. \
 None otherwise.", NULL },

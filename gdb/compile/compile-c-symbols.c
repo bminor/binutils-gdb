@@ -593,7 +593,7 @@ generate_vla_size (struct compile_c_instance *compiler,
 {
   type = check_typedef (type);
 
-  if (TYPE_CODE (type) == TYPE_CODE_REF)
+  if (TYPE_IS_REFERENCE (type))
     type = check_typedef (TYPE_TARGET_TYPE (type));
 
   switch (TYPE_CODE (type))

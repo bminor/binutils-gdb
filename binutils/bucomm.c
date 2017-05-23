@@ -587,6 +587,9 @@ get_file_size (const char * file_name)
 {
   struct stat statbuf;
 
+  if (file_name == NULL)
+    return (off_t) -1;
+
   if (stat (file_name, &statbuf) < 0)
     {
       if (errno == ENOENT)

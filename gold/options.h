@@ -814,6 +814,10 @@ class General_options
 
   // e
 
+  DEFINE_bool(emit_stub_syms, options::TWO_DASHES, '\0', true,
+	      N_("(PowerPC only) Label linker stubs with a symbol"),
+	      N_("(PowerPC only) Do not label linker stubs with a symbol"));
+
   DEFINE_string(entry, options::TWO_DASHES, 'e', NULL,
 		N_("Set program start address"), N_("ADDRESS"));
 

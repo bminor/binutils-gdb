@@ -1161,3 +1161,166 @@
 	dup	z0.d, z1.d[7]				// OK
 	dup	z0.d, z1.d[8]
 	dup	z0.d, z1.d[x0]
+
+	fabd	z0.b, p0/m, z0.b, z0.b
+	fabd	z0.q, p0/m, z0.q, z0.q
+
+	fcadd	z0.b, p0/m, z0.b, z0.b, #90
+	fcadd	z0.h, p0/m, z0.h, z0.h, #-180
+	fcadd	z0.h, p0/m, z0.h, z0.h, #-90
+	fcadd	z0.h, p0/m, z0.h, z0.h, #0
+	fcadd	z0.h, p0/m, z0.h, z0.h, #89
+	fcadd	z0.h, p0/m, z0.h, z0.h, #90.0
+	fcadd	z0.h, p0/m, z0.h, z0.h, #180
+	fcadd	z0.h, p0/m, z0.h, z0.h, #360
+	fcadd	z0.h, p0/m, z0.h, z0.h, #450
+	fcadd	z0.h, p0/z, z0.h, z0.h, #90
+	fcadd	z0.h, p0/m, z1.h, z0.h, #90
+	fcadd	z0.q, p0/m, z0.q, z0.q, #90
+
+	fcmla	z0.b, p0/m, z0.b, z0.b, #90
+	fcmla	z0.h, p0/m, z0.h, z0.h, #-180
+	fcmla	z0.h, p0/m, z0.h, z0.h, #-90
+	fcmla	z0.h, p0/m, z0.h, z0.h, #89
+	fcmla	z0.h, p0/m, z0.h, z0.h, #90.0
+	fcmla	z0.h, p0/m, z0.h, z0.h, #360
+	fcmla	z0.h, p0/m, z0.h, z0.h, #450
+	fcmla	z0.h, p0/z, z0.h, z0.h, #90
+	fcmla	z0.q, p0/m, z0.q, z0.q, #90
+
+	fcmla	z0.b, z1.b, z2.b[0], #0
+	fcmla	z0.h, z1.h, z2.h[-1], #0
+	fcmla	z0.h, z1.h, z2.h[4], #0
+	fcmla	z0.h, z1.h, z8.h[0], #0
+	fcmla	z0.h, z1.h, z2.h[0], #-180
+	fcmla	z0.h, z1.h, z2.h[0], #-90
+	fcmla	z0.h, z1.h, z2.h[0], #89
+	fcmla	z0.h, z1.h, z2.h[0], #90.0
+	fcmla	z0.h, z1.h, z2.h[0], #360
+	fcmla	z0.h, z1.h, z2.h[0], #450
+	fcmla	z0.s, z1.s, z2.s[-1], #0
+	fcmla	z0.s, z1.s, z2.s[2], #0
+	fcmla	z0.s, z1.s, z16.s[0], #0
+	fcmla	z0.s, z1.s, z2.s[0], #-180
+	fcmla	z0.s, z1.s, z2.s[0], #-90
+	fcmla	z0.s, z1.s, z2.s[0], #89
+	fcmla	z0.s, z1.s, z2.s[0], #90.0
+	fcmla	z0.s, z1.s, z2.s[0], #360
+	fcmla	z0.s, z1.s, z2.s[0], #450
+	fcmla	z0.q, z1.q, z2.q[0], #0
+
+	fmla	z0.b, z1.b, z2.b[0]
+	fmla	z0.h, z1.h, z2.h[-1]
+	fmla	z0.h, z1.h, z2.h[8]
+	fmla	z0.h, z1.h, z8.h[0]
+	fmla	z0.s, z1.s, z2.s[-1]
+	fmla	z0.s, z1.s, z2.s[4]
+	fmla	z0.s, z1.s, z8.s[0]
+	fmla	z0.d, z1.d, z2.d[-1]
+	fmla	z0.d, z1.d, z2.d[2]
+	fmla	z0.d, z1.d, z16.d[0]
+	fmla	z0.q, z1.q, z2.q[0]
+
+	fmls	z0.b, z1.b, z2.b[0]
+	fmls	z0.h, z1.h, z2.h[-1]
+	fmls	z0.h, z1.h, z2.h[8]
+	fmls	z0.h, z1.h, z8.h[0]
+	fmls	z0.s, z1.s, z2.s[-1]
+	fmls	z0.s, z1.s, z2.s[4]
+	fmls	z0.s, z1.s, z8.s[0]
+	fmls	z0.d, z1.d, z2.d[-1]
+	fmls	z0.d, z1.d, z2.d[2]
+	fmls	z0.d, z1.d, z16.d[0]
+	fmls	z0.q, z1.q, z2.q[0]
+
+	fmul	z0.b, z1.b, z2.b[0]
+	fmul	z0.h, z1.h, z2.h[-1]
+	fmul	z0.h, z1.h, z2.h[8]
+	fmul	z0.h, z1.h, z8.h[0]
+	fmul	z0.s, z1.s, z2.s[-1]
+	fmul	z0.s, z1.s, z2.s[4]
+	fmul	z0.s, z1.s, z8.s[0]
+	fmul	z0.d, z1.d, z2.d[-1]
+	fmul	z0.d, z1.d, z2.d[2]
+	fmul	z0.d, z1.d, z16.d[0]
+	fmul	z0.q, z1.q, z2.q[0]
+
+	ld1rqb	{z0.b}, p0, [x0, #0]
+	ld1rqb	{z0.b}, p0/m, [x0, #0]
+	ld1rqb	{z0.b}, p8/z, [x0, #0]
+	ld1rqb	{z0.b}, p0/z, [x0, #-144]
+	ld1rqb	{z0.b}, p0/z, [x0, #-15]
+	ld1rqb	{z0.b}, p0/z, [x0, #-14]
+	ld1rqb	{z0.b}, p0/z, [x0, #-13]
+	ld1rqb	{z0.b}, p0/z, [x0, #-12]
+	ld1rqb	{z0.b}, p0/z, [x0, #-11]
+	ld1rqb	{z0.b}, p0/z, [x0, #-10]
+	ld1rqb	{z0.b}, p0/z, [x0, #-9]
+	ld1rqb	{z0.b}, p0/z, [x0, #-8]
+	ld1rqb	{z0.b}, p0/z, [x0, #-7]
+	ld1rqb	{z0.b}, p0/z, [x0, #-6]
+	ld1rqb	{z0.b}, p0/z, [x0, #-5]
+	ld1rqb	{z0.b}, p0/z, [x0, #-4]
+	ld1rqb	{z0.b}, p0/z, [x0, #-3]
+	ld1rqb	{z0.b}, p0/z, [x0, #-2]
+	ld1rqb	{z0.b}, p0/z, [x0, #-1]
+	ld1rqb	{z0.b}, p0/z, [x0, #1]
+	ld1rqb	{z0.b}, p0/z, [x0, #2]
+	ld1rqb	{z0.b}, p0/z, [x0, #3]
+	ld1rqb	{z0.b}, p0/z, [x0, #4]
+	ld1rqb	{z0.b}, p0/z, [x0, #5]
+	ld1rqb	{z0.b}, p0/z, [x0, #6]
+	ld1rqb	{z0.b}, p0/z, [x0, #7]
+	ld1rqb	{z0.b}, p0/z, [x0, #8]
+	ld1rqb	{z0.b}, p0/z, [x0, #9]
+	ld1rqb	{z0.b}, p0/z, [x0, #10]
+	ld1rqb	{z0.b}, p0/z, [x0, #11]
+	ld1rqb	{z0.b}, p0/z, [x0, #12]
+	ld1rqb	{z0.b}, p0/z, [x0, #13]
+	ld1rqb	{z0.b}, p0/z, [x0, #14]
+	ld1rqb	{z0.b}, p0/z, [x0, #15]
+	ld1rqb	{z0.b}, p0/z, [x0, #128]
+	ld1rqb	{z0.h}, p0/z, [x0, #0]
+	ld1rqb	{z0.s}, p0/z, [x0, #0]
+	ld1rqb	{z0.d}, p0/z, [x0, #0]
+	ld1rqb	{z0.q}, p0/z, [x0, #0]
+
+	ld1rqb	{z0.b}, p0/z, [x0, xzr]
+	ld1rqb	{z0.b}, p0/z, [x0, x1, lsl #1]
+	ld1rqb	{z0.b}, p0/z, [x0, x1, lsl #2]
+	ld1rqb	{z0.b}, p0/z, [x0, x1, lsl #3]
+
+	ld1rqh	{z0.h}, p0/z, [x0, xzr, lsl #1]
+	ld1rqh	{z0.h}, p0/z, [x0, x1]
+	ld1rqh	{z0.h}, p0/z, [x0, x1, lsl #2]
+	ld1rqh	{z0.h}, p0/z, [x0, x1, lsl #3]
+
+	ld1rqw	{z0.s}, p0/z, [x0, xzr, lsl #2]
+	ld1rqw	{z0.s}, p0/z, [x0, x1]
+	ld1rqw	{z0.s}, p0/z, [x0, x1, lsl #1]
+	ld1rqw	{z0.s}, p0/z, [x0, x1, lsl #3]
+
+	ld1rqd	{z0.d}, p0/z, [x0, xzr, lsl #3]
+	ld1rqd	{z0.d}, p0/z, [x0, x1]
+	ld1rqd	{z0.d}, p0/z, [x0, x1, lsl #1]
+	ld1rqd	{z0.d}, p0/z, [x0, x1, lsl #2]
+
+	sdot	z0.b, z1.b, z2.b
+	sdot	z0.h, z1.h, z2.h
+	sdot	z0.s, z1.s, z2.s
+	sdot	z0.d, z1.d, z2.d
+
+	sdot	z0.b, z1.b, z2.b[0]
+	sdot	z0.h, z1.h, z2.h[0]
+	sdot	z0.s, z1.s, z2.s[0]
+	sdot	z0.d, z1.d, z2.d[0]
+
+	udot	z0.b, z1.b, z2.b
+	udot	z0.h, z1.h, z2.h
+	udot	z0.s, z1.s, z2.s
+	udot	z0.d, z1.d, z2.d
+
+	udot	z0.b, z1.b, z2.b[0]
+	udot	z0.h, z1.h, z2.h[0]
+	udot	z0.s, z1.s, z2.s[0]
+	udot	z0.d, z1.d, z2.d[0]

@@ -712,7 +712,17 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
     }
   return evaluate_subexp_standard (expect_type, exp, pos, noside);
 }
+
+/* la_watch_location_expression for C.  */
 
+gdb::unique_xmalloc_ptr<char>
+c_watch_location_expression (struct type *type, CORE_ADDR addr)
+{
+  type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
+  std::string name = type_to_string (type);
+  return gdb::unique_xmalloc_ptr<char>
+    (xstrprintf ("* (%s *) %s", name.c_str (), core_addr_to_string (addr)));
+}
 
 
 /* Table mapping opcodes into strings for printing operators
@@ -865,6 +875,7 @@ const struct language_defn c_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
+  c_watch_location_expression,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &c_varobj_ops,
@@ -895,6 +906,9 @@ enum cplus_primitive_types {
   cplus_primitive_type_decfloat,
   cplus_primitive_type_decdouble,
   cplus_primitive_type_declong,
+  cplus_primitive_type_char16_t,
+  cplus_primitive_type_char32_t,
+  cplus_primitive_type_wchar_t,
   nr_cplus_primitive_types
 };
 
@@ -950,6 +964,12 @@ cplus_language_arch_info (struct gdbarch *gdbarch,
     = builtin->builtin_decdouble;
   lai->primitive_type_vector [cplus_primitive_type_declong]
     = builtin->builtin_declong;
+  lai->primitive_type_vector [cplus_primitive_type_char16_t]
+    = builtin->builtin_char16;
+  lai->primitive_type_vector [cplus_primitive_type_char32_t]
+    = builtin->builtin_char32;
+  lai->primitive_type_vector [cplus_primitive_type_wchar_t]
+    = builtin->builtin_wchar;
 
   lai->bool_type_symbol = "bool";
   lai->bool_type_default = builtin->builtin_bool;
@@ -999,6 +1019,7 @@ const struct language_defn cplus_language_defn =
   default_print_array_index,
   cp_pass_by_reference,
   c_get_string,
+  c_watch_location_expression,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &cplus_varobj_ops,
@@ -1051,6 +1072,7 @@ const struct language_defn asm_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
+  c_watch_location_expression,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &default_varobj_ops,
@@ -1103,6 +1125,7 @@ const struct language_defn minimal_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
+  c_watch_location_expression,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &default_varobj_ops,

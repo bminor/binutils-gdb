@@ -893,13 +893,12 @@ rust_print_type (struct type *type, const char *varstring,
 	fputs_filtered ("[", stream);
 	rust_print_type (TYPE_TARGET_TYPE (type), NULL,
 			 stream, show - 1, level, flags);
-	fputs_filtered ("; ", stream);
 
 	if (TYPE_HIGH_BOUND_KIND (TYPE_INDEX_TYPE (type)) == PROP_LOCEXPR
 	    || TYPE_HIGH_BOUND_KIND (TYPE_INDEX_TYPE (type)) == PROP_LOCLIST)
-	  fprintf_filtered (stream, "variable length");
+	  fprintf_filtered (stream, "; variable length");
 	else if (get_array_bounds (type, &low_bound, &high_bound))
-	  fprintf_filtered (stream, "%s", 
+	  fprintf_filtered (stream, "; %s",
 			    plongest (high_bound - low_bound + 1));
 	fputs_filtered ("]", stream);
       }
@@ -1762,7 +1761,7 @@ tuple structs, and tuple-like enum variants"));
 
     case STRUCTOP_STRUCT:
       {
-        struct value* lhs;
+        struct value *lhs;
         struct type *type;
         int tem, pc;
 
@@ -1771,16 +1770,14 @@ tuple structs, and tuple-like enum variants"));
         (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
         lhs = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
+	const char *field_name = &exp->elts[pc + 2].string;
         type = value_type (lhs);
         if (TYPE_CODE (type) == TYPE_CODE_UNION
             && !rust_union_is_untagged (type))
 	  {
 	    int i, start;
 	    struct disr_info disr;
-	    struct type* variant_type;
-	    char* field_name;
-
-	    field_name = &exp->elts[pc + 2].string;
+	    struct type *variant_type;
 
 	    disr = rust_get_disr_info (type, value_contents (lhs),
 				       value_embedded_offset (lhs),
@@ -1817,9 +1814,10 @@ which has only anonymous fields"),
 	  }
 	else
 	  {
-	    /* Field access in structs and untagged unions works like C.  */
-	    *pos = pc;
-	    result = evaluate_subexp_standard (expect_type, exp, pos, noside);
+	    result = value_struct_elt (&lhs, NULL, field_name, NULL,
+				       "structure");
+	    if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	      result = value_zero (value_type (result), VALUE_LVAL (result));
 	  }
       }
       break;
@@ -1891,7 +1889,7 @@ rust_operator_length (const struct expression *exp, int pc, int *oplenp,
 
 /* op_name implementation for Rust.  */
 
-static char *
+static const char *
 rust_op_name (enum exp_opcode opcode)
 {
   switch (opcode)
@@ -1951,14 +1949,15 @@ rust_dump_subexp_body (struct expression *exp, struct ui_file *stream,
       {
 	int field_number;
 
-	field_number = longest_to_int (exp->elts[elt].longconst);
+	field_number = longest_to_int (exp->elts[elt + 1].longconst);
 
 	fprintf_filtered (stream, "Field number: %d", field_number);
-	elt = dump_subexp (exp, stream, elt + 2);
+	elt = dump_subexp (exp, stream, elt + 3);
       }
       break;
 
     case OP_RUST_ARRAY:
+      ++elt;
       break;
 
     default:
@@ -2021,7 +2020,7 @@ rust_print_subexp (struct expression *exp, int *pos, struct ui_file *stream,
 	print_subexp (exp, pos, stream, PREC_SUFFIX);
 	fprintf_filtered (stream, ".%d", tem);
       }
-      return;
+      break;
 
     case OP_RUST_ARRAY:
       ++*pos;
@@ -2122,6 +2121,20 @@ rust_sniff_from_mangled_name (const char *mangled, char **demangled)
 
 
 
+/* la_watch_location_expression for Rust.  */
+
+static gdb::unique_xmalloc_ptr<char>
+rust_watch_location_expression (struct type *type, CORE_ADDR addr)
+{
+  type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
+  std::string name = type_to_string (type);
+  return gdb::unique_xmalloc_ptr<char>
+    (xstrprintf ("*(%s as *mut %s)", core_addr_to_string (addr),
+		 name.c_str ()));
+}
+
+
+
 static const struct exp_descriptor exp_descriptor_rust = 
 {
   rust_print_subexp,
@@ -2176,6 +2189,7 @@ static const struct language_defn rust_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
+  rust_watch_location_expression,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &default_varobj_ops,

@@ -32,7 +32,7 @@
 /* Parameter constants and their values.  */
 struct parm_constant
 {
-  char *name;
+  const char *name;
   int value;
 };
 

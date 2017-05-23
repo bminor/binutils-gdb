@@ -156,8 +156,7 @@ ieee_write_id (bfd *abfd, const char *id)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%s: string too long (%d chars, max 65535)"),
-	 bfd_get_filename (abfd), length);
+	(_("%B: string too long (%d chars, max 65535)"), abfd, length);
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
     }
@@ -291,9 +290,8 @@ ieee_write_expression (bfd *abfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%s: unrecognized symbol `%s' flags 0x%x"),
-		 bfd_get_filename (abfd), bfd_asymbol_name (symbol),
-		 symbol->flags);
+		(_("%B: unrecognized symbol `%s' flags 0x%x"),
+		 abfd, bfd_asymbol_name (symbol), symbol->flags);
 	      bfd_set_error (bfd_error_invalid_operation);
 	      return FALSE;
 	    }
@@ -3882,6 +3880,7 @@ ieee_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 #define ieee_bfd_final_link _bfd_generic_final_link
 #define ieee_bfd_link_split_section  _bfd_generic_link_split_section
 #define ieee_bfd_link_check_relocs   _bfd_generic_link_check_relocs
+#define ieee_set_reloc		     _bfd_generic_set_reloc
 
 const bfd_target ieee_vec =
 {

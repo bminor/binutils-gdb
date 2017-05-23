@@ -408,12 +408,18 @@ run_dump_test "pr20244-2a"
 run_dump_test "pr20244-2b"
 run_dump_test "pr20244-2c"
 run_dump_test "pr20244-2d"
+run_dump_test "pr20244-4a"
+run_dump_test "pr20244-4b"
+run_dump_test "pr20244-4c"
 run_dump_test "pr20253-3"
 run_dump_test "pr20253-4a"
 run_dump_test "pr20253-4b"
 run_dump_test "pr20253-4c"
 run_dump_test "pr20253-5"
 run_dump_test "pr20515"
+run_dump_test "property-x86-3"
+run_dump_test "property-x86-4a"
+run_dump_test "property-x86-4b"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
@@ -434,6 +440,7 @@ run_dump_test "pr18801"
 run_dump_test "pr18815"
 run_dump_test "pr19939a"
 run_dump_test "pr19939b"
+run_dump_test "tlsdesc2"
 
 proc undefined_weak {cflags ldflags} {
     set testname "Undefined weak symbol"
@@ -733,6 +740,174 @@ if { [isnative]
 	    {{objdump {-dw} pr19319.dd}} \
 	    "pr19319" \
 	] \
+	[list \
+	    "Build property 1" \
+	    "" \
+	    "" \
+	    {pass.c property-no-copy.S} \
+	    {{readelf {-n} property-1.r}} \
+	    "property-1" \
+	] \
+	[list \
+	    "Build property 1 (.o)" \
+	    "-r -nostdlib" \
+	    "" \
+	    {pass.c property-no-copy.S} \
+	    {{readelf {-n} property-1.r}} \
+	    "property-1.o" \
+	] \
+	[list \
+	    "Build property 1 (.so)" \
+	    "-shared" \
+	    "-fPIC" \
+	    {pass.c property-no-copy.S} \
+	    {{readelf {-n} property-1.r}} \
+	    "property-1.so" \
+	] \
+	[list \
+	    "Build property 2" \
+	    "" \
+	    "" \
+	    {pass.c property-stack.S} \
+	    {{readelf {-n} property-2.r}} \
+	    "property-2" \
+	] \
+	[list \
+	    "Build property 2 (.o)" \
+	    "-r -nostdlib" \
+	    "" \
+	    {pass.c property-stack.S} \
+	    {{readelf {-n} property-2.r}} \
+	    "property-2.o" \
+	] \
+	[list \
+	    "Build property 2 (.so)" \
+	    "-shared" \
+	    "-fPIC" \
+	    {pass.c property-stack.S} \
+	    {{readelf {-n} property-2.r}} \
+	    "property-2.so" \
+	] \
+	[list \
+	    "Build property 3" \
+	    "" \
+	    "" \
+	    {pass.c property-stack.S property-x86-1.S} \
+	    {{readelf {-n} property-3.r}} \
+	    "property-3" \
+	] \
+	[list \
+	    "Build property 3 (.o)" \
+	    "-r -nostdlib" \
+	    "" \
+	    {pass.c property-x86-1.S property-stack.S} \
+	    {{readelf {-n} property-3.r}} \
+	    "property-3.o" \
+	] \
+	[list \
+	    "Build property 3 (.so)" \
+	    "-shared" \
+	    "-fPIC" \
+	    {property-x86-1.S pass.c property-stack.S} \
+	    {{readelf {-n} property-3.r}} \
+	    "property-3.so" \
+	] \
+	[list \
+	    "Build property 4" \
+	    "" \
+	    "" \
+	    {pass.c property-stack.S property-x86-1.S property-x86-2.S} \
+	    {{readelf {-n} property-4.r}} \
+	    "property-4" \
+	] \
+	[list \
+	    "Build property 4 (.o)" \
+	    "-r -nostdlib" \
+	    "" \
+	    {pass.c property-x86-2.S property-x86-1.S property-stack.S} \
+	    {{readelf {-n} property-4.r}} \
+	    "property-4.o" \
+	] \
+	[list \
+	    "Build property 4 (.so)" \
+	    "-shared" \
+	    "-fPIC" \
+	    {property-x86-2.S property-x86-1.S pass.c property-stack.S} \
+	    {{readelf {-n} property-4.r}} \
+	    "property-4.so" \
+	] \
+	[list \
+	    "Build property 4 (-Wl,-z,stack-size=0)" \
+	    "-Wl,-z,stack-size=0" \
+	    "" \
+	    {pass.c property-stack.S property-x86-1.S property-x86-2.S} \
+	    {{readelf {-n} property-4.r}} \
+	    "property-4" \
+	] \
+	[list \
+	    "Build property 5" \
+	    "-Wl,-z,stack-size=0x900000" \
+	    "" \
+	    {pass.c property-stack.S property-x86-1.S property-x86-2.S} \
+	    {{readelf {-n} property-5.r}} \
+	    "property-5" \
+	] \
+	[list \
+	    "Build property 5 (.o)" \
+	    "-r -nostdlib -Wl,-z,stack-size=0x900000" \
+	    "" \
+	    {pass.c property-x86-2.S property-x86-1.S property-stack.S} \
+	    {{readelf {-n} property-5.r}} \
+	    "property-5.o" \
+	] \
+	[list \
+	    "Build property 5 (.so)" \
+	    "-shared -Wl,-z,stack-size=0x900000" \
+	    "-fPIC" \
+	    {property-x86-2.S property-x86-1.S pass.c property-stack.S} \
+	    {{readelf {-n} property-5.r}} \
+	    "property-5.so" \
+	] \
+	[list \
+	    "Build property-6.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    {property-6a.c property-6c.S} \
+	    {{readelf {-n} property-6.r}} \
+	    "property-6.so" \
+	] \
+	[list \
+	    "Build property-6.o" \
+	    "-r -nostdlib" \
+	    "" \
+	    {property-6b.c property-stack.S} \
+	    {{readelf {-n} property-2.r}} \
+	    "property-6.o" \
+	] \
+	[list \
+	    "Build property-6" \
+	    "-Wl,--as-needed tmpdir/property-6.o tmpdir/property-6.so" \
+	    { dummy.s } \
+	    "" \
+	    {{readelf {-n} property-2.r}} \
+	    "property-6" \
+	] \
+	[list \
+	    "Build property 7a (.o)" \
+	    "-r -nostdlib" \
+	    "" \
+	    {property-unsorted-1.S} \
+	    {{readelf {-n} property-7.r}} \
+	    "property-7a.o" \
+	] \
+	[list \
+	    "Build property 7b (.o)" \
+	    "-r -nostdlib" \
+	    "" \
+	    {property-unsorted-2.S} \
+	    {{readelf {-n} property-7.r}} \
+	    "property-7b.o" \
+	] \
     ]
 
     run_ld_link_exec_tests [list \
@@ -811,6 +986,111 @@ if { [isnative]
 	    "got1" \
 	    "got1.out" \
 	] \
+	[list \
+	    "Run property 1" \
+	    "" \
+	    "" \
+	    {pass.c property-no-copy.S} \
+	    "property-1" "pass.out" \
+	] \
+	[list \
+	    "Run property 1 (PIE)" \
+	    "-pie" \
+	    "" \
+	    {pass.c property-no-copy.S} \
+	    "property-1-pie" "pass.out" "-fPIE" \
+	] \
+	[list \
+	    "Run property 1 (static)" \
+	    "-static" \
+	    "" \
+	    {pass.c property-no-copy.S} \
+	    "property-1-static" "pass.out" \
+	] \
+	[list \
+	    "Run property 2" \
+	    "" \
+	    "" \
+	    {pass.c property-stack.S} \
+	    "property-2" "pass.out" \
+	] \
+	[list \
+	    "Run property 2 (PIE)" \
+	    "-pie" \
+	    "" \
+	    {pass.c property-stack.S} \
+	    "property-2-pie" "pass.out" "-fPIE" \
+	] \
+	[list \
+	    "Run property 2 (static)" \
+	    "-static" \
+	    "" \
+	    {pass.c property-stack.S} \
+	    "property-3-static" "pass.out" \
+	] \
+	[list \
+	    "Run property 3" \
+	    "" \
+	    "" \
+	    {pass.c property-stack.S property-x86-1.S} \
+	    "property-3" "pass.out" \
+	] \
+	[list \
+	    "Run property 3 (PIE)" \
+	    "-pie" \
+	    "" \
+	    {pass.c property-x86-1.S property-stack.S} \
+	    "property-3-pie" "pass.out" "-fPIE" \
+	] \
+	[list \
+	    "Run property 3 (static)" \
+	    "-static" \
+	    "" \
+	    {property-x86-1.S pass.c property-stack.S} \
+	    "property-3-static" "pass.out" \
+	] \
+	[list \
+	    "Run property 4" \
+	    "" \
+	    "" \
+	    {pass.c property-stack.S property-x86-1.S property-x86-2.S} \
+	    "property-4" "pass.out" \
+	] \
+	[list \
+	    "Run property 4 (PIE)" \
+	    "-pie" \
+	    "" \
+	    {pass.c property-x86-2.S property-x86-1.S property-stack.S} \
+	    "property-4-pie" "pass.out" "-fPIE" \
+	] \
+	[list \
+	    "Run property 4 (static)" \
+	    "-static" \
+	    "" \
+	    {property-x86-2.S property-x86-1.S pass.c property-stack.S} \
+	    "property-4-static" "pass.out" \
+	] \
+	[list \
+	    "Run property 5" \
+	    "-Wl,-z,stack-size=0x900000" \
+	    "" \
+	    {pass.c property-stack.S property-x86-1.S property-x86-2.S} \
+	    "property-5" "pass.out" \
+	] \
+	[list \
+	    "Run property 5 (PIE)" \
+	    "-pie -Wl,-z,stack-size=0x900000" \
+	    "" \
+	    {pass.c property-x86-2.S property-x86-1.S property-stack.S} \
+	    "property-5-pie" "pass.out" "-fPIE" \
+	] \
+	[list \
+	    "Run property 5 (static)" \
+	    "-static -Wl,-z,stack-size=0x900000" \
+	    "" \
+	    {property-x86-2.S property-x86-1.S pass.c property-stack.S} \
+	    "property-5-static" "pass.out" \
+	] \
     ]
 
     undefined_weak "" ""
@@ -831,6 +1111,20 @@ if { [isnative]
 	    "" \
 	    "-fPIC -O2 -g" \
 	    { ifunc-1a.c ifunc-1b.S ifunc-1c.S ifunc-1d.S } \
+	] \
+	[list \
+	    "Build pr21168a.o" \
+	    "" \
+	    "" \
+	    { pr21168a.c } \
+	] \
+	[list \
+	    "Build pr21168.so" \
+	    "-shared" \
+	    "" \
+	    { pr21168b.S } \
+	    "" \
+	    "pr21168.so" \
 	] \
     ]
 
@@ -853,6 +1147,14 @@ if { [isnative]
 	    "ifunc-1b" \
 	    "pass.out" \
 	] \
+	[list \
+	    "Run pr21168" \
+	    "tmpdir/pr21168a.o tmpdir/pr21168.so" \
+	    "" \
+	    { dummy.c } \
+	    "pr21168" \
+	    "pass.out" \
+	] \
     ]
 }
 
@@ -860,6 +1162,27 @@ if { !([istarget "i?86-*-linux*"]
        || [istarget "x86_64-*-linux*"]) } {
     return
 }
+
+run_ld_link_tests [list \
+    [list \
+	"basic PLT generation (non-PIC, -z now)" \
+	"-z now -melf_i386 tmpdir/libpltlib.so" \
+	"" \
+	"--32" \
+	{plt2.s} \
+	{{readelf -SW plt2.rd} {objdump -dwr plt2.dd}} \
+	"plt2" \
+    ] \
+    [list \
+	"basic PLT generation (PIC, -z now)" \
+	"-z now -shared -melf_i386 tmpdir/libpltlib.so" \
+	"" \
+	"--32" \
+	{plt-pic.s} \
+	{{objdump -dwr plt-pic2.dd}} \
+	"plt-pic2.so" \
+    ] \
+]
 
 # Linux only tests
 run_dump_test "pltgot-1"

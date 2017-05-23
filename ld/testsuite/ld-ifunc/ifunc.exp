@@ -234,6 +234,10 @@ if ![ld_link $ld "tmpdir/libtest-2.so" "-shared tmpdir/test-2.o"] {
     fail "Could not link libtest-2.so"
     set fails [expr $fails + 1]
 }
+if ![ld_link $ld "tmpdir/libtest-2-now.so" "-shared -z now tmpdir/test-2.o"] {
+    fail "Could not link libtest-2-now.so"
+    set fails [expr $fails + 1]
+}
 
 if { $fails == 0 } {
   pass "Building ifunc binaries"
@@ -306,6 +310,10 @@ if {[contains_ifunc_symbol tmpdir/libtest-2.so] != 0} {
     fail "libtest-2.so contains IFUNC symbols"
     set fails [expr $fails + 1]
 }
+if {[contains_ifunc_symbol tmpdir/libtest-2-now.so] != 0} {
+    fail "libtest-2-now.so contains IFUNC symbols"
+    set fails [expr $fails + 1]
+}
 
 # The linked ifunc using executables and shared libraries should contain
 # a dynamic reloc referencing the IFUNC symbol.  (Even the static
@@ -371,6 +379,23 @@ run_cc_link_tests [list \
 	{} \
 	"libpr16467c.a" \
     ] \
+    [list \
+	"Build libpr16467an.so" \
+	"-shared -Wl,-z,now -Wl,--version-script=pr16467a.map" \
+	"-fPIC" \
+	{ pr16467a.c } \
+	{} \
+	"libpr16467an.so" \
+    ] \
+    [list \
+	"Build libpr16467bn.so" \
+	"-shared tmpdir/pr16467b.o tmpdir/libpr16467an.so \
+	 -Wl,--version-script=pr16467b.map" \
+	"-fPIC" \
+	{ dummy.c } \
+	{} \
+	"libpr16467bn.so" \
+    ] \
 ]
 
 run_ld_link_exec_tests [list \
@@ -415,6 +440,14 @@ run_cc_link_tests [list \
 	{} \
 	"libifunc-lib.so" \
     ] \
+    [list \
+	"Build ifunc-libn.so" \
+	"-shared -Wl,-z,now" \
+	"-fPIC" \
+	{ ifunc-lib.c } \
+	{} \
+	"libifunc-libn.so" \
+    ] \
 ]
 
 run_ld_link_exec_tests [list \
@@ -424,6 +457,15 @@ run_ld_link_exec_tests [list \
 	"" \
 	{ dummy.c } \
 	"pr16467" \
+	"pr16467.out" \
+	"" \
+    ] \
+    [list \
+	"Run pr16467 (-z now)" \
+	"-Wl,-z,now -Wl,--no-as-needed tmpdir/pr16467c.o tmpdir/libpr16467bn.so tmpdir/libpr16467an.so" \
+	"" \
+	{ dummy.c } \
+	"pr16467n" \
 	"pr16467.out" \
 	"" \
     ] \
@@ -443,6 +485,23 @@ run_ld_link_exec_tests [list \
 	"ifunc-main" \
 	"ifunc-main.out" \
 	"-fpic" \
+    ] \
+    [list \
+	"Run ifunc-main (-z now)" \
+	"-Wl,-z,now -Wl,--no-as-needed tmpdir/libifunc-libn.so" \
+	"" \
+	{ ifunc-main.c } \
+	"ifunc-mainn" \
+	"ifunc-main.out" \
+    ] \
+    [list \
+	"Run ifunc-main with PIE (-z now)" \
+	"-pie -Wl,-z,now -Wl,--no-as-needed tmpdir/libifunc-libn.so" \
+	"" \
+	{ ifunc-main.c } \
+	"ifunc-mainpn" \
+	"ifunc-main.out" \
+	"-fpie" \
     ] \
 ]
 
@@ -469,6 +528,14 @@ run_cc_link_tests [list \
 	"libpr18808.so" \
     ] \
     [list \
+	"Build libpr18808n.so" \
+	"-shared -Wl,-z,now" \
+	"-fPIC -O2 -g" \
+	{ pr18808b.c } \
+	{} \
+	"libpr18808n.so" \
+    ] \
+    [list \
 	"Build pr18841a.o" \
 	"" \
 	"" \
@@ -492,6 +559,22 @@ run_cc_link_tests [list \
 	{} \
 	"libpr18841c.so" \
     ] \
+    [list \
+	"Build libpr18841bn.so" \
+	"-Wl,-z,now -shared" \
+	"-fPIC -O0 -g" \
+	{ pr18841b.c } \
+	{} \
+	"libpr18841bn.so" \
+    ] \
+    [list \
+	"Build libpr18841cn.so" \
+	"-shared" \
+	"-Wl,-z,now -fPIC -O0 -g" \
+	{ pr18841c.c } \
+	{} \
+	"libpr18841cn.so" \
+    ] \
 ]
 
 run_ld_link_exec_tests [list \
@@ -501,6 +584,14 @@ run_ld_link_exec_tests [list \
 	"" \
 	{ dummy.c } \
 	"pr18808" \
+	"pr18808.out" \
+    ] \
+    [list \
+	"Run pr18808 (-z now)" \
+	"-Wl,-z,now -Wl,--no-as-needed tmpdir/pr18808a.o tmpdir/libpr18808n.so" \
+	"" \
+	{ dummy.c } \
+	"pr18808n" \
 	"pr18808.out" \
     ] \
     [list \
@@ -517,6 +608,22 @@ run_ld_link_exec_tests [list \
 	"" \
 	{ dummy.c } \
 	"pr18841c" \
+	"pr18841.out" \
+    ] \
+    [list \
+	"Run pr18841 with libpr18841bn.so (-z now)" \
+	"-Wl,-z,now -Wl,--no-as-needed tmpdir/pr18841a.o tmpdir/libpr18841bn.so" \
+	"" \
+	{ dummy.c } \
+	"pr18841bn" \
+	"pr18841.out" \
+    ] \
+    [list \
+	"Run pr18841 with libpr18841cn.so (-z now)" \
+	"-Wl,-z,now -Wl,--as-needed tmpdir/pr18841a.o tmpdir/libpr18841cn.so" \
+	"" \
+	{ dummy.c } \
+	"pr18841cn" \
 	"pr18841.out" \
     ] \
 ]

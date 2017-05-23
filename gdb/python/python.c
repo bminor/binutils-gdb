@@ -352,7 +352,7 @@ python_run_simple_file (FILE *file, const char *filename)
   /* Because we have a string for a filename, and are using Python to
      open the file, we need to expand any tilde in the path first.  */
   gdb::unique_xmalloc_ptr<char> full_path (tilde_expand (filename));
-  gdbpy_ref<> python_file (PyFile_FromString (full_path.get (), "r"));
+  gdbpy_ref<> python_file (PyFile_FromString (full_path.get (), (char *) "r"));
   if (python_file == NULL)
     {
       gdbpy_print_stack ();
@@ -433,11 +433,9 @@ python_command (char *arg, int from_tty)
     }
   else
     {
-      struct command_line *l = get_command_line (python_control, "");
-      struct cleanup *cleanup = make_cleanup_free_command_lines (&l);
+      command_line_up l = get_command_line (python_control, "");
 
-      execute_control_command_untraced (l);
-      do_cleanups (cleanup);
+      execute_control_command_untraced (l.get ());
     }
 }
 
@@ -457,7 +455,7 @@ gdbpy_parameter_value (enum var_types type, void *var)
     case var_filename:
     case var_enum:
       {
-	char *str = * (char **) var;
+	const char *str = *(char **) var;
 
 	if (! str)
 	  str = "";
@@ -572,11 +570,11 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
   const char *arg;
   PyObject *from_tty_obj = NULL, *to_string_obj = NULL;
   int from_tty, to_string;
-  static char *keywords[] = {"command", "from_tty", "to_string", NULL };
+  static const char *keywords[] = { "command", "from_tty", "to_string", NULL };
 
-  if (! PyArg_ParseTupleAndKeywords (args, kw, "s|O!O!", keywords, &arg,
-				     &PyBool_Type, &from_tty_obj,
-				     &PyBool_Type, &to_string_obj))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|O!O!", keywords, &arg,
+					&PyBool_Type, &from_tty_obj,
+					&PyBool_Type, &to_string_obj))
     return NULL;
 
   from_tty = 0;
@@ -672,7 +670,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   struct cleanup *cleanups;
   gdbpy_ref<> result;
   gdbpy_ref<> unparsed;
-  struct event_location *location = NULL;
+  event_location_up location;
 
   if (! PyArg_ParseTuple (args, "|s", &arg))
     return NULL;
@@ -682,15 +680,12 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   sals.sals = NULL;
 
   if (arg != NULL)
-    {
-      location = string_to_event_location_basic (&arg, python_language);
-      make_cleanup_delete_event_location (location);
-    }
+    location = string_to_event_location_basic (&arg, python_language);
 
   TRY
     {
       if (location != NULL)
-	sals = decode_line_1 (location, 0, NULL, NULL, 0);
+	sals = decode_line_1 (location.get (), 0, NULL, NULL, 0);
       else
 	{
 	  set_default_source_symtab_and_line ();
@@ -1047,11 +1042,11 @@ static PyObject *
 gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
 {
   const char *arg;
-  static char *keywords[] = {"text", "stream", NULL };
+  static const char *keywords[] = { "text", "stream", NULL };
   int stream_type = 0;
 
-  if (! PyArg_ParseTupleAndKeywords (args, kw, "s|i", keywords, &arg,
-				     &stream_type))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|i", keywords, &arg,
+					&stream_type))
     return NULL;
 
   TRY
@@ -1088,11 +1083,11 @@ gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
 static PyObject *
 gdbpy_flush (PyObject *self, PyObject *args, PyObject *kw)
 {
-  static char *keywords[] = {"stream", NULL };
+  static const char *keywords[] = { "stream", NULL };
   int stream_type = 0;
 
-  if (! PyArg_ParseTupleAndKeywords (args, kw, "|i", keywords,
-				     &stream_type))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "|i", keywords,
+					&stream_type))
     return NULL;
 
   switch (stream_type)
@@ -1455,11 +1450,9 @@ python_interactive_command (char *arg, int from_tty)
     error (_("Python scripting is not supported in this copy of GDB."));
   else
     {
-      struct command_line *l = get_command_line (python_control, "");
-      struct cleanup *cleanups = make_cleanup_free_command_lines (&l);
+      command_line_up l = get_command_line (python_control, "");
 
-      execute_control_command_untraced (l);
-      do_cleanups (cleanups);
+      execute_control_command_untraced (l.get ());
     }
 }
 
@@ -1550,7 +1543,7 @@ do_start_initialization ()
      /foo/bin/python
      /foo/lib/pythonX.Y/...
      This must be done before calling Py_Initialize.  */
-  progname = concat (ldirname (python_libdir), SLASH_STRING, "bin",
+  progname = concat (ldirname (python_libdir).c_str (), SLASH_STRING, "bin",
 		     SLASH_STRING, "python", (char *) NULL);
 #ifdef IS_PY3K
   oldloc = xstrdup (setlocale (LC_ALL, NULL));
@@ -1633,6 +1626,7 @@ do_start_initialization ()
       || gdbpy_initialize_values () < 0
       || gdbpy_initialize_frames () < 0
       || gdbpy_initialize_commands () < 0
+      || gdbpy_initialize_instruction () < 0
       || gdbpy_initialize_record () < 0
       || gdbpy_initialize_btrace () < 0
       || gdbpy_initialize_symbols () < 0

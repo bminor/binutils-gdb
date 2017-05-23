@@ -1405,8 +1405,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
       if (!bfd_link_relocatable (info)
 	  && strcmp (name, "__gnu_lto_slim") == 0)
 	_bfd_error_handler
-	  (_("%s: plugin needed to handle lto object"),
-	   bfd_get_filename (abfd));
+	  (_("%B: plugin needed to handle lto object"), abfd);
     }
   else
     row = DEF_ROW;
@@ -1736,7 +1735,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	     otherwise add a warning.  */
 	  if ((!info->lto_plugin_active
 	       && (h->u.undef.next != NULL || info->hash->undefs_tail == h))
-	      || h->non_ir_ref)
+	      || h->non_ir_ref_regular
+	      || h->non_ir_ref_dynamic)
 	    {
 	      (*info->callbacks->warning) (info, string, h->root.string,
 					   hash_entry_bfd (h), NULL, 0);

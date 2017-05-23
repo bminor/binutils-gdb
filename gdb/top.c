@@ -218,7 +218,7 @@ void (*deprecated_warning_hook) (const char *, va_list);
    called to notify the GUI that we are done with the interaction
    window and it can close it.  */
 
-void (*deprecated_readline_begin_hook) (char *, ...);
+void (*deprecated_readline_begin_hook) (const char *, ...);
 char *(*deprecated_readline_hook) (const char *);
 void (*deprecated_readline_end_hook) (void);
 
@@ -1030,8 +1030,11 @@ gdb_readline_wrapper (const char *prompt)
   if (cleanup->target_is_async_orig)
     target_async (0);
 
-  /* Display our prompt and prevent double prompt display.  */
-  display_gdb_prompt (prompt);
+  /* Display our prompt and prevent double prompt display.  Don't pass
+     down a NULL prompt, since that has special meaning for
+     display_gdb_prompt -- it indicates a request to print the primary
+     prompt, while we want a secondary prompt here.  */
+  display_gdb_prompt (prompt != NULL ? prompt : "");
   if (ui->command_editing)
     rl_already_prompted = 1;
 
@@ -1213,7 +1216,8 @@ gdb_safe_append_history (void)
    as the user has requested.  */
 
 char *
-command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
+command_line_input (const char *prompt_arg, int repeat,
+		    const char *annotation_suffix)
 {
   static struct buffer cmd_line_buffer;
   static int cmd_line_buffer_initialized;
@@ -1307,6 +1311,9 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
       if (cmd != NULL)
 	break;
 
+      /* Got partial input.  I.e., got a line that ends with a
+	 continuation character (backslash).  Suppress printing the
+	 prompt again.  */
       prompt = NULL;
     }
 
@@ -2016,7 +2023,7 @@ init_main (void)
   /* Setup important stuff for command line editing.  */
   rl_completion_word_break_hook = gdb_completion_word_break_characters;
   rl_completion_entry_function = readline_line_completion_function;
-  rl_completer_word_break_characters = default_word_break_characters ();
+  set_rl_completer_word_break_characters (default_word_break_characters ());
   rl_completer_quote_characters = get_gdb_completer_quote_characters ();
   rl_completion_display_matches_hook = cli_display_match_list;
   rl_readline_name = "gdb";

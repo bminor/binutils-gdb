@@ -115,6 +115,8 @@ static struct mi_cmd mi_cmds[] =
 		 mi_cmd_file_list_exec_source_file),
   DEF_MI_CMD_MI ("file-list-exec-source-files",
 		 mi_cmd_file_list_exec_source_files),
+  DEF_MI_CMD_MI ("file-list-shared-libraries",
+		 mi_cmd_file_list_shared_libraries),
   DEF_MI_CMD_CLI ("file-symbol-file", "symbol-file", 1),
   DEF_MI_CMD_MI ("gdb-exit", mi_cmd_gdb_exit),
   DEF_MI_CMD_CLI_1 ("gdb-set", "set", 1,

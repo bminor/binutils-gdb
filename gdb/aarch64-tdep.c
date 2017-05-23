@@ -196,6 +196,8 @@ show_aarch64_debug (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("AArch64 debugging is %s.\n"), value);
 }
 
+namespace {
+
 /* Abstract instruction reader.  */
 
 class abstract_instruction_reader
@@ -216,6 +218,8 @@ class instruction_reader : public abstract_instruction_reader
     return read_code_unsigned_integer (memaddr, len, byte_order);
   }
 };
+
+} // namespace
 
 /* Analyze a prologue, looking for a recognizable stack frame
    and frame pointer.  Scan until we encounter a store that could
@@ -1096,6 +1100,7 @@ aarch64_type_align (struct type *t)
     case TYPE_CODE_RANGE:
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_CHAR:
     case TYPE_CODE_BOOL:
       return TYPE_LENGTH (t);
@@ -1805,7 +1810,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 	   || TYPE_CODE (type) == TYPE_CODE_CHAR
 	   || TYPE_CODE (type) == TYPE_CODE_BOOL
 	   || TYPE_CODE (type) == TYPE_CODE_PTR
-	   || TYPE_CODE (type) == TYPE_CODE_REF
+	   || TYPE_IS_REFERENCE (type)
 	   || TYPE_CODE (type) == TYPE_CODE_ENUM)
     {
       /* If the the type is a plain integer, then the access is
@@ -1943,7 +1948,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	   || TYPE_CODE (type) == TYPE_CODE_CHAR
 	   || TYPE_CODE (type) == TYPE_CODE_BOOL
 	   || TYPE_CODE (type) == TYPE_CODE_PTR
-	   || TYPE_CODE (type) == TYPE_CODE_REF
+	   || TYPE_IS_REFERENCE (type)
 	   || TYPE_CODE (type) == TYPE_CODE_ENUM)
     {
       if (TYPE_LENGTH (type) <= X_REGISTER_SIZE)
@@ -2412,7 +2417,7 @@ value_of_aarch64_user_reg (struct frame_info *frame, const void *baton)
 /* Implement the "software_single_step" gdbarch method, needed to
    single step through atomic sequences on AArch64.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 aarch64_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -2430,14 +2435,13 @@ aarch64_software_single_step (struct regcache *regcache)
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */
   aarch64_inst inst;
-  VEC (CORE_ADDR) *next_pcs = NULL;
 
   if (aarch64_decode_insn (insn, &inst, 1) != 0)
-    return NULL;
+    return {};
 
   /* Look for a Load Exclusive instruction which begins the sequence.  */
   if (inst.opcode->iclass != ldstexcl || bit (insn, 22) == 0)
-    return NULL;
+    return {};
 
   for (insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
     {
@@ -2446,14 +2450,14 @@ aarch64_software_single_step (struct regcache *regcache)
 					   byte_order_for_code);
 
       if (aarch64_decode_insn (insn, &inst, 1) != 0)
-	return NULL;
+	return {};
       /* Check if the instruction is a conditional branch.  */
       if (inst.opcode->iclass == condbranch)
 	{
 	  gdb_assert (inst.operands[0].type == AARCH64_OPND_ADDR_PCREL19);
 
 	  if (bc_insn_count >= 1)
-	    return NULL;
+	    return {};
 
 	  /* It is, so we'll try to set a breakpoint at the destination.  */
 	  breaks[1] = loc + inst.operands[0].imm.value;
@@ -2472,7 +2476,7 @@ aarch64_software_single_step (struct regcache *regcache)
 
   /* We didn't find a closing Store Exclusive instruction, fall back.  */
   if (!closing_insn)
-    return NULL;
+    return {};
 
   /* Insert breakpoint after the end of the atomic sequence.  */
   breaks[0] = loc + insn_size;
@@ -2484,10 +2488,12 @@ aarch64_software_single_step (struct regcache *regcache)
 	  || (breaks[1] >= pc && breaks[1] <= closing_insn)))
     last_breakpoint = 0;
 
+  std::vector<CORE_ADDR> next_pcs;
+
   /* Insert the breakpoint at the end of the sequence, and one at the
      destination of the conditional branch, if it exists.  */
   for (index = 0; index <= last_breakpoint; index++)
-    VEC_safe_push (CORE_ADDR, next_pcs, breaks[index]);
+    next_pcs.push_back (breaks[index]);
 
   return next_pcs;
 }
@@ -2972,6 +2978,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_ptr_bit (gdbarch, 64);
   set_gdbarch_char_signed (gdbarch, 0);
+  set_gdbarch_wchar_signed (gdbarch, 0);
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
   set_gdbarch_double_format (gdbarch, floatformats_ieee_double);
   set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
@@ -3033,6 +3040,13 @@ aarch64_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 		      paddress (gdbarch, tdep->lowest_pc));
 }
 
+#if GDB_SELF_TEST
+namespace selftests
+{
+static void aarch64_process_record_test (void);
+}
+#endif
+
 /* Suppress warning from -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_aarch64_tdep;
 
@@ -3055,6 +3069,7 @@ When on, AArch64 specific debugging is enabled."),
 
 #if GDB_SELF_TEST
   register_self_test (selftests::aarch64_analyze_prologue_test);
+  register_self_test (selftests::aarch64_process_record_test);
 #endif
 }
 
@@ -3096,7 +3111,6 @@ struct aarch64_mem_r
 enum aarch64_record_result
 {
   AARCH64_RECORD_SUCCESS,
-  AARCH64_RECORD_FAILURE,
   AARCH64_RECORD_UNSUPPORTED,
   AARCH64_RECORD_UNKNOWN
 };
@@ -3605,15 +3619,32 @@ aarch64_record_load_store (insn_decode_record *aarch64_insn_r)
     {
       opc = bits (aarch64_insn_r->aarch64_insn, 22, 23);
       if (!(opc >> 1))
-        if (opc & 0x01)
-          ld_flag = 0x01;
-        else
-          ld_flag = 0x0;
+	{
+	  if (opc & 0x01)
+	    ld_flag = 0x01;
+	  else
+	    ld_flag = 0x0;
+	}
       else
-        if (size_bits != 0x03)
-          ld_flag = 0x01;
-        else
-          return AARCH64_RECORD_UNKNOWN;
+	{
+	  if (size_bits == 0x3 && vector_flag == 0x0 && opc == 0x2)
+	    {
+	      /* PRFM (immediate) */
+	      return AARCH64_RECORD_SUCCESS;
+	    }
+	  else if (size_bits == 0x2 && vector_flag == 0x0 && opc == 0x2)
+	    {
+	      /* LDRSW (immediate) */
+	      ld_flag = 0x1;
+	    }
+	  else
+	    {
+	      if (opc & 0x01)
+		ld_flag = 0x01;
+	      else
+		ld_flag = 0x0;
+	    }
+	}
 
       if (record_debug)
 	{
@@ -3940,6 +3971,41 @@ deallocate_reg_mem (insn_decode_record *record)
   xfree (record->aarch64_regs);
   xfree (record->aarch64_mems);
 }
+
+#if GDB_SELF_TEST
+namespace selftests {
+
+static void
+aarch64_process_record_test (void)
+{
+  struct gdbarch_info info;
+  uint32_t ret;
+
+  gdbarch_info_init (&info);
+  info.bfd_arch_info = bfd_scan_arch ("aarch64");
+
+  struct gdbarch *gdbarch = gdbarch_find_by_info (info);
+  SELF_CHECK (gdbarch != NULL);
+
+  insn_decode_record aarch64_record;
+
+  memset (&aarch64_record, 0, sizeof (insn_decode_record));
+  aarch64_record.regcache = NULL;
+  aarch64_record.this_addr = 0;
+  aarch64_record.gdbarch = gdbarch;
+
+  /* 20 00 80 f9	prfm	pldl1keep, [x1] */
+  aarch64_record.aarch64_insn = 0xf9800020;
+  ret = aarch64_record_decode_insn_handler (&aarch64_record);
+  SELF_CHECK (ret == AARCH64_RECORD_SUCCESS);
+  SELF_CHECK (aarch64_record.reg_rec_count == 0);
+  SELF_CHECK (aarch64_record.mem_rec_count == 0);
+
+  deallocate_reg_mem (&aarch64_record);
+}
+
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
 
 /* Parse the current instruction and record the values of the registers and
    memory that will be changed in current instruction to record_arch_list

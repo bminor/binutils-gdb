@@ -35,6 +35,7 @@
 #include "arch-utils.h"
 #include "target-descriptions.h"
 #include "readline/tilde.h"
+#include "progspace-and-thread.h"
 
 void _initialize_inferiors (void);
 
@@ -50,7 +51,9 @@ static int highest_inferior_num;
    `set print inferior-events'.  */
 static int print_inferior_events = 0;
 
-/* The Current Inferior.  */
+/* The Current Inferior.  This is a strong reference.  I.e., whenever
+   an inferior is the current inferior, its refcount is
+   incremented.  */
 static struct inferior *current_inferior_ = NULL;
 
 struct inferior*
@@ -65,36 +68,15 @@ set_current_inferior (struct inferior *inf)
   /* There's always an inferior.  */
   gdb_assert (inf != NULL);
 
+  inf->incref ();
+  current_inferior_->decref ();
   current_inferior_ = inf;
 }
 
-/* A cleanups callback, helper for save_current_program_space
-   below.  */
-
-static void
-restore_inferior (void *arg)
+inferior::~inferior ()
 {
-  struct inferior *saved_inferior = (struct inferior *) arg;
+  inferior *inf = this;
 
-  set_current_inferior (saved_inferior);
-}
-
-/* Save the current program space so that it may be restored by a later
-   call to do_cleanups.  Returns the struct cleanup pointer needed for
-   later doing the cleanup.  */
-
-struct cleanup *
-save_current_inferior (void)
-{
-  struct cleanup *old_chain = make_cleanup (restore_inferior,
-					    current_inferior_);
-
-  return old_chain;
-}
-
-static void
-free_inferior (struct inferior *inf)
-{
   discard_all_inferior_continuations (inf);
   inferior_free_data (inf);
   xfree (inf->args);
@@ -102,55 +84,33 @@ free_inferior (struct inferior *inf)
   free_environ (inf->environment);
   target_desc_info_free (inf->tdesc_info);
   xfree (inf->priv);
-  xfree (inf);
 }
 
-void
-init_inferior_list (void)
+inferior::inferior (int pid_)
+  : num (++highest_inferior_num),
+    pid (pid_),
+    environment (make_environ ()),
+    registry_data ()
 {
-  struct inferior *inf, *infnext;
-
-  highest_inferior_num = 0;
-  if (!inferior_list)
-    return;
-
-  for (inf = inferior_list; inf; inf = infnext)
-    {
-      infnext = inf->next;
-      free_inferior (inf);
-    }
-
-  inferior_list = NULL;
+  init_environ (this->environment);
+  inferior_alloc_data (this);
 }
 
 struct inferior *
 add_inferior_silent (int pid)
 {
-  struct inferior *inf;
-
-  inf = XNEW (struct inferior);
-  memset (inf, 0, sizeof (*inf));
-  inf->pid = pid;
-
-  inf->control.stop_soon = NO_STOP_QUIETLY;
-
-  inf->num = ++highest_inferior_num;
+  inferior *inf = new inferior (pid);
 
   if (inferior_list == NULL)
     inferior_list = inf;
   else
     {
-      struct inferior *last;
+      inferior *last;
 
       for (last = inferior_list; last->next != NULL; last = last->next)
 	;
       last->next = inf;
     }
-
-  inf->environment = make_environ ();
-  init_environ (inf->environment);
-
-  inferior_alloc_data (inf);
 
   observer_notify_inferior_added (inf);
 
@@ -225,7 +185,7 @@ delete_inferior (struct inferior *todel)
   if (program_space_empty_p (inf->pspace))
     delete_program_space (inf->pspace);
 
-  free_inferior (inf);
+  delete inf;
 }
 
 /* If SILENT then be quiet -- don't announce a inferior exit, or the
@@ -504,13 +464,12 @@ void
 prune_inferiors (void)
 {
   struct inferior *ss, **ss_link;
-  struct inferior *current = current_inferior ();
 
   ss = inferior_list;
   ss_link = &inferior_list;
   while (ss)
     {
-      if (ss == current
+      if (!ss->deletable ()
 	  || !ss->removable
 	  || ss->pid != 0)
 	{
@@ -542,7 +501,7 @@ number_of_inferiors (void)
 /* Converts an inferior process id to a string.  Like
    target_pid_to_str, but special cases the null process.  */
 
-static char *
+static const char *
 inferior_pid_to_str (int pid)
 {
   if (pid != 0)
@@ -605,12 +564,10 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
   uiout->table_body ();
   for (inf = inferior_list; inf; inf = inf->next)
     {
-      struct cleanup *chain2;
-
       if (!number_is_in_list (requested_inferiors, inf->num))
 	continue;
 
-      chain2 = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
       if (inf == current_inferior ())
 	uiout->field_string ("current", "*");
@@ -641,7 +598,6 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
 	}
 
       uiout->text ("\n");
-      do_cleanups (chain2);
     }
 
   do_cleanups (old_chain);
@@ -795,7 +751,7 @@ remove_inferior_command (char *args, int from_tty)
 	  continue;
 	}
 
-      if (inf == current_inferior ())
+      if (!inf->deletable ())
 	{
 	  warning (_("Can not remove current inferior %d."), num);
 	  continue;
@@ -883,7 +839,7 @@ add_inferior_command (char *args, int from_tty)
 	}
     }
 
-  save_current_space_and_thread ();
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
   for (i = 0; i < copies; ++i)
     {
@@ -963,7 +919,7 @@ clone_inferior_command (char *args, int from_tty)
   if (orginf == NULL)
     orginf = current_inferior ();
 
-  save_current_space_and_thread ();
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
   for (i = 0; i < copies; ++i)
     {
@@ -1038,6 +994,7 @@ initialize_inferiors (void)
      that.  Do this after initialize_progspace, due to the
      current_program_space reference.  */
   current_inferior_ = add_inferior (0);
+  current_inferior_->incref ();
   current_inferior_->pspace = current_program_space;
   current_inferior_->aspace = current_program_space->aspace;
   /* The architecture will be initialized shortly, by

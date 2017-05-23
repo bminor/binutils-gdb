@@ -1,3 +1,151 @@
+2017-05-23  Alan Modra  <amodra@gmail.com>
+
+	PR 21503
+	* options.h: Add --emit-stub-syms option.
+	* powerpc.cc (object_id): New.
+	(Powerpc_relobj): Add uniq_ and accessor.  Sort variables for
+	better packing.
+	(Powerpc_dynobj): Sort variables for better packing.
+	(Target_powerpc::define_local): New function.
+	(Target_powerpc::group_sections): Pass stub table size to
+	Stub_table constructor.
+	(Target_powerpc::do_relax): Define stub and glink symbols.
+	(Stub_table): Add uniq_ variable, and id param to constructor.
+	(Stub_table::Plt_stub_ent): Add indx_ variable.
+	(Stub_table::Branch_stub_entries): Move typedef earlier.
+	(Stub_table::branch_stub_size): Replace "to" parameter with a
+	Branch_stub_entries iterator.
+	(Stub_table::add_long_branch_entry): Adjust to suit.
+	(Stub_table::add_plt_call_entry): Set indx_.
+	(Stub_table::define_stub_syms): New function.
+
+2017-05-15  Eric Christopher <echristo@gmail.com>
+
+        * layout.cc (Layout::segment_precedes): Add a case for testing
+        pointer equality when determining which segment precedes
+        another.
+
+2017-05-13  James Clarke  <jrtc27@jrtc27.com>
+
+	PR gold/21444
+	* gold.cc (Target_sparc::Relocate::relocate_tls): Local
+	variables are final for position-independent executables. This
+	has to be consistent with Target_sparc::Scan::local otherwise
+	they will disagree as to whether local-exec is used.
+
+2017-05-12  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	PR gold/21430
+	* aarch64.cc
+	(AArch64_relobj::convert_input_section_to_relaxed_section):
+	Set the section offset to -1ULL.
+	(Target_aarch64::relocate_section): Adjust the view in case
+	of a relaxed input section.
+	* testsuite/Makefile.am (pr21430): New test.
+	* testsuite/Makefile.in: Regenerate
+	* testsuite/pr21430.s: New test source file.
+	* testsuite/pr21430.sh: New test script.
+
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/plugin_section_order.c (onload): Add missing break.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (Mips_got_entry::hash()): Shift addend to reduce
+	possibility of collisions.
+	(Mips_got_entry::equals): Fix case for GOT_TLS_LDM
+	entries.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (Mips_relobj::merge_processor_specific_data_): New data
+	member.
+	(Mips_relobj::merge_processor_specific_data): New method.
+	(Mips_relobj::do_read_symbols): Set merge_processor_specific_data_
+	to false, only if the input file is a binary or if object has no
+	contents except the section name string table and an empty symbol
+	table with the undefined symbol.
+	(Target_mips::do_finalize_sections): Refactor.  Skip empty object files
+	for merging processor-specific data.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (Target_mips::Relocate::calculated_value_): New data
+	member.
+	(Target_mips::Relocate::calculate_only_): Likewise.
+	(Target_mips::Relocate::relocate): Handle multiple consecutive
+	relocations with the same offset.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (Target_mips::Relocate::relocate): Remove redundant
+	checks for relocatable link.
+	(Mips_relocate_functions::reljalr): Likewise.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (class Mips_output_section_options): New class.
+	(Target_mips::do_make_output_section): New method.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (Mips_relocate_functions::rel26): Don't print relocation
+	overflow error message.
+	(Target_mips::relocate_special_relocatable): Improve relocation
+	overflow error message.
+	(Target_mips::Relocate::relocate): Likewise.
+
+2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (symbol_refs_local): Return false if a symbol
+	is from a dynamic object.
+	(Target_mips::got_section): Make _GLOBAL_OFFSET_TABLE_ STV_HIDDEN.
+	(Target_mips::set_gp): Refactor.  Make _gp STT_NOTYPE and
+	STB_LOCAL.
+	(Target_mips::do_finalize_sections): Set _gp after all the checks
+	for creating .got are done.
+	(Target_mips::Scan::global): Remove unused code.
+
+2017-02-22  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::make_iplt_section): Check that
+	output_section exists before attempting add_output_section_data.
+	(Target_powerpc::make_brlt_section): Likewise.
+
+2017-02-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	* mips.cc (Target_mips::Scan::get_reference_flags): Remove
+	gold_unreachable from default case.
+
+2017-02-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
+
+	PR gold/21111
+	* mips.cc (Mips_relocate_functions::relhigher): New method.
+	(Mips_relocate_functions::relhighest): Likewise.
+	(mips_get_size_for_reloc): Add support for relocs: R_MIPS_HIGHER and
+	R_MIPS_HIGHEST.
+	(Target_mips::Scan::local): Add support for relocs: R_MIPS_HIGHER,
+	R_MIPS_HIGHEST, R_MICROMIPS_HIGHER and R_MICROMIPS_HIGHEST.
+	(Target_mips::Scan::global): Likewise.
+	(Target_mips::Scan::get_reference_flags): Likewise.
+	(Target_mips::Relocate::relocate): Call static methods for resolving
+	HIGHER and HIGHEST relocations.
+
+2017-02-03  Rahul Chaudhry  <rahulchaudhry@google.com>
+
+	* x86_64.cc (Target_x86_64::do_can_check_for_function_pointers):
+	Return true even when building pie binaries.
+	(Target_x86_64::possible_function_pointer_reloc): Check opcode
+	for R_X86_64_PC32 relocations.
+	(Target_x86_64::local_reloc_may_be_function_pointer): Pass
+	extra arguments to local_reloc_may_be_function_pointer.
+	(Target_x86_64::global_reloc_may_be_function_pointer): Likewise.
+	* gc.h (gc_process_relocs): Add check for STT_FUNC.
+	* testsuite/Makefile.am (icf_safe_pie_test): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/icf_safe_pie_test.sh: New shell script.
+
 2017-02-03  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Powerpc_relobj::make_toc_relative): Don't crash

@@ -2126,12 +2126,13 @@ gnu_ptrace_me (void)
   struct inf *inf = cur_inf ();
   inf_debug (inf, "tracing self");
   if (ptrace (PTRACE_TRACEME) != 0)
-    error (_("ptrace (PTRACE_TRACEME) failed!"));
+    trace_start_error_with_name ("ptrace");
 }
 
 static void
 gnu_create_inferior (struct target_ops *ops, 
-		     char *exec_file, char *allargs, char **env,
+		     const char *exec_file, const std::string &allargs,
+		     char **env,
 		     int from_tty)
 {
   struct inf *inf = cur_inf ();
@@ -2652,7 +2653,7 @@ proc_string (struct proc *proc)
   return tid_str;
 }
 
-static char *
+static const char *
 gnu_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   struct inf *inf = gnu_current_inf;

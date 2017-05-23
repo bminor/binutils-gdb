@@ -40,13 +40,13 @@ inputd2:
 	cmtst v2.8b, v0.8b, v1.8b
 	addv b3, v2.8b
 	mov x1, v3.d[0]
-	cmp x1, #0x5fa
+	cmp x1, #0xfa
 	bne .Lfailure
 
 	cmtst v2.16b, v0.16b, v1.16b
 	addv b3, v2.16b
 	mov x1, v3.d[0]
-	cmp x1, #0xbf4
+	cmp x1, #0xf4
 	bne .Lfailure
 
 	adrp x0, inputh
@@ -56,14 +56,14 @@ inputd2:
 	cmtst v2.4h, v0.4h, v1.4h
 	addv h3, v2.4h
 	mov x1, v3.d[0]
-	mov x2, #0x1fffe
+	mov x2, #0xfffe
 	cmp x1, x2
 	bne .Lfailure
 
 	cmtst v2.8h, v0.8h, v1.8h
 	addv h3, v2.8h
 	mov x1, v3.d[0]
-	mov x2, #0x3fffc
+	mov x2, #0xfffc
 	cmp x1, x2
 	bne .Lfailure
 
@@ -82,7 +82,7 @@ inputd2:
 	cmtst v2.4s, v0.4s, v1.4s
 	addv s3, v2.4s
 	mov x1, v3.d[0]
-	mov x2, #0x1fffffffe
+	mov x2, #0xfffffffe
 	cmp x1, x2
 	bne .Lfailure
 

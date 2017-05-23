@@ -111,7 +111,8 @@ gdb_test_multiple $test $test {
 }
 
 gdb_test "break \*$syscall_insn_addr if main == 0" \
-    "Breakpoint \[0-9\]* at .*"
+    "Breakpoint \[0-9\]* at .*" \
+    "set conditional break at syscall address"
 
 # Resume the child process, and the step-over is being done.
 

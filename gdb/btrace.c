@@ -1112,15 +1112,26 @@ pt_reclassify_insn (enum pt_insn_class iclass)
 /* Return the btrace instruction flags for INSN.  */
 
 static btrace_insn_flags
-pt_btrace_insn_flags (const struct pt_insn *insn)
+pt_btrace_insn_flags (const struct pt_insn &insn)
 {
   btrace_insn_flags flags = 0;
 
-  if (insn->speculative)
+  if (insn.speculative)
     flags |= BTRACE_INSN_FLAG_SPECULATIVE;
 
   return flags;
 }
+
+/* Return the btrace instruction for INSN.  */
+
+static btrace_insn
+pt_btrace_insn (const struct pt_insn &insn)
+{
+  return {(CORE_ADDR) insn.ip, (gdb_byte) insn.size,
+	  pt_reclassify_insn (insn.iclass),
+	  pt_btrace_insn_flags (insn)};
+}
+
 
 /* Add function branch trace using DECODER.  */
 
@@ -1138,7 +1149,6 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
   end = *pend;
   for (;;)
     {
-      struct btrace_insn btinsn;
       struct pt_insn insn;
 
       errcode = pt_insn_sync_forward (decoder);
@@ -1150,7 +1160,6 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
 	  break;
 	}
 
-      memset (&btinsn, 0, sizeof (btinsn));
       for (;;)
 	{
 	  errcode = pt_insn_next (decoder, &insn, sizeof(insn));
@@ -1207,11 +1216,7 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
 	  /* Maintain the function level offset.  */
 	  *plevel = std::min (*plevel, end->level);
 
-	  btinsn.pc = (CORE_ADDR) insn.ip;
-	  btinsn.size = (gdb_byte) insn.size;
-	  btinsn.iclass = pt_reclassify_insn (insn.iclass);
-	  btinsn.flags = pt_btrace_insn_flags (&insn);
-
+	  btrace_insn btinsn = pt_btrace_insn (insn);
 	  ftrace_update_insns (end, &btinsn);
 	}
 
@@ -1797,11 +1802,17 @@ btrace_fetch (struct thread_info *tp)
   if (btinfo->replay != NULL)
     return;
 
+  /* With CLI usage, TP->PTID always equals INFERIOR_PTID here.  Now that we
+     can store a gdb.Record object in Python referring to a different thread
+     than the current one, temporarily set INFERIOR_PTID.  */
+  cleanup = save_inferior_ptid ();
+  inferior_ptid = tp->ptid;
+
   /* We should not be called on running or exited threads.  */
   gdb_assert (can_access_registers_ptid (tp->ptid));
 
   btrace_data_init (&btrace);
-  cleanup = make_cleanup_btrace_data (&btrace);
+  make_cleanup_btrace_data (&btrace);
 
   /* Let's first try to extend the trace we already have.  */
   if (btinfo->end != NULL)
@@ -1882,6 +1893,7 @@ btrace_clear (struct thread_info *tp)
       trash = it;
       it = it->flow.next;
 
+      VEC_free (btrace_insn_s, trash->insn);
       xfree (trash);
     }
 

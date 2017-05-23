@@ -165,7 +165,7 @@ extern struct bcache *bcache_xmalloc (
    eliminating duplication.  TYPE should be a string describing the
    kind of data BCACHE holds.  Statistics are printed using
    `printf_filtered' and its ilk.  */
-extern void print_bcache_statistics (struct bcache *bcache, char *type);
+extern void print_bcache_statistics (struct bcache *bcache, const char *type);
 extern int bcache_memory_used (struct bcache *bcache);
 
 /* The hash functions */

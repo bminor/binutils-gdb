@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "dis-asm.h"
+#include "dwarf2.h"
 #include "dwarf2-frame.h"
 #include "floatformat.h"
 #include "frame.h"
@@ -227,6 +228,7 @@ sparc_integral_or_pointer_p (const struct type *type)
       return (len == 1 || len == 2 || len == 4 || len == 8);
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
       /* Allow either 32-bit or 64-bit pointers.  */
       return (len == 4 || len == 8);
     default:
@@ -294,6 +296,43 @@ sparc_structure_or_union_p (const struct type *type)
     }
 
   return 0;
+}
+
+/* Check whether TYPE is returned on registers.  */
+
+static bool
+sparc_structure_return_p (const struct type *type)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_LENGTH (type) <= 8)
+    {
+      struct type *t = check_typedef (TYPE_TARGET_TYPE (type));
+
+      if (sparc_floating_p (t) && TYPE_LENGTH (t) == 8)
+        return true;
+      return false;
+    }
+  if (sparc_floating_p (type) && TYPE_LENGTH (type) == 16)
+    return true;
+  return sparc_structure_or_union_p (type);
+}
+
+/* Check whether TYPE is passed on registers.  */
+
+static bool
+sparc_arg_on_registers_p (const struct type *type)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_LENGTH (type) <= 8)
+    {
+      struct type *t = check_typedef (TYPE_TARGET_TYPE (type));
+
+      if (sparc_floating_p (t) && TYPE_LENGTH (t) == 8)
+        return false;
+      return true;
+    }
+  if (sparc_structure_or_union_p (type) || sparc_complex_floating_p (type)
+      || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
+    return false;
+  return true;
 }
 
 /* Register information.  */
@@ -568,9 +607,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
       struct type *type = value_type (args[i]);
       int len = TYPE_LENGTH (type);
 
-      if (sparc_structure_or_union_p (type)
-	  || (sparc_floating_p (type) && len == 16)
-	  || sparc_complex_floating_p (type))
+      if (!sparc_arg_on_registers_p (type))
 	{
 	  /* Structure, Union and Quad-Precision Arguments.  */
 	  sp -= len;
@@ -592,11 +629,8 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
       else
 	{
 	  /* Integral and pointer arguments.  */
-	  gdb_assert (sparc_integral_or_pointer_p (type));
-
-	  if (len < 4)
-	    args[i] = value_cast (builtin_type (gdbarch)->builtin_int32,
-				  args[i]);
+	  gdb_assert (sparc_integral_or_pointer_p (type)
+	              || (TYPE_CODE (type) == TYPE_CODE_ARRAY && len <= 8));
 	  num_elements += ((len + 3) / 4);
 	}
     }
@@ -618,6 +652,15 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
       const bfd_byte *valbuf = value_contents (args[i]);
       struct type *type = value_type (args[i]);
       int len = TYPE_LENGTH (type);
+      gdb_byte buf[4];
+
+      if (len < 4)
+        {
+          memset (buf, 0, 4 - len);
+          memcpy (buf + 4 - len, valbuf, len);
+          valbuf = buf;
+          len = 4;
+        }
 
       gdb_assert (len == 4 || len == 8);
 
@@ -1343,10 +1386,10 @@ sparc32_extract_return_value (struct type *type, struct regcache *regcache,
   int len = TYPE_LENGTH (type);
   gdb_byte buf[32];
 
-  gdb_assert (!sparc_structure_or_union_p (type));
-  gdb_assert (!(sparc_floating_p (type) && len == 16));
+  gdb_assert (!sparc_structure_return_p (type));
 
-  if (sparc_floating_p (type) || sparc_complex_floating_p (type))
+  if (sparc_floating_p (type) || sparc_complex_floating_p (type)
+      || TYPE_CODE (type) == TYPE_CODE_ARRAY)
     {
       /* Floating return values.  */
       regcache_cooked_read (regcache, SPARC_F0_REGNUM, buf);
@@ -1395,11 +1438,9 @@ sparc32_store_return_value (struct type *type, struct regcache *regcache,
 			    const gdb_byte *valbuf)
 {
   int len = TYPE_LENGTH (type);
-  gdb_byte buf[8];
+  gdb_byte buf[32];
 
-  gdb_assert (!sparc_structure_or_union_p (type));
-  gdb_assert (!(sparc_floating_p (type) && len == 16));
-  gdb_assert (len <= 8);
+  gdb_assert (!sparc_structure_return_p (type));
 
   if (sparc_floating_p (type) || sparc_complex_floating_p (type))
     {
@@ -1455,8 +1496,7 @@ sparc32_return_value (struct gdbarch *gdbarch, struct value *function,
      guarantees that we can always find the return value, not just
      before the function returns.  */
 
-  if (sparc_structure_or_union_p (type)
-      || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
+  if (sparc_structure_return_p (type))
     {
       ULONGEST sp;
       CORE_ADDR addr;
@@ -1533,6 +1573,34 @@ sparc32_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
       reg->loc.offset = off;
       break;
     }
+}
+
+/* Implement the execute_dwarf_cfa_vendor_op method.  */
+
+static bool
+sparc_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op,
+				   struct dwarf2_frame_state *fs)
+{
+  /* Only DW_CFA_GNU_window_save is expected on SPARC.  */
+  if (op != DW_CFA_GNU_window_save)
+    return false;
+
+  uint64_t reg;
+  int size = register_size (gdbarch, 0);
+
+  dwarf2_frame_state_alloc_regs (&fs->regs, 32);
+  for (reg = 8; reg < 16; reg++)
+    {
+      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_REG;
+      fs->regs.reg[reg].loc.reg = reg + 16;
+    }
+  for (reg = 16; reg < 32; reg++)
+    {
+      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_OFFSET;
+      fs->regs.reg[reg].loc.offset = (reg - 16) * size;
+    }
+
+  return true;
 }
 
 
@@ -1642,7 +1710,7 @@ sparc_step_trap (struct frame_info *frame, unsigned long insn)
   return 0;
 }
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 sparc_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *arch = get_regcache_arch (regcache);
@@ -1650,7 +1718,7 @@ sparc_software_single_step (struct regcache *regcache)
   CORE_ADDR npc, nnpc;
 
   CORE_ADDR pc, orig_npc;
-  VEC (CORE_ADDR) *next_pcs = NULL;
+  std::vector<CORE_ADDR> next_pcs;
 
   pc = regcache_raw_get_unsigned (regcache, tdep->pc_regnum);
   orig_npc = npc = regcache_raw_get_unsigned (regcache, tdep->npc_regnum);
@@ -1658,10 +1726,10 @@ sparc_software_single_step (struct regcache *regcache)
   /* Analyze the instruction at PC.  */
   nnpc = sparc_analyze_control_transfer (regcache, pc, &npc);
   if (npc != 0)
-    VEC_safe_push (CORE_ADDR, next_pcs, npc);
+    next_pcs.push_back (npc);
 
   if (nnpc != 0)
-    VEC_safe_push (CORE_ADDR, next_pcs, nnpc);
+    next_pcs.push_back (nnpc);
 
   /* Assert that we have set at least one breakpoint, and that
      they're not set at the same spot - unless we're going
@@ -1748,6 +1816,9 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_bit (gdbarch, 128);
   set_gdbarch_long_double_format (gdbarch, floatformats_sparc_quad);
 
+  set_gdbarch_wchar_bit (gdbarch, 16);
+  set_gdbarch_wchar_signed (gdbarch, 1);
+
   set_gdbarch_num_regs (gdbarch, SPARC32_NUM_REGS);
   set_gdbarch_register_name (gdbarch, sparc32_register_name);
   set_gdbarch_register_type (gdbarch, sparc32_register_type);
@@ -1797,6 +1868,9 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in the DWARF CFI frame unwinder.  */
   dwarf2_frame_set_init_reg (gdbarch, sparc32_dwarf2_frame_init_reg);
+  /* Register DWARF vendor CFI handler.  */
+  set_gdbarch_execute_dwarf_cfa_vendor_op (gdbarch,
+					   sparc_execute_dwarf_cfa_vendor_op);
   /* FIXME: kettenis/20050423: Don't enable the unwinder until the
      StackGhost issues have been resolved.  */
 

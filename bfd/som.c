@@ -6759,6 +6759,7 @@ som_bfd_link_split_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 #define som_bfd_set_private_flags		_bfd_generic_bfd_set_private_flags
 #define som_find_inliner_info			_bfd_nosymbols_find_inliner_info
 #define som_bfd_link_check_relocs               _bfd_generic_link_check_relocs
+#define som_set_reloc				_bfd_generic_set_reloc
 
 const bfd_target hppa_som_vec =
 {

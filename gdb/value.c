@@ -1205,8 +1205,7 @@ value_actual_type (struct value *value, int resolve_simple_types,
     {
       /* If result's target type is TYPE_CODE_STRUCT, proceed to
 	 fetch its rtti type.  */
-      if ((TYPE_CODE (result) == TYPE_CODE_PTR
-	   || TYPE_CODE (result) == TYPE_CODE_REF)
+      if ((TYPE_CODE (result) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (result))
 	  && TYPE_CODE (check_typedef (TYPE_TARGET_TYPE (result)))
 	     == TYPE_CODE_STRUCT
 	  && !value_optimized_out (value))
@@ -2883,7 +2882,7 @@ value_as_address (struct value *val)
      ABI-specific code is a more reasonable place to handle it.  */
 
   if (TYPE_CODE (value_type (val)) != TYPE_CODE_PTR
-      && TYPE_CODE (value_type (val)) != TYPE_CODE_REF
+      && !TYPE_IS_REFERENCE (value_type (val))
       && gdbarch_integer_to_address_p (gdbarch))
     return gdbarch_integer_to_address (gdbarch, value_type (val),
 				       value_contents (val));
@@ -2940,6 +2939,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
       /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
          whether we want this to be true eventually.  */
       return extract_typed_address (valaddr, type);
@@ -3546,6 +3546,7 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
       break;
 
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_PTR:
       store_typed_address (buf, type, (CORE_ADDR) num);
       break;
@@ -3582,6 +3583,7 @@ pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
       break;
 
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_PTR:
       store_typed_address (buf, type, (CORE_ADDR) num);
       break;
@@ -3812,7 +3814,7 @@ coerce_ref_if_computed (const struct value *arg)
 {
   const struct lval_funcs *funcs;
 
-  if (TYPE_CODE (check_typedef (value_type (arg))) != TYPE_CODE_REF)
+  if (!TYPE_IS_REFERENCE (check_typedef (value_type (arg))))
     return NULL;
 
   if (value_lval_const (arg) != lval_computed)
@@ -3854,7 +3856,7 @@ coerce_ref (struct value *arg)
   if (retval)
     return retval;
 
-  if (TYPE_CODE (value_type_arg_tmp) != TYPE_CODE_REF)
+  if (!TYPE_IS_REFERENCE (value_type_arg_tmp))
     return arg;
 
   enc_type = check_typedef (value_enclosing_type (arg));

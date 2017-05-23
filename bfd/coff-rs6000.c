@@ -2738,8 +2738,8 @@ xcoff_reloc_type_fail (bfd *input_bfd,
 {
   _bfd_error_handler
     /* xgettext: c-format */
-    (_("%s: unsupported relocation type 0x%02x"),
-     bfd_get_filename (input_bfd), (unsigned int) rel->r_type);
+    (_("%B: unsupported relocation type 0x%02x"),
+     input_bfd, (unsigned int) rel->r_type);
   bfd_set_error (bfd_error_bad_value);
   return FALSE;
 }
@@ -2824,9 +2824,8 @@ xcoff_reloc_type_toc (bfd *input_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext: c-format */
-	    (_("%s: TOC reloc at 0x%x to symbol `%s' with no TOC entry"),
-	     bfd_get_filename (input_bfd), rel->r_vaddr,
-	     h->root.root.string);
+	    (_("%B: TOC reloc at 0x%x to symbol `%s' with no TOC entry"),
+	     input_bfd, rel->r_vaddr, h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -3994,6 +3993,7 @@ const struct xcoff_dwsect_name xcoff_dwsect_names[] = {
 /* For reloc entry points.  */
 #define _bfd_xcoff_get_reloc_upper_bound coff_get_reloc_upper_bound
 #define _bfd_xcoff_canonicalize_reloc coff_canonicalize_reloc
+#define _bfd_xcoff_set_reloc _bfd_generic_set_reloc
 #define _bfd_xcoff_bfd_reloc_type_lookup _bfd_xcoff_reloc_type_lookup
 #define _bfd_xcoff_bfd_reloc_name_lookup _bfd_xcoff_reloc_name_lookup
 

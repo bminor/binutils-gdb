@@ -140,7 +140,7 @@ enum pseudo_regs { FIRST_PSEUDO_REGNUM = NUM_IA64_RAW_REGS,
 /* Array of register names; There should be ia64_num_regs strings in
    the initializer.  */
 
-static char *ia64_register_names[] = 
+static const char *ia64_register_names[] =
 { "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
   "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
   "r16",  "r17",  "r18",  "r19",  "r20",  "r21",  "r22",  "r23",
@@ -1516,7 +1516,6 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc,
 	  else if (qp == 0 && rN == 2 
 	        && ((rM == fp_reg && fp_reg != 0) || rM == 12))
 	    {
-	      gdb_byte buf[MAX_REGISTER_SIZE];
 	      CORE_ADDR saved_sp = 0;
 	      /* adds r2, spilloffset, rFramePointer 
 	           or
@@ -1533,9 +1532,8 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc,
 	      if (this_frame)
 		{
 		  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-		  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-		  get_frame_register (this_frame, sp_regnum, buf);
-		  saved_sp = extract_unsigned_integer (buf, 8, byte_order);
+		  saved_sp = get_frame_register_unsigned (this_frame,
+							  sp_regnum);
 		}
 	      spill_addr  = saved_sp
 	                  + (rM == 12 ? 0 : mem_stack_frame_size) 
@@ -2289,10 +2287,6 @@ static struct value *
 ia64_sigtramp_frame_prev_register (struct frame_info *this_frame,
 				   void **this_cache, int regnum)
 {
-  gdb_byte buf[MAX_REGISTER_SIZE];
-
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct ia64_frame_cache *cache =
     ia64_sigtramp_frame_cache (this_frame, this_cache);
 
@@ -2308,8 +2302,9 @@ ia64_sigtramp_frame_prev_register (struct frame_info *this_frame,
 
       if (addr != 0)
 	{
-	  read_memory (addr, buf, register_size (gdbarch, IA64_IP_REGNUM));
-	  pc = extract_unsigned_integer (buf, 8, byte_order);
+	  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+	  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+	  pc = read_memory_unsigned_integer (addr, 8, byte_order);
 	}
       pc &= ~0xf;
       return frame_unwind_got_constant (this_frame, regnum, pc);
@@ -2490,12 +2485,11 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
 		 int write, void *arg)
 {
   int regnum = ia64_uw2gdb_regnum (uw_regnum);
-  unw_word_t bsp, sof, sol, cfm, psr, ip;
+  unw_word_t bsp, sof, cfm, psr, ip;
   struct frame_info *this_frame = (struct frame_info *) arg;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   long new_sof, old_sof;
-  gdb_byte buf[MAX_REGISTER_SIZE];
   
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);
@@ -2505,10 +2499,8 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
       case UNW_REG_IP:
 	/* Libunwind expects to see the pc value which means the slot number
 	   from the psr must be merged with the ip word address.  */
-	get_frame_register (this_frame, IA64_IP_REGNUM, buf);
-	ip = extract_unsigned_integer (buf, 8, byte_order);
-	get_frame_register (this_frame, IA64_PSR_REGNUM, buf);
-	psr = extract_unsigned_integer (buf, 8, byte_order);
+	ip = get_frame_register_unsigned (this_frame, IA64_IP_REGNUM);
+	psr = get_frame_register_unsigned (this_frame, IA64_PSR_REGNUM);
 	*val = ip | ((psr >> 41) & 0x3);
 	break;
  
@@ -2517,10 +2509,8 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
 	   register frame so we must account for the fact that
 	   ptrace() will return a value for bsp that points *after*
 	   the current register frame.  */
-	get_frame_register (this_frame, IA64_BSP_REGNUM, buf);
-	bsp = extract_unsigned_integer (buf, 8, byte_order);
-	get_frame_register (this_frame, IA64_CFM_REGNUM, buf);
-	cfm = extract_unsigned_integer (buf, 8, byte_order);
+	bsp = get_frame_register_unsigned (this_frame, IA64_BSP_REGNUM);
+	cfm = get_frame_register_unsigned (this_frame, IA64_CFM_REGNUM);
 	sof = gdbarch_tdep (gdbarch)->size_of_register_frame (this_frame, cfm);
 	*val = ia64_rse_skip_regs (bsp, -sof);
 	break;
@@ -2528,14 +2518,12 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
       case UNW_IA64_AR_BSPSTORE:
 	/* Libunwind wants bspstore to be after the current register frame.
 	   This is what ptrace() and gdb treats as the regular bsp value.  */
-	get_frame_register (this_frame, IA64_BSP_REGNUM, buf);
-	*val = extract_unsigned_integer (buf, 8, byte_order);
+	*val = get_frame_register_unsigned (this_frame, IA64_BSP_REGNUM);
 	break;
 
       default:
 	/* For all other registers, just unwind the value directly.  */
-	get_frame_register (this_frame, regnum, buf);
-	*val = extract_unsigned_integer (buf, 8, byte_order);
+	*val = get_frame_register_unsigned (this_frame, regnum);
 	break;
     }
       
@@ -2570,12 +2558,11 @@ ia64_access_rse_reg (unw_addr_space_t as, unw_regnum_t uw_regnum,
 		     unw_word_t *val, int write, void *arg)
 {
   int regnum = ia64_uw2gdb_regnum (uw_regnum);
-  unw_word_t bsp, sof, sol, cfm, psr, ip;
+  unw_word_t bsp, sof, cfm, psr, ip;
   struct regcache *regcache = (struct regcache *) arg;
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   long new_sof, old_sof;
-  gdb_byte buf[MAX_REGISTER_SIZE];
   
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);
@@ -2585,10 +2572,8 @@ ia64_access_rse_reg (unw_addr_space_t as, unw_regnum_t uw_regnum,
       case UNW_REG_IP:
 	/* Libunwind expects to see the pc value which means the slot number
 	   from the psr must be merged with the ip word address.  */
-	regcache_cooked_read (regcache, IA64_IP_REGNUM, buf);
-	ip = extract_unsigned_integer (buf, 8, byte_order);
-	regcache_cooked_read (regcache, IA64_PSR_REGNUM, buf);
-	psr = extract_unsigned_integer (buf, 8, byte_order);
+	regcache_cooked_read_unsigned (regcache, IA64_IP_REGNUM, &ip);
+	regcache_cooked_read_unsigned (regcache, IA64_PSR_REGNUM, &psr);
 	*val = ip | ((psr >> 41) & 0x3);
 	break;
 	  
@@ -2597,10 +2582,8 @@ ia64_access_rse_reg (unw_addr_space_t as, unw_regnum_t uw_regnum,
 	   register frame so we must account for the fact that
 	   ptrace() will return a value for bsp that points *after*
 	   the current register frame.  */
-	regcache_cooked_read (regcache, IA64_BSP_REGNUM, buf);
-	bsp = extract_unsigned_integer (buf, 8, byte_order);
-	regcache_cooked_read (regcache, IA64_CFM_REGNUM, buf);
-	cfm = extract_unsigned_integer (buf, 8, byte_order);
+	regcache_cooked_read_unsigned (regcache, IA64_BSP_REGNUM, &bsp);
+	regcache_cooked_read_unsigned (regcache, IA64_CFM_REGNUM, &cfm);
 	sof = (cfm & 0x7f);
 	*val = ia64_rse_skip_regs (bsp, -sof);
 	break;
@@ -2608,14 +2591,12 @@ ia64_access_rse_reg (unw_addr_space_t as, unw_regnum_t uw_regnum,
       case UNW_IA64_AR_BSPSTORE:
 	/* Libunwind wants bspstore to be after the current register frame.
 	   This is what ptrace() and gdb treats as the regular bsp value.  */
-	regcache_cooked_read (regcache, IA64_BSP_REGNUM, buf);
-	*val = extract_unsigned_integer (buf, 8, byte_order);
+	regcache_cooked_read_unsigned (regcache, IA64_BSP_REGNUM, val);
 	break;
 
       default:
         /* For all other registers, just unwind the value directly.  */
-	regcache_cooked_read (regcache, regnum, buf);
-	*val = extract_unsigned_integer (buf, 8, byte_order);
+	regcache_cooked_read_unsigned (regcache, regnum, val);
 	break;
     }
       
@@ -2982,12 +2963,10 @@ ia64_libunwind_frame_prev_register (struct frame_info *this_frame,
 	{
 	  int rrb_pr = 0;
 	  ULONGEST cfm;
-	  gdb_byte buf[MAX_REGISTER_SIZE];
 
 	  /* Fetch predicate register rename base from current frame
 	     marker for this frame.  */
-	  get_frame_register (this_frame, IA64_CFM_REGNUM, buf);
-	  cfm = extract_unsigned_integer (buf, 8, byte_order);
+	  cfm = get_frame_register_unsigned (this_frame, IA64_CFM_REGNUM);
 	  rrb_pr = (cfm >> 32) & 0x3f;
 	  
 	  /* Adjust the register number to account for register rotation.  */

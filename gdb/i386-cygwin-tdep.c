@@ -178,7 +178,7 @@ windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
 
 /* This is how we want PTIDs from core files to be printed.  */
 
-static char *
+static const char *
 i386_windows_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 {
   static char buf[80];

@@ -24,6 +24,12 @@
 /* Need disassemble_info.  */
 #include "dis-asm.h"
 
+/* To simplify GDB code this enum assumes that internal regnums should be same
+   as architectural register numbers, i.e. PCL regnum is 63.  This allows to
+   use internal GDB regnums as architectural numbers when dealing with
+   instruction encodings, for example when analyzing what are the registers
+   saved in function prologue.  */
+
 enum arc_regnum
   {
     /* Core registers.  */
@@ -49,6 +55,16 @@ enum arc_regnum
     ARC_BLINK_REGNUM,
     /* Zero-delay loop counter.  */
     ARC_LP_COUNT_REGNUM = 60,
+    /* Reserved register number.  There should never be a register with such
+       number, this name is needed only for a sanity check in
+      arc_cannot_(fetch|store)_register.  */
+    ARC_RESERVED_REGNUM,
+    /* Long-immediate value.  This is not a physical register - if instruction
+       has register 62 as an operand, then this operand is a literal value
+       stored in the instruction memory right after the instruction itself.
+       This value is required in this enumeration as an architectural number
+       for instruction analysis.  */
+    ARC_LIMM_REGNUM,
     /* Program counter, aligned to 4-bytes, read-only.  */
     ARC_PCL_REGNUM,
     ARC_LAST_CORE_REGNUM = ARC_PCL_REGNUM,
@@ -106,5 +122,30 @@ arc_mach_is_arcv2 (struct gdbarch *gdbarch)
 {
   return gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_arc_arcv2;
 }
+
+/* Function to access ARC disassembler.  Underlying opcodes disassembler will
+   print an instruction into stream specified in the INFO, so if it is
+   undesired, then this stream should be set to some invisible stream, but it
+   can't be set to an actual NULL value - that would cause a crash.  */
+int arc_delayed_print_insn (bfd_vma addr, struct disassemble_info *info);
+
+/* Return properly initialized disassemble_info for ARC disassembler - it will
+   not print disassembled instructions to stderr.  */
+
+struct disassemble_info arc_disassemble_info (struct gdbarch *gdbarch);
+
+/* Get branch/jump target address for the INSN.  Note that this function
+   returns branch target and doesn't evaluate if this branch is taken or not.
+   For the indirect jumps value depends in register state, hence can change.
+   It is an error to call this function for a non-branch instruction.  */
+
+CORE_ADDR arc_insn_get_branch_target (const struct arc_instruction &insn);
+
+/* Get address of next instruction after INSN, assuming linear execution (no
+   taken branches).  If instruction has a delay slot, then returned value will
+   point at the instruction in delay slot.  That is - "address of instruction +
+   instruction length with LIMM".  */
+
+CORE_ADDR arc_insn_get_linear_next_pc (const struct arc_instruction &insn);
 
 #endif /* ARC_TDEP_H */

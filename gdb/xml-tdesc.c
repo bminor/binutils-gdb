@@ -26,6 +26,8 @@
 #include "xml-tdesc.h"
 #include "osabi.h"
 #include "filenames.h"
+#include <unordered_map>
+#include <string>
 
 /* Maximum sizes.
    This is just to catch obviously wrong values.  */
@@ -64,15 +66,7 @@ tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
    then we will create unnecessary duplicate gdbarches.  See
    gdbarch_list_lookup_by_info.  */
 
-struct tdesc_xml_cache
-{
-  const char *xml_document;
-  struct target_desc *tdesc;
-};
-typedef struct tdesc_xml_cache tdesc_xml_cache_s;
-DEF_VEC_O(tdesc_xml_cache_s);
-
-static VEC(tdesc_xml_cache_s) *xml_cache;
+static std::unordered_map<std::string, target_desc *> xml_cache;
 
 /* Callback data for target description parsing.  */
 
@@ -184,7 +178,8 @@ tdesc_start_reg (struct gdb_xml_parser *parser,
   struct tdesc_parsing_data *data = (struct tdesc_parsing_data *) user_data;
   struct gdb_xml_value *attrs = VEC_address (gdb_xml_value_s, attributes);
   int ix = 0, length;
-  char *name, *group, *type;
+  char *name, *group;
+  const char *type;
   int bitsize, regnum, save_restore;
 
   length = VEC_length (gdb_xml_value_s, attributes);
@@ -413,8 +408,8 @@ tdesc_start_field (struct gdb_xml_parser *parser,
 	gdb_xml_error (parser, _("Bitfield \"%s\" has start after end"),
 		       field_name);
       if (end >= data->current_type_size * TARGET_CHAR_BIT)
-	gdb_xml_error (parser,
-		       _("Bitfield \"%s\" does not fit in struct"));
+	gdb_xml_error (parser, _("Bitfield \"%s\" does not fit in struct"),
+		       field_name);
 
       if (field_type != NULL)
 	tdesc_add_typed_bitfield (t, field_name, start, end, field_type);
@@ -630,55 +625,42 @@ static struct target_desc *
 tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
 		 void *fetcher_baton)
 {
-  struct cleanup *back_to, *result_cleanup;
   struct tdesc_parsing_data data;
-  struct tdesc_xml_cache *cache;
-  char *expanded_text;
-  int ix;
 
   /* Expand all XInclude directives.  */
-  expanded_text = xml_process_xincludes (_("target description"),
-					 document, fetcher, fetcher_baton, 0);
-  if (expanded_text == NULL)
+  std::string expanded_text;
+
+  if (!xml_process_xincludes (expanded_text,
+			      _("target description"),
+			      document, fetcher, fetcher_baton, 0))
     {
       warning (_("Could not load XML target description; ignoring"));
       return NULL;
     }
 
   /* Check for an exact match in the list of descriptions we have
-     previously parsed.  strcmp is a slightly inefficient way to
-     do this; an SHA-1 checksum would work as well.  */
-  for (ix = 0; VEC_iterate (tdesc_xml_cache_s, xml_cache, ix, cache); ix++)
-    if (strcmp (cache->xml_document, expanded_text) == 0)
-      {
-       xfree (expanded_text);
-       return cache->tdesc;
-      }
-
-  back_to = make_cleanup (null_cleanup, NULL);
+     previously parsed.  */
+  const auto it = xml_cache.find (expanded_text);
+  if (it != xml_cache.end ())
+    return it->second;
 
   memset (&data, 0, sizeof (struct tdesc_parsing_data));
   data.tdesc = allocate_target_description ();
-  result_cleanup = make_cleanup_free_target_description (data.tdesc);
-  make_cleanup (xfree, expanded_text);
+  struct cleanup *result_cleanup
+    = make_cleanup_free_target_description (data.tdesc);
 
   if (gdb_xml_parse_quick (_("target description"), "gdb-target.dtd",
-			   tdesc_elements, expanded_text, &data) == 0)
+			   tdesc_elements, expanded_text.c_str (), &data) == 0)
     {
       /* Parsed successfully.  */
-      struct tdesc_xml_cache new_cache;
-
-      new_cache.xml_document = expanded_text;
-      new_cache.tdesc = data.tdesc;
-      VEC_safe_push (tdesc_xml_cache_s, xml_cache, &new_cache);
+      xml_cache.emplace (std::move (expanded_text), data.tdesc);
       discard_cleanups (result_cleanup);
-      do_cleanups (back_to);
       return data.tdesc;
     }
   else
     {
       warning (_("Could not load XML target description; ignoring"));
-      do_cleanups (back_to);
+      do_cleanups (result_cleanup);
       return NULL;
     }
 }
@@ -694,7 +676,6 @@ file_read_description_xml (const char *filename)
   struct target_desc *tdesc;
   char *tdesc_str;
   struct cleanup *back_to;
-  char *dirname;
 
   tdesc_str = xml_fetch_content_from_file (filename, NULL);
   if (tdesc_str == NULL)
@@ -705,11 +686,8 @@ file_read_description_xml (const char *filename)
 
   back_to = make_cleanup (xfree, tdesc_str);
 
-  dirname = ldirname (filename);
-  if (dirname != NULL)
-    make_cleanup (xfree, dirname);
-
-  tdesc = tdesc_parse_xml (tdesc_str, xml_fetch_content_from_file, dirname);
+  tdesc = tdesc_parse_xml (tdesc_str, xml_fetch_content_from_file,
+			   (void *) ldirname (filename).c_str ());
   do_cleanups (back_to);
 
   return tdesc;
@@ -762,7 +740,7 @@ target_read_description_xml (struct target_ops *ops)
    includes, but not parsing it.  Used to dump whole tdesc
    as a single XML file.  */
 
-char *
+gdb::optional<std::string>
 target_fetch_description_xml (struct target_ops *ops)
 {
 #if !defined(HAVE_LIBEXPAT)
@@ -775,28 +753,24 @@ target_fetch_description_xml (struct target_ops *ops)
 		 "disabled at compile time"));
     }
 
-  return NULL;
+  return {};
 #else
   struct target_desc *tdesc;
-  char *tdesc_str;
-  char *expanded_text;
-  struct cleanup *back_to;
 
-  tdesc_str = fetch_available_features_from_target ("target.xml", ops);
+  gdb::unique_xmalloc_ptr<char>
+    tdesc_str (fetch_available_features_from_target ("target.xml", ops));
   if (tdesc_str == NULL)
-    return NULL;
+    return {};
 
-  back_to = make_cleanup (xfree, tdesc_str);
-  expanded_text = xml_process_xincludes (_("target description"),
-					 tdesc_str,
-					 fetch_available_features_from_target, ops, 0);
-  do_cleanups (back_to);
-  if (expanded_text == NULL)
+  std::string output;
+  if (!xml_process_xincludes (output,
+			      _("target description"),
+			      tdesc_str.get (),
+			      fetch_available_features_from_target, ops, 0))
     {
       warning (_("Could not load XML target description; ignoring"));
-      return NULL;
+      return {};
     }
-
-  return expanded_text;
+  return output;
 #endif
 }

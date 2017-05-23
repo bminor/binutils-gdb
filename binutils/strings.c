@@ -80,7 +80,7 @@
       (   (c) >= 0 \
        && (c) <= 255 \
        && ((c) == '\t' || ISPRINT (c) || (encoding == 'S' && (c) > 127) \
-           || (include_all_whitespace == TRUE && ISSPACE (c))) \
+	   || (include_all_whitespace && ISSPACE (c))) \
       )
 
 #ifndef errno
@@ -318,7 +318,7 @@ main (int argc, char **argv)
 	  else
 	    {
 	      files_given = TRUE;
-	      exit_status |= strings_file (argv[optind]) == FALSE;
+	      exit_status |= !strings_file (argv[optind]);
 	    }
 	}
     }

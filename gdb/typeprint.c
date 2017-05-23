@@ -453,8 +453,7 @@ whatis_exp (char *exp, int show)
   get_user_print_options (&opts);
   if (opts.objectprint)
     {
-      if (((TYPE_CODE (type) == TYPE_CODE_PTR)
-	   || (TYPE_CODE (type) == TYPE_CODE_REF))
+      if (((TYPE_CODE (type) == TYPE_CODE_PTR) || TYPE_IS_REFERENCE (type))
 	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT))
         real_type = value_rtti_indirect_type (val, &full, &top, &using_enc);
       else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
@@ -571,6 +570,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     case TYPE_CODE_METHODPTR:
     case TYPE_CODE_METHOD:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_NAMESPACE:
       error (_("internal error: unhandled type in print_type_scalar"));
       break;

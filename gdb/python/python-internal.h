@@ -223,6 +223,127 @@ gdb_PyObject_HasAttrString (PyObject *obj,
 
 #define PyObject_HasAttrString(obj, attr) gdb_PyObject_HasAttrString (obj, attr)
 
+/* PyObject_CallMethod's 'method' and 'format' parameters were missing
+   the 'const' qualifier before Python 3.4.  Hence, we wrap the
+   function in our own version to avoid errors with string literals.
+   Note, this is a variadic template because PyObject_CallMethod is a
+   varargs function and Python doesn't have a "PyObject_VaCallMethod"
+   variant taking a va_list that we could defer to instead.  */
+
+template<typename... Args>
+static inline PyObject *
+gdb_PyObject_CallMethod (PyObject *o, const char *method, const char *format,
+			 Args... args) /* ARI: editCase function */
+{
+  return PyObject_CallMethod (o,
+			      const_cast<char *> (method),
+			      const_cast<char *> (format),
+			      args...);
+}
+
+#undef PyObject_CallMethod
+#define PyObject_CallMethod gdb_PyObject_CallMethod
+
+/* The 'name' parameter of PyErr_NewException was missing the 'const'
+   qualifier in Python <= 3.4.  Hence, we wrap it in a function to
+   avoid errors when compiled with -Werror.  */
+
+static inline PyObject*
+gdb_PyErr_NewException (const char *name, PyObject *base, PyObject *dict)
+{
+  return PyErr_NewException (const_cast<char *> (name), base, dict);
+}
+
+#define PyErr_NewException gdb_PyErr_NewException
+
+/* PySys_GetObject's 'name' parameter was missing the 'const'
+   qualifier before Python 3.4.  Hence, we wrap it in a function to
+   avoid errors when compiled with -Werror.  */
+
+static inline PyObject *
+gdb_PySys_GetObject (const char *name)
+{
+  return PySys_GetObject (const_cast<char *> (name));
+}
+
+#define PySys_GetObject gdb_PySys_GetObject
+
+/* PySys_SetPath's 'path' parameter was missing the 'const' qualifier
+   before Python 3.6.  Hence, we wrap it in a function to avoid errors
+   when compiled with -Werror.  */
+
+#ifdef IS_PY3K
+# define GDB_PYSYS_SETPATH_CHAR wchar_t
+#else
+# define GDB_PYSYS_SETPATH_CHAR char
+#endif
+
+static inline void
+gdb_PySys_SetPath (const GDB_PYSYS_SETPATH_CHAR *path)
+{
+  PySys_SetPath (const_cast<GDB_PYSYS_SETPATH_CHAR *> (path));
+}
+
+#define PySys_SetPath gdb_PySys_SetPath
+
+/* Wrap PyGetSetDef to allow convenient construction with string
+   literals.  Unfortunately, PyGetSetDef's 'name' and 'doc' members
+   are 'char *' instead of 'const char *', meaning that in order to
+   list-initialize PyGetSetDef arrays with string literals (and
+   without the wrapping below) would require writing explicit 'char *'
+   casts.  Instead, we extend PyGetSetDef and add constexpr
+   constructors that accept const 'name' and 'doc', hiding the ugly
+   casts here in a single place.  */
+
+struct gdb_PyGetSetDef : PyGetSetDef
+{
+  constexpr gdb_PyGetSetDef (const char *name_, getter get_, setter set_,
+			     const char *doc_, void *closure_)
+    : PyGetSetDef {const_cast<char *> (name_), get_, set_,
+		   const_cast<char *> (doc_), closure_}
+  {}
+
+  /* Alternative constructor that allows omitting the closure in list
+     initialization.  */
+  constexpr gdb_PyGetSetDef (const char *name_, getter get_, setter set_,
+			     const char *doc_)
+    : gdb_PyGetSetDef {name_, get_, set_, doc_, NULL}
+  {}
+
+  /* Constructor for the sentinel entries.  */
+  constexpr gdb_PyGetSetDef (std::nullptr_t)
+    : gdb_PyGetSetDef {NULL, NULL, NULL, NULL, NULL}
+  {}
+};
+
+/* The 'keywords' parameter of PyArg_ParseTupleAndKeywords has type
+   'char **'.  However, string literals are const in C++, and so to
+   avoid casting at every keyword array definition, we'll need to make
+   the keywords array an array of 'const char *'.  To avoid having all
+   callers add a 'const_cast<char **>' themselves when passing such an
+   array through 'char **', we define our own version of
+   PyArg_ParseTupleAndKeywords here with a corresponding 'keywords'
+   parameter type that does the cast in a single place.  (This is not
+   an overload of PyArg_ParseTupleAndKeywords in order to make it
+   clearer that we're calling our own function instead of a function
+   that exists in some newer Python version.)  */
+
+static inline int
+gdb_PyArg_ParseTupleAndKeywords (PyObject *args, PyObject *kw,
+				 const char *format, const char **keywords, ...)
+{
+  va_list ap;
+  int res;
+
+  va_start (ap, keywords);
+  res = PyArg_VaParseTupleAndKeywords (args, kw, format,
+				       const_cast<char **> (keywords),
+				       ap);
+  va_end (ap);
+
+  return res;
+}
+
 /* In order to be able to parse symtab_and_line_to_sal_object function
    a real symtab_and_line structure is needed.  */
 #include "symtab.h"
@@ -440,6 +561,8 @@ int gdbpy_initialize_auto_load (void)
 int gdbpy_initialize_values (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_frames (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_instruction (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_btrace (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;

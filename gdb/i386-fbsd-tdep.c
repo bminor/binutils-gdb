@@ -28,7 +28,6 @@
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
-#include "bsd-uthread.h"
 #include "fbsd-tdep.h"
 #include "solib-svr4.h"
 
@@ -224,20 +223,6 @@ int i386fbsd_sc_reg_offset[] =
   8 + 16 * 4			/* %gs */
 };
 
-/* From /usr/src/lib/libc/i386/gen/_setjmp.S.  */
-static int i386fbsd_jmp_buf_reg_offset[] =
-{
-  -1,				/* %eax */
-  -1,				/* %ecx */
-  -1,				/* %edx */
-  1 * 4,			/* %ebx */
-  2 * 4,			/* %esp */
-  3 * 4,			/* %ebp */
-  4 * 4,			/* %esi */
-  5 * 4,			/* %edi */
-  0 * 4				/* %eip */
-};
-
 /* Get XSAVE extended state xcr0 from core dump.  */
 
 uint64_t
@@ -333,46 +318,6 @@ i386fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 }
 
 static void
-i386fbsd_supply_uthread (struct regcache *regcache,
-			 int regnum, CORE_ADDR addr)
-{
-  gdb_byte buf[4];
-  int i;
-
-  gdb_assert (regnum >= -1);
-
-  for (i = 0; i < ARRAY_SIZE (i386fbsd_jmp_buf_reg_offset); i++)
-    {
-      if (i386fbsd_jmp_buf_reg_offset[i] != -1
-	  && (regnum == -1 || regnum == i))
-	{
-	  read_memory (addr + i386fbsd_jmp_buf_reg_offset[i], buf, 4);
-	  regcache_raw_supply (regcache, i, buf);
-	}
-    }
-}
-
-static void
-i386fbsd_collect_uthread (const struct regcache *regcache,
-			  int regnum, CORE_ADDR addr)
-{
-  gdb_byte buf[4];
-  int i;
-
-  gdb_assert (regnum >= -1);
-
-  for (i = 0; i < ARRAY_SIZE (i386fbsd_jmp_buf_reg_offset); i++)
-    {
-      if (i386fbsd_jmp_buf_reg_offset[i] != -1
-	  && (regnum == -1 || regnum == i))
-	{
-	  regcache_raw_collect (regcache, i, buf);
-	  write_memory (addr + i386fbsd_jmp_buf_reg_offset[i], buf, 4);
-	}
-    }
-}
-
-static void
 i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -399,10 +344,6 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* FreeBSD has a more complete `struct sigcontext'.  */
   tdep->sc_reg_offset = i386fbsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (i386fbsd_sc_reg_offset);
-
-  /* FreeBSD provides a user-level threads implementation.  */
-  bsd_uthread_set_supply_uthread (gdbarch, i386fbsd_supply_uthread);
-  bsd_uthread_set_collect_uthread (gdbarch, i386fbsd_collect_uthread);
 
   i386_elf_init_abi (info, gdbarch);
 

@@ -60,6 +60,7 @@
 #include "mi/mi-common.h"
 #include "arch-utils.h"
 #include "cli/cli-utils.h"
+#include "common/function-view.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).
@@ -129,7 +130,7 @@ static void replace_operator_with_call (struct expression **, int, int, int,
 
 static int possible_user_operator_p (enum exp_opcode, struct value **);
 
-static char *ada_op_name (enum exp_opcode);
+static const char *ada_op_name (enum exp_opcode);
 
 static const char *ada_decoded_op_name (enum exp_opcode);
 
@@ -149,7 +150,7 @@ static enum ada_renaming_category parse_old_style_renaming (struct type *,
 static struct symbol *find_old_style_renaming_symbol (const char *,
 						      const struct block *);
 
-static struct type *ada_lookup_struct_elt_type (struct type *, char *,
+static struct type *ada_lookup_struct_elt_type (struct type *, const char *,
                                                 int, int, int *);
 
 static struct value *evaluate_subexp_type (struct expression *, int *);
@@ -314,9 +315,7 @@ static void ada_free_symbol_cache (struct ada_symbol_cache *sym_cache);
 /* Maximum-sized dynamic type.  */
 static unsigned int varsize_limit;
 
-/* FIXME: brobecker/2003-09-17: No longer a const because it is
-   returned by a function that does not return a const char *.  */
-static char *ada_completer_word_break_characters =
+static const char ada_completer_word_break_characters[] =
 #ifdef VMS
   " \t\n!@#%^&*()+=|~`}{[]\";:?/,-";
 #else
@@ -557,7 +556,7 @@ add_angle_brackets (const char *str)
   return result;
 }
 
-static char *
+static const char *
 ada_get_gdb_completer_word_break_characters (void)
 {
   return ada_completer_word_break_characters;
@@ -1577,7 +1576,7 @@ ada_fixup_array_indexes_type (struct type *index_desc_type)
 
 /* Names of MAX_ADA_DIMENS bounds in P_BOUNDS fields of array descriptors.  */
 
-static char *bound_name[] = {
+static const char *bound_name[] = {
   "LB0", "UB0", "LB1", "UB1", "LB2", "UB2", "LB3", "UB3",
   "LB4", "UB4", "LB5", "UB5", "LB6", "UB6", "LB7", "UB7"
 };
@@ -4036,10 +4035,10 @@ See set/show multiple-symbol."));
 
 int
 get_selections (int *choices, int n_choices, int max_results,
-                int is_all_choice, char *annotation_suffix)
+                int is_all_choice, const char *annotation_suffix)
 {
   char *args;
-  char *prompt;
+  const char *prompt;
   int n_chosen;
   int first_choice = is_all_choice ? 2 : 1;
 
@@ -5850,10 +5849,9 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
 /* Implementation of the la_iterate_over_symbols method.  */
 
 static void
-ada_iterate_over_symbols (const struct block *block,
-			  const char *name, domain_enum domain,
-			  symbol_found_callback_ftype *callback,
-			  void *data)
+ada_iterate_over_symbols
+  (const struct block *block, const char *name, domain_enum domain,
+   gdb::function_view<symbol_found_callback_ftype> callback)
 {
   int ndefs, i;
   struct block_symbol *results;
@@ -5861,7 +5859,7 @@ ada_iterate_over_symbols (const struct block *block,
   ndefs = ada_lookup_symbol_list_worker (name, block, domain, &results, 0);
   for (i = 0; i < ndefs; ++i)
     {
-      if (! (*callback) (results[i].symbol, data))
+      if (!callback (results[i].symbol))
 	break;
     }
 }
@@ -6497,30 +6495,6 @@ symbol_completion_add (VEC(char_ptr) **sv,
   VEC_safe_push (char_ptr, *sv, completion);
 }
 
-/* An object of this type is passed as the user_data argument to the
-   expand_symtabs_matching method.  */
-struct add_partial_datum
-{
-  VEC(char_ptr) **completions;
-  const char *text;
-  int text_len;
-  const char *text0;
-  const char *word;
-  int wild_match;
-  int encoded;
-};
-
-/* A callback for expand_symtabs_matching.  */
-
-static int
-ada_complete_symbol_matcher (const char *name, void *user_data)
-{
-  struct add_partial_datum *data = (struct add_partial_datum *) user_data;
-  
-  return symbol_completion_match (name, data->text, data->text_len,
-                                  data->wild_match, data->encoded) != NULL;
-}
-
 /* Return a list of possible symbol names completing TEXT0.  WORD is
    the entire command on which completion is made.  */
 
@@ -6569,19 +6543,16 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
     }
 
   /* First, look at the partial symtab symbols.  */
-  {
-    struct add_partial_datum data;
-
-    data.completions = &completions;
-    data.text = text;
-    data.text_len = text_len;
-    data.text0 = text0;
-    data.word = word;
-    data.wild_match = wild_match_p;
-    data.encoded = encoded_p;
-    expand_symtabs_matching (NULL, ada_complete_symbol_matcher, NULL,
-			     ALL_DOMAIN, &data);
-  }
+  expand_symtabs_matching (NULL,
+			   [&] (const char *symname)
+			   {
+			     return symbol_completion_match (symname,
+							     text, text_len,
+							     wild_match_p,
+							     encoded_p);
+			   },
+			   NULL,
+			   ALL_DOMAIN);
 
   /* At this point scan through the misc symbol vectors and add each
      symbol you find to the list.  Eventually we want to ignore
@@ -7095,7 +7066,7 @@ ada_is_variant_part (struct type *type, int field_num)
 struct type *
 ada_variant_discrim_type (struct type *var_type, struct type *outer_type)
 {
-  char *name = ada_variant_discrim_name (var_type);
+  const char *name = ada_variant_discrim_name (var_type);
 
   return ada_lookup_struct_elt_type (outer_type, name, 1, 1, NULL);
 }
@@ -7116,7 +7087,7 @@ ada_is_others_clause (struct type *type, int field_num)
    returns the name of the discriminant controlling the variant.
    The value is valid until the next call to ada_variant_discrim_name.  */
 
-char *
+const char *
 ada_variant_discrim_name (struct type *type0)
 {
   static char *result = NULL;
@@ -7513,7 +7484,7 @@ ada_index_struct_field_1 (int *index_p, struct value *arg, int offset,
    calling error.  */
 
 struct value *
-ada_value_struct_elt (struct value *arg, char *name, int no_err)
+ada_value_struct_elt (struct value *arg, const char *name, int no_err)
 {
   struct type *t, *t1;
   struct value *v;
@@ -7627,7 +7598,7 @@ type_as_string (struct type *type)
    TYPE is not a type of the right kind.  */
 
 static struct type *
-ada_lookup_struct_elt_type (struct type *type, char *name, int refok,
+ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
                             int noerr, int *dispp)
 {
   int i;
@@ -7740,7 +7711,7 @@ BadName:
 static int
 is_unchecked_variant (struct type *var_type, struct type *outer_type)
 {
-  char *discrim_name = ada_variant_discrim_name (var_type);
+  const char *discrim_name = ada_variant_discrim_name (var_type);
 
   return (ada_lookup_struct_elt_type (outer_type, discrim_name, 0, 1, NULL) 
 	  == NULL);
@@ -7758,7 +7729,7 @@ ada_which_variant_applies (struct type *var_type, struct type *outer_type,
 {
   int others_clause;
   int i;
-  char *discrim_name = ada_variant_discrim_name (var_type);
+  const char *discrim_name = ada_variant_discrim_name (var_type);
   struct value *outer;
   struct value *discrim;
   LONGEST discrim_val;
@@ -10734,7 +10705,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 		     should return a ref as it should be valid to ask
 		     for its address; so rebuild a ref after coerce.  */
 		  arg1 = ada_coerce_ref (arg1);
-		  return value_ref (arg1);
+		  return value_ref (arg1, TYPE_CODE_REF);
 		}
 	    }
 
@@ -11863,7 +11834,7 @@ ada_modulus (struct type *type)
    an Ada83 compiler). As such, we do not include Numeric_Error from
    this list of standard exceptions.  */
 
-static char *standard_exc[] = {
+static const char *standard_exc[] = {
   "constraint_error",
   "program_error",
   "storage_error",
@@ -12253,14 +12224,14 @@ static char *ada_exception_catchpoint_cond_string (const char *excep_string);
    when symbols change.  */
 
 /* An instance of this type is used to represent an Ada catchpoint
-   breakpoint location.  It includes a "struct bp_location" as a kind
-   of base class; users downcast to "struct bp_location *" when
-   needed.  */
+   breakpoint location.  */
 
-struct ada_catchpoint_location
+class ada_catchpoint_location : public bp_location
 {
-  /* The base class.  */
-  struct bp_location base;
+public:
+  ada_catchpoint_location (const bp_location_ops *ops, breakpoint *owner)
+    : bp_location (ops, owner)
+  {}
 
   /* The condition that checks whether the exception that was raised
      is the specific exception the user specified on catchpoint
@@ -12376,12 +12347,7 @@ static struct bp_location *
 allocate_location_exception (enum ada_exception_catchpoint_kind ex,
 			     struct breakpoint *self)
 {
-  struct ada_catchpoint_location *loc;
-
-  loc = new ada_catchpoint_location ();
-  init_bp_location (&loc->base, &ada_catchpoint_location_ops, self);
-  loc->excep_cond_expr = NULL;
-  return &loc->base;
+  return new ada_catchpoint_location (&ada_catchpoint_location_ops, self);
 }
 
 /* Implement the RE_SET method in the breakpoint_ops structure for all
@@ -12820,19 +12786,19 @@ static struct breakpoint_ops catch_assert_breakpoint_ops;
    Return NULL if ARGPS does not contain any more tokens.  */
 
 static char *
-ada_get_next_arg (char **argsp)
+ada_get_next_arg (const char **argsp)
 {
-  char *args = *argsp;
-  char *end;
+  const char *args = *argsp;
+  const char *end;
   char *result;
 
-  args = skip_spaces (args);
+  args = skip_spaces_const (args);
   if (args[0] == '\0')
     return NULL; /* No more arguments.  */
   
   /* Find the end of the current argument.  */
 
-  end = skip_to_space (args);
+  end = skip_to_space_const (args);
 
   /* Adjust ARGSP to point to the start of the next argument.  */
 
@@ -12856,7 +12822,7 @@ ada_get_next_arg (char **argsp)
    after use).  Otherwise COND_STRING is set to NULL.  */
 
 static void
-catch_ada_exception_command_split (char *args,
+catch_ada_exception_command_split (const char *args,
                                    enum ada_exception_catchpoint_kind *ex,
 				   char **excep_string,
 				   char **cond_string)
@@ -12879,12 +12845,12 @@ catch_ada_exception_command_split (char *args,
 
   /* Check to see if we have a condition.  */
 
-  args = skip_spaces (args);
+  args = skip_spaces_const (args);
   if (startswith (args, "if")
       && (isspace (args[2]) || args[2] == '\0'))
     {
       args += 2;
-      args = skip_spaces (args);
+      args = skip_spaces_const (args);
 
       if (args[0] == '\0')
         error (_("Condition missing after `if' keyword"));
@@ -13106,9 +13072,10 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 /* Implement the "catch exception" command.  */
 
 static void
-catch_ada_exception_command (char *arg, int from_tty,
+catch_ada_exception_command (char *arg_entry, int from_tty,
 			     struct cmd_list_element *command)
 {
+  const char *arg = arg_entry;
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
   enum ada_exception_catchpoint_kind ex_kind;
@@ -13136,16 +13103,16 @@ catch_ada_exception_command (char *arg, int from_tty,
    (the memory needs to be deallocated after use).  */
 
 static void
-catch_ada_assert_command_split (char *args, char **cond_string)
+catch_ada_assert_command_split (const char *args, char **cond_string)
 {
-  args = skip_spaces (args);
+  args = skip_spaces_const (args);
 
   /* Check whether a condition was provided.  */
   if (startswith (args, "if")
       && (isspace (args[2]) || args[2] == '\0'))
     {
       args += 2;
-      args = skip_spaces (args);
+      args = skip_spaces_const (args);
       if (args[0] == '\0')
         error (_("condition missing after `if' keyword"));
       *cond_string = xstrdup (args);
@@ -13160,9 +13127,10 @@ catch_ada_assert_command_split (char *args, char **cond_string)
 /* Implement the "catch assert" command.  */
 
 static void
-catch_assert_command (char *arg, int from_tty,
+catch_assert_command (char *arg_entry, int from_tty,
 		      struct cmd_list_element *command)
 {
+  const char *arg = arg_entry;
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
   char *cond_string = NULL;
@@ -13267,30 +13235,6 @@ sort_remove_dups_ada_exceptions_list (VEC(ada_exc_info) **exceptions,
   VEC_truncate(ada_exc_info, *exceptions, skip + to_sort_len);
 }
 
-/* A function intended as the "name_matcher" callback in the struct
-   quick_symbol_functions' expand_symtabs_matching method.
-
-   SEARCH_NAME is the symbol's search name.
-
-   If USER_DATA is not NULL, it is a pointer to a regext_t object
-   used to match the symbol (by natural name).  Otherwise, when USER_DATA
-   is null, no filtering is performed, and all symbols are a positive
-   match.  */
-
-static int
-ada_exc_search_name_matches (const char *search_name, void *user_data)
-{
-  regex_t *preg = (regex_t *) user_data;
-
-  if (preg == NULL)
-    return 1;
-
-  /* In Ada, the symbol "search name" is a linkage name, whereas
-     the regular expression used to do the matching refers to
-     the natural name.  So match against the decoded name.  */
-  return (regexec (preg, ada_decode (search_name), 0, NULL, 0) == 0);
-}
-
 /* Add all exceptions defined by the Ada standard whose name match
    a regular expression.
 
@@ -13370,6 +13314,15 @@ ada_add_exceptions_from_frame (regex_t *preg, struct frame_info *frame,
     }
 }
 
+/* Return true if NAME matches PREG or if PREG is NULL.  */
+
+static bool
+name_matches_regex (const char *name, regex_t *preg)
+{
+  return (preg == NULL
+	  || regexec (preg, ada_decode (name), 0, NULL, 0) == 0);
+}
+
 /* Add all exceptions defined globally whose name name match
    a regular expression, excluding standard exceptions.
 
@@ -13395,8 +13348,17 @@ ada_add_global_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
   struct objfile *objfile;
   struct compunit_symtab *s;
 
-  expand_symtabs_matching (NULL, ada_exc_search_name_matches, NULL,
-			   VARIABLES_DOMAIN, preg);
+  /* In Ada, the symbol "search name" is a linkage name, whereas the
+     regular expression used to do the matching refers to the natural
+     name.  So match against the decoded name.  */
+  expand_symtabs_matching (NULL,
+			   [&] (const char *search_name)
+			   {
+			     const char *decoded = ada_decode (search_name);
+			     return name_matches_regex (decoded, preg);
+			   },
+			   NULL,
+			   VARIABLES_DOMAIN);
 
   ALL_COMPUNITS (objfile, s)
     {
@@ -13411,9 +13373,7 @@ ada_add_global_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
 
 	  ALL_BLOCK_SYMBOLS (b, iter, sym)
 	    if (ada_is_non_standard_exception_sym (sym)
-		&& (preg == NULL
-		    || regexec (preg, SYMBOL_NATURAL_NAME (sym),
-				0, NULL, 0) == 0))
+		&& name_matches_regex (SYMBOL_NATURAL_NAME (sym), preg))
 	      {
 		struct ada_exc_info info
 		  = {SYMBOL_PRINT_NAME (sym), SYMBOL_VALUE_ADDRESS (sym)};
@@ -13608,7 +13568,7 @@ ada_operator_check (struct expression *exp, int pos,
   return 0;
 }
 
-static char *
+static const char *
 ada_op_name (enum exp_opcode opcode)
 {
   switch (opcode)
@@ -14087,6 +14047,7 @@ const struct language_defn ada_language_defn = {
   ada_print_array_index,
   default_pass_by_reference,
   c_get_string,
+  c_watch_location_expression,
   ada_get_symbol_name_cmp,	/* la_get_symbol_name_cmp */
   ada_iterate_over_symbols,
   &ada_varobj_ops,

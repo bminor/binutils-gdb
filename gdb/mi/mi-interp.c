@@ -202,7 +202,7 @@ mi_interp::exec (const char *command)
 }
 
 void
-mi_cmd_interpreter_exec (char *command, char **argv, int argc)
+mi_cmd_interpreter_exec (const char *command, char **argv, int argc)
 {
   struct interp *interp_to_use;
   int i;
@@ -680,11 +680,9 @@ mi_on_normal_stop_1 (struct bpstats *bs, int print_frame)
       mi_uiout->field_int ("thread-id", tp->global_num);
       if (non_stop)
 	{
-	  struct cleanup *back_to = make_cleanup_ui_out_list_begin_end 
-	    (mi_uiout, "stopped-threads");
+	  ui_out_emit_list list_emitter (mi_uiout, "stopped-threads");
 
 	  mi_uiout->field_int (NULL, tp->global_num);
-	  do_cleanups (back_to);
 	}
       else
 	mi_uiout->field_string ("stopped-threads", "all");
@@ -1114,6 +1112,29 @@ mi_on_resume (ptid_t ptid)
     }
 }
 
+/* See mi-interp.h.  */
+
+void
+mi_output_solib_attribs (ui_out *uiout, struct so_list *solib)
+{
+  struct gdbarch *gdbarch = target_gdbarch ();
+
+  uiout->field_string ("id", solib->so_original_name);
+  uiout->field_string ("target-name", solib->so_original_name);
+  uiout->field_string ("host-name", solib->so_name);
+  uiout->field_int ("symbols-loaded", solib->symbols_loaded);
+  if (!gdbarch_has_global_solist (target_gdbarch ()))
+      uiout->field_fmt ("thread-group", "i%d", current_inferior ()->num);
+
+  ui_out_emit_list list_emitter (uiout, "ranges");
+  ui_out_emit_tuple tuple_emitter (uiout, NULL);
+  if (solib->addr_high != 0)
+    {
+      uiout->field_core_addr ("from", gdbarch, solib->addr_low);
+      uiout->field_core_addr ("to", gdbarch, solib->addr_high);
+    }
+}
+
 static void
 mi_solib_loaded (struct so_list *solib)
 {
@@ -1135,14 +1156,7 @@ mi_solib_loaded (struct so_list *solib)
 
       uiout->redirect (mi->event_channel);
 
-      uiout->field_string ("id", solib->so_original_name);
-      uiout->field_string ("target-name", solib->so_original_name);
-      uiout->field_string ("host-name", solib->so_name);
-      uiout->field_int ("symbols-loaded", solib->symbols_loaded);
-      if (!gdbarch_has_global_solist (target_gdbarch ()))
-	{
-	  uiout->field_fmt ("thread-group", "i%d", current_inferior ()->num);
-	}
+      mi_output_solib_attribs (uiout, solib);
 
       uiout->redirect (NULL);
 

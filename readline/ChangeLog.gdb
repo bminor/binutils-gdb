@@ -1,3 +1,8 @@
+2017-05-19  Eli Zaretskii  <eliz@gnu.org>
+
+	* input.c [_WIN32]: Include <conio.h> to avoid compiler warning on
+	MinGW.
+
 2016-09-17  Eli Zaretskii  <eliz@gnu.org>
 
 	* util.c: Include rlshell.h.

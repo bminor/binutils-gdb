@@ -59,7 +59,6 @@ with_test_prefix "preopened record btrace" {
 
 with_test_prefix "prepare record" {
     gdb_test_no_output "python r = gdb.start_recording(\"btrace\")"
-    gdb_test "python print(len(r.ptid))" "3"
     gdb_test "python print(r.method)" "btrace"
     gdb_test "python print(r.format)" "pt|bts"
     gdb_test "stepi 100" ".*"
@@ -82,10 +81,13 @@ with_test_prefix "replay end" {
 
 with_test_prefix "instruction " {
     gdb_test "python print(i.number)" "1"
-    gdb_test "python print(i.error)" "None"
     gdb_test "python print(i.sal)" "symbol and line for .*"
     gdb_test "python print(i.pc)" "$decimal"
-    gdb_test "python print(i.data)" "<memory at $hex>"
+    if { $gdb_py_is_py3k == 0 } {
+	gdb_test "python print(repr(i.data))" "<read-only buffer for $hex,.*>"
+    } else {
+	gdb_test "python print(repr(i.data))" "<memory at $hex>"
+    }
     gdb_test "python print(i.decoded)" ".*"
     gdb_test "python print(i.size)" "$decimal"
     gdb_test "python print(i.is_speculative)" "False"
@@ -97,8 +99,8 @@ with_test_prefix "function call" {
     gdb_test "python print(c.level)" "$decimal"
     gdb_test "python print(len(c.instructions))" "$decimal"
     gdb_test "python print(c.up)" "None"
-    gdb_test "python print(c.prev_sibling)" "None"
-    gdb_test "python print(c == c.next_sibling.prev_sibling)" "True"
+    gdb_test "python print(c.prev)" "None"
+    gdb_test "python print(c == c.next.prev)" "True"
 }
 
 with_test_prefix "list" {

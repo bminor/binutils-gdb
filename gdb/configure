@@ -598,7 +598,14 @@ GDB_NM_FILE
 LTLIBBABELTRACE
 LIBBABELTRACE
 HAVE_LIBBABELTRACE
-frags
+HAVE_NATIVE_GCORE_HOST
+NAT_GENERATED_FILES
+XM_CLIBS
+MH_CFLAGS
+LOADLIBES
+NAT_CDEPS
+NATDEPFILES
+NAT_FILE
 target_subdir
 CONFIG_UNINSTALL
 CONFIG_INSTALL
@@ -799,7 +806,7 @@ PACKAGE_TARNAME
 PACKAGE_NAME
 PATH_SEPARATOR
 SHELL'
-ac_subst_files='host_makefile_frag'
+ac_subst_files='nat_makefile_frag'
 ac_user_opts='
 enable_option_checking
 enable_maintainer_mode
@@ -13085,7 +13092,7 @@ $as_echo "#define HAVE_LANGINFO_CODESET 1" >>confdefs.h
   fi
 
 
-  for ac_header in linux/perf_event.h locale.h memory.h signal.h 		   sys/resource.h sys/socket.h sys/syscall.h 		   sys/un.h sys/wait.h 		   thread_db.h wait.h
+  for ac_header in linux/perf_event.h locale.h memory.h signal.h 		   sys/resource.h sys/socket.h sys/syscall.h 		   sys/un.h sys/wait.h 		   thread_db.h wait.h 		   termios.h termio.h sgtty.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -15108,7 +15115,7 @@ build_warnings="-Wall -Wpointer-arith \
 -Wno-unused -Wunused-value -Wunused-function \
 -Wno-switch -Wno-char-subscripts \
 -Wempty-body -Wunused-but-set-parameter -Wunused-but-set-variable \
--Wno-sign-compare -Wno-write-strings -Wno-narrowing"
+-Wno-sign-compare -Wno-narrowing -Wno-error=maybe-uninitialized"
 
 # Enable -Wno-format by default when using gcc on mingw since many
 # GCC versions complain about %I64.
@@ -16724,27 +16731,21 @@ if test "${host}" != "${target}"; then
 fi
 
 
-frags=
+# Import nat definitions.
+nat_makefile_frag=/dev/null
 if test "${gdb_native}" = "yes"; then
-  host_makefile_frag=${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh
-  if test ! -f ${host_makefile_frag}; then
-    as_fn_error "\"*** Gdb does not support native target ${host}\"" "$LINENO" 5
-  fi
-  frags="$frags $host_makefile_frag"
-else
-  host_makefile_frag=/dev/null
+  . ${srcdir}/configure.nat
+  nativefile=$NAT_FILE
 fi
 
 
 
 
-if test "${gdb_native}" = "yes"; then
-# We pick this up from the host configuration file (.mh) because we
-# do not have a native configuration Makefile fragment.
-nativefile=`sed -n '
-s/NAT_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
-' ${host_makefile_frag}`
-fi
+
+
+
+
+
 
 
 if test x"${gdb_osabi}" != x ; then
@@ -17315,8 +17316,8 @@ $as_echo "$as_me: WARNING: babeltrace is missing or unusable; GDB is unable to r
   fi
 fi
 
-# If nativefile (NAT_FILE) is not set in config/*/*.m[ht] files, we link
-# to an empty version.
+# If nativefile (NAT_FILE) is not set in configure.nat, we link to an
+# empty version.
 
 files=
 links=
@@ -17410,6 +17411,8 @@ if $development; then
 
 $as_echo "#define GDB_SELF_TEST 1" >>confdefs.h
 
+  CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_UNITTESTS_OBS)"
+  CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_UNITTESTS_SRCS)"
 fi
 
 

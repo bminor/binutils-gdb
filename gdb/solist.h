@@ -24,9 +24,16 @@
 #include "symtab.h"
 #include "gdb_bfd.h"
 
-/* Forward declaration for target specific link map information.  This
-   struct is opaque to all but the target specific file.  */
-struct lm_info;
+#define ALL_SO_LIBS(so) \
+    for (so = so_list_head; \
+	 so != NULL; \
+	 so = so->next)
+
+/* Base class for target-specific link map information.  */
+
+struct lm_info_base
+{
+};
 
 struct so_list
   {
@@ -40,7 +47,7 @@ struct so_list
        will be a copy of struct link_map from the user process, but
        it need not be; it can be any collection of data needed to
        traverse the dynamic linker's data structures.  */
-    struct lm_info *lm_info;
+    lm_info_base *lm_info;
 
     /* Shared object file name, exactly as it appears in the
        inferior's link map.  This may be a relative path, or something
@@ -74,7 +81,10 @@ struct so_list
 
     /* Record the range of addresses belonging to this shared library.
        There may not be just one (e.g. if two segments are relocated
-       differently); but this is only used for "info sharedlibrary".  */
+       differently).  This is used for "info sharedlibrary" and
+       the MI command "-file-list-shared-libraries".  The latter has a format
+       that supports outputting multiple segments once the related code
+       supports them.  */
     CORE_ADDR addr_low, addr_high;
   };
 

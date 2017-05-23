@@ -560,7 +560,7 @@ set_next_address (struct gdbarch *gdbarch, CORE_ADDR addr)
 int
 print_address_symbolic (struct gdbarch *gdbarch, CORE_ADDR addr,
 			struct ui_file *stream,
-			int do_demangle, char *leadin)
+			int do_demangle, const char *leadin)
 {
   char *name = NULL;
   char *filename = NULL;
@@ -806,9 +806,8 @@ find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
   /* The vector PCS is used to store instruction addresses within
      a pc range.  */
   CORE_ADDR loop_start, loop_end, p;
-  VEC (CORE_ADDR) *pcs = NULL;
+  std::vector<CORE_ADDR> pcs;
   struct symtab_and_line sal;
-  struct cleanup *cleanup = make_cleanup (VEC_cleanup (CORE_ADDR), &pcs);
 
   *inst_read = 0;
   loop_start = loop_end = addr;
@@ -822,7 +821,7 @@ find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
      instructions from INST_COUNT, and go to the next iteration.  */
   do
     {
-      VEC_truncate (CORE_ADDR, pcs, 0);
+      pcs.clear ();
       sal = find_pc_sect_line (loop_start, NULL, 1);
       if (sal.line <= 0)
         {
@@ -844,12 +843,12 @@ find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
          LOOP_START to LOOP_END.  */
       for (p = loop_start; p < loop_end;)
         {
-          VEC_safe_push (CORE_ADDR, pcs, p);
+	  pcs.push_back (p);
           p += gdb_insn_length (gdbarch, p);
         }
 
-      inst_count -= VEC_length (CORE_ADDR, pcs);
-      *inst_read += VEC_length (CORE_ADDR, pcs);
+      inst_count -= pcs.size ();
+      *inst_read += pcs.size ();
     }
   while (inst_count > 0);
 
@@ -875,9 +874,7 @@ find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
      The case when the length of PCS is 0 means that we reached an area for
      which line info is not available.  In such case, we return LOOP_START,
      which was the lowest instruction address that had line info.  */
-  p = VEC_length (CORE_ADDR, pcs) > 0
-    ? VEC_index (CORE_ADDR, pcs, -inst_count)
-    : loop_start;
+  p = pcs.size () > 0 ? pcs[-inst_count] : loop_start;
 
   /* INST_READ includes all instruction addresses in a pc range.  Need to
      exclude the beginning part up to the address we're returning.  That
@@ -885,7 +882,6 @@ find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
   if (inst_count < 0)
     *inst_read += inst_count;
 
-  do_cleanups (cleanup);
   return p;
 }
 
@@ -1691,7 +1687,7 @@ x_command (char *exp, int from_tty)
       if (from_tty)
 	*exp = 0;
       val = evaluate_expression (expr.get ());
-      if (TYPE_CODE (value_type (val)) == TYPE_CODE_REF)
+      if (TYPE_IS_REFERENCE (value_type (val)))
 	val = coerce_ref (val);
       /* In rvalue contexts, such as this, functions are coerced into
          pointers to functions.  This makes "x/i main" work.  */

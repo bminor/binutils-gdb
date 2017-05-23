@@ -1174,7 +1174,8 @@ auto_load_section_scripts (struct objfile *objfile, const char *section_name)
   bfd_byte *data = NULL;
 
   scripts_sect = bfd_get_section_by_name (abfd, section_name);
-  if (scripts_sect == NULL)
+  if (scripts_sect == NULL
+      || (bfd_get_section_flags (abfd, scripts_sect) & SEC_HAS_CONTENTS) == 0)
     return;
 
   if (!bfd_get_full_section_contents (abfd, scripts_sect, &data))
@@ -1267,9 +1268,8 @@ static void
 print_script (struct loaded_script *script)
 {
   struct ui_out *uiout = current_uiout;
-  struct cleanup *chain;
 
-  chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+  ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
   uiout->field_string ("loaded", script->loaded ? "Yes" : "No");
   uiout->field_string ("script", script->name);
@@ -1283,8 +1283,6 @@ print_script (struct loaded_script *script)
       uiout->field_string ("full_path", script->full_path);
       uiout->text ("\n");
     }
-
-  do_cleanups (chain);
 }
 
 /* Helper for info_auto_load_scripts to sort the scripts by name.  */
@@ -1560,12 +1558,11 @@ info_auto_load_cmd (char *args, int from_tty)
   struct cleanup *infolist_chain;
   struct ui_out *uiout = current_uiout;
 
-  infolist_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "infolist");
+  ui_out_emit_tuple tuple_emitter (uiout, "infolist");
 
   for (list = *auto_load_info_cmdlist_get (); list != NULL; list = list->next)
     {
-      struct cleanup *option_chain
-	= make_cleanup_ui_out_tuple_begin_end (uiout, "option");
+      ui_out_emit_tuple option_emitter (uiout, "option");
 
       gdb_assert (!list->prefixlist);
       gdb_assert (list->type == not_set_cmd);
@@ -1573,13 +1570,7 @@ info_auto_load_cmd (char *args, int from_tty)
       uiout->field_string ("name", list->name);
       uiout->text (":  ");
       cmd_func (list, auto_load_info_scripts_pattern_nl, from_tty);
-
-      /* Close the tuple.  */
-      do_cleanups (option_chain);
     }
-
-  /* Close the tuple.  */
-  do_cleanups (infolist_chain);
 }
 
 /* Initialize "info auto-load " commands prefix and return it.  */

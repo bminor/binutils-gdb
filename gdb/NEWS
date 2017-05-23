@@ -1,11 +1,20 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.12
+*** Changes since GDB 8.0
+
+*** Changes in GDB 8.0
+
+* GDB now supports access to the PKU register on GNU/Linux. The register is
+  added by the Memory Protection Keys for Userspace feature which will be
+  available in future Intel CPUs.
+
+* GDB now supports C++11 rvalue references.
 
 * Python Scripting
 
   ** New functions to start, stop and access a running btrace recording.
+  ** Rvalue references are now supported in gdb.Type.
 
 * GDB now supports recording and replaying rdrand and rdseed Intel 64
   instructions.
@@ -56,6 +65,9 @@
 
 * Target descriptions can now describe registers for sparc32 and sparc64.
 
+* GDB now supports DWARF version 5 (debug information format).
+  Its .debug_names index is not yet supported.
+
 * New native configurations
 
 FreeBSD/mips			mips*-*-freebsd
@@ -76,6 +88,28 @@ flash-erase
 -target-flash-erase
   Erases all the flash memory regions reported by the target.  This is
   equivalent to the CLI command flash-erase.
+
+-file-list-shared-libraries
+  List the shared libraries in the program.  This is
+  equivalent to the CLI command "info shared".
+
+* New commands
+
+set disassembler-options
+show disassembler-options
+  Controls the passing of target specific information to the disassembler.
+  If it is necessary to specify more than one disassembler option then
+  multiple options can be placed together into a comma separated list.
+  The default value is the empty string.  Currently, the only supported
+  targets are ARM, PowerPC and S/390.
+
+maint print arc arc-instruction address
+  Print internal disassembler information about instruction at a given address.
+
+* Removed targets and native configurations
+
+Alpha running FreeBSD         alpha*-*-freebsd*
+Alpha running GNU/kFreeBSD    alpha*-*-kfreebsd*-gnu
 
 *** Changes in GDB 7.12
 

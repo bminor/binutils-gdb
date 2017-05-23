@@ -2578,7 +2578,6 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
                                asection *sec,
                                const Elf_Internal_Rela *relocs)
 {
-  const char *name;
   bfd *dynobj;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -2597,8 +2596,6 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
   extsymoff = (elf_bad_symtab (abfd)) ? 0 : symtab_hdr->sh_info;
-
-  name = bfd_get_section_name (abfd, sec);
 
   if (dynobj == NULL)
     {
@@ -2638,7 +2635,7 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
         {
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%s: Malformed reloc detected for section %s"), abfd, name);
+	    (_("%B: Malformed reloc detected for section %A"), abfd, sec);
           bfd_set_error (bfd_error_bad_value);
           return FALSE;
         }
@@ -2654,7 +2651,7 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
 
 	      /* PR15323, ref flags aren't set for references in the
 		 same object.  */
-	      h->root.non_ir_ref = 1;
+	      h->root.non_ir_ref_regular = 1;
             }
         }
 

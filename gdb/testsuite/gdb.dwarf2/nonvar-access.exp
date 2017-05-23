@@ -33,7 +33,7 @@ Dwarf::assemble $asm_file {
 	} {
 	    declare_labels int_type_label char_type_label \
 		struct_s_label struct_t_label array_a9_label \
-		char_ptr_label implicit_a_label
+		char_ptr_label implicit_a_label stack_b_label
 
 	    int_type_label: base_type {
 		{name "int"}
@@ -159,7 +159,24 @@ Dwarf::assemble $asm_file {
 		    {name implicit_a_ptr}
 		    {type :$char_ptr_label}
 		    {location {
-			GNU_implicit_pointer $implicit_a_label 5
+			implicit_pointer $implicit_a_label 5
+		    } SPECIAL_expr}
+		}
+		# Stack-value location.
+		stack_b_label: DW_TAG_variable {
+		    {name def_stack_b}
+		    {type :$struct_t_label}
+		    {location {
+			const4u 0x1a2b3c4d
+			stack_value
+		    } SPECIAL_expr}
+		}
+		# Implicit pointer into stack value.
+		DW_TAG_variable {
+		    {name implicit_b_ptr}
+		    {type :$char_ptr_label}
+		    {location {
+			implicit_pointer $stack_b_label 1
 		    } SPECIAL_expr}
 		}
 	    }
@@ -194,6 +211,13 @@ gdb_test "print/x def_implicit_a" \
 gdb_test "print/x def_implicit_a\[5\]" " = 0x56"
 gdb_test "print/x *(char (*)\[5\]) implicit_a_ptr" \
     " = \\{0x56, 0x67, 0x78, 0x89, 0x9a\\}"
+switch $endian {
+    big {set val "a = 52, b = 2833485"}
+    little {set val "a = 77, b = 857502"}
+}
+gdb_test "print def_stack_b" " = \\{$val\\}"
+switch $endian {big {set val 0x2b} little {set val 0x3c}}
+gdb_test "print/x *implicit_b_ptr" " = $val"
 
 # Byte-aligned fields, pieced together from DWARF stack values.
 gdb_test "print def_s" " = \\{a = 0, b = -1\\}"

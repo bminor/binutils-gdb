@@ -102,12 +102,14 @@ static void darwin_ptrace_me (void);
 
 static void darwin_ptrace_him (int pid);
 
-static void darwin_create_inferior (struct target_ops *ops, char *exec_file,
-				    char *allargs, char **env, int from_tty);
+static void darwin_create_inferior (struct target_ops *ops,
+				    const char *exec_file,
+				    const std::string &allargs,
+				    char **env, int from_tty);
 
 static void darwin_files_info (struct target_ops *ops);
 
-static char *darwin_pid_to_str (struct target_ops *ops, ptid_t tpid);
+static const char *darwin_pid_to_str (struct target_ops *ops, ptid_t tpid);
 
 static int darwin_thread_alive (struct target_ops *ops, ptid_t tpid);
 
@@ -1729,22 +1731,28 @@ darwin_ptrace_me (void)
   char c;
 
   /* Close write end point.  */
-  close (ptrace_fds[1]);
+  if (close (ptrace_fds[1]) < 0)
+    trace_start_error_with_name ("close");
 
   /* Wait until gdb is ready.  */
   res = read (ptrace_fds[0], &c, 1);
   if (res != 0)
-    error (_("unable to read from pipe, read returned: %d"), res);
-  close (ptrace_fds[0]);
+    trace_start_error (_("unable to read from pipe, read returned: %d"), res);
+
+  if (close (ptrace_fds[0]) < 0)
+    trace_start_error_with_name ("close");
 
   /* Get rid of privileges.  */
-  setegid (getgid ());
+  if (setegid (getgid ()) < 0)
+    trace_start_error_with_name ("setegid");
 
   /* Set TRACEME.  */
-  PTRACE (PT_TRACE_ME, 0, 0, 0);
+  if (PTRACE (PT_TRACE_ME, 0, 0, 0) < 0)
+    trace_start_error_with_name ("PTRACE");
 
   /* Redirect signals to exception port.  */
-  PTRACE (PT_SIGEXC, 0, 0, 0);
+  if (PTRACE (PT_SIGEXC, 0, 0, 0) < 0)
+    trace_start_error_with_name ("PTRACE");
 }
 
 /* Dummy function to be sure fork_inferior uses fork(2) and not vfork(2).  */
@@ -1820,8 +1828,10 @@ darwin_execvp (const char *file, char * const argv[], char * const env[])
 }
 
 static void
-darwin_create_inferior (struct target_ops *ops, char *exec_file,
-			char *allargs, char **env, int from_tty)
+darwin_create_inferior (struct target_ops *ops,
+			const char *exec_file,
+			const std::string &allargs,
+			char **env, int from_tty)
 {
   /* Do the hard work.  */
   fork_inferior (exec_file, allargs, env, darwin_ptrace_me, darwin_ptrace_him,
@@ -1964,7 +1974,7 @@ darwin_files_info (struct target_ops *ops)
 {
 }
 
-static char *
+static const char *
 darwin_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[80];

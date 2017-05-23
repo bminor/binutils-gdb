@@ -8520,6 +8520,27 @@ location of the relocation table.  On some architectures, @value{GDBN}
 might be able to resolve these to actual function names.
 
 @table @code
+@kindex set disassembler-options
+@cindex disassembler options
+@item set disassembler-options @var{option1}[,@var{option2}@dots{}]
+This command controls the passing of target specific information to
+the disassembler.  For a list of valid options, please refer to the
+@code{-M}/@code{--disassembler-options} section of the @samp{objdump}
+manual and/or the output of @kbd{objdump --help}
+(@pxref{objdump,,objdump,binutils.info,The GNU Binary Utilities}).
+The default value is the empty string.
+
+If it is necessary to specify more than one disassembler option, then
+multiple options can be placed together into a comma separated list.
+Currently this command is only supported on targets ARM, PowerPC
+and S/390.
+
+@kindex show disassembler-options
+@item show disassembler-options
+Show the current setting of the disassembler options.
+@end table
+
+@table @code
 @kindex set disassembly-flavor
 @cindex Intel disassembly flavor
 @cindex AT&T disassembly flavor
@@ -9857,7 +9878,7 @@ this feature will behave in the @code{default} setting the same way as with the
 @code{no} setting.
 
 This functionality is currently supported only by DWARF 2 debugging format and
-the compiler has to produce @samp{DW_TAG_GNU_call_site} tags.  With
+the compiler has to produce @samp{DW_TAG_call_site} tags.  With
 @value{NGCC}, you need to specify @option{-O -g} during compilation, to get
 this information.
 
@@ -12025,7 +12046,7 @@ some cases @value{GDBN} can determine that @code{C} was tail-called from
 return address set up as if @code{B} called @code{C} normally.
 
 This functionality is currently supported only by DWARF 2 debugging format and
-the compiler has to produce @samp{DW_TAG_GNU_call_site} tags.  With
+the compiler has to produce @samp{DW_TAG_call_site} tags.  With
 @value{NGCC}, you need to specify @option{-O -g} during compilation, to get
 this information.
 
@@ -12078,8 +12099,8 @@ static void __attribute__((noinline, noclone)) a (void) @{ x++; @}
 static void __attribute__((noinline, noclone)) c (void) @{ a (); @}
 int main (void) @{ x (); return 0; @}
 
-Breakpoint 1, DW_OP_GNU_entry_value resolving cannot find
-DW_TAG_GNU_call_site 0x40039a in main
+Breakpoint 1, DW_OP_entry_value resolving cannot find
+DW_TAG_call_site 0x40039a in main
 a () at t.c:3
 3	static void __attribute__((noinline, noclone)) a (void) @{ x++; @}
 (gdb) bt
@@ -12155,7 +12176,7 @@ int main (void) @{ a (5); return 0; @}
 
 (gdb) bt
 #0  c (i=i@@entry=0) at t.c:2
-#1  0x0000000000400428 in a (DW_OP_GNU_entry_value resolving has found
+#1  0x0000000000400428 in a (DW_OP_entry_value resolving has found
 function "a" at 0x400420 can call itself via tail calls
 i=<optimized out>) at t.c:6
 #2  0x000000000040036e in main () at t.c:7
@@ -14806,9 +14827,9 @@ see @ref{Completion, ,Command Completion}.
 
 @cindex reference declarations
 @item
-@value{GDBN} understands variables declared as C@t{++} references; you can use
-them in expressions just as you do in C@t{++} source---they are automatically
-dereferenced.
+@value{GDBN} understands variables declared as C@t{++} lvalue or rvalue
+references; you can use them in expressions just as you do in C@t{++}
+source---they are automatically dereferenced.
 
 In the parameter list shown when @value{GDBN} displays a frame, the values of
 reference variables are not displayed (unlike other variables); this
@@ -22077,12 +22098,15 @@ acceptable commands.
 @item set debug arc
 @kindex set debug arc
 Control the level of ARC specific debug messages.  Use 0 for no messages (the
-default) and 1 for debug messages.  At present higher values offer no further
-messages.
+default), 1 for debug messages, and 2 for even more debug messages.
 
 @item show debug arc
 @kindex show debug arc
 Show the level of ARC specific debugging in operation.
+
+@item maint print arc arc-instruction @var{address}
+@kindex maint print arc arc-instruction
+Print internal disassembler information about instruction at a given address.
 
 @end table
 
@@ -22530,6 +22554,35 @@ This command takes three parameters: @var{pointer} is the pointers
 whose bounds are to be changed, @var{lbound} and @var{ubound} are new values
 for lower and upper bounds respectively.
 @end table
+
+When you call an inferior function on an Intel MPX enabled program,
+GDB sets the inferior's bound registers to the init (disabled) state
+before calling the function.  As a consequence, bounds checks for the
+pointer arguments passed to the function will always pass.
+
+This is necessary because when you call an inferior function, the
+program is usually in the middle of the execution of other function.
+Since at that point bound registers are in an arbitrary state, not
+clearing them would lead to random bound violations in the called
+function.
+
+You can still examine the influence of the bound registers on the
+execution of the called function by stopping the execution of the
+called function at its prologue, setting bound registers, and
+continuing the execution.  For example:
+
+@smallexample
+	$ break *upper
+	Breakpoint 2 at 0x4009de: file i386-mpx-call.c, line 47.
+	$ print upper (a, b, c, d, 1)
+	Breakpoint 2, upper (a=0x0, b=0x6e0000005b, c=0x0, d=0x0, len=48)....
+	$ print $bnd0
+	@{lbound = 0x0, ubound = ffffffff@} : size -1
+@end smallexample
+
+At this last step the value of bnd0 can be changed for investigation of bound
+violations caused along the execution of the call.  In order to know how to
+set the bound registers or bound table for the call consult the ABI.
 
 @node Alpha
 @subsection Alpha
@@ -26553,8 +26606,8 @@ that thread.
 
 @item =library-loaded,...
 Reports that a new library file was loaded by the program.  This
-notification has 4 fields---@var{id}, @var{target-name},
-@var{host-name}, and @var{symbols-loaded}.  The @var{id} field is an
+notification has 5 fields---@var{id}, @var{target-name},
+@var{host-name}, @var{symbols-loaded} and @var{ranges}.  The @var{id} field is an
 opaque identifier of the library.  For remote debugging case,
 @var{target-name} and @var{host-name} fields give the name of the
 library file on the target, and on the host respectively.  For native
@@ -26564,7 +26617,8 @@ and should not be relied on to convey any useful information.  The
 @var{thread-group} field, if present, specifies the id of the thread
 group in whose context the library was loaded.  If the field is
 absent, it means the library was loaded in the context of all present
-thread groups.
+thread groups.  The @var{ranges} field specifies the ranges of addresses belonging
+to this library.
 
 @item =library-unloaded,...
 Reports that a library was unloaded by the program.  This notification
@@ -26798,24 +26852,36 @@ corresponds to the frame's code address.  This field may be absent.
 @subsection @sc{gdb/mi} Thread Information
 
 Whenever @value{GDBN} has to report an information about a thread, it
-uses a tuple with the following fields:
+uses a tuple with the following fields.  The fields are always present unless
+stated otherwise.
 
 @table @code
 @item id
-The global numeric id assigned to the thread by @value{GDBN}.  This field is
-always present.
+The global numeric id assigned to the thread by @value{GDBN}.
 
 @item target-id
-Target-specific string identifying the thread.  This field is always present.
+The target-specific string identifying the thread.
 
 @item details
 Additional information about the thread provided by the target.
 It is supposed to be human-readable and not interpreted by the
 frontend.  This field is optional.
 
+@item name
+The name of the thread.  If the user specified a name using the
+@code{thread name} command, then this name is given.  Otherwise, if
+@value{GDBN} can extract the thread name from the target, then that
+name is given.  If @value{GDBN} cannot find the thread name, then this
+field is omitted.
+
 @item state
-Either @samp{stopped} or @samp{running}, depending on whether the
-thread is presently running.  This field is always present.
+The execution state of the thread, either @samp{stopped} or @samp{running},
+depending on whether the thread is presently running.
+
+@item frame
+The stack frame currently executing in the thread.  This field is only present
+if the thread is stopped.  Its format is documented in
+@ref{GDB/MI Frame Information}.
 
 @item core
 The value of this field is an integer number of the processor core the
@@ -28030,51 +28096,18 @@ about all threads.
 
 @subsubheading Result
 
-The result is a list of threads.  The following attributes are
-defined for a given thread:
+The result contains the following attributes:
 
 @table @samp
-@item current
-This field exists only for the current thread.  It has the value @samp{*}.
+@item threads
+A list of threads.  The format of the elements of the list is described in
+@ref{GDB/MI Thread Information}.
 
-@item id
-The global identifier that @value{GDBN} uses to refer to the thread.
-
-@item target-id
-The identifier that the target uses to refer to the thread.
-
-@item details
-Extra information about the thread, in a target-specific format.  This
-field is optional.
-
-@item name
-The name of the thread.  If the user specified a name using the
-@code{thread name} command, then this name is given.  Otherwise, if
-@value{GDBN} can extract the thread name from the target, then that
-name is given.  If @value{GDBN} cannot find the thread name, then this
-field is omitted.
-
-@item frame
-The stack frame currently executing in the thread.
-
-@item state
-The thread's state.  The @samp{state} field may have the following
-values:
-
-@table @code
-@item stopped
-The thread is stopped.  Frame information is available for stopped
-threads.
-
-@item running
-The thread is running.  There's no frame information for running
-threads.
-
-@end table
-
-@item core
-If @value{GDBN} can find the CPU core on which this thread is running,
-then this field is the core identifier.  This field is optional.
+@item current-thread-id
+The global id of the currently selected thread.  This field is omitted if there
+is no selected thread (for example, when the selected inferior is not running,
+and therefore has no threads) or if a @var{thread-id} argument was passed to
+the command.
 
 @end table
 
@@ -31485,26 +31518,45 @@ The @value{GDBN} equivalent is @samp{info sources}.
 (gdb)
 @end smallexample
 
-@ignore
 @subheading The @code{-file-list-shared-libraries} Command
 @findex -file-list-shared-libraries
 
 @subsubheading Synopsis
 
 @smallexample
- -file-list-shared-libraries
+ -file-list-shared-libraries [ @var{regexp} ]
 @end smallexample
 
 List the shared libraries in the program.
+With a regular expression @var{regexp}, only those libraries whose
+names match @var{regexp} are listed.
 
 @subsubheading @value{GDBN} Command
 
-The corresponding @value{GDBN} command is @samp{info shared}.
+The corresponding @value{GDBN} command is @samp{info shared}.  The fields
+have a similar meaning to the @code{=library-loaded} notification.
+The @code{ranges} field specifies the multiple segments belonging to this
+library.  Each range has the following fields:
+
+@table @samp
+@item from
+The address defining the inclusive lower bound of the segment.
+@item to
+The address defining the exclusive upper bound of the segment.
+@end table
 
 @subsubheading Example
-N.A.
+@smallexample
+(gdb)
+-file-list-exec-source-files
+^done,shared-libraries=[
+@{id="/lib/libfoo.so",target-name="/lib/libfoo.so",host-name="/lib/libfoo.so",symbols-loaded="1",thread-group="i1",ranges=[@{from="0x72815989",to="0x728162c0"@}]@},
+@{id="/lib/libbar.so",target-name="/lib/libbar.so",host-name="/lib/libbar.so",symbols-loaded="1",thread-group="i1",ranges=[@{from="0x76ee48c0",to="0x76ee9160"@}]@}]
+(gdb)
+@end smallexample
 
 
+@ignore
 @subheading The @code{-file-list-symbol-files} Command
 @findex -file-list-symbol-files
 
@@ -35774,6 +35826,19 @@ for an error
 @item OK
 for success
 @end table
+
+@item vMustReplyEmpty
+@cindex @samp{vMustReplyEmpty} packet
+The correct reply to an unknown @samp{v} packet is to return the empty
+string, however, some older versions of @command{gdbserver} would
+incorrectly return @samp{OK} for unknown @samp{v} packets.
+
+The @samp{vMustReplyEmpty} is used as a feature test to check how
+@command{gdbserver} handles unknown packets, it is important that this
+packet be handled in the same way as other unknown @samp{v} packets.
+If this packet is handled differently to other unknown @samp{v}
+packets then it is possile that @value{GDBN} may run into problems in
+other areas, specifically around use of @samp{vFile:setfs:}.
 
 @item vRun;@var{filename}@r{[};@var{argument}@r{]}@dots{}
 @cindex @samp{vRun} packet
@@ -41225,6 +41290,10 @@ describe the additional @sc{zmm} registers:
 @item
 @samp{zmm16h} through @samp{zmm31h}, only valid for amd64.
 @end itemize
+
+The @samp{org.gnu.gdb.i386.pkeys} feature is optional.  It should
+describe a single register, @samp{pkru}.  It is a 32-bit register
+valid for i386 and amd64.
 
 @node MicroBlaze Features
 @subsection MicroBlaze Features

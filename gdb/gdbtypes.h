@@ -45,6 +45,7 @@
  */
 
 #include "hashtab.h"
+#include "common/offset-type.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -57,18 +58,11 @@ struct language_defn;
 
 /* * Offset relative to the start of its containing CU (compilation
    unit).  */
-typedef struct
-{
-  unsigned int cu_off;
-} cu_offset;
+DEFINE_OFFSET_TYPE (cu_offset, unsigned int);
 
 /* * Offset relative to the start of its .debug_info or .debug_types
    section.  */
-
-typedef struct
-{
-  unsigned int sect_off;
-} sect_offset;
+DEFINE_OFFSET_TYPE (sect_offset, unsigned int);
 
 /* Some macros for char-based bitfields.  */
 
@@ -159,6 +153,8 @@ enum type_code
     TYPE_CODE_MEMBERPTR,
 
     TYPE_CODE_REF,		/**< C++ Reference types */
+
+    TYPE_CODE_RVALUE_REF,	/**< C++ rvalue reference types */
 
     TYPE_CODE_CHAR,		/**< *real* character type */
 
@@ -334,6 +330,11 @@ enum type_instance_flag_value
 
 #define TYPE_ATOMIC(t) \
   (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_ATOMIC)
+
+/* * True if this type represents either an lvalue or lvalue reference type.  */
+
+#define TYPE_IS_REFERENCE(t) \
+  (TYPE_CODE (t) == TYPE_CODE_REF || TYPE_CODE (t) == TYPE_CODE_RVALUE_REF)
 
 /* * Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
@@ -740,6 +741,10 @@ struct type
 
   struct type *reference_type;
 
+  /* * A C++ rvalue reference type added in C++11. */
+
+  struct type *rvalue_reference_type;
+
   /* * Variant chain.  This points to a type that differs from this
      one only in qualifiers and length.  Currently, the possible
      qualifiers are const, volatile, code-space, data-space, and
@@ -1041,12 +1046,12 @@ struct func_type
 
     unsigned int is_noreturn : 1;
 
-    /* * Only those DW_TAG_GNU_call_site's in this function that have
-       DW_AT_GNU_tail_call set are linked in this list.  Function
+    /* * Only those DW_TAG_call_site's in this function that have
+       DW_AT_call_tail_call set are linked in this list.  Function
        without its tail call list complete
-       (DW_AT_GNU_all_tail_call_sites or its superset
-       DW_AT_GNU_all_call_sites) has TAIL_CALL_LIST NULL, even if some
-       DW_TAG_GNU_call_site's exist in such function. */
+       (DW_AT_call_all_tail_calls or its superset
+       DW_AT_call_all_calls) has TAIL_CALL_LIST NULL, even if some
+       DW_TAG_call_site's exist in such function. */
 
     struct call_site *tail_call_list;
 
@@ -1097,7 +1102,7 @@ union call_site_parameter_u
      DW_TAG_formal_parameter which is referenced by both
      caller and the callee.  */
 
-  cu_offset param_offset;
+  cu_offset param_cu_off;
 };
 
 struct call_site_parameter
@@ -1106,13 +1111,12 @@ struct call_site_parameter
 
   union call_site_parameter_u u;
 
-  /* * DW_TAG_formal_parameter's DW_AT_GNU_call_site_value.  It
-     is never NULL.  */
+  /* * DW_TAG_formal_parameter's DW_AT_call_value.  It is never NULL.  */
 
   const gdb_byte *value;
   size_t value_size;
 
-  /* * DW_TAG_formal_parameter's DW_AT_GNU_call_site_data_value.
+  /* * DW_TAG_formal_parameter's DW_AT_call_data_value.
      It may be NULL if not provided by DWARF.  */
 
   const gdb_byte *data_value;
@@ -1120,8 +1124,7 @@ struct call_site_parameter
 };
 
 /* * A place where a function gets called from, represented by
-   DW_TAG_GNU_call_site.  It can be looked up from
-   symtab->call_site_htab.  */
+   DW_TAG_call_site.  It can be looked up from symtab->call_site_htab.  */
 
 struct call_site
   {
@@ -1135,7 +1138,7 @@ struct call_site
 
     struct call_site *tail_call_next;
 
-    /* * Describe DW_AT_GNU_call_site_target.  Missing attribute uses
+    /* * Describe DW_AT_call_target.  Missing attribute uses
        FIELD_LOC_KIND_DWARF_BLOCK with FIELD_DWARF_BLOCK == NULL.  */
 
     struct call_site_target target;
@@ -1149,7 +1152,7 @@ struct call_site
 
     struct dwarf2_per_cu_data *per_cu;
 
-    /* * Describe DW_TAG_GNU_call_site's DW_TAG_formal_parameter.  */
+    /* * Describe DW_TAG_call_site's DW_TAG_formal_parameter.  */
 
     struct call_site_parameter parameter[1];
   };
@@ -1198,6 +1201,7 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_TARGET_TYPE(thistype) TYPE_MAIN_TYPE(thistype)->target_type
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
+#define TYPE_RVALUE_REFERENCE_TYPE(thistype) (thistype)->rvalue_reference_type
 #define TYPE_CHAIN(thistype) (thistype)->chain
 /* * Note that if thistype is a TYPEDEF type, you have to call check_typedef.
    But check_typedef does set the TYPE_LENGTH of the TYPEDEF type,
@@ -1499,6 +1503,7 @@ struct builtin_type
   /* Wide character types.  */
   struct type *builtin_char16;
   struct type *builtin_char32;
+  struct type *builtin_wchar;
 
   /* Pointer types.  */
 
@@ -1704,9 +1709,13 @@ extern void append_flags_type_flag (struct type *type, int bitpos,
 extern void make_vector_type (struct type *array_type);
 extern struct type *init_vector_type (struct type *elt_type, int n);
 
-extern struct type *lookup_reference_type (struct type *);
+extern struct type *lookup_reference_type (struct type *, enum type_code);
+extern struct type *lookup_lvalue_reference_type (struct type *);
+extern struct type *lookup_rvalue_reference_type (struct type *);
 
-extern struct type *make_reference_type (struct type *, struct type **);
+
+extern struct type *make_reference_type (struct type *, struct type **,
+                                         enum type_code);
 
 extern struct type *make_cv_type (int, int, struct type *, struct type **);
 
@@ -1882,10 +1891,21 @@ extern const struct rank VOID_PTR_CONVERSION_BADNESS;
 extern const struct rank BOOL_CONVERSION_BADNESS;
 /* * Badness of converting derived to base class.  */
 extern const struct rank BASE_CONVERSION_BADNESS;
-/* * Badness of converting from non-reference to reference.  */
+/* * Badness of converting from non-reference to reference.  Subrank
+   is the type of reference conversion being done.  */
 extern const struct rank REFERENCE_CONVERSION_BADNESS;
+/* * Conversion to rvalue reference.  */
+#define REFERENCE_CONVERSION_RVALUE 1
+/* * Conversion to const lvalue reference.  */
+#define REFERENCE_CONVERSION_CONST_LVALUE 2
+
 /* * Badness of converting integer 0 to NULL pointer.  */
 extern const struct rank NULL_POINTER_CONVERSION;
+/* * Badness of cv-conversion.  Subrank is a flag describing the conversions
+   being done.  */
+extern const struct rank CV_CONVERSION_BADNESS;
+#define CV_CONVERSION_CONST 1
+#define CV_CONVERSION_VOLATILE 2
 
 /* Non-standard conversions allowed by the debugger */
 

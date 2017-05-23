@@ -825,7 +825,7 @@ free_buildsym_compunit (void)
    directory name actually is (by checking for a trailing '/').  */
 
 void
-patch_subfile_names (struct subfile *subfile, char *name)
+patch_subfile_names (struct subfile *subfile, const char *name)
 {
   if (subfile != NULL
       && buildsym_compunit->comp_dir == NULL

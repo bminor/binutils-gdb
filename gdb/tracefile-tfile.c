@@ -192,7 +192,7 @@ static void
 tfile_write_uploaded_tsv (struct trace_file_writer *self,
 			  struct uploaded_tsv *utsv)
 {
-  char *buf = "";
+  char *buf = NULL;
   struct tfile_trace_file_writer *writer
     = (struct tfile_trace_file_writer *) self;
 
@@ -204,7 +204,7 @@ tfile_write_uploaded_tsv (struct trace_file_writer *self,
 
   fprintf (writer->fp, "tsv %x:%s:%x:%s\n",
 	   utsv->number, phex_nz (utsv->initial_value, 8),
-	   utsv->builtin, buf);
+	   utsv->builtin, buf != NULL ? buf : "");
 
   if (utsv->name)
     xfree (buf);
@@ -275,17 +275,19 @@ tfile_write_tdesc (struct trace_file_writer *self)
 {
   struct tfile_trace_file_writer *writer
     = (struct tfile_trace_file_writer *) self;
-  char *tdesc = target_fetch_description_xml (&current_target);
-  char *ptr = tdesc;
-  char *next;
 
-  if (tdesc == NULL)
+  gdb::optional<std::string> tdesc
+    = target_fetch_description_xml (&current_target);
+
+  if (!tdesc)
     return;
+
+  const char *ptr = tdesc->c_str ();
 
   /* Write tdesc line by line, prefixing each line with "tdesc ".  */
   while (ptr != NULL)
     {
-      next = strchr (ptr, '\n');
+      const char *next = strchr (ptr, '\n');
       if (next != NULL)
 	{
 	  fprintf (writer->fp, "tdesc %.*s\n", (int) (next - ptr), ptr);
@@ -299,8 +301,6 @@ tfile_write_tdesc (struct trace_file_writer *self)
 	}
       ptr = next;
     }
-
-  xfree (tdesc);
 }
 
 /* This is the implementation of trace_file_write_ops method

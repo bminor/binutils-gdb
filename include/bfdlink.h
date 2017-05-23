@@ -100,9 +100,13 @@ struct bfd_link_hash_entry
   /* Type of this entry.  */
   ENUM_BITFIELD (bfd_link_hash_type) type : 8;
 
-  /* Symbol is referenced in a normal object file, as distict from a LTO
-     IR object file.  */
-  unsigned int non_ir_ref : 1;
+  /* Symbol is referenced in a normal regular object file,
+     as distinct from a LTO IR object file.  */
+  unsigned int non_ir_ref_regular : 1;
+
+  /* Symbol is referenced in a normal dynamic object file,
+     as distinct from a LTO IR object file.  */
+  unsigned int non_ir_ref_dynamic : 1;
 
   /* Symbol is a built-in define.  These will be overridden by PROVIDE
      in a linker script.  */
@@ -584,8 +588,9 @@ struct bfd_link_info
      backend to decide.  */
   int extern_protected_data;
 
-  /* > 0 to treat undefined weak symbol in the executable as dynamic,
-     requiring dynamic relocation.  */
+  /* 1 to make undefined weak symbols dynamic when building a dynamic
+     object.  0 to resolve undefined weak symbols to zero.  -1 to let
+     the backend decide.  */
   int dynamic_undefined_weak;
 
   /* Non-zero if auto-import thunks for DATA items in pei386 DLLs

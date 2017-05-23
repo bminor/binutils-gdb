@@ -260,6 +260,10 @@ proc visibility_run {visibility} {
 	set VSBCFLAG ""
     }}}}}}}}}
 
+    # Ensure we always start with a clean slate, for the "file exists"
+    # tests below.
+    remote_file host delete $tmpdir/sh1p.o $tmpdir/sh2p.o $tmpdir/sh1np.o $tmpdir/sh2np.o
+
     if { [istarget powerpc*-*-linux*] \
 	 || ( [istarget mips*-*-linux*] && [at_least_gcc_version 4 3] )} {
 	# Testing non-PIC libraries is a waste of effort on any target.
@@ -406,7 +410,8 @@ proc visibility_run {visibility} {
 	unresolved "visibility ($visibility) (PIC main, non PIC so)"
 	unresolved "visibility ($visibility) (PIC main)"
     } else {
-	if { [file exists $tmpdir/sh1np.o ] && [ file exists $tmpdir/sh2np.o ] } {
+	if { [ remote_file host exists $tmpdir/sh1np.o ]
+	     && [ remote_file host exists $tmpdir/sh2np.o ] } {
 	    if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 		visibility_test $visibility vmpnp "visibility ($visibility) (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o xcoff
 	    } else {
@@ -451,7 +456,8 @@ proc visibility_run {visibility} {
 	    unresolved "visibility (PIC main, non PIC so)"
 	}
 
-	if { [file exists $tmpdir/sh1p.o ] && [ file exists $tmpdir/sh2p.o ] } {
+	if { [ remote_file host exists $tmpdir/sh1p.o ]
+	     && [ remote_file host exists $tmpdir/sh2p.o ] } {
 	    if { [ string match $visibility "protected" ]
 		 || [ string match $visibility "protected_undef_def" ] } {
 		if [ string match $support_protected "no" ] {

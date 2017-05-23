@@ -131,9 +131,9 @@ extern int emit_clear_objfiles_event (void);
 
 extern void evpy_dealloc (PyObject *self);
 extern int evpy_add_attribute (PyObject *event,
-                               char *name, PyObject *attr)
+                               const char *name, PyObject *attr)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_event_generic (PyTypeObject *type, char *name)
+int gdbpy_initialize_event_generic (PyTypeObject *type, const char *name)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 
 #endif /* GDB_PY_EVENT_H */

@@ -106,6 +106,9 @@
     && (regnum) >= (tdep)->ppc_efpr0_regnum \
     && (regnum) < (tdep)->ppc_efpr0_regnum + ppc_num_efprs)
 
+/* Holds the current set of options to be passed to the disassembler.  */
+static char *powerpc_disassembler_options;
+
 /* The list of available "set powerpc ..." and "show powerpc ..."
    commands.  */
 static struct cmd_list_element *setpowerpccmdlist = NULL;
@@ -983,12 +986,33 @@ typedef BP_MANIPULATION_ENDIAN (little_breakpoint, big_breakpoint)
 
 /* Instruction masks used during single-stepping of atomic
    sequences.  */
-#define LWARX_MASK 0xfc0007fe
+#define LOAD_AND_RESERVE_MASK 0xfc0007fe
 #define LWARX_INSTRUCTION 0x7c000028
 #define LDARX_INSTRUCTION 0x7c0000A8
-#define STWCX_MASK 0xfc0007ff
+#define LBARX_INSTRUCTION 0x7c000068
+#define LHARX_INSTRUCTION 0x7c0000e8
+#define LQARX_INSTRUCTION 0x7c000228
+#define STORE_CONDITIONAL_MASK 0xfc0007ff
 #define STWCX_INSTRUCTION 0x7c00012d
 #define STDCX_INSTRUCTION 0x7c0001ad
+#define STBCX_INSTRUCTION 0x7c00056d
+#define STHCX_INSTRUCTION 0x7c0005ad
+#define STQCX_INSTRUCTION 0x7c00016d
+
+/* Check if insn is one of the Load And Reserve instructions used for atomic
+   sequences.  */
+#define IS_LOAD_AND_RESERVE_INSN(insn)	((insn & LOAD_AND_RESERVE_MASK) == LWARX_INSTRUCTION \
+					 || (insn & LOAD_AND_RESERVE_MASK) == LDARX_INSTRUCTION \
+					 || (insn & LOAD_AND_RESERVE_MASK) == LBARX_INSTRUCTION \
+					 || (insn & LOAD_AND_RESERVE_MASK) == LHARX_INSTRUCTION \
+					 || (insn & LOAD_AND_RESERVE_MASK) == LQARX_INSTRUCTION)
+/* Check if insn is one of the Store Conditional instructions used for atomic
+   sequences.  */
+#define IS_STORE_CONDITIONAL_INSN(insn)	((insn & STORE_CONDITIONAL_MASK) == STWCX_INSTRUCTION \
+					 || (insn & STORE_CONDITIONAL_MASK) == STDCX_INSTRUCTION \
+					 || (insn & STORE_CONDITIONAL_MASK) == STBCX_INSTRUCTION \
+					 || (insn & STORE_CONDITIONAL_MASK) == STHCX_INSTRUCTION \
+					 || (insn & STORE_CONDITIONAL_MASK) == STQCX_INSTRUCTION)
 
 /* We can't displaced step atomic sequences.  Otherwise this is just
    like simple_displaced_step_copy_insn.  */
@@ -1008,9 +1032,8 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
   insn = extract_signed_integer (buf, PPC_INSN_SIZE, byte_order);
 
-  /* Assume all atomic sequences start with a lwarx/ldarx instruction.  */
-  if ((insn & LWARX_MASK) == LWARX_INSTRUCTION
-      || (insn & LWARX_MASK) == LDARX_INSTRUCTION)
+  /* Assume all atomic sequences start with a Load and Reserve instruction.  */
+  if (IS_LOAD_AND_RESERVE_INSN (insn))
     {
       if (debug_displaced)
 	{
@@ -1138,12 +1161,11 @@ ppc_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
   return 1;
 }
 
-/* Checks for an atomic sequence of instructions beginning with a LWARX/LDARX
-   instruction and ending with a STWCX/STDCX instruction.  If such a sequence
-   is found, attempt to step through it.  A breakpoint is placed at the end of 
-   the sequence.  */
-
-VEC (CORE_ADDR) *
+/* Checks for an atomic sequence of instructions beginning with a
+   Load And Reserve instruction and ending with a Store Conditional
+   instruction.  If such a sequence is found, attempt to step through it.
+   A breakpoint is placed at the end of the sequence.  */
+std::vector<CORE_ADDR>
 ppc_deal_with_atomic_sequence (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -1158,12 +1180,10 @@ ppc_deal_with_atomic_sequence (struct regcache *regcache)
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
-  VEC (CORE_ADDR) *next_pcs = NULL;
 
-  /* Assume all atomic sequences start with a lwarx/ldarx instruction.  */
-  if ((insn & LWARX_MASK) != LWARX_INSTRUCTION
-      && (insn & LWARX_MASK) != LDARX_INSTRUCTION)
-    return NULL;
+  /* Assume all atomic sequences start with a Load And Reserve instruction.  */
+  if (!IS_LOAD_AND_RESERVE_INSN (insn))
+    return {};
 
   /* Assume that no atomic sequence is longer than "atomic_sequence_length" 
      instructions.  */
@@ -1181,8 +1201,8 @@ ppc_deal_with_atomic_sequence (struct regcache *regcache)
           int absolute = insn & 2;
 
           if (bc_insn_count >= 1)
-            return 0; /* More than one conditional branch found, fallback 
-                         to the standard single-step code.  */
+            return {}; /* More than one conditional branch found, fallback
+                          to the standard single-step code.  */
  
 	  if (absolute)
 	    breaks[1] = immediate;
@@ -1193,15 +1213,14 @@ ppc_deal_with_atomic_sequence (struct regcache *regcache)
 	  last_breakpoint++;
         }
 
-      if ((insn & STWCX_MASK) == STWCX_INSTRUCTION
-          || (insn & STWCX_MASK) == STDCX_INSTRUCTION)
+      if (IS_STORE_CONDITIONAL_INSN (insn))
         break;
     }
 
-  /* Assume that the atomic sequence ends with a stwcx/stdcx instruction.  */
-  if ((insn & STWCX_MASK) != STWCX_INSTRUCTION
-      && (insn & STWCX_MASK) != STDCX_INSTRUCTION)
-    return NULL;
+  /* Assume that the atomic sequence ends with a Store Conditional
+     instruction.  */
+  if (!IS_STORE_CONDITIONAL_INSN (insn))
+    return {};
 
   closing_insn = loc;
   loc += PPC_INSN_SIZE;
@@ -1217,8 +1236,10 @@ ppc_deal_with_atomic_sequence (struct regcache *regcache)
 	  || (breaks[1] >= pc && breaks[1] <= closing_insn)))
     last_breakpoint = 0;
 
+  std::vector<CORE_ADDR> next_pcs;
+
   for (index = 0; index <= last_breakpoint; index++)
-    VEC_safe_push (CORE_ADDR, next_pcs, breaks[index]);
+    next_pcs.push_back (breaks[index]);
 
   return next_pcs;
 }
@@ -2590,7 +2611,7 @@ rs6000_register_to_value (struct frame_info *frame,
 			  int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  gdb_byte from[MAX_REGISTER_SIZE];
+  gdb_byte from[PPC_MAX_REGISTER_SIZE];
   
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
 
@@ -2612,7 +2633,7 @@ rs6000_value_to_register (struct frame_info *frame,
                           const gdb_byte *from)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  gdb_byte to[MAX_REGISTER_SIZE];
+  gdb_byte to[PPC_MAX_REGISTER_SIZE];
 
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
 
@@ -3126,10 +3147,10 @@ rs6000_adjust_frame_regnum (struct gdbarch *gdbarch, int num, int eh_frame_p)
 struct variant
   {
     /* Name of this variant.  */
-    char *name;
+    const char *name;
 
     /* English description of the variant.  */
-    char *description;
+    const char *description;
 
     /* bfd_arch_info.arch corresponding to variant.  */
     enum bfd_architecture arch;
@@ -6591,6 +6612,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     register_e500_ravenscar_ops (gdbarch);
   else
     register_ppc_ravenscar_ops (gdbarch);
+
+  set_gdbarch_disassembler_options (gdbarch, &powerpc_disassembler_options);
+  set_gdbarch_valid_disassembler_options (gdbarch,
+					  disassembler_options_powerpc ());
 
   return gdbarch;
 }

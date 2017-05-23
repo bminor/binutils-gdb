@@ -949,8 +949,8 @@ microblaze_elf_relocate_section (bfd *output_bfd,
       if (r_type < 0 || r_type >= (int) R_MICROBLAZE_max)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%s: unknown relocation type %d"),
-			      bfd_get_filename (input_bfd), (int) r_type);
+	  _bfd_error_handler (_("%B: unknown relocation type %d"),
+			      input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;
 	  continue;
@@ -1077,12 +1077,12 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		      {
 			_bfd_error_handler
 			  /* xgettext:c-format */
-			  (_("%s: The target (%s) of an %s relocation "
-			     "is in the wrong section (%s)"),
-			   bfd_get_filename (input_bfd),
+			  (_("%B: The target (%s) of an %s relocation"
+			     " is in the wrong section (%A)"),
+			   input_bfd,
 			   sym_name,
 			   microblaze_elf_howto_table[(int) r_type]->name,
-			   bfd_get_section_name (sec->owner, sec));
+			   sec);
 			/*bfd_set_error (bfd_error_bad_value); ??? why? */
 			ret = FALSE;
 			continue;
@@ -1125,12 +1125,12 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		      {
 			_bfd_error_handler
 			  /* xgettext:c-format */
-			  (_("%s: The target (%s) of an %s relocation "
-			     "is in the wrong section (%s)"),
-			   bfd_get_filename (input_bfd),
+			  (_("%B: The target (%s) of an %s relocation"
+			     " is in the wrong section (%A)"),
+			   input_bfd,
 			   sym_name,
 			   microblaze_elf_howto_table[(int) r_type]->name,
-			   bfd_get_section_name (sec->owner, sec));
+			   sec);
 			/*bfd_set_error (bfd_error_bad_value); ??? why? */
 			ret = FALSE;
 			continue;
@@ -2315,7 +2315,7 @@ microblaze_elf_check_relocs (bfd * abfd,
 
 	  /* PR15323, ref flags aren't set for references in the same
 	     object.  */
-	  h->root.non_ir_ref = 1;
+	  h->root.non_ir_ref_regular = 1;
 	}
 
       switch (r_type)
@@ -3234,13 +3234,20 @@ microblaze_elf_finish_dynamic_symbol (bfd *output_bfd,
 	      || h->dynindx == -1))
         {
           asection *sec = h->root.u.def.section;
+	  bfd_vma value;
+
+	  value = h->root.u.def.value;
+	  if (sec->output_section != NULL)
+	    /* PR 21180: If the output section is NULL, then the symbol is no
+	       longer needed, and in theory the GOT entry is redundant.  But
+	       it is too late to change our minds now...  */
+	    value += sec->output_section->vma + sec->output_offset;
+
           microblaze_elf_output_dynamic_relocation (output_bfd,
                                                     srela, srela->reloc_count++,
                                                     /* symindex= */ 0,
                                                     R_MICROBLAZE_REL, offset,
-                                                    h->root.u.def.value
-                                                    + sec->output_section->vma
-                                                    + sec->output_offset);
+                                                    value);
         }
       else
         {
@@ -3270,7 +3277,7 @@ microblaze_elf_finish_dynamic_symbol (bfd *output_bfd,
                        + h->root.u.def.section->output_offset);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_MICROBLAZE_COPY);
       rela.r_addend = 0;
-      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (h->root.u.def.section == htab->elf.sdynrelro)
 	s = htab->elf.sreldynrelro;
       else
 	s = htab->elf.srelbss;

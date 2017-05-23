@@ -24,7 +24,7 @@
 
 #include "tui/tui-data.h"
 
-extern void tui_erase_data_content (char *);
+extern void tui_erase_data_content (const char *);
 extern void tui_display_all_data (void);
 extern void tui_check_data_values (struct frame_info *);
 extern void tui_display_data_from_line (int);

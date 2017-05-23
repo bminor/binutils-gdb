@@ -29,6 +29,15 @@ set old_ldflags $LDFLAGS
 if { [istarget spu*-*-*] } {
     set LDFLAGS "$LDFLAGS --local-store 0:0"
 }
+
+# hpux .comm differs from everyone else
+set hpux ""
+set old_asflags $ASFLAGS
+if [istarget "*-*-hpux*"] {
+    set hpux "--defsym HPUX=1"
+    set ASFLAGS "$ASFLAGS --defsym HPUX=1"
+}
+
 if { [istarget alpha*-*-* ] } {
     # The compress1 test is written expecting 32-bit addresses; force the
     # executable down into the low address space to match.
@@ -52,33 +61,31 @@ if { [is_remote host] } then {
     remote_download host merge.ld
 }
 
-if { ![istarget hppa64*-hpux*] } {
-    run_ld_link_tests {
-	{"Build symbol3.a"
-	    "" "" ""
-	    {symbol3.s} {} "symbol3.a"}
-	{"Build symbol3w.a"
-	    "" "" ""
-	    {symbol3w.s} {} "symbol3w.a"}
-    }
+run_ld_link_tests [list \
+    [list "Build symbol3.a" \
+	"" "" $hpux \
+	{symbol3.s} {} "symbol3.a" ] \
+    [list "Build symbol3w.a" \
+	"" "" "" \
+	{symbol3w.s} {} "symbol3w.a" ] \
+]
 
-    if { [check_shared_lib_support] } then {
-	run_ld_link_tests {
-	    {"Build pr14170a.o" "" "" "" "pr14170a.s" {} "pr14170.a" }
-	}
-	setup_xfail "tic6x-*-*"
-	run_ld_link_tests {
-	    {"Build shared library for pr14170"
-		"-shared" "" "" "pr14170b.s" {} "pr14170.so" }
-	}
-	# bfin does not currently support copy relocs.
-	setup_xfail "bfin-*-*"
-	run_ld_link_tests {
-	    {"PR ld/14170"
-		"--no-dynamic-linker tmpdir/pr14170a.o tmpdir/pr14170.so" "" "" "pr14170c.s"
-		{ } "pr14170" }
-	}
+if { [check_shared_lib_support] } then {
+    run_ld_link_tests {
+	{"Build pr14170a.o" "" "" "" {pr14170a.s} {} "pr14170.a" }
     }
+    setup_xfail "tic6x-*-*"
+    run_ld_link_tests {
+	{"Build shared library for pr14170"
+	    "-shared" "" "" "pr14170b.s" {} "pr14170.so" }
+    }
+    # bfin does not currently support copy relocs.
+    setup_xfail "bfin-*-*"
+    run_ld_link_tests [list \
+	[list "PR ld/14170" \
+	    "--no-dynamic-linker tmpdir/pr14170a.o tmpdir/pr14170.so" "" $hpux \
+	     {pr14170c.s} { } "pr14170" ] \
+    ]
 }
 
 # Only run these tests on targets that support creating shared libraries.
@@ -145,7 +152,7 @@ if { [check_shared_lib_support] } then {
     # xfail on arm*-*-eabi*.  The list can be enlarged to those targets that
     # don't support GNU_RELRO.  For more details, please see discussions at:
     #   https://sourceware.org/ml/binutils/2017-01/msg00441.html
-    setup_xfail "arm*-*-eabi*"
+    setup_xfail "arm*-*-eabi*" "hppa*64*-*-hpux*"
     run_ld_link_tests {
 	{"Build pr20995-2.so"
 	    "-shared -z relro" "" ""
@@ -153,6 +160,8 @@ if { [check_shared_lib_support] } then {
     }
     # These targets don't copy dynamic variables into .bss.
     setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*"
+    # or don't have .data.rel.ro
+    setup_xfail "hppa*64*-*-hpux*"
     run_ld_link_tests [list \
 	[list \
 	    "pr20995" \
@@ -161,6 +170,7 @@ if { [check_shared_lib_support] } then {
     # xfail on arm*-*-eabi* is particularly because of no support of GNU_RELRO.
     # Please see the link above for details.
     setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*" "arm*-*-eabi*"
+    setup_xfail "hppa*64*-*-hpux*"
     run_ld_link_tests [list \
 	[list \
 	    "pr20995-2" \
@@ -183,20 +193,20 @@ if [is_generic_elf] {
 }
 
 # Check that the --out-implib option work correctly.
-run_ld_link_tests {
-    {"Generate empty import library"
-	"--out-implib=tmpdir/implib.lib" ""
-	"--defsym NO_GLOBAL=1"
-	{implib.s}
-	{{ld empty-implib.out}}
-	"implib"}
-    {"Generate import library"
-	"--out-implib=tmpdir/implib.lib" ""
-	""
-	{implib.s}
-	{{readelf {-s tmpdir/implib.lib} implib.rd}}
-	"implib"}
-} $xfail_implib
+run_ld_link_tests [list \
+    [list "Generate empty import library" \
+	"--out-implib=tmpdir/implib.lib" "" \
+	[concat "--defsym NO_GLOBAL=1" $hpux] \
+	{implib.s} \
+	{{ld empty-implib.out}} \
+	"implib" ] \
+    [list "Generate import library" \
+	"--out-implib=tmpdir/implib.lib" "" \
+	$hpux \
+	{implib.s} \
+	{{readelf {-s tmpdir/implib.lib} implib.rd}} \
+	"implib" ] \
+] $xfail_implib
 
 if { [istarget *-*-linux*]
      || [istarget *-*-nacl*]
@@ -233,6 +243,7 @@ if { [istarget *-*-*linux*]
 }
 
 set LDFLAGS $old_ldflags
+set ASFLAGS $old_asflags
 
 # Check to see if the C compiler works
 if { [which $CC] == 0 } {
@@ -287,6 +298,27 @@ if { [istarget *-*-linux*]
      || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {
     run_ld_link_exec_tests $array_tests_pie $xfails
+
+    run_ld_link_exec_tests [list \
+	[list \
+	    "Run mbind2a" \
+	    "$NOPIE_LDFLAGS -Wl,-z,common-page-size=0x4000" \
+	    "" \
+	    { mbind2a.s mbind2b.c } \
+	    "mbind2a" \
+	    "pass.out" \
+	    "-O2 -I../bfd" \
+	] \
+	[list \
+	    "Run mbind2b" \
+	    "-static -Wl,-z,common-page-size=0x4000" \
+	    "" \
+	    { mbind2a.s mbind2b.c } \
+	    "mbind2b" \
+	    "pass.out" \
+	    "-O2 -I../bfd" \
+	] \
+    ]
 }
 
 # <http://www.gnu.org/software/hurd/open_issues/binutils.html#static>

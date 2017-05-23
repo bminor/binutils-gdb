@@ -32,10 +32,8 @@
 /* Struct representing built-in completion types.  */
 struct cmdpy_completer
 {
-  /* Python symbol name.
-     This isn't a const char * for Python 2.4's sake.
-     PyModule_AddIntConstant only takes a char *, sigh.  */
-  char *name;
+  /* Python symbol name.  */
+  const char *name;
   /* Completion function.  */
   completer_ftype *completer;
 };
@@ -111,8 +109,10 @@ cmdpy_destroyer (struct cmd_list_element *self, void *context)
 /* Called by gdb to invoke the command.  */
 
 static void
-cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
+cmdpy_function (struct cmd_list_element *command,
+		char *args_entry, int from_tty)
 {
+  const char *args = args_entry;
   cmdpy_object *obj = (cmdpy_object *) get_cmd_context (command);
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
@@ -490,8 +490,8 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
   char *docstring = NULL;
   struct cmd_list_element **cmd_list;
   char *cmd_name, *pfx_name;
-  static char *keywords[] = { "name", "command_class", "completer_class",
-			      "prefix", NULL };
+  static const char *keywords[] = { "name", "command_class", "completer_class",
+				    "prefix", NULL };
   PyObject *is_prefix = NULL;
   int cmp;
 
@@ -504,9 +504,9 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       return -1;
     }
 
-  if (! PyArg_ParseTupleAndKeywords (args, kw, "si|iO",
-				     keywords, &name, &cmdtype,
-			  &completetype, &is_prefix))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "si|iO",
+					keywords, &name, &cmdtype,
+					&completetype, &is_prefix))
     return -1;
 
   if (cmdtype != no_class && cmdtype != class_run

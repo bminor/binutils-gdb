@@ -262,7 +262,7 @@ struct private_thread_info
 };
 
 
-static char *
+static const char *
 thread_db_err_str (td_err_e err)
 {
   static char buf[64];
@@ -1372,7 +1372,7 @@ thread_db_update_thread_list (struct target_ops *ops)
   ops->beneath->to_update_thread_list (ops->beneath);
 }
 
-static char *
+static const char *
 thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   struct thread_info *thread_info = find_thread_ptid (ptid);
@@ -1397,7 +1397,7 @@ thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
 /* Return a string describing the state of the thread specified by
    INFO.  */
 
-static char *
+static const char *
 thread_db_extra_thread_info (struct target_ops *self,
 			     struct thread_info *info)
 {
@@ -1636,7 +1636,7 @@ info_auto_load_libthread_db (char *args, int from_tty)
   /* Note I is incremented inside the cycle, not at its end.  */
   for (i = 0; i < info_count;)
     {
-      struct cleanup *chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
       char *pids_end;
 
       info = array[i];
@@ -1661,7 +1661,6 @@ info_auto_load_libthread_db (char *args, int from_tty)
       uiout->field_string ("pids", pids);
 
       uiout->text ("\n");
-      do_cleanups (chain);
     }
 
   do_cleanups (back_to);

@@ -733,7 +733,7 @@ operand_iterator_next (struct arc_operand_iterator *iter,
 /* Helper for parsing the options.  */
 
 static void
-parse_option (char *option)
+parse_option (const char *option)
 {
   if (CONST_STRNEQ (option, "dsp"))
     add_to_decodelist (DSP, NONE);
@@ -748,7 +748,8 @@ parse_option (char *option)
     {
       add_to_decodelist (FLOAT, DPX);
       add_to_decodelist (FLOAT, SPX);
-      add_to_decodelist (FLOAT, QUARKSE);
+      add_to_decodelist (FLOAT, QUARKSE1);
+      add_to_decodelist (FLOAT, QUARKSE2);
     }
 
   else if (CONST_STRNEQ (option, "fpuda"))
@@ -772,7 +773,7 @@ parse_option (char *option)
 /* Go over the options list and parse it.  */
 
 static void
-parse_disassembler_options (char *options)
+parse_disassembler_options (const char *options)
 {
   if (options == NULL)
     return;
@@ -1208,9 +1209,22 @@ print_insn_arc (bfd_vma memaddr,
 	  if (operand->flags & ARC_OPERAND_TRUNCATE
 	      && !(operand->flags & ARC_OPERAND_ALIGNED32)
 	      && !(operand->flags & ARC_OPERAND_ALIGNED16)
-	      && value > 0 && value <= 14)
-	    (*info->fprintf_func) (info->stream, "r13-%s",
-				   regnames[13 + value - 1]);
+	      && value >= 0 && value <= 14)
+	    {
+	      switch (value)
+		{
+		case 0:
+		  need_comma = FALSE;
+		  break;
+		case 1:
+		  (*info->fprintf_func) (info->stream, "r13");
+		  break;
+		default:
+		  (*info->fprintf_func) (info->stream, "r13-%s",
+					 regnames[13 + value - 1]);
+		  break;
+		}
+	    }
 	  else
 	    {
 	      const char *rname = get_auxreg (opcode, value, isa_mask);

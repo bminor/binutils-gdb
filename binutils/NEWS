@@ -1,5 +1,20 @@
 -*- text -*-
 
+* The SPARC port now supports the SPARC M8 processor, which implements the
+  Oracle SPARC Architecture 2017.
+
+* The MIPS port now supports the MIPS16e2 ASE for assembly and disassembly.
+
+* Add support for ELF SHF_GNU_MBIND and PT_GNU_MBIND_XXX.
+
+* Add support for the wasm32 ELF conversion of the WebAssembly file format.
+
+* Add --inlines option to objdump, which extends the --line-numbers option
+  so that inlined functions will display their nesting information.
+
+* Add --merge-notes options to objcopy to reduce the size of notes in
+  a binary file by merging and deleting redundant notes.
+
 * Add support for locating separate debug info files using the build-id
   method, where the separate file has a name based upon the build-id of
   the original file.

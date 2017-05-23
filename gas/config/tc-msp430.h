@@ -116,8 +116,9 @@ extern long md_pcrel_from_section (struct fix *, segT);
    msp430_relax_frag (SEG, FRAGP, STRETCH)
 extern long msp430_relax_frag (segT, fragS *, long);
 
-#define TC_FORCE_RELOCATION_LOCAL(FIX)	\
-   msp430_force_relocation_local (FIX)
+#define TC_FORCE_RELOCATION_LOCAL(FIX)		\
+  (GENERIC_FORCE_RELOCATION_LOCAL (FIX)		\
+   || msp430_force_relocation_local (FIX))
 extern int msp430_force_relocation_local (struct fix *);
 
 /* We need to add reference symbols for .data/.bss.  */
@@ -159,9 +160,9 @@ extern bfd_boolean msp430_allow_local_subtract (expressionS *, expressionS *, se
    linker, but this fix is simpler, and it pretty much only affects
    object size a little bit.  */
 #define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEC)	\
-  (   ((SEC)->flags & SEC_CODE) != 0		\
+  (GENERIC_FORCE_RELOCATION_SUB_SAME (FIX, SEC)	\
+   || ((SEC)->flags & SEC_CODE) != 0		\
    || ((SEC)->flags & SEC_DEBUGGING) != 0	\
-   || ! SEG_NORMAL (SEC)			\
    || TC_FORCE_RELOCATION (FIX))
 
 /* We validate subtract arguments within tc_gen_reloc(),

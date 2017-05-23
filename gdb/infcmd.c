@@ -58,6 +58,7 @@
 #include "thread-fsm.h"
 #include "top.h"
 #include "interps.h"
+#include "common/gdb_optional.h"
 
 /* Local functions: */
 
@@ -261,14 +262,14 @@ construct_inferior_arguments (int argc, char **argv)
 #ifdef __MINGW32__
       /* This holds all the characters considered special to the
 	 Windows shells.  */
-      char *special = "\"!&*|[]{}<>?`~^=;, \t\n";
-      const char quote = '"';
+      static const char special[] = "\"!&*|[]{}<>?`~^=;, \t\n";
+      static const char quote = '"';
 #else
       /* This holds all the characters considered special to the
 	 typical Unix shells.  We include `^' because the SunOS
 	 /bin/sh treats it as a synonym for `|'.  */
-      char *special = "\"!#$&*()\\|[]{}<>?'`~^; \t\n";
-      const char quote = '\'';
+      static const char special[] = "\"!#$&*()\\|[]{}<>?'`~^; \t\n";
+      static const char quote = '\'';
 #endif
       int i;
       int length = 0;
@@ -458,7 +459,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
 	  /* If the solist is global across processes, there's no need to
 	     refetch it here.  */
 	  if (!gdbarch_has_global_solist (target_gdbarch ()))
-	    solib_add (NULL, 0, target, auto_solib_add);
+	    solib_add (NULL, 0, auto_solib_add);
 	}
     }
 
@@ -526,7 +527,7 @@ prepare_execution_command (struct target_ops *target, int background)
 static void
 run_command_1 (char *args, int from_tty, int tbreak_at_main)
 {
-  char *exec_file;
+  const char *exec_file;
   struct cleanup *old_chain;
   ptid_t ptid;
   struct ui_out *uiout = current_uiout;
@@ -574,7 +575,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
   if (tbreak_at_main)
     tbreak_command (main_name (), 0);
 
-  exec_file = (char *) get_exec_file (0);
+  exec_file = get_exec_file (0);
 
   /* We keep symbols from add-symbol-file, on the grounds that the
      user might want to add some symbols before running the program
@@ -607,7 +608,8 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   /* We call get_inferior_args() because we might need to compute
      the value now.  */
-  run_target->to_create_inferior (run_target, exec_file, get_inferior_args (),
+  run_target->to_create_inferior (run_target, exec_file,
+				  std::string (get_inferior_args ()),
 				  environ_vector (current_inferior ()->environment),
 				  from_tty);
   /* to_create_inferior should push the target, so after this point we
@@ -729,10 +731,10 @@ continue_1 (int all_threads)
     {
       /* Don't error out if the current thread is running, because
 	 there may be other stopped threads.  */
-      struct cleanup *old_chain;
 
-      /* Backup current thread and selected frame.  */
-      old_chain = make_cleanup_restore_current_thread ();
+      /* Backup current thread and selected frame and restore on scope
+	 exit.  */
+      scoped_restore_current_thread restore_thread;
 
       iterate_over_threads (proceed_thread_callback, NULL);
 
@@ -753,9 +755,6 @@ continue_1 (int all_threads)
 	  */
 	  target_terminal_inferior ();
 	}
-
-      /* Restore selected ptid.  */
-      do_cleanups (old_chain);
     }
   else
     {
@@ -1603,15 +1602,9 @@ advance_command (char *arg, int from_tty)
 struct value *
 get_return_value (struct value *function, struct type *value_type)
 {
-  struct regcache *stop_regs;
-  struct gdbarch *gdbarch;
+  regcache stop_regs (regcache::readonly, *get_current_regcache ());
+  struct gdbarch *gdbarch = stop_regs.arch ();
   struct value *value;
-  struct cleanup *cleanup;
-
-  stop_regs = regcache_dup (get_current_regcache ());
-  cleanup = make_cleanup_regcache_xfree (stop_regs);
-
-  gdbarch = get_regcache_arch (stop_regs);
 
   value_type = check_typedef (value_type);
   gdb_assert (TYPE_CODE (value_type) != TYPE_CODE_VOID);
@@ -1630,7 +1623,7 @@ get_return_value (struct value *function, struct type *value_type)
     case RETURN_VALUE_ABI_RETURNS_ADDRESS:
     case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
       value = allocate_value (value_type);
-      gdbarch_return_value (gdbarch, function, value_type, stop_regs,
+      gdbarch_return_value (gdbarch, function, value_type, &stop_regs,
 			    value_contents_raw (value), NULL);
       break;
     case RETURN_VALUE_STRUCT_CONVENTION:
@@ -1639,8 +1632,6 @@ get_return_value (struct value *function, struct type *value_type)
     default:
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
-
-  do_cleanups (cleanup);
 
   return value;
 }
@@ -2267,7 +2258,7 @@ static void
 path_command (char *dirname, int from_tty)
 {
   char *exec_path;
-  char *env;
+  const char *env;
 
   dont_repeat ();
   env = get_in_environ (current_inferior ()->environment, path_var_name);
@@ -2626,15 +2617,11 @@ proceed_after_attach (int pid)
 {
   /* Don't error out if the current thread is running, because
      there may be other stopped threads.  */
-  struct cleanup *old_chain;
 
   /* Backup current thread and selected frame.  */
-  old_chain = make_cleanup_restore_current_thread ();
+  scoped_restore_current_thread restore_thread;
 
   iterate_over_threads (proceed_after_attach_callback, &pid);
-
-  /* Restore selected ptid.  */
-  do_cleanups (old_chain);
 }
 
 /* See inferior.h.  */
@@ -2681,7 +2668,7 @@ enum attach_post_wait_mode
    should be running.  Else if ATTACH, */
 
 static void
-attach_post_wait (char *args, int from_tty, enum attach_post_wait_mode mode)
+attach_post_wait (const char *args, int from_tty, enum attach_post_wait_mode mode)
 {
   struct inferior *inferior;
 
@@ -2921,15 +2908,13 @@ attach_command (char *args, int from_tty)
 void
 notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
 {
-  struct cleanup* old_chain;
-  enum attach_post_wait_mode mode;
+  enum attach_post_wait_mode mode
+    = leave_running ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_NOTHING;
 
-  old_chain = make_cleanup (null_cleanup, NULL);
+  gdb::optional<scoped_restore_current_thread> restore_thread;
 
-  mode = leave_running ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_NOTHING;
-
-  if (!ptid_equal (inferior_ptid, null_ptid))
-    make_cleanup_restore_current_thread ();
+  if (inferior_ptid != null_ptid)
+    restore_thread.emplace ();
 
   /* Avoid reading registers -- we haven't fetched the target
      description yet.  */
@@ -2958,13 +2943,10 @@ notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
       add_inferior_continuation (attach_command_continuation, a,
 				 attach_command_continuation_free_args);
 
-      do_cleanups (old_chain);
       return;
     }
 
   attach_post_wait ("" /* args */, from_tty, mode);
-
-  do_cleanups (old_chain);
 }
 
 /*
@@ -3228,7 +3210,10 @@ is restored."),
 				     set_inferior_tty_command,
 				     show_inferior_tty_command,
 				     &setlist, &showlist);
-  add_com_alias ("tty", "set inferior-tty", class_alias, 0);
+  cmd_name = "inferior-tty";
+  c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  gdb_assert (c != NULL);
+  add_alias_cmd ("tty", c, class_alias, 0, &cmdlist);
 
   cmd_name = "args";
   add_setshow_string_noescape_cmd (cmd_name, class_run,

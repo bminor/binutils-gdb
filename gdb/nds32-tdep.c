@@ -445,11 +445,12 @@ nds32_pseudo_register_read (struct gdbarch *gdbarch,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   gdb_byte reg_buf[8];
   int offset, fdr_regnum;
-  enum register_status status = REG_UNKNOWN;
+  enum register_status status;
 
-  /* Sanity check.  */
-  if (tdep->fpu_freg == -1 || tdep->use_pseudo_fsrs == 0)
-    return status;
+  /* This function is registered in nds32_gdbarch_init only after these are
+     set.  */
+  gdb_assert (tdep->fpu_freg != -1);
+  gdb_assert (tdep->use_pseudo_fsrs != 0);
 
   regnum -= gdbarch_num_regs (gdbarch);
 
@@ -466,9 +467,11 @@ nds32_pseudo_register_read (struct gdbarch *gdbarch,
       status = regcache_raw_read (regcache, fdr_regnum, reg_buf);
       if (status == REG_VALID)
 	memcpy (buf, reg_buf + offset, 4);
+
+      return status;
     }
 
-  return status;
+  gdb_assert_not_reached ("invalid pseudo register number");
 }
 
 /* Implement the "pseudo_register_write" gdbarch method.  */
@@ -482,9 +485,10 @@ nds32_pseudo_register_write (struct gdbarch *gdbarch,
   gdb_byte reg_buf[8];
   int offset, fdr_regnum;
 
-  /* Sanity check.  */
-  if (tdep->fpu_freg == -1 || tdep->use_pseudo_fsrs == 0)
-    return;
+  /* This function is registered in nds32_gdbarch_init only after these are
+     set.  */
+  gdb_assert (tdep->fpu_freg != -1);
+  gdb_assert (tdep->use_pseudo_fsrs != 0);
 
   regnum -= gdbarch_num_regs (gdbarch);
 
@@ -501,7 +505,10 @@ nds32_pseudo_register_write (struct gdbarch *gdbarch,
       regcache_raw_read (regcache, fdr_regnum, reg_buf);
       memcpy (reg_buf + offset, buf, 4);
       regcache_raw_write (regcache, fdr_regnum, reg_buf);
+      return;
     }
+
+  gdb_assert_not_reached ("invalid pseudo register number");
 }
 
 /* Helper function for NDS32 ABI.  Return true if FPRs can be used
@@ -2068,6 +2075,9 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->elf_abi = elf_abi;
 
   gdbarch = gdbarch_alloc (&info, tdep);
+
+  set_gdbarch_wchar_bit (gdbarch, 16);
+  set_gdbarch_wchar_signed (gdbarch, 0);
 
   if (fpu_freg == -1)
     num_regs = NDS32_NUM_REGS;

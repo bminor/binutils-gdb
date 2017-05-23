@@ -141,6 +141,12 @@ extern struct cmd_list_element *add_alias_cmd (const char *, const char *,
 					       enum command_class, int,
 					       struct cmd_list_element **);
 
+extern struct cmd_list_element *add_alias_cmd (const char *,
+					       cmd_list_element *,
+					       enum command_class, int,
+					       struct cmd_list_element **);
+
+
 extern struct cmd_list_element *add_prefix_cmd (const char *, enum command_class,
 						cmd_cfunc_ftype *fun,
 						const char *,
@@ -204,7 +210,8 @@ extern enum cmd_types cmd_type (struct cmd_list_element *cmd);
 #define CMD_LIST_AMBIGUOUS ((struct cmd_list_element *) -1)
 
 extern struct cmd_list_element *lookup_cmd (const char **,
-					    struct cmd_list_element *, char *,
+					    struct cmd_list_element *,
+					    const char *,
 					    int, int);
 
 extern struct cmd_list_element *lookup_cmd_1 (const char **,

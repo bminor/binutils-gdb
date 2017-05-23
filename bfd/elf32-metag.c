@@ -2132,7 +2132,7 @@ elf_metag_check_relocs (bfd *abfd,
 
 	  /* PR15323, ref flags aren't set for references in the same
 	     object.  */
-	  hh->eh.root.non_ir_ref = 1;
+	  hh->eh.root.non_ir_ref_regular = 1;
 	}
 
       /* Some relocs require a global offset table.  */
@@ -3229,7 +3229,7 @@ elf_metag_finish_dynamic_symbol (bfd *output_bfd,
 		      + eh->root.u.def.section->output_section->vma);
       rel.r_addend = 0;
       rel.r_info = ELF32_R_INFO (eh->dynindx, R_METAG_COPY);
-      if ((eh->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (eh->root.u.def.section == htab->etab.sdynrelro)
 	s = htab->etab.sreldynrelro;
       else
 	s = htab->etab.srelbss;

@@ -43,10 +43,11 @@
 #include "symfile.h"
 #include "cp-support.h"
 #include "frame.h"
+#include "c-lang.h"
 
 extern void _initialize_language (void);
 
-static void unk_lang_error (char *);
+static void unk_lang_error (const char *);
 
 static int unk_lang_parser (struct parser_state *);
 
@@ -206,7 +207,7 @@ show_range_command (struct ui_file *file, int from_tty,
 {
   if (range_mode == range_mode_auto)
     {
-      char *tmp;
+      const char *tmp;
 
       switch (range_check)
 	{
@@ -280,7 +281,7 @@ show_case_command (struct ui_file *file, int from_tty,
 {
   if (case_mode == case_mode_auto)
     {
-      char *tmp = NULL;
+      const char *tmp = NULL;
 
       switch (case_sensitivity)
 	{
@@ -409,8 +410,7 @@ language_info (int quietly)
 int
 pointer_type (struct type *type)
 {
-  return TYPE_CODE (type) == TYPE_CODE_PTR ||
-    TYPE_CODE (type) == TYPE_CODE_REF;
+  return TYPE_CODE (type) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type);
 }
 
 
@@ -699,7 +699,7 @@ default_pass_by_reference (struct type *type)
    delimiting words.  This is a reasonable default value that
    most languages should be able to use.  */
 
-char *
+const char *
 default_word_break_characters (void)
 {
   return " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,-";
@@ -732,7 +732,7 @@ unk_lang_parser (struct parser_state *ps)
 }
 
 static void
-unk_lang_error (char *msg)
+unk_lang_error (const char *msg)
 {
   error (_("Attempted to parse an expression with unknown language"));
 }
@@ -860,6 +860,7 @@ const struct language_defn unknown_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   default_get_string,
+  c_watch_location_expression,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &default_varobj_ops,
@@ -909,6 +910,7 @@ const struct language_defn auto_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   default_get_string,
+  c_watch_location_expression,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &default_varobj_ops,
@@ -956,6 +958,7 @@ const struct language_defn local_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   default_get_string,
+  c_watch_location_expression,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &default_varobj_ops,

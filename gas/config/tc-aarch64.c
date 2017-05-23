@@ -62,12 +62,20 @@ static symbolS *GOT_symbol;
 /* Which ABI to use.  */
 enum aarch64_abi_type
 {
-  AARCH64_ABI_LP64 = 0,
-  AARCH64_ABI_ILP32 = 1
+  AARCH64_ABI_NONE = 0,
+  AARCH64_ABI_LP64 = 1,
+  AARCH64_ABI_ILP32 = 2
 };
 
+#ifndef DEFAULT_ARCH
+#define DEFAULT_ARCH "aarch64"
+#endif
+
+/* DEFAULT_ARCH is initialized in gas/configure.tgt.  */
+static const char *default_arch = DEFAULT_ARCH;
+
 /* AArch64 ABI for the output file.  */
-static enum aarch64_abi_type aarch64_abi = AARCH64_ABI_LP64;
+static enum aarch64_abi_type aarch64_abi = AARCH64_ABI_NONE;
 
 /* When non-zero, program to a 32-bit model, in which the C data types
    int, long and all pointer types are 32-bit objects (ILP32); or to a
@@ -837,7 +845,7 @@ elt_size:
       element_size = 64;
       break;
     case 'q':
-      if (width == 1)
+      if (reg_type == REG_TYPE_ZN || width == 1)
 	{
 	  type = NT_q;
 	  element_size = 128;
@@ -992,7 +1000,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
 	  return PARSE_FAIL;
 	}
 
-      if (in_reg_list == TRUE)
+      if (in_reg_list)
 	{
 	  first_error (_("index not allowed inside register list"));
 	  return PARSE_FAIL;
@@ -2679,7 +2687,7 @@ static struct reloc_table_entry reloc_table[] = {
    0,				/* adr_type */
    0,
    0,
-   BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC,
+   BFD_RELOC_AARCH64_TLSDESC_ADD_LO12,
    BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC,
    0},
 
@@ -3001,7 +3009,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
   switch (mode)
     {
     case SHIFTED_LOGIC_IMM:
-      if (aarch64_extend_operator_p (kind) == TRUE)
+      if (aarch64_extend_operator_p (kind))
 	{
 	  set_syntax_error (_("extending shift is not permitted"));
 	  return FALSE;
@@ -3092,7 +3100,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
     operand->shifter.amount = 1;
   else if (exp.X_op == O_absent)
     {
-      if (aarch64_extend_operator_p (kind) == FALSE || exp_has_prefix)
+      if (!aarch64_extend_operator_p (kind) || exp_has_prefix)
 	{
 	  set_syntax_error (_("missing shift amount"));
 	  return FALSE;
@@ -4413,7 +4421,7 @@ find_best_match (const aarch64_inst *instr,
       const aarch64_opnd_qualifier_t *qualifiers = *qualifiers_list;
 
       /* Most opcodes has much fewer patterns in the list.  */
-      if (empty_qualifier_sequence_p (qualifiers) == TRUE)
+      if (empty_qualifier_sequence_p (qualifiers))
 	{
 	  DEBUG_TRACE_IF (i == 0, "empty list of qualifier sequence");
 	  break;
@@ -4621,7 +4629,7 @@ output_operand_error_record (const operand_error_record *record, char *str)
 	    {
 	      /* Most opcodes has much fewer patterns in the list.
 		 First NIL qualifier indicates the end in the list.   */
-	      if (empty_qualifier_sequence_p (*qualifiers_list) == TRUE)
+	      if (empty_qualifier_sequence_p (*qualifiers_list))
 		break;
 
 	      if (i != qlf_idx)
@@ -5431,6 +5439,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->qualifier = AARCH64_OPND_QLF_S_D;
 	  break;
 
+	case AARCH64_OPND_SVE_Zm3_INDEX:
+	case AARCH64_OPND_SVE_Zm3_22_INDEX:
+	case AARCH64_OPND_SVE_Zm4_INDEX:
 	case AARCH64_OPND_SVE_Zn_INDEX:
 	  reg_type = REG_TYPE_ZN;
 	  goto vector_reg_index;
@@ -5567,6 +5578,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_IMM_ROT1:
 	case AARCH64_OPND_IMM_ROT2:
 	case AARCH64_OPND_IMM_ROT3:
+	case AARCH64_OPND_SVE_IMM_ROT1:
+	case AARCH64_OPND_SVE_IMM_ROT2:
 	  po_imm_nc_or_fail ();
 	  info->imm.value = val;
 	  break;
@@ -6090,6 +6103,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  /* No qualifier.  */
 	  break;
 
+	case AARCH64_OPND_SVE_ADDR_RI_S4x16:
 	case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x2xVL:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x3xVL:
@@ -7671,7 +7685,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC:
       fixP->fx_r_type = (ilp32_p
 			 ? BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC
-			 : BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC);
+			 : BFD_RELOC_AARCH64_TLSDESC_LD64_LO12);
       S_SET_THREAD_LOCAL (fixP->fx_addsy);
       /* Should always be exported to object file, see
 	 aarch64_force_relocation().  */
@@ -7679,11 +7693,11 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
       gas_assert (seg->use_rela_p);
       break;
 
-    case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
@@ -7911,11 +7925,11 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_LDST32_LO12:
     case BFD_RELOC_AARCH64_LDST64_LO12:
     case BFD_RELOC_AARCH64_LDST8_LO12:
-    case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
@@ -7968,6 +7982,22 @@ aarch64_force_relocation (struct fix *fixp)
 }
 
 #ifdef OBJ_ELF
+
+/* Implement md_after_parse_args.  This is the earliest time we need to decide
+   ABI.  If no -mabi specified, the ABI will be decided by target triplet.  */
+
+void
+aarch64_after_parse_args (void)
+{
+  if (aarch64_abi != AARCH64_ABI_NONE)
+    return;
+
+  /* DEFAULT_ARCH will have ":32" extension if it's configured for ILP32.  */
+  if (strlen (default_arch) > 7 && strcmp (default_arch + 7, ":32") == 0)
+    aarch64_abi = AARCH64_ABI_ILP32;
+  else
+    aarch64_abi = AARCH64_ABI_LP64;
+}
 
 const char *
 elf64_aarch64_target_format (void)
@@ -8436,7 +8466,11 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"profile",		AARCH64_FEATURE (AARCH64_FEATURE_PROFILE, 0),
 			AARCH64_ARCH_NONE},
   {"sve",		AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_FP
+			AARCH64_FEATURE (AARCH64_FEATURE_F16
+					 | AARCH64_FEATURE_SIMD
+					 | AARCH64_FEATURE_COMPNUM, 0)},
+  {"compnum",		AARCH64_FEATURE (AARCH64_FEATURE_COMPNUM, 0),
+			AARCH64_FEATURE (AARCH64_FEATURE_F16
 					 | AARCH64_FEATURE_SIMD, 0)},
   {"rcpc",		AARCH64_FEATURE (AARCH64_FEATURE_RCPC, 0),
 			AARCH64_ARCH_NONE},

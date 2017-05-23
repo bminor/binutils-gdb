@@ -113,17 +113,14 @@ static void
 exec_close_1 (struct target_ops *self)
 {
   struct program_space *ss;
-  struct cleanup *old_chain;
+  scoped_restore_current_program_space restore_pspace;
 
-  old_chain = save_current_program_space ();
   ALL_PSPACES (ss)
-  {
-    set_current_program_space (ss);
-    clear_section_table (current_target_sections);
-    exec_close ();
-  }
-
-  do_cleanups (old_chain);
+    {
+      set_current_program_space (ss);
+      clear_section_table (current_target_sections);
+      exec_close ();
+    }
 }
 
 void

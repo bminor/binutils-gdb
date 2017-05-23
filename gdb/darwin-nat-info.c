@@ -731,7 +731,7 @@ info_mach_region_command (char *exp, int from_tty)
 
   expression_up expr = parse_expression (exp);
   val = evaluate_expression (expr.get ());
-  if (TYPE_CODE (value_type (val)) == TYPE_CODE_REF)
+  if (TYPE_IS_REFERENCE (value_type (val)))
     {
       val = value_ind (val);
     }

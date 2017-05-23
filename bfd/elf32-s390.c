@@ -996,7 +996,7 @@ elf_s390_check_relocs (bfd *abfd,
 
 	  /* PR15323, ref flags aren't set for references in the same
 	     object.  */
-	  h->root.non_ir_ref = 1;
+	  h->root.non_ir_ref_regular = 1;
 	}
 
       /* Create got section and local_got_refcounts array if they
@@ -2774,7 +2774,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	      && s390_is_ifunc_symbol_p (h)
 	      && h->def_regular)
 	    {
-	      if (!bfd_link_pic (info) || !h->non_got_ref)
+	      if (!bfd_link_pic (info))
 		{
 		  /* For a non-shared object STT_GNU_IFUNC symbol must
 		     go through PLT.  */
@@ -3785,7 +3785,7 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
 	     RELATIVE reloc.  The entry in the global offset table
 	     will already have been initialized in the
 	     relocate_section function.  */
-	  if (!h->def_regular)
+	  if (!(h->def_regular || ELF_COMMON_DEF_P (h)))
 	    return FALSE;
 	  BFD_ASSERT((h->got.offset & 1) != 0);
 	  rela.r_info = ELF32_R_INFO (0, R_390_RELATIVE);
@@ -3827,7 +3827,7 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_390_COPY);
       rela.r_addend = 0;
-      if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+      if (h->root.u.def.section == htab->elf.sdynrelro)
 	s = htab->elf.sreldynrelro;
       else
 	s = htab->elf.srelbss;

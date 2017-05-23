@@ -128,7 +128,8 @@ static void gen_binop (struct agent_expr *ax,
 		       struct axs_value *value1,
 		       struct axs_value *value2,
 		       enum agent_op op,
-		       enum agent_op op_unsigned, int may_carry, char *name);
+		       enum agent_op op_unsigned, int may_carry,
+		       const char *name);
 static void gen_logical_not (struct agent_expr *ax, struct axs_value *value,
 			     struct type *result_type);
 static void gen_complement (struct agent_expr *ax, struct axs_value *value);
@@ -144,12 +145,13 @@ static void gen_primitive_field (struct expression *exp,
 static int gen_struct_ref_recursive (struct expression *exp,
 				     struct agent_expr *ax,
 				     struct axs_value *value,
-				     char *field, int offset,
+				     const char *field, int offset,
 				     struct type *type);
 static void gen_struct_ref (struct expression *exp, struct agent_expr *ax,
 			    struct axs_value *value,
-			    char *field,
-			    char *operator_name, char *operand_name);
+			    const char *field,
+			    const char *operator_name,
+			    const char *operand_name);
 static void gen_static_field (struct gdbarch *gdbarch,
 			      struct agent_expr *ax, struct axs_value *value,
 			      struct type *type, int fieldno);
@@ -491,6 +493,7 @@ gen_fetch (struct agent_expr *ax, struct type *type)
     {
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
@@ -1000,6 +1003,7 @@ gen_cast (struct agent_expr *ax, struct axs_value *value, struct type *type)
     {
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
       /* It's implementation-defined, and I'll bet this is what GCC
          does.  */
       break;
@@ -1147,7 +1151,7 @@ static void
 gen_binop (struct agent_expr *ax, struct axs_value *value,
 	   struct axs_value *value1, struct axs_value *value2,
 	   enum agent_op op, enum agent_op op_unsigned,
-	   int may_carry, char *name)
+	   int may_carry, const char *name)
 {
   /* We only handle INT op INT.  */
   if ((TYPE_CODE (value1->type) != TYPE_CODE_INT)
@@ -1432,7 +1436,7 @@ gen_primitive_field (struct expression *exp,
 static int
 gen_struct_ref_recursive (struct expression *exp, struct agent_expr *ax,
 			  struct axs_value *value,
-			  char *field, int offset, struct type *type)
+			  const char *field, int offset, struct type *type)
 {
   int i, rslt;
   int nbases = TYPE_N_BASECLASSES (type);
@@ -1496,8 +1500,8 @@ gen_struct_ref_recursive (struct expression *exp, struct agent_expr *ax,
    it operates on; we use them in error messages.  */
 static void
 gen_struct_ref (struct expression *exp, struct agent_expr *ax,
-		struct axs_value *value, char *field,
-		char *operator_name, char *operand_name)
+		struct axs_value *value, const char *field,
+		const char *operator_name, const char *operand_name)
 {
   struct type *type;
   int found;
@@ -1669,7 +1673,8 @@ static int
 gen_aggregate_elt_ref (struct expression *exp,
 		       struct agent_expr *ax, struct axs_value *value,
 		       struct type *type, char *field,
-		       char *operator_name, char *operand_name)
+		       const char *operator_name,
+		       const char *operand_name)
 {
   switch (TYPE_CODE (type))
     {
@@ -2598,17 +2603,13 @@ agent_command_1 (char *exp, int eval)
       struct linespec_result canonical;
       int ix;
       struct linespec_sals *iter;
-      struct cleanup *old_chain;
-      struct event_location *location;
 
       exp = skip_spaces (exp);
-      init_linespec_result (&canonical);
-      location = new_linespec_location (&exp);
-      old_chain = make_cleanup_delete_event_location (location);
-      decode_line_full (location, DECODE_LINE_FUNFIRSTLINE, NULL,
+
+      event_location_up location = new_linespec_location (&exp);
+      decode_line_full (location.get (), DECODE_LINE_FUNFIRSTLINE, NULL,
 			(struct symtab *) NULL, 0, &canonical,
 			NULL, NULL);
-      make_cleanup_destroy_linespec_result (&canonical);
       exp = skip_spaces (exp);
       if (exp[0] == ',')
         {
@@ -2622,7 +2623,6 @@ agent_command_1 (char *exp, int eval)
 	  for (i = 0; i < iter->sals.nelts; i++)
 	    agent_eval_command_one (exp, eval, iter->sals.sals[i].pc);
         }
-      do_cleanups (old_chain);
     }
   else
     agent_eval_command_one (exp, eval, get_frame_pc (get_current_frame ()));

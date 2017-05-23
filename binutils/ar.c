@@ -738,6 +738,9 @@ main (int argc, char **argv)
 
   arg_index = 0;
 
+  if (argv[arg_index] == NULL)
+    usage (0);
+
   if (mri_mode)
     {
       default_deterministic ();
@@ -776,18 +779,26 @@ main (int argc, char **argv)
       default_deterministic ();
 
       if (postype != pos_default)
-	posname = argv[arg_index++];
+	{
+	  posname = argv[arg_index++];
+	  if (posname == NULL)
+	    fatal (_("missing position arg."));
+	}
 
       if (counted_name_mode)
 	{
 	  if (operation != extract && operation != del)
 	    fatal (_("`N' is only meaningful with the `x' and `d' options."));
+	  if (argv[arg_index] == NULL)
+	    fatal (_("`N' missing value."));
 	  counted_name_counter = atoi (argv[arg_index++]);
 	  if (counted_name_counter <= 0)
 	    fatal (_("Value for `N' must be positive."));
 	}
 
       inarch_filename = argv[arg_index++];
+      if (inarch_filename == NULL)
+	usage (0);
 
       for (file_count = 0; argv[arg_index + file_count] != NULL; file_count++)
 	continue;

@@ -1073,7 +1073,6 @@ print_ada_task_info (struct ui_out *uiout,
       const struct ada_task_info *const task_info =
 	VEC_index (ada_task_info_s, data->task_list, taskno - 1);
       int parent_id;
-      struct cleanup *chain2;
 
       gdb_assert (task_info != NULL);
 
@@ -1083,7 +1082,7 @@ print_ada_task_info (struct ui_out *uiout,
       if (taskno_arg && taskno != taskno_arg)
         continue;
 
-      chain2 = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
       /* Print a star if this task is the current task (or the task
          currently selected).  */
@@ -1143,7 +1142,6 @@ print_ada_task_info (struct ui_out *uiout,
 						   : _("<no name>"));
 
       uiout->text ("\n");
-      do_cleanups (chain2);
     }
 
   do_cleanups (old_chain);

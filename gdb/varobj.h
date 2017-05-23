@@ -51,7 +51,7 @@ enum varobj_scope_status
   };
 
 /* String representations of gdb's format codes (defined in varobj.c).  */
-extern char *varobj_format_string[];
+extern const char *varobj_format_string[];
 
 /* Struct that describes a variable object instance.  */
 

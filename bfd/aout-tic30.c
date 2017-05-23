@@ -828,7 +828,7 @@ tic30_aout_set_arch_mach (bfd *abfd,
   _bfd_archive_bsd_construct_extended_name_table
 #endif
 #ifndef	MY_write_armap
-#define	MY_write_armap			bsd_write_armap
+#define	MY_write_armap			_bfd_bsd_write_armap
 #endif
 #ifndef MY_read_ar_hdr
 #define MY_read_ar_hdr			_bfd_generic_read_ar_hdr
@@ -904,6 +904,9 @@ tic30_aout_set_arch_mach (bfd *abfd,
 #endif
 #ifndef MY_canonicalize_reloc
 #define MY_canonicalize_reloc NAME (aout, canonicalize_reloc)
+#endif
+#ifndef MY_set_reloc
+#define MY_set_reloc _bfd_generic_set_reloc
 #endif
 #ifndef MY_make_empty_symbol
 #define MY_make_empty_symbol NAME (aout, make_empty_symbol)

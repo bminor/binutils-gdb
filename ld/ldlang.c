@@ -1138,11 +1138,14 @@ lang_add_input_file (const char *name,
 		     lang_input_file_enum_type file_type,
 		     const char *target)
 {
-  if (name != NULL && *name == '=')
+  if (name != NULL
+      && (*name == '=' || CONST_STRNEQ (name, "$SYSROOT")))
     {
       lang_input_statement_type *ret;
       char *sysrooted_name
-	= concat (ld_sysroot, name + 1, (const char *) NULL);
+	= concat (ld_sysroot,
+		  name + (*name == '=' ? 1 : strlen ("$SYSROOT")),
+		  (const char *) NULL);
 
       /* We've now forcibly prepended the sysroot, making the input
 	 file independent of the context.  Therefore, temporarily
@@ -3374,7 +3377,8 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 #endif
 	  break;
 	case lang_assignment_statement_enum:
-	  if (s->assignment_statement.exp->assign.defsym)
+	  if (s->assignment_statement.exp->type.node_class != etree_assert
+	      && s->assignment_statement.exp->assign.defsym)
 	    /* This is from a --defsym on the command line.  */
 	    exp_fold_tree_no_dot (s->assignment_statement.exp);
 	  break;
@@ -3428,6 +3432,8 @@ insert_undefined (const char *name)
     {
       h->type = bfd_link_hash_undefined;
       h->u.undef.abfd = NULL;
+      if (is_elf_hash_table (link_info.hash))
+	((struct elf_link_hash_entry *) h)->mark = 1;
       bfd_link_add_undef (link_info.hash, h);
     }
 }
@@ -4767,12 +4773,33 @@ lang_check_section_addresses (void)
   asection *s, *p;
   struct check_sec *sections;
   size_t i, count;
+  bfd_vma addr_mask;
   bfd_vma s_start;
   bfd_vma s_end;
   bfd_vma p_start = 0;
   bfd_vma p_end = 0;
   lang_memory_region_type *m;
   bfd_boolean overlays;
+
+  /* Detect address space overflow on allocated sections.  */
+  addr_mask = ((bfd_vma) 1 <<
+	       (bfd_arch_bits_per_address (link_info.output_bfd) - 1)) - 1;
+  addr_mask = (addr_mask << 1) + 1;
+  for (s = link_info.output_bfd->sections; s != NULL; s = s->next)
+    if ((s->flags & SEC_ALLOC) != 0)
+      {
+	s_end = (s->vma + s->size) & addr_mask;
+	if (s_end != 0 && s_end < (s->vma & addr_mask))
+	  einfo (_("%X%P: section %s VMA wraps around address space\n"),
+		 s->name);
+	else
+	  {
+	    s_end = (s->lma + s->size) & addr_mask;
+	    if (s_end != 0 && s_end < (s->lma & addr_mask))
+	      einfo (_("%X%P: section %s LMA wraps around address space\n"),
+		     s->name);
+	  }
+      }
 
   if (bfd_count_sections (link_info.output_bfd) <= 1)
     return;
@@ -5196,9 +5223,6 @@ lang_size_sections_1
 	      }
 	    os->processed_lma = TRUE;
 
-	    if (bfd_is_abs_section (os->bfd_section) || os->ignored)
-	      break;
-
 	    /* Keep track of normal sections using the default
 	       lma region.  We use this to set the lma for
 	       following sections.  Overlays or other linker
@@ -5206,7 +5230,13 @@ lang_size_sections_1
 	       default lma == vma is incorrect.
 	       To avoid warnings about dot moving backwards when using
 	       -Ttext, don't start tracking sections until we find one
-	       of non-zero size or with lma set differently to vma.  */
+	       of non-zero size or with lma set differently to vma.
+	       Do this tracking before we short-cut the loop so that we
+	       track changes for the case where the section size is zero,
+	       but the lma is set differently to the vma.  This is
+	       important, if an orphan section is placed after an
+	       otherwise empty output section that has an explicit lma
+	       set, we want that lma reflected in the orphans lma.  */
 	    if (!IGNORE_SECTION (os->bfd_section)
 		&& (os->bfd_section->size != 0
 		    || (r->last_os == NULL
@@ -5217,6 +5247,9 @@ lang_size_sections_1
 		&& os->lma_region == NULL
 		&& !bfd_link_relocatable (&link_info))
 	      r->last_os = s;
+
+	    if (bfd_is_abs_section (os->bfd_section) || os->ignored)
+	      break;
 
 	    /* .tbss sections effectively have zero size.  */
 	    if (!IS_TBSS (os->bfd_section)
@@ -6843,6 +6876,27 @@ lang_check_relocs (void)
     }
 }
 
+/* Look through all output sections looking for places where we can
+   propagate forward the lma region.  */
+
+static void
+lang_propagate_lma_regions (void)
+{
+  lang_output_section_statement_type *os;
+
+  for (os = &lang_output_section_statement.head->output_section_statement;
+       os != NULL;
+       os = os->next)
+    {
+      if (os->prev != NULL
+	  && os->lma_region == NULL
+	  && os->load_base == NULL
+	  && os->addr_tree == NULL
+	  && os->region == os->prev->region)
+	os->lma_region = os->prev->lma_region;
+    }
+}
+
 void
 lang_process (void)
 {
@@ -7020,6 +7074,9 @@ lang_process (void)
 	    found->flags &= ~SEC_READONLY;
 	}
     }
+
+  /* Copy forward lma regions for output sections in same lma region.  */
+  lang_propagate_lma_regions ();
 
   /* Do anything special before sizing sections.  This is where ELF
      and other back-ends size dynamic sections.  */
@@ -7300,16 +7357,6 @@ lang_leave_output_section_statement (fill_type *fill, const char *memspec,
 		    memspec, lma_memspec,
 		    current_section->load_base != NULL,
 		    current_section->addr_tree != NULL);
-
-  /* If this section has no load region or base, but uses the same
-     region as the previous section, then propagate the previous
-     section's load region.  */
-
-  if (current_section->lma_region == NULL
-      && current_section->load_base == NULL
-      && current_section->addr_tree == NULL
-      && current_section->region == current_section->prev->region)
-    current_section->lma_region = current_section->prev->lma_region;
 
   current_section->fill = fill;
   current_section->phdrs = phdrs;

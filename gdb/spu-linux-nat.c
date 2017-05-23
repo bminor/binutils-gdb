@@ -492,6 +492,11 @@ spu_fetch_inferior_registers (struct target_ops *ops,
   int fd;
   ULONGEST addr;
 
+  /* Since we use functions that rely on inferior_ptid, we need to set and
+     restore it.  */
+  scoped_restore save_ptid
+    = make_scoped_restore (&inferior_ptid, regcache_get_ptid (regcache));
+
   /* We must be stopped on a spu_run system call.  */
   if (!parse_spufs_run (&fd, &addr))
     return;
@@ -538,6 +543,11 @@ spu_store_inferior_registers (struct target_ops *ops,
 {
   int fd;
   ULONGEST addr;
+
+  /* Since we use functions that rely on inferior_ptid, we need to set and
+     restore it.  */
+  scoped_restore save_ptid
+    = make_scoped_restore (&inferior_ptid, regcache_get_ptid (regcache));
 
   /* We must be stopped on a spu_run system call.  */
   if (!parse_spufs_run (&fd, &addr))

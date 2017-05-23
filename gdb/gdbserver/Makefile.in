@@ -201,6 +201,7 @@ SFILES = \
 	$(srcdir)/common/common-regcache.c \
 	$(srcdir)/common/common-utils.c \
 	$(srcdir)/common/errors.c \
+	$(srcdir)/common/environ.c \
 	$(srcdir)/common/fileio.c \
 	$(srcdir)/common/filestuff.c \
 	$(srcdir)/common/gdb_vecs.c \
@@ -238,6 +239,7 @@ OBS = \
 	debug.o \
 	dll.o \
 	errors.o \
+	environ.o \
 	event-loop.o \
 	fileio.o \
 	filestuff.o \
@@ -326,10 +328,6 @@ FLAGS_TO_PASS = \
 # All generated files which can be included by another file.
 generated_files = config.h $(GNULIB_H)
 
-%.o: %.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
 all: gdbserver$(EXEEXT) gdbreplay$(EXEEXT) $(extra_libraries)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
@@ -415,45 +413,11 @@ tags: TAGS
 
 clean:
 	rm -f *.o ${ADD_FILES} *~
-	rm -f version.c
 	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
 	rm -f $(IPA_LIB)
-	rm -f aarch64.c
-	rm -f reg-arm.c reg-bfin.c i386.c reg-ia64.c reg-m32r.c reg-m68k.c
-	rm -f reg-sh.c reg-sparc.c reg-spu.c amd64.c i386-linux.c
-	rm -f reg-cris.c reg-crisv32.c amd64-linux.c reg-xtensa.c
-	rm -f reg-tilegx.c reg-tilegx32.c
-	rm -f arm-with-iwmmxt.c
-	rm -f arm-with-vfpv2.c arm-with-vfpv3.c arm-with-neon.c
-	rm -f mips-linux.c mips-dsp-linux.c
-	rm -f mips64-linux.c mips64-dsp-linux.c
-	rm -f nios2-linux.c
-	rm -f powerpc-32.c powerpc-32l.c powerpc-64l.c powerpc-e500l.c
-	rm -f powerpc-altivec32l.c powerpc-cell32l.c powerpc-vsx32l.c
-	rm -f powerpc-altivec64l.c powerpc-cell64l.c powerpc-vsx64l.c
-	rm -f powerpc-isa205-32l.c powerpc-isa205-64l.c
-	rm -f powerpc-isa205-altivec32l.c powerpc-isa205-vsx32l.c powerpc-isa205-altivec64l.c
-	rm -f powerpc-isa205-vsx64l.c
-	rm -f s390-linux32.c s390-linux64.c s390x-linux64.c
-	rm -f s390-linux32v1.c s390-linux32v2.c s390-linux64v1.c
-	rm -f s390-linux64v2.c s390x-linux64v1.c s390x-linux64v2.c
-	rm -f s390-te-linux64.c s390x-te-linux64.c
-	rm -f s390-vx-linux64.c s390x-vx-linux64.c
-	rm -f s390-tevx-linux64.c s390x-tevx-linux64.c
-	rm -f tic6x-c64xp-linux.c tic6x-c64x-linux.c tic6x-c62x-linux.c
-	rm -f xml-builtin.c stamp-xml
-	rm -f i386-avx.c i386-avx-linux.c
-	rm -f i386-mpx.c i386-mpx-linux.c
-	rm -f i386-avx-mpx.c i386-avx-mpx-linux.c
-	rm -f i386-avx512.c i386-avx512-linux.c
-	rm -f amd64-avx.c amd64-avx-linux.c
-	rm -f amd64-mpx.c amd64-mpx-linux.c
-	rm -f amd64-avx-mpx.c amd64-avx-mpx-linux.c
-	rm -f amd64-avx512.c amd64-avx512-linux.c
-	rm -f i386-mmx.c i386-mmx-linux.c
-	rm -f x32.c x32-linux.c
-	rm -f x32-avx.c x32-avx-linux.c
-	rm -f x32-avx512.c x32-avx512-linux.c
+	rm -f *-generated.c
+	rm -f stamp-xml
+	rm -f $(DEPDIR)/*.Po
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 maintainer-clean realclean distclean: clean
@@ -504,15 +468,15 @@ am--refresh:
 
 force:
 
-version.c: Makefile $(srcdir)/../version.in $(srcdir)/../../bfd/version.h $(srcdir)/../common/create-version.sh
+version-generated.c: Makefile $(srcdir)/../version.in $(srcdir)/../../bfd/version.h $(srcdir)/../common/create-version.sh
 	$(SHELL) $(srcdir)/../common/create-version.sh $(srcdir)/.. \
-	    $(host_alias) $(target_alias) version.c
+	    $(host_alias) $(target_alias) $@
 
-xml-builtin.c: stamp-xml; @true
+xml-builtin-generated.c: stamp-xml; @true
 stamp-xml: $(XML_DIR)/feature_to_c.sh Makefile $(XML_FILES)
 	rm -f xml-builtin.tmp
 	$(SHELL) $(XML_DIR)/feature_to_c.sh xml-builtin.tmp $(XML_FILES)
-	$(SHELL) $(srcdir)/../../move-if-change xml-builtin.tmp xml-builtin.c
+	$(SHELL) $(srcdir)/../../move-if-change xml-builtin.tmp xml-builtin-generated.c
 	echo stamp > stamp-xml
 
 .PRECIOUS: xml-builtin.c
@@ -540,508 +504,81 @@ IPAGENT_CFLAGS = $(INTERNAL_CFLAGS) $(UST_CFLAGS) \
 
 IPAGENT_COMPILE = $(COMPILE.pre) $(IPAGENT_CFLAGS) $(COMPILE.post)
 
-# In-process agent object rules
+# Rules for special cases.
+
 ax-ipa.o: ax.c
 	$(IPAGENT_COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
-	$(POSTCOMPILE)
-tracepoint-ipa.o: tracepoint.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-utils-ipa.o: utils.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-format-ipa.o: ../common/format.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-common-utils-ipa.o: ../common/common-utils.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-remote-utils-ipa.o: remote-utils.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-regcache-ipa.o: regcache.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-i386-linux-ipa.o: i386-linux.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-i386-mmx-linux-ipa.o: i386-mmx-linux.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-i386-avx-linux-ipa.o: i386-avx-linux.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-i386-mpx-linux-ipa.o: i386-mpx-linux.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-i386-avx-mpx-linux-ipa.o: i386-avx-mpx-linux.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-i386-avx512-linux-ipa.o: i386-avx512-linux.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-linux-i386-ipa.o: linux-i386-ipa.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-linux-amd64-ipa.o: linux-amd64-ipa.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-amd64-linux-ipa.o: amd64-linux.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-amd64-avx-linux-ipa.o: amd64-avx-linux.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-amd64-mpx-linux-ipa.o: amd64-mpx-linux.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-amd64-avx-mpx-linux-ipa.o: amd64-avx-mpx-linux.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-amd64-avx512-linux-ipa.o: amd64-avx512-linux.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-linux-aarch64-ipa.o: linux-aarch64-ipa.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-aarch64-ipa.o: aarch64.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-linux-s390-ipa.o: linux-s390-ipa.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390-linux32-ipa.o: s390-linux32.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390-linux32v1-ipa.o: s390-linux32v1.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390-linux32v2-ipa.o: s390-linux32v2.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390-linux64-ipa.o: s390-linux64.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390-linux64v1-ipa.o: s390-linux64v1.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390-linux64v2-ipa.o: s390-linux64v2.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390-te-linux64-ipa.o: s390-te-linux64.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390-vx-linux64-ipa.o: s390-vx-linux64.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390-tevx-linux64-ipa.o: s390-tevx-linux64.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390x-linux64-ipa.o: s390x-linux64.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390x-linux64v1-ipa.o: s390x-linux64v1.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390x-linux64v2-ipa.o: s390x-linux64v2.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390x-te-linux64-ipa.o: s390x-te-linux64.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390x-vx-linux64-ipa.o: s390x-vx-linux64.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-s390x-tevx-linux64-ipa.o: s390x-tevx-linux64.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-linux-ppc-ipa.o: linux-ppc-ipa.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-32l-ipa.o: powerpc-32l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-altivec32l-ipa.o: powerpc-altivec32l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-cell32l-ipa.o: powerpc-cell32l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-vsx32l-ipa.o: powerpc-vsx32l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-isa205-32l-ipa.o: powerpc-isa205-32l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-isa205-altivec32l-ipa.o: powerpc-isa205-altivec32l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-isa205-vsx32l-ipa.o: powerpc-isa205-vsx32l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-e500l-ipa.o: powerpc-e500l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-64l-ipa.o: powerpc-64l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-altivec64l-ipa.o: powerpc-altivec64l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-cell64l-ipa.o: powerpc-cell64l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-vsx64l-ipa.o: powerpc-vsx64l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-isa205-64l-ipa.o: powerpc-isa205-64l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-isa205-altivec64l-ipa.o: powerpc-isa205-altivec64l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-powerpc-isa205-vsx64l-ipa.o: powerpc-isa205-vsx64l.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-tdesc-ipa.o: tdesc.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-print-utils-ipa.o: ../common/print-utils.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-rsp-low-ipa.o: ../common/rsp-low.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-errors-ipa.o: ../common/errors.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-x32-linux-ipa.o: x32-linux.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-x32-avx-linux-ipa.o: x32-avx-linux.c
-	$(IPAGENT_COMPILE) $<
-	$(POSTCOMPILE)
-x32-avx512-linux-ipa.o: x32-avx512-linux.c
-	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
 ax.o: ax.c
 	$(COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
 	$(POSTCOMPILE)
 
-signals.o: ../common/signals.c
-	$(COMPILE) $<
+# Rules for objects that go in the in-process agent.
+
+%-ipa.o: %-generated.c
+	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
-print-utils.o: ../common/print-utils.c
-	$(COMPILE) $<
+
+%-ipa.o: %.c
+	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
-rsp-low.o: ../common/rsp-low.c
-	$(COMPILE) $<
+
+# Note: Between two matching pattern rules, GNU Make 3.81 chooses the first one.
+# Therefore, this one needs to be before "%.o: %.c" for it to be considered for
+# files such as linux-amd64-ipa.o generated from linux-amd64-ipa.c.
+#
+# Later versions of GNU Make choose the rule with the shortest stem, so it would
+# work in any order.
+
+%-ipa.o: %-ipa.c
+	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
-common-utils.o: ../common/common-utils.c
-	$(COMPILE) $<
+
+%-ipa.o: ../common/%.c
+	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
-posix-strerror.o: ../common/posix-strerror.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-mingw-strerror.o: ../common/mingw-strerror.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-vec.o: ../common/vec.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-gdb_vecs.o: ../common/gdb_vecs.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-xml-utils.o: ../common/xml-utils.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-ptid.o: ../common/ptid.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-buffer.o: ../common/buffer.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-format.o: ../common/format.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-filestuff.o: ../common/filestuff.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-agent.o: ../common/agent.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-errors.o: ../common/errors.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-common-debug.o: ../common/common-debug.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-cleanups.o: ../common/cleanups.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-common-exceptions.o: ../common/common-exceptions.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-waitstatus.o: ../target/waitstatus.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-fileio.o: ../common/fileio.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-common-regcache.o: ../common/common-regcache.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-signals-state-save-restore.o: ../common/signals-state-save-restore.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-new-op.o: ../common/new-op.c
+
+# Rules for objects that go in the gdbserver binary.
+
+%.o: %-generated.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-# Arch object files rules form ../arch
-
-arm.o: ../arch/arm.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-arm-linux.o: ../arch/arm-linux.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-arm-get-next-pcs.o: ../arch/arm-get-next-pcs.c
+%.o: %.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-# Native object files rules from ../nat
-
-x86-dregs.o: ../nat/x86-dregs.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-amd64-linux-siginfo.o: ../nat/amd64-linux-siginfo.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-linux-btrace.o: ../nat/linux-btrace.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-linux-osdata.o: ../nat/linux-osdata.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-linux-procfs.o: ../nat/linux-procfs.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-linux-ptrace.o: ../nat/linux-ptrace.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-linux-waitpid.o: ../nat/linux-waitpid.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-mips-linux-watch.o: ../nat/mips-linux-watch.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-ppc-linux.o: ../nat/ppc-linux.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-linux-personality.o: ../nat/linux-personality.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-aarch64-linux-hw-point.o: ../nat/aarch64-linux-hw-point.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-aarch64-linux.o: ../nat/aarch64-linux.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-btrace-common.o: ../common/btrace-common.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-x86-linux.o: ../nat/x86-linux.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-x86-linux-dregs.o: ../nat/x86-linux-dregs.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-linux-namespaces.o: ../nat/linux-namespaces.c
+%.o: ../arch/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-# Architecture specific object files rules from ../arch
-
-aarch64-insn.o: ../arch/aarch64-insn.c
+%.o: ../common/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-aarch64.c : $(srcdir)/../regformats/aarch64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/aarch64.dat aarch64.c
-reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-arm.dat reg-arm.c
-arm-with-iwmmxt.c : $(srcdir)/../regformats/arm/arm-with-iwmmxt.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm/arm-with-iwmmxt.dat arm-with-iwmmxt.c
-arm-with-vfpv2.c : $(srcdir)/../regformats/arm/arm-with-vfpv2.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm/arm-with-vfpv2.dat arm-with-vfpv2.c
-arm-with-vfpv3.c : $(srcdir)/../regformats/arm/arm-with-vfpv3.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm/arm-with-vfpv3.dat arm-with-vfpv3.c
-arm-with-neon.c : $(srcdir)/../regformats/arm/arm-with-neon.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm/arm-with-neon.dat arm-with-neon.c
-reg-bfin.c : $(srcdir)/../regformats/reg-bfin.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-bfin.dat reg-bfin.c
-reg-cris.c : $(srcdir)/../regformats/reg-cris.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-cris.dat reg-cris.c
-reg-crisv32.c : $(srcdir)/../regformats/reg-crisv32.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-crisv32.dat reg-crisv32.c
-i386.c : $(srcdir)/../regformats/i386/i386.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386.dat i386.c
-i386-linux.c : $(srcdir)/../regformats/i386/i386-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-linux.dat i386-linux.c
-i386-avx.c : $(srcdir)/../regformats/i386/i386-avx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx.dat i386-avx.c
-i386-avx-linux.c : $(srcdir)/../regformats/i386/i386-avx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-linux.dat i386-avx-linux.c
-i386-avx512.c : $(srcdir)/../regformats/i386/i386-avx512.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx512.dat i386-avx512.c
-i386-avx512-linux.c : $(srcdir)/../regformats/i386/i386-avx512-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx512-linux.dat i386-avx512-linux.c
-i386-mpx.c : $(srcdir)/../regformats/i386/i386-mpx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-mpx.dat i386-mpx.c
-i386-mpx-linux.c : $(srcdir)/../regformats/i386/i386-mpx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-mpx-linux.dat i386-mpx-linux.c
-i386-avx-mpx.c : $(srcdir)/../regformats/i386/i386-avx-mpx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-mpx.dat i386-avx-mpx.c
-i386-avx-mpx-linux.c : $(srcdir)/../regformats/i386/i386-avx-mpx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-mpx-linux.dat i386-avx-mpx-linux.c
-i386-mmx.c : $(srcdir)/../regformats/i386/i386-mmx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-mmx.dat i386-mmx.c
-i386-mmx-linux.c : $(srcdir)/../regformats/i386/i386-mmx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-mmx-linux.dat i386-mmx-linux.c
-reg-ia64.c : $(srcdir)/../regformats/reg-ia64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-ia64.dat reg-ia64.c
-reg-m32r.c : $(srcdir)/../regformats/reg-m32r.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-m32r.dat reg-m32r.c
-reg-m68k.c : $(srcdir)/../regformats/reg-m68k.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-m68k.dat reg-m68k.c
-reg-cf.c : $(srcdir)/../regformats/reg-cf.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-cf.dat reg-cf.c
-mips-linux.c : $(srcdir)/../regformats/mips-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/mips-linux.dat mips-linux.c
-mips-dsp-linux.c : $(srcdir)/../regformats/mips-dsp-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/mips-dsp-linux.dat mips-dsp-linux.c
-mips64-linux.c : $(srcdir)/../regformats/mips64-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/mips64-linux.dat mips64-linux.c
-mips64-dsp-linux.c : $(srcdir)/../regformats/mips64-dsp-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/mips64-dsp-linux.dat mips64-dsp-linux.c
-nios2-linux.c :	$(srcdir)/../regformats/nios2-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/nios2-linux.dat nios2-linux.c
-powerpc-32.c : $(srcdir)/../regformats/rs6000/powerpc-32.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-32.dat powerpc-32.c
-powerpc-32l.c : $(srcdir)/../regformats/rs6000/powerpc-32l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-32l.dat powerpc-32l.c
-powerpc-altivec32l.c : $(srcdir)/../regformats/rs6000/powerpc-altivec32l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-altivec32l.dat powerpc-altivec32l.c
-powerpc-cell32l.c : $(srcdir)/../regformats/rs6000/powerpc-cell32l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-cell32l.dat powerpc-cell32l.c
-powerpc-vsx32l.c : $(srcdir)/../regformats/rs6000/powerpc-vsx32l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-vsx32l.dat powerpc-vsx32l.c
-powerpc-isa205-32l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-32l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-32l.dat powerpc-isa205-32l.c
-powerpc-isa205-altivec32l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-altivec32l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-altivec32l.dat powerpc-isa205-altivec32l.c
-powerpc-isa205-vsx32l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx32l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx32l.dat powerpc-isa205-vsx32l.c
-powerpc-e500l.c : $(srcdir)/../regformats/rs6000/powerpc-e500l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-e500l.dat powerpc-e500l.c
-powerpc-64l.c : $(srcdir)/../regformats/rs6000/powerpc-64l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-64l.dat powerpc-64l.c
-powerpc-altivec64l.c : $(srcdir)/../regformats/rs6000/powerpc-altivec64l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-altivec64l.dat powerpc-altivec64l.c
-powerpc-cell64l.c : $(srcdir)/../regformats/rs6000/powerpc-cell64l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-cell64l.dat powerpc-cell64l.c
-powerpc-vsx64l.c : $(srcdir)/../regformats/rs6000/powerpc-vsx64l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-vsx64l.dat powerpc-vsx64l.c
-powerpc-isa205-64l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-64l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-64l.dat powerpc-isa205-64l.c
-powerpc-isa205-altivec64l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-altivec64l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-altivec64l.dat powerpc-isa205-altivec64l.c
-powerpc-isa205-vsx64l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx64l.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx64l.dat powerpc-isa205-vsx64l.c
-s390-linux32.c : $(srcdir)/../regformats/s390-linux32.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux32.dat s390-linux32.c
-s390-linux32v1.c : $(srcdir)/../regformats/s390-linux32v1.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux32v1.dat s390-linux32v1.c
-s390-linux32v2.c : $(srcdir)/../regformats/s390-linux32v2.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux32v2.dat s390-linux32v2.c
-s390-linux64.c : $(srcdir)/../regformats/s390-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux64.dat s390-linux64.c
-s390-linux64v1.c : $(srcdir)/../regformats/s390-linux64v1.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux64v1.dat s390-linux64v1.c
-s390-linux64v2.c : $(srcdir)/../regformats/s390-linux64v2.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux64v2.dat s390-linux64v2.c
-s390-te-linux64.c : $(srcdir)/../regformats/s390-te-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-te-linux64.dat s390-te-linux64.c
-s390-vx-linux64.c : $(srcdir)/../regformats/s390-vx-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-vx-linux64.dat s390-vx-linux64.c
-s390-tevx-linux64.c : $(srcdir)/../regformats/s390-tevx-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-tevx-linux64.dat s390-tevx-linux64.c
-s390x-linux64.c : $(srcdir)/../regformats/s390x-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-linux64.dat s390x-linux64.c
-s390x-linux64v1.c : $(srcdir)/../regformats/s390x-linux64v1.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-linux64v1.dat s390x-linux64v1.c
-s390x-linux64v2.c : $(srcdir)/../regformats/s390x-linux64v2.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-linux64v2.dat s390x-linux64v2.c
-s390x-te-linux64.c : $(srcdir)/../regformats/s390x-te-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-te-linux64.dat s390x-te-linux64.c
-s390x-vx-linux64.c : $(srcdir)/../regformats/s390x-vx-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-vx-linux64.dat s390x-vx-linux64.c
-s390x-tevx-linux64.c : $(srcdir)/../regformats/s390x-tevx-linux64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-tevx-linux64.dat s390x-tevx-linux64.c
+%.o: ../nat/%.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
 
-tic6x-c64xp-linux.c : $(srcdir)/../regformats/tic6x-c64xp-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/tic6x-c64xp-linux.dat tic6x-c64xp-linux.c
-tic6x-c64x-linux.c : $(srcdir)/../regformats/tic6x-c64x-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/tic6x-c64x-linux.dat tic6x-c64x-linux.c
-tic6x-c62x-linux.c : $(srcdir)/../regformats/tic6x-c62x-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/tic6x-c62x-linux.dat tic6x-c62x-linux.c
+%.o: ../target/%.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
 
-reg-sh.c : $(srcdir)/../regformats/reg-sh.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-sh.dat reg-sh.c
-reg-sparc64.c : $(srcdir)/../regformats/reg-sparc64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-sparc64.dat reg-sparc64.c
-reg-spu.c : $(srcdir)/../regformats/reg-spu.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-spu.dat reg-spu.c
-amd64.c : $(srcdir)/../regformats/i386/amd64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64.dat amd64.c
-amd64-linux.c : $(srcdir)/../regformats/i386/amd64-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-linux.dat amd64-linux.c
-amd64-avx.c : $(srcdir)/../regformats/i386/amd64-avx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx.dat amd64-avx.c
-amd64-avx-linux.c : $(srcdir)/../regformats/i386/amd64-avx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-linux.dat amd64-avx-linux.c
-amd64-avx512.c : $(srcdir)/../regformats/i386/amd64-avx512.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx512.dat amd64-avx512.c
-amd64-avx512-linux.c : $(srcdir)/../regformats/i386/amd64-avx512-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx512-linux.dat amd64-avx512-linux.c
-amd64-mpx.c : $(srcdir)/../regformats/i386/amd64-mpx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-mpx.dat amd64-mpx.c
-amd64-mpx-linux.c : $(srcdir)/../regformats/i386/amd64-mpx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-mpx-linux.dat amd64-mpx-linux.c
-amd64-avx-mpx.c : $(srcdir)/../regformats/i386/amd64-avx-mpx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-mpx.dat amd64-avx-mpx.c
-amd64-avx-mpx-linux.c : $(srcdir)/../regformats/i386/amd64-avx-mpx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-mpx-linux.dat amd64-avx-mpx-linux.c
-x32.c : $(srcdir)/../regformats/i386/x32.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32.dat x32.c
-x32-linux.c : $(srcdir)/../regformats/i386/x32-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32-linux.dat x32-linux.c
-x32-avx.c : $(srcdir)/../regformats/i386/x32-avx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32-avx.dat x32-avx.c
-x32-avx-linux.c : $(srcdir)/../regformats/i386/x32-avx-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32-avx-linux.dat x32-avx-linux.c
-x32-avx512.c : $(srcdir)/../regformats/i386/x32-avx512.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32-avx512.dat x32-avx512.c
-x32-avx512-linux.c : $(srcdir)/../regformats/i386/x32-avx512-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32-avx512-linux.dat x32-avx512-linux.c
-reg-xtensa.c : $(srcdir)/../regformats/reg-xtensa.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-xtensa.dat reg-xtensa.c
-reg-tilegx.c : $(srcdir)/../regformats/reg-tilegx.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-tilegx.dat reg-tilegx.c
-reg-tilegx32.c : $(srcdir)/../regformats/reg-tilegx32.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-tilegx32.dat reg-tilegx32.c
+# Rules for register format descriptions.  Suffix destination files with
+# -generated to identify and clean them easily.
+
+%-generated.c: ../regformats/%.dat | $(regdat_sh)
+	$(SHELL) $(regdat_sh) $< $@
+
+%-generated.c: ../regformats/arm/%.dat | $(regdat_sh)
+	$(SHELL) $(regdat_sh) $< $@
+
+%-generated.c: ../regformats/i386/%.dat | $(regdat_sh)
+	$(SHELL) $(regdat_sh) $< $@
+
+%-generated.c: ../regformats/rs6000/%.dat | $(regdat_sh)
+	$(SHELL) $(regdat_sh) $< $@
 
 #
 # Dependency tracking.

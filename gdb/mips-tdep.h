@@ -154,7 +154,8 @@ enum
 };
 
 /* Single step based on where the current instruction will take us.  */
-extern VEC (CORE_ADDR) *mips_software_single_step (struct regcache *regcache);
+extern std::vector<CORE_ADDR> mips_software_single_step
+  (struct regcache *regcache);
 
 /* Strip the ISA (compression) bit off from ADDR.  */
 extern CORE_ADDR mips_unmake_compact_addr (CORE_ADDR addr);

@@ -42,13 +42,14 @@ static void
 mipsnbsd_fetch_inferior_registers (struct target_ops *ops,
 				   struct regcache *regcache, int regno)
 {
+  pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
+
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   if (regno == -1 || getregs_supplies (gdbarch, regno))
     {
       struct reg regs;
 
-      if (ptrace (PT_GETREGS, ptid_get_pid (inferior_ptid),
-		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+      if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
       
       mipsnbsd_supply_reg (regcache, (char *) &regs, regno);
@@ -61,8 +62,7 @@ mipsnbsd_fetch_inferior_registers (struct target_ops *ops,
     {
       struct fpreg fpregs;
 
-      if (ptrace (PT_GETFPREGS, ptid_get_pid (inferior_ptid),
-		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
+      if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
       mipsnbsd_supply_fpreg (regcache, (char *) &fpregs, regno);
@@ -73,19 +73,19 @@ static void
 mipsnbsd_store_inferior_registers (struct target_ops *ops,
 				   struct regcache *regcache, int regno)
 {
+  pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
+
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   if (regno == -1 || getregs_supplies (gdbarch, regno))
     {
       struct reg regs;
 
-      if (ptrace (PT_GETREGS, ptid_get_pid (inferior_ptid),
-		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+      if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
       mipsnbsd_fill_reg (regcache, (char *) &regs, regno);
 
-      if (ptrace (PT_SETREGS, ptid_get_pid (inferior_ptid), 
-		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+      if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
 	perror_with_name (_("Couldn't write registers"));
 
       if (regno != -1)
@@ -97,14 +97,12 @@ mipsnbsd_store_inferior_registers (struct target_ops *ops,
     {
       struct fpreg fpregs; 
 
-      if (ptrace (PT_GETFPREGS, ptid_get_pid (inferior_ptid),
-		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
+      if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
       mipsnbsd_fill_fpreg (regcache, (char *) &fpregs, regno);
 
-      if (ptrace (PT_SETFPREGS, ptid_get_pid (inferior_ptid),
-		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
+      if (ptrace (PT_SETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't write floating point status"));
     }
 }
