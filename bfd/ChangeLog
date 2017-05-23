@@ -1,5 +1,10 @@
 2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
 
+	* elf32-arc.c (elf_arc_check_relocs): Fixed conditions to generate
+	dynamic sections.
+
+2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
 	* elf32-arc.c (elf_arc_size_dynamic_sections): Changed condition to
 	require TEXTREL.
 

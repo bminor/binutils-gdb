@@ -1904,9 +1904,13 @@ elf_arc_check_relocs (bfd *			 abfd,
   const Elf_Internal_Rela *	rel_end;
   bfd *				dynobj;
   asection *			sreloc = NULL;
+  struct elf_link_hash_table *	htab = elf_hash_table (info);
 
   if (bfd_link_relocatable (info))
     return TRUE;
+
+  if (htab->dynobj == NULL)
+    htab->dynobj = abfd;
 
   dynobj = (elf_hash_table (info))->dynobj;
   symtab_hdr = &((elf_tdata (abfd))->symtab_hdr);
@@ -1928,15 +1932,6 @@ elf_arc_check_relocs (bfd *			 abfd,
 	  return FALSE;
 	}
       howto = arc_elf_howto (r_type);
-
-      if (dynobj == NULL
-	  && (is_reloc_for_GOT (howto)
-	      || is_reloc_for_TLS (howto)))
-	{
-	  dynobj = elf_hash_table (info)->dynobj = abfd;
-	  if (! _bfd_elf_create_got_section (abfd, info))
-	    return FALSE;
-	}
 
       /* Load symbol information.  */
       r_symndx = ELF32_R_SYM (rel->r_info);
@@ -1994,6 +1989,10 @@ elf_arc_check_relocs (bfd *			 abfd,
 	      {
 		if (sreloc == NULL)
 		  {
+		    if (info->dynamic
+			&& ! htab->dynamic_sections_created
+			&& ! _bfd_elf_link_create_dynamic_sections (abfd, info))
+		      return FALSE;
 		    sreloc = _bfd_elf_make_dynamic_reloc_section (sec, dynobj,
 								  2, abfd,
 								  /*rela*/
@@ -2021,6 +2020,9 @@ elf_arc_check_relocs (bfd *			 abfd,
       if (is_reloc_for_GOT (howto)
 	  || is_reloc_for_TLS (howto))
 	{
+	  if (! _bfd_elf_create_got_section (dynobj, info))
+	    return FALSE;
+
 	  arc_fill_got_info_for_reloc (
 		  arc_got_entry_type_for_reloc (howto),
 		  get_got_entry_list_for_symbol (abfd, r_symndx, h),
