@@ -131,7 +131,6 @@ do
     echo "{"
     echo "  static struct target_desc tdesc_${name}_s;"
     echo "  struct target_desc *result = &tdesc_${name}_s;"
-    echo "  memset (result, 0, sizeof (*result));"
 
     continue
   elif test "${type}" = "xmltarget"; then
@@ -150,12 +149,9 @@ do
     echo "$0: $1 does not specify \`\`name''." 1>&2
     exit 1
   else
-    echo "  {struct reg *reg = XCNEW (struct reg);"
-    echo "  reg->name = \"${entry}\";"
-    echo "  reg->offset = ${offset};"
-    echo "  reg->size = ${type};"
-    echo "  VEC_safe_push (tdesc_reg_p, result->reg_defs, reg);"
-    echo "  };"
+    echo "  tdesc_create_reg ((struct tdesc_feature *) result, \"${entry}\","
+    echo "  0, 0, NULL, ${type}, NULL);"
+
     offset=`expr ${offset} + ${type}`
     i=`expr $i + 1`
   fi
