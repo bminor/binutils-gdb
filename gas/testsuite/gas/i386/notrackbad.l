@@ -23,14 +23,14 @@ GAS LISTING .*
 [ 	]*3[ 	]+\.allow_index_reg
 [ 	]*4[ 	]+\.text
 [ 	]*5[ 	]+_start:
-[ 	]*6[ 	]+\?\?\?\? E8FCFFFF 		notrack call foo
+[ 	]*6[ 	]+\?\?\?\? [0-9A-F]* 		notrack call foo
 \*\*\*\*  Error: expecting register indirect branch instruction after `notrack'
 \*\*\*\*  Warning: skipping prefixes on this instruction
-[ 	]*6[ 	]+FF
-[ 	]*7[ 	]+\?\?\?\? E9FCFFFF 		notrack jmp foo
+[ 	]*6[ 	]+[0-9A-F]*
+[ 	]*7[ 	]+\?\?\?\? [0-9A-F]* 		notrack jmp foo
 \*\*\*\*  Error: expecting register indirect branch instruction after `notrack'
 \*\*\*\*  Warning: skipping prefixes on this instruction
-[ 	]*7[ 	]+FF
+[ 	]*7[ 	]+[0-9A-F]*
 [ 	]*8[ 	]+
 [ 	]*9[ 	]+\?\?\?\? 3EFF10   		notrack call \*\(%eax\)
 \*\*\*\*  Error: expecting register indirect branch instruction after `notrack'
@@ -49,4 +49,5 @@ GAS LISTING .*
 [ 	]*19[ 	]+fs notrack call eax
 [ 	]*20[ 	]+notrack fs call eax
 [ 	]*21[ 	]+notrack bnd call eax
-[ 	]*22[ 	]+notrack data16 call eax
+[ 	]*22.*[ 	]+notrack data16 call eax
+#pass
