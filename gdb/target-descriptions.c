@@ -843,8 +843,7 @@ tdesc_predefined_type (enum tdesc_type_kind kind)
   gdb_assert_not_reached ("bad predefined tdesc type");
 }
 
-/* Return the type associated with ID in the context of FEATURE, or
-   NULL if none.  */
+/* See arch/tdesc.h.  */
 
 struct tdesc_type *
 tdesc_named_type (const struct tdesc_feature *feature, const char *id)
@@ -1563,6 +1562,8 @@ tdesc_use_registers (struct gdbarch *gdbarch,
 }
 
 
+/* See arch/tdesc.h.  */
+
 void
 tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 		  int regnum, int save_restore, const char *group,
@@ -1573,6 +1574,8 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 
   VEC_safe_push (tdesc_reg_p, feature->registers, reg);
 }
+
+/* See arch/tdesc.h.  */
 
 struct tdesc_type *
 tdesc_create_vector (struct tdesc_feature *feature, const char *name,
@@ -1587,6 +1590,8 @@ tdesc_create_vector (struct tdesc_feature *feature, const char *name,
   return type;
 }
 
+/* See arch/tdesc.h.  */
+
 struct tdesc_type *
 tdesc_create_struct (struct tdesc_feature *feature, const char *name)
 {
@@ -1596,9 +1601,7 @@ tdesc_create_struct (struct tdesc_feature *feature, const char *name)
   return type;
 }
 
-/* Set the total length of TYPE.  Structs which contain bitfields may
-   omit the reserved bits, so the end of the last field may not
-   suffice.  */
+/* See arch/tdesc.h.  */
 
 void
 tdesc_set_struct_size (struct tdesc_type *type, int size)
@@ -1608,6 +1611,8 @@ tdesc_set_struct_size (struct tdesc_type *type, int size)
   type->u.u.size = size;
 }
 
+/* See arch/tdesc.h.  */
+
 struct tdesc_type *
 tdesc_create_union (struct tdesc_feature *feature, const char *name)
 {
@@ -1616,6 +1621,8 @@ tdesc_create_union (struct tdesc_feature *feature, const char *name)
   VEC_safe_push (tdesc_type_p, feature->types, type);
   return type;
 }
+
+/* See arch/tdesc.h.  */
 
 struct tdesc_type *
 tdesc_create_flags (struct tdesc_feature *feature, const char *name,
@@ -1645,7 +1652,7 @@ tdesc_create_enum (struct tdesc_feature *feature, const char *name,
   return type;
 }
 
-/* Add a new field to TYPE.  */
+/* See arch/tdesc.h.  */
 
 void
 tdesc_add_field (struct tdesc_type *type, const char *field_name,
@@ -1666,8 +1673,6 @@ tdesc_add_field (struct tdesc_type *type, const char *field_name,
   VEC_safe_push (tdesc_type_field, type->u.u.fields, &f);
 }
 
-/* Add a new typed bitfield to TYPE.  */
-
 void
 tdesc_add_typed_bitfield (struct tdesc_type *type, const char *field_name,
 			  int start, int end, struct tdesc_type *field_type)
@@ -1686,9 +1691,7 @@ tdesc_add_typed_bitfield (struct tdesc_type *type, const char *field_name,
   VEC_safe_push (tdesc_type_field, type->u.u.fields, &f);
 }
 
-/* Add a new untyped bitfield to TYPE.
-   Untyped bitfields become either uint32 or uint64 depending on the size
-   of the underlying type.  */
+/* See arch/tdesc.h.  */
 
 void
 tdesc_add_bitfield (struct tdesc_type *type, const char *field_name,
@@ -1706,8 +1709,7 @@ tdesc_add_bitfield (struct tdesc_type *type, const char *field_name,
   tdesc_add_typed_bitfield (type, field_name, start, end, field_type);
 }
 
-/* A flag is just a typed(bool) single-bit bitfield.
-   This function is kept to minimize changes in generated files.  */
+/* See arch/tdesc.h.  */
 
 void
 tdesc_add_flag (struct tdesc_type *type, int start,
@@ -1741,6 +1743,8 @@ tdesc_add_enum_value (struct tdesc_type *type, int value,
 
   VEC_safe_push (tdesc_type_field, type->u.u.fields, &f);
 }
+
+/* See arch/tdesc.h.  */
 
 struct tdesc_feature *
 tdesc_create_feature (struct target_desc *tdesc, const char *name)
@@ -2172,7 +2176,7 @@ public:
     printf_unfiltered ("  Original: %s */\n\n",
 		       lbasename (m_filename_after_features.c_str ()));
 
-    printf_unfiltered ("#include \"target-descriptions.h\"\n");
+    printf_unfiltered ("#include \"arch/tdesc.h\"\n");
     printf_unfiltered ("\n");
   }
 
