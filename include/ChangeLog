@@ -1,3 +1,7 @@
+2017-05-23  Claudiu Zissulescu <claziss@synopsys.com>
+
+	* opcode/arc.h (MAX_INSN_FLGS): Update to 4.
+
 2017-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* include/opcode/i386.h (NOTRACK_PREFIX_OPCODE): New.
