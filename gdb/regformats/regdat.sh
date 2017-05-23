@@ -131,8 +131,8 @@ do
     echo "{"
     echo "  static struct target_desc tdesc_${name}_s;"
     echo "  struct target_desc *result = &tdesc_${name}_s;"
+    echo "  memset (result, 0, sizeof (*result));"
 
-    echo "static struct reg regs_${name}[] = {"
     continue
   elif test "${type}" = "xmltarget"; then
     xmltarget="${entry}"
@@ -150,13 +150,17 @@ do
     echo "$0: $1 does not specify \`\`name''." 1>&2
     exit 1
   else
-    echo "  { \"${entry}\", ${offset}, ${type} },"
+    echo "  {struct reg *reg = XCNEW (struct reg);"
+    echo "  reg->name = \"${entry}\";"
+    echo "  reg->offset = ${offset};"
+    echo "  reg->size = ${type};"
+    echo "  VEC_safe_push (tdesc_reg_p, result->reg_defs, reg);"
+    echo "  };"
     offset=`expr ${offset} + ${type}`
     i=`expr $i + 1`
   fi
 done
 
-echo "};"
 echo
 echo "static const char *expedite_regs_${name}[] = { \"`echo ${expedite} | sed 's/,/", "/g'`\", 0 };"
 if test "${xmltarget}" = x; then
@@ -178,9 +182,6 @@ fi
 echo
 
 cat <<EOF
-  result->reg_defs = regs_${name};
-  result->num_registers = sizeof (regs_${name}) / sizeof (regs_${name}[0]);
-
 #ifndef IN_PROCESS_AGENT
   result->expedite_regs = expedite_regs_${name};
   result->xmltarget = xmltarget_${name};

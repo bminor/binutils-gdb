@@ -399,6 +399,7 @@ IPA_OBJS = \
 	tdesc-ipa.o \
 	tracepoint-ipa.o \
 	utils-ipa.o \
+	vec-ipa.o \
 	${IPA_DEPFILES}
 
 IPA_LIB = libinproctrace.so

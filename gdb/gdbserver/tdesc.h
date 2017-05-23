@@ -21,17 +21,16 @@
 
 struct reg;
 
+typedef struct reg *tdesc_reg_p;
+DEF_VEC_P(tdesc_reg_p);
+
 /* A target description.  */
 
 struct target_desc
 {
-  /* An array of NUM_REGISTERS elements of register definitions that
+  /* A vector of elements of register definitions that
      describe the inferior's register set.  */
-  struct reg *reg_defs;
-
-  /* The number of registers in inferior's register set (and thus in
-     the regcache).  */
-  int num_registers;
+  VEC(tdesc_reg_p) *reg_defs;
 
   /* The register cache size, in bytes.  */
   int registers_size;
