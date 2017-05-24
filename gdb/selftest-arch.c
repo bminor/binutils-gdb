@@ -81,6 +81,10 @@ tests_with_arch ()
 				 _("Self test failed: arch %s: "), arches[i]);
 	    }
 	  END_CATCH
+
+	  /* Clear GDB internal state.  */
+	  registers_changed ();
+	  reinit_frame_cache ();
 	}
     }
 

@@ -1,5 +1,11 @@
 2017-05-24  Yao Qi  <yao.qi@linaro.org>
 
+	* selftest-arch.c (tests_with_arch): Call registers_changed
+	and reinit_frame_cache.
+	* selftest.c (run_self_tests): Likewise.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
 	* rs6000-tdep.c (gdb_print_insn_powerpc): Remove.
 	(rs6000_gdbarch_init): Don't call set_gdbarch_print_insn.
 
