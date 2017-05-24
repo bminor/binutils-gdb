@@ -1,5 +1,10 @@
 2017-05-24  Yao Qi  <yao.qi@linaro.org>
 
+	* ia64-tdep.c (ia64_convert_register_p): Check type's code is
+	TYPE_CODE_FLT.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
 	* m68k-tdep.c (m68k_convert_register_p): Check type's code is
 	TYPE_CODE_FLT or not.
 

@@ -1218,6 +1218,7 @@ static int
 ia64_convert_register_p (struct gdbarch *gdbarch, int regno, struct type *type)
 {
   return (regno >= IA64_FR0_REGNUM && regno <= IA64_FR127_REGNUM
+	  && TYPE_CODE (type) == TYPE_CODE_FLT
 	  && type != ia64_ext_type (gdbarch));
 }
 
