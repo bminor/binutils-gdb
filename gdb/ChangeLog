@@ -1,5 +1,24 @@
 2017-05-24  Yao Qi  <yao.qi@linaro.org>
 
+	* alpha-tdep.c (alpha_gdbarch_init): Use XCNEW instead of XNEW.
+	* avr-tdep.c (avr_gdbarch_init): Likewise.
+	* bfin-tdep.c (bfin_gdbarch_init): Likewise.
+	* cris-tdep.c (cris_gdbarch_init): Likewise.
+	* ft32-tdep.c (ft32_gdbarch_init): Likewise.
+	* lm32-tdep.c (lm32_gdbarch_init): Likewise.
+	* m32r-tdep.c (m32r_gdbarch_init): Likewise.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Likewise.
+	* mep-tdep.c (mep_gdbarch_init): Likewise.
+	* microblaze-tdep.c (microblaze_gdbarch_init): Likewise.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Likewise.
+	* moxie-tdep.c (moxie_gdbarch_init): Likewise.
+	* msp430-tdep.c (msp430_gdbarch_init): Likewise.
+	* sh64-tdep.c (sh64_gdbarch_init): Likewise.
+	* v850-tdep.c (v850_gdbarch_init): Likewise.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
 	* selftest-arch.c (tests_with_arch): Call registers_changed
 	and reinit_frame_cache.
 	* selftest.c (run_self_tests): Likewise.

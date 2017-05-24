@@ -4008,7 +4008,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* No matching architecture was found.  Create a new one.  */
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   info.byte_order = BFD_ENDIAN_LITTLE;
   gdbarch = gdbarch_alloc (&info, tdep);
 

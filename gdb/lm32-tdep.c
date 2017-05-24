@@ -521,7 +521,7 @@ lm32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* None found, create a new architecture from the information provided.  */
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Type sizes.  */

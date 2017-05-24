@@ -1396,7 +1396,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       return arches->gdbarch;
     }
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   tdep->e_flags = e_flags;
   tdep->e_machine = e_machine;
 

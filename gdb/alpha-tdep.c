@@ -1748,7 +1748,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (arches != NULL)
     return arches->gdbarch;
 
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Lowest text address.  This is used by heuristic_proc_start()

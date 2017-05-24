@@ -908,7 +908,7 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* Allocate space for the new architecture.  */
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   set_gdbarch_wchar_bit (gdbarch, 16);
