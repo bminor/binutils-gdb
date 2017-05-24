@@ -375,7 +375,8 @@ i387_register_to_value (struct frame_info *frame, int regnum,
     }
 
   /* Convert to TYPE.  */
-  if (!get_frame_register_bytes (frame, regnum, 0, TYPE_LENGTH (type),
+  if (!get_frame_register_bytes (frame, regnum, 0,
+				 register_size (gdbarch, regnum),
 				 from, optimizedp, unavailablep))
     return 0;
 

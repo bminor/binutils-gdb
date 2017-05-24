@@ -201,13 +201,15 @@ m68k_register_to_value (struct frame_info *frame, int regnum,
 			struct type *type, gdb_byte *to,
 			int *optimizedp, int *unavailablep)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte from[M68K_MAX_REGISTER_SIZE];
   struct type *fpreg_type = register_type (gdbarch, M68K_FP0_REGNUM);
 
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
 
   /* Convert to TYPE.  */
-  if (!get_frame_register_bytes (frame, regnum, 0, TYPE_LENGTH (type),
+  if (!get_frame_register_bytes (frame, regnum, 0,
+				 register_size (gdbarch, regnum),
 				 from, optimizedp, unavailablep))
     return 0;
 
