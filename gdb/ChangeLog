@@ -1,5 +1,10 @@
 2017-05-24  Yao Qi  <yao.qi@linaro.org>
 
+	* h8300-tdep.c (h8300_gdbarch_init): Don't call
+	set_gdbarch_print_insn.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
 	* alpha-tdep.c (alpha_gdbarch_init): Don't call
 	set_gdbarch_print_insn.
 	* arc-tdep.c (arc_gdbarch_init): Likewise.
