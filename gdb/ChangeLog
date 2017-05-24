@@ -1,5 +1,16 @@
 2017-05-24  Yao Qi  <yao.qi@linaro.org>
 
+	* Makefile.in (SFILES): Add gdbarch-selftests.c.
+	(COMMON_OBS): Add gdbarch-selftests.o.
+	* frame.c [GDB_SELF_TESTS] (create_new_frame): New function.
+	* frame.h [GDB_SELF_TESTS] (create_new_frame): Declare.
+	* gdbarch-selftests.c: New file.
+	* regcache.h (regcache) <~regcache>: Mark it virtual if
+	GDB_SELF_TEST.
+	<raw_write>: Likewise.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
 	* regcache.c (current_regcache): Change it to
 	regcache::current_regcache.
 	(regcache_observer_target_changed): Update.

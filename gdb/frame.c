@@ -1704,6 +1704,23 @@ select_frame (struct frame_info *fi)
     }
 }
 
+#if GDB_SELF_TEST
+struct frame_info *
+create_test_frame (struct regcache *regcache)
+{
+  struct frame_info *this_frame = XCNEW (struct frame_info);
+
+  sentinel_frame = create_sentinel_frame (NULL, regcache);
+  sentinel_frame->prev = this_frame;
+  sentinel_frame->prev_p = 1;;
+  this_frame->prev_arch.p = 1;
+  this_frame->prev_arch.arch = get_regcache_arch (regcache);
+  this_frame->next = sentinel_frame;
+
+  return this_frame;
+}
+#endif
+
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
    Always returns a non-NULL value.  */
 
