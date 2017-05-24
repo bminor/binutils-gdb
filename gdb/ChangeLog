@@ -1,5 +1,10 @@
 2017-05-24  Yao Qi  <yao.qi@linaro.org>
 
+	* i387-tdep.c (i387_convert_register_p): Return false if type
+	code isn't TYPE_CODE_FLT.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
 	* alpha-tdep.c (alpha_convert_register_p): Return true if type
 	length is 4.
 	(alpha_register_to_value): Remove type length check.
