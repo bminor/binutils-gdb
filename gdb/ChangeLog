@@ -1,5 +1,10 @@
 2017-05-24  Yao Qi  <yao.qi@linaro.org>
 
+	* rs6000-tdep.c (gdb_print_insn_powerpc): Remove.
+	(rs6000_gdbarch_init): Don't call set_gdbarch_print_insn.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
 	* rl78-tdep.c (rl78_gdbarch_init): Don't call
 	set_gdbarch_print_insn.
 
