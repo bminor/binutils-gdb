@@ -47,6 +47,12 @@ struct target_desc
      actual XML file to be used in place of "target.xml".  */
   const char *xmltarget = NULL;
 
+  VEC (char_ptr) *features = NULL;
+
+  const char *arch = NULL;
+
+  const char *osabi = NULL;
+
 public:
   target_desc ()
     : reg_defs (NULL), registers_size (0)
@@ -60,6 +66,15 @@ public:
     for (i = 0; VEC_iterate (tdesc_reg_p, reg_defs, i, reg); i++)
       xfree (reg);
     VEC_free (tdesc_reg_p, reg_defs);
+
+    xfree ((char *) arch);
+    xfree ((char *) osabi);
+
+    char *f;
+
+    for (i = 0; VEC_iterate (char_ptr, features, i, f); i++)
+      xfree (f);
+    VEC_free (char_ptr, features);
   }
   bool operator!= (const target_desc &other) const
   {
@@ -90,9 +105,6 @@ public:
     if (other.expedite_regs[i] != NULL)
       return true;
 
-    if (strcmp (xmltarget, other.xmltarget) != 0)
-      return true;
-
     return false;
   }
 
@@ -118,6 +130,11 @@ void init_target_desc (struct target_desc *tdesc);
 const struct target_desc *current_target_desc (void);
 
 #ifndef IN_PROCESS_AGENT
+void set_tdesc_architecture (struct target_desc *target_desc,
+			     const char *name);
+void set_tdesc_osabi (struct target_desc *target_desc, const char *name);
+
+const char *tdesc_get_features_xml (struct target_desc *tdesc);
 #endif
 
 #define tdesc_feature target_desc
@@ -125,7 +142,8 @@ const struct target_desc *current_target_desc (void);
 struct tdesc_type;
 
 struct tdesc_feature *tdesc_create_feature (struct target_desc *tdesc,
-					    const char *name);
+					    const char *name,
+					    const char *xml = NULL);
 
 struct tdesc_type *tdesc_create_flags (struct tdesc_feature *feature,
 				       const char *name, int size);

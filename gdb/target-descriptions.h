@@ -222,7 +222,8 @@ void tdesc_add_compatible (struct target_desc *,
 			   const struct bfd_arch_info *);
 
 struct tdesc_feature *tdesc_create_feature (struct target_desc *tdesc,
-					    const char *name);
+					    const char *name,
+					    const char *xml = NULL);
 struct tdesc_type *tdesc_create_vector (struct tdesc_feature *feature,
 					const char *name,
 					struct tdesc_type *field_type,

@@ -810,12 +810,14 @@ get_features_xml (const char *annex)
      This variable is set up from the auto-generated
      init_registers_... routine for the current target.  */
 
-  if (desc->xmltarget != NULL && strcmp (annex, "target.xml") == 0)
+  if (strcmp (annex, "target.xml") == 0)
     {
-      if (*desc->xmltarget == '@')
-	return desc->xmltarget + 1;
+      const char *ret = tdesc_get_features_xml ((target_desc*) desc);
+
+      if (*ret == '@')
+	return ret + 1;
       else
-	annex = desc->xmltarget;
+	annex = ret;
     }
 
 #ifdef USE_XML

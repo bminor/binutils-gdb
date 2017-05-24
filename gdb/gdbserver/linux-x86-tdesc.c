@@ -132,6 +132,12 @@ i386_get_ipa_tdesc (int idx)
   if (*tdesc == NULL)
     {
       *tdesc = new target_desc ();
+
+#ifndef IN_PROCESS_AGENT
+      set_tdesc_architecture (*tdesc, "i386");
+      set_tdesc_osabi (*tdesc, "GNU/Linux");
+#endif
+
       long regnum = 0;
 
       regnum = create_feature_i386_32bit_core (*tdesc, regnum);
@@ -162,35 +168,6 @@ i386_get_ipa_tdesc (int idx)
 #ifndef IN_PROCESS_AGENT
       static const char *expedite_regs_i386[] = { "ebp", "esp", "eip", NULL };
       (*tdesc)->expedite_regs = expedite_regs_i386;
-
-      switch (idx)
-	{
-	case X86_TDESC_MMX:
-	  (*tdesc)->xmltarget = "i386-mmx-linux.xml";
-	  break;
-	case X86_TDESC_SSE:
-	  (*tdesc)->xmltarget = "i386-linux.xml";
-	  break;
-	case X86_TDESC_AVX:
-	  (*tdesc)->xmltarget = "i386-avx-linux.xml";
-	  break;
-	case X86_TDESC_MPX:
-	  (*tdesc)->xmltarget = "i386-mpx-linux.xml";
-	  break;
-	case X86_TDESC_AVX_MPX:
-	  (*tdesc)->xmltarget = "i386-avx-mpx-linux.xml";
-	  break;
-	case X86_TDESC_AVX_AVX512:
-	  (*tdesc)->xmltarget = "i386-avx-avx512-linux.xml";
-	  break;
-	case X86_TDESC_AVX_MPX_AVX512_PKU:
-	  (*tdesc)->xmltarget = "i386-avx-mpx-avx512-pku-linux.xml";
-	  break;
-	default:
-	  internal_error (__FILE__, __LINE__,
-			  "unknown ipa tdesc index: %d", idx);
-	}
-
 #endif
     }
   return *tdesc;;

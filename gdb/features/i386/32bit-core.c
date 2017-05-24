@@ -14,7 +14,7 @@ create_feature_i386_32bit_core (struct target_desc *result, long regnum)
 {
   struct tdesc_feature *feature;
 
-  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.core");
+  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.core", "32bit-core.xml");
   struct tdesc_type *field_type;
   struct tdesc_type *type;
   type = tdesc_create_flags (feature, "i386_eflags", 4);
