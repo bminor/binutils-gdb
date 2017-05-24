@@ -1,3 +1,8 @@
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* disassemble.c (disassembler): Add arguments a, big and mach.
+	Use them.
+
 2017-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (NOTRACK_Fixup): New.

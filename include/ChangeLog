@@ -1,3 +1,7 @@
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* dis-asm.h (disassembler): Update declaration.
+
 2017-05-23  Claudiu Zissulescu <claziss@synopsys.com>
 
 	* opcode/arc.h (MAX_INSN_FLGS): Update to 4.

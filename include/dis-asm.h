@@ -354,8 +354,12 @@ extern const disasm_options_t *disassembler_options_powerpc (void);
 extern const disasm_options_t *disassembler_options_arm (void);
 extern const disasm_options_t *disassembler_options_s390 (void);
 
-/* Fetch the disassembler for a given BFD, if that support is available.  */
-extern disassembler_ftype disassembler (bfd *);
+/* Fetch the disassembler for a given architecture ARC, endianess (big
+   endian if BIG is true), bfd_mach value MACH, and ABFD, if that support
+   is available.  ABFD may be NULL.  */
+extern disassembler_ftype disassembler (enum bfd_architecture arc,
+					bfd_boolean big, unsigned long mach,
+					bfd *abfd);
 
 /* Amend the disassemble_info structure as necessary for the target architecture.
    Should only be called after initialising the info->arch field.  */

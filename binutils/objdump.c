@@ -2386,7 +2386,9 @@ disassemble_data (bfd *abfd)
     }
 
   /* Use libopcodes to locate a suitable disassembler.  */
-  aux.disassemble_fn = disassembler (abfd);
+  aux.disassemble_fn = disassembler (bfd_get_arch (abfd),
+				     bfd_big_endian (abfd),
+				     bfd_get_mach (abfd), abfd);
   if (!aux.disassemble_fn)
     {
       non_fatal (_("can't disassemble for architecture %s\n"),
