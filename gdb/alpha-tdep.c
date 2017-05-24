@@ -1798,9 +1798,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Prologue heuristics.  */
   set_gdbarch_skip_prologue (gdbarch, alpha_skip_prologue);
 
-  /* Disassembler.  */
-  set_gdbarch_print_insn (gdbarch, print_insn_alpha);
-
   /* Call info.  */
 
   set_gdbarch_return_value (gdbarch, alpha_return_value);

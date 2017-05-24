@@ -1240,10 +1240,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_return_in_first_hidden_param_p (gdbarch,
 					      m68k_return_in_first_hidden_param_p);
 
-
-  /* Disassembler.  */
-  set_gdbarch_print_insn (gdbarch, print_insn_m68k);
-
 #if defined JB_PC && defined JB_ELEMENT_SIZE
   tdep->jb_pc = JB_PC;
   tdep->jb_elt_size = JB_ELEMENT_SIZE;

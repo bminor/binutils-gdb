@@ -1,3 +1,51 @@
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* alpha-tdep.c (alpha_gdbarch_init): Don't call
+	set_gdbarch_print_insn.
+	* arc-tdep.c (arc_gdbarch_init): Likewise.
+	* arch-utils.c: include dis-asm.h.
+	(default_print_insn): New function.
+	* arch-utils.h (default_print_insn): Declare.
+	* avr-tdep.c (avr_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* bfin-tdep.c (bfin_gdbarch_init): Likewise.
+	* cris-tdep.c (cris_delayed_get_disassembler): Remove.
+	(cris_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* frv-tdep.c (frv_gdbarch_init): Likewise.
+	* ft32-tdep.c (ft32_gdbarch_init): Likewise.
+	* gdbarch.sh (print_insn): Use default_print_insn.
+	* gdbarch.c: Regenerated.
+	* hppa-tdep.c (hppa_gdbarch_init): Likewise.
+	* iq2000-tdep.c (iq2000_gdbarch_init): Likewise.
+	* lm32-tdep.c (lm32_gdbarch_init): Likewise.
+	* m32c-tdep.c (m32c_gdbarch_init): Likewise.
+	* m32r-tdep.c (m32r_gdbarch_init): Likewise.
+	* m68hc11-tdep.c (gdb_print_insn_m68hc11): Remove.
+	(m68hc11_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* m68k-tdep.c (m68k_gdbarch_init): Likewise.
+	* m88k-tdep.c (m88k_gdbarch_init): Likewise.
+	* microblaze-tdep.c (microblaze_gdbarch_init): Likewise.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Likewise.
+	* moxie-tdep.c (moxie_gdbarch_init): Likewise.
+	* msp430-tdep.c (msp430_gdbarch_init): Likewise.
+	* mt-tdep.c (mt_gdbarch_init): Likewise.
+	* nds32-tdep.c (nds32_gdbarch_init): Likewise.
+	* nios2-tdep.c (nios2_print_insn): Remove.
+	(nios2_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* rx-tdep.c (rx_gdbarch_init): Likewise.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* score-tdep.c (score_print_insn): Remove.
+	(score_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* sh-tdep.c (sh_gdbarch_init): Likewise.
+	* sh64-tdep.c (sh64_gdbarch_init): Likewise.
+	* sparc-tdep.c (sparc32_gdbarch_init): Likewise.
+	* tic6x-tdep.c (tic6x_print_insn): Remove.
+	(tic6x_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* tilegx-tdep.c (tilegx_gdbarch_init): Likewise.
+	* v850-tdep.c (v850_gdbarch_init): Likewise.
+	* vax-tdep.c (vax_gdbarch_init): Likewise.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Likewise.
+	* xtensa-tdep.c (xtensa_gdbarch_init): Likewise.
+
 2017-05-23  John Baldwin  <jhb@FreeBSD.org>
 
 	* mips-fbsd-tdep.c (MIPS_PC_REGNUM): Remove.

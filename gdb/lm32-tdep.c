@@ -565,9 +565,6 @@ lm32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_call (gdbarch, lm32_push_dummy_call);
   set_gdbarch_return_value (gdbarch, lm32_return_value);
 
-  /* Instruction disassembler.  */
-  set_gdbarch_print_insn (gdbarch, print_insn_lm32);
-
   lm32_add_reggroups (gdbarch);
   set_gdbarch_register_reggroup_p (gdbarch, lm32_register_reggroup_p);
 

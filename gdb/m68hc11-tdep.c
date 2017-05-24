@@ -1344,16 +1344,6 @@ m68hc11_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
   if (flags & STO_M68HC12_INTERRUPT)
     MSYMBOL_SET_RTI (msym);
 }
-
-static int
-gdb_print_insn_m68hc11 (bfd_vma memaddr, disassemble_info *info)
-{
-  if (info->arch == bfd_arch_m68hc11)
-    return print_insn_m68hc11 (memaddr, info);
-  else
-    return print_insn_m68hc12 (memaddr, info);
-}
-
 
 
 /* 68HC11/68HC12 register groups.
@@ -1525,7 +1515,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 				       m68hc11_breakpoint::kind_from_pc);
   set_gdbarch_sw_breakpoint_from_kind (gdbarch,
 				       m68hc11_breakpoint::bp_from_kind);
-  set_gdbarch_print_insn (gdbarch, gdb_print_insn_m68hc11);
 
   m68hc11_add_reggroups (gdbarch);
   set_gdbarch_register_reggroup_p (gdbarch, m68hc11_register_reggroup_p);

@@ -3122,8 +3122,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Helper for function argument information.  */
   set_gdbarch_fetch_pointer_argument (gdbarch, hppa_fetch_pointer_argument);
 
-  set_gdbarch_print_insn (gdbarch, print_insn_hppa);
-
   /* When a hardware watchpoint triggers, we'll move the inferior past
      it by removing all eventpoints; stepping past the instruction
      that caused the trigger; reinserting eventpoints; and checking

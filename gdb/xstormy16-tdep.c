@@ -849,8 +849,6 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_trampoline_code (gdbarch, xstormy16_skip_trampoline_code);
 
-  set_gdbarch_print_insn (gdbarch, print_insn_xstormy16);
-
   gdbarch_init_osabi (info, gdbarch);
 
   dwarf2_append_unwinders (gdbarch);

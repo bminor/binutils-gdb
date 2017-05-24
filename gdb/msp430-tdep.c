@@ -997,9 +997,6 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				       msp430_breakpoint::bp_from_kind);
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
 
-  /* Disassembly.  */
-  set_gdbarch_print_insn (gdbarch, print_insn_msp430);
-
   /* Frames, prologues, etc.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_skip_prologue (gdbarch, msp430_skip_prologue);

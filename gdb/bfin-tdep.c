@@ -838,7 +838,6 @@ bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 8);
   set_gdbarch_unwind_pc (gdbarch, bfin_unwind_pc);
   set_gdbarch_frame_align (gdbarch, bfin_frame_align);
-  set_gdbarch_print_insn (gdbarch, print_insn_bfin);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
