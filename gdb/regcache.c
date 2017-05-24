@@ -472,20 +472,19 @@ regcache::invalidate (int regnum)
    recording if the register values have been changed (eg. by the
    user).  Therefore all registers must be written back to the
    target when appropriate.  */
-
-static std::forward_list<regcache *> current_regcache;
+std::forward_list<regcache *> regcache::current_regcache;
 
 struct regcache *
 get_thread_arch_aspace_regcache (ptid_t ptid, struct gdbarch *gdbarch,
 				 struct address_space *aspace)
 {
-  for (const auto &regcache : current_regcache)
+  for (const auto &regcache : regcache::current_regcache)
     if (ptid_equal (regcache->ptid (), ptid) && regcache->arch () == gdbarch)
       return regcache;
 
   regcache *new_regcache = new regcache (gdbarch, aspace, false);
 
-  current_regcache.push_front (new_regcache);
+  regcache::current_regcache.push_front (new_regcache);
   new_regcache->set_ptid (ptid);
 
   return new_regcache;
@@ -548,10 +547,10 @@ regcache_observer_target_changed (struct target_ops *target)
 
 /* Update global variables old ptids to hold NEW_PTID if they were
    holding OLD_PTID.  */
-static void
-regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
+void
+regcache::regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 {
-  for (auto &regcache : current_regcache)
+  for (auto &regcache : regcache::current_regcache)
     {
       if (ptid_equal (regcache->ptid (), old_ptid))
 	regcache->set_ptid (new_ptid);
@@ -572,15 +571,15 @@ regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 void
 registers_changed_ptid (ptid_t ptid)
 {
-  for (auto oit = current_regcache.before_begin (),
+  for (auto oit = regcache::current_regcache.before_begin (),
 	 it = std::next (oit);
-       it != current_regcache.end ();
+       it != regcache::current_regcache.end ();
        )
     {
       if (ptid_match ((*it)->ptid (), ptid))
 	{
 	  delete *it;
-	  it = current_regcache.erase_after (oit);
+	  it = regcache::current_regcache.erase_after (oit);
 	}
       else
 	oit = it++;
@@ -1685,19 +1684,25 @@ maintenance_print_remote_registers (char *args, int from_tty)
 
 namespace selftests {
 
-/* Return the number of elements in current_regcache.  */
-
-static size_t
-current_regcache_size ()
+class regcache_access : public regcache
 {
-  return std::distance (current_regcache.begin (), current_regcache.end ());
-}
+public:
+
+  /* Return the number of elements in current_regcache.  */
+
+  static size_t
+  current_regcache_size ()
+  {
+    return std::distance (regcache::current_regcache.begin (),
+			  regcache::current_regcache.end ());
+  }
+};
 
 static void
 current_regcache_test (void)
 {
   /* It is empty at the start.  */
-  SELF_CHECK (current_regcache_size () == 0);
+  SELF_CHECK (regcache_access::current_regcache_size () == 0);
 
   ptid_t ptid1 (1), ptid2 (2), ptid3 (3);
 
@@ -1709,7 +1714,7 @@ current_regcache_test (void)
 
   SELF_CHECK (regcache != NULL);
   SELF_CHECK (regcache->ptid () == ptid1);
-  SELF_CHECK (current_regcache_size () == 1);
+  SELF_CHECK (regcache_access::current_regcache_size () == 1);
 
   /* Get regcache from ptid2, a new regcache is added to
      current_regcache.  */
@@ -1718,7 +1723,7 @@ current_regcache_test (void)
 					      NULL);
   SELF_CHECK (regcache != NULL);
   SELF_CHECK (regcache->ptid () == ptid2);
-  SELF_CHECK (current_regcache_size () == 2);
+  SELF_CHECK (regcache_access::current_regcache_size () == 2);
 
   /* Get regcache from ptid3, a new regcache is added to
      current_regcache.  */
@@ -1727,7 +1732,7 @@ current_regcache_test (void)
 					      NULL);
   SELF_CHECK (regcache != NULL);
   SELF_CHECK (regcache->ptid () == ptid3);
-  SELF_CHECK (current_regcache_size () == 3);
+  SELF_CHECK (regcache_access::current_regcache_size () == 3);
 
   /* Get regcache from ptid2 again, nothing is added to
      current_regcache.  */
@@ -1736,12 +1741,12 @@ current_regcache_test (void)
 					      NULL);
   SELF_CHECK (regcache != NULL);
   SELF_CHECK (regcache->ptid () == ptid2);
-  SELF_CHECK (current_regcache_size () == 3);
+  SELF_CHECK (regcache_access::current_regcache_size () == 3);
 
   /* Mark ptid2 is changed, so regcache of ptid2 should be removed from
      current_regcache.  */
   registers_changed_ptid (ptid2);
-  SELF_CHECK (current_regcache_size () == 2);
+  SELF_CHECK (regcache_access::current_regcache_size () == 2);
 }
 
 } // namespace selftests
@@ -1756,7 +1761,7 @@ _initialize_regcache (void)
     = gdbarch_data_register_post_init (init_regcache_descr);
 
   observer_attach_target_changed (regcache_observer_target_changed);
-  observer_attach_thread_ptid_changed (regcache_thread_ptid_changed);
+  observer_attach_thread_ptid_changed (regcache::regcache_thread_ptid_changed);
 
   add_com ("flushregs", class_maintenance, reg_flush_command,
 	   _("Force gdb to flush its register cache (maintainer command)"));

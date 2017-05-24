@@ -1,5 +1,20 @@
 2017-05-24  Yao Qi  <yao.qi@linaro.org>
 
+	* regcache.c (current_regcache): Change it to
+	regcache::current_regcache.
+	(regcache_observer_target_changed): Update.
+	(regcache_thread_ptid_changed): Make it a regcache static
+	method.
+	(regcache_thread_ptid_changed): Update.
+	(class regcache_access): New.
+	(current_regcache_test): Update.
+	(_initialize_regcache): Update.
+	* regcache.h: Include forward_list.
+	(regcache): Declare regcache_thread_ptid_changed and declare
+	registers_changed_ptid as friend.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
 	* i387-tdep.c (i387_register_to_value): Use register_size
 	instead of TYPE_LENGTH.
 	* m68k-tdep.c (m68k_register_to_value): Likewise.

@@ -21,6 +21,7 @@
 #define REGCACHE_H
 
 #include "common-regcache.h"
+#include <forward_list>
 
 struct regcache;
 struct regset;
@@ -336,9 +337,13 @@ public:
    debug.  */
   void debug_print_register (const char *func, int regno);
 
-private:
+  static void regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid);
+protected:
   regcache (gdbarch *gdbarch, address_space *aspace_, bool readonly_p_);
 
+  static std::forward_list<regcache *> current_regcache;
+
+private:
   gdb_byte *register_buffer (int regnum) const;
 
   void restore (struct regcache *src);
@@ -381,6 +386,9 @@ private:
   friend struct regcache *
   get_thread_arch_aspace_regcache (ptid_t ptid, struct gdbarch *gdbarch,
 				   struct address_space *aspace);
+
+  friend void
+  registers_changed_ptid (ptid_t ptid);
 
   friend void
   regcache_cpy (struct regcache *dst, struct regcache *src);
