@@ -33,7 +33,7 @@
    the Intel manual for details.  */
 
 #include "sysdep.h"
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "opintl.h"
 #include "opcode/i386.h"
 #include "libiberty.h"

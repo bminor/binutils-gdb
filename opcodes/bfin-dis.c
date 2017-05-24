@@ -38,7 +38,7 @@ typedef long TIword;
 #define SIGNEXTEND(v, n)    ((v << (HOST_LONG_WORD_SIZE - (n))) >> (HOST_LONG_WORD_SIZE - (n)))
 #define MASKBITS(val, bits) (val & ((1 << bits) - 1))
 
-#include "dis-asm.h"
+#include "disassemble.h"
 
 typedef unsigned int bu32;
 

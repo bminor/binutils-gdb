@@ -23,7 +23,7 @@
 #include <setjmp.h>
 #include <string.h>
 #include "opcode/vax.h"
-#include "dis-asm.h"
+#include "disassemble.h"
 
 static char *reg_names[] =
 {

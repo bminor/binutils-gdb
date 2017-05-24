@@ -1,5 +1,33 @@
 2017-05-24  Yao Qi  <yao.qi@linaro.org>
 
+	* alpha-dis.c: Include disassemble.h, don't include
+	dis-asm.h.
+	* avr-dis.c, bfin-dis.c, cr16-dis.c: Likewise.
+	* crx-dis.c, d10v-dis.c, d30v-dis.c: Likewise.
+	* disassemble.c, dlx-dis.c, epiphany-dis.c: Likewise.
+	* fr30-dis.c, ft32-dis.c, h8300-dis.c, h8500-dis.c: Likewise.
+	* hppa-dis.c, i370-dis.c, i386-dis.c: Likewise.
+	* i860-dis.c, i960-dis.c, ip2k-dis.c: Likewise.
+	* iq2000-dis.c, lm32-dis.c, m10200-dis.c: Likewise.
+	* m10300-dis.c, m32r-dis.c, m68hc11-dis.c: Likewise.
+	* m68k-dis.c, m88k-dis.c, mcore-dis.c: Likewise.
+	* metag-dis.c, microblaze-dis.c, mmix-dis.c: Likewise.
+	* moxie-dis.c, msp430-dis.c, mt-dis.c:
+	* nds32-dis.c, nios2-dis.c, ns32k-dis.c: Likewise.
+	* or1k-dis.c, pdp11-dis.c, pj-dis.c: Likewise.
+	* ppc-dis.c, pru-dis.c, riscv-dis.c: Likewise.
+	* rl78-dis.c, s390-dis.c, score-dis.c: Likewise.
+	* sh-dis.c, sh64-dis.c, tic30-dis.c: Likewise.
+	* tic4x-dis.c, tic54x-dis.c, tic6x-dis.c: Likewise.
+	* tic80-dis.c, tilegx-dis.c, tilepro-dis.c: Likewise.
+	* v850-dis.c, vax-dis.c, visium-dis.c: Likewise.
+	* w65-dis.c, wasm32-dis.c, xc16x-dis.c: Likewise.
+	* xgate-dis.c, xstormy16-dis.c, xtensa-dis.c: Likewise.
+	* z80-dis.c, z8k-dis.c: Likewise.
+	* disassemble.h: New file.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
 	* rl78-dis.c (rl78_get_disassembler): If parameter abfd
 	is NULL, set cpu to E_FLAG_RL78_ANY_CPU.
 

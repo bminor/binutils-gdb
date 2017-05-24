@@ -25,7 +25,7 @@
 
 #include "bfd.h"
 #include "elf-bfd.h"
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "opcode/rl78.h"
 #include "elf/rl78.h"
 
