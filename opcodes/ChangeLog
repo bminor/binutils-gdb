@@ -1,5 +1,10 @@
 2017-05-24  Yao Qi  <yao.qi@linaro.org>
 
+	* rl78-dis.c (rl78_get_disassembler): If parameter abfd
+	is NULL, set cpu to E_FLAG_RL78_ANY_CPU.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
 	* disassemble.c (disassembler): Add arguments a, big and mach.
 	Use them.
 
