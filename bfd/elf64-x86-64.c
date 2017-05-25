@@ -7245,8 +7245,7 @@ error_alignment:
 	  /* MPX PLT is supported only for non-NaCl target in 64-bit
 	     mode and is needed only for lazy binding.  */
 	  if (lazy_plt
-	      && info->bndplt
-	      && ABI_64_P (htab->elf.dynobj))
+	      && info->bndplt && ABI_64_P (dynobj))
 	    {
 	      /* Create the second PLT for Intel MPX support.  */
 	      sec = bfd_make_section_anyway_with_flags (dynobj,

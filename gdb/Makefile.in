@@ -1106,6 +1106,7 @@ SFILES = \
 	gdb_obstack.c \
 	gdb_usleep.c \
 	gdbarch.c \
+	gdbarch-selftests.c \
 	gdbtypes.c \
 	gnu-v2-abi.c \
 	gnu-v3-abi.c \
@@ -1719,6 +1720,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	gdb_usleep.o \
 	gdb_vecs.o \
 	gdbarch.o \
+	gdbarch-selftests.o \
 	gdbtypes.o \
 	gnu-v2-abi.o \
 	gnu-v3-abi.o \

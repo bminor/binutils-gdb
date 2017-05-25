@@ -728,9 +728,11 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 
 	case Tag_ARC_ABI_pic:
 	  tagname = "PIC";
+	  /* fall through */
 	case Tag_ARC_ABI_sda:
 	  if (!tagname)
 	    tagname = "SDA";
+	  /* fall through */
 	case Tag_ARC_ABI_tls:
 	  {
 	    const char *tagval[] = { "Absent", "MWDT", "GNU" };
@@ -756,9 +758,11 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 
 	case Tag_ARC_ABI_double_size:
 	  tagname = "Double size";
+	  /* fall through */
 	case Tag_ARC_ABI_enumsize:
 	  if (!tagname)
 	    tagname = "Enum size";
+	  /* fall through */
 	case Tag_ARC_ABI_exceptions:
 	  if (!tagname)
 	    tagname = "ABI exceptions";

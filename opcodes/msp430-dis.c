@@ -26,7 +26,7 @@
 #include <sys/types.h>
 #include <errno.h>
 
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "opintl.h"
 #include "libiberty.h"
 

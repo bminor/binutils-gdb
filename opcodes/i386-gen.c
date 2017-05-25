@@ -566,6 +566,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (FWait),
   BITFIELD (IsString),
   BITFIELD (BNDPrefixOk),
+  BITFIELD (NoTrackPrefixOk),
   BITFIELD (IsLockable),
   BITFIELD (RegKludge),
   BITFIELD (FirstXmm0),

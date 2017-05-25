@@ -1174,7 +1174,6 @@ mt_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sw_breakpoint_from_kind (gdbarch, mt_sw_breakpoint_from_kind);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  set_gdbarch_print_insn (gdbarch, print_insn_mt);
   set_gdbarch_register_type (gdbarch, mt_register_type);
   set_gdbarch_register_reggroup_p (gdbarch, mt_register_reggroup_p);
 

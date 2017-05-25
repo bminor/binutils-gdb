@@ -1,3 +1,33 @@
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* objdump.c (disassemble_data): Caller update.
+
+2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* objcopy.c (merge_gnu_build_notes): Remove workaround that
+	prevented deleting relocations in duplicated notes in mips64 and
+	sparc.
+
+2017-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips-note-2.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2r.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2-n32.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2-n64.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2r-n32.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2r-n64.d: New test.
+	* testsuite/binutils-all/mips/mips.exp: Define `has_newabi'.
+	Run the new tests.
+
+2017-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/lib/utils-lib.exp (run_dump_test): Handle the `dump'
+	option.
+
+2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* NEWS: Mention the SPARC M8 support.
+
 2017-05-19  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/binutils-all/mips/mips.exp: Bail out right away if

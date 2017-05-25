@@ -5047,12 +5047,22 @@ _bfd_sparc_elf_object_p (bfd *abfd)
                                    | ELF_SPARC_HWCAP2_MWAIT
                                    | ELF_SPARC_HWCAP2_XMPMUL
                                    | ELF_SPARC_HWCAP2_XMONT);
+  unsigned int m8_hwcaps2_mask = (ELF_SPARC_HWCAP2_SPARC6
+                                  | ELF_SPARC_HWCAP2_ONADDSUB
+                                  | ELF_SPARC_HWCAP2_ONMUL
+                                  | ELF_SPARC_HWCAP2_ONDIV
+                                  | ELF_SPARC_HWCAP2_DICTUNP
+                                  | ELF_SPARC_HWCAP2_FPCMPSHL
+                                  | ELF_SPARC_HWCAP2_RLE
+                                  | ELF_SPARC_HWCAP2_SHA3);
 
   if (ABI_64_P (abfd))
     {
       unsigned long mach = bfd_mach_sparc_v9;
 
-      if (hwcaps2->i & v9m_hwcaps2_mask)
+      if (hwcaps2->i & m8_hwcaps2_mask)
+        mach = bfd_mach_sparc_v9m8;
+      else if (hwcaps2->i & v9m_hwcaps2_mask)
         mach = bfd_mach_sparc_v9m;
       else if (hwcaps->i & v9v_hwcaps_mask)
         mach = bfd_mach_sparc_v9v;
@@ -5072,7 +5082,10 @@ _bfd_sparc_elf_object_p (bfd *abfd)
     {
       if (elf_elfheader (abfd)->e_machine == EM_SPARC32PLUS)
 	{
-          if (hwcaps2->i & v9m_hwcaps2_mask)
+          if (hwcaps2->i & m8_hwcaps2_mask)
+            return bfd_default_set_arch_mach (abfd, bfd_arch_sparc,
+                                              bfd_mach_sparc_v8plusm8);
+          else if (hwcaps2->i & v9m_hwcaps2_mask)
 	    return bfd_default_set_arch_mach (abfd, bfd_arch_sparc,
 					      bfd_mach_sparc_v8plusm);
           else if (hwcaps->i & v9v_hwcaps_mask)

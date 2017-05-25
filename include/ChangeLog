@@ -1,3 +1,46 @@
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* dis-asm.h: Move some function declarations to
+	opcodes/disassemble.h.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* dis-asm.h (disassembler): Update declaration.
+
+2017-05-23  Claudiu Zissulescu <claziss@synopsys.com>
+
+	* opcode/arc.h (MAX_INSN_FLGS): Update to 4.
+
+2017-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* include/opcode/i386.h (NOTRACK_PREFIX_OPCODE): New.
+
+2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* elf/sparc.h (ELF_SPARC_HWCAP2_SPARC6): Define.
+	(ELF_SPARC_HWCAP2_ONADDSUB): Likewise.
+	(ELF_SPARC_HWCAP2_ONMUL): Likewise.
+	(ELF_SPARC_HWCAP2_ONDIV): Likewise.
+	(ELF_SPARC_HWCAP2_DICTUNP): Likewise.
+	(ELF_SPARC_HWCAP2_FPCMPSHL): Likewise.
+	(ELF_SPARC_HWCAP2_RLE): Likewise.
+	(ELF_SPARC_HWCAP2_SHA3): Likewise.
+	* opcode/sparc.h (sparc_opcode_arch_val): Add SPARC_OPCODE_ARCH_M8
+	and adjust SPARC_OPCODE_ARCH_MAX.
+	(HWCAP2_SPARC6): Define.
+	(HWCAP2_ONADDSUB): Likewise.
+	(HWCAP2_ONMUL): Likewise.
+	(HWCAP2_ONDIV): Likewise.
+	(HWCAP2_DICTUNP): Likewise.
+	(HWCAP2_FPCMPSHL): Likewise.
+	(HWCAP2_RLE): Likewise.
+	(HWCAP2_SHA3): Likewise.
+	(OPM): Likewise.
+	(OPMI): Likewise.
+	(ONFCN): Likewise.
+	(REVFCN): Likewise.
+	(SIMM10): Likewise.
+
 2017-05-16  Alan Modra  <amodra@gmail.com>
 
 	* bfdlink.h (struct bfd_link_hash_entry <non_ir_ref>): Rename to

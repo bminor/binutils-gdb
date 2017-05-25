@@ -1395,7 +1395,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   if (arches != NULL)
     return arches->gdbarch;
 
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   switch (info.bfd_arch_info->mach)
@@ -1444,8 +1444,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_sw_breakpoint_from_kind (gdbarch,
 				       mn10300_breakpoint::bp_from_kind);
   /* decr_pc_after_break?  */
-  /* Disassembly.  */
-  set_gdbarch_print_insn (gdbarch, print_insn_mn10300);
 
   /* Stage 2 */
   set_gdbarch_return_value (gdbarch, mn10300_return_value);

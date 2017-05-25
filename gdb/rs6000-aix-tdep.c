@@ -253,7 +253,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	     Always store the floating point value using the register's
 	     floating-point format.  */
 	  const int fp_regnum = tdep->ppc_fp0_regnum + 1 + f_argno;
-	  gdb_byte reg_val[MAX_REGISTER_SIZE];
+	  gdb_byte reg_val[PPC_MAX_REGISTER_SIZE];
 	  struct type *reg_type = register_type (gdbarch, fp_regnum);
 
 	  gdb_assert (len <= 8);
@@ -270,7 +270,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  /* Argument takes more than one register.  */
 	  while (argbytes < len)
 	    {
-	      gdb_byte word[MAX_REGISTER_SIZE];
+	      gdb_byte word[PPC_MAX_REGISTER_SIZE];
 	      memset (word, 0, reg_size);
 	      memcpy (word,
 		      ((char *) value_contents (arg)) + argbytes,
@@ -290,7 +290,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       else
 	{
 	  /* Argument can fit in one register.  No problem.  */
-	  gdb_byte word[MAX_REGISTER_SIZE];
+	  gdb_byte word[PPC_MAX_REGISTER_SIZE];
 
 	  memset (word, 0, reg_size);
 	  memcpy (word, value_contents (arg), len);

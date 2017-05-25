@@ -19,8 +19,9 @@
    MA 02110-1301, USA.  */
 
 #include "sysdep.h"
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "safe-ctype.h"
+#include <assert.h>
 
 #ifdef ARCH_all
 #define ARCH_aarch64
@@ -109,10 +110,21 @@
 #endif
 
 disassembler_ftype
-disassembler (bfd *abfd)
+disassembler (enum bfd_architecture a, bfd_boolean big, unsigned long mach,
+	      bfd *abfd)
 {
-  enum bfd_architecture a = bfd_get_arch (abfd);
   disassembler_ftype disassemble;
+
+  if (abfd != NULL)
+    {
+      /* Do some asserts that the first three parameters should equal
+	 to what we can get from ABFD.  On the other hand, these
+	 asserts help removing some compiler errors on unused
+	 parameter.  */
+      assert (a == bfd_get_arch (abfd));
+      assert (big == bfd_big_endian (abfd));
+      assert (mach == bfd_get_mach (abfd));
+    }
 
   switch (a)
     {
@@ -135,7 +147,7 @@ disassembler (bfd *abfd)
 #endif
 #ifdef ARCH_arm
     case bfd_arch_arm:
-      if (bfd_big_endian (abfd))
+      if (big)
 	disassemble = print_insn_big_arm;
       else
 	disassemble = print_insn_little_arm;
@@ -184,13 +196,12 @@ disassembler (bfd *abfd)
 #endif
 #ifdef ARCH_h8300
     case bfd_arch_h8300:
-      if (bfd_get_mach (abfd) == bfd_mach_h8300h
-	  || bfd_get_mach (abfd) == bfd_mach_h8300hn)
+      if (mach == bfd_mach_h8300h || mach == bfd_mach_h8300hn)
 	disassemble = print_insn_h8300h;
-      else if (bfd_get_mach (abfd) == bfd_mach_h8300s
-	       || bfd_get_mach (abfd) == bfd_mach_h8300sn
-	       || bfd_get_mach (abfd) == bfd_mach_h8300sx
-	       || bfd_get_mach (abfd) == bfd_mach_h8300sxn)
+      else if (mach == bfd_mach_h8300s
+	       || mach == bfd_mach_h8300sn
+	       || mach == bfd_mach_h8300sx
+	       || mach == bfd_mach_h8300sxn)
 	disassemble = print_insn_h8300s;
       else
 	disassemble = print_insn_h8300;
@@ -326,7 +337,7 @@ disassembler (bfd *abfd)
 #endif
 #ifdef ARCH_mips
     case bfd_arch_mips:
-      if (bfd_big_endian (abfd))
+      if (big)
 	disassemble = print_insn_big_mips;
       else
 	disassemble = print_insn_little_mips;
@@ -349,7 +360,7 @@ disassembler (bfd *abfd)
 #endif
 #ifdef ARCH_nios2
     case bfd_arch_nios2:
-      if (bfd_big_endian (abfd))
+      if (big)
 	disassemble = print_insn_big_nios2;
       else
 	disassemble = print_insn_little_nios2;
@@ -372,7 +383,7 @@ disassembler (bfd *abfd)
 #endif
 #ifdef ARCH_powerpc
     case bfd_arch_powerpc:
-      if (bfd_big_endian (abfd))
+      if (big)
 	disassemble = print_insn_big_powerpc;
       else
 	disassemble = print_insn_little_powerpc;
@@ -390,7 +401,7 @@ disassembler (bfd *abfd)
 #endif
 #ifdef ARCH_rs6000
     case bfd_arch_rs6000:
-      if (bfd_get_mach (abfd) == bfd_mach_ppc_620)
+      if (mach == bfd_mach_ppc_620)
 	disassemble = print_insn_big_powerpc;
       else
 	disassemble = print_insn_rs6000;
@@ -413,7 +424,7 @@ disassembler (bfd *abfd)
 #endif
 #ifdef ARCH_score
     case bfd_arch_score:
-      if (bfd_big_endian (abfd))
+      if (big)
 	disassemble = print_insn_big_score;
       else
 	disassemble = print_insn_little_score;
@@ -507,7 +518,7 @@ disassembler (bfd *abfd)
 #endif
 #ifdef ARCH_z8k
     case bfd_arch_z8k:
-      if (bfd_get_mach(abfd) == bfd_mach_z8001)
+      if (mach == bfd_mach_z8001)
 	disassemble = print_insn_z8001;
       else
 	disassemble = print_insn_z8002;

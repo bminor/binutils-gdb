@@ -8040,8 +8040,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     }
 
-  set_gdbarch_print_insn (gdbarch, print_insn_s390);
-
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
   /* Enable TLS support.  */

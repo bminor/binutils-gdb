@@ -1275,7 +1275,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
       set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
       set_gdbarch_return_value (gdbarch, h8300_return_value);
-      set_gdbarch_print_insn (gdbarch, print_insn_h8300);
       break;
     case bfd_mach_h8300h:
     case bfd_mach_h8300hn:
@@ -1296,7 +1295,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
 	}
       set_gdbarch_return_value (gdbarch, h8300h_return_value);
-      set_gdbarch_print_insn (gdbarch, print_insn_h8300h);
       break;
     case bfd_mach_h8300s:
     case bfd_mach_h8300sn:
@@ -1317,7 +1315,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
 	}
       set_gdbarch_return_value (gdbarch, h8300h_return_value);
-      set_gdbarch_print_insn (gdbarch, print_insn_h8300s);
       break;
     case bfd_mach_h8300sx:
     case bfd_mach_h8300sxn:
@@ -1338,7 +1335,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
 	}
       set_gdbarch_return_value (gdbarch, h8300h_return_value);
-      set_gdbarch_print_insn (gdbarch, print_insn_h8300s);
       break;
     }
 

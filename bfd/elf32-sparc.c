@@ -142,6 +142,7 @@ elf32_sparc_final_write_processing (bfd *abfd,
     case bfd_mach_sparc_v8pluse :
     case bfd_mach_sparc_v8plusv :
     case bfd_mach_sparc_v8plusm :
+    case bfd_mach_sparc_v8plusm8 :
       elf_elfheader (abfd)->e_machine = EM_SPARC32PLUS;
       elf_elfheader (abfd)->e_flags &=~ EF_SPARC_32PLUS_MASK;
       elf_elfheader (abfd)->e_flags |= EF_SPARC_32PLUS | EF_SPARC_SUN_US1

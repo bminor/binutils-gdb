@@ -62,12 +62,20 @@ static symbolS *GOT_symbol;
 /* Which ABI to use.  */
 enum aarch64_abi_type
 {
-  AARCH64_ABI_LP64 = 0,
-  AARCH64_ABI_ILP32 = 1
+  AARCH64_ABI_NONE = 0,
+  AARCH64_ABI_LP64 = 1,
+  AARCH64_ABI_ILP32 = 2
 };
 
+#ifndef DEFAULT_ARCH
+#define DEFAULT_ARCH "aarch64"
+#endif
+
+/* DEFAULT_ARCH is initialized in gas/configure.tgt.  */
+static const char *default_arch = DEFAULT_ARCH;
+
 /* AArch64 ABI for the output file.  */
-static enum aarch64_abi_type aarch64_abi = AARCH64_ABI_LP64;
+static enum aarch64_abi_type aarch64_abi = AARCH64_ABI_NONE;
 
 /* When non-zero, program to a 32-bit model, in which the C data types
    int, long and all pointer types are 32-bit objects (ILP32); or to a
@@ -7974,6 +7982,22 @@ aarch64_force_relocation (struct fix *fixp)
 }
 
 #ifdef OBJ_ELF
+
+/* Implement md_after_parse_args.  This is the earliest time we need to decide
+   ABI.  If no -mabi specified, the ABI will be decided by target triplet.  */
+
+void
+aarch64_after_parse_args (void)
+{
+  if (aarch64_abi != AARCH64_ABI_NONE)
+    return;
+
+  /* DEFAULT_ARCH will have ":32" extension if it's configured for ILP32.  */
+  if (strlen (default_arch) > 7 && strcmp (default_arch + 7, ":32") == 0)
+    aarch64_abi = AARCH64_ABI_ILP32;
+  else
+    aarch64_abi = AARCH64_ABI_LP64;
+}
 
 const char *
 elf64_aarch64_target_format (void)

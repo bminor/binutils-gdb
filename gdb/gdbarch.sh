@@ -643,7 +643,7 @@ F;std::vector<CORE_ADDR>;software_single_step;struct regcache *regcache;regcache
 M;int;single_step_through_delay;struct frame_info *frame;frame
 # FIXME: cagney/2003-08-28: Need to find a better way of selecting the
 # disassembler.  Perhaps objdump can handle it?
-f;int;print_insn;bfd_vma vma, struct disassemble_info *info;vma, info;;0;
+f;int;print_insn;bfd_vma vma, struct disassemble_info *info;vma, info;;default_print_insn;;0
 f;CORE_ADDR;skip_trampoline_code;struct frame_info *frame, CORE_ADDR pc;frame, pc;;generic_skip_trampoline_code;;0
 
 

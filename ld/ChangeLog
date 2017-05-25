@@ -1,3 +1,9 @@
+2017-05-22  Jiong Wang  <jiong.wang@arm.com>
+
+	* configure.tgt: Set "targ_emul" to "aarch64linux32b" for
+	aarch64_be-*-linux-gnu_ilp32.  Set "targ_emul" to "aarch64linux32" for
+	aarch64-*-linux-gnu_ilp32.
+
 2017-05-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Run property-x86-4a and

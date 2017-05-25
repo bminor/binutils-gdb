@@ -1,3 +1,94 @@
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* alpha-dis.c: Include disassemble.h, don't include
+	dis-asm.h.
+	* avr-dis.c, bfin-dis.c, cr16-dis.c: Likewise.
+	* crx-dis.c, d10v-dis.c, d30v-dis.c: Likewise.
+	* disassemble.c, dlx-dis.c, epiphany-dis.c: Likewise.
+	* fr30-dis.c, ft32-dis.c, h8300-dis.c, h8500-dis.c: Likewise.
+	* hppa-dis.c, i370-dis.c, i386-dis.c: Likewise.
+	* i860-dis.c, i960-dis.c, ip2k-dis.c: Likewise.
+	* iq2000-dis.c, lm32-dis.c, m10200-dis.c: Likewise.
+	* m10300-dis.c, m32r-dis.c, m68hc11-dis.c: Likewise.
+	* m68k-dis.c, m88k-dis.c, mcore-dis.c: Likewise.
+	* metag-dis.c, microblaze-dis.c, mmix-dis.c: Likewise.
+	* moxie-dis.c, msp430-dis.c, mt-dis.c:
+	* nds32-dis.c, nios2-dis.c, ns32k-dis.c: Likewise.
+	* or1k-dis.c, pdp11-dis.c, pj-dis.c: Likewise.
+	* ppc-dis.c, pru-dis.c, riscv-dis.c: Likewise.
+	* rl78-dis.c, s390-dis.c, score-dis.c: Likewise.
+	* sh-dis.c, sh64-dis.c, tic30-dis.c: Likewise.
+	* tic4x-dis.c, tic54x-dis.c, tic6x-dis.c: Likewise.
+	* tic80-dis.c, tilegx-dis.c, tilepro-dis.c: Likewise.
+	* v850-dis.c, vax-dis.c, visium-dis.c: Likewise.
+	* w65-dis.c, wasm32-dis.c, xc16x-dis.c: Likewise.
+	* xgate-dis.c, xstormy16-dis.c, xtensa-dis.c: Likewise.
+	* z80-dis.c, z8k-dis.c: Likewise.
+	* disassemble.h: New file.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* rl78-dis.c (rl78_get_disassembler): If parameter abfd
+	is NULL, set cpu to E_FLAG_RL78_ANY_CPU.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* disassemble.c (disassembler): Add arguments a, big and mach.
+	Use them.
+
+2017-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (NOTRACK_Fixup): New.
+	(NOTRACK): Likewise.
+	(NOTRACK_PREFIX): Likewise.
+	(last_active_prefix): Likewise.
+	(reg_table): Use NOTRACK on indirect call and jmp.
+	(ckprefix): Set last_active_prefix.
+	(prefix_name): Return "notrack" for NOTRACK_PREFIX.
+	* i386-gen.c (opcode_modifiers): Add NoTrackPrefixOk.
+	* i386-opc.h (NoTrackPrefixOk): New.
+	(i386_opcode_modifier): Add notrackprefixok.
+	* i386-opc.tbl: Add NoTrackPrefixOk to indirect call and jmp.
+	Add notrack.
+	* i386-tbl.h: Regenerated.
+
+2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-dis.c (MASK_V9): Include SPARC_OPCODE_ARCH_M8.
+	(X_IMM2): Define.
+	(compute_arch_mask): Handle bfd_mach_sparc_v8plusm8 and
+	bfd_mach_sparc_v9m8.
+	(print_insn_sparc): Handle new operand types.
+	* sparc-opc.c (MASK_M8): Define.
+	(v6): Add MASK_M8.
+	(v6notlet): Likewise.
+	(v7): Likewise.
+	(v8): Likewise.
+	(v9): Likewise.
+	(v9a): Likewise.
+	(v9b): Likewise.
+	(v9c): Likewise.
+	(v9d): Likewise.
+	(v9e): Likewise.
+	(v9v): Likewise.
+	(v9m): Likewise.
+	(v9andleon): Likewise.
+	(m8): Define.
+	(HWS_VM8): Define.
+	(HWS2_VM8): Likewise.
+	(sparc_opcode_archs): Add entry for "m8".
+	(sparc_opcodes): Add OSA2017 and M8 instructions
+	dictunpack, fpcmp{ule,ugt,eq,ne,de,ur}{8,16,32}shl,
+	fpx{ll,ra,rl}64x,
+	ldm{sh,uh,sw,uw,x,ux}, ldm{sh,uh,sw,uw,x,ux}a, ldmf{s,d},
+	ldmf{s,d}a, on{add,sub,mul,div}, rdentropy, revbitsb,
+	revbytes{h,w,x}, rle_burst, rle_length, sha3, stm{h,w,x},
+	stm{h,w,x}a, stmf{s,d}, stmf{s,d}a.
+	(asi_table): New M8 ASIs ASI_CORE_COMMIT_COUNT,
+	ASI_CORE_SELECT_COUNT, ASI_ARF_ECC_REG, ASI_ITLB_PROBE, ASI_DSFAR,
+	ASI_DTLB_PROBE_PRIMARY, ASI_DTLB_PROBE_REAL,
+	ASI_CORE_SELECT_COMMIT_NHT.
+
 2017-05-18  Alan Modra  <amodra@gmail.com>
 
 	* aarch64-asm.c: Don't compare boolean values against TRUE or FALSE.

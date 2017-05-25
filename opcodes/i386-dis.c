@@ -33,7 +33,7 @@
    the Intel manual for details.  */
 
 #include "sysdep.h"
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "opintl.h"
 #include "opcode/i386.h"
 #include "libiberty.h"
@@ -110,6 +110,7 @@ static void CMP_Fixup (int, int);
 static void BadOp (void);
 static void REP_Fixup (int, int);
 static void BND_Fixup (int, int);
+static void NOTRACK_Fixup (int, int);
 static void HLE_Fixup1 (int, int);
 static void HLE_Fixup2 (int, int);
 static void HLE_Fixup3 (int, int);
@@ -473,6 +474,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Evh3 { HLE_Fixup3, v_mode }
 
 #define BND { BND_Fixup, 0 }
+#define NOTRACK { NOTRACK_Fixup, 0 }
 
 #define cond_jump_flag { NULL, cond_jump_mode }
 #define loop_jcxz_flag { NULL, loop_jcxz_mode }
@@ -3167,6 +3169,7 @@ static int last_data_prefix;
 static int last_addr_prefix;
 static int last_rex_prefix;
 static int last_seg_prefix;
+static int last_active_prefix;
 static int fwait_prefix;
 /* The active segment register prefix.  */
 static int active_seg_prefix;
@@ -3549,9 +3552,9 @@ static const struct dis386 reg_table[][8] = {
   {
     { "incQ",	{ Evh1 }, 0 },
     { "decQ",	{ Evh1 }, 0 },
-    { "call{&|}", { indirEv, BND }, 0 },
+    { "call{&|}", { indirEv, NOTRACK, BND }, 0 },
     { MOD_TABLE (MOD_FF_REG_3) },
-    { "jmp{&|}", { indirEv, BND }, 0 },
+    { "jmp{&|}", { indirEv, NOTRACK, BND }, 0 },
     { MOD_TABLE (MOD_FF_REG_5) },
     { "pushU",	{ stackEv }, 0 },
     { Bad_Opcode },
@@ -12281,6 +12284,7 @@ static const struct dis386 rm_table[][8] = {
 #define XACQUIRE_PREFIX	(0xf2 | 0x200)
 #define XRELEASE_PREFIX	(0xf3 | 0x400)
 #define BND_PREFIX	(0xf2 | 0x400)
+#define NOTRACK_PREFIX	(0x3e | 0x100)
 
 static int
 ckprefix (void)
@@ -12298,6 +12302,7 @@ ckprefix (void)
   last_addr_prefix = -1;
   last_rex_prefix = -1;
   last_seg_prefix = -1;
+  last_active_prefix = -1;
   fwait_prefix = -1;
   active_seg_prefix = 0;
   for (i = 0; i < (int) ARRAY_SIZE (all_prefixes); i++)
@@ -12410,7 +12415,10 @@ ckprefix (void)
 	  return 1;
 	}
       if (*codep != FWAIT_OPCODE)
-	all_prefixes[i++] = *codep;
+	{
+	  last_active_prefix = i;
+	  all_prefixes[i++] = *codep;
+	}
       rex = newrex;
       codep++;
       length++;
@@ -12499,6 +12507,8 @@ prefix_name (int pref, int sizeflag)
       return "xrelease";
     case BND_PREFIX:
       return "bnd";
+    case NOTRACK_PREFIX:
+      return "notrack";
     default:
       return NULL;
     }
@@ -16787,6 +16797,34 @@ BND_Fixup (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
   if (prefixes & PREFIX_REPNZ)
     all_prefixes[last_repnz_prefix] = BND_PREFIX;
+}
+
+/* For NOTRACK-prefixed instructions, 0x3E prefix should be displayed as
+   "notrack".  */
+
+static void
+NOTRACK_Fixup (int bytemode ATTRIBUTE_UNUSED,
+	       int sizeflag ATTRIBUTE_UNUSED)
+{
+  if (modrm.mod == 3
+      && active_seg_prefix == PREFIX_DS
+      && (address_mode != mode_64bit || last_data_prefix < 0))
+    {
+      /* NOTRACK prefix is only valid on register indirect branch
+	 instructions and it must be the last prefix before REX
+	 prefix and opcode.  NB: DATA prefix is unsupported for
+	 Intel64.  */
+      if (last_active_prefix >= 0)
+	{
+	  int notrack_prefix = last_active_prefix;
+	  if (last_rex_prefix == last_active_prefix)
+	    notrack_prefix--;
+	  if (all_prefixes[notrack_prefix] != NOTRACK_PREFIX_OPCODE)
+	    return;
+	}
+      active_seg_prefix = 0;
+      all_prefixes[last_seg_prefix] = NOTRACK_PREFIX;
+    }
 }
 
 /* Similar to OP_E.  But the 0xf2/0xf3 prefixes should be displayed as

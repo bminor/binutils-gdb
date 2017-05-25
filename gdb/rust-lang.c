@@ -893,13 +893,12 @@ rust_print_type (struct type *type, const char *varstring,
 	fputs_filtered ("[", stream);
 	rust_print_type (TYPE_TARGET_TYPE (type), NULL,
 			 stream, show - 1, level, flags);
-	fputs_filtered ("; ", stream);
 
 	if (TYPE_HIGH_BOUND_KIND (TYPE_INDEX_TYPE (type)) == PROP_LOCEXPR
 	    || TYPE_HIGH_BOUND_KIND (TYPE_INDEX_TYPE (type)) == PROP_LOCLIST)
-	  fprintf_filtered (stream, "variable length");
+	  fprintf_filtered (stream, "; variable length");
 	else if (get_array_bounds (type, &low_bound, &high_bound))
-	  fprintf_filtered (stream, "%s", 
+	  fprintf_filtered (stream, "; %s",
 			    plongest (high_bound - low_bound + 1));
 	fputs_filtered ("]", stream);
       }
@@ -2122,6 +2121,20 @@ rust_sniff_from_mangled_name (const char *mangled, char **demangled)
 
 
 
+/* la_watch_location_expression for Rust.  */
+
+static gdb::unique_xmalloc_ptr<char>
+rust_watch_location_expression (struct type *type, CORE_ADDR addr)
+{
+  type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
+  std::string name = type_to_string (type);
+  return gdb::unique_xmalloc_ptr<char>
+    (xstrprintf ("*(%s as *mut %s)", core_addr_to_string (addr),
+		 name.c_str ()));
+}
+
+
+
 static const struct exp_descriptor exp_descriptor_rust = 
 {
   rust_print_subexp,
@@ -2176,6 +2189,7 @@ static const struct language_defn rust_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
+  rust_watch_location_expression,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &default_varobj_ops,

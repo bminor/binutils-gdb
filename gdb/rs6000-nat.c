@@ -162,7 +162,7 @@ static void
 fetch_register (struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  int addr[MAX_REGISTER_SIZE];
+  int addr[PPC_MAX_REGISTER_SIZE];
   int nr, isfloat;
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
@@ -221,7 +221,7 @@ static void
 store_register (struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  int addr[MAX_REGISTER_SIZE];
+  int addr[PPC_MAX_REGISTER_SIZE];
   int nr, isfloat;
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 

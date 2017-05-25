@@ -341,8 +341,9 @@ i387_convert_register_p (struct gdbarch *gdbarch, int regnum,
   if (i386_fp_regnum_p (gdbarch, regnum))
     {
       /* Floating point registers must be converted unless we are
-	 accessing them in their hardware type.  */
-      if (type == i387_ext_type (gdbarch))
+	 accessing them in their hardware type or TYPE is not float.  */
+      if (type == i387_ext_type (gdbarch)
+	  || TYPE_CODE (type) != TYPE_CODE_FLT)
 	return 0;
       else
 	return 1;
@@ -374,7 +375,8 @@ i387_register_to_value (struct frame_info *frame, int regnum,
     }
 
   /* Convert to TYPE.  */
-  if (!get_frame_register_bytes (frame, regnum, 0, TYPE_LENGTH (type),
+  if (!get_frame_register_bytes (frame, regnum, 0,
+				 register_size (gdbarch, regnum),
 				 from, optimizedp, unavailablep))
     return 0;
 

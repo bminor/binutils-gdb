@@ -1,3 +1,24 @@
+2017-05-23  Alan Modra  <amodra@gmail.com>
+
+	PR 21503
+	* options.h: Add --emit-stub-syms option.
+	* powerpc.cc (object_id): New.
+	(Powerpc_relobj): Add uniq_ and accessor.  Sort variables for
+	better packing.
+	(Powerpc_dynobj): Sort variables for better packing.
+	(Target_powerpc::define_local): New function.
+	(Target_powerpc::group_sections): Pass stub table size to
+	Stub_table constructor.
+	(Target_powerpc::do_relax): Define stub and glink symbols.
+	(Stub_table): Add uniq_ variable, and id param to constructor.
+	(Stub_table::Plt_stub_ent): Add indx_ variable.
+	(Stub_table::Branch_stub_entries): Move typedef earlier.
+	(Stub_table::branch_stub_size): Replace "to" parameter with a
+	Branch_stub_entries iterator.
+	(Stub_table::add_long_branch_entry): Adjust to suit.
+	(Stub_table::add_plt_call_entry): Set indx_.
+	(Stub_table::define_stub_syms): New function.
+
 2017-05-15  Eric Christopher <echristo@gmail.com>
 
         * layout.cc (Layout::segment_precedes): Add a case for testing

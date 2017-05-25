@@ -1,3 +1,42 @@
+2017-05-23  Dilian Palauzov  <git-dpa@aegee.org>
+
+	* elf32-arc.c (arc_elf_merge_attributes): Add fall through
+	comments.
+
+2017-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_link_setup_gnu_properties): Use
+	dynobj instead of htab->elf.dynobj.
+
+2017-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf64-mips.c (mips_elf64_canonicalize_reloc): Remove prototype
+	and function.
+	(mips_elf64_canonicalize_dynamic_reloc): Likewise.
+	(mips_elf64_slurp_one_reloc_table): Set `reloc_count' to the
+	actual number of internal relocations retrieved.  Adjust
+	function description.
+	(bfd_elf64_canonicalize_reloc): Remove macro.
+	(bfd_elf64_canonicalize_dynamic_reloc): Likewise.
+
+2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* archures.c (bfd_mach_sparc_v9m8): Define.
+	(bfd_mach_sparc_v8plusm8): Likewise.
+	(bfd_mach_sparc_v9_p): Adjust to M8.
+	(bfd_mach_sparc_64bit_p): Likewise.
+	* aoutx.h (machine_type): Handle bfd_mach_sparc_v9m8 and
+	bfd_mach_sparc_v8plusm8.
+	* bfd-in2.h: Regenerated.
+	* cpu-sparc.c (arch_info_struct): Entries for sparc:v9m8 and
+	sparc:v8plusm8.
+	* elfxx-sparc.c (_bfd_sparc_elf_object_p): Handle
+	bfd_mach_sparc_v8plusm8 and bfd_mach_sparc_v9m8 using the new hw
+	capabilities ONADDSUB, ONMUL, ONDIV, DICTUNP, FPCPSHL, RLE and
+	SHA3.
+	* elf32-sparc.c (elf32_sparc_final_write_processing): Handle
+	bfd_mach_sparc_v8plusm8.
+
 2017-05-19  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_gc_mark_extra_sections): Don't keep

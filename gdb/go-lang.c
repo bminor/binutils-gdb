@@ -605,6 +605,7 @@ static const struct language_defn go_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
+  c_watch_location_expression,
   NULL,
   iterate_over_symbols,
   &default_varobj_ops,

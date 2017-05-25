@@ -1,3 +1,15 @@
+2017-05-21  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21466:
+	* gdb.rust/unsized.exp: New file.
+	* gdb.rust/unsized.rs: New file.
+
+2017-05-19  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21484:
+	* gdb.rust/watch.exp: New file.
+	* gdb.rust/watch.rs: New file.
+
 2017-05-18  Tom Tromey  <tom@tromey.com>
 
 	* gdb.rust/simple.exp: Allow Box to be qualified.

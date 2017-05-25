@@ -66,8 +66,11 @@
 #define HLE_PREFIX	REP_PREFIX
 #define BND_PREFIX	REP_PREFIX
 #define LOCK_PREFIX	5
-#define REX_PREFIX	6       /* must come last.  */
-#define MAX_PREFIXES	7	/* max prefixes per opcode */
+/* Only one of NOTRACK_PREFIX and SEG_PREFIX can be used at the same
+   time.  */
+#define NOTRACK_PREFIX	6
+#define REX_PREFIX	7       /* must come last.  */
+#define MAX_PREFIXES	8	/* max prefixes per opcode */
 
 /* we define the syntax here (modulo base,index,scale syntax) */
 #define REGISTER_PREFIX '%'
@@ -387,6 +390,9 @@ struct _i386_insn
 
     /* Have BND prefix.  */
     const char *bnd_prefix;
+
+    /* Have NOTRACK prefix.  */
+    const char *notrack_prefix;
 
     /* Error message.  */
     enum i386_error error;
@@ -2144,6 +2150,7 @@ enum PREFIX_GROUP
   PREFIX_EXIST = 0,
   PREFIX_LOCK,
   PREFIX_REP,
+  PREFIX_DS,
   PREFIX_OTHER
 };
 
@@ -2152,7 +2159,8 @@ enum PREFIX_GROUP
    same class already exists.
    b. PREFIX_LOCK if lock prefix is added.
    c. PREFIX_REP if rep/repne prefix is added.
-   d. PREFIX_OTHER if other prefix is added.
+   d. PREFIX_DS if ds prefix is added.
+   e. PREFIX_OTHER if other prefix is added.
  */
 
 static enum PREFIX_GROUP
@@ -2177,8 +2185,10 @@ add_prefix (unsigned int prefix)
 	default:
 	  abort ();
 
-	case CS_PREFIX_OPCODE:
 	case DS_PREFIX_OPCODE:
+	  ret = PREFIX_DS;
+	  /* Fall through.  */
+	case CS_PREFIX_OPCODE:
 	case ES_PREFIX_OPCODE:
 	case FS_PREFIX_OPCODE:
 	case GS_PREFIX_OPCODE:
@@ -3702,6 +3712,15 @@ md_assemble (char *line)
   if (i.bnd_prefix && !i.tm.opcode_modifier.bndprefixok)
     as_bad (_("expecting valid branch instruction after `bnd'"));
 
+  /* Check NOTRACK prefix.  */
+  if (i.notrack_prefix
+      && (!i.tm.opcode_modifier.notrackprefixok
+	  || i.reg_operands != 1
+	  || i.disp_operands != 0
+	  || i.mem_operands != 0
+	  || i.imm_operands != 0))
+    as_bad (_("expecting register indirect branch instruction after `notrack'"));
+
   if (i.tm.cpu_flags.bitfield.cpumpx)
     {
       if (flag_code == CODE_64BIT && i.prefix[ADDR_PREFIX])
@@ -3964,20 +3983,42 @@ parse_insn (char *line, char *mnemonic)
 	  else
 	    {
 	      /* Add prefix, checking for repeated prefixes.  */
-	      switch (add_prefix (current_templates->start->base_opcode))
+	      enum PREFIX_GROUP p
+		= add_prefix (current_templates->start->base_opcode);
+	      if (p == PREFIX_DS
+		  && current_templates->start->cpu_flags.bitfield.cpucet)
 		{
-		case PREFIX_EXIST:
-		  return NULL;
-		case PREFIX_REP:
-		  if (current_templates->start->cpu_flags.bitfield.cpuhle)
-		    i.hle_prefix = current_templates->start->name;
-		  else if (current_templates->start->cpu_flags.bitfield.cpumpx)
-		    i.bnd_prefix = current_templates->start->name;
-		  else
-		    i.rep_prefix = current_templates->start->name;
-		  break;
-		default:
-		  break;
+		  i.notrack_prefix = current_templates->start->name;
+		  /* Move NOTRACK_PREFIX_OPCODE to NOTRACK_PREFIX slot so
+		     that it is placed before others.  */
+		  i.prefix[SEG_PREFIX] = 0;
+		  i.prefix[NOTRACK_PREFIX] = NOTRACK_PREFIX_OPCODE;
+		}
+	      else
+		{
+		  switch (p)
+		    {
+		    case PREFIX_EXIST:
+		      return NULL;
+		    case PREFIX_REP:
+		      if (current_templates->start->cpu_flags.bitfield.cpuhle)
+			i.hle_prefix = current_templates->start->name;
+		      else if (current_templates->start->cpu_flags.bitfield.cpumpx)
+			i.bnd_prefix = current_templates->start->name;
+		      else
+			i.rep_prefix = current_templates->start->name;
+		      break;
+		    default:
+		      break;
+		    }
+
+		  if (i.notrack_prefix != NULL)
+		    {
+		      /* There must be no other prefixes after NOTRACK
+			 prefix.  */
+		      as_bad (_("expecting no other prefixes after `notrack'"));
+		      return NULL;
+		    }
 		}
 	    }
 	  /* Skip past PREFIX_SEPARATOR and reset token_start.  */

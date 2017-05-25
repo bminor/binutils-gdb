@@ -11256,18 +11256,11 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
       struct type *t = value_type (val);
       CORE_ADDR addr = value_as_address (val);
 
-      t = check_typedef (TYPE_TARGET_TYPE (check_typedef (t)));
-
-      std::string name = type_to_string (t);
-
-      w->exp_string_reparse = xstrprintf ("* (%s *) %s", name.c_str (),
-					  core_addr_to_string (addr));
+      w->exp_string_reparse
+	= current_language->la_watch_location_expression (t, addr).release ();
 
       w->exp_string = xstrprintf ("-location %.*s",
 				  (int) (exp_end - exp_start), exp_start);
-
-      /* The above expression is in C.  */
-      b->language = language_c;
     }
   else
     w->exp_string = savestring (exp_start, exp_end - exp_start);

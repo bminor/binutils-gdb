@@ -1,3 +1,216 @@
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (SFILES): Add gdbarch-selftests.c.
+	(COMMON_OBS): Add gdbarch-selftests.o.
+	* frame.c [GDB_SELF_TESTS] (create_new_frame): New function.
+	* frame.h [GDB_SELF_TESTS] (create_new_frame): Declare.
+	* gdbarch-selftests.c: New file.
+	* regcache.h (regcache) <~regcache>: Mark it virtual if
+	GDB_SELF_TEST.
+	<raw_write>: Likewise.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (current_regcache): Change it to
+	regcache::current_regcache.
+	(regcache_observer_target_changed): Update.
+	(regcache_thread_ptid_changed): Make it a regcache static
+	method.
+	(regcache_thread_ptid_changed): Update.
+	(class regcache_access): New.
+	(current_regcache_test): Update.
+	(_initialize_regcache): Update.
+	* regcache.h: Include forward_list.
+	(regcache): Declare regcache_thread_ptid_changed and declare
+	registers_changed_ptid as friend.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* i387-tdep.c (i387_register_to_value): Use register_size
+	instead of TYPE_LENGTH.
+	* m68k-tdep.c (m68k_register_to_value): Likewise.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* i387-tdep.c (i387_convert_register_p): Return false if type
+	code isn't TYPE_CODE_FLT.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* alpha-tdep.c (alpha_convert_register_p): Return true if type
+	length is 4.
+	(alpha_register_to_value): Remove type length check.
+	(alpha_value_to_register): Likewise.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* ia64-tdep.c (ia64_convert_register_p): Check type's code is
+	TYPE_CODE_FLT.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* m68k-tdep.c (m68k_convert_register_p): Check type's code is
+	TYPE_CODE_FLT or not.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* alpha-tdep.c (alpha_gdbarch_init): Use XCNEW instead of XNEW.
+	* avr-tdep.c (avr_gdbarch_init): Likewise.
+	* bfin-tdep.c (bfin_gdbarch_init): Likewise.
+	* cris-tdep.c (cris_gdbarch_init): Likewise.
+	* ft32-tdep.c (ft32_gdbarch_init): Likewise.
+	* lm32-tdep.c (lm32_gdbarch_init): Likewise.
+	* m32r-tdep.c (m32r_gdbarch_init): Likewise.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Likewise.
+	* mep-tdep.c (mep_gdbarch_init): Likewise.
+	* microblaze-tdep.c (microblaze_gdbarch_init): Likewise.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Likewise.
+	* moxie-tdep.c (moxie_gdbarch_init): Likewise.
+	* msp430-tdep.c (msp430_gdbarch_init): Likewise.
+	* sh64-tdep.c (sh64_gdbarch_init): Likewise.
+	* v850-tdep.c (v850_gdbarch_init): Likewise.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* selftest-arch.c (tests_with_arch): Call registers_changed
+	and reinit_frame_cache.
+	* selftest.c (run_self_tests): Likewise.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* rs6000-tdep.c (gdb_print_insn_powerpc): Remove.
+	(rs6000_gdbarch_init): Don't call set_gdbarch_print_insn.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* rl78-tdep.c (rl78_gdbarch_init): Don't call
+	set_gdbarch_print_insn.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* h8300-tdep.c (h8300_gdbarch_init): Don't call
+	set_gdbarch_print_insn.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* alpha-tdep.c (alpha_gdbarch_init): Don't call
+	set_gdbarch_print_insn.
+	* arc-tdep.c (arc_gdbarch_init): Likewise.
+	* arch-utils.c: include dis-asm.h.
+	(default_print_insn): New function.
+	* arch-utils.h (default_print_insn): Declare.
+	* avr-tdep.c (avr_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* bfin-tdep.c (bfin_gdbarch_init): Likewise.
+	* cris-tdep.c (cris_delayed_get_disassembler): Remove.
+	(cris_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* frv-tdep.c (frv_gdbarch_init): Likewise.
+	* ft32-tdep.c (ft32_gdbarch_init): Likewise.
+	* gdbarch.sh (print_insn): Use default_print_insn.
+	* gdbarch.c: Regenerated.
+	* hppa-tdep.c (hppa_gdbarch_init): Likewise.
+	* iq2000-tdep.c (iq2000_gdbarch_init): Likewise.
+	* lm32-tdep.c (lm32_gdbarch_init): Likewise.
+	* m32c-tdep.c (m32c_gdbarch_init): Likewise.
+	* m32r-tdep.c (m32r_gdbarch_init): Likewise.
+	* m68hc11-tdep.c (gdb_print_insn_m68hc11): Remove.
+	(m68hc11_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* m68k-tdep.c (m68k_gdbarch_init): Likewise.
+	* m88k-tdep.c (m88k_gdbarch_init): Likewise.
+	* microblaze-tdep.c (microblaze_gdbarch_init): Likewise.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Likewise.
+	* moxie-tdep.c (moxie_gdbarch_init): Likewise.
+	* msp430-tdep.c (msp430_gdbarch_init): Likewise.
+	* mt-tdep.c (mt_gdbarch_init): Likewise.
+	* nds32-tdep.c (nds32_gdbarch_init): Likewise.
+	* nios2-tdep.c (nios2_print_insn): Remove.
+	(nios2_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* rx-tdep.c (rx_gdbarch_init): Likewise.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* score-tdep.c (score_print_insn): Remove.
+	(score_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* sh-tdep.c (sh_gdbarch_init): Likewise.
+	* sh64-tdep.c (sh64_gdbarch_init): Likewise.
+	* sparc-tdep.c (sparc32_gdbarch_init): Likewise.
+	* tic6x-tdep.c (tic6x_print_insn): Remove.
+	(tic6x_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* tilegx-tdep.c (tilegx_gdbarch_init): Likewise.
+	* v850-tdep.c (v850_gdbarch_init): Likewise.
+	* vax-tdep.c (vax_gdbarch_init): Likewise.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Likewise.
+	* xtensa-tdep.c (xtensa_gdbarch_init): Likewise.
+
+2017-05-23  John Baldwin  <jhb@FreeBSD.org>
+
+	* mips-fbsd-tdep.c (MIPS_PC_REGNUM): Remove.
+	(MIPS_FP0_REGNUM): Remove.
+	(MIPS_FSR_REGNUM): Remove.
+	(mips_fbsd_supply_fpregs): Use mips_regnum.
+	(mips_fbsd_supply_gregs): Likewise.
+	(mips_fbsd_collect_fpregs): Likewise.
+	(mips_fbsd_collect_gregs): Likewise.
+
+2017-05-23  John Baldwin  <jhb@FreeBSD.org>
+
+	* mips-fbsd-nat.c (getregs_supplies): Fix upper bound comparison.
+	(getpfpregs_supplies): New function.
+	(mips_fbsd_fetch_inferior_registers): Remove early exit and use
+	getfpregs_supplies.
+	(mips_fbsd_store_inferior_registers): Likewise.
+
+2017-05-22  Pedro Alves <palves@redhat.com>
+
+	* MAINTAINERS (Host/Native): Add John Baldwin as FreeBSD
+	maintainer.
+
+2017-05-22  Alan Hayward  <alan.hayward@arm.com>
+
+	* ppc-linux-nat.c (fetch_register): Use PPC_MAX_REGISTER_SIZE.
+	(store_register): Likewise.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Likewise.
+	(get_decimal_float_return_value): Likewise.
+	(do_ppc_sysv_return_value): Likewise.
+	(ppc64_sysv_abi_push_integer): Likewise.
+	(ppc64_sysv_abi_push_freg): Likewise.
+	(ppc64_sysv_abi_return_value_base): Likewise.
+	(ppc64_sysv_abi_return_value): Likewise.
+	* rs6000-aix-tdep.c (rs6000_push_dummy_call): Likewise.
+	* rs6000-lynx178-tdep.c (rs6000_lynx178_push_dummy_call): Likewise.
+	* rs6000-nat.c: Likewise.
+	* rs6000-tdep.c (rs6000_register_to_value): Likewise.
+	(rs6000_value_to_register): Likewise.
+	* ppc-tdep.h (PPC_MAX_REGISTER_SIZE): Add.
+
+2017-05-21  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21466:
+	* rust-lang.c (rust_print_type) <TYPE_CODE_ARRAY>: Print unsized
+	arrays as "[T]", not "[T; ]".
+
+2017-05-19  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21484:
+	* rust-lang.c (exp_descriptor_rust): New function.
+	(rust_language_defn): Use it.
+	* p-lang.c (pascal_language_defn): Update.
+	* opencl-lang.c (opencl_language_defn): Update.
+	* objc-lang.c (objc_language_defn): Update.
+	* m2-lang.c (m2_language_defn): Update.
+	* language.h (struct language_defn)
+	<la_watch_location_expression>: New member.
+	* language.c (unknown_language_defn, auto_language_defn)
+	(local_language_defn): Update.
+	* go-lang.c (go_language_defn): Update.
+	* f-lang.c (f_language_defn): Update.
+	* d-lang.c (d_language_defn): Update.
+	* c-lang.h (c_watch_location_expression): Declare.
+	* c-lang.c (c_watch_location_expression): New function.
+	(c_language_defn, cplus_language_defn, asm_language_defn)
+	(minimal_language_defn): Use it.
+	* breakpoint.c (watch_command_1): Call
+	la_watch_location_expression.
+	* ada-lang.c (ada_language_defn): Update.
+
 2017-05-19  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR tui/21482

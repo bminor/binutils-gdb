@@ -227,7 +227,7 @@ alpha_sts (struct gdbarch *gdbarch, void *out, const void *in)
 /* The alpha needs a conversion between register and memory format if the
    register is a floating point register and memory format is float, as the
    register format must be double or memory format is an integer with 4
-   bytes or less, as the representation of integers in floating point
+   bytes, as the representation of integers in floating point
    registers is different.  */
 
 static int
@@ -235,7 +235,7 @@ alpha_convert_register_p (struct gdbarch *gdbarch, int regno,
 			  struct type *type)
 {
   return (regno >= ALPHA_FP0_REGNUM && regno < ALPHA_FP0_REGNUM + 31
-	  && TYPE_LENGTH (type) != 8);
+	  && TYPE_LENGTH (type) == 4);
 }
 
 static int
@@ -252,14 +252,10 @@ alpha_register_to_value (struct frame_info *frame, int regnum,
 				 in, optimizedp, unavailablep))
     return 0;
 
-  if (TYPE_LENGTH (valtype) == 4)
-    {
-      alpha_sts (gdbarch, out, in);
-      *optimizedp = *unavailablep = 0;
-      return 1;
-    }
-
-  error (_("Cannot retrieve value from floating point register"));
+  gdb_assert (TYPE_LENGTH (valtype) == 4);
+  alpha_sts (gdbarch, out, in);
+  *optimizedp = *unavailablep = 0;
+  return 1;
 }
 
 static void
@@ -268,14 +264,9 @@ alpha_value_to_register (struct frame_info *frame, int regnum,
 {
   gdb_byte out[MAX_REGISTER_SIZE];
 
-  switch (TYPE_LENGTH (valtype))
-    {
-    case 4:
-      alpha_lds (get_frame_arch (frame), out, in);
-      break;
-    default:
-      error (_("Cannot store value in floating point register"));
-    }
+  gdb_assert (TYPE_LENGTH (valtype) == 4);
+  alpha_lds (get_frame_arch (frame), out, in);
+
   put_frame_register (frame, regnum, out);
 }
 
@@ -1748,7 +1739,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (arches != NULL)
     return arches->gdbarch;
 
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Lowest text address.  This is used by heuristic_proc_start()
@@ -1797,9 +1788,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Prologue heuristics.  */
   set_gdbarch_skip_prologue (gdbarch, alpha_skip_prologue);
-
-  /* Disassembler.  */
-  set_gdbarch_print_insn (gdbarch, print_insn_alpha);
 
   /* Call info.  */
 

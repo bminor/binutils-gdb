@@ -407,6 +407,8 @@ enum
   IsString,
   /* quick test if branch instruction is MPX supported */
   BNDPrefixOk,
+  /* quick test if NOTRACK prefix is supported */
+  NoTrackPrefixOk,
   /* quick test for lockable instructions */
   IsLockable,
   /* fake an extra reg operand for clr, imul and special register
@@ -622,6 +624,7 @@ typedef struct i386_opcode_modifier
   unsigned int fwait:1;
   unsigned int isstring:1;
   unsigned int bndprefixok:1;
+  unsigned int notrackprefixok:1;
   unsigned int islockable:1;
   unsigned int regkludge:1;
   unsigned int firstxmm0:1;

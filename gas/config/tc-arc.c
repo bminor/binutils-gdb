@@ -2966,8 +2966,10 @@ md_apply_fix (fixS *fixP,
 	  break;
 	default:
 	  if ((int) fixP->fx_r_type < 0)
-	    as_fatal (_("PC relative relocation not allowed for (internal) type %d"),
-		      fixP->fx_r_type);
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("PC relative relocation not allowed for (internal)"
+			    " type %d"),
+			  fixP->fx_r_type);
 	  break;
 	}
     }
@@ -3942,9 +3944,8 @@ assemble_insn (const struct arc_opcode *opcode,
 	    {
 	    case O_plt:
 	      if (opcode->insn_class == JUMP)
-		as_bad_where (frag_now->fr_file, frag_now->fr_line,
-			      _("Unable to use @plt relocation for insn %s"),
-			      opcode->name);
+		as_bad (_("Unable to use @plt relocation for insn %s"),
+			opcode->name);
 	      needGOTSymbol = TRUE;
 	      reloc = find_reloc ("plt", opcode->name,
 				  pflags, nflg,
@@ -3962,9 +3963,8 @@ assemble_insn (const struct arc_opcode *opcode,
 		  reloc = ARC_RELOC_TABLE (t->X_md)->reloc;
 		  if (arc_opcode_len (opcode) == 2
 		      || opcode->insn_class == JUMP)
-		    as_bad_where (frag_now->fr_file, frag_now->fr_line,
-				  _("Unable to use @pcl relocation for insn %s"),
-				  opcode->name);
+		    as_bad (_("Unable to use @pcl relocation for insn %s"),
+			    opcode->name);
 		}
 	      else
 		{
@@ -4130,8 +4130,9 @@ assemble_insn (const struct arc_opcode *opcode,
   /* Check if the current instruction is legally used.  */
   if (arc_last_insns[1].has_delay_slot
       && is_br_jmp_insn_p (arc_last_insns[0].opcode))
-    as_bad_where (frag_now->fr_file, frag_now->fr_line,
-		  _("A jump/branch instruction in delay slot."));
+    as_bad (_("Insn %s has a jump/branch instruction %s in its delay slot."),
+	    arc_last_insns[1].opcode->name,
+	    arc_last_insns[0].opcode->name);
 }
 
 void

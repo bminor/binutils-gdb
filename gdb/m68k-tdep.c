@@ -188,6 +188,8 @@ m68k_convert_register_p (struct gdbarch *gdbarch,
   if (!gdbarch_tdep (gdbarch)->fpregs_present)
     return 0;
   return (regnum >= M68K_FP0_REGNUM && regnum <= M68K_FP0_REGNUM + 7
+	  /* We only support floating-point values.  */
+	  && TYPE_CODE (type) == TYPE_CODE_FLT
 	  && type != register_type (gdbarch, M68K_FP0_REGNUM));
 }
 
@@ -199,23 +201,15 @@ m68k_register_to_value (struct frame_info *frame, int regnum,
 			struct type *type, gdb_byte *to,
 			int *optimizedp, int *unavailablep)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte from[M68K_MAX_REGISTER_SIZE];
-  struct type *fpreg_type = register_type (get_frame_arch (frame),
-					   M68K_FP0_REGNUM);
+  struct type *fpreg_type = register_type (gdbarch, M68K_FP0_REGNUM);
 
-  /* We only support floating-point values.  */
-  if (TYPE_CODE (type) != TYPE_CODE_FLT)
-    {
-      warning (_("Cannot convert floating-point register value "
-	       "to non-floating-point type."));
-      *optimizedp = *unavailablep = 0;
-      return 0;
-    }
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
 
   /* Convert to TYPE.  */
-
-  /* Convert to TYPE.  */
-  if (!get_frame_register_bytes (frame, regnum, 0, TYPE_LENGTH (type),
+  if (!get_frame_register_bytes (frame, regnum, 0,
+				 register_size (gdbarch, regnum),
 				 from, optimizedp, unavailablep))
     return 0;
 
@@ -1239,10 +1233,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_return_value (gdbarch, m68k_return_value);
   set_gdbarch_return_in_first_hidden_param_p (gdbarch,
 					      m68k_return_in_first_hidden_param_p);
-
-
-  /* Disassembler.  */
-  set_gdbarch_print_insn (gdbarch, print_insn_m68k);
 
 #if defined JB_PC && defined JB_ELEMENT_SIZE
   tdep->jb_pc = JB_PC;

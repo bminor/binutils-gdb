@@ -192,6 +192,9 @@ struct aarch64_segment_info_type
 #define tc_regname_to_dw2regnum            tc_aarch64_regname_to_dw2regnum
 #define tc_cfi_frame_initial_instructions  tc_aarch64_frame_initial_instructions
 
+extern void aarch64_after_parse_args (void);
+#define md_after_parse_args() aarch64_after_parse_args ()
+
 #else /* Not OBJ_ELF.  */
 #define GLOBAL_OFFSET_TABLE_NAME "__GLOBAL_OFFSET_TABLE_"
 #endif
