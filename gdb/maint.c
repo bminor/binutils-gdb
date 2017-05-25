@@ -178,6 +178,19 @@ maintenance_info_command (char *arg, int from_tty)
 	     gdb_stdout);
 }
 
+/* The "maintenance check" command is defined as a prefix, with
+   allow_unknown 0.  Therefore, its own definition is called only for
+   "maintenance check" with no args.  */
+
+static void
+maintenance_check_command (char *arg, int from_tty)
+{
+  printf_unfiltered (_("\"maintenance check\" must be followed "
+		       "by the name of a check command.\n"));
+  help_list (maintenancechecklist, "maintenance check ", all_commands,
+	     gdb_stdout);
+}
+
 /* Mini tokenizing lexer for 'maint info sections' command.  */
 
 static int
@@ -1103,6 +1116,11 @@ the type structure, and the interpretation of the data."),
 Print the internal architecture configuration.\n\
 Takes an optional file parameter."),
 	   &maintenanceprintlist);
+
+  add_prefix_cmd ("check", class_maintenance, maintenance_check_command, _("\
+Commands for checking internal gdb state."),
+		  &maintenancechecklist, "maintenance check ", 0,
+		  &maintenancelist);
 
   add_cmd ("translate-address", class_maintenance,
 	   maintenance_translate_address,
