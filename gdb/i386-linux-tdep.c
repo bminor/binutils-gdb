@@ -1114,4 +1114,24 @@ _initialize_i386_linux_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_LINUX,
 			  i386_linux_init_abi);
+
+#if GDB_SELF_TEST
+  std::pair<const char *, uint64_t> xml_masks[] = {
+    { "i386/i386-linux.xml", X86_XSTATE_SSE_MASK },
+    { "i386/i386-mmx-linux.xml", X86_XSTATE_X87_MASK },
+    { "i386/i386-avx-linux.xml", X86_XSTATE_AVX_MASK },
+    { "i386/i386-mpx-linux.xml", X86_XSTATE_MPX_MASK },
+    { "i386/i386-avx-mpx-linux.xml", X86_XSTATE_AVX_MPX_MASK },
+    { "i386/i386-avx-avx512-linux.xml", X86_XSTATE_AVX_AVX512_MASK },
+    { "i386/i386-avx-mpx-avx512-pku-linux.xml",
+      X86_XSTATE_AVX_MPX_AVX512_PKU_MASK },
+  };
+
+  for (auto &a : xml_masks)
+    {
+      auto tdesc = i386_linux_read_description (a.second);
+
+      selftests::record_xml_tdesc (a.first, tdesc);
+    }
+#endif /* GDB_SELF_TEST */
 }

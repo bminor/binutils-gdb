@@ -168,6 +168,10 @@ struct cmd_list_element *maintenanceinfolist;
 
 struct cmd_list_element *maintenanceprintlist;
 
+/* Chain containing all defined "maintenance check" subcommands.  */
+
+struct cmd_list_element *maintenancechecklist;
+
 struct cmd_list_element *setprintlist;
 
 struct cmd_list_element *showprintlist;
