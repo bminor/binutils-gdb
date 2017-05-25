@@ -10,11 +10,9 @@ static void
 initialize_tdesc_arc_v2 (void)
 {
   struct target_desc *result = allocate_target_description ();
-  struct tdesc_feature *feature;
-  struct tdesc_type *field_type;
-  struct tdesc_type *type;
-
   set_tdesc_architecture (result, bfd_scan_arch ("ARCv2"));
+
+  struct tdesc_feature *feature;
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.arc.core.v2");
   tdesc_create_reg (feature, "r0", 0, 1, NULL, 32, "int");
@@ -53,6 +51,8 @@ initialize_tdesc_arc_v2 (void)
   tdesc_create_reg (feature, "pcl", 33, 1, "", 32, "code_ptr");
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.arc.aux-minimal");
+  struct tdesc_type *field_type;
+  struct tdesc_type *type;
   type = tdesc_create_flags (feature, "status32_type", 4);
   tdesc_add_flag (type, 0, "H");
   tdesc_add_bitfield (type, "E", 1, 4);

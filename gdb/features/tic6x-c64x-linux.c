@@ -10,11 +10,11 @@ static void
 initialize_tdesc_tic6x_c64x_linux (void)
 {
   struct target_desc *result = allocate_target_description ();
-  struct tdesc_feature *feature;
-
   set_tdesc_architecture (result, bfd_scan_arch ("tic6x"));
 
   set_tdesc_osabi (result, osabi_from_tdesc_string ("GNU/Linux"));
+
+  struct tdesc_feature *feature;
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.tic6x.core");
   tdesc_create_reg (feature, "A0", 0, 1, NULL, 32, "uint32");
