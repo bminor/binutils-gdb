@@ -7185,8 +7185,14 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	    {
 	      if (inst.operands[i].reg == REG_PC)
 		inst.error = BAD_PC;
-	      else if (inst.operands[i].reg == REG_SP)
-		inst.error = BAD_SP;
+	      else if (inst.operands[i].reg == REG_SP
+		       /* The restriction on Rd/Rt/Rt2 on Thumb mode has been
+			  relaxed since ARMv8-A.  */
+		       && !ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
+		{
+		  gas_assert (thumb);
+		  inst.error = BAD_SP;
+		}
 	    }
 	  break;
 
@@ -7284,14 +7290,23 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 
 /* Reject "bad registers" for Thumb-2 instructions.  Many Thumb-2
    instructions are unpredictable if these registers are used.  This
-   is the BadReg predicate in ARM's Thumb-2 documentation.  */
-#define reject_bad_reg(reg)				\
-  do							\
-   if (reg == REG_SP || reg == REG_PC)			\
-     {							\
-       inst.error = (reg == REG_SP) ? BAD_SP : BAD_PC;	\
-       return;						\
-     }							\
+   is the BadReg predicate in ARM's Thumb-2 documentation.
+
+   Before ARMv8-A, REG_PC and REG_SP were not allowed in quite a few
+   places, while the restriction on REG_SP was relaxed since ARMv8-A.  */
+#define reject_bad_reg(reg)					\
+  do								\
+   if (reg == REG_PC)						\
+     {								\
+       inst.error = BAD_PC;					\
+       return;							\
+     }								\
+   else if (reg == REG_SP					\
+	    && !ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))	\
+     {								\
+       inst.error = BAD_SP;					\
+       return;							\
+     }								\
   while (0)
 
 /* If REG is R13 (the stack pointer), warn that its use is
@@ -8643,7 +8658,7 @@ do_co_reg (void)
 	  || inst.instruction == 0xfe000010)
 	/* MCR, MCR2  */
 	reject_bad_reg (Rd);
-      else
+      else if (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
 	/* MRC, MRC2  */
 	constraint (Rd == REG_SP, BAD_SP);
     }
@@ -10523,7 +10538,8 @@ do_t_add_sub (void)
 	{
 	  int add;
 
-	  constraint (Rd == REG_SP && Rs != REG_SP, BAD_SP);
+	  if (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
+	    constraint (Rd == REG_SP && Rs != REG_SP, BAD_SP);
 
 	  add = (inst.instruction == T_MNEM_add
 		 || inst.instruction == T_MNEM_adds);
@@ -10647,7 +10663,8 @@ do_t_add_sub (void)
 	    }
 
 	  constraint (Rd == REG_PC, BAD_PC);
-	  constraint (Rd == REG_SP && Rs != REG_SP, BAD_SP);
+	  if (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
+	    constraint (Rd == REG_SP && Rs != REG_SP, BAD_SP);
 	  constraint (Rs == REG_PC, BAD_PC);
 	  reject_bad_reg (Rn);
 
@@ -11895,7 +11912,8 @@ do_t_mov_cmp (void)
 		  /* This is mov.w.  */
 		  constraint (Rn == REG_PC, BAD_PC);
 		  constraint (Rm == REG_PC, BAD_PC);
-		  constraint (Rn == REG_SP && Rm == REG_SP, BAD_SP);
+		  if (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
+		    constraint (Rn == REG_SP && Rm == REG_SP, BAD_SP);
 		}
 	    }
 	  else
@@ -13116,7 +13134,8 @@ do_t_tb (void)
   Rn = inst.operands[0].reg;
   Rm = inst.operands[0].imm;
 
-  constraint (Rn == REG_SP, BAD_SP);
+  if (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
+    constraint (Rn == REG_SP, BAD_SP);
   reject_bad_reg (Rm);
 
   constraint (!half && inst.operands[0].shifted,
