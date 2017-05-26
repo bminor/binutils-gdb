@@ -1,3 +1,20 @@
+2017-05-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* defs.h (copy_integer_to_size): New declaration.
+	* findvar.c (copy_integer_to_size): New function.
+	(do_cint_test): New selftest function.
+	(copy_integer_to_size_test): Likewise.
+	(_initialize_findvar): Likewise.
+	* mips-fbsd-tdep.c (mips_fbsd_supply_reg): Use raw_supply_integer.
+	(mips_fbsd_collect_reg): Use raw_collect_integer.
+	* mips-linux-tdep.c (supply_32bit_reg): Use raw_supply_integer.
+	(mips64_fill_gregset): Use raw_collect_integer
+	(mips64_fill_fpregset): Use raw_supply_integer.
+	* regcache.c (regcache::raw_supply_integer): New function.
+	(regcache::raw_collect_integer): Likewise.
+	* regcache.h: (regcache::raw_supply_integer): New declaration.
+	(regcache::raw_collect_integer): Likewise.
+
 2017-05-24  Yao Qi  <yao.qi@linaro.org>
 
 	* Makefile.in (SFILES): Add gdbarch-selftests.c.
