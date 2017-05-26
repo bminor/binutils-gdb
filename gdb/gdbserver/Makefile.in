@@ -258,6 +258,7 @@ OBS = \
 	regcache.o \
 	remote-utils.o \
 	rsp-low.o \
+	selftest.o \
 	server.o \
 	signals.o \
 	signals-state-save-restore.o \

@@ -40,6 +40,8 @@
 #include "job-control.h"
 #include "environ.h"
 
+#include "common/selftest.h"
+
 /* The environment to pass to the inferior when creating it.  */
 
 static gdb_environ our_environ;
@@ -3357,6 +3359,7 @@ gdbserver_usage (FILE *stream)
 	   "                          Options:\n"
 	   "                            vCont, Tthread, qC, qfThreadInfo and \n"
 	   "                            threads (disable all threading packets).\n"
+	   "  --selftest            Run self tests.\n"
 	   "\n"
 	   "For more information, consult the GDB manual (available as on-line \n"
 	   "info or a printed manual).\n");
@@ -3521,6 +3524,7 @@ captured_main (int argc, char *argv[])
   volatile int multi_mode = 0;
   volatile int attach = 0;
   int was_running;
+  bool selftest = false;
 
   while (*next_arg != NULL && **next_arg == '-')
     {
@@ -3639,6 +3643,8 @@ captured_main (int argc, char *argv[])
 	startup_with_shell = false;
       else if (strcmp (*next_arg, "--once") == 0)
 	run_once = 1;
+      else if (strcmp (*next_arg, "--selftest") == 0)
+	selftest = true;
       else
 	{
 	  fprintf (stderr, "Unknown argument: %s\n", *next_arg);
@@ -3654,7 +3660,8 @@ captured_main (int argc, char *argv[])
       port = *next_arg;
       next_arg++;
     }
-  if (port == NULL || (!attach && !multi_mode && *next_arg == NULL))
+  if ((port == NULL || (!attach && !multi_mode && *next_arg == NULL))
+       && !selftest)
     {
       gdbserver_usage (stderr);
       exit (1);
@@ -3670,7 +3677,8 @@ captured_main (int argc, char *argv[])
      starting the inferior.  Inferiors created in this scenario have
      stdin,stdout redirected.  So do this here before we call
      start_inferior.  */
-  remote_prepare (port);
+  if (port != NULL)
+    remote_prepare (port);
 
   bad_attach = 0;
   pid = 0;
@@ -3710,6 +3718,12 @@ captured_main (int argc, char *argv[])
 
   own_buf = (char *) xmalloc (PBUFSIZ + 1);
   mem_buf = (unsigned char *) xmalloc (PBUFSIZ);
+
+  if (selftest)
+    {
+      run_self_tests ();
+      throw_quit ("Quit");
+    }
 
   if (pid == 0 && *next_arg != NULL)
     {

@@ -16,7 +16,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "defs.h"
+#include "common-defs.h"
+#ifdef GDBSERVER
+#define QUIT do {} while (0)
+#else
+#include "defs.h" /* for QUIT */
+#endif
+#include "common-exceptions.h"
+#include "common-debug.h"
 #include "selftest.h"
 #include <vector>
 
@@ -50,15 +57,19 @@ run_self_tests (void)
       CATCH (ex, RETURN_MASK_ERROR)
 	{
 	  ++failed;
+#ifndef GDBSERVER
 	  exception_fprintf (gdb_stderr, ex, _("Self test failed: "));
+#endif
 	}
       END_CATCH
 
+#ifndef GDBSERVER
       /* Clear GDB internal state.  */
       registers_changed ();
       reinit_frame_cache ();
+#endif
     }
 
-  printf_filtered (_("Ran %lu unit tests, %d failed\n"),
-		   (long) tests.size (), failed);
+  debug_printf ("Ran %lu unit tests, %d failed\n",
+		(long) tests.size (), failed);
 }

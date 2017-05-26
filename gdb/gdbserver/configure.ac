@@ -56,6 +56,11 @@ else
 fi
 GDB_AC_LIBMCHECK(${libmcheck_default})
 
+if $development; then
+  AC_DEFINE(GDB_SELF_TEST, 1,
+            [Define if self-testing features should be enabled])
+fi
+
 ACX_NONCANONICAL_TARGET
 ACX_NONCANONICAL_HOST
 
