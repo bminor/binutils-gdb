@@ -262,7 +262,5 @@ alloc_jump_pad_buffer (size_t size)
 void
 initialize_low_tracepoint (void)
 {
-  initialize_low_tdesc ();
-
   initialize_fast_tracepoint_trampoline_buffer ();
 }

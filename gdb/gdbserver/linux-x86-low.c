@@ -2985,7 +2985,9 @@ initialize_low_arch (void)
   tdesc_amd64_linux_no_xml->xmltarget = xmltarget_amd64_linux_no_xml;
 #endif
 
+#if GDB_SELF_TEST
   initialize_low_tdesc ();
+#endif
 
   tdesc_i386_linux_no_xml = XNEW (struct target_desc);
   copy_target_description (tdesc_i386_linux_no_xml,
