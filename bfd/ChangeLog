@@ -1,3 +1,21 @@
+2017-06-01  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct ppc_link_hash_table): Add has_plt_localentry0.
+	(ppc64_elf_merge_symbol_attribute): Merge localentry bits from
+	dynamic objects.
+	(is_elfv2_localentry0): New function.
+	(ppc64_elf_tls_setup): Default params->plt_localentry0.
+	(plt_stub_size): Adjust size for tls_get_addr_opt stub.
+	(build_tls_get_addr_stub): Use a simpler stub when r2 is not saved.
+	(ppc64_elf_size_stubs): Leave stub_type as ppc_stub_plt_call for
+	optimized localentry:0 stubs.
+	(ppc64_elf_build_stubs): Save r2 in ELFv2 __glink_PLTresolve.
+	(ppc64_elf_relocate_section): Leave nop unchanged for optimized
+	localentry:0 stubs.
+	(ppc64_elf_finish_dynamic_sections): Set PPC64_OPT_LOCALENTRY in
+	DT_PPC64_OPT.
+	* elf64-ppc.h (struct ppc64_elf_params): Add plt_localentry0.
+
 2017-05-30  Casey Smith  <clegg89@gmail.com>
 
 	PR ld/21523

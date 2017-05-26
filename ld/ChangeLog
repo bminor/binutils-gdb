@@ -1,3 +1,13 @@
+2017-06-01  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (params): Init plt_localentry0 field.
+	(enum ppc64_opt): New, replacing OPTION_* defines.  Add
+	OPTION_PLT_LOCALENTRY, and OPTION_NO_PLT_LOCALENTRY.
+	(PARSE_AND_LIST_*): Support --plt-localentry and --no-plt-localentry.
+	* testsuite/ld-powerpc/elfv2so.d: Update.
+	* testsuite/ld-powerpc/powerpc.exp (TLS opt 5): Use --no-plt-localentry.
+	* testsuite/ld-powerpc/tlsopt5.d: Update.
+
 2017-05-31  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (plt-static-chain help): Fix quoting.
