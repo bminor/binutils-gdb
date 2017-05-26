@@ -806,7 +806,7 @@ user_args::insert_args (const char *line) const
 
       if (p[4] == 'c')
 	{
-	  new_line += std::to_string (m_args.size ());
+	  new_line += gdb::to_string (m_args.size ());
 	  line = p + 5;
 	}
       else

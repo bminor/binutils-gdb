@@ -1,3 +1,12 @@
+2017-05-26  Eli Zaretskii  <eliz@gnu.org>
+
+	* cli/cli-script.c (user_args::insert_args): Call gdb::to_string.
+
+	* common/common-utils.h (REPLACE_TO_STRING) [__MINGW32__]: Define
+	to 1 if std::to_string is not available.
+	(gdb::to_string) [REPLACE_TO_STRING]: Provide a replacement
+	implementation for std::string.
+
 2017-05-19  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR tui/21482

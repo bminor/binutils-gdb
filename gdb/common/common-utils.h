@@ -22,6 +22,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 /* If possible, define FUNCTION_NAME, a macro containing the name of
    the function being defined.  Since this macro may not always be
@@ -62,6 +63,47 @@ int xsnprintf (char *str, size_t size, const char *format, ...)
 /* Returns a std::string built from a printf-style format string.  */
 std::string string_printf (const char* fmt, ...)
   ATTRIBUTE_PRINTF (1, 2);
+
+/* Returns a string representation of VAL.  Replacement for C++11
+   std::to_string for hosts that lack it.  */
+
+namespace gdb {
+
+#define REPLACE_TO_STRING 0
+
+#ifdef __MINGW32__
+/* mingw.org's MinGW runtime before version 5.0 needs the replacement
+   below.  Tested with mingwrt-3.22.2 and mingwrt-5.0, and with
+   libstdc++ included with MinGW GCC 5.3.0.  */
+# include <_mingw.h>
+/* We test __MINGW64_VERSION_MAJOR to exclude MinGW64, which doesn't
+   need this replacement.  */
+# if !defined __MINGW64_VERSION_MAJOR && !defined _GLIBCXX_USE_C99
+#  undef REPLACE_TO_STRING
+#  define REPLACE_TO_STRING 1
+# endif
+#endif
+
+#if REPLACE_TO_STRING
+
+template <class T>
+inline std::string
+to_string (const T &val)
+{
+  std::stringstream ss;
+
+  ss << val;
+  return ss.str ();
+}
+
+#else /* !REPLACE_TO_STRING */
+
+using std::to_string;
+
+#endif
+
+#undef REPLACE_TO_STRING
+}
 
 /* Make a copy of the string at PTR with LEN characters
    (and add a null character at the end in the copy).
