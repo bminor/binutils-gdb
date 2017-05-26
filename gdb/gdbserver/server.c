@@ -3507,6 +3507,9 @@ detach_or_kill_for_exit_cleanup (void *ignore)
   END_CATCH
 }
 
+#include "../selftest.h"
+#include "../selftest.c"
+
 /* Main function.  This is called by the real "main" function,
    wrapped in a TRY_CATCH that handles any uncaught exceptions.  */
 
@@ -3521,6 +3524,7 @@ captured_main (int argc, char *argv[])
   volatile int multi_mode = 0;
   volatile int attach = 0;
   int was_running;
+  bool selftest = false;
 
   while (*next_arg != NULL && **next_arg == '-')
     {
@@ -3639,6 +3643,11 @@ captured_main (int argc, char *argv[])
 	startup_with_shell = false;
       else if (strcmp (*next_arg, "--once") == 0)
 	run_once = 1;
+      else if (strcmp (*next_arg, "--self-test") == 0)
+	{
+	  selftest = true;
+	  break;
+	}
       else
 	{
 	  fprintf (stderr, "Unknown argument: %s\n", *next_arg);
@@ -3654,7 +3663,8 @@ captured_main (int argc, char *argv[])
       port = *next_arg;
       next_arg++;
     }
-  if (port == NULL || (!attach && !multi_mode && *next_arg == NULL))
+  if ((port == NULL || (!attach && !multi_mode && *next_arg == NULL))
+       && !selftest)
     {
       gdbserver_usage (stderr);
       exit (1);
@@ -3711,6 +3721,12 @@ captured_main (int argc, char *argv[])
 
   own_buf = (char *) xmalloc (PBUFSIZ + 1);
   mem_buf = (unsigned char *) xmalloc (PBUFSIZ);
+
+  if (selftest)
+    {
+      run_self_tests ();
+      throw_quit ("Quit");
+    }
 
   if (pid == 0 && *next_arg != NULL)
     {
