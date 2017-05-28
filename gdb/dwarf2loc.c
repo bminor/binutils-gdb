@@ -2398,7 +2398,9 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
       for (i = 0; i < ctx.num_pieces; ++i)
 	bit_size += ctx.pieces[i].size;
-      if (8 * (subobj_byte_offset + TYPE_LENGTH (subobj_type)) > bit_size)
+      /* Complain if the expression is larger than the size of the
+	 outer type.  */
+      if (bit_size > 8 * TYPE_LENGTH (type))
 	invalid_synthetic_pointer ();
 
       c = allocate_piece_closure (per_cu, ctx.num_pieces, ctx.pieces,
