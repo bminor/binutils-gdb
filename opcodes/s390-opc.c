@@ -355,7 +355,7 @@ const struct s390_operand s390_operands[] =
 #define INSTR_RRF_FEUFEFE  4, { FE_24,FE_16,FE_28,U4_20,0,0 }    /* e.g. qaxtr */
 #define INSTR_RRF_FUFF2    4, { F_24,F_28,F_16,U4_20,0,0 }       /* e.g. adtra */
 #define INSTR_RRF_FEUFEFE2 4, { FE_24,FE_28,FE_16,U4_20,0,0 }    /* e.g. axtra */
-#define INSTR_RRF_RURR     4, { R_24,R_28,R_16,U4_20,0,0 }       /* e.g. .insn */
+#define INSTR_RRF_RURR     4, { R_24,R_28,R_16,U4_20,0,0 }       /* e.g. ipte  */
 #define INSTR_RRF_RURR2    4, { R_24,R_16,R_28,U4_20,0,0 }       /* e.g. lptea */
 #define INSTR_RRF_R0RR     4, { R_24,R_16,R_28,0,0,0 }           /* e.g. idte  */
 #define INSTR_RRF_R0RR2    4, { R_24,R_28,R_16,0,0,0 }           /* e.g. ark   */

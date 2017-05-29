@@ -53,6 +53,13 @@ foo:
 	crdte	%r5,%r6,%r9
 	crdte	%r5,%r6,%r9,1
 
+	idte	%r6,%r9,%r11
+	idte	%r6,%r9,%r11,13
+
+	ipte	%r6,%r9
+	ipte	%r6,%r9,%r11
+	ipte	%r6,%r9,%r11,13
+
 	bprp	10,bar,bar
 	bprp	10,bar@PLT,bar@PLT
 

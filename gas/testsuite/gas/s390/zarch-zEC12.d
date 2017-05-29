@@ -54,16 +54,21 @@ Disassembly of section .text:
 .*:	b2 e8 c0 56 [	 ]*ppa	%r5,%r6,12
 .*:	b9 8f 60 59 [	 ]*crdte	%r5,%r6,%r9
 .*:	b9 8f 61 59 [	 ]*crdte	%r5,%r6,%r9,1
-.*:	c5 a0 0c 00 00 0c [	 ]*bprp	10,12a <bar>,12a <bar>
-.*:	c5 a0 00 00 00 00 [	 ]*bprp	10,118 <foo\+0x118>,118 <foo\+0x118>
-[	 ]*119: R_390_PLT12DBL	bar\+0x1
-[	 ]*11b: R_390_PLT24DBL	bar\+0x3
-.*:	c7 a0 00 00 00 00 [	 ]*bpp	10,11e <foo\+0x11e>,0
-[	 ]*122: R_390_PLT16DBL	bar\+0x4
-.*:	c7 a0 00 00 00 00 [	 ]*bpp	10,124 <foo\+0x124>,0
-[	 ]*128: R_390_PC16DBL	baz\+0x4
+.*:	b9 8e 90 6b [	 ]*idte	%r6,%r9,%r11
+.*:	b9 8e 9d 6b [	 ]*idte	%r6,%r9,%r11,13
+.*:	b2 21 00 69 [	 ]*ipte	%r6,%r9
+.*:	b2 21 b0 69 [	 ]*ipte	%r6,%r9,%r11
+.*:	b2 21 bd 69 [	 ]*ipte	%r6,%r9,%r11,13
+.*:	c5 a0 0c 00 00 0c [	 ]*bprp	10,13e <bar>,13e <bar>
+.*:	c5 a0 00 00 00 00 [	 ]*bprp	10,12c <foo\+0x12c>,12c <foo\+0x12c>
+[	 ]*12d: R_390_PLT12DBL	bar\+0x1
+[	 ]*12f: R_390_PLT24DBL	bar\+0x3
+.*:	c7 a0 00 00 00 00 [	 ]*bpp	10,132 <foo\+0x132>,0
+[	 ]*136: R_390_PLT16DBL	bar\+0x4
+.*:	c7 a0 00 00 00 00 [	 ]*bpp	10,138 <foo\+0x138>,0
+[	 ]*13c: R_390_PC16DBL	baz\+0x4
 
 
-000000000000012a <bar>:
+000000000000013e <bar>:
 
 .*:	07 07 [	 ]*nopr	%r7
