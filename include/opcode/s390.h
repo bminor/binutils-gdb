@@ -48,10 +48,11 @@ enum s390_opcode_cpu_val
 
 /* Instruction specific flags.  */
 #define S390_INSTR_FLAG_OPTPARM 0x1
+#define S390_INSTR_FLAG_OPTPARM2 0x2
 
-#define S390_INSTR_FLAG_HTM 0x2
-#define S390_INSTR_FLAG_VX 0x4
-#define S390_INSTR_FLAG_FACILITY_MASK 0x6
+#define S390_INSTR_FLAG_HTM 0x4
+#define S390_INSTR_FLAG_VX 0x8
+#define S390_INSTR_FLAG_FACILITY_MASK 0xc
 
 /* The opcode table is an array of struct s390_opcode.  */
 

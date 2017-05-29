@@ -1270,7 +1270,8 @@ md_gather_operands (char *str,
 
       operand = s390_operands + *opindex_ptr;
 
-      if ((opcode->flags & S390_INSTR_FLAG_OPTPARM) && *str == '\0')
+      if ((opcode->flags & (S390_INSTR_FLAG_OPTPARM | S390_INSTR_FLAG_OPTPARM2))
+	  && *str == '\0')
 	{
 	  /* Optional parameters might need to be ORed with a
 	     value so calling s390_insert_operand is needed.  */
@@ -1536,7 +1537,18 @@ md_gather_operands (char *str,
 	      str++;
 	    }
 
-	  if ((opcode->flags & S390_INSTR_FLAG_OPTPARM) && *str == '\0')
+	  if ((opcode->flags & (S390_INSTR_FLAG_OPTPARM
+				| S390_INSTR_FLAG_OPTPARM2))
+	      && opindex_ptr[1] != '\0'
+	      && opindex_ptr[2] == '\0'
+	      && *str == '\0')
+	    continue;
+
+	    if ((opcode->flags & S390_INSTR_FLAG_OPTPARM2)
+		&& opindex_ptr[1] != '\0'
+		&& opindex_ptr[2] != '\0'
+		&& opindex_ptr[3] == '\0'
+		&& *str == '\0')
 	    continue;
 
 	  /* If there is a next operand it must be separated by a comma.  */
