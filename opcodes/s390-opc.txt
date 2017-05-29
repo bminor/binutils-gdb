@@ -228,7 +228,7 @@ b246 stura RRE_RR "store using real address" g5 esa,zarch
 2f swr RR_FF "subtract unnormalized (long)" g5 esa,zarch
 37 sxr RR_FEFE "subtract normalized (ext.)" g5 esa,zarch
 b24c tar RRE_AR "test access" g5 esa,zarch
-b22c tb RRE_0R "test block" g5 esa,zarch
+b22c tb RRE_RR "test block" g5 esa,zarch
 91 tm SI_URD "test under mask" g5 esa,zarch
 b236 tpi S_RD "test pending interruption" g5 esa,zarch
 e501 tprot SSE_RDRD "test protection" g5 esa,zarch
