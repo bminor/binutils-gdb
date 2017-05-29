@@ -817,8 +817,8 @@ b3f2 cdutr RRE_FR "convert from unsigned bcd to long dfp" z9-ec zarch
 b3fa cxutr RRE_FER "convert from unsigned bcd to extended dfp" z9-ec zarch
 b3e1 cgdtr RRF_U0RF "convert from long dfp to fixed" z9-ec zarch
 b3e9 cgxtr RRF_U0RFE "convert from extended dfp to fixed" z9-ec zarch
-b3e3 csdtr RRE_RF "convert from long dfp to signed bcd" z9-ec zarch
-b3eb csxtr RRE_RFE "convert from extended dfp to signed bcd" z9-ec zarch
+b3e3 csdtr RRF_0URF "convert from long dfp to signed bcd" z9-ec zarch
+b3eb csxtr RRF_0UREFE "convert from extended dfp to signed bcd" z9-ec zarch
 b3e2 cudtr RRE_RF "convert from long dfp to unsigned bcd" z9-ec zarch
 b3ea cuxtr RRE_RFE "convert from extended dfp to unsigned bcd" z9-ec zarch
 b3d1 ddtr RRR_F0FF "divide long dfp" z9-ec zarch
