@@ -1304,19 +1304,6 @@ md_gather_operands (char *str,
 	as_bad (_("illegal operand"));
       else if (ex.X_op == O_absent)
 	{
-	  /* No operands, check if all operands can be skipped.  */
-	  while (*opindex_ptr != 0 && operand->flags & S390_OPERAND_OPTIONAL)
-	    {
-	      if (operand->flags & S390_OPERAND_DISP)
-		{
-		  /* An optional displacement makes the whole D(X,B)
-		     D(L,B) or D(B) block optional.  */
-		  do {
-		    operand = s390_operands + *(++opindex_ptr);
-		  } while (!(operand->flags & S390_OPERAND_BASE));
-		}
-	      operand = s390_operands + *(++opindex_ptr);
-	    }
 	  if (opindex_ptr[0] == '\0')
 	    break;
 	  as_bad (_("missing operand"));
@@ -1486,8 +1473,6 @@ md_gather_operands (char *str,
 		      while (opindex_ptr[1] != '\0')
 			{
 			  operand = s390_operands + *(++opindex_ptr);
-			  if (operand->flags & S390_OPERAND_OPTIONAL)
-			    continue;
 			  as_bad (_("syntax error; expected ','"));
 			  break;
 			}
@@ -1530,8 +1515,6 @@ md_gather_operands (char *str,
 		  while (opindex_ptr[1] != '\0')
 		    {
 		      operand = s390_operands + *(++opindex_ptr);
-		      if (operand->flags & S390_OPERAND_OPTIONAL)
-			continue;
 		      as_bad (_("syntax error; expected ','"));
 		      break;
 		    }
@@ -1564,8 +1547,6 @@ md_gather_operands (char *str,
 		  while (opindex_ptr[1] != '\0')
 		    {
 		      operand = s390_operands + *(++opindex_ptr);
-		      if (operand->flags & S390_OPERAND_OPTIONAL)
-			continue;
 		      as_bad (_("syntax error; expected ','"));
 		      break;
 		    }

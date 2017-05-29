@@ -156,21 +156,17 @@ extern const struct s390_operand s390_operands[];
 /* This operand is a length.  */
 #define S390_OPERAND_LENGTH 0x200
 
-/* This operand is optional. Only a single operand at the end of
-   the instruction may be optional.  */
-#define S390_OPERAND_OPTIONAL 0x400
-
 /* The operand needs to be a valid GP or FP register pair.  */
-#define S390_OPERAND_REG_PAIR 0x800
+#define S390_OPERAND_REG_PAIR 0x400
 
 /* This operand names a vector register.  The disassembler uses this
    to print register names with a leading 'v'.  */
-#define S390_OPERAND_VR 0x1000
+#define S390_OPERAND_VR 0x800
 
-#define S390_OPERAND_CP16 0x2000
+#define S390_OPERAND_CP16 0x1000
 
-#define S390_OPERAND_OR1 0x4000
-#define S390_OPERAND_OR2 0x8000
-#define S390_OPERAND_OR8 0x10000
+#define S390_OPERAND_OR1 0x2000
+#define S390_OPERAND_OR2 0x4000
+#define S390_OPERAND_OR8 0x8000
 
 #endif /* S390_H */
