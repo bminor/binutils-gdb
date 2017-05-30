@@ -1,5 +1,23 @@
 2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* btrace.c (ftrace_find_call_by_number): New function.
+	(ftrace_new_function): Store objects, not pointers.
+	(ftrace_find_call_by_number, ftrace_new_return, ftrace_new_switch,
+	ftrace_new_gap, ftrace_update_function,
+	ftrace_compute_global_level_offset, btrace_stich_bts, btrace_clear,
+	btrace_insn_get, btrace_insn_get_error, btrace_insn_end,
+	btrace_insn_next, btrace_insn_prev, ptrace_find_insn_by_number,
+	btrace_ends_with_single_insn, btrace_call_get): Account for
+	btrace_thread_info::functions now storing objects.
+	* btrace.h (struct btrace_thread_info): Add constructor.
+	(struct btrace_thread_info) <functions>: Make std::vector.
+	(struct btrace_thread_info) <prev, next, up, insn, errcode, flags):
+	Initialize with default values.
+	* record-btrace.c (record_btrace_frame_sniffer): Account for
+	btrace_thread_info::functions now storing objects.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* btrace.c: Remove typedef bfun_s.
 	(ftrace_new_gap): Directly add gaps to the list of gaps.
 	(btrace_bridge_gaps, btrace_compute_ftrace_bts, pt_btrace_insn_flags,

@@ -1681,7 +1681,7 @@ record_btrace_frame_sniffer (const struct frame_unwind *self,
 
       replay = tp->btrace.replay;
       if (replay != NULL)
-	bfun = replay->btinfo->functions[replay->call_index];
+	bfun = &replay->btinfo->functions[replay->call_index];
     }
   else
     {

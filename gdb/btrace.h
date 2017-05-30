@@ -135,6 +135,13 @@ enum btrace_pt_error
    We do not allow function segments without instructions otherwise.  */
 struct btrace_function
 {
+  btrace_function (struct minimal_symbol *msym_, struct symbol *sym_,
+		   unsigned int number_, unsigned int insn_offset_, int level_)
+    : msym (msym_), sym (sym_), insn_offset (insn_offset_), number (number_),
+      level (level_)
+  {
+  }
+
   /* The full and minimal symbol for the function.  Both may be NULL.  */
   struct minimal_symbol *msym;
   struct symbol *sym;
@@ -143,22 +150,22 @@ struct btrace_function
      the same function.  If a function calls another function, the former will
      have at least two segments: one before the call and another after the
      return.  Will be zero if there is no such function segment.  */
-  unsigned int prev;
-  unsigned int next;
+  unsigned int prev = 0;
+  unsigned int next = 0;
 
   /* The function segment number of the directly preceding function segment in
      a (fake) call stack.  Will be zero if there is no such function segment in
      the record.  */
-  unsigned int up;
+  unsigned int up = 0;
 
   /* The instructions in this function segment.
      The instruction vector will be empty if the function segment
      represents a decode error.  */
-  VEC (btrace_insn_s) *insn;
+  VEC (btrace_insn_s) *insn = NULL;
 
   /* The error code of a decode error that led to a gap.
      Must be zero unless INSN is empty; non-zero otherwise.  */
-  int errcode;
+  int errcode = 0;
 
   /* The instruction number offset for the first instruction in this
      function segment.
@@ -180,7 +187,7 @@ struct btrace_function
   int level;
 
   /* A bit-vector of btrace_function_flag.  */
-  btrace_function_flags flags;
+  btrace_function_flags flags = 0;
 };
 
 /* A branch trace instruction iterator.  */
@@ -325,10 +332,10 @@ struct btrace_thread_info
   /* The raw branch trace data for the below branch trace.  */
   struct btrace_data data;
 
-  /* Vector of pointer to decoded function segments in execution flow order.
+  /* Vector of decoded function segments in execution flow order.
      Note that the numbering for btrace function segments starts with 1, so
      function segment i will be at index (i - 1).  */
-  std::vector<btrace_function *> functions;
+  std::vector<btrace_function> functions;
 
   /* The function level offset.  When added to each function's LEVEL,
      this normalizes the function levels such that the smallest level
