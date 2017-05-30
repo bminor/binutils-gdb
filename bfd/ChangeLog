@@ -1,3 +1,9 @@
+2017-05-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/21519
+	* bfdio.c (bfd_get_file_size): New function.
+	* bfd-in2.h: Regenerated.
+
 2017-05-23  Dilian Palauzov  <git-dpa@aegee.org>
 
 	* elf32-arc.c (arc_elf_merge_attributes): Add fall through
