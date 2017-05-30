@@ -271,20 +271,29 @@ ftrace_update_caller (struct btrace_function *bfun,
 /* Fix up the caller for all segments of a function.  */
 
 static void
-ftrace_fixup_caller (struct btrace_function *bfun,
+ftrace_fixup_caller (struct btrace_thread_info *btinfo,
+		     struct btrace_function *bfun,
 		     struct btrace_function *caller,
 		     enum btrace_function_flag flags)
 {
-  struct btrace_function *prev, *next;
+  unsigned int prev, next;
 
+  prev = bfun->prev;
+  next = bfun->next;
   ftrace_update_caller (bfun, caller, flags);
 
   /* Update all function segments belonging to the same function.  */
-  for (prev = bfun->segment.prev; prev != NULL; prev = prev->segment.prev)
-    ftrace_update_caller (prev, caller, flags);
+  for (; prev != 0; prev = bfun->prev)
+    {
+      bfun = ftrace_find_call_by_number (btinfo, prev);
+      ftrace_update_caller (bfun, caller, flags);
+    }
 
-  for (next = bfun->segment.next; next != NULL; next = next->segment.next)
-    ftrace_update_caller (next, caller, flags);
+  for (; next != 0; next = bfun->next)
+    {
+      bfun = ftrace_find_call_by_number (btinfo, next);
+      ftrace_update_caller (bfun, caller, flags);
+    }
 }
 
 /* Add a new function segment for a call at the end of the trace.
@@ -414,10 +423,10 @@ ftrace_new_return (struct btrace_thread_info *btinfo,
     {
       /* The caller of PREV is the preceding btrace function segment in this
 	 function instance.  */
-      gdb_assert (caller->segment.next == NULL);
+      gdb_assert (caller->next == 0);
 
-      caller->segment.next = bfun;
-      bfun->segment.prev = caller;
+      caller->next = bfun->number;
+      bfun->prev = caller->number;
 
       /* Maintain the function level.  */
       bfun->level = caller->level;
@@ -449,7 +458,7 @@ ftrace_new_return (struct btrace_thread_info *btinfo,
 	  bfun->level = prev->level - 1;
 
 	  /* Fix up the call stack for PREV.  */
-	  ftrace_fixup_caller (prev, bfun, BFUN_UP_LINKS_TO_RET);
+	  ftrace_fixup_caller (btinfo, prev, bfun, BFUN_UP_LINKS_TO_RET);
 
 	  ftrace_debug (bfun, "new return - no caller");
 	}
@@ -752,11 +761,11 @@ ftrace_connect_bfun (struct btrace_thread_info *btinfo,
   ftrace_debug (next, "..next");
 
   /* The function segments are not yet connected.  */
-  gdb_assert (prev->segment.next == NULL);
-  gdb_assert (next->segment.prev == NULL);
+  gdb_assert (prev->next == 0);
+  gdb_assert (next->prev == 0);
 
-  prev->segment.next = next;
-  next->segment.prev = prev;
+  prev->next = next->number;
+  next->prev = prev->number;
 
   /* We may have moved NEXT to a different function level.  */
   ftrace_fixup_level (btinfo, next, prev->level - next->level);
@@ -770,7 +779,7 @@ ftrace_connect_bfun (struct btrace_thread_info *btinfo,
       if (next != NULL)
 	{
 	  DEBUG_FTRACE ("using next's callers");
-	  ftrace_fixup_caller (prev, next, flags);
+	  ftrace_fixup_caller (btinfo, prev, next, flags);
 	}
     }
   else if (next->up == 0)
@@ -781,7 +790,7 @@ ftrace_connect_bfun (struct btrace_thread_info *btinfo,
       if (prev != NULL)
 	{
 	  DEBUG_FTRACE ("using prev's callers");
-	  ftrace_fixup_caller (next, prev, flags);
+	  ftrace_fixup_caller (btinfo, next, prev, flags);
 	}
     }
   else
@@ -809,7 +818,7 @@ ftrace_connect_bfun (struct btrace_thread_info *btinfo,
 	  DEBUG_FTRACE ("adding prev's tail calls to next");
 
 	  prev = ftrace_find_call_by_number (btinfo, prev->up);
-	  ftrace_fixup_caller (next, prev, prev_flags);
+	  ftrace_fixup_caller (btinfo, next, prev, prev_flags);
 
 	  for (; prev != NULL; prev = ftrace_find_call_by_number (btinfo,
 								  prev->up))
@@ -821,7 +830,7 @@ ftrace_connect_bfun (struct btrace_thread_info *btinfo,
 		  ftrace_debug (prev, "..top");
 		  ftrace_debug (caller, "..up");
 
-		  ftrace_fixup_caller (prev, caller, next_flags);
+		  ftrace_fixup_caller (btinfo, prev, caller, next_flags);
 
 		  /* If we skipped any tail calls, this may move CALLER to a
 		     different function level.
@@ -944,14 +953,13 @@ ftrace_bridge_gap (struct btrace_thread_info *btinfo,
 static void
 btrace_bridge_gaps (struct thread_info *tp, VEC (bfun_s) **gaps)
 {
-  struct btrace_thread_info *btinfo;
+  struct btrace_thread_info *btinfo = &tp->btrace;
   VEC (bfun_s) *remaining;
   struct cleanup *old_chain;
   int min_matches;
 
   DEBUG ("bridge gaps");
 
-  btinfo = &tp->btrace;
   remaining = NULL;
   old_chain = make_cleanup (VEC_cleanup (bfun_s), &remaining);
 

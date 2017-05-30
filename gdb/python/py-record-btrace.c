@@ -416,11 +416,11 @@ recpy_bt_func_prev (PyObject *self, void *closure)
   if (func == NULL)
     return NULL;
 
-  if (func->segment.prev == NULL)
+  if (func->prev == 0)
     Py_RETURN_NONE;
 
   return recpy_func_new (((recpy_element_object *) self)->ptid,
-			 RECORD_METHOD_BTRACE, func->segment.prev->number);
+			 RECORD_METHOD_BTRACE, func->prev);
 }
 
 /* Implementation of RecordFunctionSegment.next [RecordFunctionSegment] for
@@ -434,11 +434,11 @@ recpy_bt_func_next (PyObject *self, void *closure)
   if (func == NULL)
     return NULL;
 
-  if (func->segment.next == NULL)
+  if (func->next == 0)
     Py_RETURN_NONE;
 
   return recpy_func_new (((recpy_element_object *) self)->ptid,
-			 RECORD_METHOD_BTRACE, func->segment.next->number);
+			 RECORD_METHOD_BTRACE, func->next);
 }
 
 /* Implementation of BtraceList.__len__ (self) -> int.  */

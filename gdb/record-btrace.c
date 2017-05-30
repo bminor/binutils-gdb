@@ -1584,6 +1584,7 @@ record_btrace_frame_this_id (struct frame_info *this_frame, void **this_cache,
 {
   const struct btrace_frame_cache *cache;
   const struct btrace_function *bfun;
+  struct btrace_call_iterator it;
   CORE_ADDR code, special;
 
   cache = (const struct btrace_frame_cache *) *this_cache;
@@ -1591,8 +1592,8 @@ record_btrace_frame_this_id (struct frame_info *this_frame, void **this_cache,
   bfun = cache->bfun;
   gdb_assert (bfun != NULL);
 
-  while (bfun->segment.prev != NULL)
-    bfun = bfun->segment.prev;
+  while (btrace_find_call_by_number (&it, &cache->tp->btrace, bfun->prev) != 0)
+    bfun = btrace_call_get (&it);
 
   code = get_frame_func (this_frame);
   special = bfun->number;

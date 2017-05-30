@@ -85,13 +85,6 @@ struct btrace_insn
 typedef struct btrace_insn btrace_insn_s;
 DEF_VEC_O (btrace_insn_s);
 
-/* A doubly-linked list of branch trace function segments.  */
-struct btrace_func_link
-{
-  struct btrace_function *prev;
-  struct btrace_function *next;
-};
-
 /* Flags for btrace function segments.  */
 enum btrace_function_flag
 {
@@ -146,10 +139,12 @@ struct btrace_function
   struct minimal_symbol *msym;
   struct symbol *sym;
 
-  /* The previous and next segment belonging to the same function.
-     If a function calls another function, the former will have at least
-     two segments: one before the call and another after the return.  */
-  struct btrace_func_link segment;
+  /* The function segment numbers of the previous and next segment belonging to
+     the same function.  If a function calls another function, the former will
+     have at least two segments: one before the call and another after the
+     return.  Will be zero if there is no such function segment.  */
+  unsigned int prev;
+  unsigned int next;
 
   /* The function segment number of the directly preceding function segment in
      a (fake) call stack.  Will be zero if there is no such function segment in

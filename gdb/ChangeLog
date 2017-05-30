@@ -1,5 +1,21 @@
 2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* btrace.c (ftrace_fixup_caller, ftrace_new_return, ftrace_connect_bfun,
+	ftrace_bridge_gap): Replace references to btrace_thread_info::segment
+	with btrace_thread_info::next_segment and
+	btrace_thread_info::prev_segment.
+	* btrace.h: Remove struct btrace_func_link.
+	(struct btrace_function): Replace pair of function segment pointers
+	with pair of indices.
+	* python/py-record-btrace.c (btpy_call_prev_sibling,
+	btpy_call_next_sibling): Replace references to
+	btrace_thread_info::segment with btrace_thread_info::next_segment and
+	btrace_thread_info::prev_segment.
+	* record-btrace.c (record_btrace_frame_this_id): Use
+	btrace_find_call_by_number.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* btrace.c (ftrace_new_function, ftrace_fixup_level,
 	ftrace_connect_bfun, ftrace_bridge_gap, btrace_bridge_gaps,
 	btrace_insn_next, btrace_insn_prev): Remove references to
