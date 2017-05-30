@@ -1101,8 +1101,8 @@ record_btrace_call_history (struct target_ops *self, int size, int int_flags)
       replay = btinfo->replay;
       if (replay != NULL)
 	{
-	  begin.function = replay->function;
 	  begin.btinfo = btinfo;
+	  begin.index = replay->function->number - 1;
 	}
       else
 	btrace_call_end (&begin, btinfo);

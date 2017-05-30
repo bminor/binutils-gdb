@@ -2527,12 +2527,33 @@ btrace_find_insn_by_number (struct btrace_insn_iterator *it,
   return 1;
 }
 
+/* Returns true if the recording ends with a function segment that
+   contains only a single (i.e. the current) instruction.  */
+
+static bool
+btrace_ends_with_single_insn (const struct btrace_thread_info *btinfo)
+{
+  const btrace_function *bfun;
+
+  if (btinfo->functions.empty ())
+    return false;
+
+  bfun = btinfo->functions.back ();
+  if (bfun->errcode != 0)
+    return false;
+
+  return ftrace_call_num_insn (bfun) == 1;
+}
+
 /* See btrace.h.  */
 
 const struct btrace_function *
 btrace_call_get (const struct btrace_call_iterator *it)
 {
-  return it->function;
+  if (it->index >= it->btinfo->functions.size ())
+    return NULL;
+
+  return it->btinfo->functions[it->index];
 }
 
 /* See btrace.h.  */
@@ -2540,28 +2561,14 @@ btrace_call_get (const struct btrace_call_iterator *it)
 unsigned int
 btrace_call_number (const struct btrace_call_iterator *it)
 {
-  const struct btrace_thread_info *btinfo;
-  const struct btrace_function *bfun;
-  unsigned int insns;
+  const unsigned int length = it->btinfo->functions.size ();
 
-  btinfo = it->btinfo;
-  bfun = it->function;
-  if (bfun != NULL)
-    return bfun->number;
+  /* If the last function segment contains only a single instruction (i.e. the
+     current instruction), skip it.  */
+  if ((it->index == length) && btrace_ends_with_single_insn (it->btinfo))
+    return length;
 
-  /* For the end iterator, i.e. bfun == NULL, we return one more than the
-     number of the last function.  */
-  bfun = btinfo->end;
-  insns = VEC_length (btrace_insn_s, bfun->insn);
-
-  /* If the function contains only a single instruction (i.e. the current
-     instruction), it will be skipped and its number is already the number
-     we seek.  */
-  if (insns == 1)
-    return bfun->number;
-
-  /* Otherwise, return one more than the number of the last function.  */
-  return bfun->number + 1;
+  return it->index + 1;
 }
 
 /* See btrace.h.  */
@@ -2570,14 +2577,11 @@ void
 btrace_call_begin (struct btrace_call_iterator *it,
 		   const struct btrace_thread_info *btinfo)
 {
-  const struct btrace_function *bfun;
-
-  bfun = btinfo->begin;
-  if (bfun == NULL)
+  if (btinfo->functions.empty ())
     error (_("No trace."));
 
   it->btinfo = btinfo;
-  it->function = bfun;
+  it->index = 0;
 }
 
 /* See btrace.h.  */
@@ -2586,14 +2590,11 @@ void
 btrace_call_end (struct btrace_call_iterator *it,
 		 const struct btrace_thread_info *btinfo)
 {
-  const struct btrace_function *bfun;
-
-  bfun = btinfo->end;
-  if (bfun == NULL)
+  if (btinfo->functions.empty ())
     error (_("No trace."));
 
   it->btinfo = btinfo;
-  it->function = NULL;
+  it->index = btinfo->functions.size ();
 }
 
 /* See btrace.h.  */
@@ -2601,35 +2602,35 @@ btrace_call_end (struct btrace_call_iterator *it,
 unsigned int
 btrace_call_next (struct btrace_call_iterator *it, unsigned int stride)
 {
-  const struct btrace_function *bfun;
-  unsigned int steps;
+  const unsigned int length = it->btinfo->functions.size ();
 
-  bfun = it->function;
-  steps = 0;
-  while (bfun != NULL)
+  if (it->index + stride < length - 1)
+    /* Default case: Simply advance the iterator.  */
+    it->index += stride;
+  else if (it->index + stride == length - 1)
     {
-      const struct btrace_function *next;
-      unsigned int insns;
+      /* We land exactly at the last function segment.  If it contains only one
+	 instruction (i.e. the current instruction) it is not actually part of
+	 the trace.  */
+      if (btrace_ends_with_single_insn (it->btinfo))
+	it->index = length;
+      else
+	it->index = length - 1;
+    }
+  else
+    {
+      /* We land past the last function segment and have to adjust the stride.
+	 If the last function segment contains only one instruction (i.e. the
+	 current instruction) it is not actually part of the trace.  */
+      if (btrace_ends_with_single_insn (it->btinfo))
+	stride = length - it->index - 1;
+      else
+	stride = length - it->index;
 
-      next = bfun->flow.next;
-      if (next == NULL)
-	{
-	  /* Ignore the last function if it only contains a single
-	     (i.e. the current) instruction.  */
-	  insns = VEC_length (btrace_insn_s, bfun->insn);
-	  if (insns == 1)
-	    steps -= 1;
-	}
-
-      if (stride == steps)
-	break;
-
-      bfun = next;
-      steps += 1;
+      it->index = length;
     }
 
-  it->function = bfun;
-  return steps;
+  return stride;
 }
 
 /* See btrace.h.  */
@@ -2637,48 +2638,33 @@ btrace_call_next (struct btrace_call_iterator *it, unsigned int stride)
 unsigned int
 btrace_call_prev (struct btrace_call_iterator *it, unsigned int stride)
 {
-  const struct btrace_thread_info *btinfo;
-  const struct btrace_function *bfun;
-  unsigned int steps;
+  const unsigned int length = it->btinfo->functions.size ();
+  int steps = 0;
 
-  bfun = it->function;
-  steps = 0;
+  gdb_assert (it->index <= length);
 
-  if (bfun == NULL)
+  if (stride == 0 || it->index == 0)
+    return 0;
+
+  /* If we are at the end, the first step is a special case.  If the last
+     function segment contains only one instruction (i.e. the current
+     instruction) it is not actually part of the trace.  To be able to step
+     over this instruction, we need at least one more function segment.  */
+  if ((it->index == length)  && (length > 1))
     {
-      unsigned int insns;
+      if (btrace_ends_with_single_insn (it->btinfo))
+	it->index = length - 2;
+      else
+	it->index = length - 1;
 
-      btinfo = it->btinfo;
-      bfun = btinfo->end;
-      if (bfun == NULL)
-	return 0;
-
-      /* Ignore the last function if it only contains a single
-	 (i.e. the current) instruction.  */
-      insns = VEC_length (btrace_insn_s, bfun->insn);
-      if (insns == 1)
-	bfun = bfun->flow.prev;
-
-      if (bfun == NULL)
-	return 0;
-
-      steps += 1;
+      steps = 1;
+      stride -= 1;
     }
 
-  while (steps < stride)
-    {
-      const struct btrace_function *prev;
+  stride = std::min (stride, it->index);
 
-      prev = bfun->flow.prev;
-      if (prev == NULL)
-	break;
-
-      bfun = prev;
-      steps += 1;
-    }
-
-  it->function = bfun;
-  return steps;
+  it->index -= stride;
+  return steps + stride;
 }
 
 /* See btrace.h.  */
@@ -2687,12 +2673,8 @@ int
 btrace_call_cmp (const struct btrace_call_iterator *lhs,
 		 const struct btrace_call_iterator *rhs)
 {
-  unsigned int lnum, rnum;
-
-  lnum = btrace_call_number (lhs);
-  rnum = btrace_call_number (rhs);
-
-  return (int) (lnum - rnum);
+  gdb_assert (lhs->btinfo == rhs->btinfo);
+  return (int) (lhs->index - rhs->index);
 }
 
 /* See btrace.h.  */
@@ -2702,26 +2684,14 @@ btrace_find_call_by_number (struct btrace_call_iterator *it,
 			    const struct btrace_thread_info *btinfo,
 			    unsigned int number)
 {
-  const struct btrace_function *bfun;
+  const unsigned int length = btinfo->functions.size ();
 
-  for (bfun = btinfo->end; bfun != NULL; bfun = bfun->flow.prev)
-    {
-      unsigned int bnum;
+  if ((number == 0) || (number > length))
+    return 0;
 
-      bnum = bfun->number;
-      if (number == bnum)
-	{
-	  it->btinfo = btinfo;
-	  it->function = bfun;
-	  return 1;
-	}
-
-      /* Functions are ordered and numbered consecutively.  We could bail out
-	 earlier.  On the other hand, it is very unlikely that we search for
-	 a nonexistent function.  */
-  }
-
-  return 0;
+  it->btinfo = btinfo;
+  it->index = number - 1;
+  return 1;
 }
 
 /* See btrace.h.  */

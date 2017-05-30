@@ -172,7 +172,7 @@ struct btrace_function
      segment in control-flow order.  */
   unsigned int insn_offset;
 
-  /* The function number in control-flow order.
+  /* The 1-based function number in control-flow order.
      If INSN is empty indicating a gap in the trace due to a decode error,
      we still count the gap as a function.  */
   unsigned int number;
@@ -209,9 +209,8 @@ struct btrace_call_iterator
   /* The branch trace information for this thread.  Will never be NULL.  */
   const struct btrace_thread_info *btinfo;
 
-  /* The branch trace function segment.
-     This will be NULL for the iterator pointing to the end of the trace.  */
-  const struct btrace_function *function;
+  /* The index of the function segment in BTINFO->FUNCTIONS.  */
+  unsigned int index;
 };
 
 /* Branch trace iteration state for "record instruction-history".  */

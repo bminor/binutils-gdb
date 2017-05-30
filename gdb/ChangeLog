@@ -1,5 +1,18 @@
 2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* btrace.c (btrace_ends_with_single_insn): New function.
+	(btrace_call_get, btrace_call_number, btrace_call_begin,
+	btrace_call_end, btrace_call_next, btrace_call_prev,
+	btrace_find_call_by_number): Use index into call segment vector
+	instead of pointer.
+	(btrace_call_cmp): Simplify.
+	* btrace.h (struct btrace_call_iterator): Replace function call segment
+	pointer with index into vector.
+	* record-btrace.c (record_btrace_call_history): Use index instead of
+	pointer.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* btrace.c (btrace_insn_begin, btrace_insn_end,
 	btrace_find_insn_by_number): Add btinfo to iterator.
 	* btrace.h (struct btrace_insn_iterator): Add btinfo.
