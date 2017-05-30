@@ -242,10 +242,6 @@ ftrace_new_function (struct btrace_thread_info *btinfo,
     {
       struct btrace_function *prev = btinfo->functions.back ();
 
-      gdb_assert (prev->flow.next == NULL);
-      prev->flow.next = bfun;
-      bfun->flow.prev = prev;
-
       bfun->number = prev->number + 1;
       bfun->insn_offset = prev->insn_offset + ftrace_call_num_insn (prev);
       bfun->level = prev->level;
@@ -693,10 +689,12 @@ ftrace_match_backtrace (struct btrace_thread_info *btinfo,
   return matches;
 }
 
-/* Add ADJUSTMENT to the level of BFUN and succeeding function segments.  */
+/* Add ADJUSTMENT to the level of BFUN and succeeding function segments.
+   BTINFO is the branch trace information for the current thread.  */
 
 static void
-ftrace_fixup_level (struct btrace_function *bfun, int adjustment)
+ftrace_fixup_level (struct btrace_thread_info *btinfo,
+		    struct btrace_function *bfun, int adjustment)
 {
   if (adjustment == 0)
     return;
@@ -704,8 +702,11 @@ ftrace_fixup_level (struct btrace_function *bfun, int adjustment)
   DEBUG_FTRACE ("fixup level (%+d)", adjustment);
   ftrace_debug (bfun, "..bfun");
 
-  for (; bfun != NULL; bfun = bfun->flow.next)
-    bfun->level += adjustment;
+  while (bfun != NULL)
+    {
+      bfun->level += adjustment;
+      bfun = ftrace_find_call_by_number (btinfo, bfun->number + 1);
+    }
 }
 
 /* Recompute the global level offset.  Traverse the function trace and compute
@@ -758,7 +759,7 @@ ftrace_connect_bfun (struct btrace_thread_info *btinfo,
   next->segment.prev = prev;
 
   /* We may have moved NEXT to a different function level.  */
-  ftrace_fixup_level (next, prev->level - next->level);
+  ftrace_fixup_level (btinfo, next, prev->level - next->level);
 
   /* If we run out of back trace for one, let's use the other's.  */
   if (prev->up == 0)
@@ -831,7 +832,8 @@ ftrace_connect_bfun (struct btrace_thread_info *btinfo,
 
 		     Otherwise we will fix up CALLER's level when we connect it
 		     to PREV's caller in the next iteration.  */
-		  ftrace_fixup_level (caller, prev->level - caller->level - 1);
+		  ftrace_fixup_level (btinfo, caller,
+				      prev->level - caller->level - 1);
 		  break;
 		}
 
@@ -929,7 +931,7 @@ ftrace_bridge_gap (struct btrace_thread_info *btinfo,
      To catch this, we already fix up the level here where we can start at RHS
      instead of at BEST_R.  We will ignore the level fixup when connecting
      BEST_L to BEST_R as they will already be on the same level.  */
-  ftrace_fixup_level (rhs, best_l->level - best_r->level);
+  ftrace_fixup_level (btinfo, rhs, best_l->level - best_r->level);
 
   ftrace_connect_backtrace (btinfo, best_l, best_r);
 
@@ -942,12 +944,14 @@ ftrace_bridge_gap (struct btrace_thread_info *btinfo,
 static void
 btrace_bridge_gaps (struct thread_info *tp, VEC (bfun_s) **gaps)
 {
+  struct btrace_thread_info *btinfo;
   VEC (bfun_s) *remaining;
   struct cleanup *old_chain;
   int min_matches;
 
   DEBUG ("bridge gaps");
 
+  btinfo = &tp->btrace;
   remaining = NULL;
   old_chain = make_cleanup (VEC_cleanup (bfun_s), &remaining);
 
@@ -976,20 +980,20 @@ btrace_bridge_gaps (struct thread_info *tp, VEC (bfun_s) **gaps)
 		 all but the leftmost gap in such a sequence.
 
 		 Also ignore gaps at the beginning of the trace.  */
-	      lhs = gap->flow.prev;
+	      lhs = ftrace_find_call_by_number (btinfo, gap->number - 1);
 	      if (lhs == NULL || lhs->errcode != 0)
 		continue;
 
 	      /* Skip gaps to the right.  */
-	      for (rhs = gap->flow.next; rhs != NULL; rhs = rhs->flow.next)
-		if (rhs->errcode == 0)
-		  break;
+	      rhs = ftrace_find_call_by_number (btinfo, gap->number + 1);
+	      while (rhs != NULL && rhs->errcode != 0)
+		rhs = ftrace_find_call_by_number (btinfo, rhs->number + 1);
 
 	      /* Ignore gaps at the end of the trace.  */
 	      if (rhs == NULL)
 		continue;
 
-	      bridged = ftrace_bridge_gap (&tp->btrace, lhs, rhs, min_matches);
+	      bridged = ftrace_bridge_gap (btinfo, lhs, rhs, min_matches);
 
 	      /* Keep track of gaps we were not able to bridge and try again.
 		 If we just pushed them to the end of GAPS we would risk an
@@ -1019,7 +1023,7 @@ btrace_bridge_gaps (struct thread_info *tp, VEC (bfun_s) **gaps)
 
   /* We may omit this in some cases.  Not sure it is worth the extra
      complication, though.  */
-  ftrace_compute_global_level_offset (&tp->btrace);
+  ftrace_compute_global_level_offset (btinfo);
 }
 
 /* Compute the function branch trace from BTS trace.  */
@@ -2372,7 +2376,7 @@ btrace_insn_next (struct btrace_insn_iterator *it, unsigned int stride)
 	{
 	  const struct btrace_function *next;
 
-	  next = bfun->flow.next;
+	  next = ftrace_find_call_by_number (it->btinfo, bfun->number + 1);
 	  if (next == NULL)
 	    break;
 
@@ -2402,7 +2406,7 @@ btrace_insn_next (struct btrace_insn_iterator *it, unsigned int stride)
 	{
 	  const struct btrace_function *next;
 
-	  next = bfun->flow.next;
+	  next = ftrace_find_call_by_number (it->btinfo, bfun->number + 1);
 	  if (next == NULL)
 	    {
 	      /* We stepped past the last function.
@@ -2451,7 +2455,7 @@ btrace_insn_prev (struct btrace_insn_iterator *it, unsigned int stride)
 	{
 	  const struct btrace_function *prev;
 
-	  prev = bfun->flow.prev;
+	  prev = ftrace_find_call_by_number (it->btinfo, bfun->number - 1);
 	  if (prev == NULL)
 	    break;
 

@@ -1,5 +1,13 @@
 2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* btrace.c (ftrace_new_function, ftrace_fixup_level,
+	ftrace_connect_bfun, ftrace_bridge_gap, btrace_bridge_gaps,
+	btrace_insn_next, btrace_insn_prev): Remove references to
+	btrace_thread_info::flow.
+	* btrace.h (struct btrace_function): Remove FLOW.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* btrace.c (ftrace_find_call_by_number): New function.
 	(ftrace_update_caller, ftrace_new_call, ftrace_new_tailcall,
 	ftrace_get_caller, ftrace_find_call, ftrace_new_return,

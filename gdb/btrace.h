@@ -151,9 +151,6 @@ struct btrace_function
      two segments: one before the call and another after the return.  */
   struct btrace_func_link segment;
 
-  /* The previous and next function in control flow order.  */
-  struct btrace_func_link flow;
-
   /* The function segment number of the directly preceding function segment in
      a (fake) call stack.  Will be zero if there is no such function segment in
      the record.  */
