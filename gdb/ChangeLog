@@ -1,5 +1,18 @@
 2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* btrace.c (ftrace_new_function): Add btrace_thread_info to arguments
+	and save pointers directly.
+	(ftrace_new_call, ftrace_new_tailcall, ftrace_new_return,
+	ftrace_new_switch, ftrace_new_gap, ftrace_update_function,
+	ftrace_add_pt): Add btrace_thread_info to arguments.  Adjust for
+	changed signature of functions.
+	(btrace_compute_ftrace_pt): Adjust for changed signature of functions.
+	(btrace_fetch): Remove code that adds btrace_function pointers to
+	vector of btrace_functions.
+	(btrace_clear): Simplify freeing vector of btrace_functions.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* btrace.c (btrace_fetch, btrace_clear, btrace_find_insn_by_number):
 	Replace VEC_* with std::vector functions.
 	* btrace.h: Add include: vector. Remove typedef for DEF_VEC_P.
