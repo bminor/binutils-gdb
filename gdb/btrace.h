@@ -192,6 +192,9 @@ struct btrace_function
 /* A branch trace instruction iterator.  */
 struct btrace_insn_iterator
 {
+  /* The branch trace information for this thread.  Will never be NULL.  */
+  const struct btrace_thread_info *btinfo;
+
   /* The branch trace function segment containing the instruction.
      Will never be NULL.  */
   const struct btrace_function *function;

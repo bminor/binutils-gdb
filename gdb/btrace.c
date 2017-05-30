@@ -2291,6 +2291,7 @@ btrace_insn_begin (struct btrace_insn_iterator *it,
   if (bfun == NULL)
     error (_("No trace."));
 
+  it->btinfo = btinfo;
   it->function = bfun;
   it->index = 0;
 }
@@ -2316,6 +2317,7 @@ btrace_insn_end (struct btrace_insn_iterator *it,
   if (length > 0)
     length -= 1;
 
+  it->btinfo = btinfo;
   it->function = bfun;
   it->index = length;
 }
@@ -2519,6 +2521,7 @@ btrace_find_insn_by_number (struct btrace_insn_iterator *it,
       break;
     }
 
+  it->btinfo = btinfo;
   it->function = bfun;
   it->index = number - bfun->insn_offset;
   return 1;

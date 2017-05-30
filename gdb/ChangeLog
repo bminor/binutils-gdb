@@ -1,5 +1,11 @@
 2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* btrace.c (btrace_insn_begin, btrace_insn_end,
+	btrace_find_insn_by_number): Add btinfo to iterator.
+	* btrace.h (struct btrace_insn_iterator): Add btinfo.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* btrace.c (ftrace_new_function): Add btrace_thread_info to arguments
 	and save pointers directly.
 	(ftrace_new_call, ftrace_new_tailcall, ftrace_new_return,
