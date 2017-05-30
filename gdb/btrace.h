@@ -154,8 +154,10 @@ struct btrace_function
   /* The previous and next function in control flow order.  */
   struct btrace_func_link flow;
 
-  /* The directly preceding function segment in a (fake) call stack.  */
-  struct btrace_function *up;
+  /* The function segment number of the directly preceding function segment in
+     a (fake) call stack.  Will be zero if there is no such function segment in
+     the record.  */
+  unsigned int up;
 
   /* The instructions in this function segment.
      The instruction vector will be empty if the function segment

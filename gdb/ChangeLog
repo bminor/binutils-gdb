@@ -1,5 +1,20 @@
 2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* btrace.c (ftrace_find_call_by_number): New function.
+	(ftrace_update_caller, ftrace_new_call, ftrace_new_tailcall,
+	ftrace_get_caller, ftrace_find_call, ftrace_new_return,
+	ftrace_match_backtrace, ftrace_connect_bfun, ftrace_connect_backtrace,
+	ftrace_bridge_gap, btrace_bridge_gaps): Use btrace_function::up as an
+	index.
+	* btrace.h (struct btrace_function): Turn UP into an index.
+	* python/py-record-btrace.c (btpy_call_up): Use btrace_function::up
+	as an index.
+	* record-btrace.c (record_btrace_frame_unwind_stop_reason,
+	record_btrace_frame_prev_register, record_btrace_frame_sniffer,
+	record_btrace_tailcall_frame_sniffe): Use btrace_find_call_by_number.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* btrace.c (ftrace_new_function, ftrace_new_call, ftrace_new_tailcall,
 	ftrace_new_return, ftrace_new_switch, ftrace_new_gap,
 	ftrace_update_function, ftrace_compute_global_level_offset,

@@ -398,11 +398,11 @@ recpy_bt_func_up (PyObject *self, void *closure)
   if (func == NULL)
     return NULL;
 
-  if (func->up == NULL)
+  if (func->up == 0)
     Py_RETURN_NONE;
 
   return recpy_func_new (((recpy_element_object *) self)->ptid,
-			 RECORD_METHOD_BTRACE, func->up->number);
+			 RECORD_METHOD_BTRACE, func->up);
 }
 
 /* Implementation of RecordFunctionSegment.prev [RecordFunctionSegment] for

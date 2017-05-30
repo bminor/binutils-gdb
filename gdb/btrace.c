@@ -156,6 +156,19 @@ ftrace_call_num_insn (const struct btrace_function* bfun)
   return VEC_length (btrace_insn_s, bfun->insn);
 }
 
+/* Return the function segment with the given NUMBER or NULL if no such segment
+   exists.  BTINFO is the branch trace information for the current thread.  */
+
+static struct btrace_function *
+ftrace_find_call_by_number (const struct btrace_thread_info *btinfo,
+			    unsigned int number)
+{
+  if (number == 0 || number > btinfo->functions.size ())
+    return NULL;
+
+  return btinfo->functions[number - 1];
+}
+
 /* Return non-zero if BFUN does not match MFUN and FUN,
    return zero otherwise.  */
 
@@ -249,10 +262,10 @@ ftrace_update_caller (struct btrace_function *bfun,
 		      struct btrace_function *caller,
 		      enum btrace_function_flag flags)
 {
-  if (bfun->up != NULL)
+  if (bfun->up != 0)
     ftrace_debug (bfun, "updating caller");
 
-  bfun->up = caller;
+  bfun->up = caller->number;
   bfun->flags = flags;
 
   ftrace_debug (bfun, "set caller");
@@ -290,8 +303,7 @@ ftrace_new_call (struct btrace_thread_info *btinfo,
   const unsigned int length = btinfo->functions.size ();
   struct btrace_function *bfun = ftrace_new_function (btinfo, mfun, fun);
 
-  if (length != 0)
-    bfun->up = btinfo->functions[length - 1];
+  bfun->up = length;
   bfun->level += 1;
 
   ftrace_debug (bfun, "new call");
@@ -311,8 +323,7 @@ ftrace_new_tailcall (struct btrace_thread_info *btinfo,
   const unsigned int length = btinfo->functions.size ();
   struct btrace_function *bfun = ftrace_new_function (btinfo, mfun, fun);
 
-  if (length != 0)
-    bfun->up = btinfo->functions[length - 1];
+  bfun->up = length;
   bfun->level += 1;
   bfun->flags |= BFUN_UP_LINKS_TO_TAILCALL;
 
@@ -322,26 +333,30 @@ ftrace_new_tailcall (struct btrace_thread_info *btinfo,
 }
 
 /* Return the caller of BFUN or NULL if there is none.  This function skips
-   tail calls in the call chain.  */
+   tail calls in the call chain.  BTINFO is the branch trace information for
+   the current thread.  */
 static struct btrace_function *
-ftrace_get_caller (struct btrace_function *bfun)
+ftrace_get_caller (struct btrace_thread_info *btinfo,
+		   struct btrace_function *bfun)
 {
-  for (; bfun != NULL; bfun = bfun->up)
+  for (; bfun != NULL; bfun = ftrace_find_call_by_number (btinfo, bfun->up))
     if ((bfun->flags & BFUN_UP_LINKS_TO_TAILCALL) == 0)
-      return bfun->up;
+      return ftrace_find_call_by_number (btinfo, bfun->up);
 
   return NULL;
 }
 
 /* Find the innermost caller in the back trace of BFUN with MFUN/FUN
-   symbol information.  */
+   symbol information.  BTINFO is the branch trace information for the current
+   thread.  */
 
 static struct btrace_function *
-ftrace_find_caller (struct btrace_function *bfun,
+ftrace_find_caller (struct btrace_thread_info *btinfo,
+		    struct btrace_function *bfun,
 		    struct minimal_symbol *mfun,
 		    struct symbol *fun)
 {
-  for (; bfun != NULL; bfun = bfun->up)
+  for (; bfun != NULL; bfun = ftrace_find_call_by_number (btinfo, bfun->up))
     {
       /* Skip functions with incompatible symbol information.  */
       if (ftrace_function_switched (bfun, mfun, fun))
@@ -356,12 +371,14 @@ ftrace_find_caller (struct btrace_function *bfun,
 
 /* Find the innermost caller in the back trace of BFUN, skipping all
    function segments that do not end with a call instruction (e.g.
-   tail calls ending with a jump).  */
+   tail calls ending with a jump).  BTINFO is the branch trace information for
+   the current thread.  */
 
 static struct btrace_function *
-ftrace_find_call (struct btrace_function *bfun)
+ftrace_find_call (struct btrace_thread_info *btinfo,
+		  struct btrace_function *bfun)
 {
-  for (; bfun != NULL; bfun = bfun->up)
+  for (; bfun != NULL; bfun = ftrace_find_call_by_number (btinfo, bfun->up))
     {
       struct btrace_insn *last;
 
@@ -395,7 +412,8 @@ ftrace_new_return (struct btrace_thread_info *btinfo,
 
   /* It is important to start at PREV's caller.  Otherwise, we might find
      PREV itself, if PREV is a recursive function.  */
-  caller = ftrace_find_caller (prev->up, mfun, fun);
+  caller = ftrace_find_call_by_number (btinfo, prev->up);
+  caller = ftrace_find_caller (btinfo, caller, mfun, fun);
   if (caller != NULL)
     {
       /* The caller of PREV is the preceding btrace function segment in this
@@ -420,7 +438,8 @@ ftrace_new_return (struct btrace_thread_info *btinfo,
 	 wrong or that the call is simply not included in the trace.  */
 
       /* Let's search for some actual call.  */
-      caller = ftrace_find_call (prev->up);
+      caller = ftrace_find_call_by_number (btinfo, prev->up);
+      caller = ftrace_find_call (btinfo, caller);
       if (caller == NULL)
 	{
 	  /* There is no call in PREV's back trace.  We assume that the
@@ -428,8 +447,8 @@ ftrace_new_return (struct btrace_thread_info *btinfo,
 
 	  /* Let's find the topmost function and add a new caller for it.
 	     This should handle a series of initial tail calls.  */
-	  while (prev->up != NULL)
-	    prev = prev->up;
+	  while (prev->up != 0)
+	    prev = ftrace_find_call_by_number (btinfo, prev->up);
 
 	  bfun->level = prev->level - 1;
 
@@ -449,7 +468,7 @@ ftrace_new_return (struct btrace_thread_info *btinfo,
 	     on the same level as they are.
 	     This should handle things like schedule () correctly where we're
 	     switching contexts.  */
-	  prev->up = bfun;
+	  prev->up = bfun->number;
 	  prev->flags = BFUN_UP_LINKS_TO_RET;
 
 	  ftrace_debug (bfun, "new return - unknown caller");
@@ -653,10 +672,11 @@ ftrace_classify_insn (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 /* Try to match the back trace at LHS to the back trace at RHS.  Returns the
    number of matching function segments or zero if the back traces do not
-   match.  */
+   match.  BTINFO is the branch trace information for the current thread.  */
 
 static int
-ftrace_match_backtrace (struct btrace_function *lhs,
+ftrace_match_backtrace (struct btrace_thread_info *btinfo,
+			struct btrace_function *lhs,
 			struct btrace_function *rhs)
 {
   int matches;
@@ -666,8 +686,8 @@ ftrace_match_backtrace (struct btrace_function *lhs,
       if (ftrace_function_switched (lhs, rhs->msym, rhs->sym))
 	return 0;
 
-      lhs = ftrace_get_caller (lhs);
-      rhs = ftrace_get_caller (rhs);
+      lhs = ftrace_get_caller (btinfo, lhs);
+      rhs = ftrace_get_caller (btinfo, rhs);
     }
 
   return matches;
@@ -718,10 +738,12 @@ ftrace_compute_global_level_offset (struct btrace_thread_info *btinfo)
 }
 
 /* Connect the function segments PREV and NEXT in a bottom-to-top walk as in
-   ftrace_connect_backtrace.  */
+   ftrace_connect_backtrace.  BTINFO is the branch trace information for the
+   current thread.  */
 
 static void
-ftrace_connect_bfun (struct btrace_function *prev,
+ftrace_connect_bfun (struct btrace_thread_info *btinfo,
+		     struct btrace_function *prev,
 		     struct btrace_function *next)
 {
   DEBUG_FTRACE ("connecting...");
@@ -739,20 +761,26 @@ ftrace_connect_bfun (struct btrace_function *prev,
   ftrace_fixup_level (next, prev->level - next->level);
 
   /* If we run out of back trace for one, let's use the other's.  */
-  if (prev->up == NULL)
+  if (prev->up == 0)
     {
-      if (next->up != NULL)
+      const btrace_function_flags flags = next->flags;
+
+      next = ftrace_find_call_by_number (btinfo, next->up);
+      if (next != NULL)
 	{
 	  DEBUG_FTRACE ("using next's callers");
-	  ftrace_fixup_caller (prev, next->up, next->flags);
+	  ftrace_fixup_caller (prev, next, flags);
 	}
     }
-  else if (next->up == NULL)
+  else if (next->up == 0)
     {
-      if (prev->up != NULL)
+      const btrace_function_flags flags = prev->flags;
+
+      prev = ftrace_find_call_by_number (btinfo, prev->up);
+      if (prev != NULL)
 	{
 	  DEBUG_FTRACE ("using prev's callers");
-	  ftrace_fixup_caller (next, prev->up, prev->flags);
+	  ftrace_fixup_caller (next, prev, flags);
 	}
     }
   else
@@ -770,26 +798,29 @@ ftrace_connect_bfun (struct btrace_function *prev,
       if ((prev->flags & BFUN_UP_LINKS_TO_TAILCALL) != 0)
 	{
 	  struct btrace_function *caller;
-	  btrace_function_flags flags;
+	  btrace_function_flags next_flags, prev_flags;
 
 	  /* We checked NEXT->UP above so CALLER can't be NULL.  */
-	  caller = next->up;
-	  flags = next->flags;
+	  caller = ftrace_find_call_by_number (btinfo, next->up);
+	  next_flags = next->flags;
+	  prev_flags = prev->flags;
 
 	  DEBUG_FTRACE ("adding prev's tail calls to next");
 
-	  ftrace_fixup_caller (next, prev->up, prev->flags);
+	  prev = ftrace_find_call_by_number (btinfo, prev->up);
+	  ftrace_fixup_caller (next, prev, prev_flags);
 
-	  for (prev = prev->up; prev != NULL; prev = prev->up)
+	  for (; prev != NULL; prev = ftrace_find_call_by_number (btinfo,
+								  prev->up))
 	    {
 	      /* At the end of PREV's back trace, continue with CALLER.  */
-	      if (prev->up == NULL)
+	      if (prev->up == 0)
 		{
 		  DEBUG_FTRACE ("fixing up link for tailcall chain");
 		  ftrace_debug (prev, "..top");
 		  ftrace_debug (caller, "..up");
 
-		  ftrace_fixup_caller (prev, caller, flags);
+		  ftrace_fixup_caller (prev, caller, next_flags);
 
 		  /* If we skipped any tail calls, this may move CALLER to a
 		     different function level.
@@ -817,10 +848,12 @@ ftrace_connect_bfun (struct btrace_function *prev,
 
 /* Connect function segments on the same level in the back trace at LHS and RHS.
    The back traces at LHS and RHS are expected to match according to
-   ftrace_match_backtrace.  */
+   ftrace_match_backtrace.  BTINFO is the branch trace information for the
+   current thread.  */
 
 static void
-ftrace_connect_backtrace (struct btrace_function *lhs,
+ftrace_connect_backtrace (struct btrace_thread_info *btinfo,
+			  struct btrace_function *lhs,
 			  struct btrace_function *rhs)
 {
   while (lhs != NULL && rhs != NULL)
@@ -833,20 +866,22 @@ ftrace_connect_backtrace (struct btrace_function *lhs,
       prev = lhs;
       next = rhs;
 
-      lhs = ftrace_get_caller (lhs);
-      rhs = ftrace_get_caller (rhs);
+      lhs = ftrace_get_caller (btinfo, lhs);
+      rhs = ftrace_get_caller (btinfo, rhs);
 
-      ftrace_connect_bfun (prev, next);
+      ftrace_connect_bfun (btinfo, prev, next);
     }
 }
 
 /* Bridge the gap between two function segments left and right of a gap if their
-   respective back traces match in at least MIN_MATCHES functions.
+   respective back traces match in at least MIN_MATCHES functions.  BTINFO is
+   the branch trace information for the current thread.
 
    Returns non-zero if the gap could be bridged, zero otherwise.  */
 
 static int
-ftrace_bridge_gap (struct btrace_function *lhs, struct btrace_function *rhs,
+ftrace_bridge_gap (struct btrace_thread_info *btinfo,
+		   struct btrace_function *lhs, struct btrace_function *rhs,
 		   int min_matches)
 {
   struct btrace_function *best_l, *best_r, *cand_l, *cand_r;
@@ -862,12 +897,14 @@ ftrace_bridge_gap (struct btrace_function *lhs, struct btrace_function *rhs,
   /* We search the back traces of LHS and RHS for valid connections and connect
      the two functon segments that give the longest combined back trace.  */
 
-  for (cand_l = lhs; cand_l != NULL; cand_l = ftrace_get_caller (cand_l))
-    for (cand_r = rhs; cand_r != NULL; cand_r = ftrace_get_caller (cand_r))
+  for (cand_l = lhs; cand_l != NULL;
+       cand_l = ftrace_get_caller (btinfo, cand_l))
+    for (cand_r = rhs; cand_r != NULL;
+	 cand_r = ftrace_get_caller (btinfo, cand_r))
       {
 	int matches;
 
-	matches = ftrace_match_backtrace (cand_l, cand_r);
+	matches = ftrace_match_backtrace (btinfo, cand_l, cand_r);
 	if (best_matches < matches)
 	  {
 	    best_matches = matches;
@@ -894,7 +931,7 @@ ftrace_bridge_gap (struct btrace_function *lhs, struct btrace_function *rhs,
      BEST_L to BEST_R as they will already be on the same level.  */
   ftrace_fixup_level (rhs, best_l->level - best_r->level);
 
-  ftrace_connect_backtrace (best_l, best_r);
+  ftrace_connect_backtrace (btinfo, best_l, best_r);
 
   return best_matches;
 }
@@ -952,7 +989,7 @@ btrace_bridge_gaps (struct thread_info *tp, VEC (bfun_s) **gaps)
 	      if (rhs == NULL)
 		continue;
 
-	      bridged = ftrace_bridge_gap (lhs, rhs, min_matches);
+	      bridged = ftrace_bridge_gap (&tp->btrace, lhs, rhs, min_matches);
 
 	      /* Keep track of gaps we were not able to bridge and try again.
 		 If we just pushed them to the end of GAPS we would risk an
