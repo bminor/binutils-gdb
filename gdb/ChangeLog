@@ -1,3 +1,10 @@
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (btrace_fetch, btrace_clear, btrace_find_insn_by_number):
+	Replace VEC_* with std::vector functions.
+	* btrace.h: Add include: vector. Remove typedef for DEF_VEC_P.
+	(struct btrace_thread_info)<functions>: Change type to std::vector.
+
 2017-05-30  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* NEWS (Changes in GDB 8.0): Remove extra empty line.  Move

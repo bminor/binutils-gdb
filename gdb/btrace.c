@@ -1857,12 +1857,12 @@ btrace_fetch (struct thread_info *tp)
       btrace_data_append (&btinfo->data, &btrace);
       btrace_maint_clear (btinfo);
 
-      VEC_truncate (btrace_fun_p, btinfo->functions, 0);
+      btinfo->functions.clear ();
       btrace_clear_history (btinfo);
       btrace_compute_ftrace (tp, &btrace);
 
       for (bfun = btinfo->begin; bfun != NULL; bfun = bfun->flow.next)
-	VEC_safe_push (btrace_fun_p, btinfo->functions, bfun);
+	btinfo->functions.push_back (bfun);
     }
 
   do_cleanups (cleanup);
@@ -1884,8 +1884,7 @@ btrace_clear (struct thread_info *tp)
   reinit_frame_cache ();
 
   btinfo = &tp->btrace;
-
-  VEC_free (btrace_fun_p, btinfo->functions);
+  btinfo->functions.clear ();
 
   it = btinfo->begin;
   while (it != NULL)
@@ -2480,16 +2479,16 @@ btrace_find_insn_by_number (struct btrace_insn_iterator *it,
   const struct btrace_function *bfun;
   unsigned int upper, lower;
 
-  if (VEC_empty (btrace_fun_p, btinfo->functions))
+  if (btinfo->functions.empty ())
       return 0;
 
   lower = 0;
-  bfun = VEC_index (btrace_fun_p, btinfo->functions, lower);
+  bfun = btinfo->functions[lower];
   if (number < bfun->insn_offset)
     return 0;
 
-  upper = VEC_length (btrace_fun_p, btinfo->functions) - 1;
-  bfun = VEC_index (btrace_fun_p, btinfo->functions, upper);
+  upper = btinfo->functions.size () - 1;
+  bfun = btinfo->functions[upper];
   if (number >= bfun->insn_offset + ftrace_call_num_insn (bfun))
     return 0;
 
@@ -2498,7 +2497,7 @@ btrace_find_insn_by_number (struct btrace_insn_iterator *it,
     {
       const unsigned int average = lower + (upper - lower) / 2;
 
-      bfun = VEC_index (btrace_fun_p, btinfo->functions, average);
+      bfun = btinfo->functions[average];
 
       if (number < bfun->insn_offset)
 	{
