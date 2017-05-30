@@ -1,5 +1,14 @@
 2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* btrace.c: Remove typedef bfun_s.
+	(ftrace_new_gap): Directly add gaps to the list of gaps.
+	(btrace_bridge_gaps, btrace_compute_ftrace_bts, pt_btrace_insn_flags,
+	ftrace_add_pt, btrace_compute_ftrace_pt, btrace_compute_ftrace_1,
+	btrace_finalize_ftrace, btrace_compute_ftrace): Use std::vector
+	instead of gdb VEC.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* btrace.c (ftrace_fixup_caller, ftrace_new_return, ftrace_connect_bfun,
 	ftrace_bridge_gap): Replace references to btrace_thread_info::segment
 	with btrace_thread_info::next_segment and

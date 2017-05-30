@@ -49,10 +49,6 @@ static struct cmd_list_element *maint_btrace_pt_show_cmdlist;
 /* Control whether to skip PAD packets when computing the packet history.  */
 static int maint_btrace_pt_skip_pad = 1;
 
-/* A vector of function segments.  */
-typedef struct btrace_function * bfun_s;
-DEF_VEC_P (bfun_s);
-
 static void btrace_add_pc (struct thread_info *tp);
 
 /* Print a record debug message.  Use do ... while (0) to avoid ambiguities
@@ -512,7 +508,8 @@ ftrace_new_switch (struct btrace_thread_info *btinfo,
    ERRCODE is the format-specific error code.  */
 
 static struct btrace_function *
-ftrace_new_gap (struct btrace_thread_info *btinfo, int errcode)
+ftrace_new_gap (struct btrace_thread_info *btinfo, int errcode,
+		std::vector<unsigned int> &gaps)
 {
   struct btrace_function *bfun;
 
@@ -527,6 +524,7 @@ ftrace_new_gap (struct btrace_thread_info *btinfo, int errcode)
     }
 
   bfun->errcode = errcode;
+  gaps.push_back (bfun->number);
 
   ftrace_debug (bfun, "new gap");
 
@@ -951,17 +949,13 @@ ftrace_bridge_gap (struct btrace_thread_info *btinfo,
    function segments that are separated by the gap.  */
 
 static void
-btrace_bridge_gaps (struct thread_info *tp, VEC (bfun_s) **gaps)
+btrace_bridge_gaps (struct thread_info *tp, std::vector<unsigned int> &gaps)
 {
   struct btrace_thread_info *btinfo = &tp->btrace;
-  VEC (bfun_s) *remaining;
-  struct cleanup *old_chain;
+  std::vector<unsigned int> remaining;
   int min_matches;
 
   DEBUG ("bridge gaps");
-
-  remaining = NULL;
-  old_chain = make_cleanup (VEC_cleanup (bfun_s), &remaining);
 
   /* We require a minimum amount of matches for bridging a gap.  The number of
      required matches will be lowered with each iteration.
@@ -973,15 +967,14 @@ btrace_bridge_gaps (struct thread_info *tp, VEC (bfun_s) **gaps)
     {
       /* Let's try to bridge as many gaps as we can.  In some cases, we need to
 	 skip a gap and revisit it again after we closed later gaps.  */
-      while (!VEC_empty (bfun_s, *gaps))
+      while (!gaps.empty ())
 	{
-	  struct btrace_function *gap;
-	  unsigned int idx;
-
-	  for (idx = 0; VEC_iterate (bfun_s, *gaps, idx, gap); ++idx)
+	  for (const unsigned int number : gaps)
 	    {
-	      struct btrace_function *lhs, *rhs;
+	      struct btrace_function *gap, *lhs, *rhs;
 	      int bridged;
+
+	      gap = ftrace_find_call_by_number (btinfo, number);
 
 	      /* We may have a sequence of gaps if we run from one error into
 		 the next as we try to re-sync onto the trace stream.  Ignore
@@ -1007,27 +1000,23 @@ btrace_bridge_gaps (struct thread_info *tp, VEC (bfun_s) **gaps)
 		 If we just pushed them to the end of GAPS we would risk an
 		 infinite loop in case we simply cannot bridge a gap.  */
 	      if (bridged == 0)
-		VEC_safe_push (bfun_s, remaining, gap);
+		remaining.push_back (number);
 	    }
 
 	  /* Let's see if we made any progress.  */
-	  if (VEC_length (bfun_s, remaining) == VEC_length (bfun_s, *gaps))
+	  if (remaining.size () == gaps.size ())
 	    break;
 
-	  VEC_free (bfun_s, *gaps);
-
-	  *gaps = remaining;
-	  remaining = NULL;
+	  gaps.clear ();
+	  gaps.swap (remaining);
 	}
 
       /* We get here if either GAPS is empty or if GAPS equals REMAINING.  */
-      if (VEC_empty (bfun_s, *gaps))
+      if (gaps.empty ())
 	break;
 
-      VEC_free (bfun_s, remaining);
+      remaining.clear ();
     }
-
-  do_cleanups (old_chain);
 
   /* We may omit this in some cases.  Not sure it is worth the extra
      complication, though.  */
@@ -1039,7 +1028,7 @@ btrace_bridge_gaps (struct thread_info *tp, VEC (bfun_s) **gaps)
 static void
 btrace_compute_ftrace_bts (struct thread_info *tp,
 			   const struct btrace_data_bts *btrace,
-			   VEC (bfun_s) **gaps)
+			   std::vector<unsigned int> &gaps)
 {
   struct btrace_thread_info *btinfo;
   struct gdbarch *gdbarch;
@@ -1075,9 +1064,7 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	  if (block->end < pc)
 	    {
 	      /* Indicate the gap in the trace.  */
-	      bfun = ftrace_new_gap (btinfo, BDE_BTS_OVERFLOW);
-
-	      VEC_safe_push (bfun_s, *gaps, bfun);
+	      bfun = ftrace_new_gap (btinfo, BDE_BTS_OVERFLOW, gaps);
 
 	      warning (_("Recorded trace may be corrupted at instruction "
 			 "%u (pc = %s)."), bfun->insn_offset - 1,
@@ -1119,9 +1106,7 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	    {
 	      /* Indicate the gap in the trace.  We just added INSN so we're
 		 not at the beginning.  */
-	      bfun = ftrace_new_gap (btinfo, BDE_BTS_INSN_SIZE);
-
-	      VEC_safe_push (bfun_s, *gaps, bfun);
+	      bfun = ftrace_new_gap (btinfo, BDE_BTS_INSN_SIZE, gaps);
 
 	      warning (_("Recorded trace may be incomplete at instruction %u "
 			 "(pc = %s)."), bfun->insn_offset - 1,
@@ -1200,7 +1185,7 @@ static void
 ftrace_add_pt (struct btrace_thread_info *btinfo,
 	       struct pt_insn_decoder *decoder,
 	       int *plevel,
-	       VEC (bfun_s) **gaps)
+	       std::vector<unsigned int> &gaps)
 {
   struct btrace_function *bfun;
   uint64_t offset;
@@ -1235,9 +1220,7 @@ ftrace_add_pt (struct btrace_thread_info *btinfo,
 		 from some other instruction.  Indicate this as a trace gap.  */
 	      if (insn.enabled)
 		{
-		  bfun = ftrace_new_gap (btinfo, BDE_PT_DISABLED);
-
-		  VEC_safe_push (bfun_s, *gaps, bfun);
+		  bfun = ftrace_new_gap (btinfo, BDE_PT_DISABLED, gaps);
 
 		  pt_insn_get_offset (decoder, &offset);
 
@@ -1250,9 +1233,7 @@ ftrace_add_pt (struct btrace_thread_info *btinfo,
 	  /* Indicate trace overflows.  */
 	  if (insn.resynced)
 	    {
-	      bfun = ftrace_new_gap (btinfo, BDE_PT_OVERFLOW);
-
-	      VEC_safe_push (bfun_s, *gaps, bfun);
+	      bfun = ftrace_new_gap (btinfo, BDE_PT_OVERFLOW, gaps);
 
 	      pt_insn_get_offset (decoder, &offset);
 
@@ -1274,9 +1255,7 @@ ftrace_add_pt (struct btrace_thread_info *btinfo,
 	break;
 
       /* Indicate the gap in the trace.  */
-      bfun = ftrace_new_gap (btinfo, errcode);
-
-      VEC_safe_push (bfun_s, *gaps, bfun);
+      bfun = ftrace_new_gap (btinfo, errcode, gaps);
 
       pt_insn_get_offset (decoder, &offset);
 
@@ -1352,7 +1331,7 @@ static void btrace_finalize_ftrace_pt (struct pt_insn_decoder *decoder,
 static void
 btrace_compute_ftrace_pt (struct thread_info *tp,
 			  const struct btrace_data_pt *btrace,
-			  VEC (bfun_s) **gaps)
+			  std::vector<unsigned int> &gaps)
 {
   struct btrace_thread_info *btinfo;
   struct pt_insn_decoder *decoder;
@@ -1405,13 +1384,7 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
     {
       /* Indicate a gap in the trace if we quit trace processing.  */
       if (error.reason == RETURN_QUIT && !btinfo->functions.empty ())
-	{
-	  struct btrace_function *bfun;
-
-	  bfun = ftrace_new_gap (btinfo, BDE_PT_USER_QUIT);
-
-	  VEC_safe_push (bfun_s, *gaps, bfun);
-	}
+	ftrace_new_gap (btinfo, BDE_PT_USER_QUIT, gaps);
 
       btrace_finalize_ftrace_pt (decoder, tp, level);
 
@@ -1427,7 +1400,7 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
 static void
 btrace_compute_ftrace_pt (struct thread_info *tp,
 			  const struct btrace_data_pt *btrace,
-			  VEC (bfun_s) **gaps)
+			  std::vector<unsigned int> &gaps)
 {
   internal_error (__FILE__, __LINE__, _("Unexpected branch trace format."));
 }
@@ -1439,7 +1412,7 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
 
 static void
 btrace_compute_ftrace_1 (struct thread_info *tp, struct btrace_data *btrace,
-			 VEC (bfun_s) **gaps)
+			 std::vector<unsigned int> &gaps)
 {
   DEBUG ("compute ftrace");
 
@@ -1461,11 +1434,11 @@ btrace_compute_ftrace_1 (struct thread_info *tp, struct btrace_data *btrace,
 }
 
 static void
-btrace_finalize_ftrace (struct thread_info *tp, VEC (bfun_s) **gaps)
+btrace_finalize_ftrace (struct thread_info *tp, std::vector<unsigned int> &gaps)
 {
-  if (!VEC_empty (bfun_s, *gaps))
+  if (!gaps.empty ())
     {
-      tp->btrace.ngaps += VEC_length (bfun_s, *gaps);
+      tp->btrace.ngaps += gaps.size ();
       btrace_bridge_gaps (tp, gaps);
     }
 }
@@ -1473,27 +1446,21 @@ btrace_finalize_ftrace (struct thread_info *tp, VEC (bfun_s) **gaps)
 static void
 btrace_compute_ftrace (struct thread_info *tp, struct btrace_data *btrace)
 {
-  VEC (bfun_s) *gaps;
-  struct cleanup *old_chain;
-
-  gaps = NULL;
-  old_chain = make_cleanup (VEC_cleanup (bfun_s), &gaps);
+  std::vector<unsigned int> gaps;
 
   TRY
     {
-      btrace_compute_ftrace_1 (tp, btrace, &gaps);
+      btrace_compute_ftrace_1 (tp, btrace, gaps);
     }
   CATCH (error, RETURN_MASK_ALL)
     {
-      btrace_finalize_ftrace (tp, &gaps);
+      btrace_finalize_ftrace (tp, gaps);
 
       throw_exception (error);
     }
   END_CATCH
 
-  btrace_finalize_ftrace (tp, &gaps);
-
-  do_cleanups (old_chain);
+  btrace_finalize_ftrace (tp, gaps);
 }
 
 /* Add an entry for the current PC.  */
