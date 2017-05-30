@@ -1,5 +1,21 @@
 2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* btrace.c: (btrace_insn_get, btrace_insn_get_error, btrace_insn_number,
+	btrace_insn_begin, btrace_insn_end, btrace_insn_next, btrace_insn_prev,
+	btrace_find_insn_by_number): Replace function segment pointer with
+	index.
+	(btrace_insn_cmp): Simplify.
+	* btrace.h: (struct btrace_insn_iterator) Rename index to
+	insn_index.  Replace function segment pointer with index into function
+	segment vector.
+	* record-btrace.c (record_btrace_call_history): Replace function
+	segment pointer use with index.
+	(record_btrace_frame_sniffer): Retrieve function call segment through
+	vector.
+	(record_btrace_set_replay): Remove defunc't safety check.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* btrace.c (btrace_ends_with_single_insn): New function.
 	(btrace_call_get, btrace_call_number, btrace_call_begin,
 	btrace_call_end, btrace_call_next, btrace_call_prev,

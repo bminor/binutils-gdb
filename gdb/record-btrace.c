@@ -1102,7 +1102,7 @@ record_btrace_call_history (struct target_ops *self, int size, int int_flags)
       if (replay != NULL)
 	{
 	  begin.btinfo = btinfo;
-	  begin.index = replay->function->number - 1;
+	  begin.index = replay->call_index;
 	}
       else
 	btrace_call_end (&begin, btinfo);
@@ -1678,7 +1678,7 @@ record_btrace_frame_sniffer (const struct frame_unwind *self,
 
       replay = tp->btrace.replay;
       if (replay != NULL)
-	bfun = replay->function;
+	bfun = replay->btinfo->functions[replay->call_index];
     }
   else
     {
@@ -2691,7 +2691,7 @@ record_btrace_set_replay (struct thread_info *tp,
 
   btinfo = &tp->btrace;
 
-  if (it == NULL || it->function == NULL)
+  if (it == NULL)
     record_btrace_stop_replaying (tp);
   else
     {

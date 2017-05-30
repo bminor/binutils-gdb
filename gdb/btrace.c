@@ -2248,8 +2248,8 @@ btrace_insn_get (const struct btrace_insn_iterator *it)
   const struct btrace_function *bfun;
   unsigned int index, end;
 
-  index = it->index;
-  bfun = it->function;
+  index = it->insn_index;
+  bfun = it->btinfo->functions[it->call_index];
 
   /* Check if the iterator points to a gap in the trace.  */
   if (bfun->errcode != 0)
@@ -2268,7 +2268,10 @@ btrace_insn_get (const struct btrace_insn_iterator *it)
 int
 btrace_insn_get_error (const struct btrace_insn_iterator *it)
 {
-  return it->function->errcode;
+  const struct btrace_function *bfun;
+
+  bfun = it->btinfo->functions[it->call_index];
+  return bfun->errcode;
 }
 
 /* See btrace.h.  */
@@ -2276,7 +2279,10 @@ btrace_insn_get_error (const struct btrace_insn_iterator *it)
 unsigned int
 btrace_insn_number (const struct btrace_insn_iterator *it)
 {
-  return it->function->insn_offset + it->index;
+  const struct btrace_function *bfun;
+
+  bfun = it->btinfo->functions[it->call_index];
+  return bfun->insn_offset + it->insn_index;
 }
 
 /* See btrace.h.  */
@@ -2292,8 +2298,8 @@ btrace_insn_begin (struct btrace_insn_iterator *it,
     error (_("No trace."));
 
   it->btinfo = btinfo;
-  it->function = bfun;
-  it->index = 0;
+  it->call_index = 0;
+  it->insn_index = 0;
 }
 
 /* See btrace.h.  */
@@ -2318,8 +2324,8 @@ btrace_insn_end (struct btrace_insn_iterator *it,
     length -= 1;
 
   it->btinfo = btinfo;
-  it->function = bfun;
-  it->index = length;
+  it->call_index = bfun->number - 1;
+  it->insn_index = length;
 }
 
 /* See btrace.h.  */
@@ -2330,9 +2336,9 @@ btrace_insn_next (struct btrace_insn_iterator *it, unsigned int stride)
   const struct btrace_function *bfun;
   unsigned int index, steps;
 
-  bfun = it->function;
+  bfun = it->btinfo->functions[it->call_index];
   steps = 0;
-  index = it->index;
+  index = it->insn_index;
 
   while (stride != 0)
     {
@@ -2398,8 +2404,8 @@ btrace_insn_next (struct btrace_insn_iterator *it, unsigned int stride)
     }
 
   /* Update the iterator.  */
-  it->function = bfun;
-  it->index = index;
+  it->call_index = bfun->number - 1;
+  it->insn_index = index;
 
   return steps;
 }
@@ -2412,9 +2418,9 @@ btrace_insn_prev (struct btrace_insn_iterator *it, unsigned int stride)
   const struct btrace_function *bfun;
   unsigned int index, steps;
 
-  bfun = it->function;
+  bfun = it->btinfo->functions[it->call_index];
   steps = 0;
-  index = it->index;
+  index = it->insn_index;
 
   while (stride != 0)
     {
@@ -2456,8 +2462,8 @@ btrace_insn_prev (struct btrace_insn_iterator *it, unsigned int stride)
     }
 
   /* Update the iterator.  */
-  it->function = bfun;
-  it->index = index;
+  it->call_index = bfun->number - 1;
+  it->insn_index = index;
 
   return steps;
 }
@@ -2468,12 +2474,12 @@ int
 btrace_insn_cmp (const struct btrace_insn_iterator *lhs,
 		 const struct btrace_insn_iterator *rhs)
 {
-  unsigned int lnum, rnum;
+  gdb_assert (lhs->btinfo == rhs->btinfo);
 
-  lnum = btrace_insn_number (lhs);
-  rnum = btrace_insn_number (rhs);
+  if (lhs->call_index != rhs->call_index)
+    return lhs->call_index - rhs->call_index;
 
-  return (int) (lnum - rnum);
+  return lhs->insn_index - rhs->insn_index;
 }
 
 /* See btrace.h.  */
@@ -2522,8 +2528,8 @@ btrace_find_insn_by_number (struct btrace_insn_iterator *it,
     }
 
   it->btinfo = btinfo;
-  it->function = bfun;
-  it->index = number - bfun->insn_offset;
+  it->call_index = bfun->number - 1;
+  it->insn_index = number - bfun->insn_offset;
   return 1;
 }
 
