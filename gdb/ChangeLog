@@ -1,5 +1,14 @@
 2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
 
+	* btrace.c (ftrace_new_function, ftrace_new_call, ftrace_new_tailcall,
+	ftrace_new_return, ftrace_new_switch, ftrace_new_gap,
+	ftrace_update_function): Remove arguments that implicitly were always
+	BTINFO->END.
+	(btrace_compute_ftrace_bts, ftrace_add_pt, btrace_compute_ftrace_pt):
+	Don't pass BTINFO->END.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
 	* btrace.c: (btrace_insn_get, btrace_insn_get_error, btrace_insn_number,
 	btrace_insn_begin, btrace_insn_end, btrace_insn_next, btrace_insn_prev,
 	btrace_find_insn_by_number): Replace function segment pointer with
