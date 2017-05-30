@@ -1,3 +1,9 @@
+2017-05-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS (Changes in GDB 8.0): Remove extra empty line.  Move
+	"Removed targets and native configurations" up.  Merge duplicate
+	"New commands" sub-sections.  Add "New options" sub-sections.
+
 2017-05-26  Alan Hayward  <alan.hayward@arm.com>
 
 	* defs.h (copy_integer_to_size): New declaration.
