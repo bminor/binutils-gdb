@@ -1,3 +1,9 @@
+2017-05-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS (Changes in GDB 8.0): Remove extra empty line.  Move
+	"Removed targets and native configurations" up.  Merge duplicate
+	"New commands" sub-sections.  Add "New options" sub-sections.
+
 2017-05-26  Eli Zaretskii  <eliz@gnu.org>
 
 	* cli/cli-script.c (user_args::insert_args): Call gdb::to_string.
