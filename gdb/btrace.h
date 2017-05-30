@@ -331,17 +331,9 @@ struct btrace_thread_info
   /* The raw branch trace data for the below branch trace.  */
   struct btrace_data data;
 
-  /* The current branch trace for this thread (both inclusive).
-
-     The last instruction of END is the current instruction, which is not
-     part of the execution history.
-     Both will be NULL if there is no branch trace available.  If there is
-     branch trace available, both will be non-NULL.  */
-  struct btrace_function *begin;
-  struct btrace_function *end;
-
-  /* Vector of pointer to decoded function segments.  These are in execution
-     order with the first element == BEGIN and the last element == END.  */
+  /* Vector of pointer to decoded function segments in execution flow order.
+     Note that the numbering for btrace function segments starts with 1, so
+     function segment i will be at index (i - 1).  */
   std::vector<btrace_function *> functions;
 
   /* The function level offset.  When added to each function's LEVEL,

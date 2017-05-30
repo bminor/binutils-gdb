@@ -1908,7 +1908,7 @@ record_btrace_start_replaying (struct thread_info *tp)
   replay = NULL;
 
   /* We can't start replaying without trace.  */
-  if (btinfo->begin == NULL)
+  if (btinfo->functions.empty ())
     return NULL;
 
   /* GDB stores the current frame_id when stepping in order to detects steps

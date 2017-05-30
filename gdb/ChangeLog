@@ -2,6 +2,20 @@
 
 	* btrace.c (ftrace_new_function, ftrace_new_call, ftrace_new_tailcall,
 	ftrace_new_return, ftrace_new_switch, ftrace_new_gap,
+	ftrace_update_function, ftrace_compute_global_level_offset,
+	btrace_compute_ftrace_bts, ftrace_add_pt, btrace_compute_ftrace_pt,
+	btrace_stitch_bts, btrace_fetch, btrace_clear, btrace_insn_number,
+	btrace_insn_end, btrace_is_empty): Remove references to
+	btrace_thread_info::begin and btrace_thread_info::end.
+	* btrace.h (struct btrace_thread_info): Remove BEGIN and END.
+	(struct btrace_thread_info) <functions>: Adjust comment.
+	* record-btrace.c (record_btrace_start_replaying): Remove reference to
+	btrace_thread_info::begin.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_new_function, ftrace_new_call, ftrace_new_tailcall,
+	ftrace_new_return, ftrace_new_switch, ftrace_new_gap,
 	ftrace_update_function): Remove arguments that implicitly were always
 	BTINFO->END.
 	(btrace_compute_ftrace_bts, ftrace_add_pt, btrace_compute_ftrace_pt):
