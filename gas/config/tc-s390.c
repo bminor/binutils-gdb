@@ -1544,11 +1544,11 @@ md_gather_operands (char *str,
 	      && *str == '\0')
 	    continue;
 
-	    if ((opcode->flags & S390_INSTR_FLAG_OPTPARM2)
-		&& opindex_ptr[1] != '\0'
-		&& opindex_ptr[2] != '\0'
-		&& opindex_ptr[3] == '\0'
-		&& *str == '\0')
+	  if ((opcode->flags & S390_INSTR_FLAG_OPTPARM2)
+	      && opindex_ptr[1] != '\0'
+	      && opindex_ptr[2] != '\0'
+	      && opindex_ptr[3] == '\0'
+	      && *str == '\0')
 	    continue;
 
 	  /* If there is a next operand it must be separated by a comma.  */
