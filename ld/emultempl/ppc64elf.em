@@ -742,10 +742,10 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
                                 choose suitable defaults.\n"
 		   ));
   fprintf (file, _("\
-  --plt-static-chain          PLT call stubs should load r11.${DEFAULT_PLT_STATIC_CHAIN- (default)}\n"
+  --plt-static-chain          PLT call stubs should load r11.'${DEFAULT_PLT_STATIC_CHAIN- (default)}'\n"
 		   ));
   fprintf (file, _("\
-  --no-plt-static-chain       PLT call stubs should not load r11.${DEFAULT_PLT_STATIC_CHAIN+ (default)}\n"
+  --no-plt-static-chain       PLT call stubs should not load r11.'${DEFAULT_PLT_STATIC_CHAIN+ (default)}'\n"
 		   ));
   fprintf (file, _("\
   --plt-thread-safe           PLT call stubs with load-load barrier.\n"

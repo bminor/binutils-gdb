@@ -1,3 +1,7 @@
+2017-05-31  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (plt-static-chain help): Fix quoting.
+
 2017-05-22  Jiong Wang  <jiong.wang@arm.com>
 
 	* configure.tgt: Set "targ_emul" to "aarch64linux32b" for
