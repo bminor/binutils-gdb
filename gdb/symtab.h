@@ -1648,7 +1648,7 @@ std::vector<CORE_ADDR> find_pcs_for_symtab_line
    true to indicate that LA_ITERATE_OVER_SYMBOLS should continue
    iterating, or false to indicate that the iteration should end.  */
 
-typedef bool (symbol_found_callback_ftype) (struct block_symbol *sym);
+typedef bool (symbol_found_callback_ftype) (struct block_symbol *bsym);
 
 void iterate_over_symbols (const struct block *block, const char *name,
 			   const domain_enum domain,

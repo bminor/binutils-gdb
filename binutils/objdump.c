@@ -2386,7 +2386,9 @@ disassemble_data (bfd *abfd)
     }
 
   /* Use libopcodes to locate a suitable disassembler.  */
-  aux.disassemble_fn = disassembler (abfd);
+  aux.disassemble_fn = disassembler (bfd_get_arch (abfd),
+				     bfd_big_endian (abfd),
+				     bfd_get_mach (abfd), abfd);
   if (!aux.disassemble_fn)
     {
       non_fatal (_("can't disassemble for architecture %s\n"),
@@ -3377,6 +3379,14 @@ dump_relocs_in_section (bfd *abfd,
     {
       printf (" (none)\n\n");
       return;
+    }
+
+  if ((bfd_get_file_flags (abfd) & (BFD_IN_MEMORY | BFD_LINKER_CREATED)) == 0
+      && relsize > bfd_get_file_size (abfd))
+    {
+      printf (" (too many: 0x%x)\n", section->reloc_count);
+      bfd_set_error (bfd_error_file_truncated);
+      bfd_fatal (bfd_get_filename (abfd));
     }
 
   relpp = (arelent **) xmalloc (relsize);

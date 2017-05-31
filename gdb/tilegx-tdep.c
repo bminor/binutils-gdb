@@ -1055,8 +1055,6 @@ tilegx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				       tilegx_breakpoint::bp_from_kind);
   set_gdbarch_return_value (gdbarch, tilegx_return_value);
 
-  set_gdbarch_print_insn (gdbarch, print_insn_tilegx);
-
   gdbarch_init_osabi (info, gdbarch);
 
   dwarf2_append_unwinders (gdbarch);

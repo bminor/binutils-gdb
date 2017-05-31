@@ -580,7 +580,7 @@ bfd_elf_link_mark_dynamic_symbol (struct bfd_link_info *info,
 	       && (ELF_ST_TYPE (sym->st_info) == STT_OBJECT
 		   || ELF_ST_TYPE (sym->st_info) == STT_COMMON))))
       || (d != NULL
-	  && h->root.type == bfd_link_hash_new
+	  && h->non_elf
 	  && (*d->match) (&d->head, NULL, h->root.root.string)))
     h->dynamic = 1;
 }
@@ -623,6 +623,14 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 	}
     }
 
+  /* Symbols defined in a linker script but not referenced anywhere
+     else will have non_elf set.  */
+  if (h->non_elf)
+    {
+      bfd_elf_link_mark_dynamic_symbol (info, h, NULL);
+      h->non_elf = 0;
+    }
+
   switch (h->root.type)
     {
     case bfd_link_hash_defined:
@@ -639,8 +647,6 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 	bfd_link_repair_undef_list (&htab->root);
       break;
     case bfd_link_hash_new:
-      bfd_elf_link_mark_dynamic_symbol (info, h, NULL);
-      h->non_elf = 0;
       break;
     case bfd_link_hash_indirect:
       /* We had a versioned symbol in a dynamic library.  We make the
@@ -4933,7 +4939,7 @@ error_free_dyn:
 	  struct elf_link_hash_entry *h;
 	  bfd_size_type size;
 	  unsigned int alignment_power;
-	  unsigned int dynamic_ref_after_ir_def;
+	  unsigned int non_ir_ref_dynamic;
 
 	  for (p = htab->root.table.table[i]; p != NULL; p = p->next)
 	    {
@@ -4955,10 +4961,10 @@ error_free_dyn:
 		  size = 0;
 		  alignment_power = 0;
 		}
-	      /* Preserve dynamic_ref_after_ir_def so that this symbol
+	      /* Preserve non_ir_ref_dynamic so that this symbol
 		 will be exported when the dynamic lib becomes needed
 		 in the second pass.  */
-	      dynamic_ref_after_ir_def = h->root.dynamic_ref_after_ir_def;
+	      non_ir_ref_dynamic = h->root.non_ir_ref_dynamic;
 	      memcpy (p, old_ent, htab->root.table.entsize);
 	      old_ent = (char *) old_ent + htab->root.table.entsize;
 	      h = (struct elf_link_hash_entry *) p;
@@ -4975,7 +4981,7 @@ error_free_dyn:
 		  if (alignment_power > h->root.u.c.p->alignment_power)
 		    h->root.u.c.p->alignment_power = alignment_power;
 		}
-	      h->root.dynamic_ref_after_ir_def = dynamic_ref_after_ir_def;
+	      h->root.non_ir_ref_dynamic = non_ir_ref_dynamic;
 	    }
 	}
 
@@ -7295,9 +7301,10 @@ _bfd_elf_link_hash_hide_symbol (struct bfd_link_info *info,
       h->forced_local = 1;
       if (h->dynindx != -1)
 	{
-	  h->dynindx = -1;
 	  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
 				  h->dynstr_index);
+	  h->dynindx = -1;
+	  h->dynstr_index = 0;
 	}
     }
 }
@@ -8818,7 +8825,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 		else
 		  {
 		    /* Section size is only divisible by rela.  */
-		    if (use_rela_initialised && (use_rela == FALSE))
+		    if (use_rela_initialised && !use_rela)
 		      {
 			_bfd_error_handler (_("%B: Unable to sort relocs - "
 					      "they are in more than one size"),
@@ -8836,7 +8843,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	    else if ((o->size % bed->s->sizeof_rel) == 0)
 	      {
 		/* Section size is only divisible by rel.  */
-		if (use_rela_initialised && (use_rela == TRUE))
+		if (use_rela_initialised && use_rela)
 		  {
 		    _bfd_error_handler (_("%B: Unable to sort relocs - "
 					  "they are in more than one size"),
@@ -8875,7 +8882,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 		else
 		  {
 		    /* Section size is only divisible by rela.  */
-		    if (use_rela_initialised && (use_rela == FALSE))
+		    if (use_rela_initialised && !use_rela)
 		      {
 			_bfd_error_handler (_("%B: Unable to sort relocs - "
 					      "they are in more than one size"),
@@ -8893,7 +8900,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	    else if ((o->size % bed->s->sizeof_rel) == 0)
 	      {
 		/* Section size is only divisible by rel.  */
-		if (use_rela_initialised && (use_rela == TRUE))
+		if (use_rela_initialised && use_rela)
 		  {
 		    _bfd_error_handler (_("%B: Unable to sort relocs - "
 					  "they are in more than one size"),
@@ -10465,7 +10472,8 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		     linker may attach linker created dynamic sections
 		     to the plugin bfd.  Symbols defined in linker
 		     created sections are not plugin symbols.  */
-		  if (h->root.non_ir_ref
+		  if ((h->root.non_ir_ref_regular
+		       || h->root.non_ir_ref_dynamic)
 		      && (h->root.type == bfd_link_hash_defined
 			  || h->root.type == bfd_link_hash_defweak)
 		      && (h->root.u.def.section->flags
@@ -11270,10 +11278,11 @@ elf_output_implib (bfd *abfd, struct bfd_link_info *info)
   if (!bfd_set_format (implib_bfd, bfd_object))
     return FALSE;
 
+  /* Use flag from executable but make it a relocatable object.  */
   flags = bfd_get_file_flags (abfd);
   flags &= ~HAS_RELOC;
   if (!bfd_set_start_address (implib_bfd, 0)
-      || !bfd_set_file_flags (implib_bfd, flags))
+      || !bfd_set_file_flags (implib_bfd, flags & ~EXEC_P))
     return FALSE;
 
   /* Copy architecture of output file to import library file.  */
@@ -12660,6 +12669,24 @@ _bfd_elf_gc_mark_hook (asection *sec,
   return NULL;
 }
 
+/* Return the global debug definition section.  */
+
+static asection *
+elf_gc_mark_debug_section (asection *sec ATTRIBUTE_UNUSED,
+			   struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			   Elf_Internal_Rela *rel ATTRIBUTE_UNUSED,
+			   struct elf_link_hash_entry *h,
+			   Elf_Internal_Sym *sym ATTRIBUTE_UNUSED)
+{
+  if (h != NULL
+      && (h->root.type == bfd_link_hash_defined
+	  || h->root.type == bfd_link_hash_defweak)
+      && (h->root.u.def.section->flags & SEC_DEBUGGING) != 0)
+    return h->root.u.def.section;
+
+  return NULL;
+}
+
 /* For undefined __start_<name> and __stop_<name> symbols, return the
    first input section matching <name>.  Return NULL otherwise.  */
 
@@ -12921,6 +12948,7 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
       asection *isec;
       bfd_boolean some_kept;
       bfd_boolean debug_frag_seen;
+      bfd_boolean has_kept_debug_info;
 
       if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
 	continue;
@@ -12928,22 +12956,24 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
       /* Ensure all linker created sections are kept,
 	 see if any other section is already marked,
 	 and note if we have any fragmented debug sections.  */
-      debug_frag_seen = some_kept = FALSE;
+      debug_frag_seen = some_kept = has_kept_debug_info = FALSE;
       for (isec = ibfd->sections; isec != NULL; isec = isec->next)
 	{
 	  if ((isec->flags & SEC_LINKER_CREATED) != 0)
 	    isec->gc_mark = 1;
-	  else if (isec->gc_mark)
+	  else if (isec->gc_mark
+		   && (isec->flags & SEC_ALLOC) != 0
+		   && elf_section_type (isec) != SHT_NOTE)
 	    some_kept = TRUE;
 
-	  if (debug_frag_seen == FALSE
+	  if (!debug_frag_seen
 	      && (isec->flags & SEC_DEBUGGING)
 	      && CONST_STRNEQ (isec->name, ".debug_line."))
 	    debug_frag_seen = TRUE;
 	}
 
-      /* If no section in this file will be kept, then we can
-	 toss out the debug and special sections.  */
+      /* If no non-note alloc section in this file will be kept, then
+	 we can toss out the debug and special sections.  */
       if (!some_kept)
 	continue;
 
@@ -12958,45 +12988,52 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 		    || (isec->flags & (SEC_ALLOC | SEC_LOAD | SEC_RELOC)) == 0)
 		   && elf_next_in_group (isec) == NULL)
 	    isec->gc_mark = 1;
+	  if (isec->gc_mark && (isec->flags & SEC_DEBUGGING) != 0)
+	    has_kept_debug_info = TRUE;
 	}
-
-      if (! debug_frag_seen)
-	continue;
 
       /* Look for CODE sections which are going to be discarded,
 	 and find and discard any fragmented debug sections which
 	 are associated with that code section.  */
-      for (isec = ibfd->sections; isec != NULL; isec = isec->next)
-	if ((isec->flags & SEC_CODE) != 0
-	    && isec->gc_mark == 0)
-	  {
-	    unsigned int ilen;
-	    asection *dsec;
+      if (debug_frag_seen)
+	for (isec = ibfd->sections; isec != NULL; isec = isec->next)
+	  if ((isec->flags & SEC_CODE) != 0
+	      && isec->gc_mark == 0)
+	    {
+	      unsigned int ilen;
+	      asection *dsec;
 
-	    ilen = strlen (isec->name);
+	      ilen = strlen (isec->name);
 
-	    /* Association is determined by the name of the debug section
-	       containing the name of the code section as a suffix.  For
-	       example .debug_line.text.foo is a debug section associated
-	       with .text.foo.  */
-	    for (dsec = ibfd->sections; dsec != NULL; dsec = dsec->next)
-	      {
-		unsigned int dlen;
+	      /* Association is determined by the name of the debug
+	         section containing the name of the code section as
+		 a suffix.  For example .debug_line.text.foo is a
+		 debug section associated with .text.foo.  */
+	      for (dsec = ibfd->sections; dsec != NULL; dsec = dsec->next)
+		{
+		  unsigned int dlen;
 
-		if (dsec->gc_mark == 0
-		    || (dsec->flags & SEC_DEBUGGING) == 0)
-		  continue;
+		  if (dsec->gc_mark == 0
+		      || (dsec->flags & SEC_DEBUGGING) == 0)
+		    continue;
 
-		dlen = strlen (dsec->name);
+		  dlen = strlen (dsec->name);
 
-		if (dlen > ilen
-		    && strncmp (dsec->name + (dlen - ilen),
-				isec->name, ilen) == 0)
-		  {
+		  if (dlen > ilen
+		      && strncmp (dsec->name + (dlen - ilen),
+				  isec->name, ilen) == 0)
 		    dsec->gc_mark = 0;
-		  }
-	      }
+		}
 	  }
+
+      /* Mark debug sections referenced by kept debug sections.  */
+      if (has_kept_debug_info)
+	for (isec = ibfd->sections; isec != NULL; isec = isec->next)
+	  if (isec->gc_mark
+	      && (isec->flags & SEC_DEBUGGING) != 0)
+	    if (!_bfd_elf_gc_mark (info, isec,
+				   elf_gc_mark_debug_section))
+	      return FALSE;
     }
   return TRUE;
 }
@@ -13806,6 +13843,7 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
   if (o != NULL)
     {
       asection *i;
+      int eh_changed = 0;
 
       for (i = o->map_head.s; i != NULL; i = i->map_head.s)
 	{
@@ -13823,10 +13861,17 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 	  if (_bfd_elf_discard_section_eh_frame (abfd, info, i,
 						 bfd_elf_reloc_symbol_deleted_p,
 						 &cookie))
-	    changed = 1;
+	    {
+	      eh_changed = 1;
+	      if (i->size != i->rawsize)
+		changed = 1;
+	    }
 
 	  fini_reloc_cookie_for_section (&cookie, i);
 	}
+      if (eh_changed)
+	elf_link_hash_traverse (elf_hash_table (info),
+				_bfd_elf_adjust_eh_frame_global_symbol, NULL);
     }
 
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)

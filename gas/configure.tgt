@@ -46,8 +46,8 @@ eval `echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/cpu=\1 vendor=\2 os=\3/'`
 # endian and arch.
 # Note: This table is alpha-sorted, please try to keep it that way.
 case ${cpu} in
-  aarch64)		cpu_type=aarch64 endian=little ;;
-  aarch64_be)		cpu_type=aarch64 endian=big ;;
+  aarch64)		cpu_type=aarch64 endian=little arch=aarch64;;
+  aarch64_be)		cpu_type=aarch64 endian=big arch=aarch64;;
   alpha*)		cpu_type=alpha ;;
   am33_2.0)		cpu_type=mn10300 endian=little ;;
   arc*eb)		cpu_type=arc endian=big ;;
@@ -126,7 +126,10 @@ generic_target=${cpu_type}-$vendor-$os
 case ${generic_target} in
   aarch64*-*-elf*)			fmt=elf;;
   aarch64*-*-fuchsia*)			fmt=elf;;
-  aarch64*-*-linux*)			fmt=elf em=linux ;;
+  aarch64*-*-linux*)			fmt=elf em=linux
+    case ${cpu}-${os} in
+      aarch64*-linux-gnu_ilp32)		arch=aarch64:32 ;;
+    esac ;;
 
   alpha-*-*vms*)			fmt=evax ;;
   alpha-*-osf*)				fmt=ecoff ;;

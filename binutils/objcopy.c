@@ -2185,15 +2185,18 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 
       if (relcount > 0)
 	{
-	  arelent ** rel;
+	  arelent **rel = relpp;
 
-	  for (rel = relpp; rel < relpp + relcount; rel ++)
-	    if ((* rel)->howto == NULL)
+	  while (rel < relpp + relcount)
+	    if ((*rel)->howto != NULL)
+	      rel++;
+	    else
 	      {
 		/* Delete eliminated relocs.
 		   FIXME: There are better ways to do this.  */
-		memmove (rel, rel + 1, ((relcount - (rel - relpp)) - 1) * sizeof (* rel));
-		relcount --;
+		memmove (rel, rel + 1,
+			 ((relcount - (rel - relpp)) - 1) * sizeof (*rel));
+		relcount--;
 	      }
 	  bfd_set_reloc (abfd, sec, relpp, relcount);
 	}

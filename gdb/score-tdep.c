@@ -126,15 +126,6 @@ score_register_sim_regno (struct gdbarch *gdbarch, int regnum)
 }
 #endif
 
-static int
-score_print_insn (bfd_vma memaddr, struct disassemble_info *info)
-{
-  if (info->endian == BFD_ENDIAN_BIG)
-    return print_insn_big_score (memaddr, info);
-  else
-    return print_insn_little_score (memaddr, info);
-}
-
 static inst_t *
 score7_fetch_inst (struct gdbarch *gdbarch, CORE_ADDR addr, gdb_byte *memblock)
 {
@@ -1491,7 +1482,6 @@ score_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_unwind_sp (gdbarch, score_unwind_sp);
   set_gdbarch_unwind_pc (gdbarch, score_unwind_pc);
-  set_gdbarch_print_insn (gdbarch, score_print_insn);
 
   switch (target_mach)
     {

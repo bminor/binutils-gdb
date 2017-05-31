@@ -269,6 +269,17 @@ static pe_details_type pe_detail_list[] =
 #endif
     autofilter_symbollist_i386
   },
+#ifdef pe_use_x86_64
+  {
+    "pei-x86-64",
+    "pe-bigobj-x86-64",
+    3 /* R_IMAGEBASE */,
+    PE_ARCH_i386,
+    bfd_arch_i386,
+    FALSE,
+    autofilter_symbollist_i386
+  },
+#endif
   {
     "pei-shl",
     "pe-shl",

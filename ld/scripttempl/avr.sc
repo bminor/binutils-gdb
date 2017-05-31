@@ -4,6 +4,17 @@
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
 
+# RODATA_PM_OFFSET
+#         If empty, .rodata sections will be part of .data.  This is for
+#         devices where it is not possible to use LD* instructions to read
+#         from flash.
+#
+#         If non-empty, .rodata is not part of .data and the .rodata
+#         objects are assigned addresses at an offest of RODATA_PM_OFFSET.
+#         This is for devices that feature reading from flash by means of
+#         LD* instructions, provided the addresses are offset by
+#         __RODATA_PM_OFFSET__ (which defaults to RODATA_PM_OFFSET).
+
 cat <<EOF
 /* Copyright (C) 2014-2017 Free Software Foundation, Inc.
 
@@ -21,7 +32,15 @@ __FUSE_REGION_LENGTH__ = DEFINED(__FUSE_REGION_LENGTH__) ? __FUSE_REGION_LENGTH_
 __LOCK_REGION_LENGTH__ = DEFINED(__LOCK_REGION_LENGTH__) ? __LOCK_REGION_LENGTH__ : 1K;
 __SIGNATURE_REGION_LENGTH__ = DEFINED(__SIGNATURE_REGION_LENGTH__) ? __SIGNATURE_REGION_LENGTH__ : 1K;
 __USER_SIGNATURE_REGION_LENGTH__ = DEFINED(__USER_SIGNATURE_REGION_LENGTH__) ? __USER_SIGNATURE_REGION_LENGTH__ : 1K;
+EOF
 
+if test -n "$RODATA_PM_OFFSET"; then
+    cat <<EOF
+__RODATA_PM_OFFSET__ = DEFINED(__RODATA_PM_OFFSET__) ? __RODATA_PM_OFFSET__ : $RODATA_PM_OFFSET;
+EOF
+fi
+
+cat <<EOF
 MEMORY
 {
   text   (rx)   : ORIGIN = 0, LENGTH = __TEXT_REGION_LENGTH__
@@ -187,15 +206,45 @@ SECTIONS
     KEEP (*(.fini0))
     ${RELOCATING+ _etext = . ; }
   } ${RELOCATING+ > text}
+EOF
 
+# Devices like ATtiny816 allow to read from flash memory by means of LD*
+# instructions provided we add an offset of __RODATA_PM_OFFSET__ to the
+# flash addresses.
+
+if test -n "$RODATA_PM_OFFSET"; then
+    cat <<EOF
+  .rodata ${RELOCATING+ ADDR(.text) + SIZEOF (.text) + __RODATA_PM_OFFSET__ } ${RELOCATING-0} :
+  {
+    *(.rodata)
+    ${RELOCATING+ *(.rodata*)}
+    *(.gnu.linkonce.r*)
+  } ${RELOCATING+AT> text}
+EOF
+fi
+
+cat <<EOF
   .data        ${RELOCATING-0} :
   {
     ${RELOCATING+ PROVIDE (__data_start = .) ; }
     *(.data)
     ${RELOCATING+ *(.data*)}
+    *(.gnu.linkonce.d*)
+EOF
+
+# Classical devices that don't show flash memory in the SRAM address space
+# need .rodata to be part of .data because the compiler will use LD*
+# instructions and LD* cannot access flash.
+
+if test -z "$RODATA_PM_OFFSET"; then
+    cat <<EOF
     *(.rodata)  /* We need to include .rodata here if gcc is used */
     ${RELOCATING+ *(.rodata*)} /* with -fdata-sections.  */
-    *(.gnu.linkonce.d*)
+    *(.gnu.linkonce.r*)
+EOF
+fi
+
+cat <<EOF
     ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ _edata = . ; }
     ${RELOCATING+ PROVIDE (__data_end = .) ; }

@@ -1,3 +1,55 @@
+2017-05-23  Alan Modra  <amodra@gmail.com>
+
+	PR 21503
+	* options.h: Add --emit-stub-syms option.
+	* powerpc.cc (object_id): New.
+	(Powerpc_relobj): Add uniq_ and accessor.  Sort variables for
+	better packing.
+	(Powerpc_dynobj): Sort variables for better packing.
+	(Target_powerpc::define_local): New function.
+	(Target_powerpc::group_sections): Pass stub table size to
+	Stub_table constructor.
+	(Target_powerpc::do_relax): Define stub and glink symbols.
+	(Stub_table): Add uniq_ variable, and id param to constructor.
+	(Stub_table::Plt_stub_ent): Add indx_ variable.
+	(Stub_table::Branch_stub_entries): Move typedef earlier.
+	(Stub_table::branch_stub_size): Replace "to" parameter with a
+	Branch_stub_entries iterator.
+	(Stub_table::add_long_branch_entry): Adjust to suit.
+	(Stub_table::add_plt_call_entry): Set indx_.
+	(Stub_table::define_stub_syms): New function.
+
+2017-05-15  Eric Christopher <echristo@gmail.com>
+
+        * layout.cc (Layout::segment_precedes): Add a case for testing
+        pointer equality when determining which segment precedes
+        another.
+
+2017-05-13  James Clarke  <jrtc27@jrtc27.com>
+
+	PR gold/21444
+	* gold.cc (Target_sparc::Relocate::relocate_tls): Local
+	variables are final for position-independent executables. This
+	has to be consistent with Target_sparc::Scan::local otherwise
+	they will disagree as to whether local-exec is used.
+
+2017-05-12  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	PR gold/21430
+	* aarch64.cc
+	(AArch64_relobj::convert_input_section_to_relaxed_section):
+	Set the section offset to -1ULL.
+	(Target_aarch64::relocate_section): Adjust the view in case
+	of a relaxed input section.
+	* testsuite/Makefile.am (pr21430): New test.
+	* testsuite/Makefile.in: Regenerate
+	* testsuite/pr21430.s: New test source file.
+	* testsuite/pr21430.sh: New test script.
+
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/plugin_section_order.c (onload): Add missing break.
+
 2017-03-15  Vladimir Radosavljevic  <Vladimir.Radosavljevic@imgtec.com>
 
 	* mips.cc (Mips_got_entry::hash()): Shift addend to reduce

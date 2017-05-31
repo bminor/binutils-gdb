@@ -200,17 +200,17 @@ void arm_copy_symbol_attributes (symbolS *, symbolS *);
    pcrel, but it is easier to be safe than sorry.  */
 
 #define TC_FORCE_RELOCATION_LOCAL(FIX)			\
-  (!(FIX)->fx_pcrel					\
+  (GENERIC_FORCE_RELOCATION_LOCAL (FIX)			\
    || (FIX)->fx_r_type == BFD_RELOC_ARM_GOT32		\
    || (FIX)->fx_r_type == BFD_RELOC_32			\
-   || ((FIX)->fx_addsy != NULL && S_IS_WEAK ((FIX)->fx_addsy))	\
-   || TC_FORCE_RELOCATION (FIX))
+   || ((FIX)->fx_addsy != NULL				\
+       && S_IS_WEAK ((FIX)->fx_addsy)))
 
 /* Force output of R_ARM_REL32 relocations against thumb function symbols.
    This is needed to ensure the low bit is handled correctly.  */
 #define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEG)	\
-  (THUMB_IS_FUNC ((FIX)->fx_addsy)		\
-   || !SEG_NORMAL (SEG))
+  (GENERIC_FORCE_RELOCATION_SUB_SAME (FIX, SEG)	\
+   || THUMB_IS_FUNC ((FIX)->fx_addsy))
 
 #define TC_FORCE_RELOCATION_ABS(FIX)			\
   (((FIX)->fx_pcrel					\

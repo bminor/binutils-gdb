@@ -59,6 +59,7 @@
 #include <ctype.h>
 #include "run-time-clock.h"
 #include <chrono>
+#include "progspace-and-thread.h"
 
 enum
   {
@@ -274,8 +275,8 @@ exec_continue (char **argv, int argc)
 	 See comment on infcmd.c:proceed_thread_callback for rationale.  */
       if (current_context->all || current_context->thread_group != -1)
 	{
+	  scoped_restore_current_thread restore_thread;
 	  int pid = 0;
-	  struct cleanup *back_to = make_cleanup_restore_current_thread ();
 
 	  if (!current_context->all)
 	    {
@@ -285,7 +286,6 @@ exec_continue (char **argv, int argc)
 	      pid = inf->pid;
 	    }
 	  iterate_over_threads (proceed_thread_callback, &pid);
-	  do_cleanups (back_to);
 	}
       else
 	{
@@ -468,10 +468,9 @@ mi_cmd_exec_run (const char *command, char **argv, int argc)
 
   if (current_context->all)
     {
-      struct cleanup *back_to = save_current_space_and_thread ();
+      scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
       iterate_over_inferiors (run_one_inferior, &start_p);
-      do_cleanups (back_to);
     }
   else
     {
@@ -2699,7 +2698,6 @@ print_variable_or_computed (const char *expression, enum print_values values)
 void
 mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 {
-  struct cleanup *old_chain;
   struct bp_location *tloc;
   int stepping_frame;
   struct collection_list *clist;
@@ -2762,7 +2760,7 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
   /* This command only makes sense for the current frame, not the
      selected frame.  */
-  old_chain = make_cleanup_restore_current_thread ();
+  scoped_restore_current_thread restore_thread;
   select_frame (get_current_frame ());
 
   encode_actions (tloc, &tracepoint_list, &stepping_list);
@@ -2918,8 +2916,6 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
     do_cleanups (list_cleanup);
   }
-
-  do_cleanups (old_chain);
 }
 
 void

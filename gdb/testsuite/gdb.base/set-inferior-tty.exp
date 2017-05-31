@@ -21,20 +21,22 @@ if {[build_executable $testfile.exp $testfile ${srcfile} ${compile_options}] == 
     return -1
 }
 
-proc test_set_inferior_tty { } {
+proc test_set_inferior_tty { command } {
     global binfile
 
     clean_restart ${binfile}
 
-    gdb_test_no_output "set inferior-tty hello" "set inferior-tty to hello"
+    gdb_test_no_output "$command hello" "set inferior-tty to hello"
     gdb_test "show inferior-tty" \
 	     "Terminal for future runs of program being debugged is \"hello\"." \
 	     "show inferior-tty shows hello"
 
-    gdb_test_no_output "set inferior-tty" "set inferior-tty to empty"
+    gdb_test_no_output "$command" "set inferior-tty to empty"
     gdb_test "show inferior-tty" \
 	     "Terminal for future runs of program being debugged is \"\"." \
 	     "show inferior-tty shows empty"
 }
 
-test_set_inferior_tty
+foreach_with_prefix command {"set inferior-tty" "tty"} {
+    test_set_inferior_tty $command
+}

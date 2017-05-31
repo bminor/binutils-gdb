@@ -698,7 +698,7 @@ elf32_msp430_check_relocs (bfd * abfd, struct bfd_link_info * info,
 
 	  /* PR15323, ref flags aren't set for references in the same
 	     object.  */
-	  h->root.non_ir_ref = 1;
+	  h->root.non_ir_ref_regular = 1;
 	}
     }
 
@@ -2552,7 +2552,8 @@ uses_large_model (bfd *abfd)
 }
 
 static unsigned int
-elf32_msp430_eh_frame_address_size (bfd *abfd, asection *sec ATTRIBUTE_UNUSED)
+elf32_msp430_eh_frame_address_size (bfd *abfd,
+				    const asection *sec ATTRIBUTE_UNUSED)
 {
   return uses_large_model (abfd) ? 4 : 2;
 }

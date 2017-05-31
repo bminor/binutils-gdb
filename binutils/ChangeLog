@@ -1,3 +1,149 @@
+2017-05-30  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* doc/binutils.texi: Document new cpu=... disassembler options for ARC.
+
+2017-05-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/21519
+	* objdump.c (dump_relocs_in_section): Replace get_file_size
+	with bfd_get_file_size to get archive element size.
+	* testsuite/binutils-all/objdump.exp (test_objdump_f): New
+	proc.
+	(test_objdump_h): Likewise.
+	(test_objdump_t): Likewise.
+	(test_objdump_r): Likewise.
+	(test_objdump_s): Likewise.
+	Add objdump tests on archive.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* objdump.c (disassemble_data): Caller update.
+
+2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* objcopy.c (merge_gnu_build_notes): Remove workaround that
+	prevented deleting relocations in duplicated notes in mips64 and
+	sparc.
+
+2017-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips-note-2.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2r.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2-n32.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2-n64.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2r-n32.d: New test.
+	* testsuite/binutils-all/mips/mips-note-2r-n64.d: New test.
+	* testsuite/binutils-all/mips/mips.exp: Define `has_newabi'.
+	Run the new tests.
+
+2017-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/lib/utils-lib.exp (run_dump_test): Handle the `dump'
+	option.
+
+2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* NEWS: Mention the SPARC M8 support.
+
+2017-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips.exp: Bail out right away if
+	non-ELF.
+
+2017-05-18  Alan Modra  <amodra@gmail.com>
+
+	* strings.c: Don't compare boolean values against TRUE or FALSE.
+
+2017-05-15  Jeff Law  <law@redhat.com>
+
+	* readelf.c (display_arc_attribute): Avoid implicit fallthru.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips16-undecoded.d: Add `-mips3'
+	to `as' flags.
+	* testsuite/binutils-all/mips/mips16e2-undecoded.d: New test.
+	* testsuite/binutils-all/mips/mips16e2-extend-insn.d: New test.
+	* testsuite/binutils-all/mips/mips16-undecoded.s: Remove
+	`.module mips3'.
+	* testsuite/binutils-all/mips/mips.exp: Run the new tests.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* readelf.c (print_mips_ases): Handle MIPS16e2 ASE.
+	* NEWS: Mention MIPS16e2 ASE support.
+
+2017-05-12  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips16-extend-insn.d: Adjust BREAK
+	and SDBBP disassembly.
+
+2017-05-10  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips.exp: Define `tempfile' and
+	`copyfile' variables.
+
+2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* readelf.c (decode_ARC_machine_flags): Recognize OSABI v4.
+	(get_arc_section_type_name): New function.
+	(get_section_type_name): Use the above function.
+	(display_arc_attribute): New function.
+	(process_arc_specific): Likewise.
+	(process_arch_specific): Handle ARC specific information.
+
+2017-05-09  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* MAINTAINERS (SH): Remove myself as SH maintainer.
+
+2017-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objcopy.c (merge_gnu_build_notes): Cast relcount to unsigned
+	long when comparing with sec->reloc_count.
+
+2017-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (merge_gnu_build_notes): Disable merge if there are
+	more internal relocs than external relocs.
+
+2017-05-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips16-undecoded.d: Adjust the
+	disassembly of PC-relative LA and LW synthetic instructions.
+
+2017-05-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 21440
+	* objdump.c (dump_relocs_in_section): Check for an excessive
+	number of relocs before attempting to dump them.
+
+2017-05-01  Alan Modra  <amodra@gmail.com>
+
+	* objcopy.c (merge_gnu_build_notes): Correct code deleting
+	relocs.
+
+2017-04-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21439
+	* readelf.c (print_gnu_build_attribute_name): Allow for an empty
+	name field.
+
+2017-04-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21437
+	* readelf.c (process_version_sections): Check for underflow when
+	computing the start address of the auxillary version data.
+
+2017-04-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21438
+	* dwarf.c (process_extended_line_op): Do not assume that the
+	string extracted from the section is NUL terminated.
+	(fetch_indirect_string): If the string retrieved from the section
+	is not NUL terminated, return an error message.
+	(fetch_indirect_line_string): Likewise.
+	(fetch_indexed_string): Likewise.
+
 2017-04-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21433

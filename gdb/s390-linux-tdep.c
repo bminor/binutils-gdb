@@ -725,7 +725,7 @@ s390_is_partial_instruction (struct gdbarch *gdbarch, CORE_ADDR loc, int *len)
    process about 4kiB of it each time, leading to O(n**2) memory and time
    complexity.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 s390_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -733,33 +733,30 @@ s390_software_single_step (struct regcache *regcache)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len;
   uint16_t insn;
-  VEC (CORE_ADDR) *next_pcs = NULL;
 
   /* Special handling only if recording.  */
   if (!record_full_is_used ())
-    return NULL;
+    return {};
 
   /* First, match a partial instruction.  */
   if (!s390_is_partial_instruction (gdbarch, loc, &len))
-    return NULL;
+    return {};
 
   loc += len;
 
   /* Second, look for a branch back to it.  */
   insn = read_memory_integer (loc, 2, byte_order);
   if (insn != 0xa714) /* BRC with mask 1 */
-    return NULL;
+    return {};
 
   insn = read_memory_integer (loc + 2, 2, byte_order);
   if (insn != (uint16_t) -(len / 2))
-    return NULL;
+    return {};
 
   loc += 4;
 
   /* Found it, step past the whole thing.  */
-  VEC_safe_push (CORE_ADDR, next_pcs, loc);
-
-  return next_pcs;
+  return {loc};
 }
 
 static int
@@ -8042,8 +8039,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_S390X);
       break;
     }
-
-  set_gdbarch_print_insn (gdbarch, print_insn_s390);
 
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 

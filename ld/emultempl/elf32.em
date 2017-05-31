@@ -1538,7 +1538,7 @@ fragment <<EOF
     }
 
   if (link_info.eh_frame_hdr_type == COMPACT_EH_HDR)
-    if (bfd_elf_parse_eh_frame_entries (NULL, &link_info) == FALSE)
+    if (!bfd_elf_parse_eh_frame_entries (NULL, &link_info))
       einfo (_("%P%F: Failed to parse EH frame entries.\n"));
 }
 

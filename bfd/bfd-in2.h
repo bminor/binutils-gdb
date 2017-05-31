@@ -1242,6 +1242,8 @@ long bfd_get_mtime (bfd *abfd);
 
 file_ptr bfd_get_size (bfd *abfd);
 
+file_ptr bfd_get_file_size (bfd *abfd);
+
 void *bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
     int prot, int flags, file_ptr offset,
     void **map_addr, bfd_size_type *map_len);
@@ -2004,9 +2006,11 @@ enum bfd_architecture
 #define bfd_mach_sparc_v9v             18 /* with OSA2011 and T4 and IMA and FJMAU add'ns.  */
 #define bfd_mach_sparc_v8plusm         19 /* with OSA2015 and M7 add'ns.  */
 #define bfd_mach_sparc_v9m             20 /* with OSA2015 and M7 add'ns.  */
+#define bfd_mach_sparc_v8plusm8        21 /* with OSA2017 and M8 add'ns.  */
+#define bfd_mach_sparc_v9m8            22 /* with OSA2017 and M8 add'ns.  */
 /* Nonzero if MACH has the v9 instruction set.  */
 #define bfd_mach_sparc_v9_p(mach) \
-  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9m \
+  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9m8 \
    && (mach) != bfd_mach_sparc_sparclite_le)
 /* Nonzero if MACH is a 64 bit sparc architecture.  */
 #define bfd_mach_sparc_64bit_p(mach) \
@@ -2016,7 +2020,8 @@ enum bfd_architecture
    && (mach) != bfd_mach_sparc_v8plusd \
    && (mach) != bfd_mach_sparc_v8pluse \
    && (mach) != bfd_mach_sparc_v8plusv \
-   && (mach) != bfd_mach_sparc_v8plusm)
+   && (mach) != bfd_mach_sparc_v8plusm \
+   && (mach) != bfd_mach_sparc_v8plusm8)
   bfd_arch_spu,       /* PowerPC SPU */
 #define bfd_mach_spu           256
   bfd_arch_mips,      /* MIPS Rxxxx */
@@ -7075,6 +7080,8 @@ long bfd_canonicalize_reloc
 void bfd_set_reloc
    (bfd *abfd, asection *sec, arelent **rel, unsigned int count);
 
+#define bfd_set_reloc(abfd, asect, location, count) \
+     BFD_SEND (abfd, _bfd_set_reloc, (abfd, asect, location, count))
 bfd_boolean bfd_set_file_flags (bfd *abfd, flagword flags);
 
 int bfd_get_arch_size (bfd *abfd);
@@ -7542,12 +7549,15 @@ typedef struct bfd_target
 #define BFD_JUMP_TABLE_RELOCS(NAME) \
   NAME##_get_reloc_upper_bound, \
   NAME##_canonicalize_reloc, \
+  NAME##_set_reloc, \
   NAME##_bfd_reloc_type_lookup, \
   NAME##_bfd_reloc_name_lookup
 
   long        (*_get_reloc_upper_bound) (bfd *, sec_ptr);
   long        (*_bfd_canonicalize_reloc)
     (bfd *, sec_ptr, arelent **, struct bfd_symbol **);
+  void        (*_bfd_set_reloc)
+    (bfd *, sec_ptr, arelent **, unsigned int);
   /* See documentation on reloc types.  */
   reloc_howto_type *
               (*reloc_type_lookup) (bfd *, bfd_reloc_code_real_type);

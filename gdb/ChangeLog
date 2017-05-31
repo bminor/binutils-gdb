@@ -1,3 +1,1159 @@
+2017-05-31  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* memattr.c (mem_info_command): Rename to ...
+	(info_mem_command): ... this.
+	(mem_enable_command): Rename to ...
+	(enable_mem_command): ... this.
+	(mem_disable_command): Rename to ...
+	(disable_mem_command): ... this.
+	(mem_delete_command): Rename to ...
+	(delete_mem_command): ... this.
+	(_initialize_mem): Adjust function names.
+
+2017-05-31  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (handle_pt_insn_events): New.
+	(ftrace_add_pt): Call handle_pt_insn_events.  Rename ERRCODE into
+	STATUS.  Split into this and ...
+	(handle_pt_insn_event_flags): ... this.
+
+2017-05-31  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* configure.ac: Check for pt_insn_event, struct pt_insn.enabled,
+	and struct pt_insn.resynced.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_find_call_by_number): New function.
+	(ftrace_new_function): Store objects, not pointers.
+	(ftrace_find_call_by_number, ftrace_new_return, ftrace_new_switch,
+	ftrace_new_gap, ftrace_update_function,
+	ftrace_compute_global_level_offset, btrace_stich_bts, btrace_clear,
+	btrace_insn_get, btrace_insn_get_error, btrace_insn_end,
+	btrace_insn_next, btrace_insn_prev, ptrace_find_insn_by_number,
+	btrace_ends_with_single_insn, btrace_call_get): Account for
+	btrace_thread_info::functions now storing objects.
+	* btrace.h (struct btrace_thread_info): Add constructor.
+	(struct btrace_thread_info) <functions>: Make std::vector.
+	(struct btrace_thread_info) <prev, next, up, insn, errcode, flags):
+	Initialize with default values.
+	* record-btrace.c (record_btrace_frame_sniffer): Account for
+	btrace_thread_info::functions now storing objects.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c: Remove typedef bfun_s.
+	(ftrace_new_gap): Directly add gaps to the list of gaps.
+	(btrace_bridge_gaps, btrace_compute_ftrace_bts, pt_btrace_insn_flags,
+	ftrace_add_pt, btrace_compute_ftrace_pt, btrace_compute_ftrace_1,
+	btrace_finalize_ftrace, btrace_compute_ftrace): Use std::vector
+	instead of gdb VEC.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_fixup_caller, ftrace_new_return, ftrace_connect_bfun,
+	ftrace_bridge_gap): Replace references to btrace_thread_info::segment
+	with btrace_thread_info::next_segment and
+	btrace_thread_info::prev_segment.
+	* btrace.h: Remove struct btrace_func_link.
+	(struct btrace_function): Replace pair of function segment pointers
+	with pair of indices.
+	* python/py-record-btrace.c (btpy_call_prev_sibling,
+	btpy_call_next_sibling): Replace references to
+	btrace_thread_info::segment with btrace_thread_info::next_segment and
+	btrace_thread_info::prev_segment.
+	* record-btrace.c (record_btrace_frame_this_id): Use
+	btrace_find_call_by_number.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_new_function, ftrace_fixup_level,
+	ftrace_connect_bfun, ftrace_bridge_gap, btrace_bridge_gaps,
+	btrace_insn_next, btrace_insn_prev): Remove references to
+	btrace_thread_info::flow.
+	* btrace.h (struct btrace_function): Remove FLOW.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_find_call_by_number): New function.
+	(ftrace_update_caller, ftrace_new_call, ftrace_new_tailcall,
+	ftrace_get_caller, ftrace_find_call, ftrace_new_return,
+	ftrace_match_backtrace, ftrace_connect_bfun, ftrace_connect_backtrace,
+	ftrace_bridge_gap, btrace_bridge_gaps): Use btrace_function::up as an
+	index.
+	* btrace.h (struct btrace_function): Turn UP into an index.
+	* python/py-record-btrace.c (btpy_call_up): Use btrace_function::up
+	as an index.
+	* record-btrace.c (record_btrace_frame_unwind_stop_reason,
+	record_btrace_frame_prev_register, record_btrace_frame_sniffer,
+	record_btrace_tailcall_frame_sniffe): Use btrace_find_call_by_number.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_new_function, ftrace_new_call, ftrace_new_tailcall,
+	ftrace_new_return, ftrace_new_switch, ftrace_new_gap,
+	ftrace_update_function, ftrace_compute_global_level_offset,
+	btrace_compute_ftrace_bts, ftrace_add_pt, btrace_compute_ftrace_pt,
+	btrace_stitch_bts, btrace_fetch, btrace_clear, btrace_insn_number,
+	btrace_insn_end, btrace_is_empty): Remove references to
+	btrace_thread_info::begin and btrace_thread_info::end.
+	* btrace.h (struct btrace_thread_info): Remove BEGIN and END.
+	(struct btrace_thread_info) <functions>: Adjust comment.
+	* record-btrace.c (record_btrace_start_replaying): Remove reference to
+	btrace_thread_info::begin.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_new_function, ftrace_new_call, ftrace_new_tailcall,
+	ftrace_new_return, ftrace_new_switch, ftrace_new_gap,
+	ftrace_update_function): Remove arguments that implicitly were always
+	BTINFO->END.
+	(btrace_compute_ftrace_bts, ftrace_add_pt, btrace_compute_ftrace_pt):
+	Don't pass BTINFO->END.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c: (btrace_insn_get, btrace_insn_get_error, btrace_insn_number,
+	btrace_insn_begin, btrace_insn_end, btrace_insn_next, btrace_insn_prev,
+	btrace_find_insn_by_number): Replace function segment pointer with
+	index.
+	(btrace_insn_cmp): Simplify.
+	* btrace.h: (struct btrace_insn_iterator) Rename index to
+	insn_index.  Replace function segment pointer with index into function
+	segment vector.
+	* record-btrace.c (record_btrace_call_history): Replace function
+	segment pointer use with index.
+	(record_btrace_frame_sniffer): Retrieve function call segment through
+	vector.
+	(record_btrace_set_replay): Remove defunc't safety check.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (btrace_ends_with_single_insn): New function.
+	(btrace_call_get, btrace_call_number, btrace_call_begin,
+	btrace_call_end, btrace_call_next, btrace_call_prev,
+	btrace_find_call_by_number): Use index into call segment vector
+	instead of pointer.
+	(btrace_call_cmp): Simplify.
+	* btrace.h (struct btrace_call_iterator): Replace function call segment
+	pointer with index into vector.
+	* record-btrace.c (record_btrace_call_history): Use index instead of
+	pointer.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (btrace_insn_begin, btrace_insn_end,
+	btrace_find_insn_by_number): Add btinfo to iterator.
+	* btrace.h (struct btrace_insn_iterator): Add btinfo.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_new_function): Add btrace_thread_info to arguments
+	and save pointers directly.
+	(ftrace_new_call, ftrace_new_tailcall, ftrace_new_return,
+	ftrace_new_switch, ftrace_new_gap, ftrace_update_function,
+	ftrace_add_pt): Add btrace_thread_info to arguments.  Adjust for
+	changed signature of functions.
+	(btrace_compute_ftrace_pt): Adjust for changed signature of functions.
+	(btrace_fetch): Remove code that adds btrace_function pointers to
+	vector of btrace_functions.
+	(btrace_clear): Simplify freeing vector of btrace_functions.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (btrace_fetch, btrace_clear, btrace_find_insn_by_number):
+	Replace VEC_* with std::vector functions.
+	* btrace.h: Add include: vector. Remove typedef for DEF_VEC_P.
+	(struct btrace_thread_info)<functions>: Change type to std::vector.
+
+2017-05-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS (Changes in GDB 8.0): Remove extra empty line.  Move
+	"Removed targets and native configurations" up.  Merge duplicate
+	"New commands" sub-sections.  Add "New options" sub-sections.
+
+2017-05-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* defs.h (copy_integer_to_size): New declaration.
+	* findvar.c (copy_integer_to_size): New function.
+	(do_cint_test): New selftest function.
+	(copy_integer_to_size_test): Likewise.
+	(_initialize_findvar): Likewise.
+	* mips-fbsd-tdep.c (mips_fbsd_supply_reg): Use raw_supply_integer.
+	(mips_fbsd_collect_reg): Use raw_collect_integer.
+	* mips-linux-tdep.c (supply_32bit_reg): Use raw_supply_integer.
+	(mips64_fill_gregset): Use raw_collect_integer
+	(mips64_fill_fpregset): Use raw_supply_integer.
+	* regcache.c (regcache::raw_supply_integer): New function.
+	(regcache::raw_collect_integer): Likewise.
+	* regcache.h: (regcache::raw_supply_integer): New declaration.
+	(regcache::raw_collect_integer): Likewise.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (SFILES): Add gdbarch-selftests.c.
+	(COMMON_OBS): Add gdbarch-selftests.o.
+	* frame.c [GDB_SELF_TESTS] (create_new_frame): New function.
+	* frame.h [GDB_SELF_TESTS] (create_new_frame): Declare.
+	* gdbarch-selftests.c: New file.
+	* regcache.h (regcache) <~regcache>: Mark it virtual if
+	GDB_SELF_TEST.
+	<raw_write>: Likewise.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (current_regcache): Change it to
+	regcache::current_regcache.
+	(regcache_observer_target_changed): Update.
+	(regcache_thread_ptid_changed): Make it a regcache static
+	method.
+	(regcache_thread_ptid_changed): Update.
+	(class regcache_access): New.
+	(current_regcache_test): Update.
+	(_initialize_regcache): Update.
+	* regcache.h: Include forward_list.
+	(regcache): Declare regcache_thread_ptid_changed and declare
+	registers_changed_ptid as friend.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* i387-tdep.c (i387_register_to_value): Use register_size
+	instead of TYPE_LENGTH.
+	* m68k-tdep.c (m68k_register_to_value): Likewise.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* i387-tdep.c (i387_convert_register_p): Return false if type
+	code isn't TYPE_CODE_FLT.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* alpha-tdep.c (alpha_convert_register_p): Return true if type
+	length is 4.
+	(alpha_register_to_value): Remove type length check.
+	(alpha_value_to_register): Likewise.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* ia64-tdep.c (ia64_convert_register_p): Check type's code is
+	TYPE_CODE_FLT.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* m68k-tdep.c (m68k_convert_register_p): Check type's code is
+	TYPE_CODE_FLT or not.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* alpha-tdep.c (alpha_gdbarch_init): Use XCNEW instead of XNEW.
+	* avr-tdep.c (avr_gdbarch_init): Likewise.
+	* bfin-tdep.c (bfin_gdbarch_init): Likewise.
+	* cris-tdep.c (cris_gdbarch_init): Likewise.
+	* ft32-tdep.c (ft32_gdbarch_init): Likewise.
+	* lm32-tdep.c (lm32_gdbarch_init): Likewise.
+	* m32r-tdep.c (m32r_gdbarch_init): Likewise.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Likewise.
+	* mep-tdep.c (mep_gdbarch_init): Likewise.
+	* microblaze-tdep.c (microblaze_gdbarch_init): Likewise.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Likewise.
+	* moxie-tdep.c (moxie_gdbarch_init): Likewise.
+	* msp430-tdep.c (msp430_gdbarch_init): Likewise.
+	* sh64-tdep.c (sh64_gdbarch_init): Likewise.
+	* v850-tdep.c (v850_gdbarch_init): Likewise.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* selftest-arch.c (tests_with_arch): Call registers_changed
+	and reinit_frame_cache.
+	* selftest.c (run_self_tests): Likewise.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* rs6000-tdep.c (gdb_print_insn_powerpc): Remove.
+	(rs6000_gdbarch_init): Don't call set_gdbarch_print_insn.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* rl78-tdep.c (rl78_gdbarch_init): Don't call
+	set_gdbarch_print_insn.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* h8300-tdep.c (h8300_gdbarch_init): Don't call
+	set_gdbarch_print_insn.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* alpha-tdep.c (alpha_gdbarch_init): Don't call
+	set_gdbarch_print_insn.
+	* arc-tdep.c (arc_gdbarch_init): Likewise.
+	* arch-utils.c: include dis-asm.h.
+	(default_print_insn): New function.
+	* arch-utils.h (default_print_insn): Declare.
+	* avr-tdep.c (avr_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* bfin-tdep.c (bfin_gdbarch_init): Likewise.
+	* cris-tdep.c (cris_delayed_get_disassembler): Remove.
+	(cris_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* frv-tdep.c (frv_gdbarch_init): Likewise.
+	* ft32-tdep.c (ft32_gdbarch_init): Likewise.
+	* gdbarch.sh (print_insn): Use default_print_insn.
+	* gdbarch.c: Regenerated.
+	* hppa-tdep.c (hppa_gdbarch_init): Likewise.
+	* iq2000-tdep.c (iq2000_gdbarch_init): Likewise.
+	* lm32-tdep.c (lm32_gdbarch_init): Likewise.
+	* m32c-tdep.c (m32c_gdbarch_init): Likewise.
+	* m32r-tdep.c (m32r_gdbarch_init): Likewise.
+	* m68hc11-tdep.c (gdb_print_insn_m68hc11): Remove.
+	(m68hc11_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* m68k-tdep.c (m68k_gdbarch_init): Likewise.
+	* m88k-tdep.c (m88k_gdbarch_init): Likewise.
+	* microblaze-tdep.c (microblaze_gdbarch_init): Likewise.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Likewise.
+	* moxie-tdep.c (moxie_gdbarch_init): Likewise.
+	* msp430-tdep.c (msp430_gdbarch_init): Likewise.
+	* mt-tdep.c (mt_gdbarch_init): Likewise.
+	* nds32-tdep.c (nds32_gdbarch_init): Likewise.
+	* nios2-tdep.c (nios2_print_insn): Remove.
+	(nios2_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* rx-tdep.c (rx_gdbarch_init): Likewise.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* score-tdep.c (score_print_insn): Remove.
+	(score_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* sh-tdep.c (sh_gdbarch_init): Likewise.
+	* sh64-tdep.c (sh64_gdbarch_init): Likewise.
+	* sparc-tdep.c (sparc32_gdbarch_init): Likewise.
+	* tic6x-tdep.c (tic6x_print_insn): Remove.
+	(tic6x_gdbarch_init): Don't call set_gdbarch_print_insn.
+	* tilegx-tdep.c (tilegx_gdbarch_init): Likewise.
+	* v850-tdep.c (v850_gdbarch_init): Likewise.
+	* vax-tdep.c (vax_gdbarch_init): Likewise.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Likewise.
+	* xtensa-tdep.c (xtensa_gdbarch_init): Likewise.
+
+2017-05-23  John Baldwin  <jhb@FreeBSD.org>
+
+	* mips-fbsd-tdep.c (MIPS_PC_REGNUM): Remove.
+	(MIPS_FP0_REGNUM): Remove.
+	(MIPS_FSR_REGNUM): Remove.
+	(mips_fbsd_supply_fpregs): Use mips_regnum.
+	(mips_fbsd_supply_gregs): Likewise.
+	(mips_fbsd_collect_fpregs): Likewise.
+	(mips_fbsd_collect_gregs): Likewise.
+
+2017-05-23  John Baldwin  <jhb@FreeBSD.org>
+
+	* mips-fbsd-nat.c (getregs_supplies): Fix upper bound comparison.
+	(getpfpregs_supplies): New function.
+	(mips_fbsd_fetch_inferior_registers): Remove early exit and use
+	getfpregs_supplies.
+	(mips_fbsd_store_inferior_registers): Likewise.
+
+2017-05-22  Pedro Alves <palves@redhat.com>
+
+	* MAINTAINERS (Host/Native): Add John Baldwin as FreeBSD
+	maintainer.
+
+2017-05-22  Alan Hayward  <alan.hayward@arm.com>
+
+	* ppc-linux-nat.c (fetch_register): Use PPC_MAX_REGISTER_SIZE.
+	(store_register): Likewise.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Likewise.
+	(get_decimal_float_return_value): Likewise.
+	(do_ppc_sysv_return_value): Likewise.
+	(ppc64_sysv_abi_push_integer): Likewise.
+	(ppc64_sysv_abi_push_freg): Likewise.
+	(ppc64_sysv_abi_return_value_base): Likewise.
+	(ppc64_sysv_abi_return_value): Likewise.
+	* rs6000-aix-tdep.c (rs6000_push_dummy_call): Likewise.
+	* rs6000-lynx178-tdep.c (rs6000_lynx178_push_dummy_call): Likewise.
+	* rs6000-nat.c: Likewise.
+	* rs6000-tdep.c (rs6000_register_to_value): Likewise.
+	(rs6000_value_to_register): Likewise.
+	* ppc-tdep.h (PPC_MAX_REGISTER_SIZE): Add.
+
+2017-05-21  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21466:
+	* rust-lang.c (rust_print_type) <TYPE_CODE_ARRAY>: Print unsized
+	arrays as "[T]", not "[T; ]".
+
+2017-05-19  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21484:
+	* rust-lang.c (exp_descriptor_rust): New function.
+	(rust_language_defn): Use it.
+	* p-lang.c (pascal_language_defn): Update.
+	* opencl-lang.c (opencl_language_defn): Update.
+	* objc-lang.c (objc_language_defn): Update.
+	* m2-lang.c (m2_language_defn): Update.
+	* language.h (struct language_defn)
+	<la_watch_location_expression>: New member.
+	* language.c (unknown_language_defn, auto_language_defn)
+	(local_language_defn): Update.
+	* go-lang.c (go_language_defn): Update.
+	* f-lang.c (f_language_defn): Update.
+	* d-lang.c (d_language_defn): Update.
+	* c-lang.h (c_watch_location_expression): Declare.
+	* c-lang.c (c_watch_location_expression): New function.
+	(c_language_defn, cplus_language_defn, asm_language_defn)
+	(minimal_language_defn): Use it.
+	* breakpoint.c (watch_command_1): Call
+	la_watch_location_expression.
+	* ada-lang.c (ada_language_defn): Update.
+
+2017-05-19  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR tui/21482
+	* gdb_curses.h (NOMACROS): Define.
+	(NCURSES_NOMACROS): Define.
+
+2017-05-19  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR tui/21482
+	* tui/tui-windata.c (tui_erase_data_content): Cast last mvwaddstr
+	arg to char *.
+	* tui/tui-wingeneral.c (box_win): Likewise.
+	* tui/tui-winsource.c (tui_erase_source_content): Likewise.
+	(tui_show_source_line): Likewise.
+	(tui_show_exec_info_content): Likewise.
+
+2017-05-19  Vladimir Mezentsev  <vladimir.mezentsev@oracle.com>
+
+	* sparc-tdep.c (sparc_structure_return_p)
+	(sparc_arg_on_registers_p): New functions.
+	(sparc32_store_arguments): Use them.
+	* sparc64-tdep.c (sparc64_16_byte_align_p)
+	(sparc64_store_floating_fields, sparc64_extract_floating_fields):
+	Handle TYPE_CODE_ARRAY.
+
+2017-05-17  Yao Qi  <yao.qi@linaro.org>
+
+	* cli/cli-decode.c (add_alias_cmd): New function.
+	* command.h (add_alias_cmd): Declare.
+	* infcmd.c (_initialize_infcmd): Don't call add_com_alias,
+	instead call add_alias_cmd.
+
+2017-05-17  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (nat_extra_makefile_frag): Rename to ...
+	(nat_makefile_frag): ... this.  All references updated.
+	* configure.ac: Likewise.
+	* configure.nat: Likewise.  Enhance comments.
+	* configure: Regenerate.
+
+2017-05-15  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* procfs.c (procfs_create_inferior): Change prototype to match
+	definition.
+
+2017-05-13  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui.c (tui_enable): Cast "unknown" to 'char *' to avoid a
+	C++ compiler warning.
+
+2017-05-12  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21483:
+	* rust-lang.c (rust_evaluate_subexp) <STRUCTOP_STRUCT>: Don't
+	recurse, just call value_struct_elt directly.
+
+2017-05-12  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (rust_dump_subexp_body) <STRUCTOP_ANONYMOUS,
+	OP_RUST_ARRAY>: Fix.
+
+2017-05-12  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (rust_print_subexp): Replace "return" with "break".
+
+2017-05-09  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c: Include <forward_list>.
+	(struct regcache_list): Remove.
+	(current_regcache): Update.
+	(get_thread_arch_aspace_regcache): Update for std::forward_list.
+	(regcache_thread_ptid_changed): Likewise.
+	(registers_changed_ptid): Likewise.
+	(current_regcache_size): Likewise.
+
+2017-05-09  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c [GDB_SELF_TEST]: Include selftest.h.
+	(current_regcache_size): New function.
+	(current_regcache_test): New function.
+	(_initialize_regcache) [GDB_SELF_TEST]: Register the unit test.
+
+2017-05-08  Alan Hayward  <alan.hayward@arm.com>
+
+	* mips-tdep.c (mips_o32_return_value): Remove unused buffer.
+	(print_gp_register_row): Use get_frame_register_value.
+
+2017-05-08  Alan Hayward  <alan.hayward@arm.com>
+
+	* mips-linux-tdep.c (mips_supply_gregset): Use raw_supply_zeroed.
+	(mips_supply_fpregset): Likewise.
+	(mips64_supply_gregset): Likewise.
+
+2017-05-08  Alan Hayward  <alan.hayward@arm.com>
+
+	* mn10300-linux-tdep.c (am33_supply_gregset_method): Use 
+	regcache->raw_supply_zeroed.
+
+2017-05-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+ 	* configure.nat: Rearrange 'case' statements to match
+	host before cpu.
+
+2017-05-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in: Remove "@host_makefile_frag@".  Add variables
+	NAT_FILE, NATDEPFILES, NAT_CDEPS, LOADLIBES, MH_CFLAGS, XM_CLIBS,
+	NAT_GENERATED_FILES, HAVE_NATIVE_GCORE_HOST.  Add
+	"@nat_extra_makefile_frag@".
+	(Makefile): Remove dependency on "@frags@".
+	($(GNULIB_BUILDDIR)/Makefile): Likewise.
+	(data-directory/Makefile): Likewise.
+	* config/aarch64/linux.mh: Deleted; moved contents to
+	"gdb/configure.nat".
+	* config/alpha/alpha-linux.mh: Likewise.
+	* config/alpha/nbsd.mh: Likewise.
+	* config/arm/linux.mh: Likewise.
+	* config/arm/nbsdelf.mh: Likewise.
+	* config/i386/cygwin.mh: Likewise.
+	* config/i386/cygwin64.mh: Likewise.
+	* config/i386/darwin.mh: Likewise.
+	* config/i386/fbsd.mh: Likewise.
+	* config/i386/fbsd64.mh: Likewise.
+	* config/i386/go32.mh: Likewise.
+	* config/i386/i386gnu.mh: Likewise.
+	* config/i386/i386sol2.mh: Likewise.
+	* config/i386/linux.mh: Likewise.
+	* config/i386/linux64.mh: Likewise.
+	* config/i386/mingw.mh: Likewise.
+	* config/i386/mingw64.mh: Likewise.
+	* config/i386/nbsd64.mh: Likewise.
+	* config/i386/nbsdelf.mh: Likewise.
+	* config/i386/nto.mh: Likewise.
+	* config/i386/obsd.mh: Likewise.
+	* config/i386/obsd64.mh: Likewise.
+	* config/i386/sol2-64.mh: Likewise.
+	* config/ia64/linux.mh: Likewise.
+	* config/m32r/linux.mh: Likewise.
+	* config/m68k/linux.mh: Likewise.
+	* config/m68k/nbsdelf.mh: Likewise.
+	* config/m68k/obsd.mh: Likewise.
+	* config/m88k/obsd.mh: Likewise.
+	* config/mips/fbsd.mh: Likewise.
+	* config/mips/linux.mh: Likewise.
+	* config/mips/nbsd.mh: Likewise.
+	* config/mips/obsd64.mh: Likewise.
+	* config/pa/linux.mh: Likewise.
+	* config/pa/nbsd.mh: Likewise.
+	* config/pa/obsd.mh: Likewise.
+	* config/powerpc/aix.mh: Likewise.
+	* config/powerpc/fbsd.mh: Likewise.
+	* config/powerpc/linux.mh: Likewise.
+	* config/powerpc/nbsd.mh: Likewise.
+	* config/powerpc/obsd.mh: Likewise.
+	* config/powerpc/ppc64-linux.mh: Likewise.
+	* config/powerpc/spu-linux.mh: Likewise.
+	* config/s390/linux.mh: Likewise.
+	* config/sh/nbsd.mh: Likewise.
+	* config/sparc/fbsd.mh: Likewise.
+	* config/sparc/linux.mh: Likewise.
+	* config/sparc/linux64.mh: Likewise.
+	* config/sparc/nbsd64.mh: Likewise.
+	* config/sparc/nbsdelf.mh: Likewise.
+	* config/sparc/obsd64.mh: Likewise.
+	* config/sparc/sol2.mh: Likewise.
+	* config/tilegx/linux.mh: Likewise.
+	* config/vax/nbsdelf.mh: Likewise.
+	* config/vax/obsd.mh: Likewise.
+	* config/xtensa/linux.mh: Likewise.
+	* config/i386/i386gnu.mn: New file, with excerpts from
+	"config/i386/i386gnu.mh".
+	* configure: Regenerate.
+	* configure.ac: Rewrite code to use "gdb/configure.nat" instead of
+	*.mh files under "gdb/config".
+	* configure.nat: New file, with contents from the
+	"gdb/config/*/*.mh" files.
+
+2017-05-05  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (btrace_clear): Free insn vector.
+
+2017-05-05  Pedro Alves  <palves@redhat.com>
+
+	* warning.m4 (build_warnings): Add -Wno-error=maybe-uninitialized.
+	* configure: Regenerate.
+
+2017-05-04  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SFILES): Add progspace-and-thread.c.
+	(HFILES_NO_SRCDIR): Add progspace-and-thread.h.
+	(COMMON_OBS): Add progspace-and-thread.o.
+	* breakpoint.c: Include "progspace-and-thread.h".
+	(update_inserted_breakpoint_locations)
+	(insert_breakpoint_locations, create_longjmp_master_breakpoint):
+	Use scoped_restore_current_pspace_and_thread.
+	(create_std_terminate_master_breakpoint): Use
+	scoped_restore_current_program_space.
+	(remove_breakpoint): Use scoped_restore_current_pspace_and_thread.
+	(print_breakpoint_location): Use
+	scoped_restore_current_program_space.
+	(bp_loc_is_permanent): Use
+	scoped_restore_current_pspace_and_thread.
+	(resolve_sal_pc): Use scoped_restore_current_pspace_and_thread.
+	(download_tracepoint_locations): Use
+	scoped_restore_current_pspace_and_thread.
+	(breakpoint_re_set): Use scoped_restore_current_pspace_and_thread.
+	* exec.c (exec_close_1): Use scoped_restore_current_program_space.
+	(enum step_over_calls_kind): Moved from inferior.h.
+	(class scoped_restore_current_thread): New class.
+	* gdbthread.h (make_cleanup_restore_current_thread): Delete
+	declaration.
+	(scoped_restore_current_thread): New class.
+	* infcmd.c: Include "common/gdb_optional.h".
+	(continue_1, proceed_after_attach): Use
+	scoped_restore_current_thread.
+	(notice_new_inferior): Use scoped_restore_current_thread.
+	* inferior.c: Include "progspace-and-thread.h".
+	(restore_inferior, save_current_inferior): Delete.
+	(add_inferior_command, clone_inferior_command): Use
+	scoped_restore_current_pspace_and_thread.
+	* inferior.h (scoped_restore_current_inferior): New class.
+	* infrun.c: Include "progspace-and-thread.h" and
+	"common/gdb_optional.h".
+	(follow_fork_inferior): Use
+	scoped_restore_current_pspace_and_thread.
+	(scoped_restore_exited_inferior): New class.
+	(handle_vfork_child_exec_or_exit): Use
+	scoped_restore_exited_inferior,
+	scoped_restore_current_pspace_and_thread,
+	scoped_restore_current_thread and scoped_restore.
+	(fetch_inferior_event): Use scoped_restore_current_thread.
+	* linespec.c (decode_line_full, decode_line_1): Use
+	scoped_restore_current_program_space.
+	* mi/mi-main.c: Include "progspace-and-thread.h".
+	(exec_continue): Use scoped_restore_current_thread.
+	(mi_cmd_exec_run): Use scoped_restore_current_pspace_and_thread.
+	(mi_cmd_trace_frame_collected): Use scoped_restore_current_thread.
+	* proc-service.c (ps_pglobal_lookup): Use
+	scoped_restore_current_program_space.
+	* progspace-and-thread.c: New file.
+	* progspace-and-thread.h: New file.
+	* progspace.c (release_program_space, clone_program_space): Use
+	scoped_restore_current_program_space.
+	(restore_program_space, save_current_program_space)
+	(save_current_space_and_thread): Delete.
+	(switch_to_program_space_and_thread): Moved to
+	progspace-and-thread.c.
+	* progspace.h (save_current_program_space)
+	(save_current_space_and_thread): Delete declarations.
+	(scoped_restore_current_program_space): New class.
+	* remote.c (remote_btrace_maybe_reopen): Use
+	scoped_restore_current_thread.
+	* symtab.c: Include "progspace-and-thread.h".
+	(skip_prologue_sal): Use scoped_restore_current_pspace_and_thread.
+	* thread.c (print_thread_info_1): Use
+	scoped_restore_current_thread.
+	(struct current_thread_cleanup): Delete.
+	(do_restore_current_thread_cleanup)
+	(restore_current_thread_cleanup_dtor): Rename/convert both to ...
+	(scoped_restore_current_thread::~scoped_restore_current_thread):
+	... this new dtor.
+	(make_cleanup_restore_current_thread): Rename/convert to ...
+	(scoped_restore_current_thread::scoped_restore_current_thread):
+	... this new ctor.
+	(thread_apply_all_command): Use scoped_restore_current_thread.
+	(thread_apply_command): Use scoped_restore_current_thread.
+	* tracepoint.c (tdump_command): Use scoped_restore_current_thread.
+	* varobj.c (value_of_root_1): Use scoped_restore_current_thread.
+
+2017-05-04  Pedro Alves  <palves@redhat.com>
+
+	* thread.c (make_cleanup_restore_current_thread): Move
+	find_thread_ptid call before the is_stopped call.  Assert that the
+	thread is found.  Replace is_stopped call by checking the thread's
+	state directly.  Remove unnecessary NULL-thread check.
+
+2017-05-04  Pedro Alves  <palves@redhat.com>
+
+	* corelow.c (thread_section_name): New class.
+	(get_core_register_section, get_core_siginfo): Use it.
+
+2017-05-04  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* corelow.c (sniff_core_bfd): Remove extra semicolon.
+	(get_core_register_section): Remove xfree of NULL pointer.
+
+2017-05-03  Alan Hayward  <alan.hayward@arm.com>
+
+	* frv-linux-tdep.c (frv_linux_supply_gregset): Use raw_supply_zeroed.
+	* regcache.c (regcache::raw_supply_zeroed): New function.
+	* regcache.h (regcache::raw_supply_zeroed): New declaration.
+
+2017-05-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdbarch.sh: Remove commented out definition of
+	TARGET_CHAR_BIT.
+	* gdbarch.h: Re-generate.
+
+2017-05-03  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* configure: Regenerate.
+
+2017-05-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-target.c (solib_target_relocate_section_addresses):
+	Remove num_section_bases, num_bases, segment_bases variables.
+
+2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common/gdb_vecs.h (DEF_VEC_I (CORE_ADDR)): Remove.
+
+2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* solib-target.c: Include <vector>
+	(struct lm_info_target) <~lm_info_target>: Remove.
+	<segment_bases, section_bases>: Change type to
+	std::vector<CORE_ADDR>.
+	(library_list_start_segment, library_list_start_section,
+	library_list_end_library,
+	solib_target_relocate_section_addresses): Adjust.
+
+2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbarch.sh (software_single_step): Change return type to
+	std::vector<CORE_ADDR>.
+	* gdbarch.c, gdbarch.h: Re-generate.
+	* arch/arm-get-next-pcs.c (thumb_deal_with_atomic_sequence_raw):
+	Adjust.
+	(arm_deal_with_atomic_sequence_raw): Adjust.
+	(thumb_get_next_pcs_raw): Adjust.
+	(arm_get_next_pcs_raw): Adjust.
+	(arm_get_next_pcs): Adjust.
+	* arch/arm-get-next-pcs.h (arm_get_next_pcs): Adjust.
+	* aarch64-tdep.c (aarch64_software_single_step): Adjust.
+	* alpha-tdep.c (alpha_deal_with_atomic_sequence): Adjust.
+	(alpha_software_single_step): Adjust.
+	* alpha-tdep.h (alpha_software_single_step): Adjust.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Adjust.
+	* arm-tdep.c (arm_software_single_step): Adjust.
+	(arm_breakpoint_kind_from_current_state): Adjust.
+	* arm-tdep.h (arm_software_single_step): Adjust.
+	* breakpoint.c (insert_single_step_breakpoint): Adjust.
+	* cris-tdep.c (cris_software_single_step): Adjust.
+	* mips-tdep.c (mips_deal_with_atomic_sequence): Adjust.
+	(micromips_deal_with_atomic_sequence): Adjust.
+	(deal_with_atomic_sequence): Adjust.
+	(mips_software_single_step): Adjust.
+	* mips-tdep.h (mips_software_single_step): Adjust.
+	* moxie-tdep.c (moxie_software_single_step): Adjust.
+	* nios2-tdep.c (nios2_software_single_step): Adjust.
+	* ppc-tdep.h (ppc_deal_with_atomic_sequence): Adjust.
+	* rs6000-aix-tdep.c (rs6000_software_single_step): Adjust.
+	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Adjust.
+	* s390-linux-tdep.c (s390_software_single_step): Adjust.
+	* sparc-tdep.c (sparc_software_single_step): Adjust.
+	* spu-tdep.c (spu_software_single_step): Adjust.
+	* tic6x-tdep.c (tic6x_software_single_step): Adjust.
+
+2017-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbarch.sh: Use semi-colon as field separator instead of colon.
+	* gdbarch.h: Re-generate.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-instruction.o.
+	(SUBDIR_PYTHON_SRCS): Add py-instruction.c.
+	* python/py-instruction.c, python/py-instruction.h: New file.
+	* python/py-record.c: Add py-instruction.h include.
+	(gdbpy_initialize_record): Make gdb.Instruction a super class of
+	gdb.RecordInstruction.
+	* python/python-internal.h: Add gdbpy_initialize_instruction
+	declaration.
+	* python/python.c (do_start_initialization): Add
+	gdbpy_initialize_instruction.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python/py-record-btrace.c (BTPY_REQUIRE_VALID_CALL, btpy_call_type):
+	Remove.
+	(btrace_func_from_recpy_func): New function.
+	(btpy_call_new, btpy_number, btpy_hash, btpy_richcompare): Remove.
+	(btpy_call_level, btpy_call_symbol, btpy_call_instructions,
+	btpy_call_up, btpy_call_prev_sibling, btpy_call_next_sibling): Rename to ...
+	(recpy_bt_func_level, recpy_bt_func_symbol, recpy_bt_func_instructions,
+	recpy_bt_func_up, recpy_bt_func_prev, recpy_bt_func_next): This.
+	Also, use new helper functions.
+	(btpy_list_item): Use new helper functions.
+	(recpy_bt_function_call_history): Use new type name.
+	(btpy_call_getset): Remove.
+	(gdbpy_initialize_btrace): Remove code to initialize
+	gdb.BtraceFunctionCall.
+	* python/py-record-btrace.h (recpy_bt_func_number, recpy_btb_func_level,
+	recpy_btb_func_symbol, recpy_bt_func_instructions, recpy_bt_func_up,
+	recpy_bt_func_prev, recpy_bt_func_next): New export.
+	* python/py-record.c (recpy_func_type): New static object.
+	(recpy_func_new, recpy_func_level, recpy_func_symbol,
+	recpy_func_instructions, recpy_func_up, recpy_func_prev,
+	recpy_func_next): New function.
+	(recpy_element_hash, recpy_element_richcompare): Updated comment.
+	(recpy_func_getset): New static object.
+	(gdbpy_initialize_record): Add code to initialize gdb.RecordInstruction.
+	* python/py-record.h (recpy_func_type, recpy_func_new): New export.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python/py-record-btrace.c (BTPY_REQUIRE_VALID_INSN): Remove.
+	(btpy_object, btpy_insn_type, btpy_new): Remove.
+	(btpy_list_object): Use gdb.RecordInstruction type instead of
+	gdb.BtraceInstruction type.
+	(btrace_insn_from_recpy_insn): New function.
+	(btpy_insn_or_gap_new): Adjust comment. Use recpy_insn_new instead of
+	btpy_new.
+	(btpy_call_new, btpy_list_item): Do not use btpy_new anymore.
+	(btpy_number, btpy_hash, btpy_call_level, btpy_call_symbol,
+	btpy_call_instructions, btpy_call_up, btpy_call_prev_sibling,
+	btpy_call_next_sibling, btpy_richcompare): Use recpy_element_object
+	instead of btpy_object.
+	(btpy_insn_sal, btpy_insn_pc, btpy_insn_size, btpy_insn_is_speculative,
+	btpy_insn_data, btpy_insn_decode): Rename to ...
+	(recpy_bt_insn_sal, recpy_bt_insn_pc, recpy_bt_insn_size,
+	recpy_bt_insn_is_speculative, recpy_bt_insn_data,
+	recpy_bt_insn_decode): This.  Also, use new helper functions.
+	(btpy_list_position, recpy_bt_goto): Use recpy_element_object and
+	recpy_insn_type.
+	(btpy_insn_getset): Remove.
+	(gdbpy_initialize_btrace): Remove code to initialize
+	gdb.BtraceInstruction.  Use recpy_element_object.
+	* python/py-record-btrace.h (recpy_bt_insn_number, recpy_bt_insn_sal,
+	recpy_bt_insn_pc, recpy_bt_insn_data, recpy_bt_insn_decoded,
+	recpy_bt_insn_size, recpy_bt_insn_is_speculative): New export.
+	* python/py-record.c (recpy_insn_type): New static object.
+	(recpy_insn_new, recpy_insn_sal, recpy_insn_pc, recpy_insn_data,
+	recpy_insn_decoded, recpy_insn_size, recpy_insn_is_speculative,
+	recpy_element_number, recpy_element_hash, recpy_element_richcompare):
+	New function.
+	(recpy_insn_getset): New static object.
+	(gdbpy_initialize_record): Initialize gdb.RecordInstruction.
+	* python/py-record.h (recpy_element_object): New typedef.
+	(recpy_insn_type, recpy_insn_new): New export.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* py-record-btrace.c (btpy_insn_new): Removed.
+	(btpy_insn_or_gap_new): New function.
+	(btpy_insn_error): Removed.
+	(btpy_insn_sal, btpy_insn_pc, btpy_insn_size, btpy_insn_is_speculative,
+	btpy_insn_data, btpy_insn_decode): Remove code path for gaps.
+	(recpy_bt_replay_position, recpy_bt_begin, recpy_bt_end): Call
+	btpy_insn_or_gap_new instead of btpy_insn_new.
+	(btpy_insn_getset): Remove btpy_insn_error.
+	* py-record.c (recpy_gap_type): New static object.
+	(recpy_gap_object): New typedef.
+	(recpy_gap_new, recpy_gap_number, recpy_gap_reason_code,
+	recpy_gap_reason_string): New function.
+	(recpy_gap_getset): New static object.
+	(gdbpy_initialize_record): Initialize gdb.RecordGap type.
+	* py-record.h (recpy_gap_new): New export.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python/py-record.c (recpy_ptid): Remove.
+	(recpy_record_getset): Remove recpy_ptid.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (btrace_fetch): Set inferior_ptid.
+	* python/py-record-btrace.c: Add "py-record.h" include.
+	(recpy_bt_format, recpy_bt_replay_position, recpy_bt_begin,
+	recpy_bt_end, recpy_bt_instruction_history,
+	recpy_bt_function_call_history, recpy_bt_goto): Use ptid stored
+	in gdb.Record object instead of current ptid.
+	* python/py-record.c: Include new "py-record.h" file.
+	(recpy_record_object): Moved to py-record.h.
+	* python/py-record.h: New file.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python/py-record-btrace.c (BTPY_REQUIRE_VALID_INSN,
+	BTPY_REQUIRE_VALID_CALL, recpy_bt_function_call_history): Fix
+	indentation.
+
+2017-05-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS: Move Daniel Jacobowitz and Mark Kettenis to
+	the past maintainers section.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* infcmd.c (get_return_value): Use regcache ctor, and remove
+	cleanup.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+	    Pedro Alves  <palves@redhat.com>
+
+	* regcache.c (regcache::regcache): New tag dispatch ctor.
+	(do_cooked_read): Moved above.
+	(regcache_dup): Use the tag dispatch ctor..
+	* regcache.h (regcache): Declare ctor, delete copy ctor and
+	assignment operator, remove friend regcache_dup.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache_dup): Assert !src->m_readonly_p and
+	call method save instead of regcache_cpy.
+	* regcache.h (struct regcache): Make regcache_dup a friend.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (struct regcache): Move to regcache.h
+	(regcache::arch): New method.
+	(regcache_get_ptid): Update.
+	(get_regcache_arch): Call arch method.
+	(get_regcache_aspace): Call method aspace.
+	(register_buffer): Change it to method.
+	(regcache_save): Change it to regcache::save.
+	(regcache_restore): Likewise.
+	(regcache_cpy_no_passthrough): Remove the declaration.
+	(regcache_cpy): Call methods restore and cpy_no_passthrough.
+	(regcache_cpy_no_passthrough): Change it to method
+	cpy_no_passthrough.
+	(regcache_register_status): Change it to method
+	get_register_status.
+	(regcache_invalidate): Change it to method invalidate.
+	(regcache_thread_ptid_changed): Use methods ptid and set_ptid.
+	(regcache_raw_update): Change it to method raw_update.
+	(regcache_raw_read): Likewise.
+	(regcache_raw_read_signed): Likewise.
+	(regcache_raw_read_unsigned): Likewise.
+	(regcache_raw_write_signed): Likewise.
+	(regcache_raw_write_unsigned): Likewise.
+	(regcache_cooked_read): Likewise.
+	(regcache_cooked_read_value): Likewise.
+	(regcache_cooked_read_signed): Likewise.
+	(regcache_cooked_read_unsigned): Likewise.
+	(regcache_cooked_write_signed): Likewise.
+	(regcache_cooked_write_unsigned): Likewise.
+	(regcache_raw_set_cached_value): Likewise.
+	(regcache_raw_write): Likewise.
+	(regcache_cooked_write): Likewise.
+	(regcache_xfer_part): Likewise.
+	(regcache_raw_read_part): Likewise.
+	(regcache_raw_write_part): Likewise.
+	(regcache_cooked_read_part): Likewise.
+	(regcache_cooked_write_part): Likewise.
+	(regcache_raw_supply): Likewise.
+	(regcache_raw_collect): Likewise.
+	(regcache_transfer_regset): Likewise.
+	(regcache_supply_regset): Likewise.
+	(regcache_collect_regset): Likewise.
+	(regcache_debug_print_register): Likewise.
+	(enum regcache_dump_what): Move it to regcache.h.
+	(regcache_dump): Change it to method dump.
+	* regcache.h (enum regcache_dump_what): New.
+	(class regcache): New.
+	* target.c (target_fetch_registers): Call method
+	debug_print_register.
+	(target_store_registers): Likewise.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* windows-nat.c (struct lm_info_windows): Initialize field.
+	(windows_make_so): Allocate lm_info_windows with new.
+	(windows_free_so): Free lm_info_windows with delete.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-darwin.c (struct lm_info_darwin): Initialize field.
+	(darwin_current_sos): Allocate lm_info_darwin with new, remove
+	cleanup.
+	(darwin_free_so): Free lm_info_darwin with delete.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-svr4.h (struct lm_info_svr4): Initialize fields.
+	<l_addr_p>: Change type to bool.
+	* solib-svr4.c (lm_info_read): Allocate lm_info_svr4 with new.
+	(svr4_free_so): Free lm_info_svr4 with delete.
+	(svr4_copy_library_list): Replace memcpy with call to copy
+	constructor.
+	(library_list_start_library, svr4_default_sos): Allocate
+	lm_info_svr4 with new.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-target.c (struct lm_info_target): Add destructor,
+	initialize fields.
+	<name>: Change type to std::string.
+	(library_list_start_library): Allocate lm_info_target with new.
+	(solib_target_free_library_list): Free lm_info_target with
+	delete.
+	(solib_target_current_sos): Adapt to std::string.
+	(solib_target_free_so): Free lm_info_target with delete.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-frv.c (struct lm_info_frv): Add destructor, initialize
+	fields.
+	(frv_current_sos): Allocate lm_info_frv with new.
+	(frv_relocate_main_executable): Free lm_info_frv with delete,
+	allocate with new.
+	(frv_clear_solib, frv_free_so): Free lm_info_frv with delete.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-frv.c (struct lm_info_frv): Fix indentation.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-dsbt.c (struct lm_info_dsbt): Add destructor, initialize
+	map field.
+	(dsbt_current_sos): Allocate lm_info_dsbt with new.
+	(dsbt_relocate_main_executable): Free lm_info_dsbt with delete
+	and allocate with new.
+	(dsbt_clear_solib, dsbt_free_so): Free lm_info_dsbt with delete.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-aix.c (struct lm_info_aix): Initialize fields in-class.
+	<filename, member_name>: Change type to std::string.
+	(solib_aix_new_lm_info, solib_aix_xfree_lm_info): Remove.
+	(library_list_start_library): Allocate lm_info_aix with new.
+	(solib_aix_free_library_list, solib_aix_free_so): Free with delete.
+	(solib_aix_current_sos): Adapt to std::string, copy lm_info_aix
+	with copy constructor.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solist.h (struct lm_info): Remove.
+	(struct lm_info_base): New class.
+	(struct so_list) <lm_info>: Change type to lm_info_base *.
+	* nto-tdep.c (struct lm_info): Remove.
+	(lm_addr): Adjust.
+	* solib-aix.c (struct lm_info): Rename to ...
+	(struct lm_info_aix): ... this.  Extend lm_info_base.
+	(lm_info_p): Rename to ...
+	(lm_info_aix_p): ... this, and adjust.
+	(solib_aix_new_lm_info, solib_aix_xfree_lm_info,
+	solib_aix_parse_libraries, library_list_start_library,
+	solib_aix_free_library_list, solib_aix_parse_libraries,
+	solib_aix_get_library_list,
+	solib_aix_relocate_section_addresses, solib_aix_free_so,
+	solib_aix_get_section_offsets,
+	solib_aix_solib_create_inferior_hook, solib_aix_current_sos):
+	Adjust.
+	(struct solib_aix_inferior_data) <library_list>: Adjust.
+	* solib-darwin.c (struct lm_info): Rename to ...
+	(struct lm_info_darwin): ... this.  Extend lm_info_base.
+	(darwin_current_sos, darwin_relocate_section_addresses): Adjust.
+	* solib-dsbt.c (struct lm_info): Rename to ...
+	(struct lm_info_dsbt): ... this.  Extend lm_info_base.
+	(struct dsbt_info) <main_executable_lm_info): Adjust.
+	(dsbt_current_sos, dsbt_relocate_main_executable, dsbt_free_so,
+	dsbt_relocate_section_addresses): Adjust.
+	* solib-frv.c (struct lm_info): Rename to ...
+	(struct lm_info_frv): ... this.  Extend lm_info_base.
+	(main_executable_lm_info): Adjust.
+	(frv_current_sos, frv_relocate_main_executable, frv_free_so,
+	frv_relocate_section_addresses, frv_fdpic_find_global_pointer,
+	find_canonical_descriptor_in_load_object,
+	frv_fdpic_find_canonical_descriptor): Adjust.
+	* solib-svr4.c (struct lm_info): Move to solib-svr4.h, renamed
+	to lm_info_svr4.
+	(lm_info_read, lm_addr_check, svr4_keep_data_in_core,
+	svr4_clear_so, svr4_copy_library_list,
+	library_list_start_library, svr4_default_sos, svr4_read_so_list,
+	svr4_current_sos, svr4_fetch_objfile_link_map,
+	solist_update_incremental): Adjust.
+	* solib-svr4.h (struct lm_info_svr4): Move here from
+	solib-svr4.c.
+	* solib-target.c (struct lm_info): Rename to ...
+	(struct lm_info_target): ... this.  Extend lm_info_base.
+	(lm_info_p): Rename to ...
+	(lm_info_target_p): ... this.
+	(solib_target_parse_libraries, library_list_start_segment,
+	library_list_start_section, library_list_start_library,
+	library_list_end_library, solib_target_free_library_list,
+	solib_target_current_sos, solib_target_free_so,
+	solib_target_relocate_section_addresses): Adjust.
+	* windows-nat.c (struct lm_info): Rename to ...
+	(struct lm_info_windows): ... this.  Extend lm_info_base.
+	(windows_make_so, handle_load_dll, handle_unload_dll,
+	windows_xfer_shared_libraries): Adjust.
+
+2017-04-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* solib-darwin.c (struct darwin_so_list): Remove.
+	(darwin_current_sos): Allocate an so_list object instead of a
+	darwin_so_list, separately allocate an lm_info object.
+	(darwin_free_so): Free lm_info.
+
+2017-04-28  John Baldwin  <jhb@FreeBSD.org>
+
+	* mips-tdep.c (print_gp_register_row): Replace printf_filtered
+	with fprintf_filtered.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache::regcache): New function.
+	(regcache::~regcache): New function.
+	(regcache_xmalloc_1): Remove.
+	(regcache_xmalloc): Call new regcache.
+	(regcache_xfree): Call delete regcache.
+	(get_thread_arch_aspace_regcache): Call new regcache.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* mips-linux-nat.c (mips_linux_new_thread): Use ptid method
+	lwp instead of ptid_get_lwp.
+
+2017-04-28  Yao Qi  <yao.qi@linaro.org>
+
+	* mips-linux-nat.c (mips_linux_new_thread): Get lwpid from
+	lwp_info instead of getting from inferior_ptid.
+
+2017-04-27  Keith Seitz  <keiths@redhat.com>
+
+	* gdbtypes.c (LVALUE_REFERENCE_TO_RVALUE_BINDING_BADNESS)
+	DIFFERENT_REFERENCE_TYPE_BADNESS): Remove.
+	(CV_CONVERSION_BADNESS): Define.
+	(rank_one_type): Remove overly restrictive rvalue reference
+	rank checks.
+	Add cv-qualifier checks and subranks for type equality.
+	* gdbtypes.h (REFERENCE_CONVERSION_RVALUE,
+	REFERENCE_CONVERSION_CONST_LVALUE, CV_CONVERSION_BADNESS,
+	CV_CONVERSION_CONST, CV_CONVERSION_VOLATILE): Declare.
+
+2017-04-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/py-inferior.c (inferior_to_inferior_object): Increment reference
+	count when creating the object.
+
+2017-04-27  Sangamesh Mallayya  <sangamesh.swamy@in.ibm.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* xcoffread.c (read_xcoff_symtab): Read correct function auxiliary
+	entry if xlc -qfuncsect or gcc -ffunction-sections compiler option
+	is used in AIX.
+	(read_xcoff_symtab): Handle C_WEAKEXT storage class.
+	(process_xcoff_symbol): Likewise.
+	(scan_xcoff_symtab): Likewise.
+
+2017-04-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* ia64-tdep.c (examine_prologue): Use get_frame_register_unsigned.
+	(ia64_sigtramp_frame_prev_register): Use read_memory_unsigned_integer.
+	(ia64_access_reg): Use get_frame_register_unsigned.
+	(ia64_access_rse_reg): Likewise.
+	(ia64_libunwind_frame_prev_register): Likewise.
+
 2017-04-26  Jiong Wang  <jiong.wang@arm.com>
 
 	* gdbarch.sh: New gdbarch method execute_dwarf_cfa_vendor_op.

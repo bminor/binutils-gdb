@@ -85,6 +85,9 @@ if { [is_elf_format] } then {
     if {[istarget "arm*-*-*"]} {
 	set target_machine -arm
     }
+    if {[istarget "arc*-*-*"]} {
+	set target_machine -arc
+    }
 
     # The MN10300 and Xtensa ports disable the assembler's call frame
     # optimization because it interfers with link-time relaxation of

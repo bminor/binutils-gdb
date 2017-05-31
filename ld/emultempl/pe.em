@@ -379,7 +379,7 @@ typedef struct
    underscore.  */
 #define GET_INIT_SYMBOL_NAME(IDX) \
   (init[(IDX)].symbol \
-  + ((init[(IDX)].is_c_symbol == FALSE || (is_underscoring () != 0)) ? 0 : 1))
+   + ((!init[(IDX)].is_c_symbol || is_underscoring () != 0) ? 0 : 1))
 
 /* Decorates the C visible symbol by underscore, if target requires.  */
 #define U(CSTR) \

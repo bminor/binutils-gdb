@@ -228,7 +228,7 @@ b246 stura RRE_RR "store using real address" g5 esa,zarch
 2f swr RR_FF "subtract unnormalized (long)" g5 esa,zarch
 37 sxr RR_FEFE "subtract normalized (ext.)" g5 esa,zarch
 b24c tar RRE_AR "test access" g5 esa,zarch
-b22c tb RRE_0R "test block" g5 esa,zarch
+b22c tb RRE_RR "test block" g5 esa,zarch
 91 tm SI_URD "test under mask" g5 esa,zarch
 b236 tpi S_RD "test pending interruption" g5 esa,zarch
 e501 tprot SSE_RDRD "test protection" g5 esa,zarch
@@ -817,8 +817,8 @@ b3f2 cdutr RRE_FR "convert from unsigned bcd to long dfp" z9-ec zarch
 b3fa cxutr RRE_FER "convert from unsigned bcd to extended dfp" z9-ec zarch
 b3e1 cgdtr RRF_U0RF "convert from long dfp to fixed" z9-ec zarch
 b3e9 cgxtr RRF_U0RFE "convert from extended dfp to fixed" z9-ec zarch
-b3e3 csdtr RRE_RF "convert from long dfp to signed bcd" z9-ec zarch
-b3eb csxtr RRE_RFE "convert from extended dfp to signed bcd" z9-ec zarch
+b3e3 csdtr RRF_0URF "convert from long dfp to signed bcd" z9-ec zarch
+b3eb csxtr RRF_0UREFE "convert from extended dfp to signed bcd" z9-ec zarch
 b3e2 cudtr RRE_RF "convert from long dfp to unsigned bcd" z9-ec zarch
 b3ea cuxtr RRE_RFE "convert from extended dfp to unsigned bcd" z9-ec zarch
 b3d1 ddtr RRR_F0FF "divide long dfp" z9-ec zarch
@@ -976,7 +976,6 @@ b286 qsi S_RD "query sampling information" z10 zarch
 b2e0 scctr RRE_RR "set cpu counter" z10 zarch
 b2e1 spctr RRE_RR "set peripheral counter" z10 zarch
 b280 lpp S_RD "load program parameter" z10 zarch
-b928 pckmo RRE_00 "perform cryptographic key management operation" z10 zarch
 
 # The new instructions of the IBM zEnterprise z196
 b9c8 ahhhr RRF_R0RR2 "add high high" z196 zarch
@@ -1116,6 +1115,8 @@ b92a kmf RRE_RR "cipher message with CFB" z196 zarch
 b92b kmo RRE_RR "cipher message with OFB" z196 zarch
 b92c pcc RRE_00 "perform cryptographic computation" z196 zarch
 b92d kmctr RRF_R0RR "cipher message with counter" z196 zarch
+b928 pckmo RRE_00 "perform cryptographic key management operation" z196 zarch
+b221 ipte RRF_R0RR2 "invalidate page table entry" z196 zarch optparm
 
 # The new instructions of the IBM zEnterprise EC12
 b2ec etnd RRE_R0 "extract transaction nesting depth" zEC12 zarch htm
@@ -1143,6 +1144,8 @@ ed00000000aa cdzt RSL_LRDFU "convert from zoned long" zEC12 zarch
 ed00000000ab cxzt RSL_LRDFEU "convert from zoned extended" zEC12 zarch
 ed00000000a8 czdt RSL_LRDFU "convert to zoned long" zEC12 zarch
 ed00000000a9 czxt RSL_LRDFEU "convert to zoned extended" zEC12 zarch
+b98e idte RRF_RURR2 "invalidate dat table entry" zEC12 zarch optparm
+b221 ipte RRF_RURR "invalidate page table entry" zEC12 zarch optparm2
 
 # The new instructions of IBM z13
 

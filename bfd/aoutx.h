@@ -738,6 +738,7 @@ NAME (aout, machine_type) (enum bfd_architecture arch,
           || machine == bfd_mach_sparc_v8pluse
           || machine == bfd_mach_sparc_v8plusv
           || machine == bfd_mach_sparc_v8plusm
+          || machine == bfd_mach_sparc_v8plusm8
 	  || machine == bfd_mach_sparc_v9
 	  || machine == bfd_mach_sparc_v9a
 	  || machine == bfd_mach_sparc_v9b
@@ -745,7 +746,8 @@ NAME (aout, machine_type) (enum bfd_architecture arch,
           || machine == bfd_mach_sparc_v9d
           || machine == bfd_mach_sparc_v9e
           || machine == bfd_mach_sparc_v9v
-	  || machine == bfd_mach_sparc_v9m)
+	  || machine == bfd_mach_sparc_v9m
+          || machine == bfd_mach_sparc_v9m8)
 	arch_flags = M_SPARC;
       else if (machine == bfd_mach_sparc_sparclet)
 	arch_flags = M_SPARCLET;

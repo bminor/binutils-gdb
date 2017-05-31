@@ -97,7 +97,7 @@ extern void pru_cons_fix_new (struct frag *frag, int where,
    linkrelax is turned on.  */
 #define TC_FORCE_RELOCATION(fix)	pru_force_relocation (fix)
 #define TC_FORCE_RELOCATION_SUB_SAME(fix, seg) \
-  (! SEG_NORMAL (seg) || pru_force_relocation (fix))
+  (GENERIC_FORCE_RELOCATION_SUB_SAME (fix, seg) || pru_force_relocation (fix))
 extern int pru_force_relocation (struct fix *);
 
 /* Do not use PC relative fixups and relocations for

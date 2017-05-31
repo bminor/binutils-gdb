@@ -669,6 +669,13 @@ static const struct frame_base sparc64_frame_base =
 static int
 sparc64_16_byte_align_p (struct type *type)
 {
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+    {
+      struct type *t = check_typedef (TYPE_TARGET_TYPE (type));
+
+      if (sparc64_floating_p (t))
+        return 1;
+    }
   if (sparc64_floating_p (type) && TYPE_LENGTH (type) == 16)
     return 1;
 
@@ -703,7 +710,23 @@ sparc64_store_floating_fields (struct regcache *regcache, struct type *type,
 
   gdb_assert (element < 16);
 
-  if (sparc64_floating_p (type)
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+    {
+      gdb_byte buf[8];
+      int regnum = SPARC_F0_REGNUM + element * 2 + bitpos / 32;
+
+      valbuf += bitpos / 8;
+      if (len < 8)
+        {
+          memset (buf, 0, 8 - len);
+          memcpy (buf + 8 - len, valbuf, len);
+          valbuf = buf;
+          len = 8;
+        }
+      for (int n = 0; n < (len + 3) / 4; n++)
+        regcache_cooked_write (regcache, regnum + n, valbuf + n * 4);
+    }
+  else if (sparc64_floating_p (type)
       || (sparc64_complex_floating_p (type) && len <= 16))
     {
       int regnum;
@@ -776,7 +799,23 @@ sparc64_extract_floating_fields (struct regcache *regcache, struct type *type,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
-  if (sparc64_floating_p (type))
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+    {
+      int len = TYPE_LENGTH (type);
+      int regnum =  SPARC_F0_REGNUM + bitpos / 32;
+
+      valbuf += bitpos / 8;
+      if (len < 4)
+        {
+          gdb_byte buf[4];
+          regcache_cooked_read (regcache, regnum, buf);
+          memcpy (valbuf, buf + 4 - len, len);
+        }
+      else
+        for (int i = 0; i < (len + 3) / 4; i++)
+          regcache_cooked_read (regcache, regnum + i, valbuf + i * 4);
+    }
+  else if (sparc64_floating_p (type))
     {
       int len = TYPE_LENGTH (type);
       int regnum;

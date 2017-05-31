@@ -329,11 +329,11 @@ bfin_bfd_reloc (bfd *abfd,
   /* Here the variable relocation holds the final address of the
      symbol we are relocating against, plus any addend.  */
 
-  if (howto->pc_relative == TRUE)
+  if (howto->pc_relative)
     {
       relocation -= input_section->output_section->vma + input_section->output_offset;
 
-      if (howto->pcrel_offset == TRUE)
+      if (howto->pcrel_offset)
         relocation -= reloc_entry->address;
     }
 
@@ -1191,7 +1191,7 @@ bfin_check_relocs (bfd * abfd,
 
 	  /* PR15323, ref flags aren't set for references in the same
 	     object.  */
-	  h->root.non_ir_ref = 1;
+	  h->root.non_ir_ref_regular = 1;
 	}
 
       switch (ELF32_R_TYPE (rel->r_info))

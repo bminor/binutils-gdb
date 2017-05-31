@@ -24,7 +24,7 @@ IREL_IN_PLT=
 # Reuse TINY_READONLY_SECTION which is placed right after .plt section.
 TINY_READONLY_SECTION="
 .plt.got      ${RELOCATING-0} : { *(.plt.got) }
-.plt.bnd      ${RELOCATING-0} : { *(.plt.bnd) }
+.plt.sec      ${RELOCATING-0} : { *(.plt.sec) }
 "
 
 if [ "x${host}" = "x${target}" ]; then

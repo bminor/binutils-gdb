@@ -10506,10 +10506,16 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 			  + input_section->output_offset
 			  + rel->r_offset);
 
-	value = relocation;
+	/* PR 21523: Use an absolute value.  The user of this reloc will
+	   have already selected an ADD or SUB insn appropriately.  */
+	value = abs (relocation);
 
 	if (value >= 0x1000)
 	  return bfd_reloc_overflow;
+
+	/* Destination is Thumb.  Force bit 0 to 1 to reflect this.  */
+	if (branch_type == ST_BRANCH_TO_THUMB)
+	  value |= 1;
 
 	insn = (insn & 0xfb0f8f00) | (value & 0xff)
 	     | ((value & 0x700) << 4)
@@ -14552,7 +14558,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	      /* PR15323, ref flags aren't set for references in the
 		 same object.  */
-	      h->root.non_ir_ref = 1;
+	      h->root.non_ir_ref_regular = 1;
 	    }
 	}
 
@@ -17498,6 +17504,10 @@ elf32_arm_filter_implib_symbols (bfd *abfd ATTRIBUTE_UNUSED,
 {
   struct elf32_arm_link_hash_table *globals = elf32_arm_hash_table (info);
 
+  /* Requirement 8 of "ARM v8-M Security Extensions: Requirements on
+     Development Tools" (ARM-ECM-0359818) mandates Secure Gateway import
+     library to be a relocatable object file.  */
+  BFD_ASSERT (!(bfd_get_file_flags (info->out_implib_bfd) & EXEC_P));
   if (globals->cmse_implib)
     return elf32_arm_filter_cmse_symbols (abfd, info, syms, symcount);
   else

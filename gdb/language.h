@@ -362,6 +362,12 @@ struct language_defn
     void (*la_get_string) (struct value *value, gdb_byte **buffer, int *length,
 			   struct type **chartype, const char **charset);
 
+    /* Return an expression that can be used for a location
+       watchpoint.  TYPE is a pointer type that points to the memory
+       to watch, and ADDR is the address of the watched memory.  */
+    gdb::unique_xmalloc_ptr<char> (*la_watch_location_expression)
+         (struct type *type, CORE_ADDR addr);
+
     /* Return a pointer to the function that should be used to match
        a symbol name against LOOKUP_NAME. This is mostly for languages
        such as Ada where the matching algorithm depends on LOOKUP_NAME.

@@ -3110,13 +3110,6 @@ currently active.  All record objects become invalid after this call.
 
 A @code{gdb.Record} object has the following attributes:
 
-@defvar Record.ptid
-ID of the thread associated with this object as a tuple of three integers.  The
-first is the Process ID (PID); the second is the Lightweight Process ID (LWPID),
-and the third is the Thread ID (TID). Either the LWPID or TID may be 0, which
-indicates that the operating system does not use that identifier.
-@end defvar
-
 @defvar Record.method
 A string with the current recording method, e.g.@: @code{full} or
 @code{btrace}.
@@ -3156,96 +3149,99 @@ A @code{gdb.Record} object has the following methods:
 Move the replay position to the given @var{instruction}.
 @end defun
 
-The attributes and methods of instruction objects depend on the current
-recording method.  Currently, only btrace instructions are supported.
+The common @code{gdb.Instruction} class that recording method specific
+instruction objects inherit from, has the following attributes:
 
-A @code{gdb.BtraceInstruction} object has the following attributes:
+@defvar Instruction.pc
+An integer representing this instruction's address.
+@end defvar
 
-@defvar BtraceInstruction.number
-An integer identifying this instruction.  @var{number} corresponds to
+@defvar Instruction.data
+A buffer with the raw instruction data.  In Python 3, the return value is a
+@code{memoryview} object.
+@end defvar
+
+@defvar Instruction.decoded
+A human readable string with the disassembled instruction.
+@end defvar
+
+@defvar Instruction.size
+The size of the instruction in bytes.
+@end defvar
+
+Additionally @code{gdb.RecordInstruction} has the following attributes:
+
+@defvar RecordInstruction.number
+An integer identifying this instruction.  @code{number} corresponds to
 the numbers seen in @code{record instruction-history}
 (@pxref{Process Record and Replay}).
 @end defvar
 
-@defvar BtraceInstruction.error
-An integer identifying the error code for gaps in the history.
-@code{None} for regular instructions.
-@end defvar
-
-@defvar BtraceInstruction.sal
+@defvar RecordInstruction.sal
 A @code{gdb.Symtab_and_line} object representing the associated symtab
-and line of this instruction.  May be @code{None} if the instruction
-is a gap.
+and line of this instruction.  May be @code{None} if no debug information is
+available.
 @end defvar
 
-@defvar BtraceInstruction.pc
-An integer representing this instruction's address.  May be @code{None}
-if the instruction is a gap or the debug symbols could not be read.
+@defvar RecordInstruction.is_speculative
+A boolean indicating whether the instruction was executed speculatively.
 @end defvar
 
-@defvar BtraceInstruction.data
-A buffer with the raw instruction data.  May be @code{None} if the
-instruction is a gap.  In Python 3, the return value is a @code{memoryview}
-object.
+If an error occured during recording or decoding a recording, this error is
+represented by a @code{gdb.RecordGap} object in the instruction list.  It has
+the following attributes:
+
+@defvar RecordGap.number
+An integer identifying this gap.  @code{number} corresponds to the numbers seen
+in @code{record instruction-history} (@pxref{Process Record and Replay}).
 @end defvar
 
-@defvar BtraceInstruction.decoded
-A human readable string with the disassembled instruction.  Contains the
-error message for gaps.
+@defvar RecordGap.error_code
+A numerical representation of the reason for the gap.  The value is specific to
+the current recording method.
 @end defvar
 
-@defvar BtraceInstruction.size
-The size of the instruction in bytes.  Will be @code{None} if the
-instruction is a gap.
+@defvar RecordGap.error_string
+A human readable string with the reason for the gap.
 @end defvar
 
-@defvar BtraceInstruction.is_speculative
-A boolean indicating whether the instruction was executed
-speculatively.  Will be @code{None} for gaps.
-@end defvar
+A @code{gdb.RecordFunctionSegment} object has the following attributes:
 
-The attributes and methods of function call objects depend on the
-current recording format.  Currently, only btrace function calls are
-supported.
-
-A @code{gdb.BtraceFunctionCall} object has the following attributes:
-
-@defvar BtraceFunctionCall.number
-An integer identifying this function call.  @var{number} corresponds to
+@defvar RecordFunctionSegment.number
+An integer identifying this function segment.  @code{number} corresponds to
 the numbers seen in @code{record function-call-history}
 (@pxref{Process Record and Replay}).
 @end defvar
 
-@defvar BtraceFunctionCall.symbol
+@defvar RecordFunctionSegment.symbol
 A @code{gdb.Symbol} object representing the associated symbol.  May be
-@code{None} if the function call is a gap or the debug symbols could
-not be read.
+@code{None} if no debug information is available.
 @end defvar
 
-@defvar BtraceFunctionCall.level
+@defvar RecordFunctionSegment.level
 An integer representing the function call's stack level.  May be
 @code{None} if the function call is a gap.
 @end defvar
 
-@defvar BtraceFunctionCall.instructions
-A list of @code{gdb.BtraceInstruction} objects associated with this function
-call.
+@defvar RecordFunctionSegment.instructions
+A list of @code{gdb.RecordInstruction} or @code{gdb.RecordGap} objects
+associated with this function call.
 @end defvar
 
-@defvar BtraceFunctionCall.up
-A @code{gdb.BtraceFunctionCall} object representing the caller's
+@defvar RecordFunctionSegment.up
+A @code{gdb.RecordFunctionSegment} object representing the caller's
 function segment.  If the call has not been recorded, this will be the
 function segment to which control returns.  If neither the call nor the
 return have been recorded, this will be @code{None}.
 @end defvar
 
-@defvar BtraceFunctionCall.prev_sibling
-A @code{gdb.BtraceFunctionCall} object representing the previous
+@defvar RecordFunctionSegment.prev
+A @code{gdb.RecordFunctionSegment} object representing the previous
 segment of this function call.  May be @code{None}.
 @end defvar
 
-@defvar BtraceFunctionCall.next_sibling
-A @code{gdb.BtraceFunctionCall} object representing the next segment of
+@defvar RecordFunctionSegment.next
+A @code{gdb.RecordFunctionSegment} object representing the next segment of
 this function call.  May be @code{None}.
 @end defvar
 

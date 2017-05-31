@@ -2437,7 +2437,7 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     if (gdbarch_tdep (arches->gdbarch)->me_module == me_module)
       return arches->gdbarch;
 
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Get a CGEN CPU descriptor for this architecture.  */

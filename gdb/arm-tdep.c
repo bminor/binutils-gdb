@@ -6295,15 +6295,11 @@ arm_get_next_pcs_is_thumb (struct arm_get_next_pcs *self)
    single-step support.  We find the target of the coming instructions
    and breakpoint them.  */
 
-VEC (CORE_ADDR) *
+std::vector<CORE_ADDR>
 arm_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct arm_get_next_pcs next_pcs_ctx;
-  CORE_ADDR pc;
-  int i;
-  VEC (CORE_ADDR) *next_pcs = NULL;
-  struct cleanup *old_chain = make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
 
   arm_get_next_pcs_ctor (&next_pcs_ctx,
 			 &arm_get_next_pcs_ops,
@@ -6312,15 +6308,10 @@ arm_software_single_step (struct regcache *regcache)
 			 0,
 			 regcache);
 
-  next_pcs = arm_get_next_pcs (&next_pcs_ctx);
+  std::vector<CORE_ADDR> next_pcs = arm_get_next_pcs (&next_pcs_ctx);
 
-  for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
-    {
-      pc = gdbarch_addr_bits_remove (gdbarch, pc);
-      VEC_replace (CORE_ADDR, next_pcs, i, pc);
-    }
-
-  discard_cleanups (old_chain);
+  for (CORE_ADDR &pc_ref : next_pcs)
+    pc_ref = gdbarch_addr_bits_remove (gdbarch, pc_ref);
 
   return next_pcs;
 }
@@ -7898,11 +7889,6 @@ arm_breakpoint_kind_from_current_state (struct gdbarch *gdbarch,
   if (target_read_memory (regcache_read_pc (regcache), buf, 4) == 0)
     {
       struct arm_get_next_pcs next_pcs_ctx;
-      CORE_ADDR pc;
-      int i;
-      VEC (CORE_ADDR) *next_pcs = NULL;
-      struct cleanup *old_chain
-	= make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
 
       arm_get_next_pcs_ctor (&next_pcs_ctx,
 			     &arm_get_next_pcs_ops,
@@ -7911,17 +7897,15 @@ arm_breakpoint_kind_from_current_state (struct gdbarch *gdbarch,
 			     0,
 			     regcache);
 
-      next_pcs = arm_get_next_pcs (&next_pcs_ctx);
+      std::vector<CORE_ADDR> next_pcs = arm_get_next_pcs (&next_pcs_ctx);
 
       /* If MEMADDR is the next instruction of current pc, do the
 	 software single step computation, and get the thumb mode by
 	 the destination address.  */
-      for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
+      for (CORE_ADDR pc : next_pcs)
 	{
 	  if (UNMAKE_THUMB_ADDR (pc) == *pcptr)
 	    {
-	      do_cleanups (old_chain);
-
 	      if (IS_THUMB_ADDR (pc))
 		{
 		  *pcptr = MAKE_THUMB_ADDR (*pcptr);
@@ -7931,8 +7915,6 @@ arm_breakpoint_kind_from_current_state (struct gdbarch *gdbarch,
 		return ARM_BP_KIND_ARM;
 	    }
 	}
-
-      do_cleanups (old_chain);
     }
 
   return arm_breakpoint_kind_from_pc (gdbarch, pcptr);

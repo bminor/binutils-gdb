@@ -51,6 +51,7 @@ const struct rank EXACT_MATCH_BADNESS = {0,0};
 const struct rank INTEGER_PROMOTION_BADNESS = {1,0};
 const struct rank FLOAT_PROMOTION_BADNESS = {1,0};
 const struct rank BASE_PTR_CONVERSION_BADNESS = {1,0};
+const struct rank CV_CONVERSION_BADNESS = {1, 0};
 const struct rank INTEGER_CONVERSION_BADNESS = {2,0};
 const struct rank FLOAT_CONVERSION_BADNESS = {2,0};
 const struct rank INT_FLOAT_CONVERSION_BADNESS = {2,0};
@@ -58,8 +59,6 @@ const struct rank VOID_PTR_CONVERSION_BADNESS = {2,0};
 const struct rank BOOL_CONVERSION_BADNESS = {3,0};
 const struct rank BASE_CONVERSION_BADNESS = {2,0};
 const struct rank REFERENCE_CONVERSION_BADNESS = {2,0};
-const struct rank LVALUE_REFERENCE_TO_RVALUE_BINDING_BADNESS = {5,0};
-const struct rank DIFFERENT_REFERENCE_TYPE_BADNESS = {6,0};
 const struct rank NULL_POINTER_CONVERSION_BADNESS = {2,0};
 const struct rank NS_POINTER_CONVERSION_BADNESS = {10,0};
 const struct rank NS_INTEGER_POINTER_CONVERSION_BADNESS = {3,0};
@@ -3592,57 +3591,51 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
   if (TYPE_CODE (arg) == TYPE_CODE_TYPEDEF)
     arg = check_typedef (arg);
 
-  if (value != NULL)
+  if (TYPE_IS_REFERENCE (parm) && value != NULL)
     {
-      /* An rvalue argument cannot be bound to a non-const lvalue
-         reference parameter...  */
-      if (VALUE_LVAL (value) == not_lval
-          && TYPE_CODE (parm) == TYPE_CODE_REF
-          && !TYPE_CONST (parm->main_type->target_type))
-        return INCOMPATIBLE_TYPE_BADNESS;
-
-      /* ... and an lvalue argument cannot be bound to an rvalue
-         reference parameter.  [C++ 13.3.3.1.4p3]  */
-      if (VALUE_LVAL (value) != not_lval
-          && TYPE_CODE (parm) == TYPE_CODE_RVALUE_REF)
-        return INCOMPATIBLE_TYPE_BADNESS;
+      if (VALUE_LVAL (value) == not_lval)
+	{
+	  /* Rvalues should preferably bind to rvalue references or const
+	     lvalue references.  */
+	  if (TYPE_CODE (parm) == TYPE_CODE_RVALUE_REF)
+	    rank.subrank = REFERENCE_CONVERSION_RVALUE;
+	  else if (TYPE_CONST (TYPE_TARGET_TYPE (parm)))
+	    rank.subrank = REFERENCE_CONVERSION_CONST_LVALUE;
+	  else
+	    return INCOMPATIBLE_TYPE_BADNESS;
+	  return sum_ranks (rank, REFERENCE_CONVERSION_BADNESS);
+	}
+      else
+	{
+	  /* Lvalues should prefer lvalue overloads.  */
+	  if (TYPE_CODE (parm) == TYPE_CODE_RVALUE_REF)
+	    {
+	      rank.subrank = REFERENCE_CONVERSION_RVALUE;
+	      return sum_ranks (rank, REFERENCE_CONVERSION_BADNESS);
+	    }
+	}
     }
 
   if (types_equal (parm, arg))
-    return EXACT_MATCH_BADNESS;
-
-  /* An lvalue reference to a function should get higher priority than an
-     rvalue reference to a function.  */
-
-  if (value != NULL && TYPE_CODE (arg) == TYPE_CODE_RVALUE_REF
-      && TYPE_CODE (TYPE_TARGET_TYPE (arg)) == TYPE_CODE_FUNC)
     {
-      return (sum_ranks (rank_one_type (parm,
-              lookup_pointer_type (TYPE_TARGET_TYPE (arg)), NULL),
-              DIFFERENT_REFERENCE_TYPE_BADNESS));
-    }
+      struct type *t1 = parm;
+      struct type *t2 = arg;
 
-  /* If a conversion to one type of reference is an identity conversion, and a
-     conversion to the second type of reference is a non-identity conversion,
-     choose the first type.  */
+      /* For pointers and references, compare target type.  */
+      if (TYPE_CODE (parm) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (parm))
+	{
+	  t1 = TYPE_TARGET_TYPE (parm);
+	  t2 = TYPE_TARGET_TYPE (arg);
+	}
 
-  if (value != NULL && TYPE_IS_REFERENCE (parm) && TYPE_IS_REFERENCE (arg)
-     && TYPE_CODE (parm) != TYPE_CODE (arg))
-    {
-      return (sum_ranks (rank_one_type (TYPE_TARGET_TYPE (parm),
-              TYPE_TARGET_TYPE (arg), NULL), DIFFERENT_REFERENCE_TYPE_BADNESS));
-    }
-
-  /* An rvalue should be first tried to bind to an rvalue reference, and then to
-     an lvalue reference.  */
-
-  if (value != NULL && TYPE_CODE (parm) == TYPE_CODE_REF
-      && VALUE_LVAL (value) == not_lval)
-    {
-      if (TYPE_IS_REFERENCE (arg))
-	arg = TYPE_TARGET_TYPE (arg);
-      return (sum_ranks (rank_one_type (TYPE_TARGET_TYPE (parm), arg, NULL),
-			 LVALUE_REFERENCE_TO_RVALUE_BINDING_BADNESS));
+      /* Make sure they are CV equal, too.  */
+      if (TYPE_CONST (t1) != TYPE_CONST (t2))
+	rank.subrank |= CV_CONVERSION_CONST;
+      if (TYPE_VOLATILE (t1) != TYPE_VOLATILE (t2))
+	rank.subrank |= CV_CONVERSION_VOLATILE;
+      if (rank.subrank != 0)
+	return sum_ranks (CV_CONVERSION_BADNESS, rank);
+      return EXACT_MATCH_BADNESS;
     }
 
   /* See through references, since we can almost make non-references
@@ -3684,10 +3677,23 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 
 	  return INCOMPATIBLE_TYPE_BADNESS;
 	case TYPE_CODE_ARRAY:
-	  if (types_equal (TYPE_TARGET_TYPE (parm),
-	                   TYPE_TARGET_TYPE (arg)))
-	    return EXACT_MATCH_BADNESS;
-	  return INCOMPATIBLE_TYPE_BADNESS;
+	  {
+	    struct type *t1 = TYPE_TARGET_TYPE (parm);
+	    struct type *t2 = TYPE_TARGET_TYPE (arg);
+
+	    if (types_equal (t1, t2))
+	      {
+		/* Make sure they are CV equal.  */
+		if (TYPE_CONST (t1) != TYPE_CONST (t2))
+		  rank.subrank |= CV_CONVERSION_CONST;
+		if (TYPE_VOLATILE (t1) != TYPE_VOLATILE (t2))
+		  rank.subrank |= CV_CONVERSION_VOLATILE;
+		if (rank.subrank != 0)
+		  return sum_ranks (CV_CONVERSION_BADNESS, rank);
+		return EXACT_MATCH_BADNESS;
+	      }
+	    return INCOMPATIBLE_TYPE_BADNESS;
+	  }
 	case TYPE_CODE_FUNC:
 	  return rank_one_type (TYPE_TARGET_TYPE (parm), arg, NULL);
 	case TYPE_CODE_INT:

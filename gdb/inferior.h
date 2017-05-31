@@ -540,7 +540,28 @@ extern int number_of_live_inferiors (void);
    (not cores, not executables, real live processes).  */
 extern int have_live_inferiors (void);
 
-extern struct cleanup *save_current_inferior (void);
+/* Save/restore the current inferior.  */
+
+class scoped_restore_current_inferior
+{
+public:
+  scoped_restore_current_inferior ()
+    : m_saved_inf (current_inferior ())
+  {}
+
+  ~scoped_restore_current_inferior ()
+  { set_current_inferior (m_saved_inf); }
+
+  /* Disable copy.  */
+  scoped_restore_current_inferior
+    (const scoped_restore_current_inferior &) = delete;
+  void operator=
+    (const scoped_restore_current_inferior &) = delete;
+
+private:
+  inferior *m_saved_inf;
+};
+
 
 /* Traverse all inferiors.  */
 

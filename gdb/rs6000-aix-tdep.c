@@ -253,7 +253,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	     Always store the floating point value using the register's
 	     floating-point format.  */
 	  const int fp_regnum = tdep->ppc_fp0_regnum + 1 + f_argno;
-	  gdb_byte reg_val[MAX_REGISTER_SIZE];
+	  gdb_byte reg_val[PPC_MAX_REGISTER_SIZE];
 	  struct type *reg_type = register_type (gdbarch, fp_regnum);
 
 	  gdb_assert (len <= 8);
@@ -270,7 +270,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  /* Argument takes more than one register.  */
 	  while (argbytes < len)
 	    {
-	      gdb_byte word[MAX_REGISTER_SIZE];
+	      gdb_byte word[PPC_MAX_REGISTER_SIZE];
 	      memset (word, 0, reg_size);
 	      memcpy (word,
 		      ((char *) value_contents (arg)) + argbytes,
@@ -290,7 +290,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       else
 	{
 	  /* Argument can fit in one register.  No problem.  */
-	  gdb_byte word[MAX_REGISTER_SIZE];
+	  gdb_byte word[PPC_MAX_REGISTER_SIZE];
 
 	  memset (word, 0, reg_size);
 	  memcpy (word, value_contents (arg), len);
@@ -673,7 +673,7 @@ branch_dest (struct regcache *regcache, int opcode, int instr,
 
 /* AIX does not support PT_STEP.  Simulate it.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 rs6000_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -682,14 +682,13 @@ rs6000_software_single_step (struct regcache *regcache)
   CORE_ADDR loc;
   CORE_ADDR breaks[2];
   int opcode;
-  VEC (CORE_ADDR) *next_pcs;
 
   loc = regcache_read_pc (regcache);
 
   insn = read_memory_integer (loc, 4, byte_order);
 
-  next_pcs = ppc_deal_with_atomic_sequence (regcache);
-  if (next_pcs != NULL)
+  std::vector<CORE_ADDR> next_pcs = ppc_deal_with_atomic_sequence (regcache);
+  if (!next_pcs.empty ())
     return next_pcs;
   
   breaks[0] = loc + PPC_INSN_SIZE;
@@ -705,7 +704,8 @@ rs6000_software_single_step (struct regcache *regcache)
       /* ignore invalid breakpoint.  */
       if (breaks[ii] == -1)
 	continue;
-      VEC_safe_push (CORE_ADDR, next_pcs, breaks[ii]);
+
+      next_pcs.push_back (breaks[ii]);
     }
 
   errno = 0;			/* FIXME, don't ignore errors!  */

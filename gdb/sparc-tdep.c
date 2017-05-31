@@ -298,6 +298,43 @@ sparc_structure_or_union_p (const struct type *type)
   return 0;
 }
 
+/* Check whether TYPE is returned on registers.  */
+
+static bool
+sparc_structure_return_p (const struct type *type)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_LENGTH (type) <= 8)
+    {
+      struct type *t = check_typedef (TYPE_TARGET_TYPE (type));
+
+      if (sparc_floating_p (t) && TYPE_LENGTH (t) == 8)
+        return true;
+      return false;
+    }
+  if (sparc_floating_p (type) && TYPE_LENGTH (type) == 16)
+    return true;
+  return sparc_structure_or_union_p (type);
+}
+
+/* Check whether TYPE is passed on registers.  */
+
+static bool
+sparc_arg_on_registers_p (const struct type *type)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_LENGTH (type) <= 8)
+    {
+      struct type *t = check_typedef (TYPE_TARGET_TYPE (type));
+
+      if (sparc_floating_p (t) && TYPE_LENGTH (t) == 8)
+        return false;
+      return true;
+    }
+  if (sparc_structure_or_union_p (type) || sparc_complex_floating_p (type)
+      || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
+    return false;
+  return true;
+}
+
 /* Register information.  */
 #define SPARC32_FPU_REGISTERS                             \
   "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",         \
@@ -570,9 +607,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
       struct type *type = value_type (args[i]);
       int len = TYPE_LENGTH (type);
 
-      if (sparc_structure_or_union_p (type)
-	  || (sparc_floating_p (type) && len == 16)
-	  || sparc_complex_floating_p (type))
+      if (!sparc_arg_on_registers_p (type))
 	{
 	  /* Structure, Union and Quad-Precision Arguments.  */
 	  sp -= len;
@@ -594,11 +629,8 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
       else
 	{
 	  /* Integral and pointer arguments.  */
-	  gdb_assert (sparc_integral_or_pointer_p (type));
-
-	  if (len < 4)
-	    args[i] = value_cast (builtin_type (gdbarch)->builtin_int32,
-				  args[i]);
+	  gdb_assert (sparc_integral_or_pointer_p (type)
+	              || (TYPE_CODE (type) == TYPE_CODE_ARRAY && len <= 8));
 	  num_elements += ((len + 3) / 4);
 	}
     }
@@ -620,6 +652,15 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
       const bfd_byte *valbuf = value_contents (args[i]);
       struct type *type = value_type (args[i]);
       int len = TYPE_LENGTH (type);
+      gdb_byte buf[4];
+
+      if (len < 4)
+        {
+          memset (buf, 0, 4 - len);
+          memcpy (buf + 4 - len, valbuf, len);
+          valbuf = buf;
+          len = 4;
+        }
 
       gdb_assert (len == 4 || len == 8);
 
@@ -1345,10 +1386,10 @@ sparc32_extract_return_value (struct type *type, struct regcache *regcache,
   int len = TYPE_LENGTH (type);
   gdb_byte buf[32];
 
-  gdb_assert (!sparc_structure_or_union_p (type));
-  gdb_assert (!(sparc_floating_p (type) && len == 16));
+  gdb_assert (!sparc_structure_return_p (type));
 
-  if (sparc_floating_p (type) || sparc_complex_floating_p (type))
+  if (sparc_floating_p (type) || sparc_complex_floating_p (type)
+      || TYPE_CODE (type) == TYPE_CODE_ARRAY)
     {
       /* Floating return values.  */
       regcache_cooked_read (regcache, SPARC_F0_REGNUM, buf);
@@ -1397,11 +1438,9 @@ sparc32_store_return_value (struct type *type, struct regcache *regcache,
 			    const gdb_byte *valbuf)
 {
   int len = TYPE_LENGTH (type);
-  gdb_byte buf[8];
+  gdb_byte buf[32];
 
-  gdb_assert (!sparc_structure_or_union_p (type));
-  gdb_assert (!(sparc_floating_p (type) && len == 16));
-  gdb_assert (len <= 8);
+  gdb_assert (!sparc_structure_return_p (type));
 
   if (sparc_floating_p (type) || sparc_complex_floating_p (type))
     {
@@ -1457,8 +1496,7 @@ sparc32_return_value (struct gdbarch *gdbarch, struct value *function,
      guarantees that we can always find the return value, not just
      before the function returns.  */
 
-  if (sparc_structure_or_union_p (type)
-      || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
+  if (sparc_structure_return_p (type))
     {
       ULONGEST sp;
       CORE_ADDR addr;
@@ -1672,7 +1710,7 @@ sparc_step_trap (struct frame_info *frame, unsigned long insn)
   return 0;
 }
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 sparc_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *arch = get_regcache_arch (regcache);
@@ -1680,7 +1718,7 @@ sparc_software_single_step (struct regcache *regcache)
   CORE_ADDR npc, nnpc;
 
   CORE_ADDR pc, orig_npc;
-  VEC (CORE_ADDR) *next_pcs = NULL;
+  std::vector<CORE_ADDR> next_pcs;
 
   pc = regcache_raw_get_unsigned (regcache, tdep->pc_regnum);
   orig_npc = npc = regcache_raw_get_unsigned (regcache, tdep->npc_regnum);
@@ -1688,10 +1726,10 @@ sparc_software_single_step (struct regcache *regcache)
   /* Analyze the instruction at PC.  */
   nnpc = sparc_analyze_control_transfer (regcache, pc, &npc);
   if (npc != 0)
-    VEC_safe_push (CORE_ADDR, next_pcs, npc);
+    next_pcs.push_back (npc);
 
   if (nnpc != 0)
-    VEC_safe_push (CORE_ADDR, next_pcs, nnpc);
+    next_pcs.push_back (nnpc);
 
   /* Assert that we have set at least one breakpoint, and that
      they're not set at the same spot - unless we're going
@@ -1816,8 +1854,6 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				       sparc_breakpoint::bp_from_kind);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
-
-  set_gdbarch_print_insn (gdbarch, print_insn_sparc);
 
   set_gdbarch_software_single_step (gdbarch, sparc_software_single_step);
   set_gdbarch_write_pc (gdbarch, sparc_write_pc);

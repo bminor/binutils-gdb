@@ -417,6 +417,9 @@ run_dump_test "pr20253-4b"
 run_dump_test "pr20253-4c"
 run_dump_test "pr20253-5"
 run_dump_test "pr20515"
+run_dump_test "property-x86-3"
+run_dump_test "property-x86-4a"
+run_dump_test "property-x86-4b"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
@@ -437,6 +440,7 @@ run_dump_test "pr18801"
 run_dump_test "pr18815"
 run_dump_test "pr19939a"
 run_dump_test "pr19939b"
+run_dump_test "tlsdesc2"
 
 proc undefined_weak {cflags ldflags} {
     set testname "Undefined weak symbol"
@@ -1158,6 +1162,27 @@ if { !([istarget "i?86-*-linux*"]
        || [istarget "x86_64-*-linux*"]) } {
     return
 }
+
+run_ld_link_tests [list \
+    [list \
+	"basic PLT generation (non-PIC, -z now)" \
+	"-z now -melf_i386 tmpdir/libpltlib.so" \
+	"" \
+	"--32" \
+	{plt2.s} \
+	{{readelf -SW plt2.rd} {objdump -dwr plt2.dd}} \
+	"plt2" \
+    ] \
+    [list \
+	"basic PLT generation (PIC, -z now)" \
+	"-z now -shared -melf_i386 tmpdir/libpltlib.so" \
+	"" \
+	"--32" \
+	{plt-pic.s} \
+	{{objdump -dwr plt-pic2.dd}} \
+	"plt-pic2.so" \
+    ] \
+]
 
 # Linux only tests
 run_dump_test "pltgot-1"

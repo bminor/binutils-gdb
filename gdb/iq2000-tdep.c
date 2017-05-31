@@ -838,7 +838,6 @@ iq2000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip      (gdbarch, 0);
   set_gdbarch_skip_prologue        (gdbarch, iq2000_skip_prologue);
   set_gdbarch_inner_than           (gdbarch, core_addr_lessthan);
-  set_gdbarch_print_insn           (gdbarch, print_insn_iq2000);
   set_gdbarch_register_type (gdbarch, iq2000_register_type);
   set_gdbarch_frame_align (gdbarch, iq2000_frame_align);
   set_gdbarch_unwind_sp (gdbarch, iq2000_unwind_sp);

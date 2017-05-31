@@ -260,3 +260,6 @@ foo:
 	kmo %r5,%r6
 	pcc
 	kmctr %r5,%r6,%r9
+	pckmo
+	ipte	%r6,%r9
+	ipte	%r6,%r9,%r11

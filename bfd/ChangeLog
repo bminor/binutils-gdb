@@ -1,3 +1,532 @@
+2017-05-30  Casey Smith  <clegg89@gmail.com>
+
+	PR ld/21523
+	* elf32-arm.c (elf32_arm_final_link_relocate): Install an absolute
+	value when processing the R_ARM_THM_ALU_PREL_11_0 reloc.
+
+2017-05-30  Anton Kolesov  Anton.Kolesov@synopsys.com
+
+	* cpu-arc.c (arc_compatible): New function.
+
+2017-05-30  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* cpu-arc.c (arch_info_struct): Remove duplicate ARC600 entry.
+
+2017-05-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/21519
+	* bfdio.c (bfd_get_file_size): New function.
+	* bfd-in2.h: Regenerated.
+
+2017-05-23  Dilian Palauzov  <git-dpa@aegee.org>
+
+	* elf32-arc.c (arc_elf_merge_attributes): Add fall through
+	comments.
+
+2017-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_link_setup_gnu_properties): Use
+	dynobj instead of htab->elf.dynobj.
+
+2017-05-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf64-mips.c (mips_elf64_canonicalize_reloc): Remove prototype
+	and function.
+	(mips_elf64_canonicalize_dynamic_reloc): Likewise.
+	(mips_elf64_slurp_one_reloc_table): Set `reloc_count' to the
+	actual number of internal relocations retrieved.  Adjust
+	function description.
+	(bfd_elf64_canonicalize_reloc): Remove macro.
+	(bfd_elf64_canonicalize_dynamic_reloc): Likewise.
+
+2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* archures.c (bfd_mach_sparc_v9m8): Define.
+	(bfd_mach_sparc_v8plusm8): Likewise.
+	(bfd_mach_sparc_v9_p): Adjust to M8.
+	(bfd_mach_sparc_64bit_p): Likewise.
+	* aoutx.h (machine_type): Handle bfd_mach_sparc_v9m8 and
+	bfd_mach_sparc_v8plusm8.
+	* bfd-in2.h: Regenerated.
+	* cpu-sparc.c (arch_info_struct): Entries for sparc:v9m8 and
+	sparc:v8plusm8.
+	* elfxx-sparc.c (_bfd_sparc_elf_object_p): Handle
+	bfd_mach_sparc_v8plusm8 and bfd_mach_sparc_v9m8 using the new hw
+	capabilities ONADDSUB, ONMUL, ONDIV, DICTUNP, FPCPSHL, RLE and
+	SHA3.
+	* elf32-sparc.c (elf32_sparc_final_write_processing): Handle
+	bfd_mach_sparc_v8plusm8.
+
+2017-05-19  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_gc_mark_extra_sections): Don't keep
+	debug and special sections when no non-note alloc sections in an
+	object are kept.
+
+2017-05-18  Alan Modra  <amodra@gmail.com>
+
+	* arc-got.h: Don't compare boolean values against TRUE or FALSE.
+	* elf-m10300.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arc.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-nds32.c: Likewise.
+	* elf32-tilepro.c: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfnn-riscv.c: Likewise.
+	* elfxx-tilegx.c: Likewise.
+	* mach-o.c: Likewise.
+	* peXXigen.c: Likewise.
+	* vms-alpha.c: Likewise.
+	* vms-lib.c: Likewise.
+
+2017-05-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20882
+	* elflink.c (elf_gc_mark_debug_section): New function.
+	(_bfd_elf_gc_mark_extra_sections): Mark any debug sections
+	referenced by kept debug sections.
+
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
+	* elf-m10300.c: Rename occurrences of non_ir_ref.
+	* elf32-arm.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-cr16.c: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-d10v.c: Likewise.
+	* elf32-dlx.c: Likewise.
+	* elf32-fr30.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-iq2000.c: Likewise.
+	* elf32-lm32.c: Likewise.
+	* elf32-m32c.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-metag.c: Likewise.
+	* elf32-microblaze.c: Likewise.
+	* elf32-moxie.c: Likewise.
+	* elf32-msp430.c: Likewise.
+	* elf32-mt.c: Likewise.
+	* elf32-nios2.c: Likewise.
+	* elf32-or1k.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-rl78.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-score.c: Likewise.
+	* elf32-score7.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-tic6x.c: Likewise.
+	* elf32-tilepro.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf32-xstormy16.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ia64-vms.c: Likewise.
+	* elf64-mmix.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfnn-ia64.c: Likewise.
+	* elfnn-riscv.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elfxx-sparc.c: Likewise.
+	* elfxx-tilegx.c: Likewise.
+	* linker.c: Likewise.
+
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (add_symbol_adjust): Transfer non_ir_ref_dynamic.
+	* elflink.c (elf_link_add_object_symbols): Update to use
+	non_ir_ref_dynamic.
+	(elf_link_input_bfd): Test non_ir_ref_dynamic in addition to
+	non_ir_ref.
+	* linker.c (_bfd_generic_link_add_one_symbol): Likewise.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (print_mips_ases): Handle MIPS16e2 ASE.
+
+2017-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_parse_gnu_properties): Merge
+	GNU_PROPERTY_X86_ISA_1_USED and GNU_PROPERTY_X86_ISA_1_NEEDED
+	properties.
+	* elf64-x86-64.c (elf_x86_64_parse_gnu_properties): Likewise.
+
+2017-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Rename plt_bnd
+	to plt_second.
+	(elf_x86_64_link_hash_table): Rename plt_bnd/plt_bnd_eh_frame
+	to plt_second/plt_second_eh_frame.
+	(elf_x86_64_link_hash_newfunc): Updated.
+	(elf_x86_64_allocate_dynrelocs): Likewise.
+	(elf_x86_64_size_dynamic_sections): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	(elf_x86_64_finish_dynamic_symbol): Likewise.
+	(elf_x86_64_finish_dynamic_sections): Likewise.
+	(elf_x86_64_plt_type): Rename plt_bnd to plt_second.
+	(elf_x86_64_get_synthetic_symtab): Updated.  Also scan the
+	.plt.sec section.
+	(elf_backend_setup_gnu_properties): Updated.  Create the
+	.plt.sec section instead of the .plt.sec section.
+
+2017-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Partially revert
+	commit 25070364b0ce33eed46aa5d78ebebbec6accec7e.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Likewse.
+
+2017-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* elf64-sparc.c (elf64_sparc_set_reloc): New function.
+	(bfd_elf64_set_reloc): Define.
+	(elf64_sparc_write_relocs): Use `canon_reloc_count'.
+
+2017-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* targets.c (BFD_JUMP_TABLE_RELOCS): Add NAME##_set_reloc.
+	(struct bfd_target): New field _bfd_set_reloc.
+	* bfd.c (bfd_set_reloc): Call backend _set_bfd.
+	* reloc.c (_bfd_generic_set_reloc): New function.
+	* coffcode.h (coff_set_reloc): Define to _bfd_generic_set_reloc.
+	* nlm-target.h (nlm_set_reloc): Likewise.
+	* coff-rs6000.c (_bfd_xcoff_set_reloc): Likewise.
+	* aout-tic30.c (MY_set_reloc): Likewise.
+	* aout-target.h (MY_set_reloc): Likewise.
+	* elfxx-target.h (bfd_elfNN_set_reloc): Likewise.
+	* coff-alpha.c (_bfd_ecoff_set_reloc): Likewise.
+	* mach-o-target.c (bfd_mach_o_set_reloc): Likewise.
+	* vms-alpha.c (alpha_vms_set_reloc): Likewise.
+	* aout-adobe.c (aout_32_set_reloc): Likewise.
+	* bout.c (b_out_set_reloc): Likewise.
+	* coff-mips.c (_bfd_ecoff_set_reloc): Likewise.
+	* i386os9k.c (aout_32_set_reloc): Likewise.
+	* ieee.c (ieee_set_reloc): Likewise.
+	* oasys.c (oasys_set_reloc): Likewise.
+	* som.c (som_set_reloc): Likewise.
+	* versados.c (versados_set_reloc): Likewise.
+	* coff64-rs6000.c (rs6000_xcoff64_vec): Add
+	_bfd_generic_set_reloc.
+	(rs6000_xcoff64_aix_vec): LIkewise.
+	* libbfd.c (_bfd_norelocs_set_reloc): New function.
+	* libbfd-in.h: Prototype for _bfd_norelocs_set_reloc.
+	* i386msdos.c (msdos_set_reloc): Define to
+	_bfd_norelocs_set_reloc.
+	* elfcode.h (elf_set_reloc): Define.
+	* bfd-in2.h: Regenerated.
+
+2017-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21481
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Use .plt.bnd
+	for IFUNC function address.
+
+2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* elf32-arc.c (FEATURE_LIST_NAME): Define.
+	(CONFLICT_LIST): Likewise.
+	(opcode/arc-attrs.h): Include.
+	(arc_elf_print_private_bfd_data): Print OSABI v4 flag.
+	(arc_extract_features): New file.
+	(arc_stralloc): Likewise.
+	(arc_elf_merge_attributes): Likewise.
+	(arc_elf_merge_private_bfd_data): Use object attributes.
+	(bfd_arc_get_mach_from_attributes): New function.
+	(arc_elf_object_p): Use object attributes.
+	(arc_elf_final_write_processing): Likewise.
+	(elf32_arc_obj_attrs_arg_type): New function.
+	(elf32_arc_obj_attrs_handle_unknown): Likewise.
+	(elf32_arc_section_from_shdr): Likewise.
+	(elf_backend_obj_attrs_vendor): Define.
+	(elf_backend_obj_attrs_section): Likewise.
+	(elf_backend_obj_attrs_arg_type): Likewise.
+	(elf_backend_obj_attrs_section_type): Likewise.
+	(elf_backend_obj_attrs_handle_unknown): Likewise.
+	(elf_backend_section_from_shdr): Likewise.
+
+2017-05-09  Andrew Goedhart  <Andrewgoedhart@simplepowersolutions.co.za>
+
+	PR ld/21458
+	* elf32-arm.c (elf32_arm_final_link_relocate): Set the bottom bit
+	of the value when resolving a R_ARM_THM_ALU_PREL_11_0 relocation
+	and the destination is a Thumb symbol.
+
+2017-05-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_get_synthetic_symtab): Add missing
+	initializer to silence GCC 4.2.
+	* lf64-x86-64.c (elf_x86_64_get_synthetic_symtab): Likewise.
+
+2017-05-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (PLT_ENTRY_SIZE): Renamed to ...
+	(LAZY_PLT_ENTRY_SIZE): This.
+	(NON_LAZY_PLT_ENTRY_SIZE): New.
+	(elf_x86_64_plt0_entry): Renamed to ...
+	(elf_x86_64_lazy_plt0_entry): This.
+	(elf_x86_64_plt_entry): Renamed to ...
+	(elf_x86_64_lazy_plt_entry): This.
+	(elf_x86_64_bnd_plt0_entry): Renamed to ...
+	(elf_x86_64_lazy_bnd_plt0_entry): This.
+	(elf_x86_64_legacy_plt_entry): Removed.
+	(elf_x86_64_bnd_plt_entry): Renamed to ...
+	(elf_x86_64_lazy_bnd_plt_entry): This.
+	(elf_x86_64_legacy_plt2_entry): Renamed to ...
+	(elf_x86_64_non_lazy_plt_entry): This.
+	(elf_x86_64_bnd_plt2_entry): Renamed to ...
+	(elf_x86_64_non_lazy_bnd_plt_entry): This.
+	(elf_x86_64_eh_frame_plt): Renamed to ...
+	(elf_x86_64_eh_frame_lazy_plt): This.
+	(elf_x86_64_eh_frame_bnd_plt): Renamed to ...
+	(elf_x86_64_eh_frame_lazy_bnd_plt): This.
+	(elf_x86_64_eh_frame_plt_got): Renamed to ...
+	(elf_x86_64_eh_frame_non_lazy_plt): This.
+	(elf_x86_64_lazy_plt_layout): New.
+	(elf_x86_64_non_lazy_plt_layout): Likewise.
+	(elf_x86_64_plt_layout): Likewise.
+	(elf_x86_64_backend_data): Remove PLT layout information.  Add
+	os for target system.
+	(GET_PLT_ENTRY_SIZE): Removed.
+	(elf_x86_64_lazy_plt): New.
+	(elf_x86_64_non_lazy_plt): Likewise.
+	(elf_x86_64_lazy_bnd_plt): Likewise.
+	(elf_x86_64_non_lazy_bnd_plt): Likewise.
+	(elf_x86-64_arch_bed): Updated.
+	(elf_x86_64_link_hash_table): Add plt, lazy_plt and non_lazy_plt.
+	(elf_x86_64_create_dynamic_sections): Removed.
+	(elf_x86_64_check_relocs): Don't check elf.dynobj.  Don't call
+	_bfd_elf_create_ifunc_sections nor _bfd_elf_create_got_section.
+	(elf_x86-64_adjust_dynamic_symbol): Updated.
+	(elf_x86_64_allocate_dynrelocs): Updated.  Pass 0 as PLT header
+	size to _bfd_elf_allocate_ifunc_dyn_relocs and don't allocate
+	size for PLT0 if there is no PLT0.  Get plt_entry_size from
+	non_lazy_plt for non-lazy PLT entries.
+	(elf_x86_64_size_dynamic_sections): Updated.  Get plt_entry_size
+	from non_lazy_plt for non-lazy PLT entries.
+	(elf_x86-64_relocate_section): Updated.  Properly get PLT index
+	if there is no PLT0.
+	(elf_x86_64_finish_dynamic_symbol): Updated.  Fill the first slot
+	in the PLT entry with generic PLT layout.  Fill the non-lazy PLT
+	entries with non-lazy PLT layout.  Don't fill the second and third
+	slots in the PLT entry if there is no PLT0.
+	(elf_x86_64_finish_dynamic_sections): Updated.  Don't fill PLT0
+	if there is no PLT0.  Set sh_entsize on the .plt.got section.
+	(compare_relocs): New.
+	(elf_x86_64_plt_type): Likewise.
+	(elf_x86_64_plt): Likewise.
+	(elf_x86_64_nacl_plt): New. Forward declaration.
+	(elf_x86_64_get_plt_sym_val): Removed.
+	(elf_x86_64_get_synthetic_symtab): Rewrite to check PLT sections
+	against all dynamic relocations.
+	(elf_x86_64_link_setup_gnu_properties): New function.
+	(elf_backend_create_dynamic_sections): Updated.
+	(elf_backend_setup_gnu_properties): New.
+	(elf_x86_64_nacl_plt): New.
+	(elf_x86_64_nacl_arch_bed): Updated.
+
+2017-05-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (PLT_ENTRY_SIZE): Renamed to ...
+	(LAZY_PLT_ENTRY_SIZE): This.
+	(NON_LAZY_PLT_ENTRY_SIZE): New.
+	(elf_i386_plt0_entry): Renamed to ...
+	(elf_i386_lazy_plt0_entry): This.
+	(elf_i386_plt_entry): Renamed to ...
+	(elf_i386_lazy_plt_entry): This.
+	(elf_i386_pic_plt0_entry): Renamed to ...
+	(elf_i386_pic_lazy_plt0_entry): This.
+	(elf_i386_pic_plt_entry): Renamed to ...
+	(elf_i386_pic_lazy_plt_entry): This.
+	(elf_i386_got_plt_entry): Renamed to ...
+	(elf_i386_non_lazy_plt_entry): This.
+	(elf_i386_pic_got_plt_entry): Renamed to ...
+	(elf_i386_pic_non_lazy_plt_entry): This.
+	(elf_i386_eh_frame_plt): Renamed to ...
+	(elf_i386_eh_frame_lazy_plt): This.
+	(elf_i386_eh_frame_plt_got): Renamed to ...
+	(elf_i386_eh_frame_non_lazy_plt): This.
+	(elf_i386_plt_layout): Renamed to ...
+	(elf_i386_lazy_plt_layout): This.  Remove eh_frame_plt_got and
+	eh_frame_plt_got_size.
+	(elf_i386_non_lazy_plt_layout): New.
+	(elf_i386_plt_layout): Likewise.
+	(elf_i386_non_lazy_plt): Likewise.
+	(GET_PLT_ENTRY_SIZE): Removed.
+	(elf_i386_plt): Renamed to ...
+	(elf_i386_lazy_plt): This.
+	(elf_i386_backend_data): Remove plt.  Rename is_vxworks to os.
+	(elf_i386_arch_bed): Updated.
+	(elf_i386_link_hash_table): Add plt, lazy_plt and non_lazy_plt.
+	(elf_i386_create_dynamic_sections): Removed.
+	(elf_i386_check_relocs): Don't check elf.dynobj.  Don't call
+	_bfd_elf_create_ifunc_sections nor _bfd_elf_create_got_section.
+	(elf_i386_adjust_dynamic_symbol): Updated.
+	(elf_i386_allocate_dynrelocs): Updated.  Pass 0 as PLT header
+	size to _bfd_elf_allocate_ifunc_dyn_relocs and don't allocate
+	size for PLT0 if there is no PLT0.
+	(elf_i386_size_dynamic_sections): Updated.  Check whether GOT
+	output section is discarded only if GOT isn't empty.
+	(elf_i386_relocate_section): Updated.  Properly get PLT index
+	if there is no PLT0.
+	(elf_i386_finish_dynamic_symbol): Updated.  Don't fill the
+	second and third slots in the PLT entry if there is no PLT0.
+	(elf_i386_finish_dynamic_sections): Updated.  Don't fill PLT0
+	if there is no PLT0.  Set sh_entsize on the .plt.got section.
+	(elf_i386_nacl_plt): Forward declaration.
+	(elf_i386_get_plt_sym_val): Removed.
+	(elf_i386_get_synthetic_symtab): Rewrite to check PLT sections
+	against all dynamic relocations.
+	(elf_i386_link_setup_gnu_properties): New function.
+	(elf_backend_create_dynamic_sections): Updated.
+	(elf_backend_setup_gnu_properties): New.
+	(elf_i386_nacl_plt): Updated.
+	(elf_i386_nacl_arch_bed): Likewise.
+	(elf_i386_vxworks_arch_bed): Likewise.
+
+2017-05-08  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elflink.c (elf_output_implib): Remove executable flag from import
+	library bfd.
+	* elf32-arm.c (elf32_arm_filter_implib_symbols): Assert that the import
+	library is a relocatable object file.
+
+2017-05-01  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/21404
+	* elf32-avr.c (avr_should_move_sym): New function.
+	(avr_should_reduce_sym_size): Likewise.
+	(avr_should_increase_sym_size): Likewise.
+	(elf32_avr_relax_delete_bytes): Adjust symbol values
+	and sizes by calling new functions.
+
+2017-05-01  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* config.bfd (riscv32-*): Enable rv64.
+
+2017-05-02  Alan Modra  <amodra@gmail.com>
+
+	PR 21384
+	* elflink.c (bfd_elf_link_mark_dynamic_symbol): Test h->non_elf
+	rather than h->root.type == bfd_link_hash_new.
+	(bfd_elf_record_link_assignment): Similarly, call
+	bfd_elf_link_mark_dynamic_symbol when h->non_elf.
+
+2017-04-29  Alan Modra  <amodra@gmail.com>
+
+	PR 21432
+	* reloc.c (reloc_offset_in_range): New function.
+	(bfd_perform_relocation, bfd_install_relocation): Use it.
+	(_bfd_final_link_relocate): Likewise.
+
+2017-04-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Check plt_got
+	before using .plt.got.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Likewise.
+
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_size_dynamic_sections): Use "="
+	instead of "+=" to update 0.
+
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_create_dynamic_sections): Create the
+	.plt.got section here.
+	(elf_i386_check_relocs): Don't create the .plt.got section.
+	* elf64-x86-64.c (elf_x86_64_create_dynamic_sections): Create
+	the .plt.got and .plt.bnd sections here.
+	(elf_x86_64_check_relocs): Don't create the .plt.got nor
+	.plt.bnd sections.
+
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Remove
+	has_bnd_reloc.
+	(elf_x86_64_link_hash_newfunc): Don't clear has_bnd_reloc.
+	(elf_x86_64_copy_indirect_symbol): Don't copy has_bnd_reloc.
+	(elf_x86_64_check_relocs): Don't set has_bnd_reloc.
+	(elf_x86_64_finish_dynamic_symbol): Check bndplt instead of
+	has_bnd_reloc.
+
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_backend_data): Change setup_gnu_properties
+	to return bfd *.
+	(_bfd_elf_link_setup_gnu_properties): Return bfd *.
+	* elf-properties.c (_bfd_elf_link_setup_gnu_properties): Return
+	the first relocatable ELF input with GNU properties.
+
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_finish_dynamic_sections): Simplify
+	VxWorks for non-PIC.
+
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_backend_data): Make asection param of
+	elf_backend_eh_frame_address_size const.
+	(_bfd_elf_eh_frame_address_size): Likewise.
+	* elf32-m32c.c (_bfd_m32c_elf_eh_frame_address_size): Likewise.
+	* elf32-msp430.c (elf32_msp430_eh_frame_address_size): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_eh_frame_address_size): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_eh_frame_address_size): Likewise.
+	* elf-eh-frame.c (_bfd_elf_eh_frame_address_size): Likewise.
+	(next_cie_fde_offset): Constify params.
+	(offset_adjust, adjust_eh_frame_local_symbols): Likewise.
+
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct eh_cie_fde): Add aug_str_len and aug_data_len.
+	(_bfd_elf_adjust_eh_frame_global_symbol): Declare.
+	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Set aug_str_len and
+	aug_data_len.
+	(offset_adjust): New function.
+	(_bfd_elf_adjust_eh_frame_global_symbol): Likewise.
+	(adjust_eh_frame_local_symbols): Likewise.
+	(_bfd_elf_discard_section_eh_frame): Call adjust_eh_frame_local_symbols
+	after changing anything.  Return true if anything changed.
+	* elflink.c (bfd_elf_discard_info): If .eh_frame changed, call
+	_bfd_elf_adjust_eh_frame_global_symbol for globals.
+
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_link_hash_hide_symbol): Clear dynstr_index
+	when force_local.
+
+2017-04-27  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (UNDEFWEAK_NO_DYNAMIC_RELOC): Define.
+	(ppc_elf_select_plt_layout, ppc_elf_tls_setup): Use it.
+	(ppc_elf_adjust_dynamic_symbol, allocate_dynrelocs): Likewise.
+	(ppc_elf_relocate_section): Likewise.  Delete silly optimisation
+	for undef and undefweak dyn_relocs.
+	* elf64-ppc.c (UNDEFWEAK_NO_DYNAMIC_RELOC): Define.
+	(ppc64_elf_adjust_dynamic_symbol, ppc64_elf_tls_setup): Use it.
+	(allocate_got, allocate_dynrelocs): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+
+2017-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Alwasys add
+	DT_PLTRELSZ, DT_PLTREL and DT_JMPREL for .rel.plt section.
+	* elf64-x86-64.c (elf_x86_64_size_dynamic_sections): Alwasys
+	add DT_PLTRELSZ, DT_PLTREL and DT_JMPREL for .rela.plt section.
+
 2017-04-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21434

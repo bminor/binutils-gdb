@@ -318,7 +318,7 @@ relocate_fix_got_relocs_for_got_info (struct got_entry **          list_p,
 	}
 
 
-      if (entry && entry->processed == FALSE)
+      if (entry && !entry->processed)
 	{
 	  switch (entry->type)
 	    {
@@ -427,7 +427,7 @@ create_got_dynrelocs_for_single_entry (struct got_entry *list,
   bfd_vma got_offset = list->offset;
 
   if (list->type == GOT_NORMAL
-      && list->created_dyn_relocation == FALSE)
+      && !list->created_dyn_relocation)
     {
       if (bfd_link_pic (info)
 	  && h != NULL
@@ -446,7 +446,7 @@ create_got_dynrelocs_for_single_entry (struct got_entry *list,
       list->created_dyn_relocation = TRUE;
     }
   else if (list->existing_entries != TLS_GOT_NONE
-	   && list->created_dyn_relocation == FALSE)
+	   && !list->created_dyn_relocation)
     {
        /* TODO TLS: This is not called for local symbols.
 	  In order to correctly implement TLS, this should also

@@ -2060,12 +2060,12 @@ find_step_target (struct regcache *regcache, inst_env_type *inst_env)
    digs through the opcodes in order to find all possible targets.
    Either one ordinary target or two targets for branches may be found.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 cris_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   inst_env_type inst_env;
-  VEC (CORE_ADDR) *next_pcs = NULL;
+  std::vector<CORE_ADDR> next_pcs;
 
   /* Analyse the present instruction environment and insert 
      breakpoints.  */
@@ -2083,14 +2083,14 @@ cris_software_single_step (struct regcache *regcache)
       CORE_ADDR next_pc
 	= (CORE_ADDR) inst_env.reg[gdbarch_pc_regnum (gdbarch)];
 
-      VEC_safe_push (CORE_ADDR, next_pcs, next_pc);
+      next_pcs.push_back (next_pc);
       if (inst_env.branch_found 
 	  && (CORE_ADDR) inst_env.branch_break_address != next_pc)
 	{
 	  CORE_ADDR branch_target_address
 		= (CORE_ADDR) inst_env.branch_break_address;
 
-	  VEC_safe_push (CORE_ADDR, next_pcs, branch_target_address);
+	  next_pcs.push_back (branch_target_address);
 	}
     }
 
@@ -3785,19 +3785,6 @@ cris_gdb_func (struct gdbarch *gdbarch, enum cris_op_type op_type,
     }
 }
 
-/* This wrapper is to avoid cris_get_assembler being called before 
-   exec_bfd has been set.  */
-
-static int
-cris_delayed_get_disassembler (bfd_vma addr, struct disassemble_info *info)
-{
-  int (*print_insn) (bfd_vma addr, struct disassemble_info *info);
-
-  print_insn = cris_get_disassembler (exec_bfd);
-  gdb_assert (print_insn != NULL);
-  return print_insn (addr, info);
-}
-
 /* Originally from <asm/elf.h>.  */
 typedef unsigned char cris_elf_greg_t[4];
 
@@ -4021,7 +4008,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* No matching architecture was found.  Create a new one.  */
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   info.byte_order = BFD_ENDIAN_LITTLE;
   gdbarch = gdbarch_alloc (&info, tdep);
 
@@ -4133,11 +4120,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
-
-  /* FIXME: cagney/2003-08-27: It should be possible to select a CRIS
-     disassembler, even when there is no BFD.  Does something like
-     "gdb; target remote; disassmeble *0x123" work?  */
-  set_gdbarch_print_insn (gdbarch, cris_delayed_get_disassembler);
 
   return gdbarch;
 }

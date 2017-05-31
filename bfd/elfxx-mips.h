@@ -29,7 +29,7 @@ extern bfd_boolean _bfd_mips_elf_new_section_hook
 extern void _bfd_mips_elf_symbol_processing
   (bfd *, asymbol *);
 extern unsigned int _bfd_mips_elf_eh_frame_address_size
-  (bfd *, asection *);
+  (bfd *, const asection *);
 extern bfd_boolean _bfd_mips_elf_name_local_section_symbols
   (bfd *);
 extern bfd_boolean _bfd_mips_elf_section_processing

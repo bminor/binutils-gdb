@@ -227,7 +227,7 @@ alpha_sts (struct gdbarch *gdbarch, void *out, const void *in)
 /* The alpha needs a conversion between register and memory format if the
    register is a floating point register and memory format is float, as the
    register format must be double or memory format is an integer with 4
-   bytes or less, as the representation of integers in floating point
+   bytes, as the representation of integers in floating point
    registers is different.  */
 
 static int
@@ -235,7 +235,7 @@ alpha_convert_register_p (struct gdbarch *gdbarch, int regno,
 			  struct type *type)
 {
   return (regno >= ALPHA_FP0_REGNUM && regno < ALPHA_FP0_REGNUM + 31
-	  && TYPE_LENGTH (type) != 8);
+	  && TYPE_LENGTH (type) == 4);
 }
 
 static int
@@ -252,14 +252,10 @@ alpha_register_to_value (struct frame_info *frame, int regnum,
 				 in, optimizedp, unavailablep))
     return 0;
 
-  if (TYPE_LENGTH (valtype) == 4)
-    {
-      alpha_sts (gdbarch, out, in);
-      *optimizedp = *unavailablep = 0;
-      return 1;
-    }
-
-  error (_("Cannot retrieve value from floating point register"));
+  gdb_assert (TYPE_LENGTH (valtype) == 4);
+  alpha_sts (gdbarch, out, in);
+  *optimizedp = *unavailablep = 0;
+  return 1;
 }
 
 static void
@@ -268,14 +264,9 @@ alpha_value_to_register (struct frame_info *frame, int regnum,
 {
   gdb_byte out[MAX_REGISTER_SIZE];
 
-  switch (TYPE_LENGTH (valtype))
-    {
-    case 4:
-      alpha_lds (get_frame_arch (frame), out, in);
-      break;
-    default:
-      error (_("Cannot store value in floating point register"));
-    }
+  gdb_assert (TYPE_LENGTH (valtype) == 4);
+  alpha_lds (get_frame_arch (frame), out, in);
+
   put_frame_register (frame, regnum, out);
 }
 
@@ -765,7 +756,7 @@ static const int stq_c_opcode = 0x2f;
    is found, attempt to step through it.  A breakpoint is placed at the end of 
    the sequence.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 alpha_deal_with_atomic_sequence (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -779,12 +770,11 @@ alpha_deal_with_atomic_sequence (struct regcache *regcache)
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
-  VEC (CORE_ADDR) *next_pcs = NULL;
 
   /* Assume all atomic sequences start with a LDL_L/LDQ_L instruction.  */
   if (INSN_OPCODE (insn) != ldl_l_opcode
       && INSN_OPCODE (insn) != ldq_l_opcode)
-    return NULL;
+    return {};
 
   /* Assume that no atomic sequence is longer than "atomic_sequence_length" 
      instructions.  */
@@ -803,8 +793,8 @@ alpha_deal_with_atomic_sequence (struct regcache *regcache)
 	  immediate = (immediate ^ 0x400000) - 0x400000;
 
 	  if (bc_insn_count >= 1)
-	    return NULL; /* More than one branch found, fallback 
-			    to the standard single-step code.  */
+	    return {}; /* More than one branch found, fallback
+			  to the standard single-step code.  */
 
 	  breaks[1] = loc + ALPHA_INSN_SIZE + immediate;
 
@@ -820,7 +810,7 @@ alpha_deal_with_atomic_sequence (struct regcache *regcache)
   /* Assume that the atomic sequence ends with a STL_C/STQ_C instruction.  */
   if (INSN_OPCODE (insn) != stl_c_opcode
       && INSN_OPCODE (insn) != stq_c_opcode)
-    return NULL;
+    return {};
 
   closing_insn = loc;
   loc += ALPHA_INSN_SIZE;
@@ -835,8 +825,10 @@ alpha_deal_with_atomic_sequence (struct regcache *regcache)
 	  || (breaks[1] >= pc && breaks[1] <= closing_insn)))
     last_breakpoint = 0;
 
+  std::vector<CORE_ADDR> next_pcs;
+
   for (index = 0; index <= last_breakpoint; index++)
-    VEC_safe_push (CORE_ADDR, next_pcs, breaks[index]);
+    next_pcs.push_back (breaks[index]);
 
   return next_pcs;
 }
@@ -1717,17 +1709,15 @@ alpha_next_pc (struct regcache *regcache, CORE_ADDR pc)
   return (pc + ALPHA_INSN_SIZE);
 }
 
-VEC (CORE_ADDR) *
+std::vector<CORE_ADDR>
 alpha_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR pc;
-  VEC (CORE_ADDR) *next_pcs = NULL;
 
-  pc = regcache_read_pc (regcache);
+  pc = alpha_next_pc (regcache, regcache_read_pc (regcache));
 
-  VEC_safe_push (CORE_ADDR, next_pcs, alpha_next_pc (regcache, pc));
-  return next_pcs;
+  return {pc};
 }
 
 
@@ -1749,7 +1739,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (arches != NULL)
     return arches->gdbarch;
 
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Lowest text address.  This is used by heuristic_proc_start()
@@ -1798,9 +1788,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Prologue heuristics.  */
   set_gdbarch_skip_prologue (gdbarch, alpha_skip_prologue);
-
-  /* Disassembler.  */
-  set_gdbarch_print_insn (gdbarch, print_insn_alpha);
 
   /* Call info.  */
 

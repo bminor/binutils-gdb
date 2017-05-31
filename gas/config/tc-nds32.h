@@ -91,7 +91,8 @@ extern void tc_nds32_frame_initial_instructions (void);
 /* For DIFF relocations.  The default behavior is inconsistent with the
    asm internal document.  */
 #define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEC)		\
-  (! SEG_NORMAL (SEC) || TC_FORCE_RELOCATION (FIX))
+  (GENERIC_FORCE_RELOCATION_SUB_SAME (FIX, SEC)		\
+   || TC_FORCE_RELOCATION (FIX))
 #define TC_FORCE_RELOCATION(fix)		nds32_force_relocation (fix)
 #define TC_VALIDATE_FIX_SUB(FIX,SEG)		nds32_validate_fix_sub (FIX,SEG)
 #define SET_SECTION_RELOCS(sec, relocs, n)	nds32_set_section_relocs (sec, relocs, n)

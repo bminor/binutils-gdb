@@ -393,6 +393,7 @@ const struct language_defn m2_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   default_get_string,
+  c_watch_location_expression,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   default_compute_string_hash,

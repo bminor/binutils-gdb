@@ -1983,10 +1983,21 @@ extern const struct rank VOID_PTR_CONVERSION_BADNESS;
 extern const struct rank BOOL_CONVERSION_BADNESS;
 /* * Badness of converting derived to base class.  */
 extern const struct rank BASE_CONVERSION_BADNESS;
-/* * Badness of converting from non-reference to reference.  */
+/* * Badness of converting from non-reference to reference.  Subrank
+   is the type of reference conversion being done.  */
 extern const struct rank REFERENCE_CONVERSION_BADNESS;
+/* * Conversion to rvalue reference.  */
+#define REFERENCE_CONVERSION_RVALUE 1
+/* * Conversion to const lvalue reference.  */
+#define REFERENCE_CONVERSION_CONST_LVALUE 2
+
 /* * Badness of converting integer 0 to NULL pointer.  */
 extern const struct rank NULL_POINTER_CONVERSION;
+/* * Badness of cv-conversion.  Subrank is a flag describing the conversions
+   being done.  */
+extern const struct rank CV_CONVERSION_BADNESS;
+#define CV_CONVERSION_CONST 1
+#define CV_CONVERSION_VOLATILE 2
 
 /* Non-standard conversions allowed by the debugger */
 

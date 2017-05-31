@@ -273,4 +273,6 @@ extern void default_guess_tracepoint_registers (struct gdbarch *gdbarch,
 						struct regcache *regcache,
 						CORE_ADDR addr);
 
+extern int default_print_insn (bfd_vma memaddr, disassemble_info *info);
+
 #endif

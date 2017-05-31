@@ -1064,17 +1064,9 @@ DESCRIPTION
 	section @var{sec} to the values @var{rel} and @var{count}.
 	The argument @var{abfd} is ignored.
 
+.#define bfd_set_reloc(abfd, asect, location, count) \
+.     BFD_SEND (abfd, _bfd_set_reloc, (abfd, asect, location, count))
 */
-
-void
-bfd_set_reloc (bfd *ignore_abfd ATTRIBUTE_UNUSED,
-	       sec_ptr asect,
-	       arelent **location,
-	       unsigned int count)
-{
-  asect->orelocation = location;
-  asect->reloc_count = count;
-}
 
 /*
 FUNCTION

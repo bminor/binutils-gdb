@@ -346,14 +346,6 @@ tic6x_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     return tdep->breakpoint;
 }
 
-/* This is the implementation of gdbarch method print_insn.  */
-
-static int
-tic6x_print_insn (bfd_vma memaddr, disassemble_info *info)
-{
-  return print_insn_tic6x (memaddr, info);
-}
-
 static void
 tic6x_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			     struct dwarf2_frame_state_reg *reg,
@@ -699,15 +691,12 @@ tic6x_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 
 /* This is the implementation of gdbarch method software_single_step.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 tic6x_software_single_step (struct regcache *regcache)
 {
   CORE_ADDR next_pc = tic6x_get_next_pc (regcache, regcache_read_pc (regcache));
-  VEC (CORE_ADDR) *next_pcs = NULL;
 
-  VEC_safe_push (CORE_ADDR, next_pcs, next_pc);
-
-  return next_pcs;
+  return {next_pc};
 }
 
 /* This is the implementation of gdbarch method frame_align.  */
@@ -1320,8 +1309,6 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Single stepping.  */
   set_gdbarch_software_single_step (gdbarch, tic6x_software_single_step);
-
-  set_gdbarch_print_insn (gdbarch, tic6x_print_insn);
 
   /* Call dummy code.  */
   set_gdbarch_frame_align (gdbarch, tic6x_frame_align);

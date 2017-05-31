@@ -2210,3 +2210,67 @@ proc check_libdl_available { } {
     }
     return $libdl_available_saved
 }
+
+# Returns true if GNU2 TLS works.
+
+proc check_gnu2_tls_available { } {
+    global gnu2_tls_available_saved
+    global CC
+    global GNU2_CFLAGS
+
+    if {![info exists gnu2_tls_available_saved]} {
+        if { [which $CC] == 0 || "$GNU2_CFLAGS" == "" } {
+	    set gnu2_tls_available_saved 0
+	    return 0
+	}
+	# Check if GNU2 TLS works.
+	set flags "$GNU2_CFLAGS"
+	if [board_info [target_info name] exists cflags] {
+	    append flags " [board_info [target_info name] cflags]"
+	}
+	if [board_info [target_info name] exists ldflags] {
+	    append flags " [board_info [target_info name] ldflags]"
+	}
+
+	set basename "tmpdir/gnu2_tls[pid]"
+	set src1 ${basename}1.c
+	set output1 ${basename}.so
+	set f [open $src1 "w"]
+	puts $f "extern __thread int zzz;"
+	puts $f "int foo (void)"
+	puts $f "{"
+	puts $f "  return zzz;"
+	puts $f "}"
+	close $f
+	if [is_remote host] {
+	    set src1 [remote_download host $src1]
+	}
+	set src2 ${basename}2.c
+	set output2 ${basename}.exe
+	set f [open $src2 "w"]
+	puts $f "__thread int zzz = 20;"
+	puts $f "extern int foo (void);"
+	puts $f "int main (void)"
+	puts $f "{"
+	puts $f "  if (foo () != 20) __builtin_abort ();"
+	puts $f "  return 0; "
+	puts $f "}"
+	close $f
+	if [is_remote host] {
+	    set src2 [remote_download host $src2]
+	}
+	set gnu2_tls_available_saved [run_host_cmd_yesno "$CC" "-fPIC -shared $flags $src1 -o $output1"]
+	if { $gnu2_tls_available_saved == 1 } {
+	    set gnu2_tls_available_saved [run_host_cmd_yesno "$CC" "$flags $src2 $output1 -o $output2"]
+	    if { $gnu2_tls_available_saved == 1 } {
+		set gnu2_tls_available_saved [run_host_cmd_yesno "$output2" ""]
+	    }
+	}
+	remote_file host delete $src1
+	remote_file host delete $output1
+	remote_file host delete $src2
+	remote_file host delete $output2
+	file delete $src1 $src2
+    }
+    return $gnu2_tls_available_saved
+}

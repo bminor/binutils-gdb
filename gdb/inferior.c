@@ -35,6 +35,7 @@
 #include "arch-utils.h"
 #include "target-descriptions.h"
 #include "readline/tilde.h"
+#include "progspace-and-thread.h"
 
 void _initialize_inferiors (void);
 
@@ -70,30 +71,6 @@ set_current_inferior (struct inferior *inf)
   inf->incref ();
   current_inferior_->decref ();
   current_inferior_ = inf;
-}
-
-/* A cleanups callback, helper for save_current_program_space
-   below.  */
-
-static void
-restore_inferior (void *arg)
-{
-  struct inferior *saved_inferior = (struct inferior *) arg;
-
-  set_current_inferior (saved_inferior);
-}
-
-/* Save the current program space so that it may be restored by a later
-   call to do_cleanups.  Returns the struct cleanup pointer needed for
-   later doing the cleanup.  */
-
-struct cleanup *
-save_current_inferior (void)
-{
-  struct cleanup *old_chain = make_cleanup (restore_inferior,
-					    current_inferior_);
-
-  return old_chain;
 }
 
 inferior::~inferior ()
@@ -862,7 +839,7 @@ add_inferior_command (char *args, int from_tty)
 	}
     }
 
-  save_current_space_and_thread ();
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
   for (i = 0; i < copies; ++i)
     {
@@ -942,7 +919,7 @@ clone_inferior_command (char *args, int from_tty)
   if (orginf == NULL)
     orginf = current_inferior ();
 
-  save_current_space_and_thread ();
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
   for (i = 0; i < copies; ++i)
     {

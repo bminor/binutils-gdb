@@ -1,3 +1,369 @@
+2017-05-31  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (plt-static-chain help): Fix quoting.
+
+2017-05-22  Jiong Wang  <jiong.wang@arm.com>
+
+	* configure.tgt: Set "targ_emul" to "aarch64linux32b" for
+	aarch64_be-*-linux-gnu_ilp32.  Set "targ_emul" to "aarch64linux32" for
+	aarch64-*-linux-gnu_ilp32.
+
+2017-05-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run property-x86-4a and
+	property-x86-4b.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/property-x86-4a.d: New file.
+	* testsuite/ld-i386/property-x86-4a.s: Likewise.
+	* testsuite/ld-i386/property-x86-4b.d: Likewise.
+	* testsuite/ld-i386/property-x86-4b.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-4a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-4a.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-4b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-4b.s: Likewise.
+
+2017-05-19  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR ld/21472
+	* emulparams/avrxmega3.sh (RODATA_PM_OFFSET): Set to 0x8000.
+	* scripttempl/avr.sc (__RODATA_PM_OFFSET__) [RODATA_PM_OFFSET]:
+	Use RODATA_PM_OFFSET as default if not already defined.
+	(.data) [!RODATA_PM_OFFSET]: Don't include .rodata and friends.
+	(.rodata) [RODATA_PM_OFFSET]: Put at an offset of
+	__RODATA_PM_OFFSET__.
+
+2017-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/21251
+	* ldfile.c (ldfile_add_library_path): If the path starts with
+	$SYSROOT then use the sysroot as the real prefix.
+	* ldlang.c (lang_add_input_file): Treat $SYSROOT in the same
+	way as =.
+	* ldlex.l: Add $SYSROOT as allow prefix for a filename.
+	* ld.texinfo (-L): Document that $SYSROOT acts like = when
+	prefixing a library search path.
+	(INPUT): Likewise.
+	* testsuite/ld-scripts/sysroot-prefix.exp: Add $SYSROOT prefix
+	tests.
+
+2017-05-18  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em: Don't compare boolean values against TRUE or FALSE.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/xtensaelf.em (xtensa_wild_group_interleave_callback):
+	Don't compare enum against TRUE.
+
+2017-05-18  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20882
+	* testsuite/ld-gc/pr20882.d: Don't pass -gdwarf-sections to gas.
+	Allow for 16-bit address targets and match expected data fully.
+	* testsuite/ld-gc/pr20882a.s: Delete .debug_line section.
+	* testsuite/ld-gc/pr20882b.s: Likewise.
+	* testsuite/ld-gc/pr20882c.s: Likewise.
+
+2017-05-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20882
+	* testsuite/ld-gc/gc.exp: Run pr20882.
+	* testsuite/ld-gc/pr20882.d: New file.
+	* testsuite/ld-gc/pr20882a.s: Likewise.
+	* testsuite/ld-gc/pr20882b.s: Likewise.
+	* testsuite/ld-gc/pr20882c.s: Likewise.
+
+2017-05-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21481
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/21481 tests only
+	if IFUNC is supported by run-time.
+
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c: Rename occurrences of non_ir_ref.
+
+2017-05-16  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (is_visible_from_outside): Use non_ir_ref_dynamic.
+	(plugin_notice): Set non_ir_ref for references from regular
+	objects, non_ir_ref_dynamic for references from dynamic objects.
+
+2017-05-15  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips16e2-pcrel-0.d: New test.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-1.d: New test.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-addend-2.d: New test.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-addend-6.d: New test.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-n32-0.d: New test.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-n32-1.d: New test.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-n64-sym32-0.d: New test.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-n64-sym32-1.d: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2017-05-15  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/21459
+	* scripttempl/pe.sc: Add .debug_gdb_scripts section.
+	* scripttempl/pep.sc: Likewise.
+
+2017-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run property-x86-3.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/property-x86-3.d: New file.
+	* testsuite/ld-i386/property-x86-3.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-3.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-3.s: Likewise.
+
+2017-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf_x86_64.sh (TINY_READONLY_SECTION): Replace
+	.plt.bnd with .plt.sec.
+	* testsuite/ld-x86-64/bnd-ifunc-1-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-2-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-2.d: Likewise.
+	* testsuite/ld-x86-64/bnd-plt-1-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-plt-1.d: Likewise.
+	* testsuite/ld-x86-64/mpx3.dd: Likewise.
+	* testsuite/ld-x86-64/mpx3n.dd: Likewise.
+	* testsuite/ld-x86-64/mpx4.dd: Likewise.
+	* testsuite/ld-x86-64/mpx4n.dd: Likewise.
+	* testsuite/ld-x86-64/plt-main-bnd-now.rd: Likewise.
+	* testsuite/ld-x86-64/pr21038b-now.d: Likewise.
+	* testsuite/ld-x86-64/pr21038b.d: Likewise.
+	* testsuite/ld-x86-64/pr21038c-now.d: Likewise.
+	* testsuite/ld-x86-64/pr21038c.d: Likewise.
+
+2017-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/plt-pic2.dd: Updated.
+	* testsuite/ld-i386/plt2.dd: Likewise.
+	* testsuite/ld-i386/plt2.rd: Likewise.
+	* testsuite/ld-i386/pr17689now.rd: Likewise.
+	* testsuite/ld-ifunc/ifunc-16-i386-now.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-16-x86-64-now.d: Likewise.
+	* testsuite/ld-ifunc/pr17154-i386-now.d: Likewise.
+	* testsuite/ld-ifunc/pr17154-x86-64-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-branch-1-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-2-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-plt-1-now.d: Likewise.
+	* testsuite/ld-x86-64/plt2.dd: Likewise.
+	* testsuite/ld-x86-64/plt2.rd: Likewise.
+	* testsuite/ld-x86-64/pr17689now.rd: Likewise.
+	* testsuite/ld-x86-64/pr21038b-now.d: Likewise.
+	* testsuite/ld-x86-64/pr21038c-now.d: Likewise.
+
+2017-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/i386lynx.sh (CHECK_RELOCS_AFTER_OPEN_INPUT): Set
+	to yes.
+	* emulparams/i386moss.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/i386nw.sh (CHECK_RELOCS_AFTER_OPEN_INPUT): Likewise.
+
+2017-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21481
+	* testsuite/ld-x86-64/pr21481a.c: New file.
+	* testsuite/ld-x86-64/pr21481b.S: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/21481 tests.
+
+2017-05-10  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/ld-arc/attr-merge-0.d: New file.
+	* testsuite/ld-arc/attr-merge-0.s: Likewise.
+	* testsuite/ld-arc/attr-merge-0e.s: Likewise.
+	* testsuite/ld-arc/attr-merge-1.d: Likewise.
+	* testsuite/ld-arc/attr-merge-1.s: Likewise.
+	* testsuite/ld-arc/attr-merge-1e.s: Likewise.
+	* testsuite/ld-arc/attr-merge-2.d: Likewise.
+	* testsuite/ld-arc/attr-merge-2.s: Likewise.
+	* testsuite/ld-arc/attr-merge-3.d: Likewise.
+	* testsuite/ld-arc/attr-merge-3.s: Likewise.
+	* testsuite/ld-arc/attr-merge-3e.s: Likewise.
+	* testsuite/ld-arc/attr-merge-4.s: Likewise.
+	* testsuite/ld-arc/attr-merge-5.d: Likewise.
+	* testsuite/ld-arc/attr-merge-5a.s: Likewise.
+	* testsuite/ld-arc/attr-merge-5b.s: Likewise.
+	* testsuite/ld-arc/attr-merge-conflict-isa.d: Likewise.
+	* testsuite/ld-arc/attr-merge-err-isa.d: Likewise.
+	* testsuite/ld-arc/attr-merge-incompatible-cpu.d: Likewise.
+	* testsuite/ld-arc/got-01.d: Update test.
+	* testsuite/ld-arc/attr-merge-err-quarkse.d: New file.
+	* testsuite/ld-arc/attr-quarkse.s: Likewise.
+	* testsuite/ld-arc/attr-quarkse2.s: Likewise.
+
+2017-05-09  Awson  <kyrab@mail.ru>
+
+	PR ld/21471
+	* pe-dll.c (pe_detail_list): Add entry for pe-bigobj-x86-64.
+
+2017-05-09  Benjamin Peterson  <bp@benjamin.pe>
+
+	* ld.texinfo (orphan sections): Grammar fix.
+
+2017-05-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-ifunc/ifunc-16-x86-64-now.d: New file.
+	* testsuite/ld-ifunc/ifunc-2-local-x86-64-now.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-2-x86-64-now.d: Likewise.
+	* testsuite/ld-ifunc/pr17154-x86-64-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-branch-1-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-1-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-2-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-plt-1-now.d: Likewise.
+	* testsuite/ld-x86-64/mpx3n.dd: Likewise.
+	* testsuite/ld-x86-64/mpx4n.dd: Likewise.
+	* testsuite/ld-x86-64/plt-main-bnd-now.rd: Likewise.
+	* testsuite/ld-x86-64/plt2.dd: Likewise.
+	* testsuite/ld-x86-64/plt2.rd: Likewise.
+	* testsuite/ld-x86-64/plt2.s: Likewise.
+	* testsuite/ld-x86-64/pr20830a-now.d: Likewise.
+	* testsuite/ld-x86-64/pr20830b-now.d: Likewise.
+	* testsuite/ld-x86-64/pr21038a-now.d: Likewise.
+	* testsuite/ld-x86-64/pr21038b-now.d: Likewise.
+	* testsuite/ld-x86-64/pr21038c-now.d: Likewise.
+	* testsuite/ld-x86-64/load1b-nacl.d: Updated.
+	* testsuite/ld-x86-64/load1b.d: Likewise.
+	* testsuite/ld-x86-64/plt-main-bnd.dd: Likewise.
+	* testsuite/ld-x86-64/pr20253-1h.d: Likewise.
+	* testsuite/ld-x86-64/pr20830a.d: Update the .plt.got section
+	with func@plt.
+	* testsuite/ld-x86-64/pr20830b.d: Likewise.
+	* testsuite/ld-x86-64/pr21038a.d: Likewise.
+	* testsuite/ld-x86-64/pr21038c.d: Likewise.
+	* testsuite/ld-x86-64/mpx.exp: Add some -z now tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
+2017-05-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Add some -z now tests.
+	* testsuite/ld-i386/plt-pic2.dd: New file.
+	* testsuite/ld-i386/plt2.dd: Likewise.
+	* testsuite/ld-i386/plt2.rd: Likewise.
+	* testsuite/ld-i386/plt2.s: Likewise.
+	* testsuite/ld-ifunc/ifunc-16-i386-now.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-2-i386-now.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-2-local-i386-now.d: Likewise.
+	* testsuite/ld-ifunc/pr17154-i386-now.d: Likewise.
+	* testsuite/ld-i386/pr20830.d: Update the .plt.got section
+	with func@plt.
+
+2017-05-08  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp
+	(Secure gateway import library generation): Check e_type field
+	of import library and executable produced.
+	* testsuite/ld-arm/cmse-implib.type: Expectations for e_type field.
+
+2017-04-28  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/21404
+	* testsuite/ld-avr/pr21404-1.d: New test.
+	* testsuite/ld-avr/pr21404-1.s: New test.
+	* testsuite/ld-avr/pr21404-2.d: New test.
+	* testsuite/ld-avr/pr21404-2.s: New test.
+	* testsuite/ld-avr/pr21404-3.d: New test.
+	* testsuite/ld-avr/pr21404-3.s: New test.
+	* testsuite/ld-avr/pr21404-4.d: New test.
+	* testsuite/ld-avr/pr21404-4.s: New test.
+	* testsuite/ld-avr/pr21404-5.d: New test.
+	* testsuite/ld-avr/pr21404-5.s: New test.
+	* testsuite/ld-avr/pr21404-6.d: New test.
+	* testsuite/ld-avr/pr21404-6.s: New test.
+	* testsuite/ld-avr/pr21404-7.d: New test.
+	* testsuite/ld-avr/pr21404-7.s: New test.
+	* testsuite/ld-avr/pr21404-8.d: New test.
+	* testsuite/ld-avr/pr21404-8.s: New test.
+
+2017-05-03  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips16-pcrel-0.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-1.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-addend-2.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-addend-6.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-n32-0.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-n32-1.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-n64-sym32-0.d: New test.
+	* testsuite/ld-mips-elf/mips16-pcrel-n64-sym32-1.d: New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2017-05-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr21384.d: Adjusted to accommodate
+	additional dynamic symbols on some targets.
+
+2017-05-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips16-branch-absolute-1.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-2.d: New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-1.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n32-1.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n32-2.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-n32-1.d:
+	New test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n64-1.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n64-2.d: New
+	test.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-n64-1.d:
+	New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2017-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/tls.exp: Add -Wl,--no-as-needed to
+	"TLS without PLT (1)" and "TLS without PLT (3)".
+	* testsuite/ld-x86-64/tls.exp: Add -Wl,--no-as-needed to
+	to "TLS without PLT (3)".
+
+2017-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21384
+	* testsuite/ld-elf/pr21384.d: New file.
+	* testsuite/ld-elf/pr21384.dl: Likewise.
+	* testsuite/ld-elf/pr21384.ld: Likewise.
+	* testsuite/ld-elf/pr21384.s: Likewise.
+
+2017-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/tls.exp: Run GNU2 TLS tests only if there
+	is working GNU2 TLS support.
+	* testsuite/ld-x86-64/tls.exp: Likewise.
+	* testsuite/lib/ld-lib.exp (check_gnu2_tls_available): New proc.
+
+2017-04-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/config/default.exp (GNU2_CFLAGS): New.  Set
+	to -mtls-dialect=gnu2 if target compiler supports it.
+	* testsuite/ld-i386/tls.exp: Run -mtls-dialect=gnu2 tests.
+	* testsuite/ld-x86-64/tls.exp: Likewise.
+	* testsuite/ld-i386/tlsdesc1a.c: New file.
+	* testsuite/ld-i386/tlsdesc1b.c: Likewise.
+	* testsuite/ld-x86-64/tlsdesc1a.c: Likewise.
+	* testsuite/ld-x86-64/tlsdesc1b.c: Likewise.
+
+2017-04-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/shared.exp: Add run-time tests for -z now.
+	* testsuite/ld-i386/tls.exp: Likewise.
+	* testsuite/ld-ifunc/ifunc.exp: Likewise.
+	* testsuite/ld-x86-64/tls.exp: Likewise.
+
+2017-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/pr21038a.d: Update DW_CFA_nop paddings
+	in .eh_frame section.
+	* testsuite/ld-x86-64/pr21038c.d: Update .eh_frame order.
+
+2017-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/tlsdesc2.d: New test.
+	* testsuite/ld-x86-64/tlsdesc2.d: Likewise.
+
 2017-04-26  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR ld/21334

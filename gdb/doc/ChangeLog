@@ -1,3 +1,33 @@
+2017-05-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Packets): Document vMustReplyEmpty packet.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recording in Python): Factor out the documentation of
+	gdb.RecordInstruction's super class.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recording in Python): Replace gdb.BtraceFunction with
+	gdb.RecordFunctionSegment.  Rename prev_sibling and next_sibling to
+	prev and next.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recording in Python): Replace gdb.BtraceInstruction with
+	gdb.RecordInstruction
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recording in Python): Add documentation for
+	gdb.RecordGap and remove documentation of special cases for
+	gdb.BtraceInstruction.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recording in Python): Remove Record.ptid defvar.
+
 2017-04-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (GDB/MI Thread Information): Add missing
