@@ -1,3 +1,9 @@
+2017-05-31  DJ Delorie  <dj@redhat.com>
+
+	* configure.ac (strnlen): Add to AC_CHECK_DECLS.
+	* configure: Likewise.
+	* config.in: Add HACE_DECL_STRNLEN.
+
 2017-05-31  Eli Zaretskii  <eliz@gnu.org>
 
 	* waitpid.c (wait) [__MINGW32__]: Define as a macro
