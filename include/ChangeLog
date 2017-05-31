@@ -1,3 +1,7 @@
+2017-05-31  Eli Zaretskii <eliz@gnu.org>
+
+	* environ.h: Add #ifndef guard.
+
 2017-05-30  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* elf/arc-cpu.def: New file.
