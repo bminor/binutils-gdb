@@ -409,7 +409,7 @@ mem_command (char *args, int from_tty)
 
 
 static void
-mem_info_command (char *args, int from_tty)
+info_mem_command (char *args, int from_tty)
 {
   struct mem_region *m;
   struct mem_attrib *attrib;
@@ -561,7 +561,7 @@ mem_enable (int num)
 }
 
 static void
-mem_enable_command (char *args, int from_tty)
+enable_mem_command (char *args, int from_tty)
 {
   int num;
   struct mem_region *m;
@@ -606,7 +606,7 @@ mem_disable (int num)
 }
 
 static void
-mem_disable_command (char *args, int from_tty)
+disable_mem_command (char *args, int from_tty)
 {
   require_user_regions (from_tty);
 
@@ -659,7 +659,7 @@ mem_delete (int num)
 }
 
 static void
-mem_delete_command (char *args, int from_tty)
+delete_mem_command (char *args, int from_tty)
 {
   require_user_regions (from_tty);
 
@@ -705,25 +705,25 @@ where <mode>  may be rw (read/write), ro (read-only) or wo (write-only),\n\
       <width> may be 8, 16, 32, or 64, and\n\
       <cache> may be cache or nocache"));
 
-  add_cmd ("mem", class_vars, mem_enable_command, _("\
+  add_cmd ("mem", class_vars, enable_mem_command, _("\
 Enable memory region.\n\
 Arguments are the code numbers of the memory regions to enable.\n\
 Usage: enable mem <code number>...\n\
 Do \"info mem\" to see current list of code numbers."), &enablelist);
 
-  add_cmd ("mem", class_vars, mem_disable_command, _("\
+  add_cmd ("mem", class_vars, disable_mem_command, _("\
 Disable memory region.\n\
 Arguments are the code numbers of the memory regions to disable.\n\
 Usage: disable mem <code number>...\n\
 Do \"info mem\" to see current list of code numbers."), &disablelist);
 
-  add_cmd ("mem", class_vars, mem_delete_command, _("\
+  add_cmd ("mem", class_vars, delete_mem_command, _("\
 Delete memory region.\n\
 Arguments are the code numbers of the memory regions to delete.\n\
 Usage: delete mem <code number>...\n\
 Do \"info mem\" to see current list of code numbers."), &deletelist);
 
-  add_info ("mem", mem_info_command,
+  add_info ("mem", info_mem_command,
 	    _("Memory region attributes"));
 
   add_prefix_cmd ("mem", class_vars, dummy_cmd, _("\

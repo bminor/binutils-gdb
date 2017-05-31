@@ -1,3 +1,15 @@
+2017-05-31  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* memattr.c (mem_info_command): Rename to ...
+	(info_mem_command): ... this.
+	(mem_enable_command): Rename to ...
+	(enable_mem_command): ... this.
+	(mem_disable_command): Rename to ...
+	(disable_mem_command): ... this.
+	(mem_delete_command): Rename to ...
+	(delete_mem_command): ... this.
+	(_initialize_mem): Adjust function names.
+
 2017-05-31  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* btrace.c (handle_pt_insn_events): New.
