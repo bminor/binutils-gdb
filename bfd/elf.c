@@ -9814,14 +9814,14 @@ elfcore_grok_freebsd_psinfo (bfd *abfd, Elf_Internal_Note *note)
 {
   size_t offset;
 
-  switch (abfd->arch_info->bits_per_word)
+  switch (elf_elfheader (abfd)->e_ident[EI_CLASS])
     {
-    case 32:
+    case ELFCLASS32:
       if (note->descsz < 108)
 	return FALSE;
       break;
 
-    case 64:
+    case ELFCLASS64:
       if (note->descsz < 120)
 	return FALSE;
       break;
@@ -9836,7 +9836,7 @@ elfcore_grok_freebsd_psinfo (bfd *abfd, Elf_Internal_Note *note)
   offset = 4;
 
   /* Skip over pr_psinfosz. */
-  if (abfd->arch_info->bits_per_word == 32)
+  if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS32)
     offset += 4;
   else
     {
@@ -9879,13 +9879,13 @@ elfcore_grok_freebsd_prstatus (bfd *abfd, Elf_Internal_Note *note)
   offset = 4;
 
   /* Skip over pr_statussz.  */
-  switch (abfd->arch_info->bits_per_word)
+  switch (elf_elfheader (abfd)->e_ident[EI_CLASS])
     {
-    case 32:
+    case ELFCLASS32:
       offset += 4;
       break;
 
-    case 64:
+    case ELFCLASS64:
       offset += 4;	/* Padding before pr_statussz. */
       offset += 8;
       break;
@@ -9895,13 +9895,16 @@ elfcore_grok_freebsd_prstatus (bfd *abfd, Elf_Internal_Note *note)
     }
 
   /* Extract size of pr_reg from pr_gregsetsz.  */
-  if (abfd->arch_info->bits_per_word == 32)
+  if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS32)
     size = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + offset);
   else
     size = bfd_h_get_64 (abfd, (bfd_byte *) note->descdata + offset);
 
   /* Skip over pr_gregsetsz and pr_fpregsetsz. */
-  offset += (abfd->arch_info->bits_per_word / 8) * 2;
+  if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS32)
+    offset += 4 * 2;
+  else
+    offset += 8 * 2;
 
   /* Skip over pr_osreldate. */
   offset += 4;
@@ -9918,7 +9921,7 @@ elfcore_grok_freebsd_prstatus (bfd *abfd, Elf_Internal_Note *note)
   offset += 4;
 
   /* Padding before pr_reg. */
-  if (abfd->arch_info->bits_per_word == 64)
+  if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64)
     offset += 4;
 
   /* Make a ".reg/999" section and a ".reg" section.  */
