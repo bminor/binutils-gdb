@@ -206,10 +206,19 @@ s390_print_insn_with_opcode (bfd_vma memaddr,
 
       /* For instructions with a last optional operand don't print it
 	 if zero.  */
-      if ((opcode->flags & S390_INSTR_FLAG_OPTPARM)
+      if ((opcode->flags & (S390_INSTR_FLAG_OPTPARM | S390_INSTR_FLAG_OPTPARM2))
 	  && val.u == 0
 	  && opindex[1] == 0)
 	break;
+
+      if ((opcode->flags & S390_INSTR_FLAG_OPTPARM2)
+	  && val.u == 0 && opindex[1] != 0 && opindex[2] == 0)
+	{
+	  union operand_value next_op_val =
+	    s390_extract_operand (buffer, s390_operands + opindex[1]);
+	  if (next_op_val.u == 0)
+	    break;
+	}
 
       if (flags & S390_OPERAND_GPR)
 	info->fprintf_func (info->stream, "%c%%r%u", separator, val.u);

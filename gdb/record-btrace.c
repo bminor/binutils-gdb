@@ -1101,8 +1101,8 @@ record_btrace_call_history (struct target_ops *self, int size, int int_flags)
       replay = btinfo->replay;
       if (replay != NULL)
 	{
-	  begin.function = replay->function;
 	  begin.btinfo = btinfo;
+	  begin.index = replay->call_index;
 	}
       else
 	btrace_call_end (&begin, btinfo);
@@ -1570,7 +1570,7 @@ record_btrace_frame_unwind_stop_reason (struct frame_info *this_frame,
   bfun = cache->bfun;
   gdb_assert (bfun != NULL);
 
-  if (bfun->up == NULL)
+  if (bfun->up == 0)
     return UNWIND_UNAVAILABLE;
 
   return UNWIND_NO_REASON;
@@ -1584,6 +1584,7 @@ record_btrace_frame_this_id (struct frame_info *this_frame, void **this_cache,
 {
   const struct btrace_frame_cache *cache;
   const struct btrace_function *bfun;
+  struct btrace_call_iterator it;
   CORE_ADDR code, special;
 
   cache = (const struct btrace_frame_cache *) *this_cache;
@@ -1591,8 +1592,8 @@ record_btrace_frame_this_id (struct frame_info *this_frame, void **this_cache,
   bfun = cache->bfun;
   gdb_assert (bfun != NULL);
 
-  while (bfun->segment.prev != NULL)
-    bfun = bfun->segment.prev;
+  while (btrace_find_call_by_number (&it, &cache->tp->btrace, bfun->prev) != 0)
+    bfun = btrace_call_get (&it);
 
   code = get_frame_func (this_frame);
   special = bfun->number;
@@ -1615,6 +1616,7 @@ record_btrace_frame_prev_register (struct frame_info *this_frame,
   const struct btrace_frame_cache *cache;
   const struct btrace_function *bfun, *caller;
   const struct btrace_insn *insn;
+  struct btrace_call_iterator it;
   struct gdbarch *gdbarch;
   CORE_ADDR pc;
   int pcreg;
@@ -1629,10 +1631,11 @@ record_btrace_frame_prev_register (struct frame_info *this_frame,
   bfun = cache->bfun;
   gdb_assert (bfun != NULL);
 
-  caller = bfun->up;
-  if (caller == NULL)
+  if (btrace_find_call_by_number (&it, &cache->tp->btrace, bfun->up) == 0)
     throw_error (NOT_AVAILABLE_ERROR,
 		 _("No caller in btrace record history"));
+
+  caller = btrace_call_get (&it);
 
   if ((bfun->flags & BFUN_UP_LINKS_TO_RET) != 0)
     {
@@ -1678,15 +1681,21 @@ record_btrace_frame_sniffer (const struct frame_unwind *self,
 
       replay = tp->btrace.replay;
       if (replay != NULL)
-	bfun = replay->function;
+	bfun = &replay->btinfo->functions[replay->call_index];
     }
   else
     {
       const struct btrace_function *callee;
+      struct btrace_call_iterator it;
 
       callee = btrace_get_frame_function (next);
-      if (callee != NULL && (callee->flags & BFUN_UP_LINKS_TO_TAILCALL) == 0)
-	bfun = callee->up;
+      if (callee == NULL || (callee->flags & BFUN_UP_LINKS_TO_TAILCALL) != 0)
+	return 0;
+
+      if (btrace_find_call_by_number (&it, &tp->btrace, callee->up) == 0)
+	return 0;
+
+      bfun = btrace_call_get (&it);
     }
 
   if (bfun == NULL)
@@ -1713,7 +1722,9 @@ record_btrace_tailcall_frame_sniffer (const struct frame_unwind *self,
 {
   const struct btrace_function *bfun, *callee;
   struct btrace_frame_cache *cache;
+  struct btrace_call_iterator it;
   struct frame_info *next;
+  struct thread_info *tinfo;
 
   next = get_next_frame (this_frame);
   if (next == NULL)
@@ -1726,16 +1737,18 @@ record_btrace_tailcall_frame_sniffer (const struct frame_unwind *self,
   if ((callee->flags & BFUN_UP_LINKS_TO_TAILCALL) == 0)
     return 0;
 
-  bfun = callee->up;
-  if (bfun == NULL)
+  tinfo = find_thread_ptid (inferior_ptid);
+  if (btrace_find_call_by_number (&it, &tinfo->btrace, callee->up) == 0)
     return 0;
+
+  bfun = btrace_call_get (&it);
 
   DEBUG ("[frame] sniffed tailcall frame for %s on level %d",
 	 btrace_get_bfun_name (bfun), bfun->level);
 
   /* This is our frame.  Initialize the frame cache.  */
   cache = bfcache_new (this_frame);
-  cache->tp = find_thread_ptid (inferior_ptid);
+  cache->tp = tinfo;
   cache->bfun = bfun;
 
   *this_cache = cache;
@@ -1908,7 +1921,7 @@ record_btrace_start_replaying (struct thread_info *tp)
   replay = NULL;
 
   /* We can't start replaying without trace.  */
-  if (btinfo->begin == NULL)
+  if (btinfo->functions.empty ())
     return NULL;
 
   /* GDB stores the current frame_id when stepping in order to detects steps
@@ -2691,7 +2704,7 @@ record_btrace_set_replay (struct thread_info *tp,
 
   btinfo = &tp->btrace;
 
-  if (it == NULL || it->function == NULL)
+  if (it == NULL)
     record_btrace_stop_replaying (tp);
   else
     {

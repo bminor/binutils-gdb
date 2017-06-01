@@ -1179,6 +1179,31 @@ regcache::raw_supply (int regnum, const void *buf)
     }
 }
 
+/* Supply register REGNUM to REGCACHE.  Value to supply is an integer stored at
+   address ADDR, in target endian, with length ADDR_LEN and sign IS_SIGNED.  If
+   the register size is greater than ADDR_LEN, then the integer will be sign or
+   zero extended.  If the register size is smaller than the integer, then the
+   most significant bytes of the integer will be truncated.  */
+
+void
+regcache::raw_supply_integer (int regnum, const gdb_byte *addr, int addr_len,
+			      bool is_signed)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (m_descr->gdbarch);
+  gdb_byte *regbuf;
+  size_t regsize;
+
+  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  gdb_assert (!m_readonly_p);
+
+  regbuf = register_buffer (regnum);
+  regsize = m_descr->sizeof_register[regnum];
+
+  copy_integer_to_size (regbuf, regsize, addr, addr_len, is_signed,
+			byte_order);
+  m_register_status[regnum] = REG_VALID;
+}
+
 /* Supply register REGNUM with zeroed value to REGCACHE.  This is not the same
    as calling raw_supply with NULL (which will set the state to
    unavailable).  */
@@ -1225,6 +1250,29 @@ regcache::raw_collect (int regnum, void *buf) const
 /* Transfer a single or all registers belonging to a certain register
    set to or from a buffer.  This is the main worker function for
    regcache_supply_regset and regcache_collect_regset.  */
+
+/* Collect register REGNUM from REGCACHE.  Store collected value as an integer
+   at address ADDR, in target endian, with length ADDR_LEN and sign IS_SIGNED.
+   If ADDR_LEN is greater than the register size, then the integer will be sign
+   or zero extended.  If ADDR_LEN is smaller than the register size, then the
+   most significant bytes of the integer will be truncated.  */
+
+void
+regcache::raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
+			       bool is_signed) const
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (m_descr->gdbarch);
+  const gdb_byte *regbuf;
+  size_t regsize;
+
+  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+
+  regbuf = register_buffer (regnum);
+  regsize = m_descr->sizeof_register[regnum];
+
+  copy_integer_to_size (addr, addr_len, regbuf, regsize, is_signed,
+			byte_order);
+}
 
 void
 regcache::transfer_regset (const struct regset *regset,

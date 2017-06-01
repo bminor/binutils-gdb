@@ -304,7 +304,13 @@ public:
 
   void raw_collect (int regnum, void *buf) const;
 
+  void raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
+			    bool is_signed) const;
+
   void raw_supply (int regnum, const void *buf);
+
+  void raw_supply_integer (int regnum, const gdb_byte *addr, int addr_len,
+			   bool is_signed);
 
   void raw_supply_zeroed (int regnum);
 

@@ -1242,6 +1242,8 @@ long bfd_get_mtime (bfd *abfd);
 
 file_ptr bfd_get_size (bfd *abfd);
 
+file_ptr bfd_get_file_size (bfd *abfd);
+
 void *bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
     int prot, int flags, file_ptr offset,
     void **map_addr, bfd_size_type *map_len);

@@ -1272,6 +1272,13 @@ else
     else
       AC_MSG_WARN([libipt is missing or unusable; some features may be unavailable.])
     fi
+  else
+    save_LIBS=$LIBS
+    LIBS="$LIBS $LIBIPT"
+    AC_CHECK_FUNCS(pt_insn_event)
+    AC_CHECK_MEMBERS([struct pt_insn.enabled, struct pt_insn.resynced], [], [],
+                     [#include <intel-pt.h>])
+    LIBS=$save_LIBS
   fi
 fi
 

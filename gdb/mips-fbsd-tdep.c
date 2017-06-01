@@ -42,57 +42,24 @@
    34th is a dummy for padding.  */
 #define MIPS_FBSD_NUM_FPREGS	34
 
-/* Supply a single register.  If the source register size matches the
-   size the regcache expects, this can use regcache_raw_supply().  If
-   they are different, this copies the source register into a buffer
-   that can be passed to regcache_raw_supply().  */
+/* Supply a single register.  The register size might not match, so use
+   regcache->raw_supply_integer ().  */
 
 static void
 mips_fbsd_supply_reg (struct regcache *regcache, int regnum, const void *addr,
 		      size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-
-  if (register_size (gdbarch, regnum) == len)
-    regcache_raw_supply (regcache, regnum, addr);
-  else
-    {
-      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-      gdb_byte buf[MAX_REGISTER_SIZE];
-      LONGEST val;
-
-      val = extract_signed_integer ((const gdb_byte *) addr, len, byte_order);
-      store_signed_integer (buf, register_size (gdbarch, regnum), byte_order,
-			    val);
-      regcache_raw_supply (regcache, regnum, buf);
-    }
+  regcache->raw_supply_integer (regnum, (const gdb_byte *) addr, len, true);
 }
 
-/* Collect a single register.  If the destination register size
-   matches the size the regcache expects, this can use
-   regcache_raw_supply().  If they are different, this fetches the
-   register via regcache_raw_supply() into a buffer and then copies it
-   into the final destination.  */
+/* Collect a single register.  The register size might not match, so use
+   regcache->raw_collect_integer ().  */
 
 static void
 mips_fbsd_collect_reg (const struct regcache *regcache, int regnum, void *addr,
 		       size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-
-  if (register_size (gdbarch, regnum) == len)
-    regcache_raw_collect (regcache, regnum, addr);
-  else
-    {
-      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-      gdb_byte buf[MAX_REGISTER_SIZE];
-      LONGEST val;
-
-      regcache_raw_collect (regcache, regnum, buf);
-      val = extract_signed_integer (buf, register_size (gdbarch, regnum),
-				    byte_order);
-      store_signed_integer ((gdb_byte *) addr, len, byte_order, val);
-    }
+  regcache->raw_collect_integer (regnum, (gdb_byte *) addr, len, true);
 }
 
 /* Supply the floating-point registers stored in FPREGS to REGCACHE.

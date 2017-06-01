@@ -1,3 +1,196 @@
+2017-05-31  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* memattr.c (mem_info_command): Rename to ...
+	(info_mem_command): ... this.
+	(mem_enable_command): Rename to ...
+	(enable_mem_command): ... this.
+	(mem_disable_command): Rename to ...
+	(disable_mem_command): ... this.
+	(mem_delete_command): Rename to ...
+	(delete_mem_command): ... this.
+	(_initialize_mem): Adjust function names.
+
+2017-05-31  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (handle_pt_insn_events): New.
+	(ftrace_add_pt): Call handle_pt_insn_events.  Rename ERRCODE into
+	STATUS.  Split into this and ...
+	(handle_pt_insn_event_flags): ... this.
+
+2017-05-31  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* configure.ac: Check for pt_insn_event, struct pt_insn.enabled,
+	and struct pt_insn.resynced.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_find_call_by_number): New function.
+	(ftrace_new_function): Store objects, not pointers.
+	(ftrace_find_call_by_number, ftrace_new_return, ftrace_new_switch,
+	ftrace_new_gap, ftrace_update_function,
+	ftrace_compute_global_level_offset, btrace_stich_bts, btrace_clear,
+	btrace_insn_get, btrace_insn_get_error, btrace_insn_end,
+	btrace_insn_next, btrace_insn_prev, ptrace_find_insn_by_number,
+	btrace_ends_with_single_insn, btrace_call_get): Account for
+	btrace_thread_info::functions now storing objects.
+	* btrace.h (struct btrace_thread_info): Add constructor.
+	(struct btrace_thread_info) <functions>: Make std::vector.
+	(struct btrace_thread_info) <prev, next, up, insn, errcode, flags):
+	Initialize with default values.
+	* record-btrace.c (record_btrace_frame_sniffer): Account for
+	btrace_thread_info::functions now storing objects.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c: Remove typedef bfun_s.
+	(ftrace_new_gap): Directly add gaps to the list of gaps.
+	(btrace_bridge_gaps, btrace_compute_ftrace_bts, pt_btrace_insn_flags,
+	ftrace_add_pt, btrace_compute_ftrace_pt, btrace_compute_ftrace_1,
+	btrace_finalize_ftrace, btrace_compute_ftrace): Use std::vector
+	instead of gdb VEC.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_fixup_caller, ftrace_new_return, ftrace_connect_bfun,
+	ftrace_bridge_gap): Replace references to btrace_thread_info::segment
+	with btrace_thread_info::next_segment and
+	btrace_thread_info::prev_segment.
+	* btrace.h: Remove struct btrace_func_link.
+	(struct btrace_function): Replace pair of function segment pointers
+	with pair of indices.
+	* python/py-record-btrace.c (btpy_call_prev_sibling,
+	btpy_call_next_sibling): Replace references to
+	btrace_thread_info::segment with btrace_thread_info::next_segment and
+	btrace_thread_info::prev_segment.
+	* record-btrace.c (record_btrace_frame_this_id): Use
+	btrace_find_call_by_number.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_new_function, ftrace_fixup_level,
+	ftrace_connect_bfun, ftrace_bridge_gap, btrace_bridge_gaps,
+	btrace_insn_next, btrace_insn_prev): Remove references to
+	btrace_thread_info::flow.
+	* btrace.h (struct btrace_function): Remove FLOW.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_find_call_by_number): New function.
+	(ftrace_update_caller, ftrace_new_call, ftrace_new_tailcall,
+	ftrace_get_caller, ftrace_find_call, ftrace_new_return,
+	ftrace_match_backtrace, ftrace_connect_bfun, ftrace_connect_backtrace,
+	ftrace_bridge_gap, btrace_bridge_gaps): Use btrace_function::up as an
+	index.
+	* btrace.h (struct btrace_function): Turn UP into an index.
+	* python/py-record-btrace.c (btpy_call_up): Use btrace_function::up
+	as an index.
+	* record-btrace.c (record_btrace_frame_unwind_stop_reason,
+	record_btrace_frame_prev_register, record_btrace_frame_sniffer,
+	record_btrace_tailcall_frame_sniffe): Use btrace_find_call_by_number.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_new_function, ftrace_new_call, ftrace_new_tailcall,
+	ftrace_new_return, ftrace_new_switch, ftrace_new_gap,
+	ftrace_update_function, ftrace_compute_global_level_offset,
+	btrace_compute_ftrace_bts, ftrace_add_pt, btrace_compute_ftrace_pt,
+	btrace_stitch_bts, btrace_fetch, btrace_clear, btrace_insn_number,
+	btrace_insn_end, btrace_is_empty): Remove references to
+	btrace_thread_info::begin and btrace_thread_info::end.
+	* btrace.h (struct btrace_thread_info): Remove BEGIN and END.
+	(struct btrace_thread_info) <functions>: Adjust comment.
+	* record-btrace.c (record_btrace_start_replaying): Remove reference to
+	btrace_thread_info::begin.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_new_function, ftrace_new_call, ftrace_new_tailcall,
+	ftrace_new_return, ftrace_new_switch, ftrace_new_gap,
+	ftrace_update_function): Remove arguments that implicitly were always
+	BTINFO->END.
+	(btrace_compute_ftrace_bts, ftrace_add_pt, btrace_compute_ftrace_pt):
+	Don't pass BTINFO->END.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c: (btrace_insn_get, btrace_insn_get_error, btrace_insn_number,
+	btrace_insn_begin, btrace_insn_end, btrace_insn_next, btrace_insn_prev,
+	btrace_find_insn_by_number): Replace function segment pointer with
+	index.
+	(btrace_insn_cmp): Simplify.
+	* btrace.h: (struct btrace_insn_iterator) Rename index to
+	insn_index.  Replace function segment pointer with index into function
+	segment vector.
+	* record-btrace.c (record_btrace_call_history): Replace function
+	segment pointer use with index.
+	(record_btrace_frame_sniffer): Retrieve function call segment through
+	vector.
+	(record_btrace_set_replay): Remove defunc't safety check.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (btrace_ends_with_single_insn): New function.
+	(btrace_call_get, btrace_call_number, btrace_call_begin,
+	btrace_call_end, btrace_call_next, btrace_call_prev,
+	btrace_find_call_by_number): Use index into call segment vector
+	instead of pointer.
+	(btrace_call_cmp): Simplify.
+	* btrace.h (struct btrace_call_iterator): Replace function call segment
+	pointer with index into vector.
+	* record-btrace.c (record_btrace_call_history): Use index instead of
+	pointer.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (btrace_insn_begin, btrace_insn_end,
+	btrace_find_insn_by_number): Add btinfo to iterator.
+	* btrace.h (struct btrace_insn_iterator): Add btinfo.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (ftrace_new_function): Add btrace_thread_info to arguments
+	and save pointers directly.
+	(ftrace_new_call, ftrace_new_tailcall, ftrace_new_return,
+	ftrace_new_switch, ftrace_new_gap, ftrace_update_function,
+	ftrace_add_pt): Add btrace_thread_info to arguments.  Adjust for
+	changed signature of functions.
+	(btrace_compute_ftrace_pt): Adjust for changed signature of functions.
+	(btrace_fetch): Remove code that adds btrace_function pointers to
+	vector of btrace_functions.
+	(btrace_clear): Simplify freeing vector of btrace_functions.
+
+2017-05-30  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* btrace.c (btrace_fetch, btrace_clear, btrace_find_insn_by_number):
+	Replace VEC_* with std::vector functions.
+	* btrace.h: Add include: vector. Remove typedef for DEF_VEC_P.
+	(struct btrace_thread_info)<functions>: Change type to std::vector.
+
+2017-05-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS (Changes in GDB 8.0): Remove extra empty line.  Move
+	"Removed targets and native configurations" up.  Merge duplicate
+	"New commands" sub-sections.  Add "New options" sub-sections.
+
+2017-05-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* defs.h (copy_integer_to_size): New declaration.
+	* findvar.c (copy_integer_to_size): New function.
+	(do_cint_test): New selftest function.
+	(copy_integer_to_size_test): Likewise.
+	(_initialize_findvar): Likewise.
+	* mips-fbsd-tdep.c (mips_fbsd_supply_reg): Use raw_supply_integer.
+	(mips_fbsd_collect_reg): Use raw_collect_integer.
+	* mips-linux-tdep.c (supply_32bit_reg): Use raw_supply_integer.
+	(mips64_fill_gregset): Use raw_collect_integer
+	(mips64_fill_fpregset): Use raw_supply_integer.
+	* regcache.c (regcache::raw_supply_integer): New function.
+	(regcache::raw_collect_integer): Likewise.
+	* regcache.h: (regcache::raw_supply_integer): New declaration.
+	(regcache::raw_collect_integer): Likewise.
+
 2017-05-24  Yao Qi  <yao.qi@linaro.org>
 
 	* Makefile.in (SFILES): Add gdbarch-selftests.c.
