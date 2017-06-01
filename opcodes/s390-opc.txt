@@ -79,7 +79,7 @@ b224 iac RRE_R0 "insert address space control" g5 esa,zarch
 bf icm RS_RURD "insert characters under mask" g5 esa,zarch
 b20b ipk S_00 "insert PSW key" g5 esa,zarch
 b222 ipm RRE_R0 "insert program mask" g5 esa,zarch
-b221 ipte RRE_RR "invalidate page table entry" g5 esa,zarch
+b221 ipte RRF_RURR "invalidate page table entry" g5 esa,zarch optparm2
 b229 iske RRE_RR "insert storage key extended" g5 esa,zarch
 b223 ivsk RRE_RR "insert virtual storage key" g5 esa,zarch
 58 l RX_RRRD "load" g5 esa,zarch
@@ -700,7 +700,7 @@ eb000000008f clclu RSY_RRRD "compare logical long unicode with long offset" z990
 eb0000000096 lmh RSY_RRRD "load multiple high" z990 zarch
 # new z990 instructions
 b98a cspg RRE_RR "compare and swap and purge" z990 zarch
-b98e idte RRF_R0RR "invalidate dat table entry" z990 zarch
+b98e idte RRF_RURR2 "invalidate dat table entry" z990 zarch optparm
 b33e madr RRF_F0FF "multiply and add long hfp" z990 esa,zarch
 ed000000003e mad RXF_FRRDF "multiply and add long hfp" z990 esa,zarch
 b32e maer RRF_F0FF "multiply and add short hfp" z990 esa,zarch
@@ -1116,7 +1116,6 @@ b92b kmo RRE_RR "cipher message with OFB" z196 zarch
 b92c pcc RRE_00 "perform cryptographic computation" z196 zarch
 b92d kmctr RRF_R0RR "cipher message with counter" z196 zarch
 b928 pckmo RRE_00 "perform cryptographic key management operation" z196 zarch
-b221 ipte RRF_R0RR2 "invalidate page table entry" z196 zarch optparm
 
 # The new instructions of the IBM zEnterprise EC12
 b2ec etnd RRE_R0 "extract transaction nesting depth" zEC12 zarch htm
@@ -1144,8 +1143,6 @@ ed00000000aa cdzt RSL_LRDFU "convert from zoned long" zEC12 zarch
 ed00000000ab cxzt RSL_LRDFEU "convert from zoned extended" zEC12 zarch
 ed00000000a8 czdt RSL_LRDFU "convert to zoned long" zEC12 zarch
 ed00000000a9 czxt RSL_LRDFEU "convert to zoned extended" zEC12 zarch
-b98e idte RRF_RURR2 "invalidate dat table entry" zEC12 zarch optparm
-b221 ipte RRF_RURR "invalidate page table entry" zEC12 zarch optparm2
 
 # The new instructions of IBM z13
 

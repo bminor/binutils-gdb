@@ -475,3 +475,5 @@ foo:
 	xr	%r6,%r9
 	xsch
 	zap	4095(6,%r5),4095(9,%r10)
+	ipte	%r6,%r9,%r11
+	ipte	%r6,%r9,%r11,13

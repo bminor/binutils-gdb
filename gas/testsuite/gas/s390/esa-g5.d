@@ -481,4 +481,6 @@ Disassembly of section .text:
 .*:	17 69 [	 ]*xr	%r6,%r9
 .*:	b2 76 00 00 [	 ]*xsch
 .*:	f8 58 5f ff af ff [	 ]*zap	4095\(6,%r5\),4095\(9,%r10\)
+.*:	b2 21 b0 69 [	 ]*ipte	%r6,%r9,%r11
+.*:	b2 21 bd 69 [	 ]*ipte	%r6,%r9,%r11,13
 .*:	07 07 [ 	]*nopr	%r7
