@@ -1,3 +1,10 @@
+2017-06-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/call_nop.sh: Remove -z prefix-nop.
+	* ld.texinfo: Likewise.
+	* testsuite/ld-i386/call3c.d: Check for linker error.
+	* testsuite/ld-x86-64/call1c.d: Likewise.
+
 2017-05-31  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (plt-static-chain help): Fix quoting.
