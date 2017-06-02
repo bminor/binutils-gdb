@@ -1,5 +1,15 @@
 2017-06-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* breakpoint.c (struct longjmp_breakpoint): New struct.
+	(is_tracepoint_type): Change return type to bool.
+	(is_longjmp_type): New function.
+	(new_breakpoint_from_type): Handle longjmp kinds of breakpoints.
+	(set_raw_breakpoint_without_location): Use
+	new_breakpoint_from_type.
+	(set_raw_breakpoint): Likewise.
+
+2017-06-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* breakpoint.c (new_breakpoint_from_type): New function.
 	(create_breakpoint_sal): Use new_breakpoint_from_type and
 	unique_ptr.

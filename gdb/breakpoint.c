@@ -1160,14 +1160,25 @@ check_no_tracepoint_commands (struct command_line *commands)
     }
 }
 
+struct longjmp_breakpoint
+{
+  breakpoint base;
+};
+
 /* Encapsulate tests for different types of tracepoints.  */
 
-static int
-is_tracepoint_type (enum bptype type)
+static bool
+is_tracepoint_type (bptype type)
 {
   return (type == bp_tracepoint
 	  || type == bp_fast_tracepoint
 	  || type == bp_static_tracepoint);
+}
+
+static bool
+is_longjmp_type (bptype type)
+{
+  return type == bp_longjmp || type == bp_exception;
 }
 
 int
@@ -1186,6 +1197,8 @@ new_breakpoint_from_type (bptype type)
 
   if (is_tracepoint_type (type))
     b = (breakpoint *) new tracepoint ();
+  else if (is_longjmp_type (type))
+    b = (breakpoint *) new longjmp_breakpoint ();
   else
     b = new breakpoint ();
 
@@ -7446,11 +7459,12 @@ set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
 				     enum bptype bptype,
 				     const struct breakpoint_ops *ops)
 {
-  struct breakpoint *b = new breakpoint ();
+  std::unique_ptr<breakpoint> b = new_breakpoint_from_type (bptype);
 
-  init_raw_breakpoint_without_location (b, gdbarch, bptype, ops);
-  add_to_breakpoint_chain (b);
-  return b;
+  init_raw_breakpoint_without_location (b.get (), gdbarch, bptype, ops);
+  add_to_breakpoint_chain (b.get ());
+
+  return b.release ();
 }
 
 /* Initialize loc->function_name.  EXPLICIT_LOC says no indirect function
@@ -7562,11 +7576,12 @@ set_raw_breakpoint (struct gdbarch *gdbarch,
 		    struct symtab_and_line sal, enum bptype bptype,
 		    const struct breakpoint_ops *ops)
 {
-  struct breakpoint *b = new breakpoint ();
+  std::unique_ptr<breakpoint> b = new_breakpoint_from_type (bptype);
 
-  init_raw_breakpoint (b, gdbarch, sal, bptype, ops);
-  add_to_breakpoint_chain (b);
-  return b;
+  init_raw_breakpoint (b.get (), gdbarch, sal, bptype, ops);
+  add_to_breakpoint_chain (b.get ());
+
+  return b.release ();
 }
 
 /* Call this routine when stepping and nexting to enable a breakpoint
