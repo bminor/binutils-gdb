@@ -1,3 +1,8 @@
+2017-06-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* event-loop.c (poll_timers): Unallocate timer using delete
+	instead of xfree.
+
 2017-06-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* breakpoint.h (struct breakpoint_ops) <dtor>: Remove.

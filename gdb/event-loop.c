@@ -1270,7 +1270,7 @@ poll_timers (void)
       /* Delete the timer before calling the callback, not after, in
 	 case the callback itself decides to try deleting the timer
 	 too.  */
-      xfree (timer_ptr);
+      delete timer_ptr;
 
       /* Call the procedure associated with that timer.  */
       (proc) (client_data);
