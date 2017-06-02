@@ -1,3 +1,10 @@
+2017-06-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.c (new_breakpoint_from_type): New function.
+	(create_breakpoint_sal): Use new_breakpoint_from_type and
+	unique_ptr.
+	(create_breakpoint): Likewise.
+
 2017-05-31  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* memattr.c (mem_info_command): Rename to ...

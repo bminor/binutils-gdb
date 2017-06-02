@@ -1176,6 +1176,22 @@ is_tracepoint (const struct breakpoint *b)
   return is_tracepoint_type (b->type);
 }
 
+/* Factory function to create an appropriate instance of breakpoint given
+   TYPE.  */
+
+static std::unique_ptr<breakpoint>
+new_breakpoint_from_type (bptype type)
+{
+  breakpoint *b;
+
+  if (is_tracepoint_type (type))
+    b = (breakpoint *) new tracepoint ();
+  else
+    b = new breakpoint ();
+
+  return std::unique_ptr<breakpoint> (b);
+}
+
 /* A helper function that validates that COMMANDS are valid for a
    breakpoint.  This function will throw an exception if a problem is
    found.  */
@@ -9310,22 +9326,9 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		       int enabled, int internal, unsigned flags,
 		       int display_canonical)
 {
-  struct breakpoint *b;
-  struct cleanup *old_chain;
+  std::unique_ptr<breakpoint> b = new_breakpoint_from_type (type);
 
-  if (is_tracepoint_type (type))
-    {
-      struct tracepoint *t;
-
-      t = new tracepoint ();
-      b = &t->base;
-    }
-  else
-    b = new breakpoint ();
-
-  old_chain = make_cleanup (xfree, b);
-
-  init_breakpoint_sal (b, gdbarch,
+  init_breakpoint_sal (b.get (), gdbarch,
 		       sals, std::move (location),
 		       filter, cond_string, extra_string,
 		       type, disposition,
@@ -9333,9 +9336,8 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		       ops, from_tty,
 		       enabled, internal, flags,
 		       display_canonical);
-  discard_cleanups (old_chain);
 
-  install_breakpoint (internal, b, 0);
+  install_breakpoint (internal, b.release (), 0);
 }
 
 /* Add SALS.nelts breakpoints to the breakpoint table.  For each
@@ -9804,19 +9806,9 @@ create_breakpoint (struct gdbarch *gdbarch,
     }
   else
     {
-      struct breakpoint *b;
+      std::unique_ptr <breakpoint> b = new_breakpoint_from_type (type_wanted);
 
-      if (is_tracepoint_type (type_wanted))
-	{
-	  struct tracepoint *t;
-
-	  t = new tracepoint ();
-	  b = &t->base;
-	}
-      else
-	b = new breakpoint ();
-
-      init_raw_breakpoint_without_location (b, gdbarch, type_wanted, ops);
+      init_raw_breakpoint_without_location (b.get (), gdbarch, type_wanted, ops);
       b->location = copy_event_location (location);
 
       if (parse_extra)
@@ -9848,7 +9840,7 @@ create_breakpoint (struct gdbarch *gdbarch,
            && type_wanted != bp_hardware_breakpoint) || thread != -1)
 	b->pspace = current_program_space;
 
-      install_breakpoint (internal, b, 0);
+      install_breakpoint (internal, b.release (), 0);
     }
   
   if (VEC_length (linespec_sals, canonical.sals) > 1)
