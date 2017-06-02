@@ -1,5 +1,9 @@
 2017-06-12  Tom Tromey  <tom@tromey.com>
 
+	* gdb.dwarf2/formdata16.exp: Add tests.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
 	* gdb.arch/altivec-regs.exp: Expect decimal results for uint128.
 
 2017-06-12  Tom Tromey  <tom@tromey.com>
