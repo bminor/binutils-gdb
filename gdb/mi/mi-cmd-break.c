@@ -398,7 +398,7 @@ mi_cmd_break_passcount (const char *command, char **argv, int argc)
   if (t)
     {
       t->pass_count = p;
-      observer_notify_breakpoint_modified (&t->base);
+      observer_notify_breakpoint_modified (t);
     }
   else
     {

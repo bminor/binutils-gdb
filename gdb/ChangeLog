@@ -1,5 +1,106 @@
 2017-06-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* breakpoint.h (struct breakpoint_ops) <dtor>: Remove.
+	(struct breakpoint) <~breakpoint>: New.
+	(struct watchpoint): Inherit from breakpoint.
+	<~watchpoint>: New.
+	<base>: Remove.
+	(struct tracepoint): Inherit from breakpoint.
+	<base>: Remove.
+	* breakpoint.c (longjmp_breakpoint_ops): Remove.
+	(struct longjmp_breakpoint): Inherit from breakpoint.
+	<~longjmp_breakpoint>: New.
+	<base>: Remove.
+	(new_breakpoint_from_type): Remove casts.
+	(watchpoint_in_thread_scope): Remove reference to base field.
+	(watchpoint_del_at_next_stop): Likewise.
+	(update_watchpoint): Likewise.
+	(watchpoint_check): Likewise.
+	(bpstat_check_watchpoint): Likewise.
+	(set_longjmp_breakpoint): Likewise.
+	(struct fork_catchpoint): Inherit from breakpoint.
+	<base>: Remove.
+	(struct solib_catchpoint): Inherit from breakpoint.
+	<~solib_catchpoint>: New.
+	<base>: Remove.
+	(dtor_catch_solib): Change to ...
+	(solib_catchpoint::~solib_catchpoint): ... this.
+	(breakpoint_hit_catch_solib): Remove reference to base field.
+	(add_solib_catchpoint): Likewise.
+	(create_fork_vfork_event_catchpoint): Likewise.
+	(struct exec_catchpoint): Inherit from breakpoint.
+	<~exec_catchpoint>: New.
+	<base>: Remove.
+	(dtor_catch_exec): Change to ...
+	(exec_catchpoint::~exec_catchpoint): ... this.
+	(dtor_watchpoint): Change to ...
+	(watchpoint::~watchpoint): ... this.
+	(watch_command_1): Remove reference to base field.
+	(catch_exec_command_1): Likewise.
+	(base_breakpoint_dtor): Change to ...
+	(breakpoint::~breakpoint): ... this.
+	(base_breakpoint_ops): Remove dtor field value.
+	(longjmp_bkpt_dtor): Change to ...
+	(longjmp_breakpoint::~longjmp_breakpoint): ... this.
+	(strace_marker_create_breakpoints_sal): Remove reference to base
+	field.
+	(delete_breakpoint): Don't manually call breakpoint destructor.
+	(create_tracepoint_from_upload): Remove reference to base field.
+	(trace_pass_set_count): Likewise.
+	(initialize_breakpoint_ops): Don't initialize
+	momentary_breakpoint_ops, don't set dtors.
+	* ada-lang.c (struct ada_catchpoint): Inherit from breakpoint.
+	<~ada_catchpoint>: New.
+	<base>: Remove.
+	(create_excep_cond_exprs): Remove reference to base field.
+	(dtor_exception): Change to ...
+	(ada_catchpoint::~ada_catchpoint): ... this.
+	(dtor_catch_exception): Remove.
+	(dtor_catch_exception_unhandled): Remove.
+	(dtor_catch_assert): Remove.
+	(create_ada_exception_catchpoint): Remove reference to base
+	field.
+	(initialize_ada_catchpoint_ops): Don't set dtors.
+	* break-catch-sig.c (struct signal_catchpoint): Inherit from
+	breakpoint.
+	<~signal_catchpoint>: New.
+	<base>: Remove.
+	(signal_catchpoint_dtor): Change to ...
+	(signal_catchpoint::~signal_catchpoint): ... this.
+	(create_signal_catchpoint): Remove reference to base field.
+	(initialize_signal_catchpoint_ops): Don't set dtor.
+	* break-catch-syscall.c (struct syscall_catchpoint): Inherit
+	from breakpoint.
+	<~syscall_catchpoint>: New.
+	<base>: Remove.
+	(dtor_catch_syscall): Change to ...
+	(syscall_catchpoint::~syscall_catchpoint): ... this.
+	(create_syscall_event_catchpoint): Remove reference to base
+	field.
+	(initialize_syscall_catchpoint_ops): Don't set dtor.
+	* break-catch-throw.c (struct exception_catchpoint): Inherit
+	from breakpoint.
+	<~exception_catchpoint>: New.
+	<base>: Remove.
+	(dtor_exception_catchpoint): Change to ...
+	(exception_catchpoint::~exception_catchpoint): ... this.
+	(handle_gnu_v3_exceptions): Remove reference to base field.
+	(initialize_throw_catchpoint_ops): Don't set dtor.
+	* ctf.c (ctf_get_traceframe_address): Remove reference to base
+	field.
+	* remote.c (remote_get_tracepoint_status): Likewise.
+	* tracefile-tfile.c (tfile_get_traceframe_address): Likewise.
+	* tracefile.c (tracefile_fetch_registers): Likewise.
+	* tracepoint.c (actions_command): Likewise.
+	(validate_actionline): Likewise.
+	(tfind_1): Likewise.
+	(get_traceframe_location): Likewise.
+	(find_matching_tracepoint_location): Likewise.
+	(parse_tracepoint_status): Likewise.
+	* mi/mi-cmd-break.c (mi_cmd_break_passcount): Likewise.
+
+2017-06-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* breakpoint.c (struct longjmp_breakpoint): New struct.
 	(is_tracepoint_type): Change return type to bool.
 	(is_longjmp_type): New function.

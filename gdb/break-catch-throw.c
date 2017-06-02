@@ -74,11 +74,9 @@ static struct breakpoint_ops gnu_v3_exception_catchpoint_ops;
 
 /* The type of an exception catchpoint.  */
 
-struct exception_catchpoint
+struct exception_catchpoint : public breakpoint
 {
-  /* The base class.  */
-
-  struct breakpoint base;
+  ~exception_catchpoint () override;
 
   /* The kind of exception catchpoint.  */
 
@@ -142,17 +140,13 @@ classify_exception_breakpoint (struct breakpoint *b)
   return cp->kind;
 }
 
-/* Implement the 'dtor' method.  */
+/* exception_catchpoint destructor.  */
 
-static void
-dtor_exception_catchpoint (struct breakpoint *self)
+exception_catchpoint::~exception_catchpoint ()
 {
-  struct exception_catchpoint *cp = (struct exception_catchpoint *) self;
-
-  xfree (cp->exception_rx);
-  if (cp->pattern != NULL)
-    regfree (cp->pattern);
-  bkpt_breakpoint_ops.dtor (self);
+  xfree (this->exception_rx);
+  if (this->pattern != NULL)
+    regfree (this->pattern);
 }
 
 /* Implement the 'check_status' method.  */
@@ -396,18 +390,18 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx,
 
   std::unique_ptr<exception_catchpoint> cp (new exception_catchpoint ());
 
-  init_catchpoint (&cp->base, get_current_arch (), tempflag, cond_string,
+  init_catchpoint (cp.get (), get_current_arch (), tempflag, cond_string,
 		   &gnu_v3_exception_catchpoint_ops);
   /* We need to reset 'type' in order for code in breakpoint.c to do
      the right thing.  */
-  cp->base.type = bp_breakpoint;
+  cp->type = bp_breakpoint;
   cp->kind = ex_event;
   cp->exception_rx = except_rx;
   cp->pattern = pattern;
 
-  re_set_exception_catchpoint (&cp->base);
+  re_set_exception_catchpoint (cp.get ());
 
-  install_breakpoint (0, &cp->base, 1);
+  install_breakpoint (0, cp.get (), 1);
   cp.release ();
 }
 
@@ -558,7 +552,6 @@ initialize_throw_catchpoint_ops (void)
   /* GNU v3 exception catchpoints.  */
   ops = &gnu_v3_exception_catchpoint_ops;
   *ops = bkpt_breakpoint_ops;
-  ops->dtor = dtor_exception_catchpoint;
   ops->re_set = re_set_exception_catchpoint;
   ops->print_it = print_it_exception_catchpoint;
   ops->print_one = print_one_exception_catchpoint;

@@ -12650,9 +12650,9 @@ remote_get_tracepoint_status (struct target_ops *self, struct breakpoint *bp,
 
   if (tp)
     {
-      tp->base.hit_count = 0;
+      tp->hit_count = 0;
       tp->traceframe_usage = 0;
-      for (loc = tp->base.loc; loc; loc = loc->next)
+      for (loc = tp->loc; loc; loc = loc->next)
 	{
 	  /* If the tracepoint was never downloaded, don't go asking for
 	     any status.  */
