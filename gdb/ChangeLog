@@ -1,3 +1,9 @@
+2017-06-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-nat.c (linux_nat_post_attach_wait): Remove FIRST
+	parameter.
+	(linux_nat_attach): Adjust call to linux_nat_post_attach_wait.
+
 2017-06-02  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* event-loop.c (poll_timers): Unallocate timer using delete

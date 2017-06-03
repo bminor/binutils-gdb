@@ -1045,7 +1045,7 @@ exit_lwp (struct lwp_info *lp)
    Returns a wait status for that LWP, to cache.  */
 
 static int
-linux_nat_post_attach_wait (ptid_t ptid, int first, int *signalled)
+linux_nat_post_attach_wait (ptid_t ptid, int *signalled)
 {
   pid_t new_pid, pid = ptid_get_lwp (ptid);
   int status;
@@ -1245,7 +1245,7 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
   /* Add the initial process as the first LWP to the list.  */
   lp = add_initial_lwp (ptid);
 
-  status = linux_nat_post_attach_wait (lp->ptid, 1, &lp->signalled);
+  status = linux_nat_post_attach_wait (lp->ptid, &lp->signalled);
   if (!WIFSTOPPED (status))
     {
       if (WIFEXITED (status))
