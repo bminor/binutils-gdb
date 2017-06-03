@@ -1,3 +1,22 @@
+2017-07-22  Tom Tromey  <tom@tromey.com>
+
+	* break-catch-sig.c (gdb_signal_type): Remove typedef.
+	(struct signal_catchpoint) <signals_to_be_caught>: Now a
+	std::vector.
+	<catch_all>: Now a bool.
+	(~signal_catchpoint): Remove.
+	(signal_catchpoint_insert_location)
+	(signal_catchpoint_remove_location)
+	(signal_catchpoint_breakpoint_hit, signal_catchpoint_print_one)
+	(signal_catchpoint_print_mention)
+	(signal_catchpoint_print_recreate)
+	(signal_catchpoint_explains_signal): Update.
+	(create_signal_catchpoint): Change type of "filter" and
+	"catch_all".
+	(catch_signal_split_args): Return a std::vector.  Change type of
+	"catch_all".
+	(catch_signal_command): Update.
+
 2017-07-20  Pedro Alves  <palves@redhat.com>
 
 	* ada-lang.c (ada_language_defn): Make extern.
