@@ -1,5 +1,15 @@
 2017-07-22  Tom Tromey  <tom@tromey.com>
 
+	* break-catch-throw.c (struct exception_catchpoint)
+	<exception_rx>: Now a std::string.
+	(~exception_catchpoint): Remove.
+	(print_one_detail_exception_catchpoint): Update.
+	(handle_gnu_v3_exceptions): Change type of except_rx.
+	(extract_exception_regexp): Return a std::string.
+	(catch_exception_command_1): Update.
+
+2017-07-22  Tom Tromey  <tom@tromey.com>
+
 	* break-catch-sig.c (gdb_signal_type): Remove typedef.
 	(struct signal_catchpoint) <signals_to_be_caught>: Now a
 	std::vector.
