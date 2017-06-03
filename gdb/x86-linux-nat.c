@@ -43,16 +43,6 @@
 #include "nat/x86-linux-dregs.h"
 #include "nat/linux-ptrace.h"
 
-/* Per-thread arch-specific data we want to keep.  */
-
-struct arch_lwp_info
-{
-  /* Non-zero if our copy differs from what's recorded in the thread.  */
-  int debug_registers_changed;
-};
-
-
-
 /* linux_nat_new_fork hook.   */
 
 static void
