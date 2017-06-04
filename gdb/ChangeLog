@@ -1,3 +1,7 @@
+2017-06-04  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 8.0 released.
+
 2017-06-03  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* x86-linux-nat.c (struct arch_lwp_info): Remove.
