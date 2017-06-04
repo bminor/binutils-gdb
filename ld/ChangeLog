@@ -1,3 +1,11 @@
+2017-06-05  Slava Barinov  <v.barinov@samsung.com>
+
+	* configure.ac: Add --enable-new-dtags option.
+	* ldmain.c: Set link_info.new_dtags to 1 if when --enable-new-dtags is
+	switched on.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2017-06-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emulparams/call_nop.sh: Remove -z prefix-nop.
@@ -804,9 +812,9 @@
 2017-02-27   Georg-Johann Lay  <gjl@gcc.gnu.org>
 
 	PR target/20849
-        * scripttempl/avrtiny.sc (__RODATA_PM_OFFSET__): New define.
-        (.rodata): New section.
-        (.data): Remove .rodata*.
+	* scripttempl/avrtiny.sc (__RODATA_PM_OFFSET__): New define.
+	(.rodata): New section.
+	(.data): Remove .rodata*.
 
 2017-02-25  Alan Modra  <amodra@gmail.com>
 

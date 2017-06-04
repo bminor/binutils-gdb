@@ -298,6 +298,9 @@ main (int argc, char **argv)
 #ifdef DEFAULT_FLAG_COMPRESS_DEBUG
   link_info.compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
 #endif
+#ifdef DEFAULT_NEW_DTAGS
+  link_info.new_dtags = TRUE;
+#endif
 
   ldfile_add_arch ("");
   emulation = get_emulation (argc, argv);
