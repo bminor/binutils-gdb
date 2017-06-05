@@ -1,3 +1,8 @@
+2017-06-05  Alan Modra  <amodra@gmail.com>
+
+	PR 21529
+	* linker.c (_bfd_generic_link_output_symbols): Handle BSF_GNU_UNIQUE.
+
 2017-06-01  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf.c (elfcore_grok_freebsd_psinfo): Use ELF header class to
