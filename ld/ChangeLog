@@ -1,8 +1,16 @@
+2017-06-05  Alan Modra  <amodra@gmail.com>
+
+	* ldmain.c (main): Correct setting of link_indo.new_dtags.
+	* testsuite/ld-elf/now-3.d: Pass --disable-new-dtags to ld
+	* testsuite/ld-elf/now-4.d: Likewise.
+	* testsuite/ld-elf/rpath-1.d: Likewise.
+	* testsuite/ld-elf/rpath-2.d: Likewise.
+
 2017-06-05  Slava Barinov  <v.barinov@samsung.com>
 
 	* configure.ac: Add --enable-new-dtags option.
-	* ldmain.c: Set link_info.new_dtags to 1 if when --enable-new-dtags is
-	switched on.
+	* ldmain.c (main): Set link_info.new_dtags to 1 if when
+	--enable-new-dtags is switched on.
 	* configure: Regenerate.
 	* config.in: Regenerate.
 

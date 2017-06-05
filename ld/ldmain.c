@@ -299,7 +299,7 @@ main (int argc, char **argv)
   link_info.compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
 #endif
 #ifdef DEFAULT_NEW_DTAGS
-  link_info.new_dtags = TRUE;
+  link_info.new_dtags = DEFAULT_NEW_DTAGS;
 #endif
 
   ldfile_add_arch ("");
