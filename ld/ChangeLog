@@ -1,3 +1,10 @@
+2017-06-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21529
+	* testsuite/ld-unique/pr21529.d: New file.
+	* testsuite/ld-unique/pr21529.s: Likewise.
+	* testsuite/ld-unique/unique.exp: Run *.d.
+
 2017-06-05  Alan Modra  <amodra@gmail.com>
 
 	* ldmain.c (main): Correct setting of link_indo.new_dtags.
