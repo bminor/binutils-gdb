@@ -1,3 +1,11 @@
+2017-06-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* elf.c (setup_group): Make sure BFD sections are created for all
+	group sections in the input file when processing SHF_GROUP
+	sections.
+	(bfd_section_from_shdr): Avoid duplicating logic already
+	implemented in `setup_group'.
+
 2017-06-06  Daniel Bonniot de Ruisselet  <bonniot@gmail.com>
 
 	PR binutils/21546

@@ -636,6 +636,11 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		  unsigned char *src;
 		  Elf_Internal_Group *dest;
 
+                  /* Make sure the group section has a BFD section
+                     attached to it.  */
+                  if (!bfd_section_from_shdr (abfd, i))
+                    return FALSE;
+                  
 		  /* Add to list of sections.  */
 		  elf_tdata (abfd)->group_sect_ptr[num_group] = shdr;
 		  num_group += 1;
@@ -2421,34 +2426,6 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       if (!_bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
 	goto fail;
 
-      if (hdr->contents != NULL)
-	{
-	  Elf_Internal_Group *idx = (Elf_Internal_Group *) hdr->contents;
-	  unsigned int n_elt = hdr->sh_size / sizeof (* idx);
-	  asection *s;
-
-	  if (n_elt == 0)
-	    goto fail;
-	  if (idx->flags & GRP_COMDAT)
-	    hdr->bfd_section->flags
-	      |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
-
-	  /* We try to keep the same section order as it comes in.  */
-	  idx += n_elt;
-
-	  while (--n_elt != 0)
-	    {
-	      --idx;
-
-	      if (idx->shdr != NULL
-		  && (s = idx->shdr->bfd_section) != NULL
-		  && elf_next_in_group (s) != NULL)
-		{
-		  elf_next_in_group (hdr->bfd_section) = s;
-		  break;
-		}
-	    }
-	}
       goto success;
 
     default:
