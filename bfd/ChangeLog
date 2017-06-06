@@ -1,3 +1,9 @@
+2017-06-06  James Clarke  <jrtc27@jrtc27.com>
+
+	PR ld/19579
+	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_symbol): Check
+	ELF_COMMON_DEF_P for common symbols.
+
 2017-06-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Don't initially mark
