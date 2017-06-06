@@ -41,7 +41,7 @@ init_target_desc (struct target_desc *tdesc)
 
 #ifndef IN_PROCESS_AGENT
 
-static const struct target_desc default_description = { NULL, 0, NULL, NULL };
+static const struct target_desc default_description {};
 
 void
 copy_target_description (struct target_desc *dest,
@@ -61,5 +61,79 @@ current_target_desc (void)
 
   return current_process ()->tdesc;
 }
-
 #endif
+
+struct tdesc_type
+{};
+
+struct tdesc_feature *
+tdesc_create_feature (struct target_desc *tdesc, const char *name)
+{
+  return tdesc;
+}
+
+struct tdesc_type *
+tdesc_create_flags (struct tdesc_feature *feature, const char *name,
+		    int size)
+{
+  return NULL;
+}
+
+void
+tdesc_add_flag (struct tdesc_type *type, int start,
+		const char *flag_name)
+{}
+
+struct tdesc_type *
+tdesc_named_type (const struct tdesc_feature *feature, const char *id)
+{
+  return NULL;
+}
+
+void
+tdesc_create_reg (struct tdesc_feature *feature, const char *name,
+		  int regnum, int save_restore, const char *group,
+		  int bitsize, const char *type)
+{
+  struct target_desc *tdesc = (struct target_desc *) feature;
+
+  while (VEC_length (tdesc_reg_p, tdesc->reg_defs) < regnum)
+    {
+      struct reg *reg = XCNEW (struct reg);
+
+      reg->name = "";
+      reg->size = 0;
+      VEC_safe_push (tdesc_reg_p, tdesc->reg_defs, reg);
+    }
+
+  gdb_assert (regnum == 0
+	      || regnum == VEC_length (tdesc_reg_p, tdesc->reg_defs));
+
+  struct reg *reg = XCNEW (struct reg);
+
+  reg->name = name;
+  reg->size = bitsize;
+  VEC_safe_push (tdesc_reg_p, tdesc->reg_defs, reg);
+}
+
+struct tdesc_type *
+tdesc_create_vector (struct tdesc_feature *feature, const char *name,
+		     struct tdesc_type *field_type, int count)
+{
+  return NULL;
+}
+
+void
+tdesc_add_bitfield (struct tdesc_type *type, const char *field_name,
+		    int start, int end)
+{}
+
+void
+tdesc_add_field (struct tdesc_type *type, const char *field_name,
+		 struct tdesc_type *field_type)
+{}
+
+void
+tdesc_set_struct_size (struct tdesc_type *type, int size)
+{
+}

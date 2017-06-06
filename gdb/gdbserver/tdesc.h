@@ -38,13 +38,28 @@ struct target_desc
 #ifndef IN_PROCESS_AGENT
   /* An array of register names.  These are the "expedite" registers:
      registers whose values are sent along with stop replies.  */
-  const char **expedite_regs;
+  const char **expedite_regs = NULL;
 
   /* Defines what to return when looking for the "target.xml" file in
      response to qXfer:features:read.  Its contents can either be
      verbatim XML code (prefixed with a '@') or else the name of the
      actual XML file to be used in place of "target.xml".  */
-  const char *xmltarget;
+  const char *xmltarget = NULL;
+
+public:
+  target_desc ()
+    : reg_defs (NULL), registers_size (0)
+  {}
+
+  ~target_desc ()
+  {
+    int i;
+    struct reg *reg;
+
+    for (i = 0; VEC_iterate (tdesc_reg_p, reg_defs, i, reg); i++)
+      xfree (reg);
+    VEC_free (tdesc_reg_p, reg_defs);
+  }
 #endif
 };
 
@@ -61,5 +76,44 @@ void init_target_desc (struct target_desc *tdesc);
    NULL.  */
 
 const struct target_desc *current_target_desc (void);
+
+#ifndef IN_PROCESS_AGENT
+#endif
+
+#define tdesc_feature target_desc
+
+struct tdesc_type;
+
+struct tdesc_feature *tdesc_create_feature (struct target_desc *tdesc,
+					    const char *name);
+
+struct tdesc_type *tdesc_create_flags (struct tdesc_feature *feature,
+				       const char *name, int size);
+
+void tdesc_add_flag (struct tdesc_type *type, int start,
+		     const char *flag_name);
+
+struct tdesc_type *tdesc_named_type (const struct tdesc_feature *feature,
+				     const char *id);
+
+#define tdesc_create_union tdesc_named_type
+#define tdesc_create_struct tdesc_named_type
+
+void tdesc_add_field (struct tdesc_type *type, const char *field_name,
+		      struct tdesc_type *field_type);
+
+void tdesc_set_struct_size (struct tdesc_type *type, int size);
+
+void tdesc_add_bitfield (struct tdesc_type *type, const char *field_name,
+			 int start, int end);
+
+void tdesc_create_reg (struct tdesc_feature *feature, const char *name,
+		       int regnum, int save_restore, const char *group,
+		       int bitsize, const char *type);
+
+struct tdesc_type *tdesc_create_vector (struct tdesc_feature *feature,
+					const char *name,
+					struct tdesc_type *field_type,
+					int count);
 
 #endif /* TDESC_H */

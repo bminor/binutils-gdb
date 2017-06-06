@@ -1,9 +1,13 @@
 /* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
   Original: 32bit-pkeys.xml.tmp */
 
+#ifdef GDBSERVER
+#include "tdesc.h"
+#else
 #include "defs.h"
 #include "osabi.h"
 #include "target-descriptions.h"
+#endif
 
 static int
 create_feature_i386_32bit_pkeys (struct target_desc *result, long regnum)

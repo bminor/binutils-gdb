@@ -2163,9 +2163,13 @@ public:
 
   void visit (const target_desc *e) override
   {
+    printf_unfiltered ("#ifdef GDBSERVER\n");
+    printf_unfiltered ("#include \"tdesc.h\"\n");
+    printf_unfiltered ("#else\n");
     printf_unfiltered ("#include \"defs.h\"\n");
     printf_unfiltered ("#include \"osabi.h\"\n");
     printf_unfiltered ("#include \"target-descriptions.h\"\n");
+    printf_unfiltered ("#endif\n");
     printf_unfiltered ("\n");
   }
 
