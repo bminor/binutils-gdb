@@ -120,7 +120,9 @@ static void
 
 static void create_breakpoints_sal_default (struct gdbarch *,
 					    struct linespec_result *,
-					    char *, char *, enum bptype,
+					    gdb::unique_xmalloc_ptr<char>,
+					    gdb::unique_xmalloc_ptr<char>,
+					    enum bptype,
 					    enum bpdisp, int, int,
 					    int,
 					    const struct breakpoint_ops *,
@@ -9167,8 +9169,9 @@ static void
 init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 		     struct symtabs_and_lines sals,
 		     event_location_up &&location,
-		     char *filter, char *cond_string,
-		     char *extra_string,
+		     gdb::unique_xmalloc_ptr<char> filter,
+		     gdb::unique_xmalloc_ptr<char> cond_string,
+		     gdb::unique_xmalloc_ptr<char> extra_string,
 		     enum bptype type, enum bpdisp disposition,
 		     int thread, int task, int ignore_count,
 		     const struct breakpoint_ops *ops, int from_tty,
@@ -9214,8 +9217,8 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 	  b->thread = thread;
 	  b->task = task;
 
-	  b->cond_string = cond_string;
-	  b->extra_string = extra_string;
+	  b->cond_string = cond_string.release ();
+	  b->extra_string = extra_string.release ();
 	  b->ignore_count = ignore_count;
 	  b->enable_state = enabled ? bp_enabled : bp_disabled;
 	  b->disposition = disposition;
@@ -9299,15 +9302,16 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
     b->location = std::move (location);
   else
     b->location = new_address_location (b->loc->address, NULL, 0);
-  b->filter = filter;
+  b->filter = filter.release ();
 }
 
 static void
 create_breakpoint_sal (struct gdbarch *gdbarch,
 		       struct symtabs_and_lines sals,
 		       event_location_up &&location,
-		       char *filter, char *cond_string,
-		       char *extra_string,
+		       gdb::unique_xmalloc_ptr<char> filter,
+		       gdb::unique_xmalloc_ptr<char> cond_string,
+		       gdb::unique_xmalloc_ptr<char> extra_string,
 		       enum bptype type, enum bpdisp disposition,
 		       int thread, int task, int ignore_count,
 		       const struct breakpoint_ops *ops, int from_tty,
@@ -9318,7 +9322,9 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 
   init_breakpoint_sal (b.get (), gdbarch,
 		       sals, std::move (location),
-		       filter, cond_string, extra_string,
+		       std::move (filter),
+		       std::move (cond_string),
+		       std::move (extra_string),
 		       type, disposition,
 		       thread, task, ignore_count,
 		       ops, from_tty,
@@ -9346,7 +9352,8 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 static void
 create_breakpoints_sal (struct gdbarch *gdbarch,
 			struct linespec_result *canonical,
-			char *cond_string, char *extra_string,
+			gdb::unique_xmalloc_ptr<char> cond_string,
+			gdb::unique_xmalloc_ptr<char> extra_string,
 			enum bptype type, enum bpdisp disposition,
 			int thread, int task, int ignore_count,
 			const struct breakpoint_ops *ops, int from_tty,
@@ -9365,13 +9372,14 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
       event_location_up location
 	= (canonical->location != NULL
 	   ? copy_event_location (canonical->location.get ()) : NULL);
-      char *filter_string = lsal->canonical ? xstrdup (lsal->canonical) : NULL;
+      gdb::unique_xmalloc_ptr<char> filter_string
+	(lsal->canonical != NULL ? xstrdup (lsal->canonical) : NULL);
 
-      make_cleanup (xfree, filter_string);
       create_breakpoint_sal (gdbarch, lsal->sals,
 			     std::move (location),
-			     filter_string,
-			     cond_string, extra_string,
+			     std::move (filter_string),
+			     std::move (cond_string),
+			     std::move (extra_string),
 			     type, disposition,
 			     thread, task, ignore_count, ops,
 			     from_tty, enabled, internal, flags,
@@ -9650,8 +9658,9 @@ decode_static_tracepoint_spec (const char **arg_p)
 
 int
 create_breakpoint (struct gdbarch *gdbarch,
-		   const struct event_location *location, char *cond_string,
-		   int thread, char *extra_string,
+		   const struct event_location *location,
+		   const char *cond_string,
+		   int thread, const char *extra_string,
 		   int parse_extra,
 		   int tempflag, enum bptype type_wanted,
 		   int ignore_count,
@@ -9743,9 +9752,13 @@ create_breakpoint (struct gdbarch *gdbarch,
      breakpoint.  */
   if (!pending)
     {
+      gdb::unique_xmalloc_ptr<char> cond_string_copy;
+      gdb::unique_xmalloc_ptr<char> extra_string_copy;
+
       if (parse_extra)
         {
 	  char *rest;
+	  char *cond;
 	  struct linespec_sals *lsal;
 
 	  lsal = VEC_index (linespec_sals, canonical.sals, 0);
@@ -9756,15 +9769,9 @@ create_breakpoint (struct gdbarch *gdbarch,
 	     re-parse it in context of each sal.  */
 
 	  find_condition_and_thread (extra_string, lsal->sals.sals[0].pc,
-				     &cond_string, &thread, &task, &rest);
-	  if (cond_string)
-	    make_cleanup (xfree, cond_string);
-	  if (rest)
-	    make_cleanup (xfree, rest);
-	  if (rest)
-	    extra_string = rest;
-	  else
-	    extra_string = NULL;
+				     &cond, &thread, &task, &rest);
+	  cond_string_copy.reset (cond);
+	  extra_string_copy.reset (rest);
         }
       else
         {
@@ -9774,20 +9781,16 @@ create_breakpoint (struct gdbarch *gdbarch,
 
 	  /* Create a private copy of condition string.  */
 	  if (cond_string)
-	    {
-	      cond_string = xstrdup (cond_string);
-	      make_cleanup (xfree, cond_string);
-	    }
+	    cond_string_copy.reset (xstrdup (cond_string));
 	  /* Create a private copy of any extra string.  */
 	  if (extra_string)
-	    {
-	      extra_string = xstrdup (extra_string);
-	      make_cleanup (xfree, extra_string);
-	    }
+	    extra_string_copy.reset (xstrdup (extra_string));
         }
 
       ops->create_breakpoints_sal (gdbarch, &canonical,
-				   cond_string, extra_string, type_wanted,
+				   std::move (cond_string_copy),
+				   std::move (extra_string_copy),
+				   type_wanted,
 				   tempflag ? disp_del : disp_donttouch,
 				   thread, task, ignore_count, ops,
 				   from_tty, enabled, internal, flags);
@@ -9804,22 +9807,12 @@ create_breakpoint (struct gdbarch *gdbarch,
       else
 	{
 	  /* Create a private copy of condition string.  */
-	  if (cond_string)
-	    {
-	      cond_string = xstrdup (cond_string);
-	      make_cleanup (xfree, cond_string);
-	    }
-	  b->cond_string = cond_string;
+	  b->cond_string = cond_string != NULL ? xstrdup (cond_string) : NULL;
 	  b->thread = thread;
 	}
 
       /* Create a private copy of any extra string.  */
-      if (extra_string != NULL)
-	{
-	  extra_string = xstrdup (extra_string);
-	  make_cleanup (xfree, extra_string);
-	}
-      b->extra_string = extra_string;
+      b->extra_string = extra_string != NULL ? xstrdup (extra_string) : NULL;
       b->ignore_count = ignore_count;
       b->disposition = tempflag ? disp_del : disp_donttouch;
       b->condition_not_parsed = 1;
@@ -12839,8 +12832,8 @@ base_breakpoint_create_sals_from_location
 static void
 base_breakpoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 					struct linespec_result *c,
-					char *cond_string,
-					char *extra_string,
+					gdb::unique_xmalloc_ptr<char> cond_string,
+					gdb::unique_xmalloc_ptr<char> extra_string,
 					enum bptype type_wanted,
 					enum bpdisp disposition,
 					int thread,
@@ -13088,8 +13081,8 @@ bkpt_create_sals_from_location (const struct event_location *location,
 static void
 bkpt_create_breakpoints_sal (struct gdbarch *gdbarch,
 			     struct linespec_result *canonical,
-			     char *cond_string,
-			     char *extra_string,
+			     gdb::unique_xmalloc_ptr<char> cond_string,
+			     gdb::unique_xmalloc_ptr<char> extra_string,
 			     enum bptype type_wanted,
 			     enum bpdisp disposition,
 			     int thread,
@@ -13099,7 +13092,8 @@ bkpt_create_breakpoints_sal (struct gdbarch *gdbarch,
 			     int internal, unsigned flags)
 {
   create_breakpoints_sal_default (gdbarch, canonical,
-				  cond_string, extra_string,
+				  std::move (cond_string),
+				  std::move (extra_string),
 				  type_wanted,
 				  disposition, thread, task,
 				  ignore_count, ops, from_tty,
@@ -13407,8 +13401,8 @@ tracepoint_create_sals_from_location (const struct event_location *location,
 static void
 tracepoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 				   struct linespec_result *canonical,
-				   char *cond_string,
-				   char *extra_string,
+				   gdb::unique_xmalloc_ptr<char> cond_string,
+				   gdb::unique_xmalloc_ptr<char> extra_string,
 				   enum bptype type_wanted,
 				   enum bpdisp disposition,
 				   int thread,
@@ -13418,7 +13412,8 @@ tracepoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 				   int internal, unsigned flags)
 {
   create_breakpoints_sal_default (gdbarch, canonical,
-				  cond_string, extra_string,
+				  std::move (cond_string),
+				  std::move (extra_string),
 				  type_wanted,
 				  disposition, thread, task,
 				  ignore_count, ops, from_tty,
@@ -13563,8 +13558,8 @@ strace_marker_create_sals_from_location (const struct event_location *location,
 static void
 strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
 				      struct linespec_result *canonical,
-				      char *cond_string,
-				      char *extra_string,
+				      gdb::unique_xmalloc_ptr<char> cond_string,
+				      gdb::unique_xmalloc_ptr<char> extra_string,
 				      enum bptype type_wanted,
 				      enum bpdisp disposition,
 				      int thread,
@@ -13598,7 +13593,8 @@ strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
       tp = new tracepoint ();
       init_breakpoint_sal (tp, gdbarch, expanded,
 			   std::move (location), NULL,
-			   cond_string, extra_string,
+			   std::move (cond_string),
+			   std::move (extra_string),
 			   type_wanted, disposition,
 			   thread, task, ignore_count, ops,
 			   from_tty, enabled, internal, flags,
@@ -14351,8 +14347,8 @@ create_sals_from_location_default (const struct event_location *location,
 static void
 create_breakpoints_sal_default (struct gdbarch *gdbarch,
 				struct linespec_result *canonical,
-				char *cond_string,
-				char *extra_string,
+				gdb::unique_xmalloc_ptr<char> cond_string,
+				gdb::unique_xmalloc_ptr<char> extra_string,
 				enum bptype type_wanted,
 				enum bpdisp disposition,
 				int thread,
@@ -14361,8 +14357,9 @@ create_breakpoints_sal_default (struct gdbarch *gdbarch,
 				int from_tty, int enabled,
 				int internal, unsigned flags)
 {
-  create_breakpoints_sal (gdbarch, canonical, cond_string,
-			  extra_string,
+  create_breakpoints_sal (gdbarch, canonical,
+			  std::move (cond_string),
+			  std::move (extra_string),
 			  type_wanted, disposition,
 			  thread, task, ignore_count, ops, from_tty,
 			  enabled, internal, flags);

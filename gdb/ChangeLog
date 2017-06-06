@@ -1,3 +1,21 @@
+2017-06-06  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/21553
+	* breakpoint.c (create_breakpoints_sal_default)
+	(init_breakpoint_sal, create_breakpoint_sal): Use
+	gdb::unique_xmalloc_ptr for string parameters.
+	(create_breakpoint): Constify 'extra_string' and 'cond_string'
+	parameters.  Replace cleanups with gdb::unique_xmalloc_ptr.
+	(base_breakpoint_create_breakpoints_sal)
+	(bkpt_create_breakpoints_sal, tracepoint_create_breakpoints_sal)
+	(strace_marker_create_breakpoints_sal)
+	(create_breakpoints_sal_default): Use gdb::unique_xmalloc_ptr for
+	string parameters.
+	* breakpoint.h (breakpoint_ops::create_breakpoints_sal): Use
+	gdb::unique_xmalloc_ptr for string parameters.
+	(create_breakpoint): Constify 'extra_string' and 'cond_string'
+	parameters.
+
 2017-06-06  Alan Hayward  <alan.hayward@arm.com>
 
 	* alpha-tdep.c (alpha_register_to_value): Use

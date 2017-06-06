@@ -604,7 +604,8 @@ struct breakpoint_ops
      This function is called inside `create_breakpoint'.  */
   void (*create_breakpoints_sal) (struct gdbarch *,
 				  struct linespec_result *,
-				  char *, char *,
+				  gdb::unique_xmalloc_ptr<char>,
+				  gdb::unique_xmalloc_ptr<char>,
 				  enum bptype, enum bpdisp, int, int,
 				  int, const struct breakpoint_ops *,
 				  int, int, int, unsigned);
@@ -1329,8 +1330,8 @@ enum breakpoint_create_flags
 
 extern int create_breakpoint (struct gdbarch *gdbarch,
 			      const struct event_location *location,
-			      char *cond_string, int thread,
-			      char *extra_string,
+			      const char *cond_string, int thread,
+			      const char *extra_string,
 			      int parse_extra,
 			      int tempflag, enum bptype wanted_type,
 			      int ignore_count,
