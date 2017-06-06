@@ -1,3 +1,9 @@
+2017-06-06  Daniel Bonniot de Ruisselet  <bonniot@gmail.com>
+
+	PR binutils/21546
+	* peXXigen.c (pe_print_idata): Use the address of the first thunk
+	if the hint address is zero.
+
 2017-06-06  James Clarke  <jrtc27@jrtc27.com>
 
 	PR ld/19579
