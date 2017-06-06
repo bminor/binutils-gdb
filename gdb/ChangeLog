@@ -1,3 +1,8 @@
+2017-06-06  Yao Qi  <yao.qi@linaro.org>
+
+	* regformats/regdef.h (set_register_cache): Remove the
+	declaration.
+
 2017-06-06 Alan Hayward  <alan.hayward@arm.com>
 
 	* frame.c (frame_unwind_register_signed): Use
