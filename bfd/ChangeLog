@@ -1,3 +1,39 @@
+2017-06-06  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf-bfd.h (RELOC_AGAINST_DISCARDED_SECTION): Subtract `count'
+	from `reloc_count' rather than decrementing it.
+	* elf.c (bfd_section_from_shdr): Multiply the adjustment to
+	`reloc_count' by `int_rels_per_ext_rel'.
+	* elf32-score.c (score_elf_final_link_relocate): Do not multiply
+	`reloc_count' by `int_rels_per_ext_rel' for last relocation
+	entry determination.
+	(s3_bfd_score_elf_check_relocs): Likewise.
+	* elf32-score7.c (score_elf_final_link_relocate): Likewise.
+	(s7_bfd_score_elf_relocate_section): Likewise.
+	(s7_bfd_score_elf_check_relocs): Likewise.
+	* elf64-mips.c (mips_elf64_get_reloc_upper_bound): Remove
+	prototype and function.
+	(mips_elf64_slurp_one_reloc_table): Do not update `reloc_count'.
+	(mips_elf64_slurp_reloc_table): Assert that `reloc_count' is
+	triple rather than once the sum of REL and RELA relocation entry
+	counts.
+	(bfd_elf64_get_reloc_upper_bound): Remove macro.
+	* elflink.c (_bfd_elf_link_read_relocs): Do not multiply
+	`reloc_count' by `int_rels_per_ext_rel' for internal relocation
+	storage allocation size determination.
+	(elf_link_input_bfd): Multiply `.ctors' and `.dtors' section's
+	size by `int_rels_per_ext_rel'.  Do not multiply `reloc_count'
+	by `int_rels_per_ext_rel' for last relocation entry
+	determination.
+	(bfd_elf_final_link): Do not multiply `reloc_count' by
+	`int_rels_per_ext_rel' for internal relocation storage
+	allocation size determination.
+	(init_reloc_cookie_rels): Do not multiply `reloc_count' by
+	`int_rels_per_ext_rel' for last relocation entry determination.
+	(elf_gc_smash_unused_vtentry_relocs): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Likewise.
+	(_bfd_mips_elf_relocate_section): Likewise.
+
 2017-06-05  Alan Modra  <amodra@gmail.com>
 
 	PR 21529

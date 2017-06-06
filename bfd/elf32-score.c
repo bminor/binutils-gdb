@@ -2038,7 +2038,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
       bfd_vma lo_value = 0;
 
       bed = get_elf_backend_data (output_bfd);
-      relend = relocs + input_section->reloc_count * bed->s->int_rels_per_ext_rel;
+      relend = relocs + input_section->reloc_count;
       lo16_rel = score_elf_next_relocation (input_bfd, R_SCORE_GOT_LO16, rel, relend);
       if ((local_p) && (lo16_rel != NULL))
         {
@@ -2808,7 +2808,7 @@ s3_bfd_score_elf_check_relocs (bfd *abfd,
 
   sreloc = NULL;
   bed = get_elf_backend_data (abfd);
-  rel_end = relocs + sec->reloc_count * bed->s->int_rels_per_ext_rel;
+  rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; ++rel)
     {
       unsigned long r_symndx;

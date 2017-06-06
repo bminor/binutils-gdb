@@ -86,8 +86,6 @@ static void mips_elf64_info_to_howto_rel
   (bfd *, arelent *, Elf_Internal_Rela *);
 static void mips_elf64_info_to_howto_rela
   (bfd *, arelent *, Elf_Internal_Rela *);
-static long mips_elf64_get_reloc_upper_bound
-  (bfd *, asection *);
 static long mips_elf64_get_dynamic_reloc_upper_bound
   (bfd *);
 static bfd_boolean mips_elf64_slurp_one_reloc_table
@@ -3648,12 +3646,6 @@ mips_elf64_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
    to three relocs, we must tell the user to allocate more space.  */
 
 static long
-mips_elf64_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
-{
-  return (sec->reloc_count * 3 + 1) * sizeof (arelent *);
-}
-
-static long
 mips_elf64_get_dynamic_reloc_upper_bound (bfd *abfd)
 {
   return _bfd_elf_get_dynamic_reloc_upper_bound (abfd) * 3;
@@ -3819,8 +3811,6 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 	}
     }
 
-  asect->reloc_count += relent - relents;
-
   if (allocated != NULL)
     free (allocated);
 
@@ -3835,8 +3825,7 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 /* Read the relocations.  On Irix 6, there can be two reloc sections
    associated with a single data section.  This is copied from
    elfcode.h as well, with changes as small as accounting for 3
-   internal relocs per external reloc and resetting reloc_count to
-   zero before processing the relocs of a section.  */
+   internal relocs per external reloc.  */
 
 static bfd_boolean
 mips_elf64_slurp_reloc_table (bfd *abfd, asection *asect,
@@ -3864,7 +3853,7 @@ mips_elf64_slurp_reloc_table (bfd *abfd, asection *asect,
       rel_hdr2 = d->rela.hdr;
       reloc_count2 = (rel_hdr2 ? NUM_SHDR_ENTRIES (rel_hdr2) : 0);
 
-      BFD_ASSERT (asect->reloc_count == reloc_count + reloc_count2);
+      BFD_ASSERT (asect->reloc_count == 3 * (reloc_count + reloc_count2));
       BFD_ASSERT ((rel_hdr && asect->rel_filepos == rel_hdr->sh_offset)
 		  || (rel_hdr2 && asect->rel_filepos == rel_hdr2->sh_offset));
 
@@ -3889,9 +3878,6 @@ mips_elf64_slurp_reloc_table (bfd *abfd, asection *asect,
   relents = bfd_alloc (abfd, amt);
   if (relents == NULL)
     return FALSE;
-
-  /* The slurp_one_reloc_table routine increments reloc_count.  */
-  asect->reloc_count = 0;
 
   if (rel_hdr != NULL
       && ! mips_elf64_slurp_one_reloc_table (abfd, asect,
@@ -4437,7 +4423,6 @@ const struct elf_size_info mips_elf64_size_info =
 #define bfd_elf64_bfd_print_private_bfd_data \
 				_bfd_mips_elf_print_private_bfd_data
 
-#define bfd_elf64_get_reloc_upper_bound mips_elf64_get_reloc_upper_bound
 #define bfd_elf64_get_dynamic_reloc_upper_bound mips_elf64_get_dynamic_reloc_upper_bound
 #define bfd_elf64_mkobject		_bfd_mips_elf_mkobject
 

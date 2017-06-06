@@ -8102,7 +8102,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   extsymoff = (elf_bad_symtab (abfd)) ? 0 : symtab_hdr->sh_info;
 
   bed = get_elf_backend_data (abfd);
-  rel_end = relocs + sec->reloc_count * bed->s->int_rels_per_ext_rel;
+  rel_end = relocs + sec->reloc_count;
 
   /* Check for the mips16 stub sections.  */
 
@@ -10034,7 +10034,7 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   const struct elf_backend_data *bed;
 
   bed = get_elf_backend_data (output_bfd);
-  relend = relocs + input_section->reloc_count * bed->s->int_rels_per_ext_rel;
+  relend = relocs + input_section->reloc_count;
   for (rel = relocs; rel < relend; ++rel)
     {
       const char *name;

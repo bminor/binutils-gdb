@@ -2374,7 +2374,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	*hdr2 = *hdr;
 	*p_hdr = hdr2;
 	elf_elfsections (abfd)[shindex] = hdr2;
-	target_sect->reloc_count += NUM_SHDR_ENTRIES (hdr);
+	target_sect->reloc_count += (NUM_SHDR_ENTRIES (hdr)
+				     * bed->s->int_rels_per_ext_rel);
 	target_sect->flags |= SEC_RELOC;
 	target_sect->relocation = NULL;
 	target_sect->rel_filepos = hdr->sh_offset;
