@@ -1,3 +1,8 @@
+2017-06-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* elflink.c (init_reloc_cookie_rels): Remove unused variable
+	`bed'.
+
 2017-06-06  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elf-bfd.h (RELOC_AGAINST_DISCARDED_SECTION): Subtract `count'

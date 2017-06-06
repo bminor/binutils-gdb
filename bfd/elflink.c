@@ -12572,8 +12572,6 @@ init_reloc_cookie_rels (struct elf_reloc_cookie *cookie,
 			struct bfd_link_info *info, bfd *abfd,
 			asection *sec)
 {
-  const struct elf_backend_data *bed;
-
   if (sec->reloc_count == 0)
     {
       cookie->rels = NULL;
@@ -12581,8 +12579,6 @@ init_reloc_cookie_rels (struct elf_reloc_cookie *cookie,
     }
   else
     {
-      bed = get_elf_backend_data (abfd);
-
       cookie->rels = _bfd_elf_link_read_relocs (abfd, sec, NULL, NULL,
 						info->keep_memory);
       if (cookie->rels == NULL)
