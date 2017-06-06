@@ -1,4 +1,8 @@
 2017-10-02  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.h (rust_slice_type): Add "extern".
+
+2017-10-02  Tom Tromey  <tom@tromey.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	* ada-lang.h (ada_exc_info::operator<): Make const.
