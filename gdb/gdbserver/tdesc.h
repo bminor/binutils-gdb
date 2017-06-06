@@ -19,7 +19,8 @@
 #ifndef TDESC_H
 #define TDESC_H
 
-struct reg;
+#include "regdef.h"
+#include <cstring>
 
 typedef struct reg *tdesc_reg_p;
 DEF_VEC_P(tdesc_reg_p);
@@ -59,6 +60,45 @@ public:
     for (i = 0; VEC_iterate (tdesc_reg_p, reg_defs, i, reg); i++)
       xfree (reg);
     VEC_free (tdesc_reg_p, reg_defs);
+  }
+  bool operator!= (const target_desc &other) const
+  {
+    if (VEC_length (tdesc_reg_p, reg_defs)
+	!= VEC_length (tdesc_reg_p, other.reg_defs))
+      return true;
+
+    struct reg *reg;
+
+    for (int ix = 0;
+	 VEC_iterate (tdesc_reg_p, reg_defs, ix, reg);
+	 ix++)
+      {
+	struct reg *reg2
+	  = VEC_index (tdesc_reg_p, other.reg_defs, ix);
+
+	if (reg != reg2 && *reg != *reg2)
+	  return true;
+      }
+
+    /* Compare expedite_regs.  */
+    int i = 0;
+    for (; expedite_regs[i] != NULL; i++)
+      {
+	if (strcmp (expedite_regs[i], other.expedite_regs[i]) != 0)
+	  return true;
+      }
+    if (other.expedite_regs[i] != NULL)
+      return true;
+
+    if (strcmp (xmltarget, other.xmltarget) != 0)
+      return true;
+
+    return false;
+  }
+
+  bool operator== (const target_desc &other) const
+  {
+    return !(*this != other);
   }
 #endif
 };

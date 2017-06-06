@@ -61,6 +61,47 @@ extern const struct target_desc *tdesc_i386_mpx_linux;
 
 static const struct target_desc *i386_tdescs[X86_TDESC_LAST] = { };
 
+#if defined GDB_SELF_TEST && !defined IN_PROCESS_AGENT
+#include "selftest.h"
+
+namespace selftests {
+namespace gdbserver {
+static void
+i386_tdesc_test ()
+{
+  const struct target_desc *tdesc = i386_get_ipa_tdesc (X86_TDESC_MMX);
+
+  SELF_CHECK (*tdesc == *tdesc_i386_mmx_linux);
+  delete tdesc;
+
+  tdesc = i386_get_ipa_tdesc (X86_TDESC_SSE);
+  SELF_CHECK (*tdesc == *tdesc_i386_linux);
+  delete tdesc;
+
+  tdesc = i386_get_ipa_tdesc (X86_TDESC_AVX);
+  SELF_CHECK (*tdesc == *tdesc_i386_avx_linux);
+  delete tdesc;
+
+  tdesc = i386_get_ipa_tdesc (X86_TDESC_MPX);
+  SELF_CHECK (*tdesc == *tdesc_i386_mpx_linux);
+  delete tdesc;
+
+  tdesc = i386_get_ipa_tdesc (X86_TDESC_AVX_MPX);
+  SELF_CHECK (*tdesc == *tdesc_i386_avx_mpx_linux);
+  delete tdesc;
+
+  tdesc = i386_get_ipa_tdesc (X86_TDESC_AVX_AVX512);
+  SELF_CHECK (*tdesc == *tdesc_i386_avx_avx512_linux);
+  delete tdesc;
+
+  tdesc = i386_get_ipa_tdesc (X86_TDESC_AVX_MPX_AVX512_PKU);
+  SELF_CHECK (*tdesc == *tdesc_i386_avx_mpx_avx512_pku_linux);
+  delete tdesc;
+}
+}
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
+
 void
 initialize_low_tdesc ()
 {
@@ -72,6 +113,10 @@ initialize_low_tdesc ()
   init_registers_i386_avx_mpx_linux ();
   init_registers_i386_avx_avx512_linux ();
   init_registers_i386_avx_mpx_avx512_pku_linux ();
+
+#if GDB_SELF_TEST
+  register_self_test (selftests::gdbserver::i386_tdesc_test);
+#endif
 #endif
 }
 
