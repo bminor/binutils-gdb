@@ -1,5 +1,11 @@
 2017-06-06  Alan Hayward  <alan.hayward@arm.com>
 
+	* alpha-tdep.c (alpha_register_to_value): Use
+	get_frame_register_value.
+	(alpha_value_to_register): Use ALPHA_REGISTER_SIZE.
+
+2017-06-06  Alan Hayward  <alan.hayward@arm.com>
+
 	* ia64-tdep.c (IA64_MAX_FP_REGISTER_SIZE) Add.
 	(ia64_register_to_value): Use IA64_MAX_FP_REGISTER_SIZE.
 	(ia64_value_to_register): Likewise.
