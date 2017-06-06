@@ -10031,9 +10031,7 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   const Elf_Internal_Rela *relend;
   bfd_vma addend = 0;
   bfd_boolean use_saved_addend_p = FALSE;
-  const struct elf_backend_data *bed;
 
-  bed = get_elf_backend_data (output_bfd);
   relend = relocs + input_section->reloc_count;
   for (rel = relocs; rel < relend; ++rel)
     {

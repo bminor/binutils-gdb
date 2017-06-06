@@ -1,5 +1,15 @@
 2017-06-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* elfxx-mips.c (_bfd_mips_elf_relocate_section): Remove unused
+	variable `bed'.
+	* elf32-score.c (score_elf_final_link_relocate): Likewise.
+	(s3_bfd_score_elf_check_relocs): Likewise.
+	* elf32-score7.c (s7_bfd_score_elf_relocate_section): Likewise.
+	(score_elf_final_link_relocate): Likewise.
+	(s7_bfd_score_elf_check_relocs): Likewise.
+
+2017-06-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* elflink.c (init_reloc_cookie_rels): Remove unused variable
 	`bed'.
 
