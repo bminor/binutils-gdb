@@ -172,7 +172,7 @@ typedef struct
   /* If set, display the target memory usage (per memory region).  */
   bfd_boolean print_memory_usage;
 
-  /* Shold we force section groups to be resolved?  Controlled with
+  /* Should we force section groups to be resolved?  Controlled with
      --force-group-allocation on the command line or FORCE_GROUP_ALLOCATION
      in the linker script.  */
   bfd_boolean force_group_allocation;

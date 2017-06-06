@@ -1,5 +1,9 @@
 2017-06-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ld.h (struct args_type): Fix typo in comment.
+
+2017-06-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ld.h (struct args_type): Add force_group_allocation field.
 	* ldgram.y: Add support for FORCE_GROUP_ALLOCATION.
 	* ldlex.h: Likewise.
