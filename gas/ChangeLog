@@ -1,3 +1,8 @@
+2017-06-05  Jim Wilson  <jim.wilson@linaro.org>
+
+	* config/tc-arm.c (arm_cpus): Delete falkor and qdf24xx entries.
+	* doc/c-arm.texi (-mcpu): Likewise.
+
 2017-05-30  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* config/tc-arc.c (cpu_types): Include arc-cpu.def
