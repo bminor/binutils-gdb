@@ -1880,17 +1880,19 @@ ILL_RPC (S_proc_setmsgport_reply,
 	 mach_port_t oldmsgport)
 ILL_RPC (S_proc_getmsgport_reply,
 	 mach_port_t reply_port, kern_return_t return_code,
-	 mach_port_t msgports)
+	 mach_port_t msgports, mach_msg_type_name_t msgportsPoly)
 ILL_RPC (S_proc_pid2task_reply,
 	 mach_port_t reply_port, kern_return_t return_code, mach_port_t task)
 ILL_RPC (S_proc_task2pid_reply,
 	 mach_port_t reply_port, kern_return_t return_code, pid_t pid)
 ILL_RPC (S_proc_task2proc_reply,
-	 mach_port_t reply_port, kern_return_t return_code, mach_port_t proc)
+	 mach_port_t reply_port, kern_return_t return_code,
+	 mach_port_t proc, mach_msg_type_name_t procPoly)
 ILL_RPC (S_proc_proc2task_reply,
 	 mach_port_t reply_port, kern_return_t return_code, mach_port_t task)
 ILL_RPC (S_proc_pid2proc_reply,
-	 mach_port_t reply_port, kern_return_t return_code, mach_port_t proc)
+	 mach_port_t reply_port, kern_return_t return_code,
+	 mach_port_t proc, mach_msg_type_name_t procPoly)
 ILL_RPC (S_proc_getprocinfo_reply,
 	 mach_port_t reply_port, kern_return_t return_code,
 	 int flags, procinfo_t procinfo, mach_msg_type_number_t procinfoCnt,

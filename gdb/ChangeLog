@@ -1,3 +1,10 @@
+2019-02-14  David Michael  <fedora.dm0@gmail.com>
+	    Samuel Thibault  <samuel.thibault@gnu.org>
+	    Thomas Schwinge  <thomas@codesourcery.com>
+
+	* gnu-nat.c (S_proc_getmsgport_reply, S_proc_task2proc_reply)
+	(S_proc_pid2proc_reply): Adjust to Hurd "proc" interface changes.
+
 2019-02-14  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* gnu-nat.c (gnu_write_inferior, parse_int_arg, _parse_bool_arg)
