@@ -1,3 +1,10 @@
+2017-06-07  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (aarch64_store_return_value): Use
+	V_REGISTER_SIZE.
+	(aarch64_pseudo_read_value): Likewise.
+	(aarch64_pseudo_write): Likewise.
+
 2017-06-06  Yao Qi  <yao.qi@linaro.org>
 
 	* regformats/regdef.h (set_register_cache): Remove the
