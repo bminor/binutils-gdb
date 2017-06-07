@@ -1575,6 +1575,47 @@ amd64_linux_record_signal (struct gdbarch *gdbarch,
   return 0;
 }
 
+const target_desc *
+amd64_linux_read_description (uint64_t xcr0_features_bit, bool is_x32)
+{
+  switch (xcr0_features_bit)
+    {
+    case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
+      if (is_x32)
+	/* No MPX, PKU on x32, fallback to AVX-AVX512.  */
+	return tdesc_x32_avx_avx512_linux;
+      else
+	return tdesc_amd64_avx_mpx_avx512_pku_linux;
+    case X86_XSTATE_AVX_AVX512_MASK:
+      if (is_x32)
+	return tdesc_x32_avx_avx512_linux;
+      else
+	return tdesc_amd64_avx_avx512_linux;
+    case X86_XSTATE_MPX_MASK:
+      if (is_x32)
+	/* No MPX on x32, fallback to AVX.  */
+	return tdesc_x32_avx_linux;
+      else
+	return tdesc_amd64_mpx_linux;
+    case X86_XSTATE_AVX_MPX_MASK:
+      if (is_x32)
+	/* No MPX on x32, fallback to AVX.  */
+	return tdesc_x32_avx_linux;
+      else
+	return tdesc_amd64_avx_mpx_linux;
+    case X86_XSTATE_AVX_MASK:
+      if (is_x32)
+	return tdesc_x32_avx_linux;
+      else
+	return tdesc_amd64_avx_linux;
+    default:
+      if (is_x32)
+	return tdesc_x32_linux;
+      else
+	return tdesc_amd64_linux;
+    }
+}
+
 /* Get Linux/x86 target description from core dump.  */
 
 static const struct target_desc *
@@ -1585,42 +1626,8 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
   /* Linux/x86-64.  */
   uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
 
-  switch (xcr0 & X86_XSTATE_ALL_MASK)
-    {
-    case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
-      if (gdbarch_ptr_bit (gdbarch) == 32)
-	/* No MPX, PKU on x32, fallback to AVX-AVX512.  */
-	return tdesc_x32_avx_avx512_linux;
-      else
-	return tdesc_amd64_avx_mpx_avx512_pku_linux;
-    case X86_XSTATE_AVX_AVX512_MASK:
-      if (gdbarch_ptr_bit (gdbarch) == 32)
-	return tdesc_x32_avx_avx512_linux;
-      else
-	return tdesc_amd64_avx_avx512_linux;
-    case X86_XSTATE_MPX_MASK:
-      if (gdbarch_ptr_bit (gdbarch) == 32)
-	/* No MPX on x32, fallback to AVX.  */
-	return tdesc_x32_avx_linux;
-      else
-	return tdesc_amd64_mpx_linux;
-    case X86_XSTATE_AVX_MPX_MASK:
-      if (gdbarch_ptr_bit (gdbarch) == 32)
-	/* No MPX on x32, fallback to AVX.  */
-	return tdesc_x32_avx_linux;
-      else
-	return tdesc_amd64_avx_mpx_linux;
-    case X86_XSTATE_AVX_MASK:
-      if (gdbarch_ptr_bit (gdbarch) == 32)
-	return tdesc_x32_avx_linux;
-      else
-	return tdesc_amd64_avx_linux;
-    default:
-      if (gdbarch_ptr_bit (gdbarch) == 32)
-	return tdesc_x32_linux;
-      else
-	return tdesc_amd64_linux;
-    }
+  return amd64_linux_read_description (xcr0 & X86_XSTATE_ALL_MASK,
+				       gdbarch_ptr_bit (gdbarch) == 32);
 }
 
 /* Similar to amd64_supply_fpregset, but use XSAVE extended state.  */
@@ -1881,7 +1888,7 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_num_regs (gdbarch, AMD64_LINUX_NUM_REGS);
 
   if (! tdesc_has_registers (tdesc))
-    tdesc = tdesc_amd64_linux;
+    tdesc = amd64_linux_read_description (X86_XSTATE_SSE_MASK, false);
   tdep->tdesc = tdesc;
 
   feature = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.linux");
@@ -2098,7 +2105,7 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_num_regs (gdbarch, AMD64_LINUX_NUM_REGS);
 
   if (! tdesc_has_registers (tdesc))
-    tdesc = tdesc_x32_linux;
+    tdesc = amd64_linux_read_description (X86_XSTATE_SSE_MASK, true);
   tdep->tdesc = tdesc;
 
   feature = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.linux");
