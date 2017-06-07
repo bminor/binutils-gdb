@@ -1,3 +1,13 @@
+2017-06-07  Michael Collison  <michael.collison@arm.com>
+
+	* config/tc-aarch64.c (reg_entry_reg_names): Add IP0,
+	IP1, FP, and LR as register aliases of register 16, 17, 29
+	and 30 respectively.
+	* testsuite/gas/aarch64/diagnostic.l: Remove diagnostic
+	prohibiting register 'lr' which is now an alias.
+	* testsuite/gas/aarch64/diagnostic.s: Remove instruction
+	utilizing register 'lr' which is now an alias.
+
 2017-06-06  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-arm.c (reject_bad_reg): Allow REG_SP on ARMv8-A.

@@ -6797,6 +6797,11 @@ static const reg_entry reg_names[] = {
   REGDEF (wzr, 31, Z_32), REGDEF (WZR, 31, Z_32),
   REGDEF (xzr, 31, Z_64), REGDEF (XZR, 31, Z_64),
 
+  REGDEF (ip0, 16, R_64), REGDEF (IP0, 16, R_64),
+  REGDEF (ip1, 17, R_64), REGDEF (IP1, 17, R_64),
+  REGDEF (fp, 29, R_64), REGDEF (FP, 29, R_64),
+  REGDEF (lr, 30, R_64), REGDEF (LR, 30, R_64),
+
   /* Floating-point single precision registers.  */
   REGSET (s, FP_S), REGSET (S, FP_S),
 
