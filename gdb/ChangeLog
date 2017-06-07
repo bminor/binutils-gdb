@@ -1,3 +1,54 @@
+2017-06-07  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SFILES): Add gdb_regex.c.
+	(COMMON_OBS): Add gdb_regex.o.
+	* ada-lang.c (ada_add_standard_exceptions)
+	(ada_add_exceptions_from_frame, name_matches_regex)
+	(ada_add_global_exceptions, ada_exceptions_list_1): Change regex
+	parameter type to compiled_regex.  Adjust.
+	(ada_exceptions_list): Use compiled_regex.
+	* break-catch-throw.c (exception_catchpoint::pattern): Now a
+	std::unique_ptr<compiled_regex>.
+	(exception_catchpoint::~exception_catchpoint): Remove regfree
+	call.
+	(check_status_exception_catchpoint): Adjust to use compiled_regex.
+	(handle_gnu_v3_exceptions): Adjust to use compiled_regex.
+	* breakpoint.c (solib_catchpoint::compiled): Now a
+	std::unique_ptr<compiled_regex>.
+	(solib_catchpoint::~solib_catchpoint): Remove regfree call.
+	(check_status_catch_solib): Adjust to use compiled_regex.
+	(add_solib_catchpoint): Adjust to use compiled_regex.
+	* cli/cli-cmds.c (apropos_command): Use compiled_regex.
+	* cli/cli-decode.c (apropos_cmd): Change regex parameter to
+	compiled_regex reference.  Adjust to use it.
+	* cli/cli-decode.h: Remove struct re_pattern_buffer forward
+	declaration.  Include "gdb_regex.h".
+	(apropos_cmd): Change regex parameter to compiled_regex reference.
+	* gdb_regex.c: New file.
+	* gdb_regex.h (make_regfree_cleanup, get_regcomp_error): Delete
+	declarations.
+	(class compiled_regex): New.
+	* linux-tdep.c: Include "common/gdb_optional.h".
+	(struct mapping_regexes): New, factored out from
+	mapping_is_anonymous_p, and adjusted to use compiled_regex.
+	(mapping_is_anonymous_p): Use mapping_regexes wrapped in a
+	gdb::optional and remove cleanups.  Adjust to compiled_regex.
+	* probe.c: Include "common/gdb_optional.h".
+	(collect_probes): Use compiled_regex and gdb::optional and remove
+	cleanups.
+	* skip.c: Include "common/gdb_optional.h".
+	(skiplist_entry::compiled_function_regexp): Now a
+	gdb::optional<compiled_regex>.
+	(skiplist_entry::compiled_function_regexp_is_valid): Delete field.
+	(free_skiplist_entry): Remove regfree call.
+	(compile_skip_regexp, skip_rfunction_p): Adjust to use
+	compiled_regex and gdb::optional.
+	* symtab.c: Include "common/gdb_optional.h".
+	(search_symbols): Use compiled_regex and gdb::optional.
+	* utils.c (do_regfree_cleanup, make_regfree_cleanup)
+	(get_regcomp_error, compile_rx_or_error): Delete.  Some bits moved
+	to gdb_regex.c.
+
 2017-06-07  Alan Hayward  <alan.hayward@arm.com>
 
 	* regcache.c (regcache::save): Avoid buffer use.

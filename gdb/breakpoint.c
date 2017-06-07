@@ -8284,13 +8284,11 @@ struct solib_catchpoint : public breakpoint
   /* Regular expression to match, if any.  COMPILED is only valid when
      REGEX is non-NULL.  */
   char *regex;
-  regex_t compiled;
+  std::unique_ptr<compiled_regex> compiled;
 };
 
 solib_catchpoint::~solib_catchpoint ()
 {
-  if (this->regex)
-    regfree (&this->compiled);
   xfree (this->regex);
 }
 
@@ -8358,7 +8356,7 @@ check_status_catch_solib (struct bpstats *bs)
 	   ++ix)
 	{
 	  if (!self->regex
-	      || regexec (&self->compiled, iter->so_name, 0, NULL, 0) == 0)
+	      || self->compiled->exec (iter->so_name, 0, NULL, 0) == 0)
 	    return;
 	}
     }
@@ -8372,7 +8370,7 @@ check_status_catch_solib (struct bpstats *bs)
 	   ++ix)
 	{
 	  if (!self->regex
-	      || regexec (&self->compiled, iter, 0, NULL, 0) == 0)
+	      || self->compiled->exec (iter, 0, NULL, 0) == 0)
 	    return;
 	}
     }
@@ -8488,16 +8486,8 @@ add_solib_catchpoint (const char *arg, int is_load, int is_temp, int enabled)
 
   if (*arg != '\0')
     {
-      int errcode;
-
-      errcode = regcomp (&c->compiled, arg, REG_NOSUB);
-      if (errcode != 0)
-	{
-	  char *err = get_regcomp_error (errcode, &c->compiled);
-
-	  make_cleanup (xfree, err);
-	  error (_("Invalid regexp (%s): %s"), err, arg);
-	}
+      c->compiled.reset (new compiled_regex (arg, REG_NOSUB,
+					     _("Invalid regexp")));
       c->regex = xstrdup (arg);
     }
 

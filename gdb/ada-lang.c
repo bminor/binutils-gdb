@@ -13219,14 +13219,15 @@ sort_remove_dups_ada_exceptions_list (VEC(ada_exc_info) **exceptions,
    gets pushed.  */
 
 static void
-ada_add_standard_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
+ada_add_standard_exceptions (compiled_regex *preg,
+			     VEC(ada_exc_info) **exceptions)
 {
   int i;
 
   for (i = 0; i < ARRAY_SIZE (standard_exc); i++)
     {
       if (preg == NULL
-	  || regexec (preg, standard_exc[i], 0, NULL, 0) == 0)
+	  || preg->exec (standard_exc[i], 0, NULL, 0) == 0)
 	{
 	  struct bound_minimal_symbol msymbol
 	    = ada_lookup_simple_minsym (standard_exc[i]);
@@ -13253,7 +13254,8 @@ ada_add_standard_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
    gets pushed.  */
 
 static void
-ada_add_exceptions_from_frame (regex_t *preg, struct frame_info *frame,
+ada_add_exceptions_from_frame (compiled_regex *preg,
+			       struct frame_info *frame,
 			       VEC(ada_exc_info) **exceptions)
 {
   const struct block *block = get_frame_block (frame, 0);
@@ -13290,10 +13292,10 @@ ada_add_exceptions_from_frame (regex_t *preg, struct frame_info *frame,
 /* Return true if NAME matches PREG or if PREG is NULL.  */
 
 static bool
-name_matches_regex (const char *name, regex_t *preg)
+name_matches_regex (const char *name, compiled_regex *preg)
 {
   return (preg == NULL
-	  || regexec (preg, ada_decode (name), 0, NULL, 0) == 0);
+	  || preg->exec (ada_decode (name), 0, NULL, 0) == 0);
 }
 
 /* Add all exceptions defined globally whose name name match
@@ -13316,7 +13318,8 @@ name_matches_regex (const char *name, regex_t *preg)
    gets pushed.  */
 
 static void
-ada_add_global_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
+ada_add_global_exceptions (compiled_regex *preg,
+			   VEC(ada_exc_info) **exceptions)
 {
   struct objfile *objfile;
   struct compunit_symtab *s;
@@ -13364,7 +13367,7 @@ ada_add_global_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
    do not match.  Otherwise, all exceptions are listed.  */
 
 static VEC(ada_exc_info) *
-ada_exceptions_list_1 (regex_t *preg)
+ada_exceptions_list_1 (compiled_regex *preg)
 {
   VEC(ada_exc_info) *result = NULL;
   struct cleanup *old_chain
@@ -13417,19 +13420,11 @@ ada_exceptions_list_1 (regex_t *preg)
 VEC(ada_exc_info) *
 ada_exceptions_list (const char *regexp)
 {
-  VEC(ada_exc_info) *result = NULL;
-  struct cleanup *old_chain = NULL;
-  regex_t reg;
+  if (regexp == NULL)
+    return ada_exceptions_list_1 (NULL);
 
-  if (regexp != NULL)
-    old_chain = compile_rx_or_error (&reg, regexp,
-				     _("invalid regular expression"));
-
-  result = ada_exceptions_list_1 (regexp != NULL ? &reg : NULL);
-
-  if (old_chain != NULL)
-    do_cleanups (old_chain);
-  return result;
+  compiled_regex reg (regexp, REG_NOSUB, _("invalid regular expression"));
+  return ada_exceptions_list_1 (&reg);
 }
 
 /* Implement the "info exceptions" command.  */

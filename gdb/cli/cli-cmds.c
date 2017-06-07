@@ -1336,28 +1336,13 @@ show_user (char *args, int from_tty)
 static void 
 apropos_command (char *searchstr, int from_tty)
 {
-  regex_t pattern;
-  int code;
-
   if (searchstr == NULL)
     error (_("REGEXP string is empty"));
 
-  code = regcomp (&pattern, searchstr, REG_ICASE);
-  if (code == 0)
-    {
-      struct cleanup *cleanups;
+  compiled_regex pattern (searchstr, REG_ICASE,
+			  _("Error in regular expression"));
 
-      cleanups = make_regfree_cleanup (&pattern);
-      apropos_cmd (gdb_stdout, cmdlist, &pattern, "");
-      do_cleanups (cleanups);
-    }
-  else
-    {
-      char *err = get_regcomp_error (code, &pattern);
-
-      make_cleanup (xfree, err);
-      error (_("Error in regular expression: %s"), err);
-    }
+  apropos_cmd (gdb_stdout, cmdlist, pattern, "");
 }
 
 /* Subroutine of alias_command to simplify it.

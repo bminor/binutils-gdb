@@ -87,10 +87,10 @@ struct exception_catchpoint : public breakpoint
 
   char *exception_rx;
 
-  /* If non-NULL, an xmalloc'd, compiled regular expression which is
-     used to determine which exceptions to stop on.  */
+  /* If non-NULL, a compiled regular expression which is used to
+     determine which exceptions to stop on.  */
 
-  regex_t *pattern;
+  std::unique_ptr<compiled_regex> pattern;
 };
 
 
@@ -145,8 +145,6 @@ classify_exception_breakpoint (struct breakpoint *b)
 exception_catchpoint::~exception_catchpoint ()
 {
   xfree (this->exception_rx);
-  if (this->pattern != NULL)
-    regfree (this->pattern);
 }
 
 /* Implement the 'check_status' method.  */
@@ -185,7 +183,7 @@ check_status_exception_catchpoint (struct bpstats *bs)
 
   if (!type_name.empty ())
     {
-      if (regexec (self->pattern, type_name.c_str (), 0, NULL, 0) != 0)
+      if (self->pattern->exec (type_name.c_str (), 0, NULL, 0) != 0)
 	bs->stop = 0;
     }
 }
@@ -377,15 +375,12 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx,
 			  const char *cond_string,
 			  enum exception_event_kind ex_event, int from_tty)
 {
-  regex_t *pattern = NULL;
+  std::unique_ptr<compiled_regex> pattern;
 
   if (except_rx != NULL)
     {
-      pattern = XNEW (regex_t);
-      make_cleanup (xfree, pattern);
-
-      compile_rx_or_error (pattern, except_rx,
-			   _("invalid type-matching regexp"));
+      pattern.reset (new compiled_regex (except_rx, REG_NOSUB,
+					 _("invalid type-matching regexp")));
     }
 
   std::unique_ptr<exception_catchpoint> cp (new exception_catchpoint ());
@@ -397,7 +392,7 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx,
   cp->type = bp_breakpoint;
   cp->kind = ex_event;
   cp->exception_rx = except_rx;
-  cp->pattern = pattern;
+  cp->pattern = std::move (pattern);
 
   re_set_exception_catchpoint (cp.get ());
 

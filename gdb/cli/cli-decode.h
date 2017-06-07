@@ -23,8 +23,7 @@
 
 /* Include the public interfaces.  */
 #include "command.h"
-
-struct re_pattern_buffer;
+#include "gdb_regex.h"
 
 #if 0
 /* FIXME: cagney/2002-03-17: Once cmd_type() has been removed, ``enum
@@ -234,7 +233,7 @@ extern void help_cmd_list (struct cmd_list_element *, enum command_class,
 extern void help_cmd (const char *, struct ui_file *);
 
 extern void apropos_cmd (struct ui_file *, struct cmd_list_element *,
-                         struct re_pattern_buffer *, const char *);
+                         compiled_regex &, const char *);
 
 /* Used to mark commands that don't do anything.  If we just leave the
    function field NULL, the command is interpreted as a help topic, or
