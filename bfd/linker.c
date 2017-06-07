@@ -2091,7 +2091,7 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 	      && bfd_hash_lookup (info->keep_hash, bfd_asymbol_name (sym),
 				  FALSE, FALSE) == NULL))
 	output = FALSE;
-      else if ((sym->flags & (BSF_GLOBAL | BSF_WEAK)) != 0)
+      else if ((sym->flags & (BSF_GLOBAL | BSF_WEAK | BSF_GNU_UNIQUE)) != 0)
 	{
 	  /* If this symbol is marked as occurring now, rather
 	     than at the end, output it now.  This is used for

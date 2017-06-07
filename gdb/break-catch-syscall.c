@@ -31,15 +31,12 @@
 #include "xml-syscall.h"
 
 /* An instance of this type is used to represent a syscall catchpoint.
-   It includes a "struct breakpoint" as a kind of base class; users
-   downcast to "struct breakpoint *" when needed.  A breakpoint is
-   really of this type iff its ops pointer points to
+   A breakpoint is really of this type iff its ops pointer points to
    CATCH_SYSCALL_BREAKPOINT_OPS.  */
 
-struct syscall_catchpoint
+struct syscall_catchpoint : public breakpoint
 {
-  /* The base class.  */
-  struct breakpoint base;
+  ~syscall_catchpoint () override;
 
   /* Syscall numbers used for the 'catch syscall' feature.  If no
      syscall has been specified for filtering, its value is NULL.
@@ -48,17 +45,11 @@ struct syscall_catchpoint
   VEC(int) *syscalls_to_be_caught;
 };
 
-/* Implement the "dtor" breakpoint_ops method for syscall
-   catchpoints.  */
+/* catch_syscall destructor.  */
 
-static void
-dtor_catch_syscall (struct breakpoint *b)
+syscall_catchpoint::~syscall_catchpoint ()
 {
-  struct syscall_catchpoint *c = (struct syscall_catchpoint *) b;
-
-  VEC_free (int, c->syscalls_to_be_caught);
-
-  base_breakpoint_ops.dtor (b);
+  VEC_free (int, this->syscalls_to_be_caught);
 }
 
 static const struct inferior_data *catch_syscall_inferior_data = NULL;
@@ -434,10 +425,10 @@ create_syscall_event_catchpoint (int tempflag, VEC(int) *filter,
   struct gdbarch *gdbarch = get_current_arch ();
 
   c = new syscall_catchpoint ();
-  init_catchpoint (&c->base, gdbarch, tempflag, NULL, ops);
+  init_catchpoint (c, gdbarch, tempflag, NULL, ops);
   c->syscalls_to_be_caught = filter;
 
-  install_breakpoint (0, &c->base, 1);
+  install_breakpoint (0, c, 1);
 }
 
 /* Splits the argument using space as delimiter.  Returns an xmalloc'd
@@ -701,7 +692,6 @@ initialize_syscall_catchpoint_ops (void)
   /* Syscall catchpoints.  */
   ops = &catch_syscall_breakpoint_ops;
   *ops = base_breakpoint_ops;
-  ops->dtor = dtor_catch_syscall;
   ops->insert_location = insert_catch_syscall;
   ops->remove_location = remove_catch_syscall;
   ops->breakpoint_hit = breakpoint_hit_catch_syscall;

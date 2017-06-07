@@ -348,6 +348,9 @@ struct bfd_link_info
   /* TRUE if all data symbols should be dynamic.  */
   unsigned int dynamic_data: 1;
 
+  /* TRUE if section groups should be resolved.  */
+  unsigned int resolve_section_groups: 1;
+
   /* Which symbols to strip.  */
   ENUM_BITFIELD (bfd_link_strip) strip : 2;
 

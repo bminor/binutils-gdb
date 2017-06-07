@@ -2450,8 +2450,7 @@ _bfd_elf_link_read_relocs (bfd *abfd,
     {
       bfd_size_type size;
 
-      size = o->reloc_count;
-      size *= bed->s->int_rels_per_ext_rel * sizeof (Elf_Internal_Rela);
+      size = (bfd_size_type) o->reloc_count * sizeof (Elf_Internal_Rela);
       if (keep_memory)
 	internal_relocs = alloc2 = (Elf_Internal_Rela *) bfd_alloc (abfd, size);
       else
@@ -10278,7 +10277,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  continue;
 	}
 
-      if (bfd_link_relocatable (flinfo->info)
+      if (!flinfo->info->resolve_section_groups
 	  && (o->flags & (SEC_LINKER_CREATED | SEC_GROUP)) == SEC_GROUP)
 	{
 	  /* Deal with the group signature symbol.  */
@@ -10286,6 +10285,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  unsigned long symndx = sec_data->this_hdr.sh_info;
 	  asection *osec = o->output_section;
 
+	  BFD_ASSERT (bfd_link_relocatable (flinfo->info));
 	  if (symndx >= locsymcount
 	      || (elf_bad_symtab (input_bfd)
 		  && flinfo->sections[symndx] == NULL))
@@ -10402,7 +10402,8 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 				 ".fini_array") == 0))
 	      && (o->name[6] == 0 || o->name[6] == '.'))
 	    {
-	      if (o->size != o->reloc_count * address_size)
+	      if (o->size * bed->s->int_rels_per_ext_rel
+		  != o->reloc_count * address_size)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
@@ -10426,7 +10427,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	     relocs against removed link-once sections.  */
 
 	  rel = internal_relocs;
-	  relend = rel + o->reloc_count * bed->s->int_rels_per_ext_rel;
+	  relend = rel + o->reloc_count;
 	  for ( ; rel < relend; rel++)
 	    {
 	      unsigned long r_symndx = rel->r_info >> r_sym_shift;
@@ -10615,7 +10616,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	      /* Adjust the reloc addresses and symbol indices.  */
 
 	      irela = internal_relocs;
-	      irelaend = irela + o->reloc_count * bed->s->int_rels_per_ext_rel;
+	      irelaend = irela + o->reloc_count;
 	      rel_hash = esdo->rel.hashes + esdo->rel.count;
 	      /* We start processing the REL relocs, if any.  When we reach
 		 IRELAMID in the loop, we switch to the RELA relocs.  */
@@ -11789,8 +11790,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   if (max_internal_reloc_count != 0)
     {
-      amt = max_internal_reloc_count * bed->s->int_rels_per_ext_rel;
-      amt *= sizeof (Elf_Internal_Rela);
+      amt = max_internal_reloc_count * sizeof (Elf_Internal_Rela);
       flinfo.internal_relocs = (Elf_Internal_Rela *) bfd_malloc (amt);
       if (flinfo.internal_relocs == NULL)
 	goto error_return;
@@ -12464,10 +12464,11 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (bfd_link_relocatable (info))
+  if (!info->resolve_section_groups)
     {
       bfd_boolean failed = FALSE;
 
+      BFD_ASSERT (bfd_link_relocatable (info));
       bfd_map_over_sections (abfd, bfd_elf_set_group_contents, &failed);
       if (failed)
 	goto error_return;
@@ -12573,8 +12574,6 @@ init_reloc_cookie_rels (struct elf_reloc_cookie *cookie,
 			struct bfd_link_info *info, bfd *abfd,
 			asection *sec)
 {
-  const struct elf_backend_data *bed;
-
   if (sec->reloc_count == 0)
     {
       cookie->rels = NULL;
@@ -12582,15 +12581,12 @@ init_reloc_cookie_rels (struct elf_reloc_cookie *cookie,
     }
   else
     {
-      bed = get_elf_backend_data (abfd);
-
       cookie->rels = _bfd_elf_link_read_relocs (abfd, sec, NULL, NULL,
 						info->keep_memory);
       if (cookie->rels == NULL)
 	return FALSE;
       cookie->rel = cookie->rels;
-      cookie->relend = (cookie->rels
-			+ sec->reloc_count * bed->s->int_rels_per_ext_rel);
+      cookie->relend = cookie->rels + sec->reloc_count;
     }
   cookie->rel = cookie->rels;
   return TRUE;
@@ -13203,7 +13199,7 @@ elf_gc_smash_unused_vtentry_relocs (struct elf_link_hash_entry *h, void *okp)
   bed = get_elf_backend_data (sec->owner);
   log_file_align = bed->s->log_file_align;
 
-  relend = relstart + sec->reloc_count * bed->s->int_rels_per_ext_rel;
+  relend = relstart + sec->reloc_count;
 
   for (rel = relstart; rel < relend; ++rel)
     if (rel->r_offset >= hstart && rel->r_offset < hend)

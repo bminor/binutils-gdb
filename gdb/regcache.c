@@ -328,7 +328,6 @@ regcache::save (regcache_cooked_read_ftype *cooked_read,
 		void *src)
 {
   struct gdbarch *gdbarch = m_descr->gdbarch;
-  gdb_byte buf[MAX_REGISTER_SIZE];
   int regnum;
 
   /* The DST should be `read-only', if it wasn't then the save would
@@ -346,18 +345,14 @@ regcache::save (regcache_cooked_read_ftype *cooked_read,
     {
       if (gdbarch_register_reggroup_p (gdbarch, regnum, save_reggroup))
 	{
-	  enum register_status status = cooked_read (src, regnum, buf);
+	  gdb_byte *dst_buf = register_buffer (regnum);
+	  enum register_status status = cooked_read (src, regnum, dst_buf);
 
-	  if (status == REG_VALID)
-	    memcpy (register_buffer (regnum), buf,
-		    register_size (gdbarch, regnum));
-	  else
-	    {
-	      gdb_assert (status != REG_UNKNOWN);
+	  gdb_assert (status != REG_UNKNOWN);
 
-	      memset (register_buffer (regnum), 0,
-		      register_size (gdbarch, regnum));
-	    }
+	  if (status != REG_VALID)
+	    memset (dst_buf, 0, register_size (gdbarch, regnum));
+
 	  m_register_status[regnum] = status;
 	}
     }
@@ -1471,7 +1466,6 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
   int footnote_register_offset = 0;
   int footnote_register_type_name_null = 0;
   long register_offset = 0;
-  gdb_byte buf[MAX_REGISTER_SIZE];
 
 #if 0
   fprintf_unfiltered (file, "nr_raw_registers %d\n",
@@ -1597,8 +1591,8 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 	    fprintf_unfiltered (file, "<unavailable>");
 	  else
 	    {
-	      raw_read (regnum, buf);
-	      print_hex_chars (file, buf,
+	      raw_update (regnum);
+	      print_hex_chars (file, register_buffer (regnum),
 			       m_descr->sizeof_register[regnum],
 			       gdbarch_byte_order (gdbarch));
 	    }
@@ -1611,9 +1605,30 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 	    fprintf_unfiltered (file, "Cooked value");
 	  else
 	    {
+	      const gdb_byte *buf = NULL;
 	      enum register_status status;
+	      struct value *value = NULL;
 
-	      status = cooked_read (regnum, buf);
+	      if (regnum < m_descr->nr_raw_registers)
+		{
+		  raw_update (regnum);
+		  status = get_register_status (regnum);
+		  buf = register_buffer (regnum);
+		}
+	      else
+		{
+		  value = cooked_read_value (regnum);
+
+		  if (!value_optimized_out (value)
+		      && value_entirely_available (value))
+		    {
+		      status = REG_VALID;
+		      buf = value_contents_all (value);
+		    }
+		  else
+		    status = REG_UNAVAILABLE;
+		}
+
 	      if (status == REG_UNKNOWN)
 		fprintf_unfiltered (file, "<invalid>");
 	      else if (status == REG_UNAVAILABLE)
@@ -1622,6 +1637,12 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 		print_hex_chars (file, buf,
 				 m_descr->sizeof_register[regnum],
 				 gdbarch_byte_order (gdbarch));
+
+	      if (value != NULL)
+		{
+		  release_value (value);
+		  value_free (value);
+		}
 	    }
 	}
 

@@ -1,3 +1,39 @@
+2017-06-07  Michael Collison  <michael.collison@arm.com>
+
+	* config/tc-aarch64.c (reg_entry_reg_names): Add IP0,
+	IP1, FP, and LR as register aliases of register 16, 17, 29
+	and 30 respectively.
+	* testsuite/gas/aarch64/diagnostic.l: Remove diagnostic
+	prohibiting register 'lr' which is now an alias.
+	* testsuite/gas/aarch64/diagnostic.s: Remove instruction
+	utilizing register 'lr' which is now an alias.
+
+2017-06-06  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (reject_bad_reg): Allow REG_SP on ARMv8-A.
+	(parse_operands): Allow REG_SP for OP_oRRnpcsp and OP_RRnpcsp on
+	ARMv8-A.
+	(do_co_reg): Allow REG_SP for Rd on ARMv8-A.
+	(do_t_add_sub): Likewise.
+	(do_t_mov_cmp): Likewise.
+	(do_t_tb): Likewise.
+	* testsuite/gas/arm/ld-sp-warn.l: Delete the warning on REG_SP as Rt for
+	ldrsb.
+	* testsuite/gas/arm/sp-pc-validations-bad-t-v8a.d: New test.
+	* testsuite/gas/arm/sp-pc-validations-bad-t-v8a.l: New test.
+	* testsuite/gas/arm/sp-pc-validations-bad-t.d: Specifies -march=armv7-a.
+	* testsuite/gas/arm/sp-pc-validations-bad-t.s: Remove ".arch armv7-a".
+	* testsuite/gas/arm/sp-usage-thumb2-relax-on-v7.d: New test.
+	* testsuite/gas/arm/sp-usage-thumb2-relax-on-v7.l: New test.
+	* testsuite/gas/arm/sp-usage-thumb2-relax-on-v8.d: New test.
+	* testsuite/gas/arm/sp-usage-thumb2-relax.s: New test.
+	* testsuite/gas/arm/strex-bad-t.d: Specifies -march=armv7-a.
+
+2017-06-05  Jim Wilson  <jim.wilson@linaro.org>
+
+	* config/tc-arm.c (arm_cpus): Delete falkor and qdf24xx entries.
+	* doc/c-arm.texi (-mcpu): Likewise.
+
 2017-05-30  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* config/tc-arc.c (cpu_types): Include arc-cpu.def

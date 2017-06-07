@@ -1648,13 +1648,14 @@ sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			 int reg_nr, gdb_byte *buffer)
 {
   int base_regnum;
-  gdb_byte temp_buffer[MAX_REGISTER_SIZE];
   enum register_status status;
 
   if (reg_nr == PSEUDO_BANK_REGNUM)
     return regcache_raw_read (regcache, BANK_REGNUM, buffer);
   else if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
     {
+      /* Enough space for two float registers.  */
+      gdb_byte temp_buffer[4 * 2];
       base_regnum = dr_reg_base_num (gdbarch, reg_nr);
 
       /* Build the value in the provided buffer.  */
@@ -1687,7 +1688,6 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			  int reg_nr, const gdb_byte *buffer)
 {
   int base_regnum, portion;
-  gdb_byte temp_buffer[MAX_REGISTER_SIZE];
 
   if (reg_nr == PSEUDO_BANK_REGNUM)
     {
@@ -1703,6 +1703,8 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     }
   else if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
     {
+      /* Enough space for two float registers.  */
+      gdb_byte temp_buffer[4 * 2];
       base_regnum = dr_reg_base_num (gdbarch, reg_nr);
 
       /* We must pay attention to the endiannes.  */

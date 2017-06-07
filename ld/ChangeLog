@@ -1,3 +1,63 @@
+2017-06-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-unique/pr21529.d: xfail aarch64, arm, hppa, ia64,
+	nds32, and score.  Match any output.
+
+2017-06-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld.h (struct args_type): Fix typo in comment.
+
+2017-06-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld.h (struct args_type): Add force_group_allocation field.
+	* ldgram.y: Add support for FORCE_GROUP_ALLOCATION.
+	* ldlex.h: Likewise.
+	* ldlex.l: Likewise.
+	* lexsup.c: Likewise.
+	* ldlang.c (unique_section_p): Check resolve_section_groups flag
+	not the relaxable link flag.
+	(lang_add_section): Discard section groups when we're resolving
+	groups.  Clear the SEC_LINK_ONCE flag if we're resolving section
+	groups.
+	* ldmain.c (main): Initialise resolve_section_groups flag in
+	link_info based on command line flags.
+	* testsuite/ld-elf/group11.d: New file.
+	* testsuite/ld-elf/group12.d: New file.
+	* testsuite/ld-elf/group12.ld: New file.
+	* NEWS: Mention new features.
+	* ld.texinfo (Options): Document --force-group-allocation.
+	(Miscellaneous Commands): Document FORCE_GROUP_ALLOCATION.
+
+2017-06-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21529
+	* testsuite/ld-unique/pr21529.d: New file.
+	* testsuite/ld-unique/pr21529.s: Likewise.
+	* testsuite/ld-unique/unique.exp: Run *.d.
+
+2017-06-05  Alan Modra  <amodra@gmail.com>
+
+	* ldmain.c (main): Correct setting of link_indo.new_dtags.
+	* testsuite/ld-elf/now-3.d: Pass --disable-new-dtags to ld
+	* testsuite/ld-elf/now-4.d: Likewise.
+	* testsuite/ld-elf/rpath-1.d: Likewise.
+	* testsuite/ld-elf/rpath-2.d: Likewise.
+
+2017-06-05  Slava Barinov  <v.barinov@samsung.com>
+
+	* configure.ac: Add --enable-new-dtags option.
+	* ldmain.c (main): Set link_info.new_dtags to 1 if when
+	--enable-new-dtags is switched on.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2017-06-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/call_nop.sh: Remove -z prefix-nop.
+	* ld.texinfo: Likewise.
+	* testsuite/ld-i386/call3c.d: Check for linker error.
+	* testsuite/ld-x86-64/call1c.d: Likewise.
+
 2017-06-01  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (params): Init plt_localentry0 field.
@@ -797,9 +857,9 @@
 2017-02-27   Georg-Johann Lay  <gjl@gcc.gnu.org>
 
 	PR target/20849
-        * scripttempl/avrtiny.sc (__RODATA_PM_OFFSET__): New define.
-        (.rodata): New section.
-        (.data): Remove .rodata*.
+	* scripttempl/avrtiny.sc (__RODATA_PM_OFFSET__): New define.
+	(.rodata): New section.
+	(.data): Remove .rodata*.
 
 2017-02-25  Alan Modra  <amodra@gmail.com>
 

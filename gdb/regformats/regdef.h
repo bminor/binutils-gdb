@@ -36,9 +36,4 @@ struct reg
   int size;
 };
 
-/* Set the current remote protocol and register cache according to the array
-   ``regs'', with ``n'' elements.  */
-
-void set_register_cache (struct reg *regs, int n);
-
 #endif /* REGDEF_H */

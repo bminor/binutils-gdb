@@ -917,7 +917,7 @@ add_com_suppress_notification (const char *name, enum command_class theclass,
 void 
 apropos_cmd (struct ui_file *stream, 
 	     struct cmd_list_element *commandlist,
-	     struct re_pattern_buffer *regex, const char *prefix)
+	     compiled_regex &regex, const char *prefix)
 {
   struct cmd_list_element *c;
   int returnvalue;
@@ -928,9 +928,10 @@ apropos_cmd (struct ui_file *stream,
       returnvalue = -1; /* Needed to avoid double printing.  */
       if (c->name != NULL)
 	{
+	  size_t name_len = strlen (c->name);
+
 	  /* Try to match against the name.  */
-	  returnvalue = re_search (regex, c->name, strlen(c->name),
-				   0, strlen (c->name), NULL);
+	  returnvalue = regex.search (c->name, name_len, 0, name_len, NULL);
 	  if (returnvalue >= 0)
 	    {
 	      print_help_for_command (c, prefix, 
@@ -939,8 +940,10 @@ apropos_cmd (struct ui_file *stream,
 	}
       if (c->doc != NULL && returnvalue < 0)
 	{
+	  size_t doc_len = strlen (c->doc);
+
 	  /* Try to match against documentation.  */
-	  if (re_search(regex,c->doc,strlen(c->doc),0,strlen(c->doc),NULL) >=0)
+	  if (regex.search (c->doc, doc_len, 0, doc_len, NULL) >= 0)
 	    {
 	      print_help_for_command (c, prefix, 
 				      0 /* don't recurse */, stream);

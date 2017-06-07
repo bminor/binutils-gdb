@@ -1,3 +1,99 @@
+2017-06-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* elf.c (setup_group): Make sure BFD sections are created for all
+	group sections in the input file when processing SHF_GROUP
+	sections.
+	(bfd_section_from_shdr): Avoid duplicating logic already
+	implemented in `setup_group'.
+
+2017-06-06  Daniel Bonniot de Ruisselet  <bonniot@gmail.com>
+
+	PR binutils/21546
+	* peXXigen.c (pe_print_idata): Use the address of the first thunk
+	if the hint address is zero.
+
+2017-06-06  James Clarke  <jrtc27@jrtc27.com>
+
+	PR ld/19579
+	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_symbol): Check
+	ELF_COMMON_DEF_P for common symbols.
+
+2017-06-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Don't initially mark
+	SEC_GROUP sections as SEC_EXCLUDE.
+	(bfd_elf_set_group_contents): Replace use of abort with an assert.
+	(assign_section_numbers): Use resolve_section_groups flag instead
+	of relocatable link type.
+	(_bfd_elf_init_private_section_data): Use resolve_section_groups
+	flag instead of checking the final_link flag for part of the
+	checks in here.  Fix white space as a result.
+	* elflink.c (elf_link_input_bfd): Use resolve_section_groups flag
+	instead of relocatable link type.
+	(bfd_elf_final_link): Likewise.
+
+2017-06-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_relocate_section): Remove unused
+	variable `bed'.
+	* elf32-score.c (score_elf_final_link_relocate): Likewise.
+	(s3_bfd_score_elf_check_relocs): Likewise.
+	* elf32-score7.c (s7_bfd_score_elf_relocate_section): Likewise.
+	(score_elf_final_link_relocate): Likewise.
+	(s7_bfd_score_elf_check_relocs): Likewise.
+
+2017-06-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* elflink.c (init_reloc_cookie_rels): Remove unused variable
+	`bed'.
+
+2017-06-06  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf-bfd.h (RELOC_AGAINST_DISCARDED_SECTION): Subtract `count'
+	from `reloc_count' rather than decrementing it.
+	* elf.c (bfd_section_from_shdr): Multiply the adjustment to
+	`reloc_count' by `int_rels_per_ext_rel'.
+	* elf32-score.c (score_elf_final_link_relocate): Do not multiply
+	`reloc_count' by `int_rels_per_ext_rel' for last relocation
+	entry determination.
+	(s3_bfd_score_elf_check_relocs): Likewise.
+	* elf32-score7.c (score_elf_final_link_relocate): Likewise.
+	(s7_bfd_score_elf_relocate_section): Likewise.
+	(s7_bfd_score_elf_check_relocs): Likewise.
+	* elf64-mips.c (mips_elf64_get_reloc_upper_bound): Remove
+	prototype and function.
+	(mips_elf64_slurp_one_reloc_table): Do not update `reloc_count'.
+	(mips_elf64_slurp_reloc_table): Assert that `reloc_count' is
+	triple rather than once the sum of REL and RELA relocation entry
+	counts.
+	(bfd_elf64_get_reloc_upper_bound): Remove macro.
+	* elflink.c (_bfd_elf_link_read_relocs): Do not multiply
+	`reloc_count' by `int_rels_per_ext_rel' for internal relocation
+	storage allocation size determination.
+	(elf_link_input_bfd): Multiply `.ctors' and `.dtors' section's
+	size by `int_rels_per_ext_rel'.  Do not multiply `reloc_count'
+	by `int_rels_per_ext_rel' for last relocation entry
+	determination.
+	(bfd_elf_final_link): Do not multiply `reloc_count' by
+	`int_rels_per_ext_rel' for internal relocation storage
+	allocation size determination.
+	(init_reloc_cookie_rels): Do not multiply `reloc_count' by
+	`int_rels_per_ext_rel' for last relocation entry determination.
+	(elf_gc_smash_unused_vtentry_relocs): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Likewise.
+	(_bfd_mips_elf_relocate_section): Likewise.
+
+2017-06-05  Alan Modra  <amodra@gmail.com>
+
+	PR 21529
+	* linker.c (_bfd_generic_link_output_symbols): Handle BSF_GNU_UNIQUE.
+
+2017-06-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_freebsd_psinfo): Use ELF header class to
+	determine structure sizes.
+	(elfcore_grok_freebsd_prstatus): Likewise.
+
 2017-06-01  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct ppc_link_hash_table): Add has_plt_localentry0.

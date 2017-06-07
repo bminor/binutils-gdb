@@ -244,17 +244,26 @@ alpha_register_to_value (struct frame_info *frame, int regnum,
 			int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  gdb_byte in[MAX_REGISTER_SIZE];
+  struct value *value = get_frame_register_value (frame, regnum);
 
-  /* Convert to TYPE.  */
-  if (!get_frame_register_bytes (frame, regnum, 0,
-				 register_size (gdbarch, regnum),
-				 in, optimizedp, unavailablep))
-    return 0;
+  gdb_assert (value != NULL);
+  *optimizedp = value_optimized_out (value);
+  *unavailablep = !value_entirely_available (value);
+
+  if (*optimizedp || *unavailablep)
+    {
+      release_value (value);
+      value_free (value);
+      return 0;
+    }
+
+  /* Convert to VALTYPE.  */
 
   gdb_assert (TYPE_LENGTH (valtype) == 4);
-  alpha_sts (gdbarch, out, in);
-  *optimizedp = *unavailablep = 0;
+  alpha_sts (gdbarch, out, value_contents_all (value));
+
+  release_value (value);
+  value_free (value);
   return 1;
 }
 
@@ -262,9 +271,11 @@ static void
 alpha_value_to_register (struct frame_info *frame, int regnum,
 			 struct type *valtype, const gdb_byte *in)
 {
-  gdb_byte out[MAX_REGISTER_SIZE];
+  gdb_byte out[ALPHA_REGISTER_SIZE];
 
   gdb_assert (TYPE_LENGTH (valtype) == 4);
+  gdb_assert (register_size (get_frame_arch (frame), regnum)
+	      <= ALPHA_REGISTER_SIZE);
   alpha_lds (get_frame_arch (frame), out, in);
 
   put_frame_register (frame, regnum, out);

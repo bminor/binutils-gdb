@@ -1,3 +1,254 @@
+2017-06-07  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SFILES): Add gdb_regex.c.
+	(COMMON_OBS): Add gdb_regex.o.
+	* ada-lang.c (ada_add_standard_exceptions)
+	(ada_add_exceptions_from_frame, name_matches_regex)
+	(ada_add_global_exceptions, ada_exceptions_list_1): Change regex
+	parameter type to compiled_regex.  Adjust.
+	(ada_exceptions_list): Use compiled_regex.
+	* break-catch-throw.c (exception_catchpoint::pattern): Now a
+	std::unique_ptr<compiled_regex>.
+	(exception_catchpoint::~exception_catchpoint): Remove regfree
+	call.
+	(check_status_exception_catchpoint): Adjust to use compiled_regex.
+	(handle_gnu_v3_exceptions): Adjust to use compiled_regex.
+	* breakpoint.c (solib_catchpoint::compiled): Now a
+	std::unique_ptr<compiled_regex>.
+	(solib_catchpoint::~solib_catchpoint): Remove regfree call.
+	(check_status_catch_solib): Adjust to use compiled_regex.
+	(add_solib_catchpoint): Adjust to use compiled_regex.
+	* cli/cli-cmds.c (apropos_command): Use compiled_regex.
+	* cli/cli-decode.c (apropos_cmd): Change regex parameter to
+	compiled_regex reference.  Adjust to use it.
+	* cli/cli-decode.h: Remove struct re_pattern_buffer forward
+	declaration.  Include "gdb_regex.h".
+	(apropos_cmd): Change regex parameter to compiled_regex reference.
+	* gdb_regex.c: New file.
+	* gdb_regex.h (make_regfree_cleanup, get_regcomp_error): Delete
+	declarations.
+	(class compiled_regex): New.
+	* linux-tdep.c: Include "common/gdb_optional.h".
+	(struct mapping_regexes): New, factored out from
+	mapping_is_anonymous_p, and adjusted to use compiled_regex.
+	(mapping_is_anonymous_p): Use mapping_regexes wrapped in a
+	gdb::optional and remove cleanups.  Adjust to compiled_regex.
+	* probe.c: Include "common/gdb_optional.h".
+	(collect_probes): Use compiled_regex and gdb::optional and remove
+	cleanups.
+	* skip.c: Include "common/gdb_optional.h".
+	(skiplist_entry::compiled_function_regexp): Now a
+	gdb::optional<compiled_regex>.
+	(skiplist_entry::compiled_function_regexp_is_valid): Delete field.
+	(free_skiplist_entry): Remove regfree call.
+	(compile_skip_regexp, skip_rfunction_p): Adjust to use
+	compiled_regex and gdb::optional.
+	* symtab.c: Include "common/gdb_optional.h".
+	(search_symbols): Use compiled_regex and gdb::optional.
+	* utils.c (do_regfree_cleanup, make_regfree_cleanup)
+	(get_regcomp_error, compile_rx_or_error): Delete.  Some bits moved
+	to gdb_regex.c.
+
+2017-06-07  Alan Hayward  <alan.hayward@arm.com>
+
+	* regcache.c (regcache::save): Avoid buffer use.
+	(regcache::dump): Likewise.
+
+2017-06-07  Alan Hayward  <alan.hayward@arm.com>
+
+	* sh-tdep.c (sh_pseudo_register_read): Remove
+	MAX_REGISTER_SIZE.
+	(sh_pseudo_register_write): Likewise.
+	* sh64-tdep.c (sh64_pseudo_register_read): Likewise.
+	(sh64_pseudo_register_write): Likewise
+
+2017-06-07  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (aarch64_store_return_value): Use
+	V_REGISTER_SIZE.
+	(aarch64_pseudo_read_value): Likewise.
+	(aarch64_pseudo_write): Likewise.
+
+2017-06-06  Yao Qi  <yao.qi@linaro.org>
+
+	* regformats/regdef.h (set_register_cache): Remove the
+	declaration.
+
+2017-06-06 Alan Hayward  <alan.hayward@arm.com>
+
+	* frame.c (frame_unwind_register_signed): Use
+	frame_unwind_register_value.
+
+2017-06-06  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/21553
+	* breakpoint.c (create_breakpoints_sal_default)
+	(init_breakpoint_sal, create_breakpoint_sal): Use
+	gdb::unique_xmalloc_ptr for string parameters.
+	(create_breakpoint): Constify 'extra_string' and 'cond_string'
+	parameters.  Replace cleanups with gdb::unique_xmalloc_ptr.
+	(base_breakpoint_create_breakpoints_sal)
+	(bkpt_create_breakpoints_sal, tracepoint_create_breakpoints_sal)
+	(strace_marker_create_breakpoints_sal)
+	(create_breakpoints_sal_default): Use gdb::unique_xmalloc_ptr for
+	string parameters.
+	* breakpoint.h (breakpoint_ops::create_breakpoints_sal): Use
+	gdb::unique_xmalloc_ptr for string parameters.
+	(create_breakpoint): Constify 'extra_string' and 'cond_string'
+	parameters.
+
+2017-06-06  Alan Hayward  <alan.hayward@arm.com>
+
+	* alpha-tdep.c (alpha_register_to_value): Use
+	get_frame_register_value.
+	(alpha_value_to_register): Use ALPHA_REGISTER_SIZE.
+
+2017-06-06  Alan Hayward  <alan.hayward@arm.com>
+
+	* ia64-tdep.c (IA64_MAX_FP_REGISTER_SIZE) Add.
+	(ia64_register_to_value): Use IA64_MAX_FP_REGISTER_SIZE.
+	(ia64_value_to_register): Likewise.
+	(ia64_extract_return_value): Likewise.
+	(ia64_store_return_value): Likewise.
+	(ia64_push_dummy_call): Likewise.
+
+2017-06-04  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 8.0 released.
+
+2017-06-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* x86-linux-nat.c (struct arch_lwp_info): Remove.
+
+2017-06-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-nat.c (linux_nat_post_attach_wait): Remove FIRST
+	parameter.
+	(linux_nat_attach): Adjust call to linux_nat_post_attach_wait.
+
+2017-06-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* event-loop.c (poll_timers): Unallocate timer using delete
+	instead of xfree.
+
+2017-06-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.h (struct breakpoint_ops) <dtor>: Remove.
+	(struct breakpoint) <~breakpoint>: New.
+	(struct watchpoint): Inherit from breakpoint.
+	<~watchpoint>: New.
+	<base>: Remove.
+	(struct tracepoint): Inherit from breakpoint.
+	<base>: Remove.
+	* breakpoint.c (longjmp_breakpoint_ops): Remove.
+	(struct longjmp_breakpoint): Inherit from breakpoint.
+	<~longjmp_breakpoint>: New.
+	<base>: Remove.
+	(new_breakpoint_from_type): Remove casts.
+	(watchpoint_in_thread_scope): Remove reference to base field.
+	(watchpoint_del_at_next_stop): Likewise.
+	(update_watchpoint): Likewise.
+	(watchpoint_check): Likewise.
+	(bpstat_check_watchpoint): Likewise.
+	(set_longjmp_breakpoint): Likewise.
+	(struct fork_catchpoint): Inherit from breakpoint.
+	<base>: Remove.
+	(struct solib_catchpoint): Inherit from breakpoint.
+	<~solib_catchpoint>: New.
+	<base>: Remove.
+	(dtor_catch_solib): Change to ...
+	(solib_catchpoint::~solib_catchpoint): ... this.
+	(breakpoint_hit_catch_solib): Remove reference to base field.
+	(add_solib_catchpoint): Likewise.
+	(create_fork_vfork_event_catchpoint): Likewise.
+	(struct exec_catchpoint): Inherit from breakpoint.
+	<~exec_catchpoint>: New.
+	<base>: Remove.
+	(dtor_catch_exec): Change to ...
+	(exec_catchpoint::~exec_catchpoint): ... this.
+	(dtor_watchpoint): Change to ...
+	(watchpoint::~watchpoint): ... this.
+	(watch_command_1): Remove reference to base field.
+	(catch_exec_command_1): Likewise.
+	(base_breakpoint_dtor): Change to ...
+	(breakpoint::~breakpoint): ... this.
+	(base_breakpoint_ops): Remove dtor field value.
+	(longjmp_bkpt_dtor): Change to ...
+	(longjmp_breakpoint::~longjmp_breakpoint): ... this.
+	(strace_marker_create_breakpoints_sal): Remove reference to base
+	field.
+	(delete_breakpoint): Don't manually call breakpoint destructor.
+	(create_tracepoint_from_upload): Remove reference to base field.
+	(trace_pass_set_count): Likewise.
+	(initialize_breakpoint_ops): Don't initialize
+	momentary_breakpoint_ops, don't set dtors.
+	* ada-lang.c (struct ada_catchpoint): Inherit from breakpoint.
+	<~ada_catchpoint>: New.
+	<base>: Remove.
+	(create_excep_cond_exprs): Remove reference to base field.
+	(dtor_exception): Change to ...
+	(ada_catchpoint::~ada_catchpoint): ... this.
+	(dtor_catch_exception): Remove.
+	(dtor_catch_exception_unhandled): Remove.
+	(dtor_catch_assert): Remove.
+	(create_ada_exception_catchpoint): Remove reference to base
+	field.
+	(initialize_ada_catchpoint_ops): Don't set dtors.
+	* break-catch-sig.c (struct signal_catchpoint): Inherit from
+	breakpoint.
+	<~signal_catchpoint>: New.
+	<base>: Remove.
+	(signal_catchpoint_dtor): Change to ...
+	(signal_catchpoint::~signal_catchpoint): ... this.
+	(create_signal_catchpoint): Remove reference to base field.
+	(initialize_signal_catchpoint_ops): Don't set dtor.
+	* break-catch-syscall.c (struct syscall_catchpoint): Inherit
+	from breakpoint.
+	<~syscall_catchpoint>: New.
+	<base>: Remove.
+	(dtor_catch_syscall): Change to ...
+	(syscall_catchpoint::~syscall_catchpoint): ... this.
+	(create_syscall_event_catchpoint): Remove reference to base
+	field.
+	(initialize_syscall_catchpoint_ops): Don't set dtor.
+	* break-catch-throw.c (struct exception_catchpoint): Inherit
+	from breakpoint.
+	<~exception_catchpoint>: New.
+	<base>: Remove.
+	(dtor_exception_catchpoint): Change to ...
+	(exception_catchpoint::~exception_catchpoint): ... this.
+	(handle_gnu_v3_exceptions): Remove reference to base field.
+	(initialize_throw_catchpoint_ops): Don't set dtor.
+	* ctf.c (ctf_get_traceframe_address): Remove reference to base
+	field.
+	* remote.c (remote_get_tracepoint_status): Likewise.
+	* tracefile-tfile.c (tfile_get_traceframe_address): Likewise.
+	* tracefile.c (tracefile_fetch_registers): Likewise.
+	* tracepoint.c (actions_command): Likewise.
+	(validate_actionline): Likewise.
+	(tfind_1): Likewise.
+	(get_traceframe_location): Likewise.
+	(find_matching_tracepoint_location): Likewise.
+	(parse_tracepoint_status): Likewise.
+	* mi/mi-cmd-break.c (mi_cmd_break_passcount): Likewise.
+
+2017-06-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.c (struct longjmp_breakpoint): New struct.
+	(is_tracepoint_type): Change return type to bool.
+	(is_longjmp_type): New function.
+	(new_breakpoint_from_type): Handle longjmp kinds of breakpoints.
+	(set_raw_breakpoint_without_location): Use
+	new_breakpoint_from_type.
+	(set_raw_breakpoint): Likewise.
+
+2017-06-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.c (new_breakpoint_from_type): New function.
+	(create_breakpoint_sal): Use new_breakpoint_from_type and
+	unique_ptr.
+	(create_breakpoint): Likewise.
+
 2017-05-31  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* memattr.c (mem_info_command): Rename to ...

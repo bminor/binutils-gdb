@@ -36,6 +36,7 @@
 #include "location.h"
 #include <ctype.h>
 #include <algorithm>
+#include "common/gdb_optional.h"
 
 typedef struct bound_probe bound_probe_s;
 DEF_VEC_O (bound_probe_s);
@@ -288,18 +289,17 @@ collect_probes (char *objname, char *provider, char *probe_name,
 {
   struct objfile *objfile;
   VEC (bound_probe_s) *result = NULL;
-  struct cleanup *cleanup, *cleanup_temps;
-  regex_t obj_pat, prov_pat, probe_pat;
+  struct cleanup *cleanup;
+  gdb::optional<compiled_regex> obj_pat, prov_pat, probe_pat;
 
   cleanup = make_cleanup (VEC_cleanup (bound_probe_s), &result);
 
-  cleanup_temps = make_cleanup (null_cleanup, NULL);
   if (provider != NULL)
-    compile_rx_or_error (&prov_pat, provider, _("Invalid provider regexp"));
+    prov_pat.emplace (provider, REG_NOSUB, _("Invalid provider regexp"));
   if (probe_name != NULL)
-    compile_rx_or_error (&probe_pat, probe_name, _("Invalid probe regexp"));
+    probe_pat.emplace (probe_name, REG_NOSUB, _("Invalid probe regexp"));
   if (objname != NULL)
-    compile_rx_or_error (&obj_pat, objname, _("Invalid object file regexp"));
+    obj_pat.emplace (objname, REG_NOSUB, _("Invalid object file regexp"));
 
   ALL_OBJFILES (objfile)
     {
@@ -312,7 +312,7 @@ collect_probes (char *objname, char *provider, char *probe_name,
 
       if (objname)
 	{
-	  if (regexec (&obj_pat, objfile_name (objfile), 0, NULL, 0) != 0)
+	  if (obj_pat->exec (objfile_name (objfile), 0, NULL, 0) != 0)
 	    continue;
 	}
 
@@ -326,11 +326,11 @@ collect_probes (char *objname, char *provider, char *probe_name,
 	    continue;
 
 	  if (provider
-	      && regexec (&prov_pat, probe->provider, 0, NULL, 0) != 0)
+	      && prov_pat->exec (probe->provider, 0, NULL, 0) != 0)
 	    continue;
 
 	  if (probe_name
-	      && regexec (&probe_pat, probe->name, 0, NULL, 0) != 0)
+	      && probe_pat->exec (probe->name, 0, NULL, 0) != 0)
 	    continue;
 
 	  bound.objfile = objfile;
@@ -339,7 +339,6 @@ collect_probes (char *objname, char *provider, char *probe_name,
 	}
     }
 
-  do_cleanups (cleanup_temps);
   discard_cleanups (cleanup);
   return result;
 }

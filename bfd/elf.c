@@ -636,6 +636,11 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		  unsigned char *src;
 		  Elf_Internal_Group *dest;
 
+                  /* Make sure the group section has a BFD section
+                     attached to it.  */
+                  if (!bfd_section_from_shdr (abfd, i))
+                    return FALSE;
+                  
 		  /* Add to list of sections.  */
 		  elf_tdata (abfd)->group_sect_ptr[num_group] = shdr;
 		  num_group += 1;
@@ -983,7 +988,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
   if (hdr->sh_type != SHT_NOBITS)
     flags |= SEC_HAS_CONTENTS;
   if (hdr->sh_type == SHT_GROUP)
-    flags |= SEC_GROUP | SEC_EXCLUDE;
+    flags |= SEC_GROUP;
   if ((hdr->sh_flags & SHF_ALLOC) != 0)
     {
       flags |= SEC_ALLOC;
@@ -2374,7 +2379,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	*hdr2 = *hdr;
 	*p_hdr = hdr2;
 	elf_elfsections (abfd)[shindex] = hdr2;
-	target_sect->reloc_count += NUM_SHDR_ENTRIES (hdr);
+	target_sect->reloc_count += (NUM_SHDR_ENTRIES (hdr)
+				     * bed->s->int_rels_per_ext_rel);
 	target_sect->flags |= SEC_RELOC;
 	target_sect->relocation = NULL;
 	target_sect->rel_filepos = hdr->sh_offset;
@@ -2420,34 +2426,6 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       if (!_bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
 	goto fail;
 
-      if (hdr->contents != NULL)
-	{
-	  Elf_Internal_Group *idx = (Elf_Internal_Group *) hdr->contents;
-	  unsigned int n_elt = hdr->sh_size / sizeof (* idx);
-	  asection *s;
-
-	  if (n_elt == 0)
-	    goto fail;
-	  if (idx->flags & GRP_COMDAT)
-	    hdr->bfd_section->flags
-	      |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
-
-	  /* We try to keep the same section order as it comes in.  */
-	  idx += n_elt;
-
-	  while (--n_elt != 0)
-	    {
-	      --idx;
-
-	      if (idx->shdr != NULL
-		  && (s = idx->shdr->bfd_section) != NULL
-		  && elf_next_in_group (s) != NULL)
-		{
-		  elf_next_in_group (hdr->bfd_section) = s;
-		  break;
-		}
-	    }
-	}
       goto success;
 
     default:
@@ -3532,8 +3510,8 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
 	break;
     }
 
-  if ((loc -= 4) != sec->contents)
-    abort ();
+  loc -= 4;
+  BFD_ASSERT (loc == sec->contents);
 
   H_PUT_32 (abfd, sec->flags & SEC_LINK_ONCE ? GRP_COMDAT : 0, loc);
 }
@@ -3608,7 +3586,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
   _bfd_elf_strtab_clear_all_refs (elf_shstrtab (abfd));
 
   /* SHT_GROUP sections are in relocatable files only.  */
-  if (link_info == NULL || bfd_link_relocatable (link_info))
+  if (link_info == NULL || !link_info->resolve_section_groups)
     {
       size_t reloc_count = 0;
 
@@ -7444,22 +7422,21 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
      SHT_GROUP section will have its elf_next_in_group pointing back
      to the input group members.  Ignore linker created group section.
      See elfNN_ia64_object_p in elfxx-ia64.c.  */
-  if (!final_link)
+  if ((link_info == NULL
+       || !link_info->resolve_section_groups)
+      && (elf_sec_group (isec) == NULL
+	  || (elf_sec_group (isec)->flags & SEC_LINKER_CREATED) == 0))
     {
-      if (elf_sec_group (isec) == NULL
-	  || (elf_sec_group (isec)->flags & SEC_LINKER_CREATED) == 0)
-	{
-	  if (elf_section_flags (isec) & SHF_GROUP)
-	    elf_section_flags (osec) |= SHF_GROUP;
-	  elf_next_in_group (osec) = elf_next_in_group (isec);
-	  elf_section_data (osec)->group = elf_section_data (isec)->group;
-	}
-
-      /* If not decompress, preserve SHF_COMPRESSED.  */
-      if ((ibfd->flags & BFD_DECOMPRESS) == 0)
-	elf_section_flags (osec) |= (elf_section_flags (isec)
-				     & SHF_COMPRESSED);
+      if (elf_section_flags (isec) & SHF_GROUP)
+	elf_section_flags (osec) |= SHF_GROUP;
+      elf_next_in_group (osec) = elf_next_in_group (isec);
+      elf_section_data (osec)->group = elf_section_data (isec)->group;
     }
+
+  /* If not decompress, preserve SHF_COMPRESSED.  */
+  if (!final_link && (ibfd->flags & BFD_DECOMPRESS) == 0)
+    elf_section_flags (osec) |= (elf_section_flags (isec)
+				 & SHF_COMPRESSED);
 
   ihdr = &elf_section_data (isec)->this_hdr;
 
@@ -9814,14 +9791,14 @@ elfcore_grok_freebsd_psinfo (bfd *abfd, Elf_Internal_Note *note)
 {
   size_t offset;
 
-  switch (abfd->arch_info->bits_per_word)
+  switch (elf_elfheader (abfd)->e_ident[EI_CLASS])
     {
-    case 32:
+    case ELFCLASS32:
       if (note->descsz < 108)
 	return FALSE;
       break;
 
-    case 64:
+    case ELFCLASS64:
       if (note->descsz < 120)
 	return FALSE;
       break;
@@ -9836,7 +9813,7 @@ elfcore_grok_freebsd_psinfo (bfd *abfd, Elf_Internal_Note *note)
   offset = 4;
 
   /* Skip over pr_psinfosz. */
-  if (abfd->arch_info->bits_per_word == 32)
+  if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS32)
     offset += 4;
   else
     {
@@ -9879,13 +9856,13 @@ elfcore_grok_freebsd_prstatus (bfd *abfd, Elf_Internal_Note *note)
   offset = 4;
 
   /* Skip over pr_statussz.  */
-  switch (abfd->arch_info->bits_per_word)
+  switch (elf_elfheader (abfd)->e_ident[EI_CLASS])
     {
-    case 32:
+    case ELFCLASS32:
       offset += 4;
       break;
 
-    case 64:
+    case ELFCLASS64:
       offset += 4;	/* Padding before pr_statussz. */
       offset += 8;
       break;
@@ -9895,13 +9872,16 @@ elfcore_grok_freebsd_prstatus (bfd *abfd, Elf_Internal_Note *note)
     }
 
   /* Extract size of pr_reg from pr_gregsetsz.  */
-  if (abfd->arch_info->bits_per_word == 32)
+  if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS32)
     size = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + offset);
   else
     size = bfd_h_get_64 (abfd, (bfd_byte *) note->descdata + offset);
 
   /* Skip over pr_gregsetsz and pr_fpregsetsz. */
-  offset += (abfd->arch_info->bits_per_word / 8) * 2;
+  if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS32)
+    offset += 4 * 2;
+  else
+    offset += 8 * 2;
 
   /* Skip over pr_osreldate. */
   offset += 4;
@@ -9918,7 +9898,7 @@ elfcore_grok_freebsd_prstatus (bfd *abfd, Elf_Internal_Note *note)
   offset += 4;
 
   /* Padding before pr_reg. */
-  if (abfd->arch_info->bits_per_word == 64)
+  if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64)
     offset += 4;
 
   /* Make a ".reg/999" section and a ".reg" section.  */

@@ -1,3 +1,7 @@
+2017-06-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* sysinfo.y: Free memory allocated by token NAME.
+
 2017-05-30  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* doc/binutils.texi: Document new cpu=... disassembler options for ARC.

@@ -2767,7 +2767,7 @@ extern asection _bfd_elf_large_com_section;
 	    memmove (rel, rel + count,					\
 		     (relend - rel - count) * sizeof (*rel));		\
 									\
-	    input_section->reloc_count--;				\
+	    input_section->reloc_count -= count;			\
 	    relend -= count;						\
 	    rel--;							\
 	    continue;							\

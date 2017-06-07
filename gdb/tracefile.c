@@ -398,15 +398,15 @@ tracefile_fetch_registers (struct regcache *regcache, int regno)
 
   /* We can often usefully guess that the PC is going to be the same
      as the address of the tracepoint.  */
-  if (tp == NULL || tp->base.loc == NULL)
+  if (tp == NULL || tp->loc == NULL)
     return;
 
   /* But don't try to guess if tracepoint is multi-location...  */
-  if (tp->base.loc->next)
+  if (tp->loc->next)
     {
       warning (_("Tracepoint %d has multiple "
 		 "locations, cannot infer $pc"),
-	       tp->base.number);
+	       tp->number);
       return;
     }
   /* ... or does while-stepping.  */
@@ -414,13 +414,13 @@ tracefile_fetch_registers (struct regcache *regcache, int regno)
     {
       warning (_("Tracepoint %d does while-stepping, "
 		 "cannot infer $pc"),
-	       tp->base.number);
+	       tp->number);
       return;
     }
 
   /* Guess what we can from the tracepoint location.  */
   gdbarch_guess_tracepoint_registers (gdbarch, regcache,
-				      tp->base.loc->address);
+				      tp->loc->address);
 }
 
 /* This is the implementation of target_ops method to_has_all_memory.  */

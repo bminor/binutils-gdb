@@ -15,6 +15,11 @@
 * Orphan sections placed after an empty section that has an AT(LMA) will now
   take an load memory address starting from LMA.
 
+* Section groups can now be resolved (the group deleted and the group members
+  placed like normal sections) at partial link time either using the new linker
+  option --force-group-allocation or by placing FORCE_GROUP_ALLOCATION into the
+  linker script.
+
 Changes in 2.28:
 
 * The EXCLUDE_FILE linker script construct can now be applied outside of the
