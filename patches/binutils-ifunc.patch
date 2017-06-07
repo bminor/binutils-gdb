@@ -1,0 +1,319 @@
+From e7dbc617174d604903c417ae25a237d7533edac8 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Wed, 7 Jun 2017 05:51:46 -0700
+Subject: [PATCH] x86: Add -z print-local-ifuncs to ELF linker
+
+Add -z print-local-ifuncs to x86 ELF linker to list local IFUNC functions
+when generating executables and shared objects.
+
+bfd/
+
+	* elf32-i386.c (elf_i386_check_relocs): Set local IFUNC symbol
+	name.
+	(elf_i386_relocate_section): Print local IFUNC name when
+	generating R_386_IRELATIVE relocation for -z print-local-ifuncs.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	* elf_x86_64_check_relocs (elf_x86_64_check_relocs): Set local
+	IFUNC symbol name.
+	(elf_x86_64_relocate_section): Print local IFUNC name when
+	generating R_X86_64_IRELATIVE relocation for -z print-local-ifuncs.
+	(elf_x86_64_finish_dynamic_symbol): Likewise.
+
+include/
+
+	* bfdlink.h (bfd_link_info): Add print_local_ifuncs.
+
+ld/
+
+	* Makefile.am (ELF_X86_DEPS): Add
+	$(srcdir)/emulparams/print_local_ifuncs.sh.
+	* Makefile.in: Regenerated.
+	* NEWS: Mention -z print-local-ifuncs.
+	* emulparams/elf32_x86_64.sh: Source
+	${srcdir}/emulparams/print_local_ifuncs.sh.
+	* emulparams/elf_i386.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* ld/emulparams/print_local_ifuncs.sh: New file.
+	* ld.texinfo: Document -z print-local-ifuncs and
+	-z noprint-local-ifuncs.
+	* testsuite/ld-ifunc/ifunc-1-local-x86.d: Pass
+	-z print-local-ifuncs to ld and expect local IFUNC listing.
+	* ld-ifunc/ifunc-1-x86.d: Likewise.
+---
+ bfd/elf32-i386.c                          | 20 ++++++++++++++++++++
+ bfd/elf64-x86-64.c                        | 20 ++++++++++++++++++++
+ include/bfdlink.h                         |  3 +++
+ ld/Makefile.am                            |  3 ++-
+ ld/Makefile.in                            |  3 ++-
+ ld/NEWS                                   |  3 +++
+ ld/emulparams/elf32_x86_64.sh             |  1 +
+ ld/emulparams/elf_i386.sh                 |  1 +
+ ld/emulparams/elf_x86_64.sh               |  1 +
+ ld/emulparams/print_local_ifuncs.sh       | 14 ++++++++++++++
+ ld/ld.texinfo                             |  6 ++++++
+ ld/testsuite/ld-ifunc/ifunc-1-local-x86.d |  3 ++-
+ ld/testsuite/ld-ifunc/ifunc-1-x86.d       |  3 ++-
+ 13 files changed, 77 insertions(+), 4 deletions(-)
+ create mode 100644 ld/emulparams/print_local_ifuncs.sh
+
+diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
+index 1fdc06c..1b25f5f 100644
+--- a/bfd/elf32-i386.c
++++ b/bfd/elf32-i386.c
+@@ -1945,6 +1945,8 @@ elf_i386_check_relocs (bfd *abfd,
+ 		goto error_return;
+ 
+ 	      /* Fake a STT_GNU_IFUNC symbol.  */
++	      h->root.root.string = bfd_elf_sym_name (abfd, symtab_hdr,
++						      isym, NULL);
+ 	      h->type = STT_GNU_IFUNC;
+ 	      h->def_regular = 1;
+ 	      h->ref_regular = 1;
+@@ -4081,6 +4083,12 @@ do_ifunc_pointer:
+ 		      || h->forced_local
+ 		      || bfd_link_executable (info))
+ 		    {
++		      if (info->print_local_ifuncs)
++			info->callbacks->einfo (_("%B: local IFUNC function `%s' in `%B'\n"),
++						output_bfd,
++						h->root.root.string,
++						h->root.u.def.section->owner);
++
+ 		      /* This symbol is resolved locally.  */
+ 		      outrel.r_info = ELF32_R_INFO (0, R_386_IRELATIVE);
+ 		      bfd_put_32 (output_bfd,
+@@ -5413,6 +5421,12 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+ 		  && h->def_regular
+ 		  && h->type == STT_GNU_IFUNC))
+ 	    {
++	      if (info->print_local_ifuncs)
++		info->callbacks->einfo (_("%B: local IFUNC function `%s' in `%B'\n"),
++					output_bfd,
++					h->root.root.string,
++					h->root.u.def.section->owner);
++
+ 	      /* If an STT_GNU_IFUNC symbol is locally defined, generate
+ 		 R_386_IRELATIVE instead of R_386_JUMP_SLOT.  Store addend
+ 		 in the .got.plt section.  */
+@@ -5548,6 +5562,12 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+ 		}
+ 	      if (SYMBOL_REFERENCES_LOCAL (info, h))
+ 		{
++		  if (info->print_local_ifuncs)
++		    info->callbacks->einfo (_("%B: local IFUNC function `%s' in `%B'\n"),
++					    output_bfd,
++					    h->root.root.string,
++					    h->root.u.def.section->owner);
++
+ 		  bfd_put_32 (output_bfd,
+ 			      (h->root.u.def.value
+ 			       + h->root.u.def.section->output_section->vma
+diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
+index 7beb78e..8a8558c 100644
+--- a/bfd/elf64-x86-64.c
++++ b/bfd/elf64-x86-64.c
+@@ -2281,6 +2281,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ 		goto error_return;
+ 
+ 	      /* Fake a STT_GNU_IFUNC symbol.  */
++	      h->root.root.string = bfd_elf_sym_name (abfd, symtab_hdr,
++						      isym, NULL);
+ 	      h->type = STT_GNU_IFUNC;
+ 	      h->def_regular = 1;
+ 	      h->ref_regular = 1;
+@@ -4422,6 +4424,12 @@ do_ifunc_pointer:
+ 		      || h->forced_local
+ 		      || bfd_link_executable (info))
+ 		    {
++		      if (info->print_local_ifuncs)
++			info->callbacks->einfo (_("%B: local IFUNC function `%s' in `%B'\n"),
++						output_bfd,
++						h->root.root.string,
++						h->root.u.def.section->owner);
++
+ 		      /* This symbol is resolved locally.  */
+ 		      outrel.r_info = htab->r_info (0, R_X86_64_IRELATIVE);
+ 		      outrel.r_addend = (h->root.u.def.value
+@@ -5791,6 +5799,12 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+ 		  && h->def_regular
+ 		  && h->type == STT_GNU_IFUNC))
+ 	    {
++	      if (info->print_local_ifuncs)
++		info->callbacks->einfo (_("%B: local IFUNC function `%s' in `%B'\n"),
++					output_bfd,
++					h->root.root.string,
++					h->root.u.def.section->owner);
++
+ 	      /* If an STT_GNU_IFUNC symbol is locally defined, generate
+ 		 R_X86_64_IRELATIVE instead of R_X86_64_JUMP_SLOT.  */
+ 	      rela.r_info = htab->r_info (0, R_X86_64_IRELATIVE);
+@@ -5941,6 +5955,12 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+ 		}
+ 	      if (SYMBOL_REFERENCES_LOCAL (info, h))
+ 		{
++		  if (info->print_local_ifuncs)
++		    info->callbacks->einfo (_("%B: local IFUNC function `%s' in `%B'\n"),
++					    output_bfd,
++					    h->root.root.string,
++					    h->root.u.def.section->owner);
++
+ 		  rela.r_info = htab->r_info (0,
+ 					      R_X86_64_IRELATIVE);
+ 		  rela.r_addend = (h->root.u.def.value
+diff --git a/include/bfdlink.h b/include/bfdlink.h
+index 2e3f0b1..4973d76 100644
+--- a/include/bfdlink.h
++++ b/include/bfdlink.h
+@@ -461,6 +461,9 @@ struct bfd_link_info
+   /* TRUE if user should be informed of removed unreferenced sections.  */
+   unsigned int print_gc_sections: 1;
+ 
++  /* TRUE if user should be informed of local IFUNC functions.  */
++  unsigned int print_local_ifuncs: 1;
++
+   /* TRUE if we should warn alternate ELF machine code.  */
+   unsigned int warn_alternate_em: 1;
+ 
+diff --git a/ld/Makefile.am b/ld/Makefile.am
+index 3aa7e80..09074e0 100644
+--- a/ld/Makefile.am
++++ b/ld/Makefile.am
+@@ -677,7 +677,8 @@ ELF_X86_DEPS = $(ELF_DEPS) $(srcdir)/emulparams/plt_unwind.sh \
+ 	       $(srcdir)/emulparams/extern_protected_data.sh \
+ 	       $(srcdir)/emulparams/dynamic_undefined_weak.sh \
+ 	       $(srcdir)/emulparams/reloc_overflow.sh \
+-	       $(srcdir)/emulparams/call_nop.sh
++	       $(srcdir)/emulparams/call_nop.sh \
++	       $(srcdir)/emulparams/print_local_ifuncs.sh
+ 
+ @TDIRS@
+ 
+diff --git a/ld/Makefile.in b/ld/Makefile.in
+index f485f4f..7b8346f 100644
+--- a/ld/Makefile.in
++++ b/ld/Makefile.in
+@@ -932,7 +932,8 @@ ELF_X86_DEPS = $(ELF_DEPS) $(srcdir)/emulparams/plt_unwind.sh \
+ 	       $(srcdir)/emulparams/extern_protected_data.sh \
+ 	       $(srcdir)/emulparams/dynamic_undefined_weak.sh \
+ 	       $(srcdir)/emulparams/reloc_overflow.sh \
+-	       $(srcdir)/emulparams/call_nop.sh
++	       $(srcdir)/emulparams/call_nop.sh \
++	       $(srcdir)/emulparams/print_local_ifuncs.sh
+ 
+ 
+ # We need this for automake to use YLWRAP.
+diff --git a/ld/NEWS b/ld/NEWS
+index 98055b5..b15cc47 100644
+--- a/ld/NEWS
++++ b/ld/NEWS
+@@ -1,5 +1,8 @@
+ -*- text -*-
+ 
++* Support for -z print-local-ifuncs in the x86 ELF linker to list all
++  local IFUNC functions.
++
+ * Add support for ELF SHF_GNU_MBIND and PT_GNU_MBIND_XXX.
+ 
+ * Add support for ELF GNU program properties.
+diff --git a/ld/emulparams/elf32_x86_64.sh b/ld/emulparams/elf32_x86_64.sh
+index 9b85239..66a6d8e 100644
+--- a/ld/emulparams/elf32_x86_64.sh
++++ b/ld/emulparams/elf32_x86_64.sh
+@@ -3,6 +3,7 @@
+ . ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/reloc_overflow.sh
+ . ${srcdir}/emulparams/call_nop.sh
++. ${srcdir}/emulparams/print_local_ifuncs.sh
+ SCRIPT_NAME=elf
+ ELFSIZE=32
+ OUTPUT_FORMAT="elf32-x86-64"
+diff --git a/ld/emulparams/elf_i386.sh b/ld/emulparams/elf_i386.sh
+index b08e661..a760a01 100644
+--- a/ld/emulparams/elf_i386.sh
++++ b/ld/emulparams/elf_i386.sh
+@@ -2,6 +2,7 @@
+ . ${srcdir}/emulparams/extern_protected_data.sh
+ . ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/call_nop.sh
++. ${srcdir}/emulparams/print_local_ifuncs.sh
+ SCRIPT_NAME=elf
+ OUTPUT_FORMAT="elf32-i386"
+ CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+diff --git a/ld/emulparams/elf_x86_64.sh b/ld/emulparams/elf_x86_64.sh
+index ca6d06c..121e1d7 100644
+--- a/ld/emulparams/elf_x86_64.sh
++++ b/ld/emulparams/elf_x86_64.sh
+@@ -3,6 +3,7 @@
+ . ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/reloc_overflow.sh
+ . ${srcdir}/emulparams/call_nop.sh
++. ${srcdir}/emulparams/print_local_ifuncs.sh
+ SCRIPT_NAME=elf
+ ELFSIZE=64
+ OUTPUT_FORMAT="elf64-x86-64"
+diff --git a/ld/emulparams/print_local_ifuncs.sh b/ld/emulparams/print_local_ifuncs.sh
+new file mode 100644
+index 0000000..30ed9a2
+--- /dev/null
++++ b/ld/emulparams/print_local_ifuncs.sh
+@@ -0,0 +1,14 @@
++PARSE_AND_LIST_OPTIONS_PRINT_LOCAL_IFUNCS='
++  fprintf (file, _("\
++  -z print-local-ifuncs       List local IFUNC functions\n\
++  -z noprint-local-ifuncs     Do not list local IFUNC functions\n"));
++'
++PARSE_AND_LIST_ARGS_CASE_Z_PRINT_LOCAL_IFUNCS='
++      else if (strcmp (optarg, "print-local-ifuncs") == 0)
++	link_info.print_local_ifuncs = TRUE;
++      else if (strcmp (optarg, "noprint-local-ifuncs") == 0)
++	link_info.print_local_ifuncs = FALSE;
++'
++
++PARSE_AND_LIST_OPTIONS="$PARSE_AND_LIST_OPTIONS $PARSE_AND_LIST_OPTIONS_PRINT_LOCAL_IFUNCS"
++PARSE_AND_LIST_ARGS_CASE_Z="$PARSE_AND_LIST_ARGS_CASE_Z $PARSE_AND_LIST_ARGS_CASE_Z_PRINT_LOCAL_IFUNCS"
+diff --git a/ld/ld.texinfo b/ld/ld.texinfo
+index 790b52f..e93f5be 100644
+--- a/ld/ld.texinfo
++++ b/ld/ld.texinfo
+@@ -1261,6 +1261,12 @@ to a locally defined function, foo, via its GOT slot.
+ @option{call-nop=suffix-@var{byte}} generates @code{call foo @var{byte}}.
+ Supported for i386 and x86_64.
+ 
++@item print-local-ifuncs
++List all local IFUNC functions.  Supported for i386 and x86_64.
++
++@item noprint-local-ifuncs
++Don't list local IFUNC functions.  Supported for i386 and x86_64.
++
+ @end table
+ 
+ Other keywords are ignored for Solaris compatibility.
+diff --git a/ld/testsuite/ld-ifunc/ifunc-1-local-x86.d b/ld/testsuite/ld-ifunc/ifunc-1-local-x86.d
+index 00bc474..cf3b6f2 100644
+--- a/ld/testsuite/ld-ifunc/ifunc-1-local-x86.d
++++ b/ld/testsuite/ld-ifunc/ifunc-1-local-x86.d
+@@ -1,6 +1,7 @@
+-#ld: -shared
++#ld: -shared -z print-local-ifuncs
+ #objdump: -dw
+ #target: x86_64-*-* i?86-*-*
++#warning: .*: local IFUNC function `__GI_foo' in `tmpdir/ifunc-1-local-x86.o'
+ 
+ #...
+ [ \t0-9a-f]+:[ \t0-9a-f]+call[ \t0-9a-fq]+<\*ABS\*(\+0x160|\+0x170|\+0x1e0|)@plt>
+diff --git a/ld/testsuite/ld-ifunc/ifunc-1-x86.d b/ld/testsuite/ld-ifunc/ifunc-1-x86.d
+index f9dee1b..70f83d4 100644
+--- a/ld/testsuite/ld-ifunc/ifunc-1-x86.d
++++ b/ld/testsuite/ld-ifunc/ifunc-1-x86.d
+@@ -1,6 +1,7 @@
+-#ld: -shared
++#ld: -shared -z print-local-ifuncs
+ #objdump: -dw
+ #target: x86_64-*-* i?86-*-*
++#warning: .*: local IFUNC function `__GI_foo' in `tmpdir/ifunc-1-x86.o'
+ 
+ #...
+ [ \t0-9a-f]+:[ \t0-9a-f]+call[ \t0-9a-fq]+<\*ABS\*(\+0x170|\+0x190|\+0x210|)@plt>
+-- 
+2.9.4
+
