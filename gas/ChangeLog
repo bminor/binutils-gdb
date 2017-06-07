@@ -1,3 +1,13 @@
+2017-06-26  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* /config/tc-arc.c (is_br_jmp_insn_p): Update macro with known
+	instructions to be accounted as jumps.
+	(assemble_insn): Check for limms into the delay slots.  Emit an
+	error if so.
+	* testsuite/gas/arc/asm-errors-3.d: New file.
+	* testsuite/gas/arc/asm-errors-3.err: Likewise.
+	* testsuite/gas/arc/asm-errors-3.s: Likewise.
+
 2017-06-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* NEWS: Mention support of ARM Cortex-R52 processor.
