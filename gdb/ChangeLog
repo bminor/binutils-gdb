@@ -1,5 +1,13 @@
 2017-06-07  Alan Hayward  <alan.hayward@arm.com>
 
+	* sh-tdep.c (sh_pseudo_register_read): Remove
+	MAX_REGISTER_SIZE.
+	(sh_pseudo_register_write): Likewise.
+	* sh64-tdep.c (sh64_pseudo_register_read): Likewise.
+	(sh64_pseudo_register_write): Likewise
+
+2017-06-07  Alan Hayward  <alan.hayward@arm.com>
+
 	* aarch64-tdep.c (aarch64_store_return_value): Use
 	V_REGISTER_SIZE.
 	(aarch64_pseudo_read_value): Likewise.
