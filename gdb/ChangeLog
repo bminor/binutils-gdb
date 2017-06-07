@@ -1,5 +1,10 @@
 2017-06-07  Alan Hayward  <alan.hayward@arm.com>
 
+	* regcache.c (regcache::save): Avoid buffer use.
+	(regcache::dump): Likewise.
+
+2017-06-07  Alan Hayward  <alan.hayward@arm.com>
+
 	* sh-tdep.c (sh_pseudo_register_read): Remove
 	MAX_REGISTER_SIZE.
 	(sh_pseudo_register_write): Likewise.
