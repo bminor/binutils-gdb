@@ -1,3 +1,14 @@
+2017-06-08  Jiong Wang <jiong.wang@arm.com>
+
+	PR ld/21532
+	* elfnn-aarch64.c (ELIMINATE_COPY_RELOCS): Set to 1.
+	(elfNN_aarch64_final_link_relocate): Also propagate relocations to
+	runtime for copy relocation elimination cases.
+	(alias_readonly_dynrelocs): New function.
+	(elfNN_aarch64_adjust_dynamic_symbol): Keep the dynamic relocs instead
+	of generating copy relocation if it is not against read-only sections.
+	(elfNN_aarch64_check_relocs): Likewise.
+
 2017-06-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* elf.c (setup_group): Make sure BFD sections are created for all
