@@ -1,3 +1,13 @@
+2017-06-07  Nick Clifton  <nickc@redhat.com>
+
+	Import this fix from upstream:
+
+	2017-05-30  Casey Smith  <clegg89@gmail.com>
+
+	PR ld/21523
+	* elf32-arm.c (elf32_arm_final_link_relocate): Install an absolute
+	value when processing the R_ARM_THM_ALU_PREL_11_0 reloc.
+
 2017-06-05  Alan Modra  <amodra@gmail.com>
 
 	PR 21529

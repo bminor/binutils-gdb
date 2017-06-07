@@ -10505,7 +10505,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 			  + input_section->output_offset
 			  + rel->r_offset);
 
-	value = relocation;
+	/* PR 21523: Use an absolute value.  The user of this reloc will
+	   have already selected an ADD or SUB insn appropriately.  */
+	value = abs (relocation);
 
 	if (value >= 0x1000)
 	  return bfd_reloc_overflow;
