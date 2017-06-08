@@ -1,3 +1,11 @@
+2017-06-07  Eric Christopher  <echristo@gmail.com>
+
+	* aarch64.cc (maybe_apply_stub): Add debug logging for looking
+	up stubs to undefined symbols and early return rather than
+	fail to look them up.
+	(scan_reloc_for_stub): Add debug logging for no stub creation
+	for undefined symbols.
+
 2017-05-23  Alan Modra  <amodra@gmail.com>
 
 	PR 21503
