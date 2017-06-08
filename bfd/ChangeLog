@@ -1,3 +1,17 @@
+2017-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Set local IFUNC symbol
+	name.  Use local IFUNC symbol name string to report unsupported
+	non-PIC call to IFUNC function.
+	(elf_i386_relocate_section): Dump local IFUNC name with minfo
+	when generating R_386_IRELATIVE relocation.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	* elf_x86_64_check_relocs (elf_x86_64_check_relocs): Set local
+	IFUNC symbol name.
+	(elf_x86_64_relocate_section): Dump local IFUNC name with minfo
+	when generating R_X86_64_IRELATIVE relocation.
+	(elf_x86_64_finish_dynamic_symbol): Likewise.
+
 2017-06-08  Jiong Wang <jiong.wang@arm.com>
 
 	PR ld/21532

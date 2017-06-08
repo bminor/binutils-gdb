@@ -1,3 +1,13 @@
+2017-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-ifunc/ifunc-1-local-x86.d: Pass
+	"-Map tmpdir/ifunc-1-local-x86.map" to ld and check
+	ifunc-1-local-x86.map.
+	* testsuite/ld-ifunc/ifunc-1-x86.d: Pass
+	"-Map tmpdir/ifunc-1-x86.map" to ld and check ifunc-1-x86.map.
+	* testsuite/ld-ifunc/ifunc-1-local-x86.map: New file.
+	* testsuite/ld-ifunc/ifunc-1-x86.map: Likewise.
+
 2017-06-08  Jiong Wang  <jiong.wang@arm.com>
 
 	* testsuite/ld-aarch64/copy-reloc-eliminate.d: New test.
