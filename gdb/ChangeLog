@@ -1,3 +1,7 @@
+2017-06-08  Alan Hayward  <alan.hayward@arm.com>
+
+	* mi/mi-main.c (register_changed_p): Use cooked_read_value.
+
 2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* NEWS (Changes since GDB 8.0): Announce that GDBserver is now
