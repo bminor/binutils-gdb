@@ -1549,6 +1549,24 @@ darwin_nat_target::kill ()
 
   if (res == 0)
     {
+      /* On MacOS version Sierra, the darwin_restore_exception_ports call
+         does not work as expected.
+         When the kill function is called, the SIGKILL signal is received
+         by gdb whereas it should have been received by the kernel since
+         the exception ports have been restored.
+         This behavior is not the expected one thus gdb does not reply to
+         the received SIGKILL message. This situation leads to a "busy"
+         resource from the kernel point of view and the inferior is never
+         released, causing it to remain as a zombie process, even after
+	 GDB exits.
+         To work around this, we mark all the threads of the inferior as
+         signaled thus darwin_decode_message function knows that the kill
+         signal was sent by gdb and will take the appropriate action
+         (cancel signal and reply to the signal message).  */
+      darwin_inferior *priv = get_darwin_inferior (inf);
+      for (darwin_thread_t *thread : priv->threads)
+        thread->signaled = 1;
+
       darwin_resume_inferior (inf);
 
       ptid = darwin_wait (inferior_ptid, &wstatus);
