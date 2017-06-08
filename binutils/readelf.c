@@ -3726,6 +3726,16 @@ get_arm_segment_type (unsigned long type)
 }
 
 static const char *
+get_s390_segment_type (unsigned long type)
+{
+  switch (type)
+    {
+    case PT_S390_PGSTE: return "S390_PGSTE";
+    default:            return NULL;
+    }
+}
+
+static const char *
 get_mips_segment_type (unsigned long type)
 {
   switch (type)
@@ -3857,6 +3867,10 @@ get_segment_type (unsigned long p_type)
 	      break;
 	    case EM_TI_C6000:
 	      result = get_tic6x_segment_type (p_type);
+	      break;
+	    case EM_S390:
+	    case EM_S390_OLD:
+	      result = get_s390_segment_type (p_type);
 	      break;
 	    default:
 	      result = NULL;

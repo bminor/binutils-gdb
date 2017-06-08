@@ -25,6 +25,7 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/s390.h"
+#include "elf-s390.h"
 #include <stdarg.h>
 
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
@@ -660,6 +661,9 @@ struct elf_s390_link_hash_table
 
   /* Small local sym cache.  */
   struct sym_cache sym_cache;
+
+  /* Options passed from the linker.  */
+  struct s390_elf_params *params;
 };
 
 /* Get the s390 ELF linker hash table from a link_info structure.  */
@@ -3966,6 +3970,70 @@ elf64_s390_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   return elf_s390_merge_obj_attributes (ibfd, info);
 }
 
+/* We may add a PT_S390_PGSTE program header.  */
+
+static int
+elf_s390_additional_program_headers (bfd *abfd ATTRIBUTE_UNUSED,
+				     struct bfd_link_info *info)
+{
+  struct elf_s390_link_hash_table *htab;
+
+  htab = elf_s390_hash_table (info);
+  return htab->params->pgste;
+}
+
+
+/* Add the PT_S390_PGSTE program header.  */
+
+static bfd_boolean
+elf_s390_modify_segment_map (bfd *abfd ATTRIBUTE_UNUSED,
+			     struct bfd_link_info *info)
+{
+  struct elf_s390_link_hash_table *htab;
+  struct elf_segment_map *m, *pm = NULL;
+
+  htab = elf_s390_hash_table (info);
+  if (!htab->params->pgste)
+    return TRUE;
+
+  /* If there is already a PT_S390_PGSTE header, avoid adding
+     another.  */
+  m = elf_seg_map (abfd);
+  while (m && m->p_type != PT_S390_PGSTE)
+    {
+      pm = m;
+      m = m->next;
+    }
+
+  if (m)
+    return TRUE;
+
+  m = (struct elf_segment_map *)
+    bfd_zalloc (abfd, sizeof (struct elf_segment_map));
+  if (m == NULL)
+    return FALSE;
+  m->p_type = PT_S390_PGSTE;
+  m->count = 0;
+  m->next = NULL;
+  if (pm)
+    pm->next = m;
+
+  return TRUE;
+}
+
+bfd_boolean
+bfd_elf_s390_set_options (struct bfd_link_info *info,
+			  struct s390_elf_params *params)
+{
+  struct elf_s390_link_hash_table *htab;
+
+  htab = elf_s390_hash_table (info);
+  htab->params = params;
+
+  return TRUE;
+}
+
+
 /* Why was the hash table entry size definition changed from
    ARCH_SIZE/8 to 4? This breaks the 64 bit dynamic linker and
    this is the only reason for the s390_elf64_size_info structure.  */
@@ -4046,6 +4114,8 @@ const struct elf_size_info s390_elf64_size_info =
 #define elf_backend_plt_sym_val		      elf_s390_plt_sym_val
 #define elf_backend_add_symbol_hook           elf_s390_add_symbol_hook
 #define elf_backend_sort_relocs_p             elf_s390_elf_sort_relocs_p
+#define elf_backend_additional_program_headers elf_s390_additional_program_headers
+#define elf_backend_modify_segment_map	      elf_s390_modify_segment_map
 
 #define bfd_elf64_mkobject		elf_s390_mkobject
 #define elf_backend_object_p		elf_s390_object_p

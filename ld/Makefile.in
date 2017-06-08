@@ -3502,6 +3502,7 @@ eelf64_ia64_vms.c: $(srcdir)/emulparams/elf64_ia64_vms.sh \
   $(srcdir)/scripttempl/ia64vms.sc ${GEN_DEPENDS}
 
 eelf64_s390.c: $(srcdir)/emulparams/elf64_s390.sh \
+  $(srcdir)/emultempl/s390.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf64_sparc.c: $(srcdir)/emulparams/elf64_sparc.sh \

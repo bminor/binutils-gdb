@@ -515,7 +515,9 @@ enum PT
   // Platform architecture compatibility information
   PT_AARCH64_ARCHEXT = 0x70000000,
   // Exception unwind tables
-  PT_AARCH64_UNWIND = 0x70000001
+  PT_AARCH64_UNWIND = 0x70000001,
+  // 4k page table size
+  PT_S390_PGSTE = 0x70000000,
 };
 
 // The valid bit flags found in the Phdr p_flags field.
