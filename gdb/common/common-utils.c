@@ -337,7 +337,7 @@ stringify_argv (const std::vector<char *> &args)
 {
   std::string ret;
 
-  if (!args.empty ())
+  if (!args.empty () && args[0] != NULL)
     {
       for (auto s : args)
 	if (s != NULL)

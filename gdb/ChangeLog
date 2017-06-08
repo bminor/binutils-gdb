@@ -1,3 +1,8 @@
+2017-06-08  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* common/common-utils.c (stringify_argv): Check for "arg[0] !=
+	NULL".
+
 2017-06-08 Alan Hayward  <alan.hayward@arm.com>
 
 	* mn10300-tdep.c (MN10300_MAX_REGISTER_SIZE): Add.
