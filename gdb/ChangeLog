@@ -1,3 +1,9 @@
+2017-06-08 Alan Hayward  <alan.hayward@arm.com>
+
+	* mn10300-tdep.c (MN10300_MAX_REGISTER_SIZE): Add.
+	(mn10300_extract_return_value): Use MN10300_MAX_REGISTER_SIZE.
+	(mn10300_push_dummy_call): Likewise.
+
 2017-06-08  Alan Hayward  <alan.hayward@arm.com>
 
 	* mi/mi-main.c (register_changed_p): Use value_contents_eq.
