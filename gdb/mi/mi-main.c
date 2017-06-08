@@ -1125,17 +1125,8 @@ register_changed_p (int regnum, struct regcache *prev_regs,
   gdb_assert (prev_value != NULL);
   gdb_assert (this_value != NULL);
 
-  if (value_optimized_out (prev_value) != value_optimized_out (this_value)
-      || value_entirely_available (prev_value)
-	 != value_entirely_available (this_value))
-    ret = 1;
-  if (value_optimized_out (prev_value)
-      || !value_entirely_available (prev_value))
-    ret = 0;
-  else
-    ret = memcmp (value_contents_all (prev_value),
-		  value_contents_all (this_value),
-		  register_size (gdbarch, regnum)) != 0;
+  ret = value_contents_eq (prev_value, 0, this_value, 0,
+			   register_size (gdbarch, regnum)) == 0;
 
   release_value (prev_value);
   release_value (this_value);
