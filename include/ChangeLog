@@ -1,3 +1,7 @@
+2017-06-26  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* elf/riscv.h (R_RISCV_32_PCREL): New.
+
 2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf/arm.h (TAG_CPU_ARCH_V8R): New macro.

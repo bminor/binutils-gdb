@@ -1,3 +1,13 @@
+2017-06-26  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* elfnn-riscv.c (perform_relocation): Support the new
+	R_RISCV_32_PCREL relocation.
+	(riscv_elf_relocate_section): Likewise.
+	* elfxx-riscv.c (howto_table): Likewise.
+	(riscv_reloc_map): Likewise.
+	* bfd-in2.h (BFD_RELOC_RISCV_32_PCREL): New relocation.
+	* libbfd.h: Regenerate.
+
 2017-06-27  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/21665

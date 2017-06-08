@@ -1,3 +1,8 @@
+2017-06-26  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* config/tc-riscv.c (md_apply_fix) [BFD_RELOC_32]: Convert to a
+	R_RISCV_32_PCREL relocation.
+
 2017-06-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/21661
