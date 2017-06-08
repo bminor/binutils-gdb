@@ -2263,7 +2263,9 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
   if (loc != std::string::npos)
     filename_after_features = filename_after_features.substr (loc + 10);
 
-  if (strncmp (filename_after_features.c_str(), "i386/32bit-", 11) == 0)
+  if (strncmp (filename_after_features.c_str(), "i386/32bit-", 11) == 0
+      || strncmp (filename_after_features.c_str(), "i386/64bit-", 11) == 0
+      || strncmp (filename_after_features.c_str(), "i386/x32-core.xml", 17) == 0)
     {
       print_c_feature v (filename_after_features);
 

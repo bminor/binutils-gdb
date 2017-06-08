@@ -251,7 +251,16 @@ FEATURE_XMLFILES = i386/32bit-core.xml \
 	i386/32bit-avx.xml \
 	i386/32bit-mpx.xml \
 	i386/32bit-avx512.xml \
-	i386/32bit-pkeys.xml
+	i386/32bit-pkeys.xml \
+	i386/64bit-avx512.xml \
+	i386/64bit-core.xml \
+	i386/64bit-mpx.xml \
+	i386/64bit-segments.xml \
+	i386/64bit-avx.xml \
+	i386/64bit-linux.xml \
+	i386/64bit-pkeys.xml \
+	i386/64bit-sse.xml \
+	i386/x32-core.xml
 
 FEATURE_CFILES = $(patsubst %.xml,%.c,$(FEATURE_XMLFILES))
 
@@ -273,7 +282,10 @@ $(FEATURE_CFILES): %.c: %.xml.tmp
 	echo "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">" >> $@
 	echo "<target>" >> $@
 	echo "  <architecture>" >> $@
-	if test $(findstring i386/32bit-,$@); then echo "i386" >> $@ ; fi;
+	if test $(findstring i386/32bit-,$@); then echo "i386" >> $@ ; \
+	elif test $(findstring i386/64bit-,$@); then echo "i386:x86-64" >> $@; \
+	elif test $(findstring i386/x32-,$@); then echo "i386:x64-32" >> $@; \
+	fi;
 	echo "  </architecture>" >> $@
 	echo "  <xi:include href=\"$(notdir $<)\"/>" >> $@
 	echo "</target>" >> $@
