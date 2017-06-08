@@ -39,17 +39,18 @@
 #include "solib-svr4.h"
 #include "xml-syscall.h"
 #include "glibc-tdep.h"
+#include "target-descriptions.h"
 
-#include "features/i386/amd64-linux.c"
-#include "features/i386/amd64-avx-linux.c"
-#include "features/i386/amd64-mpx-linux.c"
-#include "features/i386/amd64-avx-mpx-linux.c"
-#include "features/i386/amd64-avx-avx512-linux.c"
-#include "features/i386/amd64-avx-mpx-avx512-pku-linux.c"
+#include "features/i386/64bit-avx.c"
+#include "features/i386/64bit-avx512.c"
+#include "features/i386/64bit-core.c"
+#include "features/i386/64bit-linux.c"
+#include "features/i386/64bit-mpx.c"
+#include "features/i386/64bit-pkeys.c"
+#include "features/i386/64bit-segments.c"
+#include "features/i386/64bit-sse.c"
 
-#include "features/i386/x32-linux.c"
-#include "features/i386/x32-avx-linux.c"
-#include "features/i386/x32-avx-avx512-linux.c"
+#include "features/i386/x32-core.c"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_AMD64 "syscalls/amd64-linux.xml"
@@ -1578,42 +1579,59 @@ amd64_linux_record_signal (struct gdbarch *gdbarch,
 const target_desc *
 amd64_linux_read_description (uint64_t xcr0_features_bit, bool is_x32)
 {
-  switch (xcr0_features_bit)
+  static target_desc *amd64_linux_tdescs \
+    [2/*AVX*/][2/*MPX*/][2/*AVX512*/][2/*PKRU*/] = {};
+  static target_desc *x32_linux_tdescs[2/*AVX*/][2/*AVX512*/] = {};
+
+  target_desc **tdesc;
+
+  if (is_x32)
     {
-    case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
-      if (is_x32)
-	/* No MPX, PKU on x32, fallback to AVX-AVX512.  */
-	return tdesc_x32_avx_avx512_linux;
-      else
-	return tdesc_amd64_avx_mpx_avx512_pku_linux;
-    case X86_XSTATE_AVX_AVX512_MASK:
-      if (is_x32)
-	return tdesc_x32_avx_avx512_linux;
-      else
-	return tdesc_amd64_avx_avx512_linux;
-    case X86_XSTATE_MPX_MASK:
-      if (is_x32)
-	/* No MPX on x32, fallback to AVX.  */
-	return tdesc_x32_avx_linux;
-      else
-	return tdesc_amd64_mpx_linux;
-    case X86_XSTATE_AVX_MPX_MASK:
-      if (is_x32)
-	/* No MPX on x32, fallback to AVX.  */
-	return tdesc_x32_avx_linux;
-      else
-	return tdesc_amd64_avx_mpx_linux;
-    case X86_XSTATE_AVX_MASK:
-      if (is_x32)
-	return tdesc_x32_avx_linux;
-      else
-	return tdesc_amd64_avx_linux;
-    default:
-      if (is_x32)
-	return tdesc_x32_linux;
-      else
-	return tdesc_amd64_linux;
+      tdesc = &x32_linux_tdescs[(xcr0_features_bit & X86_XSTATE_AVX) ? 1 : 0 ]
+	[(xcr0_features_bit & X86_XSTATE_AVX512) ? 1 : 0];
     }
+  else
+    {
+      tdesc = &amd64_linux_tdescs[(xcr0_features_bit & X86_XSTATE_AVX) ? 1 : 0]
+	[(xcr0_features_bit & X86_XSTATE_MPX) ? 1 : 0]
+	[(xcr0_features_bit & X86_XSTATE_AVX512) ? 1 : 0]
+	[(xcr0_features_bit & X86_XSTATE_PKRU) ? 1 : 0];
+    }
+
+  if (*tdesc == NULL)
+    {
+      *tdesc = allocate_target_description ();
+
+      set_tdesc_architecture (*tdesc,
+			      is_x32 ? "i386:x64-32" : "i386:x86-64");
+
+      set_tdesc_osabi (*tdesc, osabi_from_tdesc_string ("GNU/Linux"));
+
+      long regnum = 0;
+
+      if (is_x32)
+	regnum = create_feature_i386_x32_core (*tdesc, regnum);
+      else
+	regnum = create_feature_i386_64bit_core (*tdesc, regnum);
+
+      regnum = create_feature_i386_64bit_sse (*tdesc, regnum);
+      regnum = create_feature_i386_64bit_linux (*tdesc, regnum);
+      regnum = create_feature_i386_64bit_segments (*tdesc, regnum);
+
+      if (xcr0_features_bit & X86_XSTATE_AVX)
+	regnum = create_feature_i386_64bit_avx (*tdesc, regnum);
+
+      if ((xcr0_features_bit & X86_XSTATE_MPX) && !is_x32)
+	regnum = create_feature_i386_64bit_mpx (*tdesc, regnum);
+
+      if (xcr0_features_bit & X86_XSTATE_AVX512)
+	regnum = create_feature_i386_64bit_avx512 (*tdesc, regnum);
+
+      if ((xcr0_features_bit & X86_XSTATE_PKRU) && !is_x32)
+	regnum = create_feature_i386_64bit_pkeys (*tdesc, regnum);
+    }
+
+  return *tdesc;
 }
 
 /* Get Linux/x86 target description from core dump.  */
@@ -2305,15 +2323,31 @@ _initialize_amd64_linux_tdep (void)
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x64_32,
 			  GDB_OSABI_LINUX, amd64_x32_linux_init_abi);
 
-  /* Initialize the Linux target description.  */
-  initialize_tdesc_amd64_linux ();
-  initialize_tdesc_amd64_avx_linux ();
-  initialize_tdesc_amd64_mpx_linux ();
-  initialize_tdesc_amd64_avx_mpx_linux ();
-  initialize_tdesc_amd64_avx_avx512_linux ();
-  initialize_tdesc_amd64_avx_mpx_avx512_pku_linux ();
+#if GDB_SELF_TEST
+  struct
+  {
+    const char *xml;
+    uint64_t mask;
+  } xml_masks[] = {
+    { "i386/amd64-linux.xml", X86_XSTATE_SSE_MASK },
+    { "i386/amd64-avx-linux.xml", X86_XSTATE_AVX_MASK },
+    { "i386/amd64-mpx-linux.xml", X86_XSTATE_MPX_MASK },
+    { "i386/amd64-avx-mpx-linux.xml", X86_XSTATE_AVX_MPX_MASK },
+    { "i386/amd64-avx-avx512-linux.xml", X86_XSTATE_AVX_AVX512_MASK },
+    { "i386/amd64-avx-mpx-avx512-pku-linux.xml",
+      X86_XSTATE_AVX_MPX_AVX512_PKU_MASK },
+    { "i386/x32-linux.xml", X86_XSTATE_SSE_MASK },
+    { "i386/x32-avx-linux.xml", X86_XSTATE_AVX_MASK },
+    { "i386/x32-avx-avx512-linux.xml", X86_XSTATE_AVX_AVX512_MASK },
+  };
 
-  initialize_tdesc_x32_linux ();
-  initialize_tdesc_x32_avx_linux ();
-  initialize_tdesc_x32_avx_avx512_linux ();
+  for (auto &a : xml_masks)
+    {
+      auto tdesc = amd64_linux_read_description (a.mask,
+						 startswith (a.xml,
+							     "i386/x32"));
+
+      selftests::record_xml_tdesc (a.xml, tdesc);
+    }
+#endif /* GDB_SELF_TEST */
 }

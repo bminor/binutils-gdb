@@ -2326,7 +2326,9 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
   /* Print c files for target features instead of target descriptions,
      because c files got from target features are more flexible than the
      counterparts.  */
-  if (startswith (filename_after_features.c_str (), "i386/32bit-"))
+  if (startswith (filename_after_features.c_str (), "i386/32bit-")
+      || startswith (filename_after_features.c_str (), "i386/64bit-")
+      || startswith (filename_after_features.c_str (), "i386/x32-core.xml"))
     {
       print_c_feature v (filename_after_features);
 
