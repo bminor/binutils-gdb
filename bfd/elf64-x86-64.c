@@ -2281,6 +2281,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		goto error_return;
 
 	      /* Fake a STT_GNU_IFUNC symbol.  */
+	      h->root.root.string = bfd_elf_sym_name (abfd, symtab_hdr,
+						      isym, NULL);
 	      h->type = STT_GNU_IFUNC;
 	      h->def_regular = 1;
 	      h->ref_regular = 1;
@@ -4422,6 +4424,10 @@ do_ifunc_pointer:
 		      || h->forced_local
 		      || bfd_link_executable (info))
 		    {
+		      info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
+					      h->root.root.string,
+					      h->root.u.def.section->owner);
+
 		      /* This symbol is resolved locally.  */
 		      outrel.r_info = htab->r_info (0, R_X86_64_IRELATIVE);
 		      outrel.r_addend = (h->root.u.def.value
@@ -5791,6 +5797,10 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 		  && h->def_regular
 		  && h->type == STT_GNU_IFUNC))
 	    {
+	      info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
+				      h->root.root.string,
+				      h->root.u.def.section->owner);
+
 	      /* If an STT_GNU_IFUNC symbol is locally defined, generate
 		 R_X86_64_IRELATIVE instead of R_X86_64_JUMP_SLOT.  */
 	      rela.r_info = htab->r_info (0, R_X86_64_IRELATIVE);
@@ -5941,6 +5951,11 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 		}
 	      if (SYMBOL_REFERENCES_LOCAL (info, h))
 		{
+		  info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
+					  output_bfd,
+					  h->root.root.string,
+					  h->root.u.def.section->owner);
+
 		  rela.r_info = htab->r_info (0,
 					      R_X86_64_IRELATIVE);
 		  rela.r_addend = (h->root.u.def.value
