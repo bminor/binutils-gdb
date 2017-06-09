@@ -12,12 +12,6 @@
 	* testsuite/ld-ifunc/ifunc-1-local-x86.map: New file.
 	* testsuite/ld-ifunc/ifunc-1-x86.map: Likewise.
 
-2017-06-08  Jiong Wang  <jiong.wang@arm.com>
-
-	* testsuite/ld-aarch64/copy-reloc-eliminate.d: New test.
-	* testsuite/ld-aarch64/copy-reloc-exe-eliminate.s: New test source file.
-	* testsuite/ld-aarch64/aarch64-elf.exp: Run new testcase.
-
 2017-06-07  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-unique/pr21529.d: xfail aarch64, arm, hppa, ia64,

@@ -249,7 +249,7 @@
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_OFF_G1)
 
-#define ELIMINATE_COPY_RELOCS 1
+#define ELIMINATE_COPY_RELOCS 0
 
 /* Return size of a relocation entry.  HTAB is the bfd's
    elf_aarch64_link_hash_entry.  */
@@ -5169,25 +5169,12 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       /* When generating a shared object or relocatable executable, these
          relocations are copied into the output file to be resolved at
          run time.  */
-      if (((bfd_link_pic (info)
-	    || globals->root.is_relocatable_executable)
-	   && (input_section->flags & SEC_ALLOC)
-	   && (h == NULL
-	       || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-	       || h->root.type != bfd_link_hash_undefweak))
-	  /* Or we are creating an executable, we may need to keep relocations
-	     for symbols satisfied by a dynamic library if we manage to avoid
-	     copy relocs for the symbol.  */
-	  || (ELIMINATE_COPY_RELOCS
-	      && !bfd_link_pic (info)
-	      && h != NULL
-	      && (input_section->flags & SEC_ALLOC)
-	      && h->dynindx != -1
-	      && !h->non_got_ref
-	      && ((h->def_dynamic
-		   && !h->def_regular)
-		  || h->root.type == bfd_link_hash_undefweak
-		  || h->root.type == bfd_link_hash_undefined)))
+      if ((bfd_link_pic (info)
+	   || globals->root.is_relocatable_executable)
+	  && (input_section->flags & SEC_ALLOC)
+	  && (h == NULL
+	      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	      || h->root.type != bfd_link_hash_undefweak))
 	{
 	  Elf_Internal_Rela outrel;
 	  bfd_byte *loc;
@@ -6882,25 +6869,6 @@ elfNN_aarch64_gc_sweep_hook (bfd *abfd,
   return TRUE;
 }
 
-/* Return true if we have dynamic relocs against EH or any of its weak
-   aliases, that apply to read-only sections.  */
-
-static bfd_boolean
-alias_readonly_dynrelocs (struct elf_aarch64_link_hash_entry *eh)
-{
-  struct elf_dyn_relocs *p;
-  asection *s;
-
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
-    {
-      s = p->sec->output_section;
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	return TRUE;
-    }
-
-  return FALSE;
-}
-
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -6972,19 +6940,6 @@ elfNN_aarch64_adjust_dynamic_symbol (struct bfd_link_info *info,
     {
       h->non_got_ref = 0;
       return TRUE;
-    }
-
-  if (ELIMINATE_COPY_RELOCS)
-    {
-      struct elf_aarch64_link_hash_entry *eh;
-      /* If we didn't find any dynamic relocs in read-only sections, then
-	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-      eh = (struct elf_aarch64_link_hash_entry *) h;
-      if (eh->dyn_relocs && !alias_readonly_dynrelocs (eh))
-	{
-	  h->non_got_ref = 0;
-	  return TRUE;
-	}
     }
 
   /* We must allocate the symbol in our .dynbss section, which will
@@ -7259,16 +7214,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  /* No need to do anything if we're not creating a shared
 	     object.  */
-	  if (!(bfd_link_pic (info)
-		/* If on the other hand, we are creating an executable, we
-		   may need to keep relocations for symbols satisfied by a
-		   dynamic library if we manage to avoid copy relocs for the
-		   symbol.  */
-		|| (ELIMINATE_COPY_RELOCS
-		    && !bfd_link_pic (info)
-		    && h != NULL
-		    && (h->root.type == bfd_link_hash_defweak
-			|| !h->def_regular))))
+	  if (! bfd_link_pic (info))
 	    break;
 
 	  {
