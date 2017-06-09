@@ -1,3 +1,20 @@
+2017-06-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbarch.sh (displaced_step_free_closure): Remove.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Don't set
+	displaced_step_free_closure.
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Likewise.
+	* arm-linux-tdep.c (arm_linux_init_abi): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Likewise.
+	* rs6000-aix-tdep.c (rs6000_aix_init_osabi): Likewise.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Likewise.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* arch-utils.h (simple_displaced_step_free_closure): Remove.
+	* arch-utils.c (simple_displaced_step_free_closure): Remove.
+	* infrun.c (displaced_step_clear): Call xfree instead of
+	gdbarch_displaced_step_free_closure.
+
 2017-06-08  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* common/common-utils.c (stringify_argv): Check for "arg[0] !=

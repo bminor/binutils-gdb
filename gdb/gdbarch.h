@@ -1039,21 +1039,6 @@ typedef void (gdbarch_displaced_step_fixup_ftype) (struct gdbarch *gdbarch, stru
 extern void gdbarch_displaced_step_fixup (struct gdbarch *gdbarch, struct displaced_step_closure *closure, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
 extern void set_gdbarch_displaced_step_fixup (struct gdbarch *gdbarch, gdbarch_displaced_step_fixup_ftype *displaced_step_fixup);
 
-/* Free a closure returned by gdbarch_displaced_step_copy_insn.
-  
-   If you provide gdbarch_displaced_step_copy_insn, you must provide
-   this function as well.
-  
-   If your architecture uses closures that don't need to be freed, then
-   you can use simple_displaced_step_free_closure here.
-  
-   For a general explanation of displaced stepping and how GDB uses it,
-   see the comments in infrun.c. */
-
-typedef void (gdbarch_displaced_step_free_closure_ftype) (struct gdbarch *gdbarch, struct displaced_step_closure *closure);
-extern void gdbarch_displaced_step_free_closure (struct gdbarch *gdbarch, struct displaced_step_closure *closure);
-extern void set_gdbarch_displaced_step_free_closure (struct gdbarch *gdbarch, gdbarch_displaced_step_free_closure_ftype *displaced_step_free_closure);
-
 /* Return the address of an appropriate place to put displaced
    instructions while we step over them.  There need only be one such
    place, since we're only stepping one thread over a breakpoint at a
