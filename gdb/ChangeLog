@@ -1,5 +1,11 @@
 2017-06-12  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2read.c (file_write(FILE *, const void *, size_t)): Delete.
+	(file_write (FILE *, const std::vector<Elem>&)): Delete.
+	(data_buf::file_write): Call ::fwrite directly.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (uniquify_cu_indices): Use std::unique and
 	std::vector::erase.
 

@@ -23195,25 +23195,6 @@ dwarf2_per_objfile_free (struct objfile *objfile, void *d)
 
 /* The "save gdb-index" command.  */
 
-/* Write SIZE bytes from the buffer pointed to by DATA to FILE, with
-   error checking.  */
-
-static void
-file_write (FILE *file, const void *data, size_t size)
-{
-  if (fwrite (data, 1, size, file) != size)
-    error (_("couldn't data write to file"));
-}
-
-/* Write the contents of VEC to FILE, with error checking.  */
-
-template<class Elem>
-static void
-file_write (FILE *file, const std::vector<Elem> &vec)
-{
-  file_write (file, vec.data (), vec.size() * sizeof (vec[0]));
-}
-
 /* In-memory buffer to prepare data to be written later to a file.  */
 class data_buf
 {
@@ -23252,7 +23233,8 @@ public:
   /* Write the buffer to FILE.  */
   void file_write (FILE *file) const
   {
-    ::file_write (file, m_vec);
+    if (::fwrite (m_vec.data (), 1, m_vec.size (), file) != m_vec.size ())
+      error (_("couldn't write data to file"));
   }
 
 private:
