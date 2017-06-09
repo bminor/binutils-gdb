@@ -678,7 +678,7 @@ x86_64-*-elf*)
 	;;
 x86_64-*-linux*)
 	# Target: GNU/Linux x86-64
-	gdb_target_obs="amd64-tdep.o amd64-linux-tdep.o i386-tdep.o \
+	gdb_target_obs="amd64-tdep.o amd64-linux-tdep.o amd64.o i386-tdep.o \
 			i387-tdep.o i386.o i386-linux-tdep.o glibc-tdep.o \
 			solib-svr4.o symfile-mem.o linux-tdep.o linux-record.o"
 	build_gdbserver=yes
