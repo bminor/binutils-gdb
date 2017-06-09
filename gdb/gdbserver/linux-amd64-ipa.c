@@ -168,50 +168,6 @@ supply_static_tracepoint_registers (struct regcache *regcache,
 
 #endif /* HAVE_UST */
 
-/* Return target_desc to use for IPA, given the tdesc index passed by
-   gdbserver.  */
-
-const struct target_desc *
-get_ipa_tdesc (int idx)
-{
-#if defined __ILP32__
-  switch (idx)
-    {
-    case X86_TDESC_SSE:
-      return tdesc_x32_linux;
-    case X86_TDESC_AVX:
-      return tdesc_x32_avx_linux;
-    case X86_TDESC_AVX512:
-      return tdesc_x32_avx512_linux;
-    default:
-      break;
-    }
-#else
-  switch (idx)
-    {
-    case X86_TDESC_SSE:
-      return tdesc_amd64_linux;
-    case X86_TDESC_AVX:
-      return tdesc_amd64_avx_linux;
-    case X86_TDESC_MPX:
-      return tdesc_amd64_mpx_linux;
-    case X86_TDESC_AVX_MPX:
-      return tdesc_amd64_avx_mpx_linux;
-    case X86_TDESC_AVX_MPX_AVX512_PKU:
-      return tdesc_amd64_avx_mpx_avx512_pku_linux;
-    case X86_TDESC_AVX_AVX512:
-      return tdesc_amd64_avx_avx512_linux;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      "unknown ipa tdesc index: %d", idx);
-      return tdesc_amd64_linux;
-    }
-#endif
-
-  internal_error (__FILE__, __LINE__,
-		  "unknown ipa tdesc index: %d", idx);
-}
-
 /* Allocate buffer for the jump pads.  The branch instruction has a
    reach of +/- 31-bit, and the executable is loaded at low addresses.
 
@@ -276,16 +232,4 @@ alloc_jump_pad_buffer (size_t size)
 void
 initialize_low_tracepoint (void)
 {
-#if defined __ILP32__
-  init_registers_x32_linux ();
-  init_registers_x32_avx_linux ();
-  init_registers_x32_avx512_linux ();
-#else
-  init_registers_amd64_linux ();
-  init_registers_amd64_avx_linux ();
-  init_registers_amd64_mpx_linux ();
-  init_registers_amd64_avx_mpx_linux ();
-  init_registers_amd64_avx_avx512_linux ();
-  init_registers_amd64_avx_mpx_avx512_pku_linux ();
-#endif
 }

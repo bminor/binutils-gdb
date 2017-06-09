@@ -48,6 +48,46 @@ extern const struct target_desc *tdesc_i386_avx_mpx_avx512_pku_linux;
 void init_registers_i386_mpx_linux (void);
 extern const struct target_desc *tdesc_i386_mpx_linux;
 
+#ifdef __x86_64__
+
+/* Defined in auto-generated file amd64-linux.c.  */
+void init_registers_amd64_linux (void);
+extern const struct target_desc *tdesc_amd64_linux;
+
+/* Defined in auto-generated file amd64-avx-linux.c.  */
+void init_registers_amd64_avx_linux (void);
+extern const struct target_desc *tdesc_amd64_avx_linux;
+
+/* Defined in auto-generated file amd64-avx-avx512-linux.c.  */
+void init_registers_amd64_avx_avx512_linux (void);
+extern const struct target_desc *tdesc_amd64_avx_avx512_linux;
+
+/* Defined in auto-generated file amd64-avx-mpx-avx512-pku-linux.c.  */
+void init_registers_amd64_avx_mpx_avx512_pku_linux (void);
+extern const struct target_desc *tdesc_amd64_avx_mpx_avx512_pku_linux;
+
+/* Defined in auto-generated file amd64-avx-mpx-linux.c.  */
+void init_registers_amd64_avx_mpx_linux (void);
+extern const struct target_desc *tdesc_amd64_avx_mpx_linux;
+
+/* Defined in auto-generated file amd64-mpx-linux.c.  */
+void init_registers_amd64_mpx_linux (void);
+extern const struct target_desc *tdesc_amd64_mpx_linux;
+
+/* Defined in auto-generated file x32-linux.c.  */
+void init_registers_x32_linux (void);
+extern const struct target_desc *tdesc_x32_linux;
+
+/* Defined in auto-generated file x32-avx-linux.c.  */
+void init_registers_x32_avx_linux (void);
+extern const struct target_desc *tdesc_x32_avx_linux;
+
+/* Defined in auto-generated file x32-avx-avx512-linux.c.  */
+void init_registers_x32_avx_avx512_linux (void);
+extern const struct target_desc *tdesc_x32_avx_avx512_linux;
+
+#endif
+
 namespace selftests {
 namespace gdbserver {
 static void
@@ -82,6 +122,51 @@ i386_tdesc_test ()
   SELF_CHECK (*tdesc == *tdesc_i386_avx_mpx_avx512_pku_linux);
   delete tdesc;
 }
+
+#ifdef __x86_64__
+
+static void
+amd64_tdesc_test ()
+{
+  const struct target_desc *tdesc = amd64_get_ipa_tdesc (X86_TDESC_SSE, false);
+
+  SELF_CHECK (*tdesc == *tdesc_amd64_linux);
+  delete tdesc;
+
+  tdesc = amd64_get_ipa_tdesc (X86_TDESC_AVX, false);
+  SELF_CHECK (*tdesc == *tdesc_amd64_avx_linux);
+  delete tdesc;
+
+  tdesc = amd64_get_ipa_tdesc (X86_TDESC_AVX_AVX512, false);
+  SELF_CHECK (*tdesc == *tdesc_amd64_avx_avx512_linux);
+  delete tdesc;
+
+  tdesc = amd64_get_ipa_tdesc (X86_TDESC_MPX, false);
+  SELF_CHECK (*tdesc == *tdesc_amd64_mpx_linux);
+  delete tdesc;
+
+  tdesc = amd64_get_ipa_tdesc (X86_TDESC_AVX_MPX, false);
+  SELF_CHECK (*tdesc == *tdesc_amd64_avx_mpx_linux);
+  delete tdesc;
+
+  tdesc = amd64_get_ipa_tdesc (X86_TDESC_AVX_MPX_AVX512_PKU, false);
+  SELF_CHECK (*tdesc == *tdesc_amd64_avx_mpx_avx512_pku_linux);
+  delete tdesc;
+
+  tdesc = amd64_get_ipa_tdesc (X86_TDESC_SSE, true);
+  SELF_CHECK (*tdesc == *tdesc_x32_linux);
+  delete tdesc;
+
+  tdesc = amd64_get_ipa_tdesc (X86_TDESC_AVX, true);
+  SELF_CHECK (*tdesc == *tdesc_x32_avx_linux);
+  delete tdesc;
+
+  tdesc = amd64_get_ipa_tdesc (X86_TDESC_AVX_AVX512, true);
+  SELF_CHECK (*tdesc == *tdesc_x32_avx_avx512_linux);
+  delete tdesc;
+}
+
+#endif
 }
 } // namespace selftests
 
@@ -97,4 +182,19 @@ initialize_low_tdesc ()
   init_registers_i386_avx_mpx_avx512_pku_linux ();
 
   register_self_test (selftests::gdbserver::i386_tdesc_test);
+
+#ifdef __x86_64__
+  init_registers_x32_linux ();
+  init_registers_x32_avx_linux ();
+  init_registers_x32_avx_avx512_linux ();
+
+  init_registers_amd64_linux ();
+  init_registers_amd64_avx_linux ();
+  init_registers_amd64_mpx_linux ();
+  init_registers_amd64_avx_mpx_linux ();
+  init_registers_amd64_avx_avx512_linux ();
+  init_registers_amd64_avx_mpx_avx512_pku_linux ();
+
+  register_self_test (selftests::gdbserver::amd64_tdesc_test);
+#endif
 }
