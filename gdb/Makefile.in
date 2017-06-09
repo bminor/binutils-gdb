@@ -761,6 +761,7 @@ ALL_64_TARGET_OBS = \
 	alpha-nbsd-tdep.o \
 	alpha-obsd-tdep.o \
 	alpha-tdep.o \
+	amd64.o \
 	amd64-darwin-tdep.o \
 	amd64-dicos-tdep.o \
 	amd64-fbsd-tdep.o \

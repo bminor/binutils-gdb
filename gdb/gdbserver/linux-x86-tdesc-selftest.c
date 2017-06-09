@@ -49,6 +49,46 @@ extern const struct target_desc *tdesc_i386_avx_mpx_avx512_pku_linux;
 void init_registers_i386_mpx_linux (void);
 extern const struct target_desc *tdesc_i386_mpx_linux;
 
+#ifdef __x86_64__
+
+/* Defined in auto-generated file amd64-linux.c.  */
+void init_registers_amd64_linux (void);
+extern const struct target_desc *tdesc_amd64_linux;
+
+/* Defined in auto-generated file amd64-avx-linux.c.  */
+void init_registers_amd64_avx_linux (void);
+extern const struct target_desc *tdesc_amd64_avx_linux;
+
+/* Defined in auto-generated file amd64-avx-avx512-linux.c.  */
+void init_registers_amd64_avx_avx512_linux (void);
+extern const struct target_desc *tdesc_amd64_avx_avx512_linux;
+
+/* Defined in auto-generated file amd64-avx-mpx-avx512-pku-linux.c.  */
+void init_registers_amd64_avx_mpx_avx512_pku_linux (void);
+extern const struct target_desc *tdesc_amd64_avx_mpx_avx512_pku_linux;
+
+/* Defined in auto-generated file amd64-avx-mpx-linux.c.  */
+void init_registers_amd64_avx_mpx_linux (void);
+extern const struct target_desc *tdesc_amd64_avx_mpx_linux;
+
+/* Defined in auto-generated file amd64-mpx-linux.c.  */
+void init_registers_amd64_mpx_linux (void);
+extern const struct target_desc *tdesc_amd64_mpx_linux;
+
+/* Defined in auto-generated file x32-linux.c.  */
+void init_registers_x32_linux (void);
+extern const struct target_desc *tdesc_x32_linux;
+
+/* Defined in auto-generated file x32-avx-linux.c.  */
+void init_registers_x32_avx_linux (void);
+extern const struct target_desc *tdesc_x32_avx_linux;
+
+/* Defined in auto-generated file x32-avx-avx512-linux.c.  */
+void init_registers_x32_avx_avx512_linux (void);
+extern const struct target_desc *tdesc_x32_avx_avx512_linux;
+
+#endif
+
 namespace selftests {
 namespace tdesc {
 static void
@@ -75,6 +115,41 @@ i386_tdesc_test ()
       SELF_CHECK (*tdesc == *elem.tdesc);
     }
 }
+
+#ifdef __x86_64__
+
+static void
+amd64_tdesc_test ()
+{
+  struct
+  {
+    unsigned int mask;
+    const target_desc *tdesc[2];
+  } tdesc_tests[] = {
+    { X86_XSTATE_SSE_MASK, { tdesc_amd64_linux, tdesc_x32_linux } },
+    { X86_XSTATE_AVX_MASK, { tdesc_amd64_avx_linux, tdesc_x32_avx_linux } },
+    { X86_XSTATE_MPX_MASK, { tdesc_amd64_mpx_linux, tdesc_x32_avx_linux } },
+    { X86_XSTATE_AVX_MPX_MASK, { tdesc_amd64_avx_mpx_linux,
+				 tdesc_x32_avx_linux } },
+    { X86_XSTATE_AVX_AVX512_MASK, { tdesc_amd64_avx_avx512_linux,
+      tdesc_x32_avx_avx512_linux } },
+    { X86_XSTATE_AVX_MPX_AVX512_PKU_MASK,
+      { tdesc_amd64_avx_mpx_avx512_pku_linux,  tdesc_x32_avx_avx512_linux } },
+  };
+
+  for (auto &elem : tdesc_tests)
+    {
+      for (int i = 0; i < 2; i++)
+	{
+	  const target_desc *tdesc = amd64_linux_read_description (elem.mask,
+								   i);
+
+	  SELF_CHECK (*tdesc == *elem.tdesc[i]);
+	}
+    }
+}
+
+#endif
 }
 } // namespace selftests
 
@@ -90,4 +165,19 @@ initialize_low_tdesc ()
   init_registers_i386_avx_mpx_avx512_pku_linux ();
 
   selftests::register_test (selftests::tdesc::i386_tdesc_test);
+
+#ifdef __x86_64__
+  init_registers_x32_linux ();
+  init_registers_x32_avx_linux ();
+  init_registers_x32_avx_avx512_linux ();
+
+  init_registers_amd64_linux ();
+  init_registers_amd64_avx_linux ();
+  init_registers_amd64_mpx_linux ();
+  init_registers_amd64_avx_mpx_linux ();
+  init_registers_amd64_avx_avx512_linux ();
+  init_registers_amd64_avx_mpx_avx512_pku_linux ();
+
+  selftests::register_test (selftests::tdesc::amd64_tdesc_test);
+#endif
 }
