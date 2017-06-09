@@ -1,3 +1,7 @@
+2017-06-09  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* fork-child.c: Conditionally include <signal.h>.
+
 2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* server.c (handle_general_set): Handle new packet
