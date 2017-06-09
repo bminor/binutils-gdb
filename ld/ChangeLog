@@ -1,3 +1,19 @@
+2017-06-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/property-x86-3-x32.d: New file.
+	* testsuite/ld-x86-64/property-x86-4a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-4b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-3.d: Also pass
+	-defsym __64_bit__=1 to asssembler.
+	* testsuite/ld-x86-64/property-x86-4a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-4b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-3.s: Align to 4 bytes if
+	__64_bit__ isn't defined.
+	* testsuite/ld-x86-64/property-x86-4a.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-4b.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run property-x86-3-x32,
+	property-x86-4a-x32 and property-x86-4b-x32.
+
 2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* testsuite/ld-arc/tls_ie-01.d: Changed expected result.
