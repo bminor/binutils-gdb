@@ -23199,29 +23199,28 @@ dwarf2_per_objfile_free (struct objfile *objfile, void *d)
 class data_buf
 {
 public:
-  /* Add SIZE bytes at the end of the buffer.  Returns a pointer to
-     the start of the new block.  */
-  gdb_byte *append_space (size_t size)
-  {
-    m_vec.resize (m_vec.size () + size);
-    return &*m_vec.end () - size;
-  }
-
   /* Copy DATA to the end of the buffer.  */
   template<typename T>
   void append_data (const T &data)
   {
     std::copy (reinterpret_cast<const gdb_byte *> (&data),
 	       reinterpret_cast<const gdb_byte *> (&data + 1),
-	       append_space (sizeof (data)));
+	       grow (sizeof (data)));
   }
 
-  /* Copy CSTR (a null-terminated string) to the end of the buffer.
-     The terminating null is appended too.  */
+  /* Copy CSTR (a zero-terminated string) to the end of buffer.  The
+     terminating zero is appended too.  */
   void append_cstr0 (const char *cstr)
   {
     const size_t size = strlen (cstr) + 1;
-    std::copy (cstr, cstr + size, append_space (size));
+    std::copy (cstr, cstr + size, grow (size));
+  }
+
+  /* Accept a host-format integer in VAL and append it to the buffer
+     as a target-format integer which is LEN bytes long.  */
+  void append_uint (size_t len, bfd_endian byte_order, ULONGEST val)
+  {
+    ::store_unsigned_integer (grow (len), len, byte_order, val);
   }
 
   /* Return the size of the buffer.  */
@@ -23238,6 +23237,14 @@ public:
   }
 
 private:
+  /* Grow SIZE bytes at the end of the buffer.  Returns a pointer to
+     the start of the new block.  */
+  gdb_byte *grow (size_t size)
+  {
+    m_vec.resize (m_vec.size () + size);
+    return &*m_vec.end () - size;
+  }
+
   std::vector<gdb_byte> m_vec;
 };
 
@@ -23494,10 +23501,8 @@ add_address_entry (struct objfile *objfile, data_buf &addr_vec,
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
-  store_unsigned_integer (addr_vec.append_space (8), 8, BFD_ENDIAN_LITTLE,
-			  start - baseaddr);
-  store_unsigned_integer (addr_vec.append_space (8), 8, BFD_ENDIAN_LITTLE,
-			  end - baseaddr);
+  addr_vec.append_uint (8, BFD_ENDIAN_LITTLE, start - baseaddr);
+  addr_vec.append_uint (8, BFD_ENDIAN_LITTLE, end - baseaddr);
   addr_vec.append_data (MAYBE_SWAP (cu_index));
 }
 
@@ -23664,14 +23669,11 @@ write_one_signatured_type (void **slot, void *d)
 		  psymtab->n_static_syms, info->cu_index,
 		  1);
 
-  store_unsigned_integer (info->types_list.append_space (8), 8,
-			  BFD_ENDIAN_LITTLE,
-			  to_underlying (entry->per_cu.sect_off));
-  store_unsigned_integer (info->types_list.append_space (8), 8,
-			  BFD_ENDIAN_LITTLE,
-			  to_underlying (entry->type_offset_in_tu));
-  store_unsigned_integer (info->types_list.append_space (8), 8,
-			  BFD_ENDIAN_LITTLE, entry->signature);
+  info->types_list.append_uint (8, BFD_ENDIAN_LITTLE,
+				to_underlying (entry->per_cu.sect_off));
+  info->types_list.append_uint (8, BFD_ENDIAN_LITTLE,
+				to_underlying (entry->type_offset_in_tu));
+  info->types_list.append_uint (8, BFD_ENDIAN_LITTLE, entry->signature);
 
   ++info->cu_index;
 
@@ -23782,11 +23784,9 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
       const auto insertpair = cu_index_htab.emplace (psymtab, i);
       gdb_assert (insertpair.second);
 
-      store_unsigned_integer (cu_list.append_space (8), 8,
-			      BFD_ENDIAN_LITTLE,
-			      to_underlying (per_cu->sect_off));
-      store_unsigned_integer (cu_list.append_space (8), 8,
-			      BFD_ENDIAN_LITTLE, per_cu->length);
+      cu_list.append_uint (8, BFD_ENDIAN_LITTLE,
+			   to_underlying (per_cu->sect_off));
+      cu_list.append_uint (8, BFD_ENDIAN_LITTLE, per_cu->length);
     }
 
   /* Dump the address map.  */

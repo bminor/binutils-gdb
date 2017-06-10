@@ -1,5 +1,13 @@
 2017-06-12  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2read.c (data_buf::append_space): Rename to...
+	(data_buf::grow): ... this, and make private.  Adjust all callers.
+	(data_buf::append_uint): New method.
+	(add_address_entry, write_one_signatured_type)
+	(write_psymtabs_to_index): Use it.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (file_write(FILE *, const void *, size_t)): Delete.
 	(file_write (FILE *, const std::vector<Elem>&)): Delete.
 	(data_buf::file_write): Call ::fwrite directly.
