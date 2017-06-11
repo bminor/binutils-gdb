@@ -23430,11 +23430,22 @@ write_hash_table (mapped_symtab *symtab, data_buf &output, data_buf &cpool)
 	if (it == NULL)
 	  continue;
 	gdb_assert (it->index_offset == 0);
-	const auto insertpair
-	  = symbol_hash_table.emplace (it->cu_indices, cpool.size ());
-	it->index_offset = insertpair.first->second;
-	if (!insertpair.second)
-	  continue;
+
+	/* Finding before inserting is faster than always trying to
+	   insert, because inserting always allocates a node, does the
+	   lookup, and then destroys the new node if another node
+	   already had the same key.  C++17 try_emplace will avoid
+	   this.  */
+	const auto found
+	  = symbol_hash_table.find (it->cu_indices);
+	if (found != symbol_hash_table.end ())
+	  {
+	    it->index_offset = found->second;
+	    continue;
+	  }
+
+	symbol_hash_table.emplace (it->cu_indices, cpool.size ());
+	it->index_offset = cpool.size ();
 	cpool.append_data (MAYBE_SWAP (it->cu_indices.size ()));
 	for (const auto iter : it->cu_indices)
 	  cpool.append_data (MAYBE_SWAP (iter));

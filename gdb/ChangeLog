@@ -1,5 +1,10 @@
 2017-06-12  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2read.c (write_hash_table): Check if key already exists
+	before emplacing.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (data_buf::append_space): Rename to...
 	(data_buf::grow): ... this, and make private.  Adjust all callers.
 	(data_buf::append_uint): New method.
