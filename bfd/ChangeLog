@@ -1,3 +1,9 @@
+2017-06-11  Joe Zbiciak  <joe.zbiciak@leftturnonly.info>
+
+	PR 21564
+	* binary.c (binary_set_section_contents): Scale lma by octets
+	per byte to set filepos.
+
 2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* elf32-arc.c (elf_arc_check_relocs): Fixed conditions to generate
