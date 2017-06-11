@@ -1,3 +1,8 @@
+2017-06-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Optional Messages about Internal Happenings):
+	Document {set,show} debug separate-debug-file commands.
+
 2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.texinfo (Starting) <startup-with-shell>: Add @anchor.

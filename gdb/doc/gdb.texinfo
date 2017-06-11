@@ -23984,6 +23984,12 @@ the serial line to the remote machine.  The info is printed on the
 @value{GDBN} standard output stream. The default is off.
 @item show debug remote
 Displays the state of display of remote packets.
+
+@item set debug separate-debug-file
+Turns on or off display of debug output about separate debug file search.
+@item show debug separate-debug-file
+Displays the state of separate debug file search debug output.
+
 @item set debug serial
 Turns on or off display of @value{GDBN} serial debugging info. The
 default is off.

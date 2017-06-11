@@ -112,6 +112,9 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
 	s += sprintf (s, "%02x", (unsigned) *data++);
       strcpy (s, ".debug");
 
+      if (separate_debug_file_debug)
+	printf_unfiltered (_("  Trying %s\n"), link);
+
       /* lrealpath() is expensive even for the usually non-existent files.  */
       if (access (link, F_OK) == 0)
 	filename = lrealpath (link);
@@ -147,6 +150,10 @@ find_separate_debug_file_by_buildid (struct objfile *objfile)
   build_id = build_id_bfd_get (objfile->obfd);
   if (build_id != NULL)
     {
+      if (separate_debug_file_debug)
+	printf_unfiltered (_("\nLooking for separate debug info (build-id) for "
+			     "%s\n"), objfile_name (objfile));
+
       gdb_bfd_ref_ptr abfd (build_id_to_debug_bfd (build_id->size,
 						   build_id->data));
       /* Prevent looping on a stripped .debug file.  */

@@ -1,3 +1,16 @@
+2017-06-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS (Changes since GDB 8.0): Announce {set,show} debug
+	separate-debug-file commands.
+	* symfile.h (separate_debug_file_debug): New global.
+	* symfile.c (separate_debug_file_debug): New global.
+	(separate_debug_file_exists, find_separate_debug_file): Add
+	debug output.
+	(_initialize_symfile): Add "set debug separate-debug-file"
+	command.
+	* build-id.c (build_id_to_debug_bfd,
+	find_separate_debug_file_by_buildid): Add debug output.
+
 2017-06-10  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbarch.sh (displaced_step_free_closure): Remove.
