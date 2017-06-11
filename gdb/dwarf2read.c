@@ -23370,23 +23370,10 @@ uniquify_cu_indices (struct mapped_symtab *symtab)
     {
       if (entry && !entry->cu_indices.empty ())
 	{
-	  unsigned int next_to_insert, next_to_check;
-	  offset_type last_value;
-
-	  std::sort (entry->cu_indices.begin (), entry->cu_indices.end ());
-
-	  last_value = entry->cu_indices[0];
-	  next_to_insert = 1;
-	  for (next_to_check = 1;
-	       next_to_check < entry->cu_indices.size ();
-	       ++next_to_check)
-	    if (entry->cu_indices[next_to_check] != last_value)
-	      {
-		last_value = entry->cu_indices[next_to_check];
-		entry->cu_indices[next_to_insert] = last_value;
-		++next_to_insert;
-	      }
-	  entry->cu_indices.resize (next_to_insert);
+	  auto &cu_indices = entry->cu_indices;
+	  std::sort (cu_indices.begin (), cu_indices.end ());
+	  auto from = std::unique (cu_indices.begin (), cu_indices.end ());
+	  cu_indices.erase (from, cu_indices.end ());
 	}
     }
 }

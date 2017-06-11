@@ -1,3 +1,8 @@
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (uniquify_cu_indices): Use std::unique and
+	std::vector::erase.
+
 2017-06-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup: C++ify .gdb_index producer.
