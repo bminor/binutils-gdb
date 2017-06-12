@@ -1,3 +1,36 @@
+2017-06-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup: C++ify .gdb_index producer.
+	* dwarf2read.c: Include <unordered_set> and <unordered_map>.
+	(MAYBE_SWAP) [WORDS_BIGENDIAN]: Cast to offset_type.
+	(struct strtab_entry, hash_strtab_entry, eq_strtab_entry)
+	(create_strtab, add_string): Remove.
+	(file_write, data_buf): New.
+	(struct symtab_index_entry): Use std::vector for cu_indices.
+	(struct mapped_symtab): Use std::vector for data.
+	(hash_symtab_entry, eq_symtab_entry, delete_symtab_entry)
+	(create_symbol_hash_table, create_mapped_symtab, cleanup_mapped_symtab):
+	Remove.
+	(find_slot): Change return type.  Update it to the new data structures.
+	(hash_expand, add_index_entry): Update it to the new data structures.
+	(offset_type_compare): Remove.
+	(uniquify_cu_indices): Update it to the new data structures.
+	(c_str_view, c_str_view_hasher, vector_hasher): New.
+	(add_indices_to_cpool): Remove.
+	(write_hash_table): Update it to the new data structures.
+	(struct psymtab_cu_index_map, hash_psymtab_cu_index)
+	(eq_psymtab_cu_index): Remove.
+	(psym_index_map): New typedef.
+	(struct addrmap_index_data): Change addr_obstack pointer to data_buf
+	reference and std::unordered_map for cu_index_htab.
+	(add_address_entry, add_address_entry_worker, write_address_map)
+	(write_psymbols): Update it to the new data structures.
+	(write_obstack): Remove.
+	(struct signatured_type_index_data): Change types_list to a data_buf
+	reference and psyms_seen to a std::unordered_set reference.
+	(write_one_signatured_type, recursively_write_psymbols)
+	(write_psymtabs_to_index): Update it to the new data structures.
+
 2017-06-11  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* NEWS (Changes since GDB 8.0): Announce {set,show} debug
