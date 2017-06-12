@@ -1,4 +1,13 @@
 2017-06-12  Pedro Alves  <palves@redhat.com>
+	    Alan Hayward  <alan.hayward@arm.com>
+
+	* mips-tdep.c (MAX_MIPS_ABI_REGSIZE): New.
+	(mips_eabi_push_dummy_call): Rename local 'regsize' to
+	'abi_regsize'.  Rename local array 'valbuf' to 'ref_valbuf', and
+	use MAX_MIPS_ABI_REGSIZE instead of MAX_REGISTER_SIZE to size it.
+	Assert that abi_regsize bytes fit in 'ref_valbuf'.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
 
 	* dwarf2read.c (mapped_symtab::data): Now a vector of
 	symtab_index_entry instead of vector of

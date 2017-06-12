@@ -271,6 +271,9 @@ mips_isa_regsize (struct gdbarch *gdbarch)
 	  / gdbarch_bfd_arch_info (gdbarch)->bits_per_byte);
 }
 
+/* Max saved register size.  */
+#define MAX_MIPS_ABI_REGSIZE 8
+
 /* Return the currently configured (or set) saved register size.  */
 
 unsigned int
@@ -4476,7 +4479,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int stack_offset = 0;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR func_addr = find_function_addr (function, NULL);
-  int regsize = mips_abi_regsize (gdbarch);
+  int abi_regsize = mips_abi_regsize (gdbarch);
 
   /* For shared libraries, "t9" needs to point at the function
      address.  */
@@ -4499,7 +4502,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      than necessary for EABI, because the first few arguments are
      passed in registers, but that's OK.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += align_up (TYPE_LENGTH (value_type (args[argnum])), regsize);
+    len += align_up (TYPE_LENGTH (value_type (args[argnum])), abi_regsize);
   sp -= align_up (len, 16);
 
   if (mips_debug)
@@ -4528,7 +4531,9 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       const gdb_byte *val;
-      gdb_byte valbuf[MAX_REGISTER_SIZE];
+      /* This holds the address of structures that are passed by
+	 reference.  */
+      gdb_byte ref_valbuf[MAX_MIPS_ABI_REGSIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (value_type (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -4541,14 +4546,15 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       /* The EABI passes structures that do not fit in a register by
          reference.  */
-      if (len > regsize
+      if (len > abi_regsize
 	  && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
 	{
-	  store_unsigned_integer (valbuf, regsize, byte_order,
+	  gdb_assert (abi_regsize <= ARRAY_SIZE (ref_valbuf));
+	  store_unsigned_integer (ref_valbuf, abi_regsize, byte_order,
 				  value_address (arg));
 	  typecode = TYPE_CODE_PTR;
-	  len = regsize;
-	  val = valbuf;
+	  len = abi_regsize;
+	  val = ref_valbuf;
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stdlog, " push");
 	}
@@ -4560,7 +4566,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
          up before the check to see if there are any FP registers
          left.  Non MIPS_EABI targets also pass the FP in the integer
          registers so also round up normal registers.  */
-      if (regsize < 8 && fp_register_arg_p (gdbarch, typecode, arg_type))
+      if (abi_regsize < 8 && fp_register_arg_p (gdbarch, typecode, arg_type))
 	{
 	  if ((float_argreg & 1))
 	    float_argreg++;
@@ -4626,12 +4632,12 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  /* Copy the argument to general registers or the stack in
 	     register-sized pieces.  Large arguments are split between
 	     registers and stack.  */
-	  /* Note: structs whose size is not a multiple of regsize
+	  /* Note: structs whose size is not a multiple of abi_regsize
 	     are treated specially: Irix cc passes
 	     them in registers where gcc sometimes puts them on the
 	     stack.  For maximum compatibility, we will put them in
 	     both places.  */
-	  int odd_sized_struct = (len > regsize && len % regsize != 0);
+	  int odd_sized_struct = (len > abi_regsize && len % abi_regsize != 0);
 
 	  /* Note: Floating-point values that didn't fit into an FP
 	     register are only written to memory.  */
@@ -4639,7 +4645,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    {
 	      /* Remember if the argument was written to the stack.  */
 	      int stack_used_p = 0;
-	      int partial_len = (len < regsize ? len : regsize);
+	      int partial_len = (len < abi_regsize ? len : abi_regsize);
 
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " -- partial=%d",
@@ -4657,15 +4663,15 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  stack_used_p = 1;
 		  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 		    {
-		      if (regsize == 8
+		      if (abi_regsize == 8
 			  && (typecode == TYPE_CODE_INT
 			      || typecode == TYPE_CODE_PTR
 			      || typecode == TYPE_CODE_FLT) && len <= 4)
-			longword_offset = regsize - len;
+			longword_offset = abi_regsize - len;
 		      else if ((typecode == TYPE_CODE_STRUCT
 				|| typecode == TYPE_CODE_UNION)
-			       && TYPE_LENGTH (arg_type) < regsize)
-			longword_offset = regsize - len;
+			       && TYPE_LENGTH (arg_type) < abi_regsize)
+			longword_offset = abi_regsize - len;
 		    }
 
 		  if (mips_debug)
@@ -4706,7 +4712,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  if (mips_debug)
 		    fprintf_filtered (gdb_stdlog, " - reg=%d val=%s",
 				      argreg,
-				      phex (regval, regsize));
+				      phex (regval, abi_regsize));
 		  regcache_cooked_write_signed (regcache, argreg, regval);
 		  argreg++;
 		}
@@ -4721,7 +4727,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	         only needs to be adjusted when it has been used.  */
 
 	      if (stack_used_p)
-		stack_offset += align_up (partial_len, regsize);
+		stack_offset += align_up (partial_len, abi_regsize);
 	    }
 	}
       if (mips_debug)
