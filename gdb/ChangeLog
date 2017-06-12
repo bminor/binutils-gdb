@@ -1,5 +1,16 @@
 2017-06-12  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2read.c (mapped_symtab::data): Now a vector of
+	symtab_index_entry instead of vector of
+	std::unique_ptr<symtab_index_entry>.  All users adjusted to check
+	whether an element's name is NULL instead of checking whether the
+	element itself is NULL.
+	(find_slot): Change return type.  Adjust.
+	(hash_expand, , add_index_entry, uniquify_cu_indices)
+	(write_hash_table): Adjust.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (recursively_count_psymbols): New function.
 	(write_psymtabs_to_index): Call it to compute number of psyms and
 	pass estimate size of psyms_seen to unordered_set's ctor.

@@ -23269,7 +23269,7 @@ struct mapped_symtab
   }
 
   offset_type n_elements = 0;
-  std::vector<std::unique_ptr<symtab_index_entry>> data;
+  std::vector<symtab_index_entry> data;
 };
 
 /* Find a slot in SYMTAB for the symbol NAME.  Returns a reference to
@@ -23278,7 +23278,7 @@ struct mapped_symtab
    Function is used only during write_hash_table so no index format backward
    compatibility is needed.  */
 
-static std::unique_ptr<symtab_index_entry> &
+static symtab_index_entry &
 find_slot (struct mapped_symtab *symtab, const char *name)
 {
   offset_type index, step, hash = mapped_index_string_hash (INT_MAX, name);
@@ -23288,7 +23288,8 @@ find_slot (struct mapped_symtab *symtab, const char *name)
 
   for (;;)
     {
-      if (!symtab->data[index] || !strcmp (name, symtab->data[index]->name))
+      if (symtab->data[index].name == NULL
+	  || strcmp (name, symtab->data[index].name) == 0)
 	return symtab->data[index];
       index = (index + step) & (symtab->data.size () - 1);
     }
@@ -23305,9 +23306,9 @@ hash_expand (struct mapped_symtab *symtab)
   symtab->data.resize (old_entries.size () * 2);
 
   for (auto &it : old_entries)
-    if (it != NULL)
+    if (it.name != NULL)
       {
-	auto &ref = find_slot (symtab, it->name);
+	auto &ref = find_slot (symtab, it.name);
 	ref = std::move (it);
       }
 }
@@ -23327,11 +23328,10 @@ add_index_entry (struct mapped_symtab *symtab, const char *name,
   if (4 * symtab->n_elements / 3 >= symtab->data.size ())
     hash_expand (symtab);
 
-  std::unique_ptr<symtab_index_entry> &slot = find_slot (symtab, name);
-  if (slot == NULL)
+  symtab_index_entry &slot = find_slot (symtab, name);
+  if (slot.name == NULL)
     {
-      slot.reset (new symtab_index_entry ());
-      slot->name = name;
+      slot.name = name;
       /* index_offset is set later.  */
     }
 
@@ -23347,7 +23347,7 @@ add_index_entry (struct mapped_symtab *symtab, const char *name,
      the last entry pushed), but a symbol could have multiple kinds in one CU.
      To keep things simple we don't worry about the duplication here and
      sort and uniqufy the list after we've processed all symbols.  */
-  slot->cu_indices.push_back (cu_index_and_attrs);
+  slot.cu_indices.push_back (cu_index_and_attrs);
 }
 
 /* Sort and remove duplicates of all symbols' cu_indices lists.  */
@@ -23355,11 +23355,11 @@ add_index_entry (struct mapped_symtab *symtab, const char *name,
 static void
 uniquify_cu_indices (struct mapped_symtab *symtab)
 {
-  for (const auto &entry : symtab->data)
+  for (auto &entry : symtab->data)
     {
-      if (entry && !entry->cu_indices.empty ())
+      if (entry.name != NULL && !entry.cu_indices.empty ())
 	{
-	  auto &cu_indices = entry->cu_indices;
+	  auto &cu_indices = entry.cu_indices;
 	  std::sort (cu_indices.begin (), cu_indices.end ());
 	  auto from = std::unique (cu_indices.begin (), cu_indices.end ());
 	  cu_indices.erase (from, cu_indices.end ());
@@ -23425,11 +23425,11 @@ write_hash_table (mapped_symtab *symtab, data_buf &output, data_buf &cpool)
 
     /* We add all the index vectors to the constant pool first, to
        ensure alignment is ok.  */
-    for (const std::unique_ptr<symtab_index_entry> &it : symtab->data)
+    for (symtab_index_entry &entry : symtab->data)
       {
-	if (it == NULL)
+	if (entry.name == NULL)
 	  continue;
-	gdb_assert (it->index_offset == 0);
+	gdb_assert (entry.index_offset == 0);
 
 	/* Finding before inserting is faster than always trying to
 	   insert, because inserting always allocates a node, does the
@@ -23437,34 +23437,34 @@ write_hash_table (mapped_symtab *symtab, data_buf &output, data_buf &cpool)
 	   already had the same key.  C++17 try_emplace will avoid
 	   this.  */
 	const auto found
-	  = symbol_hash_table.find (it->cu_indices);
+	  = symbol_hash_table.find (entry.cu_indices);
 	if (found != symbol_hash_table.end ())
 	  {
-	    it->index_offset = found->second;
+	    entry.index_offset = found->second;
 	    continue;
 	  }
 
-	symbol_hash_table.emplace (it->cu_indices, cpool.size ());
-	it->index_offset = cpool.size ();
-	cpool.append_data (MAYBE_SWAP (it->cu_indices.size ()));
-	for (const auto iter : it->cu_indices)
-	  cpool.append_data (MAYBE_SWAP (iter));
+	symbol_hash_table.emplace (entry.cu_indices, cpool.size ());
+	entry.index_offset = cpool.size ();
+	cpool.append_data (MAYBE_SWAP (entry.cu_indices.size ()));
+	for (const auto index : entry.cu_indices)
+	  cpool.append_data (MAYBE_SWAP (index));
       }
   }
 
   /* Now write out the hash table.  */
   std::unordered_map<c_str_view, offset_type, c_str_view_hasher> str_table;
-  for (const auto &it : symtab->data)
+  for (const auto &entry : symtab->data)
     {
       offset_type str_off, vec_off;
 
-      if (it != NULL)
+      if (entry.name != NULL)
 	{
-	  const auto insertpair = str_table.emplace (it->name, cpool.size ());
+	  const auto insertpair = str_table.emplace (entry.name, cpool.size ());
 	  if (insertpair.second)
-	    cpool.append_cstr0 (it->name);
+	    cpool.append_cstr0 (entry.name);
 	  str_off = insertpair.first->second;
-	  vec_off = it->index_offset;
+	  vec_off = entry.index_offset;
 	}
       else
 	{
