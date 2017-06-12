@@ -13825,6 +13825,9 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 		 follow the requirement of the input.  */
 	      if (out_attr[i].i == 0)
 		{
+		  /* This assert is still reasonable, we shouldn't
+		     produce the suspicious build attribute
+		     combination (See below for in_attr).  */
 		  BFD_ASSERT (out_attr[Tag_ABI_HardFP_use].i == 0);
 		  out_attr[i].i = in_attr[i].i;
 		  out_attr[Tag_ABI_HardFP_use].i
@@ -13835,7 +13838,13 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 		 nothing.  */
 	      else if (in_attr[i].i == 0)
 		{
-		  BFD_ASSERT (in_attr[Tag_ABI_HardFP_use].i == 0);
+		  /* We used to assert that Tag_ABI_HardFP_use was
+		     zero here, but we should never assert when
+		     consuming an object file that has suspicious
+		     build attributes.  The single precision variant
+		     of 'no FP architecture' is still 'no FP
+		     architecture', so we just ignore the tag in this
+		     case.  */
 		  break;
 		}
 

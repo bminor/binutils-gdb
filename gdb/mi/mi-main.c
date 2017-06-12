@@ -1111,10 +1111,8 @@ register_changed_p (int regnum, struct regcache *prev_regs,
 		    struct regcache *this_regs)
 {
   struct gdbarch *gdbarch = get_regcache_arch (this_regs);
-  gdb_byte prev_buffer[MAX_REGISTER_SIZE];
-  gdb_byte this_buffer[MAX_REGISTER_SIZE];
-  enum register_status prev_status;
-  enum register_status this_status;
+  struct value *prev_value, *this_value;
+  int ret;
 
   /* First time through or after gdbarch change consider all registers
      as changed.  */
@@ -1122,16 +1120,19 @@ register_changed_p (int regnum, struct regcache *prev_regs,
     return 1;
 
   /* Get register contents and compare.  */
-  prev_status = regcache_cooked_read (prev_regs, regnum, prev_buffer);
-  this_status = regcache_cooked_read (this_regs, regnum, this_buffer);
+  prev_value = prev_regs->cooked_read_value (regnum);
+  this_value = this_regs->cooked_read_value (regnum);
+  gdb_assert (prev_value != NULL);
+  gdb_assert (this_value != NULL);
 
-  if (this_status != prev_status)
-    return 1;
-  else if (this_status == REG_VALID)
-    return memcmp (prev_buffer, this_buffer,
-		   register_size (gdbarch, regnum)) != 0;
-  else
-    return 0;
+  ret = value_contents_eq (prev_value, 0, this_value, 0,
+			   register_size (gdbarch, regnum)) == 0;
+
+  release_value (prev_value);
+  release_value (this_value);
+  value_free (prev_value);
+  value_free (this_value);
+  return ret;
 }
 
 /* Return a list of register number and value pairs.  The valid

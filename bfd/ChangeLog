@@ -1,3 +1,89 @@
+2017-06-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_backend_data): Add struct bfd_link_info *
+	to merge_gnu_properties.
+	* elf-properties.c (elf_merge_gnu_properties): Add struct
+	bfd_link_info * and pass it to merge_gnu_properties.
+	(elf_merge_gnu_property_list): Add struct bfd_link_info *
+	and pass it to elf_merge_gnu_properties.
+	(_bfd_elf_link_setup_gnu_properties): Pass info to
+	elf_merge_gnu_property_list.
+	* elf32-i386.c (elf_i386_merge_gnu_properties): Add struct
+	bfd_link_info *.
+	* elf64-x86-64.c (elf_x86_64_merge_gnu_properties): Likewise.
+
+2017-06-11  Joe Zbiciak  <joe.zbiciak@leftturnonly.info>
+
+	PR 21564
+	* binary.c (binary_set_section_contents): Scale lma by octets
+	per byte to set filepos.
+
+2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (elf_arc_check_relocs): Fixed conditions to generate
+	dynamic sections.
+
+2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (elf_arc_size_dynamic_sections): Changed condition to
+	require TEXTREL.
+
+2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* arc-got.h (relocate_fix_got_relocs_for_got_info): Added TCB_SIZE to
+	patched section contents for TLS IE reloc.
+	* elf32-arc.c: Remove TCB_SIZE preprocessor macro.
+
+2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (elf_arc_relocate_section): Added "call" to
+	RELOC_FOR_GLOBAL_SYMBOL macro.
+
+2018-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (elf_arc_relocate_section): Small refactor and condition
+	changes.
+
+2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* config/tc-arc.c (md_undefined_symbol): Changed.
+	* config/tc-arc.h (DYNAMIC_STRUCT_NAME): Removed.
+
+2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (elf_arc_relocate_section): Fixed reassign of indirect
+	symbols.
+
+2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (elf_arc_check_relocs): Added condition to disable
+	warning and "Bad value" for local symbols ARC_32 or ARC_32_ME relocs.
+
+2017-06-08  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* elf32-arc.c (ADD_RELA): Changed to only work when dynamic
+	object is created.
+
+2017-06-08  Richard Earnshaw  <rearnsha@arm.com>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Remove assertion
+	that the input bfd has Tag_FP_ARCH non-zero if Tag_ABI_HardFP_use
+	is non-zero.  Add clarifying comments.
+
+2017-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Set local IFUNC symbol
+	name.  Use local IFUNC symbol name string to report unsupported
+	non-PIC call to IFUNC function.
+	(elf_i386_relocate_section): Dump local IFUNC name with minfo
+	when generating R_386_IRELATIVE relocation.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	* elf_x86_64_check_relocs (elf_x86_64_check_relocs): Set local
+	IFUNC symbol name.
+	(elf_x86_64_relocate_section): Dump local IFUNC name with minfo
+	when generating R_X86_64_IRELATIVE relocation.
+	(elf_x86_64_finish_dynamic_symbol): Likewise.
+
 2017-06-06  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* elf.c (setup_group): Make sure BFD sections are created for all

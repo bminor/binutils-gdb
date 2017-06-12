@@ -3197,8 +3197,10 @@ elf_s390_relocate_section (bfd *output_bfd,
 		  insn0 = bfd_get_32 (input_bfd, contents + rel->r_offset);
 		  insn1 = bfd_get_16 (input_bfd, contents + rel->r_offset + 4);
 		  if (insn1 != 0x0004)
-		    invalid_tls_insn (input_bfd, input_section, rel);
-		  ry = 0;
+		    {
+		      invalid_tls_insn (input_bfd, input_section, rel);
+		      return FALSE;
+		    }
 		  if ((insn0 & 0xff00f000) == 0xe3000000)
 		    /* lg %rx,0(%ry,0) -> sllg %rx,%ry,0  */
 		    ry = (insn0 & 0x000f0000);
@@ -3212,7 +3214,10 @@ elf_s390_relocate_section (bfd *output_bfd,
 		    /* lg %rx,0(%r12,%ry) -> sllg %rx,%ry,0  */
 		    ry = (insn0 & 0x0000f000) << 4;
 		  else
-		    invalid_tls_insn (input_bfd, input_section, rel);
+		    {
+		      invalid_tls_insn (input_bfd, input_section, rel);
+		      return FALSE;
+		    }
 		  insn0 = 0xeb000000 | (insn0 & 0x00f00000) | ry;
 		  insn1 = 0x000d;
 		  bfd_put_32 (output_bfd, insn0, contents + rel->r_offset);
@@ -3226,7 +3231,10 @@ elf_s390_relocate_section (bfd *output_bfd,
 	      insn0 = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	      insn1 = bfd_get_16 (input_bfd, contents + rel->r_offset + 4);
 	      if ((insn0 & 0xffff0000) != 0xc0e50000)
-		invalid_tls_insn (input_bfd, input_section, rel);
+		{
+		  invalid_tls_insn (input_bfd, input_section, rel);
+		  return FALSE;
+		}
 	      if (!bfd_link_pic (info) && (h == NULL || h->dynindx == -1))
 		{
 		  /* GD->LE transition.
@@ -3253,7 +3261,10 @@ elf_s390_relocate_section (bfd *output_bfd,
 		  insn0 = bfd_get_32 (input_bfd, contents + rel->r_offset);
 		  insn1 = bfd_get_16 (input_bfd, contents + rel->r_offset + 4);
 		  if ((insn0 & 0xffff0000) != 0xc0e50000)
-		    invalid_tls_insn (input_bfd, input_section, rel);
+		    {
+		      invalid_tls_insn (input_bfd, input_section, rel);
+		      return FALSE;
+		    }
 		  /* LD->LE transition.
 		     brasl %r14,__tls_get_addr@plt -> brcl 0,. */
 		  insn0 = 0xc0040000;

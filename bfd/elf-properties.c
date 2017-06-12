@@ -197,8 +197,8 @@ next:
    with ABFD.  */
 
 static bfd_boolean
-elf_merge_gnu_properties (bfd *abfd, elf_property *aprop,
-			  elf_property *bprop)
+elf_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd,
+			  elf_property *aprop, elf_property *bprop)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   unsigned int pr_type = aprop != NULL ? aprop->pr_type : bprop->pr_type;
@@ -206,7 +206,7 @@ elf_merge_gnu_properties (bfd *abfd, elf_property *aprop,
   if (bed->merge_gnu_properties != NULL
       && pr_type >= GNU_PROPERTY_LOPROC
       && pr_type < GNU_PROPERTY_LOUSER)
-    return bed->merge_gnu_properties (abfd, aprop, bprop);
+    return bed->merge_gnu_properties (info, abfd, aprop, bprop);
 
   switch (pr_type)
     {
@@ -263,7 +263,8 @@ elf_find_and_remove_property (elf_property_list **listp,
 /* Merge GNU property list *LISTP with ABFD.  */
 
 static void
-elf_merge_gnu_property_list (bfd *abfd, elf_property_list **listp)
+elf_merge_gnu_property_list (struct bfd_link_info *info, bfd *abfd,
+			     elf_property_list **listp)
 {
   elf_property_list *p, **lastp;
   elf_property *pr;
@@ -275,7 +276,7 @@ elf_merge_gnu_property_list (bfd *abfd, elf_property_list **listp)
       pr = elf_find_and_remove_property (listp, p->property.pr_type);
       /* Pass NULL to elf_merge_gnu_properties for the property which
 	 isn't on *LISTP.  */
-      elf_merge_gnu_properties (abfd, &p->property, pr);
+      elf_merge_gnu_properties (info, abfd, &p->property, pr);
       if (p->property.pr_kind == property_remove)
 	{
 	  /* Remove this property.  */
@@ -287,7 +288,7 @@ elf_merge_gnu_property_list (bfd *abfd, elf_property_list **listp)
 
   /* Merge the remaining properties on *LISTP with ABFD.  */
   for (p = *listp; p != NULL; p = p->next)
-    if (elf_merge_gnu_properties (abfd, NULL, &p->property))
+    if (elf_merge_gnu_properties (info, abfd, NULL, &p->property))
       {
 	pr = _bfd_elf_get_property (abfd, p->property.pr_type,
 				    p->property.pr_datasz);
@@ -365,7 +366,7 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	   when all properties are from ELF objects with different
 	   machine code or class.  */
 	if (first_pbfd != NULL)
-	  elf_merge_gnu_property_list (first_pbfd, listp);
+	  elf_merge_gnu_property_list (info, first_pbfd, listp);
 
 	if (list != NULL)
 	  {

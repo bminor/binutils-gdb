@@ -204,6 +204,7 @@ SFILES = \
 	$(srcdir)/common/environ.c \
 	$(srcdir)/common/fileio.c \
 	$(srcdir)/common/filestuff.c \
+	$(srcdir)/common/job-control.c \
 	$(srcdir)/common/gdb_vecs.c \
 	$(srcdir)/common/new-op.c \
 	$(srcdir)/common/print-utils.c \
@@ -217,6 +218,7 @@ SFILES = \
 	$(srcdir)/nat/linux-personality.c \
 	$(srcdir)/nat/mips-linux-watch.c \
 	$(srcdir)/nat/ppc-linux.c \
+	$(srcdir)/nat/fork-inferior.c \
 	$(srcdir)/target/waitstatus.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
@@ -234,6 +236,7 @@ OBS = \
 	cleanups.o \
 	common-debug.o \
 	common-exceptions.o \
+	job-control.o \
 	common-regcache.o \
 	common-utils.o \
 	debug.o \

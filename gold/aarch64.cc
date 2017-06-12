@@ -3746,8 +3746,13 @@ Target_aarch64<size, big_endian>::scan_reloc_for_stub(
 	  psymval = &symval;
 	}
       else if (gsym->is_undefined())
-	// There is no need to generate a stub symbol is undefined.
-	return;
+	{
+	  // There is no need to generate a stub symbol is undefined.
+          gold_debug(DEBUG_TARGET,
+                     "stub: not creating a stub for undefined symbol %s in file %s",
+                     gsym->name(), aarch64_relobj->name().c_str());
+          return;
+	}
     }
 
   // Get the symbol value.
@@ -5405,6 +5410,15 @@ maybe_apply_stub(unsigned int r_type,
 
   const The_aarch64_relobj* aarch64_relobj =
       static_cast<const The_aarch64_relobj*>(object);
+  // We don't create stubs for undefined symbols so don't look for one.
+  if (gsym && gsym->is_undefined())
+    {
+      gold_debug(DEBUG_TARGET,
+		 "stub: looking for a stub for undefined symbol %s in file %s",
+		 gsym->name(), aarch64_relobj->name().c_str());
+      return false;
+    }
+
   The_stub_table* stub_table = aarch64_relobj->stub_table(relinfo->data_shndx);
   gold_assert(stub_table != NULL);
 

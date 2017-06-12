@@ -1945,6 +1945,8 @@ elf_i386_check_relocs (bfd *abfd,
 		goto error_return;
 
 	      /* Fake a STT_GNU_IFUNC symbol.  */
+	      h->root.root.string = bfd_elf_sym_name (abfd, symtab_hdr,
+						      isym, NULL);
 	      h->type = STT_GNU_IFUNC;
 	      h->def_regular = 1;
 	      h->ref_regular = 1;
@@ -2181,15 +2183,10 @@ do_relocation:
 		  else if (h->type == STT_GNU_IFUNC
 			   && bfd_link_pic (info))
 		    {
-		    if (isym == NULL)
-		      name = h->root.root.string;
-		    else
-		      name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
-					       NULL);
-		    _bfd_error_handler
-		      /* xgettext:c-format */
-		      (_("%B: unsupported non-PIC call to IFUNC `%s'"),
-		       abfd, name);
+		      _bfd_error_handler
+			/* xgettext:c-format */
+			(_("%B: unsupported non-PIC call to IFUNC `%s'"),
+			 abfd, h->root.root.string);
 		      bfd_set_error (bfd_error_bad_value);
 		      goto error_return;
 		    }
@@ -4081,6 +4078,10 @@ do_ifunc_pointer:
 		      || h->forced_local
 		      || bfd_link_executable (info))
 		    {
+		      info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
+					      h->root.root.string,
+					      h->root.u.def.section->owner);
+
 		      /* This symbol is resolved locally.  */
 		      outrel.r_info = ELF32_R_INFO (0, R_386_IRELATIVE);
 		      bfd_put_32 (output_bfd,
@@ -5413,6 +5414,10 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 		  && h->def_regular
 		  && h->type == STT_GNU_IFUNC))
 	    {
+	      info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
+				      h->root.root.string,
+				      h->root.u.def.section->owner);
+
 	      /* If an STT_GNU_IFUNC symbol is locally defined, generate
 		 R_386_IRELATIVE instead of R_386_JUMP_SLOT.  Store addend
 		 in the .got.plt section.  */
@@ -5548,6 +5553,10 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 		}
 	      if (SYMBOL_REFERENCES_LOCAL (info, h))
 		{
+		  info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
+					  h->root.root.string,
+					  h->root.u.def.section->owner);
+
 		  bfd_put_32 (output_bfd,
 			      (h->root.u.def.value
 			       + h->root.u.def.section->output_section->vma
@@ -6379,7 +6388,8 @@ elf_i386_parse_gnu_properties (bfd *abfd, unsigned int type,
    should be merged with ABFD.  */
 
 static bfd_boolean
-elf_i386_merge_gnu_properties (bfd *abfd ATTRIBUTE_UNUSED,
+elf_i386_merge_gnu_properties (struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			       bfd *abfd ATTRIBUTE_UNUSED,
 			       elf_property *aprop,
 			       elf_property *bprop)
 {

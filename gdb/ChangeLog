@@ -1,3 +1,155 @@
+2017-06-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS (Changes since GDB 8.0): Announce {set,show} debug
+	separate-debug-file commands.
+	* symfile.h (separate_debug_file_debug): New global.
+	* symfile.c (separate_debug_file_debug): New global.
+	(separate_debug_file_exists, find_separate_debug_file): Add
+	debug output.
+	(_initialize_symfile): Add "set debug separate-debug-file"
+	command.
+	* build-id.c (build_id_to_debug_bfd,
+	find_separate_debug_file_by_buildid): Add debug output.
+
+2017-06-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbarch.sh (displaced_step_free_closure): Remove.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Don't set
+	displaced_step_free_closure.
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Likewise.
+	* arm-linux-tdep.c (arm_linux_init_abi): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Likewise.
+	* rs6000-aix-tdep.c (rs6000_aix_init_osabi): Likewise.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Likewise.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* arch-utils.h (simple_displaced_step_free_closure): Remove.
+	* arch-utils.c (simple_displaced_step_free_closure): Remove.
+	* infrun.c (displaced_step_clear): Call xfree instead of
+	gdbarch_displaced_step_free_closure.
+
+2017-06-08  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* common/common-utils.c (stringify_argv): Check for "arg[0] !=
+	NULL".
+
+2017-06-08 Alan Hayward  <alan.hayward@arm.com>
+
+	* mn10300-tdep.c (MN10300_MAX_REGISTER_SIZE): Add.
+	(mn10300_extract_return_value): Use MN10300_MAX_REGISTER_SIZE.
+	(mn10300_push_dummy_call): Likewise.
+
+2017-06-08  Alan Hayward  <alan.hayward@arm.com>
+
+	* mi/mi-main.c (register_changed_p): Use value_contents_eq.
+
+2017-06-08  Alan Hayward  <alan.hayward@arm.com>
+
+	* mi/mi-main.c (register_changed_p): Use cooked_read_value.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* NEWS (Changes since GDB 8.0): Announce that GDBserver is now
+	able to start inferiors	using a shell.
+	(New remote packets): Announce new packet "QStartupWithShell".
+	* remote.c: Add PACKET_QStartupWithShell.
+	(extended_remote_create_inferior): Handle new
+	PACKET_QStartupWithShell.
+	(remote_protocol_features) <QStartupWithShell>: New entry for
+	PACKET_QStartupWithShell.
+	(_initialize_remote): Call "add_packet_config_cmd" for
+	QStartupShell.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add "common/common-inferior.h"
+	and "nat/fork-inferior.h".
+	* common/common-inferior.h: New file, with contents from
+	"gdb/inferior.h".
+	* commom/common-utils.c: Include "common-utils.h".
+	(stringify_argv): New function.
+	* common/common-utils.h (stringify_argv): New prototype.
+	* configure.nat: Add "fork-inferior.o" as a dependency for
+	"*linux*", "fbsd*" and "nbsd*" hosts.
+	* corefile.c (get_exec_file): Update comment.
+	* darwin-nat.c (darwin_ptrace_him): Call "gdb_startup_inferior"
+	instead of "startup_inferior".
+	(darwin_create_inferior): Call "add_thread_silent" after
+	"fork_inferior".
+	* fork-child.c: Cleanup unnecessary includes.
+	(SHELL_FILE): Move to "common/common-fork-child.c".
+	(environ): Likewise.
+	(exec_wrapper): Initialize.
+	(get_exec_wrapper): New function.
+	(breakup_args): Move to "common/common-fork-child.c"; rename to
+	"breakup_args_for_exec".
+	(escape_bang_in_quoted_argument): Move to
+	"common/common-fork-child.c".
+	(saved_ui): New variable.
+	(prefork_hook): New function.
+	(postfork_hook): Likewise.
+	(postfork_child_hook): Likewise.
+	(gdb_startup_inferior): Likewise.
+	(fork_inferior): Move to "common/common-fork-child.c".  Update
+	function to support gdbserver.
+	(startup_inferior): Likewise.
+	* gdbcore.h (get_exec_file): Remove declaration.
+	* gnu-nat.c (gnu_create_inferior): Call "gdb_startup_inferior"
+	instead of "startup_inferior".  Call "add_thread_silent" after
+	"fork_inferior".
+	* inf-ptrace.c: Include "nat/fork-inferior.h" and "utils.h".
+	(inf_ptrace_create_inferior): Call "gdb_startup_inferior"
+	instead of "startup_inferior".  Call "add_thread_silent" after
+	"fork_inferior".
+	* inferior.h: Include "common-inferior.h".
+	(trace_start_error): Move to "common/common-utils.h".
+	(trace_start_error_with_name): Likewise.
+	(fork_inferior): Move prototype to "nat/fork-inferior.h".
+	(startup_inferior): Likewise.
+	(gdb_startup_inferior): New prototype.
+	* nat/fork-inferior.c: New file, with contents from "fork-child.c".
+	* nat/fork-inferior.h: New file.
+	* procfs.c (procfs_init_inferior): Call "gdb_startup_inferior"
+	instead of "startup_inferior".  Call "add_thread_silent" after
+	"fork_inferior".
+	* target.h (target_terminal_init): Move prototype to
+	"target/target.h".
+	(target_terminal_inferior): Likewise.
+	(target_terminal_ours): Likewise.
+	* target/target.h (target_terminal_init): New prototype, moved
+	from "target.h".
+	(target_terminal_inferior): Likewise.
+	(target_terminal_ours): Likewise.
+	* utils.c (gdb_flush_out_err): New function.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add "common/common-gdbthread.h".
+	* common/common-gdbthread.h: New file, with parts from
+	"gdb/gdbthread.h".
+	* gdbthread.h: Include "common-gdbthread.h".
+	(switch_to_thread): Moved to "common/common-gdbthread.h".
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SFILES): Add "common/job-control.c".
+	(HFILES_NO_SRCDIR): Add "common/job-control.h".
+	(COMMON_OBS): Add "job-control.o".
+	* common/job-control.c: New file, with contents from
+	"gdb/inflow.c".
+	* common/job-control.h: New file, with contents from "terminal.h".
+	* fork-child.c: Include "job-control.h".
+	* inflow.c: Include "job-control.h".
+	(gdb_setpgid): Move to "common/common-inflow.c".
+	(_initialize_inflow): Move setting of "job_control" to
+	"handle_job_control".
+	* terminal.h (job_control): Moved to "common/common-terminal.h".
+	(gdb_setpgid): Likewise.
+	* top.c: Include "job_control.h".
+	* utils.c: Likewise.
+	(job_control): Moved to "job-control.c".
+
 2017-06-07  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (SFILES): Add gdb_regex.c.

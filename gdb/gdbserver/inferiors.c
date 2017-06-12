@@ -468,3 +468,12 @@ make_cleanup_restore_current_thread (void)
 {
   return make_cleanup (do_restore_current_thread_cleanup, current_thread);
 }
+
+/* See common/common-gdbthread.h.  */
+
+void
+switch_to_thread (ptid_t ptid)
+{
+  if (!ptid_equal (ptid, minus_one_ptid))
+    current_thread = find_thread_ptid (ptid);
+}

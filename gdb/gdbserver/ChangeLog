@@ -1,3 +1,97 @@
+2017-06-09  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* fork-child.c: Conditionally include <signal.h>.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* server.c (handle_general_set): Handle new packet
+	"QStartupWithShell".
+	(handle_query): Add "QStartupWithShell" to the list of supported
+	packets.
+	(gdbserver_usage): Add help text explaining the
+	new "--startup-with-shell" and "--no-startup-with-shell" CLI
+	options.
+	(captured_main): Recognize and act upon the presence of the new
+	CLI options.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SFILES): Add "nat/fork-inferior.o".
+	* configure: Regenerate.
+	* configure.srv (srv_linux_obj): Add "fork-child.o" and
+	"fork-inferior.o".
+	(i[34567]86-*-lynxos*): Likewise.
+	(spu*-*-*): Likewise.
+	* fork-child.c: New file.
+	* linux-low.c: Include "common-inferior.h", "nat/fork-inferior.h"
+	and "environ.h".
+	(linux_ptrace_fun): New function.
+	(linux_create_inferior): Adjust function prototype to reflect
+	change on "target.h".  Adjust function code to use
+	"fork_inferior".
+	(linux_request_interrupt): Delete "signal_pid".
+	* lynx-low.c: Include "common-inferior.h" and "nat/fork-inferior.h".
+	(lynx_ptrace_fun): New function.
+	(lynx_create_inferior): Adjust function prototype to reflect
+	change on "target.h".  Adjust function code to use
+	"fork_inferior".
+	* nto-low.c (nto_create_inferior): Adjust function prototype and
+	code to reflect change on "target.h".  Update comments.
+	* server.c: Include "common-inferior.h", "nat/fork-inferior.h",
+	"common-terminal.h" and "environ.h".
+	(terminal_fd): Moved to fork-child.c.
+	(old_foreground_pgrp): Likewise.
+	(restore_old_foreground_pgrp): Likewise.
+	(last_status): Make it global.
+	(last_ptid): Likewise.
+	(our_environ): New variable.
+	(startup_with_shell): Likewise.
+	(program_name): Likewise.
+	(program_argv): Rename to...
+	(program_args): ...this.
+	(wrapper_argv): New variable.
+	(start_inferior): Delete function.
+	(get_exec_wrapper): New function.
+	(get_exec_file): Likewise.
+	(get_environ): Likewise.
+	(prefork_hook): Likewise.
+	(post_fork_inferior): Likewise.
+	(postfork_hook): Likewise.
+	(postfork_child_hook): Likewise.
+	(handle_v_run): Update code to deal with arguments coming from the
+	remote host.  Update calls from "start_inferior" to
+	"create_inferior".
+	(captured_main): Likewise.  Initialize environment variable.  Call
+	"have_job_control".
+	* server.h (post_fork_inferior): New prototype.
+	(get_environ): Likewise.
+	(last_status): Declare.
+	(last_ptid): Likewise.
+	(signal_pid): Likewise.
+	* spu-low.c: Include "common-inferior.h" and "nat/fork-inferior.h".
+	(spu_ptrace_fun): New function.
+	(spu_create_inferior): Adjust function prototype to reflect change
+	on "target.h".  Adjust function code to use "fork_inferior".
+	* target.c (target_terminal_init): New function.
+	(target_terminal_inferior): Likewise.
+	(target_terminal_ours): Likewise.
+	* target.h: Include <vector>.
+	(struct target_ops) <create_inferior>: Update prototype.
+	(create_inferior): Update macro.
+	* utils.c (gdb_flush_out_err): New function.
+	* win32-low.c (win32_create_inferior): Adjust function prototype
+	and code to reflect change on "target.h".
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* inferiors.c (switch_to_thread): New function.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SFILE): Add "common/job-control.c".
+	(OBS): Add "job-control.o".
+
 2017-05-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* Makefile: Remove "@host_makefile_frag@".

@@ -1333,6 +1333,10 @@ symbol_file_clear (int from_tty)
     printf_unfiltered (_("No symbol file now.\n"));
 }
 
+/* See symfile.h.  */
+
+int separate_debug_file_debug = 0;
+
 static int
 separate_debug_file_exists (const char *name, unsigned long crc,
 			    struct objfile *parent_objfile)
@@ -1350,6 +1354,9 @@ separate_debug_file_exists (const char *name, unsigned long crc,
 
   if (filename_cmp (name, objfile_name (parent_objfile)) == 0)
     return 0;
+
+  if (separate_debug_file_debug)
+    printf_unfiltered (_("  Trying %s\n"), name);
 
   gdb_bfd_ref_ptr abfd (gdb_bfd_open (name, gnutarget, -1));
 
@@ -1443,6 +1450,10 @@ find_separate_debug_file (const char *dir,
   VEC (char_ptr) *debugdir_vec;
   struct cleanup *back_to;
   int ix;
+
+  if (separate_debug_file_debug)
+    printf_unfiltered (_("\nLooking for separate debug info (debug link) for "
+		         "%s\n"), objfile_name (objfile));
 
   /* Set I to std::max (strlen (canon_dir), strlen (dir)).  */
   i = strlen (dir);
@@ -3975,4 +3986,11 @@ full  == print messages for the executable,\n\
 			NULL,
 			NULL,
 			&setprintlist, &showprintlist);
+
+  add_setshow_boolean_cmd ("separate-debug-file", no_class,
+			   &separate_debug_file_debug, _("\
+Set printing of separate debug info file search debug."), _("\
+Show printing of separate debug info file search debug."), _("\
+When on, GDB prints the searched locations while looking for separate debug \
+info files."), NULL, NULL, &setdebuglist, &showdebuglist);
 }

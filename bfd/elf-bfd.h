@@ -1437,8 +1437,8 @@ struct elf_backend_data
 						  unsigned int);
 
   /* Merge GNU properties.  Return TRUE if property is updated.  */
-  bfd_boolean (*merge_gnu_properties) (bfd *, elf_property *,
-				       elf_property *);
+  bfd_boolean (*merge_gnu_properties) (struct bfd_link_info *, bfd *,
+				       elf_property *, elf_property *);
 
   /* Set up GNU properties.  */
   bfd *(*setup_gnu_properties) (struct bfd_link_info *);

@@ -1235,6 +1235,7 @@ SFILES = \
 	common/fileio.c \
 	common/filestuff.c \
 	common/format.c \
+	common/job-control.c \
 	common/gdb_vecs.c \
 	common/new-op.c \
 	common/print-utils.c \
@@ -1507,9 +1508,11 @@ HFILES_NO_SRCDIR = \
 	common/common-debug.h \
 	common/common-defs.h \
 	common/common-exceptions.h \
+	common/common-gdbthread.h \
 	common/common-regcache.h \
 	common/common-types.h \
 	common/common-utils.h \
+	common/job-control.h \
 	common/errors.h \
 	common/environ.h \
 	common/fileio.h \
@@ -1522,6 +1525,7 @@ HFILES_NO_SRCDIR = \
 	common/gdb_termios.h \
 	common/gdb_vecs.h \
 	common/gdb_wait.h \
+	common/common-inferior.h \
 	common/host-defs.h \
 	common/print-utils.h \
 	common/ptid.h \
@@ -1562,6 +1566,7 @@ HFILES_NO_SRCDIR = \
 	nat/amd64-linux-siginfo.h \
 	nat/gdb_ptrace.h \
 	nat/gdb_thread_db.h \
+	nat/fork-inferior.h \
 	nat/linux-btrace.h \
 	nat/linux-namespaces.h \
 	nat/linux-nat.h \
@@ -1664,6 +1669,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	common-agent.o \
 	common-debug.o \
 	common-exceptions.o \
+	job-control.o \
 	common-regcache.o \
 	common-utils.o \
 	complaints.o \

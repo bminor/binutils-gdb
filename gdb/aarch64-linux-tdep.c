@@ -1204,8 +1204,6 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_displaced_step_copy_insn (gdbarch,
 					aarch64_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, aarch64_displaced_step_fixup);
-  set_gdbarch_displaced_step_free_closure (gdbarch,
-					   simple_displaced_step_free_closure);
   set_gdbarch_displaced_step_location (gdbarch, linux_displaced_step_location);
   set_gdbarch_displaced_step_hw_singlestep (gdbarch,
 					    aarch64_displaced_step_hw_singlestep);

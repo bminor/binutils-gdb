@@ -4377,7 +4377,7 @@ procfs_init_inferior (struct target_ops *ops, int pid)
   thread_change_ptid (pid_to_ptid (pid),
 		      ptid_build (pid, lwpid, 0));
 
-  startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
+  gdb_startup_inferior (pid, START_INFERIOR_TRAPS_EXPECTED);
 
 #ifdef SYS_syssgi
   /* On mips-irix, we need to stop the inferior early enough during
@@ -4603,6 +4603,11 @@ procfs_create_inferior (struct target_ops *ops, const char *exec_file,
 
   pid = fork_inferior (exec_file, allargs, env, procfs_set_exec_trap,
 		       NULL, NULL, shell_file, NULL);
+
+  /* We have something that executes now.  We'll be running through
+     the shell at this point (if startup-with-shell is true), but the
+     pid shouldn't change.  */
+  add_thread_silent (pid_to_ptid (pid));
 
   procfs_init_inferior (ops, pid);
 }

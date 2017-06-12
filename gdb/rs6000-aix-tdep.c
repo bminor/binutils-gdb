@@ -1048,7 +1048,6 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
      software single-stepping.  */
   set_gdbarch_displaced_step_copy_insn (gdbarch, NULL);
   set_gdbarch_displaced_step_fixup (gdbarch, NULL);
-  set_gdbarch_displaced_step_free_closure (gdbarch, NULL);
   set_gdbarch_displaced_step_location (gdbarch, NULL);
 
   set_gdbarch_push_dummy_call (gdbarch, rs6000_push_dummy_call);

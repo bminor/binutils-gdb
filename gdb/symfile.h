@@ -646,4 +646,8 @@ extern void elfmdebug_build_psymtabs (struct objfile *,
 
 extern gdb_bfd_ref_ptr find_separate_debug_file_in_section (struct objfile *);
 
+/* True if we are printing debug output about separate debug info files.  */
+
+extern int separate_debug_file_debug;
+
 #endif /* !defined(SYMFILE_H) */
