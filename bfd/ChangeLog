@@ -1,3 +1,17 @@
+2017-06-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_backend_data): Add struct bfd_link_info *
+	to merge_gnu_properties.
+	* elf-properties.c (elf_merge_gnu_properties): Add struct
+	bfd_link_info * and pass it to merge_gnu_properties.
+	(elf_merge_gnu_property_list): Add struct bfd_link_info *
+	and pass it to elf_merge_gnu_properties.
+	(_bfd_elf_link_setup_gnu_properties): Pass info to
+	elf_merge_gnu_property_list.
+	* elf32-i386.c (elf_i386_merge_gnu_properties): Add struct
+	bfd_link_info *.
+	* elf64-x86-64.c (elf_x86_64_merge_gnu_properties): Likewise.
+
 2017-06-11  Joe Zbiciak  <joe.zbiciak@leftturnonly.info>
 
 	PR 21564
