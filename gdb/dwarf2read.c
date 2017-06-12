@@ -23691,6 +23691,22 @@ write_one_signatured_type (void **slot, void *d)
   return 1;
 }
 
+/* Recurse into all "included" dependencies and count their symbols as
+   if they appeared in this psymtab.  */
+
+static void
+recursively_count_psymbols (struct partial_symtab *psymtab,
+			    size_t &psyms_seen)
+{
+  for (int i = 0; i < psymtab->number_of_dependencies; ++i)
+    if (psymtab->dependencies[i]->user != NULL)
+      recursively_count_psymbols (psymtab->dependencies[i],
+				  psyms_seen);
+
+  psyms_seen += psymtab->n_global_syms;
+  psyms_seen += psymtab->n_static_syms;
+}
+
 /* Recurse into all "included" dependencies and write their symbols as
    if they appeared in this psymtab.  */
 
@@ -23764,7 +23780,6 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 
   mapped_symtab symtab;
   data_buf cu_list;
-  std::unordered_set<partial_symbol *> psyms_seen;
 
   /* While we're scanning CU's create a table that maps a psymtab pointer
      (which is what addrmap records) to its index (which is what is recorded
@@ -23776,6 +23791,25 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   /* The CU list is already sorted, so we don't need to do additional
      work here.  Also, the debug_types entries do not appear in
      all_comp_units, but only in their own hash table.  */
+
+  /* The psyms_seen set is potentially going to be largish (~40k
+     elements when indexing a -g3 build of GDB itself).  Estimate the
+     number of elements in order to avoid too many rehashes, which
+     require rebuilding buckets and thus many trips to
+     malloc/free.  */
+  size_t psyms_count = 0;
+  for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
+    {
+      struct dwarf2_per_cu_data *per_cu
+	= dwarf2_per_objfile->all_comp_units[i];
+      struct partial_symtab *psymtab = per_cu->v.psymtab;
+
+      if (psymtab != NULL && psymtab->user == NULL)
+	recursively_count_psymbols (psymtab, psyms_count);
+    }
+  /* Generating an index for gdb itself shows a ratio of
+     TOTAL_SEEN_SYMS/UNIQUE_SYMS or ~5.  4 seems like a good bet.  */
+  std::unordered_set<partial_symbol *> psyms_seen (psyms_count / 4);
   for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
     {
       struct dwarf2_per_cu_data *per_cu

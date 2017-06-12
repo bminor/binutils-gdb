@@ -1,5 +1,11 @@
 2017-06-12  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2read.c (recursively_count_psymbols): New function.
+	(write_psymtabs_to_index): Call it to compute number of psyms and
+	pass estimate size of psyms_seen to unordered_set's ctor.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (write_hash_table): Check if key already exists
 	before emplacing.
 
