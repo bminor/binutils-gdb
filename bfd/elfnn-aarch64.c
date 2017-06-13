@@ -8903,7 +8903,7 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 	}
       else if (bfd_link_pic (info) && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
-	  if (!h->def_regular)
+	  if (!(h->def_regular || ELF_COMMON_DEF_P (h)))
 	    return FALSE;
 
 	  BFD_ASSERT ((h->got.offset & 1) != 0);
