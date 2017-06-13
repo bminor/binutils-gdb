@@ -1,5 +1,14 @@
 2017-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/sizeof.d: Renamed to ...
+	* testsuite/ld-elf/sizeofa.d: This.  Updated.
+	* testsuite/ld-elf/startof.d: Renamed to ...
+	* testsuite/ld-elf/startofa.d: This.  Updated.
+	* testsuite/ld-elf/sizeofb.d: New file.
+	* testsuite/ld-elf/startofb.d: Likewise.
+
+2017-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/20022
 	PR ld/21557
 	PR ld/21562
