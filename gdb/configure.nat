@@ -81,6 +81,10 @@ case ${gdb_host} in
     aix)
 	NATDEPFILES='fork-inferior.o fork-child.o inf-ptrace.o'
 	;;
+    darwin)
+	NATDEPFILES='fork-child.o fork-inferior.o darwin-nat.o \
+	    darwin-nat-info.o'
+        ;;
 esac
 
 # This is where we actually filter by host and host CPU.
@@ -133,9 +137,8 @@ case ${gdb_host} in
 	case ${gdb_host_cpu} in
 	    i386)
 		# Host: IA86 running Darwin
-		NATDEPFILES='fork-child.o darwin-nat.o \
-		i386-darwin-nat.o x86-nat.o x86-dregs.o amd64-nat.o \
-		darwin-nat-info.o'
+		NATDEPFILES="${NATDEPFILES} i386-darwin-nat.o x86-nat.o \
+		    x86-dregs.o amd64-nat.o"
 		;;
 	esac
 	;;
