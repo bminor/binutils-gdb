@@ -12698,55 +12698,6 @@ elf_gc_mark_debug_section (asection *sec ATTRIBUTE_UNUSED,
   return NULL;
 }
 
-/* For undefined __start_<name> and __stop_<name> symbols, return the
-   first input section matching <name>.  Return NULL otherwise.  */
-
-asection *
-_bfd_elf_is_start_stop (const struct bfd_link_info *info,
-			struct elf_link_hash_entry *h)
-{
-  asection *s;
-  const char *sec_name;
-
-  if (h->root.type != bfd_link_hash_undefined
-      && h->root.type != bfd_link_hash_undefweak)
-    return NULL;
-
-  s = h->root.u.undef.section;
-  if (s != NULL)
-    {
-      if (s == (asection *) 0 - 1)
-	return NULL;
-      return s;
-    }
-
-  sec_name = NULL;
-  if (strncmp (h->root.root.string, "__start_", 8) == 0)
-    sec_name = h->root.root.string + 8;
-  else if (strncmp (h->root.root.string, "__stop_", 7) == 0)
-    sec_name = h->root.root.string + 7;
-
-  if (sec_name != NULL && *sec_name != '\0')
-    {
-      bfd *i;
-
-      for (i = info->input_bfds; i != NULL; i = i->link.next)
-	{
-	  s = bfd_get_section_by_name (i, sec_name);
-	  if (s != NULL)
-	    {
-	      h->root.u.undef.section = s;
-	      break;
-	    }
-	}
-    }
-
-  if (s == NULL)
-    h->root.u.undef.section = (asection *) 0 - 1;
-
-  return s;
-}
-
 /* COOKIE->rel describes a relocation against section SEC, which is
    a section we've decided to keep.  Return the section that contains
    the relocation symbol, or NULL if no section contains it.  */
@@ -12792,10 +12743,9 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 	     or __stop_XXX symbols.  The linker will later define such
 	     symbols for orphan input sections that have a name
 	     representable as a C identifier.  */
-	  asection *s = _bfd_elf_is_start_stop (info, h);
-
-	  if (s != NULL)
+	  if (h->start_stop)
 	    {
+	      asection *s = h->u2.start_stop_section;
 	      *start_stop = !s->gc_mark;
 	      return s;
 	    }
@@ -13136,26 +13086,28 @@ static bfd_boolean
 elf_gc_propagate_vtable_entries_used (struct elf_link_hash_entry *h, void *okp)
 {
   /* Those that are not vtables.  */
-  if (h->vtable == NULL || h->vtable->parent == NULL)
+  if (h->start_stop
+      || h->u2.vtable == NULL
+      || h->u2.vtable->parent == NULL)
     return TRUE;
 
   /* Those vtables that do not have parents, we cannot merge.  */
-  if (h->vtable->parent == (struct elf_link_hash_entry *) -1)
+  if (h->u2.vtable->parent == (struct elf_link_hash_entry *) -1)
     return TRUE;
 
   /* If we've already been done, exit.  */
-  if (h->vtable->used && h->vtable->used[-1])
+  if (h->u2.vtable->used && h->u2.vtable->used[-1])
     return TRUE;
 
   /* Make sure the parent's table is up to date.  */
-  elf_gc_propagate_vtable_entries_used (h->vtable->parent, okp);
+  elf_gc_propagate_vtable_entries_used (h->u2.vtable->parent, okp);
 
-  if (h->vtable->used == NULL)
+  if (h->u2.vtable->used == NULL)
     {
       /* None of this table's entries were referenced.  Re-use the
 	 parent's table.  */
-      h->vtable->used = h->vtable->parent->vtable->used;
-      h->vtable->size = h->vtable->parent->vtable->size;
+      h->u2.vtable->used = h->u2.vtable->parent->u2.vtable->used;
+      h->u2.vtable->size = h->u2.vtable->parent->u2.vtable->size;
     }
   else
     {
@@ -13163,9 +13115,9 @@ elf_gc_propagate_vtable_entries_used (struct elf_link_hash_entry *h, void *okp)
       bfd_boolean *cu, *pu;
 
       /* Or the parent's entries into ours.  */
-      cu = h->vtable->used;
+      cu = h->u2.vtable->used;
       cu[-1] = TRUE;
-      pu = h->vtable->parent->vtable->used;
+      pu = h->u2.vtable->parent->u2.vtable->used;
       if (pu != NULL)
 	{
 	  const struct elf_backend_data *bed;
@@ -13173,7 +13125,7 @@ elf_gc_propagate_vtable_entries_used (struct elf_link_hash_entry *h, void *okp)
 
 	  bed = get_elf_backend_data (h->root.u.def.section->owner);
 	  log_file_align = bed->s->log_file_align;
-	  n = h->vtable->parent->vtable->size >> log_file_align;
+	  n = h->u2.vtable->parent->u2.vtable->size >> log_file_align;
 	  while (n--)
 	    {
 	      if (*pu)
@@ -13198,7 +13150,9 @@ elf_gc_smash_unused_vtentry_relocs (struct elf_link_hash_entry *h, void *okp)
 
   /* Take care of both those symbols that do not describe vtables as
      well as those that are not loaded.  */
-  if (h->vtable == NULL || h->vtable->parent == NULL)
+  if (h->start_stop
+      || h->u2.vtable == NULL
+      || h->u2.vtable->parent == NULL)
     return TRUE;
 
   BFD_ASSERT (h->root.type == bfd_link_hash_defined
@@ -13220,11 +13174,11 @@ elf_gc_smash_unused_vtentry_relocs (struct elf_link_hash_entry *h, void *okp)
     if (rel->r_offset >= hstart && rel->r_offset < hend)
       {
 	/* If the entry is in use, do nothing.  */
-	if (h->vtable->used
-	    && (rel->r_offset - hstart) < h->vtable->size)
+	if (h->u2.vtable->used
+	    && (rel->r_offset - hstart) < h->u2.vtable->size)
 	  {
 	    bfd_vma entry = (rel->r_offset - hstart) >> log_file_align;
-	    if (h->vtable->used[entry])
+	    if (h->u2.vtable->used[entry])
 	      continue;
 	  }
 	/* Otherwise, kill it.  */
@@ -13448,11 +13402,11 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
   return FALSE;
 
  win:
-  if (!child->vtable)
+  if (!child->u2.vtable)
     {
-      child->vtable = ((struct elf_link_virtual_table_entry *)
-		       bfd_zalloc (abfd, sizeof (*child->vtable)));
-      if (!child->vtable)
+      child->u2.vtable = ((struct elf_link_virtual_table_entry *)
+			  bfd_zalloc (abfd, sizeof (*child->u2.vtable)));
+      if (!child->u2.vtable)
 	return FALSE;
     }
   if (!h)
@@ -13462,10 +13416,10 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
 	 would be bad.  It isn't worth paging in the local symbols to be
 	 sure though; that case should simply be handled by the assembler.  */
 
-      child->vtable->parent = (struct elf_link_hash_entry *) -1;
+      child->u2.vtable->parent = (struct elf_link_hash_entry *) -1;
     }
   else
-    child->vtable->parent = h;
+    child->u2.vtable->parent = h;
 
   return TRUE;
 }
@@ -13481,18 +13435,18 @@ bfd_elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   unsigned int log_file_align = bed->s->log_file_align;
 
-  if (!h->vtable)
+  if (!h->u2.vtable)
     {
-      h->vtable = ((struct elf_link_virtual_table_entry *)
-		   bfd_zalloc (abfd, sizeof (*h->vtable)));
-      if (!h->vtable)
+      h->u2.vtable = ((struct elf_link_virtual_table_entry *)
+		      bfd_zalloc (abfd, sizeof (*h->u2.vtable)));
+      if (!h->u2.vtable)
 	return FALSE;
     }
 
-  if (addend >= h->vtable->size)
+  if (addend >= h->u2.vtable->size)
     {
       size_t size, bytes, file_align;
-      bfd_boolean *ptr = h->vtable->used;
+      bfd_boolean *ptr = h->u2.vtable->used;
 
       /* While the symbol is undefined, we have to be prepared to handle
 	 a zero size.  */
@@ -13523,7 +13477,7 @@ bfd_elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,
 	    {
 	      size_t oldbytes;
 
-	      oldbytes = (((h->vtable->size >> log_file_align) + 1)
+	      oldbytes = (((h->u2.vtable->size >> log_file_align) + 1)
 			  * sizeof (bfd_boolean));
 	      memset (((char *) ptr) + oldbytes, 0, bytes - oldbytes);
 	    }
@@ -13535,11 +13489,11 @@ bfd_elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,
 	return FALSE;
 
       /* And arrange for that done flag to be at index -1.  */
-      h->vtable->used = ptr + 1;
-      h->vtable->size = size;
+      h->u2.vtable->used = ptr + 1;
+      h->u2.vtable->size = size;
     }
 
-  h->vtable->used[addend >> log_file_align] = TRUE;
+  h->u2.vtable->used[addend >> log_file_align] = TRUE;
 
   return TRUE;
 }

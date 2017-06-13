@@ -1,5 +1,51 @@
 2017-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/20022
+	PR ld/21557
+	PR ld/21562
+	PR ld/21571
+	* ld.texinfo: Update __start_SECNAME/__stop_SECNAME symbols.
+	* ldlang.c (lang_insert_orphan): Move handling of __start_SECNAME
+	and __stop_SECNAME symbols to ...
+	(lang_set_startof): Here.  Also define __start_SECNAME and
+	__stop_SECNAME for -Ur.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Mark
+	referenced __start_SECNAME and __stop_SECNAME symbols as hidden
+	and set start_stop for garbage collection.
+	* testsuite/ld-elf/pr21562a.d: New file.
+	* testsuite/ld-elf/pr21562a.s: Likewise.
+	* testsuite/ld-elf/pr21562a.t: Likewise.
+	* testsuite/ld-elf/pr21562b.d: Likewise.
+	* testsuite/ld-elf/pr21562b.s: Likewise.
+	* testsuite/ld-elf/pr21562b.t: Likewise.
+	* testsuite/ld-elf/pr21562c.d: Likewise.
+	* testsuite/ld-elf/pr21562c.t: Likewise.
+	* testsuite/ld-elf/pr21562d.d: Likewise.
+	* testsuite/ld-elf/pr21562d.t: Likewise.
+	* testsuite/ld-elf/pr21562e.d: Likewise.
+	* testsuite/ld-elf/pr21562f.d: Likewise.
+	* testsuite/ld-elf/pr21562g.d: Likewise.
+	* testsuite/ld-elf/pr21562h.d: Likewise.
+	* testsuite/ld-elf/pr21562i.d: Likewise.
+	* testsuite/ld-elf/pr21562j.d: Likewise.
+	* testsuite/ld-elf/pr21562k.d: Likewise.
+	* testsuite/ld-elf/pr21562l.d: Likewise.
+	* testsuite/ld-elf/pr21562m.d: Likewise.
+	* testsuite/ld-elf/pr21562n.d: Likewise.
+	* testsuite/ld-gc/pr20022.d: Likewise.
+	* testsuite/ld-gc/pr20022a.s: Likewise.
+	* testsuite/ld-gc/pr20022b.s: Likewise.
+	* testsuite/ld-gc/gc.exp: Run PR ld/20022 tests.
+	* testsuite/ld-gc/pr19161.d: Also accept local __start_SECNAME
+	symbol.
+	* testsuite/ld-gc/start.d: Likewise.
+	* testsuite/ld-x86-64/lea1a.d: Updated.
+	* testsuite/ld-x86-64/lea1b.d: Updated.
+	* testsuite/ld-x86-64/lea1d.d: Updated.
+	* testsuite/ld-x86-64/lea1e.d: Likewise.
+
+2017-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/sizeof.d: New file.
 	* testsuite/ld-elf/sizeof.s: Likewise.
 	* testsuite/ld-elf/startof.d: Likewise.
