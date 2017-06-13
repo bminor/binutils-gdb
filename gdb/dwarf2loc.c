@@ -1794,8 +1794,7 @@ read_pieced_value (struct value *v)
     {
       struct dwarf_expr_piece *p = &c->pieces[i];
       size_t this_size, this_size_bits;
-      long dest_offset_bits, source_offset_bits, source_offset;
-      const gdb_byte *intermediate_buffer;
+      long dest_offset_bits, source_offset_bits;
 
       /* Compute size, source, and destination offsets for copying, in
 	 bits.  */
@@ -1812,11 +1811,6 @@ read_pieced_value (struct value *v)
 
       if (this_size_bits > max_offset - offset)
 	this_size_bits = max_offset - offset;
-
-      this_size = bits_to_bytes (source_offset_bits, this_size_bits);
-      buffer.reserve (this_size);
-      source_offset = source_offset_bits / 8;
-      intermediate_buffer = buffer.data ();
 
       /* Copy from the source to DEST_BUFFER.  */
       switch (p->location)
@@ -1843,13 +1837,11 @@ read_pieced_value (struct value *v)
 					   this_size, buffer.data (),
 					   &optim, &unavail))
 	      {
-		/* Just so garbage doesn't ever shine through.  */
-		memset (buffer.data (), 0, this_size);
-
 		if (optim)
 		  mark_value_bits_optimized_out (v, offset, this_size_bits);
 		if (unavail)
 		  mark_value_bits_unavailable (v, offset, this_size_bits);
+		break;
 	      }
 
 	    copy_bitwise (contents, dest_offset_bits,
@@ -1859,12 +1851,15 @@ read_pieced_value (struct value *v)
 	  break;
 
 	case DWARF_VALUE_MEMORY:
+	  this_size = bits_to_bytes (source_offset_bits, this_size_bits);
+	  buffer.reserve (this_size);
+
 	  read_value_memory (v, offset,
 			     p->v.mem.in_stack_memory,
-			     p->v.mem.addr + source_offset,
+			     p->v.mem.addr + source_offset_bits / 8,
 			     buffer.data (), this_size);
 	  copy_bitwise (contents, dest_offset_bits,
-			intermediate_buffer, source_offset_bits % 8,
+			buffer.data (), source_offset_bits % 8,
 			this_size_bits, bits_big_endian);
 	  break;
 
@@ -1892,18 +1887,18 @@ read_pieced_value (struct value *v)
 
 	case DWARF_VALUE_LITERAL:
 	  {
-	    size_t n = this_size;
+	    ULONGEST literal_size_bits = 8 * p->v.literal.length;
+	    size_t n = this_size_bits;
 
-	    if (n > p->v.literal.length - source_offset)
-	      n = (p->v.literal.length >= source_offset
-		   ? p->v.literal.length - source_offset
-		   : 0);
-	    if (n != 0)
-	      intermediate_buffer = p->v.literal.data + source_offset;
+	    /* Cut off at the end of the implicit value.  */
+	    if (source_offset_bits >= literal_size_bits)
+	      break;
+	    if (n > literal_size_bits - source_offset_bits)
+	      n = literal_size_bits - source_offset_bits;
 
 	    copy_bitwise (contents, dest_offset_bits,
-			  intermediate_buffer, source_offset_bits % 8,
-			  this_size_bits, bits_big_endian);
+			  p->v.literal.data, source_offset_bits,
+			  n, bits_big_endian);
 	  }
 	  break;
 
@@ -1960,9 +1955,7 @@ write_pieced_value (struct value *to, struct value *from)
     {
       struct dwarf_expr_piece *p = &c->pieces[i];
       size_t this_size_bits, this_size;
-      long dest_offset_bits, source_offset_bits, dest_offset, source_offset;
-      int need_bitwise;
-      const gdb_byte *source_buffer;
+      long dest_offset_bits, source_offset_bits;
 
       this_size_bits = p->size;
       if (bits_to_skip > 0 && bits_to_skip >= this_size_bits)
@@ -1977,24 +1970,6 @@ write_pieced_value (struct value *to, struct value *from)
 
       if (this_size_bits > max_offset - offset)
 	this_size_bits = max_offset - offset;
-
-      this_size = bits_to_bytes (dest_offset_bits, this_size_bits);
-      source_offset = source_offset_bits / 8;
-      dest_offset = dest_offset_bits / 8;
-
-      /* Check whether the data can be transferred byte-wise.  */
-      if (dest_offset_bits % 8 == 0 && source_offset_bits % 8 == 0
-	  && this_size_bits % 8 == 0)
-	{
-	  source_buffer = contents + source_offset;
-	  need_bitwise = 0;
-	}
-      else
-	{
-	  buffer.reserve (this_size);
-	  source_buffer = buffer.data ();
-	  need_bitwise = 1;
-	}
 
       switch (p->location)
 	{
@@ -2047,21 +2022,44 @@ write_pieced_value (struct value *to, struct value *from)
 	  }
 	  break;
 	case DWARF_VALUE_MEMORY:
-	  if (need_bitwise)
-	    {
-	      /* Only the first and last bytes can possibly have any
-		 bits reused.  */
-	      read_memory (p->v.mem.addr + dest_offset, buffer.data (), 1);
-	      read_memory (p->v.mem.addr + dest_offset + this_size - 1,
-			   &buffer[this_size - 1], 1);
-	      copy_bitwise (buffer.data (), dest_offset_bits % 8,
-			    contents, source_offset_bits,
-			    this_size_bits,
-			    bits_big_endian);
-	    }
+	  {
+	    CORE_ADDR start_addr = p->v.mem.addr + dest_offset_bits / 8;
 
-	  write_memory (p->v.mem.addr + dest_offset,
-			source_buffer, this_size);
+	    if (dest_offset_bits % 8 == 0 && this_size_bits % 8 == 0
+		&& source_offset_bits % 8 == 0)
+	      {
+		/* Everything is byte-aligned; no buffer needed.  */
+		write_memory (start_addr,
+			      contents + source_offset_bits / 8,
+			      this_size_bits / 8);
+		break;
+	      }
+
+	    this_size = bits_to_bytes (dest_offset_bits, this_size_bits);
+	    buffer.reserve (this_size);
+
+	    if (dest_offset_bits % 8 != 0 || this_size_bits % 8 != 0)
+	      {
+		if (this_size <= 8)
+		  {
+		    /* Perform a single read for small sizes.  */
+		    read_memory (start_addr, buffer.data (), this_size);
+		  }
+		else
+		  {
+		    /* Only the first and last bytes can possibly have any
+		       bits reused.  */
+		    read_memory (start_addr, buffer.data (), 1);
+		    read_memory (start_addr + this_size - 1,
+				 &buffer[this_size - 1], 1);
+		  }
+	      }
+
+	    copy_bitwise (buffer.data (), dest_offset_bits % 8,
+			  contents, source_offset_bits,
+			  this_size_bits, bits_big_endian);
+	    write_memory (start_addr, buffer.data (), this_size);
+	  }
 	  break;
 	default:
 	  mark_value_bytes_optimized_out (to, 0, TYPE_LENGTH (value_type (to)));
