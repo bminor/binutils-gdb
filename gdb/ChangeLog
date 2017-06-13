@@ -1,5 +1,13 @@
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* dwarf2loc.c (write_pieced_value): When writing to a bit-field,
+	transfer the source value's least significant bits, instead of its
+	lowest-addressed ones.  Rename type_len to max_offset.
+	(read_pieced_value): Mirror above changes to write_pieced_value as
+	applicable.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* dwarf2loc.c (write_pieced_value): In DWARF_VALUE_MEMORY,
 	truncate full bytes from dest_offset_bits before using it as an
 	offset into the buffer.
