@@ -56,17 +56,7 @@ if ![runto_main] then {
     gdb_suppress_tests
 }
 
-set endianness ""
-set msg "detect endianness"
-gdb_test_multiple "show endian" "$msg" {
-    -re "(The target endianness is set automatically .currently )(big|little)( endian.*)$gdb_prompt $" {
-        pass "$msg"
-        set endianness $expect_out(2,string)
-    }
-    -re ".*$gdb_prompt $" {
-        fail "$msg"
-    }
-}
+set endianness [get_endianness]
 
 # Data sets used throughout the test
 

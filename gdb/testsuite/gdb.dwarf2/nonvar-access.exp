@@ -205,14 +205,8 @@ if ![runto_main] {
     return -1
 }
 
-# Determine endianness.
-set endian "little"
-gdb_test_multiple "show endian" "determine endianness" {
-    -re ".* (big|little) endian.*$gdb_prompt $" {
-	set endian $expect_out(1,string)
-	pass "endianness: $endian"
-    }
-}
+# Determine byte order.
+set endian [get_endianness]
 
 # Byte-aligned objects with simple location descriptions.
 switch $endian { big {set val 0x345678} little {set val 0x785634} }

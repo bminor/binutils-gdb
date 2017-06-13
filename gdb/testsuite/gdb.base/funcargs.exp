@@ -1139,15 +1139,9 @@ gdb_test_multiple "print sizeof (int)" "getting sizeof int" {
     }
 }
 
-gdb_test_multiple "show endian" "getting target endian" {
-    -re ".*little endian.*$gdb_prompt $" {
-	set target_bigendian_p 0
-	# pass silently
-    }
-    -re ".*big endian.*$gdb_prompt $" {
-	set target_bigendian_p 1
-	# pass silently
-    }
+switch [get_endianness] {
+    little { set target_bigendian_p 0 }
+    big { set target_bigendian_p 1 }
 }
 
 # Perform tests

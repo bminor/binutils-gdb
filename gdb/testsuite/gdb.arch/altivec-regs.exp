@@ -77,17 +77,7 @@ gdb_test "set \$vrsave = 1" "" ""
 
 gdb_test "next" "" ""
 
-set endianness ""
-set msg "detect endianness"
-gdb_test_multiple "show endian" "$msg" {
-    -re "(The target endianness is set automatically .currently )(big|little)( endian.*)$gdb_prompt $" {
-        pass "$msg"
-        set endianness $expect_out(2,string)
-    }
-    -re ".*$gdb_prompt $" {
-        fail "$msg"
-    }
-}
+set endianness [get_endianness]
 
 # And then read the AltiVec registers back, to see that
 # a) the register write above worked, and

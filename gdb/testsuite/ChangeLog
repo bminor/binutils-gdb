@@ -1,5 +1,21 @@
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* lib/gdb.exp (get_endianness): New proc.
+	* gdb.arch/aarch64-fp.exp: Use it.
+	* gdb.arch/altivec-regs.exp: Likewise.
+	* gdb.arch/e500-regs.exp: Likewise.
+	* gdb.arch/vsx-regs.exp: Likewise.
+	* gdb.base/dump.exp: Likewise.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/gnu_vector.exp: Likewise.
+	* gdb.dwarf2/formdata16.exp: Likewise.
+	* gdb.dwarf2/implptrpiece.exp: Likewise.
+	* gdb.dwarf2/nonvar-access.exp: Likewise.
+	* gdb.python/py-inferior.exp: Likewise.
+	* gdb.trace/unavailable-dwarf-piece.exp: Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	PR gdb/21226
 	* gdb.dwarf2/nonvar-access.exp: Add checks for verifying that
 	stack value pieces are taken from the LSB end.

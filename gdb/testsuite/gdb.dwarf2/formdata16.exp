@@ -28,14 +28,7 @@ if [prepare_for_testing "failed to prepare for endianness test" ${testfile} ${sr
     return -1
 }
 
-set endianness "little"
-set test "show endian"
-gdb_test_multiple $test $test {
-    -re "(.* )(big|little)( endian.*)\r\n$gdb_prompt $" {
-	set endianness $expect_out(2,string)
-	pass "endianness"
-    }
-}
+set endianness [get_endianness]
 
 set high "0x123456789abcdef0"
 set low "0x0fedcba987654321"
