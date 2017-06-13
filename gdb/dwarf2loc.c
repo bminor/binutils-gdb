@@ -1776,7 +1776,8 @@ read_pieced_value (struct value *v)
   bits_to_skip = 8 * value_offset (v);
   if (value_bitsize (v))
     {
-      bits_to_skip += value_bitpos (v);
+      bits_to_skip += (8 * value_offset (value_parent (v))
+		       + value_bitpos (v));
       type_len = value_bitsize (v);
     }
   else
@@ -1946,7 +1947,8 @@ write_pieced_value (struct value *to, struct value *from)
   bits_to_skip = 8 * value_offset (to);
   if (value_bitsize (to))
     {
-      bits_to_skip += value_bitpos (to);
+      bits_to_skip += (8 * value_offset (value_parent (to))
+		       + value_bitpos (to));
       type_len = value_bitsize (to);
     }
   else

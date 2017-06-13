@@ -1,5 +1,11 @@
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* dwarf2loc.c (read_pieced_value): Respect parent value's offset
+	when targeting a bit-field.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* dwarf2loc.c (struct piece_closure) <addr_size>: Remove field.
 	(allocate_piece_closure): Drop addr_size parameter.
 	(dwarf2_evaluate_loc_desc_full): Adjust call to
