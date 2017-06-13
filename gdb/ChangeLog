@@ -1,5 +1,11 @@
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* valops.c (read_value_memory): Change embedded_offset to
+	represent a bit offset instead of a byte offset.
+	* value.h (read_value_memory): Adjust comment.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* dwarf2loc.c (read_pieced_value): Remove unnecessary variables
 	dest_offset_bits and source_offset_bits.
 	(write_pieced_value): Likewise.
