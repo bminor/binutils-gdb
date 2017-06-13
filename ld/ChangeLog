@@ -1,3 +1,8 @@
+2017-06-13  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/ld-elf/shared.exp (build_tests): Add --no-dynamic-linker
+	option to rdynamic-1 and dynamic-1 tests.
+
 2017-06-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/property-x86-3-x32.d: New file.
