@@ -1,5 +1,10 @@
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* dwarf2loc.c (write_pieced_value): Fix copy/paste error in the
+	calculation of this_size.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* dwarf2loc.c (read_pieced_value): Respect parent value's offset
 	when targeting a bit-field.
 	(write_pieced_value): Likewise.

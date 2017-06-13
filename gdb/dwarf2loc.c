@@ -1983,7 +1983,7 @@ write_pieced_value (struct value *to, struct value *from)
       if (this_size_bits > type_len - offset)
 	this_size_bits = type_len - offset;
 
-      this_size = (this_size_bits + source_offset_bits % 8 + 7) / 8;
+      this_size = (this_size_bits + dest_offset_bits % 8 + 7) / 8;
       source_offset = source_offset_bits / 8;
       dest_offset = dest_offset_bits / 8;
       if (dest_offset_bits % 8 == 0 && source_offset_bits % 8 == 0)
