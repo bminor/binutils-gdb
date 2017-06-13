@@ -178,6 +178,11 @@ gdb_test "print/d s1" " = \\{a = 63, b = 3, c = 0, d = 1\\}" \
     "verify s1.a"
 gdb_test "print/d a" " = \\{0, 1, 63, 3, 4, 5, 6, 7\\}" \
     "verify s1.a through a"
+gdb_test_no_output "set var s1.b = 42"
+gdb_test "print/d s1" " = \\{a = 63, b = 42, c = 0, d = 1\\}" \
+    "verify s1.b"
+gdb_test "print/d a" " = \\{0, 1, 63, 42, 4, 5, 6, 7\\}" \
+    "verify s1.b through a"
 
 # Byte-aligned register- and memory pieces.
 gdb_test_no_output "set var \$[lindex $regname 0] = 81" \

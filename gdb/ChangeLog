@@ -1,3 +1,8 @@
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (write_pieced_value): Fix order of calculations for
+	size capping.
+
 2017-06-13  Yao Qi  <yao.qi@linaro.org>
 
 	* mips-linux-nat.c: Move include features/mips*-linux.c to

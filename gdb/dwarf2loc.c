@@ -1964,8 +1964,6 @@ write_pieced_value (struct value *to, struct value *from)
 	  bits_to_skip -= this_size_bits;
 	  continue;
 	}
-      if (this_size_bits > type_len - offset)
-	this_size_bits = type_len - offset;
       if (bits_to_skip > 0)
 	{
 	  dest_offset_bits = bits_to_skip;
@@ -1978,6 +1976,8 @@ write_pieced_value (struct value *to, struct value *from)
 	  dest_offset_bits = 0;
 	  source_offset_bits = offset;
 	}
+      if (this_size_bits > type_len - offset)
+	this_size_bits = type_len - offset;
 
       this_size = (this_size_bits + source_offset_bits % 8 + 7) / 8;
       source_offset = source_offset_bits / 8;

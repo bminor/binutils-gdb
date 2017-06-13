@@ -1,5 +1,10 @@
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.dwarf2/var-pieces.exp: Add test case for modifying a
+	variable at nonzero offset.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.dwarf2/var-access.c: New file.
 	* gdb.dwarf2/var-access.exp: New test.
 	* lib/gdb-utils.exp (string_to_regexp): Quote braces as well.
