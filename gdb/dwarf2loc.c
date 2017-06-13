@@ -1761,7 +1761,6 @@ read_pieced_value (struct value *v)
   gdb_byte *contents;
   struct piece_closure *c
     = (struct piece_closure *) value_computed_closure (v);
-  size_t buffer_size = 0;
   std::vector<gdb_byte> buffer;
   int bits_big_endian
     = gdbarch_bits_big_endian (get_type_arch (value_type (v)));
@@ -1806,12 +1805,8 @@ read_pieced_value (struct value *v)
 	this_size_bits = max_offset - offset;
 
       this_size = (this_size_bits + source_offset_bits % 8 + 7) / 8;
+      buffer.reserve (this_size);
       source_offset = source_offset_bits / 8;
-      if (buffer_size < this_size)
-	{
-	  buffer_size = this_size;
-	  buffer.reserve (buffer_size);
-	}
       intermediate_buffer = buffer.data ();
 
       /* Copy from the source to DEST_BUFFER.  */
@@ -1929,7 +1924,6 @@ write_pieced_value (struct value *to, struct value *from)
   const gdb_byte *contents;
   struct piece_closure *c
     = (struct piece_closure *) value_computed_closure (to);
-  size_t buffer_size = 0;
   std::vector<gdb_byte> buffer;
   int bits_big_endian
     = gdbarch_bits_big_endian (get_type_arch (value_type (to)));
@@ -1988,11 +1982,7 @@ write_pieced_value (struct value *to, struct value *from)
 	}
       else
 	{
-	  if (buffer_size < this_size)
-	    {
-	      buffer_size = this_size;
-	      buffer.reserve (buffer_size);
-	    }
+	  buffer.reserve (this_size);
 	  source_buffer = buffer.data ();
 	  need_bitwise = 1;
 	}
