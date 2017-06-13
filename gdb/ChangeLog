@@ -1,5 +1,11 @@
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* dwarf2loc.c (rw_pieced_value): New.  Merge logic from...
+	(read_pieced_value, write_pieced_value): ...here.  Reduce to
+	wrappers that just call rw_pieced_value.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* dwarf2loc.c (write_pieced_value): When writing the data for a
 	memory piece, use write_memory_with_notification instead of
 	write_memory.
