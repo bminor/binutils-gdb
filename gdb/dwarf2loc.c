@@ -1986,7 +1986,10 @@ write_pieced_value (struct value *to, struct value *from)
       this_size = (this_size_bits + dest_offset_bits % 8 + 7) / 8;
       source_offset = source_offset_bits / 8;
       dest_offset = dest_offset_bits / 8;
-      if (dest_offset_bits % 8 == 0 && source_offset_bits % 8 == 0)
+
+      /* Check whether the data can be transferred byte-wise.  */
+      if (dest_offset_bits % 8 == 0 && source_offset_bits % 8 == 0
+	  && this_size_bits % 8 == 0)
 	{
 	  source_buffer = contents + source_offset;
 	  need_bitwise = 0;
