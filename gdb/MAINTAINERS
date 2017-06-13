@@ -332,7 +332,6 @@ the native maintainer when resolving ABI issues.
 			Corinna Vinschen	vinschen@redhat.com
 
 	xtensa		--target=xtensa-elf
-			Maxim Grigoriev		maxim2405@gmail.com
 
 All developers recognized by this file can make arbitrary changes to
 OBSOLETE targets.
@@ -728,6 +727,7 @@ Michael Snyder (global)
 Christopher Faylor (MS Windows, host & native)
 Daniel Jacobowitz (global, GNU/Linux MIPS,
   C++, GDBserver)				drow at false dot org
+Maxim Grigoriev (xtensa)			maxim2405 at gmail dot com
 
 
 Folks that have been caught up in a paper trail:

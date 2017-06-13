@@ -1,3 +1,7 @@
+2017-06-14  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* MAINTAINERS: Move Maxim Grigoriev to the Past Maintainers.
+
 2017-06-14  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_gdb_print_insn): Call
