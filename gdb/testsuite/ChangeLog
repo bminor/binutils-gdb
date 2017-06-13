@@ -1,5 +1,11 @@
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	PR gdb/21226
+	* gdb.dwarf2/nonvar-access.exp: Add checks for verifying that
+	stack value pieces are taken from the LSB end.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.dwarf2/var-pieces.exp: Add test case for modifying a
 	variable at nonzero offset.
 

@@ -1858,6 +1858,10 @@ read_pieced_value (struct value *v)
 		if (unavail)
 		  mark_value_bits_unavailable (v, offset, this_size_bits);
 	      }
+
+	    copy_bitwise (contents, dest_offset_bits,
+			  intermediate_buffer, source_offset_bits % 8,
+			  this_size_bits, bits_big_endian);
 	  }
 	  break;
 
@@ -1866,26 +1870,30 @@ read_pieced_value (struct value *v)
 			     p->v.mem.in_stack_memory,
 			     p->v.mem.addr + source_offset,
 			     buffer.data (), this_size);
+	  copy_bitwise (contents, dest_offset_bits,
+			intermediate_buffer, source_offset_bits % 8,
+			this_size_bits, bits_big_endian);
 	  break;
 
 	case DWARF_VALUE_STACK:
 	  {
-	    size_t n = this_size;
+	    struct objfile *objfile = dwarf2_per_cu_objfile (c->per_cu);
+	    struct gdbarch *objfile_gdbarch = get_objfile_arch (objfile);
+	    ULONGEST stack_value_size_bits
+	      = 8 * TYPE_LENGTH (value_type (p->v.value));
 
-	    if (n > c->addr_size - source_offset)
-	      n = (c->addr_size >= source_offset
-		   ? c->addr_size - source_offset
-		   : 0);
-	    if (n == 0)
-	      {
-		/* Nothing.  */
-	      }
-	    else
-	      {
-		const gdb_byte *val_bytes = value_contents_all (p->v.value);
+	    /* Use zeroes if piece reaches beyond stack value.  */
+	    if (p->size > stack_value_size_bits)
+	      break;
 
-		intermediate_buffer = val_bytes + source_offset;
-	      }
+	    /* Piece is anchored at least significant bit end.  */
+	    if (gdbarch_byte_order (objfile_gdbarch) == BFD_ENDIAN_BIG)
+	      source_offset_bits += stack_value_size_bits - p->size;
+
+	    copy_bitwise (contents, dest_offset_bits,
+			  value_contents_all (p->v.value),
+			  source_offset_bits,
+			  this_size_bits, bits_big_endian);
 	  }
 	  break;
 
@@ -1899,6 +1907,10 @@ read_pieced_value (struct value *v)
 		   : 0);
 	    if (n != 0)
 	      intermediate_buffer = p->v.literal.data + source_offset;
+
+	    copy_bitwise (contents, dest_offset_bits,
+			  intermediate_buffer, source_offset_bits % 8,
+			  this_size_bits, bits_big_endian);
 	  }
 	  break;
 
@@ -1914,12 +1926,6 @@ read_pieced_value (struct value *v)
 	default:
 	  internal_error (__FILE__, __LINE__, _("invalid location type"));
 	}
-
-      if (p->location != DWARF_VALUE_OPTIMIZED_OUT
-	  && p->location != DWARF_VALUE_IMPLICIT_POINTER)
-	copy_bitwise (contents, dest_offset_bits,
-		      intermediate_buffer, source_offset_bits % 8,
-		      this_size_bits, bits_big_endian);
 
       offset += this_size_bits;
     }

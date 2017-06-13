@@ -128,12 +128,24 @@ Dwarf::assemble $asm_file {
 		    {name def_t}
 		    {type :$struct_t_label}
 		    {location {
-			const1u 0
+			const2s -184
 			stack_value
 			bit_piece 9 0
-			const1s -1
+			const4u 1752286
 			stack_value
 			bit_piece 23 0
+		    } SPECIAL_expr}
+		}
+		# Composite location with some empty pieces.
+		DW_TAG_variable {
+		    {name part_def_a}
+		    {type :$array_a9_label}
+		    {location {
+			piece 3
+			const4u 0xf1927314
+			stack_value
+			piece 4
+			piece 2
 		    } SPECIAL_expr}
 		}
 		# Implicit location: immediate value.
@@ -221,9 +233,12 @@ gdb_test "print/x *implicit_b_ptr" " = $val"
 
 # Byte-aligned fields, pieced together from DWARF stack values.
 gdb_test "print def_s" " = \\{a = 0, b = -1\\}"
+switch $endian { big {set val 0x92} little {set val 0x73} }
+gdb_test "print/x part_def_a\[4\]" " = $val"
+gdb_test "print/x part_def_a\[8\]" " = <optimized out>"
 
 # Non-byte-aligned fields, pieced together from DWARF stack values.
-gdb_test "print def_t" " = \\{a = 0, b = -1\\}"
+gdb_test "print def_t" " = \\{a = -184, b = 1752286\\}"
 
 # Simple variable without location.
 gdb_test "print undef_int" " = <optimized out>"
