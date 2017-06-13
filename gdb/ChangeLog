@@ -1,5 +1,11 @@
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* dwarf2loc.c (write_pieced_value): When writing the data for a
+	memory piece, use write_memory_with_notification instead of
+	write_memory.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* valops.c (read_value_memory): Change embedded_offset to
 	represent a bit offset instead of a byte offset.
 	* value.h (read_value_memory): Adjust comment.

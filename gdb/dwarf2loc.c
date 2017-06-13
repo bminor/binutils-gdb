@@ -2025,9 +2025,9 @@ write_pieced_value (struct value *to, struct value *from)
 		&& offset % 8 == 0)
 	      {
 		/* Everything is byte-aligned; no buffer needed.  */
-		write_memory (start_addr,
-			      contents + offset / 8,
-			      this_size_bits / 8);
+		write_memory_with_notification (start_addr,
+						contents + offset / 8,
+						this_size_bits / 8);
 		break;
 	      }
 
@@ -2054,7 +2054,8 @@ write_pieced_value (struct value *to, struct value *from)
 	    copy_bitwise (buffer.data (), bits_to_skip % 8,
 			  contents, offset,
 			  this_size_bits, bits_big_endian);
-	    write_memory (start_addr, buffer.data (), this_size);
+	    write_memory_with_notification (start_addr, buffer.data (),
+					    this_size);
 	  }
 	  break;
 	default:
