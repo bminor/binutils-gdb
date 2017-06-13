@@ -1486,9 +1486,6 @@ struct piece_closure
   /* The number of pieces used to describe this variable.  */
   int n_pieces;
 
-  /* The target address size, used only for DWARF_VALUE_STACK.  */
-  int addr_size;
-
   /* The pieces themselves.  */
   struct dwarf_expr_piece *pieces;
 
@@ -1503,7 +1500,7 @@ struct piece_closure
 static struct piece_closure *
 allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
 			int n_pieces, struct dwarf_expr_piece *pieces,
-			int addr_size, struct frame_info *frame)
+			struct frame_info *frame)
 {
   struct piece_closure *c = XCNEW (struct piece_closure);
   int i;
@@ -1511,7 +1508,6 @@ allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
   c->refc = 1;
   c->per_cu = per_cu;
   c->n_pieces = n_pieces;
-  c->addr_size = addr_size;
   c->pieces = XCNEWVEC (struct dwarf_expr_piece, n_pieces);
   if (frame == NULL)
     c->frame_id = null_frame_id;
@@ -2417,7 +2413,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	invalid_synthetic_pointer ();
 
       c = allocate_piece_closure (per_cu, ctx.num_pieces, ctx.pieces,
-				  ctx.addr_size, frame);
+				  frame);
       /* We must clean up the value chain after creating the piece
 	 closure but before allocating the result.  */
       free_values.free_to_mark ();
