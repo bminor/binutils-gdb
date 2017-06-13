@@ -1,5 +1,11 @@
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* dwarf2loc.c (read_pieced_value): Remove unnecessary variables
+	dest_offset_bits and source_offset_bits.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* dwarf2loc.c (read_pieced_value): Respect the piece offset, as
 	given by DW_OP_bit_piece.
 	(write_pieced_value): Likewise.

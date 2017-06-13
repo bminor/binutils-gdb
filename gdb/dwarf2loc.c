@@ -1790,25 +1790,16 @@ read_pieced_value (struct value *v)
   else
     max_offset = 8 * TYPE_LENGTH (value_type (v));
 
-  for (i = 0; i < c->n_pieces && offset < max_offset; i++)
+  /* Advance to the first non-skipped piece.  */
+  for (i = 0; i < c->n_pieces && bits_to_skip >= c->pieces[i].size; i++)
+    bits_to_skip -= c->pieces[i].size;
+
+  for (; i < c->n_pieces && offset < max_offset; i++)
     {
       struct dwarf_expr_piece *p = &c->pieces[i];
       size_t this_size, this_size_bits;
-      long dest_offset_bits, source_offset_bits;
 
-      /* Compute size, source, and destination offsets for copying, in
-	 bits.  */
-      this_size_bits = p->size;
-      if (bits_to_skip > 0 && bits_to_skip >= this_size_bits)
-	{
-	  bits_to_skip -= this_size_bits;
-	  continue;
-	}
-      source_offset_bits = bits_to_skip;
-      this_size_bits -= bits_to_skip;
-      bits_to_skip = 0;
-      dest_offset_bits = offset;
-
+      this_size_bits = p->size - bits_to_skip;
       if (this_size_bits > max_offset - offset)
 	this_size_bits = max_offset - offset;
 
@@ -1827,16 +1818,16 @@ read_pieced_value (struct value *v)
 		&& p->offset + p->size < reg_bits)
 	      {
 		/* Big-endian, and we want less than full size.  */
-		source_offset_bits += reg_bits - (p->offset + p->size);
+		bits_to_skip += reg_bits - (p->offset + p->size);
 	      }
 	    else
-	      source_offset_bits += p->offset;
+	      bits_to_skip += p->offset;
 
-	    this_size = bits_to_bytes (source_offset_bits, this_size_bits);
+	    this_size = bits_to_bytes (bits_to_skip, this_size_bits);
 	    buffer.reserve (this_size);
 
 	    if (!get_frame_register_bytes (frame, gdb_regnum,
-					   source_offset_bits / 8,
+					   bits_to_skip / 8,
 					   this_size, buffer.data (),
 					   &optim, &unavail))
 	      {
@@ -1846,24 +1837,23 @@ read_pieced_value (struct value *v)
 		  mark_value_bits_unavailable (v, offset, this_size_bits);
 		break;
 	      }
-
-	    copy_bitwise (contents, dest_offset_bits,
-			  buffer.data (), source_offset_bits % 8,
+	    copy_bitwise (contents, offset,
+			  buffer.data (), bits_to_skip % 8,
 			  this_size_bits, bits_big_endian);
 	  }
 	  break;
 
 	case DWARF_VALUE_MEMORY:
-	  source_offset_bits += p->offset;
-	  this_size = bits_to_bytes (source_offset_bits, this_size_bits);
+	  bits_to_skip += p->offset;
+	  this_size = bits_to_bytes (bits_to_skip, this_size_bits);
 	  buffer.reserve (this_size);
 
 	  read_value_memory (v, offset,
 			     p->v.mem.in_stack_memory,
-			     p->v.mem.addr + source_offset_bits / 8,
+			     p->v.mem.addr + bits_to_skip / 8,
 			     buffer.data (), this_size);
-	  copy_bitwise (contents, dest_offset_bits,
-			buffer.data (), source_offset_bits % 8,
+	  copy_bitwise (contents, offset,
+			buffer.data (), bits_to_skip % 8,
 			this_size_bits, bits_big_endian);
 	  break;
 
@@ -1880,14 +1870,13 @@ read_pieced_value (struct value *v)
 
 	    /* Piece is anchored at least significant bit end.  */
 	    if (gdbarch_byte_order (objfile_gdbarch) == BFD_ENDIAN_BIG)
-	      source_offset_bits += (stack_value_size_bits
-				     - p->offset - p->size);
+	      bits_to_skip += stack_value_size_bits - p->offset - p->size;
 	    else
-	      source_offset_bits += p->offset;
+	      bits_to_skip += p->offset;
 
-	    copy_bitwise (contents, dest_offset_bits,
+	    copy_bitwise (contents, offset,
 			  value_contents_all (p->v.value),
-			  source_offset_bits,
+			  bits_to_skip,
 			  this_size_bits, bits_big_endian);
 	  }
 	  break;
@@ -1898,14 +1887,14 @@ read_pieced_value (struct value *v)
 	    size_t n = this_size_bits;
 
 	    /* Cut off at the end of the implicit value.  */
-	    source_offset_bits += p->offset;
-	    if (source_offset_bits >= literal_size_bits)
+	    bits_to_skip += p->offset;
+	    if (bits_to_skip >= literal_size_bits)
 	      break;
-	    if (n > literal_size_bits - source_offset_bits)
-	      n = literal_size_bits - source_offset_bits;
+	    if (n > literal_size_bits - bits_to_skip)
+	      n = literal_size_bits - bits_to_skip;
 
-	    copy_bitwise (contents, dest_offset_bits,
-			  p->v.literal.data, source_offset_bits,
+	    copy_bitwise (contents, offset,
+			  p->v.literal.data, bits_to_skip,
 			  n, bits_big_endian);
 	  }
 	  break;
@@ -1924,6 +1913,7 @@ read_pieced_value (struct value *v)
 	}
 
       offset += this_size_bits;
+      bits_to_skip = 0;
     }
 }
 
@@ -1959,23 +1949,16 @@ write_pieced_value (struct value *to, struct value *from)
   else
     max_offset = 8 * TYPE_LENGTH (value_type (to));
 
-  for (i = 0; i < c->n_pieces && offset < max_offset; i++)
+  /* Advance to the first non-skipped piece.  */
+  for (i = 0; i < c->n_pieces && bits_to_skip >= c->pieces[i].size; i++)
+    bits_to_skip -= c->pieces[i].size;
+
+  for (; i < c->n_pieces && offset < max_offset; i++)
     {
       struct dwarf_expr_piece *p = &c->pieces[i];
       size_t this_size_bits, this_size;
-      long dest_offset_bits, source_offset_bits;
 
-      this_size_bits = p->size;
-      if (bits_to_skip > 0 && bits_to_skip >= this_size_bits)
-	{
-	  bits_to_skip -= this_size_bits;
-	  continue;
-	}
-      dest_offset_bits = bits_to_skip;
-      this_size_bits -= bits_to_skip;
-      bits_to_skip = 0;
-      source_offset_bits = offset;
-
+      this_size_bits = p->size - bits_to_skip;
       if (this_size_bits > max_offset - offset)
 	this_size_bits = max_offset - offset;
 
@@ -1992,22 +1975,22 @@ write_pieced_value (struct value *to, struct value *from)
 		&& p->offset + p->size < reg_bits)
 	      {
 		/* Big-endian, and we want less than full size.  */
-		dest_offset_bits += reg_bits - (p->offset + p->size);
+		bits_to_skip += reg_bits - (p->offset + p->size);
 	      }
 	    else
-	      dest_offset_bits += p->offset;
+	      bits_to_skip += p->offset;
 
-	    this_size = bits_to_bytes (dest_offset_bits, this_size_bits);
+	    this_size = bits_to_bytes (bits_to_skip, this_size_bits);
 	    buffer.reserve (this_size);
 
-	    if (dest_offset_bits % 8 != 0 || this_size_bits % 8 != 0)
+	    if (bits_to_skip % 8 != 0 || this_size_bits % 8 != 0)
 	      {
 		/* Data is copied non-byte-aligned into the register.
 		   Need some bits from original register value.  */
 		int optim, unavail;
 
 		if (!get_frame_register_bytes (frame, gdb_regnum,
-					       dest_offset_bits / 8,
+					       bits_to_skip / 8,
 					       this_size, buffer.data (),
 					       &optim, &unavail))
 		  {
@@ -2024,34 +2007,34 @@ write_pieced_value (struct value *to, struct value *from)
 		  }
 	      }
 
-	    copy_bitwise (buffer.data (), dest_offset_bits % 8,
-			  contents, source_offset_bits,
+	    copy_bitwise (buffer.data (), bits_to_skip % 8,
+			  contents, offset,
 			  this_size_bits, bits_big_endian);
 	    put_frame_register_bytes (frame, gdb_regnum,
-				      dest_offset_bits / 8,
+				      bits_to_skip / 8,
 				      this_size, buffer.data ());
 	  }
 	  break;
 	case DWARF_VALUE_MEMORY:
 	  {
-	    dest_offset_bits += p->offset;
+	    bits_to_skip += p->offset;
 
-	    CORE_ADDR start_addr = p->v.mem.addr + dest_offset_bits / 8;
+	    CORE_ADDR start_addr = p->v.mem.addr + bits_to_skip / 8;
 
-	    if (dest_offset_bits % 8 == 0 && this_size_bits % 8 == 0
-		&& source_offset_bits % 8 == 0)
+	    if (bits_to_skip % 8 == 0 && this_size_bits % 8 == 0
+		&& offset % 8 == 0)
 	      {
 		/* Everything is byte-aligned; no buffer needed.  */
 		write_memory (start_addr,
-			      contents + source_offset_bits / 8,
+			      contents + offset / 8,
 			      this_size_bits / 8);
 		break;
 	      }
 
-	    this_size = bits_to_bytes (dest_offset_bits, this_size_bits);
+	    this_size = bits_to_bytes (bits_to_skip, this_size_bits);
 	    buffer.reserve (this_size);
 
-	    if (dest_offset_bits % 8 != 0 || this_size_bits % 8 != 0)
+	    if (bits_to_skip % 8 != 0 || this_size_bits % 8 != 0)
 	      {
 		if (this_size <= 8)
 		  {
@@ -2068,8 +2051,8 @@ write_pieced_value (struct value *to, struct value *from)
 		  }
 	      }
 
-	    copy_bitwise (buffer.data (), dest_offset_bits % 8,
-			  contents, source_offset_bits,
+	    copy_bitwise (buffer.data (), bits_to_skip % 8,
+			  contents, offset,
 			  this_size_bits, bits_big_endian);
 	    write_memory (start_addr, buffer.data (), this_size);
 	  }
@@ -2079,6 +2062,7 @@ write_pieced_value (struct value *to, struct value *from)
 	  break;
 	}
       offset += this_size_bits;
+      bits_to_skip = 0;
     }
 }
 
