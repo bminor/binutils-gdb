@@ -1,3 +1,9 @@
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/var-access.c: New file.
+	* gdb.dwarf2/var-access.exp: New test.
+	* lib/gdb-utils.exp (string_to_regexp): Quote braces as well.
+
 2017-06-12  Tom Tromey  <tom@tromey.com>
 
 	* gdb.dwarf2/formdata16.exp: Add tests.

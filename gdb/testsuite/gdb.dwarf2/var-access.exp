@@ -1,0 +1,197 @@
+# Copyright 2017 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test reading/writing variables with non-trivial DWARF locations.  In
+# particular the test uses register- and memory locations as well as
+# composite locations with register- and memory pieces.
+
+load_lib dwarf.exp
+
+# This test can only be run on targets which support DWARF-2 and use gas.
+if {![dwarf2_support]} {
+    return 0
+}
+
+# Choose suitable integer registers for the test.
+
+set dwarf_regnum {0 1}
+
+if { [istarget "aarch64*-*-*"] } {
+    set regname {x0 x1}
+} elseif { [istarget "arm*-*-*"]
+	   || [istarget "s390*-*-*" ]
+	   || [istarget "powerpc*-*-*"]
+	   || [istarget "rs6000*-*-aix*"] } {
+    set regname {r0 r1}
+} elseif { [istarget "i?86-*-*"] } {
+    set regname {eax edx}
+} elseif { [istarget "x86_64-*-*"] } {
+    set regname {rax rdx}
+} else {
+    verbose "Skipping tests for accessing DWARF-described variables."
+    return
+}
+
+standard_testfile .c ${gdb_test_file_name}-dw.S
+
+# Make some DWARF for the test.
+
+set asm_file [standard_output_file $srcfile2]
+Dwarf::assemble $asm_file {
+    global srcdir subdir srcfile
+    global dwarf_regnum regname
+
+    set buf_var [gdb_target_symbol buf]
+
+    cu {} {
+	DW_TAG_compile_unit {
+		{DW_AT_name var-pieces-dw.c}
+		{DW_AT_comp_dir /tmp}
+	} {
+	    declare_labels char_type_label
+	    declare_labels int_type_label short_type_label
+	    declare_labels array_a8_label struct_s_label
+
+	    # char
+	    char_type_label: base_type {
+		{name "char"}
+		{encoding @DW_ATE_unsigned_char}
+		{byte_size 1 DW_FORM_sdata}
+	    }
+
+	    # int
+	    int_type_label: base_type {
+		{name "int"}
+		{encoding @DW_ATE_signed}
+		{byte_size 4 DW_FORM_sdata}
+	    }
+
+	    # char [8]
+	    array_a8_label: array_type {
+		{type :$char_type_label}
+	    } {
+		subrange_type {
+		    {type :$int_type_label}
+		    {upper_bound 7 DW_FORM_udata}
+		}
+	    }
+
+	    # struct s { char a, b, c, d; };
+	    struct_s_label: structure_type {
+		{name "s"}
+		{byte_size 4 DW_FORM_sdata}
+	    } {
+		member {
+		    {name "a"}
+		    {type :$char_type_label}
+		    {data_member_location 0 DW_FORM_udata}
+		}
+		member {
+		    {name "b"}
+		    {type :$char_type_label}
+		    {data_member_location 1 DW_FORM_udata}
+		}
+		member {
+		    {name "c"}
+		    {type :$char_type_label}
+		    {data_member_location 2 DW_FORM_udata}
+		}
+		member {
+		    {name "d"}
+		    {type :$char_type_label}
+		    {data_member_location 3 DW_FORM_udata}
+		}
+	    }
+
+	    DW_TAG_subprogram {
+		{MACRO_AT_func { main ${srcdir}/${subdir}/${srcfile} }}
+		{DW_AT_external 1 flag}
+	    } {
+		# Simple memory location.
+		DW_TAG_variable {
+		    {name "a"}
+		    {type :$array_a8_label}
+		    {location {
+			addr $buf_var
+		    } SPECIAL_expr}
+		}
+		# Memory pieces: two bytes from &buf[2], and two bytes
+		# from &buf[0].
+		DW_TAG_variable {
+		    {name "s1"}
+		    {type :$struct_s_label}
+		    {location {
+			addr $buf_var
+			plus_uconst 2
+			piece 2
+			addr $buf_var
+			piece 2
+		    } SPECIAL_expr}
+		}
+		# Register- and memory pieces: one byte each from r0,
+		# &buf[4], r1, and &buf[5].
+		DW_TAG_variable {
+		    {name "s2"}
+		    {type :$struct_s_label}
+		    {location {
+			regx [lindex $dwarf_regnum 0]
+			piece 1
+			addr "$buf_var + 4"
+			piece 1
+			regx [lindex $dwarf_regnum 1]
+			piece 1
+			addr "$buf_var + 5"
+			piece 1
+		    } SPECIAL_expr}
+		}
+	    }
+	}
+    }
+}
+
+if { [prepare_for_testing ${testfile}.exp ${testfile} \
+	  [list $srcfile $asm_file] {nodebug}] } {
+    return -1
+}
+
+if ![runto_main] {
+    return -1
+}
+
+# Byte-aligned memory pieces.
+gdb_test "print/d s1" " = \\{a = 2, b = 3, c = 0, d = 1\\}" \
+    "s1 == re-ordered buf"
+gdb_test_no_output "set var s1.a = 63"
+gdb_test "print/d s1" " = \\{a = 63, b = 3, c = 0, d = 1\\}" \
+    "verify s1.a"
+gdb_test "print/d a" " = \\{0, 1, 63, 3, 4, 5, 6, 7\\}" \
+    "verify s1.a through a"
+
+# Byte-aligned register- and memory pieces.
+gdb_test_no_output "set var \$[lindex $regname 0] = 81" \
+    "init reg for s2.a"
+gdb_test_no_output "set var \$[lindex $regname 1] = 28" \
+    "init reg for s2.c"
+gdb_test "print/d s2" " = \\{a = 81, b = 4, c = 28, d = 5\\}" \
+    "initialized s2 from mem and regs"
+gdb_test_no_output "set var s2.c += s2.a + s2.b - s2.d"
+gdb_test "print/d s2" " = \\{a = 81, b = 4, c = 108, d = 5\\}" \
+    "verify s2.c"
+gdb_test "print/d \$[lindex $regname 1]" " = 108" \
+    "verify s2.c through reg"
+gdb_test_no_output "set var s2 = {191, 73, 231, 123}" \
+    "re-initialize s2"
+gdb_test "print/d s2"  " = \\{a = 191, b = 73, c = 231, d = 123\\}" \
+    "verify re-initialized s2"
