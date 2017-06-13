@@ -1,3 +1,10 @@
+2017-06-13  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/21524
+	* elflink.c (elf_link_adjust_relocs): Generate an error when
+	encountering a reloc against a symbol removed by garbage
+	collection.
+
 2017-06-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (elf_backend_data): Add struct bfd_link_info *

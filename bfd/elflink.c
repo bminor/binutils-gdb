@@ -8547,7 +8547,8 @@ static bfd_boolean
 elf_link_adjust_relocs (bfd *abfd,
 			asection *sec,
 			struct bfd_elf_section_reloc_data *reldata,
-			bfd_boolean sort)
+			bfd_boolean sort,
+			struct bfd_link_info *info)
 {
   unsigned int i;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
@@ -8595,6 +8596,20 @@ elf_link_adjust_relocs (bfd *abfd,
       if (*rel_hash == NULL)
 	continue;
 
+      if ((*rel_hash)->indx == -2
+	  && info->gc_sections
+	  && ! info->gc_keep_exported)
+	{
+	  /* PR 21524: Let the user know if a symbol was removed by garbage collection.  */
+	  _bfd_error_handler (_("%B:%A: error: relocation references symbol %s which was removed by garbage collection."),
+			      abfd, sec,
+			      (*rel_hash)->root.root.string);
+	  _bfd_error_handler (_("%B:%A: error: try relinking with --gc-keep-exported enabled."),
+			      abfd, sec,
+			      (*rel_hash)->root.root.string);
+	  bfd_set_error (bfd_error_invalid_operation);
+	  return FALSE;
+	}
       BFD_ASSERT ((*rel_hash)->indx >= 0);
 
       (*swap_in) (abfd, erela, irela);
@@ -10701,7 +10716,6 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 			 used by a reloc.  */
 		      BFD_ASSERT (rh->indx < 0);
 		      rh->indx = -2;
-
 		      *rel_hash = rh;
 
 		      continue;
@@ -12168,15 +12182,16 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     {
       struct bfd_elf_section_data *esdo = elf_section_data (o);
       bfd_boolean sort;
+
       if ((o->flags & SEC_RELOC) == 0)
 	continue;
 
       sort = bed->sort_relocs_p == NULL || (*bed->sort_relocs_p) (o);
       if (esdo->rel.hdr != NULL
-	  && !elf_link_adjust_relocs (abfd, o, &esdo->rel, sort))
+	  && !elf_link_adjust_relocs (abfd, o, &esdo->rel, sort, info))
 	return FALSE;
       if (esdo->rela.hdr != NULL
-	  && !elf_link_adjust_relocs (abfd, o, &esdo->rela, sort))
+	  && !elf_link_adjust_relocs (abfd, o, &esdo->rela, sort, info))
 	return FALSE;
 
       /* Set the reloc_count field to 0 to prevent write_relocs from
