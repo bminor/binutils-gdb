@@ -1,3 +1,7 @@
+2017-06-14  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* config.bfd (epiphany-*-elf): Accept epiphany-*-*.
+
 2017-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20022

@@ -1,3 +1,7 @@
+2017-06-14  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* configure.tgt (epiphany-*-elf): Accept epiphany-*-*.
+
 2017-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldlang.c (lang_set_startof): Skip if config.build_constructors
