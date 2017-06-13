@@ -1,3 +1,16 @@
+2017-06-13  Yao Qi  <yao.qi@linaro.org>
+
+	* mips-linux-nat.c: Move include features/mips*-linux.c to
+	mips-linux-tdep.c.
+	(_initialize_mips_linux_nat): Move initialize_tdesc_mips* calls
+	to mips-linux-tdep.c.
+	* mips-linux-tdep.c: Include features/mips*-linux.c
+	(_initialize_mips_linux_tdep): Call initialize_tdesc_mips*
+	functions.
+	* mips-linux-tdep.h (tdesc_mips_linux): Declare.
+	(tdesc_mips_dsp_linux, tdesc_mips64_linux): Declare.
+	(tdesc_mips64_dsp_linux): Declare.
+
 2017-06-12  Tom Tromey  <tom@tromey.com>
 
 	* valprint.h (val_print_type_code_int): Remove.

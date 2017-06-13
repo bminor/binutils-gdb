@@ -40,6 +40,11 @@
 #include "xml-syscall.h"
 #include "gdb_signals.h"
 
+#include "features/mips-linux.c"
+#include "features/mips-dsp-linux.c"
+#include "features/mips64-linux.c"
+#include "features/mips64-dsp-linux.c"
+
 static struct target_so_ops mips_svr4_so_ops;
 
 /* This enum represents the signals' numbers on the MIPS
@@ -1739,4 +1744,10 @@ _initialize_mips_linux_tdep (void)
 			      GDB_OSABI_LINUX,
 			      mips_linux_init_abi);
     }
+
+  /* Initialize the standard target descriptions.  */
+  initialize_tdesc_mips_linux ();
+  initialize_tdesc_mips_dsp_linux ();
+  initialize_tdesc_mips64_linux ();
+  initialize_tdesc_mips64_dsp_linux ();
 }

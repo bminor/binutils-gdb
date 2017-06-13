@@ -38,11 +38,6 @@
 
 #include "nat/mips-linux-watch.h"
 
-#include "features/mips-linux.c"
-#include "features/mips-dsp-linux.c"
-#include "features/mips64-linux.c"
-#include "features/mips64-dsp-linux.c"
-
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 25
 #endif
@@ -803,10 +798,4 @@ triggers a breakpoint or watchpoint."),
 
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, mips_linux_new_thread);
-
-  /* Initialize the standard target descriptions.  */
-  initialize_tdesc_mips_linux ();
-  initialize_tdesc_mips_dsp_linux ();
-  initialize_tdesc_mips64_linux ();
-  initialize_tdesc_mips64_dsp_linux ();
 }
