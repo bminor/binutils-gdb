@@ -1752,6 +1752,15 @@ copy_bitwise_tests (void)
 
 #endif /* GDB_SELF_TEST */
 
+/* Return the number of bytes overlapping a contiguous chunk of N_BITS
+   bits whose first bit is located at bit offset START.  */
+
+static size_t
+bits_to_bytes (ULONGEST start, ULONGEST n_bits)
+{
+  return (start % 8 + n_bits + 7) / 8;
+}
+
 static void
 read_pieced_value (struct value *v)
 {
@@ -1804,7 +1813,7 @@ read_pieced_value (struct value *v)
       if (this_size_bits > max_offset - offset)
 	this_size_bits = max_offset - offset;
 
-      this_size = (this_size_bits + source_offset_bits % 8 + 7) / 8;
+      this_size = bits_to_bytes (source_offset_bits, this_size_bits);
       buffer.reserve (this_size);
       source_offset = source_offset_bits / 8;
       intermediate_buffer = buffer.data ();
@@ -1817,20 +1826,20 @@ read_pieced_value (struct value *v)
 	    struct frame_info *frame = frame_find_by_id (c->frame_id);
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, p->v.regno);
+	    ULONGEST reg_bits = 8 * register_size (arch, gdb_regnum);
 	    int optim, unavail;
-	    LONGEST reg_offset = source_offset;
 
 	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
-		&& this_size < register_size (arch, gdb_regnum))
+		&& p->size < reg_bits)
 	      {
 		/* Big-endian, and we want less than full size.  */
-		reg_offset = register_size (arch, gdb_regnum) - this_size;
-		/* We want the lower-order THIS_SIZE_BITS of the bytes
-		   we extract from the register.  */
-		source_offset_bits += 8 * this_size - this_size_bits;
+		source_offset_bits += reg_bits - p->size;
 	      }
+	    this_size = bits_to_bytes (source_offset_bits, this_size_bits);
+	    buffer.reserve (this_size);
 
-	    if (!get_frame_register_bytes (frame, gdb_regnum, reg_offset,
+	    if (!get_frame_register_bytes (frame, gdb_regnum,
+					   source_offset_bits / 8,
 					   this_size, buffer.data (),
 					   &optim, &unavail))
 	      {
@@ -1844,7 +1853,7 @@ read_pieced_value (struct value *v)
 	      }
 
 	    copy_bitwise (contents, dest_offset_bits,
-			  intermediate_buffer, source_offset_bits % 8,
+			  buffer.data (), source_offset_bits % 8,
 			  this_size_bits, bits_big_endian);
 	  }
 	  break;
@@ -1969,7 +1978,7 @@ write_pieced_value (struct value *to, struct value *from)
       if (this_size_bits > max_offset - offset)
 	this_size_bits = max_offset - offset;
 
-      this_size = (this_size_bits + dest_offset_bits % 8 + 7) / 8;
+      this_size = bits_to_bytes (dest_offset_bits, this_size_bits);
       source_offset = source_offset_bits / 8;
       dest_offset = dest_offset_bits / 8;
 
@@ -1994,20 +2003,25 @@ write_pieced_value (struct value *to, struct value *from)
 	    struct frame_info *frame = frame_find_by_id (c->frame_id);
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, p->v.regno);
-	    int reg_offset = dest_offset;
+	    ULONGEST reg_bits = 8 * register_size (arch, gdb_regnum);
 
 	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
-		&& this_size <= register_size (arch, gdb_regnum))
+		&& p->size <= reg_bits)
 	      {
 		/* Big-endian, and we want less than full size.  */
-		reg_offset = register_size (arch, gdb_regnum) - this_size;
+		dest_offset_bits += reg_bits - p->size;
 	      }
+	    this_size = bits_to_bytes (dest_offset_bits, this_size_bits);
+	    buffer.reserve (this_size);
 
-	    if (need_bitwise)
+	    if (dest_offset_bits % 8 != 0 || this_size_bits % 8 != 0)
 	      {
+		/* Data is copied non-byte-aligned into the register.
+		   Need some bits from original register value.  */
 		int optim, unavail;
 
-		if (!get_frame_register_bytes (frame, gdb_regnum, reg_offset,
+		if (!get_frame_register_bytes (frame, gdb_regnum,
+					       dest_offset_bits / 8,
 					       this_size, buffer.data (),
 					       &optim, &unavail))
 		  {
@@ -2022,14 +2036,14 @@ write_pieced_value (struct value *to, struct value *from)
 				     "bitfield; containing word "
 				     "is unavailable"));
 		  }
-		copy_bitwise (buffer.data (), dest_offset_bits,
-			      contents, source_offset_bits,
-			      this_size_bits,
-			      bits_big_endian);
 	      }
 
-	    put_frame_register_bytes (frame, gdb_regnum, reg_offset, 
-				      this_size, source_buffer);
+	    copy_bitwise (buffer.data (), dest_offset_bits % 8,
+			  contents, source_offset_bits,
+			  this_size_bits, bits_big_endian);
+	    put_frame_register_bytes (frame, gdb_regnum,
+				      dest_offset_bits / 8,
+				      this_size, buffer.data ());
 	  }
 	  break;
 	case DWARF_VALUE_MEMORY:

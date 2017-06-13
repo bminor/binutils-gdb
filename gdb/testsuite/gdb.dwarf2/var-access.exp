@@ -215,6 +215,19 @@ Dwarf::assemble $asm_file {
 			piece 1
 		    } SPECIAL_expr}
 		}
+		# Register pieces for bitfield access: 4 bytes optimized
+		# out, 3 bytes from r0, and 1 byte from r1.
+		DW_TAG_variable {
+		    {name "t2"}
+		    {type :$struct_t_label}
+		    {location {
+			piece 4
+			regx [lindex $dwarf_regnum 0]
+			piece 3
+			regx [lindex $dwarf_regnum 1]
+			piece 1
+		    } SPECIAL_expr}
+		}
 	    }
 	}
     }
@@ -279,3 +292,15 @@ switch $endian {
 #                             val
 gdb_test "print/x a" " = \\{0x0, ${val}, 0x0, 0x0\\}" \
     "verify st1 through a"
+
+switch $endian { big {set val 0x7ffc} little {set val 0x3ffe00} }
+gdb_test_no_output "set var \$[lindex $regname 0] = $val" \
+    "init t2, first piece"
+gdb_test_no_output "set var \$[lindex $regname 1] = 0" \
+    "init t2, second piece"
+gdb_test "print/d t2" " = \\{u = <optimized out>, x = 0, y = -1, z = 0\\}" \
+    "initialized t2 from regs"
+gdb_test_no_output "set var t2.y = 2641"
+gdb_test_no_output "set var t2.z = -400"
+gdb_test_no_output "set var t2.x = 200"
+gdb_test "print t2.x + t2.y + t2.z" " = 2441"

@@ -1,5 +1,10 @@
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* gdb.dwarf2/var-access.exp: Add test for non-byte-aligned
+	register pieces.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdb.dwarf2/var-access.exp: Add tests for accessing bit-fields
 	located in one or more DWARF pieces.
 

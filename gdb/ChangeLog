@@ -1,5 +1,12 @@
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* dwarf2loc.c (bits_to_bytes): New function.
+	(read_pieced_value): Fix offset calculations for register pieces
+	on big-endian targets.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* dwarf2loc.c (read_pieced_value): Remove buffer_size variable.
 	(write_pieced_value): Likewise.
 
