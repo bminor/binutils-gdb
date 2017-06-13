@@ -1,3 +1,10 @@
+2017-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/sizeof.d: New file.
+	* testsuite/ld-elf/sizeof.s: Likewise.
+	* testsuite/ld-elf/startof.d: Likewise.
+	* testsuite/ld-elf/startof.s: Likewise.
+
 2017-06-13  Renlin Li  <renlin.li@arm.com>
 
 	* testsuite/ld-elf/shared.exp (build_tests): Add --no-dynamic-linker
