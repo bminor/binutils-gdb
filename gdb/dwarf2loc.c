@@ -2058,7 +2058,7 @@ write_pieced_value (struct value *to, struct value *from)
 	      read_memory (p->v.mem.addr + dest_offset, buffer.data (), 1);
 	      read_memory (p->v.mem.addr + dest_offset + this_size - 1,
 			   &buffer[this_size - 1], 1);
-	      copy_bitwise (buffer.data (), dest_offset_bits,
+	      copy_bitwise (buffer.data (), dest_offset_bits % 8,
 			    contents, source_offset_bits,
 			    this_size_bits,
 			    bits_big_endian);

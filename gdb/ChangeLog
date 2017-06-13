@@ -1,5 +1,11 @@
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* dwarf2loc.c (write_pieced_value): In DWARF_VALUE_MEMORY,
+	truncate full bytes from dest_offset_bits before using it as an
+	offset into the buffer.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* dwarf2loc.c (write_pieced_value): Include transfer size in
 	byte-wise check.
 
