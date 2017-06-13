@@ -1,5 +1,11 @@
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* dwarf2loc.c (read_pieced_value): Respect the piece offset, as
+	given by DW_OP_bit_piece.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* dwarf2loc.c (read_pieced_value): Move the buffer allocation and
 	some other preparations to the places where sufficient information
 	is available.

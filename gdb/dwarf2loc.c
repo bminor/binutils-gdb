@@ -1824,11 +1824,14 @@ read_pieced_value (struct value *v)
 	    int optim, unavail;
 
 	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
-		&& p->size < reg_bits)
+		&& p->offset + p->size < reg_bits)
 	      {
 		/* Big-endian, and we want less than full size.  */
-		source_offset_bits += reg_bits - p->size;
+		source_offset_bits += reg_bits - (p->offset + p->size);
 	      }
+	    else
+	      source_offset_bits += p->offset;
+
 	    this_size = bits_to_bytes (source_offset_bits, this_size_bits);
 	    buffer.reserve (this_size);
 
@@ -1851,6 +1854,7 @@ read_pieced_value (struct value *v)
 	  break;
 
 	case DWARF_VALUE_MEMORY:
+	  source_offset_bits += p->offset;
 	  this_size = bits_to_bytes (source_offset_bits, this_size_bits);
 	  buffer.reserve (this_size);
 
@@ -1871,12 +1875,15 @@ read_pieced_value (struct value *v)
 	      = 8 * TYPE_LENGTH (value_type (p->v.value));
 
 	    /* Use zeroes if piece reaches beyond stack value.  */
-	    if (p->size > stack_value_size_bits)
+	    if (p->offset + p->size > stack_value_size_bits)
 	      break;
 
 	    /* Piece is anchored at least significant bit end.  */
 	    if (gdbarch_byte_order (objfile_gdbarch) == BFD_ENDIAN_BIG)
-	      source_offset_bits += stack_value_size_bits - p->size;
+	      source_offset_bits += (stack_value_size_bits
+				     - p->offset - p->size);
+	    else
+	      source_offset_bits += p->offset;
 
 	    copy_bitwise (contents, dest_offset_bits,
 			  value_contents_all (p->v.value),
@@ -1891,6 +1898,7 @@ read_pieced_value (struct value *v)
 	    size_t n = this_size_bits;
 
 	    /* Cut off at the end of the implicit value.  */
+	    source_offset_bits += p->offset;
 	    if (source_offset_bits >= literal_size_bits)
 	      break;
 	    if (n > literal_size_bits - source_offset_bits)
@@ -1981,11 +1989,14 @@ write_pieced_value (struct value *to, struct value *from)
 	    ULONGEST reg_bits = 8 * register_size (arch, gdb_regnum);
 
 	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
-		&& p->size <= reg_bits)
+		&& p->offset + p->size < reg_bits)
 	      {
 		/* Big-endian, and we want less than full size.  */
-		dest_offset_bits += reg_bits - p->size;
+		dest_offset_bits += reg_bits - (p->offset + p->size);
 	      }
+	    else
+	      dest_offset_bits += p->offset;
+
 	    this_size = bits_to_bytes (dest_offset_bits, this_size_bits);
 	    buffer.reserve (this_size);
 
@@ -2023,6 +2034,8 @@ write_pieced_value (struct value *to, struct value *from)
 	  break;
 	case DWARF_VALUE_MEMORY:
 	  {
+	    dest_offset_bits += p->offset;
+
 	    CORE_ADDR start_addr = p->v.mem.addr + dest_offset_bits / 8;
 
 	    if (dest_offset_bits % 8 == 0 && this_size_bits % 8 == 0

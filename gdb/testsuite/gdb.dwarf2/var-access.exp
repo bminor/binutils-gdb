@@ -228,6 +228,24 @@ Dwarf::assemble $asm_file {
 			piece 1
 		    } SPECIAL_expr}
 		}
+		# One piece per bitfield, using piece offsets: 32 bits of
+		# an implicit value, 9 bits of a stack value, 13 bits of
+		# r0, and 10 bits of buf.
+		DW_TAG_variable {
+		    {name "t3"}
+		    {type :$struct_t_label}
+		    {location {
+			implicit_value 0x12 0x34 0x56 0x78 0x9a
+			bit_piece 32 4
+			const2s -280
+			stack_value
+			bit_piece 9 2
+			regx [lindex $dwarf_regnum 0]
+			bit_piece 13 14
+			addr $buf_var
+			bit_piece 10 42
+		    } SPECIAL_expr}
+		}
 	    }
 	}
     }
@@ -304,3 +322,24 @@ gdb_test_no_output "set var t2.y = 2641"
 gdb_test_no_output "set var t2.z = -400"
 gdb_test_no_output "set var t2.x = 200"
 gdb_test "print t2.x + t2.y + t2.z" " = 2441"
+
+# Bitfield access through pieces with nonzero piece offsets.
+gdb_test_no_output "set var \$[lindex $regname 0] = 0xa8000" \
+    "init reg for t3.y"
+gdb_test_no_output "set var *(char \[2\] *) (a + 5) = { 70, 82 }" \
+    "init mem for t3.z"
+switch $endian {
+    little {set val "u = -1484430527, x = -70, y = 42, z = 145"}
+    big {set val "u = 591751049, x = -70, y = 42, z = 101"}
+}
+gdb_test "print t3" " = \\{$val\\}" \
+    "initialized t3 from reg and mem"
+gdb_test_no_output "set var t3.y = -1" \
+    "overwrite t3.y"
+gdb_test "print/x \$[lindex $regname 0]" " = 0x7ffc000" \
+    "verify t3.y through reg"
+gdb_test_no_output "set var t3.z = -614" \
+    "overwrite t3.z"
+switch $endian {big {set val "0x59, 0xa2"} little {set val "0x6a, 0x56"}}
+gdb_test "print/x *(char \[2\] *) (a + 5)" " = \\{$val\\}" \
+    "verify t3.z through mem"
