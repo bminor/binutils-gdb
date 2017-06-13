@@ -1,5 +1,12 @@
 2017-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ldlang.c (lang_set_startof): Skip if config.build_constructors
+	is FALSE.
+	* testsuite/ld-elf/sizeofc.d: New file.
+	* testsuite/ld-elf/startofc.d: Likewise.
+
+2017-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/sizeof.d: Renamed to ...
 	* testsuite/ld-elf/sizeofa.d: This.  Updated.
 	* testsuite/ld-elf/startof.d: Renamed to ...
