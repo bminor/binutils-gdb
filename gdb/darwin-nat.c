@@ -63,6 +63,7 @@
 
 #include "darwin-nat.h"
 #include "common/filestuff.h"
+#include "nat/fork-inferior.h"
 
 /* Quick overview.
    Darwin kernel is Mach + BSD derived kernel.  Note that they share the

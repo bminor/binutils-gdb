@@ -1,3 +1,17 @@
+2017-06-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* darwin-nat.c: Include "nat/fork-inferior.h".
+
+2017-06-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure.nat: Factor out Darwin bits that are not
+	architecture-specific.  Add fork-inferior.o.
+
+2017-06-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure.nat: Factor out AIX bits that are not
+	architecture-specific.  Add fork-inferior.o.
+
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* dwarf2loc.c (rw_pieced_value): New.  Merge logic from...

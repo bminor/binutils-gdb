@@ -5892,9 +5892,15 @@ lang_set_startof (void)
 {
   asection *s;
   char leading_char;
-  bfd_boolean is_elf = (bfd_get_flavour (link_info.output_bfd)
-			== bfd_target_elf_flavour);
-  bfd_boolean is_elocatable = bfd_link_relocatable (&link_info);
+  bfd_boolean is_elf;
+  bfd_boolean is_relocatable;
+
+  if (!config.build_constructors)
+    return;
+
+  is_elf = (bfd_get_flavour (link_info.output_bfd)
+	    == bfd_target_elf_flavour);
+  is_relocatable = bfd_link_relocatable (&link_info);
 
   leading_char = bfd_get_symbol_leading_char (link_info.output_bfd);
 
@@ -5907,7 +5913,7 @@ lang_set_startof (void)
       secname = bfd_get_section_name (link_info.output_bfd, s);
       buf = (char *) xmalloc (10 + strlen (secname));
 
-      if (!is_elocatable)
+      if (!is_relocatable)
 	{
 	  sprintf (buf, ".startof.%s", secname);
 	  h = bfd_link_hash_lookup (link_info.hash, buf, FALSE, FALSE,
