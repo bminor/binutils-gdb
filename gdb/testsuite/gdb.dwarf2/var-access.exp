@@ -62,7 +62,8 @@ Dwarf::assemble $asm_file {
 	} {
 	    declare_labels char_type_label
 	    declare_labels int_type_label short_type_label
-	    declare_labels array_a8_label struct_s_label
+	    declare_labels array_a8_label struct_s_label struct_t_label
+	    declare_labels struct_st_label
 
 	    # char
 	    char_type_label: base_type {
@@ -115,6 +116,51 @@ Dwarf::assemble $asm_file {
 		}
 	    }
 
+	    # struct t { int u, x:9, y:13, z:10; };
+	    struct_t_label: structure_type {
+		{name "t"}
+		{byte_size 8 DW_FORM_sdata}
+	    } {
+		member {
+		    {name "u"}
+		    {type :$int_type_label}
+		}
+		member {
+		    {name "x"}
+		    {type :$int_type_label}
+		    {data_member_location 4 DW_FORM_udata}
+		    {bit_size 9 DW_FORM_udata}
+		}
+		member {
+		    {name "y"}
+		    {type :$int_type_label}
+		    {data_bit_offset 41 DW_FORM_udata}
+		    {bit_size 13 DW_FORM_udata}
+		}
+		member {
+		    {name "z"}
+		    {type :$int_type_label}
+		    {data_bit_offset 54 DW_FORM_udata}
+		    {bit_size 10 DW_FORM_udata}
+		}
+	    }
+
+	    # struct st { struct s s; struct t t; };
+	    struct_st_label: structure_type {
+		{name "st"}
+		{byte_size 12 DW_FORM_udata}
+	    } {
+		member {
+		    {name "s"}
+		    {type :$struct_s_label}
+		}
+		member {
+		    {name "t"}
+		    {type :$struct_t_label}
+		    {data_member_location 4 DW_FORM_udata}
+		}
+	    }
+
 	    DW_TAG_subprogram {
 		{MACRO_AT_func { main ${srcdir}/${subdir}/${srcfile} }}
 		{DW_AT_external 1 flag}
@@ -156,6 +202,19 @@ Dwarf::assemble $asm_file {
 			piece 1
 		    } SPECIAL_expr}
 		}
+		# Memory pieces for bitfield access: 8 bytes optimized
+		# out, 3 bytes from &buf[3], and 1 byte from &buf[1].
+		DW_TAG_variable {
+		    {name "st1"}
+		    {type :$struct_st_label}
+		    {location {
+			piece 8
+			addr "$buf_var + 3"
+			piece 3
+			addr "$buf_var + 1"
+			piece 1
+		    } SPECIAL_expr}
+		}
 	    }
 	}
     }
@@ -169,6 +228,9 @@ if { [prepare_for_testing ${testfile}.exp ${testfile} \
 if ![runto_main] {
     return -1
 }
+
+# Determine byte order.
+set endian [get_endianness]
 
 # Byte-aligned memory pieces.
 gdb_test "print/d s1" " = \\{a = 2, b = 3, c = 0, d = 1\\}" \
@@ -200,3 +262,20 @@ gdb_test_no_output "set var s2 = {191, 73, 231, 123}" \
     "re-initialize s2"
 gdb_test "print/d s2"  " = \\{a = 191, b = 73, c = 231, d = 123\\}" \
     "verify re-initialized s2"
+
+# Unaligned bitfield access through byte-aligned pieces.
+gdb_test_no_output "set var a = { 0 }"
+gdb_test_no_output "set var st1.t.x = -7"
+gdb_test_no_output "set var st1.t.z = 340"
+gdb_test_no_output "set var st1.t.y = 1234"
+gdb_test "print st1.t" " = \\{u = <optimized out>, x = -7, y = 1234, z = 340\\}" \
+    "verify st1.t"
+switch $endian {
+    little {set val "0x55, 0x0, 0xf9, 0xa5, 0x9"}
+    big {set val "0x54, 0x0, 0xfc, 0x93, 0x49"}
+}
+# | -- | z:2-9 | -- | x:0-7 | x:8 y:0-6 | y:7-12 z:0-1 | -- | -- |
+#      \_______________________________________________/
+#                             val
+gdb_test "print/x a" " = \\{0x0, ${val}, 0x0, 0x0\\}" \
+    "verify st1 through a"
