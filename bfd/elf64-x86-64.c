@@ -1920,21 +1920,25 @@ elf_x86_64_convert_load_reloc (bfd *abfd, asection *sec,
 	}
       /* Avoid optimizing GOTPCREL relocations againt _DYNAMIC since
 	 ld.so may use its link-time address.  */
-      else if ((h->def_regular
-		|| h->root.type == bfd_link_hash_defined
-		|| h->root.type == bfd_link_hash_defweak)
-	       && h != htab->elf.hdynamic
-	       && SYMBOL_REFERENCES_LOCAL (link_info, h))
+      else if (h->start_stop
+	       || ((h->def_regular
+		    || h->root.type == bfd_link_hash_defined
+		    || h->root.type == bfd_link_hash_defweak)
+		   && h != htab->elf.hdynamic
+		   && SYMBOL_REFERENCES_LOCAL (link_info, h)))
 	{
 	  /* bfd_link_hash_new or bfd_link_hash_undefined is
 	     set by an assignment in a linker script in
-	     bfd_elf_record_link_assignment.   */
-	  if (h->def_regular
-	      && (h->root.type == bfd_link_hash_new
-		  || h->root.type == bfd_link_hash_undefined
-		  || ((h->root.type == bfd_link_hash_defined
-		       || h->root.type == bfd_link_hash_defweak)
-		      && h->root.u.def.section == bfd_und_section_ptr)))
+	     bfd_elf_record_link_assignment.  start_stop is set
+	     on __start_SECNAME/__stop_SECNAME which mark section
+	     SECNAME.  */
+	  if (h->start_stop
+	      || (h->def_regular
+		  && (h->root.type == bfd_link_hash_new
+		      || h->root.type == bfd_link_hash_undefined
+		      || ((h->root.type == bfd_link_hash_defined
+			   || h->root.type == bfd_link_hash_defweak)
+			  && h->root.u.def.section == bfd_und_section_ptr))))
 	    {
 	      /* Skip since R_X86_64_32/R_X86_64_32S may overflow.  */
 	      if (require_reloc_pc32)

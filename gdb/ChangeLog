@@ -1,3 +1,236 @@
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (rw_pieced_value): New.  Merge logic from...
+	(read_pieced_value, write_pieced_value): ...here.  Reduce to
+	wrappers that just call rw_pieced_value.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (write_pieced_value): When writing the data for a
+	memory piece, use write_memory_with_notification instead of
+	write_memory.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* valops.c (read_value_memory): Change embedded_offset to
+	represent a bit offset instead of a byte offset.
+	* value.h (read_value_memory): Adjust comment.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (read_pieced_value): Remove unnecessary variables
+	dest_offset_bits and source_offset_bits.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (read_pieced_value): Respect the piece offset, as
+	given by DW_OP_bit_piece.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (read_pieced_value): Move the buffer allocation and
+	some other preparations to the places where sufficient information
+	is available.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (bits_to_bytes): New function.
+	(read_pieced_value): Fix offset calculations for register pieces
+	on big-endian targets.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (read_pieced_value): Remove buffer_size variable.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (write_pieced_value): When writing to a bit-field,
+	transfer the source value's least significant bits, instead of its
+	lowest-addressed ones.  Rename type_len to max_offset.
+	(read_pieced_value): Mirror above changes to write_pieced_value as
+	applicable.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (write_pieced_value): In DWARF_VALUE_MEMORY,
+	truncate full bytes from dest_offset_bits before using it as an
+	offset into the buffer.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (write_pieced_value): Include transfer size in
+	byte-wise check.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (write_pieced_value): Fix copy/paste error in the
+	calculation of this_size.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (read_pieced_value): Respect parent value's offset
+	when targeting a bit-field.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (struct piece_closure) <addr_size>: Remove field.
+	(allocate_piece_closure): Drop addr_size parameter.
+	(dwarf2_evaluate_loc_desc_full): Adjust call to
+	allocate_piece_closure.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	PR gdb/21226
+	* dwarf2loc.c (read_pieced_value): Anchor stack value pieces at
+	the LSB end, independent of endianness.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (write_pieced_value): Fix order of calculations for
+	size capping.
+
+2017-06-13  Yao Qi  <yao.qi@linaro.org>
+
+	* mips-linux-nat.c: Move include features/mips*-linux.c to
+	mips-linux-tdep.c.
+	(_initialize_mips_linux_nat): Move initialize_tdesc_mips* calls
+	to mips-linux-tdep.c.
+	* mips-linux-tdep.c: Include features/mips*-linux.c
+	(_initialize_mips_linux_tdep): Call initialize_tdesc_mips*
+	functions.
+	* mips-linux-tdep.h (tdesc_mips_linux): Declare.
+	(tdesc_mips_dsp_linux, tdesc_mips64_linux): Declare.
+	(tdesc_mips64_dsp_linux): Declare.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	* valprint.h (val_print_type_code_int): Remove.
+	* valprint.c (generic_val_print_int): Always call
+	val_print_scalar_formatted.
+	(val_print_type_code_int): Remove.
+	* printcmd.c (print_scalar_formatted): Handle options->format==0.
+	* f-valprint.c (f_val_print): Use val_print_scalar_formatted.
+	* c-valprint.c (c_val_print_int): Use val_print_scalar_formatted.
+	* ada-valprint.c (ada_val_print_num): Use
+	val_print_scalar_formatted.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	* printcmd.c (print_scalar_formatted): Unify the two switches.
+	Don't convert scalars to LONGEST.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	PR exp/16225:
+	* valprint.h (print_decimal_chars): Update.
+	* valprint.c (maybe_negate_by_bytes): New function.
+	(print_decimal_chars): Add "is_signed" argument.
+	* printcmd.c (print_scalar_formatted): Update.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	PR exp/16225:
+	* valprint.h (print_binary_chars, print_hex_chars): Update.
+	* valprint.c (val_print_type_code_int): Update.
+	(print_binary_chars): Add "zero_pad" argument.
+	(emit_octal_digit): New function.
+	(print_octal_chars): Don't zero-pad.
+	(print_decimal_chars): Likewise.
+	(print_hex_chars): Add "zero_pad" argument.
+	* sh64-tdep.c (sh64_do_fp_register): Update.
+	* regcache.c (regcache::dump): Update.
+	* printcmd.c (print_scalar_formatted): Update.
+	* infcmd.c (default_print_one_register_info): Update.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+	    Alan Hayward  <alan.hayward@arm.com>
+
+	* mips-tdep.c (MAX_MIPS_ABI_REGSIZE): New.
+	(mips_eabi_push_dummy_call): Rename local 'regsize' to
+	'abi_regsize'.  Rename local array 'valbuf' to 'ref_valbuf', and
+	use MAX_MIPS_ABI_REGSIZE instead of MAX_REGISTER_SIZE to size it.
+	Assert that abi_regsize bytes fit in 'ref_valbuf'.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (mapped_symtab::data): Now a vector of
+	symtab_index_entry instead of vector of
+	std::unique_ptr<symtab_index_entry>.  All users adjusted to check
+	whether an element's name is NULL instead of checking whether the
+	element itself is NULL.
+	(find_slot): Change return type.  Adjust.
+	(hash_expand, , add_index_entry, uniquify_cu_indices)
+	(write_hash_table): Adjust.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (recursively_count_psymbols): New function.
+	(write_psymtabs_to_index): Call it to compute number of psyms and
+	pass estimate size of psyms_seen to unordered_set's ctor.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (write_hash_table): Check if key already exists
+	before emplacing.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (data_buf::append_space): Rename to...
+	(data_buf::grow): ... this, and make private.  Adjust all callers.
+	(data_buf::append_uint): New method.
+	(add_address_entry, write_one_signatured_type)
+	(write_psymtabs_to_index): Use it.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (file_write(FILE *, const void *, size_t)): Delete.
+	(file_write (FILE *, const std::vector<Elem>&)): Delete.
+	(data_buf::file_write): Call ::fwrite directly.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (uniquify_cu_indices): Use std::unique and
+	std::vector::erase.
+
+2017-06-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup: C++ify .gdb_index producer.
+	* dwarf2read.c: Include <unordered_set> and <unordered_map>.
+	(MAYBE_SWAP) [WORDS_BIGENDIAN]: Cast to offset_type.
+	(struct strtab_entry, hash_strtab_entry, eq_strtab_entry)
+	(create_strtab, add_string): Remove.
+	(file_write, data_buf): New.
+	(struct symtab_index_entry): Use std::vector for cu_indices.
+	(struct mapped_symtab): Use std::vector for data.
+	(hash_symtab_entry, eq_symtab_entry, delete_symtab_entry)
+	(create_symbol_hash_table, create_mapped_symtab, cleanup_mapped_symtab):
+	Remove.
+	(find_slot): Change return type.  Update it to the new data structures.
+	(hash_expand, add_index_entry): Update it to the new data structures.
+	(offset_type_compare): Remove.
+	(uniquify_cu_indices): Update it to the new data structures.
+	(c_str_view, c_str_view_hasher, vector_hasher): New.
+	(add_indices_to_cpool): Remove.
+	(write_hash_table): Update it to the new data structures.
+	(struct psymtab_cu_index_map, hash_psymtab_cu_index)
+	(eq_psymtab_cu_index): Remove.
+	(psym_index_map): New typedef.
+	(struct addrmap_index_data): Change addr_obstack pointer to data_buf
+	reference and std::unordered_map for cu_index_htab.
+	(add_address_entry, add_address_entry_worker, write_address_map)
+	(write_psymbols): Update it to the new data structures.
+	(write_obstack): Remove.
+	(struct signatured_type_index_data): Change types_list to a data_buf
+	reference and psyms_seen to a std::unordered_set reference.
+	(write_one_signatured_type, recursively_write_psymbols)
+	(write_psymtabs_to_index): Update it to the new data structures.
+
 2017-06-11  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* NEWS (Changes since GDB 8.0): Announce {set,show} debug

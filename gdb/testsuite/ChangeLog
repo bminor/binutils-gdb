@@ -1,3 +1,63 @@
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/var-access.exp: Add test for non-byte-aligned
+	register pieces.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/var-access.exp: Add tests for accessing bit-fields
+	located in one or more DWARF pieces.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* lib/gdb.exp (get_endianness): New proc.
+	* gdb.arch/aarch64-fp.exp: Use it.
+	* gdb.arch/altivec-regs.exp: Likewise.
+	* gdb.arch/e500-regs.exp: Likewise.
+	* gdb.arch/vsx-regs.exp: Likewise.
+	* gdb.base/dump.exp: Likewise.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/gnu_vector.exp: Likewise.
+	* gdb.dwarf2/formdata16.exp: Likewise.
+	* gdb.dwarf2/implptrpiece.exp: Likewise.
+	* gdb.dwarf2/nonvar-access.exp: Likewise.
+	* gdb.python/py-inferior.exp: Likewise.
+	* gdb.trace/unavailable-dwarf-piece.exp: Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	PR gdb/21226
+	* gdb.dwarf2/nonvar-access.exp: Add checks for verifying that
+	stack value pieces are taken from the LSB end.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/var-pieces.exp: Add test case for modifying a
+	variable at nonzero offset.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/var-access.c: New file.
+	* gdb.dwarf2/var-access.exp: New test.
+	* lib/gdb-utils.exp (string_to_regexp): Quote braces as well.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	* gdb.dwarf2/formdata16.exp: Add tests.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	* gdb.arch/altivec-regs.exp: Expect decimal results for uint128.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	PR exp/16225:
+	* gdb.reverse/i386-sse-reverse.exp: Update tests.
+	* gdb.arch/vsx-regs.exp: Update tests.
+	* gdb.arch/s390-vregs.exp (hex128): New proc.
+	Update test.
+	* gdb.arch/altivec-regs.exp: Update tests.
+
 2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/startup-with-shell.c: New file.

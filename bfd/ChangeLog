@@ -1,3 +1,31 @@
+2017-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20022
+	PR ld/21557
+	PR ld/21562
+	PR ld/21571
+	* elf-bfd.h (elf_link_hash_entry): Add start_stop.  Change the
+	vtable field to a union.
+	(_bfd_elf_is_start_stop): Removed.
+	* elf32-i386.c (elf_i386_convert_load_reloc): Also check for
+	__start_SECNAME and __stop_SECNAME symbols.
+	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Likewise.
+	* elflink.c (_bfd_elf_is_start_stop): Removed.
+	(_bfd_elf_gc_mark_rsec): Check start_stop instead of calling
+	_bfd_elf_is_start_stop.
+	(elf_gc_propagate_vtable_entries_used): Skip __start_SECNAME and
+	__stop_SECNAME symbols.  Updated.
+	(elf_gc_smash_unused_vtentry_relocs): Likewise.
+	(bfd_elf_gc_record_vtinherit): Likewise.
+	(bfd_elf_gc_record_vtentry): Likewise.
+
+2017-06-13  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/21524
+	* elflink.c (elf_link_adjust_relocs): Generate an error when
+	encountering a reloc against a symbol removed by garbage
+	collection.
+
 2017-06-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (elf_backend_data): Add struct bfd_link_info *

@@ -5671,6 +5671,19 @@ proc set_remotetimeout { timeout } {
     }
 }
 
+# Get the target's current endianness and return it.
+proc get_endianness { } {
+    global gdb_prompt
+
+    gdb_test_multiple "show endian" "determine endianness" {
+	-re ".* (little|big) endian.*\r\n$gdb_prompt $" {
+	    # Pass silently.
+	    return $expect_out(1,string)
+	}
+    }
+    return "little"
+}
+
 # ROOT and FULL are file names.  Returns the relative path from ROOT
 # to FULL.  Note that FULL must be in a subdirectory of ROOT.
 # For example, given ROOT = /usr/bin and FULL = /usr/bin/ls, this

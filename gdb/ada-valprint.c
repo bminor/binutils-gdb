@@ -859,7 +859,8 @@ ada_val_print_num (struct type *type, const gdb_byte *valaddr,
 	}
       else
 	{
-	  val_print_type_code_int (type, valaddr + offset_aligned, stream);
+	  val_print_scalar_formatted (type, offset_aligned,
+				      original_value, options, 0, stream);
 	  if (ada_is_character_type (type))
 	    {
 	      LONGEST c;

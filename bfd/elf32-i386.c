@@ -1787,11 +1787,13 @@ convert_branch:
 	return TRUE;
 
       /* def_regular is set by an assignment in a linker script in
-	 bfd_elf_record_link_assignment.  */
-      if ((h->def_regular
-	   || h->root.type == bfd_link_hash_defined
-	   || h->root.type == bfd_link_hash_defweak)
-	  && SYMBOL_REFERENCES_LOCAL (link_info, h))
+	 bfd_elf_record_link_assignment.  start_stop is set on
+	 __start_SECNAME/__stop_SECNAME which mark section SECNAME.  */
+      if (h->start_stop
+	  || ((h->def_regular
+	       || h->root.type == bfd_link_hash_defined
+	       || h->root.type == bfd_link_hash_defweak)
+	      && SYMBOL_REFERENCES_LOCAL (link_info, h)))
 	{
 convert_load:
 	  if (opcode == 0x8b)

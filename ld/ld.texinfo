@@ -4657,6 +4657,14 @@ SECTIONS @{
 @end group
 @end smallexample
 
+If an output section's name is the same as the input section's name
+and is representable as a C identifier, then the linker will
+automatically @pxref{PROVIDE} two symbols: __start_SECNAME and
+__stop_SECNAME, where SECNAME is the name of the section.  These
+indicate the start address and end address of the output section
+respectively.  Note: most section names are not representable as
+C identifiers because they contain a @samp{.} character.
+
 @node Output Section Data
 @subsection Output Section Data
 @cindex data
@@ -5840,14 +5848,6 @@ support, the orphan section is placed at the end of the file.
 The command line options @samp{--orphan-handling} and @samp{--unique}
 (@pxref{Options,,Command Line Options}) can be used to control which
 output sections an orphan is placed in.
-
-If an orphaned section's name is representable as a C identifier then
-the linker will automatically @pxref{PROVIDE} two symbols:
-__start_SECNAME and __stop_SECNAME, where SECNAME is the name of the
-section.  These indicate the start address and end address of the
-orphaned section respectively.  Note: most section names are not
-representable as C identifiers because they contain a @samp{.}
-character.
 
 @node Location Counter
 @subsection The Location Counter

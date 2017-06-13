@@ -1594,7 +1594,7 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 	      raw_update (regnum);
 	      print_hex_chars (file, register_buffer (regnum),
 			       m_descr->sizeof_register[regnum],
-			       gdbarch_byte_order (gdbarch));
+			       gdbarch_byte_order (gdbarch), true);
 	    }
 	}
 
@@ -1636,7 +1636,7 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 	      else
 		print_hex_chars (file, buf,
 				 m_descr->sizeof_register[regnum],
-				 gdbarch_byte_order (gdbarch));
+				 gdbarch_byte_order (gdbarch), true);
 
 	      if (value != NULL)
 		{

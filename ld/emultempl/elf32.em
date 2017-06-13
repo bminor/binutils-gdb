@@ -1216,6 +1216,9 @@ gld${EMULATION_NAME}_after_open (void)
 {
   struct bfd_link_needed_list *needed, *l;
   struct elf_link_hash_table *htab;
+  asection *s;
+  bfd *abfd;
+  char leading_char;
 
   after_open_default ();
 
@@ -1239,8 +1242,6 @@ gld${EMULATION_NAME}_after_open (void)
 
   if (emit_note_gnu_build_id != NULL)
     {
-      bfd *abfd;
-
       /* Find an ELF input.  */
       for (abfd = link_info.input_bfds;
 	   abfd != (bfd *) NULL; abfd = abfd->link.next)
@@ -1276,11 +1277,66 @@ gld${EMULATION_NAME}_after_open (void)
       return;
     }
 
+  leading_char = bfd_get_symbol_leading_char (link_info.output_bfd);
+
+  /* Check for input sections whose names match references to
+     __start_SECNAME or __stop_SECNAME symbols.  Mark the matched
+     symbols as hidden and set start_stop for garbage collection.  */
+  for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
+    for (s = abfd->sections; s; s = s->next)
+      {
+	const char *name = bfd_get_section_name (abfd, s);
+	const char *ps;
+
+	for (ps = name; *ps != '\0'; ps++)
+	  if (!ISALNUM ((unsigned char) *ps) && *ps != '_')
+	    break;
+	if (*ps == '\0')
+	  {
+	    struct elf_link_hash_entry *h;
+	    char *symbol = (char *) xmalloc (ps - name
+					     + sizeof "__start_" + 1);
+
+	    symbol[0] = leading_char;
+	    sprintf (symbol + (leading_char != 0), "__start_%s", name);
+	    h = elf_link_hash_lookup (elf_hash_table (&link_info),
+				      symbol, FALSE, FALSE, TRUE);
+	    if (h != NULL
+		&& (h->root.type == bfd_link_hash_undefined
+		    || h->root.type == bfd_link_hash_undefweak)
+		&& h->u2.start_stop_section == NULL)
+	      {
+		h->start_stop = 1;
+		h->u2.start_stop_section = s;
+		_bfd_elf_link_hash_hide_symbol (&link_info, h, TRUE);
+		if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
+		  h->other = ((h->other & ~ELF_ST_VISIBILITY (-1))
+			      | STV_HIDDEN);
+	      }
+
+	    symbol[0] = leading_char;
+	    sprintf (symbol + (leading_char != 0), "__stop_%s", name);
+	    h = elf_link_hash_lookup (elf_hash_table (&link_info),
+				      symbol, FALSE, FALSE, TRUE);
+	    if (h != NULL
+		&& (h->root.type == bfd_link_hash_undefined
+		    || h->root.type == bfd_link_hash_undefweak)
+		&& h->u2.start_stop_section == NULL)
+	      {
+		h->start_stop = 1;
+		h->u2.start_stop_section = s;
+		_bfd_elf_link_hash_hide_symbol (&link_info, h, TRUE);
+		if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
+		  h->other = ((h->other & ~ELF_ST_VISIBILITY (-1))
+			      | STV_HIDDEN);
+	      }
+	  }
+      }
+
   if (!link_info.traditional_format)
     {
-      bfd *abfd, *elfbfd = NULL;
+      bfd *elfbfd = NULL;
       bfd_boolean warn_eh_frame = FALSE;
-      asection *s;
       int seen_type = 0;
 
       for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)

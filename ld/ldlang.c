@@ -1829,8 +1829,6 @@ lang_insert_orphan (asection *s,
 		    lang_statement_list_type *add_child)
 {
   lang_statement_list_type add;
-  const char *ps;
-  lang_assignment_statement_type *start_assign;
   lang_output_section_statement_type *os;
   lang_output_section_statement_type **os_tail;
 
@@ -1852,29 +1850,6 @@ lang_insert_orphan (asection *s,
   os = lang_enter_output_section_statement (secname, address, normal_section,
 					    NULL, NULL, NULL, constraint, 0);
 
-  ps = NULL;
-  start_assign = NULL;
-  if (config.build_constructors && *os_tail == os)
-    {
-      /* If the name of the section is representable in C, then create
-	 symbols to mark the start and the end of the section.  */
-      for (ps = secname; *ps != '\0'; ps++)
-	if (!ISALNUM ((unsigned char) *ps) && *ps != '_')
-	  break;
-      if (*ps == '\0')
-	{
-	  char *symname;
-
-	  symname = (char *) xmalloc (ps - secname + sizeof "__start_" + 1);
-	  symname[0] = bfd_get_symbol_leading_char (link_info.output_bfd);
-	  sprintf (symname + (symname[0] != 0), "__start_%s", secname);
-	  start_assign
-	    = lang_add_assignment (exp_provide (symname,
-						exp_nameop (NAME, "."),
-						FALSE));
-	}
-    }
-
   if (add_child == NULL)
     add_child = &os->children;
   lang_add_section (add_child, s, NULL, os);
@@ -1893,27 +1868,6 @@ lang_insert_orphan (asection *s,
   else
     lang_leave_output_section_statement (NULL, DEFAULT_MEMORY_REGION, NULL,
 					 NULL);
-
-  if (start_assign != NULL)
-    {
-      char *symname;
-      lang_assignment_statement_type *stop_assign;
-      bfd_vma dot;
-
-      symname = (char *) xmalloc (ps - secname + sizeof "__stop_" + 1);
-      symname[0] = bfd_get_symbol_leading_char (link_info.output_bfd);
-      sprintf (symname + (symname[0] != 0), "__stop_%s", secname);
-      stop_assign
-	= lang_add_assignment (exp_provide (symname,
-					    exp_nameop (NAME, "."),
-					    FALSE));
-      /* Evaluate the expression to define the symbol if referenced,
-	 before sizing dynamic sections.  */
-      dot = os->bfd_section->vma;
-      exp_fold_tree (start_assign->exp, os->bfd_section, &dot);
-      dot += TO_ADDR (s->size);
-      exp_fold_tree (stop_assign->exp, os->bfd_section, &dot);
-    }
 
   /* Restore the global list pointer.  */
   if (after != NULL)
@@ -5924,20 +5878,25 @@ section_for_dot (void)
   return bfd_abs_section_ptr;
 }
 
-/* Fix any .startof. or .sizeof. symbols.  When the assemblers see the
-   operator .startof. (section_name), it produces an undefined symbol
-   .startof.section_name.  Similarly, when it sees
+/* Fix any .startof., .sizeof., __start or __stop symbols.  When the
+   assemblers see the operator .startof. (section_name), it produces
+   an undefined symbol .startof.section_name.  Similarly, when it sees
    .sizeof. (section_name), it produces an undefined symbol
-   .sizeof.section_name.  For all the output sections, we look for
-   such symbols, and set them to the correct value.  */
+   .sizeof.section_name.  Also for ELF linker, __start_XXX or __stop_XXX
+   symbols should be resolved to the start and end of section XXX.  For
+   all the output sections, we look for such symbols, and set them to
+   the correct value.  */
 
 static void
 lang_set_startof (void)
 {
   asection *s;
+  char leading_char;
+  bfd_boolean is_elf = (bfd_get_flavour (link_info.output_bfd)
+			== bfd_target_elf_flavour);
+  bfd_boolean is_elocatable = bfd_link_relocatable (&link_info);
 
-  if (bfd_link_relocatable (&link_info))
-    return;
+  leading_char = bfd_get_symbol_leading_char (link_info.output_bfd);
 
   for (s = link_info.output_bfd->sections; s != NULL; s = s->next)
     {
@@ -5948,24 +5907,58 @@ lang_set_startof (void)
       secname = bfd_get_section_name (link_info.output_bfd, s);
       buf = (char *) xmalloc (10 + strlen (secname));
 
-      sprintf (buf, ".startof.%s", secname);
-      h = bfd_link_hash_lookup (link_info.hash, buf, FALSE, FALSE, TRUE);
-      if (h != NULL && h->type == bfd_link_hash_undefined)
+      if (!is_elocatable)
+	{
+	  sprintf (buf, ".startof.%s", secname);
+	  h = bfd_link_hash_lookup (link_info.hash, buf, FALSE, FALSE,
+				    TRUE);
+	  if (h != NULL && h->type == bfd_link_hash_undefined)
+	    {
+	      h->type = bfd_link_hash_defined;
+	      h->u.def.value = 0;
+	      h->u.def.section = s;
+	    }
+
+	  sprintf (buf, ".sizeof.%s", secname);
+	  h = bfd_link_hash_lookup (link_info.hash, buf, FALSE, FALSE,
+				    TRUE);
+	  if (h != NULL && h->type == bfd_link_hash_undefined)
+	    {
+	      h->type = bfd_link_hash_defined;
+	      h->u.def.value = TO_ADDR (s->size);
+	      h->u.def.section = bfd_abs_section_ptr;
+	    }
+	}
+
+      buf[0] = leading_char;
+      sprintf (buf + (buf[0] != 0), "__start_%s", secname);
+      h = bfd_link_hash_lookup (link_info.hash, buf, FALSE, FALSE,
+				TRUE);
+      if (h != NULL
+	  && (h->type == bfd_link_hash_undefined
+	      || h->type == bfd_link_hash_undefweak))
 	{
 	  h->type = bfd_link_hash_defined;
 	  h->u.def.value = 0;
 	  h->u.def.section = s;
+	  if (is_elf)
+	    ((struct elf_link_hash_entry *) h)->def_regular = 1;
 	}
 
-      sprintf (buf, ".sizeof.%s", secname);
-      h = bfd_link_hash_lookup (link_info.hash, buf, FALSE, FALSE, TRUE);
-      if (h != NULL && h->type == bfd_link_hash_undefined)
+      buf[0] = leading_char;
+      sprintf (buf + (buf[0] != 0), "__stop_%s", secname);
+      h = bfd_link_hash_lookup (link_info.hash, buf, FALSE, FALSE,
+				TRUE);
+      if (h != NULL
+	  && (h->type == bfd_link_hash_undefined
+	      || h->type == bfd_link_hash_undefweak))
 	{
 	  h->type = bfd_link_hash_defined;
 	  h->u.def.value = TO_ADDR (s->size);
-	  h->u.def.section = bfd_abs_section_ptr;
+	  h->u.def.section = s;
+	  if (is_elf)
+	    ((struct elf_link_hash_entry *) h)->def_regular = 1;
 	}
-
       free (buf);
     }
 }

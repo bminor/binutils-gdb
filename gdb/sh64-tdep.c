@@ -1945,7 +1945,7 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
   fprintf_filtered (file, "\t(raw ");
   print_hex_chars (file, raw_buffer,
 		   register_size (gdbarch, regnum),
-		   gdbarch_byte_order (gdbarch));
+		   gdbarch_byte_order (gdbarch), true);
   fprintf_filtered (file, ")");
   fprintf_filtered (file, "\n");
 }
