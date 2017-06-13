@@ -922,7 +922,7 @@ eavrxmega7.c: $(srcdir)/emulparams/avrxmega7.sh \
   ${GEN_DEPENDS}
 
 eavrtiny.c: $(srcdir)/emulparams/avrtiny.sh \
-  $(srcdir)/emultempl/avrelf.em $(ELF_DEPS) $(srcdir)/scripttempl/avrtiny.sc \
+  $(srcdir)/emultempl/avrelf.em $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
   ${GEN_DEPENDS}
 
 ecoff_i860.c: $(srcdir)/emulparams/coff_i860.sh \
