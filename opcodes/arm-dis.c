@@ -2310,8 +2310,6 @@ static const struct opcode32 arm_opcodes[] =
     0x01300000, 0x0ff00010, "teq%p%c\t%16-19r, %o"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0x01300010, 0x0ff00010, "teq%p%c\t%16-19R, %o"},
-  {ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
-    0x0130f000, 0x0ff0f010, "bx%c\t%0-3r"},
 
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0x03400000, 0x0fe00000, "cmp%p%c\t%16-19r, %o"},
