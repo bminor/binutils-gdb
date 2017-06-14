@@ -22,7 +22,7 @@
 
 #include "sysdep.h"
 
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "opcode/arm.h"
 #include "opintl.h"
 #include "safe-ctype.h"

@@ -1,3 +1,20 @@
+2017-06-14  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_gdb_print_insn): Call
+	default_print_insn instead of print_insn_aarch64.
+	* arm-tdep.c (gdb_print_insn_arm): Call
+	default_print_insn instead of print_insn_big_arm
+	and print_insn_little_arm.
+	* i386-tdep.c (i386_print_insn): Call default_print_insn
+	instead of print_insn_i386.
+	* ia64-tdep.c (ia64_print_insn): Call
+	default_print_insn instead of print_insn_ia64.
+	* mips-tdep.c (gdb_print_insn_mips): Call
+	default_print_insn instead of print_insn_big_mips
+	and print_insn_little_mips.
+	* spu-tdep.c (gdb_print_insn_spu): Call default_print_insn
+	instead of print_insn_spu.
+
 2017-06-14  Pedro Alves  <palves@redhat.com>
 
 	* ada-lang.c: Include "common/byte-vector.h".

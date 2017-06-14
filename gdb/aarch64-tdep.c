@@ -1777,7 +1777,7 @@ static int
 aarch64_gdb_print_insn (bfd_vma memaddr, disassemble_info *info)
 {
   info->symbols = NULL;
-  return print_insn_aarch64 (memaddr, info);
+  return default_print_insn (memaddr, info);
 }
 
 /* AArch64 BRK software debug mode instruction.

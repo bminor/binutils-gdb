@@ -1,3 +1,11 @@
+2017-06-14  Yao Qi  <yao.qi@linaro.org>
+
+	* dis-asm.h (print_insn_aarch64): Move it to opcodes/disassemble.h.
+	(print_insn_big_arm, print_insn_big_mips): Likewise.
+	(print_insn_i386, print_insn_ia64): Likewise.
+	(print_insn_little_arm, print_insn_little_mips): Likewise.
+	(print_insn_spu): Likewise.
+
 2017-06-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* bfdlink.h (struct bfd_link_info): Add new resolve_section_groups

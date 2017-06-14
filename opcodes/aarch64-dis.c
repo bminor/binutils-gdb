@@ -20,7 +20,7 @@
 
 #include "sysdep.h"
 #include "bfd_stdint.h"
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "libiberty.h"
 #include "opintl.h"
 #include "aarch64-dis.h"

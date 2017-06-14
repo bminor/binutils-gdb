@@ -1,3 +1,16 @@
+2017-06-14  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-dis.c: Include disassemble.h instead of dis-asm.h.
+	* arm-dis.c: Likewise.
+	* ia64-dis.c: Likewise.
+	* mips-dis.c: Likewise.
+	* spu-dis.c: Likewise.
+	* disassemble.h (print_insn_aarch64): New declaration, moved from
+	include/dis-asm.h.
+	(print_insn_big_arm, print_insn_big_mips): Likewise.
+	(print_insn_i386, print_insn_ia64): Likewise.
+	(print_insn_little_arm, print_insn_little_mips): Likewise.
+
 2017-06-14  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21587
