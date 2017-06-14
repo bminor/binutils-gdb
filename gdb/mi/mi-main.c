@@ -55,6 +55,7 @@
 #include "gdbcmd.h"
 #include "observer.h"
 #include "common/gdb_optional.h"
+#include "common/byte-vector.h"
 
 #include <ctype.h>
 #include "run-time-clock.h"
@@ -1466,12 +1467,12 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
   /* Create a buffer and read it in.  */
   total_bytes = word_size * nr_rows * nr_cols;
 
-  std::unique_ptr<gdb_byte[]> mbuf (new gdb_byte[total_bytes]);
+  gdb::byte_vector mbuf (total_bytes);
 
   /* Dispatch memory reads to the topmost target, not the flattened
      current_target.  */
   nr_bytes = target_read (current_target.beneath,
-			  TARGET_OBJECT_MEMORY, NULL, mbuf.get (),
+			  TARGET_OBJECT_MEMORY, NULL, mbuf.data (),
 			  addr, total_bytes);
   if (nr_bytes <= 0)
     error (_("Unable to read memory."));

@@ -61,6 +61,7 @@
 #include "arch-utils.h"
 #include "cli/cli-utils.h"
 #include "common/function-view.h"
+#include "common/byte-vector.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).
@@ -2567,8 +2568,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   gdb_byte *unpacked;
   const int is_scalar = is_scalar_type (type);
   const int is_big_endian = gdbarch_bits_big_endian (get_type_arch (type));
-  std::unique_ptr<gdb_byte[]> staging;
-  int staging_len = 0;
+  gdb::byte_vector staging;
 
   type = ada_check_typedef (type);
 
@@ -2586,14 +2586,14 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 	 packed, and therefore maybe not at a byte boundary.  So, what
 	 we do, is unpack the data into a byte-aligned buffer, and then
 	 use that buffer as our object's value for resolving the type.  */
-      staging_len = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
-      staging.reset (new gdb_byte[staging_len]);
+      int staging_len = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
+      staging.resize (staging_len);
 
       ada_unpack_from_contents (src, bit_offset, bit_size,
-			        staging.get (), staging_len,
+			        staging.data (), staging.size (),
 				is_big_endian, has_negatives (type),
 				is_scalar);
-      type = resolve_dynamic_type (type, staging.get (), 0);
+      type = resolve_dynamic_type (type, staging.data (), 0);
       if (TYPE_LENGTH (type) < (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT)
 	{
 	  /* This happens when the length of the object is dynamic,
@@ -2656,12 +2656,12 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
       return v;
     }
 
-  if (staging != NULL && staging_len == TYPE_LENGTH (type))
+  if (staging.size () == TYPE_LENGTH (type))
     {
       /* Small short-cut: If we've unpacked the data into a buffer
 	 of the same size as TYPE's length, then we can reuse that,
 	 instead of doing the unpacking again.  */
-      memcpy (unpacked, staging.get (), staging_len);
+      memcpy (unpacked, staging.data (), staging.size ());
     }
   else
     ada_unpack_from_contents (src, bit_offset, bit_size,

@@ -48,6 +48,7 @@
 #include "cli/cli-script.h"
 #include "format.h"
 #include "source.h"
+#include "common/byte-vector.h"
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_active et al.   */
@@ -407,7 +408,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
   /* Historically gdb has printed floats by first casting them to a
      long, and then printing the long.  PR cli/16242 suggests changing
      this to using C-style hex float format.  */
-  std::vector<gdb_byte> converted_float_bytes;
+  gdb::byte_vector converted_float_bytes;
   if (TYPE_CODE (type) == TYPE_CODE_FLT
       && (options->format == 'o'
 	  || options->format == 'x'

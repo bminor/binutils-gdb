@@ -17,6 +17,7 @@
 
 #include "defs.h"
 #include "gdb_regex.h"
+#include "common/def-vector.h"
 
 compiled_regex::compiled_regex (const char *regex, int cflags,
 				const char *message)
@@ -28,10 +29,10 @@ compiled_regex::compiled_regex (const char *regex, int cflags,
   if (code != 0)
     {
       size_t length = regerror (code, &m_pattern, NULL, 0);
-      std::unique_ptr<char[]> err (new char[length]);
+      gdb::def_vector<char> err (length);
 
-      regerror (code, &m_pattern, err.get (), length);
-      error (("%s: %s"), message, err.get ());
+      regerror (code, &m_pattern, err.data (), length);
+      error (("%s: %s"), message, err.data ());
     }
 }
 

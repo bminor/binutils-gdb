@@ -37,6 +37,7 @@
 #include "typeprint.h"
 #include <ctype.h>
 #include <algorithm>
+#include "common/byte-vector.h"
 
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
@@ -1721,7 +1722,7 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 static bool
 maybe_negate_by_bytes (const gdb_byte *bytes, unsigned len,
 		       enum bfd_endian byte_order,
-		       std::vector<gdb_byte> *out_vec)
+		       gdb::byte_vector *out_vec)
 {
   gdb_byte sign_byte;
   if (byte_order == BFD_ENDIAN_BIG)
@@ -1780,7 +1781,7 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
   int dummy;
   int flip;
 
-  std::vector<gdb_byte> negated_bytes;
+  gdb::byte_vector negated_bytes;
   if (is_signed
       && maybe_negate_by_bytes (valaddr, len, byte_order, &negated_bytes))
     {

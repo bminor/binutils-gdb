@@ -43,6 +43,7 @@
 #include <vector>
 #include <unordered_set>
 #include "common/underlying.h"
+#include "common/byte-vector.h"
 
 extern int dwarf_always_disassemble;
 
@@ -1776,7 +1777,7 @@ rw_pieced_value (struct value *v, struct value *from)
   const gdb_byte *from_contents;
   struct piece_closure *c
     = (struct piece_closure *) value_computed_closure (v);
-  std::vector<gdb_byte> buffer;
+  gdb::byte_vector buffer;
   int bits_big_endian
     = gdbarch_bits_big_endian (get_type_arch (value_type (v)));
 
@@ -1847,7 +1848,7 @@ rw_pieced_value (struct value *v, struct value *from)
 	      bits_to_skip += p->offset;
 
 	    this_size = bits_to_bytes (bits_to_skip, this_size_bits);
-	    buffer.reserve (this_size);
+	    buffer.resize (this_size);
 
 	    if (from == NULL)
 	      {
@@ -1928,7 +1929,7 @@ rw_pieced_value (struct value *v, struct value *from)
 	      }
 
 	    this_size = bits_to_bytes (bits_to_skip, this_size_bits);
-	    buffer.reserve (this_size);
+	    buffer.resize (this_size);
 
 	    if (from == NULL)
 	      {
