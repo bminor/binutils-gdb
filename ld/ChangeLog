@@ -1,5 +1,9 @@
 2017-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-gc/pr20022a.s: Add size to bar.
+
+2017-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/sizeofa.d: Skip on targets with leading char
 	in symbol name.
 	* testsuite/ld-elf/sizeofb.d: Likewise.
