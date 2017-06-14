@@ -37,9 +37,9 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 
 set bp_lineno [gdb_get_line_number "vla1-not-allocated"]
-mi_create_breakpoint "-t vla.f90:$bp_lineno" 1 "del" "vla" \
-  ".*vla.f90" $bp_lineno $hex \
-  "insert breakpoint at line $bp_lineno (vla not allocated)"
+mi_create_breakpoint "-t vla.f90:$bp_lineno" \
+    "insert breakpoint at line $bp_lineno (vla not allocated)" \
+    -number 1 -disp del -func vla ".*vla.f90" $bp_lineno $hex
 mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
@@ -63,8 +63,9 @@ mi_list_array_varobj_children_with_index "vla1_not_allocated" "0" "1" \
 
 
 set bp_lineno [gdb_get_line_number "vla1-allocated"]
-mi_create_breakpoint "-t vla.f90:$bp_lineno" 2 "del" "vla" ".*vla.f90" \
-  $bp_lineno $hex "insert breakpoint at line $bp_lineno (vla allocated)"
+mi_create_breakpoint "-t vla.f90:$bp_lineno" \
+    "insert breakpoint at line $bp_lineno (vla allocated)" \
+    -number 2 -disp del -func vla ".*vla.f90" $bp_lineno $hex
 mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
@@ -87,8 +88,9 @@ mi_list_array_varobj_children_with_index "vla1_allocated" "5" "1" \
 
 
 set bp_lineno [gdb_get_line_number "vla1-filled"]
-mi_create_breakpoint "-t vla.f90:$bp_lineno" 3 "del" "vla" ".*vla.f90" \
-  $bp_lineno $hex "insert breakpoint at line $bp_lineno"
+mi_create_breakpoint "-t vla.f90:$bp_lineno" \
+    "insert breakpoint at line $bp_lineno" \
+    -number 3 -disp del -func vla ".*vla.f90" $bp_lineno $hex
 mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
@@ -97,8 +99,9 @@ mi_gdb_test "520-data-evaluate-expression vla1" \
 
 
 set bp_lineno [gdb_get_line_number "vla1-modified"]
-mi_create_breakpoint "-t vla.f90:$bp_lineno" 4 "del" "vla" ".*vla.f90" \
-  $bp_lineno $hex "insert breakpoint at line $bp_lineno"
+mi_create_breakpoint "-t vla.f90:$bp_lineno" \
+    "insert breakpoint at line $bp_lineno" \
+    -number 4 -disp del -func vla ".*vla.f90" $bp_lineno $hex
 mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
@@ -113,8 +116,9 @@ mi_gdb_test "560-data-evaluate-expression vla1(4)" \
 
 
 set bp_lineno [gdb_get_line_number "vla1-deallocated"]
-mi_create_breakpoint "-t vla.f90:$bp_lineno" 5 "del" "vla" ".*vla.f90" \
-  $bp_lineno $hex "insert breakpoint at line $bp_lineno"
+mi_create_breakpoint "-t vla.f90:$bp_lineno" \
+    "insert breakpoint at line $bp_lineno" \
+    -number 5 -disp del -func vla ".*vla.f90" $bp_lineno $hex
 mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
@@ -163,8 +167,9 @@ gdb_expect {
 }
 
 set bp_lineno [gdb_get_line_number "pvla2-associated"]
-mi_create_breakpoint "-t vla.f90:$bp_lineno" 7 "del" "vla" ".*vla.f90" \
-  $bp_lineno $hex "insert breakpoint at line $bp_lineno"
+mi_create_breakpoint "-t vla.f90:$bp_lineno" \
+    "insert breakpoint at line $bp_lineno" \
+    -number 7 -disp del -func vla ".*vla.f90" $bp_lineno $hex
 mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
@@ -186,8 +191,9 @@ mi_gdb_test "593-var-evaluate-expression pvla2_associated" \
 
 
 set bp_lineno [gdb_get_line_number "pvla2-set-to-null"]
-mi_create_breakpoint "-t vla.f90:$bp_lineno" 8 "del" "vla" ".*vla.f90" \
-  $bp_lineno $hex "insert breakpoint at line $bp_lineno"
+mi_create_breakpoint "-t vla.f90:$bp_lineno" \
+    "insert breakpoint at line $bp_lineno" \
+    -number 8 -disp del -func vla ".*vla.f90" $bp_lineno $hex
 mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
