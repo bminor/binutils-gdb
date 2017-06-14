@@ -1,3 +1,8 @@
+2017-06-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21580
+	* testsuite/ld-nds32/diff.d: Adjust expected output.
+
 2017-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/20022
