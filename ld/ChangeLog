@@ -1,5 +1,11 @@
 2017-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/20022
+	* testsuite/ld-gc/pr20022.d: Skip on targets without dynamic
+	relocations in .text section.
+
+2017-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/pr21562a.d: Skip on targets with leading char
 	in in symbol name or without --gc-sections.
 	* testsuite/ld-elf/pr21562b.d: Likewise.
