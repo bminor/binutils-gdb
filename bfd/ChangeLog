@@ -1,5 +1,11 @@
 2017-06-14  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21578
+	* elf32-sh.c (sh_elf_set_mach_from_flags): Fix check for invalid
+	flag value.
+
+2017-06-14  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21589
 	* vms-alpha.c (_bfd_vms_get_value): Add an extra parameter - the
 	maximum value for the ascic pointer.  Check that name processing
