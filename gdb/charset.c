@@ -673,7 +673,7 @@ wchar_iterator::iterate (enum wchar_iterate_result *out_result,
 
 	      ++out_request;
 	      if (out_request > m_out.size ())
-		m_out.reserve (out_request);
+		m_out.resize (out_request);
 	      continue;
 
 	    case EINVAL:

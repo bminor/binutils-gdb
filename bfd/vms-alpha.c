@@ -1456,7 +1456,7 @@ dst_retrieve_location (bfd *abfd, unsigned int loc)
 /* Write multiple bytes to section image.  */
 
 static bfd_boolean
-image_write (bfd *abfd, unsigned char *ptr, int size)
+image_write (bfd *abfd, unsigned char *ptr, unsigned int size)
 {
 #if VMS_DEBUG
   _bfd_vms_debug (8, "image_write from (%p, %d) to (%ld)\n", ptr, size,
@@ -1603,14 +1603,16 @@ _bfd_vms_etir_name (int cmd)
 #define HIGHBIT(op) ((op & 0x80000000L) == 0x80000000L)
 
 static void
-_bfd_vms_get_value (bfd *abfd, const unsigned char *ascic,
+_bfd_vms_get_value (bfd *abfd,
+		    const unsigned char *ascic,
+		    const unsigned char *max_ascic,
                     struct bfd_link_info *info,
                     bfd_vma *vma,
                     struct alpha_vms_link_hash_entry **hp)
 {
   char name[257];
-  int len;
-  int i;
+  unsigned int len;
+  unsigned int i;
   struct alpha_vms_link_hash_entry *h;
 
   /* Not linking.  Do not try to resolve the symbol.  */
@@ -1622,6 +1624,14 @@ _bfd_vms_get_value (bfd *abfd, const unsigned char *ascic,
     }
 
   len = *ascic;
+  if (ascic + len >= max_ascic)
+    {
+      _bfd_error_handler (_("Corrupt vms value"));
+      *vma = 0;
+      *hp = NULL;
+      return;
+    }
+
   for (i = 0; i < len; i++)
     name[i] = ascic[i + 1];
   name[i] = 0;
@@ -1741,6 +1751,15 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
       _bfd_hexdump (8, ptr, cmd_length - 4, 0);
 #endif
 
+      /* PR 21589: Check for a corrupt ETIR record.  */
+      if (cmd_length < 4)
+	{
+	corrupt_etir:
+	  _bfd_error_handler (_("Corrupt ETIR record encountered"));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+
       switch (cmd)
         {
           /* Stack global
@@ -1748,7 +1767,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 
              stack 32 bit value of symbol (high bits set to 0).  */
         case ETIR__C_STA_GBL:
-          _bfd_vms_get_value (abfd, ptr, info, &op1, &h);
+          _bfd_vms_get_value (abfd, ptr, maxptr, info, &op1, &h);
           _bfd_vms_push (abfd, op1, alpha_vms_sym_to_ctxt (h));
           break;
 
@@ -1757,6 +1776,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 
              stack 32 bit value, sign extend to 64 bit.  */
         case ETIR__C_STA_LW:
+	  if (ptr + 4 >= maxptr)
+	    goto corrupt_etir;
           _bfd_vms_push (abfd, bfd_getl32 (ptr), RELC_NONE);
           break;
 
@@ -1765,6 +1786,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 
              stack 64 bit value of symbol.  */
         case ETIR__C_STA_QW:
+	  if (ptr + 8 >= maxptr)
+	    goto corrupt_etir;
           _bfd_vms_push (abfd, bfd_getl64 (ptr), RELC_NONE);
           break;
 
@@ -1778,6 +1801,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
           {
             int psect;
 
+	    if (ptr + 12 >= maxptr)
+	      goto corrupt_etir;
             psect = bfd_getl32 (ptr);
             if ((unsigned int) psect >= PRIV (section_count))
               {
@@ -1867,6 +1892,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
           {
             int size;
 
+	    if (ptr + 4 >= maxptr)
+	      goto corrupt_etir;
             size = bfd_getl32 (ptr);
             _bfd_vms_pop (abfd, &op1, &rel1);
             if (rel1 != RELC_NONE)
@@ -1879,7 +1906,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
           /* Store global: write symbol value
              arg: cs	global symbol name.  */
         case ETIR__C_STO_GBL:
-          _bfd_vms_get_value (abfd, ptr, info, &op1, &h);
+          _bfd_vms_get_value (abfd, ptr, maxptr, info, &op1, &h);
           if (h && h->sym)
             {
               if (h->sym->typ == EGSD__C_SYMG)
@@ -1901,7 +1928,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
           /* Store code address: write address of entry point
              arg: cs	global symbol name (procedure).  */
         case ETIR__C_STO_CA:
-          _bfd_vms_get_value (abfd, ptr, info, &op1, &h);
+          _bfd_vms_get_value (abfd, ptr, maxptr, info, &op1, &h);
           if (h && h->sym)
             {
               if (h->sym->flags & EGSY__V_NORM)
@@ -1946,8 +1973,10 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
              da	data.  */
         case ETIR__C_STO_IMM:
           {
-            int size;
+            unsigned int size;
 
+	    if (ptr + 4 >= maxptr)
+	      goto corrupt_etir;
             size = bfd_getl32 (ptr);
             image_write (abfd, ptr + 4, size);
           }
@@ -1960,7 +1989,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
              store global longword: store 32bit value of symbol
              arg: cs	symbol name.  */
         case ETIR__C_STO_GBL_LW:
-          _bfd_vms_get_value (abfd, ptr, info, &op1, &h);
+          _bfd_vms_get_value (abfd, ptr, maxptr, info, &op1, &h);
 #if 0
           abort ();
 #endif
@@ -2013,7 +2042,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
              da	signature.  */
 
         case ETIR__C_STC_LP_PSB:
-          _bfd_vms_get_value (abfd, ptr + 4, info, &op1, &h);
+          _bfd_vms_get_value (abfd, ptr + 4, maxptr, info, &op1, &h);
           if (h && h->sym)
             {
               if (h->sym->typ == EGSD__C_SYMG)
@@ -2109,6 +2138,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
           /* Augment relocation base: increment image location counter by offset
              arg: lw	offset value.  */
         case ETIR__C_CTL_AUGRB:
+	  if (ptr + 4 >= maxptr)
+	    goto corrupt_etir;
           op1 = bfd_getl32 (ptr);
           image_inc_ptr (abfd, op1);
           break;

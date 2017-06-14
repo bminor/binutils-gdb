@@ -1,3 +1,31 @@
+2017-06-14  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c: Include "common/byte-vector.h".
+	(ada_value_primitive_packed_val): Use gdb::byte_vector.
+	* charset.c (wchar_iterator::iterate): Resize the vector instead
+	of reserving it.
+	* common/byte-vector.h: Include "common/def-vector.h".
+	(wchar_iterator::m_out): Now a gdb::def_vector<gdb_wchar_t>.
+	* cli/cli-dump.c: Include "common/byte-vector.h".
+	(dump_memory_to_file, restore_binary_file): Use gdb::byte_vector.
+	* common/byte-vector.h: New file.
+	* common/def-vector.h: New file.
+	* common/default-init-alloc.h: New file.
+	* dwarf2loc.c: Include "common/byte-vector.h".
+	(rw_pieced_value): Use gdb::byte_vector, and resize the vector
+	instead of reserving it.
+	* dwarf2read.c: Include "common/byte-vector.h".
+	(data_buf::m_vec): Now a gdb::byte_vector.
+	* gdb_regex.c: Include "common/def-vector.h".
+	(compiled_regex::compiled_regex): Use gdb::def_vector<char>.
+	* mi/mi-main.c: Include "common/byte-vector.h".
+	(mi_cmd_data_read_memory): Use gdb::byte_vector.
+	* printcmd.c: Include "common/byte-vector.h".
+	(print_scalar_formatted): Use gdb::byte_vector.
+	* valprint.c: Include "common/byte-vector.h".
+	(maybe_negate_by_bytes, print_decimal_chars): Use
+	gdb::byte_vector.
+
 2017-06-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* darwin-nat.c: Include "nat/fork-inferior.h".

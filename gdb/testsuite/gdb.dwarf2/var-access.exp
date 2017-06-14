@@ -28,16 +28,16 @@ if {![dwarf2_support]} {
 
 set dwarf_regnum {0 1}
 
-if { [istarget "aarch64*-*-*"] } {
+if { [is_aarch64_target] } {
     set regname {x0 x1}
-} elseif { [istarget "arm*-*-*"]
+} elseif { [is_aarch32_target]
 	   || [istarget "s390*-*-*" ]
 	   || [istarget "powerpc*-*-*"]
 	   || [istarget "rs6000*-*-aix*"] } {
     set regname {r0 r1}
-} elseif { [istarget "i?86-*-*"] } {
-    set regname {eax edx}
-} elseif { [istarget "x86_64-*-*"] } {
+} elseif { [is_x86_like_target] } {
+    set regname {eax ecx}
+} elseif { [is_amd64_regs_target] } {
     set regname {rax rdx}
 } else {
     verbose "Skipping tests for accessing DWARF-described variables."

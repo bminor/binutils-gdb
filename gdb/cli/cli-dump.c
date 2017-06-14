@@ -31,7 +31,7 @@
 #include "cli/cli-utils.h"
 #include "gdb_bfd.h"
 #include "filestuff.h"
-
+#include "common/byte-vector.h"
 
 static const char *
 scan_expression_with_cleanup (const char **cmd, const char *def)
@@ -230,17 +230,17 @@ dump_memory_to_file (const char *cmd, const char *mode, const char *file_format)
 
   /* FIXME: Should use read_memory_partial() and a magic blocking
      value.  */
-  std::unique_ptr<gdb_byte[]> buf (new gdb_byte[count]);
-  read_memory (lo, buf.get (), count);
+  gdb::byte_vector buf (count);
+  read_memory (lo, buf.data (), count);
   
   /* Have everything.  Open/write the data.  */
   if (file_format == NULL || strcmp (file_format, "binary") == 0)
     {
-      dump_binary_file (filename, mode, buf.get (), count);
+      dump_binary_file (filename, mode, buf.data (), count);
     }
   else
     {
-      dump_bfd_file (filename, mode, file_format, lo, buf.get (), count);
+      dump_bfd_file (filename, mode, file_format, lo, buf.data (), count);
     }
 
   do_cleanups (old_cleanups);
@@ -545,13 +545,13 @@ restore_binary_file (const char *filename, struct callback_data *data)
     perror_with_name (filename);
 
   /* Now allocate a buffer and read the file contents.  */
-  std::unique_ptr<gdb_byte[]> buf (new gdb_byte[len]);
-  if (fread (buf.get (), 1, len, file) != len)
+  gdb::byte_vector buf (len);
+  if (fread (buf.data (), 1, len, file) != len)
     perror_with_name (filename);
 
   /* Now write the buffer into target memory.  */
   len = target_write_memory (data->load_start + data->load_offset,
-			     buf.get (), len);
+			     buf.data (), len);
   if (len != 0)
     warning (_("restore: memory write failed (%s)."), safe_strerror (len));
   do_cleanups (cleanup);

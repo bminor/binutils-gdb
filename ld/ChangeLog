@@ -1,3 +1,50 @@
+2017-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20022
+	* testsuite/ld-gc/pr20022.d: Skip on targets without dynamic
+	relocations in .text section.
+
+2017-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr21562a.d: Skip on targets with leading char
+	in in symbol name or without --gc-sections.
+	* testsuite/ld-elf/pr21562b.d: Likewise.
+	* testsuite/ld-elf/pr21562c.d: Likewise.
+	* testsuite/ld-elf/pr21562d.d: Likewise.
+	* testsuite/ld-elf/pr21562i.d: Likewise.
+	* testsuite/ld-elf/pr21562j.d: Likewise.
+	* testsuite/ld-elf/pr21562k.d: Likewise.
+	* testsuite/ld-elf/pr21562l.d: Likewise.
+	* testsuite/ld-elf/pr21562m.d: Likewise.
+	* testsuite/ld-elf/pr21562n.d: Likewise.
+	* testsuite/ld-elf/pr21562e.d: Skip on targets with leading char
+	in symbol name.
+	* testsuite/ld-elf/pr21562f.d: Likewise.
+	* testsuite/ld-elf/pr21562g.d: Likewise.
+	* testsuite/ld-elf/pr21562h.d: Likewise.
+
+2017-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-gc/pr20022a.s: Add size to bar.
+
+2017-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/sizeofa.d: Skip on targets with leading char
+	in symbol name.
+	* testsuite/ld-elf/sizeofb.d: Likewise.
+	* testsuite/ld-elf/startofa.d: Likewise.
+	* testsuite/ld-elf/startofb.d: Likewise.
+
+2017-06-14  Georg-Johann Lay  <gjl@gcc.gnu.org>
+
+	PR ld/21583
+	* scripttempl/avr.sc (.jumptables): Move down in text section.
+	(.hightext): New in text.
+
+2017-06-14  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* configure.tgt (epiphany-*-elf): Accept epiphany-*-*.
+
 2017-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldlang.c (lang_set_startof): Skip if config.build_constructors

@@ -73,6 +73,7 @@
 #include "common/function-view.h"
 #include "common/gdb_optional.h"
 #include "common/underlying.h"
+#include "common/byte-vector.h"
 
 #include <fcntl.h>
 #include <sys/types.h>
@@ -23245,7 +23246,7 @@ private:
     return &*m_vec.end () - size;
   }
 
-  std::vector<gdb_byte> m_vec;
+  gdb::byte_vector m_vec;
 };
 
 /* An entry in the symbol table.  */

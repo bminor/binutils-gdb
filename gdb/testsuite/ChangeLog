@@ -1,3 +1,9 @@
+2017-06-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/var-access.exp: Use register name ecx instead of edx
+	on 32-bit x86 targets.  Exploit is_*_target macros where
+	appropriate.
+
 2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.dwarf2/var-access.exp: Add test for non-byte-aligned
