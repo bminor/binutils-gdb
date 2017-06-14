@@ -3400,13 +3400,16 @@ Specifying -a and an ignore count simultaneously is an error."));
 
   c = add_com ("run", class_run, run_command, _("\
 Start debugged program.  You may specify arguments to give it.\n\
-Args may include \"*\", or \"[...]\"; they are expanded using \"sh\".\n\
-Input and output redirection with \">\", \"<\", or \">>\" are also \
-allowed.\n\n\
+Args may include \"*\", or \"[...]\"; they are expanded using the\n\
+shell that will start the program (specified by the \"$SHELL\"\
+environment\nvariable).  Input and output redirection with \">\",\
+\"<\", or \">>\"\nare also allowed.\n\n\
 With no arguments, uses arguments last specified (with \"run\" \
 or \"set args\").\n\
 To cancel previous arguments and run with no arguments,\n\
-use \"set args\" without arguments."));
+use \"set args\" without arguments.\n\
+To start the inferior without using a shell, use \"set \
+startup-with-shell off\"."));
   set_cmd_completer (c, filename_completer);
   add_com_alias ("r", "run", class_run, 1);
 

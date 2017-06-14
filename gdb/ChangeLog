@@ -1,3 +1,9 @@
+2017-06-14  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21574
+	* infcmd.c (_initialize_infcmd): Expand "help run" documentation
+	to mention $SHELL and startup-with-shell.
+
 2017-06-14  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* MAINTAINERS: Move Maxim Grigoriev to the Past Maintainers.
