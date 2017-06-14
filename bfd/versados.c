@@ -149,7 +149,7 @@ versados_mkobject (bfd *abfd)
   if (abfd->tdata.versados_data == NULL)
     {
       bfd_size_type amt = sizeof (tdata_type);
-      tdata_type *tdata = bfd_alloc (abfd, amt);
+      tdata_type *tdata = bfd_zalloc (abfd, amt);
 
       if (tdata == NULL)
 	return FALSE;
@@ -345,13 +345,13 @@ reloc_howto_type versados_howto_table[] =
 };
 
 static int
-get_offset (int len, unsigned char *ptr)
+get_offset (unsigned int len, unsigned char *ptr)
 {
   int val = 0;
 
   if (len)
     {
-      int i;
+      unsigned int i;
 
       val = *ptr++;
       if (val & 0x80)
@@ -394,8 +394,12 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
 	  int flag = *srcp++;
 	  int esdids = (flag >> 5) & 0x7;
 	  int sizeinwords = ((flag >> 3) & 1) ? 2 : 1;
-	  int offsetlen = flag & 0x7;
+	  unsigned int offsetlen = flag & 0x7;
 	  int j;
+
+	  /* PR 21591: Check for invalid lengths.  */
+	  if (srcp + esdids + offsetlen >= endp)
+	    return;
 
 	  if (esdids == 0)
 	    {

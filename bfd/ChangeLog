@@ -1,3 +1,9 @@
+2017-06-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21591
+	* versados.c (versados_mkobject): Zero the allocated tdata structure.
+	(process_otr): Check for an invalid offset in the otr structure.
+
 2017-06-14  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* config.bfd (epiphany-*-elf): Accept epiphany-*-*.
