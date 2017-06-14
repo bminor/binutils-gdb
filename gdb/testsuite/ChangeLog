@@ -1,3 +1,7 @@
+2017-07-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.mi/mi-vla-fortran.exp: Make test names unique.
+
 2017-07-14  Tom Tromey  <tom@tromey.com>
 
 	PR rust/21764:

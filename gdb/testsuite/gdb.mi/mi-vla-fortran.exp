@@ -44,7 +44,7 @@ mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
 mi_gdb_test "500-data-evaluate-expression vla1" \
-  "500\\^done,value=\"<not allocated>\"" "evaluate not allocated vla"
+  "500\\^done,value=\"<not allocated>\"" "evaluate not allocated vla, before allocation"
 
 mi_create_varobj_checked vla1_not_allocated vla1 "<not allocated>" \
   "create local variable vla1_not_allocated"
@@ -95,7 +95,7 @@ mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
 mi_gdb_test "520-data-evaluate-expression vla1" \
-  "520\\^done,value=\"\\(1, 1, 1, 1, 1\\)\"" "evaluate filled vla"
+  "520\\^done,value=\"\\(1, 1, 1, 1, 1\\)\"" "evaluate filled vla, filled all 1s"
 
 
 set bp_lineno [gdb_get_line_number "vla1-modified"]
@@ -106,13 +106,13 @@ mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
 mi_gdb_test "530-data-evaluate-expression vla1" \
-  "530\\^done,value=\"\\(1, 42, 1, 24, 1\\)\"" "evaluate filled vla"
+  "530\\^done,value=\"\\(1, 42, 1, 24, 1\\)\"" "evaluate filled vla, contents modified"
 mi_gdb_test "540-data-evaluate-expression vla1(1)" \
-  "540\\^done,value=\"1\"" "evaluate filled vla"
+  "540\\^done,value=\"1\"" "evaluate filled vla(1)"
 mi_gdb_test "550-data-evaluate-expression vla1(2)" \
-  "550\\^done,value=\"42\"" "evaluate filled vla"
+  "550\\^done,value=\"42\"" "evaluate filled vla(2)"
 mi_gdb_test "560-data-evaluate-expression vla1(4)" \
-  "560\\^done,value=\"24\"" "evaluate filled vla"
+  "560\\^done,value=\"24\"" "evaluate filled vla(4)"
 
 
 set bp_lineno [gdb_get_line_number "vla1-deallocated"]
@@ -123,7 +123,7 @@ mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
 mi_gdb_test "570-data-evaluate-expression vla1" \
-  "570\\^done,value=\"<not allocated>\"" "evaluate not allocated vla"
+  "570\\^done,value=\"<not allocated>\"" "evaluate not allocated vla, after deallocation"
 
 
 set bp_lineno [gdb_get_line_number "pvla2-not-associated"]
