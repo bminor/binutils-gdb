@@ -1,3 +1,11 @@
+2017-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/sizeofa.d: Skip on targets with leading char
+	in symbol name.
+	* testsuite/ld-elf/sizeofb.d: Likewise.
+	* testsuite/ld-elf/startofa.d: Likewise.
+	* testsuite/ld-elf/startofb.d: Likewise.
+
 2017-06-14  Georg-Johann Lay  <gjl@gcc.gnu.org>
 
 	PR ld/21583
