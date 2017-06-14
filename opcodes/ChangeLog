@@ -1,3 +1,12 @@
+2017-06-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21587
+	* rx-decode.opc: Include libiberty.h
+	(GET_SCALE): New macro - validates access to SCALE array.
+	(GET_PSCALE): New macro - validates access to PSCALE array.
+	(DIs, SIs, S2Is, rx_disp): Use new macros.
+	* rx-decode.c: Regenerate.
+
 2017-07-14  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* arm-dis.c (print_insn_arm): Remove bogus entry for bx.
