@@ -132,11 +132,6 @@ SECTIONS
     
     ${RELOCATING+. = ALIGN(2);}
 
-    /* For future tablejump instruction arrays for 3 byte pc devices.
-       We don't relax jump/call instructions within these sections.  */
-    *(.jumptables) 
-    ${RELOCATING+ *(.jumptables*)}
-
     /* For code that needs to reside in the lower 128k progmem.  */
     *(.lowtext)
     ${RELOCATING+ *(.lowtext*)}
@@ -196,6 +191,18 @@ SECTIONS
     KEEP (*(.fini1))
     *(.fini0)  /* Infinite loop after program termination.  */
     KEEP (*(.fini0))
+
+    /* For code that needs not to reside in the lower progmem.  */
+    *(.hightext)
+    ${RELOCATING+ *(.hightext*)}
+
+    ${RELOCATING+. = ALIGN(2);}
+
+    /* For tablejump instruction arrays.  We don't relax
+       JMP / CALL instructions within these sections.  */
+    *(.jumptables)
+    ${RELOCATING+ *(.jumptables*)}
+
     ${RELOCATING+ _etext = . ; }
   } ${RELOCATING+ > text}
 EOF

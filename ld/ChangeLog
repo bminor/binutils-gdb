@@ -1,3 +1,9 @@
+2017-06-14  Georg-Johann Lay  <gjl@gcc.gnu.org>
+
+	PR ld/21583
+	* scripttempl/avr.sc (.jumptables): Move down in text section.
+	(.hightext): New in text.
+
 2017-06-14  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* configure.tgt (epiphany-*-elf): Accept epiphany-*-*.
