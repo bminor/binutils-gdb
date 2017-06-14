@@ -1,3 +1,8 @@
+2017-06-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21576
+	* score7-dis.c (score_opcodes): Add sentinel.
+
 2017-06-14  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-dis.c: Include disassemble.h instead of dis-asm.h.
