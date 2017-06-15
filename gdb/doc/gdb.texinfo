@@ -34694,7 +34694,9 @@ a C source file.  By default, the target description is for the current
 target, but if the optional argument @var{file} is provided, that file
 is used to produce the description.  The @var{file} should be an XML
 document, of the form described in @ref{Target Description Format}.
-The created source file is built into @value{GDBN}.
+The created source file is built into @value{GDBN} when @value{GDBN} is
+built again.  This command is used by developers after they add or
+modify XML target descriptions.
 
 @kindex maint print dummy-frames
 @item maint print dummy-frames
