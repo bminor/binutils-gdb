@@ -1,3 +1,12 @@
+2017-06-15  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-aarch64/copy-reloc-exe-2.s: New test source file.
+	* testsuite/ld-aarch64/copy-reloc-2.d: New test.
+	* testsuite/ld-aarch64/copy-reloc-exe-eliminate.s: New test source file.
+	* testsuite/ld-aarch64/copy-reloc-eliminate.d: New test.
+	* testsuite/ld-aarch64/copy-reloc-so.s: Define new global objects.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run new tests.
+
 2017-06-14  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21580

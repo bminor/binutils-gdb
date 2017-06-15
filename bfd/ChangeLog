@@ -1,3 +1,17 @@
+2017-06-15  Jiong Wang  <jiong.wang@arm.com>
+
+	PR ld/21532
+	* elfnn-aarch64.c (ELIMINATE_COPY_RELOCS): Set to 1.
+	(elfNN_aarch64_final_link_relocate): Also propagate relocations to
+	runtime for if there needs copy relocation elimination.
+	(need_copy_relocation_p): New function.  Return true for symbol with
+	pc-relative references and if it's against read-only sections.
+	(elfNN_aarch64_adjust_dynamic_symbol): Use need_copy_relocation_p.
+	(elfNN_aarch64_check_relocs): Allocate dynrelocs for relocation types
+	that are related with accessing external objects.
+	(elfNN_aarch64_gc_sweep_hook): Sync the relocation types with the change
+	in elfNN_aarch64_check_relocs.
+
 2017-06-15  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21582
