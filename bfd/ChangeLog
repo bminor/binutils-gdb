@@ -1,5 +1,11 @@
 2017-06-15  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21582
+	* ieee.c (ieee_object_p): Use a static buffer to avoid compiler
+	bugs.
+
+2017-06-15  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21579
 	* vms-alpha.c (_bfd_vms_slurp_etir): Extend check of cmd_length.
 

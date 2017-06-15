@@ -1873,7 +1873,7 @@ ieee_object_p (bfd *abfd)
   char *processor;
   unsigned int part;
   ieee_data_type *ieee;
-  unsigned char buffer[300];
+  static unsigned char buffer[300];
   ieee_data_type *save = IEEE_DATA (abfd);
   bfd_size_type amt;
 
