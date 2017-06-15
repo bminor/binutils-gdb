@@ -1,5 +1,14 @@
 2017-06-15  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21588
+	* rl78-decode.opc (OP_BUF_LEN): Define.
+	(GETBYTE): Check for the index exceeding OP_BUF_LEN.
+	(rl78_decode_opcode): Use OP_BUF_LEN as the length of the op_buf
+	array.
+	* rl78-decode.c: Regenerate.
+
+2017-06-15  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21586
 	* bfin-dis.c (gregs): Clip index to prevent overflow.
 	(regs): Likewise.
