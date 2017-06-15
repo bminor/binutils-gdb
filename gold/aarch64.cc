@@ -110,6 +110,10 @@ public:
   is_adrp(const Insntype insn)
   { return (insn & 0x9F000000) == 0x90000000; }
 
+  static bool
+  is_mrs_tpidr_el0(const Insntype insn)
+  { return (insn & 0xFFFFFFE0) == 0xd53bd040; }
+
   static unsigned int
   aarch64_rm(const Insntype insn)
   { return aarch64_bits(insn, 16, 5); }
@@ -2010,9 +2014,32 @@ AArch64_relobj<size, big_endian>::try_fix_erratum_843419_optimized(
   E843419_stub<size, big_endian>* e843419_stub =
     reinterpret_cast<E843419_stub<size, big_endian>*>(stub);
   AArch64_address pc = pview.address + e843419_stub->adrp_sh_offset();
-  Insntype* adrp_view = reinterpret_cast<Insntype*>(
-    pview.view + e843419_stub->adrp_sh_offset());
+  unsigned int adrp_offset = e843419_stub->adrp_sh_offset ();
+  Insntype* adrp_view = reinterpret_cast<Insntype*>(pview.view + adrp_offset);
   Insntype adrp_insn = adrp_view[0];
+
+  // If the instruction at adrp_sh_offset is "mrs R, tpidr_el0", it may come
+  // from IE -> LE relaxation etc.  This is a side-effect of TLS relaxation that
+  // ADRP has been turned into MRS, there is no erratum risk anymore.
+  // Therefore, we return true to avoid doing unnecessary branch-to-stub.
+  if (Insn_utilities::is_mrs_tpidr_el0(adrp_insn))
+    return true;
+
+  // If the instruction at adrp_sh_offset is not ADRP and the instruction before
+  // it is "mrs R, tpidr_el0", it may come from LD -> LE relaxation etc.
+  // Like the above case, there is no erratum risk any more, we can safely
+  // return true.
+  if (!Insn_utilities::is_adrp(adrp_insn) && adrp_offset)
+    {
+      Insntype* prev_view
+	= reinterpret_cast<Insntype*>(pview.view + adrp_offset - 4);
+      Insntype prev_insn = prev_view[0];
+
+      if (Insn_utilities::is_mrs_tpidr_el0(prev_insn))
+	return true;
+    }
+
+  /* If we reach here, the first instruction must be ADRP.  */
   gold_assert(Insn_utilities::is_adrp(adrp_insn));
   // Get adrp 33-bit signed imm value.
   int64_t adrp_imm = Insn_utilities::
