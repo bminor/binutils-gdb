@@ -1,3 +1,8 @@
+2017-06-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21579
+	* vms-alpha.c (_bfd_vms_slurp_etir): Extend check of cmd_length.
+
 2017-06-14  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* elf32-xtensa.c (elf_xtensa_be_plt_entry,

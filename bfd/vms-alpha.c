@@ -1745,20 +1745,20 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 
       ptr += 4;
 
-#if VMS_DEBUG
-      _bfd_vms_debug (4, "etir: %s(%d)\n",
-                      _bfd_vms_etir_name (cmd), cmd);
-      _bfd_hexdump (8, ptr, cmd_length - 4, 0);
-#endif
-
-      /* PR 21589: Check for a corrupt ETIR record.  */
-      if (cmd_length < 4)
+      /* PR 21589 and 21579: Check for a corrupt ETIR record.  */
+      if (cmd_length < 4 || (ptr + cmd_length > maxptr + 4))
 	{
 	corrupt_etir:
 	  _bfd_error_handler (_("Corrupt ETIR record encountered"));
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
+
+#if VMS_DEBUG
+      _bfd_vms_debug (4, "etir: %s(%d)\n",
+                      _bfd_vms_etir_name (cmd), cmd);
+      _bfd_hexdump (8, ptr, cmd_length - 4, 0);
+#endif
 
       switch (cmd)
         {
