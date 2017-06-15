@@ -1,3 +1,9 @@
+2017-06-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/21594
+	* i386-dis.c (OP_E_register): Check valid bnd register.
+	(OP_G): Likewise.
+
 2017-06-15  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21595

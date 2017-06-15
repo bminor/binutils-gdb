@@ -15025,6 +15025,11 @@ OP_E_register (int bytemode, int sizeflag)
       names = address_mode == mode_64bit ? names64 : names32;
       break;
     case bnd_mode:
+      if (reg > 0x3)
+	{
+	  oappend ("(bad)");
+	  return;
+	}
       names = names_bnd;
       break;
     case indir_v_mode:
@@ -15569,6 +15574,11 @@ OP_G (int bytemode, int sizeflag)
       oappend (names64[modrm.reg + add]);
       break;
     case bnd_mode:
+      if (modrm.reg > 0x3)
+	{
+	  oappend ("(bad)");
+	  return;
+	}
       oappend (names_bnd[modrm.reg]);
       break;
     case v_mode:
