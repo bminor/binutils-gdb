@@ -1355,7 +1355,7 @@ ieee_archive_p (bfd *abfd)
 {
   char *library;
   unsigned int i;
-  unsigned char buffer[512];
+  static unsigned char buffer[512];
   file_ptr buffer_offset = 0;
   ieee_ar_data_type *save = abfd->tdata.ieee_ar_data;
   ieee_ar_data_type *ieee;

@@ -3,6 +3,8 @@
 	PR binutils/21582
 	* ieee.c (ieee_object_p): Use a static buffer to avoid compiler
 	bugs.
+	PR binutils/21581
+	(ieee_archive_p): Likewise.
 
 2017-06-15  Nick Clifton  <nickc@redhat.com>
 
