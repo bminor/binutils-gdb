@@ -1,3 +1,9 @@
+2017-06-29  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* arc-dis.c (parse_option): Use disassembler_options_cmp to compare
+	disassembler option strings.
+	(parse_cpu_option): Likewise.
+
 2017-06-28  Tamar Christina  <tamar.christina@arm.com>
 
 	* aarch64-asm.c (aarch64_ins_reglane): Added 4B dotprod.

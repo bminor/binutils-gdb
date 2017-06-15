@@ -740,16 +740,16 @@ operand_iterator_next (struct arc_operand_iterator *iter,
 static void
 parse_option (const char *option)
 {
-  if (CONST_STRNEQ (option, "dsp"))
+  if (disassembler_options_cmp (option, "dsp") == 0)
     add_to_decodelist (DSP, NONE);
 
-  else if (CONST_STRNEQ (option, "spfp"))
+  else if (disassembler_options_cmp (option, "spfp") == 0)
     add_to_decodelist (FLOAT, SPX);
 
-  else if (CONST_STRNEQ (option, "dpfp"))
+  else if (disassembler_options_cmp (option, "dpfp") == 0)
     add_to_decodelist (FLOAT, DPX);
 
-  else if (CONST_STRNEQ (option, "quarkse_em"))
+  else if (disassembler_options_cmp (option, "quarkse_em") == 0)
     {
       add_to_decodelist (FLOAT, DPX);
       add_to_decodelist (FLOAT, SPX);
@@ -757,16 +757,16 @@ parse_option (const char *option)
       add_to_decodelist (FLOAT, QUARKSE2);
     }
 
-  else if (CONST_STRNEQ (option, "fpuda"))
+  else if (disassembler_options_cmp (option, "fpuda") == 0)
     add_to_decodelist (FLOAT, DPA);
 
-  else if (CONST_STRNEQ (option, "fpus"))
+  else if (disassembler_options_cmp (option, "fpus") == 0)
     {
       add_to_decodelist (FLOAT, SP);
       add_to_decodelist (FLOAT, CVT);
     }
 
-  else if (CONST_STRNEQ (option, "fpud"))
+  else if (disassembler_options_cmp (option, "fpud") == 0)
     {
       add_to_decodelist (FLOAT, DP);
       add_to_decodelist (FLOAT, CVT);
@@ -808,7 +808,7 @@ parse_cpu_option (const char *option)
 
   for (i = 0; cpu_types[i].name; ++i)
     {
-      if (!strcasecmp (cpu_types[i].name, option))
+      if (!disassembler_options_cmp (cpu_types[i].name, option))
 	{
 	  return cpu_types[i].flags;
 	}
