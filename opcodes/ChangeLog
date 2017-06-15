@@ -1,3 +1,11 @@
+2017-06-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21586
+	* bfin-dis.c (gregs): Clip index to prevent overflow.
+	(regs): Likewise.
+	(regs_lo): Likewise.
+	(regs_hi): Likewise.
+
 2017-06-14  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21576
