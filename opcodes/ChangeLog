@@ -1,5 +1,11 @@
 2017-06-15  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21595
+	* aarch64-dis.c (aarch64_ext_ldst_reglist): Check for an out of
+	range value.
+
+2017-06-15  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21588
 	* rl78-decode.opc (OP_BUF_LEN): Define.
 	(GETBYTE): Check for the index exceeding OP_BUF_LEN.

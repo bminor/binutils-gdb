@@ -409,6 +409,9 @@ aarch64_ext_ldst_reglist (const aarch64_operand *self ATTRIBUTE_UNUSED,
   info->reglist.first_regno = extract_field (FLD_Rt, code, 0);
   /* opcode */
   value = extract_field (FLD_opcode, code, 0);
+  /* PR 21595: Check for a bogus value.  */
+  if (value >= ARRAY_SIZE (data))
+    return 0;
   if (expected_num != data[value].num_elements || data[value].is_reserved)
     return 0;
   info->reglist.num_regs = data[value].num_regs;
