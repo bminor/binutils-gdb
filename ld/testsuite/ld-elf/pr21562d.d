@@ -2,12 +2,12 @@
 #ld: -shared -z defs --gc-sections -T pr21562a.t
 #readelf: -s -S --wide
 #target: *-*-linux* *-*-gnu*
-#notarget: d30v-*-* dlx-*-* i960-*-* pj*-*-*
-#notarget: hppa64-*-* i370-*-* i860-*-* ia64-*-* mep-*-* mn10200-*-*
-#notarget: bfin-*-* cr16-*-* cr16c-*-* cris*-*-* crx-*-* epiphany-*-*
-#notarget: h8300-*-* ip2k-*-* m10200-*-* m10300-*-* m32c-*-* metag-*-*
-#notarget: metag-*-* rl78-*-* rx-*-* sh*-*-* v850*-*-*
-# Targets with a leading char will faill this test.
+#xfail: d30v-*-* dlx-*-* i960-*-* pj*-*-*
+#xfail: hppa64-*-* i370-*-* i860-*-* ia64-*-* mep-*-* mn10200-*-*
+#xfail: bfin-*-* cr16-*-* cr16c-*-* crx-*-* epiphany-*-*
+#xfail: h8300-*-* ip2k-*-* mn10200-*-* mn10300-*-* m32c-*-* metag-*-*
+#xfail: rl78-*-* rx-*-* v850*-*-*
+# Targets with a leading char will fail this test.
 # generic linker targets don't support --gc-sections, nor do a bunch of others
 
 #...

@@ -144,9 +144,6 @@ struct bfd_link_hash_entry
 	  struct bfd_link_hash_entry *next;
 	  /* BFD symbol was found in.  */
 	  bfd *abfd;
-	  /* For __start_<name> and __stop_<name> symbols, the first
-	     input section matching the name.  */
-	  asection *section;
 	} undef;
       /* bfd_link_hash_defined, bfd_link_hash_defweak.  */
       struct

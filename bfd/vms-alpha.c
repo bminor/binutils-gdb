@@ -9311,6 +9311,7 @@ bfd_vms_get_data (bfd *abfd)
 #define vms_bfd_discard_group             bfd_generic_discard_group
 #define vms_section_already_linked        _bfd_generic_section_already_linked
 #define vms_bfd_define_common_symbol      bfd_generic_define_common_symbol
+#define vms_bfd_define_start_stop      bfd_generic_define_start_stop
 #define vms_bfd_copy_private_header_data  _bfd_generic_bfd_copy_private_header_data
 
 #define vms_bfd_copy_private_bfd_data	  _bfd_generic_bfd_copy_private_bfd_data
@@ -9358,6 +9359,7 @@ bfd_vms_get_data (bfd *abfd)
   _bfd_generic_section_already_linked
 
 #define alpha_vms_bfd_define_common_symbol bfd_generic_define_common_symbol
+#define alpha_vms_bfd_define_start_stop bfd_generic_define_start_stop
 #define alpha_vms_bfd_link_just_syms _bfd_generic_link_just_syms
 #define alpha_vms_bfd_copy_link_hash_symbol_type \
   _bfd_generic_copy_link_hash_symbol_type

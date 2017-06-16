@@ -2273,6 +2273,9 @@ extern bfd_reloc_status_type bfd_elf_perform_complex_relocation
 extern bfd_boolean _bfd_elf_setup_sections
   (bfd *);
 
+extern struct bfd_link_hash_entry *bfd_elf_define_start_stop
+  (struct bfd_link_info *, const char *, asection *);
+
 extern void _bfd_elf_post_process_headers (bfd * , struct bfd_link_info *);
 
 extern const bfd_target *bfd_elf32_object_p

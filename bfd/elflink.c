@@ -12738,11 +12738,9 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 
       if (start_stop != NULL)
 	{
-	  /* To work around a glibc bug, mark all XXX input sections
-	     when there is an as yet undefined reference to __start_XXX
-	     or __stop_XXX symbols.  The linker will later define such
-	     symbols for orphan input sections that have a name
-	     representable as a C identifier.  */
+	  /* To work around a glibc bug, mark XXX input sections
+	     when there is a reference to __start_XXX or __stop_XXX
+	     symbols.  */
 	  if (h->start_stop)
 	    {
 	      asection *s = h->u2.start_stop_section;
@@ -14192,4 +14190,26 @@ elf_append_rel (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
   bfd_byte *loc = s->contents + (s->reloc_count++ * bed->s->sizeof_rel);
   BFD_ASSERT (loc + bed->s->sizeof_rel <= s->contents + s->size);
   bed->s->swap_reloc_out (abfd, rel, loc);
+}
+
+/* Define __start, __stop, .startof. or .sizeof. symbol.  */
+
+struct bfd_link_hash_entry *
+bfd_elf_define_start_stop (struct bfd_link_info *info,
+			   const char *symbol, asection *sec)
+{
+  struct bfd_link_hash_entry *h;
+
+  h = bfd_generic_define_start_stop (info, symbol, sec);
+  if (h != NULL)
+    {
+      struct elf_link_hash_entry *eh = (struct elf_link_hash_entry *) h;
+      eh->start_stop = 1;
+      eh->u2.start_stop_section = sec;
+      _bfd_elf_link_hash_hide_symbol (info, eh, TRUE);
+      if (ELF_ST_VISIBILITY (eh->other) != STV_INTERNAL)
+	eh->other = ((eh->other & ~ELF_ST_VISIBILITY (-1))
+		     | STV_HIDDEN);
+    }
+  return h;
 }

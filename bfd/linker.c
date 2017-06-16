@@ -3097,6 +3097,43 @@ bfd_generic_define_common_symbol (bfd *output_bfd,
 
 /*
 FUNCTION
+	bfd_generic_define_start_stop
+
+SYNOPSIS
+	struct bfd_link_hash_entry *bfd_generic_define_start_stop
+	  (struct bfd_link_info *info,
+	   const char *symbol, asection *sec);
+
+DESCRIPTION
+	Define a __start, __stop, .startof. or .sizeof. symbol.
+	Return the symbol or NULL if no such undefined symbol exists.
+
+.#define bfd_define_start_stop(output_bfd, info, symbol, sec) \
+.       BFD_SEND (output_bfd, _bfd_define_start_stop, (info, symbol, sec))
+.
+*/
+
+struct bfd_link_hash_entry *
+bfd_generic_define_start_stop (struct bfd_link_info *info,
+			       const char *symbol, asection *sec)
+{
+  struct bfd_link_hash_entry *h;
+
+  h = bfd_link_hash_lookup (info->hash, symbol, FALSE, FALSE, TRUE);
+  if (h != NULL
+      && (h->type == bfd_link_hash_undefined
+	  || h->type == bfd_link_hash_undefweak))
+    {
+      h->type = bfd_link_hash_defined;
+      h->u.def.section = sec;
+      h->u.def.value = 0;
+      return h;
+    }
+  return NULL;
+}
+
+/*
+FUNCTION
 	bfd_find_version_for_sym
 
 SYNOPSIS

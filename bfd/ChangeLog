@@ -1,3 +1,49 @@
+2017-06-16  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20022
+	PR ld/21557
+	PR ld/21562
+	PR ld/21571
+	* targets.c (struct bfd_target): Add _bfd_define_start_stop.
+	(BFD_JUMP_TABLE_LINK): Likewise.
+	* elf-bfd.h (bfd_elf_define_start_stop): Declare.
+	* elflink.c (_bfd_elf_gc_mark_rsec): Update comment.
+	(bfd_elf_define_start_stop): New function.
+	* linker.c (bfd_generic_define_start_stop): New function.
+	* coff64-rs6000.c (rs6000_xcoff64_vec, rs6000_xcoff64_aix_vec): Init
+	new field.
+	* aout-adobe.c (aout_32_bfd_define_start_stop): Define.
+	* aout-target.h (MY_bfd_define_start_stop): Define.
+	* aout-tic30.c (MY_bfd_define_start_stop): Define.
+	* binary.c (binary_bfd_define_start_stop): Define.
+	* bout.c (b_out_bfd_define_start_stop): Define.
+	* coff-alpha.c (_bfd_ecoff_bfd_define_start_stop): Define.
+	* coff-mips.c (_bfd_ecoff_bfd_define_start_stop): Define.
+	* coff-rs6000.c (_bfd_xcoff_bfd_define_start_stop): Define.
+	* coffcode.h (coff_bfd_define_start_stop): Define.
+	* elfxx-target.h (bfd_elfNN_bfd_define_start_stop): Define.
+	* i386msdos.c (msdos_bfd_define_start_stop): Define.
+	* i386os9k.c (os9k_bfd_define_start_stop): Define.
+	* ieee.c (ieee_bfd_define_start_stop): Define.
+	* ihex.c (ihex_bfd_define_start_stop): Define.
+	* libbfd-in.h (_bfd_nolink_bfd_define_start_stop): Define.
+	* mach-o-target.c (bfd_mach_o_bfd_define_start_stop): Define.
+	* mmo.c (mmo_bfd_define_start_stop): Define.
+	* nlm-target.h (nlm_bfd_define_start_stop): Define.
+	* oasys.c (oasys_bfd_define_start_stop): Define.
+	* pef.c (bfd_pef_bfd_define_start_stop): Define.
+	* plugin.c (bfd_plugin_bfd_define_start_stop): Define.
+	* ppcboot.c (ppcboot_bfd_define_start_stop): Define.
+	* som.c (som_bfd_define_start_stop): Define.
+	* srec.c (srec_bfd_define_start_stop): Define.
+	* tekhex.c (tekhex_bfd_define_start_stop): Define.
+	* versados.c (versados_bfd_define_start_stop): Define.
+	* vms-alpha.c (vms_bfd_define_start_stop): Define.
+	(alpha_vms_bfd_define_start_stop): Define.
+	* xsym.c (bfd_sym_bfd_define_start_stop): Define.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2017-06-16  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Use

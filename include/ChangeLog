@@ -1,3 +1,11 @@
+2017-06-16  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20022
+	PR ld/21557
+	PR ld/21562
+	PR ld/21571
+	* bfdlink.h (struct bfd_link_hash_entry): Delete undef.section.
+
 2017-06-14  Yao Qi  <yao.qi@linaro.org>
 
 	* dis-asm.h (print_insn_aarch64): Move it to opcodes/disassemble.h.
