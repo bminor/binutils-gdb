@@ -1,3 +1,7 @@
+2017-06-15  Eric Christopher  <echristo@gmail.com>
+
+	* aarch64.cc: Fix a few typos and grammar-os.
+
 2017-06-15  Jiong Wang  <jiong.wang@arm.com>
 
 	* aarch64.cc (Insn_utilities::is_mrs_tpidr_el0): New method.
