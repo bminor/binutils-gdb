@@ -6940,7 +6940,7 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	    = compute_bucket_count (info, hashcodes, nsyms, 0);
 	  free (hashcodes);
 
-	  if (bucketcount == 0)
+	  if (bucketcount == 0 && nsyms > 0)
 	    return FALSE;
 
 	  elf_hash_table (info)->bucketcount = bucketcount;
