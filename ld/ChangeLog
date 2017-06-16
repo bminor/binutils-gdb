@@ -1,3 +1,13 @@
+2017-06-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp: Update test name
+	* testsuite/ld-aarch64/pcrel.s: Add new testcases.
+	* testsuite/ld-aarch64/pcrel_pic_undefined.d: Update the expected
+	warnings.
+	* testsuite/ld-aarch64/pcrel_pic_defined_local.d: Rename ...
+	* testsuite/ld-aarch64/pcrel_pic_defined.d: ... to this.
+	Update expected warnings.
+
 2017-06-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* exsup.c (elf_shlib_list_options): Display "-z stack-size=SIZE"

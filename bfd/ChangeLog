@@ -1,3 +1,8 @@
+2017-06-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Use
+	SYMBOL_REFERENCES_LOCAL.
+
 2017-06-15  Jiong Wang  <jiong.wang@arm.com>
 
 	PR ld/21532
