@@ -1,6 +1,13 @@
 2017-06-21  Eric Christopher  <echristo@gmail.com>
 
 	Apply from master
+        2017-06-15  Eric Christopher  <echristo@gmail.com>
+
+	* aarch64.cc: Fix a few typos and grammar-os.
+
+2017-06-21  Eric Christopher  <echristo@gmail.com>
+
+	Apply from master
         2017-06-07  Eric Christopher  <echristo@gmail.com>
 
 	* aarch64.cc (maybe_apply_stub): Add debug logging for looking

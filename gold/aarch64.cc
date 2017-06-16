@@ -920,7 +920,7 @@ private:
 
 // Erratum stub class. An erratum stub differs from a reloc stub in that for
 // each erratum occurrence, we generate an erratum stub. We never share erratum
-// stubs, whereas for reloc stubs, different branches insns share a single reloc
+// stubs, whereas for reloc stubs, different branch insns share a single reloc
 // stub as long as the branch targets are the same. (More to the point, reloc
 // stubs can be shared because they're used to reach a specific target, whereas
 // erratum stubs branch back to the original control flow.)
@@ -3740,7 +3740,8 @@ Target_aarch64<size, big_endian>::scan_reloc_for_stub(
 	}
       else if (gsym->is_undefined())
 	{
-	  // There is no need to generate a stub symbol is undefined.
+          // There is no need to generate a stub symbol if the original symbol
+          // is undefined.
           gold_debug(DEBUG_TARGET,
                      "stub: not creating a stub for undefined symbol %s in file %s",
                      gsym->name(), aarch64_relobj->name().c_str());
@@ -7702,8 +7703,8 @@ Target_aarch64<size, big_endian>::Relocate::tls_ld_to_le(
     {
       // Ideally we should give up gd_to_le relaxation and do gd access.
       // However the gd_to_le relaxation decision has been made early
-      // in the scan stage, where we did not allocate any GOT entry for
-      // this symbol. Therefore we have to exit and report error now.
+      // in the scan stage, where we did not allocate a GOT entry for
+      // this symbol. Therefore we have to exit and report an error now.
       gold_error(_("unexpected reloc insn sequence while relaxing "
 		   "tls gd to le for reloc %u."), r_type);
       return aarch64_reloc_funcs::STATUS_BAD_RELOC;
