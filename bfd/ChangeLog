@@ -1,5 +1,10 @@
 2017-09-07  Palmer Dabbelt  <palmer@dabbelt.com>
 
+	* (_bfd_riscv_relax_align): Call bfd_set_error and
+	print an error message when unable to relax a .align directive.
+
+2017-09-07  Palmer Dabbelt  <palmer@dabbelt.com>
+
 	* elfnn-riscv.c (riscv_zero_pcrel_hi_reloc): New function.
 	(riscv_record_pcrel_hi_reloc): Add absolute argument.
 	(riscv_elf_relocate_section): Call riscv_zero_pcrel_hi_reloc for

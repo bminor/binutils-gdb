@@ -2986,7 +2986,7 @@ _bfd_riscv_relax_tls_le (bfd *abfd,
 
 static bfd_boolean
 _bfd_riscv_relax_align (bfd *abfd, asection *sec,
-			asection *sym_sec ATTRIBUTE_UNUSED,
+			asection *sym_sec,
 			struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 			Elf_Internal_Rela *rel,
 			bfd_vma symval,
@@ -3008,7 +3008,14 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
 
   /* Make sure there are enough NOPs to actually achieve the alignment.  */
   if (rel->r_addend < nop_bytes)
-    return FALSE;
+    {
+      (*_bfd_error_handler)
+	(_("%B(%A+0x%lx): %d bytes required for alignment"
+	   "to %d-byte boundary, but only %d present"),
+	   abfd, sym_sec, rel->r_offset, nop_bytes, alignment, rel->r_addend);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
 
   /* Delete the reloc.  */
   rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
