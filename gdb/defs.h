@@ -82,6 +82,11 @@ enum compile_i_scope_types
     COMPILE_I_PRINT_VALUE_SCOPE,
   };
 
+
+template<typename T>
+using RequireLongest = gdb::Requires<gdb::Or<std::is_same<T, LONGEST>,
+					     std::is_same<T, ULONGEST>>>;
+
 /* Just in case they're not defined in stdio.h.  */
 
 #ifndef SEEK_SET
@@ -637,11 +642,22 @@ enum { MAX_REGISTER_SIZE = 64 };
 
 /* In findvar.c.  */
 
-extern LONGEST extract_signed_integer (const gdb_byte *, int,
-				       enum bfd_endian);
+template<typename T, typename = RequireLongest<T>>
+T extract_integer (const gdb_byte *addr, int len, enum bfd_endian byte_order);
 
-extern ULONGEST extract_unsigned_integer (const gdb_byte *, int,
-					  enum bfd_endian);
+static inline LONGEST
+extract_signed_integer (const gdb_byte *addr, int len,
+			enum bfd_endian byte_order)
+{
+  return extract_integer<LONGEST> (addr, len, byte_order);
+}
+
+static inline ULONGEST
+extract_unsigned_integer (const gdb_byte *addr, int len,
+			  enum bfd_endian byte_order)
+{
+  return extract_integer<ULONGEST> (addr, len, byte_order);
+}
 
 extern int extract_long_unsigned_integer (const gdb_byte *, int,
 					  enum bfd_endian, LONGEST *);
@@ -649,11 +665,26 @@ extern int extract_long_unsigned_integer (const gdb_byte *, int,
 extern CORE_ADDR extract_typed_address (const gdb_byte *buf,
 					struct type *type);
 
-extern void store_signed_integer (gdb_byte *, int,
-				  enum bfd_endian, LONGEST);
+/* All 'store' functions accept a host-format integer and store a
+   target-format integer at ADDR which is LEN bytes long.  */
 
-extern void store_unsigned_integer (gdb_byte *, int,
-				    enum bfd_endian, ULONGEST);
+template<typename T, typename = RequireLongest<T>>
+extern void store_integer (gdb_byte *addr, int len, enum bfd_endian byte_order,
+			   T val);
+
+static inline void
+store_signed_integer (gdb_byte *addr, int len,
+		      enum bfd_endian byte_order, LONGEST val)
+{
+  return store_integer (addr, len, byte_order, val);
+}
+
+static inline void
+store_unsigned_integer (gdb_byte *addr, int len,
+			enum bfd_endian byte_order, ULONGEST val)
+{
+  return store_integer (addr, len, byte_order, val);
+}
 
 extern void store_typed_address (gdb_byte *buf, struct type *type,
 				 CORE_ADDR addr);

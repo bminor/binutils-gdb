@@ -1,3 +1,49 @@
+2017-06-16  Alan Hayward  <alan.hayward@arm.com>
+	    Pedro Alves  <palves@redhat.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* defs.h (RequireLongest): New.
+	(extract_integer): Declare function template.
+	(extract_signed_integer): Remove the declaration, but define it
+	static inline.
+	(extract_unsigned_integer): Likewise.
+	(store_integer): Declare function template.
+	(store_signed_integer): Remove the declaration, but define it
+	static inline.
+	(store_unsigned_integer): Likewise.
+	* findvar.c (extract_integer): New function template.
+	(extract_signed_integer): Remove.
+	(extract_unsigned_integer): Remove.
+	(extract_integer<LONGEST>, extract_integer<ULONGEST>): Explicit
+	instantiations.
+	(store_integer): New function template.
+	(store_signed_integer): Remove.
+	(store_unsigned_integer): Remove.
+	(store_integer): Explicit instantiations.
+	* regcache.c (regcache_raw_read_signed): Update.
+	(regcache::raw_read): New function.
+	(regcache::raw_read_signed): Remove.
+	(regcache::raw_read_unsigned): Remove.
+	(regcache_raw_read_unsigned): Update.
+	(regcache_raw_write_unsigned): Update.
+	(regcache::raw_write_signed): Remove.
+	(regcache::raw_write): New function.
+	(regcache_cooked_read_signed): Update.
+	(regcache::raw_write_unsigned): Remove.
+	(regcache::cooked_read_signed): Remove.
+	(regcache_cooked_read_unsigned): Update.
+	(regcache::cooked_read_unsigned): Remove.
+	(regcache_cooked_write_signed): Update.
+	(regcache_cooked_write_unsigned): Update.
+	* regcache.h (regcache) <raw_read_signed>: Remove.
+	<raw_write_signed, raw_read_unsigned, raw_write_unsigned>: Remove.
+	<raw_read, raw_write>: New.
+	<cooked_read_signed, cooked_write_signed>: Remove.
+	<cooked_write_unsigned, cooked_read_unsigned>: Remove.
+	<cooked_read, cooked_write>: New.
+	* sh64-tdep.c (sh64_pseudo_register_read): Update.
+	(sh64_pseudo_register_write): Update.
+
 2017-06-16  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* arc-tdep.c (arc_disassembler_options): New variable.

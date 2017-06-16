@@ -282,23 +282,19 @@ public:
 #endif
   void raw_write (int regnum, const gdb_byte *buf);
 
-  enum register_status raw_read_signed (int regnum, LONGEST *val);
+  template<typename T, typename = RequireLongest<T>>
+  enum register_status raw_read (int regnum, T *val);
 
-  void raw_write_signed (int regnum, LONGEST val);
-
-  enum register_status raw_read_unsigned (int regnum, ULONGEST *val);
-
-  void raw_write_unsigned (int regnum, ULONGEST val);
+  template<typename T, typename = RequireLongest<T>>
+  void raw_write (int regnum, T val);
 
   struct value *cooked_read_value (int regnum);
 
-  enum register_status cooked_read_signed (int regnum, LONGEST *val);
+  template<typename T, typename = RequireLongest<T>>
+  enum register_status cooked_read (int regnum, T *val);
 
-  void cooked_write_signed (int regnum, LONGEST val);
-
-  enum register_status cooked_read_unsigned (int regnum, ULONGEST *val);
-
-  void cooked_write_unsigned (int regnum, ULONGEST val);
+  template<typename T, typename = RequireLongest<T>>
+  void cooked_write (int regnum, T val);
 
   void raw_update (int regnum);
 
