@@ -1,3 +1,7 @@
+2017-06-16  Alan Modra  <amodra@gmail.com>
+
+	* rx-decode.c: Regenerate.
+
 2017-06-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/21594
