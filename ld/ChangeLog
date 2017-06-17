@@ -1,3 +1,35 @@
+2017-06-18  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (is_underscore_target): New.
+	* testsuite/ld-elf/elf.exp (ASFLAGS): Define UNDERSCORE.
+	* testsuite/ld-elf/pr21562a.s: If UNDERSCORE defined,
+	reference sym with prefix.
+	* testsuite/ld-elf/pr21562b.s: Likewise.
+	* testsuite/ld-elf/sizeof.s: Likewise.
+	* testsuite/ld-elf/startof.s: Likewise.
+	* testsuite/ld-elf/pr14156a.d: Adjust for extra symbols.
+	* testsuite/ld-elf/pr21562a.d: Remove underscore target from
+	xfails, and match prefixed symbol.
+	* testsuite/ld-elf/pr21562b.d: Likewise.
+	* testsuite/ld-elf/pr21562c.d: Likewise.
+	* testsuite/ld-elf/pr21562d.d: Likewise.
+	* testsuite/ld-elf/pr21562e.d: Likewise.
+	* testsuite/ld-elf/pr21562f.d: Likewise.
+	* testsuite/ld-elf/pr21562g.d: Likewise.
+	* testsuite/ld-elf/pr21562h.d: Likewise.
+	* testsuite/ld-elf/pr21562i.d: Likewise.
+	* testsuite/ld-elf/pr21562j.d: Likewise.
+	* testsuite/ld-elf/pr21562k.d: Likewise.
+	* testsuite/ld-elf/pr21562l.d: Likewise.
+	* testsuite/ld-elf/pr21562m.d: Likewise.
+	* testsuite/ld-elf/pr21562n.d: Likewise.
+	* testsuite/ld-elf/sizeofa.d: Likewise.
+	* testsuite/ld-elf/sizeofb.d: Likewise.
+	* testsuite/ld-elf/sizeofc.d: Likewise.
+	* testsuite/ld-elf/startofa.d: Likewise.
+	* testsuite/ld-elf/startofb.d: Likewise.
+	* testsuite/ld-elf/startofc.d: Likewise.
+
 2017-06-16  Alan Modra  <amodra@gmail.com>
 
 	PR ld/20022

@@ -1858,6 +1858,25 @@ proc is_generic_elf { } {
     return 0;
 }
 
+proc is_underscore_target { } {
+    global is_underscore_target_saved
+    global target_triplet
+    global srcdir
+
+    if { ![info exists is_underscore_target_saved] } {
+	set cmd "targ=$target_triplet . $srcdir/../../bfd/config.bfd &&"
+	append cmd { echo "$targ_underscore"}
+	verbose -log "$cmd"
+	set status [catch {exec sh -c $cmd} result]
+	if { $status == 0 && [string match "yes" $result] } {
+	    set is_underscore_target_saved 1
+	} else {
+	    set is_underscore_target_saved 0
+	}
+    }
+    return $is_underscore_target_saved
+}
+
 # Returns true if the target ld supports the plugin API.
 proc check_plugin_api_available { } {
     global plugin_api_available_saved
