@@ -1,5 +1,10 @@
 2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* linux-low.c (linux_read_memory, linux_write_memory): Remove
+	usage of "register" keyword.
+
+2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* configure: Re-generate.
 
 2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
