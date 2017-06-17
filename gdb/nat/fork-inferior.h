@@ -95,7 +95,7 @@ extern void gdb_flush_out_err ();
    (i.e., when the "traceme_fun" callback is called on fork_inferior)
    and bail out.  This function does not return.  */
 extern void trace_start_error (const char *fmt, ...)
-  ATTRIBUTE_NORETURN;
+  ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
 
 /* Like "trace_start_error", but the error message is constructed by
    combining STRING with the system error message for errno.  This
