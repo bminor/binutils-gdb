@@ -1,6 +1,11 @@
 2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* configure: Re-generate.
+	* warning.m4 (build_warnings): Add -Wno-mismatched-tags.
+
+2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure: Re-generate.
 	* warning.m4: Pass -Werror to compiler when checking for
 	supported warning flags.
 

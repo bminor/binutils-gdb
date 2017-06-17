@@ -4,6 +4,10 @@
 
 2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* configure: Re-generate.
+
+2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* Makefile.in (COMPILE.pre): Add "-x c++".
 
 2017-06-09  Sergio Durigan Junior  <sergiodj@redhat.com>
