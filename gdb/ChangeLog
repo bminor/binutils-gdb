@@ -1,3 +1,8 @@
+2017-06-18  Thomas Petazzoni  <thomas.petazzoni@free-electrons.com>
+
+	* nat/linux-ptrace.c (linux_fork_to_function): Add cast to
+	gdb_byte*.
+
 2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* nat/fork-inferior.h (trace_start_error): Add ATTRIBUTE_PRINTF.
