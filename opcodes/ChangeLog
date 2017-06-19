@@ -1,5 +1,10 @@
 2017-06-29  Anton Kolesov  <Anton.Kolesov@synopsys.com>
 
+	* arc-dis.c (parse_disassembler_options): Use
+	FOR_EACH_DISASSEMBLER_OPTION.
+
+2017-06-29  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
 	* arc-dis.c (parse_option): Use disassembler_options_cmp to compare
 	disassembler option strings.
 	(parse_cpu_option): Likewise.

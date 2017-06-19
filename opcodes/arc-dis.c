@@ -823,6 +823,8 @@ parse_cpu_option (const char *option)
 static void
 parse_disassembler_options (const char *options)
 {
+  const char *option;
+
   if (options == NULL)
     return;
 
@@ -832,25 +834,15 @@ parse_disassembler_options (const char *options)
      CPU when new options are being parsed.  */
   enforced_isa_mask = ARC_OPCODE_NONE;
 
-  while (*options)
+  FOR_EACH_DISASSEMBLER_OPTION (option, options)
     {
-      /* Skip empty options.  */
-      if (*options == ',')
-	{
-	  ++ options;
-	  continue;
-	}
-
       /* A CPU option?  Cannot use STRING_COMMA_LEN because strncmp is also a
 	 preprocessor macro.  */
-      if (strncmp (options, "cpu=", 4) == 0)
+      if (strncmp (option, "cpu=", 4) == 0)
 	/* Strip leading `cpu=`.  */
-	enforced_isa_mask = parse_cpu_option (options + 4);
+	enforced_isa_mask = parse_cpu_option (option + 4);
       else
-	parse_option (options);
-
-      while (*options != ',' && *options != '\0')
-	++ options;
+	parse_option (option);
     }
 }
 
