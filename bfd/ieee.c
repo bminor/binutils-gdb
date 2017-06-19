@@ -170,7 +170,7 @@ ieee_write_id (bfd *abfd, const char *id)
    standard requires.  */
 
 #define this_byte(ieee)           *((ieee)->input_p)
-#define this_byte_and_next(ieee) (*((ieee)->input_p++))
+#define this_byte_and_next(ieee) ((ieee)->input_p < (ieee)->end_p ? *((ieee)->input_p++) : 0)
 
 static bfd_boolean
 next_byte (common_header_type * ieee)
@@ -218,6 +218,15 @@ read_id (common_header_type *ieee)
       /* Length is next two bytes, allowing 0..65535.  */
       length = this_byte_and_next (ieee);
       length = (length * 256) + this_byte_and_next (ieee);
+    }
+
+  /* PR 21612: Check for an invalid length.  */
+  if (ieee->input_p + length >= ieee->end_p)
+    {
+      _bfd_error_handler (_("IEEE parser: string length: %#lx longer than buffer: %#lx"),
+			  length, (long) (ieee->end_p - ieee->input_p));
+      bfd_set_error (bfd_error_invalid_operation);
+      return NULL;
     }
 
   /* Buy memory and read string.  */
@@ -699,12 +708,12 @@ ieee_seek (ieee_data_type * ieee, file_ptr offset)
   if (offset < 0 || (bfd_size_type) offset >= ieee->h.total_amt)
     {
       ieee->h.input_p = ieee->h.first_byte + ieee->h.total_amt;
-      ieee->h.last_byte = ieee->h.input_p;
+      ieee->h.end_p = ieee->h.last_byte = ieee->h.input_p;
       return FALSE;
     }
 
   ieee->h.input_p = ieee->h.first_byte + offset;
-  ieee->h.last_byte = (ieee->h.first_byte + ieee_part_after (ieee, offset));
+  ieee->h.end_p = ieee->h.last_byte = (ieee->h.first_byte + ieee_part_after (ieee, offset));
   return TRUE;
 }
 
@@ -1375,6 +1384,8 @@ ieee_archive_p (bfd *abfd)
 
   ieee->h.first_byte = buffer;
   ieee->h.input_p = buffer;
+  ieee->h.total_amt = sizeof (buffer);
+  ieee->h.end_p = buffer + sizeof (buffer);
 
   ieee->h.abfd = abfd;
 
@@ -1442,6 +1453,8 @@ ieee_archive_p (bfd *abfd)
 	  bfd_bread ((void *) buffer, (bfd_size_type) sizeof (buffer), abfd);
 	  ieee->h.first_byte = buffer;
 	  ieee->h.input_p = buffer;
+	  ieee->h.total_amt = sizeof (buffer);
+	  ieee->h.end_p = buffer + sizeof (buffer);
 	}
     }
 
@@ -1465,6 +1478,8 @@ ieee_archive_p (bfd *abfd)
       bfd_bread ((void *) buffer, (bfd_size_type) sizeof (buffer), abfd);
       ieee->h.first_byte = buffer;
       ieee->h.input_p = buffer;
+      ieee->h.total_amt = sizeof (buffer);
+      ieee->h.end_p = buffer + sizeof (buffer);
 
       (void) next_byte (&(ieee->h));	/* Drop F8.  */
       if (! next_byte (&(ieee->h)))	/* Drop 14.  */
@@ -1890,6 +1905,8 @@ ieee_object_p (bfd *abfd)
 
   ieee->h.input_p = buffer;
   ieee->h.total_amt = sizeof (buffer);
+  ieee->h.end_p = buffer + sizeof (buffer);
+
   if (this_byte_and_next (&(ieee->h)) != Module_Beginning)
     goto got_wrong_format;
 

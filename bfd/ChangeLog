@@ -1,5 +1,17 @@
 2017-06-19  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21612
+	* libieee.h (struct common_header_type): Add end_p field.
+	* ieee.c (this_byte_and_next): Do not advance input_p beyond
+	end_p.
+	(read_id): Check for a length that exceeds the remaining bytes in
+	the input buffer.
+	(ieee_seek): Initialise end_p.
+	(ieee_archive_p): Likewise.
+	(ieee_object_p): Likewise.
+
+2017-06-19  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21611
 	* vms-alpha.c (_bfd_vms_slurp_eihs): Check for invalid offset
 	before reading the EIHS structure entries.
