@@ -622,13 +622,28 @@ static bfd_boolean
 _bfd_vms_slurp_eihs (bfd *abfd, unsigned int offset)
 {
   unsigned char *p = PRIV (recrd.rec) + offset;
-  unsigned int gstvbn = bfd_getl32 (p + EIHS__L_GSTVBN);
-  unsigned int gstsize ATTRIBUTE_UNUSED = bfd_getl32 (p + EIHS__L_GSTSIZE);
-  unsigned int dstvbn = bfd_getl32 (p + EIHS__L_DSTVBN);
-  unsigned int dstsize = bfd_getl32 (p + EIHS__L_DSTSIZE);
-  unsigned int dmtvbn = bfd_getl32 (p + EIHS__L_DMTVBN);
-  unsigned int dmtbytes = bfd_getl32 (p + EIHS__L_DMTBYTES);
+  unsigned int gstvbn;
+  unsigned int gstsize ATTRIBUTE_UNUSED;
+  unsigned int dstvbn;
+  unsigned int dstsize;
+  unsigned int dmtvbn;
+  unsigned int dmtbytes;
   asection *section;
+
+  /* PR 21611: Check that offset is valid.  */
+  if (offset > PRIV (recrd.rec_size) - (EIHS__L_DMTBYTES + 4))
+    {
+      _bfd_error_handler (_("Unable to read EIHS record at offset %#x"), offset); 
+      bfd_set_error (bfd_error_file_truncated);
+      return FALSE;
+    }
+
+  gstvbn   = bfd_getl32 (p + EIHS__L_GSTVBN);
+  gstsize  = bfd_getl32 (p + EIHS__L_GSTSIZE);
+  dstvbn   = bfd_getl32 (p + EIHS__L_DSTVBN);
+  dstsize  = bfd_getl32 (p + EIHS__L_DSTSIZE);
+  dmtvbn   = bfd_getl32 (p + EIHS__L_DMTVBN);
+  dmtbytes = bfd_getl32 (p + EIHS__L_DMTBYTES);
 
 #if VMS_DEBUG
   vms_debug (8, "_bfd_vms_slurp_ihs\n");

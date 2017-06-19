@@ -1,6 +1,12 @@
 2017-06-19  Nick Clifton  <nickc@redhat.com>
 
-	PR 21615
+	PR binutils/21611
+	* vms-alpha.c (_bfd_vms_slurp_eihs): Check for invalid offset
+	before reading the EIHS structure entries.
+
+2017-06-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21615
 	* vms-alpha.c (_bfd_vms_slurp_egsd): Use unsigned int for
 	gsd_size.  Check that there are enough bytes remaining to read the
 	type and size of the next egsd.  Check that the size of the egsd
