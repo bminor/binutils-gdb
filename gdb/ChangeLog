@@ -1,3 +1,8 @@
+2017-06-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* mips-tdep.c (print_gp_register_row): Don't error for unavailable
+	registers.
+
 2017-06-19  Pedro Alves  <palves@redhat.com>
 
 	* dwarf2read.c (write_psymtabs_to_index): Construct file_closer
