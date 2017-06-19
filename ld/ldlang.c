@@ -5878,95 +5878,171 @@ section_for_dot (void)
   return bfd_abs_section_ptr;
 }
 
-/* Fix any .startof., .sizeof., __start or __stop symbols.  When the
-   assemblers see the operator .startof. (section_name), it produces
-   an undefined symbol .startof.section_name.  Similarly, when it sees
-   .sizeof. (section_name), it produces an undefined symbol
-   .sizeof.section_name.  Also for ELF linker, __start_XXX or __stop_XXX
-   symbols should be resolved to the start and end of section XXX.  For
-   all the output sections, we look for such symbols, and set them to
-   the correct value.  */
+/* Array of __start/__stop/.startof./.sizeof/ symbols.  */
+
+static struct bfd_link_hash_entry **start_stop_syms;
+static size_t start_stop_count = 0;
+static size_t start_stop_alloc = 0;
+
+/* Give start/stop SYMBOL for SEC a preliminary definition, and add it
+   to start_stop_syms.  */
 
 static void
-lang_set_startof (void)
+lang_define_start_stop (const char *symbol, asection *sec)
 {
-  asection *s;
-  char leading_char;
-  bfd_boolean is_elf;
-  bfd_boolean is_relocatable;
+  struct bfd_link_hash_entry *h;
 
-  if (!config.build_constructors)
+  h = bfd_define_start_stop (link_info.output_bfd, &link_info, symbol, sec);
+  if (h != NULL)
+    {
+      if (start_stop_count == start_stop_alloc)
+	{
+	  start_stop_alloc = 2 * start_stop_alloc + 10;
+	  start_stop_syms
+	    = xrealloc (start_stop_syms,
+			start_stop_alloc * sizeof (*start_stop_syms));
+	}
+      start_stop_syms[start_stop_count++] = h;
+    }
+}
+
+/* Check for input sections whose names match references to
+   __start_SECNAME or __stop_SECNAME symbols.  Give the symbols
+   preliminary definitions.  */
+
+static void
+lang_init_start_stop (void)
+{
+  bfd *abfd;
+  asection *s;
+  char leading_char = bfd_get_symbol_leading_char (link_info.output_bfd);
+
+  for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link.next)
+    for (s = abfd->sections; s != NULL; s = s->next)
+      {
+	const char *ps;
+	const char *secname = s->name;
+
+	for (ps = secname; *ps != '\0'; ps++)
+	  if (!ISALNUM ((unsigned char) *ps) && *ps != '_')
+	    break;
+	if (*ps == '\0')
+	  {
+	    char *symbol = (char *) xmalloc (10 + strlen (secname));
+
+	    symbol[0] = leading_char;
+	    sprintf (symbol + (leading_char != 0), "__start_%s", secname);
+	    lang_define_start_stop (symbol, s);
+
+	    symbol[1] = leading_char;
+	    memcpy (symbol + 1 + (leading_char != 0), "__stop", 6);
+	    lang_define_start_stop (symbol + 1, s);
+
+	    free (symbol);
+	  }
+      }
+}
+
+/* Iterate over start_stop_syms.  */
+
+static void
+foreach_start_stop (void (*func) (struct bfd_link_hash_entry *))
+{
+  size_t i;
+
+  for (i = 0; i < start_stop_count; ++i)
+    func (start_stop_syms[i]);
+}
+
+/* __start and __stop symbols are only supposed to be defined by the
+   linker for orphan sections, but we now extend that to sections that
+   map to an output section of the same name.  The symbols were
+   defined early for --gc-sections, before we mapped input to output
+   sections, so undo those that don't satisfy this rule.  */
+
+static void
+undef_start_stop (struct bfd_link_hash_entry *h)
+{
+  if (h->ldscript_def)
     return;
 
-  is_elf = (bfd_get_flavour (link_info.output_bfd)
-	    == bfd_target_elf_flavour);
-  is_relocatable = bfd_link_relocatable (&link_info);
+  if (h->u.def.section->output_section == NULL
+      || h->u.def.section->output_section->owner != link_info.output_bfd
+      || strcmp (h->u.def.section->name,
+		 h->u.def.section->output_section->name) != 0)
+    {
+      h->type = bfd_link_hash_undefined;
+      h->u.undef.abfd = NULL;
+    }
+}
 
-  leading_char = bfd_get_symbol_leading_char (link_info.output_bfd);
+static void
+lang_undef_start_stop (void)
+{
+  foreach_start_stop (undef_start_stop);
+}
+
+/* Check for output sections whose names match references to
+   .startof.SECNAME or .sizeof.SECNAME symbols.  Give the symbols
+   preliminary definitions.  */
+
+static void
+lang_init_startof_sizeof (void)
+{
+  asection *s;
 
   for (s = link_info.output_bfd->sections; s != NULL; s = s->next)
     {
-      const char *secname;
-      char *buf;
-      struct bfd_link_hash_entry *h;
+      const char *secname = s->name;
+      char *symbol = (char *) xmalloc (10 + strlen (secname));
 
-      secname = bfd_get_section_name (link_info.output_bfd, s);
-      buf = (char *) xmalloc (10 + strlen (secname));
+      sprintf (symbol, ".startof.%s", secname);
+      lang_define_start_stop (symbol, s);
 
-      if (!is_relocatable)
-	{
-	  sprintf (buf, ".startof.%s", secname);
-	  h = bfd_link_hash_lookup (link_info.hash, buf, FALSE, FALSE,
-				    TRUE);
-	  if (h != NULL && h->type == bfd_link_hash_undefined)
-	    {
-	      h->type = bfd_link_hash_defined;
-	      h->u.def.value = 0;
-	      h->u.def.section = s;
-	    }
-
-	  sprintf (buf, ".sizeof.%s", secname);
-	  h = bfd_link_hash_lookup (link_info.hash, buf, FALSE, FALSE,
-				    TRUE);
-	  if (h != NULL && h->type == bfd_link_hash_undefined)
-	    {
-	      h->type = bfd_link_hash_defined;
-	      h->u.def.value = TO_ADDR (s->size);
-	      h->u.def.section = bfd_abs_section_ptr;
-	    }
-	}
-
-      buf[0] = leading_char;
-      sprintf (buf + (buf[0] != 0), "__start_%s", secname);
-      h = bfd_link_hash_lookup (link_info.hash, buf, FALSE, FALSE,
-				TRUE);
-      if (h != NULL
-	  && (h->type == bfd_link_hash_undefined
-	      || h->type == bfd_link_hash_undefweak))
-	{
-	  h->type = bfd_link_hash_defined;
-	  h->u.def.value = 0;
-	  h->u.def.section = s;
-	  if (is_elf)
-	    ((struct elf_link_hash_entry *) h)->def_regular = 1;
-	}
-
-      buf[0] = leading_char;
-      sprintf (buf + (buf[0] != 0), "__stop_%s", secname);
-      h = bfd_link_hash_lookup (link_info.hash, buf, FALSE, FALSE,
-				TRUE);
-      if (h != NULL
-	  && (h->type == bfd_link_hash_undefined
-	      || h->type == bfd_link_hash_undefweak))
-	{
-	  h->type = bfd_link_hash_defined;
-	  h->u.def.value = TO_ADDR (s->size);
-	  h->u.def.section = s;
-	  if (is_elf)
-	    ((struct elf_link_hash_entry *) h)->def_regular = 1;
-	}
-      free (buf);
+      memcpy (symbol + 1, ".size", 5);
+      lang_define_start_stop (symbol + 1, s);
+      free (symbol);
     }
+}
+
+/* Set .startof., .sizeof., __start and __stop symbols final values.  */
+
+static void
+set_start_stop (struct bfd_link_hash_entry *h)
+{
+  if (h->ldscript_def
+      || h->type != bfd_link_hash_defined)
+    return;
+
+  if (h->root.string[0] == '.')
+    {
+      /* .startof. or .sizeof. symbol.
+	 .startof. already has final value.  */
+      if (h->root.string[2] == 'i')
+	{
+	  /* .sizeof.  */
+	  h->u.def.value = TO_ADDR (h->u.def.section->size);
+	  h->u.def.section = bfd_abs_section_ptr;
+	}
+    }
+  else
+    {
+      /* __start or __stop symbol.  */
+      int has_lead = bfd_get_symbol_leading_char (link_info.output_bfd) != 0;
+
+      h->u.def.section = h->u.def.section->output_section;
+      if (h->root.string[4 + has_lead] == 'o')
+	{
+	  /* __stop_ */
+	  h->u.def.value = TO_ADDR (h->u.def.section->size);
+	}
+    }
+}
+
+static void
+lang_finalize_start_stop (void)
+{
+  foreach_start_stop (set_start_stop);
 }
 
 static void
@@ -7035,6 +7111,12 @@ lang_process (void)
      files.  */
   ldctor_build_sets ();
 
+  /* Give initial values for __start and __stop symbols, so that  ELF
+     gc_sections will keep sections referenced by these symbols.  Must
+     be done before lang_do_assignments below.  */
+  if (config.build_constructors)
+    lang_init_start_stop ();
+
   /* PR 13683: We must rerun the assignments prior to running garbage
      collection in order to make sure that all symbol aliases are resolved.  */
   lang_do_assignments (lang_mark_phase_enum);
@@ -7089,6 +7171,17 @@ lang_process (void)
   /* Copy forward lma regions for output sections in same lma region.  */
   lang_propagate_lma_regions ();
 
+  /* Defining __start/__stop symbols early for --gc-sections to work
+     around a glibc build problem can result in these symbols being
+     defined when they should not be.  Fix them now.  */
+  if (config.build_constructors)
+    lang_undef_start_stop ();
+
+  /* Define .startof./.sizeof. symbols with preliminary values before
+     dynamic symbols are created.  */
+  if (!bfd_link_relocatable (&link_info))
+    lang_init_startof_sizeof ();
+
   /* Do anything special before sizing sections.  This is where ELF
      and other back-ends size dynamic sections.  */
   ldemul_before_allocation ();
@@ -7108,8 +7201,8 @@ lang_process (void)
      everything is.  This is where relaxation is done.  */
   ldemul_after_allocation ();
 
-  /* Fix any .startof. or .sizeof. symbols.  */
-  lang_set_startof ();
+  /* Fix any __start, __stop, .startof. or .sizeof. symbols.  */
+  lang_finalize_start_stop ();
 
   /* Do all the assignments, now that we know the final resting places
      of all the symbols.  */

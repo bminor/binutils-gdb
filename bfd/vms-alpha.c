@@ -1121,7 +1121,8 @@ add_symbol (bfd *abfd, const unsigned char *ascic)
 static bfd_boolean
 _bfd_vms_slurp_egsd (bfd *abfd)
 {
-  int gsd_type, gsd_size;
+  int gsd_type;
+  unsigned int gsd_size;
   unsigned char *vms_rec;
   unsigned long base_addr;
 
@@ -1133,7 +1134,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
   /* Calculate base address for each section.  */
   base_addr = 0L;
 
-  while (PRIV (recrd.rec_size) > 0)
+  while (PRIV (recrd.rec_size) > 4)
     {
       vms_rec = PRIV (recrd.rec);
 
@@ -1141,6 +1142,15 @@ _bfd_vms_slurp_egsd (bfd *abfd)
       gsd_size = bfd_getl16 (vms_rec + 2);
 
       vms_debug2 ((3, "egsd_type %d\n", gsd_type));
+
+      /* PR 21615: Check for size overflow.  */
+      if (PRIV (recrd.rec_size) < gsd_size)
+	{
+	  _bfd_error_handler (_("Corrupt EGSD record: size (%#x) is larger than remaining space (%#x)"),
+			      gsd_size, PRIV (recrd.rec_size));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
 
       switch (gsd_type)
 	{
@@ -1745,20 +1755,20 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 
       ptr += 4;
 
-#if VMS_DEBUG
-      _bfd_vms_debug (4, "etir: %s(%d)\n",
-                      _bfd_vms_etir_name (cmd), cmd);
-      _bfd_hexdump (8, ptr, cmd_length - 4, 0);
-#endif
-
-      /* PR 21589: Check for a corrupt ETIR record.  */
-      if (cmd_length < 4)
+      /* PR 21589 and 21579: Check for a corrupt ETIR record.  */
+      if (cmd_length < 4 || (ptr + cmd_length > maxptr + 4))
 	{
 	corrupt_etir:
 	  _bfd_error_handler (_("Corrupt ETIR record encountered"));
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
+
+#if VMS_DEBUG
+      _bfd_vms_debug (4, "etir: %s(%d)\n",
+                      _bfd_vms_etir_name (cmd), cmd);
+      _bfd_hexdump (8, ptr, cmd_length - 4, 0);
+#endif
 
       switch (cmd)
         {
@@ -9311,6 +9321,7 @@ bfd_vms_get_data (bfd *abfd)
 #define vms_bfd_discard_group             bfd_generic_discard_group
 #define vms_section_already_linked        _bfd_generic_section_already_linked
 #define vms_bfd_define_common_symbol      bfd_generic_define_common_symbol
+#define vms_bfd_define_start_stop      bfd_generic_define_start_stop
 #define vms_bfd_copy_private_header_data  _bfd_generic_bfd_copy_private_header_data
 
 #define vms_bfd_copy_private_bfd_data	  _bfd_generic_bfd_copy_private_bfd_data
@@ -9358,6 +9369,7 @@ bfd_vms_get_data (bfd *abfd)
   _bfd_generic_section_already_linked
 
 #define alpha_vms_bfd_define_common_symbol bfd_generic_define_common_symbol
+#define alpha_vms_bfd_define_start_stop bfd_generic_define_start_stop
 #define alpha_vms_bfd_link_just_syms _bfd_generic_link_just_syms
 #define alpha_vms_bfd_copy_link_hash_symbol_type \
   _bfd_generic_copy_link_hash_symbol_type

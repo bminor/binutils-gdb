@@ -6344,7 +6344,7 @@ sh_elf_set_mach_from_flags (bfd *abfd)
 {
   flagword flags = elf_elfheader (abfd)->e_flags & EF_SH_MACH_MASK;
 
-  if (flags >= sizeof(sh_ef_bfd_table))
+  if (flags >= ARRAY_SIZE (sh_ef_bfd_table))
     return FALSE;
 
   if (sh_ef_bfd_table[flags] == 0)

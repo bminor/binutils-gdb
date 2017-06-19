@@ -3926,7 +3926,7 @@ static int
 ia64_print_insn (bfd_vma memaddr, struct disassemble_info *info)
 {
   info->bytes_per_line = SLOT_MULTIPLIER;
-  return print_insn_ia64 (memaddr, info);
+  return default_print_insn (memaddr, info);
 }
 
 /* The default "size_of_register_frame" gdbarch_tdep routine for ia64.  */

@@ -47,70 +47,54 @@
 you lose
 #endif
 
-LONGEST
-extract_signed_integer (const gdb_byte *addr, int len,
-			enum bfd_endian byte_order)
+template<typename T, typename>
+T
+extract_integer (const gdb_byte *addr, int len, enum bfd_endian byte_order)
 {
-  LONGEST retval;
+  T retval = 0;
   const unsigned char *p;
   const unsigned char *startaddr = addr;
   const unsigned char *endaddr = startaddr + len;
 
-  if (len > (int) sizeof (LONGEST))
+  if (len > (int) sizeof (T))
     error (_("\
 That operation is not available on integers of more than %d bytes."),
-	   (int) sizeof (LONGEST));
+	   (int) sizeof (T));
 
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
   if (byte_order == BFD_ENDIAN_BIG)
     {
       p = startaddr;
-      /* Do the sign extension once at the start.  */
-      retval = ((LONGEST) * p ^ 0x80) - 0x80;
-      for (++p; p < endaddr; ++p)
+      if (std::is_signed<T>::value)
+	{
+	  /* Do the sign extension once at the start.  */
+	  retval = ((LONGEST) * p ^ 0x80) - 0x80;
+	  ++p;
+	}
+      for (; p < endaddr; ++p)
 	retval = (retval << 8) | *p;
     }
   else
     {
       p = endaddr - 1;
-      /* Do the sign extension once at the start.  */
-      retval = ((LONGEST) * p ^ 0x80) - 0x80;
-      for (--p; p >= startaddr; --p)
+      if (std::is_signed<T>::value)
+	{
+	  /* Do the sign extension once at the start.  */
+	  retval = ((LONGEST) * p ^ 0x80) - 0x80;
+	  --p;
+	}
+      for (; p >= startaddr; --p)
 	retval = (retval << 8) | *p;
     }
   return retval;
 }
 
-ULONGEST
-extract_unsigned_integer (const gdb_byte *addr, int len,
-			  enum bfd_endian byte_order)
-{
-  ULONGEST retval;
-  const unsigned char *p;
-  const unsigned char *startaddr = addr;
-  const unsigned char *endaddr = startaddr + len;
-
-  if (len > (int) sizeof (ULONGEST))
-    error (_("\
-That operation is not available on integers of more than %d bytes."),
-	   (int) sizeof (ULONGEST));
-
-  /* Start at the most significant end of the integer, and work towards
-     the least significant.  */
-  retval = 0;
-  if (byte_order == BFD_ENDIAN_BIG)
-    {
-      for (p = startaddr; p < endaddr; ++p)
-	retval = (retval << 8) | *p;
-    }
-  else
-    {
-      for (p = endaddr - 1; p >= startaddr; --p)
-	retval = (retval << 8) | *p;
-    }
-  return retval;
-}
+/* Explicit instantiations.  */
+template LONGEST extract_integer<LONGEST> (const gdb_byte *addr, int len,
+					   enum bfd_endian byte_order);
+template ULONGEST extract_integer<ULONGEST> (const gdb_byte *addr, int len,
+					     enum bfd_endian byte_order);
 
 /* Sometimes a long long unsigned integer can be extracted as a
    LONGEST value.  This is done so that we can print these values
@@ -180,10 +164,10 @@ extract_typed_address (const gdb_byte *buf, struct type *type)
 
 /* All 'store' functions accept a host-format integer and store a
    target-format integer at ADDR which is LEN bytes long.  */
-
+template<typename T, typename>
 void
-store_signed_integer (gdb_byte *addr, int len,
-		      enum bfd_endian byte_order, LONGEST val)
+store_integer (gdb_byte *addr, int len, enum bfd_endian byte_order,
+	       T val)
 {
   gdb_byte *p;
   gdb_byte *startaddr = addr;
@@ -209,33 +193,14 @@ store_signed_integer (gdb_byte *addr, int len,
     }
 }
 
-void
-store_unsigned_integer (gdb_byte *addr, int len,
-			enum bfd_endian byte_order, ULONGEST val)
-{
-  unsigned char *p;
-  unsigned char *startaddr = (unsigned char *) addr;
-  unsigned char *endaddr = startaddr + len;
+/* Explicit instantiations.  */
+template void store_integer (gdb_byte *addr, int len,
+			     enum bfd_endian byte_order,
+			     LONGEST val);
 
-  /* Start at the least significant end of the integer, and work towards
-     the most significant.  */
-  if (byte_order == BFD_ENDIAN_BIG)
-    {
-      for (p = endaddr - 1; p >= startaddr; --p)
-	{
-	  *p = val & 0xff;
-	  val >>= 8;
-	}
-    }
-  else
-    {
-      for (p = startaddr; p < endaddr; ++p)
-	{
-	  *p = val & 0xff;
-	  val >>= 8;
-	}
-    }
-}
+template void store_integer (gdb_byte *addr, int len,
+			     enum bfd_endian byte_order,
+			     ULONGEST val);
 
 /* Store the address ADDR as a pointer of type TYPE at BUF, in target
    form.  */

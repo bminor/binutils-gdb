@@ -8,5 +8,5 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 #...
  +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +UND +.startof.scnfoo
 #...
- +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +UND +__start_scnfoo
+ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +UND +___?start_scnfoo
 #pass

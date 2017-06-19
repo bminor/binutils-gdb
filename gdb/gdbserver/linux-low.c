@@ -5870,11 +5870,11 @@ static int
 linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
   int pid = lwpid_of (current_thread);
-  register PTRACE_XFER_TYPE *buffer;
-  register CORE_ADDR addr;
-  register int count;
+  PTRACE_XFER_TYPE *buffer;
+  CORE_ADDR addr;
+  int count;
   char filename[64];
-  register int i;
+  int i;
   int ret;
   int fd;
 
@@ -5958,16 +5958,16 @@ linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 static int
 linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 {
-  register int i;
+  int i;
   /* Round starting address down to longword boundary.  */
-  register CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
+  CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
   /* Round ending address up; get number of longwords that makes.  */
-  register int count
+  int count
     = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
     / sizeof (PTRACE_XFER_TYPE);
 
   /* Allocate buffer of that many longwords.  */
-  register PTRACE_XFER_TYPE *buffer = XALLOCAVEC (PTRACE_XFER_TYPE, count);
+  PTRACE_XFER_TYPE *buffer = XALLOCAVEC (PTRACE_XFER_TYPE, count);
 
   int pid = lwpid_of (current_thread);
 

@@ -269,6 +269,9 @@
 #ifndef bfd_elfNN_bfd_link_add_symbols
 #define bfd_elfNN_bfd_link_add_symbols	bfd_elf_link_add_symbols
 #endif
+#ifndef bfd_elfNN_bfd_define_start_stop
+#define bfd_elfNN_bfd_define_start_stop bfd_elf_define_start_stop
+#endif
 #ifndef bfd_elfNN_bfd_final_link
 #define bfd_elfNN_bfd_final_link	bfd_elf_final_link
 #endif
@@ -288,6 +291,9 @@
 #endif
 #ifndef bfd_elfNN_bfd_link_add_symbols
 #define bfd_elfNN_bfd_link_add_symbols	_bfd_generic_link_add_symbols
+#endif
+#ifndef bfd_elfNN_bfd_define_start_stop
+#define bfd_elfNN_bfd_define_start_stop bfd_generic_define_start_stop
 #endif
 #ifndef bfd_elfNN_bfd_final_link
 #define bfd_elfNN_bfd_final_link	_bfd_generic_final_link

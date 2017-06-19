@@ -1355,7 +1355,7 @@ ieee_archive_p (bfd *abfd)
 {
   char *library;
   unsigned int i;
-  unsigned char buffer[512];
+  static unsigned char buffer[512];
   file_ptr buffer_offset = 0;
   ieee_ar_data_type *save = abfd->tdata.ieee_ar_data;
   ieee_ar_data_type *ieee;
@@ -1873,7 +1873,7 @@ ieee_object_p (bfd *abfd)
   char *processor;
   unsigned int part;
   ieee_data_type *ieee;
-  unsigned char buffer[300];
+  static unsigned char buffer[300];
   ieee_data_type *save = IEEE_DATA (abfd);
   bfd_size_type amt;
 
@@ -3872,6 +3872,7 @@ ieee_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 #define ieee_section_already_linked \
   _bfd_generic_section_already_linked
 #define ieee_bfd_define_common_symbol bfd_generic_define_common_symbol
+#define ieee_bfd_define_start_stop bfd_generic_define_start_stop
 #define ieee_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define ieee_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define ieee_bfd_link_just_syms _bfd_generic_link_just_syms

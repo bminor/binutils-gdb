@@ -662,11 +662,12 @@ enum register_status
 regcache_raw_read_signed (struct regcache *regcache, int regnum, LONGEST *val)
 {
   gdb_assert (regcache != NULL);
-  return regcache->raw_read_signed (regnum, val);
+  return regcache->raw_read (regnum, val);
 }
 
+template<typename T, typename>
 enum register_status
-regcache::raw_read_signed (int regnum, LONGEST *val)
+regcache::raw_read (int regnum, T *val)
 {
   gdb_byte *buf;
   enum register_status status;
@@ -675,9 +676,9 @@ regcache::raw_read_signed (int regnum, LONGEST *val)
   buf = (gdb_byte *) alloca (m_descr->sizeof_register[regnum]);
   status = raw_read (regnum, buf);
   if (status == REG_VALID)
-    *val = extract_signed_integer
-      (buf, m_descr->sizeof_register[regnum],
-       gdbarch_byte_order (m_descr->gdbarch));
+    *val = extract_integer<T> (buf,
+			       m_descr->sizeof_register[regnum],
+			       gdbarch_byte_order (m_descr->gdbarch));
   else
     *val = 0;
   return status;
@@ -688,44 +689,26 @@ regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
 			    ULONGEST *val)
 {
   gdb_assert (regcache != NULL);
-  return regcache->raw_read_unsigned (regnum, val);
-}
-
-
-enum register_status
-regcache::raw_read_unsigned (int regnum, ULONGEST *val)
-{
-  gdb_byte *buf;
-  enum register_status status;
-
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
-  buf = (gdb_byte *) alloca (m_descr->sizeof_register[regnum]);
-  status = raw_read (regnum, buf);
-  if (status == REG_VALID)
-    *val = extract_unsigned_integer
-      (buf, m_descr->sizeof_register[regnum],
-       gdbarch_byte_order (m_descr->gdbarch));
-  else
-    *val = 0;
-  return status;
+  return regcache->raw_read (regnum, val);
 }
 
 void
 regcache_raw_write_signed (struct regcache *regcache, int regnum, LONGEST val)
 {
   gdb_assert (regcache != NULL);
-  regcache->raw_write_signed (regnum, val);
+  regcache->raw_write (regnum, val);
 }
 
+template<typename T, typename>
 void
-regcache::raw_write_signed (int regnum, LONGEST val)
+regcache::raw_write (int regnum, T val)
 {
   gdb_byte *buf;
 
   gdb_assert (regnum >=0 && regnum < m_descr->nr_raw_registers);
   buf = (gdb_byte *) alloca (m_descr->sizeof_register[regnum]);
-  store_signed_integer (buf, m_descr->sizeof_register[regnum],
-			gdbarch_byte_order (m_descr->gdbarch), val);
+  store_integer (buf, m_descr->sizeof_register[regnum],
+		 gdbarch_byte_order (m_descr->gdbarch), val);
   raw_write (regnum, buf);
 }
 
@@ -734,19 +717,7 @@ regcache_raw_write_unsigned (struct regcache *regcache, int regnum,
 			     ULONGEST val)
 {
   gdb_assert (regcache != NULL);
-  regcache->raw_write_unsigned (regnum, val);
-}
-
-void
-regcache::raw_write_unsigned (int regnum, ULONGEST val)
-{
-  gdb_byte *buf;
-
-  gdb_assert (regnum >=0 && regnum < m_descr->nr_raw_registers);
-  buf = (gdb_byte *) alloca (m_descr->sizeof_register[regnum]);
-  store_unsigned_integer (buf, m_descr->sizeof_register[regnum],
-			  gdbarch_byte_order (m_descr->gdbarch), val);
-  raw_write (regnum, buf);
+  regcache->raw_write (regnum, val);
 }
 
 LONGEST
@@ -857,11 +828,12 @@ regcache_cooked_read_signed (struct regcache *regcache, int regnum,
 			     LONGEST *val)
 {
   gdb_assert (regcache != NULL);
-  return regcache->cooked_read_signed (regnum, val);
+  return regcache->cooked_read (regnum, val);
 }
 
+template<typename T, typename>
 enum register_status
-regcache::cooked_read_signed (int regnum, LONGEST *val)
+regcache::cooked_read (int regnum, T *val)
 {
   enum register_status status;
   gdb_byte *buf;
@@ -870,9 +842,8 @@ regcache::cooked_read_signed (int regnum, LONGEST *val)
   buf = (gdb_byte *) alloca (m_descr->sizeof_register[regnum]);
   status = cooked_read (regnum, buf);
   if (status == REG_VALID)
-    *val = extract_signed_integer
-      (buf, m_descr->sizeof_register[regnum],
-       gdbarch_byte_order (m_descr->gdbarch));
+    *val = extract_integer<T> (buf, m_descr->sizeof_register[regnum],
+			       gdbarch_byte_order (m_descr->gdbarch));
   else
     *val = 0;
   return status;
@@ -883,25 +854,7 @@ regcache_cooked_read_unsigned (struct regcache *regcache, int regnum,
 			       ULONGEST *val)
 {
   gdb_assert (regcache != NULL);
-  return regcache->cooked_read_unsigned (regnum, val);
-}
-
-enum register_status
-regcache::cooked_read_unsigned (int regnum, ULONGEST *val)
-{
-  enum register_status status;
-  gdb_byte *buf;
-
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_cooked_registers);
-  buf = (gdb_byte *) alloca (m_descr->sizeof_register[regnum]);
-  status = cooked_read (regnum, buf);
-  if (status == REG_VALID)
-    *val = extract_unsigned_integer
-      (buf, m_descr->sizeof_register[regnum],
-       gdbarch_byte_order (m_descr->gdbarch));
-  else
-    *val = 0;
-  return status;
+  return regcache->cooked_read (regnum, val);
 }
 
 void
@@ -909,18 +862,19 @@ regcache_cooked_write_signed (struct regcache *regcache, int regnum,
 			      LONGEST val)
 {
   gdb_assert (regcache != NULL);
-  regcache->cooked_write_signed (regnum, val);
+  regcache->cooked_write (regnum, val);
 }
 
+template<typename T, typename>
 void
-regcache::cooked_write_signed (int regnum, LONGEST val)
+regcache::cooked_write (int regnum, T val)
 {
   gdb_byte *buf;
 
   gdb_assert (regnum >=0 && regnum < m_descr->nr_cooked_registers);
   buf = (gdb_byte *) alloca (m_descr->sizeof_register[regnum]);
-  store_signed_integer (buf, m_descr->sizeof_register[regnum],
-			gdbarch_byte_order (m_descr->gdbarch), val);
+  store_integer (buf, m_descr->sizeof_register[regnum],
+		 gdbarch_byte_order (m_descr->gdbarch), val);
   cooked_write (regnum, buf);
 }
 
@@ -929,19 +883,7 @@ regcache_cooked_write_unsigned (struct regcache *regcache, int regnum,
 				ULONGEST val)
 {
   gdb_assert (regcache != NULL);
-  regcache->cooked_write_unsigned (regnum, val);
-}
-
-void
-regcache::cooked_write_unsigned (int regnum, ULONGEST val)
-{
-  gdb_byte *buf;
-
-  gdb_assert (regnum >=0 && regnum < m_descr->nr_cooked_registers);
-  buf = (gdb_byte *) alloca (m_descr->sizeof_register[regnum]);
-  store_unsigned_integer (buf, m_descr->sizeof_register[regnum],
-			  gdbarch_byte_order (m_descr->gdbarch), val);
-  cooked_write (regnum, buf);
+  regcache->cooked_write (regnum, val);
 }
 
 /* See regcache.h.  */

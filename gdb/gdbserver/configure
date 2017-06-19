@@ -7148,7 +7148,8 @@ build_warnings="-Wall -Wpointer-arith \
 -Wno-unused -Wunused-value -Wunused-function \
 -Wno-switch -Wno-char-subscripts \
 -Wempty-body -Wunused-but-set-parameter -Wunused-but-set-variable \
--Wno-sign-compare -Wno-narrowing -Wno-error=maybe-uninitialized"
+-Wno-sign-compare -Wno-narrowing -Wno-error=maybe-uninitialized \
+-Wno-mismatched-tags"
 
 # Enable -Wno-format by default when using gcc on mingw since many
 # GCC versions complain about %I64.
@@ -7219,9 +7220,9 @@ $as_echo_n "checking compiler warning flags... " >&6; }
 	*)
 	    # Check whether GCC accepts it.
 	    saved_CFLAGS="$CFLAGS"
-	    CFLAGS="$CFLAGS $wtest"
+	    CFLAGS="$CFLAGS -Werror $wtest"
 	    saved_CXXFLAGS="$CXXFLAGS"
-	    CXXFLAGS="$CXXFLAGS $wtest"
+	    CXXFLAGS="$CXXFLAGS -Werror $wtest"
 	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -7498,9 +7499,9 @@ _ACEOF
 fi
 
 
-# See if <sys/user.h> supports the %fs_base and %gs_base amd64 segment
-# registers.  Older amd64 Linux's don't have the fs_base and gs_base
-# members of `struct user_regs_struct'.
+# See if <sys/user.h> supports the %fs_base and %gs_bas amd64 segment registers.
+# Older amd64 Linux's don't have the fs_base and gs_base members of
+# `struct user_regs_struct'.
 ac_fn_c_check_member "$LINENO" "struct user_regs_struct" "fs_base" "ac_cv_member_struct_user_regs_struct_fs_base" "#include <sys/user.h>
 "
 if test "x$ac_cv_member_struct_user_regs_struct_fs_base" = x""yes; then :

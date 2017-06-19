@@ -1,3 +1,113 @@
+2017-06-19  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* mi/mi-cm-env.c (_initialize_mi_cmd_env): Use getenv instead of
+	gdb_environ to access an environment variable.
+
+2017-06-18  Thomas Petazzoni  <thomas.petazzoni@free-electrons.com>
+
+	* nat/linux-ptrace.c (linux_fork_to_function): Add cast to
+	gdb_byte*.
+
+2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* nat/fork-inferior.h (trace_start_error): Add ATTRIBUTE_PRINTF.
+
+2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure: Re-generate.
+	* warning.m4 (build_warnings): Add -Wno-mismatched-tags.
+
+2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure: Re-generate.
+	* warning.m4: Pass -Werror to compiler when checking for
+	supported warning flags.
+
+2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (COMPILE.pre): Add "-x c++".
+
+2017-06-16  Alan Hayward  <alan.hayward@arm.com>
+	    Pedro Alves  <palves@redhat.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* defs.h (RequireLongest): New.
+	(extract_integer): Declare function template.
+	(extract_signed_integer): Remove the declaration, but define it
+	static inline.
+	(extract_unsigned_integer): Likewise.
+	(store_integer): Declare function template.
+	(store_signed_integer): Remove the declaration, but define it
+	static inline.
+	(store_unsigned_integer): Likewise.
+	* findvar.c (extract_integer): New function template.
+	(extract_signed_integer): Remove.
+	(extract_unsigned_integer): Remove.
+	(extract_integer<LONGEST>, extract_integer<ULONGEST>): Explicit
+	instantiations.
+	(store_integer): New function template.
+	(store_signed_integer): Remove.
+	(store_unsigned_integer): Remove.
+	(store_integer): Explicit instantiations.
+	* regcache.c (regcache_raw_read_signed): Update.
+	(regcache::raw_read): New function.
+	(regcache::raw_read_signed): Remove.
+	(regcache::raw_read_unsigned): Remove.
+	(regcache_raw_read_unsigned): Update.
+	(regcache_raw_write_unsigned): Update.
+	(regcache::raw_write_signed): Remove.
+	(regcache::raw_write): New function.
+	(regcache_cooked_read_signed): Update.
+	(regcache::raw_write_unsigned): Remove.
+	(regcache::cooked_read_signed): Remove.
+	(regcache_cooked_read_unsigned): Update.
+	(regcache::cooked_read_unsigned): Remove.
+	(regcache_cooked_write_signed): Update.
+	(regcache_cooked_write_unsigned): Update.
+	* regcache.h (regcache) <raw_read_signed>: Remove.
+	<raw_write_signed, raw_read_unsigned, raw_write_unsigned>: Remove.
+	<raw_read, raw_write>: New.
+	<cooked_read_signed, cooked_write_signed>: Remove.
+	<cooked_write_unsigned, cooked_read_unsigned>: Remove.
+	<cooked_read, cooked_write>: New.
+	* sh64-tdep.c (sh64_pseudo_register_read): Update.
+	(sh64_pseudo_register_write): Update.
+
+2017-06-16  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep.c (arc_disassembler_options): New variable.
+	(arc_gdbarch_init): Set and use it. Use arc_delayed_print_insn instead
+	of default_print_insn.
+	(arc_delayed_print_insn): Set info->section when needed,
+	use default_print_insn to retrieve a disassembler.
+
+2017-06-14  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21574
+	* infcmd.c (_initialize_infcmd): Expand "help run" documentation
+	to mention $SHELL and startup-with-shell.
+
+2017-06-14  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* MAINTAINERS: Move Maxim Grigoriev to the Past Maintainers.
+
+2017-06-14  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_gdb_print_insn): Call
+	default_print_insn instead of print_insn_aarch64.
+	* arm-tdep.c (gdb_print_insn_arm): Call
+	default_print_insn instead of print_insn_big_arm
+	and print_insn_little_arm.
+	* i386-tdep.c (i386_print_insn): Call default_print_insn
+	instead of print_insn_i386.
+	* ia64-tdep.c (ia64_print_insn): Call
+	default_print_insn instead of print_insn_ia64.
+	* mips-tdep.c (gdb_print_insn_mips): Call
+	default_print_insn instead of print_insn_big_mips
+	and print_insn_little_mips.
+	* spu-tdep.c (gdb_print_insn_spu): Call default_print_insn
+	instead of print_insn_spu.
+
 2017-06-14  Pedro Alves  <palves@redhat.com>
 
 	* ada-lang.c: Include "common/byte-vector.h".

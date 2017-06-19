@@ -7,5 +7,9 @@
         .type   bar, %object
         .size   bar, 8
 bar:
+  .ifdef UNDERSCORE
+        .dc.a   ___stop_scnfoo
+  .else
         .dc.a   __stop_scnfoo
+  .endif
         .dc.a  .sizeof. (scnfoo)

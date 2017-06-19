@@ -1,3 +1,119 @@
+2017-06-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 21615
+	* vms-alpha.c (_bfd_vms_slurp_egsd): Use unsigned int for
+	gsd_size.  Check that there are enough bytes remaining to read the
+	type and size of the next egsd.  Check that the size of the egsd
+	does not exceed the size of the record.
+
+2017-06-19  Alan Modra  <amodra@gmail.com>
+
+	* config.bfd: Correct targ_underscore for cris.
+
+2017-06-18  Alan Modra  <amodra@gmail.com>
+
+	* config.bfd: Correct targ_underscore for epiphany, ip2k,
+	m32c, mn10200, pru, rl78, rx, crisv32 and v850.
+
+2017-06-16  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (bfd_elf_size_dynsym_hash_dynstr): Do not fail if the
+	bucketlist is empty because there are no symbols to add to the
+	list.
+
+2017-06-16  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20022
+	PR ld/21557
+	PR ld/21562
+	PR ld/21571
+	* targets.c (struct bfd_target): Add _bfd_define_start_stop.
+	(BFD_JUMP_TABLE_LINK): Likewise.
+	* elf-bfd.h (bfd_elf_define_start_stop): Declare.
+	* elflink.c (_bfd_elf_gc_mark_rsec): Update comment.
+	(bfd_elf_define_start_stop): New function.
+	* linker.c (bfd_generic_define_start_stop): New function.
+	* coff64-rs6000.c (rs6000_xcoff64_vec, rs6000_xcoff64_aix_vec): Init
+	new field.
+	* aout-adobe.c (aout_32_bfd_define_start_stop): Define.
+	* aout-target.h (MY_bfd_define_start_stop): Define.
+	* aout-tic30.c (MY_bfd_define_start_stop): Define.
+	* binary.c (binary_bfd_define_start_stop): Define.
+	* bout.c (b_out_bfd_define_start_stop): Define.
+	* coff-alpha.c (_bfd_ecoff_bfd_define_start_stop): Define.
+	* coff-mips.c (_bfd_ecoff_bfd_define_start_stop): Define.
+	* coff-rs6000.c (_bfd_xcoff_bfd_define_start_stop): Define.
+	* coffcode.h (coff_bfd_define_start_stop): Define.
+	* elfxx-target.h (bfd_elfNN_bfd_define_start_stop): Define.
+	* i386msdos.c (msdos_bfd_define_start_stop): Define.
+	* i386os9k.c (os9k_bfd_define_start_stop): Define.
+	* ieee.c (ieee_bfd_define_start_stop): Define.
+	* ihex.c (ihex_bfd_define_start_stop): Define.
+	* libbfd-in.h (_bfd_nolink_bfd_define_start_stop): Define.
+	* mach-o-target.c (bfd_mach_o_bfd_define_start_stop): Define.
+	* mmo.c (mmo_bfd_define_start_stop): Define.
+	* nlm-target.h (nlm_bfd_define_start_stop): Define.
+	* oasys.c (oasys_bfd_define_start_stop): Define.
+	* pef.c (bfd_pef_bfd_define_start_stop): Define.
+	* plugin.c (bfd_plugin_bfd_define_start_stop): Define.
+	* ppcboot.c (ppcboot_bfd_define_start_stop): Define.
+	* som.c (som_bfd_define_start_stop): Define.
+	* srec.c (srec_bfd_define_start_stop): Define.
+	* tekhex.c (tekhex_bfd_define_start_stop): Define.
+	* versados.c (versados_bfd_define_start_stop): Define.
+	* vms-alpha.c (vms_bfd_define_start_stop): Define.
+	(alpha_vms_bfd_define_start_stop): Define.
+	* xsym.c (bfd_sym_bfd_define_start_stop): Define.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2017-06-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Use
+	SYMBOL_REFERENCES_LOCAL.
+
+2017-06-15  Jiong Wang  <jiong.wang@arm.com>
+
+	PR ld/21532
+	* elfnn-aarch64.c (ELIMINATE_COPY_RELOCS): Set to 1.
+	(elfNN_aarch64_final_link_relocate): Also propagate relocations to
+	runtime for if there needs copy relocation elimination.
+	(need_copy_relocation_p): New function.  Return true for symbol with
+	pc-relative references and if it's against read-only sections.
+	(elfNN_aarch64_adjust_dynamic_symbol): Use need_copy_relocation_p.
+	(elfNN_aarch64_check_relocs): Allocate dynrelocs for relocation types
+	that are related with accessing external objects.
+	(elfNN_aarch64_gc_sweep_hook): Sync the relocation types with the change
+	in elfNN_aarch64_check_relocs.
+
+2017-06-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21582
+	* ieee.c (ieee_object_p): Use a static buffer to avoid compiler
+	bugs.
+	PR binutils/21581
+	(ieee_archive_p): Likewise.
+
+2017-06-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21579
+	* vms-alpha.c (_bfd_vms_slurp_etir): Extend check of cmd_length.
+
+2017-06-14  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (elf_xtensa_be_plt_entry,
+	elf_xtensa_le_plt_entry): Add dimension for the ABI to arrays,
+	keep both windowed and call0 ABI PLT definitions.
+	(elf_xtensa_create_plt_entry): Use selected ABI to choose upper
+	elf_xtensa_*_plt_entry endex.
+	(ELF_MAXPAGESIZE): Fix at minimal supported MMU page size.
+
+2017-06-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21578
+	* elf32-sh.c (sh_elf_set_mach_from_flags): Fix check for invalid
+	flag value.
+
 2017-06-14  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21589

@@ -7773,10 +7773,7 @@ gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
   else
     info->symbols = NULL;
 
-  if (info->endian == BFD_ENDIAN_BIG)
-    return print_insn_big_arm (memaddr, info);
-  else
-    return print_insn_little_arm (memaddr, info);
+  return default_print_insn (memaddr, info);
 }
 
 /* The following define instruction sequences that will cause ARM

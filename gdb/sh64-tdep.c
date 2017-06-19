@@ -1665,11 +1665,11 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
        */
       /* *INDENT-ON* */
       /* Get FPSCR as an int.  */
-      status = regcache->raw_read_unsigned (fpscr_base_regnum, &fpscr_value);
+      status = regcache->raw_read (fpscr_base_regnum, &fpscr_value);
       if (status != REG_VALID)
 	return status;
       /* Get SR as an int.  */
-      status = regcache->raw_read_unsigned (sr_base_regnum, &sr_value);
+      status = regcache->raw_read (sr_base_regnum, &sr_value);
       if (status != REG_VALID)
 	return status;
       /* Build the new value.  */
@@ -1847,15 +1847,15 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       fpscr_value = fpscr_c_value & fpscr_mask;
       sr_value = (fpscr_value & sr_mask) >> 6;
       
-      regcache->raw_read_unsigned (fpscr_base_regnum, &old_fpscr_value);
+      regcache->raw_read (fpscr_base_regnum, &old_fpscr_value);
       old_fpscr_value &= 0xfffc0002;
       fpscr_value |= old_fpscr_value;
-      regcache->raw_write_unsigned (fpscr_base_regnum, fpscr_value);
+      regcache->raw_write (fpscr_base_regnum, fpscr_value);
 
-      regcache->raw_read_unsigned (sr_base_regnum, &old_sr_value);
+      regcache->raw_read (sr_base_regnum, &old_sr_value);
       old_sr_value &= 0xffff8fff;
       sr_value |= old_sr_value;
-      regcache->raw_write_unsigned (sr_base_regnum, sr_value);
+      regcache->raw_write (sr_base_regnum, sr_value);
     }
 
   else if (reg_nr == FPUL_C_REGNUM)
