@@ -1121,7 +1121,8 @@ add_symbol (bfd *abfd, const unsigned char *ascic)
 static bfd_boolean
 _bfd_vms_slurp_egsd (bfd *abfd)
 {
-  int gsd_type, gsd_size;
+  int gsd_type;
+  unsigned int gsd_size;
   unsigned char *vms_rec;
   unsigned long base_addr;
 
@@ -1133,7 +1134,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
   /* Calculate base address for each section.  */
   base_addr = 0L;
 
-  while (PRIV (recrd.rec_size) > 0)
+  while (PRIV (recrd.rec_size) > 4)
     {
       vms_rec = PRIV (recrd.rec);
 
@@ -1141,6 +1142,15 @@ _bfd_vms_slurp_egsd (bfd *abfd)
       gsd_size = bfd_getl16 (vms_rec + 2);
 
       vms_debug2 ((3, "egsd_type %d\n", gsd_type));
+
+      /* PR 21615: Check for size overflow.  */
+      if (PRIV (recrd.rec_size) < gsd_size)
+	{
+	  _bfd_error_handler (_("Corrupt EGSD record: size (%#x) is larger than remaining space (%#x)"),
+			      gsd_size, PRIV (recrd.rec_size));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
 
       switch (gsd_type)
 	{
