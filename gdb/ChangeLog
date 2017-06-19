@@ -1,3 +1,8 @@
+2017-06-19  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (write_psymtabs_to_index): Construct file_closer
+	after gdb::unlinker.
+
 2017-06-19  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* mi/mi-cm-env.c (_initialize_mi_cmd_env): Use getenv instead of

@@ -23776,8 +23776,12 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   if (!out_file)
     error (_("Can't open `%s' for writing"), filename.c_str ());
 
-  file_closer close_out_file (out_file);
+  /* Order matters here; we want FILE to be closed before FILENAME is
+     unlinked, because on MS-Windows one cannot delete a file that is
+     still open.  (Don't call anything here that might throw until
+     file_closer is created.)  */
   gdb::unlinker unlink_file (filename.c_str ());
+  file_closer close_out_file (out_file);
 
   mapped_symtab symtab;
   data_buf cu_list;
