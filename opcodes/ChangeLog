@@ -1,3 +1,8 @@
+2017-06-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21614
+	* score-dis.c (score_opcodes): Add sentinel.
+
 2017-06-16  Alan Modra  <amodra@gmail.com>
 
 	* rx-decode.c: Regenerate.
