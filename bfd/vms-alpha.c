@@ -5634,6 +5634,13 @@ evax_bfd_print_emh (FILE *file, unsigned char *rec, unsigned int rec_len)
   /* xgettext:c-format */
   fprintf (file, _("  EMH %u (len=%u): "), subtype, rec_len);
 
+  /* PR 21618: Check for invalid lengths.  */
+  if (rec_len < sizeof (* emh))
+    {
+      fprintf (file, _("   Error: The length is less than the length of an EMH record\n"));
+      return;
+    }
+  
   switch (subtype)
     {
     case EMH__C_MHD:
@@ -5697,6 +5704,14 @@ evax_bfd_print_eeom (FILE *file, unsigned char *rec, unsigned int rec_len)
   struct vms_eeom *eeom = (struct vms_eeom *)rec;
 
   fprintf (file, _("  EEOM (len=%u):\n"), rec_len);
+
+  /* PR 21618: Check for invalid lengths.  */
+  if (rec_len < sizeof (* eeom))
+    {
+      fprintf (file, _("   Error: The length is less than the length of an EEOM record\n"));
+      return;
+    }
+  
   fprintf (file, _("   number of cond linkage pairs: %u\n"),
            (unsigned)bfd_getl32 (eeom->total_lps));
   fprintf (file, _("   completion code: %u\n"),
@@ -5785,6 +5800,12 @@ evax_bfd_print_egsd (FILE *file, unsigned char *rec, unsigned int rec_len)
       fprintf (file, _("  EGSD entry %2u (type: %u, len: %u): "),
                n, type, len);
       n++;
+
+      if (off + len > rec_len || off + len < off)
+	{
+	  fprintf (file, _("   Error: length larger than remaining space in record\n"));
+	  return;
+	}
 
       switch (type)
         {
@@ -6030,6 +6051,12 @@ evax_bfd_print_etir (FILE *file, const char *name,
       type = bfd_getl16 (etir->rectyp);
       size = bfd_getl16 (etir->size);
       buf = rec + off + sizeof (struct vms_etir);
+
+      if (off + size > rec_len || off + size < off)
+	{
+	  fprintf (file, _("   Error: length larger than remaining space in record\n"));
+	  return;
+	}
 
       /* xgettext:c-format */
       fprintf (file, _("   (type: %3u, size: 4+%3u): "), type, size - 4);

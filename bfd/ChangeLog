@@ -1,5 +1,14 @@
 2017-06-19  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21618
+	* vms-alpha.c (evax_bfd_print_emh): Check for insufficient record
+	length.
+	(evax_bfd_print_eeom): Likewise.
+	(evax_bfd_print_egsd): Check for an overlarge record length.
+	(evax_bfd_print_etir): Likewise.
+
+2017-06-19  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21612
 	* libieee.h (struct common_header_type): Add end_p field.
 	* ieee.c (this_byte_and_next): Do not advance input_p beyond
