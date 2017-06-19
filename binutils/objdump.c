@@ -1982,20 +1982,23 @@ disassemble_bytes (struct disassemble_info * inf,
 		    pb = octets;
 		  for (; j < addr_offset * opb + pb; j += bpc)
 		    {
-		      int k;
+		      /* PR 21619: Check for a buffer ending early.  */
+		      if (j + bpc <= stop_offset * opb)
+			{
+			  int k;
 
-		      if (bpc > 1 && inf->display_endian == BFD_ENDIAN_LITTLE)
-			{
-			  for (k = bpc - 1; k >= 0; k--)
-			    printf ("%02x", (unsigned) data[j + k]);
-			  putchar (' ');
+			  if (inf->display_endian == BFD_ENDIAN_LITTLE)
+			    {
+			      for (k = bpc - 1; k >= 0; k--)
+				printf ("%02x", (unsigned) data[j + k]);
+			    }
+			  else
+			    {
+			      for (k = 0; k < bpc; k++)
+				printf ("%02x", (unsigned) data[j + k]);
+			    }
 			}
-		      else
-			{
-			  for (k = 0; k < bpc; k++)
-			    printf ("%02x", (unsigned) data[j + k]);
-			  putchar (' ');
-			}
+		      putchar (' ');
 		    }
 		}
 	    }
