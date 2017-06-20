@@ -1,5 +1,11 @@
 2017-06-20  Yao Qi  <yao.qi@linaro.org>
 
+	* features/i386/i386-linux.xml: Exchange the order of including
+	32bit-linux.xml and 32bit-sse.xml.
+	* features/i386/i386-linux.c: Regenerated.
+
+2017-06-20  Yao Qi  <yao.qi@linaro.org>
+
 	* target-descriptions.c (tdesc_reg): Add ctor, dtor.
 	Delete copy ctor and assignment operator.
 	(tdesc_type): Likewise.
