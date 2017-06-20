@@ -116,8 +116,8 @@ gdb_environ::unset (const char *var)
 
   /* We iterate until '.cend () - 1' because the last element is
      always NULL.  */
-  for (std::vector<char *>::const_iterator el = m_environ_vector.cbegin ();
-       el != m_environ_vector.cend () - 1;
+  for (std::vector<char *>::iterator el = m_environ_vector.begin ();
+       el != m_environ_vector.end () - 1;
        ++el)
     if (match_var_in_string (*el, var, len))
       {

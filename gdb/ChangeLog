@@ -1,5 +1,10 @@
 2017-06-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* common/environ.c (gdb_environ::unset): Use '::iterator' instead
+	of '::const_iterator'.
+
+2017-06-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
 	'unittests/environ-selftests.c'.
 	(SUBDIR_UNITTESTS_OBS): Add 'environ-selftests.o'.
