@@ -7955,17 +7955,13 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 	{
 	  if (thumb_p)
 	    {
-	      /* This can be encoded only for a low register.  */
-	      if ((v & ~0xFF) == 0 && (inst.operands[i].reg < 8))
-		{
-		  /* This can be done with a mov(1) instruction.  */
-		  inst.instruction = T_OPCODE_MOV_I8 | (inst.operands[i].reg << 8);
-		  inst.instruction |= v;
-		  return TRUE;
-		}
+	      /* LDR should not use lead in a flag-setting instruction being
+		 chosen so we do not check whether movs can be used.  */
 
-	      if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2)
+	      if ((ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2)
 		  || ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2_v8m))
+		  && inst.operands[i].reg != 13
+		  && inst.operands[i].reg != 15)
 		{
 		  /* Check if on thumb2 it can be done with a mov.w, mvn or
 		     movw instruction.  */

@@ -1,6 +1,19 @@
 2017-06-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	Backport from mainline
+	2017-04-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (move_or_literal_pool): Remove code generating MOVS.
+	Forbid MOV.W and MOVW if destination is SP or PC.
+	* testsuite/gas/arm/thumb2_ldr_immediate_highregs_armv6t2.s: Explain
+	expectation of LDR not generating a MOVS for low registers and small
+	constants.  Add tests of MOVW generation.
+	* testsuite/gas/arm/thumb2_ldr_immediate_highregs_armv6t2.d: Update
+	expected disassembly.
+
+2017-06-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Backport from mainline
 	2017-05-08  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* testsuite/ld-arm/arm-elf.exp
