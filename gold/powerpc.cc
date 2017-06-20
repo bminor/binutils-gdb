@@ -4656,19 +4656,25 @@ Stub_table<size, big_endian>::define_stub_syms(Symbol_table* symtab)
 	  add[0] = 0;
 	  if (cs->first.addend_ != 0)
 	    sprintf(add, "+%x", static_cast<uint32_t>(cs->first.addend_));
-	  char localname[18];
-	  const char *symname;
-	  if (cs->first.sym_ == NULL)
+	  char obj[10];
+	  obj[0] = 0;
+	  if (cs->first.object_)
 	    {
 	      const Powerpc_relobj<size, big_endian>* ppcobj = static_cast
 		<const Powerpc_relobj<size, big_endian>*>(cs->first.object_);
-	      sprintf(localname, "%x:%x", ppcobj->uniq(), cs->first.locsym_);
+	      sprintf(obj, "%x:", ppcobj->uniq());
+	    }
+	  char localname[9];
+	  const char *symname;
+	  if (cs->first.sym_ == NULL)
+	    {
+	      sprintf(localname, "%x", cs->first.locsym_);
 	      symname = localname;
 	    }
 	  else
 	    symname = cs->first.sym_->name();
-	  char* name = new char[8 + 10 + strlen(symname) + strlen(add) + 1];
-	  sprintf(name, "%08x.plt_call.%s%s", this->uniq_, symname, add);
+	  char* name = new char[8 + 10 + strlen(obj) + strlen(symname) + strlen(add) + 1];
+	  sprintf(name, "%08x.plt_call.%s%s%s", this->uniq_, obj, symname, add);
 	  Address value = this->stub_address() - this->address() + cs->second;
 	  unsigned int stub_size = this->plt_call_size(cs);
 	  this->targ_->define_local(symtab, name, this, value, stub_size);
