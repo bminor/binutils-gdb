@@ -1182,6 +1182,24 @@ run_ld_link_tests [list \
 	{{objdump -dwr plt-pic2.dd}} \
 	"plt-pic2.so" \
     ] \
+    [list \
+	"Build pr21626.so" \
+	"-shared -melf_i386" \
+	"" \
+	"--32" \
+	{property-x86-3.s} \
+	"" \
+	"pr21626.so" \
+    ] \
+    [list \
+	"Build pr21626" \
+	"-melf_i386 tmpdir/pr21626.so" \
+	"" \
+	"--32" \
+	{start.s foo.s} \
+	"" \
+	"pr21626" \
+    ] \
 ]
 
 # Linux only tests

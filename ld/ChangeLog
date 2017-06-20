@@ -1,3 +1,9 @@
+2017-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21626
+	* testsuite/ld-i386/i386.exp: Run ld/21626 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
 2017-06-18  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/ld-lib.exp (is_underscore_target): New.

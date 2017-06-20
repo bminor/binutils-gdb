@@ -1,3 +1,9 @@
+2017-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21626
+	* elf-properties.c (_bfd_elf_link_setup_gnu_properties): Check
+	the DYNAMIC bit instead of bfd_count_sections.
+
 2017-06-19  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21618

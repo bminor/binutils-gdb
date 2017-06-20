@@ -318,7 +318,7 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
   /* Find the first relocatable ELF input with GNU properties.  */
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)
     if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
-	&& bfd_count_sections (abfd) != 0
+	&& (abfd->flags & DYNAMIC) == 0
 	&& elf_properties (abfd) != NULL)
       {
 	has_properties = TRUE;
@@ -342,7 +342,7 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 
   /* Merge .note.gnu.property sections.  */
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)
-    if (abfd != first_pbfd && bfd_count_sections (abfd) != 0)
+    if (abfd != first_pbfd && (abfd->flags & DYNAMIC) == 0)
       {
 	elf_property_list *null_ptr = NULL;
 	elf_property_list **listp = &null_ptr;
