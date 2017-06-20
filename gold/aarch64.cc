@@ -3734,8 +3734,7 @@ Target_aarch64<size, big_endian>::scan_reloc_for_stub(
       if (gsym->use_plt_offset(arp->reference_flags()))
 	{
 	  // This uses a PLT, change the symbol value.
-	  symval.set_output_value(this->plt_section()->address()
-				  + gsym->plt_offset());
+	  symval.set_output_value(this->plt_address_for_global(gsym));
 	  psymval = &symval;
 	}
       else if (gsym->is_undefined())
@@ -3967,11 +3966,6 @@ Target_aarch64<size, big_endian>::scan_reloc_section_for_stubs(
 	  symval2.set_no_output_symtab_entry();
 	  psymval = &symval2;
 	}
-
-      // If symbol is a section symbol, we don't know the actual type of
-      // destination.  Give up.
-      if (psymval->is_section_symbol())
-	continue;
 
       this->scan_reloc_for_stub(relinfo, r_type, sym, r_sym, psymval,
 				addend, view_address + offset);
@@ -5404,8 +5398,14 @@ maybe_apply_stub(unsigned int r_type,
 
   const The_aarch64_relobj* aarch64_relobj =
       static_cast<const The_aarch64_relobj*>(object);
-  // We don't create stubs for undefined symbols so don't look for one.
-  if (gsym && gsym->is_undefined())
+  const AArch64_reloc_property* arp =
+    aarch64_reloc_property_table->get_reloc_property(r_type);
+  gold_assert(arp != NULL);
+
+  // We don't create stubs for undefined symbols, but do for weak.
+  if (gsym
+      && !gsym->use_plt_offset(arp->reference_flags())
+      && gsym->is_undefined())
     {
       gold_debug(DEBUG_TARGET,
 		 "stub: looking for a stub for undefined symbol %s in file %s",
@@ -5424,9 +5424,6 @@ maybe_apply_stub(unsigned int r_type,
   Address new_branch_target = stub_table->address() + stub->offset();
   typename elfcpp::Swap<size, big_endian>::Valtype branch_offset =
       new_branch_target - address;
-  const AArch64_reloc_property* arp =
-      aarch64_reloc_property_table->get_reloc_property(r_type);
-  gold_assert(arp != NULL);
   typename This::Status status = This::template
       rela_general<32>(view, branch_offset, 0, arp);
   if (status != This::STATUS_OKAY)

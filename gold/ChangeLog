@@ -1,6 +1,18 @@
 2017-06-21  Eric Christopher  <echristo@gmail.com>
 
 	Apply from master
+        2017-06-20  Eric Christopher  <echristo@gmail.com>
+
+	* aarch64.cc (scan_reloc_for_stub): Use plt_address_for_global to
+	calculate the symbol value.
+	(scan_reloc_section_for_stubs): Allow stubs to be created for
+	section symbols.
+	(maybe_apply_stub): Handle creating stubs for weak symbols to
+	match the code in scan_reloc_for_stub.
+
+2017-06-21  Eric Christopher  <echristo@gmail.com>
+
+	Apply from master
         2017-06-15  Eric Christopher  <echristo@gmail.com>
 
 	* aarch64.cc: Fix a few typos and grammar-os.
