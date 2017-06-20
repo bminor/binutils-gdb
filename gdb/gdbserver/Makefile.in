@@ -387,9 +387,18 @@ gdbreplay$(EXEEXT): $(GDBREPLAY_OBS) $(LIBGNU) $(LIBIBERTY)
 	$(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
 	  $(XM_CLIBS) $(LIBGNU) $(LIBIBERTY)
 
-IPA_OBJS = ax-ipa.o tracepoint-ipa.o format-ipa.o utils-ipa.o \
-	regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o \
-	tdesc-ipa.o print-utils-ipa.o rsp-low-ipa.o errors-ipa.o \
+IPA_OBJS = \
+	ax-ipa.o \
+	common-utils-ipa.o \
+	errors-ipa.o \
+	format-ipa.o \
+	print-utils-ipa.o \
+	regcache-ipa.o \
+	remote-utils-ipa.o \
+	rsp-low-ipa.o \
+	tdesc-ipa.o \
+	tracepoint-ipa.o \
+	utils-ipa.o \
 	${IPA_DEPFILES}
 
 IPA_LIB = libinproctrace.so
