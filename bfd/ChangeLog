@@ -1,3 +1,13 @@
+2017-06-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Backport from mainline
+	2017-05-08  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elflink.c (elf_output_implib): Remove executable flag from import
+	library bfd.
+	* elf32-arm.c (elf32_arm_filter_implib_symbols): Assert that the import
+	library is a relocatable object file.
+
 2017-06-13  Nick Clifton  <nickc@redhat.com>
 
 	Import this fix from the mainline sources:

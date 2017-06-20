@@ -685,7 +685,8 @@ set armeabitests_nonacl {
      "--section-start .gnu.sgstubs=0x20000 --out-implib=tmpdir/cmse-implib.lib --cmse-implib" ""
      "-march=armv8-m.base -mthumb --defsym VER=1"
      {cmse-implib.s}
-     {{readelf {-s tmpdir/cmse-implib.lib} cmse-implib.rd}}
+     {{readelf {-s tmpdir/cmse-implib.lib} cmse-implib.rd}
+      {readelf {-h tmpdir/cmse-implib.lib} cmse-implib.type}}
      "cmse-implib"}
     {"Input secure gateway import library"
      "--section-start .gnu.sgstubs=0x20000 --out-implib=tmpdir/cmse-new-implib.lib --in-implib=tmpdir/cmse-implib.lib --cmse-implib" ""
