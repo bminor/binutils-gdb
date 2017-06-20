@@ -1,3 +1,8 @@
+2017-06-20  James Clarke  <jrtc27@jrtc27.com>
+
+	* powerpc.cc (Stub_table::define_stub_syms): Always include object's
+	uniq_ value.
+
 2017-06-15  Eric Christopher  <echristo@gmail.com>
 
 	* aarch64.cc: Fix a few typos and grammar-os.
