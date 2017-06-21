@@ -1,3 +1,14 @@
+2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (struct arm_cpu_option_table): New ext field.
+	(ARM_CPU_OPT): Add parameter to set new ext field and reorder canonical
+	name field just after the name field.
+	(arm_cpus): Move extension feature bit from value field to ext field,
+	reorder parameter according to changes in ARM_CPU_OPT and reindent.
+	(arm_parse_cpu): Point mcpu_cpu_opt to a bitfield merging the value and
+	ext field from the selected arm_cpus entry.
+	(s_arm_cpu): Likewise.
+
 2017-06-21  James Greenhalgh  <james.greenhalgh@arm.com>
 
 	* config/tc-aarch64.c (aarch64_cpus): Add cortex-a55 and cortex-a75.
