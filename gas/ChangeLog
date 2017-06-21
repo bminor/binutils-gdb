@@ -4,6 +4,15 @@
 	* testsuite/gas/i386/cet.d: Likewise.
 	* testsuite/gas/i386/x86-64-cet-intel.d: Likewise.
 	* testsuite/gas/i386/x86-64-cet.d: Likewise.
+	* testsuite/gas/i386/cet.s: Update incsspd and setssbsy tests.
+	* testsuite/gas/i386/x86-64-cet.s: Likewise.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/cet-intel.d: Updated.
+	* testsuite/gas/i386/cet.d: Likewise.
+	* testsuite/gas/i386/x86-64-cet-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-cet.d: Likewise.
 	* testsuite/gas/i386/cet.s: Replace savessp with saveprevssp.
 	* testsuite/gas/i386/x86-64-cet.s: Likewise.
 

@@ -6009,8 +6009,8 @@ ptwrite, 1, 0xf30fae, 0x4, 2, CpuPTWRITE, Modrm|CheckRegSize|No_bSuf|No_wSuf|No_
 
 // CET instructions.
 
-incsspd, 0, 0xf30f01e9, None, 3, CpuCET, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
-incsspq, 0, 0xf30f01e9, None, 3, CpuCET|Cpu64, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { 0 }
+incsspd, 1, 0xf30fae, 0x5, 2, CpuCET, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32 }
+incsspq, 1, 0xf30fae, 0x5, 2, CpuCET|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg64 }
 rdsspd, 1, 0xf30f1e, 0x1, 2, CpuCET, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32 }
 rdsspq, 1, 0xf30f1e, 0x1, 2, CpuCET|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg64 }
 saveprevssp, 0, 0xf30f01ea, None, 3, CpuCET, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
@@ -6019,7 +6019,7 @@ wrssd, 2, 0x0f38f6, None, 3, CpuCET, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No
 wrssq, 2, 0x0f38f6, None, 3, CpuCET|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg64, Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 wrussd, 2, 0x660f38f5, None, 3, CpuCET, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32, Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 wrussq, 2, 0x660f38f5, None, 3, CpuCET|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg64, Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-setssbsy, 1, 0xf30fae, 0x5, 2, CpuCET, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+setssbsy, 0, 0xf30f01e8, None, 3, CpuCET, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 clrssbsy, 1, 0xf30fae, 0x6, 2, CpuCET, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 endbr64, 0, 0xf30f1efa, None, 3, CpuCET, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 endbr32, 0, 0xf30f1efb, None, 3, CpuCET, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }

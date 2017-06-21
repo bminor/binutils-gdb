@@ -1,25 +1,25 @@
 # Check CET instructions
 	.text
 _start:
-	incsspd
+	incsspd %ecx
 	rdsspd %ecx
 	saveprevssp
 	rstorssp (%ecx)
 	wrssd %eax, (%edx, %eax)
 	wrussd %edx, (%edi, %ebp)
-	setssbsy (%eax)
+	setssbsy
 	clrssbsy (%esp, %eax)
 	endbr64
 	endbr32
 
 	.intel_syntax noprefix
-	incsspd
+	incsspd ecx
 	rdsspd ecx
 	saveprevssp
 	rstorssp QWORD PTR [ecx + eax]
 	wrssd [edx],eax
 	wrussd [edi + ebp],edx
-	setssbsy QWORD PTR [eax]
+	setssbsy
 	clrssbsy QWORD PTR [esp + eax]
 	endbr64
 	endbr32
