@@ -2910,6 +2910,7 @@ sh_coff_get_relocated_section_contents (bfd *output_bfd,
   struct internal_reloc *internal_relocs = NULL;
   struct internal_syment *internal_syms = NULL;
 
+fprintf (stderr, "DATA = %p\n", data);
   /* We only need to handle the case of relaxing, or of having a
      particular set of section contents, specially.  */
   if (relocatable

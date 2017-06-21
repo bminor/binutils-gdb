@@ -1,5 +1,11 @@
 2017-06-21  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21645
+	* reloc.c (bfd_generic_get_relocated_section_contents): Fail if
+	bfd_get_full_section_contents returns no contents.
+
+2017-06-21  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21638
 	* vms-alpha.c (_bfd_vms_slurp_egsd): Check for an undersized
 	record.

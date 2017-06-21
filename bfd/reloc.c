@@ -8126,6 +8126,9 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
   if (!bfd_get_full_section_contents (input_bfd, input_section, &data))
     return NULL;
 
+  if (data == NULL)
+    return NULL;
+
   if (reloc_size == 0)
     return data;
 
