@@ -57,9 +57,11 @@ message if an attempt is made to assemble an instruction which will not execute
 on the target processor.  The following processor names are recognized:
 @code{cortex-a35},
 @code{cortex-a53},
+@code{cortex-a55},
 @code{cortex-a57},
 @code{cortex-a72},
 @code{cortex-a73},
+@code{cortex-a75},
 @code{exynos-m1},
 @code{falkor},
 @code{qdf24xx},
