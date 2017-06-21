@@ -1,3 +1,7 @@
+2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* opcode/arm.h (FPU_ANY): New macro.
+
 2017-06-16  Alan Modra  <amodra@gmail.com>
 
 	PR ld/20022

@@ -285,6 +285,7 @@
 #define ARM_ARCH_NONE	ARM_FEATURE_LOW (0, 0)
 #define FPU_NONE	ARM_FEATURE_LOW (0, 0)
 #define ARM_ANY		ARM_FEATURE (-1, -1, 0)	/* Any basic core.  */
+#define FPU_ANY		ARM_FEATURE_COPROC (-1) /* Any FPU.  */
 #define ARM_FEATURE_ALL	ARM_FEATURE (-1, -1, -1)/* All CPU and FPU features.  */
 #define FPU_ANY_HARD	ARM_FEATURE_COPROC (FPU_FPA | FPU_VFP_HARD | FPU_MAVERICK)
 /* Extensions containing some Thumb-2 instructions.  If any is present, Thumb
