@@ -1143,6 +1143,14 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 
   vms_debug2 ((2, "EGSD\n"));
 
+  if (PRIV (recrd.rec_size) < 8)
+    {
+      _bfd_error_handler (_("Corrupt EGSD record: its size (%#x) is too small"),
+			  PRIV (recrd.rec_size));
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+ 
   PRIV (recrd.rec) += 8;	/* Skip type, size, align pad.  */
   PRIV (recrd.rec_size) -= 8;
 
@@ -1353,6 +1361,8 @@ _bfd_vms_slurp_egsd (bfd *abfd)
       PRIV (recrd.rec_size) -= gsd_size;
       PRIV (recrd.rec) += gsd_size;
     }
+
+  /* FIXME: Should we complain if PRIV (recrd.rec_size) is not zero ?  */
 
   if (PRIV (gsd_sym_count) > 0)
     abfd->flags |= HAS_SYMS;
