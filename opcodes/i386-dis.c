@@ -3552,9 +3552,9 @@ static const struct dis386 reg_table[][8] = {
   {
     { "incQ",	{ Evh1 }, 0 },
     { "decQ",	{ Evh1 }, 0 },
-    { "call{&|}", { indirEv, NOTRACK, BND }, 0 },
+    { "call{&|}", { NOTRACK, indirEv, BND }, 0 },
     { MOD_TABLE (MOD_FF_REG_3) },
-    { "jmp{&|}", { indirEv, NOTRACK, BND }, 0 },
+    { "jmp{&|}", { NOTRACK, indirEv, BND }, 0 },
     { MOD_TABLE (MOD_FF_REG_5) },
     { "pushU",	{ stackEv }, 0 },
     { Bad_Opcode },
@@ -16816,14 +16816,12 @@ static void
 NOTRACK_Fixup (int bytemode ATTRIBUTE_UNUSED,
 	       int sizeflag ATTRIBUTE_UNUSED)
 {
-  if (modrm.mod == 3
-      && active_seg_prefix == PREFIX_DS
+  if (active_seg_prefix == PREFIX_DS
       && (address_mode != mode_64bit || last_data_prefix < 0))
     {
-      /* NOTRACK prefix is only valid on register indirect branch
-	 instructions and it must be the last prefix before REX
-	 prefix and opcode.  NB: DATA prefix is unsupported for
-	 Intel64.  */
+      /* NOTRACK prefix is only valid on indirect branch instructions
+         and it must be the last prefix before REX prefix and opcode.
+	 NB: DATA prefix is unsupported for Intel64.  */
       if (last_active_prefix >= 0)
 	{
 	  int notrack_prefix = last_active_prefix;

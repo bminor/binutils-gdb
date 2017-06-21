@@ -1,3 +1,10 @@
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (reg_table): Swap indirEv with NOTRACK on "call{&|}"
+	and "jmp{&|}".
+	(NOTRACK_Fixup): Support memory indirect branch with NOTRACK
+	prefix.
+
 2017-06-19  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21614
