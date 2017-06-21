@@ -1,6 +1,12 @@
 2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21090
+	* testsuite/ld-scripts/crossref.exp: Also pass $NOPIE_CFLAGS
+	to CC.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21090
 	* testsuite/ld-size/size.exp: Pass $NOPIE_LDFLAGS to size-4a,
 	size-4b, size-5a, size-5b, size-6 and size-8 tests.
 	* testsuite/ld-srec/srec.exp (NOPIE_CFLAGS): New.
