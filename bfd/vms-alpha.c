@@ -521,8 +521,10 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
       asection *section;
       flagword bfd_flags;
 
-      /* PR 17512: file: 3d9e9fe9.  */
-      if (offset >= PRIV (recrd.rec_size))
+      /* PR 17512: file: 3d9e9fe9.
+	 12 is the offset of the eisdsize field from the start of the record (8)
+	 plus the size of the eisdsize field (4).  */
+      if (offset >= PRIV (recrd.rec_size) - 12)
 	return FALSE;
       eisd = (struct vms_eisd *)(PRIV (recrd.rec) + offset);
       rec_size = bfd_getl32 (eisd->eisdsize);
@@ -535,8 +537,16 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
           offset = (offset + VMS_BLOCK_SIZE) & ~(VMS_BLOCK_SIZE - 1);
           continue;
         }
-      else
-        offset += rec_size;
+
+      /* Make sure that there is enough data present in the record.  */
+      /* FIXME: Should we use sizeof (struct vms_eisd) rather than just 32 here ?  */
+      if (rec_size < 32)
+	return FALSE;
+      /* Make sure that the record is not too big either.  */
+      if (offset + rec_size >= PRIV (recrd.rec_size))
+	return FALSE;
+
+      offset += rec_size;
 
       size = bfd_getl32 (eisd->secsize);
       vaddr = bfd_getl64 (eisd->virt_addr);
@@ -574,7 +584,13 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
 
       if (flags & EISD__M_GBL)
 	{
-	  name = _bfd_vms_save_counted_string (eisd->gblnam);
+	  if (rec_size < offsetof (struct vms_eisd, gblnam))
+	    return FALSE;
+	  else if (rec_size < sizeof (struct vms_eisd))
+	    name = _bfd_vms_save_counted_string (eisd->gblnam,
+						 rec_size - offsetof (struct vms_eisd, gblnam));
+	  else
+	    name = _bfd_vms_save_counted_string (eisd->gblnam, EISD__K_GBLNAMLEN);
 	  bfd_flags |= SEC_COFF_SHARED_LIBRARY;
 	  bfd_flags &= ~(SEC_ALLOC | SEC_LOAD);
 	}
@@ -622,13 +638,28 @@ static bfd_boolean
 _bfd_vms_slurp_eihs (bfd *abfd, unsigned int offset)
 {
   unsigned char *p = PRIV (recrd.rec) + offset;
-  unsigned int gstvbn = bfd_getl32 (p + EIHS__L_GSTVBN);
-  unsigned int gstsize ATTRIBUTE_UNUSED = bfd_getl32 (p + EIHS__L_GSTSIZE);
-  unsigned int dstvbn = bfd_getl32 (p + EIHS__L_DSTVBN);
-  unsigned int dstsize = bfd_getl32 (p + EIHS__L_DSTSIZE);
-  unsigned int dmtvbn = bfd_getl32 (p + EIHS__L_DMTVBN);
-  unsigned int dmtbytes = bfd_getl32 (p + EIHS__L_DMTBYTES);
+  unsigned int gstvbn;
+  unsigned int gstsize ATTRIBUTE_UNUSED;
+  unsigned int dstvbn;
+  unsigned int dstsize;
+  unsigned int dmtvbn;
+  unsigned int dmtbytes;
   asection *section;
+
+  /* PR 21611: Check that offset is valid.  */
+  if (offset > PRIV (recrd.rec_size) - (EIHS__L_DMTBYTES + 4))
+    {
+      _bfd_error_handler (_("Unable to read EIHS record at offset %#x"), offset); 
+      bfd_set_error (bfd_error_file_truncated);
+      return FALSE;
+    }
+
+  gstvbn   = bfd_getl32 (p + EIHS__L_GSTVBN);
+  gstsize  = bfd_getl32 (p + EIHS__L_GSTSIZE);
+  dstvbn   = bfd_getl32 (p + EIHS__L_DSTVBN);
+  dstsize  = bfd_getl32 (p + EIHS__L_DSTSIZE);
+  dmtvbn   = bfd_getl32 (p + EIHS__L_DMTVBN);
+  dmtbytes = bfd_getl32 (p + EIHS__L_DMTBYTES);
 
 #if VMS_DEBUG
   vms_debug (8, "_bfd_vms_slurp_ihs\n");
@@ -864,7 +895,7 @@ _bfd_vms_slurp_ehdr (bfd *abfd)
 
   vms_rec = PRIV (recrd.rec);
   /* PR 17512: file: 62736583.  */
-  end = PRIV (recrd.buf) + PRIV (recrd.buf_size);
+  end = vms_rec + PRIV (recrd.buf_size);
 
   vms_debug2 ((2, "HDR/EMH\n"));
 
@@ -884,11 +915,11 @@ _bfd_vms_slurp_ehdr (bfd *abfd)
       PRIV (hdr_data).hdr_l_recsiz = bfd_getl32 (vms_rec + 16);
       if ((vms_rec + 20 + vms_rec[20] + 1) >= end)
 	goto fail;
-      PRIV (hdr_data).hdr_t_name   = _bfd_vms_save_counted_string (vms_rec + 20);
+      PRIV (hdr_data).hdr_t_name   = _bfd_vms_save_counted_string (vms_rec + 20, vms_rec[20]);
       ptr = vms_rec + 20 + vms_rec[20] + 1;
       if ((ptr + *ptr + 1) >= end)
 	goto fail;
-      PRIV (hdr_data).hdr_t_version =_bfd_vms_save_counted_string (ptr);
+      PRIV (hdr_data).hdr_t_version =_bfd_vms_save_counted_string (ptr, *ptr);
       ptr += *ptr + 1;
       if (ptr + 17 >= end)
 	goto fail;
@@ -1128,6 +1159,14 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 
   vms_debug2 ((2, "EGSD\n"));
 
+  if (PRIV (recrd.rec_size) < 8)
+    {
+      _bfd_error_handler (_("Corrupt EGSD record: its size (%#x) is too small"),
+			  PRIV (recrd.rec_size));
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+ 
   PRIV (recrd.rec) += 8;	/* Skip type, size, align pad.  */
   PRIV (recrd.rec_size) -= 8;
 
@@ -1148,6 +1187,14 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	{
 	  _bfd_error_handler (_("Corrupt EGSD record: size (%#x) is larger than remaining space (%#x)"),
 			      gsd_size, PRIV (recrd.rec_size));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+
+      if (gsd_size < 4)
+	{
+	  _bfd_error_handler (_("Corrupt EGSD record: size (%#x) is too small"),
+			      gsd_size);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -1174,7 +1221,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
                 char *name;
                 unsigned long align_addr;
 
-                name = _bfd_vms_save_counted_string (&egps->namlng);
+		name = _bfd_vms_save_counted_string (&egps->namlng, gsd_size - 4);
 
                 section = bfd_make_section (abfd, name);
                 if (!section)
@@ -1267,6 +1314,8 @@ _bfd_vms_slurp_egsd (bfd *abfd)
                 struct vms_esdf *esdf = (struct vms_esdf *)vms_rec;
 
 		entry->value = bfd_getl64 (esdf->value);
+		if (PRIV (sections) == NULL)
+		  return FALSE;
 		entry->section = PRIV (sections)[bfd_getl32 (esdf->psindx)];
 
                 if (old_flags & EGSY__V_NORM)
@@ -1301,7 +1350,11 @@ _bfd_vms_slurp_egsd (bfd *abfd)
             entry->symbol_vector = bfd_getl32 (egst->value);
 
             if (old_flags & EGSY__V_REL)
-              entry->section = PRIV (sections)[bfd_getl32 (egst->psindx)];
+	      {
+		if (PRIV (sections) == NULL)
+		  return FALSE;
+		entry->section = PRIV (sections)[bfd_getl32 (egst->psindx)];
+	      }
             else
               entry->section = bfd_abs_section_ptr;
 
@@ -1332,6 +1385,8 @@ _bfd_vms_slurp_egsd (bfd *abfd)
       PRIV (recrd.rec_size) -= gsd_size;
       PRIV (recrd.rec) += gsd_size;
     }
+
+  /* FIXME: Should we complain if PRIV (recrd.rec_size) is not zero ?  */
 
   if (PRIV (gsd_sym_count) > 0)
     abfd->flags |= HAS_SYMS;
@@ -1389,6 +1444,8 @@ image_set_ptr (bfd *abfd, bfd_vma vma, int sect, struct bfd_link_info *info)
 
   vms_debug2 ((4, "image_set_ptr (0x%08x, sect=%d)\n", (unsigned)vma, sect));
 
+  if (PRIV (sections) == NULL)
+    return;
   sec = PRIV (sections)[sect];
 
   if (info)
@@ -1711,7 +1768,12 @@ static bfd_vma
 alpha_vms_fix_sec_rel (bfd *abfd, struct bfd_link_info *info,
                        unsigned int rel, bfd_vma vma)
 {
-  asection *sec = PRIV (sections)[rel & RELC_MASK];
+  asection *sec;
+
+  if (PRIV (sections) == NULL)
+    return 0;
+
+  sec = PRIV (sections)[rel & RELC_MASK];
 
   if (info)
     {
@@ -4085,7 +4147,8 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 	{
 	case DST__K_MODBEG:
 	  module->name
-	    = _bfd_vms_save_counted_string (ptr + DST_S_B_MODBEG_NAME);
+	    = _bfd_vms_save_counted_string (ptr + DST_S_B_MODBEG_NAME,
+					    maxptr - (ptr + DST_S_B_MODBEG_NAME));
 
 	  curr_pc = 0;
 	  prev_pc = 0;
@@ -4102,7 +4165,8 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 	  funcinfo = (struct funcinfo *)
 	    bfd_zalloc (abfd, sizeof (struct funcinfo));
           funcinfo->name
-	    = _bfd_vms_save_counted_string (ptr + DST_S_B_RTNBEG_NAME);
+	    = _bfd_vms_save_counted_string (ptr + DST_S_B_RTNBEG_NAME,
+					    maxptr - (ptr + DST_S_B_RTNBEG_NAME));
 	  funcinfo->low = bfd_getl32 (ptr + DST_S_L_RTNBEG_ADDRESS);
 	  funcinfo->next = module->func_table;
 	  module->func_table = funcinfo;
@@ -4153,8 +4217,10 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 		    unsigned int fileid
 		      = bfd_getl16 (src_ptr + DST_S_W_SRC_DF_FILEID);
 		    char *filename
-		      = _bfd_vms_save_counted_string (src_ptr
-			  + DST_S_B_SRC_DF_FILENAME);
+		      = _bfd_vms_save_counted_string (src_ptr + DST_S_B_SRC_DF_FILENAME,
+						      (ptr + rec_length) -
+						      (src_ptr + DST_S_B_SRC_DF_FILENAME)
+						      );
 
 		    while (fileid >= module->file_table_count)
 		      {
@@ -5046,6 +5112,8 @@ alpha_vms_slurp_relocs (bfd *abfd)
                 return FALSE;
               }
 
+	    if (PRIV (sections) == NULL)
+	      return FALSE;
             sec = PRIV (sections)[cur_psect];
             if (sec == bfd_abs_section_ptr)
               {
@@ -5104,8 +5172,12 @@ alpha_vms_slurp_relocs (bfd *abfd)
                   reloc->sym_ptr_ptr = sym;
               }
             else if (cur_psidx >= 0)
-              reloc->sym_ptr_ptr =
-                PRIV (sections)[cur_psidx]->symbol_ptr_ptr;
+	      {
+		if (PRIV (sections) == NULL)
+		  return FALSE;
+		reloc->sym_ptr_ptr =
+		  PRIV (sections)[cur_psidx]->symbol_ptr_ptr;
+	      }
             else
               reloc->sym_ptr_ptr = NULL;
 
@@ -5619,6 +5691,13 @@ evax_bfd_print_emh (FILE *file, unsigned char *rec, unsigned int rec_len)
   /* xgettext:c-format */
   fprintf (file, _("  EMH %u (len=%u): "), subtype, rec_len);
 
+  /* PR 21618: Check for invalid lengths.  */
+  if (rec_len < sizeof (* emh))
+    {
+      fprintf (file, _("   Error: The length is less than the length of an EMH record\n"));
+      return;
+    }
+  
   switch (subtype)
     {
     case EMH__C_MHD:
@@ -5682,6 +5761,14 @@ evax_bfd_print_eeom (FILE *file, unsigned char *rec, unsigned int rec_len)
   struct vms_eeom *eeom = (struct vms_eeom *)rec;
 
   fprintf (file, _("  EEOM (len=%u):\n"), rec_len);
+
+  /* PR 21618: Check for invalid lengths.  */
+  if (rec_len < sizeof (* eeom))
+    {
+      fprintf (file, _("   Error: The length is less than the length of an EEOM record\n"));
+      return;
+    }
+  
   fprintf (file, _("   number of cond linkage pairs: %u\n"),
            (unsigned)bfd_getl32 (eeom->total_lps));
   fprintf (file, _("   completion code: %u\n"),
@@ -5770,6 +5857,12 @@ evax_bfd_print_egsd (FILE *file, unsigned char *rec, unsigned int rec_len)
       fprintf (file, _("  EGSD entry %2u (type: %u, len: %u): "),
                n, type, len);
       n++;
+
+      if (off + len > rec_len || off + len < off)
+	{
+	  fprintf (file, _("   Error: length larger than remaining space in record\n"));
+	  return;
+	}
 
       switch (type)
         {
@@ -6015,6 +6108,12 @@ evax_bfd_print_etir (FILE *file, const char *name,
       type = bfd_getl16 (etir->rectyp);
       size = bfd_getl16 (etir->size);
       buf = rec + off + sizeof (struct vms_etir);
+
+      if (off + size > rec_len || off + size < off)
+	{
+	  fprintf (file, _("   Error: length larger than remaining space in record\n"));
+	  return;
+	}
 
       /* xgettext:c-format */
       fprintf (file, _("   (type: %3u, size: 4+%3u): "), type, size - 4);

@@ -321,7 +321,7 @@ func:
 	.long  0xf1319d6f    /* xscvdphp vs41,vs51         */
 	.long  0xf158a76f    /* xvcvhpsp vs42,vs52         */
 	.long  0xf179af6f    /* xvcvsphp vs43,vs53         */
-	.long  0x4c600004    /* addpcis r3,0               */
+	.long  0x4c600004    /* lnia r3                    */
 	.long  0x4c600004    /* addpcis r3,0               */
 	.long  0x4c800005    /* addpcis r4,1               */
 	.long  0x4c800005    /* addpcis r4,1               */

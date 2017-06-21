@@ -1,3 +1,25 @@
+2017-06-21  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Plt_stub_key): Rename from Plt_stub_ent.  Remove indx_.
+	(Plt_stub_key_hash): Rename from Plt_stub_ent_hash.
+	(struct Plt_stub_ent): New.
+	(Plt_stub_entries): Map from Plt_stub_key to Plt_stub_ent.  Adjust
+	use throughout file.
+
+2017-06-20  Eric Christopher  <echristo@gmail.com>
+
+	* aarch64.cc (scan_reloc_for_stub): Use plt_address_for_global to
+	calculate the symbol value.
+	(scan_reloc_section_for_stubs): Allow stubs to be created for
+	section symbols.
+	(maybe_apply_stub): Handle creating stubs for weak symbols to
+	match the code in scan_reloc_for_stub.
+
+2017-06-20  James Clarke  <jrtc27@jrtc27.com>
+
+	* powerpc.cc (Stub_table::define_stub_syms): Always include object's
+	uniq_ value.
+
 2017-06-15  Eric Christopher  <echristo@gmail.com>
 
 	* aarch64.cc: Fix a few typos and grammar-os.

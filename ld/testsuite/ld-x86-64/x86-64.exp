@@ -1368,6 +1368,24 @@ run_ld_link_tests [list \
 	{{readelf -SW plt2.rd} {objdump -dwr plt2.dd}} \
 	"plt2" \
     ] \
+    [list \
+	"Build pr21626.so" \
+	"-shared -melf_x86_64" \
+	"" \
+	"--64 -defsym __64_bit__=1" \
+	{property-x86-3.s} \
+	"" \
+	"pr21626.so" \
+    ] \
+    [list \
+	"Build pr21626" \
+	"-melf_x86_64 tmpdir/pr21626.so" \
+	"" \
+	"--64" \
+	{start.s foo.s} \
+	"" \
+	"pr21626" \
+    ] \
 ]
 
 # Linux only tests

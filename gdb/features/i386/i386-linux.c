@@ -71,9 +71,6 @@ initialize_tdesc_i386_linux (void)
   tdesc_create_reg (feature, "fooff", 30, 1, "float", 32, "int");
   tdesc_create_reg (feature, "fop", 31, 1, "float", 32, "int");
 
-  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.linux");
-  tdesc_create_reg (feature, "orig_eax", 41, 1, NULL, 32, "int");
-
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.sse");
   field_type = tdesc_named_type (feature, "ieee_single");
   tdesc_create_vector (feature, "v4f", field_type, 4);
@@ -134,6 +131,9 @@ initialize_tdesc_i386_linux (void)
   tdesc_create_reg (feature, "xmm6", 38, 1, NULL, 128, "vec128");
   tdesc_create_reg (feature, "xmm7", 39, 1, NULL, 128, "vec128");
   tdesc_create_reg (feature, "mxcsr", 40, 1, "vector", 32, "i386_mxcsr");
+
+  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.linux");
+  tdesc_create_reg (feature, "orig_eax", 41, 1, NULL, 32, "int");
 
   tdesc_i386_linux = result;
 }

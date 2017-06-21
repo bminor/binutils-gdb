@@ -81,7 +81,6 @@ inferior::~inferior ()
   inferior_free_data (inf);
   xfree (inf->args);
   xfree (inf->terminal);
-  free_environ (inf->environment);
   target_desc_info_free (inf->tdesc_info);
   xfree (inf->priv);
 }
@@ -89,10 +88,9 @@ inferior::~inferior ()
 inferior::inferior (int pid_)
   : num (++highest_inferior_num),
     pid (pid_),
-    environment (make_environ ()),
+    environment (gdb_environ::from_host_environ ()),
     registry_data ()
 {
-  init_environ (this->environment);
   inferior_alloc_data (this);
 }
 

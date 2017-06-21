@@ -1,3 +1,19 @@
+2017-06-20  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (IPA_OBJS): Sort and format one item per line.
+
+2017-06-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* linux-low.c (linux_create_inferior): Adjust code to access the
+	environment information via 'gdb_environ' class.
+	* lynx-low.c (lynx_create_inferior): Likewise.
+	* server.c (our_environ): Make it an instance of 'gdb_environ'.
+	(get_environ): Return a pointer to 'our_environ'.
+	(captured_main): Initialize 'our_environ'.
+	* server.h (get_environ): Adjust prototype.
+	* spu-low.c (spu_create_inferior): Adjust code to access the
+	environment information via 'gdb_environ' class.
+
 2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* linux-low.c (linux_read_memory, linux_write_memory): Remove

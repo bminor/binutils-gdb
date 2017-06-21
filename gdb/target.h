@@ -712,22 +712,25 @@ struct target_ops
 					      CORE_ADDR offset)
       TARGET_DEFAULT_NORETURN (generic_tls_error ());
 
-    /* Request that OPS transfer up to LEN 8-bit bytes of the target's
-       OBJECT.  The OFFSET, for a seekable object, specifies the
+    /* Request that OPS transfer up to LEN addressable units of the target's
+       OBJECT.  When reading from a memory object, the size of an addressable
+       unit is architecture dependent and can be found using
+       gdbarch_addressable_memory_unit_size.  Otherwise, an addressable unit is
+       1 byte long.  The OFFSET, for a seekable object, specifies the
        starting point.  The ANNEX can be used to provide additional
        data-specific information to the target.
 
        Return the transferred status, error or OK (an
-       'enum target_xfer_status' value).  Save the number of bytes
+       'enum target_xfer_status' value).  Save the number of addressable units
        actually transferred in *XFERED_LEN if transfer is successful
-       (TARGET_XFER_OK) or the number unavailable bytes if the requested
+       (TARGET_XFER_OK) or the number unavailable units if the requested
        data is unavailable (TARGET_XFER_UNAVAILABLE).  *XFERED_LEN
        smaller than LEN does not indicate the end of the object, only
        the end of the transfer; higher level code should continue
        transferring if desired.  This is handled in target.c.
 
        The interface does not support a "retry" mechanism.  Instead it
-       assumes that at least one byte will be transfered on each
+       assumes that at least one addressable unit will be transfered on each
        successful call.
 
        NOTE: cagney/2003-10-17: The current interface can lead to

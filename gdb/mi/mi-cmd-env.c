@@ -167,7 +167,7 @@ mi_cmd_env_path (const char *command, char **argv, int argc)
   else
     {
       /* Otherwise, get current path to modify.  */
-      env = get_in_environ (current_inferior ()->environment, path_var_name);
+      env = current_inferior ()->environment.get (path_var_name);
 
       /* Can be null if path is not set.  */
       if (!env)
@@ -178,9 +178,9 @@ mi_cmd_env_path (const char *command, char **argv, int argc)
   for (i = argc - 1; i >= 0; --i)
     env_mod_path (argv[i], &exec_path);
 
-  set_in_environ (current_inferior ()->environment, path_var_name, exec_path);
+  current_inferior ()->environment.set (path_var_name, exec_path);
   xfree (exec_path);
-  env = get_in_environ (current_inferior ()->environment, path_var_name);
+  env = current_inferior ()->environment.get (path_var_name);
   uiout->field_string ("path", env);
 }
 

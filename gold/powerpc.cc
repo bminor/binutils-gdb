@@ -4117,10 +4117,19 @@ class Stub_table : public Output_relaxed_input_section
   { return targ_; }
 
  private:
-  class Plt_stub_ent;
-  class Plt_stub_ent_hash;
-  typedef Unordered_map<Plt_stub_ent, unsigned int,
-			Plt_stub_ent_hash> Plt_stub_entries;
+  class Plt_stub_key;
+  class Plt_stub_key_hash;
+  struct Plt_stub_ent
+  {
+    Plt_stub_ent(unsigned int off, unsigned int indx)
+      : off_(off), indx_(indx)
+    { }
+
+    unsigned int off_;
+    unsigned int indx_;
+  };
+  typedef Unordered_map<Plt_stub_key, Plt_stub_ent,
+			Plt_stub_key_hash> Plt_stub_entries;
   class Branch_stub_ent;
   class Branch_stub_ent_hash;
   typedef Unordered_map<Branch_stub_ent, unsigned int,
@@ -4208,19 +4217,19 @@ class Stub_table : public Output_relaxed_input_section
   do_write(Output_file*);
 
   // Plt call stub keys.
-  class Plt_stub_ent
+  class Plt_stub_key
   {
   public:
-    Plt_stub_ent(const Symbol* sym)
+    Plt_stub_key(const Symbol* sym)
       : sym_(sym), object_(0), addend_(0), locsym_(0)
     { }
 
-    Plt_stub_ent(const Sized_relobj_file<size, big_endian>* object,
+    Plt_stub_key(const Sized_relobj_file<size, big_endian>* object,
 		 unsigned int locsym_index)
       : sym_(NULL), object_(object), addend_(0), locsym_(locsym_index)
     { }
 
-    Plt_stub_ent(const Sized_relobj_file<size, big_endian>* object,
+    Plt_stub_key(const Sized_relobj_file<size, big_endian>* object,
 		 const Symbol* sym,
 		 unsigned int r_type,
 		 Address addend)
@@ -4237,7 +4246,7 @@ class Stub_table : public Output_relaxed_input_section
 	}
     }
 
-    Plt_stub_ent(const Sized_relobj_file<size, big_endian>* object,
+    Plt_stub_key(const Sized_relobj_file<size, big_endian>* object,
 		 unsigned int locsym_index,
 		 unsigned int r_type,
 		 Address addend)
@@ -4250,7 +4259,7 @@ class Stub_table : public Output_relaxed_input_section
 	this->addend_ = addend;
     }
 
-    bool operator==(const Plt_stub_ent& that) const
+    bool operator==(const Plt_stub_key& that) const
     {
       return (this->sym_ == that.sym_
 	      && this->object_ == that.object_
@@ -4262,13 +4271,12 @@ class Stub_table : public Output_relaxed_input_section
     const Sized_relobj_file<size, big_endian>* object_;
     typename elfcpp::Elf_types<size>::Elf_Addr addend_;
     unsigned int locsym_;
-    unsigned int indx_;
   };
 
-  class Plt_stub_ent_hash
+  class Plt_stub_key_hash
   {
   public:
-    size_t operator()(const Plt_stub_ent& ent) const
+    size_t operator()(const Plt_stub_key& ent) const
     {
       return (reinterpret_cast<uintptr_t>(ent.sym_)
 	      ^ reinterpret_cast<uintptr_t>(ent.object_)
@@ -4346,14 +4354,13 @@ Stub_table<size, big_endian>::add_plt_call_entry(
     unsigned int r_type,
     Address addend)
 {
-  Plt_stub_ent ent(object, gsym, r_type, addend);
-  unsigned int off = this->plt_size_;
-  ent.indx_ = this->plt_call_stubs_.size();
+  Plt_stub_key key(object, gsym, r_type, addend);
+  Plt_stub_ent ent(this->plt_size_, this->plt_call_stubs_.size());
   std::pair<typename Plt_stub_entries::iterator, bool> p
-    = this->plt_call_stubs_.insert(std::make_pair(ent, off));
+    = this->plt_call_stubs_.insert(std::make_pair(key, ent));
   if (p.second)
-    this->plt_size_ = off + this->plt_call_size(p.first);
-  return this->can_reach_stub(from, off, r_type);
+    this->plt_size_ = ent.off_ + this->plt_call_size(p.first);
+  return this->can_reach_stub(from, ent.off_, r_type);
 }
 
 template<int size, bool big_endian>
@@ -4365,14 +4372,13 @@ Stub_table<size, big_endian>::add_plt_call_entry(
     unsigned int r_type,
     Address addend)
 {
-  Plt_stub_ent ent(object, locsym_index, r_type, addend);
-  unsigned int off = this->plt_size_;
-  ent.indx_ = this->plt_call_stubs_.size();
+  Plt_stub_key key(object, locsym_index, r_type, addend);
+  Plt_stub_ent ent(this->plt_size_, this->plt_call_stubs_.size());
   std::pair<typename Plt_stub_entries::iterator, bool> p
-    = this->plt_call_stubs_.insert(std::make_pair(ent, off));
+    = this->plt_call_stubs_.insert(std::make_pair(key, ent));
   if (p.second)
-    this->plt_size_ = off + this->plt_call_size(p.first);
-  return this->can_reach_stub(from, off, r_type);
+    this->plt_size_ = ent.off_ + this->plt_call_size(p.first);
+  return this->can_reach_stub(from, ent.off_, r_type);
 }
 
 // Find a plt call stub.
@@ -4385,18 +4391,20 @@ Stub_table<size, big_endian>::find_plt_call_entry(
     unsigned int r_type,
     Address addend) const
 {
-  Plt_stub_ent ent(object, gsym, r_type, addend);
-  typename Plt_stub_entries::const_iterator p = this->plt_call_stubs_.find(ent);
-  return p == this->plt_call_stubs_.end() ? invalid_address : p->second;
+  Plt_stub_key key(object, gsym, r_type, addend);
+  typename Plt_stub_entries::const_iterator p = this->plt_call_stubs_.find(key);
+  if (p == this->plt_call_stubs_.end())
+    return invalid_address;
+  return p->second.off_;
 }
 
 template<int size, bool big_endian>
 typename Stub_table<size, big_endian>::Address
 Stub_table<size, big_endian>::find_plt_call_entry(const Symbol* gsym) const
 {
-  Plt_stub_ent ent(gsym);
-  typename Plt_stub_entries::const_iterator p = this->plt_call_stubs_.find(ent);
-  return p == this->plt_call_stubs_.end() ? invalid_address : p->second;
+  Plt_stub_key key(gsym);
+  typename Plt_stub_entries::const_iterator p = this->plt_call_stubs_.find(key);
+  return p == this->plt_call_stubs_.end() ? invalid_address : p->second.off_;
 }
 
 template<int size, bool big_endian>
@@ -4407,9 +4415,11 @@ Stub_table<size, big_endian>::find_plt_call_entry(
     unsigned int r_type,
     Address addend) const
 {
-  Plt_stub_ent ent(object, locsym_index, r_type, addend);
-  typename Plt_stub_entries::const_iterator p = this->plt_call_stubs_.find(ent);
-  return p == this->plt_call_stubs_.end() ? invalid_address : p->second;
+  Plt_stub_key key(object, locsym_index, r_type, addend);
+  typename Plt_stub_entries::const_iterator p = this->plt_call_stubs_.find(key);
+  if (p == this->plt_call_stubs_.end())
+    return invalid_address;
+  return p->second.off_;
 }
 
 template<int size, bool big_endian>
@@ -4418,9 +4428,9 @@ Stub_table<size, big_endian>::find_plt_call_entry(
     const Sized_relobj_file<size, big_endian>* object,
     unsigned int locsym_index) const
 {
-  Plt_stub_ent ent(object, locsym_index);
-  typename Plt_stub_entries::const_iterator p = this->plt_call_stubs_.find(ent);
-  return p == this->plt_call_stubs_.end() ? invalid_address : p->second;
+  Plt_stub_key key(object, locsym_index);
+  typename Plt_stub_entries::const_iterator p = this->plt_call_stubs_.find(key);
+  return p == this->plt_call_stubs_.end() ? invalid_address : p->second.off_;
 }
 
 // Add a long branch stub if we don't already have one to given
@@ -4647,7 +4657,7 @@ Stub_table<size, big_endian>::define_stub_syms(Symbol_table* symtab)
       for (plt_iter cs = this->plt_call_stubs_.begin();
 	   cs != this->plt_call_stubs_.end();
 	   ++cs)
-	sorted[cs->first.indx_] = cs;
+	sorted[cs->second.indx_] = cs;
 
       for (unsigned int i = 0; i < this->plt_call_stubs_.size(); ++i)
 	{
@@ -4656,20 +4666,27 @@ Stub_table<size, big_endian>::define_stub_syms(Symbol_table* symtab)
 	  add[0] = 0;
 	  if (cs->first.addend_ != 0)
 	    sprintf(add, "+%x", static_cast<uint32_t>(cs->first.addend_));
-	  char localname[18];
-	  const char *symname;
-	  if (cs->first.sym_ == NULL)
+	  char obj[10];
+	  obj[0] = 0;
+	  if (cs->first.object_)
 	    {
 	      const Powerpc_relobj<size, big_endian>* ppcobj = static_cast
 		<const Powerpc_relobj<size, big_endian>*>(cs->first.object_);
-	      sprintf(localname, "%x:%x", ppcobj->uniq(), cs->first.locsym_);
+	      sprintf(obj, "%x:", ppcobj->uniq());
+	    }
+	  char localname[9];
+	  const char *symname;
+	  if (cs->first.sym_ == NULL)
+	    {
+	      sprintf(localname, "%x", cs->first.locsym_);
 	      symname = localname;
 	    }
 	  else
 	    symname = cs->first.sym_->name();
-	  char* name = new char[8 + 10 + strlen(symname) + strlen(add) + 1];
-	  sprintf(name, "%08x.plt_call.%s%s", this->uniq_, symname, add);
-	  Address value = this->stub_address() - this->address() + cs->second;
+	  char* name = new char[8 + 10 + strlen(obj) + strlen(symname) + strlen(add) + 1];
+	  sprintf(name, "%08x.plt_call.%s%s%s", this->uniq_, obj, symname, add);
+	  Address value
+	    = this->stub_address() - this->address() + cs->second.off_;
 	  unsigned int stub_size = this->plt_call_size(cs);
 	  this->targ_->define_local(symtab, name, this, value, stub_size);
 	}
@@ -4769,7 +4786,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		  Address to
 		    = this->targ_->glink_section()->address() + glinkoff;
 		  Address from
-		    = (this->stub_address() + cs->second + 24
+		    = (this->stub_address() + cs->second.off_ + 24
 		       + 4 * (ha(off) != 0)
 		       + 4 * (ha(off + 8 + 8 * static_chain) != ha(off))
 		       + 4 * static_chain);
@@ -4777,7 +4794,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		  use_fake_dep = cmp_branch_off + (1 << 25) >= (1 << 26);
 		}
 
-	      p = oview + cs->second;
+	      p = oview + cs->second.off_;
 	      if (ha(off) != 0)
 		{
 		  write_insn<big_endian>(p, std_2_1 + this->targ_->stk_toc());
@@ -4931,7 +4948,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	      else
 		plt_addr += plt_base;
 
-	      p = oview + cs->second;
+	      p = oview + cs->second.off_;
 	      if (parameters->options().output_is_position_independent())
 		{
 		  Address got_addr;

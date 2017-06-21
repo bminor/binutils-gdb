@@ -613,6 +613,7 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 	{
 	  num_group = (unsigned) -1;
 	  elf_tdata (abfd)->num_group = num_group;
+	  elf_tdata (abfd)->group_sect_ptr = NULL;
 	}
       else
 	{
@@ -625,8 +626,9 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
               bfd_alloc2 (abfd, num_group, sizeof (Elf_Internal_Shdr *));
 	  if (elf_tdata (abfd)->group_sect_ptr == NULL)
 	    return FALSE;
-
+	  memset (elf_tdata (abfd)->group_sect_ptr, 0, num_group * sizeof (Elf_Internal_Shdr *));
 	  num_group = 0;
+
 	  for (i = 0; i < shnum; i++)
 	    {
 	      Elf_Internal_Shdr *shdr = elf_elfsections (abfd)[i];
@@ -739,8 +741,14 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
       for (i = 0; i < num_group; i++)
 	{
 	  Elf_Internal_Shdr *shdr = elf_tdata (abfd)->group_sect_ptr[i];
-	  Elf_Internal_Group *idx = (Elf_Internal_Group *) shdr->contents;
-	  unsigned int n_elt = shdr->sh_size / 4;
+	  Elf_Internal_Group *idx;
+	  unsigned int n_elt;
+
+	  if (shdr == NULL)
+	    continue;
+
+	  idx = (Elf_Internal_Group *) shdr->contents;
+	  n_elt = shdr->sh_size / 4;
 
 	  /* Look through this group's sections to see if current
 	     section is a member.  */

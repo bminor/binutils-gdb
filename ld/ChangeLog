@@ -1,3 +1,20 @@
+2017-06-21  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/powerpc.exp: Run TOCSAVE tests.
+	* testsuite/ld-powerpc/tocsave1.s,
+	* testsuite/ld-powerpc/tocsave1a.d,
+	* testsuite/ld-powerpc/tocsave1s.d,
+	* testsuite/ld-powerpc/tocsave2.s,
+	* testsuite/ld-powerpc/tocsave2a.d,
+	* testsuite/ld-powerpc/tocsave2s.d,
+	* testsuite/ld-powerpc/tocsavelib.s: New files.
+
+2017-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21626
+	* testsuite/ld-i386/i386.exp: Run ld/21626 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
 2017-06-18  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/ld-lib.exp (is_underscore_target): New.

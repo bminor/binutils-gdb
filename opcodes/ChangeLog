@@ -1,3 +1,36 @@
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (RM_0FAE_REG_5): Removed.
+	(PREFIX_MOD_3_0F01_REG_5_RM_1): Likewise.
+	(PREFIX_MOD_3_0F01_REG_5_RM_0): New.
+	(PREFIX_MOD_3_0FAE_REG_5): Likewise.
+	(prefix_table): Remove PREFIX_MOD_3_0F01_REG_5_RM_1.  Add
+	PREFIX_MOD_3_0F01_REG_5_RM_0.
+	(prefix_table): Update PREFIX_MOD_0_0FAE_REG_5.  Add
+	PREFIX_MOD_3_0FAE_REG_5.
+	(mod_table): Update MOD_0FAE_REG_5.
+	(rm_table): Update RM_0F01_REG_5.  Remove RM_0FAE_REG_5.
+	* i386-opc.tbl: Update incsspd, incsspq and setssbsy.
+	* i386-tbl.h: Regenerated.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (prefix_table): Replace savessp with saveprevssp.
+	* i386-opc.tbl: Likewise.
+	* i386-tbl.h: Regenerated.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (reg_table): Swap indirEv with NOTRACK on "call{&|}"
+	and "jmp{&|}".
+	(NOTRACK_Fixup): Support memory indirect branch with NOTRACK
+	prefix.
+
+2017-06-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21614
+	* score-dis.c (score_opcodes): Add sentinel.
+
 2017-06-16  Alan Modra  <amodra@gmail.com>
 
 	* rx-decode.c: Regenerate.

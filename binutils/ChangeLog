@@ -1,3 +1,9 @@
+2017-06-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21619
+	* objdump.c (disassemble_bytes): Check that there is sufficient
+	data available before attempting to display it.
+
 2017-06-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* sysinfo.y: Free memory allocated by token NAME.

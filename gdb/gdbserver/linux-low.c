@@ -998,7 +998,7 @@ linux_create_inferior (const char *program,
 
   pid = fork_inferior (program,
 		       str_program_args.c_str (),
-		       environ_vector (get_environ ()), linux_ptrace_fun,
+		       get_environ ()->envp (), linux_ptrace_fun,
 		       NULL, NULL, NULL, NULL);
 
   do_cleanups (restore_personality);

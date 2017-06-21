@@ -610,7 +610,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
      the value now.  */
   run_target->to_create_inferior (run_target, exec_file,
 				  std::string (get_inferior_args ()),
-				  environ_vector (current_inferior ()->environment),
+				  current_inferior ()->environment.envp (),
 				  from_tty);
   /* to_create_inferior should push the target, so after this point we
      shouldn't refer to run_target again.  */
@@ -2131,7 +2131,7 @@ environment_info (char *var, int from_tty)
 {
   if (var)
     {
-      char *val = get_in_environ (current_inferior ()->environment, var);
+      const char *val = current_inferior ()->environment.get (var);
 
       if (val)
 	{
@@ -2149,11 +2149,11 @@ environment_info (char *var, int from_tty)
     }
   else
     {
-      char **vector = environ_vector (current_inferior ()->environment);
+      char **envp = current_inferior ()->environment.envp ();
 
-      while (*vector)
+      for (int idx = 0; envp[idx] != NULL; ++idx)
 	{
-	  puts_filtered (*vector++);
+	  puts_filtered (envp[idx]);
 	  puts_filtered ("\n");
 	}
     }
@@ -2215,10 +2215,10 @@ set_environment_command (char *arg, int from_tty)
       printf_filtered (_("Setting environment variable "
 			 "\"%s\" to null value.\n"),
 		       var);
-      set_in_environ (current_inferior ()->environment, var, "");
+      current_inferior ()->environment.set (var, "");
     }
   else
-    set_in_environ (current_inferior ()->environment, var, val);
+    current_inferior ()->environment.set (var, val);
   xfree (var);
 }
 
@@ -2230,13 +2230,10 @@ unset_environment_command (char *var, int from_tty)
       /* If there is no argument, delete all environment variables.
          Ask for confirmation if reading from the terminal.  */
       if (!from_tty || query (_("Delete all environment variables? ")))
-	{
-	  free_environ (current_inferior ()->environment);
-	  current_inferior ()->environment = make_environ ();
-	}
+	current_inferior ()->environment = gdb_environ::from_host_environ ();
     }
   else
-    unset_in_environ (current_inferior ()->environment, var);
+    current_inferior ()->environment.unset (var);
 }
 
 /* Handle the execution path (PATH variable).  */
@@ -2247,8 +2244,7 @@ static void
 path_info (char *args, int from_tty)
 {
   puts_filtered ("Executable and object file path: ");
-  puts_filtered (get_in_environ (current_inferior ()->environment,
-				 path_var_name));
+  puts_filtered (current_inferior ()->environment.get (path_var_name));
   puts_filtered ("\n");
 }
 
@@ -2261,13 +2257,13 @@ path_command (char *dirname, int from_tty)
   const char *env;
 
   dont_repeat ();
-  env = get_in_environ (current_inferior ()->environment, path_var_name);
+  env = current_inferior ()->environment.get (path_var_name);
   /* Can be null if path is not set.  */
   if (!env)
     env = "";
   exec_path = xstrdup (env);
   mod_path (dirname, &exec_path);
-  set_in_environ (current_inferior ()->environment, path_var_name, exec_path);
+  current_inferior ()->environment.set (path_var_name, exec_path);
   xfree (exec_path);
   if (from_tty)
     path_info ((char *) NULL, from_tty);

@@ -526,6 +526,7 @@ SUBDIR_PYTHON_LDFLAGS =
 SUBDIR_PYTHON_CFLAGS =
 
 SUBDIR_UNITTESTS_SRCS = \
+	unittests/environ-selftests.c \
 	unittests/function-view-selftests.c \
 	unittests/offset-type-selftests.c \
 	unittests/optional-selftests.c \
@@ -533,6 +534,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/scoped_restore-selftests.c
 
 SUBDIR_UNITTESTS_OBS = \
+	environ-selftests.o \
 	function-view-selftests.o \
 	offset-type-selftests.o \
 	optional-selftests.o \

@@ -1,3 +1,9 @@
+2017-06-19  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdb.arch/powerpc-power9.exp: Update test case for new lnia
+	extended mnemonic.
+	* gdb.arch/powerpc-power9.s: Likewise.
+
 2017-06-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.dwarf2/var-access.exp: Use register name ecx instead of edx

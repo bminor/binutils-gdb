@@ -473,6 +473,7 @@ static struct score_opcode score_opcodes[] =
   {0x00003454, 0x3e007fff, "tvc"},
   {0x00000026, 0x3e0003ff, "xor\t\t%20-24r, %15-19r, %10-14r"},
   {0x00000027, 0x3e0003ff, "xor.c\t\t%20-24r, %15-19r, %10-14r"},
+  {0,0,NULL}
 };
 
 

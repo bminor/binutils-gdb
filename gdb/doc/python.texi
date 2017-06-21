@@ -4559,7 +4559,7 @@ This domain holds a subset of the @code{SYMBOLS_VAR_DOMAIN}; it
 contains everything minus functions and types.
 
 @vindex SYMBOL_FUNCTIONS_DOMAIN
-@item gdb.SYMBOL_FUNCTION_DOMAIN
+@item gdb.SYMBOL_FUNCTIONS_DOMAIN
 This domain contains all functions.
 
 @vindex SYMBOL_TYPES_DOMAIN

@@ -3713,13 +3713,8 @@ md_assemble (char *line)
     as_bad (_("expecting valid branch instruction after `bnd'"));
 
   /* Check NOTRACK prefix.  */
-  if (i.notrack_prefix
-      && (!i.tm.opcode_modifier.notrackprefixok
-	  || i.reg_operands != 1
-	  || i.disp_operands != 0
-	  || i.mem_operands != 0
-	  || i.imm_operands != 0))
-    as_bad (_("expecting register indirect branch instruction after `notrack'"));
+  if (i.notrack_prefix && !i.tm.opcode_modifier.notrackprefixok)
+    as_bad (_("expecting indirect branch instruction after `notrack'"));
 
   if (i.tm.cpu_flags.bitfield.cpumpx)
     {

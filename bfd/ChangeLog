@@ -1,6 +1,97 @@
+2017-06-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21639
+	* vms-misc.c (_bfd_vms_save_sized_string): Use unsigned int as
+	type of the size parameter.
+	(_bfd_vms_save_counted_string): Add second parameter - the maximum
+	length of the counted string.
+	* vms.h (_bfd_vms_save_sized_string): Update prototype.
+	(_bfd_vms_save_counted_string): Likewise.
+	* vms-alpha.c (_bfd_vms_slurp_eisd): Update calls to
+	_bfd_vms_save_counted_string.
+	(_bfd_vms_slurp_ehdr): Likewise.
+	(_bfd_vms_slurp_egsd): Likewise.
+	(Parse_module): Likewise.
+
+2017-06-21  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_size_stubs): Test for localentry:0 plt
+	calls before tocsave calls.
+	(ppc64_elf_relocate_section): Allow localentry:0 plt calls without
+	following nop.
+
+2017-06-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21645
+	* reloc.c (bfd_generic_get_relocated_section_contents): Fail if
+	bfd_get_full_section_contents returns no contents.
+
+2017-06-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21638
+	* vms-alpha.c (_bfd_vms_slurp_egsd): Check for an undersized
+	record.
+
+2017-06-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21637
+	* vms-alpha.c (_bfd_vms_slurp_egsd): Check for an empty section
+	list.
+	(image_set_ptr): Likewise.
+	(alpha_vms_fix_sec_rel): Likewise.
+	(alpha_vms_slurp_relocs): Likewise.
+
+2017-06-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21633
+	* ieee.c (ieee_slurp_sections): Check for a NULL return from
+	read_id.
+	(ieee_archive_p): Likewise.
+	(ieee_object_p): Likewise.
+
+2017-06-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21640
+	* elf.c (setup_group): Zero the group section pointer list after
+	allocation so that loops can be caught.  Check for NULL pointers
+	when processing a group list.
+
+2017-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21626
+	* elf-properties.c (_bfd_elf_link_setup_gnu_properties): Check
+	the DYNAMIC bit instead of bfd_count_sections.
+
 2017-06-19  Nick Clifton  <nickc@redhat.com>
 
-	PR 21615
+	PR binutils/21618
+	* vms-alpha.c (evax_bfd_print_emh): Check for insufficient record
+	length.
+	(evax_bfd_print_eeom): Likewise.
+	(evax_bfd_print_egsd): Check for an overlarge record length.
+	(evax_bfd_print_etir): Likewise.
+
+2017-06-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21612
+	* libieee.h (struct common_header_type): Add end_p field.
+	* ieee.c (this_byte_and_next): Do not advance input_p beyond
+	end_p.
+	(read_id): Check for a length that exceeds the remaining bytes in
+	the input buffer.
+	(ieee_seek): Initialise end_p.
+	(ieee_archive_p): Likewise.
+	(ieee_object_p): Likewise.
+
+2017-06-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21611
+	* vms-alpha.c (_bfd_vms_slurp_eihs): Check for invalid offset
+	before reading the EIHS structure entries.
+
+2017-06-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21615
 	* vms-alpha.c (_bfd_vms_slurp_egsd): Use unsigned int for
 	gsd_size.  Check that there are enough bytes remaining to read the
 	type and size of the next egsd.  Check that the size of the egsd

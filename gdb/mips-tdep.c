@@ -6542,8 +6542,14 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
       value = get_frame_register_value (frame, regnum);
       if (value_optimized_out (value)
 	|| !value_entirely_available (value))
-	error (_("can't read register %d (%s)"),
-	       regnum, gdbarch_register_name (gdbarch, regnum));
+	{
+	  fprintf_filtered (file, "%*s ",
+			    (int) mips_abi_regsize (gdbarch) * 2,
+			    (mips_abi_regsize (gdbarch) == 4 ? "<unavl>"
+			     : "<unavailable>"));
+	  col++;
+	  continue;
+	}
       raw_buffer = value_contents_all (value);
       /* pad small registers */
       for (byte = 0;

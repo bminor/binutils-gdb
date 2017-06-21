@@ -18,165 +18,119 @@
 #include "common-defs.h"
 #include "environ.h"
 #include <algorithm>
-
+#include <utility>
 
-/* Return a new environment object.  */
+/* See common/environ.h.  */
 
-struct gdb_environ *
-make_environ (void)
+gdb_environ &
+gdb_environ::operator= (gdb_environ &&e)
 {
-  struct gdb_environ *e;
+  /* Are we self-moving?  */
+  if (&e == this)
+    return *this;
 
-  e = XNEW (struct gdb_environ);
+  m_environ_vector = std::move (e.m_environ_vector);
+  e.m_environ_vector.clear ();
+  e.m_environ_vector.push_back (NULL);
+  return *this;
+}
 
-  e->allocated = 10;
-  e->vector = (char **) xmalloc ((e->allocated + 1) * sizeof (char *));
-  e->vector[0] = 0;
+/* See common/environ.h.  */
+
+gdb_environ gdb_environ::from_host_environ ()
+{
+  extern char **environ;
+  gdb_environ e;
+
+  if (environ == NULL)
+    return e;
+
+  for (int i = 0; environ[i] != NULL; ++i)
+    {
+      /* Make sure we add the element before the last (NULL).  */
+      e.m_environ_vector.insert (e.m_environ_vector.end () - 1,
+				 xstrdup (environ[i]));
+    }
+
   return e;
 }
 
-/* Free an environment and all the strings in it.  */
+/* See common/environ.h.  */
 
 void
-free_environ (struct gdb_environ *e)
+gdb_environ::clear ()
 {
-  char **vector = e->vector;
-
-  while (*vector)
-    xfree (*vector++);
-
-  xfree (e->vector);
-  xfree (e);
+  for (char *v : m_environ_vector)
+    xfree (v);
+  m_environ_vector.clear ();
+  /* Always add the NULL element.  */
+  m_environ_vector.push_back (NULL);
 }
 
-/* Copy the environment given to this process into E.
-   Also copies all the strings in it, so we can be sure
-   that all strings in these environments are safe to free.  */
+/* Helper function to check if STRING contains an environment variable
+   assignment of VAR, i.e., if STRING starts with 'VAR='.  Return true
+   if it contains, false otherwise.  */
+
+static bool
+match_var_in_string (char *string, const char *var, size_t var_len)
+{
+  if (strncmp (string, var, var_len) == 0 && string[var_len] == '=')
+    return true;
+
+  return false;
+}
+
+/* See common/environ.h.  */
+
+const char *
+gdb_environ::get (const char *var) const
+{
+  size_t len = strlen (var);
+
+  for (char *el : m_environ_vector)
+    if (el != NULL && match_var_in_string (el, var, len))
+      return &el[len + 1];
+
+  return NULL;
+}
+
+/* See common/environ.h.  */
 
 void
-init_environ (struct gdb_environ *e)
+gdb_environ::set (const char *var, const char *value)
 {
-  extern char **environ;
-  int i;
+  /* We have to unset the variable in the vector if it exists.  */
+  unset (var);
 
-  if (environ == NULL)
-    return;
-
-  for (i = 0; environ[i]; i++) /*EMPTY */ ;
-
-  if (e->allocated < i)
-    {
-      e->allocated = std::max (i, e->allocated + 10);
-      e->vector = (char **) xrealloc ((char *) e->vector,
-				      (e->allocated + 1) * sizeof (char *));
-    }
-
-  memcpy (e->vector, environ, (i + 1) * sizeof (char *));
-
-  while (--i >= 0)
-    {
-      int len = strlen (e->vector[i]);
-      char *newobj = (char *) xmalloc (len + 1);
-
-      memcpy (newobj, e->vector[i], len + 1);
-      e->vector[i] = newobj;
-    }
+  /* Insert the element before the last one, which is always NULL.  */
+  m_environ_vector.insert (m_environ_vector.end () - 1,
+			   concat (var, "=", value, NULL));
 }
 
-/* Return the vector of environment E.
-   This is used to get something to pass to execve.  */
+/* See common/environ.h.  */
+
+void
+gdb_environ::unset (const char *var)
+{
+  size_t len = strlen (var);
+
+  /* We iterate until '.cend () - 1' because the last element is
+     always NULL.  */
+  for (std::vector<char *>::iterator el = m_environ_vector.begin ();
+       el != m_environ_vector.end () - 1;
+       ++el)
+    if (match_var_in_string (*el, var, len))
+      {
+	xfree (*el);
+	m_environ_vector.erase (el);
+	break;
+      }
+}
+
+/* See common/environ.h.  */
 
 char **
-environ_vector (struct gdb_environ *e)
+gdb_environ::envp () const
 {
-  return e->vector;
-}
-
-/* Return the value in environment E of variable VAR.  */
-
-char *
-get_in_environ (const struct gdb_environ *e, const char *var)
-{
-  int len = strlen (var);
-  char **vector = e->vector;
-  char *s;
-
-  for (; (s = *vector) != NULL; vector++)
-    if (strncmp (s, var, len) == 0 && s[len] == '=')
-      return &s[len + 1];
-
-  return 0;
-}
-
-/* Store the value in E of VAR as VALUE.  */
-
-void
-set_in_environ (struct gdb_environ *e, const char *var, const char *value)
-{
-  int i;
-  int len = strlen (var);
-  char **vector = e->vector;
-  char *s;
-
-  for (i = 0; (s = vector[i]) != NULL; i++)
-    if (strncmp (s, var, len) == 0 && s[len] == '=')
-      break;
-
-  if (s == 0)
-    {
-      if (i == e->allocated)
-	{
-	  e->allocated += 10;
-	  vector = (char **) xrealloc ((char *) vector,
-				       (e->allocated + 1) * sizeof (char *));
-	  e->vector = vector;
-	}
-      vector[i + 1] = 0;
-    }
-  else
-    xfree (s);
-
-  s = (char *) xmalloc (len + strlen (value) + 2);
-  strcpy (s, var);
-  strcat (s, "=");
-  strcat (s, value);
-  vector[i] = s;
-
-  /* This used to handle setting the PATH and GNUTARGET variables
-     specially.  The latter has been replaced by "set gnutarget"
-     (which has worked since GDB 4.11).  The former affects searching
-     the PATH to find SHELL, and searching the PATH to find the
-     argument of "symbol-file" or "exec-file".  Maybe we should have
-     some kind of "set exec-path" for that.  But in any event, having
-     "set env" affect anything besides the inferior is a bad idea.
-     What if we want to change the environment we pass to the program
-     without afecting GDB's behavior?  */
-
-  return;
-}
-
-/* Remove the setting for variable VAR from environment E.  */
-
-void
-unset_in_environ (struct gdb_environ *e, const char *var)
-{
-  int len = strlen (var);
-  char **vector = e->vector;
-  char *s;
-
-  for (; (s = *vector) != NULL; vector++)
-    {
-      if (strncmp (s, var, len) == 0 && s[len] == '=')
-	{
-	  xfree (s);
-	  /* Walk through the vector, shuffling args down by one, including
-	     the NULL terminator.  Can't use memcpy() here since the regions
-	     overlap, and memmove() might not be available.  */
-	  while ((vector[0] = vector[1]) != NULL)
-	    {
-	      vector++;
-	    }
-	  break;
-	}
-    }
+  return const_cast<char **> (&m_environ_vector[0]);
 }

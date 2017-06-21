@@ -1,3 +1,90 @@
+2017-06-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target.h (struct target_ops) <to_xfer_partial>: Update doc to
+	talk about addressable units instead of bytes.
+
+2017-06-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* common/environ.c (gdb_environ::unset): Use '::iterator' instead
+	of '::const_iterator'.
+
+2017-06-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	'unittests/environ-selftests.c'.
+	(SUBDIR_UNITTESTS_OBS): Add 'environ-selftests.o'.
+	* charset.c (find_charset_names): Declare object 'iconv_env'.
+	Update code to use 'iconv_env' object.  Remove call to
+	'free_environ'.
+	* common/environ.c: Include <utility>.
+	(make_environ): Delete function.
+	(free_environ): Delete function.
+	(gdb_environ::clear): New function.
+	(gdb_environ::operator=): New function.
+	(gdb_environ::get): Likewise.
+	(environ_vector): Delete function.
+	(set_in_environ): Delete function.
+	(gdb_environ::set): New function.
+	(unset_in_environ): Delete function.
+	(gdb_environ::unset): New function.
+	(gdb_environ::envp): Likewise.
+	* common/environ.h: Include <vector>.
+	(struct gdb_environ): Delete; transform into...
+	(class gdb_environ): ... this class.
+	(free_environ): Delete prototype.
+	(init_environ, get_in_environ, set_in_environ, unset_in_environ,
+	environ_vector): Likewise.
+	* infcmd.c (run_command_1): Update code to call
+	'envp' from 'gdb_environ' class.
+	(environment_info): Update code to call methods from 'gdb_environ'
+	class.
+	(unset_environment_command): Likewise.
+	(path_info): Likewise.
+	(path_command): Likewise.
+	* inferior.c (inferior::~inferior): Delete call to 'free_environ'.
+	(inferior::inferior): Initialize 'environment' using the host's
+	information.
+	* inferior.h: Remove forward declaration of 'struct gdb_environ'.
+	Include "environ.h".
+	(class inferior) <environment>: Change type from 'struct
+	gdb_environ' to 'gdb_environ'.
+	* mi/mi-cmd-env.c (mi_cmd_env_path): Update code to call
+	methods from 'gdb_environ' class.
+	* solib.c (solib_find_1): Likewise
+	* unittests/environ-selftests.c: New file.
+
+2017-06-20  Yao Qi  <yao.qi@linaro.org>
+
+	* features/i386/i386-linux.xml: Exchange the order of including
+	32bit-linux.xml and 32bit-sse.xml.
+	* features/i386/i386-linux.c: Regenerated.
+
+2017-06-20  Yao Qi  <yao.qi@linaro.org>
+
+	* target-descriptions.c (tdesc_reg): Add ctor, dtor.
+	Delete copy ctor and assignment operator.
+	(tdesc_type): Likewise.
+	(tdesc_feature): Likewise.
+	(tdesc_free_reg): Remove.
+	(tdesc_create_reg): Use new.
+	(tdesc_free_type): Remove.
+	(tdesc_create_vector): Use new.
+	(tdesc_create_union): Likewise.
+	(tdesc_create_flags): Likewise.
+	(tdesc_create_enum): Likewise.
+	(tdesc_free_feature): Delete.
+	(free_target_description): Use delete.
+
+2017-06-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* mips-tdep.c (print_gp_register_row): Don't error for unavailable
+	registers.
+
+2017-06-19  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (write_psymtabs_to_index): Construct file_closer
+	after gdb::unlinker.
+
 2017-06-19  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* mi/mi-cm-env.c (_initialize_mi_cmd_env): Use getenv instead of

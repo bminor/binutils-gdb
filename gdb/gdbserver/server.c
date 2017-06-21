@@ -42,7 +42,7 @@
 
 /* The environment to pass to the inferior when creating it.  */
 
-struct gdb_environ *our_environ = NULL;
+static gdb_environ our_environ;
 
 /* Start the inferior using a shell.  */
 
@@ -257,10 +257,10 @@ get_exec_file (int err)
 
 /* See server.h.  */
 
-struct gdb_environ *
+gdb_environ *
 get_environ ()
 {
-  return our_environ;
+  return &our_environ;
 }
 
 static int
@@ -3698,8 +3698,7 @@ captured_main (int argc, char *argv[])
     }
 
   /* Gather information about the environment.  */
-  our_environ = make_environ ();
-  init_environ (our_environ);
+  our_environ = gdb_environ::from_host_environ ();
 
   initialize_async_io ();
   initialize_low ();
