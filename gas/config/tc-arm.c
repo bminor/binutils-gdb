@@ -26600,7 +26600,6 @@ aeabi_set_public_attributes (void)
   char profile;
   int virt_sec = 0;
   int fp16_optional = 0;
-  arm_feature_set arm_arch = ARM_ARCH_NONE;
   arm_feature_set flags;
   arm_feature_set tmp;
   arm_feature_set arm_arch_v8m_base = ARM_ARCH_V8M_BASE;
@@ -26640,7 +26639,6 @@ aeabi_set_public_attributes (void)
       if (ARM_CPU_HAS_FEATURE (tmp, p->flags))
 	{
 	  arch = p->val;
-	  arm_arch = p->flags;
 	  ARM_CLEAR_FEATURE (tmp, tmp, p->flags);
 	}
     }
@@ -26657,27 +26655,18 @@ aeabi_set_public_attributes (void)
       && !ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a)
       && ARM_CPU_HAS_FEATURE (flags, arm_ext_v7m)
       && ARM_CPU_HAS_FEATURE (flags, arm_ext_v6_dsp))
-    {
-      arch = TAG_CPU_ARCH_V7E_M;
-      arm_arch = (arm_feature_set) ARM_ARCH_V7EM;
-    }
+    arch = TAG_CPU_ARCH_V7E_M;
 
   ARM_CLEAR_FEATURE (tmp, flags, arm_arch_v8m_base);
   if (arch == TAG_CPU_ARCH_V8M_BASE && ARM_CPU_HAS_FEATURE (tmp, arm_arch_any))
-    {
-      arch = TAG_CPU_ARCH_V8M_MAIN;
-      arm_arch = (arm_feature_set) ARM_ARCH_V8M_MAIN;
-    }
+    arch = TAG_CPU_ARCH_V8M_MAIN;
 
   /* In cpu_arch_ver ARMv8-A is before ARMv8-M for atomics to be detected as
      coming from ARMv8-A.  However, since ARMv8-A has more instructions than
      ARMv8-M, -march=all must be detected as ARMv8-A.  */
   if (arch == TAG_CPU_ARCH_V8M_MAIN
       && ARM_FEATURE_CORE_EQUAL (selected_cpu, arm_arch_any))
-    {
-      arch = TAG_CPU_ARCH_V8;
-      arm_arch = (arm_feature_set) ARM_ARCH_V8A;
-    }
+    arch = TAG_CPU_ARCH_V8;
 
   /* Tag_CPU_name.  */
   if (selected_cpu_name[0])
@@ -26716,15 +26705,8 @@ aeabi_set_public_attributes (void)
     aeabi_set_attribute_int (Tag_CPU_arch_profile, profile);
 
   /* Tag_DSP_extension.  */
-  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_dsp))
-    {
-      arm_feature_set ext;
-
-      /* DSP instructions not in architecture.  */
-      ARM_CLEAR_FEATURE (ext, flags, arm_arch);
-      if (ARM_CPU_HAS_FEATURE (ext, arm_ext_dsp))
-	aeabi_set_attribute_int (Tag_DSP_extension, 1);
-    }
+  if (dyn_mcpu_ext_opt && ARM_CPU_HAS_FEATURE (*dyn_mcpu_ext_opt, arm_ext_dsp))
+    aeabi_set_attribute_int (Tag_DSP_extension, 1);
 
   /* Tag_ARM_ISA_use.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v1)
