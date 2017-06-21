@@ -1,3 +1,10 @@
+2017-06-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21640
+	* elf.c (setup_group): Zero the group section pointer list after
+	allocation so that loops can be caught.  Check for NULL pointers
+	when processing a group list.
+
 2017-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21626
