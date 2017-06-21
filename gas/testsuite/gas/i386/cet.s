@@ -3,7 +3,7 @@
 _start:
 	incsspd
 	rdsspd %ecx
-	savessp
+	saveprevssp
 	rstorssp (%ecx)
 	wrssd %eax, (%edx, %eax)
 	wrussd %edx, (%edi, %ebp)
@@ -15,7 +15,7 @@ _start:
 	.intel_syntax noprefix
 	incsspd
 	rdsspd ecx
-	savessp
+	saveprevssp
 	rstorssp QWORD PTR [ecx + eax]
 	wrssd [edx],eax
 	wrussd [edi + ebp],edx

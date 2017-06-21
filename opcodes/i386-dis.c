@@ -3798,7 +3798,7 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_MOD_3_0F01_REG_5_RM_2 */
   {
     { Bad_Opcode },
-    { "savessp",	{ Skip_MODRM }, PREFIX_OPCODE },
+    { "saveprevssp",	{ Skip_MODRM }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F10 */

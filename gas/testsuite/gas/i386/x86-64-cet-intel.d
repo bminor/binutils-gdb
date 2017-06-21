@@ -11,7 +11,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	f3 48 0f 01 e9       	incsspq 
  +[a-f0-9]+:	f3 41 0f 1e cc       	rdsspd r12d
  +[a-f0-9]+:	f3 48 0f 1e c8       	rdsspq rax
- +[a-f0-9]+:	f3 0f 01 ea          	savessp 
+ +[a-f0-9]+:	f3 0f 01 ea          	saveprevssp 
  +[a-f0-9]+:	f3 41 0f 01 2c 24    	rstorssp QWORD PTR \[r12\]
  +[a-f0-9]+:	41 0f 38 f6 04 24    	wrssd  \[r12\],eax
  +[a-f0-9]+:	4a 0f 38 f6 14 39    	wrssq  \[rcx\+r15\*1\],rdx
@@ -25,7 +25,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	f3 48 0f 01 e9       	incsspq 
  +[a-f0-9]+:	f3 41 0f 1e cc       	rdsspd r12d
  +[a-f0-9]+:	f3 48 0f 1e c8       	rdsspq rax
- +[a-f0-9]+:	f3 0f 01 ea          	savessp 
+ +[a-f0-9]+:	f3 0f 01 ea          	saveprevssp 
  +[a-f0-9]+:	f3 41 0f 01 2c 24    	rstorssp QWORD PTR \[r12\]
  +[a-f0-9]+:	41 0f 38 f6 04 24    	wrssd  \[r12\],eax
  +[a-f0-9]+:	4a 0f 38 f6 14 39    	wrssq  \[rcx\+r15\*1\],rdx

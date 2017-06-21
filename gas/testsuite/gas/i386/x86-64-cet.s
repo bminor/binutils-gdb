@@ -5,7 +5,7 @@ _start:
 	incsspq
 	rdsspd %r12d
 	rdsspq %rax
-	savessp
+	saveprevssp
 	rstorssp (%r12)
 	wrssd %eax, (%r12)
 	wrssq %rdx, (%rcx, %r15)
@@ -21,7 +21,7 @@ _start:
 	incsspq
 	rdsspd r12d
 	rdsspq rax
-	savessp
+	saveprevssp
 	rstorssp QWORD PTR [r12]
 	wrssd [r12],eax
 	wrssq [rcx+r15],rdx
