@@ -521,8 +521,10 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
       asection *section;
       flagword bfd_flags;
 
-      /* PR 17512: file: 3d9e9fe9.  */
-      if (offset >= PRIV (recrd.rec_size))
+      /* PR 17512: file: 3d9e9fe9.
+	 12 is the offset of the eisdsize field from the start of the record (8)
+	 plus the size of the eisdsize field (4).  */
+      if (offset >= PRIV (recrd.rec_size) - 12)
 	return FALSE;
       eisd = (struct vms_eisd *)(PRIV (recrd.rec) + offset);
       rec_size = bfd_getl32 (eisd->eisdsize);
@@ -535,8 +537,16 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
           offset = (offset + VMS_BLOCK_SIZE) & ~(VMS_BLOCK_SIZE - 1);
           continue;
         }
-      else
-        offset += rec_size;
+
+      /* Make sure that there is enough data present in the record.  */
+      /* FIXME: Should we use sizeof (struct vms_eisd) rather than just 32 here ?  */
+      if (rec_size < 32)
+	return FALSE;
+      /* Make sure that the record is not too big either.  */
+      if (offset + rec_size >= PRIV (recrd.rec_size))
+	return FALSE;
+
+      offset += rec_size;
 
       size = bfd_getl32 (eisd->secsize);
       vaddr = bfd_getl64 (eisd->virt_addr);
@@ -574,7 +584,13 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
 
       if (flags & EISD__M_GBL)
 	{
-	  name = _bfd_vms_save_counted_string (eisd->gblnam);
+	  if (rec_size < offsetof (struct vms_eisd, gblnam))
+	    return FALSE;
+	  else if (rec_size < sizeof (struct vms_eisd))
+	    name = _bfd_vms_save_counted_string (eisd->gblnam,
+						 rec_size - offsetof (struct vms_eisd, gblnam));
+	  else
+	    name = _bfd_vms_save_counted_string (eisd->gblnam, EISD__K_GBLNAMLEN);
 	  bfd_flags |= SEC_COFF_SHARED_LIBRARY;
 	  bfd_flags &= ~(SEC_ALLOC | SEC_LOAD);
 	}
@@ -879,7 +895,7 @@ _bfd_vms_slurp_ehdr (bfd *abfd)
 
   vms_rec = PRIV (recrd.rec);
   /* PR 17512: file: 62736583.  */
-  end = PRIV (recrd.buf) + PRIV (recrd.buf_size);
+  end = vms_rec + PRIV (recrd.buf_size);
 
   vms_debug2 ((2, "HDR/EMH\n"));
 
@@ -899,11 +915,11 @@ _bfd_vms_slurp_ehdr (bfd *abfd)
       PRIV (hdr_data).hdr_l_recsiz = bfd_getl32 (vms_rec + 16);
       if ((vms_rec + 20 + vms_rec[20] + 1) >= end)
 	goto fail;
-      PRIV (hdr_data).hdr_t_name   = _bfd_vms_save_counted_string (vms_rec + 20);
+      PRIV (hdr_data).hdr_t_name   = _bfd_vms_save_counted_string (vms_rec + 20, vms_rec[20]);
       ptr = vms_rec + 20 + vms_rec[20] + 1;
       if ((ptr + *ptr + 1) >= end)
 	goto fail;
-      PRIV (hdr_data).hdr_t_version =_bfd_vms_save_counted_string (ptr);
+      PRIV (hdr_data).hdr_t_version =_bfd_vms_save_counted_string (ptr, *ptr);
       ptr += *ptr + 1;
       if (ptr + 17 >= end)
 	goto fail;
@@ -1175,6 +1191,14 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	  return FALSE;
 	}
 
+      if (gsd_size < 4)
+	{
+	  _bfd_error_handler (_("Corrupt EGSD record: size (%#x) is too small"),
+			      gsd_size);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+
       switch (gsd_type)
 	{
 	case EGSD__C_PSC:
@@ -1197,7 +1221,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
                 char *name;
                 unsigned long align_addr;
 
-                name = _bfd_vms_save_counted_string (&egps->namlng);
+		name = _bfd_vms_save_counted_string (&egps->namlng, gsd_size - 4);
 
                 section = bfd_make_section (abfd, name);
                 if (!section)
@@ -4123,7 +4147,8 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 	{
 	case DST__K_MODBEG:
 	  module->name
-	    = _bfd_vms_save_counted_string (ptr + DST_S_B_MODBEG_NAME);
+	    = _bfd_vms_save_counted_string (ptr + DST_S_B_MODBEG_NAME,
+					    maxptr - (ptr + DST_S_B_MODBEG_NAME));
 
 	  curr_pc = 0;
 	  prev_pc = 0;
@@ -4140,7 +4165,8 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 	  funcinfo = (struct funcinfo *)
 	    bfd_zalloc (abfd, sizeof (struct funcinfo));
           funcinfo->name
-	    = _bfd_vms_save_counted_string (ptr + DST_S_B_RTNBEG_NAME);
+	    = _bfd_vms_save_counted_string (ptr + DST_S_B_RTNBEG_NAME,
+					    maxptr - (ptr + DST_S_B_RTNBEG_NAME));
 	  funcinfo->low = bfd_getl32 (ptr + DST_S_L_RTNBEG_ADDRESS);
 	  funcinfo->next = module->func_table;
 	  module->func_table = funcinfo;
@@ -4191,8 +4217,10 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 		    unsigned int fileid
 		      = bfd_getl16 (src_ptr + DST_S_W_SRC_DF_FILEID);
 		    char *filename
-		      = _bfd_vms_save_counted_string (src_ptr
-			  + DST_S_B_SRC_DF_FILENAME);
+		      = _bfd_vms_save_counted_string (src_ptr + DST_S_B_SRC_DF_FILENAME,
+						      (ptr + rec_length) -
+						      (src_ptr + DST_S_B_SRC_DF_FILENAME)
+						      );
 
 		    while (fileid >= module->file_table_count)
 		      {
