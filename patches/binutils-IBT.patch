@@ -1,0 +1,4424 @@
+From 261749d6ed02344a391508ff6db9ff00a668e6ab Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Mon, 3 Apr 2017 10:56:02 -0700
+Subject: [PATCH 1/2] x86: Support Intel IBT with IBT property and IBT-enable
+ PLT
+
+To support IBT in Intel Control-flow Enforcement Technology (CET)
+instructions:
+
+https://software.intel.com/sites/default/files/managed/4d/2a/control-flow-enforcement-technology-preview.pdf
+
+ #define GNU_PROPERTY_X86_FEATURE_1_AND 0xc0000002
+
+ #define GNU_PROPERTY_X86_FEATURE_1_IBT (1U << 0)
+
+are added to GNU program properties to indicate that all executable
+sections are compatible with IBT when ENDBR instruction starts each
+valid target where an indirect branch instruction can land.
+
+GNU_PROPERTY_X86_FEATURE_1_IBT is set on output only if it is set on
+all relocatable inputs.
+
+The followings changes are made to the Procedure Linkage Table (PLT):
+
+1. For 64-bit x86-64,  PLT is changed to
+
+PLT0:  push       GOT[1]
+       bnd jmp    *GOT[2]
+       nop
+...
+PLTn:  endbr64
+       push       namen_reloc_index
+       bnd jmp    PLT0
+
+together with the second PLT section:
+
+PLTn:  endbr64
+       bnd jmp   *GOT[namen_index]
+       nop
+
+BND prefix is also added so that IBT-enabled PLT is compatible with MPX.
+
+2. For 32-bit x86-64 (x32) and i386,  PLT is changed to
+
+PLT0:  push       GOT[1]
+       jmp        *GOT[2]
+       nop
+...
+PLTn:  endbr64                                 # endbr32 for i386.
+       push       namen_reloc_index
+       jmp        PLT0
+
+together with the second PLT section:
+
+PLTn:  endbr64                                 # endbr32 for i386.
+       jmp       *GOT[namen_index]
+       nop
+
+BND prefix isn't used since MPX isn't supported on x32 and BND registers
+aren't used in parameter passing on i386.
+
+GOT is an array of addresses.  Initially, GOT[namen_index] is filled
+with the address of the ENDBR instruction of the corresponding entry
+in the first PLT section.  The function, namen, is called via the
+ENDBR instruction in the second PLT entry.  GOT[namen_index] is updated
+to the actual address of the function, namen, at run-time.
+
+2 linker command line options are added:
+
+1. -z ibtplt: Generate IBT-enabled PLT.
+2. -z ibt: Generate GNU_PROPERTY_X86_FEATURE_1_IBT in GNU program
+properties as well as IBT-enabled PLT.
+
+bfd/
+
+	* elf32-i386.c (elf_i386_lazy_ibt_plt0_entry): New.
+	(elf_i386_lazy_ibt_plt_entry): Likewise.
+	(elf_i386_pic_lazy_ibt_plt0_entry): Likewise.
+	(elf_i386_non_lazy_ibt_plt_entry): Likewise.
+	(elf_i386_pic_non_lazy_ibt_plt_entry): Likewise.
+	(elf_i386_eh_frame_lazy_ibt_plt): Likewise.
+	(elf_i386_lazy_plt_layout): Likewise.
+	(elf_i386_non_lazy_plt_layout): Likewise.
+	(elf_i386_link_hash_entry): Add plt_second.
+	(elf_i386_link_hash_table): Add plt_second and
+	plt_second_eh_frame.
+	(elf_i386_allocate_dynrelocs): Use the second PLT if needed.
+	(elf_i386_size_dynamic_sections): Use .plt.got unwind info for
+	the second PLT.  Check the second PLT.
+	(elf_i386_relocate_section): Use the second PLT to resolve
+	PLT reference if needed.
+	(elf_i386_finish_dynamic_symbol): Fill and use the second PLT if
+	needed.
+	(elf_i386_finish_dynamic_sections): Set sh_entsize on the
+	second PLT.  Generate unwind info for the second PLT.
+	(elf_i386_plt_type): Add plt_second.
+	(elf_i386_get_synthetic_symtab): Support the second PLT.
+	(elf_i386_parse_gnu_properties): Support
+	GNU_PROPERTY_X86_FEATURE_1_AND.
+	(elf_i386_merge_gnu_properties): Support
+	GNU_PROPERTY_X86_FEATURE_1_AND.  If info->ibt is set, turn
+	on GNU_PROPERTY_X86_FEATURE_1_IBT
+	(elf_i386_link_setup_gnu_properties): If info->ibt is set,
+	turn on GNU_PROPERTY_X86_FEATURE_1_IBT.  Use IBT-enabled PLT
+	for info->ibtplt, info->ibt or GNU_PROPERTY_X86_FEATURE_1_IBT
+	is set on all relocatable inputs.
+	* elf64-x86-64.c (elf_x86_64_lazy_ibt_plt_entry): New.
+	(elf_x32_lazy_ibt_plt_entry): Likewise.
+	(elf_x86_64_non_lazy_ibt_plt_entry): Likewise.
+	(elf_x32_non_lazy_ibt_plt_entry): Likewise.
+	(elf_x86_64_eh_frame_lazy_ibt_plt): Likewise.
+	(elf_x32_eh_frame_lazy_ibt_plt): Likewise.
+	(elf_x86_64_lazy_ibt_plt): Likewise.
+	(elf_x32_lazy_ibt_plt): Likewise.
+	(elf_x86_64_non_lazy_ibt_plt): Likewise.
+	(elf_x32_non_lazy_ibt_plt): Likewise.
+	(elf_x86_64_get_synthetic_symtab): Support the second PLT.
+	(elf_x86_64_parse_gnu_properties): Support
+	GNU_PROPERTY_X86_FEATURE_1_AND.
+	(elf_x86_64_merge_gnu_properties): Support
+	GNU_PROPERTY_X86_FEATURE_1_AND.  If info->ibt is set, turn
+	on GNU_PROPERTY_X86_FEATURE_1_IBT
+	(elf_x86_64_link_setup_gnu_properties): If info->ibt is set,
+	turn on GNU_PROPERTY_X86_FEATURE_1_IBT.  Use IBT-enabled PLT
+	for info->ibtplt, info->ibt or GNU_PROPERTY_X86_FEATURE_1_IBT
+	is set on all relocatable inputs.
+
+binutils/
+
+	* readelf.c (decode_x86_feature): New.
+	(print_gnu_property_note): Call decode_x86_feature on
+	GNU_PROPERTY_X86_FEATURE_1_AND.
+	* testsuite/binutils-all/i386/empty.d: New file.
+	* testsuite/binutils-all/i386/empty.s: Likewise.
+	* testsuite/binutils-all/i386/ibt.d: Likewise.
+	* testsuite/binutils-all/i386/ibt.s: Likewise.
+	* testsuite/binutils-all/x86-64/empty-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/empty.d: Likewise.
+	* testsuite/binutils-all/x86-64/empty.s: Likewise.
+	* testsuite/binutils-all/x86-64/ibt-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/ibt.d: Likewise.
+	* testsuite/binutils-all/x86-64/ibt.s: Likewise.
+
+include/
+
+	* bfdlink.h (bfd_link_info): Add ibtplt and ibt.
+	* elf/common.h (GNU_PROPERTY_X86_FEATURE_1_AND): New.
+	(GNU_PROPERTY_X86_FEATURE_1_IBT): Likewise.
+
+ld/
+
+	* Makefile.am (ELF_X86_DEPS): Add $(srcdir)/emulparams/cet.sh.
+	* Makefile.in: Regenerated.
+	* NEWS: Mention GNU_PROPERTY_X86_FEATURE_1_IBT, -z ibtplt
+	and -z ibt.
+	* emulparams/cet.sh: New file.
+	* testsuite/ld-i386/ibt-plt-1.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-1.s: Likewise.
+	* testsuite/ld-i386/ibt-plt-2.s: Likewise.
+	* testsuite/ld-i386/ibt-plt-2a.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-2b.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-2c.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-2d.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3.s: Likewise.
+	* testsuite/ld-i386/ibt-plt-3a.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3b.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3c.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3d.d: Likewise.
+	* testsuite/ld-i386/plt-main-ibt.dd: Likewise.
+	* testsuite/ld-i386/plt-pie-ibt.dd: Likewise.
+	* testsuite/ld-i386/property-x86-empty.s: Likewise.
+	* testsuite/ld-i386/property-x86-ibt.s: Likewise.
+	* testsuite/ld-i386/property-x86-ibt1a.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt1b.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt2.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt3a.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt3b.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt4.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt5.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-1-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-1.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-1.s: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2.s: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2a-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2a.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2b-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2b.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2c-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2c.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2d-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2d.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3.s: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3a-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3a.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3b-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3b.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3c-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3c.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3d-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3d.d: Likewise.
+	* testsuite/ld-x86-64/plt-main-ibt-now.rd: Likewise.
+	* testsuite/ld-x86-64/plt-main-ibt-x32.dd: Likewise.
+	* testsuite/ld-x86-64/plt-main-ibt.dd: Likewise.
+	* testsuite/ld-x86-64/property-x86-empty.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt1a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt1a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt1b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt1b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt2-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt2.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt4-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt4.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt5-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt5.d: Likewise.
+	* emulparams/elf32_x86_64.sh: Source emulparams/cet.sh.
+	(TINY_READONLY_SECTION): Add .plt.sec.
+	* emulparams/elf_i386.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Source emulparams/cet.sh.
+	* ld.texinfo: Document -z ibtplt and -z ibt.
+	* testsuite/ld-i386/i386.exp: Run IBT and IBT PLT tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-x86-64/pr21481b.S (check): Updated for x32.
+---
+ bfd/elf32-i386.c                                   | 556 +++++++++++++++++++--
+ bfd/elf64-x86-64.c                                 | 454 +++++++++++++++--
+ binutils/readelf.c                                 |  38 ++
+ binutils/testsuite/binutils-all/i386/empty.d       |   9 +
+ binutils/testsuite/binutils-all/i386/empty.s       |  27 +
+ binutils/testsuite/binutils-all/i386/ibt.d         |   9 +
+ binutils/testsuite/binutils-all/i386/ibt.s         |  27 +
+ binutils/testsuite/binutils-all/x86-64/empty-x32.d |  10 +
+ binutils/testsuite/binutils-all/x86-64/empty.d     |   9 +
+ binutils/testsuite/binutils-all/x86-64/empty.s     |  27 +
+ binutils/testsuite/binutils-all/x86-64/ibt-x32.d   |  10 +
+ binutils/testsuite/binutils-all/x86-64/ibt.d       |   9 +
+ binutils/testsuite/binutils-all/x86-64/ibt.s       |  27 +
+ include/bfdlink.h                                  |   6 +
+ include/elf/common.h                               |   3 +
+ ld/Makefile.am                                     |   3 +-
+ ld/Makefile.in                                     |   3 +-
+ ld/NEWS                                            |   9 +
+ ld/emulparams/cet.sh                               |  14 +
+ ld/emulparams/elf32_x86_64.sh                      |   2 +
+ ld/emulparams/elf_i386.sh                          |   2 +
+ ld/emulparams/elf_x86_64.sh                        |   1 +
+ ld/ld.texinfo                                      |   9 +
+ ld/testsuite/ld-i386/i386.exp                      |  78 +++
+ ld/testsuite/ld-i386/ibt-plt-1.d                   |  51 ++
+ ld/testsuite/ld-i386/ibt-plt-1.s                   |  54 ++
+ ld/testsuite/ld-i386/ibt-plt-2.s                   |  54 ++
+ ld/testsuite/ld-i386/ibt-plt-2a.d                  |  52 ++
+ ld/testsuite/ld-i386/ibt-plt-2b.d                  |   9 +
+ ld/testsuite/ld-i386/ibt-plt-2c.d                  |  52 ++
+ ld/testsuite/ld-i386/ibt-plt-2d.d                  |   9 +
+ ld/testsuite/ld-i386/ibt-plt-3.s                   |  38 ++
+ ld/testsuite/ld-i386/ibt-plt-3a.d                  |  52 ++
+ ld/testsuite/ld-i386/ibt-plt-3b.d                  |   5 +
+ ld/testsuite/ld-i386/ibt-plt-3c.d                  |  52 ++
+ ld/testsuite/ld-i386/ibt-plt-3d.d                  |   9 +
+ ld/testsuite/ld-i386/plt-main-ibt.dd               |   7 +
+ ld/testsuite/ld-i386/plt-pie-ibt.dd                |   7 +
+ ld/testsuite/ld-i386/property-x86-empty.s          |  27 +
+ ld/testsuite/ld-i386/property-x86-ibt.s            |  27 +
+ ld/testsuite/ld-i386/property-x86-ibt1a.d          |   6 +
+ ld/testsuite/ld-i386/property-x86-ibt1b.d          |   6 +
+ ld/testsuite/ld-i386/property-x86-ibt2.d           |   9 +
+ ld/testsuite/ld-i386/property-x86-ibt3a.d          |  11 +
+ ld/testsuite/ld-i386/property-x86-ibt3b.d          |  11 +
+ ld/testsuite/ld-i386/property-x86-ibt4.d           |   9 +
+ ld/testsuite/ld-i386/property-x86-ibt5.d           |   9 +
+ ld/testsuite/ld-x86-64/ibt-plt-1-x32.d             |  43 ++
+ ld/testsuite/ld-x86-64/ibt-plt-1.d                 |  43 ++
+ ld/testsuite/ld-x86-64/ibt-plt-1.s                 |  45 ++
+ ld/testsuite/ld-x86-64/ibt-plt-2.s                 |  45 ++
+ ld/testsuite/ld-x86-64/ibt-plt-2a-x32.d            |  43 ++
+ ld/testsuite/ld-x86-64/ibt-plt-2a.d                |  43 ++
+ ld/testsuite/ld-x86-64/ibt-plt-2b-x32.d            |   9 +
+ ld/testsuite/ld-x86-64/ibt-plt-2b.d                |   9 +
+ ld/testsuite/ld-x86-64/ibt-plt-2c-x32.d            |  43 ++
+ ld/testsuite/ld-x86-64/ibt-plt-2c.d                |  43 ++
+ ld/testsuite/ld-x86-64/ibt-plt-2d-x32.d            |   9 +
+ ld/testsuite/ld-x86-64/ibt-plt-2d.d                |   9 +
+ ld/testsuite/ld-x86-64/ibt-plt-3.s                 |  17 +
+ ld/testsuite/ld-x86-64/ibt-plt-3a-x32.d            |  43 ++
+ ld/testsuite/ld-x86-64/ibt-plt-3a.d                |  43 ++
+ ld/testsuite/ld-x86-64/ibt-plt-3b-x32.d            |   5 +
+ ld/testsuite/ld-x86-64/ibt-plt-3b.d                |   5 +
+ ld/testsuite/ld-x86-64/ibt-plt-3c-x32.d            |  43 ++
+ ld/testsuite/ld-x86-64/ibt-plt-3c.d                |  43 ++
+ ld/testsuite/ld-x86-64/ibt-plt-3d-x32.d            |  10 +
+ ld/testsuite/ld-x86-64/ibt-plt-3d.d                |  10 +
+ ld/testsuite/ld-x86-64/plt-main-ibt-now.rd         |   3 +
+ ld/testsuite/ld-x86-64/plt-main-ibt-x32.dd         |   7 +
+ ld/testsuite/ld-x86-64/plt-main-ibt.dd             |   7 +
+ ld/testsuite/ld-x86-64/pr21481b.S                  |   4 +
+ ld/testsuite/ld-x86-64/property-x86-empty.s        |  27 +
+ ld/testsuite/ld-x86-64/property-x86-ibt.s          |  27 +
+ ld/testsuite/ld-x86-64/property-x86-ibt1a-x32.d    |   6 +
+ ld/testsuite/ld-x86-64/property-x86-ibt1a.d        |   6 +
+ ld/testsuite/ld-x86-64/property-x86-ibt1b-x32.d    |   6 +
+ ld/testsuite/ld-x86-64/property-x86-ibt1b.d        |   6 +
+ ld/testsuite/ld-x86-64/property-x86-ibt2-x32.d     |   9 +
+ ld/testsuite/ld-x86-64/property-x86-ibt2.d         |   9 +
+ ld/testsuite/ld-x86-64/property-x86-ibt3a-x32.d    |  11 +
+ ld/testsuite/ld-x86-64/property-x86-ibt3a.d        |  11 +
+ ld/testsuite/ld-x86-64/property-x86-ibt3b-x32.d    |  11 +
+ ld/testsuite/ld-x86-64/property-x86-ibt3b.d        |  11 +
+ ld/testsuite/ld-x86-64/property-x86-ibt4-x32.d     |   9 +
+ ld/testsuite/ld-x86-64/property-x86-ibt4.d         |   9 +
+ ld/testsuite/ld-x86-64/property-x86-ibt5-x32.d     |   9 +
+ ld/testsuite/ld-x86-64/property-x86-ibt5.d         |   9 +
+ ld/testsuite/ld-x86-64/x86-64.exp                  | 182 +++++++
+ 89 files changed, 2813 insertions(+), 77 deletions(-)
+ create mode 100644 binutils/testsuite/binutils-all/i386/empty.d
+ create mode 100644 binutils/testsuite/binutils-all/i386/empty.s
+ create mode 100644 binutils/testsuite/binutils-all/i386/ibt.d
+ create mode 100644 binutils/testsuite/binutils-all/i386/ibt.s
+ create mode 100644 binutils/testsuite/binutils-all/x86-64/empty-x32.d
+ create mode 100644 binutils/testsuite/binutils-all/x86-64/empty.d
+ create mode 100644 binutils/testsuite/binutils-all/x86-64/empty.s
+ create mode 100644 binutils/testsuite/binutils-all/x86-64/ibt-x32.d
+ create mode 100644 binutils/testsuite/binutils-all/x86-64/ibt.d
+ create mode 100644 binutils/testsuite/binutils-all/x86-64/ibt.s
+ create mode 100644 ld/emulparams/cet.sh
+ create mode 100644 ld/testsuite/ld-i386/ibt-plt-1.d
+ create mode 100644 ld/testsuite/ld-i386/ibt-plt-1.s
+ create mode 100644 ld/testsuite/ld-i386/ibt-plt-2.s
+ create mode 100644 ld/testsuite/ld-i386/ibt-plt-2a.d
+ create mode 100644 ld/testsuite/ld-i386/ibt-plt-2b.d
+ create mode 100644 ld/testsuite/ld-i386/ibt-plt-2c.d
+ create mode 100644 ld/testsuite/ld-i386/ibt-plt-2d.d
+ create mode 100644 ld/testsuite/ld-i386/ibt-plt-3.s
+ create mode 100644 ld/testsuite/ld-i386/ibt-plt-3a.d
+ create mode 100644 ld/testsuite/ld-i386/ibt-plt-3b.d
+ create mode 100644 ld/testsuite/ld-i386/ibt-plt-3c.d
+ create mode 100644 ld/testsuite/ld-i386/ibt-plt-3d.d
+ create mode 100644 ld/testsuite/ld-i386/plt-main-ibt.dd
+ create mode 100644 ld/testsuite/ld-i386/plt-pie-ibt.dd
+ create mode 100644 ld/testsuite/ld-i386/property-x86-empty.s
+ create mode 100644 ld/testsuite/ld-i386/property-x86-ibt.s
+ create mode 100644 ld/testsuite/ld-i386/property-x86-ibt1a.d
+ create mode 100644 ld/testsuite/ld-i386/property-x86-ibt1b.d
+ create mode 100644 ld/testsuite/ld-i386/property-x86-ibt2.d
+ create mode 100644 ld/testsuite/ld-i386/property-x86-ibt3a.d
+ create mode 100644 ld/testsuite/ld-i386/property-x86-ibt3b.d
+ create mode 100644 ld/testsuite/ld-i386/property-x86-ibt4.d
+ create mode 100644 ld/testsuite/ld-i386/property-x86-ibt5.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-1-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-1.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-1.s
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-2.s
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-2a-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-2a.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-2b-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-2b.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-2c-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-2c.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-2d-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-2d.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-3.s
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-3a-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-3a.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-3b-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-3b.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-3c-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-3c.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-3d-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/ibt-plt-3d.d
+ create mode 100644 ld/testsuite/ld-x86-64/plt-main-ibt-now.rd
+ create mode 100644 ld/testsuite/ld-x86-64/plt-main-ibt-x32.dd
+ create mode 100644 ld/testsuite/ld-x86-64/plt-main-ibt.dd
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-empty.s
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt.s
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt1a-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt1a.d
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt1b-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt1b.d
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt2-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt2.d
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt3a-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt3a.d
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt3b-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt3b.d
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt4-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt4.d
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt5-x32.d
+ create mode 100644 ld/testsuite/ld-x86-64/property-x86-ibt5.d
+
+diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
+index 6636551..d662816 100644
+--- a/bfd/elf32-i386.c
++++ b/bfd/elf32-i386.c
+@@ -617,6 +617,60 @@ static const bfd_byte elf_i386_pic_non_lazy_plt_entry[NON_LAZY_PLT_ENTRY_SIZE] =
+   0x66, 0x90	/* xchg %ax,%ax  */
+ };
+ 
++/* The first entry in an absolute IBT-enabled lazy procedure linkage
++   table looks like this.  */
++
++static const bfd_byte elf_i386_lazy_ibt_plt0_entry[LAZY_PLT_ENTRY_SIZE] =
++{
++  0xff, 0x35, 0, 0, 0, 0,	/* pushl GOT[1]       */
++  0xff, 0x25, 0, 0, 0, 0,	/* jmp *GOT[2]        */
++  0x0f, 0x1f, 0x40, 0x00	/* nopl 0(%rax)       */
++};
++
++/* Subsequent entries for an absolute IBT-enabled lazy procedure linkage
++   table look like this.  Subsequent entries for a PIC IBT-enabled lazy
++   procedure linkage table are the same.  */
++
++static const bfd_byte elf_i386_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
++{
++  0xf3, 0x0f, 0x1e, 0xfb,       /* endbr32                    */
++  0x68, 0, 0, 0, 0,             /* pushl immediate            */
++  0xe9, 0, 0, 0, 0,             /* jmp relative               */
++  0x66, 0x90	                /* xchg %ax,%ax               */
++};
++
++/* The first entry in a PIC IBT-enabled lazy procedure linkage table
++   look like.  */
++
++static const bfd_byte elf_i386_pic_lazy_ibt_plt0_entry[LAZY_PLT_ENTRY_SIZE] =
++{
++  0xff, 0xb3, 4, 0, 0, 0,	/* pushl 4(%ebx)      */
++  0xff, 0xa3, 8, 0, 0, 0,	/* jmp *8(%ebx)       */
++  0x0f, 0x1f, 0x40, 0x00	/* nopl 0(%rax)       */
++};
++
++/* Entries for branches with IBT-enabled in the absolute non-lazey
++   procedure linkage table look like this.  They have the same size
++   as the lazy PLT entry.  */
++
++static const bfd_byte elf_i386_non_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
++{
++  0xf3, 0x0f, 0x1e, 0xfb,            /* endbr32               */
++  0xff, 0x25, 0, 0, 0, 0,	     /* jmp *name@GOT	      */
++  0x66, 0x0f, 0x1f, 0x44, 0x00, 0x00 /* nopw 0x0(%rax,%rax,1) */
++};
++
++/* Entries for branches with IBT-enabled in the PIC non-lazey procedure
++   linkage table look like this.  They have the same size as the lazy
++   PLT entry.  */
++
++static const bfd_byte elf_i386_pic_non_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
++{
++  0xf3, 0x0f, 0x1e, 0xfb,            /* endbr32               */
++  0xff, 0xa3, 0, 0, 0, 0,	     /* jmp *name@GOT(%ebx)   */
++  0x66, 0x0f, 0x1f, 0x44, 0x00, 0x00 /* nopw 0x0(%rax,%rax,1) */
++};
++
+ /* .eh_frame covering the lazy .plt section.  */
+ 
+ static const bfd_byte elf_i386_eh_frame_lazy_plt[] =
+@@ -656,6 +710,41 @@ static const bfd_byte elf_i386_eh_frame_lazy_plt[] =
+   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
+ };
+ 
++/* .eh_frame covering the lazy .plt section with IBT-enabled.  */
++
++static const bfd_byte elf_i386_eh_frame_lazy_ibt_plt[] =
++{
++  PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
++  0, 0, 0, 0,			/* CIE ID */
++  1,				/* CIE version */
++  'z', 'R', 0,			/* Augmentation string */
++  1,				/* Code alignment factor */
++  0x7c,				/* Data alignment factor */
++  8,				/* Return address column */
++  1,				/* Augmentation size */
++  DW_EH_PE_pcrel | DW_EH_PE_sdata4, /* FDE encoding */
++  DW_CFA_def_cfa, 4, 4,		/* DW_CFA_def_cfa: r4 (esp) ofs 4 */
++  DW_CFA_offset + 8, 1,		/* DW_CFA_offset: r8 (eip) at cfa-4 */
++  DW_CFA_nop, DW_CFA_nop,
++
++  PLT_FDE_LENGTH, 0, 0, 0,	/* FDE length */
++  PLT_CIE_LENGTH + 8, 0, 0, 0,	/* CIE pointer */
++  0, 0, 0, 0,			/* R_386_PC32 .plt goes here */
++  0, 0, 0, 0,			/* .plt size goes here */
++  0,				/* Augmentation size */
++  DW_CFA_def_cfa_offset, 8,	/* DW_CFA_def_cfa_offset: 8 */
++  DW_CFA_advance_loc + 6,	/* DW_CFA_advance_loc: 6 to __PLT__+6 */
++  DW_CFA_def_cfa_offset, 12,	/* DW_CFA_def_cfa_offset: 12 */
++  DW_CFA_advance_loc + 10,	/* DW_CFA_advance_loc: 10 to __PLT__+16 */
++  DW_CFA_def_cfa_expression,	/* DW_CFA_def_cfa_expression */
++  11,				/* Block length */
++  DW_OP_breg4, 4,		/* DW_OP_breg4 (esp): 4 */
++  DW_OP_breg8, 0,		/* DW_OP_breg8 (eip): 0 */
++  DW_OP_lit15, DW_OP_and, DW_OP_lit9, DW_OP_ge,
++  DW_OP_lit2, DW_OP_shl, DW_OP_plus,
++  DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
++};
++
+ /* .eh_frame covering the non-lazy .plt section.  */
+ 
+ static const bfd_byte elf_i386_eh_frame_non_lazy_plt[] =
+@@ -786,6 +875,34 @@ static const struct elf_i386_non_lazy_plt_layout elf_i386_non_lazy_plt =
+     elf_i386_eh_frame_non_lazy_plt,     /* eh_frame_plt */
+     sizeof (elf_i386_eh_frame_non_lazy_plt) /* eh_frame_plt_size */
+   };
++
++static const struct elf_i386_lazy_plt_layout elf_i386_lazy_ibt_plt =
++  {
++    elf_i386_lazy_ibt_plt0_entry,       /* plt0_entry */
++    sizeof (elf_i386_lazy_ibt_plt0_entry), /* plt0_entry_size */
++    2,                                  /* plt0_got1_offset */
++    8,                                  /* plt0_got2_offset */
++    elf_i386_lazy_ibt_plt_entry,        /* plt_entry */
++    LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
++    4+2,                                /* plt_got_offset */
++    4+1,                                /* plt_reloc_offset */
++    4+6,                                /* plt_plt_offset */
++    0,                                  /* plt_lazy_offset */
++    elf_i386_pic_lazy_ibt_plt0_entry,   /* pic_plt0_entry */
++    elf_i386_lazy_ibt_plt_entry,        /* pic_plt_entry */
++    elf_i386_eh_frame_lazy_ibt_plt,     /* eh_frame_plt */
++    sizeof (elf_i386_eh_frame_lazy_ibt_plt) /* eh_frame_plt_size */
++  };
++
++static const struct elf_i386_non_lazy_plt_layout elf_i386_non_lazy_ibt_plt =
++  {
++    elf_i386_non_lazy_ibt_plt_entry,    /* plt_entry */
++    elf_i386_pic_non_lazy_ibt_plt_entry,/* pic_plt_entry */
++    LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
++    4+2,                                /* plt_got_offset */
++    elf_i386_eh_frame_non_lazy_plt,     /* eh_frame_plt */
++    sizeof (elf_i386_eh_frame_non_lazy_plt) /* eh_frame_plt_size */
++  };
+ 
+ 
+ /* On VxWorks, the .rel.plt.unloaded section has absolute relocations
+@@ -889,6 +1006,9 @@ struct elf_i386_link_hash_entry
+      GOT and PLT relocations against the same function.  */
+   union gotplt_union plt_got;
+ 
++  /* Information about the second PLT entry.   */
++  union gotplt_union plt_second;
++
+   /* Offset of the GOTPLT entry reserved for the TLS descriptor,
+      starting at the end of the jump table.  */
+   bfd_vma tlsdesc_got;
+@@ -937,6 +1057,8 @@ struct elf_i386_link_hash_table
+   /* Short-cuts to get to dynamic linker sections.  */
+   asection *interp;
+   asection *plt_eh_frame;
++  asection *plt_second;
++  asection *plt_second_eh_frame;
+   asection *plt_got;
+   asection *plt_got_eh_frame;
+ 
+@@ -2644,12 +2766,29 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+      here if it is defined and referenced in a non-shared object.  */
+   if (h->type == STT_GNU_IFUNC
+       && h->def_regular)
+-    return _bfd_elf_allocate_ifunc_dyn_relocs (info, h, &eh->dyn_relocs,
+-					       &htab->readonly_dynrelocs_against_ifunc,
+-					       plt_entry_size,
+-					       (htab->plt.has_plt0 *
++    {
++      if (_bfd_elf_allocate_ifunc_dyn_relocs (info, h, &eh->dyn_relocs,
++					      &htab->readonly_dynrelocs_against_ifunc,
++					      plt_entry_size,
++					      (htab->plt.has_plt0 *
+ 						plt_entry_size),
+-					       4, TRUE);
++					       4, TRUE))
++	{
++	  asection *s = htab->plt_second;
++	  if (h->plt.offset != (bfd_vma) -1 && s != NULL)
++	    {
++	      /* Use the second PLT section if it is created.  */
++	      eh->plt_second.offset = s->size;
++
++	      /* Make room for this entry in the second PLT section.  */
++	      s->size += htab->non_lazy_plt->plt_entry_size;
++	    }
++
++	  return TRUE;
++	}
++      else
++	return FALSE;
++    }
+   /* Don't create the PLT entry if there are only function pointer
+      relocations which can be resolved at run-time.  */
+   else if (htab->elf.dynamic_sections_created
+@@ -2677,6 +2816,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
+ 	{
+ 	  asection *s = htab->elf.splt;
++	  asection *second_s = htab->plt_second;
+ 	  asection *got_s = htab->plt_got;
+ 
+ 	  /* If this is the first .plt entry, make room for the special
+@@ -2688,7 +2828,11 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 	  if (use_plt_got)
+ 	    eh->plt_got.offset = got_s->size;
+ 	  else
+-	    h->plt.offset = s->size;
++	    {
++	      h->plt.offset = s->size;
++	      if (second_s)
++		eh->plt_second.offset = second_s->size;
++	    }
+ 
+ 	  /* If this symbol is not defined in a regular file, and we are
+ 	     not generating a shared library, then set the symbol to this
+@@ -2707,8 +2851,18 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 		}
+ 	      else
+ 		{
+-		  h->root.u.def.section = s;
+-		  h->root.u.def.value = h->plt.offset;
++		  if (second_s)
++		    {
++		      /* We need to make a call to the entry of the
++			 second PLT instead of regular PLT entry.  */
++		      h->root.u.def.section = second_s;
++		      h->root.u.def.value = eh->plt_second.offset;
++		    }
++		  else
++		    {
++		      h->root.u.def.section = s;
++		      h->root.u.def.value = h->plt.offset;
++		    }
+ 		}
+ 	    }
+ 
+@@ -2718,6 +2872,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 	  else
+ 	    {
+ 	      s->size += plt_entry_size;
++	      if (second_s)
++		second_s->size += htab->non_lazy_plt->plt_entry_size;
+ 
+ 	      /* We also need to make an entry in the .got.plt section,
+ 		 which will be placed in the .got section by the linker
+@@ -3370,6 +3526,15 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
+ 	  && !bfd_is_abs_section (htab->plt_got->output_section))
+ 	htab->plt_got_eh_frame->size
+ 	  = htab->non_lazy_plt->eh_frame_plt_size;
++
++      /* Unwind info for the second PLT and .plt.got sections are
++	 identical.  */
++      if (htab->plt_second_eh_frame != NULL
++	  && htab->plt_second != NULL
++	  && htab->plt_second->size != 0
++	  && !bfd_is_abs_section (htab->plt_second->output_section))
++	htab->plt_second_eh_frame->size
++	  = htab->non_lazy_plt->eh_frame_plt_size;
+     }
+ 
+   /* We now have determined the sizes of the various dynamic sections.
+@@ -3397,9 +3562,11 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
+       else if (s == htab->elf.sgotplt
+ 	       || s == htab->elf.iplt
+ 	       || s == htab->elf.igotplt
++	       || s == htab->plt_second
+ 	       || s == htab->plt_got
+ 	       || s == htab->plt_eh_frame
+ 	       || s == htab->plt_got_eh_frame
++	       || s == htab->plt_second_eh_frame
+ 	       || s == htab->elf.sdynbss
+ 	       || s == htab->elf.sdynrelro)
+ 	{
+@@ -3472,6 +3639,17 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
+ 		   + PLT_FDE_LEN_OFFSET));
+     }
+ 
++  if (htab->plt_second_eh_frame != NULL
++      && htab->plt_second_eh_frame->contents != NULL)
++    {
++      memcpy (htab->plt_second_eh_frame->contents,
++	      htab->non_lazy_plt->eh_frame_plt,
++	      htab->plt_second_eh_frame->size);
++      bfd_put_32 (dynobj, htab->plt_second->size,
++		  (htab->plt_second_eh_frame->contents
++		   + PLT_FDE_LEN_OFFSET));
++    }
++
+   if (htab->elf.dynamic_sections_created)
+     {
+       /* Add some entries to the .dynamic section.  We fill in the
+@@ -3903,13 +4081,15 @@ elf_i386_relocate_section (bfd *output_bfd,
+ 	  continue;
+ 	}
+ 
++      eh = (struct elf_i386_link_hash_entry *) h;
++
+       /* Since STT_GNU_IFUNC symbol must go through PLT, we handle
+ 	 it here if it is defined in a non-shared object.  */
+       if (h != NULL
+ 	  && h->type == STT_GNU_IFUNC
+ 	  && h->def_regular)
+ 	{
+-	  asection *plt, *gotplt, *base_got;
++	  asection *gotplt, *base_got;
+ 	  bfd_vma plt_index;
+ 	  const char *name;
+ 
+@@ -3926,12 +4106,22 @@ elf_i386_relocate_section (bfd *output_bfd,
+ 	  /* STT_GNU_IFUNC symbol must go through PLT.  */
+ 	  if (htab->elf.splt != NULL)
+ 	    {
+-	      plt = htab->elf.splt;
++	      if (htab->plt_second != NULL)
++		{
++		  resolved_plt = htab->plt_second;
++		  plt_offset = eh->plt_second.offset;
++		}
++	      else
++		{
++		  resolved_plt = htab->elf.splt;
++		  plt_offset = h->plt.offset;
++		}
+ 	      gotplt = htab->elf.sgotplt;
+ 	    }
+ 	  else
+ 	    {
+-	      plt = htab->elf.iplt;
++	      resolved_plt = htab->elf.iplt;
++	      plt_offset = h->plt.offset;
+ 	      gotplt = htab->elf.igotplt;
+ 	    }
+ 
+@@ -4031,8 +4221,8 @@ elf_i386_relocate_section (bfd *output_bfd,
+ 	      goto bad_ifunc_reloc;
+ 	    }
+ 
+-	  relocation = (plt->output_section->vma
+-			+ plt->output_offset + h->plt.offset);
++	  relocation = (resolved_plt->output_section->vma
++			+ resolved_plt->output_offset + plt_offset);
+ 
+ 	  switch (r_type)
+ 	    {
+@@ -4126,7 +4316,6 @@ do_ifunc_pointer:
+ 	    }
+ 	}
+ 
+-      eh = (struct elf_i386_link_hash_entry *) h;
+       resolved_to_zero = (eh != NULL
+ 			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
+ 							      eh->has_got_reloc,
+@@ -4424,8 +4613,16 @@ disallow_got32:
+ 
+ 	  if (h->plt.offset != (bfd_vma) -1)
+ 	    {
+-	      resolved_plt = htab->elf.splt;
+-	      plt_offset = h->plt.offset;
++	      if (htab->plt_second != NULL)
++		{
++		  resolved_plt = htab->plt_second;
++		  plt_offset = eh->plt_second.offset;
++		}
++	      else
++		{
++		  resolved_plt = htab->elf.splt;
++		  plt_offset = h->plt.offset;
++		}
+ 	    }
+ 	  else
+ 	    {
+@@ -5258,6 +5455,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+   const struct elf_i386_backend_data *abed;
+   struct elf_i386_link_hash_entry *eh;
+   bfd_boolean local_undefweak;
++  bfd_boolean use_plt_second;
+ 
+   htab = elf_i386_hash_table (info);
+   if (htab == NULL)
+@@ -5266,6 +5464,9 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+   abed = get_elf_i386_backend_data (output_bfd);
+   plt_entry_size = htab->plt.plt_entry_size;
+ 
++  /* Use the second PLT section only if there is .plt section.  */
++  use_plt_second = htab->elf.splt != NULL && htab->plt_second != NULL;
++
+   eh = (struct elf_i386_link_hash_entry *) h;
+   if (eh->no_finish_dynamic_symbol)
+     abort ();
+@@ -5279,11 +5480,11 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+ 
+   if (h->plt.offset != (bfd_vma) -1)
+     {
+-      bfd_vma plt_index;
++      bfd_vma plt_index, plt_offset;
+       bfd_vma got_offset;
+       Elf_Internal_Rela rel;
+       bfd_byte *loc;
+-      asection *plt, *gotplt, *relplt;
++      asection *plt, *resolved_plt, *gotplt, *relplt;
+ 
+       /* When building a static executable, use .iplt, .igot.plt and
+ 	 .rel.iplt sections for STT_GNU_IFUNC symbols.  */
+@@ -5340,13 +5541,33 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+ 	 the first slot.  */
+       memcpy (plt->contents + h->plt.offset, htab->plt.plt_entry,
+ 	      plt_entry_size);
++
++      if (use_plt_second)
++	{
++	  const bfd_byte *plt_entry;
++	  if (bfd_link_pic (info))
++	    plt_entry = htab->non_lazy_plt->pic_plt_entry;
++	  else
++	    plt_entry = htab->non_lazy_plt->plt_entry;
++	  memcpy (htab->plt_second->contents + eh->plt_second.offset,
++		  plt_entry, htab->non_lazy_plt->plt_entry_size);
++
++	  resolved_plt = htab->plt_second;
++	  plt_offset = eh->plt_second.offset;
++	}
++      else
++	{
++	  resolved_plt = plt;
++	  plt_offset = h->plt.offset;
++	}
++
+       if (! bfd_link_pic (info))
+ 	{
+ 	  bfd_put_32 (output_bfd,
+ 		      (gotplt->output_section->vma
+ 		       + gotplt->output_offset
+ 		       + got_offset),
+-		      plt->contents + h->plt.offset
++		      resolved_plt->contents + plt_offset
+                       + htab->plt.plt_got_offset);
+ 
+ 	  if (abed->os == is_vxworks)
+@@ -5370,8 +5591,8 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+ 	      loc = (htab->srelplt2->contents + reloc_index
+ 		     * sizeof (Elf32_External_Rel));
+ 
+-	      rel.r_offset = (htab->elf.splt->output_section->vma
+-			      + htab->elf.splt->output_offset
++	      rel.r_offset = (plt->output_section->vma
++			      + plt->output_offset
+ 			      + h->plt.offset + 2),
+ 	      rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx, R_386_32);
+ 	      bfd_elf32_swap_reloc_out (output_bfd, &rel, loc);
+@@ -5389,7 +5610,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+       else
+ 	{
+ 	  bfd_put_32 (output_bfd, got_offset,
+-		      plt->contents + h->plt.offset
++		      resolved_plt->contents + plt_offset
+                       + htab->plt.plt_got_offset);
+ 	}
+ 
+@@ -5577,6 +5798,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+ 	  else
+ 	    {
+ 	      asection *plt;
++	      bfd_vma plt_offset;
+ 
+ 	      if (!h->pointer_equality_needed)
+ 		abort ();
+@@ -5584,10 +5806,19 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+ 	      /* For non-shared object, we can't use .got.plt, which
+ 		 contains the real function addres if we need pointer
+ 		 equality.  We load the GOT entry with the PLT entry.  */
+-	      plt = htab->elf.splt ? htab->elf.splt : htab->elf.iplt;
++	      if (htab->plt_second != NULL)
++		{
++		  plt = htab->plt_second;
++		  plt_offset = eh->plt_second.offset;
++		}
++	      else
++		{
++		  plt = htab->elf.splt ? htab->elf.splt : htab->elf.iplt;
++		  plt_offset = h->plt.offset;
++		}
+ 	      bfd_put_32 (output_bfd,
+ 			  (plt->output_section->vma
+-			   + plt->output_offset + h->plt.offset),
++			   + plt->output_offset + plt_offset),
+ 			  htab->elf.sgot->contents + h->got.offset);
+ 	      return TRUE;
+ 	    }
+@@ -5868,6 +6099,10 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
+       if (htab->plt_got != NULL && htab->plt_got->size > 0)
+ 	elf_section_data (htab->plt_got->output_section)
+ 	  ->this_hdr.sh_entsize = htab->non_lazy_plt->plt_entry_size;
++
++      if (htab->plt_second != NULL && htab->plt_second->size > 0)
++	elf_section_data (htab->plt_second->output_section)
++	  ->this_hdr.sh_entsize = htab->non_lazy_plt->plt_entry_size;
+     }
+ 
+   /* Fill in the first three entries in the global offset table.  */
+@@ -5945,6 +6180,35 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
+ 	}
+     }
+ 
++  /* Adjust .eh_frame for the second PLT section.  */
++  if (htab->plt_second_eh_frame != NULL
++      && htab->plt_second_eh_frame->contents != NULL)
++    {
++      if (htab->plt_second != NULL
++	  && htab->plt_second->size != 0
++	  && (htab->plt_second->flags & SEC_EXCLUDE) == 0
++	  && htab->plt_second->output_section != NULL
++	  && htab->plt_second_eh_frame->output_section != NULL)
++	{
++	  bfd_vma plt_start = htab->plt_second->output_section->vma;
++	  bfd_vma eh_frame_start
++	    = (htab->plt_second_eh_frame->output_section->vma
++	       + htab->plt_second_eh_frame->output_offset
++	       + PLT_FDE_START_OFFSET);
++	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
++			     htab->plt_second_eh_frame->contents
++			     + PLT_FDE_START_OFFSET);
++	}
++      if (htab->plt_second_eh_frame->sec_info_type
++	  == SEC_INFO_TYPE_EH_FRAME)
++	{
++	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
++						 htab->plt_second_eh_frame,
++						 htab->plt_second_eh_frame->contents))
++	    return FALSE;
++	}
++    }
++
+   if (htab->elf.sgot && htab->elf.sgot->size > 0)
+     elf_section_data (htab->elf.sgot->output_section)->this_hdr.sh_entsize = 4;
+ 
+@@ -6005,6 +6269,7 @@ enum elf_i386_plt_type
+   plt_non_lazy = 0,
+   plt_lazy = 1 << 0,
+   plt_pic = 1 << 1,
++  plt_second = 1 << 2,
+   plt_unknown = -1
+ };
+ 
+@@ -6042,6 +6307,8 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
+   arelent **dynrelbuf;
+   const struct elf_i386_lazy_plt_layout *lazy_plt;
+   const struct elf_i386_non_lazy_plt_layout *non_lazy_plt;
++  const struct elf_i386_lazy_plt_layout *lazy_ibt_plt;
++  const struct elf_i386_non_lazy_plt_layout *non_lazy_ibt_plt;
+   asection *plt;
+   bfd_vma got_addr;
+   char *names;
+@@ -6050,6 +6317,7 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
+     {
+       { ".plt", NULL, NULL, plt_unknown, 0, 0, 0 },
+       { ".plt.got", NULL, NULL, plt_non_lazy, 0, 0, 0 },
++      { ".plt.sec", NULL, NULL, plt_second, 0, 0, 0 },
+       { NULL, NULL, NULL, plt_non_lazy, 0, 0, 0 }
+     };
+ 
+@@ -6078,10 +6346,14 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
+   non_lazy_plt = NULL;
+   /* Silence GCC 6.  */
+   lazy_plt = NULL;
++  non_lazy_ibt_plt = NULL;
++  lazy_ibt_plt = NULL;
+   switch (get_elf_i386_backend_data (abfd)->os)
+     {
+     case is_normal:
+       non_lazy_plt = &elf_i386_non_lazy_plt;
++      lazy_ibt_plt = &elf_i386_lazy_ibt_plt;
++      non_lazy_ibt_plt = &elf_i386_non_lazy_ibt_plt;
+       /* Fall through */
+     case is_vxworks:
+       lazy_plt = &elf_i386_lazy_plt;
+@@ -6118,10 +6390,30 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
+ 	  /* Match lazy PLT first.  */
+ 	  if (memcmp (plt_contents, lazy_plt->plt0_entry,
+ 		      lazy_plt->plt0_got1_offset) == 0)
+-	    plt_type = plt_lazy;
++	    {
++	      /* The fist entry in the lazy IBT PLT is the same as the
++		 normal lazy PLT.  */
++	      if (lazy_ibt_plt != NULL
++		  && (memcmp (plt_contents + lazy_ibt_plt->plt_entry_size,
++			      lazy_ibt_plt->plt_entry,
++			      lazy_ibt_plt->plt_got_offset) == 0))
++		plt_type = plt_lazy | plt_second;
++	      else
++		plt_type = plt_lazy;
++	    }
+ 	  else if (memcmp (plt_contents, lazy_plt->pic_plt0_entry,
+ 			   lazy_plt->plt0_got1_offset) == 0)
+-	    plt_type = plt_lazy | plt_pic;
++	    {
++	      /* The fist entry in the PIC lazy IBT PLT is the same as
++		 the normal PIC lazy PLT.  */
++	      if (lazy_ibt_plt != NULL
++		  && (memcmp (plt_contents + lazy_ibt_plt->plt_entry_size,
++			      lazy_ibt_plt->pic_plt_entry,
++			      lazy_ibt_plt->plt_got_offset) == 0))
++		plt_type = plt_lazy | plt_pic | plt_second;
++	      else
++		plt_type = plt_lazy | plt_pic;
++	    }
+ 	}
+ 
+       if (non_lazy_plt != NULL
+@@ -6136,6 +6428,27 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
+ 	    plt_type = plt_pic;
+ 	}
+ 
++      if ((non_lazy_ibt_plt != NULL)
++	  && (plt_type == plt_unknown || plt_type == plt_second))
++	{
++	  if (memcmp (plt_contents,
++		      non_lazy_ibt_plt->plt_entry,
++		      non_lazy_ibt_plt->plt_got_offset) == 0)
++	    {
++	      /* Match IBT PLT.  */
++	      plt_type = plt_second;
++	      non_lazy_plt = non_lazy_ibt_plt;
++	    }
++	  else if (memcmp (plt_contents,
++			   non_lazy_ibt_plt->pic_plt_entry,
++			   non_lazy_ibt_plt->plt_got_offset) == 0)
++	    {
++	      /* Match PIC IBT PLT.  */
++	      plt_type = plt_second | plt_pic;
++	      non_lazy_plt = non_lazy_ibt_plt;
++	    }
++	}
++
+       if (plt_type == plt_unknown)
+ 	continue;
+ 
+@@ -6156,9 +6469,16 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
+ 	  i = 0;
+ 	}
+ 
+-      n = plt->size / plts[j].plt_entry_size;
+-      plts[j].count = n;
+-      count += n - i;
++      /* Skip lazy PLT when the second PLT is used.  */
++      if ((plt_type & (plt_lazy | plt_second))
++	  == (plt_lazy | plt_second))
++	plts[j].count = 0;
++      else
++	{
++	  n = plt->size / plts[j].plt_entry_size;
++	  plts[j].count = n;
++	  count += n - i;
++	}
+ 
+       plts[j].contents = plt_contents;
+ 
+@@ -6363,12 +6683,15 @@ elf_i386_parse_gnu_properties (bfd *abfd, unsigned int type,
+     {
+     case GNU_PROPERTY_X86_ISA_1_USED:
+     case GNU_PROPERTY_X86_ISA_1_NEEDED:
++    case GNU_PROPERTY_X86_FEATURE_1_AND:
+       if (datasz != 4)
+ 	{
+ 	  _bfd_error_handler
+ 	    ((type == GNU_PROPERTY_X86_ISA_1_USED
+ 	      ? _("error: %B: <corrupt x86 ISA used size: 0x%x>")
+-	      : _("error: %B: <corrupt x86 ISA needed size: 0x%x>")),
++	      : (type == GNU_PROPERTY_X86_ISA_1_NEEDED
++		 ? _("error: %B: <corrupt x86 ISA needed size: 0x%x>")
++		 : _("error: %B: <corrupt x86 feature size: 0x%x>"))),
+ 	     abfd, datasz);
+ 	  return property_corrupt;
+ 	}
+@@ -6390,12 +6713,12 @@ elf_i386_parse_gnu_properties (bfd *abfd, unsigned int type,
+    should be merged with ABFD.  */
+ 
+ static bfd_boolean
+-elf_i386_merge_gnu_properties (struct bfd_link_info *info ATTRIBUTE_UNUSED,
++elf_i386_merge_gnu_properties (struct bfd_link_info *info,
+ 			       bfd *abfd ATTRIBUTE_UNUSED,
+ 			       elf_property *aprop,
+ 			       elf_property *bprop)
+ {
+-  unsigned int number;
++  unsigned int number, features;
+   bfd_boolean updated = FALSE;
+   unsigned int pr_type = aprop != NULL ? aprop->pr_type : bprop->pr_type;
+ 
+@@ -6417,6 +6740,53 @@ elf_i386_merge_gnu_properties (struct bfd_link_info *info ATTRIBUTE_UNUSED,
+ 	}
+       break;
+ 
++    case GNU_PROPERTY_X86_FEATURE_1_AND:
++      /* Only one of APROP and BPROP can be NULL:
++	 1. APROP & BPROP when both APROP and BPROP aren't NULL.
++	 2. If APROP is NULL, remove x86 feature.
++	 3. Otherwise, do nothing.
++       */
++      if (aprop != NULL && bprop != NULL)
++	{
++	  features = 0;
++	  if (info->ibt)
++	    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
++	  number = aprop->u.number;
++	  /* Add GNU_PROPERTY_X86_FEATURE_1_IBT.  */
++	  aprop->u.number = (number & bprop->u.number) | features;
++	  updated = number != (unsigned int) aprop->u.number;
++	  /* Remove the property if all feature bits are cleared.  */
++	  if (aprop->u.number == 0)
++	    aprop->pr_kind = property_remove;
++	}
++      else
++	{
++	  features = 0;
++	  if (info->ibt)
++	    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
++	  if (features)
++	    {
++	      /* Add GNU_PROPERTY_X86_FEATURE_1_IBT.  */
++	      if (aprop != NULL)
++		{
++		  number = aprop->u.number;
++		  aprop->u.number = number | features;
++		  updated = number != (unsigned int) aprop->u.number;
++		}
++	      else
++		{
++		  bprop->u.number |= features;
++		  updated = TRUE;
++		}
++	    }
++	  else if (aprop != NULL)
++	    {
++	      aprop->pr_kind = property_remove;
++	      updated = TRUE;
++	    }
++	}
++      break;
++
+     default:
+       /* Never should happen.  */
+       abort ();
+@@ -6432,11 +6802,72 @@ static bfd *
+ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
+ {
+   bfd_boolean normal_target;
++  bfd_boolean lazy_plt;
+   asection *sec, *pltsec;
+   bfd *dynobj;
+-  unsigned int plt_alignment;
++  bfd_boolean use_ibt_plt;
++  unsigned int plt_alignment, features;
+   struct elf_i386_link_hash_table *htab;
+-  bfd *pbfd = _bfd_elf_link_setup_gnu_properties (info);
++  bfd *pbfd;
++
++  features = 0;
++  if (info->ibt)
++    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
++  if (features)
++    {
++      /* Turn on GNU_PROPERTY_X86_FEATURE_1_IBT.  */
++      bfd *ebfd = NULL;
++      elf_property *prop;
++
++      for (pbfd = info->input_bfds;
++	   pbfd != NULL;
++	   pbfd = pbfd->link.next)
++	if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
++	    && bfd_count_sections (pbfd) != 0)
++	  {
++	    ebfd = pbfd;
++
++	    if (elf_properties (pbfd) != NULL)
++	      {
++		/* Find a normal input file with GNU property note.  */
++		prop = _bfd_elf_get_property (pbfd,
++					      GNU_PROPERTY_X86_FEATURE_1_AND,
++					      4);
++		/* Add GNU_PROPERTY_X86_FEATURE_1_IBT.  */
++		prop->u.number |= features;
++		prop->pr_kind = property_number;
++		break;
++	      }
++	  }
++
++      if (pbfd == NULL && ebfd != NULL)
++	{
++	  /* Create GNU_PROPERTY_X86_FEATURE_1_IBT if needed.  */
++	  prop = _bfd_elf_get_property (ebfd,
++					GNU_PROPERTY_X86_FEATURE_1_AND,
++					4);
++	  prop->u.number = features;
++	  prop->pr_kind = property_number;
++
++	  sec = bfd_make_section_with_flags (ebfd,
++					     NOTE_GNU_PROPERTY_SECTION_NAME,
++					     (SEC_ALLOC
++					      | SEC_LOAD
++					      | SEC_IN_MEMORY
++					      | SEC_READONLY
++					      | SEC_HAS_CONTENTS
++					      | SEC_DATA));
++	  if (sec == NULL)
++	    info->callbacks->einfo (_("%F: failed to create GNU property section\n"));
++
++	  if (!bfd_set_section_alignment (ebfd, sec, 2))
++	    goto error_alignment;
++
++	  elf_section_type (sec) = SHT_NOTE;
++	}
++    }
++
++  pbfd = _bfd_elf_link_setup_gnu_properties (info);
+ 
+   if (bfd_link_relocatable (info))
+     return pbfd;
+@@ -6445,6 +6876,26 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
+   if (htab == NULL)
+     return pbfd;
+ 
++  use_ibt_plt = info->ibtplt || info->ibt;
++  if (!use_ibt_plt && pbfd != NULL)
++    {
++      /* Check if GNU_PROPERTY_X86_FEATURE_1_IBT is on.  */
++      elf_property_list *p;
++
++      /* The property list is sorted in order of type.  */
++      for (p = elf_properties (pbfd); p; p = p->next)
++	{
++	  if (GNU_PROPERTY_X86_FEATURE_1_AND == p->property.pr_type)
++	    {
++	      use_ibt_plt = !!(p->property.u.number
++			       & GNU_PROPERTY_X86_FEATURE_1_IBT);
++	      break;
++	    }
++	  else if (GNU_PROPERTY_X86_FEATURE_1_AND < p->property.pr_type)
++	    break;
++	}
++    }
++
+   dynobj = htab->elf.dynobj;
+ 
+   /* Set htab->elf.dynobj here so that there is no need to check and
+@@ -6476,8 +6927,16 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
+   switch (get_elf_i386_backend_data (info->output_bfd)->os)
+     {
+     case is_normal:
+-      htab->lazy_plt = &elf_i386_lazy_plt;
+-      htab->non_lazy_plt = &elf_i386_non_lazy_plt;
++      if (use_ibt_plt)
++	{
++	  htab->lazy_plt = &elf_i386_lazy_ibt_plt;
++	  htab->non_lazy_plt = &elf_i386_non_lazy_ibt_plt;
++	}
++      else
++	{
++	  htab->lazy_plt = &elf_i386_lazy_plt;
++	  htab->non_lazy_plt = &elf_i386_non_lazy_plt;
++	}
+       normal_target = TRUE;
+       break;
+     case is_vxworks:
+@@ -6500,6 +6959,7 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
+   if (htab->non_lazy_plt != NULL
+       && (!htab->plt.has_plt0 || pltsec == NULL))
+     {
++      lazy_plt = FALSE;
+       if (bfd_link_pic (info))
+ 	htab->plt.plt_entry
+ 	  = htab->non_lazy_plt->pic_plt_entry;
+@@ -6517,6 +6977,7 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
+     }
+   else
+     {
++      lazy_plt = TRUE;
+       if (bfd_link_pic (info))
+ 	{
+ 	  htab->plt.plt0_entry
+@@ -6605,6 +7066,29 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
+ 	    goto error_alignment;
+ 
+ 	  htab->plt_got = sec;
++
++	  if (lazy_plt)
++	    {
++	      sec = NULL;
++
++	      if (use_ibt_plt)
++		{
++		  /* Create the second PLT for Intel IBT support.  IBT
++		     PLT is supported only for non-NaCl target and is
++		     is needed only for lazy binding.  */
++		  sec = bfd_make_section_anyway_with_flags (dynobj,
++							    ".plt.sec",
++							    pltflags);
++		  if (sec == NULL)
++		    info->callbacks->einfo (_("%F: failed to create IBT-enabled PLT section\n"));
++
++		  if (!bfd_set_section_alignment (dynobj, sec,
++						  plt_alignment))
++		    goto error_alignment;
++		}
++
++	      htab->plt_second = sec;
++	    }
+ 	}
+ 
+       if (!info->no_ld_generated_unwind_info)
+diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
+index ab6f068..1f8e6d0 100644
+--- a/bfd/elf64-x86-64.c
++++ b/bfd/elf64-x86-64.c
+@@ -596,6 +596,32 @@ static const bfd_byte elf_x86_64_lazy_bnd_plt_entry[LAZY_PLT_ENTRY_SIZE] =
+   0x0f, 0x1f, 0x44, 0, 0        /* nopl 0(%rax,%rax,1)        */
+ };
+ 
++/* The first entry in the IBT-enabled lazy procedure linkage table is the
++   the same as the lazy PLT with BND prefix so that bound registers are
++   preserved when control is passed to dynamic linker.  Subsequent
++   entries for a IBT-enabled lazy procedure linkage table look like
++   this.  */
++
++static const bfd_byte elf_x86_64_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
++{
++  0xf3, 0x0f, 0x1e, 0xfa,       /* endbr64                    */
++  0x68, 0, 0, 0, 0,             /* pushq immediate            */
++  0xf2, 0xe9, 0, 0, 0, 0,       /* bnd jmpq relative          */
++  0x90                          /* nop                        */
++};
++
++/* The first entry in the x32 IBT-enabled lazy procedure linkage table
++   is the the same as the normal lazy PLT.  Subsequent entries for an
++   x32 IBT-enabled lazy procedure linkage table look like this.  */
++
++static const bfd_byte elf_x32_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
++{
++  0xf3, 0x0f, 0x1e, 0xfa,       /* endbr64                    */
++  0x68, 0, 0, 0, 0,             /* pushq immediate            */
++  0xe9, 0, 0, 0, 0,             /* jmpq relative              */
++  0x66, 0x90                    /* xchg %ax,%ax               */
++};
++
+ /* Entries in the non-lazey procedure linkage table look like this.  */
+ 
+ static const bfd_byte elf_x86_64_non_lazy_plt_entry[NON_LAZY_PLT_ENTRY_SIZE] =
+@@ -615,6 +641,30 @@ static const bfd_byte elf_x86_64_non_lazy_bnd_plt_entry[NON_LAZY_PLT_ENTRY_SIZE]
+   0x90               /* nop                                           */
+ };
+ 
++/* Entries for branches with IBT-enabled in the non-lazey procedure
++   linkage table look like this.  They have the same size as the lazy
++   PLT entry.  */
++
++static const bfd_byte elf_x86_64_non_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
++{
++  0xf3, 0x0f, 0x1e, 0xfa,       /* endbr64                     */
++  0xf2, 0xff, 0x25,             /* bnd jmpq *name@GOTPC(%rip)  */
++  0, 0, 0, 0,  /* replaced with offset to this symbol in .got. */
++  0x0f, 0x1f, 0x44, 0x00, 0x00  /* nopl 0x0(%rax,%rax,1)       */
++};
++
++/* Entries for branches with IBT-enabled in the x32 non-lazey procedure
++   linkage table look like this.  They have the same size as the lazy
++   PLT entry.  */
++
++static const bfd_byte elf_x32_non_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
++{
++  0xf3, 0x0f, 0x1e, 0xfa,            /* endbr64                */
++  0xff, 0x25,                        /* jmpq *name@GOTPC(%rip) */
++  0, 0, 0, 0,  /* replaced with offset to this symbol in .got. */
++  0x66, 0x0f, 0x1f, 0x44, 0x00, 0x00 /* nopw 0x0(%rax,%rax,1)  */
++};
++
+ /* .eh_frame covering the lazy .plt section.  */
+ 
+ static const bfd_byte elf_x86_64_eh_frame_lazy_plt[] =
+@@ -689,6 +739,76 @@ static const bfd_byte elf_x86_64_eh_frame_lazy_bnd_plt[] =
+   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
+ };
+ 
++/* .eh_frame covering the lazy .plt section with IBT-enabled.  */
++
++static const bfd_byte elf_x86_64_eh_frame_lazy_ibt_plt[] =
++{
++  PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
++  0, 0, 0, 0,			/* CIE ID */
++  1,				/* CIE version */
++  'z', 'R', 0,			/* Augmentation string */
++  1,				/* Code alignment factor */
++  0x78,				/* Data alignment factor */
++  16,				/* Return address column */
++  1,				/* Augmentation size */
++  DW_EH_PE_pcrel | DW_EH_PE_sdata4, /* FDE encoding */
++  DW_CFA_def_cfa, 7, 8,		/* DW_CFA_def_cfa: r7 (rsp) ofs 8 */
++  DW_CFA_offset + 16, 1,	/* DW_CFA_offset: r16 (rip) at cfa-8 */
++  DW_CFA_nop, DW_CFA_nop,
++
++  PLT_FDE_LENGTH, 0, 0, 0,	/* FDE length */
++  PLT_CIE_LENGTH + 8, 0, 0, 0,	/* CIE pointer */
++  0, 0, 0, 0,			/* R_X86_64_PC32 .plt goes here */
++  0, 0, 0, 0,			/* .plt size goes here */
++  0,				/* Augmentation size */
++  DW_CFA_def_cfa_offset, 16,	/* DW_CFA_def_cfa_offset: 16 */
++  DW_CFA_advance_loc + 6,	/* DW_CFA_advance_loc: 6 to __PLT__+6 */
++  DW_CFA_def_cfa_offset, 24,	/* DW_CFA_def_cfa_offset: 24 */
++  DW_CFA_advance_loc + 10,	/* DW_CFA_advance_loc: 10 to __PLT__+16 */
++  DW_CFA_def_cfa_expression,	/* DW_CFA_def_cfa_expression */
++  11,				/* Block length */
++  DW_OP_breg7, 8,		/* DW_OP_breg7 (rsp): 8 */
++  DW_OP_breg16, 0,		/* DW_OP_breg16 (rip): 0 */
++  DW_OP_lit15, DW_OP_and, DW_OP_lit10, DW_OP_ge,
++  DW_OP_lit3, DW_OP_shl, DW_OP_plus,
++  DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
++};
++
++/* .eh_frame covering the x32 lazy .plt section with IBT-enabled.  */
++
++static const bfd_byte elf_x32_eh_frame_lazy_ibt_plt[] =
++{
++  PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
++  0, 0, 0, 0,			/* CIE ID */
++  1,				/* CIE version */
++  'z', 'R', 0,			/* Augmentation string */
++  1,				/* Code alignment factor */
++  0x78,				/* Data alignment factor */
++  16,				/* Return address column */
++  1,				/* Augmentation size */
++  DW_EH_PE_pcrel | DW_EH_PE_sdata4, /* FDE encoding */
++  DW_CFA_def_cfa, 7, 8,		/* DW_CFA_def_cfa: r7 (rsp) ofs 8 */
++  DW_CFA_offset + 16, 1,	/* DW_CFA_offset: r16 (rip) at cfa-8 */
++  DW_CFA_nop, DW_CFA_nop,
++
++  PLT_FDE_LENGTH, 0, 0, 0,	/* FDE length */
++  PLT_CIE_LENGTH + 8, 0, 0, 0,	/* CIE pointer */
++  0, 0, 0, 0,			/* R_X86_64_PC32 .plt goes here */
++  0, 0, 0, 0,			/* .plt size goes here */
++  0,				/* Augmentation size */
++  DW_CFA_def_cfa_offset, 16,	/* DW_CFA_def_cfa_offset: 16 */
++  DW_CFA_advance_loc + 6,	/* DW_CFA_advance_loc: 6 to __PLT__+6 */
++  DW_CFA_def_cfa_offset, 24,	/* DW_CFA_def_cfa_offset: 24 */
++  DW_CFA_advance_loc + 10,	/* DW_CFA_advance_loc: 10 to __PLT__+16 */
++  DW_CFA_def_cfa_expression,	/* DW_CFA_def_cfa_expression */
++  11,				/* Block length */
++  DW_OP_breg7, 8,		/* DW_OP_breg7 (rsp): 8 */
++  DW_OP_breg16, 0,		/* DW_OP_breg16 (rip): 0 */
++  DW_OP_lit15, DW_OP_and, DW_OP_lit9, DW_OP_ge,
++  DW_OP_lit3, DW_OP_shl, DW_OP_plus,
++  DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
++};
++
+ /* .eh_frame covering the non-lazy .plt section.  */
+ 
+ static const bfd_byte elf_x86_64_eh_frame_non_lazy_plt[] =
+@@ -862,6 +982,62 @@ static const struct elf_x86_64_non_lazy_plt_layout elf_x86_64_non_lazy_bnd_plt =
+     sizeof (elf_x86_64_eh_frame_non_lazy_plt) /* eh_frame_plt_size */
+   };
+ 
++static const struct elf_x86_64_lazy_plt_layout elf_x86_64_lazy_ibt_plt =
++  {
++    elf_x86_64_lazy_bnd_plt0_entry,     /* plt0_entry */
++    elf_x86_64_lazy_ibt_plt_entry,      /* plt_entry */
++    LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
++    2,                                  /* plt0_got1_offset */
++    1+8,                                /* plt0_got2_offset */
++    1+12,                               /* plt0_got2_insn_end */
++    4+1+2,                              /* plt_got_offset */
++    4+1,                                /* plt_reloc_offset */
++    4+1+6,                              /* plt_plt_offset */
++    4+1+6,                              /* plt_got_insn_size */
++    4+1+5+5,                            /* plt_plt_insn_end */
++    0,                                  /* plt_lazy_offset */
++    elf_x86_64_eh_frame_lazy_ibt_plt,   /* eh_frame_plt */
++    sizeof (elf_x86_64_eh_frame_lazy_ibt_plt) /* eh_frame_plt_size */
++  };
++
++static const struct elf_x86_64_lazy_plt_layout elf_x32_lazy_ibt_plt =
++  {
++    elf_x86_64_lazy_plt0_entry,         /* plt0_entry */
++    elf_x32_lazy_ibt_plt_entry,         /* plt_entry */
++    LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
++    2,                                  /* plt0_got1_offset */
++    8,                                  /* plt0_got2_offset */
++    12,                                 /* plt0_got2_insn_end */
++    4+2,                                /* plt_got_offset */
++    4+1,                                /* plt_reloc_offset */
++    4+6,                                /* plt_plt_offset */
++    4+6,                                /* plt_got_insn_size */
++    4+5+5,                              /* plt_plt_insn_end */
++    0,                                  /* plt_lazy_offset */
++    elf_x32_eh_frame_lazy_ibt_plt,      /* eh_frame_plt */
++    sizeof (elf_x32_eh_frame_lazy_ibt_plt) /* eh_frame_plt_size */
++  };
++
++static const struct elf_x86_64_non_lazy_plt_layout elf_x86_64_non_lazy_ibt_plt =
++  {
++    elf_x86_64_non_lazy_ibt_plt_entry,  /* plt_entry */
++    LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
++    4+1+2,                              /* plt_got_offset */
++    4+1+6,                              /* plt_got_insn_size */
++    elf_x86_64_eh_frame_non_lazy_plt,   /* eh_frame_plt */
++    sizeof (elf_x86_64_eh_frame_non_lazy_plt) /* eh_frame_plt_size */
++  };
++
++static const struct elf_x86_64_non_lazy_plt_layout elf_x32_non_lazy_ibt_plt =
++  {
++    elf_x32_non_lazy_ibt_plt_entry,     /* plt_entry */
++    LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
++    4+2,                                /* plt_got_offset */
++    4+6,                                /* plt_got_insn_size */
++    elf_x86_64_eh_frame_non_lazy_plt,   /* eh_frame_plt */
++    sizeof (elf_x86_64_eh_frame_non_lazy_plt) /* eh_frame_plt_size */
++  };
++
+ static const struct elf_x86_64_backend_data elf_x86_64_arch_bed =
+   {
+     is_normal                            /* os */
+@@ -6508,6 +6684,8 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
+   const struct elf_x86_64_non_lazy_plt_layout *non_lazy_plt;
+   const struct elf_x86_64_lazy_plt_layout *lazy_bnd_plt;
+   const struct elf_x86_64_non_lazy_plt_layout *non_lazy_bnd_plt;
++  const struct elf_x86_64_lazy_plt_layout *lazy_ibt_plt;
++  const struct elf_x86_64_non_lazy_plt_layout *non_lazy_ibt_plt;
+   asection *plt;
+   char *names;
+   enum elf_x86_64_plt_type plt_type;
+@@ -6548,6 +6726,16 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
+       non_lazy_plt = &elf_x86_64_non_lazy_plt;
+       lazy_bnd_plt = &elf_x86_64_lazy_bnd_plt;
+       non_lazy_bnd_plt = &elf_x86_64_non_lazy_bnd_plt;
++      if (ABI_64_P (abfd))
++	{
++	  lazy_ibt_plt = &elf_x86_64_lazy_ibt_plt;
++	  non_lazy_ibt_plt = &elf_x86_64_non_lazy_ibt_plt;
++	}
++      else
++	{
++	  lazy_ibt_plt = &elf_x32_lazy_ibt_plt;
++	  non_lazy_ibt_plt = &elf_x32_non_lazy_ibt_plt;
++	}
+     }
+   else
+     {
+@@ -6555,6 +6743,8 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
+       non_lazy_plt = NULL;
+       lazy_bnd_plt = NULL;
+       non_lazy_bnd_plt = NULL;
++      lazy_ibt_plt = NULL;
++      non_lazy_ibt_plt = NULL;
+     }
+ 
+   count = 0;
+@@ -6593,7 +6783,14 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
+ 			       lazy_bnd_plt->plt0_entry + 6, 3) == 0))
+ 	    {
+ 	      plt_type = plt_lazy | plt_second;
+-	      lazy_plt = lazy_bnd_plt;
++	      /* The fist entry in the lazy IBT PLT is the same as the
++		 lazy BND PLT.  */
++	      if ((memcmp (plt_contents + lazy_ibt_plt->plt_entry_size,
++			   lazy_ibt_plt->plt_entry,
++			   lazy_ibt_plt->plt_got_offset) == 0))
++		lazy_plt = lazy_ibt_plt;
++	      else
++		lazy_plt = lazy_bnd_plt;
+ 	    }
+ 	}
+ 
+@@ -6606,16 +6803,25 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
+ 	    plt_type = plt_non_lazy;
+ 	}
+ 
+-      if (non_lazy_bnd_plt != NULL
+-	  && (plt_type == plt_unknown || plt_type == plt_second))
++      if (plt_type == plt_unknown || plt_type == plt_second)
+ 	{
+-	  /* Match BND PLT.  */
+-	  if (memcmp (plt_contents, non_lazy_bnd_plt->plt_entry,
+-		      non_lazy_bnd_plt->plt_got_offset) == 0)
++	  if (non_lazy_bnd_plt != NULL
++	      && (memcmp (plt_contents, non_lazy_bnd_plt->plt_entry,
++			  non_lazy_bnd_plt->plt_got_offset) == 0))
+ 	    {
++	      /* Match BND PLT.  */
+ 	      plt_type = plt_second;
+ 	      non_lazy_plt = non_lazy_bnd_plt;
+ 	    }
++	  else if (non_lazy_ibt_plt != NULL
++		   && (memcmp (plt_contents,
++			       non_lazy_ibt_plt->plt_entry,
++			       non_lazy_ibt_plt->plt_got_offset) == 0))
++	    {
++	      /* Match IBT PLT.  */
++	      plt_type = plt_second;
++	      non_lazy_plt = non_lazy_ibt_plt;
++	    }
+ 	}
+ 
+       if (plt_type == plt_unknown)
+@@ -7012,12 +7218,15 @@ elf_x86_64_parse_gnu_properties (bfd *abfd, unsigned int type,
+     {
+     case GNU_PROPERTY_X86_ISA_1_USED:
+     case GNU_PROPERTY_X86_ISA_1_NEEDED:
++    case GNU_PROPERTY_X86_FEATURE_1_AND:
+       if (datasz != 4)
+ 	{
+ 	  _bfd_error_handler
+ 	    ((type == GNU_PROPERTY_X86_ISA_1_USED
+ 	      ? _("error: %B: <corrupt x86 ISA used size: 0x%x>")
+-	      : _("error: %B: <corrupt x86 ISA needed size: 0x%x>")),
++	      : (type == GNU_PROPERTY_X86_ISA_1_NEEDED
++		 ? _("error: %B: <corrupt x86 ISA needed size: 0x%x>")
++		 : _("error: %B: <corrupt x86 feature size: 0x%x>"))),
+ 	     abfd, datasz);
+ 	  return property_corrupt;
+ 	}
+@@ -7039,12 +7248,12 @@ elf_x86_64_parse_gnu_properties (bfd *abfd, unsigned int type,
+    should be merged with ABFD.  */
+ 
+ static bfd_boolean
+-elf_x86_64_merge_gnu_properties (struct bfd_link_info *info ATTRIBUTE_UNUSED,
++elf_x86_64_merge_gnu_properties (struct bfd_link_info *info,
+ 				 bfd *abfd ATTRIBUTE_UNUSED,
+ 				 elf_property *aprop,
+ 				 elf_property *bprop)
+ {
+-  unsigned int number;
++  unsigned int number, features;
+   bfd_boolean updated = FALSE;
+   unsigned int pr_type = aprop != NULL ? aprop->pr_type : bprop->pr_type;
+ 
+@@ -7066,6 +7275,53 @@ elf_x86_64_merge_gnu_properties (struct bfd_link_info *info ATTRIBUTE_UNUSED,
+ 	}
+       break;
+ 
++    case GNU_PROPERTY_X86_FEATURE_1_AND:
++      /* Only one of APROP and BPROP can be NULL:
++	 1. APROP & BPROP when both APROP and BPROP aren't NULL.
++	 2. If APROP is NULL, remove x86 feature.
++	 3. Otherwise, do nothing.
++       */
++      if (aprop != NULL && bprop != NULL)
++	{
++	  features = 0;
++	  if (info->ibt)
++	    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
++	  number = aprop->u.number;
++	  /* Add GNU_PROPERTY_X86_FEATURE_1_IBT.  */
++	  aprop->u.number = (number & bprop->u.number) | features;
++	  updated = number != (unsigned int) aprop->u.number;
++	  /* Remove the property if all feature bits are cleared.  */
++	  if (aprop->u.number == 0)
++	    aprop->pr_kind = property_remove;
++	}
++      else
++	{
++	  features = 0;
++	  if (info->ibt)
++	    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
++	  if (features)
++	    {
++	      /* Add GNU_PROPERTY_X86_FEATURE_1_IBT.  */
++	      if (aprop != NULL)
++		{
++		  number = aprop->u.number;
++		  aprop->u.number = number | features;
++		  updated = number != (unsigned int) aprop->u.number;
++		}
++	      else
++		{
++		  bprop->u.number |= features;
++		  updated = TRUE;
++		}
++	    }
++	  else if (aprop != NULL)
++	    {
++	      aprop->pr_kind = property_remove;
++	      updated = TRUE;
++	    }
++	}
++      break;
++
+     default:
+       /* Never should happen.  */
+       abort ();
+@@ -7084,9 +7340,69 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
+   bfd_boolean lazy_plt;
+   asection *sec, *pltsec;
+   bfd *dynobj;
+-  unsigned int plt_alignment;
++  bfd_boolean use_ibt_plt;
++  unsigned int plt_alignment, features;
+   struct elf_x86_64_link_hash_table *htab;
+-  bfd *pbfd = _bfd_elf_link_setup_gnu_properties (info);
++  bfd *pbfd;
++
++  features = 0;
++  if (info->ibt)
++    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
++  if (features)
++    {
++      /* Turn on GNU_PROPERTY_X86_FEATURE_1_IBT.  */
++      bfd *ebfd = NULL;
++      elf_property *prop;
++
++      for (pbfd = info->input_bfds;
++	   pbfd != NULL;
++	   pbfd = pbfd->link.next)
++	if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
++	    && bfd_count_sections (pbfd) != 0)
++	  {
++	    ebfd = pbfd;
++
++	    if (elf_properties (pbfd) != NULL)
++	      {
++		/* Find a normal input file with GNU property note.  */
++		prop = _bfd_elf_get_property (pbfd,
++					      GNU_PROPERTY_X86_FEATURE_1_AND,
++					      4);
++		/* Add GNU_PROPERTY_X86_FEATURE_1_IBT.  */
++		prop->u.number |= features;
++		prop->pr_kind = property_number;
++		break;
++	      }
++	  }
++
++      if (pbfd == NULL && ebfd != NULL)
++	{
++	  /* Create GNU_PROPERTY_X86_FEATURE_1_IBT if needed.  */
++	  prop = _bfd_elf_get_property (ebfd,
++					GNU_PROPERTY_X86_FEATURE_1_AND,
++					4);
++	  prop->u.number = features;
++	  prop->pr_kind = property_number;
++
++	  sec = bfd_make_section_with_flags (ebfd,
++					     NOTE_GNU_PROPERTY_SECTION_NAME,
++					     (SEC_ALLOC
++					      | SEC_LOAD
++					      | SEC_IN_MEMORY
++					      | SEC_READONLY
++					      | SEC_HAS_CONTENTS
++					      | SEC_DATA));
++	  if (sec == NULL)
++	    info->callbacks->einfo (_("%F: failed to create GNU property section\n"));
++
++	  if (!bfd_set_section_alignment (ebfd, sec, 2))
++	    goto error_alignment;
++
++	  elf_section_type (sec) = SHT_NOTE;
++	}
++    }
++
++  pbfd = _bfd_elf_link_setup_gnu_properties (info);
+ 
+   if (bfd_link_relocatable (info))
+     return pbfd;
+@@ -7095,26 +7411,54 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
+   if (htab == NULL)
+     return pbfd;
+ 
++  use_ibt_plt = info->ibtplt || info->ibt;
++  if (!use_ibt_plt && pbfd != NULL)
++    {
++      /* Check if GNU_PROPERTY_X86_FEATURE_1_IBT is on.  */
++      elf_property_list *p;
++
++      /* The property list is sorted in order of type.  */
++      for (p = elf_properties (pbfd); p; p = p->next)
++	{
++	  if (GNU_PROPERTY_X86_FEATURE_1_AND == p->property.pr_type)
++	    {
++	      use_ibt_plt = !!(p->property.u.number
++			       & GNU_PROPERTY_X86_FEATURE_1_IBT);
++	      break;
++	    }
++	  else if (GNU_PROPERTY_X86_FEATURE_1_AND < p->property.pr_type)
++	    break;
++	}
++    }
++
+   dynobj = htab->elf.dynobj;
+ 
+   /* Set htab->elf.dynobj here so that there is no need to check and
+      set it in check_relocs.  */
+   if (dynobj == NULL)
+     {
+-      bfd *abfd;
+-
+-      /* Find a normal input file to hold linker created
+-	 sections.  */
+-      for (abfd = info->input_bfds;
+-	   abfd != NULL;
+-	   abfd = abfd->link.next)
+-	if ((abfd->flags
+-	     & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
+-	  {
+-	    htab->elf.dynobj = abfd;
+-	    dynobj = abfd;
+-	    break;
+-	  }
++      if (pbfd != NULL)
++	{
++	  htab->elf.dynobj = pbfd;
++	  dynobj = pbfd;
++	}
++      else
++	{
++	  bfd *abfd;
++
++	  /* Find a normal input file to hold linker created
++	     sections.  */
++	  for (abfd = info->input_bfds;
++	       abfd != NULL;
++	       abfd = abfd->link.next)
++	    if ((abfd->flags
++		 & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
++	      {
++		htab->elf.dynobj = abfd;
++		dynobj = abfd;
++		break;
++	      }
++	}
+     }
+ 
+   /* Even when lazy binding is disabled by "-z now", the PLT0 entry may
+@@ -7125,7 +7469,20 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
+   if (get_elf_x86_64_backend_data (info->output_bfd)->os
+       == is_normal)
+     {
+-      if (info->bndplt)
++      if (use_ibt_plt)
++	{
++	  if (ABI_64_P (dynobj))
++	    {
++	      htab->lazy_plt = &elf_x86_64_lazy_ibt_plt;
++	      htab->non_lazy_plt = &elf_x86_64_non_lazy_ibt_plt;
++	    }
++	  else
++	    {
++	      htab->lazy_plt = &elf_x32_lazy_ibt_plt;
++	      htab->non_lazy_plt = &elf_x32_non_lazy_ibt_plt;
++	    }
++	}
++      else if (info->bndplt)
+ 	{
+ 	  htab->lazy_plt = &elf_x86_64_lazy_bnd_plt;
+ 	  htab->non_lazy_plt = &elf_x86_64_non_lazy_bnd_plt;
+@@ -7262,21 +7619,40 @@ error_alignment:
+ 
+ 	  htab->plt_got = sec;
+ 
+-	  /* MPX PLT is supported only for non-NaCl target in 64-bit
+-	     mode and is needed only for lazy binding.  */
+-	  if (lazy_plt
+-	      && info->bndplt && ABI_64_P (dynobj))
++	  if (lazy_plt)
+ 	    {
+-	      /* Create the second PLT for Intel MPX support.  */
+-	      sec = bfd_make_section_anyway_with_flags (dynobj,
+-							".plt.sec",
+-							pltflags);
+-	      if (sec == NULL)
+-		info->callbacks->einfo (_("%F: failed to create BND PLT section\n"));
++	      sec = NULL;
+ 
+-	      if (!bfd_set_section_alignment (dynobj, sec,
+-					      non_lazy_plt_alignment))
+-		goto error_alignment;
++	      if (use_ibt_plt)
++		{
++		  /* Create the second PLT for Intel IBT support.  IBT
++		     PLT is supported only for non-NaCl target and is
++		     is needed only for lazy binding.  */
++		  sec = bfd_make_section_anyway_with_flags (dynobj,
++							    ".plt.sec",
++							    pltflags);
++		  if (sec == NULL)
++		    info->callbacks->einfo (_("%F: failed to create IBT-enabled PLT section\n"));
++
++		  if (!bfd_set_section_alignment (dynobj, sec,
++						  plt_alignment))
++		    goto error_alignment;
++		}
++	      else if (info->bndplt && ABI_64_P (dynobj))
++		{
++		  /* Create the second PLT for Intel MPX support.  MPX
++		     PLT is supported only for non-NaCl target in 64-bit
++		     mode and is needed only for lazy binding.  */
++		  sec = bfd_make_section_anyway_with_flags (dynobj,
++							    ".plt.sec",
++							    pltflags);
++		  if (sec == NULL)
++		    info->callbacks->einfo (_("%F: failed to create BND PLT section\n"));
++
++		  if (!bfd_set_section_alignment (dynobj, sec,
++						  non_lazy_plt_alignment))
++		    goto error_alignment;
++		}
+ 
+ 	      htab->plt_second = sec;
+ 	    }
+diff --git a/binutils/readelf.c b/binutils/readelf.c
+index bb6bb79..50354c1 100644
+--- a/binutils/readelf.c
++++ b/binutils/readelf.c
+@@ -16338,6 +16338,36 @@ decode_x86_isa (unsigned int bitmask)
+ }
+ 
+ static void
++decode_x86_feature (unsigned int type, unsigned int bitmask)
++{
++  while (bitmask)
++    {
++      unsigned int bit = bitmask & (- bitmask);
++
++      bitmask &= ~ bit;
++      switch (bit)
++	{
++	case GNU_PROPERTY_X86_FEATURE_1_IBT:
++	  switch (type)
++	    {
++	    case GNU_PROPERTY_X86_FEATURE_1_AND:
++	      printf ("IBT");
++	      break;
++	    default:
++	      /* This should never happen.  */
++	      abort ();
++	    }
++	  break;
++	default:
++	  printf (_("<unknown: %x>"), bit);
++	  break;
++	}
++      if (bitmask)
++	printf (", ");
++    }
++}
++
++static void
+ print_gnu_property_note (Elf_Internal_Note * pnote)
+ {
+   unsigned char * ptr = (unsigned char *) pnote->descdata;
+@@ -16391,6 +16421,14 @@ print_gnu_property_note (Elf_Internal_Note * pnote)
+ 		    decode_x86_isa (byte_get (ptr, 4));
+ 		  goto next;
+ 
++		case GNU_PROPERTY_X86_FEATURE_1_AND:
++		  printf ("x86 feature: ");
++		  if (datasz != 4)
++		    printf (_("<corrupt length: %#x> "), datasz);
++		  else
++		    decode_x86_feature (type, byte_get (ptr, 4));
++		  goto next;
++
+ 		default:
+ 		  break;
+ 		}
+diff --git a/binutils/testsuite/binutils-all/i386/empty.d b/binutils/testsuite/binutils-all/i386/empty.d
+new file mode 100644
+index 0000000..5f4cc56
+--- /dev/null
++++ b/binutils/testsuite/binutils-all/i386/empty.d
+@@ -0,0 +1,9 @@
++#PROG: objcopy
++#as: --32
++#objcopy:
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: 
+diff --git a/binutils/testsuite/binutils-all/i386/empty.s b/binutils/testsuite/binutils-all/i386/empty.s
+new file mode 100644
+index 0000000..6a6b517
+--- /dev/null
++++ b/binutils/testsuite/binutils-all/i386/empty.s
+@@ -0,0 +1,27 @@
++	.section ".note.gnu.property", "a"
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++	.long 1f - 0f		/* name length */
++	.long 5f - 2f		/* data length */
++	.long 5			/* note type */
++0:	.asciz "GNU"		/* vendor name */
++1:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++2:	.long 0xc0000002	/* pr_type.  */
++	.long 4f - 3f		/* pr_datasz.  */
++3:
++	.long 0x0
++4:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++5:
+diff --git a/binutils/testsuite/binutils-all/i386/ibt.d b/binutils/testsuite/binutils-all/i386/ibt.d
+new file mode 100644
+index 0000000..dfd7676
+--- /dev/null
++++ b/binutils/testsuite/binutils-all/i386/ibt.d
+@@ -0,0 +1,9 @@
++#PROG: objcopy
++#as: --32
++#objcopy:
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/binutils/testsuite/binutils-all/i386/ibt.s b/binutils/testsuite/binutils-all/i386/ibt.s
+new file mode 100644
+index 0000000..84ee964
+--- /dev/null
++++ b/binutils/testsuite/binutils-all/i386/ibt.s
+@@ -0,0 +1,27 @@
++	.section ".note.gnu.property", "a"
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++	.long 1f - 0f		/* name length */
++	.long 5f - 2f		/* data length */
++	.long 5			/* note type */
++0:	.asciz "GNU"		/* vendor name */
++1:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++2:	.long 0xc0000002	/* pr_type.  */
++	.long 4f - 3f		/* pr_datasz.  */
++3:
++	.long 0x1
++4:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++5:
+diff --git a/binutils/testsuite/binutils-all/x86-64/empty-x32.d b/binutils/testsuite/binutils-all/x86-64/empty-x32.d
+new file mode 100644
+index 0000000..4193818
+--- /dev/null
++++ b/binutils/testsuite/binutils-all/x86-64/empty-x32.d
+@@ -0,0 +1,10 @@
++#source: empty.s
++#PROG: objcopy
++#as: --x32
++#objcopy:
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: 
+diff --git a/binutils/testsuite/binutils-all/x86-64/empty.d b/binutils/testsuite/binutils-all/x86-64/empty.d
+new file mode 100644
+index 0000000..777efbb
+--- /dev/null
++++ b/binutils/testsuite/binutils-all/x86-64/empty.d
+@@ -0,0 +1,9 @@
++#PROG: objcopy
++#as: --64 -defsym __64_bit__=1
++#objcopy:
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x00000010	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: 
+diff --git a/binutils/testsuite/binutils-all/x86-64/empty.s b/binutils/testsuite/binutils-all/x86-64/empty.s
+new file mode 100644
+index 0000000..6a6b517
+--- /dev/null
++++ b/binutils/testsuite/binutils-all/x86-64/empty.s
+@@ -0,0 +1,27 @@
++	.section ".note.gnu.property", "a"
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++	.long 1f - 0f		/* name length */
++	.long 5f - 2f		/* data length */
++	.long 5			/* note type */
++0:	.asciz "GNU"		/* vendor name */
++1:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++2:	.long 0xc0000002	/* pr_type.  */
++	.long 4f - 3f		/* pr_datasz.  */
++3:
++	.long 0x0
++4:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++5:
+diff --git a/binutils/testsuite/binutils-all/x86-64/ibt-x32.d b/binutils/testsuite/binutils-all/x86-64/ibt-x32.d
+new file mode 100644
+index 0000000..5be7c98
+--- /dev/null
++++ b/binutils/testsuite/binutils-all/x86-64/ibt-x32.d
+@@ -0,0 +1,10 @@
++#source: ibt.s
++#PROG: objcopy
++#as: --x32
++#objcopy:
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/binutils/testsuite/binutils-all/x86-64/ibt.d b/binutils/testsuite/binutils-all/x86-64/ibt.d
+new file mode 100644
+index 0000000..7bedff5
+--- /dev/null
++++ b/binutils/testsuite/binutils-all/x86-64/ibt.d
+@@ -0,0 +1,9 @@
++#PROG: objcopy
++#as: --64 -defsym __64_bit__=1
++#objcopy:
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x00000010	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/binutils/testsuite/binutils-all/x86-64/ibt.s b/binutils/testsuite/binutils-all/x86-64/ibt.s
+new file mode 100644
+index 0000000..84ee964
+--- /dev/null
++++ b/binutils/testsuite/binutils-all/x86-64/ibt.s
+@@ -0,0 +1,27 @@
++	.section ".note.gnu.property", "a"
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++	.long 1f - 0f		/* name length */
++	.long 5f - 2f		/* data length */
++	.long 5			/* note type */
++0:	.asciz "GNU"		/* vendor name */
++1:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++2:	.long 0xc0000002	/* pr_type.  */
++	.long 4f - 3f		/* pr_datasz.  */
++3:
++	.long 0x1
++4:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++5:
+diff --git a/include/bfdlink.h b/include/bfdlink.h
+index 69232c4..3b4dce9 100644
+--- a/include/bfdlink.h
++++ b/include/bfdlink.h
+@@ -471,6 +471,12 @@ struct bfd_link_info
+   /* TRUE if BND prefix in PLT entries is always generated.  */
+   unsigned int bndplt: 1;
+ 
++  /* TRUE if IBT-enabled PLT entries should be generated.  */
++  unsigned int ibtplt: 1;
++
++  /* TRUE if GNU_PROPERTY_X86_FEATURE_1_IBT should be generated.  */
++  unsigned int ibt: 1;
++
+   /* TRUE if generation of .interp/PT_INTERP should be suppressed.  */
+   unsigned int nointerp: 1;
+ 
+diff --git a/include/elf/common.h b/include/elf/common.h
+index 484cb48..e638ba0 100644
+--- a/include/elf/common.h
++++ b/include/elf/common.h
+@@ -709,6 +709,7 @@
+ 
+ #define GNU_PROPERTY_X86_ISA_1_USED		0xc0000000
+ #define GNU_PROPERTY_X86_ISA_1_NEEDED		0xc0000001
++#define GNU_PROPERTY_X86_FEATURE_1_AND		0xc0000002
+ 
+ #define GNU_PROPERTY_X86_ISA_1_486           (1U << 0)
+ #define GNU_PROPERTY_X86_ISA_1_586           (1U << 1)
+@@ -729,6 +730,8 @@
+ #define GNU_PROPERTY_X86_ISA_1_AVX512DQ      (1U << 16)
+ #define GNU_PROPERTY_X86_ISA_1_AVX512BW      (1U << 17)
+ 
++#define GNU_PROPERTY_X86_FEATURE_1_IBT       (1U << 0)
++
+ /* Values used in GNU .note.ABI-tag notes (NT_GNU_ABI_TAG).  */
+ #define GNU_ABI_TAG_LINUX	0
+ #define GNU_ABI_TAG_HURD	1
+diff --git a/ld/Makefile.am b/ld/Makefile.am
+index b509e23..fcd4c36 100644
+--- a/ld/Makefile.am
++++ b/ld/Makefile.am
+@@ -677,7 +677,8 @@ ELF_X86_DEPS = $(ELF_DEPS) $(srcdir)/emulparams/plt_unwind.sh \
+ 	       $(srcdir)/emulparams/extern_protected_data.sh \
+ 	       $(srcdir)/emulparams/dynamic_undefined_weak.sh \
+ 	       $(srcdir)/emulparams/reloc_overflow.sh \
+-	       $(srcdir)/emulparams/call_nop.sh
++	       $(srcdir)/emulparams/call_nop.sh \
++	       $(srcdir)/emulparams/cet.sh
+ 
+ @TDIRS@
+ 
+diff --git a/ld/Makefile.in b/ld/Makefile.in
+index b69d6b8..5e66e02 100644
+--- a/ld/Makefile.in
++++ b/ld/Makefile.in
+@@ -932,7 +932,8 @@ ELF_X86_DEPS = $(ELF_DEPS) $(srcdir)/emulparams/plt_unwind.sh \
+ 	       $(srcdir)/emulparams/extern_protected_data.sh \
+ 	       $(srcdir)/emulparams/dynamic_undefined_weak.sh \
+ 	       $(srcdir)/emulparams/reloc_overflow.sh \
+-	       $(srcdir)/emulparams/call_nop.sh
++	       $(srcdir)/emulparams/call_nop.sh \
++	       $(srcdir)/emulparams/cet.sh
+ 
+ 
+ # We need this for automake to use YLWRAP.
+diff --git a/ld/NEWS b/ld/NEWS
+index 98055b5..b115843 100644
+--- a/ld/NEWS
++++ b/ld/NEWS
+@@ -1,5 +1,14 @@
+ -*- text -*-
+ 
++* Add support for GNU_PROPERTY_X86_FEATURE_1_IBT in ELF GNU program
++
++* Support for -z ibtplt in the x86 ELF linker to generate IBT-enabled
++  PLT.
++
++* Support for -z ibt in the x86 ELF linker to generate IBT-enabled
++  PLT as well as GNU_PROPERTY_X86_FEATURE_1_IBT in ELF GNU program
++  properties.
++
+ * Add support for ELF SHF_GNU_MBIND and PT_GNU_MBIND_XXX.
+ 
+ * Add support for ELF GNU program properties.
+diff --git a/ld/emulparams/cet.sh b/ld/emulparams/cet.sh
+new file mode 100644
+index 0000000..62ff105
+--- /dev/null
++++ b/ld/emulparams/cet.sh
+@@ -0,0 +1,14 @@
++PARSE_AND_LIST_OPTIONS_CET='
++  fprintf (file, _("\
++  -z ibtplt                   Generate IBT-enabled PLT entries\n\
++  -z ibt                      Generate GNU_PROPERTY_X86_FEATURE_1_IBT\n"));
++'
++PARSE_AND_LIST_ARGS_CASE_Z_CET='
++      else if (strcmp (optarg, "ibtplt") == 0)
++	link_info.ibtplt = TRUE;
++      else if (strcmp (optarg, "ibt") == 0)
++	link_info.ibt = TRUE;
++'
++
++PARSE_AND_LIST_OPTIONS="$PARSE_AND_LIST_OPTIONS $PARSE_AND_LIST_OPTIONS_CET"
++PARSE_AND_LIST_ARGS_CASE_Z="$PARSE_AND_LIST_ARGS_CASE_Z $PARSE_AND_LIST_ARGS_CASE_Z_CET"
+diff --git a/ld/emulparams/elf32_x86_64.sh b/ld/emulparams/elf32_x86_64.sh
+index 9b85239..06a0f3c 100644
+--- a/ld/emulparams/elf32_x86_64.sh
++++ b/ld/emulparams/elf32_x86_64.sh
+@@ -3,6 +3,7 @@
+ . ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/reloc_overflow.sh
+ . ${srcdir}/emulparams/call_nop.sh
++. ${srcdir}/emulparams/cet.sh
+ SCRIPT_NAME=elf
+ ELFSIZE=32
+ OUTPUT_FORMAT="elf32-x86-64"
+@@ -24,6 +25,7 @@ IREL_IN_PLT=
+ # Reuse TINY_READONLY_SECTION which is placed right after .plt section.
+ TINY_READONLY_SECTION="
+ .plt.got      ${RELOCATING-0} : { *(.plt.got) }
++.plt.sec      ${RELOCATING-0} : { *(.plt.sec) }
+ "
+ 
+ if [ "x${host}" = "x${target}" ]; then
+diff --git a/ld/emulparams/elf_i386.sh b/ld/emulparams/elf_i386.sh
+index b08e661..6997d40 100644
+--- a/ld/emulparams/elf_i386.sh
++++ b/ld/emulparams/elf_i386.sh
+@@ -2,6 +2,7 @@
+ . ${srcdir}/emulparams/extern_protected_data.sh
+ . ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/call_nop.sh
++. ${srcdir}/emulparams/cet.sh
+ SCRIPT_NAME=elf
+ OUTPUT_FORMAT="elf32-i386"
+ CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+@@ -20,6 +21,7 @@ IREL_IN_PLT=
+ # Reuse TINY_READONLY_SECTION which is placed right after .plt section.
+ TINY_READONLY_SECTION="
+ .plt.got      ${RELOCATING-0} : { *(.plt.got) }
++.plt.sec      ${RELOCATING-0} : { *(.plt.sec) }
+ "
+ 
+ # Linux modify the default library search path to first include
+diff --git a/ld/emulparams/elf_x86_64.sh b/ld/emulparams/elf_x86_64.sh
+index ca6d06c..ad25526 100644
+--- a/ld/emulparams/elf_x86_64.sh
++++ b/ld/emulparams/elf_x86_64.sh
+@@ -3,6 +3,7 @@
+ . ${srcdir}/emulparams/dynamic_undefined_weak.sh
+ . ${srcdir}/emulparams/reloc_overflow.sh
+ . ${srcdir}/emulparams/call_nop.sh
++. ${srcdir}/emulparams/cet.sh
+ SCRIPT_NAME=elf
+ ELFSIZE=64
+ OUTPUT_FORMAT="elf64-x86-64"
+diff --git a/ld/ld.texinfo b/ld/ld.texinfo
+index 44ad84b..4f7873c 100644
+--- a/ld/ld.texinfo
++++ b/ld/ld.texinfo
+@@ -1261,6 +1261,15 @@ to a locally defined function, foo, via its GOT slot.
+ @option{call-nop=suffix-@var{byte}} generates @code{call foo @var{byte}}.
+ Supported for i386 and x86_64.
+ 
++@item ibtplt
++Generate Intel Indirect Branch Tracking (IBT) enabled PLT entries.
++Supported for Linux/i386 and Linux/x86_64.
++
++@item IBT
++Generate GNU_PROPERTY_X86_FEATURE_1_IBT in .note.gnu.property section
++to indicate compatibility with IBT.  This also implies @option{ibtplt}.
++Supported for Linux/i386 and Linux/x86_64.
++
+ @end table
+ 
+ Other keywords are ignored for Solaris compatibility.
+diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
+index 2e3c224..d30dc76 100644
+--- a/ld/testsuite/ld-i386/i386.exp
++++ b/ld/testsuite/ld-i386/i386.exp
+@@ -420,6 +420,13 @@ run_dump_test "pr20515"
+ run_dump_test "property-x86-3"
+ run_dump_test "property-x86-4a"
+ run_dump_test "property-x86-4b"
++run_dump_test "property-x86-ibt1a"
++run_dump_test "property-x86-ibt1b"
++run_dump_test "property-x86-ibt2"
++run_dump_test "property-x86-ibt3a"
++run_dump_test "property-x86-ibt3b"
++run_dump_test "property-x86-ibt4"
++run_dump_test "property-x86-ibt5"
+ 
+ if { !([istarget "i?86-*-linux*"]
+        || [istarget "i?86-*-gnu*"]
+@@ -1100,6 +1107,8 @@ if { [isnative]
+     undefined_weak "-fPIE" "-pie -z nodynamic-undefined-weak"
+ }
+ 
++global NOPIE_LDFLAGS
++
+ # Must be native with the C compiler and working IFUNC support,
+ if { [isnative]
+      && [check_ifunc_available]
+@@ -1156,6 +1165,66 @@ if { [isnative]
+ 	    "pass.out" \
+ 	] \
+     ]
++
++    if { [istarget "i?86-*-linux*"] } {
++	run_cc_link_tests [list \
++	    [list \
++		"Build pr21168.so with -z ibtplt" \
++		"-shared -Wl,-z,ibtplt" \
++		"" \
++		{ pr21168b.S } \
++		"" \
++		"pr21168-ibt.so" \
++	    ] \
++	    [list \
++		"Build ifunc-1a with -z ibtplt" \
++		"-Wl,-z,ibtplt $NOPIE_LDFLAGS tmpdir/ifunc-1a.o \
++		 tmpdir/ifunc-1b.o tmpdir/ifunc-1c.o tmpdir/ifunc-1d.o" \
++		"" \
++		{ dummy.c } \
++		{{objdump {-dw} plt-main-ibt.dd}} \
++		"ifunc-1a-ibt" \
++	    ] \
++	    [list \
++		"Build ifunc-1a with PIE -z ibtplt" \
++		"-Wl,-z,ibtplt -pie tmpdir/ifunc-1a.o \
++		 tmpdir/ifunc-1b.o tmpdir/ifunc-1c.o tmpdir/ifunc-1d.o" \
++		"" \
++		{ dummy.c } \
++		{{objdump {-dw} plt-pie-ibt.dd}} \
++		"ifunc-1a-pie-ibt" \
++	    ] \
++	]
++
++	run_ld_link_exec_tests [list \
++	    [list \
++		"Run ifunc-1a with -z ibtplt" \
++		"-Wl,-z,ibtplt $NOPIE_LDFLAGS tmpdir/ifunc-1a.o \
++		 tmpdir/ifunc-1b.o tmpdir/ifunc-1c.o tmpdir/ifunc-1d.o" \
++		"" \
++		{ dummy.c } \
++		"ifunc-1a-ibt" \
++		"pass.out" \
++	    ] \
++	    [list \
++		"Run ifunc-1a with PIE -z ibtplt" \
++		"-Wl,-z,ibtplt -pie tmpdir/ifunc-1a.o \
++		 tmpdir/ifunc-1b.o tmpdir/ifunc-1c.o tmpdir/ifunc-1d.o" \
++		"" \
++		{ dummy.c } \
++		"ifunc-1a-pie-ibt" \
++		"pass.out" \
++	    ] \
++	    [list \
++		"Run pr21168 with -z ibtplt" \
++		"tmpdir/pr21168a.o tmpdir/pr21168-ibt.so" \
++		"" \
++		{ dummy.c } \
++		"pr21168-ibt" \
++		"pass.out" \
++	    ] \
++	]
++    }
+ }
+ 
+ if { !([istarget "i?86-*-linux*"]
+@@ -1206,3 +1275,12 @@ run_ld_link_tests [list \
+ run_dump_test "pltgot-1"
+ run_dump_test "pltgot-2"
+ run_dump_test "pr20830"
++run_dump_test "ibt-plt-1"
++run_dump_test "ibt-plt-2a"
++run_dump_test "ibt-plt-2b"
++run_dump_test "ibt-plt-2c"
++run_dump_test "ibt-plt-2d"
++run_dump_test "ibt-plt-3a"
++run_dump_test "ibt-plt-3b"
++run_dump_test "ibt-plt-3c"
++run_dump_test "ibt-plt-3d"
+diff --git a/ld/testsuite/ld-i386/ibt-plt-1.d b/ld/testsuite/ld-i386/ibt-plt-1.d
+new file mode 100644
+index 0000000..1c90591
+--- /dev/null
++++ b/ld/testsuite/ld-i386/ibt-plt-1.d
+@@ -0,0 +1,51 @@
++#as: --32
++#ld: -shared -m elf_i386
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+1b0 <.plt>:
++ +[a-f0-9]+:	ff b3 04 00 00 00    	pushl  0x4\(%ebx\)
++ +[a-f0-9]+:	ff a3 08 00 00 00    	jmp    \*0x8\(%ebx\)
++ +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%eax\)
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
++ +[a-f0-9]+:	e9 e2 ff ff ff       	jmp    1b0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	68 08 00 00 00       	push   \$0x8
++ +[a-f0-9]+:	e9 d2 ff ff ff       	jmp    1b0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++
++Disassembly of section .plt.sec:
++
++0+1e0 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	ff a3 0c 00 00 00    	jmp    \*0xc\(%ebx\)
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%eax,%eax,1\)
++
++0+1f0 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	ff a3 10 00 00 00    	jmp    \*0x10\(%ebx\)
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%eax,%eax,1\)
++
++Disassembly of section .text:
++
++0+200 <foo>:
++ +[a-f0-9]+:	53                   	push   %ebx
++ +[a-f0-9]+:	e8 18 00 00 00       	call   21e <__x86.get_pc_thunk.bx>
++ +[a-f0-9]+:	81 c3 22 11 00 00    	add    \$0x1122,%ebx
++ +[a-f0-9]+:	83 ec 08             	sub    \$0x8,%esp
++ +[a-f0-9]+:	e8 dc ff ff ff       	call   1f0 <bar2@plt>
++ +[a-f0-9]+:	e8 c7 ff ff ff       	call   1e0 <bar1@plt>
++ +[a-f0-9]+:	83 c4 08             	add    \$0x8,%esp
++ +[a-f0-9]+:	5b                   	pop    %ebx
++ +[a-f0-9]+:	c3                   	ret    
++
++0+21e <__x86.get_pc_thunk.bx>:
++ +[a-f0-9]+:	8b 1c 24             	mov    \(%esp\),%ebx
++ +[a-f0-9]+:	c3                   	ret    
++#pass
+diff --git a/ld/testsuite/ld-i386/ibt-plt-1.s b/ld/testsuite/ld-i386/ibt-plt-1.s
+new file mode 100644
+index 0000000..80e2311
+--- /dev/null
++++ b/ld/testsuite/ld-i386/ibt-plt-1.s
+@@ -0,0 +1,54 @@
++	.text
++	.p2align 4,,15
++	.globl	foo
++	.type	foo, @function
++foo:
++.LFB0:
++	.cfi_startproc
++	pushl	%ebx
++	.cfi_def_cfa_offset 8
++	.cfi_offset 3, -8
++	call	__x86.get_pc_thunk.bx
++	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
++	subl	$8, %esp
++	.cfi_def_cfa_offset 16
++	call	bar2@PLT
++	call	bar1@PLT
++	addl	$8, %esp
++	.cfi_def_cfa_offset 8
++	popl	%ebx
++	.cfi_restore 3
++	.cfi_def_cfa_offset 4
++	ret
++	.cfi_endproc
++.LFE0:
++	.size	foo, .-foo
++	.section	.note.GNU-stack,"",@progbits
++
++	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
++	.globl	__x86.get_pc_thunk.bx
++	.hidden	__x86.get_pc_thunk.bx
++	.type	__x86.get_pc_thunk.bx, @function
++__x86.get_pc_thunk.bx:
++.LFB1:
++	.cfi_startproc
++	movl	(%esp), %ebx
++	ret
++	.cfi_endproc
++.LFE1:
++
++	.section ".note.gnu.property", "a"
++	.p2align 2
++	.long 1f - 0f		/* name length */
++	.long 5f - 2f		/* data length */
++	.long 5			/* note type */
++0:	.asciz "GNU"		/* vendor name */
++1:
++	.p2align 2
++2:	.long 0xc0000002	/* pr_type.  */
++	.long 4f - 3f		/* pr_datasz.  */
++3:
++	.long 0x1
++4:
++	.p2align 2
++5:
+diff --git a/ld/testsuite/ld-i386/ibt-plt-2.s b/ld/testsuite/ld-i386/ibt-plt-2.s
+new file mode 100644
+index 0000000..500fdd2
+--- /dev/null
++++ b/ld/testsuite/ld-i386/ibt-plt-2.s
+@@ -0,0 +1,54 @@
++	.text
++	.p2align 4,,15
++	.globl	foo
++	.type	foo, @function
++foo:
++.LFB0:
++	.cfi_startproc
++	pushl	%ebx
++	.cfi_def_cfa_offset 8
++	.cfi_offset 3, -8
++	call	__x86.get_pc_thunk.bx
++	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
++	subl	$8, %esp
++	.cfi_def_cfa_offset 16
++	call	bar2@PLT
++	call	bar1@PLT
++	addl	$8, %esp
++	.cfi_def_cfa_offset 8
++	popl	%ebx
++	.cfi_restore 3
++	.cfi_def_cfa_offset 4
++	ret
++	.cfi_endproc
++.LFE0:
++	.size	foo, .-foo
++	.section	.note.GNU-stack,"",@progbits
++
++	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
++	.globl	__x86.get_pc_thunk.bx
++	.hidden	__x86.get_pc_thunk.bx
++	.type	__x86.get_pc_thunk.bx, @function
++__x86.get_pc_thunk.bx:
++.LFB1:
++	.cfi_startproc
++	movl	(%esp), %ebx
++	ret
++	.cfi_endproc
++.LFE1:
++
++	.section ".note.gnu.property", "a"
++	.p2align 2
++	.long 1f - 0f		/* name length */
++	.long 5f - 2f		/* data length */
++	.long 5			/* note type */
++0:	.asciz "GNU"		/* vendor name */
++1:
++	.p2align 2
++2:	.long 0xc0000002	/* pr_type.  */
++	.long 4f - 3f		/* pr_datasz.  */
++3:
++	.long 0x0
++4:
++	.p2align 2
++5:
+diff --git a/ld/testsuite/ld-i386/ibt-plt-2a.d b/ld/testsuite/ld-i386/ibt-plt-2a.d
+new file mode 100644
+index 0000000..4881dea
+--- /dev/null
++++ b/ld/testsuite/ld-i386/ibt-plt-2a.d
+@@ -0,0 +1,52 @@
++#source: ibt-plt-2.s
++#as: --32
++#ld: -shared -m elf_i386 -z ibtplt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+1b0 <.plt>:
++ +[a-f0-9]+:	ff b3 04 00 00 00    	pushl  0x4\(%ebx\)
++ +[a-f0-9]+:	ff a3 08 00 00 00    	jmp    \*0x8\(%ebx\)
++ +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%eax\)
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
++ +[a-f0-9]+:	e9 e2 ff ff ff       	jmp    1b0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	68 08 00 00 00       	push   \$0x8
++ +[a-f0-9]+:	e9 d2 ff ff ff       	jmp    1b0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++
++Disassembly of section .plt.sec:
++
++0+1e0 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	ff a3 0c 00 00 00    	jmp    \*0xc\(%ebx\)
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%eax,%eax,1\)
++
++0+1f0 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	ff a3 10 00 00 00    	jmp    \*0x10\(%ebx\)
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%eax,%eax,1\)
++
++Disassembly of section .text:
++
++0+200 <foo>:
++ +[a-f0-9]+:	53                   	push   %ebx
++ +[a-f0-9]+:	e8 18 00 00 00       	call   21e <__x86.get_pc_thunk.bx>
++ +[a-f0-9]+:	81 c3 22 11 00 00    	add    \$0x1122,%ebx
++ +[a-f0-9]+:	83 ec 08             	sub    \$0x8,%esp
++ +[a-f0-9]+:	e8 dc ff ff ff       	call   1f0 <bar2@plt>
++ +[a-f0-9]+:	e8 c7 ff ff ff       	call   1e0 <bar1@plt>
++ +[a-f0-9]+:	83 c4 08             	add    \$0x8,%esp
++ +[a-f0-9]+:	5b                   	pop    %ebx
++ +[a-f0-9]+:	c3                   	ret    
++
++0+21e <__x86.get_pc_thunk.bx>:
++ +[a-f0-9]+:	8b 1c 24             	mov    \(%esp\),%ebx
++ +[a-f0-9]+:	c3                   	ret    
++#pass
+diff --git a/ld/testsuite/ld-i386/ibt-plt-2b.d b/ld/testsuite/ld-i386/ibt-plt-2b.d
+new file mode 100644
+index 0000000..740b889
+--- /dev/null
++++ b/ld/testsuite/ld-i386/ibt-plt-2b.d
+@@ -0,0 +1,9 @@
++#source: ibt-plt-2.s
++#as: --32
++#ld: -shared -m elf_i386 -z ibtplt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: 
+diff --git a/ld/testsuite/ld-i386/ibt-plt-2c.d b/ld/testsuite/ld-i386/ibt-plt-2c.d
+new file mode 100644
+index 0000000..2ba1d78
+--- /dev/null
++++ b/ld/testsuite/ld-i386/ibt-plt-2c.d
+@@ -0,0 +1,52 @@
++#source: ibt-plt-2.s
++#as: --32
++#ld: -shared -m elf_i386 -z ibt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+1b0 <.plt>:
++ +[a-f0-9]+:	ff b3 04 00 00 00    	pushl  0x4\(%ebx\)
++ +[a-f0-9]+:	ff a3 08 00 00 00    	jmp    \*0x8\(%ebx\)
++ +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%eax\)
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
++ +[a-f0-9]+:	e9 e2 ff ff ff       	jmp    1b0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	68 08 00 00 00       	push   \$0x8
++ +[a-f0-9]+:	e9 d2 ff ff ff       	jmp    1b0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++
++Disassembly of section .plt.sec:
++
++0+1e0 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	ff a3 0c 00 00 00    	jmp    \*0xc\(%ebx\)
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%eax,%eax,1\)
++
++0+1f0 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	ff a3 10 00 00 00    	jmp    \*0x10\(%ebx\)
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%eax,%eax,1\)
++
++Disassembly of section .text:
++
++0+200 <foo>:
++ +[a-f0-9]+:	53                   	push   %ebx
++ +[a-f0-9]+:	e8 18 00 00 00       	call   21e <__x86.get_pc_thunk.bx>
++ +[a-f0-9]+:	81 c3 22 11 00 00    	add    \$0x1122,%ebx
++ +[a-f0-9]+:	83 ec 08             	sub    \$0x8,%esp
++ +[a-f0-9]+:	e8 dc ff ff ff       	call   1f0 <bar2@plt>
++ +[a-f0-9]+:	e8 c7 ff ff ff       	call   1e0 <bar1@plt>
++ +[a-f0-9]+:	83 c4 08             	add    \$0x8,%esp
++ +[a-f0-9]+:	5b                   	pop    %ebx
++ +[a-f0-9]+:	c3                   	ret    
++
++0+21e <__x86.get_pc_thunk.bx>:
++ +[a-f0-9]+:	8b 1c 24             	mov    \(%esp\),%ebx
++ +[a-f0-9]+:	c3                   	ret    
++#pass
+diff --git a/ld/testsuite/ld-i386/ibt-plt-2d.d b/ld/testsuite/ld-i386/ibt-plt-2d.d
+new file mode 100644
+index 0000000..3e02a62
+--- /dev/null
++++ b/ld/testsuite/ld-i386/ibt-plt-2d.d
+@@ -0,0 +1,9 @@
++#source: ibt-plt-2.s
++#as: --32
++#ld: -shared -m elf_i386 -z ibt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/ld/testsuite/ld-i386/ibt-plt-3.s b/ld/testsuite/ld-i386/ibt-plt-3.s
+new file mode 100644
+index 0000000..b52f2e7
+--- /dev/null
++++ b/ld/testsuite/ld-i386/ibt-plt-3.s
+@@ -0,0 +1,38 @@
++	.text
++	.p2align 4,,15
++	.globl	foo
++	.type	foo, @function
++foo:
++.LFB0:
++	.cfi_startproc
++	pushl	%ebx
++	.cfi_def_cfa_offset 8
++	.cfi_offset 3, -8
++	call	__x86.get_pc_thunk.bx
++	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
++	subl	$8, %esp
++	.cfi_def_cfa_offset 16
++	call	bar2@PLT
++	call	bar1@PLT
++	addl	$8, %esp
++	.cfi_def_cfa_offset 8
++	popl	%ebx
++	.cfi_restore 3
++	.cfi_def_cfa_offset 4
++	ret
++	.cfi_endproc
++.LFE0:
++	.size	foo, .-foo
++	.section	.note.GNU-stack,"",@progbits
++
++	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
++	.globl	__x86.get_pc_thunk.bx
++	.hidden	__x86.get_pc_thunk.bx
++	.type	__x86.get_pc_thunk.bx, @function
++__x86.get_pc_thunk.bx:
++.LFB1:
++	.cfi_startproc
++	movl	(%esp), %ebx
++	ret
++	.cfi_endproc
++.LFE1:
+diff --git a/ld/testsuite/ld-i386/ibt-plt-3a.d b/ld/testsuite/ld-i386/ibt-plt-3a.d
+new file mode 100644
+index 0000000..c2ce3fd
+--- /dev/null
++++ b/ld/testsuite/ld-i386/ibt-plt-3a.d
+@@ -0,0 +1,52 @@
++#source: ibt-plt-3.s
++#as: --32
++#ld: -shared -m elf_i386 -z ibtplt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+190 <.plt>:
++ +[a-f0-9]+:	ff b3 04 00 00 00    	pushl  0x4\(%ebx\)
++ +[a-f0-9]+:	ff a3 08 00 00 00    	jmp    \*0x8\(%ebx\)
++ +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%eax\)
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
++ +[a-f0-9]+:	e9 e2 ff ff ff       	jmp    190 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	68 08 00 00 00       	push   \$0x8
++ +[a-f0-9]+:	e9 d2 ff ff ff       	jmp    190 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++
++Disassembly of section .plt.sec:
++
++0+1c0 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	ff a3 0c 00 00 00    	jmp    \*0xc\(%ebx\)
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%eax,%eax,1\)
++
++0+1d0 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	ff a3 10 00 00 00    	jmp    \*0x10\(%ebx\)
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%eax,%eax,1\)
++
++Disassembly of section .text:
++
++0+1e0 <foo>:
++ +[a-f0-9]+:	53                   	push   %ebx
++ +[a-f0-9]+:	e8 18 00 00 00       	call   1fe <__x86.get_pc_thunk.bx>
++ +[a-f0-9]+:	81 c3 06 11 00 00    	add    \$0x1106,%ebx
++ +[a-f0-9]+:	83 ec 08             	sub    \$0x8,%esp
++ +[a-f0-9]+:	e8 dc ff ff ff       	call   1d0 <bar2@plt>
++ +[a-f0-9]+:	e8 c7 ff ff ff       	call   1c0 <bar1@plt>
++ +[a-f0-9]+:	83 c4 08             	add    \$0x8,%esp
++ +[a-f0-9]+:	5b                   	pop    %ebx
++ +[a-f0-9]+:	c3                   	ret    
++
++0+1fe <__x86.get_pc_thunk.bx>:
++ +[a-f0-9]+:	8b 1c 24             	mov    \(%esp\),%ebx
++ +[a-f0-9]+:	c3                   	ret    
++#pass
+diff --git a/ld/testsuite/ld-i386/ibt-plt-3b.d b/ld/testsuite/ld-i386/ibt-plt-3b.d
+new file mode 100644
+index 0000000..d9b5be2
+--- /dev/null
++++ b/ld/testsuite/ld-i386/ibt-plt-3b.d
+@@ -0,0 +1,5 @@
++#source: ibt-plt-3.s
++#as: --32
++#ld: -shared -m elf_i386 -z ibtplt
++#readelf: -n
++
+diff --git a/ld/testsuite/ld-i386/ibt-plt-3c.d b/ld/testsuite/ld-i386/ibt-plt-3c.d
+new file mode 100644
+index 0000000..c2ce3fd
+--- /dev/null
++++ b/ld/testsuite/ld-i386/ibt-plt-3c.d
+@@ -0,0 +1,52 @@
++#source: ibt-plt-3.s
++#as: --32
++#ld: -shared -m elf_i386 -z ibtplt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+190 <.plt>:
++ +[a-f0-9]+:	ff b3 04 00 00 00    	pushl  0x4\(%ebx\)
++ +[a-f0-9]+:	ff a3 08 00 00 00    	jmp    \*0x8\(%ebx\)
++ +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%eax\)
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
++ +[a-f0-9]+:	e9 e2 ff ff ff       	jmp    190 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	68 08 00 00 00       	push   \$0x8
++ +[a-f0-9]+:	e9 d2 ff ff ff       	jmp    190 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++
++Disassembly of section .plt.sec:
++
++0+1c0 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	ff a3 0c 00 00 00    	jmp    \*0xc\(%ebx\)
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%eax,%eax,1\)
++
++0+1d0 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++ +[a-f0-9]+:	ff a3 10 00 00 00    	jmp    \*0x10\(%ebx\)
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%eax,%eax,1\)
++
++Disassembly of section .text:
++
++0+1e0 <foo>:
++ +[a-f0-9]+:	53                   	push   %ebx
++ +[a-f0-9]+:	e8 18 00 00 00       	call   1fe <__x86.get_pc_thunk.bx>
++ +[a-f0-9]+:	81 c3 06 11 00 00    	add    \$0x1106,%ebx
++ +[a-f0-9]+:	83 ec 08             	sub    \$0x8,%esp
++ +[a-f0-9]+:	e8 dc ff ff ff       	call   1d0 <bar2@plt>
++ +[a-f0-9]+:	e8 c7 ff ff ff       	call   1c0 <bar1@plt>
++ +[a-f0-9]+:	83 c4 08             	add    \$0x8,%esp
++ +[a-f0-9]+:	5b                   	pop    %ebx
++ +[a-f0-9]+:	c3                   	ret    
++
++0+1fe <__x86.get_pc_thunk.bx>:
++ +[a-f0-9]+:	8b 1c 24             	mov    \(%esp\),%ebx
++ +[a-f0-9]+:	c3                   	ret    
++#pass
+diff --git a/ld/testsuite/ld-i386/ibt-plt-3d.d b/ld/testsuite/ld-i386/ibt-plt-3d.d
+new file mode 100644
+index 0000000..3cf159a
+--- /dev/null
++++ b/ld/testsuite/ld-i386/ibt-plt-3d.d
+@@ -0,0 +1,9 @@
++#source: ibt-plt-3.s
++#as: --32
++#ld: -shared -m elf_i386 -z ibt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/ld/testsuite/ld-i386/plt-main-ibt.dd b/ld/testsuite/ld-i386/plt-main-ibt.dd
+new file mode 100644
+index 0000000..18240a2
+--- /dev/null
++++ b/ld/testsuite/ld-i386/plt-main-ibt.dd
+@@ -0,0 +1,7 @@
++#...
++Disassembly of section .plt.got:
++
++[a-f0-9]+ <[_a-z]+@plt>:
++[ 	]*[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++[ 	]*[a-f0-9]+:	ff 25 .. .. .. ..    	jmp +\*0x[a-f0-9]+
++#pass
+diff --git a/ld/testsuite/ld-i386/plt-pie-ibt.dd b/ld/testsuite/ld-i386/plt-pie-ibt.dd
+new file mode 100644
+index 0000000..2dc016c
+--- /dev/null
++++ b/ld/testsuite/ld-i386/plt-pie-ibt.dd
+@@ -0,0 +1,7 @@
++#...
++Disassembly of section .plt.got:
++
++[a-f0-9]+ <[_a-z]+@plt>:
++[ 	]*[a-f0-9]+:	f3 0f 1e fb          	endbr32 
++[ 	]*[a-f0-9]+:	ff a3 .. .. .. ..    	jmp +\*\-0x[a-f0-9]+\(%ebx\)
++#pass
+diff --git a/ld/testsuite/ld-i386/property-x86-empty.s b/ld/testsuite/ld-i386/property-x86-empty.s
+new file mode 100644
+index 0000000..6a6b517
+--- /dev/null
++++ b/ld/testsuite/ld-i386/property-x86-empty.s
+@@ -0,0 +1,27 @@
++	.section ".note.gnu.property", "a"
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++	.long 1f - 0f		/* name length */
++	.long 5f - 2f		/* data length */
++	.long 5			/* note type */
++0:	.asciz "GNU"		/* vendor name */
++1:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++2:	.long 0xc0000002	/* pr_type.  */
++	.long 4f - 3f		/* pr_datasz.  */
++3:
++	.long 0x0
++4:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++5:
+diff --git a/ld/testsuite/ld-i386/property-x86-ibt.s b/ld/testsuite/ld-i386/property-x86-ibt.s
+new file mode 100644
+index 0000000..84ee964
+--- /dev/null
++++ b/ld/testsuite/ld-i386/property-x86-ibt.s
+@@ -0,0 +1,27 @@
++	.section ".note.gnu.property", "a"
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++	.long 1f - 0f		/* name length */
++	.long 5f - 2f		/* data length */
++	.long 5			/* note type */
++0:	.asciz "GNU"		/* vendor name */
++1:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++2:	.long 0xc0000002	/* pr_type.  */
++	.long 4f - 3f		/* pr_datasz.  */
++3:
++	.long 0x1
++4:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++5:
+diff --git a/ld/testsuite/ld-i386/property-x86-ibt1a.d b/ld/testsuite/ld-i386/property-x86-ibt1a.d
+new file mode 100644
+index 0000000..43b272f
+--- /dev/null
++++ b/ld/testsuite/ld-i386/property-x86-ibt1a.d
+@@ -0,0 +1,6 @@
++#source: property-x86-empty.s
++#source: property-x86-ibt.s
++#as: --32
++#ld: -r -melf_i386
++#readelf: -n
++
+diff --git a/ld/testsuite/ld-i386/property-x86-ibt1b.d b/ld/testsuite/ld-i386/property-x86-ibt1b.d
+new file mode 100644
+index 0000000..83bf411
+--- /dev/null
++++ b/ld/testsuite/ld-i386/property-x86-ibt1b.d
+@@ -0,0 +1,6 @@
++#source: property-x86-ibt.s
++#source: property-x86-empty.s
++#as: --32
++#ld: -r -melf_i386
++#readelf: -n
++
+diff --git a/ld/testsuite/ld-i386/property-x86-ibt2.d b/ld/testsuite/ld-i386/property-x86-ibt2.d
+new file mode 100644
+index 0000000..fbdf4c1
+--- /dev/null
++++ b/ld/testsuite/ld-i386/property-x86-ibt2.d
+@@ -0,0 +1,9 @@
++#source: property-x86-ibt.s
++#as: --32
++#ld: -r -melf_i386
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/ld/testsuite/ld-i386/property-x86-ibt3a.d b/ld/testsuite/ld-i386/property-x86-ibt3a.d
+new file mode 100644
+index 0000000..4bb35b0
+--- /dev/null
++++ b/ld/testsuite/ld-i386/property-x86-ibt3a.d
+@@ -0,0 +1,11 @@
++#source: property-x86-3.s
++#source: property-x86-ibt.s
++#as: --32
++#ld: -r -melf_i386
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x00000018	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 ISA used: i486, 586, SSE2, SSE3
++	x86 ISA needed: 586, SSE, SSE3, SSE4_1
+diff --git a/ld/testsuite/ld-i386/property-x86-ibt3b.d b/ld/testsuite/ld-i386/property-x86-ibt3b.d
+new file mode 100644
+index 0000000..418d58a
+--- /dev/null
++++ b/ld/testsuite/ld-i386/property-x86-ibt3b.d
+@@ -0,0 +1,11 @@
++#source: property-x86-ibt.s
++#source: property-x86-3.s
++#as: --32
++#ld: -r -melf_i386
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x00000018	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 ISA used: i486, 586, SSE2, SSE3
++	x86 ISA needed: 586, SSE, SSE3, SSE4_1
+diff --git a/ld/testsuite/ld-i386/property-x86-ibt4.d b/ld/testsuite/ld-i386/property-x86-ibt4.d
+new file mode 100644
+index 0000000..db14fb9
+--- /dev/null
++++ b/ld/testsuite/ld-i386/property-x86-ibt4.d
+@@ -0,0 +1,9 @@
++#source: property-x86-empty.s
++#as: --32
++#ld: -r -melf_i386 -z ibt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/ld/testsuite/ld-i386/property-x86-ibt5.d b/ld/testsuite/ld-i386/property-x86-ibt5.d
+new file mode 100644
+index 0000000..652f660
+--- /dev/null
++++ b/ld/testsuite/ld-i386/property-x86-ibt5.d
+@@ -0,0 +1,9 @@
++#source: start.s
++#as: --32
++#ld: -r -melf_i386 -z ibt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-1-x32.d b/ld/testsuite/ld-x86-64/ibt-plt-1-x32.d
+new file mode 100644
+index 0000000..6147ab4
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-1-x32.d
+@@ -0,0 +1,43 @@
++#source: ibt-plt-1.s
++#as: --x32
++#ld: -shared -m elf32_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+1c0 <.plt>:
++ +[a-f0-9]+:	ff 35 6a 01 20 00    	pushq  0x20016a\(%rip\)        # 200330 <_GLOBAL_OFFSET_TABLE_\+0x8>
++ +[a-f0-9]+:	ff 25 6c 01 20 00    	jmpq   \*0x20016c\(%rip\)        # 200338 <_GLOBAL_OFFSET_TABLE_\+0x10>
++ +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%rax\)
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++ +[a-f0-9]+:	e9 e2 ff ff ff       	jmpq   1c0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	e9 d2 ff ff ff       	jmpq   1c0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++
++Disassembly of section .plt.sec:
++
++0+1f0 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	ff 25 46 01 20 00    	jmpq   \*0x200146\(%rip\)        # 200340 <bar1>
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%rax,%rax,1\)
++
++0+200 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	ff 25 3e 01 20 00    	jmpq   \*0x20013e\(%rip\)        # 200348 <bar2>
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%rax,%rax,1\)
++
++Disassembly of section .text:
++
++0+210 <foo>:
++ +[a-f0-9]+:	48 83 ec 08          	sub    \$0x8,%rsp
++ +[a-f0-9]+:	e8 e7 ff ff ff       	callq  200 <bar2@plt>
++ +[a-f0-9]+:	48 83 c4 08          	add    \$0x8,%rsp
++ +[a-f0-9]+:	e9 ce ff ff ff       	jmpq   1f0 <bar1@plt>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-1.d b/ld/testsuite/ld-x86-64/ibt-plt-1.d
+new file mode 100644
+index 0000000..dbec3ed
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-1.d
+@@ -0,0 +1,43 @@
++#source: ibt-plt-1.s
++#as: --64 -defsym __64_bit__=1
++#ld: -shared -m elf_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+290 <.plt>:
++ +[a-f0-9]+:	ff 35 ea 01 20 00    	pushq  0x2001ea\(%rip\)        # 200480 <_GLOBAL_OFFSET_TABLE_\+0x8>
++ +[a-f0-9]+:	f2 ff 25 eb 01 20 00 	bnd jmpq \*0x2001eb\(%rip\)        # 200488 <_GLOBAL_OFFSET_TABLE_\+0x10>
++ +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++ +[a-f0-9]+:	f2 e9 e1 ff ff ff    	bnd jmpq 290 <.plt>
++ +[a-f0-9]+:	90                   	nop
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	f2 e9 d1 ff ff ff    	bnd jmpq 290 <.plt>
++ +[a-f0-9]+:	90                   	nop
++
++Disassembly of section .plt.sec:
++
++0+2c0 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	f2 ff 25 c5 01 20 00 	bnd jmpq \*0x2001c5\(%rip\)        # 200490 <bar1>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++
++0+2d0 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	f2 ff 25 bd 01 20 00 	bnd jmpq \*0x2001bd\(%rip\)        # 200498 <bar2>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++
++Disassembly of section .text:
++
++0+2e0 <foo>:
++ +[a-f0-9]+:	48 83 ec 08          	sub    \$0x8,%rsp
++ +[a-f0-9]+:	e8 e7 ff ff ff       	callq  2d0 <bar2@plt>
++ +[a-f0-9]+:	48 83 c4 08          	add    \$0x8,%rsp
++ +[a-f0-9]+:	e9 ce ff ff ff       	jmpq   2c0 <bar1@plt>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-1.s b/ld/testsuite/ld-x86-64/ibt-plt-1.s
+new file mode 100644
+index 0000000..2ddf3bb
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-1.s
+@@ -0,0 +1,45 @@
++	.text
++	.p2align 4,,15
++	.globl	foo
++	.type	foo, @function
++foo:
++.LFB0:
++	.cfi_startproc
++	subq	$8, %rsp
++	.cfi_def_cfa_offset 16
++	call	bar2@PLT
++	addq	$8, %rsp
++	.cfi_def_cfa_offset 8
++	jmp	bar1@PLT
++	.cfi_endproc
++.LFE0:
++	.size	foo, .-foo
++	.section	.note.GNU-stack,"",@progbits
++
++	.section ".note.gnu.property", "a"
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++	.long 1f - 0f		/* name length */
++	.long 5f - 2f		/* data length */
++	.long 5			/* note type */
++0:	.asciz "GNU"		/* vendor name */
++1:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++2:	.long 0xc0000002	/* pr_type.  */
++	.long 4f - 3f		/* pr_datasz.  */
++3:
++	.long 0x1
++4:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++5:
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-2.s b/ld/testsuite/ld-x86-64/ibt-plt-2.s
+new file mode 100644
+index 0000000..e1ea540
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-2.s
+@@ -0,0 +1,45 @@
++	.text
++	.p2align 4,,15
++	.globl	foo
++	.type	foo, @function
++foo:
++.LFB0:
++	.cfi_startproc
++	subq	$8, %rsp
++	.cfi_def_cfa_offset 16
++	call	bar2@PLT
++	addq	$8, %rsp
++	.cfi_def_cfa_offset 8
++	jmp	bar1@PLT
++	.cfi_endproc
++.LFE0:
++	.size	foo, .-foo
++	.section	.note.GNU-stack,"",@progbits
++
++	.section ".note.gnu.property", "a"
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++	.long 1f - 0f		/* name length */
++	.long 5f - 2f		/* data length */
++	.long 5			/* note type */
++0:	.asciz "GNU"		/* vendor name */
++1:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++2:	.long 0xc0000002	/* pr_type.  */
++	.long 4f - 3f		/* pr_datasz.  */
++3:
++	.long 0x0
++4:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++5:
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-2a-x32.d b/ld/testsuite/ld-x86-64/ibt-plt-2a-x32.d
+new file mode 100644
+index 0000000..df9dc8e
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-2a-x32.d
+@@ -0,0 +1,43 @@
++#source: ibt-plt-2.s
++#as: --x32
++#ld: -shared -m elf32_x86_64 -z ibtplt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+1c0 <.plt>:
++ +[a-f0-9]+:	ff 35 6a 01 20 00    	pushq  0x20016a\(%rip\)        # 200330 <_GLOBAL_OFFSET_TABLE_\+0x8>
++ +[a-f0-9]+:	ff 25 6c 01 20 00    	jmpq   \*0x20016c\(%rip\)        # 200338 <_GLOBAL_OFFSET_TABLE_\+0x10>
++ +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%rax\)
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++ +[a-f0-9]+:	e9 e2 ff ff ff       	jmpq   1c0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	e9 d2 ff ff ff       	jmpq   1c0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++
++Disassembly of section .plt.sec:
++
++0+1f0 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	ff 25 46 01 20 00    	jmpq   \*0x200146\(%rip\)        # 200340 <bar1>
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%rax,%rax,1\)
++
++0+200 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	ff 25 3e 01 20 00    	jmpq   \*0x20013e\(%rip\)        # 200348 <bar2>
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%rax,%rax,1\)
++
++Disassembly of section .text:
++
++0+210 <foo>:
++ +[a-f0-9]+:	48 83 ec 08          	sub    \$0x8,%rsp
++ +[a-f0-9]+:	e8 e7 ff ff ff       	callq  200 <bar2@plt>
++ +[a-f0-9]+:	48 83 c4 08          	add    \$0x8,%rsp
++ +[a-f0-9]+:	e9 ce ff ff ff       	jmpq   1f0 <bar1@plt>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-2a.d b/ld/testsuite/ld-x86-64/ibt-plt-2a.d
+new file mode 100644
+index 0000000..0e4f424
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-2a.d
+@@ -0,0 +1,43 @@
++#source: ibt-plt-2.s
++#as: --64 -defsym __64_bit__=1
++#ld: -shared -m elf_x86_64 -z ibtplt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+290 <.plt>:
++ +[a-f0-9]+:	ff 35 ea 01 20 00    	pushq  0x2001ea\(%rip\)        # 200480 <_GLOBAL_OFFSET_TABLE_\+0x8>
++ +[a-f0-9]+:	f2 ff 25 eb 01 20 00 	bnd jmpq \*0x2001eb\(%rip\)        # 200488 <_GLOBAL_OFFSET_TABLE_\+0x10>
++ +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++ +[a-f0-9]+:	f2 e9 e1 ff ff ff    	bnd jmpq 290 <.plt>
++ +[a-f0-9]+:	90                   	nop
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	f2 e9 d1 ff ff ff    	bnd jmpq 290 <.plt>
++ +[a-f0-9]+:	90                   	nop
++
++Disassembly of section .plt.sec:
++
++0+2c0 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	f2 ff 25 c5 01 20 00 	bnd jmpq \*0x2001c5\(%rip\)        # 200490 <bar1>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++
++0+2d0 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	f2 ff 25 bd 01 20 00 	bnd jmpq \*0x2001bd\(%rip\)        # 200498 <bar2>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++
++Disassembly of section .text:
++
++0+2e0 <foo>:
++ +[a-f0-9]+:	48 83 ec 08          	sub    \$0x8,%rsp
++ +[a-f0-9]+:	e8 e7 ff ff ff       	callq  2d0 <bar2@plt>
++ +[a-f0-9]+:	48 83 c4 08          	add    \$0x8,%rsp
++ +[a-f0-9]+:	e9 ce ff ff ff       	jmpq   2c0 <bar1@plt>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-2b-x32.d b/ld/testsuite/ld-x86-64/ibt-plt-2b-x32.d
+new file mode 100644
+index 0000000..e9e5638
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-2b-x32.d
+@@ -0,0 +1,9 @@
++#source: ibt-plt-2.s
++#as: --x32
++#ld: -shared -m elf32_x86_64 -z ibtplt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: 
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-2b.d b/ld/testsuite/ld-x86-64/ibt-plt-2b.d
+new file mode 100644
+index 0000000..604db82
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-2b.d
+@@ -0,0 +1,9 @@
++#source: ibt-plt-2.s
++#as: --64 -defsym __64_bit__=1
++#ld: -shared -m elf_x86_64 -z ibtplt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x00000010	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: 
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-2c-x32.d b/ld/testsuite/ld-x86-64/ibt-plt-2c-x32.d
+new file mode 100644
+index 0000000..e908804
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-2c-x32.d
+@@ -0,0 +1,43 @@
++#source: ibt-plt-2.s
++#as: --x32
++#ld: -shared -m elf32_x86_64 -z ibt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+1c0 <.plt>:
++ +[a-f0-9]+:	ff 35 6a 01 20 00    	pushq  0x20016a\(%rip\)        # 200330 <_GLOBAL_OFFSET_TABLE_\+0x8>
++ +[a-f0-9]+:	ff 25 6c 01 20 00    	jmpq   \*0x20016c\(%rip\)        # 200338 <_GLOBAL_OFFSET_TABLE_\+0x10>
++ +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%rax\)
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++ +[a-f0-9]+:	e9 e2 ff ff ff       	jmpq   1c0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	e9 d2 ff ff ff       	jmpq   1c0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++
++Disassembly of section .plt.sec:
++
++0+1f0 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	ff 25 46 01 20 00    	jmpq   \*0x200146\(%rip\)        # 200340 <bar1>
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%rax,%rax,1\)
++
++0+200 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	ff 25 3e 01 20 00    	jmpq   \*0x20013e\(%rip\)        # 200348 <bar2>
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%rax,%rax,1\)
++
++Disassembly of section .text:
++
++0+210 <foo>:
++ +[a-f0-9]+:	48 83 ec 08          	sub    \$0x8,%rsp
++ +[a-f0-9]+:	e8 e7 ff ff ff       	callq  200 <bar2@plt>
++ +[a-f0-9]+:	48 83 c4 08          	add    \$0x8,%rsp
++ +[a-f0-9]+:	e9 ce ff ff ff       	jmpq   1f0 <bar1@plt>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-2c.d b/ld/testsuite/ld-x86-64/ibt-plt-2c.d
+new file mode 100644
+index 0000000..0ef1131
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-2c.d
+@@ -0,0 +1,43 @@
++#source: ibt-plt-2.s
++#as: --64 -defsym __64_bit__=1
++#ld: -shared -m elf_x86_64 -z ibt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+290 <.plt>:
++ +[a-f0-9]+:	ff 35 ea 01 20 00    	pushq  0x2001ea\(%rip\)        # 200480 <_GLOBAL_OFFSET_TABLE_\+0x8>
++ +[a-f0-9]+:	f2 ff 25 eb 01 20 00 	bnd jmpq \*0x2001eb\(%rip\)        # 200488 <_GLOBAL_OFFSET_TABLE_\+0x10>
++ +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++ +[a-f0-9]+:	f2 e9 e1 ff ff ff    	bnd jmpq 290 <.plt>
++ +[a-f0-9]+:	90                   	nop
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	f2 e9 d1 ff ff ff    	bnd jmpq 290 <.plt>
++ +[a-f0-9]+:	90                   	nop
++
++Disassembly of section .plt.sec:
++
++0+2c0 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	f2 ff 25 c5 01 20 00 	bnd jmpq \*0x2001c5\(%rip\)        # 200490 <bar1>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++
++0+2d0 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	f2 ff 25 bd 01 20 00 	bnd jmpq \*0x2001bd\(%rip\)        # 200498 <bar2>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++
++Disassembly of section .text:
++
++0+2e0 <foo>:
++ +[a-f0-9]+:	48 83 ec 08          	sub    \$0x8,%rsp
++ +[a-f0-9]+:	e8 e7 ff ff ff       	callq  2d0 <bar2@plt>
++ +[a-f0-9]+:	48 83 c4 08          	add    \$0x8,%rsp
++ +[a-f0-9]+:	e9 ce ff ff ff       	jmpq   2c0 <bar1@plt>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-2d-x32.d b/ld/testsuite/ld-x86-64/ibt-plt-2d-x32.d
+new file mode 100644
+index 0000000..b3be904
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-2d-x32.d
+@@ -0,0 +1,9 @@
++#source: ibt-plt-2.s
++#as: --x32
++#ld: -shared -m elf32_x86_64 -z ibt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-2d.d b/ld/testsuite/ld-x86-64/ibt-plt-2d.d
+new file mode 100644
+index 0000000..7226b69
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-2d.d
+@@ -0,0 +1,9 @@
++#source: ibt-plt-2.s
++#as: --64 -defsym __64_bit__=1
++#ld: -shared -m elf_x86_64 -z ibt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x00000010	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-3.s b/ld/testsuite/ld-x86-64/ibt-plt-3.s
+new file mode 100644
+index 0000000..299b023
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-3.s
+@@ -0,0 +1,17 @@
++	.text
++	.p2align 4,,15
++	.globl	foo
++	.type	foo, @function
++foo:
++.LFB0:
++	.cfi_startproc
++	subq	$8, %rsp
++	.cfi_def_cfa_offset 16
++	call	bar2@PLT
++	addq	$8, %rsp
++	.cfi_def_cfa_offset 8
++	jmp	bar1@PLT
++	.cfi_endproc
++.LFE0:
++	.size	foo, .-foo
++	.section	.note.GNU-stack,"",@progbits
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-3a-x32.d b/ld/testsuite/ld-x86-64/ibt-plt-3a-x32.d
+new file mode 100644
+index 0000000..0f7835d
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-3a-x32.d
+@@ -0,0 +1,43 @@
++#source: ibt-plt-3.s
++#as: --x32
++#ld: -shared -m elf32_x86_64 -z ibtplt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+1a0 <.plt>:
++ +[a-f0-9]+:	ff 35 52 01 20 00    	pushq  0x200152\(%rip\)        # 2002f8 <_GLOBAL_OFFSET_TABLE_\+0x8>
++ +[a-f0-9]+:	ff 25 54 01 20 00    	jmpq   \*0x200154\(%rip\)        # 200300 <_GLOBAL_OFFSET_TABLE_\+0x10>
++ +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%rax\)
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++ +[a-f0-9]+:	e9 e2 ff ff ff       	jmpq   1a0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	e9 d2 ff ff ff       	jmpq   1a0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++
++Disassembly of section .plt.sec:
++
++0+1d0 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	ff 25 2e 01 20 00    	jmpq   \*0x20012e\(%rip\)        # 200308 <bar1>
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%rax,%rax,1\)
++
++0+1e0 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	ff 25 26 01 20 00    	jmpq   \*0x200126\(%rip\)        # 200310 <bar2>
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%rax,%rax,1\)
++
++Disassembly of section .text:
++
++0+1f0 <foo>:
++ +[a-f0-9]+:	48 83 ec 08          	sub    \$0x8,%rsp
++ +[a-f0-9]+:	e8 e7 ff ff ff       	callq  1e0 <bar2@plt>
++ +[a-f0-9]+:	48 83 c4 08          	add    \$0x8,%rsp
++ +[a-f0-9]+:	e9 ce ff ff ff       	jmpq   1d0 <bar1@plt>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-3a.d b/ld/testsuite/ld-x86-64/ibt-plt-3a.d
+new file mode 100644
+index 0000000..b8f2ebc
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-3a.d
+@@ -0,0 +1,43 @@
++#source: ibt-plt-3.s
++#as: --64 -defsym __64_bit__=1
++#ld: -shared -m elf_x86_64 -z ibtplt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+250 <.plt>:
++ +[a-f0-9]+:	ff 35 ca 01 20 00    	pushq  0x2001ca\(%rip\)        # 200420 <_GLOBAL_OFFSET_TABLE_\+0x8>
++ +[a-f0-9]+:	f2 ff 25 cb 01 20 00 	bnd jmpq \*0x2001cb\(%rip\)        # 200428 <_GLOBAL_OFFSET_TABLE_\+0x10>
++ +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++ +[a-f0-9]+:	f2 e9 e1 ff ff ff    	bnd jmpq 250 <.plt>
++ +[a-f0-9]+:	90                   	nop
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	f2 e9 d1 ff ff ff    	bnd jmpq 250 <.plt>
++ +[a-f0-9]+:	90                   	nop
++
++Disassembly of section .plt.sec:
++
++0+280 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	f2 ff 25 a5 01 20 00 	bnd jmpq \*0x2001a5\(%rip\)        # 200430 <bar1>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++
++0+290 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	f2 ff 25 9d 01 20 00 	bnd jmpq \*0x20019d\(%rip\)        # 200438 <bar2>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++
++Disassembly of section .text:
++
++0+2a0 <foo>:
++ +[a-f0-9]+:	48 83 ec 08          	sub    \$0x8,%rsp
++ +[a-f0-9]+:	e8 e7 ff ff ff       	callq  290 <bar2@plt>
++ +[a-f0-9]+:	48 83 c4 08          	add    \$0x8,%rsp
++ +[a-f0-9]+:	e9 ce ff ff ff       	jmpq   280 <bar1@plt>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-3b-x32.d b/ld/testsuite/ld-x86-64/ibt-plt-3b-x32.d
+new file mode 100644
+index 0000000..fb0a834
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-3b-x32.d
+@@ -0,0 +1,5 @@
++#source: ibt-plt-3.s
++#as: --x32
++#ld: -shared -m elf32_x86_64 -z ibtplt
++#readelf: -n
++
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-3b.d b/ld/testsuite/ld-x86-64/ibt-plt-3b.d
+new file mode 100644
+index 0000000..5a3843b
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-3b.d
+@@ -0,0 +1,5 @@
++#source: ibt-plt-3.s
++#as: --64 -defsym __64_bit__=1
++#ld: -shared -m elf_x86_64 -z ibtplt
++#readelf: -n
++
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-3c-x32.d b/ld/testsuite/ld-x86-64/ibt-plt-3c-x32.d
+new file mode 100644
+index 0000000..234944d
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-3c-x32.d
+@@ -0,0 +1,43 @@
++#source: ibt-plt-3.s
++#as: --x32
++#ld: -shared -m elf32_x86_64 -z ibt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+1c0 <.plt>:
++ +[a-f0-9]+:	ff 35 6a 01 20 00    	pushq  0x20016a\(%rip\)        # 200330 <_GLOBAL_OFFSET_TABLE_\+0x8>
++ +[a-f0-9]+:	ff 25 6c 01 20 00    	jmpq   \*0x20016c\(%rip\)        # 200338 <_GLOBAL_OFFSET_TABLE_\+0x10>
++ +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%rax\)
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++ +[a-f0-9]+:	e9 e2 ff ff ff       	jmpq   1c0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	e9 d2 ff ff ff       	jmpq   1c0 <.plt>
++ +[a-f0-9]+:	66 90                	xchg   %ax,%ax
++
++Disassembly of section .plt.sec:
++
++0+1f0 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	ff 25 46 01 20 00    	jmpq   \*0x200146\(%rip\)        # 200340 <bar1>
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%rax,%rax,1\)
++
++0+200 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	ff 25 3e 01 20 00    	jmpq   \*0x20013e\(%rip\)        # 200348 <bar2>
++ +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%rax,%rax,1\)
++
++Disassembly of section .text:
++
++0+210 <foo>:
++ +[a-f0-9]+:	48 83 ec 08          	sub    \$0x8,%rsp
++ +[a-f0-9]+:	e8 e7 ff ff ff       	callq  200 <bar2@plt>
++ +[a-f0-9]+:	48 83 c4 08          	add    \$0x8,%rsp
++ +[a-f0-9]+:	e9 ce ff ff ff       	jmpq   1f0 <bar1@plt>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-3c.d b/ld/testsuite/ld-x86-64/ibt-plt-3c.d
+new file mode 100644
+index 0000000..b299f22
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-3c.d
+@@ -0,0 +1,43 @@
++#source: ibt-plt-3.s
++#as: --64 -defsym __64_bit__=1
++#ld: -shared -m elf_x86_64 -z ibt
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+290 <.plt>:
++ +[a-f0-9]+:	ff 35 ea 01 20 00    	pushq  0x2001ea\(%rip\)        # 200480 <_GLOBAL_OFFSET_TABLE_\+0x8>
++ +[a-f0-9]+:	f2 ff 25 eb 01 20 00 	bnd jmpq \*0x2001eb\(%rip\)        # 200488 <_GLOBAL_OFFSET_TABLE_\+0x10>
++ +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++ +[a-f0-9]+:	f2 e9 e1 ff ff ff    	bnd jmpq 290 <.plt>
++ +[a-f0-9]+:	90                   	nop
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	68 01 00 00 00       	pushq  \$0x1
++ +[a-f0-9]+:	f2 e9 d1 ff ff ff    	bnd jmpq 290 <.plt>
++ +[a-f0-9]+:	90                   	nop
++
++Disassembly of section .plt.sec:
++
++0+2c0 <bar1@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	f2 ff 25 c5 01 20 00 	bnd jmpq \*0x2001c5\(%rip\)        # 200490 <bar1>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++
++0+2d0 <bar2@plt>:
++ +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++ +[a-f0-9]+:	f2 ff 25 bd 01 20 00 	bnd jmpq \*0x2001bd\(%rip\)        # 200498 <bar2>
++ +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
++
++Disassembly of section .text:
++
++0+2e0 <foo>:
++ +[a-f0-9]+:	48 83 ec 08          	sub    \$0x8,%rsp
++ +[a-f0-9]+:	e8 e7 ff ff ff       	callq  2d0 <bar2@plt>
++ +[a-f0-9]+:	48 83 c4 08          	add    \$0x8,%rsp
++ +[a-f0-9]+:	e9 ce ff ff ff       	jmpq   2c0 <bar1@plt>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-3d-x32.d b/ld/testsuite/ld-x86-64/ibt-plt-3d-x32.d
+new file mode 100644
+index 0000000..447e811
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-3d-x32.d
+@@ -0,0 +1,10 @@
++#source: ibt-plt-3.s
++#as: --x32
++#ld: -shared -m elf32_x86_64 -z ibt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
++
+diff --git a/ld/testsuite/ld-x86-64/ibt-plt-3d.d b/ld/testsuite/ld-x86-64/ibt-plt-3d.d
+new file mode 100644
+index 0000000..342626a
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/ibt-plt-3d.d
+@@ -0,0 +1,10 @@
++#source: ibt-plt-3.s
++#as: --64 -defsym __64_bit__=1
++#ld: -shared -m elf_x86_64 -z ibt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x00000010	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
++
+diff --git a/ld/testsuite/ld-x86-64/plt-main-ibt-now.rd b/ld/testsuite/ld-x86-64/plt-main-ibt-now.rd
+new file mode 100644
+index 0000000..2478c1f
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/plt-main-ibt-now.rd
+@@ -0,0 +1,3 @@
++#...
++ +\[[ 0-9]+\] \.plt\.sec +.*
++#pass
+diff --git a/ld/testsuite/ld-x86-64/plt-main-ibt-x32.dd b/ld/testsuite/ld-x86-64/plt-main-ibt-x32.dd
+new file mode 100644
+index 0000000..7b5e174
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/plt-main-ibt-x32.dd
+@@ -0,0 +1,7 @@
++#...
++Disassembly of section .plt.got:
++
++[a-f0-9]+ <[_a-z]+@plt>:
++[ 	]*[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++[ 	]*[a-f0-9]+:	ff 25 .. .. 20 00    	jmpq +\*0x20....\(%rip\)        # ...... <[_a-z]+>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/plt-main-ibt.dd b/ld/testsuite/ld-x86-64/plt-main-ibt.dd
+new file mode 100644
+index 0000000..725f427
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/plt-main-ibt.dd
+@@ -0,0 +1,7 @@
++#...
++Disassembly of section .plt.got:
++
++[a-f0-9]+ <[_a-z]+@plt>:
++[ 	]*[a-f0-9]+:	f3 0f 1e fa          	endbr64 
++[ 	]*[a-f0-9]+:	f2 ff 25 .. .. 20 00 	bnd jmpq \*0x20....\(%rip\)        # ...... <[_a-z]+>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/pr21481b.S b/ld/testsuite/ld-x86-64/pr21481b.S
+index 744d86a..583ec77 100644
+--- a/ld/testsuite/ld-x86-64/pr21481b.S
++++ b/ld/testsuite/ld-x86-64/pr21481b.S
+@@ -10,7 +10,11 @@ check:
+ 	cmpl	$func1, %eax
+ 	jne	.L3
+ 	movq	func1_p@GOTPCREL(%rip), %rdx
++#ifdef __LP64__
+ 	cmpq	%rax, (%rdx)
++#else
++	cmpl	%eax, (%rdx)
++#endif
+ 	jne	.L3
+ 	call	*func1@GOTPCREL(%rip)
+ 	cmpl	$1, %eax
+diff --git a/ld/testsuite/ld-x86-64/property-x86-empty.s b/ld/testsuite/ld-x86-64/property-x86-empty.s
+new file mode 100644
+index 0000000..6a6b517
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-empty.s
+@@ -0,0 +1,27 @@
++	.section ".note.gnu.property", "a"
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++	.long 1f - 0f		/* name length */
++	.long 5f - 2f		/* data length */
++	.long 5			/* note type */
++0:	.asciz "GNU"		/* vendor name */
++1:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++2:	.long 0xc0000002	/* pr_type.  */
++	.long 4f - 3f		/* pr_datasz.  */
++3:
++	.long 0x0
++4:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++5:
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt.s b/ld/testsuite/ld-x86-64/property-x86-ibt.s
+new file mode 100644
+index 0000000..84ee964
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt.s
+@@ -0,0 +1,27 @@
++	.section ".note.gnu.property", "a"
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++	.long 1f - 0f		/* name length */
++	.long 5f - 2f		/* data length */
++	.long 5			/* note type */
++0:	.asciz "GNU"		/* vendor name */
++1:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++2:	.long 0xc0000002	/* pr_type.  */
++	.long 4f - 3f		/* pr_datasz.  */
++3:
++	.long 0x1
++4:
++.ifdef __64_bit__
++	.p2align 3
++.else
++	.p2align 2
++.endif
++5:
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt1a-x32.d b/ld/testsuite/ld-x86-64/property-x86-ibt1a-x32.d
+new file mode 100644
+index 0000000..b215d79d
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt1a-x32.d
+@@ -0,0 +1,6 @@
++#source: property-x86-empty.s
++#source: property-x86-ibt.s
++#as: --x32
++#ld: -r -m elf32_x86_64
++#readelf: -n
++
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt1a.d b/ld/testsuite/ld-x86-64/property-x86-ibt1a.d
+new file mode 100644
+index 0000000..50f220c
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt1a.d
+@@ -0,0 +1,6 @@
++#source: property-x86-empty.s
++#source: property-x86-ibt.s
++#as: --64 -defsym __64_bit__=1
++#ld: -r -melf_x86_64
++#readelf: -n
++
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt1b-x32.d b/ld/testsuite/ld-x86-64/property-x86-ibt1b-x32.d
+new file mode 100644
+index 0000000..7361cea
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt1b-x32.d
+@@ -0,0 +1,6 @@
++#source: property-x86-ibt.s
++#source: property-x86-empty.s
++#as: --x32
++#ld: -r -m elf32_x86_64
++#readelf: -n
++
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt1b.d b/ld/testsuite/ld-x86-64/property-x86-ibt1b.d
+new file mode 100644
+index 0000000..7f47db7
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt1b.d
+@@ -0,0 +1,6 @@
++#source: property-x86-ibt.s
++#source: property-x86-empty.s
++#as: --64 -defsym __64_bit__=1
++#ld: -r -melf_x86_64
++#readelf: -n
++
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt2-x32.d b/ld/testsuite/ld-x86-64/property-x86-ibt2-x32.d
+new file mode 100644
+index 0000000..a0fb614
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt2-x32.d
+@@ -0,0 +1,9 @@
++#source: property-x86-ibt.s
++#as: --x32
++#ld: -r -m elf32_x86_64
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt2.d b/ld/testsuite/ld-x86-64/property-x86-ibt2.d
+new file mode 100644
+index 0000000..be3df9c
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt2.d
+@@ -0,0 +1,9 @@
++#source: property-x86-ibt.s
++#as: --64 -defsym __64_bit__=1
++#ld: -r -melf_x86_64
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x00000010	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt3a-x32.d b/ld/testsuite/ld-x86-64/property-x86-ibt3a-x32.d
+new file mode 100644
+index 0000000..011426f
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt3a-x32.d
+@@ -0,0 +1,11 @@
++#source: property-x86-3.s
++#source: property-x86-ibt.s
++#as: --x32
++#ld: -r -m elf32_x86_64
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x00000018	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 ISA used: 586, SSE, SSE3, SSE4_1
++	x86 ISA needed: i486, 586, SSE2, SSE3
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt3a.d b/ld/testsuite/ld-x86-64/property-x86-ibt3a.d
+new file mode 100644
+index 0000000..1b4229a
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt3a.d
+@@ -0,0 +1,11 @@
++#source: property-x86-3.s
++#source: property-x86-ibt.s
++#as: --64 -defsym __64_bit__=1
++#ld: -r -melf_x86_64
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x00000020	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 ISA used: 586, SSE, SSE3, SSE4_1
++	x86 ISA needed: i486, 586, SSE2, SSE3
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt3b-x32.d b/ld/testsuite/ld-x86-64/property-x86-ibt3b-x32.d
+new file mode 100644
+index 0000000..290ed6a
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt3b-x32.d
+@@ -0,0 +1,11 @@
++#source: property-x86-ibt.s
++#source: property-x86-3.s
++#as: --x32
++#ld: -r -m elf32_x86_64
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x00000018	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 ISA used: 586, SSE, SSE3, SSE4_1
++	x86 ISA needed: i486, 586, SSE2, SSE3
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt3b.d b/ld/testsuite/ld-x86-64/property-x86-ibt3b.d
+new file mode 100644
+index 0000000..1142e03
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt3b.d
+@@ -0,0 +1,11 @@
++#source: property-x86-ibt.s
++#source: property-x86-3.s
++#as: --64 -defsym __64_bit__=1
++#ld: -r -melf_x86_64
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x00000020	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 ISA used: 586, SSE, SSE3, SSE4_1
++	x86 ISA needed: i486, 586, SSE2, SSE3
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt4-x32.d b/ld/testsuite/ld-x86-64/property-x86-ibt4-x32.d
+new file mode 100644
+index 0000000..b96abbc
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt4-x32.d
+@@ -0,0 +1,9 @@
++#source: property-x86-empty.s
++#as: --x32
++#ld: -r -m elf32_x86_64 -z ibt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt4.d b/ld/testsuite/ld-x86-64/property-x86-ibt4.d
+new file mode 100644
+index 0000000..3f61a76
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt4.d
+@@ -0,0 +1,9 @@
++#source: property-x86-empty.s
++#as: --64 -defsym __64_bit__=1
++#ld: -r -melf_x86_64 -z ibt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x00000010	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt5-x32.d b/ld/testsuite/ld-x86-64/property-x86-ibt5-x32.d
+new file mode 100644
+index 0000000..5245d0b
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt5-x32.d
+@@ -0,0 +1,9 @@
++#source: start.s
++#as: --x32
++#ld: -r -m elf32_x86_64 -z ibt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x0000000c	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/ld/testsuite/ld-x86-64/property-x86-ibt5.d b/ld/testsuite/ld-x86-64/property-x86-ibt5.d
+new file mode 100644
+index 0000000..ab74033
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/property-x86-ibt5.d
+@@ -0,0 +1,9 @@
++#source: start.s
++#as: --64 -defsym __64_bit__=1
++#ld: -r -melf_x86_64 -z ibt
++#readelf: -n
++
++Displaying notes found in: .note.gnu.property
++  Owner                 Data size	Description
++  GNU                  0x00000010	NT_GNU_PROPERTY_TYPE_0
++      Properties: x86 feature: IBT
+diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
+index 48d8ad2..a7b8367 100644
+--- a/ld/testsuite/ld-x86-64/x86-64.exp
++++ b/ld/testsuite/ld-x86-64/x86-64.exp
+@@ -335,6 +335,20 @@ run_dump_test "property-x86-4b"
+ run_dump_test "property-x86-3-x32"
+ run_dump_test "property-x86-4a-x32"
+ run_dump_test "property-x86-4b-x32"
++run_dump_test "property-x86-ibt1a"
++run_dump_test "property-x86-ibt1b"
++run_dump_test "property-x86-ibt1a-x32"
++run_dump_test "property-x86-ibt1b-x32"
++run_dump_test "property-x86-ibt2"
++run_dump_test "property-x86-ibt2-x32"
++run_dump_test "property-x86-ibt3a"
++run_dump_test "property-x86-ibt3b"
++run_dump_test "property-x86-ibt3a-x32"
++run_dump_test "property-x86-ibt3b-x32"
++run_dump_test "property-x86-ibt4"
++run_dump_test "property-x86-ibt4-x32"
++run_dump_test "property-x86-ibt5"
++run_dump_test "property-x86-ibt5-x32"
+ 
+ if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
+     return
+@@ -1347,6 +1361,156 @@ if { [isnative] && [which $CC] != 0 } {
+ 	}
+     }
+ 
++    if { [istarget "x86_64-*-linux*"] } {
++	if { [istarget "x86_64-*-linux*-gnux32"] } {
++	    set pltdump {{objdump {-drw} plt-main-ibt-x32.dd}}
++	    set pltsecdump {{readelf {-SW} plt-main-ibt-now.rd} {objdump {-drw} plt-main-ibt-x32.dd}}
++	} else {
++	    set pltdump {{objdump {-drw} plt-main-ibt.dd}}
++	    set pltsecdump {{readelf {-SW} plt-main-ibt-now.rd} {objdump {-drw} plt-main-ibt.dd}}
++	}
++	run_cc_link_tests [list \
++	    [list \
++		"Build plt-main with -z ibtplt" \
++		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
++		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt" \
++		"" \
++		{ plt-main5.c } \
++		$pltdump \
++		"plt-main-ibt" \
++	    ] \
++	    [list \
++		"Build plt-main with PIE and -z ibtplt" \
++		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
++		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt -pie" \
++		"-fPIC" \
++		{ plt-main5.c } \
++		$pltdump \
++		"plt-main-pie-ibt" \
++	    ] \
++	    [list \
++		"Build plt-main with -z ibtplt -z now" \
++		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
++		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt -z now" \
++		"" \
++		{ plt-main5.c } \
++		$pltsecdump \
++		"plt-main-ibt-now" \
++	    ] \
++	    [list \
++		"Build plt-main with PIE and -z ibtplt -z now" \
++		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
++		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt -z now -pie" \
++		"-fPIC" \
++		{ plt-main5.c } \
++		$pltsecdump \
++		"plt-main-pie-ibt-now" \
++	    ] \
++	    [list \
++		"Build libibtplt-lib.so with -z ibtplt" \
++		"-shared -z ibtplt" \
++		"-fPIC" \
++		{ plt-main1.c plt-main2.c plt-main3.c plt-main4.c} \
++		$pltdump \
++		"libibtplt-lib.so" \
++	    ] \
++	    [list \
++		"Build libibtplt--now-lib.so with -z ibtplt -z now" \
++		"-shared -z ibtplt -z now" \
++		"-fPIC" \
++		{ plt-main1.c plt-main2.c plt-main3.c plt-main4.c} \
++		$pltdump \
++		"libibtplt-now-lib.so" \
++	    ] \
++	]
++
++	run_ld_link_exec_tests [list \
++	    [list \
++		"Run plt-main with -z ibtplt" \
++		"-Wl,--no-as-needed,-z,ibtplt tmpdir/plt-main1.o \
++		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
++		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
++		"" \
++		{ plt-main5.c } \
++		"plt-main-ibt" \
++		"plt-main.out" \
++	    ] \
++	    [list \
++		"Run plt-main with PIE and -z ibtplt" \
++		"-Wl,--no-as-needed,-z,ibtplt -pie tmpdir/plt-main1.o \
++		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
++		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
++		"" \
++		{ plt-main5.c } \
++		"plt-main-pie-ibt" \
++		"plt-main.out" \
++		"-fPIC" \
++	    ] \
++	    [list \
++		"Run plt-main with -z ibtplt -z now" \
++		"-Wl,--no-as-needed,-z,ibtplt,-z,now tmpdir/plt-main1.o \
++		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
++		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
++		"" \
++		{ plt-main5.c } \
++		"plt-main-ibt-now" \
++		"plt-main.out" \
++	    ] \
++	    [list \
++		"Run plt-main with PIE and -z ibtplt -z now" \
++		"-Wl,--no-as-needed,-z,ibtplt,-z,now -pie tmpdir/plt-main1.o \
++		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
++		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
++		"" \
++		{ plt-main5.c } \
++		"plt-main-pie-ibt-now" \
++		"plt-main.out" \
++		"-fPIC" \
++	    ] \
++	    [list \
++		"Run plt-main with libibtplt-lib.so -z ibtplt" \
++		"-Wl,--no-as-needed,-z,ibtplt tmpdir/libibtplt-lib.so \
++		 tmpdir/libplt-lib.so" \
++		"" \
++		{ plt-main5.c } \
++		"plt-main-ibt-lib" \
++		"plt-main.out" \
++	    ] \
++	    [list \
++		"Run plt-main with libibtplt-lib.so -z ibtplt -z now" \
++		"-Wl,--no-as-needed,-z,ibtplt,-z,now \
++		 tmpdir/libibtplt-now-lib.so tmpdir/libplt-lib.so" \
++		"" \
++		{ plt-main5.c } \
++		"plt-main-ibt-now-lib" \
++		"plt-main.out" \
++	    ] \
++	]
++
++	if { [check_ifunc_attribute_available] } {
++	    run_ld_link_exec_tests [list \
++		[list \
++		    "Run pr21481a" \
++		    "$NOPIE_LDFLAGS -Wl,-z,ibtplt" \
++		    "" \
++		    { pr21481a.c pr21481b.S } \
++		    "pr21481a" \
++		    "pass.out" \
++		     "$NOPIE_CFLAGS" \
++		] \
++		[list \
++		    "Run pr21481b" \
++		    "$NOPIE_LDFLAGS -Wl,-z,ibtplt,-z,now" \
++		    "" \
++		    { pr21481a.c pr21481b.S } \
++		    "pr21481b" \
++		    "pass.out" \
++		    "$NOPIE_CFLAGS" \
++		] \
++	    ]
++	}
++    }
++
+     undefined_weak "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS"
+     undefined_weak "-fPIE" ""
+     undefined_weak "-fPIE" "-pie"
+@@ -1402,3 +1566,21 @@ run_dump_test "pr20830b-now"
+ run_dump_test "pr21038a-now"
+ run_dump_test "pr21038b-now"
+ run_dump_test "pr21038c-now"
++run_dump_test "ibt-plt-1"
++run_dump_test "ibt-plt-1-x32"
++run_dump_test "ibt-plt-2a"
++run_dump_test "ibt-plt-2b"
++run_dump_test "ibt-plt-2c"
++run_dump_test "ibt-plt-2d"
++run_dump_test "ibt-plt-2a-x32"
++run_dump_test "ibt-plt-2b-x32"
++run_dump_test "ibt-plt-2c-x32"
++run_dump_test "ibt-plt-2d-x32"
++run_dump_test "ibt-plt-3a"
++run_dump_test "ibt-plt-3b"
++run_dump_test "ibt-plt-3c"
++run_dump_test "ibt-plt-3d"
++run_dump_test "ibt-plt-3a-x32"
++run_dump_test "ibt-plt-3b-x32"
++run_dump_test "ibt-plt-3c-x32"
++run_dump_test "ibt-plt-3d-x32"
+-- 
+2.9.4
+
