@@ -1,3 +1,14 @@
+2017-06-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (arm_extensions): New duplicate idiv entry to enable
+	Thumb division for ARMv7 architecture.
+	(arm_parse_extension): Document expected behavior for duplicate
+	entries.
+	(s_arm_arch_extension): Likewise.
+	* testsuite/gas/arm/forbid-armv7-idiv-ext.d: New test.
+	* testsuite/gas/arm/forbid-armv7-idiv-ext.l: New expected output for
+	above test.
+
 2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* config/tc-arm.c (aeabi_set_public_attributes): Populate flags from

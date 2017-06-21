@@ -25963,6 +25963,13 @@ static const struct arm_option_extension_value_table arm_extensions[] =
 			ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_V7A),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_V7R)),
+  /* Duplicate entry for the purpose of allowing ARMv7 to match in presence of
+     Thumb divide instruction.  Due to this having the same name as the
+     previous entry, this will be ignored when doing command-line parsing and
+     only considered by build attribute selection code.  */
+  ARM_EXT_OPT ("idiv",	ARM_FEATURE_CORE_LOW (ARM_EXT_DIV),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_DIV),
+			ARM_FEATURE_CORE_LOW (ARM_EXT_V7)),
   ARM_EXT_OPT ("iwmmxt",ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT),
 			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT), ARM_ARCH_NONE),
   ARM_EXT_OPT ("iwmmxt2", ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2),
@@ -26195,6 +26202,10 @@ arm_parse_extension (const char *str, const arm_feature_set *opt_set,
 	    else
 	      ARM_CLEAR_FEATURE (**ext_set_p, **ext_set_p, opt->clear_value);
 
+	    /* Allowing Thumb division instructions for ARMv7 in autodetection
+	       rely on this break so that duplicate extensions (extensions
+	       with the same name as a previous extension in the list) are not
+	       considered for command-line parsing.  */
 	    break;
 	  }
 
@@ -27028,6 +27039,10 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
 	ARM_MERGE_FEATURE_SETS (cpu_variant, selected_cpu, *mfpu_opt);
 	*input_line_pointer = saved_char;
 	demand_empty_rest_of_line ();
+	/* Allowing Thumb division instructions for ARMv7 in autodetection rely
+	   on this return so that duplicate extensions (extensions with the
+	   same name as a previous extension in the list) are not considered
+	   for command-line parsing.  */
 	return;
       }
 
