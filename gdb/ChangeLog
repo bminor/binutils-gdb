@@ -1,3 +1,8 @@
+2017-06-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target.h (struct target_ops) <to_xfer_partial>: Update doc to
+	talk about addressable units instead of bytes.
+
 2017-06-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* common/environ.c (gdb_environ::unset): Use '::iterator' instead
