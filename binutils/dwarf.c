@@ -323,7 +323,7 @@ read_uleb128 (unsigned char * data,
 								\
       (var) = _val = read_uleb128 (start, &length_return, end);	\
       if ((var) != _val)					\
-	error (_("Internal error: %s%d: LEB value (%#lx) too large for containing variable\n"),	\
+	error (_("Internal error: %s%d: LEB value (%#" DWARF_VMA_FMT "x) too large for containing variable\n"),	\
 	       __FILE__, __LINE__, _val);			\
       start += length_return;					\
     }								\
@@ -336,7 +336,7 @@ read_uleb128 (unsigned char * data,
 								\
       (var) = _val = read_sleb128 (start, &length_return, end);	\
       if ((var) != _val)					\
-	error (_("Internal error: %s%d: LEB value (%#lx) too large for containing variable\n"),	\
+	error (_("Internal error: %s%d: LEB value (%#" DWARF_VMA_FMT "x) too large for containing variable\n"),	\
 	       __FILE__, __LINE__, _val);			\
       start += length_return;					\
     }								\

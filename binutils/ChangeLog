@@ -1,3 +1,8 @@
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (READ_ULEB): Use DWARF_VMA_FMT to report error.
+	(READ_SLEB): Likewise.
+
 2017-06-21  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21648
