@@ -1282,6 +1282,8 @@ _bfd_vms_slurp_egsd (bfd *abfd)
                 struct vms_esdf *esdf = (struct vms_esdf *)vms_rec;
 
 		entry->value = bfd_getl64 (esdf->value);
+		if (PRIV (sections) == NULL)
+		  return FALSE;
 		entry->section = PRIV (sections)[bfd_getl32 (esdf->psindx)];
 
                 if (old_flags & EGSY__V_NORM)
@@ -1316,7 +1318,11 @@ _bfd_vms_slurp_egsd (bfd *abfd)
             entry->symbol_vector = bfd_getl32 (egst->value);
 
             if (old_flags & EGSY__V_REL)
-              entry->section = PRIV (sections)[bfd_getl32 (egst->psindx)];
+	      {
+		if (PRIV (sections) == NULL)
+		  return FALSE;
+		entry->section = PRIV (sections)[bfd_getl32 (egst->psindx)];
+	      }
             else
               entry->section = bfd_abs_section_ptr;
 
@@ -1404,6 +1410,8 @@ image_set_ptr (bfd *abfd, bfd_vma vma, int sect, struct bfd_link_info *info)
 
   vms_debug2 ((4, "image_set_ptr (0x%08x, sect=%d)\n", (unsigned)vma, sect));
 
+  if (PRIV (sections) == NULL)
+    return;
   sec = PRIV (sections)[sect];
 
   if (info)
@@ -1726,7 +1734,12 @@ static bfd_vma
 alpha_vms_fix_sec_rel (bfd *abfd, struct bfd_link_info *info,
                        unsigned int rel, bfd_vma vma)
 {
-  asection *sec = PRIV (sections)[rel & RELC_MASK];
+  asection *sec;
+
+  if (PRIV (sections) == NULL)
+    return 0;
+
+  sec = PRIV (sections)[rel & RELC_MASK];
 
   if (info)
     {
@@ -5061,6 +5074,8 @@ alpha_vms_slurp_relocs (bfd *abfd)
                 return FALSE;
               }
 
+	    if (PRIV (sections) == NULL)
+	      return FALSE;
             sec = PRIV (sections)[cur_psect];
             if (sec == bfd_abs_section_ptr)
               {
@@ -5119,8 +5134,12 @@ alpha_vms_slurp_relocs (bfd *abfd)
                   reloc->sym_ptr_ptr = sym;
               }
             else if (cur_psidx >= 0)
-              reloc->sym_ptr_ptr =
-                PRIV (sections)[cur_psidx]->symbol_ptr_ptr;
+	      {
+		if (PRIV (sections) == NULL)
+		  return FALSE;
+		reloc->sym_ptr_ptr =
+		  PRIV (sections)[cur_psidx]->symbol_ptr_ptr;
+	      }
             else
               reloc->sym_ptr_ptr = NULL;
 

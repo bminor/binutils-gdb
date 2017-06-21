@@ -1,5 +1,14 @@
 2017-06-21  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21637
+	* vms-alpha.c (_bfd_vms_slurp_egsd): Check for an empty section
+	list.
+	(image_set_ptr): Likewise.
+	(alpha_vms_fix_sec_rel): Likewise.
+	(alpha_vms_slurp_relocs): Likewise.
+
+2017-06-21  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21633
 	* ieee.c (ieee_slurp_sections): Check for a NULL return from
 	read_id.
