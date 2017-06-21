@@ -1,5 +1,11 @@
 2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* config/tc-arm.c (aeabi_set_public_attributes): Populate flags from
+	feature bits used or selected_cpu depending on whether a CPU was
+	selected by the user.
+
+2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* config/tc-arm.c (aeabi_set_public_attributes): Test *mcpu_ext_opt to
 	decide whether to set Tag_DSP_extension build attribute value.  Remove
 	now useless arm_arch variable.

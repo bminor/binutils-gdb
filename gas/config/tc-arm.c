@@ -26605,19 +26605,33 @@ aeabi_set_public_attributes (void)
   arm_feature_set arm_arch_v8m_base = ARM_ARCH_V8M_BASE;
   const cpu_arch_ver_table *p;
 
-  /* Choose the architecture based on the capabilities of the requested cpu
-     (if any) and/or the instructions actually used.  */
-  ARM_MERGE_FEATURE_SETS (flags, arm_arch_used, thumb_arch_used);
+  /* Autodetection mode, choose the architecture based the instructions
+     actually used.  */
+  if (no_cpu_selected ())
+    {
+      ARM_MERGE_FEATURE_SETS (flags, arm_arch_used, thumb_arch_used);
+
+      if (ARM_CPU_HAS_FEATURE (arm_arch_used, arm_arch_any))
+	ARM_MERGE_FEATURE_SETS (flags, flags, arm_ext_v1);
+
+      if (ARM_CPU_HAS_FEATURE (thumb_arch_used, arm_arch_any))
+	ARM_MERGE_FEATURE_SETS (flags, flags, arm_ext_v4t);
+
+      /* We need to make sure that the attributes do not identify us as v6S-M
+	 when the only v6S-M feature in use is the Operating System
+	 Extensions.  */
+      if (ARM_CPU_HAS_FEATURE (flags, arm_ext_os))
+	if (!ARM_CPU_HAS_FEATURE (flags, arm_arch_v6m_only))
+	  ARM_CLEAR_FEATURE (flags, flags, arm_ext_os);
+
+      /* Code run during relaxation relies on selected_cpu being set.  */
+      selected_cpu = flags;
+    }
+  /* Otherwise, choose the architecture based on the capabilities of the
+     requested cpu.  */
+  else
+    flags = selected_cpu;
   ARM_MERGE_FEATURE_SETS (flags, flags, *mfpu_opt);
-  ARM_MERGE_FEATURE_SETS (flags, flags, selected_cpu);
-
-  if (ARM_CPU_HAS_FEATURE (arm_arch_used, arm_arch_any))
-    ARM_MERGE_FEATURE_SETS (flags, flags, arm_ext_v1);
-
-  if (ARM_CPU_HAS_FEATURE (thumb_arch_used, arm_arch_any))
-    ARM_MERGE_FEATURE_SETS (flags, flags, arm_ext_v4t);
-
-  selected_cpu = flags;
 
   /* Allow the user to override the reported architecture.  */
   if (object_arch)
@@ -26625,12 +26639,6 @@ aeabi_set_public_attributes (void)
       ARM_CLEAR_FEATURE (flags, flags, arm_arch_any);
       ARM_MERGE_FEATURE_SETS (flags, flags, *object_arch);
     }
-
-  /* We need to make sure that the attributes do not identify us as v6S-M
-     when the only v6S-M feature in use is the Operating System Extensions.  */
-  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_os))
-      if (!ARM_CPU_HAS_FEATURE (flags, arm_arch_v6m_only))
-	ARM_CLEAR_FEATURE (flags, flags, arm_ext_os);
 
   tmp = flags;
   arch = 0;
