@@ -12634,18 +12634,19 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 
 		  if (stub_type == ppc_stub_plt_call)
 		    {
-		      if (irela + 1 < irelaend
-			  && irela[1].r_offset == irela->r_offset + 4
-			  && ELF64_R_TYPE (irela[1].r_info) == R_PPC64_TOCSAVE)
+		      if (!htab->opd_abi
+			  && htab->params->plt_localentry0 != 0
+			  && is_elfv2_localentry0 (&hash->elf))
+			htab->has_plt_localentry0 = 1;
+		      else if (irela + 1 < irelaend
+			       && irela[1].r_offset == irela->r_offset + 4
+			       && (ELF64_R_TYPE (irela[1].r_info)
+				   == R_PPC64_TOCSAVE))
 			{
 			  if (!tocsave_find (htab, INSERT,
 					     &local_syms, irela + 1, input_bfd))
 			    goto error_ret_free_internal;
 			}
-		      else if (!htab->opd_abi
-			       && htab->params->plt_localentry0 != 0
-			       && is_elfv2_localentry0 (&hash->elf))
-			htab->has_plt_localentry0 = 1;
 		      else
 			stub_type = ppc_stub_plt_call_r2save;
 		    }
@@ -14212,10 +14213,19 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    {
 	      bfd_boolean can_plt_call = FALSE;
 
+	      if (stub_entry->stub_type == ppc_stub_plt_call
+		  && !htab->opd_abi
+		  && htab->params->plt_localentry0 != 0
+		  && is_elfv2_localentry0 (&h->elf))
+		{
+		  /* The function doesn't use or change r2.  */
+		  can_plt_call = TRUE;
+		}
+
 	      /* All of these stubs may modify r2, so there must be a
 		 branch and link followed by a nop.  The nop is
 		 replaced by an insn to restore r2.  */
-	      if (rel->r_offset + 8 <= input_section->size)
+	      else if (rel->r_offset + 8 <= input_section->size)
 		{
 		  unsigned long br;
 
@@ -14236,13 +14246,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			      && htab->params->tls_get_addr_opt)
 			    {
 			      /* Special stub used, leave nop alone.  */
-			    }
-			  else if (stub_entry->stub_type == ppc_stub_plt_call
-				   && !htab->opd_abi
-				   && htab->params->plt_localentry0 != 0
-				   && is_elfv2_localentry0 (&h->elf))
-			    {
-			      /* The function doesn't use or change r2.  */
 			    }
 			  else
 			    bfd_put_32 (input_bfd,

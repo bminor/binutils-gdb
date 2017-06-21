@@ -1,3 +1,10 @@
+2017-06-21  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_size_stubs): Test for localentry:0 plt
+	calls before tocsave calls.
+	(ppc64_elf_relocate_section): Allow localentry:0 plt calls without
+	following nop.
+
 2017-06-21  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21645
