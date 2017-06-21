@@ -118,8 +118,8 @@ extern bfd_boolean tc_start_label_without_colon (void);
 extern void arm_md_end (void);
 bfd_boolean arm_is_eabi (void);
 
-#define md_post_relax_hook		aeabi_set_public_attributes ()
-extern void aeabi_set_public_attributes (void);
+#define md_post_relax_hook		arm_md_post_relax ()
+extern void arm_md_post_relax (void);
 #endif
 
 /* NOTE: The fake label creation in stabs.c:s_stab_generic() has

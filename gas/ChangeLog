@@ -1,5 +1,36 @@
 2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* config/tc-arm.c (dyn_mcpu_ext_opt): New static variable.
+	(dyn_march_ext_opt): Likewise.
+	(md_begin): Copy extension feature bits alongside architecture ones.
+	Merge extensions feature bits in selected_cpu and cpu_variant if there
+	is some.
+	(arm_parse_extension): Pass architecture and extension feature bits in
+	separate parameters, with architecture bits being read only.  Update
+	**opt_p directly rather than *ext_set and initialize it if needed.
+	(arm_parse_cpu): Stop merging architecture and extension feature bits
+	and instead use mcpu_cpu_opt and dyn_mcpu_ext_opt to memorize them
+	respectively.  Adapt to change in parameters of arm_parse_extension.
+	(arm_parse_arch): Adapt to change in parameters of arm_parse_extension.
+	(aeabi_set_attribute_string): Make function static.
+	(arm_md_post_relax): New function.
+	(s_arm_cpu): Stop merging architecture and extension feature bits and
+	instead use mcpu_cpu_opt and dyn_mcpu_ext_opt to memorize them
+	respectively.  Merge extension feature bits in cpu_variant
+	if there is any.
+	(s_arm_arch): Reset extension feature bit.  Set selected_cpu from
+	*mcpu_cpu_opt and cpu_variant from selected_cpu and *mfpu_opt for
+	consistency with s_arm_cpu.
+	(s_arm_arch_extension): Update *dyn_mcpu_ext_opt rather than
+	selected_cpu, allocating it before hand if needed.  Set selected_cpu
+	from it and then cpu_variant.
+	(s_arm_fpu): Merge *mcpu_ext_opt feature bits if any in cpu_variant.
+	* config/tc-arm.h (md_post_relax_hook): Set to arm_md_post_relax.
+	(aeabi_set_public_attributes): Delete external declaration.
+	(arm_md_post_relax): Declare externally.
+
+2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* config/tc-arm.c (struct arm_cpu_option_table): New ext field.
 	(ARM_CPU_OPT): Add parameter to set new ext field and reorder canonical
 	name field just after the name field.

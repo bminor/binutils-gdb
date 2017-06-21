@@ -147,8 +147,10 @@ static const arm_feature_set *legacy_cpu = NULL;
 static const arm_feature_set *legacy_fpu = NULL;
 
 static const arm_feature_set *mcpu_cpu_opt = NULL;
+static arm_feature_set *dyn_mcpu_ext_opt = NULL;
 static const arm_feature_set *mcpu_fpu_opt = NULL;
 static const arm_feature_set *march_cpu_opt = NULL;
+static arm_feature_set *dyn_march_ext_opt = NULL;
 static const arm_feature_set *march_fpu_opt = NULL;
 static const arm_feature_set *mfpu_opt = NULL;
 static const arm_feature_set *object_arch = NULL;
@@ -25033,7 +25035,12 @@ md_begin (void)
       mcpu_cpu_opt = legacy_cpu;
     }
   else if (!mcpu_cpu_opt)
-    mcpu_cpu_opt = march_cpu_opt;
+    {
+      mcpu_cpu_opt = march_cpu_opt;
+      dyn_mcpu_ext_opt = dyn_march_ext_opt;
+      /* Avoid double free in arm_md_end.  */
+      dyn_march_ext_opt = NULL;
+    }
 
   if (legacy_fpu)
     {
@@ -25073,16 +25080,22 @@ md_begin (void)
       mcpu_cpu_opt = &cpu_default;
       selected_cpu = cpu_default;
     }
+  else if (dyn_mcpu_ext_opt)
+    ARM_MERGE_FEATURE_SETS (selected_cpu, *mcpu_cpu_opt, *dyn_mcpu_ext_opt);
   else
     selected_cpu = *mcpu_cpu_opt;
 #else
-  if (mcpu_cpu_opt)
+  if (mcpu_cpu_opt && dyn_mcpu_ext_opt)
+    ARM_MERGE_FEATURE_SETS (selected_cpu, *mcpu_cpu_opt, *dyn_mcpu_ext_opt);
+  else if (mcpu_cpu_opt)
     selected_cpu = *mcpu_cpu_opt;
   else
     mcpu_cpu_opt = &arm_arch_any;
 #endif
 
   ARM_MERGE_FEATURE_SETS (cpu_variant, *mcpu_cpu_opt, *mfpu_opt);
+  if (dyn_mcpu_ext_opt)
+    ARM_MERGE_FEATURE_SETS (cpu_variant, cpu_variant, *dyn_mcpu_ext_opt);
 
   autoselect_thumb_from_cpu_variant ();
 
@@ -26081,10 +26094,9 @@ struct arm_long_option_table
 };
 
 static bfd_boolean
-arm_parse_extension (const char *str, const arm_feature_set **opt_p)
+arm_parse_extension (const char *str, const arm_feature_set *opt_set,
+		     arm_feature_set **ext_set_p)
 {
-  arm_feature_set *ext_set = XNEW (arm_feature_set);
-
   /* We insist on extensions being specified in alphabetical order, and with
      extensions being added before being removed.  We achieve this by having
      the global ARM_EXTENSIONS table in alphabetical order, and using the
@@ -26095,9 +26107,11 @@ arm_parse_extension (const char *str, const arm_feature_set **opt_p)
   const arm_feature_set arm_any = ARM_ANY;
   int adding_value = -1;
 
-  /* Copy the feature set, so that we can modify it.  */
-  *ext_set = **opt_p;
-  *opt_p = ext_set;
+  if (!*ext_set_p)
+    {
+      *ext_set_p = XNEW (arm_feature_set);
+      **ext_set_p = arm_arch_none;
+    }
 
   while (str != NULL && *str != 0)
     {
@@ -26165,7 +26179,7 @@ arm_parse_extension (const char *str, const arm_feature_set **opt_p)
 		/* Empty entry.  */
 		if (ARM_FEATURE_EQUAL (opt->allowed_archs[i], arm_any))
 		  continue;
-		if (ARM_FSET_CPU_SUBSET (opt->allowed_archs[i], *ext_set))
+		if (ARM_FSET_CPU_SUBSET (opt->allowed_archs[i], *opt_set))
 		  break;
 	      }
 	    if (i == nb_allowed_archs)
@@ -26176,9 +26190,10 @@ arm_parse_extension (const char *str, const arm_feature_set **opt_p)
 
 	    /* Add or remove the extension.  */
 	    if (adding_value)
-	      ARM_MERGE_FEATURE_SETS (*ext_set, *ext_set, opt->merge_value);
+	      ARM_MERGE_FEATURE_SETS (**ext_set_p, **ext_set_p,
+				      opt->merge_value);
 	    else
-	      ARM_CLEAR_FEATURE (*ext_set, *ext_set, opt->clear_value);
+	      ARM_CLEAR_FEATURE (**ext_set_p, **ext_set_p, opt->clear_value);
 
 	    break;
 	  }
@@ -26234,9 +26249,10 @@ arm_parse_cpu (const char *str)
   for (opt = arm_cpus; opt->name != NULL; opt++)
     if (opt->name_len == len && strncmp (opt->name, str, len) == 0)
       {
-	arm_feature_set *cpu_set = XNEW (arm_feature_set);
-	ARM_MERGE_FEATURE_SETS (*cpu_set, opt->value, opt->ext);
-	mcpu_cpu_opt = cpu_set;
+	mcpu_cpu_opt = &opt->value;
+	if (!dyn_mcpu_ext_opt)
+	  dyn_mcpu_ext_opt = XNEW (arm_feature_set);
+	*dyn_mcpu_ext_opt = opt->ext;
 	mcpu_fpu_opt = &opt->default_fpu;
 	if (opt->canonical_name)
 	  {
@@ -26256,7 +26272,7 @@ arm_parse_cpu (const char *str)
 	  }
 
 	if (ext != NULL)
-	  return arm_parse_extension (ext, &mcpu_cpu_opt);
+	  return arm_parse_extension (ext, mcpu_cpu_opt, &dyn_mcpu_ext_opt);
 
 	return TRUE;
       }
@@ -26291,7 +26307,7 @@ arm_parse_arch (const char *str)
 	strcpy (selected_cpu_name, opt->name);
 
 	if (ext != NULL)
-	  return arm_parse_extension (ext, &march_cpu_opt);
+	  return arm_parse_extension (ext, march_cpu_opt, &dyn_march_ext_opt);
 
 	return TRUE;
       }
@@ -26577,7 +26593,7 @@ aeabi_set_attribute_string (int tag, const char *value)
 }
 
 /* Set the public EABI object attributes.  */
-void
+static void
 aeabi_set_public_attributes (void)
 {
   int arch;
@@ -26824,6 +26840,18 @@ aeabi_set_public_attributes (void)
     aeabi_set_attribute_int (Tag_Virtualization_use, virt_sec);
 }
 
+/* Post relaxation hook.  Recompute ARM attributes now that relaxation is
+   finished and free extension feature bits which will not be used anymore.  */
+void
+arm_md_post_relax (void)
+{
+  aeabi_set_public_attributes ();
+  XDELETE (dyn_mcpu_ext_opt);
+  dyn_mcpu_ext_opt = NULL;
+  XDELETE (dyn_march_ext_opt);
+  dyn_march_ext_opt = NULL;
+}
+
 /* Add the default contents for the .ARM.attributes section.  */
 void
 arm_md_end (void)
@@ -26855,10 +26883,11 @@ s_arm_cpu (int ignored ATTRIBUTE_UNUSED)
   for (opt = arm_cpus + 1; opt->name != NULL; opt++)
     if (streq (opt->name, name))
       {
-	arm_feature_set *cpu_set = XNEW (arm_feature_set);
-	ARM_MERGE_FEATURE_SETS (*cpu_set, opt->value, opt->ext);
-	mcpu_cpu_opt = cpu_set;
-	selected_cpu = *mcpu_cpu_opt;
+	mcpu_cpu_opt = &opt->value;
+	if (!dyn_mcpu_ext_opt)
+	  dyn_mcpu_ext_opt = XNEW (arm_feature_set);
+	*dyn_mcpu_ext_opt = opt->ext;
+	ARM_MERGE_FEATURE_SETS (selected_cpu, *mcpu_cpu_opt, *dyn_mcpu_ext_opt);
 	if (opt->canonical_name)
 	  strcpy (selected_cpu_name, opt->canonical_name);
 	else
@@ -26870,6 +26899,8 @@ s_arm_cpu (int ignored ATTRIBUTE_UNUSED)
 	    selected_cpu_name[i] = 0;
 	  }
 	ARM_MERGE_FEATURE_SETS (cpu_variant, *mcpu_cpu_opt, *mfpu_opt);
+	if (dyn_mcpu_ext_opt)
+	  ARM_MERGE_FEATURE_SETS (cpu_variant, cpu_variant, *dyn_mcpu_ext_opt);
 	*input_line_pointer = saved_char;
 	demand_empty_rest_of_line ();
 	return;
@@ -26900,9 +26931,11 @@ s_arm_arch (int ignored ATTRIBUTE_UNUSED)
     if (streq (opt->name, name))
       {
 	mcpu_cpu_opt = &opt->value;
-	selected_cpu = opt->value;
+	XDELETE (dyn_mcpu_ext_opt);
+	dyn_mcpu_ext_opt = NULL;
+	selected_cpu = *mcpu_cpu_opt;
 	strcpy (selected_cpu_name, opt->name);
-	ARM_MERGE_FEATURE_SETS (cpu_variant, *mcpu_cpu_opt, *mfpu_opt);
+	ARM_MERGE_FEATURE_SETS (cpu_variant, selected_cpu, *mfpu_opt);
 	*input_line_pointer = saved_char;
 	demand_empty_rest_of_line ();
 	return;
@@ -26989,14 +27022,20 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
 	    break;
 	  }
 
+	if (!dyn_mcpu_ext_opt)
+	  {
+	    dyn_mcpu_ext_opt = XNEW (arm_feature_set);
+	    *dyn_mcpu_ext_opt = arm_arch_none;
+	  }
 	if (adding_value)
-	  ARM_MERGE_FEATURE_SETS (selected_cpu, selected_cpu,
+	  ARM_MERGE_FEATURE_SETS (*dyn_mcpu_ext_opt, *dyn_mcpu_ext_opt,
 				  opt->merge_value);
 	else
-	  ARM_CLEAR_FEATURE (selected_cpu, selected_cpu, opt->clear_value);
+	  ARM_CLEAR_FEATURE (*dyn_mcpu_ext_opt, *dyn_mcpu_ext_opt,
+			     opt->clear_value);
 
-	mcpu_cpu_opt = &selected_cpu;
-	ARM_MERGE_FEATURE_SETS (cpu_variant, *mcpu_cpu_opt, *mfpu_opt);
+	ARM_MERGE_FEATURE_SETS (selected_cpu, *mcpu_cpu_opt, *dyn_mcpu_ext_opt);
+	ARM_MERGE_FEATURE_SETS (cpu_variant, selected_cpu, *mfpu_opt);
 	*input_line_pointer = saved_char;
 	demand_empty_rest_of_line ();
 	return;
@@ -27029,6 +27068,8 @@ s_arm_fpu (int ignored ATTRIBUTE_UNUSED)
       {
 	mfpu_opt = &opt->value;
 	ARM_MERGE_FEATURE_SETS (cpu_variant, *mcpu_cpu_opt, *mfpu_opt);
+	if (dyn_mcpu_ext_opt)
+	  ARM_MERGE_FEATURE_SETS (cpu_variant, cpu_variant, *dyn_mcpu_ext_opt);
 	*input_line_pointer = saved_char;
 	demand_empty_rest_of_line ();
 	return;
