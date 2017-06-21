@@ -1,6 +1,12 @@
 2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21090
+	* testsuite/ld-elf/shared.exp: Pass $NOPIE_CFLAGS and
+	$NOPIE_LDFLAGS if non-PIE is required.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21090
 	* testsuite/ld-scripts/crossref.exp: Also pass $NOPIE_CFLAGS
 	to CC.
 
