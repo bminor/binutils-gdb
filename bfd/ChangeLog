@@ -1,5 +1,13 @@
 2017-06-21  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21633
+	* ieee.c (ieee_slurp_sections): Check for a NULL return from
+	read_id.
+	(ieee_archive_p): Likewise.
+	(ieee_object_p): Likewise.
+
+2017-06-21  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21640
 	* elf.c (setup_group): Zero the group section pointer list after
 	allocation so that loops can be caught.  Check for NULL pointers

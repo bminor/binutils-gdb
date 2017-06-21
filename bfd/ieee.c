@@ -1246,6 +1246,8 @@ ieee_slurp_sections (bfd *abfd)
 
 		/* Read section name, use it if non empty.  */
 		name = read_id (&ieee->h);
+		if (name == NULL)
+		  return FALSE;
 		if (name[0])
 		  section->name = name;
 
@@ -1395,6 +1397,8 @@ ieee_archive_p (bfd *abfd)
   (void) next_byte (&(ieee->h));
 
   library = read_id (&(ieee->h));
+  if (library == NULL)
+    goto got_wrong_format_error;    
   if (strcmp (library, "LIBRARY") != 0)
     goto got_wrong_format_error;
 
@@ -1922,9 +1926,13 @@ ieee_object_p (bfd *abfd)
   ieee->section_table_size = 0;
 
   processor = ieee->mb.processor = read_id (&(ieee->h));
+  if (processor == NULL)
+    goto got_wrong_format;    
   if (strcmp (processor, "LIBRARY") == 0)
     goto got_wrong_format;
   ieee->mb.module_name = read_id (&(ieee->h));
+  if (ieee->mb.module_name == NULL)
+    goto got_wrong_format;
   if (abfd->filename == (const char *) NULL)
     abfd->filename = xstrdup (ieee->mb.module_name);
 
