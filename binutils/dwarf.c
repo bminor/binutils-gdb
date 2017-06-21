@@ -313,6 +313,35 @@ read_uleb128 (unsigned char * data,
   return read_leb128 (data, length_return, FALSE, end);
 }
 
+#define SKIP_ULEB()	read_uleb128 (start, & length_return, end); start += length_return
+#define SKIP_SLEB()	read_sleb128 (start, & length_return, end); start += length_return
+
+#define READ_ULEB(var)						\
+  do								\
+    {								\
+      dwarf_vma _val;						\
+								\
+      (var) = _val = read_uleb128 (start, &length_return, end);	\
+      if ((var) != _val)					\
+	error (_("Internal error: %s%d: LEB value (%#lx) too large for containing variable\n"),	\
+	       __FILE__, __LINE__, _val);			\
+      start += length_return;					\
+    }								\
+  while (0)
+
+#define READ_SLEB(var)						\
+  do								\
+    {								\
+      dwarf_signed_vma _val;					\
+								\
+      (var) = _val = read_sleb128 (start, &length_return, end);	\
+      if ((var) != _val)					\
+	error (_("Internal error: %s%d: LEB value (%#lx) too large for containing variable\n"),	\
+	       __FILE__, __LINE__, _val);			\
+      start += length_return;					\
+    }								\
+  while (0)
+
 #define SAFE_BYTE_GET(VAL, PTR, AMOUNT, END)	\
   do						\
     {						\
@@ -6421,6 +6450,7 @@ static const char *
 regname (unsigned int regno, int row)
 {
   static char reg[64];
+
   if (dwarf_regnames
       && regno < dwarf_regnames_count
       && dwarf_regnames [regno] != NULL)
@@ -6509,8 +6539,6 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, unsigned int *max_reg
 }
 
 #define GET(VAR, N)	SAFE_BYTE_GET_AND_INC (VAR, start, N, end)
-#define LEB()	read_uleb128 (start, & length_return, end); start += length_return
-#define SLEB()	read_sleb128 (start, & length_return, end); start += length_return
 
 static unsigned char *
 read_cie (unsigned char *start, unsigned char *end,
@@ -6575,26 +6603,27 @@ read_cie (unsigned char *start, unsigned char *end,
       fc->ptr_size = eh_addr_size;
       fc->segment_size = 0;
     }
-  fc->code_factor = LEB ();
-  fc->data_factor = SLEB ();
+  READ_ULEB (fc->code_factor);
+  READ_SLEB (fc->data_factor);
   if (version == 1)
     {
       GET (fc->ra, 1);
     }
   else
     {
-      fc->ra = LEB ();
+      READ_ULEB (fc->ra);
     }
 
   if (fc->augmentation[0] == 'z')
     {
-      augmentation_data_len = LEB ();
+      READ_ULEB (augmentation_data_len);
       augmentation_data = start;
       start += augmentation_data_len;
       /* PR 17512: file: 11042-2589-0.004.  */
       if (start > end)
 	{
-	  warn (_("Augmentation data too long: 0x%lx\n"), augmentation_data_len);
+	  warn (_("Augmentation data too long: %#lx, expected at most %#lx\n"),
+		augmentation_data_len, (long)((end - start) + augmentation_data_len));
 	  return end;
 	}
     }
@@ -6929,7 +6958,7 @@ display_debug_frames (struct dwarf_section *section,
 
 	  if (cie->augmentation[0] == 'z')
 	    {
-	      augmentation_data_len = LEB ();
+	      READ_ULEB (augmentation_data_len);
 	      augmentation_data = start;
 	      start += augmentation_data_len;
 	      /* PR 17512: file: 722-8446-0.004.  */
@@ -6999,7 +7028,7 @@ display_debug_frames (struct dwarf_section *section,
 		case DW_CFA_advance_loc:
 		  break;
 		case DW_CFA_offset:
-		  LEB ();
+		  SKIP_ULEB ();
 		  if (frame_need_space (fc, opa) >= 0)
 		    fc->col_type[opa] = DW_CFA_undefined;
 		  break;
@@ -7021,41 +7050,44 @@ display_debug_frames (struct dwarf_section *section,
 		  break;
 		case DW_CFA_offset_extended:
 		case DW_CFA_val_offset:
-		  reg = LEB (); LEB ();
+		  READ_ULEB (reg);
+		  SKIP_ULEB ();
 		  if (frame_need_space (fc, reg) >= 0)
 		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		case DW_CFA_restore_extended:
-		  reg = LEB ();
+		  READ_ULEB (reg);
 		  if (frame_need_space (fc, reg) >= 0)
 		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		case DW_CFA_undefined:
-		  reg = LEB ();
+		  READ_ULEB (reg);
 		  if (frame_need_space (fc, reg) >= 0)
 		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		case DW_CFA_same_value:
-		  reg = LEB ();
+		  READ_ULEB (reg);
 		  if (frame_need_space (fc, reg) >= 0)
 		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		case DW_CFA_register:
-		  reg = LEB (); LEB ();
+		  READ_ULEB (reg);
+		  SKIP_ULEB ();
 		  if (frame_need_space (fc, reg) >= 0)
 		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		case DW_CFA_def_cfa:
-		  LEB (); LEB ();
+		  SKIP_ULEB ();
+		  SKIP_ULEB ();
 		  break;
 		case DW_CFA_def_cfa_register:
-		  LEB ();
+		  SKIP_ULEB ();
 		  break;
 		case DW_CFA_def_cfa_offset:
-		  LEB ();
+		  SKIP_ULEB ();
 		  break;
 		case DW_CFA_def_cfa_expression:
-		  temp = LEB ();
+		  READ_ULEB (temp);
 		  new_start = start + temp;
 		  if (new_start < start)
 		    {
@@ -7067,8 +7099,8 @@ display_debug_frames (struct dwarf_section *section,
 		  break;
 		case DW_CFA_expression:
 		case DW_CFA_val_expression:
-		  reg = LEB ();
-		  temp = LEB ();
+		  READ_ULEB (reg);
+		  READ_ULEB (temp);
 		  new_start = start + temp;
 		  if (new_start < start)
 		    {
@@ -7083,24 +7115,27 @@ display_debug_frames (struct dwarf_section *section,
 		  break;
 		case DW_CFA_offset_extended_sf:
 		case DW_CFA_val_offset_sf:
-		  reg = LEB (); SLEB ();
+		  READ_ULEB (reg);
+		  SKIP_SLEB ();
 		  if (frame_need_space (fc, reg) >= 0)
 		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		case DW_CFA_def_cfa_sf:
-		  LEB (); SLEB ();
+		  SKIP_ULEB ();
+		  SKIP_SLEB ();
 		  break;
 		case DW_CFA_def_cfa_offset_sf:
-		  SLEB ();
+		  SKIP_SLEB ();
 		  break;
 		case DW_CFA_MIPS_advance_loc8:
 		  start += 8;
 		  break;
 		case DW_CFA_GNU_args_size:
-		  LEB ();
+		  SKIP_ULEB ();
 		  break;
 		case DW_CFA_GNU_negative_offset_extended:
-		  reg = LEB (); LEB ();
+		  READ_ULEB (reg);
+		  SKIP_ULEB ();
 		  if (frame_need_space (fc, reg) >= 0)
 		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
@@ -7120,8 +7155,12 @@ display_debug_frames (struct dwarf_section *section,
 	{
 	  unsigned char * tmp;
 	  unsigned op, opa;
-	  unsigned long ul, reg, roffs;
-	  dwarf_vma l;
+	  unsigned long ul, roffs;
+	  /* Note: It is tempting to use an unsigned long for 'reg' but there
+	     are various functions, notably frame_space_needed() that assume that
+	     reg is an unsigned int.  */
+	  unsigned int reg;
+	  dwarf_signed_vma l;
 	  dwarf_vma ofs;
 	  dwarf_vma vma;
 	  const char *reg_prefix = "";
@@ -7152,7 +7191,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_offset:
-	      roffs = LEB ();
+	      READ_ULEB (roffs);
 	      if (opa >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
@@ -7239,8 +7278,8 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_offset_extended:
-	      reg = LEB ();
-	      roffs = LEB ();
+	      READ_ULEB (reg);
+	      READ_ULEB (roffs);
 	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
@@ -7255,8 +7294,8 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_val_offset:
-	      reg = LEB ();
-	      roffs = LEB ();
+	      READ_ULEB (reg);
+	      READ_ULEB (roffs);
 	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
@@ -7271,7 +7310,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_restore_extended:
-	      reg = LEB ();
+	      READ_ULEB (reg);
 	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
@@ -7293,7 +7332,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_undefined:
-	      reg = LEB ();
+	      READ_ULEB (reg);
 	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
@@ -7307,7 +7346,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_same_value:
-	      reg = LEB ();
+	      READ_ULEB (reg);
 	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
@@ -7321,8 +7360,8 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_register:
-	      reg = LEB ();
-	      roffs = LEB ();
+	      READ_ULEB (reg);
+	      READ_ULEB (roffs);
 	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
@@ -7385,8 +7424,8 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_def_cfa:
-	      fc->cfa_reg = LEB ();
-	      fc->cfa_offset = LEB ();
+	      READ_SLEB (fc->cfa_reg);
+	      READ_ULEB (fc->cfa_offset);
 	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa: %s ofs %d\n",
@@ -7394,7 +7433,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_def_cfa_register:
-	      fc->cfa_reg = LEB ();
+	      READ_SLEB (fc->cfa_reg);
 	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa_register: %s\n",
@@ -7402,7 +7441,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_def_cfa_offset:
-	      fc->cfa_offset = LEB ();
+	      READ_ULEB (fc->cfa_offset);
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa_offset: %d\n", (int) fc->cfa_offset);
 	      break;
@@ -7413,7 +7452,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_def_cfa_expression:
-	      ul = LEB ();
+	      READ_ULEB (ul);
 	      if (start >= block_end || ul > (unsigned long) (block_end - start))
 		{
 		  printf (_("  DW_CFA_def_cfa_expression: <corrupt len %lu>\n"), ul);
@@ -7431,8 +7470,8 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_expression:
-	      reg = LEB ();
-	      ul = LEB ();
+	      READ_ULEB (reg);
+	      READ_ULEB (ul);
 	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
 	      /* PR 17512: file: 069-133014-0.006.  */
@@ -7457,8 +7496,8 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_val_expression:
-	      reg = LEB ();
-	      ul = LEB ();
+	      READ_ULEB (reg);
+	      READ_ULEB (ul);
 	      if (reg >= (unsigned int) fc->ncols)
 		reg_prefix = bad_reg;
 	      tmp = start + ul;
@@ -7481,8 +7520,8 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_offset_extended_sf:
-	      reg = LEB ();
-	      l = SLEB ();
+	      READ_ULEB (reg);
+	      READ_SLEB (l);
 	      if (frame_need_space (fc, reg) < 0)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
@@ -7497,8 +7536,8 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_val_offset_sf:
-	      reg = LEB ();
-	      l = SLEB ();
+	      READ_ULEB (reg);
+	      READ_SLEB (l);
 	      if (frame_need_space (fc, reg) < 0)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
@@ -7513,8 +7552,8 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_def_cfa_sf:
-	      fc->cfa_reg = LEB ();
-	      fc->cfa_offset = SLEB ();
+	      READ_SLEB (fc->cfa_reg);
+	      READ_ULEB (fc->cfa_offset);
 	      fc->cfa_offset = fc->cfa_offset * fc->data_factor;
 	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
@@ -7523,7 +7562,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_def_cfa_offset_sf:
-	      fc->cfa_offset = SLEB ();
+	      READ_ULEB (fc->cfa_offset);
 	      fc->cfa_offset *= fc->data_factor;
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa_offset_sf: %d\n", (int) fc->cfa_offset);
@@ -7548,14 +7587,15 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_GNU_args_size:
-	      ul = LEB ();
+	      READ_ULEB (ul);
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_GNU_args_size: %ld\n", ul);
 	      break;
 
 	    case DW_CFA_GNU_negative_offset_extended:
-	      reg = LEB ();
-	      l = - LEB ();
+	      READ_ULEB (reg);
+	      READ_SLEB (l);
+	      l = - l;
 	      if (frame_need_space (fc, reg) < 0)
 		reg_prefix = bad_reg;
 	      if (! do_debug_frames_interp || *reg_prefix != '\0')
@@ -7592,8 +7632,6 @@ display_debug_frames (struct dwarf_section *section,
 }
 
 #undef GET
-#undef LEB
-#undef SLEB
 
 static int
 display_gdb_index (struct dwarf_section *section,

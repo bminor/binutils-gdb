@@ -1,3 +1,13 @@
+2017-06-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21648
+	* dwarf.c (LEB): Rename to SKIP_ULEB and READ_ULEB.  Add check for
+	reading a value that is too big for the containing variable.
+	(SLEB): Rename to SKIP_SLEB and READ_SLEB.  Add similar check.
+	Replace uses of LEB and SLEB with appropriate new macro.
+	(display_debug_frames): Use an unsigned int for the 'reg'
+	variable.  Use a signed long for the 'l' variable.
+
 2017-06-19  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21619
