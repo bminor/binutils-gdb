@@ -1,3 +1,9 @@
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21090
+	* testsuite/ld-size/size.exp: Pass $NOPIE_LDFLAGS to size-4a,
+	size-4b, size-5a, size-5b, size-6 and size-8 tests.
+
 2017-06-21  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/powerpc.exp: Run TOCSAVE tests.

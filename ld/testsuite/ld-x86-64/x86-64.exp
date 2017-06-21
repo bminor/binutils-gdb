@@ -815,7 +815,9 @@ if { [isnative] && [which $CC] != 0 } {
 	] \
 	[list \
 	    "Build gotpcrel1" \
-	    "-Wl,--as-needed tmpdir/gotpcrel1a.o tmpdir/gotpcrel1b.o tmpdir/gotpcrel1c.o tmpdir/gotpcrel1d.so" \
+	    "$NOPIE_LDFLAGS -Wl,--as-needed tmpdir/gotpcrel1a.o \
+	     tmpdir/gotpcrel1b.o tmpdir/gotpcrel1c.o \
+	     tmpdir/gotpcrel1d.so" \
 	    { dummy.s } \
 	    "" \
 	    {{objdump {-dw} gotpcrel1.dd}} \
@@ -1061,11 +1063,12 @@ if { [isnative] && [which $CC] != 0 } {
 	] \
 	[list \
 	    "Run pr19031" \
-	    "-Wl,--no-as-needed tmpdir/pr19031.so" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr19031.so" \
 	    "" \
 	    { pr19031b.S pr19031c.c } \
 	    "pr19031" \
 	    "pr19031.out" \
+	    "$NOPIE_CFLAGS" \
 	] \
 	[list \
 	    "Run gotpcrel1" \
