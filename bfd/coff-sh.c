@@ -596,6 +596,9 @@ sh_reloc (bfd *      abfd,
       && bfd_is_und_section (symbol_in->section))
     return bfd_reloc_undefined;
 
+  if (addr > input_section->size)
+    return bfd_reloc_outofrange;
+
   sym_value = get_symbol_value (symbol_in);
 
   switch (r_type)
@@ -2910,7 +2913,6 @@ sh_coff_get_relocated_section_contents (bfd *output_bfd,
   struct internal_reloc *internal_relocs = NULL;
   struct internal_syment *internal_syms = NULL;
 
-fprintf (stderr, "DATA = %p\n", data);
   /* We only need to handle the case of relaxing, or of having a
      particular set of section contents, specially.  */
   if (relocatable

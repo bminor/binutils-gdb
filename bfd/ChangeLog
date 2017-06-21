@@ -1,5 +1,10 @@
 2017-06-21  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21646
+	* coff-sh.c (sh_reloc): Check for an out of range reloc.
+
+2017-06-21  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21639
 	* vms-misc.c (_bfd_vms_save_sized_string): Use unsigned int as
 	type of the size parameter.
