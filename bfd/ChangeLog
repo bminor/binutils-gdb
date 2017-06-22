@@ -1,3 +1,10 @@
+2017-06-22  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21649
+	* som.c (setup_sections): NUL terminate the space_strings buffer.
+	Check that the space.name field does not index beyond the end of
+	the space_strings buffer.
+
 2017-06-21  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21646
