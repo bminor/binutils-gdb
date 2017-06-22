@@ -1,3 +1,7 @@
+2017-06-22  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (arm_ext_v7m): Add ATTRIBUTE_UNUSED.
+
 2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* config/tc-arm.c (fpu_any): Defined from FPU_ANY.
