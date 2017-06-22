@@ -6311,12 +6311,6 @@ remote_console_output (char *msg)
   gdb_flush (gdb_stdtarg);
 }
 
-typedef struct cached_reg
-{
-  int num;
-  gdb_byte *data;
-} cached_reg_t;
-
 DEF_VEC_O(cached_reg_t);
 
 typedef struct stop_reply

@@ -1,3 +1,13 @@
+2017-06-22  Alan Hayward  <alan.hayward@arm.com>
+
+	* remote.c (cached_reg): Move from here...
+	* regcache.h (cached_reg): ...to here.
+	* python/py-unwind.c (struct reg_info): Remove.
+	(cached_frame_info): Use cached_reg_t.
+	(pyuw_prev_register): Likewise.
+	(pyuw_sniffer): Use cached_reg_t and allocate registers.
+	(pyuw_dealloc_cache): Free all registers.
+
 2017-06-22  Pedro Alves  <palves@redhat.com>
 	    Simon Marchi  <simon.marchi@ericsson.com>
 
