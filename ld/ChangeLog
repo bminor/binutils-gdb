@@ -1,7 +1,13 @@
 2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21090
-	* testsuite/ld-gc/gc.ex: Compile tmpdir/pr14265.o with
+	* testsuite/ld-i386/i386.exp: Pass $NOPIE_CFLAGS and
+	$NOPIE_LDFLAGS to "Run pr19031".
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21090
+	* testsuite/ld-gc/gc.exp: Compile tmpdir/pr14265.o with
 	$NOPIE_CFLAGS.
 	* testsuite/ld-i386/i386.exp: Pass $NOPIE_CFLAGS and
 	$NOPIE_LDFLAGS if non-PIE is required.

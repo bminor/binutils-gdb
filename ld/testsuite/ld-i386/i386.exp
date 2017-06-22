@@ -986,11 +986,12 @@ if { [isnative]
 	] \
 	[list \
 	    "Run pr19031" \
-	    "tmpdir/pr19031.so" \
+	    "$NOPIE_LDFLAGS tmpdir/pr19031.so" \
 	    "" \
 	    { pr19031b.S pr19031c.c } \
 	    "pr19031" \
 	    "pr19031.out" \
+	    "$NOPIE_CFLAGS" \
 	] \
 	[list \
 	    "Run got1" \
