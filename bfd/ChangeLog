@@ -1,3 +1,9 @@
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_link_setup_gnu_properties): Move
+	the error_alignment label forward.  Properly align program
+	property note section.
+
 2017-06-22  Eric Christopher  <echristo@gmail.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Use labs rather than

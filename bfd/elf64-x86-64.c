@@ -7407,8 +7407,13 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
 	  if (sec == NULL)
 	    info->callbacks->einfo (_("%F: failed to create GNU property section\n"));
 
-	  if (!bfd_set_section_alignment (ebfd, sec, 2))
-	    goto error_alignment;
+	  if (!bfd_set_section_alignment (ebfd, sec,
+					  ABI_64_P (ebfd) ? 3 : 2))
+	    {
+error_alignment:
+	      info->callbacks->einfo (_("%F%A: failed to align section\n"),
+				      sec);
+	    }
 
 	  elf_section_type (sec) = SHT_NOTE;
 	}
@@ -7567,11 +7572,7 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
      properly aligned even if create_dynamic_sections isn't called.  */
   sec = htab->elf.sgot;
   if (!bfd_set_section_alignment (dynobj, sec, 3))
-    {
-error_alignment:
-      info->callbacks->einfo (_("%F%A: failed to align section\n"),
-			      sec);
-    }
+    goto error_alignment;
 
   sec = htab->elf.sgotplt;
   if (!bfd_set_section_alignment (dynobj, sec, 3))
