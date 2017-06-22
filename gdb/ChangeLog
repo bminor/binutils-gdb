@@ -1,3 +1,7 @@
+2017-06-22  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* common/environ.c (gdb_environ::unset): Update comment.
+
 2017-06-22  Alan Hayward  <alan.hayward@arm.com>
 
 	* python/py-unwind.c (pyuw_sniffer): Allocate space for

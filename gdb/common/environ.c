@@ -114,7 +114,7 @@ gdb_environ::unset (const char *var)
 {
   size_t len = strlen (var);
 
-  /* We iterate until '.cend () - 1' because the last element is
+  /* We iterate until '.end () - 1' because the last element is
      always NULL.  */
   for (std::vector<char *>::iterator el = m_environ_vector.begin ();
        el != m_environ_vector.end () - 1;
