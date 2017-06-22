@@ -16358,6 +16358,17 @@ decode_x86_feature (unsigned int type, unsigned int bitmask)
 	      abort ();
 	    }
 	  break;
+	case GNU_PROPERTY_X86_FEATURE_1_SHSTK:
+	  switch (type)
+	    {
+	    case GNU_PROPERTY_X86_FEATURE_1_AND:
+	      printf ("SHSTK");
+	      break;
+	    default:
+	      /* This should never happen.  */
+	      abort ();
+	    }
+	  break;
 	default:
 	  printf (_("<unknown: %x>"), bit);
 	  break;

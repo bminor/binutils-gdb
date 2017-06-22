@@ -1,5 +1,15 @@
 2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* readelf.c (decode_x86_feature): Decode
+	GNU_PROPERTY_X86_FEATURE_1_SHSTK.
+	* testsuite/binutils-all/i386/shstk.d: New file.
+	* testsuite/binutils-all/i386/shstk.s: Likewise.
+	* testsuite/binutils-all/x86-64/shstk-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/shstk.d: Likewise.
+	* testsuite/binutils-all/x86-64/shstk.s: Likewise.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* readelf.c (decode_x86_feature): New.
 	(print_gnu_property_note): Call decode_x86_feature on
 	GNU_PROPERTY_X86_FEATURE_1_AND.

@@ -427,6 +427,13 @@ run_dump_test "property-x86-ibt3a"
 run_dump_test "property-x86-ibt3b"
 run_dump_test "property-x86-ibt4"
 run_dump_test "property-x86-ibt5"
+run_dump_test "property-x86-shstk1a"
+run_dump_test "property-x86-shstk1b"
+run_dump_test "property-x86-shstk2"
+run_dump_test "property-x86-shstk3a"
+run_dump_test "property-x86-shstk3b"
+run_dump_test "property-x86-shstk4"
+run_dump_test "property-x86-shstk5"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]

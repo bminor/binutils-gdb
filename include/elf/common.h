@@ -731,6 +731,7 @@
 #define GNU_PROPERTY_X86_ISA_1_AVX512BW      (1U << 17)
 
 #define GNU_PROPERTY_X86_FEATURE_1_IBT       (1U << 0)
+#define GNU_PROPERTY_X86_FEATURE_1_SHSTK     (1U << 1)
 
 /* Values used in GNU .note.ABI-tag notes (NT_GNU_ABI_TAG).  */
 #define GNU_ABI_TAG_LINUX	0

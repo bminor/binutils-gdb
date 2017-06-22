@@ -6751,8 +6751,11 @@ elf_i386_merge_gnu_properties (struct bfd_link_info *info,
 	  features = 0;
 	  if (info->ibt)
 	    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
+	  if (info->shstk)
+	    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
 	  number = aprop->u.number;
-	  /* Add GNU_PROPERTY_X86_FEATURE_1_IBT.  */
+	  /* Add GNU_PROPERTY_X86_FEATURE_1_IBT and
+	     GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
 	  aprop->u.number = (number & bprop->u.number) | features;
 	  updated = number != (unsigned int) aprop->u.number;
 	  /* Remove the property if all feature bits are cleared.  */
@@ -6764,9 +6767,12 @@ elf_i386_merge_gnu_properties (struct bfd_link_info *info,
 	  features = 0;
 	  if (info->ibt)
 	    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
+	  if (info->shstk)
+	    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
 	  if (features)
 	    {
-	      /* Add GNU_PROPERTY_X86_FEATURE_1_IBT.  */
+	      /* Add GNU_PROPERTY_X86_FEATURE_1_IBT and
+		 GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
 	      if (aprop != NULL)
 		{
 		  number = aprop->u.number;
@@ -6813,9 +6819,12 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
   features = 0;
   if (info->ibt)
     features = GNU_PROPERTY_X86_FEATURE_1_IBT;
+  if (info->shstk)
+    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
   if (features)
     {
-      /* Turn on GNU_PROPERTY_X86_FEATURE_1_IBT.  */
+      /* Turn on GNU_PROPERTY_X86_FEATURE_1_IBT and
+	 GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
       bfd *ebfd = NULL;
       elf_property *prop;
 
@@ -6833,7 +6842,8 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 		prop = _bfd_elf_get_property (pbfd,
 					      GNU_PROPERTY_X86_FEATURE_1_AND,
 					      4);
-		/* Add GNU_PROPERTY_X86_FEATURE_1_IBT.  */
+		/* Add GNU_PROPERTY_X86_FEATURE_1_IBT and
+		   GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
 		prop->u.number |= features;
 		prop->pr_kind = property_number;
 		break;

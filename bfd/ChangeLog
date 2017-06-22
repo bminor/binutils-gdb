@@ -1,5 +1,16 @@
 2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_merge_gnu_properties): If info->shstk
+	is set, turn on GNU_PROPERTY_X86_FEATURE_1_SHSTK.
+	(elf_i386_link_setup_gnu_properties): If info->shstk is set,
+	turn on GNU_PROPERTY_X86_FEATURE_1_IBT.
+	* elf64-x86-64.c (elf_x86_64_merge_gnu_properties): If
+	info->shstk is set, turn on GNU_PROPERTY_X86_FEATURE_1_SHSTK.
+	(elf_x86_64_link_setup_gnu_properties): If info->shstk is set,
+	turn on GNU_PROPERTY_X86_FEATURE_1_IBT.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_lazy_ibt_plt0_entry): New.
 	(elf_i386_lazy_ibt_plt_entry): Likewise.
 	(elf_i386_pic_lazy_ibt_plt0_entry): Likewise.
