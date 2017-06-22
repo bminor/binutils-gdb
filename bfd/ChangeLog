@@ -5,6 +5,12 @@
 
 2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Resolve
+	local undefined weak symbol to 0.
+	* elf64-x86-64.c (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Likewise.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_merge_gnu_properties): If info->shstk
 	is set, turn on GNU_PROPERTY_X86_FEATURE_1_SHSTK.
 	(elf_i386_link_setup_gnu_properties): If info->shstk is set,

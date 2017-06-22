@@ -945,14 +945,16 @@ static const struct elf_i386_backend_data elf_i386_arch_bed =
    it isn't dynamic and
    1. Has non-GOT/non-PLT relocations in text section.  Or
    2. Has no GOT/PLT relocation.
+   Local undefined weak symbol is always resolved to 0.
  */
 #define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, GOT_RELOC, EH)	\
   ((EH)->elf.root.type == bfd_link_hash_undefweak		\
-   && bfd_link_executable (INFO)				\
-   && (elf_i386_hash_table (INFO)->interp == NULL	 	\
-       || !(GOT_RELOC)						\
-       || (EH)->has_non_got_reloc				\
-       || !(INFO)->dynamic_undefined_weak))
+   && ((EH)->elf.forced_local					\
+       || (bfd_link_executable (INFO)				\
+	   && (elf_i386_hash_table (INFO)->interp == NULL 	\
+	       || !(GOT_RELOC)					\
+	       || (EH)->has_non_got_reloc			\
+	       || !(INFO)->dynamic_undefined_weak))))
 
 /* i386 ELF linker hash entry.  */
 
