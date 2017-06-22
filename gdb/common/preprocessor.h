@@ -24,6 +24,10 @@
 #define CONCAT_1(a, b) a ## b
 #define CONCAT(a, b) CONCAT_1 (a, b)
 
+/* Stringification.  */
+#define STRINGIFY_1(x) #x
+#define STRINGIFY(x) STRINGIFY_1 (x)
+
 /* Escape parens out.  Useful if you need to pass an argument that
    includes commas to another macro.  */
 #define ESC(...) __VA_ARGS__

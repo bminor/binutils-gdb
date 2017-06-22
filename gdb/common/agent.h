@@ -20,16 +20,16 @@
 #ifndef COMMON_AGENT_H
 #define COMMON_AGENT_H
 
+#include "common/preprocessor.h"
+
 int agent_run_command (int pid, const char *cmd, int len);
 
 int agent_look_up_symbols (void *);
 
-#define STRINGIZE_1(STR) #STR
-#define STRINGIZE(STR) STRINGIZE_1(STR)
 #define IPA_SYM_EXPORTED_NAME(SYM) gdb_agent_ ## SYM
 #define IPA_SYM(SYM)                                   \
   {                                                    \
-    STRINGIZE (IPA_SYM_EXPORTED_NAME (SYM)),		\
+    STRINGIFY (IPA_SYM_EXPORTED_NAME (SYM)),		\
     offsetof (struct ipa_sym_addresses, addr_ ## SYM)	\
   }
 
