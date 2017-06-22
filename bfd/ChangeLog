@@ -1,3 +1,9 @@
+2017-06-23  Jiong Wang  <jiong.wang@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_ADR_GOTPAGE): Rename to
+	BFD_RELOC_AARCH64_ADR_GOT_PAGE
+	* bfd-in2.h: Regenerate.
+
 2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_link_setup_gnu_properties): Move
