@@ -1,4 +1,11 @@
 2017-06-22  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	* unittests/environ-selftests.c (run_tests): Ignore -Wself-move
+	warning.
+	* common/diagnostics.h: New file.
+
+2017-06-22  Pedro Alves  <palves@redhat.com>
 
 	* common/agent.h: Add include guards.
 
