@@ -1,5 +1,10 @@
 2017-06-22  Alan Hayward  <alan.hayward@arm.com>
 
+	* python/py-unwind.c (pyuw_sniffer): Allocate space for
+	registers.
+
+2017-06-22  Alan Hayward  <alan.hayward@arm.com>
+
 	* record-full.c (record_full_exec_insn): Use byte_vector.
 
 2017-06-22  Yao Qi  <yao.qi@linaro.org>
