@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef COMMON_AGENT_H
+#define COMMON_AGENT_H
+
 int agent_run_command (int pid, const char *cmd, int len);
 
 int agent_look_up_symbols (void *);
@@ -56,3 +59,5 @@ enum agent_capa
 int agent_capability_check (enum agent_capa);
 
 void agent_capability_invalidate (void);
+
+#endif /* COMMON_AGENT_H */
