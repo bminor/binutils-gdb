@@ -709,6 +709,7 @@
 
 #define GNU_PROPERTY_X86_ISA_1_USED		0xc0000000
 #define GNU_PROPERTY_X86_ISA_1_NEEDED		0xc0000001
+#define GNU_PROPERTY_X86_FEATURE_1_AND		0xc0000002
 
 #define GNU_PROPERTY_X86_ISA_1_486           (1U << 0)
 #define GNU_PROPERTY_X86_ISA_1_586           (1U << 1)
@@ -728,6 +729,8 @@
 #define GNU_PROPERTY_X86_ISA_1_AVX512VL      (1U << 15)
 #define GNU_PROPERTY_X86_ISA_1_AVX512DQ      (1U << 16)
 #define GNU_PROPERTY_X86_ISA_1_AVX512BW      (1U << 17)
+
+#define GNU_PROPERTY_X86_FEATURE_1_IBT       (1U << 0)
 
 /* Values used in GNU .note.ABI-tag notes (NT_GNU_ABI_TAG).  */
 #define GNU_ABI_TAG_LINUX	0

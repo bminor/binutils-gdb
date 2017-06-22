@@ -16338,6 +16338,36 @@ decode_x86_isa (unsigned int bitmask)
 }
 
 static void
+decode_x86_feature (unsigned int type, unsigned int bitmask)
+{
+  while (bitmask)
+    {
+      unsigned int bit = bitmask & (- bitmask);
+
+      bitmask &= ~ bit;
+      switch (bit)
+	{
+	case GNU_PROPERTY_X86_FEATURE_1_IBT:
+	  switch (type)
+	    {
+	    case GNU_PROPERTY_X86_FEATURE_1_AND:
+	      printf ("IBT");
+	      break;
+	    default:
+	      /* This should never happen.  */
+	      abort ();
+	    }
+	  break;
+	default:
+	  printf (_("<unknown: %x>"), bit);
+	  break;
+	}
+      if (bitmask)
+	printf (", ");
+    }
+}
+
+static void
 print_gnu_property_note (Elf_Internal_Note * pnote)
 {
   unsigned char * ptr = (unsigned char *) pnote->descdata;
@@ -16389,6 +16419,14 @@ print_gnu_property_note (Elf_Internal_Note * pnote)
 		    printf (_("<corrupt length: %#x> "), datasz);
 		  else
 		    decode_x86_isa (byte_get (ptr, 4));
+		  goto next;
+
+		case GNU_PROPERTY_X86_FEATURE_1_AND:
+		  printf ("x86 feature: ");
+		  if (datasz != 4)
+		    printf (_("<corrupt length: %#x> "), datasz);
+		  else
+		    decode_x86_feature (type, byte_get (ptr, 4));
 		  goto next;
 
 		default:

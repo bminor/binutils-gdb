@@ -1,3 +1,57 @@
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_lazy_ibt_plt0_entry): New.
+	(elf_i386_lazy_ibt_plt_entry): Likewise.
+	(elf_i386_pic_lazy_ibt_plt0_entry): Likewise.
+	(elf_i386_non_lazy_ibt_plt_entry): Likewise.
+	(elf_i386_pic_non_lazy_ibt_plt_entry): Likewise.
+	(elf_i386_eh_frame_lazy_ibt_plt): Likewise.
+	(elf_i386_lazy_plt_layout): Likewise.
+	(elf_i386_non_lazy_plt_layout): Likewise.
+	(elf_i386_link_hash_entry): Add plt_second.
+	(elf_i386_link_hash_table): Add plt_second and
+	plt_second_eh_frame.
+	(elf_i386_allocate_dynrelocs): Use the second PLT if needed.
+	(elf_i386_size_dynamic_sections): Use .plt.got unwind info for
+	the second PLT.  Check the second PLT.
+	(elf_i386_relocate_section): Use the second PLT to resolve
+	PLT reference if needed.
+	(elf_i386_finish_dynamic_symbol): Fill and use the second PLT if
+	needed.
+	(elf_i386_finish_dynamic_sections): Set sh_entsize on the
+	second PLT.  Generate unwind info for the second PLT.
+	(elf_i386_plt_type): Add plt_second.
+	(elf_i386_get_synthetic_symtab): Support the second PLT.
+	(elf_i386_parse_gnu_properties): Support
+	GNU_PROPERTY_X86_FEATURE_1_AND.
+	(elf_i386_merge_gnu_properties): Support
+	GNU_PROPERTY_X86_FEATURE_1_AND.  If info->ibt is set, turn
+	on GNU_PROPERTY_X86_FEATURE_1_IBT
+	(elf_i386_link_setup_gnu_properties): If info->ibt is set,
+	turn on GNU_PROPERTY_X86_FEATURE_1_IBT.  Use IBT-enabled PLT
+	for info->ibtplt, info->ibt or GNU_PROPERTY_X86_FEATURE_1_IBT
+	is set on all relocatable inputs.
+	* elf64-x86-64.c (elf_x86_64_lazy_ibt_plt_entry): New.
+	(elf_x32_lazy_ibt_plt_entry): Likewise.
+	(elf_x86_64_non_lazy_ibt_plt_entry): Likewise.
+	(elf_x32_non_lazy_ibt_plt_entry): Likewise.
+	(elf_x86_64_eh_frame_lazy_ibt_plt): Likewise.
+	(elf_x32_eh_frame_lazy_ibt_plt): Likewise.
+	(elf_x86_64_lazy_ibt_plt): Likewise.
+	(elf_x32_lazy_ibt_plt): Likewise.
+	(elf_x86_64_non_lazy_ibt_plt): Likewise.
+	(elf_x32_non_lazy_ibt_plt): Likewise.
+	(elf_x86_64_get_synthetic_symtab): Support the second PLT.
+	(elf_x86_64_parse_gnu_properties): Support
+	GNU_PROPERTY_X86_FEATURE_1_AND.
+	(elf_x86_64_merge_gnu_properties): Support
+	GNU_PROPERTY_X86_FEATURE_1_AND.  If info->ibt is set, turn
+	on GNU_PROPERTY_X86_FEATURE_1_IBT
+	(elf_x86_64_link_setup_gnu_properties): If info->ibt is set,
+	turn on GNU_PROPERTY_X86_FEATURE_1_IBT.  Use IBT-enabled PLT
+	for info->ibtplt, info->ibt or GNU_PROPERTY_X86_FEATURE_1_IBT
+	is set on all relocatable inputs.
+
 2017-06-22  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21649

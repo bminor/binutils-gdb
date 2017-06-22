@@ -1,3 +1,19 @@
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (decode_x86_feature): New.
+	(print_gnu_property_note): Call decode_x86_feature on
+	GNU_PROPERTY_X86_FEATURE_1_AND.
+	* testsuite/binutils-all/i386/empty.d: New file.
+	* testsuite/binutils-all/i386/empty.s: Likewise.
+	* testsuite/binutils-all/i386/ibt.d: Likewise.
+	* testsuite/binutils-all/i386/ibt.s: Likewise.
+	* testsuite/binutils-all/x86-64/empty-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/empty.d: Likewise.
+	* testsuite/binutils-all/x86-64/empty.s: Likewise.
+	* testsuite/binutils-all/x86-64/ibt-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/ibt.d: Likewise.
+	* testsuite/binutils-all/x86-64/ibt.s: Likewise.
+
 2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf.c (READ_ULEB): Use DWARF_VMA_FMT to report error.

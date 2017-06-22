@@ -1,5 +1,14 @@
 -*- text -*-
 
+* Add support for GNU_PROPERTY_X86_FEATURE_1_IBT in ELF GNU program
+
+* Support for -z ibtplt in the x86 ELF linker to generate IBT-enabled
+  PLT.
+
+* Support for -z ibt in the x86 ELF linker to generate IBT-enabled
+  PLT as well as GNU_PROPERTY_X86_FEATURE_1_IBT in ELF GNU program
+  properties.
+
 * Add support for ELF SHF_GNU_MBIND and PT_GNU_MBIND_XXX.
 
 * Add support for ELF GNU program properties.

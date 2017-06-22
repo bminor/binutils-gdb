@@ -471,6 +471,12 @@ struct bfd_link_info
   /* TRUE if BND prefix in PLT entries is always generated.  */
   unsigned int bndplt: 1;
 
+  /* TRUE if IBT-enabled PLT entries should be generated.  */
+  unsigned int ibtplt: 1;
+
+  /* TRUE if GNU_PROPERTY_X86_FEATURE_1_IBT should be generated.  */
+  unsigned int ibt: 1;
+
   /* TRUE if generation of .interp/PT_INTERP should be suppressed.  */
   unsigned int nointerp: 1;
 

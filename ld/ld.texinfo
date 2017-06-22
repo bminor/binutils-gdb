@@ -1261,6 +1261,15 @@ to a locally defined function, foo, via its GOT slot.
 @option{call-nop=suffix-@var{byte}} generates @code{call foo @var{byte}}.
 Supported for i386 and x86_64.
 
+@item ibtplt
+Generate Intel Indirect Branch Tracking (IBT) enabled PLT entries.
+Supported for Linux/i386 and Linux/x86_64.
+
+@item IBT
+Generate GNU_PROPERTY_X86_FEATURE_1_IBT in .note.gnu.property section
+to indicate compatibility with IBT.  This also implies @option{ibtplt}.
+Supported for Linux/i386 and Linux/x86_64.
+
 @end table
 
 Other keywords are ignored for Solaris compatibility.

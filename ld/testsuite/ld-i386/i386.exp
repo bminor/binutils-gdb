@@ -420,6 +420,13 @@ run_dump_test "pr20515"
 run_dump_test "property-x86-3"
 run_dump_test "property-x86-4a"
 run_dump_test "property-x86-4b"
+run_dump_test "property-x86-ibt1a"
+run_dump_test "property-x86-ibt1b"
+run_dump_test "property-x86-ibt2"
+run_dump_test "property-x86-ibt3a"
+run_dump_test "property-x86-ibt3b"
+run_dump_test "property-x86-ibt4"
+run_dump_test "property-x86-ibt5"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
@@ -1100,6 +1107,8 @@ if { [isnative]
     undefined_weak "-fPIE" "-pie -z nodynamic-undefined-weak"
 }
 
+global NOPIE_LDFLAGS
+
 # Must be native with the C compiler and working IFUNC support,
 if { [isnative]
      && [check_ifunc_available]
@@ -1156,6 +1165,66 @@ if { [isnative]
 	    "pass.out" \
 	] \
     ]
+
+    if { [istarget "i?86-*-linux*"] } {
+	run_cc_link_tests [list \
+	    [list \
+		"Build pr21168.so with -z ibtplt" \
+		"-shared -Wl,-z,ibtplt" \
+		"" \
+		{ pr21168b.S } \
+		"" \
+		"pr21168-ibt.so" \
+	    ] \
+	    [list \
+		"Build ifunc-1a with -z ibtplt" \
+		"-Wl,-z,ibtplt $NOPIE_LDFLAGS tmpdir/ifunc-1a.o \
+		 tmpdir/ifunc-1b.o tmpdir/ifunc-1c.o tmpdir/ifunc-1d.o" \
+		"" \
+		{ dummy.c } \
+		{{objdump {-dw} plt-main-ibt.dd}} \
+		"ifunc-1a-ibt" \
+	    ] \
+	    [list \
+		"Build ifunc-1a with PIE -z ibtplt" \
+		"-Wl,-z,ibtplt -pie tmpdir/ifunc-1a.o \
+		 tmpdir/ifunc-1b.o tmpdir/ifunc-1c.o tmpdir/ifunc-1d.o" \
+		"" \
+		{ dummy.c } \
+		{{objdump {-dw} plt-pie-ibt.dd}} \
+		"ifunc-1a-pie-ibt" \
+	    ] \
+	]
+
+	run_ld_link_exec_tests [list \
+	    [list \
+		"Run ifunc-1a with -z ibtplt" \
+		"-Wl,-z,ibtplt $NOPIE_LDFLAGS tmpdir/ifunc-1a.o \
+		 tmpdir/ifunc-1b.o tmpdir/ifunc-1c.o tmpdir/ifunc-1d.o" \
+		"" \
+		{ dummy.c } \
+		"ifunc-1a-ibt" \
+		"pass.out" \
+	    ] \
+	    [list \
+		"Run ifunc-1a with PIE -z ibtplt" \
+		"-Wl,-z,ibtplt -pie tmpdir/ifunc-1a.o \
+		 tmpdir/ifunc-1b.o tmpdir/ifunc-1c.o tmpdir/ifunc-1d.o" \
+		"" \
+		{ dummy.c } \
+		"ifunc-1a-pie-ibt" \
+		"pass.out" \
+	    ] \
+	    [list \
+		"Run pr21168 with -z ibtplt" \
+		"tmpdir/pr21168a.o tmpdir/pr21168-ibt.so" \
+		"" \
+		{ dummy.c } \
+		"pr21168-ibt" \
+		"pass.out" \
+	    ] \
+	]
+    }
 }
 
 if { !([istarget "i?86-*-linux*"]
@@ -1206,3 +1275,12 @@ run_ld_link_tests [list \
 run_dump_test "pltgot-1"
 run_dump_test "pltgot-2"
 run_dump_test "pr20830"
+run_dump_test "ibt-plt-1"
+run_dump_test "ibt-plt-2a"
+run_dump_test "ibt-plt-2b"
+run_dump_test "ibt-plt-2c"
+run_dump_test "ibt-plt-2d"
+run_dump_test "ibt-plt-3a"
+run_dump_test "ibt-plt-3b"
+run_dump_test "ibt-plt-3c"
+run_dump_test "ibt-plt-3d"

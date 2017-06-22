@@ -335,6 +335,20 @@ run_dump_test "property-x86-4b"
 run_dump_test "property-x86-3-x32"
 run_dump_test "property-x86-4a-x32"
 run_dump_test "property-x86-4b-x32"
+run_dump_test "property-x86-ibt1a"
+run_dump_test "property-x86-ibt1b"
+run_dump_test "property-x86-ibt1a-x32"
+run_dump_test "property-x86-ibt1b-x32"
+run_dump_test "property-x86-ibt2"
+run_dump_test "property-x86-ibt2-x32"
+run_dump_test "property-x86-ibt3a"
+run_dump_test "property-x86-ibt3b"
+run_dump_test "property-x86-ibt3a-x32"
+run_dump_test "property-x86-ibt3b-x32"
+run_dump_test "property-x86-ibt4"
+run_dump_test "property-x86-ibt4-x32"
+run_dump_test "property-x86-ibt5"
+run_dump_test "property-x86-ibt5-x32"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return
@@ -1350,6 +1364,156 @@ if { [isnative] && [which $CC] != 0 } {
 	}
     }
 
+    if { [istarget "x86_64-*-linux*"] } {
+	if { [istarget "x86_64-*-linux*-gnux32"] } {
+	    set pltdump {{objdump {-drw} plt-main-ibt-x32.dd}}
+	    set pltsecdump {{readelf {-SW} plt-main-ibt-now.rd} {objdump {-drw} plt-main-ibt-x32.dd}}
+	} else {
+	    set pltdump {{objdump {-drw} plt-main-ibt.dd}}
+	    set pltsecdump {{readelf {-SW} plt-main-ibt-now.rd} {objdump {-drw} plt-main-ibt.dd}}
+	}
+	run_cc_link_tests [list \
+	    [list \
+		"Build plt-main with -z ibtplt" \
+		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt" \
+		"" \
+		{ plt-main5.c } \
+		$pltdump \
+		"plt-main-ibt" \
+	    ] \
+	    [list \
+		"Build plt-main with PIE and -z ibtplt" \
+		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt -pie" \
+		"-fPIC" \
+		{ plt-main5.c } \
+		$pltdump \
+		"plt-main-pie-ibt" \
+	    ] \
+	    [list \
+		"Build plt-main with -z ibtplt -z now" \
+		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt -z now" \
+		"" \
+		{ plt-main5.c } \
+		$pltsecdump \
+		"plt-main-ibt-now" \
+	    ] \
+	    [list \
+		"Build plt-main with PIE and -z ibtplt -z now" \
+		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt -z now -pie" \
+		"-fPIC" \
+		{ plt-main5.c } \
+		$pltsecdump \
+		"plt-main-pie-ibt-now" \
+	    ] \
+	    [list \
+		"Build libibtplt-lib.so with -z ibtplt" \
+		"-shared -z ibtplt" \
+		"-fPIC" \
+		{ plt-main1.c plt-main2.c plt-main3.c plt-main4.c} \
+		$pltdump \
+		"libibtplt-lib.so" \
+	    ] \
+	    [list \
+		"Build libibtplt--now-lib.so with -z ibtplt -z now" \
+		"-shared -z ibtplt -z now" \
+		"-fPIC" \
+		{ plt-main1.c plt-main2.c plt-main3.c plt-main4.c} \
+		$pltdump \
+		"libibtplt-now-lib.so" \
+	    ] \
+	]
+
+	run_ld_link_exec_tests [list \
+	    [list \
+		"Run plt-main with -z ibtplt" \
+		"-Wl,--no-as-needed,-z,ibtplt tmpdir/plt-main1.o \
+		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
+		"" \
+		{ plt-main5.c } \
+		"plt-main-ibt" \
+		"plt-main.out" \
+	    ] \
+	    [list \
+		"Run plt-main with PIE and -z ibtplt" \
+		"-Wl,--no-as-needed,-z,ibtplt -pie tmpdir/plt-main1.o \
+		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
+		"" \
+		{ plt-main5.c } \
+		"plt-main-pie-ibt" \
+		"plt-main.out" \
+		"-fPIC" \
+	    ] \
+	    [list \
+		"Run plt-main with -z ibtplt -z now" \
+		"-Wl,--no-as-needed,-z,ibtplt,-z,now tmpdir/plt-main1.o \
+		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
+		"" \
+		{ plt-main5.c } \
+		"plt-main-ibt-now" \
+		"plt-main.out" \
+	    ] \
+	    [list \
+		"Run plt-main with PIE and -z ibtplt -z now" \
+		"-Wl,--no-as-needed,-z,ibtplt,-z,now -pie tmpdir/plt-main1.o \
+		 tmpdir/plt-main2.o tmpdir/plt-main3.o \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so" \
+		"" \
+		{ plt-main5.c } \
+		"plt-main-pie-ibt-now" \
+		"plt-main.out" \
+		"-fPIC" \
+	    ] \
+	    [list \
+		"Run plt-main with libibtplt-lib.so -z ibtplt" \
+		"-Wl,--no-as-needed,-z,ibtplt tmpdir/libibtplt-lib.so \
+		 tmpdir/libplt-lib.so" \
+		"" \
+		{ plt-main5.c } \
+		"plt-main-ibt-lib" \
+		"plt-main.out" \
+	    ] \
+	    [list \
+		"Run plt-main with libibtplt-lib.so -z ibtplt -z now" \
+		"-Wl,--no-as-needed,-z,ibtplt,-z,now \
+		 tmpdir/libibtplt-now-lib.so tmpdir/libplt-lib.so" \
+		"" \
+		{ plt-main5.c } \
+		"plt-main-ibt-now-lib" \
+		"plt-main.out" \
+	    ] \
+	]
+
+	if { [check_ifunc_attribute_available] } {
+	    run_ld_link_exec_tests [list \
+		[list \
+		    "Run pr21481a" \
+		    "$NOPIE_LDFLAGS -Wl,-z,ibtplt" \
+		    "" \
+		    { pr21481a.c pr21481b.S } \
+		    "pr21481a" \
+		    "pass.out" \
+		     "$NOPIE_CFLAGS" \
+		] \
+		[list \
+		    "Run pr21481b" \
+		    "$NOPIE_LDFLAGS -Wl,-z,ibtplt,-z,now" \
+		    "" \
+		    { pr21481a.c pr21481b.S } \
+		    "pr21481b" \
+		    "pass.out" \
+		    "$NOPIE_CFLAGS" \
+		] \
+	    ]
+	}
+    }
+
     undefined_weak "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS"
     undefined_weak "-fPIE" ""
     undefined_weak "-fPIE" "-pie"
@@ -1405,3 +1569,21 @@ run_dump_test "pr20830b-now"
 run_dump_test "pr21038a-now"
 run_dump_test "pr21038b-now"
 run_dump_test "pr21038c-now"
+run_dump_test "ibt-plt-1"
+run_dump_test "ibt-plt-1-x32"
+run_dump_test "ibt-plt-2a"
+run_dump_test "ibt-plt-2b"
+run_dump_test "ibt-plt-2c"
+run_dump_test "ibt-plt-2d"
+run_dump_test "ibt-plt-2a-x32"
+run_dump_test "ibt-plt-2b-x32"
+run_dump_test "ibt-plt-2c-x32"
+run_dump_test "ibt-plt-2d-x32"
+run_dump_test "ibt-plt-3a"
+run_dump_test "ibt-plt-3b"
+run_dump_test "ibt-plt-3c"
+run_dump_test "ibt-plt-3d"
+run_dump_test "ibt-plt-3a-x32"
+run_dump_test "ibt-plt-3b-x32"
+run_dump_test "ibt-plt-3c-x32"
+run_dump_test "ibt-plt-3d-x32"
