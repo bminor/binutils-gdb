@@ -1,3 +1,8 @@
+2017-06-22  Yao Qi  <yao.qi@linaro.org>
+
+	* regformats/i386/amd64-avx-mpx-avx512-pku-linux.dat: Regenerated.
+	* regformats/i386/amd64-avx-mpx-avx512-pku.dat: Regenerated.
+
 2017-06-22  Alan Hayward  <alan.hayward@arm.com>
 
 	* remote.c (cached_reg): Move from here...
