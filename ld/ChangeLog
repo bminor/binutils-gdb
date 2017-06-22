@@ -1,6 +1,12 @@
 2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21090
+	* testsuite/ld-elfvsb/elfvsb.exp (visibility_run): Pass
+	$NOPIE_CFLAGS if non-PIE is required.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21090
 	* testsuite/ld-i386/i386.exp: Pass $NOPIE_CFLAGS and
 	$NOPIE_LDFLAGS to "Run pr19031".
 
