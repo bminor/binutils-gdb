@@ -1,5 +1,18 @@
 2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/21090
+	* testsuite/ld-gc/gc.ex: Compile tmpdir/pr14265.o with
+	$NOPIE_CFLAGS.
+	* testsuite/ld-i386/i386.exp: Pass $NOPIE_CFLAGS and
+	$NOPIE_LDFLAGS if non-PIE is required.
+	* testsuite/ld-i386/no-plt.exp (NOPIE_CFLAGS): New.
+	(NOPIE_LDFLAGS): Likewise.
+	Pass $NOPIE_LDFLAGS if non-PIE is required.
+	* testsuite/ld-shared/shared.exp: Compile tmpdir/sh1np.o with
+	$NOPIE_CFLAGS.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* NEWS: Mention -z shstk and GNU_PROPERTY_X86_FEATURE_1_SHSTK.
 	* emulparams/cet.sh (PARSE_AND_LIST_OPTIONS_CET): Add "-z shstk".
 	(PARSE_AND_LIST_ARGS_CASE_Z_CET): Support "-z shstk".

@@ -732,7 +732,7 @@ if { [isnative]
 	] \
 	[list \
 	    "Build gotpc1" \
-	    "-Wl,--as-needed tmpdir/gotpc1.o tmpdir/got1d.so" \
+	    "$NOPIE_LDFLAGS -Wl,--as-needed tmpdir/gotpc1.o tmpdir/got1d.so" \
 	    "" \
 	    { dummy.s } \
 	    {{objdump {-dw} got1.dd}} \
@@ -994,7 +994,7 @@ if { [isnative]
 	] \
 	[list \
 	    "Run got1" \
-	    "tmpdir/got1d.so" \
+	    "$NOPIE_LDFLAGS tmpdir/got1d.so" \
 	    "" \
 	    { got1a.S got1b.c got1c.c } \
 	    "got1" \
@@ -1107,14 +1107,14 @@ if { [isnative]
 	] \
     ]
 
-    undefined_weak "" ""
-    undefined_weak "-fPIE" ""
+    undefined_weak "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS"
+    undefined_weak "-fPIE" "$NOPIE_LDFLAGS"
     undefined_weak "-fPIE" "-pie"
-    undefined_weak "-fPIE" "-z nodynamic-undefined-weak"
+    undefined_weak "-fPIE" "-z nodynamic-undefined-weak $NOPIE_LDFLAGS"
     undefined_weak "-fPIE" "-pie -z nodynamic-undefined-weak"
 }
 
-global NOPIE_LDFLAGS
+global NOPIE_CFLAGS NOPIE_LDFLAGS
 
 # Must be native with the C compiler and working IFUNC support,
 if { [isnative]
