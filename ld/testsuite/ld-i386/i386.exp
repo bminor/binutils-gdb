@@ -1235,6 +1235,32 @@ if { [isnative]
     }
 }
 
+# Must be native with the C compiler.
+if { [isnative]
+     && [istarget "i?86-*-*"]
+     && [which $CC] != 0 } {
+    run_ld_link_exec_tests [list \
+	[list \
+	    "Run weakundef1 without PIE" \
+	    "$NOPIE_LDFLAGS" \
+	    "" \
+	    { weakundef1.c } \
+	    "weakundef1pie" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run weakundef1 with PIE" \
+	    "-pie" \
+	    "" \
+	    { weakundef1.c } \
+	    "weakundef1pie" \
+	    "pass.out" \
+	    "-fPIE" \
+	] \
+    ]
+}
+
 if { !([istarget "i?86-*-linux*"]
        || [istarget "x86_64-*-linux*"]) } {
     return
