@@ -1,3 +1,23 @@
+2017-06-23  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::tocsave_loc_): New var.
+	(Target_powerpc::mark_pltcall, add_tocsave, tocsave_loc): New functions.
+	(Target_powerpc::Branch_info::tocsave_): New var.
+	(Target_powerpc::Branch_info::mark_pltcall): New function.
+	(Target_powerpc::Branch_info::make_stub): Pass tocsave_ to
+	add_plt_call_entry.
+	(Stub_table::Plt_stub_ent): Make public.  Add r2save_.
+	(Stub_table::add_plt_call_entry): Add bool tocsave_ param.  Set
+	r2save_.
+	(Stub_table::find_plt_call_entry): Return Plt_stub_ent*.  Adjust
+	use throughout.
+	(Stub_table::do_write): Conditionally output r2 save in plt stubs.
+	(Target_powerpc::Scan::local): Handle R_PPC64_TOCSAVE.
+	(Target_powerpc::Scan::global): Likewise.
+	(Target_powerpc::Relocate::relocate): Skip r2 save in plt call stub
+	with tocsave reloc.  Replace header tocsave nop with r2 save.
+	* symtab.h (struct Symbol_location_hash): Make public.
+
 2017-06-21  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Plt_stub_key): Rename from Plt_stub_ent.  Remove indx_.
