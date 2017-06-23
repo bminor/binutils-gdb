@@ -1,3 +1,9 @@
+2017-06-23  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21659
+	* strings.c (strings_file): Warn about attempts to run strings on
+	a directory.
+
 2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (decode_x86_feature): Decode
