@@ -1,3 +1,26 @@
+2017-06-22  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (arm_ext_v7m): Add ATTRIBUTE_UNUSED.
+
+2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (fpu_any): Defined from FPU_ANY.
+	(cpu_arch_ver): Add all architectures and sort by release date.
+	(have_ext_for_needed_feat_p): New.
+	(get_aeabi_cpu_arch_from_fset): New.
+	(aeabi_set_public_attributes): Call above function to determine
+	Tag_CPU_arch and Tag_CPU_arch_profile values.  Adapt Tag_ARM_ISA_use
+	and Tag_THUMB_ISA_use selection logic to check absence of feature bit
+	accordingly.
+	* testsuite/gas/arm/attr-march-armv1.d: Fix expected Tag_CPU_arch build
+	attribute value.
+	* testsuite/gas/arm/attr-march-armv2.d: Likewise.
+	* testsuite/gas/arm/attr-march-armv2a.d: Likewise.
+	* testsuite/gas/arm/attr-march-armv2s.d: Likewise.
+	* testsuite/gas/arm/attr-march-armv3.d: Likewise.
+	* testsuite/gas/arm/attr-march-armv3m.d: Likewise.
+	* testsuite/gas/arm/pr12198-2.d: Likewise.
+
 2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/i386/cet-intel.d: Updated.

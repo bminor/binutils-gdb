@@ -1,3 +1,9 @@
+2017-06-21  Alan Modra  <amodra@gmail.com>
+
+	* elfcpp.h (DT_PPC64_OPT): Define.
+	* powerpc.h (PPC64_OPT_TLS, PPC64_OPT_MULTI_TOC,
+	PPC64_OPT_LOCALENTRY): Define.
+
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

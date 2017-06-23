@@ -6014,12 +6014,12 @@ conjunction with BFD_RELOC_AARCH64_LD64_GOT_LO12_NC.  */
 
 /* Unsigned 12 bit byte offset for 64 bit load/store from the page of
 the GOT entry for this symbol.  Used in conjunction with
-BFD_RELOC_AARCH64_ADR_GOTPAGE.  Valid in LP64 ABI only.  */
+BFD_RELOC_AARCH64_ADR_GOT_PAGE.  Valid in LP64 ABI only.  */
   BFD_RELOC_AARCH64_LD64_GOT_LO12_NC,
 
 /* Unsigned 12 bit byte offset for 32 bit load/store from the page of
 the GOT entry for this symbol.  Used in conjunction with
-BFD_RELOC_AARCH64_ADR_GOTPAGE.  Valid in ILP32 ABI only.  */
+BFD_RELOC_AARCH64_ADR_GOT_PAGE.  Valid in ILP32 ABI only.  */
   BFD_RELOC_AARCH64_LD32_GOT_LO12_NC,
 
 /* Unsigned 16 bit byte offset for 64 bit load/store from the GOT entry

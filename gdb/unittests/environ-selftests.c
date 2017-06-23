@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "selftest.h"
 #include "common/environ.h"
+#include "common/diagnostics.h"
 
 namespace selftests {
 namespace gdb_environ_tests {
@@ -136,7 +137,14 @@ run_tests ()
   env.clear ();
   env.set ("A", "1");
   SELF_CHECK (strcmp (env.get ("A"), "1") == 0);
+
+  /* Some compilers warn about moving to self, but that's precisely what we want
+     to test here, so turn this warning off.  */
+  DIAGNOSTIC_PUSH
+  DIAGNOSTIC_IGNORE_SELF_MOVE
   env = std::move (env);
+  DIAGNOSTIC_POP
+
   SELF_CHECK (strcmp (env.get ("A"), "1") == 0);
   SELF_CHECK (strcmp (env.envp ()[0], "A=1") == 0);
   SELF_CHECK (env.envp ()[1] == NULL);

@@ -232,6 +232,14 @@ enum regcache_dump_what
   regcache_dump_remote
 };
 
+/* A (register_number, register_value) pair.  */
+
+typedef struct cached_reg
+{
+  int num;
+  gdb_byte *data;
+} cached_reg_t;
+
 /* The register cache for storing raw register values.  */
 
 class regcache

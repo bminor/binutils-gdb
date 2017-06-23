@@ -1,3 +1,172 @@
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run weakundef1 tests.
+	* testsuite/ld-i386/weakundef1.c: New file.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21090
+	* testsuite/ld-elfvsb/elfvsb.exp (visibility_run): Pass
+	$NOPIE_CFLAGS if non-PIE is required.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21090
+	* testsuite/ld-i386/i386.exp: Pass $NOPIE_CFLAGS and
+	$NOPIE_LDFLAGS to "Run pr19031".
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21090
+	* testsuite/ld-gc/gc.exp: Compile tmpdir/pr14265.o with
+	$NOPIE_CFLAGS.
+	* testsuite/ld-i386/i386.exp: Pass $NOPIE_CFLAGS and
+	$NOPIE_LDFLAGS if non-PIE is required.
+	* testsuite/ld-i386/no-plt.exp (NOPIE_CFLAGS): New.
+	(NOPIE_LDFLAGS): Likewise.
+	Pass $NOPIE_LDFLAGS if non-PIE is required.
+	* testsuite/ld-shared/shared.exp: Compile tmpdir/sh1np.o with
+	$NOPIE_CFLAGS.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention -z shstk and GNU_PROPERTY_X86_FEATURE_1_SHSTK.
+	* emulparams/cet.sh (PARSE_AND_LIST_OPTIONS_CET): Add "-z shstk".
+	(PARSE_AND_LIST_ARGS_CASE_Z_CET): Support "-z shstk".
+	* ld.texinfo: Document -z shstk.
+	* testsuite/ld-i386/i386.exp: Run SHSTK tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/property-x86-shstk.s: New file.
+	* testsuite/ld-i386/property-x86-shstk1a.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk1b.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk2.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk3a.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk3b.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk4.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk5.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk1a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk1a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk1b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk1b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk2-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk2.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk3a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk3a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk3b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk3b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk4-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk4.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk5-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk5.d: Likewise.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ELF_X86_DEPS): Add $(srcdir)/emulparams/cet.sh.
+	* Makefile.in: Regenerated.
+	* NEWS: Mention GNU_PROPERTY_X86_FEATURE_1_IBT, -z ibtplt
+	and -z ibt.
+	* emulparams/cet.sh: New file.
+	* testsuite/ld-i386/ibt-plt-1.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-1.s: Likewise.
+	* testsuite/ld-i386/ibt-plt-2.s: Likewise.
+	* testsuite/ld-i386/ibt-plt-2a.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-2b.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-2c.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-2d.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3.s: Likewise.
+	* testsuite/ld-i386/ibt-plt-3a.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3b.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3c.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3d.d: Likewise.
+	* testsuite/ld-i386/plt-main-ibt.dd: Likewise.
+	* testsuite/ld-i386/plt-pie-ibt.dd: Likewise.
+	* testsuite/ld-i386/property-x86-empty.s: Likewise.
+	* testsuite/ld-i386/property-x86-ibt.s: Likewise.
+	* testsuite/ld-i386/property-x86-ibt1a.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt1b.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt2.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt3a.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt3b.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt4.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt5.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-1-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-1.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-1.s: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2.s: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2a-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2a.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2b-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2b.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2c-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2c.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2d-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2d.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3.s: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3a-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3a.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3b-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3b.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3c-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3c.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3d-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3d.d: Likewise.
+	* testsuite/ld-x86-64/plt-main-ibt-now.rd: Likewise.
+	* testsuite/ld-x86-64/plt-main-ibt-x32.dd: Likewise.
+	* testsuite/ld-x86-64/plt-main-ibt.dd: Likewise.
+	* testsuite/ld-x86-64/property-x86-empty.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt1a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt1a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt1b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt1b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt2-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt2.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt4-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt4.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt5-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt5.d: Likewise.
+	* emulparams/elf32_x86_64.sh: Source emulparams/cet.sh.
+	(TINY_READONLY_SECTION): Add .plt.sec.
+	* emulparams/elf_i386.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Source emulparams/cet.sh.
+	* ld.texinfo: Document -z ibtplt and -z ibt.
+	* testsuite/ld-i386/i386.exp: Run IBT and IBT PLT tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-x86-64/pr21481b.S (check): Updated for x32.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21090
+	* testsuite/ld-elf/shared.exp: Pass $NOPIE_CFLAGS and
+	$NOPIE_LDFLAGS if non-PIE is required.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21090
+	* testsuite/ld-scripts/crossref.exp: Also pass $NOPIE_CFLAGS
+	to CC.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21090
+	* testsuite/ld-size/size.exp: Pass $NOPIE_LDFLAGS to size-4a,
+	size-4b, size-5a, size-5b, size-6 and size-8 tests.
+	* testsuite/ld-srec/srec.exp (NOPIE_CFLAGS): New.
+	(NOPIE_LDFLAGS): Likewise.
+	(CC): Add $NOPIE_CFLAGS $NOPIE_LDFLAGS.
+	(CXX): Likewise.
+	* testsuite/ld-x86-64/no-plt.exp (NOPIE_CFLAGS): New.
+	(NOPIE_LDFLAGS): Likewise.
+	Pass $NOPIE_LDFLAGS to "No PLT (dynamic 1a)",
+	"No PLT (dynamic 1c)" and "Run pr20253-2f".
+	* testsuite/ld-x86-64/x86-64.exp: Pass $NOPIE_LDFLAGS to
+	"Build gotpcrel1" and "Run pr19031".
+
 2017-06-21  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/powerpc.exp: Run TOCSAVE tests.

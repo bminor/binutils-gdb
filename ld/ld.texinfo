@@ -34,6 +34,7 @@
 @set POWERPC
 @set POWERPC64
 @set Renesas
+@set S/390
 @set SPU
 @set TICOFF
 @set WIN32
@@ -157,6 +158,9 @@ in the section entitled ``GNU Free Documentation License''.
 @end ifset
 @ifset POWERPC64
 * PowerPC64 ELF64::             ld and PowerPC64 64-bit ELF Support
+@end ifset
+@ifset S/390
+* S/390 ELF::			ld and S/390 ELF Support
 @end ifset
 @ifset SPU
 * SPU ELF::			ld and SPU ELF Support
@@ -1260,6 +1264,20 @@ to a locally defined function, foo, via its GOT slot.
 @option{call-nop=prefix-@var{byte}} generates @code{@var{byte} call foo}.
 @option{call-nop=suffix-@var{byte}} generates @code{call foo @var{byte}}.
 Supported for i386 and x86_64.
+
+@item ibtplt
+Generate Intel Indirect Branch Tracking (IBT) enabled PLT entries.
+Supported for Linux/i386 and Linux/x86_64.
+
+@item IBT
+Generate GNU_PROPERTY_X86_FEATURE_1_IBT in .note.gnu.property section
+to indicate compatibility with IBT.  This also implies @option{ibtplt}.
+Supported for Linux/i386 and Linux/x86_64.
+
+@item shstk
+Generate GNU_PROPERTY_X86_FEATURE_1_SHSTK in .note.gnu.property section
+to indicate compatibility with Intel Shadow Stack.  Supported for
+Linux/i386 and Linux/x86_64.
 
 @end table
 
@@ -6551,6 +6569,9 @@ functionality are not listed.
 @ifset POWERPC64
 * PowerPC64 ELF64::		@command{ld} and PowerPC64 64-bit ELF Support
 @end ifset
+@ifset S/390
+* S/390 ELF::			@command{ld} and S/390 ELF Support
+@end ifset
 @ifset SPU
 * SPU ELF::			@command{ld} and SPU ELF Support
 @end ifset
@@ -7579,6 +7600,30 @@ barrier in the call stub, or use LD_BIND_NOW=1.  By default, @code{ld}
 looks for calls to commonly used functions that create threads, and if
 seen, adds the necessary barriers.  Use these options to change the
 default behaviour.
+@end table
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset S/390
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node S/390 ELF
+@section @command{ld} and S/390 ELF Support
+
+@cindex S/390 ELF options
+@table @option
+
+@cindex S/390
+@kindex --s390-pgste
+@item --s390-pgste
+This option marks the result file with a @code{PT_S390_PGSTE}
+segment.  The Linux kernel is supposed to allocate 4k page tables for
+binaries marked that way.
 @end table
 
 @ifclear GENERIC

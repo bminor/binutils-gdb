@@ -203,7 +203,7 @@ static const arm_feature_set arm_ext_v7 = ARM_FEATURE_CORE_LOW (ARM_EXT_V7);
 static const arm_feature_set arm_ext_v7a = ARM_FEATURE_CORE_LOW (ARM_EXT_V7A);
 static const arm_feature_set arm_ext_v7r = ARM_FEATURE_CORE_LOW (ARM_EXT_V7R);
 #ifdef OBJ_ELF
-static const arm_feature_set arm_ext_v7m = ARM_FEATURE_CORE_LOW (ARM_EXT_V7M);
+static const arm_feature_set ATTRIBUTE_UNUSED arm_ext_v7m = ARM_FEATURE_CORE_LOW (ARM_EXT_V7M);
 #endif
 static const arm_feature_set arm_ext_v8 = ARM_FEATURE_CORE_LOW (ARM_EXT_V8);
 static const arm_feature_set arm_ext_m =
@@ -240,6 +240,7 @@ static const arm_feature_set arm_ext_v8_3 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
+static const arm_feature_set fpu_any = FPU_ANY;
 static const arm_feature_set arm_arch_full ATTRIBUTE_UNUSED = ARM_FEATURE (-1, -1, -1);
 static const arm_feature_set arm_arch_t2 = ARM_ARCH_THUMB2;
 static const arm_feature_set arm_arch_none = ARM_ARCH_NONE;
@@ -26558,30 +26559,61 @@ typedef struct
   arm_feature_set flags;
 } cpu_arch_ver_table;
 
-/* Mapping from CPU features to EABI CPU arch values.  As a general rule, table
-   must be sorted least features first but some reordering is needed, eg. for
-   Thumb-2 instructions to be detected as coming from ARMv6T2.  */
+/* Mapping from CPU features to EABI CPU arch values.  Table must be sorted
+   chronologically for architectures, with an exception for ARMv6-M and
+   ARMv6S-M due to legacy reasons.  No new architecture should have a
+   special case.  This allows for build attribute selection results to be
+   stable when new architectures are added.  */
 static const cpu_arch_ver_table cpu_arch_ver[] =
 {
+    {0, ARM_ARCH_V1},
+    {0, ARM_ARCH_V2},
+    {0, ARM_ARCH_V2S},
+    {0, ARM_ARCH_V3},
+    {0, ARM_ARCH_V3M},
+    {1, ARM_ARCH_V4xM},
     {1, ARM_ARCH_V4},
+    {2, ARM_ARCH_V4TxM},
     {2, ARM_ARCH_V4T},
+    {3, ARM_ARCH_V5xM},
     {3, ARM_ARCH_V5},
+    {3, ARM_ARCH_V5TxM},
     {3, ARM_ARCH_V5T},
+    {4, ARM_ARCH_V5TExP},
     {4, ARM_ARCH_V5TE},
     {5, ARM_ARCH_V5TEJ},
     {6, ARM_ARCH_V6},
-    {9, ARM_ARCH_V6K},
     {7, ARM_ARCH_V6Z},
+    {7, ARM_ARCH_V6KZ},
+    {9, ARM_ARCH_V6K},
+    {8, ARM_ARCH_V6T2},
+    {8, ARM_ARCH_V6KT2},
+    {8, ARM_ARCH_V6ZT2},
+    {8, ARM_ARCH_V6KZT2},
+
+    /* When assembling a file with only ARMv6-M or ARMv6S-M instruction, GNU as
+       always selected build attributes to match those of ARMv6-M
+       (resp. ARMv6S-M).  However, due to these architectures being a strict
+       subset of ARMv7-M in terms of instructions available, ARMv7-M attributes
+       would be selected when fully respecting chronology of architectures.
+       It is thus necessary to make a special case of ARMv6-M and ARMv6S-M and
+       move them before ARMv7 architectures.  */
     {11, ARM_ARCH_V6M},
     {12, ARM_ARCH_V6SM},
-    {8, ARM_ARCH_V6T2},
-    {10, ARM_ARCH_V7VE},
+
+    {10, ARM_ARCH_V7},
+    {10, ARM_ARCH_V7A},
     {10, ARM_ARCH_V7R},
     {10, ARM_ARCH_V7M},
+    {10, ARM_ARCH_V7VE},
+    {13, ARM_ARCH_V7EM},
     {14, ARM_ARCH_V8A},
+    {14, ARM_ARCH_V8_1A},
+    {14, ARM_ARCH_V8_2A},
+    {14, ARM_ARCH_V8_3A},
     {16, ARM_ARCH_V8M_BASE},
     {17, ARM_ARCH_V8M_MAIN},
-    {0, ARM_ARCH_NONE}
+    {-1, ARM_ARCH_NONE}
 };
 
 /* Set an attribute if it has not already been set by the user.  */
@@ -26603,18 +26635,162 @@ aeabi_set_attribute_string (int tag, const char *value)
     bfd_elf_add_proc_attr_string (stdoutput, tag, value);
 }
 
+/* Return whether features in the *NEEDED feature set are available via
+   extensions for the architecture whose feature set is *ARCH_FSET.  */
+static bfd_boolean
+have_ext_for_needed_feat_p (const arm_feature_set *arch_fset,
+			    const arm_feature_set *needed)
+{
+  int i, nb_allowed_archs;
+  arm_feature_set ext_fset;
+  const struct arm_option_extension_value_table *opt;
+
+  ext_fset = arm_arch_none;
+  for (opt = arm_extensions; opt->name != NULL; opt++)
+    {
+      /* Extension does not provide any feature we need.  */
+      if (!ARM_CPU_HAS_FEATURE (*needed, opt->merge_value))
+	continue;
+
+      nb_allowed_archs =
+	sizeof (opt->allowed_archs) / sizeof (opt->allowed_archs[0]);
+      for (i = 0; i < nb_allowed_archs; i++)
+	{
+	  /* Empty entry.  */
+	  if (ARM_FEATURE_EQUAL (opt->allowed_archs[i], arm_arch_any))
+	    break;
+
+	  /* Extension is available, add it.  */
+	  if (ARM_FSET_CPU_SUBSET (opt->allowed_archs[i], *arch_fset))
+	    ARM_MERGE_FEATURE_SETS (ext_fset, ext_fset, opt->merge_value);
+	}
+    }
+
+  /* Can we enable all features in *needed?  */
+  return ARM_FSET_CPU_SUBSET (*needed, ext_fset);
+}
+
+/* Select value for Tag_CPU_arch and Tag_CPU_arch_profile build attributes for
+   a given architecture feature set *ARCH_EXT_FSET including extension feature
+   set *EXT_FSET.  Selection logic used depend on EXACT_MATCH:
+   - if true, check for an exact match of the architecture modulo extensions;
+   - otherwise, select build attribute value of the first superset
+     architecture released so that results remains stable when new architectures
+     are added.
+   For -march/-mcpu=all the build attribute value of the most featureful
+   architecture is returned.  Tag_CPU_arch_profile result is returned in
+   PROFILE.  */
+static int
+get_aeabi_cpu_arch_from_fset (const arm_feature_set *arch_ext_fset,
+			      const arm_feature_set *ext_fset,
+			      char *profile, int exact_match)
+{
+  arm_feature_set arch_fset;
+  const cpu_arch_ver_table *p_ver, *p_ver_ret = NULL;
+
+  /* Select most featureful architecture with all its extensions if building
+     for -march=all as the feature sets used to set build attributes.  */
+  if (ARM_FEATURE_EQUAL (*arch_ext_fset, arm_arch_any))
+    {
+      /* Force revisiting of decision for each new architecture.  */
+      gas_assert (MAX_TAG_CPU_ARCH <= TAG_CPU_ARCH_V8M_MAIN);
+      *profile = 'A';
+      return TAG_CPU_ARCH_V8;
+    }
+
+  ARM_CLEAR_FEATURE (arch_fset, *arch_ext_fset, *ext_fset);
+
+  for (p_ver = cpu_arch_ver; p_ver->val != -1; p_ver++)
+    {
+      arm_feature_set known_arch_fset;
+
+      ARM_CLEAR_FEATURE (known_arch_fset, p_ver->flags, fpu_any);
+      if (exact_match)
+	{
+	  /* Base architecture match user-specified architecture and
+	     extensions, eg. ARMv6S-M matching -march=armv6-m+os.  */
+	  if (ARM_FEATURE_EQUAL (*arch_ext_fset, known_arch_fset))
+	    {
+	      p_ver_ret = p_ver;
+	      goto found;
+	    }
+	  /* Base architecture match user-specified architecture only
+	     (eg. ARMv6-M in the same case as above).  Record it in case we
+	     find a match with above condition.  */
+	  else if (p_ver_ret == NULL
+		   && ARM_FEATURE_EQUAL (arch_fset, known_arch_fset))
+	    p_ver_ret = p_ver;
+	}
+      else
+	{
+
+	  /* Architecture has all features wanted.  */
+	  if (ARM_FSET_CPU_SUBSET (arch_fset, known_arch_fset))
+	    {
+	      arm_feature_set added_fset;
+
+	      /* Compute features added by this architecture over the one
+		 recorded in p_ver_ret.  */
+	      if (p_ver_ret != NULL)
+		ARM_CLEAR_FEATURE (added_fset, known_arch_fset,
+				   p_ver_ret->flags);
+	      /* First architecture that match incl. with extensions, or the
+		 only difference in features over the recorded match is
+		 features that were optional and are now mandatory.  */
+	      if (p_ver_ret == NULL
+		  || ARM_FSET_CPU_SUBSET (added_fset, arch_fset))
+		{
+		  p_ver_ret = p_ver;
+		  goto found;
+		}
+	    }
+	  else if (p_ver_ret == NULL)
+	    {
+	      arm_feature_set needed_ext_fset;
+
+	      ARM_CLEAR_FEATURE (needed_ext_fset, arch_fset, known_arch_fset);
+
+	      /* Architecture has all features needed when using some
+		 extensions.  Record it and continue searching in case there
+		 exist an architecture providing all needed features without
+		 the need for extensions (eg. ARMv6S-M Vs ARMv6-M with
+		 OS extension).  */
+	      if (have_ext_for_needed_feat_p (&known_arch_fset,
+					      &needed_ext_fset))
+		p_ver_ret = p_ver;
+	    }
+	}
+    }
+
+  if (p_ver_ret == NULL)
+    return -1;
+
+found:
+  /* Tag_CPU_arch_profile.  */
+  if (ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v7a)
+      || ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v8)
+      || (ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_atomics)
+	  && !ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v8m_m_only)))
+    *profile = 'A';
+  else if (ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v7r))
+    *profile = 'R';
+  else if (ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_m))
+    *profile = 'M';
+  else
+    *profile = '\0';
+  return p_ver_ret->val;
+}
+
 /* Set the public EABI object attributes.  */
 static void
 aeabi_set_public_attributes (void)
 {
-  int arch;
   char profile;
+  int arch = -1;
   int virt_sec = 0;
   int fp16_optional = 0;
-  arm_feature_set flags;
-  arm_feature_set tmp;
-  arm_feature_set arm_arch_v8m_base = ARM_ARCH_V8M_BASE;
-  const cpu_arch_ver_table *p;
+  int skip_exact_match = 0;
+  arm_feature_set flags, flags_arch, flags_ext;
 
   /* Autodetection mode, choose the architecture based the instructions
      actually used.  */
@@ -26647,45 +26823,29 @@ aeabi_set_public_attributes (void)
   /* Allow the user to override the reported architecture.  */
   if (object_arch)
     {
-      ARM_CLEAR_FEATURE (flags, flags, arm_arch_any);
-      ARM_MERGE_FEATURE_SETS (flags, flags, *object_arch);
+      ARM_CLEAR_FEATURE (flags_arch, *object_arch, fpu_any);
+      flags_ext = arm_arch_none;
     }
-
-  tmp = flags;
-  arch = 0;
-  for (p = cpu_arch_ver; p->val; p++)
+  else
     {
-      if (ARM_CPU_HAS_FEATURE (tmp, p->flags))
-	{
-	  arch = p->val;
-	  ARM_CLEAR_FEATURE (tmp, tmp, p->flags);
-	}
+      ARM_CLEAR_FEATURE (flags_arch, flags, fpu_any);
+      flags_ext = dyn_mcpu_ext_opt ? *dyn_mcpu_ext_opt : arm_arch_none;
+      skip_exact_match = ARM_FEATURE_EQUAL (selected_cpu, arm_arch_any);
     }
 
-  /* The table lookup above finds the last architecture to contribute
-     a new feature.  Unfortunately, Tag13 is a subset of the union of
-     v6T2 and v7-M, so it is never seen as contributing a new feature.
-     We can not search for the last entry which is entirely used,
-     because if no CPU is specified we build up only those flags
-     actually used.  Perhaps we should separate out the specified
-     and implicit cases.  Avoid taking this path for -march=all by
-     checking for contradictory v7-A / v7-M features.  */
-  if (arch == TAG_CPU_ARCH_V7
-      && !ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a)
-      && ARM_CPU_HAS_FEATURE (flags, arm_ext_v7m)
-      && ARM_CPU_HAS_FEATURE (flags, arm_ext_v6_dsp))
-    arch = TAG_CPU_ARCH_V7E_M;
-
-  ARM_CLEAR_FEATURE (tmp, flags, arm_arch_v8m_base);
-  if (arch == TAG_CPU_ARCH_V8M_BASE && ARM_CPU_HAS_FEATURE (tmp, arm_arch_any))
-    arch = TAG_CPU_ARCH_V8M_MAIN;
-
-  /* In cpu_arch_ver ARMv8-A is before ARMv8-M for atomics to be detected as
-     coming from ARMv8-A.  However, since ARMv8-A has more instructions than
-     ARMv8-M, -march=all must be detected as ARMv8-A.  */
-  if (arch == TAG_CPU_ARCH_V8M_MAIN
-      && ARM_FEATURE_CORE_EQUAL (selected_cpu, arm_arch_any))
-    arch = TAG_CPU_ARCH_V8;
+  /* When this function is run again after relaxation has happened there is no
+     way to determine whether an architecture or CPU was specified by the user:
+     - selected_cpu is set above for relaxation to work;
+     - march_cpu_opt is not set if only -mcpu or .cpu is used;
+     - mcpu_cpu_opt is set to arm_arch_any for autodetection.
+     Therefore, if not in -march=all case we first try an exact match and fall
+     back to autodetection.  */
+  if (!skip_exact_match)
+    arch = get_aeabi_cpu_arch_from_fset (&flags_arch, &flags_ext, &profile, 1);
+  if (arch == -1)
+    arch = get_aeabi_cpu_arch_from_fset (&flags_arch, &flags_ext, &profile, 0);
+  if (arch == -1)
+    as_bad (_("no architecture contains all the instructions used\n"));
 
   /* Tag_CPU_name.  */
   if (selected_cpu_name[0])
@@ -26708,18 +26868,6 @@ aeabi_set_public_attributes (void)
   aeabi_set_attribute_int (Tag_CPU_arch, arch);
 
   /* Tag_CPU_arch_profile.  */
-  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a)
-      || ARM_CPU_HAS_FEATURE (flags, arm_ext_v8)
-      || (ARM_CPU_HAS_FEATURE (flags, arm_ext_atomics)
-	  && !ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m_m_only)))
-    profile = 'A';
-  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7r))
-    profile = 'R';
-  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_m))
-    profile = 'M';
-  else
-    profile = '\0';
-
   if (profile != '\0')
     aeabi_set_attribute_int (Tag_CPU_arch_profile, profile);
 
@@ -26727,14 +26875,15 @@ aeabi_set_public_attributes (void)
   if (dyn_mcpu_ext_opt && ARM_CPU_HAS_FEATURE (*dyn_mcpu_ext_opt, arm_ext_dsp))
     aeabi_set_attribute_int (Tag_DSP_extension, 1);
 
+  ARM_CLEAR_FEATURE (flags_arch, flags, fpu_any);
   /* Tag_ARM_ISA_use.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v1)
-      || arch == 0)
+      || ARM_FEATURE_ZERO (flags_arch))
     aeabi_set_attribute_int (Tag_ARM_ISA_use, 1);
 
   /* Tag_THUMB_ISA_use.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v4t)
-      || arch == 0)
+      || ARM_FEATURE_ZERO (flags_arch))
     {
       int thumb_isa_use;
 

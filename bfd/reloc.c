@@ -7120,13 +7120,13 @@ ENUM
 ENUMDOC
   Unsigned 12 bit byte offset for 64 bit load/store from the page of
   the GOT entry for this symbol.  Used in conjunction with
-  BFD_RELOC_AARCH64_ADR_GOTPAGE.  Valid in LP64 ABI only.
+  BFD_RELOC_AARCH64_ADR_GOT_PAGE.  Valid in LP64 ABI only.
 ENUM
   BFD_RELOC_AARCH64_LD32_GOT_LO12_NC
 ENUMDOC
   Unsigned 12 bit byte offset for 32 bit load/store from the page of
   the GOT entry for this symbol.  Used in conjunction with
-  BFD_RELOC_AARCH64_ADR_GOTPAGE.  Valid in ILP32 ABI only.
+  BFD_RELOC_AARCH64_ADR_GOT_PAGE.  Valid in ILP32 ABI only.
  ENUM
   BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC
 ENUMDOC

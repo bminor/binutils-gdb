@@ -3726,6 +3726,16 @@ get_arm_segment_type (unsigned long type)
 }
 
 static const char *
+get_s390_segment_type (unsigned long type)
+{
+  switch (type)
+    {
+    case PT_S390_PGSTE: return "S390_PGSTE";
+    default:            return NULL;
+    }
+}
+
+static const char *
 get_mips_segment_type (unsigned long type)
 {
   switch (type)
@@ -3857,6 +3867,10 @@ get_segment_type (unsigned long p_type)
 	      break;
 	    case EM_TI_C6000:
 	      result = get_tic6x_segment_type (p_type);
+	      break;
+	    case EM_S390:
+	    case EM_S390_OLD:
+	      result = get_s390_segment_type (p_type);
 	      break;
 	    default:
 	      result = NULL;
@@ -16338,6 +16352,47 @@ decode_x86_isa (unsigned int bitmask)
 }
 
 static void
+decode_x86_feature (unsigned int type, unsigned int bitmask)
+{
+  while (bitmask)
+    {
+      unsigned int bit = bitmask & (- bitmask);
+
+      bitmask &= ~ bit;
+      switch (bit)
+	{
+	case GNU_PROPERTY_X86_FEATURE_1_IBT:
+	  switch (type)
+	    {
+	    case GNU_PROPERTY_X86_FEATURE_1_AND:
+	      printf ("IBT");
+	      break;
+	    default:
+	      /* This should never happen.  */
+	      abort ();
+	    }
+	  break;
+	case GNU_PROPERTY_X86_FEATURE_1_SHSTK:
+	  switch (type)
+	    {
+	    case GNU_PROPERTY_X86_FEATURE_1_AND:
+	      printf ("SHSTK");
+	      break;
+	    default:
+	      /* This should never happen.  */
+	      abort ();
+	    }
+	  break;
+	default:
+	  printf (_("<unknown: %x>"), bit);
+	  break;
+	}
+      if (bitmask)
+	printf (", ");
+    }
+}
+
+static void
 print_gnu_property_note (Elf_Internal_Note * pnote)
 {
   unsigned char * ptr = (unsigned char *) pnote->descdata;
@@ -16389,6 +16444,14 @@ print_gnu_property_note (Elf_Internal_Note * pnote)
 		    printf (_("<corrupt length: %#x> "), datasz);
 		  else
 		    decode_x86_isa (byte_get (ptr, 4));
+		  goto next;
+
+		case GNU_PROPERTY_X86_FEATURE_1_AND:
+		  printf ("x86 feature: ");
+		  if (datasz != 4)
+		    printf (_("<corrupt length: %#x> "), datasz);
+		  else
+		    decode_x86_feature (type, byte_get (ptr, 4));
 		  goto next;
 
 		default:

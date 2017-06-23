@@ -73,15 +73,6 @@ typedef struct
 /* The data we keep for a frame we can unwind: frame ID and an array of
    (register_number, register_value) pairs.  */
 
-struct reg_info
-{
-  /* Register number.  */
-  int number;
-
-  /* Register data bytes pointer.  */
-  gdb_byte data[MAX_REGISTER_SIZE];
-};
-
 typedef struct
 {
   /* Frame ID.  */
@@ -93,7 +84,7 @@ typedef struct
   /* Length of the `reg' array below.  */
   int reg_count;
 
-  struct reg_info reg[];
+  cached_reg_t reg[];
 } cached_frame_info;
 
 extern PyTypeObject pending_frame_object_type
@@ -483,14 +474,14 @@ pyuw_prev_register (struct frame_info *this_frame, void **cache_ptr,
                     int regnum)
 {
   cached_frame_info *cached_frame = (cached_frame_info *) *cache_ptr;
-  struct reg_info *reg_info = cached_frame->reg;
-  struct reg_info *reg_info_end = reg_info + cached_frame->reg_count;
+  cached_reg_t *reg_info = cached_frame->reg;
+  cached_reg_t *reg_info_end = reg_info + cached_frame->reg_count;
 
   TRACE_PY_UNWIND (1, "%s (frame=%p,...,reg=%d)\n", __FUNCTION__, this_frame,
                    regnum);
   for (; reg_info < reg_info_end; ++reg_info)
     {
-      if (regnum == reg_info->number)
+      if (regnum == reg_info->num)
         return frame_unwind_got_bytes (this_frame, regnum, reg_info->data);
     }
 
@@ -580,13 +571,14 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
         struct value *value = value_object_to_value (reg->value);
         size_t data_size = register_size (gdbarch, reg->number);
 
-        cached_frame->reg[i].number = reg->number;
+	cached_frame->reg[i].num = reg->number;
 
         /* `value' validation was done before, just assert.  */
         gdb_assert (value != NULL);
         gdb_assert (data_size == TYPE_LENGTH (value_type (value)));
         gdb_assert (data_size <= MAX_REGISTER_SIZE);
 
+	cached_frame->reg[i].data = (gdb_byte *) xmalloc (data_size);
         memcpy (cached_frame->reg[i].data, value_contents (value), data_size);
       }
   }
@@ -601,6 +593,11 @@ static void
 pyuw_dealloc_cache (struct frame_info *this_frame, void *cache)
 {
   TRACE_PY_UNWIND (3, "%s: enter", __FUNCTION__);
+  cached_frame_info *cached_frame = (cached_frame_info *) cache;
+
+  for (int i = 0; cached_frame->reg_count; i++)
+    xfree (cached_frame->reg[i].data);
+
   xfree (cache);
 }
 

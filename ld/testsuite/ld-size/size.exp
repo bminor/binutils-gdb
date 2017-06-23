@@ -234,7 +234,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run size-4a" \
-	"" \
+	"$NOPIE_LDFLAGS" \
 	"" \
 	{size-4a.c size-4b.c} \
 	"size-4a" \
@@ -243,7 +243,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run size-4b" \
-	"" \
+	"$NOPIE_LDFLAGS" \
 	"" \
 	{size-4b.c size-4a.c} \
 	"size-4b" \
@@ -252,7 +252,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run size-5a" \
-	"" \
+	"$NOPIE_LDFLAGS" \
 	"" \
 	{size-5a.c size-5b.c} \
 	"size-5a" \
@@ -261,7 +261,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run size-5b" \
-	"" \
+	"$NOPIE_LDFLAGS" \
 	"" \
 	{size-5b.c size-5a.c} \
 	"size-5b" \
@@ -270,7 +270,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run size-6" \
-	"-Wl,--no-as-needed tmpdir/libsize-6b.so" \
+	"$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libsize-6b.so" \
 	"" \
 	{size-6a.c} \
 	"size-6" \
@@ -279,7 +279,8 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run size-8" \
-	"-Wl,--no-as-needed,--hash-styl=gnu tmpdir/libsize-8.so" \
+	"$NOPIE_LDFLAGS -Wl,--no-as-needed,--hash-styl=gnu \
+	 tmpdir/libsize-8.so" \
 	"" \
 	{size-8a.c} \
 	"size-8" \

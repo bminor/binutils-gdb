@@ -446,6 +446,11 @@ strings_file (char *file)
 		   file, strerror (errno));
       return FALSE;
     }
+  else if (S_ISDIR (st.st_mode))
+    {
+      non_fatal (_("Warning: '%s' is a directory"), file);
+      return FALSE;
+    }
 
   /* If we weren't told to scan the whole file,
      try to open it as an object file and only look at

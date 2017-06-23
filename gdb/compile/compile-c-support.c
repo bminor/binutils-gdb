@@ -26,6 +26,7 @@
 #include "macroscope.h"
 #include "regcache.h"
 #include "common/function-view.h"
+#include "common/preprocessor.h"
 
 /* See compile-internal.h.  */
 
@@ -64,9 +65,6 @@ c_get_range_decl_name (const struct dynamic_prop *prop)
 }
 
 
-
-#define STR(x) #x
-#define STRINGIFY(x) STR(x)
 
 /* Helper function for c_get_compile_context.  Open the GCC front-end
    shared library and return the symbol specified by the current

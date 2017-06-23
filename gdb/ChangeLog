@@ -1,3 +1,48 @@
+2017-06-23  Alan Hayward  <alan.hayward@arm.com>
+
+	* xtensa-tdep.c (XTENSA_MAX_REGISTER_SIZE): Add.
+	(xtensa_register_write_masked): Use XTENSA_MAX_REGISTER_SIZE.
+	(xtensa_register_read_masked): Likewise.
+
+2017-06-22  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* common/environ.c (gdb_environ::unset): Update comment.
+
+2017-06-22  Alan Hayward  <alan.hayward@arm.com>
+
+	* python/py-unwind.c (pyuw_sniffer): Allocate space for
+	registers.
+
+2017-06-22  Alan Hayward  <alan.hayward@arm.com>
+
+	* record-full.c (record_full_exec_insn): Use byte_vector.
+
+2017-06-22  Yao Qi  <yao.qi@linaro.org>
+
+	* regformats/i386/amd64-avx-mpx-avx512-pku-linux.dat: Regenerated.
+	* regformats/i386/amd64-avx-mpx-avx512-pku.dat: Regenerated.
+
+2017-06-22  Alan Hayward  <alan.hayward@arm.com>
+
+	* remote.c (cached_reg): Move from here...
+	* regcache.h (cached_reg): ...to here.
+	* python/py-unwind.c (struct reg_info): Remove.
+	(cached_frame_info): Use cached_reg_t.
+	(pyuw_prev_register): Likewise.
+	(pyuw_sniffer): Use cached_reg_t and allocate registers.
+	(pyuw_dealloc_cache): Free all registers.
+
+2017-06-22  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	* unittests/environ-selftests.c (run_tests): Ignore -Wself-move
+	warning.
+	* common/diagnostics.h: New file.
+
+2017-06-22  Pedro Alves  <palves@redhat.com>
+
+	* common/agent.h: Add include guards.
+
 2017-06-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* target.h (struct target_ops) <to_xfer_partial>: Update doc to
