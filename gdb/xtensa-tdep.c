@@ -120,6 +120,9 @@ static unsigned int xtensa_debug_level = 0;
 #define PS_WOE			(1<<18)
 #define PS_EXC			(1<<4)
 
+/* Big enough to hold the size of the largest register in bytes.  */
+#define XTENSA_MAX_REGISTER_SIZE	64
+
 static int
 windowing_enabled (struct gdbarch *gdbarch, unsigned int ps)
 {
@@ -370,7 +373,7 @@ static void
 xtensa_register_write_masked (struct regcache *regcache,
 			      xtensa_register_t *reg, const gdb_byte *buffer)
 {
-  unsigned int value[(MAX_REGISTER_SIZE + 3) / 4];
+  unsigned int value[(XTENSA_MAX_REGISTER_SIZE + 3) / 4];
   const xtensa_mask_t *mask = reg->mask;
 
   int shift = 0;		/* Shift for next mask (mod 32).  */
@@ -454,7 +457,7 @@ static enum register_status
 xtensa_register_read_masked (struct regcache *regcache,
 			     xtensa_register_t *reg, gdb_byte *buffer)
 {
-  unsigned int value[(MAX_REGISTER_SIZE + 3) / 4];
+  unsigned int value[(XTENSA_MAX_REGISTER_SIZE + 3) / 4];
   const xtensa_mask_t *mask = reg->mask;
 
   int shift = 0;
