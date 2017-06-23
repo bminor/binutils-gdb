@@ -1,5 +1,24 @@
 2017-06-23  Alan Modra  <amodra@gmail.com>
 
+	* options.h (General_options): Add plt_localentry.
+	* powerpc.cc (Target_powerpc::st_other): New function.
+	(Target_powerpc::plt_localentry0_, plt_localentry0_init_,
+	has_localentry0_): New vars.
+	(Target_powerpc::plt_localentry0, set_has_localentry0,
+	is_elfv2_localentry0): New functions.
+	(Target_powerpc::Branch_info::mark_pltcall): Don't set tocsave or
+	return true for localentry:0 calls.
+	(Stub_table::Plt_stub_ent::localentry0_): New var.
+	(Stub_table::add_plt_call_entry): Set localentry0_ and has_localentry0_.
+	Don't set r2save_ for localentry:0 calls.
+	(Output_data_glink::do_write): Save r2 in __glink_PLTresolve for elfv2.
+	(Target_powerpc::scan_relocs): Default plt_localentry0_.
+	(Target_powerpc::do_finalize_sections): Set DT_PPC64_OPT.
+	(Target_powerpc::Relocate::relocate): Don't require nop following
+	calls for localentry:0 plt calls, and don't change nop.
+
+2017-06-23  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc::tocsave_loc_): New var.
 	(Target_powerpc::mark_pltcall, add_tocsave, tocsave_loc): New functions.
 	(Target_powerpc::Branch_info::tocsave_): New var.

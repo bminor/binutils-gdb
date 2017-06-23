@@ -775,6 +775,9 @@ enum DT
   DT_PPC64_OPD = 0x70000001,
   DT_PPC64_OPDSZ = 0x70000002,
 
+  // Specify whether various optimisations are possible.
+  DT_PPC64_OPT = 0x70000003,
+
   // The index of an STT_SPARC_REGISTER symbol within the DT_SYMTAB
   // symbol table.  One dynamic entry exists for every STT_SPARC_REGISTER
   // symbol in the symbol table.
