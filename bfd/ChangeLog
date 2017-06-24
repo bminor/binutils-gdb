@@ -1,3 +1,7 @@
+2017-06-25  Sergei Trofimovich  <slyfox@gentoo.org>
+
+	* elf.c (find_link): Bounds check "hint".
+
 2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf32-arm.c (using_thumb_only): Update list of architectures in
