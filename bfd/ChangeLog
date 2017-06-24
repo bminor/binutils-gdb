@@ -1,3 +1,15 @@
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (using_thumb_only): Update list of architectures in
+	BFD_ASSERT for which the logic is valid.
+	(using_thumb2_bl): Likewise.
+	(using_thumb2): Likewise and return true for ARMv8-R.
+	(arch_has_arm_nop): Likewise.
+	(tag_cpu_arch_combine): New v8r table for ARMv8-R Tag_CPU_arch
+	merging logic.  Update commentis for value 15 of v8m_baseline,
+	v8m_mainline and v4t_plus_v6_m arrays.  Use v8r array to decide
+	merging of value 15 of Tag_CPU_arch.
+
 2017-06-23  Jiong Wang  <jiong.wang@arm.com>
 
 	* reloc.c (BFD_RELOC_AARCH64_ADR_GOTPAGE): Rename to

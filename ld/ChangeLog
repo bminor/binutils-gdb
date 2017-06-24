@@ -1,3 +1,14 @@
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp (EABI attribute merging 11): New test.
+	(EABI attribute merging 12): Likewise.
+	* testsuite/ld-arm/attr-merge-11a.s: New file.
+	* testsuite/ld-arm/attr-merge-11b.s: New file.
+	* testsuite/ld-arm/attr-merge-11.attr: New file.
+	* testsuite/ld-arm/attr-merge-12a.s: New file.
+	* testsuite/ld-arm/attr-merge-12b.s: New file.
+	* testsuite/ld-arm/attr-merge-12.attr: New file.
+
 2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Run weakundef1 tests.

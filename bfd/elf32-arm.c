@@ -3567,9 +3567,7 @@ using_thumb_only (struct elf32_arm_link_hash_table *globals)
   arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
 
   /* Force return logic to be reviewed for each new architecture.  */
-  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8
-	      || arch == TAG_CPU_ARCH_V8M_BASE
-	      || arch == TAG_CPU_ARCH_V8M_MAIN);
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8M_MAIN);
 
   if (arch == TAG_CPU_ARCH_V6_M
       || arch == TAG_CPU_ARCH_V6S_M
@@ -3596,14 +3594,13 @@ using_thumb2 (struct elf32_arm_link_hash_table *globals)
   arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
 
   /* Force return logic to be reviewed for each new architecture.  */
-  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8
-	      || arch == TAG_CPU_ARCH_V8M_BASE
-	      || arch == TAG_CPU_ARCH_V8M_MAIN);
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8M_MAIN);
 
   return (arch == TAG_CPU_ARCH_V6T2
 	  || arch == TAG_CPU_ARCH_V7
 	  || arch == TAG_CPU_ARCH_V7E_M
 	  || arch == TAG_CPU_ARCH_V8
+	  || arch == TAG_CPU_ARCH_V8R
 	  || arch == TAG_CPU_ARCH_V8M_MAIN);
 }
 
@@ -3616,9 +3613,7 @@ using_thumb2_bl (struct elf32_arm_link_hash_table *globals)
     bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
 
   /* Force return logic to be reviewed for each new architecture.  */
-  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8
-	      || arch == TAG_CPU_ARCH_V8M_BASE
-	      || arch == TAG_CPU_ARCH_V8M_MAIN);
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8M_MAIN);
 
   /* Architecture was introduced after ARMv6T2 (eg. ARMv6-M).  */
   return (arch == TAG_CPU_ARCH_V6T2
@@ -3824,14 +3819,13 @@ arch_has_arm_nop (struct elf32_arm_link_hash_table *globals)
 					     Tag_CPU_arch);
 
   /* Force return logic to be reviewed for each new architecture.  */
-  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8
-	      || arch == TAG_CPU_ARCH_V8M_BASE
-	      || arch == TAG_CPU_ARCH_V8M_MAIN);
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8M_MAIN);
 
   return (arch == TAG_CPU_ARCH_V6T2
 	  || arch == TAG_CPU_ARCH_V6K
 	  || arch == TAG_CPU_ARCH_V7
-	  || arch == TAG_CPU_ARCH_V8);
+	  || arch == TAG_CPU_ARCH_V8
+	  || arch == TAG_CPU_ARCH_V8R);
 }
 
 static bfd_boolean
@@ -13329,6 +13323,25 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V8),		/* V7E_M.  */
       T(V8)		/* V8.  */
     };
+  const int v8r[] =
+    {
+      T(V8R),		/* PRE_V4.  */
+      T(V8R),		/* V4.  */
+      T(V8R),		/* V4T.  */
+      T(V8R),		/* V5T.  */
+      T(V8R),		/* V5TE.  */
+      T(V8R),		/* V5TEJ.  */
+      T(V8R),		/* V6.  */
+      T(V8R),		/* V6KZ.  */
+      T(V8R),		/* V6T2.  */
+      T(V8R),		/* V6K.  */
+      T(V8R),		/* V7.  */
+      T(V8R),		/* V6_M.  */
+      T(V8R),		/* V6S_M.  */
+      T(V8R),		/* V7E_M.  */
+      T(V8),		/* V8.  */
+      T(V8R),		/* V8R.  */
+    };
   const int v8m_baseline[] =
     {
       -1,		/* PRE_V4.  */
@@ -13346,7 +13359,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V8M_BASE),	/* V6S_M.  */
       -1,		/* V7E_M.  */
       -1,		/* V8.  */
-      -1,
+      -1,		/* V8R.  */
       T(V8M_BASE)	/* V8-M BASELINE.  */
     };
   const int v8m_mainline[] =
@@ -13366,7 +13379,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V8M_MAIN),	/* V6S_M.  */
       T(V8M_MAIN),	/* V7E_M.  */
       -1,		/* V8.  */
-      -1,
+      -1,		/* V8R.  */
       T(V8M_MAIN),	/* V8-M BASELINE.  */
       T(V8M_MAIN)	/* V8-M MAINLINE.  */
     };
@@ -13387,7 +13400,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V6S_M),		/* V6S_M.  */
       T(V7E_M),		/* V7E_M.  */
       T(V8),		/* V8.  */
-      -1,		/* Unused.  */
+      -1,		/* V8R.  */
       T(V8M_BASE),	/* V8-M BASELINE.  */
       T(V8M_MAIN),	/* V8-M MAINLINE.  */
       T(V4T_PLUS_V6_M)	/* V4T plus V6_M.  */
@@ -13401,7 +13414,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       v6s_m,
       v7e_m,
       v8,
-      NULL,
+      v8r,
       v8m_baseline,
       v8m_mainline,
       /* Pseudo-architecture.  */
