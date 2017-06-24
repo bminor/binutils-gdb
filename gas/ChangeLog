@@ -1,3 +1,9 @@
+2017-06-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* NEWS: Mention support of ARM Cortex-R52 processor.
+	* config/tc-arm.c (arm_cpus): Add entry for ARM Cortex-R52 processor.
+	* doc/c-arm.texi: Mention support for -mcpu=cortex-r52.
+
 2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* NEWS: Mention support for ARMv8-R architecture.
