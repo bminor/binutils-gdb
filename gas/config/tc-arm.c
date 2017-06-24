@@ -189,7 +189,6 @@ static const arm_feature_set arm_ext_v5j = ARM_FEATURE_CORE_LOW (ARM_EXT_V5J);
 static const arm_feature_set arm_ext_v6 = ARM_FEATURE_CORE_LOW (ARM_EXT_V6);
 static const arm_feature_set arm_ext_v6k = ARM_FEATURE_CORE_LOW (ARM_EXT_V6K);
 static const arm_feature_set arm_ext_v6t2 = ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2);
-static const arm_feature_set arm_ext_v6m = ARM_FEATURE_CORE_LOW (ARM_EXT_V6M);
 static const arm_feature_set arm_ext_v6_notm =
   ARM_FEATURE_CORE_LOW (ARM_EXT_V6_NOTM);
 static const arm_feature_set arm_ext_v6_dsp =
@@ -207,7 +206,7 @@ static const arm_feature_set ATTRIBUTE_UNUSED arm_ext_v7m = ARM_FEATURE_CORE_LOW
 #endif
 static const arm_feature_set arm_ext_v8 = ARM_FEATURE_CORE_LOW (ARM_EXT_V8);
 static const arm_feature_set arm_ext_m =
-  ARM_FEATURE_CORE (ARM_EXT_V6M | ARM_EXT_OS | ARM_EXT_V7M,
+  ARM_FEATURE_CORE (ARM_EXT_V6M | ARM_EXT_V7M,
 		    ARM_EXT2_V8M | ARM_EXT2_V8M_MAIN);
 static const arm_feature_set arm_ext_mp = ARM_FEATURE_CORE_LOW (ARM_EXT_MP);
 static const arm_feature_set arm_ext_sec = ARM_FEATURE_CORE_LOW (ARM_EXT_SEC);
@@ -244,9 +243,6 @@ static const arm_feature_set fpu_any = FPU_ANY;
 static const arm_feature_set arm_arch_full ATTRIBUTE_UNUSED = ARM_FEATURE (-1, -1, -1);
 static const arm_feature_set arm_arch_t2 = ARM_ARCH_THUMB2;
 static const arm_feature_set arm_arch_none = ARM_ARCH_NONE;
-#ifdef OBJ_ELF
-static const arm_feature_set arm_arch_v6m_only = ARM_ARCH_V6M_ONLY;
-#endif
 
 static const arm_feature_set arm_cext_iwmmxt2 =
   ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2);
@@ -13120,17 +13116,6 @@ do_t_sxth (void)
 static void
 do_t_swi (void)
 {
-  /* We have to do the following check manually as ARM_EXT_OS only applies
-     to ARM_EXT_V6M.  */
-  if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6m))
-    {
-      if (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_os)
-	  /* This only applies to the v6m however, not later architectures.  */
-	  && ! ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v7))
-	as_bad (_("SVC is not permitted on this architecture"));
-      ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used, arm_ext_os);
-    }
-
   inst.reloc.type = BFD_RELOC_ARM_SWI;
 }
 
@@ -18471,7 +18456,10 @@ md_assemble (char *str)
 	  || (thumb_mode == 1
 	      && !ARM_CPU_HAS_FEATURE (variant, *opcode->tvariant)))
 	{
-	  as_bad (_("selected processor does not support `%s' in Thumb mode"), str);
+	  if (opcode->tencode == do_t_swi)
+	    as_bad (_("SVC is not permitted on this architecture"));
+	  else
+	    as_bad (_("selected processor does not support `%s' in Thumb mode"), str);
 	  return;
 	}
       if (inst.cond != COND_ALWAYS && !unified_syntax
@@ -19295,8 +19283,6 @@ static const struct asm_opcode insns[] =
  tC3("ldmia",	8900000, _ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
  tC3("ldmfd",	8900000, _ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
 
- TCE("swi",	f000000, df00,     1, (EXPi),        swi, t_swi),
- TCE("svc",	f000000, df00,     1, (EXPi),        swi, t_swi),
  tCE("b",	a000000, _b,	   1, (EXPr),	     branch, t_branch),
  TCE("bl",	b000000, f000f800, 1, (EXPr),	     bl, t_branch23),
 
@@ -19323,6 +19309,12 @@ static const struct asm_opcode insns[] =
  /* These may simplify to neg.  */
  TCE("rsb",	0600000, ebc00000, 3, (RR, oRR, SH), arit, t_rsb),
  TC3("rsbs",	0700000, ebd00000, 3, (RR, oRR, SH), arit, t_rsb),
+
+#undef THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_os
+
+ TCE("swi",	f000000, df00,     1, (EXPi),        swi, t_swi),
+ TCE("svc",	f000000, df00,     1, (EXPi),        swi, t_swi),
 
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6
@@ -26803,13 +26795,6 @@ aeabi_set_public_attributes (void)
 
       if (ARM_CPU_HAS_FEATURE (thumb_arch_used, arm_arch_any))
 	ARM_MERGE_FEATURE_SETS (flags, flags, arm_ext_v4t);
-
-      /* We need to make sure that the attributes do not identify us as v6S-M
-	 when the only v6S-M feature in use is the Operating System
-	 Extensions.  */
-      if (ARM_CPU_HAS_FEATURE (flags, arm_ext_os))
-	if (!ARM_CPU_HAS_FEATURE (flags, arm_arch_v6m_only))
-	  ARM_CLEAR_FEATURE (flags, flags, arm_ext_os);
 
       /* Code run during relaxation relies on selected_cpu being set.  */
       selected_cpu = flags;

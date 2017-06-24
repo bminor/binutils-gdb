@@ -1,3 +1,11 @@
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* opcode/arm.h (ARM_AEXT_V4TxM): Add ARM_EXT_OS bit to the set.
+	(ARM_AEXT_V4T): Likewise.
+	(ARM_AEXT_V5TxM): Likewise.
+	(ARM_AEXT_V5T): Likewise.
+	(ARM_AEXT_V6M): Mask off ARM_EXT_OS bit.
+
 2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfdlink.h (bfd_link_info): Add shstk.
