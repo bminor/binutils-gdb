@@ -1,6 +1,6 @@
-#name: Valid v8-a
+#name: Valid v8-r
 #source: armv8-ar.s
-#as: -march=armv8-a
+#as: -march=armv8-r
 #objdump: -dr --prefix-addresses --show-raw-insn
 
 .*: +file format .*arm.*

@@ -1,6 +1,7 @@
 #objdump: -dr --prefix-address --show-raw-insn
-#name: vsel, vmaxnm, vminnm, vrint decoding mask.
-#as: -march=armv8-a
+#name: ARMv8-R vsel, vmaxnm, vminnm, vrint decoding mask.
+#source: mask_1-armv8-ar.s
+#as: -march=armv8-r
 # This test is only valid on ELF based ports.
 #not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
 

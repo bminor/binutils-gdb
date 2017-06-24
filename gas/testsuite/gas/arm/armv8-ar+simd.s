@@ -1,5 +1,4 @@
 	.syntax unified
-	.arch armv8-a
 	.arch_extension simd
 
 	.arm

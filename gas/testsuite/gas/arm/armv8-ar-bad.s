@@ -1,6 +1,5 @@
 	.syntax unified
 	.text
-	.arch armv8-a
 
 	// SWP
 	.arm

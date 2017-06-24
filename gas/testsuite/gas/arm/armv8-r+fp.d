@@ -1,6 +1,6 @@
-#name: Valid v8-a+fp
+#name: Valid v8-r+fp
 #source: armv8-ar+fp.s
-#as: -march=armv8-a
+#as: -march=armv8-r
 #objdump: -dr --prefix-addresses --show-raw-insn
 #skip: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd
 

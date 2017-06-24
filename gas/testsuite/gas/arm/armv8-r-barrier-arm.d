@@ -1,5 +1,5 @@
-#name: Valid v8-A barrier (ARM)
-#as: -march=armv8-a
+#name: Valid v8-R barrier (ARM)
+#as: -march=armv8-r
 #source: armv8-ar-barrier.s
 #objdump: -dr --prefix-addresses --show-raw-insn
 

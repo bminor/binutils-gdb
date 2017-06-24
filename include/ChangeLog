@@ -1,5 +1,16 @@
 2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* elf/arm.h (TAG_CPU_ARCH_V8R): New macro.
+	* opcode/arm.h (ARM_EXT2_V8A): New macro.
+	(ARM_AEXT2_V8A): Rename into ...
+	(ARM_AEXT2_V8AR): This.
+	(ARM_AEXT2_V8A): New macro.
+	(ARM_AEXT_V8R): New macro.
+	(ARM_AEXT2_V8R): New macro.
+	(ARM_ARCH_V8R): New macro.
+
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* opcode/arm.h (ARM_AEXT_V4TxM): Add ARM_EXT_OS bit to the set.
 	(ARM_AEXT_V4T): Likewise.
 	(ARM_AEXT_V5TxM): Likewise.

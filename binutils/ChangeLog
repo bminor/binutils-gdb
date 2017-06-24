@@ -1,3 +1,7 @@
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* readelf.c (arm_attr_tag_CPU_arch): Fill value for ARMv8-R.
+
 2017-06-23  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21659

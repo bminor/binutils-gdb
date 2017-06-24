@@ -1,6 +1,6 @@
-#name: Valid v8-a+simdv3
+#name: Valid v8-r+simdv3
 #source: armv8-ar+simd.s
-#as: -march=armv8-a
+#as: -march=armv8-r
 #objdump: -dr --prefix-addresses --show-raw-insn
 #skip: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd
 
