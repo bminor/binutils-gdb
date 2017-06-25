@@ -1,5 +1,10 @@
 2017-06-25  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* dtrace-probe.c (dtrace_process_dof_probe): Put semi-colon on
+	its own line.
+
+2017-06-25  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* nat/x86-dregs.c (x86_show_dr): Print registers one per line.
 
 2017-06-23  Alan Hayward  <alan.hayward@arm.com>
