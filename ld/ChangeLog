@@ -1,3 +1,9 @@
+2017-06-26  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Skip
+	--just-syms bfds when looking for a place to attach .note.gnu.build-id
+	and .eh_frame_hdr sections.  Delete dead code.
+
 2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* testsuite/ld-arm/arm-elf.exp (EABI attribute merging 11): New test.

@@ -1245,7 +1245,8 @@ gld${EMULATION_NAME}_after_open (void)
       for (abfd = link_info.input_bfds;
 	   abfd != (bfd *) NULL; abfd = abfd->link.next)
 	if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
-	    && bfd_count_sections (abfd) != 0)
+	    && bfd_count_sections (abfd) != 0
+	    && !((lang_input_statement_type *) abfd->usrdata)->flags.just_syms)
 	  break;
 
       /* PR 10555: If there are no ELF input files do not try to
@@ -1285,6 +1286,10 @@ gld${EMULATION_NAME}_after_open (void)
       for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
 	{
 	  int type = 0;
+
+	  if (((lang_input_statement_type *) abfd->usrdata)->flags.just_syms)
+	    continue;
+
 	  for (s = abfd->sections; s && type < COMPACT_EH_HDR; s = s->next)
 	    {
 	      const char *name = bfd_get_section_name (abfd, s);
@@ -1323,9 +1328,6 @@ gld${EMULATION_NAME}_after_open (void)
 
 	  if (seen_type == COMPACT_EH_HDR)
 	    link_info.eh_frame_hdr_type = COMPACT_EH_HDR;
-
-	  if (bfd_count_sections (abfd) == 0)
-	    continue;
 	}
       if (elfbfd)
 	{

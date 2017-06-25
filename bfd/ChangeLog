@@ -1,3 +1,14 @@
+2017-06-26  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_link_create_dynstrtab): Don't make dynobj
+	a --just-syms bfd.
+	(_bfd_elf_size_group_sections): Skip --just-syms bfds.
+	(bfd_elf_size_dynamic_sections): Ignore .note.GNU-stack and
+	.preinit_array on --just-syms bfds.
+	(_bfd_elf_gc_mark_extra_sections): Skip --just-syms bfds.
+	(elf_gc_sweep, bfd_elf_parse_eh_frame_entries): Likewise.
+	(bfd_elf_gc_sections, bfd_elf_discard_info): Likewise.
+
 2017-06-25  Sergei Trofimovich  <slyfox@gentoo.org>
 
 	* elf.c (find_link): Bounds check "hint".
