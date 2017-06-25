@@ -1,5 +1,10 @@
 2017-06-25  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* main.c (get_init_files): Replace "SYSTEM_GDBINIT +
+	datadir_len" with "&SYSTEM_GDBINIT[datadir_len]".
+
+2017-06-25  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* dtrace-probe.c (dtrace_process_dof_probe): Put semi-colon on
 	its own line.
 
