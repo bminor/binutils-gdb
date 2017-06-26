@@ -239,12 +239,6 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
       *ptr = NULL;
       return TRUE;
     }
-  else if (bfd_get_file_size (abfd) > 0
-	   && sz > (bfd_size_type) bfd_get_file_size (abfd))
-    {
-      *ptr = NULL;
-      return FALSE;
-    }
 
   switch (sec->compress_status)
     {
@@ -260,7 +254,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 		  /* xgettext:c-format */
 		  (_("error: %B(%A) is too large (%#lx bytes)"),
 		  abfd, sec, (long) sz);
-	    return FALSE;
+	      return FALSE;
 	    }
 	}
 
