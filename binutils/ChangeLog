@@ -1,3 +1,19 @@
+2017-06-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21665
+	* objdump.c (disassemble_section): Skip any section that is bigger
+	than the entire file.
+
+2017-06-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21659
+	* bucomm.c (get_file_size): Explicitly warn if the file is a
+	directory.
+
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* readelf.c (arm_attr_tag_CPU_arch): Fill value for ARMv8-R.
+
 2017-06-23  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21659
@@ -44,6 +60,12 @@
 	Replace uses of LEB and SLEB with appropriate new macro.
 	(display_debug_frames): Use an unsigned int for the 'reg'
 	variable.  Use a signed long for the 'l' variable.
+
+2017-06-20  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* readelf.c (get_s390_segment_type): Add support for the new
+	segment type PT_S390_PGSTE.
+	(get_segment_type): Call get_s390_segment_type.
 
 2017-06-19  Nick Clifton  <nickc@redhat.com>
 

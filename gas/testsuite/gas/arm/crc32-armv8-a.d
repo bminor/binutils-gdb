@@ -1,5 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
-#name: ARMv8 CRC32 instructions
+#name: ARMv8-A CRC32 instructions
+#source: crc32-armv8-ar.s
 #as: -march=armv8-a+crc
 #not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
 

@@ -1,3 +1,20 @@
+2017-06-26  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Skip
+	--just-syms bfds when looking for a place to attach .note.gnu.build-id
+	and .eh_frame_hdr sections.  Delete dead code.
+
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp (EABI attribute merging 11): New test.
+	(EABI attribute merging 12): Likewise.
+	* testsuite/ld-arm/attr-merge-11a.s: New file.
+	* testsuite/ld-arm/attr-merge-11b.s: New file.
+	* testsuite/ld-arm/attr-merge-11.attr: New file.
+	* testsuite/ld-arm/attr-merge-12a.s: New file.
+	* testsuite/ld-arm/attr-merge-12b.s: New file.
+	* testsuite/ld-arm/attr-merge-12.attr: New file.
+
 2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Run weakundef1 tests.
@@ -177,6 +194,14 @@
 	* testsuite/ld-powerpc/tocsave2a.d,
 	* testsuite/ld-powerpc/tocsave2s.d,
 	* testsuite/ld-powerpc/tocsavelib.s: New files.
+
+2017-06-20  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* Makefile.in: Add s390.em as build dependency.
+	* emulparams/elf64_s390.sh (EXTRA_EM_FILE): Add s390.em.
+	* emultempl/s390.em: New file.
+	* gen-doc.texi: Add documentation for --s390-pgste option.
+	* ld.texinfo: Likewise.
 
 2017-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 

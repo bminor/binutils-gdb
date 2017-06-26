@@ -1,3 +1,119 @@
+2017-06-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/21661
+	* config/obj-elf.c (obj_elf_symver): Don't allow .symver with
+	common symbol.
+	(elf_frob_symbol): Likewise.
+	* testsuite/gas/elf/elf.exp: Run pr21661.
+	* testsuite/gas/elf/pr21661.d: New file.
+	* testsuite/gas/elf/pr21661.s: Likewise.
+
+2017-06-26  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (fpu_any): Only define for ELF based targets.
+
+2017-06-26  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* /config/tc-arc.c (is_br_jmp_insn_p): Update macro with known
+	instructions to be accounted as jumps.
+	(assemble_insn): Check for limms into the delay slots.  Emit an
+	error if so.
+	* testsuite/gas/arc/asm-errors-3.d: New file.
+	* testsuite/gas/arc/asm-errors-3.err: Likewise.
+	* testsuite/gas/arc/asm-errors-3.s: Likewise.
+
+2017-06-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* NEWS: Mention support of ARM Cortex-R52 processor.
+	* config/tc-arm.c (arm_cpus): Add entry for ARM Cortex-R52 processor.
+	* doc/c-arm.texi: Mention support for -mcpu=cortex-r52.
+
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* NEWS: Mention support for ARMv8-R architecture.
+	* config/tc-arm.c (arm_archs): Add entry for ARMv8-R.
+	(arm_extensions): Restrict pan, ras and rdma extension to
+	ARMv8-A and make crypto, fp and simd extensions available to
+	ARMv8-R.
+	(cpu_arch_ver): Add entry for ARMv8-R.
+	(aeabi_set_public_attributes): Update gas_assert for Tag_DIV_use
+	logic.
+	* testsuite/gas/arm/armv8-a+fp.s: Rename into ...
+	* testsuite/gas/arm/armv8-ar+fp.s: This.  Remove .arch directive.
+	* testsuite/gas/arm/armv8-a+fp.d: Specify source to assemble and
+	architecture to assemble for.
+	* testsuite/gas/arm/armv8-r+fp.d: New.
+	* testsuite/gas/arm/armv8-a+simd.s: Rename into ...
+	* testsuite/gas/arm/armv8-ar+simd.s: This.  Remove .arch directive.
+	* testsuite/gas/arm/armv8-a+simd.d: Specify source to assemble and
+	architecture to assemble for.
+	* testsuite/gas/arm/armv8-r+simd.d: New.
+	* testsuite/gas/arm/armv8-a-bad.s: Rename into ...
+	* testsuite/gas/arm/armv8-ar-bad.s: This.  Remove .arch directive.
+	* testsuite/gas/arm/armv8-a-bad.l: Rename into ...
+	* testsuite/gas/arm/armv8-ar-bad.l: This.  Decrement line number by 1.
+	* testsuite/gas/arm/armv8-a-bad.d: Specify source to assemble,
+	architecture to assemble for and adjust error output file.
+	* testsuite/gas/arm/armv8-r-bad.d: New.
+	* testsuite/gas/arm/armv8-a-barrier.s: Rename into ...
+	* testsuite/gas/arm/armv8-ar-barrier.s: This.
+	* testsuite/gas/arm/armv8-a-barrier-arm.d: Adjust source.
+	* testsuite/gas/arm/armv8-a-barrier-thumb.d: Likewise.
+	* testsuite/gas/arm/armv8-r-barrier-arm.d: New.
+	* testsuite/gas/arm/armv8-r-barrier-thumb.d: New.
+	* testsuite/gas/arm/armv8-a-it-bad.s: Rename into ...
+	* testsuite/gas/arm/armv8-ar-it-bad.s: This.  Remove .arch directive.
+	* testsuite/gas/arm/armv8-a-it-bad.l: Rename into ...
+	* testsuite/gas/arm/armv8-ar-it-bad.l: This.  Decrement line number
+	by 1.
+	* testsuite/gas/arm/armv8-a-it-bad.d: Specify source to assemble,
+	architecture to assemble for and adjust error output file.
+	* testsuite/gas/arm/armv8-r-it-bad.d: New.
+	* testsuite/gas/arm/armv8-a.s: Rename into ...
+	* testsuite/gas/arm/armv8-ar.s: This.  Remove .arch directive.
+	* testsuite/gas/arm/armv8-a.d: Specify source to assemble and
+	architecture to assemble for.
+	* testsuite/gas/arm/armv8-r.d: New.
+	* testsuite/gas/arm/attr-march-armv8-r+crypto.d: New.
+	* testsuite/gas/arm/attr-march-armv8-r+fp.d: New.
+	* testsuite/gas/arm/attr-march-armv8-r+simd.d: New.
+	* testsuite/gas/arm/attr-march-armv8-r.d: New.
+	* testsuite/gas/arm/crc32.s: Rename into ...
+	* testsuite/gas/arm/crc32-armv8-ar.s: This.
+	* testsuite/gas/arm/crc32.d: Rename into ...
+	* testsuite/gas/arm/crc32-armv8-a.d: This.  Specify source to assemble.
+	* testsuite/gas/arm/crc32-armv8-r.d: New.
+	* testsuite/gas/arm/crc32-bad.s: Rename into ...
+	* testsuite/gas/arm/crc32-armv8-ar-bad.s: This.
+	* testsuite/gas/arm/crc32-bad.d: Rename into ...
+	* testsuite/gas/arm/crc32-armv8-a-bad.d: This.  Specify source to
+	assemble.
+	* testsuite/gas/arm/crc32-armv8-r-bad.d: New.
+	* testsuite/gas/arm/mask_1.s: Rename into ...
+	* testsuite/gas/arm/mask_1-armv8-ar.s: This.
+	* testsuite/gas/arm/mask_1.d: Rename into ...
+	* testsuite/gas/arm/mask_1-armv8-a.d: This.  Specify source to
+	assemble.
+	* testsuite/gas/arm/mask_1-armv8-r.d: new.
+
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (arm_ext_v6m): Delete.
+	(arm_ext_v7m): Delete.
+	(arm_ext_m): Remove ARM_EXT_OS from the set of feature defined M
+	profile.
+	(arm_arch_v6m_only): Delete.
+	(do_t_swi): Remove special case for ARMv6S-M.
+	(md_assemble): Display error message previously in do_t_swi when
+	SVC is not available.
+	(insns): Guard swi and svc by arm_ext_os for Thumb mode.
+	(aeabi_set_public_attributes): Remove special case for ARMv6S-M.
+
+2017-05-11  Andrew Waterman  <andrew@sifive.com>
+
+	* config/tc-riscv.c (riscv_ip): Changes as_warn to as_bad for improper
+	shift amounts.
+
 2017-06-22  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (arm_ext_v7m): Add ATTRIBUTE_UNUSED.

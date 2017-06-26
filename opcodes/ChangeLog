@@ -1,3 +1,8 @@
+2017-06-23  Andrew Waterman  <andrew@sifive.com>
+
+	* riscv-opc.c (riscv_opcodes): Mark I-type SLT instruction as an
+	alias; do not mark SLTI instruction as an alias.
+
 2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (RM_0FAE_REG_5): Removed.

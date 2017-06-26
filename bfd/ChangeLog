@@ -1,3 +1,53 @@
+2017-06-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21670
+	* tekhex.c (getvalue): Check for the source pointer exceeding the
+	end pointer before the first byte is read.
+
+2017-06-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21665
+	* opncls.c (get_build_id): Check that the section is beig enough
+	to contain the whole note.
+	* compress.c (bfd_get_full_section_contents): Check for and reject
+	a section whoes size is greater than the size of the entire file.
+	* elf32-v850.c (v850_elf_copy_notes): Allow for the ouput to not
+	contain a notes section.
+
+2017-06-26  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf64-s390.c (elf_s390_additional_program_headers): Add NULL
+	pointer checks.
+	(elf_s390_modify_segment_map): Likewise.
+	(bfd_elf_s390_set_options): Lisewise.
+
+2017-06-26  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_link_create_dynstrtab): Don't make dynobj
+	a --just-syms bfd.
+	(_bfd_elf_size_group_sections): Skip --just-syms bfds.
+	(bfd_elf_size_dynamic_sections): Ignore .note.GNU-stack and
+	.preinit_array on --just-syms bfds.
+	(_bfd_elf_gc_mark_extra_sections): Skip --just-syms bfds.
+	(elf_gc_sweep, bfd_elf_parse_eh_frame_entries): Likewise.
+	(bfd_elf_gc_sections, bfd_elf_discard_info): Likewise.
+
+2017-06-25  Sergei Trofimovich  <slyfox@gentoo.org>
+
+	* elf.c (find_link): Bounds check "hint".
+
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf32-arm.c (using_thumb_only): Update list of architectures in
+	BFD_ASSERT for which the logic is valid.
+	(using_thumb2_bl): Likewise.
+	(using_thumb2): Likewise and return true for ARMv8-R.
+	(arch_has_arm_nop): Likewise.
+	(tag_cpu_arch_combine): New v8r table for ARMv8-R Tag_CPU_arch
+	merging logic.  Update commentis for value 15 of v8m_baseline,
+	v8m_mainline and v4t_plus_v6_m arrays.  Use v8r array to decide
+	merging of value 15 of Tag_CPU_arch.
+
 2017-06-23  Jiong Wang  <jiong.wang@arm.com>
 
 	* reloc.c (BFD_RELOC_AARCH64_ADR_GOTPAGE): Rename to
@@ -155,6 +205,17 @@
 	* elf.c (setup_group): Zero the group section pointer list after
 	allocation so that loops can be caught.  Check for NULL pointers
 	when processing a group list.
+
+2017-06-20  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf-s390.h: New file.
+	* elf64-s390.c (struct elf_s390_link_hash_table): Add params
+	field.
+	(elf_s390_additional_program_headers): New function.
+	(elf_s390_modify_segment_map): New function.
+	(bfd_elf_s390_set_options): New function.
+	(elf_backend_additional_program_headers)
+	(elf_backend_modify_segment_map): Add macro definitions.
 
 2017-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 

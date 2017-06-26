@@ -31,10 +31,26 @@
 # define DIAGNOSTIC_IGNORE(option)
 #endif
 
-#ifdef __clang__
+#if defined (__clang__) /* clang */
+
 # define DIAGNOSTIC_IGNORE_SELF_MOVE DIAGNOSTIC_IGNORE ("-Wself-move")
-#else
+# define DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER \
+  DIAGNOSTIC_IGNORE ("-Wdeprecated-register")
+# define DIAGNOSTIC_IGNORE_UNUSED_FUNCTION \
+  DIAGNOSTIC_IGNORE ("-Wunused-function")
+
+#elif defined (__GNUC__) /* GCC */
+
 # define DIAGNOSTIC_IGNORE_SELF_MOVE
+# define DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER
+# define DIAGNOSTIC_IGNORE_UNUSED_FUNCTION \
+  DIAGNOSTIC_IGNORE ("-Wunused-function")
+
+#else /* Other compilers */
+
+# define DIAGNOSTIC_IGNORE_SELF_MOVE
+# define DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER
+# define DIAGNOSTIC_IGNORE_UNUSED_FUNCTION
 #endif
 
 #endif /* COMMON_DIAGNOSTICS_H */

@@ -1,5 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
-#name: Unpredictable ARMv8 CRC32 instructions.
+#name: Unpredictable ARMv8-A CRC32 instructions.
+#source: crc32-armv8-ar-bad.s
 #as: -march=armv8-a+crc
 #stderr: crc32-bad.l
 #not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*

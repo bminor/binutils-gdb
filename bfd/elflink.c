@@ -218,9 +218,13 @@ _bfd_elf_link_create_dynstrtab (bfd *abfd, struct bfd_link_info *info)
       if ((abfd->flags & (DYNAMIC | BFD_PLUGIN)) != 0)
 	{
 	  bfd *ibfd;
+	  asection *s;
 	  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
 	    if ((ibfd->flags
-		 & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
+		 & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0
+		&& bfd_get_flavour (ibfd) == bfd_target_elf_flavour
+		&& !((s = ibfd->sections) != NULL
+		     && s->sec_info_type == SEC_INFO_TYPE_JUST_SYMS))
 	      {
 		abfd = ibfd;
 		break;
@@ -5861,9 +5865,12 @@ bfd_boolean
 _bfd_elf_size_group_sections (struct bfd_link_info *info)
 {
   bfd *ibfd;
+  asection *s;
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour
+	&& (s = ibfd->sections) != NULL
+	&& s->sec_info_type != SEC_INFO_TYPE_JUST_SYMS
 	&& !_bfd_elf_fixup_group_sections (ibfd, bfd_abs_section_ptr))
       return FALSE;
   return TRUE;
@@ -6511,6 +6518,10 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	  if (inputobj->flags
 	      & (DYNAMIC | EXEC_P | BFD_PLUGIN | BFD_LINKER_CREATED))
 	    continue;
+	  s = inputobj->sections;
+	  if (s == NULL || s->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
+	    continue;
+
 	  s = bfd_get_section_by_name (inputobj, ".note.GNU-stack");
 	  if (s)
 	    {
@@ -6660,9 +6671,10 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	      bfd *sub;
 	      asection *o;
 
-	      for (sub = info->input_bfds; sub != NULL;
-		   sub = sub->link.next)
-		if (bfd_get_flavour (sub) == bfd_target_elf_flavour)
+	      for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
+		if (bfd_get_flavour (sub) == bfd_target_elf_flavour
+		    && (o = sub->sections) != NULL
+		    && o->sec_info_type != SEC_INFO_TYPE_JUST_SYMS)
 		  for (o = sub->sections; o != NULL; o = o->next)
 		    if (elf_section_data (o)->this_hdr.sh_type
 			== SHT_PREINIT_ARRAY)
@@ -12911,6 +12923,9 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 
       if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
 	continue;
+      isec = ibfd->sections;
+      if (isec == NULL || isec->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
+	continue;
 
       /* Ensure all linker created sections are kept,
 	 see if any other section is already marked,
@@ -13015,6 +13030,9 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 
       if (bfd_get_flavour (sub) != bfd_target_elf_flavour
 	  || !(*bed->relocs_compatible) (sub->xvec, abfd->xvec))
+	continue;
+      o = sub->sections;
+      if (o == NULL || o->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
 	continue;
 
       for (o = sub->sections; o != NULL; o = o->next)
@@ -13253,6 +13271,9 @@ bfd_elf_parse_eh_frame_entries (bfd *abfd ATTRIBUTE_UNUSED,
 
       if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
 	continue;
+      sec = ibfd->sections;
+      if (sec == NULL || sec->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
+	continue;
 
       if (!init_reloc_cookie (&cookie, info, ibfd))
 	return FALSE;
@@ -13300,6 +13321,9 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       asection *sec;
       struct elf_reloc_cookie cookie;
 
+      sec = sub->sections;
+      if (sec == NULL || sec->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
+	continue;
       sec = bfd_get_section_by_name (sub, ".eh_frame");
       while (sec && init_reloc_cookie_for_section (&cookie, info, sec))
 	{
@@ -13334,6 +13358,10 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 
       if (bfd_get_flavour (sub) != bfd_target_elf_flavour
 	  || !(*bed->relocs_compatible) (sub->xvec, abfd->xvec))
+	continue;
+
+      o = sub->sections;
+      if (o == NULL || o->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
 	continue;
 
       /* Start at sections marked with SEC_KEEP (ref _bfd_elf_gc_keep).
@@ -13840,8 +13868,12 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)
     {
       const struct elf_backend_data *bed;
+      asection *s;
 
       if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+	continue;
+      s = abfd->sections;
+      if (s == NULL || s->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
 	continue;
 
       bed = get_elf_backend_data (abfd);

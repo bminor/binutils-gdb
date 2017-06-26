@@ -1,5 +1,4 @@
 .syntax unified
-.arch armv8-a
 
 .thumb
 @ Wide instruction in IT block is deprecated.

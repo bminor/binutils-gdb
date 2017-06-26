@@ -1283,7 +1283,8 @@ section_match (const Elf_Internal_Shdr * a,
    to be the correct section.  */
 
 static unsigned int
-find_link (const bfd * obfd, const Elf_Internal_Shdr * iheader, const unsigned int hint)
+find_link (const bfd *obfd, const Elf_Internal_Shdr *iheader,
+	   const unsigned int hint)
 {
   Elf_Internal_Shdr ** oheaders = elf_elfsections (obfd);
   unsigned int i;
@@ -1291,7 +1292,8 @@ find_link (const bfd * obfd, const Elf_Internal_Shdr * iheader, const unsigned i
   BFD_ASSERT (iheader != NULL);
 
   /* See PR 20922 for a reproducer of the NULL test.  */
-  if (oheaders[hint] != NULL
+  if (hint < elf_numsections (obfd)
+      && oheaders[hint] != NULL
       && section_match (oheaders[hint], iheader))
     return hint;
 

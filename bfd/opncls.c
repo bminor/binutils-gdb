@@ -1825,6 +1825,7 @@ get_build_id (bfd *abfd)
   Elf_External_Note *enote;
   bfd_byte *contents;
   asection *sect;
+  bfd_size_type size;
 
   BFD_ASSERT (abfd);
 
@@ -1839,8 +1840,9 @@ get_build_id (bfd *abfd)
       return NULL;
     }
 
+  size = bfd_get_section_size (sect);
   /* FIXME: Should we support smaller build-id notes ?  */
-  if (bfd_get_section_size (sect) < 0x24)
+  if (size < 0x24)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return NULL;
@@ -1850,6 +1852,17 @@ get_build_id (bfd *abfd)
     {
       if (contents != NULL)
 	free (contents);
+      return NULL;
+    }
+
+  /* FIXME: Paranoia - allow for compressed build-id sections.
+     Maybe we should complain if this size is different from
+     the one obtained above...  */
+  size = bfd_get_section_size (sect);
+  if (size < sizeof (Elf_External_Note))
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      free (contents);
       return NULL;
     }
 
@@ -1864,7 +1877,8 @@ get_build_id (bfd *abfd)
   if (inote.descsz == 0
       || inote.type != NT_GNU_BUILD_ID
       || inote.namesz != 4 /* sizeof "GNU"  */
-      || strcmp (inote.namedata, "GNU") != 0)
+      || strncmp (inote.namedata, "GNU", 4) != 0
+      || size < (12 + BFD_ALIGN (inote.namesz, 4) + inote.descsz))
     {
       free (contents);
       bfd_set_error (bfd_error_invalid_operation);

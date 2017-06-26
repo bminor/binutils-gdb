@@ -1,3 +1,36 @@
+2017-06-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* record-full.c (netorder16): Remove.
+
+2017-06-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/diagnostics.h: Define macros for GCC.
+	(DIAGNOSTIC_IGNORE_UNUSED_FUNCTION): New macro.
+	* common/vec.h: Include diagnostics.h.
+	(DIAGNOSTIC_IGNORE_UNUSED_VEC_FUNCTION): New macro.
+	(DEF_VEC_I, DEF_VEC_P, DEF_VEC_O): Ignore -Wunused-function
+	warning.
+
+2017-06-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/diagnostics.h (DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER):
+	New macro.
+	* ada-lex.l: Ignore deprecated register warnings.
+
+2017-06-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* main.c (get_init_files): Replace "SYSTEM_GDBINIT +
+	datadir_len" with "&SYSTEM_GDBINIT[datadir_len]".
+
+2017-06-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dtrace-probe.c (dtrace_process_dof_probe): Put semi-colon on
+	its own line.
+
+2017-06-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* nat/x86-dregs.c (x86_show_dr): Print registers one per line.
+
 2017-06-23  Alan Hayward  <alan.hayward@arm.com>
 
 	* xtensa-tdep.c (XTENSA_MAX_REGISTER_SIZE): Add.

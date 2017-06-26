@@ -2340,16 +2340,6 @@ netorder32 (uint32_t input)
   return ret;
 }
 
-static inline uint16_t
-netorder16 (uint16_t input)
-{
-  uint16_t ret;
-
-  store_unsigned_integer ((gdb_byte *) &ret, sizeof (ret), 
-			  BFD_ENDIAN_BIG, input);
-  return ret;
-}
-
 /* Restore the execution log from a core_bfd file.  */
 static void
 record_full_restore (void)
