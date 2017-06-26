@@ -1,5 +1,11 @@
 2017-06-26  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21670
+	* tekhex.c (getvalue): Check for the source pointer exceeding the
+	end pointer before the first byte is read.
+
+2017-06-26  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21665
 	* opncls.c (get_build_id): Check that the section is beig enough
 	to contain the whole note.

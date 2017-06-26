@@ -273,6 +273,9 @@ getvalue (char **srcp, bfd_vma *valuep, char * endp)
   bfd_vma value = 0;
   unsigned int len;
 
+  if (src >= endp)
+    return FALSE;
+
   if (!ISHEX (*src))
     return FALSE;
 
@@ -514,9 +517,10 @@ pass_over (bfd *abfd, bfd_boolean (*func) (bfd *, int, char *, char *))
   /* To the front of the file.  */
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
     return FALSE;
+
   while (! is_eof)
     {
-      char src[MAXCHUNK];
+      static char src[MAXCHUNK];
       char type;
 
       /* Find first '%'.  */
