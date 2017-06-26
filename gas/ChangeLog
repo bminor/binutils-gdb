@@ -1,3 +1,13 @@
+2017-06-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/21661
+	* config/obj-elf.c (obj_elf_symver): Don't allow .symver with
+	common symbol.
+	(elf_frob_symbol): Likewise.
+	* testsuite/gas/elf/elf.exp: Run pr21661.
+	* testsuite/gas/elf/pr21661.d: New file.
+	* testsuite/gas/elf/pr21661.s: Likewise.
+
 2017-06-26  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (fpu_any): Only define for ELF based targets.
