@@ -1,3 +1,10 @@
+2017-06-26  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf64-s390.c (elf_s390_additional_program_headers): Add NULL
+	pointer checks.
+	(elf_s390_modify_segment_map): Likewise.
+	(bfd_elf_s390_set_options): Lisewise.
+
 2017-06-26  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_link_create_dynstrtab): Don't make dynobj
