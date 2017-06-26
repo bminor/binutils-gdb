@@ -1,5 +1,10 @@
 2017-06-26  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/ld-mips-elf/lsi-4010-isa.d: New test.
+	* ld/testsuite/ld-mips-elf/mips-elf.exp: Run the new test.
+
+2017-06-26  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/ld-elf/sizeofa.d: Also accept the OBJECT type for
 	the symbols examined.
 	* testsuite/ld-elf/sizeofc.d: Likewise.

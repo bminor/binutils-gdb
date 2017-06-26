@@ -1,3 +1,11 @@
+2017-06-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* cpu-mips.c (arch_info_struct): Mark the 4010 32-bit.
+	* elfxx-mips.c (mips_set_isa_flags) <bfd_mach_mips4010>: Set
+	E_MIPS_ARCH_2 rather than E_MIPS_ARCH_3 in `e_flags'.
+	(mips_mach_extensions): Mark `bfd_mach_mips4010' as extending
+	`bfd_mach_mips6000' rather than `bfd_mach_mips4000'.
+
 2017-06-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/21665

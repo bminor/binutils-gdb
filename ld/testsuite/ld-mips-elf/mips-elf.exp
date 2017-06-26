@@ -1176,3 +1176,6 @@ run_ld_link_tests [list \
 	{{objdump {-d --prefix-addresses} pr21334.dd} \
 	 {readelf -A pr21334.gd}} \
 	"pr21334"]]
+
+# Check that the ISA level is consistently II for the LSI 4010.
+run_dump_test "lsi-4010-isa" [list [list ld $abi_ldflags(o32)]]
