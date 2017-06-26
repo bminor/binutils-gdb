@@ -1,5 +1,9 @@
 2017-06-26  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* record-full.c (netorder16): Remove.
+
+2017-06-26  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* common/diagnostics.h: Define macros for GCC.
 	(DIAGNOSTIC_IGNORE_UNUSED_FUNCTION): New macro.
 	* common/vec.h: Include diagnostics.h.
