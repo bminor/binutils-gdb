@@ -1,5 +1,11 @@
 2017-06-26  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/21665
+	* objdump.c (disassemble_section): Skip any section that is bigger
+	than the entire file.
+
+2017-06-26  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21659
 	* bucomm.c (get_file_size): Explicitly warn if the file is a
 	directory.

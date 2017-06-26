@@ -1,3 +1,13 @@
+2017-06-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21665
+	* opncls.c (get_build_id): Check that the section is beig enough
+	to contain the whole note.
+	* compress.c (bfd_get_full_section_contents): Check for and reject
+	a section whoes size is greater than the size of the entire file.
+	* elf32-v850.c (v850_elf_copy_notes): Allow for the ouput to not
+	contain a notes section.
+
 2017-06-26  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* elf64-s390.c (elf_s390_additional_program_headers): Add NULL

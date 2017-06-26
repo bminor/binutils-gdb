@@ -2114,7 +2114,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
     return;
 
   datasize = bfd_get_section_size (section);
-  if (datasize == 0)
+  if (datasize == 0 || datasize >= (bfd_size_type) bfd_get_file_size (abfd))
     return;
 
   if (start_address == (bfd_vma) -1
@@ -2985,7 +2985,7 @@ dump_target_specific (bfd *abfd)
 static void
 dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
 {
-  bfd_byte *data = 0;
+  bfd_byte *data = NULL;
   bfd_size_type datasize;
   bfd_vma addr_offset;
   bfd_vma start_offset;
