@@ -1,3 +1,7 @@
+2017-06-26  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (fpu_any): Only define for ELF based targets.
+
 2017-06-26  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* /config/tc-arc.c (is_br_jmp_insn_p): Update macro with known

@@ -239,7 +239,9 @@ static const arm_feature_set arm_ext_v8_3 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
+#ifdef OBJ_ELF
 static const arm_feature_set fpu_any = FPU_ANY;
+#endif
 static const arm_feature_set arm_arch_full ATTRIBUTE_UNUSED = ARM_FEATURE (-1, -1, -1);
 static const arm_feature_set arm_arch_t2 = ARM_ARCH_THUMB2;
 static const arm_feature_set arm_arch_none = ARM_ARCH_NONE;
