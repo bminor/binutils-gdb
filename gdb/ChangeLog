@@ -1,3 +1,9 @@
+2017-06-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/diagnostics.h (DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER):
+	New macro.
+	* ada-lex.l: Ignore deprecated register warnings.
+
 2017-06-25  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* main.c (get_init_files): Replace "SYSTEM_GDBINIT +
