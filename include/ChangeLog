@@ -32,6 +32,10 @@
 
 	* opcode/arm.h (FPU_ANY): New macro.
 
+2017-06-20  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf/s390.h (PT_S390_PGSTE): Define macro.
+
 2017-06-16  Alan Modra  <amodra@gmail.com>
 
 	PR ld/20022

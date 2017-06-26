@@ -190,6 +190,17 @@
 	allocation so that loops can be caught.  Check for NULL pointers
 	when processing a group list.
 
+2017-06-20  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf-s390.h: New file.
+	* elf64-s390.c (struct elf_s390_link_hash_table): Add params
+	field.
+	(elf_s390_additional_program_headers): New function.
+	(elf_s390_modify_segment_map): New function.
+	(bfd_elf_s390_set_options): New function.
+	(elf_backend_additional_program_headers)
+	(elf_backend_modify_segment_map): Add macro definitions.
+
 2017-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21626

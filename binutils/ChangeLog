@@ -49,6 +49,12 @@
 	(display_debug_frames): Use an unsigned int for the 'reg'
 	variable.  Use a signed long for the 'l' variable.
 
+2017-06-20  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* readelf.c (get_s390_segment_type): Add support for the new
+	segment type PT_S390_PGSTE.
+	(get_segment_type): Call get_s390_segment_type.
+
 2017-06-19  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21619

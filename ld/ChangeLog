@@ -195,6 +195,14 @@
 	* testsuite/ld-powerpc/tocsave2s.d,
 	* testsuite/ld-powerpc/tocsavelib.s: New files.
 
+2017-06-20  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* Makefile.in: Add s390.em as build dependency.
+	* emulparams/elf64_s390.sh (EXTRA_EM_FILE): Add s390.em.
+	* emultempl/s390.em: New file.
+	* gen-doc.texi: Add documentation for --s390-pgste option.
+	* ld.texinfo: Likewise.
+
 2017-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21626
