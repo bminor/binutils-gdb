@@ -1,3 +1,9 @@
+2017-06-26  Pedro Alves  <palves@redhat.com>
+
+	PR binutils/21665
+	* libbfd.c (_bfd_generic_get_section_contents): Add "count", not
+	"sz".
+
 2017-06-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/21665

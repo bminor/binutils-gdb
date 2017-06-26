@@ -820,7 +820,7 @@ _bfd_generic_get_section_contents (bfd *abfd,
     }
   if (offset + count < count
       || offset + count > sz
-      || (section->filepos + offset + sz) > (bfd_size_type) filesz)
+      || (section->filepos + offset + count) > (bfd_size_type) filesz)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
