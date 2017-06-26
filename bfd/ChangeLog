@@ -1,3 +1,9 @@
+2017-06-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/21665
+	* libbfd.c (_bfd_generic_get_section_contents_in_window): Add
+	a missing line.
+
 2017-06-26  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* cpu-mips.c (arch_info_struct): Mark the 4010 32-bit.

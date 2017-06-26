@@ -877,6 +877,7 @@ _bfd_generic_get_section_contents_in_window
   else
     sz = section->size;
   filesz = bfd_get_file_size (abfd);
+  if (filesz < 0)
     {
       /* This should never happen.  */
       abort ();
