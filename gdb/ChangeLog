@@ -1,5 +1,14 @@
 2017-06-26  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* common/diagnostics.h: Define macros for GCC.
+	(DIAGNOSTIC_IGNORE_UNUSED_FUNCTION): New macro.
+	* common/vec.h: Include diagnostics.h.
+	(DIAGNOSTIC_IGNORE_UNUSED_VEC_FUNCTION): New macro.
+	(DEF_VEC_I, DEF_VEC_P, DEF_VEC_O): Ignore -Wunused-function
+	warning.
+
+2017-06-26  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* common/diagnostics.h (DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER):
 	New macro.
 	* ada-lex.l: Ignore deprecated register warnings.
