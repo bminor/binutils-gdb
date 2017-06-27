@@ -1,3 +1,10 @@
+2017-06-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* darwin-nat.c (darwin_check_new_threads): Don't handle dummy
+	thread.
+	(darwin_init_thread_list): Don't update dummy thread.
+	(darwin_create_inferior, darwin_attach): Don't add a dummy thread.
+
 2017-06-26  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* record-full.c (netorder16): Remove.
