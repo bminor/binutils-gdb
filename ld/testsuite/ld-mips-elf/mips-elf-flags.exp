@@ -70,8 +70,13 @@ proc good_combination {arglist flags} {
     } elseif {![ld_link "$ld $ldemul" $finalobj "-r $objs"]} {
 	fail $testname
     } else {
-	catch "exec $READELF -h $finalobj" output
-	if {![regexp "Flags: *(\[^\n\]*)" $output full gotflags]} {
+	set cmd "$READELF -h $finalobj"
+	send_log "$cmd\n"
+	set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]]]
+	set output [lindex $cmdret 1]
+	set cmdret [lindex $cmdret 0]
+	if {$cmdret != 0 \
+	    || ![regexp "Flags: *(\[^\n\r\]*)" $output full gotflags]} {
 	    unresolved $testname
 	} else {
 	    set failed 0

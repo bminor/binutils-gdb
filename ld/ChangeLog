@@ -1,6 +1,11 @@
 2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/mips-elf-flags.exp (good_combination):
+	Use `remote_exec' to call `readelf'.  Log the command issued.
+
+2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips-elf-flags.exp (good_combination):
 	Use `readelf -h' rather than `readelf --headers'.
 
 2017-06-26  Maciej W. Rozycki  <macro@imgtec.com>
