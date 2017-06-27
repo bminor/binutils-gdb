@@ -1,5 +1,22 @@
 2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/mips16e-save.d: Rename to...
+	* testsuite/gas/mips/save.d: ... this.
+	* testsuite/gas/mips/mips16e-save-err.d: Update the
+	`error-output' option and rename to...
+	* testsuite/gas/mips/save-err.d: ... this.
+	* testsuite/gas/mips/mips16e-save-err.l: Rename to...
+	* testsuite/gas/mips/save-err.l: ... this.
+	* testsuite/gas/mips/mips16e-save.s: Rename to...
+	* testsuite/gas/mips/save.s: ... this.
+	* testsuite/gas/mips/mips16e-save-err.s: Rename to...
+	* testsuite/gas/mips/save-err.s: ... this.
+	* testsuite/gas/mips/mips.exp: Rename `mips16e-save' and
+	`mips16e-save-err' invocations to `save' and `save-err'
+	respectively and reorder these tests away from MIPS16 tests.
+
+2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips16e-save.d: Remove `-mmips:isa32
 	-mmips:16' from `objdump' flags and `-march=mips32 -mips16' from
 	`as' flags.
