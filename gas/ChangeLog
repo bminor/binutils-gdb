@@ -1,5 +1,11 @@
 2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/mips16e-save-err.d: New test.
+	* gas/testsuite/gas/mips/mips.exp: Fold `mips16e-save-err' list
+	test into the new test.
+
+2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips16e-save.d: Capitalize the `name'
 	option.
 
