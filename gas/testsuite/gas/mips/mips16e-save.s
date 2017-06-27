@@ -1,6 +1,5 @@
 # Test the generation of the mips16e save instruction
 
-	.set	mips16
 	.text
 func:
 # Un-extended version

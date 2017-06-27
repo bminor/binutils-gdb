@@ -1,4 +1,4 @@
-	.set	mips16
+
 	save	$3,100		# error
 	save	$4		# error
 	save	$4,100,200	# error

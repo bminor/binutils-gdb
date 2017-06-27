@@ -1,5 +1,18 @@
 2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/mips16e-save.d: Remove `-mmips:isa32
+	-mmips:16' from `objdump' flags and `-march=mips32 -mips16' from
+	`as' flags.
+	* testsuite/gas/mips/mips16e-save-err.d: Remove `-march=mips32'
+	from `as' flags.
+	* testsuite/gas/mips/mips16e-save.s: Remove the `.set mips16'
+	pseudo-op.
+	* testsuite/gas/mips/mips16e-save-err.s: Likewise.
+	* testsuite/gas/mips/mips.exp: Run SAVE/RESTORE tests across all
+	MIPS16e architectures.
+
+2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips16e-save-err.d: New test.
 	* gas/testsuite/gas/mips/mips.exp: Fold `mips16e-save-err' list
 	test into the new test.
