@@ -1,3 +1,9 @@
+2017-06-27  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/21665
+	* libbfd.c (_bfd_generic_get_section_contents): Warning fix.
+	(_bfd_generic_get_section_contents_in_window): Likewise.
+
 2017-06-26  Kuan-Lin Chen  <rufus@andestech.com>
 
 	* elfnn-riscv.c (perform_relocation): Support the new
@@ -42,7 +48,7 @@
 	* compress.c (bfd_get_full_section_contents): Don't check the
 	file size here.
 	* libbfd.c (_bfd_generic_get_section_contents): Check for and
-	reject a section whoes size + offset is greater than the size
+	reject a section whose size + offset is greater than the size
 	of the entire file.
 	(_bfd_generic_get_section_contents_in_window): Likewise.
 
@@ -55,10 +61,10 @@
 2017-06-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21665
-	* opncls.c (get_build_id): Check that the section is beig enough
+	* opncls.c (get_build_id): Check that the section is big enough
 	to contain the whole note.
 	* compress.c (bfd_get_full_section_contents): Check for and reject
-	a section whoes size is greater than the size of the entire file.
+	a section whose size is greater than the size of the entire file.
 	* elf32-v850.c (v850_elf_copy_notes): Allow for the ouput to not
 	contain a notes section.
 

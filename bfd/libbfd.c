@@ -815,7 +815,7 @@ _bfd_generic_get_section_contents (bfd *abfd,
   filesz = bfd_get_file_size (abfd);
   if (offset + count < count
       || offset + count > sz
-      || section->filepos + offset + count > filesz)
+      || (ufile_ptr) section->filepos + offset + count > filesz)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
@@ -873,7 +873,7 @@ _bfd_generic_get_section_contents_in_window
     sz = section->size;
   filesz = bfd_get_file_size (abfd);
   if (offset + count > sz
-      || section->filepos + offset + count > filesz
+      || (ufile_ptr) section->filepos + offset + count > filesz
       || ! bfd_get_file_window (abfd, section->filepos + offset, count, w,
 				TRUE))
     return FALSE;
