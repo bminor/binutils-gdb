@@ -1,5 +1,12 @@
 2017-07-11  John Baldwin  <jhb@FreeBSD.org>
 
+	* amd64-bsd-nat.c (amd64bsd_fetch_inferior_registers): Use
+	PT_GETFSBASE and PT_GETGSBASE.
+	(amd64bsd_store_inferior_registers): Use PT_SETFSBASE and
+	PT_SETGSBASE.
+
+2017-07-11  John Baldwin  <jhb@FreeBSD.org>
+
 	* features/Makefile (amd64.dat, amd64-avx.dat, amd64-mpx.dat)
 	(amd64-avx-mpx.dat, amd64-avx-avx512.dat)
 	(amd64-avx-mpx-avx512-pku.dat): Add i386/64bit-segments.xml in
