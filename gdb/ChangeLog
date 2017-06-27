@@ -1,3 +1,8 @@
+2017-06-27  Alan Hayward  <alan.hayward@arm.com>
+
+	* remote-sim.c (gdbsim_fetch_register): Use byte_vector.
+	(gdbsim_store_register): Likewise.
+
 2017-06-27  Pedro Alves  <palves@redhat.com>
 
 	* c-exp.y (name_obstack): Now an auto_obstack.

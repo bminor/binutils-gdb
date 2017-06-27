@@ -40,6 +40,7 @@
 #include "arch-utils.h"
 #include "readline/readline.h"
 #include "gdbthread.h"
+#include "common/byte-vector.h"
 
 /* Prototypes */
 
@@ -448,38 +449,31 @@ gdbsim_fetch_register (struct target_ops *ops,
       {
 	/* For moment treat a `does not exist' register the same way
 	   as an ``unavailable'' register.  */
-	gdb_byte buf[MAX_REGISTER_SIZE];
-	int nr_bytes;
-
-	memset (buf, 0, MAX_REGISTER_SIZE);
-	regcache_raw_supply (regcache, regno, buf);
+	regcache->raw_supply_zeroed (regno);
 	break;
       }
 
     default:
       {
 	static int warn_user = 1;
-	gdb_byte buf[MAX_REGISTER_SIZE];
+	int regsize = register_size (gdbarch, regno);
+	gdb::byte_vector buf (regsize, 0);
 	int nr_bytes;
 
 	gdb_assert (regno >= 0 && regno < gdbarch_num_regs (gdbarch));
-	memset (buf, 0, MAX_REGISTER_SIZE);
 	nr_bytes = sim_fetch_register (sim_data->gdbsim_desc,
 				       gdbarch_register_sim_regno
 					 (gdbarch, regno),
-				       buf,
-				       register_size (gdbarch, regno));
-	if (nr_bytes > 0
-	    && nr_bytes != register_size (gdbarch, regno) && warn_user)
+				       buf.data (), regsize);
+	if (nr_bytes > 0 && nr_bytes != regsize && warn_user)
 	  {
 	    fprintf_unfiltered (gdb_stderr,
 				"Size of register %s (%d/%d) "
 				"incorrect (%d instead of %d))",
 				gdbarch_register_name (gdbarch, regno),
 				regno,
-				gdbarch_register_sim_regno
-				  (gdbarch, regno),
-				nr_bytes, register_size (gdbarch, regno));
+				gdbarch_register_sim_regno (gdbarch, regno),
+				nr_bytes, regsize);
 	    warn_user = 0;
 	  }
 	/* FIXME: cagney/2002-05-27: Should check `nr_bytes == 0'
@@ -487,13 +481,13 @@ gdbsim_fetch_register (struct target_ops *ops,
 	   which registers are fetchable.  */
 	/* Else if (nr_bytes < 0): an old simulator, that doesn't
 	   think to return the register size.  Just assume all is ok.  */
-	regcache_raw_supply (regcache, regno, buf);
+	regcache->raw_supply (regno, buf.data ());
 	if (remote_debug)
 	  {
 	    fprintf_unfiltered (gdb_stdlog,
 				"gdbsim_fetch_register: %d", regno);
 	    /* FIXME: We could print something more intelligible.  */
-	    dump_mem (buf, register_size (gdbarch, regno));
+	    dump_mem (buf.data (), regsize);
 	  }
 	break;
       }
@@ -518,15 +512,17 @@ gdbsim_store_register (struct target_ops *ops,
     }
   else if (gdbarch_register_sim_regno (gdbarch, regno) >= 0)
     {
-      gdb_byte tmp[MAX_REGISTER_SIZE];
+      int regsize = register_size (gdbarch, regno);
+      gdb::byte_vector tmp (regsize);
       int nr_bytes;
 
-      regcache_cooked_read (regcache, regno, tmp);
+      regcache->cooked_read (regno, tmp.data ());
       nr_bytes = sim_store_register (sim_data->gdbsim_desc,
 				     gdbarch_register_sim_regno
 				       (gdbarch, regno),
-				     tmp, register_size (gdbarch, regno));
-      if (nr_bytes > 0 && nr_bytes != register_size (gdbarch, regno))
+				     tmp.data (), regsize);
+
+      if (nr_bytes > 0 && nr_bytes != regsize)
 	internal_error (__FILE__, __LINE__,
 			_("Register size different to expected"));
       if (nr_bytes < 0)
@@ -540,7 +536,7 @@ gdbsim_store_register (struct target_ops *ops,
 	{
 	  fprintf_unfiltered (gdb_stdlog, "gdbsim_store_register: %d", regno);
 	  /* FIXME: We could print something more intelligible.  */
-	  dump_mem (tmp, register_size (gdbarch, regno));
+	  dump_mem (tmp.data (), regsize);
 	}
     }
 }
