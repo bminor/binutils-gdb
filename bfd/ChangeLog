@@ -1,3 +1,11 @@
+2017-06-27  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/21665
+	* libbfd.c (_bfd_generic_get_section_contents): Delete abort.
+	Use unsigned file pointer type, and remove cast.
+	* libbfd.c (_bfd_generic_get_section_contents_in_window): Likewise.
+	Add "count", not "sz".
+
 2017-06-26  Pedro Alves  <palves@redhat.com>
 
 	PR binutils/21665
