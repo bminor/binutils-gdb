@@ -1,5 +1,14 @@
 2017-06-27  Pedro Alves  <palves@redhat.com>
 
+	* symtab.c (COMPLETION_LIST_ADD_SYMBOL)
+	(MCOMPLETION_LIST_ADD_SYMBOL): Delete macros, replace with ...
+	(completion_list_add_symbol, completion_list_add_msymbol):
+	... these new functions.
+	(add_symtab_completions)
+	(default_make_symbol_completion_list_break_on_1): Adjust.
+
+2017-06-27  Pedro Alves  <palves@redhat.com>
+
 	* objfiles.c (get_objfile_bfd_data): Call bfd_alloc instead of
 	bfd_zalloc.  Call objfile_per_bfd_storage's ctor.
 	(free_objfile_per_bfd_storage): Call objfile_per_bfd_storage's
