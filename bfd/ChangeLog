@@ -1,3 +1,10 @@
+2017-06-27  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/13402
+	* elf32-avr.c (elf32_avr_adjust_diff_reloc_value): Adjust
+	reloc addend if necessary. Adjust diff only if
+	shrinked_insn_address < end_address.
+
 2017-06-27  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/21665

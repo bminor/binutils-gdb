@@ -1,3 +1,9 @@
+2017-06-27  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/13402
+	* testsuite/ld-avr/pr13402.d: New test.
+	* testsuite/ld-avr/pr13402.s: New test.
+
 2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/mips-elf-flags.exp (good_combination):
