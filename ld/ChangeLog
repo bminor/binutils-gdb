@@ -1,6 +1,12 @@
 2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/mips-elf-flags.exp (good_combination):
+	Add an `args' final argument and examination code for `readelf
+	-A' output.  Update procedure description accordingly.
+
+2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/mips-elf-flags.exp (good_combination):
 	Use `remote_exec' to call `readelf'.  Log the command issued.
 
 2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>

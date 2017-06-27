@@ -57,8 +57,13 @@ proc assemble_for_flags {arglist} {
 
 # Assemble a file using each set of arguments in ARGLIST.  Check that
 # the objects can be linked together and that the `readelf -h' output
-# includes each flag named in FLAGS.
-proc good_combination {arglist flags} {
+# includes each flag named in FLAGS.  Additional one or more arguments
+# request the addition of the `-A' option to `readelf' invocation.  In
+# this case check MIPS ABI Flags reported for the ISA to match the
+# first of these arguments, the ISA Extension to match the second, and
+# the ASEs listed are exactly the same as those listed in the third,
+# passed as a TCL list.
+proc good_combination {arglist flags args} {
     global ld ldemul READELF
 
     set finalobj "tmpdir/mips-flags.o"
@@ -70,7 +75,8 @@ proc good_combination {arglist flags} {
     } elseif {![ld_link "$ld $ldemul" $finalobj "-r $objs"]} {
 	fail $testname
     } else {
-	set cmd "$READELF -h $finalobj"
+	set A [expr {[llength $args] > 0} ? {"A"} : {""}]
+	set cmd "$READELF -h$A $finalobj"
 	send_log "$cmd\n"
 	set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]]]
 	set output [lindex $cmdret 1]
@@ -91,6 +97,47 @@ proc good_combination {arglist flags} {
 		    set failed 1
 		}
 	    }
+
+	    set isa [string trim [lindex $args 0]]
+	    if {$isa != ""
+		&& (![regexp "ISA: *(\[^\n\r\]*)" $output full gotisa]
+		    || ![string match $isa $gotisa])} {
+		set failed 1
+	    }
+
+	    set ext [string trim [lindex $args 1]]
+	    if {$ext != ""
+		&& (![regexp "ISA Extension: *(\[^\n\r\]*)" \
+		      $output full gotext]
+		    || ![string match $ext $gotext])} {
+		set failed 1
+	    }
+
+	    set ases [string trim [lindex $args 2]]
+	    if {[llength $ases] > 0} {
+		if {![regexp "ASEs:\[\n\r\]+((?:\t\[^\n\r\]*\[\n\r\]+)*)" \
+		      $output full gotases]} {
+		    set failed 1
+		} else {
+		    # GOTASES is a list of strings separated by tab and
+		    # line separator characters.  Convert it to a TCL list.
+		    regsub -all "\[\n\r\t\]+" $gotases "\n" gotases
+		    set gotases [split [string trim $gotases] "\n"]
+
+		    foreach ase $ases {
+			set aseidx [lsearch -exact $gotases $ase]
+			if {$aseidx >= 0} {
+			    set gotases [lreplace $gotases $aseidx $aseidx]
+			} else {
+			    set failed 1
+			}
+		    }
+		    if {[llength $gotases] > 0} {
+			set failed 1
+		    }
+		}
+	    }
+
 	    if {$failed} {
 		fail $testname
 	    } else {
