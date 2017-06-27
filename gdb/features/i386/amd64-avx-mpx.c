@@ -146,23 +146,27 @@ initialize_tdesc_amd64_avx_mpx (void)
   tdesc_create_reg (feature, "xmm15", 55, 1, NULL, 128, "vec128");
   tdesc_create_reg (feature, "mxcsr", 56, 1, "vector", 32, "i386_mxcsr");
 
+  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.segments");
+  tdesc_create_reg (feature, "fs_base", 57, 1, NULL, 64, "int");
+  tdesc_create_reg (feature, "gs_base", 58, 1, NULL, 64, "int");
+
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.avx");
-  tdesc_create_reg (feature, "ymm0h", 57, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm1h", 58, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm2h", 59, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm3h", 60, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm4h", 61, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm5h", 62, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm6h", 63, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm7h", 64, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm8h", 65, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm9h", 66, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm10h", 67, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm11h", 68, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm12h", 69, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm13h", 70, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm14h", 71, 1, NULL, 128, "uint128");
-  tdesc_create_reg (feature, "ymm15h", 72, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm0h", 59, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm1h", 60, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm2h", 61, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm3h", 62, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm4h", 63, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm5h", 64, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm6h", 65, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm7h", 66, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm8h", 67, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm9h", 68, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm10h", 69, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm11h", 70, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm12h", 71, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm13h", 72, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm14h", 73, 1, NULL, 128, "uint128");
+  tdesc_create_reg (feature, "ymm15h", 74, 1, NULL, 128, "uint128");
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.mpx");
   type = tdesc_create_struct (feature, "br128");
@@ -195,12 +199,12 @@ initialize_tdesc_amd64_avx_mpx (void)
   field_type = tdesc_named_type (feature, "_bndcfgu");
   tdesc_add_field (type, "config", field_type);
 
-  tdesc_create_reg (feature, "bnd0raw", 73, 1, NULL, 128, "br128");
-  tdesc_create_reg (feature, "bnd1raw", 74, 1, NULL, 128, "br128");
-  tdesc_create_reg (feature, "bnd2raw", 75, 1, NULL, 128, "br128");
-  tdesc_create_reg (feature, "bnd3raw", 76, 1, NULL, 128, "br128");
-  tdesc_create_reg (feature, "bndcfgu", 77, 1, NULL, 64, "cfgu");
-  tdesc_create_reg (feature, "bndstatus", 78, 1, NULL, 64, "status");
+  tdesc_create_reg (feature, "bnd0raw", 75, 1, NULL, 128, "br128");
+  tdesc_create_reg (feature, "bnd1raw", 76, 1, NULL, 128, "br128");
+  tdesc_create_reg (feature, "bnd2raw", 77, 1, NULL, 128, "br128");
+  tdesc_create_reg (feature, "bnd3raw", 78, 1, NULL, 128, "br128");
+  tdesc_create_reg (feature, "bndcfgu", 79, 1, NULL, 64, "cfgu");
+  tdesc_create_reg (feature, "bndstatus", 80, 1, NULL, 64, "status");
 
   tdesc_amd64_avx_mpx = result;
 }

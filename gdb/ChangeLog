@@ -1,3 +1,28 @@
+2017-07-11  John Baldwin  <jhb@FreeBSD.org>
+
+	* features/Makefile (amd64.dat, amd64-avx.dat, amd64-mpx.dat)
+	(amd64-avx-mpx.dat, amd64-avx-avx512.dat)
+	(amd64-avx-mpx-avx512-pku.dat): Add i386/64bit-segments.xml in
+	those rules.
+	* features/i386/amd64-avx-avx512.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-mpx-avx512-pku.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-mpx.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-mpx.xml: Add 64bit-segments.xml.
+	* features/i386/amd64.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-avx512.c: Regenerated.
+	* features/i386/amd64-avx-mpx-avx512-pku.c: Regenerated.
+	* features/i386/amd64-avx-mpx.c: Regenerated.
+	* features/i386/amd64-avx.c: Regenerated.
+	* features/i386/amd64-mpx.c: Regenerated.
+	* features/i386/amd64.c: Regenerated.
+	* regformats/i386/amd64-avx-avx512.dat: Regenerated.
+	* regformats/i386/amd64-avx-mpx-avx512-pku.dat: Regenerated.
+	* regformats/i386/amd64-avx-mpx.dat: Regenerated.
+	* regformats/i386/amd64-avx.dat: Regenerated.
+	* regformats/i386/amd64-mpx.dat: Regenerated.
+	* regformats/i386/amd64.dat: Regenerated.
+
 2017-07-10  Yao Qi  <yao.qi@linaro.org>
 
 	* features/i386/amd64-avx-avx512-linux.c: Re-generated.
