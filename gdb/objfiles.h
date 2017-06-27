@@ -184,24 +184,28 @@ extern void print_symbol_bcache_statistics (void);
 
 struct objfile_per_bfd_storage
 {
+  objfile_per_bfd_storage ()
+    : minsyms_read (false)
+  {}
+
   /* The storage has an obstack of its own.  */
 
-  struct obstack storage_obstack;
+  auto_obstack storage_obstack;
 
   /* Byte cache for file names.  */
 
-  struct bcache *filename_cache;
+  bcache *filename_cache = NULL;
 
   /* Byte cache for macros.  */
 
-  struct bcache *macro_cache;
+  bcache *macro_cache = NULL;
 
   /* The gdbarch associated with the BFD.  Note that this gdbarch is
      determined solely from BFD information, without looking at target
      information.  The gdbarch determined from a running target may
      differ from this e.g. with respect to register types and names.  */
 
-  struct gdbarch *gdbarch;
+  struct gdbarch *gdbarch = NULL;
 
   /* Hash table for mapping symbol names to demangled names.  Each
      entry in the hash table is actually two consecutive strings,
@@ -209,19 +213,19 @@ struct objfile_per_bfd_storage
      name, and the second is the demangled name or just a zero byte
      if the name doesn't demangle.  */
 
-  struct htab *demangled_names_hash;
+  htab *demangled_names_hash = NULL;
 
   /* The per-objfile information about the entry point, the scope (file/func)
      containing the entry point, and the scope of the user's main() func.  */
 
-  struct entry_info ei;
+  entry_info ei {};
 
   /* The name and language of any "main" found in this objfile.  The
      name can be NULL, which means that the information was not
      recorded.  */
 
-  const char *name_of_main;
-  enum language language_of_main;
+  const char *name_of_main = NULL;
+  enum language language_of_main = language_unknown;
 
   /* Each file contains a pointer to an array of minimal symbols for all
      global symbols that are defined within the file.  The array is
@@ -233,15 +237,15 @@ struct objfile_per_bfd_storage
      as all the data that it points to, should be allocated on the
      objfile_obstack for this file.  */
 
-  struct minimal_symbol *msymbols;
-  int minimal_symbol_count;
+  minimal_symbol *msymbols = NULL;
+  int minimal_symbol_count = 0;
 
   /* The number of minimal symbols read, before any minimal symbol
      de-duplication is applied.  Note in particular that this has only
      a passing relationship with the actual size of the table above;
      use minimal_symbol_count if you need the true size.  */
 
-  int n_minsyms;
+  int n_minsyms = 0;
 
   /* This is true if minimal symbols have already been read.  Symbol
      readers can use this to bypass minimal symbol reading.  Also, the
@@ -251,16 +255,16 @@ struct objfile_per_bfd_storage
      for multiple readers to install minimal symbols into a given
      per-BFD.  */
 
-  unsigned int minsyms_read : 1;
+  bool minsyms_read : 1;
 
   /* This is a hash table used to index the minimal symbols by name.  */
 
-  struct minimal_symbol *msymbol_hash[MINIMAL_SYMBOL_HASH_SIZE];
+  minimal_symbol *msymbol_hash[MINIMAL_SYMBOL_HASH_SIZE] {};
 
   /* This hash table is used to index the minimal symbols by their
      demangled names.  */
 
-  struct minimal_symbol *msymbol_demangled_hash[MINIMAL_SYMBOL_HASH_SIZE];
+  minimal_symbol *msymbol_demangled_hash[MINIMAL_SYMBOL_HASH_SIZE] {};
 };
 
 /* Master structure for keeping track of each file from which
