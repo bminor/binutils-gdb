@@ -1,3 +1,9 @@
+2017-10-11  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* arc-tdep.c (arc_gdbarch_init): Pass proper cpu value to disassembler.
+	* arc-tdep.h (arc_arch_is_em): New function.
+	(arc_arch_is_hs): Likewise.
+
 2017-10-11  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
 
 	* macrotab.h (macro_lookup_inclusion): Remove unnecessary

@@ -2085,8 +2085,38 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	     existing gdbarches, which also can be problematic, if
 	     arc_gdbarch_init will start reusing existing gdbarch
 	     instances.  */
-	  arc_disassembler_options = xstrprintf ("cpu=%s",
-						 tdesc_arch->printable_name);
+	  /* Target description specifies a BFD architecture, which is
+	     different from ARC cpu, as accepted by disassembler (and most
+	     other ARC tools), because cpu values are much more fine grained -
+	     there can be multiple cpu values per single BFD architecture.  As
+	     a result this code should translate architecture to some cpu
+	     value.  Since there is no info on exact cpu configuration, it is
+	     best to use the most feature-rich CPU, so that disassembler will
+	     recognize all instructions available to the specified
+	     architecture.  */
+	  switch (tdesc_arch->mach)
+	    {
+	    case bfd_mach_arc_arc601:
+	      arc_disassembler_options = xstrdup ("cpu=arc601");
+	      break;
+	    case bfd_mach_arc_arc600:
+	      arc_disassembler_options = xstrdup ("cpu=arc600");
+	      break;
+	    case bfd_mach_arc_arc700:
+	      arc_disassembler_options = xstrdup ("cpu=arc700");
+	      break;
+	    case bfd_mach_arc_arcv2:
+	      /* Machine arcv2 has three arches: ARCv2, EM and HS; where ARCv2
+		 is treated as EM.  */
+	      if (arc_arch_is_hs (tdesc_arch))
+		arc_disassembler_options = xstrdup ("cpu=hs38_linux");
+	      else
+		arc_disassembler_options = xstrdup ("cpu=em4_fpuda");
+	      break;
+	    default:
+	      arc_disassembler_options = NULL;
+	      break;
+	    }
 	  set_gdbarch_disassembler_options (gdbarch,
 					    &arc_disassembler_options);
 	}

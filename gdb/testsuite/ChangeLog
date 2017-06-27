@@ -1,3 +1,8 @@
+2017-10-11  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* gdb.arch/arc-tdesc-cpu.exp: New file.
+	* gdb.arch/arc-tdesc-cpu.xml: Likewise.
+
 2017-10-10  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* lib/gdb.exp (get_integer_valueof): Don't output read value in test name.

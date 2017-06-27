@@ -123,6 +123,21 @@ arc_mach_is_arcv2 (struct gdbarch *gdbarch)
   return gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_arc_arcv2;
 }
 
+/* ARC EM and ARC HS are unique BFD arches, however they share the same machine
+   number as "ARCv2".  */
+
+static inline bool
+arc_arch_is_hs (const struct bfd_arch_info* arch)
+{
+  return startswith (arch->printable_name, "HS");
+}
+
+static inline bool
+arc_arch_is_em (const struct bfd_arch_info* arch)
+{
+  return startswith (arch->printable_name, "EM");
+}
+
 /* Function to access ARC disassembler.  Underlying opcodes disassembler will
    print an instruction into stream specified in the INFO, so if it is
    undesired, then this stream should be set to some invisible stream, but it
