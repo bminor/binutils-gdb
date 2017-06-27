@@ -1506,16 +1506,12 @@ linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
 				    char *note_data, int *note_size)
 {
   struct cleanup *cleanup;
-  struct obstack data_obstack, filename_obstack;
   struct linux_make_mappings_data mapping_data;
   struct type *long_type
     = arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch), 0, "long");
   gdb_byte buf[sizeof (ULONGEST)];
 
-  obstack_init (&data_obstack);
-  cleanup = make_cleanup_obstack_free (&data_obstack);
-  obstack_init (&filename_obstack);
-  make_cleanup_obstack_free (&filename_obstack);
+  auto_obstack data_obstack, filename_obstack;
 
   mapping_data.file_count = 0;
   mapping_data.data_obstack = &data_obstack;
@@ -1548,7 +1544,6 @@ linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
 				      obstack_object_size (&data_obstack));
     }
 
-  do_cleanups (cleanup);
   return note_data;
 }
 

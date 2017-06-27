@@ -3060,13 +3060,11 @@ create_addrmap_from_index (struct objfile *objfile, struct mapped_index *index)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   const gdb_byte *iter, *end;
-  struct obstack temp_obstack;
   struct addrmap *mutable_map;
-  struct cleanup *cleanup;
   CORE_ADDR baseaddr;
 
-  obstack_init (&temp_obstack);
-  cleanup = make_cleanup_obstack_free (&temp_obstack);
+  auto_obstack temp_obstack;
+
   mutable_map = addrmap_create_mutable (&temp_obstack);
 
   iter = index->address_table;
@@ -3107,7 +3105,6 @@ create_addrmap_from_index (struct objfile *objfile, struct mapped_index *index)
 
   objfile->psymtabs_addrmap = addrmap_create_fixed (mutable_map,
 						    &objfile->objfile_obstack);
-  do_cleanups (cleanup);
 }
 
 /* The hash function for strings in the mapped index.  This is the same as
@@ -6626,7 +6623,6 @@ static void
 dwarf2_build_psymtabs_hard (struct objfile *objfile)
 {
   struct cleanup *back_to, *addrmap_cleanup;
-  struct obstack temp_obstack;
   int i;
 
   if (dwarf_read_debug)
@@ -6649,8 +6645,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile)
 
   /* Create a temporary address map on a temporary obstack.  We later
      copy this to the final obstack.  */
-  obstack_init (&temp_obstack);
-  make_cleanup_obstack_free (&temp_obstack);
+  auto_obstack temp_obstack;
   objfile->psymtabs_addrmap = addrmap_create_mutable (&temp_obstack);
   addrmap_cleanup = make_cleanup (psymtabs_addrmap_cleanup, objfile);
 
@@ -13796,15 +13791,12 @@ update_enumeration_type_from_children (struct die_info *die,
 				       struct type *type,
 				       struct dwarf2_cu *cu)
 {
-  struct obstack obstack;
   struct die_info *child_die;
   int unsigned_enum = 1;
   int flag_enum = 1;
   ULONGEST mask = 0;
-  struct cleanup *old_chain;
 
-  obstack_init (&obstack);
-  old_chain = make_cleanup_obstack_free (&obstack);
+  auto_obstack obstack;
 
   for (child_die = die->child;
        child_die != NULL && child_die->tag;
@@ -13849,8 +13841,6 @@ update_enumeration_type_from_children (struct die_info *die,
     TYPE_UNSIGNED (type) = 1;
   if (flag_enum)
     TYPE_FLAG_ENUM (type) = 1;
-
-  do_cleanups (old_chain);
 }
 
 /* Given a DW_AT_enumeration_type die, set its type.  We do not

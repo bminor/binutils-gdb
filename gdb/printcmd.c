@@ -2255,8 +2255,6 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
 					 "wchar_t", NULL, 0);
   int wcwidth = TYPE_LENGTH (wctype);
   gdb_byte *buf = (gdb_byte *) alloca (wcwidth);
-  struct obstack output;
-  struct cleanup *inner_cleanup;
 
   tem = value_as_address (value);
 
@@ -2275,8 +2273,7 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
     read_memory (tem, str, j);
   memset (&str[j], 0, wcwidth);
 
-  obstack_init (&output);
-  inner_cleanup = make_cleanup_obstack_free (&output);
+  auto_obstack output;
 
   convert_between_encodings (target_wide_charset (gdbarch),
 			     host_charset (),
@@ -2285,7 +2282,6 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
   obstack_grow_str0 (&output, "");
 
   fprintf_filtered (stream, format, obstack_base (&output));
-  do_cleanups (inner_cleanup);
 }
 
 /* Subroutine of ui_printf to simplify it.
@@ -2531,8 +2527,6 @@ ui_printf (const char *arg, struct ui_file *stream)
 	      struct type *wctype = lookup_typename (current_language, gdbarch,
 						     "wchar_t", NULL, 0);
 	      struct type *valtype;
-	      struct obstack output;
-	      struct cleanup *inner_cleanup;
 	      const gdb_byte *bytes;
 
 	      valtype = value_type (val_args[i]);
@@ -2542,8 +2536,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 
 	      bytes = value_contents (val_args[i]);
 
-	      obstack_init (&output);
-	      inner_cleanup = make_cleanup_obstack_free (&output);
+	      auto_obstack output;
 
 	      convert_between_encodings (target_wide_charset (gdbarch),
 					 host_charset (),
@@ -2554,7 +2547,6 @@ ui_printf (const char *arg, struct ui_file *stream)
 
 	      fprintf_filtered (stream, current_substring,
                                 obstack_base (&output));
-	      do_cleanups (inner_cleanup);
 	    }
 	    break;
 	  case double_arg:

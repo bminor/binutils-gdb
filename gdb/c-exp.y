@@ -2806,7 +2806,7 @@ static int popping;
 
 /* Temporary storage for c_lex; this holds symbol names as they are
    built up.  */
-static struct obstack name_obstack;
+auto_obstack name_obstack;
 
 /* Classify a NAME token.  The contents of the token are in `yylval'.
    Updates yylval and returns the new token type.  BLOCK is the block
@@ -3067,7 +3067,7 @@ yylex (void)
   current = *VEC_index (token_and_value, token_fifo, next_to_examine);
   ++next_to_examine;
 
-  obstack_free (&name_obstack, obstack_base (&name_obstack));
+  name_obstack.clear ();
   checkpoint = 0;
   if (current.token == FILENAME)
     search_block = current.value.bval;
@@ -3169,6 +3169,9 @@ c_parse (struct parser_state *par_state)
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
+  /* Note that parsing (within yyparse) freely installs cleanups
+     assuming they'll be run here (below).  */
+
   back_to = make_cleanup (free_current_contents, &expression_macro_scope);
   make_cleanup_clear_parser_state (&pstate);
 
@@ -3197,8 +3200,7 @@ c_parse (struct parser_state *par_state)
 
   VEC_free (token_and_value, token_fifo);
   popping = 0;
-  obstack_init (&name_obstack);
-  make_cleanup_obstack_free (&name_obstack);
+  name_obstack.clear ();
 
   result = yyparse ();
   do_cleanups (back_to);

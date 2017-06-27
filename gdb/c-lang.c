@@ -570,15 +570,12 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
       {
 	int oplen, limit;
 	struct type *type;
-	struct obstack output;
-	struct cleanup *cleanup;
 	struct value *result;
 	c_string_type dest_type;
 	const char *dest_charset;
 	int satisfy_expected = 0;
 
-	obstack_init (&output);
-	cleanup = make_cleanup_obstack_free (&output);
+	auto_obstack output;
 
 	++*pos;
 	oplen = longest_to_int (exp->elts[*pos].longconst);
@@ -656,7 +653,6 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 	      result = allocate_value (type);
 	    else
 	      result = value_cstring ("", 0, type);
-	    do_cleanups (cleanup);
 	    return result;
 	  }
 
@@ -702,7 +698,6 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 				      obstack_object_size (&output),
 				      type);
 	  }
-	do_cleanups (cleanup);
 	return result;
       }
       break;

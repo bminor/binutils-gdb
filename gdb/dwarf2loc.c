@@ -2121,13 +2121,10 @@ fetch_const_value_from_synthetic_pointer (sect_offset die, LONGEST byte_offset,
 					  struct type *type)
 {
   struct value *result = NULL;
-  struct obstack temp_obstack;
-  struct cleanup *cleanup;
   const gdb_byte *bytes;
   LONGEST len;
 
-  obstack_init (&temp_obstack);
-  cleanup = make_cleanup_obstack_free (&temp_obstack);
+  auto_obstack temp_obstack;
   bytes = dwarf2_fetch_constant_bytes (die, per_cu, &temp_obstack, &len);
 
   if (bytes != NULL)
@@ -2143,8 +2140,6 @@ fetch_const_value_from_synthetic_pointer (sect_offset die, LONGEST byte_offset,
     }
   else
     result = allocate_optimized_out_value (TYPE_TARGET_TYPE (type));
-
-  do_cleanups (cleanup);
 
   return result;
 }

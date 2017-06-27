@@ -166,24 +166,6 @@ make_cleanup_fclose (FILE *file)
   return make_cleanup (do_fclose_cleanup, file);
 }
 
-/* Helper function which does the work for make_cleanup_obstack_free.  */
-
-static void
-do_obstack_free (void *arg)
-{
-  struct obstack *ob = (struct obstack *) arg;
-
-  obstack_free (ob, NULL);
-}
-
-/* Return a new cleanup that frees OBSTACK.  */
-
-struct cleanup *
-make_cleanup_obstack_free (struct obstack *obstack)
-{
-  return make_cleanup (do_obstack_free, obstack);
-}
-
 /* Helper function for make_cleanup_ui_out_redirect_pop.  */
 
 static void
@@ -1277,13 +1259,10 @@ query (const char *ctlstr, ...)
 static int
 host_char_to_target (struct gdbarch *gdbarch, int c, int *target_c)
 {
-  struct obstack host_data;
   char the_char = c;
-  struct cleanup *cleanups;
   int result = 0;
 
-  obstack_init (&host_data);
-  cleanups = make_cleanup_obstack_free (&host_data);
+  auto_obstack host_data;
 
   convert_between_encodings (target_charset (gdbarch), host_charset (),
 			     (gdb_byte *) &the_char, 1, 1,
@@ -1295,7 +1274,6 @@ host_char_to_target (struct gdbarch *gdbarch, int c, int *target_c)
       *target_c = *(char *) obstack_base (&host_data);
     }
 
-  do_cleanups (cleanups);
   return result;
 }
 
