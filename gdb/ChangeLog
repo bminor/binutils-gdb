@@ -1,3 +1,48 @@
+2017-06-27  Alan Hayward  <alan.hayward@arm.com>
+
+	* remote-sim.c (gdbsim_fetch_register): Use byte_vector.
+	(gdbsim_store_register): Likewise.
+
+2017-06-27  Pedro Alves  <palves@redhat.com>
+
+	* c-exp.y (name_obstack): Now an auto_obstack.
+	(yylex): Use auto_obstack::clear.
+	(c_parse): Use auto_obstack::clear instead of reinitializing and
+	freeing the obstack.
+	* c-lang.c (evaluate_subexp_c): Use auto_obstack.
+	* d-exp.y (name_obstack): Now an auto_obstack.
+	(yylex): Use auto_obstack::clear.
+	(d_parse): Use auto_obstack::clear instead of reinitializing and
+	freeing the obstack.
+	* dwarf2loc.c (fetch_const_value_from_synthetic_pointer): Use
+	auto_obstack.
+	* dwarf2read.c (create_addrmap_from_index)
+	(dwarf2_build_psymtabs_hard)
+	(update_enumeration_type_from_children): Likewise.
+	* gdb_obstack.h (auto_obstack): New type.
+	* go-exp.y (name_obstack): Now an auto_obstack.
+	(build_packaged_name): Use auto_obstack::clear.
+	(go_parse): Use auto_obstack::clear instead of reinitializing and
+	freeing the obstack.
+	* linux-tdep.c (linux_make_mappings_corefile_notes): Use
+	auto_obstack.
+	* printcmd.c (printf_wide_c_string, ui_printf): Use auto_obstack.
+	* rust-exp.y (work_obstack): Now an auto_obstack.
+	(rust_parse, rust_lex_tests): Use auto_obstack::clear instead of
+	reinitializing and freeing the obstack.
+	* utils.c (do_obstack_free, make_cleanup_obstack_free): Delete.
+	(host_char_to_target): Use auto_obstack.
+	* utils.h (make_cleanup_obstack_free): Delete declaration.
+	* valprint.c (generic_emit_char, generic_printstr): Use
+	auto_obstack.
+
+2017-06-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* darwin-nat.c (darwin_check_new_threads): Don't handle dummy
+	thread.
+	(darwin_init_thread_list): Don't update dummy thread.
+	(darwin_create_inferior, darwin_attach): Don't add a dummy thread.
+
 2017-06-26  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* record-full.c (netorder16): Remove.

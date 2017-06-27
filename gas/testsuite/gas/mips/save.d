@@ -1,6 +1,6 @@
-#objdump: -dr -mmips:isa32 -mmips:16
-#as: -march=mips32 -mips16 -32
-#name: mips16e save/restore
+#objdump: -dr
+#as: -32
+#name: MIPS16e SAVE/RESTORE
 
 .*: +file format .*mips.*
 

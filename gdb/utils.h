@@ -78,9 +78,6 @@ extern struct cleanup *(make_cleanup_free_section_addr_info
 
 extern struct cleanup *make_cleanup_fclose (FILE *file);
 
-struct obstack;
-extern struct cleanup *make_cleanup_obstack_free (struct obstack *obstack);
-
 extern struct cleanup *make_cleanup_restore_integer (int *variable);
 extern struct cleanup *make_cleanup_restore_uinteger (unsigned int *variable);
 

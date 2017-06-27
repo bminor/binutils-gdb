@@ -520,7 +520,7 @@ pass_over (bfd *abfd, bfd_boolean (*func) (bfd *, int, char *, char *))
 
   while (! is_eof)
     {
-      static char src[MAXCHUNK];
+      char src[MAXCHUNK];
       char type;
 
       /* Find first '%'.  */

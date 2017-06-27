@@ -185,7 +185,7 @@ static int unit_testing;
 
 /* Obstack for data temporarily allocated during parsing.  */
 
-static struct obstack work_obstack;
+static auto_obstack work_obstack;
 
 /* Result of parsing.  Points into work_obstack.  */
 
@@ -2446,13 +2446,17 @@ int
 rust_parse (struct parser_state *state)
 {
   int result;
-  struct cleanup *cleanup;
 
-  obstack_init (&work_obstack);
-  cleanup = make_cleanup_obstack_free (&work_obstack);
+  work_obstack.clear ();
+
   rust_ast = NULL;
 
   pstate = state;
+
+  /* Note that parsing (within rustyyparse) freely installs cleanups
+     assuming they're run here (below).  */
+  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
+
   result = rustyyparse ();
 
   if (!result || (parse_completion && rust_ast != NULL))
@@ -2631,7 +2635,7 @@ rust_lex_tests (void)
 {
   int i;
 
-  obstack_init (&work_obstack);
+  work_obstack.clear ();
   unit_testing = 1;
 
   rust_lex_test_one ("", 0);
@@ -2722,7 +2726,6 @@ rust_lex_tests (void)
   rust_lex_test_completion ();
   rust_lex_test_push_back ();
 
-  obstack_free (&work_obstack, NULL);
   unit_testing = 0;
 }
 

@@ -2484,8 +2484,6 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
 {
   enum bfd_endian byte_order
     = gdbarch_byte_order (get_type_arch (type));
-  struct obstack wchar_buf, output;
-  struct cleanup *cleanups;
   gdb_byte *buf;
   int need_escape = 0;
 
@@ -2495,8 +2493,7 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
   wchar_iterator iter (buf, TYPE_LENGTH (type), encoding, TYPE_LENGTH (type));
 
   /* This holds the printable form of the wchar_t data.  */
-  obstack_init (&wchar_buf);
-  cleanups = make_cleanup_obstack_free (&wchar_buf);
+  auto_obstack wchar_buf;
 
   while (1)
     {
@@ -2543,8 +2540,7 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
     }
 
   /* The output in the host encoding.  */
-  obstack_init (&output);
-  make_cleanup_obstack_free (&output);
+  auto_obstack output;
 
   convert_between_encodings (INTERMEDIATE_ENCODING, host_charset (),
 			     (gdb_byte *) obstack_base (&wchar_buf),
@@ -2553,8 +2549,6 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
   obstack_1grow (&output, '\0');
 
   fputs_filtered ((const char *) obstack_base (&output), stream);
-
-  do_cleanups (cleanups);
 }
 
 /* Return the repeat count of the next character/byte in ITER,
@@ -2813,7 +2807,6 @@ generic_printstr (struct ui_file *stream, struct type *type,
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   unsigned int i;
   int width = TYPE_LENGTH (type);
-  struct obstack wchar_buf, output;
   struct cleanup *cleanup;
   int finished = 0;
   struct converted_character *last;
@@ -2885,8 +2878,7 @@ generic_printstr (struct ui_file *stream, struct type *type,
 
   /* WCHAR_BUF is the obstack we use to represent the string in
      wchar_t form.  */
-  obstack_init (&wchar_buf);
-  make_cleanup_obstack_free (&wchar_buf);
+  auto_obstack wchar_buf;
 
   /* Print the output string to the obstack.  */
   print_converted_chars_to_obstack (&wchar_buf, converted_chars, quote_char,
@@ -2896,8 +2888,7 @@ generic_printstr (struct ui_file *stream, struct type *type,
     obstack_grow_wstr (&wchar_buf, LCST ("..."));
 
   /* OUTPUT is where we collect `char's for printing.  */
-  obstack_init (&output);
-  make_cleanup_obstack_free (&output);
+  auto_obstack output;
 
   convert_between_encodings (INTERMEDIATE_ENCODING, host_charset (),
 			     (gdb_byte *) obstack_base (&wchar_buf),

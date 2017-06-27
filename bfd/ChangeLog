@@ -1,10 +1,66 @@
+2017-06-27  Nick Clifton  <nickc@redhat.com>
+
+	* tekhex.c (pass_over): Revert accidental conversion of a local
+	array to a static array.
+
+2017-06-27  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/13402
+	* elf32-avr.c (elf32_avr_adjust_diff_reloc_value): Adjust
+	reloc addend if necessary. Adjust diff only if
+	shrinked_insn_address < end_address.
+
+2017-06-27  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/21665
+	* libbfd.c (_bfd_generic_get_section_contents): Warning fix.
+	(_bfd_generic_get_section_contents_in_window): Likewise.
+
+2017-06-26  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* elfnn-riscv.c (perform_relocation): Support the new
+	R_RISCV_32_PCREL relocation.
+	(riscv_elf_relocate_section): Likewise.
+	* elfxx-riscv.c (howto_table): Likewise.
+	(riscv_reloc_map): Likewise.
+	* bfd-in2.h (BFD_RELOC_RISCV_32_PCREL): New relocation.
+	* libbfd.h: Regenerate.
+
+2017-06-27  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/21665
+	* libbfd.c (_bfd_generic_get_section_contents): Delete abort.
+	Use unsigned file pointer type, and remove cast.
+	* libbfd.c (_bfd_generic_get_section_contents_in_window): Likewise.
+	Add "count", not "sz".
+
+2017-06-26  Pedro Alves  <palves@redhat.com>
+
+	PR binutils/21665
+	* libbfd.c (_bfd_generic_get_section_contents): Add "count", not
+	"sz".
+
+2017-06-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/21665
+	* libbfd.c (_bfd_generic_get_section_contents_in_window): Add
+	a missing line.
+
+2017-06-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* cpu-mips.c (arch_info_struct): Mark the 4010 32-bit.
+	* elfxx-mips.c (mips_set_isa_flags) <bfd_mach_mips4010>: Set
+	E_MIPS_ARCH_2 rather than E_MIPS_ARCH_3 in `e_flags'.
+	(mips_mach_extensions): Mark `bfd_mach_mips4010' as extending
+	`bfd_mach_mips6000' rather than `bfd_mach_mips4000'.
+
 2017-06-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/21665
 	* compress.c (bfd_get_full_section_contents): Don't check the
 	file size here.
 	* libbfd.c (_bfd_generic_get_section_contents): Check for and
-	reject a section whoes size + offset is greater than the size
+	reject a section whose size + offset is greater than the size
 	of the entire file.
 	(_bfd_generic_get_section_contents_in_window): Likewise.
 
@@ -17,10 +73,10 @@
 2017-06-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21665
-	* opncls.c (get_build_id): Check that the section is beig enough
+	* opncls.c (get_build_id): Check that the section is big enough
 	to contain the whole note.
 	* compress.c (bfd_get_full_section_contents): Check for and reject
-	a section whoes size is greater than the size of the entire file.
+	a section whose size is greater than the size of the entire file.
 	* elf32-v850.c (v850_elf_copy_notes): Allow for the ouput to not
 	contain a notes section.
 

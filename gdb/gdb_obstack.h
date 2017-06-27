@@ -63,4 +63,19 @@ extern char *obconcat (struct obstack *obstackp, ...) ATTRIBUTE_SENTINEL;
 
 extern char *obstack_strdup (struct obstack *obstackp, const char *string);
 
+/* An obstack that frees itself on scope exit.  */
+struct auto_obstack : obstack
+{
+  auto_obstack ()
+  { obstack_init (this); }
+
+  ~auto_obstack ()
+  { obstack_free (this, NULL); }
+
+  /* Free all memory in the obstack but leave it valid for further
+     allocation.  */
+  void clear ()
+  { obstack_free (this, obstack_base (this)); }
+};
+
 #endif
