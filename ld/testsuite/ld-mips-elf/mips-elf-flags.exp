@@ -56,7 +56,7 @@ proc assemble_for_flags {arglist} {
 }
 
 # Assemble a file using each set of arguments in ARGLIST.  Check that
-# the objects can be linked together and that the readelf output
+# the objects can be linked together and that the `readelf -h' output
 # includes each flag named in FLAGS.
 proc good_combination {arglist flags} {
     global ld ldemul READELF
@@ -70,7 +70,7 @@ proc good_combination {arglist flags} {
     } elseif {![ld_link "$ld $ldemul" $finalobj "-r $objs"]} {
 	fail $testname
     } else {
-	catch "exec $READELF --headers $finalobj" output
+	catch "exec $READELF -h $finalobj" output
 	if {![regexp "Flags: *(\[^\n\]*)" $output full gotflags]} {
 	    unresolved $testname
 	} else {
