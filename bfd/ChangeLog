@@ -1,3 +1,9 @@
+2017-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in2.h: Regenerated.
+	* bfdio.c (bfd_get_size): Change return type to ufile_ptr.
+	(bfd_get_file_size): Likewise.
+
 2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
 

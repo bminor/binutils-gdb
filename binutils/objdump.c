@@ -3388,7 +3388,7 @@ dump_relocs_in_section (bfd *abfd,
     }
 
   if ((bfd_get_file_flags (abfd) & (BFD_IN_MEMORY | BFD_LINKER_CREATED)) == 0
-      && relsize > bfd_get_file_size (abfd))
+      && (ufile_ptr) relsize > bfd_get_file_size (abfd))
     {
       printf (" (too many: 0x%x)\n", section->reloc_count);
       bfd_set_error (bfd_error_file_truncated);

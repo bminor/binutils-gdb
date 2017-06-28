@@ -1,3 +1,8 @@
+2017-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objdump.c (dump_relocs_in_section): Cast to ufile_ptr when
+	comparing against bfd_get_file_size return.
+
 2017-06-28  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (merge_gnu_build_notes): Add support for version 2 notes.

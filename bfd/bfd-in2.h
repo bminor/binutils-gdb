@@ -1240,9 +1240,9 @@ char *bfd_follow_build_id_debuglink (bfd *abfd, const char *dir);
 /* Extracted from bfdio.c.  */
 long bfd_get_mtime (bfd *abfd);
 
-file_ptr bfd_get_size (bfd *abfd);
+ufile_ptr bfd_get_size (bfd *abfd);
 
-file_ptr bfd_get_file_size (bfd *abfd);
+ufile_ptr bfd_get_file_size (bfd *abfd);
 
 void *bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
     int prot, int flags, file_ptr offset,
