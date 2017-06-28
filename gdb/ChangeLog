@@ -1,3 +1,7 @@
+2017-06-28  Pedro Alves  <palves@redhat.com>
+
+	* command.h: Include "common/scoped_restore.h".
+
 2017-06-28  Yao Qi  <yao.qi@linaro.org>
 
 	* mi/mi-cmd-break.c (mi_argv_to_format): Use obstack_grow_str
