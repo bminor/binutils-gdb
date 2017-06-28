@@ -1,5 +1,9 @@
 2017-07-07  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-tdep.c (fbsd_core_thread_name): Use thread_section_name.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
 	* corelow.c (get_core_siginfo): Remove.
 	(core_xfer_partial): Use the gdbarch "core_xfer_siginfo" method
 	instead of get_core_siginfo.

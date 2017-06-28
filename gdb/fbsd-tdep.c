@@ -75,7 +75,6 @@ fbsd_core_thread_name (struct gdbarch *gdbarch, struct thread_info *thr)
   static char buf[80];
   struct bfd_section *section;
   bfd_size_type size;
-  char sectionstr[32];
 
   if (ptid_get_lwp (thr->ptid) != 0)
     {
@@ -86,9 +85,9 @@ fbsd_core_thread_name (struct gdbarch *gdbarch, struct thread_info *thr)
 	 structure.  Rather than define the full structure here, just
 	 extract the null-terminated name from the start of the
 	 note.  */
-      xsnprintf (sectionstr, sizeof sectionstr, ".thrmisc/%ld",
-		ptid_get_lwp (thr->ptid));
-      section = bfd_get_section_by_name (core_bfd, sectionstr);
+      thread_section_name section_name (".thrmisc", thr->ptid);
+
+      section = bfd_get_section_by_name (core_bfd, section_name.c_str ());
       if (section != NULL && bfd_section_size (core_bfd, section) > 0)
 	{
 	  /* Truncate the name if it is longer than "buf".  */
