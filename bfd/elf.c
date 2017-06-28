@@ -9980,6 +9980,10 @@ elfcore_grok_freebsd_note (bfd *abfd, Elf_Internal_Note *note)
       else
 	return TRUE;
 
+    case NT_FREEBSD_PTLWPINFO:
+      return elfcore_make_note_pseudosection (abfd, ".note.freebsdcore.lwpinfo",
+					      note);
+
     default:
       return TRUE;
     }
