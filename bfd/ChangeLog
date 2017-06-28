@@ -1,3 +1,8 @@
+2017-06-29  Andrew Waterman  <andrew@sifive.com>
+
+	* elfnn-riscv.c (riscv_elf_adjust_dynamic_symbol): Fix TLS copy
+	relocs.
+
 2017-06-29  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
 
 	* elfxx-sparc.c (allocate_dynrelocs): Don't make a symbol dynamic
