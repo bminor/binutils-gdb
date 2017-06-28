@@ -1,6 +1,7 @@
 #objdump: -dr
-#as: -32
-#name: SAVE/RESTORE instructions
+#as: -32 -I$srcdir/$subdir
+#name: SAVE/RESTORE instruction subset disassembly
+#source: save-sub.s
 
 .*: +file format .*mips.*
 

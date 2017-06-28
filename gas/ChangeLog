@@ -1,5 +1,44 @@
 2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/elf_mach_interaptiv-mr2.d: New test.
+	* testsuite/gas/mips/save-err.d: New test.
+	* testsuite/gas/mips/save-sub.d: New test.
+	* testsuite/gas/mips/interaptiv-mr2@save.d: New test.
+	* testsuite/gas/mips/mips1@save-sub.d: New test.
+	* testsuite/gas/mips/mips2@save-sub.d: New test.
+	* testsuite/gas/mips/mips3@save-sub.d: New test.
+	* testsuite/gas/mips/mips4@save-sub.d: New test.
+	* testsuite/gas/mips/mips5@save-sub.d: New test.
+	* testsuite/gas/mips/mips32@save-sub.d: New test.
+	* testsuite/gas/mips/mips64@save-sub.d: New test.
+	* testsuite/gas/mips/mips16@save-sub.d: New test.
+	* testsuite/gas/mips/mips16e@save-sub.d: New test.
+	* testsuite/gas/mips/r3000@save-sub.d: New test.
+	* testsuite/gas/mips/r3900@save-sub.d: New test.
+	* testsuite/gas/mips/r4000@save-sub.d: New test.
+	* testsuite/gas/mips/vr5400@save-sub.d: New test.
+	* testsuite/gas/mips/interaptiv-mr2@save-sub.d: New test.
+	* testsuite/gas/mips/sb1@save-sub.d: New test.
+	* testsuite/gas/mips/octeon2@save-sub.d: New test.
+	* testsuite/gas/mips/octeon3@save-sub.d: New test.
+	* testsuite/gas/mips/xlr@save-sub.d: New test.
+	* testsuite/gas/mips/r5900@save-sub.d: New test.
+	* testsuite/gas/mips/mips16e2-copy.d: New test.
+	* testsuite/gas/mips/mips16e2-copy-err.d: New test.
+	* testsuite/gas/mips/save.d: Remove `MIPS16e' from the `name'
+	option.  Adjust for trailing padding change.
+	* testsuite/gas/mips/mips16e2-copy-err.l: New stderr output.
+	* testsuite/gas/mips/save-sub.s: New test source.
+	* testsuite/gas/mips/mips16e2-copy.s: New test source.
+	* testsuite/gas/mips/mips16e2-copy-err.s: New test source.
+	* testsuite/gas/mips/save.s: Update description, change trailing
+	padding and remove trailing white space.
+	* testsuite/gas/mips/mips.exp: Expand `save' and `save-err'
+	tests across the regular MIPS interAptiv MR2 architecture.  Run
+	the new tests.
+
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/mips.exp (interaptiv-mr2): New architecture.
 	(mips16e2-interaptiv-mr2): Likewise.
 	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-macro.d: New

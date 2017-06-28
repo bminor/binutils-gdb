@@ -1128,6 +1128,9 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "elf_ase_micromips"
     run_dump_test "elf_ase_micromips-2"
 
+    # Verify that machine markings are handled properly.
+    run_dump_test "elf_mach_interaptiv-mr2"
+
     run_dump_test "mips-gp32-fp32-pic"
     run_dump_test "mips-gp32-fp64-pic"
     run_dump_test "mips-gp64-fp32-pic"
@@ -1382,8 +1385,15 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "mips64-dsp"
     run_dump_test "mips32-mt"
 
-    run_dump_test_arches "save"		[mips_arch_list_matching mips16e-32]
-    run_dump_test_arches "save-err"	[mips_arch_list_matching mips16e-32]
+    run_dump_test_arches "save" [lsort -dictionary -unique [concat \
+				[mips_arch_list_matching mips16e-32] \
+				[mips_arch_list_matching interaptiv-mr2]]]
+    run_dump_test_arches "save-err" [lsort -dictionary -unique [concat \
+				[mips_arch_list_matching mips16e-32] \
+				[mips_arch_list_matching interaptiv-mr2]]]
+    run_dump_test_arches "save-sub" [lsort -dictionary -unique [concat \
+				[mips_arch_list_matching mips1 !micromips] \
+				[mips_arch_list_matching mips16-32]]]
 
     run_dump_test "mips16-dwarf2"
     if $has_newabi {
@@ -1393,6 +1403,8 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "mips16e-jrc"
     run_dump_test "mips16e2-lui"
+    run_dump_test "mips16e2-copy"
+    run_dump_test "mips16e2-copy-err"
 
     run_dump_test "mips16-intermix"
     run_dump_test "mips16-extend"
