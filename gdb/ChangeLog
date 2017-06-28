@@ -1,5 +1,10 @@
 2017-07-07  John Baldwin  <jhb@FreeBSD.org>
 
+	* corelow.c (thread_section_name): Move to ...
+	* gdbcore.h (thread_section_name): ... here.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-nat.c [PT_LWPINFO && __LP64__] (union sigval32)
 	(struct siginfo32): New.
 	[PT_LWPINFO] (fbsd_siginfo_size, fbsd_convert_siginfo): New.
