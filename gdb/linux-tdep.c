@@ -1127,6 +1127,26 @@ linux_core_info_proc (struct gdbarch *gdbarch, const char *args,
     error (_("unable to handle request"));
 }
 
+/* Read siginfo data from the core, if possible.  Returns -1 on
+   failure.  Otherwise, returns the number of bytes read.  READBUF,
+   OFFSET, and LEN are all as specified by the to_xfer_partial
+   interface.  */
+
+static LONGEST
+linux_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf,
+			 ULONGEST offset, ULONGEST len)
+{
+  thread_section_name section_name (".note.linuxcore.siginfo", inferior_ptid);
+  asection *section = bfd_get_section_by_name (core_bfd, section_name.c_str ());
+  if (section == NULL)
+    return -1;
+
+  if (!bfd_get_section_contents (core_bfd, section, readbuf, offset, len))
+    return -1;
+
+  return len;
+}
+
 typedef int linux_find_memory_region_ftype (ULONGEST vaddr, ULONGEST size,
 					    ULONGEST offset, ULONGEST inode,
 					    int read, int write,
@@ -2516,6 +2536,7 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_core_pid_to_str (gdbarch, linux_core_pid_to_str);
   set_gdbarch_info_proc (gdbarch, linux_info_proc);
   set_gdbarch_core_info_proc (gdbarch, linux_core_info_proc);
+  set_gdbarch_core_xfer_siginfo (gdbarch, linux_core_xfer_siginfo);
   set_gdbarch_find_memory_regions (gdbarch, linux_find_memory_regions);
   set_gdbarch_make_corefile_notes (gdbarch, linux_make_corefile_notes);
   set_gdbarch_has_shared_address_space (gdbarch,

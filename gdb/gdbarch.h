@@ -933,6 +933,16 @@ typedef const char * (gdbarch_core_thread_name_ftype) (struct gdbarch *gdbarch, 
 extern const char * gdbarch_core_thread_name (struct gdbarch *gdbarch, struct thread_info *thr);
 extern void set_gdbarch_core_thread_name (struct gdbarch *gdbarch, gdbarch_core_thread_name_ftype *core_thread_name);
 
+/* Read offset OFFSET of TARGET_OBJECT_SIGNAL_INFO signal information
+   from core file into buffer READBUF with length LEN.  Return the number
+   of bytes read (zero indicates EOF, a negative value indicates failure). */
+
+extern int gdbarch_core_xfer_siginfo_p (struct gdbarch *gdbarch);
+
+typedef LONGEST (gdbarch_core_xfer_siginfo_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
+extern LONGEST gdbarch_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
+extern void set_gdbarch_core_xfer_siginfo (struct gdbarch *gdbarch, gdbarch_core_xfer_siginfo_ftype *core_xfer_siginfo);
+
 /* BFD target to use when generating a core file. */
 
 extern int gdbarch_gcore_bfd_target_p (struct gdbarch *gdbarch);
