@@ -1,5 +1,13 @@
 2017-07-07  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c [PT_LWPINFO && __LP64__] (union sigval32)
+	(struct siginfo32): New.
+	[PT_LWPINFO] (fbsd_siginfo_size, fbsd_convert_siginfo): New.
+	(fbsd_xfer_partial) [PT_LWPINFO]: Handle TARGET_OBJECT_SIGNAL_INFO
+	via ptrace(PT_LWPINFO).
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-tdep.c (fbsd_gdbarch_data_handle, struct fbsd_gdbarch_data)
 	(init_fbsd_gdbarch_data, get_fbsd_gdbarch_data)
 	(fbsd_get_siginfo_type): New.
