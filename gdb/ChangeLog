@@ -1,3 +1,9 @@
+2017-06-28  Doug Gilmore  <Doug.Gilmore@imgtec.com>
+
+	PR gdb/21337
+	* symfile.c (reread_symbols): Call objfiles_changed just before
+	read_symbols.
+
 2017-06-27  Pedro Alves  <palves@redhat.com>
 
 	* symtab.c (COMPLETION_LIST_ADD_SYMBOL)
