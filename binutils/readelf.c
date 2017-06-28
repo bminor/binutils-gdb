@@ -16782,6 +16782,8 @@ get_freebsd_elfcore_note_type (unsigned e_type)
       return _("NT_PROCSTAT_PSSTRINGS (ps_strings data)");
     case NT_FREEBSD_PROCSTAT_AUXV:
       return _("NT_PROCSTAT_AUXV (auxv data)");
+    case NT_FREEBSD_PTLWPINFO:
+      return _("NT_PTLWPINFO (ptrace_lwpinfo structure)");
     }
   return get_note_type (e_type);
 }
