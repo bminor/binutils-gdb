@@ -1,3 +1,10 @@
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* readelf.c (get_machine_flags) <E_MIPS_MACH_IAMR2>: New case.
+	(print_mips_isa_ext) <AFL_EXT_INTERAPTIV_MR2>: Likewise.
+	* NEWS: Mention Imagination interAptiv MR2 processor support.
+
 2017-06-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21665

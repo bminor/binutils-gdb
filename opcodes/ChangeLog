@@ -1,3 +1,24 @@
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+	    Andrew Bennett <andrew.bennett@imgtec.com>
+
+	* mips-formats.h (INT_BIAS): New macro.
+	(INT_ADJ): Redefine in INT_BIAS terms.
+	* mips-dis.c (mips_arch_choices): Add "interaptiv-mr2" entry.
+	(mips_print_save_restore): New function.
+	(print_insn_arg) <OP_SAVE_RESTORE_LIST>: Update comment.
+	(validate_insn_args) <OP_SAVE_RESTORE_LIST>: Remove `abort'
+	call.
+	(print_insn_args): Handle OP_SAVE_RESTORE_LIST.
+	(print_mips16_insn_arg): Call `mips_print_save_restore' for
+	OP_SAVE_RESTORE_LIST handling, factored out from here.
+	* mips-opc.c (decode_mips_operand) <'-'> <'m'>: New case.
+	(RD_31, RD_SP, WR_SP, MOD_SP, IAMR2): New macros.
+	(mips_builtin_opcodes): Add "restore" and "save" entries.
+	* mips16-opc.c (decode_mips16_operand) <'n', 'o'>: New cases.
+	(IAMR2): New macro.
+	(mips16_opcodes): Add "copyw" and "ucopyw" entries.
+
 2017-06-23  Andrew Waterman  <andrew@sifive.com>
 
 	* riscv-opc.c (riscv_opcodes): Mark I-type SLT instruction as an

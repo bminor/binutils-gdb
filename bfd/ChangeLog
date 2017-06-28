@@ -1,3 +1,18 @@
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* archures.c (bfd_mach_mips_interaptiv_mr2): New macro.
+	* cpu-mips.c (I_interaptiv_mr2): New enum value.
+	(arch_info_struct): Add "mips:interaptiv-mr2" entry.
+	* elfxx-mips.c (_bfd_elf_mips_mach) <E_MIPS_MACH_IAMR2>: New
+	case.
+	(mips_set_isa_flags) <bfd_mach_mips_interaptiv_mr2>: Likewise.
+	(bfd_mips_isa_ext) <bfd_mach_mips_interaptiv_mr2>: Likewise.
+	(print_mips_isa_ext) <AFL_EXT_INTERAPTIV_MR2>: Likewise.
+	(mips_mach_extensions): Add `bfd_mach_mipsisa32r3' and
+	`bfd_mach_mips_interaptiv_mr2' entries.
+	* bfd-in2.h: Regenerate.
+
 2017-06-27  Nick Clifton  <nickc@redhat.com>
 
 	* tekhex.c (pass_over): Revert accidental conversion of a local

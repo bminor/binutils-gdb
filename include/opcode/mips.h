@@ -935,6 +935,9 @@ mips_opcode_32bit_p (const struct mips_opcode *mo)
    "+z" 5-bit rz register (OP_*_RZ)
    "+Z" 5-bit fz register (OP_*_FZ)
 
+   interAptiv MR2:
+   "-m" register list for SAVE/RESTORE instruction
+
    Enhanced VA Scheme:
    "+j" 9-bit signed offset in bit 7 (OP_*_EVAOFFSET)
 
@@ -1007,7 +1010,7 @@ mips_opcode_32bit_p (const struct mips_opcode *mo)
    Extension character sequences used so far ("-" followed by the
    following), for quick reference when adding more:
    "AB"
-   "abdstuvwxy"
+   "abdmstuvwxy"
 */
 
 /* These are the bits which may be set in the pinfo field of an
@@ -1214,7 +1217,7 @@ static const unsigned int mips_isa_table[] = {
 #undef ISAF
 
 /* Masks used for Chip specific instructions.  */
-#define INSN_CHIP_MASK		  0xc3ff4f60
+#define INSN_CHIP_MASK		  0xc7ff4f60
 
 /* Cavium Networks Octeon instructions.  */
 #define INSN_OCTEON		  0x00000800
@@ -1254,6 +1257,8 @@ static const unsigned int mips_isa_table[] = {
 #define INSN_LOONGSON_3A          0x00000400
 /* RMI Xlr instruction */
 #define INSN_XLR                 0x00000020
+/* Imagination interAptiv MR2.  */
+#define INSN_INTERAPTIV_MR2	  0x04000000
 
 /* DSP ASE */
 #define ASE_DSP			0x00000001
@@ -1356,6 +1361,7 @@ static const unsigned int mips_isa_table[] = {
 #define CPU_OCTEON2	6502
 #define CPU_OCTEON3	6503
 #define CPU_XLR     	887682   	/* decimal 'XLR'   */
+#define CPU_INTERAPTIV_MR2 736550	/* decimal 'IA2'  */
 
 /* Return true if the given CPU is included in INSN_* mask MASK.  */
 
@@ -1425,6 +1431,9 @@ cpu_is_member (int cpu, unsigned int mask)
 
     case CPU_XLR:
       return (mask & INSN_XLR) != 0;
+
+    case CPU_INTERAPTIV_MR2:
+      return (mask & INSN_INTERAPTIV_MR2) != 0;
 
     case CPU_MIPS32R6:
       return (mask & INSN_ISA_MASK) == INSN_ISA32R6;
@@ -1847,6 +1856,8 @@ extern int bfd_mips_num_opcodes;
    "d" 5-bit EXT size, which becomes MSBD
        Requires that "b" occurs first to set position.
        Enforces: 0 < (pos+size) <= 32.
+   "n" 2-bit immediate (1 .. 4)
+   "o" 5-bit unsigned immediate * 16
    "r" 3-bit register
    "s" 3-bit ASMACRO select immediate
    "u" 16-bit unsigned immediate
@@ -1882,13 +1893,13 @@ extern int bfd_mips_num_opcodes;
    "0123456 89"
    ".[]<>"
    "ABCDEFGHI KLMNOPQRSTUVWXYZ"
-   "abcde   ijklm  pqrs uvwxyz"
+   "abcde   ijklmnopqrs uvwxyz"
   */
 
 /* Save/restore encoding for the args field when all 4 registers are
    either saved as arguments or saved/restored as statics.  */
-#define MIPS16_ALL_ARGS    0xe
-#define MIPS16_ALL_STATICS 0xb
+#define MIPS_SVRS_ALL_ARGS    0xe
+#define MIPS_SVRS_ALL_STATICS 0xb
 
 /* The following flags have the same value for the mips16 opcode
    table:

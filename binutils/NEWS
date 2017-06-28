@@ -1,5 +1,9 @@
 -*- text -*-
 
+* The MIPS port now supports the Imagination interAptiv MR2 processor,
+  which implements the MIPS32r3 ISA, the MIPS16e2 ASE as well as a couple
+  of implementation-specific regular MIPS and MIPS16e2 ASE instructions.
+
 * The SPARC port now supports the SPARC M8 processor, which implements the
   Oracle SPARC Architecture 2017.
 

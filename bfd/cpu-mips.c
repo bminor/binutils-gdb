@@ -104,6 +104,7 @@ enum
   I_mipsocteon2,
   I_mipsocteon3,
   I_xlr,
+  I_interaptiv_mr2,
   I_micromips
 };
 
@@ -155,6 +156,8 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (64, 64, bfd_mach_mips_octeon2,"mips:octeon2",  FALSE, NN(I_mipsocteon2)),
   N (64, 64, bfd_mach_mips_octeon3, "mips:octeon3",  FALSE, NN(I_mipsocteon3)),
   N (64, 64, bfd_mach_mips_xlr, "mips:xlr",       FALSE, NN(I_xlr)),
+  N (32, 32, bfd_mach_mips_interaptiv_mr2, "mips:interaptiv-mr2", FALSE,
+     NN(I_interaptiv_mr2)),
   N (64, 64, bfd_mach_mips_micromips,"mips:micromips",FALSE,0)
 };
 

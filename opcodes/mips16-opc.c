@@ -82,6 +82,8 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
     case 'i': JALX (26, 0, 2);
     case 'l': SPECIAL (6, 5, ENTRY_EXIT_LIST);
     case 'm': SPECIAL (7, 0, SAVE_RESTORE_LIST);
+    case 'n': INT_BIAS (2, 0, 3, 1, 0, FALSE);	/* (1 .. 4) */
+    case 'o': INT_ADJ (5, 16, 31, 4, FALSE);	/* (0 .. 31) << 4 */
     case 'r': MAPPED_REG (3, 16, GP, reg_m16_map);
     case 's': HINT (3, 24);
     case 'u': HINT (16, 0);
@@ -201,6 +203,7 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
 #define I32	INSN_ISA32
 #define I64	INSN_ISA64
 #define T3	INSN_3900
+#define IAMR2	INSN_INTERAPTIV_MR2
 
 #define E2	ASE_MIPS16E2
 #define E2MT	ASE_MIPS16E2_MT
@@ -465,6 +468,9 @@ const struct mips_opcode mips16_opcodes[] =
 {"evpe",    "",		0xf0276700, 0xffffffff,	WR_C0,			0,		0,	E2MT,	0 },
 {"evpe",    ".",	0xf0276700, 0xffffffff,	WR_C0,			0,		0,	E2MT,	0 },
 {"evpe",    "y",	0xf0236700, 0xffffff1f,	WR_1|WR_C0,		0,		0,	E2MT,	0 },
+  /* interAptiv MR2 instruction extensions.  */
+{"copyw",   "x,y,o,n",	0xf020e000, 0xffe0f81c,	RD_1|RD_2|NODS,		0,		IAMR2,	0,	0 },
+{"ucopyw",  "x,y,o,n",	0xf000e000, 0xffe0f81c,	RD_1|RD_2|NODS,		0,		IAMR2,	0,	0 },
   /* Place asmacro at the bottom so that it catches any implementation
      specific macros that didn't match anything.  */
 {"asmacro", "s,0,1,2,3,4", 0xf000e000, 0xf800f800, 0,			0,		I32,	0,	0 },

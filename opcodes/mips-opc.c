@@ -46,6 +46,7 @@ decode_mips_operand (const char *p)
 	case 'a': INT_ADJ (19, 0, 262143, 2, FALSE);
 	case 'b': INT_ADJ (18, 0, 131071, 3, FALSE);
 	case 'd': SPECIAL (0, 0, REPEAT_DEST_REG);
+	case 'm': SPECIAL (20, 6, SAVE_RESTORE_LIST);
 	case 's': SPECIAL (5, 21, NON_ZERO_REG);
 	case 't': SPECIAL (5, 16, NON_ZERO_REG);
 	case 'u': PREV_CHECK (5, 16, TRUE, FALSE, FALSE, FALSE);
@@ -232,6 +233,7 @@ decode_mips_operand (const char *p)
 #define RD_2	INSN_READ_2
 #define RD_3	INSN_READ_3
 #define RD_4	INSN_READ_4
+#define RD_31	INSN2_READ_GPR_31
 #define MOD_1	(WR_1|RD_1)
 #define MOD_2	(WR_2|RD_2)
 
@@ -260,6 +262,10 @@ decode_mips_operand (const char *p)
 #define WR_HILO WR_HI|WR_LO
 #define RD_HILO RD_HI|RD_LO
 #define MOD_HILO WR_HILO|RD_HILO
+
+#define RD_SP	INSN2_READ_SP
+#define WR_SP	INSN2_WRITE_SP
+#define MOD_SP	(RD_SP|WR_SP)
 
 #define IS_M    INSN_MULT
 
@@ -321,6 +327,7 @@ decode_mips_operand (const char *p)
 #define IOCT2	(INSN_OCTEON2 | INSN_OCTEON3)
 #define IOCT3	INSN_OCTEON3
 #define XLR     INSN_XLR
+#define IAMR2	INSN_INTERAPTIV_MR2
 #define IVIRT	ASE_VIRT
 #define IVIRT64	ASE_VIRT64
 
@@ -3150,6 +3157,10 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"ctcmsa",		"+l,d",		0x783e0019, 0xffff003f,	RD_2|CM,		0,		0,		MSA,	0 },
 {"cfcmsa",		"+k,+n",	0x787e0019, 0xffff003f,	WR_1|CM,		0,		0,		MSA,	0 },
 {"move.v",		"+d,+e",	0x78be0019, 0xffff003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
+
+/* interAptiv MR2 instruction extensions.  */
+{"restore",		"-m",		0x7000001f, 0xfc00603f, WR_31|NODS,		MOD_SP,		IAMR2,		0,	0 },
+{"save",		"-m",		0x7000201f, 0xfc00603f, NODS,			RD_31|MOD_SP,	IAMR2,		0,	0 },
 
 /* User Defined Instruction.  */
 {"udi0",		"s,t,d,+1",	0x70000010, 0xfc00003f,	UDI,			0,		I33,		0,	0 },

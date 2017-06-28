@@ -1,3 +1,18 @@
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (validate_mips_insn): Handle
+	OP_SAVE_RESTORE_LIST specially.
+	(mips_encode_save_restore, mips16_encode_save_restore): New
+	functions.
+	(match_save_restore_list_operand): Factor out SAVE/RESTORE
+	operand insertion into the instruction word or halfword to these
+	new functions.
+	(mips_cpu_info_table): Add "interaptiv-mr2" entry.
+
+	* doc/c-mips.texi (MIPS Options): Add `interaptiv-mr2' to the
+	`-march=' argument list.
+
 2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/gas/mips/mips16e-save.d: Rename to...

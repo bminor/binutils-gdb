@@ -6793,6 +6793,9 @@ _bfd_elf_mips_mach (flagword flags)
     case E_MIPS_MACH_XLR:
       return bfd_mach_mips_xlr;
 
+    case E_MIPS_MACH_IAMR2:
+      return bfd_mach_mips_interaptiv_mr2;
+
     default:
       switch (flags & EF_MIPS_ARCH)
 	{
@@ -11967,6 +11970,10 @@ mips_set_isa_flags (bfd *abfd)
       val = E_MIPS_ARCH_32R2;
       break;
 
+    case bfd_mach_mips_interaptiv_mr2:
+      val = E_MIPS_ARCH_32R2 | E_MIPS_MACH_IAMR2;
+      break;
+
     case bfd_mach_mipsisa64r2:
     case bfd_mach_mipsisa64r3:
     case bfd_mach_mipsisa64r5:
@@ -14026,6 +14033,12 @@ static const struct mips_mach_extension mips_mach_extensions[] =
   { bfd_mach_mips4100, bfd_mach_mips4000 },
   { bfd_mach_mips5900, bfd_mach_mips4000 },
 
+  /* MIPS32r3 extensions.  */
+  { bfd_mach_mips_interaptiv_mr2, bfd_mach_mipsisa32r3 },
+
+  /* MIPS32r2 extensions.  */
+  { bfd_mach_mipsisa32r3, bfd_mach_mipsisa32r2 },
+
   /* MIPS32 extensions.  */
   { bfd_mach_mipsisa32r2, bfd_mach_mipsisa32 },
 
@@ -14123,6 +14136,8 @@ bfd_mips_isa_ext (bfd *abfd)
     case bfd_mach_mips_octeon3:     return AFL_EXT_OCTEON3;
     case bfd_mach_mips_octeon2:     return AFL_EXT_OCTEON2;
     case bfd_mach_mips_xlr:         return AFL_EXT_XLR;
+    case bfd_mach_mips_interaptiv_mr2:
+      return AFL_EXT_INTERAPTIV_MR2;
     default:                        return 0;
     }
 }
@@ -15718,6 +15733,9 @@ print_mips_isa_ext (FILE *file, unsigned int isa_ext)
       break;
     case AFL_EXT_LOONGSON_2F:
       fputs ("ST Microelectronics Loongson 2F", file);
+      break;
+    case AFL_EXT_INTERAPTIV_MR2:
+      fputs ("Imagination interAptiv MR2", file);
       break;
     default:
       fprintf (file, "%s (%d)", _("Unknown"), isa_ext);
