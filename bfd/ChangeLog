@@ -1,5 +1,11 @@
 2017-06-28  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* libbfd.c (_bfd_generic_get_section_contents): Don't call
+	bfd_get_file_size.  Check archive element size.
+	(_bfd_generic_get_section_contents_in_window): Likewise.
+
+2017-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* bfd-in2.h: Regenerated.
 	* bfdio.c (bfd_get_size): Change return type to ufile_ptr.
 	(bfd_get_file_size): Likewise.
