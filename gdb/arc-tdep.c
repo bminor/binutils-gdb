@@ -1472,7 +1472,7 @@ const static int MAX_PROLOGUE_LENGTH
 static CORE_ADDR
 arc_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  arc_debug_printf ("called");
+  arc_debug_printf ("pc = %s", paddress (gdbarch, pc));
 
   CORE_ADDR func_addr;
   const char *func_name;
