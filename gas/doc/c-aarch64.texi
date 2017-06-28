@@ -165,6 +165,8 @@ automatically cause those extensions to be disabled.
 @item @code{sve} @tab ARMv8.2-A @tab No
  @tab Enable the Scalable Vector Extensions.  This implies @code{fp16},
  @code{simd} and @code{compnum}.
+@item @code{dotprod} @tab ARMv8.2-A @tab No
+ @tab Enable the Dot Product extension.  This implies @code{simd}.
 @end multitable
 
 @node AArch64 Syntax

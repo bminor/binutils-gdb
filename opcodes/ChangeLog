@@ -1,3 +1,12 @@
+2017-06-28  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-asm.c (aarch64_ins_reglane): Added 4B dotprod.
+	* aarch64-dis.c (aarch64_ext_reglane): Likewise.
+	* aarch64-tbl.h (QL_V3DOT, QL_V2DOT): New.
+	(aarch64_feature_dotprod, DOT_INSN): New.
+	(udot, sdot): New.
+	* aarch64-dis-2.c: Regenerated.
+
 2017-06-28  Jiong Wang  <jiong.wang@arm.com>
 
 	* arm-dis.c (coprocessor_opcodes): New entries for vsdot and vudot.

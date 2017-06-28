@@ -1,3 +1,8 @@
+2017-06-28  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcode/aarch64.h: (AARCH64_FEATURE_DOTPROD): New.
+	(aarch64_insn_class): Added dotprod.
+
 2017-06-28  Jiong Wang  <jiong.wang@arm.com>
 
 	* opcode/arm.h (FPU_NEON_EXT_DOTPROD): New macro.

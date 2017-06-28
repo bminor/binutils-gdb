@@ -1982,6 +1982,19 @@
 {                                                       \
   QLF3(X,X,NIL),                                        \
 }
+/* e.g. UDOT <Vd>.2S, <Vn>.8B, <Vm>.8B.  */
+#define QL_V3DOT	   \
+{			   \
+  QLF3(V_2S, V_8B,  V_8B), \
+  QLF3(V_4S, V_16B, V_16B),\
+}
+
+/* e.g. UDOT <Vd>.2S, <Vn>.8B, <Vm>.4B[<index>].  */
+#define QL_V2DOT	 \
+{			 \
+  QLF3(V_2S, V_8B,  S_B),\
+  QLF3(V_4S, V_16B, S_B),\
+}
 
 /* Opcode table.  */
 
@@ -2021,6 +2034,8 @@ static const aarch64_feature_set aarch64_feature_compnum =
   AARCH64_FEATURE (AARCH64_FEATURE_COMPNUM, 0);
 static const aarch64_feature_set aarch64_feature_rcpc =
   AARCH64_FEATURE (AARCH64_FEATURE_RCPC, 0);
+static const aarch64_feature_set aarch64_feature_dotprod =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_DOTPROD, 0);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2040,6 +2055,7 @@ static const aarch64_feature_set aarch64_feature_rcpc =
 #define FP_V8_3		&aarch64_feature_fp_v8_3
 #define COMPNUM		&aarch64_feature_compnum
 #define RCPC		&aarch64_feature_rcpc
+#define DOTPROD		&aarch64_feature_dotprod
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, NULL }
@@ -2072,6 +2088,8 @@ static const aarch64_feature_set aarch64_feature_rcpc =
   { NAME, OPCODE, MASK, CLASS, OP, COMPNUM, OPS, QUALS, FLAGS, 0, NULL }
 #define RCPC_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, RCPC, OPS, QUALS, FLAGS, 0, NULL }
+#define DOT_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, DOTPROD, OPS, QUALS, FLAGS, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -4136,6 +4154,12 @@ struct aarch64_opcode aarch64_opcode_table[] =
   _SVE_INSN ("fmov", 0x2538c000, 0xff3fffe0, sve_size_hsd, 0, OP2 (SVE_Zd, FPIMM0), OP_SVE_V_HSD, F_ALIAS | F_PSEUDO, 0),
   _SVE_INSN ("fmov", 0x05104000, 0xff30ffe0, sve_size_hsd, 0, OP3 (SVE_Zd, SVE_Pg4_16, FPIMM0), OP_SVE_VM_HSD, F_ALIAS | F_PSEUDO, 0),
   _SVE_INSN ("orn", 0x05000000, 0xfffc0000, sve_limm, 0, OP3 (SVE_Zd, SVE_Zd, SVE_INV_LIMM), OP_SVE_VVU_BHSD, F_ALIAS | F_PSEUDO, 1),
+
+  /* SIMD Dot Product (optional in v8.2-A).  */
+  DOT_INSN ("udot", 0x2e009400, 0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
+  DOT_INSN ("sdot", 0xe009400,  0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
+  DOT_INSN ("udot", 0x2f00e000, 0xbf00f000, dotproduct, OP3 (Vd, Vn, Em), QL_V2DOT, F_SIZEQ),
+  DOT_INSN ("sdot", 0xf00e000,  0xbf00f000, dotproduct, OP3 (Vd, Vn, Em), QL_V2DOT, F_SIZEQ),
 
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, NULL},
 };
