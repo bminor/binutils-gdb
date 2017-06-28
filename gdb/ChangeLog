@@ -1,3 +1,8 @@
+2017-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* mi/mi-cmd-break.c (mi_argv_to_format): Use obstack_grow_str
+	instead of obstack_grow.
+
 2017-06-28  Doug Gilmore  <Doug.Gilmore@imgtec.com>
 
 	PR gdb/21337
