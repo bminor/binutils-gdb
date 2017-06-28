@@ -1,0 +1,7 @@
+2017-08-04  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
+
+	Backport from master.
+
+	2017-06-28  Jiong Wang  <jiong.wang@arm.com>
+
+	* arm-dis.c (coprocessor_opcodes): New entries for vsdot and vudot.

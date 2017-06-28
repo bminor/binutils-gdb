@@ -1,0 +1,24 @@
+2017-08-04  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
+
+	Backport from master.
+
+	2017-06-28  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (fpu_neon_ext_dotprod): New variable.
+	(neon_scalar_for_mul): Improve comments.
+	(do_neon_dotproduct): New function to encode Dot Product instructions.
+	(do_neon_dotproduct_s): Wrapper function for signed Dot Product
+	instructions.
+	(do_neon_dotproduct_u): Wrapper function for unsigned Dot Product
+	instructions.
+	(insns): New entries for vsdot and vudot.
+	(arm_extensions): New entry for "dotprod".
+	* doc/c-arm.texi: Document new "dotprod" extension.
+	* testsuite/gas/arm/dotprod.s: New test source.
+	* testsuite/gas/arm/dotprod-illegal.s: New test source.
+	* testsuite/gas/arm/dotprod.d: New test.
+	* testsuite/gas/arm/dotprod-thumb2.d: New test.
+	* testsuite/gas/arm/dotprod-illegal.d: New test.
+	* testsuite/gas/arm/dotprod-legacy-arch.d: New test.
+	* testsuite/gas/arm/dotprod-illegal.l: New error file.
+	* testsuite/gas/arm/dotprod-legacy-arch.l: New error file.
