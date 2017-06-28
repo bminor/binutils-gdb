@@ -902,6 +902,12 @@ static const struct opcode32 coprocessor_opcodes[] =
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
     0xfea00800, 0xffa00f10, "vcmla%c.f32\t%12-15,22V, %16-19,7V, %0-3,5D[0], #%20?21%20?780"},
 
+  /* Dot Product instructions in the space of coprocessor 13.  */
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_DOTPROD),
+    0xfc200d00, 0xffb00f00, "v%4?usdot.%4?us8\t%12-15,22V, %16-19,7V, %0-3,5V"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_DOTPROD),
+    0xfe000d00, 0xff000f00, "v%4?usdot.%4?us8\t%12-15,22V, %16-19,7V, %0-3D[%5?10]"},
+
   /* V5 coprocessor instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
     0xfc100000, 0xfe100000, "ldc2%22'l%c\t%8-11d, cr%12-15d, %A"},

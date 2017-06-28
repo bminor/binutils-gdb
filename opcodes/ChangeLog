@@ -1,3 +1,7 @@
+2017-06-28  Jiong Wang  <jiong.wang@arm.com>
+
+	* arm-dis.c (coprocessor_opcodes): New entries for vsdot and vudot.
+
 2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
 	    Andrew Bennett <andrew.bennett@imgtec.com>

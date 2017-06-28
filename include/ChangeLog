@@ -1,3 +1,8 @@
+2017-06-28  Jiong Wang  <jiong.wang@arm.com>
+
+	* opcode/arm.h (FPU_NEON_EXT_DOTPROD): New macro.
+	(FPU_ARCH_DOTPROD_NEON_VFP_ARMV8): New macro.
+
 2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
 
