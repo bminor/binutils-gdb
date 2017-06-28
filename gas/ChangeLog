@@ -1,4 +1,61 @@
 2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips.exp (interaptiv-mr2): New architecture.
+	(mips16e2-interaptiv-mr2): Likewise.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-macro.d: New
+	test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-macro-t.d:
+	New test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-macro-e.d:
+	New test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-insn-t.d:
+	New test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-insn-e.d:
+	New test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16e-64.d: New
+	test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-sub.d: New
+	test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16e-sub.d: New
+	test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16e-64-sub.d:
+	New test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16e2-mt-sub.d:
+	New test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-asmacro.d:
+	New test.
+	* testsuite/gas/mips/interaptiv-mr2@mcu.d: New test.
+	* testsuite/gas/mips/interaptiv-mr2@isa-override-1.d: New test.
+	* testsuite/gas/mips/interaptiv-mr2@isa-override-2.d: New test.
+	* testsuite/gas/mips/attr-gnu-4-5.d: Ignore any number of ASE
+	flag lines present rather than just one.
+	* testsuite/gas/mips/attr-gnu-4-6.d: Likewise.
+	* testsuite/gas/mips/attr-gnu-4-7.d: Likewise.
+	* testsuite/gas/mips/attr-none-o32-fp64-nooddspreg.d: Likewise.
+	* testsuite/gas/mips/attr-none-o32-fp64.d: Likewise.
+	* testsuite/gas/mips/attr-none-o32-fpxx.d: Likewise.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-macro.l: New
+	stderr output.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-macro-t.l:
+	New stderr output.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-macro-e.l:
+	New stderr output.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-insn-t.l:
+	New stderr output.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-insn-e.l:
+	New stderr output.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-sub.l: New
+	stderr output.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16e-sub.l: New
+	stderr output.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16e-64-sub.l:
+	New stderr output.
+	* testsuite/gas/mips/interaptiv-mr2@isa-override-1.l: New stderr
+	output.
+	* testsuite/gas/mips/interaptiv-mr2@isa-override-2.l: New stderr
+	output.
+
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* config/tc-mips.c (validate_mips_insn): Handle
