@@ -30,6 +30,28 @@
 #include "fbsd-tdep.h"
 
 
+/* FreeBSD kernels 12.0 and later include a copy of the
+   'ptrace_lwpinfo' structure returned by the PT_LWPINFO ptrace
+   operation in an ELF core note (NT_FREEBSD_PTLWPINFO) for each LWP.
+   The constants below define the offset of field members and flags in
+   this structure used by methods in this file.  Note that the
+   'ptrace_lwpinfo' struct in the note is preceded by a 4 byte integer
+   containing the size of the structure.  */
+
+#define	LWPINFO_OFFSET		0x4
+
+/* Offsets in ptrace_lwpinfo.  */
+#define	LWPINFO_PL_FLAGS	0x8
+#define	LWPINFO64_PL_SIGINFO	0x30
+#define	LWPINFO32_PL_SIGINFO	0x2c
+
+/* Flags in pl_flags.  */
+#define	PL_FLAG_SI	0x20	/* siginfo is valid */
+
+/* Sizes of siginfo_t.	*/
+#define	SIZE64_SIGINFO_T	80
+#define	SIZE32_SIGINFO_T	64
+
 static struct gdbarch_data *fbsd_gdbarch_data_handle;
 
 struct fbsd_gdbarch_data
@@ -111,6 +133,51 @@ fbsd_core_thread_name (struct gdbarch *gdbarch, struct thread_info *thr)
     }
 
   return NULL;
+}
+
+/* Implement the "core_xfer_siginfo" gdbarch method.  */
+
+static LONGEST
+fbsd_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf,
+			ULONGEST offset, ULONGEST len)
+{
+  size_t siginfo_size;
+
+  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+    siginfo_size = SIZE32_SIGINFO_T;
+  else
+    siginfo_size = SIZE64_SIGINFO_T;
+  if (offset > siginfo_size)
+    return -1;
+
+  thread_section_name section_name (".note.freebsdcore.lwpinfo", inferior_ptid);
+  asection *section = bfd_get_section_by_name (core_bfd, section_name.c_str ());
+  if (section == NULL)
+    return -1;
+
+  gdb_byte buf[4];
+  if (!bfd_get_section_contents (core_bfd, section, buf,
+				 LWPINFO_OFFSET + LWPINFO_PL_FLAGS, 4))
+    return -1;
+
+  int pl_flags = extract_signed_integer (buf, 4, gdbarch_byte_order (gdbarch));
+  if (!(pl_flags & PL_FLAG_SI))
+    return -1;
+
+  if (offset + len > siginfo_size)
+    len = siginfo_size - offset;
+
+  ULONGEST siginfo_offset;
+  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+    siginfo_offset = LWPINFO_OFFSET + LWPINFO32_PL_SIGINFO;
+  else
+    siginfo_offset = LWPINFO_OFFSET + LWPINFO64_PL_SIGINFO;
+
+  if (!bfd_get_section_contents (core_bfd, section, readbuf,
+				 siginfo_offset + offset, len))
+    return -1;
+
+  return len;
 }
 
 static int
@@ -447,6 +514,7 @@ fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   set_gdbarch_core_pid_to_str (gdbarch, fbsd_core_pid_to_str);
   set_gdbarch_core_thread_name (gdbarch, fbsd_core_thread_name);
+  set_gdbarch_core_xfer_siginfo (gdbarch, fbsd_core_xfer_siginfo);
   set_gdbarch_make_corefile_notes (gdbarch, fbsd_make_corefile_notes);
   set_gdbarch_print_auxv_entry (gdbarch, fbsd_print_auxv_entry);
   set_gdbarch_get_siginfo_type (gdbarch, fbsd_get_siginfo_type);

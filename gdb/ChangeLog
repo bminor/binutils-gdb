@@ -1,5 +1,12 @@
 2017-07-07  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-tdep.c (LWPINFO_OFFSET, LWPINFO_PL_FLAGS)
+	(LWPINFO64_PL_SIGINFO, LWPINFO32_PL_SIGINFO, PL_FLAG_SI)
+	(SIZE64_SIGINFO_T, SIZE32_SIGINFO_T, fbsd_core_xfer_siginfo): New.
+	(fbsd_init_abi): Install gdbarch "core_xfer_siginfo" method.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-tdep.c (fbsd_core_thread_name): Use thread_section_name.
 
 2017-07-07  John Baldwin  <jhb@FreeBSD.org>
