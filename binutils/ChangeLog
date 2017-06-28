@@ -1,3 +1,8 @@
+2017-06-28  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (merge_gnu_build_notes): Add support for version 2 notes.
+	* readelf.c (print_gnu_build_attribute_name): Likewise.
+
 2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
 
