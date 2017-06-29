@@ -1,3 +1,12 @@
+2017-06-29  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (aarch64_relocation_aginst_gp_p): New function.
+	(elfNN_aarch64_final_link_relocate): Delete duplicated code for
+	BFD_RELOC_AARCH64_LD64_GOTOFF_LO15, BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC,
+	BFD_RELOC_AARCH64_MOVW_GOTOFF_G1.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_resolve_relocation): Optimize the
+	support for them.
+
 2017-06-29  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* elf-bfd.h (elfcore_write_s390_gs_cb): Add prototype.
