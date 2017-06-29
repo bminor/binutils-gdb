@@ -181,6 +181,38 @@ gdb_test "complete expr_test bar\." \
     "expr_test bar\.bc.*expr_test bar\.ij.*" \
     "test completion through complete command"
 
+# Test that the "python" command is correctly recognized as
+# inline/multi-line when entering a sequence of commands.
+#
+# This proc tests PR cli/21688.  The PR is not language-specific, but
+# the easiest way is just to test with Python.
+proc test_python_inline_or_multiline { } {
+    set define_cmd_not_inline {
+	{ "if 1"                 " >$"            "multi-line if 1" }
+	{ "python"               " >$"            "multi-line python command" }
+	{ "print ('hello')"      "  >$"           "multi-line print" }
+	{ "end"                  " >$"            "multi-line first end" }
+	{ "end"                  "hello\r\n"      "multi-line last end" } }
+
+    set define_cmd_inline {
+	{ "if 1"                      " >$"          "inline if 1" }
+	{ "python print ('hello')"    " >$"          "inline python command" }
+	{ "end"                       "hello\r\n"    "inline end" } }
+
+    foreach t [list $define_cmd_not_inline $define_cmd_inline] {
+	foreach l $t {
+	    lassign $l command regex testmsg
+	    gdb_test_multiple "$command" "$testmsg" {
+		-re "$regex" {
+		    pass "$testmsg"
+		}
+	    }
+	}
+    }
+}
+
+test_python_inline_or_multiline
+
 if { [readline_is_used] } {
     set test "complete 'expr_test bar.i'"
     send_gdb "expr_test bar\.i\t\t"

@@ -900,6 +900,20 @@ command_name_equals (struct cmd_list_element *cmd, const char *name)
 	  && strcmp (cmd->name, name) == 0);
 }
 
+/* Return true if NAME is the only command between COMMAND_START and
+   COMMAND_END.  This is useful when we want to know whether the
+   command is inline (i.e., has arguments like 'python command1') or
+   is the start of a multi-line command block.  */
+
+static bool
+command_name_equals_not_inline (const char *command_start,
+				const char *command_end,
+				const char *name)
+{
+  return (command_end - command_start == strlen (name)
+	  && startswith (command_start, name));
+}
+
 /* Given an input line P, skip the command and return a pointer to the
    first argument.  */
 
@@ -997,21 +1011,20 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	{
 	  *command = build_command_line (commands_control, line_first_arg (p));
 	}
-      else if (command_name_equals (cmd, "python"))
+      else if (command_name_equals_not_inline (p_start, p_end, "python"))
 	{
 	  /* Note that we ignore the inline "python command" form
 	     here.  */
 	  *command = build_command_line (python_control, "");
 	}
-      else if (command_name_equals (cmd, "compile"))
+      else if (command_name_equals_not_inline (p_start, p_end, "compile"))
 	{
 	  /* Note that we ignore the inline "compile command" form
 	     here.  */
 	  *command = build_command_line (compile_control, "");
 	  (*command)->control_u.compile.scope = COMPILE_I_INVALID_SCOPE;
 	}
-
-      else if (command_name_equals (cmd, "guile"))
+      else if (command_name_equals_not_inline (p_start, p_end, "guile"))
 	{
 	  /* Note that we ignore the inline "guile command" form here.  */
 	  *command = build_command_line (guile_control, "");

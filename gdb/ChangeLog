@@ -1,3 +1,10 @@
+2017-06-30  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR cli/21688
+	* cli/cli-script.c (command_name_equals_not_inline): New function.
+	(process_next_line): Adjust 'if' clauses for "python", "compile"
+	and "guile" to use command_name_equals_not_inline.
+
 2017-06-29  Pedro Alves  <palves@redhat.com>
 
 	* completer.c (expression_completer): Call
