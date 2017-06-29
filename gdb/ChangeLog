@@ -1,3 +1,8 @@
+2017-06-29  Pedro Alves  <palves@redhat.com>
+
+	* completer.c (expression_completer): Remove code that recomputes
+	'text' from 'word'.
+
 2017-06-29  Yao Qi  <yao.qi@linaro.org>
 
 	* regformats/regdat.sh: Generate code with
