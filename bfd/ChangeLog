@@ -1,3 +1,13 @@
+2017-06-29  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
+
+	* elfxx-sparc.c (allocate_dynrelocs): Don't make a symbol dynamic
+	unless it is undefined weak.
+	* elfxx-sparc.c (_bfd_sparc_elf_relocate_section): Set the flag
+	relative_reloc to direct non-dynamic symbols to R_SPARC_RELATIVE
+	relocation.
+	* elfxx-sparc.c (_bfd_sparc_elf_finish_dynamic_symbol): If symbol
+        is not dynamic in PIC, abort.
+
 2017-06-29  Jiong Wang  <jiong.wang@arm.com>
 
         PR ld/21402
