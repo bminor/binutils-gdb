@@ -1403,6 +1403,7 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "mips16e-jrc"
     run_dump_test "mips16e2-lui"
+    run_dump_test "mips16e2-mt-err"
     run_dump_test "mips16e2-copy"
     run_dump_test "mips16e2-copy-err"
 

@@ -1,3 +1,12 @@
+2017-06-29  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips_set_ase): Clear the ASE_MIPS16E2_MT
+	flag before recalculating.
+	* testsuite/gas/mips/mips16e2-mt-err.d: New test.
+	* testsuite/gas/mips/mips16e2-mt-err.l: New stderr output.
+	* testsuite/gas/mips/mips16e2-mt-err.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
 2017-06-28  Tamar Christina  <tamar.christina@arm.com>
 
 	* config/tc-aarch64.c (aarch64_reg_parse_32_64): Accept 4B.

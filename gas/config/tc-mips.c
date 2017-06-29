@@ -2130,6 +2130,11 @@ mips_set_ase (const struct mips_ase *ase, struct mips_set_options *opts,
 
   mask = mips_ase_mask (ase->flags);
   opts->ase &= ~mask;
+
+  /* Clear combination ASE flags, which need to be recalculated based on
+     updated regular ASE settings.  */
+  opts->ase &= ~ASE_MIPS16E2_MT;
+
   if (enabled_p)
     opts->ase |= ase->flags;
 
