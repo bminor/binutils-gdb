@@ -1,5 +1,12 @@
 2017-06-29  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/mips16e2@mips16e2-mt-sub.d: Adjust for the
+	ASE_MIPS16E2_MT flag disassembler fix.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16e2-mt-sub.d:
+	Likewise.
+
+2017-06-29  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (mips_set_ase): Clear the ASE_MIPS16E2_MT
 	flag before recalculating.
 	* testsuite/gas/mips/mips16e2-mt-err.d: New test.

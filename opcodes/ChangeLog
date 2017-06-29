@@ -1,3 +1,10 @@
+2017-06-29  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-dis.c (mips_calculate_combination_ases): New function.
+	(mips_convert_abiflags_ases): Factor out ASE_MIPS16E2_MT
+	calculation to the new function.
+	(set_default_mips_dis_options): Call the new function.
+
 2017-06-29  Anton Kolesov  <Anton.Kolesov@synopsys.com>
 
 	* arc-dis.c (parse_disassembler_options): Use

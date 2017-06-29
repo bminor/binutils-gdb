@@ -805,10 +805,19 @@ mips_convert_abiflags_ases (unsigned long afl_ases)
     opcode_ases |= ASE_DSPR3;
   if (afl_ases & AFL_ASE_MIPS16E2)
     opcode_ases |= ASE_MIPS16E2;
-  if ((afl_ases & (AFL_ASE_MIPS16E2 | AFL_ASE_MT))
-      == (AFL_ASE_MIPS16E2 | AFL_ASE_MT))
-    opcode_ases |= ASE_MIPS16E2_MT;
   return opcode_ases;
+}
+
+/* Calculate combination ASE flags from regular ASE flags.  */
+
+static unsigned long
+mips_calculate_combination_ases (unsigned long opcode_ases)
+{
+  unsigned long combination_ases = 0;
+
+  if ((opcode_ases & (ASE_MIPS16E2 | ASE_MT)) == (ASE_MIPS16E2 | ASE_MT))
+    combination_ases |= ASE_MIPS16E2_MT;
+  return combination_ases;
 }
 
 static void
@@ -880,6 +889,7 @@ set_default_mips_dis_options (struct disassemble_info *info)
 	mips_ase |= ASE_MDMX;
     }
 #endif
+  mips_ase |= mips_calculate_combination_ases (mips_ase);
 }
 
 static void
