@@ -1,3 +1,14 @@
+2017-08-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (set environment): Add @anchor.  Explain that
+	environment variables set by the user are sent to GDBserver.
+	(unset environment): Likewise, but for unsetting variables.
+	(Connecting) <Remote Packet>: Add "environment-hex-encoded",
+	"QEnvironmentHexEncoded", "environment-unset", "QEnvironmentUnset",
+	"environment-reset" and "QEnvironmentReset" to the table.
+	(Remote Protocol) <QEnvironmentHexEncoded, QEnvironmentUnset,
+	QEnvironmentReset>: New item, explaining the packet.
+
 2017-08-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Compiling and Injecting Code): Add to subsection

@@ -132,6 +132,30 @@ hex2bin (const char *hex, gdb_byte *bin, int count)
 
 /* See rsp-low.h.  */
 
+std::string
+hex2str (const char *hex)
+{
+  std::string ret;
+  size_t len = strlen (hex);
+
+  ret.reserve (len / 2);
+  for (size_t i = 0; i < len; ++i)
+    {
+      if (hex[0] == '\0' || hex[1] == '\0')
+	{
+	  /* Hex string is short, or of uneven length.  Return what we
+	     have so far.  */
+	  return ret;
+	}
+      ret += fromhex (hex[0]) * 16 + fromhex (hex[1]);
+      hex += 2;
+    }
+
+  return ret;
+}
+
+/* See rsp-low.h.  */
+
 int
 bin2hex (const gdb_byte *bin, char *hex, int count)
 {
@@ -144,6 +168,23 @@ bin2hex (const gdb_byte *bin, char *hex, int count)
     }
   *hex = 0;
   return i;
+}
+
+/* See rsp-low.h.  */
+
+std::string
+bin2hex (const gdb_byte *bin, int count)
+{
+  std::string ret;
+
+  ret.reserve (count * 2);
+  for (int i = 0; i < count; ++i)
+    {
+      ret += tohex ((*bin >> 4) & 0xf);
+      ret += tohex (*bin++ & 0xf);
+    }
+
+  return ret;
 }
 
 /* Return whether byte B needs escaping when sent as part of binary data.  */

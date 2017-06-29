@@ -2363,6 +2363,7 @@ print the names and values of all environment variables to be given to
 your program.  You can abbreviate @code{environment} as @code{env}.
 
 @kindex set environment
+@anchor{set environment}
 @item set environment @var{varname} @r{[}=@var{value}@r{]}
 Set environment variable @var{varname} to @var{value}.  The value
 changes for your program (and the shell @value{GDBN} uses to launch
@@ -2391,12 +2392,21 @@ If necessary, you can avoid that by using the @samp{env} program as a
 wrapper instead of using @code{set environment}.  @xref{set
 exec-wrapper}, for an example doing just that.
 
+Environment variables that are set by the user are also transmitted to
+@command{gdbserver} to be used when starting the remote inferior.
+@pxref{QEnvironmentHexEncoded}.
+
 @kindex unset environment
+@anchor{unset environment}
 @item unset environment @var{varname}
 Remove variable @var{varname} from the environment to be passed to your
 program.  This is different from @samp{set env @var{varname} =};
 @code{unset environment} removes the variable from the environment,
 rather than assigning it an empty value.
+
+Environment variables that are unset by the user are also unset on
+@command{gdbserver} when starting the remote inferior.
+@pxref{QEnvironmentUnset}.
 @end table
 
 @emph{Warning:} On Unix systems, @value{GDBN} runs your program using
@@ -20849,6 +20859,18 @@ are:
 @tab @code{QStartupWithShell}
 @tab @code{set startup-with-shell}
 
+@item @code{environment-hex-encoded}
+@tab @code{QEnvironmentHexEncoded}
+@tab @code{set environment}
+
+@item @code{environment-unset}
+@tab @code{QEnvironmentUnset}
+@tab @code{unset environment}
+
+@item @code{environment-reset}
+@tab @code{QEnvironmentReset}
+@tab @code{Reset the inferior environment (i.e., unset user-set variables)}
+
 @item @code{conditional-breakpoints-packet}
 @tab @code{Z0 and Z1}
 @tab @code{Support for target-side breakpoint condition evaluation}
@@ -36603,6 +36625,100 @@ actually support starting the inferior using a shell.
 
 Use of this packet is controlled by the @code{set startup-with-shell}
 command; @pxref{set startup-with-shell}.
+
+@item QEnvironmentHexEncoded:@var{hex-value}
+@anchor{QEnvironmentHexEncoded}
+@cindex set environment variable, remote request
+@cindex @samp{QEnvironmentHexEncoded} packet
+On UNIX-like targets, it is possible to set environment variables that
+will be passed to the inferior during the startup process.  This
+packet is used to inform @command{gdbserver} of an environment
+variable that has been defined by the user on @value{GDBN} (@pxref{set
+environment}).
+
+The packet is composed by @var{hex-value}, an hex encoded
+representation of the @var{name=value} format representing an
+environment variable.  The name of the environment variable is
+represented by @var{name}, and the value to be assigned to the
+environment variable is represented by @var{value}.  If the variable
+has no value (i.e., the value is @code{null}), then @var{value} will
+not be present.
+
+This packet is only available in extended mode (@pxref{extended
+mode}).
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+@end table
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).  This should only be done on targets that
+actually support passing environment variables to the starting
+inferior.
+
+This packet is related to the @code{set environment} command;
+@pxref{set environment}.
+
+@item QEnvironmentUnset:@var{hex-value}
+@anchor{QEnvironmentUnset}
+@cindex unset environment variable, remote request
+@cindex @samp{QEnvironmentUnset} packet
+On UNIX-like targets, it is possible to unset environment variables
+before starting the inferior in the remote target.  This packet is
+used to inform @command{gdbserver} of an environment variable that has
+been unset by the user on @value{GDBN} (@pxref{unset environment}).
+
+The packet is composed by @var{hex-value}, an hex encoded
+representation of the name of the environment variable to be unset.
+
+This packet is only available in extended mode (@pxref{extended
+mode}).
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+@end table
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).  This should only be done on targets that
+actually support passing environment variables to the starting
+inferior.
+
+This packet is related to the @code{unset environment} command;
+@pxref{unset environment}.
+
+@item QEnvironmentReset
+@anchor{QEnvironmentReset}
+@cindex reset environment, remote request
+@cindex @samp{QEnvironmentReset} packet
+On UNIX-like targets, this packet is used to reset the state of
+environment variables in the remote target before starting the
+inferior.  In this context, reset means unsetting all environment
+variables that were previously set by the user (i.e., were not
+initially present in the environment).  It is sent to
+@command{gdbserver} before the @samp{QEnvironmentHexEncoded}
+(@pxref{QEnvironmentHexEncoded}) and the @samp{QEnvironmentUnset}
+(@pxref{QEnvironmentUnset}) packets.
+
+This packet is only available in extended mode (@pxref{extended
+mode}).
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+@end table
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).  This should only be done on targets that
+actually support passing environment variables to the starting
+inferior.
 
 @item qfThreadInfo
 @itemx qsThreadInfo

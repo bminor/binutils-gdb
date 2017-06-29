@@ -1,3 +1,8 @@
+2017-08-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/share-env-with-gdbserver.c: New file.
+	* gdb.base/share-env-with-gdbserver.exp: Likewise.
+
 2017-08-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/commands.exp (gdbvar_simple_if_test,
