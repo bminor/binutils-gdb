@@ -635,7 +635,7 @@ expression_completer (struct cmd_list_element *ignore,
   xfree (fieldname);
 
   /* Not ideal but it is what we used to do before...  */
-  return location_completer (ignore, text, word);
+  return linespec_location_completer (ignore, text, word);
 }
 
 /* See definition in completer.h.  */

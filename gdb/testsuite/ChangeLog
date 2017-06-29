@@ -1,3 +1,7 @@
+2017-06-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/printcmds.exp: Add tests.
+
 2017-06-28  Doug Gilmore  <Doug.Gilmore@imgtec.com>
 
 	PR gdb/21337

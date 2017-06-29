@@ -1,5 +1,10 @@
 2017-06-29  Pedro Alves  <palves@redhat.com>
 
+	* completer.c (expression_completer): Call
+	linespec_location_completer instead of location_completer.
+
+2017-06-29  Pedro Alves  <palves@redhat.com>
+
 	* completer.c (expression_completer): Remove code that recomputes
 	'text' from 'word'.
 
