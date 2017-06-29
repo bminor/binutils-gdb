@@ -4944,11 +4944,13 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     = elfNN_aarch64_bfd_reloc_from_howto (howto);
   unsigned long r_symndx;
   bfd_byte *hit_data = contents + rel->r_offset;
-  bfd_vma place, off;
+  bfd_vma place, off, got_entry_addr;
   bfd_signed_vma signed_addend;
   struct elf_aarch64_link_hash_table *globals;
   bfd_boolean weak_undef_p;
+  bfd_boolean relative_reloc;
   asection *base_got;
+  bfd_vma orig_value = value;
 
   globals = elf_aarch64_hash_table (info);
 
@@ -5383,12 +5385,32 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       if (globals->root.sgot == NULL)
 	BFD_ASSERT (h != NULL);
 
+      relative_reloc = FALSE;
       if (h != NULL)
 	{
 	  bfd_vma addend = 0;
+
+	  /* If a symbol is not dynamic and is not undefined weak, bind it
+	     locally and generate a RELATIVE relocation under PIC mode.
+
+	     NOTE: one symbol may be referenced by several relocations, we
+	     should only generate one RELATIVE relocation for that symbol.
+	     Therefore, check GOT offset mark first.  */
+	  if (h->dynindx == -1
+	      && !h->forced_local
+	      && h->root.type != bfd_link_hash_undefweak
+	      && bfd_link_pic (info)
+	      && !symbol_got_offset_mark_p (input_bfd, h, r_symndx))
+	    relative_reloc = TRUE;
+
 	  value = aarch64_calculate_got_entry_vma (h, globals, info, value,
 						   output_bfd,
 						   unresolved_reloc_p);
+	  /* Record the GOT entry address which will be used when generating
+	     RELATIVE relocation.  */
+	  if (relative_reloc)
+	    got_entry_addr = value;
+
 	  if (aarch64_relocation_aginst_gp_p (bfd_r_type))
 	    addend = (globals->root.sgot->output_section->vma
 		      + globals->root.sgot->output_offset);
@@ -5414,32 +5436,20 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	off = symbol_got_offset (input_bfd, h, r_symndx);
 	base_got = globals->root.sgot;
-	bfd_vma got_entry_addr = (base_got->output_section->vma
-				  + base_got->output_offset + off);
+	got_entry_addr = (base_got->output_section->vma
+			  + base_got->output_offset + off);
 
 	if (!symbol_got_offset_mark_p (input_bfd, h, r_symndx))
 	  {
 	    bfd_put_64 (output_bfd, value, base_got->contents + off);
 
+	    /* For local symbol, we have done absolute relocation in static
+	       linking stage.  While for shared library, we need to update the
+	       content of GOT entry according to the shared object's runtime
+	       base address.  So, we need to generate a R_AARCH64_RELATIVE reloc
+	       for dynamic linker.  */
 	    if (bfd_link_pic (info))
-	      {
-		asection *s;
-		Elf_Internal_Rela outrel;
-
-		/* For local symbol, we have done absolute relocation in static
-		   linking stageh. While for share library, we need to update
-		   the content of GOT entry according to the share objects
-		   loading base address. So we need to generate a
-		   R_AARCH64_RELATIVE reloc for dynamic linker.  */
-		s = globals->root.srelgot;
-		if (s == NULL)
-		  abort ();
-
-		outrel.r_offset = got_entry_addr;
-		outrel.r_info = ELFNN_R_INFO (0, AARCH64_R (RELATIVE));
-		outrel.r_addend = value;
-		elf_append_rela (output_bfd, s, &outrel);
-	      }
+	      relative_reloc = TRUE;
 
 	    symbol_got_offset_mark (input_bfd, h, r_symndx);
 	  }
@@ -5454,6 +5464,21 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
 						     addend, weak_undef_p);
       }
+
+      if (relative_reloc)
+	{
+	  asection *s;
+	  Elf_Internal_Rela outrel;
+
+	  s = globals->root.srelgot;
+	  if (s == NULL)
+	    abort ();
+
+	  outrel.r_offset = got_entry_addr;
+	  outrel.r_info = ELFNN_R_INFO (0, AARCH64_R (RELATIVE));
+	  outrel.r_addend = orig_value;
+	  elf_append_rela (output_bfd, s, &outrel);
+	}
       break;
 
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
@@ -8021,7 +8046,8 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     {
       /* Make sure this symbol is output as a dynamic symbol.
          Undefined weak syms won't yet be marked as dynamic.  */
-      if (h->dynindx == -1 && !h->forced_local)
+      if (h->dynindx == -1 && !h->forced_local
+	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (!bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -8102,7 +8128,8 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       /* Make sure this symbol is output as a dynamic symbol.
          Undefined weak syms won't yet be marked as dynamic.  */
-      if (dyn && h->dynindx == -1 && !h->forced_local)
+      if (dyn && h->dynindx == -1 && !h->forced_local
+	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (!bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -8221,6 +8248,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	     symbol in PIEs.  */
 	  else if (h->dynindx == -1
 		   && !h->forced_local
+		   && h->root.type == bfd_link_hash_undefweak
 		   && !bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
@@ -8243,6 +8271,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	     Undefined weak syms won't yet be marked as dynamic.  */
 	  if (h->dynindx == -1
 	      && !h->forced_local
+	      && h->root.type == bfd_link_hash_undefweak
 	      && !bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 
@@ -8862,6 +8891,13 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 {
   struct elf_aarch64_link_hash_table *htab;
   htab = elf_aarch64_hash_table (info);
+
+  /* Sanity check to make sure no unexpected symbol reaches here.  */
+    if (h->dynindx == -1
+	&& !h->forced_local
+	&& h->root.type != bfd_link_hash_undefweak
+	&& bfd_link_pic (info))
+      abort ();
 
   if (h->plt.offset != (bfd_vma) - 1)
     {

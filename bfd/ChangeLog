@@ -1,5 +1,14 @@
 2017-06-29  Jiong Wang  <jiong.wang@arm.com>
 
+        PR ld/21402
+	* elfnn-aarch64.c (elfNN_aarch64_allocate_dynrelocs): Only make
+	undefined weak symbols into dynamic.
+	(elfNN_aarch64_final_link_relocate): Generate runtime RELATIVE
+	relocation for non-dynamic symbols.
+	(elfNN_aarch64_finish_dynamic_symbol): Add sanity check.
+
+2017-06-29  Jiong Wang  <jiong.wang@arm.com>
+
 	* elfnn-aarch64.c (aarch64_relocation_aginst_gp_p): New function.
 	(elfNN_aarch64_final_link_relocate): Delete duplicated code for
 	BFD_RELOC_AARCH64_LD64_GOTOFF_LO15, BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC,
