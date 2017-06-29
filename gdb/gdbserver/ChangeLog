@@ -1,3 +1,9 @@
+2017-06-29  Yao Qi  <yao.qi@linaro.org>
+
+	* tdesc.h (struct target_desc) [IN_PROCESS_AGENT] <expedite_regs>:
+	Remove.
+	[IN_PROCESS_AGENT] <xmltarget>: Likewise.
+
 2017-06-20  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* Makefile.in (IPA_OBJS): Sort and format one item per line.
