@@ -16158,6 +16158,10 @@ get_note_type (unsigned e_type)
 	return _("NT_S390_VXRS_LOW (s390 vector registers 0-15 upper half)");
       case NT_S390_VXRS_HIGH:
 	return _("NT_S390_VXRS_HIGH (s390 vector registers 16-31)");
+      case NT_S390_GS_CB:
+	return _("NT_S390_GS_CB (s390 guarded-storage registers)");
+      case NT_S390_GS_BC:
+	return _("NT_S390_GS_BC (s390 guarded-storage broadcast control)");
       case NT_ARM_VFP:
 	return _("NT_ARM_VFP (arm VFP registers)");
       case NT_ARM_TLS:

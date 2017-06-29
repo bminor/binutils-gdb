@@ -598,6 +598,10 @@
 					/*   note name must be "LINUX".  */
 #define NT_S390_VXRS_HIGH	0x30a	/* S390 vector registers 16-31 */
 					/*   note name must be "LINUX".  */
+#define NT_S390_GS_CB	0x30b		/* s390 guarded storage registers */
+					/*   note name must be "LINUX".  */
+#define NT_S390_GS_BC	0x30c		/* s390 guarded storage broadcast control block */
+					/*   note name must be "LINUX".  */
 #define NT_ARM_VFP	0x400		/* ARM VFP registers */
 /* The following definitions should really use NT_AARCH_..., but defined
    this way for compatibility with Linux.  */

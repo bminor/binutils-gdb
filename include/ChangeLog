@@ -1,3 +1,8 @@
+2017-06-29  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* elf/common.h (NT_S390_GS_CB): New macro.
+	(NT_S390_GS_BC): Likewise.
+
 2017-06-28  Tamar Christina  <tamar.christina@arm.com>
 
 	* opcode/aarch64.h: (AARCH64_FEATURE_DOTPROD): New.
