@@ -56,7 +56,7 @@
 
 2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
 	    Matthew Fortune  <matthew.fortune@imgtec.com>
-	    Andrew Bennett <andrew.bennett@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* mips-formats.h (INT_BIAS): New macro.
 	(INT_ADJ): Redefine in INT_BIAS terms.
