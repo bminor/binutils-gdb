@@ -254,8 +254,7 @@ $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 
 cfiles: $(CFILES)
 %.c: %.xml
-	$(GDB) -nx -q -batch \
-	  -ex "set tdesc filename $<" -ex 'maint print c-tdesc' > $@.tmp
+	$(GDB) -nx -q -batch -ex 'maint print c-tdesc $<' > $@.tmp
 	sh ../../move-if-change $@.tmp $@
 
 # Other dependencies.
