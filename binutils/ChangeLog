@@ -1,3 +1,11 @@
+2017-06-30  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21665
+	* objdump.c (disassemble_section): Move check for an overlarge
+	section to just before the allocation of memory.  Do not check
+	section size against file size, but instead use an arbitrary 2Gb
+	limit.  Issue a warning message if the section is too big.
+
 2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* NEWS: Mention microMIPS XPA support.
