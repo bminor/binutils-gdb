@@ -1,5 +1,10 @@
 2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (md_convert_frag): Use a switch on the
+	microMIPS relaxation type rather than a chain of conditionals.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (md_convert_frag): Rewrite `fix_new_exp'
 	calls in terms of `fix_new'.
 

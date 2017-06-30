@@ -18342,16 +18342,21 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  /* We generate a fixup instead of applying it right now,
 	     because if there is linker relaxation, we're going to
 	     need the relocations.  */
-	  if (type == 'D')
-	    fixp = fix_new (fragp, buf - fragp->fr_literal, 2,
-			    fragp->fr_symbol, fragp->fr_offset,
-			    TRUE, BFD_RELOC_MICROMIPS_10_PCREL_S1);
-	  else if (type == 'E')
-	    fixp = fix_new (fragp, buf - fragp->fr_literal, 2,
-			    fragp->fr_symbol, fragp->fr_offset,
-			    TRUE, BFD_RELOC_MICROMIPS_7_PCREL_S1);
-	  else
-	    abort ();
+	  switch (type)
+	    {
+	    case 'D':
+	      fixp = fix_new (fragp, buf - fragp->fr_literal, 2,
+			      fragp->fr_symbol, fragp->fr_offset,
+			      TRUE, BFD_RELOC_MICROMIPS_10_PCREL_S1);
+	      break;
+	    case 'E':
+	      fixp = fix_new (fragp, buf - fragp->fr_literal, 2,
+			      fragp->fr_symbol, fragp->fr_offset,
+			      TRUE, BFD_RELOC_MICROMIPS_7_PCREL_S1);
+	      break;
+	    default:
+	      abort ();
+	    }
 
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
