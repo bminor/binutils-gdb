@@ -1,3 +1,17 @@
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (md_convert_frag): Don't make a helper
+	expression symbol for `fix_new_exp' called with a non-zero
+	offset.
+	* testsuite/gas/mips/relax-offset.d: New test.
+	* testsuite/gas/mips/mips1@relax-offset.d: New test.
+	* testsuite/gas/mips/r3000@relax-offset.d: New test.
+	* testsuite/gas/mips/r3900@relax-offset.d: New test.
+	* testsuite/gas/mips/micromips@relax-offset.d: New test.
+	* testsuite/gas/mips/relax-offset.l: New stderr output.
+	* testsuite/gas/mips/relax-offset.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2017-06-30  Georg-Johann Lay  <avr@gjlay.de>
 
 	PR gas/21683

@@ -1069,6 +1069,8 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test_arches "relax"	[mips_arch_list_matching mips2 !mips32r6]
     run_dump_test_arches "relax-at"	[mips_arch_list_matching mips2 !mips32r6]
+    run_dump_test_arches "relax-offset"	[mips_arch_list_matching mips1 \
+					    !mips32r6]
     run_dump_test "relax-swap1-mips1"
     run_dump_test "relax-swap1-mips2"
     run_dump_test "relax-swap2"
