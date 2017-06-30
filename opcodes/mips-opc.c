@@ -3158,6 +3158,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"ctcmsa",		"+l,d",		0x783e0019, 0xffff003f,	RD_2|CM,		0,		0,		MSA,	0 },
 {"cfcmsa",		"+k,+n",	0x787e0019, 0xffff003f,	WR_1|CM,		0,		0,		MSA,	0 },
 {"move.v",		"+d,+e",	0x78be0019, 0xffff003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
+{"lsa",			"d,v,t,+~",	0x00000005, 0xfc00073f,	WR_1|RD_2|RD_3,		0,		I37,		MSA,	0 },
+{"dlsa",		"d,v,t,+~",	0x00000015, 0xfc00073f,	WR_1|RD_2|RD_3,		0,		I69,		MSA64,	0 },
 
 /* interAptiv MR2 instruction extensions.  */
 {"restore",		"-m",		0x7000001f, 0xfc00603f, WR_31|NODS,		MOD_SP,		IAMR2,		0,	0 },
@@ -3228,10 +3230,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"udi15",		"s,t,+2",	0x7000001f, 0xfc00003f,	UDI,			0,		I33,		0,	0 },
 {"udi15",		"s,+3",		0x7000001f, 0xfc00003f,	UDI,			0,		I33,		0,	0 },
 {"udi15",		"+4",		0x7000001f, 0xfc00003f,	UDI,			0,		I33,		0,	0 },
-{"lsa",			"d,v,t,+~",	0x00000005, 0xfc00073f,	WR_1|RD_2|RD_3,		0,		I37,		MSA,	0 },
-{"dlsa",		"d,v,t,+~",	0x00000015, 0xfc00073f,	WR_1|RD_2|RD_3,		0,		I69,		MSA64,	0 },
-/* MIPS r6.  */
 
+/* MIPS r6.  */
 {"aui",			"t,s,u",	0x3c000000, 0xfc000000,	WR_1|RD_2,		0,		I37,		0,	0 },
 {"auipc",		"s,u",		0xec1e0000, 0xfc1f0000, WR_1,			RD_pc,		I37,		0,	0 },
 {"daui",		"t,s,u",	0x74000000, 0xfc000000,	WR_1|RD_2,		0,		I37,		0,	0 },
