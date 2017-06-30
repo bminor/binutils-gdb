@@ -325,6 +325,21 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	  info->reglane.index = (unsigned) (value >> 1);
 	}
     }
+  else if (inst->opcode->iclass == dotproduct)
+    {
+      /* Need information in other operand(s) to help decoding.  */
+      info->qualifier = get_expected_qualifier (inst, info->idx);
+      switch (info->qualifier)
+	{
+	case AARCH64_OPND_QLF_S_B:
+	  /* L:H */
+	  info->reglane.index = extract_fields (code, 0, 2, FLD_H, FLD_L);
+	  info->reglane.regno &= 0x1f;
+	  break;
+	default:
+	  return 0;
+	}
+    }
   else
     {
       /* Index only for e.g. SQDMLAL <Va><d>, <Vb><n>, <Vm>.<Ts>[<index>]

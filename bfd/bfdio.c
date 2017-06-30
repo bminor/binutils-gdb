@@ -392,7 +392,7 @@ FUNCTION
 	bfd_get_size
 
 SYNOPSIS
-	file_ptr bfd_get_size (bfd *abfd);
+	ufile_ptr bfd_get_size (bfd *abfd);
 
 DESCRIPTION
 	Return the file size (as read from file system) for the file
@@ -420,7 +420,7 @@ DESCRIPTION
 	size reasonable?".
 */
 
-file_ptr
+ufile_ptr
 bfd_get_size (bfd *abfd)
 {
   struct stat buf;
@@ -439,7 +439,7 @@ FUNCTION
 	bfd_get_file_size
 
 SYNOPSIS
-	file_ptr bfd_get_file_size (bfd *abfd);
+	ufile_ptr bfd_get_file_size (bfd *abfd);
 
 DESCRIPTION
 	Return the file size (as read from file system) for the file
@@ -448,7 +448,7 @@ DESCRIPTION
 
 */
 
-file_ptr
+ufile_ptr
 bfd_get_file_size (bfd *abfd)
 {
   if (abfd->my_archive != NULL

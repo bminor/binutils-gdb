@@ -294,6 +294,7 @@ END_RELOC_NUMBERS (R_MIPS_maxext)
 #define E_MIPS_MACH_OCTEON3	0x008e0000
 #define E_MIPS_MACH_5400	0x00910000
 #define E_MIPS_MACH_5900	0x00920000
+#define E_MIPS_MACH_IAMR2	0x00930000
 #define E_MIPS_MACH_5500	0x00980000
 #define E_MIPS_MACH_9000	0x00990000
 #define E_MIPS_MACH_LS2E        0x00A00000
@@ -1257,6 +1258,7 @@ extern void bfd_mips_elf_swap_abiflags_v0_out
 #define AFL_EXT_LOONGSON_2E  17  /* ST Microelectronics Loongson 2E.  */
 #define AFL_EXT_LOONGSON_2F  18  /* ST Microelectronics Loongson 2F.  */
 #define AFL_EXT_OCTEON3      19  /* Cavium Networks Octeon3.  */
+#define AFL_EXT_INTERAPTIV_MR2 20  /* Imagination interAptiv MR2.  */
 
 /* Masks for the flags1 word of an ABI flags structure.  */
 #define AFL_FLAGS1_ODDSPREG   1	 /* Uses odd single-precision registers.  */

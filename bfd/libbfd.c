@@ -789,7 +789,6 @@ _bfd_generic_get_section_contents (bfd *abfd,
 				   bfd_size_type count)
 {
   bfd_size_type sz;
-  ufile_ptr filesz;
   if (count == 0)
     return TRUE;
 
@@ -812,10 +811,12 @@ _bfd_generic_get_section_contents (bfd *abfd,
     sz = section->rawsize;
   else
     sz = section->size;
-  filesz = bfd_get_file_size (abfd);
   if (offset + count < count
       || offset + count > sz
-      || (ufile_ptr) section->filepos + offset + count > filesz)
+      || (abfd->my_archive != NULL
+	  && !bfd_is_thin_archive (abfd->my_archive)
+	  && ((ufile_ptr) section->filepos + offset + count
+	      > arelt_size (abfd))))
     {
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
@@ -838,7 +839,6 @@ _bfd_generic_get_section_contents_in_window
 {
 #ifdef USE_MMAP
   bfd_size_type sz;
-  ufile_ptr filesz;
 
   if (count == 0)
     return TRUE;
@@ -871,9 +871,12 @@ _bfd_generic_get_section_contents_in_window
     sz = section->rawsize;
   else
     sz = section->size;
-  filesz = bfd_get_file_size (abfd);
-  if (offset + count > sz
-      || (ufile_ptr) section->filepos + offset + count > filesz
+  if (offset + count < count
+      || offset + count > sz
+      || (abfd->my_archive != NULL
+	  && !bfd_is_thin_archive (abfd->my_archive)
+	  && ((ufile_ptr) section->filepos + offset + count
+	      > arelt_size (abfd)))
       || ! bfd_get_file_window (abfd, section->filepos + offset, count, w,
 				TRUE))
     return FALSE;

@@ -1,3 +1,74 @@
+2017-06-29  Andrew Waterman  <andrew@sifive.com>
+
+	* elfnn-riscv.c (riscv_elf_adjust_dynamic_symbol): Fix TLS copy
+	relocs.
+
+2017-06-29  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
+
+	* elfxx-sparc.c (allocate_dynrelocs): Don't make a symbol dynamic
+	unless it is undefined weak.
+	* elfxx-sparc.c (_bfd_sparc_elf_relocate_section): Set the flag
+	relative_reloc to direct non-dynamic symbols to R_SPARC_RELATIVE
+	relocation.
+	* elfxx-sparc.c (_bfd_sparc_elf_finish_dynamic_symbol): If symbol
+        is not dynamic in PIC, abort.
+
+2017-06-29  Jiong Wang  <jiong.wang@arm.com>
+
+        PR ld/21402
+	* elfnn-aarch64.c (elfNN_aarch64_allocate_dynrelocs): Only make
+	undefined weak symbols into dynamic.
+	(elfNN_aarch64_final_link_relocate): Generate runtime RELATIVE
+	relocation for non-dynamic symbols.
+	(elfNN_aarch64_finish_dynamic_symbol): Add sanity check.
+
+2017-06-29  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (aarch64_relocation_aginst_gp_p): New function.
+	(elfNN_aarch64_final_link_relocate): Delete duplicated code for
+	BFD_RELOC_AARCH64_LD64_GOTOFF_LO15, BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC,
+	BFD_RELOC_AARCH64_MOVW_GOTOFF_G1.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_resolve_relocation): Optimize the
+	support for them.
+
+2017-06-29  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* elf-bfd.h (elfcore_write_s390_gs_cb): Add prototype.
+	(elfcore_write_s390_gs_bc): Likewise.
+	* elf.c (elfcore_grok_s390_gs_cb): New function.
+	(elfcore_grok_s390_gs_bc): New function.
+	(elfcore_grok_note): Call them.
+	(elfcore_write_s390_gs_cb): New function.
+	(elfcore_write_s390_gs_bc): New function.
+	(elfcore_write_register_note): Call them.
+
+2017-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* libbfd.c (_bfd_generic_get_section_contents): Don't call
+	bfd_get_file_size.  Check archive element size.
+	(_bfd_generic_get_section_contents_in_window): Likewise.
+
+2017-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in2.h: Regenerated.
+	* bfdio.c (bfd_get_size): Change return type to ufile_ptr.
+	(bfd_get_file_size): Likewise.
+
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* archures.c (bfd_mach_mips_interaptiv_mr2): New macro.
+	* cpu-mips.c (I_interaptiv_mr2): New enum value.
+	(arch_info_struct): Add "mips:interaptiv-mr2" entry.
+	* elfxx-mips.c (_bfd_elf_mips_mach) <E_MIPS_MACH_IAMR2>: New
+	case.
+	(mips_set_isa_flags) <bfd_mach_mips_interaptiv_mr2>: Likewise.
+	(bfd_mips_isa_ext) <bfd_mach_mips_interaptiv_mr2>: Likewise.
+	(print_mips_isa_ext) <AFL_EXT_INTERAPTIV_MR2>: Likewise.
+	(mips_mach_extensions): Add `bfd_mach_mipsisa32r3' and
+	`bfd_mach_mips_interaptiv_mr2' entries.
+	* bfd-in2.h: Regenerate.
+
 2017-06-27  Nick Clifton  <nickc@redhat.com>
 
 	* tekhex.c (pass_over): Revert accidental conversion of a local

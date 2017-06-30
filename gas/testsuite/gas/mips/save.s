@@ -1,4 +1,4 @@
-# Test the generation of the mips16e save instruction
+# Test the generation of the SAVE/RESTORE instructions.
 
 	.text
 func:
@@ -26,7 +26,7 @@ func:
 	save	$18-$23,72
 	save	$18-$23,$30,80
 	save	$16-$23,$30,88
-	
+
 	# static areg
 	save    64,$7
 	save    128,$7,$6
@@ -49,6 +49,5 @@ func:
 	restore	$31,136
 	restore	$18,64
 	restore	$4-$5,$16-$23,$30-$31,128,$6-$7
-	
-        .p2align 4
 
+	.p2align 4, 0

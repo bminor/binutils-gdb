@@ -2114,7 +2114,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
     return;
 
   datasize = bfd_get_section_size (section);
-  if (datasize == 0 || datasize >= (bfd_size_type) bfd_get_file_size (abfd))
+  if (datasize == 0)
     return;
 
   if (start_address == (bfd_vma) -1
@@ -2177,6 +2177,29 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	}
     }
   rel_ppend = rel_pp + rel_count;
+
+  /* PR 21665: Check for overlarge datasizes.
+     Note - we used to check for "datasize > bfd_get_file_size (abfd)" but
+     this fails when using compressed sections or compressed file formats
+     (eg MMO, tekhex).
+
+     The call to xmalloc below will fail if too much memory is requested,
+     which will catch the problem in the normal use case.  But if a memory
+     checker is in use, eg valgrind or sanitize, then an exception will
+     be still generated, so we try to catch the problem first.
+
+     Unfortunately there is no simple way to determine how much memory can
+     be allocated by calling xmalloc.  So instead we use a simple, arbitrary
+     limit of 2Gb.  Hopefully this should be enough for most users.  If
+     someone does start trying to disassemble sections larger then 2Gb in
+     size they will doubtless complain and we can increase the limit.  */
+#define MAX_XMALLOC (1024 * 1024 * 1024 * 2UL) /* 2Gb */
+  if (datasize > MAX_XMALLOC)
+    {
+      non_fatal (_("Reading section %s failed because it is too big (%#lx)"),
+		 section->name, (unsigned long) datasize);
+      return;
+    }
 
   data = (bfd_byte *) xmalloc (datasize);
 
@@ -3388,7 +3411,7 @@ dump_relocs_in_section (bfd *abfd,
     }
 
   if ((bfd_get_file_flags (abfd) & (BFD_IN_MEMORY | BFD_LINKER_CREATED)) == 0
-      && relsize > bfd_get_file_size (abfd))
+      && (ufile_ptr) relsize > bfd_get_file_size (abfd))
     {
       printf (" (too many: 0x%x)\n", section->reloc_count);
       bfd_set_error (bfd_error_file_truncated);

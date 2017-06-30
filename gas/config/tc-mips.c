@@ -1762,7 +1762,7 @@ static const struct mips_ase mips_ases[] = {
 
   { "xpa", ASE_XPA, 0,
     OPTION_XPA, OPTION_NO_XPA,
-     2,  2, -1, -1,
+    2, 2, 2, 2,
     -1 },
 
   { "mips16e2", ASE_MIPS16E2, 0,
@@ -2130,9 +2130,22 @@ mips_set_ase (const struct mips_ase *ase, struct mips_set_options *opts,
 
   mask = mips_ase_mask (ase->flags);
   opts->ase &= ~mask;
+
+  /* Clear combination ASE flags, which need to be recalculated based on
+     updated regular ASE settings.  */
+  opts->ase &= ~(ASE_MIPS16E2_MT | ASE_XPA_VIRT);
+
   if (enabled_p)
     opts->ase |= ase->flags;
 
+  /* The Virtualization ASE has eXtended Physical Addressing (XPA)
+     instructions which are only valid when both ASEs are enabled.
+     This sets the ASE_XPA_VIRT flag when both ASEs are present.  */
+  if ((opts->ase & (ASE_XPA | ASE_VIRT)) == (ASE_XPA | ASE_VIRT))
+    {
+      opts->ase |= ASE_XPA_VIRT;
+      mask |= ASE_XPA_VIRT;
+    }
   if ((opts->ase & (ASE_MIPS16E2 | ASE_MT)) == (ASE_MIPS16E2 | ASE_MT))
     {
       opts->ase |= ASE_MIPS16E2_MT;
@@ -3463,6 +3476,10 @@ validate_mips_insn (const struct mips_opcode *opcode,
 	      used_bits &= ~(1 << (operand->lsb + 5));
 	    if (operand->type == OP_ENTRY_EXIT_LIST)
 	      used_bits &= ~(mask & 0x700);
+	    /* interAptiv MR2 SAVE/RESTORE instructions have a discontiguous
+	       operand field that cannot be fully described with LSB/SIZE.  */
+	    if (operand->type == OP_SAVE_RESTORE_LIST && operand->lsb == 6)
+	      used_bits &= ~0x6000;
 	  }
 	/* Skip prefix characters.  */
 	if (decode_operand && (*s == '+' || *s == 'm' || *s == '-'))
@@ -5555,6 +5572,39 @@ match_entry_exit_operand (struct mips_arg_info *arg,
   return TRUE;
 }
 
+/* Encode regular MIPS SAVE/RESTORE instruction operands according to
+   the argument register mask AMASK, the number of static registers
+   saved NSREG, the $ra, $s0 and $s1 register specifiers RA, S0 and S1
+   respectively, and the frame size FRAME_SIZE.  */
+
+static unsigned int
+mips_encode_save_restore (unsigned int amask, unsigned int nsreg,
+			  unsigned int ra, unsigned int s0, unsigned int s1,
+			  unsigned int frame_size)
+{
+  return ((nsreg << 23) | ((frame_size & 0xf0) << 15) | (amask << 15)
+	  | (ra << 12) | (s0 << 11) | (s1 << 10) | ((frame_size & 0xf) << 6));
+}
+
+/* Encode MIPS16 SAVE/RESTORE instruction operands according to the
+   argument register mask AMASK, the number of static registers saved
+   NSREG, the $ra, $s0 and $s1 register specifiers RA, S0 and S1
+   respectively, and the frame size FRAME_SIZE.  */
+
+static unsigned int
+mips16_encode_save_restore (unsigned int amask, unsigned int nsreg,
+			    unsigned int ra, unsigned int s0, unsigned int s1,
+			    unsigned int frame_size)
+{
+  unsigned int args;
+
+  args = (ra << 6) | (s0 << 5) | (s1 << 4) | (frame_size & 0xf);
+  if (nsreg || amask || frame_size == 0 || frame_size > 16)
+    args |= (MIPS16_EXTEND | (nsreg << 24) | (amask << 16)
+	     | ((frame_size & 0xf0) << 16));
+  return args;
+}
+
 /* OP_SAVE_RESTORE_LIST matcher.  */
 
 static bfd_boolean
@@ -5562,6 +5612,7 @@ match_save_restore_list_operand (struct mips_arg_info *arg)
 {
   unsigned int opcode, args, statics, sregs;
   unsigned int num_frame_sizes, num_args, num_statics, num_sregs;
+  unsigned int arg_mask, ra, s0, s1;
   offsetT frame_size;
 
   opcode = arg->insn->insn_opcode;
@@ -5570,6 +5621,9 @@ match_save_restore_list_operand (struct mips_arg_info *arg)
   args = 0;
   statics = 0;
   sregs = 0;
+  ra = 0;
+  s0 = 0;
+  s1 = 0;
   do
     {
       unsigned int regno1, regno2;
@@ -5605,7 +5659,7 @@ match_save_restore_list_operand (struct mips_arg_info *arg)
 		sregs |= 1 << 8;
 	      else if (regno1 == 31)
 		/* Add $ra to insn.  */
-		opcode |= 0x40;
+		ra = 1;
 	      else
 		return FALSE;
 	      regno1 += 1;
@@ -5621,10 +5675,10 @@ match_save_restore_list_operand (struct mips_arg_info *arg)
     return FALSE;
   else if (args == 0xf)
     /* All $a0-$a3 are args.  */
-    opcode |= MIPS16_ALL_ARGS << 16;
+    arg_mask = MIPS_SVRS_ALL_ARGS;
   else if (statics == 0xf)
     /* All $a0-$a3 are statics.  */
-    opcode |= MIPS16_ALL_STATICS << 16;
+    arg_mask = MIPS_SVRS_ALL_STATICS;
   else
     {
       /* Count arg registers.  */
@@ -5648,14 +5702,14 @@ match_save_restore_list_operand (struct mips_arg_info *arg)
 	return FALSE;
 
       /* Encode args/statics.  */
-      opcode |= ((num_args << 2) | num_statics) << 16;
+      arg_mask = (num_args << 2) | num_statics;
     }
 
   /* Encode $s0/$s1.  */
   if (sregs & (1 << 0))		/* $s0 */
-    opcode |= 0x20;
+    s0 = 1;
   if (sregs & (1 << 1))		/* $s1 */
-    opcode |= 0x10;
+    s1 = 1;
   sregs >>= 2;
 
   /* Encode $s2-$s8. */
@@ -5667,7 +5721,6 @@ match_save_restore_list_operand (struct mips_arg_info *arg)
     }
   if (sregs != 0)
     return FALSE;
-  opcode |= num_sregs << 24;
 
   /* Encode frame size.  */
   if (num_frame_sizes == 0)
@@ -5685,16 +5738,18 @@ match_save_restore_list_operand (struct mips_arg_info *arg)
       set_insn_error (arg->argnum, _("invalid frame size"));
       return FALSE;
     }
-  if (frame_size != 128 || (opcode >> 16) != 0)
-    {
-      frame_size /= 8;
-      opcode |= (((frame_size & 0xf0) << 16)
-		 | (frame_size & 0x0f));
-    }
+  frame_size /= 8;
 
   /* Finally build the instruction.  */
-  if ((opcode >> 16) != 0 || frame_size == 0)
-    opcode |= MIPS16_EXTEND;
+  if (mips_opts.mips16)
+    opcode |= mips16_encode_save_restore (arg_mask, num_sregs, ra, s0, s1,
+					  frame_size);
+  else if (!mips_opts.micromips)
+    opcode |= mips_encode_save_restore (arg_mask, num_sregs, ra, s0, s1,
+					frame_size);
+  else
+    abort ();
+
   arg->insn->insn_opcode = opcode;
   return TRUE;
 }
@@ -5882,9 +5937,9 @@ match_tied_reg_operand (struct mips_arg_info *arg, unsigned int other_regno)
   return match_reg (arg, OP_REG_GP, &regno) && regno == other_regno;
 }
 
-/* Read a floating-point constant from S for LI.S or LI.D.  LENGTH is
-   the length of the value in bytes (4 for float, 8 for double) and
-   USING_GPRS says whether the destination is a GPR rather than an FPR.
+/* Try to match a floating-point constant from ARG for LI.S or LI.D.
+   LENGTH is the length of the value in bytes (4 for float, 8 for double)
+   and USING_GPRS says whether the destination is a GPR rather than an FPR.
 
    Return the constant in IMM and OFFSET as follows:
 
@@ -6078,8 +6133,8 @@ match_vu0_suffix_operand (struct mips_arg_info *arg,
   return TRUE;
 }
 
-/* S is the text seen for ARG.  Match it against OPERAND.  Return the end
-   of the argument text if the match is successful, otherwise return null.  */
+/* Try to match a token from ARG against OPERAND.  Consume the token
+   and return true on success, otherwise return false.  */
 
 static bfd_boolean
 match_operand (struct mips_arg_info *arg,
@@ -19665,6 +19720,9 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "1004kf1_1",      0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
   /* interaptiv is the new name for 1004kf */
   { "interaptiv",     0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "interaptiv-mr2", 0,
+    ASE_DSP | ASE_EVA | ASE_MT | ASE_MIPS16E2 | ASE_MIPS16E2_MT,
+    ISA_MIPS32R3, CPU_INTERAPTIV_MR2 },
   /* M5100 family */
   { "m5100",          0, ASE_MCU,		ISA_MIPS32R5, CPU_MIPS32R5 },
   { "m5101",          0, ASE_MCU,		ISA_MIPS32R5, CPU_MIPS32R5 },

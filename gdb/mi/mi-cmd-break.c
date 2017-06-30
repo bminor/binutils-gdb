@@ -141,7 +141,7 @@ mi_argv_to_format (char **argv, int argc)
 
 	      xsnprintf (tmp, sizeof (tmp), "\\%o",
 			 (unsigned char) argv[0][i]);
-	      obstack_grow (&obstack, tmp, strlen (tmp));
+	      obstack_grow_str (&obstack, tmp);
 	    }
 	  break;
 	}
@@ -152,7 +152,7 @@ mi_argv_to_format (char **argv, int argc)
   for (i = 1; i < argc; i++)
     {
       obstack_1grow (&obstack, ',');
-      obstack_grow (&obstack, argv[i], strlen (argv[i]));
+      obstack_grow_str (&obstack, argv[i]);
     }
   obstack_1grow (&obstack, '\0');
 

@@ -1,3 +1,43 @@
+2017-06-30  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR gas/21683
+	* opcode/avr.h (AVR_INSN): Add one for __gcc_isr.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* opcode/mips.h (ASE_XPA_VIRT): New macro.
+
+2017-06-29  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* elf/common.h (NT_S390_GS_CB): New macro.
+	(NT_S390_GS_BC): Likewise.
+
+2017-06-28  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcode/aarch64.h: (AARCH64_FEATURE_DOTPROD): New.
+	(aarch64_insn_class): Added dotprod.
+
+2017-06-28  Jiong Wang  <jiong.wang@arm.com>
+
+	* opcode/arm.h (FPU_NEON_EXT_DOTPROD): New macro.
+	(FPU_ARCH_DOTPROD_NEON_VFP_ARMV8): New macro.
+
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* elf/mips.h (E_MIPS_MACH_IAMR2): New macro.
+	(AFL_EXT_INTERAPTIV_MR2): Likewise.
+	* opcode/mips.h: Document new operand codes defined.
+	(INSN_INTERAPTIV_MR2): New macro.
+	(INSN_CHIP_MASK): Adjust accordingly.
+	(CPU_INTERAPTIV_MR2): New macro.
+	(cpu_is_member) <CPU_INTERAPTIV_MR2>: New case.
+	(MIPS16_ALL_ARGS): Rename to...
+	(MIPS_SVRS_ALL_ARGS): ... this.
+	(MIPS16_ALL_STATICS): Rename to...
+	(MIPS_SVRS_ALL_STATICS): ... this.
+
 2017-06-26  Kuan-Lin Chen  <rufus@andestech.com>
 
 	* elf/riscv.h (R_RISCV_32_PCREL): New.

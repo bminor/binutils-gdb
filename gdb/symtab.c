@@ -4837,17 +4837,7 @@ do_free_completion_list (void *list)
   free_completion_list ((VEC (char_ptr) **) list);
 }
 
-/* Helper routine for make_symbol_completion_list.  */
-
 static VEC (char_ptr) *return_val;
-
-#define COMPLETION_LIST_ADD_SYMBOL(symbol, sym_text, len, text, word) \
-      completion_list_add_name \
-	(SYMBOL_NATURAL_NAME (symbol), (sym_text), (len), (text), (word))
-
-#define MCOMPLETION_LIST_ADD_SYMBOL(symbol, sym_text, len, text, word) \
-      completion_list_add_name \
-	(MSYMBOL_NATURAL_NAME (symbol), (sym_text), (len), (text), (word))
 
 /* Tracker for how many unique completions have been generated.  Used
    to terminate completion list generation early if the list has grown
@@ -4916,6 +4906,28 @@ completion_list_add_name (const char *symname,
 	break;
       }
   }
+}
+
+/* completion_list_add_name wrapper for struct symbol.  */
+
+static void
+completion_list_add_symbol (symbol *sym,
+			    const char *sym_text, int sym_text_len,
+			    const char *text, const char *word)
+{
+  completion_list_add_name (SYMBOL_NATURAL_NAME (sym),
+			    sym_text, sym_text_len, text, word);
+}
+
+/* completion_list_add_name wrapper for struct minimal_symbol.  */
+
+static void
+completion_list_add_msymbol (minimal_symbol *sym,
+			     const char *sym_text, int sym_text_len,
+			     const char *text, const char *word)
+{
+  completion_list_add_name (MSYMBOL_NATURAL_NAME (sym),
+			    sym_text, sym_text_len, text, word);
 }
 
 /* ObjC: In case we are completing on a selector, look as the msymbol
@@ -5068,7 +5080,7 @@ add_symtab_completions (struct compunit_symtab *cust,
 	  if (code == TYPE_CODE_UNDEF
 	      || (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 		  && TYPE_CODE (SYMBOL_TYPE (sym)) == code))
-	    COMPLETION_LIST_ADD_SYMBOL (sym,
+	    completion_list_add_symbol (sym,
 					sym_text, sym_text_len,
 					text, word);
 	}
@@ -5179,7 +5191,7 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
       ALL_MSYMBOLS (objfile, msymbol)
 	{
 	  QUIT;
-	  MCOMPLETION_LIST_ADD_SYMBOL (msymbol, sym_text, sym_text_len, text,
+	  completion_list_add_msymbol (msymbol, sym_text, sym_text_len, text,
 				       word);
 
 	  completion_list_objc_symbol (msymbol, sym_text, sym_text_len, text,
@@ -5226,14 +5238,14 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
 	  {
 	    if (code == TYPE_CODE_UNDEF)
 	      {
-		COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text,
+		completion_list_add_symbol (sym, sym_text, sym_text_len, text,
 					    word);
 		completion_list_add_fields (sym, sym_text, sym_text_len, text,
 					    word);
 	      }
 	    else if (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 		     && TYPE_CODE (SYMBOL_TYPE (sym)) == code)
-	      COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text,
+	      completion_list_add_symbol (sym, sym_text, sym_text_len, text,
 					  word);
 	  }
 

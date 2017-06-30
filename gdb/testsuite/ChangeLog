@@ -1,3 +1,25 @@
+2017-06-30  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR cli/21688
+	* gdb.python/py-cmd.exp (test_python_inline_or_multiline): Add new
+	tests for alias commands and trailing whitespace.
+
+2017-06-30  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR cli/21688
+	* gdb.python/py-cmd.exp (test_python_inline_or_multiline): New
+	procedure.  Call it.
+
+2017-06-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/printcmds.exp: Add tests.
+
+2017-06-28  Doug Gilmore  <Doug.Gilmore@imgtec.com>
+
+	PR gdb/21337
+	* gdb.base/reread-readsym.exp: New file.
+	* gdb.base/reread-readsym.c: New file.
+
 2017-06-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.exp (gdb_test): Using noncapturing parens for the $pattern

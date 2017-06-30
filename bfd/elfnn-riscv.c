@@ -965,7 +965,12 @@ riscv_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      to copy the initial value out of the dynamic object and into the
      runtime process image.  We need to remember the offset into the
      .rel.bss section we are going to use.  */
-  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
+  if (eh->tls_type & ~GOT_NORMAL)
+    {
+      s = htab->sdyntdata;
+      srel = htab->elf.srelbss;
+    }
+  else if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
     {
       s = htab->elf.sdynrelro;
       srel = htab->elf.sreldynrelro;
@@ -980,9 +985,6 @@ riscv_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       srel->size += sizeof (ElfNN_External_Rela);
       h->needs_copy = 1;
     }
-
-  if (eh->tls_type & ~GOT_NORMAL)
-    return _bfd_elf_adjust_dynamic_copy (info, h, htab->sdyntdata);
 
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }

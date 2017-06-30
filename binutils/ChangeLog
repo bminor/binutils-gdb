@@ -1,3 +1,57 @@
+2017-06-30  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21665
+	* objdump.c (disassemble_section): Move check for an overlarge
+	section to just before the allocation of memory.  Do not check
+	section size against file size, but instead use an arbitrary 2Gb
+	limit.  Issue a warning message if the section is too big.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* NEWS: Mention microMIPS XPA support.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* NEWS: Mention microMIPS Release 5 ISA support.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips-xpa-virt-1.d: New test.
+	* testsuite/binutils-all/mips/mips-xpa-virt-2.d: New test.
+	* testsuite/binutils-all/mips/mips-xpa-virt-3.d: New test.
+	* testsuite/binutils-all/mips/mips-xpa-virt-4.d: New test.
+	* testsuite/binutils-all/mips/mips-xpa-virt.s: New test source.
+	* testsuite/binutils-all/mips/mips.exp: Run the new tests.
+
+2017-06-29  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* testsuite/binutils-all/arc/double_store.s: New file.
+	* testsuite/binutils-all/arc/objdump.exp: Tests for disassembler
+	options.
+	(do_objfile): New function.
+	(check_assembly): Likewise.
+
+2017-06-29  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* readelf.c (get_note_type): Add NT_S390_GS_CB and NT_S390_GS_BC.
+
+2017-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objdump.c (dump_relocs_in_section): Cast to ufile_ptr when
+	comparing against bfd_get_file_size return.
+
+2017-06-28  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (merge_gnu_build_notes): Add support for version 2 notes.
+	* readelf.c (print_gnu_build_attribute_name): Likewise.
+
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* readelf.c (get_machine_flags) <E_MIPS_MACH_IAMR2>: New case.
+	(print_mips_isa_ext) <AFL_EXT_INTERAPTIV_MR2>: Likewise.
+	* NEWS: Mention Imagination interAptiv MR2 processor support.
+
 2017-06-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21665

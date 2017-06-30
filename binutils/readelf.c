@@ -481,7 +481,7 @@ print_symbol (signed int width, const char *symbol)
 
   if (width < 0)
     {
-      /* Keep the width positive.  This also helps.  */
+      /* Keep the width positive.  This helps the code below.  */
       width = - width;
       extra_padding = TRUE;
     }
@@ -3334,6 +3334,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case E_MIPS_MACH_OCTEON2: strcat (buf, ", octeon2"); break;
 	    case E_MIPS_MACH_OCTEON3: strcat (buf, ", octeon3"); break;
 	    case E_MIPS_MACH_XLR:  strcat (buf, ", xlr"); break;
+	    case E_MIPS_MACH_IAMR2:  strcat (buf, ", interaptiv-mr2"); break;
 	    case 0:
 	    /* We simply ignore the field in this case to avoid confusion:
 	       MIPS ELF does not specify EF_MIPS_MACH, it is a GNU
@@ -15131,6 +15132,9 @@ print_mips_isa_ext (unsigned int isa_ext)
     case AFL_EXT_LOONGSON_2F:
       fputs ("ST Microelectronics Loongson 2F", stdout);
       break;
+    case AFL_EXT_INTERAPTIV_MR2:
+      fputs ("Imagination interAptiv MR2", stdout);
+      break;
     default:
       fprintf (stdout, "%s (%d)", _("Unknown"), isa_ext);
     }
@@ -16154,6 +16158,10 @@ get_note_type (unsigned e_type)
 	return _("NT_S390_VXRS_LOW (s390 vector registers 0-15 upper half)");
       case NT_S390_VXRS_HIGH:
 	return _("NT_S390_VXRS_HIGH (s390 vector registers 16-31)");
+      case NT_S390_GS_CB:
+	return _("NT_S390_GS_CB (s390 guarded-storage registers)");
+      case NT_S390_GS_BC:
+	return _("NT_S390_GS_BC (s390 guarded-storage broadcast control)");
       case NT_ARM_VFP:
 	return _("NT_ARM_VFP (arm VFP registers)");
       case NT_ARM_TLS:
@@ -17181,13 +17189,23 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
   const char * expected_types;
   const char * name = pnote->namedata;
   const char * text;
-  int          left;
+  signed int   left;
 
   if (name == NULL || pnote->namesz < 2)
     {
       error (_("corrupt name field in GNU build attribute note: size = %ld\n"), pnote->namesz);
       print_symbol (-20, _("  <corrupt name>"));
       return FALSE;
+    }
+
+  left = 20;
+
+  /* Version 2 of the spec adds a "GA" prefix to the name field.  */
+  if (name[0] == 'G' && name[1] == 'A')
+    {
+      printf ("GA");
+      name += 2;
+      left -= 2;
     }
 
   switch ((name_type = * name))
@@ -17197,6 +17215,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     case GNU_BUILD_ATTRIBUTE_TYPE_BOOL_TRUE:
     case GNU_BUILD_ATTRIBUTE_TYPE_BOOL_FALSE:
       printf ("%c", * name);
+      left --;
       break;
     default:
       error (_("unrecognised attribute type in name field: %d\n"), name_type);
@@ -17204,7 +17223,6 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       return FALSE;
     }
 
-  left = 19;
   ++ name;
   text = NULL;
 
@@ -17264,6 +17282,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       else
 	{
 	  static char tmpbuf [128];
+
 	  error (_("unrecognised byte in name field: %d\n"), * name);
 	  sprintf (tmpbuf, _("<unknown:_%d>"), * name);
 	  text = tmpbuf;
@@ -17274,10 +17293,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     }
 
   if (text)
-    {
-      printf ("%s", text);
-      left -= strlen (text);
-    }
+    left -= printf ("%s", text);
 
   if (strchr (expected_types, name_type) == NULL)
     warn (_("attribute does not have an expected type (%c)\n"), name_type);

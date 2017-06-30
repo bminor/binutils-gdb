@@ -1,3 +1,85 @@
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Move "lsa" and "dlsa"
+	entries to the MSA ASE instruction block.
+
+2017-06-30  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Maciej W. Rozycki  <macro@imgtec.com>
+
+	* micromips-opc.c (XPA, XPAVZ): New macros.
+	(micromips_opcodes): Add "mfhc0", "mfhgc0", "mthc0" and
+	"mthgc0".
+
+2017-06-30  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Maciej W. Rozycki  <macro@imgtec.com>
+
+	* micromips-opc.c (I36): New macro.
+	(micromips_opcodes): Add "eretnc".
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* mips-dis.c (mips_calculate_combination_ases): Handle the
+	ASE_XPA_VIRT flag.
+	(parse_mips_ase_option): New function.
+	(parse_mips_dis_option): Factor out ASE option handling to the
+	new function.  Call `mips_calculate_combination_ases'.
+	* mips-opc.c (XPAVZ): New macro.
+	(mips_builtin_opcodes): Correct ISA and ASE flags for "mfhc0",
+	"mfhgc0", "mthc0" and "mthgc0".
+
+2017-06-29  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-dis.c (mips_calculate_combination_ases): New function.
+	(mips_convert_abiflags_ases): Factor out ASE_MIPS16E2_MT
+	calculation to the new function.
+	(set_default_mips_dis_options): Call the new function.
+
+2017-06-29  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* arc-dis.c (parse_disassembler_options): Use
+	FOR_EACH_DISASSEMBLER_OPTION.
+
+2017-06-29  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* arc-dis.c (parse_option): Use disassembler_options_cmp to compare
+	disassembler option strings.
+	(parse_cpu_option): Likewise.
+
+2017-06-28  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-asm.c (aarch64_ins_reglane): Added 4B dotprod.
+	* aarch64-dis.c (aarch64_ext_reglane): Likewise.
+	* aarch64-tbl.h (QL_V3DOT, QL_V2DOT): New.
+	(aarch64_feature_dotprod, DOT_INSN): New.
+	(udot, sdot): New.
+	* aarch64-dis-2.c: Regenerated.
+
+2017-06-28  Jiong Wang  <jiong.wang@arm.com>
+
+	* arm-dis.c (coprocessor_opcodes): New entries for vsdot and vudot.
+
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* mips-formats.h (INT_BIAS): New macro.
+	(INT_ADJ): Redefine in INT_BIAS terms.
+	* mips-dis.c (mips_arch_choices): Add "interaptiv-mr2" entry.
+	(mips_print_save_restore): New function.
+	(print_insn_arg) <OP_SAVE_RESTORE_LIST>: Update comment.
+	(validate_insn_args) <OP_SAVE_RESTORE_LIST>: Remove `abort'
+	call.
+	(print_insn_args): Handle OP_SAVE_RESTORE_LIST.
+	(print_mips16_insn_arg): Call `mips_print_save_restore' for
+	OP_SAVE_RESTORE_LIST handling, factored out from here.
+	* mips-opc.c (decode_mips_operand) <'-'> <'m'>: New case.
+	(RD_31, RD_SP, WR_SP, MOD_SP, IAMR2): New macros.
+	(mips_builtin_opcodes): Add "restore" and "save" entries.
+	* mips16-opc.c (decode_mips16_operand) <'n', 'o'>: New cases.
+	(IAMR2): New macro.
+	(mips16_opcodes): Add "copyw" and "ucopyw" entries.
+
 2017-06-23  Andrew Waterman  <andrew@sifive.com>
 
 	* riscv-opc.c (riscv_opcodes): Mark I-type SLT instruction as an

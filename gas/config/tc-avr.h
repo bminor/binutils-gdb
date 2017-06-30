@@ -220,6 +220,12 @@ extern bfd_boolean avr_allow_local_subtract (expressionS *, expressionS *, segT)
 #define elf_tc_final_processing 	avr_elf_final_processing
 extern void avr_elf_final_processing (void);
 
+#define md_pre_output_hook avr_pre_output_hook ()
+extern void avr_pre_output_hook (void);
+
+#define md_undefined_symbol avr_undefined_symbol
+extern symbolS* avr_undefined_symbol (char*);
+
 #define md_post_relax_hook avr_post_relax_hook ()
 extern void avr_post_relax_hook (void);
 

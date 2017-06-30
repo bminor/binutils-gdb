@@ -1,3 +1,69 @@
+2017-06-30  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR cli/21688
+	* cli/cli-script.c (command_name_equals_not_inline): Remove function.
+	(process_next_line): New variable 'inline_cmd'.
+	Adjust 'if' clauses for "python", "compile" and "guile" to use
+	'command_name_equals' and check for '!inline_cmd'.
+
+2017-06-30  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR cli/21688
+	* cli/cli-script.c (command_name_equals_not_inline): New function.
+	(process_next_line): Adjust 'if' clauses for "python", "compile"
+	and "guile" to use command_name_equals_not_inline.
+
+2017-06-29  Pedro Alves  <palves@redhat.com>
+
+	* completer.c (expression_completer): Call
+	linespec_location_completer instead of location_completer.
+
+2017-06-29  Pedro Alves  <palves@redhat.com>
+
+	* completer.c (expression_completer): Remove code that recomputes
+	'text' from 'word'.
+
+2017-06-29  Yao Qi  <yao.qi@linaro.org>
+
+	* regformats/regdat.sh: Generate code with
+	"ifndef IN_PROCESS_AGENT".
+
+2017-06-28  Pedro Alves  <palves@redhat.com>
+
+	* command.h: Include "common/scoped_restore.h".
+
+2017-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* mi/mi-cmd-break.c (mi_argv_to_format): Use obstack_grow_str
+	instead of obstack_grow.
+
+2017-06-28  Doug Gilmore  <Doug.Gilmore@imgtec.com>
+
+	PR gdb/21337
+	* symfile.c (reread_symbols): Call objfiles_changed just before
+	read_symbols.
+
+2017-06-27  Pedro Alves  <palves@redhat.com>
+
+	* symtab.c (COMPLETION_LIST_ADD_SYMBOL)
+	(MCOMPLETION_LIST_ADD_SYMBOL): Delete macros, replace with ...
+	(completion_list_add_symbol, completion_list_add_msymbol):
+	... these new functions.
+	(add_symtab_completions)
+	(default_make_symbol_completion_list_break_on_1): Adjust.
+
+2017-06-27  Pedro Alves  <palves@redhat.com>
+
+	* objfiles.c (get_objfile_bfd_data): Call bfd_alloc instead of
+	bfd_zalloc.  Call objfile_per_bfd_storage's ctor.
+	(free_objfile_per_bfd_storage): Call objfile_per_bfd_storage's
+	dtor.
+	* objfiles.h (objfile_per_bfd_storage): Add ctor.  Make
+	'storage_obstack' field an auto_obstack.  In-class initialize all
+	non-bitfield fields.  Make minsyms_read bool.
+	* symfile.c (read_symbols): Adjust.
+
 2017-06-27  Alan Hayward  <alan.hayward@arm.com>
 
 	* remote-sim.c (gdbsim_fetch_register): Use byte_vector.

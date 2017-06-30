@@ -513,6 +513,9 @@ mips_arch_create r4000 	64	mips3	{} \
 			{ -march=r4000 -mtune=r4000 } { -mmips:4000 }
 mips_arch_create vr5400	64	mips4	{ ror } \
 			{ -march=vr5400 -mtune=vr5400 } { -mmips:5400 }
+mips_arch_create interaptiv-mr2 32 mips32r3	{} \
+			{ -march=interaptiv-mr2 -mtune=interaptiv-mr2 } \
+			{ -mmips:interaptiv-mr2 }
 mips_arch_create sb1 	64	mips64	{ mips3d oddspreg } \
 			{ -march=sb1 -mtune=sb1 } { -mmips:sb1 } \
 			{ mipsisa64sb1-*-* mipsisa64sb1el-*-* }
@@ -533,6 +536,9 @@ mips_arch_create xlr 	64	mips64	{ oddspreg } \
 mips_arch_create r5900 	64	mips3	{ gpr_ilocks singlefloat nollsc } \
 			{ -march=r5900 -mtune=r5900 } { -mmips:5900 } \
 			{ mipsr5900el-*-* mips64r5900el-*-* }
+mips_arch_create mips16e2-interaptiv-mr2 32 mips16e2-32 {} \
+			{ -march=interaptiv-mr2 -mips16 } \
+			{ -mmips:interaptiv-mr2 }
 
 #
 # And now begin the actual tests!  VxWorks uses RELA rather than REL
@@ -1122,6 +1128,9 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "elf_ase_micromips"
     run_dump_test "elf_ase_micromips-2"
 
+    # Verify that machine markings are handled properly.
+    run_dump_test "elf_mach_interaptiv-mr2"
+
     run_dump_test "mips-gp32-fp32-pic"
     run_dump_test "mips-gp32-fp64-pic"
     run_dump_test "mips-gp64-fp32-pic"
@@ -1376,8 +1385,15 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "mips64-dsp"
     run_dump_test "mips32-mt"
 
-    run_dump_test_arches "save"		[mips_arch_list_matching mips16e-32]
-    run_dump_test_arches "save-err"	[mips_arch_list_matching mips16e-32]
+    run_dump_test_arches "save" [lsort -dictionary -unique [concat \
+				[mips_arch_list_matching mips16e-32] \
+				[mips_arch_list_matching interaptiv-mr2]]]
+    run_dump_test_arches "save-err" [lsort -dictionary -unique [concat \
+				[mips_arch_list_matching mips16e-32] \
+				[mips_arch_list_matching interaptiv-mr2]]]
+    run_dump_test_arches "save-sub" [lsort -dictionary -unique [concat \
+				[mips_arch_list_matching mips1 !micromips] \
+				[mips_arch_list_matching mips16-32]]]
 
     run_dump_test "mips16-dwarf2"
     if $has_newabi {
@@ -1387,6 +1403,9 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "mips16e-jrc"
     run_dump_test "mips16e2-lui"
+    run_dump_test "mips16e2-mt-err"
+    run_dump_test "mips16e2-copy"
+    run_dump_test "mips16e2-copy-err"
 
     run_dump_test "mips16-intermix"
     run_dump_test "mips16-extend"
@@ -1542,8 +1561,10 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "msa-relax"	[mips_arch_list_matching mips32r2 !mips32r6]
     run_dump_test_arches "msa-branch"	[mips_arch_list_matching mips32r2]
 
-    run_dump_test_arches "xpa"		[mips_arch_list_matching mips32r2 !micromips]
-    run_dump_test_arches "r5" "-32"	[mips_arch_list_matching mips32r5 !micromips]
+    run_dump_test_arches "xpa"		[mips_arch_list_matching mips32r2]
+    run_dump_test_arches "xpa-err"	[mips_arch_list_matching mips32r2]
+    run_dump_test_arches "xpa-virt-err"	[mips_arch_list_matching mips32r2]
+    run_dump_test_arches "r5" "-32"	[mips_arch_list_matching mips32r5]
 
     run_dump_test "pcrel-1"
     run_dump_test "pcrel-2"
