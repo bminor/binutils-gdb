@@ -1,3 +1,39 @@
+2017-06-30  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR gas/21683
+	* doc/c-avr.texi (AVR Options) <-mgcc-isr>: Document it.
+	(AVR Pseudo Instructions): New node.
+	* config/tc-avr.h (md_pre_output_hook): Define to avr_pre_output_hook.
+	(md_undefined_symbol): Define to avr_undefined_symbol.
+	(avr_pre_output_hook, avr_undefined_symbol): New protos.
+	* config/tc-avr.c (struc-symbol.h): Include it.
+	(ISR_CHUNK_Done, ISR_CHUNK_Prologue, ISR_CHUNK_Epilogue): New enums.
+	(avr_isr, avr_gccisr_opcode)
+	(avr_no_sreg_hash, avr_no_sreg): New static variables.
+	(avr_opt_s) <have_gccisr>: Add field.
+	(avr_opt): Add initializer for have_gccisr.
+	(enum options) <OPTION_HAVE_GCCISR>: Add enum.
+	(md_longopts) <"mgcc-isr">: Add entry.
+	(md_show_usage): Document -mgcc-isr.
+	(md_parse_option) [OPTION_HAVE_GCCISR]: Handle it.
+	(md_undefined_symbol): Remove.
+	(avr_undefined_symbol, avr_pre_output_hook): New fuctions.
+	(md_begin) <avr_no_sreg_hash, avr_gccisr_opcode>: Initialize them.
+	(avr_operand) <pregno>: Add argument and set *pregno if function
+	is called for a register constraint.
+	[N]: Handle constraint.
+	(avr_operands) <avr_operand>: Pass 5th parameter to calls.
+	[avr_opt.have_gccisr]: Call avr_update_gccisr.  Call
+	avr_gccisr_operands instead of avr_operands.
+	(avr_update_gccisr, avr_emit_insn, avr_patch_gccisr_frag)
+	(avr_gccisr_operands, avr_check_gccisr_done): New static functions.
+	* testsuite/gas/avr/gccisr-01.d: New test.
+	* testsuite/gas/avr/gccisr-01.s: New test.
+	* testsuite/gas/avr/gccisr-02.d: New test.
+	* testsuite/gas/avr/gccisr-02.s: New test.
+	* testsuite/gas/avr/gccisr-03.d: New test.
+	* testsuite/gas/avr/gccisr-03.s: New test.
+
 2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (match_float_constant): Update description.
