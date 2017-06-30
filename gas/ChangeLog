@@ -1,3 +1,9 @@
+2017-06-30  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/micromips@r5.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
 2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
 	    Andrew Bennett  <andrew.bennett@imgtec.com>
 

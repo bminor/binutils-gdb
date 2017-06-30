@@ -1565,7 +1565,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "xpa-err"	[mips_arch_list_matching mips32r2 !micromips]
     run_dump_test_arches "xpa-virt-err" \
 				[mips_arch_list_matching mips32r2 !micromips]
-    run_dump_test_arches "r5" "-32"	[mips_arch_list_matching mips32r5 !micromips]
+    run_dump_test_arches "r5" "-32"	[mips_arch_list_matching mips32r5]
 
     run_dump_test "pcrel-1"
     run_dump_test "pcrel-2"

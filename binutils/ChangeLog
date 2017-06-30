@@ -1,5 +1,9 @@
 2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* NEWS: Mention microMIPS Release 5 ISA support.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/binutils-all/mips/mips-xpa-virt-1.d: New test.
 	* testsuite/binutils-all/mips/mips-xpa-virt-2.d: New test.
 	* testsuite/binutils-all/mips/mips-xpa-virt-3.d: New test.

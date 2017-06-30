@@ -1,3 +1,9 @@
+2017-06-30  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Maciej W. Rozycki  <macro@imgtec.com>
+
+	* micromips-opc.c (I36): New macro.
+	(micromips_opcodes): Add "eretnc".
+
 2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
 	    Andrew Bennett  <andrew.bennett@imgtec.com>
 
