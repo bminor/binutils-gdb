@@ -1,5 +1,9 @@
 2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* NEWS: Mention microMIPS XPA support.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* NEWS: Mention microMIPS Release 5 ISA support.
 
 2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>

@@ -1,5 +1,8 @@
 -*- text -*-
 
+* The MIPS port now supports microMIPS eXtended Physical Addressing (XPA)
+  instructions for assembly and disassembly.
+
 * The MIPS port now supports the microMIPS Release 5 ISA for assembly and
   disassembly.
 

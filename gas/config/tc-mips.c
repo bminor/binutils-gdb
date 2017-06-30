@@ -1762,7 +1762,7 @@ static const struct mips_ase mips_ases[] = {
 
   { "xpa", ASE_XPA, 0,
     OPTION_XPA, OPTION_NO_XPA,
-     2,  2, -1, -1,
+    2, 2, 2, 2,
     -1 },
 
   { "mips16e2", ASE_MIPS16E2, 0,

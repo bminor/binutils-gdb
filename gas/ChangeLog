@@ -1,6 +1,14 @@
 2017-06-30  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (mips_ases): Add microMIPS XPA support.
+	* testsuite/gas/mips/micromips@xpa.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new test.  Enable
+	`xpa-virt-err' test for `micromips'.
+
+2017-06-30  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/micromips@r5.d: New test.
 	* testsuite/gas/mips/mips.exp: Run the new test.
 

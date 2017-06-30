@@ -1,6 +1,13 @@
 2017-06-30  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Maciej W. Rozycki  <macro@imgtec.com>
 
+	* micromips-opc.c (XPA, XPAVZ): New macros.
+	(micromips_opcodes): Add "mfhc0", "mfhgc0", "mthc0" and
+	"mthgc0".
+
+2017-06-30  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Maciej W. Rozycki  <macro@imgtec.com>
+
 	* micromips-opc.c (I36): New macro.
 	(micromips_opcodes): Add "eretnc".
 
