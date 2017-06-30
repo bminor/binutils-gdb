@@ -1,4 +1,13 @@
 2017-06-30  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR cli/21688
+	* cli/cli-script.c (command_name_equals_not_inline): Remove function.
+	(process_next_line): New variable 'inline_cmd'.
+	Adjust 'if' clauses for "python", "compile" and "guile" to use
+	'command_name_equals' and check for '!inline_cmd'.
+
+2017-06-30  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR cli/21688
 	* cli/cli-script.c (command_name_equals_not_inline): New function.

@@ -1,6 +1,12 @@
 2017-06-30  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR cli/21688
+	* gdb.python/py-cmd.exp (test_python_inline_or_multiline): Add new
+	tests for alias commands and trailing whitespace.
+
+2017-06-30  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR cli/21688
 	* gdb.python/py-cmd.exp (test_python_inline_or_multiline): New
 	procedure.  Call it.
 

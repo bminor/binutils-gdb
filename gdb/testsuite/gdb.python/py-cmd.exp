@@ -187,6 +187,8 @@ gdb_test "complete expr_test bar\." \
 # This proc tests PR cli/21688.  The PR is not language-specific, but
 # the easiest way is just to test with Python.
 proc test_python_inline_or_multiline { } {
+    global gdb_prompt
+
     set define_cmd_not_inline {
 	{ "if 1"                 " >$"            "multi-line if 1" }
 	{ "python"               " >$"            "multi-line python command" }
@@ -194,12 +196,43 @@ proc test_python_inline_or_multiline { } {
 	{ "end"                  " >$"            "multi-line first end" }
 	{ "end"                  "hello\r\n"      "multi-line last end" } }
 
+    # This also tests trailing whitespace on the command.
+    set define_cmd_alias_not_inline {
+	{ "if 1"                 " >$"            "multi-line if 1 alias" }
+	{ "py    "               " >$"            "multi-line python command alias" }
+	{ "print ('hello')"      "  >$"           "multi-line print alias" }
+	{ "end"                  " >$"            "multi-line first end alias" }
+	{ "end"                  "hello\r\n"      "multi-line last end alias" } }
+
+    set define_cmd_alias_foo_not_inline {
+	{ "alias foo=python"     "\r\n"           "multi-line alias foo" }
+	{ "if 1"                 " >$"            "multi-line if 1 alias foo" }
+	{ "foo    "              " >$"            "multi-line python command alias foo" }
+	{ "print ('hello')"      "  >$"           "multi-line print alias foo" }
+	{ "end"                  " >$"            "multi-line first end alias foo" }
+	{ "end"                  "hello\r\n"      "multi-line last end alias foo" } }
+
     set define_cmd_inline {
 	{ "if 1"                      " >$"          "inline if 1" }
 	{ "python print ('hello')"    " >$"          "inline python command" }
 	{ "end"                       "hello\r\n"    "inline end" } }
 
-    foreach t [list $define_cmd_not_inline $define_cmd_inline] {
+    set define_cmd_alias_inline {
+	{ "if 1"                      " >$"          "inline if 1 alias" }
+	{ "py print ('hello')"        " >$"          "inline python command alias" }
+	{ "end"                       "hello\r\n"    "inline end alias" } }
+
+    set define_cmd_alias_foo_inline {
+	{ "if 1"                      " >$"          "inline if 1 alias foo" }
+	{ "foo print ('hello')"       " >$"          "inline python command alias foo" }
+	{ "end"                       "hello\r\n"    "inline end alias foo" } }
+
+    foreach t [list $define_cmd_not_inline \
+	       $define_cmd_alias_not_inline \
+	       $define_cmd_alias_foo_not_inline \
+	       $define_cmd_inline \
+	       $define_cmd_alias_inline \
+	       $define_cmd_alias_foo_inline] {
 	foreach l $t {
 	    lassign $l command regex testmsg
 	    gdb_test_multiple "$command" "$testmsg" {
