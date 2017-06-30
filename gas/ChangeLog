@@ -1,3 +1,17 @@
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* config/tc-mips.c (mips_set_ase): Handle the ASE_XPA_VIRT flag.
+	* testsuite/gas/mips/xpa.d: Remove `xpa' from `-M' in `objdump'
+	flags.  Add `-mvirt' to `as' flags.
+	* testsuite/gas/mips/xpa-err.d: New test.
+	* testsuite/gas/mips/xpa-virt-err.d: New test.
+	* testsuite/gas/mips/xpa-err.l: New stderr output.
+	* testsuite/gas/mips/xpa-virt-err.l: New stderr output.
+	* testsuite/gas/mips/xpa-err.s: New test source.
+	* testsuite/gas/mips/xpa-virt-err.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2017-06-29  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/gas/mips/mips16e2@mips16e2-mt-sub.d: Adjust for the

@@ -1,3 +1,8 @@
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* opcode/mips.h (ASE_XPA_VIRT): New macro.
+
 2017-06-29  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* elf/common.h (NT_S390_GS_CB): New macro.

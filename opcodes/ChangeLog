@@ -1,3 +1,15 @@
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* mips-dis.c (mips_calculate_combination_ases): Handle the
+	ASE_XPA_VIRT flag.
+	(parse_mips_ase_option): New function.
+	(parse_mips_dis_option): Factor out ASE option handling to the
+	new function.  Call `mips_calculate_combination_ases'.
+	* mips-opc.c (XPAVZ): New macro.
+	(mips_builtin_opcodes): Correct ISA and ASE flags for "mfhc0",
+	"mfhgc0", "mthc0" and "mthgc0".
+
 2017-06-29  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* mips-dis.c (mips_calculate_combination_ases): New function.

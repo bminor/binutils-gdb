@@ -815,6 +815,8 @@ mips_calculate_combination_ases (unsigned long opcode_ases)
 {
   unsigned long combination_ases = 0;
 
+  if ((opcode_ases & (ASE_XPA | ASE_VIRT)) == (ASE_XPA | ASE_VIRT))
+    combination_ases |= ASE_XPA_VIRT;
   if ((opcode_ases & (ASE_MIPS16E2 | ASE_MT)) == (ASE_MIPS16E2 | ASE_MT))
     combination_ases |= ASE_MIPS16E2_MT;
   return combination_ases;
@@ -892,6 +894,43 @@ set_default_mips_dis_options (struct disassemble_info *info)
   mips_ase |= mips_calculate_combination_ases (mips_ase);
 }
 
+/* Parse an ASE disassembler option and set the corresponding global
+   ASE flag(s).  Return TRUE if successful, FALSE otherwise.  */
+
+static bfd_boolean
+parse_mips_ase_option (const char *option)
+{
+  if (CONST_STRNEQ (option, "msa"))
+    {
+      mips_ase |= ASE_MSA;
+      if ((mips_isa & INSN_ISA_MASK) == ISA_MIPS64R2
+	   || (mips_isa & INSN_ISA_MASK) == ISA_MIPS64R3
+	   || (mips_isa & INSN_ISA_MASK) == ISA_MIPS64R5
+	   || (mips_isa & INSN_ISA_MASK) == ISA_MIPS64R6)
+	  mips_ase |= ASE_MSA64;
+      return TRUE;
+    }
+
+  if (CONST_STRNEQ (option, "virt"))
+    {
+      mips_ase |= ASE_VIRT;
+      if (mips_isa & ISA_MIPS64R2
+	  || mips_isa & ISA_MIPS64R3
+	  || mips_isa & ISA_MIPS64R5
+	  || mips_isa & ISA_MIPS64R6)
+	mips_ase |= ASE_VIRT64;
+      return TRUE;
+    }
+
+  if (CONST_STRNEQ (option, "xpa"))
+    {
+      mips_ase |= ASE_XPA;
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
 static void
 parse_mips_dis_option (const char *option, unsigned int len)
 {
@@ -907,34 +946,11 @@ parse_mips_dis_option (const char *option, unsigned int len)
       return;
     }
 
-  if (CONST_STRNEQ (option, "msa"))
+  if (parse_mips_ase_option (option))
     {
-      mips_ase |= ASE_MSA;
-      if ((mips_isa & INSN_ISA_MASK) == ISA_MIPS64R2
-	   || (mips_isa & INSN_ISA_MASK) == ISA_MIPS64R3
-	   || (mips_isa & INSN_ISA_MASK) == ISA_MIPS64R5
-	   || (mips_isa & INSN_ISA_MASK) == ISA_MIPS64R6)
-	  mips_ase |= ASE_MSA64;
+      mips_ase |= mips_calculate_combination_ases (mips_ase);
       return;
     }
-
-  if (CONST_STRNEQ (option, "virt"))
-    {
-      mips_ase |= ASE_VIRT;
-      if (mips_isa & ISA_MIPS64R2
-	  || mips_isa & ISA_MIPS64R3
-	  || mips_isa & ISA_MIPS64R5
-	  || mips_isa & ISA_MIPS64R6)
-	mips_ase |= ASE_VIRT64;
-      return;
-    }
-
-  if (CONST_STRNEQ (option, "xpa"))
-    {
-      mips_ase |= ASE_XPA;
-      return;
-    }
-
 
   /* Look for the = that delimits the end of the option name.  */
   for (i = 0; i < len; i++)

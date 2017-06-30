@@ -1291,6 +1291,9 @@ static const unsigned int mips_isa_table[] = {
 #define ASE_MIPS16E2		0x00008000
 /* MIPS16e2 MT ASE instructions.  */
 #define ASE_MIPS16E2_MT		0x00010000
+/* The Virtualization ASE has eXtended Physical Addressing (XPA)
+   instructions which are only valid when both ASEs are enabled.  */
+#define ASE_XPA_VIRT		0x00020000
 
 /* MIPS ISA defines, use instead of hardcoding ISA level.  */
 
