@@ -1,3 +1,8 @@
+2017-07-01  Eli Zaretskii  <eliz@gnu.org>
+
+	* .dir-locals.el: Automatically switch to C-style comments in
+	versions of Emacs that support the feature.
+
 2017-06-30  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
