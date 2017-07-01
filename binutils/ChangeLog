@@ -1,3 +1,16 @@
+2017-07-01  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/21665
+	* objdump.c (strtab): Make var a bfd_byte*.
+	(disassemble_section): Don't limit malloc size.  Instead, use
+	bfd_malloc_and_get_section.
+	(read_section_stabs): Use bfd_malloc_and_get_section.  Return
+	bfd_byte*.
+	(find_stabs_section): Remove now unnecessary cast.
+	* objcopy.c (copy_object): Use bfd_malloc_and_get_section.  Free
+	contents on error return.
+	* nlmconv.c (copy_sections): Use bfd_malloc_and_get_section.
+
 2017-06-30  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/21665
