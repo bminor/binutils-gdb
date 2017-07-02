@@ -6060,7 +6060,8 @@ process_section_headers (FILE * file)
 	request_dump_bynumber (i, DEBUG_DUMP);
       else if (do_debug_frames && streq (name, ".eh_frame"))
 	request_dump_bynumber (i, DEBUG_DUMP);
-      else if (do_gdb_index && streq (name, ".gdb_index"))
+      else if (do_gdb_index && (streq (name, ".gdb_index")
+				|| streq (name, ".debug_names")))
 	request_dump_bynumber (i, DEBUG_DUMP);
       /* Trace sections for Itanium VMS.  */
       else if ((do_debugging || do_trace_info || do_trace_abbrevs

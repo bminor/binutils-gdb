@@ -1,3 +1,11 @@
+2017-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf.c: Include assert.h.
+	(MAX, MIN, get_IDX_name, display_debug_names): New.
+	(debug_displays): Add .debug_names.
+	* dwarf.h: (enum dwarf_section_display_enum): Add debug_names.
+	* readelf.c (process_section_headers): Add ".debug_names".
+
 2017-07-01  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/21665
