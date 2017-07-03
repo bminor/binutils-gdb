@@ -1,3 +1,8 @@
+2017-07-04  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_symbol): Remove the
+	sanity check at the head of this function.
+
 2017-07-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2.c (struct dwarf2_debug): Add fields dwarf_line_str_buffer and
