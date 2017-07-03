@@ -1,3 +1,8 @@
+2017-07-03  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
+
+        * elfxx-sparc.c (_bfd_sparc_elf_finish_dynamic_symbol): Remove the
+        abort statement that was put for symbols that are not dynamic.
+
 2017-07-03  Tristan Gingold  <gingold@adacore.com>
 
 	* po/bfd.pot: Regenerate

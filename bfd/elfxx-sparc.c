@@ -4502,13 +4502,6 @@ _bfd_sparc_elf_finish_dynamic_symbol (bfd *output_bfd,
 
   eh = (struct _bfd_sparc_elf_link_hash_entry *) h;
 
-  /* Abort if the symbol is not dynamic in PIC */
-  if (h->dynindx == -1
-      && !h->forced_local
-      && h->root.type != bfd_link_hash_undefweak
-      && bfd_link_pic (info))
-    abort();
-
   /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
      resolved undefined weak symbols in executable so that their
      references have value 0 at run-time.  */
