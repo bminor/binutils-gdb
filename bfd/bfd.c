@@ -1363,7 +1363,7 @@ bfd_scan_vma (const char *string, const char **end, int base)
   if (sizeof (bfd_vma) <= sizeof (unsigned long))
     return strtoul (string, (char **) end, base);
 
-#ifdef HAVE_STRTOULL
+#if defined (HAVE_STRTOULL) && defined (HAVE_LONG_LONG)
   if (sizeof (bfd_vma) <= sizeof (unsigned long long))
     return strtoull (string, (char **) end, base);
 #endif

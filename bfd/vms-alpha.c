@@ -514,7 +514,7 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
       struct vms_eisd *eisd;
       unsigned int rec_size;
       unsigned int size;
-      unsigned long long vaddr;
+      bfd_uint64_t vaddr;
       unsigned int flags;
       unsigned int vbn;
       char *name = NULL;
