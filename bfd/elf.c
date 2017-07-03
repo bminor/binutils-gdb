@@ -1669,7 +1669,7 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
 
 	      if (!strcmp (name, ""))
 		{
-		  sprintf (ab, "0x%lx", (unsigned long) dyn.d_tag);
+		  sprintf (ab, "%#" BFD_VMA_FMT "x", dyn.d_tag);
 		  name = ab;
 		}
 	      break;
@@ -1879,7 +1879,7 @@ bfd_elf_print_symbol (bfd *abfd,
     case bfd_print_symbol_more:
       fprintf (file, "elf ");
       bfd_fprintf_vma (abfd, file, symbol->value);
-      fprintf (file, " %lx", (unsigned long) symbol->flags);
+      fprintf (file, " %x", symbol->flags);
       break;
     case bfd_print_symbol_all:
       {
@@ -6426,8 +6426,8 @@ _bfd_elf_symbol_from_bfd_symbol (bfd *abfd, asymbol **asym_ptr_ptr)
 #if DEBUG & 4
   {
     fprintf (stderr,
-	     "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = 0x%.8lx\n",
-	     (long) asym_ptr, asym_ptr->name, idx, (long) flags);
+	     "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = 0x%.8x\n",
+	     (long) asym_ptr, asym_ptr->name, idx, flags);
     fflush (stderr);
   }
 #endif

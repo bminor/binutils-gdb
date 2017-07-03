@@ -2849,7 +2849,7 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
     free (buffer);
 
   if (error_message)
-    _bfd_error_handler (error_message, ibfd, APUINFO_SECTION_NAME);
+    _bfd_error_handler (error_message, APUINFO_SECTION_NAME, ibfd);
 }
 
 /* Prevent the output section from accumulating the input sections'
@@ -4906,9 +4906,9 @@ ppc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  error = TRUE;
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: uses different e_flags (0x%lx) fields "
-	       "than previous modules (0x%lx)"),
-	     ibfd, (long) new_flags, (long) old_flags);
+	    (_("%B: uses different e_flags (%#x) fields "
+	       "than previous modules (%#x)"),
+	     ibfd, new_flags, old_flags);
 	}
 
       if (error)
