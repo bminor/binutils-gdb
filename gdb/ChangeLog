@@ -1,3 +1,7 @@
+2017-07-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* buffer.h (buffer_finish): Fix spelling mistakes.
+
 2017-07-01  Eli Zaretskii  <eliz@gnu.org>
 
 	* .dir-locals.el: Automatically switch to C-style comments in
