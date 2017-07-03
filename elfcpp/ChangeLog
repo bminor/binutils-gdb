@@ -1,6 +1,7 @@
 2017-07-03  Alan Modra  <amodra@gmail.com>
 
-	* dwarf.h (DW_FIRST_IDX, DW_IDX, DW_IDX_DUP, DW_END_IDX): Define.
+	* dwarf.h (DW_FIRST_IDX, DW_IDX, DW_IDX_DUP, DW_END_IDX): Define,
+	and undefine after using.
 
 2017-06-21  Alan Modra  <amodra@gmail.com>
 

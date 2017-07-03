@@ -110,6 +110,11 @@ namespace elfcpp
 #undef DW_CFA
 #undef DW_END_CFA
 
+#undef DW_FIRST_IDX
+#undef DW_IDX
+#undef DW_IDX_DUP
+#undef DW_END_IDX
+
 // Frame unwind information.
 
 enum DW_EH_PE
