@@ -74,6 +74,12 @@ namespace elfcpp
 #define DW_CFA(name, value) , name = value
 #define DW_END_CFA };
 
+#define DW_FIRST_IDX(name, value) enum dwarf_name_index_attribute { \
+  name = value
+#define DW_IDX(name, value) , name = value
+#define DW_IDX_DUP(name, value) , name = value
+#define DW_END_IDX };
+
 #include "dwarf2.def"
 
 #undef DW_FIRST_TAG

@@ -1,3 +1,7 @@
+2017-07-03  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.h (DW_FIRST_IDX, DW_IDX, DW_IDX_DUP, DW_END_IDX): Define.
+
 2017-06-21  Alan Modra  <amodra@gmail.com>
 
 	* elfcpp.h (DT_PPC64_OPT): Define.
