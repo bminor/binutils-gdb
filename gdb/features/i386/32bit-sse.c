@@ -8,7 +8,7 @@ create_feature_i386_32bit_sse (struct target_desc *result, long regnum)
 {
   struct tdesc_feature *feature;
 
-  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.sse");
+  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.sse", "32bit-sse.xml");
   struct tdesc_type *field_type;
   field_type = tdesc_named_type (feature, "ieee_single");
   tdesc_create_vector (feature, "v4f", field_type, 4);

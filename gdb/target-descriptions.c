@@ -1747,7 +1747,8 @@ tdesc_add_enum_value (struct tdesc_type *type, int value,
 /* See arch/tdesc.h.  */
 
 struct tdesc_feature *
-tdesc_create_feature (struct target_desc *tdesc, const char *name)
+tdesc_create_feature (struct target_desc *tdesc, const char *name,
+		      const char *xml)
 {
   struct tdesc_feature *new_feature = new tdesc_feature (name);
 
@@ -2199,8 +2200,10 @@ public:
 
     printf_unfiltered ("{\n");
     printf_unfiltered ("  struct tdesc_feature *feature;\n");
-    printf_unfiltered ("\n  feature = tdesc_create_feature (result, \"%s\");\n",
-		       e->name);
+
+    printf_unfiltered
+      ("\n  feature = tdesc_create_feature (result, \"%s\", \"%s\");\n",
+       e->name, lbasename (m_filename_after_features.c_str ()));
   }
 
   void visit_post (const tdesc_feature *e) override
