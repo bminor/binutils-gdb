@@ -2394,8 +2394,8 @@ elf_link_read_relocs_from_section (bfd *abfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: bad reloc symbol index (0x%lx >= 0x%lx)"
-		   " for offset 0x%lx in section `%A'"),
+		(_("%B: bad reloc symbol index (%#lx >= %#lx)"
+		   " for offset %#Lx in section `%A'"),
 		 abfd, (unsigned long) r_symndx, (unsigned long) nsyms,
 		 irela->r_offset, sec);
 	      bfd_set_error (bfd_error_bad_value);
@@ -2406,8 +2406,8 @@ elf_link_read_relocs_from_section (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: non-zero symbol index (0x%lx)"
-	       " for offset 0x%lx in section `%A'"
+	    (_("%B: non-zero symbol index (%#lx)"
+	       " for offset %#Lx in section `%A'"
 	       " when the object file has no symbol table"),
 	     abfd, (unsigned long) r_symndx, (unsigned long) nsyms,
 	     irela->r_offset, sec);
@@ -4752,9 +4752,8 @@ error_free_dyn:
 		_bfd_error_handler
 		  /* xgettext:c-format */
 		  (_("Warning: size of symbol `%s' changed"
-		     " from %lu in %B to %lu in %B"),
-		   name, (unsigned long) h->size, old_bfd,
-		   (unsigned long) isym->st_size, abfd);
+		     " from %Lu in %B to %Lu in %B"),
+		   name, h->size, old_bfd, isym->st_size, abfd);
 
 	      h->size = isym->st_size;
 	    }
@@ -10477,14 +10476,11 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		     we do not seg fault.  */
 		  if (h == NULL)
 		    {
-		      char buffer [32];
-
-		      sprintf_vma (buffer, rel->r_info);
 		      _bfd_error_handler
 			/* xgettext:c-format */
-			(_("error: %B contains a reloc (0x%s) for section %A "
+			(_("error: %B contains a reloc (%#Lx) for section %A "
 			   "that references a non-existent global symbol"),
-			 input_bfd, buffer, o);
+			 input_bfd, rel->r_info, o);
 		      bfd_set_error (bfd_error_bad_value);
 		      return FALSE;
 		    }
@@ -13422,8 +13418,8 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
     }
 
   /* xgettext:c-format */
-  _bfd_error_handler (_("%B: %A+%lu: No symbol found for INHERIT"),
-		      abfd, sec, (unsigned long) offset);
+  _bfd_error_handler (_("%B: %A+%#Lx: No symbol found for INHERIT"),
+		      abfd, sec, offset);
   bfd_set_error (bfd_error_invalid_operation);
   return FALSE;
 

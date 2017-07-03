@@ -1,5 +1,29 @@
 2017-07-03  Alan Modra  <amodra@gmail.com>
 
+	* bfd.c (_doprnt): Rewrite "ll" and "L" modifiers to "I64" for
+	__MSVCRT__.  Support "L" modifier for bfd_vma.  Formatting.
+	* elf.c (setup_group): Use "Lx" to print sh_size.
+	(_bfd_elf_setup_sections): Remove unnecessary cast and print
+	unknown section type in hex.
+	(copy_special_section_fields): Style fix.
+	(bfd_section_from_shdr): Correct format for sh_link.  Use a
+	common error message for all the variants of unrecognized
+	section types.
+	(assign_file_positions_for_load_sections): Use "Lx" for lma
+	adjust error message.
+	(assign_file_positions_for_non_load_sections): Formatting.
+	(rewrite_elf_program_header): Formatting.  Use "Lx" for
+	bfd_vma values in error messages.
+	* elfcode.h (elf_slurp_reloc_table_from_section): Cast
+	ELF_R_SYM value to type expected by format.
+	* elflink.c (elf_link_read_relocs_from_section): Use "Lx"
+	in error messages.
+	(elf_link_add_object_symbols): Use "Lu" for symbol sizes.
+	(elf_link_input_bfd): Use "Lx" for r_info.
+	(bfd_elf_gc_record_vtinherit): Use "Lx" for offset.
+
+2017-07-03  Alan Modra  <amodra@gmail.com>
+
 	* bfd.c (bfd_scan_vma): Don't use long long unless HAVE_LONG_LONG.
 	* coff-rs6000.c (FMT20): Handle hosts with 64-bit long and
 	Microsoft C library variant of long long format specifier.

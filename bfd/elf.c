@@ -658,7 +658,7 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		      _bfd_error_handler
 			/* xgettext:c-format */
 			(_("%B: corrupt size field in group section"
-			   " header: 0x%lx"), abfd, shdr->sh_size);
+			   " header: %#Lx"), abfd, shdr->sh_size);
 		      bfd_set_error (bfd_error_bad_value);
 		      -- num_group;
 		      continue;
@@ -673,7 +673,7 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		      _bfd_error_handler
 			/* xgettext:c-format */
 			(_("%B: invalid size field in group section"
-			   " header: 0x%lx"), abfd, shdr->sh_size);
+			   " header: %#Lx"), abfd, shdr->sh_size);
 		      bfd_set_error (bfd_error_bad_value);
 		      -- num_group;
 		      /* PR 17510: If the group contents are even
@@ -911,9 +911,9 @@ _bfd_elf_setup_sections (bfd *abfd)
 	    /* There are some unknown sections in the group.  */
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B: unknown [%d] section `%s' in group [%A]"),
+	      (_("%B: unknown type [%#x] section `%s' in group [%A]"),
 	       abfd,
-	       (unsigned int) idx->shdr->sh_type,
+	       idx->shdr->sh_type,
 	       bfd_elf_string_from_elf_section (abfd,
 						(elf_elfheader (abfd)
 						 ->e_shstrndx),
@@ -1368,7 +1368,7 @@ copy_special_section_fields (const bfd *ibfd,
       /* See PR 20931 for a reproducer.  */
       if (iheader->sh_link >= elf_numsections (ibfd))
 	{
-	  (* _bfd_error_handler)
+	  _bfd_error_handler
 	    /* xgettext:c-format */
 	    (_("%B: Invalid sh_link field (%d) in section number %d"),
 	     ibfd, iheader->sh_link, secnum);
@@ -1384,7 +1384,7 @@ copy_special_section_fields (const bfd *ibfd,
       else
 	/* FIXME: Should we install iheader->sh_link
 	   if we could not find a match ?  */
-	(* _bfd_error_handler)
+	_bfd_error_handler
 	  /* xgettext:c-format */
 	  (_("%B: Failed to find link section for section %d"), obfd, secnum);
     }
@@ -1411,7 +1411,7 @@ copy_special_section_fields (const bfd *ibfd,
 	  changed = TRUE;
 	}
       else
-	(* _bfd_error_handler)
+	_bfd_error_handler
 	  /* xgettext:c-format */
 	  (_("%B: Failed to find info section for section %d"), obfd, secnum);
     }
@@ -2301,7 +2301,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B: invalid link %lu for reloc section %s (index %u)"),
+	      (_("%B: invalid link %u for reloc section %s (index %u)"),
 	       abfd, hdr->sh_link, name, shindex);
 	    ret = _bfd_elf_make_section_from_shdr (abfd, hdr, name,
 						   shindex);
@@ -2460,9 +2460,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	       for applications?  */
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B: don't know how to handle allocated, application "
-		 "specific section `%s' [0x%8x]"),
-	       abfd, name, hdr->sh_type);
+	      (_("%B: unknown type [%#x] section `%s'"),
+	       abfd, hdr->sh_type, name);
 	  else
 	    {
 	      /* Allow sections reserved for applications.  */
@@ -2476,9 +2475,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	/* FIXME: We should handle this section.  */
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("%B: don't know how to handle processor specific section "
-	     "`%s' [0x%8x]"),
-	   abfd, name, hdr->sh_type);
+	  (_("%B: unknown type [%#x] section `%s'"),
+	   abfd, hdr->sh_type, name);
       else if (hdr->sh_type >= SHT_LOOS && hdr->sh_type <= SHT_HIOS)
 	{
 	  /* Unrecognised OS-specific sections.  */
@@ -2488,9 +2486,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	       be rejected with an error message.  */
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B: don't know how to handle OS specific section "
-		 "`%s' [0x%8x]"),
-	       abfd, name, hdr->sh_type);
+	      (_("%B: unknown type [%#x] section `%s'"),
+	       abfd, hdr->sh_type, name);
 	  else
 	    {
 	      /* Otherwise it should be processed.  */
@@ -2502,8 +2499,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	/* FIXME: We should handle this section.  */
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("%B: don't know how to handle section `%s' [0x%8x]"),
-	   abfd, name, hdr->sh_type);
+	  (_("%B: unknown type [%#x] section `%s'"),
+	   abfd, hdr->sh_type, name);
 
       goto fail;
     }
@@ -5514,8 +5511,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: section %A lma %#lx adjusted to %#lx"), abfd, sec,
-		     (unsigned long) s_start, (unsigned long) p_end);
+		    (_("%B: section %A lma %#Lx adjusted to %#Lx"),
+		     abfd, sec, s_start, p_end);
 		  adjust = 0;
 		  sec->lma = p_end;
 		}
@@ -5897,8 +5894,9 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		{
 		  /* PR 17512: file: 2195325e.  */
 		  _bfd_error_handler
-		    (_("%B: error: non-load segment %d includes file header and/or program header"),
-		     abfd, (int)(p - phdrs));
+		    (_("%B: error: non-load segment %d includes file header "
+		       "and/or program header"),
+		     abfd, (int) (p - phdrs));
 		  return FALSE;
 		}
 
@@ -6760,8 +6758,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	  if (segment->p_type == PT_LOAD
 	      && (segment->p_filesz > 0 || segment->p_memsz == 0))
 	    /* xgettext:c-format */
-	    _bfd_error_handler (_("\
-%B: warning: Empty loadable segment detected at vaddr=0x%.8x, is this intentional ?"),
+	    _bfd_error_handler (_("%B: warning: Empty loadable segment detected"
+				  " at vaddr=%#Lx, is this intentional?"),
 				ibfd, segment->p_vaddr);
 
 	  map->count = 0;
@@ -7374,9 +7372,9 @@ rewrite:
 	    /* PR 17512: file: f17299af.  */
 	    if (segment->p_align > (bfd_vma) 1 << ((sizeof (bfd_vma) * 8) - 2))
 	      /* xgettext:c-format */
-	      _bfd_error_handler (_("\
-%B: warning: segment alignment of 0x%llx is too large"),
-				  ibfd, (long long) segment->p_align);
+	      _bfd_error_handler (_("%B: warning: segment alignment of %#Lx"
+				    " is too large"),
+				  ibfd, segment->p_align);
 	    else
 	      maxpagesize = segment->p_align;
 	  }
