@@ -49,8 +49,20 @@ struct target_desc : tdesc_feature
   /* Defines what to return when looking for the "target.xml" file in
      response to qXfer:features:read.  Its contents can either be
      verbatim XML code (prefixed with a '@') or else the name of the
-     actual XML file to be used in place of "target.xml".  */
+     actual XML file to be used in place of "target.xml".
+
+     It can be NULL, then, its content is got from the following three
+     fields features, arch, and osabi in tdesc_get_features_xml.  */
   const char *xmltarget = NULL;
+
+  /* XML features in this target description.  */
+  VEC (char_ptr) *features = NULL;
+
+  /* The value of <architecture> element in the XML, replying GDB.  */
+  const char *arch = NULL;
+
+  /* The value of <osabi> element in the XML, replying GDB.  */
+  const char *osabi = NULL;
 
 public:
   target_desc ()
@@ -65,6 +77,15 @@ public:
     for (i = 0; VEC_iterate (tdesc_reg_p, reg_defs, i, reg); i++)
       xfree (reg);
     VEC_free (tdesc_reg_p, reg_defs);
+
+    xfree ((char *) arch);
+    xfree ((char *) osabi);
+
+    char *f;
+
+    for (i = 0; VEC_iterate (char_ptr, features, i, f); i++)
+      xfree (f);
+    VEC_free (char_ptr, features);
   }
 
   bool operator== (const target_desc &other) const
@@ -96,9 +117,6 @@ public:
     if (other.expedite_regs[i] != NULL)
       return false;
 
-    if (strcmp (xmltarget, other.xmltarget) != 0)
-      return false;
-
     return true;
   }
 
@@ -122,5 +140,13 @@ void init_target_desc (struct target_desc *tdesc);
    NULL.  */
 
 const struct target_desc *current_target_desc (void);
+
+#ifndef IN_PROCESS_AGENT
+void set_tdesc_architecture (struct target_desc *target_desc,
+			     const char *name);
+void set_tdesc_osabi (struct target_desc *target_desc, const char *name);
+
+const char *tdesc_get_features_xml (struct target_desc *tdesc);
+#endif
 
 #endif /* TDESC_H */

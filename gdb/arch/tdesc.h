@@ -30,7 +30,9 @@ struct tdesc_type *tdesc_named_type (const struct tdesc_feature *feature,
 
 /* Return the created feature named NAME in target description TDESC.  */
 struct tdesc_feature *tdesc_create_feature (struct target_desc *tdesc,
-					    const char *name);
+					    const char *name,
+					    const char *xml = nullptr);
+
 
 /* Return the created vector tdesc_type named NAME in FEATURE.  */
 struct tdesc_type *tdesc_create_vector (struct tdesc_feature *feature,
