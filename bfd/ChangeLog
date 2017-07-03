@@ -1,3 +1,7 @@
+2017-07-03  Tristan Gingold  <gingold@adacore.com>
+
+	* po/bfd.pot: Regenerate
+
 2017-07-03  Alan Modra  <amodra@gmail.com>
 
 	* bfd.c (_doprnt): Rewrite "ll" and "L" modifiers to "I64" for
