@@ -1,3 +1,10 @@
+2017-07-03  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Invoke AC_CHECK_TYPES for long long.  Invoke
+	AC_TYPE_LONG_DOUBLE.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2017-06-29  Andrew Waterman  <andrew@sifive.com>
 
 	* elfnn-riscv.c (riscv_elf_adjust_dynamic_symbol): Fix TLS copy
