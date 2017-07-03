@@ -1,3 +1,14 @@
+2017-07-03  Alan Modra  <amodra@gmail.com>
+
+	* strings.c (filename_and_size_t): Delete.
+	(strings_a_section): Don't check section size against file size.
+	Use bdf_malloc_and_get_section.  Report an error on failures.
+	Replace arg param with filename and got_a_section param.
+	(got_a_section): Move to..
+	(strings_object_file): ..an auto var here.  Iterate over sections
+	rather than calling bfd_map_over_sections.  Adjust strings_a_section
+	call.
+
 2017-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf.c: Include assert.h.
