@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.29:
+
 * Add support for ELF SHF_GNU_MBIND.
 
 * Add support for the WebAssembly file format and wasm32 ELF conversion.

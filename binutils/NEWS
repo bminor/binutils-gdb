@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.29:
+
 * The MIPS port now supports microMIPS eXtended Physical Addressing (XPA)
   instructions for assembly and disassembly.
 
