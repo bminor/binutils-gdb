@@ -1,3 +1,22 @@
+2017-07-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2.c (struct dwarf2_debug): Add fields dwarf_line_str_buffer and
+	dwarf_line_str_size.
+	(struct attr_abbrev): Add field implicit_const.
+	(dwarf_debug_sections): Add .debug_line_str.
+	(enum dwarf_debug_section_enum): Add debug_line_str and debug_max.
+	(dwarf_debug_section_assert): Add static assertion.
+	(read_indirect_line_string): New.
+	(read_abbrevs): Support DW_FORM_implicit_const.
+	(is_str_attr): Support DW_FORM_line_strp.
+	(read_attribute_value): Support DW_FORM_line_strp and
+	DW_FORM_implicit_const.
+	(read_attribute): Support DW_FORM_implicit_const.
+	(line_info_add_include_dir, line_info_add_include_dir_stub):
+	(line_info_add_file_name, read_formatted_entries): New.
+	(decode_line_info, parse_comp_unit): Support DWARF 5.
+	(_bfd_dwarf2_cleanup_debug_info): Free dwarf_line_str_buffer.
+
 2017-07-03  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
 
         * elfxx-sparc.c (_bfd_sparc_elf_finish_dynamic_symbol): Remove the
