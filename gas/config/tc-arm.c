@@ -9142,6 +9142,11 @@ do_vmrs (void)
       return;
     }
 
+  /* MVFR2 is only valid at ARMv8-A.  */
+  if (inst.operands[1].reg == 5)
+    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		_(BAD_FPU));
+
   /* APSR_ sets isvec. All other refs to PC are illegal.  */
   if (!inst.operands[0].isvec && Rt == REG_PC)
     {
@@ -9167,6 +9172,11 @@ do_vmsr (void)
       inst.error = BAD_PC;
       return;
     }
+
+  /* MVFR2 is only valid for ARMv8-A.  */
+  if (inst.operands[0].reg == 5)
+    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		_(BAD_FPU));
 
   /* If we get through parsing the register name, we just insert the number
      generated into the instruction without further validation.  */
@@ -18910,6 +18920,7 @@ static const struct reg_entry reg_names[] =
   REGDEF(FPINST,9,VFC), REGDEF(FPINST2,10,VFC),
   REGDEF(mvfr0,7,VFC), REGDEF(mvfr1,6,VFC),
   REGDEF(MVFR0,7,VFC), REGDEF(MVFR1,6,VFC),
+  REGDEF(mvfr2,5,VFC), REGDEF(MVFR2,5,VFC),
 
   /* Maverick DSP coprocessor registers.  */
   REGSET(mvf,MVF),  REGSET(mvd,MVD),  REGSET(mvfx,MVFX),  REGSET(mvdx,MVDX),
