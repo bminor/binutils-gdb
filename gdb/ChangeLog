@@ -1,3 +1,14 @@
+2017-07-04  Pedro Alves  <palves@redhat.com>
+
+	* gdbtypes.c (recursive_dump_type): Don't reference TYPE_STATIC.
+	* gdbtypes.h (TYPE_STATIC): Delete.
+	(struct fn_field) <is_public, is_abstract, is_static, is_final,
+	is_synchronized, is_native>: Delete.
+	<dummy>: Bump.
+	(TYPE_FN_FIELD_PUBLIC, TYPE_FN_FIELD_STATIC, TYPE_FN_FIELD_FINAL)
+	(TYPE_FN_FIELD_SYNCHRONIZED, TYPE_FN_FIELD_NATIVE)
+	(TYPE_FN_FIELD_ABSTRACT): Delete.
+
 2017-07-03  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* buffer.h (buffer_finish): Fix spelling mistakes.
