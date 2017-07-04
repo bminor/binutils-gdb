@@ -114,3 +114,8 @@
 	vcvtb.f64.f16	d16, s1
 	vcvtt.f64.f16	d15, s30
 	vcvtb.f64.f16	d31, s31
+	vmrs		r9, MVFR2
+	vmsr		MVFR2, r7
+	vmrs		r4, mvfr2
+	vmsr		mvfr2, r5
+

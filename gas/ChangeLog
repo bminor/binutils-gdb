@@ -1,3 +1,15 @@
+2017-04-05  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	Backport from mainline
+	2017-04-04  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+	* config/tc-arm.c (arm_regs): Add MVFR2.
+        (do_vmrs): Constraint for MVFR2 and armv8.
+        (do_vmsr): Likewise.
+        * testsuite/gas/arm/armv8-a+fp.d: Update.
+        * testsuite/gas/arm/armv8-a+fp.s: Likewise.
+        * testsuite/gas/arm/vfp-bad.s: Likewise.
+        * testsuite/gas/arm/vfp-bad.l: Likewise.
+
 2017-06-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	Backport from mainline

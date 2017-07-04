@@ -1,3 +1,9 @@
+2017-07-05  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	Backport from mainline
+	2017-07-04  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+	* arm-dis.c: Support MVFR2 in disassembly with vmrs and vmsr.
+
 2017-05-01  Michael Clark  <michaeljclark@mac.com>
 
 	* riscv-opc.c (riscv_opcodes) <call>: Use RA not T1 as a temporary
