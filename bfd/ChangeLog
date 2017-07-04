@@ -1,3 +1,9 @@
+2017-08-17  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	PR ld/18841
+	* elfnn-aarch64.c (elfNN_aarch64_reloc_type_class): Return
+	reloc_class_ifunc for ifunc symbols.
+
 2017-08-11  Nick Clifton  <nickc@redhat.com>
 
 	PR 21884
