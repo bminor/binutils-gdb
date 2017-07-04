@@ -11,16 +11,6 @@
 	* testsuite/gas/arm/thumb2_ldr_immediate_highregs_armv6t2.d: Update
 	expected disassembly.
 
-2017-06-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
-
-	Backport from mainline
-	2017-05-08  Thomas Preud'homme  <thomas.preudhomme@arm.com>
-
-	* testsuite/ld-arm/arm-elf.exp
-	(Secure gateway import library generation): Check e_type field
-	of import library and executable produced.
-	* testsuite/ld-arm/cmse-implib.type: Expectations for e_type field.
-
 2017-06-05  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
