@@ -63,6 +63,39 @@ extern const struct target_desc *tdesc_i386_mpx_linux;
 
 static struct target_desc *i386_tdescs[X86_TDESC_LAST] = { };
 
+#if defined GDB_SELF_TEST && !defined IN_PROCESS_AGENT
+#include "selftest.h"
+
+namespace selftests {
+namespace tdesc {
+static void
+i386_tdesc_test ()
+{
+  struct
+  {
+    unsigned int mask;
+    const target_desc *tdesc;
+  } tdesc_tests[] = {
+    { X86_XSTATE_X87, tdesc_i386_mmx_linux },
+    { X86_XSTATE_SSE_MASK, tdesc_i386_linux },
+    { X86_XSTATE_AVX_MASK, tdesc_i386_avx_linux },
+    { X86_XSTATE_MPX_MASK, tdesc_i386_mpx_linux },
+    { X86_XSTATE_AVX_MPX_MASK, tdesc_i386_avx_mpx_linux },
+    { X86_XSTATE_AVX_AVX512_MASK, tdesc_i386_avx_avx512_linux },
+    { X86_XSTATE_AVX_MPX_AVX512_PKU_MASK, tdesc_i386_avx_mpx_avx512_pku_linux }
+  };
+
+  for (auto &elem : tdesc_tests)
+    {
+      const target_desc *tdesc = i386_linux_read_description (elem.mask);
+
+      SELF_CHECK (*tdesc == *elem.tdesc);
+    }
+}
+}
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
+
 void
 initialize_low_tdesc ()
 {
@@ -74,6 +107,10 @@ initialize_low_tdesc ()
   init_registers_i386_avx_mpx_linux ();
   init_registers_i386_avx_avx512_linux ();
   init_registers_i386_avx_mpx_avx512_pku_linux ();
+
+#if GDB_SELF_TEST && !defined IN_PROCESS_AGENT
+  selftests::register_test (selftests::tdesc::i386_tdesc_test);
+#endif
 #endif
 }
 
