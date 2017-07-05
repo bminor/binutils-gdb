@@ -603,4 +603,10 @@ Disassembly of section .text:
  +[a-f0-9]+:	f6 c9 01             	test   \$(0x)?0*1,%cl
  +[a-f0-9]+:	66 f7 c9 02 00       	test   \$(0x)?0*2,%cx
  +[a-f0-9]+:	f7 c9 04 00 00 00    	test   \$(0x)?0*4,%ecx
+ +[a-f0-9]+:	c0 f0 02             	shl    \$0x2,%al
+ +[a-f0-9]+:	c1 f0 01             	shl    \$0x1,%eax
+ +[a-f0-9]+:	d0 f0                	shl    %al
+ +[a-f0-9]+:	d1 f0                	shl    %eax
+ +[a-f0-9]+:	d2 f0                	shl    %cl,%al
+ +[a-f0-9]+:	d3 f0                	shl    %cl,%eax
 #pass

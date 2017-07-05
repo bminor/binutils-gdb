@@ -1,3 +1,10 @@
+2017-07-05  Borislav Petkov  <bp@suse.de>
+
+	* testsuite/gas/i386/opcode.s: Add tests for ModRM.reg == 6 variants.
+	* testsuite/gas/i386/opcode.d: ditto.
+	* testsuite/gas/i386/x86-64-opcode.s: Add x86_64 variants too.
+	* testsuite/gas/i386/x86-64-opcode.d: ditto.
+
 2017-07-04  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
         * config/tc-arm.c (arm_regs): Add MVFR2.
