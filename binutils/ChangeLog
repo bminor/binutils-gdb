@@ -1,3 +1,7 @@
+2017-07-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (display_debug_names): Replace index with xindex.
+
 2017-07-04  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
