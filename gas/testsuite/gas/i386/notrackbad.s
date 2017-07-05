@@ -6,16 +6,12 @@ _start:
 	notrack call foo
 	notrack jmp foo
 
-	notrack call *(%eax)
-	notrack jmp *(%eax)
 	fs notrack call *%eax
 	notrack fs call *%eax
 	notrack bnd call *%eax
 	notrack data16 call *%eax
 
 	.intel_syntax noprefix
-	notrack call [eax]
-	notrack jmp [eax]
 	fs notrack call eax
 	notrack fs call eax
 	notrack bnd call eax

@@ -931,6 +931,12 @@ gdb_test "ptype \"abc\"" " = char \\\[4\\\]"
 gdb_test "print \$cvar = \"abc\"" " = \"abc\""
 gdb_test "print sizeof (\$cvar)" " = 4"
 
+# GDB used to complete the explicit location options even when
+# printing expressions.
+gdb_test_no_output "complete p -function"
+gdb_test_no_output "complete p -line"
+gdb_test_no_output "complete p -source"
+
 gdb_file_cmd ${binfile}
 
 gdb_test "print \$pc" "No registers\\." "print \$pc (with file)"

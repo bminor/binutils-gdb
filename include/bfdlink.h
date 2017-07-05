@@ -144,9 +144,6 @@ struct bfd_link_hash_entry
 	  struct bfd_link_hash_entry *next;
 	  /* BFD symbol was found in.  */
 	  bfd *abfd;
-	  /* For __start_<name> and __stop_<name> symbols, the first
-	     input section matching the name.  */
-	  asection *section;
 	} undef;
       /* bfd_link_hash_defined, bfd_link_hash_defweak.  */
       struct
@@ -348,6 +345,9 @@ struct bfd_link_info
   /* TRUE if all data symbols should be dynamic.  */
   unsigned int dynamic_data: 1;
 
+  /* TRUE if section groups should be resolved.  */
+  unsigned int resolve_section_groups: 1;
+
   /* Which symbols to strip.  */
   ENUM_BITFIELD (bfd_link_strip) strip : 2;
 
@@ -470,6 +470,15 @@ struct bfd_link_info
 
   /* TRUE if BND prefix in PLT entries is always generated.  */
   unsigned int bndplt: 1;
+
+  /* TRUE if IBT-enabled PLT entries should be generated.  */
+  unsigned int ibtplt: 1;
+
+  /* TRUE if GNU_PROPERTY_X86_FEATURE_1_IBT should be generated.  */
+  unsigned int ibt: 1;
+
+  /* TRUE if GNU_PROPERTY_X86_FEATURE_1_SHSTK should be generated.  */
+  unsigned int shstk: 1;
 
   /* TRUE if generation of .interp/PT_INTERP should be suppressed.  */
   unsigned int nointerp: 1;

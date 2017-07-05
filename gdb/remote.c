@@ -1428,6 +1428,7 @@ enum {
   PACKET_QPassSignals,
   PACKET_QCatchSyscalls,
   PACKET_QProgramSignals,
+  PACKET_QStartupWithShell,
   PACKET_qCRC,
   PACKET_qSearch_memory,
   PACKET_vAttach,
@@ -4633,6 +4634,8 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_QCatchSyscalls },
   { "QProgramSignals", PACKET_DISABLE, remote_supported_packet,
     PACKET_QProgramSignals },
+  { "QStartupWithShell", PACKET_DISABLE, remote_supported_packet,
+    PACKET_QStartupWithShell },
   { "QStartNoAckMode", PACKET_DISABLE, remote_supported_packet,
     PACKET_QStartNoAckMode },
   { "multiprocess", PACKET_DISABLE, remote_supported_packet,
@@ -6307,12 +6310,6 @@ remote_console_output (char *msg)
     }
   gdb_flush (gdb_stdtarg);
 }
-
-typedef struct cached_reg
-{
-  int num;
-  gdb_byte *data;
-} cached_reg_t;
 
 DEF_VEC_O(cached_reg_t);
 
@@ -9614,6 +9611,20 @@ extended_remote_create_inferior (struct target_ops *ops,
   if (extended_remote_supports_disable_randomization (ops))
     extended_remote_disable_randomization (disable_randomization);
 
+  /* If startup-with-shell is on, we inform gdbserver to start the
+     remote inferior using a shell.  */
+  if (packet_support (PACKET_QStartupWithShell) != PACKET_DISABLE)
+    {
+      xsnprintf (rs->buf, get_remote_packet_size (),
+		 "QStartupWithShell:%d", startup_with_shell ? 1 : 0);
+      putpkt (rs->buf);
+      getpkt (&rs->buf, &rs->buf_size, 0);
+      if (strcmp (rs->buf, "OK") != 0)
+	error (_("\
+Remote replied unexpectedly while setting startup-with-shell: %s"),
+	       rs->buf);
+    }
+
   /* Now restart the remote server.  */
   run_worked = extended_remote_run (args) != -1;
   if (!run_worked)
@@ -12650,9 +12661,9 @@ remote_get_tracepoint_status (struct target_ops *self, struct breakpoint *bp,
 
   if (tp)
     {
-      tp->base.hit_count = 0;
+      tp->hit_count = 0;
       tp->traceframe_usage = 0;
-      for (loc = tp->base.loc; loc; loc = loc->next)
+      for (loc = tp->loc; loc; loc = loc->next)
 	{
 	  /* If the tracepoint was never downloaded, don't go asking for
 	     any status.  */
@@ -14103,6 +14114,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_QProgramSignals],
 			 "QProgramSignals", "program-signals", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_QStartupWithShell],
+			 "QStartupWithShell", "startup-with-shell", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qSymbol],
 			 "qSymbol", "symbol-lookup", 0);

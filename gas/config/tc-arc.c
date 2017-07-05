@@ -107,8 +107,18 @@ enum arc_rlx_types
 #define is_spfp_p(op)           (((sc) == SPX))
 #define is_dpfp_p(op)           (((sc) == DPX))
 #define is_fpuda_p(op)          (((sc) == DPA))
-#define is_br_jmp_insn_p(op)    (((op)->insn_class == BRANCH \
-				  || (op)->insn_class == JUMP))
+#define is_br_jmp_insn_p(op)    (((op)->insn_class == BRANCH		\
+				  || (op)->insn_class == JUMP		\
+				  || (op)->insn_class == BRCC		\
+				  || (op)->insn_class == BBIT0		\
+				  || (op)->insn_class == BBIT1		\
+				  || (op)->insn_class == BI		\
+				  || (op)->insn_class == EI		\
+				  || (op)->insn_class == ENTER		\
+				  || (op)->insn_class == JLI		\
+				  || (op)->insn_class == LOOP		\
+				  || (op)->insn_class == LEAVE		\
+				  ))
 #define is_kernel_insn_p(op)    (((op)->insn_class == KERNEL))
 #define is_nps400_p(op)         (((sc) == NPS400))
 
@@ -445,6 +455,8 @@ static struct hash_control *arc_addrtype_hash;
 #define ARC_CPU_TYPE_AV2HS(NAME,EXTRA)			\
   { #NAME,  ARC_OPCODE_ARCv2HS, bfd_mach_arc_arcv2,	\
       EF_ARC_CPU_ARCV2HS, EXTRA}
+#define ARC_CPU_TYPE_NONE				\
+  { 0, 0, 0, 0, 0 }
 
 /* A table of CPU names and opcode sets.  */
 static const struct cpu_type
@@ -457,32 +469,7 @@ static const struct cpu_type
 }
   cpu_types[] =
 {
-  ARC_CPU_TYPE_A7xx (arc700, 0x00),
-  ARC_CPU_TYPE_A7xx (nps400, NPS400),
-
-  ARC_CPU_TYPE_AV2EM (arcem,	  0x00),
-  ARC_CPU_TYPE_AV2EM (em,	  0x00),
-  ARC_CPU_TYPE_AV2EM (em4,	  CD),
-  ARC_CPU_TYPE_AV2EM (em4_dmips,  CD),
-  ARC_CPU_TYPE_AV2EM (em4_fpus,	  CD),
-  ARC_CPU_TYPE_AV2EM (em4_fpuda,  CD | DPA),
-  ARC_CPU_TYPE_AV2EM (quarkse_em, CD | SPX | DPX),
-
-  ARC_CPU_TYPE_AV2HS (archs,	  CD),
-  ARC_CPU_TYPE_AV2HS (hs,	  CD),
-  ARC_CPU_TYPE_AV2HS (hs34,	  CD),
-  ARC_CPU_TYPE_AV2HS (hs38,	  CD),
-  ARC_CPU_TYPE_AV2HS (hs38_linux, CD),
-
-  ARC_CPU_TYPE_A6xx (arc600, 0x00),
-  ARC_CPU_TYPE_A6xx (arc600_norm,     0x00),
-  ARC_CPU_TYPE_A6xx (arc600_mul64,    0x00),
-  ARC_CPU_TYPE_A6xx (arc600_mul32x16, 0x00),
-  ARC_CPU_TYPE_A6xx (arc601,	      0x00),
-  ARC_CPU_TYPE_A6xx (arc601_norm,     0x00),
-  ARC_CPU_TYPE_A6xx (arc601_mul64,    0x00),
-  ARC_CPU_TYPE_A6xx (arc601_mul32x16, 0x00),
-  { 0, 0, 0, 0, 0 }
+  #include "elf/arc-cpu.def"
 };
 
 /* Information about the cpu/variant we're assembling for.  */
@@ -3303,10 +3290,7 @@ md_undefined_symbol (char *name)
      GOTPC reference to _GLOBAL_OFFSET_TABLE_.  */
   if (((*name == '_')
        && (*(name+1) == 'G')
-       && (strcmp (name, GLOBAL_OFFSET_TABLE_NAME) == 0))
-      || ((*name == '_')
-	  && (*(name+1) == 'D')
-	  && (strcmp (name, DYNAMIC_STRUCT_NAME) == 0)))
+       && (strcmp (name, GLOBAL_OFFSET_TABLE_NAME) == 0)))
     {
       if (!GOT_symbol)
 	{
@@ -4131,6 +4115,11 @@ assemble_insn (const struct arc_opcode *opcode,
   if (arc_last_insns[1].has_delay_slot
       && is_br_jmp_insn_p (arc_last_insns[0].opcode))
     as_bad (_("Insn %s has a jump/branch instruction %s in its delay slot."),
+	    arc_last_insns[1].opcode->name,
+	    arc_last_insns[0].opcode->name);
+  if (arc_last_insns[1].has_delay_slot
+      && arc_last_insns[0].has_limm)
+    as_bad (_("Insn %s has an instruction %s with limm in its delay slot."),
 	    arc_last_insns[1].opcode->name,
 	    arc_last_insns[0].opcode->name);
 }

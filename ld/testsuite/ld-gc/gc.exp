@@ -26,6 +26,9 @@ if ![check_gc_sections_available] {
 set cflags "-ffunction-sections -fdata-sections"
 set objfile "tmpdir/gc.o"
 
+# Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.
+global NOPIE_CFLAGS NOPIE_LDFLAGS
+
 if [istarget powerpc64*-*-*] {
     # otherwise with -mcmodel=medium gcc we get XPASSes.
     set cflags "$cflags -mminimal-toc"
@@ -119,6 +122,12 @@ if { [is_elf_format] && [check_shared_lib_support] } then {
 	run_dump_test "personality"
     }
     run_dump_test "pr18223"
+    if {![ld_assemble_flags $as $gasopt $srcdir/$subdir/pr20022a.s tmpdir/pr20022a.o]
+	|| ![ld_link $ld tmpdir/pr20022.so "-shared --gc-sections tmpdir/pr20022a.o"] } then {
+	fail pr20022
+    } else {
+	run_dump_test "pr20022"
+    }
 }
 
 if { [is_remote host] || [which $CC] != 0 } {
@@ -138,7 +147,7 @@ if { [is_remote host] || [which $CC] != 0 } {
 }
 
 if { [is_remote host] || [which $CC] != 0 } {
-    ld_compile "$CC $CFLAGS $cflags" $srcdir/$subdir/pr14265.c tmpdir/pr14265.o
+    ld_compile "$CC $CFLAGS $cflags $NOPIE_CFLAGS" $srcdir/$subdir/pr14265.c tmpdir/pr14265.o
     run_dump_test "pr14265"
 }
 

@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.29:
+
 * Add support for ELF SHF_GNU_MBIND.
 
 * Add support for the WebAssembly file format and wasm32 ELF conversion.
@@ -9,6 +11,9 @@
   that the registers are invalid.
 
 * Add support for the Texas Instruments PRU processor.
+
+* Support for the ARMv8-R architecture and Cortex-R52 processor has been
+  added to the ARM port.
 
 Changes in 2.28:
 

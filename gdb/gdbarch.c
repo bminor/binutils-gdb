@@ -295,7 +295,6 @@ struct gdbarch
   gdbarch_displaced_step_copy_insn_ftype *displaced_step_copy_insn;
   gdbarch_displaced_step_hw_singlestep_ftype *displaced_step_hw_singlestep;
   gdbarch_displaced_step_fixup_ftype *displaced_step_fixup;
-  gdbarch_displaced_step_free_closure_ftype *displaced_step_free_closure;
   gdbarch_displaced_step_location_ftype *displaced_step_location;
   gdbarch_relocate_instruction_ftype *relocate_instruction;
   gdbarch_overlay_update_ftype *overlay_update;
@@ -429,6 +428,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->stabs_argument_has_addr = default_stabs_argument_has_addr;
   gdbarch->convert_from_func_ptr_addr = convert_from_func_ptr_addr_identity;
   gdbarch->addr_bits_remove = core_addr_identity;
+  gdbarch->print_insn = default_print_insn;
   gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
   gdbarch->skip_solib_resolver = generic_skip_solib_resolver;
   gdbarch->in_solib_return_trampoline = generic_in_solib_return_trampoline;
@@ -442,7 +442,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->skip_permanent_breakpoint = default_skip_permanent_breakpoint;
   gdbarch->displaced_step_hw_singlestep = default_displaced_step_hw_singlestep;
   gdbarch->displaced_step_fixup = NULL;
-  gdbarch->displaced_step_free_closure = NULL;
   gdbarch->displaced_step_location = NULL;
   gdbarch->relocate_instruction = NULL;
   gdbarch->has_shared_address_space = default_has_shared_address_space;
@@ -621,8 +620,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of addr_bits_remove, invalid_p == 0 */
   /* Skip verify of software_single_step, has predicate.  */
   /* Skip verify of single_step_through_delay, has predicate.  */
-  if (gdbarch->print_insn == 0)
-    log.puts ("\n\tprint_insn");
+  /* Skip verify of print_insn, invalid_p == 0 */
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
   /* Skip verify of skip_solib_resolver, invalid_p == 0 */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
@@ -656,8 +654,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of displaced_step_copy_insn, has predicate.  */
   /* Skip verify of displaced_step_hw_singlestep, invalid_p == 0 */
   /* Skip verify of displaced_step_fixup, has predicate.  */
-  if ((! gdbarch->displaced_step_free_closure) != (! gdbarch->displaced_step_copy_insn))
-    log.puts ("\n\tdisplaced_step_free_closure");
   if ((! gdbarch->displaced_step_location) != (! gdbarch->displaced_step_copy_insn))
     log.puts ("\n\tdisplaced_step_location");
   /* Skip verify of relocate_instruction, has predicate.  */
@@ -911,9 +907,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: displaced_step_fixup = <%s>\n",
                       host_address_to_string (gdbarch->displaced_step_fixup));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: displaced_step_free_closure = <%s>\n",
-                      host_address_to_string (gdbarch->displaced_step_free_closure));
   fprintf_unfiltered (file,
                       "gdbarch_dump: displaced_step_hw_singlestep = <%s>\n",
                       host_address_to_string (gdbarch->displaced_step_hw_singlestep));
@@ -3968,23 +3961,6 @@ set_gdbarch_displaced_step_fixup (struct gdbarch *gdbarch,
                                   gdbarch_displaced_step_fixup_ftype displaced_step_fixup)
 {
   gdbarch->displaced_step_fixup = displaced_step_fixup;
-}
-
-void
-gdbarch_displaced_step_free_closure (struct gdbarch *gdbarch, struct displaced_step_closure *closure)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->displaced_step_free_closure != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_displaced_step_free_closure called\n");
-  gdbarch->displaced_step_free_closure (gdbarch, closure);
-}
-
-void
-set_gdbarch_displaced_step_free_closure (struct gdbarch *gdbarch,
-                                         gdbarch_displaced_step_free_closure_ftype displaced_step_free_closure)
-{
-  gdbarch->displaced_step_free_closure = displaced_step_free_closure;
 }
 
 CORE_ADDR

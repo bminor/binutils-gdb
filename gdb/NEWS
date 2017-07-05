@@ -3,6 +3,26 @@
 
 *** Changes since GDB 8.0
 
+* On Unix systems, GDBserver now does globbing expansion and variable
+  substitution in inferior command line arguments.
+
+  This is done by starting inferiors using a shell, like GDB does.
+  See "set startup-with-shell" in the user manual for how to disable
+  this from GDB when using "target extended-remote".  When using
+  "target remote", you can disable the startup with shell by using the
+  new "--no-startup-with-shell" GDBserver command line option.
+
+* New remote packets
+
+QStartupWithShell
+  Indicates whether the inferior must be started with a shell or not.
+
+* New commands
+
+set debug separate-debug-file
+show debug separate-debug-file
+  Control the display of debug output about separate debug file search.
+
 *** Changes in GDB 8.0
 
 * GDB now supports access to the PKU register on GNU/Linux. The register is
@@ -72,16 +92,33 @@
 
 FreeBSD/mips			mips*-*-freebsd
 
-
 * New targets
 
 Synopsys ARC			arc*-*-elf32
 FreeBSD/mips			mips*-*-freebsd
 
+* Removed targets and native configurations
+
+Alpha running FreeBSD         alpha*-*-freebsd*
+Alpha running GNU/kFreeBSD    alpha*-*-kfreebsd*-gnu
+
 * New commands
 
 flash-erase
   Erases all the flash memory regions reported by the target.
+
+maint print arc arc-instruction address
+  Print internal disassembler information about instruction at a given address.
+
+* New options
+
+set disassembler-options
+show disassembler-options
+  Controls the passing of target specific information to the disassembler.
+  If it is necessary to specify more than one disassembler option then
+  multiple options can be placed together into a comma separated list.
+  The default value is the empty string.  Currently, the only supported
+  targets are ARM, PowerPC and S/390.
 
 * New MI commands
 
@@ -92,24 +129,6 @@ flash-erase
 -file-list-shared-libraries
   List the shared libraries in the program.  This is
   equivalent to the CLI command "info shared".
-
-* New commands
-
-set disassembler-options
-show disassembler-options
-  Controls the passing of target specific information to the disassembler.
-  If it is necessary to specify more than one disassembler option then
-  multiple options can be placed together into a comma separated list.
-  The default value is the empty string.  Currently, the only supported
-  targets are ARM, PowerPC and S/390.
-
-maint print arc arc-instruction address
-  Print internal disassembler information about instruction at a given address.
-
-* Removed targets and native configurations
-
-Alpha running FreeBSD         alpha*-*-freebsd*
-Alpha running GNU/kFreeBSD    alpha*-*-kfreebsd*-gnu
 
 *** Changes in GDB 7.12
 
@@ -409,6 +428,9 @@ show max-value-size
   whose memory is addressable in units of any integral multiple of 8 bits.
 
 * New remote packets
+
+QStartupWithShell
+  Indicates whether the inferior must be started with a shell or not.
 
 exec stop reason
   Indicates that an exec system call was executed.

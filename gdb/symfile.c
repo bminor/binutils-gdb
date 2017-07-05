@@ -859,7 +859,7 @@ static void
 read_symbols (struct objfile *objfile, symfile_add_flags add_flags)
 {
   (*objfile->sf->sym_read) (objfile, add_flags);
-  objfile->per_bfd->minsyms_read = 1;
+  objfile->per_bfd->minsyms_read = true;
 
   /* find_separate_debug_file_in_section should be called only if there is
      single binary with no existing separate debug info file.  */
@@ -1333,6 +1333,10 @@ symbol_file_clear (int from_tty)
     printf_unfiltered (_("No symbol file now.\n"));
 }
 
+/* See symfile.h.  */
+
+int separate_debug_file_debug = 0;
+
 static int
 separate_debug_file_exists (const char *name, unsigned long crc,
 			    struct objfile *parent_objfile)
@@ -1350,6 +1354,9 @@ separate_debug_file_exists (const char *name, unsigned long crc,
 
   if (filename_cmp (name, objfile_name (parent_objfile)) == 0)
     return 0;
+
+  if (separate_debug_file_debug)
+    printf_unfiltered (_("  Trying %s\n"), name);
 
   gdb_bfd_ref_ptr abfd (gdb_bfd_open (name, gnutarget, -1));
 
@@ -1443,6 +1450,10 @@ find_separate_debug_file (const char *dir,
   VEC (char_ptr) *debugdir_vec;
   struct cleanup *back_to;
   int ix;
+
+  if (separate_debug_file_debug)
+    printf_unfiltered (_("\nLooking for separate debug info (debug link) for "
+		         "%s\n"), objfile_name (objfile));
 
   /* Set I to std::max (strlen (canon_dir), strlen (dir)).  */
   i = strlen (dir);
@@ -2576,6 +2587,9 @@ reread_symbols (void)
 	  /* Free the obstacks for non-reusable objfiles.  */
 	  psymbol_bcache_free (objfile->psymbol_cache);
 	  objfile->psymbol_cache = psymbol_bcache_init ();
+
+	  /* NB: after this call to obstack_free, objfiles_changed
+	     will need to be called (see discussion below).  */
 	  obstack_free (&objfile->objfile_obstack, 0);
 	  objfile->sections = NULL;
 	  objfile->compunit_symtabs = NULL;
@@ -2628,6 +2642,23 @@ reread_symbols (void)
 	  clear_complaints (&symfile_complaints, 1, 1);
 
 	  objfile->flags &= ~OBJF_PSYMTABS_READ;
+
+	  /* We are about to read new symbols and potentially also
+	     DWARF information.  Some targets may want to pass addresses
+	     read from DWARF DIE's through an adjustment function before
+	     saving them, like MIPS, which may call into
+	     "find_pc_section".  When called, that function will make
+	     use of per-objfile program space data.
+
+	     Since we discarded our section information above, we have
+	     dangling pointers in the per-objfile program space data
+	     structure.  Force GDB to update the section mapping
+	     information by letting it know the objfile has changed,
+	     making the dangling pointers point to correct data
+	     again.  */
+
+	  objfiles_changed ();
+
 	  read_symbols (objfile, 0);
 
 	  if (!objfile_has_symbols (objfile))
@@ -2660,9 +2691,6 @@ reread_symbols (void)
 
   if (!new_objfiles.empty ())
     {
-      /* Notify objfiles that we've modified objfile sections.  */
-      objfiles_changed ();
-
       clear_symtab_users (0);
 
       /* clear_objfile_data for each objfile was called before freeing it and
@@ -3975,4 +4003,11 @@ full  == print messages for the executable,\n\
 			NULL,
 			NULL,
 			&setprintlist, &showprintlist);
+
+  add_setshow_boolean_cmd ("separate-debug-file", no_class,
+			   &separate_debug_file_debug, _("\
+Set printing of separate debug info file search debug."), _("\
+Show printing of separate debug info file search debug."), _("\
+When on, GDB prints the searched locations while looking for separate debug \
+info files."), NULL, NULL, &setdebuglist, &showdebuglist);
 }

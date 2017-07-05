@@ -19,7 +19,7 @@
    MA 02110-1301, USA.  */
 
 #include "sysdep.h"
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "floatformat.h"
 #include "libiberty.h"
 #include "opintl.h"

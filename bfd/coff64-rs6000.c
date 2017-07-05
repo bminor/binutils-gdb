@@ -2746,6 +2746,7 @@ const bfd_target rs6000_xcoff64_vec =
     bfd_generic_discard_group,
     _bfd_generic_section_already_linked,
     _bfd_xcoff_define_common_symbol,
+    bfd_generic_define_start_stop,
 
     /* Dynamic */
     _bfd_xcoff_get_dynamic_symtab_upper_bound,
@@ -3006,6 +3007,7 @@ const bfd_target rs6000_xcoff64_aix_vec =
     bfd_generic_discard_group,
     _bfd_generic_section_already_linked,
     _bfd_xcoff_define_common_symbol,
+    bfd_generic_define_start_stop,
 
     /* Dynamic */
     _bfd_xcoff_get_dynamic_symtab_upper_bound,

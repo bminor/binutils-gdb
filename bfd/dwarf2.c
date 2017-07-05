@@ -150,6 +150,12 @@ struct dwarf2_debug
   /* Length of the loaded .debug_str section.  */
   bfd_size_type dwarf_str_size;
 
+  /* Pointer to the .debug_line_str section loaded into memory.  */
+  bfd_byte *dwarf_line_str_buffer;
+
+  /* Length of the loaded .debug_line_str section.  */
+  bfd_size_type dwarf_line_str_size;
+
   /* Pointer to the .debug_ranges section loaded into memory.  */
   bfd_byte *dwarf_ranges_buffer;
 
@@ -306,6 +312,7 @@ struct attr_abbrev
 {
   enum dwarf_attribute name;
   enum dwarf_form form;
+  bfd_vma implicit_const;
 };
 
 /* Map of uncompressed DWARF debug section name to compressed one.  It
@@ -329,6 +336,7 @@ const struct dwarf_debug_section dwarf_debug_sections[] =
   { ".debug_static_vars",	".zdebug_static_vars" },
   { ".debug_str",		".zdebug_str", },
   { ".debug_str",		".zdebug_str", },
+  { ".debug_line_str",		".zdebug_line_str", },
   { ".debug_types",		".zdebug_types" },
   /* GNU DWARF 1 extensions */
   { ".debug_sfnames",		".zdebug_sfnames" },
@@ -361,14 +369,20 @@ enum dwarf_debug_section_enum
   debug_static_vars,
   debug_str,
   debug_str_alt,
+  debug_line_str,
   debug_types,
   debug_sfnames,
   debug_srcinfo,
   debug_funcnames,
   debug_typenames,
   debug_varnames,
-  debug_weaknames
+  debug_weaknames,
+  debug_max
 };
+
+/* A static assertion.  */
+extern int dwarf_debug_section_assert[ARRAY_SIZE (dwarf_debug_sections)
+				      == debug_max + 1 ? 1 : -1];
 
 #ifndef ABBREV_HASH_SIZE
 #define ABBREV_HASH_SIZE 121
@@ -703,6 +717,45 @@ read_indirect_string (struct comp_unit * unit,
   return str;
 }
 
+/* Like read_indirect_string but from .debug_line_str section.  */
+
+static char *
+read_indirect_line_string (struct comp_unit * unit,
+			   bfd_byte *         buf,
+			   bfd_byte *         buf_end,
+			   unsigned int *     bytes_read_ptr)
+{
+  bfd_uint64_t offset;
+  struct dwarf2_debug *stash = unit->stash;
+  char *str;
+
+  if (buf + unit->offset_size > buf_end)
+    {
+      * bytes_read_ptr = 0;
+      return NULL;
+    }
+
+  if (unit->offset_size == 4)
+    offset = read_4_bytes (unit->abfd, buf, buf_end);
+  else
+    offset = read_8_bytes (unit->abfd, buf, buf_end);
+
+  *bytes_read_ptr = unit->offset_size;
+
+  if (! read_section (unit->abfd, &stash->debug_sections[debug_line_str],
+		      stash->syms, offset,
+		      &stash->dwarf_line_str_buffer,
+		      &stash->dwarf_line_str_size))
+    return NULL;
+
+  if (offset >= stash->dwarf_line_str_size)
+    return NULL;
+  str = (char *) stash->dwarf_line_str_buffer + offset;
+  if (*str == '\0')
+    return NULL;
+  return str;
+}
+
 /* Like read_indirect_string but uses a .debug_str located in
    an alternate file pointed to by the .gnu_debugaltlink section.
    Used to impement DW_FORM_GNU_strp_alt.  */
@@ -928,15 +981,28 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
       abbrev_ptr += 1;
 
       /* Now read in declarations.  */
-      abbrev_name = _bfd_safe_read_leb128 (abfd, abbrev_ptr, &bytes_read,
-					   FALSE, abbrev_end);
-      abbrev_ptr += bytes_read;
-      abbrev_form = _bfd_safe_read_leb128 (abfd, abbrev_ptr, &bytes_read,
-					   FALSE, abbrev_end);
-      abbrev_ptr += bytes_read;
-
-      while (abbrev_name)
+      for (;;)
 	{
+	  /* Initialize it just to avoid a GCC false warning.  */
+	  bfd_vma implicit_const = -1;
+
+	  abbrev_name = _bfd_safe_read_leb128 (abfd, abbrev_ptr, &bytes_read,
+					       FALSE, abbrev_end);
+	  abbrev_ptr += bytes_read;
+	  abbrev_form = _bfd_safe_read_leb128 (abfd, abbrev_ptr, &bytes_read,
+					       FALSE, abbrev_end);
+	  abbrev_ptr += bytes_read;
+	  if (abbrev_form == DW_FORM_implicit_const)
+	    {
+	      implicit_const = _bfd_safe_read_leb128 (abfd, abbrev_ptr,
+						      &bytes_read, TRUE,
+						      abbrev_end);
+	      abbrev_ptr += bytes_read;
+	    }
+
+	  if (abbrev_name == 0)
+	    break;
+
 	  if ((cur_abbrev->num_attrs % ATTR_ALLOC_CHUNK) == 0)
 	    {
 	      struct attr_abbrev *tmp;
@@ -965,14 +1031,11 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 
 	  cur_abbrev->attrs[cur_abbrev->num_attrs].name
 	    = (enum dwarf_attribute) abbrev_name;
-	  cur_abbrev->attrs[cur_abbrev->num_attrs++].form
+	  cur_abbrev->attrs[cur_abbrev->num_attrs].form
 	    = (enum dwarf_form) abbrev_form;
-	  abbrev_name = _bfd_safe_read_leb128 (abfd, abbrev_ptr, &bytes_read,
-					       FALSE, abbrev_end);
-	  abbrev_ptr += bytes_read;
-	  abbrev_form = _bfd_safe_read_leb128 (abfd, abbrev_ptr, &bytes_read,
-					       FALSE, abbrev_end);
-	  abbrev_ptr += bytes_read;
+	  cur_abbrev->attrs[cur_abbrev->num_attrs].implicit_const
+	    = implicit_const;
+	  ++cur_abbrev->num_attrs;
 	}
 
       hash_number = abbrev_number % ABBREV_HASH_SIZE;
@@ -1004,7 +1067,8 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 static inline bfd_boolean
 is_str_attr (enum dwarf_form form)
 {
-  return form == DW_FORM_string || form == DW_FORM_strp || form == DW_FORM_GNU_strp_alt;
+  return (form == DW_FORM_string || form == DW_FORM_strp
+	  || form == DW_FORM_line_strp || form == DW_FORM_GNU_strp_alt);
 }
 
 /* Read and fill in the value of attribute ATTR as described by FORM.
@@ -1014,6 +1078,7 @@ is_str_attr (enum dwarf_form form)
 static bfd_byte *
 read_attribute_value (struct attribute *  attr,
 		      unsigned            form,
+		      bfd_vma             implicit_const,
 		      struct comp_unit *  unit,
 		      bfd_byte *          info_ptr,
 		      bfd_byte *          info_ptr_end)
@@ -1101,6 +1166,10 @@ read_attribute_value (struct attribute *  attr,
       attr->u.str = read_indirect_string (unit, info_ptr, info_ptr_end, &bytes_read);
       info_ptr += bytes_read;
       break;
+    case DW_FORM_line_strp:
+      attr->u.str = read_indirect_line_string (unit, info_ptr, info_ptr_end, &bytes_read);
+      info_ptr += bytes_read;
+      break;
     case DW_FORM_GNU_strp_alt:
       attr->u.str = read_alt_indirect_string (unit, info_ptr, info_ptr_end, &bytes_read);
       info_ptr += bytes_read;
@@ -1179,7 +1248,18 @@ read_attribute_value (struct attribute *  attr,
       form = _bfd_safe_read_leb128 (abfd, info_ptr, &bytes_read,
 				    FALSE, info_ptr_end);
       info_ptr += bytes_read;
-      info_ptr = read_attribute_value (attr, form, unit, info_ptr, info_ptr_end);
+      if (form == DW_FORM_implicit_const)
+	{
+	  implicit_const = _bfd_safe_read_leb128 (abfd, info_ptr, &bytes_read,
+						  TRUE, info_ptr_end);
+	  info_ptr += bytes_read;
+	}
+      info_ptr = read_attribute_value (attr, form, implicit_const, unit,
+				       info_ptr, info_ptr_end);
+      break;
+    case DW_FORM_implicit_const:
+      attr->form = DW_FORM_sdata;
+      attr->u.sval = implicit_const;
       break;
     default:
       _bfd_error_handler (_("Dwarf Error: Invalid or unhandled FORM value: %#x."),
@@ -1200,7 +1280,8 @@ read_attribute (struct attribute *    attr,
 		bfd_byte *            info_ptr_end)
 {
   attr->name = abbrev->name;
-  info_ptr = read_attribute_value (attr, abbrev->form, unit, info_ptr, info_ptr_end);
+  info_ptr = read_attribute_value (attr, abbrev->form, abbrev->implicit_const,
+				   unit, info_ptr, info_ptr_end);
   return info_ptr;
 }
 
@@ -1734,6 +1815,196 @@ sort_line_sequences (struct line_info_table* table)
   return TRUE;
 }
 
+/* Add directory to TABLE.  CUR_DIR memory ownership is taken by TABLE.  */
+
+static bfd_boolean
+line_info_add_include_dir (struct line_info_table *table, char *cur_dir)
+{
+  if ((table->num_dirs % DIR_ALLOC_CHUNK) == 0)
+    {
+      char **tmp;
+      bfd_size_type amt;
+
+      amt = table->num_dirs + DIR_ALLOC_CHUNK;
+      amt *= sizeof (char *);
+
+      tmp = (char **) bfd_realloc (table->dirs, amt);
+      if (tmp == NULL)
+	return FALSE;
+      table->dirs = tmp;
+    }
+
+  table->dirs[table->num_dirs++] = cur_dir;
+  return TRUE;
+}
+
+static bfd_boolean
+line_info_add_include_dir_stub (struct line_info_table *table, char *cur_dir,
+				unsigned int dir ATTRIBUTE_UNUSED,
+				unsigned int xtime ATTRIBUTE_UNUSED,
+				unsigned int size ATTRIBUTE_UNUSED)
+{
+  return line_info_add_include_dir (table, cur_dir);
+}
+
+/* Add file to TABLE.  CUR_FILE memory ownership is taken by TABLE.  */
+
+static bfd_boolean
+line_info_add_file_name (struct line_info_table *table, char *cur_file,
+			 unsigned int dir, unsigned int xtime,
+			 unsigned int size)
+{
+  if ((table->num_files % FILE_ALLOC_CHUNK) == 0)
+    {
+      struct fileinfo *tmp;
+      bfd_size_type amt;
+
+      amt = table->num_files + FILE_ALLOC_CHUNK;
+      amt *= sizeof (struct fileinfo);
+
+      tmp = (struct fileinfo *) bfd_realloc (table->files, amt);
+      if (tmp == NULL)
+	return FALSE;
+      table->files = tmp;
+    }
+
+  table->files[table->num_files].name = cur_file;
+  table->files[table->num_files].dir = dir;
+  table->files[table->num_files].time = xtime;
+  table->files[table->num_files].size = size;
+  table->num_files++;
+  return TRUE;
+}
+
+/* Read directory or file name entry format, starting with byte of
+   format count entries, ULEB128 pairs of entry formats, ULEB128 of
+   entries count and the entries themselves in the described entry
+   format.  */
+
+static bfd_boolean
+read_formatted_entries (struct comp_unit *unit, bfd_byte **bufp,
+			bfd_byte *buf_end, struct line_info_table *table,
+			bfd_boolean (*callback) (struct line_info_table *table,
+						 char *cur_file,
+						 unsigned int dir,
+						 unsigned int time,
+						 unsigned int size))
+{
+  bfd *abfd = unit->abfd;
+  bfd_byte format_count, formati;
+  bfd_vma data_count, datai;
+  bfd_byte *buf = *bufp;
+  bfd_byte *format_header_data;
+  unsigned int bytes_read;
+
+  format_count = read_1_byte (abfd, buf, buf_end);
+  buf += 1;
+  format_header_data = buf;
+  for (formati = 0; formati < format_count; formati++)
+    {
+      _bfd_safe_read_leb128 (abfd, buf, &bytes_read, FALSE, buf_end);
+      buf += bytes_read;
+      _bfd_safe_read_leb128 (abfd, buf, &bytes_read, FALSE, buf_end);
+      buf += bytes_read;
+    }
+
+  data_count = _bfd_safe_read_leb128 (abfd, buf, &bytes_read, FALSE, buf_end);
+  buf += bytes_read;
+  for (datai = 0; datai < data_count; datai++)
+    {
+      bfd_byte *format = format_header_data;
+      struct fileinfo fe;
+
+      for (formati = 0; formati < format_count; formati++)
+	{
+	  bfd_vma content_type, form;
+	  char *string_trash;
+	  char **stringp = &string_trash;
+	  unsigned int uint_trash, *uintp = &uint_trash;
+
+	  content_type = _bfd_safe_read_leb128 (abfd, format, &bytes_read,
+						FALSE, buf_end);
+	  format += bytes_read;
+	  switch (content_type)
+	    {
+	    case DW_LNCT_path:
+	      stringp = &fe.name;
+	      break;
+	    case DW_LNCT_directory_index:
+	      uintp = &fe.dir;
+	      break;
+	    case DW_LNCT_timestamp:
+	      uintp = &fe.time;
+	      break;
+	    case DW_LNCT_size:
+	      uintp = &fe.size;
+	      break;
+	    case DW_LNCT_MD5:
+	      break;
+	    default:
+	      _bfd_error_handler
+		(_("Dwarf Error: Unknown format content type %lu."),
+		 (unsigned long) content_type);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+
+	  form = _bfd_safe_read_leb128 (abfd, format, &bytes_read, FALSE,
+					buf_end);
+	  format += bytes_read;
+	  switch (form)
+	    {
+	    case DW_FORM_string:
+	      *stringp = read_string (abfd, buf, buf_end, &bytes_read);
+	      buf += bytes_read;
+	      break;
+
+	    case DW_FORM_line_strp:
+	      *stringp = read_indirect_line_string (unit, buf, buf_end, &bytes_read);
+	      buf += bytes_read;
+	      break;
+
+	    case DW_FORM_data1:
+	      *uintp = read_1_byte (abfd, buf, buf_end);
+	      buf += 1;
+	      break;
+
+	    case DW_FORM_data2:
+	      *uintp = read_2_bytes (abfd, buf, buf_end);
+	      buf += 2;
+	      break;
+
+	    case DW_FORM_data4:
+	      *uintp = read_4_bytes (abfd, buf, buf_end);
+	      buf += 4;
+	      break;
+
+	    case DW_FORM_data8:
+	      *uintp = read_8_bytes (abfd, buf, buf_end);
+	      buf += 8;
+	      break;
+
+	    case DW_FORM_udata:
+	      *uintp = _bfd_safe_read_leb128 (abfd, buf, &bytes_read, FALSE,
+					      buf_end);
+	      buf += bytes_read;
+	      break;
+
+	    case DW_FORM_block:
+	      /* It is valid only for DW_LNCT_timestamp which is ignored by
+		 current GDB.  */
+	      break;
+	    }
+	}
+
+      if (!callback (table, fe.name, fe.dir, fe.time, fe.size))
+	return FALSE;
+    }
+
+  *bufp = buf;
+  return TRUE;
+}
+
 /* Decode the line number information for UNIT.  */
 
 static struct line_info_table*
@@ -1815,7 +2086,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
   line_end = line_ptr + lh.total_length;
 
   lh.version = read_2_bytes (abfd, line_ptr, line_end);
-  if (lh.version < 2 || lh.version > 4)
+  if (lh.version < 2 || lh.version > 5)
     {
       _bfd_error_handler
 	(_("Dwarf Error: Unhandled .debug_line version %d."), lh.version);
@@ -1824,12 +2095,33 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
     }
   line_ptr += 2;
 
-  if (line_ptr + offset_size + (lh.version >=4 ? 6 : 5) >= line_end)
+  if (line_ptr + offset_size + (lh.version >= 5 ? 8 : (lh.version >= 4 ? 6 : 5))
+      >= line_end)
     {
       _bfd_error_handler
 	(_("Dwarf Error: Ran out of room reading prologue"));
       bfd_set_error (bfd_error_bad_value);
       return NULL;
+    }
+
+  if (lh.version >= 5)
+    {
+      unsigned int segment_selector_size;
+
+      /* Skip address size.  */
+      read_1_byte (abfd, line_ptr, line_end);
+      line_ptr += 1;
+
+      segment_selector_size = read_1_byte (abfd, line_ptr, line_end);
+      line_ptr += 1;
+      if (segment_selector_size != 0)
+	{
+	  _bfd_error_handler
+	    (_("Dwarf Error: Line info unsupported segment selector size %u."),
+	     segment_selector_size);
+	  bfd_set_error (bfd_error_bad_value);
+	  return NULL;
+	}
     }
 
   if (offset_size == 4)
@@ -1887,61 +2179,51 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
       line_ptr += 1;
     }
 
-  /* Read directory table.  */
-  while ((cur_dir = read_string (abfd, line_ptr, line_end, &bytes_read)) != NULL)
+  if (lh.version >= 5)
     {
-      line_ptr += bytes_read;
+      /* Read directory table.  */
+      if (!read_formatted_entries (unit, &line_ptr, line_end, table,
+				   line_info_add_include_dir_stub))
+	goto fail;
 
-      if ((table->num_dirs % DIR_ALLOC_CHUNK) == 0)
+      /* Read file name table.  */
+      if (!read_formatted_entries (unit, &line_ptr, line_end, table,
+				   line_info_add_file_name))
+	goto fail;
+    }
+  else
+    {
+      /* Read directory table.  */
+      while ((cur_dir = read_string (abfd, line_ptr, line_end, &bytes_read)) != NULL)
 	{
-	  char **tmp;
+	  line_ptr += bytes_read;
 
-	  amt = table->num_dirs + DIR_ALLOC_CHUNK;
-	  amt *= sizeof (char *);
-
-	  tmp = (char **) bfd_realloc (table->dirs, amt);
-	  if (tmp == NULL)
+	  if (!line_info_add_include_dir (table, cur_dir))
 	    goto fail;
-	  table->dirs = tmp;
 	}
 
-      table->dirs[table->num_dirs++] = cur_dir;
-    }
-
-  line_ptr += bytes_read;
-
-  /* Read file name table.  */
-  while ((cur_file = read_string (abfd, line_ptr, line_end, &bytes_read)) != NULL)
-    {
       line_ptr += bytes_read;
 
-      if ((table->num_files % FILE_ALLOC_CHUNK) == 0)
+      /* Read file name table.  */
+      while ((cur_file = read_string (abfd, line_ptr, line_end, &bytes_read)) != NULL)
 	{
-	  struct fileinfo *tmp;
+	  unsigned int dir, xtime, size;
 
-	  amt = table->num_files + FILE_ALLOC_CHUNK;
-	  amt *= sizeof (struct fileinfo);
+	  line_ptr += bytes_read;
 
-	  tmp = (struct fileinfo *) bfd_realloc (table->files, amt);
-	  if (tmp == NULL)
+	  dir = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+	  line_ptr += bytes_read;
+	  xtime = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+	  line_ptr += bytes_read;
+	  size = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+	  line_ptr += bytes_read;
+
+	  if (!line_info_add_file_name (table, cur_file, dir, xtime, size))
 	    goto fail;
-	  table->files = tmp;
 	}
 
-      table->files[table->num_files].name = cur_file;
-      table->files[table->num_files].dir =
-	_bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
       line_ptr += bytes_read;
-      table->files[table->num_files].time
-	= _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
-      line_ptr += bytes_read;
-      table->files[table->num_files].size
-	= _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
-      line_ptr += bytes_read;
-      table->num_files++;
     }
-
-  line_ptr += bytes_read;
 
   /* Read the statement sequences until there's nothing left.  */
   while (line_ptr < line_end)
@@ -2987,7 +3269,8 @@ parse_comp_unit (struct dwarf2_debug *stash,
   struct comp_unit* unit;
   unsigned int version;
   bfd_uint64_t abbrev_offset = 0;
-  unsigned int addr_size;
+  /* Initialize it just to avoid a GCC false warning.  */
+  unsigned int addr_size = -1;
   struct abbrev_info** abbrevs;
   unsigned int abbrev_number, bytes_read, i;
   struct abbrev_info *abbrev;
@@ -2999,19 +3282,11 @@ parse_comp_unit (struct dwarf2_debug *stash,
   bfd_vma high_pc = 0;
   bfd *abfd = stash->bfd_ptr;
   bfd_boolean high_pc_relative = FALSE;
+  enum dwarf_unit_type unit_type;
 
   version = read_2_bytes (abfd, info_ptr, end_ptr);
   info_ptr += 2;
-  BFD_ASSERT (offset_size == 4 || offset_size == 8);
-  if (offset_size == 4)
-    abbrev_offset = read_4_bytes (abfd, info_ptr, end_ptr);
-  else
-    abbrev_offset = read_8_bytes (abfd, info_ptr, end_ptr);
-  info_ptr += offset_size;
-  addr_size = read_1_byte (abfd, info_ptr, end_ptr);
-  info_ptr += 1;
-
-  if (version != 2 && version != 3 && version != 4)
+  if (version < 2 || version > 5)
     {
       /* PR 19872: A version number of 0 probably means that there is padding
 	 at the end of the .debug_info section.  Gold puts it there when
@@ -3021,10 +3296,43 @@ parse_comp_unit (struct dwarf2_debug *stash,
 	{
 	  _bfd_error_handler
 	    (_("Dwarf Error: found dwarf version '%u', this reader"
-	       " only handles version 2, 3 and 4 information."), version);
+	       " only handles version 2, 3, 4 and 5 information."), version);
 	  bfd_set_error (bfd_error_bad_value);
 	}
       return NULL;
+    }
+
+  if (version < 5)
+    unit_type = DW_UT_compile;
+  else
+    {
+      unit_type = read_1_byte (abfd, info_ptr, end_ptr);
+      info_ptr += 1;
+
+      addr_size = read_1_byte (abfd, info_ptr, end_ptr);
+      info_ptr += 1;
+    }
+
+  BFD_ASSERT (offset_size == 4 || offset_size == 8);
+  if (offset_size == 4)
+    abbrev_offset = read_4_bytes (abfd, info_ptr, end_ptr);
+  else
+    abbrev_offset = read_8_bytes (abfd, info_ptr, end_ptr);
+  info_ptr += offset_size;
+
+  if (version < 5)
+    {
+      addr_size = read_1_byte (abfd, info_ptr, end_ptr);
+      info_ptr += 1;
+    }
+
+  if (unit_type == DW_UT_type)
+    {
+      /* Skip type signature.  */
+      info_ptr += 8;
+
+      /* Skip type offset.  */
+      info_ptr += offset_size;
     }
 
   if (addr_size > sizeof (bfd_vma))
@@ -4576,6 +4884,8 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
     free (stash->dwarf_line_buffer);
   if (stash->dwarf_str_buffer)
     free (stash->dwarf_str_buffer);
+  if (stash->dwarf_line_str_buffer)
+    free (stash->dwarf_line_str_buffer);
   if (stash->dwarf_ranges_buffer)
     free (stash->dwarf_ranges_buffer);
   if (stash->info_ptr_memory)

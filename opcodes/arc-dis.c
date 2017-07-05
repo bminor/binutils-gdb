@@ -117,6 +117,11 @@ typedef struct skipclass
    disassembling.  */
 static linkclass decodelist = NULL;
 
+/* ISA mask value enforced via disassembler info options.  ARC_OPCODE_NONE
+   value means that no CPU is enforced.  */
+
+static unsigned enforced_isa_mask = ARC_OPCODE_NONE;
+
 /* Macros section.  */
 
 #ifdef DEBUG
@@ -735,16 +740,16 @@ operand_iterator_next (struct arc_operand_iterator *iter,
 static void
 parse_option (const char *option)
 {
-  if (CONST_STRNEQ (option, "dsp"))
+  if (disassembler_options_cmp (option, "dsp") == 0)
     add_to_decodelist (DSP, NONE);
 
-  else if (CONST_STRNEQ (option, "spfp"))
+  else if (disassembler_options_cmp (option, "spfp") == 0)
     add_to_decodelist (FLOAT, SPX);
 
-  else if (CONST_STRNEQ (option, "dpfp"))
+  else if (disassembler_options_cmp (option, "dpfp") == 0)
     add_to_decodelist (FLOAT, DPX);
 
-  else if (CONST_STRNEQ (option, "quarkse_em"))
+  else if (disassembler_options_cmp (option, "quarkse_em") == 0)
     {
       add_to_decodelist (FLOAT, DPX);
       add_to_decodelist (FLOAT, SPX);
@@ -752,16 +757,16 @@ parse_option (const char *option)
       add_to_decodelist (FLOAT, QUARKSE2);
     }
 
-  else if (CONST_STRNEQ (option, "fpuda"))
+  else if (disassembler_options_cmp (option, "fpuda") == 0)
     add_to_decodelist (FLOAT, DPA);
 
-  else if (CONST_STRNEQ (option, "fpus"))
+  else if (disassembler_options_cmp (option, "fpus") == 0)
     {
       add_to_decodelist (FLOAT, SP);
       add_to_decodelist (FLOAT, CVT);
     }
 
-  else if (CONST_STRNEQ (option, "fpud"))
+  else if (disassembler_options_cmp (option, "fpud") == 0)
     {
       add_to_decodelist (FLOAT, DP);
       add_to_decodelist (FLOAT, CVT);
@@ -770,27 +775,74 @@ parse_option (const char *option)
     fprintf (stderr, _("Unrecognised disassembler option: %s\n"), option);
 }
 
+#define ARC_CPU_TYPE_A6xx(NAME,EXTRA)			\
+  { #NAME, ARC_OPCODE_ARC600, "ARC600" }
+#define ARC_CPU_TYPE_A7xx(NAME,EXTRA)			\
+  { #NAME, ARC_OPCODE_ARC700, "ARC700" }
+#define ARC_CPU_TYPE_AV2EM(NAME,EXTRA)			\
+  { #NAME,  ARC_OPCODE_ARCv2EM, "ARC EM" }
+#define ARC_CPU_TYPE_AV2HS(NAME,EXTRA)			\
+  { #NAME,  ARC_OPCODE_ARCv2HS, "ARC HS" }
+#define ARC_CPU_TYPE_NONE				\
+  { 0, 0, 0 }
+
+/* A table of CPU names and opcode sets.  */
+static const struct cpu_type
+{
+  const char *name;
+  unsigned flags;
+  const char *isa;
+}
+  cpu_types[] =
+{
+  #include "elf/arc-cpu.def"
+};
+
+/* Helper for parsing the CPU options.  Accept any of the ARC architectures
+   values.  OPTION should be a value passed to cpu=.  */
+
+static unsigned
+parse_cpu_option (const char *option)
+{
+  int i;
+
+  for (i = 0; cpu_types[i].name; ++i)
+    {
+      if (!disassembler_options_cmp (cpu_types[i].name, option))
+	{
+	  return cpu_types[i].flags;
+	}
+    }
+
+  fprintf (stderr, _("Unrecognised disassembler CPU option: %s\n"), option);
+  return ARC_OPCODE_NONE;
+}
+
 /* Go over the options list and parse it.  */
 
 static void
 parse_disassembler_options (const char *options)
 {
+  const char *option;
+
   if (options == NULL)
     return;
 
-  while (*options)
+  /* Disassembler might be reused for difference CPU's, and cpu option set for
+     the first one shouldn't be applied to second (which might not have
+     explicit cpu in its options.  Therefore it is required to reset enforced
+     CPU when new options are being parsed.  */
+  enforced_isa_mask = ARC_OPCODE_NONE;
+
+  FOR_EACH_DISASSEMBLER_OPTION (option, options)
     {
-      /* Skip empty options.  */
-      if (*options == ',')
-	{
-	  ++ options;
-	  continue;
-	}
-
-      parse_option (options);
-
-      while (*options != ',' && *options != '\0')
-	++ options;
+      /* A CPU option?  Cannot use STRING_COMMA_LEN because strncmp is also a
+	 preprocessor macro.  */
+      if (strncmp (option, "cpu=", 4) == 0)
+	/* Strip leading `cpu=`.  */
+	enforced_isa_mask = parse_cpu_option (option + 4);
+      else
+	parse_option (option);
     }
 }
 
@@ -859,7 +911,7 @@ print_insn_arc (bfd_vma memaddr,
   int status;
   unsigned int insn_len;
   unsigned long long insn = 0;
-  unsigned isa_mask;
+  unsigned isa_mask = ARC_OPCODE_NONE;
   const struct arc_opcode *opcode;
   bfd_boolean need_comma;
   bfd_boolean open_braket;
@@ -867,7 +919,6 @@ print_insn_arc (bfd_vma memaddr,
   const struct arc_operand *operand;
   int value;
   struct arc_operand_iterator iter;
-  Elf_Internal_Ehdr *header = NULL;
   struct arc_disassemble_info *arc_infop;
 
   if (info->disassembler_options)
@@ -885,34 +936,44 @@ print_insn_arc (bfd_vma memaddr,
   highbyte  = ((info->endian == BFD_ENDIAN_LITTLE) ? 1 : 0);
   lowbyte = ((info->endian == BFD_ENDIAN_LITTLE) ? 0 : 1);
 
-  if (info->section && info->section->owner)
-    header = elf_elfheader (info->section->owner);
-
-  switch (info->mach)
+  /* Figure out CPU type, unless it was enforced via disassembler options.  */
+  if (enforced_isa_mask == ARC_OPCODE_NONE)
     {
-    case bfd_mach_arc_arc700:
-      isa_mask = ARC_OPCODE_ARC700;
-      break;
+      Elf_Internal_Ehdr *header = NULL;
 
-    case bfd_mach_arc_arc600:
-      isa_mask = ARC_OPCODE_ARC600;
-      break;
+      if (info->section && info->section->owner)
+	header = elf_elfheader (info->section->owner);
 
-    case bfd_mach_arc_arcv2:
-    default:
-      isa_mask = ARC_OPCODE_ARCv2EM;
-      /* TODO: Perhaps remove defitinion of header since it is only used at
-	 this location.  */
-      if (header != NULL
-	  && (header->e_flags & EF_ARC_MACH_MSK) == EF_ARC_CPU_ARCV2HS)
+      switch (info->mach)
 	{
-	  isa_mask = ARC_OPCODE_ARCv2HS;
-	  /* FPU instructions are not extensions for HS.  */
-	  add_to_decodelist (FLOAT, SP);
-	  add_to_decodelist (FLOAT, DP);
-	  add_to_decodelist (FLOAT, CVT);
+	case bfd_mach_arc_arc700:
+	  isa_mask = ARC_OPCODE_ARC700;
+	  break;
+
+	case bfd_mach_arc_arc600:
+	  isa_mask = ARC_OPCODE_ARC600;
+	  break;
+
+	case bfd_mach_arc_arcv2:
+	default:
+	  isa_mask = ARC_OPCODE_ARCv2EM;
+	  /* TODO: Perhaps remove definition of header since it is only used at
+	     this location.  */
+	  if (header != NULL
+	      && (header->e_flags & EF_ARC_MACH_MSK) == EF_ARC_CPU_ARCV2HS)
+	    isa_mask = ARC_OPCODE_ARCv2HS;
+	  break;
 	}
-      break;
+    }
+  else
+    isa_mask = enforced_isa_mask;
+
+  if (isa_mask == ARC_OPCODE_ARCv2HS)
+    {
+      /* FPU instructions are not extensions for HS.  */
+      add_to_decodelist (FLOAT, SP);
+      add_to_decodelist (FLOAT, DP);
+      add_to_decodelist (FLOAT, CVT);
     }
 
   /* This variable may be set by the instruction decoder.  It suggests
@@ -1278,9 +1339,19 @@ arc_get_disassembler (bfd *abfd)
 void
 print_arc_disassembler_options (FILE *stream)
 {
+  int i;
+
   fprintf (stream, _("\n\
 The following ARC specific disassembler options are supported for use \n\
 with -M switch (multiple options should be separated by commas):\n"));
+
+  /* cpu=... options.  */
+  for (i = 0; cpu_types[i].name; ++i)
+    {
+      /* As of now all value CPU values are less than 16 characters.  */
+      fprintf (stream, "  cpu=%-16s\tEnforce %s ISA.\n",
+	       cpu_types[i].name, cpu_types[i].isa);
+    }
 
   fprintf (stream, _("\
   dsp             Recognize DSP instructions.\n"));

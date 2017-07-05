@@ -19,6 +19,7 @@
 #define COMMAND_H 1
 
 #include "gdb_vecs.h"
+#include "common/scoped_restore.h"
 
 /* This file defines the public interface for any code wanting to
    create commands.  */

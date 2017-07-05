@@ -35,6 +35,7 @@
 #include "value.h"
 #include "language.h"
 #include "terminal.h"		/* For job_control.  */
+#include "job-control.h"
 #include "annotate.h"
 #include "completer.h"
 #include "top.h"

@@ -1855,8 +1855,6 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
-  set_gdbarch_print_insn (gdbarch, print_insn_sparc);
-
   set_gdbarch_software_single_step (gdbarch, sparc_software_single_step);
   set_gdbarch_write_pc (gdbarch, sparc_write_pc);
 

@@ -2599,23 +2599,15 @@ coff_print_aux (bfd *abfd ATTRIBUTE_UNUSED,
       if (SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp) != XTY_LD)
 	{
 	  BFD_ASSERT (! aux->fix_scnlen);
-#ifdef XCOFF64
-	  fprintf (file, "val %5lld",
-		   (long long) aux->u.auxent.x_csect.x_scnlen.l);
-#else
-	  fprintf (file, "val %5ld", (long) aux->u.auxent.x_csect.x_scnlen.l);
-#endif
+	  fprintf (file, "val %5" BFD_VMA_FMT "d",
+		   aux->u.auxent.x_csect.x_scnlen.l);
 	}
       else
 	{
 	  fprintf (file, "indx ");
 	  if (! aux->fix_scnlen)
-#ifdef XCOFF64
-	    fprintf (file, "%4lld",
-		     (long long) aux->u.auxent.x_csect.x_scnlen.l);
-#else
-	    fprintf (file, "%4ld", (long) aux->u.auxent.x_csect.x_scnlen.l);
-#endif
+	    fprintf (file, "%4" BFD_VMA_FMT "d",
+		     aux->u.auxent.x_csect.x_scnlen.l);
 	  else
 	    fprintf (file, "%4ld",
 		     (long) (aux->u.auxent.x_csect.x_scnlen.p - table_base));
@@ -6059,6 +6051,10 @@ static bfd_coff_backend_data bigobj_swap_table =
 
 #ifndef coff_bfd_define_common_symbol
 #define coff_bfd_define_common_symbol	    bfd_generic_define_common_symbol
+#endif
+
+#ifndef coff_bfd_define_start_stop
+#define coff_bfd_define_start_stop	    bfd_generic_define_start_stop
 #endif
 
 #define CREATE_BIG_COFF_TARGET_VEC(VAR, NAME, EXTRA_O_FLAGS, EXTRA_S_FLAGS, UNDER, ALTERNATIVE, SWAP_TABLE)	\

@@ -184,6 +184,7 @@ if { [is_elf_format] } then {
 	run_dump_test "symtab"
     }
     run_dump_test "symver"
+    run_dump_test "pr21661"
 
     # No indirect functions on non-GNU targets.
     # The Visium and MSP set the ELF header's OSABI field to ELFOSABI_STANDALONE.

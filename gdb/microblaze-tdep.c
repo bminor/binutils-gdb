@@ -703,7 +703,7 @@ microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* Allocate space for the new architecture.  */
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   set_gdbarch_long_double_bit (gdbarch, 128);
@@ -737,8 +737,6 @@ microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				       microblaze_breakpoint::bp_from_kind);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
-
-  set_gdbarch_print_insn (gdbarch, print_insn_microblaze);
 
   set_gdbarch_write_pc (gdbarch, microblaze_write_pc);
 

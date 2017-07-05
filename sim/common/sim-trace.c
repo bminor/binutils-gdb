@@ -919,7 +919,11 @@ trace_disasm (SIM_DESC sd, sim_cpu *cpu, address_word addr)
   if (trace_data->dis_bfd != bfd)
     {
       trace_data->dis_bfd = bfd;
-      trace_data->disassembler = disassembler (trace_data->dis_bfd);
+      trace_data->disassembler
+	= disassembler (bfd_get_arch (trace_data->dis_bfd),
+			bfd_big_endian (trace_data->dis_bfd),
+			bfd_get_mach (trace_data->dis_bfd),
+			trace_data->dis_bfd);
       INIT_DISASSEMBLE_INFO (*info, cpu, dis_printf);
       info->read_memory_func = dis_read;
       info->arch = bfd_get_arch (bfd);

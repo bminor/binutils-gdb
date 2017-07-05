@@ -798,7 +798,7 @@ aarch64_reg_parse_32_64 (char **ccp, aarch64_opnd_qualifier_t *qualifier)
    succeeds; otherwise return FALSE.
 
    Accept only one occurrence of:
-   8b 16b 2h 4h 8h 2s 4s 1d 2d
+   4b 8b 16b 2h 4h 8h 2s 4s 1d 2d
    b h s d q  */
 static bfd_boolean
 parse_vector_type_for_operand (aarch64_reg_type reg_type,
@@ -859,8 +859,10 @@ elt_size:
 	first_error (_("missing element size"));
       return FALSE;
     }
-  if (width != 0 && width * element_size != 64 && width * element_size != 128
-      && !(width == 2 && element_size == 16))
+  if (width != 0 && width * element_size != 64
+      && width * element_size != 128
+      && !(width == 2 && element_size == 16)
+      && !(width == 4 && element_size == 8))
     {
       first_error_fmt (_
 		       ("invalid element size %d and vector size combination %c"),
@@ -6797,6 +6799,11 @@ static const reg_entry reg_names[] = {
   REGDEF (wzr, 31, Z_32), REGDEF (WZR, 31, Z_32),
   REGDEF (xzr, 31, Z_64), REGDEF (XZR, 31, Z_64),
 
+  REGDEF (ip0, 16, R_64), REGDEF (IP0, 16, R_64),
+  REGDEF (ip1, 17, R_64), REGDEF (IP1, 17, R_64),
+  REGDEF (fp, 29, R_64), REGDEF (FP, 29, R_64),
+  REGDEF (lr, 30, R_64), REGDEF (LR, 30, R_64),
+
   /* Floating-point single precision registers.  */
   REGSET (s, FP_S), REGSET (S, FP_S),
 
@@ -8390,6 +8397,12 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
 				  AARCH64_FEATURE_CRC), "Cortex-A72"},
   {"cortex-a73", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				  AARCH64_FEATURE_CRC), "Cortex-A73"},
+  {"cortex-a55", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16),
+				  "Cortex-A55"},
+  {"cortex-a75", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16),
+				  "Cortex-A75"},
   {"exynos-m1", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				 AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
 				"Samsung Exynos M1"},
@@ -8473,6 +8486,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
 			AARCH64_FEATURE (AARCH64_FEATURE_F16
 					 | AARCH64_FEATURE_SIMD, 0)},
   {"rcpc",		AARCH64_FEATURE (AARCH64_FEATURE_RCPC, 0),
+			AARCH64_ARCH_NONE},
+  {"dotprod",		AARCH64_FEATURE (AARCH64_FEATURE_DOTPROD, 0),
 			AARCH64_ARCH_NONE},
   {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };

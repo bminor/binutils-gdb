@@ -46,7 +46,7 @@ void buffer_free (struct buffer *buffer);
 /* Initialize BUFFER.  BUFFER holds no memory afterwards.  */
 void buffer_init (struct buffer *buffer);
 
-/* Return a pointer into BUFFER data, effectivelly transfering
+/* Return a pointer into BUFFER data, effectively transferring
    ownership of the buffer memory to the caller.  Calling buffer_free
    afterwards has no effect on the returned data.  */
 char* buffer_finish (struct buffer *buffer);

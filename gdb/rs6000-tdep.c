@@ -3233,14 +3233,6 @@ find_variant_by_arch (enum bfd_architecture arch, unsigned long mach)
   return NULL;
 }
 
-static int
-gdb_print_insn_powerpc (bfd_vma memaddr, disassemble_info *info)
-{
-  if (info->endian == BFD_ENDIAN_BIG)
-    return print_insn_big_powerpc (memaddr, info);
-  else
-    return print_insn_little_powerpc (memaddr, info);
-}
 
 static CORE_ADDR
 rs6000_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
@@ -6449,12 +6441,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
 
-  /* Select instruction printer.  */
-  if (arch == bfd_arch_rs6000)
-    set_gdbarch_print_insn (gdbarch, print_insn_rs6000);
-  else
-    set_gdbarch_print_insn (gdbarch, gdb_print_insn_powerpc);
-
   set_gdbarch_num_regs (gdbarch, PPC_NUM_REGS);
 
   if (have_spe)
@@ -6536,8 +6522,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_displaced_step_hw_singlestep (gdbarch,
 					    ppc_displaced_step_hw_singlestep);
   set_gdbarch_displaced_step_fixup (gdbarch, ppc_displaced_step_fixup);
-  set_gdbarch_displaced_step_free_closure (gdbarch,
-					   simple_displaced_step_free_closure);
   set_gdbarch_displaced_step_location (gdbarch,
 				       displaced_step_at_entry_point);
 

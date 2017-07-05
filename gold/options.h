@@ -1104,6 +1104,10 @@ class General_options
 	     N_("(PowerPC64 only) Align PLT call stubs to fit cache lines"),
 	     N_("[=P2ALIGN]"), true, int, int, options::parse_uint, false);
 
+  DEFINE_bool(plt_localentry, options::TWO_DASHES, '\0', false,
+	      N_("(PowerPC64 only) Optimize calls to ELFv2 localentry:0 functions"),
+	      N_("(PowerPC64 only) Don't optimize ELFv2 calls"));
+
   DEFINE_bool(plt_static_chain, options::TWO_DASHES, '\0', false,
 	      N_("(PowerPC64 only) PLT call stubs should load r11"),
 	      N_("(PowerPC64 only) PLT call stubs should not load r11"));

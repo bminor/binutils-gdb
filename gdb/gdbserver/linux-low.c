@@ -47,6 +47,9 @@
 #include "tracepoint.h"
 #include "hostio.h"
 #include <inttypes.h>
+#include "common-inferior.h"
+#include "nat/fork-inferior.h"
+#include "environ.h"
 #ifndef ELFMAG0
 /* Don't include <linux/elf.h> here.  If it got included by gdb_proc_service.h
    then ELFMAG0 will have been defined.  If it didn't get included by
@@ -946,59 +949,57 @@ add_lwp (ptid_t ptid)
   return lwp;
 }
 
+/* Callback to be used when calling fork_inferior, responsible for
+   actually initiating the tracing of the inferior.  */
+
+static void
+linux_ptrace_fun ()
+{
+  if (ptrace (PTRACE_TRACEME, 0, (PTRACE_TYPE_ARG3) 0,
+	      (PTRACE_TYPE_ARG4) 0) < 0)
+    trace_start_error_with_name ("ptrace");
+
+  if (setpgid (0, 0) < 0)
+    trace_start_error_with_name ("setpgid");
+
+  /* If GDBserver is connected to gdb via stdio, redirect the inferior's
+     stdout to stderr so that inferior i/o doesn't corrupt the connection.
+     Also, redirect stdin to /dev/null.  */
+  if (remote_connection_is_stdio ())
+    {
+      if (close (0) < 0)
+	trace_start_error_with_name ("close");
+      if (open ("/dev/null", O_RDONLY) < 0)
+	trace_start_error_with_name ("open");
+      if (dup2 (2, 1) < 0)
+	trace_start_error_with_name ("dup2");
+      if (write (2, "stdin/stdout redirected\n",
+		 sizeof ("stdin/stdout redirected\n") - 1) < 0)
+	{
+	  /* Errors ignored.  */;
+	}
+    }
+}
+
 /* Start an inferior process and returns its pid.
-   ALLARGS is a vector of program-name and args. */
+   PROGRAM is the name of the program to be started, and PROGRAM_ARGS
+   are its arguments.  */
 
 static int
-linux_create_inferior (char *program, char **allargs)
+linux_create_inferior (const char *program,
+		       const std::vector<char *> &program_args)
 {
   struct lwp_info *new_lwp;
   int pid;
   ptid_t ptid;
   struct cleanup *restore_personality
     = maybe_disable_address_space_randomization (disable_randomization);
+  std::string str_program_args = stringify_argv (program_args);
 
-#if defined(__UCLIBC__) && defined(HAS_NOMMU)
-  pid = vfork ();
-#else
-  pid = fork ();
-#endif
-  if (pid < 0)
-    perror_with_name ("fork");
-
-  if (pid == 0)
-    {
-      close_most_fds ();
-      ptrace (PTRACE_TRACEME, 0, (PTRACE_TYPE_ARG3) 0, (PTRACE_TYPE_ARG4) 0);
-
-      setpgid (0, 0);
-
-      /* If gdbserver is connected to gdb via stdio, redirect the inferior's
-	 stdout to stderr so that inferior i/o doesn't corrupt the connection.
-	 Also, redirect stdin to /dev/null.  */
-      if (remote_connection_is_stdio ())
-	{
-	  close (0);
-	  open ("/dev/null", O_RDONLY);
-	  dup2 (2, 1);
-	  if (write (2, "stdin/stdout redirected\n",
-		     sizeof ("stdin/stdout redirected\n") - 1) < 0)
-	    {
-	      /* Errors ignored.  */;
-	    }
-	}
-
-      restore_original_signals_state ();
-
-      execv (program, allargs);
-      if (errno == ENOENT)
-	execvp (program, allargs);
-
-      fprintf (stderr, "Cannot exec %s: %s.\n", program,
-	       strerror (errno));
-      fflush (stderr);
-      _exit (0177);
-    }
+  pid = fork_inferior (program,
+		       str_program_args.c_str (),
+		       get_environ ()->envp (), linux_ptrace_fun,
+		       NULL, NULL, NULL, NULL);
 
   do_cleanups (restore_personality);
 
@@ -1007,6 +1008,8 @@ linux_create_inferior (char *program, char **allargs)
   ptid = ptid_build (pid, pid, 0);
   new_lwp = add_lwp (ptid);
   new_lwp->must_set_ptrace_flags = 1;
+
+  post_fork_inferior (pid, program);
 
   return pid;
 }
@@ -5867,11 +5870,11 @@ static int
 linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
   int pid = lwpid_of (current_thread);
-  register PTRACE_XFER_TYPE *buffer;
-  register CORE_ADDR addr;
-  register int count;
+  PTRACE_XFER_TYPE *buffer;
+  CORE_ADDR addr;
+  int count;
   char filename[64];
-  register int i;
+  int i;
   int ret;
   int fd;
 
@@ -5955,16 +5958,16 @@ linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 static int
 linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 {
-  register int i;
+  int i;
   /* Round starting address down to longword boundary.  */
-  register CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
+  CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
   /* Round ending address up; get number of longwords that makes.  */
-  register int count
+  int count
     = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
     / sizeof (PTRACE_XFER_TYPE);
 
   /* Allocate buffer of that many longwords.  */
-  register PTRACE_XFER_TYPE *buffer = XALLOCAVEC (PTRACE_XFER_TYPE, count);
+  PTRACE_XFER_TYPE *buffer = XALLOCAVEC (PTRACE_XFER_TYPE, count);
 
   int pid = lwpid_of (current_thread);
 
@@ -6055,8 +6058,6 @@ linux_look_up_symbols (void)
 static void
 linux_request_interrupt (void)
 {
-  extern unsigned long signal_pid;
-
   /* Send a SIGINT to the process group.  This acts just like the user
      typed a ^C on the controlling terminal.  */
   kill (-signal_pid, SIGINT);

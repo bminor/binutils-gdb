@@ -121,9 +121,6 @@ extern void val_print_array_elements (struct type *, LONGEST,
 				      const struct value_print_options *,
 				      unsigned int);
 
-extern void val_print_type_code_int (struct type *, const gdb_byte *,
-				     struct ui_file *);
-
 extern void val_print_scalar_formatted (struct type *,
 					LONGEST,
 					struct value *,
@@ -132,16 +129,16 @@ extern void val_print_scalar_formatted (struct type *,
 					struct ui_file *);
 
 extern void print_binary_chars (struct ui_file *, const gdb_byte *,
-				unsigned int, enum bfd_endian);
+				unsigned int, enum bfd_endian, bool);
 
 extern void print_octal_chars (struct ui_file *, const gdb_byte *,
 			       unsigned int, enum bfd_endian);
 
 extern void print_decimal_chars (struct ui_file *, const gdb_byte *,
-				 unsigned int, enum bfd_endian);
+				 unsigned int, bool, enum bfd_endian);
 
 extern void print_hex_chars (struct ui_file *, const gdb_byte *,
-			     unsigned int, enum bfd_endian);
+			     unsigned int, enum bfd_endian, bool);
 
 extern void print_char_chars (struct ui_file *, struct type *,
 			      const gdb_byte *, unsigned int, enum bfd_endian);

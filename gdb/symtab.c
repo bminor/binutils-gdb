@@ -62,6 +62,7 @@
 #include "parser-defs.h"
 #include "completer.h"
 #include "progspace-and-thread.h"
+#include "common/gdb_optional.h"
 
 /* Forward declarations for local functions.  */
 
@@ -4299,9 +4300,7 @@ search_symbols (const char *regexp, enum search_domain kind,
   struct symbol_search *found;
   struct symbol_search *tail;
   int nfound;
-  /* This is true if PREG contains valid data, false otherwise.  */
-  bool preg_p;
-  regex_t preg;
+  gdb::optional<compiled_regex> preg;
 
   /* OLD_CHAIN .. RETVAL_CHAIN is always freed, RETVAL_CHAIN .. current
      CLEANUP_CHAIN is freed only in the case of an error.  */
@@ -4316,7 +4315,6 @@ search_symbols (const char *regexp, enum search_domain kind,
   ourtype4 = types4[kind];
 
   *matches = NULL;
-  preg_p = false;
 
   if (regexp != NULL)
     {
@@ -4355,18 +4353,9 @@ search_symbols (const char *regexp, enum search_domain kind,
 	    }
 	}
 
-      errcode = regcomp (&preg, regexp,
-			 REG_NOSUB | (case_sensitivity == case_sensitive_off
-				      ? REG_ICASE : 0));
-      if (errcode != 0)
-	{
-	  char *err = get_regcomp_error (errcode, &preg);
-
-	  make_cleanup (xfree, err);
-	  error (_("Invalid regexp (%s): %s"), err, regexp);
-	}
-      preg_p = true;
-      make_regfree_cleanup (&preg);
+      int cflags = REG_NOSUB | (case_sensitivity == case_sensitive_off
+				? REG_ICASE : 0);
+      preg.emplace (regexp, cflags, _("Invalid regexp"));
     }
 
   /* Search through the partial symtabs *first* for all symbols
@@ -4379,8 +4368,8 @@ search_symbols (const char *regexp, enum search_domain kind,
 			   },
 			   [&] (const char *symname)
 			   {
-			     return (!preg_p || regexec (&preg, symname,
-							 0, NULL, 0) == 0);
+			     return (!preg || preg->exec (symname,
+							  0, NULL, 0) == 0);
 			   },
 			   NULL,
 			   kind);
@@ -4415,9 +4404,9 @@ search_symbols (const char *regexp, enum search_domain kind,
 	    || MSYMBOL_TYPE (msymbol) == ourtype3
 	    || MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
-	    if (!preg_p
-		|| regexec (&preg, MSYMBOL_NATURAL_NAME (msymbol), 0,
-			    NULL, 0) == 0)
+	    if (!preg
+		|| preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
+			       NULL, 0) == 0)
 	      {
 		/* Note: An important side-effect of these lookup functions
 		   is to expand the symbol table if msymbol is found, for the
@@ -4459,9 +4448,9 @@ search_symbols (const char *regexp, enum search_domain kind,
 				       files, nfiles, 1))
 		     && file_matches (symtab_to_fullname (real_symtab),
 				      files, nfiles, 0)))
-		&& ((!preg_p
-		     || regexec (&preg, SYMBOL_NATURAL_NAME (sym), 0,
-				 NULL, 0) == 0)
+		&& ((!preg
+		     || preg->exec (SYMBOL_NATURAL_NAME (sym), 0,
+				    NULL, 0) == 0)
 		    && ((kind == VARIABLES_DOMAIN
 			 && SYMBOL_CLASS (sym) != LOC_TYPEDEF
 			 && SYMBOL_CLASS (sym) != LOC_UNRESOLVED
@@ -4517,9 +4506,8 @@ search_symbols (const char *regexp, enum search_domain kind,
 	    || MSYMBOL_TYPE (msymbol) == ourtype3
 	    || MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
-	    if (!preg_p
-		|| regexec (&preg, MSYMBOL_NATURAL_NAME (msymbol), 0,
-			    NULL, 0) == 0)
+	    if (!preg || preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
+				     NULL, 0) == 0)
 	      {
 		/* For functions we can do a quick check of whether the
 		   symbol might be found via find_pc_symtab.  */
@@ -4849,17 +4837,7 @@ do_free_completion_list (void *list)
   free_completion_list ((VEC (char_ptr) **) list);
 }
 
-/* Helper routine for make_symbol_completion_list.  */
-
 static VEC (char_ptr) *return_val;
-
-#define COMPLETION_LIST_ADD_SYMBOL(symbol, sym_text, len, text, word) \
-      completion_list_add_name \
-	(SYMBOL_NATURAL_NAME (symbol), (sym_text), (len), (text), (word))
-
-#define MCOMPLETION_LIST_ADD_SYMBOL(symbol, sym_text, len, text, word) \
-      completion_list_add_name \
-	(MSYMBOL_NATURAL_NAME (symbol), (sym_text), (len), (text), (word))
 
 /* Tracker for how many unique completions have been generated.  Used
    to terminate completion list generation early if the list has grown
@@ -4928,6 +4906,28 @@ completion_list_add_name (const char *symname,
 	break;
       }
   }
+}
+
+/* completion_list_add_name wrapper for struct symbol.  */
+
+static void
+completion_list_add_symbol (symbol *sym,
+			    const char *sym_text, int sym_text_len,
+			    const char *text, const char *word)
+{
+  completion_list_add_name (SYMBOL_NATURAL_NAME (sym),
+			    sym_text, sym_text_len, text, word);
+}
+
+/* completion_list_add_name wrapper for struct minimal_symbol.  */
+
+static void
+completion_list_add_msymbol (minimal_symbol *sym,
+			     const char *sym_text, int sym_text_len,
+			     const char *text, const char *word)
+{
+  completion_list_add_name (MSYMBOL_NATURAL_NAME (sym),
+			    sym_text, sym_text_len, text, word);
 }
 
 /* ObjC: In case we are completing on a selector, look as the msymbol
@@ -5080,7 +5080,7 @@ add_symtab_completions (struct compunit_symtab *cust,
 	  if (code == TYPE_CODE_UNDEF
 	      || (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 		  && TYPE_CODE (SYMBOL_TYPE (sym)) == code))
-	    COMPLETION_LIST_ADD_SYMBOL (sym,
+	    completion_list_add_symbol (sym,
 					sym_text, sym_text_len,
 					text, word);
 	}
@@ -5191,7 +5191,7 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
       ALL_MSYMBOLS (objfile, msymbol)
 	{
 	  QUIT;
-	  MCOMPLETION_LIST_ADD_SYMBOL (msymbol, sym_text, sym_text_len, text,
+	  completion_list_add_msymbol (msymbol, sym_text, sym_text_len, text,
 				       word);
 
 	  completion_list_objc_symbol (msymbol, sym_text, sym_text_len, text,
@@ -5238,14 +5238,14 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
 	  {
 	    if (code == TYPE_CODE_UNDEF)
 	      {
-		COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text,
+		completion_list_add_symbol (sym, sym_text, sym_text_len, text,
 					    word);
 		completion_list_add_fields (sym, sym_text, sym_text_len, text,
 					    word);
 	      }
 	    else if (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 		     && TYPE_CODE (SYMBOL_TYPE (sym)) == code)
-	      COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text,
+	      completion_list_add_symbol (sym, sym_text, sym_text_len, text,
 					  word);
 	  }
 

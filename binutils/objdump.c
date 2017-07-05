@@ -181,7 +181,7 @@ static long dynsymcount = 0;
 static bfd_byte *stabs;
 static bfd_size_type stab_size;
 
-static char *strtab;
+static bfd_byte *strtab;
 static bfd_size_type stabstr_size;
 
 static bfd_boolean is_relocatable = FALSE;
@@ -1918,20 +1918,23 @@ disassemble_bytes (struct disassemble_info * inf,
 
 	      for (j = addr_offset * opb; j < addr_offset * opb + pb; j += bpc)
 		{
-		  int k;
+		  /* PR 21580: Check for a buffer ending early.  */
+		  if (j + bpc <= stop_offset * opb)
+		    {
+		      int k;
 
-		  if (bpc > 1 && inf->display_endian == BFD_ENDIAN_LITTLE)
-		    {
-		      for (k = bpc - 1; k >= 0; k--)
-			printf ("%02x", (unsigned) data[j + k]);
-		      putchar (' ');
+		      if (inf->display_endian == BFD_ENDIAN_LITTLE)
+			{
+			  for (k = bpc - 1; k >= 0; k--)
+			    printf ("%02x", (unsigned) data[j + k]);
+			}
+		      else
+			{
+			  for (k = 0; k < bpc; k++)
+			    printf ("%02x", (unsigned) data[j + k]);
+			}
 		    }
-		  else
-		    {
-		      for (k = 0; k < bpc; k++)
-			printf ("%02x", (unsigned) data[j + k]);
-		      putchar (' ');
-		    }
+		  putchar (' ');
 		}
 
 	      for (; pb < octets_per_line; pb += bpc)
@@ -1979,20 +1982,23 @@ disassemble_bytes (struct disassemble_info * inf,
 		    pb = octets;
 		  for (; j < addr_offset * opb + pb; j += bpc)
 		    {
-		      int k;
+		      /* PR 21619: Check for a buffer ending early.  */
+		      if (j + bpc <= stop_offset * opb)
+			{
+			  int k;
 
-		      if (bpc > 1 && inf->display_endian == BFD_ENDIAN_LITTLE)
-			{
-			  for (k = bpc - 1; k >= 0; k--)
-			    printf ("%02x", (unsigned) data[j + k]);
-			  putchar (' ');
+			  if (inf->display_endian == BFD_ENDIAN_LITTLE)
+			    {
+			      for (k = bpc - 1; k >= 0; k--)
+				printf ("%02x", (unsigned) data[j + k]);
+			    }
+			  else
+			    {
+			      for (k = 0; k < bpc; k++)
+				printf ("%02x", (unsigned) data[j + k]);
+			    }
 			}
-		      else
-			{
-			  for (k = 0; k < bpc; k++)
-			    printf ("%02x", (unsigned) data[j + k]);
-			  putchar (' ');
-			}
+		      putchar (' ');
 		    }
 		}
 	    }
@@ -2172,9 +2178,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
     }
   rel_ppend = rel_pp + rel_count;
 
-  data = (bfd_byte *) xmalloc (datasize);
-
-  if (!bfd_get_section_contents (abfd, section, data, 0, datasize))
+  if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
       non_fatal (_("Reading section %s failed because: %s"),
 		 section->name, bfd_errmsg (bfd_get_error ()));
@@ -2386,7 +2390,9 @@ disassemble_data (bfd *abfd)
     }
 
   /* Use libopcodes to locate a suitable disassembler.  */
-  aux.disassemble_fn = disassembler (abfd);
+  aux.disassemble_fn = disassembler (bfd_get_arch (abfd),
+				     bfd_big_endian (abfd),
+				     bfd_get_mach (abfd), abfd);
   if (!aux.disassemble_fn)
     {
       non_fatal (_("can't disassemble for architecture %s\n"),
@@ -2694,12 +2700,11 @@ dump_dwarf (bfd *abfd)
 /* Read ABFD's stabs section STABSECT_NAME, and return a pointer to
    it.  Return NULL on failure.   */
 
-static char *
+static bfd_byte *
 read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
 {
   asection *stabsect;
-  bfd_size_type size;
-  char *contents;
+  bfd_byte *contents;
 
   stabsect = bfd_get_section_by_name (abfd, sect_name);
   if (stabsect == NULL)
@@ -2708,10 +2713,7 @@ read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
       return FALSE;
     }
 
-  size = bfd_section_size (abfd, stabsect);
-  contents  = (char *) xmalloc (size);
-
-  if (! bfd_get_section_contents (abfd, stabsect, contents, 0, size))
+  if (!bfd_malloc_and_get_section (abfd, stabsect, &contents))
     {
       non_fatal (_("reading %s section of %s failed: %s"),
 		 sect_name, bfd_get_filename (abfd),
@@ -2721,7 +2723,7 @@ read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
       return NULL;
     }
 
-  *size_ptr = size;
+  *size_ptr = bfd_section_size (abfd, stabsect);
 
   return contents;
 }
@@ -2848,8 +2850,7 @@ find_stabs_section (bfd *abfd, asection *section, void *names)
 
       if (strtab)
 	{
-	  stabs = (bfd_byte *) read_section_stabs (abfd, section->name,
-						   &stab_size);
+	  stabs = read_section_stabs (abfd, section->name, &stab_size);
 	  if (stabs)
 	    print_section_stabs (abfd, section->name, &sought->string_offset);
 	}
@@ -2977,7 +2978,7 @@ dump_target_specific (bfd *abfd)
 static void
 dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
 {
-  bfd_byte *data = 0;
+  bfd_byte *data = NULL;
   bfd_size_type datasize;
   bfd_vma addr_offset;
   bfd_vma start_offset;
@@ -3380,7 +3381,7 @@ dump_relocs_in_section (bfd *abfd,
     }
 
   if ((bfd_get_file_flags (abfd) & (BFD_IN_MEMORY | BFD_LINKER_CREATED)) == 0
-      && relsize > get_file_size (bfd_get_filename (abfd)))
+      && (ufile_ptr) relsize > bfd_get_file_size (abfd))
     {
       printf (" (too many: 0x%x)\n", section->reloc_count);
       bfd_set_error (bfd_error_file_truncated);

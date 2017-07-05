@@ -587,7 +587,6 @@ expression_completer (struct cmd_list_element *ignore,
 {
   struct type *type = NULL;
   char *fieldname;
-  const char *p;
   enum type_code code = TYPE_CODE_UNDEF;
 
   /* Perform a tentative parse of the expression, to see whether a
@@ -635,15 +634,8 @@ expression_completer (struct cmd_list_element *ignore,
     }
   xfree (fieldname);
 
-  /* Commands which complete on locations want to see the entire
-     argument.  */
-  for (p = word;
-       p > text && p[-1] != ' ' && p[-1] != '\t';
-       p--)
-    ;
-
   /* Not ideal but it is what we used to do before...  */
-  return location_completer (ignore, p, word);
+  return linespec_location_completer (ignore, text, word);
 }
 
 /* See definition in completer.h.  */

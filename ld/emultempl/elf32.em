@@ -1216,6 +1216,8 @@ gld${EMULATION_NAME}_after_open (void)
 {
   struct bfd_link_needed_list *needed, *l;
   struct elf_link_hash_table *htab;
+  asection *s;
+  bfd *abfd;
 
   after_open_default ();
 
@@ -1239,13 +1241,12 @@ gld${EMULATION_NAME}_after_open (void)
 
   if (emit_note_gnu_build_id != NULL)
     {
-      bfd *abfd;
-
       /* Find an ELF input.  */
       for (abfd = link_info.input_bfds;
 	   abfd != (bfd *) NULL; abfd = abfd->link.next)
 	if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
-	    && bfd_count_sections (abfd) != 0)
+	    && bfd_count_sections (abfd) != 0
+	    && !((lang_input_statement_type *) abfd->usrdata)->flags.just_syms)
 	  break;
 
       /* PR 10555: If there are no ELF input files do not try to
@@ -1278,14 +1279,17 @@ gld${EMULATION_NAME}_after_open (void)
 
   if (!link_info.traditional_format)
     {
-      bfd *abfd, *elfbfd = NULL;
+      bfd *elfbfd = NULL;
       bfd_boolean warn_eh_frame = FALSE;
-      asection *s;
       int seen_type = 0;
 
       for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
 	{
 	  int type = 0;
+
+	  if (((lang_input_statement_type *) abfd->usrdata)->flags.just_syms)
+	    continue;
+
 	  for (s = abfd->sections; s && type < COMPACT_EH_HDR; s = s->next)
 	    {
 	      const char *name = bfd_get_section_name (abfd, s);
@@ -1324,9 +1328,6 @@ gld${EMULATION_NAME}_after_open (void)
 
 	  if (seen_type == COMPACT_EH_HDR)
 	    link_info.eh_frame_hdr_type = COMPACT_EH_HDR;
-
-	  if (bfd_count_sections (abfd) == 0)
-	    continue;
 	}
       if (elfbfd)
 	{

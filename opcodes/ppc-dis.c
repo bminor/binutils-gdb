@@ -21,7 +21,7 @@
 
 #include "sysdep.h"
 #include <stdio.h>
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "elf-bfd.h"
 #include "elf/ppc.h"
 #include "opintl.h"

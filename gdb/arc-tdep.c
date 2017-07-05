@@ -145,6 +145,8 @@ static const char *const core_arcompact_register_names[] = {
   "lp_count", "reserved", "limm", "pcl",
 };
 
+static char *arc_disassembler_options = NULL;
+
 /* Functions are sorted in the order as they are used in the
    _initialize_arc_tdep (), which uses the same order as gdbarch.h.  Static
    functions are defined before the first invocation.  */
@@ -1405,12 +1407,34 @@ arc_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 int
 arc_delayed_print_insn (bfd_vma addr, struct disassemble_info *info)
 {
-  int (*print_insn) (bfd_vma, struct disassemble_info *);
-  /* exec_bfd may be null, if GDB is run without a target BFD file.  Opcodes
-     will handle NULL value gracefully.  */
-  print_insn = arc_get_disassembler (exec_bfd);
-  gdb_assert (print_insn != NULL);
-  return print_insn (addr, info);
+  /* Standard BFD "machine number" field allows libocodes disassembler to
+     distinguish ARC 600, 700 and v2 cores, however v2 encompasses both ARC EM
+     and HS, which have some difference between.  There are two ways to specify
+     what is the target core:
+     1) via the disassemble_info->disassembler_options;
+     2) otherwise libopcodes will use private (architecture-specific) ELF
+     header.
+
+     Using disassembler_options is preferable, because it comes directly from
+     GDBserver which scanned an actual ARC core identification info.  However,
+     not all GDBservers report core architecture, so as a fallback GDB still
+     should support analysis of ELF header.  The libopcodes disassembly code
+     uses the section to find the BFD and the BFD to find the ELF header,
+     therefore this function should set disassemble_info->section properly.
+
+     disassembler_options was already set by non-target specific code with
+     proper options obtained via gdbarch_disassembler_options ().
+
+     This function might be called multiple times in a sequence, reusing same
+     disassemble_info.  */
+  if ((info->disassembler_options == NULL) && (info->section == NULL))
+    {
+      struct obj_section *s = find_pc_section (addr);
+      if (s != NULL)
+	info->section = s->the_bfd_section;
+    }
+
+  return default_print_insn (addr, info);
 }
 
 /* Baremetal breakpoint instructions.
@@ -2042,6 +2066,31 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   if (tdep->jb_pc >= 0)
     set_gdbarch_get_longjmp_target (gdbarch, arc_get_longjmp_target);
+
+  /* Disassembler options.  Enforce CPU if it was specified in XML target
+     description, otherwise use default method of determining CPU (ELF private
+     header).  */
+  if (info.target_desc != NULL)
+    {
+      const struct bfd_arch_info *tdesc_arch
+	= tdesc_architecture (info.target_desc);
+      if (tdesc_arch != NULL)
+	{
+	  xfree (arc_disassembler_options);
+	  /* FIXME: It is not really good to change disassembler options
+	     behind the scene, because that might override options
+	     specified by the user.  However as of now ARC doesn't support
+	     `set disassembler-options' hence this code is the only place
+	     where options are changed.  It also changes options for all
+	     existing gdbarches, which also can be problematic, if
+	     arc_gdbarch_init will start reusing existing gdbarch
+	     instances.  */
+	  arc_disassembler_options = xstrprintf ("cpu=%s",
+						 tdesc_arch->printable_name);
+	  set_gdbarch_disassembler_options (gdbarch,
+					    &arc_disassembler_options);
+	}
+    }
 
   tdesc_use_registers (gdbarch, tdesc, tdesc_data);
 

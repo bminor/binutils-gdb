@@ -1777,7 +1777,7 @@ static int
 aarch64_gdb_print_insn (bfd_vma memaddr, disassemble_info *info)
 {
   info->symbols = NULL;
-  return print_insn_aarch64 (memaddr, info);
+  return default_print_insn (memaddr, info);
 }
 
 /* AArch64 BRK software debug mode instruction.
@@ -1987,7 +1987,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
       for (i = 0; i < elements; i++)
 	{
 	  int regno = AARCH64_V0_REGNUM + i;
-	  bfd_byte tmpbuf[MAX_REGISTER_SIZE];
+	  bfd_byte tmpbuf[V_REGISTER_SIZE];
 
 	  if (aarch64_debug)
 	    {
@@ -2241,7 +2241,7 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch,
 			   struct regcache *regcache,
 			   int regnum)
 {
-  gdb_byte reg_buf[MAX_REGISTER_SIZE];
+  gdb_byte reg_buf[V_REGISTER_SIZE];
   struct value *result_value;
   gdb_byte *buf;
 
@@ -2336,7 +2336,7 @@ static void
 aarch64_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 		      int regnum, const gdb_byte *buf)
 {
-  gdb_byte reg_buf[MAX_REGISTER_SIZE];
+  gdb_byte reg_buf[V_REGISTER_SIZE];
 
   /* Ensure the register buffer is zero, we want gdb writes of the
      various 'scalar' pseudo registers to behavior like architectural

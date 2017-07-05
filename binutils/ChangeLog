@@ -1,3 +1,205 @@
+2017-07-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (display_debug_names): Replace index with xindex.
+
+2017-07-04  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2017-07-04  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.29.
+
+2017-07-03  Tristan Gingold  <gingold@adacore.com>
+
+	* po/binutils.pot: Regenerate.
+
+2017-07-03  Alan Modra  <amodra@gmail.com>
+
+	* strings.c (filename_and_size_t): Delete.
+	(strings_a_section): Don't check section size against file size.
+	Use bdf_malloc_and_get_section.  Report an error on failures.
+	Replace arg param with filename and got_a_section param.
+	(got_a_section): Move to..
+	(strings_object_file): ..an auto var here.  Iterate over sections
+	rather than calling bfd_map_over_sections.  Adjust strings_a_section
+	call.
+
+2017-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf.c: Include assert.h.
+	(MAX, MIN, get_IDX_name, display_debug_names): New.
+	(debug_displays): Add .debug_names.
+	* dwarf.h: (enum dwarf_section_display_enum): Add debug_names.
+	* readelf.c (process_section_headers): Add ".debug_names".
+
+2017-07-01  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/21665
+	* objdump.c (strtab): Make var a bfd_byte*.
+	(disassemble_section): Don't limit malloc size.  Instead, use
+	bfd_malloc_and_get_section.
+	(read_section_stabs): Use bfd_malloc_and_get_section.  Return
+	bfd_byte*.
+	(find_stabs_section): Remove now unnecessary cast.
+	* objcopy.c (copy_object): Use bfd_malloc_and_get_section.  Free
+	contents on error return.
+	* nlmconv.c (copy_sections): Use bfd_malloc_and_get_section.
+
+2017-06-30  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21665
+	* objdump.c (disassemble_section): Move check for an overlarge
+	section to just before the allocation of memory.  Do not check
+	section size against file size, but instead use an arbitrary 2Gb
+	limit.  Issue a warning message if the section is too big.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* NEWS: Mention microMIPS XPA support.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* NEWS: Mention microMIPS Release 5 ISA support.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/binutils-all/mips/mips-xpa-virt-1.d: New test.
+	* testsuite/binutils-all/mips/mips-xpa-virt-2.d: New test.
+	* testsuite/binutils-all/mips/mips-xpa-virt-3.d: New test.
+	* testsuite/binutils-all/mips/mips-xpa-virt-4.d: New test.
+	* testsuite/binutils-all/mips/mips-xpa-virt.s: New test source.
+	* testsuite/binutils-all/mips/mips.exp: Run the new tests.
+
+2017-06-29  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* testsuite/binutils-all/arc/double_store.s: New file.
+	* testsuite/binutils-all/arc/objdump.exp: Tests for disassembler
+	options.
+	(do_objfile): New function.
+	(check_assembly): Likewise.
+
+2017-06-29  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* readelf.c (get_note_type): Add NT_S390_GS_CB and NT_S390_GS_BC.
+
+2017-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objdump.c (dump_relocs_in_section): Cast to ufile_ptr when
+	comparing against bfd_get_file_size return.
+
+2017-06-28  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (merge_gnu_build_notes): Add support for version 2 notes.
+	* readelf.c (print_gnu_build_attribute_name): Likewise.
+
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* readelf.c (get_machine_flags) <E_MIPS_MACH_IAMR2>: New case.
+	(print_mips_isa_ext) <AFL_EXT_INTERAPTIV_MR2>: Likewise.
+	* NEWS: Mention Imagination interAptiv MR2 processor support.
+
+2017-06-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21665
+	* objdump.c (disassemble_section): Skip any section that is bigger
+	than the entire file.
+
+2017-06-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21659
+	* bucomm.c (get_file_size): Explicitly warn if the file is a
+	directory.
+
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* readelf.c (arm_attr_tag_CPU_arch): Fill value for ARMv8-R.
+
+2017-06-23  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21659
+	* strings.c (strings_file): Warn about attempts to run strings on
+	a directory.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (decode_x86_feature): Decode
+	GNU_PROPERTY_X86_FEATURE_1_SHSTK.
+	* testsuite/binutils-all/i386/shstk.d: New file.
+	* testsuite/binutils-all/i386/shstk.s: Likewise.
+	* testsuite/binutils-all/x86-64/shstk-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/shstk.d: Likewise.
+	* testsuite/binutils-all/x86-64/shstk.s: Likewise.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (decode_x86_feature): New.
+	(print_gnu_property_note): Call decode_x86_feature on
+	GNU_PROPERTY_X86_FEATURE_1_AND.
+	* testsuite/binutils-all/i386/empty.d: New file.
+	* testsuite/binutils-all/i386/empty.s: Likewise.
+	* testsuite/binutils-all/i386/ibt.d: Likewise.
+	* testsuite/binutils-all/i386/ibt.s: Likewise.
+	* testsuite/binutils-all/x86-64/empty-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/empty.d: Likewise.
+	* testsuite/binutils-all/x86-64/empty.s: Likewise.
+	* testsuite/binutils-all/x86-64/ibt-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/ibt.d: Likewise.
+	* testsuite/binutils-all/x86-64/ibt.s: Likewise.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (READ_ULEB): Use DWARF_VMA_FMT to report error.
+	(READ_SLEB): Likewise.
+
+2017-06-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21648
+	* dwarf.c (LEB): Rename to SKIP_ULEB and READ_ULEB.  Add check for
+	reading a value that is too big for the containing variable.
+	(SLEB): Rename to SKIP_SLEB and READ_SLEB.  Add similar check.
+	Replace uses of LEB and SLEB with appropriate new macro.
+	(display_debug_frames): Use an unsigned int for the 'reg'
+	variable.  Use a signed long for the 'l' variable.
+
+2017-06-20  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* readelf.c (get_s390_segment_type): Add support for the new
+	segment type PT_S390_PGSTE.
+	(get_segment_type): Call get_s390_segment_type.
+
+2017-06-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21619
+	* objdump.c (disassemble_bytes): Check that there is sufficient
+	data available before attempting to display it.
+
+2017-06-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* sysinfo.y: Free memory allocated by token NAME.
+
+2017-05-30  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* doc/binutils.texi: Document new cpu=... disassembler options for ARC.
+
+2017-05-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/21519
+	* objdump.c (dump_relocs_in_section): Replace get_file_size
+	with bfd_get_file_size to get archive element size.
+	* testsuite/binutils-all/objdump.exp (test_objdump_f): New
+	proc.
+	(test_objdump_h): Likewise.
+	(test_objdump_t): Likewise.
+	(test_objdump_r): Likewise.
+	(test_objdump_s): Likewise.
+	Add objdump tests on archive.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* objdump.c (disassemble_data): Caller update.
+
 2017-05-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* objcopy.c (merge_gnu_build_notes): Remove workaround that

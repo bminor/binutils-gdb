@@ -1,3 +1,136 @@
+2017-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2.def (DW_IDX_compile_unit, DW_IDX_type_unit, DW_IDX_die_offset)
+	(DW_IDX_parent, DW_IDX_type_hash, DW_IDX_lo_user, DW_IDX_hi_user)
+	(DW_IDX_GNU_internal, DW_IDX_GNU_external): New.
+	* dwarf2.h (DW_IDX, DW_IDX_DUP, DW_FIRST_IDX, DW_END_IDX): New.
+	(enum dwarf_name_index_attribute): Remove.
+	(get_DW_IDX_name): New declaration.
+
+2017-06-30  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR gas/21683
+	* opcode/avr.h (AVR_INSN): Add one for __gcc_isr.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* opcode/mips.h (ASE_XPA_VIRT): New macro.
+
+2017-06-29  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* elf/common.h (NT_S390_GS_CB): New macro.
+	(NT_S390_GS_BC): Likewise.
+
+2017-06-28  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcode/aarch64.h: (AARCH64_FEATURE_DOTPROD): New.
+	(aarch64_insn_class): Added dotprod.
+
+2017-06-28  Jiong Wang  <jiong.wang@arm.com>
+
+	* opcode/arm.h (FPU_NEON_EXT_DOTPROD): New macro.
+	(FPU_ARCH_DOTPROD_NEON_VFP_ARMV8): New macro.
+
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* elf/mips.h (E_MIPS_MACH_IAMR2): New macro.
+	(AFL_EXT_INTERAPTIV_MR2): Likewise.
+	* opcode/mips.h: Document new operand codes defined.
+	(INSN_INTERAPTIV_MR2): New macro.
+	(INSN_CHIP_MASK): Adjust accordingly.
+	(CPU_INTERAPTIV_MR2): New macro.
+	(cpu_is_member) <CPU_INTERAPTIV_MR2>: New case.
+	(MIPS16_ALL_ARGS): Rename to...
+	(MIPS_SVRS_ALL_ARGS): ... this.
+	(MIPS16_ALL_STATICS): Rename to...
+	(MIPS_SVRS_ALL_STATICS): ... this.
+
+2017-06-26  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* elf/riscv.h (R_RISCV_32_PCREL): New.
+
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf/arm.h (TAG_CPU_ARCH_V8R): New macro.
+	* opcode/arm.h (ARM_EXT2_V8A): New macro.
+	(ARM_AEXT2_V8A): Rename into ...
+	(ARM_AEXT2_V8AR): This.
+	(ARM_AEXT2_V8A): New macro.
+	(ARM_AEXT_V8R): New macro.
+	(ARM_AEXT2_V8R): New macro.
+	(ARM_ARCH_V8R): New macro.
+
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* opcode/arm.h (ARM_AEXT_V4TxM): Add ARM_EXT_OS bit to the set.
+	(ARM_AEXT_V4T): Likewise.
+	(ARM_AEXT_V5TxM): Likewise.
+	(ARM_AEXT_V5T): Likewise.
+	(ARM_AEXT_V6M): Mask off ARM_EXT_OS bit.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfdlink.h (bfd_link_info): Add shstk.
+	* elf/common.h (GNU_PROPERTY_X86_FEATURE_1_SHSTK): New.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfdlink.h (bfd_link_info): Add ibtplt and ibt.
+	* elf/common.h (GNU_PROPERTY_X86_FEATURE_1_AND): New.
+	(GNU_PROPERTY_X86_FEATURE_1_IBT): Likewise.
+
+2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* opcode/arm.h (FPU_ANY): New macro.
+
+2017-06-20  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf/s390.h (PT_S390_PGSTE): Define macro.
+
+2017-06-16  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20022
+	PR ld/21557
+	PR ld/21562
+	PR ld/21571
+	* bfdlink.h (struct bfd_link_hash_entry): Delete undef.section.
+
+2017-06-14  Yao Qi  <yao.qi@linaro.org>
+
+	* dis-asm.h (print_insn_aarch64): Move it to opcodes/disassemble.h.
+	(print_insn_big_arm, print_insn_big_mips): Likewise.
+	(print_insn_i386, print_insn_ia64): Likewise.
+	(print_insn_little_arm, print_insn_little_mips): Likewise.
+	(print_insn_spu): Likewise.
+
+2017-06-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* bfdlink.h (struct bfd_link_info): Add new resolve_section_groups
+	flag.
+
+2017-06-01  Alan Modra  <amodra@gmail.com>
+
+	* elf/ppc64.h (PPC64_OPT_LOCALENTRY): Define.
+
+2017-05-31  Eli Zaretskii <eliz@gnu.org>
+
+	* environ.h: Add #ifndef guard.
+
+2017-05-30  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* elf/arc-cpu.def: New file.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* dis-asm.h: Move some function declarations to
+	opcodes/disassemble.h.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* dis-asm.h (disassembler): Update declaration.
+
 2017-05-23  Claudiu Zissulescu <claziss@synopsys.com>
 
 	* opcode/arc.h (MAX_INSN_FLGS): Update to 4.

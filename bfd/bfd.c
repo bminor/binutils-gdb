@@ -612,7 +612,9 @@ CODE_FRAGMENT
 static const char *_bfd_error_program_name;
 
 /* This macro and _doprnt taken from libiberty _doprnt.c, tidied a
-   little and extended to handle '%A' and '%B'.  */
+   little and extended to handle '%A' and '%B'.  'L' as a modifer for
+   integer formats is used for bfd_vma and bfd_size_type args, which
+   vary in size depending on BFD configuration.  */
 
 #define PRINT_TYPE(TYPE) \
   do								\
@@ -721,6 +723,12 @@ _doprnt (FILE *stream, const char *format, va_list ap)
 		  PRINT_TYPE (int);
 		else
 		  {
+		    /* L modifier for bfd_vma or bfd_size_type may be
+		       either long long or long.  */
+		    if ((BFD_ARCH_SIZE < 64 || BFD_HOST_64BIT_LONG)
+			&& sptr[-2] == 'L')
+		      wide_width = 1;
+
 		    switch (wide_width)
 		      {
 		      case 0:
@@ -731,7 +739,17 @@ _doprnt (FILE *stream, const char *format, va_list ap)
 			break;
 		      case 2:
 		      default:
-#if defined(__GNUC__) || defined(HAVE_LONG_LONG)
+#if defined (__GNUC__) || defined (HAVE_LONG_LONG)
+# if defined (__MSVCRT__)
+			sptr--;
+			while (sptr[-1] == 'L' || sptr[-1] == 'l')
+			  sptr--;
+			*sptr++ = 'I';
+			*sptr++ = '6';
+			*sptr++ = '4';
+			*sptr++ = ptr[-1];
+			*sptr = '\0';
+# endif
 			PRINT_TYPE (long long);
 #else
 			/* Fake it and hope for the best.  */
@@ -752,7 +770,7 @@ _doprnt (FILE *stream, const char *format, va_list ap)
 		  PRINT_TYPE (double);
 		else
 		  {
-#if defined(__GNUC__) || defined(HAVE_LONG_DOUBLE)
+#if defined (__GNUC__) || defined (HAVE_LONG_DOUBLE)
 		    PRINT_TYPE (long double);
 #else
 		    /* Fake it and hope for the best.  */
@@ -1363,7 +1381,7 @@ bfd_scan_vma (const char *string, const char **end, int base)
   if (sizeof (bfd_vma) <= sizeof (unsigned long))
     return strtoul (string, (char **) end, base);
 
-#ifdef HAVE_STRTOULL
+#if defined (HAVE_STRTOULL) && defined (HAVE_LONG_LONG)
   if (sizeof (bfd_vma) <= sizeof (unsigned long long))
     return strtoull (string, (char **) end, base);
 #endif

@@ -1000,7 +1000,7 @@ proc gdb_test { args } {
     }
 
     return [gdb_test_multiple $command $message {
-	-re "\[\r\n\]*($pattern)\[\r\n\]+$gdb_prompt $" {
+	-re "\[\r\n\]*(?:$pattern)\[\r\n\]+$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		pass "$message"
             }
@@ -5669,6 +5669,19 @@ proc set_remotetimeout { timeout } {
 	    verbose "Set remotetimeout to $timeout\n"
 	}
     }
+}
+
+# Get the target's current endianness and return it.
+proc get_endianness { } {
+    global gdb_prompt
+
+    gdb_test_multiple "show endian" "determine endianness" {
+	-re ".* (little|big) endian.*\r\n$gdb_prompt $" {
+	    # Pass silently.
+	    return $expect_out(1,string)
+	}
+    }
+    return "little"
 }
 
 # ROOT and FULL are file names.  Returns the relative path from ROOT

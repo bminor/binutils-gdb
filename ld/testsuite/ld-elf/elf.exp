@@ -178,6 +178,10 @@ if { [check_shared_lib_support] } then {
 	    {pr20995a.s} {{readelf {-S --wide} pr20995.r}} "pr20995-2"]]
 }
 
+if [is_underscore_target] {
+    set ASFLAGS "$ASFLAGS --defsym UNDERSCORE=1"
+}
+
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 foreach t $test_list {
     # We need to strip the ".d", but can leave the dirname.

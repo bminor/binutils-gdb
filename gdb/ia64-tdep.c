@@ -125,6 +125,9 @@ static CORE_ADDR ia64_find_global_pointer (struct gdbarch *gdbarch,
 
 #define NUM_IA64_RAW_REGS 462
 
+/* Big enough to hold a FP register in bytes.  */
+#define IA64_FP_REGISTER_SIZE 16
+
 static int sp_regnum = IA64_GR12_REGNUM;
 
 /* NOTE: we treat the register stack registers r32-r127 as
@@ -1218,6 +1221,7 @@ static int
 ia64_convert_register_p (struct gdbarch *gdbarch, int regno, struct type *type)
 {
   return (regno >= IA64_FR0_REGNUM && regno <= IA64_FR127_REGNUM
+	  && TYPE_CODE (type) == TYPE_CODE_FLT
 	  && type != ia64_ext_type (gdbarch));
 }
 
@@ -1227,7 +1231,7 @@ ia64_register_to_value (struct frame_info *frame, int regnum,
 			int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  gdb_byte in[MAX_REGISTER_SIZE];
+  gdb_byte in[IA64_FP_REGISTER_SIZE];
 
   /* Convert to TYPE.  */
   if (!get_frame_register_bytes (frame, regnum, 0,
@@ -1245,7 +1249,7 @@ ia64_value_to_register (struct frame_info *frame, int regnum,
                          struct type *valtype, const gdb_byte *in)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  gdb_byte out[MAX_REGISTER_SIZE];
+  gdb_byte out[IA64_FP_REGISTER_SIZE];
   convert_typed_floating (in, valtype, out, ia64_ext_type (gdbarch));
   put_frame_register (frame, regnum, out);
 }
@@ -3208,7 +3212,7 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache,
   float_elt_type = is_float_or_hfa_type (type);
   if (float_elt_type != NULL)
     {
-      gdb_byte from[MAX_REGISTER_SIZE];
+      gdb_byte from[IA64_FP_REGISTER_SIZE];
       int offset = 0;
       int regnum = IA64_FR8_REGNUM;
       int n = TYPE_LENGTH (type) / TYPE_LENGTH (float_elt_type);
@@ -3273,7 +3277,7 @@ ia64_store_return_value (struct type *type, struct regcache *regcache,
   float_elt_type = is_float_or_hfa_type (type);
   if (float_elt_type != NULL)
     {
-      gdb_byte to[MAX_REGISTER_SIZE];
+      gdb_byte to[IA64_FP_REGISTER_SIZE];
       int offset = 0;
       int regnum = IA64_FR8_REGNUM;
       int n = TYPE_LENGTH (type) / TYPE_LENGTH (float_elt_type);
@@ -3835,7 +3839,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  len = TYPE_LENGTH (type);
 	  while (len > 0 && floatreg < IA64_FR16_REGNUM)
 	    {
-	      gdb_byte to[MAX_REGISTER_SIZE];
+	      gdb_byte to[IA64_FP_REGISTER_SIZE];
 	      convert_typed_floating (value_contents (arg) + argoffset,
 				      float_elt_type, to,
 				      ia64_ext_type (gdbarch));
@@ -3922,7 +3926,7 @@ static int
 ia64_print_insn (bfd_vma memaddr, struct disassemble_info *info)
 {
   info->bytes_per_line = SLOT_MULTIPLIER;
-  return print_insn_ia64 (memaddr, info);
+  return default_print_insn (memaddr, info);
 }
 
 /* The default "size_of_register_frame" gdbarch_tdep routine for ia64.  */

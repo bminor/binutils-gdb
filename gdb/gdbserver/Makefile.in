@@ -65,7 +65,7 @@ depcomp = $(SHELL) $(srcdir)/../depcomp
 
 # Note that these are overridden by GNU make-specific code below if
 # GNU make is used.  The overrides implement dependency tracking.
-COMPILE.pre = $(CXX) $(CXX_DIALECT)
+COMPILE.pre = $(CXX) -x c++ $(CXX_DIALECT)
 COMPILE.post = -c -o $@
 COMPILE = $(COMPILE.pre) $(INTERNAL_CFLAGS) $(COMPILE.post)
 POSTCOMPILE = @true
@@ -204,6 +204,7 @@ SFILES = \
 	$(srcdir)/common/environ.c \
 	$(srcdir)/common/fileio.c \
 	$(srcdir)/common/filestuff.c \
+	$(srcdir)/common/job-control.c \
 	$(srcdir)/common/gdb_vecs.c \
 	$(srcdir)/common/new-op.c \
 	$(srcdir)/common/print-utils.c \
@@ -217,6 +218,7 @@ SFILES = \
 	$(srcdir)/nat/linux-personality.c \
 	$(srcdir)/nat/mips-linux-watch.c \
 	$(srcdir)/nat/ppc-linux.c \
+	$(srcdir)/nat/fork-inferior.c \
 	$(srcdir)/target/waitstatus.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
@@ -234,6 +236,7 @@ OBS = \
 	cleanups.o \
 	common-debug.o \
 	common-exceptions.o \
+	job-control.o \
 	common-regcache.o \
 	common-utils.o \
 	debug.o \
@@ -384,9 +387,18 @@ gdbreplay$(EXEEXT): $(GDBREPLAY_OBS) $(LIBGNU) $(LIBIBERTY)
 	$(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
 	  $(XM_CLIBS) $(LIBGNU) $(LIBIBERTY)
 
-IPA_OBJS = ax-ipa.o tracepoint-ipa.o format-ipa.o utils-ipa.o \
-	regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o \
-	tdesc-ipa.o print-utils-ipa.o rsp-low-ipa.o errors-ipa.o \
+IPA_OBJS = \
+	ax-ipa.o \
+	common-utils-ipa.o \
+	errors-ipa.o \
+	format-ipa.o \
+	print-utils-ipa.o \
+	regcache-ipa.o \
+	remote-utils-ipa.o \
+	rsp-low-ipa.o \
+	tdesc-ipa.o \
+	tracepoint-ipa.o \
+	utils-ipa.o \
 	${IPA_DEPFILES}
 
 IPA_LIB = libinproctrace.so

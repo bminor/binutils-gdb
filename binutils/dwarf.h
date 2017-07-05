@@ -99,6 +99,7 @@ enum dwarf_section_display_enum
   types,
   weaknames,
   gdb_index,
+  debug_names,
   trace_info,
   trace_abbrev,
   trace_aranges,

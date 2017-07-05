@@ -2450,7 +2450,9 @@ v850_elf_copy_notes (bfd *ibfd, bfd *obfd)
 	BFD_ASSERT (bfd_malloc_and_get_section (ibfd, inotes, & icont));
 
       if ((ocont = elf_section_data (onotes)->this_hdr.contents) == NULL)
-	BFD_ASSERT (bfd_malloc_and_get_section (obfd, onotes, & ocont));
+	/* If the output is being stripped then it is possible for
+	   the notes section to disappear.  In this case do nothing.  */
+	return;
 
       /* Copy/overwrite notes from the input to the output.  */
       memcpy (ocont, icont, bfd_section_size (obfd, onotes));

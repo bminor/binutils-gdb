@@ -34,6 +34,7 @@
 #include "filenames.h"
 #include "fnmatch.h"
 #include "gdb_regex.h"
+#include "common/gdb_optional.h"
 
 struct skiplist_entry
 {
@@ -57,10 +58,7 @@ struct skiplist_entry
   char *function;
 
   /* If this is a function regexp, the compiled form.  */
-  regex_t compiled_function_regexp;
-
-  /* Non-zero if the function regexp has been compiled.  */
-  int compiled_function_regexp_is_valid;
+  gdb::optional<compiled_regex> compiled_function_regexp;
 
   int enabled;
 
@@ -112,8 +110,6 @@ free_skiplist_entry (struct skiplist_entry *e)
 {
   xfree (e->file);
   xfree (e->function);
-  if (e->function_is_regexp && e->compiled_function_regexp_is_valid)
-    regfree (&e->compiled_function_regexp);
   xfree (e);
 }
 
@@ -202,7 +198,6 @@ skip_function_command (char *arg, int from_tty)
 static void
 compile_skip_regexp (struct skiplist_entry *e, const char *message)
 {
-  int code;
   int flags = REG_NOSUB;
 
 #ifdef REG_EXTENDED
@@ -210,16 +205,7 @@ compile_skip_regexp (struct skiplist_entry *e, const char *message)
 #endif
 
   gdb_assert (e->function_is_regexp && e->function != NULL);
-
-  code = regcomp (&e->compiled_function_regexp, e->function, flags);
-  if (code != 0)
-    {
-      char *err = get_regcomp_error (code, &e->compiled_function_regexp);
-
-      make_cleanup (xfree, err);
-      error (_("%s: %s"), message, err);
-    }
-  e->compiled_function_regexp_is_valid = 1;
+  e->compiled_function_regexp.emplace (e->function, flags, message);
 }
 
 /* Process "skip ..." that does not match "skip file" or "skip function".  */
@@ -601,8 +587,8 @@ static int
 skip_rfunction_p (struct skiplist_entry *e, const char *function_name)
 {
   gdb_assert (e->function != NULL && e->function_is_regexp
-	      && e->compiled_function_regexp_is_valid);
-  return (regexec (&e->compiled_function_regexp, function_name, 0, NULL, 0)
+	      && e->compiled_function_regexp);
+  return (e->compiled_function_regexp->exec (function_name, 0, NULL, 0)
 	  == 0);
 }
 

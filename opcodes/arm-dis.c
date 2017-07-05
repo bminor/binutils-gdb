@@ -22,7 +22,7 @@
 
 #include "sysdep.h"
 
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "opcode/arm.h"
 #include "opintl.h"
 #include "safe-ctype.h"
@@ -503,6 +503,8 @@ static const struct opcode32 coprocessor_opcodes[] =
     0x0ee60a10, 0x0fff0fff, "vmsr%c\tmvfr1, %12-15r"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
     0x0ee70a10, 0x0fff0fff, "vmsr%c\tmvfr0, %12-15r"},
+  {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
+    0x0ee50a10, 0x0fff0fff, "vmsr%c\tmvfr2, %12-15r"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
     0x0ee80a10, 0x0fff0fff, "vmsr%c\tfpexc, %12-15r"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
@@ -515,6 +517,8 @@ static const struct opcode32 coprocessor_opcodes[] =
     0x0ef1fa10, 0x0fffffff, "vmrs%c\tAPSR_nzcv, fpscr"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
     0x0ef10a10, 0x0fff0fff, "vmrs%c\t%12-15r, fpscr"},
+  {ARM_FEATURE_COPROC (FPU_VFP_EXT_ARMV8),
+    0x0ef50a10, 0x0fff0fff, "vmrs%c\t%12-15r, mvfr2"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
     0x0ef60a10, 0x0fff0fff, "vmrs%c\t%12-15r, mvfr1"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
@@ -901,6 +905,12 @@ static const struct opcode32 coprocessor_opcodes[] =
     0xfe800800, 0xffa00f10, "vcmla%c.f32\t%12-15,22V, %16-19,7V, %0-3,5D[0], #%20'90"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A),
     0xfea00800, 0xffa00f10, "vcmla%c.f32\t%12-15,22V, %16-19,7V, %0-3,5D[0], #%20?21%20?780"},
+
+  /* Dot Product instructions in the space of coprocessor 13.  */
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_DOTPROD),
+    0xfc200d00, 0xffb00f00, "v%4?usdot.%4?us8\t%12-15,22V, %16-19,7V, %0-3,5V"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_DOTPROD),
+    0xfe000d00, 0xff000f00, "v%4?usdot.%4?us8\t%12-15,22V, %16-19,7V, %0-3D[%5?10]"},
 
   /* V5 coprocessor instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
@@ -2310,8 +2320,6 @@ static const struct opcode32 arm_opcodes[] =
     0x01300000, 0x0ff00010, "teq%p%c\t%16-19r, %o"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0x01300010, 0x0ff00010, "teq%p%c\t%16-19R, %o"},
-  {ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
-    0x0130f000, 0x0ff0f010, "bx%c\t%0-3r"},
 
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0x03400000, 0x0fe00000, "cmp%p%c\t%16-19r, %o"},

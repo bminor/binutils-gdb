@@ -2143,6 +2143,11 @@ gnu_create_inferior (struct target_ops *ops,
   pid = fork_inferior (exec_file, allargs, env, gnu_ptrace_me,
                        NULL, NULL, NULL, NULL);
 
+  /* We have something that executes now.  We'll be running through
+     the shell at this point (if startup-with-shell is true), but the
+     pid shouldn't change.  */
+  add_thread_silent (pid_to_ptid (pid));
+
   /* Attach to the now stopped child, which is actually a shell...  */
   inf_debug (inf, "attaching to child: %d", pid);
 
@@ -2162,7 +2167,8 @@ gnu_create_inferior (struct target_ops *ops,
   thread_change_ptid (inferior_ptid,
 		      ptid_build (inf->pid, inf_pick_first_thread (), 0));
 
-  startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
+  gdb_startup_inferior (pid, START_INFERIOR_TRAPS_EXPECTED);
+
   inf->pending_execs = 0;
   /* Get rid of the old shell threads.  */
   prune_threads ();

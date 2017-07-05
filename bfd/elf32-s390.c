@@ -3231,7 +3231,6 @@ elf_s390_relocate_section (bfd *output_bfd,
 		  unsigned int insn, ry;
 
 		  insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
-		  ry = 0;
 		  if ((insn & 0xff00f000) == 0x58000000)
 		    /* l %rx,0(%ry,0) -> lr %rx,%ry + bcr 0,0  */
 		    ry = (insn & 0x000f0000);
@@ -3245,7 +3244,10 @@ elf_s390_relocate_section (bfd *output_bfd,
 		    /* l %rx,0(%r12,%ry) -> lr %rx,%ry + bcr 0,0  */
 		    ry = (insn & 0x0000f000) << 4;
 		  else
-		    invalid_tls_insn (input_bfd, input_section, rel);
+		    {
+		      invalid_tls_insn (input_bfd, input_section, rel);
+		      return FALSE;
+		    }
 		  insn = 0x18000700 | (insn & 0x00f00000) | ry;
 		  bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
 		}
@@ -3258,7 +3260,10 @@ elf_s390_relocate_section (bfd *output_bfd,
 	      if ((insn & 0xff000fff) != 0x4d000000 &&
 		  (insn & 0xffff0000) != 0xc0e50000 &&
 		  (insn & 0xff000000) != 0x0d000000)
-		invalid_tls_insn (input_bfd, input_section, rel);
+		{
+		  invalid_tls_insn (input_bfd, input_section, rel);
+		  return FALSE;
+		}
 	      if (!bfd_link_pic (info) && (h == NULL || h->dynindx == -1))
 		{
 		  if ((insn & 0xff000000) == 0x0d000000)
@@ -3287,7 +3292,10 @@ elf_s390_relocate_section (bfd *output_bfd,
 		  /* If basr is used in the pic case to invoke
 		     _tls_get_offset, something went wrong before.  */
 		  if ((insn & 0xff000000) == 0x0d000000)
-		    invalid_tls_insn (input_bfd, input_section, rel);
+		    {
+		      invalid_tls_insn (input_bfd, input_section, rel);
+		      return FALSE;
+		    }
 
 		  if ((insn & 0xff000000) == 0x4d000000)
 		    {
@@ -3317,7 +3325,10 @@ elf_s390_relocate_section (bfd *output_bfd,
 		  if ((insn & 0xff000fff) != 0x4d000000 &&
 		      (insn & 0xffff0000) != 0xc0e50000 &&
 		      (insn & 0xff000000) != 0x0d000000)
-		    invalid_tls_insn (input_bfd, input_section, rel);
+		    {
+		      invalid_tls_insn (input_bfd, input_section, rel);
+		      return FALSE;
+		    }
 
 		  if ((insn & 0xff000000) == 0x0d000000)
 		    {

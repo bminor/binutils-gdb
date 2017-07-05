@@ -838,8 +838,6 @@ m88k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, m88k_iterate_over_regset_sections);
 
-  set_gdbarch_print_insn (gdbarch, print_insn_m88k);
-
   set_gdbarch_skip_prologue (gdbarch, m88k_skip_prologue);
 
   /* Stack grows downward.  */

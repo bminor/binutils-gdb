@@ -57,9 +57,11 @@ message if an attempt is made to assemble an instruction which will not execute
 on the target processor.  The following processor names are recognized:
 @code{cortex-a35},
 @code{cortex-a53},
+@code{cortex-a55},
 @code{cortex-a57},
 @code{cortex-a72},
 @code{cortex-a73},
+@code{cortex-a75},
 @code{exynos-m1},
 @code{falkor},
 @code{qdf24xx},
@@ -163,6 +165,8 @@ automatically cause those extensions to be disabled.
 @item @code{sve} @tab ARMv8.2-A @tab No
  @tab Enable the Scalable Vector Extensions.  This implies @code{fp16},
  @code{simd} and @code{compnum}.
+@item @code{dotprod} @tab ARMv8.2-A @tab No
+ @tab Enable the Dot Product extension.  This implies @code{simd}.
 @end multitable
 
 @node AArch64 Syntax

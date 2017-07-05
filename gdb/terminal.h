@@ -29,15 +29,7 @@ extern void new_tty_postfork (void);
 
 extern void copy_terminal_info (struct inferior *to, struct inferior *from);
 
-/* Do we have job control?  Can be assumed to always be the same within
-   a given run of GDB.  In inflow.c.  */
-extern int job_control;
-
 extern pid_t create_tty_session (void);
-
-/* Set the process group of the caller to its own pid, or do nothing if
-   we lack job control.  */
-extern int gdb_setpgid (void);
 
 /* Set up a serial structure describing standard input.  In inflow.c.  */
 extern void initialize_stdin_serial (void);
@@ -47,9 +39,5 @@ extern void gdb_save_tty_state (void);
 /* Take a snapshot of our initial tty state before readline/ncurses
    have had a chance to alter it.  */
 extern void set_initial_gdb_ttystate (void);
-
-/* Set the process group of the caller to its own pid, or do nothing
-   if we lack job control.  */
-extern int gdb_setpgid (void);
 
 #endif /* !defined (TERMINAL_H) */

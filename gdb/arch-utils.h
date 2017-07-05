@@ -85,13 +85,6 @@ extern struct displaced_step_closure *
                                    CORE_ADDR from, CORE_ADDR to,
                                    struct regcache *regs);
 
-/* Simple implementation of gdbarch_displaced_step_free_closure: Call
-   xfree.
-   This is appropriate for use with simple_displaced_step_copy_insn.  */
-extern void
-  simple_displaced_step_free_closure (struct gdbarch *gdbarch,
-                                      struct displaced_step_closure *closure);
-
 /* Default implementation of gdbarch_displaced_hw_singlestep.  */
 extern int
   default_displaced_step_hw_singlestep (struct gdbarch *,
@@ -272,5 +265,7 @@ extern int default_addressable_memory_unit_size (struct gdbarch *gdbarch);
 extern void default_guess_tracepoint_registers (struct gdbarch *gdbarch,
 						struct regcache *regcache,
 						CORE_ADDR addr);
+
+extern int default_print_insn (bfd_vma memaddr, disassemble_info *info);
 
 #endif

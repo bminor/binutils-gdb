@@ -48,6 +48,7 @@
 #include "cli/cli-script.h"
 #include "format.h"
 #include "source.h"
+#include "common/byte-vector.h"
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_active et al.   */
@@ -356,42 +357,11 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 			int size, struct ui_file *stream)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
-  LONGEST val_long = 0;
   unsigned int len = TYPE_LENGTH (type);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* String printing should go through val_print_scalar_formatted.  */
   gdb_assert (options->format != 's');
-
-  if (len > sizeof(LONGEST)
-      && (TYPE_CODE (type) == TYPE_CODE_INT
-	  || TYPE_CODE (type) == TYPE_CODE_ENUM))
-    {
-      switch (options->format)
-	{
-	case 'o':
-	  print_octal_chars (stream, valaddr, len, byte_order);
-	  return;
-	case 'u':
-	case 'd':
-	  print_decimal_chars (stream, valaddr, len, byte_order);
-	  return;
-	case 't':
-	  print_binary_chars (stream, valaddr, len, byte_order);
-	  return;
-	case 'x':
-	  print_hex_chars (stream, valaddr, len, byte_order);
-	  return;
-	case 'c':
-	  print_char_chars (stream, type, valaddr, len, byte_order);
-	  return;
-	default:
-	  break;
-	};
-    }
-
-  if (options->format != 'f')
-    val_long = unpack_long (type, valaddr);
 
   /* If the value is a pointer, and pointers and addresses are not the
      same, then at this point, the value's length (in target bytes) is
@@ -402,60 +372,92 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
   /* If we are printing it as unsigned, truncate it in case it is actually
      a negative signed value (e.g. "print/u (short)-1" should print 65535
      (if shorts are 16 bits) instead of 4294967295).  */
-  if (options->format != 'd' || TYPE_UNSIGNED (type))
+  if (options->format != 'c'
+      && (options->format != 'd' || TYPE_UNSIGNED (type)))
     {
-      if (len < sizeof (LONGEST))
-	val_long &= ((LONGEST) 1 << HOST_CHAR_BIT * len) - 1;
+      if (len < TYPE_LENGTH (type) && byte_order == BFD_ENDIAN_BIG)
+	valaddr += TYPE_LENGTH (type) - len;
+    }
+
+  if (size != 0 && (options->format == 'x' || options->format == 't'))
+    {
+      /* Truncate to fit.  */
+      unsigned newlen;
+      switch (size)
+	{
+	case 'b':
+	  newlen = 1;
+	  break;
+	case 'h':
+	  newlen = 2;
+	  break;
+	case 'w':
+	  newlen = 4;
+	  break;
+	case 'g':
+	  newlen = 8;
+	  break;
+	default:
+	  error (_("Undefined output size \"%c\"."), size);
+	}
+      if (newlen < len && byte_order == BFD_ENDIAN_BIG)
+	valaddr += len - newlen;
+      len = newlen;
+    }
+
+  /* Historically gdb has printed floats by first casting them to a
+     long, and then printing the long.  PR cli/16242 suggests changing
+     this to using C-style hex float format.  */
+  gdb::byte_vector converted_float_bytes;
+  if (TYPE_CODE (type) == TYPE_CODE_FLT
+      && (options->format == 'o'
+	  || options->format == 'x'
+	  || options->format == 't'
+	  || options->format == 'z'))
+    {
+      LONGEST val_long = unpack_long (type, valaddr);
+      converted_float_bytes.resize (TYPE_LENGTH (type));
+      store_signed_integer (converted_float_bytes.data (), TYPE_LENGTH (type),
+			    byte_order, val_long);
+      valaddr = converted_float_bytes.data ();
     }
 
   switch (options->format)
     {
-    case 'x':
-      if (!size)
-	{
-	  /* No size specified, like in print.  Print varying # of digits.  */
-	  print_longest (stream, 'x', 1, val_long);
-	}
-      else
-	switch (size)
-	  {
-	  case 'b':
-	  case 'h':
-	  case 'w':
-	  case 'g':
-	    print_longest (stream, size, 1, val_long);
-	    break;
-	  default:
-	    error (_("Undefined output size \"%c\"."), size);
-	  }
-      break;
-
-    case 'd':
-      print_longest (stream, 'd', 1, val_long);
-      break;
-
-    case 'u':
-      print_longest (stream, 'u', 0, val_long);
-      break;
-
     case 'o':
-      if (val_long)
-	print_longest (stream, 'o', 1, val_long);
-      else
-	fprintf_filtered (stream, "0");
+      print_octal_chars (stream, valaddr, len, byte_order);
+      break;
+    case 'u':
+      print_decimal_chars (stream, valaddr, len, false, byte_order);
+      break;
+    case 0:
+    case 'd':
+      if (TYPE_CODE (type) != TYPE_CODE_FLT)
+	{
+	  print_decimal_chars (stream, valaddr, len, !TYPE_UNSIGNED (type),
+			       byte_order);
+	  break;
+	}
+      /* FALLTHROUGH */
+    case 'f':
+      type = float_type_from_length (type);
+      print_floating (valaddr, type, stream);
       break;
 
-    case 'a':
-      {
-	CORE_ADDR addr = unpack_pointer (type, valaddr);
-
-	print_address (gdbarch, addr, stream);
-      }
+    case 't':
+      print_binary_chars (stream, valaddr, len, byte_order, size > 0);
       break;
-
+    case 'x':
+      print_hex_chars (stream, valaddr, len, byte_order, size > 0);
+      break;
+    case 'z':
+      print_hex_chars (stream, valaddr, len, byte_order, true);
+      break;
     case 'c':
       {
 	struct value_print_options opts = *options;
+
+	LONGEST val_long = unpack_long (type, valaddr);
 
 	opts.format = 0;
 	if (TYPE_UNSIGNED (type))
@@ -467,64 +469,12 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       }
       break;
 
-    case 'f':
-      type = float_type_from_length (type);
-      print_floating (valaddr, type, stream);
-      break;
-
-    case 0:
-      internal_error (__FILE__, __LINE__,
-		      _("failed internal consistency check"));
-
-    case 't':
-      /* Binary; 't' stands for "two".  */
+    case 'a':
       {
-	char bits[8 * (sizeof val_long) + 1];
-	char buf[8 * (sizeof val_long) + 32];
-	char *cp = bits;
-	int width;
+	CORE_ADDR addr = unpack_pointer (type, valaddr);
 
-	if (!size)
-	  width = 8 * (sizeof val_long);
-	else
-	  switch (size)
-	    {
-	    case 'b':
-	      width = 8;
-	      break;
-	    case 'h':
-	      width = 16;
-	      break;
-	    case 'w':
-	      width = 32;
-	      break;
-	    case 'g':
-	      width = 64;
-	      break;
-	    default:
-	      error (_("Undefined output size \"%c\"."), size);
-	    }
-
-	bits[width] = '\0';
-	while (width-- > 0)
-	  {
-	    bits[width] = (val_long & 1) ? '1' : '0';
-	    val_long >>= 1;
-	  }
-	if (!size)
-	  {
-	    while (*cp && *cp == '0')
-	      cp++;
-	    if (*cp == '\0')
-	      cp--;
-	  }
-	strncpy (buf, cp, sizeof (bits));
-	fputs_filtered (buf, stream);
+	print_address (gdbarch, addr, stream);
       }
-      break;
-
-    case 'z':
-      print_hex_chars (stream, valaddr, len, byte_order);
       break;
 
     default:
@@ -2305,8 +2255,6 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
 					 "wchar_t", NULL, 0);
   int wcwidth = TYPE_LENGTH (wctype);
   gdb_byte *buf = (gdb_byte *) alloca (wcwidth);
-  struct obstack output;
-  struct cleanup *inner_cleanup;
 
   tem = value_as_address (value);
 
@@ -2325,8 +2273,7 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
     read_memory (tem, str, j);
   memset (&str[j], 0, wcwidth);
 
-  obstack_init (&output);
-  inner_cleanup = make_cleanup_obstack_free (&output);
+  auto_obstack output;
 
   convert_between_encodings (target_wide_charset (gdbarch),
 			     host_charset (),
@@ -2335,7 +2282,6 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
   obstack_grow_str0 (&output, "");
 
   fprintf_filtered (stream, format, obstack_base (&output));
-  do_cleanups (inner_cleanup);
 }
 
 /* Subroutine of ui_printf to simplify it.
@@ -2581,8 +2527,6 @@ ui_printf (const char *arg, struct ui_file *stream)
 	      struct type *wctype = lookup_typename (current_language, gdbarch,
 						     "wchar_t", NULL, 0);
 	      struct type *valtype;
-	      struct obstack output;
-	      struct cleanup *inner_cleanup;
 	      const gdb_byte *bytes;
 
 	      valtype = value_type (val_args[i]);
@@ -2592,8 +2536,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 
 	      bytes = value_contents (val_args[i]);
 
-	      obstack_init (&output);
-	      inner_cleanup = make_cleanup_obstack_free (&output);
+	      auto_obstack output;
 
 	      convert_between_encodings (target_wide_charset (gdbarch),
 					 host_charset (),
@@ -2604,7 +2547,6 @@ ui_printf (const char *arg, struct ui_file *stream)
 
 	      fprintf_filtered (stream, current_substring,
                                 obstack_base (&output));
-	      do_cleanups (inner_cleanup);
 	    }
 	    break;
 	  case double_arg:

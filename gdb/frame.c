@@ -1252,10 +1252,27 @@ frame_unwind_register_signed (struct frame_info *frame, int regnum)
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int size = register_size (gdbarch, regnum);
-  gdb_byte buf[MAX_REGISTER_SIZE];
+  struct value *value = frame_unwind_register_value (frame, regnum);
 
-  frame_unwind_register (frame, regnum, buf);
-  return extract_signed_integer (buf, size, byte_order);
+  gdb_assert (value != NULL);
+
+  if (value_optimized_out (value))
+    {
+      throw_error (OPTIMIZED_OUT_ERROR,
+		   _("Register %d was not saved"), regnum);
+    }
+  if (!value_entirely_available (value))
+    {
+      throw_error (NOT_AVAILABLE_ERROR,
+		   _("Register %d is not available"), regnum);
+    }
+
+  LONGEST r = extract_signed_integer (value_contents_all (value), size,
+				      byte_order);
+
+  release_value (value);
+  value_free (value);
+  return r;
 }
 
 LONGEST
@@ -1703,6 +1720,23 @@ select_frame (struct frame_info *fi)
 	}
     }
 }
+
+#if GDB_SELF_TEST
+struct frame_info *
+create_test_frame (struct regcache *regcache)
+{
+  struct frame_info *this_frame = XCNEW (struct frame_info);
+
+  sentinel_frame = create_sentinel_frame (NULL, regcache);
+  sentinel_frame->prev = this_frame;
+  sentinel_frame->prev_p = 1;;
+  this_frame->prev_arch.p = 1;
+  this_frame->prev_arch.arch = get_regcache_arch (regcache);
+  this_frame->next = sentinel_frame;
+
+  return this_frame;
+}
+#endif
 
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
    Always returns a non-NULL value.  */

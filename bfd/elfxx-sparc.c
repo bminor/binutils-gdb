@@ -2310,7 +2310,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	 Undefined weak syms won't yet be marked as dynamic.  */
       if (h->dynindx == -1
 	  && !h->forced_local
-          && !resolved_to_zero)
+          && !resolved_to_zero
+          && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -2422,7 +2423,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	 Undefined weak syms won't yet be marked as dynamic.  */
       if (h->dynindx == -1
 	  && !h->forced_local
-          && !resolved_to_zero)
+          && !resolved_to_zero
+          && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -2564,7 +2566,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	     Undefined weak syms won't yet be marked as dynamic.  */
 	  if (h->dynindx == -1
 	      && !h->forced_local
-              && !resolved_to_zero)
+              && !resolved_to_zero
+              && h->root.type == bfd_link_hash_undefweak)
 	    {
 	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		return FALSE;
@@ -3125,6 +3128,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
       bfd_boolean is_plt = FALSE;
       bfd_boolean unresolved_reloc;
       bfd_boolean resolved_to_zero;
+      bfd_boolean relative_reloc;
 
       r_type = SPARC_ELF_R_TYPE (rel->r_info);
       if (r_type == R_SPARC_GNU_VTINHERIT
@@ -3349,6 +3353,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	  if (htab->elf.sgot == NULL)
 	    abort ();
 
+	  relative_reloc = FALSE;
 	  if (h != NULL)
 	    {
 	      bfd_boolean dyn;
@@ -3382,6 +3387,16 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 		      SPARC_ELF_PUT_WORD (htab, output_bfd, relocation,
 					  htab->elf.sgot->contents + off);
 		      h->got.offset |= 1;
+
+		      if (h->dynindx == -1
+			  && !h->forced_local
+			  && h->root.type != bfd_link_hash_undefweak
+			  && bfd_link_pic (info))
+			{
+			  /* If this symbol isn't dynamic in PIC
+			     generate R_SPARC_RELATIVE here.  */
+			  relative_reloc = TRUE;
+			}
 		    }
 		}
 	      else
@@ -3401,25 +3416,9 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 		off &= ~1;
 	      else
 		{
-
 		  if (bfd_link_pic (info))
 		    {
-		      asection *s;
-		      Elf_Internal_Rela outrel;
-
-		      /* We need to generate a R_SPARC_RELATIVE reloc
-			 for the dynamic linker.  */
-		      s = htab->elf.srelgot;
-		      BFD_ASSERT (s != NULL);
-
-		      outrel.r_offset = (htab->elf.sgot->output_section->vma
-					 + htab->elf.sgot->output_offset
-					 + off);
-		      outrel.r_info = SPARC_ELF_R_INFO (htab, NULL,
-							0, R_SPARC_RELATIVE);
-		      outrel.r_addend = relocation;
-		      relocation = 0;
-		      sparc_elf_append_rela (output_bfd, s, &outrel);
+		      relative_reloc = TRUE;
 		    }
 
 		  SPARC_ELF_PUT_WORD (htab, output_bfd, relocation,
@@ -3427,6 +3426,27 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 		  local_got_offsets[r_symndx] |= 1;
 		}
 	    }
+
+	  if (relative_reloc)
+	    {
+	      asection *s;
+	      Elf_Internal_Rela outrel;
+
+	      /* We need to generate a R_SPARC_RELATIVE reloc
+		 for the dynamic linker.  */
+	      s = htab->elf.srelgot;
+	      BFD_ASSERT (s != NULL);
+
+	      outrel.r_offset = (htab->elf.sgot->output_section->vma
+				 + htab->elf.sgot->output_offset
+				 + off);
+	      outrel.r_info = SPARC_ELF_R_INFO (htab, NULL,
+						0, R_SPARC_RELATIVE);
+	      outrel.r_addend = relocation;
+	      relocation = 0;
+	      sparc_elf_append_rela (output_bfd, s, &outrel);
+	    }
+
 	  relocation = htab->elf.sgot->output_offset + off - got_base;
 	  break;
 

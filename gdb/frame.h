@@ -833,6 +833,14 @@ extern struct frame_info *deprecated_safe_get_selected_frame (void);
 
 extern struct frame_info *create_new_frame (CORE_ADDR base, CORE_ADDR pc);
 
+#if GDB_SELF_TEST
+
+/* Create a frame for unit test.  Its next frame is sentinel frame,
+   created from REGCACHE.  */
+
+extern struct frame_info *create_test_frame (struct regcache *regcache);
+#endif
+
 /* Return true if the frame unwinder for frame FI is UNWINDER; false
    otherwise.  */
 

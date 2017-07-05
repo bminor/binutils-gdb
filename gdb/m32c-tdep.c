@@ -2639,9 +2639,6 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Register set.  */
   make_regs (gdbarch);
 
-  /* Disassembly.  */
-  set_gdbarch_print_insn (gdbarch, print_insn_m32c);
-
   /* Breakpoints.  */
   set_gdbarch_breakpoint_kind_from_pc (gdbarch, m32c_breakpoint::kind_from_pc);
   set_gdbarch_sw_breakpoint_from_kind (gdbarch, m32c_breakpoint::bp_from_kind);

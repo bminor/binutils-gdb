@@ -1715,12 +1715,18 @@ xcoff_write_armap_old (bfd *abfd, unsigned int elength ATTRIBUTE_UNUSED,
 }
 
 static char buff20[XCOFFARMAGBIG_ELEMENT_SIZE + 1];
+#if BFD_HOST_64BIT_LONG
+#define FMT20  "%-20ld"
+#elif defined (__MSVCRT__)
+#define FMT20  "%-20I64d"
+#else
 #define FMT20  "%-20lld"
+#endif
 #define FMT12  "%-12d"
 #define FMT12_OCTAL  "%-12o"
 #define FMT4  "%-4d"
 #define PRINT20(d, v) \
-  sprintf (buff20, FMT20, (long long)(v)), \
+  sprintf (buff20, FMT20, (bfd_uint64_t)(v)), \
   memcpy ((void *) (d), buff20, 20)
 
 #define PRINT12(d, v) \
@@ -4013,6 +4019,7 @@ const struct xcoff_dwsect_name xcoff_dwsect_names[] = {
 #define _bfd_xcoff_bfd_discard_group bfd_generic_discard_group
 #define _bfd_xcoff_section_already_linked _bfd_generic_section_already_linked
 #define _bfd_xcoff_bfd_define_common_symbol _bfd_xcoff_define_common_symbol
+#define _bfd_xcoff_bfd_define_start_stop    bfd_generic_define_start_stop
 #define _bfd_xcoff_bfd_link_check_relocs    _bfd_generic_link_check_relocs
 
 /* For dynamic symbols and relocs entry points.  */

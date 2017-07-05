@@ -1432,6 +1432,11 @@ pe_print_idata (bfd * abfd, void * vfile)
       bfd_size_type maxlen = (char *)(data + datasize) - dll - 1;
       fprintf (file, _("\n\tDLL Name: %.*s\n"), (int) maxlen, dll);
 
+      /* PR 21546: When the Hint Address is zero,
+	 we try the First Thunk instead.  */
+      if (hint_addr == 0)
+	hint_addr = first_thunk;
+
       if (hint_addr != 0)
 	{
 	  bfd_byte *ft_data;

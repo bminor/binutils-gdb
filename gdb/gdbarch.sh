@@ -643,7 +643,7 @@ F;std::vector<CORE_ADDR>;software_single_step;struct regcache *regcache;regcache
 M;int;single_step_through_delay;struct frame_info *frame;frame
 # FIXME: cagney/2003-08-28: Need to find a better way of selecting the
 # disassembler.  Perhaps objdump can handle it?
-f;int;print_insn;bfd_vma vma, struct disassemble_info *info;vma, info;;0;
+f;int;print_insn;bfd_vma vma, struct disassemble_info *info;vma, info;;default_print_insn;;0
 f;CORE_ADDR;skip_trampoline_code;struct frame_info *frame, CORE_ADDR pc;frame, pc;;generic_skip_trampoline_code;;0
 
 
@@ -832,18 +832,6 @@ m;int;displaced_step_hw_singlestep;struct displaced_step_closure *closure;closur
 # For a general explanation of displaced stepping and how GDB uses it,
 # see the comments in infrun.c.
 M;void;displaced_step_fixup;struct displaced_step_closure *closure, CORE_ADDR from, CORE_ADDR to, struct regcache *regs;closure, from, to, regs;;NULL
-
-# Free a closure returned by gdbarch_displaced_step_copy_insn.
-#
-# If you provide gdbarch_displaced_step_copy_insn, you must provide
-# this function as well.
-#
-# If your architecture uses closures that don't need to be freed, then
-# you can use simple_displaced_step_free_closure here.
-#
-# For a general explanation of displaced stepping and how GDB uses it,
-# see the comments in infrun.c.
-m;void;displaced_step_free_closure;struct displaced_step_closure *closure;closure;;NULL;;(! gdbarch->displaced_step_free_closure) != (! gdbarch->displaced_step_copy_insn)
 
 # Return the address of an appropriate place to put displaced
 # instructions while we step over them.  There need only be one such

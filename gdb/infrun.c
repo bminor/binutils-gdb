@@ -1710,12 +1710,8 @@ displaced_step_clear (struct displaced_step_inferior_state *displaced)
   /* Indicate that there is no cleanup pending.  */
   displaced->step_ptid = null_ptid;
 
-  if (displaced->step_closure)
-    {
-      gdbarch_displaced_step_free_closure (displaced->step_gdbarch,
-                                           displaced->step_closure);
-      displaced->step_closure = NULL;
-    }
+  xfree (displaced->step_closure);
+  displaced->step_closure = NULL;
 }
 
 static void

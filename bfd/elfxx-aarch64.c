@@ -413,7 +413,6 @@ _bfd_aarch64_elf_resolve_relocation (bfd_reloc_code_real_type r_type,
 
     case BFD_RELOC_AARCH64_16:
     case BFD_RELOC_AARCH64_32:
-    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
     case BFD_RELOC_AARCH64_MOVW_G0:
     case BFD_RELOC_AARCH64_MOVW_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_G0_S:
@@ -424,8 +423,6 @@ _bfd_aarch64_elf_resolve_relocation (bfd_reloc_code_real_type r_type,
     case BFD_RELOC_AARCH64_MOVW_G2_NC:
     case BFD_RELOC_AARCH64_MOVW_G2_S:
     case BFD_RELOC_AARCH64_MOVW_G3:
-    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
-    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
     case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
@@ -468,10 +465,15 @@ _bfd_aarch64_elf_resolve_relocation (bfd_reloc_code_real_type r_type,
       value = PG (value + addend) - PG (place);
       break;
 
+    /* Caller must make sure addend is the base address of .got section.  */
     case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
     case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
-      /* Caller must make sure addend is the base address of .got section.  */
-      value = value - PG (addend);
+      addend = PG (addend);
+      /* Fall through.  */
+    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
+      value = value - addend;
       break;
 
     case BFD_RELOC_AARCH64_ADD_LO12:

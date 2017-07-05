@@ -155,6 +155,17 @@ AC_ARG_ENABLE(compressed_debug_sections,
   ,no, | ,none,)  ac_default_compressed_debug_sections=no ;;
 esac])dnl
 
+# Decide setting DT_RUNPATH instead of DT_RPATH by default
+ac_default_new_dtags=unset
+# Provide a configure time option to override our default.
+AC_ARG_ENABLE(new_dtags,
+	      AS_HELP_STRING([--enable-new-dtags],
+	      [set DT_RUNPATH instead of DT_RPATH by default])],
+[case "${enableval}" in
+  yes) ac_default_new_dtags=1 ;;
+  no) ac_default_new_dtags=0 ;;
+esac])dnl
+
 # Decide if -z relro should be enabled in ELF linker by default.
 ac_default_ld_z_relro=unset
 # Provide a configure time option to override our default.
@@ -382,6 +393,13 @@ done
 if test x$ac_default_compressed_debug_sections = xyes ; then
   AC_DEFINE(DEFAULT_FLAG_COMPRESS_DEBUG, 1, [Define if you want compressed debug sections by default.])
 fi
+
+if test "${ac_default_new_dtags}" = unset; then
+  ac_default_new_dtags=0
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_NEW_DTAGS,
+  $ac_default_new_dtags,
+  [Define to 1 if you want to set DT_RUNPATH instead of DT_RPATH by default.])
 
 if test "${ac_default_ld_z_relro}" = unset; then
   ac_default_ld_z_relro=0

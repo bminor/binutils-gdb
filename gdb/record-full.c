@@ -36,6 +36,7 @@
 #include "observer.h"
 #include "infrun.h"
 #include "common/gdb_unlinker.h"
+#include "common/byte-vector.h"
 
 #include <signal.h>
 
@@ -698,7 +699,7 @@ record_full_exec_insn (struct regcache *regcache,
     {
     case record_full_reg: /* reg */
       {
-        gdb_byte reg[MAX_REGISTER_SIZE];
+	gdb::byte_vector reg (entry->u.reg.len);
 
         if (record_debug > 1)
           fprintf_unfiltered (gdb_stdlog,
@@ -707,10 +708,10 @@ record_full_exec_insn (struct regcache *regcache,
                               host_address_to_string (entry),
                               entry->u.reg.num);
 
-        regcache_cooked_read (regcache, entry->u.reg.num, reg);
+        regcache_cooked_read (regcache, entry->u.reg.num, reg.data ());
         regcache_cooked_write (regcache, entry->u.reg.num, 
 			       record_full_get_loc (entry));
-        memcpy (record_full_get_loc (entry), reg, entry->u.reg.len);
+        memcpy (record_full_get_loc (entry), reg.data (), entry->u.reg.len);
       }
       break;
 
@@ -2333,16 +2334,6 @@ static inline uint32_t
 netorder32 (uint32_t input)
 {
   uint32_t ret;
-
-  store_unsigned_integer ((gdb_byte *) &ret, sizeof (ret), 
-			  BFD_ENDIAN_BIG, input);
-  return ret;
-}
-
-static inline uint16_t
-netorder16 (uint16_t input)
-{
-  uint16_t ret;
 
   store_unsigned_integer ((gdb_byte *) &ret, sizeof (ret), 
 			  BFD_ENDIAN_BIG, input);

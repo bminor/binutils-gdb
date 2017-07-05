@@ -227,14 +227,14 @@ static bfd_vma
 score3_bfd_getl48 (const void *p)
 {
   const bfd_byte *addr = p;
-  unsigned long long v;
+  bfd_uint64_t v;
 
-  v = (unsigned long long) addr[4];
-  v |= (unsigned long long) addr[5] << 8;
-  v |= (unsigned long long) addr[2] << 16;
-  v |= (unsigned long long) addr[3] << 24;
-  v |= (unsigned long long) addr[0] << 32;
-  v |= (unsigned long long) addr[1] << 40;
+  v = (bfd_uint64_t) addr[4];
+  v |= (bfd_uint64_t) addr[5] << 8;
+  v |= (bfd_uint64_t) addr[2] << 16;
+  v |= (bfd_uint64_t) addr[3] << 24;
+  v |= (bfd_uint64_t) addr[0] << 32;
+  v |= (bfd_uint64_t) addr[1] << 40;
   return v;
 }
 
@@ -2034,11 +2034,9 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
     {
       const Elf_Internal_Rela *relend;
       const Elf_Internal_Rela *lo16_rel;
-      const struct elf_backend_data *bed;
       bfd_vma lo_value = 0;
 
-      bed = get_elf_backend_data (output_bfd);
-      relend = relocs + input_section->reloc_count * bed->s->int_rels_per_ext_rel;
+      relend = relocs + input_section->reloc_count;
       lo16_rel = score_elf_next_relocation (input_bfd, R_SCORE_GOT_LO16, rel, relend);
       if ((local_p) && (lo16_rel != NULL))
         {
@@ -2778,7 +2776,6 @@ s3_bfd_score_elf_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel_end;
   asection *sgot;
   asection *sreloc;
-  const struct elf_backend_data *bed;
 
   if (bfd_link_relocatable (info))
     return TRUE;
@@ -2807,8 +2804,7 @@ s3_bfd_score_elf_check_relocs (bfd *abfd,
     }
 
   sreloc = NULL;
-  bed = get_elf_backend_data (abfd);
-  rel_end = relocs + sec->reloc_count * bed->s->int_rels_per_ext_rel;
+  rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; ++rel)
     {
       unsigned long r_symndx;

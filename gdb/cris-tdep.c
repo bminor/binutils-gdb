@@ -3785,19 +3785,6 @@ cris_gdb_func (struct gdbarch *gdbarch, enum cris_op_type op_type,
     }
 }
 
-/* This wrapper is to avoid cris_get_assembler being called before 
-   exec_bfd has been set.  */
-
-static int
-cris_delayed_get_disassembler (bfd_vma addr, struct disassemble_info *info)
-{
-  int (*print_insn) (bfd_vma addr, struct disassemble_info *info);
-
-  print_insn = cris_get_disassembler (exec_bfd);
-  gdb_assert (print_insn != NULL);
-  return print_insn (addr, info);
-}
-
 /* Originally from <asm/elf.h>.  */
 typedef unsigned char cris_elf_greg_t[4];
 
@@ -4021,7 +4008,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* No matching architecture was found.  Create a new one.  */
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   info.byte_order = BFD_ENDIAN_LITTLE;
   gdbarch = gdbarch_alloc (&info, tdep);
 
@@ -4133,11 +4120,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
-
-  /* FIXME: cagney/2003-08-27: It should be possible to select a CRIS
-     disassembler, even when there is no BFD.  Does something like
-     "gdb; target remote; disassmeble *0x123" work?  */
-  set_gdbarch_print_insn (gdbarch, cris_delayed_get_disassembler);
 
   return gdbarch;
 }

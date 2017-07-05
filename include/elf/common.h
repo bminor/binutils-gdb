@@ -598,6 +598,10 @@
 					/*   note name must be "LINUX".  */
 #define NT_S390_VXRS_HIGH	0x30a	/* S390 vector registers 16-31 */
 					/*   note name must be "LINUX".  */
+#define NT_S390_GS_CB	0x30b		/* s390 guarded storage registers */
+					/*   note name must be "LINUX".  */
+#define NT_S390_GS_BC	0x30c		/* s390 guarded storage broadcast control block */
+					/*   note name must be "LINUX".  */
 #define NT_ARM_VFP	0x400		/* ARM VFP registers */
 /* The following definitions should really use NT_AARCH_..., but defined
    this way for compatibility with Linux.  */
@@ -709,6 +713,7 @@
 
 #define GNU_PROPERTY_X86_ISA_1_USED		0xc0000000
 #define GNU_PROPERTY_X86_ISA_1_NEEDED		0xc0000001
+#define GNU_PROPERTY_X86_FEATURE_1_AND		0xc0000002
 
 #define GNU_PROPERTY_X86_ISA_1_486           (1U << 0)
 #define GNU_PROPERTY_X86_ISA_1_586           (1U << 1)
@@ -728,6 +733,9 @@
 #define GNU_PROPERTY_X86_ISA_1_AVX512VL      (1U << 15)
 #define GNU_PROPERTY_X86_ISA_1_AVX512DQ      (1U << 16)
 #define GNU_PROPERTY_X86_ISA_1_AVX512BW      (1U << 17)
+
+#define GNU_PROPERTY_X86_FEATURE_1_IBT       (1U << 0)
+#define GNU_PROPERTY_X86_FEATURE_1_SHSTK     (1U << 1)
 
 /* Values used in GNU .note.ABI-tag notes (NT_GNU_ABI_TAG).  */
 #define GNU_ABI_TAG_LINUX	0

@@ -392,7 +392,7 @@ FUNCTION
 	bfd_get_size
 
 SYNOPSIS
-	file_ptr bfd_get_size (bfd *abfd);
+	ufile_ptr bfd_get_size (bfd *abfd);
 
 DESCRIPTION
 	Return the file size (as read from file system) for the file
@@ -420,7 +420,7 @@ DESCRIPTION
 	size reasonable?".
 */
 
-file_ptr
+ufile_ptr
 bfd_get_size (bfd *abfd)
 {
   struct stat buf;
@@ -434,6 +434,29 @@ bfd_get_size (bfd *abfd)
   return buf.st_size;
 }
 
+/*
+FUNCTION
+	bfd_get_file_size
+
+SYNOPSIS
+	ufile_ptr bfd_get_file_size (bfd *abfd);
+
+DESCRIPTION
+	Return the file size (as read from file system) for the file
+	associated with BFD @var{abfd}.  It supports both normal files
+	and archive elements.
+
+*/
+
+ufile_ptr
+bfd_get_file_size (bfd *abfd)
+{
+  if (abfd->my_archive != NULL
+      && !bfd_is_thin_archive (abfd->my_archive))
+    return arelt_size (abfd);
+
+  return bfd_get_size (abfd);
+}
 
 /*
 FUNCTION

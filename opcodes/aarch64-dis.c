@@ -20,7 +20,7 @@
 
 #include "sysdep.h"
 #include "bfd_stdint.h"
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "libiberty.h"
 #include "opintl.h"
 #include "aarch64-dis.h"
@@ -325,6 +325,21 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	  info->reglane.index = (unsigned) (value >> 1);
 	}
     }
+  else if (inst->opcode->iclass == dotproduct)
+    {
+      /* Need information in other operand(s) to help decoding.  */
+      info->qualifier = get_expected_qualifier (inst, info->idx);
+      switch (info->qualifier)
+	{
+	case AARCH64_OPND_QLF_S_B:
+	  /* L:H */
+	  info->reglane.index = extract_fields (code, 0, 2, FLD_H, FLD_L);
+	  info->reglane.regno &= 0x1f;
+	  break;
+	default:
+	  return 0;
+	}
+    }
   else
     {
       /* Index only for e.g. SQDMLAL <Va><d>, <Vb><n>, <Vm>.<Ts>[<index>]
@@ -409,6 +424,9 @@ aarch64_ext_ldst_reglist (const aarch64_operand *self ATTRIBUTE_UNUSED,
   info->reglist.first_regno = extract_field (FLD_Rt, code, 0);
   /* opcode */
   value = extract_field (FLD_opcode, code, 0);
+  /* PR 21595: Check for a bogus value.  */
+  if (value >= ARRAY_SIZE (data))
+    return 0;
   if (expected_num != data[value].num_elements || data[value].is_reserved)
     return 0;
   info->reglist.num_regs = data[value].num_regs;

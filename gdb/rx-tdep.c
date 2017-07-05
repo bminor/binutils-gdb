@@ -1117,8 +1117,6 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sw_breakpoint_from_kind (gdbarch, rx_breakpoint::bp_from_kind);
   set_gdbarch_skip_prologue (gdbarch, rx_skip_prologue);
 
-  set_gdbarch_print_insn (gdbarch, print_insn_rx);
-
   set_gdbarch_unwind_pc (gdbarch, rx_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, rx_unwind_sp);
 

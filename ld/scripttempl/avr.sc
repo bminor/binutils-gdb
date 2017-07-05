@@ -27,29 +27,21 @@ OUTPUT_ARCH(${ARCH})
 
 __TEXT_REGION_LENGTH__ = DEFINED(__TEXT_REGION_LENGTH__) ? __TEXT_REGION_LENGTH__ : $TEXT_LENGTH;
 __DATA_REGION_LENGTH__ = DEFINED(__DATA_REGION_LENGTH__) ? __DATA_REGION_LENGTH__ : $DATA_LENGTH;
-__EEPROM_REGION_LENGTH__ = DEFINED(__EEPROM_REGION_LENGTH__) ? __EEPROM_REGION_LENGTH__ : 64K;
-__FUSE_REGION_LENGTH__ = DEFINED(__FUSE_REGION_LENGTH__) ? __FUSE_REGION_LENGTH__ : 1K;
-__LOCK_REGION_LENGTH__ = DEFINED(__LOCK_REGION_LENGTH__) ? __LOCK_REGION_LENGTH__ : 1K;
-__SIGNATURE_REGION_LENGTH__ = DEFINED(__SIGNATURE_REGION_LENGTH__) ? __SIGNATURE_REGION_LENGTH__ : 1K;
-__USER_SIGNATURE_REGION_LENGTH__ = DEFINED(__USER_SIGNATURE_REGION_LENGTH__) ? __USER_SIGNATURE_REGION_LENGTH__ : 1K;
-EOF
-
-if test -n "$RODATA_PM_OFFSET"; then
-    cat <<EOF
-__RODATA_PM_OFFSET__ = DEFINED(__RODATA_PM_OFFSET__) ? __RODATA_PM_OFFSET__ : $RODATA_PM_OFFSET;
-EOF
-fi
-
-cat <<EOF
+${EEPROM_LENGTH+__EEPROM_REGION_LENGTH__ = DEFINED(__EEPROM_REGION_LENGTH__) ? __EEPROM_REGION_LENGTH__ : $EEPROM_LENGTH;}
+__FUSE_REGION_LENGTH__ = DEFINED(__FUSE_REGION_LENGTH__) ? __FUSE_REGION_LENGTH__ : $FUSE_LENGTH;
+__LOCK_REGION_LENGTH__ = DEFINED(__LOCK_REGION_LENGTH__) ? __LOCK_REGION_LENGTH__ : $LOCK_LENGTH;
+__SIGNATURE_REGION_LENGTH__ = DEFINED(__SIGNATURE_REGION_LENGTH__) ? __SIGNATURE_REGION_LENGTH__ : $SIGNATURE_LENGTH;
+${USER_SIGNATURE_LENGTH+__USER_SIGNATURE_REGION_LENGTH__ = DEFINED(__USER_SIGNATURE_REGION_LENGTH__) ? __USER_SIGNATURE_REGION_LENGTH__ : $USER_SIGNATURE_LENGTH;}
+${RODATA_PM_OFFSET+__RODATA_PM_OFFSET__ = DEFINED(__RODATA_PM_OFFSET__) ? __RODATA_PM_OFFSET__ : $RODATA_PM_OFFSET;}
 MEMORY
 {
   text   (rx)   : ORIGIN = 0, LENGTH = __TEXT_REGION_LENGTH__
   data   (rw!x) : ORIGIN = $DATA_ORIGIN, LENGTH = __DATA_REGION_LENGTH__
-  eeprom (rw!x) : ORIGIN = 0x810000, LENGTH = __EEPROM_REGION_LENGTH__
-  fuse      (rw!x) : ORIGIN = 0x820000, LENGTH = __FUSE_REGION_LENGTH__
+${EEPROM_LENGTH+  eeprom (rw!x) : ORIGIN = 0x810000, LENGTH = __EEPROM_REGION_LENGTH__}
+  $FUSE_NAME      (rw!x) : ORIGIN = 0x820000, LENGTH = __FUSE_REGION_LENGTH__
   lock      (rw!x) : ORIGIN = 0x830000, LENGTH = __LOCK_REGION_LENGTH__
   signature (rw!x) : ORIGIN = 0x840000, LENGTH = __SIGNATURE_REGION_LENGTH__
-  user_signatures (rw!x) : ORIGIN = 0x850000, LENGTH = __USER_SIGNATURE_REGION_LENGTH__
+${USER_SIGNATURE_LENGTH+  user_signatures (rw!x) : ORIGIN = 0x850000, LENGTH = __USER_SIGNATURE_REGION_LENGTH__}
 }
 
 SECTIONS
@@ -140,11 +132,6 @@ SECTIONS
     
     ${RELOCATING+. = ALIGN(2);}
 
-    /* For future tablejump instruction arrays for 3 byte pc devices.
-       We don't relax jump/call instructions within these sections.  */
-    *(.jumptables) 
-    ${RELOCATING+ *(.jumptables*)}
-
     /* For code that needs to reside in the lower 128k progmem.  */
     *(.lowtext)
     ${RELOCATING+ *(.lowtext*)}
@@ -204,6 +191,18 @@ SECTIONS
     KEEP (*(.fini1))
     *(.fini0)  /* Infinite loop after program termination.  */
     KEEP (*(.fini0))
+
+    /* For code that needs not to reside in the lower progmem.  */
+    *(.hightext)
+    ${RELOCATING+ *(.hightext*)}
+
+    ${RELOCATING+. = ALIGN(2);}
+
+    /* For tablejump instruction arrays.  We don't relax
+       JMP / CALL instructions within these sections.  */
+    *(.jumptables)
+    ${RELOCATING+ *(.jumptables*)}
+
     ${RELOCATING+ _etext = . ; }
   } ${RELOCATING+ > text}
 EOF
@@ -271,6 +270,10 @@ cat <<EOF
     ${RELOCATING+ _end = . ;  }
     ${RELOCATING+ PROVIDE (__heap_start = .) ; }
   } ${RELOCATING+ > data}
+EOF
+
+if test -n "${EEPROM_LENGTH}"; then
+cat <<EOF
 
   .eeprom ${RELOCATING-0}:
   {
@@ -278,6 +281,11 @@ cat <<EOF
     KEEP(*(.eeprom*))
     ${RELOCATING+ __eeprom_end = . ; }
   } ${RELOCATING+ > eeprom}
+EOF
+fi
+
+if test "$FUSE_NAME" = "fuse" ; then
+cat <<EOF
 
   .fuse ${RELOCATING-0}:
   {
@@ -286,6 +294,10 @@ cat <<EOF
     KEEP(*(.hfuse))
     KEEP(*(.efuse))
   } ${RELOCATING+ > fuse}
+EOF
+fi
+
+cat <<EOF
 
   .lock ${RELOCATING-0}:
   {
@@ -296,6 +308,19 @@ cat <<EOF
   {
     KEEP(*(.signature*))
   } ${RELOCATING+ > signature}
+EOF
+
+if test "$FUSE_NAME" = "config" ; then
+cat <<EOF
+
+  .config ${RELOCATING-0}:
+  {
+    KEEP(*(.config*))
+  } ${RELOCATING+ > config}
+EOF
+fi
+
+cat <<EOF
 
   /* Stabs debugging sections.  */
   .stab 0 : { *(.stab) }

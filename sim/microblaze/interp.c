@@ -31,7 +31,7 @@
 
 #include "microblaze-dis.h"
 
-#define target_big_endian (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+#define target_big_endian (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 
 static unsigned long
 microblaze_extract_unsigned_integer (unsigned char *addr, int len)
