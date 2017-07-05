@@ -1841,7 +1841,7 @@ line_info_add_include_dir (struct line_info_table *table, char *cur_dir)
 static bfd_boolean
 line_info_add_include_dir_stub (struct line_info_table *table, char *cur_dir,
 				unsigned int dir ATTRIBUTE_UNUSED,
-				unsigned int time ATTRIBUTE_UNUSED,
+				unsigned int xtime ATTRIBUTE_UNUSED,
 				unsigned int size ATTRIBUTE_UNUSED)
 {
   return line_info_add_include_dir (table, cur_dir);
@@ -1851,7 +1851,8 @@ line_info_add_include_dir_stub (struct line_info_table *table, char *cur_dir,
 
 static bfd_boolean
 line_info_add_file_name (struct line_info_table *table, char *cur_file,
-			 unsigned int dir, unsigned int time, unsigned int size)
+			 unsigned int dir, unsigned int xtime,
+			 unsigned int size)
 {
   if ((table->num_files % FILE_ALLOC_CHUNK) == 0)
     {
@@ -1869,7 +1870,7 @@ line_info_add_file_name (struct line_info_table *table, char *cur_file,
 
   table->files[table->num_files].name = cur_file;
   table->files[table->num_files].dir = dir;
-  table->files[table->num_files].time = time;
+  table->files[table->num_files].time = xtime;
   table->files[table->num_files].size = size;
   table->num_files++;
   return TRUE;
@@ -2206,18 +2207,18 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
       /* Read file name table.  */
       while ((cur_file = read_string (abfd, line_ptr, line_end, &bytes_read)) != NULL)
 	{
-	  unsigned int dir, time, size;
+	  unsigned int dir, xtime, size;
 
 	  line_ptr += bytes_read;
 
 	  dir = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
 	  line_ptr += bytes_read;
-	  time = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
+	  xtime = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
 	  line_ptr += bytes_read;
 	  size = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read, FALSE, line_end);
 	  line_ptr += bytes_read;
 
-	  if (!line_info_add_file_name (table, cur_file, dir, time, size))
+	  if (!line_info_add_file_name (table, cur_file, dir, xtime, size))
 	    goto fail;
 	}
 

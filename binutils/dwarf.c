@@ -7887,13 +7887,14 @@ display_debug_names (struct dwarf_section *section, void *file)
 	  abbrevptr += bytes_read;
 	  for (;;)
 	    {
-	      const dwarf_vma index = read_uleb128 (abbrevptr, &bytes_read,
-						    abbrev_table_end);
+	      const dwarf_vma xindex = read_uleb128 (abbrevptr,
+						     &bytes_read,
+						     abbrev_table_end);
 	      abbrevptr += bytes_read;
 	      const dwarf_vma form = read_uleb128 (abbrevptr, &bytes_read,
 						   abbrev_table_end);
 	      abbrevptr += bytes_read;
-	      if (index == 0 && form == 0)
+	      if (xindex == 0 && form == 0)
 		break;
 	    }
 	}
@@ -7965,17 +7966,18 @@ display_debug_names (struct dwarf_section *section, void *file)
 		printf (" %s", get_TAG_name (dwarf_tag));
 	      for (;;)
 		{
-		  const dwarf_vma index = read_uleb128 (abbrevptr, &bytes_read,
-							abbrev_table_end);
+		  const dwarf_vma xindex = read_uleb128 (abbrevptr,
+							 &bytes_read,
+							 abbrev_table_end);
 		  abbrevptr += bytes_read;
 		  const dwarf_vma form = read_uleb128 (abbrevptr, &bytes_read,
 						       abbrev_table_end);
 		  abbrevptr += bytes_read;
-		  if (index == 0 && form == 0)
+		  if (xindex == 0 && form == 0)
 		    break;
 
 		  if (tagno >= 0)
-		    printf (" %s", get_IDX_name (index));
+		    printf (" %s", get_IDX_name (xindex));
 		  entryptr = read_and_display_attr_value (0, form, 0, entryptr,
 							  unit_end, 0, 0,
 							  offset_size,
