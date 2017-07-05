@@ -1,3 +1,10 @@
+2017-07-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf2.c (line_info_add_include_dir_stub): Replace time with
+	xtime.
+	(line_info_add_file_name): Likewise.
+	(decode_line_info): Likewise.
+
 2017-07-04  Tristan Gingold  <gingold@adacore.com>
 
 	* version.m4: Bump version to 2.28.90
