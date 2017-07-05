@@ -39,6 +39,12 @@ init_target_desc (struct target_desc *tdesc)
   gdb_assert (2 * tdesc->registers_size + 32 <= PBUFSIZ);
 }
 
+struct target_desc *
+allocate_target_description (void)
+{
+  return new target_desc ();
+}
+
 #ifndef IN_PROCESS_AGENT
 
 static const struct target_desc default_description {};
@@ -62,12 +68,16 @@ current_target_desc (void)
   return current_process ()->tdesc;
 }
 
+/* See arch/tdesc.h.  */
+
 void
 set_tdesc_architecture (struct target_desc *target_desc,
 			const char *name)
 {
   target_desc->arch = xstrdup (name);
 }
+
+/* See arch/tdesc.h.  */
 
 void
 set_tdesc_osabi (struct target_desc *target_desc, const char *name)

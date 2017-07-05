@@ -23,6 +23,16 @@ struct tdesc_type;
 struct tdesc_reg;
 struct target_desc;
 
+/* Allocate a new target_desc.  */
+target_desc *allocate_target_description (void);
+
+/* Set TARGET_DESC's architecture by NAME.  */
+void set_tdesc_architecture (target_desc *target_desc,
+			     const char *name);
+
+/* Set TARGET_DESC's osabi by NAME.  */
+void set_tdesc_osabi (target_desc *target_desc, const char *name);
+
 /* Return the type associated with ID in the context of FEATURE, or
    NULL if none.  */
 struct tdesc_type *tdesc_named_type (const struct tdesc_feature *feature,
