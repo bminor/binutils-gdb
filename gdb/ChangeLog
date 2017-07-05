@@ -1,3 +1,7 @@
+2017-07-06  Pedro Alves  <palves@redhat.com>
+
+	* python/py-unwind.c (pyuw_dealloc_cache): Fix for loop condition.
+
 2017-07-04  Pedro Alves  <palves@redhat.com>
 
 	* gdbtypes.c (recursive_dump_type): Don't reference TYPE_STATIC.

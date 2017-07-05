@@ -51,4 +51,5 @@ gdb_test_sequence "where"  "Backtrace restored by unwinder" {
     "\\r\\n#2 .* main \\(.*\\) at"
 }
 
-
+# Check that the Python unwinder frames can be flushed / released.
+gdb_test "flushregs" "Register cache flushed\\." "flush frames"
