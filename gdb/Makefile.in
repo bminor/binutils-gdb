@@ -812,6 +812,7 @@ ALL_TARGET_OBS = \
 	hppa-nbsd-tdep.o \
 	hppa-obsd-tdep.o \
 	hppa-tdep.o \
+	i386.o \
 	i386-bsd-tdep.o \
 	i386-cygwin-tdep.o \
 	i386-darwin-tdep.o \
@@ -1030,6 +1031,7 @@ SFILES = \
 	agent.c \
 	annotate.c \
 	arch-utils.c \
+	arch/i386.c \
 	auto-load.c \
 	auxv.c \
 	ax-gdb.c \
@@ -1500,6 +1502,7 @@ HFILES_NO_SRCDIR = \
 	xtensa-tdep.h \
 	arch/aarch64-insn.h \
 	arch/arm.h \
+	arch/i386.h \
 	cli/cli-cmds.h \
 	cli/cli-decode.h \
 	cli/cli-script.h \

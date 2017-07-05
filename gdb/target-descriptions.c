@@ -1820,11 +1820,28 @@ set_tdesc_property (struct target_desc *target_desc,
   VEC_safe_push (property_s, target_desc->properties, &new_prop);
 }
 
+/* See arch/tdesc.h.  */
+
+void
+set_tdesc_architecture (struct target_desc *target_desc,
+			const char *name)
+{
+  set_tdesc_architecture (target_desc, bfd_scan_arch (name));
+}
+
 void
 set_tdesc_architecture (struct target_desc *target_desc,
 			const struct bfd_arch_info *arch)
 {
   target_desc->arch = arch;
+}
+
+/* See arch/tdesc.h.  */
+
+void
+set_tdesc_osabi (struct target_desc *target_desc, const char *name)
+{
+  set_tdesc_osabi (target_desc, osabi_from_tdesc_string (name));
 }
 
 void

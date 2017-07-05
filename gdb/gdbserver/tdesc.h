@@ -142,10 +142,6 @@ void init_target_desc (struct target_desc *tdesc);
 const struct target_desc *current_target_desc (void);
 
 #ifndef IN_PROCESS_AGENT
-void set_tdesc_architecture (struct target_desc *target_desc,
-			     const char *name);
-void set_tdesc_osabi (struct target_desc *target_desc, const char *name);
-
 const char *tdesc_get_features_xml (struct target_desc *tdesc);
 #endif
 
