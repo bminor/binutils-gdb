@@ -9142,6 +9142,11 @@ do_vmrs (void)
       return;
     }
 
+  /* MVFR2 is only valid at ARMv8-A.  */
+  if (inst.operands[1].reg == 5)
+    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		_(BAD_FPU));
+
   /* APSR_ sets isvec. All other refs to PC are illegal.  */
   if (!inst.operands[0].isvec && Rt == REG_PC)
     {
@@ -9167,6 +9172,11 @@ do_vmsr (void)
       inst.error = BAD_PC;
       return;
     }
+
+  /* MVFR2 is only valid for ARMv8-A.  */
+  if (inst.operands[0].reg == 5)
+    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		_(BAD_FPU));
 
   /* If we get through parsing the register name, we just insert the number
      generated into the instruction without further validation.  */
@@ -18910,6 +18920,7 @@ static const struct reg_entry reg_names[] =
   REGDEF(FPINST,9,VFC), REGDEF(FPINST2,10,VFC),
   REGDEF(mvfr0,7,VFC), REGDEF(mvfr1,6,VFC),
   REGDEF(MVFR0,7,VFC), REGDEF(MVFR1,6,VFC),
+  REGDEF(mvfr2,5,VFC), REGDEF(MVFR2,5,VFC),
 
   /* Maverick DSP coprocessor registers.  */
   REGSET(mvf,MVF),  REGSET(mvd,MVD),  REGSET(mvfx,MVFX),  REGSET(mvdx,MVDX),
@@ -25847,6 +25858,9 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-a53",	  "Cortex-A53",	       ARM_ARCH_V8A,
 	       ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
+  ARM_CPU_OPT ("cortex-a55",    "Cortex-A55",	       ARM_ARCH_V8_2A,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("cortex-a57",	  "Cortex-A57",	       ARM_ARCH_V8A,
 	       ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
@@ -25856,6 +25870,9 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-a73",	  "Cortex-A73",	       ARM_ARCH_V8A,
 	      ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
 	      FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
+  ARM_CPU_OPT ("cortex-a75",    "Cortex-A75",	       ARM_ARCH_V8_2A,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("cortex-r4",	  "Cortex-R4",	       ARM_ARCH_V7R,
 	       ARM_ARCH_NONE,
 	       FPU_NONE),

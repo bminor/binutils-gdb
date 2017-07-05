@@ -1,3 +1,62 @@
+2017-07-05  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add Cortex-A55 and Cortex-A75.
+	* doc/c-arm.texi (-mcpu): Document Cortex-A55 and Cortex-A75.
+
+2017-07-05  Borislav Petkov  <bp@suse.de>
+
+	* testsuite/gas/i386/opcode.s: Add tests for ModRM.reg == 6 variants.
+	* testsuite/gas/i386/opcode.d: ditto.
+	* testsuite/gas/i386/x86-64-opcode.s: Add x86_64 variants too.
+	* testsuite/gas/i386/x86-64-opcode.d: ditto.
+
+2017-07-04  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+        * config/tc-arm.c (arm_regs): Add MVFR2.
+        (do_vmrs): Constraint for MVFR2 and armv8.
+        (do_vmsr): Likewise.
+        * testsuite/gas/arm/armv8-a+fp.d: Update.
+        * testsuite/gas/arm/armv8-ar+fp.s: Likewise.
+        * testsuite/gas/arm/armv8-r+fp.d: Likewise.
+        * testsuite/gas/arm/vfp-bad.s: Likewise.
+        * testsuite/gas/arm/vfp-bad.l: Likewise.
+
+2017-07-04  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2017-07-04  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.29.
+
+2017-07-03  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/symver.d: Don't run on hppa64-hpux.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (md_convert_frag): Use a switch on the
+	microMIPS relaxation type rather than a chain of conditionals.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (md_convert_frag): Rewrite `fix_new_exp'
+	calls in terms of `fix_new'.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (md_convert_frag): Don't make a helper
+	expression symbol for `fix_new_exp' called with a non-zero
+	offset.
+	* testsuite/gas/mips/relax-offset.d: New test.
+	* testsuite/gas/mips/mips1@relax-offset.d: New test.
+	* testsuite/gas/mips/r3000@relax-offset.d: New test.
+	* testsuite/gas/mips/r3900@relax-offset.d: New test.
+	* testsuite/gas/mips/micromips@relax-offset.d: New test.
+	* testsuite/gas/mips/relax-offset.l: New stderr output.
+	* testsuite/gas/mips/relax-offset.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2017-06-30  Georg-Johann Lay  <avr@gjlay.de>
 
 	PR gas/21683

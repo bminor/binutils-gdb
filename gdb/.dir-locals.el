@@ -26,4 +26,6 @@
 	    (c-basic-offset . 2)
 	    (eval . (c-set-offset 'innamespace 0))
 	    ))
+ (c++-mode . ((eval . (when (fboundp 'c-toggle-comment-style)
+			(c-toggle-comment-style 1)))))
 )

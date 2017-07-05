@@ -2650,14 +2650,15 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	      continue;
 	    }
 
-	  bfd_byte * contents = xmalloc (size);
-	  if (bfd_get_section_contents (ibfd, osec, contents, 0, size))
+	  bfd_byte *contents;
+	  if (bfd_malloc_and_get_section (ibfd, osec, &contents))
 	    {
 	      if (fwrite (contents, 1, size, f) != size)
 		{
 		  non_fatal (_("error writing section contents to %s (error: %s)"),
 			     pdump->filename,
 			     strerror (errno));
+		  free (contents);
 		  return FALSE;
 		}
 	    }

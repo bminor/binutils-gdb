@@ -1,3 +1,94 @@
+2017-07-04  Tristan Gingold  <gingold@adacore.com>
+
+	* version.m4: Bump version to 2.29.51
+	* configure: Regenerate.
+
+2017-07-04  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_symbol): Remove the
+	sanity check at the head of this function.
+
+2017-07-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2.c (struct dwarf2_debug): Add fields dwarf_line_str_buffer and
+	dwarf_line_str_size.
+	(struct attr_abbrev): Add field implicit_const.
+	(dwarf_debug_sections): Add .debug_line_str.
+	(enum dwarf_debug_section_enum): Add debug_line_str and debug_max.
+	(dwarf_debug_section_assert): Add static assertion.
+	(read_indirect_line_string): New.
+	(read_abbrevs): Support DW_FORM_implicit_const.
+	(is_str_attr): Support DW_FORM_line_strp.
+	(read_attribute_value): Support DW_FORM_line_strp and
+	DW_FORM_implicit_const.
+	(read_attribute): Support DW_FORM_implicit_const.
+	(line_info_add_include_dir, line_info_add_include_dir_stub):
+	(line_info_add_file_name, read_formatted_entries): New.
+	(decode_line_info, parse_comp_unit): Support DWARF 5.
+	(_bfd_dwarf2_cleanup_debug_info): Free dwarf_line_str_buffer.
+
+2017-07-03  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
+
+        * elfxx-sparc.c (_bfd_sparc_elf_finish_dynamic_symbol): Remove the
+        abort statement that was put for symbols that are not dynamic.
+
+2017-07-03  Tristan Gingold  <gingold@adacore.com>
+
+	* po/bfd.pot: Regenerate
+
+2017-07-03  Alan Modra  <amodra@gmail.com>
+
+	* bfd.c (_doprnt): Rewrite "ll" and "L" modifiers to "I64" for
+	__MSVCRT__.  Support "L" modifier for bfd_vma.  Formatting.
+	* elf.c (setup_group): Use "Lx" to print sh_size.
+	(_bfd_elf_setup_sections): Remove unnecessary cast and print
+	unknown section type in hex.
+	(copy_special_section_fields): Style fix.
+	(bfd_section_from_shdr): Correct format for sh_link.  Use a
+	common error message for all the variants of unrecognized
+	section types.
+	(assign_file_positions_for_load_sections): Use "Lx" for lma
+	adjust error message.
+	(assign_file_positions_for_non_load_sections): Formatting.
+	(rewrite_elf_program_header): Formatting.  Use "Lx" for
+	bfd_vma values in error messages.
+	* elfcode.h (elf_slurp_reloc_table_from_section): Cast
+	ELF_R_SYM value to type expected by format.
+	* elflink.c (elf_link_read_relocs_from_section): Use "Lx"
+	in error messages.
+	(elf_link_add_object_symbols): Use "Lu" for symbol sizes.
+	(elf_link_input_bfd): Use "Lx" for r_info.
+	(bfd_elf_gc_record_vtinherit): Use "Lx" for offset.
+
+2017-07-03  Alan Modra  <amodra@gmail.com>
+
+	* bfd.c (bfd_scan_vma): Don't use long long unless HAVE_LONG_LONG.
+	* coff-rs6000.c (FMT20): Handle hosts with 64-bit long and
+	Microsoft C library variant of long long format specifier.
+	(PRINT20): Cast value to bfd_uint64_t not long long.
+	* coffcode.h (coff_print_aux): Use BFD_VMA_FMT.
+	* coff-x86_64.c (coff_amd64_reloc): Use bfd_uint64_t rather than
+	long long.  Don't cast to bfd_vma.
+	* elf32-score.c (score3_bfd_getl48): Likewise.
+	* vms-alpha.c (_bfd_vms_slurp_eisd): Likewise.
+
+2017-07-03  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_print_private_bfd_data): Use BFD_VMA_FMT to
+	print d_tag.
+	(bfd_elf_print_symbol): Don't cast symbol->flags.
+	(_bfd_elf_symbol_from_bfd_symbol): Likewise.
+	* elf32-ppc.c (ppc_elf_begin_write_processing): Correct
+	_bfd_error_handler argument order.
+	(ppc_elf_merge_private_bfd_data): Don't cast flags.
+
+2017-07-03  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Invoke AC_CHECK_TYPES for long long.  Invoke
+	AC_TYPE_LONG_DOUBLE.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2017-06-29  Andrew Waterman  <andrew@sifive.com>
 
 	* elfnn-riscv.c (riscv_elf_adjust_dynamic_symbol): Fix TLS copy

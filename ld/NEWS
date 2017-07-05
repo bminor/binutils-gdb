@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.29:
+
 * Support for -z shstk in the x86 ELF linker to generate
   GNU_PROPERTY_X86_FEATURE_1_SHSTK in ELF GNU program properties.
 

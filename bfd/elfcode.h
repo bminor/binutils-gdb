@@ -1446,7 +1446,7 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
 	  _bfd_error_handler
 	    /* xgettext:c-format */
 	    (_("%B(%A): relocation %d has invalid symbol index %ld"),
-	     abfd, asect, i, ELF_R_SYM (rela.r_info));
+	     abfd, asect, i, (long) ELF_R_SYM (rela.r_info));
 	  relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	}
       else

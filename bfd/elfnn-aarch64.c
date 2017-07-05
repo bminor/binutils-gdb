@@ -8892,13 +8892,6 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
   struct elf_aarch64_link_hash_table *htab;
   htab = elf_aarch64_hash_table (info);
 
-  /* Sanity check to make sure no unexpected symbol reaches here.  */
-    if (h->dynindx == -1
-	&& !h->forced_local
-	&& h->root.type != bfd_link_hash_undefweak
-	&& bfd_link_pic (info))
-      abort ();
-
   if (h->plt.offset != (bfd_vma) - 1)
     {
       asection *plt, *gotplt, *relplt;

@@ -1,3 +1,25 @@
+2017-07-04  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2017-07-04  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.29.
+
+2017-07-03  Tristan Gingold  <gingold@adacore.com>
+
+	* po/ld.pot: Regenerate.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/relax-offset.dd: New test.
+	* testsuite/ld-mips-elf/relax-offset.gd: New test.
+	* testsuite/ld-mips-elf/relax-offset-umips.dd: New test.
+	* testsuite/ld-mips-elf/relax-offset-umips.gd: New test.
+	* testsuite/ld-mips-elf/relax-offset.ld: New test linker script.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+	(prune_warnings): New temporary procedure.
+
 2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/ld-mips-elf/mips-elf-flags.exp: Add interAptiv MR2

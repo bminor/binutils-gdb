@@ -181,7 +181,7 @@ static long dynsymcount = 0;
 static bfd_byte *stabs;
 static bfd_size_type stab_size;
 
-static char *strtab;
+static bfd_byte *strtab;
 static bfd_size_type stabstr_size;
 
 static bfd_boolean is_relocatable = FALSE;
@@ -2178,32 +2178,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
     }
   rel_ppend = rel_pp + rel_count;
 
-  /* PR 21665: Check for overlarge datasizes.
-     Note - we used to check for "datasize > bfd_get_file_size (abfd)" but
-     this fails when using compressed sections or compressed file formats
-     (eg MMO, tekhex).
-
-     The call to xmalloc below will fail if too much memory is requested,
-     which will catch the problem in the normal use case.  But if a memory
-     checker is in use, eg valgrind or sanitize, then an exception will
-     be still generated, so we try to catch the problem first.
-
-     Unfortunately there is no simple way to determine how much memory can
-     be allocated by calling xmalloc.  So instead we use a simple, arbitrary
-     limit of 2Gb.  Hopefully this should be enough for most users.  If
-     someone does start trying to disassemble sections larger then 2Gb in
-     size they will doubtless complain and we can increase the limit.  */
-#define MAX_XMALLOC (1024 * 1024 * 1024 * 2UL) /* 2Gb */
-  if (datasize > MAX_XMALLOC)
-    {
-      non_fatal (_("Reading section %s failed because it is too big (%#lx)"),
-		 section->name, (unsigned long) datasize);
-      return;
-    }
-
-  data = (bfd_byte *) xmalloc (datasize);
-
-  if (!bfd_get_section_contents (abfd, section, data, 0, datasize))
+  if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
       non_fatal (_("Reading section %s failed because: %s"),
 		 section->name, bfd_errmsg (bfd_get_error ()));
@@ -2725,12 +2700,11 @@ dump_dwarf (bfd *abfd)
 /* Read ABFD's stabs section STABSECT_NAME, and return a pointer to
    it.  Return NULL on failure.   */
 
-static char *
+static bfd_byte *
 read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
 {
   asection *stabsect;
-  bfd_size_type size;
-  char *contents;
+  bfd_byte *contents;
 
   stabsect = bfd_get_section_by_name (abfd, sect_name);
   if (stabsect == NULL)
@@ -2739,10 +2713,7 @@ read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
       return FALSE;
     }
 
-  size = bfd_section_size (abfd, stabsect);
-  contents  = (char *) xmalloc (size);
-
-  if (! bfd_get_section_contents (abfd, stabsect, contents, 0, size))
+  if (!bfd_malloc_and_get_section (abfd, stabsect, &contents))
     {
       non_fatal (_("reading %s section of %s failed: %s"),
 		 sect_name, bfd_get_filename (abfd),
@@ -2752,7 +2723,7 @@ read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
       return NULL;
     }
 
-  *size_ptr = size;
+  *size_ptr = bfd_section_size (abfd, stabsect);
 
   return contents;
 }
@@ -2879,8 +2850,7 @@ find_stabs_section (bfd *abfd, asection *section, void *names)
 
       if (strtab)
 	{
-	  stabs = (bfd_byte *) read_section_stabs (abfd, section->name,
-						   &stab_size);
+	  stabs = read_section_stabs (abfd, section->name, &stab_size);
 	  if (stabs)
 	    print_section_stabs (abfd, section->name, &sought->string_offset);
 	}
