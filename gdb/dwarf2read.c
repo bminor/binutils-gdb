@@ -855,12 +855,11 @@ struct dwo_file
      sections (for lack of a better name).  */
   struct dwo_sections sections;
 
-  /* The CU in the file.
-     We only support one because having more than one requires hacking the
-     dwo_name of each to match, which is highly unlikely to happen.
-     Doing this means all TUs can share comp_dir: We also assume that
-     DW_AT_comp_dir across all TUs in a DWO file will be identical.  */
-  struct dwo_unit *cu;
+  /* The CUs in the file.
+     Each element is a struct dwo_unit. Multiple CUs per DWO are supported as
+     an extension to handle LLVM's Link Time Optimization output (where
+     multiple source files may be compiled into a single object/dwo pair). */
+  htab_t cus;
 
   /* Table of TUs in the file.
      Each element is a struct dwo_unit.  */
@@ -9700,72 +9699,75 @@ create_dwo_cu_reader (const struct die_reader_specs *reader,
 			hex_string (dwo_unit->signature));
 }
 
-/* Create the dwo_unit for the lone CU in DWO_FILE.
+/* Create the dwo_units for the CUs in a DWO_FILE.
    Note: This function processes DWO files only, not DWP files.  */
 
-static struct dwo_unit *
-create_dwo_cu (struct dwo_file *dwo_file)
+static void
+create_cus_hash_table (struct dwo_file &dwo_file, dwarf2_section_info &section,
+		       htab_t &cus_htab)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  struct dwarf2_section_info *section = &dwo_file->sections.info;
+  const struct dwarf2_section_info *abbrev_section = &dwo_file.sections.abbrev;
   const gdb_byte *info_ptr, *end_ptr;
-  struct create_dwo_cu_data create_dwo_cu_data;
-  struct dwo_unit *dwo_unit;
 
-  dwarf2_read_section (objfile, section);
-  info_ptr = section->buffer;
+  dwarf2_read_section (objfile, &section);
+  info_ptr = section.buffer;
 
   if (info_ptr == NULL)
-    return NULL;
+    return;
 
   if (dwarf_read_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "Reading %s for %s:\n",
-			  get_section_name (section),
-			  get_section_file_name (section));
+			  get_section_name (&section),
+			  get_section_file_name (&section));
     }
 
-  create_dwo_cu_data.dwo_file = dwo_file;
-  dwo_unit = NULL;
-
-  end_ptr = info_ptr + section->size;
+  end_ptr = info_ptr + section.size;
   while (info_ptr < end_ptr)
     {
       struct dwarf2_per_cu_data per_cu;
+      struct create_dwo_cu_data create_dwo_cu_data;
+      struct dwo_unit *dwo_unit;
+      void **slot;
+      sect_offset sect_off = (sect_offset) (info_ptr - section.buffer);
 
       memset (&create_dwo_cu_data.dwo_unit, 0,
 	      sizeof (create_dwo_cu_data.dwo_unit));
       memset (&per_cu, 0, sizeof (per_cu));
       per_cu.objfile = objfile;
       per_cu.is_debug_types = 0;
-      per_cu.sect_off = sect_offset (info_ptr - section->buffer);
-      per_cu.section = section;
+      per_cu.sect_off = sect_offset (info_ptr - section.buffer);
+      per_cu.section = &section;
 
-      init_cutu_and_read_dies_no_follow (&per_cu, dwo_file,
-					 create_dwo_cu_reader,
-					 &create_dwo_cu_data);
-
-      if (create_dwo_cu_data.dwo_unit.dwo_file != NULL)
-	{
-	  /* If we've already found one, complain.  We only support one
-	     because having more than one requires hacking the dwo_name of
-	     each to match, which is highly unlikely to happen.  */
-	  if (dwo_unit != NULL)
-	    {
-	      complaint (&symfile_complaints,
-			 _("Multiple CUs in DWO file %s [in module %s]"),
-			 dwo_file->dwo_name, objfile_name (objfile));
-	      break;
-	    }
-
-	  dwo_unit = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_unit);
-	  *dwo_unit = create_dwo_cu_data.dwo_unit;
-	}
-
+      init_cutu_and_read_dies_no_follow (
+	  &per_cu, &dwo_file, create_dwo_cu_reader, &create_dwo_cu_data);
       info_ptr += per_cu.length;
-    }
 
-  return dwo_unit;
+      // If the unit could not be parsed, skip it.
+      if (create_dwo_cu_data.dwo_unit.dwo_file == NULL)
+	continue;
+
+      if (cus_htab == NULL)
+	cus_htab = allocate_dwo_unit_table (objfile);
+
+      dwo_unit = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_unit);
+      *dwo_unit = create_dwo_cu_data.dwo_unit;
+      slot = htab_find_slot (cus_htab, dwo_unit, INSERT);
+      gdb_assert (slot != NULL);
+      if (*slot != NULL)
+	{
+	  const struct dwo_unit *dup_cu = (const struct dwo_unit *)*slot;
+	  sect_offset dup_sect_off = dup_cu->sect_off;
+
+	  complaint (&symfile_complaints,
+		     _("debug cu entry at offset 0x%x is duplicate to"
+		       " the entry at offset 0x%x, signature %s"),
+		     to_underlying (sect_off), to_underlying (dup_sect_off),
+		     hex_string (dwo_unit->signature));
+	}
+      *slot = (void *)dwo_unit;
+    }
 }
 
 /* DWP file .debug_{cu,tu}_index section format:
@@ -10770,7 +10772,7 @@ open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
   bfd_map_over_sections (dwo_file->dbfd, dwarf2_locate_dwo_sections,
 			 &dwo_file->sections);
 
-  dwo_file->cu = create_dwo_cu (dwo_file);
+  create_cus_hash_table (*dwo_file, dwo_file->sections.info, dwo_file->cus);
 
   create_debug_types_hash_table (dwo_file, dwo_file->sections.types,
 				 dwo_file->tus);
@@ -11137,10 +11139,14 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
 	      dwo_cutu
 		= (struct dwo_unit *) htab_find (dwo_file->tus, &find_dwo_cutu);
 	    }
-	  else if (!is_debug_types && dwo_file->cu)
+	  else if (!is_debug_types && dwo_file->cus)
 	    {
-	      if (signature == dwo_file->cu->signature)
-		dwo_cutu = dwo_file->cu;
+	      struct dwo_unit find_dwo_cutu;
+
+	      memset (&find_dwo_cutu, 0, sizeof (find_dwo_cutu));
+	      find_dwo_cutu.signature = signature;
+	      dwo_cutu = (struct dwo_unit *)htab_find (dwo_file->cus,
+						       &find_dwo_cutu);
 	    }
 
 	  if (dwo_cutu != NULL)

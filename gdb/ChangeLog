@@ -1,3 +1,16 @@
+2017-07-06  David Blaikie  <dblaikie@gmail.com>
+
+	* dwarf2read.c (struct dwo_file): Use a htab of dwo_unit* (rather than
+	a singular dwo_unit*) to support multiple CUs in the same way that
+	multiple TUs are supported.
+	(create_cus_hash_table): Replace create_dwo_cu with a function for
+	parsing multiple CUs from a DWO file.
+	(open_and_init_dwo_file): Use create_cus_hash_table rather than
+	create_dwo_cu.
+	(lookup_dwo_cutu): Lookup CU in the hash table in the dwo_file with
+	htab_find, rather than comparing the signature to a singleton CU in
+	the dwo_file.
+
 2017-07-06  Pedro Alves  <palves@redhat.com>
 
 	* python/py-unwind.c (pyuw_dealloc_cache): Fix for loop condition.
