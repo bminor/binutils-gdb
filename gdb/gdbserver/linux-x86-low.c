@@ -2927,7 +2927,8 @@ x86_get_ipa_tdesc_idx (void)
   if (tdesc == tdesc_i386_avx_avx512_linux)
     return X86_TDESC_AVX_AVX512;
 
-  return 0;
+  /* If none tdesc is found, return the one with minimum features.  */
+  return X86_TDESC_MMX;
 }
 
 /* This is initialized assuming an amd64 target.
