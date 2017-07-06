@@ -1,3 +1,8 @@
+2017-07-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd.c (_doprnt): Convert 'L' to 'l' when setting wide_width
+	to 1.
+
 2017-07-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf2.c (line_info_add_include_dir_stub): Replace time with
