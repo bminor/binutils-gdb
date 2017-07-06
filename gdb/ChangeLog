@@ -1,3 +1,27 @@
+2017-11-17  Tom Tromey  <tom@tromey.com>
+
+	* symtab.h (struct symbol) <is_rust_vtable>: New member.
+	(struct rust_vtable_symbol): New.
+	(find_symbol_at_address): Declare.
+	* symtab.c (find_symbol_at_address): New function.
+	* symfile.h (struct quick_symbol_functions)
+	<find_compunit_symtab_by_address>: New member.
+	* symfile-debug.c (debug_qf_find_compunit_symtab_by_address): New
+	function.
+	(debug_sym_quick_functions): Link to
+	debug_qf_find_compunit_symtab_by_address.
+	* rust-lang.c (rust_get_trait_object_pointer): New function.
+	(rust_evaluate_subexp) <case UNOP_IND>: New case.  Call
+	rust_get_trait_object_pointer.
+	* psymtab.c (psym_relocate): Clear psymbol_map.
+	(psym_fill_psymbol_map, psym_find_compunit_symtab_by_address): New
+	functions.
+	(psym_functions): Link to psym_find_compunit_symtab_by_address.
+	* objfiles.h (struct objfile) <psymbol_map>: New member.
+	* dwarf2read.c (dwarf2_gdb_index_functions): Update.
+	(process_die) <DW_TAG_variable>: New case.  Call read_variable.
+	(rust_containing_type, read_variable): New functions.
+
 2017-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* common/gdb_vecs.h (DEF_VEC_I (int)): Remove.

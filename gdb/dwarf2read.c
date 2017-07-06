@@ -1797,6 +1797,8 @@ static void read_lexical_block_scope (struct die_info *, struct dwarf2_cu *);
 
 static void read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu);
 
+static void read_variable (struct die_info *die, struct dwarf2_cu *cu);
+
 static int dwarf2_ranges_read (unsigned, CORE_ADDR *, CORE_ADDR *,
 			       struct dwarf2_cu *, struct partial_symtab *);
 
@@ -4995,6 +4997,7 @@ const struct quick_symbol_functions dwarf2_gdb_index_functions =
   dw2_map_matching_symbols,
   dw2_expand_symtabs_matching,
   dw2_find_pc_sect_compunit_symtab,
+  NULL,
   dw2_map_symbol_filenames
 };
 
@@ -9230,6 +9233,10 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       process_imported_unit_die (die, cu);
       break;
 
+    case DW_TAG_variable:
+      read_variable (die, cu);
+      break;
+
     default:
       new_symbol (die, NULL, cu);
       break;
@@ -12768,6 +12775,57 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	}
     }
+}
+
+/* Helper function for read_variable.  If DIE represents a virtual
+   table, then return the type of the concrete object that is
+   associated with the virtual table.  Otherwise, return NULL.  */
+
+static struct type *
+rust_containing_type (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct attribute *attr = dwarf2_attr (die, DW_AT_type, cu);
+  if (attr == NULL)
+    return NULL;
+
+  /* Find the type DIE.  */
+  struct die_info *type_die = NULL;
+  struct dwarf2_cu *type_cu = cu;
+
+  if (attr_form_is_ref (attr))
+    type_die = follow_die_ref (die, attr, &type_cu);
+  if (type_die == NULL)
+    return NULL;
+
+  if (dwarf2_attr (type_die, DW_AT_containing_type, type_cu) == NULL)
+    return NULL;
+  return die_containing_type (type_die, type_cu);
+}
+
+/* Read a variable (DW_TAG_variable) DIE and create a new symbol.  */
+
+static void
+read_variable (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct rust_vtable_symbol *storage = NULL;
+
+  if (cu->language == language_rust)
+    {
+      struct type *containing_type = rust_containing_type (die, cu);
+
+      if (containing_type != NULL)
+	{
+	  struct objfile *objfile = cu->objfile;
+
+	  storage = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+				    struct rust_vtable_symbol);
+	  initialize_objfile_symbol (storage);
+	  storage->concrete_type = containing_type;
+	  storage->is_rust_vtable = 1;
+	}
+    }
+
+  new_symbol_full (die, NULL, cu, storage);
 }
 
 /* Call CALLBACK from DW_AT_ranges attribute value OFFSET

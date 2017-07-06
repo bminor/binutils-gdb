@@ -29,6 +29,7 @@
 #include "gdbarch.h"
 #include "infcall.h"
 #include "objfiles.h"
+#include "psymtab.h"
 #include "rust-lang.h"
 #include "valprint.h"
 #include "varobj.h"
@@ -394,6 +395,39 @@ rust_chartype_p (struct type *type)
   return (TYPE_CODE (type) == TYPE_CODE_CHAR
 	  && TYPE_LENGTH (type) == 4
 	  && TYPE_UNSIGNED (type));
+}
+
+/* If VALUE represents a trait object pointer, return the underlying
+   pointer with the correct (i.e., runtime) type.  Otherwise, return
+   NULL.  */
+
+static struct value *
+rust_get_trait_object_pointer (struct value *value)
+{
+  struct type *type = check_typedef (value_type (value));
+
+  if (TYPE_CODE (type) != TYPE_CODE_STRUCT || TYPE_NFIELDS (type) != 2)
+    return NULL;
+
+  /* Try to be a bit resilient if the ABI changes.  */
+  int vtable_field = 0;
+  for (int i = 0; i < 2; ++i)
+    {
+      if (strcmp (TYPE_FIELD_NAME (type, i), "vtable") == 0)
+	vtable_field = i;
+      else if (strcmp (TYPE_FIELD_NAME (type, i), "pointer") != 0)
+	return NULL;
+    }
+
+  CORE_ADDR vtable = value_as_address (value_field (value, vtable_field));
+  struct symbol *symbol = find_symbol_at_address (vtable);
+  if (symbol == NULL || !symbol->is_rust_vtable)
+    return NULL;
+
+  struct rust_vtable_symbol *vtable_sym
+    = static_cast<struct rust_vtable_symbol *> (symbol);
+  struct type *pointer_type = lookup_pointer_type (vtable_sym->concrete_type);
+  return value_cast (pointer_type, value_field (value, 1 - vtable_field));
 }
 
 
@@ -1617,6 +1651,25 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
   switch (exp->elts[*pos].opcode)
     {
+    case UNOP_IND:
+      {
+	if (noside != EVAL_NORMAL)
+	  result = evaluate_subexp_standard (expect_type, exp, pos, noside);
+	else
+	  {
+	    ++*pos;
+	    struct value *value = evaluate_subexp (expect_type, exp, pos,
+						   noside);
+
+	    struct value *trait_ptr = rust_get_trait_object_pointer (value);
+	    if (trait_ptr != NULL)
+	      value = trait_ptr;
+
+	    result = value_ind (value);
+	  }
+      }
+      break;
+
     case UNOP_COMPLEMENT:
       {
 	struct value *value;

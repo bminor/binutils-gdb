@@ -2964,6 +2964,45 @@ find_pc_compunit_symtab (CORE_ADDR pc)
 {
   return find_pc_sect_compunit_symtab (pc, find_pc_mapped_section (pc));
 }
+
+/* See symtab.h.  */
+
+struct symbol *
+find_symbol_at_address (CORE_ADDR address)
+{
+  struct objfile *objfile;
+
+  ALL_OBJFILES (objfile)
+  {
+    if (objfile->sf == NULL
+	|| objfile->sf->qf->find_compunit_symtab_by_address == NULL)
+      continue;
+
+    struct compunit_symtab *symtab
+      = objfile->sf->qf->find_compunit_symtab_by_address (objfile, address);
+    if (symtab != NULL)
+      {
+	const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (symtab);
+
+	for (int i = GLOBAL_BLOCK; i <= STATIC_BLOCK; ++i)
+	  {
+	    struct block *b = BLOCKVECTOR_BLOCK (bv, i);
+	    struct block_iterator iter;
+	    struct symbol *sym;
+
+	    ALL_BLOCK_SYMBOLS (b, iter, sym)
+	    {
+	      if (SYMBOL_CLASS (sym) == LOC_STATIC
+		  && SYMBOL_VALUE_ADDRESS (sym) == address)
+		return sym;
+	    }
+	  }
+      }
+  }
+
+  return NULL;
+}
+
 
 
 /* Find the source file and line number for a given PC value and SECTION.

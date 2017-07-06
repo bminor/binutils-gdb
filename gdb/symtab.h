@@ -1062,6 +1062,11 @@ struct symbol
      In this case the symbol is really a "struct template_symbol".  */
   unsigned is_cplus_template_function : 1;
 
+  /* True if this is a Rust virtual table.  In this case, the symbol
+     can be downcast to "struct rust_vtable_symbol".  */
+
+  unsigned is_rust_vtable : 1;
+
   /* Line number of this symbol's definition, except for inlined
      functions.  For an inlined function (class LOC_BLOCK and
      SYMBOL_INLINED set) this is the line number of the function's call
@@ -1178,6 +1183,15 @@ struct template_symbol
   /* The template arguments.  This is an array with
      N_TEMPLATE_ARGUMENTS elements.  */
   struct symbol **template_arguments;
+};
+
+/* A symbol that represents a Rust virtual table object.  */
+
+struct rust_vtable_symbol : public symbol
+{
+  /* The concrete type for which this vtable was created; that is, in
+     "impl Trait for Type", this is "Type".  */
+  struct type *concrete_type;
 };
 
 
@@ -1605,6 +1619,11 @@ extern struct symbol *find_pc_function (CORE_ADDR);
 /* lookup the function corresponding to the address and section.  */
 
 extern struct symbol *find_pc_sect_function (CORE_ADDR, struct obj_section *);
+
+/* Find the symbol at the given address.  Returns NULL if no symbol
+   found.  Only exact matches for ADDRESS are considered.  */
+
+extern struct symbol *find_symbol_at_address (CORE_ADDR);
 
 extern int find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
 					       CORE_ADDR *address,
