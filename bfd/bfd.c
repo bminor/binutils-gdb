@@ -727,7 +727,10 @@ _doprnt (FILE *stream, const char *format, va_list ap)
 		       either long long or long.  */
 		    if ((BFD_ARCH_SIZE < 64 || BFD_HOST_64BIT_LONG)
 			&& sptr[-2] == 'L')
-		      wide_width = 1;
+		      {
+			wide_width = 1;
+			sptr[-2] = 'l';
+		      }
 
 		    switch (wide_width)
 		      {
