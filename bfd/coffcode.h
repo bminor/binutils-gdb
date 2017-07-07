@@ -4811,6 +4811,7 @@ coff_slurp_symbol_table (bfd * abfd)
 #endif
 #ifdef RS6000COFF_C
 	    case C_HIDEXT:
+	    case C_AIX_WEAKEXT:
 #endif
 #ifdef C_SYSTEM
 	    case C_SYSTEM:	/* System Wide variable.  */
@@ -4883,7 +4884,11 @@ coff_slurp_symbol_table (bfd * abfd)
 		  && src->u.syment.n_scnum > 0)
 		dst->symbol.flags = BSF_LOCAL;
 #endif
-	      if (src->u.syment.n_sclass == C_WEAKEXT)
+	      if (src->u.syment.n_sclass == C_WEAKEXT
+#ifdef RS6000COFF_C
+		  || src->u.syment.n_sclass == C_AIX_WEAKEXT
+#endif
+		  )
 		dst->symbol.flags |= BSF_WEAK;
 
 	      break;
