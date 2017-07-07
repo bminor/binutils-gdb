@@ -1,3 +1,7 @@
+2017-07-07  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (eelf64_s390.c): Depend on emultempl/s390.em.
+
 2017-07-04  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
