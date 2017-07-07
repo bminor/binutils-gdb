@@ -1,3 +1,12 @@
+2017-07-07  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* emultempl/mipself.em (mips_before_allocation): Avoid ELF
+	processing if not MIPS ELF.
+	* testsuite/ld-mips-elf/binary.d: New test.
+	* testsuite/ld-mips-elf/binary.ld: New test linker script.
+	* testsuite/ld-mips-elf/binary.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new test.
+
 2017-07-07  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/ppc476-shared.lnk: Align .bss.
