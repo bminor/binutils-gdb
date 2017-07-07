@@ -1213,3 +1213,6 @@ run_ld_link_tests [list \
 	"relax-offset-umips"]]
 rename prune_warnings ""
 rename mips_old_prune_warnings prune_warnings
+
+# Verify that we can link ELF input into the `binary' output format.
+run_dump_test "binary"
