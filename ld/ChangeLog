@@ -1,5 +1,11 @@
 2017-07-07  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-powerpc/ppc476-shared.lnk: Align .bss.
+	* testsuite/ld-powerpc/ppc476-shared.d: Adjust.
+	* testsuite/ld-powerpc/ppc476-shared2.d: Adjust.
+
+2017-07-07  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am (eelf64_s390.c): Depend on emultempl/s390.em.
 
 2017-07-04  Tristan Gingold  <gingold@adacore.com>
