@@ -1,3 +1,9 @@
+2017-07-07  Alan Modra  <amodra@gmail.com>
+
+	* cgen-dis.in: Include disassemble.h, not dis-asm.h.
+	* m32c-dis.c: Regenerate.
+	* mep-dis.c: Regenerate.
+
 2017-07-05  Borislav Petkov  <bp@suse.de>
 
 	* i386-dis.c: Enable ModRM.reg /6 aliases.
