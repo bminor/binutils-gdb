@@ -1,5 +1,9 @@
 2017-07-07  Alan Modra  <amodra@gmail.com>
 
+	* coffcode.h (coff_slurp_symbol_table): Handle C_AIX_WEAKEXT.
+
+2017-07-07  Alan Modra  <amodra@gmail.com>
+
 	* bfd.c (_doprnt): Replace "L" with "ll" when printing bfd_vma
 	as long long.  Move code replacing "ll" with "I64", and simplify.
 
