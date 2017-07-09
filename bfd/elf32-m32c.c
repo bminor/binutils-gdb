@@ -826,7 +826,7 @@ m32c_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
 #ifdef DEBUG
   _bfd_error_handler
-    ("old_flags = 0x%.8lx, new_flags = 0x%.8lx, init = %s, filename = %s",
+    ("old_flags = 0x%.8x, new_flags = 0x%.8x, init = %s, filename = %s",
      old_flags, new_flags, elf_flags_init (obfd) ? "yes" : "no",
      bfd_get_filename (ibfd));
 #endif
@@ -887,9 +887,9 @@ m32c_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  error = TRUE;
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: uses different e_flags (0x%lx) fields"
-	       " than previous modules (0x%lx)"),
-	     ibfd, (long) new_flags, (long) old_flags);
+	    (_("%B: uses different e_flags (%#x) fields"
+	       " than previous modules (%#x)"),
+	     ibfd, new_flags, old_flags);
 	}
     }
 

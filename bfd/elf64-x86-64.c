@@ -1885,10 +1885,9 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: TLS transition from %s to %s against `%s' at 0x%lx "
+	(_("%B: TLS transition from %s to %s against `%s' at %#Lx "
 	   "in section `%A' failed"),
-	 abfd, from->name, to->name, name,
-	 (unsigned long) rel->r_offset, sec);
+	 abfd, from->name, to->name, name, rel->r_offset, sec);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -2428,7 +2427,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   for (rel = relocs; rel < rel_end; rel++)
     {
       unsigned int r_type;
-      unsigned long r_symndx;
+      unsigned int r_symndx;
       struct elf_link_hash_entry *h;
       struct elf_x86_64_link_hash_entry *eh;
       Elf_Internal_Sym *isym;
@@ -4574,7 +4573,7 @@ do_ifunc_pointer:
 		  _bfd_error_handler
 		    /* xgettext:c-format */
 		    (_("%B: relocation %s against STT_GNU_IFUNC "
-		       "symbol `%s' has non-zero addend: %d"),
+		       "symbol `%s' has non-zero addend: %Ld"),
 		     input_bfd, howto->name, name, rel->r_addend);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
@@ -5116,22 +5115,13 @@ direct:
 			  else
 			    name = bfd_elf_sym_name (input_bfd, symtab_hdr,
 						     sym, NULL);
-			  if (addend < 0)
-			    _bfd_error_handler
-			      /* xgettext:c-format */
-			      (_("%B: addend -0x%x in relocation %s against "
-				 "symbol `%s' at 0x%lx in section `%A' is "
-				 "out of range"),
-			       input_bfd, addend, howto->name, name,
-			       (unsigned long) rel->r_offset, input_section);
-			  else
-			    _bfd_error_handler
-			      /* xgettext:c-format */
-			      (_("%B: addend 0x%x in relocation %s against "
-				 "symbol `%s' at 0x%lx in section `%A' is "
-				 "out of range"),
-			       input_bfd, addend, howto->name, name,
-			       (unsigned long) rel->r_offset, input_section);
+			  _bfd_error_handler
+			    /* xgettext:c-format */
+			    (_("%B: addend %s%#x in relocation %s against "
+			       "symbol `%s' at %#Lx in section `%A' is "
+			       "out of range"),
+			     input_bfd, addend < 0 ? "-" : "", addend,
+			     howto->name, name, rel->r_offset, input_section);
 			  bfd_set_error (bfd_error_bad_value);
 			  return FALSE;
 			}
@@ -5750,10 +5740,10 @@ direct:
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
-	     (long) rel->r_offset,
+	     rel->r_offset,
 	     howto->name,
 	     h->root.root.string);
 	  return FALSE;
@@ -5790,9 +5780,9 @@ check_relocation_error:
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
+		(_("%B(%A+%#Lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
-		 (long) rel->r_offset, name, (int) r);
+		 rel->r_offset, name, (int) r);
 	      return FALSE;
 	    }
 	}

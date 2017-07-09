@@ -1311,7 +1311,7 @@ styp_to_sec_flags (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B (%s): Section flag %s (0x%x) ignored"),
+	    (_("%B (%s): Section flag %s (%#lx) ignored"),
 	     abfd, name, unhandled, flag);
 	  result = FALSE;
 	}
@@ -3765,7 +3765,7 @@ coff_write_object_contents (bfd * abfd)
 		  _bfd_error_handler
 		    /* xgettext:c-format */
 		    (_("%B: section %A: string table overflow at offset %ld"),
-		    abfd, current, string_size);
+		    abfd, current, (unsigned long) string_size);
 		  return FALSE;
 		}
 
@@ -4607,7 +4607,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
       if (cache_ptr->line_number == 0)
 	{
 	  combined_entry_type * ent;
-	  bfd_vma symndx;
+	  unsigned long symndx;
 	  coff_symbol_type *sym;
 
 	  have_func = FALSE;
@@ -4617,7 +4617,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	      _bfd_error_handler
 		/* xgettext:c-format */
 		(_("%B: warning: illegal symbol index 0x%lx in line number entry %d"),
-		 abfd, (long) symndx, counter);
+		 abfd, symndx, counter);
 	      cache_ptr->line_number = -1;
 	      ret = FALSE;
 	      continue;
@@ -4631,7 +4631,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	      _bfd_error_handler
 		/* xgettext:c-format */
 		(_("%B: warning: illegal symbol index 0x%lx in line number entry %d"),
-		 abfd, (long) symndx, counter);
+		 abfd, symndx, counter);
 	      cache_ptr->line_number = -1;
 	      ret = FALSE;
 	      continue;
@@ -5319,7 +5319,7 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 	      _bfd_error_handler
 		/* xgettext:c-format */
 		(_("%B: warning: illegal symbol index %ld in relocs"),
-		 abfd, (long) dst.r_symndx);
+		 abfd, dst.r_symndx);
 	      cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	      ptr = NULL;
 	    }
@@ -5358,8 +5358,8 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: illegal relocation type %d at address 0x%lx"),
-	     abfd, dst.r_type, (long) dst.r_vaddr);
+	    (_("%B: illegal relocation type %d at address %#Lx"),
+	     abfd, dst.r_type, dst.r_vaddr);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}

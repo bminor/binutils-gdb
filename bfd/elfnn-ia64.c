@@ -617,9 +617,9 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: Can't relax br at 0x%lx in section `%A'."
+		(_("%B: Can't relax br at %#Lx in section `%A'."
 		   " Please use brl or indirect branch."),
-		 sec->owner, (unsigned long) roff, sec);
+		 sec->owner, roff, sec);
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;
 	    }
@@ -3685,8 +3685,8 @@ elfNN_ia64_choose_gp (bfd *abfd, struct bfd_link_info *info, bfd_boolean final)
 overflow:
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: short data segment overflowed (0x%lx >= 0x400000)"),
-	     abfd, (unsigned long) (max_short_vma - min_short_vma));
+	    (_("%B: short data segment overflowed (%#Lx >= 0x400000)"),
+	     abfd, max_short_vma - min_short_vma);
 	  return FALSE;
 	}
       else if ((gp_val > min_short_vma
@@ -4473,7 +4473,7 @@ missing_tls_sec:
 		_bfd_error_handler
 		  /* xgettext:c-format */
 		  (_("%B: missing TLS section for relocation %s against `%s'"
-		     " at 0x%lx in section `%A'."),
+		     " at %#Lx in section `%A'."),
 		   input_bfd, howto->name, name,
 		   rel->r_offset, input_section);
 		break;
@@ -4489,8 +4489,8 @@ missing_tls_sec:
 		       that the section is too big to relax.  */
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B: Can't relax br (%s) to `%s' at 0x%lx"
-			 " in section `%A' with size 0x%lx (> 0x1000000)."),
+		      (_("%B: Can't relax br (%s) to `%s' at %#Lx"
+			 " in section `%A' with size %#Lx (> 0x1000000)."),
 		       input_bfd, howto->name, name, rel->r_offset,
 		       input_section, input_section->size);
 		    break;

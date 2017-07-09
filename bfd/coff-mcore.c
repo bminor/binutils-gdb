@@ -479,10 +479,9 @@ coff_mcore_relocate_section (bfd * output_bfd,
 	  _bfd_error_handler
 	    /* xgettext: c-format */
 	    (_("Warning: unsupported reloc %s <file %B, section %A>\n"
-	       "sym %ld (%s), r_vaddr %ld (%lx)"),
+	       "sym %ld (%s), r_vaddr %Ld (%#Lx)"),
 	     howto->name, input_bfd, input_section,
-	     rel->r_symndx, my_name, (long) rel->r_vaddr,
-	     (unsigned long) rel->r_vaddr);
+	     rel->r_symndx, my_name, rel->r_vaddr, rel->r_vaddr);
 	  break;
 
 	case IMAGE_REL_MCORE_PCREL_IMM8BY4:

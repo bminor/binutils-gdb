@@ -408,10 +408,10 @@ mcore_elf_relocate_section (bfd * output_bfd,
 
 #ifdef DEBUG
   _bfd_error_handler
-    ("mcore_elf_relocate_section called for %B section %A, %ld relocations%s",
+    ("mcore_elf_relocate_section called for %B section %A, %u relocations%s",
      input_bfd,
      input_section,
-     (long) input_section->reloc_count,
+     input_section->reloc_count,
      (bfd_link_relocatable (info)) ? " (relocatable)" : "");
 #endif
 

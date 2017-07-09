@@ -1,3 +1,166 @@
+2017-07-12  Alan Modra  <amodra@gmail.com>
+
+	* binary.c (binary_set_section_contents): Don't print filepos in
+	error message.
+	(coff_write_object_contents): Cast size_t for error message.
+	(coff_slurp_line_table): Don't use bfd_vma symndx.
+	(coff_slurp_reloc_table): Remove unneeded cast.
+	* dwarf2.c (read_section): Cast bfd_int64_t to long long for
+	error message.
+	(find_abstract_instance_name): Likewise.
+	* elf32-arm.c (arm_type_of_stub): Correct error arg order.
+	(bfd_elf32_arm_stm32l4xx_erratum_scan): Don't cast error arg.
+	(elf32_arm_check_relocs): Make r_symndx an int.
+	* elf32-cris.c (cris_elf_check_relocs): Delete extraneous %s in
+	format string.
+	* elf32-metag.c (elf_metag_relocate_section): Delete extra error
+	message arg.
+	* elf32-nds32.c (nds32_elf_ex9_build_hash_table): Rewrite bogus
+	error message.
+	* elf32-i386.c (elf_i386_check_relocs): Make r_symndx an int.
+	* elf32-s390.c (elf_s390_check_relocs): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_check_relocs): Likewise.
+	* elf32-tilepro.c (tilepro_elf_check_relocs): Likewise.
+	* elf32-xtensa.c (elf_xtensa_check_relocs): Likewise.
+	* elf64-s390.c (elf_s390_check_relocs): Likewise.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_check_relocs): Likewise.
+	* elfnn-riscv.c (riscv_elf_check_relocs): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_check_relocs): Likewise.
+	* elf64-mmix.c (_bfd_mmix_after_linker_allocation): Cast size_t args
+	and use %lu for error message.
+	* elflink.c (elf_link_adjust_relocs): Delete extra error message arg.
+	* mmo.c (mmo_scan): Make stab_loc a file_ptr.  Cast expression for
+	error message.
+
+	* elf32-arm.c (elf32_arm_tls_relax): Correct format string and args
+	in error message.
+	(elf32_arm_final_link_relocate): Likewise.
+	* coff-arm.c (bfd_arm_process_before_allocation): Likewise.
+	* coffcode.h (styp_to_sec_flags): Likewise.
+	* cofflink.c (_bfd_coff_write_global_sym): Likewise.
+	* ecoff.c (_bfd_ecoff_slurp_symbol_table): Likewise.
+	* elf32-arc.c (arc_elf_merge_private_bfd_data): Likewise.
+	* elf32-bfin.c (bfinfdpic_check_relocs): Likewise.
+	(elf32_bfin_merge_private_bfd_data): Likewise.
+	* elf32-cris.c (cris_elf_relocate_section): Likewise.
+	* elf32-frv.c (frv_elf_merge_private_bfd_data): Likewise.
+	* elf32-i370.c (i370_elf_merge_private_bfd_data): Likewise.
+	(i370_elf_relocate_section): Likewise.
+	* elf32-iq2000.c (iq2000_elf_merge_private_bfd_data): Likewise.
+	* elf32-m32c.c (m32c_elf_merge_private_bfd_data): Likewise.
+	* elf32-m68hc1x.c (_bfd_m68hc11_elf_merge_private_bfd_data): Likewise.
+	* elf32-mcore.c (mcore_elf_relocate_section): Likewise.
+	* elf32-mep.c (mep_elf_merge_private_bfd_data): Likewise.
+	* elf32-mt.c (mt_elf_merge_private_bfd_data): Likewise.
+	* elf64-sparc.c (elf64_sparc_merge_private_bfd_data): Likewise.
+	* elfxx-mips.c (mips_elf_merge_obj_e_flags): Likewise.
+	(_bfd_mips_elf_merge_private_bfd_data): Likewise.
+	* ieee.c (ieee_write_id, read_id): Likewise.
+	* mach-o.c (bfd_mach_o_write_contents): Likewise.
+	(bfd_mach_o_layout_commands, bfd_mach_o_read_section_32): Likewise.
+	(bfd_mach_o_read_section_64, bfd_mach_o_read_symtab_symbol): Likewise.
+	(bfd_mach_o_read_command, bfd_mach_o_header_p): Likewise.
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_in): Likewise.
+	* stabs.c (_bfd_link_section_stabs): Likewise.
+
+	* coff-arm.c (coff_arm_relocate_section): Use L modifier in error
+	format.
+	* coff-mcore.c (coff_mcore_relocate_section): Likewise.
+	* coff-ppc.c (coff_ppc_relocate_section): Likewise.
+	* coff-rs6000.c (xcoff_reloc_type_toc): Likewise.
+	* coff-sh.c (sh_relax_section): Likewise.
+	(sh_relax_delete_bytes, sh_swap_insns): Likewise.
+	* coff-tic80.c (coff_tic80_relocate_section): Likewise.
+	* coffcode.h (coff_slurp_reloc_table): Likewise.
+	* coffgen.c (_bfd_coff_get_external_symbols): Likewise.
+	(_bfd_coff_read_string_table): Likewise.
+	* cofflink.c (_bfd_coff_generic_relocate_section): Likewise.
+	* compress.c (bfd_get_full_section_contents): Likewise.
+	* dwarf2.c (read_formatted_entries, decode_line_info): Likewise.
+	* elf-m10300.c (mn10300_elf_relocate_section): Likewise.
+	* elf.c (bfd_elf_string_from_elf_section): Likewise.
+	* elf32-arc.c (arc_special_overflow_checks): Likewise.
+	* elf32-arm.c (elf32_arm_tls_relax): Likewise.
+	(elf32_arm_final_link_relocate, elf32_arm_relocate_section): Likewise.
+	(elf32_arm_write_section): Likewise.
+	* elf32-bfin.c (bfin_relocate_section): Likewise.
+	(bfinfdpic_relocate_section): Likewise.
+	* elf32-hppa.c (hppa_build_one_stub): Likewise.
+	(final_link_relocate, elf32_hppa_relocate_section): Likewise.
+	* elf32-i386.c (elf_i386_tls_transition): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	* elf32-ip2k.c (ip2k_final_link_relocate): Likewise.
+	* elf32-lm32.c (lm32_elf_finish_dynamic_sections): Likewise.
+	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-metag.c (elf_metag_relocate_section): Likewise.
+	* elf32-nds32.c (unrecognized_reloc_msg): Likewise.
+	(nds32_elf_relax_longcall1, nds32_elf_relax_longcall2): Likewise.
+	(nds32_elf_relax_longcall3, nds32_elf_relax_longjump1): Likewise.
+	(nds32_elf_relax_longjump2, nds32_elf_relax_longjump3): Likewise.
+	(nds32_elf_relax_longcall4, nds32_elf_relax_longcall5): Likewise.
+	(nds32_elf_relax_longcall6, nds32_elf_relax_longjump4): Likewise.
+	(nds32_elf_relax_longjump5, nds32_elf_relax_longjump6): Likewise.
+	(nds32_elf_relax_longjump7, nds32_elf_relax_loadstore): Likewise.
+	(nds32_elf_relax_ptr, nds32_elf_ex9_build_hash_table): Likewise.
+	* elf32-nios2.c (nios2_elf32_relocate_section): Likewise.
+	* elf32-rx.c (UNSAFE_FOR_PID): Likewise.
+	* elf32-s390.c (invalid_tls_insn, elf_s390_relocate_section): Likewise.
+	* elf32-score.c (s3_bfd_score_elf_check_relocs): Likewise.
+	* elf32-score7.c (s7_bfd_score_elf_check_relocs): Likewise.
+	* elf32-sh.c (sh_elf_relax_section): Likewise.
+	(sh_elf_relax_delete_bytes, sh_elf_swap_insns): Likewise.
+	(sh_elf_relocate_section): Likewise.
+	* elf32-sh64.c (shmedia_prepare_reloc): Likewise.
+	* elf32-spu.c (spu_elf_relocate_section): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_relocate_section): Likewise.
+	* elf32-tilepro.c (tilepro_elf_relocate_section): Likewise.
+	* elf32-v850.c (v850_elf_relax_section): Likewise.
+	* elf32-vax.c (elf_vax_check_relocs): Likewise.
+	(elf_vax_relocate_section): Likewise.
+	* elf32-xtensa.c (elf_xtensa_relocate_section): Likewise.
+	(extend_ebb_bounds_forward, extend_ebb_bounds_backward): Likewise.
+	(compute_text_actions, compute_ebb_proposed_actions): Likewise.
+	(do_fix_for_relocatable_link): Likewise.
+	* elf64-alpha.c (elf64_alpha_relax_got_load): Likewise.
+	(elf64_alpha_relax_with_lituse): Likewise.
+	* elf64-hppa.c (elf64_hppa_finish_dynamic_symbol): Likewise.
+	(elf_hppa_final_link_relocate): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_relax_section): Likewise.
+	(elf64_ia64_choose_gp, elf64_ia64_relocate_section): Likewise.
+	(elf64_vms_link_add_object_symbols): Likewise.
+	* elf64-mmix.c (mmix_elf_perform_relocation): Likewise.
+	(mmix_final_link_relocate): Likewise.
+	* elf64-s390.c (invalid_tls_insn): Likewise.
+	(elf_s390_relocate_section): Likewise.
+	* elf64-sh64.c (sh_elf64_relocate_section): Likewise.
+	* elf64-x86-64.c (elf_x86_64_tls_transition): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	* elfcode.h (elf_slurp_symbol_table): Likewise.
+	* elfcore.h (elf_core_file_p): Likewise.
+	* elflink.c (elf_link_read_relocs_from_section): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Likewise.
+	(elfNN_aarch64_relocate_section): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_relax_section): Likewise.
+	(elfNN_ia64_choose_gp, elfNN_ia64_relocate_section): Likewise.
+	* elfnn-riscv.c (riscv_elf_relocate_section): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Likewise.
+	(_bfd_mips_elf_relocate_section): Likewise.
+	(_bfd_mips_elf_finish_dynamic_symbol, mips_finish_exec_plt): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_relocate_section): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_relocate_section): Likewise.
+	* ieee.c (ieee_slurp_external_symbols): Likewise.
+	* ihex.c (ihex_write_object_content): Likewise.
+	* mach-o.c (bfd_mach_o_build_exec_seg_command): Likewise.
+	* merge.c (_bfd_merged_section_offset): Likewise.
+	* mmo.c (mmo_write_loc_chunk): Likewise.
+	(mmo_write_object_contents): Likewise.
+	* peXXigen.c (_bfd_XX_bfd_copy_private_bfd_data_common): Likewise.
+	* stabs.c (_bfd_link_section_stabs): Likewise.
+	* xcofflink.c (xcoff_link_add_symbols, xcoff_find_tc0): Likewise.
+
 2017-07-11  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Fix typo.

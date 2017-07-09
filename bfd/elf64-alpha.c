@@ -3081,9 +3081,8 @@ elf64_alpha_relax_got_load (struct alpha_relax_info *info, bfd_vma symval,
       reloc_howto_type *howto = elf64_alpha_howto_table + r_type;
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: %A+0x%lx: warning: %s relocation against unexpected insn"),
-	 info->abfd, info->sec,
-	 (unsigned long) irel->r_offset, howto->name);
+	(_("%B: %A+%#Lx: warning: %s relocation against unexpected insn"),
+	 info->abfd, info->sec, irel->r_offset, howto->name);
       return TRUE;
     }
 
@@ -3277,9 +3276,8 @@ elf64_alpha_relax_with_lituse (struct alpha_relax_info *info,
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: %A+0x%lx: warning: LITERAL relocation against unexpected insn"),
-	 abfd, info->sec,
-	 (unsigned long) irel->r_offset);
+	(_("%B: %A+%#Lx: warning: LITERAL relocation against unexpected insn"),
+	 abfd, info->sec, irel->r_offset);
       return TRUE;
     }
 

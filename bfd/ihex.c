@@ -825,13 +825,10 @@ ihex_write_object_contents (bfd *abfd)
 		  extbase = where & 0xffff0000;
 		  if (where > extbase + 0xffff)
 		    {
-		      char buf[20];
-
-		      sprintf_vma (buf, where);
 		      _bfd_error_handler
 			/* xgettext:c-format */
-			(_("%B: address 0x%s out of range for Intel Hex file"),
-			 abfd, buf);
+			(_("%B: address %#Lx out of range for Intel Hex file"),
+			 abfd, where);
 		      bfd_set_error (bfd_error_bad_value);
 		      return FALSE;
 		    }

@@ -577,8 +577,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       if (laddr >= sec->size)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: 0x%lx: warning: bad R_SH_USES offset"),
-			      abfd, (unsigned long) irel->r_offset);
+	  _bfd_error_handler (_("%B: %#Lx: warning: bad R_SH_USES offset"),
+			      abfd, irel->r_offset);
 	  continue;
 	}
       insn = bfd_get_16 (abfd, contents + laddr);
@@ -589,8 +589,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: 0x%lx: warning: R_SH_USES points to unrecognized insn 0x%x"),
-	     abfd, (unsigned long) irel->r_offset, insn);
+	    (_("%B: %#Lx: warning: R_SH_USES points to unrecognized insn 0x%x"),
+	     abfd, irel->r_offset, insn);
 	  continue;
 	}
 
@@ -607,8 +607,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: 0x%lx: warning: bad R_SH_USES load offset"),
-	     abfd, (unsigned long) irel->r_offset);
+	    (_("%B: %#Lx: warning: bad R_SH_USES load offset"),
+	     abfd, irel->r_offset);
 	  continue;
 	}
 
@@ -623,8 +623,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: 0x%lx: warning: could not find expected reloc"),
-	     abfd, (unsigned long) paddr);
+	    (_("%B: %#Lx: warning: could not find expected reloc"),
+	     abfd, paddr);
 	  continue;
 	}
 
@@ -652,8 +652,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: 0x%lx: warning: symbol in unexpected section"),
-		 abfd, (unsigned long) paddr);
+		(_("%B: %#Lx: warning: symbol in unexpected section"),
+		 abfd, paddr);
 	      continue;
 	    }
 
@@ -782,8 +782,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: 0x%lx: warning: could not find expected COUNT reloc"),
-	     abfd, (unsigned long) paddr);
+	    (_("%B: %#Lx: warning: could not find expected COUNT reloc"),
+	     abfd, paddr);
 	  continue;
 	}
 
@@ -792,8 +792,8 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       if (irelcount->r_addend == 0)
 	{
 	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%B: 0x%lx: warning: bad count"),
-			      abfd, (unsigned long) paddr);
+	  _bfd_error_handler (_("%B: %#Lx: warning: bad count"),
+			      abfd, paddr);
 	  continue;
 	}
 
@@ -1196,8 +1196,8 @@ sh_elf_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: 0x%lx: fatal: reloc overflow while relaxing"),
-		 abfd, (unsigned long) irel->r_offset);
+		(_("%B: %#Lx: fatal: reloc overflow while relaxing"),
+		 abfd, irel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -1567,8 +1567,8 @@ sh_elf_swap_insns (bfd *abfd, asection *sec, void *relocs,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: 0x%lx: fatal: reloc overflow while relaxing"),
-		 abfd, (unsigned long) irel->r_offset);
+		(_("%B: %#Lx: fatal: reloc overflow while relaxing"),
+		 abfd, irel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4006,9 +4006,9 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B(%A+0x%lx): %s relocation against SEC_MERGE section"),
+		    (_("%B(%A+%#Lx): %s relocation against SEC_MERGE section"),
 		     input_bfd, input_section,
-		     (long) rel->r_offset, howto->name);
+		     rel->r_offset, howto->name);
 		  return FALSE;
 		}
 
@@ -4124,10 +4124,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+		    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
 		     input_bfd,
 		     input_section,
-		     (long) rel->r_offset,
+		     rel->r_offset,
 		     howto->name,
 		     h->root.root.string);
 		  return FALSE;
@@ -4203,9 +4203,9 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: 0x%lx: fatal: unaligned branch target for relax-support relocation"),
+		    (_("%B: %#Lx: fatal: unaligned branch target for relax-support relocation"),
 		     input_section->owner,
-		     (unsigned long) rel->r_offset);
+		     rel->r_offset);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
@@ -4237,10 +4237,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: 0x%lx: fatal: unaligned %s relocation 0x%lx"),
+		(_("%B: %#Lx: fatal: unaligned %s relocation %#Lx"),
 		 input_section->owner,
-		 (unsigned long) rel->r_offset, howto->name,
-		 (unsigned long) relocation);
+		 rel->r_offset, howto->name,
+		 relocation);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4253,10 +4253,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: 0x%lx: fatal: unaligned %s relocation 0x%lx"),
+		(_("%B: %#Lx: fatal: unaligned %s relocation %#Lx"),
 		 input_section->owner,
-		 (unsigned long) rel->r_offset, howto->name,
-		 (unsigned long) relocation);
+		 rel->r_offset, howto->name,
+		 relocation);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4268,10 +4268,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: 0x%lx: fatal: R_SH_PSHA relocation %d not in range -32..32"),
+		(_("%B: %#Lx: fatal: R_SH_PSHA relocation %Ld not in range -32..32"),
 		 input_section->owner,
-		 (unsigned long) rel->r_offset,
-		 (unsigned long) relocation);
+		 rel->r_offset,
+		 relocation);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4283,10 +4283,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: 0x%lx: fatal: R_SH_PSHL relocation %d not in range -32..32"),
+		(_("%B: %#Lx: fatal: R_SH_PSHL relocation %Ld not in range -32..32"),
 		 input_section->owner,
-		 (unsigned long) rel->r_offset,
-		 (unsigned long) relocation);
+		 rel->r_offset,
+		 relocation);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -4428,10 +4428,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B(%A+0x%lx): cannot emit fixup to `%s' in read-only section"),
+		      (_("%B(%A+%#Lx): cannot emit fixup to `%s' in read-only section"),
 		       input_bfd,
 		       input_section,
-		       (long) rel->r_offset,
+		       rel->r_offset,
 		       symname);
 		    return FALSE;
 		  }
@@ -4900,10 +4900,10 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B(%A+0x%lx): cannot emit fixup to `%s' in read-only section"),
+		      (_("%B(%A+%#Lx): cannot emit fixup to `%s' in read-only section"),
 		       input_bfd,
 		       input_section,
-		       (long) rel->r_offset,
+		       rel->r_offset,
 		       symname);
 		    return FALSE;
 		  }
@@ -5002,8 +5002,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+0x%lx): %s relocation against external symbol \"%s\""),
-		 input_bfd, input_section, (long) rel->r_offset, howto->name,
+		(_("%B(%A+%#Lx): %s relocation against external symbol \"%s\""),
+		 input_bfd, input_section, rel->r_offset, howto->name,
 		 h->root.root.string);
 	      return FALSE;
 	    }

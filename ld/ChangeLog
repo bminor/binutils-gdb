@@ -1,3 +1,8 @@
+2017-07-12  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-arc/nps-1b.err: Update.
+	* testsuite/ld-x86-64/ilp32-11.d: Update.
+
 2017-07-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-selective/selective.exp: Support single digit

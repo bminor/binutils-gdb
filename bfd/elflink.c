@@ -2394,9 +2394,9 @@ elf_link_read_relocs_from_section (bfd *abfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: bad reloc symbol index (%#lx >= %#lx)"
+		(_("%B: bad reloc symbol index (%#Lx >= %#lx)"
 		   " for offset %#Lx in section `%A'"),
-		 abfd, (unsigned long) r_symndx, (unsigned long) nsyms,
+		 abfd, r_symndx, (unsigned long) nsyms,
 		 irela->r_offset, sec);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
@@ -2406,10 +2406,10 @@ elf_link_read_relocs_from_section (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: non-zero symbol index (%#lx)"
+	    (_("%B: non-zero symbol index (%#Lx)"
 	       " for offset %#Lx in section `%A'"
 	       " when the object file has no symbol table"),
-	     abfd, (unsigned long) r_symndx, (unsigned long) nsyms,
+	     abfd, r_symndx,
 	     irela->r_offset, sec);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
@@ -8616,8 +8616,7 @@ elf_link_adjust_relocs (bfd *abfd,
 			      abfd, sec,
 			      (*rel_hash)->root.root.string);
 	  _bfd_error_handler (_("%B:%A: error: try relinking with --gc-keep-exported enabled."),
-			      abfd, sec,
-			      (*rel_hash)->root.root.string);
+			      abfd, sec);
 	  bfd_set_error (bfd_error_invalid_operation);
 	  return FALSE;
 	}
