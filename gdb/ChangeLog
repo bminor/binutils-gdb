@@ -1,3 +1,8 @@
+2017-07-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* compile/compile-loc2c.c (do_compile_dwarf_expr_to_c): Read
+	address when op is DW_OP_addr.
+
 2017-07-09  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Reverse size
