@@ -809,7 +809,7 @@ x86_linux_read_description (void)
 
   /* Check the native XCR0 only if PTRACE_GETREGSET is available.  */
   xcr0_features = (have_ptrace_getregset
-         && (xcr0 & X86_XSTATE_ALL_MASK));
+		   && (xcr0 & X86_XSTATE_ALL_MASK));
 
   if (xcr0_features)
     x86_xcr0 = xcr0;
