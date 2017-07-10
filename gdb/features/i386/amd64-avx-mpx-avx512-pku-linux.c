@@ -323,7 +323,7 @@ initialize_tdesc_amd64_avx_mpx_avx512_pku_linux (void)
   tdesc_create_reg (feature, "zmm31h", 153, 1, NULL, 256, "v2ui128");
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.pkeys");
-  tdesc_create_reg (feature, "pkru", 152, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "pkru", 154, 1, NULL, 32, "uint32");
 
   tdesc_amd64_avx_mpx_avx512_pku_linux = result;
 }

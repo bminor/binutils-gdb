@@ -282,7 +282,7 @@ initialize_tdesc_amd64_avx_avx512_linux (void)
   tdesc_create_reg (feature, "zmm28h", 144, 1, NULL, 256, "v2ui128");
   tdesc_create_reg (feature, "zmm29h", 145, 1, NULL, 256, "v2ui128");
   tdesc_create_reg (feature, "zmm30h", 146, 1, NULL, 256, "v2ui128");
-  tdesc_create_reg (feature, "zmm31h", 146, 1, NULL, 256, "v2ui128");
+  tdesc_create_reg (feature, "zmm31h", 147, 1, NULL, 256, "v2ui128");
 
   tdesc_amd64_avx_avx512_linux = result;
 }
