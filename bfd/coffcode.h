@@ -4811,7 +4811,9 @@ coff_slurp_symbol_table (bfd * abfd)
 #endif
 #ifdef RS6000COFF_C
 	    case C_HIDEXT:
+#if ! defined _AIX52 && ! defined AIX_WEAK_SUPPORT
 	    case C_AIX_WEAKEXT:
+#endif
 #endif
 #ifdef C_SYSTEM
 	    case C_SYSTEM:	/* System Wide variable.  */
