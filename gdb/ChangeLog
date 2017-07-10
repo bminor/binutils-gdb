@@ -3,6 +3,22 @@
 	* features/i386/amd64-avx-avx512-linux.c: Re-generated.
 	* features/i386/amd64-avx-mpx-avx512-pku-linux.c: Re-generated.
 
+2017-07-10  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add setenv and
+	unsetenv.
+	* gnulib/aclocal.m4: Regenerate.
+	* gnulib/config.in: Regenerate.
+	* gnulib/configure: Regenerate.
+	* gnulib/import/Makefile.am: Regenerate.
+	* gnulib/import/Makefile.in: Regenerate.
+	* gnulib/import/m4/gnulib-cache.m4: Regenerate.
+	* gnulib/import/m4/gnulib-comp.m4: Regenerate.
+	* gnulib/import/m4/environ.m4: New file.
+	* gnulib/import/m4/setenv.m4: New file.
+	* gnulib/import/setenv.c: New file.
+	* gnulib/import/unsetenv.c: New file.
+
 2017-07-09  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* compile/compile-loc2c.c (do_compile_dwarf_expr_to_c): Read
