@@ -43,7 +43,7 @@ srv_i386_64bit_xmlfiles="i386/64bit-core.xml i386/64bit-segments.xml i386/64bit-
 srv_i386_xmlfiles="i386/i386.xml $srv_i386_32bit_xmlfiles"
 srv_amd64_xmlfiles="i386/amd64.xml $srv_i386_64bit_xmlfiles"
 srv_i386_linux_xmlfiles="i386/32bit-linux.xml $srv_i386_32bit_xmlfiles"
-srv_amd64_linux_xmlfiles="i386/amd64-linux.xml i386/amd64-avx-linux.xml i386/amd64-avx-avx512.xml i386/amd64-avx-mpx-avx512-pku-linux.xml i386/64bit-linux.xml i386/amd64-mpx-linux.xml i386/amd64-avx-mpx-linux.xml i386/x32-linux.xml i386/x32-avx-linux.xml i386/x32-avx-avx512-linux.xml $srv_i386_64bit_xmlfiles"
+srv_amd64_linux_xmlfiles="i386/64bit-linux.xml $srv_i386_64bit_xmlfiles"
 
 
 # Linux object files.  This is so we don't have to repeat
