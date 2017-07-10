@@ -1,3 +1,8 @@
+2017-07-10  Nick Clifton  <nickc@redhat.com>
+
+	* coffcode.h (coff_slurp_symbol_table): Do not include an entry
+	for C_AIX_WEAKEXT if it has the same value as C_WEAKEXT.
+
 2017-07-07  Alan Modra  <amodra@gmail.com>
 
 	* coffcode.h (coff_slurp_symbol_table): Handle C_AIX_WEAKEXT.
