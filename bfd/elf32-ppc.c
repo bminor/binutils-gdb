@@ -8286,7 +8286,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      else
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%B(%A+#Lx): error: %s with unexpected instruction %#x"),
+		  (_("%B(%A+%#Lx): error: %s with unexpected instruction %#x"),
 		   input_bfd, input_section, rel->r_offset,
 		   "R_PPC_ADDR16_HA", insn);
 	    }
@@ -8321,7 +8321,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      else
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%B(%A+#Lx): error: %s with unexpected instruction %#x"),
+		  (_("%B(%A+%#Lx): error: %s with unexpected instruction %#x"),
 		   input_bfd, input_section, rel->r_offset,
 		   "R_PPC_ADDR16_LO", insn);
 	    }
