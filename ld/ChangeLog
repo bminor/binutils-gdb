@@ -1,5 +1,10 @@
 2017-07-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-selective/selective.exp: Support single digit
+	GCC version.
+
+2017-07-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/21782
 	* testsuite/ld-x86-64/pie3-nacl.d: New file.
 	* testsuite/ld-x86-64/pie3.d: Likewise.
