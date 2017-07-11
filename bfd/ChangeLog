@@ -1,3 +1,8 @@
+2017-07-11  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Emit "unexpected
+	instruction" error using _bfd_error_handler, not einfo.
+
 2017-07-10  Nick Clifton  <nickc@redhat.com>
 
 	* coffcode.h (coff_slurp_symbol_table): Do not include an entry
