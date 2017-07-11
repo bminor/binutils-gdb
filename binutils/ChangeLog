@@ -1,3 +1,10 @@
+2017-07-11  Andreas Schwab  <schwab@suse.de>
+
+	* readelf.c (process_note): Print newline after description data
+	in narrow mode.
+	(print_core_note): Print newline if nothing was printed in wide
+	mode.
+
 2017-07-09  Rafael Fontenelle <rafaelff@gnome.org>
 
 	* dwarf.c (display_formatted_table): Fix error message typo.

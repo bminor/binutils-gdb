@@ -16217,7 +16217,11 @@ print_core_note (Elf_Internal_Note *pnote)
   unsigned char *descdata, *filenames, *descend;
 
   if (pnote->type != NT_FILE)
-    return TRUE;
+    {
+      if (do_wide)
+	printf ("\n");
+      return TRUE;
+    }
 
 #ifndef BFD64
   if (!is_32bit_elf)
@@ -17497,6 +17501,8 @@ process_note (Elf_Internal_Note *  pnote,
       printf (_("   description data: "));
       for (i = 0; i < pnote->descsz; i++)
 	printf ("%02x ", pnote->descdata[i]);
+      if (!do_wide)
+	printf ("\n");
     }
 
   if (do_wide)
