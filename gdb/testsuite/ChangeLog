@@ -1,3 +1,11 @@
+2017-08-14  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/21675:
+	* gdb.base/printcmds.exp (test_radices): New function.
+	* gdb.dwarf2/var-access.exp: Use p/u, not p/d.
+	* gdb.base/sizeof.exp (check_valueof): Use p/d.
+	* lib/gdb.exp (get_integer_valueof): Use p/d.
+
 2017-08-12  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* lib/gdb.exp (get_valueof): Don't capture end-of-line

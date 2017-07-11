@@ -413,7 +413,9 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       && (options->format == 'o'
 	  || options->format == 'x'
 	  || options->format == 't'
-	  || options->format == 'z'))
+	  || options->format == 'z'
+	  || options->format == 'd'
+	  || options->format == 'u'))
     {
       LONGEST val_long = unpack_long (type, valaddr);
       converted_float_bytes.resize (TYPE_LENGTH (type));
@@ -427,11 +429,13 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
     case 'o':
       print_octal_chars (stream, valaddr, len, byte_order);
       break;
+    case 'd':
+      print_decimal_chars (stream, valaddr, len, true, byte_order);
+      break;
     case 'u':
       print_decimal_chars (stream, valaddr, len, false, byte_order);
       break;
     case 0:
-    case 'd':
       if (TYPE_CODE (type) != TYPE_CODE_FLT)
 	{
 	  print_decimal_chars (stream, valaddr, len, !TYPE_UNSIGNED (type),
