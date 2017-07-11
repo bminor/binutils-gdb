@@ -3085,7 +3085,7 @@ display_formatted_table (unsigned char *data,
       data += bytes_read;
       if (data == end)
 	{
-	  warn (_("Corrupt %s entry format table entry\n"), what);
+	  warn (_("Corrupt %s format table entry\n"), what);
 	  return data;
 	}
     }

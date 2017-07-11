@@ -1,3 +1,12 @@
+2017-07-09  Rafael Fontenelle <rafaelff@gnome.org>
+
+	* dwarf.c (display_formatted_table): Fix error message typo.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* readelf.c (get_freebsd_elfcore_note_type): Handle
+	NT_FREEBSD_PTLWPINFO.
+
 2017-07-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf.c (display_debug_names): Replace index with xindex.

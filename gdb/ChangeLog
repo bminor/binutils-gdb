@@ -1,3 +1,94 @@
+2017-07-10  Yao Qi  <yao.qi@linaro.org>
+
+	* features/i386/amd64-avx-avx512-linux.c: Re-generated.
+	* features/i386/amd64-avx-mpx-avx512-pku-linux.c: Re-generated.
+
+2017-07-10  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add setenv and
+	unsetenv.
+	* gnulib/aclocal.m4: Regenerate.
+	* gnulib/config.in: Regenerate.
+	* gnulib/configure: Regenerate.
+	* gnulib/import/Makefile.am: Regenerate.
+	* gnulib/import/Makefile.in: Regenerate.
+	* gnulib/import/m4/gnulib-cache.m4: Regenerate.
+	* gnulib/import/m4/gnulib-comp.m4: Regenerate.
+	* gnulib/import/m4/environ.m4: New file.
+	* gnulib/import/m4/setenv.m4: New file.
+	* gnulib/import/setenv.c: New file.
+	* gnulib/import/unsetenv.c: New file.
+
+2017-07-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* compile/compile-loc2c.c (do_compile_dwarf_expr_to_c): Read
+	address when op is DW_OP_addr.
+
+2017-07-09  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Reverse size
+	check and apply to outer type.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (LWPINFO_OFFSET, LWPINFO_PL_FLAGS)
+	(LWPINFO64_PL_SIGINFO, LWPINFO32_PL_SIGINFO, PL_FLAG_SI)
+	(SIZE64_SIGINFO_T, SIZE32_SIGINFO_T, fbsd_core_xfer_siginfo): New.
+	(fbsd_init_abi): Install gdbarch "core_xfer_siginfo" method.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_core_thread_name): Use thread_section_name.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* corelow.c (get_core_siginfo): Remove.
+	(core_xfer_partial): Use the gdbarch "core_xfer_siginfo" method
+	instead of get_core_siginfo.
+	* gdbarch.sh (core_xfer_siginfo): New gdbarch callback.
+	* gdbarch.h: Re-generate.
+	* gdbarch.c: Re-generate.
+	* linux-tdep.c (linux_core_xfer_siginfo): New.
+	(linux_init_abi): Install gdbarch "core_xfer_siginfo" method.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* corelow.c (thread_section_name): Move to ...
+	* gdbcore.h (thread_section_name): ... here.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c [PT_LWPINFO && __LP64__] (union sigval32)
+	(struct siginfo32): New.
+	[PT_LWPINFO] (fbsd_siginfo_size, fbsd_convert_siginfo): New.
+	(fbsd_xfer_partial) [PT_LWPINFO]: Handle TARGET_OBJECT_SIGNAL_INFO
+	via ptrace(PT_LWPINFO).
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_gdbarch_data_handle, struct fbsd_gdbarch_data)
+	(init_fbsd_gdbarch_data, get_fbsd_gdbarch_data)
+	(fbsd_get_siginfo_type): New.
+	(fbsd_init_abi): Install gdbarch "get_siginfo_type" method.
+	(_initialize_fbsd_tdep): New.
+
+2017-07-06  David Blaikie  <dblaikie@gmail.com>
+
+	* dwarf2read.c (struct dwo_file): Use a htab of dwo_unit* (rather than
+	a singular dwo_unit*) to support multiple CUs in the same way that
+	multiple TUs are supported.
+	(create_cus_hash_table): Replace create_dwo_cu with a function for
+	parsing multiple CUs from a DWO file.
+	(open_and_init_dwo_file): Use create_cus_hash_table rather than
+	create_dwo_cu.
+	(lookup_dwo_cutu): Lookup CU in the hash table in the dwo_file with
+	htab_find, rather than comparing the signature to a singleton CU in
+	the dwo_file.
+
+2017-07-06  Pedro Alves  <palves@redhat.com>
+
+	* python/py-unwind.c (pyuw_dealloc_cache): Fix for loop condition.
+
 2017-07-04  Pedro Alves  <palves@redhat.com>
 
 	* gdbtypes.c (recursive_dump_type): Don't reference TYPE_STATIC.

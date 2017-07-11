@@ -1,3 +1,27 @@
+2017-07-11  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-aarch64/dt_textrel.d: Use "#pass" instead of ".*" to
+	filter out remaining lines.
+
+2017-07-07  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* emultempl/mipself.em (mips_before_allocation): Avoid ELF
+	processing if not MIPS ELF.
+	* testsuite/ld-mips-elf/binary.d: New test.
+	* testsuite/ld-mips-elf/binary.ld: New test linker script.
+	* testsuite/ld-mips-elf/binary.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new test.
+
+2017-07-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/ppc476-shared.lnk: Align .bss.
+	* testsuite/ld-powerpc/ppc476-shared.d: Adjust.
+	* testsuite/ld-powerpc/ppc476-shared2.d: Adjust.
+
+2017-07-07  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (eelf64_s390.c): Depend on emultempl/s390.em.
+
 2017-07-04  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.

@@ -1,3 +1,31 @@
+2017-07-11  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Emit "unexpected
+	instruction" error using _bfd_error_handler, not einfo.
+
+2017-07-10  Nick Clifton  <nickc@redhat.com>
+
+	* coffcode.h (coff_slurp_symbol_table): Do not include an entry
+	for C_AIX_WEAKEXT if it has the same value as C_WEAKEXT.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_freebsd_note): Handle NT_FREEBSD_PTLWPINFO.
+
+2017-07-07  Alan Modra  <amodra@gmail.com>
+
+	* coffcode.h (coff_slurp_symbol_table): Handle C_AIX_WEAKEXT.
+
+2017-07-07  Alan Modra  <amodra@gmail.com>
+
+	* bfd.c (_doprnt): Replace "L" with "ll" when printing bfd_vma
+	as long long.  Move code replacing "ll" with "I64", and simplify.
+
+2017-07-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd.c (_doprnt): Convert 'L' to 'l' when setting wide_width
+	to 1.
+
 2017-07-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf2.c (line_info_add_include_dir_stub): Replace time with

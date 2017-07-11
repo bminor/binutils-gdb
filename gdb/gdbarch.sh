@@ -755,6 +755,11 @@ M;const char *;core_pid_to_str;ptid_t ptid;ptid
 # How the core target extracts the name of a thread from a core file.
 M;const char *;core_thread_name;struct thread_info *thr;thr
 
+# Read offset OFFSET of TARGET_OBJECT_SIGNAL_INFO signal information
+# from core file into buffer READBUF with length LEN.  Return the number
+# of bytes read (zero indicates EOF, a negative value indicates failure).
+M;LONGEST;core_xfer_siginfo;gdb_byte *readbuf, ULONGEST offset, ULONGEST len; readbuf, offset, len
+
 # BFD target to use when generating a core file.
 V;const char *;gcore_bfd_target;;;0;0;;;pstring (gdbarch->gcore_bfd_target)
 

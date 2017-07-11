@@ -8284,9 +8284,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  r_type = R_PPC_GOT16_LO;
 		}
 	      else
-		info->callbacks->einfo
+		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%H: error: %s with unexpected instruction %x\n"),
+		  (_("%B(%A+#Lx): error: %s with unexpected instruction %#x"),
 		   input_bfd, input_section, rel->r_offset,
 		   "R_PPC_ADDR16_HA", insn);
 	    }
@@ -8319,9 +8319,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  rel->r_info = ELF32_R_INFO (0, r_type);
 		}
 	      else
-		info->callbacks->einfo
+		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%H: error: %s with unexpected instruction %x\n"),
+		  (_("%B(%A+#Lx): error: %s with unexpected instruction %#x"),
 		   input_bfd, input_section, rel->r_offset,
 		   "R_PPC_ADDR16_LO", insn);
 	    }

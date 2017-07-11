@@ -1,3 +1,26 @@
+2017-07-11  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/demangle.exp: Update for demangling changes.
+
+2017-07-09  Tom Tromey  <tom@tromey.com>
+
+	* gdb.dwarf2/shortpiece.exp: New file.
+
+2017-07-06  David Blaikie  <dblaikie@gmail.com>
+
+	* gdb.dwarf2/fission-multi-cu.S: Test containing multiple CUs in a DWO,
+	built from fissiont-multi-cu{1,2}.c.
+	* gdb.dwarf2/fission-multi-cu.exp: Test similar to fission-base.exp,
+	except putting 'main' and 'func' in separate CUs in the same DWO file.
+	* gdb.dwarf2/fission-multi-cu1.c: First CU for the multi-CU-single-DWO
+	test.
+	* gdb.dwarf2/fission-multi-cu2.c: Second CU in the multi-CU-single-DWO
+	test.
+
+2017-07-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.python/py-unwind.exp: Test flushregs.
+
 2017-06-30  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR cli/21688

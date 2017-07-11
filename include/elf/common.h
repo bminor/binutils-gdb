@@ -641,6 +641,7 @@
 #define	NT_FREEBSD_PROCSTAT_OSREL	14	/* Procstat osreldate data. */
 #define	NT_FREEBSD_PROCSTAT_PSSTRINGS	15	/* Procstat ps_strings data. */
 #define	NT_FREEBSD_PROCSTAT_AUXV	16	/* Procstat auxv data. */
+#define	NT_FREEBSD_PTLWPINFO	17	/* Thread ptrace miscellaneous info. */
 
 /* Note segments for core files on NetBSD systems.  Note name
    must start with "NetBSD-CORE".  */

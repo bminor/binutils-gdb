@@ -722,6 +722,7 @@ do_compile_dwarf_expr_to_c (int indent, string_file &stream,
 	  break;
 
 	case DW_OP_addr:
+	  uoffset = extract_unsigned_integer (op_ptr, addr_size, byte_order);
 	  op_ptr += addr_size;
 	  /* Some versions of GCC emit DW_OP_addr before
 	     DW_OP_GNU_push_tls_address.  In this case the value is an
