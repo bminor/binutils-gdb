@@ -1,5 +1,11 @@
 2017-08-14  Tom Tromey  <tom@tromey.com>
 
+	* valprint.c (print_octal_chars): Use HOST_CHAR_BIT.
+	(print_binary_chars): Likewise.
+	(BITS_IN_BYTES): Remove.
+
+2017-08-14  Tom Tromey  <tom@tromey.com>
+
 	PR gdb/21675
 	* valprint.c (LOW_ZERO): Change value to 034.
 	(print_octal_chars): Add static_asserts for octal constants.

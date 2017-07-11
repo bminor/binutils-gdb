@@ -1490,9 +1490,6 @@ void
 print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
 		    unsigned len, enum bfd_endian byte_order, bool zero_pad)
 {
-
-#define BITS_IN_BYTES 8
-
   const gdb_byte *p;
   unsigned int i;
   int b;
@@ -1512,7 +1509,7 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
 	  /* Every byte has 8 binary characters; peel off
 	     and print from the MSB end.  */
 
-	  for (i = 0; i < (BITS_IN_BYTES * sizeof (*p)); i++)
+	  for (i = 0; i < (HOST_CHAR_BIT * sizeof (*p)); i++)
 	    {
 	      if (*p & (mask >> i))
 		b = '1';
@@ -1532,7 +1529,7 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
 	   p >= valaddr;
 	   p--)
 	{
-	  for (i = 0; i < (BITS_IN_BYTES * sizeof (*p)); i++)
+	  for (i = 0; i < (HOST_CHAR_BIT * sizeof (*p)); i++)
 	    {
 	      if (*p & (mask >> i))
 		b = '1';
@@ -1612,7 +1609,7 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
   /* For 32 we start in cycle 2, with two bits and one bit carry;
      for 64 in cycle in cycle 1, with one bit and a two bit carry.  */
 
-  cycle = (len * BITS_IN_BYTES) % BITS_IN_OCTAL;
+  cycle = (len * HOST_CHAR_BIT) % BITS_IN_OCTAL;
   carry = 0;
 
   fputs_filtered ("0", stream);
