@@ -1,3 +1,7 @@
+2017-07-11  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/demangle.exp: Update for demangling changes.
+
 2017-07-09  Tom Tromey  <tom@tromey.com>
 
 	* gdb.dwarf2/shortpiece.exp: New file.
