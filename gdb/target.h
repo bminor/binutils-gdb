@@ -1,6 +1,6 @@
 /* Interface between GDB and target environments, including files and processes
 
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2017 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by John Gilmore.
 
@@ -72,6 +72,7 @@ struct inferior;
 #include "vec.h"
 #include "gdb_signals.h"
 #include "btrace.h"
+#include "record.h"
 #include "command.h"
 
 #include "break-common.h" /* For enum target_hw_bp_type.  */
@@ -461,6 +462,8 @@ struct target_ops
 		       int TARGET_DEBUG_PRINTER (target_debug_print_step),
 		       enum gdb_signal)
       TARGET_DEFAULT_NORETURN (noprocess ());
+    void (*to_commit_resume) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
     ptid_t (*to_wait) (struct target_ops *,
 		       ptid_t, struct target_waitstatus *,
 		       int TARGET_DEBUG_PRINTER (target_debug_print_options))
@@ -478,7 +481,8 @@ struct target_ops
 				 struct bp_target_info *)
       TARGET_DEFAULT_FUNC (memory_insert_breakpoint);
     int (*to_remove_breakpoint) (struct target_ops *, struct gdbarch *,
-				 struct bp_target_info *)
+				 struct bp_target_info *,
+				 enum remove_bp_reason)
       TARGET_DEFAULT_FUNC (memory_remove_breakpoint);
 
     /* Returns true if the target stopped because it executed a
@@ -587,7 +591,8 @@ struct target_ops
        ENV is the environment vector to pass.  Errors reported with error().
        On VxWorks and various standalone systems, we ignore exec_file.  */
     void (*to_create_inferior) (struct target_ops *, 
-				char *, char *, char **, int);
+				const char *, const std::string &,
+				char **, int);
     void (*to_post_startup_inferior) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
     int (*to_insert_fork_catchpoint) (struct target_ops *, int)
@@ -635,9 +640,9 @@ struct target_ops
       TARGET_DEFAULT_RETURN (0);
     void (*to_update_thread_list) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
-    char *(*to_pid_to_str) (struct target_ops *, ptid_t)
+    const char *(*to_pid_to_str) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_FUNC (default_pid_to_str);
-    char *(*to_extra_thread_info) (struct target_ops *, struct thread_info *)
+    const char *(*to_extra_thread_info) (struct target_ops *, struct thread_info *)
       TARGET_DEFAULT_RETURN (NULL);
     const char *(*to_thread_name) (struct target_ops *, struct thread_info *)
       TARGET_DEFAULT_RETURN (NULL);
@@ -707,22 +712,25 @@ struct target_ops
 					      CORE_ADDR offset)
       TARGET_DEFAULT_NORETURN (generic_tls_error ());
 
-    /* Request that OPS transfer up to LEN 8-bit bytes of the target's
-       OBJECT.  The OFFSET, for a seekable object, specifies the
+    /* Request that OPS transfer up to LEN addressable units of the target's
+       OBJECT.  When reading from a memory object, the size of an addressable
+       unit is architecture dependent and can be found using
+       gdbarch_addressable_memory_unit_size.  Otherwise, an addressable unit is
+       1 byte long.  The OFFSET, for a seekable object, specifies the
        starting point.  The ANNEX can be used to provide additional
        data-specific information to the target.
 
        Return the transferred status, error or OK (an
-       'enum target_xfer_status' value).  Save the number of bytes
+       'enum target_xfer_status' value).  Save the number of addressable units
        actually transferred in *XFERED_LEN if transfer is successful
-       (TARGET_XFER_OK) or the number unavailable bytes if the requested
+       (TARGET_XFER_OK) or the number unavailable units if the requested
        data is unavailable (TARGET_XFER_UNAVAILABLE).  *XFERED_LEN
        smaller than LEN does not indicate the end of the object, only
        the end of the transfer; higher level code should continue
        transferring if desired.  This is handled in target.c.
 
        The interface does not support a "retry" mechanism.  Instead it
-       assumes that at least one byte will be transfered on each
+       assumes that at least one addressable unit will be transfered on each
        successful call.
 
        NOTE: cagney/2003-10-17: The current interface can lead to
@@ -1146,6 +1154,10 @@ struct target_ops
 						   const struct btrace_target_info *)
       TARGET_DEFAULT_RETURN (NULL);
 
+    /* Current recording method.  */
+    enum record_method (*to_record_method) (struct target_ops *, ptid_t ptid)
+      TARGET_DEFAULT_RETURN (RECORD_METHOD_NONE);
+
     /* Stop trace recording.  */
     void (*to_stop_recording) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
@@ -1327,30 +1339,43 @@ extern void target_detach (const char *, int);
 
 extern void target_disconnect (const char *, int);
 
-/* Resume execution of the target process PTID (or a group of
-   threads).  STEP says whether to hardware single-step or to run free;
-   SIGGNAL is the signal to be given to the target, or GDB_SIGNAL_0 for no
-   signal.  The caller may not pass GDB_SIGNAL_DEFAULT.  A specific
-   PTID means `step/resume only this process id'.  A wildcard PTID
-   (all threads, or all threads of process) means `step/resume
-   INFERIOR_PTID, and let other threads (for which the wildcard PTID
-   matches) resume with their 'thread->suspend.stop_signal' signal
-   (usually GDB_SIGNAL_0) if it is in "pass" state, or with no signal
-   if in "no pass" state.  */
+/* Resume execution (or prepare for execution) of a target thread,
+   process or all processes.  STEP says whether to hardware
+   single-step or to run free; SIGGNAL is the signal to be given to
+   the target, or GDB_SIGNAL_0 for no signal.  The caller may not pass
+   GDB_SIGNAL_DEFAULT.  A specific PTID means `step/resume only this
+   process id'.  A wildcard PTID (all threads, or all threads of
+   process) means `step/resume INFERIOR_PTID, and let other threads
+   (for which the wildcard PTID matches) resume with their
+   'thread->suspend.stop_signal' signal (usually GDB_SIGNAL_0) if it
+   is in "pass" state, or with no signal if in "no pass" state.
 
+   In order to efficiently handle batches of resumption requests,
+   targets may implement this method such that it records the
+   resumption request, but defers the actual resumption to the
+   target_commit_resume method implementation.  See
+   target_commit_resume below.  */
 extern void target_resume (ptid_t ptid, int step, enum gdb_signal signal);
 
-/* Wait for process pid to do something.  PTID = -1 to wait for any
-   pid to do something.  Return pid of child, or -1 in case of error;
-   store status through argument pointer STATUS.  Note that it is
-   _NOT_ OK to throw_exception() out of target_wait() without popping
-   the debugging target from the stack; GDB isn't prepared to get back
-   to the prompt with a debugging target but without the frame cache,
-   stop_pc, etc., set up.  OPTIONS is a bitwise OR of TARGET_W*
-   options.  */
+/* Commit a series of resumption requests previously prepared with
+   target_resume calls.
 
-extern ptid_t target_wait (ptid_t ptid, struct target_waitstatus *status,
-			   int options);
+   GDB always calls target_commit_resume after calling target_resume
+   one or more times.  A target may thus use this method in
+   coordination with the target_resume method to batch target-side
+   resumption requests.  In that case, the target doesn't actually
+   resume in its target_resume implementation.  Instead, it prepares
+   the resumption in target_resume, and defers the actual resumption
+   to target_commit_resume.  E.g., the remote target uses this to
+   coalesce multiple resumption requests in a single vCont packet.  */
+extern void target_commit_resume ();
+
+/* Setup to defer target_commit_resume calls, and return a cleanup
+   that reactivates target_commit_resume, if it was previously
+   active.  */
+struct cleanup *make_cleanup_defer_target_commit_resume ();
+
+/* For target_read_memory see target/target.h.  */
 
 /* The default target_ops::to_wait implementation.  */
 
@@ -1388,12 +1413,6 @@ struct address_space *target_thread_address_space (ptid_t);
    request.  */
 
 int target_info_proc (const char *, enum info_proc_what);
-
-/* Returns true if this target can debug multiple processes
-   simultaneously.  */
-
-#define	target_supports_multi_process()	\
-     (*current_target.to_supports_multi_process) (&current_target)
 
 /* Returns true if this target can disable address space randomization.  */
 
@@ -1440,6 +1459,9 @@ extern int target_write_raw_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
    and returned, after some consistency checking.  Otherwise, NULL
    is returned.  */
 VEC(mem_region_s) *target_memory_map (void);
+
+/* Erases all flash memory regions on the target.  */
+void flash_erase_command (char *cmd, int from_tty);
 
 /* Erase the specified flash region.  */
 void target_flash_erase (ULONGEST address, LONGEST length);
@@ -1507,7 +1529,8 @@ extern int target_insert_breakpoint (struct gdbarch *gdbarch,
    machine.  Result is 0 for success, non-zero for error.  */
 
 extern int target_remove_breakpoint (struct gdbarch *gdbarch,
-				     struct bp_target_info *bp_tgt);
+				     struct bp_target_info *bp_tgt,
+				     enum remove_bp_reason reason);
 
 /* Returns true if the terminal settings of the inferior are in
    effect.  */
@@ -1518,28 +1541,16 @@ extern int target_terminal_is_inferior (void);
 
 extern int target_terminal_is_ours (void);
 
-/* Initialize the terminal settings we record for the inferior,
-   before we actually run the inferior.  */
-
-extern void target_terminal_init (void);
-
-/* Put the inferior's terminal settings into effect.
-   This is preparation for starting or resuming the inferior.  */
-
-extern void target_terminal_inferior (void);
+/* For target_terminal_init, target_terminal_inferior and
+   target_terminal_ours, see target/target.h.  */
 
 /* Put some of our terminal settings into effect, enough to get proper
    results from our output, but do not change into or out of RAW mode
    so that no input is discarded.  This is a no-op if terminal_ours
-   was most recently called.  */
+   was most recently called.  This is a no-op unless called with the main
+   UI as current UI.  */
 
 extern void target_terminal_ours_for_output (void);
-
-/* Put our terminal settings into effect.
-   First record the inferior's terminal settings
-   so they can be restored properly later.  */
-
-extern void target_terminal_ours (void);
 
 /* Return true if the target stack has a non-default
   "to_terminal_ours" method.  */
@@ -1666,9 +1677,7 @@ void target_follow_exec (struct inferior *inf, char *execd_pathname);
    be defined by those targets that require the debugger to perform
    cleanup or internal state changes in response to the process event.  */
 
-/* The inferior process has died.  Do what is right.  */
-
-void target_mourn_inferior (void);
+/* For target_mourn_inferior see target/target.h.  */
 
 /* Does target have enough data to do a run or attach command? */
 
@@ -1832,9 +1841,9 @@ extern int target_is_non_stop_p (void);
    `process xyz', but on some systems it may contain
    `process xyz thread abc'.  */
 
-extern char *target_pid_to_str (ptid_t ptid);
+extern const char *target_pid_to_str (ptid_t ptid);
 
-extern char *normal_pid_to_str (ptid_t ptid);
+extern const char *normal_pid_to_str (ptid_t ptid);
 
 /* Return a short string describing extra information about PID,
    e.g. "sleeping", "runnable", "running on LWP 3".  Null return value
@@ -2305,7 +2314,8 @@ extern void complete_target_initialization (struct target_ops *t);
 /* Adds a command ALIAS for target T and marks it deprecated.  This is useful
    for maintaining backwards compatibility when renaming targets.  */
 
-extern void add_deprecated_target_alias (struct target_ops *t, char *alias);
+extern void add_deprecated_target_alias (struct target_ops *t,
+					 const char *alias);
 
 extern void push_target (struct target_ops *);
 
@@ -2371,7 +2381,8 @@ extern struct target_section_table *target_get_section_table
 /* From mem-break.c */
 
 extern int memory_remove_breakpoint (struct target_ops *, struct gdbarch *,
-				     struct bp_target_info *);
+				     struct bp_target_info *,
+				     enum remove_bp_reason);
 
 extern int memory_insert_breakpoint (struct target_ops *, struct gdbarch *,
 				     struct bp_target_info *);
@@ -2479,6 +2490,9 @@ extern int target_supports_delete_record (void);
 
 /* See to_delete_record in struct target_ops.  */
 extern void target_delete_record (void);
+
+/* See to_record_method.  */
+extern enum record_method target_record_method (ptid_t ptid);
 
 /* See to_record_is_replaying in struct target_ops.  */
 extern int target_record_is_replaying (ptid_t ptid);

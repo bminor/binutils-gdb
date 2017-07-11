@@ -1,6 +1,6 @@
 /* Debug register code for x86 (i386 and x86-64).
 
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -193,20 +193,16 @@ x86_show_dr (struct x86_debug_reg_state *state,
 			      here.  */
 			   : "??unknown??"))));
   debug_printf (":\n");
-  debug_printf ("\tCONTROL (DR7): %s          STATUS (DR6): %s\n",
-		phex (state->dr_control_mirror, 8),
-		phex (state->dr_status_mirror, 8));
+
+  debug_printf ("\tCONTROL (DR7): 0x%s\n", phex (state->dr_control_mirror, 8));
+  debug_printf ("\tSTATUS (DR6): 0x%s\n", phex (state->dr_status_mirror, 8));
+
   ALL_DEBUG_ADDRESS_REGISTERS (i)
     {
-      debug_printf ("\
-\tDR%d: addr=0x%s, ref.count=%d  DR%d: addr=0x%s, ref.count=%d\n",
+      debug_printf ("\tDR%d: addr=0x%s, ref.count=%d\n",
 		    i, phex (state->dr_mirror[i],
 			     x86_get_debug_register_length ()),
-		    state->dr_ref_count[i],
-		    i + 1, phex (state->dr_mirror[i + 1],
-				 x86_get_debug_register_length ()),
-		    state->dr_ref_count[i + 1]);
-      i++;
+		    state->dr_ref_count[i]);
     }
 }
 

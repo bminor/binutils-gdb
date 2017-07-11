@@ -1,6 +1,6 @@
 /* GNU/Linux/Nios II specific low level interface, for the remote server for
    GDB.
-   Copyright (C) 2008-2016 Free Software Foundation, Inc.
+   Copyright (C) 2008-2017 Free Software Foundation, Inc.
 
    Contributed by Mentor Graphics, Inc.
 
@@ -145,7 +145,7 @@ nios2_breakpoint_at (CORE_ADDR where)
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (const struct ps_prochandle *ph,
+ps_get_thread_area (struct ps_prochandle *ph,
                     lwpid_t lwpid, int idx, void **base)
 {
   if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
@@ -183,7 +183,7 @@ nios2_supply_register (struct regcache *regcache, int regno,
 static void
 nios2_fill_gregset (struct regcache *regcache, void *buf)
 {
-  union nios2_register *regset = buf;
+  union nios2_register *regset = (union nios2_register *) buf;
   int i;
 
   for (i = 1; i < nios2_num_regs; i++)
@@ -193,7 +193,7 @@ nios2_fill_gregset (struct regcache *regcache, void *buf)
 static void
 nios2_store_gregset (struct regcache *regcache, const void *buf)
 {
-  const union nios2_register *regset = buf;
+  const union nios2_register *regset = (union nios2_register *) buf;
   int i;
 
   for (i = 0; i < nios2_num_regs; i++)

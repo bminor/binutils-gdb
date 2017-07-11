@@ -18,3 +18,4 @@ g6:
 
 	.data
 .Ldata:
+	.insn

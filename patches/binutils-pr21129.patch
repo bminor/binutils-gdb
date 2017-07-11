@@ -1,0 +1,49 @@
+From e9d8872f56b73872356309b72b5452ee63159885 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Mon, 1 May 2017 15:38:51 -0700
+Subject: [PATCH] gold: Check if _ZN1AD2Ev/_ZN1AC2Ev exist first
+
+Since GCC 4.2 doesn't generate _ZN1AD2Ev nor _ZN1AC2Ev, check if they
+are folded only when they exist.
+
+	PR gold/21129
+	* testsuite/icf_safe_pie_test.sh: Don't check if _ZN1AD2Ev and
+	_ZN1AC2Ev are folded when they don't exist.
+---
+ gold/testsuite/icf_safe_pie_test.sh | 5 ++++-
+ gold/testsuite/icf_safe_test.sh     | 5 ++++-
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/gold/testsuite/icf_safe_pie_test.sh b/gold/testsuite/icf_safe_pie_test.sh
+index f91a80c..da726da 100755
+--- a/gold/testsuite/icf_safe_pie_test.sh
++++ b/gold/testsuite/icf_safe_pie_test.sh
+@@ -71,6 +71,9 @@ arch_specific_safe_fold()
+ 
+ arch_specific_safe_fold icf_safe_pie_test_1.stdout icf_safe_pie_test_2.stdout \
+   icf_safe_pie_test.map "kept_func_1" "kept_func_2"
+-check_fold   icf_safe_pie_test.map "_ZN1AD2Ev" "_ZN1AC2Ev"
++if grep -q _ZN1A[CD]2Ev icf_safe_pie_test_1.stdout
++then
++    check_fold   icf_safe_pie_test.map "_ZN1AD2Ev" "_ZN1AC2Ev"
++fi
+ check_nofold icf_safe_pie_test_1.stdout "kept_func_3" "kept_func_1"
+ check_nofold icf_safe_pie_test_1.stdout "kept_func_3" "kept_func_2"
+diff --git a/gold/testsuite/icf_safe_test.sh b/gold/testsuite/icf_safe_test.sh
+index f048d86..dae8582 100755
+--- a/gold/testsuite/icf_safe_test.sh
++++ b/gold/testsuite/icf_safe_test.sh
+@@ -69,6 +69,9 @@ arch_specific_safe_fold()
+ 
+ arch_specific_safe_fold icf_safe_test_1.stdout icf_safe_test_2.stdout \
+   icf_safe_test.map "kept_func_1" "kept_func_2"
+-check_fold   icf_safe_test.map "_ZN1AD2Ev" "_ZN1AC2Ev"
++if grep -q _ZN1A[CD]2Ev icf_safe_test_1.stdout
++then
++    check_fold   icf_safe_test.map "_ZN1AD2Ev" "_ZN1AC2Ev"
++fi
+ check_nofold icf_safe_test_1.stdout "kept_func_3" "kept_func_1"
+ check_nofold icf_safe_test_1.stdout "kept_func_3" "kept_func_2"
+-- 
+2.9.3
+

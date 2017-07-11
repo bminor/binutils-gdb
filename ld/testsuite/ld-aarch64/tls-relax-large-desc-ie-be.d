@@ -12,7 +12,7 @@ Disassembly of section .text:
   +10008:	8b020032 	add	x18, x1, x2
   +1000c:	d2a00000 	movz	x0, #0x0, lsl #16
   +10010:	f2800100 	movk	x0, #0x8
-  +10014:	f8606a40 	ldr	x0, \[x18,x0\]
+  +10014:	f8606a40 	ldr	x0, \[x18, x0\]
   +10018:	d503201f 	nop
   +1001c:	d503201f 	nop
   +10020:	00000000 	.word	0x00000000

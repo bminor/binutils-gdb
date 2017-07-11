@@ -1,5 +1,5 @@
 /* Altera Nios II assembler.
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2017 Free Software Foundation, Inc.
    Contributed by Nigel Gray (ngray@altera.com).
    Contributed by Mentor Graphics, Inc.
 
@@ -25,7 +25,6 @@
 #include "elf/nios2.h"
 #include "tc-nios2.h"
 #include "bfd.h"
-#include "libbfd.h"
 #include "dwarf2dbg.h"
 #include "subsegs.h"
 #include "safe-ctype.h"
@@ -207,7 +206,7 @@ static segT nios2_current_align_seg;
 static int nios2_auto_align_on = 1;
 
 /* The last seen label in the current section.  This is used to auto-align
-   labels preceeding instructions.  */
+   labels preceding instructions.  */
 static symbolS *nios2_last_label;
 
 /* If we saw a 16-bit CDX instruction, we can align on 2-byte boundaries
@@ -728,8 +727,8 @@ const pseudo_typeS md_pseudo_table[] = {
 #define CDX_CBRANCH_SUBTYPE(N) (CDXBRANCH | CBRANCH | (N))
 #define SUBTYPE_ADDIS(SUBTYPE) ((SUBTYPE) & 0xffff)
 
-/* For the -relax-section mode, unconditional branches require 2 extra i
-   nstructions besides the addis, conditional branches require 3.  */
+/* For the -relax-section mode, unconditional branches require 2 extra
+   instructions besides the addis, conditional branches require 3.  */
 #define UBRANCH_ADDIS_TO_SIZE(N) (((N) + 2) * 4)
 #define CBRANCH_ADDIS_TO_SIZE(N) (((N) + 3) * 4)
 
@@ -3247,7 +3246,7 @@ nios2_translate_pseudo_insn (nios2_insn_infoS *insn)
 
   nios2_ps_insn_infoS *ps_insn;
 
-  /* Find which real insn the pseudo-op transates to and
+  /* Find which real insn the pseudo-op translates to and
      switch the insn_info ptr to point to it.  */
   ps_insn = nios2_ps_lookup (insn->insn_nios2_opcode->name);
 

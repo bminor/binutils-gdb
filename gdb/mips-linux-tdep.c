@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux on MIPS processors.
 
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -39,6 +39,11 @@
 #include "linux-tdep.h"
 #include "xml-syscall.h"
 #include "gdb_signals.h"
+
+#include "features/mips-linux.c"
+#include "features/mips-dsp-linux.c"
+#include "features/mips64-linux.c"
+#include "features/mips64-dsp-linux.c"
 
 static struct target_so_ops mips_svr4_so_ops;
 
@@ -116,13 +121,7 @@ mips_linux_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 static void
 supply_32bit_reg (struct regcache *regcache, int regnum, const void *addr)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  gdb_byte buf[MAX_REGISTER_SIZE];
-  store_signed_integer (buf, register_size (gdbarch, regnum), byte_order,
-			extract_signed_integer ((const gdb_byte *) addr, 4,
-						byte_order));
-  regcache_raw_supply (regcache, regnum, buf);
+  regcache->raw_supply_integer (regnum, (const gdb_byte *) addr, 4, true);
 }
 
 /* Unpack an elf_gregset_t into GDB's register cache.  */
@@ -133,10 +132,7 @@ mips_supply_gregset (struct regcache *regcache,
 {
   int regi;
   const mips_elf_greg_t *regp = *gregsetp;
-  char zerobuf[MAX_REGISTER_SIZE];
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-
-  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   for (regi = EF_REG0 + 1; regi <= EF_REG31; regi++)
     supply_32bit_reg (regcache, regi - EF_REG0, regp + regi);
@@ -156,7 +152,7 @@ mips_supply_gregset (struct regcache *regcache,
 		    regp + EF_CP0_CAUSE);
 
   /* Fill the inaccessible zero register with zero.  */
-  regcache_raw_supply (regcache, MIPS_ZERO_REGNUM, zerobuf);
+  regcache->raw_supply_zeroed (MIPS_ZERO_REGNUM);
 }
 
 static void
@@ -245,9 +241,6 @@ mips_supply_fpregset (struct regcache *regcache,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int regi;
-  char zerobuf[MAX_REGISTER_SIZE];
-
-  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   for (regi = 0; regi < 32; regi++)
     regcache_raw_supply (regcache,
@@ -259,9 +252,8 @@ mips_supply_fpregset (struct regcache *regcache,
 		       *fpregsetp + 32);
 
   /* FIXME: how can we supply FCRIR?  The ABI doesn't tell us.  */
-  regcache_raw_supply (regcache,
-		       mips_regnum (gdbarch)->fp_implementation_revision,
-		       zerobuf);
+  regcache->raw_supply_zeroed
+    (mips_regnum (gdbarch)->fp_implementation_revision);
 }
 
 static void
@@ -379,10 +371,7 @@ mips64_supply_gregset (struct regcache *regcache,
 {
   int regi;
   const mips64_elf_greg_t *regp = *gregsetp;
-  gdb_byte zerobuf[MAX_REGISTER_SIZE];
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-
-  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   for (regi = MIPS64_EF_REG0 + 1; regi <= MIPS64_EF_REG31; regi++)
     supply_64bit_reg (regcache, regi - MIPS64_EF_REG0,
@@ -407,7 +396,7 @@ mips64_supply_gregset (struct regcache *regcache,
 		    (const gdb_byte *) (regp + MIPS64_EF_CP0_CAUSE));
 
   /* Fill the inaccessible zero register with zero.  */
-  regcache_raw_supply (regcache, MIPS_ZERO_REGNUM, zerobuf);
+  regcache->raw_supply_zeroed (MIPS_ZERO_REGNUM);
 }
 
 static void
@@ -427,7 +416,6 @@ mips64_fill_gregset (const struct regcache *regcache,
 		     mips64_elf_gregset_t *gregsetp, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int regaddr, regi;
   mips64_elf_greg_t *regp = *gregsetp;
   void *dst;
@@ -470,14 +458,8 @@ mips64_fill_gregset (const struct regcache *regcache,
 
   if (regaddr != -1)
     {
-      gdb_byte buf[MAX_REGISTER_SIZE];
-      LONGEST val;
-
-      regcache_raw_collect (regcache, regno, buf);
-      val = extract_signed_integer (buf, register_size (gdbarch, regno),
-				    byte_order);
       dst = regp + regaddr;
-      store_signed_integer ((gdb_byte *) dst, 8, byte_order, val);
+      regcache->raw_collect_integer (regno, (gdb_byte *) dst, 8, true);
     }
 }
 
@@ -574,25 +556,13 @@ mips64_fill_fpregset (const struct regcache *regcache,
     }
   else if (regno == mips_regnum (gdbarch)->fp_control_status)
     {
-      gdb_byte buf[MAX_REGISTER_SIZE];
-      LONGEST val;
-
-      regcache_raw_collect (regcache, regno, buf);
-      val = extract_signed_integer (buf, register_size (gdbarch, regno),
-				    byte_order);
       to = (gdb_byte *) (*fpregsetp + 32);
-      store_signed_integer (to, 4, byte_order, val);
+      regcache->raw_collect_integer (regno, to, 4, true);
     }
   else if (regno == mips_regnum (gdbarch)->fp_implementation_revision)
     {
-      gdb_byte buf[MAX_REGISTER_SIZE];
-      LONGEST val;
-
-      regcache_raw_collect (regcache, regno, buf);
-      val = extract_signed_integer (buf, register_size (gdbarch, regno),
-				    byte_order);
       to = (gdb_byte *) (*fpregsetp + 32) + 4;
-      store_signed_integer (to, 4, byte_order, val);
+      regcache->raw_collect_integer (regno, to, 4, true);
     }
   else if (regno == -1)
     {
@@ -1774,4 +1744,10 @@ _initialize_mips_linux_tdep (void)
 			      GDB_OSABI_LINUX,
 			      mips_linux_init_abi);
     }
+
+  /* Initialize the standard target descriptions.  */
+  initialize_tdesc_mips_linux ();
+  initialize_tdesc_mips_dsp_linux ();
+  initialize_tdesc_mips64_linux ();
+  initialize_tdesc_mips64_dsp_linux ();
 }

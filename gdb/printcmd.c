@@ -1,6 +1,6 @@
 /* Print values for GNU debugger GDB.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -45,8 +45,10 @@
 #include "charset.h"
 #include "arch-utils.h"
 #include "cli/cli-utils.h"
+#include "cli/cli-script.h"
 #include "format.h"
 #include "source.h"
+#include "common/byte-vector.h"
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_active et al.   */
@@ -119,7 +121,7 @@ struct display
     char *exp_string;
 
     /* Expression to be evaluated and displayed.  */
-    struct expression *exp;
+    expression_up exp;
 
     /* Item number of this auto-display item.  */
     int number;
@@ -322,7 +324,6 @@ print_formatted (struct value *val, int size,
     /* User specified format, so don't look to the type to tell us
        what to do.  */
     val_print_scalar_formatted (type,
-				value_contents_for_printing (val),
 				value_embedded_offset (val),
 				val,
 				options, size, stream);
@@ -356,42 +357,11 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 			int size, struct ui_file *stream)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
-  LONGEST val_long = 0;
   unsigned int len = TYPE_LENGTH (type);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* String printing should go through val_print_scalar_formatted.  */
   gdb_assert (options->format != 's');
-
-  if (len > sizeof(LONGEST)
-      && (TYPE_CODE (type) == TYPE_CODE_INT
-	  || TYPE_CODE (type) == TYPE_CODE_ENUM))
-    {
-      switch (options->format)
-	{
-	case 'o':
-	  print_octal_chars (stream, valaddr, len, byte_order);
-	  return;
-	case 'u':
-	case 'd':
-	  print_decimal_chars (stream, valaddr, len, byte_order);
-	  return;
-	case 't':
-	  print_binary_chars (stream, valaddr, len, byte_order);
-	  return;
-	case 'x':
-	  print_hex_chars (stream, valaddr, len, byte_order);
-	  return;
-	case 'c':
-	  print_char_chars (stream, type, valaddr, len, byte_order);
-	  return;
-	default:
-	  break;
-	};
-    }
-
-  if (options->format != 'f')
-    val_long = unpack_long (type, valaddr);
 
   /* If the value is a pointer, and pointers and addresses are not the
      same, then at this point, the value's length (in target bytes) is
@@ -402,60 +372,92 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
   /* If we are printing it as unsigned, truncate it in case it is actually
      a negative signed value (e.g. "print/u (short)-1" should print 65535
      (if shorts are 16 bits) instead of 4294967295).  */
-  if (options->format != 'd' || TYPE_UNSIGNED (type))
+  if (options->format != 'c'
+      && (options->format != 'd' || TYPE_UNSIGNED (type)))
     {
-      if (len < sizeof (LONGEST))
-	val_long &= ((LONGEST) 1 << HOST_CHAR_BIT * len) - 1;
+      if (len < TYPE_LENGTH (type) && byte_order == BFD_ENDIAN_BIG)
+	valaddr += TYPE_LENGTH (type) - len;
+    }
+
+  if (size != 0 && (options->format == 'x' || options->format == 't'))
+    {
+      /* Truncate to fit.  */
+      unsigned newlen;
+      switch (size)
+	{
+	case 'b':
+	  newlen = 1;
+	  break;
+	case 'h':
+	  newlen = 2;
+	  break;
+	case 'w':
+	  newlen = 4;
+	  break;
+	case 'g':
+	  newlen = 8;
+	  break;
+	default:
+	  error (_("Undefined output size \"%c\"."), size);
+	}
+      if (newlen < len && byte_order == BFD_ENDIAN_BIG)
+	valaddr += len - newlen;
+      len = newlen;
+    }
+
+  /* Historically gdb has printed floats by first casting them to a
+     long, and then printing the long.  PR cli/16242 suggests changing
+     this to using C-style hex float format.  */
+  gdb::byte_vector converted_float_bytes;
+  if (TYPE_CODE (type) == TYPE_CODE_FLT
+      && (options->format == 'o'
+	  || options->format == 'x'
+	  || options->format == 't'
+	  || options->format == 'z'))
+    {
+      LONGEST val_long = unpack_long (type, valaddr);
+      converted_float_bytes.resize (TYPE_LENGTH (type));
+      store_signed_integer (converted_float_bytes.data (), TYPE_LENGTH (type),
+			    byte_order, val_long);
+      valaddr = converted_float_bytes.data ();
     }
 
   switch (options->format)
     {
-    case 'x':
-      if (!size)
-	{
-	  /* No size specified, like in print.  Print varying # of digits.  */
-	  print_longest (stream, 'x', 1, val_long);
-	}
-      else
-	switch (size)
-	  {
-	  case 'b':
-	  case 'h':
-	  case 'w':
-	  case 'g':
-	    print_longest (stream, size, 1, val_long);
-	    break;
-	  default:
-	    error (_("Undefined output size \"%c\"."), size);
-	  }
-      break;
-
-    case 'd':
-      print_longest (stream, 'd', 1, val_long);
-      break;
-
-    case 'u':
-      print_longest (stream, 'u', 0, val_long);
-      break;
-
     case 'o':
-      if (val_long)
-	print_longest (stream, 'o', 1, val_long);
-      else
-	fprintf_filtered (stream, "0");
+      print_octal_chars (stream, valaddr, len, byte_order);
+      break;
+    case 'u':
+      print_decimal_chars (stream, valaddr, len, false, byte_order);
+      break;
+    case 0:
+    case 'd':
+      if (TYPE_CODE (type) != TYPE_CODE_FLT)
+	{
+	  print_decimal_chars (stream, valaddr, len, !TYPE_UNSIGNED (type),
+			       byte_order);
+	  break;
+	}
+      /* FALLTHROUGH */
+    case 'f':
+      type = float_type_from_length (type);
+      print_floating (valaddr, type, stream);
       break;
 
-    case 'a':
-      {
-	CORE_ADDR addr = unpack_pointer (type, valaddr);
-
-	print_address (gdbarch, addr, stream);
-      }
+    case 't':
+      print_binary_chars (stream, valaddr, len, byte_order, size > 0);
       break;
-
+    case 'x':
+      print_hex_chars (stream, valaddr, len, byte_order, size > 0);
+      break;
+    case 'z':
+      print_hex_chars (stream, valaddr, len, byte_order, true);
+      break;
     case 'c':
       {
 	struct value_print_options opts = *options;
+
+	LONGEST val_long = unpack_long (type, valaddr);
 
 	opts.format = 0;
 	if (TYPE_UNSIGNED (type))
@@ -467,64 +469,12 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       }
       break;
 
-    case 'f':
-      type = float_type_from_length (type);
-      print_floating (valaddr, type, stream);
-      break;
-
-    case 0:
-      internal_error (__FILE__, __LINE__,
-		      _("failed internal consistency check"));
-
-    case 't':
-      /* Binary; 't' stands for "two".  */
+    case 'a':
       {
-	char bits[8 * (sizeof val_long) + 1];
-	char buf[8 * (sizeof val_long) + 32];
-	char *cp = bits;
-	int width;
+	CORE_ADDR addr = unpack_pointer (type, valaddr);
 
-	if (!size)
-	  width = 8 * (sizeof val_long);
-	else
-	  switch (size)
-	    {
-	    case 'b':
-	      width = 8;
-	      break;
-	    case 'h':
-	      width = 16;
-	      break;
-	    case 'w':
-	      width = 32;
-	      break;
-	    case 'g':
-	      width = 64;
-	      break;
-	    default:
-	      error (_("Undefined output size \"%c\"."), size);
-	    }
-
-	bits[width] = '\0';
-	while (width-- > 0)
-	  {
-	    bits[width] = (val_long & 1) ? '1' : '0';
-	    val_long >>= 1;
-	  }
-	if (!size)
-	  {
-	    while (*cp && *cp == '0')
-	      cp++;
-	    if (*cp == '\0')
-	      cp--;
-	  }
-	strncpy (buf, cp, sizeof (bits));
-	fputs_filtered (buf, stream);
+	print_address (gdbarch, addr, stream);
       }
-      break;
-
-    case 'z':
-      print_hex_chars (stream, valaddr, len, byte_order);
       break;
 
     default:
@@ -560,7 +510,7 @@ set_next_address (struct gdbarch *gdbarch, CORE_ADDR addr)
 int
 print_address_symbolic (struct gdbarch *gdbarch, CORE_ADDR addr,
 			struct ui_file *stream,
-			int do_demangle, char *leadin)
+			int do_demangle, const char *leadin)
 {
   char *name = NULL;
   char *filename = NULL;
@@ -806,9 +756,8 @@ find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
   /* The vector PCS is used to store instruction addresses within
      a pc range.  */
   CORE_ADDR loop_start, loop_end, p;
-  VEC (CORE_ADDR) *pcs = NULL;
+  std::vector<CORE_ADDR> pcs;
   struct symtab_and_line sal;
-  struct cleanup *cleanup = make_cleanup (VEC_cleanup (CORE_ADDR), &pcs);
 
   *inst_read = 0;
   loop_start = loop_end = addr;
@@ -822,7 +771,7 @@ find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
      instructions from INST_COUNT, and go to the next iteration.  */
   do
     {
-      VEC_truncate (CORE_ADDR, pcs, 0);
+      pcs.clear ();
       sal = find_pc_sect_line (loop_start, NULL, 1);
       if (sal.line <= 0)
         {
@@ -844,12 +793,12 @@ find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
          LOOP_START to LOOP_END.  */
       for (p = loop_start; p < loop_end;)
         {
-          VEC_safe_push (CORE_ADDR, pcs, p);
+	  pcs.push_back (p);
           p += gdb_insn_length (gdbarch, p);
         }
 
-      inst_count -= VEC_length (CORE_ADDR, pcs);
-      *inst_read += VEC_length (CORE_ADDR, pcs);
+      inst_count -= pcs.size ();
+      *inst_read += pcs.size ();
     }
   while (inst_count > 0);
 
@@ -875,9 +824,7 @@ find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
      The case when the length of PCS is 0 means that we reached an area for
      which line info is not available.  In such case, we return LOOP_START,
      which was the lowest instruction address that had line info.  */
-  p = VEC_length (CORE_ADDR, pcs) > 0
-    ? VEC_index (CORE_ADDR, pcs, -inst_count)
-    : loop_start;
+  p = pcs.size () > 0 ? pcs[-inst_count] : loop_start;
 
   /* INST_READ includes all instruction addresses in a pc range.  Need to
      exclude the beginning part up to the address we're returning.  That
@@ -885,7 +832,6 @@ find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
   if (inst_count < 0)
     *inst_read += inst_count;
 
-  do_cleanups (cleanup);
   return p;
 }
 
@@ -1243,8 +1189,6 @@ print_value (struct value *val, const struct format_data *fmtp)
 static void
 print_command_1 (const char *exp, int voidprint)
 {
-  struct expression *expr;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   struct value *val;
   struct format_data fmt;
 
@@ -1252,9 +1196,8 @@ print_command_1 (const char *exp, int voidprint)
 
   if (exp && *exp)
     {
-      expr = parse_expression (exp);
-      make_cleanup (free_current_contents, &expr);
-      val = evaluate_expression (expr);
+      expression_up expr = parse_expression (exp);
+      val = evaluate_expression (expr.get ());
     }
   else
     val = access_value_history (0);
@@ -1262,8 +1205,6 @@ print_command_1 (const char *exp, int voidprint)
   if (voidprint || (val && value_type (val) &&
 		    TYPE_CODE (value_type (val)) != TYPE_CODE_VOID))
     print_value (val, &fmt);
-
-  do_cleanups (old_chain);
 }
 
 static void
@@ -1292,8 +1233,6 @@ output_command (char *exp, int from_tty)
 void
 output_command_const (const char *exp, int from_tty)
 {
-  struct expression *expr;
-  struct cleanup *old_chain;
   char format = 0;
   struct value *val;
   struct format_data fmt;
@@ -1310,10 +1249,9 @@ output_command_const (const char *exp, int from_tty)
       format = fmt.format;
     }
 
-  expr = parse_expression (exp);
-  old_chain = make_cleanup (free_current_contents, &expr);
+  expression_up expr = parse_expression (exp);
 
-  val = evaluate_expression (expr);
+  val = evaluate_expression (expr.get ());
 
   annotate_value_begin (value_type (val));
 
@@ -1325,16 +1263,12 @@ output_command_const (const char *exp, int from_tty)
 
   wrap_here ("");
   gdb_flush (gdb_stdout);
-
-  do_cleanups (old_chain);
 }
 
 static void
 set_command (char *exp, int from_tty)
 {
-  struct expression *expr = parse_expression (exp);
-  struct cleanup *old_chain =
-    make_cleanup (free_current_contents, &expr);
+  expression_up expr = parse_expression (exp);
 
   if (expr->nelts >= 1)
     switch (expr->elts[0].opcode)
@@ -1352,8 +1286,7 @@ set_command (char *exp, int from_tty)
 	  (_("Expression is not an assignment (and might have no effect)"));
       }
 
-  evaluate_expression (expr);
-  do_cleanups (old_chain);
+  evaluate_expression (expr.get ());
 }
 
 static void
@@ -1676,7 +1609,6 @@ address_info (char *exp, int from_tty)
 static void
 x_command (char *exp, int from_tty)
 {
-  struct expression *expr;
   struct format_data fmt;
   struct cleanup *old_chain;
   struct value *val;
@@ -1698,15 +1630,14 @@ x_command (char *exp, int from_tty)
 
   if (exp != 0 && *exp != 0)
     {
-      expr = parse_expression (exp);
+      expression_up expr = parse_expression (exp);
       /* Cause expression not to be there any more if this command is
          repeated with Newline.  But don't clobber a user-defined
          command's definition.  */
       if (from_tty)
 	*exp = 0;
-      old_chain = make_cleanup (free_current_contents, &expr);
-      val = evaluate_expression (expr);
-      if (TYPE_CODE (value_type (val)) == TYPE_CODE_REF)
+      val = evaluate_expression (expr.get ());
+      if (TYPE_IS_REFERENCE (value_type (val)))
 	val = coerce_ref (val);
       /* In rvalue contexts, such as this, functions are coerced into
          pointers to functions.  This makes "x/i main" work.  */
@@ -1718,7 +1649,6 @@ x_command (char *exp, int from_tty)
 	next_address = value_as_address (val);
 
       next_gdbarch = expr->gdbarch;
-      do_cleanups (old_chain);
     }
 
   if (!next_gdbarch)
@@ -1764,7 +1694,6 @@ static void
 display_command (char *arg, int from_tty)
 {
   struct format_data fmt;
-  struct expression *expr;
   struct display *newobj;
   const char *exp = arg;
 
@@ -1792,12 +1721,12 @@ display_command (char *arg, int from_tty)
     }
 
   innermost_block = NULL;
-  expr = parse_expression (exp);
+  expression_up expr = parse_expression (exp);
 
-  newobj = XNEW (struct display);
+  newobj = new display ();
 
   newobj->exp_string = xstrdup (exp);
-  newobj->exp = expr;
+  newobj->exp = std::move (expr);
   newobj->block = innermost_block;
   newobj->pspace = current_program_space;
   newobj->number = ++display_number;
@@ -1826,8 +1755,7 @@ static void
 free_display (struct display *d)
 {
   xfree (d->exp_string);
-  xfree (d->exp);
-  xfree (d);
+  delete d;
 }
 
 /* Clear out the display_chain.  Done when new symtabs are loaded,
@@ -1876,19 +1804,18 @@ map_display_numbers (char *args,
 				       void *),
 		     void *data)
 {
-  struct get_number_or_range_state state;
   int num;
 
   if (args == NULL)
     error_no_arg (_("one or more display numbers"));
 
-  init_number_or_range (&state, args);
+  number_or_range_parser parser (args);
 
-  while (!state.finished)
+  while (!parser.finished ())
     {
-      const char *p = state.string;
+      const char *p = parser.cur_tok ();
 
-      num = get_number_or_range (&state);
+      num = parser.get_number ();
       if (num == 0)
 	warning (_("bad display number at or near '%s'"), p);
       else
@@ -1938,7 +1865,6 @@ undisplay_command (char *args, int from_tty)
 static void
 do_one_display (struct display *d)
 {
-  struct cleanup *old_chain;
   int within_current_scope;
 
   if (d->enabled_p == 0)
@@ -1953,8 +1879,7 @@ do_one_display (struct display *d)
      expression if the current architecture has changed.  */
   if (d->exp != NULL && d->exp->gdbarch != get_current_arch ())
     {
-      xfree (d->exp);
-      d->exp = NULL;
+      d->exp.reset ();
       d->block = NULL;
     }
 
@@ -1990,8 +1915,8 @@ do_one_display (struct display *d)
   if (!within_current_scope)
     return;
 
-  old_chain = make_cleanup_restore_integer (&current_display_number);
-  current_display_number = d->number;
+  scoped_restore save_display_number
+    = make_scoped_restore (&current_display_number, d->number);
 
   annotate_display_begin ();
   printf_filtered ("%d", d->number);
@@ -2027,7 +1952,7 @@ do_one_display (struct display *d)
 	  struct value *val;
 	  CORE_ADDR addr;
 
-	  val = evaluate_expression (d->exp);
+	  val = evaluate_expression (d->exp.get ());
 	  addr = value_as_address (val);
 	  if (d->format.format == 'i')
 	    addr = gdbarch_addr_bits_remove (d->exp->gdbarch, addr);
@@ -2064,7 +1989,7 @@ do_one_display (struct display *d)
         {
 	  struct value *val;
 
-	  val = evaluate_expression (d->exp);
+	  val = evaluate_expression (d->exp.get ());
 	  print_formatted (val, d->format.size, &opts, gdb_stdout);
 	}
       CATCH (ex, RETURN_MASK_ERROR)
@@ -2079,7 +2004,6 @@ do_one_display (struct display *d)
   annotate_display_end ();
 
   gdb_flush (gdb_stdout);
-  do_cleanups (old_chain);
 }
 
 /* Display all of the values on the auto-display chain which can be
@@ -2225,10 +2149,9 @@ clear_dangling_display_expressions (struct objfile *objfile)
 	continue;
 
       if (lookup_objfile_from_block (d->block) == objfile
-	  || (d->exp && exp_uses_objfile (d->exp, objfile)))
+	  || (d->exp != NULL && exp_uses_objfile (d->exp.get (), objfile)))
       {
-	xfree (d->exp);
-	d->exp = NULL;
+	d->exp.reset ();
 	d->block = NULL;
       }
     }
@@ -2332,8 +2255,6 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
 					 "wchar_t", NULL, 0);
   int wcwidth = TYPE_LENGTH (wctype);
   gdb_byte *buf = (gdb_byte *) alloca (wcwidth);
-  struct obstack output;
-  struct cleanup *inner_cleanup;
 
   tem = value_as_address (value);
 
@@ -2352,8 +2273,7 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
     read_memory (tem, str, j);
   memset (&str[j], 0, wcwidth);
 
-  obstack_init (&output);
-  inner_cleanup = make_cleanup_obstack_free (&output);
+  auto_obstack output;
 
   convert_between_encodings (target_wide_charset (gdbarch),
 			     host_charset (),
@@ -2362,7 +2282,6 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
   obstack_grow_str0 (&output, "");
 
   fprintf_filtered (stream, format, obstack_base (&output));
-  do_cleanups (inner_cleanup);
 }
 
 /* Subroutine of ui_printf to simplify it.
@@ -2608,8 +2527,6 @@ ui_printf (const char *arg, struct ui_file *stream)
 	      struct type *wctype = lookup_typename (current_language, gdbarch,
 						     "wchar_t", NULL, 0);
 	      struct type *valtype;
-	      struct obstack output;
-	      struct cleanup *inner_cleanup;
 	      const gdb_byte *bytes;
 
 	      valtype = value_type (val_args[i]);
@@ -2619,8 +2536,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 
 	      bytes = value_contents (val_args[i]);
 
-	      obstack_init (&output);
-	      inner_cleanup = make_cleanup_obstack_free (&output);
+	      auto_obstack output;
 
 	      convert_between_encodings (target_wide_charset (gdbarch),
 					 host_charset (),
@@ -2631,7 +2547,6 @@ ui_printf (const char *arg, struct ui_file *stream)
 
 	      fprintf_filtered (stream, current_substring,
                                 obstack_base (&output));
-	      do_cleanups (inner_cleanup);
 	    }
 	    break;
 	  case double_arg:
@@ -2740,18 +2655,13 @@ printf_command (char *arg, int from_tty)
 static void
 eval_command (char *arg, int from_tty)
 {
-  struct ui_file *ui_out = mem_fileopen ();
-  struct cleanup *cleanups = make_cleanup_ui_file_delete (ui_out);
-  char *expanded;
+  string_file stb;
 
-  ui_printf (arg, ui_out);
+  ui_printf (arg, &stb);
 
-  expanded = ui_file_xstrdup (ui_out, NULL);
-  make_cleanup (xfree, expanded);
+  std::string expanded = insert_user_defined_cmd_args (stb.c_str ());
 
-  execute_command (expanded, from_tty);
-
-  do_cleanups (cleanups);
+  execute_command (&expanded[0], from_tty);
 }
 
 void

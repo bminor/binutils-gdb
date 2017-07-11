@@ -1,4 +1,4 @@
-# Copyright (C) 2016 Free Software Foundation, Inc.
+# Copyright (C) 2016-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -28,3 +28,18 @@ foreach arc_test $arc_test_list {
     run_dump_test [file rootname $arc_test]
 }
 
+# Note - we force the generation of little endian binaries, even if the default is
+# for big endian, because the sda-relocs.ld script selects little endian output.
+set arccommon_tests {
+    { "SDA relocs"
+        "-q -T sda-relocs.ld -A elf32-arclittle" "" "-mcpu=archs -EL" {sda-relocs.s}
+        {{objdump -fdw sda-relocs.dd} {readelf --relocs sda-relocs.rd}}
+        "sda-relocs.so" }
+    { "TLS reloc dtpoff"
+        "-q -T tls-relocs.ld -A elf32-arclittle" "" "-mcpu=archs -EL"
+	{tls-dtpoff.s}
+        {{objdump -fdw tls-dtpoff.dd} {readelf --relocs tls-dtpoff.rd}}
+        "sda-relocs.so" }
+}
+
+run_ld_link_tests $arccommon_tests

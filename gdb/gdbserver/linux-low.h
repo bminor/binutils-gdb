@@ -1,5 +1,5 @@
 /* Internal interfaces for the GNU/Linux specific target code for gdbserver.
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -154,7 +154,7 @@ struct linux_target_ops
   const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
 
   /* Find the next possible PCs after the current instruction executes.  */
-  VEC (CORE_ADDR) *(*get_next_pcs) (struct regcache *regcache);
+  std::vector<CORE_ADDR> (*get_next_pcs) (struct regcache *regcache);
 
   int decr_pc_after_break;
   int (*breakpoint_at) (CORE_ADDR pc);
@@ -300,6 +300,12 @@ struct lwp_info
      processing.  This is used to store extended ptrace event
      information or exit status until it can be reported to GDB.  */
   struct target_waitstatus waitstatus;
+
+  /* A pointer to the fork child/parent relative.  Valid only while
+     the parent fork event is not reported to higher layers.  Used to
+     avoid wildcard vCont actions resuming a fork child before GDB is
+     notified about the parent's fork event.  */
+  struct lwp_info *fork_relative;
 
   /* When stopped is set, this is where the lwp last stopped, with
      decr_pc_after_break already accounted for.  If the LWP is

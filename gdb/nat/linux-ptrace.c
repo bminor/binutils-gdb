@@ -1,5 +1,5 @@
 /* Linux-specific ptrace manipulation routines.
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +23,9 @@
 #include "buffer.h"
 #include "gdb_wait.h"
 #include "gdb_ptrace.h"
+#ifdef HAVE_SYS_PROCFS_H
+#include <sys/procfs.h>
+#endif
 
 /* Stores the ptrace options supported by the running kernel.
    A value of -1 means we did not check for features yet.  A value
@@ -100,6 +103,7 @@ linux_ptrace_test_ret_to_nx (void)
   gdb_byte *return_address, *pc;
   long l;
   int status, kill_status;
+  elf_gregset_t regs;
 
   return_address
     = (gdb_byte *) mmap (NULL, 2, PROT_READ | PROT_WRITE,
@@ -188,23 +192,19 @@ linux_ptrace_test_ret_to_nx (void)
       return;
     }
 
-  errno = 0;
+  if (ptrace (PTRACE_GETREGS, child, (PTRACE_TYPE_ARG3) 0,
+	      (PTRACE_TYPE_ARG4) &regs) < 0)
+    {
+      warning (_("linux_ptrace_test_ret_to_nx: Cannot PTRACE_GETREGS: %s"),
+	       safe_strerror (errno));
+    }
 #if defined __i386__
-  l = ptrace (PTRACE_PEEKUSER, child, (PTRACE_TYPE_ARG3) (uintptr_t) (EIP * 4),
-	      (PTRACE_TYPE_ARG4) NULL);
+  pc = (gdb_byte *) (uintptr_t) regs[EIP];
 #elif defined __x86_64__
-  l = ptrace (PTRACE_PEEKUSER, child, (PTRACE_TYPE_ARG3) (uintptr_t) (RIP * 8),
-	      (PTRACE_TYPE_ARG4) NULL);
+  pc = (gdb_byte *) (uintptr_t) regs[RIP];
 #else
 # error "!__i386__ && !__x86_64__"
 #endif
-  if (errno != 0)
-    {
-      warning (_("linux_ptrace_test_ret_to_nx: Cannot PTRACE_PEEKUSER: %s"),
-	       safe_strerror (errno));
-      return;
-    }
-  pc = (gdb_byte *) (uintptr_t) l;
 
   kill (child, SIGKILL);
   ptrace (PTRACE_KILL, child, (PTRACE_TYPE_ARG3) NULL,
@@ -272,7 +272,7 @@ linux_fork_to_function (gdb_byte *child_stack, int (*function) (void *))
 #define STACK_SIZE 4096
 
     if (child_stack == NULL)
-      child_stack = xmalloc (STACK_SIZE * 4);
+      child_stack = (gdb_byte *) xmalloc (STACK_SIZE * 4);
 
     /* Use CLONE_VM instead of fork, to support uClinux (no MMU).  */
 #ifdef __ia64__

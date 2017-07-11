@@ -1,5 +1,5 @@
 /* Multi-thread control defs for remote server for GDB.
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -86,5 +86,8 @@ struct thread_info *find_any_thread_of_pid (int pid);
 
 /* Get current thread ID (Linux task ID).  */
 #define current_ptid (current_thread->entry.id)
+
+/* Create a cleanup to restore current_thread.  */
+struct cleanup *make_cleanup_restore_current_thread (void);
 
 #endif /* GDB_THREAD_H */

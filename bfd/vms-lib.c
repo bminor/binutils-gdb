@@ -1,6 +1,6 @@
 /* BFD back-end for VMS archive files.
 
-   Copyright (C) 2010-2016 Free Software Foundation, Inc.
+   Copyright (C) 2010-2017 Free Software Foundation, Inc.
    Written by Tristan Gingold <gingold@adacore.com>, AdaCore.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1441,8 +1441,9 @@ _bfd_vms_lib_get_imagelib_file (bfd *el)
 
   if (res == NULL)
     {
-      (*_bfd_error_handler)(_("could not open shared image '%s' from '%s'"),
-                            filename, archive->filename);
+      /* xgettext:c-format */
+      _bfd_error_handler(_("could not open shared image '%s' from '%s'"),
+			 filename, archive->filename);
       bfd_release (archive, filename);
       return NULL;
     }
@@ -1661,7 +1662,7 @@ vms_write_index (bfd *abfd,
                       /* Write it to the disk (if there is one).  */
                       if (kbn_vbn != 0)
                         {
-                          if (vms_write_block (abfd, kbn_vbn, kbn_blk) != TRUE)
+                          if (!vms_write_block (abfd, kbn_vbn, kbn_blk))
                             return FALSE;
                         }
                       else
@@ -1779,7 +1780,7 @@ vms_write_index (bfd *abfd,
               if (abfd != NULL)
                 {
                   bfd_putl16 (blk[j].len + blk[j].lastlen, rblk[j]->used);
-                  if (vms_write_block (abfd, blk[j].vbn, rblk[j]) != TRUE)
+                  if (!vms_write_block (abfd, blk[j].vbn, rblk[j]))
                     return FALSE;
                 }
 
@@ -1872,7 +1873,7 @@ vms_write_index (bfd *abfd,
     {
       /* Write this block on the disk.  */
       bfd_putl16 (blk[j].len + blk[j].lastlen, rblk[j]->used);
-      if (vms_write_block (abfd, blk[j].vbn, rblk[j]) != TRUE)
+      if (!vms_write_block (abfd, blk[j].vbn, rblk[j]))
         return FALSE;
 
       free (rblk[j]);
@@ -1881,7 +1882,7 @@ vms_write_index (bfd *abfd,
   /* Write the last kbn (if any).  */
   if (kbn_vbn != 0)
     {
-      if (vms_write_block (abfd, kbn_vbn, kbn_blk) != TRUE)
+      if (!vms_write_block (abfd, kbn_vbn, kbn_blk))
         return FALSE;
       free (kbn_blk);
     }
@@ -2222,11 +2223,11 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
 
   /* Write the indexes.  */
   vbn = 2;
-  if (vms_write_index (arch, modules, nbr_modules, &vbn, &mod_idx_vbn,
-                       is_elfidx) != TRUE)
+  if (!vms_write_index (arch, modules, nbr_modules, &vbn, &mod_idx_vbn,
+			is_elfidx))
     return FALSE;
-  if (vms_write_index (arch, symbols, nbr_symbols, &vbn, &sym_idx_vbn,
-                       is_elfidx) != TRUE)
+  if (!vms_write_index (arch, symbols, nbr_symbols, &vbn, &sym_idx_vbn,
+			is_elfidx))
     return FALSE;
 
   /* Write libary header.  */
@@ -2297,7 +2298,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
     bfd_putl16 (sym_idx_vbn, idd->vbn);
     idd++;
 
-    if (vms_write_block (arch, 1, blk) != TRUE)
+    if (!vms_write_block (arch, 1, blk))
       return FALSE;
   }
 

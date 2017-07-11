@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB, the GNU debugger.
-dnl Copyright (C) 1995-2016 Free Software Foundation, Inc.
+dnl Copyright (C) 1995-2017 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
 dnl
@@ -38,23 +38,13 @@ AC_CONFIG_AUX_DIR(..)
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 
-# See if we are building with C++, and substitute COMPILER.
-GDB_AC_BUILD_WITH_CXX
+# We require a C++11 compiler.  Check if one is available, and if
+# necessary, set CXX_DIALECT to some -std=xxx switch.
+AX_CXX_COMPILE_STDCXX(11, , mandatory)
 
 # Dependency checking.
 ZW_CREATE_DEPDIR
 ZW_PROG_COMPILER_DEPENDENCIES([CC])
-
-# Check for the 'make' the user wants to use.
-AC_CHECK_PROGS(MAKE, make)
-MAKE_IS_GNU=
-case "`$MAKE --version 2>&1 | sed 1q`" in
-  *GNU*)
-    MAKE_IS_GNU=yes
-    ;;
-esac
-AM_CONDITIONAL(GMAKE, test "$MAKE_IS_GNU" = yes)
-AC_PROG_MAKE_SET
 
 gnulib_extra_configure_args=
 # If large-file support is disabled, make sure gnulib does the same.
@@ -607,7 +597,7 @@ fi
 
 # Since GDB uses Readline, we need termcap functionality.  In many
 # cases this will be provided by the curses library, but some systems
-# have a seperate termcap library, or no curses library at all.
+# have a separate termcap library, or no curses library at all.
 
 case $host_os in
   cygwin*)
@@ -1282,6 +1272,13 @@ else
     else
       AC_MSG_WARN([libipt is missing or unusable; some features may be unavailable.])
     fi
+  else
+    save_LIBS=$LIBS
+    LIBS="$LIBS $LIBIPT"
+    AC_CHECK_FUNCS(pt_insn_event)
+    AC_CHECK_MEMBERS([struct pt_insn.enabled, struct pt_insn.resynced], [], [],
+                     [#include <intel-pt.h>])
+    LIBS=$save_LIBS
   fi
 fi
 
@@ -1543,12 +1540,6 @@ if test "${target}" = "${host}"; then
   *-*-solaris2.[[6789]] | *-*-solaris2.1[[0-9]]*)
       AC_DEFINE(NEW_PROC_API, 1,
       [Define if you want to use new multi-fd /proc interface.])
-      ;;
-  mips-sgi-irix5*)
-      # Work around <sys/proc.h> needing _KMEMUSER problem on IRIX 5.
-      AC_DEFINE([_KMEMUSER], 1,
-      [Define to 1 so <sys/proc.h> gets a definition of anon_hdl.  Works
-       around a <sys/proc.h> problem on IRIX 5.])
       ;;
   esac
 fi
@@ -2215,29 +2206,22 @@ if test "${host}" != "${target}"; then
 fi
 AC_SUBST(target_subdir)
 
-frags=
+# Import nat definitions.
+nat_makefile_frag=/dev/null
 if test "${gdb_native}" = "yes"; then
-  host_makefile_frag=${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh
-  if test ! -f ${host_makefile_frag}; then
-    AC_MSG_ERROR("*** Gdb does not support native target ${host}")
-  fi
-  frags="$frags $host_makefile_frag"
-else
-  host_makefile_frag=/dev/null
+  . ${srcdir}/configure.nat
+  nativefile=$NAT_FILE
 fi
 
-AC_SUBST_FILE(host_makefile_frag)
-AC_SUBST(frags)
-
-changequote(,)dnl
-if test "${gdb_native}" = "yes"; then
-# We pick this up from the host configuration file (.mh) because we
-# do not have a native configuration Makefile fragment.
-nativefile=`sed -n '
-s/NAT_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
-' ${host_makefile_frag}`
-fi
-changequote([,])
+AC_SUBST(NAT_FILE)
+AC_SUBST(NATDEPFILES)
+AC_SUBST(NAT_CDEPS)
+AC_SUBST(LOADLIBES)
+AC_SUBST(MH_CFLAGS)
+AC_SUBST(XM_CLIBS)
+AC_SUBST(NAT_GENERATED_FILES)
+AC_SUBST(HAVE_NATIVE_GCORE_HOST)
+AC_SUBST_FILE(nat_makefile_frag)
 
 if test x"${gdb_osabi}" != x ; then
     AC_DEFINE_UNQUOTED(GDB_OSABI_DEFAULT, $gdb_osabi,
@@ -2326,8 +2310,8 @@ else
   fi
 fi
 
-# If nativefile (NAT_FILE) is not set in config/*/*.m[ht] files, we link
-# to an empty version.
+# If nativefile (NAT_FILE) is not set in configure.nat, we link to an
+# empty version.
 
 files=
 links=
@@ -2344,6 +2328,15 @@ if test "${nativefile}" != ""; then
 fi
 AC_SUBST(GDB_NM_FILE)
 
+dnl Add dependency for xsltproc if building with maintainer-mode enabled.
+AC_PATH_PROGS(XSLTPROC, xsltproc, missing)
+if test "x$USE_MAINTAINER_MODE" = xyes; then
+  if test "${XSLTPROC}" = missing; then
+    AC_ERROR(unable to find xsltproc.  maintainer-mode requires xsltproc.)
+  fi
+fi
+AC_SUBST(XSLTPROC)
+
 AC_LINK_FILES($files, $links)
 
 dnl Check for exe extension set on certain hosts (e.g. Win32)
@@ -2357,6 +2350,8 @@ AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "UTF-8",
 if $development; then
   AC_DEFINE(GDB_SELF_TEST, 1,
             [Define if self-testing features should be enabled])
+  CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_UNITTESTS_OBS)"
+  CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_UNITTESTS_SRCS)"
 fi
 
 GDB_AC_TRANSFORM([gdb], [GDB_TRANSFORM_NAME])

@@ -1,7 +1,146 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.11
+*** Changes since GDB 8.0
+
+* On Unix systems, GDBserver now does globbing expansion and variable
+  substitution in inferior command line arguments.
+
+  This is done by starting inferiors using a shell, like GDB does.
+  See "set startup-with-shell" in the user manual for how to disable
+  this from GDB when using "target extended-remote".  When using
+  "target remote", you can disable the startup with shell by using the
+  new "--no-startup-with-shell" GDBserver command line option.
+
+* New remote packets
+
+QStartupWithShell
+  Indicates whether the inferior must be started with a shell or not.
+
+* New commands
+
+set debug separate-debug-file
+show debug separate-debug-file
+  Control the display of debug output about separate debug file search.
+
+*** Changes in GDB 8.0
+
+* GDB now supports access to the PKU register on GNU/Linux. The register is
+  added by the Memory Protection Keys for Userspace feature which will be
+  available in future Intel CPUs.
+
+* GDB now supports C++11 rvalue references.
+
+* Python Scripting
+
+  ** New functions to start, stop and access a running btrace recording.
+  ** Rvalue references are now supported in gdb.Type.
+
+* GDB now supports recording and replaying rdrand and rdseed Intel 64
+  instructions.
+
+* Building GDB and GDBserver now requires a C++11 compiler.
+
+  For example, GCC 4.8 or later.
+
+  It is no longer possible to build GDB or GDBserver with a C
+  compiler.  The --disable-build-with-cxx configure option has been
+  removed.
+
+* Building GDB and GDBserver now requires GNU make >= 3.81.
+
+  It is no longer supported to build GDB or GDBserver with another
+  implementation of the make program or an earlier version of GNU make.
+
+* Native debugging on MS-Windows supports command-line redirection
+
+  Command-line arguments used for starting programs on MS-Windows can
+  now include redirection symbols supported by native Windows shells,
+  such as '<', '>', '>>', '2>&1', etc.  This affects GDB commands such
+  as "run", "start", and "set args", as well as the corresponding MI
+  features.
+
+* Support for thread names on MS-Windows.
+
+  GDB now catches and handles the special exception that programs
+  running on MS-Windows use to assign names to threads in the
+  debugger.
+
+* Support for Java programs compiled with gcj has been removed.
+
+* User commands now accept an unlimited number of arguments.
+  Previously, only up to 10 was accepted.
+
+* The "eval" command now expands user-defined command arguments.
+
+  This makes it easier to process a variable number of arguments:
+
+   define mycommand
+     set $i = 0
+     while $i < $argc
+       eval "print $arg%d", $i
+       set $i = $i + 1
+     end
+   end
+
+* Target descriptions can now describe registers for sparc32 and sparc64.
+
+* GDB now supports DWARF version 5 (debug information format).
+  Its .debug_names index is not yet supported.
+
+* New native configurations
+
+FreeBSD/mips			mips*-*-freebsd
+
+* New targets
+
+Synopsys ARC			arc*-*-elf32
+FreeBSD/mips			mips*-*-freebsd
+
+* Removed targets and native configurations
+
+Alpha running FreeBSD         alpha*-*-freebsd*
+Alpha running GNU/kFreeBSD    alpha*-*-kfreebsd*-gnu
+
+* New commands
+
+flash-erase
+  Erases all the flash memory regions reported by the target.
+
+maint print arc arc-instruction address
+  Print internal disassembler information about instruction at a given address.
+
+* New options
+
+set disassembler-options
+show disassembler-options
+  Controls the passing of target specific information to the disassembler.
+  If it is necessary to specify more than one disassembler option then
+  multiple options can be placed together into a comma separated list.
+  The default value is the empty string.  Currently, the only supported
+  targets are ARM, PowerPC and S/390.
+
+* New MI commands
+
+-target-flash-erase
+  Erases all the flash memory regions reported by the target.  This is
+  equivalent to the CLI command flash-erase.
+
+-file-list-shared-libraries
+  List the shared libraries in the program.  This is
+  equivalent to the CLI command "info shared".
+
+*** Changes in GDB 7.12
+
+* GDB and GDBserver now build with a C++ compiler by default.
+
+  The --enable-build-with-cxx configure option is now enabled by
+  default.  One must now explicitly configure with
+  --disable-build-with-cxx in order to build with a C compiler.  This
+  option will be removed in a future release.
+
+* GDBserver now supports recording btrace without maintaining an active
+  GDB connection.
 
 * GDB now supports a negative repeat count in the 'x' command to examine
   memory backward from the given address.  For example:
@@ -19,6 +158,13 @@
 
 * Fortran: Support structures with fields of dynamic types and 
   arrays of dynamic types.
+
+* The symbol dumping maintenance commands have new syntax.
+maint print symbols [-pc address] [--] [filename]
+maint print symbols [-objfile objfile] [-source source] [--] [filename]
+maint print psymbols [-objfile objfile] [-pc address] [--] [filename]
+maint print psymbols [-objfile objfile] [-source source] [--] [filename]
+maint print msymbols [-objfile objfile] [--] [filename]
 
 * GDB now supports multibit bitfields and enums in target register
   descriptions.
@@ -60,6 +206,11 @@
   for its own control and synchronization, invisible to the command
   line.
 
+* The "catch syscall" command catches groups of related syscalls.
+
+  The "catch syscall" command now supports catching a group of related
+  syscalls using the 'group:' or 'g:' prefix.
+
 * New commands
 
 skip -file file
@@ -79,6 +230,21 @@ maint selftest
 new-ui INTERP TTY
   Start a new user interface instance running INTERP as interpreter,
   using the TTY file for input/output.
+
+* Python Scripting
+
+  ** gdb.Breakpoint objects have a new attribute "pending", which
+     indicates whether the breakpoint is pending.
+  ** Three new breakpoint-related events have been added:
+     gdb.breakpoint_created, gdb.breakpoint_modified, and
+     gdb.breakpoint_deleted.
+
+signal-event EVENTID
+  Signal ("set") the given MS-Windows event object.  This is used in
+  conjunction with the Windows JIT debugging (AeDebug) support, where
+  the OS suspends a crashing process until a debugger can attach to
+  it.  Resuming the crashing process, in order to debug it, is done by
+  signalling an event.
 
 * Support for tracepoints and fast tracepoints on s390-linux and s390x-linux
   was added in GDBserver, including JIT compiling fast tracepoint's
@@ -103,6 +269,10 @@ new-ui INTERP TTY
   recording.  For example:
 
     =record-started,thread-group="i1",method="btrace",format="bts"
+
+* MI async record =thread-selected now includes the frame field.  For example:
+
+     =thread-selected,id="3",frame={level="0",addr="0x00000000004007c0"}
 
 * New targets
 
@@ -258,6 +428,9 @@ show max-value-size
   whose memory is addressable in units of any integral multiple of 8 bits.
 
 * New remote packets
+
+QStartupWithShell
+  Indicates whether the inferior must be started with a shell or not.
 
 exec stop reason
   Indicates that an exec system call was executed.

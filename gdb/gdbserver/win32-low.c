@@ -1,5 +1,5 @@
 /* Low level interface to Windows debugging, for gdbserver.
-   Copyright (C) 2006-2016 Free Software Foundation, Inc.
+   Copyright (C) 2006-2017 Free Software Foundation, Inc.
 
    Contributed by Leo Zayas.  Based on "win32-nat.c" from GDB.
 
@@ -608,13 +608,13 @@ create_process (const char *program, char *args,
 }
 
 /* Start a new process.
-   PROGRAM is a path to the program to execute.
-   ARGS is a standard NULL-terminated array of arguments,
-   to be passed to the inferior as ``argv''.
+   PROGRAM is the program name.
+   PROGRAM_ARGS is the vector containing the inferior's args.
    Returns the new PID on success, -1 on failure.  Registers the new
    process with the process list.  */
 static int
-win32_create_inferior (char *program, char **program_args)
+win32_create_inferior (const char *program,
+		       const std::vector<char *> &program_args)
 {
 #ifndef USE_WIN32API
   char real_path[PATH_MAX];
@@ -622,11 +622,12 @@ win32_create_inferior (char *program, char **program_args)
 #endif
   BOOL ret;
   DWORD flags;
-  char *args;
   int argslen;
   int argc;
   PROCESS_INFORMATION pi;
   DWORD err;
+  std::string str_program_args = stringify_argv (program_args);
+  char *args = (char *) str_program_args.c_str ();
 
   /* win32_wait needs to know we're not attaching.  */
   attaching = 0;
@@ -652,18 +653,6 @@ win32_create_inferior (char *program, char **program_args)
   program = real_path;
 #endif
 
-  argslen = 1;
-  for (argc = 1; program_args[argc]; argc++)
-    argslen += strlen (program_args[argc]) + 1;
-  args = (char *) alloca (argslen);
-  args[0] = '\0';
-  for (argc = 1; program_args[argc]; argc++)
-    {
-      /* FIXME: Can we do better about quoting?  How does Cygwin
-	 handle this?  */
-      strcat (args, " ");
-      strcat (args, program_args[argc]);
-    }
   OUTMSG2 (("Command line is \"%s\"\n", args));
 
 #ifdef CREATE_NEW_PROCESS_GROUP
@@ -1495,16 +1484,12 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
       main_thread_id = current_event.dwThreadId;
 
-      ourstatus->kind = TARGET_WAITKIND_EXECD;
-      ourstatus->value.execd_pathname = "Main executable";
-
       /* Add the main thread.  */
       child_add_thread (current_event.dwProcessId,
 			main_thread_id,
 			current_event.u.CreateProcessInfo.hThread,
 			current_event.u.CreateProcessInfo.lpThreadLocalBase);
 
-      ourstatus->value.related_pid = debug_event_ptid (&current_event);
 #ifdef _WIN32_WCE
       if (!attaching)
 	{
@@ -1632,7 +1617,6 @@ win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 	  OUTMSG (("Ignoring unknown internal event, %d\n", ourstatus->kind));
 	  /* fall-through */
 	case TARGET_WAITKIND_SPURIOUS:
-	case TARGET_WAITKIND_EXECD:
 	  /* do nothing, just continue */
 	  child_continue (DBG_CONTINUE, -1);
 	  break;

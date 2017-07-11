@@ -1,5 +1,5 @@
 /* MI Command Set - symbol commands.
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,13 +27,12 @@
    in ascending PC order.  */
 
 void
-mi_cmd_symbol_list_lines (char *command, char **argv, int argc)
+mi_cmd_symbol_list_lines (const char *command, char **argv, int argc)
 {
   struct gdbarch *gdbarch;
   char *filename;
   struct symtab *s;
   int i;
-  struct cleanup *cleanup_stack, *cleanup_tuple;
   struct ui_out *uiout = current_uiout;
 
   if (argc != 1)
@@ -50,17 +49,13 @@ mi_cmd_symbol_list_lines (char *command, char **argv, int argc)
      need to perform any other sorting.  */
 
   gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
-  cleanup_stack = make_cleanup_ui_out_list_begin_end (uiout, "lines");
 
+  ui_out_emit_list list_emitter (uiout, "lines");
   if (SYMTAB_LINETABLE (s) != NULL && SYMTAB_LINETABLE (s)->nitems > 0)
     for (i = 0; i < SYMTAB_LINETABLE (s)->nitems; i++)
     {
-      cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-      ui_out_field_core_addr (uiout, "pc", gdbarch,
-			      SYMTAB_LINETABLE (s)->item[i].pc);
-      ui_out_field_int (uiout, "line", SYMTAB_LINETABLE (s)->item[i].line);
-      do_cleanups (cleanup_tuple);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
+      uiout->field_core_addr ("pc", gdbarch, SYMTAB_LINETABLE (s)->item[i].pc);
+      uiout->field_int ("line", SYMTAB_LINETABLE (s)->item[i].line);
     }
-
-  do_cleanups (cleanup_stack);
 }

@@ -1,5 +1,5 @@
 /* Plugin support for BFD.
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2017 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -105,6 +105,7 @@ dlerror (void)
 #define bfd_plugin_bfd_discard_group                  bfd_generic_discard_group
 #define bfd_plugin_section_already_linked             _bfd_generic_section_already_linked
 #define bfd_plugin_bfd_define_common_symbol           bfd_generic_define_common_symbol
+#define bfd_plugin_bfd_define_start_stop              bfd_generic_define_start_stop
 #define bfd_plugin_bfd_copy_link_hash_symbol_type     _bfd_generic_copy_link_hash_symbol_type
 #define bfd_plugin_bfd_link_check_relocs              _bfd_generic_link_check_relocs
 
@@ -132,10 +133,10 @@ register_claim_file (ld_plugin_claim_file_handler handler)
 }
 
 static asection bfd_plugin_fake_text_section
-  = BFD_FAKE_SECTION (bfd_plugin_fake_text_section, 0, 0, ".text", 0);
+  = BFD_FAKE_SECTION (bfd_plugin_fake_text_section, NULL, ".text", 0, 0);
 static asection bfd_plugin_fake_common_section
-  = BFD_FAKE_SECTION (bfd_plugin_fake_common_section, SEC_IS_COMMON, 0,
-		      NULL, 0);
+  = BFD_FAKE_SECTION (bfd_plugin_fake_common_section, NULL, NULL,
+		      0, SEC_IS_COMMON);
 
 /* Get symbols from object only section.  */
 
@@ -301,49 +302,50 @@ bfd_plugin_set_program_name (const char *program_name)
   plugin_program_name = program_name;
 }
 
+int
+bfd_plugin_open_input (bfd *ibfd, struct ld_plugin_input_file *file)
+{
+  bfd *iobfd;
+
+  iobfd = ibfd;
+  if (ibfd->my_archive && !bfd_is_thin_archive (ibfd->my_archive))
+    iobfd = ibfd->my_archive;
+  file->name = iobfd->filename;
+
+  if (!iobfd->iostream && !bfd_open_file (iobfd))
+    return 0;
+
+  file->fd = fileno ((FILE *) iobfd->iostream);
+
+  if (iobfd == ibfd)
+    {
+      struct stat stat_buf;
+      if (fstat (file->fd, &stat_buf))
+        return 0;
+      file->offset = 0;
+      file->filesize = stat_buf.st_size;
+    }
+  else
+    {
+      file->offset = ibfd->origin;
+      file->filesize = arelt_size (ibfd);
+    }
+  return 1;
+}
+
 static int
 try_claim (bfd *abfd)
 {
   int claimed = 0;
   struct ld_plugin_input_file file;
-  bfd *iobfd;
 
-  file.name = abfd->filename;
-
-  if (abfd->my_archive && !bfd_is_thin_archive (abfd->my_archive))
-    {
-      iobfd = abfd->my_archive;
-      file.offset = abfd->origin;
-      file.filesize = arelt_size (abfd);
-    }
-  else
-    {
-      iobfd = abfd;
-      file.offset = 0;
-      file.filesize = 0;
-    }
-
-  if (!iobfd->iostream && !bfd_open_file (iobfd))
+  if (!bfd_plugin_open_input (abfd, &file))
     return 0;
-
-  file.fd = fileno ((FILE *) iobfd->iostream);
-
-  if (!abfd->my_archive || bfd_is_thin_archive (abfd->my_archive))
-    {
-      struct stat stat_buf;
-      if (fstat (file.fd, &stat_buf))
-        return 0;
-      file.filesize = stat_buf.st_size;
-    }
-
   file.handle = abfd;
-  off_t cur_offset = lseek(file.fd, 0, SEEK_CUR);
+  off_t cur_offset = lseek (file.fd, 0, SEEK_CUR);
   claim_file (&file, &claimed);
-  lseek(file.fd, cur_offset, SEEK_SET);
-  if (!claimed)
-    return 0;
-
-  return 1;
+  lseek (file.fd, cur_offset, SEEK_SET);
+  return claimed;
 }
 
 static int
@@ -360,7 +362,7 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
   plugin_handle = dlopen (pname, RTLD_NOW);
   if (!plugin_handle)
     {
-      (*_bfd_error_handler)("%s\n", dlerror ());
+      _bfd_error_handler ("%s\n", dlerror ());
       return 0;
     }
 

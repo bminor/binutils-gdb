@@ -1,6 +1,6 @@
 /* Definitions for dealing with stack frames, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -77,6 +77,7 @@ struct frame_base;
 struct block;
 struct gdbarch;
 struct ui_file;
+struct ui_out;
 
 /* Status of a given frame's stack.  */
 
@@ -88,6 +89,9 @@ enum frame_id_stack_status
 
   /* Stack address is valid, and is found in the stack_addr field.  */
   FID_STACK_VALID = 1,
+
+  /* Sentinel frame.  */
+  FID_STACK_SENTINEL = 2,
 
   /* Stack address is unavailable.  I.e., there's a valid stack, but
      we don't know where it is (because memory or registers we'd
@@ -149,7 +153,7 @@ struct frame_id
   CORE_ADDR special_addr;
 
   /* Flags to indicate the above fields have valid contents.  */
-  ENUM_BITFIELD(frame_id_stack_status) stack_status : 2;
+  ENUM_BITFIELD(frame_id_stack_status) stack_status : 3;
   unsigned int code_addr_p : 1;
   unsigned int special_addr_p : 1;
 
@@ -164,6 +168,9 @@ struct frame_id
 
 /* For convenience.  All fields are zero.  This means "there is no frame".  */
 extern const struct frame_id null_frame_id;
+
+/* Sentinel frame.  */
+extern const struct frame_id sentinel_frame_id;
 
 /* This means "there is no frame ID, but there is a frame".  It should be
    replaced by best-effort frame IDs for the outermost frame, somehow.
@@ -309,6 +316,10 @@ extern void select_frame (struct frame_info *);
 extern struct frame_info *get_prev_frame (struct frame_info *);
 extern struct frame_info *get_next_frame (struct frame_info *);
 
+/* Like get_next_frame(), but allows return of the sentinel frame.  NULL
+   is never returned.  */
+extern struct frame_info *get_next_frame_sentinel_okay (struct frame_info *);
+
 /* Return a "struct frame_info" corresponding to the frame that called
    THIS_FRAME.  Returns NULL if there is no such frame.
 
@@ -319,6 +330,10 @@ extern struct frame_info *get_prev_frame_always (struct frame_info *);
 /* Given a frame's ID, relocate the frame.  Returns NULL if the frame
    is not found.  */
 extern struct frame_info *frame_find_by_id (struct frame_id id);
+
+/* Given a frame's ID, find the previous frame's ID.  Returns null_frame_id
+   if the frame is not found.  */
+extern struct frame_id get_prev_frame_id_by_id (struct frame_id id);
 
 /* Base attributes of a frame: */
 
@@ -704,6 +719,14 @@ extern CORE_ADDR get_pc_function_start (CORE_ADDR);
 
 extern struct frame_info *find_relative_frame (struct frame_info *, int *);
 
+/* Wrapper over print_stack_frame modifying current_uiout with UIOUT for
+   the function call.  */
+
+extern void print_stack_frame_to_uiout (struct ui_out *uiout,
+					struct frame_info *, int print_level,
+					enum print_what print_what,
+					int set_current_sal);
+
 extern void print_stack_frame (struct frame_info *, int print_level,
 			       enum print_what print_what,
 			       int set_current_sal);
@@ -809,6 +832,14 @@ extern struct frame_info *deprecated_safe_get_selected_frame (void);
 /* Create a frame using the specified BASE and PC.  */
 
 extern struct frame_info *create_new_frame (CORE_ADDR base, CORE_ADDR pc);
+
+#if GDB_SELF_TEST
+
+/* Create a frame for unit test.  Its next frame is sentinel frame,
+   created from REGCACHE.  */
+
+extern struct frame_info *create_test_frame (struct regcache *regcache);
+#endif
 
 /* Return true if the frame unwinder for frame FI is UNWINDER; false
    otherwise.  */

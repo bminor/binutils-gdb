@@ -1,6 +1,6 @@
 /* Common code for ARM software single stepping support.
 
-   Copyright (C) 1988-2016 Free Software Foundation, Inc.
+   Copyright (C) 1988-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -45,7 +45,7 @@ arm_get_next_pcs_ctor (struct arm_get_next_pcs *self,
    is found, attempt to step through it.  The end of the sequence address is
    added to the next_pcs list.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 {
   int byte_order_for_code = self->byte_order_for_code;
@@ -58,27 +58,26 @@ thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
   ULONGEST status, itstate;
-  VEC (CORE_ADDR) *next_pcs = NULL;
 
   /* We currently do not support atomic sequences within an IT block.  */
   status = regcache_raw_get_unsigned (self->regcache, ARM_PS_REGNUM);
   itstate = ((status >> 8) & 0xfc) | ((status >> 25) & 0x3);
   if (itstate & 0x0f)
-    return NULL;
+    return {};
 
   /* Assume all atomic sequences start with a ldrex{,b,h,d} instruction.  */
   insn1 = self->ops->read_mem_uint (loc, 2, byte_order_for_code);
 
   loc += 2;
   if (thumb_insn_size (insn1) != 4)
-    return NULL;
+    return {};
 
   insn2 = self->ops->read_mem_uint (loc, 2, byte_order_for_code);
 
   loc += 2;
   if (!((insn1 & 0xfff0) == 0xe850
         || ((insn1 & 0xfff0) == 0xe8d0 && (insn2 & 0x00c0) == 0x0040)))
-    return NULL;
+    return {};
 
   /* Assume that no atomic sequence is longer than "atomic_sequence_length"
      instructions.  */
@@ -95,8 +94,8 @@ thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 	  if ((insn1 & 0xf000) == 0xd000 && bits (insn1, 8, 11) != 0x0f)
 	    {
 	      if (last_breakpoint > 0)
-		return NULL; /* More than one conditional branch found,
-			     fallback to the standard code.  */
+		return {}; /* More than one conditional branch found,
+			      fallback to the standard code.  */
 
 	      breaks[1] = loc + 2 + (sbits (insn1, 0, 7) << 1);
 	      last_breakpoint++;
@@ -107,7 +106,7 @@ thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 	     Fall back to standard code to avoid losing control of
 	     execution.  */
 	  else if (thumb_instruction_changes_pc (insn1))
-	    return NULL;
+	    return {};
 	}
       else
 	{
@@ -135,8 +134,8 @@ thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 	      offset += (imm1 << 12) + (imm2 << 1);
 
 	      if (last_breakpoint > 0)
-		return 0; /* More than one conditional branch found,
-			     fallback to the standard code.  */
+		return {}; /* More than one conditional branch found,
+			      fallback to the standard code.  */
 
 	      breaks[1] = loc + offset;
 	      last_breakpoint++;
@@ -147,7 +146,7 @@ thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 	     Fall back to standard code to avoid losing control of
 	     execution.  */
 	  else if (thumb2_instruction_changes_pc (insn1, insn2))
-	    return NULL;
+	    return {};
 
 	  /* If we find a strex{,b,h,d}, we're done.  */
 	  if ((insn1 & 0xfff0) == 0xe840
@@ -158,7 +157,7 @@ thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 
   /* If we didn't find the strex{,b,h,d}, we cannot handle the sequence.  */
   if (insn_count == atomic_sequence_length)
-    return NULL;
+    return {};
 
   /* Insert a breakpoint right after the end of the atomic sequence.  */
   breaks[0] = loc;
@@ -170,9 +169,11 @@ thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 	  || (breaks[1] >= pc && breaks[1] < loc)))
     last_breakpoint = 0;
 
+  std::vector<CORE_ADDR> next_pcs;
+
   /* Adds the breakpoints to the list to be inserted.  */
   for (index = 0; index <= last_breakpoint; index++)
-    VEC_safe_push (CORE_ADDR, next_pcs, MAKE_THUMB_ADDR (breaks[index]));
+    next_pcs.push_back (MAKE_THUMB_ADDR (breaks[index]));
 
   return next_pcs;
 }
@@ -182,7 +183,7 @@ thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
    is found, attempt to step through it.  The end of the sequence address is
    added to the next_pcs list.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 {
   int byte_order_for_code = self->byte_order_for_code;
@@ -194,7 +195,6 @@ arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
   int index;
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
-  VEC (CORE_ADDR) *next_pcs = NULL;
 
   /* Assume all atomic sequences start with a ldrex{,b,h,d} instruction.
      Note that we do not currently support conditionally executed atomic
@@ -203,7 +203,7 @@ arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 
   loc += 4;
   if ((insn & 0xff9000f0) != 0xe1900090)
-    return NULL;
+    return {};
 
   /* Assume that no atomic sequence is longer than "atomic_sequence_length"
      instructions.  */
@@ -219,8 +219,8 @@ arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
       if (bits (insn, 24, 27) == 0xa)
 	{
           if (last_breakpoint > 0)
-            return NULL; /* More than one conditional branch found, fallback
-                         to the standard single-step code.  */
+            return {}; /* More than one conditional branch found, fallback
+			  to the standard single-step code.  */
 
 	  breaks[1] = BranchDest (loc - 4, insn);
 	  last_breakpoint++;
@@ -230,7 +230,7 @@ arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
          but conditional branches to change the PC.  Fall back to standard
 	 code to avoid losing control of execution.  */
       else if (arm_instruction_changes_pc (insn))
-	return NULL;
+	return {};
 
       /* If we find a strex{,b,h,d}, we're done.  */
       if ((insn & 0xff9000f0) == 0xe1800090)
@@ -239,7 +239,7 @@ arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 
   /* If we didn't find the strex{,b,h,d}, we cannot handle the sequence.  */
   if (insn_count == atomic_sequence_length)
-    return NULL;
+    return {};
 
   /* Insert a breakpoint right after the end of the atomic sequence.  */
   breaks[0] = loc;
@@ -251,16 +251,18 @@ arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 	  || (breaks[1] >= pc && breaks[1] < loc)))
     last_breakpoint = 0;
 
+  std::vector<CORE_ADDR> next_pcs;
+
   /* Adds the breakpoints to the list to be inserted.  */
   for (index = 0; index <= last_breakpoint; index++)
-    VEC_safe_push (CORE_ADDR, next_pcs, breaks[index]);
+    next_pcs.push_back (breaks[index]);
 
   return next_pcs;
 }
 
 /* Find the next possible PCs for thumb mode.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 {
   int byte_order = self->byte_order;
@@ -272,7 +274,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
   unsigned long offset;
   ULONGEST status, itstate;
   struct regcache *regcache = self->regcache;
-  VEC (CORE_ADDR) * next_pcs = NULL;
+  std::vector<CORE_ADDR> next_pcs;
 
   nextpc = MAKE_THUMB_ADDR (nextpc);
   pc_val = MAKE_THUMB_ADDR (pc_val);
@@ -315,7 +317,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 	      itstate = thumb_advance_itstate (itstate);
 	    }
 
-	  VEC_safe_push (CORE_ADDR, next_pcs, MAKE_THUMB_ADDR (pc));
+	  next_pcs.push_back (MAKE_THUMB_ADDR (pc));
 	  return next_pcs;
 	}
       else if (itstate != 0)
@@ -335,7 +337,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 		  itstate = thumb_advance_itstate (itstate);
 		}
 
-	      VEC_safe_push (CORE_ADDR, next_pcs, MAKE_THUMB_ADDR (pc));
+	      next_pcs.push_back (MAKE_THUMB_ADDR (pc));
 	      return next_pcs;
 	    }
 	  else if ((itstate & 0x0f) == 0x08)
@@ -361,7 +363,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 
 	      /* Set a breakpoint on the following instruction.  */
 	      gdb_assert ((itstate & 0x0f) != 0);
-	      VEC_safe_push (CORE_ADDR, next_pcs, MAKE_THUMB_ADDR (pc));
+	      next_pcs.push_back (MAKE_THUMB_ADDR (pc));
 
 	      cond_negated = (itstate >> 4) & 1;
 
@@ -378,7 +380,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 		}
 	      while (itstate != 0 && ((itstate >> 4) & 1) == cond_negated);
 
-	      VEC_safe_push (CORE_ADDR, next_pcs, MAKE_THUMB_ADDR (pc));
+	      next_pcs.push_back (MAKE_THUMB_ADDR (pc));
 
 	      return next_pcs;
 	    }
@@ -393,8 +395,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 	{
 	  /* Advance to the next instruction.  All the 32-bit
 	     instructions share a common prefix.  */
-	  VEC_safe_push (CORE_ADDR, next_pcs,
-			 MAKE_THUMB_ADDR (pc + thumb_insn_size (inst1)));
+	  next_pcs.push_back (MAKE_THUMB_ADDR (pc + thumb_insn_size (inst1)));
 	}
 
       return next_pcs;
@@ -628,7 +629,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 	nextpc = pc_val + imm;
     }
 
-  VEC_safe_push (CORE_ADDR, next_pcs, nextpc);
+  next_pcs.push_back (nextpc);
 
   return next_pcs;
 }
@@ -641,7 +642,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
    in Thumb-State, and gdbarch_addr_bits_remove () to get the plain memory
    address in GDB and arm_addr_bits_remove in GDBServer.  */
 
-static VEC (CORE_ADDR) *
+static std::vector<CORE_ADDR>
 arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
 {
   int byte_order = self->byte_order;
@@ -652,7 +653,7 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
   CORE_ADDR nextpc;
   struct regcache *regcache = self->regcache;
   CORE_ADDR pc = regcache_read_pc (self->regcache);
-  VEC (CORE_ADDR) *next_pcs = NULL;
+  std::vector<CORE_ADDR> next_pcs;
 
   pc_val = (unsigned long) pc;
   this_instr = self->ops->read_mem_uint (pc, 4, byte_order_for_code);
@@ -709,7 +710,7 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
 			  ? (pc_val + 8)
 			  : regcache_raw_get_unsigned (regcache, rn));
 
-		VEC_safe_push (CORE_ADDR, next_pcs, nextpc);
+		next_pcs.push_back (nextpc);
 		return next_pcs;
 	      }
 
@@ -899,40 +900,36 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
 	}
     }
 
-  VEC_safe_push (CORE_ADDR, next_pcs, nextpc);
+  next_pcs.push_back (nextpc);
+
   return next_pcs;
 }
 
 /* See arm-get-next-pcs.h.  */
 
-VEC (CORE_ADDR) *
+std::vector<CORE_ADDR>
 arm_get_next_pcs (struct arm_get_next_pcs *self)
 {
-  VEC (CORE_ADDR) *next_pcs = NULL;
+  std::vector<CORE_ADDR> next_pcs;
 
   if (self->ops->is_thumb (self))
     {
       next_pcs = thumb_deal_with_atomic_sequence_raw (self);
-      if (next_pcs == NULL)
+      if (next_pcs.empty ())
 	next_pcs = thumb_get_next_pcs_raw (self);
     }
   else
     {
       next_pcs = arm_deal_with_atomic_sequence_raw (self);
-      if (next_pcs == NULL)
+      if (next_pcs.empty ())
 	next_pcs = arm_get_next_pcs_raw (self);
     }
 
   if (self->ops->fixup != NULL)
     {
-      CORE_ADDR nextpc;
-      int i;
-
-      for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, nextpc); i++)
-	{
-	  nextpc = self->ops->fixup (self, nextpc);
-	  VEC_replace (CORE_ADDR, next_pcs, i, nextpc);
-	}
+      for (CORE_ADDR &pc_ref : next_pcs)
+	pc_ref = self->ops->fixup (self, pc_ref);
     }
+
   return next_pcs;
 }

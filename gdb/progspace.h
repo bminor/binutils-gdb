@@ -1,6 +1,6 @@
 /* Program and address space management, for GDB, the GNU debugger.
 
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -251,11 +251,6 @@ extern int program_space_empty_p (struct program_space *pspace);
 extern struct program_space *clone_program_space (struct program_space *dest,
 						struct program_space *src);
 
-/* Save the current program space so that it may be restored by a later
-   call to do_cleanups.  Returns the struct cleanup pointer needed for
-   later doing the cleanup.  */
-extern struct cleanup *save_current_program_space (void);
-
 /* Sets PSPACE as the current program space.  This is usually used
    instead of set_current_space_and_thread when the current
    thread/inferior is not important for the operations that follow.
@@ -266,14 +261,27 @@ extern struct cleanup *save_current_program_space (void);
    space.  */
 extern void set_current_program_space (struct program_space *pspace);
 
-/* Saves the current thread (may be null), frame and program space in
-   the current cleanup chain.  */
-extern struct cleanup *save_current_space_and_thread (void);
+/* Save/restore the current program space.  */
 
-/* Switches full context to program space PSPACE.  Switches to the
-   first thread found bound to PSPACE, giving preference to the
-   current thread, if there's one and it isn't executing.  */
-extern void switch_to_program_space_and_thread (struct program_space *pspace);
+class scoped_restore_current_program_space
+{
+public:
+  scoped_restore_current_program_space ()
+    : m_saved_pspace (current_program_space)
+  {}
+
+  ~scoped_restore_current_program_space ()
+  { set_current_program_space (m_saved_pspace); }
+
+  /* Disable copy.  */
+  scoped_restore_current_program_space
+    (const scoped_restore_current_program_space &) = delete;
+  void operator=
+    (const scoped_restore_current_program_space &) = delete;
+
+private:
+  program_space *m_saved_pspace;
+};
 
 /* Create a new address space object, and add it to the list.  */
 extern struct address_space *new_address_space (void);

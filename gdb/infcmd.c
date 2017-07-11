@@ -1,6 +1,6 @@
 /* Memory-access and commands for "inferior" process, for GDB.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -58,6 +58,7 @@
 #include "thread-fsm.h"
 #include "top.h"
 #include "interps.h"
+#include "common/gdb_optional.h"
 
 /* Local functions: */
 
@@ -151,7 +152,11 @@ void
 set_inferior_io_terminal (const char *terminal_name)
 {
   xfree (current_inferior ()->terminal);
-  current_inferior ()->terminal = terminal_name ? xstrdup (terminal_name) : 0;
+
+  if (terminal_name != NULL && *terminal_name != '\0')
+    current_inferior ()->terminal = xstrdup (terminal_name);
+  else
+    current_inferior ()->terminal = NULL;
 }
 
 const char *
@@ -257,14 +262,14 @@ construct_inferior_arguments (int argc, char **argv)
 #ifdef __MINGW32__
       /* This holds all the characters considered special to the
 	 Windows shells.  */
-      char *special = "\"!&*|[]{}<>?`~^=;, \t\n";
-      const char quote = '"';
+      static const char special[] = "\"!&*|[]{}<>?`~^=;, \t\n";
+      static const char quote = '"';
 #else
       /* This holds all the characters considered special to the
 	 typical Unix shells.  We include `^' because the SunOS
 	 /bin/sh treats it as a synonym for `|'.  */
-      char *special = "\"!#$&*()\\|[]{}<>?'`~^; \t\n";
-      const char quote = '\'';
+      static const char special[] = "\"!#$&*()\\|[]{}<>?'`~^; \t\n";
+      static const char quote = '\'';
 #endif
       int i;
       int length = 0;
@@ -454,7 +459,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
 	  /* If the solist is global across processes, there's no need to
 	     refetch it here.  */
 	  if (!gdbarch_has_global_solist (target_gdbarch ()))
-	    solib_add (NULL, 0, target, auto_solib_add);
+	    solib_add (NULL, 0, auto_solib_add);
 	}
     }
 
@@ -522,7 +527,7 @@ prepare_execution_command (struct target_ops *target, int background)
 static void
 run_command_1 (char *args, int from_tty, int tbreak_at_main)
 {
-  char *exec_file;
+  const char *exec_file;
   struct cleanup *old_chain;
   ptid_t ptid;
   struct ui_out *uiout = current_uiout;
@@ -570,7 +575,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
   if (tbreak_at_main)
     tbreak_command (main_name (), 0);
 
-  exec_file = (char *) get_exec_file (0);
+  exec_file = get_exec_file (0);
 
   /* We keep symbols from add-symbol-file, on the grounds that the
      user might want to add some symbols before running the program
@@ -586,16 +591,16 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   if (from_tty)
     {
-      ui_out_field_string (uiout, NULL, "Starting program");
-      ui_out_text (uiout, ": ");
+      uiout->field_string (NULL, "Starting program");
+      uiout->text (": ");
       if (exec_file)
-	ui_out_field_string (uiout, "execfile", exec_file);
-      ui_out_spaces (uiout, 1);
+	uiout->field_string ("execfile", exec_file);
+      uiout->spaces (1);
       /* We call get_inferior_args() because we might need to compute
 	 the value now.  */
-      ui_out_field_string (uiout, "infargs", get_inferior_args ());
-      ui_out_text (uiout, "\n");
-      ui_out_flush (uiout);
+      uiout->field_string ("infargs", get_inferior_args ());
+      uiout->text ("\n");
+      uiout->flush ();
     }
 
   /* Done with ARGS.  */
@@ -603,8 +608,9 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   /* We call get_inferior_args() because we might need to compute
      the value now.  */
-  run_target->to_create_inferior (run_target, exec_file, get_inferior_args (),
-				  environ_vector (current_inferior ()->environment),
+  run_target->to_create_inferior (run_target, exec_file,
+				  std::string (get_inferior_args ()),
+				  current_inferior ()->environment.envp (),
 				  from_tty);
   /* to_create_inferior should push the target, so after this point we
      shouldn't refer to run_target again.  */
@@ -725,10 +731,10 @@ continue_1 (int all_threads)
     {
       /* Don't error out if the current thread is running, because
 	 there may be other stopped threads.  */
-      struct cleanup *old_chain;
 
-      /* Backup current thread and selected frame.  */
-      old_chain = make_cleanup_restore_current_thread ();
+      /* Backup current thread and selected frame and restore on scope
+	 exit.  */
+      scoped_restore_current_thread restore_thread;
 
       iterate_over_threads (proceed_thread_callback, NULL);
 
@@ -749,9 +755,6 @@ continue_1 (int all_threads)
 	  */
 	  target_terminal_inferior ();
 	}
-
-      /* Restore selected ptid.  */
-      do_cleanups (old_chain);
     }
   else
     {
@@ -1599,15 +1602,9 @@ advance_command (char *arg, int from_tty)
 struct value *
 get_return_value (struct value *function, struct type *value_type)
 {
-  struct regcache *stop_regs;
-  struct gdbarch *gdbarch;
+  regcache stop_regs (regcache::readonly, *get_current_regcache ());
+  struct gdbarch *gdbarch = stop_regs.arch ();
   struct value *value;
-  struct cleanup *cleanup;
-
-  stop_regs = regcache_dup (get_current_regcache ());
-  cleanup = make_cleanup_regcache_xfree (stop_regs);
-
-  gdbarch = get_regcache_arch (stop_regs);
 
   value_type = check_typedef (value_type);
   gdb_assert (TYPE_CODE (value_type) != TYPE_CODE_VOID);
@@ -1626,7 +1623,7 @@ get_return_value (struct value *function, struct type *value_type)
     case RETURN_VALUE_ABI_RETURNS_ADDRESS:
     case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
       value = allocate_value (value_type);
-      gdbarch_return_value (gdbarch, function, value_type, stop_regs,
+      gdbarch_return_value (gdbarch, function, value_type, &stop_regs,
 			    value_contents_raw (value), NULL);
       break;
     case RETURN_VALUE_STRUCT_CONVENTION:
@@ -1635,8 +1632,6 @@ get_return_value (struct value *function, struct type *value_type)
     default:
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
-
-  do_cleanups (cleanup);
 
   return value;
 }
@@ -1666,34 +1661,27 @@ print_return_value_1 (struct ui_out *uiout, struct return_value_info *rv)
   if (rv->value != NULL)
     {
       struct value_print_options opts;
-      struct ui_file *stb;
-      struct cleanup *old_chain;
 
       /* Print it.  */
-      stb = mem_fileopen ();
-      old_chain = make_cleanup_ui_file_delete (stb);
-      ui_out_text (uiout, "Value returned is ");
-      ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
-			rv->value_history_index);
-      ui_out_text (uiout, " = ");
+      uiout->text ("Value returned is ");
+      uiout->field_fmt ("gdb-result-var", "$%d",
+			 rv->value_history_index);
+      uiout->text (" = ");
       get_no_prettyformat_print_options (&opts);
-      value_print (rv->value, stb, &opts);
-      ui_out_field_stream (uiout, "return-value", stb);
-      ui_out_text (uiout, "\n");
-      do_cleanups (old_chain);
+
+      string_file stb;
+
+      value_print (rv->value, &stb, &opts);
+      uiout->field_stream ("return-value", stb);
+      uiout->text ("\n");
     }
   else
     {
-      struct cleanup *oldchain;
-      char *type_name;
-
-      type_name = type_to_string (rv->type);
-      oldchain = make_cleanup (xfree, type_name);
-      ui_out_text (uiout, "Value returned has type: ");
-      ui_out_field_string (uiout, "return-type", type_name);
-      ui_out_text (uiout, ".");
-      ui_out_text (uiout, " Cannot determine contents\n");
-      do_cleanups (oldchain);
+      std::string type_name = type_to_string (rv->type);
+      uiout->text ("Value returned has type: ");
+      uiout->field_string ("return-type", type_name.c_str ());
+      uiout->text (".");
+      uiout->text (" Cannot determine contents\n");
     }
 }
 
@@ -2143,7 +2131,7 @@ environment_info (char *var, int from_tty)
 {
   if (var)
     {
-      char *val = get_in_environ (current_inferior ()->environment, var);
+      const char *val = current_inferior ()->environment.get (var);
 
       if (val)
 	{
@@ -2161,11 +2149,11 @@ environment_info (char *var, int from_tty)
     }
   else
     {
-      char **vector = environ_vector (current_inferior ()->environment);
+      char **envp = current_inferior ()->environment.envp ();
 
-      while (*vector)
+      for (int idx = 0; envp[idx] != NULL; ++idx)
 	{
-	  puts_filtered (*vector++);
+	  puts_filtered (envp[idx]);
 	  puts_filtered ("\n");
 	}
     }
@@ -2227,10 +2215,10 @@ set_environment_command (char *arg, int from_tty)
       printf_filtered (_("Setting environment variable "
 			 "\"%s\" to null value.\n"),
 		       var);
-      set_in_environ (current_inferior ()->environment, var, "");
+      current_inferior ()->environment.set (var, "");
     }
   else
-    set_in_environ (current_inferior ()->environment, var, val);
+    current_inferior ()->environment.set (var, val);
   xfree (var);
 }
 
@@ -2242,13 +2230,10 @@ unset_environment_command (char *var, int from_tty)
       /* If there is no argument, delete all environment variables.
          Ask for confirmation if reading from the terminal.  */
       if (!from_tty || query (_("Delete all environment variables? ")))
-	{
-	  free_environ (current_inferior ()->environment);
-	  current_inferior ()->environment = make_environ ();
-	}
+	current_inferior ()->environment = gdb_environ::from_host_environ ();
     }
   else
-    unset_in_environ (current_inferior ()->environment, var);
+    current_inferior ()->environment.unset (var);
 }
 
 /* Handle the execution path (PATH variable).  */
@@ -2259,8 +2244,7 @@ static void
 path_info (char *args, int from_tty)
 {
   puts_filtered ("Executable and object file path: ");
-  puts_filtered (get_in_environ (current_inferior ()->environment,
-				 path_var_name));
+  puts_filtered (current_inferior ()->environment.get (path_var_name));
   puts_filtered ("\n");
 }
 
@@ -2270,16 +2254,16 @@ static void
 path_command (char *dirname, int from_tty)
 {
   char *exec_path;
-  char *env;
+  const char *env;
 
   dont_repeat ();
-  env = get_in_environ (current_inferior ()->environment, path_var_name);
+  env = current_inferior ()->environment.get (path_var_name);
   /* Can be null if path is not set.  */
   if (!env)
     env = "";
   exec_path = xstrdup (env);
   mod_path (dirname, &exec_path);
-  set_in_environ (current_inferior ()->environment, path_var_name, exec_path);
+  current_inferior ()->environment.set (path_var_name, exec_path);
   xfree (exec_path);
   if (from_tty)
     path_info ((char *) NULL, from_tty);
@@ -2316,14 +2300,14 @@ default_print_one_register_info (struct ui_file *file,
       opts.deref_ref = 1;
 
       val_print (regtype,
-		 value_contents_for_printing (val),
 		 value_embedded_offset (val), 0,
 		 file, 0, val, &opts, current_language);
 
       if (print_raw_format)
 	{
 	  fprintf_filtered (file, "\t(raw ");
-	  print_hex_chars (file, valaddr, TYPE_LENGTH (regtype), byte_order);
+	  print_hex_chars (file, valaddr, TYPE_LENGTH (regtype), byte_order,
+			   true);
 	  fprintf_filtered (file, ")");
 	}
     }
@@ -2335,7 +2319,6 @@ default_print_one_register_info (struct ui_file *file,
       get_formatted_print_options (&opts, 'x');
       opts.deref_ref = 1;
       val_print (regtype,
-		 value_contents_for_printing (val),
 		 value_embedded_offset (val), 0,
 		 file, 0, val, &opts, current_language);
       /* If not a vector register, print it also according to its
@@ -2346,7 +2329,6 @@ default_print_one_register_info (struct ui_file *file,
 	  opts.deref_ref = 1;
 	  fprintf_filtered (file, "\t");
 	  val_print (regtype,
-		     value_contents_for_printing (val),
 		     value_embedded_offset (val), 0,
 		     file, 0, val, &opts, current_language);
 	}
@@ -2632,15 +2614,11 @@ proceed_after_attach (int pid)
 {
   /* Don't error out if the current thread is running, because
      there may be other stopped threads.  */
-  struct cleanup *old_chain;
 
   /* Backup current thread and selected frame.  */
-  old_chain = make_cleanup_restore_current_thread ();
+  scoped_restore_current_thread restore_thread;
 
   iterate_over_threads (proceed_after_attach_callback, &pid);
-
-  /* Restore selected ptid.  */
-  do_cleanups (old_chain);
 }
 
 /* See inferior.h.  */
@@ -2656,7 +2634,7 @@ setup_inferior (int from_tty)
   /* If no exec file is yet known, try to determine it from the
      process itself.  */
   if (get_exec_file (0) == NULL)
-    exec_file_locate_attach (ptid_get_pid (inferior_ptid), from_tty);
+    exec_file_locate_attach (ptid_get_pid (inferior_ptid), 1, from_tty);
   else
     {
       reopen_exec_file ();
@@ -2687,7 +2665,7 @@ enum attach_post_wait_mode
    should be running.  Else if ATTACH, */
 
 static void
-attach_post_wait (char *args, int from_tty, enum attach_post_wait_mode mode)
+attach_post_wait (const char *args, int from_tty, enum attach_post_wait_mode mode)
 {
   struct inferior *inferior;
 
@@ -2927,15 +2905,13 @@ attach_command (char *args, int from_tty)
 void
 notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
 {
-  struct cleanup* old_chain;
-  enum attach_post_wait_mode mode;
+  enum attach_post_wait_mode mode
+    = leave_running ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_NOTHING;
 
-  old_chain = make_cleanup (null_cleanup, NULL);
+  gdb::optional<scoped_restore_current_thread> restore_thread;
 
-  mode = leave_running ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_NOTHING;
-
-  if (!ptid_equal (inferior_ptid, null_ptid))
-    make_cleanup_restore_current_thread ();
+  if (inferior_ptid != null_ptid)
+    restore_thread.emplace ();
 
   /* Avoid reading registers -- we haven't fetched the target
      description yet.  */
@@ -2964,13 +2940,10 @@ notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
       add_inferior_continuation (attach_command_continuation, a,
 				 attach_command_continuation_free_args);
 
-      do_cleanups (old_chain);
       return;
     }
 
   attach_post_wait ("" /* args */, from_tty, mode);
-
-  do_cleanups (old_chain);
 }
 
 /*
@@ -3067,7 +3040,7 @@ interrupt_target_1 (int all_threads)
 
 /* interrupt [-a]
    Stop the execution of the target while running in async mode, in
-   the backgound.  In all-stop, stop the whole process.  In non-stop
+   the background.  In all-stop, stop the whole process.  In non-stop
    mode, stop the current thread only by default, or stop all threads
    if the `-a' switch is used.  */
 
@@ -3224,15 +3197,20 @@ _initialize_infcmd (void)
   const char *cmd_name;
 
   /* Add the filename of the terminal connected to inferior I/O.  */
-  add_setshow_filename_cmd ("inferior-tty", class_run,
-			    &inferior_io_terminal_scratch, _("\
+  add_setshow_optional_filename_cmd ("inferior-tty", class_run,
+				     &inferior_io_terminal_scratch, _("\
 Set terminal for future runs of program being debugged."), _("\
 Show terminal for future runs of program being debugged."), _("\
-Usage: set inferior-tty /dev/pts/1"),
-			    set_inferior_tty_command,
-			    show_inferior_tty_command,
-			    &setlist, &showlist);
-  add_com_alias ("tty", "set inferior-tty", class_alias, 0);
+Usage: set inferior-tty [TTY]\n\n\
+If TTY is omitted, the default behavior of using the same terminal as GDB\n\
+is restored."),
+				     set_inferior_tty_command,
+				     show_inferior_tty_command,
+				     &setlist, &showlist);
+  cmd_name = "inferior-tty";
+  c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  gdb_assert (c != NULL);
+  add_alias_cmd ("tty", c, class_alias, 0, &cmdlist);
 
   cmd_name = "args";
   add_setshow_string_noescape_cmd (cmd_name, class_run,
@@ -3418,13 +3396,16 @@ Specifying -a and an ignore count simultaneously is an error."));
 
   c = add_com ("run", class_run, run_command, _("\
 Start debugged program.  You may specify arguments to give it.\n\
-Args may include \"*\", or \"[...]\"; they are expanded using \"sh\".\n\
-Input and output redirection with \">\", \"<\", or \">>\" are also \
-allowed.\n\n\
+Args may include \"*\", or \"[...]\"; they are expanded using the\n\
+shell that will start the program (specified by the \"$SHELL\"\
+environment\nvariable).  Input and output redirection with \">\",\
+\"<\", or \">>\"\nare also allowed.\n\n\
 With no arguments, uses arguments last specified (with \"run\" \
 or \"set args\").\n\
 To cancel previous arguments and run with no arguments,\n\
-use \"set args\" without arguments."));
+use \"set args\" without arguments.\n\
+To start the inferior without using a shell, use \"set \
+startup-with-shell off\"."));
   set_cmd_completer (c, filename_completer);
   add_com_alias ("r", "run", class_run, 1);
 

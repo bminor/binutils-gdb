@@ -15,12 +15,12 @@
 
     <struct id="struct2" size="8">
       <field name="f1" start="0" end="34"/>
-      <field name="f2" start="63" end="63"/>
+      <field name="f2" start="63" end="63" type="uint64"/>
     </struct>
 
     <flags id="flags" size="4">
       <field name="X" start="0" end="0"/>
-      <field name="Y" start="2" end="2"/>
+      <field name="Y" start="2" end="2" type="uint32"/>
     </flags>
 
     <enum id="Z_values" size="4">
@@ -31,18 +31,16 @@
     </enum>
 
     <flags id="mixed_flags" size="4">
-      <!-- Elided end and type. -->
-      <field name="A" start="0"/>
-      <!-- Elided end, unsigned int. -->
-      <field name="B" start="1" type="uint32"/>
-      <!-- Elided end, bool. -->
-      <field name="C" start="2" type="bool"/>
-      <!-- Elided type, single bitfield. -->
-      <field name="D" start="3" end="3"/>
+      <!-- Elided type. -->
+      <field name="A" start="0" end="0"/>
+      <!-- Elided type, multiple bits. -->
+      <field name="B" start="1" end="3"/>
+      <!-- Bool. -->
+      <field name="C" start="4" end="4" type="bool"/>
+      <!-- Unsigned int. -->
+      <field name="D" start="5" end="5" type="uint32"/>
       <!-- Anonymous field. -->
-      <field name="" start="4" end="5"/>
-      <!-- Multi-bit bitfield, elided type. -->
-      <field name="E" start="6" end="7"/>
+      <field name="" start="6" end="7"/>
       <!-- Enum bitfield. -->
       <field name="Z" start="8" end="9" type="Z_values"/>
     </flags>

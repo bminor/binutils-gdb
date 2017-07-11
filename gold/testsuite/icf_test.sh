@@ -2,7 +2,7 @@
 
 # icf_test.sh -- test --icf
 
-# Copyright (C) 2009-2016 Free Software Foundation, Inc.
+# Copyright (C) 2009-2017 Free Software Foundation, Inc.
 # Written by Sriraman Tallam <tmsriram@google.com>.
 
 # This file is part of gold.
@@ -25,6 +25,8 @@
 # The goal of this program is to verify if icf works as expected.
 # File icf_test.cc is in this test. This program checks if the 
 # identical sections are correctly folded.
+
+set -e
 
 check()
 {

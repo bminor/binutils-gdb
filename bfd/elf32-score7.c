@@ -1,5 +1,5 @@
 /* 32-bit ELF support for S+core.
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2017 Free Software Foundation, Inc.
    Contributed by
    Brain.lin (brain.lin@sunplusct.com)
    Mei Ligang (ligang@sunnorth.com.cn)
@@ -1287,7 +1287,8 @@ score_elf_create_got_section (bfd *abfd,
   /* We have to use an alignment of 2**4 here because this is hardcoded
      in the function stub generation and in the linker script.  */
   s = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
-   if (s == NULL
+  elf_hash_table (info)->sgot = s;
+  if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, 4))
     return FALSE;
 
@@ -1304,6 +1305,7 @@ score_elf_create_got_section (bfd *abfd,
   h->non_elf = 0;
   h->def_regular = 1;
   h->type = STT_OBJECT;
+  elf_hash_table (info)->hgot = h;
 
   if (bfd_link_pic (info)
       && ! bfd_elf_link_record_dynamic_symbol (info, h))
@@ -1376,7 +1378,7 @@ score_elf_create_local_got_entry (bfd *abfd,
     {
       (*loc)->gotidx = -1;
       /* We didn't allocate enough space in the GOT.  */
-      (*_bfd_error_handler)
+      _bfd_error_handler
         (_("not enough GOT space for local GOT entries"));
       bfd_set_error (bfd_error_bad_value);
       return NULL;
@@ -1850,9 +1852,12 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
 
       bh = bfd_link_hash_lookup (info->hash, "_gp", 0, 0, 1);
       if (bh != NULL && bh->type == bfd_link_hash_defined)
-        elf_gp (output_bfd) = (bh->u.def.value
-                               + bh->u.def.section->output_section->vma
-                               + bh->u.def.section->output_offset);
+	{
+	  elf_gp (output_bfd) = (bh->u.def.value
+				 + bh->u.def.section->output_offset);
+	  if (bh->u.def.section->output_section)
+	    elf_gp (output_bfd) += bh->u.def.section->output_section->vma;
+	}
       else if (bfd_link_relocatable (info))
         {
           bfd_vma lo = -1;
@@ -1897,11 +1902,9 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
     {
       const Elf_Internal_Rela *relend;
       const Elf_Internal_Rela *lo16_rel;
-      const struct elf_backend_data *bed;
       bfd_vma lo_value = 0;
 
-      bed = get_elf_backend_data (output_bfd);
-      relend = relocs + input_section->reloc_count * bed->s->int_rels_per_ext_rel;
+      relend = relocs + input_section->reloc_count;
       lo16_rel = score_elf_next_relocation (input_bfd, R_SCORE_GOT_LO16, rel, relend);
       if ((local_p) && (lo16_rel != NULL))
         {
@@ -1930,7 +1933,6 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
         {
           const Elf_Internal_Rela *relend;
           const Elf_Internal_Rela *lo16_rel;
-          const struct elf_backend_data *bed;
           bfd_vma lo_value = 0;
 
           value = bfd_get_32 (input_bfd, contents + rel->r_offset);
@@ -1938,8 +1940,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
           if ((addend & 0x4000) == 0x4000)
             addend |= 0xffffc000;
 
-          bed = get_elf_backend_data (output_bfd);
-          relend = relocs + input_section->reloc_count * bed->s->int_rels_per_ext_rel;
+          relend = relocs + input_section->reloc_count;
           lo16_rel = score_elf_next_relocation (input_bfd, R_SCORE_GOT_LO16, rel, relend);
           if ((local_p) && (lo16_rel != NULL))
             {
@@ -2466,7 +2467,6 @@ s7_bfd_score_elf_relocate_section (bfd *output_bfd,
               if (r_type == R_SCORE_GOT15)
                 {
                   const Elf_Internal_Rela *lo16_rel;
-                  const struct elf_backend_data *bed;
                   bfd_vma lo_addend = 0, lo_value = 0;
                   bfd_vma addend, value;
 
@@ -2475,8 +2475,7 @@ s7_bfd_score_elf_relocate_section (bfd *output_bfd,
                   if ((addend & 0x4000) == 0x4000)
                     addend |= 0xffffc000;
 
-                  bed = get_elf_backend_data (output_bfd);
-                  relend = relocs + input_section->reloc_count * bed->s->int_rels_per_ext_rel;
+                  relend = relocs + input_section->reloc_count;
                   lo16_rel = score_elf_next_relocation (input_bfd, R_SCORE_GOT_LO16, rel, relend);
                   if (lo16_rel != NULL)
                     {
@@ -2551,7 +2550,7 @@ s7_bfd_score_elf_relocate_section (bfd *output_bfd,
 
             default:
               msg = _("internal error: unknown error");
-              /* fall through */
+              /* Fall through.  */
 
             common_error:
 	      (*info->callbacks->warning) (info, msg, name, input_bfd,
@@ -2573,7 +2572,6 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
                                asection *sec,
                                const Elf_Internal_Rela *relocs)
 {
-  const char *name;
   bfd *dynobj;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -2583,7 +2581,6 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel_end;
   asection *sgot;
   asection *sreloc;
-  const struct elf_backend_data *bed;
 
   if (bfd_link_relocatable (info))
     return TRUE;
@@ -2592,8 +2589,6 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
   extsymoff = (elf_bad_symtab (abfd)) ? 0 : symtab_hdr->sh_info;
-
-  name = bfd_get_section_name (abfd, sec);
 
   if (dynobj == NULL)
     {
@@ -2614,8 +2609,7 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
     }
 
   sreloc = NULL;
-  bed = get_elf_backend_data (abfd);
-  rel_end = relocs + sec->reloc_count * bed->s->int_rels_per_ext_rel;
+  rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; ++rel)
     {
       unsigned long r_symndx;
@@ -2631,7 +2625,9 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
         }
       else if (r_symndx >= extsymoff + NUM_SHDR_ENTRIES (symtab_hdr))
         {
-          (*_bfd_error_handler) (_("%s: Malformed reloc detected for section %s"), abfd, name);
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%B: Malformed reloc detected for section %A"), abfd, sec);
           bfd_set_error (bfd_error_bad_value);
           return FALSE;
         }
@@ -2647,7 +2643,7 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
 
 	      /* PR15323, ref flags aren't set for references in the
 		 same object.  */
-	      h->root.non_ir_ref = 1;
+	      h->root.non_ir_ref_regular = 1;
             }
         }
 
@@ -2687,7 +2683,8 @@ s7_bfd_score_elf_check_relocs (bfd *abfd,
         case R_SCORE_CALL15:
           if (h == NULL)
             {
-              (*_bfd_error_handler)
+	      _bfd_error_handler
+		/* xgettext:c-format */
                 (_("%B: CALL15 reloc at 0x%lx not against global symbol"),
                  abfd, (unsigned long) rel->r_offset);
               bfd_set_error (bfd_error_bad_value);
@@ -3435,8 +3432,7 @@ s7_bfd_score_elf_finish_dynamic_sections (bfd *output_bfd,
               break;
 
             case DT_PLTGOT:
-              name = ".got";
-              s = bfd_get_linker_section (dynobj, name);
+              s = elf_hash_table (info)->sgot;
               dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
               break;
 
@@ -3465,7 +3461,8 @@ s7_bfd_score_elf_finish_dynamic_sections (bfd *output_bfd,
                 }
               /* In case if we don't have global got symbols we default
                   to setting DT_SCORE_GOTSYM to the same value as
-                  DT_SCORE_SYMTABNO, so we just fall through.  */
+                  DT_SCORE_SYMTABNO.  */
+	      /* Fall through.  */
 
             case DT_SCORE_SYMTABNO:
               name = ".dynsym";
@@ -3822,12 +3819,13 @@ s7_elf32_score_print_private_bfd_data (bfd *abfd, void * ptr)
 }
 
 bfd_boolean
-s7_elf32_score_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+s7_elf32_score_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
+  bfd *obfd = info->output_bfd;
   flagword in_flags;
   flagword out_flags;
 
-  if (!_bfd_generic_verify_endian_match (ibfd, obfd))
+  if (!_bfd_generic_verify_endian_match (ibfd, info))
     return FALSE;
 
   in_flags  = elf_elfheader (ibfd)->e_flags;
@@ -3856,7 +3854,7 @@ s7_elf32_score_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
   if (((in_flags & EF_SCORE_PIC) != 0) != ((out_flags & EF_SCORE_PIC) != 0))
     {
-      (*_bfd_error_handler) (_("%B: warning: linking PIC files with non-PIC files"), ibfd);
+      _bfd_error_handler (_("%B: warning: linking PIC files with non-PIC files"), ibfd);
     }
 
   /* Maybe dependency fix compatibility should be checked here.  */

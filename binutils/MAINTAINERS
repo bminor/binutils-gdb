@@ -61,13 +61,10 @@ responsibility among the other maintainers.
   AARCH64	   Marcus Shawcroft <marcus.shawcroft@arm.com>
   ARM		   Nick Clifton <nickc@redhat.com>
   ARM		   Richard Earnshaw <rearnsha@arm.com>
-  ARM		   Paul Brook <paul@codesourcery.com>
   ARM		   Ramana Radhakrishnan <ramana.radhakrishnan@arm.com>
-  ARM (Symbian)	   Mark Mitchell <mark@codesourcery.com>
   AVR		   Denis Chertykov <chertykov@gmail.com>
   AVR		   Marek Michalkiewicz <marekm@amelek.gda.pl>
   BFIN		   Jie Zhang <jzhang918@gmail.com>
-  BFIN		   Bernd Schmidt <bernd.schmidt@analog.com>
   BFIN		   Mike Frysinger <vapier@gentoo.org>
   BUILD SYSTEM	   Daniel Jacobowitz <drow@false.org>
   CR16		   M R Swami Reddy <MR.Swami.Reddy@nsc.com>
@@ -104,10 +101,8 @@ responsibility among the other maintainers.
   MEP		   Dave Brolley <brolley@redhat.com>
   METAG            Markos Chandras <markos.chandras@imgtec.com>
   MICROBLAZE	   Michael Eager <eager@eagercon.com>
-  MIPS		   Eric Christopher <echristo@apple.com>
   MIPS		   Maciej W. Rozycki <macro@imgtec.com>
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>
-  MN10300	   Eric Christopher <echristo@apple.com>
   MN10300	   Alexandre Oliva <aoliva@redhat.com>
   Moxie		   Anthony Green <green@moxielogic.com>
   MSP430	   Dmitry Diky <diwil@spec.ru>
@@ -122,15 +117,16 @@ responsibility among the other maintainers.
   PPC		   Alan Modra <amodra@gmail.com>
   PPC		   Peter Bergner <bergner@vnet.ibm.com>
   PPC vector ext   Aldy Hernandez <aldyh@redhat.com>
+  RISC-V           Palmer Dabbelt <palmer@dabbelt.com>
+  RISC-V           Andrew Waterman <andrew@sifive.com> 
   RL78             DJ Delorie <dj@redhat.com>
   RX               DJ Delorie <dj@redhat.com>
   RX               Nick Clifton <nickc@redhat.com>
   s390, s390x	   Martin Schwidefsky <schwidefsky@de.ibm.com>
   s390, s390x	   Andreas Krebbel <krebbel@linux.vnet.ibm.com>
-  SCORE		   Mei Ligang <ligang@sunnorth.com.cn>
   SH		   Alexandre Oliva <aoliva@redhat.com>
-  SH		   Kaz Kojima <kkojima@rr.iij4u.or.jp>
   SPARC		   David S. Miller <davem@davemloft.net>
+  SPARC		   Jose E. Marchesi <jose.marchesi@oracle.com>
   SPU		   Alan Modra <amodra@gmail.com>
   TIC4X            Svein Seldal <svein@dev.seldal.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
@@ -149,6 +145,17 @@ responsibility among the other maintainers.
   z80		   Arnold Metselaar <arnold.metselaar@planet.nl>
   z8k		   Christian Groessler <chris@groessler.org>
 
+      --------- Past Maintainers -------------
+
+These folks have acted as maintainers in the past, but have now
+moved on to other things.  Our thanks for all their hard work
+goes with them.
+
+  Paul Brook
+  Eric Christopher
+  Mei Ligang
+  Mark Mitchell
+  Bernd Schmidt
 
       --------- CGEN Maintainers -------------
 
@@ -204,7 +211,7 @@ the branch, ask the branch maintainer.  This is:
 In general patches to any of the binutils testsuites should be
 considered generic and sent to the binutils mailing list for
 approval.  Patches to target specific tests are the responsibility the
-relevent port maintainer(s), and can be approved/checked in by them.
+relevant port maintainer(s), and can be approved/checked in by them.
 Other testsuite patches need the approval of a blanket-write-priveleges
 person.
 
@@ -285,7 +292,7 @@ Having selected the branch name, create the branch as follows:
 Please do not commit any patches to a branch you did not create
 without the explicit permission of the person who created the branch.
 
-Copyright (C) 2012-2016 Free Software Foundation, Inc.
+Copyright (C) 2012-2017 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

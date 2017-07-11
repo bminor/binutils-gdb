@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2008-2017 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,6 +13,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifdef __GNUC__
+# define ATTR __attribute__((always_inline))
+#else
+# define ATTR
+#endif
+
 extern int x, y;
 extern volatile int z;
 
@@ -26,7 +32,7 @@ void marker(void)
   x += y - z; /* set breakpoint 2 here */
 }
 
-inline void inlined_fn(void)
+inline ATTR void inlined_fn(void)
 {
   x += y + z;
 }

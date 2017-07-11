@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2009-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,8 @@
 #include "gdb_wait.h"
 #include <signal.h>
 #include "filestuff.h"
+#include "common-inferior.h"
+#include "nat/fork-inferior.h"
 
 int using_threads = 1;
 
@@ -224,36 +226,43 @@ lynx_add_process (int pid, int attached)
   return proc;
 }
 
+/* Callback used by fork_inferior to start tracing the inferior.  */
+
+static void
+lynx_ptrace_fun ()
+{
+  int pgrp;
+
+  /* Switch child to its own process group so that signals won't
+     directly affect GDBserver. */
+  pgrp = getpid();
+  if (pgrp < 0)
+    trace_start_error_with_name ("pgrp");
+  if (setpgid (0, pgrp) < 0)
+    trace_start_error_with_name ("setpgid");
+  if (ioctl (0, TIOCSPGRP, &pgrp) < 0)
+    trace_start_error_with_name ("ioctl");
+  if (lynx_ptrace (PTRACE_TRACEME, null_ptid, 0, 0, 0) < 0)
+    trace_start_error_with_name ("lynx_ptrace");
+}
+
 /* Implement the create_inferior method of the target_ops vector.  */
 
 static int
-lynx_create_inferior (char *program, char **allargs)
+lynx_create_inferior (const char *program,
+		      const std::vector<char *> &program_args)
 {
   int pid;
+  std::string str_program_args = stringify_argv (program_args);
 
   lynx_debug ("lynx_create_inferior ()");
 
-  pid = fork ();
-  if (pid < 0)
-    perror_with_name ("fork");
+  pid = fork_inferior (program,
+		       str_program_args.c_str (),
+		       get_environ ()->envp (), lynx_ptrace_fun,
+		       NULL, NULL, NULL, NULL);
 
-  if (pid == 0)
-    {
-      int pgrp;
-
-      close_most_fds ();
-
-      /* Switch child to its own process group so that signals won't
-         directly affect gdbserver. */
-      pgrp = getpid();
-      setpgid (0, pgrp);
-      ioctl (0, TIOCSPGRP, &pgrp);
-      lynx_ptrace (PTRACE_TRACEME, null_ptid, 0, 0, 0);
-      execv (program, allargs);
-      fprintf (stderr, "Cannot exec %s: %s.\n", program, strerror (errno));
-      fflush (stderr);
-      _exit (0177);
-    }
+  post_fork_inferior (pid, program);
 
   lynx_add_process (pid, 0);
   /* Do not add the process thread just yet, as we do not know its tid.

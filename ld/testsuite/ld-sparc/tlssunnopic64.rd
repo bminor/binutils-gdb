@@ -18,9 +18,9 @@ Section Headers:
  +\[[ 0-9]+\] .tbss +NOBITS +0+102000 0+2000 0+24 0+ WAT +0 +0 +4
  +\[[ 0-9]+\] .dynamic +DYNAMIC +0+102000 0+2000 0+100 10 +WA +3 +0 +8
  +\[[ 0-9]+\] .got +PROGBITS +0+102100 0+2100 0+38 08 +WA +0 +0 +8
- +\[[ 0-9]+\] .shstrtab +.*
  +\[[ 0-9]+\] .symtab +.*
  +\[[ 0-9]+\] .strtab +.*
+ +\[[ 0-9]+\] .shstrtab +.*
 #...
 Elf file type is DYN \(Shared object file\)
 Entry point 0x1000

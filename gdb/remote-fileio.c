@@ -1,6 +1,6 @@
 /* Remote File-I/O communications
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -308,7 +308,8 @@ static quit_handler_ftype *remote_fileio_o_quit_handler;
 static void
 remote_fileio_quit_handler (void)
 {
-  quit ();
+  if (check_quit_flag ())
+    quit ();
 }
 
 static void
@@ -1099,7 +1100,7 @@ remote_fileio_func_system (char *buf)
 }
 
 static struct {
-  char *name;
+  const char *name;
   void (*func)(char *);
 } remote_fio_func_map[] = {
   { "open", remote_fileio_func_open },

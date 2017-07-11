@@ -165,6 +165,9 @@
 	\op	v1.4h, v2.4h, v3.h[0]
 	\op	v0.8h, v0.8h, v0.h[0]
 	\op	v1.8h, v2.8h, v3.h[0]
+	\op	v1.2d, v5.2d, v10.d[0]
+	\op	v8.2s, v0.2s, v11.s[3]
+	\op	v0.4h, v9.4h, v15.h[7]
 	.endm
 
 	indexed_elem fmla

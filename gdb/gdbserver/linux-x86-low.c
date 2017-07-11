@@ -1,6 +1,6 @@
 /* GNU/Linux/x86-64 specific low level interface, for the remote server
    for GDB.
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -133,6 +133,11 @@ static const int x86_64_regmap[] =
   -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
   ORIG_RAX * 8,
+#ifdef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+  21 * 8,  22 * 8,
+#else
+  -1, -1,
+#endif
   -1, -1, -1, -1,			/* MPX registers BND0 ... BND3.  */
   -1, -1,				/* MPX registers BNDCFGU, BNDSTATUS.  */
   -1, -1, -1, -1, -1, -1, -1, -1,       /* xmm16 ... xmm31 (AVX512)  */
@@ -143,7 +148,8 @@ static const int x86_64_regmap[] =
   -1, -1, -1, -1, -1, -1, -1, -1,       /* zmm0 ... zmm31 (AVX512)  */
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1					/* pkru  */
 };
 
 #define X86_64_NUM_REGS (sizeof (x86_64_regmap) / sizeof (x86_64_regmap[0]))
@@ -186,7 +192,7 @@ is_64bit_tdesc (void)
 /* Called by libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (const struct ps_prochandle *ph,
+ps_get_thread_area (struct ps_prochandle *ph,
 		    lwpid_t lwpid, int idx, void **base)
 {
 #ifdef __x86_64__
@@ -306,6 +312,20 @@ x86_fill_gregset (struct regcache *regcache, void *buf)
       for (i = 0; i < X86_64_NUM_REGS; i++)
 	if (x86_64_regmap[i] != -1)
 	  collect_register (regcache, i, ((char *) buf) + x86_64_regmap[i]);
+
+#ifndef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+      {
+        unsigned long base;
+        int lwpid = lwpid_of (current_thread);
+
+        collect_register_by_name (regcache, "fs_base", &base);
+        ptrace (PTRACE_ARCH_PRCTL, lwpid, &base, ARCH_SET_FS);
+
+        collect_register_by_name (regcache, "gs_base", &base);
+        ptrace (PTRACE_ARCH_PRCTL, lwpid, &base, ARCH_SET_GS);
+      }
+#endif
+
       return;
     }
 
@@ -332,6 +352,19 @@ x86_store_gregset (struct regcache *regcache, const void *buf)
       for (i = 0; i < X86_64_NUM_REGS; i++)
 	if (x86_64_regmap[i] != -1)
 	  supply_register (regcache, i, ((char *) buf) + x86_64_regmap[i]);
+
+#ifndef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+      {
+        unsigned long base;
+        int lwpid = lwpid_of (current_thread);
+
+        if (ptrace (PTRACE_ARCH_PRCTL, lwpid, &base, ARCH_GET_FS) == 0)
+          supply_register_by_name (regcache, "fs_base", &base);
+
+        if (ptrace (PTRACE_ARCH_PRCTL, lwpid, &base, ARCH_GET_GS) == 0)
+          supply_register_by_name (regcache, "gs_base", &base);
+      }
+#endif
       return;
     }
 #endif
@@ -427,13 +460,15 @@ x86_get_pc (struct regcache *regcache)
 
   if (use_64bit)
     {
-      unsigned long pc;
+      uint64_t pc;
+
       collect_register_by_name (regcache, "rip", &pc);
       return (CORE_ADDR) pc;
     }
   else
     {
-      unsigned int pc;
+      uint32_t pc;
+
       collect_register_by_name (regcache, "eip", &pc);
       return (CORE_ADDR) pc;
     }
@@ -446,12 +481,14 @@ x86_set_pc (struct regcache *regcache, CORE_ADDR pc)
 
   if (use_64bit)
     {
-      unsigned long newpc = pc;
+      uint64_t newpc = pc;
+
       supply_register_by_name (regcache, "rip", &newpc);
     }
   else
     {
-      unsigned int newpc = pc;
+      uint32_t newpc = pc;
+
       supply_register_by_name (regcache, "eip", &newpc);
     }
 }
@@ -624,14 +661,14 @@ x86_debug_reg_state (pid_t pid)
    as debugging it with a 32-bit GDBSERVER, we do the 32-bit <-> 64-bit
    conversion in-place ourselves.  */
 
-/* Convert a native/host siginfo object, into/from the siginfo in the
+/* Convert a ptrace/host siginfo object, into/from the siginfo in the
    layout of the inferiors' architecture.  Returns true if any
    conversion was done; false otherwise.  If DIRECTION is 1, then copy
-   from INF to NATIVE.  If DIRECTION is 0, copy from NATIVE to
+   from INF to PTRACE.  If DIRECTION is 0, copy from PTRACE to
    INF.  */
 
 static int
-x86_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
+x86_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
 {
 #ifdef __x86_64__
   unsigned int machine;
@@ -640,11 +677,11 @@ x86_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
 
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
   if (!is_64bit_tdesc ())
-      return amd64_linux_siginfo_fixup_common (native, inf, direction,
+      return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
 					       FIXUP_32);
   /* No fixup for native x32 GDB.  */
   else if (!is_elf64 && sizeof (void *) == 8)
-    return amd64_linux_siginfo_fixup_common (native, inf, direction,
+    return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
 					     FIXUP_X32);
 #endif
 
@@ -786,8 +823,11 @@ x86_linux_read_description (void)
 	    {
 	      switch (xcr0 & X86_XSTATE_ALL_MASK)
 	        {
-		case X86_XSTATE_AVX512_MASK:
-		  return tdesc_amd64_avx512_linux;
+		case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
+		  return tdesc_amd64_avx_mpx_avx512_pku_linux;
+
+		case X86_XSTATE_AVX_AVX512_MASK:
+		  return tdesc_amd64_avx_avx512_linux;
 
 		case X86_XSTATE_AVX_MPX_MASK:
 		  return tdesc_amd64_avx_mpx_linux;
@@ -811,8 +851,12 @@ x86_linux_read_description (void)
 	    {
 	      switch (xcr0 & X86_XSTATE_ALL_MASK)
 	        {
-		case X86_XSTATE_AVX512_MASK:
-		  return tdesc_x32_avx512_linux;
+		case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
+		  /* No x32 MPX and PKU, fall back to avx_avx512.  */
+		  return tdesc_x32_avx_avx512_linux;
+
+		case X86_XSTATE_AVX_AVX512_MASK:
+		  return tdesc_x32_avx_avx512_linux;
 
 		case X86_XSTATE_MPX_MASK: /* No MPX on x32.  */
 		case X86_XSTATE_AVX_MASK:
@@ -833,8 +877,11 @@ x86_linux_read_description (void)
 	{
 	  switch (xcr0 & X86_XSTATE_ALL_MASK)
 	    {
-	    case (X86_XSTATE_AVX512_MASK):
-	      return tdesc_i386_avx512_linux;
+	    case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
+	      return tdesc_i386_avx_mpx_avx512_pku_linux;
+
+	    case (X86_XSTATE_AVX_AVX512_MASK):
+	      return tdesc_i386_avx_avx512_linux;
 
 	    case (X86_XSTATE_MPX_MASK):
 	      return tdesc_i386_mpx_linux;
@@ -1020,7 +1067,7 @@ append_insns (CORE_ADDR *to, size_t len, const unsigned char *buf)
 }
 
 static int
-push_opcode (unsigned char *buf, char *op)
+push_opcode (unsigned char *buf, const char *op)
 {
   unsigned char *buf_org = buf;
 
@@ -1088,10 +1135,10 @@ amd64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
   buf[i++] = 0x41; buf[i++] = 0x51; /* push %r9 */
   buf[i++] = 0x41; buf[i++] = 0x50; /* push %r8 */
   buf[i++] = 0x9c; /* pushfq */
-  buf[i++] = 0x48; /* movl <addr>,%rdi */
+  buf[i++] = 0x48; /* movabs <addr>,%rdi */
   buf[i++] = 0xbf;
-  *((unsigned long *)(buf + i)) = (unsigned long) tpaddr;
-  i += sizeof (unsigned long);
+  memcpy (buf + i, &tpaddr, 8);
+  i += 8;
   buf[i++] = 0x57; /* push %rdi */
   append_insns (&buildaddr, i, buf);
 
@@ -1838,6 +1885,8 @@ amd64_emit_call (CORE_ADDR fn)
   else
     {
       int offset32 = offset64; /* we know we can't overflow here.  */
+
+      buf[i++] = 0xe8; /* call <reladdr> */
       memcpy (buf + i, &offset32, 4);
       i += 4;
     }
@@ -2857,8 +2906,10 @@ x86_get_ipa_tdesc_idx (void)
     return X86_TDESC_MPX;
   if (tdesc == tdesc_amd64_avx_mpx_linux)
     return X86_TDESC_AVX_MPX;
-  if (tdesc == tdesc_amd64_avx512_linux || tdesc == tdesc_x32_avx512_linux)
-    return X86_TDESC_AVX512;
+  if (tdesc == tdesc_amd64_avx_mpx_avx512_pku_linux || tdesc == tdesc_x32_avx_avx512_linux)
+    return X86_TDESC_AVX_MPX_AVX512_PKU;
+  if (tdesc == tdesc_amd64_avx_avx512_linux)
+    return X86_TDESC_AVX_AVX512;
 #endif
 
   if (tdesc == tdesc_i386_mmx_linux)
@@ -2871,8 +2922,10 @@ x86_get_ipa_tdesc_idx (void)
     return X86_TDESC_MPX;
   if (tdesc == tdesc_i386_avx_mpx_linux)
     return X86_TDESC_AVX_MPX;
-  if (tdesc == tdesc_i386_avx512_linux)
-    return X86_TDESC_AVX512;
+  if (tdesc == tdesc_i386_avx_mpx_avx512_pku_linux)
+    return X86_TDESC_AVX_MPX_AVX512_PKU;
+  if (tdesc == tdesc_i386_avx_avx512_linux)
+    return X86_TDESC_AVX_AVX512;
 
   return 0;
 }
@@ -2930,13 +2983,14 @@ initialize_low_arch (void)
 #ifdef __x86_64__
   init_registers_amd64_linux ();
   init_registers_amd64_avx_linux ();
-  init_registers_amd64_avx512_linux ();
   init_registers_amd64_mpx_linux ();
   init_registers_amd64_avx_mpx_linux ();
+  init_registers_amd64_avx_avx512_linux ();
+  init_registers_amd64_avx_mpx_avx512_pku_linux ();
 
   init_registers_x32_linux ();
   init_registers_x32_avx_linux ();
-  init_registers_x32_avx512_linux ();
+  init_registers_x32_avx_avx512_linux ();
 
   tdesc_amd64_linux_no_xml = XNEW (struct target_desc);
   copy_target_description (tdesc_amd64_linux_no_xml, tdesc_amd64_linux);
@@ -2945,9 +2999,10 @@ initialize_low_arch (void)
   init_registers_i386_linux ();
   init_registers_i386_mmx_linux ();
   init_registers_i386_avx_linux ();
-  init_registers_i386_avx512_linux ();
   init_registers_i386_mpx_linux ();
   init_registers_i386_avx_mpx_linux ();
+  init_registers_i386_avx_avx512_linux ();
+  init_registers_i386_avx_mpx_avx512_pku_linux ();
 
   tdesc_i386_linux_no_xml = XNEW (struct target_desc);
   copy_target_description (tdesc_i386_linux_no_xml, tdesc_i386_linux);

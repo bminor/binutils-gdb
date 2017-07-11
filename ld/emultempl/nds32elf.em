@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-# Copyright (C) 2012-2016 Free Software Foundation, Inc.
+# Copyright (C) 2012-2017 Free Software Foundation, Inc.
 # Contributed by Andes Technology Corporation.
 #
 # This file is part of the GNU Binutils.
@@ -22,7 +22,6 @@
 
 fragment <<EOF
 
-#include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/nds32.h"
 #include "bfd_stdint.h"

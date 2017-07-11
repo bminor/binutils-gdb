@@ -1,6 +1,6 @@
 /* Fortran language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2017 Free Software Foundation, Inc.
 
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
@@ -203,7 +203,7 @@ f_language_arch_info (struct gdbarch *gdbarch,
 
 /* Remove the modules separator :: from the default break list.  */
 
-static char *
+static const char *
 f_word_break_characters (void)
 {
   static char *retval;
@@ -287,6 +287,7 @@ const struct language_defn f_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   default_get_string,
+  c_watch_location_expression,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   &default_varobj_ops,
@@ -332,13 +333,13 @@ build_fortran_types (struct gdbarch *gdbarch)
 
   builtin_f_type->builtin_real
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
-		       "real", NULL);
+		       "real", gdbarch_float_format (gdbarch));
   builtin_f_type->builtin_real_s8
     = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
-		       "real*8", NULL);
+		       "real*8", gdbarch_double_format (gdbarch));
   builtin_f_type->builtin_real_s16
     = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
-		       "real*16", NULL);
+		       "real*16", gdbarch_long_double_format (gdbarch));
 
   builtin_f_type->builtin_complex_s8
     = arch_complex_type (gdbarch, "complex*8",

@@ -1,6 +1,6 @@
 /* Target description support for GDB.
 
-   Copyright (C) 2006-2016 Free Software Foundation, Inc.
+   Copyright (C) 2006-2017 Free Software Foundation, Inc.
 
    Contributed by CodeSourcery.
 
@@ -48,6 +48,31 @@ DEF_VEC_O(property_s);
 
 typedef struct tdesc_reg
 {
+  tdesc_reg (struct tdesc_feature *feature, const char *name_,
+	     int regnum, int save_restore_, const char *group_,
+	     int bitsize_, const char *type_)
+    : name (xstrdup (name_)), target_regnum (regnum),
+      save_restore (save_restore_),
+      group (group_ != NULL ? xstrdup (group_) : NULL),
+      bitsize (bitsize_),
+      type (type_ != NULL ? xstrdup (type_) : xstrdup ("<unknown>"))
+  {
+    /* If the register's type is target-defined, look it up now.  We may not
+       have easy access to the containing feature when we want it later.  */
+    tdesc_type = tdesc_named_type (feature, type);
+  }
+
+  ~tdesc_reg ()
+  {
+    xfree (name);
+    xfree (type);
+    xfree (group);
+  }
+
+  /* Disable copying.  */
+  tdesc_reg (const tdesc_reg &) = delete;
+  tdesc_reg &operator= (const tdesc_reg &) = delete;
+
   /* The name of this register.  In standard features, it may be
      recognized by the architecture support code, or it may be purely
      for the user.  */
@@ -128,8 +153,46 @@ enum tdesc_type_kind
 
 typedef struct tdesc_type
 {
-  /* The name of this type.  */
-  char *name;
+  tdesc_type (const char *name_, enum tdesc_type_kind kind_)
+    : name (xstrdup (name_)), kind (kind_)
+  {
+    memset (&u, 0, sizeof (u));
+  }
+
+  ~tdesc_type ()
+  {
+    switch (kind)
+      {
+      case TDESC_TYPE_STRUCT:
+      case TDESC_TYPE_UNION:
+      case TDESC_TYPE_FLAGS:
+      case TDESC_TYPE_ENUM:
+	{
+	  struct tdesc_type_field *f;
+	  int ix;
+
+	  for (ix = 0;
+	       VEC_iterate (tdesc_type_field, u.u.fields, ix, f);
+	       ix++)
+	    xfree (f->name);
+
+	  VEC_free (tdesc_type_field, u.u.fields);
+	}
+	break;
+
+      default:
+	break;
+      }
+    xfree ((char *) name);
+  }
+  /* Disable copying.  */
+  tdesc_type (const tdesc_type &) = delete;
+  tdesc_type &operator= (const tdesc_type &) = delete;
+
+  /* The name of this type.  If this type is a built-in type, this is
+     a pointer to a constant string.  Otherwise, it's a
+     malloc-allocated string (and thus must be freed).  */
+  const char *name;
 
   /* Identify the kind of this type.  */
   enum tdesc_type_kind kind;
@@ -159,15 +222,40 @@ DEF_VEC_P(tdesc_type_p);
 
 typedef struct tdesc_feature
 {
+  tdesc_feature (const char *name_)
+    : name (xstrdup (name_))
+  {}
+
+  ~tdesc_feature ()
+  {
+    struct tdesc_reg *reg;
+    struct tdesc_type *type;
+    int ix;
+
+    for (ix = 0; VEC_iterate (tdesc_reg_p, registers, ix, reg); ix++)
+      delete reg;
+    VEC_free (tdesc_reg_p, registers);
+
+    for (ix = 0; VEC_iterate (tdesc_type_p, types, ix, type); ix++)
+      delete type;
+    VEC_free (tdesc_type_p, types);
+
+    xfree (name);
+  }
+
+  /* Disable copying.  */
+  tdesc_feature (const tdesc_feature &) = delete;
+  tdesc_feature &operator= (const tdesc_feature &) = delete;
+
   /* The name of this feature.  It may be recognized by the architecture
      support code.  */
   char *name;
 
   /* The registers associated with this feature.  */
-  VEC(tdesc_reg_p) *registers;
+  VEC(tdesc_reg_p) *registers = NULL;
 
   /* The types associated with this feature.  */
-  VEC(tdesc_type_p) *types;
+  VEC(tdesc_type_p) *types = NULL;
 } *tdesc_feature_p;
 DEF_VEC_P(tdesc_feature_p);
 
@@ -1272,81 +1360,23 @@ tdesc_use_registers (struct gdbarch *gdbarch,
 }
 
 
-/* Methods for constructing a target description.  */
-
-static void
-tdesc_free_reg (struct tdesc_reg *reg)
-{
-  xfree (reg->name);
-  xfree (reg->type);
-  xfree (reg->group);
-  xfree (reg);
-}
-
 void
 tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 		  int regnum, int save_restore, const char *group,
 		  int bitsize, const char *type)
 {
-  struct tdesc_reg *reg = XCNEW (struct tdesc_reg);
-
-  reg->name = xstrdup (name);
-  reg->target_regnum = regnum;
-  reg->save_restore = save_restore;
-  reg->group = group ? xstrdup (group) : NULL;
-  reg->bitsize = bitsize;
-  reg->type = type ? xstrdup (type) : xstrdup ("<unknown>");
-
-  /* If the register's type is target-defined, look it up now.  We may not
-     have easy access to the containing feature when we want it later.  */
-  reg->tdesc_type = tdesc_named_type (feature, reg->type);
+  tdesc_reg *reg = new tdesc_reg (feature, name, regnum, save_restore,
+				  group, bitsize, type);
 
   VEC_safe_push (tdesc_reg_p, feature->registers, reg);
-}
-
-/* Subroutine of tdesc_free_feature to simplify it.
-   Note: We do not want to free any referenced types here (e.g., types of
-   fields of a struct).  All types of a feature are recorded in
-   feature->types and are freed that way.  */
-
-static void
-tdesc_free_type (struct tdesc_type *type)
-{
-  switch (type->kind)
-    {
-    case TDESC_TYPE_STRUCT:
-    case TDESC_TYPE_UNION:
-    case TDESC_TYPE_FLAGS:
-    case TDESC_TYPE_ENUM:
-      {
-	struct tdesc_type_field *f;
-	int ix;
-
-	for (ix = 0;
-	     VEC_iterate (tdesc_type_field, type->u.u.fields, ix, f);
-	     ix++)
-	  xfree (f->name);
-
-	VEC_free (tdesc_type_field, type->u.u.fields);
-      }
-      break;
-
-    default:
-      break;
-    }
-
-  xfree (type->name);
-  xfree (type);
 }
 
 struct tdesc_type *
 tdesc_create_vector (struct tdesc_feature *feature, const char *name,
 		     struct tdesc_type *field_type, int count)
 {
-  struct tdesc_type *type = XCNEW (struct tdesc_type);
+  struct tdesc_type *type = new tdesc_type (name, TDESC_TYPE_VECTOR);
 
-  type->name = xstrdup (name);
-  type->kind = TDESC_TYPE_VECTOR;
   type->u.v.type = field_type;
   type->u.v.count = count;
 
@@ -1357,10 +1387,7 @@ tdesc_create_vector (struct tdesc_feature *feature, const char *name,
 struct tdesc_type *
 tdesc_create_struct (struct tdesc_feature *feature, const char *name)
 {
-  struct tdesc_type *type = XCNEW (struct tdesc_type);
-
-  type->name = xstrdup (name);
-  type->kind = TDESC_TYPE_STRUCT;
+  struct tdesc_type *type = new tdesc_type (name, TDESC_TYPE_STRUCT);
 
   VEC_safe_push (tdesc_type_p, feature->types, type);
   return type;
@@ -1381,10 +1408,7 @@ tdesc_set_struct_size (struct tdesc_type *type, int size)
 struct tdesc_type *
 tdesc_create_union (struct tdesc_feature *feature, const char *name)
 {
-  struct tdesc_type *type = XCNEW (struct tdesc_type);
-
-  type->name = xstrdup (name);
-  type->kind = TDESC_TYPE_UNION;
+  struct tdesc_type *type = new tdesc_type (name, TDESC_TYPE_UNION);
 
   VEC_safe_push (tdesc_type_p, feature->types, type);
   return type;
@@ -1394,12 +1418,10 @@ struct tdesc_type *
 tdesc_create_flags (struct tdesc_feature *feature, const char *name,
 		    int size)
 {
-  struct tdesc_type *type = XCNEW (struct tdesc_type);
+  struct tdesc_type *type = new tdesc_type (name, TDESC_TYPE_FLAGS);
 
   gdb_assert (size > 0);
 
-  type->name = xstrdup (name);
-  type->kind = TDESC_TYPE_FLAGS;
   type->u.u.size = size;
 
   VEC_safe_push (tdesc_type_p, feature->types, type);
@@ -1410,12 +1432,10 @@ struct tdesc_type *
 tdesc_create_enum (struct tdesc_feature *feature, const char *name,
 		   int size)
 {
-  struct tdesc_type *type = XCNEW (struct tdesc_type);
+  struct tdesc_type *type = new tdesc_type (name, TDESC_TYPE_ENUM);
 
   gdb_assert (size > 0);
 
-  type->name = xstrdup (name);
-  type->kind = TDESC_TYPE_ENUM;
   type->u.u.size = size;
 
   VEC_safe_push (tdesc_type_p, feature->types, type);
@@ -1519,31 +1539,10 @@ tdesc_add_enum_value (struct tdesc_type *type, int value,
   VEC_safe_push (tdesc_type_field, type->u.u.fields, &f);
 }
 
-static void
-tdesc_free_feature (struct tdesc_feature *feature)
-{
-  struct tdesc_reg *reg;
-  struct tdesc_type *type;
-  int ix;
-
-  for (ix = 0; VEC_iterate (tdesc_reg_p, feature->registers, ix, reg); ix++)
-    tdesc_free_reg (reg);
-  VEC_free (tdesc_reg_p, feature->registers);
-
-  for (ix = 0; VEC_iterate (tdesc_type_p, feature->types, ix, type); ix++)
-    tdesc_free_type (type);
-  VEC_free (tdesc_type_p, feature->types);
-
-  xfree (feature->name);
-  xfree (feature);
-}
-
 struct tdesc_feature *
 tdesc_create_feature (struct target_desc *tdesc, const char *name)
 {
-  struct tdesc_feature *new_feature = XCNEW (struct tdesc_feature);
-
-  new_feature->name = xstrdup (name);
+  struct tdesc_feature *new_feature = new tdesc_feature (name);
 
   VEC_safe_push (tdesc_feature_p, tdesc->features, new_feature);
   return new_feature;
@@ -1566,7 +1565,7 @@ free_target_description (void *arg)
   for (ix = 0;
        VEC_iterate (tdesc_feature_p, target_desc->features, ix, feature);
        ix++)
-    tdesc_free_feature (feature);
+    delete feature;
   VEC_free (tdesc_feature_p, target_desc->features);
 
   for (ix = 0;

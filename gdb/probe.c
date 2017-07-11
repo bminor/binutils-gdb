@@ -1,6 +1,6 @@
 /* Generic static probe support for GDB.
 
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,6 +35,8 @@
 #include "ax-gdb.h"
 #include "location.h"
 #include <ctype.h>
+#include <algorithm>
+#include "common/gdb_optional.h"
 
 typedef struct bound_probe bound_probe_s;
 DEF_VEC_O (bound_probe_s);
@@ -287,18 +289,17 @@ collect_probes (char *objname, char *provider, char *probe_name,
 {
   struct objfile *objfile;
   VEC (bound_probe_s) *result = NULL;
-  struct cleanup *cleanup, *cleanup_temps;
-  regex_t obj_pat, prov_pat, probe_pat;
+  struct cleanup *cleanup;
+  gdb::optional<compiled_regex> obj_pat, prov_pat, probe_pat;
 
   cleanup = make_cleanup (VEC_cleanup (bound_probe_s), &result);
 
-  cleanup_temps = make_cleanup (null_cleanup, NULL);
   if (provider != NULL)
-    compile_rx_or_error (&prov_pat, provider, _("Invalid provider regexp"));
+    prov_pat.emplace (provider, REG_NOSUB, _("Invalid provider regexp"));
   if (probe_name != NULL)
-    compile_rx_or_error (&probe_pat, probe_name, _("Invalid probe regexp"));
+    probe_pat.emplace (probe_name, REG_NOSUB, _("Invalid probe regexp"));
   if (objname != NULL)
-    compile_rx_or_error (&obj_pat, objname, _("Invalid object file regexp"));
+    obj_pat.emplace (objname, REG_NOSUB, _("Invalid object file regexp"));
 
   ALL_OBJFILES (objfile)
     {
@@ -311,7 +312,7 @@ collect_probes (char *objname, char *provider, char *probe_name,
 
       if (objname)
 	{
-	  if (regexec (&obj_pat, objfile_name (objfile), 0, NULL, 0) != 0)
+	  if (obj_pat->exec (objfile_name (objfile), 0, NULL, 0) != 0)
 	    continue;
 	}
 
@@ -325,11 +326,11 @@ collect_probes (char *objname, char *provider, char *probe_name,
 	    continue;
 
 	  if (provider
-	      && regexec (&prov_pat, probe->provider, 0, NULL, 0) != 0)
+	      && prov_pat->exec (probe->provider, 0, NULL, 0) != 0)
 	    continue;
 
 	  if (probe_name
-	      && regexec (&probe_pat, probe->name, 0, NULL, 0) != 0)
+	      && probe_pat->exec (probe->name, 0, NULL, 0) != 0)
 	    continue;
 
 	  bound.objfile = objfile;
@@ -338,7 +339,6 @@ collect_probes (char *objname, char *provider, char *probe_name,
 	}
     }
 
-  do_cleanups (cleanup_temps);
   discard_cleanups (cleanup);
   return result;
 }
@@ -432,13 +432,13 @@ gen_ui_out_table_header_info (VEC (bound_probe_s) *probes,
 	      if (val == NULL)
 		continue;
 
-	      size_max = max (strlen (val), size_max);
+	      size_max = std::max (strlen (val), size_max);
 	    }
 	  do_cleanups (c2);
 	}
 
-      ui_out_table_header (current_uiout, size_max, ui_left,
-			   column->field_name, column->print_name);
+      current_uiout->table_header (size_max, ui_left,
+				   column->field_name, column->print_name);
     }
 
   do_cleanups (c);
@@ -464,7 +464,7 @@ print_ui_out_not_applicables (const struct probe_ops *pops)
   for (ix = 0;
        VEC_iterate (info_probe_column_s, headings, ix, column);
        ++ix)
-    ui_out_field_string (current_uiout, column->field_name, _("n/a"));
+    current_uiout->field_string (column->field_name, _("n/a"));
 
   do_cleanups (c);
 }
@@ -510,9 +510,9 @@ print_ui_out_info (struct probe *probe)
       const char *val = VEC_index (const_char_ptr, values, j++);
 
       if (val == NULL)
-	ui_out_field_skip (current_uiout, column->field_name);
+	current_uiout->field_skip (column->field_name);
       else
-	ui_out_field_string (current_uiout, column->field_name, val);
+	current_uiout->field_string (column->field_name, val);
     }
 
   do_cleanups (c);
@@ -644,17 +644,18 @@ info_probes_for_ops (const char *arg, int from_tty,
     {
       const char *probe_type = probe->probe->pops->type_name (probe->probe);
 
-      size_type = max (strlen (probe_type), size_type);
-      size_name = max (strlen (probe->probe->name), size_name);
-      size_provider = max (strlen (probe->probe->provider), size_provider);
-      size_objname = max (strlen (objfile_name (probe->objfile)), size_objname);
+      size_type = std::max (strlen (probe_type), size_type);
+      size_name = std::max (strlen (probe->probe->name), size_name);
+      size_provider = std::max (strlen (probe->probe->provider), size_provider);
+      size_objname = std::max (strlen (objfile_name (probe->objfile)),
+			       size_objname);
     }
 
-  ui_out_table_header (current_uiout, size_type, ui_left, "type", _("Type"));
-  ui_out_table_header (current_uiout, size_provider, ui_left, "provider",
-		       _("Provider"));
-  ui_out_table_header (current_uiout, size_name, ui_left, "name", _("Name"));
-  ui_out_table_header (current_uiout, size_addr, ui_left, "addr", _("Where"));
+  current_uiout->table_header (size_type, ui_left, "type", _("Type"));
+  current_uiout->table_header (size_provider, ui_left, "provider",
+			       _("Provider"));
+  current_uiout->table_header (size_name, ui_left, "name", _("Name"));
+  current_uiout->table_header (size_addr, ui_left, "addr", _("Where"));
 
   if (pops == NULL)
     {
@@ -671,23 +672,21 @@ info_probes_for_ops (const char *arg, int from_tty,
   else
     gen_ui_out_table_header_info (probes, pops);
 
-  ui_out_table_header (current_uiout, size_objname, ui_left, "object",
-		       _("Object"));
-  ui_out_table_body (current_uiout);
+  current_uiout->table_header (size_objname, ui_left, "object", _("Object"));
+  current_uiout->table_body ();
 
   for (i = 0; VEC_iterate (bound_probe_s, probes, i, probe); ++i)
     {
-      struct cleanup *inner;
       const char *probe_type = probe->probe->pops->type_name (probe->probe);
 
-      inner = make_cleanup_ui_out_tuple_begin_end (current_uiout, "probe");
+      ui_out_emit_tuple tuple_emitter (current_uiout, "probe");
 
-      ui_out_field_string (current_uiout, "type",probe_type);
-      ui_out_field_string (current_uiout, "provider", probe->probe->provider);
-      ui_out_field_string (current_uiout, "name", probe->probe->name);
-      ui_out_field_core_addr (current_uiout, "addr",
-			      probe->probe->arch,
-			      get_probe_address (probe->probe, probe->objfile));
+      current_uiout->field_string ("type",probe_type);
+      current_uiout->field_string ("provider", probe->probe->provider);
+      current_uiout->field_string ("name", probe->probe->name);
+      current_uiout->field_core_addr (
+	"addr", probe->probe->arch,
+	get_probe_address (probe->probe, probe->objfile));
 
       if (pops == NULL)
 	{
@@ -704,18 +703,16 @@ info_probes_for_ops (const char *arg, int from_tty,
       else
 	print_ui_out_info (probe->probe);
 
-      ui_out_field_string (current_uiout, "object",
+      current_uiout->field_string ("object",
 			   objfile_name (probe->objfile));
-      ui_out_text (current_uiout, "\n");
-
-      do_cleanups (inner);
+      current_uiout->text ("\n");
     }
 
   any_found = !VEC_empty (bound_probe_s, probes);
   do_cleanups (cleanup);
 
   if (!any_found)
-    ui_out_message (current_uiout, 0, _("No probes matched.\n"));
+    current_uiout->message (_("No probes matched.\n"));
 }
 
 /* Implementation of the `info probes' command.  */
@@ -745,7 +742,7 @@ enable_probes_command (char *arg, int from_tty)
   probes = collect_probes (objname, provider, probe_name, NULL);
   if (VEC_empty (bound_probe_s, probes))
     {
-      ui_out_message (current_uiout, 0, _("No probes matched.\n"));
+      current_uiout->message (_("No probes matched.\n"));
       do_cleanups (cleanup);
       return;
     }
@@ -759,14 +756,12 @@ enable_probes_command (char *arg, int from_tty)
       if (pops->enable_probe != NULL)
 	{
 	  pops->enable_probe (probe->probe);
-	  ui_out_message (current_uiout, 0,
-			  _("Probe %s:%s enabled.\n"),
-			  probe->probe->provider, probe->probe->name);
+	  current_uiout->message (_("Probe %s:%s enabled.\n"),
+				  probe->probe->provider, probe->probe->name);
 	}
       else
-	ui_out_message (current_uiout, 0,
-			_("Probe %s:%s cannot be enabled.\n"),
-			probe->probe->provider, probe->probe->name);
+	current_uiout->message (_("Probe %s:%s cannot be enabled.\n"),
+				probe->probe->provider, probe->probe->name);
     }
 
   do_cleanups (cleanup);
@@ -791,7 +786,7 @@ disable_probes_command (char *arg, int from_tty)
   probes = collect_probes (objname, provider, probe_name, NULL /* pops */);
   if (VEC_empty (bound_probe_s, probes))
     {
-      ui_out_message (current_uiout, 0, _("No probes matched.\n"));
+      current_uiout->message (_("No probes matched.\n"));
       do_cleanups (cleanup);
       return;
     }
@@ -805,14 +800,12 @@ disable_probes_command (char *arg, int from_tty)
       if (pops->disable_probe != NULL)
 	{
 	  pops->disable_probe (probe->probe);
-	  ui_out_message (current_uiout, 0,
-			  _("Probe %s:%s disabled.\n"),
-			  probe->probe->provider, probe->probe->name);
+	  current_uiout->message (_("Probe %s:%s disabled.\n"),
+				  probe->probe->provider, probe->probe->name);
 	}
       else
-	ui_out_message (current_uiout, 0,
-			_("Probe %s:%s cannot be disabled.\n"),
-			probe->probe->provider, probe->probe->name);
+	current_uiout->message (_("Probe %s:%s cannot be disabled.\n"),
+				probe->probe->provider, probe->probe->name);
     }
 
   do_cleanups (cleanup);

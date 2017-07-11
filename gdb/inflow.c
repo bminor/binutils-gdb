@@ -1,5 +1,5 @@
 /* Low level interface to ptrace, for GDB when running under Unix.
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,6 +31,8 @@
 
 #include "inflow.h"
 #include "gdbcmd.h"
+#include "gdb_termios.h"
+#include "job-control.h"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -74,13 +76,17 @@ struct terminal_info
 };
 
 /* Our own tty state, which we restore every time we need to deal with
-   the terminal.  This is only set once, when GDB first starts.  The
-   settings of flags which readline saves and restores and
+   the terminal.  This is set once, when GDB first starts, and then
+   whenever we enter/leave TUI mode (gdb_save_tty_state).  The
+   settings of flags which readline saves and restores are
    unimportant.  */
 static struct terminal_info our_terminal_info;
 
-/* Snapshot of our own tty state taken during initialization of GDB.
-   This is used as the initial tty state given to each new inferior.  */
+/* Snapshot of the initial tty state taken during initialization of
+   GDB, before readline/ncurses have had a chance to change it.  This
+   is used as the initial tty state given to each new spawned
+   inferior.  Unlike our_terminal_info, this is only ever set
+   once.  */
 static serial_ttystate initial_gdb_ttystate;
 
 static struct terminal_info *get_inflow_inferior_data (struct inferior *);
@@ -136,59 +142,35 @@ gdb_getpgrp (void)
 }
 #endif
 
-enum gdb_has_a_terminal_flag_enum
-  {
-    yes, no, have_not_checked
-  }
-gdb_has_a_terminal_flag = have_not_checked;
-
-/* Set the initial tty state that is to be inherited by new inferiors.  */
+/* See terminal.h.  */
 
 void
 set_initial_gdb_ttystate (void)
 {
+  /* Note we can't do any of this in _initialize_inflow because at
+     that point stdin_serial has not been created yet.  */
+
   initial_gdb_ttystate = serial_get_tty_state (stdin_serial);
-}
 
-/* Does GDB have a terminal (on stdin)?  */
-int
-gdb_has_a_terminal (void)
-{
-  switch (gdb_has_a_terminal_flag)
+  if (initial_gdb_ttystate != NULL)
     {
-    case yes:
-      return 1;
-    case no:
-      return 0;
-    case have_not_checked:
-      /* Get all the current tty settings (including whether we have a
-         tty at all!).  Can't do this in _initialize_inflow because
-         serial_fdopen() won't work until the serial_ops_list is
-         initialized.  */
-
+      our_terminal_info.ttystate
+	= serial_copy_tty_state (stdin_serial, initial_gdb_ttystate);
 #ifdef F_GETFL
       our_terminal_info.tflags = fcntl (0, F_GETFL, 0);
 #endif
-
-      gdb_has_a_terminal_flag = no;
-      if (stdin_serial != NULL)
-	{
-	  our_terminal_info.ttystate = serial_get_tty_state (stdin_serial);
-
-	  if (our_terminal_info.ttystate != NULL)
-	    {
-	      gdb_has_a_terminal_flag = yes;
 #ifdef PROCESS_GROUP_TYPE
-	      our_terminal_info.process_group = gdb_getpgrp ();
+      our_terminal_info.process_group = gdb_getpgrp ();
 #endif
-	    }
-	}
-
-      return gdb_has_a_terminal_flag == yes;
-    default:
-      /* "Can't happen".  */
-      return 0;
     }
+}
+
+/* Does GDB have a terminal (on stdin)?  */
+
+static int
+gdb_has_a_terminal (void)
+{
+  return initial_gdb_ttystate != NULL;
 }
 
 /* Macro for printing errors from ioctl operations */
@@ -398,7 +380,7 @@ child_terminal_ours_1 (int output_only)
          pgrp.  */
       sighandler_t osigttou = NULL;
 #endif
-      int result;
+      int result ATTRIBUTE_UNUSED;
 
 #ifdef SIGTTOU
       if (job_control)
@@ -823,43 +805,6 @@ create_tty_session (void)
 #endif /* HAVE_SETSID */
 }
 
-/* This is here because this is where we figure out whether we (probably)
-   have job control.  Just using job_control only does part of it because
-   setpgid or setpgrp might not exist on a system without job control.
-   It might be considered misplaced (on the other hand, process groups and
-   job control are closely related to ttys).
-
-   For a more clean implementation, in libiberty, put a setpgid which merely
-   calls setpgrp and a setpgrp which does nothing (any system with job control
-   will have one or the other).  */
-int
-gdb_setpgid (void)
-{
-  int retval = 0;
-
-  if (job_control)
-    {
-#if defined (HAVE_TERMIOS) || defined (TIOCGPGRP)
-#ifdef HAVE_SETPGID
-      /* The call setpgid (0, 0) is supposed to work and mean the same
-         thing as this, but on Ultrix 4.2A it fails with EPERM (and
-         setpgid (getpid (), getpid ()) succeeds).  */
-      retval = setpgid (getpid (), getpid ());
-#else
-#ifdef HAVE_SETPGRP
-#ifdef SETPGRP_VOID 
-      retval = setpgrp ();
-#else
-      retval = setpgrp (getpid (), getpid ());
-#endif
-#endif /* HAVE_SETPGRP */
-#endif /* HAVE_SETPGID */
-#endif /* defined (HAVE_TERMIOS) || defined (TIOCGPGRP) */
-    }
-
-  return retval;
-}
-
 /* Get all the current tty settings (including whether we have a
    tty at all!).  We can't do this in _initialize_inflow because
    serial_fdopen() won't work until the serial_ops_list is
@@ -880,30 +825,8 @@ _initialize_inflow (void)
 
   terminal_is_ours = 1;
 
-  /* OK, figure out whether we have job control.  If neither termios nor
-     sgtty (i.e. termio or go32), leave job_control 0.  */
-
-#if defined (HAVE_TERMIOS)
-  /* Do all systems with termios have the POSIX way of identifying job
-     control?  I hope so.  */
-#ifdef _POSIX_JOB_CONTROL
-  job_control = 1;
-#else
-#ifdef _SC_JOB_CONTROL
-  job_control = sysconf (_SC_JOB_CONTROL);
-#else
-  job_control = 0;		/* Have to assume the worst.  */
-#endif /* _SC_JOB_CONTROL */
-#endif /* _POSIX_JOB_CONTROL */
-#endif /* HAVE_TERMIOS */
-
-#ifdef HAVE_SGTTY
-#ifdef TIOCGPGRP
-  job_control = 1;
-#else
-  job_control = 0;
-#endif /* TIOCGPGRP */
-#endif /* sgtty */
+  /* OK, figure out whether we have job control.  */
+  have_job_control ();
 
   observer_attach_inferior_exit (inflow_inferior_exit);
 

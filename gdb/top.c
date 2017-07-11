@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,6 +35,7 @@
 #include "value.h"
 #include "language.h"
 #include "terminal.h"		/* For job_control.  */
+#include "job-control.h"
 #include "annotate.h"
 #include "completer.h"
 #include "top.h"
@@ -218,7 +219,7 @@ void (*deprecated_warning_hook) (const char *, va_list);
    called to notify the GUI that we are done with the interaction
    window and it can close it.  */
 
-void (*deprecated_readline_begin_hook) (char *, ...);
+void (*deprecated_readline_begin_hook) (const char *, ...);
 char *(*deprecated_readline_hook) (const char *);
 void (*deprecated_readline_end_hook) (void);
 
@@ -272,9 +273,9 @@ new_ui (FILE *instream, FILE *outstream, FILE *errstream)
 
   ui->input_interactive_p = ISATTY (ui->instream);
 
-  ui->m_gdb_stdin = stdio_fileopen (ui->instream);
-  ui->m_gdb_stdout = stdio_fileopen (ui->outstream);
-  ui->m_gdb_stderr = stderr_fileopen (ui->errstream);
+  ui->m_gdb_stdin = new stdio_file (ui->instream);
+  ui->m_gdb_stdout = new stdio_file (ui->outstream);
+  ui->m_gdb_stderr = new stderr_file (ui->errstream);
   ui->m_gdb_stdlog = ui->m_gdb_stderr;
 
   ui->prompt_state = PROMPT_NEEDED;
@@ -296,9 +297,9 @@ new_ui (FILE *instream, FILE *outstream, FILE *errstream)
 static void
 free_ui (struct ui *ui)
 {
-  ui_file_delete (ui->m_gdb_stdin);
-  ui_file_delete (ui->m_gdb_stdout);
-  ui_file_delete (ui->m_gdb_stderr);
+  delete ui->m_gdb_stdin;
+  delete ui->m_gdb_stdout;
+  delete ui->m_gdb_stderr;
 
   xfree (ui);
 }
@@ -322,6 +323,24 @@ delete_ui (struct ui *todel)
     ui_list = ui->next;
 
   free_ui (ui);
+}
+
+/* Cleanup that deletes a UI.  */
+
+static void
+delete_ui_cleanup (void *void_ui)
+{
+  struct ui *ui = (struct ui *) void_ui;
+
+  delete_ui (ui);
+}
+
+/* See top.h.  */
+
+struct cleanup *
+make_delete_ui_cleanup (struct ui *ui)
+{
+  return make_cleanup (delete_ui_cleanup, ui);
 }
 
 /* Open file named NAME for read/write, making sure not to make it the
@@ -353,13 +372,13 @@ new_ui_command (char *args, int from_tty)
   char **argv;
   const char *interpreter_name;
   const char *tty_name;
-  struct cleanup *back_to;
-  struct cleanup *streams_chain;
+  struct cleanup *success_chain;
+  struct cleanup *failure_chain;
 
   dont_repeat ();
 
   argv = gdb_buildargv (args);
-  back_to = make_cleanup_freeargv (argv);
+  success_chain = make_cleanup_freeargv (argv);
   argc = countargv (argv);
 
   if (argc < 2)
@@ -368,31 +387,35 @@ new_ui_command (char *args, int from_tty)
   interpreter_name = argv[0];
   tty_name = argv[1];
 
-  streams_chain = make_cleanup (null_cleanup, NULL);
+  {
+    scoped_restore save_ui = make_scoped_restore (&current_ui);
 
-  /* Open specified terminal, once for each of
-     stdin/stdout/stderr.  */
-  for (i = 0; i < 3; i++)
-    {
-      stream[i] = open_terminal_stream (tty_name);
-      make_cleanup_fclose (stream[i]);
-    }
+    failure_chain = make_cleanup (null_cleanup, NULL);
 
-  ui = new_ui (stream[0], stream[1], stream[2]);
+    /* Open specified terminal, once for each of
+       stdin/stdout/stderr.  */
+    for (i = 0; i < 3; i++)
+      {
+	stream[i] = open_terminal_stream (tty_name);
+	make_cleanup_fclose (stream[i]);
+      }
 
-  discard_cleanups (streams_chain);
+    ui = new_ui (stream[0], stream[1], stream[2]);
+    make_cleanup (delete_ui_cleanup, ui);
 
-  ui->async = 1;
+    ui->async = 1;
 
-  make_cleanup (restore_ui_cleanup, current_ui);
-  current_ui = ui;
+    current_ui = ui;
 
-  set_top_level_interpreter (interpreter_name);
+    set_top_level_interpreter (interpreter_name);
 
-  interp_pre_command_loop (top_level_interpreter ());
+    interp_pre_command_loop (top_level_interpreter ());
 
-  /* This restores the previous UI.  */
-  do_cleanups (back_to);
+    discard_cleanups (failure_chain);
+
+    /* This restores the previous UI and frees argv.  */
+    do_cleanups (success_chain);
+  }
 
   printf_unfiltered ("New UI allocated\n");
 }
@@ -470,7 +493,7 @@ void (*pre_init_ui_hook) (void);
 static void
 do_chdir_cleanup (void *old_dir)
 {
-  chdir (old_dir);
+  chdir ((const char *) old_dir);
   xfree (old_dir);
 }
 #endif
@@ -541,8 +564,12 @@ check_frame_language_change (void)
 void
 wait_sync_command_done (void)
 {
+  /* Processing events may change the current UI.  */
+  scoped_restore save_ui = make_scoped_restore (&current_ui);
+  struct ui *ui = current_ui;
+
   while (gdb_do_one_event () >= 0)
-    if (current_ui->prompt_state != PROMPT_BLOCKED)
+    if (ui->prompt_state != PROMPT_BLOCKED)
       break;
 }
 
@@ -664,47 +691,38 @@ execute_command (char *p, int from_tty)
    returned string, do not display it to the screen.  BATCH_FLAG will be
    temporarily set to true.  */
 
-char *
+std::string
 execute_command_to_string (char *p, int from_tty)
 {
-  struct ui_file *str_file;
   struct cleanup *cleanup;
-  char *retval;
 
   /* GDB_STDOUT should be better already restored during these
      restoration callbacks.  */
   cleanup = set_batch_flag_and_make_cleanup_restore_page_info ();
 
-  make_cleanup_restore_integer (&current_ui->async);
-  current_ui->async = 0;
+  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
-  str_file = mem_fileopen ();
+  string_file str_file;
 
-  make_cleanup_ui_file_delete (str_file);
-  make_cleanup_restore_ui_file (&gdb_stdout);
-  make_cleanup_restore_ui_file (&gdb_stderr);
-  make_cleanup_restore_ui_file (&gdb_stdlog);
-  make_cleanup_restore_ui_file (&gdb_stdtarg);
-  make_cleanup_restore_ui_file (&gdb_stdtargerr);
+  current_uiout->redirect (&str_file);
+  make_cleanup_ui_out_redirect_pop (current_uiout);
 
-  if (ui_out_redirect (current_uiout, str_file) < 0)
-    warning (_("Current output protocol does not support redirection"));
-  else
-    make_cleanup_ui_out_redirect_pop (current_uiout);
-
-  gdb_stdout = str_file;
-  gdb_stderr = str_file;
-  gdb_stdlog = str_file;
-  gdb_stdtarg = str_file;
-  gdb_stdtargerr = str_file;
+  scoped_restore save_stdout
+    = make_scoped_restore (&gdb_stdout, &str_file);
+  scoped_restore save_stderr
+    = make_scoped_restore (&gdb_stderr, &str_file);
+  scoped_restore save_stdlog
+    = make_scoped_restore (&gdb_stdlog, &str_file);
+  scoped_restore save_stdtarg
+    = make_scoped_restore (&gdb_stdtarg, &str_file);
+  scoped_restore save_stdtargerr
+    = make_scoped_restore (&gdb_stdtargerr, &str_file);
 
   execute_command (p, from_tty);
 
-  retval = ui_file_xstrdup (str_file, NULL);
-
   do_cleanups (cleanup);
 
-  return retval;
+  return std::move (str_file.string ());
 }
 
 
@@ -733,13 +751,10 @@ dont_repeat (void)
 /* Prevent dont_repeat from working, and return a cleanup that
    restores the previous state.  */
 
-struct cleanup *
+scoped_restore_tmpl<int>
 prevent_dont_repeat (void)
 {
-  struct cleanup *result = make_cleanup_restore_integer (&suppress_dont_repeat);
-
-  suppress_dont_repeat = 1;
-  return result;
+  return make_scoped_restore (&suppress_dont_repeat, 1);
 }
 
 
@@ -1010,11 +1025,17 @@ gdb_readline_wrapper (const char *prompt)
   ui->secondary_prompt_depth++;
   back_to = make_cleanup (gdb_readline_wrapper_cleanup, cleanup);
 
+  /* Processing events may change the current UI.  */
+  scoped_restore save_ui = make_scoped_restore (&current_ui);
+
   if (cleanup->target_is_async_orig)
     target_async (0);
 
-  /* Display our prompt and prevent double prompt display.  */
-  display_gdb_prompt (prompt);
+  /* Display our prompt and prevent double prompt display.  Don't pass
+     down a NULL prompt, since that has special meaning for
+     display_gdb_prompt -- it indicates a request to print the primary
+     prompt, while we want a secondary prompt here.  */
+  display_gdb_prompt (prompt != NULL ? prompt : "");
   if (ui->command_editing)
     rl_already_prompted = 1;
 
@@ -1138,7 +1159,7 @@ gdb_safe_append_history (void)
   struct cleanup *old_chain;
 
   local_history_filename
-    = xstrprintf ("%s-gdb%d~", history_filename, getpid ());
+    = xstrprintf ("%s-gdb%ld~", history_filename, (long) getpid ());
   old_chain = make_cleanup (xfree, local_history_filename);
 
   ret = rename (history_filename, local_history_filename);
@@ -1196,7 +1217,8 @@ gdb_safe_append_history (void)
    as the user has requested.  */
 
 char *
-command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
+command_line_input (const char *prompt_arg, int repeat,
+		    const char *annotation_suffix)
 {
   static struct buffer cmd_line_buffer;
   static int cmd_line_buffer_initialized;
@@ -1290,6 +1312,9 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
       if (cmd != NULL)
 	break;
 
+      /* Got partial input.  I.e., got a line that ends with a
+	 continuation character (backslash).  Suppress printing the
+	 prompt again.  */
       prompt = NULL;
     }
 
@@ -1314,7 +1339,7 @@ print_gdb_version (struct ui_file *stream)
   /* Second line is a copyright notice.  */
 
   fprintf_filtered (stream,
-		    "Copyright (C) 2016 Free Software Foundation, Inc.\n");
+		    "Copyright (C) 2017 Free Software Foundation, Inc.\n");
 
   /* Following the copyright is a brief statement that the program is
      free software, that users are free to copy and change it on
@@ -1547,29 +1572,18 @@ print_inferior_quit_action (struct inferior *inf, void *arg)
 int
 quit_confirm (void)
 {
-  struct ui_file *stb;
-  struct cleanup *old_chain;
-  char *str;
-  int qr;
-
   /* Don't even ask if we're only debugging a core file inferior.  */
   if (!have_live_inferiors ())
     return 1;
 
   /* Build the query string as a single string.  */
-  stb = mem_fileopen ();
-  old_chain = make_cleanup_ui_file_delete (stb);
+  string_file stb;
 
-  fprintf_filtered (stb, _("A debugging session is active.\n\n"));
-  iterate_over_inferiors (print_inferior_quit_action, stb);
-  fprintf_filtered (stb, _("\nQuit anyway? "));
+  stb.puts (_("A debugging session is active.\n\n"));
+  iterate_over_inferiors (print_inferior_quit_action, &stb);
+  stb.puts (_("\nQuit anyway? "));
 
-  str = ui_file_xstrdup (stb, NULL);
-  make_cleanup (xfree, str);
-
-  qr = query ("%s", str);
-  do_cleanups (old_chain);
-  return qr;
+  return query ("%s", stb.c_str ());
 }
 
 /* Prepare to exit GDB cleanly by undoing any changes made to the
@@ -1596,7 +1610,7 @@ undo_terminal_modifications_before_exit (void)
 /* Quit without asking for confirmation.  */
 
 void
-quit_force (char *args, int from_tty)
+quit_force (int *exit_arg, int from_tty)
 {
   int exit_code = 0;
   struct qt_args qt;
@@ -1605,16 +1619,12 @@ quit_force (char *args, int from_tty)
 
   /* An optional expression may be used to cause gdb to terminate with the 
      value of that expression.  */
-  if (args)
-    {
-      struct value *val = parse_and_eval (args);
-
-      exit_code = (int) value_as_long (val);
-    }
+  if (exit_arg)
+    exit_code = *exit_arg;
   else if (return_child_result)
     exit_code = return_child_result_value;
 
-  qt.args = args;
+  qt.args = NULL;
   qt.from_tty = from_tty;
 
   /* We want to handle any quit errors and exit regardless.  */
@@ -1699,7 +1709,7 @@ show_interactive_mode (struct ui_file *file, int from_tty,
   if (interactive_mode == AUTO_BOOLEAN_AUTO)
     fprintf_filtered (file, "Debugger's interactive mode "
 		            "is %s (currently %s).\n",
-                      value, gdb_has_a_terminal () ? "on" : "off");
+                      value, input_interactive_p (current_ui) ? "on" : "off");
   else
     fprintf_filtered (file, "Debugger's interactive mode is %s.\n", value);
 }
@@ -2014,7 +2024,7 @@ init_main (void)
   /* Setup important stuff for command line editing.  */
   rl_completion_word_break_hook = gdb_completion_word_break_characters;
   rl_completion_entry_function = readline_line_completion_function;
-  rl_completer_word_break_characters = default_word_break_characters ();
+  set_rl_completer_word_break_characters (default_word_break_characters ());
   rl_completer_quote_characters = get_gdb_completer_quote_characters ();
   rl_completion_display_matches_hook = cli_display_match_list;
   rl_readline_name = "gdb";

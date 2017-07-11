@@ -1,6 +1,6 @@
 /* YACC parser for Go expressions, for GDB.
 
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -81,7 +81,7 @@ int yyparse (void);
 
 static int yylex (void);
 
-void yyerror (char *);
+void yyerror (const char *);
 
 %}
 
@@ -936,7 +936,7 @@ parse_string_or_char (const char *tokptr, const char **outptr,
 
 struct token
 {
-  char *oper;
+  const char *oper;
   int token;
   enum exp_opcode opcode;
 };
@@ -1297,7 +1297,7 @@ static int popping;
 
 /* Temporary storage for yylex; this holds symbol names as they are
    built up.  */
-static struct obstack name_obstack;
+static auto_obstack name_obstack;
 
 /* Build "package.name" in name_obstack.
    For convenience of the caller, the name is NUL-terminated,
@@ -1309,7 +1309,7 @@ build_packaged_name (const char *package, int package_len,
 {
   struct stoken result;
 
-  obstack_free (&name_obstack, obstack_base (&name_obstack));
+  name_obstack.clear ();
   obstack_grow (&name_obstack, package, package_len);
   obstack_grow_str (&name_obstack, ".");
   obstack_grow (&name_obstack, name, name_len);
@@ -1567,11 +1567,13 @@ go_parse (struct parser_state *par_state)
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
+  /* Note that parsing (within yyparse) freely installs cleanups
+     assuming they'll be run here (below).  */
   back_to = make_cleanup (null_cleanup, NULL);
 
-  make_cleanup_restore_integer (&yydebug);
+  scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
+							parser_debug);
   make_cleanup_clear_parser_state (&pstate);
-  yydebug = parser_debug;
 
   /* Initialize some state used by the lexer.  */
   last_was_structop = 0;
@@ -1579,8 +1581,7 @@ go_parse (struct parser_state *par_state)
 
   VEC_free (token_and_value, token_fifo);
   popping = 0;
-  obstack_init (&name_obstack);
-  make_cleanup_obstack_free (&name_obstack);
+  name_obstack.clear ();
 
   result = yyparse ();
   do_cleanups (back_to);
@@ -1588,7 +1589,7 @@ go_parse (struct parser_state *par_state)
 }
 
 void
-yyerror (char *msg)
+yyerror (const char *msg)
 {
   if (prev_lexptr)
     lexptr = prev_lexptr;

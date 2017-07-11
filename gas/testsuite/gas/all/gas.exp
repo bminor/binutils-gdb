@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2016 Free Software Foundation, Inc.
+# Copyright (C) 2012-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -159,10 +159,10 @@ case $target_triplet in {
 	# These targets fail redef2 because they disallow redefined
 	# symbols on relocs.
 	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*" "rl78-*-*"
-	setup_xfail "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
+	setup_xfail "riscv*-*-*" "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
 	run_dump_test redef2
 	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*" "rl78-*-*"
-	setup_xfail "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
+	setup_xfail "riscv*-*-*" "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
 	# rs6000-aix disallows redefinition via .comm.
 	setup_xfail "*-*-aix*"
 	# SOM uses a different syntax for .comm
@@ -247,7 +247,7 @@ proc do_930509a {} {
     set x 0
     gas_start "x930509.s" "-al"
     while 1 {
-# We need to accomodate both byte orders here.
+# We need to accommodate both byte orders here.
 # If ".long" means an 8-byte value on some target someday, this test will have
 # to be fixed.
 	expect {
@@ -277,8 +277,8 @@ if {    ![istarget *c30*-*-*]
      && ![istarget hppa*-*-*] } then {
     # The vax fails because VMS can apparently actually handle this
     # case in relocs, so gas doesn't handle it itself.
-    # msp430 and mn10[23]00 emit two relocs to handle the difference of two symbols.
-    setup_xfail "mn10200-*-*" "mn10300*-*-*" "msp430*-*-*" "vax*-*-vms*"
+    # msp430, mn10[23]00 and riscv emit two relocs to handle the difference of two symbols.
+    setup_xfail "mn10200-*-*" "mn10300*-*-*" "msp430*-*-*" "riscv*-*-*" "vax*-*-vms*"
     do_930509a
 }
 
@@ -311,7 +311,7 @@ case $target_triplet in {
 	# character (it is allowed to be a line comment character).
 	if [string match "" [lindex [gas_run excl.s "-o /dev/null" ""] 0]] {
 	    run_dump_test altmac2
-	    # Similarly this test does not work when ! is a line seperator.
+	    # Similarly this test does not work when ! is a line separator.
 	    run_dump_test eval
 	}
     }
@@ -392,6 +392,7 @@ run_dump_test sleb128-5
 # .byte is not 8 bits on either tic4x or tic54x
 if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] } {
     run_dump_test sleb128-7
+    run_dump_test sleb128-8
 }
 
 # .byte is 32 bits on tic4x, and .p2align isn't supported on tic54x
@@ -454,3 +455,31 @@ load_lib gas-dg.exp
 dg-init
 dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/err-*.s $srcdir/$subdir/warn-*.s]] "" ""
 dg-finish
+
+# Set $nop_type appropriately to indicate the NOP instruction mnemonic.
+case $target_triplet in {
+    { "mmix-*-*" } {
+	set nop_type 5
+    }
+    { "i960-*-*" } {
+	set nop_type 4
+    }
+    { "i370-*-*" } {
+	set nop_type 3
+    }
+    { "or1k*-*-*" } {
+	set nop_type 2
+    }
+    { "ia64-*-*" } {
+	set nop_type 1
+    }
+    default {
+	set nop_type 0
+    }
+}
+run_dump_test "org-1" [list [list as "--defsym nop_type=$nop_type"]]
+run_dump_test "org-2"
+run_dump_test "org-3"
+run_dump_test "org-4"
+run_dump_test "org-5"
+run_dump_test "org-6"

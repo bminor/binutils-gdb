@@ -1,6 +1,6 @@
 /* Header file for GDB command decoding library.
 
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2017 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,8 +23,7 @@
 
 /* Include the public interfaces.  */
 #include "command.h"
-
-struct re_pattern_buffer;
+#include "gdb_regex.h"
 
 #if 0
 /* FIXME: cagney/2002-03-17: Once cmd_type() has been removed, ``enum
@@ -218,6 +217,12 @@ struct cmd_list_element
 
     /* Link pointer for aliases on an alias list.  */
     struct cmd_list_element *alias_chain;
+
+    /* If non-null, the pointer to a field in 'struct
+       cli_suppress_notification', which will be set to true in cmd_func
+       when this command is being executed.  It will be set back to false
+       when the command has been executed.  */
+    int *suppress_notification;
   };
 
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
@@ -228,7 +233,7 @@ extern void help_cmd_list (struct cmd_list_element *, enum command_class,
 extern void help_cmd (const char *, struct ui_file *);
 
 extern void apropos_cmd (struct ui_file *, struct cmd_list_element *,
-                         struct re_pattern_buffer *, const char *);
+                         compiled_regex &, const char *);
 
 /* Used to mark commands that don't do anything.  If we just leave the
    function field NULL, the command is interpreted as a help topic, or
@@ -246,5 +251,7 @@ extern const char * const auto_boolean_enums[];
    Return 1 if it is user-defined.  Return 0 otherwise.  */
 
 extern int cli_user_command_p (struct cmd_list_element *);
+
+extern int find_command_name_length (const char *);
 
 #endif /* !defined (CLI_DECODE_H) */

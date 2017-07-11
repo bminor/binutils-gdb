@@ -1,5 +1,5 @@
 /* Common definitions for remote server for GDB.
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -62,6 +62,7 @@ int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 #include "mem-break.h"
 #include "gdbthread.h"
 #include "inferiors.h"
+#include "environ.h"
 
 /* Target-specific functions */
 
@@ -123,6 +124,10 @@ extern int handle_target_event (int err, gdb_client_data client_data);
 /* Get rid of the currently pending stop replies that match PTID.  */
 extern void discard_queued_stop_replies (ptid_t ptid);
 
+/* Returns true if there's a pending stop reply that matches PTID in
+   the vStopped notifications queue.  */
+extern int in_queued_stop_replies (ptid_t ptid);
+
 #include "remote-utils.h"
 
 #include "utils.h"
@@ -143,5 +148,18 @@ extern void discard_queued_stop_replies (ptid_t ptid);
 
 /* Definition for any syscall, used for unfiltered syscall reporting.  */
 #define ANY_SYSCALL (-2)
+
+/* After fork_inferior has been called, we need to adjust a few
+   signals and call startup_inferior to start the inferior and consume
+   its first events.  This is done here.  PID is the pid of the new
+   inferior and PROGRAM is its name.  */
+extern void post_fork_inferior (int pid, const char *program);
+
+/* Get the gdb_environ being used in the current session.  */
+extern gdb_environ *get_environ ();
+
+extern target_waitstatus last_status;
+extern ptid_t last_ptid;
+extern unsigned long signal_pid;
 
 #endif /* SERVER_H */

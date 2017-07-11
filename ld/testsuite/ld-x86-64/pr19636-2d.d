@@ -20,6 +20,6 @@ Disassembly of section .plt:
 Disassembly of section .text:
 
 0+140 <_start>:
-[ 	]*[a-f0-9]+:	48 3b 05 f1 00 20 00 	cmp    0x2000f1\(%rip\),%rax        # 200238 <_DYNAMIC\+0xe0>
-[ 	]*[a-f0-9]+:	ff 25 f3 00 20 00    	jmpq   \*0x2000f3\(%rip\)        # 200240 <_DYNAMIC\+0xe8>
-[ 	]*[a-f0-9]+:	e8 de ff ff ff       	callq  130 <_start-0x10>
+[ 	]*[a-f0-9]+:	48 3b 05 f1 00 20 00 	cmp    0x2000f1\(%rip\),%rax        # 200238 <.*>
+[ 	]*[a-f0-9]+:	ff 25 f3 00 20 00    	jmpq   \*0x2000f3\(%rip\)        # 200240 <.*>
+[ 	]*[a-f0-9]+:	e8 de ff ff ff       	callq  130 <.*>

@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2016 Free Software Foundation, Inc.
+# Copyright (C) 2012-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@ if { [istarget powerpc*-*-*] } then {
 	run_dump_test "common"
 	run_dump_test "476"
 	run_dump_test "a2"
+	run_dump_test "pr21303"
 	if { ![istarget powerpc*le-*-*] } then {
 	    run_dump_test "vle"
 	    run_dump_test "vle-reloc"

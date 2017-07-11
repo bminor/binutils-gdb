@@ -21,9 +21,9 @@ Section Headers:
  +\[[ 0-9]+\] .dynamic +DYNAMIC +0+12060 0+2060 0+98 08 +WA +3 +0 +4
  +\[[ 0-9]+\] .got +PROGBITS +0+120f8 0+20f8 0+4c 04 +WA +0 +0 +4
  +\[[ 0-9]+\] .plt +.*
- +\[[ 0-9]+\] .shstrtab +.*
  +\[[ 0-9]+\] .symtab +.*
  +\[[ 0-9]+\] .strtab +.*
+ +\[[ 0-9]+\] .shstrtab +.*
 #...
 
 Elf file type is DYN \(Shared object file\)

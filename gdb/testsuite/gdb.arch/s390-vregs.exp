@@ -1,4 +1,4 @@
-# Copyright 2015-2016 Free Software Foundation, Inc.
+# Copyright 2015-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ if [isnative] {
     remote_exec build "mkdir $coredir"
 }
 
-if { [prepare_for_testing ${testfile}.exp $testfile $srcfile \
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
 	  [list "additional_flags=-mzarch"]] } {
     return -1
 }
@@ -146,16 +146,23 @@ if { $i != 32 } {
 gdb_continue_to_breakpoint "change vrs"
 set vregs [capture_command_output "info registers vector" ""]
 
+# Format a 128-bit value, given individual 4-byte values, as hex.
+# Leading zeros are suppressed.
+proc hex128 {a_high a_low b_high b_low} {
+    set result [format %08x%08x%08x%08x \
+		    [expr $a_high * ($i + 1) * $a_high ] \
+		    [expr $a_low * ($i + 1) * $a_low ] \
+		    [expr $b_high * (32 - $i) * $b_high * 32] \
+		    [expr $b_low * (32 - $i) * $b_low * 32] ]
+    return [regsub -- "^0*" $result ""]
+}
+
 set j 1
 foreach {- r i val} [regexp -all -inline -line \
 			 {^(\D*)(\d+)\s+.*?uint128 = 0x([0-9a-f]+?)} $vregs] {
     if { $r ne "v" } {
 	fail "info registers vector: bad line $j"
-    } elseif { $val ne [format %08x%08x%08x%08x \
-			    [expr $a_high * ($i + 1) * $a_high ] \
-			    [expr $a_low * ($i + 1) * $a_low ] \
-			    [expr $b_high * (32 - $i) * $b_high * 32] \
-			    [expr $b_low * (32 - $i) * $b_low * 32] ] } {
+    } elseif { $val ne [hex128 $a_high $a_low $b_high $b_low] } {
 	fail "compare \$v$i"
     }
     incr j 1

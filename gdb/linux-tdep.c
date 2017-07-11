@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux, architecture independent.
 
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,6 +38,7 @@
 #include "gdbcmd.h"
 #include "gdb_regex.h"
 #include "common/enum-flags.h"
+#include "common/gdb_optional.h"
 
 #include <ctype.h>
 
@@ -407,7 +408,7 @@ linux_has_shared_address_space (struct gdbarch *gdbarch)
 
 /* This is how we want PTIDs from core files to be printed.  */
 
-static char *
+static const char *
 linux_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 {
   static char buf[80];
@@ -493,6 +494,44 @@ decode_vmflags (char *p, struct smaps_vmflags *v)
     }
 }
 
+/* Regexes used by mapping_is_anonymous_p.  Put in a structure because
+   they're initialized lazily.  */
+
+struct mapping_regexes
+{
+  /* Matches "/dev/zero" filenames (with or without the "(deleted)"
+     string in the end).  We know for sure, based on the Linux kernel
+     code, that memory mappings whose associated filename is
+     "/dev/zero" are guaranteed to be MAP_ANONYMOUS.  */
+  compiled_regex dev_zero
+    {"^/dev/zero\\( (deleted)\\)\\?$", REG_NOSUB,
+     _("Could not compile regex to match /dev/zero filename")};
+
+  /* Matches "/SYSV%08x" filenames (with or without the "(deleted)"
+     string in the end).  These filenames refer to shared memory
+     (shmem), and memory mappings associated with them are
+     MAP_ANONYMOUS as well.  */
+  compiled_regex shmem_file
+    {"^/\\?SYSV[0-9a-fA-F]\\{8\\}\\( (deleted)\\)\\?$", REG_NOSUB,
+     _("Could not compile regex to match shmem filenames")};
+
+  /* A heuristic we use to try to mimic the Linux kernel's 'n_link ==
+     0' code, which is responsible to decide if it is dealing with a
+     'MAP_SHARED | MAP_ANONYMOUS' mapping.  In other words, if
+     FILE_DELETED matches, it does not necessarily mean that we are
+     dealing with an anonymous shared mapping.  However, there is no
+     easy way to detect this currently, so this is the best
+     approximation we have.
+
+     As a result, GDB will dump readonly pages of deleted executables
+     when using the default value of coredump_filter (0x33), while the
+     Linux kernel will not dump those pages.  But we can live with
+     that.  */
+  compiled_regex file_deleted
+    {" (deleted)$", REG_NOSUB,
+     _("Could not compile regex to match '<file> (deleted)'")};
+};
+
 /* Return 1 if the memory mapping is anonymous, 0 otherwise.
 
    FILENAME is the name of the file present in the first line of the
@@ -506,52 +545,16 @@ decode_vmflags (char *p, struct smaps_vmflags *v)
 static int
 mapping_is_anonymous_p (const char *filename)
 {
-  static regex_t dev_zero_regex, shmem_file_regex, file_deleted_regex;
+  static gdb::optional<mapping_regexes> regexes;
   static int init_regex_p = 0;
 
   if (!init_regex_p)
     {
-      struct cleanup *c = make_cleanup (null_cleanup, NULL);
-
       /* Let's be pessimistic and assume there will be an error while
 	 compiling the regex'es.  */
       init_regex_p = -1;
 
-      /* DEV_ZERO_REGEX matches "/dev/zero" filenames (with or
-	 without the "(deleted)" string in the end).  We know for
-	 sure, based on the Linux kernel code, that memory mappings
-	 whose associated filename is "/dev/zero" are guaranteed to be
-	 MAP_ANONYMOUS.  */
-      compile_rx_or_error (&dev_zero_regex, "^/dev/zero\\( (deleted)\\)\\?$",
-			   _("Could not compile regex to match /dev/zero "
-			     "filename"));
-      /* SHMEM_FILE_REGEX matches "/SYSV%08x" filenames (with or
-	 without the "(deleted)" string in the end).  These filenames
-	 refer to shared memory (shmem), and memory mappings
-	 associated with them are MAP_ANONYMOUS as well.  */
-      compile_rx_or_error (&shmem_file_regex,
-			   "^/\\?SYSV[0-9a-fA-F]\\{8\\}\\( (deleted)\\)\\?$",
-			   _("Could not compile regex to match shmem "
-			     "filenames"));
-      /* FILE_DELETED_REGEX is a heuristic we use to try to mimic the
-	 Linux kernel's 'n_link == 0' code, which is responsible to
-	 decide if it is dealing with a 'MAP_SHARED | MAP_ANONYMOUS'
-	 mapping.  In other words, if FILE_DELETED_REGEX matches, it
-	 does not necessarily mean that we are dealing with an
-	 anonymous shared mapping.  However, there is no easy way to
-	 detect this currently, so this is the best approximation we
-	 have.
-
-	 As a result, GDB will dump readonly pages of deleted
-	 executables when using the default value of coredump_filter
-	 (0x33), while the Linux kernel will not dump those pages.
-	 But we can live with that.  */
-      compile_rx_or_error (&file_deleted_regex, " (deleted)$",
-			   _("Could not compile regex to match "
-			     "'<file> (deleted)'"));
-      /* We will never release these regexes, so just discard the
-	 cleanups.  */
-      discard_cleanups (c);
+      regexes.emplace ();
 
       /* If we reached this point, then everything succeeded.  */
       init_regex_p = 1;
@@ -573,9 +576,9 @@ mapping_is_anonymous_p (const char *filename)
     }
 
   if (*filename == '\0'
-      || regexec (&dev_zero_regex, filename, 0, NULL, 0) == 0
-      || regexec (&shmem_file_regex, filename, 0, NULL, 0) == 0
-      || regexec (&file_deleted_regex, filename, 0, NULL, 0) == 0)
+      || regexes->dev_zero.exec (filename, 0, NULL, 0) == 0
+      || regexes->shmem_file.exec (filename, 0, NULL, 0) == 0
+      || regexes->file_deleted.exec (filename, 0, NULL, 0) == 0)
     return 1;
 
   return 0;
@@ -1503,16 +1506,12 @@ linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
 				    char *note_data, int *note_size)
 {
   struct cleanup *cleanup;
-  struct obstack data_obstack, filename_obstack;
   struct linux_make_mappings_data mapping_data;
   struct type *long_type
     = arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch), 0, "long");
   gdb_byte buf[sizeof (ULONGEST)];
 
-  obstack_init (&data_obstack);
-  cleanup = make_cleanup_obstack_free (&data_obstack);
-  obstack_init (&filename_obstack);
-  make_cleanup_obstack_free (&filename_obstack);
+  auto_obstack data_obstack, filename_obstack;
 
   mapping_data.file_count = 0;
   mapping_data.data_obstack = &data_obstack;
@@ -1545,7 +1544,6 @@ linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
 				      obstack_object_size (&data_obstack));
     }
 
-  do_cleanups (cleanup);
   return note_data;
 }
 
@@ -2287,15 +2285,40 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
   long pid;
   char *data;
 
-  /* Can't access /proc if debugging a core file.  */
-  if (!target_has_execution)
+  if (target_auxv_search (&current_target, AT_SYSINFO_EHDR, &range->start) <= 0)
     return 0;
+
+  /* It doesn't make sense to access the host's /proc when debugging a
+     core file.  Instead, look for the PT_LOAD segment that matches
+     the vDSO.  */
+  if (!target_has_execution)
+    {
+      Elf_Internal_Phdr *phdrs;
+      long phdrs_size;
+      int num_phdrs, i;
+
+      phdrs_size = bfd_get_elf_phdr_upper_bound (core_bfd);
+      if (phdrs_size == -1)
+	return 0;
+
+      phdrs = (Elf_Internal_Phdr *) alloca (phdrs_size);
+      num_phdrs = bfd_get_elf_phdrs (core_bfd, phdrs);
+      if (num_phdrs == -1)
+	return 0;
+
+      for (i = 0; i < num_phdrs; i++)
+	if (phdrs[i].p_type == PT_LOAD
+	    && phdrs[i].p_vaddr == range->start)
+	  {
+	    range->length = phdrs[i].p_memsz;
+	    return 1;
+	  }
+
+      return 0;
+    }
 
   /* We need to know the real target PID to access /proc.  */
   if (current_inferior ()->fake_pid_p)
-    return 0;
-
-  if (target_auxv_search (&current_target, AT_SYSINFO_EHDR, &range->start) <= 0)
     return 0;
 
   pid = current_inferior ()->pid;

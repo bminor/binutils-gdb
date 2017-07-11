@@ -592,4 +592,16 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 4b 90 90 90 90 90 	cmovnp edx,DWORD PTR \[eax-0x6f6f6f70\]
 [ 	]*[a-f0-9]+:	66 0f 4a 90 90 90 90 90 	cmovp  dx,WORD PTR \[eax-0x6f6f6f70\]
 [ 	]*[a-f0-9]+:	66 0f 4b 90 90 90 90 90 	cmovnp dx,WORD PTR \[eax-0x6f6f6f70\]
+ +[a-f0-9]+:	82 c3 01             	add    bl,0x1
+ +[a-f0-9]+:	82 f3 01             	xor    bl,0x1
+ +[a-f0-9]+:	82 d3 01             	adc    bl,0x1
+ +[a-f0-9]+:	82 db 01             	sbb    bl,0x1
+ +[a-f0-9]+:	82 e3 01             	and    bl,0x1
+ +[a-f0-9]+:	82 eb 01             	sub    bl,0x1
+ +[a-f0-9]+:	82 f3 01             	xor    bl,0x1
+ +[a-f0-9]+:	82 fb 01             	cmp    bl,0x1
+ +[a-f0-9]+:	62 f3 7d 08 15 e8 ab 	vpextrw eax,xmm5,0xab
+ +[a-f0-9]+:	f6 c9 01             	test   cl,(0x)?0*1
+ +[a-f0-9]+:	66 f7 c9 02 00       	test   cx,(0x)?0*2
+ +[a-f0-9]+:	f7 c9 04 00 00 00    	test   ecx,(0x)?0*4
 #pass

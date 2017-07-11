@@ -8,7 +8,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
    [0-9a-f]+:	d51d4007 	msr	spsr_el12, x7
    [0-9a-f]+:	d53d4007 	mrs	x7, spsr_el12
    [0-9a-f]+:	d51d4027 	msr	elr_el12, x7

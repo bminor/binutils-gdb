@@ -1,6 +1,6 @@
 /* Generic remote debugging interface for simulators.
 
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2017 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
    Steve Chamberlain (sac@cygnus.com).
@@ -40,6 +40,7 @@
 #include "arch-utils.h"
 #include "readline/readline.h"
 #include "gdbthread.h"
+#include "common/byte-vector.h"
 
 /* Prototypes */
 
@@ -429,8 +430,9 @@ gdbsim_fetch_register (struct target_ops *ops,
 		       struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct inferior *inf = find_inferior_ptid (regcache_get_ptid (regcache));
   struct sim_inferior_data *sim_data
-    = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NEEDED);
+    = get_sim_inferior_data (inf, SIM_INSTANCE_NEEDED);
 
   if (regno == -1)
     {
@@ -447,38 +449,31 @@ gdbsim_fetch_register (struct target_ops *ops,
       {
 	/* For moment treat a `does not exist' register the same way
 	   as an ``unavailable'' register.  */
-	gdb_byte buf[MAX_REGISTER_SIZE];
-	int nr_bytes;
-
-	memset (buf, 0, MAX_REGISTER_SIZE);
-	regcache_raw_supply (regcache, regno, buf);
+	regcache->raw_supply_zeroed (regno);
 	break;
       }
 
     default:
       {
 	static int warn_user = 1;
-	gdb_byte buf[MAX_REGISTER_SIZE];
+	int regsize = register_size (gdbarch, regno);
+	gdb::byte_vector buf (regsize, 0);
 	int nr_bytes;
 
 	gdb_assert (regno >= 0 && regno < gdbarch_num_regs (gdbarch));
-	memset (buf, 0, MAX_REGISTER_SIZE);
 	nr_bytes = sim_fetch_register (sim_data->gdbsim_desc,
 				       gdbarch_register_sim_regno
 					 (gdbarch, regno),
-				       buf,
-				       register_size (gdbarch, regno));
-	if (nr_bytes > 0
-	    && nr_bytes != register_size (gdbarch, regno) && warn_user)
+				       buf.data (), regsize);
+	if (nr_bytes > 0 && nr_bytes != regsize && warn_user)
 	  {
 	    fprintf_unfiltered (gdb_stderr,
 				"Size of register %s (%d/%d) "
 				"incorrect (%d instead of %d))",
 				gdbarch_register_name (gdbarch, regno),
 				regno,
-				gdbarch_register_sim_regno
-				  (gdbarch, regno),
-				nr_bytes, register_size (gdbarch, regno));
+				gdbarch_register_sim_regno (gdbarch, regno),
+				nr_bytes, regsize);
 	    warn_user = 0;
 	  }
 	/* FIXME: cagney/2002-05-27: Should check `nr_bytes == 0'
@@ -486,13 +481,13 @@ gdbsim_fetch_register (struct target_ops *ops,
 	   which registers are fetchable.  */
 	/* Else if (nr_bytes < 0): an old simulator, that doesn't
 	   think to return the register size.  Just assume all is ok.  */
-	regcache_raw_supply (regcache, regno, buf);
+	regcache->raw_supply (regno, buf.data ());
 	if (remote_debug)
 	  {
 	    fprintf_unfiltered (gdb_stdlog,
 				"gdbsim_fetch_register: %d", regno);
 	    /* FIXME: We could print something more intelligible.  */
-	    dump_mem (buf, register_size (gdbarch, regno));
+	    dump_mem (buf.data (), regsize);
 	  }
 	break;
       }
@@ -505,8 +500,9 @@ gdbsim_store_register (struct target_ops *ops,
 		       struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct inferior *inf = find_inferior_ptid (regcache_get_ptid (regcache));
   struct sim_inferior_data *sim_data
-    = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NEEDED);
+    = get_sim_inferior_data (inf, SIM_INSTANCE_NEEDED);
 
   if (regno == -1)
     {
@@ -516,15 +512,17 @@ gdbsim_store_register (struct target_ops *ops,
     }
   else if (gdbarch_register_sim_regno (gdbarch, regno) >= 0)
     {
-      gdb_byte tmp[MAX_REGISTER_SIZE];
+      int regsize = register_size (gdbarch, regno);
+      gdb::byte_vector tmp (regsize);
       int nr_bytes;
 
-      regcache_cooked_read (regcache, regno, tmp);
+      regcache->cooked_read (regno, tmp.data ());
       nr_bytes = sim_store_register (sim_data->gdbsim_desc,
 				     gdbarch_register_sim_regno
 				       (gdbarch, regno),
-				     tmp, register_size (gdbarch, regno));
-      if (nr_bytes > 0 && nr_bytes != register_size (gdbarch, regno))
+				     tmp.data (), regsize);
+
+      if (nr_bytes > 0 && nr_bytes != regsize)
 	internal_error (__FILE__, __LINE__,
 			_("Register size different to expected"));
       if (nr_bytes < 0)
@@ -538,7 +536,7 @@ gdbsim_store_register (struct target_ops *ops,
 	{
 	  fprintf_unfiltered (gdb_stdlog, "gdbsim_store_register: %d", regno);
 	  /* FIXME: We could print something more intelligible.  */
-	  dump_mem (tmp, register_size (gdbarch, regno));
+	  dump_mem (tmp.data (), regsize);
 	}
     }
 }
@@ -554,7 +552,7 @@ gdbsim_kill (struct target_ops *ops)
 
   /* There is no need to `kill' running simulator - the simulator is
      not running.  Mourning it is enough.  */
-  target_mourn_inferior ();
+  target_mourn_inferior (inferior_ptid);
 }
 
 /* Load an executable file into the target process.  This is expected to
@@ -605,13 +603,14 @@ gdbsim_load (struct target_ops *self, const char *args, int fromtty)
    user types "run" after having attached.  */
 
 static void
-gdbsim_create_inferior (struct target_ops *target, char *exec_file, char *args,
-			char **env, int from_tty)
+gdbsim_create_inferior (struct target_ops *target, const char *exec_file,
+			const std::string &allargs, char **env, int from_tty)
 {
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NEEDED);
   int len;
   char *arg_buf, **argv;
+  const char *args = allargs.c_str ();
 
   if (exec_file == 0 || exec_bfd == 0)
     warning (_("No executable file specified."));
@@ -631,7 +630,7 @@ gdbsim_create_inferior (struct target_ops *target, char *exec_file, char *args,
 
   if (exec_file != NULL)
     {
-      len = strlen (exec_file) + 1 + strlen (args) + 1 + /*slop */ 10;
+      len = strlen (exec_file) + 1 + allargs.size () + 1 + /*slop */ 10;
       arg_buf = (char *) alloca (len);
       arg_buf[0] = '\0';
       strcat (arg_buf, exec_file);
@@ -1268,7 +1267,7 @@ gdbsim_thread_alive (struct target_ops *ops, ptid_t ptid)
 /* Convert a thread ID to a string.  Returns the string in a static
    buffer.  */
 
-static char *
+static const char *
 gdbsim_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   return normal_pid_to_str (ptid);

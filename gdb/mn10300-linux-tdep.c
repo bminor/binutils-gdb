@@ -1,6 +1,6 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -86,7 +86,6 @@ am33_supply_gregset_method (const struct regset *regset,
 			    struct regcache *regcache, 
 			    int regnum, const void *gregs, size_t len)
 {
-  char zerobuf[MAX_REGISTER_SIZE];
   const mn10300_elf_greg_t *regp = (const mn10300_elf_greg_t *) gregs;
   int i;
 
@@ -188,17 +187,13 @@ am33_supply_gregset_method (const struct regset *regset,
 
     /* ssp, msp, and usp are inaccessible.  */
   case E_E8_REGNUM:
-    memset (zerobuf, 0, MAX_REGISTER_SIZE);
-    regcache_raw_supply (regcache, E_E8_REGNUM, zerobuf);
+    regcache->raw_supply_zeroed (E_E8_REGNUM);
     break;
   case E_E9_REGNUM:
-    memset (zerobuf, 0, MAX_REGISTER_SIZE);
-    regcache_raw_supply (regcache, E_E9_REGNUM, zerobuf);
+    regcache->raw_supply_zeroed (E_E9_REGNUM);
     break;
   case E_E10_REGNUM:
-    memset (zerobuf, 0, MAX_REGISTER_SIZE);
-    regcache_raw_supply (regcache, E_E10_REGNUM, zerobuf);
-
+    regcache->raw_supply_zeroed (E_E10_REGNUM);
     break;
   case E_MCRH_REGNUM:
     regcache_raw_supply (regcache, E_MCRH_REGNUM, 
@@ -218,12 +213,10 @@ am33_supply_gregset_method (const struct regset *regset,
     break;
   case E_FPCR_REGNUM + 1:
     /* The two unused registers beyond fpcr are inaccessible.  */
-    memset (zerobuf, 0, MAX_REGISTER_SIZE);
-    regcache_raw_supply (regcache, E_FPCR_REGNUM + 1, zerobuf);
+    regcache->raw_supply_zeroed (E_FPCR_REGNUM + 1);
     break;
   case E_FPCR_REGNUM + 2:
-    memset (zerobuf, 0, MAX_REGISTER_SIZE);
-    regcache_raw_supply (regcache, E_FPCR_REGNUM + 2, zerobuf);
+    regcache->raw_supply_zeroed (E_FPCR_REGNUM + 2);
     break;
   default:	/* An error, obviously, but should we error out?  */
     break;

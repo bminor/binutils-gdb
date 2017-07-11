@@ -1,6 +1,6 @@
 /* Shared utility routines for GDB to interact with agent.
 
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,16 +17,19 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef COMMON_AGENT_H
+#define COMMON_AGENT_H
+
+#include "common/preprocessor.h"
+
 int agent_run_command (int pid, const char *cmd, int len);
 
 int agent_look_up_symbols (void *);
 
-#define STRINGIZE_1(STR) #STR
-#define STRINGIZE(STR) STRINGIZE_1(STR)
 #define IPA_SYM_EXPORTED_NAME(SYM) gdb_agent_ ## SYM
 #define IPA_SYM(SYM)                                   \
   {                                                    \
-    STRINGIZE (IPA_SYM_EXPORTED_NAME (SYM)),		\
+    STRINGIFY (IPA_SYM_EXPORTED_NAME (SYM)),		\
     offsetof (struct ipa_sym_addresses, addr_ ## SYM)	\
   }
 
@@ -56,3 +59,5 @@ enum agent_capa
 int agent_capability_check (enum agent_capa);
 
 void agent_capability_invalidate (void);
+
+#endif /* COMMON_AGENT_H */

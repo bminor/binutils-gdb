@@ -1,4 +1,4 @@
-# Copyright 2015-2016 Free Software Foundation, Inc.
+# Copyright 2015-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ standard_testfile
 # gdbserver modes are supported.  Only non-extended gdbserver is not
 # supported.
 if [target_info exists use_gdb_stub] {
-    untested ${testfile}.exp
+    untested "using gdb stub"
     return
 }
 
@@ -223,6 +223,12 @@ with_test_prefix "two inferiors" {
     # Multiple ranges with mixed explicit inferiors.
     thr_apply_info_thr "1.1-2 2.2-3" \
 	"1.1 1.2 2.2 2.3"
+
+    # All threads.
+    thread_apply "all" \
+	"2.3 2.2 2.1 1.3 1.2 1.1"
+    thread_apply "all -ascending" \
+	"1.1 1.2 1.3 2.1 2.2 2.3"
 
     # Now test using GDB convenience variables.
 

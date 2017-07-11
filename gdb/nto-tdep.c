@@ -1,6 +1,6 @@
 /* nto-tdep.c - general QNX Neutrino target functionality.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    Contributed by QNX Software Systems Ltd.
 
@@ -87,7 +87,8 @@ nto_map_arch_to_cputype (const char *arch)
 }
 
 int
-nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
+nto_find_and_open_solib (const char *solib, unsigned o_flags,
+			 char **temp_pathname)
 {
   char *buf, *arch_path, *nto_root;
   const char *endian;
@@ -189,7 +190,7 @@ nto_parse_redirection (char *pargv[], const char **pin, const char **pout,
 		       const char **perr)
 {
   char **argv;
-  char *in, *out, *err, *p;
+  const char *in, *out, *err, *p;
   int argc, i, n;
 
   for (n = 0; pargv[n]; n++);
@@ -238,43 +239,12 @@ nto_parse_redirection (char *pargv[], const char **pin, const char **pout,
   return argv;
 }
 
-/* The struct lm_info, lm_addr, and nto_truncate_ptr are copied from
-   solib-svr4.c to support nto_relocate_section_addresses
-   which is different from the svr4 version.  */
-
-/* Link map info to include in an allocated so_list entry */
-
-struct lm_info
-  {
-    /* Pointer to copy of link map from inferior.  The type is char *
-       rather than void *, so that we may use byte offsets to find the
-       various fields without the need for a cast.  */
-    gdb_byte *lm;
-
-    /* Amount by which addresses in the binary should be relocated to
-       match the inferior.  This could most often be taken directly
-       from lm, but when prelinking is involved and the prelink base
-       address changes, we may need a different offset, we want to
-       warn about the difference and compute it only once.  */
-    CORE_ADDR l_addr;
-
-    /* The target location of lm.  */
-    CORE_ADDR lm_addr;
-  };
-
-
 static CORE_ADDR
 lm_addr (struct so_list *so)
 {
-  if (so->lm_info->l_addr == (CORE_ADDR)-1)
-    {
-      struct link_map_offsets *lmo = nto_fetch_link_map_offsets ();
-      struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
 
-      so->lm_info->l_addr =
-	extract_typed_address (so->lm_info->lm + lmo->l_addr_offset, ptr_type);
-    }
-  return so->lm_info->l_addr;
+  return li->l_addr;
 }
 
 static CORE_ADDR
@@ -407,7 +377,7 @@ static const char *nto_thread_state_str[] =
   "NET_REPLY"	/* 20 0x14 */
 };
 
-char *
+const char *
 nto_extra_thread_info (struct target_ops *self, struct thread_info *ti)
 {
   if (ti && ti->priv

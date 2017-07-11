@@ -1,6 +1,6 @@
 /* CTF format support.
 
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2017 Free Software Foundation, Inc.
    Contributed by Hui Zhu <hui_zhu@mentor.com>
    Contributed by Yao Qi <yao@codesourcery.com>
 
@@ -29,8 +29,8 @@
 #include "inferior.h"
 #include "gdbthread.h"
 #include "tracefile.h"
-
 #include <ctype.h>
+#include <algorithm>
 
 /* GDB saves trace buffers and other information (such as trace
    status) got from the remote target into Common Trace Format (CTF).
@@ -303,11 +303,6 @@ ctf_target_save (struct trace_file_writer *self,
   /* Don't support save trace file to CTF format in the target.  */
   return 0;
 }
-
-#ifdef USE_WIN32API
-#undef mkdir
-#define mkdir(pathname, mode) mkdir (pathname)
-#endif
 
 /* This is the implementation of trace_file_write_ops method
    start.  It creates the directory DIRNAME, metadata and datastream
@@ -1397,7 +1392,7 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 	 and this address falls within a read-only section, fallback
 	 to reading from executable, up to LOW_ADDR_AVAILABLE  */
       if (offset < low_addr_available)
-	len = min (len, low_addr_available - offset);
+	len = std::min (len, low_addr_available - offset);
       res = exec_read_partial_read_only (readbuf, offset, len, xfered_len);
 
       if (res == TARGET_XFER_OK)
@@ -1527,8 +1522,8 @@ ctf_get_traceframe_address (void)
       struct tracepoint *tp
 	= get_tracepoint_by_number_on_target (tpnum);
 
-      if (tp && tp->base.loc)
-	addr = tp->base.loc->address;
+      if (tp && tp->loc)
+	addr = tp->loc->address;
     }
 
   /* Restore the position.  */
@@ -1692,7 +1687,7 @@ ctf_traceframe_info (struct target_ops *self)
 	  const struct bt_definition *def;
 
 	  def = bt_ctf_get_field (event, scope, "num");
-	  vnum = (int) bt_ctf_get_int64 (def);
+	  vnum = (int) bt_ctf_get_uint64 (def);
 	  VEC_safe_push (int, info->tvars, vnum);
 	}
       else

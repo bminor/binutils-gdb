@@ -1,5 +1,5 @@
 /* BFD back-end for MIPS Extended-Coff files.
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2017 Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
 
@@ -1356,6 +1356,8 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
 #define _bfd_ecoff_section_already_linked \
   _bfd_coff_section_already_linked
 #define _bfd_ecoff_bfd_define_common_symbol bfd_generic_define_common_symbol
+#define _bfd_ecoff_bfd_define_start_stop bfd_generic_define_start_stop
+#define _bfd_ecoff_set_reloc _bfd_generic_set_reloc
 
 extern const bfd_target mips_ecoff_be_vec;
 

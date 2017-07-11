@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux on MIPS processors.
 
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -34,13 +34,9 @@
 #include <sgidefs.h>
 #include "nat/gdb_ptrace.h"
 #include <asm/ptrace.h>
+#include "inf-ptrace.h"
 
 #include "nat/mips-linux-watch.h"
-
-#include "features/mips-linux.c"
-#include "features/mips-dsp-linux.c"
-#include "features/mips64-linux.c"
-#include "features/mips64-dsp-linux.c"
 
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 25
@@ -152,7 +148,7 @@ mips64_linux_register_addr (struct gdbarch *gdbarch, int regno, int store)
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (const struct ps_prochandle *ph,
+ps_get_thread_area (struct ps_prochandle *ph,
                     lwpid_t lwpid, int idx, void **base)
 {
   if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
@@ -244,9 +240,7 @@ mips64_linux_regsets_fetch_registers (struct target_ops *ops,
   else
     is_dsp = 0;
 
-  tid = ptid_get_lwp (inferior_ptid);
-  if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);
+  tid = get_ptrace_pid (regcache_get_ptid (regcache));
 
   if (regno == -1 || (!is_fp && !is_dsp))
     {
@@ -332,9 +326,7 @@ mips64_linux_regsets_store_registers (struct target_ops *ops,
   else
     is_dsp = 0;
 
-  tid = ptid_get_lwp (inferior_ptid);
-  if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);
+  tid = get_ptrace_pid (regcache_get_ptid (regcache));
 
   if (regno == -1 || (!is_fp && !is_dsp))
     {
@@ -627,14 +619,13 @@ write_watchpoint_regs (void)
 static void
 mips_linux_new_thread (struct lwp_info *lp)
 {
-  int tid;
+  long tid = lp->ptid.lwp ();
 
-  if (!mips_linux_read_watch_registers (ptid_get_lwp (inferior_ptid),
+  if (!mips_linux_read_watch_registers (tid,
 					&watch_readback,
 					&watch_readback_valid, 0))
     return;
 
-  tid = ptid_get_lwp (lp->ptid);
   if (ptrace (PTRACE_SET_WATCH_REGS, tid, &watch_mirror, NULL) == -1)
     perror_with_name (_("Couldn't write debug register"));
 }
@@ -807,10 +798,4 @@ triggers a breakpoint or watchpoint."),
 
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, mips_linux_new_thread);
-
-  /* Initialize the standard target descriptions.  */
-  initialize_tdesc_mips_linux ();
-  initialize_tdesc_mips_dsp_linux ();
-  initialize_tdesc_mips64_linux ();
-  initialize_tdesc_mips64_dsp_linux ();
 }

@@ -1,4 +1,4 @@
-# Copyright (C) 2010-2016 Free Software Foundation, Inc.
+# Copyright (C) 2010-2017 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ load_lib gdb-python.exp
 
 standard_testfile
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1
 }
 
@@ -38,7 +38,7 @@ proc test_bkpt_basic { } {
 	gdb_test "python print (gdb.breakpoints())" "\\(\\)"
 
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 
@@ -49,6 +49,8 @@ proc test_bkpt_basic { } {
 	    "<gdb.Breakpoint object at $hex>" "Check obj exists @main"
 	gdb_test "python print (blist\[0\].location)" \
 	    "main." "Check breakpoint location @main"
+	gdb_test "python print (blist\[0\].pending)" "False" \
+	    "Check pending status of main breakpoint"
 
 	set mult_line [gdb_get_line_number "Break at multiply."]
 	gdb_breakpoint ${mult_line}
@@ -70,7 +72,7 @@ proc test_bkpt_basic { } {
 
 	gdb_test "python print (blist\[1\].location)" \
 	    "py-breakpoint\.c:${mult_line}*" \
-	    "Check breakpoint location @mult_line"
+	    "check breakpoint location @mult_line"
 
 	# Check hit and ignore counts. 
 	gdb_test "python print (blist\[1\].hit_count)" \
@@ -121,7 +123,7 @@ proc test_bkpt_deletion { } {
 	clean_restart ${testfile}
 
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 
@@ -159,7 +161,7 @@ proc test_bkpt_cond_and_cmds { } {
 	clean_restart ${testfile}
 
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 
@@ -211,7 +213,7 @@ proc test_bkpt_invisible { } {
 	clean_restart ${testfile}
 
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 
@@ -261,12 +263,13 @@ proc test_watchpoints { } {
 	}
 
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 
 	gdb_py_test_silent_cmd  "python wp1 = gdb.Breakpoint (\"result\", type=gdb.BP_WATCHPOINT, wp_class=gdb.WP_WRITE )" \
 	    "Set watchpoint" 0
+	gdb_test "python print (wp1.pending)" "False"
 	gdb_test "continue" \
 	    ".*\[Ww\]atchpoint.*result.*Old value = 0.*New value = 25.*main.*" \
 	    "Test watchpoint write"
@@ -285,7 +288,7 @@ proc test_bkpt_internal { } {
 	    gdb_test_no_output "set can-use-hw-watchpoints 0" ""
 	}
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 	delete_breakpoints
@@ -315,7 +318,7 @@ proc test_bkpt_eval_funcs { } {
 	    gdb_test_no_output "set can-use-hw-watchpoints 0" ""
 	}
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 	delete_breakpoints
@@ -389,7 +392,7 @@ proc test_bkpt_eval_funcs { } {
 
 	gdb_test "python eval_bp2.stop = stop_func"  \
 	    "RuntimeError: Only one stop condition allowed.  There is currently a GDB.*" \
-	    "Assign stop function to a breakpoint that has a condition"
+	    "assign stop function to a breakpoint that has a condition"
 
 	delete_breakpoints
 	gdb_breakpoint [gdb_get_line_number "Break at multiply."]
@@ -431,7 +434,7 @@ proc test_bkpt_temporary { } {
 	clean_restart ${testfile}
 
 	if ![runto_main] then {
-	    fail "Cannot run to main."
+	    fail "cannot run to main."
 	    return 0
 	}
 	delete_breakpoints
@@ -497,6 +500,53 @@ proc test_bkpt_address {} {
 	".*Breakpoint ($decimal)+ at .*$srcfile, line ($decimal)+\."
 }
 
+proc test_bkpt_pending {} {
+    delete_breakpoints
+    gdb_breakpoint "nosuchfunction" allow-pending
+    gdb_test "python print (gdb.breakpoints()\[0\].pending)" "True" \
+	"Check pending status of pending breakpoint"
+}
+
+# Helper proc to install an event listener for a given breakpoint
+# event.  NAME is the name of the event to listen for.
+proc connect_event {name} {
+    set lambda "lambda x: note_event(\"$name\")"
+    gdb_test_no_output "python gdb.events.$name.connect($lambda)" \
+	"install $name event listener"
+}
+
+# Helper proc to check that the most recently emitted breakpoint event
+# is EXPECTED.
+proc check_last_event {expected} {
+    gdb_test "python print (last_bp_event)" $expected \
+	"check for $expected event"
+}
+
+proc test_bkpt_events {} {
+    global testfile
+
+    clean_restart ${testfile}
+
+    gdb_py_test_multiple "Create event handler" \
+	"python" "" \
+	"def note_event(arg):" "" \
+	"  global last_bp_event" "" \
+	"  last_bp_event = arg" "" \
+	"end" ""
+    gdb_test_no_output "python last_bp_event = None"
+
+    connect_event breakpoint_created
+    connect_event breakpoint_modified
+    connect_event breakpoint_deleted
+
+    gdb_breakpoint [gdb_get_line_number "Break at add."]
+    check_last_event breakpoint_created
+    gdb_test_no_output "disable 1"
+    check_last_event breakpoint_modified
+    gdb_test_no_output "delete 1"
+    check_last_event breakpoint_deleted
+}
+
 test_bkpt_basic
 test_bkpt_deletion
 test_bkpt_cond_and_cmds
@@ -506,3 +556,5 @@ test_bkpt_internal
 test_bkpt_eval_funcs
 test_bkpt_temporary
 test_bkpt_address
+test_bkpt_pending
+test_bkpt_events

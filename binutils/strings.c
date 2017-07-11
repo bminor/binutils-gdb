@@ -1,5 +1,5 @@
 /* strings -- print the strings of printable characters in files
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2017 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@
       (   (c) >= 0 \
        && (c) <= 255 \
        && ((c) == '\t' || ISPRINT (c) || (encoding == 'S' && (c) > 127) \
-           || (include_all_whitespace == TRUE && ISSPACE (c))) \
+	   || (include_all_whitespace && ISSPACE (c))) \
       )
 
 #ifndef errno
@@ -146,12 +146,9 @@ typedef struct
   bfd_size_type filesize;
 } filename_and_size_t;
 
-static void strings_a_section (bfd *, asection *, void *);
-static bfd_boolean strings_object_file (const char *);
 static bfd_boolean strings_file (char *);
 static void print_strings (const char *, FILE *, file_ptr, int, int, char *);
-static void usage (FILE *, int);
-static long get_char (FILE *, file_ptr *, int *, char **);
+static void usage (FILE *, int) ATTRIBUTE_NORETURN;
 
 int main (int, char **);
 
@@ -321,7 +318,7 @@ main (int argc, char **argv)
 	  else
 	    {
 	      files_given = TRUE;
-	      exit_status |= strings_file (argv[optind]) == FALSE;
+	      exit_status |= !strings_file (argv[optind]);
 	    }
 	}
     }
@@ -447,6 +444,11 @@ strings_file (char *file)
       else
 	non_fatal (_("Warning: could not locate '%s'.  reason: %s"),
 		   file, strerror (errno));
+      return FALSE;
+    }
+  else if (S_ISDIR (st.st_mode))
+    {
+      non_fatal (_("Warning: '%s' is a directory"), file);
       return FALSE;
     }
 

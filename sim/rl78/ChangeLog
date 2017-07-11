@@ -1,3 +1,8 @@
+2016-07-27  Alan Modra  <amodra@gmail.com>
+
+	* load.c: Don't include libbfd.h.
+	(rl78_load): Don't use private iovec seek or read.
+
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

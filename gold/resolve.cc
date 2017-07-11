@@ -1,6 +1,6 @@
 // resolve.cc -- symbol resolution for gold
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2017 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -193,6 +193,7 @@ symbol_to_bits(elfcpp::STB binding, bool is_dynamic,
       // table.
       gold_error(_("invalid STB_LOCAL symbol in external symbols"));
       bits = global_flag;
+      break;
 
     default:
       // Any target which wants to handle STB_LOOS, etc., needs to

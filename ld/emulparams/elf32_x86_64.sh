@@ -3,6 +3,7 @@
 . ${srcdir}/emulparams/dynamic_undefined_weak.sh
 . ${srcdir}/emulparams/reloc_overflow.sh
 . ${srcdir}/emulparams/call_nop.sh
+. ${srcdir}/emulparams/cet.sh
 SCRIPT_NAME=elf
 ELFSIZE=32
 OUTPUT_FORMAT="elf32-x86-64"
@@ -21,7 +22,11 @@ LARGE_SECTIONS=yes
 LARGE_BSS_AFTER_BSS=
 SEPARATE_GOTPLT="SIZEOF (.got.plt) >= 24 ? 24 : 0"
 IREL_IN_PLT=
-SHARABLE_SECTIONS=yes
+# Reuse TINY_READONLY_SECTION which is placed right after .plt section.
+TINY_READONLY_SECTION="
+.plt.got      ${RELOCATING-0} : { *(.plt.got) }
+.plt.sec      ${RELOCATING-0} : { *(.plt.sec) }
+"
 
 if [ "x${host}" = "x${target}" ]; then
   case " $EMULATION_LIBPATH " in

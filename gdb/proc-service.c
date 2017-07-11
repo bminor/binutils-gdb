@@ -1,6 +1,6 @@
 /* <proc_service.h> implementation.
 
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -112,25 +112,19 @@ ps_err_e
 ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
 		   const char *name, psaddr_t *sym_addr)
 {
-  struct bound_minimal_symbol ms;
-  struct cleanup *old_chain = save_current_program_space ();
   struct inferior *inf = find_inferior_ptid (ph->ptid);
-  ps_err_e result;
+
+  scoped_restore_current_program_space restore_pspace;
 
   set_current_program_space (inf->pspace);
 
   /* FIXME: kettenis/2000-09-03: What should we do with OBJ?  */
-  ms = lookup_minimal_symbol (name, NULL, NULL);
+  bound_minimal_symbol ms = lookup_minimal_symbol (name, NULL, NULL);
   if (ms.minsym == NULL)
-    result = PS_NOSYM;
-  else
-    {
-      *sym_addr = core_addr_to_ps_addr (BMSYMBOL_VALUE_ADDRESS (ms));
-      result = PS_OK;
-    }
+    return PS_NOSYM;
 
-  do_cleanups (old_chain);
-  return result;
+  *sym_addr = core_addr_to_ps_addr (BMSYMBOL_VALUE_ADDRESS (ms));
+  return PS_OK;
 }
 
 /* Read SIZE bytes from the target process PH at address ADDR and copy
@@ -158,16 +152,13 @@ ps_pdwrite (gdb_ps_prochandle_t ph, psaddr_t addr,
 ps_err_e
 ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
 {
-  struct cleanup *old_chain = save_inferior_ptid ();
-  struct regcache *regcache;
-
-  inferior_ptid = ptid_build (ptid_get_pid (ph->ptid), lwpid, 0);
-  regcache = get_thread_arch_regcache (inferior_ptid, target_gdbarch ());
+  ptid_t ptid = ptid_build (ptid_get_pid (ph->ptid), lwpid, 0);
+  struct regcache *regcache
+    = get_thread_arch_regcache (ptid, target_gdbarch ());
 
   target_fetch_registers (regcache, -1);
   fill_gregset (regcache, (gdb_gregset_t *) gregset, -1);
 
-  do_cleanups (old_chain);
   return PS_OK;
 }
 
@@ -177,16 +168,13 @@ ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
 ps_err_e
 ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, const prgregset_t gregset)
 {
-  struct cleanup *old_chain = save_inferior_ptid ();
-  struct regcache *regcache;
-
-  inferior_ptid = ptid_build (ptid_get_pid (ph->ptid), lwpid, 0);
-  regcache = get_thread_arch_regcache (inferior_ptid, target_gdbarch ());
+  ptid_t ptid = ptid_build (ptid_get_pid (ph->ptid), lwpid, 0);
+  struct regcache *regcache
+    = get_thread_arch_regcache (ptid, target_gdbarch ());
 
   supply_gregset (regcache, (const gdb_gregset_t *) gregset);
   target_store_registers (regcache, -1);
 
-  do_cleanups (old_chain);
   return PS_OK;
 }
 
@@ -197,16 +185,13 @@ ps_err_e
 ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	       gdb_prfpregset_t *fpregset)
 {
-  struct cleanup *old_chain = save_inferior_ptid ();
-  struct regcache *regcache;
-
-  inferior_ptid = ptid_build (ptid_get_pid (ph->ptid), lwpid, 0);
-  regcache = get_thread_arch_regcache (inferior_ptid, target_gdbarch ());
+  ptid_t ptid = ptid_build (ptid_get_pid (ph->ptid), lwpid, 0);
+  struct regcache *regcache
+    = get_thread_arch_regcache (ptid, target_gdbarch ());
 
   target_fetch_registers (regcache, -1);
   fill_fpregset (regcache, (gdb_fpregset_t *) fpregset, -1);
 
-  do_cleanups (old_chain);
   return PS_OK;
 }
 
@@ -217,16 +202,13 @@ ps_err_e
 ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	       const gdb_prfpregset_t *fpregset)
 {
-  struct cleanup *old_chain = save_inferior_ptid ();
-  struct regcache *regcache;
-
-  inferior_ptid = ptid_build (ptid_get_pid (ph->ptid), lwpid, 0);
-  regcache = get_thread_arch_regcache (inferior_ptid, target_gdbarch ());
+  ptid_t ptid = ptid_build (ptid_get_pid (ph->ptid), lwpid, 0);
+  struct regcache *regcache
+    = get_thread_arch_regcache (ptid, target_gdbarch ());
 
   supply_fpregset (regcache, (const gdb_fpregset_t *) fpregset);
   target_store_registers (regcache, -1);
 
-  do_cleanups (old_chain);
   return PS_OK;
 }
 

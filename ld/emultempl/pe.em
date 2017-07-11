@@ -8,7 +8,7 @@ fi
 rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 fragment <<EOF
-/* Copyright (C) 1995-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -138,7 +138,6 @@ static const char *emit_build_id;
 #ifdef DLL_SUPPORT
 static int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable.  */
 static char *pe_out_def_filename = NULL;
-static char *pe_implib_filename = NULL;
 static int pe_enable_auto_image_base = 0;
 static unsigned long pe_auto_image_base = 0x61500000;
 static char *pe_dll_search_prefix = NULL;
@@ -228,8 +227,7 @@ fragment <<EOF
 #define OPTION_STDCALL_ALIASES		(OPTION_KILL_ATS + 1)
 #define OPTION_ENABLE_STDCALL_FIXUP	(OPTION_STDCALL_ALIASES + 1)
 #define OPTION_DISABLE_STDCALL_FIXUP	(OPTION_ENABLE_STDCALL_FIXUP + 1)
-#define OPTION_IMPLIB_FILENAME		(OPTION_DISABLE_STDCALL_FIXUP + 1)
-#define OPTION_THUMB_ENTRY		(OPTION_IMPLIB_FILENAME + 1)
+#define OPTION_THUMB_ENTRY		(OPTION_DISABLE_STDCALL_FIXUP + 1)
 #define OPTION_WARN_DUPLICATE_EXPORTS	(OPTION_THUMB_ENTRY + 1)
 #define OPTION_IMP_COMPAT		(OPTION_WARN_DUPLICATE_EXPORTS + 1)
 #define OPTION_ENABLE_AUTO_IMAGE_BASE	(OPTION_IMP_COMPAT + 1)
@@ -323,7 +321,6 @@ gld${EMULATION_NAME}_add_options
     {"add-stdcall-alias", no_argument, NULL, OPTION_STDCALL_ALIASES},
     {"enable-stdcall-fixup", no_argument, NULL, OPTION_ENABLE_STDCALL_FIXUP},
     {"disable-stdcall-fixup", no_argument, NULL, OPTION_DISABLE_STDCALL_FIXUP},
-    {"out-implib", required_argument, NULL, OPTION_IMPLIB_FILENAME},
     {"warn-duplicate-exports", no_argument, NULL, OPTION_WARN_DUPLICATE_EXPORTS},
     /* getopt() allows abbreviations, so we do this to stop it from
        treating -c as an abbreviation for these --compat-implib.  */
@@ -382,7 +379,7 @@ typedef struct
    underscore.  */
 #define GET_INIT_SYMBOL_NAME(IDX) \
   (init[(IDX)].symbol \
-  + ((init[(IDX)].is_c_symbol == FALSE || (is_underscoring () != 0)) ? 0 : 1))
+   + ((!init[(IDX)].is_c_symbol || is_underscoring () != 0) ? 0 : 1))
 
 /* Decorates the C visible symbol by underscore, if target requires.  */
 #define U(CSTR) \
@@ -461,7 +458,6 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("                                     export, place into import library instead.\n"));
   fprintf (file, _("  --export-all-symbols               Automatically export all globals to DLL\n"));
   fprintf (file, _("  --kill-at                          Remove @nn from exported symbols\n"));
-  fprintf (file, _("  --out-implib <file>                Generate import library\n"));
   fprintf (file, _("  --output-def <file>                Generate a .DEF file for the built DLL\n"));
   fprintf (file, _("  --warn-duplicate-exports           Warn about duplicate exports\n"));
   fprintf (file, _("  --compat-implib                    Create backward compatible import libs;\n\
@@ -804,9 +800,6 @@ gld${EMULATION_NAME}_handle_option (int optc)
     case OPTION_DISABLE_STDCALL_FIXUP:
       pe_enable_stdcall_fixup = 0;
       break;
-    case OPTION_IMPLIB_FILENAME:
-      pe_implib_filename = xstrdup (optarg);
-      break;
     case OPTION_WARN_DUPLICATE_EXPORTS:
       pe_dll_warn_dup_exports = 1;
       break;
@@ -1137,7 +1130,7 @@ pe_fixup_stdcalls (void)
 }
 
 static int
-make_import_fixup (arelent *rel, asection *s)
+make_import_fixup (arelent *rel, asection *s, char *name)
 {
   struct bfd_symbol *sym = *rel->sym_ptr_ptr;
   char addend[4];
@@ -1150,7 +1143,7 @@ make_import_fixup (arelent *rel, asection *s)
     einfo (_("%C: Cannot get section contents - auto-import exception\n"),
 	   s->owner, s, rel->address);
 
-  pe_create_import_fixup (rel, s, bfd_get_32 (s->owner, addend));
+  pe_create_import_fixup (rel, s, bfd_get_32 (s->owner, addend), name);
 
   return 1;
 }
@@ -1159,32 +1152,46 @@ static void
 pe_find_data_imports (void)
 {
   struct bfd_link_hash_entry *undef, *sym;
+  size_t namelen;
+  char *buf, *name;
 
   if (link_info.pei386_auto_import == 0)
     return;
 
-  for (undef = link_info.hash->undefs; undef; undef=undef->u.undef.next)
+  namelen = 0;
+  for (undef = link_info.hash->undefs; undef; undef = undef->u.undef.next)
     {
       if (undef->type == bfd_link_hash_undefined)
 	{
-	  /* C++ symbols are *long*.  */
-#define BUF_SIZE 4096
-	  char buf[BUF_SIZE];
+	  size_t len = strlen (undef->root.string);
+	  if (namelen < len)
+	    namelen = len;
+	}
+    }
+  if (namelen == 0)
+    return;
+
+  /* We are being a bit cunning here.  The buffer will have space for
+     prefixes at the beginning.  The prefix is modified here and in a
+     number of functions called from this function.  */
+#define PREFIX_LEN 32
+  buf = xmalloc (PREFIX_LEN + namelen + 1);
+  name = buf + PREFIX_LEN;
+
+  for (undef = link_info.hash->undefs; undef; undef = undef->u.undef.next)
+    {
+      if (undef->type == bfd_link_hash_undefined)
+	{
+	  char *impname;
 
 	  if (pe_dll_extra_pe_debug)
 	    printf ("%s:%s\n", __FUNCTION__, undef->root.string);
 
-	  if (strlen (undef->root.string) > (BUF_SIZE - 6))
-	    {
-	      /* PR linker/18466.  */
-	      einfo (_("%P: internal error: symbol too long: %s\n"),
-		     undef->root.string);
-	      return;
-	    }
+	  strcpy (name, undef->root.string);
+	  impname = name - (sizeof "__imp_" - 1);
+	  memcpy (impname, "__imp_", sizeof "__imp_" - 1);
 
-	  sprintf (buf, "__imp_%s", undef->root.string);
-
-	  sym = bfd_link_hash_lookup (link_info.hash, buf, 0, 0, 1);
+	  sym = bfd_link_hash_lookup (link_info.hash, impname, 0, 0, 1);
 
 	  if (sym && sym->type == bfd_link_hash_defined)
 	    {
@@ -1196,15 +1203,18 @@ pe_find_data_imports (void)
 		{
 		  static bfd_boolean warned = FALSE;
 
-		  info_msg (_("Info: resolving %s by linking to %s (auto-import)\n"),
-			    undef->root.string, buf);
+		  info_msg (_("Info: resolving %s by linking to %s "
+			      "(auto-import)\n"), name, impname);
 
 		  /* PR linker/4844.  */
 		  if (! warned)
 		    {
 		      warned = TRUE;
-		      einfo (_("%P: warning: auto-importing has been activated without --enable-auto-import specified on the command line.\n\
-This should work unless it involves constant data structures referencing symbols from auto-imported DLLs.\n"));
+		      einfo (_("%P: warning: auto-importing has been activated "
+			       "without --enable-auto-import specified on the "
+			       "command line.\nThis should work unless it "
+			       "involves constant data structures referencing "
+			       "symbols from auto-imported DLLs.\n"));
 		    }
 		}
 
@@ -1219,8 +1229,7 @@ This should work unless it involves constant data structures referencing symbols
 
 	      for (i = 0; i < nsyms; i++)
 		{
-		  if (! CONST_STRNEQ (symbols[i]->name,
-				      U ("_head_")))
+		  if (! CONST_STRNEQ (symbols[i]->name, U ("_head_")))
 		    continue;
 
 		  if (pe_dll_extra_pe_debug)
@@ -1231,20 +1240,20 @@ This should work unless it involves constant data structures referencing symbols
 		  break;
 		}
 
-	      pe_walk_relocs_of_symbol (&link_info, undef->root.string,
-					make_import_fixup);
+	      pe_walk_relocs_of_symbol (&link_info, name, make_import_fixup);
 
 	      /* Let's differentiate it somehow from defined.  */
 	      undef->type = bfd_link_hash_defweak;
 	      /* We replace original name with __imp_ prefixed, this
 		 1) may trash memory 2) leads to duplicate symbol generation.
-		 Still, IMHO it's better than having name poluted.  */
+		 Still, IMHO it's better than having name polluted.  */
 	      undef->root.string = sym->root.string;
 	      undef->u.def.value = sym->u.def.value;
 	      undef->u.def.section = sym->u.def.section;
 	    }
 	}
     }
+  free (buf);
 }
 
 static bfd_boolean
@@ -2070,8 +2079,9 @@ gld_${EMULATION_NAME}_finish (void)
     )
     {
       pe_dll_fill_sections (link_info.output_bfd, &link_info);
-      if (pe_implib_filename)
-	pe_dll_generate_implib (pe_def_file, pe_implib_filename, &link_info);
+      if (command_line.out_implib_filename)
+	pe_dll_generate_implib (pe_def_file, command_line.out_implib_filename,
+				&link_info);
     }
 #if defined(TARGET_IS_shpe)
   /* ARM doesn't need relocs.  */

@@ -1,6 +1,6 @@
 // object.cc -- support for an object file for linking in gold
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2017 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -816,9 +816,9 @@ Sized_relobj_file<size, big_endian>::do_find_special_sections(
   return (this->has_eh_frame_
 	  || (!parameters->options().relocatable()
 	      && parameters->options().gdb_index()
-	      && (memmem(names, sd->section_names_size, "debug_info", 12) == 0
-		  || memmem(names, sd->section_names_size, "debug_types",
-			    13) == 0)));
+	      && (memmem(names, sd->section_names_size, "debug_info", 11) == 0
+		  || memmem(names, sd->section_names_size,
+			    "debug_types", 12) == 0)));
 }
 
 // Read the sections and symbols from an object file.
@@ -2225,8 +2225,9 @@ Sized_relobj_file<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 
       // Decide whether this symbol should go into the output file.
 
-      if ((shndx < shnum && out_sections[shndx] == NULL)
-	  || shndx == this->discarded_eh_frame_shndx_)
+      if (is_ordinary
+	  && ((shndx < shnum && out_sections[shndx] == NULL)
+	      || shndx == this->discarded_eh_frame_shndx_))
 	{
 	  lv.set_no_output_symtab_entry();
 	  gold_assert(!lv.needs_output_dynsym_entry());
@@ -3454,6 +3455,38 @@ template
 void
 Xindex::read_symtab_xindex<64, true>(Object*, unsigned int,
 				     const unsigned char*);
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+Compressed_section_map*
+build_compressed_section_map<32, false>(const unsigned char*, unsigned int,
+					const char*, section_size_type, 
+					Object*, bool);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+Compressed_section_map*
+build_compressed_section_map<32, true>(const unsigned char*, unsigned int,
+					const char*, section_size_type, 
+					Object*, bool);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+Compressed_section_map*
+build_compressed_section_map<64, false>(const unsigned char*, unsigned int,
+					const char*, section_size_type, 
+					Object*, bool);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+Compressed_section_map*
+build_compressed_section_map<64, true>(const unsigned char*, unsigned int,
+					const char*, section_size_type, 
+					Object*, bool);
 #endif
 
 } // End namespace gold.

@@ -1,6 +1,6 @@
 /* Memory attributes support, for GDB.
 
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -409,7 +409,7 @@ mem_command (char *args, int from_tty)
 
 
 static void
-mem_info_command (char *args, int from_tty)
+info_mem_command (char *args, int from_tty)
 {
   struct mem_region *m;
   struct mem_attrib *attrib;
@@ -441,7 +441,7 @@ mem_info_command (char *args, int from_tty)
 
   for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
     {
-      char *tmp;
+      const char *tmp;
 
       printf_filtered ("%-3d %-3c\t",
 		       m->number,
@@ -561,7 +561,7 @@ mem_enable (int num)
 }
 
 static void
-mem_enable_command (char *args, int from_tty)
+enable_mem_command (char *args, int from_tty)
 {
   int num;
   struct mem_region *m;
@@ -578,12 +578,10 @@ mem_enable_command (char *args, int from_tty)
     }
   else
     {
-      struct get_number_or_range_state state;
-
-      init_number_or_range (&state, args);
-      while (!state.finished)
+      number_or_range_parser parser (args);
+      while (!parser.finished ())
 	{
-	  num = get_number_or_range (&state);
+	  num = parser.get_number ();
 	  mem_enable (num);
 	}
     }
@@ -608,29 +606,26 @@ mem_disable (int num)
 }
 
 static void
-mem_disable_command (char *args, int from_tty)
+disable_mem_command (char *args, int from_tty)
 {
-  int num;
-  struct mem_region *m;
-  int ix;
-
   require_user_regions (from_tty);
 
   target_dcache_invalidate ();
 
   if (args == NULL || *args == '\0')
     {
+      struct mem_region *m;
+      int ix;
+
       for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
 	m->enabled_p = 0;
     }
   else
     {
-      struct get_number_or_range_state state;
-
-      init_number_or_range (&state, args);
-      while (!state.finished)
+      number_or_range_parser parser (args);
+      while (!parser.finished ())
 	{
-	  num = get_number_or_range (&state);
+	  int num = parser.get_number ();
 	  mem_disable (num);
 	}
     }
@@ -664,11 +659,8 @@ mem_delete (int num)
 }
 
 static void
-mem_delete_command (char *args, int from_tty)
+delete_mem_command (char *args, int from_tty)
 {
-  int num;
-  struct get_number_or_range_state state;
-
   require_user_regions (from_tty);
 
   target_dcache_invalidate ();
@@ -681,10 +673,10 @@ mem_delete_command (char *args, int from_tty)
       return;
     }
 
-  init_number_or_range (&state, args);
-  while (!state.finished)
+  number_or_range_parser parser (args);
+  while (!parser.finished ())
     {
-      num = get_number_or_range (&state);
+      int num = parser.get_number ();
       mem_delete (num);
     }
 
@@ -713,25 +705,25 @@ where <mode>  may be rw (read/write), ro (read-only) or wo (write-only),\n\
       <width> may be 8, 16, 32, or 64, and\n\
       <cache> may be cache or nocache"));
 
-  add_cmd ("mem", class_vars, mem_enable_command, _("\
+  add_cmd ("mem", class_vars, enable_mem_command, _("\
 Enable memory region.\n\
 Arguments are the code numbers of the memory regions to enable.\n\
 Usage: enable mem <code number>...\n\
 Do \"info mem\" to see current list of code numbers."), &enablelist);
 
-  add_cmd ("mem", class_vars, mem_disable_command, _("\
+  add_cmd ("mem", class_vars, disable_mem_command, _("\
 Disable memory region.\n\
 Arguments are the code numbers of the memory regions to disable.\n\
 Usage: disable mem <code number>...\n\
 Do \"info mem\" to see current list of code numbers."), &disablelist);
 
-  add_cmd ("mem", class_vars, mem_delete_command, _("\
+  add_cmd ("mem", class_vars, delete_mem_command, _("\
 Delete memory region.\n\
 Arguments are the code numbers of the memory regions to delete.\n\
 Usage: delete mem <code number>...\n\
 Do \"info mem\" to see current list of code numbers."), &deletelist);
 
-  add_info ("mem", mem_info_command,
+  add_info ("mem", info_mem_command,
 	    _("Memory region attributes"));
 
   add_prefix_cmd ("mem", class_vars, dummy_cmd, _("\

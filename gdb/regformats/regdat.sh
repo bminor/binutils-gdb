@@ -1,7 +1,7 @@
 #!/bin/sh -u
 
 # Register protocol definitions for GDB, the GNU debugger.
-# Copyright (C) 2001-2016 Free Software Foundation, Inc.
+# Copyright (C) 2001-2017 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -179,8 +179,11 @@ init_registers_${name} (void)
 
   result->reg_defs = regs_${name};
   result->num_registers = sizeof (regs_${name}) / sizeof (regs_${name}[0]);
+
+#ifndef IN_PROCESS_AGENT
   result->expedite_regs = expedite_regs_${name};
   result->xmltarget = xmltarget_${name};
+#endif
 
   init_target_desc (result);
 

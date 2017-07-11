@@ -1,6 +1,6 @@
 /* Machine independent variables that describe the core file under GDB.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,12 +28,6 @@ struct regcache;
 #include "bfd.h"
 #include "exec.h"
 #include "target.h"
-
-/* Return the name of the executable file as a string.
-   ERR nonzero means get error if there is none specified;
-   otherwise return 0 in that case.  */
-
-extern char *get_exec_file (int err);
 
 /* Nonzero if there is a core file.  */
 
@@ -154,9 +148,10 @@ extern void exec_file_attach (const char *filename, int from_tty);
 /* If the filename of the main executable is unknown, attempt to
    determine it.  If a filename is determined, proceed as though
    it was just specified with the "file" command.  Do nothing if
-   the filename of the main executable is already known.  */
+   the filename of the main executable is already known.
+   DEFER_BP_RESET uses SYMFILE_DEFER_BP_RESET for the main symbol file.  */
 
-extern void exec_file_locate_attach (int pid, int from_tty);
+extern void exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty);
 
 extern void exec_file_clear (int from_tty);
 
@@ -166,7 +161,7 @@ extern void validate_files (void);
 
 extern char *gnutarget;
 
-extern void set_gnutarget (char *);
+extern void set_gnutarget (const char *);
 
 /* Structure to keep track of core register reading functions for
    various core file types.  */

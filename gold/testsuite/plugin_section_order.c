@@ -1,6 +1,6 @@
 /* plugin_section_reorder.c -- Simple plugin to reorder function sections
 
-   Copyright (C) 2011-2016 Free Software Foundation, Inc.
+   Copyright (C) 2011-2017 Free Software Foundation, Inc.
    Written by Sriraman Tallam <tmsriram@google.com>.
 
    This file is part of gold.
@@ -85,6 +85,7 @@ onload(struct ld_plugin_tv *tv)
 	case LDPT_ALLOW_UNIQUE_SEGMENT_FOR_SECTIONS:
 	  allow_unique_segment_for_sections
 	      = *entry->tv_u.tv_allow_unique_segment_for_sections;
+	  break;
 	case LDPT_UNIQUE_SEGMENT_FOR_SECTIONS:
 	  unique_segment_for_sections
 	      = *entry->tv_u.tv_unique_segment_for_sections;

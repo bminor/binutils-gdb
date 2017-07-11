@@ -6,15 +6,15 @@
 
 Disassembly of section \.text:
 	\.\.\.
-[0-9a-f]+ <[^>]*> f000 1000 	b	00001004 <foo\+0x4>
-[ 	]*[0-9a-f]+: R_MIPS16_PC16_S1	\*ABS\*
-[0-9a-f]+ <[^>]*> f000 6000 	bteqz	00001008 <foo\+0x8>
-[ 	]*[0-9a-f]+: R_MIPS16_PC16_S1	\*ABS\*
-[0-9a-f]+ <[^>]*> f000 6100 	btnez	0000100c <foo\+0xc>
-[ 	]*[0-9a-f]+: R_MIPS16_PC16_S1	\*ABS\*
-[0-9a-f]+ <[^>]*> f000 2200 	beqz	v0,00001010 <foo\+0x10>
-[ 	]*[0-9a-f]+: R_MIPS16_PC16_S1	\*ABS\*
-[0-9a-f]+ <[^>]*> f000 2a00 	bnez	v0,00001014 <foo\+0x14>
-[ 	]*[0-9a-f]+: R_MIPS16_PC16_S1	\*ABS\*
+[0-9a-f]+ <[^>]*> f7ff 101e 	b	00001000 <foo>
+[ 	]*[0-9a-f]+: R_MIPS16_PC16_S1	bar
+[0-9a-f]+ <[^>]*> f7ff 601e 	bteqz	00001004 <foo\+0x4>
+[ 	]*[0-9a-f]+: R_MIPS16_PC16_S1	bar
+[0-9a-f]+ <[^>]*> f7ff 611e 	btnez	00001008 <foo\+0x8>
+[ 	]*[0-9a-f]+: R_MIPS16_PC16_S1	bar
+[0-9a-f]+ <[^>]*> f7ff 221e 	beqz	v0,0000100c <foo\+0xc>
+[ 	]*[0-9a-f]+: R_MIPS16_PC16_S1	bar
+[0-9a-f]+ <[^>]*> f7ff 2a1e 	bnez	v0,00001010 <foo\+0x10>
+[ 	]*[0-9a-f]+: R_MIPS16_PC16_S1	bar
 [0-9a-f]+ <[^>]*> 6500      	nop
 	\.\.\.

@@ -1,6 +1,6 @@
 /* Trace file TFILE format support in GDB.
 
-   Copyright (C) 1997-2016 Free Software Foundation, Inc.
+   Copyright (C) 1997-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,6 +32,7 @@
 #include "xml-tdesc.h"
 #include "target-descriptions.h"
 #include "buffer.h"
+#include <algorithm>
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -137,7 +138,7 @@ tfile_write_status (struct trace_file_writer *self,
   fprintf (writer->fp, "status %c;%s",
 	   (ts->running ? '1' : '0'), stop_reason_names[ts->stop_reason]);
   if (ts->stop_reason == tracepoint_error
-      || ts->stop_reason == tstop_command)
+      || ts->stop_reason == trace_stop_command)
     {
       char *buf = (char *) alloca (strlen (ts->stop_desc) * 2 + 1);
 
@@ -191,7 +192,7 @@ static void
 tfile_write_uploaded_tsv (struct trace_file_writer *self,
 			  struct uploaded_tsv *utsv)
 {
-  char *buf = "";
+  char *buf = NULL;
   struct tfile_trace_file_writer *writer
     = (struct tfile_trace_file_writer *) self;
 
@@ -203,7 +204,7 @@ tfile_write_uploaded_tsv (struct trace_file_writer *self,
 
   fprintf (writer->fp, "tsv %x:%s:%x:%s\n",
 	   utsv->number, phex_nz (utsv->initial_value, 8),
-	   utsv->builtin, buf);
+	   utsv->builtin, buf != NULL ? buf : "");
 
   if (utsv->name)
     xfree (buf);
@@ -274,17 +275,19 @@ tfile_write_tdesc (struct trace_file_writer *self)
 {
   struct tfile_trace_file_writer *writer
     = (struct tfile_trace_file_writer *) self;
-  char *tdesc = target_fetch_description_xml (&current_target);
-  char *ptr = tdesc;
-  char *next;
 
-  if (tdesc == NULL)
+  gdb::optional<std::string> tdesc
+    = target_fetch_description_xml (&current_target);
+
+  if (!tdesc)
     return;
+
+  const char *ptr = tdesc->c_str ();
 
   /* Write tdesc line by line, prefixing each line with "tdesc ".  */
   while (ptr != NULL)
     {
-      next = strchr (ptr, '\n');
+      const char *next = strchr (ptr, '\n');
       if (next != NULL)
 	{
 	  fprintf (writer->fp, "tdesc %.*s\n", (int) (next - ptr), ptr);
@@ -298,8 +301,6 @@ tfile_write_tdesc (struct trace_file_writer *self)
 	}
       ptr = next;
     }
-
-  xfree (tdesc);
 }
 
 /* This is the implementation of trace_file_write_ops method
@@ -649,8 +650,8 @@ tfile_get_traceframe_address (off_t tframe_offset)
 
   tp = get_tracepoint_by_number_on_target (tpnum);
   /* FIXME this is a poor heuristic if multiple locations.  */
-  if (tp && tp->base.loc)
-    addr = tp->base.loc->address;
+  if (tp && tp->loc)
+    addr = tp->loc->address;
 
   /* Restore our seek position.  */
   cur_offset = saved_offset;
@@ -987,7 +988,7 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	 and this address falls within a read-only section, fallback
 	 to reading from executable, up to LOW_ADDR_AVAILABLE.  */
       if (offset < low_addr_available)
-	len = min (len, low_addr_available - offset);
+	len = std::min (len, low_addr_available - offset);
       res = exec_read_partial_read_only (readbuf, offset, len, xfered_len);
 
       if (res == TARGET_XFER_OK)

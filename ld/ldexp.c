@@ -1,5 +1,5 @@
 /* This module handles expression trees.
-   Copyright (C) 1991-2016 Free Software Foundation, Inc.
+   Copyright (C) 1991-2017 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
    This file is part of the GNU Binutils.
@@ -417,6 +417,32 @@ fold_unary (etree_type *tree)
     }
 }
 
+/* Arithmetic operators, bitwise AND, bitwise OR and XOR keep the
+   section of one of their operands only when the other operand is a
+   plain number.  Losing the section when operating on two symbols,
+   ie. a result of a plain number, is required for subtraction and
+   XOR.  It's justifiable for the other operations on the grounds that
+   adding, multiplying etc. two section relative values does not
+   really make sense unless they are just treated as numbers.
+   The same argument could be made for many expressions involving one
+   symbol and a number.  For example, "1 << x" and "100 / x" probably
+   should not be given the section of x.  The trouble is that if we
+   fuss about such things the rules become complex and it is onerous
+   to document ld expression evaluation.  */
+static void
+arith_result_section (const etree_value_type *lhs)
+{
+  if (expld.result.section == lhs->section)
+    {
+      if (expld.section == bfd_abs_section_ptr
+	  && !config.sane_expr)
+	/* Duplicate the insanity in exp_fold_tree_1 case etree_value.  */
+	expld.result.section = bfd_abs_section_ptr;
+      else
+	expld.result.section = NULL;
+    }
+}
+
 static void
 fold_binary (etree_type *tree)
 {
@@ -483,26 +509,10 @@ fold_binary (etree_type *tree)
 
       switch (tree->type.node_code)
 	{
-	  /* Arithmetic operators, bitwise AND, bitwise OR and XOR
-	     keep the section of one of their operands only when the
-	     other operand is a plain number.  Losing the section when
-	     operating on two symbols, ie. a result of a plain number,
-	     is required for subtraction and XOR.  It's justifiable
-	     for the other operations on the grounds that adding,
-	     multiplying etc. two section relative values does not
-	     really make sense unless they are just treated as
-	     numbers.
-	     The same argument could be made for many expressions
-	     involving one symbol and a number.  For example,
-	     "1 << x" and "100 / x" probably should not be given the
-	     section of x.  The trouble is that if we fuss about such
-	     things the rules become complex and it is onerous to
-	     document ld expression evaluation.  */
 #define BOP(x, y) \
 	case x:							\
 	  expld.result.value = lhs.value y expld.result.value;	\
-	  if (expld.result.section == lhs.section)		\
-	    expld.result.section = NULL;			\
+	  arith_result_section (&lhs);				\
 	  break;
 
 	  /* Comparison operators, logical AND, and logical OR always
@@ -536,8 +546,7 @@ fold_binary (etree_type *tree)
 				  % (bfd_signed_vma) expld.result.value);
 	  else if (expld.phase != lang_mark_phase_enum)
 	    einfo (_("%F%S %% by zero\n"), tree->binary.rhs);
-	  if (expld.result.section == lhs.section)
-	    expld.result.section = NULL;
+	  arith_result_section (&lhs);
 	  break;
 
 	case '/':
@@ -546,8 +555,7 @@ fold_binary (etree_type *tree)
 				  / (bfd_signed_vma) expld.result.value);
 	  else if (expld.phase != lang_mark_phase_enum)
 	    einfo (_("%F%S / by zero\n"), tree->binary.rhs);
-	  if (expld.result.section == lhs.section)
-	    expld.result.section = NULL;
+	  arith_result_section (&lhs);
 	  break;
 
 	case MAX_K:
@@ -982,16 +990,12 @@ is_align_conditional (const etree_type *tree)
 static void
 try_copy_symbol_type (struct bfd_link_hash_entry *h, etree_type *src)
 {
-  if (src->type.node_class == etree_name)
-    {
-      struct bfd_link_hash_entry *hsrc;
+  struct bfd_link_hash_entry *hsrc;
 
-      hsrc = bfd_link_hash_lookup (link_info.hash, src->name.name,
-				    FALSE, FALSE, TRUE);
-      if (hsrc)
-	bfd_copy_link_hash_symbol_type (link_info.output_bfd, h,
-						    hsrc);
-    }
+  hsrc = bfd_link_hash_lookup (link_info.hash, src->name.name,
+			       FALSE, FALSE, TRUE);
+  if (hsrc != NULL)
+    bfd_copy_link_hash_symbol_type (link_info.output_bfd, h, hsrc);
 }
 
 static void
@@ -1069,6 +1073,7 @@ exp_fold_tree_1 (etree_type *tree)
 		 before relaxation and so be stripped incorrectly.  */
 	      if (expld.phase == lang_mark_phase_enum
 		  && expld.section != bfd_abs_section_ptr
+		  && expld.section != bfd_und_section_ptr
 		  && !(expld.result.valid_p
 		       && expld.result.value == 0
 		       && (is_value (tree->assign.src, 0)
@@ -1077,7 +1082,8 @@ exp_fold_tree_1 (etree_type *tree)
 			   || is_align_conditional (tree->assign.src))))
 		expld.section->flags |= SEC_KEEP;
 
-	      if (!expld.result.valid_p)
+	      if (!expld.result.valid_p
+		  || expld.section == bfd_und_section_ptr)
 		{
 		  if (expld.phase != lang_mark_phase_enum)
 		    einfo (_("%F%S invalid assignment to"
@@ -1183,6 +1189,7 @@ exp_fold_tree_1 (etree_type *tree)
 	      h->u.def.value = expld.result.value;
 	      h->u.def.section = expld.result.section;
 	      h->linker_def = ! tree->assign.type.lineno;
+	      h->ldscript_def = 1;
 	      if (tree->type.node_class == etree_provide)
 		tree->type.node_class = etree_provided;
 
@@ -1251,83 +1258,89 @@ exp_fold_tree_no_dot (etree_type *tree)
   exp_fold_tree_1 (tree);
 }
 
+static void
+exp_value_fold (etree_type *tree)
+{
+  exp_fold_tree_no_dot (tree);
+  if (expld.result.valid_p)
+    {
+      tree->type.node_code = INT;
+      tree->value.value = expld.result.value;
+      tree->value.str = NULL;
+      tree->type.node_class = etree_value;
+    }
+}
+
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 etree_type *
 exp_binop (int code, etree_type *lhs, etree_type *rhs)
 {
-  etree_type value, *new_e;
-
-  value.type.node_code = code;
-  value.type.filename = lhs->type.filename;
-  value.type.lineno = lhs->type.lineno;
-  value.binary.lhs = lhs;
-  value.binary.rhs = rhs;
-  value.type.node_class = etree_binary;
-  exp_fold_tree_no_dot (&value);
-  if (expld.result.valid_p)
-    return exp_intop (expld.result.value);
-
-  new_e = (etree_type *) stat_alloc (sizeof (new_e->binary));
-  memcpy (new_e, &value, sizeof (new_e->binary));
+  etree_type *new_e = (etree_type *) stat_alloc (MAX (sizeof (new_e->binary),
+						      sizeof (new_e->value)));
+  new_e->type.node_code = code;
+  new_e->type.filename = lhs->type.filename;
+  new_e->type.lineno = lhs->type.lineno;
+  new_e->binary.lhs = lhs;
+  new_e->binary.rhs = rhs;
+  new_e->type.node_class = etree_binary;
+  if (lhs->type.node_class == etree_value
+      && rhs->type.node_class == etree_value
+      && code != ALIGN_K
+      && code != DATA_SEGMENT_ALIGN
+      && code != DATA_SEGMENT_RELRO_END)
+    exp_value_fold (new_e);
   return new_e;
 }
 
 etree_type *
 exp_trinop (int code, etree_type *cond, etree_type *lhs, etree_type *rhs)
 {
-  etree_type value, *new_e;
-
-  value.type.node_code = code;
-  value.type.filename = cond->type.filename;
-  value.type.lineno = cond->type.lineno;
-  value.trinary.lhs = lhs;
-  value.trinary.cond = cond;
-  value.trinary.rhs = rhs;
-  value.type.node_class = etree_trinary;
-  exp_fold_tree_no_dot (&value);
-  if (expld.result.valid_p)
-    return exp_intop (expld.result.value);
-
-  new_e = (etree_type *) stat_alloc (sizeof (new_e->trinary));
-  memcpy (new_e, &value, sizeof (new_e->trinary));
+  etree_type *new_e = (etree_type *) stat_alloc (MAX (sizeof (new_e->trinary),
+						      sizeof (new_e->value)));
+  new_e->type.node_code = code;
+  new_e->type.filename = cond->type.filename;
+  new_e->type.lineno = cond->type.lineno;
+  new_e->trinary.lhs = lhs;
+  new_e->trinary.cond = cond;
+  new_e->trinary.rhs = rhs;
+  new_e->type.node_class = etree_trinary;
+  if (cond->type.node_class == etree_value
+      && lhs->type.node_class == etree_value
+      && rhs->type.node_class == etree_value)
+    exp_value_fold (new_e);
   return new_e;
 }
 
 etree_type *
 exp_unop (int code, etree_type *child)
 {
-  etree_type value, *new_e;
-
-  value.unary.type.node_code = code;
-  value.unary.type.filename = child->type.filename;
-  value.unary.type.lineno = child->type.lineno;
-  value.unary.child = child;
-  value.unary.type.node_class = etree_unary;
-  exp_fold_tree_no_dot (&value);
-  if (expld.result.valid_p)
-    return exp_intop (expld.result.value);
-
-  new_e = (etree_type *) stat_alloc (sizeof (new_e->unary));
-  memcpy (new_e, &value, sizeof (new_e->unary));
+  etree_type *new_e = (etree_type *) stat_alloc (MAX (sizeof (new_e->unary),
+						      sizeof (new_e->value)));
+  new_e->unary.type.node_code = code;
+  new_e->unary.type.filename = child->type.filename;
+  new_e->unary.type.lineno = child->type.lineno;
+  new_e->unary.child = child;
+  new_e->unary.type.node_class = etree_unary;
+  if (child->type.node_class == etree_value
+      && code != ALIGN_K
+      && code != ABSOLUTE
+      && code != NEXT
+      && code != DATA_SEGMENT_END)
+    exp_value_fold (new_e);
   return new_e;
 }
 
 etree_type *
 exp_nameop (int code, const char *name)
 {
-  etree_type value, *new_e;
+  etree_type *new_e = (etree_type *) stat_alloc (sizeof (new_e->name));
 
-  value.name.type.node_code = code;
-  value.name.type.filename = ldlex_filename ();
-  value.name.type.lineno = lineno;
-  value.name.name = name;
-  value.name.type.node_class = etree_name;
-
-  exp_fold_tree_no_dot (&value);
-  if (expld.result.valid_p)
-    return exp_intop (expld.result.value);
-
-  new_e = (etree_type *) stat_alloc (sizeof (new_e->name));
-  memcpy (new_e, &value, sizeof (new_e->name));
+  new_e->name.type.node_code = code;
+  new_e->name.type.filename = ldlex_filename ();
+  new_e->name.type.lineno = lineno;
+  new_e->name.name = name;
+  new_e->name.type.node_class = etree_name;
   return new_e;
 
 }

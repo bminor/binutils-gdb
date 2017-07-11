@@ -1,6 +1,6 @@
 // aarch64.cc -- aarch64 target support for gold.
 
-// Copyright (C) 2014-2016 Free Software Foundation, Inc.
+// Copyright (C) 2014-2017 Free Software Foundation, Inc.
 // Written by Jing Yu <jingyu@google.com> and Han Shen <shenhan@google.com>.
 
 // This file is part of gold.
@@ -110,6 +110,10 @@ public:
   is_adrp(const Insntype insn)
   { return (insn & 0x9F000000) == 0x90000000; }
 
+  static bool
+  is_mrs_tpidr_el0(const Insntype insn)
+  { return (insn & 0xFFFFFFE0) == 0xd53bd040; }
+
   static unsigned int
   aarch64_rm(const Insntype insn)
   { return aarch64_bits(insn, 16, 5); }
@@ -156,7 +160,7 @@ public:
     uint64_t imm = ((adrp >> 29) & mask2) | (((adrp >> 5) & mask19) << 2);
     // Retrieve msb of 21-bit-signed imm for sign extension.
     uint64_t msbt = (imm >> 20) & 1;
-    // Real value is imm multipled by 4k. Value now has 33-bit information.
+    // Real value is imm multiplied by 4k. Value now has 33-bit information.
     int64_t value = imm << 12;
     // Sign extend to 64-bit by repeating msbt 31 (64-33) times and merge it
     // with value.
@@ -784,8 +788,14 @@ Stub_template_repertoire<big_endian>::Stub_template_repertoire()
       0x14000000,    /* b <label> */
     };
 
-  // ST_E_835769 has the same stub template as ST_E_843419.
-  const static Insntype* ST_E_835769_INSNS = ST_E_843419_INSNS;
+  // ST_E_835769 has the same stub template as ST_E_843419
+  // but we reproduce the array here so that the sizeof
+  // expressions in install_insn_template will work.
+  const static Insntype ST_E_835769_INSNS[] =
+    {
+      0x00000000,    /* Placeholder for erratum insn. */
+      0x14000000,    /* b <label> */
+    };
 
 #define install_insn_template(T) \
   const static Stub_template<big_endian> template_##T = {  \
@@ -920,7 +930,7 @@ private:
 
 // Erratum stub class. An erratum stub differs from a reloc stub in that for
 // each erratum occurrence, we generate an erratum stub. We never share erratum
-// stubs, whereas for reloc stubs, different branches insns share a single reloc
+// stubs, whereas for reloc stubs, different branch insns share a single reloc
 // stub as long as the branch targets are the same. (More to the point, reloc
 // stubs can be shared because they're used to reach a specific target, whereas
 // erratum stubs branch back to the original control flow.)
@@ -1022,7 +1032,7 @@ public:
   { this->erratum_address_ = addr; }
 
   // Comparator used to group Erratum_stubs in a set by (obj, shndx,
-  // sh_offset). We do not include 'type' in the calculation, becuase there is
+  // sh_offset). We do not include 'type' in the calculation, because there is
   // at most one stub type at (obj, shndx, sh_offset).
   bool
   operator<(const Erratum_stub<size, big_endian>& k) const
@@ -1763,10 +1773,11 @@ class AArch64_relobj : public Sized_relobj_file<size, big_endian>
 
   // Convert regular input section with index SHNDX to a relaxed section.
   void
-  convert_input_section_to_relaxed_section(unsigned /* shndx */)
+  convert_input_section_to_relaxed_section(unsigned shndx)
   {
     // The stubs have relocations and we need to process them after writing
     // out the stubs.  So relocation now must follow section write.
+    this->set_section_offset(shndx, -1ULL);
     this->set_relocs_must_follow_section_writes();
   }
 
@@ -2003,9 +2014,32 @@ AArch64_relobj<size, big_endian>::try_fix_erratum_843419_optimized(
   E843419_stub<size, big_endian>* e843419_stub =
     reinterpret_cast<E843419_stub<size, big_endian>*>(stub);
   AArch64_address pc = pview.address + e843419_stub->adrp_sh_offset();
-  Insntype* adrp_view = reinterpret_cast<Insntype*>(
-    pview.view + e843419_stub->adrp_sh_offset());
+  unsigned int adrp_offset = e843419_stub->adrp_sh_offset ();
+  Insntype* adrp_view = reinterpret_cast<Insntype*>(pview.view + adrp_offset);
   Insntype adrp_insn = adrp_view[0];
+
+  // If the instruction at adrp_sh_offset is "mrs R, tpidr_el0", it may come
+  // from IE -> LE relaxation etc.  This is a side-effect of TLS relaxation that
+  // ADRP has been turned into MRS, there is no erratum risk anymore.
+  // Therefore, we return true to avoid doing unnecessary branch-to-stub.
+  if (Insn_utilities::is_mrs_tpidr_el0(adrp_insn))
+    return true;
+
+  // If the instruction at adrp_sh_offset is not ADRP and the instruction before
+  // it is "mrs R, tpidr_el0", it may come from LD -> LE relaxation etc.
+  // Like the above case, there is no erratum risk any more, we can safely
+  // return true.
+  if (!Insn_utilities::is_adrp(adrp_insn) && adrp_offset)
+    {
+      Insntype* prev_view
+	= reinterpret_cast<Insntype*>(pview.view + adrp_offset - 4);
+      Insntype prev_insn = prev_view[0];
+
+      if (Insn_utilities::is_mrs_tpidr_el0(prev_insn))
+	return true;
+    }
+
+  /* If we reach here, the first instruction must be ADRP.  */
   gold_assert(Insn_utilities::is_adrp(adrp_insn));
   // Get adrp 33-bit signed imm value.
   int64_t adrp_imm = Insn_utilities::
@@ -2044,9 +2078,9 @@ AArch64_relobj<size, big_endian>::do_relocate_sections(
     const unsigned char* pshdrs, Output_file* of,
     typename Sized_relobj_file<size, big_endian>::Views* pviews)
 {
-  // Call parent to relocate sections.
-  Sized_relobj_file<size, big_endian>::do_relocate_sections(symtab, layout,
-							    pshdrs, of, pviews);
+  // Relocate the section data.
+  this->relocate_section_range(symtab, layout, pshdrs, of, pviews,
+			       1, this->shnum() - 1);
 
   // We do not generate stubs if doing a relocatable link.
   if (parameters->options().relocatable())
@@ -3734,13 +3768,18 @@ Target_aarch64<size, big_endian>::scan_reloc_for_stub(
       if (gsym->use_plt_offset(arp->reference_flags()))
 	{
 	  // This uses a PLT, change the symbol value.
-	  symval.set_output_value(this->plt_section()->address()
-				  + gsym->plt_offset());
+	  symval.set_output_value(this->plt_address_for_global(gsym));
 	  psymval = &symval;
 	}
       else if (gsym->is_undefined())
-	// There is no need to generate a stub symbol is undefined.
-	return;
+	{
+          // There is no need to generate a stub symbol if the original symbol
+          // is undefined.
+          gold_debug(DEBUG_TARGET,
+                     "stub: not creating a stub for undefined symbol %s in file %s",
+                     gsym->name(), aarch64_relobj->name().c_str());
+          return;
+	}
     }
 
   // Get the symbol value.
@@ -3865,6 +3904,8 @@ Target_aarch64<size, big_endian>::scan_reloc_section_for_stubs(
 	  if (!is_defined_in_discarded_section)
 	    {
 	      typedef Sized_relobj_file<size, big_endian> ObjType;
+	      if (psymval->is_section_symbol())
+		symval.set_is_section_symbol();
 	      typename ObjType::Compute_final_local_value_status status =
 		object->compute_final_local_value(r_sym, psymval, &symval,
 						  relinfo->symtab);
@@ -3959,11 +4000,6 @@ Target_aarch64<size, big_endian>::scan_reloc_section_for_stubs(
 	  symval2.set_no_output_symtab_entry();
 	  psymval = &symval2;
 	}
-
-      // If symbol is a section symbol, we don't know the actual type of
-      // destination.  Give up.
-      if (psymval->is_section_symbol())
-	continue;
 
       this->scan_reloc_for_stub(relinfo, r_type, sym, r_sym, psymval,
 				addend, view_address + offset);
@@ -5396,6 +5432,21 @@ maybe_apply_stub(unsigned int r_type,
 
   const The_aarch64_relobj* aarch64_relobj =
       static_cast<const The_aarch64_relobj*>(object);
+  const AArch64_reloc_property* arp =
+    aarch64_reloc_property_table->get_reloc_property(r_type);
+  gold_assert(arp != NULL);
+
+  // We don't create stubs for undefined symbols, but do for weak.
+  if (gsym
+      && !gsym->use_plt_offset(arp->reference_flags())
+      && gsym->is_undefined())
+    {
+      gold_debug(DEBUG_TARGET,
+		 "stub: looking for a stub for undefined symbol %s in file %s",
+		 gsym->name(), aarch64_relobj->name().c_str());
+      return false;
+    }
+
   The_stub_table* stub_table = aarch64_relobj->stub_table(relinfo->data_shndx);
   gold_assert(stub_table != NULL);
 
@@ -5407,9 +5458,6 @@ maybe_apply_stub(unsigned int r_type,
   Address new_branch_target = stub_table->address() + stub->offset();
   typename elfcpp::Swap<size, big_endian>::Valtype branch_offset =
       new_branch_target - address;
-  const AArch64_reloc_property* arp =
-      aarch64_reloc_property_table->get_reloc_property(r_type);
-  gold_assert(arp != NULL);
   typename This::Status status = This::template
       rela_general<32>(view, branch_offset, 0, arp);
   if (status != This::STATUS_OKAY)
@@ -6026,6 +6074,23 @@ Target_aarch64<size, big_endian>::Scan::local(
       }
       break;
 
+    case elfcpp::R_AARCH64_MOVW_UABS_G0:        // 263
+    case elfcpp::R_AARCH64_MOVW_UABS_G0_NC:     // 264
+    case elfcpp::R_AARCH64_MOVW_UABS_G1:        // 265
+    case elfcpp::R_AARCH64_MOVW_UABS_G1_NC:     // 266
+    case elfcpp::R_AARCH64_MOVW_UABS_G2:        // 267
+    case elfcpp::R_AARCH64_MOVW_UABS_G2_NC:     // 268
+    case elfcpp::R_AARCH64_MOVW_UABS_G3:        // 269
+    case elfcpp::R_AARCH64_MOVW_SABS_G0:        // 270
+    case elfcpp::R_AARCH64_MOVW_SABS_G1:        // 271
+    case elfcpp::R_AARCH64_MOVW_SABS_G2:        // 272
+      if (parameters->options().output_is_position_independent())
+	{
+	  gold_error(_("%s: unsupported reloc %u in pos independent link."),
+		     object->name().c_str(), r_type);
+	}
+      break;
+
     case elfcpp::R_AARCH64_LD_PREL_LO19:        // 273
     case elfcpp::R_AARCH64_ADR_PREL_LO21:       // 274
     case elfcpp::R_AARCH64_ADR_PREL_PG_HI21:    // 275
@@ -6308,6 +6373,23 @@ Target_aarch64<size, big_endian>::Scan::global(
       if (gsym->needs_plt_entry())
 	{
 	  target->make_plt_entry(symtab, layout, gsym);
+	}
+      break;
+
+    case elfcpp::R_AARCH64_MOVW_UABS_G0:        // 263
+    case elfcpp::R_AARCH64_MOVW_UABS_G0_NC:     // 264
+    case elfcpp::R_AARCH64_MOVW_UABS_G1:        // 265
+    case elfcpp::R_AARCH64_MOVW_UABS_G1_NC:     // 266
+    case elfcpp::R_AARCH64_MOVW_UABS_G2:        // 267
+    case elfcpp::R_AARCH64_MOVW_UABS_G2_NC:     // 268
+    case elfcpp::R_AARCH64_MOVW_UABS_G3:        // 269
+    case elfcpp::R_AARCH64_MOVW_SABS_G0:        // 270
+    case elfcpp::R_AARCH64_MOVW_SABS_G1:        // 271
+    case elfcpp::R_AARCH64_MOVW_SABS_G2:        // 272
+      if (parameters->options().output_is_position_independent())
+	{
+	  gold_error(_("%s: unsupported reloc %u in pos independent link."),
+		     object->name().c_str(), r_type);
 	}
       break;
 
@@ -6993,6 +7075,23 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
 	view, object, psymval, addend, address, reloc_property);
       break;
 
+    case elfcpp::R_AARCH64_MOVW_UABS_G0:
+    case elfcpp::R_AARCH64_MOVW_UABS_G0_NC:
+    case elfcpp::R_AARCH64_MOVW_UABS_G1:
+    case elfcpp::R_AARCH64_MOVW_UABS_G1_NC:
+    case elfcpp::R_AARCH64_MOVW_UABS_G2:
+    case elfcpp::R_AARCH64_MOVW_UABS_G2_NC:
+    case elfcpp::R_AARCH64_MOVW_UABS_G3:
+      reloc_status = Reloc::template rela_general<32>(
+	view, object, psymval, addend, reloc_property);
+      break;
+    case elfcpp::R_AARCH64_MOVW_SABS_G0:
+    case elfcpp::R_AARCH64_MOVW_SABS_G1:
+    case elfcpp::R_AARCH64_MOVW_SABS_G2:
+      reloc_status = Reloc::movnz(view, psymval->value(object, addend),
+				  reloc_property);
+      break;
+
     case elfcpp::R_AARCH64_LD_PREL_LO19:
       reloc_status = Reloc::template pcrela_general<32>(
 	  view, object, psymval, addend, address, reloc_property);
@@ -7033,13 +7132,13 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
 	  // Return false to stop further processing this reloc.
 	  return false;
 	}
-      // Fallthrough
+      // Fall through.
     case elfcpp::R_AARCH64_JUMP26:
       if (Reloc::maybe_apply_stub(r_type, relinfo, rela, view, address,
 				  gsym, psymval, object,
 				  target->stub_group_size_))
 	break;
-      // Fallthrough
+      // Fall through.
     case elfcpp::R_AARCH64_TSTBR14:
     case elfcpp::R_AARCH64_CONDBR19:
       reloc_status = Reloc::template pcrela_general<32>(
@@ -7635,8 +7734,8 @@ Target_aarch64<size, big_endian>::Relocate::tls_ld_to_le(
     {
       // Ideally we should give up gd_to_le relaxation and do gd access.
       // However the gd_to_le relaxation decision has been made early
-      // in the scan stage, where we did not allocate any GOT entry for
-      // this symbol. Therefore we have to exit and report error now.
+      // in the scan stage, where we did not allocate a GOT entry for
+      // this symbol. Therefore we have to exit and report an error now.
       gold_error(_("unexpected reloc insn sequence while relaxing "
 		   "tls gd to le for reloc %u."), r_type);
       return aarch64_reloc_funcs::STATUS_BAD_RELOC;
@@ -7901,12 +8000,36 @@ Target_aarch64<size, big_endian>::relocate_section(
     section_size_type view_size,
     const Reloc_symbol_changes* reloc_symbol_changes)
 {
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
   typedef Target_aarch64<size, big_endian> Aarch64;
   typedef typename Target_aarch64<size, big_endian>::Relocate AArch64_relocate;
   typedef gold::Default_classify_reloc<elfcpp::SHT_RELA, size, big_endian>
       Classify_reloc;
 
   gold_assert(sh_type == elfcpp::SHT_RELA);
+
+  // See if we are relocating a relaxed input section.  If so, the view
+  // covers the whole output section and we need to adjust accordingly.
+  if (needs_special_offset_handling)
+    {
+      const Output_relaxed_input_section* poris =
+	output_section->find_relaxed_input_section(relinfo->object,
+						   relinfo->data_shndx);
+      if (poris != NULL)
+	{
+	  Address section_address = poris->address();
+	  section_size_type section_size = poris->data_size();
+
+	  gold_assert((section_address >= address)
+		      && ((section_address + section_size)
+			  <= (address + view_size)));
+
+	  off_t offset = section_address - address;
+	  view += offset;
+	  address += offset;
+	  view_size = section_size;
+	}
+    }
 
   gold::relocate_section<size, big_endian, Aarch64, AArch64_relocate,
 			 gold::Default_comdat_behavior, Classify_reloc>(
@@ -8075,7 +8198,7 @@ Target_aarch64<size, big_endian>::is_erratum_835769_sequence(
     typename elfcpp::Swap<32,big_endian>::Valtype insn2)
 {
   uint32_t rt;
-  uint32_t rt2;
+  uint32_t rt2 = 0;
   uint32_t rn;
   uint32_t rm;
   uint32_t ra;

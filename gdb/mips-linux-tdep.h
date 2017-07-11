@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux on MIPS processors.
 
-   Copyright (C) 2006-2016 Free Software Foundation, Inc.
+   Copyright (C) 2006-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -105,3 +105,9 @@ enum {
 /* Return 1 if MIPS_RESTART_REGNUM is usable.  */
 
 int mips_linux_restart_reg_p (struct gdbarch *gdbarch);
+
+/* Target descriptions.  */
+extern struct target_desc *tdesc_mips_linux;
+extern struct target_desc *tdesc_mips64_linux;
+extern struct target_desc *tdesc_mips_dsp_linux;
+extern struct target_desc *tdesc_mips64_dsp_linux;

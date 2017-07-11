@@ -1,6 +1,6 @@
 /* Skipping uninteresting files and functions while stepping.
 
-   Copyright (C) 2011-2016 Free Software Foundation, Inc.
+   Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #include "filenames.h"
 #include "fnmatch.h"
 #include "gdb_regex.h"
+#include "common/gdb_optional.h"
 
 struct skiplist_entry
 {
@@ -57,10 +58,7 @@ struct skiplist_entry
   char *function;
 
   /* If this is a function regexp, the compiled form.  */
-  regex_t compiled_function_regexp;
-
-  /* Non-zero if the function regexp has been compiled.  */
-  int compiled_function_regexp_is_valid;
+  gdb::optional<compiled_regex> compiled_function_regexp;
 
   int enabled;
 
@@ -112,8 +110,6 @@ free_skiplist_entry (struct skiplist_entry *e)
 {
   xfree (e->file);
   xfree (e->function);
-  if (e->function_is_regexp && e->compiled_function_regexp_is_valid)
-    regfree (&e->compiled_function_regexp);
   xfree (e);
 }
 
@@ -202,7 +198,6 @@ skip_function_command (char *arg, int from_tty)
 static void
 compile_skip_regexp (struct skiplist_entry *e, const char *message)
 {
-  int code;
   int flags = REG_NOSUB;
 
 #ifdef REG_EXTENDED
@@ -210,16 +205,7 @@ compile_skip_regexp (struct skiplist_entry *e, const char *message)
 #endif
 
   gdb_assert (e->function_is_regexp && e->function != NULL);
-
-  code = regcomp (&e->compiled_function_regexp, e->function, flags);
-  if (code != 0)
-    {
-      char *err = get_regcomp_error (code, &e->compiled_function_regexp);
-
-      make_cleanup (xfree, err);
-      error (_("%s: %s"), message, err);
-    }
-  e->compiled_function_regexp_is_valid = 1;
+  e->compiled_function_regexp.emplace (e->function, flags, message);
 }
 
 /* Process "skip ..." that does not match "skip file" or "skip function".  */
@@ -373,11 +359,10 @@ skip_info (char *arg, int from_tty)
   if (num_printable_entries == 0)
     {
       if (arg == NULL)
-	ui_out_message (current_uiout, 0, _("\
-Not skipping any files or functions.\n"));
+	current_uiout->message (_("Not skipping any files or functions.\n"));
       else
-	ui_out_message (current_uiout, 0,
-			_("No skiplist entries found with number %s.\n"), arg);
+	current_uiout->message (
+	  _("No skiplist entries found with number %s.\n"), arg);
 
       return;
     }
@@ -386,49 +371,45 @@ Not skipping any files or functions.\n"));
 						   num_printable_entries,
 						   "SkiplistTable");
 
-  ui_out_table_header (current_uiout, 5, ui_left, "number", "Num");   /* 1 */
-  ui_out_table_header (current_uiout, 3, ui_left, "enabled", "Enb");  /* 2 */
-  ui_out_table_header (current_uiout, 4, ui_right, "regexp", "Glob"); /* 3 */
-  ui_out_table_header (current_uiout, 20, ui_left, "file", "File");   /* 4 */
-  ui_out_table_header (current_uiout, 2, ui_right, "regexp", "RE");   /* 5 */
-  ui_out_table_header (current_uiout, 40, ui_noalign,
-		       "function", "Function"); /* 6 */
-  ui_out_table_body (current_uiout);
+  current_uiout->table_header (5, ui_left, "number", "Num");   /* 1 */
+  current_uiout->table_header (3, ui_left, "enabled", "Enb");  /* 2 */
+  current_uiout->table_header (4, ui_right, "regexp", "Glob"); /* 3 */
+  current_uiout->table_header (20, ui_left, "file", "File");   /* 4 */
+  current_uiout->table_header (2, ui_right, "regexp", "RE");   /* 5 */
+  current_uiout->table_header (40, ui_noalign, "function", "Function"); /* 6 */
+  current_uiout->table_body ();
 
   ALL_SKIPLIST_ENTRIES (e)
     {
-      struct cleanup *entry_chain;
 
       QUIT;
       if (arg != NULL && !number_is_in_list (arg, e->number))
 	continue;
 
-      entry_chain = make_cleanup_ui_out_tuple_begin_end (current_uiout,
-							 "blklst-entry");
-      ui_out_field_int (current_uiout, "number", e->number); /* 1 */
+      ui_out_emit_tuple tuple_emitter (current_uiout, "blklst-entry");
+      current_uiout->field_int ("number", e->number); /* 1 */
 
       if (e->enabled)
-	ui_out_field_string (current_uiout, "enabled", "y"); /* 2 */
+	current_uiout->field_string ("enabled", "y"); /* 2 */
       else
-	ui_out_field_string (current_uiout, "enabled", "n"); /* 2 */
+	current_uiout->field_string ("enabled", "n"); /* 2 */
 
       if (e->file_is_glob)
-	ui_out_field_string (current_uiout, "regexp", "y"); /* 3 */
+	current_uiout->field_string ("regexp", "y"); /* 3 */
       else
-	ui_out_field_string (current_uiout, "regexp", "n"); /* 3 */
+	current_uiout->field_string ("regexp", "n"); /* 3 */
 
-      ui_out_field_string (current_uiout, "file",
+      current_uiout->field_string ("file",
 			   e->file ? e->file : "<none>"); /* 4 */
       if (e->function_is_regexp)
-	ui_out_field_string (current_uiout, "regexp", "y"); /* 5 */
+	current_uiout->field_string ("regexp", "y"); /* 5 */
       else
-	ui_out_field_string (current_uiout, "regexp", "n"); /* 5 */
+	current_uiout->field_string ("regexp", "n"); /* 5 */
 
-      ui_out_field_string (current_uiout, "function", 
-			   e->function ? e->function : "<none>"); /* 6 */
+      current_uiout->field_string (
+	"function", e->function ? e->function : "<none>"); /* 6 */
 
-      ui_out_text (current_uiout, "\n");
-      do_cleanups (entry_chain);
+      current_uiout->text ("\n");
     }
 
   do_cleanups (tbl_chain);
@@ -606,8 +587,8 @@ static int
 skip_rfunction_p (struct skiplist_entry *e, const char *function_name)
 {
   gdb_assert (e->function != NULL && e->function_is_regexp
-	      && e->compiled_function_regexp_is_valid);
-  return (regexec (&e->compiled_function_regexp, function_name, 0, NULL, 0)
+	      && e->compiled_function_regexp);
+  return (e->compiled_function_regexp->exec (function_name, 0, NULL, 0)
 	  == 0);
 }
 

@@ -1,6 +1,6 @@
 /* Definitions for values of C expressions, for GDB.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -434,13 +434,21 @@ extern void set_value_address (struct value *, CORE_ADDR);
 extern struct internalvar **deprecated_value_internalvar_hack (struct value *);
 #define VALUE_INTERNALVAR(val) (*deprecated_value_internalvar_hack (val))
 
-/* Frame register value is relative to.  This will be described in the
-   lval enum above as "lval_register".  */
-extern struct frame_id *deprecated_value_frame_id_hack (struct value *);
-#define VALUE_FRAME_ID(val) (*deprecated_value_frame_id_hack (val))
+/* Frame ID of "next" frame to which a register value is relative.  A
+   register value is indicated by VALUE_LVAL being set to lval_register.
+   So, if the register value is found relative to frame F, then the
+   frame id of F->next will be stored in VALUE_NEXT_FRAME_ID.  */
+extern struct frame_id *deprecated_value_next_frame_id_hack (struct value *);
+#define VALUE_NEXT_FRAME_ID(val) (*deprecated_value_next_frame_id_hack (val))
+
+/* Frame ID of frame to which a register value is relative.  This is
+   similar to VALUE_NEXT_FRAME_ID, above, but may not be assigned to. 
+   Note that VALUE_FRAME_ID effectively undoes the "next" operation
+   that was performed during the assignment to VALUE_NEXT_FRAME_ID.  */
+#define VALUE_FRAME_ID(val) (get_prev_frame_id_by_id (VALUE_NEXT_FRAME_ID (val)))
 
 /* Register number if the value is from a register.  */
-extern short *deprecated_value_regnum_hack (struct value *);
+extern int *deprecated_value_regnum_hack (struct value *);
 #define VALUE_REGNUM(val) (*deprecated_value_regnum_hack (val))
 
 /* Return value after lval_funcs->coerce_ref (after check_typedef).  Return
@@ -573,12 +581,11 @@ extern int value_contents_eq (const struct value *val1, LONGEST offset1,
 
 /* Read LENGTH addressable memory units starting at MEMADDR into BUFFER,
    which is (or will be copied to) VAL's contents buffer offset by
-   EMBEDDED_OFFSET (that is, to &VAL->contents[EMBEDDED_OFFSET]).
-   Marks value contents ranges as unavailable if the corresponding
-   memory is likewise unavailable.  STACK indicates whether the memory
-   is known to be stack memory.  */
+   BIT_OFFSET bits.  Marks value contents ranges as unavailable if
+   the corresponding memory is likewise unavailable.  STACK indicates
+   whether the memory is known to be stack memory.  */
 
-extern void read_value_memory (struct value *val, LONGEST embedded_offset,
+extern void read_value_memory (struct value *val, LONGEST bit_offset,
 			       int stack, CORE_ADDR memaddr,
 			       gdb_byte *buffer, size_t length);
 
@@ -637,6 +644,8 @@ extern struct value *value_from_double (struct type *type, DOUBLEST num);
 extern struct value *value_from_decfloat (struct type *type,
 					  const gdb_byte *decbytes);
 extern struct value *value_from_history_ref (const char *, const char **);
+extern struct value *value_from_component (struct value *, struct type *,
+					   LONGEST);
 
 extern struct value *value_at (struct type *type, CORE_ADDR addr);
 extern struct value *value_at_lazy (struct type *type, CORE_ADDR addr);
@@ -672,6 +681,13 @@ extern struct value *value_of_register (int regnum, struct frame_info *frame);
 
 struct value *value_of_register_lazy (struct frame_info *frame, int regnum);
 
+/* Return the symbol's reading requirement.  */
+
+extern enum symbol_needs_kind symbol_read_needs (struct symbol *);
+
+/* Return true if the symbol needs a frame.  This is a wrapper for
+   symbol_read_needs that simply checks for SYMBOL_NEEDS_FRAME.  */
+
 extern int symbol_read_needs_frame (struct symbol *);
 
 extern struct value *read_var_value (struct symbol *var,
@@ -696,6 +712,38 @@ extern struct value *allocate_repeat_value (struct type *type, int count);
 extern struct value *value_mark (void);
 
 extern void value_free_to_mark (const struct value *mark);
+
+/* A helper class that uses value_mark at construction time and calls
+   value_free_to_mark in the destructor.  This is used to clear out
+   temporary values created during the lifetime of this object.  */
+class scoped_value_mark
+{
+ public:
+
+  scoped_value_mark ()
+    : m_value (value_mark ())
+  {
+  }
+
+  ~scoped_value_mark ()
+  {
+    free_to_mark ();
+  }
+
+  /* Free the values currently on the value stack.  */
+  void free_to_mark ()
+  {
+    if (m_value != NULL)
+      {
+	value_free_to_mark (m_value);
+	m_value = NULL;
+      }
+  }
+
+ private:
+
+  const struct value *m_value;
+};
 
 extern struct value *value_cstring (const char *ptr, ssize_t len,
 				    struct type *char_type);
@@ -726,7 +774,7 @@ extern struct value *value_ind (struct value *arg1);
 
 extern struct value *value_addr (struct value *arg1);
 
-extern struct value *value_ref (struct value *arg1);
+extern struct value *value_ref (struct value *arg1, enum type_code refcode);
 
 extern struct value *value_assign (struct value *toval,
 				   struct value *fromval);
@@ -985,7 +1033,7 @@ extern void modify_field (struct type *type, gdb_byte *addr,
 extern void type_print (struct type *type, const char *varstring,
 			struct ui_file *stream, int show);
 
-extern char *type_to_string (struct type *type);
+extern std::string type_to_string (struct type *type);
 
 extern gdb_byte *baseclass_addr (struct type *type, int index,
 				 gdb_byte *valaddr,
@@ -1009,10 +1057,10 @@ extern void value_print_array_elements (struct value *val,
 
 extern struct value *value_release_to_mark (const struct value *mark);
 
-extern void val_print (struct type *type, const gdb_byte *valaddr,
+extern void val_print (struct type *type,
 		       LONGEST embedded_offset, CORE_ADDR address,
 		       struct ui_file *stream, int recurse,
-		       const struct value *val,
+		       struct value *val,
 		       const struct value_print_options *options,
 		       const struct language_defn *language);
 

@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 1992-2016 Free Software Foundation, Inc.
+# Copyright 1992-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 standard_testfile .c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested printcmds.exp
+     untested "failed to compile"
      return -1
 }
 
@@ -683,7 +683,7 @@ proc test_print_string_constants {} {
     gdb_test_no_output "set print elements 50"
 
     if [target_info exists gdb,cannot_call_functions] {
-	unsupported "This target can not call functions"
+	unsupported "this target can not call functions"
 	return
     }
 
@@ -706,7 +706,7 @@ proc test_print_string_constants {} {
 proc test_print_array_constants {} {
 
     if [target_info exists gdb,cannot_call_functions] {
-	unsupported "This target can not call functions"
+	unsupported "this target can not call functions"
 	return
     }
 
@@ -931,6 +931,12 @@ gdb_test "ptype \"abc\"" " = char \\\[4\\\]"
 gdb_test "print \$cvar = \"abc\"" " = \"abc\""
 gdb_test "print sizeof (\$cvar)" " = 4"
 
+# GDB used to complete the explicit location options even when
+# printing expressions.
+gdb_test_no_output "complete p -function"
+gdb_test_no_output "complete p -line"
+gdb_test_no_output "complete p -source"
+
 gdb_file_cmd ${binfile}
 
 gdb_test "print \$pc" "No registers\\." "print \$pc (with file)"
@@ -950,7 +956,7 @@ gdb_test "p ctable1\[120\]" "120 'x'" "p ctable1\[120\] #1"
 gdb_load ${binfile}
 
 if ![runto_main] then {
-    fail "Can't run to main"
+    fail "can't run to main"
     return 0
 }
 

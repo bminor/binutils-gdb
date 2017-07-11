@@ -13,9 +13,9 @@ Section Headers:
   \[ 3\] .dynstr           STRTAB          0000010c 00010c 000019 00   A  0   0  1
   \[ 4\] .text             PROGBITS        00000125 000125 000001 00  AX  0   0  1
   \[ 5\] .dynamic          DYNAMIC         00200128 000128 000058 08  WA  3   0  4
-  \[ 6\] .shstrtab         STRTAB          00000000 [0-9a-f]+ 000040 00      0   0  1
-  \[ 7\] .symtab           SYMTAB          00000000 [0-9a-f]+ [0-9a-f]+ 10      8   [0-9]  4
-  \[ 8\] .strtab           STRTAB          00000000 [0-9a-f]+ [0-9a-f]+ 00      0   0  1
+  \[ 6\] .symtab           SYMTAB          00000000 [0-9a-f]+ [0-9a-f]+ 10      7   [0-9]  4
+  \[ 7\] .strtab           STRTAB          00000000 [0-9a-f]+ [0-9a-f]+ 00      0   0  1
+  \[ 8\] .shstrtab         STRTAB          00000000 [0-9a-f]+ 000040 00      0   0  1
 Key to Flags:
 #...
 

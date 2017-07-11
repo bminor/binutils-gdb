@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2016 Free Software Foundation, Inc.
+# Copyright (C) 2014-2017 Free Software Foundation, Inc.
 # 
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -153,7 +153,7 @@ STACK="  .stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
 test -z "${TEXT_BASE_ADDRESS}" && TEXT_BASE_ADDRESS="${TEXT_START_ADDR}"
 
 cat <<EOF
-/* Copyright (C) 2014-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2014-2017 Free Software Foundation, Inc.
 
    Copying and distribution of this script, with or without modification,
    are permitted in any medium without royalty provided the copyright
@@ -317,6 +317,7 @@ cat <<EOF
   ${RELOCATING+${OTHER_END_SYMBOLS}}
   ${RELOCATING+_end = .;}
   ${RELOCATING+PROVIDE (end = .);}
+  ${STACK_ADDR+${STACK}}
 
   /* Stabs debugging sections.  */
   . = ALIGN(0x1000);
@@ -335,7 +336,6 @@ EOF
 . $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
-  ${STACK_ADDR+${STACK}}
   ${ATTRS_SECTIONS}
   ${OTHER_SECTIONS}
   ${RELOCATING+${OTHER_SYMBOLS}}

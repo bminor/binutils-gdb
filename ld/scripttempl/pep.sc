@@ -1,6 +1,6 @@
 # Linker script for PE.
 #
-# Copyright (C) 2014-2016 Free Software Foundation, Inc.
+# Copyright (C) 2014-2017 Free Software Foundation, Inc.
 # 
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -60,12 +60,17 @@ else
   R_IDATA234=
   R_IDATA5=
   R_IDATA67=
-  R_CRT=
+  R_CRT_XC=
+  R_CRT_XI=
+  R_CRT_XL=
+  R_CRT_XP=
+  R_CRT_XT=
+  R_TLS='*(.tls)'
   R_RSRC='*(.rsrc)'
 fi
 
 cat <<EOF
-/* Copyright (C) 2014-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2014-2017 Free Software Foundation, Inc.
 
    Copying and distribution of this script, with or without modification,
    are permitted in any medium without royalty provided the copyright
@@ -90,8 +95,8 @@ SECTIONS
     ${R_TEXT}
     ${RELOCATING+ *(.text.*)}
     ${RELOCATING+ *(.gnu.linkonce.t.*)}
-    *(.glue_7t)
-    *(.glue_7)
+    ${RELOCATING+*(.glue_7t)}
+    ${RELOCATING+*(.glue_7)}
     ${CONSTRUCTING+. = ALIGN(8);}
     ${CONSTRUCTING+ ___CTOR_LIST__ = .; __CTOR_LIST__ = . ;
 			LONG (-1); LONG (-1);
@@ -122,7 +127,7 @@ SECTIONS
   {
     ${RELOCATING+__data_start__ = . ;}
     *(.data)
-    *(.data2)
+    ${RELOCATING+*(.data2)}
     ${R_DATA}
     KEEP(*(.jcr))
     ${RELOCATING+__data_end__ = . ;}
@@ -133,7 +138,7 @@ SECTIONS
   {
     ${R_RDATA}
     ${RELOCATING+__rt_psrelocs_start = .;}
-    KEEP(*(.rdata_runtime_pseudo_reloc))
+    ${RELOCATING+KEEP(*(.rdata_runtime_pseudo_reloc))}
     ${RELOCATING+__rt_psrelocs_end = .;}
   }
   ${RELOCATING+__rt_psrelocs_size = __rt_psrelocs_end - __rt_psrelocs_start;}
@@ -144,17 +149,17 @@ SECTIONS
 
   .eh_frame ${RELOCATING+BLOCK(__section_alignment__)} :
   {
-    KEEP (*(.eh_frame*))
+    KEEP (*(.eh_frame${RELOCATING+*}))
   }
 
   .pdata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
-    KEEP(*(.pdata*))
+    KEEP(*(.pdata${RELOCATING+*}))
   }
 
   .xdata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
-    KEEP(*(.xdata*))
+    KEEP(*(.xdata${RELOCATING+*}))
   }
 
   .bss ${RELOCATING+BLOCK(__section_alignment__)} :
@@ -410,6 +415,16 @@ SECTIONS
   .zdebug_types ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
   {
     *(.zdebug_types${RELOCATING+ .zdebug.gnu.linkonce.wt.*})
+  }
+
+  /* For Go and Rust.  */
+  .debug_gdb_scripts ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_gdb_scripts)
+  }
+  .zdebug_gdb_scripts ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.zdebug_gdb_scripts)
   }
 }
 EOF

@@ -1,6 +1,6 @@
 /* Go language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -605,6 +605,7 @@ static const struct language_defn go_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
+  c_watch_location_expression,
   NULL,
   iterate_over_symbols,
   &default_varobj_ops,
@@ -648,9 +649,9 @@ build_go_types (struct gdbarch *gdbarch)
   builtin_go_type->builtin_uint64
     = arch_integer_type (gdbarch, 64, 1, "uint64");
   builtin_go_type->builtin_float32
-    = arch_float_type (gdbarch, 32, "float32", NULL);
+    = arch_float_type (gdbarch, 32, "float32", floatformats_ieee_single);
   builtin_go_type->builtin_float64
-    = arch_float_type (gdbarch, 64, "float64", NULL);
+    = arch_float_type (gdbarch, 64, "float64", floatformats_ieee_double);
   builtin_go_type->builtin_complex64
     = arch_complex_type (gdbarch, "complex64",
 			 builtin_go_type->builtin_float32);

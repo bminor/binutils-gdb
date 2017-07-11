@@ -1,6 +1,6 @@
 /* Find a variable's value in memory, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,6 +33,7 @@
 #include "objfiles.h"
 #include "language.h"
 #include "dwarf2loc.h"
+#include "selftest.h"
 
 /* Basic byte-swapping routines.  All 'extract' functions return a
    host-format integer from a target-format integer at ADDR which is
@@ -46,70 +47,54 @@
 you lose
 #endif
 
-LONGEST
-extract_signed_integer (const gdb_byte *addr, int len,
-			enum bfd_endian byte_order)
+template<typename T, typename>
+T
+extract_integer (const gdb_byte *addr, int len, enum bfd_endian byte_order)
 {
-  LONGEST retval;
+  T retval = 0;
   const unsigned char *p;
   const unsigned char *startaddr = addr;
   const unsigned char *endaddr = startaddr + len;
 
-  if (len > (int) sizeof (LONGEST))
+  if (len > (int) sizeof (T))
     error (_("\
 That operation is not available on integers of more than %d bytes."),
-	   (int) sizeof (LONGEST));
+	   (int) sizeof (T));
 
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
   if (byte_order == BFD_ENDIAN_BIG)
     {
       p = startaddr;
-      /* Do the sign extension once at the start.  */
-      retval = ((LONGEST) * p ^ 0x80) - 0x80;
-      for (++p; p < endaddr; ++p)
+      if (std::is_signed<T>::value)
+	{
+	  /* Do the sign extension once at the start.  */
+	  retval = ((LONGEST) * p ^ 0x80) - 0x80;
+	  ++p;
+	}
+      for (; p < endaddr; ++p)
 	retval = (retval << 8) | *p;
     }
   else
     {
       p = endaddr - 1;
-      /* Do the sign extension once at the start.  */
-      retval = ((LONGEST) * p ^ 0x80) - 0x80;
-      for (--p; p >= startaddr; --p)
+      if (std::is_signed<T>::value)
+	{
+	  /* Do the sign extension once at the start.  */
+	  retval = ((LONGEST) * p ^ 0x80) - 0x80;
+	  --p;
+	}
+      for (; p >= startaddr; --p)
 	retval = (retval << 8) | *p;
     }
   return retval;
 }
 
-ULONGEST
-extract_unsigned_integer (const gdb_byte *addr, int len,
-			  enum bfd_endian byte_order)
-{
-  ULONGEST retval;
-  const unsigned char *p;
-  const unsigned char *startaddr = addr;
-  const unsigned char *endaddr = startaddr + len;
-
-  if (len > (int) sizeof (ULONGEST))
-    error (_("\
-That operation is not available on integers of more than %d bytes."),
-	   (int) sizeof (ULONGEST));
-
-  /* Start at the most significant end of the integer, and work towards
-     the least significant.  */
-  retval = 0;
-  if (byte_order == BFD_ENDIAN_BIG)
-    {
-      for (p = startaddr; p < endaddr; ++p)
-	retval = (retval << 8) | *p;
-    }
-  else
-    {
-      for (p = endaddr - 1; p >= startaddr; --p)
-	retval = (retval << 8) | *p;
-    }
-  return retval;
-}
+/* Explicit instantiations.  */
+template LONGEST extract_integer<LONGEST> (const gdb_byte *addr, int len,
+					   enum bfd_endian byte_order);
+template ULONGEST extract_integer<ULONGEST> (const gdb_byte *addr, int len,
+					     enum bfd_endian byte_order);
 
 /* Sometimes a long long unsigned integer can be extracted as a
    LONGEST value.  This is done so that we can print these values
@@ -169,8 +154,7 @@ extract_long_unsigned_integer (const gdb_byte *addr, int orig_len,
 CORE_ADDR
 extract_typed_address (const gdb_byte *buf, struct type *type)
 {
-  if (TYPE_CODE (type) != TYPE_CODE_PTR
-      && TYPE_CODE (type) != TYPE_CODE_REF)
+  if (TYPE_CODE (type) != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
     internal_error (__FILE__, __LINE__,
 		    _("extract_typed_address: "
 		    "type is not a pointer or reference"));
@@ -180,10 +164,10 @@ extract_typed_address (const gdb_byte *buf, struct type *type)
 
 /* All 'store' functions accept a host-format integer and store a
    target-format integer at ADDR which is LEN bytes long.  */
-
+template<typename T, typename>
 void
-store_signed_integer (gdb_byte *addr, int len,
-		      enum bfd_endian byte_order, LONGEST val)
+store_integer (gdb_byte *addr, int len, enum bfd_endian byte_order,
+	       T val)
 {
   gdb_byte *p;
   gdb_byte *startaddr = addr;
@@ -209,41 +193,21 @@ store_signed_integer (gdb_byte *addr, int len,
     }
 }
 
-void
-store_unsigned_integer (gdb_byte *addr, int len,
-			enum bfd_endian byte_order, ULONGEST val)
-{
-  unsigned char *p;
-  unsigned char *startaddr = (unsigned char *) addr;
-  unsigned char *endaddr = startaddr + len;
+/* Explicit instantiations.  */
+template void store_integer (gdb_byte *addr, int len,
+			     enum bfd_endian byte_order,
+			     LONGEST val);
 
-  /* Start at the least significant end of the integer, and work towards
-     the most significant.  */
-  if (byte_order == BFD_ENDIAN_BIG)
-    {
-      for (p = endaddr - 1; p >= startaddr; --p)
-	{
-	  *p = val & 0xff;
-	  val >>= 8;
-	}
-    }
-  else
-    {
-      for (p = startaddr; p < endaddr; ++p)
-	{
-	  *p = val & 0xff;
-	  val >>= 8;
-	}
-    }
-}
+template void store_integer (gdb_byte *addr, int len,
+			     enum bfd_endian byte_order,
+			     ULONGEST val);
 
 /* Store the address ADDR as a pointer of type TYPE at BUF, in target
    form.  */
 void
 store_typed_address (gdb_byte *buf, struct type *type, CORE_ADDR addr)
 {
-  if (TYPE_CODE (type) != TYPE_CODE_PTR
-      && TYPE_CODE (type) != TYPE_CODE_REF)
+  if (TYPE_CODE (type) != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
     internal_error (__FILE__, __LINE__,
 		    _("store_typed_address: "
 		    "type is not a pointer or reference"));
@@ -251,7 +215,46 @@ store_typed_address (gdb_byte *buf, struct type *type, CORE_ADDR addr)
   gdbarch_address_to_pointer (get_type_arch (type), type, buf, addr);
 }
 
+/* Copy a value from SOURCE of size SOURCE_SIZE bytes to DEST of size DEST_SIZE
+   bytes.  If SOURCE_SIZE is greater than DEST_SIZE, then truncate the most
+   significant bytes.  If SOURCE_SIZE is less than DEST_SIZE then either sign
+   or zero extended according to IS_SIGNED.  Values are stored in memory with
+   endianess BYTE_ORDER.  */
 
+void
+copy_integer_to_size (gdb_byte *dest, int dest_size, const gdb_byte *source,
+		      int source_size, bool is_signed,
+		      enum bfd_endian byte_order)
+{
+  signed int size_diff = dest_size - source_size;
+
+  /* Copy across everything from SOURCE that can fit into DEST.  */
+
+  if (byte_order == BFD_ENDIAN_BIG && size_diff > 0)
+    memcpy (dest + size_diff, source, source_size);
+  else if (byte_order == BFD_ENDIAN_BIG && size_diff < 0)
+    memcpy (dest, source - size_diff, dest_size);
+  else
+    memcpy (dest, source, std::min (source_size, dest_size));
+
+  /* Fill the remaining space in DEST by either zero extending or sign
+     extending.  */
+
+  if (size_diff > 0)
+    {
+      gdb_byte extension = 0;
+      if (is_signed
+	  && ((byte_order != BFD_ENDIAN_BIG && source[source_size - 1] & 0x80)
+	      || (byte_order == BFD_ENDIAN_BIG && source[0] & 0x80)))
+	extension = 0xff;
+
+      /* Extend into MSBs of SOURCE.  */
+      if (byte_order == BFD_ENDIAN_BIG)
+	memset (dest, extension, size_diff);
+      else
+	memset (dest + source_size, extension, size_diff);
+    }
+}
 
 /* Return a `value' with the contents of (virtual or cooked) register
    REGNUM as found in the specified FRAME.  The register's type is
@@ -283,17 +286,23 @@ value_of_register_lazy (struct frame_info *frame, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct value *reg_val;
+  struct frame_info *next_frame;
 
   gdb_assert (regnum < (gdbarch_num_regs (gdbarch)
 			+ gdbarch_num_pseudo_regs (gdbarch)));
 
-  /* We should have a valid (i.e. non-sentinel) frame.  */
-  gdb_assert (frame_id_p (get_frame_id (frame)));
+  gdb_assert (frame != NULL);
+
+  next_frame = get_next_frame_sentinel_okay (frame);
+
+  /* We should have a valid next frame.  */
+  gdb_assert (frame_id_p (get_frame_id (next_frame)));
 
   reg_val = allocate_value_lazy (register_type (gdbarch, regnum));
   VALUE_LVAL (reg_val) = lval_register;
   VALUE_REGNUM (reg_val) = regnum;
-  VALUE_FRAME_ID (reg_val) = get_frame_id (frame);
+  VALUE_NEXT_FRAME_ID (reg_val) = get_frame_id (next_frame);
+
   return reg_val;
 }
 
@@ -337,14 +346,13 @@ address_to_signed_pointer (struct gdbarch *gdbarch, struct type *type,
   store_signed_integer (buf, TYPE_LENGTH (type), byte_order, addr);
 }
 
-/* Will calling read_var_value or locate_var_value on SYM end
-   up caring what frame it is being evaluated relative to?  SYM must
-   be non-NULL.  */
-int
-symbol_read_needs_frame (struct symbol *sym)
+/* See value.h.  */
+
+enum symbol_needs_kind
+symbol_read_needs (struct symbol *sym)
 {
   if (SYMBOL_COMPUTED_OPS (sym) != NULL)
-    return SYMBOL_COMPUTED_OPS (sym)->read_needs_frame (sym);
+    return SYMBOL_COMPUTED_OPS (sym)->get_symbol_read_needs (sym);
 
   switch (SYMBOL_CLASS (sym))
     {
@@ -358,7 +366,7 @@ symbol_read_needs_frame (struct symbol *sym)
     case LOC_REF_ARG:
     case LOC_REGPARM_ADDR:
     case LOC_LOCAL:
-      return 1;
+      return SYMBOL_NEEDS_FRAME;
 
     case LOC_UNDEF:
     case LOC_CONST:
@@ -374,9 +382,17 @@ symbol_read_needs_frame (struct symbol *sym)
     case LOC_CONST_BYTES:
     case LOC_UNRESOLVED:
     case LOC_OPTIMIZED_OUT:
-      return 0;
+      return SYMBOL_NEEDS_NONE;
     }
-  return 1;
+  return SYMBOL_NEEDS_FRAME;
+}
+
+/* See value.h.  */
+
+int
+symbol_read_needs_frame (struct symbol *sym)
+{
+  return symbol_read_needs (sym) == SYMBOL_NEEDS_FRAME;
 }
 
 /* Private data to be used with minsym_lookup_iterator_cb.  */
@@ -575,6 +591,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
   struct value *v;
   struct type *type = SYMBOL_TYPE (var);
   CORE_ADDR addr;
+  enum symbol_needs_kind sym_need;
 
   /* Call check_typedef on our type to make sure that, if TYPE is
      a TYPE_CODE_TYPEDEF, its length is set to the length of the target type
@@ -583,8 +600,11 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
      set the returned value type description correctly.  */
   check_typedef (type);
 
-  if (symbol_read_needs_frame (var))
+  sym_need = symbol_read_needs (var);
+  if (sym_need == SYMBOL_NEEDS_FRAME)
     gdb_assert (frame != NULL);
+  else if (sym_need == SYMBOL_NEEDS_REGISTERS && !target_has_registers)
+    error (_("Cannot read `%s' without registers"), SYMBOL_PRINT_NAME (var));
 
   if (frame != NULL)
     frame = get_hosting_frame (var, var_block, frame);
@@ -804,9 +824,17 @@ default_value_from_register (struct gdbarch *gdbarch, struct type *type,
 {
   int len = TYPE_LENGTH (type);
   struct value *value = allocate_value (type);
+  struct frame_info *frame;
 
   VALUE_LVAL (value) = lval_register;
-  VALUE_FRAME_ID (value) = frame_id;
+  frame = frame_find_by_id (frame_id);
+
+  if (frame == NULL)
+    frame_id = null_frame_id;
+  else
+    frame_id = get_frame_id (get_next_frame_sentinel_okay (frame));
+
+  VALUE_NEXT_FRAME_ID (value) = frame_id;
   VALUE_REGNUM (value) = regnum;
 
   /* Any structure stored in more than one register will always be
@@ -891,7 +919,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
          including the location.  */
       v = allocate_value (type);
       VALUE_LVAL (v) = lval_register;
-      VALUE_FRAME_ID (v) = get_frame_id (frame);
+      VALUE_NEXT_FRAME_ID (v) = get_frame_id (get_next_frame_sentinel_okay (frame));
       VALUE_REGNUM (v) = regnum;
       ok = gdbarch_register_to_value (gdbarch, frame, regnum, type1,
 				      value_contents_raw (v), &optim,
@@ -939,7 +967,7 @@ address_from_register (int regnum, struct frame_info *frame)
      where the ID of FRAME is not yet known.  Calling value_from_register
      would therefore abort in get_frame_id.  However, since we only need
      a temporary value that is never used as lvalue, we actually do not
-     really need to set its VALUE_FRAME_ID.  Therefore, we re-implement
+     really need to set its VALUE_NEXT_FRAME_ID.  Therefore, we re-implement
      the core of value_from_register, but use the null_frame_id.  */
 
   /* Some targets require a special conversion routine even for plain
@@ -982,3 +1010,91 @@ address_from_register (int regnum, struct frame_info *frame)
   return result;
 }
 
+#if GDB_SELF_TEST
+namespace selftests {
+namespace findvar_tests {
+
+/* Function to test copy_integer_to_size.  Store SOURCE_VAL with size
+   SOURCE_SIZE to a buffer, making sure no sign extending happens at this
+   stage.  Copy buffer to a new buffer using copy_integer_to_size.  Extract
+   copied value and compare to DEST_VALU.  Copy again with a signed
+   copy_integer_to_size and compare to DEST_VALS.  Do everything for both
+   LITTLE and BIG target endians.  Use unsigned values throughout to make
+   sure there are no implicit sign extensions.  */
+
+static void
+do_cint_test (ULONGEST dest_valu, ULONGEST dest_vals, int dest_size,
+	      ULONGEST src_val, int src_size)
+{
+  for (int i = 0; i < 2 ; i++)
+    {
+      gdb_byte srcbuf[sizeof (ULONGEST)] = {};
+      gdb_byte destbuf[sizeof (ULONGEST)] = {};
+      enum bfd_endian byte_order = i ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
+
+      /* Fill the src buffer (and later the dest buffer) with non-zero junk,
+	 to ensure zero extensions aren't hidden.  */
+      memset (srcbuf, 0xaa, sizeof (srcbuf));
+
+      /* Store (and later extract) using unsigned to ensure there are no sign
+	 extensions.  */
+      store_unsigned_integer (srcbuf, src_size, byte_order, src_val);
+
+      /* Test unsigned.  */
+      memset (destbuf, 0xaa, sizeof (destbuf));
+      copy_integer_to_size (destbuf, dest_size, srcbuf, src_size, false,
+			    byte_order);
+      SELF_CHECK (dest_valu == extract_unsigned_integer (destbuf, dest_size,
+							 byte_order));
+
+      /* Test signed.  */
+      memset (destbuf, 0xaa, sizeof (destbuf));
+      copy_integer_to_size (destbuf, dest_size, srcbuf, src_size, true,
+			    byte_order);
+      SELF_CHECK (dest_vals == extract_unsigned_integer (destbuf, dest_size,
+							 byte_order));
+    }
+}
+
+static void
+copy_integer_to_size_test ()
+{
+  /* Destination is bigger than the source, which has the signed bit unset.  */
+  do_cint_test (0x12345678, 0x12345678, 8, 0x12345678, 4);
+  do_cint_test (0x345678, 0x345678, 8, 0x12345678, 3);
+
+  /* Destination is bigger than the source, which has the signed bit set.  */
+  do_cint_test (0xdeadbeef, 0xffffffffdeadbeef, 8, 0xdeadbeef, 4);
+  do_cint_test (0xadbeef, 0xffffffffffadbeef, 8, 0xdeadbeef, 3);
+
+  /* Destination is smaller than the source.  */
+  do_cint_test (0x5678, 0x5678, 2, 0x12345678, 3);
+  do_cint_test (0xbeef, 0xbeef, 2, 0xdeadbeef, 3);
+
+  /* Destination and source are the same size.  */
+  do_cint_test (0x8765432112345678, 0x8765432112345678, 8, 0x8765432112345678,
+		8);
+  do_cint_test (0x432112345678, 0x432112345678, 6, 0x8765432112345678, 6);
+  do_cint_test (0xfeedbeaddeadbeef, 0xfeedbeaddeadbeef, 8, 0xfeedbeaddeadbeef,
+		8);
+  do_cint_test (0xbeaddeadbeef, 0xbeaddeadbeef, 6, 0xfeedbeaddeadbeef, 6);
+
+  /* Destination is bigger than the source.  Source is bigger than 32bits.  */
+  do_cint_test (0x3412345678, 0x3412345678, 8, 0x3412345678, 6);
+  do_cint_test (0xff12345678, 0xff12345678, 8, 0xff12345678, 6);
+  do_cint_test (0x432112345678, 0x432112345678, 8, 0x8765432112345678, 6);
+  do_cint_test (0xff2112345678, 0xffffff2112345678, 8, 0xffffff2112345678, 6);
+}
+
+} // namespace findvar_test
+} // namespace selftests
+
+#endif
+
+void
+_initialize_findvar (void)
+{
+#if GDB_SELF_TEST
+  register_self_test (selftests::findvar_tests::copy_integer_to_size_test);
+#endif
+}

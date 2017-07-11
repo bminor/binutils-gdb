@@ -1,5 +1,5 @@
 /* Object file "section" support for the BFD library.
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2017 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -703,9 +703,9 @@ CODE_FRAGMENT
 .#define bfd_section_removed_from_list(ABFD, S) \
 .  ((S)->next == NULL ? (ABFD)->section_last != (S) : (S)->next->prev != (S))
 .
-.#define BFD_FAKE_SECTION(SEC, FLAGS, SYM, NAME, IDX)			\
+.#define BFD_FAKE_SECTION(SEC, SYM, NAME, IDX, FLAGS)			\
 .  {* name, id,  index, next, prev, flags, user_set_vma,            *}	\
-.  { NAME,  IDX, 0,     NULL, NULL, FLAGS, 0,				\
+.  {  NAME, IDX, 0,     NULL, NULL, FLAGS, 0,				\
 .									\
 .  {* linker_mark, linker_has_input, gc_mark, decompress_status,    *}	\
 .     0,           0,                1,       0,			\
@@ -741,19 +741,19 @@ CODE_FRAGMENT
 .     { NULL }, { NULL }						\
 .    }
 .
+.{* We use a macro to initialize the static asymbol structures because
+.   traditional C does not permit us to initialize a union member while
+.   gcc warns if we don't initialize it.
+.   the_bfd, name, value, attr, section [, udata]  *}
+.#ifdef __STDC__
+.#define GLOBAL_SYM_INIT(NAME, SECTION) \
+.  { 0, NAME, 0, BSF_SECTION_SYM, SECTION, { 0 }}
+.#else
+.#define GLOBAL_SYM_INIT(NAME, SECTION) \
+.  { 0, NAME, 0, BSF_SECTION_SYM, SECTION }
+.#endif
+.
 */
-
-/* We use a macro to initialize the static asymbol structures because
-   traditional C does not permit us to initialize a union member while
-   gcc warns if we don't initialize it.  */
- /* the_bfd, name, value, attr, section [, udata] */
-#ifdef __STDC__
-#define GLOBAL_SYM_INIT(NAME, SECTION) \
-  { 0, NAME, 0, BSF_SECTION_SYM, SECTION, { 0 }}
-#else
-#define GLOBAL_SYM_INIT(NAME, SECTION) \
-  { 0, NAME, 0, BSF_SECTION_SYM, SECTION }
-#endif
 
 /* These symbols are global, not specific to any BFD.  Therefore, anything
    that tries to change them is broken, and should be repaired.  */
@@ -767,7 +767,7 @@ static const asymbol global_syms[] =
 };
 
 #define STD_SECTION(NAME, IDX, FLAGS) \
-  BFD_FAKE_SECTION(_bfd_std_section[IDX], FLAGS, &global_syms[IDX], NAME, IDX)
+  BFD_FAKE_SECTION(_bfd_std_section[IDX], &global_syms[IDX], NAME, IDX, FLAGS)
 
 asection _bfd_std_section[] = {
   STD_SECTION (BFD_COM_SECTION_NAME, 0, SEC_IS_COMMON),

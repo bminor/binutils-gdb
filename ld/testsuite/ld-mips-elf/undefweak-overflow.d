@@ -16,12 +16,27 @@
 [ 0-9a-f]+:	00000000 	nop
 [ 0-9a-f]+:	0411fff5 	bal	20000000 <_ftext>
 [ 0-9a-f]+:	3c...... 	lui	a0,0x....
+[ 0-9a-f]+:	0c000000 	jal	20000000 <_ftext>
+[ 0-9a-f]+:	00000000 	nop
+[ 0-9a-f]+:	08000000 	j	20000000 <_ftext>
+[ 0-9a-f]+:	00000000 	nop
 
 [0-9a-f]+ <micro>:
-[ 0-9a-f]+:	8e67      	beqz	a0,20000000 <_ftext>
+[ 0-9a-f]+:	8e5f      	beqz	a0,20000000 <_ftext>
 [ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	cfe5      	b	20000000 <_ftext>
+[ 0-9a-f]+:	cfdd      	b	20000000 <_ftext>
 [ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	9400 ffe2 	b	20000000 <_ftext>
+[ 0-9a-f]+:	9400 ffda 	b	20000000 <_ftext>
 [ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	4060 ffd7 	bal	20000000 <_ftext>
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	f400 0000 	jal	20000000 <_ftext>
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	d400 0000 	j	20000000 <_ftext>
+[ 0-9a-f]+:	0c00      	nop
+
+[0-9a-f]+ <mips16>:
+[ 0-9a-f]+:	f7df 100c 	b	20000000 <_ftext>
+[ 0-9a-f]+:	1800 0000 	jal	20000000 <_ftext>
+[ 0-9a-f]+:	6500      	nop
 #pass

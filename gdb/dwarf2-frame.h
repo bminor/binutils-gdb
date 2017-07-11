@@ -1,6 +1,6 @@
 /* Frame unwinder for frames with DWARF Call Frame Information.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    Contributed by Mark Kettenis.
 
@@ -82,6 +82,58 @@ struct dwarf2_frame_state_reg
   enum dwarf2_frame_reg_rule how;
 };
 
+enum cfa_how_kind
+{
+  CFA_UNSET,
+  CFA_REG_OFFSET,
+  CFA_EXP
+};
+
+struct dwarf2_frame_state_reg_info
+{
+  struct dwarf2_frame_state_reg *reg;
+  int num_regs;
+
+  LONGEST cfa_offset;
+  ULONGEST cfa_reg;
+  enum cfa_how_kind cfa_how;
+  const gdb_byte *cfa_exp;
+
+  /* Used to implement DW_CFA_remember_state.  */
+  struct dwarf2_frame_state_reg_info *prev;
+};
+
+/* Structure describing a frame state.  */
+
+struct dwarf2_frame_state
+{
+  /* Each register save state can be described in terms of a CFA slot,
+     another register, or a location expression.  */
+  struct dwarf2_frame_state_reg_info regs;
+
+  /* The PC described by the current frame state.  */
+  CORE_ADDR pc;
+
+  /* Initial register set from the CIE.
+     Used to implement DW_CFA_restore.  */
+  struct dwarf2_frame_state_reg_info initial;
+
+  /* The information we care about from the CIE.  */
+  LONGEST data_align;
+  ULONGEST code_align;
+  ULONGEST retaddr_column;
+
+  /* Flags for known producer quirks.  */
+
+  /* The ARM compilers, in DWARF2 mode, assume that DW_CFA_def_cfa
+     and DW_CFA_def_cfa_offset takes a factored offset.  */
+  int armcc_cfa_offsets_sf;
+
+  /* The ARM compilers, in DWARF2 or DWARF3 mode, may assume that
+     the CFA is defined as REG - OFFSET rather than REG + OFFSET.  */
+  int armcc_cfa_offsets_reversed;
+};
+
 /* Set the architecture-specific register state initialization
    function for GDBARCH to INIT_REG.  */
 
@@ -119,6 +171,12 @@ extern const struct frame_base *
 /* Compute the DWARF CFA for a frame.  */
 
 CORE_ADDR dwarf2_frame_cfa (struct frame_info *this_frame);
+
+/* Assert that the register set RS is large enough to store gdbarch_num_regs
+   columns.  If necessary, enlarge the register set.  */
+
+void dwarf2_frame_state_alloc_regs (struct dwarf2_frame_state_reg_info *rs,
+				    int num_regs);
 
 /* Find the CFA information for PC.
 

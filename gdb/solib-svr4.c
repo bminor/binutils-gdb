@@ -1,6 +1,6 @@
 /* Handle SVR4 shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -50,27 +50,6 @@ static struct link_map_offsets *svr4_fetch_link_map_offsets (void);
 static int svr4_have_link_map_offsets (void);
 static void svr4_relocate_main_executable (void);
 static void svr4_free_library_list (void *p_list);
-
-/* Link map info to include in an allocated so_list entry.  */
-
-struct lm_info
-  {
-    /* Amount by which addresses in the binary should be relocated to
-       match the inferior.  The direct inferior value is L_ADDR_INFERIOR.
-       When prelinking is involved and the prelink base address changes,
-       we may need a different offset - the recomputed offset is in L_ADDR.
-       It is commonly the same value.  It is cached as we want to warn about
-       the difference and compute it only once.  L_ADDR is valid
-       iff L_ADDR_P.  */
-    CORE_ADDR l_addr, l_addr_inferior;
-    unsigned int l_addr_p : 1;
-
-    /* The target location of lm.  */
-    CORE_ADDR lm_addr;
-
-    /* Values read in from inferior's fields of the same name.  */
-    CORE_ADDR l_ld, l_next, l_prev, l_name;
-  };
 
 /* On SVR4 systems, a list of symbols in the dynamic linker where
    GDB can try to place a breakpoint to monitor shared library
@@ -189,12 +168,12 @@ svr4_same (struct so_list *gdb, struct so_list *inferior)
   return (svr4_same_1 (gdb->so_original_name, inferior->so_original_name));
 }
 
-static struct lm_info *
+static lm_info_svr4 *
 lm_info_read (CORE_ADDR lm_addr)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   gdb_byte *lm;
-  struct lm_info *lm_info;
+  lm_info_svr4 *lm_info;
   struct cleanup *back_to;
 
   lm = (gdb_byte *) xmalloc (lmo->link_map_size);
@@ -210,7 +189,7 @@ lm_info_read (CORE_ADDR lm_addr)
     {
       struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
 
-      lm_info = XCNEW (struct lm_info);
+      lm_info = new lm_info_svr4;
       lm_info->lm_addr = lm_addr;
 
       lm_info->l_addr_inferior = extract_typed_address (&lm[lmo->l_addr_offset],
@@ -240,17 +219,19 @@ has_lm_dynamic_from_link_map (void)
 static CORE_ADDR
 lm_addr_check (const struct so_list *so, bfd *abfd)
 {
-  if (!so->lm_info->l_addr_p)
+  lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
+
+  if (!li->l_addr_p)
     {
       struct bfd_section *dyninfo_sect;
       CORE_ADDR l_addr, l_dynaddr, dynaddr;
 
-      l_addr = so->lm_info->l_addr_inferior;
+      l_addr = li->l_addr_inferior;
 
       if (! abfd || ! has_lm_dynamic_from_link_map ())
 	goto set_addr;
 
-      l_dynaddr = so->lm_info->l_ld;
+      l_dynaddr = li->l_ld;
 
       dyninfo_sect = bfd_get_section_by_name (abfd, ".dynamic");
       if (dyninfo_sect == NULL)
@@ -333,11 +314,11 @@ lm_addr_check (const struct so_list *so, bfd *abfd)
 	}
 
     set_addr:
-      so->lm_info->l_addr = l_addr;
-      so->lm_info->l_addr_p = 1;
+      li->l_addr = l_addr;
+      li->l_addr_p = 1;
     }
 
-  return so->lm_info->l_addr;
+  return li->l_addr;
 }
 
 /* Per pspace SVR4 specific data.  */
@@ -994,9 +975,10 @@ svr4_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
 
   newobj = XCNEW (struct so_list);
   old_chain = make_cleanup (xfree, newobj);
-  newobj->lm_info = lm_info_read (ldsomap);
+  lm_info_svr4 *li = lm_info_read (ldsomap);
+  newobj->lm_info = li;
   make_cleanup (xfree, newobj->lm_info);
-  name_lm = newobj->lm_info ? newobj->lm_info->l_name : 0;
+  name_lm = li != NULL ? li->l_name : 0;
   do_cleanups (old_chain);
 
   return (name_lm >= vaddr && name_lm < vaddr + size);
@@ -1022,6 +1004,10 @@ open_symbol_file_object (void *from_ttyp)
   gdb_byte *l_name_buf = (gdb_byte *) xmalloc (l_name_size);
   struct cleanup *cleanups = make_cleanup (xfree, l_name_buf);
   struct svr4_info *info = get_svr4_info ();
+  symfile_add_flags add_flags = 0;
+
+  if (from_tty)
+    add_flags |= SYMFILE_VERBOSE;
 
   if (symfile_objfile)
     if (!query (_("Attempt to reload symbols from process? ")))
@@ -1071,7 +1057,7 @@ open_symbol_file_object (void *from_ttyp)
     }
 
   /* Have a pathname: read the symbol file.  */
-  symbol_file_add_main (filename, from_tty);
+  symbol_file_add_main (filename, add_flags);
 
   do_cleanups (cleanups);
   return 1;
@@ -1094,7 +1080,9 @@ struct svr4_library_list
 static void
 svr4_free_so (struct so_list *so)
 {
-  xfree (so->lm_info);
+  lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
+
+  delete li;
 }
 
 /* Implement target_so_ops.clear_so.  */
@@ -1102,8 +1090,10 @@ svr4_free_so (struct so_list *so)
 static void
 svr4_clear_so (struct so_list *so)
 {
-  if (so->lm_info != NULL)
-    so->lm_info->l_addr_p = 0;
+  lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
+
+  if (li != NULL)
+    li->l_addr_p = 0;
 }
 
 /* Free so_list built so far (called via cleanup).  */
@@ -1137,8 +1127,8 @@ svr4_copy_library_list (struct so_list *src)
       newobj = XNEW (struct so_list);
       memcpy (newobj, src, sizeof (struct so_list));
 
-      newobj->lm_info = XNEW (struct lm_info);
-      memcpy (newobj->lm_info, src->lm_info, sizeof (struct lm_info));
+      lm_info_svr4 *src_li = (lm_info_svr4 *) src->lm_info;
+      newobj->lm_info = new lm_info_svr4 (*src_li);
 
       newobj->next = NULL;
       *link = newobj;
@@ -1174,10 +1164,11 @@ library_list_start_library (struct gdb_xml_parser *parser,
   struct so_list *new_elem;
 
   new_elem = XCNEW (struct so_list);
-  new_elem->lm_info = XCNEW (struct lm_info);
-  new_elem->lm_info->lm_addr = *lmp;
-  new_elem->lm_info->l_addr_inferior = *l_addrp;
-  new_elem->lm_info->l_ld = *l_ldp;
+  lm_info_svr4 *li = new lm_info_svr4;
+  new_elem->lm_info = li;
+  li->lm_addr = *lmp;
+  li->l_addr_inferior = *l_addrp;
+  li->l_ld = *l_ldp;
 
   strncpy (new_elem->so_name, name, sizeof (new_elem->so_name) - 1);
   new_elem->so_name[sizeof (new_elem->so_name) - 1] = 0;
@@ -1328,12 +1319,12 @@ svr4_default_sos (void)
     return NULL;
 
   newobj = XCNEW (struct so_list);
-
-  newobj->lm_info = XCNEW (struct lm_info);
+  lm_info_svr4 *li = new lm_info_svr4;
+  newobj->lm_info = li;
 
   /* Nothing will ever check the other fields if we set l_addr_p.  */
-  newobj->lm_info->l_addr = info->debug_loader_offset;
-  newobj->lm_info->l_addr_p = 1;
+  li->l_addr = info->debug_loader_offset;
+  li->l_addr_p = 1;
 
   strncpy (newobj->so_name, info->debug_loader_name, SO_NAME_MAX_PATH_SIZE - 1);
   newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
@@ -1367,20 +1358,21 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
       newobj = XCNEW (struct so_list);
       old_chain = make_cleanup_free_so (newobj);
 
-      newobj->lm_info = lm_info_read (lm);
-      if (newobj->lm_info == NULL)
+      lm_info_svr4 *li = lm_info_read (lm);
+      newobj->lm_info = li;
+      if (li == NULL)
 	{
 	  do_cleanups (old_chain);
 	  return 0;
 	}
 
-      next_lm = newobj->lm_info->l_next;
+      next_lm = li->l_next;
 
-      if (newobj->lm_info->l_prev != prev_lm)
+      if (li->l_prev != prev_lm)
 	{
 	  warning (_("Corrupted shared library list: %s != %s"),
 		   paddress (target_gdbarch (), prev_lm),
-		   paddress (target_gdbarch (), newobj->lm_info->l_prev));
+		   paddress (target_gdbarch (), li->l_prev));
 	  do_cleanups (old_chain);
 	  return 0;
 	}
@@ -1390,26 +1382,26 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
          SVR4, it has no name.  For others (Solaris 2.3 for example), it
          does have a name, so we can no longer use a missing name to
          decide when to ignore it.  */
-      if (ignore_first && newobj->lm_info->l_prev == 0)
+      if (ignore_first && li->l_prev == 0)
 	{
 	  struct svr4_info *info = get_svr4_info ();
 
-	  first_l_name = newobj->lm_info->l_name;
-	  info->main_lm_addr = newobj->lm_info->lm_addr;
+	  first_l_name = li->l_name;
+	  info->main_lm_addr = li->lm_addr;
 	  do_cleanups (old_chain);
 	  continue;
 	}
 
       /* Extract this shared object's name.  */
-      target_read_string (newobj->lm_info->l_name, &buffer,
-			  SO_NAME_MAX_PATH_SIZE - 1, &errcode);
+      target_read_string (li->l_name, &buffer, SO_NAME_MAX_PATH_SIZE - 1,
+			  &errcode);
       if (errcode != 0)
 	{
 	  /* If this entry's l_name address matches that of the
 	     inferior executable, then this is not a normal shared
 	     object, but (most likely) a vDSO.  In this case, silently
 	     skip it; otherwise emit a warning. */
-	  if (first_l_name == 0 || newobj->lm_info->l_name != first_l_name)
+	  if (first_l_name == 0 || li->l_name != first_l_name)
 	    warning (_("Can't read pathname for load map: %s."),
 		     safe_strerror (errcode));
 	  do_cleanups (old_chain);
@@ -1590,7 +1582,10 @@ svr4_current_sos (void)
 	      [...]
 		[ 9] .dynamic DYNAMIC ffffffffff700580 000580 0000f0
 	  */
-	  if (address_in_mem_range (so->lm_info->l_ld, &vsyscall_range))
+
+	  lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
+
+	  if (address_in_mem_range (li->l_ld, &vsyscall_range))
 	    {
 	      *sop = so->next;
 	      free_so (so);
@@ -1614,7 +1609,7 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
 
   /* Cause svr4_current_sos() to be run if it hasn't been already.  */
   if (info->main_lm_addr == 0)
-    solib_add (NULL, 0, &current_target, auto_solib_add);
+    solib_add (NULL, 0, auto_solib_add);
 
   /* svr4_current_sos() will set main_lm_addr for the main executable.  */
   if (objfile == symfile_objfile)
@@ -1624,7 +1619,11 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
      of shared libraries.  */
   for (so = master_so_list (); so; so = so->next)
     if (so->objfile == objfile)
-      return so->lm_info->lm_addr;
+      {
+	lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
+
+	return li->lm_addr;
+      }
 
   /* Not found!  */
   return 0;
@@ -1856,7 +1855,9 @@ solist_update_incremental (struct svr4_info *info, CORE_ADDR lm)
   /* Walk to the end of the list.  */
   for (tail = info->solib_list; tail->next != NULL; tail = tail->next)
     /* Nothing.  */;
-  prev_lm = tail->lm_info->lm_addr;
+
+  lm_info_svr4 *li = (lm_info_svr4 *) tail->lm_info;
+  prev_lm = li->lm_addr;
 
   /* Read the new objects.  */
   if (info->using_xfer)
@@ -2273,7 +2274,7 @@ enable_break (struct svr4_info *info, int from_tty)
      mean r_brk has already been relocated.  Assume the dynamic linker
      is the object containing r_brk.  */
 
-  solib_add (NULL, from_tty, &current_target, auto_solib_add);
+  solib_add (NULL, from_tty, auto_solib_add);
   sym_addr = 0;
   if (info->debug_base && solib_svr4_r_map (info) != 0)
     sym_addr = solib_svr4_r_brk (info);
@@ -2351,7 +2352,6 @@ enable_break (struct svr4_info *info, int from_tty)
       int load_addr_found = 0;
       int loader_found_in_list = 0;
       struct so_list *so;
-      bfd *tmp_bfd = NULL;
       struct target_ops *tmp_bfd_target;
 
       sym_addr = 0;
@@ -2365,6 +2365,7 @@ enable_break (struct svr4_info *info, int from_tty)
          be trivial on GNU/Linux).  Therefore, we have to try an alternate
          mechanism to find the dynamic linker's base address.  */
 
+      gdb_bfd_ref_ptr tmp_bfd;
       TRY
         {
 	  tmp_bfd = solib_bfd_open (interp_name);
@@ -2378,11 +2379,9 @@ enable_break (struct svr4_info *info, int from_tty)
 	goto bkpt_at_symbol;
 
       /* Now convert the TMP_BFD into a target.  That way target, as
-         well as BFD operations can be used.  */
-      tmp_bfd_target = target_bfd_reopen (tmp_bfd);
-      /* target_bfd_reopen acquired its own reference, so we can
-         release ours now.  */
-      gdb_bfd_unref (tmp_bfd);
+         well as BFD operations can be used.  target_bfd_reopen
+         acquires its own reference.  */
+      tmp_bfd_target = target_bfd_reopen (tmp_bfd.get ());
 
       /* On a running target, we can get the dynamic linker's base
          address from the shared library table.  */
@@ -2393,7 +2392,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	    {
 	      load_addr_found = 1;
 	      loader_found_in_list = 1;
-	      load_addr = lm_addr_check (so, tmp_bfd);
+	      load_addr = lm_addr_check (so, tmp_bfd.get ());
 	      break;
 	    }
 	  so = so->next;
@@ -2414,7 +2413,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	    if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
 	      {
 		CORE_ADDR space_size = (CORE_ADDR) 1 << addr_bit;
-		CORE_ADDR tmp_entry_point = exec_entry_point (tmp_bfd,
+		CORE_ADDR tmp_entry_point = exec_entry_point (tmp_bfd.get (),
 							      tmp_bfd_target);
 
 		gdb_assert (load_addr < space_size);
@@ -2443,7 +2442,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	    = get_thread_arch_regcache (inferior_ptid, target_gdbarch ());
 
 	  load_addr = (regcache_read_pc (regcache)
-		       - exec_entry_point (tmp_bfd, tmp_bfd_target));
+		       - exec_entry_point (tmp_bfd.get (), tmp_bfd_target));
 	}
 
       if (!loader_found_in_list)
@@ -2451,34 +2450,35 @@ enable_break (struct svr4_info *info, int from_tty)
 	  info->debug_loader_name = xstrdup (interp_name);
 	  info->debug_loader_offset_p = 1;
 	  info->debug_loader_offset = load_addr;
-	  solib_add (NULL, from_tty, &current_target, auto_solib_add);
+	  solib_add (NULL, from_tty, auto_solib_add);
 	}
 
       /* Record the relocated start and end address of the dynamic linker
          text and plt section for svr4_in_dynsym_resolve_code.  */
-      interp_sect = bfd_get_section_by_name (tmp_bfd, ".text");
+      interp_sect = bfd_get_section_by_name (tmp_bfd.get (), ".text");
       if (interp_sect)
 	{
 	  info->interp_text_sect_low =
-	    bfd_section_vma (tmp_bfd, interp_sect) + load_addr;
+	    bfd_section_vma (tmp_bfd.get (), interp_sect) + load_addr;
 	  info->interp_text_sect_high =
 	    info->interp_text_sect_low
-	    + bfd_section_size (tmp_bfd, interp_sect);
+	    + bfd_section_size (tmp_bfd.get (), interp_sect);
 	}
-      interp_sect = bfd_get_section_by_name (tmp_bfd, ".plt");
+      interp_sect = bfd_get_section_by_name (tmp_bfd.get (), ".plt");
       if (interp_sect)
 	{
 	  info->interp_plt_sect_low =
-	    bfd_section_vma (tmp_bfd, interp_sect) + load_addr;
+	    bfd_section_vma (tmp_bfd.get (), interp_sect) + load_addr;
 	  info->interp_plt_sect_high =
 	    info->interp_plt_sect_low
-	    + bfd_section_size (tmp_bfd, interp_sect);
+	    + bfd_section_size (tmp_bfd.get (), interp_sect);
 	}
 
       /* Now try to set a breakpoint in the dynamic linker.  */
       for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
-	  sym_addr = gdb_bfd_lookup_symbol (tmp_bfd, cmp_name_and_sec_flags,
+	  sym_addr = gdb_bfd_lookup_symbol (tmp_bfd.get (),
+					    cmp_name_and_sec_flags,
 					    *bkpt_namep);
 	  if (sym_addr != 0)
 	    break;
@@ -2550,14 +2550,6 @@ enable_break (struct svr4_info *info, int from_tty)
 	}
     }
   return 0;
-}
-
-/* Implement the "special_symbol_handling" target_so_ops method.  */
-
-static void
-svr4_special_symbol_handling (void)
-{
-  /* Nothing to do.  */
 }
 
 /* Read the ELF program headers from ABFD.  Return the contents and
@@ -3327,7 +3319,6 @@ _initialize_svr4_solib (void)
   svr4_so_ops.clear_so = svr4_clear_so;
   svr4_so_ops.clear_solib = svr4_clear_solib;
   svr4_so_ops.solib_create_inferior_hook = svr4_solib_create_inferior_hook;
-  svr4_so_ops.special_symbol_handling = svr4_special_symbol_handling;
   svr4_so_ops.current_sos = svr4_current_sos;
   svr4_so_ops.open_symbol_file_object = open_symbol_file_object;
   svr4_so_ops.in_dynsym_resolve_code = svr4_in_dynsym_resolve_code;

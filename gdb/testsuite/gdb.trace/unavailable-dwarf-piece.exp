@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2016 Free Software Foundation, Inc.
+# Copyright (C) 2013-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -325,13 +325,7 @@ with_test_prefix "tracing bar" {
     gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*"
     gdb_test_no_output "tstop"
 
-    set endian ""
-    gdb_test_multiple "show endian" "show endian" {
-	-re ".* (big|little) endian.*$gdb_prompt $" {
-	    set endian $expect_out(1,string)
-	    pass "endianness: $endian"
-	}
-    }
+    set endian [get_endianness]
 
     gdb_test "tfind 0" "Found trace frame 0, tracepoint .*"
     if { $endian == "little" } {

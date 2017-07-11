@@ -1,5 +1,5 @@
 /* BFD back-end for VERSAdos-E objects.
-   Copyright (C) 1995-2016 Free Software Foundation, Inc.
+   Copyright (C) 1995-2017 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
    Versados is a Motorola trademark.
@@ -149,7 +149,7 @@ versados_mkobject (bfd *abfd)
   if (abfd->tdata.versados_data == NULL)
     {
       bfd_size_type amt = sizeof (tdata_type);
-      tdata_type *tdata = bfd_alloc (abfd, amt);
+      tdata_type *tdata = bfd_zalloc (abfd, amt);
 
       if (tdata == NULL)
 	return FALSE;
@@ -296,6 +296,7 @@ process_esd (bfd *abfd, struct ext_esd *esd, int pass)
 	  break;
 	case ESD_XDEF_IN_ABS:
 	  sec = bfd_abs_section_ptr;
+	  /* Fall through.  */
 	case ESD_XDEF_IN_SEC:
 	  {
 	    int snum = VDATA (abfd)->def_idx++;
@@ -344,13 +345,13 @@ reloc_howto_type versados_howto_table[] =
 };
 
 static int
-get_offset (int len, unsigned char *ptr)
+get_offset (unsigned int len, unsigned char *ptr)
 {
   int val = 0;
 
   if (len)
     {
-      int i;
+      unsigned int i;
 
       val = *ptr++;
       if (val & 0x80)
@@ -393,8 +394,12 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
 	  int flag = *srcp++;
 	  int esdids = (flag >> 5) & 0x7;
 	  int sizeinwords = ((flag >> 3) & 1) ? 2 : 1;
-	  int offsetlen = flag & 0x7;
+	  unsigned int offsetlen = flag & 0x7;
 	  int j;
+
+	  /* PR 21591: Check for invalid lengths.  */
+	  if (srcp + esdids + offsetlen >= endp)
+	    return;
 
 	  if (esdids == 0)
 	    {
@@ -866,6 +871,7 @@ versados_canonicalize_reloc (bfd *abfd,
 #define versados_bfd_discard_group                    bfd_generic_discard_group
 #define versados_section_already_linked               _bfd_generic_section_already_linked
 #define versados_bfd_define_common_symbol             bfd_generic_define_common_symbol
+#define versados_bfd_define_start_stop                bfd_generic_define_start_stop
 #define versados_bfd_link_hash_table_create           _bfd_generic_link_hash_table_create
 #define versados_bfd_link_add_symbols                 _bfd_generic_link_add_symbols
 #define versados_bfd_link_just_syms                   _bfd_generic_link_just_syms
@@ -874,6 +880,7 @@ versados_canonicalize_reloc (bfd *abfd,
 #define versados_bfd_final_link                       _bfd_generic_final_link
 #define versados_bfd_link_split_section               _bfd_generic_link_split_section
 #define versados_bfd_link_check_relocs                _bfd_generic_link_check_relocs
+#define versados_set_reloc			      _bfd_generic_set_reloc
 
 const bfd_target m68k_versados_vec =
 {

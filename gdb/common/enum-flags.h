@@ -1,4 +1,4 @@
-/* Copyright (C) 2015-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2015-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -115,19 +115,10 @@ private:
   }
 
 public:
-  /* Allow default construction, just like raw enums.  */
+  /* Allow default construction.  */
   enum_flags ()
+    : m_enum_value ((enum_type) 0)
   {}
-
-  enum_flags (const enum_flags &other)
-    : m_enum_value (other.m_enum_value)
-  {}
-
-  enum_flags &operator= (const enum_flags &other)
-  {
-    m_enum_value = other.m_enum_value;
-    return *this;
-  }
 
   /* If you get an error saying these two overloads are ambiguous,
      then you tried to mix values of different enum types.  */

@@ -25,13 +25,13 @@ Disassembly of section .plt:
 [ 	]*[a-f0-9]+:	41 ff e3             	jmpq   \*%r11
 [ 	]*[a-f0-9]+:	66 66 66 66 66 66 2e 0f 1f 84 00 00 00 00 00 	data16 data16 data16 data16 data16 nopw %cs:0x0\(%rax,%rax,1\)
 [ 	]*[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
-[ 	]*[a-f0-9]+:	e9 00 00 00 00       	jmpq   6a <_start-0x16>
+[ 	]*[a-f0-9]+:	e9 00 00 00 00       	jmpq   6a <\.plt\+0x6a>
 [ 	]*[a-f0-9]+:	66 66 66 66 66 66 2e 0f 1f 84 00 00 00 00 00 	data16 data16 data16 data16 data16 nopw %cs:0x0\(%rax,%rax,1\)
 [ 	]*[a-f0-9]+:	0f 1f 80 00 00 00 00 	nopl   0x0\(%rax\)
 
 Disassembly of section .text:
 
 0+80 <_start>:
-[ 	]*[a-f0-9]+:	48 3b 05 a9 01 01 10 	cmp    0x100101a9\(%rip\),%rax        # 10010230 <_DYNAMIC\+0xe0>
-[ 	]*[a-f0-9]+:	ff 25 ab 01 01 10    	jmpq   \*0x100101ab\(%rip\)        # 10010238 <_DYNAMIC\+0xe8>
-[ 	]*[a-f0-9]+:	e8 ae ff ff ff       	callq  40 <_start-0x40>
+[ 	]*[a-f0-9]+:	48 3b 05 a9 01 01 10 	cmp    0x100101a9\(%rip\),%rax        # 10010230 <\.got>
+[ 	]*[a-f0-9]+:	ff 25 ab 01 01 10    	jmpq   \*0x100101ab\(%rip\)        # 10010238 <\.got\+0x8>
+[ 	]*[a-f0-9]+:	e8 ae ff ff ff       	callq  40 <\.plt\+0x40>

@@ -1,5 +1,5 @@
 /* PEF support for BFD.
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -59,6 +59,7 @@
 #define bfd_pef_bfd_discard_group                   bfd_generic_discard_group
 #define bfd_pef_section_already_linked	            _bfd_generic_section_already_linked
 #define bfd_pef_bfd_define_common_symbol            bfd_generic_define_common_symbol
+#define bfd_pef_bfd_define_start_stop               bfd_generic_define_start_stop
 #define bfd_pef_bfd_link_hash_table_create          _bfd_generic_link_hash_table_create
 #define bfd_pef_bfd_link_add_symbols                _bfd_generic_link_add_symbols
 #define bfd_pef_bfd_link_just_syms                  _bfd_generic_link_just_syms
@@ -522,8 +523,8 @@ bfd_pef_scan (bfd *abfd,
   bfd_pef_convert_architecture (header->architecture, &cputype, &cpusubtype);
   if (cputype == bfd_arch_unknown)
     {
-      (*_bfd_error_handler) (_("bfd_pef_scan: unknown architecture 0x%lx"),
-			       header->architecture);
+      _bfd_error_handler (_("bfd_pef_scan: unknown architecture 0x%lx"),
+			  header->architecture);
       return -1;
     }
   bfd_set_arch_mach (abfd, cputype, cpusubtype);

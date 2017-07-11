@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux x86-64.
 
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2017 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -40,6 +40,12 @@
 #include "nat/linux-ptrace.h"
 #include "nat/amd64-linux-siginfo.h"
 
+/* This definition comes from prctl.h.  Kernels older than 2.5.64
+   do not have it.  */
+#ifndef PTRACE_ARCH_PRCTL
+#define PTRACE_ARCH_PRCTL      30
+#endif
+
 /* Mapping between the general-purpose registers in GNU/Linux x86-64
    `struct user' format and GDB's register cache layout for GNU/Linux
    i386.
@@ -67,6 +73,7 @@ static int amd64_linux_gregset32_reg_offset[] =
   -1, -1,			  /* MPX registers BNDCFGU, BNDSTATUS.  */
   -1, -1, -1, -1, -1, -1, -1, -1, /* k0 ... k7 (AVX512)  */
   -1, -1, -1, -1, -1, -1, -1, -1, /* zmm0 ... zmm7 (AVX512)  */
+  -1,				  /* PKEYS register PKRU  */
   ORIG_RAX * 8			  /* "orig_eax"  */
 };
 
@@ -131,9 +138,9 @@ amd64_linux_fetch_inferior_registers (struct target_ops *ops,
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (regcache_get_ptid (regcache));
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (regcache_get_ptid (regcache)); /* Not a threaded program.  */
 
   if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
@@ -171,6 +178,30 @@ amd64_linux_fetch_inferior_registers (struct target_ops *ops,
 
 	  amd64_supply_fxsave (regcache, -1, &fpregs);
 	}
+#ifndef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+      {
+	/* PTRACE_ARCH_PRCTL is obsolete since 2.6.25, where the
+	   fs_base and gs_base fields of user_regs_struct can be
+	   used directly.  */
+	unsigned long base;
+
+	if (regnum == -1 || regnum == AMD64_FSBASE_REGNUM)
+	  {
+	    if (ptrace (PTRACE_ARCH_PRCTL, tid, &base, ARCH_GET_FS) < 0)
+	      perror_with_name (_("Couldn't get segment register fs_base"));
+
+	    regcache_raw_supply (regcache, AMD64_FSBASE_REGNUM, &base);
+	  }
+
+	if (regnum == -1 || regnum == AMD64_GSBASE_REGNUM)
+	  {
+	    if (ptrace (PTRACE_ARCH_PRCTL, tid, &base, ARCH_GET_GS) < 0)
+	      perror_with_name (_("Couldn't get segment register gs_base"));
+
+	    regcache_raw_supply (regcache, AMD64_GSBASE_REGNUM, &base);
+	  }
+      }
+#endif
     }
 }
 
@@ -186,9 +217,9 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = ptid_get_lwp (regcache_get_ptid (regcache));
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (regcache_get_ptid (regcache)); /* Not a threaded program.  */
 
   if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
@@ -237,6 +268,30 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
 	  if (ptrace (PTRACE_SETFPREGS, tid, 0, (long) &fpregs) < 0)
 	    perror_with_name (_("Couldn't write floating point status"));
 	}
+
+#ifndef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+      {
+	/* PTRACE_ARCH_PRCTL is obsolete since 2.6.25, where the
+	   fs_base and gs_base fields of user_regs_struct can be
+	   used directly.  */
+	void *base;
+
+	if (regnum == -1 || regnum == AMD64_FSBASE_REGNUM)
+	  {
+	    regcache_raw_collect (regcache, AMD64_FSBASE_REGNUM, &base);
+
+	    if (ptrace (PTRACE_ARCH_PRCTL, tid, base, ARCH_SET_FS) < 0)
+	      perror_with_name (_("Couldn't write segment register fs_base"));
+	  }
+	if (regnum == -1 || regnum == AMD64_GSBASE_REGNUM)
+	  {
+
+	    regcache_raw_collect (regcache, AMD64_GSBASE_REGNUM, &base);
+	    if (ptrace (PTRACE_ARCH_PRCTL, tid, base, ARCH_SET_GS) < 0)
+	      perror_with_name (_("Couldn't write segment register gs_base"));
+	  }
+      }
+#endif
     }
 }
 
@@ -245,7 +300,7 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
    a request for a thread's local storage address.  */
 
 ps_err_e
-ps_get_thread_area (const struct ps_prochandle *ph,
+ps_get_thread_area (struct ps_prochandle *ph,
                     lwpid_t lwpid, int idx, void **base)
 {
   if (gdbarch_bfd_arch_info (target_gdbarch ())->bits_per_word == 32)
@@ -265,11 +320,7 @@ ps_get_thread_area (const struct ps_prochandle *ph,
     }
   else
     {
-      /* This definition comes from prctl.h, but some kernels may not
-         have it.  */
-#ifndef PTRACE_ARCH_PRCTL
-#define PTRACE_ARCH_PRCTL      30
-#endif
+
       /* FIXME: ezannoni-2003-07-09 see comment above about include
 	 file order.  We could be getting bogus values for these two.  */
       gdb_assert (FS < ELF_NGREG);
@@ -321,25 +372,25 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 }
 
 
-/* Convert a native/host siginfo object, into/from the siginfo in the
+/* Convert a ptrace/host siginfo object, into/from the siginfo in the
    layout of the inferiors' architecture.  Returns true if any
    conversion was done; false otherwise.  If DIRECTION is 1, then copy
-   from INF to NATIVE.  If DIRECTION is 0, copy from NATIVE to
+   from INF to PTRACE.  If DIRECTION is 0, copy from PTRACE to
    INF.  */
 
 static int
-amd64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
+amd64_linux_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
 {
   struct gdbarch *gdbarch = get_frame_arch (get_current_frame ());
 
   /* Is the inferior 32-bit?  If so, then do fixup the siginfo
      object.  */
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
-      return amd64_linux_siginfo_fixup_common (native, inf, direction,
+      return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
 					       FIXUP_32);
   /* No fixup for native x32 GDB.  */
   else if (gdbarch_addr_bit (gdbarch) == 32 && sizeof (void *) == 8)
-      return amd64_linux_siginfo_fixup_common (native, inf, direction,
+      return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
 					       FIXUP_X32);
   else
     return 0;

@@ -1,6 +1,6 @@
 /* Core dump and executable file functions above target vector, for GDB.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -144,7 +144,7 @@ reopen_exec_file (void)
   cleanups = make_cleanup (xfree, filename);
   res = stat (filename, &st);
 
-  if (exec_bfd_mtime && exec_bfd_mtime != st.st_mtime)
+  if (res == 0 && exec_bfd_mtime && exec_bfd_mtime != st.st_mtime)
     exec_file_attach (filename, 0);
   else
     /* If we accessed the file since last opening it, close it now;
@@ -170,9 +170,7 @@ validate_files (void)
     }
 }
 
-/* Return the name of the executable file as a string.
-   ERR nonzero means get error if there is none specified;
-   otherwise return 0 in that case.  */
+/* See common/common-inferior.h.  */
 
 char *
 get_exec_file (int err)
@@ -509,7 +507,7 @@ complete_set_gnutarget (struct cmd_list_element *cmd,
 
 /* Set the gnutarget.  */
 void
-set_gnutarget (char *newtarget)
+set_gnutarget (const char *newtarget)
 {
   if (gnutarget_string != NULL)
     xfree (gnutarget_string);

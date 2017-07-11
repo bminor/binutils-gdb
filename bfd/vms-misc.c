@@ -1,6 +1,6 @@
 /* vms-misc.c -- BFD back-end for VMS/VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright (C) 1996-2016 Free Software Foundation, Inc.
+   Copyright (C) 1996-2017 Free Software Foundation, Inc.
 
    Miscellaneous functions.
 
@@ -139,7 +139,7 @@ _bfd_hexdump (int level, unsigned char *ptr, int size, int offset)
    size is string size (size of record)  */
 
 char *
-_bfd_vms_save_sized_string (unsigned char *str, int size)
+_bfd_vms_save_sized_string (unsigned char *str, unsigned int size)
 {
   char *newstr = bfd_malloc ((bfd_size_type) size + 1);
 
@@ -155,10 +155,12 @@ _bfd_vms_save_sized_string (unsigned char *str, int size)
    ptr points to size byte on entry  */
 
 char *
-_bfd_vms_save_counted_string (unsigned char *ptr)
+_bfd_vms_save_counted_string (unsigned char *ptr, unsigned int maxlen)
 {
-  int len = *ptr++;
+  unsigned int len = *ptr++;
 
+  if (len > maxlen)
+    return NULL;
   return _bfd_vms_save_sized_string (ptr, len);
 }
 
@@ -356,12 +358,12 @@ _bfd_vms_output_counted (struct vms_rec_wr *recwr, const char *value)
   len = strlen (value);
   if (len == 0)
     {
-      (*_bfd_error_handler) (_("_bfd_vms_output_counted called with zero bytes"));
+      _bfd_error_handler (_("_bfd_vms_output_counted called with zero bytes"));
       return;
     }
   if (len > 255)
     {
-      (*_bfd_error_handler) (_("_bfd_vms_output_counted called with too many bytes"));
+      _bfd_error_handler (_("_bfd_vms_output_counted called with too many bytes"));
       return;
     }
   _bfd_vms_output_byte (recwr, (unsigned int) len & 0xff);

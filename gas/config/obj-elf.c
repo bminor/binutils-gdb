@@ -1,5 +1,5 @@
 /* ELF object file format
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2017 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -64,6 +64,10 @@
 #include "elf/nios2.h"
 #endif
 
+#ifdef TC_PRU
+#include "elf/pru.h"
+#endif
+
 static void obj_elf_line (int);
 static void obj_elf_size (int);
 static void obj_elf_type (int);
@@ -77,7 +81,6 @@ static void obj_elf_subsection (int);
 static void obj_elf_popsection (int);
 static void obj_elf_gnu_attribute (int);
 static void obj_elf_tls_common (int);
-static void obj_elf_sharable_common (int);
 static void obj_elf_lcomm (int);
 static void obj_elf_struct (int);
 
@@ -139,8 +142,6 @@ static const pseudo_typeS elf_pseudo_table[] =
 
   {"tls_common", obj_elf_tls_common, 0},
 
-  {"sharable_common", obj_elf_sharable_common, 0},
-
   /* End sentinel.  */
   {NULL, NULL, 0},
 };
@@ -165,6 +166,7 @@ static const pseudo_typeS ecoff_debug_pseudo_table[] =
   { "etype",	ecoff_directive_type,	0 },
 
   /* ECOFF specific debugging information.  */
+  { "aent",	ecoff_directive_ent,	1 },
   { "begin",	ecoff_directive_begin,	0 },
   { "bend",	ecoff_directive_bend,	0 },
   { "end",	ecoff_directive_end,	0 },
@@ -399,39 +401,6 @@ obj_elf_tls_common (int ignore ATTRIBUTE_UNUSED)
 }
 
 static void
-obj_elf_sharable_common (int ignore ATTRIBUTE_UNUSED)
-{
-  static segT sharable_bss_section;
-  asection *saved_com_section_ptr = elf_com_section_ptr;
-  asection *saved_bss_section = bss_section;
-
-  if (sharable_bss_section == NULL)
-    {
-      flagword applicable;
-      segT seg = now_seg;
-      subsegT subseg = now_subseg;
-
-      /* The .sharable_bss section is for local .sharable_common
-	 symbols.  */
-      sharable_bss_section = subseg_new (".sharable_bss", 0);
-      applicable = bfd_applicable_section_flags (stdoutput);
-      bfd_set_section_flags (stdoutput, sharable_bss_section,
-			     applicable & SEC_ALLOC);
-      seg_info (sharable_bss_section)->bss = 1;
-
-      subseg_set (seg, subseg);
-    }
-
-  elf_com_section_ptr = &_bfd_elf_sharable_com_section;
-  bss_section = sharable_bss_section;
-
-  s_comm_internal (0, elf_common_parse);
-
-  elf_com_section_ptr = saved_com_section_ptr;
-  bss_section = saved_bss_section;
-}
-
-static void
 obj_elf_lcomm (int ignore ATTRIBUTE_UNUSED)
 {
   symbolS *symbolP = s_comm_internal (0, s_lcomm_internal);
@@ -577,16 +546,26 @@ struct section_stack
 
 static struct section_stack *section_stack;
 
+/* Match both section group name and the sh_info field.  */
+struct section_match
+{
+  const char *group_name;
+  unsigned int info;
+};
+
 static bfd_boolean
 get_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 {
-  const char *gname = (const char *) inf;
+  struct section_match *match = (struct section_match *) inf;
+  const char *gname = match->group_name;
   const char *group_name = elf_group_name (sec);
+  unsigned int info = elf_section_data (sec)->this_hdr.sh_info;
 
-  return (group_name == gname
-	  || (group_name != NULL
-	      && gname != NULL
-	      && strcmp (group_name, gname) == 0));
+  return (info == match->info
+	  && (group_name == gname
+	      || (group_name != NULL
+		  && gname != NULL
+		  && strcmp (group_name, gname) == 0)));
 }
 
 /* Handle the .section pseudo-op.  This code supports two different
@@ -610,6 +589,7 @@ get_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 void
 obj_elf_change_section (const char *name,
 			unsigned int type,
+			unsigned int info,
 			bfd_vma attr,
 			int entsize,
 			const char *group_name,
@@ -621,6 +601,7 @@ obj_elf_change_section (const char *name,
   flagword flags;
   const struct elf_backend_data *bed;
   const struct bfd_elf_special_section *ssect;
+  struct section_match match;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -641,8 +622,10 @@ obj_elf_change_section (const char *name,
   previous_section = now_seg;
   previous_subsection = now_subseg;
 
+  match.group_name = group_name;
+  match.info = info;
   old_sec = bfd_get_section_by_name_if (stdoutput, name, get_section,
-					(void *) group_name);
+					(void *) &match);
   if (old_sec)
     {
       sec = old_sec;
@@ -673,17 +656,11 @@ obj_elf_change_section (const char *name,
 
 		 .section .lbss,"aw",@progbits
 
-		 "@progbits" is incorrect.  Also for sharable bss
-		 sections, gcc, as of 2005-07-06, will emit
-
-		 .section .sharable_bss,"aw",@progbits
-
 		 "@progbits" is incorrect.  */
 #ifdef TC_I386
 	      && (bed->s->arch_size != 64
 		  || !(ssect->attr & SHF_X86_64_LARGE))
 #endif
-	      && !(ssect->attr & SHF_GNU_SHARABLE)
 	      && ssect->type != SHT_INIT_ARRAY
 	      && ssect->type != SHT_FINI_ARRAY
 	      && ssect->type != SHT_PREINIT_ARRAY)
@@ -758,6 +735,9 @@ obj_elf_change_section (const char *name,
 	attr |= ssect->attr;
     }
 
+  if ((attr & (SHF_ALLOC | SHF_GNU_MBIND)) == SHF_GNU_MBIND)
+    as_fatal (_("SHF_ALLOC isn't set for GNU_MBIND section: %s"), name);
+
   /* Convert ELF type and flags to BFD flags.  */
   flags = (SEC_RELOC
 	   | ((attr & SHF_WRITE) ? 0 : SEC_READONLY)
@@ -783,6 +763,7 @@ obj_elf_change_section (const char *name,
 	type = bfd_elf_get_default_section_type (flags);
       elf_section_type (sec) = type;
       elf_section_flags (sec) = attr;
+      elf_section_data (sec)->this_hdr.sh_info = info;
 
       /* Prevent SEC_HAS_CONTENTS from being inadvertently set.  */
       if (type == SHT_NOBITS)
@@ -866,6 +847,9 @@ obj_elf_parse_section_letters (char *str, size_t len, bfd_boolean *is_clone)
 	case 'T':
 	  attr |= SHF_TLS;
 	  break;
+	case 'd':
+	  attr |= SHF_GNU_MBIND;
+	  break;
 	case '?':
 	  *is_clone = TRUE;
 	  break;
@@ -881,6 +865,7 @@ obj_elf_parse_section_letters (char *str, size_t len, bfd_boolean *is_clone)
 		}
 	      break;
 	    }
+	  /* Fall through.  */
 	default:
 	  {
 	    const char *bad_msg = _("unrecognized .section attribute:"
@@ -1058,6 +1043,7 @@ obj_elf_section (int push)
   int entsize;
   int linkonce;
   subsegT new_subsection = -1;
+  unsigned int info = 0;
 
 #ifndef TC_I370
   if (flag_mri)
@@ -1221,6 +1207,23 @@ obj_elf_section (int push)
 		  linkonce = (now_seg->flags & SEC_LINK_ONCE) != 0;
 		}
 	    }
+
+	  if ((attr & SHF_GNU_MBIND) != 0 && *input_line_pointer == ',')
+	    {
+	      ++input_line_pointer;
+	      SKIP_WHITESPACE ();
+	      if (ISDIGIT (* input_line_pointer))
+		{
+		  char *t = input_line_pointer;
+		  info = strtoul (input_line_pointer,
+				  &input_line_pointer, 0);
+		  if (info == (unsigned int) -1)
+		    {
+		      as_warn (_("unsupported mbind section info: %s"), t);
+		      info = 0;
+		    }
+		}
+	    }
 	}
       else
 	{
@@ -1251,7 +1254,8 @@ obj_elf_section (int push)
 done:
   demand_empty_rest_of_line ();
 
-  obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push);
+  obj_elf_change_section (name, type, info, attr, entsize, group_name,
+			  linkonce, push);
 
   if (push && new_subsection != -1)
     subseg_set (now_seg, new_subsection);
@@ -1435,6 +1439,14 @@ obj_elf_symver (int ignore ATTRIBUTE_UNUSED)
   lex_type[(unsigned char) '@'] |= LEX_NAME;
   c = get_symbol_name (& name);
   lex_type[(unsigned char) '@'] = old_lexat;
+
+  if (S_IS_COMMON (sym))
+    {
+      as_bad (_("`%s' can't be versioned to common symbol '%s'"),
+	      name, S_GET_NAME (sym));
+      ignore_rest_of_line ();
+      return;
+    }
 
   if (symbol_get_obj (sym)->versioned_name == NULL)
     {
@@ -2299,6 +2311,13 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 	      symp2 = symbol_find_or_make (sy_obj->versioned_name);
 
 	      /* Now we act as though we saw symp2 = sym.  */
+	      if (S_IS_COMMON (symp))
+		{
+		  as_bad (_("`%s' can't be versioned to common symbol '%s'"),
+			  sy_obj->versioned_name, S_GET_NAME (symp));
+		  *puntp = TRUE;
+		  return;
+		}
 
 	      S_SET_SEGMENT (symp2, S_GET_SEGMENT (symp));
 

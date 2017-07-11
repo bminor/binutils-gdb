@@ -1,6 +1,6 @@
 /* Support for printing Fortran values for GDB, the GNU debugger.
 
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2017 Free Software Foundation, Inc.
 
    Contributed by Motorola.  Adapted from the C definitions by Farooq Butt
    (fmbutt@engage.sps.mot.com), additionally worked over by Stan Shebs.
@@ -152,7 +152,6 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
 	  struct value *elt = value_subscript ((struct value *)val, i);
 
 	  val_print (value_type (elt),
-		     value_contents_for_printing (elt),
 		     value_embedded_offset (elt),
 		     value_address (elt), stream, recurse,
 		     elt, options, current_language);
@@ -211,18 +210,18 @@ static const struct generic_val_print_decorations f_decorations =
    function; they are identical.  */
 
 void
-f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
+f_val_print (struct type *type, int embedded_offset,
 	     CORE_ADDR address, struct ui_file *stream, int recurse,
-	     const struct value *original_value,
+	     struct value *original_value,
 	     const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  unsigned int i = 0;	/* Number of characters printed.  */
   int printed_field = 0; /* Number of fields printed.  */
   struct type *elttype;
   CORE_ADDR addr;
   int index;
+  const gdb_byte *valaddr =value_contents_for_printing (original_value);
 
   type = check_typedef (type);
   switch (TYPE_CODE (type))
@@ -257,7 +256,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
     case TYPE_CODE_PTR:
       if (options->format && options->format != 's')
 	{
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
+	  val_print_scalar_formatted (type, embedded_offset,
 				      original_value, options, 0, stream);
 	  break;
 	}
@@ -293,8 +292,8 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	    {
 	      if (want_space)
 		fputs_filtered (" ", stream);
-	      i = val_print_string (TYPE_TARGET_TYPE (type), NULL, addr, -1,
-				    stream, options);
+	      val_print_string (TYPE_TARGET_TYPE (type), NULL, addr, -1,
+				stream, options);
 	    }
 	  return;
 	}
@@ -307,12 +306,13 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
+	  val_print_scalar_formatted (type, embedded_offset,
 				      original_value, &opts, 0, stream);
 	}
       else
 	{
-	  val_print_type_code_int (type, valaddr + embedded_offset, stream);
+	  val_print_scalar_formatted (type, embedded_offset,
+				      original_value, options, 0, stream);
 	  /* C and C++ has no single byte int type, char is used instead.
 	     Since we don't know whether the value is really intended to
 	     be used as an integer or a character, print the character
@@ -356,7 +356,6 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 		}
 
 	      val_print (value_type (field),
-			 value_contents_for_printing (field),
 			 value_embedded_offset (field),
 			 value_address (field), stream, recurse + 1,
 			 field, options, current_language);
@@ -379,7 +378,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
     case TYPE_CODE_BOOL:
     case TYPE_CODE_CHAR:
     default:
-      generic_val_print (type, valaddr, embedded_offset, address,
+      generic_val_print (type, embedded_offset, address,
 			 stream, recurse, original_value, options,
 			 &f_decorations);
       break;

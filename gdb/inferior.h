@@ -1,7 +1,7 @@
 /* Variables that describe the inferior process running under GDB:
    Where it is, why it stopped, and how to step it.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,6 +30,8 @@ struct regcache;
 struct ui_out;
 struct terminal_info;
 struct target_desc_info;
+struct continuation;
+struct inferior;
 
 /* For bpstat.  */
 #include "breakpoint.h"
@@ -40,8 +42,16 @@ struct target_desc_info;
 /* For struct frame_id.  */
 #include "frame.h"
 
+/* For gdb_environ.  */
+#include "environ.h"
+
 #include "progspace.h"
 #include "registry.h"
+
+#include "symfile-add-flags.h"
+#include "common/refcounted-object.h"
+
+#include "common-inferior.h"
 
 struct infcall_suspend_state;
 struct infcall_control_state;
@@ -130,14 +140,10 @@ extern void child_terminal_init_with_pgrp (int pgrp);
 
 /* From fork-child.c */
 
-extern int fork_inferior (char *, char *, char **,
-			  void (*)(void),
-			  void (*)(int), void (*)(void), char *,
-                          void (*)(const char *,
-                                   char * const *, char * const *));
-
-
-extern void startup_inferior (int);
+/* Helper function to call STARTUP_INFERIOR with PID and NUM_TRAPS.
+   This function already calls set_executing.  Return the ptid_t from
+   STARTUP_INFERIOR.  */
+extern ptid_t gdb_startup_inferior (pid_t pid, int num_traps);
 
 extern char *construct_inferior_arguments (int, char **);
 
@@ -262,12 +268,6 @@ enum stop_kind
 #define ON_STACK 1
 #define AT_ENTRY_POINT 4
 
-/* Number of traps that happen between exec'ing the shell to run an
-   inferior and when we finally get to the inferior code, not counting
-   the exec for the shell.  This is 1 on all supported
-   implementations.  */
-#define START_INFERIOR_TRAPS_EXPECTED	1
-
 struct private_inferior;
 
 /* Inferior process specific part of `struct infcall_control_state'.
@@ -280,6 +280,11 @@ struct inferior_control_state
   enum stop_kind stop_soon;
 };
 
+/* Return a pointer to the current inferior.  */
+extern inferior *current_inferior ();
+
+extern void set_current_inferior (inferior *);
+
 /* GDB represents the state of each program execution with an object
    called an inferior.  An inferior typically corresponds to a process
    but is more general and applies also to targets that do not have a
@@ -287,114 +292,132 @@ struct inferior_control_state
    inferior, as does each attachment to an existing process.
    Inferiors have unique internal identifiers that are different from
    target process ids.  Each inferior may in turn have multiple
-   threads running in it.  */
+   threads running in it.
 
-struct inferior
+   Inferiors are intrusively refcounted objects.  Unlike thread
+   objects, being the user-selected inferior is considered a strong
+   reference and is thus accounted for in the inferior object's
+   refcount (see set_current_inferior).  When GDB needs to remember
+   the selected inferior to later restore it, GDB temporarily bumps
+   the inferior object's refcount, to prevent something deleting the
+   inferior object before reverting back (e.g., due to a
+   "remove-inferiors" command (see
+   make_cleanup_restore_current_thread).  All other inferior
+   references are considered weak references.  Inferiors are always
+   listed exactly once in the inferior list, so placing an inferior in
+   the inferior list is an implicit, not counted strong reference.  */
+
+class inferior : public refcounted_object
 {
+public:
+  explicit inferior (int pid);
+  ~inferior ();
+
+  /* Returns true if we can delete this inferior.  */
+  bool deletable () const { return refcount () == 0; }
+
   /* Pointer to next inferior in singly-linked list of inferiors.  */
-  struct inferior *next;
+  struct inferior *next = NULL;
 
   /* Convenient handle (GDB inferior id).  Unique across all
      inferiors.  */
-  int num;
+  int num = 0;
 
   /* Actual target inferior id, usually, a process id.  This matches
      the ptid_t.pid member of threads of this inferior.  */
-  int pid;
+  int pid = 0;
   /* True if the PID was actually faked by GDB.  */
-  int fake_pid_p;
+  bool fake_pid_p = false;
 
   /* The highest thread number this inferior ever had.  */
-  int highest_thread_num;
+  int highest_thread_num = 0;
 
   /* State of GDB control of inferior process execution.
      See `struct inferior_control_state'.  */
-  struct inferior_control_state control;
+  inferior_control_state control {NO_STOP_QUIETLY};
 
   /* True if this was an auto-created inferior, e.g. created from
      following a fork; false, if this inferior was manually added by
      the user, and we should not attempt to prune it
      automatically.  */
-  int removable;
+  bool removable = false;
 
   /* The address space bound to this inferior.  */
-  struct address_space *aspace;
+  struct address_space *aspace = NULL;
 
   /* The program space bound to this inferior.  */
-  struct program_space *pspace;
+  struct program_space *pspace = NULL;
 
   /* The arguments string to use when running.  */
-  char *args;
+  char *args = NULL;
 
   /* The size of elements in argv.  */
-  int argc;
+  int argc = 0;
 
   /* The vector version of arguments.  If ARGC is nonzero,
      then we must compute ARGS from this (via the target).
      This is always coming from main's argv and therefore
      should never be freed.  */
-  char **argv;
+  char **argv = NULL;
 
   /* The name of terminal device to use for I/O.  */
-  char *terminal;
+  char *terminal = NULL;
 
   /* Environment to use for running inferior,
      in format described in environ.h.  */
-  struct gdb_environ *environment;
+  gdb_environ environment;
 
-  /* Nonzero if this child process was attached rather than
-     forked.  */
-  int attach_flag;
+  /* True if this child process was attached rather than forked.  */
+  bool attach_flag = false;
 
   /* If this inferior is a vfork child, then this is the pointer to
      its vfork parent, if GDB is still attached to it.  */
-  struct inferior *vfork_parent;
+  inferior *vfork_parent = NULL;
 
   /* If this process is a vfork parent, this is the pointer to the
      child.  Since a vfork parent is left frozen by the kernel until
      the child execs or exits, a process can only have one vfork child
      at a given time.  */
-  struct inferior *vfork_child;
+  inferior *vfork_child = NULL;
 
   /* True if this inferior should be detached when it's vfork sibling
      exits or execs.  */
-  int pending_detach;
+  bool pending_detach = false;
 
   /* True if this inferior is a vfork parent waiting for a vfork child
      not under our control to be done with the shared memory region,
      either by exiting or execing.  */
-  int waiting_for_vfork_done;
+  bool waiting_for_vfork_done = false;
 
   /* True if we're in the process of detaching from this inferior.  */
-  int detaching;
+  bool detaching = false;
 
   /* What is left to do for an execution command after any thread of
      this inferior stops.  For continuations associated with a
      specific thread, see `struct thread_info'.  */
-  struct continuation *continuations;
+  continuation *continuations = NULL;
 
   /* True if setup_inferior wasn't called for this inferior yet.
      Until that is done, we must not access inferior memory or
      registers, as we haven't determined the target
      architecture/description.  */
-  int needs_setup;
+  bool needs_setup = false;
 
   /* Private data used by the target vector implementation.  */
-  struct private_inferior *priv;
+  private_inferior *priv = NULL;
 
   /* HAS_EXIT_CODE is true if the inferior exited with an exit code.
      In this case, the EXIT_CODE field is also valid.  */
-  int has_exit_code;
-  LONGEST exit_code;
+  bool has_exit_code = false;
+  LONGEST exit_code = 0;
 
   /* Default flags to pass to the symbol reading functions.  These are
-     used whenever a new objfile is created.  The valid values come
-     from enum symfile_add_flags.  */
-  int symfile_flags;
+     used whenever a new objfile is created.  */
+  symfile_add_flags symfile_flags = 0;
 
   /* Info about an inferior's target description (if it's fetched; the
      user supplied description's filename, if any; etc.).  */
-  struct target_desc_info *tdesc_info;
+  target_desc_info *tdesc_info = NULL;
 
   /* The architecture associated with the inferior through the
      connection to the target.
@@ -407,7 +430,7 @@ struct inferior
      per-thread/per-frame/per-objfile properties, accesses to
      per-inferior/target properties should be made through
      this gdbarch.  */
-  struct gdbarch *gdbarch;
+  struct gdbarch *gdbarch = NULL;
 
   /* Per inferior data-pointers required by other GDB modules.  */
   REGISTRY_FIELDS;
@@ -417,9 +440,6 @@ struct inferior
    modules.  */
 
 DECLARE_REGISTRY (inferior);
-
-/* Create an empty inferior list, or empty the existing one.  */
-extern void init_inferior_list (void);
 
 /* Add an inferior to the inferior list, print a message that a new
    inferior is found, and return the pointer to the new inferior.
@@ -500,18 +520,39 @@ extern int number_of_live_inferiors (void);
    (not cores, not executables, real live processes).  */
 extern int have_live_inferiors (void);
 
-/* Return a pointer to the current inferior.  It is an error to call
-   this if there is no current inferior.  */
-extern struct inferior *current_inferior (void);
+/* Save/restore the current inferior.  */
 
-extern void set_current_inferior (struct inferior *);
+class scoped_restore_current_inferior
+{
+public:
+  scoped_restore_current_inferior ()
+    : m_saved_inf (current_inferior ())
+  {}
 
-extern struct cleanup *save_current_inferior (void);
+  ~scoped_restore_current_inferior ()
+  { set_current_inferior (m_saved_inf); }
+
+  /* Disable copy.  */
+  scoped_restore_current_inferior
+    (const scoped_restore_current_inferior &) = delete;
+  void operator=
+    (const scoped_restore_current_inferior &) = delete;
+
+private:
+  inferior *m_saved_inf;
+};
+
 
 /* Traverse all inferiors.  */
 
 #define ALL_INFERIORS(I) \
   for ((I) = inferior_list; (I); (I) = (I)->next)
+
+/* Traverse all non-exited inferiors.  */
+
+#define ALL_NON_EXITED_INFERIORS(I) \
+  ALL_INFERIORS (I)		    \
+    if ((I)->pid != 0)
 
 extern struct inferior *inferior_list;
 
@@ -522,5 +563,8 @@ extern void prune_inferiors (void);
 extern int number_of_inferiors (void);
 
 extern struct inferior *add_inferior_with_spaces (void);
+
+/* Print the current selected inferior.  */
+extern void print_selected_inferior (struct ui_out *uiout);
 
 #endif /* !defined (INFERIOR_H) */

@@ -1,6 +1,6 @@
 // symtab.h -- the gold symbol table   -*- C++ -*-
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2017 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1273,6 +1273,16 @@ struct Symbol_location
   }
 };
 
+// A map from symbol name (as a pointer into the namepool) to all
+// the locations the symbols is (weakly) defined (and certain other
+// conditions are met).  This map will be used later to detect
+// possible One Definition Rule (ODR) violations.
+struct Symbol_location_hash
+{
+  size_t operator()(const Symbol_location& loc) const
+  { return reinterpret_cast<uintptr_t>(loc.object) ^ loc.offset ^ loc.shndx; }
+};
+
 // This class manages warnings.  Warnings are a GNU extension.  When
 // we see a section named .gnu.warning.SYM in an object file, and if
 // we wind using the definition of SYM from that object file, then we
@@ -1574,12 +1584,13 @@ class Symbol_table
   get_copy_source(const Symbol* sym) const;
 
   // Set the dynamic symbol indexes.  INDEX is the index of the first
-  // global dynamic symbol.  Pointers to the symbols are stored into
+  // global dynamic symbol.  Return the count of forced-local symbols in
+  // *PFORCED_LOCAL_COUNT.  Pointers to the symbols are stored into
   // the vector.  The names are stored into the Stringpool.  This
   // returns an updated dynamic symbol index.
   unsigned int
-  set_dynsym_indexes(unsigned int index, std::vector<Symbol*>*,
-		     Stringpool*, Versions*);
+  set_dynsym_indexes(unsigned int index, unsigned int* pforced_local_count,
+		     std::vector<Symbol*>*, Stringpool*, Versions*);
 
   // Finalize the symbol table after we have set the final addresses
   // of all the input sections.  This sets the final symbol indexes,
@@ -1694,16 +1705,6 @@ class Symbol_table
   typedef Unordered_map<Symbol_table_key, Symbol*, Symbol_table_hash,
 			Symbol_table_eq> Symbol_table_type;
 
-  // A map from symbol name (as a pointer into the namepool) to all
-  // the locations the symbols is (weakly) defined (and certain other
-  // conditions are met).  This map will be used later to detect
-  // possible One Definition Rule (ODR) violations.
-  struct Symbol_location_hash
-  {
-    size_t operator()(const Symbol_location& loc) const
-    { return reinterpret_cast<uintptr_t>(loc.object) ^ loc.offset ^ loc.shndx; }
-  };
-
   typedef Unordered_map<const char*,
                         Unordered_set<Symbol_location, Symbol_location_hash> >
   Odr_map;
@@ -1790,7 +1791,7 @@ class Symbol_table
   Sized_symbol<size>*
   define_special_symbol(const char** pname, const char** pversion,
 			bool only_if_ref, Sized_symbol<size>** poldsym,
-			bool* resolve_oldsym);
+			bool* resolve_oldsym, bool is_forced_local);
 
   // Define a symbol in an Output_data, sized version.
   template<int size>
@@ -1928,9 +1929,11 @@ class Symbol_table
   unsigned int output_count_;
   // The file offset of the global dynamic symbols, or 0 if none.
   off_t dynamic_offset_;
-  // The index of the first global dynamic symbol.
+  // The index of the first global dynamic symbol (including
+  // forced-local symbols).
   unsigned int first_dynamic_global_index_;
-  // The number of global dynamic symbols, or 0 if none.
+  // The number of global dynamic symbols (including forced-local symbols),
+  // or 0 if none.
   unsigned int dynamic_count_;
   // The symbol hash table.
   Symbol_table_type table_;

@@ -1,5 +1,5 @@
 /* ld.h -- general linker header file
-   Copyright (C) 1991-2016 Free Software Foundation, Inc.
+   Copyright (C) 1991-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -163,11 +163,19 @@ typedef struct
      input files.  */
   bfd_boolean accept_unknown_input_arch;
 
+  /* Name of the import library to generate.  */
+  char *out_implib_filename;
+
   /* If TRUE we'll just print the default output on stdout.  */
   bfd_boolean print_output_format;
 
   /* If set, display the target memory usage (per memory region).  */
   bfd_boolean print_memory_usage;
+
+  /* Should we force section groups to be resolved?  Controlled with
+     --force-group-allocation on the command line or FORCE_GROUP_ALLOCATION
+     in the linker script.  */
+  bfd_boolean force_group_allocation;
 
   /* Big or little endian as set on command line.  */
   enum endian_enum endian;
@@ -182,7 +190,7 @@ typedef struct
   /* Name of runtime interpreter to invoke.  */
   char *interpreter;
 
-  /* Name to give runtime libary from the -soname argument.  */
+  /* Name to give runtime library from the -soname argument.  */
   char *soname;
 
   /* Runtime library search path from the -rpath argument.  */

@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl   Copyright (C) 2006-2016 Free Software Foundation, Inc.
+dnl   Copyright (C) 2006-2017 Free Software Foundation, Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ fi
 
 sysroot_relocatable=0
 if test -n "$sysroot"; then
-  case "sysroot" in
+  case "$sysroot" in
     "${prefix}" | "${prefix}/"* | \
     "${exec_prefix}" | "${exec_prefix}/"* | \
     '${prefix}' | '${prefix}/'*| \

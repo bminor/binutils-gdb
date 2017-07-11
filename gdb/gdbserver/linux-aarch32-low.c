@@ -1,4 +1,4 @@
-/* Copyright (C) 1995-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -62,11 +62,15 @@ arm_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
   uint32_t *regs = (uint32_t *) buf;
+  uint32_t cpsr = regs[ARM_CPSR_GREGNUM];
 
   for (i = ARM_A1_REGNUM; i <= ARM_PC_REGNUM; i++)
     collect_register (regcache, i, &regs[i]);
 
   collect_register (regcache, ARM_PS_REGNUM, &regs[ARM_CPSR_GREGNUM]);
+  /* Keep reserved bits bit 20 to bit 23.  */
+  regs[ARM_CPSR_GREGNUM] = ((regs[ARM_CPSR_GREGNUM] & 0xff0fffff)
+			    | (cpsr & 0x00f00000));
 }
 
 /* Supply GP registers contents, stored in BUF, to REGCACHE.  */
@@ -215,14 +219,6 @@ arm_breakpoint_at (CORE_ADDR where)
   return 0;
 }
 
-/* Enum describing the different kinds of breakpoints.  */
-enum arm_breakpoint_kinds
-{
-   ARM_BP_KIND_THUMB = 2,
-   ARM_BP_KIND_THUMB2 = 3,
-   ARM_BP_KIND_ARM = 4,
-};
-
 /* Implementation of linux_target_ops method "breakpoint_kind_from_pc".
 
    Determine the type and size of breakpoint to insert at PCPTR.  Uses the
@@ -241,11 +237,11 @@ arm_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
       *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
 
       /* Check whether we are replacing a thumb2 32-bit instruction.  */
-      if ((*the_target->read_memory) (*pcptr, buf, 2) == 0)
+      if (target_read_memory (*pcptr, buf, 2) == 0)
 	{
 	  unsigned short inst1 = 0;
 
-	  (*the_target->read_memory) (*pcptr, (gdb_byte *) &inst1, 2);
+	  target_read_memory (*pcptr, (gdb_byte *) &inst1, 2);
 	  if (thumb_insn_size (inst1) == 4)
 	    return ARM_BP_KIND_THUMB2;
 	}

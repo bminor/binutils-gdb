@@ -1,6 +1,6 @@
 /* GNU/Linux on ARM target support.
 
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -921,24 +921,16 @@ arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
 
 /* Insert a single step breakpoint at the next executed instruction.  */
 
-static int
-arm_linux_software_single_step (struct frame_info *frame)
+static std::vector<CORE_ADDR>
+arm_linux_software_single_step (struct regcache *regcache)
 {
-  struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  struct address_space *aspace = get_regcache_aspace (regcache);
   struct arm_get_next_pcs next_pcs_ctx;
-  CORE_ADDR pc;
-  int i;
-  VEC (CORE_ADDR) *next_pcs = NULL;
-  struct cleanup *old_chain;
 
   /* If the target does have hardware single step, GDB doesn't have
      to bother software single step.  */
   if (target_can_do_single_step () == 1)
-    return 0;
-
-  old_chain = make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
+    return {};
 
   arm_get_next_pcs_ctor (&next_pcs_ctx,
 			 &arm_linux_get_next_pcs_ops,
@@ -947,14 +939,12 @@ arm_linux_software_single_step (struct frame_info *frame)
 			 1,
 			 regcache);
 
-  next_pcs = arm_get_next_pcs (&next_pcs_ctx);
+  std::vector<CORE_ADDR> next_pcs = arm_get_next_pcs (&next_pcs_ctx);
 
-  for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
-    arm_insert_single_step_breakpoint (gdbarch, aspace, pc);
+  for (CORE_ADDR &pc_ref : next_pcs)
+    pc_ref = gdbarch_addr_bits_remove (gdbarch, pc_ref);
 
-  do_cleanups (old_chain);
-
-  return 1;
+  return next_pcs;
 }
 
 /* Support for displaced stepping of Linux SVC instructions.  */
@@ -1822,8 +1812,6 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_displaced_step_copy_insn (gdbarch,
 					arm_linux_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, arm_displaced_step_fixup);
-  set_gdbarch_displaced_step_free_closure (gdbarch,
-					   simple_displaced_step_free_closure);
   set_gdbarch_displaced_step_location (gdbarch, linux_displaced_step_location);
 
   /* Reversible debugging, process record.  */

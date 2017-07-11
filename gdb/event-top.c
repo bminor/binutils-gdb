@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
 
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
@@ -157,10 +157,12 @@ void (*after_char_processing_hook) (void);
    sjlj-based TRY/CATCH mechanism, which knows to handle multiple
    levels of active setjmp/longjmp frames, needed in order to handle
    the readline callback recursing, as happens with e.g., secondary
-   prompts / queries, through gdb_readline_wrapper.  */
+   prompts / queries, through gdb_readline_wrapper.  This must be
+   noexcept in order to avoid problems with mixing sjlj and
+   (sjlj-based) C++ exceptions.  */
 
-static void
-gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
+static struct gdb_exception
+gdb_rl_callback_read_char_wrapper_noexcept () noexcept
 {
   struct gdb_exception gdb_expt = exception_none;
 
@@ -180,6 +182,15 @@ gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
     }
   END_CATCH_SJLJ
 
+  return gdb_expt;
+}
+
+static void
+gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
+{
+  struct gdb_exception gdb_expt
+    = gdb_rl_callback_read_char_wrapper_noexcept ();
+
   /* Rethrow using the normal EH mechanism.  */
   if (gdb_expt.reason < 0)
     throw_exception (gdb_expt);
@@ -187,10 +198,12 @@ gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
 
 /* GDB's readline callback handler.  Calls the current INPUT_HANDLER,
    and propagates GDB exceptions/errors thrown from INPUT_HANDLER back
-   across readline.  See gdb_rl_callback_read_char_wrapper.  */
+   across readline.  See gdb_rl_callback_read_char_wrapper.  This must
+   be noexcept in order to avoid problems with mixing sjlj and
+   (sjlj-based) C++ exceptions.  */
 
 static void
-gdb_rl_callback_handler (char *rl)
+gdb_rl_callback_handler (char *rl) noexcept
 {
   struct gdb_exception gdb_rl_expt = exception_none;
   struct ui *ui = current_ui;
@@ -447,48 +460,6 @@ struct ui *main_ui;
 struct ui *current_ui;
 struct ui *ui_list;
 
-/* See top.h.  */
-
-void
-restore_ui_cleanup (void *data)
-{
-  current_ui = (struct ui *) data;
-}
-
-/* See top.h.  */
-
-void
-switch_thru_all_uis_init (struct switch_thru_all_uis *state)
-{
-  state->iter = ui_list;
-  state->old_chain = make_cleanup (restore_ui_cleanup, current_ui);
-}
-
-/* See top.h.  */
-
-int
-switch_thru_all_uis_cond (struct switch_thru_all_uis *state)
-{
-  if (state->iter != NULL)
-    {
-      current_ui = state->iter;
-      return 1;
-    }
-  else
-    {
-      do_cleanups (state->old_chain);
-      return 0;
-    }
-}
-
-/* See top.h.  */
-
-void
-switch_thru_all_uis_next (struct switch_thru_all_uis *state)
-{
-  state->iter = state->iter->next;
-}
-
 /* Get a pointer to the current UI's line buffer.  This is used to
    construct a whole line of input from partial input.  */
 
@@ -550,6 +521,22 @@ stdin_event_handler (int error, gdb_client_data client_data)
     }
 }
 
+/* See top.h.  */
+
+void
+ui_register_input_event_handler (struct ui *ui)
+{
+  add_file_handler (ui->input_fd, stdin_event_handler, ui);
+}
+
+/* See top.h.  */
+
+void
+ui_unregister_input_event_handler (struct ui *ui)
+{
+  delete_file_handler (ui->input_fd);
+}
+
 /* Re-enable stdin after the end of an execution command in
    synchronous mode, or after an error from the target, and we aborted
    the exec operation.  */
@@ -562,6 +549,7 @@ async_enable_stdin (void)
   if (ui->prompt_state == PROMPT_BLOCKED)
     {
       target_terminal_ours ();
+      ui_register_input_event_handler (ui);
       ui->prompt_state = PROMPT_NEEDED;
     }
 }
@@ -575,6 +563,7 @@ async_disable_stdin (void)
   struct ui *ui = current_ui;
 
   ui->prompt_state = PROMPT_BLOCKED;
+  delete_file_handler (ui->input_fd);
 }
 
 
@@ -586,13 +575,12 @@ void
 command_handler (char *command)
 {
   struct ui *ui = current_ui;
-  struct cleanup *stat_chain;
   char *c;
 
   if (ui->instream == ui->stdin_stream)
     reinitialize_more_filter ();
 
-  stat_chain = make_command_stats_cleanup (1);
+  scoped_command_stats stat_reporter (true);
 
   /* Do not execute commented lines.  */
   for (c = command; *c == ' ' || *c == '\t'; c++)
@@ -604,8 +592,6 @@ command_handler (char *command)
       /* Do any commands attached to breakpoint we stopped at.  */
       bpstat_do_actions ();
     }
-
-  do_cleanups (stat_chain);
 }
 
 /* Append RL, an input line returned by readline or one of its
@@ -664,7 +650,7 @@ command_line_append_input_line (struct buffer *cmd_line_buffer, char *rl)
 
 char *
 handle_line_of_input (struct buffer *cmd_line_buffer,
-		      char *rl, int repeat, char *annotation_suffix)
+		      char *rl, int repeat, const char *annotation_suffix)
 {
   struct ui *ui = current_ui;
   int from_tty = ui->instream == ui->stdin_stream;
@@ -780,7 +766,7 @@ command_line_handler (char *rl)
 	 hung up but GDB is still alive.  In such a case, we just quit
 	 gdb killing the inferior program too.  */
       printf_unfiltered ("quit\n");
-      execute_command ("quit", 1);
+      execute_command ((char *) "quit", 1);
     }
   else if (cmd == NULL)
     {
@@ -1251,8 +1237,8 @@ gdb_setup_readline (int editing)
      mess it up here.  The sync stuff should really go away over
      time.  */
   if (!batch_silent)
-    gdb_stdout = stdio_fileopen (ui->outstream);
-  gdb_stderr = stderr_fileopen (ui->errstream);
+    gdb_stdout = new stdio_file (ui->outstream);
+  gdb_stderr = new stderr_file (ui->errstream);
   gdb_stdlog = gdb_stderr;  /* for moment */
   gdb_stdtarg = gdb_stderr; /* for moment */
   gdb_stdtargerr = gdb_stderr; /* for moment */
@@ -1284,7 +1270,7 @@ gdb_setup_readline (int editing)
      Another source is going to be the target program (inferior), but
      that must be registered only when it actually exists (I.e. after
      we say 'run' or after we connect to a remote target.  */
-  add_file_handler (ui->input_fd, stdin_event_handler, ui);
+  ui_register_input_event_handler (ui);
 }
 
 /* Disable command input through the standard CLI channels.  Used in

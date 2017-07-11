@@ -1,4 +1,4 @@
-# Copyright (C) 2004-2016 Free Software Foundation, Inc.
+# Copyright (C) 2004-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -100,7 +100,7 @@ proc test_arch { file opt arch resultfile } {
 }
 
 
-# This procedure tests that a file that is not suposed to assemble
+# This procedure tests that a file that is not supposed to assemble
 # with a given option does, in fact, not assemble.
 # It also writes an entry to the arch_results.txt file.
 

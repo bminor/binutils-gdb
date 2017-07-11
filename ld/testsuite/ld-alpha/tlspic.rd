@@ -23,9 +23,9 @@ Section Headers:
  +\[[ 0-9]+\] .tbss +NOBITS +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 0+ WAT +0 +0 +1
  +\[[ 0-9]+\] .dynamic +DYNAMIC +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 10 +WA +3 +0 +8
  +\[[ 0-9]+\] .got +PROGBITS +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 0+ +WA +0 +0 +8
- +\[[ 0-9]+\] .shstrtab +.*
  +\[[ 0-9]+\] .symtab +.*
  +\[[ 0-9]+\] .strtab +.*
+ +\[[ 0-9]+\] .shstrtab +.*
 #...
 
 Elf file type is DYN \(Shared object file\)
@@ -37,7 +37,7 @@ Program Headers:
  +LOAD +0x0+ 0x0+ 0x0+ 0x[0-9a-f]+ 0x[0-9a-f]+ R E 0x10000
  +LOAD +0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ RW  0x10000
  +DYNAMIC +0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ RW +0x8
- +TLS +0x0+10e0 0x0+110e0 0x0+110e0 0x0+60 0x0+80 R +0x4
+ +TLS +0x0+10d8 0x0+110d8 0x0+110d8 0x0+60 0x0+80 R +0x4
 #...
 
 Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 7 entries:

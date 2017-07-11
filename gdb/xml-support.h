@@ -1,6 +1,6 @@
 /* Helper routines for parsing XML using Expat.
 
-   Copyright (C) 2006-2016 Free Software Foundation, Inc.
+   Copyright (C) 2006-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -54,17 +54,18 @@ extern const char *xml_builtin[][2];
 
 typedef char *(*xml_fetch_another) (const char *href, void *baton);
 
-/* Return a new string which is the expansion of TEXT after processing
-   <xi:include> tags.  FETCHER will be called (with FETCHER_BATON) to
-   retrieve any new files.  DEPTH should be zero on the initial call.
+/* Append the expansion of TEXT after processing <xi:include> tags in
+   RESULT.  FETCHER will be called (with FETCHER_BATON) to retrieve
+   any new files.  DEPTH should be zero on the initial call.
 
-   On failure, this function uses NAME in a warning and returns NULL.
+   On failure, this function uses NAME in a warning and returns false.
    It may throw an exception, but does not for XML parsing
    problems.  */
 
-char *xml_process_xincludes (const char *name, const char *text,
-			     xml_fetch_another fetcher, void *fetcher_baton,
-			     int depth);
+bool xml_process_xincludes (std::string &result,
+			    const char *name, const char *text,
+			    xml_fetch_another fetcher, void *fetcher_baton,
+			    int depth);
 
 /* Simplified XML parser infrastructure.  */
 
@@ -171,20 +172,6 @@ struct gdb_xml_element
   gdb_xml_element_end_handler *end_handler;
 };
 
-/* Associate DTD_NAME, which must be the name of a compiled-in DTD,
-   with PARSER.  */
-
-void gdb_xml_use_dtd (struct gdb_xml_parser *parser, const char *dtd_name);
-
-/* Invoke PARSER on BUFFER.  BUFFER is the data to parse, which
-   should be NUL-terminated.
-
-   The return value is 0 for success or -1 for error.  It may throw,
-   but only if something unexpected goes wrong during parsing; parse
-   errors will be caught, warned about, and reported as failure.  */
-
-int gdb_xml_parse (struct gdb_xml_parser *parser, const char *buffer);
-
 /* Parse a XML document.  DOCUMENT is the data to parse, which should
    be NUL-terminated. If non-NULL, use the compiled-in DTD named
    DTD_NAME to drive the parsing.
@@ -200,13 +187,13 @@ int gdb_xml_parse_quick (const char *name, const char *dtd_name,
 /* Issue a debugging message from one of PARSER's handlers.  */
 
 void gdb_xml_debug (struct gdb_xml_parser *parser, const char *format, ...)
-     ATTRIBUTE_PRINTF (2, 0);
+  ATTRIBUTE_PRINTF (2, 3);
 
 /* Issue an error message from one of PARSER's handlers, and stop
    parsing.  */
 
 void gdb_xml_error (struct gdb_xml_parser *parser, const char *format, ...)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 0);
+  ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 3);
 
 /* Find the attribute named NAME in the set of parsed attributes
    ATTRIBUTES.  Returns NULL if not found.  */
@@ -239,13 +226,6 @@ extern gdb_xml_attribute_handler gdb_xml_parse_attr_enum;
 
 ULONGEST gdb_xml_parse_ulongest (struct gdb_xml_parser *parser,
 				 const char *value);
-
-/* Simple printf to obstack function.  Current implemented formatters:
-   %s - grow an xml escaped text in OBSTACK.  */
-
-extern void obstack_xml_printf (struct obstack *obstack,
-                               const char *format, ...)
-  ATTRIBUTE_PRINTF_2;
 
 /* Open FILENAME, read all its text into memory, close it, and return
    the text.  If something goes wrong, return NULL and warn.  */

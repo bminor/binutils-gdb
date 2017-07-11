@@ -1,6 +1,6 @@
 /* QNX Neutrino specific low level interface, for the remote server
    for GDB.
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -347,14 +347,17 @@ nto_read_auxv_from_initial_stack (CORE_ADDR initial_stack,
   return len_read;
 }
 
-/* Start inferior specified by PROGRAM passing arguments ALLARGS.  */
+/* Start inferior specified by PROGRAM, using PROGRAM_ARGS as its
+   arguments.  */
 
 static int
-nto_create_inferior (char *program, char **allargs)
+nto_create_inferior (const char *program,
+		     const std::vector<char *> &program_args)
 {
   struct inheritance inherit;
   pid_t pid;
   sigset_t set;
+  std::string str_program_args = stringify_argv (program_args);
 
   TRACE ("%s %s\n", __func__, program);
   /* Clear any pending SIGUSR1's but keep the behavior the same.  */
@@ -367,7 +370,8 @@ nto_create_inferior (char *program, char **allargs)
   memset (&inherit, 0, sizeof (inherit));
   inherit.flags |= SPAWN_SETGROUP | SPAWN_HOLD;
   inherit.pgroup = SPAWN_NEWPGROUP;
-  pid = spawnp (program, 0, NULL, &inherit, allargs, 0);
+  pid = spawnp (program, 0, NULL, &inherit,
+		(char *) str_program_args.c_str (), 0);
   sigprocmask (SIG_BLOCK, &set, NULL);
 
   if (pid == -1)

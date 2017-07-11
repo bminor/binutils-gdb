@@ -1,4 +1,4 @@
-##Copyright (C) 1991-2016 Free Software Foundation, Inc.
+##Copyright (C) 1991-2017 Free Software Foundation, Inc.
 
 # Makefile for GDB documentation.
 # This file is part of GDB.
@@ -178,9 +178,6 @@ MAN1S = gdb.1 gdbserver.1 gcore.1
 MAN5S = gdbinit.5
 MANS = $(MAN1S) $(MAN5S)
 
-# Host-dependent makefile fragment comes in here.
-@host_makefile_frag@
-# End of host-dependent makefile fragment
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
 ###
@@ -676,3 +673,6 @@ maintainer-clean realclean: distclean
 install: install-info install-man
 
 uninstall: uninstall-info uninstall-man
+
+# Disable implicit make rules.
+include $(srcdir)/../disable-implicit-rules.mk

@@ -1,7 +1,7 @@
 /* Target-dependent code for GNU/Linux running on the Fujitsu FR-V,
    for GDB.
 
-   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+   Copyright (C) 2004-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -413,17 +413,14 @@ frv_linux_supply_gregset (const struct regset *regset,
 			  int regnum, const void *gregs, size_t len)
 {
   int regi;
-  char zerobuf[MAX_REGISTER_SIZE];
-
-  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   /* gr0 always contains 0.  Also, the kernel passes the TBR value in
      this slot.  */
-  regcache_raw_supply (regcache, first_gpr_regnum, zerobuf);
+  regcache->raw_supply_zeroed (first_gpr_regnum);
 
   /* Fill gr32, ..., gr63 with zeros. */
   for (regi = first_gpr_regnum + 32; regi <= last_gpr_regnum; regi++)
-    regcache_raw_supply (regcache, regi, zerobuf);
+    regcache->raw_supply_zeroed (regi);
 
   regcache_supply_regset (regset, regcache, regnum, gregs, len);
 }

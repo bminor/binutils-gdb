@@ -1,6 +1,6 @@
 /* Target-dependent code for Motorola 68HC11 & 68HC12
 
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2017 Free Software Foundation, Inc.
 
    Contributed by Stephane Carrez, stcarrez@nerim.fr
 
@@ -166,7 +166,7 @@ struct m68hc11_unwind_cache
 
 /* Table of registers for 68HC11.  This includes the hard registers
    and the soft registers used by GCC.  */
-static char *
+static const char *
 m68hc11_register_names[] =
 {
   "x",    "d",    "y",    "sp",   "pc",   "a",    "b",
@@ -390,16 +390,9 @@ m68hc11_register_name (struct gdbarch *gdbarch, int reg_nr)
   return m68hc11_register_names[reg_nr];
 }
 
-static const unsigned char *
-m68hc11_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-			    int *lenptr)
-{
-  static unsigned char breakpoint[] = {0x0};
+constexpr gdb_byte m68hc11_break_insn[] = {0x0};
 
-  *lenptr = sizeof (breakpoint);
-  return breakpoint;
-}
-
+typedef BP_MANIPULATION (m68hc11_break_insn) m68hc11_breakpoint;
 
 /* 68HC11 & 68HC12 prologue analysis.  */
 
@@ -1351,16 +1344,6 @@ m68hc11_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
   if (flags & STO_M68HC12_INTERRUPT)
     MSYMBOL_SET_RTI (msym);
 }
-
-static int
-gdb_print_insn_m68hc11 (bfd_vma memaddr, disassemble_info *info)
-{
-  if (info->arch == bfd_arch_m68hc11)
-    return print_insn_m68hc11 (memaddr, info);
-  else
-    return print_insn_m68hc12 (memaddr, info);
-}
-
 
 
 /* 68HC11/68HC12 register groups.
@@ -1451,7 +1434,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
     }
 
   /* Need a new architecture.  Fill in a target specific vector.  */
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
 
@@ -1528,8 +1511,10 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_return_value (gdbarch, m68hc11_return_value);
   set_gdbarch_skip_prologue (gdbarch, m68hc11_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_breakpoint_from_pc (gdbarch, m68hc11_breakpoint_from_pc);
-  set_gdbarch_print_insn (gdbarch, gdb_print_insn_m68hc11);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       m68hc11_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       m68hc11_breakpoint::bp_from_kind);
 
   m68hc11_add_reggroups (gdbarch);
   set_gdbarch_register_reggroup_p (gdbarch, m68hc11_register_reggroup_p);

@@ -1,5 +1,5 @@
 /* dwarf.h - DWARF support header file
-   Copyright (C) 2005-2016 Free Software Foundation, Inc.
+   Copyright (C) 2005-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -18,6 +18,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#include "dwarf2.h" /* for enum dwarf_unit_type */
+
 typedef unsigned HOST_WIDEST_INT  dwarf_vma;
 typedef HOST_WIDEST_INT           dwarf_signed_vma;
 typedef unsigned HOST_WIDEST_INT  dwarf_size_type;
@@ -34,6 +36,7 @@ typedef struct
   int            li_line_base;
   unsigned char  li_line_range;
   unsigned char  li_opcode_base;
+  unsigned int   li_offset_size;
 }
 DWARF2_Internal_LineInfo;
 
@@ -54,6 +57,7 @@ typedef struct
   unsigned short cu_version;
   dwarf_vma	 cu_abbrev_offset;
   unsigned char  cu_pointer_size;
+  enum dwarf_unit_type cu_unit_type;
 }
 DWARF2_Internal_CompUnit;
 
@@ -83,10 +87,13 @@ enum dwarf_section_display_enum
   macinfo,
   macro,
   str,
+  line_str,
   loc,
+  loclists,
   pubtypes,
   gnu_pubtypes,
   ranges,
+  rnglists,
   static_func,
   static_vars,
   types,
@@ -224,7 +231,7 @@ extern void * xcrealloc (void *, size_t, size_t);
 
 extern dwarf_vma read_leb128 (unsigned char *, unsigned int *, bfd_boolean, const unsigned char * const);
 
-/* A callback into the client.  Retuns TRUE if there is a
+/* A callback into the client.  Returns TRUE if there is a
    relocation against the given debug section at the given
    offset.  */
 extern bfd_boolean reloc_at (struct dwarf_section *, dwarf_vma);

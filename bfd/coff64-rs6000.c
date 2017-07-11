@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF64" files.
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2017 Free Software Foundation, Inc.
    Written Clinton Popetz.
    Contributed by Cygnus Support.
 
@@ -2105,7 +2105,8 @@ xcoff64_create_csect_from_smclas (bfd *abfd, union internal_auxent *aux,
     }
   else
     {
-      (*_bfd_error_handler)
+      _bfd_error_handler
+	/* xgettext: c-format */
 	(_("%B: symbol `%s' has unrecognized smclas %d"),
 	 abfd, symbol_name, aux->x_csect.x_smclas);
       bfd_set_error (bfd_error_bad_value);
@@ -2719,6 +2720,7 @@ const bfd_target rs6000_xcoff64_vec =
     /* Reloc */
     coff_get_reloc_upper_bound,
     coff_canonicalize_reloc,
+    _bfd_generic_set_reloc,
     xcoff64_reloc_type_lookup,
     xcoff64_reloc_name_lookup,
 
@@ -2744,6 +2746,7 @@ const bfd_target rs6000_xcoff64_vec =
     bfd_generic_discard_group,
     _bfd_generic_section_already_linked,
     _bfd_xcoff_define_common_symbol,
+    bfd_generic_define_start_stop,
 
     /* Dynamic */
     _bfd_xcoff_get_dynamic_symtab_upper_bound,
@@ -2978,6 +2981,7 @@ const bfd_target rs6000_xcoff64_aix_vec =
     /* Reloc */
     coff_get_reloc_upper_bound,
     coff_canonicalize_reloc,
+    _bfd_generic_set_reloc,
     xcoff64_reloc_type_lookup,
     xcoff64_reloc_name_lookup,
 
@@ -3003,6 +3007,7 @@ const bfd_target rs6000_xcoff64_aix_vec =
     bfd_generic_discard_group,
     _bfd_generic_section_already_linked,
     _bfd_xcoff_define_common_symbol,
+    bfd_generic_define_start_stop,
 
     /* Dynamic */
     _bfd_xcoff_get_dynamic_symtab_upper_bound,

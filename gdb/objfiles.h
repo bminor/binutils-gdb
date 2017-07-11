@@ -1,6 +1,6 @@
 /* Definitions for symbol file management in GDB.
 
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
 
 #include "hashtab.h"
 #include "gdb_obstack.h"	/* For obstack internals.  */
+#include "objfile-flags.h"
 #include "symfile.h"		/* For struct psymbol_allocation_list.  */
 #include "progspace.h"
 #include "registry.h"
@@ -183,24 +184,28 @@ extern void print_symbol_bcache_statistics (void);
 
 struct objfile_per_bfd_storage
 {
+  objfile_per_bfd_storage ()
+    : minsyms_read (false)
+  {}
+
   /* The storage has an obstack of its own.  */
 
-  struct obstack storage_obstack;
+  auto_obstack storage_obstack;
 
   /* Byte cache for file names.  */
 
-  struct bcache *filename_cache;
+  bcache *filename_cache = NULL;
 
   /* Byte cache for macros.  */
 
-  struct bcache *macro_cache;
+  bcache *macro_cache = NULL;
 
   /* The gdbarch associated with the BFD.  Note that this gdbarch is
      determined solely from BFD information, without looking at target
      information.  The gdbarch determined from a running target may
      differ from this e.g. with respect to register types and names.  */
 
-  struct gdbarch *gdbarch;
+  struct gdbarch *gdbarch = NULL;
 
   /* Hash table for mapping symbol names to demangled names.  Each
      entry in the hash table is actually two consecutive strings,
@@ -208,19 +213,19 @@ struct objfile_per_bfd_storage
      name, and the second is the demangled name or just a zero byte
      if the name doesn't demangle.  */
 
-  struct htab *demangled_names_hash;
+  htab *demangled_names_hash = NULL;
 
   /* The per-objfile information about the entry point, the scope (file/func)
      containing the entry point, and the scope of the user's main() func.  */
 
-  struct entry_info ei;
+  entry_info ei {};
 
   /* The name and language of any "main" found in this objfile.  The
      name can be NULL, which means that the information was not
      recorded.  */
 
-  const char *name_of_main;
-  enum language language_of_main;
+  const char *name_of_main = NULL;
+  enum language language_of_main = language_unknown;
 
   /* Each file contains a pointer to an array of minimal symbols for all
      global symbols that are defined within the file.  The array is
@@ -232,15 +237,15 @@ struct objfile_per_bfd_storage
      as all the data that it points to, should be allocated on the
      objfile_obstack for this file.  */
 
-  struct minimal_symbol *msymbols;
-  int minimal_symbol_count;
+  minimal_symbol *msymbols = NULL;
+  int minimal_symbol_count = 0;
 
   /* The number of minimal symbols read, before any minimal symbol
      de-duplication is applied.  Note in particular that this has only
      a passing relationship with the actual size of the table above;
      use minimal_symbol_count if you need the true size.  */
 
-  int n_minsyms;
+  int n_minsyms = 0;
 
   /* This is true if minimal symbols have already been read.  Symbol
      readers can use this to bypass minimal symbol reading.  Also, the
@@ -250,16 +255,16 @@ struct objfile_per_bfd_storage
      for multiple readers to install minimal symbols into a given
      per-BFD.  */
 
-  unsigned int minsyms_read : 1;
+  bool minsyms_read : 1;
 
   /* This is a hash table used to index the minimal symbols by name.  */
 
-  struct minimal_symbol *msymbol_hash[MINIMAL_SYMBOL_HASH_SIZE];
+  minimal_symbol *msymbol_hash[MINIMAL_SYMBOL_HASH_SIZE] {};
 
   /* This hash table is used to index the minimal symbols by their
      demangled names.  */
 
-  struct minimal_symbol *msymbol_demangled_hash[MINIMAL_SYMBOL_HASH_SIZE];
+  minimal_symbol *msymbol_demangled_hash[MINIMAL_SYMBOL_HASH_SIZE] {};
 };
 
 /* Master structure for keeping track of each file from which
@@ -288,10 +293,9 @@ struct objfile
 
   CORE_ADDR addr_low;
 
-  /* Some flag bits for this objfile.
-     The values are defined by OBJF_*.  */
+  /* Some flag bits for this objfile.  */
 
-  unsigned short flags;
+  objfile_flags flags;
 
   /* The program space associated with this objfile.  */
 
@@ -444,54 +448,10 @@ struct objfile
   htab_t static_links;
 };
 
-/* Defines for the objfile flag word.  */
-
-/* When an object file has its functions reordered (currently Irix-5.2
-   shared libraries exhibit this behaviour), we will need an expensive
-   algorithm to locate a partial symtab or symtab via an address.
-   To avoid this penalty for normal object files, we use this flag,
-   whose setting is determined upon symbol table read in.  */
-
-#define OBJF_REORDERED	(1 << 0)	/* Functions are reordered */
-
-/* Distinguish between an objfile for a shared library and a "vanilla"
-   objfile.  This may come from a target's implementation of the solib
-   interface, from add-symbol-file, or any other mechanism that loads
-   dynamic objects.  */
-
-#define OBJF_SHARED     (1 << 1)	/* From a shared library */
-
-/* User requested that this objfile be read in it's entirety.  */
-
-#define OBJF_READNOW	(1 << 2)	/* Immediate full read */
-
-/* This objfile was created because the user explicitly caused it
-   (e.g., used the add-symbol-file command).  This bit offers a way
-   for run_command to remove old objfile entries which are no longer
-   valid (i.e., are associated with an old inferior), but to preserve
-   ones that the user explicitly loaded via the add-symbol-file
-   command.  */
-
-#define OBJF_USERLOADED	(1 << 3)	/* User loaded */
-
-/* Set if we have tried to read partial symtabs for this objfile.
-   This is used to allow lazy reading of partial symtabs.  */
-
-#define OBJF_PSYMTABS_READ (1 << 4)
-
-/* Set if this is the main symbol file
-   (as opposed to symbol file for dynamically loaded code).  */
-
-#define OBJF_MAINLINE (1 << 5)
-
-/* ORIGINAL_NAME and OBFD->FILENAME correspond to text description unrelated to
-   filesystem names.  It can be for example "<image in memory>".  */
-
-#define OBJF_NOT_FILENAME (1 << 6)
-
 /* Declarations for functions defined in objfiles.c */
 
-extern struct objfile *allocate_objfile (bfd *, const char *name, int);
+extern struct objfile *allocate_objfile (bfd *, const char *name,
+					 objfile_flags);
 
 extern struct gdbarch *get_objfile_arch (const struct objfile *);
 
@@ -500,8 +460,6 @@ extern int entry_point_address_query (CORE_ADDR *entry_p);
 extern CORE_ADDR entry_point_address (void);
 
 extern void build_objfile_section_table (struct objfile *);
-
-extern void terminate_minimal_symbol_table (struct objfile *objfile);
 
 extern struct objfile *objfile_separate_debug_iterate (const struct objfile *,
                                                        const struct objfile *);
@@ -560,7 +518,7 @@ extern int have_minimal_symbols (void);
 extern struct obj_section *find_pc_section (CORE_ADDR pc);
 
 /* Return non-zero if PC is in a section called NAME.  */
-extern int pc_in_section (CORE_ADDR, char *);
+extern int pc_in_section (CORE_ADDR, const char *);
 
 /* Return non-zero if PC is in a SVR4-style procedure linkage table
    section.  */

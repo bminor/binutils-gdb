@@ -37,4 +37,3 @@ OTHER_READONLY_SECTIONS="${OTHER_READONLY_SECTIONS}
 # .dtors.  They have to be next to .sbss/.sbss2/.sdata/.sdata2.
 SMALL_DATA_CTOR=" "
 SMALL_DATA_DTOR=" "
-SHARABLE_SECTIONS=yes

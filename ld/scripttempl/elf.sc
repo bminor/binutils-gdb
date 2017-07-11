@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2016 Free Software Foundation, Inc.
+# Copyright (C) 2014-2017 Free Software Foundation, Inc.
 # 
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -120,21 +120,23 @@ test -z "${ELFSIZE}" && ELFSIZE=32
 test -z "${ALIGNMENT}" && ALIGNMENT="${ELFSIZE} / 8"
 test "$LD_FLAG" = "N" && DATA_ADDR=.
 test -z "${ETEXT_NAME}" && ETEXT_NAME=${USER_LABEL_PREFIX}etext
-test -n "$CREATE_SHLIB$CREATE_PIE" && test -n "$SHLIB_DATA_ADDR" && COMMONPAGESIZE=""
-test -z "$CREATE_SHLIB$CREATE_PIE" && test -n "$DATA_ADDR" && COMMONPAGESIZE=""
 test -n "$RELRO_NOW" && unset SEPARATE_GOTPLT
 test -z "$ATTRS_SECTIONS" && ATTRS_SECTIONS=".gnu.attributes 0 : { KEEP (*(.gnu.attributes)) }"
-DATA_SEGMENT_ALIGN="ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))"
-DATA_SEGMENT_RELRO_END=""
-DATA_SEGMENT_END=""
-if test -n "${COMMONPAGESIZE}"; then
-  if test "${SEGMENT_SIZE}" != "${MAXPAGESIZE}"; then
-    DATA_SEGMENT_ALIGN="ALIGN (${SEGMENT_SIZE}) - ((${MAXPAGESIZE} - .) & (${MAXPAGESIZE} - 1)); . = DATA_SEGMENT_ALIGN (${MAXPAGESIZE}, ${COMMONPAGESIZE})"
-  else
-    DATA_SEGMENT_ALIGN="DATA_SEGMENT_ALIGN (${MAXPAGESIZE}, ${COMMONPAGESIZE})"
+if test -z "$DATA_SEGMENT_ALIGN"; then
+  test -n "$CREATE_SHLIB$CREATE_PIE" && test -n "$SHLIB_DATA_ADDR" && COMMONPAGESIZE=""
+  test -z "$CREATE_SHLIB$CREATE_PIE" && test -n "$DATA_ADDR" && COMMONPAGESIZE=""
+  DATA_SEGMENT_ALIGN="ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))"
+  DATA_SEGMENT_RELRO_END=""
+  DATA_SEGMENT_END=""
+  if test -n "${COMMONPAGESIZE}"; then
+    if test "${SEGMENT_SIZE}" != "${MAXPAGESIZE}"; then
+      DATA_SEGMENT_ALIGN="ALIGN (${SEGMENT_SIZE}) - ((${MAXPAGESIZE} - .) & (${MAXPAGESIZE} - 1)); . = DATA_SEGMENT_ALIGN (${MAXPAGESIZE}, ${COMMONPAGESIZE})"
+    else
+      DATA_SEGMENT_ALIGN="DATA_SEGMENT_ALIGN (${MAXPAGESIZE}, ${COMMONPAGESIZE})"
+    fi
+    DATA_SEGMENT_END=". = DATA_SEGMENT_END (.);"
+    DATA_SEGMENT_RELRO_END=". = DATA_SEGMENT_RELRO_END (${SEPARATE_GOTPLT-0}, .);"
   fi
-  DATA_SEGMENT_END=". = DATA_SEGMENT_END (.);"
-  DATA_SEGMENT_RELRO_END=". = DATA_SEGMENT_RELRO_END (${SEPARATE_GOTPLT-0}, .);"
 fi
 if test -z "${INITIAL_READONLY_SECTIONS}${CREATE_SHLIB}"; then
   INITIAL_READONLY_SECTIONS=".interp       ${RELOCATING-0} : { *(.interp) }"
@@ -303,45 +305,12 @@ DTOR=".dtors        ${CONSTRUCTING-0} :
     KEEP (*(.dtors))
     ${CONSTRUCTING+${DTOR_END}}
   }"
-STACK="  .stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
+STACK=".stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
   {
     ${RELOCATING+${USER_LABEL_PREFIX}_stack = .;}
     *(.stack)
+    ${RELOCATING+${STACK_SENTINEL}}
   }"
-test "${SHARABLE_SECTIONS}" = "yes" && OTHER_READWRITE_SECTIONS="
-  ${OTHER_READWRITE_SECTIONS}
-  /* Sharable data sections.  */
-  .sharable_data ${RELOCATING-0} : ${RELOCATING+ALIGN(${MAXPAGESIZE})}
-  {
-    ${RELOCATING+PROVIDE_HIDDEN (__sharable_data_start = .);}
-    *(.sharable_data${RELOCATING+ .sharable_data.* .gnu.linkonce.shrd.*})
-    /* Align here to ensure that the sharable data section ends at the
-       page boundary.  */
-    ${RELOCATING+. = ALIGN(. != 0 ? ${MAXPAGESIZE} : 1);}
-    ${RELOCATING+PROVIDE_HIDDEN (__sharable_data_end = .);}
-  }
-"
-test "${SHARABLE_SECTIONS}" = "yes" && OTHER_BSS_SECTIONS="
-  ${OTHER_BSS_SECTIONS}
-  /* Sharable bss sections  */
-  .sharable_bss ${RELOCATING-0} : ${RELOCATING+ALIGN(${MAXPAGESIZE})}
-  {
-    ${RELOCATING+PROVIDE_HIDDEN (__sharable_bss_start = .);}
-    *(.dynsharablebss)
-    *(.sharable_bss${RELOCATING+ .sharable_bss.* .gnu.linkonce.shrb.*}) 
-    *(SHARABLE_COMMON)
-    /* Align here to ensure that the sharable bss section ends at the
-       page boundary.  */
-    ${RELOCATING+. = ALIGN(. != 0 ? ${MAXPAGESIZE} : 1);}
-    ${RELOCATING+PROVIDE_HIDDEN (__sharable_bss_end = .);}
-  }
-"
-test "${SHARABLE_SECTIONS}" = "yes" && REL_SHARABLE="
-  .rel.sharable_data	${RELOCATING-0} : { *(.rel.sharable_data${RELOCATING+ .rel.sharable_data.* .rel.gnu.linkonce.shrd.*}) }
-  .rela.sharable_data	${RELOCATING-0} : { *(.rela.sharable_data${RELOCATING+ .rela.sharable_data.* .rela.gnu.linkonce.shrd.*}) }
-  .rel.sharable_bss	${RELOCATING-0} : { *(.rel.sharable_bss${RELOCATING+ .rel.sharable_bss.* .rel.gnu.linkonce.shrb.*}) }
-  .rela.sharable_bss	${RELOCATING-0} : { *(.rela.sharable_bss${RELOCATING+ .rela.sharable_bss.* .rela.gnu.linkonce.shrb.*}) }
-"
 
 TEXT_START_ADDR="SEGMENT_START(\"text-segment\", ${TEXT_START_ADDR})"
 SHLIB_TEXT_START_ADDR="SEGMENT_START(\"text-segment\", ${SHLIB_TEXT_START_ADDR:-0})"
@@ -360,7 +329,7 @@ else
 fi
 
 cat <<EOF
-/* Copyright (C) 2014-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2014-2017 Free Software Foundation, Inc.
 
    Copying and distribution of this script, with or without modification,
    are permitted in any medium without royalty provided the copyright
@@ -442,7 +411,6 @@ eval $COMBRELOCCAT <<EOF
   .rel.got      ${RELOCATING-0} : { *(.rel.got) }
   .rela.got     ${RELOCATING-0} : { *(.rela.got) }
   ${OTHER_GOT_RELOC_SECTIONS}
-  ${REL_SHARABLE}
   ${REL_SDATA}
   ${REL_SBSS}
   ${REL_SDATA2}
@@ -655,7 +623,7 @@ cat <<EOF
   ${BSS_PLT+${PLT}}
   .${BSS_NAME}          ${RELOCATING-0} :
   {
-   *(.dyn${BSS_NAME})
+   ${RELOCATING+*(.dynbss)}
    *(.${BSS_NAME}${RELOCATING+ .${BSS_NAME}.* .gnu.linkonce.b.*})
    *(COMMON)
    /* Align here to ensure that the .bss section occupies space up to
@@ -674,7 +642,7 @@ EOF
 LARGE_DATA_ADDR=". = SEGMENT_START(\"ldata-segment\", ${LARGE_DATA_ADDR-.});"
 SHLIB_LARGE_DATA_ADDR=". = SEGMENT_START(\"ldata-segment\", ${SHLIB_LARGE_DATA_ADDR-.});"
 
-  cat <<EOF
+cat <<EOF
   ${RELOCATING+${CREATE_SHLIB-${CREATE_PIE-${LARGE_DATA_ADDR}}}}
   ${RELOCATING+${CREATE_SHLIB+${SHLIB_LARGE_DATA_ADDR}}}
   ${RELOCATING+${CREATE_PIE+${SHLIB_LARGE_DATA_ADDR}}}
@@ -684,6 +652,9 @@ SHLIB_LARGE_DATA_ADDR=". = SEGMENT_START(\"ldata-segment\", ${SHLIB_LARGE_DATA_A
   ${RELOCATING+${OTHER_END_SYMBOLS}}
   ${RELOCATING+${END_SYMBOLS-${USER_LABEL_PREFIX}_end = .; PROVIDE (${USER_LABEL_PREFIX}end = .);}}
   ${RELOCATING+${DATA_SEGMENT_END}}
+  ${TINY_DATA_SECTION}
+  ${TINY_BSS_SECTION}
+  ${STACK_ADDR+${STACK}}
 EOF
 
 test -z "${NON_ALLOC_DYN}" || emit_dyn
@@ -704,11 +675,6 @@ EOF
 . $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
-
-  ${TINY_DATA_SECTION}
-  ${TINY_BSS_SECTION}
-
-  ${STACK_ADDR+${STACK}}
   ${ATTRS_SECTIONS}
   ${OTHER_SECTIONS}
   ${RELOCATING+${OTHER_SYMBOLS}}

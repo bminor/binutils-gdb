@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2016 Free Software Foundation, Inc.
+# Copyright (C) 2014-2017 Free Software Foundation, Inc.
 # 
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -272,10 +272,11 @@ DTOR=".dtors        ${CONSTRUCTING-0} :
     KEEP (*(.dtors))
     ${CONSTRUCTING+${DTOR_END}}
   }"
-STACK="  .stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
+STACK=".stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
   {
-    ${RELOCATING+_stack = .;}
+    ${RELOCATING+${USER_LABEL_PREFIX}_stack = .;}
     *(.stack)
+    ${RELOCATING+${STACK_SENTINEL}}
   }"
 
 # If this is for an embedded system, don't add SIZEOF_HEADERS.
@@ -286,7 +287,7 @@ else
 fi
 
 cat <<EOF
-/* Copyright (C) 2014-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2014-2017 Free Software Foundation, Inc.
 
    Copying and distribution of this script, with or without modification,
    are permitted in any medium without royalty provided the copyright
@@ -523,6 +524,9 @@ cat <<EOF
   ${RELOCATING+${OTHER_END_SYMBOLS}}
   ${RELOCATING+${END_SYMBOLS-${USER_LABEL_PREFIX}_end = .; PROVIDE (${USER_LABEL_PREFIX}end = .);}}
   ${RELOCATING+${DATA_SEGMENT_END}}
+  ${TINY_DATA_SECTION}
+  ${TINY_BSS_SECTION}
+  ${STACK_ADDR+${STACK}}
 EOF
 
 if test -n "${NON_ALLOC_DYN}"; then
@@ -555,10 +559,6 @@ EOF
 . $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
-  ${TINY_DATA_SECTION}
-  ${TINY_BSS_SECTION}
-
-  ${STACK_ADDR+${STACK}}
   ${ATTRS_SECTIONS}
   ${OTHER_SECTIONS}
   ${RELOCATING+${OTHER_SYMBOLS}}

@@ -1,5 +1,5 @@
 /* Main code for remote server for GDB.
-   Copyright (C) 1989-2016 Free Software Foundation, Inc.
+   Copyright (C) 1989-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,7 +22,7 @@
 #include "notif.h"
 #include "tdesc.h"
 #include "rsp-low.h"
-
+#include "signals-state-save-restore.h"
 #include <ctype.h>
 #include <unistd.h>
 #if HAVE_SIGNAL_H
@@ -35,6 +35,20 @@
 #include "tracepoint.h"
 #include "dll.h"
 #include "hostio.h"
+#include <vector>
+#include "common-inferior.h"
+#include "job-control.h"
+#include "environ.h"
+
+/* The environment to pass to the inferior when creating it.  */
+
+static gdb_environ our_environ;
+
+/* Start the inferior using a shell.  */
+
+/* We always try to start the inferior using a shell.  */
+
+int startup_with_shell = 1;
 
 /* The thread set with an `Hc' packet.  `Hc' is deprecated in favor of
    `vCont'.  Note the multi-process extensions made `vCont' a
@@ -78,7 +92,9 @@ static int vCont_supported;
    space randomization feature before starting an inferior.  */
 int disable_randomization = 1;
 
-static char **program_argv, **wrapper_argv;
+static char *program_name = NULL;
+static std::vector<char *> program_args;
+static std::string wrapper_argv;
 
 int pass_signals[GDB_SIGNAL_LAST];
 int program_signals[GDB_SIGNAL_LAST];
@@ -91,22 +107,6 @@ int program_signals_p;
 
 unsigned long signal_pid;
 
-#ifdef SIGTTOU
-/* A file descriptor for the controlling terminal.  */
-int terminal_fd;
-
-/* TERMINAL_FD's original foreground group.  */
-pid_t old_foreground_pgrp;
-
-/* Hand back terminal ownership to the original foreground group.  */
-
-static void
-restore_old_foreground_pgrp (void)
-{
-  tcsetpgrp (terminal_fd, old_foreground_pgrp);
-}
-#endif
-
 /* Set if you want to disable optional thread related packets support
    in gdbserver, for the sake of testing GDB against stubs that don't
    support them.  */
@@ -116,8 +116,8 @@ int disable_packet_qC;
 int disable_packet_qfThreadInfo;
 
 /* Last status reported to GDB.  */
-static struct target_waitstatus last_status;
-static ptid_t last_ptid;
+struct target_waitstatus last_status;
+ptid_t last_ptid;
 
 char *own_buf;
 static unsigned char *mem_buf;
@@ -193,6 +193,38 @@ vstop_notif_reply (struct notif_event *event, char *own_buf)
   prepare_resume_reply (own_buf, vstop->ptid, &vstop->status);
 }
 
+/* QUEUE_iterate callback helper for in_queued_stop_replies.  */
+
+static int
+in_queued_stop_replies_ptid (QUEUE (notif_event_p) *q,
+			     QUEUE_ITER (notif_event_p) *iter,
+			     struct notif_event *event,
+			     void *data)
+{
+  ptid_t filter_ptid = *(ptid_t *) data;
+  struct vstop_notif *vstop_event = (struct vstop_notif *) event;
+
+  if (ptid_match (vstop_event->ptid, filter_ptid))
+    return 0;
+
+  /* Don't resume fork children that GDB does not know about yet.  */
+  if ((vstop_event->status.kind == TARGET_WAITKIND_FORKED
+       || vstop_event->status.kind == TARGET_WAITKIND_VFORKED)
+      && ptid_match (vstop_event->status.value.related_pid, filter_ptid))
+    return 0;
+
+  return 1;
+}
+
+/* See server.h.  */
+
+int
+in_queued_stop_replies (ptid_t ptid)
+{
+  return !QUEUE_iterate (notif_event_p, notif_stop.queue,
+			 in_queued_stop_replies_ptid, &ptid);
+}
+
 struct notif_server notif_stop =
 {
   "vStopped", "Stop", NULL, vstop_notif_reply,
@@ -204,104 +236,31 @@ target_running (void)
   return get_first_thread () != NULL;
 }
 
-static int
-start_inferior (char **argv)
+/* See common/common-inferior.h.  */
+
+const char *
+get_exec_wrapper ()
 {
-  char **new_argv = argv;
+  return !wrapper_argv.empty () ? wrapper_argv.c_str () : NULL;
+}
 
-  if (wrapper_argv != NULL)
-    {
-      int i, count = 1;
+/* See common/common-inferior.h.  */
 
-      for (i = 0; wrapper_argv[i] != NULL; i++)
-	count++;
-      for (i = 0; argv[i] != NULL; i++)
-	count++;
-      new_argv = XALLOCAVEC (char *, count);
-      count = 0;
-      for (i = 0; wrapper_argv[i] != NULL; i++)
-	new_argv[count++] = wrapper_argv[i];
-      for (i = 0; argv[i] != NULL; i++)
-	new_argv[count++] = argv[i];
-      new_argv[count] = NULL;
-    }
+char *
+get_exec_file (int err)
+{
+  if (err && program_name == NULL)
+    error (_("No executable file specified."));
 
-  if (debug_threads)
-    {
-      int i;
-      for (i = 0; new_argv[i]; ++i)
-	debug_printf ("new_argv[%d] = \"%s\"\n", i, new_argv[i]);
-      debug_flush ();
-    }
+  return program_name;
+}
 
-#ifdef SIGTTOU
-  signal (SIGTTOU, SIG_DFL);
-  signal (SIGTTIN, SIG_DFL);
-#endif
+/* See server.h.  */
 
-  signal_pid = create_inferior (new_argv[0], new_argv);
-
-  /* FIXME: we don't actually know at this point that the create
-     actually succeeded.  We won't know that until we wait.  */
-  fprintf (stderr, "Process %s created; pid = %ld\n", argv[0],
-	   signal_pid);
-  fflush (stderr);
-
-#ifdef SIGTTOU
-  signal (SIGTTOU, SIG_IGN);
-  signal (SIGTTIN, SIG_IGN);
-  terminal_fd = fileno (stderr);
-  old_foreground_pgrp = tcgetpgrp (terminal_fd);
-  tcsetpgrp (terminal_fd, signal_pid);
-  atexit (restore_old_foreground_pgrp);
-#endif
-
-  if (wrapper_argv != NULL)
-    {
-      struct thread_resume resume_info;
-
-      memset (&resume_info, 0, sizeof (resume_info));
-      resume_info.thread = pid_to_ptid (signal_pid);
-      resume_info.kind = resume_continue;
-      resume_info.sig = 0;
-
-      last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
-
-      if (last_status.kind == TARGET_WAITKIND_STOPPED)
-	{
-	  do
-	    {
-	      (*the_target->resume) (&resume_info, 1);
-
-	      last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
-	      if (last_status.kind != TARGET_WAITKIND_STOPPED)
-		break;
-
-	      current_thread->last_resume_kind = resume_stop;
-	      current_thread->last_status = last_status;
-	    }
-	  while (last_status.value.sig != GDB_SIGNAL_TRAP);
-	}
-      target_post_create_inferior ();
-      return signal_pid;
-    }
-
-  /* Wait till we are at 1st instruction in program, return new pid
-     (assuming success).  */
-  last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
-
-  target_post_create_inferior ();
-
-  if (last_status.kind != TARGET_WAITKIND_EXITED
-      && last_status.kind != TARGET_WAITKIND_SIGNALLED)
-    {
-      current_thread->last_resume_kind = resume_stop;
-      current_thread->last_status = last_status;
-    }
-  else
-    mourn_inferior (find_process_pid (ptid_get_pid (last_ptid)));
-
-  return signal_pid;
+gdb_environ *
+get_environ ()
+{
+  return &our_environ;
 }
 
 static int
@@ -676,8 +635,8 @@ handle_general_set (char *own_buf)
     {
       if (remote_debug)
 	{
-	  fprintf (stderr, "[noack mode enabled]\n");
-	  fflush (stderr);
+	  debug_printf ("[noack mode enabled]\n");
+	  debug_flush ();
 	}
 
       noack_mode = 1;
@@ -716,7 +675,7 @@ handle_general_set (char *own_buf)
       non_stop = req;
 
       if (remote_debug)
-	fprintf (stderr, "[%s mode enabled]\n", req_str);
+	debug_printf ("[%s mode enabled]\n", req_str);
 
       write_ok (own_buf);
       return;
@@ -732,10 +691,9 @@ handle_general_set (char *own_buf)
 
       if (remote_debug)
 	{
-	  if (disable_randomization)
-	    fprintf (stderr, "[address space randomization disabled]\n");
-	  else
-	    fprintf (stderr, "[address space randomization enabled]\n");
+	  debug_printf (disable_randomization
+			? "[address space randomization disabled]\n"
+			: "[address space randomization enabled]\n");
 	}
 
       write_ok (own_buf);
@@ -765,7 +723,7 @@ handle_general_set (char *own_buf)
       /* Update the flag.  */
       use_agent = req;
       if (remote_debug)
-	fprintf (stderr, "[%s agent]\n", req ? "Enable" : "Disable");
+	debug_printf ("[%s agent]\n", req ? "Enable" : "Disable");
       write_ok (own_buf);
       return;
     }
@@ -802,8 +760,33 @@ handle_general_set (char *own_buf)
 	{
 	  const char *req_str = report_thread_events ? "enabled" : "disabled";
 
-	  fprintf (stderr, "[thread events are now %s]\n", req_str);
+	  debug_printf ("[thread events are now %s]\n", req_str);
 	}
+
+      write_ok (own_buf);
+      return;
+    }
+
+  if (startswith (own_buf, "QStartupWithShell:"))
+    {
+      const char *value = own_buf + strlen ("QStartupWithShell:");
+
+      if (strcmp (value, "1") == 0)
+	startup_with_shell = true;
+      else if (strcmp (value, "0") == 0)
+	startup_with_shell = false;
+      else
+	{
+	  /* Unknown value.  */
+	  fprintf (stderr, "Unknown value to startup-with-shell: %s\n",
+		   own_buf);
+	  write_enn (own_buf);
+	  return;
+	}
+
+      if (remote_debug)
+	debug_printf (_("[Inferior will %s started with shell]"),
+		      startup_with_shell ? "be" : "not be");
 
       write_ok (own_buf);
       return;
@@ -2245,7 +2228,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	}
 
       sprintf (own_buf,
-	       "PacketSize=%x;QPassSignals+;QProgramSignals+",
+	       "PacketSize=%x;QPassSignals+;QProgramSignals+;QStartupWithShell+",
 	       PBUFSIZ - 1);
 
       if (target_supports_catch_syscall ())
@@ -2625,7 +2608,7 @@ handle_v_cont (char *own_buf)
   char *p, *q;
   int n = 0, i = 0;
   struct thread_resume *resume_info;
-  struct thread_resume default_action = {{0}};
+  struct thread_resume default_action { null_ptid };
 
   /* Count the number of semicolons in the packet.  There should be one
      for every action.  */
@@ -2781,7 +2764,7 @@ resume (struct thread_resume *actions, size_t num_actions)
 
       if (last_status.kind == TARGET_WAITKIND_EXITED
           || last_status.kind == TARGET_WAITKIND_SIGNALLED)
-        mourn_inferior (find_process_pid (ptid_get_pid (last_ptid)));
+        target_mourn_inferior (last_ptid);
     }
 }
 
@@ -2823,7 +2806,9 @@ handle_v_attach (char *own_buf)
 static int
 handle_v_run (char *own_buf)
 {
-  char *p, *next_p, **new_argv;
+  char *p, *next_p;
+  std::vector<char *> new_argv;
+  char *new_program_name = NULL;
   int i, new_argc;
 
   new_argc = 0;
@@ -2833,62 +2818,103 @@ handle_v_run (char *own_buf)
       new_argc++;
     }
 
-  new_argv = (char **) calloc (new_argc + 2, sizeof (char *));
-  if (new_argv == NULL)
-    {
-      write_enn (own_buf);
-      return 0;
-    }
-
-  i = 0;
-  for (p = own_buf + strlen ("vRun;"); *p; p = next_p)
+  for (i = 0, p = own_buf + strlen ("vRun;"); *p; p = next_p, ++i)
     {
       next_p = strchr (p, ';');
       if (next_p == NULL)
 	next_p = p + strlen (p);
 
       if (i == 0 && p == next_p)
-	new_argv[i] = NULL;
+	{
+	  /* No program specified.  */
+	  new_program_name = NULL;
+	}
+      else if (p == next_p)
+	{
+	  /* Empty argument.  */
+	  new_argv.push_back (xstrdup ("''"));
+	}
       else
 	{
-	  /* FIXME: Fail request if out of memory instead of dying.  */
-	  new_argv[i] = (char *) xmalloc (1 + (next_p - p) / 2);
-	  hex2bin (p, (gdb_byte *) new_argv[i], (next_p - p) / 2);
-	  new_argv[i][(next_p - p) / 2] = '\0';
-	}
+	  size_t len = (next_p - p) / 2;
+	  /* ARG is the unquoted argument received via the RSP.  */
+	  char *arg = (char *) xmalloc (len + 1);
+	  /* FULL_ARGS will contain the quoted version of ARG.  */
+	  char *full_arg = (char *) xmalloc ((len + 1) * 2);
+	  /* These are pointers used to navigate the strings above.  */
+	  char *tmp_arg = arg;
+	  char *tmp_full_arg = full_arg;
+	  int need_quote = 0;
 
+	  hex2bin (p, (gdb_byte *) arg, len);
+	  arg[len] = '\0';
+
+	  while (*tmp_arg != '\0')
+	    {
+	      switch (*tmp_arg)
+		{
+		case '\n':
+		  /* Quote \n.  */
+		  *tmp_full_arg = '\'';
+		  ++tmp_full_arg;
+		  need_quote = 1;
+		  break;
+
+		case '\'':
+		  /* Quote single quote.  */
+		  *tmp_full_arg = '\\';
+		  ++tmp_full_arg;
+		  break;
+
+		default:
+		  break;
+		}
+
+	      *tmp_full_arg = *tmp_arg;
+	      ++tmp_full_arg;
+	      ++tmp_arg;
+	    }
+
+	  if (need_quote)
+	    *tmp_full_arg++ = '\'';
+
+	  /* Finish FULL_ARG and push it into the vector containing
+	     the argv.  */
+	  *tmp_full_arg = '\0';
+	  if (i == 0)
+	    new_program_name = full_arg;
+	  else
+	    new_argv.push_back (full_arg);
+	  xfree (arg);
+	}
       if (*next_p)
 	next_p++;
-      i++;
     }
-  new_argv[i] = NULL;
+  new_argv.push_back (NULL);
 
-  if (new_argv[0] == NULL)
+  if (new_program_name == NULL)
     {
       /* GDB didn't specify a program to run.  Use the program from the
 	 last run with the new argument list.  */
-
-      if (program_argv == NULL)
+      if (program_name == NULL)
 	{
 	  write_enn (own_buf);
-	  freeargv (new_argv);
-	  return 0;
-	}
-
-      new_argv[0] = strdup (program_argv[0]);
-      if (new_argv[0] == NULL)
-	{
-	  write_enn (own_buf);
-	  freeargv (new_argv);
+	  free_vector_argv (new_argv);
 	  return 0;
 	}
     }
+  else
+    {
+      xfree (program_name);
+      program_name = new_program_name;
+    }
 
   /* Free the old argv and install the new one.  */
-  freeargv (program_argv);
-  program_argv = new_argv;
+  free_vector_argv (program_args);
+  program_args = new_argv;
 
-  start_inferior (program_argv);
+  create_inferior (program_name, program_args);
+
   if (last_status.kind == TARGET_WAITKIND_STOPPED)
     {
       prepare_resume_reply (own_buf, last_ptid, &last_status);
@@ -2949,7 +2975,6 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
 
       if (startswith (own_buf, "vCont;"))
 	{
-	  require_running (own_buf);
 	  handle_v_cont (own_buf);
 	  return;
 	}
@@ -2958,12 +2983,15 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
 	{
 	  strcpy (own_buf, "vCont;c;C;t");
 
-	  if (target_supports_hardware_single_step () || !vCont_supported)
+	  if (target_supports_hardware_single_step ()
+	      || target_supports_software_single_step ()
+	      || !vCont_supported)
 	    {
-	      /* If target supports hardware single step, add actions s
-		 and S to the list of supported actions.  On the other
-		 hand, if GDB doesn't request the supported vCont actions
-		 in qSupported packet, add s and S to the list too.  */
+	      /* If target supports single step either by hardware or by
+		 software, add actions s and S to the list of supported
+		 actions.  On the other hand, if GDB doesn't request the
+		 supported vCont actions in qSupported packet, add s and
+		 S to the list too.  */
 	      own_buf = own_buf + strlen (own_buf);
 	      strcpy (own_buf, ";s;S");
 	    }
@@ -3269,7 +3297,7 @@ static void
 gdbserver_version (void)
 {
   printf ("GNU gdbserver %s%s\n"
-	  "Copyright (C) 2016 Free Software Foundation, Inc.\n"
+	  "Copyright (C) 2017 Free Software Foundation, Inc.\n"
 	  "gdbserver is free software, covered by the "
 	  "GNU General Public License.\n"
 	  "This gdbserver was configured as \"%s\"\n",
@@ -3306,6 +3334,13 @@ gdbserver_usage (FILE *stream)
 	   "  --no-disable-randomization\n"
 	   "                        Don't disable address space randomization when\n"
 	   "                        starting PROG.\n"
+	   "  --startup-with-shell\n"
+	   "                        Start PROG using a shell.  I.e., execs a shell that\n"
+	   "                        then execs PROG.  (default)\n"
+	   "  --no-startup-with-shell\n"
+	   "                        Exec PROG directly instead of using a shell.\n"
+	   "                        Disables argument globbing and variable substitution\n"
+	   "                        on UNIX-like systems.\n"
 	   "\n"
 	   "Debug options:\n"
 	   "\n"
@@ -3480,7 +3515,8 @@ captured_main (int argc, char *argv[])
 {
   int bad_attach;
   int pid;
-  char *arg_end, *port;
+  char *arg_end;
+  const char *port = NULL;
   char **next_arg = &argv[1];
   volatile int multi_mode = 0;
   volatile int attach = 0;
@@ -3504,13 +3540,25 @@ captured_main (int argc, char *argv[])
 	multi_mode = 1;
       else if (strcmp (*next_arg, "--wrapper") == 0)
 	{
+	  char **tmp;
+
 	  next_arg++;
 
-	  wrapper_argv = next_arg;
+	  tmp = next_arg;
 	  while (*next_arg != NULL && strcmp (*next_arg, "--") != 0)
-	    next_arg++;
+	    {
+	      wrapper_argv += *next_arg;
+	      wrapper_argv += ' ';
+	      next_arg++;
+	    }
 
-	  if (next_arg == wrapper_argv || *next_arg == NULL)
+	  if (!wrapper_argv.empty ())
+	    {
+	      /* Erase the last whitespace.  */
+	      wrapper_argv.erase (wrapper_argv.end () - 1);
+	    }
+
+	  if (next_arg == tmp || *next_arg == NULL)
 	    {
 	      gdbserver_usage (stderr);
 	      exit (1);
@@ -3577,13 +3625,18 @@ captured_main (int argc, char *argv[])
 	{
 	  /* "-" specifies a stdio connection and is a form of port
 	     specification.  */
-	  *next_arg = STDIO_CONNECTION_NAME;
+	  port = STDIO_CONNECTION_NAME;
+	  next_arg++;
 	  break;
 	}
       else if (strcmp (*next_arg, "--disable-randomization") == 0)
 	disable_randomization = 1;
       else if (strcmp (*next_arg, "--no-disable-randomization") == 0)
 	disable_randomization = 0;
+      else if (strcmp (*next_arg, "--startup-with-shell") == 0)
+	startup_with_shell = true;
+      else if (strcmp (*next_arg, "--no-startup-with-shell") == 0)
+	startup_with_shell = false;
       else if (strcmp (*next_arg, "--once") == 0)
 	run_once = 1;
       else
@@ -3596,8 +3649,11 @@ captured_main (int argc, char *argv[])
       continue;
     }
 
-  port = *next_arg;
-  next_arg++;
+  if (port == NULL)
+    {
+      port = *next_arg;
+      next_arg++;
+    }
   if (port == NULL || (!attach && !multi_mode && *next_arg == NULL))
     {
       gdbserver_usage (stderr);
@@ -3607,6 +3663,8 @@ captured_main (int argc, char *argv[])
   /* Remember stdio descriptors.  LISTEN_DESC must not be listed, it will be
      opened by remote_prepare.  */
   notice_open_fds ();
+
+  save_original_signals_state ();
 
   /* We need to know whether the remote connection is stdio before
      starting the inferior.  Inferiors created in this scenario have
@@ -3639,8 +3697,12 @@ captured_main (int argc, char *argv[])
       exit (1);
     }
 
+  /* Gather information about the environment.  */
+  our_environ = gdb_environ::from_host_environ ();
+
   initialize_async_io ();
   initialize_low ();
+  have_job_control ();
   initialize_event_loop ();
   if (target_supports_tracepoints ())
     initialize_tracepoint ();
@@ -3654,13 +3716,13 @@ captured_main (int argc, char *argv[])
       int i, n;
 
       n = argc - (next_arg - argv);
-      program_argv = XNEWVEC (char *, n + 1);
-      for (i = 0; i < n; i++)
-	program_argv[i] = xstrdup (next_arg[i]);
-      program_argv[i] = NULL;
+      program_name = xstrdup (next_arg[0]);
+      for (i = 1; i < n; i++)
+	program_args.push_back (xstrdup (next_arg[i]));
+      program_args.push_back (NULL);
 
       /* Wait till we are at first instruction in program.  */
-      start_inferior (program_argv);
+      create_inferior (program_name, program_args);
 
       /* We are now (hopefully) stopped at the first instruction of
 	 the target process.  This assumes that the target process was
@@ -3825,7 +3887,7 @@ main (int argc, char *argv[])
    after the last processed option.  */
 
 static void
-process_point_options (struct breakpoint *bp, char **packet)
+process_point_options (struct gdb_breakpoint *bp, char **packet)
 {
   char *dataptr = *packet;
   int persist;
@@ -3924,7 +3986,6 @@ process_serial_event (void)
 
       if ((tracing && disconnected_tracing) || any_persistent_commands ())
 	{
-	  struct thread_resume resume_info;
 	  struct process_info *process = find_process_pid (pid);
 
 	  if (process == NULL)
@@ -3960,10 +4021,7 @@ process_serial_event (void)
 	  process->gdb_detached = 1;
 
 	  /* Detaching implicitly resumes all threads.  */
-	  resume_info.thread = minus_one_ptid;
-	  resume_info.kind = resume_continue;
-	  resume_info.sig = 0;
-	  (*the_target->resume) (&resume_info, 1);
+	  target_continue_no_signal (minus_one_ptid);
 
 	  write_ok (own_buf);
 	  break; /* from switch/case */
@@ -4197,7 +4255,7 @@ process_serial_event (void)
 
 	if (insert)
 	  {
-	    struct breakpoint *bp;
+	    struct gdb_breakpoint *bp;
 
 	    bp = set_gdb_breakpoint (type, addr, kind, &res);
 	    if (bp != NULL)
@@ -4279,9 +4337,10 @@ process_serial_event (void)
 	  fprintf (stderr, "GDBserver restarting\n");
 
 	  /* Wait till we are at 1st instruction in prog.  */
-	  if (program_argv != NULL)
+	  if (program_name != NULL)
 	    {
-	      start_inferior (program_argv);
+	      create_inferior (program_name, program_args);
+
 	      if (last_status.kind == TARGET_WAITKIND_STOPPED)
 		{
 		  /* Stopped at the first instruction of the target
@@ -4393,7 +4452,7 @@ handle_target_event (int err, gdb_client_data client_data)
 	  || last_status.kind == TARGET_WAITKIND_SIGNALLED)
 	{
 	  mark_breakpoints_out (process);
-	  mourn_inferior (process);
+	  target_mourn_inferior (last_ptid);
 	}
       else if (last_status.kind == TARGET_WAITKIND_THREAD_EXITED)
 	;
@@ -4423,7 +4482,7 @@ handle_target_event (int err, gdb_client_data client_data)
 	      /* A thread stopped with a signal, but gdb isn't
 		 connected to handle it.  Pass it down to the
 		 inferior, as if it wasn't being traced.  */
-	      struct thread_resume resume_info;
+	      enum gdb_signal signal;
 
 	      if (debug_threads)
 		debug_printf ("GDB not connected; forwarding event %d for"
@@ -4431,13 +4490,11 @@ handle_target_event (int err, gdb_client_data client_data)
 			      (int) last_status.kind,
 			      target_pid_to_str (last_ptid));
 
-	      resume_info.thread = last_ptid;
-	      resume_info.kind = resume_continue;
 	      if (last_status.kind == TARGET_WAITKIND_STOPPED)
-		resume_info.sig = gdb_signal_to_host (last_status.value.sig);
+		signal = last_status.value.sig;
 	      else
-		resume_info.sig = 0;
-	      (*the_target->resume) (&resume_info, 1);
+		signal = GDB_SIGNAL_0;
+	      target_continue (last_ptid, signal);
 	    }
 	}
       else

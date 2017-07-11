@@ -22,9 +22,9 @@ Section Headers:
  +\[[ 0-9]+\] .dynamic +DYNAMIC +0+201380 0+1380 0+100 10 +WA +3 +0 +8
  +\[[ 0-9]+\] .got +PROGBITS +0+201480 0+1480 0+98 08 +WA +0 +0 +8
  +\[[ 0-9]+\] .got.plt +PROGBITS +0+201518 0+1518 0+18 08 +WA +0 +0 +8
- +\[[ 0-9]+\] .shstrtab +.*
  +\[[ 0-9]+\] .symtab +.*
  +\[[ 0-9]+\] .strtab +.*
+ +\[[ 0-9]+\] .shstrtab +.*
 Key to Flags:
 #...
 

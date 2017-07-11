@@ -1,6 +1,6 @@
 # Test ASSERT in a linker script.
 # By Nathan Sidwell, CodeSourcery LLC
-#   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2004-2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -26,7 +26,7 @@ if ![ld_assemble $as $srcdir/$subdir/assert.s tmpdir/assert.o] {
     return
 }
 
-if ![ld_simple_link $ld tmpdir/assert "-T $srcdir/$subdir/assert.t tmpdir/assert.o"] {
+if ![ld_link $ld tmpdir/assert "-T $srcdir/$subdir/assert.t tmpdir/assert.o"] {
     fail $testname
 } else {
     pass $testname

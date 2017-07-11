@@ -5,9 +5,9 @@ start address 0x.*
 
 Disassembly of section .plt:
 
-.* <app_func@plt-0x14>:
+.* <.plt>:
  .*:	e52de004 	push	{lr}		; \(str lr, \[sp, #-4\]!\)
- .*:	e59fe004 	ldr	lr, \[pc, #4\]	; .* <app_func@plt-0x4>
+ .*:	e59fe004 	ldr	lr, \[pc, #4\]	; .* <.*>
  .*:	e08fe00e 	add	lr, pc, lr
  .*:	e5bef008 	ldr	pc, \[lr, #8\]!
  .*:	.*
@@ -72,18 +72,18 @@ Disassembly of section .text:
 	...
 
 .* <lib_func3>:
- .*:	f000 e80c 	blx	200037c <__app_func_from_thumb>
- .*:	f000 e804 	blx	2000370 <__app_func_weak_from_thumb>
+ .*:	f000 e80(c|6) 	blx	.* <__app_func_from_thumb>
+ .*:	f000 e80(4|a) 	blx	.* <__app_func_weak_from_thumb>
  .*:	4770      	bx	lr
 #...
 
-.* <__app_func_weak_from_thumb>:
- .*:	e59fc000 	ldr	ip, \[pc\]	; 2000378 <__app_func_weak_from_thumb\+0x8>
+.* <__app_func(_weak)?_from_thumb>:
+ .*:	e59fc000 	ldr	ip, \[pc\]	; 2000378 <__app_func(_weak)?_from_thumb\+0x8>
  .*:	e08ff00c 	add	pc, pc, ip
- .*:	fdffff34 	.word	0xfdffff34
+ .*:	fdffff(34|28) 	.word	0xfdffff(34|28)
 
-.* <__app_func_from_thumb>:
- .*:	e59fc000 	ldr	ip, \[pc\]	; 2000384 <__app_func_from_thumb\+0x8>
+.* <__app_func(_weak)?_from_thumb>:
+ .*:	e59fc000 	ldr	ip, \[pc\]	; 2000384 <__app_func(_weak)?_from_thumb\+0x8>
  .*:	e08ff00c 	add	pc, pc, ip
- .*:	fdffff1c 	.word	0xfdffff1c
+ .*:	fdffff(1c|28) 	.word	0xfdffff(1c|28)
 	...

@@ -1,6 +1,6 @@
 // symtab.cc -- the gold symbol table
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2017 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -882,6 +882,7 @@ Symbol_table::define_default_version(Sized_symbol<size>* sym,
 	;
       else if (pdef->second->is_from_dynobj()
 	       && sym->is_from_dynobj()
+	       && pdef->second->is_defined()
 	       && pdef->second->object() != sym->object())
         ;
       else
@@ -1325,6 +1326,9 @@ Symbol_table::add_from_relobj(
       res = this->add_from_object(relobj, name, name_key, ver, ver_key,
 				  is_default_version, *psym, st_shndx,
 				  is_ordinary, orig_st_shndx);
+
+      if (res == NULL)
+	continue;
       
       if (is_forced_local)
 	this->force_local(res);
@@ -1405,6 +1409,9 @@ Symbol_table::add_from_pluginobj(
   res = this->add_from_object(obj, name, name_key, ver, ver_key,
 		              is_default_version, *sym, st_shndx,
 			      is_ordinary, st_shndx);
+
+  if (res == NULL)
+    return NULL;
 
   if (is_forced_local)
     this->force_local(res);
@@ -1602,6 +1609,9 @@ Symbol_table::add_from_dynobj(
 	    }
 	}
 
+      if (res == NULL)
+	continue;
+
       // Note that it is possible that RES was overridden by an
       // earlier object, in which case it can't be aliased here.
       if (st_shndx != elfcpp::SHN_UNDEF
@@ -1640,7 +1650,6 @@ Symbol_table::add_from_incrobj(
 
   Stringpool::Key ver_key = 0;
   bool is_default_version = false;
-  bool is_forced_local = false;
 
   Stringpool::Key name_key;
   name = this->namepool_.add(name, true, &name_key);
@@ -1649,9 +1658,6 @@ Symbol_table::add_from_incrobj(
   res = this->add_from_object(obj, name, name_key, ver, ver_key,
 		              is_default_version, *sym, st_shndx,
 			      is_ordinary, st_shndx);
-
-  if (is_forced_local)
-    this->force_local(res);
 
   return res;
 }
@@ -1753,7 +1759,7 @@ Sized_symbol<size>*
 Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 				    bool only_if_ref,
                                     Sized_symbol<size>** poldsym,
-				    bool* resolve_oldsym)
+				    bool* resolve_oldsym, bool is_forced_local)
 {
   *resolve_oldsym = false;
   *poldsym = NULL;
@@ -1762,7 +1768,7 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
   // the version script.
   std::string v;
   bool is_default_version = false;
-  if (*pversion == NULL)
+  if (!is_forced_local && *pversion == NULL)
     {
       bool is_global;
       if (this->version_script_.get_symbol_version(*pname, &v, &is_global))
@@ -1960,13 +1966,15 @@ Symbol_table::do_define_in_output_data(
   Sized_symbol<size>* sym;
   Sized_symbol<size>* oldsym;
   bool resolve_oldsym;
+  const bool is_forced_local = binding == elfcpp::STB_LOCAL;
 
   if (parameters->target().is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol<size, true>(&name, &version,
 						    only_if_ref, &oldsym,
-						    &resolve_oldsym);
+						    &resolve_oldsym,
+						    is_forced_local);
 #else
       gold_unreachable();
 #endif
@@ -1976,7 +1984,8 @@ Symbol_table::do_define_in_output_data(
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol<size, false>(&name, &version,
 						     only_if_ref, &oldsym,
-						     &resolve_oldsym);
+						     &resolve_oldsym,
+						     is_forced_local);
 #else
       gold_unreachable();
 #endif
@@ -1991,8 +2000,7 @@ Symbol_table::do_define_in_output_data(
 
   if (oldsym == NULL)
     {
-      if (binding == elfcpp::STB_LOCAL
-	  || this->version_script_.symbol_is_local(name))
+      if (is_forced_local || this->version_script_.symbol_is_local(name))
 	this->force_local(sym);
       else if (version != NULL)
 	sym->set_is_default();
@@ -2007,8 +2015,7 @@ Symbol_table::do_define_in_output_data(
   else
     {
       if (defined == PREDEFINED
-	  && (binding == elfcpp::STB_LOCAL
-	      || this->version_script_.symbol_is_local(name)))
+	  && (is_forced_local || this->version_script_.symbol_is_local(name)))
 	this->force_local(oldsym);
       delete sym;
       return oldsym;
@@ -2078,13 +2085,15 @@ Symbol_table::do_define_in_output_segment(
   Sized_symbol<size>* sym;
   Sized_symbol<size>* oldsym;
   bool resolve_oldsym;
+  const bool is_forced_local = binding == elfcpp::STB_LOCAL;
 
   if (parameters->target().is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol<size, true>(&name, &version,
 						    only_if_ref, &oldsym,
-						    &resolve_oldsym);
+						    &resolve_oldsym,
+						    is_forced_local);
 #else
       gold_unreachable();
 #endif
@@ -2094,7 +2103,8 @@ Symbol_table::do_define_in_output_segment(
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol<size, false>(&name, &version,
 						     only_if_ref, &oldsym,
-						     &resolve_oldsym);
+						     &resolve_oldsym,
+						     is_forced_local);
 #else
       gold_unreachable();
 #endif
@@ -2109,8 +2119,7 @@ Symbol_table::do_define_in_output_segment(
 
   if (oldsym == NULL)
     {
-      if (binding == elfcpp::STB_LOCAL
-	  || this->version_script_.symbol_is_local(name))
+      if (is_forced_local || this->version_script_.symbol_is_local(name))
 	this->force_local(sym);
       else if (version != NULL)
 	sym->set_is_default();
@@ -2124,8 +2133,7 @@ Symbol_table::do_define_in_output_segment(
     return sym;
   else
     {
-      if (binding == elfcpp::STB_LOCAL
-	  || this->version_script_.symbol_is_local(name))
+      if (is_forced_local || this->version_script_.symbol_is_local(name))
 	this->force_local(oldsym);
       delete sym;
       return oldsym;
@@ -2194,13 +2202,15 @@ Symbol_table::do_define_as_constant(
   Sized_symbol<size>* sym;
   Sized_symbol<size>* oldsym;
   bool resolve_oldsym;
+  const bool is_forced_local = binding == elfcpp::STB_LOCAL;
 
   if (parameters->target().is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol<size, true>(&name, &version,
 						    only_if_ref, &oldsym,
-						    &resolve_oldsym);
+						    &resolve_oldsym,
+						    is_forced_local);
 #else
       gold_unreachable();
 #endif
@@ -2210,7 +2220,8 @@ Symbol_table::do_define_as_constant(
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol<size, false>(&name, &version,
 						     only_if_ref, &oldsym,
-						     &resolve_oldsym);
+						     &resolve_oldsym,
+						     is_forced_local);
 #else
       gold_unreachable();
 #endif
@@ -2229,8 +2240,7 @@ Symbol_table::do_define_as_constant(
       if ((version == NULL
 	   || name != version
 	   || value != 0)
-	  && (binding == elfcpp::STB_LOCAL
-	      || this->version_script_.symbol_is_local(name)))
+	  && (is_forced_local || this->version_script_.symbol_is_local(name)))
 	this->force_local(sym);
       else if (version != NULL
 	       && (name != version || value != 0))
@@ -2246,8 +2256,7 @@ Symbol_table::do_define_as_constant(
     return sym;
   else
     {
-      if (binding == elfcpp::STB_LOCAL
-	  || this->version_script_.symbol_is_local(name))
+      if (is_forced_local || this->version_script_.symbol_is_local(name))
 	this->force_local(oldsym);
       delete sym;
       return oldsym;
@@ -2438,7 +2447,8 @@ Symbol_table::add_undefined_symbol_from_command_line(const char* name)
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol<size, true>(&name, &version,
 						    false, &oldsym,
-						    &resolve_oldsym);
+						    &resolve_oldsym,
+						    false);
 #else
       gold_unreachable();
 #endif
@@ -2448,7 +2458,8 @@ Symbol_table::add_undefined_symbol_from_command_line(const char* name)
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol<size, false>(&name, &version,
 						     false, &oldsym,
-						     &resolve_oldsym);
+						     &resolve_oldsym,
+						     false);
 #else
       gold_unreachable();
 #endif
@@ -2462,17 +2473,41 @@ Symbol_table::add_undefined_symbol_from_command_line(const char* name)
 }
 
 // Set the dynamic symbol indexes.  INDEX is the index of the first
-// global dynamic symbol.  Pointers to the symbols are stored into the
-// vector SYMS.  The names are added to DYNPOOL.  This returns an
-// updated dynamic symbol index.
+// global dynamic symbol.  Pointers to the global symbols are stored
+// into the vector SYMS.  The names are added to DYNPOOL.
+// This returns an updated dynamic symbol index.
 
 unsigned int
 Symbol_table::set_dynsym_indexes(unsigned int index,
+				 unsigned int* pforced_local_count,
 				 std::vector<Symbol*>* syms,
 				 Stringpool* dynpool,
 				 Versions* versions)
 {
   std::vector<Symbol*> as_needed_sym;
+
+  // First process all the symbols which have been forced to be local,
+  // as they must appear before all global symbols.
+  unsigned int forced_local_count = 0;
+  for (Forced_locals::iterator p = this->forced_locals_.begin();
+       p != this->forced_locals_.end();
+       ++p)
+    {
+      Symbol* sym = *p;
+      gold_assert(sym->is_forced_local());
+      if (sym->has_dynsym_index())
+        continue;
+      if (!sym->should_add_dynsym_entry(this))
+	sym->set_dynsym_index(-1U);
+      else
+        {
+          sym->set_dynsym_index(index);
+          ++index;
+          ++forced_local_count;
+	  dynpool->add(sym->name(), false, NULL);
+        }
+    }
+  *pforced_local_count = forced_local_count;
 
   // Allow a target to set dynsym indexes.
   if (parameters->target().has_custom_set_dynsym_indexes())
@@ -2483,6 +2518,8 @@ Symbol_table::set_dynsym_indexes(unsigned int index,
            ++p)
         {
           Symbol* sym = p->second;
+          if (sym->is_forced_local())
+	    continue;
           if (!sym->should_add_dynsym_entry(this))
             sym->set_dynsym_index(-1U);
           else
@@ -2498,6 +2535,9 @@ Symbol_table::set_dynsym_indexes(unsigned int index,
        ++p)
     {
       Symbol* sym = p->second;
+
+      if (sym->is_forced_local())
+        continue;
 
       // Note that SYM may already have a dynamic symbol index, since
       // some symbols appear more than once in the symbol table, with
@@ -2570,7 +2610,12 @@ Symbol_table::set_dynsym_indexes(unsigned int index,
 // Set the final values for all the symbols.  The index of the first
 // global symbol in the output file is *PLOCAL_SYMCOUNT.  Record the
 // file offset OFF.  Add their names to POOL.  Return the new file
-// offset.  Update *PLOCAL_SYMCOUNT if necessary.
+// offset.  Update *PLOCAL_SYMCOUNT if necessary.  DYNOFF and
+// DYN_GLOBAL_INDEX refer to the start of the symbols that will be
+// written from the global symbol table in Symtab::write_globals(),
+// which will include forced-local symbols.  DYN_GLOBAL_INDEX is
+// not necessarily the same as the sh_info field for the .dynsym
+// section, which will point to the first real global symbol.
 
 off_t
 Symbol_table::finalize(off_t off, off_t dynoff, size_t dyn_global_index,
@@ -3105,12 +3150,23 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 	    // In object files symbol values are section
 	    // relative.
 	    if (parameters->options().relocatable())
-	      sym_value -= od->address();
+	      {
+		Output_section* os = od->output_section();
+		gold_assert(os != NULL);
+		sym_value -= os->address();
+	      }
 	  }
 	  break;
 
 	case Symbol::IN_OUTPUT_SEGMENT:
-	  shndx = elfcpp::SHN_ABS;
+	  {
+	    Output_segment* oseg = sym->output_segment();
+	    Output_section* osect = oseg->first_section();
+	    if (osect == NULL)
+	      shndx = elfcpp::SHN_ABS;
+	    else
+	      shndx = osect->out_shndx();
+	  }
 	  break;
 
 	case Symbol::IS_CONSTANT:

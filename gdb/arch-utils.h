@@ -1,6 +1,6 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2016 Free Software Foundation, Inc.
+   Copyright (C) 1998-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,6 +25,53 @@ struct frame_info;
 struct minimal_symbol;
 struct type;
 struct gdbarch_info;
+struct dwarf2_frame_state;
+
+template <size_t bp_size, const gdb_byte *break_insn>
+struct bp_manipulation
+{
+  static int
+  kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+  {
+    return bp_size;
+  }
+
+  static const gdb_byte *
+  bp_from_kind (struct gdbarch *gdbarch, int kind, int *size)
+  {
+    *size = kind;
+    return break_insn;
+  }
+};
+
+template <size_t bp_size,
+	  const gdb_byte *break_insn_little,
+	  const gdb_byte *break_insn_big>
+struct bp_manipulation_endian
+{
+  static int
+  kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+  {
+    return bp_size;
+  }
+
+  static const gdb_byte *
+  bp_from_kind (struct gdbarch *gdbarch, int kind, int *size)
+  {
+    *size = kind;
+    if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+      return break_insn_big;
+    else
+      return break_insn_little;
+  }
+};
+
+#define BP_MANIPULATION(BREAK_INSN) \
+  bp_manipulation<sizeof (BREAK_INSN), BREAK_INSN>
+
+#define BP_MANIPULATION_ENDIAN(BREAK_INSN_LITTLE, BREAK_INSN_BIG) \
+  bp_manipulation_endian<sizeof (BREAK_INSN_LITTLE),		  \
+  BREAK_INSN_LITTLE, BREAK_INSN_BIG>
 
 /* An implementation of gdbarch_displaced_step_copy_insn for
    processors that don't need to modify the instruction before
@@ -37,13 +84,6 @@ extern struct displaced_step_closure *
   simple_displaced_step_copy_insn (struct gdbarch *gdbarch,
                                    CORE_ADDR from, CORE_ADDR to,
                                    struct regcache *regs);
-
-/* Simple implementation of gdbarch_displaced_step_free_closure: Call
-   xfree.
-   This is appropriate for use with simple_displaced_step_copy_insn.  */
-extern void
-  simple_displaced_step_free_closure (struct gdbarch *gdbarch,
-                                      struct displaced_step_closure *closure);
 
 /* Default implementation of gdbarch_displaced_hw_singlestep.  */
 extern int
@@ -84,6 +124,11 @@ CORE_ADDR default_adjust_dwarf2_addr (CORE_ADDR pc);
 
 CORE_ADDR default_adjust_dwarf2_line (CORE_ADDR addr, int rel);
 
+/* Default DWARF vendor CFI handler.  */
+
+bool default_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op,
+					  struct dwarf2_frame_state *fs);
+
 /* Version of cannot_fetch_register() / cannot_store_register() that
    always fails.  */
 
@@ -94,6 +139,11 @@ int cannot_register_not (struct gdbarch *gdbarch, int regnum);
    raw.  */
 
 extern gdbarch_virtual_frame_pointer_ftype legacy_virtual_frame_pointer;
+
+/* Default implementation of gdbarch_floatformat_for_type.  */
+extern const struct floatformat **
+  default_floatformat_for_type (struct gdbarch *gdbarch,
+				const char *name, int len);
 
 extern CORE_ADDR generic_skip_trampoline_code (struct frame_info *frame,
 					       CORE_ADDR pc);
@@ -166,8 +216,13 @@ extern int default_has_shared_address_space (struct gdbarch *);
 extern int default_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
 					     CORE_ADDR addr, char **msg);
 
-extern void default_remote_breakpoint_from_pc (struct gdbarch *,
-					       CORE_ADDR *pcptr, int *kindptr);
+extern const gdb_byte *default_breakpoint_from_pc (struct gdbarch *gdbarch,
+						   CORE_ADDR *pcptr,
+						   int *lenptr);
+
+extern int default_breakpoint_kind_from_current_state (struct gdbarch *gdbarch,
+						       struct regcache *regcache,
+						       CORE_ADDR *pcptr);
 
 extern void default_gen_return_address (struct gdbarch *gdbarch,
 					struct agent_expr *ax,
@@ -210,5 +265,7 @@ extern int default_addressable_memory_unit_size (struct gdbarch *gdbarch);
 extern void default_guess_tracepoint_registers (struct gdbarch *gdbarch,
 						struct regcache *regcache,
 						CORE_ADDR addr);
+
+extern int default_print_insn (bfd_vma memaddr, disassemble_info *info);
 
 #endif

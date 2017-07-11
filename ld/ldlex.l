@@ -1,8 +1,8 @@
-%option nounput
+%option nounput noyywrap
 
 %{
 
-/* Copyright (C) 1991-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2017 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
    This file is part of the GNU Binutils.
@@ -86,10 +86,6 @@ static void lex_warn_invalid (char *where, char *what);
 */
 #define RTOKEN(x)  {  yylval.token = x; return x; }
 
-/* Some versions of flex want this.  */
-#ifndef yywrap
-int yywrap (void) { return 1; }
-#endif
 %}
 
 %a 4000
@@ -278,6 +274,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 <BOTH,SCRIPT>"CREATE_OBJECT_SYMBOLS"	{ RTOKEN(CREATE_OBJECT_SYMBOLS);}
 <BOTH,SCRIPT>"CONSTRUCTORS"		{ RTOKEN( CONSTRUCTORS);}
 <BOTH,SCRIPT>"FORCE_COMMON_ALLOCATION"	{ RTOKEN(FORCE_COMMON_ALLOCATION);}
+<BOTH,SCRIPT>"FORCE_GROUP_ALLOCATION"	{ RTOKEN(FORCE_GROUP_ALLOCATION);}
 <BOTH,SCRIPT>"INHIBIT_COMMON_ALLOCATION" { RTOKEN(INHIBIT_COMMON_ALLOCATION);}
 <BOTH,SCRIPT>"SECTIONS"			{ RTOKEN(SECTIONS);}
 <BOTH,SCRIPT>"INSERT"			{ RTOKEN(INSERT_K);}
@@ -384,6 +381,11 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 				 yylval.name = xstrdup (yytext);
 				  return NAME;
 				}
+<INPUTLIST>"$SYSROOT"{FILENAMECHAR1}{FILENAMECHAR}*	{
+/* Filename to be prefixed by --sysroot or when non-sysrooted, nothing.  */
+				 yylval.name = xstrdup (yytext);
+				  return NAME;
+				}
 <BOTH,INPUTLIST>"-l"{FILENAMECHAR}+ {
 				  yylval.name = xstrdup (yytext + 2);
 				  return LNAME;
@@ -415,9 +417,15 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 
 <EXPRESSION,BOTH,SCRIPT,VERS_NODE,INPUTLIST>"\""[^\"]*"\"" {
 					/* No matter the state, quotes
-					   give what's inside */
+					   give what's inside.  */
+					bfd_size_type len;
 					yylval.name = xstrdup (yytext + 1);
-					yylval.name[yyleng - 2] = 0;
+					/* PR ld/20906.  A corrupt input file
+					   can contain bogus strings.  */
+					len = strlen (yylval.name);
+					if (len > yyleng - 2)
+					  len = yyleng - 2;
+					yylval.name[len] = 0;
 					return NAME;
 				}
 <BOTH,SCRIPT,EXPRESSION>"\n"		{ lineno++;}

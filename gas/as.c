@@ -1,5 +1,5 @@
 /* as.c - GAS main program.
-   Copyright (C) 1987-2016 Free Software Foundation, Inc.
+   Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -660,7 +660,7 @@ parse_args (int * pargc, char *** pargv)
 	case OPTION_VERSION:
 	  /* This output is intended to follow the GNU standards document.  */
 	  printf (_("GNU assembler %s\n"), BFD_VERSION_STRING);
-	  printf (_("Copyright (C) 2016 Free Software Foundation, Inc.\n"));
+	  printf (_("Copyright (C) 2017 Free Software Foundation, Inc.\n"));
 	  printf (_("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License version 3 or later.\n\
@@ -1186,6 +1186,7 @@ main (int argc, char ** argv)
   int macro_strip_at;
 
   start_time = get_run_time ();
+  signal_init ();
 #ifdef HAVE_SBRK
   start_sbrk = (char *) sbrk (0);
 #endif

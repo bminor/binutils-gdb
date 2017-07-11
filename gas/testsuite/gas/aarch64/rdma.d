@@ -6,7 +6,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
    0:	2e428420 	sqrdmlah	v0\.4h, v1\.4h, v2\.4h
    4:	6e428420 	sqrdmlah	v0\.8h, v1\.8h, v2\.8h
    8:	2e828420 	sqrdmlah	v0\.2s, v1\.2s, v2\.2s

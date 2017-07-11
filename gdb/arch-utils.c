@@ -1,6 +1,6 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2016 Free Software Foundation, Inc.
+   Copyright (C) 1998-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -37,6 +37,7 @@
 
 #include "floatformat.h"
 
+#include "dis-asm.h"
 
 struct displaced_step_closure *
 simple_displaced_step_copy_insn (struct gdbarch *gdbarch,
@@ -57,14 +58,6 @@ simple_displaced_step_copy_insn (struct gdbarch *gdbarch,
     }
 
   return (struct displaced_step_closure *) buf;
-}
-
-
-void
-simple_displaced_step_free_closure (struct gdbarch *gdbarch,
-                                    struct displaced_step_closure *closure)
-{
-  xfree (closure);
 }
 
 int
@@ -204,6 +197,15 @@ default_adjust_dwarf2_line (CORE_ADDR addr, int rel)
   return addr;
 }
 
+/* See arch-utils.h.  */
+
+bool
+default_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op,
+				     struct dwarf2_frame_state *fs)
+{
+  return false;
+}
+
 int
 cannot_register_not (struct gdbarch *gdbarch, int regnum)
 {
@@ -241,6 +243,34 @@ legacy_virtual_frame_pointer (struct gdbarch *gdbarch,
   *frame_offset = 0;
 }
 
+/* Return a floating-point format for a floating-point variable of
+   length LEN in bits.  If non-NULL, NAME is the name of its type.
+   If no suitable type is found, return NULL.  */
+
+const struct floatformat **
+default_floatformat_for_type (struct gdbarch *gdbarch,
+			      const char *name, int len)
+{
+  const struct floatformat **format = NULL;
+
+  if (len == gdbarch_half_bit (gdbarch))
+    format = gdbarch_half_format (gdbarch);
+  else if (len == gdbarch_float_bit (gdbarch))
+    format = gdbarch_float_format (gdbarch);
+  else if (len == gdbarch_double_bit (gdbarch))
+    format = gdbarch_double_format (gdbarch);
+  else if (len == gdbarch_long_double_bit (gdbarch))
+    format = gdbarch_long_double_format (gdbarch);
+  /* On i386 the 'long double' type takes 96 bits,
+     while the real number of used bits is only 80,
+     both in processor and in memory.
+     The code below accepts the real bit size.  */
+  else if (gdbarch_long_double_format (gdbarch) != NULL
+	   && len == gdbarch_long_double_format (gdbarch)[0]->totalsize)
+    format = gdbarch_long_double_format (gdbarch);
+
+  return format;
+}
 
 int
 generic_convert_register_p (struct gdbarch *gdbarch, int regnum,
@@ -812,12 +842,22 @@ default_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr,
   return 1;
 }
 
-void
-default_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-				   int *kindptr)
+const gdb_byte *
+default_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
+			    int *lenptr)
 {
-  gdbarch_breakpoint_from_pc (gdbarch, pcptr, kindptr);
+  int kind = gdbarch_breakpoint_kind_from_pc (gdbarch, pcptr);
+
+  return gdbarch_sw_breakpoint_from_kind (gdbarch, kind, lenptr);
 }
+int
+default_breakpoint_kind_from_current_state (struct gdbarch *gdbarch,
+					    struct regcache *regcache,
+					    CORE_ADDR *pcptr)
+{
+  return gdbarch_breakpoint_kind_from_pc (gdbarch, pcptr);
+}
+
 
 void
 default_gen_return_address (struct gdbarch *gdbarch,
@@ -857,10 +897,9 @@ default_skip_permanent_breakpoint (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR current_pc = regcache_read_pc (regcache);
-  const gdb_byte *bp_insn;
   int bp_len;
 
-  bp_insn = gdbarch_breakpoint_from_pc (gdbarch, &current_pc, &bp_len);
+  gdbarch_breakpoint_from_pc (gdbarch, &current_pc, &bp_len);
   current_pc += bp_len;
   regcache_write_pc (regcache, current_pc);
 }
@@ -925,6 +964,25 @@ default_guess_tracepoint_registers (struct gdbarch *gdbarch,
   store_unsigned_integer (regs, register_size (gdbarch, pc_regno),
 			  gdbarch_byte_order (gdbarch), addr);
   regcache_raw_supply (regcache, pc_regno, regs);
+}
+
+int
+default_print_insn (bfd_vma memaddr, disassemble_info *info)
+{
+  disassembler_ftype disassemble_fn;
+
+  if (exec_bfd != NULL)
+    {
+      gdb_assert (info->arch == bfd_get_arch (exec_bfd));
+      gdb_assert (info->endian == (bfd_big_endian (exec_bfd)
+				   ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE));
+      gdb_assert (info->mach == bfd_get_mach (exec_bfd));
+    }
+  disassemble_fn = disassembler (info->arch, info->endian == BFD_ENDIAN_BIG,
+				 info->mach, exec_bfd);
+
+  gdb_assert (disassemble_fn != NULL);
+  return (*disassemble_fn) (memaddr, info);
 }
 
 /* -Wmissing-prototypes */

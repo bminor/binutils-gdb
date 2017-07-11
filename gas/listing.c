@@ -1,5 +1,5 @@
 /* listing.c - maintain assembly listings
-   Copyright (C) 1991-2016 Free Software Foundation, Inc.
+   Copyright (C) 1991-2017 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -41,7 +41,7 @@
   will affect the page they are on, as well as any subsequent page
 
  .eject
- 	Thow a page
+ 	Throw a page
  .list
  	Increment the enable listing counter
  .nolist

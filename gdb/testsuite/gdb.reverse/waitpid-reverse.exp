@@ -1,4 +1,4 @@
-# Copyright 2015-2016 Free Software Foundation, Inc.
+# Copyright 2015-2017 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
 #
 # This test tests waitpid syscall for reverse execution.
 #
+# Also serves as regression test for gdb/19187 (recording across a
+# fork).
 
 if ![supports_reverse] {
     return
@@ -25,7 +27,7 @@ if ![supports_reverse] {
 
 standard_testfile
 
-if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }
 
@@ -33,21 +35,19 @@ runto main
 
 if [supports_process_record] {
     # Activate process record/replay
-    gdb_test_no_output "record" "Turn on process record"
+    gdb_test_no_output "record" "turn on process record"
 }
 
 gdb_test "break marker2" \
     "Breakpoint $decimal at $hex: file .*$srcfile, line $decimal.*" \
     "set breakpoint at marker2"
 
-setup_kfail "gdb/19187" *-*-*
 gdb_continue_to_breakpoint "marker2" ".*$srcfile:.*"
 
 gdb_test "break marker1" \
     "Breakpoint $decimal at $hex: file .*$srcfile, line $decimal.*" \
     "set breakpoint at marker1"
 
-setup_kfail "gdb/19187" *-*-*
 gdb_test "reverse-continue" ".*$srcfile:$decimal.*" "reverse to marker1"
 
 # If the variable was recorded properly on syscall, the old contents (-1)

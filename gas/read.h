@@ -1,5 +1,5 @@
 /* read.h - of read.c
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2017 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -29,8 +29,11 @@ extern char *input_line_pointer;	/* -> char we are parsing now.  */
 #ifdef PERMIT_WHITESPACE
 #define SKIP_WHITESPACE()			\
   ((*input_line_pointer == ' ') ? ++input_line_pointer : 0)
+#define SKIP_ALL_WHITESPACE()			\
+  while (*input_line_pointer == ' ') ++input_line_pointer
 #else
-#define SKIP_WHITESPACE() know(*input_line_pointer != ' ' )
+#define SKIP_WHITESPACE() know (*input_line_pointer != ' ' )
+#define SKIP_ALL_WHITESPACE() SKIP_WHITESPACE()
 #endif
 
 #define SKIP_WHITESPACE_AFTER_NAME()		\
@@ -210,3 +213,5 @@ extern void s_xstab (int what);
 extern void s_rva (int);
 extern void s_incbin (int);
 extern void s_weakref (int);
+extern void temp_ilp (char *);
+extern void restore_ilp (void);

@@ -1,6 +1,6 @@
 /* Frame unwinder for frames with DWARF Call Frame Information.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2017 Free Software Foundation, Inc.
 
    Contributed by Mark Kettenis.
 
@@ -165,58 +165,6 @@ static CORE_ADDR read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
 				     CORE_ADDR func_base);
 
 
-enum cfa_how_kind
-{
-  CFA_UNSET,
-  CFA_REG_OFFSET,
-  CFA_EXP
-};
-
-struct dwarf2_frame_state_reg_info
-{
-  struct dwarf2_frame_state_reg *reg;
-  int num_regs;
-
-  LONGEST cfa_offset;
-  ULONGEST cfa_reg;
-  enum cfa_how_kind cfa_how;
-  const gdb_byte *cfa_exp;
-
-  /* Used to implement DW_CFA_remember_state.  */
-  struct dwarf2_frame_state_reg_info *prev;
-};
-
-/* Structure describing a frame state.  */
-
-struct dwarf2_frame_state
-{
-  /* Each register save state can be described in terms of a CFA slot,
-     another register, or a location expression.  */
-  struct dwarf2_frame_state_reg_info regs;
-
-  /* The PC described by the current frame state.  */
-  CORE_ADDR pc;
-
-  /* Initial register set from the CIE.
-     Used to implement DW_CFA_restore.  */
-  struct dwarf2_frame_state_reg_info initial;
-
-  /* The information we care about from the CIE.  */
-  LONGEST data_align;
-  ULONGEST code_align;
-  ULONGEST retaddr_column;
-
-  /* Flags for known producer quirks.  */
-
-  /* The ARM compilers, in DWARF2 mode, assume that DW_CFA_def_cfa
-     and DW_CFA_def_cfa_offset takes a factored offset.  */
-  int armcc_cfa_offsets_sf;
-
-  /* The ARM compilers, in DWARF2 or DWARF3 mode, may assume that
-     the CFA is defined as REG - OFFSET rather than REG + OFFSET.  */
-  int armcc_cfa_offsets_reversed;
-};
-
 /* Store the length the expression for the CFA in the `cfa_reg' field,
    which is unused in that case.  */
 #define cfa_exp_len cfa_reg
@@ -224,7 +172,7 @@ struct dwarf2_frame_state
 /* Assert that the register set RS is large enough to store gdbarch_num_regs
    columns.  If necessary, enlarge the register set.  */
 
-static void
+void
 dwarf2_frame_state_alloc_regs (struct dwarf2_frame_state_reg_info *rs,
 			       int num_regs)
 {
@@ -288,31 +236,12 @@ dwarf2_frame_state_free (void *p)
 /* Helper functions for execute_stack_op.  */
 
 static CORE_ADDR
-read_addr_from_reg (void *baton, int reg)
+read_addr_from_reg (struct frame_info *this_frame, int reg)
 {
-  struct frame_info *this_frame = (struct frame_info *) baton;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int regnum = dwarf_reg_to_regnum_or_error (gdbarch, reg);
 
   return address_from_register (regnum, this_frame);
-}
-
-/* Implement struct dwarf_expr_context_funcs' "get_reg_value" callback.  */
-
-static struct value *
-get_reg_value (void *baton, struct type *type, int reg)
-{
-  struct frame_info *this_frame = (struct frame_info *) baton;
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  int regnum = dwarf_reg_to_regnum_or_error (gdbarch, reg);
-
-  return value_from_register (type, regnum, this_frame);
-}
-
-static void
-read_mem (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t len)
-{
-  read_memory (addr, buf, len);
 }
 
 /* Execute the required actions for both the DW_CFA_restore and
@@ -347,21 +276,73 @@ register %s (#%d) at %s"),
     }
 }
 
-/* Virtual method table for execute_stack_op below.  */
-
-static const struct dwarf_expr_context_funcs dwarf2_frame_ctx_funcs =
+class dwarf_expr_executor : public dwarf_expr_context
 {
-  read_addr_from_reg,
-  get_reg_value,
-  read_mem,
-  ctx_no_get_frame_base,
-  ctx_no_get_frame_cfa,
-  ctx_no_get_frame_pc,
-  ctx_no_get_tls_address,
-  ctx_no_dwarf_call,
-  ctx_no_get_base_type,
-  ctx_no_push_dwarf_reg_entry_value,
-  ctx_no_get_addr_index
+ public:
+
+  struct frame_info *this_frame;
+
+  CORE_ADDR read_addr_from_reg (int reg) OVERRIDE
+  {
+    return ::read_addr_from_reg (this_frame, reg);
+  }
+
+  struct value *get_reg_value (struct type *type, int reg) OVERRIDE
+  {
+    struct gdbarch *gdbarch = get_frame_arch (this_frame);
+    int regnum = dwarf_reg_to_regnum_or_error (gdbarch, reg);
+
+    return value_from_register (type, regnum, this_frame);
+  }
+
+  void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t len) OVERRIDE
+  {
+    read_memory (addr, buf, len);
+  }
+
+  void get_frame_base (const gdb_byte **start, size_t *length) OVERRIDE
+  {
+    invalid ("DW_OP_fbreg");
+  }
+
+  void push_dwarf_reg_entry_value (enum call_site_parameter_kind kind,
+				   union call_site_parameter_u kind_u,
+				   int deref_size) OVERRIDE
+  {
+    invalid ("DW_OP_entry_value");
+  }
+
+  CORE_ADDR get_object_address () OVERRIDE
+  {
+    invalid ("DW_OP_push_object_address");
+  }
+
+  CORE_ADDR get_frame_cfa () OVERRIDE
+  {
+    invalid ("DW_OP_call_frame_cfa");
+  }
+
+  CORE_ADDR get_tls_address (CORE_ADDR offset) OVERRIDE
+  {
+    invalid ("DW_OP_form_tls_address");
+  }
+
+  void dwarf_call (cu_offset die_offset) OVERRIDE
+  {
+    invalid ("DW_OP_call*");
+  }
+
+  CORE_ADDR get_addr_index (unsigned int index)
+  {
+    invalid ("DW_OP_GNU_addr_index");
+  }
+
+ private:
+
+  void invalid (const char *op) ATTRIBUTE_NORETURN
+  {
+    error (_("%s is invalid in this context"), op);
+  }
 };
 
 static CORE_ADDR
@@ -369,29 +350,24 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 		  CORE_ADDR offset, struct frame_info *this_frame,
 		  CORE_ADDR initial, int initial_in_stack_memory)
 {
-  struct dwarf_expr_context *ctx;
   CORE_ADDR result;
-  struct cleanup *old_chain;
 
-  ctx = new_dwarf_expr_context ();
-  old_chain = make_cleanup_free_dwarf_expr_context (ctx);
-  make_cleanup_value_free_to_mark (value_mark ());
+  dwarf_expr_executor ctx;
+  scoped_value_mark free_values;
 
-  ctx->gdbarch = get_frame_arch (this_frame);
-  ctx->addr_size = addr_size;
-  ctx->ref_addr_size = -1;
-  ctx->offset = offset;
-  ctx->baton = this_frame;
-  ctx->funcs = &dwarf2_frame_ctx_funcs;
+  ctx.this_frame = this_frame;
+  ctx.gdbarch = get_frame_arch (this_frame);
+  ctx.addr_size = addr_size;
+  ctx.ref_addr_size = -1;
+  ctx.offset = offset;
 
-  dwarf_expr_push_address (ctx, initial, initial_in_stack_memory);
-  dwarf_expr_eval (ctx, exp, len);
+  ctx.push_address (initial, initial_in_stack_memory);
+  ctx.eval (exp, len);
 
-  if (ctx->location == DWARF_VALUE_MEMORY)
-    result = dwarf_expr_fetch_address (ctx, 0);
-  else if (ctx->location == DWARF_VALUE_REGISTER)
-    result = read_addr_from_reg (this_frame,
-				 value_as_long (dwarf_expr_fetch (ctx, 0)));
+  if (ctx.location == DWARF_VALUE_MEMORY)
+    result = ctx.fetch_address (0);
+  else if (ctx.location == DWARF_VALUE_REGISTER)
+    result = ctx.read_addr_from_reg (value_as_long (ctx.fetch (0)));
   else
     {
       /* This is actually invalid DWARF, but if we ever do run across
@@ -400,8 +376,6 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
       error (_("\
 Not implemented: computing unwound register using explicit value operator"));
     }
-
-  do_cleanups (old_chain);
 
   return result;
 }
@@ -646,31 +620,6 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 	      /* cfa_how deliberately not set.  */
 	      break;
 
-	    case DW_CFA_GNU_window_save:
-	      /* This is SPARC-specific code, and contains hard-coded
-		 constants for the register numbering scheme used by
-		 GCC.  Rather than having a architecture-specific
-		 operation that's only ever used by a single
-		 architecture, we provide the implementation here.
-		 Incidentally that's what GCC does too in its
-		 unwinder.  */
-	      {
-		int size = register_size (gdbarch, 0);
-
-		dwarf2_frame_state_alloc_regs (&fs->regs, 32);
-		for (reg = 8; reg < 16; reg++)
-		  {
-		    fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_REG;
-		    fs->regs.reg[reg].loc.reg = reg + 16;
-		  }
-		for (reg = 16; reg < 32; reg++)
-		  {
-		    fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_OFFSET;
-		    fs->regs.reg[reg].loc.offset = (reg - 16) * size;
-		  }
-	      }
-	      break;
-
 	    case DW_CFA_GNU_args_size:
 	      /* Ignored.  */
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &utmp);
@@ -687,8 +636,17 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 	      break;
 
 	    default:
-	      internal_error (__FILE__, __LINE__,
-			      _("Unknown CFI encountered."));
+	      if (insn >= DW_CFA_lo_user && insn <= DW_CFA_hi_user)
+		{
+		  /* Handle vendor-specific CFI for different architectures.  */
+		  if (!gdbarch_execute_dwarf_cfa_vendor_op (gdbarch, insn, fs))
+		    error (_("Call Frame Instruction op %d in vendor extension "
+			     "space is not handled on this architecture."),
+			   insn);
+		}
+	      else
+		internal_error (__FILE__, __LINE__,
+				_("Unknown CFI encountered."));
 	    }
 	}
     }
@@ -908,7 +866,6 @@ dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
   struct dwarf2_fde *fde;
   CORE_ADDR text_offset;
   struct dwarf2_frame_state fs;
-  int addr_size;
 
   memset (&fs, 0, sizeof (struct dwarf2_frame_state));
 
@@ -923,7 +880,6 @@ dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
   fs.data_align = fde->cie->data_alignment_factor;
   fs.code_align = fde->cie->code_alignment_factor;
   fs.retaddr_column = fde->cie->return_address_register;
-  addr_size = fde->cie->addr_size;
 
   /* Check for "quirks" - known bugs in producers.  */
   dwarf2_frame_find_quirks (&fs, fde);

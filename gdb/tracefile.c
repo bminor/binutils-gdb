@@ -1,6 +1,6 @@
 /* Trace file support in GDB.
 
-   Copyright (C) 1997-2016 Free Software Foundation, Inc.
+   Copyright (C) 1997-2017 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -57,7 +57,6 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 	    int target_does_save)
 {
   struct trace_status *ts = current_trace_status ();
-  int status;
   struct uploaded_tp *uploaded_tps = NULL, *utp;
   struct uploaded_tsv *uploaded_tsvs = NULL, *utsv;
 
@@ -77,8 +76,10 @@ trace_save (const char *filename, struct trace_file_writer *writer,
     }
 
   /* Get the trace status first before opening the file, so if the
-     target is losing, we can get out without touching files.  */
-  status = target_get_trace_status (ts);
+     target is losing, we can get out without touching files.  Since
+     we're just calling this for side effects, we ignore the
+     result.  */
+  target_get_trace_status (ts);
 
   writer->ops->start (writer, filename);
 
@@ -305,7 +306,7 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 }
 
 static void
-trace_save_command (char *args, int from_tty)
+tsave_command (char *args, int from_tty)
 {
   int target_does_save = 0;
   char **argv;
@@ -324,7 +325,7 @@ trace_save_command (char *args, int from_tty)
     {
       if (strcmp (*argv, "-r") == 0)
 	target_does_save = 1;
-      if (strcmp (*argv, "-ctf") == 0)
+      else if (strcmp (*argv, "-ctf") == 0)
 	generate_ctf = 1;
       else if (**argv == '-')
 	error (_("unknown option `%s'"), *argv);
@@ -397,15 +398,15 @@ tracefile_fetch_registers (struct regcache *regcache, int regno)
 
   /* We can often usefully guess that the PC is going to be the same
      as the address of the tracepoint.  */
-  if (tp == NULL || tp->base.loc == NULL)
+  if (tp == NULL || tp->loc == NULL)
     return;
 
   /* But don't try to guess if tracepoint is multi-location...  */
-  if (tp->base.loc->next)
+  if (tp->loc->next)
     {
       warning (_("Tracepoint %d has multiple "
 		 "locations, cannot infer $pc"),
-	       tp->base.number);
+	       tp->number);
       return;
     }
   /* ... or does while-stepping.  */
@@ -413,13 +414,13 @@ tracefile_fetch_registers (struct regcache *regcache, int regno)
     {
       warning (_("Tracepoint %d does while-stepping, "
 		 "cannot infer $pc"),
-	       tp->base.number);
+	       tp->number);
       return;
     }
 
   /* Guess what we can from the tracepoint location.  */
   gdbarch_guess_tracepoint_registers (gdbarch, regcache,
-				      tp->base.loc->address);
+				      tp->loc->address);
 }
 
 /* This is the implementation of target_ops method to_has_all_memory.  */
@@ -499,7 +500,7 @@ extern initialize_file_ftype _initialize_tracefile;
 void
 _initialize_tracefile (void)
 {
-  add_com ("tsave", class_trace, trace_save_command, _("\
+  add_com ("tsave", class_trace, tsave_command, _("\
 Save the trace data to a file.\n\
 Use the '-ctf' option to save the data to CTF format.\n\
 Use the '-r' option to direct the target to save directly to the file,\n\

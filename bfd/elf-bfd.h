@@ -1,5 +1,5 @@
 /* BFD back-end data structures for ELF files.
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2017 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -213,6 +213,9 @@ struct elf_link_hash_entry
   /* Symbol is defined by a shared library with non-default visibility
      in a read/write section.  */
   unsigned int protected_def : 1;
+  /* Symbol is __start_SECNAME or __stop_SECNAME to mark section
+     SECNAME.  */
+  unsigned int start_stop : 1;
 
   /* String table index in .dynstr if this is a dynamic symbol.  */
   unsigned long dynstr_index;
@@ -243,7 +246,15 @@ struct elf_link_hash_entry
     struct bfd_elf_version_tree *vertree;
   } verinfo;
 
-  struct elf_link_virtual_table_entry *vtable;
+  union
+  {
+    /* For __start_SECNAME and __stop_SECNAME symbols, record the first
+       input section whose section name is SECNAME.  */
+    asection *start_stop_section;
+
+    /* Vtable information. */
+    struct elf_link_virtual_table_entry *vtable;
+  } u2;
 };
 
 /* Will references to this symbol always reference the symbol
@@ -326,6 +337,12 @@ struct eh_cie_fde
 	 or 0 if the CIE doesn't have any.  */
       unsigned int personality_offset : 8;
 
+      /* Length of augmentation.  aug_str_len is the length of the
+	 string including null terminator.  aug_data_len is the length
+	 of the rest up to the initial insns.  */
+      unsigned int aug_str_len : 3;
+      unsigned int aug_data_len : 5;
+
       /* True if we have marked relocations associated with this CIE.  */
       unsigned int gc_mark : 1;
 
@@ -342,6 +359,10 @@ struct eh_cie_fde
 	 make_per_encoding_relative is.  */
       unsigned int per_encoding_relative : 1;
 
+      /* True if the CIE contains personality data aligned to a
+	 multiple of eight bytes.  */
+      unsigned int per_encoding_aligned8 : 1;
+
       /* True if we need to add an 'R' (FDE encoding) entry to the
 	 CIE's augmentation data.  */
       unsigned int add_fde_encoding : 1;
@@ -350,7 +371,7 @@ struct eh_cie_fde
       unsigned int merged : 1;
 
       /* Unused bits.  */
-      unsigned int pad1 : 18;
+      unsigned int pad1 : 9;
     } cie;
   } u;
   unsigned int reloc_index;
@@ -444,6 +465,7 @@ enum elf_target_id
 {
   AARCH64_ELF_DATA = 1,
   ALPHA_ELF_DATA,
+  ARC_ELF_DATA,
   ARM_ELF_DATA,
   AVR_ELF_DATA,
   BFIN_ELF_DATA,
@@ -466,6 +488,7 @@ enum elf_target_id
   OR1K_ELF_DATA,
   PPC32_ELF_DATA,
   PPC64_ELF_DATA,
+  PRU_ELF_DATA,
   S390_ELF_DATA,
   SH_ELF_DATA,
   SPARC_ELF_DATA,
@@ -476,6 +499,7 @@ enum elf_target_id
   XGATE_ELF_DATA,
   TILEGX_ELF_DATA,
   TILEPRO_ELF_DATA,
+  RISCV_ELF_DATA,
   GENERIC_ELF_DATA
 };
 
@@ -524,6 +548,7 @@ struct elf_link_hash_table
   /* The number of symbols found in the link which is intended for the
      mandatory DT_SYMTAB tag (.dynsym section) in .dynamic section.  */
   bfd_size_type dynsymcount;
+  bfd_size_type local_dynsymcount;
 
   /* The string table of dynamic symbols, which becomes the .dynstr
      section.  */
@@ -592,6 +617,10 @@ struct elf_link_hash_table
   asection *srelgot;
   asection *splt;
   asection *srelplt;
+  asection *sdynbss;
+  asection *srelbss;
+  asection *sdynrelro;
+  asection *sreldynrelro;
   asection *igotplt;
   asection *iplt;
   asection *irelplt;
@@ -754,6 +783,41 @@ typedef asection * (*elf_gc_mark_hook_fn)
   (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
    struct elf_link_hash_entry *, Elf_Internal_Sym *);
 
+enum elf_property_kind
+ {
+    /* A new property.  */
+    property_unknown = 0,
+    /* A property ignored by backend.  */
+    property_ignored,
+    /* A corrupt property reported by backend.  */
+    property_corrupt,
+    /* A property should be removed due to property merge.  */
+    property_remove,
+    /* A property which is a number.  */
+    property_number
+ };
+
+typedef struct elf_property
+{
+  unsigned int pr_type;
+  unsigned int pr_datasz;
+  union
+    {
+      /* For property_number, this is a number.  */
+      bfd_vma number;
+      /* Add a new one if elf_property_kind is updated.  */
+    } u;
+  enum elf_property_kind pr_kind;
+} elf_property;
+
+typedef struct elf_property_list
+{
+  struct elf_property_list *next;
+  struct elf_property property;
+} elf_property_list;
+
+struct bfd_elf_section_reloc_data;
+
 struct elf_backend_data
 {
   /* The architecture for this backend.  */
@@ -766,7 +830,7 @@ struct elf_backend_data
   /* The ELF machine code (EM_xxxx) for this backend.  */
   int elf_machine_code;
 
-  /* EI_OSABI. */
+  /* EI_OSABI.  */
   int elf_osabi;
 
   /* The maximum page size for this backend.  */
@@ -1072,6 +1136,11 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_modify_program_headers)
     (bfd *, struct bfd_link_info *);
 
+  /* This function is called to see if the PHDR header should be
+     checked for validity.  */
+  bfd_boolean (*elf_backend_allow_non_load_phdr)
+    (bfd *,  const Elf_Internal_Phdr *, unsigned);
+
   /* This function is called before section garbage collection to
      mark entry symbol sections.  */
   void (*gc_keep)
@@ -1126,6 +1195,11 @@ struct elf_backend_data
      bfd_boolean (*) (void *, const char *, Elf_Internal_Sym *, asection *,
 		      struct elf_link_hash_entry *));
 
+  /* Filter what symbols of the output file to include in the import
+     library if one is created.  */
+  unsigned int (*elf_backend_filter_implib_symbols)
+    (bfd *, struct bfd_link_info *, asymbol **, long);
+
   /* Copy any information related to dynamic linking from a pre-existing
      symbol to a newly created symbol.  Also called to copy flags and
      other back-end info to a weakdef, in which case the symbol is not
@@ -1165,6 +1239,11 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_emit_relocs)
     (bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *,
      struct elf_link_hash_entry **);
+
+  /* Update relocations.  It is allowed to change the number and the order.
+     In such a case hashes should be invalidated.  */
+  void (*elf_backend_update_relocs)
+    (asection *, struct bfd_elf_section_reloc_data *);
 
   /* Count relocations.  Not called for relocatable links
      or if all relocs are being preserved in the output.  */
@@ -1223,7 +1302,7 @@ struct elf_backend_data
      that can't be determined for some reason.  The default definition
      goes by the bfd's EI_CLASS.  */
   unsigned int (*elf_backend_eh_frame_address_size)
-    (bfd *, asection *);
+    (bfd *, const asection *);
 
   /* These functions tell elf-eh-frame whether to attempt to turn
      absolute or lsda encodings into pc-relative ones.  The default
@@ -1283,9 +1362,8 @@ struct elf_backend_data
   /* Return TRUE if we can merge 2 definitions.  */
   bfd_boolean (*merge_symbol) (struct elf_link_hash_entry *,
 			       const Elf_Internal_Sym *, asection **,
-			       bfd_boolean, bfd_boolean, bfd *,
 			       bfd_boolean, bfd_boolean,
-			       bfd *, asection *);
+			       bfd *, const asection *);
 
   /* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */
   bfd_boolean (*elf_hash_symbol) (struct elf_link_hash_entry *);
@@ -1299,8 +1377,10 @@ struct elf_backend_data
   bfd_size_type (*maybe_function_sym) (const asymbol *sym, asection *sec,
 				       bfd_vma *code_off);
 
-  /* Return the section which RELOC_SEC applies to.  */
-  asection *(*get_reloc_section) (asection *reloc_sec);
+  /* Given NAME, the name of a relocation section stripped of its
+     .rel/.rela prefix, return the section in ABFD to which the
+     relocations apply.  */
+  asection *(*get_reloc_section) (bfd *abfd, const char *name);
 
   /* Called to set the sh_flags, sh_link and sh_info fields of OSECTION which
      has a type >= SHT_LOOS.  Returns TRUE if the fields were initialised,
@@ -1313,7 +1393,7 @@ struct elf_backend_data
      Elf_Internal_Shdr *osection);
 		
   /* Used to handle bad SHF_LINK_ORDER input.  */
-  bfd_error_handler_type link_order_error_handler;
+  void (*link_order_error_handler) (const char *, ...);
 
   /* Name of the PLT relocation section.  */
   const char *relplt_name;
@@ -1361,6 +1441,19 @@ struct elf_backend_data
      or give an error and return FALSE.  */
   bfd_boolean (*obj_attrs_handle_unknown) (bfd *, int);
 
+  /* Parse GNU properties.  Return the property kind.  If the property
+     is corrupt, issue an error message and return property_corrupt.  */
+  enum elf_property_kind (*parse_gnu_properties) (bfd *, unsigned int,
+						  bfd_byte *,
+						  unsigned int);
+
+  /* Merge GNU properties.  Return TRUE if property is updated.  */
+  bfd_boolean (*merge_gnu_properties) (struct bfd_link_info *, bfd *,
+				       elf_property *, elf_property *);
+
+  /* Set up GNU properties.  */
+  bfd *(*setup_gnu_properties) (struct bfd_link_info *);
+
   /* Encoding used for compact EH tables.  */
   int (*compact_eh_encoding) (struct bfd_link_info *);
 
@@ -1370,7 +1463,7 @@ struct elf_backend_data
   /* This is non-zero if static TLS segments require a special alignment.  */
   unsigned static_tls_alignment;
 
-  /* Alignment for the PT_GNU_STACK segment. */
+  /* Alignment for the PT_GNU_STACK segment.  */
   unsigned stack_align;
 
   /* Flag bits to assign to a section of type SHT_STRTAB.  */
@@ -1413,6 +1506,10 @@ struct elf_backend_data
      backend relocate_section routine for relocatable linking.  */
   unsigned rela_normal : 1;
 
+  /* Set if DT_REL/DT_RELA/DT_RELSZ/DT_RELASZ should not include PLT
+     relocations.  */
+  unsigned dtrel_excludes_plt : 1;
+
   /* TRUE if addresses "naturally" sign extend.  This is used when
      swapping in from Elf32 when BFD64.  */
   unsigned sign_extend_vma : 1;
@@ -1426,11 +1523,16 @@ struct elf_backend_data
   unsigned can_refcount : 1;
   unsigned want_got_sym : 1;
   unsigned want_dynbss : 1;
+  unsigned want_dynrelro : 1;
 
   /* Targets which do not support physical addressing often require
      that the p_paddr field in the section header to be set to zero.
      This field indicates whether this behavior is required.  */
   unsigned want_p_paddr_set_to_zero : 1;
+
+  /* Target has broken hardware and/or kernel that requires pages not
+     to be mapped twice with different permissions.  */
+  unsigned no_page_alias : 1;
 
   /* True if an object file lacking a .note.GNU-stack section
      should be assumed to be requesting exec stack.  At least one
@@ -1446,6 +1548,10 @@ struct elf_backend_data
   /* Address of protected data defined in the shared library may be
      external, i.e., due to copy relocation.   */
   unsigned extern_protected_data : 1;
+
+  /* True if `_bfd_elf_link_renumber_dynsyms' must be called even for
+     static binaries.  */
+  unsigned always_renumber_dynsyms : 1;
 };
 
 /* Information about reloc sections associated with a bfd_elf_section_data
@@ -1666,13 +1772,13 @@ struct output_elf_obj_tdata
    symbol type or STB_GNU_UNIQUE binding.  Used to set the osabi
    field in the ELF header structure.  */
 enum elf_gnu_symbols
-  {
-    elf_gnu_symbol_none = 0,
-    elf_gnu_symbol_any = 1 << 0,
-    elf_gnu_symbol_ifunc = (elf_gnu_symbol_any | 1 << 1),
-    elf_gnu_symbol_unique = (elf_gnu_symbol_any | 1 << 2),
-    elf_gnu_symbol_all = (elf_gnu_symbol_ifunc | elf_gnu_symbol_unique)
-  };
+{
+  elf_gnu_symbol_none = 0,
+  elf_gnu_symbol_any = 1 << 0,
+  elf_gnu_symbol_ifunc = (elf_gnu_symbol_any | 1 << 1),
+  elf_gnu_symbol_unique = (elf_gnu_symbol_any | 1 << 2),
+  elf_gnu_symbol_all = (elf_gnu_symbol_ifunc | elf_gnu_symbol_unique)
+};
 
 typedef struct elf_section_list
 {
@@ -1680,8 +1786,7 @@ typedef struct elf_section_list
   unsigned int               ndx;
   struct elf_section_list *  next;
 } elf_section_list;
-  
-    
+
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
 
@@ -1761,6 +1866,10 @@ struct elf_obj_tdata
 
   /* Symbol buffer.  */
   void *symbuf;
+
+  /* List of GNU properties.  Will be updated by setup_gnu_properties
+     after all input GNU properties are merged for output.  */
+  elf_property_list *properties;
 
   obj_attribute known_obj_attributes[2][NUM_KNOWN_OBJ_ATTRIBUTES];
   obj_attribute_list *other_obj_attributes[2];
@@ -1846,6 +1955,7 @@ struct elf_obj_tdata
   (elf_known_obj_attributes (bfd) [OBJ_ATTR_PROC])
 #define elf_other_obj_attributes_proc(bfd) \
   (elf_other_obj_attributes (bfd) [OBJ_ATTR_PROC])
+#define elf_properties(bfd) (elf_tdata (bfd) -> properties)
 
 extern void _bfd_elf_swap_verdef_in
   (bfd *, const Elf_External_Verdef *, Elf_Internal_Verdef *);
@@ -1888,7 +1998,7 @@ extern void bfd_elf_print_symbol
   (bfd *, void *, asymbol *, bfd_print_symbol_type);
 
 extern unsigned int _bfd_elf_eh_frame_address_size
-  (bfd *, asection *);
+  (bfd *, const asection *);
 extern bfd_byte _bfd_elf_encode_eh_address
   (bfd *abfd, struct bfd_link_info *info, asection *osec, bfd_vma offset,
    asection *loc_sec, bfd_vma loc_offset, bfd_vma *encoded);
@@ -1952,6 +2062,8 @@ extern bfd_boolean _bfd_elf_section_already_linked
   (bfd *, asection *, struct bfd_link_info *);
 extern void bfd_elf_set_group_contents
   (bfd *, asection *, void *);
+extern unsigned int _bfd_elf_filter_global_symbols
+  (bfd *, struct bfd_link_info *, asymbol **, long);
 extern asection *_bfd_elf_check_kept_section
   (asection *, struct bfd_link_info *);
 #define _bfd_elf_link_just_syms _bfd_generic_link_just_syms
@@ -2085,6 +2197,8 @@ extern bfd_boolean _bfd_elf_end_eh_frame_parsing
 extern bfd_boolean _bfd_elf_discard_section_eh_frame
   (bfd *, struct bfd_link_info *, asection *,
    bfd_boolean (*) (bfd_vma, void *), struct elf_reloc_cookie *);
+extern bfd_boolean _bfd_elf_adjust_eh_frame_global_symbol
+  (struct elf_link_hash_entry *, void *);
 extern bfd_boolean _bfd_elf_discard_section_eh_frame_hdr
   (bfd *, struct bfd_link_info *);
 extern bfd_vma _bfd_elf_eh_frame_section_offset
@@ -2158,6 +2272,9 @@ extern bfd_reloc_status_type bfd_elf_perform_complex_relocation
 
 extern bfd_boolean _bfd_elf_setup_sections
   (bfd *);
+
+extern struct bfd_link_hash_entry *bfd_elf_define_start_stop
+  (struct bfd_link_info *, const char *, asection *);
 
 extern void _bfd_elf_post_process_headers (bfd * , struct bfd_link_info *);
 
@@ -2269,24 +2386,6 @@ extern bfd_boolean _bfd_elf_add_dynamic_entry
   (struct bfd_link_info *, bfd_vma, bfd_vma);
 extern bfd_boolean _bfd_elf_link_check_relocs
   (bfd *, struct bfd_link_info *);
-extern asection _bfd_elf_sharable_com_section;
-extern bfd_boolean _bfd_elf_add_sharable_symbol
-  (bfd *, struct bfd_link_info *, Elf_Internal_Sym *, const char **,
-   flagword *, asection **, bfd_vma *);
-extern bfd_boolean _bfd_elf_sharable_section_from_bfd_section
-  (bfd *, asection *, int *);
-extern void _bfd_elf_sharable_symbol_processing
-  (bfd *, asymbol *);
-extern bfd_boolean _bfd_elf_sharable_common_definition
-  (Elf_Internal_Sym *);
-extern unsigned int _bfd_elf_sharable_common_section_index
-  (asection *);
-extern asection *_bfd_elf_sharable_common_section
-  (asection *);
-extern bfd_boolean _bfd_elf_sharable_merge_symbol
-  (struct elf_link_hash_entry *, const Elf_Internal_Sym *,
-   asection **, bfd_boolean, bfd_boolean, bfd *,
-   bfd_boolean, bfd_boolean, bfd *, asection *);
 
 extern bfd_boolean bfd_elf_link_record_dynamic_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *);
@@ -2360,9 +2459,6 @@ extern bfd_boolean bfd_elf_gc_common_finalize_got_offsets
 extern bfd_boolean bfd_elf_gc_common_final_link
   (bfd *, struct bfd_link_info *);
 
-extern asection *_bfd_elf_is_start_stop
-  (const struct bfd_link_info *, struct elf_link_hash_entry *);
-
 extern bfd_boolean bfd_elf_reloc_symbol_deleted_p
   (bfd_vma, void *);
 
@@ -2377,7 +2473,7 @@ extern bfd_boolean _bfd_elf_is_function_type (unsigned int);
 extern bfd_size_type _bfd_elf_maybe_function_sym (const asymbol *, asection *,
 						  bfd_vma *);
 
-extern asection *_bfd_elf_get_reloc_section (asection *);
+extern asection *_bfd_elf_plt_get_reloc_section (bfd *, const char *);
 
 extern int bfd_elf_get_default_section_type (flagword);
 
@@ -2395,8 +2491,10 @@ extern unsigned int _bfd_elf_ppc_at_tprel_transform
   (unsigned int, unsigned int);
 /* PowerPC elf_object_p tweak.  */
 extern bfd_boolean _bfd_elf_ppc_set_arch (bfd *);
+/* PowerPC .gnu.attributes handling common to both 32-bit and 64-bit.  */
+extern void _bfd_elf_ppc_merge_fp_attributes (bfd *, struct bfd_link_info *);
 
-/* Exported interface for writing elf corefile notes. */
+/* Exported interface for writing elf corefile notes.  */
 extern char *elfcore_write_note
   (bfd *, char *, int *, const char *, int, const void *, int);
 extern char *elfcore_write_prpsinfo
@@ -2434,6 +2532,10 @@ extern char *elfcore_write_s390_tdb
 extern char *elfcore_write_s390_vxrs_low
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_s390_vxrs_high
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_s390_gs_cb
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_s390_gs_bc
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_arm_vfp
   (bfd *, char *, int *, const void *, int);
@@ -2510,10 +2612,18 @@ extern char *_bfd_elf_attr_strdup (bfd *, const char *);
 extern void _bfd_elf_copy_obj_attributes (bfd *, bfd *);
 extern int _bfd_elf_obj_attrs_arg_type (bfd *, int, unsigned int);
 extern void _bfd_elf_parse_attributes (bfd *, Elf_Internal_Shdr *);
-extern bfd_boolean _bfd_elf_merge_object_attributes (bfd *, bfd *);
+extern bfd_boolean _bfd_elf_merge_object_attributes
+  (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_merge_unknown_attribute_low (bfd *, bfd *, int);
 extern bfd_boolean _bfd_elf_merge_unknown_attribute_list (bfd *, bfd *);
 extern Elf_Internal_Shdr *_bfd_elf_single_rel_hdr (asection *sec);
+
+extern bfd_boolean _bfd_elf_parse_gnu_properties
+  (bfd *, Elf_Internal_Note *);
+extern elf_property * _bfd_elf_get_property
+  (bfd *, unsigned int, unsigned int);
+extern bfd *_bfd_elf_link_setup_gnu_properties
+  (struct bfd_link_info *);
 
 /* The linker may need to keep track of the number of relocs that it
    decides to copy as dynamic relocs in check_relocs for each symbol.
@@ -2672,7 +2782,7 @@ extern asection _bfd_elf_large_com_section;
 	    memmove (rel, rel + count,					\
 		     (relend - rel - count) * sizeof (*rel));		\
 									\
-	    input_section->reloc_count--;				\
+	    input_section->reloc_count -= count;			\
 	    relend -= count;						\
 	    rel--;							\
 	    continue;							\
