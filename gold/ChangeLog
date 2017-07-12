@@ -11,6 +11,18 @@
 	* po/sv.po: Likewise.
 	* po/uk.po: Likewise.
 
+2017-07-06  Han Shen  <shenhan@google.com>
+
+	PR gold/21491
+	* aarch64.cc (Erratum_stub::invalidate_erratum_stub): New method.
+	(Erratum_stub::is_invalidated_erratum_stub): New method.
+	(Stub_table::relocate_reloc_stub): Renamed from "relocate_stub".
+	(Stub_table::relocate_reloc_stubs): Renamed from "relocate_stubs".
+	(Stub_table::relocate_erratum_stub): New method.
+	(AArch64_relobj::fix_errata_and_relocate_erratum_stubs): Renamed from
+	"fix_errata".
+	(Target_aarch64::relocate_reloc_stub): Renamed from "relocate_stub".
+
 2017-06-23  Alan Modra  <amodra@gmail.com>
 
 	* options.h (General_options): Add plt_localentry.
