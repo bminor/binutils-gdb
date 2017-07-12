@@ -1,5 +1,18 @@
 2017-07-12  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-scripts/align.exp: Exclude powerpc*-*-aix*.
+	* testsuite/ld-scripts/assign-loc.d: Likewise.
+	* testsuite/ld-scripts/defined3.d: Likewise.
+	* testsuite/ld-scripts/defined4.d: Likewise.
+	* testsuite/ld-scripts/defined5.d: Likewise.
+	* testsuite/ld-scripts/expr2.d: Likewise.
+	* testsuite/ld-scripts/provide.exp: Likewise.
+	* testsuite/ld-scripts/sane1.d: Likewise.
+	* testsuite/ld-scripts/size.exp: Likewise.
+	* testsuite/ld-scripts/defined2.d: Don't xfail rs6000-*-aix*.
+
+2017-07-12  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-arc/nps-1b.err: Update.
 	* testsuite/ld-x86-64/ilp32-11.d: Update.
 
