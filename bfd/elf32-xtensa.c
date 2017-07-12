@@ -10841,7 +10841,7 @@ static asection *
 elf_xtensa_get_plt_section (struct bfd_link_info *info, int chunk)
 {
   bfd *dynobj;
-  char plt_name[10];
+  char plt_name[17];
 
   if (chunk == 0)
     return elf_hash_table (info)->splt;
@@ -10856,7 +10856,7 @@ static asection *
 elf_xtensa_get_gotplt_section (struct bfd_link_info *info, int chunk)
 {
   bfd *dynobj;
-  char got_name[14];
+  char got_name[21];
 
   if (chunk == 0)
     return elf_hash_table (info)->sgotplt;
