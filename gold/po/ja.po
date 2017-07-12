@@ -1,95 +1,95 @@
-# Pesan bahasa indonesia untuk gold.
-# Copyright (C) 2009 Free Software Foundation, Inc.
+# Japanese messages for GNU binutils gold.
+# Copyright (C) 2010 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
-# Arif E. Nugroho <arif_endro@yahoo.com>, 2009, 2010, 2011, 2012, 2013, 2014.
+# Yasuaki Taniguchi <yasuakit@gmail.com>, 2010.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gold 2.23.90\n"
+"Project-Id-Version: gold 2.20.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2010-03-03 15:08+0100\n"
-"PO-Revision-Date: 2014-08-16 08:00+0700\n"
-"Last-Translator: Arif E. Nugroho <arif_endro@yahoo.com>\n"
-"Language-Team: Indonesian <translation-team-id@lists.sourceforge.net>\n"
-"Language: id\n"
+"PO-Revision-Date: 2010-12-18 16:06+0900\n"
+"Last-Translator: Yasuaki Taniguchi <yasuakit@gmail.com>\n"
+"Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: archive.cc:119
 #, c-format
 msgid "%s: no archive symbol table (run ranlib)"
-msgstr "%s: tidak ada kumpulan tabel simbol (jalankan ranlib)"
+msgstr "%s: 書庫シンボル表がありません (ranlib を実行してください)"
 
 #: archive.cc:204
 #, c-format
 msgid "%s: bad archive symbol table names"
-msgstr "%s: nama kumpulan tabel simbol buruk"
+msgstr "%s: 誤った書庫シンボル表名です"
 
 #: archive.cc:236
 #, c-format
 msgid "%s: malformed archive header at %zu"
-msgstr "%s: kumpulan kepala salah bentuk di %zu"
+msgstr "%s:  誤った形式の書庫ヘッダが %zu にあります"
 
 #: archive.cc:256
 #, c-format
 msgid "%s: malformed archive header size at %zu"
-msgstr "%s: ukuran kepala kumpulan salah bentuk di %zu"
+msgstr "%s: 誤った形式の書庫ヘッダサイズが %zu にあります"
 
 #: archive.cc:267
 #, c-format
 msgid "%s: malformed archive header name at %zu"
-msgstr "%s: salah bentuk nama kepala kumpulan di %zu"
+msgstr "%s: 誤った形式の書庫ヘッダ名が %zu にあります"
 
 #: archive.cc:297
 #, c-format
 msgid "%s: bad extended name index at %zu"
-msgstr "%s: nama indeks extensi buruk di %zu"
+msgstr "%s: 誤った拡張名索引が %zu にあります"
 
 #: archive.cc:307
 #, c-format
 msgid "%s: bad extended name entry at header %zu"
-msgstr "%s: nama masukan ekstensi buruk di kepala %zu"
+msgstr "%s: 誤った拡張名エントリが %zu にあります"
 
 #: archive.cc:404
 #, c-format
 msgid "%s: short archive header at %zu"
-msgstr "%s: kumpulan kepala pendek di %zu"
+msgstr "%s: 短い書庫ヘッダが %zu にあります"
 
 #: archive.cc:560
 #, c-format
 msgid "%s: member at %zu is not an ELF object"
-msgstr "%s: anggota di %zu bukan sebuah objek ELF"
+msgstr "%s: %zu にあるメンバは ELF オブジェクトではありません"
 
 #: archive.cc:879
 #, c-format
 msgid "%s: archive libraries: %u\n"
-msgstr "%s: kumpulan perpustakaan: %u\n"
+msgstr "%s: 書庫ライブラリ: %u\n"
 
 #: archive.cc:881
 #, c-format
 msgid "%s: total archive members: %u\n"
-msgstr "%s: jumlah total kumpulan: %u\n"
+msgstr "%s: 書庫メンバ総数: %u\n"
 
 #: archive.cc:883
 #, c-format
 msgid "%s: loaded archive members: %u\n"
-msgstr "%s: dimuat anggota kumpulan: %u\n"
+msgstr "%s: ロードされた書庫メンバ数: %u\n"
 
 #: arm.cc:1149 i386.cc:536 sparc.cc:1087 x86_64.cc:565
 msgid "** PLT"
-msgstr "** PLT"
+msgstr ""
 
 #: arm.cc:1364 i386.cc:880 powerpc.cc:1014 sparc.cc:1502 x86_64.cc:955
 #: x86_64.cc:1265
 #, c-format
 msgid "%s: unsupported reloc %u against local symbol"
-msgstr "%s: tidak didukung relokasi %u terhadap simbol lokal"
+msgstr "%s: 局所シンボルに対するサポートされない再配置 %u です"
 
 #: arm.cc:1404 powerpc.cc:1105 sparc.cc:1592 x86_64.cc:992
 msgid "requires unsupported dynamic reloc; recompile with -fPIC"
-msgstr "relokasi dinamis yang dibutuhkan tidak didukung; rekompilasi dengan -fPIC"
+msgstr "サポートされていない動的再配置が必要になりました。 -fPIC を付けて再コンパイルしてください"
 
 #. These are relocations which should only be seen by the
 #. dynamic linker, and should never be seen here.
@@ -98,263 +98,263 @@ msgstr "relokasi dinamis yang dibutuhkan tidak didukung; rekompilasi dengan -fPI
 #: x86_64.cc:1453
 #, c-format
 msgid "%s: unexpected reloc %u in object file"
-msgstr "%s: tidak terduga relokasi %u dalam berkas objek"
+msgstr "%s: オブジェクトファイル内で予期しない再配置 %u です"
 
 #: arm.cc:1538 i386.cc:1171 powerpc.cc:1242 sparc.cc:1896 x86_64.cc:1279
 #: x86_64.cc:1571
 #, c-format
 msgid "%s: unsupported reloc %u against global symbol %s"
-msgstr "%s: tidak didukung relokasi %u terhadap simbol global %s"
+msgstr "%1$s: 大域シンボル %3$s に対するサポートされない再配置 %2$u です"
 
 #: arm.cc:1804 i386.cc:1542
 #, c-format
 msgid "%s: unsupported RELA reloc section"
-msgstr "%s: tidak didukung daerah relokasi RELA"
+msgstr "%s: サポートされない RELA 再配置セクションです"
 
 #: arm.cc:2047
 msgid "relocation R_ARM_MOVW_ABS_NC cannot be used when makinga shared object; recompile with -fPIC"
-msgstr "relocation R_ARM_MOVW_ABS_NC cannot be used when makinga shared object; recompile with -fPIC"
+msgstr ""
 
 #: arm.cc:2056
 msgid "relocation R_ARM_MOVT_ABS cannot be used when makinga shared object; recompile with -fPIC"
-msgstr "relocation R_ARM_MOVT_ABS cannot be used when makinga shared object; recompile with -fPIC"
+msgstr ""
 
 #: arm.cc:2067
 msgid "relocation R_ARM_THM_MOVW_ABS_NC cannot be used whenmaking a shared object; recompile with -fPIC"
-msgstr "relocation R_ARM_THM_MOVW_ABS_NC cannot be used whenmaking a shared object; recompile with -fPIC"
+msgstr ""
 
 #: arm.cc:2077
 msgid "relocation R_ARM_THM_MOVT_ABS cannot be used whenmaking a shared object; recompile with -fPIC"
-msgstr "relocation R_ARM_THM_MOVT_ABS cannot be used whenmaking a shared object; recompile with -fPIC"
+msgstr ""
 
 #: arm.cc:2141
 msgid "cannot find origin of R_ARM_BASE_PREL"
-msgstr "cannot find origin of R_ARM_BASE_PREL"
+msgstr ""
 
 #: arm.cc:2169
 msgid "cannot find origin of R_ARM_BASE_ABS"
-msgstr "cannot find origin of R_ARM_BASE_ABS"
+msgstr ""
 
 #: arm.cc:2230 i386.cc:1820 i386.cc:2521 powerpc.cc:1798 sparc.cc:2711
 #: x86_64.cc:1935 x86_64.cc:2518
 #, c-format
 msgid "unexpected reloc %u in object file"
-msgstr "tidak diduga relokasi %u dalam berkas objek"
+msgstr "オブジェクトファイル内で予期しない再配置 %u です"
 
 #: arm.cc:2236 i386.cc:1852 i386.cc:1931 i386.cc:1983 i386.cc:2014
 #: i386.cc:2076 powerpc.cc:1804 sparc.cc:2717 sparc.cc:2900 sparc.cc:2961
 #: sparc.cc:3068 x86_64.cc:1956 x86_64.cc:2039 x86_64.cc:2094 x86_64.cc:2119
 #, c-format
 msgid "unsupported reloc %u"
-msgstr "tidak diduga relokasi %u"
+msgstr "サポートされない再配置 %u です"
 
 #: arm.cc:2248
 #, c-format
 msgid "relocation overflow in relocation %u"
-msgstr "relocation overflow in relocation %u"
+msgstr "再配置 %u で再配置オーバーフローが発生しました"
 
 #: arm.cc:2256
 #, c-format
 msgid "unexpected opcode while processing relocation %u"
-msgstr "tidak terduga opcode ketika memproses relokasi %u"
+msgstr "再配置 %u を処理中に予期しないオペコードです"
 
 #: arm.cc:2359 i386.cc:2535
 #, c-format
 msgid "unsupported reloc %u in object file"
-msgstr "tidak diduga relokasi %u dalam berkas objek"
+msgstr "オブジェクトファイル内でサポートされない再配置 %u です"
 
 #: binary.cc:129
 #, c-format
 msgid "cannot open %s: %s:"
-msgstr "tidak dapat membuka %s: %s:"
+msgstr "%s を開けません: %s:"
 
 #: compressed_output.cc:128
 msgid "not compressing section data: zlib error"
-msgstr "tidak mengkompress bagian data: zlib error"
+msgstr "セクションデータを圧縮しません: zlib エラー"
 
 #: cref.cc:244
 #, c-format
 msgid "cannot open symbol count file %s: %s"
-msgstr "tidak dapat membuka jumlah berkas simbol %s: %s"
+msgstr "シンボルカウントファイル %s を開けません: %s"
 
 #: descriptors.cc:116
 #, c-format
 msgid "file %s was removed during the link"
-msgstr "berkas %s telah dihapus ketika penyambungan"
+msgstr "ファイル %s がリンク中に削除されました"
 
 #: descriptors.cc:169
 msgid "out of file descriptors and couldn't close any"
-msgstr "diluar dari berkas deskripsi dan tidak dapat menutup apapun"
+msgstr "ファイル記述子が足りなくなり、どれも閉じることが出来ませんでした"
 
 #: descriptors.cc:190 descriptors.cc:226
 #, c-format
 msgid "while closing %s: %s"
-msgstr "ketika menutup %s: %s"
+msgstr "%s を閉じている間: %s"
 
 #: dirsearch.cc:71
 #, c-format
 msgid "%s: can not read directory: %s"
-msgstr "%s: tidak dapat membaca direktori: %s"
+msgstr "%s: ディレクトリを読み込めません: %s"
 
 #: dwarf_reader.cc:53 dwarf_reader.cc:84
 msgid "Unusually large LEB128 decoded, debug information may be corrupted"
-msgstr "Besar LEB128 terurai tidak biasa, informasi penelusuran mungkin telah terkorupsi"
+msgstr "通常ではない大きな LEB128 デコードです。デバッグ情報が壊れているかもしれません"
 
 #: dynobj.cc:164
 #, c-format
 msgid "unexpected duplicate type %u section: %u, %u"
-msgstr "tidak terduga duplikasi daerah tipe %u: %u, %u"
+msgstr ""
 
 #: dynobj.cc:200
 #, c-format
 msgid "unexpected link in section %u header: %u != %u"
-msgstr "tidak terduga sambungan dalam daerah %u kepala: %u != %u"
+msgstr ""
 
 #: dynobj.cc:236
 #, c-format
 msgid "DYNAMIC section %u link out of range: %u"
-msgstr "daerah DINAMIS %u sambungan diluar dari jangkauan: %u"
+msgstr ""
 
 #: dynobj.cc:244
 #, c-format
 msgid "DYNAMIC section %u link %u is not a strtab"
-msgstr "daerah DINAMIS %u sambungan %u bukan sebuah a strtab"
+msgstr ""
 
 #: dynobj.cc:273
 #, c-format
 msgid "DT_SONAME value out of range: %lld >= %lld"
-msgstr "DT_SONAME nilai diluar dari jangkauan: %lld >= %lld"
+msgstr "DT_SONAME の値が範囲外です: %lld >= %lld"
 
 #: dynobj.cc:285
 #, c-format
 msgid "DT_NEEDED value out of range: %lld >= %lld"
-msgstr "DT_NEEDED nilai diluar dari jangkauan: %lld >= %lld"
+msgstr "DT_NEEDED の値が範囲外です: %lld >= %lld"
 
 #: dynobj.cc:298
 msgid "missing DT_NULL in dynamic segment"
-msgstr "hilang DT_NULL dalam bagian dinamis"
+msgstr "動的セグメント内に DT_NULL がありません"
 
 #: dynobj.cc:344
 #, c-format
 msgid "invalid dynamic symbol table name index: %u"
-msgstr "nama indeks table simbol dinamis tidak valid: %u"
+msgstr "無効な動的シンボル表名索引です: %u"
 
 #: dynobj.cc:351
 #, c-format
 msgid "dynamic symbol table name section has wrong type: %u"
-msgstr "nama daerah tabel simbol dinamis memiliki tipe salah: %u"
+msgstr "動的シンボルテーブル名セクションの型が誤っています: %u"
 
 #: dynobj.cc:438 object.cc:463 object.cc:1106
 #, c-format
 msgid "bad section name offset for section %u: %lu"
-msgstr "nama daerah ofset buruk untuk daerah %u: %lu"
+msgstr "セクション %u に対する誤ったセクション名オフセットです: %lu"
 
 #: dynobj.cc:468
 #, c-format
 msgid "duplicate definition for version %u"
-msgstr "duplikasi definisi untuk versi %u"
+msgstr ""
 
 #: dynobj.cc:497
 #, c-format
 msgid "unexpected verdef version %u"
-msgstr "tidak terduga verdef versi %u"
+msgstr ""
 
 #: dynobj.cc:513
 #, c-format
 msgid "verdef vd_cnt field too small: %u"
-msgstr "verdef vd_cnt daerah terlalu kecil: %u"
+msgstr ""
 
 #: dynobj.cc:521
 #, c-format
 msgid "verdef vd_aux field out of range: %u"
-msgstr "daerah verdef vd_aux diluar dari jangkauan: %u"
+msgstr ""
 
 #: dynobj.cc:532
 #, c-format
 msgid "verdaux vda_name field out of range: %u"
-msgstr "daerah verdaux vda_name diluar dari jangkauan: %u"
+msgstr ""
 
 #: dynobj.cc:542
 #, c-format
 msgid "verdef vd_next field out of range: %u"
-msgstr "daerah verdef vd_next diluar dari jangkauan: %u"
+msgstr ""
 
 #: dynobj.cc:576
 #, c-format
 msgid "unexpected verneed version %u"
-msgstr "tidak terduga versi verneed %u"
+msgstr ""
 
 #: dynobj.cc:585
 #, c-format
 msgid "verneed vn_aux field out of range: %u"
-msgstr "daerah verneed vn_aux diluar dari jangkauan: %u"
+msgstr ""
 
 #: dynobj.cc:599
 #, c-format
 msgid "vernaux vna_name field out of range: %u"
-msgstr "daerah vernaux vna_name diluar dari jangkauan: %u"
+msgstr ""
 
 #: dynobj.cc:610
 #, c-format
 msgid "verneed vna_next field out of range: %u"
-msgstr "daerah verneed vna_next diluar dari jangkauan: %u"
+msgstr ""
 
 #: dynobj.cc:621
 #, c-format
 msgid "verneed vn_next field out of range: %u"
-msgstr "daerah verneed vn_next diluar dari jangkauan: %u"
+msgstr ""
 
 #: dynobj.cc:670
 msgid "size of dynamic symbols is not multiple of symbol size"
-msgstr "ukuran dari simbol dinamis bukan kelipatan dari ukuran simbol"
+msgstr "動的シンボルのサイズがシンボルサイズの倍数ではありません"
 
 #: dynobj.cc:1435
 #, c-format
 msgid "symbol %s has undefined version %s"
-msgstr "simbol %s memiliki versi %s tidak terdefinisi"
+msgstr ""
 
 #: ehframe.h:82
 msgid "** eh_frame_hdr"
-msgstr "** eh_frame_hdr"
+msgstr ""
 
 #: ehframe.h:353
 msgid "** eh_frame"
-msgstr "** eh_frame"
+msgstr ""
 
 #: errors.cc:81
 #, c-format
 msgid "%s: fatal error: "
-msgstr "%s: fatal error: "
+msgstr "%s: 致命的エラー: "
 
 #: errors.cc:92
 #, c-format
 msgid "%s: error: "
-msgstr "%s: error: "
+msgstr "%s: エラー: "
 
 #: errors.cc:104
 #, c-format
 msgid "%s: warning: "
-msgstr "%s: peringatan: "
+msgstr "%s: 警告: "
 
 #: errors.cc:128
 #, c-format
 msgid "%s: %s: error: "
-msgstr "%s: %s: error: "
+msgstr "%s: %s: エラー: "
 
 #: errors.cc:144
 #, c-format
 msgid "%s: %s: warning: "
-msgstr "%s: %s: peringatan: "
+msgstr "%s: %s: 警告: "
 
 #: errors.cc:167
 #, c-format
 msgid "%s: %s: error: undefined reference to '%s'\n"
-msgstr "%s: %s: error: referensi tidak terdefinisi ke '%s'\n"
+msgstr "%s: %s: エラー: '%s' への未定義の参照です\n"
 
 #: errors.cc:172
 #, c-format
 msgid "%s: %s: error: undefined reference to '%s', version '%s'\n"
-msgstr "%s: %s: error: referensi ke '%s' tidak terdefinisi, versi '%s'\n"
+msgstr "%s: %s: error:  '%s', バージョン '%s' への未定義の参照です\n"
 
 #: errors.cc:182
 #, c-format
@@ -364,17 +364,17 @@ msgstr "%s: "
 #: expression.cc:172
 #, c-format
 msgid "undefined symbol '%s' referenced in expression"
-msgstr "simbol '%s' tidak terdefinisi direferensikan dalam ekspresi"
+msgstr "式内で未定義シンボル '%s' が参照されました"
 
 #: expression.cc:209
 msgid "invalid reference to dot symbol outside of SECTIONS clause"
-msgstr "referensi tidak valid ke dot symbol diluar dari SECTIONS clause"
+msgstr ""
 
 #. Handle unary operators.  We use a preprocessor macro as a hack to
 #. capture the C operator.
 #: expression.cc:278
 msgid "unary "
-msgstr "unary "
+msgstr "単項演算子 "
 
 #. Handle binary operators.  We use a preprocessor macro as a hack to
 #. capture the C operator.  KEEP_LEFT means that if the left operand
@@ -386,344 +386,344 @@ msgstr "unary "
 #. warn if used on values in different sections in a relocatable link.
 #: expression.cc:400
 msgid "binary "
-msgstr "binari "
+msgstr "二項演算子 "
 
 #: expression.cc:404
 msgid " by zero"
-msgstr " dengan nol"
+msgstr ""
 
 #: expression.cc:575
 msgid "max applied to section relative value"
-msgstr "maks diaplikasikan ke daerah nilai relatif"
+msgstr ""
 
 #: expression.cc:610
 msgid "min applied to section relative value"
-msgstr "min diaplikasikan ke daerah nilai relatif"
+msgstr ""
 
 #: expression.cc:740
 msgid "aligning to section relative value"
-msgstr "menyesuaikan ke daerah nilai relatif"
+msgstr ""
 
 #: expression.cc:895
 #, c-format
 msgid "unknown constant %s"
-msgstr "konstanta %s tidak diketahui"
+msgstr "不明な定数 %s"
 
 #: expression.cc:1126
 msgid "SEGMENT_START not implemented"
-msgstr "SEGMENT_START tidak diimplementasikan"
+msgstr "SEGMENT_START は実装されていません"
 
 #: expression.cc:1135
 msgid "ORIGIN not implemented"
-msgstr "ORIGIN tidak diimplementasikan"
+msgstr "ORIGIN は実装されていません"
 
 #: expression.cc:1141
 msgid "LENGTH not implemented"
-msgstr "LENGTH tidak diimplementasikan"
+msgstr "LENGTH は実装されていません"
 
 #: fileread.cc:65
 #, c-format
 msgid "munmap failed: %s"
-msgstr "munmap gagal:  %s"
+msgstr "munmap に失敗しました: %s"
 
 #: fileread.cc:129
 #, c-format
 msgid "%s: fstat failed: %s"
-msgstr "%s: fstat gagal: %s"
+msgstr "%s: fstat に失敗しました: %s"
 
 #: fileread.cc:169
 #, c-format
 msgid "could not reopen file %s"
-msgstr "tidak dapat membuka kembali berkas %s"
+msgstr "ファイル %s を再度開くことが出来ませんでした"
 
 #: fileread.cc:302
 #, c-format
 msgid "%s: pread failed: %s"
-msgstr "%s: pread gagal: %s"
+msgstr "%s: pread に失敗しました: %s"
 
 #: fileread.cc:308
 #, c-format
 msgid "%s: file too short: read only %lld of %lld bytes at %lld"
-msgstr "%s: berkas terlalu pendek: hanya membaca %lld dari %lld byte di %lld"
+msgstr "%1$s: ファイルが短すぎます。位置 %4$lld で %3$lld バイト中 %2$lld バイトしか読み込めませんでした"
 
 #: fileread.cc:372
 #, c-format
 msgid "%s: attempt to map %lld bytes at offset %lld exceeds size of file; the file may be corrupt"
-msgstr "%s: attempt to map %lld bytes at offset %lld exceeds size of file; the file may be corrupt"
+msgstr "%1$s: オフセット %3$lld で %2$lld バイト分マップを試みましたがファイルサイズを超過しています。ファイルが壊れているかもしれません"
 
 #: fileread.cc:402
 #, c-format
 msgid "%s: mmap offset %lld size %lld failed: %s"
-msgstr "%s: mmap ofset %lld ukuran %lld gagal: %s"
+msgstr "%s: オフセット %lld、サイズ %lld の mmap に失敗しました: %s"
 
 #: fileread.cc:548
 #, c-format
 msgid "%s: lseek failed: %s"
-msgstr "%s: lseek gagal: %s"
+msgstr "%s: lseek に失敗しました: %s"
 
 #: fileread.cc:554
 #, c-format
 msgid "%s: readv failed: %s"
-msgstr "%s: readv gagal: %s"
+msgstr "%s: readv に失敗しました: %s"
 
 #: fileread.cc:557
 #, c-format
 msgid "%s: file too short: read only %zd of %zd bytes at %lld"
-msgstr "%s: berkas terlalu pendek: hanya membaca %zd dari %zd byte di %lld"
+msgstr "%1$s: ファイルが短すぎます。位置 %4$lld で %3$zd バイト中 %2$zd バイトしか読み込めませんでした"
 
 #: fileread.cc:706
 #, c-format
 msgid "%s: total bytes mapped for read: %llu\n"
-msgstr "%s: total byte dipetakan untuk pembacaan: %llu\n"
+msgstr ""
 
 #: fileread.cc:708
 #, c-format
 msgid "%s: maximum bytes mapped for read at one time: %llu\n"
-msgstr "%s: jumlah maksimal byte dipetakan untuk pembacaan di setiap waktu: %llu\n"
+msgstr ""
 
 #: fileread.cc:791
 #, c-format
 msgid "%s: stat failed: %s"
-msgstr "%s: stat gagal: %s"
+msgstr "%s: stat に失敗しました: %s"
 
 #: fileread.cc:849
 #, c-format
 msgid "cannot find %s%s"
-msgstr "tidak dapat menemukan %s%s"
+msgstr "%s%s が見つかりません"
 
 #: fileread.cc:880
 #, c-format
 msgid "cannot find %s"
-msgstr "tidak dapat menemukan %s"
+msgstr "%s が見つかりません"
 
 #: fileread.cc:904
 #, c-format
 msgid "cannot open %s: %s"
-msgstr "tidak dapat membuka %s: %s"
+msgstr "%s を開けません: %s"
 
 #: gold-threads.cc:103
 #, c-format
 msgid "pthead_mutextattr_init failed: %s"
-msgstr "pthead_mutextattr_init gagal: %s"
+msgstr "pthead_mutextattr_init に失敗しました: %s"
 
 #: gold-threads.cc:107
 #, c-format
 msgid "pthread_mutextattr_settype failed: %s"
-msgstr "pthread_mutextattr_settype gagal: %s"
+msgstr "pthread_mutextattr_settype に失敗しました: %s"
 
 #: gold-threads.cc:112
 #, c-format
 msgid "pthread_mutex_init failed: %s"
-msgstr "pthread_mutex_init gagal: %s"
+msgstr "pthread_mutex_init に失敗しました: %s"
 
 #: gold-threads.cc:116
 #, c-format
 msgid "pthread_mutexattr_destroy failed: %s"
-msgstr "pthread_mutexattr_destroy gagal: %s"
+msgstr "pthread_mutexattr_destroy に失敗しました: %s"
 
 #: gold-threads.cc:123
 #, c-format
 msgid "pthread_mutex_destroy failed: %s"
-msgstr "pthread_mutex_destroy gagal: %s"
+msgstr "pthread_mutex_destroy に失敗しました: %s"
 
 #: gold-threads.cc:131 gold-threads.cc:382
 #, c-format
 msgid "pthread_mutex_lock failed: %s"
-msgstr "pthread_mutex_lock gagal: %s"
+msgstr "pthread_mutex_lock に失敗しました: %s"
 
 #: gold-threads.cc:139 gold-threads.cc:394
 #, c-format
 msgid "pthread_mutex_unlock failed: %s"
-msgstr "pthread_mutex_unlock gagal: %s"
+msgstr "pthread_mutex_unlock に失敗しました: %s"
 
 #: gold-threads.cc:220
 #, c-format
 msgid "pthread_cond_init failed: %s"
-msgstr "pthread_cond_init gagal: %s"
+msgstr "pthread_cond_init に失敗しました: %s"
 
 #: gold-threads.cc:227
 #, c-format
 msgid "pthread_cond_destroy failed: %s"
-msgstr "pthread_cond_destroy gagal: %s"
+msgstr "pthread_cond_destroy に失敗しました: %s"
 
 #: gold-threads.cc:236
 #, c-format
 msgid "pthread_cond_wait failed: %s"
-msgstr "pthread_cond_wait gagal: %s"
+msgstr "pthread_cond_wait に失敗しました: %s"
 
 #: gold-threads.cc:244
 #, c-format
 msgid "pthread_cond_signal failed: %s"
-msgstr "pthread_cond_signal gagal: %s"
+msgstr "pthread_cond_signal に失敗しました: %s"
 
 #: gold-threads.cc:252
 #, c-format
 msgid "pthread_cond_broadcast failed: %s"
-msgstr "pthread_cond_broadcast gagal: %s"
+msgstr "pthread_cond_broadcast に失敗しました: %s"
 
 #: gold-threads.cc:388
 #, c-format
 msgid "pthread_once failed: %s"
-msgstr "pthread_once gagal: %s"
+msgstr "pthread_once に失敗しました: %s"
 
 #: gold.cc:91
 #, c-format
 msgid "%s: internal error in %s, at %s:%d\n"
-msgstr "%s: kerusakan internal dalam %s, di %s:%d\n"
+msgstr "%s: %s の中の位置 %s で内部エラーが発生しました:%d\n"
 
 #: gold.cc:173
 msgid "no input files"
-msgstr "tidak ada berkas masukan"
+msgstr "入力ファイルがありません"
 
 #: gold.cc:226
 msgid "cannot mix -r with --gc-sections or --icf"
-msgstr "tidak dapat mencampurkan -r dengan --gc-sections or --icf"
+msgstr "-r と --gc-sections 、--icf は同時に使用できません"
 
 #: gold.cc:407
 #, c-format
 msgid "cannot mix -static with dynamic object %s"
-msgstr "tidak dapat mencampurkan -static dengan objek dinamis %s"
+msgstr "-static と動的オブジェクト %s は同時に使用できません"
 
 #: gold.cc:411
 #, c-format
 msgid "cannot mix -r with dynamic object %s"
-msgstr "tidak dapat mencampurkan -r dengan objek dinamis %s"
+msgstr "-r と動的オブジェクト %s は同時に使用できません"
 
 #: gold.cc:415
 #, c-format
 msgid "cannot use non-ELF output format with dynamic object %s"
-msgstr "tidak dapat menggunakan format keluaran bukan ELF dengan objek dinamis %s"
+msgstr "動的オブジェクト %s を使用すると非 ELF 出力形式を使用できません"
 
 #: gold.cc:427
 #, c-format
 msgid "cannot mix split-stack '%s' and non-split-stack '%s' when using -r"
-msgstr "cannot mix split-stack '%s' and non-split-stack '%s' when using -r"
+msgstr "-r を使用しているときはスタック分割 '%s' と非スタック分割 '%s' を同時に使用できません"
 
 #. FIXME: This needs to specify the location somehow.
 #: i386.cc:232 i386.cc:1669 sparc.cc:234 sparc.cc:2395 x86_64.cc:237
 #: x86_64.cc:1732
 msgid "missing expected TLS relocation"
-msgstr "hilang relokasi TLS yang diduga"
+msgstr "予期される TLS 再配置がありません"
 
 #: i386.cc:944 x86_64.cc:1068
 #, c-format
 msgid "section symbol %u has bad shndx %u"
-msgstr "daerah simbol %u memiliki shndx buruk %u"
+msgstr ""
 
 #: i386.cc:1036 i386.cc:1060 sparc.cc:1777 x86_64.cc:1176 x86_64.cc:1204
 #, c-format
 msgid "local symbol %u has bad shndx %u"
-msgstr "lokal simbol %u memiliki shndx buruk %u"
+msgstr ""
 
 #: i386.cc:1991
 msgid "both SUN and GNU model TLS relocations"
-msgstr "baik model relokasi TLS SUN dan GNU"
+msgstr "SUN と GNU モデルの TLS 再配置が両方あります"
 
 #: i386.cc:2730 x86_64.cc:2719
 #, c-format
 msgid "failed to match split-stack sequence at section %u offset %0zx"
-msgstr "failed to match split-stack sequence at section %u offset %0zx"
+msgstr ""
 
 #: icf.cc:616
 #, c-format
 msgid "%s: ICF Converged after %u iteration(s)"
-msgstr "%s: ICF Converged after %u iteration(s)"
+msgstr ""
 
 #: icf.cc:619
 #, c-format
 msgid "%s: ICF stopped after %u iteration(s)"
-msgstr "%s: ICF stopped after %u iteration(s)"
+msgstr ""
 
 #: icf.cc:633
 #, c-format
 msgid "Could not find symbol %s to unfold\n"
-msgstr "Could not find symbol %s to unfold\n"
+msgstr ""
 
 #: incremental.cc:242
 #, c-format
 msgid "the link might take longer: cannot perform incremental link: %s"
-msgstr "the link might take longer: cannot perform incremental link: %s"
+msgstr "リンクに時間がかかるかもしれません: 増分リンクを実行できません: %s"
 
 #: incremental.cc:302
 msgid "no incremental data from previous build"
-msgstr "no incremental data from previous build"
+msgstr "前回のビルドからの増分データがありません"
 
 #: incremental.cc:309 incremental.cc:332
 msgid "invalid incremental build data"
-msgstr "invalid incremental build data"
+msgstr "無効な増分ビルドデータです"
 
 #: incremental.cc:321
 msgid "different version of incremental build data"
-msgstr "different version of incremental build data"
+msgstr "異なるバージョンの増分ビルドデータです"
 
 #: incremental.cc:338
 msgid "command line changed"
-msgstr "baris perintah berubah"
+msgstr "コマンドラインに変更がありました"
 
 #: incremental.cc:362
 #, c-format
 msgid "unsupported ELF machine number %d"
-msgstr "tidak didukung nomor mesin ELF %d"
+msgstr "サポートされていない ELF マシン番号 %d です"
 
 #: incremental.cc:387
 msgid "output is not an ELF file."
-msgstr "output is not an ELF file."
+msgstr "出力が ELF ファイルではありません。"
 
 #: incremental.cc:410
 msgid "unsupported file: 32-bit, big-endian"
-msgstr "berkas tidak didukung: 32-bit, big-endian"
+msgstr "サポートされていないファイルです: 32-ビット、ビッグエンディアン"
 
 #: incremental.cc:419
 msgid "unsupported file: 32-bit, little-endian"
-msgstr "berkas tidak didukung: 32-bit, little-endian"
+msgstr "サポートされていないファイルです: 32-ビット、リトルエンディアン"
 
 #: incremental.cc:431
 msgid "unsupported file: 64-bit, big-endian"
-msgstr "berkas tidak didukung: 64-bit, big-endian"
+msgstr "サポートされていないファイルです: 64-ビット、ビッグエンディアン"
 
 #: incremental.cc:440
 msgid "unsupported file: 64-bit, little-endian"
-msgstr "berkas tidak didukung: 64-bit, little-endian"
+msgstr "サポートされていないファイルです: 64-ビット、リトルエンディアン"
 
 #: layout.cc:1887
 #, c-format
 msgid "--build-id=uuid failed: could not open /dev/urandom: %s"
-msgstr "--build-id=uuid gagal: tidak dapat membuka /dev/urandom: %s"
+msgstr "--build-id=uuid に失敗しました: /dev/urandom を開けませんでした: %s"
 
 #: layout.cc:1894
 #, c-format
 msgid "/dev/urandom: read failed: %s"
-msgstr "/dev/urandom: pembacaan gagal: %s"
+msgstr "/dev/urandom: 読み込みに失敗しました: %s"
 
 #: layout.cc:1896
 #, c-format
 msgid "/dev/urandom: expected %zu bytes, got %zd bytes"
-msgstr "/dev/urandom: tidak terduga %zu byte, diperoleh %zd byte"
+msgstr ""
 
 #: layout.cc:1918
 #, c-format
 msgid "--build-id argument '%s' not a valid hex number"
-msgstr "--build-id argumen '%s' bukan sebuah nomor heksa yang valid"
+msgstr "--build-id の引数 '%s' が有効な十六進数ではありません"
 
 #: layout.cc:1924
 #, c-format
 msgid "unrecognized --build-id argument '%s'"
-msgstr "tidak dikenal argumen --build-id '%s'"
+msgstr "認識できない --build-id の引数 '%s' です"
 
 #: layout.cc:2337
 #, c-format
 msgid "load segment overlap [0x%llx -> 0x%llx] and [0x%llx -> 0x%llx]"
-msgstr "daerah pemuatan saling tumpang tindih [0x%llx -> 0x%llx] dan [0x%llx -> 0x%llx]"
+msgstr "ロードセグメントが重なり合っています [0x%llx -> 0x%llx] および [0x%llx -> 0x%llx]"
 
 #: mapfile.cc:70
 #, c-format
 msgid "cannot open map file %s: %s"
-msgstr "tidak dapat membuka berkas peta %s: %s"
+msgstr "マップファイル %s を開けません: %s"
 
 #: mapfile.cc:84
 #, c-format
 msgid "cannot close map file: %s"
-msgstr "tidak dapat menutup berkas peta: %s"
+msgstr "マップファイルを閉じられません: %s"
 
 #: mapfile.cc:116
 #, c-format
@@ -731,8 +731,6 @@ msgid ""
 "Archive member included because of file (symbol)\n"
 "\n"
 msgstr ""
-"Kumpulan anggota dimasukan karena berkas (simbol)\n"
-"\n"
 
 #: mapfile.cc:159
 #, c-format
@@ -740,8 +738,6 @@ msgid ""
 "\n"
 "Allocating common symbols\n"
 msgstr ""
-"\n"
-"Mengalokasikan simbol umum\n"
 
 #: mapfile.cc:161
 #, c-format
@@ -749,8 +745,6 @@ msgid ""
 "Common symbol       size              file\n"
 "\n"
 msgstr ""
-"Simbol umum         ukuran            berkas\n"
-"\n"
 
 #: mapfile.cc:195
 #, c-format
@@ -760,7 +754,7 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Peta memori\n"
+"メモリマップ\n"
 "\n"
 
 #: mapfile.cc:361
@@ -771,163 +765,163 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Mengabaikan daerah masukan\n"
+"破棄された入力セクション\n"
 "\n"
 
 #: merge.cc:455
 #, c-format
 msgid "%s: %s merged constants size: %lu; input: %zu; output: %zu\n"
-msgstr "%s: %s gabungan ukuran konstanta: %lu; masukan: %zu; keluaran: %zu\n"
+msgstr ""
 
 #: merge.cc:478
 msgid "mergeable string section length not multiple of character size"
-msgstr "panjang daerah string dapat digabungkan bukan kelipatan dari besar karakter"
+msgstr ""
 
 #: merge.cc:494
 #, c-format
 msgid "%s: last entry in mergeable string section '%s' not null terminated"
-msgstr "%s: masukan terakhir dalam daerah '%s' string yang dapat digabungkan bukan diakhiri kosong"
+msgstr ""
 
 #: merge.cc:613
 #, c-format
 msgid "%s: %s input: %zu\n"
-msgstr "%s: %s masukan: %zu\n"
+msgstr ""
 
 #: merge.h:300
 msgid "** merge constants"
-msgstr "** gabungan konstanta"
+msgstr ""
 
 #: merge.h:422
 msgid "** merge strings"
-msgstr "** gabungan strings"
+msgstr ""
 
 #: object.cc:75
 msgid "missing SHT_SYMTAB_SHNDX section"
-msgstr "hilang daerah SHT_SYMTAB_SHNDX"
+msgstr ""
 
 #: object.cc:119
 #, c-format
 msgid "symbol %u out of range for SHT_SYMTAB_SHNDX section"
-msgstr "simbol %u diluar dari jangkauan untuk daerah SHT_SYMTAB_SHNDX"
+msgstr ""
 
 #: object.cc:126
 #, c-format
 msgid "extended index for symbol %u out of range: %u"
-msgstr "indeks ekstensi untuk simbol %u diluar dari jangkauan: %u"
+msgstr ""
 
 #: object.cc:148 object.cc:2331 output.cc:4052
 #, c-format
 msgid "%s: %s"
-msgstr "%s: %s"
+msgstr ""
 
 #: object.cc:190
 #, c-format
 msgid "section name section has wrong type: %u"
-msgstr "nama daerah nama memiliki tipe salah: %u"
+msgstr ""
 
 #: object.cc:546
 #, c-format
 msgid "invalid symbol table name index: %u"
-msgstr "nama indeks tabel simbol tidak valid: %u"
+msgstr ""
 
 #: object.cc:552
 #, c-format
 msgid "symbol table name section has wrong type: %u"
-msgstr "nama daerah tabel simbol memiliki tipe salah: %u"
+msgstr ""
 
 #: object.cc:641
 #, c-format
 msgid "section group %u info %u out of range"
-msgstr "nama grup %u info %u diluar dari jangkauan"
+msgstr ""
 
 #: object.cc:660
 #, c-format
 msgid "symbol %u name offset %u out of range"
-msgstr "simbol %u nama ofset %u diluar dari jangkauan"
+msgstr ""
 
 #: object.cc:678
 #, c-format
 msgid "symbol %u invalid section index %u"
-msgstr "simbol %u tidak valid daerah indeks %u"
+msgstr ""
 
 #: object.cc:723
 #, c-format
 msgid "section %u in section group %u out of range"
-msgstr "daerah %u dalam daerah grup %u diluar dari jangkauan"
+msgstr ""
 
 #: object.cc:731
 #, c-format
 msgid "invalid section group %u refers to earlier section %u"
-msgstr "tidak valid daerah grup %u mereferensikan ke daerah sebelumnya %u"
+msgstr ""
 
 #: object.cc:1037 reloc.cc:271 reloc.cc:838
 #, c-format
 msgid "relocation section %u has bad info %u"
-msgstr "relokasi daerah %u memiliki info %u buruk"
+msgstr ""
 
 #: object.cc:1231
 #, c-format
 msgid "%s: removing unused section from '%s' in file '%s'"
-msgstr "%s: removing unused section from '%s' in file '%s'"
+msgstr ""
 
 #: object.cc:1257
 #, c-format
 msgid "%s: ICF folding section '%s' in file '%s'into '%s' in file '%s'"
-msgstr "%s: ICF folding section '%s' in file '%s'into '%s' in file '%s'"
+msgstr ""
 
 #: object.cc:1454
 msgid "size of symbols is not multiple of symbol size"
-msgstr "ukuran dari simbol bukan kelipatan dari ukuran simbol"
+msgstr ""
 
 #: object.cc:1563
 #, c-format
 msgid "local symbol %u section name out of range: %u >= %u"
-msgstr "simbol lokal %u nama daerah diluar dari jangkauan: %u >= %u"
+msgstr ""
 
 #: object.cc:1652
 #, c-format
 msgid "unknown section index %u for local symbol %u"
-msgstr "daerah indeks %u tidak diketahui untuk simbol lokal %u"
+msgstr ""
 
 #: object.cc:1661
 #, c-format
 msgid "local symbol %u section index %u out of range"
-msgstr "lokal simbol %u daerah indeks %u diluar dari daerah"
+msgstr ""
 
 #: object.cc:2169
 #, c-format
 msgid "%s is not supported but is required for %s in %s"
-msgstr "%s is not supported but is required for %s in %s"
+msgstr ""
 
 #: object.cc:2273
 #, c-format
 msgid "%s: unsupported ELF machine number %d"
-msgstr "%s: tidak didukung nomor mesin ELF %d"
+msgstr ""
 
 #: object.cc:2283
 #, c-format
 msgid "%s: incompatible target"
-msgstr "%s: target tidak kompatibel"
+msgstr ""
 
 #: object.cc:2347 plugin.cc:1019
 #, c-format
 msgid "%s: not configured to support 32-bit big-endian object"
-msgstr "%s: tidak dikonfigurasikan untuk mendukung objek 32-bit big-endian"
+msgstr ""
 
 #: object.cc:2363 plugin.cc:1028
 #, c-format
 msgid "%s: not configured to support 32-bit little-endian object"
-msgstr "%s: tidak dikonfigurasikan untuk mendukung objek 32-bit little-endian"
+msgstr ""
 
 #: object.cc:2382 plugin.cc:1040
 #, c-format
 msgid "%s: not configured to support 64-bit big-endian object"
-msgstr "%s: tidak dikonfigurasikan untuk mendukung objek 64-bit big-endian"
+msgstr ""
 
 #: object.cc:2398 plugin.cc:1049
 #, c-format
 msgid "%s: not configured to support 64-bit little-endian object"
-msgstr "%s: tidak dikonfigurasikan untuk mendukung objek 64-bit little-endian"
+msgstr ""
 
 #: options.cc:156
 #, c-format
@@ -935,1290 +929,1290 @@ msgid ""
 "Usage: %s [options] file...\n"
 "Options:\n"
 msgstr ""
-"Penggunaan: %s [pilihan] berkas...\n"
-"Pilihan:\n"
+"使用法: %s [options] file...\n"
+"オプション:\n"
 
 #. config.guess and libtool.m4 look in ld --help output for the
 #. string "supported targets".
 #: options.cc:164
 #, c-format
 msgid "%s: supported targets:"
-msgstr "%s: target yang didukung:"
+msgstr ""
 
 #: options.cc:176
 #, c-format
 msgid "Report bugs to %s\n"
-msgstr "Laporkan bugs ke %s\n"
+msgstr ""
 
 #: options.cc:193 options.cc:203 options.cc:213
 #, c-format
 msgid "%s: invalid option value (expected an integer): %s"
-msgstr "%s: nilai pilihan tidak valid (diduga sebuah bilangan bulat): %s"
+msgstr ""
 
 #: options.cc:223
 #, c-format
 msgid "%s: invalid option value (expected a floating point number): %s"
-msgstr "%s: nilai pilihan tidak valid (diduga sebuah bilangan pecahan): %s"
+msgstr ""
 
 #: options.cc:232
 #, c-format
 msgid "%s: must take a non-empty argument"
-msgstr "%s: harus mengambil sebuah argumen tidak kosong"
+msgstr ""
 
 #: options.cc:273
 #, c-format
 msgid "%s: must take one of the following arguments: %s"
-msgstr "%s: harus mengambil salah satu dari argumen berikut: %s"
+msgstr ""
 
 #: options.cc:300
 #, c-format
 msgid "  Supported targets:\n"
-msgstr "  Target yang didukung:\n"
+msgstr ""
 
 #: options.cc:409
 #, c-format
 msgid "unable to parse script file %s"
-msgstr "tidak dapat mengambil berkas script %s"
+msgstr ""
 
 #: options.cc:417
 #, c-format
 msgid "unable to parse version script file %s"
-msgstr "tidak dapat mengambil berkas script versi %s"
+msgstr ""
 
 #: options.cc:425
 #, c-format
 msgid "unable to parse dynamic-list script file %s"
-msgstr "tidak dapat mengambil berkas script %s"
+msgstr ""
 
 #: options.cc:522
 #, c-format
 msgid "format '%s' not supported; treating as elf (supported formats: elf, binary)"
-msgstr "format '%s' tidak didukung; memperlakukan sebagai elf (format yang didukung: elf, binari)"
+msgstr ""
 
 #: options.cc:538
 #, c-format
 msgid "%s: use the --help option for usage information\n"
-msgstr "%s: gunakan pilihan --help untuk informasi penggunaan\n"
+msgstr ""
 
 #: options.cc:547
 #, c-format
 msgid "%s: %s: %s\n"
-msgstr "%s: %s: %s\n"
+msgstr ""
 
 #: options.cc:651
 msgid "unexpected argument"
-msgstr "argumen tidak diduga"
+msgstr ""
 
 #: options.cc:664 options.cc:725
 msgid "missing argument"
-msgstr "hilang argumen"
+msgstr ""
 
 #: options.cc:736
 msgid "unknown -z option"
-msgstr "pilihan -z tidak diketahui"
+msgstr ""
 
 #: options.cc:935
 #, c-format
 msgid "ignoring --threads: %s was compiled without thread support"
-msgstr "mengabaikan --threads: %s telah dikompilasi tanpa dukungan thread"
+msgstr ""
 
 #: options.cc:942
 #, c-format
 msgid "ignoring --thread-count: %s was compiled without thread support"
-msgstr "mengabaikan --thread-count: %s telah dikompilasi tanpa bantuah thread"
+msgstr ""
 
 #: options.cc:981
 #, c-format
 msgid "unable to open -retain-symbols-file file %s: %s"
-msgstr "tidak dapat membuka -retain-symbols-file berkas %s: %s"
+msgstr ""
 
 #: options.cc:1003
 msgid "-shared and -static are incompatible"
-msgstr "-shared dan -static tidak kompatibel"
+msgstr ""
 
 #: options.cc:1005
 msgid "-shared and -pie are incompatible"
-msgstr "-shared dan -pie tidak kompatibel"
+msgstr ""
 
 #: options.cc:1008
 msgid "-shared and -r are incompatible"
-msgstr "-shared dan -r tidak kompatibel"
+msgstr ""
 
 #: options.cc:1010
 msgid "-pie and -r are incompatible"
-msgstr "-pie dan -r tidak kompatibel"
+msgstr ""
 
 #: options.cc:1014
 msgid "-retain-symbols-file does not yet work with -r"
-msgstr "-retain-symbols-file does not yet work with -r"
+msgstr ""
 
 #: options.cc:1020
 msgid "binary output format not compatible with -shared or -pie or -r"
-msgstr "format keluaran binari tidak kompatibel dengan -shared atau -pie atau -r"
+msgstr ""
 
 #: options.cc:1026
 #, c-format
 msgid "--hash-bucket-empty-fraction value %g out of range [0.0, 1.0)"
-msgstr "nilai --hash-bucket-empty-fraction %g diluar dari jangkauan [0.0, 1.0]"
+msgstr ""
 
 #: options.cc:1031
 msgid "Options --incremental-changed, --incremental-unchanged, --incremental-unknown require the use of --incremental"
-msgstr "Options --incremental-changed, --incremental-unchanged, --incremental-unknown require the use of --incremental"
+msgstr ""
 
 #: options.cc:1097
 msgid "May not nest groups"
-msgstr "Mungkin bukan grups nest"
+msgstr ""
 
 #: options.cc:1109
 msgid "Group end without group start"
-msgstr "Grup berakhir tanpa awal grup"
+msgstr ""
 
 #. I guess it's neither a long option nor a short option.
 #: options.cc:1174
 msgid "unknown option"
-msgstr "pilihan tidak diketahui"
+msgstr ""
 
 #: options.cc:1201
 #, c-format
 msgid "%s: missing group end\n"
-msgstr "%s: hilang grup akhir\n"
+msgstr ""
 
 #: options.h:571
 msgid "Report usage information"
-msgstr "Laporan informasi penggunaan"
+msgstr ""
 
 #: options.h:573
 msgid "Report version information"
-msgstr "Laporan informasi versi"
+msgstr ""
 
 #: options.h:575
 msgid "Report version and target information"
-msgstr "Laporan versi dan informasi target"
+msgstr ""
 
 #: options.h:584 options.h:635
 msgid "Not supported"
-msgstr "Not supported"
+msgstr ""
 
 #: options.h:585 options.h:636
 msgid "Do not copy DT_NEEDED tags from shared libraries"
-msgstr "Jangan salin DT_NEEDED tags dari perpustakaan terbagi"
+msgstr ""
 
 #: options.h:588
 msgid "Allow unresolved references in shared libraries"
-msgstr "Ijinkan referensi tidak terselesaikan dalam perpustakaan terbagi"
+msgstr ""
 
 #: options.h:589
 msgid "Do not allow unresolved references in shared libraries"
-msgstr "Jangan ijinkan referensi tidak terselesaikan dalam perpustakaan terbagi"
+msgstr ""
 
 #: options.h:592
 msgid "Only set DT_NEEDED for shared libraries if used"
-msgstr "Hanya set DT_NEEDED untuk libs terbagi jika digunakan"
+msgstr ""
 
 #: options.h:593
 msgid "Always DT_NEEDED for shared libraries"
-msgstr "Selalu DT_NEEDED untuk libs terbagi"
+msgstr ""
 
 #: options.h:600
 msgid "Set input format"
-msgstr "Set format masukan"
+msgstr ""
 
 #: options.h:603
 msgid "-l searches for shared libraries"
-msgstr "-l mencari untuk perpustakaan terbagi"
+msgstr ""
 
 #: options.h:605
 msgid "-l does not search for shared libraries"
-msgstr "-l tidak mencari untuk perpustakaan terbagi"
+msgstr ""
 
 #: options.h:609
 msgid "Bind defined symbols locally"
-msgstr "Ikat simbol terdefinisi secara lokal"
+msgstr ""
 
 #: options.h:612
 msgid "Bind defined function symbols locally"
-msgstr "Ikan simbol fungsi terdefinisi secara lokal"
+msgstr ""
 
 #: options.h:615
 msgid "Generate build ID note"
-msgstr "Buat catatan identitas pembuatan"
+msgstr ""
 
 #: options.h:616 options.h:655
 msgid "[=STYLE]"
-msgstr "[=GAYA]"
+msgstr ""
 
 #: options.h:619
 msgid "Check segment addresses for overlaps (default)"
-msgstr "Periksa daerah alamat untuk tumpang tindih (baku)"
+msgstr ""
 
 #: options.h:620
 msgid "Do not check segment addresses for overlaps"
-msgstr "Jangan periksa daerah alamat untuk tumpang tindih"
+msgstr ""
 
 #: options.h:624 options.h:629
 msgid "Compress .debug_* sections in the output file"
-msgstr "Kompress .debug_* daerah dalam berkas keluaran"
+msgstr ""
 
 #: options.h:630
 msgid "[none]"
-msgstr "[kosong]"
+msgstr ""
 
 #: options.h:639
 msgid "Define common symbols"
-msgstr "Definisikan simbol umum"
+msgstr ""
 
 #: options.h:640
 msgid "Do not define common symbols"
-msgstr "Jangan definisikan simbol umum"
+msgstr ""
 
 #: options.h:642 options.h:644
 msgid "Alias for -d"
-msgstr "Alias untuk -d"
+msgstr ""
 
 #: options.h:647
 msgid "Turn on debugging"
-msgstr "Aktifkan penelusuran"
+msgstr ""
 
 #: options.h:648
 msgid "[all,files,script,task][,...]"
-msgstr "[semua,berkas,skript,tugas][,...]"
+msgstr ""
 
 #: options.h:651
 msgid "Define a symbol"
-msgstr "Definisikan sebuah simbol"
+msgstr ""
 
 #: options.h:651
 msgid "SYMBOL=EXPRESSION"
-msgstr "SIMBOL=EKSPRESI"
+msgstr ""
 
 #: options.h:654
 msgid "Demangle C++ symbols in log messages"
-msgstr "Demangle simbol C++ dalam pesan pencatatan"
+msgstr ""
 
 #: options.h:658
 msgid "Do not demangle C++ symbols in log messages"
-msgstr "Jangan demangle simbol C++ dalam pesan pencatatan"
+msgstr ""
 
 #: options.h:662
 msgid "Try to detect violations of the One Definition Rule"
-msgstr "Coba detekasi pelanggaran dalam Definisi Satu Aturan"
+msgstr ""
 
 #: options.h:666
 msgid "Delete all temporary local symbols"
-msgstr "Delete all temporary local symbols"
+msgstr ""
 
 #: options.h:669
 msgid "Add data symbols to dynamic symbols"
-msgstr "Tambahkan data simbol ke simbol dinamis"
+msgstr ""
 
 #: options.h:672
 msgid "Add C++ operator new/delete to dynamic symbols"
-msgstr "Add C++ operator new/delete to dynamic symbols"
+msgstr ""
 
 #: options.h:675
 msgid "Add C++ typeinfo to dynamic symbols"
-msgstr "Tambahkan C++ typeinfo ke simbol dinamis"
+msgstr ""
 
 #: options.h:678
 msgid "Read a list of dynamic symbols"
-msgstr "Baca daftar dari simbol dinamis"
+msgstr ""
 
 #: options.h:678 options.h:732 options.h:766 options.h:893 options.h:921
 msgid "FILE"
-msgstr "BERKAS"
+msgstr ""
 
 #: options.h:681
 msgid "Set program start address"
-msgstr "Set alamat awal aplikasi"
+msgstr ""
 
 #: options.h:681 options.h:908 options.h:910 options.h:912
 msgid "ADDRESS"
-msgstr "ALAMAT"
+msgstr ""
 
 #: options.h:684
 msgid "Exclude libraries from automatic export"
-msgstr "Exclude libraries from automatic export"
+msgstr ""
 
 #: options.h:688
 msgid "Export all dynamic symbols"
-msgstr "Ekpor seluruh simbol dinamis"
+msgstr ""
 
 #: options.h:689
 msgid "Do not export all dynamic symbols (default)"
-msgstr "Jangan Ekpor seluruh simbol dinamis (baku)"
+msgstr ""
 
 #: options.h:692
 msgid "Create exception frame header"
-msgstr "Buat pengecualian lembar kepala"
+msgstr ""
 
 #: options.h:695
 msgid "Treat warnings as errors"
-msgstr "Perlakukan peringatan sebagai kesalahan"
+msgstr ""
 
 #: options.h:696
 msgid "Do not treat warnings as errors"
-msgstr "Jangan perlakukan peringatan sebagai kesalahan"
+msgstr ""
 
 #: options.h:699
 msgid "Call SYMBOL at unload-time"
-msgstr "Call SYMBOL at unload-time"
+msgstr ""
 
 #: options.h:699 options.h:729 options.h:873 options.h:915 options.h:936
 #: options.h:939
 msgid "SYMBOL"
-msgstr "SIMBOL"
+msgstr ""
 
 #: options.h:702
 msgid "Set shared library name"
-msgstr "Set nama perpustakaan terbagi"
+msgstr ""
 
 #: options.h:702 options.h:792
 msgid "FILENAME"
-msgstr "NAMA BERKAS"
+msgstr ""
 
 #: options.h:705
 msgid "Min fraction of empty buckets in dynamic hash"
-msgstr "Bagian minimal dari tempat kosong dalam hash dinamis"
+msgstr ""
 
 #: options.h:706
 msgid "FRACTION"
-msgstr "BAGIAN"
+msgstr ""
 
 #: options.h:709
 msgid "Dynamic hash style"
-msgstr "Gaya hash dinamis"
+msgstr ""
 
 #: options.h:709
 msgid "[sysv,gnu,both]"
-msgstr "[sysv,gnu,keduanya]"
+msgstr ""
 
 #: options.h:713
 msgid "Set dynamic linker path"
-msgstr "Set jalur penghubung dinamis"
+msgstr ""
 
 #: options.h:713
 msgid "PROGRAM"
-msgstr "APLIKASI"
+msgstr ""
 
 #: options.h:716
 msgid "Work in progress; do not use"
-msgstr "Work in progress; do not use"
+msgstr ""
 
 #: options.h:717
 msgid "Do a full build"
-msgstr "Do a full build"
+msgstr ""
 
 #: options.h:720
 msgid "Assume files changed"
-msgstr "Assume files changed"
+msgstr ""
 
 #: options.h:723
 msgid "Assume files didn't change"
-msgstr "Assume files didn't change"
+msgstr ""
 
 #: options.h:726
 msgid "Use timestamps to check files (default)"
-msgstr "Use timestamps to check files (default)"
+msgstr ""
 
 #: options.h:729
 msgid "Call SYMBOL at load-time"
-msgstr "Call SYMBOL at load-time"
+msgstr ""
 
 #: options.h:732
 msgid "Read only symbol values from FILE"
-msgstr "Hanya baca nilai simbol dari BERKAS"
+msgstr ""
 
 #: options.h:735
 msgid "Search for library LIBNAME"
-msgstr "Cari untuk perpustakaan LIBNAME"
+msgstr ""
 
 #: options.h:735
 msgid "LIBNAME"
-msgstr "LIBNAME"
+msgstr ""
 
 #: options.h:738
 msgid "Add directory to search path"
-msgstr "Tambahkan direktori ke jalur pencarian"
+msgstr ""
 
 #: options.h:738 options.h:813 options.h:816 options.h:820 options.h:887
 msgid "DIR"
-msgstr "DIR"
+msgstr ""
 
 #: options.h:741
 msgid "Ignored for compatibility"
-msgstr "Abaikan untuk kompabilitas"
+msgstr ""
 
 #: options.h:741
 msgid "EMULATION"
-msgstr "EMULASI"
+msgstr ""
 
 #: options.h:744
 msgid "Write map file on standard output"
-msgstr "Tulis berkas peta di standar keluaran"
+msgstr ""
 
 #: options.h:745
 msgid "Write map file"
-msgstr "Tulis berkas peta"
+msgstr ""
 
 #: options.h:746
 msgid "MAPFILENAME"
-msgstr "NAMABERKASPETA"
+msgstr ""
 
 #: options.h:749
 msgid "Do not page align data"
-msgstr "Jangan sesuaikan data page"
+msgstr ""
 
 #: options.h:751
 msgid "Do not page align data, do not make text readonly"
-msgstr "Jangan sesuaikan data page, jangan buat teks baca-saja"
+msgstr ""
 
 #: options.h:752
 msgid "Page align data, make text readonly"
-msgstr "Sesuaikan data halaman, buat teks baca saja"
+msgstr ""
 
 #: options.h:755
 msgid "Enable use of DT_RUNPATH and DT_FLAGS"
-msgstr "Aktifkan penggunaan DT_RUNPATH dan DT_FLAGS"
+msgstr ""
 
 #: options.h:756
 msgid "Disable use of DT_RUNPATH and DT_FLAGS"
-msgstr "Nonaktifkan penggunaan DT_RUNPATH dan DT_FLAGS"
+msgstr ""
 
 #: options.h:759
 msgid "Create an output file even if errors occur"
-msgstr "Buat sebuah berkas keluaran walaupun terjadi kesalahan"
+msgstr ""
 
 #: options.h:762 options.h:958
 msgid "Report undefined symbols (even with --shared)"
-msgstr "Laporkan simbol tidak terdefinisi (walaupun dengan --shared)"
+msgstr ""
 
 #: options.h:766
 msgid "Set output file name"
-msgstr "Set nama berkas keluaran"
+msgstr ""
 
 #: options.h:769
 msgid "Optimize output file size"
-msgstr "Optimasi besar berkas keluaran"
+msgstr ""
 
 #: options.h:769
 msgid "LEVEL"
-msgstr "TINGKAT"
+msgstr ""
 
 #: options.h:772
 msgid "Set output format"
-msgstr "Set format keluaran"
+msgstr ""
 
 #: options.h:772
 msgid "[binary]"
-msgstr "[binari]"
+msgstr ""
 
 #: options.h:775 options.h:777
 msgid "Create a position independent executable"
-msgstr "Create a position independent executable"
+msgstr ""
 
 #: options.h:782
 msgid "Load a plugin library"
-msgstr "Load a plugin library"
+msgstr ""
 
 #: options.h:782
 msgid "PLUGIN"
-msgstr "PLUGIN"
+msgstr ""
 
 #: options.h:784
 msgid "Pass an option to the plugin"
-msgstr "Pass an option to the plugin"
+msgstr ""
 
 #: options.h:784
 msgid "OPTION"
-msgstr "OPTION"
+msgstr ""
 
 #: options.h:788
 msgid "Preread archive symbols when multi-threaded"
-msgstr "Baca terlebih dahulu kumpulan simbol ketika multi-threaded"
+msgstr ""
 
 #: options.h:791
 msgid "Print symbols defined and used for each input"
-msgstr "Tampilkan simbol didefinisikan dan digunakan untuk setiap masukan"
+msgstr ""
 
 #: options.h:795
 msgid "Ignored for SVR4 compatibility"
-msgstr "Abaikan untuk kompabilitas SVR4"
+msgstr ""
 
 #: options.h:798
 msgid "Generate relocations in output"
-msgstr "Buat relokasi dalam keluaran"
+msgstr ""
 
 #: options.h:801
 msgid "Generate relocatable output"
-msgstr "Buat relokasi keluaran"
+msgstr ""
 
 #: options.h:804
 msgid "Relax branches on certain targets"
-msgstr "Percabangan relaks dalam beberapa target"
+msgstr ""
 
 #: options.h:807
 msgid "keep only symbols listed in this file"
-msgstr "keep only symbols listed in this file"
+msgstr ""
 
 #: options.h:807
 msgid "[file]"
-msgstr "[file]"
+msgstr ""
 
 #: options.h:813 options.h:816
 msgid "Add DIR to runtime search path"
-msgstr "Tambahkan DIR ke jalur pencarian waktu jalan"
+msgstr ""
 
 #: options.h:819
 msgid "Add DIR to link time shared library search path"
-msgstr "Tambahkan DIR ke jalur pencarian waktu penyambungan perpustakaan terbagi"
+msgstr ""
 
 #: options.h:823
 msgid "Strip all symbols"
-msgstr "Hapus seluruh simbol"
+msgstr ""
 
 #: options.h:825
 msgid "Strip debugging information"
-msgstr "Hapus informasi penelusuran"
+msgstr ""
 
 #: options.h:827
 msgid "Emit only debug line number information"
-msgstr "Hanya keluarkan informasi nomor baris penelusuran"
+msgstr ""
 
 #: options.h:829
 msgid "Strip debug symbols that are unused by gdb (at least versions <= 6.7)"
-msgstr "Hapus simbol penelusuran yang tidak digunakan oleh gdb (paling tidak versi < 6.7)"
+msgstr ""
 
 #: options.h:832
 msgid "Strip LTO intermediate code sections"
-msgstr "Strip LTO intermediate code sections"
+msgstr ""
 
 #: options.h:835
 msgid "(ARM only) The maximum distance from instructions in a group of sections to their stubs.  Negative values mean stubs are always after the group. 1 means using default size.\n"
-msgstr "(ARM only) The maximum distance from instructions in a group of sections to their stubs.  Negative values mean stubs are always after the group. 1 means using default size.\n"
+msgstr ""
 
 #: options.h:838 options.h:852 options.h:956 options.h:975
 msgid "SIZE"
-msgstr "BESAR"
+msgstr ""
 
 #: options.h:841
 msgid "Use less memory and more disk I/O (included only for compatibility with GNU ld)"
-msgstr "Use less memory and more disk I/O (included only for compatibility with GNU ld)"
+msgstr ""
 
 #: options.h:845 options.h:848
 msgid "Generate shared library"
-msgstr "Buat perpustakaan terbagi"
+msgstr ""
 
 #: options.h:851
 msgid "Stack size when -fsplit-stack function calls non-split"
-msgstr "Stack size when -fsplit-stack function calls non-split"
+msgstr ""
 
 #: options.h:857
 msgid "Do not link against shared libraries"
-msgstr "Jangan sambungkan terhadap perpustakaan terbagi"
+msgstr ""
 
 #: options.h:860
 msgid "Identical Code Folding. '--icf=safe' folds only ctors and dtors."
-msgstr "Identical Code Folding. '--icf=safe' folds only ctors and dtors."
+msgstr ""
 
 #: options.h:866
 msgid "Number of iterations of ICF (default 2)"
-msgstr "Number of iterations of ICF (default 2)"
+msgstr ""
 
 #: options.h:866 options.h:899 options.h:901 options.h:903 options.h:905
 msgid "COUNT"
-msgstr "JUMLAH"
+msgstr ""
 
 #: options.h:869
 msgid "List folded identical sections on stderr"
-msgstr "List folded identical sections on stderr"
+msgstr ""
 
 #: options.h:870
 msgid "Do not list folded identical sections"
-msgstr "Do not list folded identical sections"
+msgstr ""
 
 #: options.h:873
 msgid "Do not fold this symbol during ICF"
-msgstr "Do not fold this symbol during ICF"
+msgstr ""
 
 #: options.h:876
 msgid "Remove unused sections"
-msgstr "Remove unused sections"
+msgstr ""
 
 #: options.h:877
 msgid "Don't remove unused sections (default)"
-msgstr "Don't remove unused sections (default)"
+msgstr ""
 
 #: options.h:880
 msgid "List removed unused sections on stderr"
-msgstr "List removed unused sections on stderr"
+msgstr ""
 
 #: options.h:881
 msgid "Do not list removed unused sections"
-msgstr "Do not list removed unused sections"
+msgstr ""
 
 #: options.h:884
 msgid "Print resource usage statistics"
-msgstr "Tampilkan statistik penggunaan sumber daya"
+msgstr ""
 
 #: options.h:887
 msgid "Set target system root directory"
-msgstr "Set target direktori root sistem"
+msgstr ""
 
 #: options.h:890
 msgid "Print the name of each input file"
-msgstr "Tampilkan nama dari setiap berkas masukan"
+msgstr ""
 
 #: options.h:893
 msgid "Read linker script"
-msgstr "Baca script penyambung"
+msgstr ""
 
 #: options.h:896
 msgid "Run the linker multi-threaded"
-msgstr "Jalankan penyambung multi-threaded"
+msgstr ""
 
 #: options.h:897
 msgid "Do not run the linker multi-threaded"
-msgstr "Jangan jalankan penyambung multi-threaded"
+msgstr ""
 
 #: options.h:899
 msgid "Number of threads to use"
-msgstr "Jumlah dari thread yang digunakan"
+msgstr ""
 
 #: options.h:901
 msgid "Number of threads to use in initial pass"
-msgstr "Jumlah dari thread yang digunakan dalam tahap awal"
+msgstr ""
 
 #: options.h:903
 msgid "Number of threads to use in middle pass"
-msgstr "Jumlah thread yang digunakan dalam tahap perantara"
+msgstr ""
 
 #: options.h:905
 msgid "Number of threads to use in final pass"
-msgstr "Jumlah dari thread yang digunakan dalam tahap akhir"
+msgstr ""
 
 #: options.h:908
 msgid "Set the address of the bss segment"
-msgstr "Set alamat dari bagian bss"
+msgstr ""
 
 #: options.h:910
 msgid "Set the address of the data segment"
-msgstr "Set alamat dari bagian data"
+msgstr ""
 
 #: options.h:912
 msgid "Set the address of the text segment"
-msgstr "Set alamat dari bagian teks"
+msgstr ""
 
 #: options.h:915
 msgid "Create undefined reference to SYMBOL"
-msgstr "Buat referensi tidak terdefinisi ke SIMBOL"
+msgstr ""
 
 #: options.h:918
 msgid "Synonym for --debug=files"
-msgstr "Sinonim untuk --debug=berkas"
+msgstr ""
 
 #: options.h:921
 msgid "Read version script"
-msgstr "Baca versi script"
+msgstr ""
 
 #: options.h:924
 msgid "Warn about duplicate common symbols"
-msgstr "Peringatkan tentang duplikasi simbol umum"
+msgstr ""
 
 #: options.h:925
 msgid "Do not warn about duplicate common symbols (default)"
-msgstr "Jangan peringatkan tentang duplikasi simbol umum (baku)"
+msgstr ""
 
 #: options.h:928
 msgid "Warn when skipping an incompatible library"
-msgstr "Warn when skipping an incompatible library"
+msgstr ""
 
 #: options.h:929
 msgid "Don't warn when skipping an incompatible library"
-msgstr "Don't warn when skipping an incompatible library"
+msgstr ""
 
 #: options.h:932
 msgid "Include all archive contents"
-msgstr "Masukan seluruh isi kumpulan"
+msgstr ""
 
 #: options.h:933
 msgid "Include only needed archive contents"
-msgstr "Masukan hanya isi kumpulan yang dibutuhkan"
+msgstr ""
 
 #: options.h:936
 msgid "Use wrapper functions for SYMBOL"
-msgstr "Gunakan wrapper fungsi untuk SIMBOL"
+msgstr ""
 
 #: options.h:939
 msgid "Trace references to symbol"
-msgstr "Telusuri referensi ke simbol"
+msgstr ""
 
 #: options.h:942
 msgid "Default search path for Solaris compatibility"
-msgstr "Jalur pencarian baku untuk kompabilitas solaris"
+msgstr ""
 
 #: options.h:943
 msgid "PATH"
-msgstr "JALUR"
+msgstr ""
 
 #: options.h:946
 msgid "Start a library search group"
-msgstr "Awal sebuah perpustakaan grup pencarian"
+msgstr ""
 
 #: options.h:948
 msgid "End a library search group"
-msgstr "Akhir sebuah perpustakaan grup pencarian"
+msgstr ""
 
 #: options.h:953
 msgid "Sort dynamic relocs"
-msgstr "Urutkan relokasi dinamis"
+msgstr ""
 
 #: options.h:954
 msgid "Do not sort dynamic relocs"
-msgstr "Jangan urutkan relokasi dinamis"
+msgstr ""
 
 #: options.h:956
 msgid "Set common page size to SIZE"
-msgstr "Set ukuran halaman umum ke BESAR"
+msgstr ""
 
 #: options.h:961
 msgid "Mark output as requiring executable stack"
-msgstr "Tandai keluaran sebagai stack eksekusi yang dibutuhkan"
+msgstr ""
 
 #: options.h:963
 msgid "Mark DSO to be initialized first at runtime"
-msgstr "Tandai DSO untuk diinisialisasi terlebih dahulu di waktu jalan"
+msgstr ""
 
 #: options.h:966
 msgid "Mark object to interpose all DSOs but executable"
-msgstr "Tandai objek untuk interpose seluruh DSO tetapi eksekusi"
+msgstr ""
 
 #: options.h:969
 msgid "Mark object for lazy runtime binding (default)"
-msgstr "Mark object for lazy runtime binding (default)"
+msgstr ""
 
 #: options.h:972
 msgid "Mark object requiring immediate process"
-msgstr "Tandai objek membutuhkan proses perantara"
+msgstr ""
 
 #: options.h:975
 msgid "Set maximum page size to SIZE"
-msgstr "Set ukuran maksimal halaman ke UKURAN"
+msgstr ""
 
 #: options.h:978
 msgid "Do not create copy relocs"
-msgstr "Jangan buat salinan relokasi"
+msgstr ""
 
 #: options.h:980
 msgid "Mark object not to use default search paths"
-msgstr "Tandai objek tidak menggunakan jalur pencarian baku"
+msgstr ""
 
 #: options.h:983
 msgid "Mark DSO non-deletable at runtime"
-msgstr "Tandai DSO tidak dapat dihapus di waktu jalan"
+msgstr ""
 
 #: options.h:986
 msgid "Mark DSO not available to dlopen"
-msgstr "Tandai DSO tidak tersedia di dlopen"
+msgstr ""
 
 #: options.h:989
 msgid "Mark DSO not available to dldump"
-msgstr "Tandai DSO tidak tersedia ke dldump"
+msgstr ""
 
 #: options.h:992
 msgid "Mark output as not requiring executable stack"
-msgstr "Tandai keluaran sebagai tidak membutuhkan stack eksekusi"
+msgstr ""
 
 #: options.h:994
 msgid "Mark object for immediate function binding"
-msgstr "Tandai objek untuk fungsi proses langsung"
+msgstr ""
 
 #: options.h:997
 msgid "Mark DSO to indicate that needs immediate $ORIGIN processing at runtime"
-msgstr "Mark DSO to indicate that needs immediate $ORIGIN processing at runtime"
+msgstr ""
 
 #: options.h:1000
 msgid "Where possible mark variables read-only after relocation"
-msgstr "Dimana memungkinkan tanda variabel baca-saja setelah relokasi"
+msgstr ""
 
 #: options.h:1001
 msgid "Don't mark variables read-only after relocation"
-msgstr "Jangan tandai variabel baca-saja setelah relokasi"
+msgstr ""
 
 #: output.cc:1132
 msgid "section group retained but group element discarded"
-msgstr "daerah grup dijaga tetapi elemen grup diabaikan"
+msgstr ""
 
 #: output.cc:1860
 #, c-format
 msgid "invalid alignment %lu for section \"%s\""
-msgstr "alignment %lu tidak valid untuk daerah \"%s\""
+msgstr ""
 
 #: output.cc:3573
 #, c-format
 msgid "dot moves backward in linker script from 0x%llx to 0x%llx"
-msgstr "dot moves backward in linker script from 0x%llx to 0x%llx"
+msgstr ""
 
 #: output.cc:3576
 #, c-format
 msgid "address of section '%s' moves backward from 0x%llx to 0x%llx"
-msgstr "address of section '%s' moves backward from 0x%llx to 0x%llx"
+msgstr ""
 
 #: output.cc:3755
 #, c-format
 msgid "nobits section %s may not precede progbits section %s in same segment"
-msgstr "daerah nobits %s tidak boleh mengawali daerah progbits %s dalam daerah yang sama"
+msgstr ""
 
 #: output.cc:3907 output.cc:3975
 #, c-format
 msgid "%s: open: %s"
-msgstr "%s: buka: %s"
+msgstr ""
 
 #: output.cc:3996
 #, c-format
 msgid "%s: mremap: %s"
-msgstr "%s: mremap: %s"
+msgstr ""
 
 #: output.cc:4005
 #, c-format
 msgid "%s: mmap: %s"
-msgstr "%s: mmap: %s"
+msgstr ""
 
 #: output.cc:4085
 #, c-format
 msgid "%s: mmap: failed to allocate %lu bytes for output file: %s"
-msgstr "%s: mmap: failed to allocate %lu bytes for output file: %s"
+msgstr ""
 
 #: output.cc:4096
 #, c-format
 msgid "%s: munmap: %s"
-msgstr "%s: munmap: %s"
+msgstr ""
 
 #: output.cc:4115
 #, c-format
 msgid "%s: write: unexpected 0 return-value"
-msgstr "%s: tulis: tidak terduga 0 nilai-kembali"
+msgstr ""
 
 #: output.cc:4117
 #, c-format
 msgid "%s: write: %s"
-msgstr "%s: tulis: %s"
+msgstr ""
 
 #: output.cc:4132
 #, c-format
 msgid "%s: close: %s"
-msgstr "%s: tutup: %s"
+msgstr ""
 
 #: output.h:520
 msgid "** section headers"
-msgstr "** daerah kepala"
+msgstr ""
 
 #: output.h:565
 msgid "** segment headers"
-msgstr "** bagian kepala"
+msgstr ""
 
 #: output.h:613
 msgid "** file header"
-msgstr "** berkas kepala"
+msgstr ""
 
 #: output.h:833
 msgid "** fill"
-msgstr "** isi"
+msgstr ""
 
 #: output.h:987
 msgid "** string table"
-msgstr "** tabel string"
+msgstr ""
 
 #: output.h:1300
 msgid "** dynamic relocs"
-msgstr "** relokasi dinamis"
+msgstr ""
 
 #: output.h:1301 output.h:1637
 msgid "** relocs"
-msgstr "** relokasi"
+msgstr ""
 
 #: output.h:1662
 msgid "** group"
-msgstr "** grup"
+msgstr ""
 
 #: output.h:1774
 msgid "** GOT"
-msgstr "** GOT"
+msgstr ""
 
 #: output.h:1916
 msgid "** dynamic"
-msgstr "** dinamis"
+msgstr ""
 
 #: output.h:2039
 msgid "** symtab xindex"
-msgstr "** symtab xindex"
+msgstr ""
 
 #: parameters.cc:172
 #, c-format
 msgid "unrecognized output format %s"
-msgstr "format keluaran tidak diketahui %s"
+msgstr ""
 
 #: plugin.cc:106
 #, c-format
 msgid "%s: could not load plugin library"
-msgstr "%s: could not load plugin library"
+msgstr ""
 
 #: plugin.cc:116
 #, c-format
 msgid "%s: could not find onload entry point"
-msgstr "%s: could not find onload entry point"
+msgstr ""
 
 #: plugin.cc:426
 msgid "Input files added by plug-ins in --incremental mode not supported yet.\n"
-msgstr "Input files added by plug-ins in --incremental mode not supported yet.\n"
+msgstr ""
 
 #: powerpc.cc:1502 sparc.cc:2307 x86_64.cc:1632
 #, c-format
 msgid "%s: unsupported REL reloc section"
-msgstr "%s: daerah relokasi REL tidak didukung"
+msgstr ""
 
 #: readsyms.cc:191
 #, c-format
 msgid "%s: file is empty"
-msgstr "%s: berkas kosong"
+msgstr ""
 
 #. Here we have to handle any other input file types we need.
 #: readsyms.cc:575
 #, c-format
 msgid "%s: not an object or archive"
-msgstr "%s: bukan sebuah objek atau kumpulan"
+msgstr ""
 
 #: reduced_debug_output.cc:236
 msgid "Debug abbreviations extend beyond .debug_abbrev section; failed to reduce debug abbreviations"
-msgstr "Kependekan debug melewati daerah .debug_abbrev; gagai untuk mengurangi kependekan penelusuran"
+msgstr ""
 
 #: reduced_debug_output.cc:322
 msgid "Extremely large compile unit in debug info; failed to reduce debug info"
-msgstr "Ekstremely satuan kompilasi besar dalam informasi penelusuran; gagal untuk mengurangi informasi penelusuran"
+msgstr ""
 
 #: reduced_debug_output.cc:330
 msgid "Debug info extends beyond .debug_info section;failed to reduce debug info"
-msgstr "Informasi penelusuran melewati daerah .debug_info; gagal untuk mengurangi informasi penelusuran"
+msgstr ""
 
 #: reduced_debug_output.cc:350 reduced_debug_output.cc:392
 msgid "Invalid DIE in debug info; failed to reduce debug info"
-msgstr "Informasi debugu dalam DIE tidak valid; gagal untuk mengurangi informasi debug"
+msgstr ""
 
 #: reduced_debug_output.cc:373
 msgid "Debug info extends beyond .debug_info section; failed to reduce debug info"
-msgstr "Informasi debug melewati daerah .debug_info; gagal mengurangi informasi penelusuran"
+msgstr ""
 
 #: reloc.cc:297 reloc.cc:858
 #, c-format
 msgid "relocation section %u uses unexpected symbol table %u"
-msgstr "daerah relokasi %u menggunakan tabel simbol tidak terduga %u"
+msgstr ""
 
 #: reloc.cc:312 reloc.cc:875
 #, c-format
 msgid "unexpected entsize for reloc section %u: %lu != %u"
-msgstr "tidak terduga entsize untuk daerah relokasi %u: %lu != %u"
+msgstr ""
 
 #: reloc.cc:321 reloc.cc:884
 #, c-format
 msgid "reloc section %u size %lu uneven"
-msgstr "daerah relokasi %u besar %lu tidak genap"
+msgstr ""
 
 #: reloc.cc:1203
 #, c-format
 msgid "could not convert call to '%s' to '%s'"
-msgstr "could not convert call to '%s' to '%s'"
+msgstr ""
 
 #: reloc.cc:1343
 #, c-format
 msgid "reloc section size %zu is not a multiple of reloc size %d\n"
-msgstr "ukuran daerah relokasi %zu bukan kelipatan dari ukuran relokasi %d\n"
+msgstr ""
 
 #. We should only see externally visible symbols in the symbol
 #. table.
 #: resolve.cc:191
 msgid "invalid STB_LOCAL symbol in external symbols"
-msgstr "simbol STB_LOCAL tidak valid dalam simbol eksternal"
+msgstr ""
 
 #. Any target which wants to handle STB_LOOS, etc., needs to
 #. define a resolve method.
 #: resolve.cc:197
 msgid "unsupported symbol binding"
-msgstr "pengikatan simbol tidak diduga"
+msgstr ""
 
 #. A dynamic object cannot reference a hidden or internal symbol
 #. defined in another object.
 #: resolve.cc:266
 #, c-format
 msgid "%s symbol '%s' in %s is referenced by DSO %s"
-msgstr "%s symbol '%s' in %s is referenced by DSO %s"
+msgstr ""
 
 #: resolve.cc:326
 #, c-format
 msgid "common of '%s' overriding smaller common"
-msgstr "common of '%s' overriding smaller common"
+msgstr ""
 
 #: resolve.cc:331
 #, c-format
 msgid "common of '%s' overidden by larger common"
-msgstr "common of '%s' overidden by larger common"
+msgstr ""
 
 #: resolve.cc:336
 #, c-format
 msgid "multiple common of '%s'"
-msgstr "multiple common dari '%s'"
+msgstr ""
 
 #: resolve.cc:442
 #, c-format
 msgid "multiple definition of '%s'"
-msgstr "definisi ganda dari '%s'"
+msgstr ""
 
 #: resolve.cc:481
 #, c-format
 msgid "definition of '%s' overriding common"
-msgstr "definition of '%s' overriding common"
+msgstr ""
 
 #: resolve.cc:516
 #, c-format
 msgid "definition of '%s' overriding dynamic common definition"
-msgstr "definition of '%s' overriding dynamic common definition"
+msgstr ""
 
 #: resolve.cc:636
 #, c-format
 msgid "common '%s' overridden by previous definition"
-msgstr "common '%s' overridden oleh definisi sebelumnya"
+msgstr ""
 
 #: resolve.cc:766 resolve.cc:778
 msgid "command line"
-msgstr "baris perintah"
+msgstr ""
 
 #: script-sections.cc:690
 msgid "dot may not move backward"
-msgstr "dot tidak boleh bergerak kebelakang"
+msgstr ""
 
 #: script-sections.cc:757
 msgid "** expression"
-msgstr "** ekspresi"
+msgstr ""
 
 #: script-sections.cc:941
 msgid "fill value is not absolute"
-msgstr "nilai isi tidak absolut"
+msgstr ""
 
 #: script-sections.cc:1913
 #, c-format
 msgid "alignment of section %s is not absolute"
-msgstr "penyesuaian dari daerah %s tidak absolut"
+msgstr ""
 
 #: script-sections.cc:1957
 #, c-format
 msgid "subalign of section %s is not absolute"
-msgstr "subalign dari daerah %s tidak absolut"
+msgstr ""
 
 #: script-sections.cc:1972
 #, c-format
 msgid "fill of section %s is not absolute"
-msgstr "isi dari daerah %s tidak absolut"
+msgstr ""
 
 #: script-sections.cc:2048
 msgid "SPECIAL constraints are not implemented"
-msgstr "konstrain SPESIAL tidak terimplementasi"
+msgstr ""
 
 #: script-sections.cc:2090
 msgid "mismatched definition for constrained sections"
-msgstr "definisi tidak cocok untuk daerah konstrain"
+msgstr ""
 
 #: script-sections.cc:2634
 msgid "DATA_SEGMENT_ALIGN may only appear once in a linker script"
-msgstr "DATA_SEGMENT_ALIGN hanya mungkin muncul sekali dalam script linker"
+msgstr ""
 
 #: script-sections.cc:2649
 msgid "DATA_SEGMENT_RELRO_END may only appear once in a linker script"
-msgstr "DATA_SEGMENT_RELRO_END hanya mungkin muncul sekali dalam script linker"
+msgstr ""
 
 #: script-sections.cc:2654
 msgid "DATA_SEGMENT_RELRO_END must follow DATA_SEGMENT_ALIGN"
-msgstr "DATA_SEGMENT_RELRO_END harus mengikuti DATA_SEGMENT_ALIGN"
+msgstr ""
 
 #: script-sections.cc:2826
 msgid "no matching section constraint"
-msgstr "tidak ada kecocokan daerah konstrain"
+msgstr ""
 
 #: script-sections.cc:3151
 msgid "TLS sections are not adjacent"
-msgstr "daerah TLS tidak berurutan"
+msgstr ""
 
 #: script-sections.cc:3280
 msgid "allocated section not in any segment"
-msgstr "daerah yang dialokasikan tidka dalam bagian apapun"
+msgstr ""
 
 #: script-sections.cc:3309
 #, c-format
 msgid "no segment %s"
-msgstr "bukan bagian %s"
+msgstr ""
 
 #: script-sections.cc:3323
 msgid "section in two PT_LOAD segments"
-msgstr "daerah dalam dua bagian PT_LOAD"
+msgstr ""
 
 #: script-sections.cc:3330
 msgid "allocated section not in any PT_LOAD segment"
-msgstr "daerah dialokasikan tidak dalam bagian PT_LOAD apapun"
+msgstr ""
 
 #: script-sections.cc:3358
 msgid "may only specify load address for PT_LOAD segment"
-msgstr "mungkin hanya dispesifikasikan alamat pemuatan untuk bagian PT_LOAD"
+msgstr ""
 
 #: script-sections.cc:3382
 #, c-format
 msgid "PHDRS load address overrides section %s load address"
-msgstr "PHDRS alamat pemuatan memaksa daerah %s alamat pemuatan"
+msgstr ""
 
 #. We could support this if we wanted to.
 #: script-sections.cc:3393
 msgid "using only one of FILEHDR and PHDRS is not currently supported"
-msgstr "hanya menggunakan satu dari FILEHDR dan PHDRS belum didukung"
+msgstr ""
 
 #: script-sections.cc:3408
 msgid "sections loaded on first page without room for file and program headers are not supported"
-msgstr "daerah dimuat dalam halaman pertama tanpa ruang untuk berkas dan aplikasi kepala tidak didukung"
+msgstr ""
 
 #: script-sections.cc:3414
 msgid "using FILEHDR and PHDRS on more than one PT_LOAD segment is not currently supported"
-msgstr "menggunakan FILEHDR dan PHDRS di lebih dari sekali bagian PT_LOAD saat ini belum didukung"
+msgstr ""
 
 #: script.cc:1072
 msgid "invalid use of PROVIDE for dot symbol"
-msgstr "penggunaan tidak valid dari PROVIDE untuk simbol dot"
+msgstr ""
 
 #: script.cc:2132
 #, c-format
 msgid "%s:%d:%d: %s"
-msgstr "%s:%d:%d: %s"
+msgstr ""
 
 #. There are some options that we could handle here--e.g.,
 #. -lLIBRARY.  Should we bother?
 #: script.cc:2297
 #, c-format
 msgid "%s:%d:%d: ignoring command OPTION; OPTION is only valid for scripts specified via -T/--script"
-msgstr "%s:%d:%d mengabaikan perintah OPTION; OPTION hanya valid untuk script dispesifikasikan melalui -T/--script"
+msgstr ""
 
 #: script.cc:2362
 #, c-format
 msgid "%s:%d:%d: ignoring SEARCH_DIR; SEARCH_DIR is only valid for scripts specified via -T/--script"
-msgstr "%s:%d:%d: mengabaikan SEARCH_DIR; SEARCH_DIR hanya valid untuk script dispesifikasikan melalui -T/--script"
+msgstr ""
 
 #: script.cc:2606 script.cc:2620
 #, c-format
 msgid "%s:%d:%d: DATA_SEGMENT_ALIGN not in SECTIONS clause"
-msgstr "%s:%d:%d: DATA_SEGMENT_ALIGN tidak dalam clause DAERAH"
+msgstr ""
 
 #: script.cc:2739
 msgid "unknown PHDR type (try integer)"
-msgstr "tipe PHDR tidak diketahui (coba bilangan bulat)"
+msgstr ""
 
 #: stringpool.cc:528
 #, c-format
 msgid "%s: %s entries: %zu; buckets: %zu\n"
-msgstr "%s: %s masukan: %zu; buckets: %zu\n"
+msgstr ""
 
 #: stringpool.cc:532
 #, c-format
 msgid "%s: %s entries: %zu\n"
-msgstr "%s: %s masukan: %zu\n"
+msgstr ""
 
 #: stringpool.cc:535
 #, c-format
 msgid "%s: %s Stringdata structures: %zu\n"
-msgstr "%s: %s struktur Stringdata: %zu\n"
+msgstr ""
 
 #: symtab.cc:857
 #, c-format
 msgid "%s: reference to %s"
-msgstr "%s: referensi ke %s"
+msgstr ""
 
 #: symtab.cc:859
 #, c-format
 msgid "%s: definition of %s"
-msgstr "%s: definisi dari %s"
+msgstr ""
 
 #: symtab.cc:1052
 #, c-format
 msgid "bad global symbol name offset %u at %zu"
-msgstr "ofset nama simbol global buruk %u di %zu"
+msgstr ""
 
 #: symtab.cc:1278
 msgid "--just-symbols does not make sense with a shared object"
-msgstr "--just-symbols tidak masuk akal dengan sebuah objek terbagi"
+msgstr ""
 
 #: symtab.cc:1284
 msgid "too few symbol versions"
-msgstr "terlalu sedikit versi simbol"
+msgstr ""
 
 #: symtab.cc:1333
 #, c-format
 msgid "bad symbol name offset %u at %zu"
-msgstr "ofset nama simbol buruk %u di %zu"
+msgstr ""
 
 #: symtab.cc:1396
 #, c-format
 msgid "versym for symbol %zu out of range: %u"
-msgstr "versym untuk simbol %zu diluar dari jangkauan: %u"
+msgstr ""
 
 #: symtab.cc:1404
 #, c-format
 msgid "versym for symbol %zu has no name: %u"
-msgstr "versym untuk symbol %zu tidak memiliki nama: %u"
+msgstr ""
 
 #: symtab.cc:2549 symtab.cc:2681
 #, c-format
 msgid "%s: unsupported symbol section 0x%x"
-msgstr "%s: daerah simbol tidak didukung 0x%x"
+msgstr ""
 
 #: symtab.cc:2933
 #, c-format
 msgid "%s: symbol table entries: %zu; buckets: %zu\n"
-msgstr "%s: masukan tabel simbol: %zu; buckets: %zu\n"
+msgstr ""
 
 #: symtab.cc:2936
 #, c-format
 msgid "%s: symbol table entries: %zu\n"
-msgstr "%s: masukan tabel simbol: %zu\n"
+msgstr ""
 
 #: symtab.cc:3007
 #, c-format
 msgid "while linking %s: symbol '%s' defined in multiple places (possible ODR violation):"
-msgstr "ketika menyambungkan %s: simbol '%s' didefinisikan dalam beberapa tempat (mungkin penyimpangan ODR):"
+msgstr ""
 
 #: target-reloc.h:259
 msgid "relocation refers to discarded comdat section"
-msgstr "relokasi mereferensikan ke daerah comdat yang diabaikan"
+msgstr "再配置が破棄された domdat セクションを参照しています"
 
 #: target-reloc.h:298
 #, c-format
 msgid "reloc has bad offset %zu"
-msgstr "relokasi memliki ofset %zu buruk"
+msgstr "再配置に誤ったオフセット %zu があります"
 
 #: target.cc:90
 #, c-format
 msgid "%s: unsupported ELF file type %d"
-msgstr "%s: tipe berkas ELF %d tidak didukung"
+msgstr "%s: サポートされていない ELF ファイル型 %d です"
 
 #: target.cc:157
 #, c-format
 msgid "linker does not include stack split support required by %s"
-msgstr "linker does not include stack split support required by %s"
+msgstr "リンカは %s で必要となるスタック分割をサポートしていません"
 
 #: tls.h:59
 msgid "TLS relocation out of range"
-msgstr "relokasi TLS diluar dari jangkauan"
+msgstr "TLS 再配置が範囲外です"
 
 #: tls.h:73
 msgid "TLS relocation against invalid instruction"
-msgstr "relokasi TLS terhadap instruksi tidak valid"
+msgstr "無効な命令に対する TLS 再配置です"
 
 #. This output is intended to follow the GNU standards.
 #: version.cc:65
 #, c-format
 msgid "Copyright 2008 Free Software Foundation, Inc.\n"
-msgstr "Hak Cipta 2008 Free Software Foundation, Inc.\n"
+msgstr "Copyright 2008 Free Software Foundation, Inc.\n"
 
 #: version.cc:66
 #, c-format
@@ -2227,61 +2221,21 @@ msgid ""
 "the GNU General Public License version 3 or (at your option) a later version.\n"
 "This program has absolutely no warranty.\n"
 msgstr ""
-"Aplikasi ini adalah aplikasi bebas; anda boleh meredistribusikannya dibawah\n"
-"perjanjian dari GNU General Public License versi 3 atau (menurut pilihan anda)\n"
-" di versi selanjutnya.\n"
-"Aplikasi ini benar benar tidak bergaransi.\n"
+"This program is free software; you may redistribute it under the terms of\n"
+"the GNU General Public License version 3 or (at your option) a later version.\n"
+"This program has absolutely no warranty.\n"
 
 #: workqueue-threads.cc:106
 #, c-format
 msgid "%s failed: %s"
-msgstr "%s gagal: %s"
+msgstr "%s に失敗しました: %s"
 
 #: x86_64.cc:2184
 #, c-format
 msgid "unsupported reloc type %u"
-msgstr "tipe relokasi %u tidak didukung"
+msgstr "サポートされていない再配置型 %u です"
 
 #: x86_64.cc:2524
 #, c-format
 msgid "unsupported reloc %u against local symbol"
-msgstr "relokasi %u terhadap simbol lokal tidak didukung"
-
-#~ msgid " applied to section relative value"
-#~ msgstr " diaplikasikan ke daerah nilai relatif"
-
-#~ msgid "cannot find -l%s"
-#~ msgstr "tidak dapat menemukan -l%s"
-
-#~ msgid "%s: ELF file too short"
-#~ msgstr "%s: berkas ELF terlalu pendek"
-
-#~ msgid "%s: invalid ELF version 0"
-#~ msgstr "%s: versi ELF 0 tidak valid"
-
-#~ msgid "%s: unsupported ELF version %d"
-#~ msgstr "%s: versi %d ELF tidak didukung"
-
-#~ msgid "%s: invalid ELF class 0"
-#~ msgstr "%s: ELF kelas 0 tidak valid"
-
-#~ msgid "%s: unsupported ELF class %d"
-#~ msgstr "%s: ELF kelas %d tidak didukung"
-
-#~ msgid "%s: invalid ELF data encoding"
-#~ msgstr "%s: pengkodean data ELF tidak valid"
-
-#~ msgid "%s: unsupported ELF data encoding %d"
-#~ msgstr "%s: pengkodean data ELF %d tidak didukung"
-
-#~ msgid "%s: lseek: %s"
-#~ msgstr "%s: lseek: %s"
-
-#~ msgid "invalid assignment to dot outside of SECTIONS"
-#~ msgstr "penempatan tidak valid untuk dot diluar dari DAERAH"
-
-#~ msgid "%s: undefined reference to '%s', version '%s'"
-#~ msgstr "%s: referensi ke '%s' tidak terdefinisi, versi '%s'"
-
-#~ msgid "%s: undefined reference to '%s'"
-#~ msgstr "%s: referensi ke '%s' tidak terdefinisi"
+msgstr "サポートされていない局所シンボルに対する再配置 %u です"

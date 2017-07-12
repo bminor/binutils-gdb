@@ -1,5 +1,25 @@
 2017-07-12  Alan Modra  <amodra@gmail.com>
 
+	* po/bg.po: Update from translationproject.org/latest/ld/.
+	* po/da.po: Likewise.
+	* po/es.po: Likewise.
+	* po/fi.po: Likewise.
+	* po/fr.po: Likewise.
+	* po/id.po: Likewise.
+	* po/it.po: Likewise.
+	* po/ja.po: Likewise.
+	* po/tr.po: Likewise.
+	* po/uk.po: Likewise.
+	* po/vi.po: Likewise.
+	* po/zh_CN.po: Likewise.
+	* po/zh_TW.po: Likewise.
+	* po/de.po: New file from translationproject.org.
+	* po/ru.po: Likewise.
+	* configure.ac (ALL_LINGUAS): Add de, ru.  Sort.
+	* configure: Regenerate.
+
+2017-07-12  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-scripts/align.exp: Exclude powerpc*-*-aix*.
 	* testsuite/ld-scripts/assign-loc.d: Likewise.
 	* testsuite/ld-scripts/defined3.d: Likewise.

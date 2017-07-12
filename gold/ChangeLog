@@ -1,3 +1,16 @@
+2017-07-12  Alan Modra  <amodra@gmail.com>
+
+	* po/es.po: Update from translationproject.org/latest/gold/.
+	* po/fi.po: Likewise.
+	* po/fr.po: Likewise.
+	* po/id.po: Likewise.
+	* po/it.po: Likewise.
+	* po/vi.po: Likewise.
+	* po/zh_CN.po: Likewise.
+	* po/ja.po: New file from translationproject.org.
+	* po/sv.po: Likewise.
+	* po/uk.po: Likewise.
+
 2017-06-23  Alan Modra  <amodra@gmail.com>
 
 	* options.h (General_options): Add plt_localentry.
