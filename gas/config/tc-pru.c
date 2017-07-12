@@ -296,9 +296,10 @@ typedef enum
 static PRU_MODE pru_mode = PRU_MODE_ASSEMBLE;
 
 /* This function is used to in self-checking mode
-   to check the assembled instruction
-   opcode should be the assembled opcode, and exp_opcode
+   to check the assembled instruction.
+   OPCODE should be the assembled opcode, and exp_opcode
    the parsed string representing the expected opcode.  */
+
 static void
 pru_check_assembly (unsigned int opcode, const char *exp_opcode)
 {
@@ -1698,6 +1699,8 @@ md_assemble (char *op_str)
 
 	    case 'E':
 	      pru_check_assembly (insn->insn_code, *argtk++);
+	      continue;
+
 	    default:
 	      BAD_CASE (*argp);
 	    }

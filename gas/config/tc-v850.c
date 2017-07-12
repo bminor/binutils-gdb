@@ -2298,7 +2298,7 @@ md_assemble (char *str)
   const unsigned char *opindex_ptr;
   int next_opindex;
   int relaxable = 0;
-  unsigned long insn;
+  unsigned long insn = 0;
   unsigned long insn_size;
   char *f = NULL;
   int i;

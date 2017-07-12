@@ -1,3 +1,15 @@
+2017-07-12  Nick Clifton  <nickc@redhat.com>
+
+	Fix compile time warnings using gcc 7.1.1.
+	* elf32-xtensa.c (elf_xtensa_get_plt_section): Increase length of
+	plt_name buffer.
+	(elf_xtensa_get_gotplt_section): Increase length of got_name
+	buffer.
+	* mach-o-arm.c (bfd_mach_o_arm_canonicalize_one_reloc): Add a
+	default return of FALSE.
+	* mach-o-i386.c (bfd_mach_o_i386_canonicalize_one_reloc): Add a
+	default return of FALSE.
+
 2017-07-10  Nick Clifton  <nickc@redhat.com>
 
 	* coffcode.h (coff_slurp_symbol_table): Do not include an entry

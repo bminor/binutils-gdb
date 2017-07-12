@@ -1,3 +1,11 @@
+2017-07-12  Nick Clifton  <nickc@redhat.com>
+
+	Fix compile time warnings using gcc 7.1.1.
+	* dwarf.c (dwarf_vmatoa_1): Do not pass a NULL string pointer to
+	sprintf.
+	* srconv.c (walk_tree_type): Initialise the spare field of the
+	IT_dty structure.
+
 2017-07-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf.c (display_debug_names): Replace index with xindex.

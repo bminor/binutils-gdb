@@ -1,3 +1,10 @@
+2017-07-12  Nick Clifton  <nickc@redhat.com>
+
+	Fix compile time warnings using gcc 7.1.1.
+	* config/tc-pru.c (md_assemble): Add continue statement after
+	handling 'E' operand character.
+	* config/tc-v850.c (md_assemble): Initialise the 'insn' variable.
+
 2017-07-04  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
