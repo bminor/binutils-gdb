@@ -217,7 +217,7 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (amd64fbsd_r_reg_offset);
   tdep->sizeof_gregset = 22 * 8;
 
-  amd64_init_abi (info, gdbarch);
+  amd64_init_abi (info, gdbarch, tdesc_amd64);
 
   tdep->sigtramp_p = amd64fbsd_sigtramp_p;
   tdep->sigtramp_start = amd64fbsd_sigtramp_start_addr;

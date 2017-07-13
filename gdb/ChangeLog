@@ -1,3 +1,28 @@
+2017-07-13  Pedro Alves  <palves@redhat.com>
+
+	* amd64-darwin-tdep.c (x86_darwin_init_abi_64): Pass tdesc_amd64
+	as default tdesc.
+	* amd64-dicos-tdep.c (amd64_dicos_init_abi):
+	* amd64-fbsd-tdep.c (amd64fbsd_init_abi):
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Pass
+	tdesc_amd64_linux as default tdesc.  Get final tdesc from the
+	tdep.
+	(amd64_x32_linux_init_abi): Pass tdesc_x32_linux as default tdesc.
+	Get final tdesc from the tdep.
+	* amd64-nbsd-tdep.c (amd64nbsd_init_abi): Pass tdesc_amd64 as
+	default tdesc.
+	* amd64-obsd-tdep.c (amd64obsd_init_abi): Likewise.
+	* amd64-sol2-tdep.c (amd64_sol2_init_abi): Likewise.
+	* amd64-tdep.c (amd64_init_abi): Add 'default_tdesc' parameter.
+	Use it as default tdesc.
+	(amd64_x32_init_abi): Add 'default_tdesc' parameter, and pass it
+	down to amd_init_abi.  No longer handle fallback tdesc here.
+	* amd64-tdep.h (tdesc_x32): Declare.
+	(amd64_init_abi, amd64_x32_init_abi): Add 'default_tdesc'
+	parameter.
+	* amd64-windows-tdep.c (amd64_windows_init_abi): Pass tdesc_amd64
+	as default tdesc.
+
 2017-07-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-linux-tdep.c (s390_process_record): Add support for

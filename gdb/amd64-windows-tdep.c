@@ -1224,7 +1224,7 @@ amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   */
   frame_unwind_append_unwinder (gdbarch, &amd64_windows_frame_unwind);
 
-  amd64_init_abi (info, gdbarch);
+  amd64_init_abi (info, gdbarch, tdesc_amd64);
 
   windows_init_abi (info, gdbarch);
 
