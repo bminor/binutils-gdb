@@ -1,3 +1,11 @@
+2017-07-14  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21763:
+	* symtab.c (symbol_matches_domain): Add language_rust to special
+	case.
+	* rust-exp.y (convert_ast_to_expression) <OP_VAR_VALUE>: Don't
+	treat LOC_TYPEDEF symbols as variables.
+
 2017-07-14  Pedro Alves  <palves@redhat.com>
 
 	* symtab.c (make_file_symbol_completion_list_1): Iterate over

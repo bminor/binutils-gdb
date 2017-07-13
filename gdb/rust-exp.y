@@ -2316,7 +2316,7 @@ convert_ast_to_expression (struct parser_state *state,
 	varname = convert_name (state, operation);
 	sym = rust_lookup_symbol (varname, expression_context_block,
 				  VAR_DOMAIN);
-	if (sym.symbol != NULL)
+	if (sym.symbol != NULL && SYMBOL_CLASS (sym.symbol) != LOC_TYPEDEF)
 	  {
 	    write_exp_elt_opcode (state, OP_VAR_VALUE);
 	    write_exp_elt_block (state, sym.block);
@@ -2325,9 +2325,15 @@ convert_ast_to_expression (struct parser_state *state,
 	  }
 	else
 	  {
-	    struct type *type;
+	    struct type *type = NULL;
 
-	    type = rust_lookup_type (varname, expression_context_block);
+	    if (sym.symbol != NULL)
+	      {
+		gdb_assert (SYMBOL_CLASS (sym.symbol) == LOC_TYPEDEF);
+		type = SYMBOL_TYPE (sym.symbol);
+	      }
+	    if (type == NULL)
+	      type = rust_lookup_type (varname, expression_context_block);
 	    if (type == NULL)
 	      error (_("No symbol '%s' in current context"), varname);
 

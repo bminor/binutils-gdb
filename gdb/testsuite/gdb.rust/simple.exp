@@ -246,3 +246,11 @@ gdb_test "print parametrized.next.val" \
     " = \\(simple::ParametrizedStruct<i32> \\*\\) $hex"
 gdb_test "print parametrized" \
     " = simple::ParametrizedStruct<i32> \\{next: simple::ParametrizedEnum<\[a-z:\]*Box<simple::ParametrizedStruct<i32>>>::Val\\{val: $hex\\}, value: 0\\}"
+
+
+load_lib gdb-python.exp
+if {[skip_python_tests]} {
+    continue
+}
+
+gdb_test "python print(gdb.lookup_type('simple::HiBob'))" "simple::HiBob"
