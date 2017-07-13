@@ -1,0 +1,37 @@
+From 572333ba13fdeef3f7769bf11e169800f9170f22 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Fri, 7 Mar 2014 10:51:47 -0800
+Subject: [PATCH 2/3] Add test for nm on mixed LTO/non-LTO object
+
+	* testsuite/ld-plugin/lto.exp: Add test for nm on
+	mixed LTO/non-LTO object.
+---
+ ld/testsuite/ld-plugin/lto.exp | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/ld/testsuite/ld-plugin/lto.exp b/ld/testsuite/ld-plugin/lto.exp
+index 3e6b918..ba46d26 100644
+--- a/ld/testsuite/ld-plugin/lto.exp
++++ b/ld/testsuite/ld-plugin/lto.exp
+@@ -540,6 +540,18 @@ run_dump_test "lto-5r"
+ remote_exec host "mv" "tmpdir/dump tmpdir/lto-5.o"
+ run_dump_test "lto-10r"
+ remote_exec host "mv" "tmpdir/dump tmpdir/lto-10.o"
++set testname "nm mixed object"
++set lto_plugin [run_host_cmd "$CC" "-print-prog-name=liblto_plugin.so tmpdir/lto-10.o"]
++if { [ regexp "liblto_plugin.so" $lto_plugin ] } {
++    set exec_output [run_host_cmd "$NM" "--plugin $lto_plugin tmpdir/lto-10.o"]
++    if { [ regexp "T main" $exec_output ] } {
++	pass $testname
++    } {
++	fail $testname
++    }
++} {
++    fail $testname
++ }
+ 
+ run_cc_link_tests $lto_link_symbol_tests
+ 
+-- 
+2.9.4
+

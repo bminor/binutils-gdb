@@ -17,6 +17,8 @@ clean=$1
 
 patches="
 	binutils-lto-mixed.patch
+	binutils-lto-mixed-test.patch
+	binutils-lto-mixed-plugin.patch
 	binutils-pr12639.patch
 	binutils-secondary.patch
 	binutils-pr21128.patch
