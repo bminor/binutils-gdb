@@ -1,3 +1,8 @@
+2017-07-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_process_record): Add support for
+	instructions new in arch12.
+
 2017-07-11  John Baldwin  <jhb@FreeBSD.org>
 
 	* amd64-bsd-nat.c (amd64bsd_fetch_inferior_registers): Use
