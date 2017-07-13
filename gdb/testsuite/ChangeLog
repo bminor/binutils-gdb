@@ -1,5 +1,10 @@
 2017-07-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.mi/mi-vla-fortran.exp: Correct even more parameter passing
+	to mi_create_breakpoint.
+
+2017-07-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.mi/mi-vla-fortran.exp: Correct parameter passing to
 	mi_create_breakpoint.
 

@@ -127,8 +127,9 @@ mi_gdb_test "570-data-evaluate-expression vla1" \
 
 
 set bp_lineno [gdb_get_line_number "pvla2-not-associated"]
-mi_create_breakpoint "-t vla.f90:$bp_lineno" 6 "del" "vla" ".*vla.f90" \
-  $bp_lineno $hex "insert breakpoint at line $bp_lineno"
+mi_create_breakpoint "-t vla.f90:$bp_lineno" \
+    "insert breakpoint at line $bp_lineno" \
+    -number 6 -disp "del" -func "vla" ".*vla.f90" $bp_lineno $hex
 mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
