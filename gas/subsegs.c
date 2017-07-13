@@ -25,6 +25,8 @@
 #include "subsegs.h"
 #include "obstack.h"
 
+#include "dwarf2dbg.h"
+
 frchainS *frchain_now;
 
 static struct obstack frchains;

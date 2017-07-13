@@ -37,6 +37,7 @@
 #include "macro.h"
 #include "obstack.h"
 #include "ecoff.h"
+#include "dwarf2dbg.h"
 #include "dw2gencfi.h"
 #include "wchar.h"
 
