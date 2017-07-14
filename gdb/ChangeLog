@@ -1,3 +1,20 @@
+2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ax-gdb.c (gen_usual_unary): Remove exp parameter, get gdbarch
+	from ax, update calls.
+	(gen_usual_arithmetic): Likewise.
+	(gen_integral_promotions): Likewise.
+	(gen_bitfield_ref): Likewise.
+	(gen_primitive_field): Likewise.
+	(gen_struct_ref_recursive): Likewise.
+	(gen_struct_ref): Likewise.
+	(gen_maybe_namespace_elt): Likewise.
+	(gen_struct_elt_for_reference): Likewise.
+	(gen_namespace_elt): Likewise.
+	(gen_aggregate_elt_ref): Likewise.
+	(gen_expr): Get gdbarch from ax, update calls.
+	(gen_expr_binop_rest): Likewise.
+
 2017-07-13  Pedro Alves  <palves@redhat.com>
 
 	* amd64-darwin-tdep.c (x86_darwin_init_abi_64): Pass tdesc_amd64
