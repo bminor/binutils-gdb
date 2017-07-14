@@ -1,3 +1,17 @@
+2017-07-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/powerpc.exp: Add -shared to tlsop5 tests.
+	* testsuite/ld-powerpc/tlsopt5.d: Adjust.
+	* testsuite/ld-powerpc/tlsopt1_32.s: Use r30 as GOT pointer.
+	* testsuite/ld-powerpc/tlsopt2_32.s: Likewise.
+	* testsuite/ld-powerpc/tlsopt3_32.s: Likewise.
+	* testsuite/ld-powerpc/tlsopt4_32.s: Likewise.
+	* testsuite/ld-powerpc/tlsopt5_32.s: Rewrite.
+	* testsuite/ld-powerpc/tlsopt1_32.d: Adjust.
+	* testsuite/ld-powerpc/tlsopt2_32.d: Adjust.
+	* testsuite/ld-powerpc/tlsopt3_32.d: Adjust.
+	* testsuite/ld-powerpc/tlsopt5_32.d: Adjust.
+
 2017-08-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21923
