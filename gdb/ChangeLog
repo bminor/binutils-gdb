@@ -1,5 +1,11 @@
 2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* ax-gdb.c (gen_aggregate_elt_ref): Remove operand_name and
+	operator_name parameters.
+	(gen_expr): Update function call.
+
+2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* dwarf2loc.h (dwarf2_compile_expr_to_ax): Remove gdbarch
 	parameter.
 	* symtab.h (struct symbol_computed_ops::tracepoint_var_ref):

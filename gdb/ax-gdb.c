@@ -1651,9 +1651,7 @@ gen_maybe_namespace_elt (struct agent_expr *ax, struct axs_value *value,
 
 static int
 gen_aggregate_elt_ref (struct agent_expr *ax, struct axs_value *value,
-		       struct type *type, char *field,
-		       const char *operator_name,
-		       const char *operand_name)
+		       struct type *type, char *field)
 {
   switch (TYPE_CODE (type))
     {
@@ -2198,7 +2196,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	char *name = &(*pc)[3].string;
 	int found;
 
-	found = gen_aggregate_elt_ref (ax, value, type, name, "?", "??");
+	found = gen_aggregate_elt_ref (ax, value, type, name);
 	if (!found)
 	  error (_("There is no field named %s"), name);
 	(*pc) += 5 + BYTES_TO_EXP_ELEM (length + 1);
