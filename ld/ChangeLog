@@ -1,3 +1,8 @@
+2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-unique/pr21529.ld: New test linker script.
+	* testsuite/ld-unique/pr21529.d: Use it.
+
 2017-07-12  Alan Modra  <amodra@gmail.com>
 
 	* po/bg.po: Update from translationproject.org/latest/ld/.
