@@ -1,5 +1,11 @@
 2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* ax-gdb.c (gen_deref, gen_address_of): Remove unused ax
+	parameter.
+	(gen_struct_ref, gen_expr, gen_expr_binop_rest): Update call.
+
+2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* ax-gdb.c (gen_usual_unary): Remove exp parameter, get gdbarch
 	from ax, update calls.
 	(gen_usual_arithmetic): Likewise.

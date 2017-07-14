@@ -130,8 +130,8 @@ static void gen_binop (struct agent_expr *ax,
 static void gen_logical_not (struct agent_expr *ax, struct axs_value *value,
 			     struct type *result_type);
 static void gen_complement (struct agent_expr *ax, struct axs_value *value);
-static void gen_deref (struct agent_expr *, struct axs_value *);
-static void gen_address_of (struct agent_expr *, struct axs_value *);
+static void gen_deref (struct axs_value *);
+static void gen_address_of (struct axs_value *);
 static void gen_bitfield_ref (struct agent_expr *ax, struct axs_value *value,
 			      struct type *type, int start, int end);
 static void gen_primitive_field (struct agent_expr *ax,
@@ -1188,7 +1188,7 @@ gen_complement (struct agent_expr *ax, struct axs_value *value)
 
 /* Dereference the value on the top of the stack.  */
 static void
-gen_deref (struct agent_expr *ax, struct axs_value *value)
+gen_deref (struct axs_value *value)
 {
   /* The caller should check the type, because several operators use
      this, and we don't know what error message to generate.  */
@@ -1211,7 +1211,7 @@ gen_deref (struct agent_expr *ax, struct axs_value *value)
 
 /* Produce the address of the lvalue on the top of the stack.  */
 static void
-gen_address_of (struct agent_expr *ax, struct axs_value *value)
+gen_address_of (struct axs_value *value)
 {
   /* Special case for taking the address of a function.  The ANSI
      standard describes this as a special case, too, so this
@@ -1501,7 +1501,7 @@ gen_struct_ref (struct agent_expr *ax, struct axs_value *value,
   while (pointer_type (value->type))
     {
       require_rvalue (ax, value);
-      gen_deref (ax, value);
+      gen_deref (value);
     }
   type = check_typedef (value->type);
 
@@ -2132,13 +2132,13 @@ gen_expr (struct expression *exp, union exp_element **pc,
       gen_usual_unary (ax, value);
       if (!pointer_type (value->type))
 	error (_("Argument of unary `*' is not a pointer."));
-      gen_deref (ax, value);
+      gen_deref (value);
       break;
 
     case UNOP_ADDR:
       (*pc)++;
       gen_expr (exp, pc, ax, value);
-      gen_address_of (ax, value);
+      gen_address_of (value);
       break;
 
     case UNOP_SIZEOF:
@@ -2316,7 +2316,7 @@ gen_expr_binop_rest (struct expression *exp,
 		   "not a number or boolean."));
 
 	gen_ptradd (ax, value, value1, value2);
-	gen_deref (ax, value);
+	gen_deref (value);
 	break;
       }
     case BINOP_BITWISE_AND:
