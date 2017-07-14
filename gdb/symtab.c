@@ -5379,13 +5379,12 @@ make_symbol_completion_list_fn (struct cmd_list_element *ignore,
 }
 
 /* Like make_symbol_completion_list, but returns a list of symbols
-   defined in a source file FILE.  */
+   defined in all source files name SRCFILE.  */
 
 static VEC (char_ptr) *
 make_file_symbol_completion_list_1 (const char *text, const char *word,
 				    const char *srcfile)
 {
-  struct symtab *s;
   /* The symbol we are completing on.  Points in same buffer as text.  */
   const char *sym_text;
   /* Length of sym_text.  */
@@ -5436,28 +5435,15 @@ make_file_symbol_completion_list_1 (const char *text, const char *word,
 
   sym_text_len = strlen (sym_text);
 
-  /* Find the symtab for SRCFILE (this loads it if it was not yet read
-     in).  */
-  s = lookup_symtab (srcfile);
-  if (s == NULL)
+  /* Go through symtabs for SRCFILE and check the externs and statics
+     for symbols which match.  */
+  iterate_over_symtabs (srcfile, [&] (symtab *s)
     {
-      /* Maybe they typed the file with leading directories, while the
-	 symbol tables record only its basename.  */
-      const char *tail = lbasename (srcfile);
-
-      if (tail > srcfile)
-	s = lookup_symtab (tail);
-    }
-
-  /* If we have no symtab for that file, return an empty list.  */
-  if (s == NULL)
-    return (return_val);
-
-  /* Go through this symtab and check the externs and statics for
-     symbols which match.  */
-  add_symtab_completions (SYMTAB_COMPUNIT (s),
-			  sym_text, sym_text_len,
-			  text, word, TYPE_CODE_UNDEF);
+      add_symtab_completions (SYMTAB_COMPUNIT (s),
+			      sym_text, sym_text_len,
+			      text, word, TYPE_CODE_UNDEF);
+      return false;
+    });
 
   return (return_val);
 }

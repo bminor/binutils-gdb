@@ -1,3 +1,9 @@
+2017-07-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.linespec/base/one/thefile.cc (z1): New function.
+	* gdb.linespec/base/two/thefile.cc (z2): New function.
+	* gdb.linespec/linespec.exp: Add tests.
+
 2017-07-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.mi/mi-vla-fortran.exp: Correct even more parameter passing

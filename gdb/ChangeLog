@@ -1,3 +1,9 @@
+2017-07-14  Pedro Alves  <palves@redhat.com>
+
+	* symtab.c (make_file_symbol_completion_list_1): Iterate over
+	symtabs matching all symtabs with SRCFILE as file name instead of
+	only considering the first hit, with lookup_symtab.
+
 2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* ax-gdb.c (gen_aggregate_elt_ref): Remove operand_name and
