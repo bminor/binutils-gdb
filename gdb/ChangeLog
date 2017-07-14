@@ -1,5 +1,29 @@
 2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* dwarf2loc.h (dwarf2_compile_expr_to_ax): Remove gdbarch
+	parameter.
+	* symtab.h (struct symbol_computed_ops::tracepoint_var_ref):
+	Likewise.
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax): Remove gdbarch
+	parameter, use agent_expr::gdbarch instead, update function
+	calls.
+	(locexpr_tracepoint_var_ref): Likewise.
+	(loclist_tracepoint_var_ref): Likewise.
+	* ax-gdb.c (gen_trace_static_fields): Likewise.
+	(gen_traced_pop): Likewise.
+	(gen_frame_args_address): Likewise.
+	(gen_frame_locals_address): Likewise.
+	(gen_var_ref): Likewise.
+	(gen_struct_ref_recursive): Likewise.
+	(gen_static_field): Likewise.
+	(gen_maybe_namespace_elt): Likewise.
+	(gen_expr): Likewise.
+	(gen_trace_for_var): Likewise.
+	(gen_trace_for_expr): Likewise.
+	(gen_trace_for_return_address): Likewise.
+
+2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* ax-gdb.c (gen_deref, gen_address_of): Remove unused ax
 	parameter.
 	(gen_struct_ref, gen_expr, gen_expr_binop_rest): Update call.

@@ -3018,10 +3018,11 @@ get_ax_pc (void *baton)
 
 void
 dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
-			   struct gdbarch *arch, unsigned int addr_size,
-			   const gdb_byte *op_ptr, const gdb_byte *op_end,
+			   unsigned int addr_size, const gdb_byte *op_ptr,
+			   const gdb_byte *op_end,
 			   struct dwarf2_per_cu_data *per_cu)
 {
+  gdbarch *arch = expr->gdbarch;
   int i;
   std::vector<int> dw_labels, patches;
   const gdb_byte * const base = op_ptr;
@@ -3297,7 +3298,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 					     &datastart, &datalen);
 
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
-	    dwarf2_compile_expr_to_ax (expr, loc, arch, addr_size, datastart,
+	    dwarf2_compile_expr_to_ax (expr, loc, addr_size, datastart,
 				       datastart + datalen, per_cu);
 	    if (loc->kind == axs_lvalue_register)
 	      require_rvalue (expr, loc);
@@ -3523,8 +3524,8 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	      {
 		/* Another expression.  */
 		ax_const_l (expr, text_offset);
-		dwarf2_compile_expr_to_ax (expr, loc, arch, addr_size,
-					   cfa_start, cfa_end, per_cu);
+		dwarf2_compile_expr_to_ax (expr, loc, addr_size, cfa_start,
+					   cfa_end, per_cu);
 	      }
 
 	    loc->kind = axs_lvalue_memory;
@@ -3648,9 +3649,8 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	    /* DW_OP_call_ref is currently not supported.  */
 	    gdb_assert (block.per_cu == per_cu);
 
-	    dwarf2_compile_expr_to_ax (expr, loc, arch, addr_size,
-				       block.data, block.data + block.size,
-				       per_cu);
+	    dwarf2_compile_expr_to_ax (expr, loc, addr_size, block.data,
+				       block.data + block.size, per_cu);
 	  }
 	  break;
 
@@ -4407,8 +4407,8 @@ locexpr_describe_location (struct symbol *symbol, CORE_ADDR addr,
    any necessary bytecode in AX.  */
 
 static void
-locexpr_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
-			    struct agent_expr *ax, struct axs_value *value)
+locexpr_tracepoint_var_ref (struct symbol *symbol, struct agent_expr *ax,
+			    struct axs_value *value)
 {
   struct dwarf2_locexpr_baton *dlbaton
     = (struct dwarf2_locexpr_baton *) SYMBOL_LOCATION_BATON (symbol);
@@ -4417,9 +4417,8 @@ locexpr_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
   if (dlbaton->size == 0)
     value->optimized_out = 1;
   else
-    dwarf2_compile_expr_to_ax (ax, value, gdbarch, addr_size,
-			       dlbaton->data, dlbaton->data + dlbaton->size,
-			       dlbaton->per_cu);
+    dwarf2_compile_expr_to_ax (ax, value, addr_size, dlbaton->data,
+			       dlbaton->data + dlbaton->size, dlbaton->per_cu);
 }
 
 /* symbol_computed_ops 'generate_c_location' method.  */
@@ -4615,8 +4614,8 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 /* Describe the location of SYMBOL as an agent value in VALUE, generating
    any necessary bytecode in AX.  */
 static void
-loclist_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
-			    struct agent_expr *ax, struct axs_value *value)
+loclist_tracepoint_var_ref (struct symbol *symbol, struct agent_expr *ax,
+			    struct axs_value *value)
 {
   struct dwarf2_loclist_baton *dlbaton
     = (struct dwarf2_loclist_baton *) SYMBOL_LOCATION_BATON (symbol);
@@ -4628,7 +4627,7 @@ loclist_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
   if (size == 0)
     value->optimized_out = 1;
   else
-    dwarf2_compile_expr_to_ax (ax, value, gdbarch, addr_size, data, data + size,
+    dwarf2_compile_expr_to_ax (ax, value, addr_size, data, data + size,
 			       dlbaton->per_cu);
 }
 

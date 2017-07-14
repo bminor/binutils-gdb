@@ -270,7 +270,6 @@ extern const struct symbol_block_ops dwarf2_block_frame_base_loclist_funcs;
 
 extern void dwarf2_compile_expr_to_ax (struct agent_expr *expr,
 				       struct axs_value *loc,
-				       struct gdbarch *arch,
 				       unsigned int addr_size,
 				       const gdb_byte *op_ptr,
 				       const gdb_byte *op_end,

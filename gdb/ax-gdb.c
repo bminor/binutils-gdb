@@ -77,8 +77,7 @@ static struct value *const_var_ref (struct symbol *var);
 static struct value *const_expr (union exp_element **pc);
 static struct value *maybe_const_expr (union exp_element **pc);
 
-static void gen_traced_pop (struct gdbarch *, struct agent_expr *,
-			    struct axs_value *);
+static void gen_traced_pop (struct agent_expr *, struct axs_value *);
 
 static void gen_sign_extend (struct agent_expr *, struct type *);
 static void gen_extend (struct agent_expr *, struct type *);
@@ -86,12 +85,12 @@ static void gen_fetch (struct agent_expr *, struct type *);
 static void gen_left_shift (struct agent_expr *, int);
 
 
-static void gen_frame_args_address (struct gdbarch *, struct agent_expr *);
-static void gen_frame_locals_address (struct gdbarch *, struct agent_expr *);
+static void gen_frame_args_address (struct agent_expr *);
+static void gen_frame_locals_address (struct agent_expr *);
 static void gen_offset (struct agent_expr *ax, int offset);
 static void gen_sym_offset (struct agent_expr *, struct symbol *);
-static void gen_var_ref (struct gdbarch *, struct agent_expr *ax,
-			 struct axs_value *value, struct symbol *var);
+static void gen_var_ref (struct agent_expr *ax, struct axs_value *value,
+			 struct symbol *var);
 
 
 static void gen_int_literal (struct agent_expr *ax,
@@ -146,8 +145,7 @@ static void gen_struct_ref (struct agent_expr *ax,
 			    const char *field,
 			    const char *operator_name,
 			    const char *operand_name);
-static void gen_static_field (struct gdbarch *gdbarch,
-			      struct agent_expr *ax, struct axs_value *value,
+static void gen_static_field (struct agent_expr *ax, struct axs_value *value,
 			      struct type *type, int fieldno);
 static void gen_repeat (struct expression *exp, union exp_element **pc,
 			struct agent_expr *ax, struct axs_value *value);
@@ -312,8 +310,7 @@ maybe_const_expr (union exp_element **pc)
    classes, and generate tracing bytecodes for each.  */
 
 static void
-gen_trace_static_fields (struct gdbarch *gdbarch,
-			 struct agent_expr *ax,
+gen_trace_static_fields (struct agent_expr *ax,
 			 struct type *type)
 {
   int i, nbases = TYPE_N_BASECLASSES (type);
@@ -325,7 +322,7 @@ gen_trace_static_fields (struct gdbarch *gdbarch,
     {
       if (field_is_static (&TYPE_FIELD (type, i)))
 	{
-	  gen_static_field (gdbarch, ax, &value, type, i);
+	  gen_static_field (ax, &value, type, i);
 	  if (value.optimized_out)
 	    continue;
 	  switch (value.kind)
@@ -355,7 +352,7 @@ gen_trace_static_fields (struct gdbarch *gdbarch,
     {
       struct type *basetype = check_typedef (TYPE_BASECLASS (type, i));
 
-      gen_trace_static_fields (gdbarch, ax, basetype);
+      gen_trace_static_fields (ax, basetype);
     }
 }
 
@@ -363,8 +360,7 @@ gen_trace_static_fields (struct gdbarch *gdbarch,
    the value.  Useful on the left side of a comma, and at the end of
    an expression being used for tracing.  */
 static void
-gen_traced_pop (struct gdbarch *gdbarch,
-		struct agent_expr *ax, struct axs_value *value)
+gen_traced_pop (struct agent_expr *ax, struct axs_value *value)
 {
   int string_trace = 0;
   if (ax->trace_string
@@ -437,7 +433,7 @@ gen_traced_pop (struct gdbarch *gdbarch,
   if (ax->tracing
       && (TYPE_CODE (value->type) == TYPE_CODE_STRUCT
 	  || TYPE_CODE (value->type) == TYPE_CODE_UNION))
-    gen_trace_static_fields (gdbarch, ax, value->type);
+    gen_trace_static_fields (ax, value->type);
 }
 
 
@@ -556,12 +552,12 @@ gen_left_shift (struct agent_expr *ax, int distance)
 /* Generate code to push the base address of the argument portion of
    the top stack frame.  */
 static void
-gen_frame_args_address (struct gdbarch *gdbarch, struct agent_expr *ax)
+gen_frame_args_address (struct agent_expr *ax)
 {
   int frame_reg;
   LONGEST frame_offset;
 
-  gdbarch_virtual_frame_pointer (gdbarch,
+  gdbarch_virtual_frame_pointer (ax->gdbarch,
 				 ax->scope, &frame_reg, &frame_offset);
   ax_reg (ax, frame_reg);
   gen_offset (ax, frame_offset);
@@ -571,12 +567,12 @@ gen_frame_args_address (struct gdbarch *gdbarch, struct agent_expr *ax)
 /* Generate code to push the base address of the locals portion of the
    top stack frame.  */
 static void
-gen_frame_locals_address (struct gdbarch *gdbarch, struct agent_expr *ax)
+gen_frame_locals_address (struct agent_expr *ax)
 {
   int frame_reg;
   LONGEST frame_offset;
 
-  gdbarch_virtual_frame_pointer (gdbarch,
+  gdbarch_virtual_frame_pointer (ax->gdbarch,
 				 ax->scope, &frame_reg, &frame_offset);
   ax_reg (ax, frame_reg);
   gen_offset (ax, frame_offset);
@@ -621,8 +617,7 @@ gen_sym_offset (struct agent_expr *ax, struct symbol *var)
    symbol VAR.  Set VALUE to describe the result.  */
 
 static void
-gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
-	     struct axs_value *value, struct symbol *var)
+gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
 {
   /* Dereference any typedefs.  */
   value->type = check_typedef (SYMBOL_TYPE (var));
@@ -630,7 +625,7 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
 
   if (SYMBOL_COMPUTED_OPS (var) != NULL)
     {
-      SYMBOL_COMPUTED_OPS (var)->tracepoint_var_ref (var, gdbarch, ax, value);
+      SYMBOL_COMPUTED_OPS (var)->tracepoint_var_ref (var, ax, value);
       return;
     }
 
@@ -660,22 +655,22 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
       break;
 
     case LOC_ARG:		/* var lives in argument area of frame */
-      gen_frame_args_address (gdbarch, ax);
+      gen_frame_args_address (ax);
       gen_sym_offset (ax, var);
       value->kind = axs_lvalue_memory;
       break;
 
     case LOC_REF_ARG:		/* As above, but the frame slot really
 				   holds the address of the variable.  */
-      gen_frame_args_address (gdbarch, ax);
+      gen_frame_args_address (ax);
       gen_sym_offset (ax, var);
       /* Don't assume any particular pointer size.  */
-      gen_fetch (ax, builtin_type (gdbarch)->builtin_data_ptr);
+      gen_fetch (ax, builtin_type (ax->gdbarch)->builtin_data_ptr);
       value->kind = axs_lvalue_memory;
       break;
 
     case LOC_LOCAL:		/* var lives in locals area of frame */
-      gen_frame_locals_address (gdbarch, ax);
+      gen_frame_locals_address (ax);
       gen_sym_offset (ax, var);
       value->kind = axs_lvalue_memory;
       break;
@@ -695,7 +690,8 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
          this as an lvalue or rvalue, the caller will generate the
          right code.  */
       value->kind = axs_lvalue_register;
-      value->u.reg = SYMBOL_REGISTER_OPS (var)->register_number (var, gdbarch);
+      value->u.reg
+	= SYMBOL_REGISTER_OPS (var)->register_number (var, ax->gdbarch);
       break;
 
       /* A lot like LOC_REF_ARG, but the pointer lives directly in a
@@ -703,7 +699,8 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
          because it's just like any other case where the thing
 	 has a real address.  */
     case LOC_REGPARM_ADDR:
-      ax_reg (ax, SYMBOL_REGISTER_OPS (var)->register_number (var, gdbarch));
+      ax_reg (ax,
+	      SYMBOL_REGISTER_OPS (var)->register_number (var, ax->gdbarch));
       value->kind = axs_lvalue_memory;
       break;
 
@@ -1446,7 +1443,7 @@ gen_struct_ref_recursive (struct agent_expr *ax, struct axs_value *value,
 		 being handled as a global.  */
 	      if (field_is_static (&TYPE_FIELD (type, i)))
 		{
-		  gen_static_field (ax->gdbarch, ax, value, type, i);
+		  gen_static_field (ax, value, type, i);
 		  if (value->optimized_out)
 		    error (_("static field `%s' has been "
 			     "optimized out, cannot use"),
@@ -1532,8 +1529,7 @@ gen_maybe_namespace_elt (struct agent_expr *ax, struct axs_value *value,
 			 const struct type *curtype, char *name);
 
 static void
-gen_static_field (struct gdbarch *gdbarch,
-		  struct agent_expr *ax, struct axs_value *value,
+gen_static_field (struct agent_expr *ax, struct axs_value *value,
 		  struct type *type, int fieldno)
 {
   if (TYPE_FIELD_LOC_KIND (type, fieldno) == FIELD_LOC_KIND_PHYSADDR)
@@ -1550,7 +1546,7 @@ gen_static_field (struct gdbarch *gdbarch,
 
       if (sym)
 	{
-	  gen_var_ref (gdbarch, ax, value, sym);
+	  gen_var_ref (ax, value, sym);
   
 	  /* Don't error if the value was optimized out, we may be
 	     scanning all static fields and just want to pass over this
@@ -1585,7 +1581,7 @@ gen_struct_elt_for_reference (struct agent_expr *ax, struct axs_value *value,
 	{
 	  if (field_is_static (&TYPE_FIELD (t, i)))
 	    {
-	      gen_static_field (ax->gdbarch, ax, value, t, i);
+	      gen_static_field (ax, value, t, i);
 	      if (value->optimized_out)
 		error (_("static field `%s' has been "
 			 "optimized out, cannot use"),
@@ -1643,7 +1639,7 @@ gen_maybe_namespace_elt (struct agent_expr *ax, struct axs_value *value,
   if (sym.symbol == NULL)
     return 0;
 
-  gen_var_ref (ax->gdbarch, ax, value, sym.symbol);
+  gen_var_ref (ax, value, sym.symbol);
 
   if (value->optimized_out)
     error (_("`%s' has been optimized out, cannot use"),
@@ -1945,7 +1941,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       /* Don't just dispose of the left operand.  We might be tracing,
          in which case we want to emit code to trace it if it's an
          lvalue.  */
-      gen_traced_pop (ax->gdbarch, ax, &value1);
+      gen_traced_pop (ax, &value1);
       gen_expr (exp, pc, ax, value);
       /* It's the consumer's responsibility to trace the right operand.  */
       break;
@@ -1961,7 +1957,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       break;
 
     case OP_VAR_VALUE:
-      gen_var_ref (ax->gdbarch, ax, value, (*pc)[2].symbol);
+      gen_var_ref (ax, value, (*pc)[2].symbol);
 
       if (value->optimized_out)
 	error (_("`%s' has been optimized out, cannot use"),
@@ -2185,7 +2181,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	if (!sym)
 	  error (_("no `%s' found"), lang->la_name_of_this);
 
-	gen_var_ref (ax->gdbarch, ax, value, sym);
+	gen_var_ref (ax, value, sym);
 
 	if (value->optimized_out)
 	  error (_("`%s' has been optimized out, cannot use"),
@@ -2386,7 +2382,7 @@ gen_trace_for_var (CORE_ADDR scope, struct gdbarch *gdbarch,
 
   ax->tracing = 1;
   ax->trace_string = trace_string;
-  gen_var_ref (gdbarch, ax.get (), &value, var);
+  gen_var_ref (ax.get (), &value, var);
 
   /* If there is no actual variable to trace, flag it by returning
      an empty agent expression.  */
@@ -2394,7 +2390,7 @@ gen_trace_for_var (CORE_ADDR scope, struct gdbarch *gdbarch,
     return agent_expr_up ();
 
   /* Make sure we record the final object, and get rid of it.  */
-  gen_traced_pop (gdbarch, ax.get (), &value);
+  gen_traced_pop (ax.get (), &value);
 
   /* Oh, and terminate.  */
   ax_simple (ax.get (), aop_end);
@@ -2425,7 +2421,7 @@ gen_trace_for_expr (CORE_ADDR scope, struct expression *expr,
   gen_expr (expr, &pc, ax.get (), &value);
 
   /* Make sure we record the final object, and get rid of it.  */
-  gen_traced_pop (expr->gdbarch, ax.get (), &value);
+  gen_traced_pop (ax.get (), &value);
 
   /* Oh, and terminate.  */
   ax_simple (ax.get (), aop_end);
@@ -2473,7 +2469,7 @@ gen_trace_for_return_address (CORE_ADDR scope, struct gdbarch *gdbarch,
   gdbarch_gen_return_address (gdbarch, ax.get (), &value, scope);
 
   /* Make sure we record the final object, and get rid of it.  */
-  gen_traced_pop (gdbarch, ax.get (), &value);
+  gen_traced_pop (ax.get (), &value);
 
   /* Oh, and terminate.  */
   ax_simple (ax.get (), aop_end);
