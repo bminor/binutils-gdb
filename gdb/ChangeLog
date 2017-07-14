@@ -1,5 +1,13 @@
 2017-07-14  Tom Tromey  <tom@tromey.com>
 
+	PR rust/21764:
+	* rust-exp.y (convert_ast_to_expression): Add "want_type"
+	parameter.
+	<UNOP_SIZEOF>: Split into separate case.
+	<UNOP_VAR_VALUE>: Handle want_type.  Add error case.
+
+2017-07-14  Tom Tromey  <tom@tromey.com>
+
 	PR rust/21763:
 	* symtab.c (symbol_matches_domain): Add language_rust to special
 	case.

@@ -135,6 +135,9 @@ gdb_test "print simple::ByeBob\{field1: 0xff, field2:5\}" \
 
 gdb_test "print simple::HiBob(0xff, 5)" \
     "Type simple::HiBob is not a tuple struct"
+gdb_test "print sizeof(simple::HiBob)" " = \[0-9\]+"
+gdb_test "print simple::HiBob + 5" \
+    "Found type 'simple::HiBob', which can't be evaluated in this context"
 gdb_test "print nosuchsymbol" \
     "No symbol 'nosuchsymbol' in current context"
 
