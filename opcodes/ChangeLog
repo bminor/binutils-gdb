@@ -1,3 +1,8 @@
+2017-07-14  Ravi Bangoria  <ravi.bangoria@linux.vnet.ibm.com>
+
+	* dis-buf.c (buffer_read_memory): Change type of end_addr_offset,
+	max_addr_offset and octets variables to size_t.
+
 2017-07-12  Alan Modra  <amodra@gmail.com>
 
 	* po/da.po: Update from translationproject.org/latest/opcodes/.
