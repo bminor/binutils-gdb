@@ -345,11 +345,12 @@ case ${gdb_host} in
 		# Host: NetBSD/sparc64
 		NATDEPFILES="${NATDEPFILES} sparc64-nbsd-nat.o sparc-nat.o \
 		bsd-kvm.o"
+		LOADLIBES='-lkvm'
 		;;
 
 	esac
 	;;
-    nbdself)
+    nbsdelf)
 	case ${gdb_host_cpu} in
 	    arm)
 		# Host: NetBSD/arm
