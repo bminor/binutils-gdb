@@ -8639,10 +8639,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		    else
 		      {
 			bfd_vma value = relocation;
-			int tlsopt = (htab->plt_type == PLT_NEW
-				      && !htab->params->no_tls_get_addr_opt
-				      && htab->tls_get_addr != NULL
-				      && htab->tls_get_addr->plt.plist != NULL);
 
 			if (tls_ty != 0)
 			  {
@@ -8654,8 +8650,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 				  value = 0;
 				else
 				  value -= htab->elf.tls_sec->vma + DTP_OFFSET;
-				if ((tls_ty & TLS_TPREL)
-				    || (tlsopt && !(tls_ty & TLS_DTPREL)))
+				if (tls_ty & TLS_TPREL)
 				  value += DTP_OFFSET - TP_OFFSET;
 			      }
 
@@ -8663,7 +8658,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			      {
 				bfd_put_32 (input_bfd, value,
 					    htab->elf.sgot->contents + off + 4);
-				value = !tlsopt;
+				value = 1;
 			      }
 			  }
 			bfd_put_32 (input_bfd, value,
@@ -9007,34 +9002,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  addend = 0;
 		  break;
 		}
-	    }
-	  else if (r_type == R_PPC_DTPMOD32
-		   && htab->plt_type == PLT_NEW
-		   && !htab->params->no_tls_get_addr_opt
-		   && htab->tls_get_addr != NULL
-		   && htab->tls_get_addr->plt.plist != NULL)
-	    {
-	      /* Set up for __tls_get_addr_opt stub when this entry
-		 does not have dynamic relocs.  */
-	      relocation = 0;
-	      /* Set up the next word for local dynamic.  If it turns
-		 out to be global dynamic, the reloc will overwrite
-		 this value.  */
-	      if (rel->r_offset + 8 <= input_section->size)
-		bfd_put_32 (input_bfd, DTP_OFFSET - TP_OFFSET,
-			    contents + rel->r_offset + 4);
-	    }
-	  else if (r_type == R_PPC_DTPREL32
-		   && htab->plt_type == PLT_NEW
-		   && !htab->params->no_tls_get_addr_opt
-		   && htab->tls_get_addr != NULL
-		   && htab->tls_get_addr->plt.plist != NULL
-		   && rel > relocs
-		   && rel[-1].r_info == ELF32_R_INFO (r_symndx, R_PPC_DTPMOD32)
-		   && rel[-1].r_offset + 4 == rel->r_offset)
-	    {
-	      /* __tls_get_addr_opt stub value.  */
-	      addend += DTP_OFFSET - TP_OFFSET;
 	    }
 	  break;
 
