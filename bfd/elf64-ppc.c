@@ -14647,11 +14647,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		   emitting a reloc.  */
 		else
 		  {
-		    int tlsopt
-		      = (htab->params->tls_get_addr_opt
-			 && htab->tls_get_addr_fd != NULL
-			 && htab->tls_get_addr_fd->elf.plt.plist != NULL);
-
 		    relocation += addend;
 		    if (tls_type != 0)
 		      {
@@ -14663,8 +14658,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			      relocation = 0;
 			    else
 			      relocation -= htab->elf.tls_sec->vma + DTP_OFFSET;
-			    if ((tls_type & TLS_TPREL)
-				|| (tlsopt && !(tls_type & TLS_DTPREL)))
+			    if (tls_type & TLS_TPREL)
 			      relocation += DTP_OFFSET - TP_OFFSET;
 			  }
 
@@ -14672,7 +14666,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			  {
 			    bfd_put_64 (output_bfd, relocation,
 					got->contents + off + 8);
-			    relocation = !tlsopt;
+			    relocation = 1;
 			  }
 		      }
 		    bfd_put_64 (output_bfd, relocation,
@@ -15079,32 +15073,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  else if (ppc64_elf_howto_table[r_type]->pc_relative)
 		    addend = outrel.r_offset;
 		}
-	    }
-	  else if (r_type == R_PPC64_DTPMOD64
-		   && htab->params->tls_get_addr_opt
-		   && htab->tls_get_addr_fd != NULL
-		   && htab->tls_get_addr_fd->elf.plt.plist != NULL)
-	    {
-	      /* Set up for __tls_get_addr_opt stub, when this entry
-		 does not have dynamic relocs.  */
-	      relocation = 0;
-	      /* Set up the next word for local dynamic.  If it turns
-		 out to be global dynamic, the reloc will overwrite
-		 this value.  */
-	      if (rel->r_offset + 16 <= input_section->size)
-		bfd_put_64 (input_bfd, DTP_OFFSET - TP_OFFSET,
-			    contents + rel->r_offset + 8);
-	    }
-	  else if (r_type == R_PPC64_DTPREL64
-		   && htab->params->tls_get_addr_opt
-		   && htab->tls_get_addr_fd != NULL
-		   && htab->tls_get_addr_fd->elf.plt.plist != NULL
-		   && rel > relocs
-		   && rel[-1].r_info == ELF64_R_INFO (r_symndx, R_PPC64_DTPMOD64)
-		   && rel[-1].r_offset + 8 == rel->r_offset)
-	    {
-	      /* __tls_get_addr_opt stub value.  */
-	      addend += DTP_OFFSET - TP_OFFSET;
 	    }
 	  break;
 
@@ -15899,4 +15867,3 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf64_bed	elf64_powerpc_fbsd_bed
 
 #include "elf64-target.h"
-
