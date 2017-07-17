@@ -24,6 +24,7 @@
 #include "linespec.h"
 #include "cli/cli-utils.h"
 #include "probe.h"
+#include "cp-support.h"
 
 #include <ctype.h>
 #include <string.h>
@@ -473,8 +474,8 @@ explicit_location_lex_one (const char **inp,
 	{
 	  /* Special case: C++ operator,.  */
 	  if (language->la_language == language_cplus
-	      && strncmp (*inp, "operator", 8) == 0)
-	    (*inp) += 8;
+	      && startswith (*inp, CP_OPERATOR_STR))
+	    (*inp) += CP_OPERATOR_LEN;
 	  ++(*inp);
 	}
     }

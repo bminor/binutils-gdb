@@ -931,10 +931,6 @@ cp_find_first_component (const char *name)
    the recursion easier, it also stops if it reaches an unexpected ')'
    or '>' if the value of PERMISSIVE is nonzero.  */
 
-/* Let's optimize away calls to strlen("operator").  */
-
-#define LENGTH_OF_OPERATOR 8
-
 static unsigned int
 cp_find_first_component_aux (const char *name, int permissive)
 {
@@ -1006,10 +1002,9 @@ cp_find_first_component_aux (const char *name, int permissive)
 	case 'o':
 	  /* Operator names can screw up the recursion.  */
 	  if (operator_possible
-	      && strncmp (name + index, "operator",
-			  LENGTH_OF_OPERATOR) == 0)
+	      && startswith (name + index, CP_OPERATOR_STR))
 	    {
-	      index += LENGTH_OF_OPERATOR;
+	      index += CP_OPERATOR_LEN;
 	      while (ISSPACE(name[index]))
 		++index;
 	      switch (name[index])

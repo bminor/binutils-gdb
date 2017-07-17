@@ -3839,9 +3839,9 @@ static const char *
 operator_chars (const char *p, const char **end)
 {
   *end = "";
-  if (!startswith (p, "operator"))
+  if (!startswith (p, CP_OPERATOR_STR))
     return *end;
-  p += 8;
+  p += CP_OPERATOR_LEN;
 
   /* Don't get faked out by `operator' being part of a longer
      identifier.  */

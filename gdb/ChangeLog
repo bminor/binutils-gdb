@@ -1,5 +1,25 @@
 2017-07-17  Pedro Alves  <palves@redhat.com>
 
+	* c-exp.y (operator_stoken): Use CP_OPERATOR_LEN and
+	CP_OPERATOR_STR.
+	* c-typeprint.c (is_type_conversion_operator): Use
+	CP_OPERATOR_STR.
+	* cp-support.c (LENGTH_OF_OPERATOR): Delete.
+	(cp_find_first_component_aux): Use CP_OPERATOR_STR and
+	CP_OPERATOR_LEN.
+	* cp-support.h (CP_OPERATOR_STR, CP_OPERATOR_LEN): New.
+	* gnu-v2-abi.c (gnuv2_is_operator_name): Use CP_OPERATOR_STR.
+	* gnu-v3-abi.c (gnuv3_is_operator_name): Use CP_OPERATOR_STR.
+	* linespec.c (linespec_lexer_lex_string): Use CP_OPERATOR_LEN and
+	CP_OPERATOR_STR.
+	* location.c: Include "cp-support.h".
+	(explicit_location_lex_one): Use CP_OPERATOR_LEN and
+	CP_OPERATOR_STR.
+	* symtab.c (operator_chars): Use CP_OPERATOR_STR and
+	CP_OPERATOR_LEN.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-cmds.c (complete_command): Use a completion tracker
 	along with completion_find_completion_word for handle_brkchars
 	phase.

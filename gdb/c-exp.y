@@ -1625,13 +1625,12 @@ write_destructor_name (struct parser_state *par_state, struct stoken token)
 static struct stoken
 operator_stoken (const char *op)
 {
-  static const char *operator_string = "operator";
   struct stoken st = { NULL, 0 };
   char *buf;
 
-  st.length = strlen (operator_string) + strlen (op);
+  st.length = CP_OPERATOR_LEN + strlen (op);
   buf = (char *) malloc (st.length + 1);
-  strcpy (buf, operator_string);
+  strcpy (buf, CP_OPERATOR_STR);
   strcat (buf, op);
   st.ptr = buf;
 

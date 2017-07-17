@@ -688,10 +688,9 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	    {
 	      if ((PARSER_STATE (parser)->language->la_language
 		   == language_cplus)
-		  && (PARSER_STREAM (parser) - start) > 8
-		  /* strlen ("operator") */)
+		  && (PARSER_STREAM (parser) - start) > CP_OPERATOR_LEN)
 		{
-		  const char *p = strstr (start, "operator");
+		  const char *p = strstr (start, CP_OPERATOR_STR);
 
 		  if (p != NULL && is_operator_name (p))
 		    {
