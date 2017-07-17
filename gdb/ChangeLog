@@ -1,5 +1,10 @@
 2017-07-17  Pedro Alves  <palves@redhat.com>
 
+	* linespec.c (linespec_lexer_lex_string, find_toplevel_char):
+	Handle 'operator<' / 'operator<<'.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
 	* completer.c (collect_explicit_location_matches): Handle
 	MATCH_LABEL.
 	(convert_explicit_location_to_linespec): New, factored out from

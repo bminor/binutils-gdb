@@ -674,14 +674,50 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	  else if (*PARSER_STREAM (parser) == '<'
 		   || *PARSER_STREAM (parser) == '(')
 	    {
-	      const char *p;
-
-	      p = find_parameter_list_end (PARSER_STREAM (parser));
-	      if (p != NULL)
+	      /* Don't interpret 'operator<' / 'operator<<' as a
+		 template parameter list though.  */
+	      if (*PARSER_STREAM (parser) == '<'
+		  && (PARSER_STATE (parser)->language->la_language
+		      == language_cplus)
+		  && (PARSER_STREAM (parser) - start) >= CP_OPERATOR_LEN)
 		{
-		  PARSER_STREAM (parser) = p;
-		  continue;
+		  const char *p = PARSER_STREAM (parser);
+
+		  while (p > start && isspace (p[-1]))
+		    p--;
+		  if (p - start >= CP_OPERATOR_LEN)
+		    {
+		      p -= CP_OPERATOR_LEN;
+		      if (strncmp (p, CP_OPERATOR_STR, CP_OPERATOR_LEN) == 0
+			  && (p == start
+			      || !(isalnum (p[-1]) || p[-1] == '_')))
+			{
+			  /* This is an operator name.  Keep going.  */
+			  ++(PARSER_STREAM (parser));
+			  if (*PARSER_STREAM (parser) == '<')
+			    ++(PARSER_STREAM (parser));
+			  continue;
+			}
+		    }
 		}
+
+	      const char *p = find_parameter_list_end (PARSER_STREAM (parser));
+	      PARSER_STREAM (parser) = p;
+
+	      /* Don't loop around to the normal \0 case above because
+		 we don't want to misinterpret a potential keyword at
+		 the end of the token when the string isn't
+		 "()<>"-balanced.  This handles "b
+		 function(thread<tab>" in completion mode.  */
+	      if (*p == '\0')
+		{
+		  LS_TOKEN_STOKEN (token).ptr = start;
+		  LS_TOKEN_STOKEN (token).length
+		    = PARSER_STREAM (parser) - start;
+		  return token;
+		}
+	      else
+		continue;
 	    }
 	  /* Commas are terminators, but not if they are part of an
 	     operator name.  */
@@ -1112,7 +1148,7 @@ find_methods (struct type *t, const char *name,
 /* Find an instance of the character C in the string S that is outside
    of all parenthesis pairs, single-quoted strings, and double-quoted
    strings.  Also, ignore the char within a template name, like a ','
-   within foo<int, int>.  */
+   within foo<int, int>, while considering C++ operator</operator<<.  */
 
 const char *
 find_toplevel_char (const char *s, char c)
@@ -1140,6 +1176,47 @@ find_toplevel_char (const char *s, char c)
 	depth++;
       else if ((*scan == ')' || *scan == '>') && depth > 0)
 	depth--;
+      else if (*scan == 'o' && !quoted && depth == 0)
+	{
+	  /* Handle C++ operator names.  */
+	  if (strncmp (scan, CP_OPERATOR_STR, CP_OPERATOR_LEN) == 0)
+	    {
+	      scan += CP_OPERATOR_LEN;
+	      if (*scan == c)
+		return scan;
+	      while (isspace (*scan))
+		{
+		  ++scan;
+		  if (*scan == c)
+		    return scan;
+		}
+	      if (*scan == '\0')
+		break;
+
+	      switch (*scan)
+		{
+		  /* Skip over one less than the appropriate number of
+		     characters: the for loop will skip over the last
+		     one.  */
+		case '<':
+		  if (scan[1] == '<')
+		    {
+		      scan++;
+		      if (*scan == c)
+			return scan;
+		    }
+		  break;
+		case '>':
+		  if (scan[1] == '>')
+		    {
+		      scan++;
+		      if (*scan == c)
+			return scan;
+		    }
+		  break;
+		}
+	    }
+	}
     }
 
   return 0;
