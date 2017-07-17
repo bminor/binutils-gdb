@@ -230,10 +230,11 @@ f_word_break_characters (void)
 
 static void
 f_collect_symbol_completion_matches (completion_tracker &tracker,
+				     complete_symbol_mode mode,
 				     const char *text, const char *word,
 				     enum type_code code)
 {
-  default_collect_symbol_completion_matches_break_on (tracker,
+  default_collect_symbol_completion_matches_break_on (tracker, mode,
 						      text, word, ":", code);
 }
 

@@ -330,6 +330,7 @@ struct language_defn
        symbols whose type has a code of CODE should be matched.  */
     void (*la_collect_symbol_completion_matches)
       (completion_tracker &tracker,
+       complete_symbol_mode mode,
        const char *text,
        const char *word,
        enum type_code code);

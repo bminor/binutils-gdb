@@ -218,20 +218,37 @@ extern event_location_up
   string_to_event_location_basic (char **argp,
 				  const struct language_defn *language);
 
+/* Structure filled in by string_to_explicit_location to aid the
+   completer.  */
+struct explicit_completion_info
+{
+  /* Pointer to the last option found.  E.g., in "b -sou src.c -fun
+     func", LAST_OPTION is left pointing at "-fun func".  */
+  const char *last_option = NULL;
+
+  /* These point to the start and end of a quoted argument, iff the
+     last argument was quoted.  If parsing finds an incomplete quoted
+     string (e.g., "break -function 'fun"), then QUOTED_ARG_START is
+     set to point to the opening \', and QUOTED_ARG_END is left NULL.
+     If the last option is not quoted, then both are set to NULL. */
+  const char *quoted_arg_start = NULL;
+  const char *quoted_arg_end = NULL;
+};
+
 /* Attempt to convert the input string in *ARGP into an explicit location.
    ARGP is advanced past any processed input.  Returns an event_location
    (malloc'd) if an explicit location was successfully found in *ARGP,
    NULL otherwise.
 
-   IF !DONT_THROW, this function may call error() if *ARGP looks like
-   properly formed input, e.g., if it is called with missing argument
-   parameters or invalid options.  If DONT_THROW is non-zero, this function
-   will not throw any exceptions.  */
+   If COMPLETION_INFO is NULL, this function may call error() if *ARGP
+   looks like improperly formed input, e.g., if it is called with
+   missing argument parameters or invalid options.  If COMPLETION_INFO
+   is not NULL, this function will not throw any exceptions.  */
 
 extern event_location_up
   string_to_explicit_location (const char **argp,
-			       const struct language_defn *langauge,
-			       int dont_throw);
+			       const struct language_defn *language,
+			       explicit_completion_info *completion_info);
 
 /* A convenience function for testing for unset locations.  */
 

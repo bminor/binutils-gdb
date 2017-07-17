@@ -6500,6 +6500,7 @@ symbol_completion_add (completion_tracker &tracker,
 
 static void
 ada_collect_symbol_completion_matches (completion_tracker &tracker,
+				       complete_symbol_mode mode,
 				       const char *text0, const char *word,
 				       enum type_code code)
 {

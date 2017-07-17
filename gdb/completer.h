@@ -133,6 +133,12 @@ public:
      up in the event the user requests to complete on something vague
      that necessitates the time consuming expansion of many symbol
      tables.
+
+   - The custom word point to hand over to readline, for completers
+     that parse the input string in order to dynamically adjust
+     themselves depending on exactly what they're completing.  E.g.,
+     the linespec completer needs to bypass readline's too-simple word
+     breaking algorithm.
 */
 class completion_tracker
 {
@@ -153,9 +159,51 @@ public:
      LIST.  */
   void add_completions (completion_list &&list);
 
+  /* Set the quote char to be appended after a unique completion is
+     added to the input line.  Set to '\0' to clear.  See
+     m_quote_char's description.  */
+  void set_quote_char (int quote_char)
+  { m_quote_char = quote_char; }
+
+  /* The quote char to be appended after a unique completion is added
+     to the input line.  Returns '\0' if no quote char has been set.
+     See m_quote_char's description.  */
+  int quote_char () { return m_quote_char; }
+
+  /* Tell the tracker that the current completer wants to provide a
+     custom word point instead of a list of a break chars, in the
+     handle_brkchars phase.  Such completers must also compute their
+     completions then.  */
+  void set_use_custom_word_point (bool enable)
+  { m_use_custom_word_point = enable; }
+
+  /* Whether the current completer computes a custom word point.  */
+  bool use_custom_word_point () const
+  { return m_use_custom_word_point; }
+
+  /* The custom word point.  */
+  int custom_word_point () const
+  { return m_custom_word_point; }
+
+  /* Set the custom word point to POINT.  */
+  void set_custom_word_point (int point)
+  { m_custom_word_point = point; }
+
+  /* Advance the custom word point by LEN.  */
+  void advance_custom_word_point_by (size_t len);
+
+  /* Return true if we only have one completion, and it matches
+     exactly the completion word.  I.e., completing results in what we
+     already have.  */
+  bool completes_to_completion_word (const char *word);
+
   /* True if we have any completion match recorded.  */
   bool have_completions () const
   { return !m_entries_vec.empty (); }
+
+  /* Discard the current completion match list and the current
+     LCD.  */
+  void discard_completions ();
 
   /* Build a completion_result containing the list of completion
      matches to hand over to readline.  The parameters are as in
@@ -185,7 +233,30 @@ private:
      searching too early.  */
   htab_t m_entries_hash;
 
-  /* Our idea of lowest common denominator to hand over to readline.  */
+  /* If non-zero, then this is the quote char that needs to be
+     appended after completion (iff we have a unique completion).  We
+     don't rely on readline appending the quote char as delimiter as
+     then readline wouldn't append the ' ' after the completion.
+     I.e., we want this:
+
+      before tab: "b 'function("
+      after tab:  "b 'function()' "
+  */
+  int m_quote_char = '\0';
+
+  /* If true, the completer has its own idea of "word" point, and
+     doesn't want to rely on readline computing it based on brkchars.
+     Set in the handle_brkchars phase.  */
+  bool m_use_custom_word_point = false;
+
+  /* The completer's idea of where the "word" we were looking at is
+     relative to RL_LINE_BUFFER.  This is advanced in the
+     handle_brkchars phase as the completer discovers potential
+     completable words.  */
+  int m_custom_word_point = 0;
+
+  /* Our idea of lowest common denominator to hand over to readline.
+     See intro.  */
   char *m_lowest_common_denominator = NULL;
 
   /* If true, the LCD is unique.  I.e., all completion candidates had
@@ -212,6 +283,15 @@ extern void complete_line (completion_tracker &tracker,
 extern const char *completion_find_completion_word (completion_tracker &tracker,
 						    const char *text,
 						    int *quote_char);
+
+
+/* Assuming TEXT is an expression in the current language, find the
+   completion word point for TEXT, emulating the algorithm readline
+   uses to find the word point, using the current language's word
+   break characters.  */
+
+const char *advance_to_expression_complete_word_point
+  (completion_tracker &tracker, const char *text);
 
 extern char **gdb_rl_attempted_completion_function (const char *text,
 						    int start, int end);

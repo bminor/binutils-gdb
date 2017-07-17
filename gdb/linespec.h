@@ -184,6 +184,16 @@ extern const char *find_toplevel_char (const char *s, char c);
 
 extern void linespec_lex_to_end (char **stringp);
 
+extern const char * const linespec_keywords[];
+
+/* Complete a function symbol, in linespec mode.  If SOURCE_FILENAME
+   is non-NULL, limits completion to the list of functions defined in
+   source files that match SOURCE_FILENAME.  */
+
+extern void linespec_complete_function (completion_tracker &tracker,
+					const char *function,
+					const char *source_filename);
+
 /* Evaluate the expression pointed to by EXP_PTR into a CORE_ADDR,
    advancing EXP_PTR past any parsed text.  */
 

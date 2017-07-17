@@ -1,5 +1,99 @@
 2017-07-17  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (ada_collect_symbol_completion_matches): Add
+	complete_symbol_mode parameter.
+	* cli/cli-cmds.c (complete_command): Get the completion result out
+	of the handle_brkchars tracker if used a custom word point.
+	* completer.c: Include "linespec.h".
+	(enum explicit_location_match_type) <MATCH_LINE>: New enumerator.
+	(advance_to_expression_complete_word_point): New.
+	(completion_tracker::completes_to_completion_word): New.
+	(complete_files_symbols): Pass down
+	complete_symbol_mode::EXPRESSION.
+	(explicit_options, probe_options): New.
+	(collect_explicit_location_matches): Complete on the
+	explictit_loc->foo instead of word.  Use
+	linespec_complete_function.  Handle MATCH_LINE.  Handle offering
+	keyword and options completions.
+	(backup_text_ptr): Delete.
+	(skip_keyword): New.
+	(complete_explicit_location): Remove 'word' parameter.  Add
+	language, quoted_arg_start and quoted_arg_end parameters.
+	Rewrite, parsing left to right.
+	(location_completer): Rewrite.
+	(location_completer_handle_brkchars): New function.
+	(symbol_completer): Pass down complete_symbol_mode::EXPRESSION.
+	(enum complete_line_internal_reason): Adjust comments.
+	(completion_tracker::discard_completions): New.
+	(completer_handle_brkchars_func_for_completer): Handle
+	location_completer.
+	(gdb_custom_word_point_brkchars)
+	(gdb_org_rl_basic_quote_characters): New.
+	(gdb_completion_word_break_characters_throw)
+	(completion_find_completion_word): Handle trackers that use a
+	custom word point.
+	(completion_tracker::advance_custom_word_point_by): New.
+	(completion_tracker::build_completion_result): Don't rely on
+	readline appending the quote char.
+	(gdb_rl_attempted_completion_function_throw): Handle trackers that
+	use a custom word point.
+	(gdb_rl_attempted_completion_function): Restore
+	rl_basic_quote_characters.
+	* completer.h (class completion_tracker): Extend intro comment.
+	(completion_tracker::set_quote_char)
+	(completion_tracker::quote_char)
+	(completion_tracker::set_use_custom_word_point)
+	(completion_tracker::use_custom_word_point)
+	(completion_tracker::custom_word_point)
+	(completion_tracker::set_custom_word_point)
+	(completion_tracker::advance_custom_word_point_by)
+	(completion_tracker::completes_to_completion_word)
+	(completion_tracker::discard_completions): New methods.
+	(completion_tracker::m_quote_char)
+	(completion_tracker::m_use_custom_word_point)
+	(completion_tracker::m_custom_word_point): New fields.
+	(advance_to_expression_complete_word_point): Declare.
+	* f-lang.c (f_collect_symbol_completion_matches): Add
+	complete_symbol_mode parameter.
+	* language.h (struct language_defn)
+	<la_collect_symbol_completion_matches>: Add complete_symbol_mode
+	parameter.
+	* linespec.c (linespec_keywords): Add NULL terminator.  Make extern.
+	(linespec_complete_function): New function.
+	(linespec_lexer_lex_keyword): Adjust.
+	* linespec.h (linespec_keywords, linespec_complete_function): New
+	declarations.
+	* location.c (find_end_quote): New function.
+	(explicit_location_lex_one): Add explicit_completion_info
+	parameter.  Save quoting info.  Don't throw if being called for
+	completion.  Don't handle Ada operators here.
+	(is_cp_operator, skip_op_false_positives, first_of)
+	(explicit_location_lex_one_function): New function.
+	(string_to_explicit_location): Replace 'dont_throw' parameter with
+	an explicit_completion_info pointer parameter.  Handle it.  Don't
+	use explicit_location_lex_one to lex function names.  Use
+	explicit_location_lex_one_function instead.
+	* location.h (struct explicit_completion_info): New.
+	(string_to_explicit_location): Replace 'dont_throw' parameter with
+	an explicit_completion_info pointer parameter.
+	* symtab.c (default_collect_symbol_completion_matches_break_on):
+	Add complete_symbol_mode parameter.  Handle LINESPEC mode.
+	(default_collect_symbol_completion_matches)
+	(collect_symbol_completion_matches): Add complete_symbol_mode
+	parameter.
+	(collect_symbol_completion_matches_type): Pass down
+	complete_symbol_mode::EXPRESSION.
+	(collect_file_symbol_completion_matches): Add complete_symbol_mode
+	parameter.  Handle LINESPEC mode.
+	* symtab.h (complete_symbol_mode): New.
+	(default_collect_symbol_completion_matches_break_on)
+	(default_collect_symbol_completion_matches)
+	(collect_symbol_completion_matches)
+	(collect_file_symbol_completion_matches): Add complete_symbol_mode
+	parameter.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
 	* utils.c (enum class strncmp_iw_mode): New.
 	(strcmp_iw): Rename to ...
 	(strncmp_iw_with_mode): ... this.  Add string2_len and mode

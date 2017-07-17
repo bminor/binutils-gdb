@@ -1499,22 +1499,37 @@ extern void forget_cached_source_info (void);
 
 extern void select_source_symtab (struct symtab *);
 
+/* The reason we're calling into a completion match list collector
+   function.  */
+enum class complete_symbol_mode
+  {
+    /* Completing an expression.  */
+    EXPRESSION,
+
+    /* Completing a linespec.  */
+    LINESPEC,
+  };
+
 extern void default_collect_symbol_completion_matches_break_on
   (completion_tracker &tracker,
+   complete_symbol_mode mode,
    const char *text, const char *word, const char *break_on,
    enum type_code code);
 extern void default_collect_symbol_completion_matches
   (completion_tracker &tracker,
+   complete_symbol_mode,
    const char *,
    const char *,
    enum type_code);
 extern void collect_symbol_completion_matches (completion_tracker &tracker,
+					       complete_symbol_mode,
 					       const char *, const char *);
 extern void collect_symbol_completion_matches_type (completion_tracker &tracker,
 						    const char *, const char *,
 						    enum type_code);
 
 extern void collect_file_symbol_completion_matches (completion_tracker &tracker,
+						    complete_symbol_mode,
 						    const char *,
 						    const char *,
 						    const char *);

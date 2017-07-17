@@ -216,9 +216,9 @@ enum ls_token_type
 };
 typedef enum ls_token_type linespec_token_type;
 
-/* List of keywords  */
-
-static const char * const linespec_keywords[] = { "if", "thread", "task" };
+/* List of keywords.  This is NULL-terminated so that it can be used
+   as enum completer.  */
+const char * const linespec_keywords[] = { "if", "thread", "task", NULL };
 #define IF_KEYWORD_INDEX 0
 
 /* A token of the linespec lexer  */
@@ -400,7 +400,7 @@ linespec_lexer_lex_keyword (const char *p)
 
   if (p != NULL)
     {
-      for (i = 0; i < ARRAY_SIZE (linespec_keywords); ++i)
+      for (i = 0; linespec_keywords[i] != NULL; ++i)
 	{
 	  int len = strlen (linespec_keywords[i]);
 
@@ -421,7 +421,7 @@ linespec_lexer_lex_keyword (const char *p)
 		{
 		  p += len;
 		  p = skip_spaces_const (p);
-		  for (j = 0; j < ARRAY_SIZE (linespec_keywords); ++j)
+		  for (j = 0; linespec_keywords[j] != NULL; ++j)
 		    {
 		      int nextlen = strlen (linespec_keywords[j]);
 
@@ -1714,7 +1714,7 @@ linespec_parse_basic (linespec_parser *parser)
 	      if (token.type != LSTOKEN_NUMBER)
 		unexpected_linespec_error (parser);
 
-	      /* Record the lione offset and get the next token.  */
+	      /* Record the line offset and get the next token.  */
 	      name = copy_token_string (token);
 	      cleanup = make_cleanup (xfree, name);
 
@@ -2449,6 +2449,25 @@ linespec_lex_to_end (char **stringp)
 
   *stringp += PARSER_STREAM (&parser) - orig;
   do_cleanups (cleanup);
+}
+
+/* See linespec.h.  */
+
+void
+linespec_complete_function (completion_tracker &tracker,
+			    const char *function,
+			    const char *source_filename)
+{
+  complete_symbol_mode mode = complete_symbol_mode::LINESPEC;
+
+  if (source_filename != NULL)
+    {
+      collect_file_symbol_completion_matches (tracker, mode,
+					      function, function,
+					      source_filename);
+    }
+  else
+    collect_symbol_completion_matches (tracker, mode, function, function);
 }
 
 /* A helper function for decode_line_full and decode_line_1 to

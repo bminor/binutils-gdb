@@ -1,3 +1,7 @@
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* gdb.linespec/ls-errs.exp (do_test): Adjust expected output.
+
 2017-07-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.mi/mi-vla-fortran.exp: Make test names unique.
