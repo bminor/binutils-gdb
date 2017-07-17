@@ -1,5 +1,35 @@
 2017-07-17  Pedro Alves  <palves@redhat.com>
 
+	* completer.c (complete_source_filenames): New function.
+	(complete_address_and_linespec_locations): New function.
+	(location_completer): Use complete_address_and_linespec_locations.
+	(completion_tracker::build_completion_result): Honor the tracker's
+	request to suppress append.
+	* completer.h (completion_tracker::suppress_append_ws)
+	(completion_tracker::set_suppress_append_ws): New methods.
+	(completion_tracker::m_suppress_append_ws): New field.
+	(complete_source_filenames): New declaration.
+	* linespec.c (linespec_complete_what): New.
+	(struct ls_parser) <complete_what, completion_word,
+	completion_quote_char, completion_quote_end, completion_tracker>:
+	New fields.
+	(string_find_incomplete_keyword_at_end): New.
+	(linespec_lexer_lex_string): Record quote char.  If in completion
+	mode, don't throw.
+	(linespec_lexer_consume_token): Advance the completion word point.
+	(linespec_lexer_peek_token): Save/restore completion info.
+	(save_stream_and_consume_token): New.
+	(set_completion_after_number): New.
+	(linespec_parse_basic): Set what to complete next depending on
+	token.  Handle function and label completions specially.
+	(parse_linespec): Disable objc shortcut in completion mode.  Set
+	what to complete next depending on token type.  Skip keyword if in
+	completion mode.
+	(complete_linespec_component, linespec_complete): New.
+	* linespec.h (linespec_complete): Declare.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
 	* linespec.c (linespec_lexer_lex_string, find_toplevel_char):
 	Handle 'operator<' / 'operator<<'.
 

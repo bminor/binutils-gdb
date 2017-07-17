@@ -1,5 +1,11 @@
 2017-07-17  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/completion.exp: Adjust expected output.
+	* gdb.linespec/ls-errs.exp: Don't send tab characters, now that
+	the completer works.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
 	* gdb.linespec/ls-errs.exp (do_test): Adjust expected output.
 
 2017-07-15  Andrew Burgess  <andrew.burgess@embecosm.com>

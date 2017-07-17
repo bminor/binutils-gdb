@@ -96,8 +96,13 @@ proc do_test {lang} {
     }
 
     # Some commonly used whitespace tests around ':'.
-    set spaces [list ":" ": " " :" " : " "\t:  " "  :\t" "\t:\t" \
-		     " \t:\t " "\t  \t:\t  \t  \t"]
+    set spaces [list \
+		    ":" \
+		    ": " \
+		    " :" \
+		    " : " \
+		    "  :  " \
+		   ]
 
     # A list of invalid offsets.
     set invalid_offsets [list -100 +500 1000]
