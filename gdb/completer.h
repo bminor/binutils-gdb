@@ -203,6 +203,16 @@ extern void complete_line (completion_tracker &tracker,
 			   const char *line_buffer,
 			   int point);
 
+/* Find the bounds of the word in TEXT for completion purposes, and
+   return a pointer to the end of the word.  Calls the completion
+   machinery for a handle_brkchars phase (using TRACKER) to figure out
+   the right work break characters for the command in TEXT.
+   QUOTE_CHAR, if non-null, is set to the opening quote character if
+   we found an unclosed quoted substring, '\0' otherwise.  */
+extern const char *completion_find_completion_word (completion_tracker &tracker,
+						    const char *text,
+						    int *quote_char);
+
 extern char **gdb_rl_attempted_completion_function (const char *text,
 						    int start, int end);
 

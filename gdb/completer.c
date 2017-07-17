@@ -212,6 +212,160 @@ filename_completer_handle_brkchars (struct cmd_list_element *ignore,
     (gdb_completer_file_name_break_characters);
 }
 
+/* Possible values for the found_quote flags word used by the completion
+   functions.  It says what kind of (shell-like) quoting we found anywhere
+   in the line. */
+#define RL_QF_SINGLE_QUOTE      0x01
+#define RL_QF_DOUBLE_QUOTE      0x02
+#define RL_QF_BACKSLASH         0x04
+#define RL_QF_OTHER_QUOTE       0x08
+
+/* Find the bounds of the current word for completion purposes, and
+   return a pointer to the end of the word.  This mimics (and is a
+   modified version of) readline's _rl_find_completion_word internal
+   function.
+
+   This function skips quoted substrings (characters between matched
+   pairs of characters in rl_completer_quote_characters).  We try to
+   find an unclosed quoted substring on which to do matching.  If one
+   is not found, we use the word break characters to find the
+   boundaries of the current word.  QC, if non-null, is set to the
+   opening quote character if we found an unclosed quoted substring,
+   '\0' otherwise.  DP, if non-null, is set to the value of the
+   delimiter character that caused a word break.  */
+
+struct gdb_rl_completion_word_info
+{
+  const char *word_break_characters;
+  const char *quote_characters;
+  const char *basic_quote_characters;
+};
+
+static const char *
+gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
+			     int *qc, int *dp,
+			     const char *line_buffer)
+{
+  int scan, end, found_quote, delimiter, pass_next, isbrk;
+  char quote_char;
+  const char *brkchars;
+  int point = strlen (line_buffer);
+
+  /* The algorithm below does '--point'.  Avoid buffer underflow with
+     the empty string.  */
+  if (point == 0)
+    {
+      if (qc != NULL)
+	*qc = '\0';
+      if (dp != NULL)
+	*dp = '\0';
+      return line_buffer;
+    }
+
+  end = point;
+  found_quote = delimiter = 0;
+  quote_char = '\0';
+
+  brkchars = info->word_break_characters;
+
+  if (info->quote_characters != NULL)
+    {
+      /* We have a list of characters which can be used in pairs to
+	 quote substrings for the completer.  Try to find the start of
+	 an unclosed quoted substring.  */
+      /* FOUND_QUOTE is set so we know what kind of quotes we
+	 found.  */
+      for (scan = pass_next = 0;
+	   scan < end;
+	   scan++)
+	{
+	  if (pass_next)
+	    {
+	      pass_next = 0;
+	      continue;
+	    }
+
+	  /* Shell-like semantics for single quotes -- don't allow
+	     backslash to quote anything in single quotes, especially
+	     not the closing quote.  If you don't like this, take out
+	     the check on the value of quote_char.  */
+	  if (quote_char != '\'' && line_buffer[scan] == '\\')
+	    {
+	      pass_next = 1;
+	      found_quote |= RL_QF_BACKSLASH;
+	      continue;
+	    }
+
+	  if (quote_char != '\0')
+	    {
+	      /* Ignore everything until the matching close quote
+		 char.  */
+	      if (line_buffer[scan] == quote_char)
+		{
+		  /* Found matching close.  Abandon this
+		     substring.  */
+		  quote_char = '\0';
+		  point = end;
+		}
+	    }
+	  else if (strchr (info->quote_characters, line_buffer[scan]))
+	    {
+	      /* Found start of a quoted substring.  */
+	      quote_char = line_buffer[scan];
+	      point = scan + 1;
+	      /* Shell-like quoting conventions.  */
+	      if (quote_char == '\'')
+		found_quote |= RL_QF_SINGLE_QUOTE;
+	      else if (quote_char == '"')
+		found_quote |= RL_QF_DOUBLE_QUOTE;
+	      else
+		found_quote |= RL_QF_OTHER_QUOTE;
+	    }
+	}
+    }
+
+  if (point == end && quote_char == '\0')
+    {
+      /* We didn't find an unclosed quoted substring upon which to do
+	 completion, so use the word break characters to find the
+	 substring on which to complete.  */
+      while (--point)
+	{
+	  scan = line_buffer[point];
+
+	  if (strchr (brkchars, scan) != 0)
+	    break;
+	}
+    }
+
+  /* If we are at an unquoted word break, then advance past it.  */
+  scan = line_buffer[point];
+
+  if (scan)
+    {
+      isbrk = strchr (brkchars, scan) != 0;
+
+      if (isbrk)
+	{
+	  /* If the character that caused the word break was a quoting
+	     character, then remember it as the delimiter.  */
+	  if (info->basic_quote_characters
+	      && strchr (info->basic_quote_characters, scan)
+	      && (end - point) > 1)
+	    delimiter = scan;
+
+	  point++;
+	}
+    }
+
+  if (qc != NULL)
+    *qc = quote_char;
+  if (dp != NULL)
+    *dp = delimiter;
+
+  return line_buffer + point;
+}
+
 /* Complete on linespecs, which might be of two possible forms:
 
        file:line
@@ -1302,6 +1456,25 @@ gdb_completion_word_break_characters ()
   END_CATCH
 
   return NULL;
+}
+
+/* See completer.h.  */
+
+const char *
+completion_find_completion_word (completion_tracker &tracker, const char *text,
+				 int *quote_char)
+{
+  size_t point = strlen (text);
+
+  complete_line_internal (tracker, NULL, text, point, handle_brkchars);
+
+  gdb_rl_completion_word_info info;
+
+  info.word_break_characters = rl_completer_word_break_characters;
+  info.quote_characters = gdb_completer_quote_characters;
+  info.basic_quote_characters = rl_basic_quote_characters;
+
+  return gdb_rl_find_completion_word (&info, quote_char, NULL, text);
 }
 
 /* See completer.h.  */

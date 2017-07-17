@@ -1,5 +1,17 @@
 2017-07-17  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-cmds.c (complete_command): Use a completion tracker
+	along with completion_find_completion_word for handle_brkchars
+	phase.
+	* completer.c (RL_QF_SINGLE_QUOTE, RL_QF_DOUBLE_QUOTE)
+	(RL_QF_BACKSLASH, RL_QF_OTHER_QUOTE): New.
+	(struct gdb_rl_completion_word_info): New.
+	(gdb_rl_find_completion_word): New.
+	(completion_find_completion_word): New.
+	* completer.h (completion_find_completion_word): Declare.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (symbol_completion_match): Adjust comments.
 	(symbol_completion_add): Replace vector parameter with
 	completion_tracker parameter.  Use it.

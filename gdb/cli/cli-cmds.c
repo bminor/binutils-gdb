@@ -246,7 +246,6 @@ static void
 complete_command (char *arg_entry, int from_tty)
 {
   const char *arg = arg_entry;
-  int argpoint;
 
   dont_repeat ();
 
@@ -264,36 +263,31 @@ complete_command (char *arg_entry, int from_tty)
 
   if (arg == NULL)
     arg = "";
-  argpoint = strlen (arg);
 
-  /* complete_line assumes that its first argument is somewhere
-     within, and except for filenames at the beginning of, the word to
-     be completed.  The following crude imitation of readline's
-     word-breaking tries to accomodate this.  */
-  const char *point = arg + argpoint;
-  while (point > arg)
-    {
-      if (strchr (rl_completer_word_break_characters, point[-1]) != 0)
-        break;
-      point--;
-    }
-
+  completion_tracker tracker_handle_brkchars;
   completion_tracker tracker_handle_completions;
+
+  int quote_char = '\0';
+  const char *word;
 
   TRY
     {
-      complete_line (tracker_handle_completions, point, arg, strlen (arg));
+      word = completion_find_completion_word (tracker_handle_brkchars,
+					      arg, &quote_char);
+
+      /* Completers must be called twice.  */
+      complete_line (tracker_handle_completions, word, arg, strlen (arg));
     }
   CATCH (ex, RETURN_MASK_ALL)
     {
       return;
     }
 
-  std::string arg_prefix (arg, point - arg);
+  std::string arg_prefix (arg, word - arg);
 
   completion_result result
     = (tracker_handle_completions.build_completion_result
-       (point, point - arg, strlen (arg)));
+       (word, word - arg, strlen (arg)));
 
   if (result.number_matches != 0)
     {
@@ -308,16 +302,18 @@ complete_command (char *arg_entry, int from_tty)
 	      printf_unfiltered ("%s%s",
 				 arg_prefix.c_str (),
 				 result.match_list[i + 1]);
+	      if (quote_char)
+		printf_unfiltered ("%c", quote_char);
 	      printf_unfiltered ("\n");
 	    }
 	}
 
       if (result.number_matches == max_completions)
 	{
-	  /* ARG_PREFIX and POINT are included in the output so that emacs
+	  /* ARG_PREFIX and WORD are included in the output so that emacs
 	     will include the message in the output.  */
 	  printf_unfiltered (_("%s%s %s\n"),
-			     arg_prefix.c_str (), point,
+			     arg_prefix.c_str (), word,
 			     get_max_completions_reached_message ());
 	}
     }
