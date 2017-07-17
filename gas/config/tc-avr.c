@@ -402,10 +402,21 @@ static struct mcu_type_s mcu_types[] =
   {"atxmega16e5", AVR_ISA_XMEGA,  bfd_mach_avrxmega2},
   {"atxmega8e5",  AVR_ISA_XMEGA,  bfd_mach_avrxmega2},
   {"atxmega32x1", AVR_ISA_XMEGA,  bfd_mach_avrxmega2},
+  {"attiny212",   AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
+  {"attiny214",   AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
+  {"attiny412",   AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
+  {"attiny414",   AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
   {"attiny416",   AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
   {"attiny417",   AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
+  {"attiny814",   AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
   {"attiny816",   AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
   {"attiny817",   AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
+  {"attiny1614",  AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
+  {"attiny1616",  AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
+  {"attiny1617",  AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
+  {"attiny3214",  AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
+  {"attiny3216",  AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
+  {"attiny3217",  AVR_ISA_XMEGA,  bfd_mach_avrxmega3},
   {"atxmega64a3", AVR_ISA_XMEGA,  bfd_mach_avrxmega4},
   {"atxmega64a3u",AVR_ISA_XMEGAU, bfd_mach_avrxmega4},
   {"atxmega64a4u",AVR_ISA_XMEGAU, bfd_mach_avrxmega4},
@@ -661,7 +672,7 @@ md_show_usage (FILE *stream)
 	"                   avr51 - enhanced AVR core with up to 128K program memory\n"
 	"                   avr6  - enhanced AVR core with up to 256K program memory\n"
 	"                   avrxmega2 - XMEGA, > 8K, < 64K FLASH, < 64K RAM\n"
-	"                   avrxmega3 - XMEGA, > 8K, <= 64K FLASH, > 64K RAM\n"
+	"                   avrxmega3 - XMEGA, RAM + FLASH < 64K, Flash visible in RAM\n"
 	"                   avrxmega4 - XMEGA, > 64K, <= 128K FLASH, <= 64K RAM\n"
 	"                   avrxmega5 - XMEGA, > 64K, <= 128K FLASH, > 64K RAM\n"
 	"                   avrxmega6 - XMEGA, > 128K, <= 256K FLASH, <= 64K RAM\n"

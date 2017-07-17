@@ -1,3 +1,15 @@
+2017-07-17  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR 21472
+	* config/tc-avr.c (mcu_types): Add entries for: attiny212,
+	attiny214, attiny412, attiny414, attiny814, attiny1614,
+	attiny1616, attiny1617, attiny3214, attiny3216, attiny3217.
+	(md_show_usage): Adjust doc for "avrxmega3".
+	* doc/c-avr.texi (AVR options) [-mmcu=]: Adjust doc for avrxmega3.
+	Add MCUs: attiny212, attiny214, attiny412, attiny414, attiny416,
+	attiny417, attiny814, attiny816, attiny817, attiny1614,
+	attiny1616, attiny1617, attiny3214, attiny3216, attiny3217.
+
 2017-07-13  Jim Wilson  <jim.wilson@linaro.org>
 
 	* config/tc-arch64.c (aarch64_cpus): Add AARCH64_FEATURE_RDMA to
