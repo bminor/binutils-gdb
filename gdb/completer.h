@@ -112,12 +112,14 @@ extern char *gdb_completion_word_break_characters (void);
    not "const char *".  */
 extern void set_rl_completer_word_break_characters (const char *break_chars);
 
-/* Set the word break characters array to the corresponding set of
-   chars, based on FN.  This function is useful for cases when the
-   completer doesn't know the type of the completion until some
+/* Get the matching completer_handle_brkchars_ftype function for FN.
+   FN is one of the core completer functions above (filename,
+   location, symbol, etc.).  This function is useful for cases when
+   the completer doesn't know the type of the completion until some
    calculation is done (e.g., for Python functions).  */
 
-extern void set_gdb_completion_word_break_characters (completer_ftype *fn);
+extern completer_handle_brkchars_ftype *
+  completer_handle_brkchars_func_for_completer (completer_ftype *fn);
 
 /* Exported to linespec.c */
 

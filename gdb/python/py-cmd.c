@@ -293,11 +293,14 @@ cmdpy_completer_handle_brkchars (struct cmd_list_element *command,
 	}
       else if (value >= 0 && value < (long) N_COMPLETERS)
 	{
+	  completer_handle_brkchars_ftype *brkchars_fn;
+
 	  /* This is the core of this function.  Depending on which
 	     completer type the Python function returns, we have to
 	     adjust the break characters accordingly.  */
-	  set_gdb_completion_word_break_characters
-	    (completers[value].completer);
+	  brkchars_fn = (completer_handle_brkchars_func_for_completer
+			 (completers[value].completer));
+	  brkchars_fn (command, text, word);
 	}
     }
 }

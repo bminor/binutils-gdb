@@ -1,5 +1,31 @@
 2017-07-17  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-decode.c (set_cmd_completer_handle_brkchars): Adjust to
+	renames.
+	* cli/cli-decode.h (struct cmd_list_element) <completer>: Move
+	comments to completer_ftype's declaration.
+	<completer_handle_brkchars>: Change type to
+	completer_handle_brkchars_ftype.
+	* command.h (completer_ftype): Add describing comment and give
+	names to parameters.
+	(completer_ftype_void): Rename to ...
+	(completer_handle_brkchars_ftype) ... this.  Add describing comment.
+	(set_cmd_completer_handle_brkchars): Adjust.
+	* completer.c (filename_completer_handle_brkchars): New function.
+	(complete_line_internal_normal_command): New function, factored
+	out from ...
+	(complete_line_internal): ... here.
+	(command_completer_handle_brkchars)
+	(default_completer_handle_brkchars)
+	(completer_handle_brkchars_func_for_completer): New functions.
+	* completer.h (set_gdb_completion_word_break_characters): Delete
+	declaration.
+	(completer_handle_brkchars_func_for_completer): New declaration.
+	* python/py-cmd.c (cmdpy_completer_handle_brkchars): Adjust to use
+	completer_handle_brkchars_func_for_completer.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
 	* completer.c (symbol_completer): New function, based on
 	make_symbol_completion_list_fn.
 	* completer.h (symbol_completer): New declaration.

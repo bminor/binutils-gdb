@@ -132,6 +132,7 @@ noop_completer (struct cmd_list_element *ignore,
 }
 
 /* Complete on filenames.  */
+
 VEC (char_ptr) *
 filename_completer (struct cmd_list_element *ignore, 
 		    const char *text, const char *word)
@@ -190,6 +191,17 @@ filename_completer (struct cmd_list_element *ignore,
   rl_completer_word_break_characters = "";
 #endif
   return return_val;
+}
+
+/* The corresponding completer_handle_brkchars
+   implementation.  */
+
+static void
+filename_completer_handle_brkchars (struct cmd_list_element *ignore,
+				    const char *text, const char *word)
+{
+  set_rl_completer_word_break_characters
+    (gdb_completer_file_name_break_characters);
 }
 
 /* Complete on linespecs, which might be of two possible forms:
@@ -703,6 +715,51 @@ typedef enum
 }
 complete_line_internal_reason;
 
+/* Helper for complete_line_internal to simplify it.  */
+
+static VEC (char_ptr) *
+complete_line_internal_normal_command (const char *command, const char *word,
+				       const char *cmd_args,
+				       complete_line_internal_reason reason,
+				       struct cmd_list_element *c)
+{
+  const char *p = cmd_args;
+
+  if (c->completer == filename_completer)
+    {
+      /* Many commands which want to complete on file names accept
+	 several file names, as in "run foo bar >>baz".  So we don't
+	 want to complete the entire text after the command, just the
+	 last word.  To this end, we need to find the beginning of the
+	 file name by starting at `word' and going backwards.  */
+      for (p = word;
+	   p > command
+	     && strchr (gdb_completer_file_name_break_characters,
+			p[-1]) == NULL;
+	   p--)
+	;
+    }
+
+  if (reason == handle_brkchars)
+    {
+      completer_handle_brkchars_ftype *brkchars_fn;
+
+      if (c->completer_handle_brkchars != NULL)
+	brkchars_fn = c->completer_handle_brkchars;
+      else
+	{
+	  brkchars_fn
+	    = (completer_handle_brkchars_func_for_completer
+	       (c->completer));
+	}
+
+      brkchars_fn (c, p, word);
+    }
+
+  if (reason != handle_brkchars && c->completer != NULL)
+    return (*c->completer) (c, p, word);
+  return NULL;
+}
 
 /* Internal function used to handle completions.
 
@@ -872,29 +929,9 @@ complete_line_internal (const char *text,
 		{
 		  /* It is a normal command; what comes after it is
 		     completed by the command's completer function.  */
-		  if (c->completer == filename_completer)
-		    {
-		      /* Many commands which want to complete on
-			 file names accept several file names, as
-			 in "run foo bar >>baz".  So we don't want
-			 to complete the entire text after the
-			 command, just the last word.  To this
-			 end, we need to find the beginning of the
-			 file name by starting at `word' and going
-			 backwards.  */
-		      for (p = word;
-			   p > tmp_command
-			     && strchr (gdb_completer_file_name_break_characters, p[-1]) == NULL;
-			   p--)
-			;
-		      set_rl_completer_word_break_characters
-			(gdb_completer_file_name_break_characters);
-		    }
-		  if (reason == handle_brkchars
-		      && c->completer_handle_brkchars != NULL)
-		    (*c->completer_handle_brkchars) (c, p, word);
-		  if (reason != handle_brkchars && c->completer != NULL)
-		    list = (*c->completer) (c, p, word);
+		  list = complete_line_internal_normal_command (tmp_command,
+								word, p,
+								reason, c);
 		}
 	    }
 	  else
@@ -945,24 +982,9 @@ complete_line_internal (const char *text,
 	  else
 	    {
 	      /* It is a normal command.  */
-	      if (c->completer == filename_completer)
-		{
-		  /* See the commentary above about the specifics
-		     of file-name completion.  */
-		  for (p = word;
-		       p > tmp_command
-			 && strchr (gdb_completer_file_name_break_characters, 
-				    p[-1]) == NULL;
-		       p--)
-		    ;
-		  set_rl_completer_word_break_characters
-		    (gdb_completer_file_name_break_characters);
-		}
-	      if (reason == handle_brkchars
-		  && c->completer_handle_brkchars != NULL)
-		(*c->completer_handle_brkchars) (c, p, word);
-	      if (reason != handle_brkchars && c->completer != NULL)
-		list = (*c->completer) (c, p, word);
+	      list = complete_line_internal_normal_command (tmp_command,
+							    word, p,
+							    reason, c);
 	    }
 	}
     }
@@ -1116,12 +1138,23 @@ complete_line (const char *text, const char *line_buffer, int point)
 }
 
 /* Complete on command names.  Used by "help".  */
+
 VEC (char_ptr) *
 command_completer (struct cmd_list_element *ignore, 
 		   const char *text, const char *word)
 {
   return complete_line_internal (word, text, 
 				 strlen (text), handle_help);
+}
+
+/* The corresponding completer_handle_brkchars implementation.  */
+
+static void
+command_completer_handle_brkchars (struct cmd_list_element *ignore,
+				   const char *text, const char *word)
+{
+  set_rl_completer_word_break_characters
+    (gdb_completer_command_word_break_characters);
 }
 
 /* Complete on signals.  */
@@ -1230,6 +1263,30 @@ reggroup_completer (struct cmd_list_element *ignore,
 {
   return reg_or_group_completer_1 (ignore, text, word,
 				   complete_reggroup_names);
+}
+
+/* The default completer_handle_brkchars implementation.  */
+
+static void
+default_completer_handle_brkchars (struct cmd_list_element *ignore,
+				   const char *text, const char *word)
+{
+  set_rl_completer_word_break_characters
+    (current_language->la_word_break_characters ());
+}
+
+/* See definition in completer.h.  */
+
+completer_handle_brkchars_ftype *
+completer_handle_brkchars_func_for_completer (completer_ftype *fn)
+{
+  if (fn == filename_completer)
+    return filename_completer_handle_brkchars;
+
+  if (fn == command_completer)
+    return command_completer_handle_brkchars;
+
+  return default_completer_handle_brkchars;
 }
 
 /* Get the list of chars that are considered as word breaks

@@ -166,9 +166,9 @@ set_cmd_completer (struct cmd_list_element *cmd, completer_ftype *completer)
 
 void
 set_cmd_completer_handle_brkchars (struct cmd_list_element *cmd,
-			       completer_ftype_void *completer_handle_brkchars)
+				   completer_handle_brkchars_ftype *func)
 {
-  cmd->completer_handle_brkchars = completer_handle_brkchars;
+  cmd->completer_handle_brkchars = func;
 }
 
 /* Add element named NAME.
