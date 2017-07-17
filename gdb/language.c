@@ -855,7 +855,7 @@ const struct language_defn unknown_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
   default_pass_by_reference,
@@ -905,7 +905,7 @@ const struct language_defn auto_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
   default_pass_by_reference,
@@ -953,7 +953,7 @@ const struct language_defn local_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
   default_pass_by_reference,

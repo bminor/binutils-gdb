@@ -612,15 +612,14 @@ catching_syscall_number (int syscall_number)
 }
 
 /* Complete syscall names.  Used by "catch syscall".  */
-static VEC (char_ptr) *
+
+static void
 catch_syscall_completer (struct cmd_list_element *cmd,
+			 completion_tracker &tracker,
                          const char *text, const char *word)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
-  VEC (char_ptr) *group_retlist = NULL;
-  VEC (char_ptr) *syscall_retlist = NULL;
-  VEC (char_ptr) *retlist = NULL;
   const char **group_list = NULL;
   const char **syscall_list = NULL;
   const char *prefix;
@@ -636,8 +635,8 @@ catch_syscall_completer (struct cmd_list_element *cmd,
     {
       /* Perform completion inside 'group:' namespace only.  */
       group_list = get_syscall_group_names (gdbarch);
-      retlist = (group_list == NULL
-		 ? NULL : complete_on_enum (group_list, word, word));
+      if (group_list != NULL)
+	complete_on_enum (tracker, group_list, word, word);
     }
   else
     {
@@ -654,21 +653,15 @@ catch_syscall_completer (struct cmd_list_element *cmd,
 	  make_cleanup (xfree, prefixed_group);
 	}
 
-      syscall_retlist = ((syscall_list == NULL)
-			 ? NULL : complete_on_enum (syscall_list, word, word));
-      group_retlist = ((group_list == NULL)
-		       ? NULL : complete_on_enum (group_list, word, word));
-
-      retlist = VEC_merge (char_ptr, syscall_retlist, group_retlist);
+      if (syscall_list != NULL)
+	complete_on_enum (tracker, syscall_list, word, word);
+      if (group_list != NULL)
+	complete_on_enum (tracker, group_list, word, word);
     }
 
-  VEC_free (char_ptr, syscall_retlist);
-  VEC_free (char_ptr, group_retlist);
   xfree (syscall_list);
   xfree (group_list);
   do_cleanups (cleanups);
-
-  return retlist;
 }
 
 static void

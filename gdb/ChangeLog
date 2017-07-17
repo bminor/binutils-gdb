@@ -1,5 +1,187 @@
 2017-07-17  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (symbol_completion_match): Adjust comments.
+	(symbol_completion_add): Replace vector parameter with
+	completion_tracker parameter.  Use it.
+	(ada_make_symbol_completion_list): Rename to...
+	(ada_collect_symbol_completion_matches): ... this.  Add
+	completion_tracker parameter and use it.
+	(ada_language_defn): Adjust.
+	* break-catch-syscall.c (catch_syscall_completer): Adjust
+	prototype and work with completion_tracker instead of VEC.
+	* breakpoint.c (condition_completer): Adjust prototype and work
+	with completion_tracker instead of VEC.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Adjust to renames.
+	* cli/cli-cmds.c (complete_command): Rework using
+	completion_tracker.  Catch exceptions when completing.
+	* cli/cli-decode.c (integer_unlimited_completer)
+	(complete_on_cmdlist, complete_on_enum): Adjust prototype and work
+	with completion_tracker instead of VEC.
+	* command.h (struct completion_tracker): Forward declare.
+	(completer_ftype, completer_handle_brkchars_ftype): Change
+	types.
+	(complete_on_cmdlist, complete_on_enum): Adjust.
+	* completer.c: Include <algorithm>.
+	(struct gdb_completer_state): New.
+	(current_completion): New global.
+	(readline_line_completion_function): Delete.
+	(noop_completer, filename_completer)
+	(filename_completer_handle_brkchars, complete_files_symbols)
+	(linespec_location_completer): Adjust to work with a
+	completion_tracker instead of a VEC.
+	(string_or_empty): New.
+	(collect_explicit_location_matches): Adjust to work with a
+	completion_tracker instead of a VEC.
+	(explicit_location_completer): Rename to ...
+	(complete_explicit_location): ... this and adjust to work with a
+	completion_tracker instead of a VEC.
+	(location_completer): Adjust to work with a completion_tracker
+	instead of a VEC.
+	(add_struct_fields): Adjust to work with a completion_list instead
+	of VEC.
+	(expression_completer): Rename to ...
+	(complete_expression): ... this and adjust to work with a
+	completion_tracker instead of a VEC.  Use complete_files_symbols.
+	(expression_completer): Reimplement on top of complete_expression.
+	(symbol_completer): Adjust to work with a completion_tracker
+	instead of a VEC.
+	(enum complete_line_internal_reason): Add describing comments.
+	(complete_line_internal_normal_command): Adjust to work with a
+	completion_tracker instead of a VEC.
+	(complete_line_internal): Rename to ...
+	(complete_line_internal_1): ... this and adjust to work with a
+	completion_tracker instead of a VEC.  Assert TEXT is NULL in the
+	handle_brkchars phase.
+	(new_completion_tracker): Delete.
+	(complete_line_internal): Reimplement as TRY/CATCH wrapper around
+	complete_line_internal_1.
+	(free_completion_tracker): Delete.
+	(INITIAL_COMPLETION_HTAB_SIZE): New.
+	(completion_tracker::completion_tracker)
+	(completion_tracker::~completion_tracker): New.
+	(maybe_add_completion): Delete.
+	(completion_tracker::maybe_add_completion)
+	(completion_tracker::add_completion)
+	(completion_tracker::add_completions): New.
+	(throw_max_completions_reached_error): Delete.
+	(complete_line): Adjust to work with a completion_tracker instead
+	of a VEC.  Don't create a completion_tracker_t or check for max
+	completions here.
+	(command_completer, command_completer_handle_brkchars)
+	(signal_completer, reg_or_group_completer_1)
+	(reg_or_group_completer, default_completer_handle_brkchars):
+	Adjust to work with a completion_tracker.
+	(gdb_completion_word_break_characters_throw): New.
+	(gdb_completion_word_break_characters): Reimplement.
+	(line_completion_function): Delete.
+	(completion_tracker::recompute_lowest_common_denominator)
+	(expand_preserving_ws)
+	(completion_tracker::build_completion_result)
+	(completion_result::completion_result)
+	(completion_result::completion_result)
+	(completion_result::~completion_result)
+	(completion_result::completion_result)
+	(completion_result::release_match_list, compare_cstrings)
+	(completion_result::sort_match_list)
+	(completion_result::reset_match_list)
+	(gdb_rl_attempted_completion_function_throw)
+	(gdb_rl_attempted_completion_function): New.
+	* completer.h (completion_list, struct completion_result)
+	(class completion_tracker): New.
+	(complete_line): Add completion_tracker parameter.
+	(readline_line_completion_function): Delete.
+	(gdb_rl_attempted_completion_function): New.
+	(noop_completer, filename_completer, expression_completer)
+	(location_completer, symbol_completer, command_completer)
+	(signal_completer, reg_or_group_completer): Update prototypes.
+	(completion_tracker_t, new_completion_tracker)
+	(make_cleanup_free_completion_tracker): Delete.
+	(enum maybe_add_completion_enum): Delete.
+	(maybe_add_completion): Delete.
+	(throw_max_completions_reached_error): Delete.
+	* corefile.c (complete_set_gnutarget): Adjust to work with a
+	completion_tracker instead of a VEC.
+	* cp-abi.c (cp_abi_completer): Adjust to work with a
+	completion_tracker instead of a VEC.
+	* d-lang.c (d_language_defn): Adjust.
+	* disasm.c (disassembler_options_completer): Adjust to work with a
+	completion_tracker instead of a VEC.
+	* f-lang.c (f_make_symbol_completion_list): Rename to ...
+	(f_collect_symbol_completion_matches): ... this.  Adjust to work
+	with a completion_tracker instead of a VEC.
+	(f_language_defn): Adjust.
+	* go-lang.c (go_language_defn): Adjust.
+	* guile/scm-cmd.c (cmdscm_add_completion, cmdscm_completer):
+	Adjust to work with a completion_tracker instead of a VEC.
+	* infrun.c (handle_completer): Likewise.
+	* interps.c (interpreter_completer): Likewise.
+	* interps.h (interpreter_completer): Likewise.
+	* language.c (unknown_language_defn, auto_language_defn)
+	(local_language_defn): Adjust.
+	* language.h (language_defn::la_make_symbol_completion_list):
+	Rename to ...
+	(language_defn::la_collect_symbol_completion_matches): ... this
+	and adjust to work with a completion_tracker instead of a VEC.
+	* m2-lang.c (m2_language_defn): Adjust.
+	* objc-lang.c (objc_language_defn): Adjust.
+	* opencl-lang.c (opencl_language_defn): Adjust.
+	* p-lang.c (pascal_language_defn): Adjust.
+	* python/py-cmd.c (cmdpy_completer_helper): Handle NULL word.
+	(cmdpy_completer_handle_brkchars, cmdpy_completer): Adjust to work
+	with a completion_tracker.
+	* rust-lang.c (rust_language_defn): Adjust.
+	* symtab.c (free_completion_list, do_free_completion_list)
+	(return_val, completion_tracker): Delete.
+	(completion_list_add_name, completion_list_add_symbol)
+	(completion_list_add_msymbol, completion_list_objc_symbol)
+	(completion_list_add_fields, add_symtab_completions): Add
+	completion_tracker parameter and use it.
+	(default_make_symbol_completion_list_break_on_1): Rename to...
+	(default_collect_symbol_completion_matches_break_on): ... this.
+	Add completion_tracker parameter and use it instead of allocating
+	a completion tracker here.
+	(default_make_symbol_completion_list_break_on): Delete old
+	implementation.
+	(default_make_symbol_completion_list): Delete.
+	(default_collect_symbol_completion_matches): New.
+	(make_symbol_completion_list): Delete.
+	(collect_symbol_completion_matches): New.
+	(make_symbol_completion_type): Rename to ...
+	(collect_symbol_completion_matches_type): ... this.  Add
+	completion_tracker parameter and use it instead of VEC.
+	(make_file_symbol_completion_list_1): Rename to...
+	(collect_file_symbol_completion_matches): ... this.  Add
+	completion_tracker parameter and use it instead of VEC.
+	(make_file_symbol_completion_list): Delete.
+	(add_filename_to_list): Use completion_list instead of a VEC.
+	(add_partial_filename_data::list): Now a completion_list.
+	(make_source_files_completion_list): Work with a completion_list
+	instead of a VEC.
+	* symtab.h: Include "completer.h".
+	(default_make_symbol_completion_list_break_on)
+	(default_make_symbol_completion_list, make_symbol_completion_list)
+	(make_symbol_completion_type, make_file_symbol_completion_list)
+	(make_source_files_completion_list): Delete.
+	(default_collect_symbol_completion_matches_break_on)
+	(default_collect_symbol_completion_matches)
+	(collect_symbol_completion_matches)
+	(collect_symbol_completion_matches_type)
+	(collect_file_symbol_completion_matches)
+	(make_source_files_completion_list): New.
+	* top.c (init_main): Don't install a rl_completion_entry_function
+	hook.  Install a rl_attempted_completion_function hook instead.
+	* tui/tui-layout.c (layout_completer): Adjust to work with a
+	completion_tracker.
+	* tui/tui-regs.c (tui_reggroup_completer):
+	* tui/tui-win.c (window_name_completer, focus_completer)
+	(winheight_completer): Adjust to work with a completion_tracker.
+	* value.c: Include "completer.h".
+	(complete_internalvar): Adjust to work with a completion_tracker.
+	* value.h (complete_internalvar): Likewise.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-decode.c (set_cmd_completer_handle_brkchars): Adjust to
 	renames.
 	* cli/cli-decode.h (struct cmd_list_element) <completer>: Move

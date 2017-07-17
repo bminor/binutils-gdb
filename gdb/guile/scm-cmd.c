@@ -350,9 +350,8 @@ cmdscm_bad_completion_result (const char *msg, SCM completion)
    The result is a boolean indicating success.  */
 
 static int
-cmdscm_add_completion (SCM completion, VEC (char_ptr) **result)
+cmdscm_add_completion (SCM completion, completion_tracker &tracker)
 {
-  char *item;
   SCM except_scm;
 
   if (!scm_is_string (completion))
@@ -363,8 +362,9 @@ cmdscm_add_completion (SCM completion, VEC (char_ptr) **result)
       return 0;
     }
 
-  item = gdbscm_scm_to_string (completion, NULL, host_charset (), 1,
-			       &except_scm);
+  gdb::unique_xmalloc_ptr<char> item
+    (gdbscm_scm_to_string (completion, NULL, host_charset (), 1,
+			   &except_scm));
   if (item == NULL)
     {
       /* Inform the user, but otherwise ignore the entire result.  */
@@ -372,21 +372,21 @@ cmdscm_add_completion (SCM completion, VEC (char_ptr) **result)
       return 0;
     }
 
-  VEC_safe_push (char_ptr, *result, item);
+  tracker.add_completion (std::move (item));
 
   return 1;
 }
 
 /* Called by gdb for command completion.  */
 
-static VEC (char_ptr) *
+static void
 cmdscm_completer (struct cmd_list_element *command,
+		  completion_tracker &tracker,
 		  const char *text, const char *word)
 {
   command_smob *c_smob/*obj*/ = (command_smob *) get_cmd_context (command);
   SCM completer_result_scm;
   SCM text_scm, word_scm, result_scm;
-  VEC (char_ptr) *result = NULL;
 
   gdb_assert (c_smob != NULL);
   gdb_assert (gdbscm_is_procedure (c_smob->complete));
@@ -408,7 +408,7 @@ cmdscm_completer (struct cmd_list_element *command,
     {
       /* Inform the user, but otherwise ignore.  */
       gdbscm_print_gdb_exception (SCM_BOOL_F, completer_result_scm);
-      goto done;
+      return;
     }
 
   if (gdbscm_is_true (scm_list_p (completer_result_scm)))
@@ -419,11 +419,8 @@ cmdscm_completer (struct cmd_list_element *command,
 	{
 	  SCM next = scm_car (list);
 
-	  if (!cmdscm_add_completion (next, &result))
-	    {
-	      VEC_free (char_ptr, result);
-	      goto done;
-	    }
+	  if (!cmdscm_add_completion (next, tracker))
+	    break;
 
 	  list = scm_cdr (list);
 	}
@@ -437,17 +434,13 @@ cmdscm_completer (struct cmd_list_element *command,
 	{
 	  if (gdbscm_is_exception (next))
 	    {
-	      /* Inform the user, but otherwise ignore the entire result.  */
+	      /* Inform the user.  */
 	      gdbscm_print_gdb_exception (SCM_BOOL_F, completer_result_scm);
-	      VEC_free (char_ptr, result);
-	      goto done;
+	      break;
 	    }
 
-	  if (!cmdscm_add_completion (next, &result))
-	    {
-	      VEC_free (char_ptr, result);
-	      goto done;
-	    }
+	  if (cmdscm_add_completion (next, tracker))
+	    break;
 
 	  next = itscm_safe_call_next_x (iter, NULL);
 	}
@@ -458,9 +451,6 @@ cmdscm_completer (struct cmd_list_element *command,
       cmdscm_bad_completion_result (_("Bad completer result: "),
 				    completer_result_scm);
     }
-
- done:
-  return result;
 }
 
 /* Helper for gdbscm_make_command which locates the command list to use and

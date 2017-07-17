@@ -134,7 +134,7 @@ struct language_arch_info
    transformed for lookup.  */
 
 typedef int (*symbol_name_cmp_ftype) (const char *symbol_search_name,
-					  const char *lookup_name);
+				      const char *lookup_name);
 
 /* Structure tying together assorted information about a language.  */
 
@@ -323,14 +323,16 @@ struct language_defn
     /* The list of characters forming word boundaries.  */
     const char *(*la_word_break_characters) (void);
 
-    /* Should return a vector of all symbols which are possible
+    /* Add to the completion tracker all symbols which are possible
        completions for TEXT.  WORD is the entire command on which the
        completion is being made.  If CODE is TYPE_CODE_UNDEF, then all
        symbols should be examined; otherwise, only STRUCT_DOMAIN
        symbols whose type has a code of CODE should be matched.  */
-    VEC (char_ptr) *(*la_make_symbol_completion_list) (const char *text,
-						       const char *word,
-						       enum type_code code);
+    void (*la_collect_symbol_completion_matches)
+      (completion_tracker &tracker,
+       const char *text,
+       const char *word,
+       enum type_code code);
 
     /* The per-architecture (OS/ABI) language information.  */
     void (*la_language_arch_info) (struct gdbarch *,

@@ -668,24 +668,23 @@ tui_reg_command (char *args, int from_tty)
 /* Complete names of register groups, and add the special "prev" and "next"
    names.  */
 
-static VEC (char_ptr) *
+static void
 tui_reggroup_completer (struct cmd_list_element *ignore,
+			completion_tracker &tracker,
 			const char *text, const char *word)
 {
-  VEC (char_ptr) *result = NULL;
   static const char *extra[] = { "next", "prev", NULL };
   size_t len = strlen (word);
   const char **tmp;
 
-  result = reggroup_completer (ignore, text, word);
+  reggroup_completer (ignore, tracker, text, word);
 
+  /* XXXX use complete_on_enum instead?  */
   for (tmp = extra; *tmp != NULL; ++tmp)
     {
       if (strncmp (word, *tmp, len) == 0)
-	VEC_safe_push (char_ptr, result, xstrdup (*tmp));
+	tracker.add_completion (gdb::unique_xmalloc_ptr<char> (xstrdup (*tmp)));
     }
-
-  return result;
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

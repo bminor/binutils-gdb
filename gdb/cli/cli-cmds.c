@@ -238,6 +238,7 @@ help_command (char *command, int from_tty)
   help_cmd (command, gdb_stdout);
 }
 
+
 /* Note: The "complete" command is used by Emacs to implement completion.
    [Is that why this function writes output with *_unfiltered?]  */
 
@@ -246,8 +247,6 @@ complete_command (char *arg_entry, int from_tty)
 {
   const char *arg = arg_entry;
   int argpoint;
-  char *arg_prefix;
-  VEC (char_ptr) *completions;
 
   dont_repeat ();
 
@@ -279,43 +278,46 @@ complete_command (char *arg_entry, int from_tty)
       point--;
     }
 
-  arg_prefix = (char *) alloca (point - arg + 1);
-  memcpy (arg_prefix, arg, point - arg);
-  arg_prefix[point - arg] = 0;
+  completion_tracker tracker_handle_completions;
 
-  completions = complete_line (point, arg, argpoint);
-
-  if (completions)
+  TRY
     {
-      int ix, size = VEC_length (char_ptr, completions);
-      char *item, *prev = NULL;
+      complete_line (tracker_handle_completions, point, arg, strlen (arg));
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      return;
+    }
 
-      qsort (VEC_address (char_ptr, completions), size,
-	     sizeof (char *), compare_strings);
+  std::string arg_prefix (arg, point - arg);
 
-      /* We do extra processing here since we only want to print each
-	 unique item once.  */
-      for (ix = 0; VEC_iterate (char_ptr, completions, ix, item); ++ix)
+  completion_result result
+    = (tracker_handle_completions.build_completion_result
+       (point, point - arg, strlen (arg)));
+
+  if (result.number_matches != 0)
+    {
+      if (result.number_matches == 1)
+	printf_unfiltered ("%s%s\n", arg_prefix.c_str (), result.match_list[0]);
+      else
 	{
-	  if (prev == NULL || strcmp (item, prev) != 0)
+	  result.sort_match_list ();
+
+	  for (size_t i = 0; i < result.number_matches; i++)
 	    {
-	      printf_unfiltered ("%s%s\n", arg_prefix, item);
-	      xfree (prev);
-	      prev = item;
+	      printf_unfiltered ("%s%s",
+				 arg_prefix.c_str (),
+				 result.match_list[i + 1]);
+	      printf_unfiltered ("\n");
 	    }
-	  else
-	    xfree (item);
 	}
 
-      xfree (prev);
-      VEC_free (char_ptr, completions);
-
-      if (size == max_completions)
+      if (result.number_matches == max_completions)
 	{
 	  /* ARG_PREFIX and POINT are included in the output so that emacs
 	     will include the message in the output.  */
 	  printf_unfiltered (_("%s%s %s\n"),
-			     arg_prefix, point,
+			     arg_prefix.c_str (), point,
 			     get_max_completions_reached_message ());
 	}
     }

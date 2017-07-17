@@ -355,8 +355,9 @@ set_cp_abi_cmd (char *args, int from_tty)
 
 /* A completion function for "set cp-abi".  */
 
-static VEC (char_ptr) *
+static void
 cp_abi_completer (struct cmd_list_element *ignore,
+		  completion_tracker &tracker,
 		  const char *text, const char *word)
 {
   static const char **cp_abi_names;
@@ -371,7 +372,7 @@ cp_abi_completer (struct cmd_list_element *ignore,
       cp_abi_names[i] = NULL;
     }
 
-  return complete_on_enum (cp_abi_names, text, word);
+  complete_on_enum (tracker, cp_abi_names, text, word);
 }
 
 /* Show the currently selected C++ ABI.  */
