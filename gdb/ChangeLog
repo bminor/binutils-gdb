@@ -1,5 +1,16 @@
 2017-07-17  Pedro Alves  <palves@redhat.com>
 
+	* completer.c (symbol_completer): New function, based on
+	make_symbol_completion_list_fn.
+	* completer.h (symbol_completer): New declaration.
+	* guile/scm-cmd.c (cmdscm_completers): Adjust.
+	* python/py-cmd.c (completers): Adjust.
+	* symtab.c (make_symbol_completion_list_fn): Delete.
+	* symtab.h (make_symbol_completion_list_fn): Delete.
+	* cli/cli-decode.c (add_cmd): Adjust.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (COMMON_OBS): Add filename-seen-cache.o.
 	* dwarf2read.c: Include "filename-seen-cache.h".
 	* dwarf2read.c (dwarf2_per_objfile) <filenames_cache>: New field.

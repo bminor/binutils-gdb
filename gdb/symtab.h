@@ -1507,9 +1507,6 @@ extern VEC (char_ptr) *default_make_symbol_completion_list (const char *,
 extern VEC (char_ptr) *make_symbol_completion_list (const char *, const char *);
 extern VEC (char_ptr) *make_symbol_completion_type (const char *, const char *,
 						    enum type_code);
-extern VEC (char_ptr) *make_symbol_completion_list_fn (struct cmd_list_element *,
-						       const char *,
-						       const char *);
 
 extern VEC (char_ptr) *make_file_symbol_completion_list (const char *,
 							 const char *,

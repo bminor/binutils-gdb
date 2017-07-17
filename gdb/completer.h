@@ -87,6 +87,9 @@ extern VEC (char_ptr) *expression_completer (struct cmd_list_element *,
 extern VEC (char_ptr) *location_completer (struct cmd_list_element *,
 					   const char *, const char *);
 
+extern VEC (char_ptr) *symbol_completer (struct cmd_list_element *,
+					 const char *, const char *);
+
 extern VEC (char_ptr) *command_completer (struct cmd_list_element *,
 					  const char *, const char *);
 

@@ -114,7 +114,7 @@ static const struct cmdscm_completer cmdscm_completers[] =
   { "COMPLETE_FILENAME", filename_completer },
   { "COMPLETE_LOCATION", location_completer },
   { "COMPLETE_COMMAND", command_completer },
-  { "COMPLETE_SYMBOL", make_symbol_completion_list_fn },
+  { "COMPLETE_SYMBOL", symbol_completer },
   { "COMPLETE_EXPRESSION", expression_completer },
 };
 

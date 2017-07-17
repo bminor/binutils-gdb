@@ -244,7 +244,7 @@ add_cmd (const char *name, enum command_class theclass, cmd_cfunc_ftype *fun,
   c->allow_unknown = 0;
   c->prefix = NULL;
   c->abbrev_flag = 0;
-  set_cmd_completer (c, make_symbol_completion_list_fn);
+  set_cmd_completer (c, symbol_completer);
   c->completer_handle_brkchars = NULL;
   c->destroyer = NULL;
   c->type = not_set_cmd;

@@ -663,6 +663,15 @@ set_gdb_completion_word_break_characters (completer_ftype *fn)
   set_rl_completer_word_break_characters (break_chars);
 }
 
+/* Complete on symbols.  */
+
+VEC (char_ptr) *
+symbol_completer (struct cmd_list_element *ignore,
+		  const char *text, const char *word)
+{
+  return make_symbol_completion_list (text, word);
+}
+
 /* Here are some useful test cases for completion.  FIXME: These
    should be put in the test suite.  They should be tested with both
    M-? and TAB.

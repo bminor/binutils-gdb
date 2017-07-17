@@ -5299,16 +5299,6 @@ make_symbol_completion_type (const char *text, const char *word,
   return current_language->la_make_symbol_completion_list (text, word, code);
 }
 
-/* Like make_symbol_completion_list, but suitable for use as a
-   completion function.  */
-
-VEC (char_ptr) *
-make_symbol_completion_list_fn (struct cmd_list_element *ignore,
-				const char *text, const char *word)
-{
-  return make_symbol_completion_list (text, word);
-}
-
 /* Like make_symbol_completion_list, but returns a list of symbols
    defined in all source files name SRCFILE.  */
 
