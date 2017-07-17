@@ -1,3 +1,11 @@
+2017-07-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21782
+	* testsuite/ld-x86-64/pie3-nacl.d: New file.
+	* testsuite/ld-x86-64/pie3.d: Likewise.
+	* testsuite/ld-x86-64/pie3.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pie3 and pie3-nacl.
+
 2017-07-14  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/powerpc.exp: Add -shared to tlsop5 tests.
