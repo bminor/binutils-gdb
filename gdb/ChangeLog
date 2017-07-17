@@ -1,3 +1,23 @@
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (dwarf2_per_objfile): In-class initialize all
+	fields.
+	(dwarf2_per_objfile::dwarf2_per_objfile(objfile*, const
+	dwarf2_debug_sections*)): New.
+	(dwarf2_per_objfile::dwarf2_per_objfile(const
+	dwarf2_per_objfile&)): Declare as deleted.
+	(dwarf2_per_objfile::operator=): Declare as deleted.
+	(dwarf2_per_objfile::dwarf2_per_objfile)
+	(dwarf2_per_objfile::~dwarf2_per_objfile)
+	(dwarf2_per_objfile::free_cached_comp_units): New.
+	(dwarf2_has_info): dwarf2_per_objfile initialization code moved to
+	ctor.  Call dwarf2_per_objfile's ctor manually.
+	(dwarf2_locate_sections): Deleted/refactored as ...
+	(dwarf2_per_objfile::locate_sections): ... this new method.
+	(free_cached_comp_units): Defer to
+	dwarf2_per_objfile::free_cached_comp_units.
+	(dwarf2_free_objfile): Call dwarf2_per_objfile's dtor manually.
+
 2017-07-14  Tom Tromey  <tom@tromey.com>
 
 	PR rust/21764:
