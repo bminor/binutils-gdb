@@ -1,5 +1,23 @@
 2017-07-17  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (COMMON_OBS): Add filename-seen-cache.o.
+	* dwarf2read.c: Include "filename-seen-cache.h".
+	* dwarf2read.c (dwarf2_per_objfile) <filenames_cache>: New field.
+	(dw2_map_symbol_filenames): Build and use a filenames_seen_cache.
+	* filename-seen-cache.c: New file.
+	* filename-seen-cache.h: New file.
+	* symtab.c: Include "filename-seen-cache.h".
+	(struct filename_seen_cache, INITIAL_FILENAME_SEEN_CACHE_SIZE)
+	(create_filename_seen_cache, clear_filename_seen_cache)
+	(delete_filename_seen_cache, filename_seen): Delete, parts moved
+	to filename-seen-cache.h/filename-seen-cache.c.
+	(output_source_filename, sources_info)
+	(maybe_add_partial_symtab_filename)
+	(make_source_files_completion_list): Adjust to use
+	filename_seen_cache.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (dwarf2_per_objfile): In-class initialize all
 	fields.
 	(dwarf2_per_objfile::dwarf2_per_objfile(objfile*, const

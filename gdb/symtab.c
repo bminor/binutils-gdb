@@ -63,6 +63,7 @@
 #include "completer.h"
 #include "progspace-and-thread.h"
 #include "common/gdb_optional.h"
+#include "filename-seen-cache.h"
 
 /* Forward declarations for local functions.  */
 
@@ -3968,74 +3969,6 @@ operator_chars (const char *p, const char **end)
 }
 
 
-/* Cache to watch for file names already seen by filename_seen.  */
-
-struct filename_seen_cache
-{
-  /* Table of files seen so far.  */
-  htab_t tab;
-  /* Initial size of the table.  It automagically grows from here.  */
-#define INITIAL_FILENAME_SEEN_CACHE_SIZE 100
-};
-
-/* filename_seen_cache constructor.  */
-
-static struct filename_seen_cache *
-create_filename_seen_cache (void)
-{
-  struct filename_seen_cache *cache = XNEW (struct filename_seen_cache);
-
-  cache->tab = htab_create_alloc (INITIAL_FILENAME_SEEN_CACHE_SIZE,
-				  filename_hash, filename_eq,
-				  NULL, xcalloc, xfree);
-
-  return cache;
-}
-
-/* Empty the cache, but do not delete it.  */
-
-static void
-clear_filename_seen_cache (struct filename_seen_cache *cache)
-{
-  htab_empty (cache->tab);
-}
-
-/* filename_seen_cache destructor.
-   This takes a void * argument as it is generally used as a cleanup.  */
-
-static void
-delete_filename_seen_cache (void *ptr)
-{
-  struct filename_seen_cache *cache = (struct filename_seen_cache *) ptr;
-
-  htab_delete (cache->tab);
-  xfree (cache);
-}
-
-/* If FILE is not already in the table of files in CACHE, return zero;
-   otherwise return non-zero.  Optionally add FILE to the table if ADD
-   is non-zero.
-
-   NOTE: We don't manage space for FILE, we assume FILE lives as long
-   as the caller needs.  */
-
-static int
-filename_seen (struct filename_seen_cache *cache, const char *file, int add)
-{
-  void **slot;
-
-  /* Is FILE in tab?  */
-  slot = htab_find_slot (cache->tab, file, add ? INSERT : NO_INSERT);
-  if (*slot != NULL)
-    return 1;
-
-  /* No; maybe add it to tab.  */
-  if (add)
-    *slot = (char *) file;
-
-  return 0;
-}
-
 /* Data structure to maintain printing state for output_source_filename.  */
 
 struct output_source_filename_data
@@ -4065,7 +3998,7 @@ output_source_filename (const char *name,
      symtabs; it doesn't hurt to check.  */
 
   /* Was NAME already seen?  */
-  if (filename_seen (data->filename_seen_cache, name, 1))
+  if (data->filename_seen_cache->seen (name))
     {
       /* Yes; don't print it again.  */
       return;
@@ -4097,16 +4030,15 @@ sources_info (char *ignore, int from_tty)
   struct symtab *s;
   struct objfile *objfile;
   struct output_source_filename_data data;
-  struct cleanup *cleanups;
 
   if (!have_full_symbols () && !have_partial_symbols ())
     {
       error (_("No symbol table is loaded.  Use the \"file\" command."));
     }
 
-  data.filename_seen_cache = create_filename_seen_cache ();
-  cleanups = make_cleanup (delete_filename_seen_cache,
-			   data.filename_seen_cache);
+  filename_seen_cache filenames_seen;
+
+  data.filename_seen_cache = &filenames_seen;
 
   printf_filtered ("Source files for which symbols have been read in:\n\n");
 
@@ -4122,13 +4054,11 @@ sources_info (char *ignore, int from_tty)
   printf_filtered ("Source files for which symbols "
 		   "will be read in on demand:\n\n");
 
-  clear_filename_seen_cache (data.filename_seen_cache);
+  filenames_seen.clear ();
   data.first = 1;
   map_symbol_filenames (output_partial_symbol_filename, &data,
 			1 /*need_fullname*/);
   printf_filtered ("\n");
-
-  do_cleanups (cleanups);
 }
 
 /* Compare FILE against all the NFILES entries of FILES.  If BASENAMES is
@@ -5552,7 +5482,7 @@ maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
 
   if (not_interesting_fname (filename))
     return;
-  if (!filename_seen (data->filename_seen_cache, filename, 1)
+  if (!data->filename_seen_cache->seen (filename)
       && filename_ncmp (filename, data->text, data->text_len) == 0)
     {
       /* This file matches for a completion; add it to the
@@ -5564,7 +5494,7 @@ maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
       const char *base_name = lbasename (filename);
 
       if (base_name != filename
-	  && !filename_seen (data->filename_seen_cache, base_name, 1)
+	  && !data->filename_seen_cache->seen (base_name)
 	  && filename_ncmp (base_name, data->text, data->text_len) == 0)
 	add_filename_to_list (base_name, data->text, data->word, data->list);
     }
@@ -5585,23 +5515,20 @@ make_source_files_completion_list (const char *text, const char *word)
   VEC (char_ptr) *list = NULL;
   const char *base_name;
   struct add_partial_filename_data datum;
-  struct filename_seen_cache *filename_seen_cache;
-  struct cleanup *back_to, *cache_cleanup;
+  struct cleanup *back_to;
 
   if (!have_full_symbols () && !have_partial_symbols ())
     return list;
 
   back_to = make_cleanup (do_free_completion_list, &list);
 
-  filename_seen_cache = create_filename_seen_cache ();
-  cache_cleanup = make_cleanup (delete_filename_seen_cache,
-				filename_seen_cache);
+  filename_seen_cache filenames_seen;
 
   ALL_FILETABS (objfile, cu, s)
     {
       if (not_interesting_fname (s->filename))
 	continue;
-      if (!filename_seen (filename_seen_cache, s->filename, 1)
+      if (!filenames_seen.seen (s->filename)
 	  && filename_ncmp (s->filename, text, text_len) == 0)
 	{
 	  /* This file matches for a completion; add it to the current
@@ -5616,13 +5543,13 @@ make_source_files_completion_list (const char *text, const char *word)
 	     command do when they parse file names.  */
 	  base_name = lbasename (s->filename);
 	  if (base_name != s->filename
-	      && !filename_seen (filename_seen_cache, base_name, 1)
+	      && !filenames_seen.seen (base_name)
 	      && filename_ncmp (base_name, text, text_len) == 0)
 	    add_filename_to_list (base_name, text, word, &list);
 	}
     }
 
-  datum.filename_seen_cache = filename_seen_cache;
+  datum.filename_seen_cache = &filenames_seen;
   datum.text = text;
   datum.word = word;
   datum.text_len = text_len;
@@ -5630,7 +5557,6 @@ make_source_files_completion_list (const char *text, const char *word)
   map_symbol_filenames (maybe_add_partial_symtab_filename, &datum,
 			0 /*need_fullname*/);
 
-  do_cleanups (cache_cleanup);
   discard_cleanups (back_to);
 
   return list;
