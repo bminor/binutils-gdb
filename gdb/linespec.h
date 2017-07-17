@@ -194,6 +194,17 @@ extern void linespec_complete_function (completion_tracker &tracker,
 					const char *function,
 					const char *source_filename);
 
+/* Complete a label symbol, in linespec mode.  Only labels of
+   functions named FUNCTION_NAME are considered.  If SOURCE_FILENAME
+   is non-NULL, limits completion to labels of functions defined in
+   source files that match SOURCE_FILENAME.  */
+
+extern void linespec_complete_label (completion_tracker &tracker,
+				     const struct language_defn *language,
+				     const char *source_filename,
+				     const char *function_name,
+				     const char *label_name);
+
 /* Evaluate the expression pointed to by EXP_PTR into a CORE_ADDR,
    advancing EXP_PTR past any parsed text.  */
 

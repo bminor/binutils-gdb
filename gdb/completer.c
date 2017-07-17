@@ -627,7 +627,13 @@ collect_explicit_location_matches (completion_tracker &tracker,
       break;
 
     case MATCH_LABEL:
-      /* Not supported.  */
+      {
+	const char *label = string_or_empty (explicit_loc->label_name);
+	linespec_complete_label (tracker, language,
+				 explicit_loc->source_filename,
+				 explicit_loc->function_name,
+				 label);
+      }
       break;
 
     default:

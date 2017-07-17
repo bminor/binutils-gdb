@@ -299,7 +299,8 @@ static VEC (symtab_ptr) *symtabs_from_filename (const char *,
 static VEC (symbolp) *find_label_symbols (struct linespec_state *self,
 					  VEC (symbolp) *function_symbols,
 					  VEC (symbolp) **label_funcs_ret,
-					  const char *name);
+					  const char *name,
+					  bool completion_mode = false);
 
 static void find_linespec_symbols (struct linespec_state *self,
 				   VEC (symtab_ptr) *file_symtabs,
@@ -2053,31 +2054,33 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
   return sals;
 }
 
-/* Convert the explicit location EXPLICIT_LOC into SaLs.  */
+/* Build RESULT from the explicit location components SOURCE_FILENAME,
+   FUNCTION_NAME, LABEL_NAME and LINE_OFFSET.  */
 
-static struct symtabs_and_lines
-convert_explicit_location_to_sals (struct linespec_state *self,
-				   linespec_p result,
-				   const struct explicit_location *explicit_loc)
+static void
+convert_explicit_location_to_linespec (struct linespec_state *self,
+				       linespec_p result,
+				       const char *source_filename,
+				       const char *function_name,
+				       const char *label_name,
+				       struct line_offset line_offset)
 {
   VEC (symbolp) *symbols, *labels;
   VEC (bound_minimal_symbol_d) *minimal_symbols;
 
-  if (explicit_loc->source_filename != NULL)
+  if (source_filename != NULL)
     {
       TRY
 	{
 	  result->file_symtabs
-	    = symtabs_from_filename (explicit_loc->source_filename,
-				     self->search_pspace);
+	    = symtabs_from_filename (source_filename, self->search_pspace);
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
-	  source_file_not_found_error (explicit_loc->source_filename);
+	  source_file_not_found_error (source_filename);
 	}
       END_CATCH
-      result->explicit_loc.source_filename
-	= xstrdup (explicit_loc->source_filename);
+      result->explicit_loc.source_filename = xstrdup (source_filename);
     }
   else
     {
@@ -2085,41 +2088,53 @@ convert_explicit_location_to_sals (struct linespec_state *self,
       VEC_safe_push (symtab_ptr, result->file_symtabs, NULL);
     }
 
-  if (explicit_loc->function_name != NULL)
+  if (function_name != NULL)
     {
       find_linespec_symbols (self, result->file_symtabs,
-			     explicit_loc->function_name, &symbols,
+			     function_name, &symbols,
 			     &minimal_symbols);
 
       if (symbols == NULL && minimal_symbols == NULL)
-	symbol_not_found_error (explicit_loc->function_name,
+	symbol_not_found_error (function_name,
 				result->explicit_loc.source_filename);
 
-      result->explicit_loc.function_name
-	= xstrdup (explicit_loc->function_name);
+      result->explicit_loc.function_name = xstrdup (function_name);
       result->function_symbols = symbols;
       result->minimal_symbols = minimal_symbols;
     }
 
-  if (explicit_loc->label_name != NULL)
+  if (label_name != NULL)
     {
       symbols = NULL;
       labels = find_label_symbols (self, result->function_symbols,
-				   &symbols, explicit_loc->label_name);
+				   &symbols, label_name);
 
       if (labels == NULL)
 	undefined_label_error (result->explicit_loc.function_name,
-			       explicit_loc->label_name);
+			       label_name);
 
-      result->explicit_loc.label_name = xstrdup (explicit_loc->label_name);
+      result->explicit_loc.label_name = xstrdup (label_name);
       result->labels.label_symbols = labels;
       result->labels.function_symbols = symbols;
     }
 
-  if (explicit_loc->line_offset.sign != LINE_OFFSET_UNKNOWN)
-    result->explicit_loc.line_offset = explicit_loc->line_offset;
+  if (line_offset.sign != LINE_OFFSET_UNKNOWN)
+    result->explicit_loc.line_offset = line_offset;
+}
 
-   return convert_linespec_to_sals (self, result);
+/* Convert the explicit location EXPLICIT_LOC into SaLs.  */
+
+static struct symtabs_and_lines
+convert_explicit_location_to_sals (struct linespec_state *self,
+				   linespec_p result,
+				   const struct explicit_location *explicit_loc)
+{
+  convert_explicit_location_to_linespec (self, result,
+					 explicit_loc->source_filename,
+					 explicit_loc->function_name,
+					 explicit_loc->label_name,
+					 explicit_loc->line_offset);
+  return convert_linespec_to_sals (self, result);
 }
 
 /* Parse a string that specifies a linespec.
@@ -2468,6 +2483,69 @@ linespec_complete_function (completion_tracker &tracker,
     }
   else
     collect_symbol_completion_matches (tracker, mode, function, function);
+}
+
+/* Helper for linespec_complete_label.  Find labels that match
+   LABEL_NAME in the function symbols listed in the PARSER, and add
+   them to the tracker.  */
+
+static void
+complete_label (completion_tracker &tracker,
+		linespec_parser *parser,
+		const char *label_name)
+{
+  VEC (symbolp) *label_function_symbols = NULL;
+  VEC (symbolp) *labels
+    = find_label_symbols (PARSER_STATE (parser),
+			  PARSER_RESULT (parser)->function_symbols,
+			  &label_function_symbols,
+			  label_name, true);
+
+  symbol *label;
+  for (int ix = 0;
+       VEC_iterate (symbolp, labels, ix, label); ++ix)
+    {
+      char *match = xstrdup (SYMBOL_SEARCH_NAME (label));
+      tracker.add_completion (gdb::unique_xmalloc_ptr<char> (match));
+    }
+  VEC_free (symbolp, labels);
+}
+
+/* See linespec.h.  */
+
+void
+linespec_complete_label (completion_tracker &tracker,
+			 const struct language_defn *language,
+			 const char *source_filename,
+			 const char *function_name,
+			 const char *label_name)
+{
+  linespec_parser parser;
+  struct cleanup *cleanup;
+
+  linespec_parser_new (&parser, 0, language, NULL, NULL, 0, NULL);
+  cleanup = make_cleanup (linespec_parser_delete, &parser);
+
+  line_offset unknown_offset = { 0, LINE_OFFSET_UNKNOWN };
+
+  TRY
+    {
+      convert_explicit_location_to_linespec (PARSER_STATE (&parser),
+					     PARSER_RESULT (&parser),
+					     source_filename,
+					     function_name,
+					     NULL, unknown_offset);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      do_cleanups (cleanup);
+      return;
+    }
+  END_CATCH
+
+  complete_label (tracker, &parser, label_name);
+
+  do_cleanups (cleanup);
 }
 
 /* A helper function for decode_line_full and decode_line_1 to
@@ -3385,13 +3463,63 @@ find_linespec_symbols (struct linespec_state *state,
     }
 }
 
-/* Return all labels named NAME in FUNCTION_SYMBOLS.  Return the
-   actual function symbol in which the label was found in LABEL_FUNC_RET.  */
+/* Helper for find_label_symbols.  Find all labels that match name
+   NAME in BLOCK.  Return all labels that match in FUNCTION_SYMBOLS.
+   Return the actual function symbol in which the label was found in
+   LABEL_FUNC_RET.  If COMPLETION_MODE is true, then NAME is
+   interpreted as a label name prefix.  Otherwise, only a label named
+   exactly NAME match.  */
+
+static void
+find_label_symbols_in_block (const struct block *block,
+			     const char *name, struct symbol *fn_sym,
+			     bool completion_mode,
+			     VEC (symbolp) **result,
+			     VEC (symbolp) **label_funcs_ret)
+{
+  if (completion_mode)
+    {
+      struct block_iterator iter;
+      struct symbol *sym;
+      size_t name_len = strlen (name);
+
+      int (*cmp) (const char *, const char *, size_t);
+      cmp = case_sensitivity == case_sensitive_on ? strncmp : strncasecmp;
+
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
+	{
+	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+				     SYMBOL_DOMAIN (sym), LABEL_DOMAIN)
+	      && cmp (SYMBOL_SEARCH_NAME (sym), name, name_len) == 0)
+	    {
+	      VEC_safe_push (symbolp, *result, sym);
+	      VEC_safe_push (symbolp, *label_funcs_ret, fn_sym);
+	    }
+	}
+    }
+  else
+    {
+      struct symbol *sym = lookup_symbol (name, block, LABEL_DOMAIN, 0).symbol;
+
+      if (sym != NULL)
+	{
+	  VEC_safe_push (symbolp, *result, sym);
+	  VEC_safe_push (symbolp, *label_funcs_ret, fn_sym);
+	}
+    }
+}
+
+/* Return all labels that match name NAME in FUNCTION_SYMBOLS.  Return
+   the actual function symbol in which the label was found in
+   LABEL_FUNC_RET.  If COMPLETION_MODE is true, then NAME is
+   interpreted as a label name prefix.  Otherwise, only labels named
+   exactly NAME match.  */
 
 static VEC (symbolp) *
 find_label_symbols (struct linespec_state *self,
 		    VEC (symbolp) *function_symbols,
-		    VEC (symbolp) **label_funcs_ret, const char *name)
+		    VEC (symbolp) **label_funcs_ret, const char *name,
+		    bool completion_mode)
 {
   int ix;
   const struct block *block;
@@ -3412,13 +3540,8 @@ find_label_symbols (struct linespec_state *self,
 	return NULL;
       fn_sym = BLOCK_FUNCTION (block);
 
-      sym = lookup_symbol (name, block, LABEL_DOMAIN, 0).symbol;
-
-      if (sym != NULL)
-	{
-	  VEC_safe_push (symbolp, result, sym);
-	  VEC_safe_push (symbolp, *label_funcs_ret, fn_sym);
-	}
+      find_label_symbols_in_block (block, name, fn_sym, completion_mode,
+				   &result, label_funcs_ret);
     }
   else
     {
@@ -3427,13 +3550,9 @@ find_label_symbols (struct linespec_state *self,
 	{
 	  set_current_program_space (SYMTAB_PSPACE (symbol_symtab (fn_sym)));
 	  block = SYMBOL_BLOCK_VALUE (fn_sym);
-	  sym = lookup_symbol (name, block, LABEL_DOMAIN, 0).symbol;
 
-	  if (sym != NULL)
-	    {
-	      VEC_safe_push (symbolp, result, sym);
-	      VEC_safe_push (symbolp, *label_funcs_ret, fn_sym);
-	    }
+	  find_label_symbols_in_block (block, name, fn_sym, completion_mode,
+				       &result, label_funcs_ret);
 	}
     }
 

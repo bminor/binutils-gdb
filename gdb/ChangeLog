@@ -1,5 +1,18 @@
 2017-07-17  Pedro Alves  <palves@redhat.com>
 
+	* completer.c (collect_explicit_location_matches): Handle
+	MATCH_LABEL.
+	(convert_explicit_location_to_linespec): New, factored out from
+	...
+	(convert_explicit_location_to_sals): ... this.
+	(complete_label): New.
+	(linespec_complete_label, find_label_symbols_in_block): New.
+	(find_label_symbols): Add completion_mode parameter and adjust to
+	call find_label_symbols_in_block.
+	* linespec.h (linespec_complete_label): Declare.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (ada_collect_symbol_completion_matches): Add
 	complete_symbol_mode parameter.
 	* cli/cli-cmds.c (complete_command): Get the completion result out
