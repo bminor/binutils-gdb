@@ -4966,8 +4966,8 @@ do_ifunc_pointer:
 	      && (input_section->flags & SEC_READONLY) != 0
 	      && h != NULL
 	      && ((bfd_link_executable (info)
-		  && h->root.type == bfd_link_hash_undefweak
-		  && !resolved_to_zero)
+		   && h->root.type == bfd_link_hash_undefweak
+		   && !resolved_to_zero)
 		  || (bfd_link_pic (info)
 		      && !(bfd_link_pie (info)
 			   && h->root.type == bfd_link_hash_undefined))))
