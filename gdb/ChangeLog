@@ -1,5 +1,19 @@
 2017-07-22  Tom Tromey  <tom@tromey.com>
 
+	* break-catch-syscall.c (syscall_catchpoint)
+	<syscalls_to_be_caught>: Now a std::vector<int>
+	(~syscall_catchpoint): Remove.
+	(insert_catch_syscall, remove_catch_syscall)
+	(breakpoint_hit_catch_syscall, print_one_catch_syscall)
+	(print_mention_catch_syscall, print_recreate_catch_syscall):
+	Update.
+	(create_syscall_event_catchpoint): Change type of "filter"
+	parameter.
+	(catch_syscall_split_args): Return a std::vector.
+	(catch_syscall_command_1, catching_syscall_number_1): Update.
+
+2017-07-22  Tom Tromey  <tom@tromey.com>
+
 	* break-catch-throw.c (struct exception_catchpoint)
 	<exception_rx>: Now a std::string.
 	(~exception_catchpoint): Remove.
