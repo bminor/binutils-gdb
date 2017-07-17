@@ -1,5 +1,16 @@
 2017-07-17  Pedro Alves  <palves@redhat.com>
 
+	* utils.c (enum class strncmp_iw_mode): New.
+	(strcmp_iw): Rename to ...
+	(strncmp_iw_with_mode): ... this.  Add string2_len and mode
+	parameters.  Handle them.
+	(strncmp_iw): New.
+	(strcmp_iw): Reimplement as wrapper around strncmp_iw_with_mode.
+	* utils.h (strncmp_iw): Declare.
+	(strcmp_iw): Move describing comments here.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
 	* c-exp.y (operator_stoken): Use CP_OPERATOR_LEN and
 	CP_OPERATOR_STR.
 	* c-typeprint.c (is_type_conversion_operator): Use
