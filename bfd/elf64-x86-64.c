@@ -4969,9 +4969,7 @@ do_ifunc_pointer:
 	      && ((bfd_link_executable (info)
 		  && h->root.type == bfd_link_hash_undefweak
 		  && !resolved_to_zero)
-		  || (bfd_link_pic (info)
-		      && !(bfd_link_pie (info)
-			   && h->root.type == bfd_link_hash_undefined))))
+		  || bfd_link_dll (info)))
 	    {
 	      bfd_boolean fail = FALSE;
 	      bfd_boolean branch
