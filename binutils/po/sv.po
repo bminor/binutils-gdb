@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: binutils 2.28.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2017-07-03 16:55+0200\n"
-"PO-Revision-Date: 2017-07-09 19:39+0200\n"
+"PO-Revision-Date: 2017-07-14 14:10+0200\n"
 "Last-Translator: Göran Uddeborg <goeran@uddeborg.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -2498,7 +2498,7 @@ msgstr "Radintervall på 0 är felaktigt, använder 1 istället\n"
 
 #: dwarf.c:3263
 msgid "Line Base extends beyond end of section\n"
-msgstr "Radbasen sträckers sig utanför slutet på sektionen\n"
+msgstr "Radbasen sträcker sig utanför slutet på sektionen\n"
 
 #: dwarf.c:3267
 #, c-format
@@ -3573,7 +3573,7 @@ msgstr ""
 #: dwarf.c:7954
 #, c-format
 msgid "Undefined abbreviation tag %lu in unit 0x%lx in the debug_names\n"
-msgstr ""
+msgstr "Odefinierad förkortningstagg %lu i enhet 0x%lx i debug_names\n"
 
 #: dwarf.c:7989
 #, fuzzy, c-format
@@ -3615,26 +3615,26 @@ msgstr "Trasigt huvud i sektionen %s.\n"
 #: dwarf.c:8065
 #, c-format
 msgid "TU offset (%x) is less than CU offset (%x)\n"
-msgstr ""
+msgstr "TU-avståndet (%x) är mindre än CU-avståndet (%x)\n"
 
 #: dwarf.c:8074
 #, c-format
 msgid "Address table offset (%x) is less than TU offset (%x)\n"
-msgstr ""
+msgstr "Adresstabellavståndet (%x) är mindre än TU-avståndet (%x)\n"
 
 #: dwarf.c:8084
 #, c-format
 msgid "Symbol table offset (%xl) is less then Address table offset (%x)\n"
-msgstr ""
+msgstr "Symboltabellavståndet (%xl) är mindre än adresstebellavståndet (%x)\n"
 
 #: dwarf.c:8093
 #, c-format
 msgid "Constant pool offset (%x) is less than symbol table offset (%x)\n"
-msgstr ""
+msgstr "Konstant-pool-avståndet (%x) är mindre än symboltabellavståndet (%x)\n"
 
 #: dwarf.c:8108
 msgid "Address table extends beyond end of section.\n"
-msgstr ""
+msgstr "Adresstabellen sträcker sig bortom slutet på sektionen.\n"
 
 #: dwarf.c:8112
 #, c-format
@@ -3687,22 +3687,22 @@ msgstr " <trasig: %14ld>"
 #: dwarf.c:8168
 #, c-format
 msgid "Corrupt name offset of 0x%x found for symbol table slot %d\n"
-msgstr ""
+msgstr "Trasigt namnavstånd på 0x%x hittat för symboltabellfack %d\n"
 
 #: dwarf.c:8179
 #, c-format
 msgid "<invalid CU vector offset: %x>\n"
-msgstr ""
+msgstr "<felaktigt CU-vektoravstånd: %x>\n"
 
 #: dwarf.c:8180
 #, c-format
 msgid "Corrupt CU vector offset of 0x%x found for symbol table slot %d\n"
-msgstr ""
+msgstr "Trasigt CU-vektoravstånd på 0x%x hittat för symboltabellfack %d\n"
 
 #: dwarf.c:8193
 #, c-format
 msgid "Invalid number of CUs (0x%x) for symbol table slot %d\n"
-msgstr ""
+msgstr "Felaktigt antal CU:n (0x%x) för symboltabellfack %d\n"
 
 #: dwarf.c:8218
 msgid "static"
@@ -3769,7 +3769,7 @@ msgstr "Sektionen %s är för liten för %d hashtabellposter\n"
 
 #: dwarf.c:8394
 msgid "Section index pool located before start of section\n"
-msgstr ""
+msgstr "Sektionsindexpoolen placerad före starten på sektionen\n"
 
 #: dwarf.c:8399
 #, c-format
@@ -3814,7 +3814,7 @@ msgstr "sektion %u: sh_link-värdet på %u är större än antalet sektioner\n"
 #: dwarf.c:8513
 #, c-format
 msgid "Row index (%u) * num columns (%u) > space remaining in section\n"
-msgstr ""
+msgstr "Radindex (%u) · antal kolumner (%u) > utrymmet som återstår i sektionen\n"
 
 #: dwarf.c:8519 dwarf.c:8576
 #, c-format
@@ -3824,7 +3824,7 @@ msgstr "  [%3d] 0x%s"
 #: dwarf.c:8533 dwarf.c:8589
 #, c-format
 msgid "Overlarge Dwarf section index detected: %u\n"
-msgstr ""
+msgstr "För stort Dwarf-sektionsindex upptäckt: %u\n"
 
 #: dwarf.c:8551
 #, c-format
@@ -3845,17 +3845,17 @@ msgstr "Visa felsökningsinnehållet i sektion %s hanteras inte än.\n"
 #: dwarf.c:8705
 #, c-format
 msgid "Attempt to allocate an array with an excessive number of elements: 0x%lx\n"
-msgstr ""
+msgstr "Försök att allokera en vektor med ett överdrivet antal element: 0x%lx\n"
 
 #: dwarf.c:8723
 #, c-format
 msgid "Attempt to re-allocate an array with an excessive number of elements: 0x%lx\n"
-msgstr ""
+msgstr "Försök att omallokera en vektor med ett överdrivet antal element: 0x%lx\n"
 
 #: dwarf.c:8739
 #, c-format
 msgid "Attempt to allocate a zero'ed array with an excessive number of elements: 0x%lx\n"
-msgstr ""
+msgstr "Försök att allokera en nollställd vektor med ett överdrivet antal element: 0x%lx\n"
 
 #: dwarf.c:8848 dwarf.c:8919
 #, c-format
@@ -3884,7 +3884,7 @@ msgstr "Slut på minne\n"
 #: elfcomm.c:434
 #, c-format
 msgid "Abnormal length of thin archive member name: %lx\n"
-msgstr ""
+msgstr "Onormal längd på namn på medlem i tunt arkiv: %lx\n"
 
 #: elfcomm.c:474
 #, fuzzy, c-format
@@ -3958,12 +3958,12 @@ msgstr "%s har inget arkivindex\n"
 #: elfcomm.c:662
 #, c-format
 msgid "%s: long name table is too small, (size = %ld)\n"
-msgstr ""
+msgstr "%s: tabellen över långa namn är för liten, (storlek = %ld)\n"
 
 #: elfcomm.c:669
 #, c-format
 msgid "%s: long name table is too big, (size = 0x%lx)\n"
-msgstr ""
+msgstr "%s: tabellen över långa namn är för stor, (storlek = 0x%lx)\n"
 
 #: elfcomm.c:680
 msgid "Out of memory reading long symbol names in archive\n"
@@ -3981,7 +3981,7 @@ msgstr "Arkivmedlemmen använder långa namn, men ingen tabell med långa namn h
 #: elfcomm.c:775
 #, c-format
 msgid "Found long name index (%ld) beyond end of long name table\n"
-msgstr ""
+msgstr "Hittade ett index till långt namn (%ld) efter slutet på tabellen över långa namn\n"
 
 #: elfcomm.c:794
 #, fuzzy
@@ -4603,7 +4603,7 @@ msgstr "ouppklarad programräknarrelativ relokering mot %s"
 #: nlmconv.c:1938 nlmconv.c:1994 nlmconv.c:2017
 #, c-format
 msgid "Out of range relocation: %lx"
-msgstr ""
+msgstr "Omlokalisering utanför intervallet: %lx"
 
 # FIXME
 #: nlmconv.c:2008
@@ -4780,7 +4780,7 @@ msgstr ""
 #: nm.c:484
 #, c-format
 msgid "%s: plugin needed to handle lto object"
-msgstr ""
+msgstr "%s: en insticksmodul behövs för att hantera lto-objekt"
 
 #: nm.c:1361
 #, c-format
@@ -5441,39 +5441,39 @@ msgstr "kopiera från ”%s” [okänd] till ”%s” [okänd]\n"
 
 #: objcopy.c:1938
 msgid "corrupt GNU build attribute note: wrong note type"
-msgstr ""
+msgstr "trasig notering om GNU-byggattribut: felaktig noteringstyp"
 
 #: objcopy.c:1944
 msgid "corrupt GNU build attribute note: note too big"
-msgstr ""
+msgstr "trasig notering om GNU-byggattribut: noteringen är för stor"
 
 #: objcopy.c:1950
 msgid "corrupt GNU build attribute note: name too small"
-msgstr ""
+msgstr "trasig notering om GNU-byggattribut: namnet är för litet"
 
 #: objcopy.c:1958
 msgid "corrupt GNU build attribute note: bad description size"
-msgstr ""
+msgstr "trasig notering om GNU-byggattribut: felaktig beskrivningsstorlek"
 
 #: objcopy.c:1970
 msgid "corrupt GNU build attribute note: name not NUL terminated"
-msgstr ""
+msgstr "trasig notering om GNU-byggattribut: namnet är inte NUL-avslutat"
 
 #: objcopy.c:1994
 msgid "corrupt GNU build attribute notes: excess data at end"
-msgstr ""
+msgstr "trasig notering om GNU-byggattribut: extra data på slutet"
 
 #: objcopy.c:2000
 msgid "bad GNU build attribute notes: no known versions detected"
-msgstr ""
+msgstr "felaktiga noteringar om GNU-byggattribut: inga kända versioner hittade"
 
 #: objcopy.c:2006
 msgid "bad GNU build attribute notes: multiple different versions"
-msgstr ""
+msgstr "felaktiga noteringar om GNU-byggattribut: flera olika versioner"
 
 #: objcopy.c:2020
 msgid "bad GNU build attribute notes: first note not version note"
-msgstr ""
+msgstr "felaktiga noteringar om GNU-byggattribut: första noteringen är inte en versionsnotering"
 
 #. PR 17636: Call non-fatal so that we return to our parent who
 #. may need to tidy temporary files.
@@ -5490,12 +5490,12 @@ msgstr "fel: infilen ”%s” är tom"
 #: objcopy.c:2286
 #, c-format
 msgid "--compress-debug-sections=[zlib|zlib-gnu|zlib-gabi] is unsupported on `%s'"
-msgstr ""
+msgstr "--compress-debug-sections=[zlib|zlib-gnu|zlib-gabi] stödjs inte på ”%s”"
 
 #: objcopy.c:2293
 #, c-format
 msgid "--elf-stt-common=[yes|no] is unsupported on `%s'"
-msgstr ""
+msgstr "--elf-stt-common=[yes|no] stödjs inte på ”%s”"
 
 #: objcopy.c:2300
 #, c-format
@@ -5576,7 +5576,7 @@ msgstr "kunde inte öppna sektionsutskriftsfil"
 #: objcopy.c:2658
 #, c-format
 msgid "error writing section contents to %s (error: %s)"
-msgstr ""
+msgstr "fel när sektionsinnehållet skrevs till %s (fel: %s)"
 
 #: objcopy.c:2667
 msgid "could not retrieve section contents"
@@ -5602,7 +5602,7 @@ msgstr "kan inte lägga till utfyllnad"
 
 #: objcopy.c:2926
 msgid "error: failed to copy merged notes into output"
-msgstr ""
+msgstr "fel: misslyckades att kopiera sammanslagna noteringar till utdata"
 
 #  BUGG: Fortsättningen är inte markerad för översättning i koden och innehåller '-citattecken.
 #: objcopy.c:2931
@@ -6041,7 +6041,7 @@ msgstr "Sektioner:\n"
 #: objdump.c:590
 #, c-format
 msgid "Idx %-*s Size      %-*s%-*sFile off  Algn"
-msgstr ""
+msgstr "Idx %-*s Storlek   %-*s%-*sFilavst   Just"
 
 #: objdump.c:596
 #, c-format
@@ -6056,7 +6056,7 @@ msgstr "kan inte läsa symboltabellen"
 
 #: objdump.c:619 objdump.c:3398
 msgid "error message was"
-msgstr ""
+msgstr "felmeddelandet var"
 
 #: objdump.c:643
 #, c-format
@@ -6071,7 +6071,7 @@ msgstr " (Filavstånd: 0x%lx)"
 #: objdump.c:1431
 #, c-format
 msgid "source file %s is more recent than object file\n"
-msgstr ""
+msgstr "källfilen %s är nyare än objektfilen\n"
 
 #: objdump.c:1877
 #, c-format
@@ -6223,7 +6223,7 @@ msgstr "I arkiv %s:\n"
 #. infinite loop.  100 is an arbitrary heuristic.
 #: objdump.c:3655
 msgid "Archive nesting is too deep"
-msgstr ""
+msgstr "Arkivnästningen är för djup"
 
 #: objdump.c:3659
 #, c-format
@@ -6990,7 +6990,7 @@ msgstr "ogiltigt värde angivet till pragma code_page.\n"
 #: rdcoff.c:116
 #, c-format
 msgid "Excessively large slot index: %lx"
-msgstr ""
+msgstr "Överdrivet stort fackindex: %lx"
 
 #: rdcoff.c:202
 #, c-format
@@ -7025,12 +7025,12 @@ msgstr "%s: ingen känd felsökningsinformation"
 #: rddbg.c:194
 #, c-format
 msgid "%s: %s: stab entry %ld is corrupt, strx = 0x%x, type = %d\n"
-msgstr ""
+msgstr "%s: %s: stab-post %ld är trasig, strx = 0x%x, typ = %d\n"
 
 #: rddbg.c:218
 #, c-format
 msgid "%s: %s: stab entry %ld is corrupt\n"
-msgstr ""
+msgstr "%s: %s: stab-post %ld är trasig\n"
 
 #: rddbg.c:416
 #, c-format
@@ -7047,11 +7047,13 @@ msgstr "<inget-namn>"
 
 #: readelf.c:350
 msgid "Size truncation prevents reading 0x%"
-msgstr ""
+msgstr "Storleksavhuggning förhindrar läsning av 0x%"
 
+# Felaktig sträng, rapporterad:
+# https://sourceware.org/bugzilla/show_bug.cgi?id=21732
 #: readelf.c:360
 msgid "Size overflow prevents reading 0x%"
-msgstr ""
+msgstr "Storleksavhuggning förhindrar läsning av 0x%"
 
 #: readelf.c:372
 #, fuzzy
@@ -7276,7 +7278,7 @@ msgstr ", okänd ISA"
 #: readelf.c:3549
 #, c-format
 msgid "Unrecognised IA64 VMS Command Code: %x\n"
-msgstr ""
+msgstr "Okänd IA64 VMS-kommandokod: %x\n"
 
 #: readelf.c:3613
 msgid ": architecture variant: "
@@ -7628,11 +7630,11 @@ msgstr " <trasig: utanför intervallet>"
 
 #: readelf.c:4753 readelf.c:4797
 msgid "The e_phentsize field in the ELF header is less than the size of an ELF program header\n"
-msgstr ""
+msgstr "e_phentsize-fältet i ELF-huvudet är mindre än storleken på ett ELF-programhuvud\n"
 
 #: readelf.c:4757 readelf.c:4801
 msgid "The e_phentsize field in the ELF header is larger than the size of an ELF program header\n"
-msgstr ""
+msgstr "e_phentsize-fältet i ELF-huvudet är större än storleken på ett ELF-programhuvud\n"
 
 #: readelf.c:4760 readelf.c:4804
 msgid "program headers"
@@ -7641,7 +7643,7 @@ msgstr "programhuvuden"
 #: readelf.c:4843
 #, c-format
 msgid "Too many program headers - %#x - the file is not that big\n"
-msgstr ""
+msgstr "För många programhuvuden — %#x — filen är inte så stor\n"
 
 #: readelf.c:4852
 #, fuzzy, c-format
@@ -7719,19 +7721,19 @@ msgstr "                 FilStrl            MinneStrl           Flagg  Just\n"
 
 #: readelf.c:5023
 msgid "LOAD segments must be sorted in order of increasing VirtAddr\n"
-msgstr ""
+msgstr "LOAD-segment måste sorteras i ordning med ökande VirtAddr\n"
 
 #: readelf.c:5026
 msgid "the segment's file size is larger than its memory size\n"
-msgstr ""
+msgstr "segmentets filstorlek är större än dess minnesstorlek\n"
 
 #: readelf.c:5033
 msgid "the PHDR segment must occur before any LOAD segment\n"
-msgstr ""
+msgstr "PHDR-segmentet måste komma före alla LOAD-segment\n"
 
 #: readelf.c:5044
 msgid "the PHDR segment is not covered by a LOAD segment\n"
-msgstr ""
+msgstr "PHDR-segmentet täcks inte av något LOAD-segment\n"
 
 #: readelf.c:5050
 msgid "more than one dynamic segment\n"
@@ -7751,7 +7753,7 @@ msgstr "sektionen .dynamic är inte den första sektionen i det dynamiska segmen
 
 #: readelf.c:5097
 msgid "the dynamic segment offset + size exceeds the size of the file\n"
-msgstr ""
+msgstr "det dynamiska segmentavståndet + storleken överskrider storleken på filen\n"
 
 #: readelf.c:5105
 msgid "Unable to find program interpreter name\n"
@@ -7800,11 +7802,11 @@ msgstr "Virtuell adress 0x%lx finns ej i något PT_LOAD-segment.\n"
 
 #: readelf.c:5206 readelf.c:5268
 msgid "The e_shentsize field in the ELF header is less than the size of an ELF section header\n"
-msgstr ""
+msgstr "e_shentsize-fältet i ELF-huvudet är mindre än storleken på ett ELF-sektionshuvud\n"
 
 #: readelf.c:5210 readelf.c:5272
 msgid "The e_shentsize field in the ELF header is larger than the size of an ELF section header\n"
-msgstr ""
+msgstr "e_shentsize-fältet i ELF-huvudet är större än storleken på ett ELF-sektionshuvud\n"
 
 #: readelf.c:5214 readelf.c:5276
 msgid "section headers"
@@ -7851,7 +7853,7 @@ msgstr "Sektion %d har felaktig sh_entsize %"
 #: readelf.c:5353 readelf.c:5466
 #, c-format
 msgid "Size (0x%lx) of section %s is not a multiple of its sh_entsize (0x%lx)\n"
-msgstr ""
+msgstr "Storleken (0x%lx) på sektionen %s är inte en multipel av dess sh_entsize (0x%lx)\n"
 
 #: readelf.c:5361 readelf.c:5474
 msgid "symbols"
@@ -7864,7 +7866,7 @@ msgstr "sektionsindex för symboltabellen"
 #: readelf.c:5381 readelf.c:5494
 #, c-format
 msgid "Index section %s has an sh_size of 0x%lx - expected 0x%lx\n"
-msgstr ""
+msgstr "Indexsektionen %s har en sh_size på 0x%lx — 0x%lx förväntades\n"
 
 #: readelf.c:5394 readelf.c:5507
 #, fuzzy, c-format
@@ -7874,7 +7876,7 @@ msgstr "Slut på minne när långa symbolnamn i arkivet lästes\n"
 
 #: readelf.c:5682 readelf.c:5754 readelf.c:5772 readelf.c:5790
 msgid "Internal error: not enough buffer room for section flag info"
-msgstr ""
+msgstr "Internt fel: inte tillräckligt med buffertutrymme för sektionsflagginformation"
 
 #: readelf.c:5797
 #, c-format
@@ -7883,7 +7885,7 @@ msgstr "OKÄND (%*.*lx)"
 
 #: readelf.c:5816 readelf.c:5831
 msgid "Compressed section is too small even for a compression header\n"
-msgstr ""
+msgstr "Komprimerad sektion är för liten till och med för ett komprimeringshuvud\n"
 
 #: readelf.c:5855
 msgid "possibly corrupt ELF file header - it has a non-zero section header offset, but no section headers\n"
@@ -8006,37 +8008,37 @@ msgstr "       Flaggor\n"
 #: readelf.c:6150
 #, c-format
 msgid "[%2u]: Link field (%u) should index a symtab section.\n"
-msgstr ""
+msgstr "[%2u]: Länkfält (%u) skall indexera en symboltabellsektion.\n"
 
 #: readelf.c:6163
 #, c-format
 msgid "[%2u]: Link field (%u) should index a string section.\n"
-msgstr ""
+msgstr "[%2u]: Länkfält (%u) skall indexera en stränsektion.\n"
 
 #: readelf.c:6171 readelf.c:6182
 #, c-format
 msgid "[%2u]: Unexpected value (%u) in link field.\n"
-msgstr ""
+msgstr "[%2u]: Oväntat värde (%u) i länkfält.\n"
 
 #: readelf.c:6210
 #, c-format
 msgid "[%2u]: Info field (%u) should index a relocatable section.\n"
-msgstr ""
+msgstr "[%2u]: Infofält (%u) skall indexera en omlokaliserbar sektion.\n"
 
 #: readelf.c:6222 readelf.c:6249
 #, c-format
 msgid "[%2u]: Unexpected value (%u) in info field.\n"
-msgstr ""
+msgstr "[%2u]: Oväntat värde (%u) i infofält.\n"
 
 #: readelf.c:6244
 #, c-format
 msgid "[%2u]: Expected link to another section in info field"
-msgstr ""
+msgstr "[%2u]: En länk till en annan sektion förväntades i infofältet"
 
 #: readelf.c:6259
 #, c-format
 msgid "Size of section %u is larger than the entire file!\n"
-msgstr ""
+msgstr "Storleken på sektion %u är större än hela filen!\n"
 
 #: readelf.c:6328
 #, c-format
@@ -8080,17 +8082,17 @@ msgstr ""
 #: readelf.c:6460
 #, c-format
 msgid "l (large), "
-msgstr ""
+msgstr "l (stor), "
 
 #: readelf.c:6462
 #, c-format
 msgid "y (purecode), "
-msgstr ""
+msgstr "y (ren kod), "
 
 #: readelf.c:6479
 #, c-format
 msgid "[0x%x: "
-msgstr ""
+msgstr "[0x%x: "
 
 #: readelf.c:6521
 #, c-format
@@ -8144,7 +8146,7 @@ msgstr "Felaktig sh_info i gruppsektionen ”%s”\n"
 #: readelf.c:6665
 #, c-format
 msgid "Section %s has sh_entsize (0x%lx) which is larger than its size (0x%lx)\n"
-msgstr ""
+msgstr "Sektionen %s har sh_entsize (0x%lx) som är större än dess storlek (0x%lx)\n"
 
 #: readelf.c:6674
 msgid "section data"
@@ -8171,7 +8173,7 @@ msgstr "sektion [%5u] i gruppsektion [%5u] > maximala sektionen [%5u]\n"
 
 #: readelf.c:6709
 msgid "Futher error messages about overlarge group section indicies suppressed\n"
-msgstr ""
+msgstr "Ytterligare felmeddelanden om överstora gruppsektionsindex utelämnas\n"
 
 #: readelf.c:6722
 #, c-format
@@ -8180,7 +8182,7 @@ msgstr "sektion [%5u] i gruppsektion [%5u] är redan i gruppsektion [%5u]\n"
 
 #: readelf.c:6726
 msgid "Further error messages about already contained group sections suppressed\n"
-msgstr ""
+msgstr "Ytterligare felmeddelanden om gruppsektioner som redan är inuti utelämnas\n"
 
 #: readelf.c:6738
 #, c-format
@@ -8194,7 +8196,7 @@ msgstr "avbildsfixar för den dynamiska sektionen"
 #: readelf.c:6815
 #, c-format
 msgid "corrupt library name index of 0x%lx found in dynamic entry"
-msgstr ""
+msgstr "trasigt biblioteksnamnsindex på 0x%lx hittat i en dynamisk post"
 
 #: readelf.c:6819
 #, c-format
@@ -8312,7 +8314,7 @@ msgstr "Hoppar över oväntad omlokalisering på avståndet 0x%lx\n"
 
 #: readelf.c:7484 readelf.c:7927
 msgid "Multiple auxillary string tables encountered\n"
-msgstr ""
+msgstr "Flera tabeller med ytterligare strängar påträffade\n"
 
 #: readelf.c:7498 readelf.c:7941 readelf.c:9031
 #, c-format
@@ -8381,7 +8383,7 @@ msgstr "Okänd index för ARM kompakt modell påträffat\n"
 #: readelf.c:8182
 #, c-format
 msgid "Bad symbol index in unwind relocation (%lu > %lu)\n"
-msgstr ""
+msgstr "Felaktigt symbolindex i utrullningsomlokalisering (%lu > %lu)\n"
 
 #: readelf.c:8197
 #, fuzzy, c-format
@@ -8461,7 +8463,7 @@ msgstr "[fyll]"
 
 #: readelf.c:8647
 msgid "Corrupt stack pointer adjustment detected\n"
-msgstr ""
+msgstr "Trasig stackpekarjustering upptäckt\n"
 
 #: readelf.c:8654
 #, c-format
@@ -8552,7 +8554,7 @@ msgstr "Arkitekturtyp %d som ej stödjs påträffad när utrullningstabellen bea
 
 #: readelf.c:9018
 msgid "Multiple string tables found in file.\n"
-msgstr ""
+msgstr "Flera strängtabeller hittade i filen.\n"
 
 #: readelf.c:9037
 #, c-format
@@ -8617,7 +8619,7 @@ msgstr ""
 #: readelf.c:9485
 #, c-format
 msgid "Invalid DT_SYMTAB entry: %lx"
-msgstr ""
+msgstr "Felaktig DT_SYMTAB-post: %lx"
 
 #: readelf.c:9494
 msgid "Unable to seek to end of file!\n"
@@ -8642,7 +8644,7 @@ msgstr "dynamisk strängtabell"
 #: readelf.c:9576
 #, c-format
 msgid "Bad value (%d) for SYMINENT entry\n"
-msgstr ""
+msgstr "Felaktigt värde (%d) för SYMINENT-post\n"
 
 #: readelf.c:9595
 msgid "symbol information"
@@ -8866,7 +8868,7 @@ msgstr "  Flaggor: %s  Version: %d\n"
 #: readelf.c:10370
 #, c-format
 msgid "Invalid vna_next field of %lx\n"
-msgstr ""
+msgstr "Felaktigt vna_next-fält på %lx\n"
 
 #: readelf.c:10380
 msgid "Missing Version Needs auxillary information\n"
@@ -8874,7 +8876,7 @@ msgstr "Saknad version behöver ytterligare information\n"
 
 #: readelf.c:10384
 msgid "Corrupt Version Needs structure - offset to next structure is zero with entries still left to be processed\n"
-msgstr ""
+msgstr "Trasig versionsbehovsstruktur — avståndet till nästa struktur är noll med poster kvar som skall behandlas\n"
 
 #: readelf.c:10392
 msgid "Missing Version Needs information\n"
@@ -8939,7 +8941,7 @@ msgstr "yttre versionsdef."
 
 #: readelf.c:10609
 msgid "*both*"
-msgstr ""
+msgstr "*båda*"
 
 #: readelf.c:10639
 #, c-format
@@ -8965,7 +8967,7 @@ msgstr "Okänd XCOFF-typ %d\n"
 #: readelf.c:10823
 #, c-format
 msgid "Unrecognized IA64 VMS ST Linkage: %d\n"
-msgstr ""
+msgstr "Okänd IA64 VMS ST-länkning: %d\n"
 
 #: readelf.c:10843
 #, c-format
@@ -8983,9 +8985,11 @@ msgstr "<annan>: %x"
 msgid "bad section index[%3d]"
 msgstr "Lyckades inte läsa sektionen"
 
+# Felaktig sträng, rapporterad:
+# https://sourceware.org/bugzilla/show_bug.cgi?id=21732
 #: readelf.c:10938
 msgid "Size truncation prevents reading %"
-msgstr ""
+msgstr "Avhuggen storlek förhindrar läsning av %"
 
 #: readelf.c:10948
 #, fuzzy
@@ -9106,7 +9110,7 @@ msgstr "    Nr:    Värde          Strl Typ     Bind   Synl     Idx Namn\n"
 #: readelf.c:11548
 #, c-format
 msgid "local symbol %u found at index >= %s's sh_info value of %u\n"
-msgstr ""
+msgstr "lokal symbol %u hittad vid index ≥ %ss sh_info-värde på %u\n"
 
 #: readelf.c:11559
 #, c-format
@@ -9139,7 +9143,7 @@ msgstr " Längd   Nummer     %% av alla   Täckning\n"
 
 #: readelf.c:11599
 msgid "histogram chain is corrupt\n"
-msgstr ""
+msgstr "histogramkedjan är trasig\n"
 
 #: readelf.c:11608
 #, fuzzy
@@ -9196,18 +9200,18 @@ msgstr "<trasig: %19ld>"
 #: readelf.c:11827
 #, c-format
 msgid "MSP430 SYM_DIFF reloc contains invalid symbol index %lu\n"
-msgstr ""
+msgstr "MSP430 SYM_DIFF-omlokalisering innehåller ett felaktigt symbolindex %lu\n"
 
 #: readelf.c:11856
 #, c-format
 msgid "MSP430 reloc contains invalid symbol index %lu\n"
-msgstr ""
+msgstr "MSP430-omlokalisering innehåller ett felaktigt symbolindex %lu\n"
 
 #. PR 21137
 #: readelf.c:11867
 #, c-format
 msgid "MSP430 sym diff reloc contains invalid offset: 0x%lx\n"
-msgstr ""
+msgstr "MSP430 symbolskillnadsomlokallisering innehåller ett felaktigt avstånd: 0x%lx\n"
 
 #: readelf.c:11878
 #, fuzzy
@@ -9218,17 +9222,17 @@ msgstr "Ej hanterad MSP430-omlokaliseringstyp hittad efter SYM_DIFF-omlokaliseri
 #: readelf.c:11901
 #, c-format
 msgid "MN10300_SYM_DIFF reloc contains invalid symbol index %lu\n"
-msgstr ""
+msgstr "MN10300_SYM_DIFF-omlokalisering innehåller ett felaktigt symbolindex %lu\n"
 
 #: readelf.c:11915
 #, c-format
 msgid "MN10300 reloc contains invalid symbol index %lu\n"
-msgstr ""
+msgstr "MN10300-omlokalisering innehåller ett felaktigt symbolindex %lu\n"
 
 #: readelf.c:11925
 #, c-format
 msgid "MN10300 sym diff reloc contains invalid offset: 0x%lx\n"
-msgstr ""
+msgstr "MN10300-symbolskillnadsomlokalisering innehåller ett felaktigt avstånd: 0x%lx\n"
 
 #: readelf.c:11935
 #, fuzzy
@@ -9239,12 +9243,12 @@ msgstr "Ej hanterad MN10300-omlokaliseringstyp hittad efter SYM_DIFF-omlokaliser
 #: readelf.c:11958
 #, c-format
 msgid "RL78_SYM reloc contains invalid symbol index %lu\n"
-msgstr ""
+msgstr "RL78_SYM-omlokalisering innehåller ett felaktigt symbolindex %lu\n"
 
 #: readelf.c:11977 readelf.c:11986
 #, c-format
 msgid "RL78 sym diff reloc contains invalid offset: 0x%lx\n"
-msgstr ""
+msgstr "RL78-symbolskillnadsomlokalisering innehåller ett felaktigt avstånd: 0x%lx\n"
 
 #: readelf.c:12193
 #, c-format
@@ -9311,7 +9315,7 @@ msgstr "IEEE klarar inte komplextyper av storlek %u\n"
 #: readelf.c:12865 readelf.c:13011 readelf.c:13179
 #, c-format
 msgid "compressed section '%s' is corrupted\n"
-msgstr ""
+msgstr "den komprimerade sektionen ”%s” är trasig\n"
 
 #: readelf.c:12897 readelf.c:13045 readelf.c:13216
 #, fuzzy, c-format
@@ -9358,7 +9362,7 @@ msgstr "sektionsdata för %s"
 #: readelf.c:13164
 #, c-format
 msgid "compressed section %s is too small to contain a compression header"
-msgstr ""
+msgstr "den komprimerade sektionen %s är för liten för att innehålla ett komprimeringshuvud"
 
 #: readelf.c:13301
 #, c-format
@@ -9408,22 +9412,22 @@ msgstr "<trasigt strängtabellsindex: %3ld>"
 #: readelf.c:13552
 #, c-format
 msgid "Absent/Non standard\n"
-msgstr ""
+msgstr "Frånvarande/ickestandard\n"
 
 #: readelf.c:13555
 #, c-format
 msgid "Bare metal/mwdt\n"
-msgstr ""
+msgstr "Ren metall/mwdt\n"
 
 #: readelf.c:13558
 #, c-format
 msgid "Bare metal/newlib\n"
-msgstr ""
+msgstr "Ren metall/newlib\n"
 
 #: readelf.c:13561
 #, c-format
 msgid "Linux/uclibc\n"
-msgstr ""
+msgstr "Linux/uclibc\n"
 
 #: readelf.c:13564
 #, c-format

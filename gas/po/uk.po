@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: gas 2.28.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2017-03-29 17:08+0100\n"
-"PO-Revision-Date: 2017-07-11 21:53+0300\n"
+"PO-Revision-Date: 2017-07-12 21:02+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
 "Language: uk\n"
@@ -1409,16 +1409,13 @@ msgid "invalid element size %d and vector size combination %c"
 msgstr "некоректне поєднання розміру елемента %d та розміру вектора %c"
 
 #: config/tc-aarch64.c:893
-#, fuzzy, c-format
-#| msgid "unexpected character `%c' in type specifier"
+#, c-format
 msgid "unexpected character `%c' in predication type"
-msgstr "неочікуваний символ «%c» у специфікації типу"
+msgstr "неочікуваний символ, «%c», у предикативному типі"
 
 #: config/tc-aarch64.c:896
-#, fuzzy
-#| msgid "Missing predicate relation type"
 msgid "missing predication type"
-msgstr "Пропущено предикативний тип співвідношення"
+msgstr "не вказано предикативного типу"
 
 #: config/tc-aarch64.c:991
 msgid "this type of register can't be indexed"
@@ -1670,16 +1667,14 @@ msgid "the specified option is not accepted for PSB"
 msgstr "вказаний параметр є неприйнятним для PSB"
 
 #: config/tc-aarch64.c:3915
-#, fuzzy, c-format
-#| msgid "selected processor does not support ARM mode `%s'"
+#, c-format
 msgid "selected processor does not support PSTATE field name '%s'"
-msgstr "у вибраному процесорі не передбачено підтримки режиму ARM «%s»"
+msgstr "для вибрано процесора не передбачено підтримки назви поля PSTATE «%s»"
 
 #: config/tc-aarch64.c:3918 config/tc-aarch64.c:3951
-#, fuzzy, c-format
-#| msgid "selected processor does not support Thumb mode `%s'"
+#, c-format
 msgid "selected processor does not support system register name '%s'"
-msgstr "у вибраному процесорі не передбачено підтримки режиму Thumb «%s»"
+msgstr "для вибраного процесора не передбачено підтримки назви системного регістра «%s»"
 
 #: config/tc-aarch64.c:3921
 #, c-format
@@ -1706,10 +1701,9 @@ msgid "%s at operand %d -- `%s'"
 msgstr "%s у операнді %d -- «%s»"
 
 #: config/tc-aarch64.c:4542
-#, fuzzy, c-format
-#| msgid "operand %d should be %s -- `%s'"
+#, c-format
 msgid "operand %d must be %s -- `%s'"
-msgstr "операндом %d має бути %s -- «%s»"
+msgstr "операнд %d має бути %s -- «%s»"
 
 #: config/tc-aarch64.c:4548
 #, c-format
@@ -1731,10 +1725,9 @@ msgid "   other valid variant(s):"
 msgstr "   інші коректні варіанти:"
 
 #: config/tc-aarch64.c:4645
-#, fuzzy, c-format
-#| msgid "operands 0 and 1 must be the same register"
+#, c-format
 msgid "operand %d must be the same register as operand 1 -- `%s'"
-msgstr "операнди 0 і 1 мають бути тим самим регістром"
+msgstr "операнд %d має бути тим самим регістром, що і операнд 1 -- «%s»"
 
 #: config/tc-aarch64.c:4651
 #, c-format
@@ -1746,10 +1739,9 @@ msgid "immediate value"
 msgstr "константа"
 
 #: config/tc-aarch64.c:4655
-#, fuzzy, c-format
-#| msgid "%s expected to be %d at operand %d -- `%s'"
+#, c-format
 msgid "%s must be %d at operand %d -- `%s'"
-msgstr "%s мав бути %d у операнді %d -- «%s»"
+msgstr "%s має бути %d у операнді %d -- «%s»"
 
 #: config/tc-aarch64.c:4662
 #, c-format
@@ -1895,10 +1887,9 @@ msgid "unpredictable transfer with writeback -- `%s'"
 msgstr "непередбачуване передавання з writeback -- «%s»"
 
 #: config/tc-aarch64.c:6540
-#, fuzzy, c-format
-#| msgid "unrecognized register name `%s'"
+#, c-format
 msgid "unpredictable load of register pair -- `%s'"
-msgstr "нерозпізнана назва регістра, «%s»"
+msgstr "непередбачуване завантаження пари регістрів -- «%s»"
 
 #: config/tc-aarch64.c:6617
 #, c-format
@@ -2593,10 +2584,9 @@ msgid "Virtual memory exhausted"
 msgstr "Віртуальна пам'ять вичерпана"
 
 #: config/tc-arc.c:840
-#, fuzzy, c-format
-#| msgid "invalid listing option `%c'"
+#, c-format
 msgid "invalid %s option for %s cpu"
-msgstr "некоректний параметр списку «%c»"
+msgstr "некоректний параметр %s для процесора %s"
 
 #: config/tc-arc.c:863
 msgid "Multiple .cpu directives found"
@@ -2623,10 +2613,8 @@ msgid "could not set architecture and machine"
 msgstr "не вдалося встановити архітектуру і тип комп’ютера"
 
 #: config/tc-arc.c:1203
-#, fuzzy
-#| msgid "No relocation operand"
 msgid "No valid label relocation operand"
-msgstr "Немає операнда пересування"
+msgstr "Операнд пересування без коректної мітки"
 
 #: config/tc-arc.c:1225
 #, c-format
@@ -2634,22 +2622,19 @@ msgid "Unknown relocation operand: @%s"
 msgstr "Невідомий операнд пересування: @%s"
 
 #: config/tc-arc.c:1238
-#, fuzzy, c-format
-#| msgid "unable to rebuffer file: %s\n"
+#, c-format
 msgid "Unable to parse TLS base: %s"
-msgstr "не можна повторно буферизувати файл: %s\n"
+msgstr "Не вдалося обробити базу TLS: %s"
 
 #: config/tc-arc.c:1262
-#, fuzzy, c-format
-#| msgid "`%s' is not a valid %s expression"
+#, c-format
 msgid "@%s is not a complex relocation."
-msgstr "«%s» не є коректним виразом %s"
+msgstr "@%s є не комплексним пересуванням."
 
 #: config/tc-arc.c:1268
-#, fuzzy, c-format
-#| msgid "GOT bad expression with %s."
+#, c-format
 msgid "Bad expression: @%s + %s."
-msgstr "GOT, помилковий вираз з %s."
+msgstr "Помилковий вираз: @%s + %s."
 
 #: config/tc-arc.c:1329
 msgid "Brackets in operand field incorrect"
@@ -2681,10 +2666,8 @@ msgid "failed to parse flags"
 msgstr "не вдалося обробити прапорці"
 
 #: config/tc-arc.c:1434
-#, fuzzy
-#| msgid "unhandled relocation type %s"
 msgid "Unhandled reloc type"
-msgstr "непридатний до обробки тип пересування %s"
+msgstr "Непридатний до обробки тип пересування"
 
 #: config/tc-arc.c:2393
 #, c-format
@@ -2707,40 +2690,32 @@ msgid "unknown opcode '%s'"
 msgstr "невідомий код операції «%s»"
 
 #: config/tc-arc.c:2459
-#, fuzzy, c-format
-#| msgid "Inserting \"%s\" into structure table failed: %s"
+#, c-format
 msgid "Inserting \"%s\" into register table failed: %s"
-msgstr "Спроба вставити «%s» до таблиці структур зазнала невдачі: %s"
+msgstr "Спроба вставити «%s» до таблиці регістрів зазнала невдачі: %s"
 
 #: config/tc-arc.c:2495
-#, fuzzy, c-format
-#| msgid "Inserting \"%s\" into structure table failed: %s"
+#, c-format
 msgid "Inserting \"%s\" into address type table failed: %s"
-msgstr "Спроба вставити «%s» до таблиці структур зазнала невдачі: %s"
+msgstr "Спроба вставити «%s» до таблиці типів адрес зазнала невдачі: %s"
 
 #: config/tc-arc.c:2610 config/tc-arc.c:4800
-#, fuzzy, c-format
-#| msgid "internal error: can't hash macro `%s': %s"
+#, c-format
 msgid "internal error: can't hash aux register '%s': %s"
-msgstr "внутрішня помилка: не вдалося виконати хешування макросу «%s»: %s"
+msgstr "внутрішня помилка: хешування допоміжного регістра «%s» неможливе: %s"
 
 #: config/tc-arc.c:2717
-#, fuzzy, c-format
-#| msgid "unhandled local relocation fix %s"
+#, c-format
 msgid "unhandled reloc %s in md_pcrel_from_section"
-msgstr "непридатне до обробки виправлення локального пересування, %s"
+msgstr "непридатне до обробки пересування %s у md_pcrel_from_section"
 
 #: config/tc-arc.c:2782
-#, fuzzy
-#| msgid "invalid operand, not a 12-bit signed value: %d"
 msgid "Unaligned operand. Needs to be 32bit aligned"
-msgstr "некоректний операнд, не є 12-бітовим значенням зі знаком: %d"
+msgstr "Невирівняний операнд. Операнд має бути вирівняно до 32 бітів"
 
 #: config/tc-arc.c:2787
-#, fuzzy
-#| msgid "invalid operand, not a 16-bit signed value: %d"
 msgid "Unaligned operand. Needs to be 16bit aligned"
-msgstr "некоректний операнд, не є 16-бітовим значенням зі знаком: %d"
+msgstr "Невирівняний операнд. Операнд має бути вирівняно до 16 бітів"
 
 #: config/tc-arc.c:2864 config/tc-cr16.c:568 config/tc-crx.c:345
 #: config/tc-mn10200.c:766 write.c:1015
@@ -2749,40 +2724,31 @@ msgid "can't resolve `%s' {%s section} - `%s' {%s section}"
 msgstr "не вдалося визначити «%s» {розділ %s} - «%s» {розділ %s}"
 
 #: config/tc-arc.c:2922
-#, fuzzy, c-format
-#| msgid "pcrel relocation not allowed in an instruction"
+#, c-format
 msgid "PC relative relocation not allowed for (internal) type %d"
-msgstr "пересування pcrel у інструкції заборонено"
+msgstr "Не можна використовувати пересування відносно PC для (внутрішнього) типу %d"
 
 #. FIXME! Check for the conditionality of
 #. the insn.
 #. FIXME! Check for the conditionality of
 #. the insn.
 #: config/tc-arc.c:2966 config/tc-arc.c:3949
-#, fuzzy
-#| msgid "relocation is not supported"
 msgid "TLS_*_S9 relocs are not supported yet"
-msgstr "підтримки пересування не передбачено"
+msgstr "Підтримки пересувань TLS_*_S9 ще не передбачено"
 
 #. I cannot fix an GOTPC relocation because I need to relax it
 #. from ld rx,[pcl,@sym@gotpc] to add rx,pcl,@sym@gotpc.
 #: config/tc-arc.c:3002
-#, fuzzy
-#| msgid "unsupported constant in relocation"
 msgid "Unsupported operation on reloc"
-msgstr "непідтримувана константа у пересуванні"
+msgstr "Непідтримувана дії при пересуванні"
 
 #: config/tc-arc.c:3078 config/tc-arc.c:3094
-#, fuzzy
-#| msgid "unknown fpu `%s'"
 msgid "unknown fixup size"
-msgstr "невідомий fpu, «%s»"
+msgstr "невідомий розмір виправлення"
 
 #: config/tc-arc.c:3228
-#, fuzzy
-#| msgid "invalid relocation for '%s' instruction"
 msgid "no relaxation found for this instruction."
-msgstr "некоректне пересування для інструкції «%s»"
+msgstr "не знайдено оптимізації для цієї інструкції."
 
 #: config/tc-arc.c:3481
 #, c-format
@@ -2859,22 +2825,19 @@ msgstr ""
 "  -mxy\n"
 
 #: config/tc-arc.c:3603
-#, fuzzy, c-format
-#| msgid "invalid relocation for instruction"
+#, c-format
 msgid "Unable to find %s relocation for instruction %s"
-msgstr "некоректне пересування для інструкції"
+msgstr "Не вдалося знайти пересування %s для інструкції %s"
 
 #: config/tc-arc.c:3899
-#, fuzzy, c-format
-#| msgid "unhandled local relocation fix %s"
+#, c-format
 msgid "Unable to use @plt relocation for insn %s"
-msgstr "непридатне до обробки виправлення локального пересування, %s"
+msgstr "Неможливо використати пересування @plt для інструкції %s"
 
 #: config/tc-arc.c:3919
-#, fuzzy, c-format
-#| msgid "unhandled local relocation fix %s"
+#, c-format
 msgid "Unable to use @pcl relocation for insn %s"
-msgstr "непридатне до обробки виправлення локального пересування, %s"
+msgstr "Неможливо використати пересування @pcl для інструкції %s"
 
 #: config/tc-arc.c:3975
 #, c-format
@@ -2882,10 +2845,8 @@ msgid "invalid relocation %s for field"
 msgstr "Некоректне пересування, %s, для поля"
 
 #: config/tc-arc.c:4087
-#, fuzzy
-#| msgid "8 byte instruction in delay slot"
 msgid "A jump/branch instruction in delay slot."
-msgstr "8-байтова інструкція у слоті затримки"
+msgstr "Інструкція переходу або розгалуження у слоті затримки."
 
 #: config/tc-arc.c:4195 config/tc-microblaze.c:2525 config/tc-mn10300.c:1069
 #: config/tc-sh.c:801 config/tc-z80.c:700 read.c:4582
@@ -2918,10 +2879,8 @@ msgid "expected comma after instruction name"
 msgstr "після назви інструкції мало бути вказано кому"
 
 #: config/tc-arc.c:4350
-#, fuzzy
-#| msgid "expected comma after opcode"
 msgid "expected comma after major opcode"
-msgstr "після коду операції мало бути вказано кому"
+msgstr "після основного коду операції мало бути вказано кому"
 
 #: config/tc-arc.c:4536
 #, c-format
@@ -2934,10 +2893,8 @@ msgid "major opcode not in range [0x%02x - 0x%02x]"
 msgstr "основний код операції не потрапляє до діапазону [0x%02x - 0x%02x]"
 
 #: config/tc-arc.c:4548
-#, fuzzy
-#| msgid "value not in range [0, 0xffffffff]"
 msgid "minor opcode not in range [0x00 - 0x3f]"
-msgstr "значення не належить до діапазону [0, 0xffffffff]"
+msgstr "додатковий код операції не належить діапазону [0x00 - 0x3f]"
 
 #: config/tc-arc.c:4554
 msgid "Improper use of OP1_IMM_IMPLIED"
@@ -2977,16 +2934,14 @@ msgid "shortcut designator invalid"
 msgstr "позначник скорочення є некоректним"
 
 #: config/tc-arc.c:4787
-#, fuzzy, c-format
-#| msgid "core register value (%d) too large"
+#, c-format
 msgid "core register %s value (%d) too large"
-msgstr "значення регістра ядра (%d) є надто великим"
+msgstr "значення регістра ядра %s (%d) є надто великим"
 
 #: config/tc-arc.c:4806
-#, fuzzy, c-format
-#| msgid "condition code value (%d) too large"
+#, c-format
 msgid "condition code %s value (%d) too large"
-msgstr "значення коду умови (%d) є надто великим"
+msgstr "значення коду умови %s (%d) є надто великим"
 
 #: config/tc-arc.c:4825
 msgid "Unknown extension"
@@ -3146,20 +3101,16 @@ msgid "cannot use writeback with PC-relative addressing"
 msgstr "не можна використовувати зворотний запис з адресуванням відносно PC"
 
 #: config/tc-arm.c:811
-#, fuzzy
-#| msgid "selected processor does not support 'A' form of this instruction"
 msgid "selected processor does not support fp16 instruction"
-msgstr "у вибраному процесорі не передбачено підтримки форми «A» цієї інструкції"
+msgstr "у вибраному процесорі не передбачено підтримки fp16 інструкції"
 
 #: config/tc-arm.c:812
 msgid "using "
 msgstr "використовується "
 
 #: config/tc-arm.c:813
-#, fuzzy
-#| msgid "branch prediction invalid on this opcode"
 msgid "relocation valid in thumb1 code only"
-msgstr "некоректне передбачено гілки на цьому коді операції"
+msgstr "пересування є коректним лише у коді thumb1"
 
 #: config/tc-arm.c:1020
 msgid "immediate expression requires a # prefix"
@@ -3709,10 +3660,8 @@ msgid "invalid pseudo operation"
 msgstr "некоректна псевдооперація"
 
 #: config/tc-arm.c:8149
-#, fuzzy
-#| msgid "invalid source memory operand"
 msgid "invalid co-processor operand"
-msgstr "некоректний операнд пам’яті джерела"
+msgstr "некоректний операнд співпроцесора"
 
 #: config/tc-arm.c:8165
 msgid "instruction does not support unindexed addressing"
@@ -3890,10 +3839,8 @@ msgid "extraneous shift as part of operand to shift insn"
 msgstr "зайвий зсув є частиною операнда інструкції зсуву (shift)"
 
 #: config/tc-arm.c:9465 config/tc-arm.c:9474
-#, fuzzy
-#| msgid "selected processor does not support DSP extension"
 msgid "selected processor does not support SETPAN instruction"
-msgstr "у вибраному процесорі не передбачено підтримки розширення DSP"
+msgstr "у вибраному процесорі не передбачено підтримки SETPAN інструкції"
 
 #: config/tc-arm.c:9533
 msgid "SRS base register must be r13"
@@ -4010,10 +3957,8 @@ msgid "dest and source1 must be the same register"
 msgstr "призначення і джерело1 мають бути одним регістром"
 
 #: config/tc-arm.c:11067
-#, fuzzy
-#| msgid "This architecture doesn't support atomic instruction"
 msgid "selected architecture does not support wide conditional branch instruction"
-msgstr "У цій архітектурі не передбачено підтримки інструкції atomic"
+msgstr "у вибраній архітектурі не передбачено підтримки інструкції широкого умовного розгалуження"
 
 #: config/tc-arm.c:11100
 msgid "instruction is always unconditional"
@@ -4309,10 +4254,8 @@ msgid "bad register for post-index"
 msgstr "помилковий регістр для постіндексу"
 
 #: config/tc-arm.c:17283
-#, fuzzy
-#| msgid "scalar index out of range"
 msgid "scalar out of range"
-msgstr "індекс скаляра поза межами діапазону"
+msgstr "скаляр поза межами припустимого діапазону"
 
 #: config/tc-arm.c:17858 config/tc-arm.c:17944
 msgid "conditional infixes are deprecated in unified syntax"
@@ -4375,26 +4318,23 @@ msgid "s suffix on comparison instruction is deprecated"
 msgstr "суфікс s у інструкції порівняння є застарілим"
 
 #: config/tc-arm.c:18439
-#, fuzzy, c-format
-#| msgid "selected processor does not support Thumb mode `%s'"
+#, c-format
 msgid "selected processor does not support `%s' in Thumb mode"
-msgstr "у вибраному процесорі не передбачено підтримки режиму Thumb «%s»"
+msgstr "у вибраному процесорі не передбачено підтримки «%s» у режимі Thumb"
 
 #: config/tc-arm.c:18445
 msgid "Thumb does not support conditional execution"
 msgstr "У Thumb не передбачено підтримки умовного виконання"
 
 #: config/tc-arm.c:18465
-#, fuzzy, c-format
-#| msgid "selected processor does not support 'A' form of this instruction"
+#, c-format
 msgid "selected processor does not support 32bit wide variant of instruction `%s'"
-msgstr "у вибраному процесорі не передбачено підтримки форми «A» цієї інструкції"
+msgstr "у вибраному процесорі не передбачено підтримки 32-бітового широкого варіанта інструкції «%s»"
 
 #: config/tc-arm.c:18468
-#, fuzzy, c-format
-#| msgid "selected processor does not support Thumb-2 mode `%s'"
+#, c-format
 msgid "selected processor does not support `%s' in Thumb-2 mode"
-msgstr "у вибраному процесорі не передбачено підтримки режиму Thumb-2 «%s»"
+msgstr "у вибраному процесорі не передбачено підтримки «%s» у режимі Thumb-2"
 
 #: config/tc-arm.c:18493
 #, c-format
@@ -4402,10 +4342,9 @@ msgid "cannot honor width suffix -- `%s'"
 msgstr "не можна використати суфікс ширини -- «%s»"
 
 #: config/tc-arm.c:18535
-#, fuzzy, c-format
-#| msgid "selected processor does not support ARM mode `%s'"
+#, c-format
 msgid "selected processor does not support `%s' in ARM mode"
-msgstr "у вибраному процесорі не передбачено підтримки режиму ARM «%s»"
+msgstr "у вибраному процесорі не передбачено підтримки «%s» у режимі ARM"
 
 #: config/tc-arm.c:18540
 #, c-format
@@ -7884,10 +7823,9 @@ msgid "`%s' is not a valid %s expression"
 msgstr "«%s» не є коректним виразом %s"
 
 #: config/tc-i386.c:8737
-#, fuzzy, c-format
-#| msgid "`%s' can not be used with `%s'"
+#, c-format
 msgid "`%s' cannot be used here"
-msgstr "«%s» не можна використовувати разом із «%s»"
+msgstr "тут не можна використовувати «%s»"
 
 #: config/tc-i386.c:8744
 msgid "register scaling is being ignored here"
@@ -8208,19 +8146,15 @@ msgstr ""
 "                          вилучити усі префікси блокування\n"
 
 #: config/tc-i386.c:10545
-#, fuzzy, c-format
-#| msgid ""
-#| "  --reduce-memory-overheads \n"
-#| "                          prefer smaller memory use at the cost of longer\n"
-#| "                          assembly times\n"
+#, c-format
 msgid ""
 "  -mfence-as-lock-add=[no|yes]\n"
 "                          encode lfence, mfence and sfence as\n"
 "                           lock addl $0x0, (%%{re}sp)\n"
 msgstr ""
-"  --reduce-memory-overheads \n"
-"                          надавати перевагу зменшенню використанню пам’яті перед\n"
-"                          зменшенням часу збирання\n"
+"  -mfence-as-lock-add=[no|yes]\n"
+"                          кодувати lfence, mfence і sfence як\n"
+"                           lock addl $0x0, (%%{re}sp)\n"
 
 #: config/tc-i386.c:10549
 #, c-format
@@ -12000,22 +11934,18 @@ msgid "unsupported constant in relocation"
 msgstr "непідтримувана константа у пересуванні"
 
 #: config/tc-mips.c:15529
-#, fuzzy, c-format
-#| msgid "PC-relative access to misaligned address (%lx)"
+#, c-format
 msgid "PC-relative access using misaligned symbol (%lx)"
-msgstr "доступ відносно лічильника команд до невирівняної адреси (%lx)"
+msgstr "доступ відносно PC з використанням невирівняного символу (%lx)"
 
 #: config/tc-mips.c:15533
-#, fuzzy, c-format
-#| msgid "PC-relative access to misaligned address (%lx)"
+#, c-format
 msgid "PC-relative access using misaligned offset (%lx)"
-msgstr "доступ відносно лічильника команд до невирівняної адреси (%lx)"
+msgstr "доступ відносно PC з використанням невирівняного зсуву (%lx)"
 
 #: config/tc-mips.c:15546 config/tc-mips.c:15565
-#, fuzzy
-#| msgid "relative address out of range"
 msgid "PC-relative access out of range"
-msgstr "відносна адреса поза межами припустимого діапазону"
+msgstr "доступ відносно PC з виходом за межі припустимого діапазону"
 
 #: config/tc-mips.c:15552
 #, c-format
@@ -12042,10 +11972,9 @@ msgid ".option pic%d not supported"
 msgstr "Підтримки .option pic%d не передбачено"
 
 #: config/tc-mips.c:16007
-#, fuzzy, c-format
-#| msgid ".option pic%d not supported"
+#, c-format
 msgid ".option pic%d not supported in VxWorks PIC mode"
-msgstr "Підтримки .option pic%d не передбачено"
+msgstr "у режимі PIC VxWorks не передбачено підтримки .option pic%d"
 
 #: config/tc-mips.c:16019 config/tc-mips.c:16356
 msgid "-G may not be used with SVR4 PIC code"
@@ -12793,16 +12722,14 @@ msgid "profiling in absolute section?"
 msgstr "профілювати у абсолютному розділі?"
 
 #: config/tc-msp430.c:1365
-#, fuzzy, c-format
-#| msgid "unrecognised instruction %s"
+#, c-format
 msgid "Unrecognised CPU errata name starting here: %s"
-msgstr "нерозпізнана інструкція %s"
+msgstr "Нерозпізнана назва помилок процесора, починаючи з %s"
 
 #: config/tc-msp430.c:1371
-#, fuzzy, c-format
-#| msgid "Expected comma after name \"%s\""
+#, c-format
 msgid "Expecting comma after CPU errata name, not: %s"
-msgstr "Після назви «%s» мало бути вказано кому"
+msgstr "Після назви помилок процесора має бути вказано кому, а не %s"
 
 #: config/tc-msp430.c:1381
 msgid "MCU option requires a name\n"
@@ -12897,10 +12824,9 @@ msgid "error: unsupported #foo() directive used on symbol"
 msgstr "помилка: для символу використано непідтримувану директиву #foo()"
 
 #: config/tc-msp430.c:1881
-#, fuzzy, c-format
-#| msgid "unknown expression in operand %s. use #llo() #lhi() #hlo() #hhi() "
+#, c-format
 msgid "unknown expression in operand %s.  Use #llo(), #lhi(), #hlo() or #hhi()"
-msgstr "невідомий вираз у операнді %s. Слід використовувати #llo() #lhi() #hlo() #hhi() "
+msgstr "невідомий вираз у операнді %s. Слід використовувати #llo(), #lhi(), #hlo() або #hhi()"
 
 #: config/tc-msp430.c:1932
 #, c-format
@@ -13056,10 +12982,8 @@ msgid "CPU19: Instruction setting CPUOFF must be followed by a NOP"
 msgstr "CPU19: за інструкцією встановлення CPUOFF має слідувати інструкція NOP"
 
 #: config/tc-msp430.c:2649
-#, fuzzy
-#| msgid "internal error: unknown option name '%s'"
 msgid "internal error: unknown nop check state"
-msgstr "внутрішня помилка: невідома назва параметра, «%s»"
+msgstr "внутрішня помилка: невідомий стан перевірки nop"
 
 #: config/tc-msp430.c:2684
 msgid "inserting a NOP before EINT"
@@ -13096,8 +13020,7 @@ msgid "expected #n as first argument of %s"
 msgstr "першим аргументом %s має бути #n"
 
 #: config/tc-msp430.c:3095 config/tc-msp430.c:3166
-#, fuzzy, c-format
-#| msgid "expected constant expression for first argument of %s"
+#, c-format
 msgid "expected constant expression as first argument of %s"
 msgstr "першим аргументом %s має бути сталий вираз"
 
@@ -13408,10 +13331,9 @@ msgid "  -mall-ext\t\t  Turn on all extensions and instructions support\n"
 msgstr "  -mall-ext\t\t  увімкнути усі розширення та підтримку усіх інструкцій\n"
 
 #: config/tc-nds32.c:2326
-#, fuzzy, c-format
-#| msgid "need PIC qualifier with symbol. '%s'"
+#, c-format
 msgid "la must use with symbol. '%s'"
-msgstr "потребує специфікатора PIC із символом. «%s»"
+msgstr "la має використовуватися із символом. «%s»"
 
 #: config/tc-nds32.c:2379
 #, c-format
@@ -13552,10 +13474,9 @@ msgid "Internal error: Range error. %s"
 msgstr "Внутрішня помилка: помилка діапазону. %s"
 
 #: config/tc-nds32.c:5153
-#, fuzzy, c-format
-#| msgid "instruction `%s' isn't supported in 16-bit mode."
+#, c-format
 msgid "Instruction %s not supported in the baseline."
-msgstr "у 16 бітовому режимі не передбачено підтримки інструкції «%s»."
+msgstr "У базовому рядку не передбачено підтримки інструкції %s."
 
 #: config/tc-nds32.c:5208
 #, c-format
@@ -13568,10 +13489,9 @@ msgid "Incorrect syntax, %s."
 msgstr "Некоректний синтаксис, %s."
 
 #: config/tc-nds32.c:5214
-#, fuzzy, c-format
-#| msgid "Unrecognized operand, %s."
+#, c-format
 msgid "Unrecognized operand/register, %s."
-msgstr "Нерозпізнаний операнд, %s."
+msgstr "Нерозпізнаний операнд або регістр, %s."
 
 #: config/tc-nds32.c:5217
 #, c-format
@@ -13643,10 +13563,9 @@ msgid "branch offset %d out of range %d to %d"
 msgstr "зсув гілки %d лежить поза межами діапазону від %d до %d"
 
 #: config/tc-nios2.c:1198
-#, fuzzy, c-format
-#| msgid "branch offset out of range\n"
+#, c-format
 msgid "branch offset %d out of range"
-msgstr "відступ гілки поза припустимими межами\n"
+msgstr "відступ гілки %d поза припустимими межами"
 
 #: config/tc-nios2.c:1204 config/tc-pru.c:607
 #, c-format
@@ -13654,10 +13573,9 @@ msgid "%s offset %d out of range %d to %d"
 msgstr "зсув %s %d лежить поза межами діапазону від %d до %d"
 
 #: config/tc-nios2.c:1208
-#, fuzzy, c-format
-#| msgid "offset out of range"
+#, c-format
 msgid "%s offset %d out of range"
-msgstr "перевищення можливого зміщення"
+msgstr "зсув %s, %d, поза припустимим діапазоном"
 
 #: config/tc-nios2.c:1213 config/tc-nios2.c:1228 config/tc-pru.c:612
 #, c-format
@@ -13742,10 +13660,8 @@ msgstr ""
 "Якщо ви не маєте наміру виконувати діагностичну перевірку цього коду, скористайтеся .set nobreak, щоб вимкнути це попередження."
 
 #: config/tc-nios2.c:1939 config/tc-nios2.c:1967
-#, fuzzy
-#| msgid "-mips16 cannot be used with -micromips"
 msgid "r31 cannot be used with jmp; use ret instead"
-msgstr "-mips16 не можна використовувати разом з -micromips"
+msgstr "r31 не можна використовувати разом із jmp; скористайтеся краще ret"
 
 #: config/tc-nios2.c:1982
 msgid "r31 cannot be used with jmpr.n; use ret.n instead"
@@ -13753,10 +13669,9 @@ msgstr "r31 не можна використовувати разом із jmpr.
 
 #: config/tc-nios2.c:2595 config/tc-nios2.c:2622 config/tc-nios2.c:2649
 #: config/tc-nios2.c:2680
-#, fuzzy, c-format
-#| msgid "Invalid operands %s"
+#, c-format
 msgid "Invalid constant operand %s"
-msgstr "Некоректні операнди %s"
+msgstr "Некоректний сталий операнд %s"
 
 #: config/tc-nios2.c:2997 config/tc-nios2.c:3021 config/tc-pru.c:1311
 #: config/tc-pru.c:1336 config/tc-pru.c:1356
@@ -14611,10 +14526,9 @@ msgid "Gas failure, reloc value %d\n"
 msgstr "Помилка gas, значення пересування %d\n"
 
 #: config/tc-pru.c:602
-#, fuzzy, c-format
-#| msgid "branch offset %d out of range %d to %d"
+#, c-format
 msgid "quick branch offset %d out of range %d to %d"
-msgstr "зсув гілки %d лежить поза межами діапазону від %d до %d"
+msgstr "зсув швидкої гілки %d лежить поза межами діапазону від %d до %d"
 
 #: config/tc-pru.c:617
 #, c-format
@@ -14630,10 +14544,9 @@ msgid "residual low bits in pmem diff relocation"
 msgstr "залишкові нижні біти у пересуванні diff pmem"
 
 #: config/tc-pru.c:934 config/tc-pru.c:967
-#, fuzzy, c-format
-#| msgid "missing or bad offset expression"
+#, c-format
 msgid "trailing garbage after expression: %s"
-msgstr "не вказано виразу відступу або вказано помилковий вираз"
+msgstr "залишкові зайві символи після виразу: %s"
 
 #: config/tc-pru.c:939
 #, c-format
@@ -14646,10 +14559,8 @@ msgid "expected constant expression, got %s"
 msgstr "мало бути вказано сталий вираз, маємо %s"
 
 #: config/tc-pru.c:1025
-#, fuzzy
-#| msgid "first transfer register must be even"
 msgid "data transfer register cannot be halfword"
-msgstr "перший регістр передавання має бути парним"
+msgstr "регістр передавання даних не може бути регістром місткості у півслова"
 
 #: config/tc-pru.c:1044
 msgid "destination register must be full-word"
@@ -14661,32 +14572,27 @@ msgid "cannot use partial register %s for addressing"
 msgstr "не можна використовувати частковий регістр %s для адресування"
 
 #: config/tc-pru.c:1109
-#, fuzzy, c-format
-#| msgid "constant out of 8-bit range: %d"
+#, c-format
 msgid "loop count constant %ld is out of range [1..%d]"
-msgstr "стала поза межами 8-бітового діапазону: %d"
+msgstr "стала циклу %ld лежить поза межами припустимого діапазону [1..%d]"
 
 #: config/tc-pru.c:1208 config/tc-pru.c:1234
-#, fuzzy, c-format
-#| msgid "constant out of 8-bit range: %d"
+#, c-format
 msgid "byte count constant %ld is out of range [1..%d]"
-msgstr "стала поза межами 8-бітового діапазону: %d"
+msgstr "стала байтів %ld лежить поза межами припустимого діапазону [1..%d]"
 
 #: config/tc-pru.c:1215 config/tc-pru.c:1241
-#, fuzzy
-#| msgid "can only transfer two consecutive registers"
 msgid "only r0 can be used as byte count register"
-msgstr "переносити можна лише два послідовних регістри"
+msgstr "як регістр-лічильник байтів можна використовувати лише r0"
 
 #: config/tc-pru.c:1217 config/tc-pru.c:1243
 msgid "only r0.bX byte fields of r0 can be used as byte count"
 msgstr "для підрахунку байтів можна використовувати лише байтові поля r0.bX r0"
 
 #: config/tc-pru.c:1256
-#, fuzzy, c-format
-#| msgid "invalid constant (%lx) after fixup"
+#, c-format
 msgid "invalid constant table offset %ld"
-msgstr "некоректна стала (%lx) після адресної прив’язки"
+msgstr "некоректний зсув у таблиці сталих, %ld"
 
 #: config/tc-pru.c:1267
 #, c-format
@@ -14694,10 +14600,9 @@ msgid "invalid WakeOnStatus %ld"
 msgstr "некоректне WakeOnStatus %ld"
 
 #: config/tc-pru.c:1278
-#, fuzzy, c-format
-#| msgid "invalid VSIB address"
+#, c-format
 msgid "invalid XFR WideBus Address %ld"
-msgstr "некоректна адреса VSIB"
+msgstr "некоректна адреса XFR WideBus, %ld"
 
 #: config/tc-pru.c:1536
 #, c-format
@@ -14711,10 +14616,9 @@ msgstr ""
 "  -mno-link-relax  не створювати пересування для оптимізації компонувальником.\n"
 
 #: config/tc-pru.c:1828
-#, fuzzy, c-format
-#| msgid "invalid system register name"
+#, c-format
 msgid "Label \"%s\" matches a CPU register name"
-msgstr "некоректна назва системного регістра"
+msgstr "Мітка «%s» збігається із назвою регістра процесора"
 
 #: config/tc-riscv.c:412
 #, c-format
@@ -14727,22 +14631,19 @@ msgid "internal: bad RISC-V opcode (mask error): %s %s"
 msgstr "внутрішня помилка: помилковий код операції RISC-V (помилка маскування): %s %s"
 
 #: config/tc-riscv.c:532
-#, fuzzy, c-format
-#| msgid "Internal error: bad microMIPS opcode (unknown operand type `%c'): %s %s"
+#, c-format
 msgid "internal: bad RISC-V opcode (unknown operand type `C%c'): %s %s"
-msgstr "Внутрішня помилка: помилковий код операції microMIPS (невідомий тип операнда «%c»): %s %s"
+msgstr "внутрішня помилка: помилковий код операції RISC-V (невідомий тип операнда «C%c»): %s %s"
 
 #: config/tc-riscv.c:567
-#, fuzzy, c-format
-#| msgid "Internal error: bad microMIPS opcode (unknown operand type `%c'): %s %s"
+#, c-format
 msgid "internal: bad RISC-V opcode (unknown operand type `%c'): %s %s"
-msgstr "Внутрішня помилка: помилковий код операції microMIPS (невідомий тип операнда «%c»): %s %s"
+msgstr "внутрішня помилка: помилковий код операції RISC-V (невідомий тип операнда «%c»): %s %s"
 
 #: config/tc-riscv.c:575
-#, fuzzy, c-format
-#| msgid "internal: bad mips opcode (bits 0x%08lx undefined): %s %s"
+#, c-format
 msgid "internal: bad RISC-V opcode (bits 0x%lx undefined): %s %s"
-msgstr "внутрішня помилка: помилковий код операції MIPS (не визначено біти 0x%08lx): %s %s"
+msgstr "внутрішня помилка: помилковий код операції RISC-V (не визначено біти 0x%lx): %s %s"
 
 #: config/tc-riscv.c:696
 #, c-format
@@ -14882,10 +14783,9 @@ msgid " RL78 specific command line options:\n"
 msgstr " Специфічні для RL78 параметри командного рядка:\n"
 
 #: config/tc-rl78.c:369
-#, fuzzy, c-format
-#| msgid "  -mrelax                   Enable relaxation\n"
+#, c-format
 msgid "  --mrelax          Enable link time relaxation\n"
-msgstr "  -mrelax                   Увімкнути оптимізацію\n"
+msgstr "  --mrelax          увімкнути оптимізацію під час компонування\n"
 
 #: config/tc-rl78.c:370
 #, c-format
@@ -15093,16 +14993,14 @@ msgid "Invalid default architecture, broken assembler."
 msgstr "Некоректна типова архітектура, непрацездатний асемблер."
 
 #: config/tc-s390.c:373
-#, fuzzy, c-format
-#| msgid "no such architecture: `%s'"
+#, c-format
 msgid "no such machine extension `%s'"
-msgstr "немає такої архітектури: «%s»"
+msgstr "немає такого виразу архітектури «%s»"
 
 #: config/tc-s390.c:384
-#, fuzzy, c-format
-#| msgid "junk at end of line, first unrecognized character is `%c'"
+#, c-format
 msgid "junk at end of machine string, first unrecognized character is `%c'"
-msgstr "зайві символи наприкінці рядка, першим нерозпізнаним символом є «%c»"
+msgstr "зайві символи наприкінці рядка архітектури, першим нерозпізнаним символом є «%c»"
 
 #: config/tc-s390.c:451 config/tc-sparc.c:528
 #, c-format
@@ -15171,10 +15069,8 @@ msgid "relocation not applicable"
 msgstr "пересування незастосовне"
 
 #: config/tc-s390.c:1343
-#, fuzzy
-#| msgid "invalid quickrot unit specified"
 msgid "invalid length field specified"
-msgstr "вказано некоректний модуль quickrot"
+msgstr "вказано некоректний вміст поля довжини"
 
 #: config/tc-s390.c:1347
 msgid "index register specified but zero"
@@ -15569,10 +15465,9 @@ msgid "        -FIXDD\t\tfix data dependencies\n"
 msgstr "        -FIXDD\t\tвиправити залежності даних\n"
 
 #: config/tc-score.c:7812
-#, fuzzy, c-format
-#| msgid "        -NWARN\t\tassemble code for no warning message for fix data dependency\n"
+#, c-format
 msgid "        -NWARN\t\tdo not print warning message when fixing data dependencies\n"
-msgstr "        -NWARN\t\tзібрати код так, щоб уникнути попередження щодо виправлення залежності даних\n"
+msgstr "        -NWARN\t\tне виводити попередження, якщо виконується виправлення залежностей даних\n"
 
 #: config/tc-score.c:7814
 #, c-format
@@ -18811,10 +18706,8 @@ msgid "missing local index"
 msgstr "пропущено локальний індекс"
 
 #: config/tc-wasm32.c:680
-#, fuzzy
-#| msgid "missing argument"
 msgid "missing break count"
-msgstr "не вистачає аргументу"
+msgstr "немає лічильника переривання"
 
 #: config/tc-wasm32.c:685
 msgid "missing reserved current_memory/grow_memory argument"
@@ -20700,10 +20593,8 @@ msgid "repeat < 0; .fill ignored"
 msgstr "кількість повторень < 0; .fill проігноровано"
 
 #: read.c:2241
-#, fuzzy
-#| msgid "only constant offsets supported in absolute section"
 msgid "non-constant fill count for absolute section"
-msgstr "У абсолютному розділі передбачено підтримку лише сталих відступів"
+msgstr "нестале значення обсягу заповнення для абсолютного розділу"
 
 #: read.c:2243
 msgid "attempt to fill absolute section with non-zero value"
