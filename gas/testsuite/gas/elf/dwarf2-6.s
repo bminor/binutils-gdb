@@ -17,7 +17,7 @@
 
 	.file "dwarf2-6.c"
 	.text
-	.align 4
+	.balign 4
 	.globl _start
 _start:
 .L_start:

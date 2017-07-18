@@ -17,12 +17,12 @@
 
 	.file "dwarf2-14.c"
 	.text
-	.align 4
+	.balign 4
 	.globl _start
 _start:
 	.file 1 "dwarf2-14.c"
 	.loc 1 1 view 0
-	.align 4
+	.balign 4
 	.loc 1 2 view -0
 	.loc 1 3 view .L1
 	.int 0

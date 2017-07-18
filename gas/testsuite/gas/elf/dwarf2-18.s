@@ -17,7 +17,7 @@
 
 	.file "dwarf2-18.c"
 	.text
-	.align 8
+	.balign 8
 	.globl _start
 _start:
 	.file 1 "dwarf2-18.c"

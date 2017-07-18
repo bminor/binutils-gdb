@@ -17,7 +17,7 @@
 
 	.file "dwarf2-5.c"
 	.text
-	.align 4
+	.balign 4
 	.globl _start
 _start:
 	.file 1 "dwarf2-5.c"
@@ -25,11 +25,11 @@ _start:
 	.loc 1 2 view .L2
 	.int 0
 	.loc 1 3 view 0
-	.align 4
+	.balign 4
 	.loc 1 4 view .L4
 	.loc 1 5 view .L5
 	.org .+1
-	.align 4
+	.balign 4
 	.loc 1 6 view 0
 	.int 0
 	.text
