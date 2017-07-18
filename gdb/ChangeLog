@@ -1,3 +1,10 @@
+2017-07-18  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache_cpy): Simplify it.
+	(regcache::cpy_no_passthrough): Remove it.
+	* regcache.h (cpy_no_passthrough): Remove it.
+	(regcache_dup, regcache_cpy): Update comments.
+
 2017-07-18  Pedro Alves  <palves@redhat.com>
 
 	* remote-sim.c (sim_command_completer): Adjust to work with a
