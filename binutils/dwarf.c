@@ -7816,7 +7816,7 @@ display_debug_names (struct dwarf_section *section, void *file)
       printf (_("Used %zu of %lu buckets.\n"), buckets_filled,
 	      (unsigned long) bucket_count);
 
-      uint32_t hash_prev;
+      uint32_t hash_prev = 0;
       size_t hash_clash_count = 0;
       size_t longest_clash = 0;
       size_t this_length = 0;
