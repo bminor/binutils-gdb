@@ -1,5 +1,13 @@
 2017-07-18  Nick Clifton  <nickc@redhat.com>
 
+	PR 21775
+	* coffgrok.c: Fix spelling typos.
+	* readelf.c: Likewise.
+	* stabs.c: Likewise.
+	* testsuite/binutils-all/objcopy.exp: Likewise.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
 	* po/sv.po: Updated Swedish translation.
 
 2017-07-18  Hans-Peter Nilsson  <hp@bitrange.com>

@@ -3464,7 +3464,7 @@ is_text_segment(const Target* target, const Output_segment* seg)
 }
 
 // Set the file offsets of all the segments, and all the sections they
-// contain.  They have all been created.  LOAD_SEG must be be laid out
+// contain.  They have all been created.  LOAD_SEG must be laid out
 // first.  Return the offset of the data to follow.
 
 off_t

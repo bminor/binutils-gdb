@@ -106,7 +106,7 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
       if (orig_compression_header_size == 0)
 	{
 	  /* Convert it from .zdebug* section.  Get the uncompressed
-	     size first.  We need to substract the 12-byte overhead in
+	     size first.  We need to subtract the 12-byte overhead in
 	     .zdebug* section.  Set orig_compression_header_size to
 	     the 12-bye overhead.  */
 	  orig_compression_header_size = 12;

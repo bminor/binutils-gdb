@@ -1,3 +1,9 @@
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 21775
+	* ld.texinfo: Fix spelling typos.
+	* testsuite/ld-elfcomm/elfcomm.exp: Likewise.
+
 2017-07-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Run pie1 and pie1-nacl.

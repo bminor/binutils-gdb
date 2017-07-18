@@ -8979,7 +8979,7 @@ check_ldr_r15_aligned (void)
 	      && (inst.operands[0].reg == REG_PC
 	      && inst.operands[1].reg == REG_PC
 	      && (inst.reloc.exp.X_add_number & 0x3)),
-	      _("ldr to register 15 must be 4-byte alligned"));
+	      _("ldr to register 15 must be 4-byte aligned"));
 }
 
 static void
@@ -23542,7 +23542,7 @@ md_apply_fix (fixS *	fixP,
       /* We are going to store value (shifted right by two) in the
 	 instruction, in a 24 bit, signed field.  Bits 26 through 32 either
 	 all clear or all set and bit 0 must be clear.  For B/BL bit 1 must
-	 also be be clear.  */
+	 also be clear.  */
       if (value & temp)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("misaligned branch destination"));

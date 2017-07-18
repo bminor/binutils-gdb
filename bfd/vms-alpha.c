@@ -6220,7 +6220,7 @@ evax_bfd_print_etir (FILE *file, const char *name,
           fprintf (file, _("OPR_ADD (add)\n"));
           break;
         case ETIR__C_OPR_SUB:
-          fprintf (file, _("OPR_SUB (substract)\n"));
+          fprintf (file, _("OPR_SUB (subtract)\n"));
           break;
         case ETIR__C_OPR_MUL:
           fprintf (file, _("OPR_MUL (multiply)\n"));

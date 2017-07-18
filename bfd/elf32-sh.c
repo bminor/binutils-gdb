@@ -913,7 +913,7 @@ sh_elf_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr,
 
   contents = elf_section_data (sec)->this_hdr.contents;
 
-  /* The deletion must stop at the next ALIGN reloc for an aligment
+  /* The deletion must stop at the next ALIGN reloc for an alignment
      power larger than the number of bytes we are deleting.  */
 
   irelalign = NULL;

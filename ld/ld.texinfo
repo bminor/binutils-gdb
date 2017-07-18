@@ -7888,7 +7888,7 @@ application will behave unexpectedly.
 @code{PRIVATE}: Put the symbol in the DLL's export table, but do not put
 it into the static import library used to resolve imports at link time. The
 symbol can still be imported using the @code{LoadLibrary/GetProcAddress}
-API at runtime or by by using the GNU ld extension of linking directly to
+API at runtime or by using the GNU ld extension of linking directly to
 the DLL without an import library.
 
 See ld/deffilep.y in the binutils sources for the full specification of

@@ -2525,7 +2525,7 @@ v850_elf_merge_notes (bfd * ibfd, bfd *obfd)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("error: %B needs 8-byte aligment but %B is set for 4-byte alignment"),
+		    (_("error: %B needs 8-byte alignment but %B is set for 4-byte alignment"),
 				      ibfd, obfd);
 		  result = FALSE;
 		}

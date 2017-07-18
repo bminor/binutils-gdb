@@ -8904,7 +8904,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
    the values of any global symbols in a toc section that has been
    edited.  Globals in toc sections should be a rarity, so this function
    sets a flag if any are found in toc sections other than the one just
-   edited, so that futher hash table traversals can be avoided.  */
+   edited, so that further hash table traversals can be avoided.  */
 
 struct adjust_toc_info
 {
@@ -9400,7 +9400,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 
       /* Merge the used and skip arrays.  Assume that TOC
 	 doublewords not appearing as either used or unused belong
-	 to to an entry more than one doubleword in size.  */
+	 to an entry more than one doubleword in size.  */
       for (drop = skip, keep = used, last = 0, some_unused = 0;
 	   drop < skip + (toc->size + 7) / 8;
 	   ++drop, ++keep)

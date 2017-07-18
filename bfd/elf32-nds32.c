@@ -11509,12 +11509,12 @@ nds32_relax_adjust_label (bfd *abfd, asection *sec,
      of instruction a time.
 
      It recognizes three types of relocations.
-     1. R_NDS32_LABEL - a aligment.
+     1. R_NDS32_LABEL - a alignment.
      2. R_NDS32_INSN16 - relax a 32-bit instruction to 16-bit.
      3. is_16bit_NOP () - remove a 16-bit instruction.  */
 
-  /* TODO: It seems currently implementation only support 4-byte aligment.
-     We should handle any-aligment.  */
+  /* TODO: It seems currently implementation only support 4-byte alignment.
+     We should handle any-alignment.  */
 
   Elf_Internal_Rela *insn_rel = NULL, *label_rel = NULL, *irel;
   Elf_Internal_Rela *tmp_rel, *tmp2_rel = NULL;

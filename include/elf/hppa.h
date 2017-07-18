@@ -138,7 +138,7 @@ RELOC_NUMBER (R_PARISC_DIR14F,	   	 7)
    When supporting argument relocations, function calls must be
    accompanied by parameter relocation information.  This information is
    carried in the ten high-order bits of the addend field.  The remaining
-   22 bits of of the addend field are sign-extended to form the Addend.
+   22 bits of the addend field are sign-extended to form the Addend.
 
    Note the code to build argument relocations depends on the
    addend being zero.  A consequence of this limitation is GAS

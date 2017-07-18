@@ -2935,7 +2935,7 @@ _bfd_elf_adjust_dynamic_copy (struct bfd_link_info *info,
   bfd_vma mask;
   asection *sec = h->root.u.def.section;
 
-  /* The section aligment of definition is the maximum alignment
+  /* The section alignment of the definition is the maximum alignment
      requirement of symbols defined in the section.  Since we don't
      know the symbol alignment requirement, we start with the
      maximum alignment and check low bits of the symbol address

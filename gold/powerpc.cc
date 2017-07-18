@@ -1064,7 +1064,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
     this->set_processor_specific_flags(flags);
   }
 
-  // Offset to to save stack slot
+  // Offset to save stack slot
   int
   stk_toc () const
   { return this->abiversion() < 2 ? 40 : 24; }

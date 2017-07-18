@@ -3281,7 +3281,7 @@ aarch64_mem_op_p (uint32_t insn, unsigned int *rt, unsigned int *rt2,
   uint32_t v = 0;
   uint32_t opc_v = 0;
 
-  /* Bail out quickly if INSN doesn't fall into the the load-store
+  /* Bail out quickly if INSN doesn't fall into the load-store
      encoding space.  */
   if (!AARCH64_LDST (insn))
     return FALSE;

@@ -1,3 +1,9 @@
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 21775
+	* aarch64-opc.c: Fix spelling typos.
+	* i386-dis.c: Likewise.
+
 2017-07-14  Ravi Bangoria  <ravi.bangoria@linux.vnet.ibm.com>
 
 	* dis-buf.c (buffer_read_memory): Change type of end_addr_offset,

@@ -6706,7 +6706,7 @@ process_section_groups (FILE * file)
 		      error (_("section [%5u] in group section [%5u] > maximum section [%5u]\n"),
 			     entry, i, elf_header.e_shnum - 1);
 		      if (num_group_errors == 10)
-			warn (_("Futher error messages about overlarge group section indicies suppressed\n"));
+			warn (_("Further error messages about overlarge group section indicies suppressed\n"));
 		    }
 		  continue;
 		}

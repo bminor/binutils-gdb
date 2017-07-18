@@ -611,7 +611,7 @@ static const bfd_byte elf_x86_64_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
 };
 
 /* The first entry in the x32 IBT-enabled lazy procedure linkage table
-   is the the same as the normal lazy PLT.  Subsequent entries for an
+   is the same as the normal lazy PLT.  Subsequent entries for an
    x32 IBT-enabled lazy procedure linkage table look like this.  */
 
 static const bfd_byte elf_x32_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
@@ -4669,7 +4669,7 @@ do_ifunc_pointer:
 	case R_X86_64_GOTPCREL64:
 	  /* Use global offset table entry as symbol value.  */
 	case R_X86_64_GOTPLT64:
-	  /* This is obsolete and treated the the same as GOT64.  */
+	  /* This is obsolete and treated the same as GOT64.  */
 	  base_got = htab->elf.sgot;
 
 	  if (htab->elf.sgot == NULL)

@@ -270,7 +270,7 @@ public:
     uint32_t v = 0;
     uint32_t opc_v = 0;
 
-    /* Bail out quickly if INSN doesn't fall into the the load-store
+    /* Bail out quickly if INSN doesn't fall into the load-store
        encoding space.  */
     if (!aarch64_ldst (insn))
       return false;
@@ -1101,7 +1101,7 @@ public:
 
 private:
   // Section offset of "adrp". (We do not need a "adrp_shndx_" field, because we
-  // can can obtain it from its parent.)
+  // can obtain it from its parent.)
   const unsigned int adrp_sh_offset_;
 };
 

@@ -134,7 +134,7 @@ static const bfd_vma ppc_elf_vxworks_pic_plt0_entry
 #define VXWORKS_PLT_NON_JMP_SLOT_RELOCS 3
 /* The number of relocations in the PLTResolve slot. */
 #define VXWORKS_PLTRESOLVE_RELOCS 2
-/* The number of relocations in the PLTResolve slot when when creating
+/* The number of relocations in the PLTResolve slot when creating
    a shared library. */
 #define VXWORKS_PLTRESOLVE_RELOCS_SHLIB 0
 

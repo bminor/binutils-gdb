@@ -5310,7 +5310,7 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
 	tocoff += h->descriptor->u.toc_offset;
 
       /* The first instruction in the glink code needs to be
-	 cooked to to hold the correct offset in the toc.  The
+	 cooked to hold the correct offset in the toc.  The
 	 rest are just output raw.  */
       bfd_put_32 (output_bfd,
 		  bfd_xcoff_glink_code(output_bfd, 0) | (tocoff & 0xffff), p);

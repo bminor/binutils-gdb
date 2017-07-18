@@ -14037,7 +14037,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      if (in_attr[Tag_MPextension_use].i != in_attr[i].i)
 		{
 		  _bfd_error_handler
-		    (_("%B has has both the current and legacy "
+		    (_("%B has both the current and legacy "
 		       "Tag_MPextension_use attributes"),
 		     ibfd);
 		  result = FALSE;

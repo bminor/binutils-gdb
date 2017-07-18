@@ -1,5 +1,19 @@
 2017-07-18  Nick Clifton  <nickc@redhat.com>
 
+	PR 21775
+	* config/tc-arm.c: Fix spelling typos.
+	* config/tc-mips.c: Likewise.
+	* config/tc-msp430.c: Likewise.
+	* config/tc-sh64.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* ecoff.c: Likewise.
+	* testsuite/gas/arm/ldr-bad.l: Likewise.
+	* testsuite/gas/arm/ldr-t-bad.l: Likewise.
+	* testsuite/gas/tic54x/opcodes.s: Likewise.
+	* testsuite/gas/msp340/errata_warns.l: Likewise.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
 	* po/uk.po: Updated Ukranian translation.
 
 2017-07-17  Georg-Johann Lay  <avr@gjlay.de>

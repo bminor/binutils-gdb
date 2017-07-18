@@ -1,5 +1,30 @@
 2017-07-18  Nick Clifton  <nickc@redhat.com>
 
+	PR 21775
+	* coff-sh.c: Fix spelling typos.
+	* compress.c: Likewise.
+	* cpu-pdp11.c: Likewise.
+	* ecofflink.c: Likewise.
+	* elf-m10300.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-nds32.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* som.c: Likewise.
+	* sunos.c: Likewise.
+	* vms-alpha.c: Likewise.
+	* xcofflink.c: Likewise.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/21781
 	* coffcode.h (handle_COMDAT): Replace abort with an error message
 	and return.

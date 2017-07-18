@@ -5115,7 +5115,7 @@ elf_sort_sections (const void *arg1, const void *arg2)
    else
      adjustment = vma_offset - off_offset;
 
-   which can can be collapsed into the expression below.  */
+   which can be collapsed into the expression below.  */
 
 static file_ptr
 vma_page_aligned_bias (bfd_vma vma, ufile_ptr off, bfd_vma maxpagesize)
