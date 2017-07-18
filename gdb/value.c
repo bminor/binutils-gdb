@@ -41,6 +41,7 @@
 #include "cp-abi.h"
 #include "user-regs.h"
 #include <algorithm>
+#include "completer.h"
 
 /* Prototypes for exported functions.  */
 
@@ -2144,14 +2145,12 @@ lookup_only_internalvar (const char *name)
   return NULL;
 }
 
-/* Complete NAME by comparing it to the names of internal variables.
-   Returns a vector of newly allocated strings, or NULL if no matches
-   were found.  */
+/* Complete NAME by comparing it to the names of internal
+   variables.  */
 
-VEC (char_ptr) *
-complete_internalvar (const char *name)
+void
+complete_internalvar (completion_tracker &tracker, const char *name)
 {
-  VEC (char_ptr) *result = NULL;
   struct internalvar *var;
   int len;
 
@@ -2160,12 +2159,10 @@ complete_internalvar (const char *name)
   for (var = internalvars; var; var = var->next)
     if (strncmp (var->name, name, len) == 0)
       {
-	char *r = xstrdup (var->name);
+	gdb::unique_xmalloc_ptr<char> copy (xstrdup (var->name));
 
-	VEC_safe_push (char_ptr, result, r);
+	tracker.add_completion (std::move (copy));
       }
-
-  return result;
 }
 
 /* Create an internal variable with name NAME and with a void value.

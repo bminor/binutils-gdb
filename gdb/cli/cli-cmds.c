@@ -238,6 +238,7 @@ help_command (char *command, int from_tty)
   help_cmd (command, gdb_stdout);
 }
 
+
 /* Note: The "complete" command is used by Emacs to implement completion.
    [Is that why this function writes output with *_unfiltered?]  */
 
@@ -245,9 +246,6 @@ static void
 complete_command (char *arg_entry, int from_tty)
 {
   const char *arg = arg_entry;
-  int argpoint;
-  char *arg_prefix;
-  VEC (char_ptr) *completions;
 
   dont_repeat ();
 
@@ -265,57 +263,66 @@ complete_command (char *arg_entry, int from_tty)
 
   if (arg == NULL)
     arg = "";
-  argpoint = strlen (arg);
 
-  /* complete_line assumes that its first argument is somewhere
-     within, and except for filenames at the beginning of, the word to
-     be completed.  The following crude imitation of readline's
-     word-breaking tries to accomodate this.  */
-  const char *point = arg + argpoint;
-  while (point > arg)
+  completion_tracker tracker_handle_brkchars;
+  completion_tracker tracker_handle_completions;
+  completion_tracker *tracker;
+
+  int quote_char = '\0';
+  const char *word;
+
+  TRY
     {
-      if (strchr (rl_completer_word_break_characters, point[-1]) != 0)
-        break;
-      point--;
+      word = completion_find_completion_word (tracker_handle_brkchars,
+					      arg, &quote_char);
+
+      /* Completers that provide a custom word point in the
+	 handle_brkchars phase also compute their completions then.
+	 Completers that leave the completion word handling to readline
+	 must be called twice.  */
+      if (tracker_handle_brkchars.use_custom_word_point ())
+	tracker = &tracker_handle_brkchars;
+      else
+	{
+	  complete_line (tracker_handle_completions, word, arg, strlen (arg));
+	  tracker = &tracker_handle_completions;
+	}
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      return;
     }
 
-  arg_prefix = (char *) alloca (point - arg + 1);
-  memcpy (arg_prefix, arg, point - arg);
-  arg_prefix[point - arg] = 0;
+  std::string arg_prefix (arg, word - arg);
 
-  completions = complete_line (point, arg, argpoint);
+  completion_result result
+    = tracker->build_completion_result (word, word - arg, strlen (arg));
 
-  if (completions)
+  if (result.number_matches != 0)
     {
-      int ix, size = VEC_length (char_ptr, completions);
-      char *item, *prev = NULL;
-
-      qsort (VEC_address (char_ptr, completions), size,
-	     sizeof (char *), compare_strings);
-
-      /* We do extra processing here since we only want to print each
-	 unique item once.  */
-      for (ix = 0; VEC_iterate (char_ptr, completions, ix, item); ++ix)
+      if (result.number_matches == 1)
+	printf_unfiltered ("%s%s\n", arg_prefix.c_str (), result.match_list[0]);
+      else
 	{
-	  if (prev == NULL || strcmp (item, prev) != 0)
+	  result.sort_match_list ();
+
+	  for (size_t i = 0; i < result.number_matches; i++)
 	    {
-	      printf_unfiltered ("%s%s\n", arg_prefix, item);
-	      xfree (prev);
-	      prev = item;
+	      printf_unfiltered ("%s%s",
+				 arg_prefix.c_str (),
+				 result.match_list[i + 1]);
+	      if (quote_char)
+		printf_unfiltered ("%c", quote_char);
+	      printf_unfiltered ("\n");
 	    }
-	  else
-	    xfree (item);
 	}
 
-      xfree (prev);
-      VEC_free (char_ptr, completions);
-
-      if (size == max_completions)
+      if (result.number_matches == max_completions)
 	{
-	  /* ARG_PREFIX and POINT are included in the output so that emacs
+	  /* ARG_PREFIX and WORD are included in the output so that emacs
 	     will include the message in the output.  */
 	  printf_unfiltered (_("%s%s %s\n"),
-			     arg_prefix, point,
+			     arg_prefix.c_str (), word,
 			     get_max_completions_reached_message ());
 	}
     }

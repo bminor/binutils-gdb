@@ -263,7 +263,8 @@ $(outdir)/arm/arm-with-iwmmxt.dat: arm/arm-core.xml arm/xscale-iwmmxt.xml
 $(outdir)/i386/i386.dat: i386/32bit-core.xml i386/32bit-sse.xml
 $(outdir)/i386/i386-linux.dat: i386/32bit-core.xml i386/32bit-sse.xml \
 			       i386/32bit-linux.xml
-$(outdir)/i386/amd64.dat: i386/64bit-core.xml i386/64bit-sse.xml
+$(outdir)/i386/amd64.dat: i386/64bit-core.xml i386/64bit-sse.xml \
+			       i386/64bit-segments.xml
 $(outdir)/i386/amd64-linux.dat: i386/64bit-core.xml i386/64bit-sse.xml \
 			       i386/64bit-linux.xml i386/64bit-segments.xml
 $(outdir)/i386/i386-avx.dat: i386/32bit-core.xml i386/32bit-avx.xml
@@ -289,7 +290,8 @@ $(outdir)/i386/i386-avx-mpx-avx512-pku-linux.dat: i386/32bit-core.xml \
 			       i386/32bit-pkeys.xml i386/32bit-linux.xml
 $(outdir)/i386/i386-mmx.dat: i386/32bit-core.xml 
 $(outdir)/i386/i386-mmx-linux.dat: i386/32bit-core.xml i386/32bit-linux.xml
-$(outdir)/i386/amd64-avx.dat: i386/64bit-core.xml i386/64bit-avx.xml
+$(outdir)/i386/amd64-avx.dat: i386/64bit-core.xml i386/64bit-avx.xml \
+			       i386/64bit-segments.xml
 $(outdir)/i386/amd64-avx-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
 			       i386/64bit-linux.xml i386/64bit-segments.xml
 $(outdir)/i386/amd64-mpx-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
@@ -297,16 +299,16 @@ $(outdir)/i386/amd64-mpx-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
 $(outdir)/i386/amd64-avx-mpx-linux.dat: i386/64bit-core.xml \
 			       i386/64bit-linux.xml i386/64bit-segments.xml i386/64bit-mpx.xml
 $(outdir)/i386/amd64-mpx.dat: i386/64bit-core.xml i386/64bit-avx.xml \
-			       i386/64bit-mpx.xml
+			       i386/64bit-segments.xml i386/64bit-mpx.xml
 $(outdir)/i386/amd64-avx-mpx.dat: i386/64bit-core.xml \
-			       i386/64bit-mpx.xml
+			       i386/64bit-segments.xml i386/64bit-mpx.xml
 $(outdir)/i386/amd64-avx-avx512.dat: i386/64bit-core.xml i386/64bit-avx.xml \
-			       i386/64bit-avx512.xml
+			       i386/64bit-avx512.xml i386/64bit-segments.xml
 $(outdir)/i386/amd64-avx-avx512-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
 			       i386/64bit-avx512.xml i386/64bit-linux.xml
 $(outdir)/i386/amd64-avx-mpx-avx512-pku.dat: i386/64bit-core.xml \
 			       i386/64bit-avx.xml i386/64bit-mpx.xml i386/64bit-avx512.xml \
-			       i386/64bit-pkeys.xml
+			       i386/64bit-pkeys.xml i386/64bit-segments.xml
 $(outdir)/i386/amd64-avx-mpx-avx512-pku-linux.dat: i386/64bit-core.xml \
 			       i386/64bit-avx.xml i386/64bit-mpx.xml i386/64bit-avx512.xml \
 			       i386/64bit-linux.xml i386/64bit-segments.xml \

@@ -1190,9 +1190,9 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: version count (%ld) does not match symbol count (%ld)"),
+	    (_("%B: version count (%Ld) does not match symbol count (%ld)"),
 	     abfd,
-	     (long) (verhdr->sh_size / sizeof (Elf_External_Versym)),
+	     verhdr->sh_size / sizeof (Elf_External_Versym),
 	     symcount);
 
 	  /* Slurp in the symbols without the version information,

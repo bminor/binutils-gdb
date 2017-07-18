@@ -297,9 +297,9 @@ elf_core_file_p (bfd *abfd)
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("Warning: %B is truncated: expected core file "
-		 "size >= %lu, found: %lu."),
-	       abfd, (unsigned long) high, (unsigned long) statbuf.st_size);
+	      (_("warning: %B is truncated: expected core file "
+		 "size >= %Lu, found: %llu"),
+	       abfd, high, (unsigned long long) statbuf.st_size);
 	  }
       }
   }

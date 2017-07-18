@@ -1,3 +1,8 @@
+2017-07-14  Ravi Bangoria  <ravi.bangoria@linux.vnet.ibm.com>
+
+	* dis-asm.h (struct disassemble_info): Change type of buffer_length
+	field to size_t.
+
 2017-07-07  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf/common.h (NT_FREEBSD_PTLWPINFO): Define.

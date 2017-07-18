@@ -77,8 +77,7 @@ static struct value *const_var_ref (struct symbol *var);
 static struct value *const_expr (union exp_element **pc);
 static struct value *maybe_const_expr (union exp_element **pc);
 
-static void gen_traced_pop (struct gdbarch *, struct agent_expr *,
-			    struct axs_value *);
+static void gen_traced_pop (struct agent_expr *, struct axs_value *);
 
 static void gen_sign_extend (struct agent_expr *, struct type *);
 static void gen_extend (struct agent_expr *, struct type *);
@@ -86,31 +85,28 @@ static void gen_fetch (struct agent_expr *, struct type *);
 static void gen_left_shift (struct agent_expr *, int);
 
 
-static void gen_frame_args_address (struct gdbarch *, struct agent_expr *);
-static void gen_frame_locals_address (struct gdbarch *, struct agent_expr *);
+static void gen_frame_args_address (struct agent_expr *);
+static void gen_frame_locals_address (struct agent_expr *);
 static void gen_offset (struct agent_expr *ax, int offset);
 static void gen_sym_offset (struct agent_expr *, struct symbol *);
-static void gen_var_ref (struct gdbarch *, struct agent_expr *ax,
-			 struct axs_value *value, struct symbol *var);
+static void gen_var_ref (struct agent_expr *ax, struct axs_value *value,
+			 struct symbol *var);
 
 
 static void gen_int_literal (struct agent_expr *ax,
 			     struct axs_value *value,
 			     LONGEST k, struct type *type);
 
-static void gen_usual_unary (struct expression *exp, struct agent_expr *ax,
-			     struct axs_value *value);
+static void gen_usual_unary (struct agent_expr *ax, struct axs_value *value);
 static int type_wider_than (struct type *type1, struct type *type2);
 static struct type *max_type (struct type *type1, struct type *type2);
 static void gen_conversion (struct agent_expr *ax,
 			    struct type *from, struct type *to);
 static int is_nontrivial_conversion (struct type *from, struct type *to);
-static void gen_usual_arithmetic (struct expression *exp,
-				  struct agent_expr *ax,
+static void gen_usual_arithmetic (struct agent_expr *ax,
 				  struct axs_value *value1,
 				  struct axs_value *value2);
-static void gen_integral_promotions (struct expression *exp,
-				     struct agent_expr *ax,
+static void gen_integral_promotions (struct agent_expr *ax,
 				     struct axs_value *value);
 static void gen_cast (struct agent_expr *ax,
 		      struct axs_value *value, struct type *type);
@@ -133,27 +129,23 @@ static void gen_binop (struct agent_expr *ax,
 static void gen_logical_not (struct agent_expr *ax, struct axs_value *value,
 			     struct type *result_type);
 static void gen_complement (struct agent_expr *ax, struct axs_value *value);
-static void gen_deref (struct agent_expr *, struct axs_value *);
-static void gen_address_of (struct agent_expr *, struct axs_value *);
-static void gen_bitfield_ref (struct expression *exp, struct agent_expr *ax,
-			      struct axs_value *value,
+static void gen_deref (struct axs_value *);
+static void gen_address_of (struct axs_value *);
+static void gen_bitfield_ref (struct agent_expr *ax, struct axs_value *value,
 			      struct type *type, int start, int end);
-static void gen_primitive_field (struct expression *exp,
-				 struct agent_expr *ax,
+static void gen_primitive_field (struct agent_expr *ax,
 				 struct axs_value *value,
 				 int offset, int fieldno, struct type *type);
-static int gen_struct_ref_recursive (struct expression *exp,
-				     struct agent_expr *ax,
+static int gen_struct_ref_recursive (struct agent_expr *ax,
 				     struct axs_value *value,
 				     const char *field, int offset,
 				     struct type *type);
-static void gen_struct_ref (struct expression *exp, struct agent_expr *ax,
+static void gen_struct_ref (struct agent_expr *ax,
 			    struct axs_value *value,
 			    const char *field,
 			    const char *operator_name,
 			    const char *operand_name);
-static void gen_static_field (struct gdbarch *gdbarch,
-			      struct agent_expr *ax, struct axs_value *value,
+static void gen_static_field (struct agent_expr *ax, struct axs_value *value,
 			      struct type *type, int fieldno);
 static void gen_repeat (struct expression *exp, union exp_element **pc,
 			struct agent_expr *ax, struct axs_value *value);
@@ -318,8 +310,7 @@ maybe_const_expr (union exp_element **pc)
    classes, and generate tracing bytecodes for each.  */
 
 static void
-gen_trace_static_fields (struct gdbarch *gdbarch,
-			 struct agent_expr *ax,
+gen_trace_static_fields (struct agent_expr *ax,
 			 struct type *type)
 {
   int i, nbases = TYPE_N_BASECLASSES (type);
@@ -331,7 +322,7 @@ gen_trace_static_fields (struct gdbarch *gdbarch,
     {
       if (field_is_static (&TYPE_FIELD (type, i)))
 	{
-	  gen_static_field (gdbarch, ax, &value, type, i);
+	  gen_static_field (ax, &value, type, i);
 	  if (value.optimized_out)
 	    continue;
 	  switch (value.kind)
@@ -361,7 +352,7 @@ gen_trace_static_fields (struct gdbarch *gdbarch,
     {
       struct type *basetype = check_typedef (TYPE_BASECLASS (type, i));
 
-      gen_trace_static_fields (gdbarch, ax, basetype);
+      gen_trace_static_fields (ax, basetype);
     }
 }
 
@@ -369,8 +360,7 @@ gen_trace_static_fields (struct gdbarch *gdbarch,
    the value.  Useful on the left side of a comma, and at the end of
    an expression being used for tracing.  */
 static void
-gen_traced_pop (struct gdbarch *gdbarch,
-		struct agent_expr *ax, struct axs_value *value)
+gen_traced_pop (struct agent_expr *ax, struct axs_value *value)
 {
   int string_trace = 0;
   if (ax->trace_string
@@ -443,7 +433,7 @@ gen_traced_pop (struct gdbarch *gdbarch,
   if (ax->tracing
       && (TYPE_CODE (value->type) == TYPE_CODE_STRUCT
 	  || TYPE_CODE (value->type) == TYPE_CODE_UNION))
-    gen_trace_static_fields (gdbarch, ax, value->type);
+    gen_trace_static_fields (ax, value->type);
 }
 
 
@@ -562,12 +552,12 @@ gen_left_shift (struct agent_expr *ax, int distance)
 /* Generate code to push the base address of the argument portion of
    the top stack frame.  */
 static void
-gen_frame_args_address (struct gdbarch *gdbarch, struct agent_expr *ax)
+gen_frame_args_address (struct agent_expr *ax)
 {
   int frame_reg;
   LONGEST frame_offset;
 
-  gdbarch_virtual_frame_pointer (gdbarch,
+  gdbarch_virtual_frame_pointer (ax->gdbarch,
 				 ax->scope, &frame_reg, &frame_offset);
   ax_reg (ax, frame_reg);
   gen_offset (ax, frame_offset);
@@ -577,12 +567,12 @@ gen_frame_args_address (struct gdbarch *gdbarch, struct agent_expr *ax)
 /* Generate code to push the base address of the locals portion of the
    top stack frame.  */
 static void
-gen_frame_locals_address (struct gdbarch *gdbarch, struct agent_expr *ax)
+gen_frame_locals_address (struct agent_expr *ax)
 {
   int frame_reg;
   LONGEST frame_offset;
 
-  gdbarch_virtual_frame_pointer (gdbarch,
+  gdbarch_virtual_frame_pointer (ax->gdbarch,
 				 ax->scope, &frame_reg, &frame_offset);
   ax_reg (ax, frame_reg);
   gen_offset (ax, frame_offset);
@@ -627,8 +617,7 @@ gen_sym_offset (struct agent_expr *ax, struct symbol *var)
    symbol VAR.  Set VALUE to describe the result.  */
 
 static void
-gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
-	     struct axs_value *value, struct symbol *var)
+gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
 {
   /* Dereference any typedefs.  */
   value->type = check_typedef (SYMBOL_TYPE (var));
@@ -636,7 +625,7 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
 
   if (SYMBOL_COMPUTED_OPS (var) != NULL)
     {
-      SYMBOL_COMPUTED_OPS (var)->tracepoint_var_ref (var, gdbarch, ax, value);
+      SYMBOL_COMPUTED_OPS (var)->tracepoint_var_ref (var, ax, value);
       return;
     }
 
@@ -666,22 +655,22 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
       break;
 
     case LOC_ARG:		/* var lives in argument area of frame */
-      gen_frame_args_address (gdbarch, ax);
+      gen_frame_args_address (ax);
       gen_sym_offset (ax, var);
       value->kind = axs_lvalue_memory;
       break;
 
     case LOC_REF_ARG:		/* As above, but the frame slot really
 				   holds the address of the variable.  */
-      gen_frame_args_address (gdbarch, ax);
+      gen_frame_args_address (ax);
       gen_sym_offset (ax, var);
       /* Don't assume any particular pointer size.  */
-      gen_fetch (ax, builtin_type (gdbarch)->builtin_data_ptr);
+      gen_fetch (ax, builtin_type (ax->gdbarch)->builtin_data_ptr);
       value->kind = axs_lvalue_memory;
       break;
 
     case LOC_LOCAL:		/* var lives in locals area of frame */
-      gen_frame_locals_address (gdbarch, ax);
+      gen_frame_locals_address (ax);
       gen_sym_offset (ax, var);
       value->kind = axs_lvalue_memory;
       break;
@@ -701,7 +690,8 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
          this as an lvalue or rvalue, the caller will generate the
          right code.  */
       value->kind = axs_lvalue_register;
-      value->u.reg = SYMBOL_REGISTER_OPS (var)->register_number (var, gdbarch);
+      value->u.reg
+	= SYMBOL_REGISTER_OPS (var)->register_number (var, ax->gdbarch);
       break;
 
       /* A lot like LOC_REF_ARG, but the pointer lives directly in a
@@ -709,7 +699,8 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
          because it's just like any other case where the thing
 	 has a real address.  */
     case LOC_REGPARM_ADDR:
-      ax_reg (ax, SYMBOL_REGISTER_OPS (var)->register_number (var, gdbarch));
+      ax_reg (ax,
+	      SYMBOL_REGISTER_OPS (var)->register_number (var, ax->gdbarch));
       value->kind = axs_lvalue_memory;
       break;
 
@@ -818,8 +809,7 @@ require_rvalue (struct agent_expr *ax, struct axs_value *value)
    lvalue through unchanged, and let `+' raise an error.  */
 
 static void
-gen_usual_unary (struct expression *exp, struct agent_expr *ax,
-		 struct axs_value *value)
+gen_usual_unary (struct agent_expr *ax, struct axs_value *value)
 {
   /* We don't have to generate any code for the usual integral
      conversions, since values are always represented as full-width on
@@ -934,8 +924,8 @@ is_nontrivial_conversion (struct type *from, struct type *to)
    and promotes each argument to that type.  *VALUE1 and *VALUE2
    describe the values as they are passed in, and as they are left.  */
 static void
-gen_usual_arithmetic (struct expression *exp, struct agent_expr *ax,
-		      struct axs_value *value1, struct axs_value *value2)
+gen_usual_arithmetic (struct agent_expr *ax, struct axs_value *value1,
+		      struct axs_value *value2)
 {
   /* Do the usual binary conversions.  */
   if (TYPE_CODE (value1->type) == TYPE_CODE_INT
@@ -946,7 +936,7 @@ gen_usual_arithmetic (struct expression *exp, struct agent_expr *ax,
          unsigned type is considered "wider" than an n-bit signed
          type.  Promote to the "wider" of the two types, and always
          promote at least to int.  */
-      struct type *target = max_type (builtin_type (exp->gdbarch)->builtin_int,
+      struct type *target = max_type (builtin_type (ax->gdbarch)->builtin_int,
 				      max_type (value1->type, value2->type));
 
       /* Deal with value2, on the top of the stack.  */
@@ -971,10 +961,9 @@ gen_usual_arithmetic (struct expression *exp, struct agent_expr *ax,
    the value on the top of the stack, as described by VALUE.  Assume
    the value has integral type.  */
 static void
-gen_integral_promotions (struct expression *exp, struct agent_expr *ax,
-			 struct axs_value *value)
+gen_integral_promotions (struct agent_expr *ax, struct axs_value *value)
 {
-  const struct builtin_type *builtin = builtin_type (exp->gdbarch);
+  const struct builtin_type *builtin = builtin_type (ax->gdbarch);
 
   if (!type_wider_than (value->type, builtin->builtin_int))
     {
@@ -1196,7 +1185,7 @@ gen_complement (struct agent_expr *ax, struct axs_value *value)
 
 /* Dereference the value on the top of the stack.  */
 static void
-gen_deref (struct agent_expr *ax, struct axs_value *value)
+gen_deref (struct axs_value *value)
 {
   /* The caller should check the type, because several operators use
      this, and we don't know what error message to generate.  */
@@ -1219,7 +1208,7 @@ gen_deref (struct agent_expr *ax, struct axs_value *value)
 
 /* Produce the address of the lvalue on the top of the stack.  */
 static void
-gen_address_of (struct agent_expr *ax, struct axs_value *value)
+gen_address_of (struct axs_value *value)
 {
   /* Special case for taking the address of a function.  The ANSI
      standard describes this as a special case, too, so this
@@ -1249,9 +1238,8 @@ gen_address_of (struct agent_expr *ax, struct axs_value *value)
    starting and one-past-ending *bit* numbers of the field within the
    structure.  */
 static void
-gen_bitfield_ref (struct expression *exp, struct agent_expr *ax,
-		  struct axs_value *value, struct type *type,
-		  int start, int end)
+gen_bitfield_ref (struct agent_expr *ax, struct axs_value *value,
+		  struct type *type, int start, int end)
 {
   /* Note that ops[i] fetches 8 << i bits.  */
   static enum agent_op ops[]
@@ -1376,7 +1364,7 @@ gen_bitfield_ref (struct expression *exp, struct agent_expr *ax,
 	     the sign/zero extension will wipe them out.
 	     - If we're in the interior of the word, then there is no garbage
 	     on either end, because the ref operators zero-extend.  */
-	  if (gdbarch_byte_order (exp->gdbarch) == BFD_ENDIAN_BIG)
+	  if (gdbarch_byte_order (ax->gdbarch) == BFD_ENDIAN_BIG)
 	    gen_left_shift (ax, end - (offset + op_size));
 	  else
 	    gen_left_shift (ax, offset - start);
@@ -1409,13 +1397,12 @@ gen_bitfield_ref (struct expression *exp, struct agent_expr *ax,
    generally follow value_primitive_field.  */
 
 static void
-gen_primitive_field (struct expression *exp,
-		     struct agent_expr *ax, struct axs_value *value,
+gen_primitive_field (struct agent_expr *ax, struct axs_value *value,
 		     int offset, int fieldno, struct type *type)
 {
   /* Is this a bitfield?  */
   if (TYPE_FIELD_PACKED (type, fieldno))
-    gen_bitfield_ref (exp, ax, value, TYPE_FIELD_TYPE (type, fieldno),
+    gen_bitfield_ref (ax, value, TYPE_FIELD_TYPE (type, fieldno),
 		      (offset * TARGET_CHAR_BIT
 		       + TYPE_FIELD_BITPOS (type, fieldno)),
 		      (offset * TARGET_CHAR_BIT
@@ -1434,8 +1421,7 @@ gen_primitive_field (struct expression *exp,
    base classes.  Return 1 if found, 0 if not.  */
 
 static int
-gen_struct_ref_recursive (struct expression *exp, struct agent_expr *ax,
-			  struct axs_value *value,
+gen_struct_ref_recursive (struct agent_expr *ax, struct axs_value *value,
 			  const char *field, int offset, struct type *type)
 {
   int i, rslt;
@@ -1457,7 +1443,7 @@ gen_struct_ref_recursive (struct expression *exp, struct agent_expr *ax,
 		 being handled as a global.  */
 	      if (field_is_static (&TYPE_FIELD (type, i)))
 		{
-		  gen_static_field (exp->gdbarch, ax, value, type, i);
+		  gen_static_field (ax, value, type, i);
 		  if (value->optimized_out)
 		    error (_("static field `%s' has been "
 			     "optimized out, cannot use"),
@@ -1465,7 +1451,7 @@ gen_struct_ref_recursive (struct expression *exp, struct agent_expr *ax,
 		  return 1;
 		}
 
-	      gen_primitive_field (exp, ax, value, offset, i, type);
+	      gen_primitive_field (ax, value, offset, i, type);
 	      return 1;
 	    }
 #if 0 /* is this right? */
@@ -1481,7 +1467,7 @@ gen_struct_ref_recursive (struct expression *exp, struct agent_expr *ax,
     {
       struct type *basetype = check_typedef (TYPE_BASECLASS (type, i));
 
-      rslt = gen_struct_ref_recursive (exp, ax, value, field,
+      rslt = gen_struct_ref_recursive (ax, value, field,
 				       offset + TYPE_BASECLASS_BITPOS (type, i)
 				       / TARGET_CHAR_BIT,
 				       basetype);
@@ -1499,9 +1485,9 @@ gen_struct_ref_recursive (struct expression *exp, struct agent_expr *ax,
    the operator being compiled, and OPERAND_NAME is the kind of thing
    it operates on; we use them in error messages.  */
 static void
-gen_struct_ref (struct expression *exp, struct agent_expr *ax,
-		struct axs_value *value, const char *field,
-		const char *operator_name, const char *operand_name)
+gen_struct_ref (struct agent_expr *ax, struct axs_value *value,
+		const char *field, const char *operator_name,
+		const char *operand_name)
 {
   struct type *type;
   int found;
@@ -1512,7 +1498,7 @@ gen_struct_ref (struct expression *exp, struct agent_expr *ax,
   while (pointer_type (value->type))
     {
       require_rvalue (ax, value);
-      gen_deref (ax, value);
+      gen_deref (value);
     }
   type = check_typedef (value->type);
 
@@ -1528,7 +1514,7 @@ gen_struct_ref (struct expression *exp, struct agent_expr *ax,
     error (_("Structure does not live in memory."));
 
   /* Search through fields and base classes recursively.  */
-  found = gen_struct_ref_recursive (exp, ax, value, field, 0, type);
+  found = gen_struct_ref_recursive (ax, value, field, 0, type);
   
   if (!found)
     error (_("Couldn't find member named `%s' in struct/union/class `%s'"),
@@ -1536,17 +1522,14 @@ gen_struct_ref (struct expression *exp, struct agent_expr *ax,
 }
 
 static int
-gen_namespace_elt (struct expression *exp,
-		   struct agent_expr *ax, struct axs_value *value,
+gen_namespace_elt (struct agent_expr *ax, struct axs_value *value,
 		   const struct type *curtype, char *name);
 static int
-gen_maybe_namespace_elt (struct expression *exp,
-			 struct agent_expr *ax, struct axs_value *value,
+gen_maybe_namespace_elt (struct agent_expr *ax, struct axs_value *value,
 			 const struct type *curtype, char *name);
 
 static void
-gen_static_field (struct gdbarch *gdbarch,
-		  struct agent_expr *ax, struct axs_value *value,
+gen_static_field (struct agent_expr *ax, struct axs_value *value,
 		  struct type *type, int fieldno)
 {
   if (TYPE_FIELD_LOC_KIND (type, fieldno) == FIELD_LOC_KIND_PHYSADDR)
@@ -1563,7 +1546,7 @@ gen_static_field (struct gdbarch *gdbarch,
 
       if (sym)
 	{
-	  gen_var_ref (gdbarch, ax, value, sym);
+	  gen_var_ref (ax, value, sym);
   
 	  /* Don't error if the value was optimized out, we may be
 	     scanning all static fields and just want to pass over this
@@ -1579,8 +1562,7 @@ gen_static_field (struct gdbarch *gdbarch,
 }
 
 static int
-gen_struct_elt_for_reference (struct expression *exp,
-			      struct agent_expr *ax, struct axs_value *value,
+gen_struct_elt_for_reference (struct agent_expr *ax, struct axs_value *value,
 			      struct type *type, char *fieldname)
 {
   struct type *t = type;
@@ -1599,7 +1581,7 @@ gen_struct_elt_for_reference (struct expression *exp,
 	{
 	  if (field_is_static (&TYPE_FIELD (t, i)))
 	    {
-	      gen_static_field (exp->gdbarch, ax, value, t, i);
+	      gen_static_field (ax, value, t, i);
 	      if (value->optimized_out)
 		error (_("static field `%s' has been "
 			 "optimized out, cannot use"),
@@ -1618,18 +1600,17 @@ gen_struct_elt_for_reference (struct expression *exp,
   /* FIXME add other scoped-reference cases here */
 
   /* Do a last-ditch lookup.  */
-  return gen_maybe_namespace_elt (exp, ax, value, type, fieldname);
+  return gen_maybe_namespace_elt (ax, value, type, fieldname);
 }
 
 /* C++: Return the member NAME of the namespace given by the type
    CURTYPE.  */
 
 static int
-gen_namespace_elt (struct expression *exp,
-		   struct agent_expr *ax, struct axs_value *value,
+gen_namespace_elt (struct agent_expr *ax, struct axs_value *value,
 		   const struct type *curtype, char *name)
 {
-  int found = gen_maybe_namespace_elt (exp, ax, value, curtype, name);
+  int found = gen_maybe_namespace_elt (ax, value, curtype, name);
 
   if (!found)
     error (_("No symbol \"%s\" in namespace \"%s\"."), 
@@ -1645,8 +1626,7 @@ gen_namespace_elt (struct expression *exp,
    to, say, some base class of CURTYPE).  */
 
 static int
-gen_maybe_namespace_elt (struct expression *exp,
-			 struct agent_expr *ax, struct axs_value *value,
+gen_maybe_namespace_elt (struct agent_expr *ax, struct axs_value *value,
 			 const struct type *curtype, char *name)
 {
   const char *namespace_name = TYPE_TAG_NAME (curtype);
@@ -1659,7 +1639,7 @@ gen_maybe_namespace_elt (struct expression *exp,
   if (sym.symbol == NULL)
     return 0;
 
-  gen_var_ref (exp->gdbarch, ax, value, sym.symbol);
+  gen_var_ref (ax, value, sym.symbol);
 
   if (value->optimized_out)
     error (_("`%s' has been optimized out, cannot use"),
@@ -1670,20 +1650,17 @@ gen_maybe_namespace_elt (struct expression *exp,
 
 
 static int
-gen_aggregate_elt_ref (struct expression *exp,
-		       struct agent_expr *ax, struct axs_value *value,
-		       struct type *type, char *field,
-		       const char *operator_name,
-		       const char *operand_name)
+gen_aggregate_elt_ref (struct agent_expr *ax, struct axs_value *value,
+		       struct type *type, char *field)
 {
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      return gen_struct_elt_for_reference (exp, ax, value, type, field);
+      return gen_struct_elt_for_reference (ax, value, type, field);
       break;
     case TYPE_CODE_NAMESPACE:
-      return gen_namespace_elt (exp, ax, value, type, field);
+      return gen_namespace_elt (ax, value, type, field);
       break;
     default:
       internal_error (__FILE__, __LINE__,
@@ -1784,7 +1761,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
   struct axs_value value1, value2, value3;
   enum exp_opcode op = (*pc)[0].opcode, op2;
   int if1, go1, if2, go2, end;
-  struct type *int_type = builtin_type (exp->gdbarch)->builtin_int;
+  struct type *int_type = builtin_type (ax->gdbarch)->builtin_int;
 
   /* If we're looking at a constant expression, just push its value.  */
   {
@@ -1822,7 +1799,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
     case BINOP_GEQ:
       (*pc)++;
       gen_expr (exp, pc, ax, &value1);
-      gen_usual_unary (exp, ax, &value1);
+      gen_usual_unary (ax, &value1);
       gen_expr_binop_rest (exp, op, pc, ax, value, &value1, &value2);
       break;
 
@@ -1830,12 +1807,12 @@ gen_expr (struct expression *exp, union exp_element **pc,
       (*pc)++;
       /* Generate the obvious sequence of tests and jumps.  */
       gen_expr (exp, pc, ax, &value1);
-      gen_usual_unary (exp, ax, &value1);
+      gen_usual_unary (ax, &value1);
       if1 = ax_goto (ax, aop_if_goto);
       go1 = ax_goto (ax, aop_goto);
       ax_label (ax, if1, ax->len);
       gen_expr (exp, pc, ax, &value2);
-      gen_usual_unary (exp, ax, &value2);
+      gen_usual_unary (ax, &value2);
       if2 = ax_goto (ax, aop_if_goto);
       go2 = ax_goto (ax, aop_goto);
       ax_label (ax, if2, ax->len);
@@ -1853,10 +1830,10 @@ gen_expr (struct expression *exp, union exp_element **pc,
       (*pc)++;
       /* Generate the obvious sequence of tests and jumps.  */
       gen_expr (exp, pc, ax, &value1);
-      gen_usual_unary (exp, ax, &value1);
+      gen_usual_unary (ax, &value1);
       if1 = ax_goto (ax, aop_if_goto);
       gen_expr (exp, pc, ax, &value2);
-      gen_usual_unary (exp, ax, &value2);
+      gen_usual_unary (ax, &value2);
       if2 = ax_goto (ax, aop_if_goto);
       ax_const_l (ax, 0);
       end = ax_goto (ax, aop_goto);
@@ -1871,7 +1848,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
     case TERNOP_COND:
       (*pc)++;
       gen_expr (exp, pc, ax, &value1);
-      gen_usual_unary (exp, ax, &value1);
+      gen_usual_unary (ax, &value1);
       /* For (A ? B : C), it's easiest to generate subexpression
 	 bytecodes in order, but if_goto jumps on true, so we invert
 	 the sense of A.  Then we can do B by dropping through, and
@@ -1879,11 +1856,11 @@ gen_expr (struct expression *exp, union exp_element **pc,
       gen_logical_not (ax, &value1, int_type);
       if1 = ax_goto (ax, aop_if_goto);
       gen_expr (exp, pc, ax, &value2);
-      gen_usual_unary (exp, ax, &value2);
+      gen_usual_unary (ax, &value2);
       end = ax_goto (ax, aop_goto);
       ax_label (ax, if1, ax->len);
       gen_expr (exp, pc, ax, &value3);
-      gen_usual_unary (exp, ax, &value3);
+      gen_usual_unary (ax, &value3);
       ax_label (ax, end, ax->len);
       /* This is arbitary - what if B and C are incompatible types? */
       value->type = value2.type;
@@ -1934,7 +1911,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 		ax_tsv (ax, aop_tracev, tsv->number);
 	      /* Trace state variables are always 64-bit integers.  */
 	      value1.kind = axs_rvalue;
-	      value1.type = builtin_type (exp->gdbarch)->builtin_long_long;
+	      value1.type = builtin_type (ax->gdbarch)->builtin_long_long;
 	      /* Now do right half of expression.  */
 	      gen_expr_binop_rest (exp, op2, pc, ax, value, &value1, &value2);
 	      /* We have a result of the binary op, set the tsv.  */
@@ -1962,7 +1939,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       /* Don't just dispose of the left operand.  We might be tracing,
          in which case we want to emit code to trace it if it's an
          lvalue.  */
-      gen_traced_pop (exp->gdbarch, ax, &value1);
+      gen_traced_pop (ax, &value1);
       gen_expr (exp, pc, ax, value);
       /* It's the consumer's responsibility to trace the right operand.  */
       break;
@@ -1978,7 +1955,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       break;
 
     case OP_VAR_VALUE:
-      gen_var_ref (exp->gdbarch, ax, value, (*pc)[2].symbol);
+      gen_var_ref (ax, value, (*pc)[2].symbol);
 
       if (value->optimized_out)
 	error (_("`%s' has been optimized out, cannot use"),
@@ -1993,19 +1970,19 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	int reg;
 
 	(*pc) += 4 + BYTES_TO_EXP_ELEM ((*pc)[1].longconst + 1);
-	reg = user_reg_map_name_to_regnum (exp->gdbarch, name, strlen (name));
+	reg = user_reg_map_name_to_regnum (ax->gdbarch, name, strlen (name));
 	if (reg == -1)
 	  internal_error (__FILE__, __LINE__,
 			  _("Register $%s not available"), name);
 	/* No support for tracing user registers yet.  */
-	if (reg >= gdbarch_num_regs (exp->gdbarch)
-	    + gdbarch_num_pseudo_regs (exp->gdbarch))
+	if (reg >= gdbarch_num_regs (ax->gdbarch)
+	    + gdbarch_num_pseudo_regs (ax->gdbarch))
 	  error (_("'%s' is a user-register; "
 		   "GDB cannot yet trace user-register contents."),
 		 name);
 	value->kind = axs_lvalue_register;
 	value->u.reg = reg;
-	value->type = register_type (exp->gdbarch, reg);
+	value->type = register_type (ax->gdbarch, reg);
       }
       break;
 
@@ -2024,7 +2001,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	      ax_tsv (ax, aop_tracev, tsv->number);
 	    /* Trace state variables are always 64-bit integers.  */
 	    value->kind = axs_rvalue;
-	    value->type = builtin_type (exp->gdbarch)->builtin_long_long;
+	    value->type = builtin_type (ax->gdbarch)->builtin_long_long;
 	  }
 	else if (! compile_internalvar_to_ax (var, ax, value))
 	  error (_("$%s is not a trace state variable; GDB agent "
@@ -2113,49 +2090,49 @@ gen_expr (struct expression *exp, union exp_element **pc,
       (*pc)++;
       /* + FOO is equivalent to 0 + FOO, which can be optimized.  */
       gen_expr (exp, pc, ax, value);
-      gen_usual_unary (exp, ax, value);
+      gen_usual_unary (ax, value);
       break;
       
     case UNOP_NEG:
       (*pc)++;
       /* -FOO is equivalent to 0 - FOO.  */
       gen_int_literal (ax, &value1, 0,
-		       builtin_type (exp->gdbarch)->builtin_int);
-      gen_usual_unary (exp, ax, &value1);	/* shouldn't do much */
+		       builtin_type (ax->gdbarch)->builtin_int);
+      gen_usual_unary (ax, &value1);	/* shouldn't do much */
       gen_expr (exp, pc, ax, &value2);
-      gen_usual_unary (exp, ax, &value2);
-      gen_usual_arithmetic (exp, ax, &value1, &value2);
+      gen_usual_unary (ax, &value2);
+      gen_usual_arithmetic (ax, &value1, &value2);
       gen_binop (ax, value, &value1, &value2, aop_sub, aop_sub, 1, "negation");
       break;
 
     case UNOP_LOGICAL_NOT:
       (*pc)++;
       gen_expr (exp, pc, ax, value);
-      gen_usual_unary (exp, ax, value);
+      gen_usual_unary (ax, value);
       gen_logical_not (ax, value, int_type);
       break;
 
     case UNOP_COMPLEMENT:
       (*pc)++;
       gen_expr (exp, pc, ax, value);
-      gen_usual_unary (exp, ax, value);
-      gen_integral_promotions (exp, ax, value);
+      gen_usual_unary (ax, value);
+      gen_integral_promotions (ax, value);
       gen_complement (ax, value);
       break;
 
     case UNOP_IND:
       (*pc)++;
       gen_expr (exp, pc, ax, value);
-      gen_usual_unary (exp, ax, value);
+      gen_usual_unary (ax, value);
       if (!pointer_type (value->type))
 	error (_("Argument of unary `*' is not a pointer."));
-      gen_deref (ax, value);
+      gen_deref (value);
       break;
 
     case UNOP_ADDR:
       (*pc)++;
       gen_expr (exp, pc, ax, value);
-      gen_address_of (ax, value);
+      gen_address_of (value);
       break;
 
     case UNOP_SIZEOF:
@@ -2164,7 +2141,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
          of the other unary operator functions.  This is because we
          have to throw away the code we generate.  */
       gen_sizeof (exp, pc, ax, value,
-		  builtin_type (exp->gdbarch)->builtin_int);
+		  builtin_type (ax->gdbarch)->builtin_int);
       break;
 
     case STRUCTOP_STRUCT:
@@ -2176,9 +2153,9 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	(*pc) += 4 + BYTES_TO_EXP_ELEM (length + 1);
 	gen_expr (exp, pc, ax, value);
 	if (op == STRUCTOP_STRUCT)
-	  gen_struct_ref (exp, ax, value, name, ".", "structure or union");
+	  gen_struct_ref (ax, value, name, ".", "structure or union");
 	else if (op == STRUCTOP_PTR)
-	  gen_struct_ref (exp, ax, value, name, "->",
+	  gen_struct_ref (ax, value, name, "->",
 			  "pointer to a structure or union");
 	else
 	  /* If this `if' chain doesn't handle it, then the case list
@@ -2202,7 +2179,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	if (!sym)
 	  error (_("no `%s' found"), lang->la_name_of_this);
 
-	gen_var_ref (exp->gdbarch, ax, value, sym);
+	gen_var_ref (ax, value, sym);
 
 	if (value->optimized_out)
 	  error (_("`%s' has been optimized out, cannot use"),
@@ -2219,8 +2196,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	char *name = &(*pc)[3].string;
 	int found;
 
-	found = gen_aggregate_elt_ref (exp, ax, value, type, name,
-				       "?", "??");
+	found = gen_aggregate_elt_ref (ax, value, type, name);
 	if (!found)
 	  error (_("There is no field named %s"), name);
 	(*pc) += 5 + BYTES_TO_EXP_ELEM (length + 1);
@@ -2248,11 +2224,11 @@ gen_expr_binop_rest (struct expression *exp,
 		     struct agent_expr *ax, struct axs_value *value,
 		     struct axs_value *value1, struct axs_value *value2)
 {
-  struct type *int_type = builtin_type (exp->gdbarch)->builtin_int;
+  struct type *int_type = builtin_type (ax->gdbarch)->builtin_int;
 
   gen_expr (exp, pc, ax, value2);
-  gen_usual_unary (exp, ax, value2);
-  gen_usual_arithmetic (exp, ax, value1, value2);
+  gen_usual_unary (ax, value2);
+  gen_usual_arithmetic (ax, value1, value2);
   switch (op)
     {
     case BINOP_ADD:
@@ -2278,7 +2254,7 @@ gen_expr_binop_rest (struct expression *exp,
 	       && pointer_type (value2->type))
 	/* FIXME --- result type should be ptrdiff_t */
 	gen_ptrdiff (ax, value, value1, value2,
-		     builtin_type (exp->gdbarch)->builtin_long);
+		     builtin_type (ax->gdbarch)->builtin_long);
       else
 	gen_binop (ax, value, value1, value2,
 		   aop_sub, aop_sub, 1, "subtraction");
@@ -2334,7 +2310,7 @@ gen_expr_binop_rest (struct expression *exp,
 		   "not a number or boolean."));
 
 	gen_ptradd (ax, value, value1, value2);
-	gen_deref (ax, value);
+	gen_deref (value);
 	break;
       }
     case BINOP_BITWISE_AND:
@@ -2404,7 +2380,7 @@ gen_trace_for_var (CORE_ADDR scope, struct gdbarch *gdbarch,
 
   ax->tracing = 1;
   ax->trace_string = trace_string;
-  gen_var_ref (gdbarch, ax.get (), &value, var);
+  gen_var_ref (ax.get (), &value, var);
 
   /* If there is no actual variable to trace, flag it by returning
      an empty agent expression.  */
@@ -2412,7 +2388,7 @@ gen_trace_for_var (CORE_ADDR scope, struct gdbarch *gdbarch,
     return agent_expr_up ();
 
   /* Make sure we record the final object, and get rid of it.  */
-  gen_traced_pop (gdbarch, ax.get (), &value);
+  gen_traced_pop (ax.get (), &value);
 
   /* Oh, and terminate.  */
   ax_simple (ax.get (), aop_end);
@@ -2443,7 +2419,7 @@ gen_trace_for_expr (CORE_ADDR scope, struct expression *expr,
   gen_expr (expr, &pc, ax.get (), &value);
 
   /* Make sure we record the final object, and get rid of it.  */
-  gen_traced_pop (expr->gdbarch, ax.get (), &value);
+  gen_traced_pop (ax.get (), &value);
 
   /* Oh, and terminate.  */
   ax_simple (ax.get (), aop_end);
@@ -2491,7 +2467,7 @@ gen_trace_for_return_address (CORE_ADDR scope, struct gdbarch *gdbarch,
   gdbarch_gen_return_address (gdbarch, ax.get (), &value, scope);
 
   /* Make sure we record the final object, and get rid of it.  */
-  gen_traced_pop (gdbarch, ax.get (), &value);
+  gen_traced_pop (ax.get (), &value);
 
   /* Oh, and terminate.  */
   ax_simple (ax.get (), aop_end);

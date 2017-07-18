@@ -1220,30 +1220,48 @@ simulator_command (char *args, int from_tty)
   registers_changed ();
 }
 
-static VEC (char_ptr) *
-sim_command_completer (struct cmd_list_element *ignore, const char *text,
-		       const char *word)
+static void
+sim_command_completer (struct cmd_list_element *ignore,
+		       completion_tracker &tracker,
+		       const char *text, const char *word)
 {
   struct sim_inferior_data *sim_data;
-  char **tmp;
-  int i;
-  VEC (char_ptr) *result = NULL;
 
   sim_data = ((struct sim_inferior_data *)
 	      inferior_data (current_inferior (), sim_inferior_data_key));
   if (sim_data == NULL || sim_data->gdbsim_desc == NULL)
-    return NULL;
+    return;
 
-  tmp = sim_complete_command (sim_data->gdbsim_desc, text, word);
-  if (tmp == NULL)
-    return NULL;
+  /* sim_complete_command returns a NULL-terminated malloc'ed array of
+     malloc'ed strings.  */
+  struct sim_completions_deleter
+  {
+    void operator() (char **ptr) const
+    {
+      for (size_t i = 0; ptr[i] != NULL; i++)
+	xfree (ptr[i]);
+      xfree (ptr);
+    }
+  };
 
-  /* Transform the array into a VEC, and then free the array.  */
-  for (i = 0; tmp[i] != NULL; i++)
-    VEC_safe_push (char_ptr, result, tmp[i]);
-  xfree (tmp);
+  std::unique_ptr<char *[], sim_completions_deleter> sim_completions
+    (sim_complete_command (sim_data->gdbsim_desc, text, word));
+  if (sim_completions == NULL)
+    return;
 
-  return result;
+  /* Count the elements and add completions from tail to head because
+     below we'll swap elements out of the array in case add_completion
+     throws and the deleter deletes until it finds a NULL element.  */
+  size_t count = 0;
+  while (sim_completions[count] != NULL)
+    count++;
+
+  for (size_t i = count; i > 0; i--)
+    {
+      gdb::unique_xmalloc_ptr<char> match (sim_completions[i - 1]);
+      sim_completions[i - 1] = NULL;
+      tracker.add_completion (std::move (match));
+    }
 }
 
 /* Check to see if a thread is still alive.  */

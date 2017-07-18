@@ -1,3 +1,598 @@
+2017-07-18  Yao Qi  <yao.qi@linaro.org>
+
+	* remote.c (store_registers_using_G): Remove one line comment.
+
+2017-07-18  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache_cpy): Simplify it.
+	(regcache::cpy_no_passthrough): Remove it.
+	* regcache.h (cpy_no_passthrough): Remove it.
+	(regcache_dup, regcache_cpy): Update comments.
+
+2017-07-18  Pedro Alves  <palves@redhat.com>
+
+	* remote-sim.c (sim_command_completer): Adjust to work with a
+	completion_tracker instead of a VEC.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* completer.c (complete_source_filenames): New function.
+	(complete_address_and_linespec_locations): New function.
+	(location_completer): Use complete_address_and_linespec_locations.
+	(completion_tracker::build_completion_result): Honor the tracker's
+	request to suppress append.
+	* completer.h (completion_tracker::suppress_append_ws)
+	(completion_tracker::set_suppress_append_ws): New methods.
+	(completion_tracker::m_suppress_append_ws): New field.
+	(complete_source_filenames): New declaration.
+	* linespec.c (linespec_complete_what): New.
+	(struct ls_parser) <complete_what, completion_word,
+	completion_quote_char, completion_quote_end, completion_tracker>:
+	New fields.
+	(string_find_incomplete_keyword_at_end): New.
+	(linespec_lexer_lex_string): Record quote char.  If in completion
+	mode, don't throw.
+	(linespec_lexer_consume_token): Advance the completion word point.
+	(linespec_lexer_peek_token): Save/restore completion info.
+	(save_stream_and_consume_token): New.
+	(set_completion_after_number): New.
+	(linespec_parse_basic): Set what to complete next depending on
+	token.  Handle function and label completions specially.
+	(parse_linespec): Disable objc shortcut in completion mode.  Set
+	what to complete next depending on token type.  Skip keyword if in
+	completion mode.
+	(complete_linespec_component, linespec_complete): New.
+	* linespec.h (linespec_complete): Declare.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* linespec.c (linespec_lexer_lex_string, find_toplevel_char):
+	Handle 'operator<' / 'operator<<'.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* completer.c (collect_explicit_location_matches): Handle
+	MATCH_LABEL.
+	(convert_explicit_location_to_linespec): New, factored out from
+	...
+	(convert_explicit_location_to_sals): ... this.
+	(complete_label): New.
+	(linespec_complete_label, find_label_symbols_in_block): New.
+	(find_label_symbols): Add completion_mode parameter and adjust to
+	call find_label_symbols_in_block.
+	* linespec.h (linespec_complete_label): Declare.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_collect_symbol_completion_matches): Add
+	complete_symbol_mode parameter.
+	* cli/cli-cmds.c (complete_command): Get the completion result out
+	of the handle_brkchars tracker if used a custom word point.
+	* completer.c: Include "linespec.h".
+	(enum explicit_location_match_type) <MATCH_LINE>: New enumerator.
+	(advance_to_expression_complete_word_point): New.
+	(completion_tracker::completes_to_completion_word): New.
+	(complete_files_symbols): Pass down
+	complete_symbol_mode::EXPRESSION.
+	(explicit_options, probe_options): New.
+	(collect_explicit_location_matches): Complete on the
+	explictit_loc->foo instead of word.  Use
+	linespec_complete_function.  Handle MATCH_LINE.  Handle offering
+	keyword and options completions.
+	(backup_text_ptr): Delete.
+	(skip_keyword): New.
+	(complete_explicit_location): Remove 'word' parameter.  Add
+	language, quoted_arg_start and quoted_arg_end parameters.
+	Rewrite, parsing left to right.
+	(location_completer): Rewrite.
+	(location_completer_handle_brkchars): New function.
+	(symbol_completer): Pass down complete_symbol_mode::EXPRESSION.
+	(enum complete_line_internal_reason): Adjust comments.
+	(completion_tracker::discard_completions): New.
+	(completer_handle_brkchars_func_for_completer): Handle
+	location_completer.
+	(gdb_custom_word_point_brkchars)
+	(gdb_org_rl_basic_quote_characters): New.
+	(gdb_completion_word_break_characters_throw)
+	(completion_find_completion_word): Handle trackers that use a
+	custom word point.
+	(completion_tracker::advance_custom_word_point_by): New.
+	(completion_tracker::build_completion_result): Don't rely on
+	readline appending the quote char.
+	(gdb_rl_attempted_completion_function_throw): Handle trackers that
+	use a custom word point.
+	(gdb_rl_attempted_completion_function): Restore
+	rl_basic_quote_characters.
+	* completer.h (class completion_tracker): Extend intro comment.
+	(completion_tracker::set_quote_char)
+	(completion_tracker::quote_char)
+	(completion_tracker::set_use_custom_word_point)
+	(completion_tracker::use_custom_word_point)
+	(completion_tracker::custom_word_point)
+	(completion_tracker::set_custom_word_point)
+	(completion_tracker::advance_custom_word_point_by)
+	(completion_tracker::completes_to_completion_word)
+	(completion_tracker::discard_completions): New methods.
+	(completion_tracker::m_quote_char)
+	(completion_tracker::m_use_custom_word_point)
+	(completion_tracker::m_custom_word_point): New fields.
+	(advance_to_expression_complete_word_point): Declare.
+	* f-lang.c (f_collect_symbol_completion_matches): Add
+	complete_symbol_mode parameter.
+	* language.h (struct language_defn)
+	<la_collect_symbol_completion_matches>: Add complete_symbol_mode
+	parameter.
+	* linespec.c (linespec_keywords): Add NULL terminator.  Make extern.
+	(linespec_complete_function): New function.
+	(linespec_lexer_lex_keyword): Adjust.
+	* linespec.h (linespec_keywords, linespec_complete_function): New
+	declarations.
+	* location.c (find_end_quote): New function.
+	(explicit_location_lex_one): Add explicit_completion_info
+	parameter.  Save quoting info.  Don't throw if being called for
+	completion.  Don't handle Ada operators here.
+	(is_cp_operator, skip_op_false_positives, first_of)
+	(explicit_location_lex_one_function): New function.
+	(string_to_explicit_location): Replace 'dont_throw' parameter with
+	an explicit_completion_info pointer parameter.  Handle it.  Don't
+	use explicit_location_lex_one to lex function names.  Use
+	explicit_location_lex_one_function instead.
+	* location.h (struct explicit_completion_info): New.
+	(string_to_explicit_location): Replace 'dont_throw' parameter with
+	an explicit_completion_info pointer parameter.
+	* symtab.c (default_collect_symbol_completion_matches_break_on):
+	Add complete_symbol_mode parameter.  Handle LINESPEC mode.
+	(default_collect_symbol_completion_matches)
+	(collect_symbol_completion_matches): Add complete_symbol_mode
+	parameter.
+	(collect_symbol_completion_matches_type): Pass down
+	complete_symbol_mode::EXPRESSION.
+	(collect_file_symbol_completion_matches): Add complete_symbol_mode
+	parameter.  Handle LINESPEC mode.
+	* symtab.h (complete_symbol_mode): New.
+	(default_collect_symbol_completion_matches_break_on)
+	(default_collect_symbol_completion_matches)
+	(collect_symbol_completion_matches)
+	(collect_file_symbol_completion_matches): Add complete_symbol_mode
+	parameter.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* utils.c (enum class strncmp_iw_mode): New.
+	(strcmp_iw): Rename to ...
+	(strncmp_iw_with_mode): ... this.  Add string2_len and mode
+	parameters.  Handle them.
+	(strncmp_iw): New.
+	(strcmp_iw): Reimplement as wrapper around strncmp_iw_with_mode.
+	* utils.h (strncmp_iw): Declare.
+	(strcmp_iw): Move describing comments here.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* c-exp.y (operator_stoken): Use CP_OPERATOR_LEN and
+	CP_OPERATOR_STR.
+	* c-typeprint.c (is_type_conversion_operator): Use
+	CP_OPERATOR_STR.
+	* cp-support.c (LENGTH_OF_OPERATOR): Delete.
+	(cp_find_first_component_aux): Use CP_OPERATOR_STR and
+	CP_OPERATOR_LEN.
+	* cp-support.h (CP_OPERATOR_STR, CP_OPERATOR_LEN): New.
+	* gnu-v2-abi.c (gnuv2_is_operator_name): Use CP_OPERATOR_STR.
+	* gnu-v3-abi.c (gnuv3_is_operator_name): Use CP_OPERATOR_STR.
+	* linespec.c (linespec_lexer_lex_string): Use CP_OPERATOR_LEN and
+	CP_OPERATOR_STR.
+	* location.c: Include "cp-support.h".
+	(explicit_location_lex_one): Use CP_OPERATOR_LEN and
+	CP_OPERATOR_STR.
+	* symtab.c (operator_chars): Use CP_OPERATOR_STR and
+	CP_OPERATOR_LEN.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-cmds.c (complete_command): Use a completion tracker
+	along with completion_find_completion_word for handle_brkchars
+	phase.
+	* completer.c (RL_QF_SINGLE_QUOTE, RL_QF_DOUBLE_QUOTE)
+	(RL_QF_BACKSLASH, RL_QF_OTHER_QUOTE): New.
+	(struct gdb_rl_completion_word_info): New.
+	(gdb_rl_find_completion_word): New.
+	(completion_find_completion_word): New.
+	* completer.h (completion_find_completion_word): Declare.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (symbol_completion_match): Adjust comments.
+	(symbol_completion_add): Replace vector parameter with
+	completion_tracker parameter.  Use it.
+	(ada_make_symbol_completion_list): Rename to...
+	(ada_collect_symbol_completion_matches): ... this.  Add
+	completion_tracker parameter and use it.
+	(ada_language_defn): Adjust.
+	* break-catch-syscall.c (catch_syscall_completer): Adjust
+	prototype and work with completion_tracker instead of VEC.
+	* breakpoint.c (condition_completer): Adjust prototype and work
+	with completion_tracker instead of VEC.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Adjust to renames.
+	* cli/cli-cmds.c (complete_command): Rework using
+	completion_tracker.  Catch exceptions when completing.
+	* cli/cli-decode.c (integer_unlimited_completer)
+	(complete_on_cmdlist, complete_on_enum): Adjust prototype and work
+	with completion_tracker instead of VEC.
+	* command.h (struct completion_tracker): Forward declare.
+	(completer_ftype, completer_handle_brkchars_ftype): Change
+	types.
+	(complete_on_cmdlist, complete_on_enum): Adjust.
+	* completer.c: Include <algorithm>.
+	(struct gdb_completer_state): New.
+	(current_completion): New global.
+	(readline_line_completion_function): Delete.
+	(noop_completer, filename_completer)
+	(filename_completer_handle_brkchars, complete_files_symbols)
+	(linespec_location_completer): Adjust to work with a
+	completion_tracker instead of a VEC.
+	(string_or_empty): New.
+	(collect_explicit_location_matches): Adjust to work with a
+	completion_tracker instead of a VEC.
+	(explicit_location_completer): Rename to ...
+	(complete_explicit_location): ... this and adjust to work with a
+	completion_tracker instead of a VEC.
+	(location_completer): Adjust to work with a completion_tracker
+	instead of a VEC.
+	(add_struct_fields): Adjust to work with a completion_list instead
+	of VEC.
+	(expression_completer): Rename to ...
+	(complete_expression): ... this and adjust to work with a
+	completion_tracker instead of a VEC.  Use complete_files_symbols.
+	(expression_completer): Reimplement on top of complete_expression.
+	(symbol_completer): Adjust to work with a completion_tracker
+	instead of a VEC.
+	(enum complete_line_internal_reason): Add describing comments.
+	(complete_line_internal_normal_command): Adjust to work with a
+	completion_tracker instead of a VEC.
+	(complete_line_internal): Rename to ...
+	(complete_line_internal_1): ... this and adjust to work with a
+	completion_tracker instead of a VEC.  Assert TEXT is NULL in the
+	handle_brkchars phase.
+	(new_completion_tracker): Delete.
+	(complete_line_internal): Reimplement as TRY/CATCH wrapper around
+	complete_line_internal_1.
+	(free_completion_tracker): Delete.
+	(INITIAL_COMPLETION_HTAB_SIZE): New.
+	(completion_tracker::completion_tracker)
+	(completion_tracker::~completion_tracker): New.
+	(maybe_add_completion): Delete.
+	(completion_tracker::maybe_add_completion)
+	(completion_tracker::add_completion)
+	(completion_tracker::add_completions): New.
+	(throw_max_completions_reached_error): Delete.
+	(complete_line): Adjust to work with a completion_tracker instead
+	of a VEC.  Don't create a completion_tracker_t or check for max
+	completions here.
+	(command_completer, command_completer_handle_brkchars)
+	(signal_completer, reg_or_group_completer_1)
+	(reg_or_group_completer, default_completer_handle_brkchars):
+	Adjust to work with a completion_tracker.
+	(gdb_completion_word_break_characters_throw): New.
+	(gdb_completion_word_break_characters): Reimplement.
+	(line_completion_function): Delete.
+	(completion_tracker::recompute_lowest_common_denominator)
+	(expand_preserving_ws)
+	(completion_tracker::build_completion_result)
+	(completion_result::completion_result)
+	(completion_result::completion_result)
+	(completion_result::~completion_result)
+	(completion_result::completion_result)
+	(completion_result::release_match_list, compare_cstrings)
+	(completion_result::sort_match_list)
+	(completion_result::reset_match_list)
+	(gdb_rl_attempted_completion_function_throw)
+	(gdb_rl_attempted_completion_function): New.
+	* completer.h (completion_list, struct completion_result)
+	(class completion_tracker): New.
+	(complete_line): Add completion_tracker parameter.
+	(readline_line_completion_function): Delete.
+	(gdb_rl_attempted_completion_function): New.
+	(noop_completer, filename_completer, expression_completer)
+	(location_completer, symbol_completer, command_completer)
+	(signal_completer, reg_or_group_completer): Update prototypes.
+	(completion_tracker_t, new_completion_tracker)
+	(make_cleanup_free_completion_tracker): Delete.
+	(enum maybe_add_completion_enum): Delete.
+	(maybe_add_completion): Delete.
+	(throw_max_completions_reached_error): Delete.
+	* corefile.c (complete_set_gnutarget): Adjust to work with a
+	completion_tracker instead of a VEC.
+	* cp-abi.c (cp_abi_completer): Adjust to work with a
+	completion_tracker instead of a VEC.
+	* d-lang.c (d_language_defn): Adjust.
+	* disasm.c (disassembler_options_completer): Adjust to work with a
+	completion_tracker instead of a VEC.
+	* f-lang.c (f_make_symbol_completion_list): Rename to ...
+	(f_collect_symbol_completion_matches): ... this.  Adjust to work
+	with a completion_tracker instead of a VEC.
+	(f_language_defn): Adjust.
+	* go-lang.c (go_language_defn): Adjust.
+	* guile/scm-cmd.c (cmdscm_add_completion, cmdscm_completer):
+	Adjust to work with a completion_tracker instead of a VEC.
+	* infrun.c (handle_completer): Likewise.
+	* interps.c (interpreter_completer): Likewise.
+	* interps.h (interpreter_completer): Likewise.
+	* language.c (unknown_language_defn, auto_language_defn)
+	(local_language_defn): Adjust.
+	* language.h (language_defn::la_make_symbol_completion_list):
+	Rename to ...
+	(language_defn::la_collect_symbol_completion_matches): ... this
+	and adjust to work with a completion_tracker instead of a VEC.
+	* m2-lang.c (m2_language_defn): Adjust.
+	* objc-lang.c (objc_language_defn): Adjust.
+	* opencl-lang.c (opencl_language_defn): Adjust.
+	* p-lang.c (pascal_language_defn): Adjust.
+	* python/py-cmd.c (cmdpy_completer_helper): Handle NULL word.
+	(cmdpy_completer_handle_brkchars, cmdpy_completer): Adjust to work
+	with a completion_tracker.
+	* rust-lang.c (rust_language_defn): Adjust.
+	* symtab.c (free_completion_list, do_free_completion_list)
+	(return_val, completion_tracker): Delete.
+	(completion_list_add_name, completion_list_add_symbol)
+	(completion_list_add_msymbol, completion_list_objc_symbol)
+	(completion_list_add_fields, add_symtab_completions): Add
+	completion_tracker parameter and use it.
+	(default_make_symbol_completion_list_break_on_1): Rename to...
+	(default_collect_symbol_completion_matches_break_on): ... this.
+	Add completion_tracker parameter and use it instead of allocating
+	a completion tracker here.
+	(default_make_symbol_completion_list_break_on): Delete old
+	implementation.
+	(default_make_symbol_completion_list): Delete.
+	(default_collect_symbol_completion_matches): New.
+	(make_symbol_completion_list): Delete.
+	(collect_symbol_completion_matches): New.
+	(make_symbol_completion_type): Rename to ...
+	(collect_symbol_completion_matches_type): ... this.  Add
+	completion_tracker parameter and use it instead of VEC.
+	(make_file_symbol_completion_list_1): Rename to...
+	(collect_file_symbol_completion_matches): ... this.  Add
+	completion_tracker parameter and use it instead of VEC.
+	(make_file_symbol_completion_list): Delete.
+	(add_filename_to_list): Use completion_list instead of a VEC.
+	(add_partial_filename_data::list): Now a completion_list.
+	(make_source_files_completion_list): Work with a completion_list
+	instead of a VEC.
+	* symtab.h: Include "completer.h".
+	(default_make_symbol_completion_list_break_on)
+	(default_make_symbol_completion_list, make_symbol_completion_list)
+	(make_symbol_completion_type, make_file_symbol_completion_list)
+	(make_source_files_completion_list): Delete.
+	(default_collect_symbol_completion_matches_break_on)
+	(default_collect_symbol_completion_matches)
+	(collect_symbol_completion_matches)
+	(collect_symbol_completion_matches_type)
+	(collect_file_symbol_completion_matches)
+	(make_source_files_completion_list): New.
+	* top.c (init_main): Don't install a rl_completion_entry_function
+	hook.  Install a rl_attempted_completion_function hook instead.
+	* tui/tui-layout.c (layout_completer): Adjust to work with a
+	completion_tracker.
+	* tui/tui-regs.c (tui_reggroup_completer):
+	* tui/tui-win.c (window_name_completer, focus_completer)
+	(winheight_completer): Adjust to work with a completion_tracker.
+	* value.c: Include "completer.h".
+	(complete_internalvar): Adjust to work with a completion_tracker.
+	* value.h (complete_internalvar): Likewise.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-decode.c (set_cmd_completer_handle_brkchars): Adjust to
+	renames.
+	* cli/cli-decode.h (struct cmd_list_element) <completer>: Move
+	comments to completer_ftype's declaration.
+	<completer_handle_brkchars>: Change type to
+	completer_handle_brkchars_ftype.
+	* command.h (completer_ftype): Add describing comment and give
+	names to parameters.
+	(completer_ftype_void): Rename to ...
+	(completer_handle_brkchars_ftype) ... this.  Add describing comment.
+	(set_cmd_completer_handle_brkchars): Adjust.
+	* completer.c (filename_completer_handle_brkchars): New function.
+	(complete_line_internal_normal_command): New function, factored
+	out from ...
+	(complete_line_internal): ... here.
+	(command_completer_handle_brkchars)
+	(default_completer_handle_brkchars)
+	(completer_handle_brkchars_func_for_completer): New functions.
+	* completer.h (set_gdb_completion_word_break_characters): Delete
+	declaration.
+	(completer_handle_brkchars_func_for_completer): New declaration.
+	* python/py-cmd.c (cmdpy_completer_handle_brkchars): Adjust to use
+	completer_handle_brkchars_func_for_completer.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* completer.c (symbol_completer): New function, based on
+	make_symbol_completion_list_fn.
+	* completer.h (symbol_completer): New declaration.
+	* guile/scm-cmd.c (cmdscm_completers): Adjust.
+	* python/py-cmd.c (completers): Adjust.
+	* symtab.c (make_symbol_completion_list_fn): Delete.
+	* symtab.h (make_symbol_completion_list_fn): Delete.
+	* cli/cli-decode.c (add_cmd): Adjust.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (COMMON_OBS): Add filename-seen-cache.o.
+	* dwarf2read.c: Include "filename-seen-cache.h".
+	* dwarf2read.c (dwarf2_per_objfile) <filenames_cache>: New field.
+	(dw2_map_symbol_filenames): Build and use a filenames_seen_cache.
+	* filename-seen-cache.c: New file.
+	* filename-seen-cache.h: New file.
+	* symtab.c: Include "filename-seen-cache.h".
+	(struct filename_seen_cache, INITIAL_FILENAME_SEEN_CACHE_SIZE)
+	(create_filename_seen_cache, clear_filename_seen_cache)
+	(delete_filename_seen_cache, filename_seen): Delete, parts moved
+	to filename-seen-cache.h/filename-seen-cache.c.
+	(output_source_filename, sources_info)
+	(maybe_add_partial_symtab_filename)
+	(make_source_files_completion_list): Adjust to use
+	filename_seen_cache.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (dwarf2_per_objfile): In-class initialize all
+	fields.
+	(dwarf2_per_objfile::dwarf2_per_objfile(objfile*, const
+	dwarf2_debug_sections*)): New.
+	(dwarf2_per_objfile::dwarf2_per_objfile(const
+	dwarf2_per_objfile&)): Declare as deleted.
+	(dwarf2_per_objfile::operator=): Declare as deleted.
+	(dwarf2_per_objfile::dwarf2_per_objfile)
+	(dwarf2_per_objfile::~dwarf2_per_objfile)
+	(dwarf2_per_objfile::free_cached_comp_units): New.
+	(dwarf2_has_info): dwarf2_per_objfile initialization code moved to
+	ctor.  Call dwarf2_per_objfile's ctor manually.
+	(dwarf2_locate_sections): Deleted/refactored as ...
+	(dwarf2_per_objfile::locate_sections): ... this new method.
+	(free_cached_comp_units): Defer to
+	dwarf2_per_objfile::free_cached_comp_units.
+	(dwarf2_free_objfile): Call dwarf2_per_objfile's dtor manually.
+
+2017-07-14  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21764:
+	* rust-exp.y (convert_ast_to_expression): Add "want_type"
+	parameter.
+	<UNOP_SIZEOF>: Split into separate case.
+	<UNOP_VAR_VALUE>: Handle want_type.  Add error case.
+
+2017-07-14  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21763:
+	* symtab.c (symbol_matches_domain): Add language_rust to special
+	case.
+	* rust-exp.y (convert_ast_to_expression) <OP_VAR_VALUE>: Don't
+	treat LOC_TYPEDEF symbols as variables.
+
+2017-07-14  Pedro Alves  <palves@redhat.com>
+
+	* symtab.c (make_file_symbol_completion_list_1): Iterate over
+	symtabs matching all symtabs with SRCFILE as file name instead of
+	only considering the first hit, with lookup_symtab.
+
+2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ax-gdb.c (gen_aggregate_elt_ref): Remove operand_name and
+	operator_name parameters.
+	(gen_expr): Update function call.
+
+2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2loc.h (dwarf2_compile_expr_to_ax): Remove gdbarch
+	parameter.
+	* symtab.h (struct symbol_computed_ops::tracepoint_var_ref):
+	Likewise.
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax): Remove gdbarch
+	parameter, use agent_expr::gdbarch instead, update function
+	calls.
+	(locexpr_tracepoint_var_ref): Likewise.
+	(loclist_tracepoint_var_ref): Likewise.
+	* ax-gdb.c (gen_trace_static_fields): Likewise.
+	(gen_traced_pop): Likewise.
+	(gen_frame_args_address): Likewise.
+	(gen_frame_locals_address): Likewise.
+	(gen_var_ref): Likewise.
+	(gen_struct_ref_recursive): Likewise.
+	(gen_static_field): Likewise.
+	(gen_maybe_namespace_elt): Likewise.
+	(gen_expr): Likewise.
+	(gen_trace_for_var): Likewise.
+	(gen_trace_for_expr): Likewise.
+	(gen_trace_for_return_address): Likewise.
+
+2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ax-gdb.c (gen_deref, gen_address_of): Remove unused ax
+	parameter.
+	(gen_struct_ref, gen_expr, gen_expr_binop_rest): Update call.
+
+2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ax-gdb.c (gen_usual_unary): Remove exp parameter, get gdbarch
+	from ax, update calls.
+	(gen_usual_arithmetic): Likewise.
+	(gen_integral_promotions): Likewise.
+	(gen_bitfield_ref): Likewise.
+	(gen_primitive_field): Likewise.
+	(gen_struct_ref_recursive): Likewise.
+	(gen_struct_ref): Likewise.
+	(gen_maybe_namespace_elt): Likewise.
+	(gen_struct_elt_for_reference): Likewise.
+	(gen_namespace_elt): Likewise.
+	(gen_aggregate_elt_ref): Likewise.
+	(gen_expr): Get gdbarch from ax, update calls.
+	(gen_expr_binop_rest): Likewise.
+
+2017-07-13  Pedro Alves  <palves@redhat.com>
+
+	* amd64-darwin-tdep.c (x86_darwin_init_abi_64): Pass tdesc_amd64
+	as default tdesc.
+	* amd64-dicos-tdep.c (amd64_dicos_init_abi):
+	* amd64-fbsd-tdep.c (amd64fbsd_init_abi):
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Pass
+	tdesc_amd64_linux as default tdesc.  Get final tdesc from the
+	tdep.
+	(amd64_x32_linux_init_abi): Pass tdesc_x32_linux as default tdesc.
+	Get final tdesc from the tdep.
+	* amd64-nbsd-tdep.c (amd64nbsd_init_abi): Pass tdesc_amd64 as
+	default tdesc.
+	* amd64-obsd-tdep.c (amd64obsd_init_abi): Likewise.
+	* amd64-sol2-tdep.c (amd64_sol2_init_abi): Likewise.
+	* amd64-tdep.c (amd64_init_abi): Add 'default_tdesc' parameter.
+	Use it as default tdesc.
+	(amd64_x32_init_abi): Add 'default_tdesc' parameter, and pass it
+	down to amd_init_abi.  No longer handle fallback tdesc here.
+	* amd64-tdep.h (tdesc_x32): Declare.
+	(amd64_init_abi, amd64_x32_init_abi): Add 'default_tdesc'
+	parameter.
+	* amd64-windows-tdep.c (amd64_windows_init_abi): Pass tdesc_amd64
+	as default tdesc.
+
+2017-07-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_process_record): Add support for
+	instructions new in arch12.
+
+2017-07-11  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64-bsd-nat.c (amd64bsd_fetch_inferior_registers): Use
+	PT_GETFSBASE and PT_GETGSBASE.
+	(amd64bsd_store_inferior_registers): Use PT_SETFSBASE and
+	PT_SETGSBASE.
+
+2017-07-11  John Baldwin  <jhb@FreeBSD.org>
+
+	* features/Makefile (amd64.dat, amd64-avx.dat, amd64-mpx.dat)
+	(amd64-avx-mpx.dat, amd64-avx-avx512.dat)
+	(amd64-avx-mpx-avx512-pku.dat): Add i386/64bit-segments.xml in
+	those rules.
+	* features/i386/amd64-avx-avx512.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-mpx-avx512-pku.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-mpx.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-mpx.xml: Add 64bit-segments.xml.
+	* features/i386/amd64.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-avx512.c: Regenerated.
+	* features/i386/amd64-avx-mpx-avx512-pku.c: Regenerated.
+	* features/i386/amd64-avx-mpx.c: Regenerated.
+	* features/i386/amd64-avx.c: Regenerated.
+	* features/i386/amd64-mpx.c: Regenerated.
+	* features/i386/amd64.c: Regenerated.
+	* regformats/i386/amd64-avx-avx512.dat: Regenerated.
+	* regformats/i386/amd64-avx-mpx-avx512-pku.dat: Regenerated.
+	* regformats/i386/amd64-avx-mpx.dat: Regenerated.
+	* regformats/i386/amd64-avx.dat: Regenerated.
+	* regformats/i386/amd64-mpx.dat: Regenerated.
+	* regformats/i386/amd64.dat: Regenerated.
+
 2017-07-10  Yao Qi  <yao.qi@linaro.org>
 
 	* features/i386/amd64-avx-avx512-linux.c: Re-generated.

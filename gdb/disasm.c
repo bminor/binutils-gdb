@@ -1030,8 +1030,9 @@ The following disassembler options are supported for use with the\n\
 
 /* A completion function for "set disassembler".  */
 
-static VEC (char_ptr) *
+static void
 disassembler_options_completer (struct cmd_list_element *ignore,
+				completion_tracker &tracker,
 				const char *text, const char *word)
 {
   struct gdbarch *gdbarch = get_current_arch ();
@@ -1044,9 +1045,8 @@ disassembler_options_completer (struct cmd_list_element *ignore,
       if (separator != NULL)
 	text = separator + 1;
       text = skip_spaces_const (text);
-      return complete_on_enum (opts->name, text, word);
+      complete_on_enum (tracker, opts->name, text, word);
     }
-  return NULL;
 }
 
 

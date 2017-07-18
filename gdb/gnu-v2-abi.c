@@ -68,7 +68,7 @@ gnuv2_is_vtable_name (const char *name)
 static int
 gnuv2_is_operator_name (const char *name)
 {
-  return startswith (name, "operator");
+  return startswith (name, CP_OPERATOR_STR);
 }
 
 

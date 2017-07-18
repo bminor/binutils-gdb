@@ -354,8 +354,8 @@ bfd_elf_string_from_elf_section (bfd *abfd,
       unsigned int shstrndx = elf_elfheader(abfd)->e_shstrndx;
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: invalid string offset %u >= %lu for section `%s'"),
-	 abfd, strindex, (unsigned long) hdr->sh_size,
+	(_("%B: invalid string offset %u >= %Lu for section `%s'"),
+	 abfd, strindex, hdr->sh_size,
 	 (shindex == shstrndx && strindex == hdr->sh_name
 	  ? ".shstrtab"
 	  : bfd_elf_string_from_elf_section (abfd, shstrndx, hdr->sh_name)));

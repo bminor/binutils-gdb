@@ -2094,10 +2094,10 @@ mn10300_elf_relocate_section (bfd *output_bfd,
 
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	      (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	       input_bfd,
 	       input_section,
-	       (long) rel->r_offset,
+	       rel->r_offset,
 	       howto->name,
 	       h->root.root.root.string);
 	}

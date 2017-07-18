@@ -1863,7 +1863,6 @@ static void
 amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  const struct target_desc *tdesc = info.target_desc;
   struct tdesc_arch_data *tdesc_data
     = (struct tdesc_arch_data *) info.tdep_info;
   const struct tdesc_feature *feature;
@@ -1875,14 +1874,12 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (amd64_linux_gregset_reg_offset);
   tdep->sizeof_gregset = 27 * 8;
 
-  amd64_init_abi (info, gdbarch);
+  amd64_init_abi (info, gdbarch, tdesc_amd64_linux);
+
+  const target_desc *tdesc = tdep->tdesc;
 
   /* Reserve a number for orig_rax.  */
   set_gdbarch_num_regs (gdbarch, AMD64_LINUX_NUM_REGS);
-
-  if (! tdesc_has_registers (tdesc))
-    tdesc = tdesc_amd64_linux;
-  tdep->tdesc = tdesc;
 
   feature = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.linux");
   if (feature == NULL)
@@ -2080,7 +2077,6 @@ static void
 amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  const struct target_desc *tdesc = info.target_desc;
   struct tdesc_arch_data *tdesc_data
     = (struct tdesc_arch_data *) info.tdep_info;
   const struct tdesc_feature *feature;
@@ -2092,14 +2088,12 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (amd64_linux_gregset_reg_offset);
   tdep->sizeof_gregset = 27 * 8;
 
-  amd64_x32_init_abi (info, gdbarch);
+  amd64_x32_init_abi (info, gdbarch, tdesc_x32_linux);
 
   /* Reserve a number for orig_rax.  */
   set_gdbarch_num_regs (gdbarch, AMD64_LINUX_NUM_REGS);
 
-  if (! tdesc_has_registers (tdesc))
-    tdesc = tdesc_x32_linux;
-  tdep->tdesc = tdesc;
+  const target_desc *tdesc = tdep->tdesc;
 
   feature = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.linux");
   if (feature == NULL)

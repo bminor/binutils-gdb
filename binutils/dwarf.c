@@ -217,7 +217,10 @@ dwarf_vmatoa_1 (const char *fmtch, dwarf_vma value, unsigned num_bytes)
     {
       char fmt[32];
 
-      sprintf (fmt, "%%%s%s", DWARF_VMA_FMT, fmtch);
+      if (fmtch)
+	sprintf (fmt, "%%%s%s", DWARF_VMA_FMT, fmtch);
+      else
+	sprintf (fmt, "%%%s", DWARF_VMA_FMT);
       snprintf (ret, sizeof (buf[0].place), fmt, value);
       return ret;
     }
@@ -7813,7 +7816,7 @@ display_debug_names (struct dwarf_section *section, void *file)
       printf (_("Used %zu of %lu buckets.\n"), buckets_filled,
 	      (unsigned long) bucket_count);
 
-      uint32_t hash_prev;
+      uint32_t hash_prev = 0;
       size_t hash_clash_count = 0;
       size_t longest_clash = 0;
       size_t this_length = 0;

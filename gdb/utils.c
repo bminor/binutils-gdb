@@ -2363,41 +2363,72 @@ fprintf_symbol_filtered (struct ui_file *stream, const char *name,
     }
 }
 
-/* Do a strcmp() type operation on STRING1 and STRING2, ignoring any
-   differences in whitespace.  Returns 0 if they match, non-zero if they
-   don't (slightly different than strcmp()'s range of return values).
+/* Modes of operation for strncmp_iw_with_mode.  */
 
-   As an extra hack, string1=="FOO(ARGS)" matches string2=="FOO".
-   This "feature" is useful when searching for matching C++ function names
-   (such as if the user types 'break FOO', where FOO is a mangled C++
-   function).  */
-
-int
-strcmp_iw (const char *string1, const char *string2)
+enum class strncmp_iw_mode
 {
-  while ((*string1 != '\0') && (*string2 != '\0'))
+  /* Work like strncmp, while ignoring whitespace.  */
+  NORMAL,
+
+  /* Like NORMAL, but also apply the strcmp_iw hack.  I.e.,
+     string1=="FOO(PARAMS)" matches string2=="FOO".  */
+  MATCH_PARAMS,
+};
+
+/* Helper for strncmp_iw and strcmp_iw.  */
+
+static int
+strncmp_iw_with_mode (const char *string1, const char *string2,
+		      size_t string2_len, strncmp_iw_mode mode)
+{
+  const char *end_str2 = string2 + string2_len;
+
+  while (1)
     {
       while (isspace (*string1))
-	{
-	  string1++;
-	}
-      while (isspace (*string2))
-	{
-	  string2++;
-	}
+	string1++;
+      while (string2 < end_str2 && isspace (*string2))
+	string2++;
+      if (*string1 == '\0' || string2 == end_str2)
+	break;
       if (case_sensitivity == case_sensitive_on && *string1 != *string2)
 	break;
       if (case_sensitivity == case_sensitive_off
 	  && (tolower ((unsigned char) *string1)
 	      != tolower ((unsigned char) *string2)))
 	break;
-      if (*string1 != '\0')
-	{
-	  string1++;
-	  string2++;
-	}
+
+      string1++;
+      string2++;
     }
-  return (*string1 != '\0' && *string1 != '(') || (*string2 != '\0');
+
+  if (string2 == end_str2)
+    {
+      if (mode == strncmp_iw_mode::NORMAL)
+	return 0;
+      else
+	return (*string1 != '\0' && *string1 != '(');
+    }
+  else
+    return 1;
+}
+
+/* See utils.h.  */
+
+int
+strncmp_iw (const char *string1, const char *string2, size_t string2_len)
+{
+  return strncmp_iw_with_mode (string1, string2, string2_len,
+			       strncmp_iw_mode::NORMAL);
+}
+
+/* See utils.h.  */
+
+int
+strcmp_iw (const char *string1, const char *string2)
+{
+  return strncmp_iw_with_mode (string1, string2, strlen (string2),
+			       strncmp_iw_mode::MATCH_PARAMS);
 }
 
 /* This is like strcmp except that it ignores whitespace and treats

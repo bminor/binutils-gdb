@@ -452,13 +452,13 @@ interpreter_exec_cmd (char *args, int from_tty)
 
 /* See interps.h.  */
 
-VEC (char_ptr) *
+void
 interpreter_completer (struct cmd_list_element *ignore,
+		       completion_tracker &tracker,
 		       const char *text, const char *word)
 {
   struct interp_factory *interp;
   int textlen;
-  VEC (char_ptr) *matches = NULL;
   int ix;
 
   textlen = strlen (text);
@@ -485,11 +485,9 @@ interpreter_completer (struct cmd_list_element *ignore,
 	      match[text - word] = '\0';
 	      strcat (match, interp->name);
 	    }
-	  VEC_safe_push (char_ptr, matches, match);
+	  tracker.add_completion (gdb::unique_xmalloc_ptr<char> (match));
 	}
     }
-
-  return matches;
 }
 
 struct interp *

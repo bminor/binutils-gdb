@@ -34690,8 +34690,9 @@ Print the entire architecture configuration.  The optional argument
 @kindex maint print c-tdesc
 @item maint print c-tdesc
 Print the current target description (@pxref{Target Descriptions}) as
-a C source file.  The created source file can be used in @value{GDBN}
-when an XML parser is not available to parse the description.
+a C source file.  The created source file is built into @value{GDBN}
+when @value{GDBN} is built again.  This command is used by developers
+after they add or modify XML target descriptions.
 
 @kindex maint print dummy-frames
 @item maint print dummy-frames

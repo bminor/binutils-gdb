@@ -5016,7 +5016,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	      _bfd_error_handler
 		/* xgettext:c-format */
 		(_("%B: relocation %s against STT_GNU_IFUNC "
-		   "symbol `%s' has non-zero addend: %d"),
+		   "symbol `%s' has non-zero addend: %Ld"),
 		 input_bfd, howto->name, name, rel->r_addend);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
@@ -6162,11 +6162,11 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	  _bfd_error_handler
 	    ((sym_type == STT_TLS
 	      /* xgettext:c-format */
-	      ? _("%B(%A+0x%lx): %s used with TLS symbol %s")
+	      ? _("%B(%A+%#Lx): %s used with TLS symbol %s")
 	      /* xgettext:c-format */
-	      : _("%B(%A+0x%lx): %s used with non-TLS symbol %s")),
+	      : _("%B(%A+%#Lx): %s used with non-TLS symbol %s")),
 	     input_bfd,
-	     input_section, (long) rel->r_offset, howto->name, name);
+	     input_section, rel->r_offset, howto->name, name);
 	}
 
       /* We relax only if we can see that there can be a valid transition
@@ -6434,8 +6434,8 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
-	     input_bfd, input_section, (long) rel->r_offset, howto->name,
+	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	     input_bfd, input_section, rel->r_offset, howto->name,
 	     h->root.root.string);
 	  return FALSE;
 	}
@@ -7101,7 +7101,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   for (rel = relocs; rel < rel_end; rel++)
     {
       struct elf_link_hash_entry *h;
-      unsigned long r_symndx;
+      unsigned int r_symndx;
       unsigned int r_type;
       bfd_reloc_code_real_type bfd_r_type;
       Elf_Internal_Sym *isym;

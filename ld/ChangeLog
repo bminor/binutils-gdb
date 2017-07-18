@@ -1,3 +1,75 @@
+2017-07-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run pie1 and pie1-nacl.
+	* testsuite/ld-i386/pie1-nacl.d: New file.
+	* testsuite/ld-i386/pie1.d: Likewise.
+	* testsuite/ld-i386/pie1.s: Likewise.
+
+2017-07-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21782
+	* testsuite/ld-x86-64/pie3-nacl.d: New file.
+	* testsuite/ld-x86-64/pie3.d: Likewise.
+	* testsuite/ld-x86-64/pie3.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pie3 and pie3-nacl.
+
+2017-07-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/powerpc.exp: Add -shared to tlsop5 tests.
+	* testsuite/ld-powerpc/tlsopt5.d: Adjust.
+	* testsuite/ld-powerpc/tlsopt1_32.s: Use r30 as GOT pointer.
+	* testsuite/ld-powerpc/tlsopt2_32.s: Likewise.
+	* testsuite/ld-powerpc/tlsopt3_32.s: Likewise.
+	* testsuite/ld-powerpc/tlsopt4_32.s: Likewise.
+	* testsuite/ld-powerpc/tlsopt5_32.s: Rewrite.
+	* testsuite/ld-powerpc/tlsopt1_32.d: Adjust.
+	* testsuite/ld-powerpc/tlsopt2_32.d: Adjust.
+	* testsuite/ld-powerpc/tlsopt3_32.d: Adjust.
+	* testsuite/ld-powerpc/tlsopt5_32.d: Adjust.
+
+2016-07-14  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-unique/pr21529.ld: New test linker script.
+	* testsuite/ld-unique/pr21529.d: Use it.
+
+2017-07-12  Alan Modra  <amodra@gmail.com>
+
+	* po/bg.po: Update from translationproject.org/latest/ld/.
+	* po/da.po: Likewise.
+	* po/es.po: Likewise.
+	* po/fi.po: Likewise.
+	* po/fr.po: Likewise.
+	* po/id.po: Likewise.
+	* po/it.po: Likewise.
+	* po/ja.po: Likewise.
+	* po/tr.po: Likewise.
+	* po/uk.po: Likewise.
+	* po/vi.po: Likewise.
+	* po/zh_CN.po: Likewise.
+	* po/zh_TW.po: Likewise.
+	* po/de.po: New file from translationproject.org.
+	* po/ru.po: Likewise.
+	* configure.ac (ALL_LINGUAS): Add de, ru.  Sort.
+	* configure: Regenerate.
+
+2017-07-12  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-scripts/align.exp: Exclude powerpc*-*-aix*.
+	* testsuite/ld-scripts/assign-loc.d: Likewise.
+	* testsuite/ld-scripts/defined3.d: Likewise.
+	* testsuite/ld-scripts/defined4.d: Likewise.
+	* testsuite/ld-scripts/defined5.d: Likewise.
+	* testsuite/ld-scripts/expr2.d: Likewise.
+	* testsuite/ld-scripts/provide.exp: Likewise.
+	* testsuite/ld-scripts/sane1.d: Likewise.
+	* testsuite/ld-scripts/size.exp: Likewise.
+	* testsuite/ld-scripts/defined2.d: Don't xfail rs6000-*-aix*.
+
+2017-07-12  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-arc/nps-1b.err: Update.
+	* testsuite/ld-x86-64/ilp32-11.d: Update.
+
 2017-07-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-selective/selective.exp: Support single digit

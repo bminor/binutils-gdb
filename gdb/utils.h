@@ -31,7 +31,24 @@ extern void initialize_utils (void);
 
 extern int sevenbit_strings;
 
-extern int strcmp_iw (const char *, const char *);
+/* Do a strncmp() type operation on STRING1 and STRING2, ignoring any
+   differences in whitespace.  STRING2_LEN is STRING2's length.
+   Returns 0 if STRING1 matches STRING2_LEN characters of STRING2,
+   non-zero otherwise (slightly different than strncmp()'s range of
+   return values).  */
+extern int strncmp_iw (const char *string1, const char *string2,
+		       size_t string2_len);
+
+/* Do a strcmp() type operation on STRING1 and STRING2, ignoring any
+   differences in whitespace.  Returns 0 if they match, non-zero if
+   they don't (slightly different than strcmp()'s range of return
+   values).
+
+   As an extra hack, string1=="FOO(ARGS)" matches string2=="FOO".
+   This "feature" is useful when searching for matching C++ function
+   names (such as if the user types 'break FOO', where FOO is a
+   mangled C++ function).  */
+extern int strcmp_iw (const char *string1, const char *string2);
 
 extern int strcmp_iw_ordered (const char *, const char *);
 

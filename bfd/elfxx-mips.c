@@ -8456,8 +8456,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: GOT reloc at 0x%lx not expected in executables"),
-		 abfd, (unsigned long) rel->r_offset);
+		(_("%B: GOT reloc at %#Lx not expected in executables"),
+		 abfd, rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -8594,8 +8594,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: CALL16 reloc at 0x%lx not against global symbol"),
-		 abfd, (unsigned long) rel->r_offset);
+		(_("%B: CALL16 reloc at %#Lx not against global symbol"),
+		 abfd, rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -10137,7 +10137,7 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      _bfd_error_handler
 			/* xgettext:c-format */
 			(_("%B: Can't find matching LO16 reloc against `%s'"
-			   " for %s at 0x%lx in section `%A'"),
+			   " for %s at %#Lx in section `%A'"),
 			 input_bfd, name,
 			 howto->name, rel->r_offset, input_section);
 		    }
@@ -10680,11 +10680,11 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: `%A' offset of %ld from `%A' "
+		    (_("%B: `%A' offset of %Ld from `%A' "
 		       "beyond the range of ADDIUPC"),
 		     output_bfd,
 		     htab->root.sgotplt->output_section,
-		     (long) gotpc_offset,
+		     gotpc_offset,
 		     htab->root.splt->output_section);
 		  bfd_set_error (bfd_error_no_error);
 		  return FALSE;
@@ -11248,10 +11248,10 @@ mips_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: `%A' offset of %ld from `%A' beyond the range of ADDIUPC"),
+	    (_("%B: `%A' offset of %Ld from `%A' beyond the range of ADDIUPC"),
 	     output_bfd,
 	     htab->root.sgotplt->output_section,
-	     (long) gotpc_offset,
+	     gotpc_offset,
 	     htab->root.splt->output_section);
 	  bfd_set_error (bfd_error_no_error);
 	  return FALSE;
@@ -15124,10 +15124,9 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, struct bfd_link_info *info)
     {
       /* xgettext:c-format */
       _bfd_error_handler
-	(_("%B: uses different e_flags (0x%lx) fields than previous modules "
-	   "(0x%lx)"),
-	 ibfd, (unsigned long) new_flags,
-	 (unsigned long) old_flags);
+	(_("%B: uses different e_flags (%#x) fields than previous modules "
+	   "(%#x)"),
+	 ibfd, new_flags, old_flags);
       ok = FALSE;
     }
 
@@ -15427,7 +15426,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	_bfd_error_handler
 	  (_("%B: warning: Unexpected flag in the flags2 field of "
 	     ".MIPS.abiflags (0x%lx)"), ibfd,
-	   (unsigned long) in_abiflags.flags2);
+	   in_abiflags.flags2);
     }
   else
     {

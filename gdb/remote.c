@@ -7844,8 +7844,6 @@ store_registers_using_G (const struct regcache *regcache)
      each byte encoded as two hex characters.  */
   p = rs->buf;
   *p++ = 'G';
-  /* remote_prepare_to_store insures that rsa->sizeof_g_packet gets
-     updated.  */
   bin2hex (regs, p, rsa->sizeof_g_packet);
   putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);

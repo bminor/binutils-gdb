@@ -146,5 +146,9 @@ initialize_tdesc_amd64 (void)
   tdesc_create_reg (feature, "xmm15", 55, 1, NULL, 128, "vec128");
   tdesc_create_reg (feature, "mxcsr", 56, 1, "vector", 32, "i386_mxcsr");
 
+  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.segments");
+  tdesc_create_reg (feature, "fs_base", 57, 1, NULL, 64, "int");
+  tdesc_create_reg (feature, "gs_base", 58, 1, NULL, 64, "int");
+
   tdesc_amd64 = result;
 }

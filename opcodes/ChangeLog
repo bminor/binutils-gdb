@@ -1,3 +1,26 @@
+2017-07-14  Ravi Bangoria  <ravi.bangoria@linux.vnet.ibm.com>
+
+	* dis-buf.c (buffer_read_memory): Change type of end_addr_offset,
+	max_addr_offset and octets variables to size_t.
+
+2017-07-12  Alan Modra  <amodra@gmail.com>
+
+	* po/da.po: Update from translationproject.org/latest/opcodes/.
+	* po/de.po: Likewise.
+	* po/es.po: Likewise.
+	* po/fi.po: Likewise.
+	* po/fr.po: Likewise.
+	* po/id.po: Likewise.
+	* po/it.po: Likewise.
+	* po/nl.po: Likewise.
+	* po/pt_BR.po: Likewise.
+	* po/ro.po: Likewise.
+	* po/sv.po: Likewise.
+	* po/tr.po: Likewise.
+	* po/uk.po: Likewise.
+	* po/vi.po: Likewise.
+	* po/zh_CN.po: Likewise.
+
 2017-07-11  Yao Qi  <yao.qi@linaro.org>
 	    Alan Modra  <amodra@gmail.com>
 

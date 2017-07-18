@@ -1,3 +1,44 @@
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/uk.po: Updated Ukranian translation.
+
+2017-07-17  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR 21472
+	* config/tc-avr.c (mcu_types): Add entries for: attiny212,
+	attiny214, attiny412, attiny414, attiny814, attiny1614,
+	attiny1616, attiny1617, attiny3214, attiny3216, attiny3217.
+	(md_show_usage): Adjust doc for "avrxmega3".
+	* doc/c-avr.texi (AVR options) [-mmcu=]: Adjust doc for avrxmega3.
+	Add MCUs: attiny212, attiny214, attiny412, attiny414, attiny416,
+	attiny417, attiny814, attiny816, attiny817, attiny1614,
+	attiny1616, attiny1617, attiny3214, attiny3216, attiny3217.
+
+2017-07-13  Jim Wilson  <jim.wilson@linaro.org>
+
+	* config/tc-arch64.c (aarch64_cpus): Add AARCH64_FEATURE_RDMA to
+	falkor and qdf24xx entries.
+
+2017-07-12  Alan Modra  <amodra@gmail.com>
+
+	* po/es.po: Update from translationproject.org/latest/gas/.
+	* po/fi.po: Likewise.
+	* po/fr.po: Likewise.
+	* po/id.po: Likewise.
+	* po/ja.po: Likewise.
+	* po/ru.po: Likewise.
+	* po/sv.po: Likewise.
+	* po/tr.po: Likewise.
+	* po/uk.po: Likewise.
+	* po/zh_CN.po: Likewise.
+
+2017-07-12  Nick Clifton  <nickc@redhat.com>
+
+	Fix compile time warnings using gcc 7.1.1.
+	* config/tc-pru.c (md_assemble): Add continue statement after
+	handling 'E' operand character.
+	* config/tc-v850.c (md_assemble): Initialise the 'insn' variable.
+
 2017-07-05  James Greenhalgh  <james.greenhalgh@arm.com>
 
 	* config/tc-arm.c (arm_cpus): Add Cortex-A55 and Cortex-A75.

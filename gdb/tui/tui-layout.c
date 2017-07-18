@@ -353,14 +353,15 @@ tui_default_win_viewport_height (enum tui_win_type type,
 /* Complete possible layout names.  TEXT is the complete text entered so
    far, WORD is the word currently being completed.  */
 
-static VEC (char_ptr) *
+static void
 layout_completer (struct cmd_list_element *ignore,
+		  completion_tracker &tracker,
 		  const char *text, const char *word)
 {
   static const char *layout_names [] =
     { "src", "asm", "split", "regs", "next", "prev", NULL };
 
-  return complete_on_enum (layout_names, text, word);
+  complete_on_enum (tracker, layout_names, text, word);
 }
 
 /* Function to initialize gdb commands, for tui window layout

@@ -515,7 +515,7 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   for (rel = relocs; rel < relocs + sec->reloc_count; rel++)
     {
       unsigned int r_type;
-      unsigned long r_symndx;
+      unsigned int r_symndx;
       struct elf_link_hash_entry *h;
 
       r_symndx = ELFNN_R_SYM (rel->r_info);
@@ -2233,10 +2233,10 @@ riscv_elf_relocate_section (bfd *output_bfd,
 				      rel->r_offset) != (bfd_vma) -1)
 	{
 	  (*_bfd_error_handler)
-	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
-	     (long) rel->r_offset,
+	     rel->r_offset,
 	     howto->name,
 	     h->root.root.string);
 	  continue;

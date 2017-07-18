@@ -419,7 +419,7 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  amd64_init_abi (info, gdbarch);
+  amd64_init_abi (info, gdbarch, tdesc_amd64);
   obsd_init_abi (info, gdbarch);
 
   /* Initialize general-purpose register set details.  */

@@ -3887,9 +3887,8 @@ elf_m68k_relocate_section (bfd *output_bfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+0x%lx): R_68K_TLS_LE32 relocation not permitted "
-		   "in shared object"),
-		 input_bfd, input_section, (long) rel->r_offset, howto->name);
+		(_("%B(%A+%#Lx): %s relocation not permitted in shared object"),
+		 input_bfd, input_section, rel->r_offset, howto->name);
 
 	      return FALSE;
 	    }
@@ -4081,10 +4080,10 @@ elf_m68k_relocate_section (bfd *output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
-	     (long) rel->r_offset,
+	     rel->r_offset,
 	     howto->name,
 	     h->root.root.string);
 	  return FALSE;
@@ -4117,12 +4116,12 @@ elf_m68k_relocate_section (bfd *output_bfd,
 	      _bfd_error_handler
 		((sym_type == STT_TLS
 		  /* xgettext:c-format */
-		  ? _("%B(%A+0x%lx): %s used with TLS symbol %s")
+		  ? _("%B(%A+%#Lx): %s used with TLS symbol %s")
 		  /* xgettext:c-format */
-		  : _("%B(%A+0x%lx): %s used with non-TLS symbol %s")),
+		  : _("%B(%A+%#Lx): %s used with non-TLS symbol %s")),
 		 input_bfd,
 		 input_section,
-		 (long) rel->r_offset,
+		 rel->r_offset,
 		 howto->name,
 		 name);
 	    }
@@ -4157,9 +4156,9 @@ elf_m68k_relocate_section (bfd *output_bfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
+		(_("%B(%A+%#Lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
-		 (long) rel->r_offset, name, (int) r);
+		 rel->r_offset, name, (int) r);
 	      return FALSE;
 	    }
 	}

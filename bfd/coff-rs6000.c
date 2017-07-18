@@ -2830,7 +2830,7 @@ xcoff_reloc_type_toc (bfd *input_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext: c-format */
-	    (_("%B: TOC reloc at 0x%x to symbol `%s' with no TOC entry"),
+	    (_("%B: TOC reloc at %#Lx to symbol `%s' with no TOC entry"),
 	     input_bfd, rel->r_vaddr, h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;

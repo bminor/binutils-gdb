@@ -135,6 +135,9 @@ gdb_test "print simple::ByeBob\{field1: 0xff, field2:5\}" \
 
 gdb_test "print simple::HiBob(0xff, 5)" \
     "Type simple::HiBob is not a tuple struct"
+gdb_test "print sizeof(simple::HiBob)" " = \[0-9\]+"
+gdb_test "print simple::HiBob + 5" \
+    "Found type 'simple::HiBob', which can't be evaluated in this context"
 gdb_test "print nosuchsymbol" \
     "No symbol 'nosuchsymbol' in current context"
 
@@ -246,3 +249,11 @@ gdb_test "print parametrized.next.val" \
     " = \\(simple::ParametrizedStruct<i32> \\*\\) $hex"
 gdb_test "print parametrized" \
     " = simple::ParametrizedStruct<i32> \\{next: simple::ParametrizedEnum<\[a-z:\]*Box<simple::ParametrizedStruct<i32>>>::Val\\{val: $hex\\}, value: 0\\}"
+
+
+load_lib gdb-python.exp
+if {[skip_python_tests]} {
+    continue
+}
+
+gdb_test "python print(gdb.lookup_type('simple::HiBob'))" "simple::HiBob"

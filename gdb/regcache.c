@@ -388,36 +388,9 @@ regcache_cpy (struct regcache *dst, struct regcache *src)
   gdb_assert (src != NULL && dst != NULL);
   gdb_assert (src->m_descr->gdbarch == dst->m_descr->gdbarch);
   gdb_assert (src != dst);
-  gdb_assert (src->m_readonly_p || dst->m_readonly_p);
+  gdb_assert (src->m_readonly_p && !dst->m_readonly_p);
 
-  if (!src->m_readonly_p)
-    regcache_save (dst, do_cooked_read, src);
-  else if (!dst->m_readonly_p)
-    dst->restore (src);
-  else
-    dst->cpy_no_passthrough (src);
-}
-
-/* Copy/duplicate the contents of a register cache.  Unlike regcache_cpy,
-   which is pass-through, this does not go through to the target.
-   Only values values already in the cache are transferred.  The SRC and DST
-   buffers must not overlap.  */
-
-void
-regcache::cpy_no_passthrough (struct regcache *src)
-{
-  gdb_assert (src != NULL);
-  gdb_assert (src->m_descr->gdbarch == m_descr->gdbarch);
-  /* NOTE: cagney/2002-05-17: Don't let the caller do a no-passthrough
-     move of data into a thread's regcache.  Doing this would be silly
-     - it would mean that regcache->register_status would be
-     completely invalid.  */
-  gdb_assert (m_readonly_p && src->m_readonly_p);
-
-  memcpy (m_registers, src->m_registers,
-	  m_descr->sizeof_cooked_registers);
-  memcpy (m_register_status, src->m_register_status,
-	  m_descr->sizeof_cooked_register_status);
+  dst->restore (src);
 }
 
 struct regcache *

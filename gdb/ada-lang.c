@@ -6440,10 +6440,10 @@ symbol_completion_match (const char *sym_name,
   return sym_name;
 }
 
-/* A companion function to ada_make_symbol_completion_list().
+/* A companion function to ada_collect_symbol_completion_matches().
    Check if SYM_NAME represents a symbol which name would be suitable
-   to complete TEXT (TEXT_LEN is the length of TEXT), in which case
-   it is appended at the end of the given string vector SV.
+   to complete TEXT (TEXT_LEN is the length of TEXT), in which case it
+   is added as a completion match to TRACKER.
 
    ORIG_TEXT is the string original string from the user command
    that needs to be completed.  WORD is the entire command on which
@@ -6456,8 +6456,8 @@ symbol_completion_match (const char *sym_name,
    encoded).  */
 
 static void
-symbol_completion_add (VEC(char_ptr) **sv,
-                       const char *sym_name,
+symbol_completion_add (completion_tracker &tracker,
+		       const char *sym_name,
                        const char *text, int text_len,
                        const char *orig_text, const char *word,
                        int wild_match_p, int encoded_p)
@@ -6492,21 +6492,22 @@ symbol_completion_add (VEC(char_ptr) **sv,
       strcat (completion, match);
     }
 
-  VEC_safe_push (char_ptr, *sv, completion);
+  tracker.add_completion (gdb::unique_xmalloc_ptr<char> (completion));
 }
 
-/* Return a list of possible symbol names completing TEXT0.  WORD is
-   the entire command on which completion is made.  */
+/* Add the list of possible symbol names completing TEXT0 to TRACKER.
+   WORD is the entire command on which completion is made.  */
 
-static VEC (char_ptr) *
-ada_make_symbol_completion_list (const char *text0, const char *word,
-				 enum type_code code)
+static void
+ada_collect_symbol_completion_matches (completion_tracker &tracker,
+				       complete_symbol_mode mode,
+				       const char *text0, const char *word,
+				       enum type_code code)
 {
   char *text;
   int text_len;
   int wild_match_p;
   int encoded_p;
-  VEC(char_ptr) *completions = VEC_alloc (char_ptr, 128);
   struct symbol *sym;
   struct compunit_symtab *s;
   struct minimal_symbol *msymbol;
@@ -6562,7 +6563,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
   ALL_MSYMBOLS (objfile, msymbol)
   {
     QUIT;
-    symbol_completion_add (&completions, MSYMBOL_LINKAGE_NAME (msymbol),
+    symbol_completion_add (tracker, MSYMBOL_LINKAGE_NAME (msymbol),
 			   text, text_len, text0, word, wild_match_p,
 			   encoded_p);
   }
@@ -6577,7 +6578,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
 
       ALL_BLOCK_SYMBOLS (b, iter, sym)
       {
-        symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
+	symbol_completion_add (tracker, SYMBOL_LINKAGE_NAME (sym),
                                text, text_len, text0, word,
                                wild_match_p, encoded_p);
       }
@@ -6592,7 +6593,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
     b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), GLOBAL_BLOCK);
     ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
+      symbol_completion_add (tracker, SYMBOL_LINKAGE_NAME (sym),
                              text, text_len, text0, word,
                              wild_match_p, encoded_p);
     }
@@ -6607,14 +6608,13 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
       continue;
     ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
+      symbol_completion_add (tracker, SYMBOL_LINKAGE_NAME (sym),
                              text, text_len, text0, word,
                              wild_match_p, encoded_p);
     }
   }
 
   do_cleanups (old_chain);
-  return completions;
 }
 
                                 /* Field Access */
@@ -14010,7 +14010,7 @@ const struct language_defn ada_language_defn = {
   0,                            /* c-style arrays */
   1,                            /* String lower bound */
   ada_get_gdb_completer_word_break_characters,
-  ada_make_symbol_completion_list,
+  ada_collect_symbol_completion_matches,
   ada_language_arch_info,
   ada_print_array_index,
   default_pass_by_reference,

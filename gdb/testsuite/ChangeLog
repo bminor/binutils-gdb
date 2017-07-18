@@ -1,3 +1,42 @@
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/completion.exp: Adjust expected output.
+	* gdb.linespec/ls-errs.exp: Don't send tab characters, now that
+	the completer works.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* gdb.linespec/ls-errs.exp (do_test): Adjust expected output.
+
+2017-07-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.mi/mi-vla-fortran.exp: Make test names unique.
+
+2017-07-14  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21764:
+	* gdb.rust/simple.exp: Add tests.
+
+2017-07-14  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.exp: Add regression test for PR rust/21763.
+
+2017-07-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.linespec/base/one/thefile.cc (z1): New function.
+	* gdb.linespec/base/two/thefile.cc (z2): New function.
+	* gdb.linespec/linespec.exp: Add tests.
+
+2017-07-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.mi/mi-vla-fortran.exp: Correct even more parameter passing
+	to mi_create_breakpoint.
+
+2017-07-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.mi/mi-vla-fortran.exp: Correct parameter passing to
+	mi_create_breakpoint.
+
 2017-07-11  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* gdb.dlang/demangle.exp: Update for demangling changes.

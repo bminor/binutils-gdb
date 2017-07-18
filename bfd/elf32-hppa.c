@@ -836,10 +836,10 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+0x%lx): cannot reach %s, recompile with -ffunction-sections"),
+	    (_("%B(%A+%#Lx): cannot reach %s, recompile with -ffunction-sections"),
 	     hsh->target_section->owner,
 	     stub_sec,
-	     (long) hsh->stub_offset,
+	     hsh->stub_offset,
 	     hsh->bh_root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
@@ -3430,10 +3430,10 @@ final_link_relocate (asection *input_section,
 		   error.  */
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%B(%A+0x%lx): %s fixup for insn 0x%x is not supported in a non-shared link"),
+		  (_("%B(%A+%#Lx): %s fixup for insn %#x is not supported in a non-shared link"),
 		   input_bfd,
 		   input_section,
-		   (long) offset,
+		   offset,
 		   howto->name,
 		   insn);
 	    }
@@ -3596,10 +3596,10 @@ final_link_relocate (asection *input_section,
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B(%A+0x%lx): cannot reach %s, recompile with -ffunction-sections"),
+	(_("%B(%A+%#Lx): cannot reach %s, recompile with -ffunction-sections"),
 	 input_bfd,
 	 input_section,
-	 (long) offset,
+	 offset,
 	 hsh->bh_root.string);
       bfd_set_error (bfd_error_bad_value);
       return bfd_reloc_notsupported;
@@ -4287,10 +4287,10 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+0x%lx): cannot handle %s for %s"),
+		(_("%B(%A+%#Lx): cannot handle %s for %s"),
 		 input_bfd,
 		 input_section,
-		 (long) rela->r_offset,
+		 rela->r_offset,
 		 howto->name,
 		 sym_name);
 	      bfd_set_error (bfd_error_bad_value);

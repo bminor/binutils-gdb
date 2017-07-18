@@ -46,6 +46,14 @@ struct using_direct;
 
 #define CP_ANONYMOUS_NAMESPACE_LEN 21
 
+/* A string representing the start of an operator name.  */
+
+#define CP_OPERATOR_STR "operator"
+
+/* The length of CP_OPERATOR_STR.  */
+
+#define CP_OPERATOR_LEN 8
+
 /* The result of parsing a name.  */
 
 struct demangle_parse_info

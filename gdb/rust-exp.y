@@ -2100,7 +2100,8 @@ convert_name (struct parser_state *state, const struct rust_op *operation)
 
 static void convert_ast_to_expression (struct parser_state *state,
 				       const struct rust_op *operation,
-				       const struct rust_op *top);
+				       const struct rust_op *top,
+				       bool want_type = false);
 
 /* A helper function that converts a vec of rust_ops to a gdb
    expression.  */
@@ -2121,12 +2122,16 @@ convert_params_to_expression (struct parser_state *state,
    OPERATION is the operation to lower.  TOP is a pointer to the
    top-most operation; it is used to handle the special case where the
    top-most expression is an identifier and can be optionally lowered
-   to OP_TYPE.  */
+   to OP_TYPE.  WANT_TYPE is a flag indicating that, if the expression
+   is the name of a type, then emit an OP_TYPE for it (rather than
+   erroring).  If WANT_TYPE is set, then the similar TOP handling is
+   not done.  */
 
 static void
 convert_ast_to_expression (struct parser_state *state,
 			   const struct rust_op *operation,
-			   const struct rust_op *top)
+			   const struct rust_op *top,
+			   bool want_type)
 {
   switch (operation->opcode)
     {
@@ -2166,12 +2171,16 @@ convert_ast_to_expression (struct parser_state *state,
       }
       break;
 
+    case UNOP_SIZEOF:
+      convert_ast_to_expression (state, operation->left.op, top, true);
+      write_exp_elt_opcode (state, UNOP_SIZEOF);
+      break;
+
     case UNOP_PLUS:
     case UNOP_NEG:
     case UNOP_COMPLEMENT:
     case UNOP_IND:
     case UNOP_ADDR:
-    case UNOP_SIZEOF:
       convert_ast_to_expression (state, operation->left.op, top);
       write_exp_elt_opcode (state, operation->opcode);
       break;
@@ -2316,7 +2325,7 @@ convert_ast_to_expression (struct parser_state *state,
 	varname = convert_name (state, operation);
 	sym = rust_lookup_symbol (varname, expression_context_block,
 				  VAR_DOMAIN);
-	if (sym.symbol != NULL)
+	if (sym.symbol != NULL && SYMBOL_CLASS (sym.symbol) != LOC_TYPEDEF)
 	  {
 	    write_exp_elt_opcode (state, OP_VAR_VALUE);
 	    write_exp_elt_block (state, sym.block);
@@ -2325,13 +2334,20 @@ convert_ast_to_expression (struct parser_state *state,
 	  }
 	else
 	  {
-	    struct type *type;
+	    struct type *type = NULL;
 
-	    type = rust_lookup_type (varname, expression_context_block);
+	    if (sym.symbol != NULL)
+	      {
+		gdb_assert (SYMBOL_CLASS (sym.symbol) == LOC_TYPEDEF);
+		type = SYMBOL_TYPE (sym.symbol);
+	      }
+	    if (type == NULL)
+	      type = rust_lookup_type (varname, expression_context_block);
 	    if (type == NULL)
 	      error (_("No symbol '%s' in current context"), varname);
 
-	    if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	    if (!want_type
+		&& TYPE_CODE (type) == TYPE_CODE_STRUCT
 		&& TYPE_NFIELDS (type) == 0)
 	      {
 		/* A unit-like struct.  */
@@ -2340,13 +2356,16 @@ convert_ast_to_expression (struct parser_state *state,
 		write_exp_elt_longcst (state, 0);
 		write_exp_elt_opcode (state, OP_AGGREGATE);
 	      }
-	    else if (operation == top)
+	    else if (want_type || operation == top)
 	      {
 		write_exp_elt_opcode (state, OP_TYPE);
 		write_exp_elt_type (state, type);
 		write_exp_elt_opcode (state, OP_TYPE);
-		break;
 	      }
+	    else
+	      error (_("Found type '%s', which can't be "
+		       "evaluated in this context"),
+		     varname);
 	  }
       }
       break;

@@ -8691,11 +8691,11 @@ Are you sure you want to change it? "),
 
 /* Complete the "handle" command.  */
 
-static VEC (char_ptr) *
+static void
 handle_completer (struct cmd_list_element *ignore,
+		  completion_tracker &tracker,
 		  const char *text, const char *word)
 {
-  VEC (char_ptr) *vec_signals, *vec_keywords, *return_val;
   static const char * const keywords[] =
     {
       "all",
@@ -8710,13 +8710,8 @@ handle_completer (struct cmd_list_element *ignore,
       NULL,
     };
 
-  vec_signals = signal_completer (ignore, text, word);
-  vec_keywords = complete_on_enum (keywords, word, word);
-
-  return_val = VEC_merge (char_ptr, vec_signals, vec_keywords);
-  VEC_free (char_ptr, vec_signals);
-  VEC_free (char_ptr, vec_keywords);
-  return return_val;
+  signal_completer (ignore, tracker, text, word);
+  complete_on_enum (tracker, keywords, word, word);
 }
 
 enum gdb_signal
