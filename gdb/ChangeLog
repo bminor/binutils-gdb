@@ -1,5 +1,9 @@
 2017-07-18  Yao Qi  <yao.qi@linaro.org>
 
+	* remote.c (store_registers_using_G): Remove one line comment.
+
+2017-07-18  Yao Qi  <yao.qi@linaro.org>
+
 	* regcache.c (regcache_cpy): Simplify it.
 	(regcache::cpy_no_passthrough): Remove it.
 	* regcache.h (cpy_no_passthrough): Remove it.
