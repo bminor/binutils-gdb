@@ -1,3 +1,8 @@
+2017-07-18  David Blaikie  <dblaikie@gmail.com>
+
+	* dwarf2read.c (create_cus_hash_table): Re-add lost initialization
+	of dwo_cu's dwo_file.
+
 2017-07-18  Yao Qi  <yao.qi@linaro.org>
 
 	* remote.c (store_registers_using_G): Remove one line comment.

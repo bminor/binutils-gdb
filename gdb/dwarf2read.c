@@ -9808,6 +9808,7 @@ create_cus_hash_table (struct dwo_file &dwo_file, dwarf2_section_info &section,
       per_cu.is_debug_types = 0;
       per_cu.sect_off = sect_offset (info_ptr - section.buffer);
       per_cu.section = &section;
+      create_dwo_cu_data.dwo_file = &dwo_file;
 
       init_cutu_and_read_dies_no_follow (
 	  &per_cu, &dwo_file, create_dwo_cu_reader, &create_dwo_cu_data);
