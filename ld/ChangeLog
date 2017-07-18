@@ -1,3 +1,8 @@
+2017-07-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-elf/binutils.exp (binutils_test): Make the
+	expectation for `.dynamic' in GNU_RELRO segment target-specific.
+
 2017-07-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 21775
