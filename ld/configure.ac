@@ -201,7 +201,7 @@ fi
 
 # host-specific stuff:
 
-ALL_LINGUAS="fr sv tr es da vi zh_CN zh_TW ga fi id bg it uk sr"
+ALL_LINGUAS="fr sv tr es da vi zh_CN zh_TW ga fi id bg it uk sr ru de"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
 

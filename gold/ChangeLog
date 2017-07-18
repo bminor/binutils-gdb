@@ -1,3 +1,17 @@
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated translation.
+	* po/fi.po: Likewise.
+	* po/fr.po: Likewise.
+	* po/id.po: Likewise.
+	* po/it.po: Likewise.
+	* po/vi.po: Likewise.
+	* po/zh_CN.po: Likewise.
+
+	* po/ja.po: New translation.
+	* po/sv.po: Likewise.
+	* po/uk.po: Likewise.
+
 2017-07-06  Han Shen  <shenhan@google.com>
 
 	PR gold/21491

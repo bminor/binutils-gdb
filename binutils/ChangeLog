@@ -1,3 +1,26 @@
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated translation.
+	* po/ca.po: Likewise.
+	* po/da.po: Likewise.
+	* po/es.po: Likewise.
+	* po/fi.po: Likewise.
+	* po/fr.po: Likewise.
+	* po/hr.po: Likewise.
+	* po/id.po: Likewise.
+	* po/it.po: Likewise.
+	* po/ja.po: Likewise.
+	* po/ro.po: Likewise.
+	* po/ru.po: Likewise.
+	* po/sk.po: Likewise.
+	* po/sr.po: Likewise.
+	* po/sv.po: Likewise.
+	* po/tr.po: Likewise.
+	* po/uk.po: Likewise.
+	* po/vi.po: Likewise.
+	* po/zh_CN.po: Likewise.
+	* po/zh_TW.po: Likewise.
+
 2017-07-17  Nick Clifton  <nickc@redhat.com>
 
 	PR 21433

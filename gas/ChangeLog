@@ -1,3 +1,16 @@
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated translation.
+	* po/fi.po: Likewise.
+	* po/fr.po: Likewise.
+	* po/id.po: Likewise.
+	* po/ja.po: Likewise.
+	* po/ru.po: Likewise.
+	* po/sv.po: Likewise.
+	* po/tr.po: Likewise.
+	* po/uk.po: Likewise.
+	* po/zh_CN.po: Likewise.
+
 2017-07-12  Nick Clifton  <nickc@redhat.com>
 
 	Fix compile time warnings using gcc 7.1.1.

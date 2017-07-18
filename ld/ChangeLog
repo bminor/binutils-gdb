@@ -1,3 +1,24 @@
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated translation.
+	* po/da.po: Likewise.
+	* po/es.po: Likewise.
+	* po/fi.po: Likewise.
+	* po/fr.po: Likewise.
+	* po/id.po: Likewise.
+	* po/it.po: Likewise.
+	* po/ja.po: Likewise.
+	* po/tr.po: Likewise.
+	* po/uk.po: Likewise.
+	* po/vi.po: Likewise.
+	* po/zh_CN.po: Likewise.
+	* po/zh_TW.po: Likewise.
+
+	* po/ru.po: New translation.
+	* po/de.po: Likewise.
+	* configure.ac (ALL_LINGUAS): Add ru and de.
+	* configure: Regenerate.
+
 2017-07-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-selective/selective.exp: Support single digit
