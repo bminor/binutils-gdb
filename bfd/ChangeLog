@@ -1,3 +1,9 @@
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21781
+	* coffcode.h (handle_COMDAT): Replace abort with an error message
+	and return.
+
 2017-07-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21782
