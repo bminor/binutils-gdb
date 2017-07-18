@@ -1,3 +1,8 @@
+2017-07-18  Pedro Alves  <palves@redhat.com>
+
+	* remote-sim.c (sim_command_completer): Adjust to work with a
+	completion_tracker instead of a VEC.
+
 2017-07-17  Pedro Alves  <palves@redhat.com>
 
 	* completer.c (complete_source_filenames): New function.
