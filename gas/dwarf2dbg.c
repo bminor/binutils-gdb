@@ -957,6 +957,10 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
   dwarf2_loc_directive_seen = TRUE;
   debug_type = DEBUG_NONE;
+
+  /* If we were given a view id, emit the row right away.  */
+  if (current.view)
+    dwarf2_emit_insn (0);
 }
 
 void

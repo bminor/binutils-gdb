@@ -5834,18 +5834,17 @@ This directive will set the @code{discriminator} register in the @code{.debug_li
 state machine to @var{value}, which must be an unsigned integer.
 
 @item view @var{value}
-This directive will verify that the @code{view} register in the
-@code{.debug_line} state machine matches @var{value}.  In general, the
-@code{view} register counts how many prior @code{.loc} directives are at the
-same program location, but there are a few exceptions, such as that view
-numbers may be forced reset e.g. at function entry points, or they may not be
-reset even when the location changes.  The assembler will determine the view
-number for that @code{.loc}.  Then, if @var{value} is a label, it will set the
-label to the @var{value}.  Otherwise, @var{value} may be either @code{0}, in
-which case the assembler will error out if the computed view number is not
-zero, or @code{-0}, that will cause the assembler to arrange for the
-@code{view} register to be reset for this @code{.loc} even if for @code{0} it
-would have issued an error.
+This option causes a row to be added to @code{.debug_line} in reference to the
+current address (which might not be the same as that of the following assembly
+instruction), and to associate @var{value} with the @code{view} register in the
+@code{.debug_line} state machine.  If @var{value} is a label, both the
+@code{view} register and the label are set to the number of prior @code{.loc}
+directives at the same program location.  If @var{value} is the literal
+@code{0}, the @code{view} register is set to zero, and the assembler asserts
+that there aren't any prior @code{.loc} directives at the same program
+location.  If @var{value} is the literal @code{-0}, the assembler arrange for
+the @code{view} register to be reset in this row, even if there are prior
+@code{.loc} directives at the same program location.
 
 @end table
 

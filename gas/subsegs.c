@@ -25,8 +25,6 @@
 #include "subsegs.h"
 #include "obstack.h"
 
-#include "dwarf2dbg.h"
-
 frchainS *frchain_now;
 
 static struct obstack frchains;
@@ -82,10 +80,7 @@ subseg_set_rest (segT seg, subsegT subseg)
   mri_common_symbol = NULL;
 
   if (frag_now && frchain_now)
-    {
-      frchain_now->frch_frag_now = frag_now;
-      dwarf2_emit_insn (0);
-    }
+    frchain_now->frch_frag_now = frag_now;
 
   gas_assert (frchain_now == 0
 	  || frchain_now->frch_last == frag_now);

@@ -831,8 +831,6 @@ sh_elf_cons (int nbytes)
       return;
     }
 
-  dwarf2_emit_insn (0);
-
 #ifdef md_cons_align
   md_cons_align (nbytes);
 #endif
