@@ -1,3 +1,11 @@
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+	    John Eric Martin  <John.Martin@emmicro-us.com>
+
+	* arc-opc.c (UIMM10_6_S_JLIOFF): Define.
+	(UIMM3_23): Adjust accordingly.
+	* arc-regs.h: Add/correct jli_base register.
+	* arc-tbl.h (jli_s): Likewise.
+
 2017-07-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 21775

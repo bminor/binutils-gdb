@@ -1,3 +1,9 @@
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/jli-1.d: New file.
+	* testsuite/gas/arc/jli-1.s: Likewise.
+	* testsuite/gas/arc/taux.d: Update for jli_base.
+
 2017-07-19  Tristan Gingold  <gingold@adacore.com>
 
 	* as.c (start_sbrk): Remove.

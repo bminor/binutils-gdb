@@ -1,3 +1,9 @@
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+	    John Eric Martin  <John.Martin@emmicro-us.com>
+
+	* elf/arc-reloc.def: Add JLI relocs howto.
+	* opcode/arc-func.h (replace_jli): New function.
+
 2017-07-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 21775

@@ -2039,8 +2039,14 @@ const struct arc_operand arc_operands[] =
    | ARC_OPERAND_TRUNCATE | ARC_OPERAND_PCREL, insert_simm8_a16_9_s,
    extract_simm8_a16_9_s},
 
+/* UIMM10_6_S_JLIOFF mask = 0000001111111111.  */
+#define UIMM10_6_S_JLIOFF     (SIMM8_A16_9_S + 1)
+  {12, 0, BFD_RELOC_ARC_JLI_SECTOFF, ARC_OPERAND_UNSIGNED
+   | ARC_OPERAND_ALIGNED32 | ARC_OPERAND_TRUNCATE, insert_uimm10_6_s,
+   extract_uimm10_6_s},
+
   /* UIMM3_23 mask = 00000000000000000000000111000000.  */
-#define UIMM3_23       (SIMM8_A16_9_S + 1)
+#define UIMM3_23       (UIMM10_6_S_JLIOFF + 1)
   {3, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm3_23, extract_uimm3_23},
 
   /* UIMM10_6_S mask = 0000001111111111.  */
