@@ -15865,6 +15865,7 @@ mips_align (int to, int *fill, struct insn_label_list *labels)
 {
   mips_emit_delays ();
   mips_record_compressed_mode ();
+  dwarf2_emit_insn (0);
   if (fill == NULL && subseg_text_p (now_seg))
     frag_align_code (to, 0);
   else
