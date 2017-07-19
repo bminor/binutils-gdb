@@ -1,5 +1,12 @@
 2017-07-19  Nick Clifton  <nickc@redhat.com>
 
+	PR 21787
+	* archive.c (bfd_generic_archive_p): If the bfd does not have the
+	correct magic bytes at the start, set the error to wrong format
+	and clear the format selector before returning NULL.
+
+2017-07-19  Nick Clifton  <nickc@redhat.com>
+
 	PR 21786
 	* coff-rs6000.c (_bfd_strntol): New function.
 	(_bfd_strntoll): New function.
