@@ -1,3 +1,16 @@
+2017-07-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 21786
+	* coff-rs6000.c (_bfd_strntol): New function.
+	(_bfd_strntoll): New function.
+	(GET_VALUE_IN_FIELD): New macro.
+	(EQ_VALUE_IN_FIELD): new macro.
+	(_bfd_xcoff_slurp_armap): Use new macros.
+	(_bfd_xcoff_archive_p): Likewise.
+	(_bfd_xcoff_read_ar_hdr): Likewise.
+	(_bfd_xcoff_openr_next_archived_file): Likewise.
+	(_bfd_xcoff_stat_arch_elt): Likewise.
+
 2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
 	    John Eric Martin  <John.Martin@emmicro-us.com>
 
