@@ -17,6 +17,10 @@
 	(_bfd_xcoff_read_ar_hdr): Likewise.
 	(_bfd_xcoff_openr_next_archived_file): Likewise.
 	(_bfd_xcoff_stat_arch_elt): Likewise.
+	* coff64-rs6000.c (_bfd_strntol): New function.
+	(_bfd_strntoll): New function.
+	(GET_VALUE_IN_FIELD): New macro.
+	(xcoff64_slurp_armap): Use new macros.
 
 2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
 	    John Eric Martin  <John.Martin@emmicro-us.com>
