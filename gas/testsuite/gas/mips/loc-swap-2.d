@@ -38,9 +38,9 @@ Raw dump of debug contents of section .debug_line:
 
  Line Number Statements:
   \[0x.*\]  Extended opcode 2: set Address to 0x0
-  \[0x.*\]  Special opcode 11: advance Address by 0 to 0x0 and Line by 6 to 7 \(view 1\)
-  \[0x.*\]  Special opcode 7: advance Address by 0 to 0x0 and Line by 2 to 9 \(view 2\)
-  \[0x.*\]  Special opcode 6: advance Address by 0 to 0x0 and Line by 1 to 10 \(view 3\)
+  \[0x.*\]  Special opcode 11: advance Address by 0 to 0x0 and Line by 6 to 7
+  \[0x.*\]  Special opcode 7: advance Address by 0 to 0x0 and Line by 2 to 9 \(view 1\)
+  \[0x.*\]  Special opcode 6: advance Address by 0 to 0x0 and Line by 1 to 10 \(view 2\)
   \[0x.*\]  Special opcode 120: advance Address by 8 to 0x8 and Line by 3 to 13
   \[0x.*\]  Special opcode 62: advance Address by 4 to 0xc and Line by 1 to 14
   \[0x.*\]  Special opcode 6: advance Address by 0 to 0xc and Line by 1 to 15 \(view 1\)
