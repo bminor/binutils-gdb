@@ -1269,6 +1269,18 @@ extract_nps_misc_imm_offset (unsigned long long  insn,
   return ((insn >> 8) & 0x1f) * 4;
 }
 
+static long long int
+extract_uimm12_20 (unsigned long long insn ATTRIBUTE_UNUSED,
+		   bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  int value = 0;
+
+  value |= ((insn >> 6) & 0x003f) << 0;
+  value |= ((insn >> 0) & 0x003f) << 6;
+
+  return value;
+}
+
 /* Include the generic extract/insert functions.  Order is important
    as some of the functions present in the .h may be disabled via
    defines.  */
@@ -1934,8 +1946,12 @@ const struct arc_operand arc_operands[] =
   {12, 0, -SIMM12_20R, ARC_OPERAND_SIGNED | ARC_OPERAND_PCREL,
    insert_simm12_20, extract_simm12_20},
 
+  /* UIMM12_20 mask = 00000000000000000000111111222222.  */
+#define UIMM12_20	(SIMM12_20R + 1)
+  {12, 0, 0, ARC_OPERAND_UNSIGNED, insert_simm12_20, extract_uimm12_20},
+
   /* SIMM3_5_S mask = 0000011100000000.  */
-#define SIMM3_5_S	(SIMM12_20R + 1)
+#define SIMM3_5_S	(UIMM12_20 + 1)
   {3, 0, 0, ARC_OPERAND_SIGNED | ARC_OPERAND_NCHK,
    insert_simm3s, extract_simm3s},
 

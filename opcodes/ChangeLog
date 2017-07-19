@@ -1,4 +1,11 @@
 2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-opc.c (extract_uimm12_20): New function.
+	(UIMM12_20): New operand.
+	(SIMM3_5_S): Adjust.
+	* arc-tbl.h (sjli): Add new instruction.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
 	    John Eric Martin  <John.Martin@emmicro-us.com>
 
 	* arc-opc.c (UIMM10_6_S_JLIOFF): Define.
