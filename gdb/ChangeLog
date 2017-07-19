@@ -1,5 +1,14 @@
 2017-07-22  Tom Tromey  <tom@tromey.com>
 
+	* break-catch-syscall.c (struct catch_syscall_inferior_data)
+	<syscalls_counts>: Now a std::vector.
+	(get_catch_syscall_inferior_data): Use "new".
+	(catch_syscall_inferior_data_cleanup): Use "delete".
+	(insert_catch_syscall, remove_catch_syscall)
+	(clear_syscall_counts): Update.
+
+2017-07-22  Tom Tromey  <tom@tromey.com>
+
 	* break-catch-syscall.c (syscall_catchpoint)
 	<syscalls_to_be_caught>: Now a std::vector<int>
 	(~syscall_catchpoint): Remove.

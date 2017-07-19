@@ -54,14 +54,14 @@ struct catch_syscall_inferior_data
   int any_syscall_count;
 
   /* Count of each system call.  */
-  VEC(int) *syscalls_counts;
+  std::vector<int> syscalls_counts;
 
   /* This counts all syscall catch requests, so we can readily determine
      if any catching is necessary.  */
   int total_syscalls_count;
 };
 
-static struct catch_syscall_inferior_data*
+static struct catch_syscall_inferior_data *
 get_catch_syscall_inferior_data (struct inferior *inf)
 {
   struct catch_syscall_inferior_data *inf_data;
@@ -70,7 +70,7 @@ get_catch_syscall_inferior_data (struct inferior *inf)
 	      inferior_data (inf, catch_syscall_inferior_data));
   if (inf_data == NULL)
     {
-      inf_data = XCNEW (struct catch_syscall_inferior_data);
+      inf_data = new struct catch_syscall_inferior_data ();
       set_inferior_data (inf, catch_syscall_inferior_data, inf_data);
     }
 
@@ -80,7 +80,9 @@ get_catch_syscall_inferior_data (struct inferior *inf)
 static void
 catch_syscall_inferior_data_cleanup (struct inferior *inf, void *arg)
 {
-  xfree (arg);
+  struct catch_syscall_inferior_data *inf_data
+    = (struct catch_syscall_inferior_data *) arg;
+  delete inf_data;
 }
 
 
@@ -104,31 +106,17 @@ insert_catch_syscall (struct bp_location *bl)
 	{
           int elem;
 
-	  if (iter >= VEC_length (int, inf_data->syscalls_counts))
-	    {
-              int old_size = VEC_length (int, inf_data->syscalls_counts);
-              uintptr_t vec_addr_offset
-		= old_size * ((uintptr_t) sizeof (int));
-              uintptr_t vec_addr;
-              VEC_safe_grow (int, inf_data->syscalls_counts, iter + 1);
-              vec_addr = ((uintptr_t) VEC_address (int,
-						  inf_data->syscalls_counts)
-			  + vec_addr_offset);
-              memset ((void *) vec_addr, 0,
-                      (iter + 1 - old_size) * sizeof (int));
-	    }
-          elem = VEC_index (int, inf_data->syscalls_counts, iter);
-          VEC_replace (int, inf_data->syscalls_counts, iter, ++elem);
+	  if (iter >= inf_data->syscalls_counts.size ())
+	    inf_data->syscalls_counts.resize (iter + 1);
+	  ++inf_data->syscalls_counts[iter];
 	}
     }
 
   return target_set_syscall_catchpoint (ptid_get_pid (inferior_ptid),
 					inf_data->total_syscalls_count != 0,
 					inf_data->any_syscall_count,
-					VEC_length (int,
-						    inf_data->syscalls_counts),
-					VEC_address (int,
-						     inf_data->syscalls_counts));
+					inf_data->syscalls_counts.size (),
+					inf_data->syscalls_counts.data ());
 }
 
 /* Implement the "remove" breakpoint_ops method for syscall
@@ -150,21 +138,18 @@ remove_catch_syscall (struct bp_location *bl, enum remove_bp_reason reason)
       for (int iter : c->syscalls_to_be_caught)
 	{
           int elem;
-	  if (iter >= VEC_length (int, inf_data->syscalls_counts))
+	  if (iter >= inf_data->syscalls_counts.size ())
 	    /* Shouldn't happen.  */
 	    continue;
-          elem = VEC_index (int, inf_data->syscalls_counts, iter);
-          VEC_replace (int, inf_data->syscalls_counts, iter, --elem);
+          --inf_data->syscalls_counts[iter];
         }
     }
 
   return target_set_syscall_catchpoint (ptid_get_pid (inferior_ptid),
 					inf_data->total_syscalls_count != 0,
 					inf_data->any_syscall_count,
-					VEC_length (int,
-						    inf_data->syscalls_counts),
-					VEC_address (int,
-						     inf_data->syscalls_counts));
+					inf_data->syscalls_counts.size (),
+					inf_data->syscalls_counts.data ());
 }
 
 /* Implement the "breakpoint_hit" breakpoint_ops method for syscall
@@ -629,7 +614,7 @@ clear_syscall_counts (struct inferior *inf)
 
   inf_data->total_syscalls_count = 0;
   inf_data->any_syscall_count = 0;
-  VEC_free (int, inf_data->syscalls_counts);
+  inf_data->syscalls_counts.clear ();
 }
 
 static void
