@@ -1,5 +1,11 @@
 2017-07-19  Tristan Gingold  <gingold@adacore.com>
 
+	* as.c (start_sbrk): Remove.
+	(main): Remove assignment.
+	(dump_statistics): Remove display of data size.
+
+2017-07-19  Tristan Gingold  <gingold@adacore.com>
+
 	* testsuite/gas/pe/seh-x64-err-2.s: New test.
 	* testsuite/gas/pe/seh-x64-err-2.l: New stderr output.
 	* testsuite/gas/pe/pe.exp: Add test.

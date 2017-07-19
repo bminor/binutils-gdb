@@ -1,3 +1,9 @@
+2017-07-19  Tristan Gingold  <gingold@adacore.com>
+
+	* nm.c (show_stats): Remove variable.
+	(long_options): Remove --stats option.
+	(main): Remove handling of --stats.
+
 2017-07-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 21775

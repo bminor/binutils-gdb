@@ -50,12 +50,6 @@
 
 #include <string.h>
 
-#ifdef HAVE_SBRK
-#if !HAVE_DECL_SBRK
-extern void *sbrk ();
-#endif
-#endif
-
 #ifndef TARGET_SYSTEM_ROOT
 #define TARGET_SYSTEM_ROOT ""
 #endif
@@ -198,9 +192,6 @@ main (int argc, char **argv)
 {
   char *emulation;
   long start_time = get_run_time ();
-#ifdef HAVE_SBRK
-  char *start_sbrk = (char *) sbrk (0);
-#endif
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
@@ -539,18 +530,11 @@ main (int argc, char **argv)
 
   if (config.stats)
     {
-#ifdef HAVE_SBRK
-      char *lim = (char *) sbrk (0);
-#endif
       long run_time = get_run_time () - start_time;
 
       fflush (stdout);
       fprintf (stderr, _("%s: total time in link: %ld.%06ld\n"),
 	       program_name, run_time / 1000000, run_time % 1000000);
-#ifdef HAVE_SBRK
-      fprintf (stderr, _("%s: data size %ld\n"), program_name,
-	       (long) (lim - start_sbrk));
-#endif
       fflush (stderr);
     }
 
