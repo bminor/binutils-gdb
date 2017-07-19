@@ -1,3 +1,13 @@
+2017-07-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-scripts/fill.d: Adjust `xfail' entries.  Add
+	`notarget' entries.  Update comments.
+	* testsuite/ld-scripts/fill16.d: New test.
+	* testsuite/ld-scripts/fill16_0.s: New test source.
+	* testsuite/ld-scripts/fill16_1.s: New test source.
+	* testsuite/ld-scripts/fill16_2.s: New test source.
+	* testsuite/ld-scripts/data.exp: Run the new test.
+
 2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
 	    John Eric Martin  <John.Martin@emmicro-us.com>
 
