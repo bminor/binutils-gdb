@@ -1,3 +1,11 @@
+2017-07-19  Tristan Gingold  <gingold@adacore.com>
+
+	* testsuite/gas/pe/seh-x64-err-2.s: New test.
+	* testsuite/gas/pe/seh-x64-err-2.l: New stderr output.
+	* testsuite/gas/pe/pe.exp: Add test.
+	* config/obj-coff-seh.c (obj_coff_seh_do_final): Don't try to end
+	seh part.
+
 2017-07-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 21775
