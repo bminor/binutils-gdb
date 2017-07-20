@@ -922,10 +922,6 @@ struct dwarf2_frame_cache
   /* DWARF Call Frame Address.  */
   CORE_ADDR cfa;
 
-  /* Set if the return address column was marked as unavailable
-     (required non-collected memory or registers to compute).  */
-  int unavailable_retaddr;
-
   /* Set if the return address column was marked as undefined.  */
   int undefined_retaddr;
 
@@ -1037,41 +1033,27 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   execute_cfa_program (fde, instr, fde->end, gdbarch,
 		       get_frame_address_in_block (this_frame), &fs);
 
-  TRY
+  /* Calculate the CFA.  */
+  switch (fs.regs.cfa_how)
     {
-      /* Calculate the CFA.  */
-      switch (fs.regs.cfa_how)
-	{
-	case CFA_REG_OFFSET:
-	  cache->cfa = read_addr_from_reg (this_frame, fs.regs.cfa_reg);
-	  if (fs.armcc_cfa_offsets_reversed)
-	    cache->cfa -= fs.regs.cfa_offset;
-	  else
-	    cache->cfa += fs.regs.cfa_offset;
-	  break;
+    case CFA_REG_OFFSET:
+      cache->cfa = read_addr_from_reg (this_frame, fs.regs.cfa_reg);
+      if (fs.armcc_cfa_offsets_reversed)
+	cache->cfa -= fs.regs.cfa_offset;
+      else
+	cache->cfa += fs.regs.cfa_offset;
+      break;
 
-	case CFA_EXP:
-	  cache->cfa =
-	    execute_stack_op (fs.regs.cfa_exp, fs.regs.cfa_exp_len,
-			      cache->addr_size, cache->text_offset,
-			      this_frame, 0, 0);
-	  break;
+    case CFA_EXP:
+      cache->cfa =
+	execute_stack_op (fs.regs.cfa_exp, fs.regs.cfa_exp_len,
+			  cache->addr_size, cache->text_offset,
+			  this_frame, 0, 0);
+      break;
 
-	default:
-	  internal_error (__FILE__, __LINE__, _("Unknown CFA rule."));
-	}
+    default:
+      internal_error (__FILE__, __LINE__, _("Unknown CFA rule."));
     }
-  CATCH (ex, RETURN_MASK_ERROR)
-    {
-      if (ex.error == NOT_AVAILABLE_ERROR)
-	{
-	  cache->unavailable_retaddr = 1;
-	  return cache;
-	}
-
-      throw_exception (ex);
-    }
-  END_CATCH
 
   /* Initialize the register state.  */
   {
@@ -1181,9 +1163,6 @@ dwarf2_frame_unwind_stop_reason (struct frame_info *this_frame,
   struct dwarf2_frame_cache *cache
     = dwarf2_frame_cache (this_frame, this_cache);
 
-  if (cache->unavailable_retaddr)
-    return UNWIND_UNAVAILABLE;
-
   if (cache->undefined_retaddr)
     return UNWIND_OUTERMOST;
 
@@ -1197,11 +1176,7 @@ dwarf2_frame_this_id (struct frame_info *this_frame, void **this_cache,
   struct dwarf2_frame_cache *cache =
     dwarf2_frame_cache (this_frame, this_cache);
 
-  if (cache->unavailable_retaddr)
-    (*this_id) = frame_id_build_unavailable_stack (get_frame_func (this_frame));
-  else if (cache->undefined_retaddr)
-    return;
-  else
+  if (!cache->undefined_retaddr)
     (*this_id) = frame_id_build (cache->cfa, get_frame_func (this_frame));
 }
 
