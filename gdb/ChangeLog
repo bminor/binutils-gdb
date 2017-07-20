@@ -1,5 +1,53 @@
 2017-07-20  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (ada_language_defn): Make extern.
+	(_initialize_ada_language): Remove add_language call.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Make extern.
+	(_initialize_c_language): Delete.
+	* completer.c (compare_cstrings): Delete, moved to utils.h.
+	* d-lang.c (d_language_defn): Make extern.
+	(_initialize_d_language): Remove add_language calls.
+	* defs.h (enum language): Add comment.
+	* f-lang.c (f_language_defn): Make extern.
+	(_initialize_f_language): Remove add_language call.
+	* go-lang.c (go_language_defn): Make extern.
+	(_initialize_go_language): Remove add_language call.
+	* language.c: Include <algorithm>.
+	(languages): Redefine as const array.
+	(languages_size, languages_allocsize, DEFAULT_ALLOCSIZE): Delete.
+	(set_language_command): Handle "local".  Use for-range loop.
+	(set_language): Remove loop.
+	(language_enum): Rewrite.
+	(language_def, language_str): Remove loops.
+	(add_language): Delete.
+	(add_set_language_command): New, based on add_languages.
+	(skip_language_trampoline): Adjust.
+	(local_language_defn): Delete.
+	(language_gdbarch_post_init): Adjust.
+	(_initialize_language): Remove add_language calls.  Call
+	add_set_language_command.
+	* language.h (add_language): Delete.
+	(auto_language_defn)
+	(unknown_language_defn, minimal_language_defn, ada_language_defn)
+	(asm_language_defn, c_language_defn, cplus_language_defn)
+	(d_language_defn, f_language_defn, go_language_defn)
+	(m2_language_defn, objc_language_defn, opencl_language_defn)
+	(pascal_language_defn, rust_language_defn): Declare.
+	* m2-lang.c (m2_language_defn): Make extern.
+	(_initialize_m2_language): Remove add_language call.
+	* objc-lang.c (objc_language_defn): Make extern.
+	(_initialize_objc_language): Remove add_language call.
+	* opencl-lang.c (opencl_language_defn): Make extern.
+	(_initialize_opencl_language): Remove add_language call.
+	* p-lang.c (pascal_language_defn): Make extern.
+	(_initialize_pascal_language): Delete.
+	* rust-lang.c (rust_language_defn): Make extern.
+	(_initialize_rust_language): Delete.
+	* utils.h (compare_cstrings): New static inline function.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (ada_to_fixed_type_1): Adjust.
 	(get_var_value): Constify parameters.
 	(get_int_var_value): Change prototype.

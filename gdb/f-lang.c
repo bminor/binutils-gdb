@@ -245,7 +245,7 @@ static const char *f_extensions[] =
   NULL
 };
 
-const struct language_defn f_language_defn =
+extern const struct language_defn f_language_defn =
 {
   "fortran",
   "Fortran",
@@ -369,6 +369,4 @@ void
 _initialize_f_language (void)
 {
   f_type_data = gdbarch_data_register_post_init (build_fortran_types);
-
-  add_language (&f_language_defn);
 }

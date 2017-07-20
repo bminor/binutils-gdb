@@ -1,5 +1,9 @@
 2017-07-20  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/default.exp (set language): Adjust expected output.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/dmsym.c (pck__foo__bar__minsym): Rename to ...
 	(test_minsym): ... this, and make static.
 	(get_pck__foo__bar__minsym): Rename to ...

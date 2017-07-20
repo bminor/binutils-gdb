@@ -2026,14 +2026,6 @@ completion_result::release_match_list ()
   return ret;
 }
 
-/* Compare C strings for std::sort.  */
-
-static bool
-compare_cstrings (const char *str1, const char *str2)
-{
-  return strcmp (str1, str2) < 0;
-}
-
 /* See completer.h  */
 
 void

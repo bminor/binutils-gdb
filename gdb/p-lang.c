@@ -32,9 +32,6 @@
 #include <ctype.h>
 #include "c-lang.h"
 
-extern void _initialize_pascal_language (void);
-
-
 /* All GPC versions until now (2007-09-27) also define a symbol called
    '_p_initialize'.  Check for the presence of this symbol first.  */
 static const char GPC_P_INITIALIZE[] = "_p_initialize";
@@ -418,7 +415,7 @@ static const char *p_extensions[] =
   ".pas", ".p", ".pp", NULL
 };
 
-const struct language_defn pascal_language_defn =
+extern const struct language_defn pascal_language_defn =
 {
   "pascal",			/* Language name */
   "Pascal",
@@ -464,9 +461,3 @@ const struct language_defn pascal_language_defn =
   NULL,
   LANG_MAGIC
 };
-
-void
-_initialize_pascal_language (void)
-{
-  add_language (&pascal_language_defn);
-}

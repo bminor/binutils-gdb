@@ -13960,7 +13960,7 @@ static const char *ada_extensions[] =
   ".adb", ".ads", ".a", ".ada", ".dg", NULL
 };
 
-const struct language_defn ada_language_defn = {
+extern const struct language_defn ada_language_defn = {
   "ada",                        /* Language name */
   "Ada",
   language_ada,
@@ -14090,8 +14090,6 @@ ada_free_objfile_observer (struct objfile *objfile)
 void
 _initialize_ada_language (void)
 {
-  add_language (&ada_language_defn);
-
   initialize_ada_catchpoint_ops ();
 
   add_prefix_cmd ("ada", no_class, set_ada_command,

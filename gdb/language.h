@@ -568,10 +568,6 @@ extern const struct language_defn *language_def (enum language);
 
 extern const char *language_str (enum language);
 
-/* Add a language to the set known by GDB (at initialization time).  */
-
-extern void add_language (const struct language_defn *);
-
 /* Check for a language-specific trampoline.  */
 
 extern CORE_ADDR skip_language_trampoline (struct frame_info *, CORE_ADDR pc);
@@ -617,5 +613,24 @@ void default_get_string (struct value *value, gdb_byte **buffer, int *length,
 
 void c_get_string (struct value *value, gdb_byte **buffer, int *length,
 		   struct type **char_type, const char **charset);
+
+/* The languages supported by GDB.  */
+
+extern const struct language_defn auto_language_defn;
+extern const struct language_defn unknown_language_defn;
+extern const struct language_defn minimal_language_defn;
+
+extern const struct language_defn ada_language_defn;
+extern const struct language_defn asm_language_defn;
+extern const struct language_defn c_language_defn;
+extern const struct language_defn cplus_language_defn;
+extern const struct language_defn d_language_defn;
+extern const struct language_defn f_language_defn;
+extern const struct language_defn go_language_defn;
+extern const struct language_defn m2_language_defn;
+extern const struct language_defn objc_language_defn;
+extern const struct language_defn opencl_language_defn;
+extern const struct language_defn pascal_language_defn;
+extern const struct language_defn rust_language_defn;
 
 #endif /* defined (LANGUAGE_H) */
