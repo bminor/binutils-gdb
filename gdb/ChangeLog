@@ -1,5 +1,13 @@
 2017-07-20  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (ada_to_fixed_type_1): Adjust.
+	(get_var_value): Constify parameters.
+	(get_int_var_value): Change prototype.
+	(to_fixed_range_type): Adjust.
+	* ada-lang.h (get_int_var_value): Change prototype.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (dw2_lookup_symbol): Use
 	SYMBOL_MATCHES_SEARCH_NAME.
 	* psymtab.c (psym_lookup_symbol): Use SYMBOL_MATCHES_SEARCH_NAME.

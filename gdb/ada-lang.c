@@ -194,8 +194,6 @@ static void move_bits (gdb_byte *, int, const gdb_byte *, int, int, int);
 static struct value *coerce_unspec_val_to_type (struct value *,
                                                 struct type *);
 
-static struct value *get_var_value (char *, char *);
-
 static int lesseq_defined_than (struct symbol *, struct symbol *);
 
 static int equiv_types (struct type *, struct type *);
@@ -8989,12 +8987,11 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
             const char *name = ada_type_name (fixed_record_type);
             char *xvz_name
 	      = (char *) alloca (strlen (name) + 7 /* "___XVZ\0" */);
-            int xvz_found = 0;
             LONGEST size;
 
             xsnprintf (xvz_name, strlen (name) + 7, "%s___XVZ", name);
-            size = get_int_var_value (xvz_name, &xvz_found);
-            if (xvz_found && TYPE_LENGTH (fixed_record_type) != size)
+            if (get_int_var_value (xvz_name, size)
+		&& TYPE_LENGTH (fixed_record_type) != size)
               {
                 fixed_record_type = copy_type (fixed_record_type);
                 TYPE_LENGTH (fixed_record_type) = size;
@@ -11614,7 +11611,7 @@ scan_discrim_bound (const char *str, int k, struct value *dval, LONGEST * px,
    otherwise causes an error with message ERR_MSG.  */
 
 static struct value *
-get_var_value (char *name, char *err_msg)
+get_var_value (const char *name, const char *err_msg)
 {
   struct block_symbol *syms;
   int nsyms;
@@ -11633,27 +11630,20 @@ get_var_value (char *name, char *err_msg)
   return value_of_variable (syms[0].symbol, syms[0].block);
 }
 
-/* Value of integer variable named NAME in the current environment.  If
-   no such variable found, returns 0, and sets *FLAG to 0.  If
-   successful, sets *FLAG to 1.  */
+/* Value of integer variable named NAME in the current environment.
+   If no such variable is found, returns false.  Otherwise, sets VALUE
+   to the variable's value and returns true.  */
 
-LONGEST
-get_int_var_value (char *name, int *flag)
+bool
+get_int_var_value (const char *name, LONGEST &value)
 {
   struct value *var_val = get_var_value (name, 0);
 
   if (var_val == 0)
-    {
-      if (flag != NULL)
-        *flag = 0;
-      return 0;
-    }
-  else
-    {
-      if (flag != NULL)
-        *flag = 1;
-      return value_as_long (var_val);
-    }
+    return false;
+
+  value = value_as_long (var_val);
+  return true;
 }
 
 
@@ -11725,11 +11715,8 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
         }
       else
         {
-          int ok;
-
           strcpy (name_buf + prefix_len, "___L");
-          L = get_int_var_value (name_buf, &ok);
-          if (!ok)
+          if (!get_int_var_value (name_buf, L))
             {
               lim_warning (_("Unknown lower bound, using 1."));
               L = 1;
@@ -11744,11 +11731,8 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
         }
       else
         {
-          int ok;
-
           strcpy (name_buf + prefix_len, "___U");
-          U = get_int_var_value (name_buf, &ok);
-          if (!ok)
+          if (!get_int_var_value (name_buf, U))
             {
               lim_warning (_("Unknown upper bound, using %ld."), (long) L);
               U = L;
