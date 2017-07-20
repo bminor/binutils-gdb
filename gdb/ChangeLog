@@ -1,5 +1,16 @@
 2017-07-20  Pedro Alves  <palves@redhat.com>
 
+	* block.c (block_iter_name_step, block_iter_name_first)
+	(block_iter_name_next): Delete.
+	(block_lookup_symbol_primary): Adjust to use
+	dict_iter_match_first/dict_iter_match_next.
+	* block.h (block_iter_name_first, block_iter_name_next): Delete
+	declarations.
+	(ALL_BLOCK_SYMBOLS_WITH_NAME): Adjust to use
+	dict_iter_match_first/dict_iter_match_next.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
 	* cp-support.c (cp_find_first_component_aux): Add missing case for
 	end of string.
 
