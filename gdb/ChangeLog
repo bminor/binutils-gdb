@@ -1,5 +1,11 @@
 2017-07-20  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2read.c (dw2_lookup_symbol): Use
+	SYMBOL_MATCHES_SEARCH_NAME.
+	* psymtab.c (psym_lookup_symbol): Use SYMBOL_MATCHES_SEARCH_NAME.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
 	* block.c (block_iter_name_step, block_iter_name_first)
 	(block_iter_name_next): Delete.
 	(block_lookup_symbol_primary): Adjust to use

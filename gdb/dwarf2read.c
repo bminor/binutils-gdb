@@ -3907,10 +3907,10 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 	     information (but NAME might contain it).  */
 
 	  if (sym != NULL
-	      && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
+	      && SYMBOL_MATCHES_SEARCH_NAME (sym, name))
 	    return stab;
 	  if (with_opaque != NULL
-	      && strcmp_iw (SYMBOL_SEARCH_NAME (with_opaque), name) == 0)
+	      && SYMBOL_MATCHES_SEARCH_NAME (with_opaque, name))
 	    stab_best = stab;
 
 	  /* Keep looking through other CUs.  */
