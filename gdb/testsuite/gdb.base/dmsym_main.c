@@ -15,18 +15,18 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-extern int get_pck__foo__bar__minsym (void);
+extern int get_test_minsym (void);
 
-int
-pck__foo__bar__minsym__2 (void)
+static int
+test_minsym (void)
 {
-  return get_pck__foo__bar__minsym ();
+  return get_test_minsym ();
 }
 
 int
 main (void)
 {
-  int val = pck__foo__bar__minsym__2 ();
+  int val = test_minsym ();
 
   if (val != 124) /* BREAK */
     return 1;

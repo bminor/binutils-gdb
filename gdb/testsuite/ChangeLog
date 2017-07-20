@@ -1,3 +1,17 @@
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/dmsym.c (pck__foo__bar__minsym): Rename to ...
+	(test_minsym): ... this, and make static.
+	(get_pck__foo__bar__minsym): Rename to ...
+	(get_test_minsym): ... this.
+	* gdb.base/dmsym.exp (): Remove "set language ada" call.  Adjust
+	symbol names and comments.
+	* gdb.base/dmsym_main.c (get_pck__foo__bar__minsym): Rename to ...
+	(get_test_minsym): ... this.
+	(pck__foo__bar__minsym__2): Rename to ...
+	(test_minsym): ... this.
+	(main): Adjust.
+
 2017-07-17  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/completion.exp: Adjust expected output.
