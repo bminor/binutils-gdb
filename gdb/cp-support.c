@@ -1009,6 +1009,8 @@ cp_find_first_component_aux (const char *name, int permissive)
 		++index;
 	      switch (name[index])
 		{
+		case '\0':
+		  return index;
 		  /* Skip over one less than the appropriate number of
 		     characters: the for loop will skip over the last
 		     one.  */
