@@ -1,3 +1,9 @@
+2017-07-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf.c (last_pointer_size, warned_about_missing_comp_units):
+	Remove.
+	(load_debug_info): Remove assignments to those two variables.
+
 2017-07-21  Alexandre Oliva  <aoliva@redhat.com>
 
 	* dwarf.c (struct State_Machine_Registers): Add view field.

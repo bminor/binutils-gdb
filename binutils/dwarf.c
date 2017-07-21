@@ -40,9 +40,6 @@ static const char *regname (unsigned int regno, int row);
 static int have_frame_base;
 static int need_base_address;
 
-static unsigned int last_pointer_size = 0;
-static int warned_about_missing_comp_units = FALSE;
-
 static unsigned int num_debug_info_entries = 0;
 static unsigned int alloc_num_debug_info_entries = 0;
 static debug_info *debug_information = NULL;
@@ -2923,11 +2920,6 @@ process_debug_info (struct dwarf_section *section,
 static unsigned int
 load_debug_info (void * file)
 {
-  /* Reset the last pointer size so that we can issue correct error
-     messages if we are displaying the contents of more than one section.  */
-  last_pointer_size = 0;
-  warned_about_missing_comp_units = FALSE;
-
   /* If we have already tried and failed to load the .debug_info
      section then do not bother to repeat the task.  */
   if (num_debug_info_entries == DEBUG_INFO_UNAVAILABLE)
