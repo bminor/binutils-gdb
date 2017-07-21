@@ -1,3 +1,10 @@
+2017-07-25  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/21717
+	* arm-linux-nat.c (arm_linux_fetch_inferior_registers): Update
+	condition for FPSCR.
+	(arm_linux_store_inferior_registers): Likewise.
+
 2017-07-22  Tom Tromey  <tom@tromey.com>
 
 	* break-catch-syscall.c (struct catch_syscall_inferior_data)
