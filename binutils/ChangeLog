@@ -1,3 +1,7 @@
+2017-07-21  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
 2017-07-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* dwarf.c (last_pointer_size, warned_about_missing_comp_units):
