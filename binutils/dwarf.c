@@ -8158,7 +8158,7 @@ display_gdb_index (struct dwarf_section *section,
   /* PR 17531: file: 18a47d3d.  */
   if (symbol_table_offset < address_table_offset)
     {
-      warn (_("Symbol table offset (%xl) is less then Address table offset (%x)\n"),
+      warn (_("Symbol table offset (%x) is less then Address table offset (%x)\n"),
 	    symbol_table_offset, address_table_offset);
       return 0;
     }
