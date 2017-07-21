@@ -1,3 +1,10 @@
+2017-07-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* config/tc-s390.c (s390_parse_cpu): Add z14 as alternate CPU
+	name.
+	* doc/as.texinfo: Add z14 to CPU string list.
+	* doc/c-s390.texi: Likewise.
+
 2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/jli-1.d: New file.

@@ -1,3 +1,8 @@
+2017-07-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-mkopc.c (main): Enable z14 as CPU string in the opcode
+	table.
+
 2017-07-20  Nick Clifton  <nickc@redhat.com>
 
 	* po/de.po: Updated German translation.
