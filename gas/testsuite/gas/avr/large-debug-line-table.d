@@ -9,7 +9,7 @@
 Decoded dump of debug contents of section \.debug_line:
 
 CU: large-debug-line-table\.c:
-File name                            Line number    Starting address
+File name                            Line number    Starting address.*
 large-debug-line-table\.c                       1                   0
 
 #...

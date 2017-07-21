@@ -5384,7 +5384,7 @@ s_leb128 (int sign)
 
   do
     {
-      expression (&exp);
+      deferred_expression (&exp);
       emit_leb128_expr (&exp, sign);
     }
   while (*input_line_pointer++ == ',');

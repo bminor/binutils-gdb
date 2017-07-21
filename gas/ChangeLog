@@ -5,6 +5,80 @@
 	* doc/as.texinfo: Add z14 to CPU string list.
 	* doc/c-s390.texi: Likewise.
 
+2017-07-21  Alexandre Oliva  <aoliva@redhat.com>
+
+	* dwarf2dbg.c (unused): Check offset of next in struct line_entry.
+	(current): Initialize view.
+	(force_reset_view, view_assert_failed): New variables.
+	(reverse_line_entry_list): New function.
+	(set_or_check_view): Likewise.
+	(dwarf2_gen_line_info_1): Call it.
+	(dwarf2_where): Set view to NULL.
+	(dwarf2_emit_insn): Return early when called before first file.
+	(dwarf2_directive_loc): Add view support.  Emit insn
+	immediately when view option is given.
+	(process_entries): Avoid set_address to reset view when a known
+	address change already implies the view reset.
+	(dwarf2dbg_final_check): New function.
+	* dwarf2dbg.h (struct dwarf2_line_info): Add view.
+	(dwarf2dbg_final_check): Declare.
+	* read.c (s_leb128): Parse expression as deferred.
+	* write.c (write_object_file): Check pending view asserts.
+	(cvt_frag_to_fill): Complain about undefined leb128 operand.
+	* doc/as.texinfo (.loc): Document view support.
+	* NEWS: Mention the new feature.
+	* testsuite/gas/all/gas.exp: Run sleb128-9.
+	* testsuite/gas/all/sleb128-9.d: New.
+	* testsuite/gas/all/sleb128-9.l: New.
+	* testsuite/gas/all/sleb128-9.s: New.
+	* testsuite/gas/elf/dwarf2-1.d: Add nonzero views.
+	* testsuite/gas/elf/dwarf2-2.d: Likewise.
+	* testsuite/gas/elf/dwarf2-5.d: New.
+	* testsuite/gas/elf/dwarf2-5.s: New.
+	* testsuite/gas/elf/dwarf2-6.d: New.
+	* testsuite/gas/elf/dwarf2-6.s: New.
+	* testsuite/gas/elf/dwarf2-7.d: New.
+	* testsuite/gas/elf/dwarf2-7.s: New.
+	* testsuite/gas/elf/dwarf2-8.d: New.
+	* testsuite/gas/elf/dwarf2-8.l: New.
+	* testsuite/gas/elf/dwarf2-8.s: New.
+	* testsuite/gas/elf/dwarf2-9.d: New.
+	* testsuite/gas/elf/dwarf2-9.l: New.
+	* testsuite/gas/elf/dwarf2-9.s: New.
+	* testsuite/gas/elf/dwarf2-10.d: New.
+	* testsuite/gas/elf/dwarf2-10.l: New.
+	* testsuite/gas/elf/dwarf2-10.s: New.
+	* testsuite/gas/elf/dwarf2-11.d: New.
+	* testsuite/gas/elf/dwarf2-11.s: New.
+	* testsuite/gas/elf/dwarf2-12.d: New.
+	* testsuite/gas/elf/dwarf2-12.s: New.
+	* testsuite/gas/elf/dwarf2-13.d: New.
+	* testsuite/gas/elf/dwarf2-13.s: New.
+	* testsuite/gas/elf/dwarf2-14.d: New.
+	* testsuite/gas/elf/dwarf2-14.s: New.
+	* testsuite/gas/elf/dwarf2-15.d: New.
+	* testsuite/gas/elf/dwarf2-15.s: New.
+	* testsuite/gas/elf/dwarf2-16.d: New.
+	* testsuite/gas/elf/dwarf2-16.s: New.
+	* testsuite/gas/elf/dwarf2-17.d: New.
+	* testsuite/gas/elf/dwarf2-17.s: New.
+	* testsuite/gas/elf/dwarf2-18.d: New.
+	* testsuite/gas/elf/dwarf2-18.s: New.
+	* testsuite/gas/elf/elf.exp: Run dwarf2-5..18 tests.
+	* testsuite/gas/i386/dw2-compress-1.d: Add nonzero views.
+	* testsuite/gas/i386/dw2-compressed-1.d: Likewise.
+	* testsuite/gas/i386/ilp32/lns/lns-duplicate.d: Likewise.
+	* testsuite/gas/lns/lns-big-delta.d: Likewise.
+	* testsuite/gas/lns/lns-duplicate.d: Likewise.
+	* testsuite/gas/mips/loc-swap-2.d: Likewise.
+	* testsuite/gas/mips/loc-swap-3.d: Likewise.
+	* testsuite/gas/mips/loc-swap.d: Likewise.
+	* testsuite/gas/mips/micromips@loc-swap-2.d: Likewise.
+	* testsuite/gas/mips/micromips@loc-swap.d: Likewise.
+	* testsuite/gas/mips/mips16@loc-swap-2.d: Likewise.
+	* testsuite/gas/mips/mips16@loc-swap.d: Likewise.
+	* testsuite/gas/mips/mips16e@loc-swap.d: Likewise.
+
 2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/gas/arc/jli-1.d: New file.

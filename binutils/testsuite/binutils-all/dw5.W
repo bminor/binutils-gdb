@@ -345,10 +345,12 @@ Raw dump of debug contents of section .debug_line:
 Decoded dump of debug contents of section .debug_line:
 
 CU: ./main.c:
-File name                            Line number    Starting address
+File name                            Line number    Starting address    View
 main.c                                         6              0x1234
 main.c                                         6             0x12346
+main.c                                         6              0x1234
 
+main.c                                         5              0x1234
 main.c                                         5              0x1234
 main.c                                         5              0x1234
 
