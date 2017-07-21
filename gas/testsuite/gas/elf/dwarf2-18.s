@@ -23,9 +23,9 @@ _start:
 	.file 1 "dwarf2-18.c"
 	.loc 1 1
 	.loc 1 2 view .L1
-	.int 0
+	.dc.l 0
 	.loc 1 3 view .L2
-	.int 0
+	.dc.l 0
 	.size _start, .-_start
 
 	.section .rodata

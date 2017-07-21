@@ -162,7 +162,8 @@
 #define TC_PARSE_CONS_RETURN_NONE BFD_RELOC_NONE
 #endif
 
-struct line_entry {
+struct line_entry
+{
   struct line_entry *next;
   symbolS *label;
   struct dwarf2_line_info loc;
@@ -173,7 +174,8 @@ struct line_entry {
 static char unused[offsetof(struct line_entry, next) ? -1 : 1]
 ATTRIBUTE_UNUSED;
 
-struct line_subseg {
+struct line_subseg
+{
   struct line_subseg *next;
   subsegT subseg;
   struct line_entry *head;
@@ -181,7 +183,8 @@ struct line_subseg {
   struct line_entry **pmove_tail;
 };
 
-struct line_seg {
+struct line_seg
+{
   struct line_seg *next;
   segT seg;
   struct line_subseg *head;
@@ -193,7 +196,8 @@ struct line_seg {
 static struct line_seg *all_segs;
 static struct line_seg **last_seg_ptr;
 
-struct file_entry {
+struct file_entry
+{
   const char *filename;
   unsigned int dir;
 };
@@ -217,7 +221,8 @@ bfd_boolean dwarf2_loc_directive_seen;
 bfd_boolean dwarf2_loc_mark_labels;
 
 /* Current location as indicated by the most recent .loc directive.  */
-static struct dwarf2_line_info current = {
+static struct dwarf2_line_info current =
+{
   1, 1, 0, 0,
   DWARF2_LINE_DEFAULT_IS_STMT ? DWARF2_FLAG_IS_STMT : 0,
   0, NULL
@@ -302,6 +307,7 @@ static struct line_entry *
 reverse_line_entry_list (struct line_entry *h)
 {
   struct line_entry *p = NULL, *e, *n;
+
   for (e = h; e; e = n)
     {
       n = e->next;
@@ -314,14 +320,14 @@ reverse_line_entry_list (struct line_entry *h)
 /* Compute the view for E based on the previous entry P.  If we
    introduce an (undefined) view symbol for P, and H is given (P must
    be the tail in this case), introduce view symbols for earlier list
-   entries as well, until one of them is constant.
- */
+   entries as well, until one of them is constant.  */
 
 static void
 set_or_check_view (struct line_entry *e, struct line_entry *p,
 		   struct line_entry *h)
 {
   expressionS viewx;
+
   memset (&viewx, 0, sizeof (viewx));
   viewx.X_unsigned = 1;
 
@@ -387,13 +393,14 @@ set_or_check_view (struct line_entry *e, struct line_entry *p,
 
   if (viewx.X_op != O_constant || viewx.X_add_number)
     {
+      expressionS incv;
+
       if (!p->loc.view)
 	{
 	  p->loc.view = symbol_temp_make ();
 	  gas_assert (!S_IS_DEFINED (p->loc.view));
 	}
 
-      expressionS incv;
       memset (&incv, 0, sizeof (incv));
       incv.X_unsigned = 1;
       incv.X_op = O_symbol;
@@ -425,18 +432,22 @@ set_or_check_view (struct line_entry *e, struct line_entry *p,
      compute E's.  */
   if (h && p && p->loc.view && !S_IS_DEFINED (p->loc.view))
     {
+      struct line_entry *h2;
       /* Reverse the list to avoid quadratic behavior going backwards
 	 in a single-linked list.  */
       struct line_entry *r = reverse_line_entry_list (h);
+
       gas_assert (r == p);
       /* Set or check views until we find a defined or absent view.  */
       do
 	set_or_check_view (r, r->next, NULL);
       while (r->next && r->next->loc.view && !S_IS_DEFINED (r->next->loc.view)
 	     && (r = r->next));
+
       /* Unreverse the list, so that we can go forward again.  */
-      struct line_entry *h2 = reverse_line_entry_list (p);
+      h2 = reverse_line_entry_list (p);
       gas_assert (h2 == h);
+
       /* Starting from the last view we just defined, attempt to
 	 simplify the view expressions, until we do so to P.  */
       do
@@ -525,8 +536,10 @@ dwarf2_where (struct dwarf2_line_info *line)
 {
   if (debug_type == DEBUG_DWARF2)
     {
+      const char *filename;
+
       memset (line, 0, sizeof (*line));
-      const char *filename = as_where (&line->line);
+      filename = as_where (&line->line);
       line->filenum = get_filenum (filename, 0);
       line->column = 0;
       line->flags = DWARF2_FLAG_IS_STMT;
@@ -902,13 +915,16 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	}
       else if (strcmp (p, "view") == 0)
 	{
-	  (void) restore_line_pointer (c);
 	  symbolS *sym;
+
+	  (void) restore_line_pointer (c);
 	  SKIP_WHITESPACE ();
+
 	  if (ISDIGIT (*input_line_pointer)
 	      || *input_line_pointer == '-')
 	    {
 	      bfd_boolean force_reset = *input_line_pointer == '-';
+
 	      value = get_absolute_expression ();
 	      if (value != 0)
 		{
@@ -928,6 +944,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	  else
 	    {
 	      char *name = read_symbol_name ();
+
 	      if (!name)
 		return;
 	      sym = symbol_find_or_make (name);
@@ -1591,8 +1608,8 @@ process_entries (segT seg, struct line_entry *e)
 
       if (last_frag == NULL
 	  || (e->loc.view == force_reset_view && force_reset_view
-	      /* If we're to reset the view, but we know we're
-		 advancing PC, we don't have to force with
+	      /* If we're going to reset the view, but we know we're
+		 advancing the PC, we don't have to force with
 		 set_address.  We know we do when we're at the same
 		 address of the same frag, and we know we might when
 		 we're in the beginning of a frag, and we were at the
@@ -2226,10 +2243,14 @@ dwarf2dbg_final_check (void)
      holding the check value in X_op_symbol.  */
   while (view_assert_failed)
     {
+      expressionS *expr;
+      symbolS *sym;
+      offsetT failed;
+
       gas_assert (!symbol_resolved_p (view_assert_failed));
 
-      expressionS *expr = symbol_get_value_expression (view_assert_failed);
-      symbolS *sym = view_assert_failed;
+      expr = symbol_get_value_expression (view_assert_failed);
+      sym = view_assert_failed;
 
       /* If view_assert_failed looks like a compound check in the
 	 chain, break it up.  */
@@ -2241,7 +2262,7 @@ dwarf2dbg_final_check (void)
       else
 	view_assert_failed = NULL;
 
-      offsetT failed = resolve_symbol_value (sym);
+      failed = resolve_symbol_value (sym);
       if (!symbol_resolved_p (sym) || failed)
 	{
 	  as_bad (_("view number mismatch"));

@@ -431,8 +431,8 @@ typedef struct State_Machine_Registers
   int basic_block;
   unsigned char op_index;
   unsigned char end_sequence;
-/* This variable hold the number of the last entry seen
-   in the File Table.  */
+  /* This variable hold the number of the last entry seen
+     in the File Table.  */
   unsigned int last_file_entry;
 } SMR;
 
@@ -3397,8 +3397,8 @@ display_debug_lines_raw (struct dwarf_section *section,
 			= ((state_machine_regs.op_index + uladv)
 			    / linfo.li_max_ops_per_insn)
 			* linfo.li_min_insn_length;
-		      state_machine_regs.address
-			+= addrdelta;
+
+		      state_machine_regs.address += addrdelta;
 		      state_machine_regs.op_index
 			= (state_machine_regs.op_index + uladv)
 			% linfo.li_max_ops_per_insn;

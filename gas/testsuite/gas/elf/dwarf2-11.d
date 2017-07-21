@@ -1,6 +1,10 @@
 #as:
 #readelf: -wL
 #name: DWARF2 11
+# The am3 avr cr16 crx mn10 msp430 nds32 pru rl78 and xtensa targets do not evaluate the subtraction of symbols at assembly time
+# The riscv targets do not support the subtraction of symbols.
+# The tile targets require 8-byte instructions, but the test only simulates 4-byte instructions.
+#not-target: am3-* avr-* cr16-* crx-* m32c-* mn10*-* msp430-* nds32*-* pru-* riscv*-* rl78-* tile*-* xtensa-*
 
 Decoded dump of debug contents of section \.debug_line:
 

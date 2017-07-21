@@ -21,7 +21,7 @@
 	.globl _start
 _start:
 	.file 1 "dwarf2-11.c"
-	.int 0
+	.dc.l 0
 	.loc 1 1 view 0
 	.balign 8
 	.loc 1 2 view 0
