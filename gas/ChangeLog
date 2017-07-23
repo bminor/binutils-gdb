@@ -1,3 +1,8 @@
+2017-07-24  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* dwarf2dbg.c (dwarf2dbg_final_check): Rename local variable exp
+	from expr.
+
 2017-07-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* config/tc-s390.c (s390_parse_cpu): Add z14 as alternate CPU

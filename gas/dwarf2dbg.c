@@ -2243,21 +2243,21 @@ dwarf2dbg_final_check (void)
      holding the check value in X_op_symbol.  */
   while (view_assert_failed)
     {
-      expressionS *expr;
+      expressionS *exp;
       symbolS *sym;
       offsetT failed;
 
       gas_assert (!symbol_resolved_p (view_assert_failed));
 
-      expr = symbol_get_value_expression (view_assert_failed);
+      exp = symbol_get_value_expression (view_assert_failed);
       sym = view_assert_failed;
 
       /* If view_assert_failed looks like a compound check in the
 	 chain, break it up.  */
-      if (expr->X_op == O_add && expr->X_add_number == 0 && expr->X_unsigned)
+      if (exp->X_op == O_add && exp->X_add_number == 0 && exp->X_unsigned)
 	{
-	  view_assert_failed = expr->X_add_symbol;
-	  sym = expr->X_op_symbol;
+	  view_assert_failed = exp->X_add_symbol;
+	  sym = exp->X_op_symbol;
 	}
       else
 	view_assert_failed = NULL;
