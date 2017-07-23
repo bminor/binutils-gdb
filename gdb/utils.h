@@ -85,8 +85,6 @@ extern int parse_pid_to_attach (const char *args);
 
 extern int parse_escape (struct gdbarch *, const char **);
 
-char **gdb_buildargv (const char *);
-
 /* A wrapper for an array of char* that was allocated in the way that
    'buildargv' does, and should be freed with 'freeargv'.  */
 
@@ -206,8 +204,6 @@ private:
 
 
 /* Cleanup utilities.  */
-
-extern struct cleanup *make_cleanup_freeargv (char **);
 
 struct ui_out;
 extern struct cleanup *

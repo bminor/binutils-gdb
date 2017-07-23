@@ -136,18 +136,6 @@ show_pagination_enabled (struct ui_file *file, int from_tty,
    because while they use the "cleanup API" they are not part of the
    "cleanup API".  */
 
-static void
-do_freeargv (void *arg)
-{
-  freeargv ((char **) arg);
-}
-
-struct cleanup *
-make_cleanup_freeargv (char **arg)
-{
-  return make_cleanup (do_freeargv, arg);
-}
-
 /* Helper function for make_cleanup_ui_out_redirect_pop.  */
 
 static void
@@ -2875,21 +2863,6 @@ gdb_argv::reset (const char *s)
 
   freeargv (m_argv);
   m_argv = argv;
-}
-
-/* Call libiberty's buildargv, and return the result.
-   If buildargv fails due to out-of-memory, call nomem.
-   Therefore, the returned value is guaranteed to be non-NULL,
-   unless the parameter itself is NULL.  */
-
-char **
-gdb_buildargv (const char *s)
-{
-  char **argv = buildargv (s);
-
-  if (s != NULL && argv == NULL)
-    malloc_failure (0);
-  return argv;
 }
 
 int
