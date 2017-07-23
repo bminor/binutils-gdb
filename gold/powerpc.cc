@@ -3987,7 +3987,7 @@ static const unsigned char glink_eh_frame_fde_64v1[] =
   0,					// Augmentation size.
   elfcpp::DW_CFA_advance_loc + 1,
   elfcpp::DW_CFA_register, 65, 12,
-  elfcpp::DW_CFA_advance_loc + 4,
+  elfcpp::DW_CFA_advance_loc + 5,
   elfcpp::DW_CFA_restore_extended, 65
 };
 
@@ -3999,7 +3999,7 @@ static const unsigned char glink_eh_frame_fde_64v2[] =
   0,					// Augmentation size.
   elfcpp::DW_CFA_advance_loc + 1,
   elfcpp::DW_CFA_register, 65, 0,
-  elfcpp::DW_CFA_advance_loc + 4,
+  elfcpp::DW_CFA_advance_loc + 7,
   elfcpp::DW_CFA_restore_extended, 65
 };
 
