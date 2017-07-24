@@ -3219,6 +3219,11 @@ void _bfd_generic_set_reloc
     arelent **relptr,
     unsigned int count);
 
+bfd_boolean _bfd_unrecognized_reloc
+   (bfd * abfd,
+    sec_ptr section,
+    unsigned int r_type);
+
 /* Extracted from archures.c.  */
 extern const bfd_arch_info_type bfd_default_arch_struct;
 const bfd_arch_info_type *bfd_default_compatible

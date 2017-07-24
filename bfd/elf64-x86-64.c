@@ -4314,14 +4314,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	}
 
       if (r_type >= (int) R_X86_64_standard)
-	{
-	  _bfd_error_handler
-	    /* xgettext:c-format */
-	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
-	     input_bfd, r_type, input_section);
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
-	}
+	return _bfd_unrecognized_reloc (input_bfd, input_section, r_type);
 
       if (r_type != (int) R_X86_64_32
 	  || ABI_64_P (output_bfd))

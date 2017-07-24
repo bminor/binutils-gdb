@@ -50,6 +50,7 @@ SECTION
 #include "bfd.h"
 #include "bfdlink.h"
 #include "libbfd.h"
+#include "bfdver.h"
 /*
 DOCDD
 INODE
@@ -8281,13 +8282,43 @@ DESCRIPTION
 	Installs a new set of internal relocations in SECTION.
 */
 
-
-void _bfd_generic_set_reloc
-  (bfd *abfd ATTRIBUTE_UNUSED,
-   sec_ptr section,
-   arelent **relptr,
-   unsigned int count)
+void
+_bfd_generic_set_reloc (bfd *abfd ATTRIBUTE_UNUSED,
+			sec_ptr section,
+			arelent **relptr,
+			unsigned int count)
 {
   section->orelocation = relptr;
   section->reloc_count = count;
+}
+
+/*
+INTERNAL_FUNCTION
+	_bfd_unrecognized_reloc
+
+SYNOPSIS
+	bfd_boolean _bfd_unrecognized_reloc
+	  (bfd * abfd,
+	   sec_ptr section,
+	   unsigned int r_type);
+
+DESCRIPTION
+	Reports an unrecognized reloc.
+	Written as a function in order to reduce code duplication.
+	Returns FALSE so that it can be called from a return statement.
+*/
+
+bfd_boolean
+_bfd_unrecognized_reloc (bfd * abfd, sec_ptr section, unsigned int r_type)
+{
+   /* xgettext:c-format */
+  _bfd_error_handler (_("%B: unrecognized relocation (%#x) in section `%A'"),
+		      abfd, r_type, section);
+
+  /* PR 21803: Suggest the most likely cause of this error.  */
+  _bfd_error_handler (_("Is this version of the linker - %s - out of date ?"),
+		      BFD_VERSION_STRING);
+
+  bfd_set_error (bfd_error_bad_value);
+  return FALSE;
 }

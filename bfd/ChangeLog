@@ -1,3 +1,17 @@
+2017-07-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 21803
+	* reloc.c (_bfd_unrecognized_reloc): New function.  Reports
+	an unrecognized reloc and sets the bfd_error value.
+	* libbfd.h: Regenerate.
+	* elf32-arm.c (elf32_arm_final_link_relocate): Use the new
+	function.
+	* elf32-i386.c (elf_i386_relocate_section): Likewise.
+	* elf32-tilepro.c (tilepro_elf_relocate_section): Likewise.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_relocate_section): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_relocate_section): Likewise.
+
 2017-07-23  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_size_stubs): Correct advance to

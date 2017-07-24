@@ -9906,6 +9906,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
     return bfd_reloc_notsupported;
 
   BFD_ASSERT (is_arm_elf (input_bfd));
+  BFD_ASSERT (howto != NULL);
 
   /* Some relocation types map to different relocations depending on the
      target.  We pick the right one here.  */
@@ -12289,8 +12290,10 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	  || r_type == R_ARM_GNU_VTINHERIT)
 	continue;
 
-      bfd_reloc.howto = elf32_arm_howto_from_type (r_type);
-      howto = bfd_reloc.howto;
+      howto = bfd_reloc.howto = elf32_arm_howto_from_type (r_type);
+
+      if (howto == NULL)
+	return _bfd_unrecognized_reloc (input_bfd, input_section, r_type);
 
       h = NULL;
       sym = NULL;
