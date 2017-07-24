@@ -1,5 +1,9 @@
 2017-07-24  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
 
+	* gas/testsuite/gas/aarch64/mapping_5.d: Remove extra symbol from
+	superflous padding.
+	* gas/testsuite/gas/aarch64/mapping_6.d: Likewise.
+
 	Backport from master.
 
 	2015-03-13  Jiong Wang  <jiong.wang@arm.com>
