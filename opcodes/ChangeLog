@@ -1,3 +1,10 @@
+2017-07-24  Laurent Desnogues  <laurent.desnogues@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64-gen.c (print_decision_tree_1): Reverse the index of PATTERN to
+	correct the print.
+	* aarch64-dis-2.c: Regenerated.
+
 2017-07-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* s390-mkopc.c (main): Enable z14 as CPU string in the opcode
