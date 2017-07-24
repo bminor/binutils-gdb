@@ -473,6 +473,14 @@ _bfd_vms_slurp_eihd (bfd *abfd, unsigned int *eisd_offset,
 
   vms_debug2 ((8, "_bfd_vms_slurp_eihd\n"));
 
+  /* PR 21813: Check for an undersized record.  */
+  if (PRIV (recrd.buf_size) < sizeof (* eihd))
+    {
+      _bfd_error_handler (_("Corrupt EIHD record - size is too small"));
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
   size = bfd_getl32 (eihd->size);
   imgtype = bfd_getl32 (eihd->imgtype);
 
@@ -1312,19 +1320,38 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	    if (old_flags & EGSY__V_DEF)
               {
                 struct vms_esdf *esdf = (struct vms_esdf *)vms_rec;
+		long psindx;
 
 		entry->value = bfd_getl64 (esdf->value);
 		if (PRIV (sections) == NULL)
 		  return FALSE;
-		entry->section = PRIV (sections)[bfd_getl32 (esdf->psindx)];
+
+		psindx = bfd_getl32 (esdf->psindx);
+		/* PR 21813: Check for an out of range index.  */
+		if (psindx < 0 || psindx >= (int) PRIV (section_count))
+		  {
+		    _bfd_error_handler (_("Corrupt EGSD record: its psindx field is too big (%#lx)"),
+					psindx);
+		    bfd_set_error (bfd_error_bad_value);
+		    return FALSE;
+		  }
+		entry->section = PRIV (sections)[psindx];
 
                 if (old_flags & EGSY__V_NORM)
                   {
                     PRIV (norm_sym_count)++;
 
                     entry->code_value = bfd_getl64 (esdf->code_address);
-                    entry->code_section =
-                      PRIV (sections)[bfd_getl32 (esdf->ca_psindx)];
+		    psindx = bfd_getl32 (esdf->ca_psindx);
+		/* PR 21813: Check for an out of range index.  */
+		    if (psindx < 0 || psindx >= (int) PRIV (section_count))
+		      {
+			_bfd_error_handler (_("Corrupt EGSD record: its psindx field is too big (%#lx)"),
+					    psindx);
+			bfd_set_error (bfd_error_bad_value);
+			return FALSE;
+		      }
+                    entry->code_section = PRIV (sections)[psindx];
                   }
               }
 	  }
@@ -1351,9 +1378,20 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 
             if (old_flags & EGSY__V_REL)
 	      {
+		long psindx;
+
 		if (PRIV (sections) == NULL)
 		  return FALSE;
-		entry->section = PRIV (sections)[bfd_getl32 (egst->psindx)];
+		psindx = bfd_getl32 (egst->psindx);
+		/* PR 21813: Check for an out of range index.  */
+		if (psindx < 0 || psindx >= (int) PRIV (section_count))
+		  {
+		    _bfd_error_handler (_("Corrupt EGSD record: its psindx field is too big (%#lx)"),
+					psindx);
+		    bfd_set_error (bfd_error_bad_value);
+		    return FALSE;
+		  }
+		entry->section = PRIV (sections)[psindx];
 	      }
             else
               entry->section = bfd_abs_section_ptr;
@@ -1446,6 +1484,9 @@ image_set_ptr (bfd *abfd, bfd_vma vma, int sect, struct bfd_link_info *info)
 
   if (PRIV (sections) == NULL)
     return;
+  if (sect < 0 || sect >= (int) PRIV (section_count))
+    return;
+
   sec = PRIV (sections)[sect];
 
   if (info)
@@ -2449,6 +2490,14 @@ _bfd_vms_slurp_eeom (bfd *abfd)
   struct vms_eeom *eeom = (struct vms_eeom *) PRIV (recrd.rec);
 
   vms_debug2 ((2, "EEOM\n"));
+
+  /* PR 21813: Check for an undersized record.  */
+  if (PRIV (recrd.buf_size) < sizeof (* eeom))
+    {
+      _bfd_error_handler (_("Corrupt EEOM record - size is too small"));
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
 
   PRIV (eom_data).eom_l_total_lps = bfd_getl32 (eeom->total_lps);
   PRIV (eom_data).eom_w_comcod = bfd_getl16 (eeom->comcod);
@@ -5173,7 +5222,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
               }
             else if (cur_psidx >= 0)
 	      {
-		if (PRIV (sections) == NULL)
+		if (PRIV (sections) == NULL || cur_psidx >= (int) PRIV (section_count))
 		  return FALSE;
 		reloc->sym_ptr_ptr =
 		  PRIV (sections)[cur_psidx]->symbol_ptr_ptr;

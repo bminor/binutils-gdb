@@ -1496,7 +1496,7 @@ bfd_mach_o_canonicalize_relocs (bfd *abfd, unsigned long filepos,
   for (i = 0; i < count; i++)
     {
       if (!(*bed->_bfd_mach_o_canonicalize_one_reloc)(abfd, &native_relocs[i],
-						      &res[i], syms))
+						      &res[i], syms, res))
         goto err;
     }
   free (native_relocs);

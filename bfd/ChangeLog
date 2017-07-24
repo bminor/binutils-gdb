@@ -1,5 +1,29 @@
 2017-07-24  Nick Clifton  <nickc@redhat.com>
 
+	PR 21813
+	* mach-o.c (bfd_mach_o_canonicalize_relocs): Pass the base address
+	of the relocs to the canonicalize_one_reloc routine.
+	* mach-o.h (struct bfd_mach_o_backend_data): Update the prototype
+	for the _bfd_mach_o_canonicalize_one_reloc field.
+	* mach-o-arm.c (bfd_mach_o_arm_canonicalize_one_reloc): Add
+	res_base parameter.  Use to check for corrupt pair relocs.
+	* mach-o-aarch64.c (bfd_mach_o_arm64_canonicalize_one_reloc):
+	Likewise.
+	* mach-o-i386.c (bfd_mach_o_i386_canonicalize_one_reloc):
+	Likewise.
+	* mach-o-x86-64.c (bfd_mach_o_x86_64_canonicalize_one_reloc):
+	Likewise.
+
+	* vms-alpha.c (_bfd_vms_slurp_eihd): Make sure that there is
+	enough data in the record before attempting to parse it.
+	(_bfd_vms_slurp_eeom): Likewise.
+
+	(_bfd_vms_slurp_egsd): Check for an invalid section index.
+	(image_set_ptr): Likewise.
+	(alpha_vms_slurp_relocs): Likewise.
+
+2017-07-24  Nick Clifton  <nickc@redhat.com>
+
 	PR 21803
 	* reloc.c (_bfd_unrecognized_reloc): New function.  Reports
 	an unrecognized reloc and sets the bfd_error value.

@@ -30,7 +30,7 @@
 #define bfd_mach_o_mkobject bfd_mach_o_arm_mkobject
 
 #define bfd_mach_o_canonicalize_one_reloc bfd_mach_o_arm_canonicalize_one_reloc
-#define bfd_mach_o_swap_reloc_out NULL
+#define bfd_mach_o_swap_reloc_out  NULL
 #define bfd_mach_o_bfd_reloc_type_lookup bfd_mach_o_arm_bfd_reloc_type_lookup
 #define bfd_mach_o_bfd_reloc_name_lookup bfd_mach_o_arm_bfd_reloc_name_lookup
 
@@ -147,9 +147,11 @@ static reloc_howto_type arm_howto_table[]=
 };
 
 static bfd_boolean
-bfd_mach_o_arm_canonicalize_one_reloc (bfd *abfd,
-                                      struct mach_o_reloc_info_external *raw,
-                                      arelent *res, asymbol **syms)
+bfd_mach_o_arm_canonicalize_one_reloc (bfd *       abfd,
+				       struct mach_o_reloc_info_external * raw,
+				       arelent *   res,
+				       asymbol **  syms,
+				       arelent *   res_base)
 {
   bfd_mach_o_reloc_info reloc;
 
@@ -161,6 +163,9 @@ bfd_mach_o_arm_canonicalize_one_reloc (bfd *abfd,
       switch (reloc.r_type)
         {
         case BFD_MACH_O_ARM_RELOC_PAIR:
+	  /* PR 21813: Check for a corrupt PAIR reloc at the start.  */
+	  if (res == res_base)
+	    return FALSE;
           if (reloc.r_length == 2)
             {
 	      res->howto = &arm_howto_table[7];
