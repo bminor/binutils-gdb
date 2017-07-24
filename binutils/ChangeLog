@@ -2,6 +2,10 @@
 
 	* configure: Regenerate.
 
+2017-07-24  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
 2017-07-21  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
