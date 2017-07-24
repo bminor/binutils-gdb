@@ -2679,6 +2679,9 @@ alpha_vms_object_p (bfd *abfd)
           PRIV (recrd.buf_size) = PRIV (recrd.rec_size);
         }
 
+      /* PR 21813: Check for a truncated record.  */
+      if (PRIV (recrd.rec_size < test_len))
+	goto error_ret;
       /* Read the remaining record.  */
       remaining = PRIV (recrd.rec_size) - test_len;
       to_read = MIN (VMS_BLOCK_SIZE - test_len, remaining);

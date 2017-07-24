@@ -22,6 +22,8 @@
 	(image_set_ptr): Likewise.
 	(alpha_vms_slurp_relocs): Likewise.
 
+	(alpha_vms_object_p): Check for a truncated record.
+
 2017-07-24  Nick Clifton  <nickc@redhat.com>
 
 	PR 21803
