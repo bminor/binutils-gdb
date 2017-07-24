@@ -4,7 +4,7 @@
 #objdump: -d
 #xfail: arc*-*-elf*
 
-[^:]+:     file format elf32-littlearc
+[^:]+:     file format elf32-.*arc
 
 
 Disassembly of section \.text:
