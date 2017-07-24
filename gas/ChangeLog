@@ -1,3 +1,10 @@
+2017-07-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 21809
+	* config/tc-aarch64.c (aarch64_init_frag): Do not set a mapping
+	state for frags in debug sections.
+	* config/tc-arm.c (arm_init_frag): Likewise.
+
 2017-07-24  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* dwarf2dbg.c (dwarf2dbg_final_check): Rename local variable exp
