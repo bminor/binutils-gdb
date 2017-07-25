@@ -1,3 +1,12 @@
+2017-07-25  Tristan Gingold  <gingold@adacore.com>
+
+	* version.m4: Bump version to 2.28.1
+	* configure: Regenerate.
+
+2017-07-25  Tristan Gingold  <gingold@adacore.com>
+
+	* development.sh: Set development to false.
+
 2017-06-22  Eric Christopher  <echristo@gmail.com>
 
 	Backport from mainline
