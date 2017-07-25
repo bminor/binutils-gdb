@@ -66,6 +66,7 @@
 #include "common/enum-flags.h"
 #include "progspace-and-thread.h"
 #include "common/gdb_optional.h"
+#include "arch-utils.h"
 
 /* Prototypes for local functions */
 
@@ -7317,8 +7318,8 @@ handle_step_into_function (struct gdbarch *gdbarch,
 
   cust = find_pc_compunit_symtab (stop_pc);
   if (cust != NULL && compunit_language (cust) != language_asm)
-    ecs->stop_func_start = gdbarch_skip_prologue (gdbarch,
-						  ecs->stop_func_start);
+    ecs->stop_func_start
+      = gdbarch_skip_prologue_noexcept (gdbarch, ecs->stop_func_start);
 
   stop_func_sal = find_pc_line (ecs->stop_func_start, 0);
   /* Use the step_resume_break to step until the end of the prologue,
@@ -7396,8 +7397,8 @@ handle_step_into_function_backward (struct gdbarch *gdbarch,
 
   cust = find_pc_compunit_symtab (stop_pc);
   if (cust != NULL && compunit_language (cust) != language_asm)
-    ecs->stop_func_start = gdbarch_skip_prologue (gdbarch,
-						  ecs->stop_func_start);
+    ecs->stop_func_start
+      = gdbarch_skip_prologue_noexcept (gdbarch, ecs->stop_func_start);
 
   stop_func_sal = find_pc_line (stop_pc, 0);
 

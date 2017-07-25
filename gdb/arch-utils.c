@@ -985,6 +985,24 @@ default_print_insn (bfd_vma memaddr, disassemble_info *info)
   return (*disassemble_fn) (memaddr, info);
 }
 
+/* See arch-utils.h.  */
+
+CORE_ADDR
+gdbarch_skip_prologue_noexcept (gdbarch *gdbarch, CORE_ADDR pc) noexcept
+{
+  CORE_ADDR new_pc = pc;
+
+  TRY
+    {
+      new_pc = gdbarch_skip_prologue (gdbarch, pc);
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {}
+  END_CATCH
+
+  return new_pc;
+}
+
 /* -Wmissing-prototypes */
 extern initialize_file_ftype _initialize_gdbarch_utils;
 
