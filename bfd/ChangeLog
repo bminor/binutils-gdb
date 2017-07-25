@@ -1,3 +1,10 @@
+2017-07-25  Benjamin Green  <bengreen5mx@gmail.com>
+
+	PR 21824
+	* elf32-msp430.c (msp430_elf_relax_section): Allow conversion of
+	16-bit absolute branches into 10-bit pc-relative branches on the
+	MSP430 as well as the MSP430X.
+
 2017-07-25  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct map_stub): Add tls_get_addr_opt_bctrl.
