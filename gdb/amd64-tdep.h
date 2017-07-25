@@ -102,13 +102,13 @@ extern void amd64_displaced_step_fixup (struct gdbarch *gdbarch,
    tdesc, if INFO does not specify one.  */
 extern void amd64_init_abi (struct gdbarch_info info,
 			    struct gdbarch *gdbarch,
-			    target_desc *default_tdesc);
+			    const target_desc *default_tdesc);
 
 /* Initialize the ABI for x32.  Uses DEFAULT_TDESC as fallback tdesc,
    if INFO does not specify one.  */
 extern void amd64_x32_init_abi (struct gdbarch_info info,
 				struct gdbarch *gdbarch,
-				target_desc *default_tdesc);
+				const target_desc *default_tdesc);
 extern const struct target_desc *amd64_target_description (uint64_t xcr0);
 
 /* Fill register REGNUM in REGCACHE with the appropriate

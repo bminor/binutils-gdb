@@ -1,5 +1,13 @@
 2017-07-25  Yao Qi  <yao.qi@linaro.org>
 
+	* amd64-tdep.c (amd64_init_abi): Make argument default_tdesc
+	constant.
+	(amd64_x32_init_abi): Likewise.
+	* amd64-tdep.h (amd64_init_abi): Update declaration.
+	(amd64_x32_init_abi): Likewise.
+
+2017-07-25  Yao Qi  <yao.qi@linaro.org>
+
 	PR tdep/21717
 	* arm-linux-nat.c (arm_linux_fetch_inferior_registers): Update
 	condition for FPSCR.
