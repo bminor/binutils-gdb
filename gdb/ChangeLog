@@ -1,3 +1,10 @@
+2017-07-25  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/21717
+	* arm-linux-nat.c (arm_linux_fetch_inferior_registers): Update
+	condition for FPSCR.
+	(arm_linux_store_inferior_registers): Likewise.
+
 2017-06-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 8.0.0.DATE-git.
