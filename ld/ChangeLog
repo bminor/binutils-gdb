@@ -2,6 +2,10 @@
 
 	* configure: Regenerate.
 
+2017-07-25  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
 2017-06-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	Backport from mainline
