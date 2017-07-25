@@ -61,6 +61,7 @@
 
 #include "parser-defs.h"
 #include "completer.h"
+#include "arch-utils.h"
 
 /* Forward declarations for local functions.  */
 
@@ -3626,7 +3627,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       if (gdbarch_skip_entrypoint_p (gdbarch))
         pc = gdbarch_skip_entrypoint (gdbarch, pc);
       if (skip)
-	pc = gdbarch_skip_prologue (gdbarch, pc);
+	pc = gdbarch_skip_prologue_noexcept (gdbarch, pc);
 
       /* For overlays, map pc back into its mapped VMA range.  */
       pc = overlay_mapped_address (pc, section);
