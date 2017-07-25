@@ -1,3 +1,42 @@
+2017-07-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 21739
+	* arc-opc.c (insert_rhv2): Use lower case first letter in error
+	message.
+	(insert_r0): Likewise.
+	(insert_r1): Likewise.
+	(insert_r2): Likewise.
+	(insert_r3): Likewise.
+	(insert_sp): Likewise.
+	(insert_gp): Likewise.
+	(insert_pcl): Likewise.
+	(insert_blink): Likewise.
+	(insert_ilink1): Likewise.
+	(insert_ilink2): Likewise.
+	(insert_ras): Likewise.
+	(insert_rbs): Likewise.
+	(insert_rcs): Likewise.
+	(insert_simm3s): Likewise.
+	(insert_rrange): Likewise.
+	(insert_r13el): Likewise.
+	(insert_fpel): Likewise.
+	(insert_blinkel): Likewise.
+	(insert_pclel): Likewise.
+	(insert_nps_bitop_size_2b): Likewise.
+	(insert_nps_imm_offset): Likewise.
+	(insert_nps_imm_entry): Likewise.
+	(insert_nps_size_16bit): Likewise.
+	(insert_nps_##NAME##_pos): Likewise.
+	(insert_nps_##NAME): Likewise.
+	(insert_nps_bitop_ins_ext): Likewise.
+	(insert_nps_##NAME): Likewise.
+	(insert_nps_min_hofs): Likewise.
+	(insert_nps_##NAME): Likewise.
+	(insert_nps_rbdouble_64): Likewise.
+	(insert_nps_misc_imm_offset): Likewise.
+	* riscv-dis.c (print_riscv_disassembler_options): Fix typo in
+	option description.
+
 2017-07-24  Laurent Desnogues  <laurent.desnogues@arm.com>
 	    Jiong Wang  <jiong.wang@arm.com>
 
