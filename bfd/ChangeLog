@@ -1,3 +1,15 @@
+2017-07-25  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct map_stub): Add tls_get_addr_opt_bctrl.
+	(stub_eh_frame_size): New function.
+	(ppc_size_one_stub): Set group tls_get_addr_opt_bctrl.
+	(group_sections): Init group tls_get_addr_opt_bctrl.
+	(ppc64_elf_size_stubs): Update sizing and initialization of
+	.eh_frame.  Iteration over stubs via group list.
+	(ppc64_elf_build_stubs): Iterate over stubs via group list.
+	(ppc64_elf_finish_dynamic_sections): Update finalization of
+	.eh_frame.
+
 2017-07-24  Nick Clifton  <nickc@redhat.com>
 
 	PR 21813
