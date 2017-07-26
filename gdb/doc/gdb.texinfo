@@ -34698,6 +34698,11 @@ The created source file is built into @value{GDBN} when @value{GDBN} is
 built again.  This command is used by developers after they add or
 modify XML target descriptions.
 
+@kindex maint check xml-descriptions
+@item maint check xml-descriptions @var{dir}
+Check that the target descriptions dynamically created by @value{GDBN}
+equal the descriptions created from XML files found in @var{dir}.
+
 @kindex maint print dummy-frames
 @item maint print dummy-frames
 Prints the contents of @value{GDBN}'s internal dummy-frame stack.

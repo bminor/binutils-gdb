@@ -1,5 +1,22 @@
 2017-07-26  Yao Qi  <yao.qi@linaro.org>
 
+	* cli/cli-cmds.c (maintenancechecklist): New variable.
+	* gdbcmd.h (maintenancechecklist): Declare it.
+	* i386-linux-tdep.c (_initialize_i386_linux_tdep) [GDB_SELF_TEST]:
+	Call i386_linux_read_description with different masks.
+	* maint.c (maintenance_check_command): New function.
+	(_initialize_maint_cmds): Call add_prefix_cmd.
+	* target-descriptions.c (tdesc_reg): override operator != and ==.
+	(tdesc_type): Likewise.
+	(tdesc_feature): Likewise.
+	(target_desc): Likewise.
+	[GDB_SELF_TEST] (selftests::record_xml_tdesc): New function.
+	(maintenance_check_xml_descriptions): New function.
+	(_initialize_target_descriptions) Add command "xml-descriptions".
+	* target-descriptions.h (selftests::record_xml_tdesc): Declare.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
 	* i386-linux-tdep.c: Don't include features/i386/i386-*linux.c.
 	Include features/i386/32bit-*.c.
 	(i386_linux_read_description): Generate target description if it

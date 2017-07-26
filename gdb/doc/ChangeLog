@@ -1,5 +1,10 @@
 2017-07-26  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.texinfo (Maintenance Commands): Document command
+	"maint check xml-descriptions".
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.texinfo (Maintenance Commands): Document optional
 	argument of "maint print c-tdesc".
 

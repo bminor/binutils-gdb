@@ -1,3 +1,8 @@
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.gdb/unittest.exp: Invoke command
+	"maintenance check xml-descriptions".
+
 2017-07-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.arch/s390-vregs.exp: Calculate parameters to hex128 in the

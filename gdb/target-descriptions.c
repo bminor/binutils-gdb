@@ -35,6 +35,8 @@
 #include "hashtab.h"
 #include "inferior.h"
 #include <algorithm>
+#include "completer.h"
+#include "readline/tilde.h" /* tilde_expand */
 
 /* The interface to visit different elements of target description.  */
 
@@ -134,6 +136,20 @@ typedef struct tdesc_reg : tdesc_element
     v.visit (this);
   }
 
+  bool operator== (const tdesc_reg &other) const
+  {
+    return (streq (name, other.name)
+	    && target_regnum == other.target_regnum
+	    && save_restore == other.save_restore
+	    && bitsize == other.bitsize
+	    && (group == other.group || streq (group, other.group))
+	    && streq (type, other.type));
+  }
+
+  bool operator!= (const tdesc_reg &other) const
+  {
+    return !(*this == other);
+  }
 } *tdesc_reg_p;
 DEF_VEC_P(tdesc_reg_p);
 
@@ -248,6 +264,15 @@ typedef struct tdesc_type : tdesc_element
     v.visit (this);
   }
 
+  bool operator== (const tdesc_type &other) const
+  {
+    return (streq (name, other.name) && kind == other.kind);
+  }
+
+  bool operator!= (const tdesc_type &other) const
+  {
+    return !(*this == other);
+  }
 } *tdesc_type_p;
 DEF_VEC_P(tdesc_type_p);
 
@@ -312,6 +337,54 @@ typedef struct tdesc_feature : tdesc_element
 
     v.visit_post (this);
   }
+
+  bool operator== (const tdesc_feature &other) const
+  {
+    if (strcmp (name, other.name) != 0)
+      return false;
+
+    if (VEC_length (tdesc_reg_p, registers)
+	!= VEC_length (tdesc_reg_p, other.registers))
+      return false;
+
+    struct tdesc_reg *reg;
+
+    for (int ix = 0;
+	 VEC_iterate (tdesc_reg_p, registers, ix, reg);
+	 ix++)
+      {
+	tdesc_reg *reg2
+	  = VEC_index (tdesc_reg_p, other.registers, ix);
+
+	if (reg != reg2 && *reg != *reg2)
+	  return false;
+      }
+
+    if (VEC_length (tdesc_type_p, types)
+	!= VEC_length (tdesc_type_p, other.types))
+      return false;
+
+    tdesc_type *type;
+
+    for (int ix = 0;
+	 VEC_iterate (tdesc_type_p, types, ix, type);
+	 ix++)
+      {
+	tdesc_type *type2
+	  = VEC_index (tdesc_type_p, other.types, ix);
+
+	if (type != type2 && *type != *type2)
+	  return false;
+      }
+
+    return true;
+  }
+
+  bool operator!= (const tdesc_feature &other) const
+  {
+    return !(*this == other);
+  }
+
 } *tdesc_feature_p;
 DEF_VEC_P(tdesc_feature_p);
 
@@ -381,6 +454,39 @@ struct target_desc : tdesc_element
       feature->accept (v);
 
     v.visit_post (this);
+  }
+
+  bool operator== (const target_desc &other) const
+  {
+    if (arch != other.arch)
+      return false;
+
+    if (osabi != other.osabi)
+      return false;
+
+    if (VEC_length (tdesc_feature_p, features)
+	!= VEC_length (tdesc_feature_p, other.features))
+      return false;
+
+    struct tdesc_feature *feature;
+
+    for (int ix = 0;
+	 VEC_iterate (tdesc_feature_p, features, ix, feature);
+	 ix++)
+      {
+	struct tdesc_feature *feature2
+	  = VEC_index (tdesc_feature_p, other.features, ix);
+
+	if (feature != feature2 && *feature != *feature2)
+	  return false;
+      }
+
+    return true;
+  }
+
+  bool operator!= (const target_desc &other) const
+  {
+    return !(*this == other);
   }
 };
 
@@ -2213,6 +2319,50 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
     }
 }
 
+namespace selftests {
+
+static std::vector<std::pair<const char*, const target_desc *>> xml_tdesc;
+
+#if GDB_SELF_TEST
+
+/* See target-descritpions.h.  */
+
+void
+record_xml_tdesc (const char *xml_file, const struct target_desc *tdesc)
+{
+  xml_tdesc.emplace_back (xml_file, tdesc);
+}
+#endif
+
+}
+
+/* Check that the target descriptions created dynamically by
+   architecture-specific code equal the descriptions created from XML files
+   found in the specified directory DIR.  */
+
+static void
+maintenance_check_xml_descriptions (char *dir, int from_tty)
+{
+  if (dir == NULL)
+    error (_("Missing dir name"));
+
+  gdb::unique_xmalloc_ptr<char> dir1 (tilde_expand (dir));
+  std::string feature_dir (dir1.get ());
+  unsigned int failed = 0;
+
+  for (auto const &e : selftests::xml_tdesc)
+    {
+      std::string tdesc_xml = (feature_dir + SLASH_STRING + e.first);
+      const target_desc *tdesc
+	= file_read_description_xml (tdesc_xml.data ());
+
+      if (tdesc == NULL || *tdesc != *e.second)
+	failed++;
+    }
+  printf_filtered (_("Tested %lu XML files, %d failed\n"),
+		   (long) selftests::xml_tdesc.size (), failed);
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_target_descriptions;
 
@@ -2253,4 +2403,14 @@ GDB will read the description from the target."),
   add_cmd ("c-tdesc", class_maintenance, maint_print_c_tdesc_cmd, _("\
 Print the current target description as a C source file."),
 	   &maintenanceprintlist);
+
+  cmd_list_element *cmd;
+
+  cmd = add_cmd ("xml-descriptions", class_maintenance,
+		 maintenance_check_xml_descriptions, _("\
+Check the target descriptions created in GDB equal the descriptions\n\
+created from XML files in the directory.\n\
+The parameter is the directory name."),
+		 &maintenancechecklist);
+  set_cmd_completer (cmd, filename_completer);
 }
