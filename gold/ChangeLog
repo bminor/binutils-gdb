@@ -1,3 +1,8 @@
+2017-07-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* mips.cc (Mips_relocate_functions): Add "llu" suffix to
+	0x800080008000.
+
 2017-07-23  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (glink_eh_frame_fde_64v2): Correct advance to
