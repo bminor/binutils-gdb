@@ -1729,18 +1729,29 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
   int ix, ix2, ix3;
   int printed_field_type = 0;
 
-  /* Use the global target-supplied description, not the current
-     architecture's.  This lets a GDB for one architecture generate C
-     for another architecture's description, even though the gdbarch
-     initialization code will reject the new description.  */
-  tdesc = current_target_desc;
+  if (args == NULL)
+    {
+      /* Use the global target-supplied description, not the current
+	 architecture's.  This lets a GDB for one architecture generate C
+	 for another architecture's description, even though the gdbarch
+	 initialization code will reject the new description.  */
+      tdesc = current_target_desc;
+      filename = target_description_filename;
+    }
+  else
+    {
+      /* Use the target description from the XML file.  */
+      filename = args;
+      tdesc = file_read_description_xml (filename);
+    }
+
   if (tdesc == NULL)
     error (_("There is no target description to print."));
 
-  if (target_description_filename == NULL)
+  if (filename == NULL)
     error (_("The current target description did not come from an XML file."));
 
-  filename = lbasename (target_description_filename);
+  filename = lbasename (filename);
   function = (char *) alloca (strlen (filename) + 1);
   for (inp = filename, outp = function; *inp != '\0'; inp++)
     if (*inp == '.')

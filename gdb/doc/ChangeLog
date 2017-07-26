@@ -1,3 +1,8 @@
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Maintenance Commands): Document optional
+	argument of "maint print c-tdesc".
+
 2017-07-18  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.texinfo (Maintenance Commands): Improve the doc to

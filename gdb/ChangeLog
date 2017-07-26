@@ -1,5 +1,13 @@
 2017-07-26  Yao Qi  <yao.qi@linaro.org>
 
+	* NEWS: Mention it.
+	* features/Makefile (%.c: %.xml): Pass the xml file name to
+	command "maint print c-tdesc".
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Get file
+	name from 'arg'.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
 	* target-descriptions.c (target_desc): Add ctor and dtor.  Do
 	in-class initialization.
 	(tdesc_create_feature): Call new instead of XCNEW.
