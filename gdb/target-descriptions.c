@@ -267,21 +267,51 @@ DEF_VEC_P(arch_p);
 
 struct target_desc
 {
+  target_desc ()
+  {}
+
+  ~target_desc ()
+  {
+    struct tdesc_feature *feature;
+    struct property *prop;
+    int ix;
+
+    for (ix = 0;
+	 VEC_iterate (tdesc_feature_p, features, ix, feature);
+	 ix++)
+      delete feature;
+    VEC_free (tdesc_feature_p, features);
+
+    for (ix = 0;
+	 VEC_iterate (property_s, properties, ix, prop);
+	 ix++)
+      {
+	xfree (prop->key);
+	xfree (prop->value);
+      }
+
+    VEC_free (property_s, properties);
+    VEC_free (arch_p, compatible);
+  }
+
+  target_desc (const target_desc &) = delete;
+  void operator= (const target_desc &) = delete;
+
   /* The architecture reported by the target, if any.  */
-  const struct bfd_arch_info *arch;
+  const struct bfd_arch_info *arch = NULL;
 
   /* The osabi reported by the target, if any; GDB_OSABI_UNKNOWN
      otherwise.  */
-  enum gdb_osabi osabi;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   /* The list of compatible architectures reported by the target.  */
-  VEC(arch_p) *compatible;
+  VEC(arch_p) *compatible = NULL;
 
   /* Any architecture-specific properties specified by the target.  */
-  VEC(property_s) *properties;
+  VEC(property_s) *properties = NULL;
 
   /* The features associated with this target.  */
-  VEC(tdesc_feature_p) *features;
+  VEC(tdesc_feature_p) *features = NULL;
 };
 
 /* Per-architecture data associated with a target description.  The
@@ -1551,35 +1581,15 @@ tdesc_create_feature (struct target_desc *tdesc, const char *name)
 struct target_desc *
 allocate_target_description (void)
 {
-  return XCNEW (struct target_desc);
+  return new target_desc ();
 }
 
 static void
 free_target_description (void *arg)
 {
   struct target_desc *target_desc = (struct target_desc *) arg;
-  struct tdesc_feature *feature;
-  struct property *prop;
-  int ix;
 
-  for (ix = 0;
-       VEC_iterate (tdesc_feature_p, target_desc->features, ix, feature);
-       ix++)
-    delete feature;
-  VEC_free (tdesc_feature_p, target_desc->features);
-
-  for (ix = 0;
-       VEC_iterate (property_s, target_desc->properties, ix, prop);
-       ix++)
-    {
-      xfree (prop->key);
-      xfree (prop->value);
-    }
-  VEC_free (property_s, target_desc->properties);
-
-  VEC_free (arch_p, target_desc->compatible);
-
-  xfree (target_desc);
+  delete target_desc;
 }
 
 struct cleanup *

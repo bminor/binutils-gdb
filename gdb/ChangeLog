@@ -1,3 +1,10 @@
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* target-descriptions.c (target_desc): Add ctor and dtor.  Do
+	in-class initialization.
+	(tdesc_create_feature): Call new instead of XCNEW.
+	(free_target_description): Ue delete.
+
 2017-07-25  John Baldwin  <jhb@FreeBSD.org>
 
 	* configure.nat: Add "-lkvm" for NetBSD/sparc64 and fix typo.
