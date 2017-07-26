@@ -1,3 +1,21 @@
+2017-07-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* tracepoint.h (enum class fast_tpoint_collect_result): New
+	enumeration.
+	(fast_tracepoint_collecting): Change return type to
+	fast_tpoint_collect_result.
+	* tracepoint.c (fast_tracepoint_collecting): Likewise.
+	* linux-low.h: Include tracepoint.h.
+	(struct lwp_info) <collecting_fast_tracepoint>: Change type to
+	fast_tpoint_collect_result.
+	* linux-low.c (handle_tracepoints): Adjust.
+	(linux_fast_tracepoint_collecting): Change return type to
+	fast_tpoint_collect_result.
+	(maybe_move_out_of_jump_pad, linux_wait_for_event_filtered,
+	linux_wait_1, stuck_in_jump_pad_callback,
+	lwp_signal_can_be_delivered, linux_resume_one_lwp_throw,
+	proceed_one_lwp): Adjust to type change.
+
 2017-07-10  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-x86-low.c (x86_linux_read_description): Re-indent the code.

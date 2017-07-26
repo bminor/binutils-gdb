@@ -26,6 +26,7 @@
 /* Included for ptrace type definitions.  */
 #include "nat/linux-ptrace.h"
 #include "target/waitstatus.h" /* For enum target_stop_reason.  */
+#include "tracepoint.h"
 
 #define PTRACE_XFER_TYPE long
 
@@ -353,12 +354,11 @@ struct lwp_info
      and then processed and cleared in linux_resume_one_lwp.  */
   struct thread_resume *resume;
 
-  /* True if it is known that this lwp is presently collecting a fast
-     tracepoint (it is in the jump pad or in some code that will
-     return to the jump pad.  Normally, we won't care about this, but
-     we will if a signal arrives to this lwp while it is
-     collecting.  */
-  int collecting_fast_tracepoint;
+  /* Information bout this lwp's fast tracepoint collection status (is it
+     currently stopped in the jump pad, and if so, before or at/after the
+     relocated instruction).  Normally, we won't care about this, but we will
+     if a signal arrives to this lwp while it is collecting.  */
+  fast_tpoint_collect_result collecting_fast_tracepoint;
 
   /* If this is non-zero, it points to a chain of signals which need
      to be reported to GDB.  These were deferred because the thread
