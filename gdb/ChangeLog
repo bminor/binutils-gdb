@@ -1,5 +1,133 @@
 2017-07-26  Yao Qi  <yao.qi@linaro.org>
 
+	* target-descriptions.c (tdesc_element_visitor): New class.
+	(tdesc_element): New class.
+	(tdesc_reg): Inherit from tdesc_element.
+	(tdesc_reg::accept): New function.
+	(tdesc_type): Inherit from tdesc_element.
+	(tdesc_type::accept): New function.
+	(tdesc_feature): Inherit from tdesc_element.
+	(tdesc_feature::accept): New function.
+	(target_desc): Inherit from tdesc_element.
+	(target_desc::target_desc): New.
+	(target_desc::~target_desc): New.
+	(target_desc::accept): New.
+	(allocate_target_description): Use new.
+	(free_target_description): Use delete.
+	(print_c_tdesc): New class.
+	(maint_print_c_tdesc_cmd): Adjust.
+
+	* features/aarch64.c: Re-generated.
+	* features/arc-arcompact.c: Re-generated.
+	* features/arc-v2.c: Re-generated.
+	* features/arm/arm-with-iwmmxt.c: Re-generated.
+	* features/arm/arm-with-m.c: Re-generated.
+	* features/arm/arm-with-m-fpa-layout.c: Re-generated.
+	* features/arm/arm-with-m-vfp-d16.c: Re-generated.
+	* features/arm/arm-with-neon.c: Re-generated.
+	* features/arm/arm-with-vfpv2.c: Re-generated.
+	* features/arm/arm-with-vfpv3.c: Re-generated.
+	* features/i386/amd64-avx-avx512.c: Re-generated.
+	* features/i386/amd64-avx-avx512-linux.c: Re-generated.
+	* features/i386/amd64-avx.c: Re-generated.
+	* features/i386/amd64-avx-linux.c: Re-generated.
+	* features/i386/amd64-avx-mpx-avx512-pku.c: Re-generated.
+	* features/i386/amd64-avx-mpx-avx512-pku-linux.c: Re-generated.
+	* features/i386/amd64-avx-mpx.c: Re-generated.
+	* features/i386/amd64-avx-mpx-linux.c: Re-generated.
+	* features/i386/amd64.c: Re-generated.
+	* features/i386/amd64-linux.c: Re-generated.
+	* features/i386/amd64-mpx.c: Re-generated.
+	* features/i386/amd64-mpx-linux.c: Re-generated.
+	* features/i386/i386-avx-avx512.c: Re-generated.
+	* features/i386/i386-avx-avx512-linux.c: Re-generated.
+	* features/i386/i386-avx.c: Re-generated.
+	* features/i386/i386-avx-linux.c: Re-generated.
+	* features/i386/i386-avx-mpx-avx512-pku.c: Re-generated.
+	* features/i386/i386-avx-mpx-avx512-pku-linux.c: Re-generated.
+	* features/i386/i386-avx-mpx.c: Re-generated.
+	* features/i386/i386-avx-mpx-linux.c: Re-generated.
+	* features/i386/i386.c: Re-generated.
+	* features/i386/i386-linux.c: Re-generated.
+	* features/i386/i386-mmx.c: Re-generated.
+	* features/i386/i386-mmx-linux.c: Re-generated.
+	* features/i386/i386-mpx.c: Re-generated.
+	* features/i386/i386-mpx-linux.c: Re-generated.
+	* features/i386/x32-avx-avx512.c: Re-generated.
+	* features/i386/x32-avx-avx512-linux.c: Re-generated.
+	* features/i386/x32-avx.c: Re-generated.
+	* features/i386/x32-avx-linux.c: Re-generated.
+	* features/i386/x32.c: Re-generated.
+	* features/i386/x32-linux.c: Re-generated.
+	* features/microblaze.c: Re-generated.
+	* features/microblaze-with-stack-protect.c: Re-generated.
+	* features/mips64-dsp-linux.c: Re-generated.
+	* features/mips64-linux.c: Re-generated.
+	* features/mips-dsp-linux.c: Re-generated.
+	* features/mips-linux.c: Re-generated.
+	* features/nds32.c: Re-generated.
+	* features/nios2.c: Re-generated.
+	* features/nios2-linux.c: Re-generated.
+	* features/rs6000/powerpc-32.c: Re-generated.
+	* features/rs6000/powerpc-32l.c: Re-generated.
+	* features/rs6000/powerpc-403.c: Re-generated.
+	* features/rs6000/powerpc-403gc.c : Re-generated.
+	* features/rs6000/powerpc-405.c: Re-generated.
+	* features/rs6000/powerpc-505.c: Re-generated.
+	* features/rs6000/powerpc-601.c: Re-generated.
+	* features/rs6000/powerpc-602.c: Re-generated.
+	* features/rs6000/powerpc-603.c: Re-generated.
+	* features/rs6000/powerpc-604.c: Re-generated.
+	* features/rs6000/powerpc-64.c: Re-generated.
+	* features/rs6000/powerpc-64l.c: Re-generated.
+	* features/rs6000/powerpc-7400.c: Re-generated.
+	* features/rs6000/powerpc-750.c: Re-generated.
+	* features/rs6000/powerpc-860.c: Re-generated.
+	* features/rs6000/powerpc-altivec32.c: Re-generated.
+	* features/rs6000/powerpc-altivec32l.c: Re-generated.
+	* features/rs6000/powerpc-altivec64.c: Re-generated.
+	* features/rs6000/powerpc-altivec64l.c: Re-generated.
+	* features/rs6000/powerpc-cell32l.c: Re-generated.
+	* features/rs6000/powerpc-cell64l.c: Re-generated.
+	* features/rs6000/powerpc-e500.c: Re-generated.
+	* features/rs6000/powerpc-e500l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-32l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-64l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-altivec32l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-altivec64l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-vsx32l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-vsx64l.c: Re-generated.
+	* features/rs6000/powerpc-vsx32.c: Re-generated.
+	* features/rs6000/powerpc-vsx32l.c: Re-generated.
+	* features/rs6000/powerpc-vsx64.c: Re-generated.
+	* features/rs6000/powerpc-vsx64l.c: Re-generated.
+	* features/rs6000/rs6000.c: Re-generated.
+	* features/s390-linux32.c: Re-generated.
+	* features/s390-linux32v1.c: Re-generated.
+	* features/s390-linux32v2.c: Re-generated.
+	* features/s390-linux64.c: Re-generated.
+	* features/s390-linux64v1.c: Re-generated.
+	* features/s390-linux64v2.c: Re-generated.
+	* features/s390-te-linux64.c: Re-generated.
+	* features/s390-tevx-linux64.c: Re-generated.
+	* features/s390-vx-linux64.c: Re-generated.
+	* features/s390x-linux64.c: Re-generated.
+	* features/s390x-linux64v1.c: Re-generated.
+	* features/s390x-linux64v2.c: Re-generated.
+	* features/s390x-te-linux64.c: Re-generated.
+	* features/s390x-tevx-linux64.c: Re-generated.
+	* features/s390x-vx-linux64.c: Re-generated.
+	* features/sparc/sparc32-solaris.c: Re-generated.
+	* features/sparc/sparc64-solaris.c: Re-generated.
+	* features/tic6x-c62x.c: Re-generated.
+	* features/tic6x-c62x-linux.c: Re-generated.
+	* features/tic6x-c64x.c: Re-generated.
+	* features/tic6x-c64x-linux.c: Re-generated.
+	* features/tic6x-c64xp.c: Re-generated.
+	* features/tic6x-c64xp-linux.c: Re-generated.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
 	* i386-linux-tdep.c (i386_linux_read_description): New function.
 	(i386_linux_core_read_description): Call
 	i386_linux_read_description.
