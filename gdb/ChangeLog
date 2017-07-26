@@ -1,5 +1,28 @@
 2017-07-26  Yao Qi  <yao.qi@linaro.org>
 
+	* features/Makefile (CFILES): Rename with TDESC_CFILES.
+	(FEATURE_XMLFILES): New.
+	(FEATURE_CFILES): New.
+	New rules.
+	(clean-cfiles): Remove generated c files.
+	* features/i386/32bit-avx.c: Generated.
+ 	* features/i386/32bit-avx512.c: Generated.
+ 	* features/i386/32bit-core.c: Generated.
+ 	* features/i386/32bit-linux.c: Generated.
+ 	* features/i386/32bit-mpx.c: Generated.
+ 	* features/i386/32bit-pkeys.c: Generated.
+ 	* features/i386/32bit-sse.c: Generated.
+ 	* target-descriptions.c: Include algorithm.
+	(tdesc_element_visitor): Add method visit_end.
+	(print_c_tdesc): Implement visit_end.
+	(print_c_tdesc:: m_filename_after_features): Move it to
+	protected.
+	(print_c_feature): New class.
+	(maint_print_c_tdesc_cmd): Use print_c_feature if XML file
+	name starts with "i386/32bit-".
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
 	* target-descriptions.c (tdesc_element_visitor): New class.
 	(tdesc_element): New class.
 	(tdesc_reg): Inherit from tdesc_element.
