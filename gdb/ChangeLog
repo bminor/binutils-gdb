@@ -1,5 +1,18 @@
 2017-07-26  Yao Qi  <yao.qi@linaro.org>
 
+	* i386-linux-tdep.c (i386_linux_read_description): New function.
+	(i386_linux_core_read_description): Call
+	i386_linux_read_description.
+	* i386-linux-tdep.h (i386_linux_read_description): Declare.
+	(tdesc_i386_linux, tdesc_i386_mmx_linux): Remove declarations.
+	(tdesc_i386_avx_linux, tdesc_i386_mpx_linux): Likewise
+	(tdesc_i386_avx_mpx_linux, tdesc_i386_avx_avx512_linux): Likewise.
+	(tdesc_i386_avx_mpx_avx512_pku_linux): Likewise.
+	* x86-linux-nat.c (x86_linux_read_description): Call
+	i386_linux_read_description.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
 	* NEWS: Mention it.
 	* features/Makefile (%.c: %.xml): Pass the xml file name to
 	command "maint print c-tdesc".
