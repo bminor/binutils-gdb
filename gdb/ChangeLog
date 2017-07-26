@@ -1,5 +1,19 @@
 2017-07-26  Yao Qi  <yao.qi@linaro.org>
 
+	* i386-linux-tdep.c: Don't include features/i386/i386-*linux.c.
+	Include features/i386/32bit-*.c.
+	(i386_linux_read_description): Generate target description if it
+	doesn't exist.
+	(_initialize_i386_linux_tdep): Don't call _initialize_tdesc_i386
+	functions.
+	* features/i386/32bit-linux.c: Re-generated.
+	* features/i386/32bit-sse.c: Likewise.
+	* target-descriptions.c (print_c_feature::visit): Print code to
+	set register number if needed.
+	(print_c_feature) <m_next_regnum>: New field.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
 	* features/Makefile (CFILES): Rename with TDESC_CFILES.
 	(FEATURE_XMLFILES): New.
 	(FEATURE_CFILES): New.
