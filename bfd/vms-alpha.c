@@ -903,7 +903,7 @@ _bfd_vms_slurp_ehdr (bfd *abfd)
 
   vms_rec = PRIV (recrd.rec);
   /* PR 17512: file: 62736583.  */
-  end = vms_rec + PRIV (recrd.buf_size);
+  end = PRIV (recrd.buf) + PRIV (recrd.buf_size);
 
   vms_debug2 ((2, "HDR/EMH\n"));
 
@@ -5737,8 +5737,9 @@ evax_bfd_print_emh (FILE *file, unsigned char *rec, unsigned int rec_len)
 {
   struct vms_emh_common *emh = (struct vms_emh_common *)rec;
   unsigned int subtype;
+  int extra;
 
-  subtype = (unsigned)bfd_getl16 (emh->subtyp);
+  subtype = (unsigned) bfd_getl16 (emh->subtyp);
 
   /* xgettext:c-format */
   fprintf (file, _("  EMH %u (len=%u): "), subtype, rec_len);
@@ -5749,58 +5750,82 @@ evax_bfd_print_emh (FILE *file, unsigned char *rec, unsigned int rec_len)
       fprintf (file, _("   Error: The length is less than the length of an EMH record\n"));
       return;
     }
-  
+  extra = rec_len - sizeof (struct vms_emh_common);
+
   switch (subtype)
     {
     case EMH__C_MHD:
       {
-        struct vms_emh_mhd *mhd = (struct vms_emh_mhd *)rec;
-        const char *name;
+        struct vms_emh_mhd *mhd = (struct vms_emh_mhd *) rec;
+        const char * name;
+	const char * nextname;
+	const char * maxname;
 
+	/* PR 21840: Check for invalid lengths.  */
+	if (rec_len < sizeof (* mhd))
+	  {
+	    fprintf (file, _("   Error: The record length is less than the size of an EMH_MHD record\n"));
+	    return;
+	  }
         fprintf (file, _("Module header\n"));
         fprintf (file, _("   structure level: %u\n"), mhd->strlvl);
         fprintf (file, _("   max record size: %u\n"),
-                 (unsigned)bfd_getl32 (mhd->recsiz));
+                 (unsigned) bfd_getl32 (mhd->recsiz));
         name = (char *)(mhd + 1);
+	maxname = (char *) rec + rec_len;
+	if (name > maxname - 2)
+	  {
+	    fprintf (file, _("   Error: The module name is missing\n"));
+	    return;
+	  }
+	nextname = name + name[0] + 1;
+	if (nextname >= maxname)
+	  {
+	    fprintf (file, _("   Error: The module name is too long\n"));
+	    return;
+	  }
         fprintf (file, _("   module name    : %.*s\n"), name[0], name + 1);
-        name += name[0] + 1;
+        name = nextname;
+	if (name > maxname - 2)
+	  {
+	    fprintf (file, _("   Error: The module version is missing\n"));
+	    return;
+	  }
+	nextname = name + name[0] + 1;
+	if (nextname >= maxname)
+	  {
+	    fprintf (file, _("   Error: The module version is too long\n"));
+	    return;
+	  }
         fprintf (file, _("   module version : %.*s\n"), name[0], name + 1);
-        name += name[0] + 1;
-        fprintf (file, _("   compile date   : %.17s\n"), name);
+        name = nextname;
+	if ((maxname - name) < 17 && maxname[-1] != 0)
+	  fprintf (file, _("   Error: The compile date is truncated\n"));
+	else
+	  fprintf (file, _("   compile date   : %.17s\n"), name);
       }
       break;
+
     case EMH__C_LNM:
-      {
-        fprintf (file, _("Language Processor Name\n"));
-        fprintf (file, _("   language name: %.*s\n"),
-                 (int)(rec_len - sizeof (struct vms_emh_common)),
-                 (char *)rec + sizeof (struct vms_emh_common));
-      }
+      fprintf (file, _("Language Processor Name\n"));
+      fprintf (file, _("   language name: %.*s\n"), extra, (char *)(emh + 1));
       break;
+
     case EMH__C_SRC:
-      {
-        fprintf (file, _("Source Files Header\n"));
-        fprintf (file, _("   file: %.*s\n"),
-                 (int)(rec_len - sizeof (struct vms_emh_common)),
-                 (char *)rec + sizeof (struct vms_emh_common));
-      }
+      fprintf (file, _("Source Files Header\n"));
+      fprintf (file, _("   file: %.*s\n"), extra, (char *)(emh + 1));
       break;
+
     case EMH__C_TTL:
-      {
-        fprintf (file, _("Title Text Header\n"));
-        fprintf (file, _("   title: %.*s\n"),
-                 (int)(rec_len - sizeof (struct vms_emh_common)),
-                 (char *)rec + sizeof (struct vms_emh_common));
-      }
+      fprintf (file, _("Title Text Header\n"));
+      fprintf (file, _("   title: %.*s\n"), extra, (char *)(emh + 1));
       break;
+
     case EMH__C_CPR:
-      {
-        fprintf (file, _("Copyright Header\n"));
-        fprintf (file, _("   copyright: %.*s\n"),
-                 (int)(rec_len - sizeof (struct vms_emh_common)),
-                 (char *)rec + sizeof (struct vms_emh_common));
-      }
+      fprintf (file, _("Copyright Header\n"));
+      fprintf (file, _("   copyright: %.*s\n"), extra, (char *)(emh + 1));
       break;
+
     default:
       fprintf (file, _("unhandled emh subtype %u\n"), subtype);
       break;

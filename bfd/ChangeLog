@@ -1,3 +1,16 @@
+2017-07-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 21840
+	* mach-o.c (bfd_mach_o_read_symtab_strtab): Fail if the symtab
+	size is -1.
+	* nlmcode.h (nlm_swap_auxiliary_headers_in): Replace assertion
+	with error return.
+	* section.c (bfd_make_section_with_flags): Fail if the name or bfd
+	are NULL.
+	* vms-alpha.c (bfd_make_section_with_flags): Correct computation
+	of end pointer.
+	(evax_bfd_print_emh): Check for invalid string lengths.
+
 2017-07-25  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
