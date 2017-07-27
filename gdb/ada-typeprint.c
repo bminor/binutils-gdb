@@ -256,14 +256,12 @@ print_dynamic_range_bound (struct type *type, const char *name, int name_len,
   static char *name_buf = NULL;
   static size_t name_buf_len = 0;
   LONGEST B;
-  int OK;
 
   GROW_VECT (name_buf, name_buf_len, name_len + strlen (suffix) + 1);
   strncpy (name_buf, name, name_len);
   strcpy (name_buf + name_len, suffix);
 
-  B = get_int_var_value (name_buf, &OK);
-  if (OK)
+  if (get_int_var_value (name_buf, B))
     ada_print_scalar (type, B, stream);
   else
     fprintf_filtered (stream, "?");

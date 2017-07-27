@@ -5456,7 +5456,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	{
 	  /* If this is a dynamic link, we should have created a
 	     _DYNAMIC_LINK symbol or _DYNAMIC_LINKING(for normal mips) symbol
-	     in in _bfd_mips_elf_create_dynamic_sections.
+	     in _bfd_mips_elf_create_dynamic_sections.
 	     Otherwise, we should define the symbol with a value of 0.
 	     FIXME: It should probably get into the symbol table
 	     somehow as well.  */
@@ -6955,7 +6955,7 @@ _bfd_mips_elf_symbol_processing (bfd *abfd, asymbol *asym)
 	  {
 	    asym->section = section;
 	    /* MIPS_TEXT is a bit special, the address is not an offset
-	       to the base of the .text section.  So substract the section
+	       to the base of the .text section.  So subtract the section
 	       base address to make it an offset.  */
 	    asym->value -= section->vma;
 	  }
@@ -6970,7 +6970,7 @@ _bfd_mips_elf_symbol_processing (bfd *abfd, asymbol *asym)
 	  {
 	    asym->section = section;
 	    /* MIPS_DATA is a bit special, the address is not an offset
-	       to the base of the .data section.  So substract the section
+	       to the base of the .data section.  So subtract the section
 	       base address to make it an offset.  */
 	    asym->value -= section->vma;
 	  }

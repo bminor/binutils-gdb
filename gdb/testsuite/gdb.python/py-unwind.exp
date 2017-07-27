@@ -20,7 +20,12 @@ load_lib gdb-python.exp
 
 standard_testfile
 
-if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
+# Stack protection can make the stack look a bit different, breaking the
+# assumptions this test has about its layout.
+
+set flags "additional_flags=-fno-stack-protector"
+
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} "debug $flags"] } {
     return -1
 }
 

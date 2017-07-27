@@ -95,6 +95,10 @@ extern struct cmd_list_element *maintenanceinfolist;
 
 extern struct cmd_list_element *maintenanceprintlist;
 
+/* Chain containing all defined "maintenance check" subcommands.  */
+
+extern struct cmd_list_element *maintenancechecklist;
+
 /* Chain containing all defined "maintenance set" subcommands.  */
 
 extern struct cmd_list_element *maintenance_set_cmdlist;

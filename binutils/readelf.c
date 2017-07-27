@@ -6706,7 +6706,7 @@ process_section_groups (FILE * file)
 		      error (_("section [%5u] in group section [%5u] > maximum section [%5u]\n"),
 			     entry, i, elf_header.e_shnum - 1);
 		      if (num_group_errors == 10)
-			warn (_("Futher error messages about overlarge group section indicies suppressed\n"));
+			warn (_("Further error messages about overlarge group section indicies suppressed\n"));
 		    }
 		  continue;
 		}
@@ -12760,7 +12760,7 @@ get_section_contents (Elf_Internal_Shdr * section, FILE * file)
 
   if (num_bytes == 0 || section->sh_type == SHT_NOBITS)
     {
-      printf (_("\nSection '%s' has no data to dump.\n"),
+      printf (_("Section '%s' has no data to dump.\n"),
 	      printable_section_name (section));
       return NULL;
     }
@@ -12834,10 +12834,11 @@ dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
   unsigned char *      start;
   bfd_boolean          some_strings_shown;
 
-  real_start = start = (unsigned char *) get_section_contents (section,
-							       file);
+  real_start = start = (unsigned char *) get_section_contents (section, file);
   if (start == NULL)
-    return FALSE;
+    /* PR 21820: Do not fail if the section was empty.  */
+    return (section->sh_size == 0 || section->sh_type == SHT_NOBITS) ? TRUE : FALSE;
+
   num_bytes = section->sh_size;
 
   printf (_("\nString dump of section '%s':\n"), printable_section_name (section));
@@ -12983,7 +12984,8 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
 
   real_start = start = (unsigned char *) get_section_contents (section, file);
   if (start == NULL)
-    return FALSE;
+    /* PR 21820: Do not fail if the section was empty.  */
+    return (section->sh_size == 0 || section->sh_type == SHT_NOBITS) ? TRUE : FALSE;
 
   section_size = section->sh_size;
 

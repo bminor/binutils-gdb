@@ -364,7 +364,7 @@ static const char *objc_extensions[] =
   ".m", NULL
 };
 
-const struct language_defn objc_language_defn = {
+extern const struct language_defn objc_language_defn = {
   "objective-c",		/* Language name */
   "Objective-C",
   language_objc,
@@ -1377,7 +1377,6 @@ extern initialize_file_ftype _initialize_objc_language;
 void
 _initialize_objc_language (void)
 {
-  add_language (&objc_language_defn);
   add_info ("selectors", selectors_info,    /* INFO SELECTORS command.  */
 	    _("All Objective-C selectors, or those matching REGEXP."));
   add_info ("classes", classes_info, 	    /* INFO CLASSES   command.  */

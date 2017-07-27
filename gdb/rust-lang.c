@@ -35,8 +35,6 @@
 #include <string>
 #include <vector>
 
-extern initialize_file_ftype _initialize_rust_language;
-
 /* Returns the last segment of a Rust path like foo::bar::baz.  Will
    not handle cases where the last segment contains generics.  This
    will return NULL if the last segment cannot be found.  */
@@ -2150,7 +2148,7 @@ static const char *rust_extensions[] =
   ".rs", NULL
 };
 
-static const struct language_defn rust_language_defn =
+extern const struct language_defn rust_language_defn =
 {
   "rust",
   "Rust",
@@ -2197,9 +2195,3 @@ static const struct language_defn rust_language_defn =
   NULL,
   LANG_MAGIC
 };
-
-void
-_initialize_rust_language (void)
-{
-  add_language (&rust_language_defn);
-}

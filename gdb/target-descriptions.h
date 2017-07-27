@@ -253,4 +253,16 @@ void tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 		       int regnum, int save_restore, const char *group,
 		       int bitsize, const char *type);
 
+#if GDB_SELF_TEST
+namespace selftests {
+
+/* Record that XML_FILE should generate a target description that equals
+   TDESC, to be verified by the "maintenance check xml-descriptions"
+   command.  */
+
+void record_xml_tdesc (const char *xml_file,
+		       const struct target_desc *tdesc);
+}
+#endif
+
 #endif /* TARGET_DESCRIPTIONS_H */

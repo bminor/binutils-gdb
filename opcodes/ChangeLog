@@ -1,3 +1,91 @@
+2017-07-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 21739
+	* arc-opc.c (insert_rhv2): Use lower case first letter in error
+	message.
+	(insert_r0): Likewise.
+	(insert_r1): Likewise.
+	(insert_r2): Likewise.
+	(insert_r3): Likewise.
+	(insert_sp): Likewise.
+	(insert_gp): Likewise.
+	(insert_pcl): Likewise.
+	(insert_blink): Likewise.
+	(insert_ilink1): Likewise.
+	(insert_ilink2): Likewise.
+	(insert_ras): Likewise.
+	(insert_rbs): Likewise.
+	(insert_rcs): Likewise.
+	(insert_simm3s): Likewise.
+	(insert_rrange): Likewise.
+	(insert_r13el): Likewise.
+	(insert_fpel): Likewise.
+	(insert_blinkel): Likewise.
+	(insert_pclel): Likewise.
+	(insert_nps_bitop_size_2b): Likewise.
+	(insert_nps_imm_offset): Likewise.
+	(insert_nps_imm_entry): Likewise.
+	(insert_nps_size_16bit): Likewise.
+	(insert_nps_##NAME##_pos): Likewise.
+	(insert_nps_##NAME): Likewise.
+	(insert_nps_bitop_ins_ext): Likewise.
+	(insert_nps_##NAME): Likewise.
+	(insert_nps_min_hofs): Likewise.
+	(insert_nps_##NAME): Likewise.
+	(insert_nps_rbdouble_64): Likewise.
+	(insert_nps_misc_imm_offset): Likewise.
+	* riscv-dis.c (print_riscv_disassembler_options): Fix typo in
+	option description.
+
+2017-07-24  Laurent Desnogues  <laurent.desnogues@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64-gen.c (print_decision_tree_1): Reverse the index of PATTERN to
+	correct the print.
+	* aarch64-dis-2.c: Regenerated.
+
+2017-07-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-mkopc.c (main): Enable z14 as CPU string in the opcode
+	table.
+
+2017-07-20  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: Updated German translation.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-regs.h (sec_stat): New aux register.
+	(aux_kernel_sp): Likewise.
+	(aux_sec_u_sp): Likewise.
+	(aux_sec_k_sp): Likewise.
+	(sec_vecbase_build): Likewise.
+	(nsc_table_top): Likewise.
+	(nsc_table_base): Likewise.
+	(ersec_stat): Likewise.
+	(aux_sec_except): Likewise.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-opc.c (extract_uimm12_20): New function.
+	(UIMM12_20): New operand.
+	(SIMM3_5_S): Adjust.
+	* arc-tbl.h (sjli): Add new instruction.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+	    John Eric Martin  <John.Martin@emmicro-us.com>
+
+	* arc-opc.c (UIMM10_6_S_JLIOFF): Define.
+	(UIMM3_23): Adjust accordingly.
+	* arc-regs.h: Add/correct jli_base register.
+	* arc-tbl.h (jli_s): Likewise.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 21775
+	* aarch64-opc.c: Fix spelling typos.
+	* i386-dis.c: Likewise.
+
 2017-07-14  Ravi Bangoria  <ravi.bangoria@linux.vnet.ibm.com>
 
 	* dis-buf.c (buffer_read_memory): Change type of end_addr_offset,

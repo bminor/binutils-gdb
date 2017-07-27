@@ -611,7 +611,7 @@ static const bfd_byte elf_x86_64_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
 };
 
 /* The first entry in the x32 IBT-enabled lazy procedure linkage table
-   is the the same as the normal lazy PLT.  Subsequent entries for an
+   is the same as the normal lazy PLT.  Subsequent entries for an
    x32 IBT-enabled lazy procedure linkage table look like this.  */
 
 static const bfd_byte elf_x32_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
@@ -4314,14 +4314,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	}
 
       if (r_type >= (int) R_X86_64_standard)
-	{
-	  _bfd_error_handler
-	    /* xgettext:c-format */
-	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
-	     input_bfd, r_type, input_section);
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
-	}
+	return _bfd_unrecognized_reloc (input_bfd, input_section, r_type);
 
       if (r_type != (int) R_X86_64_32
 	  || ABI_64_P (output_bfd))
@@ -4669,7 +4662,7 @@ do_ifunc_pointer:
 	case R_X86_64_GOTPCREL64:
 	  /* Use global offset table entry as symbol value.  */
 	case R_X86_64_GOTPLT64:
-	  /* This is obsolete and treated the the same as GOT64.  */
+	  /* This is obsolete and treated the same as GOT64.  */
 	  base_got = htab->elf.sgot;
 
 	  if (htab->elf.sgot == NULL)

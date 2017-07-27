@@ -2631,7 +2631,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 		case NOP_CHECK_CPU12:
 		  if (silicon_errata_warn & SILICON_ERRATA_CPU12)
-		    as_warn (_("CPU12: CMP/BIT with PC destinstion ignores next instruction"));
+		    as_warn (_("CPU12: CMP/BIT with PC destination ignores next instruction"));
 
 		  if (silicon_errata_fix & SILICON_ERRATA_CPU12)
 		    doit = TRUE;
@@ -2724,9 +2724,9 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		   || is_opcode ("bicx") || is_opcode ("bisx") || is_opcode ("movx")))
 	    {
 	      if (silicon_errata_fix & SILICON_ERRATA_CPU11)
-		as_bad (_("CPU11: PC is destinstion of SR altering instruction"));
+		as_bad (_("CPU11: PC is destination of SR altering instruction"));
 	      else if (silicon_errata_warn & SILICON_ERRATA_CPU11)
-		as_warn (_("CPU11: PC is destinstion of SR altering instruction"));
+		as_warn (_("CPU11: PC is destination of SR altering instruction"));
 	    }
 	  
 	  /* If the status register is the destination...  */
@@ -2741,9 +2741,9 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		  ))
 	    {
 	      if (silicon_errata_fix & SILICON_ERRATA_CPU13)
-		as_bad (_("CPU13: SR is destinstion of SR altering instruction"));
+		as_bad (_("CPU13: SR is destination of SR altering instruction"));
 	      else if (silicon_errata_warn & SILICON_ERRATA_CPU13)
-		as_warn (_("CPU13: SR is destinstion of SR altering instruction"));
+		as_warn (_("CPU13: SR is destination of SR altering instruction"));
 	    }
 	  
 	  if (is_opcode ("clr") && bin == 0x4302 /* CLR R2*/)
@@ -2849,9 +2849,9 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		  ))
 	    {
 	      if (silicon_errata_fix & SILICON_ERRATA_CPU13)
-		as_bad (_("CPU13: SR is destinstion of SR altering instruction"));
+		as_bad (_("CPU13: SR is destination of SR altering instruction"));
 	      else if (silicon_errata_warn & SILICON_ERRATA_CPU13)
-		as_warn (_("CPU13: SR is destinstion of SR altering instruction"));
+		as_warn (_("CPU13: SR is destination of SR altering instruction"));
 	    }
 	  
 	  if (extended_op)
@@ -3410,9 +3410,9 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	       || is_opcode ("bicx") || is_opcode ("bisx") || is_opcode ("movx")))
 	{
 	  if (silicon_errata_fix & SILICON_ERRATA_CPU11)
-	    as_bad (_("CPU11: PC is destinstion of SR altering instruction"));
+	    as_bad (_("CPU11: PC is destination of SR altering instruction"));
 	  else if (silicon_errata_warn & SILICON_ERRATA_CPU11)
-	    as_warn (_("CPU11: PC is destinstion of SR altering instruction"));
+	    as_warn (_("CPU11: PC is destination of SR altering instruction"));
 	}
 	  
       /* If the status register is the destination...  */
@@ -3427,9 +3427,9 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      ))
 	{
 	  if (silicon_errata_fix & SILICON_ERRATA_CPU13)
-	    as_bad (_("CPU13: SR is destinstion of SR altering instruction"));
+	    as_bad (_("CPU13: SR is destination of SR altering instruction"));
 	  else if (silicon_errata_warn & SILICON_ERRATA_CPU13)
-	    as_warn (_("CPU13: SR is destinstion of SR altering instruction"));
+	    as_warn (_("CPU13: SR is destination of SR altering instruction"));
 	}
 	  
       if (   (is_opcode ("bic") && bin == 0xc232)
@@ -3605,9 +3605,9 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  && (is_opcode ("rra") || is_opcode ("rrc") || is_opcode ("sxt")))
 	{
 	  if (silicon_errata_fix & SILICON_ERRATA_CPU13)
-	    as_bad (_("CPU13: SR is destinstion of SR altering instruction"));
+	    as_bad (_("CPU13: SR is destination of SR altering instruction"));
 	  else if (silicon_errata_warn & SILICON_ERRATA_CPU13)
-	    as_warn (_("CPU13: SR is destinstion of SR altering instruction"));
+	    as_warn (_("CPU13: SR is destination of SR altering instruction"));
 	}
 	  
       insn_length = (extended_op ? 2 : 0) + 2 + (op1.ol * 2);

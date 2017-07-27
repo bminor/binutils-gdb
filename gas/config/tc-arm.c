@@ -8979,7 +8979,7 @@ check_ldr_r15_aligned (void)
 	      && (inst.operands[0].reg == REG_PC
 	      && inst.operands[1].reg == REG_PC
 	      && (inst.reloc.exp.X_add_number & 0x3)),
-	      _("ldr to register 15 must be 4-byte alligned"));
+	      _("ldr to register 15 must be 4-byte aligned"));
 }
 
 static void
@@ -22005,12 +22005,17 @@ arm_init_frag (fragS * fragP, int max_chars ATTRIBUTE_UNUSED)
 void
 arm_init_frag (fragS * fragP, int max_chars)
 {
-  int frag_thumb_mode;
+  bfd_boolean frag_thumb_mode;
 
   /* If the current ARM vs THUMB mode has not already
      been recorded into this frag then do so now.  */
   if ((fragP->tc_frag_data.thumb_mode & MODE_RECORDED) == 0)
     fragP->tc_frag_data.thumb_mode = thumb_mode | MODE_RECORDED;
+
+  /* PR 21809: Do not set a mapping state for debug sections
+     - it just confuses other tools.  */
+  if (bfd_get_section_flags (NULL, now_seg) & SEC_DEBUGGING)
+    return;
 
   frag_thumb_mode = fragP->tc_frag_data.thumb_mode ^ MODE_RECORDED;
 
@@ -23542,7 +23547,7 @@ md_apply_fix (fixS *	fixP,
       /* We are going to store value (shifted right by two) in the
 	 instruction, in a 24 bit, signed field.  Bits 26 through 32 either
 	 all clear or all set and bit 0 must be clear.  For B/BL bit 1 must
-	 also be be clear.  */
+	 also be clear.  */
       if (value & temp)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("misaligned branch destination"));

@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for loaction views in DWARF debug line information.
+
 Changes in 2.29:
 
 * Add support for ELF SHF_GNU_MBIND.

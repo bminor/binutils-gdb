@@ -203,7 +203,8 @@ extern void quit_serial_event_clear (void);
    several languages.  For that reason, the constants here are sorted
    in the order we'll attempt demangling them.  For example: Rust uses
    C++ mangling, so must come after C++; Ada must come last (see
-   ada_sniff_from_mangled_name).  */
+   ada_sniff_from_mangled_name).  (Keep this order in sync with the
+   'languages' array in language.c.)  */
 
 enum language
   {

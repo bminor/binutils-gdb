@@ -1083,7 +1083,7 @@ sh_relax_delete_bytes (bfd *abfd,
 
   contents = coff_section_data (abfd, sec)->contents;
 
-  /* The deletion must stop at the next ALIGN reloc for an aligment
+  /* The deletion must stop at the next ALIGN reloc for an alignment
      power larger than the number of bytes we are deleting.  */
 
   irelalign = NULL;

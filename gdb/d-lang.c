@@ -204,7 +204,7 @@ static const char *d_extensions[] =
   ".d", NULL
 };
 
-static const struct language_defn d_language_defn =
+extern const struct language_defn d_language_defn =
 {
   "d",
   "D",
@@ -349,6 +349,4 @@ void
 _initialize_d_language (void)
 {
   d_type_data = gdbarch_data_register_post_init (build_d_types);
-
-  add_language (&d_language_defn);
 }

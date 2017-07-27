@@ -5664,7 +5664,7 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
                                      : addend_a);
 
     Valtype x = psymval->value(object, addend);
-    x = ((x + (uint64_t) 0x800080008000) >> 48) & 0xffff;
+    x = ((x + (uint64_t) 0x800080008000llu) >> 48) & 0xffff;
     val = Bits<32>::bit_select32(val, x, 0xffff);
 
     if (calculate_only)

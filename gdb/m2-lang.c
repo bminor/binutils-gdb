@@ -354,7 +354,7 @@ const struct exp_descriptor exp_descriptor_modula2 =
   evaluate_subexp_modula2
 };
 
-const struct language_defn m2_language_defn =
+extern const struct language_defn m2_language_defn =
 {
   "modula-2",
   "Modula-2",
@@ -439,6 +439,4 @@ void
 _initialize_m2_language (void)
 {
   m2_type_data = gdbarch_data_register_post_init (build_m2_types);
-
-  add_language (&m2_language_defn);
 }

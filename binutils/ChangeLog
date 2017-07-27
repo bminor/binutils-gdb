@@ -1,3 +1,59 @@
+2017-07-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 21820
+	* readelf.c (dump_section_as_strings): Do not fail if the section
+	was empty.
+	(dump_section_as_bytes): Likewise.
+
+2017-07-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 21813
+	* rddbg.c (read_symbol_stabs_debugging_info): Check for an empty
+	string whilst concatenating symbol names.
+
+2017-07-21  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
+2017-07-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf.c (last_pointer_size, warned_about_missing_comp_units):
+	Remove.
+	(load_debug_info): Remove assignments to those two variables.
+
+2017-07-21  Alexandre Oliva  <aoliva@redhat.com>
+
+	* dwarf.c (struct State_Machine_Registers): Add view field.
+	(reset_state_machine): Reset view.
+	(process_extended_line_op): Reset view when appropriate.
+	(display_debug_lines_raw): Increment or reset view when appropriate.
+	Print nonzero views.  Support print view resets, disabled by default.
+	(display_debug_lines_decoded): Likewise.  Disambiguate op_code tests,
+	enabling printing of end_sequence.
+	* testsuite/binutils-all/dw2-1.W: Add nonzero views.
+	* testsuite/binutils-all/dw2-3.W: Likewise.
+	* testsuite/binutils-all/dw2-3gabi.W: Likewise.
+	* testsuite/binutils-all/dw5.W: Add end sequence lines.
+	* testsuite/binutils-all/i386/compressed-1a.d: Add nonzero views.
+	* testsuite/binutils-all/libdw2-compressedgabi.out: Likewise.
+	* testsuite/binutils-all/objdump.W: Likewise.
+	* testsuite/binutils-all/objdump.WL: Add end sequence lines.
+	* testsuite/binutils-all/x86-64/compressed-1a.d: Add nonzero views.
+
+2017-07-19  Tristan Gingold  <gingold@adacore.com>
+
+	* nm.c (show_stats): Remove variable.
+	(long_options): Remove --stats option.
+	(main): Remove handling of --stats.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 21775
+	* coffgrok.c: Fix spelling typos.
+	* readelf.c: Likewise.
+	* stabs.c: Likewise.
+	* testsuite/binutils-all/objcopy.exp: Likewise.
+
 2017-07-18  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.

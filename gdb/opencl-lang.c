@@ -1043,7 +1043,7 @@ const struct exp_descriptor exp_descriptor_opencl =
   evaluate_subexp_opencl
 };
 
-const struct language_defn opencl_language_defn =
+extern const struct language_defn opencl_language_defn =
 {
   "opencl",			/* Language name */
   "OpenCL C",
@@ -1185,5 +1185,4 @@ void
 _initialize_opencl_language (void)
 {
   opencl_type_data = gdbarch_data_register_post_init (build_opencl_types);
-  add_language (&opencl_language_defn);
 }

@@ -1,3 +1,367 @@
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* cli/cli-cmds.c (maintenancechecklist): New variable.
+	* gdbcmd.h (maintenancechecklist): Declare it.
+	* i386-linux-tdep.c (_initialize_i386_linux_tdep) [GDB_SELF_TEST]:
+	Call i386_linux_read_description with different masks.
+	* maint.c (maintenance_check_command): New function.
+	(_initialize_maint_cmds): Call add_prefix_cmd.
+	* target-descriptions.c (tdesc_reg): override operator != and ==.
+	(tdesc_type): Likewise.
+	(tdesc_feature): Likewise.
+	(target_desc): Likewise.
+	[GDB_SELF_TEST] (selftests::record_xml_tdesc): New function.
+	(maintenance_check_xml_descriptions): New function.
+	(_initialize_target_descriptions) Add command "xml-descriptions".
+	* target-descriptions.h (selftests::record_xml_tdesc): Declare.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* i386-linux-tdep.c: Don't include features/i386/i386-*linux.c.
+	Include features/i386/32bit-*.c.
+	(i386_linux_read_description): Generate target description if it
+	doesn't exist.
+	(_initialize_i386_linux_tdep): Don't call _initialize_tdesc_i386
+	functions.
+	* features/i386/32bit-linux.c: Re-generated.
+	* features/i386/32bit-sse.c: Likewise.
+	* target-descriptions.c (print_c_feature::visit): Print code to
+	set register number if needed.
+	(print_c_feature) <m_next_regnum>: New field.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* features/Makefile (CFILES): Rename with TDESC_CFILES.
+	(FEATURE_XMLFILES): New.
+	(FEATURE_CFILES): New.
+	New rules.
+	(clean-cfiles): Remove generated c files.
+	* features/i386/32bit-avx.c: Generated.
+ 	* features/i386/32bit-avx512.c: Generated.
+ 	* features/i386/32bit-core.c: Generated.
+ 	* features/i386/32bit-linux.c: Generated.
+ 	* features/i386/32bit-mpx.c: Generated.
+ 	* features/i386/32bit-pkeys.c: Generated.
+ 	* features/i386/32bit-sse.c: Generated.
+ 	* target-descriptions.c: Include algorithm.
+	(tdesc_element_visitor): Add method visit_end.
+	(print_c_tdesc): Implement visit_end.
+	(print_c_tdesc:: m_filename_after_features): Move it to
+	protected.
+	(print_c_feature): New class.
+	(maint_print_c_tdesc_cmd): Use print_c_feature if XML file
+	name starts with "i386/32bit-".
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* target-descriptions.c (tdesc_element_visitor): New class.
+	(tdesc_element): New class.
+	(tdesc_reg): Inherit from tdesc_element.
+	(tdesc_reg::accept): New function.
+	(tdesc_type): Inherit from tdesc_element.
+	(tdesc_type::accept): New function.
+	(tdesc_feature): Inherit from tdesc_element.
+	(tdesc_feature::accept): New function.
+	(target_desc): Inherit from tdesc_element.
+	(target_desc::target_desc): New.
+	(target_desc::~target_desc): New.
+	(target_desc::accept): New.
+	(allocate_target_description): Use new.
+	(free_target_description): Use delete.
+	(print_c_tdesc): New class.
+	(maint_print_c_tdesc_cmd): Adjust.
+
+	* features/aarch64.c: Re-generated.
+	* features/arc-arcompact.c: Re-generated.
+	* features/arc-v2.c: Re-generated.
+	* features/arm/arm-with-iwmmxt.c: Re-generated.
+	* features/arm/arm-with-m.c: Re-generated.
+	* features/arm/arm-with-m-fpa-layout.c: Re-generated.
+	* features/arm/arm-with-m-vfp-d16.c: Re-generated.
+	* features/arm/arm-with-neon.c: Re-generated.
+	* features/arm/arm-with-vfpv2.c: Re-generated.
+	* features/arm/arm-with-vfpv3.c: Re-generated.
+	* features/i386/amd64-avx-avx512.c: Re-generated.
+	* features/i386/amd64-avx-avx512-linux.c: Re-generated.
+	* features/i386/amd64-avx.c: Re-generated.
+	* features/i386/amd64-avx-linux.c: Re-generated.
+	* features/i386/amd64-avx-mpx-avx512-pku.c: Re-generated.
+	* features/i386/amd64-avx-mpx-avx512-pku-linux.c: Re-generated.
+	* features/i386/amd64-avx-mpx.c: Re-generated.
+	* features/i386/amd64-avx-mpx-linux.c: Re-generated.
+	* features/i386/amd64.c: Re-generated.
+	* features/i386/amd64-linux.c: Re-generated.
+	* features/i386/amd64-mpx.c: Re-generated.
+	* features/i386/amd64-mpx-linux.c: Re-generated.
+	* features/i386/i386-avx-avx512.c: Re-generated.
+	* features/i386/i386-avx-avx512-linux.c: Re-generated.
+	* features/i386/i386-avx.c: Re-generated.
+	* features/i386/i386-avx-linux.c: Re-generated.
+	* features/i386/i386-avx-mpx-avx512-pku.c: Re-generated.
+	* features/i386/i386-avx-mpx-avx512-pku-linux.c: Re-generated.
+	* features/i386/i386-avx-mpx.c: Re-generated.
+	* features/i386/i386-avx-mpx-linux.c: Re-generated.
+	* features/i386/i386.c: Re-generated.
+	* features/i386/i386-linux.c: Re-generated.
+	* features/i386/i386-mmx.c: Re-generated.
+	* features/i386/i386-mmx-linux.c: Re-generated.
+	* features/i386/i386-mpx.c: Re-generated.
+	* features/i386/i386-mpx-linux.c: Re-generated.
+	* features/i386/x32-avx-avx512.c: Re-generated.
+	* features/i386/x32-avx-avx512-linux.c: Re-generated.
+	* features/i386/x32-avx.c: Re-generated.
+	* features/i386/x32-avx-linux.c: Re-generated.
+	* features/i386/x32.c: Re-generated.
+	* features/i386/x32-linux.c: Re-generated.
+	* features/microblaze.c: Re-generated.
+	* features/microblaze-with-stack-protect.c: Re-generated.
+	* features/mips64-dsp-linux.c: Re-generated.
+	* features/mips64-linux.c: Re-generated.
+	* features/mips-dsp-linux.c: Re-generated.
+	* features/mips-linux.c: Re-generated.
+	* features/nds32.c: Re-generated.
+	* features/nios2.c: Re-generated.
+	* features/nios2-linux.c: Re-generated.
+	* features/rs6000/powerpc-32.c: Re-generated.
+	* features/rs6000/powerpc-32l.c: Re-generated.
+	* features/rs6000/powerpc-403.c: Re-generated.
+	* features/rs6000/powerpc-403gc.c : Re-generated.
+	* features/rs6000/powerpc-405.c: Re-generated.
+	* features/rs6000/powerpc-505.c: Re-generated.
+	* features/rs6000/powerpc-601.c: Re-generated.
+	* features/rs6000/powerpc-602.c: Re-generated.
+	* features/rs6000/powerpc-603.c: Re-generated.
+	* features/rs6000/powerpc-604.c: Re-generated.
+	* features/rs6000/powerpc-64.c: Re-generated.
+	* features/rs6000/powerpc-64l.c: Re-generated.
+	* features/rs6000/powerpc-7400.c: Re-generated.
+	* features/rs6000/powerpc-750.c: Re-generated.
+	* features/rs6000/powerpc-860.c: Re-generated.
+	* features/rs6000/powerpc-altivec32.c: Re-generated.
+	* features/rs6000/powerpc-altivec32l.c: Re-generated.
+	* features/rs6000/powerpc-altivec64.c: Re-generated.
+	* features/rs6000/powerpc-altivec64l.c: Re-generated.
+	* features/rs6000/powerpc-cell32l.c: Re-generated.
+	* features/rs6000/powerpc-cell64l.c: Re-generated.
+	* features/rs6000/powerpc-e500.c: Re-generated.
+	* features/rs6000/powerpc-e500l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-32l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-64l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-altivec32l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-altivec64l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-vsx32l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-vsx64l.c: Re-generated.
+	* features/rs6000/powerpc-vsx32.c: Re-generated.
+	* features/rs6000/powerpc-vsx32l.c: Re-generated.
+	* features/rs6000/powerpc-vsx64.c: Re-generated.
+	* features/rs6000/powerpc-vsx64l.c: Re-generated.
+	* features/rs6000/rs6000.c: Re-generated.
+	* features/s390-linux32.c: Re-generated.
+	* features/s390-linux32v1.c: Re-generated.
+	* features/s390-linux32v2.c: Re-generated.
+	* features/s390-linux64.c: Re-generated.
+	* features/s390-linux64v1.c: Re-generated.
+	* features/s390-linux64v2.c: Re-generated.
+	* features/s390-te-linux64.c: Re-generated.
+	* features/s390-tevx-linux64.c: Re-generated.
+	* features/s390-vx-linux64.c: Re-generated.
+	* features/s390x-linux64.c: Re-generated.
+	* features/s390x-linux64v1.c: Re-generated.
+	* features/s390x-linux64v2.c: Re-generated.
+	* features/s390x-te-linux64.c: Re-generated.
+	* features/s390x-tevx-linux64.c: Re-generated.
+	* features/s390x-vx-linux64.c: Re-generated.
+	* features/sparc/sparc32-solaris.c: Re-generated.
+	* features/sparc/sparc64-solaris.c: Re-generated.
+	* features/tic6x-c62x.c: Re-generated.
+	* features/tic6x-c62x-linux.c: Re-generated.
+	* features/tic6x-c64x.c: Re-generated.
+	* features/tic6x-c64x-linux.c: Re-generated.
+	* features/tic6x-c64xp.c: Re-generated.
+	* features/tic6x-c64xp-linux.c: Re-generated.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* i386-linux-tdep.c (i386_linux_read_description): New function.
+	(i386_linux_core_read_description): Call
+	i386_linux_read_description.
+	* i386-linux-tdep.h (i386_linux_read_description): Declare.
+	(tdesc_i386_linux, tdesc_i386_mmx_linux): Remove declarations.
+	(tdesc_i386_avx_linux, tdesc_i386_mpx_linux): Likewise
+	(tdesc_i386_avx_mpx_linux, tdesc_i386_avx_avx512_linux): Likewise.
+	(tdesc_i386_avx_mpx_avx512_pku_linux): Likewise.
+	* x86-linux-nat.c (x86_linux_read_description): Call
+	i386_linux_read_description.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* NEWS: Mention it.
+	* features/Makefile (%.c: %.xml): Pass the xml file name to
+	command "maint print c-tdesc".
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Get file
+	name from 'arg'.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* target-descriptions.c (target_desc): Add ctor and dtor.  Do
+	in-class initialization.
+	(tdesc_create_feature): Call new instead of XCNEW.
+	(free_target_description): Ue delete.
+
+2017-07-25  John Baldwin  <jhb@FreeBSD.org>
+
+	* configure.nat: Add "-lkvm" for NetBSD/sparc64 and fix typo.
+
+2017-07-25  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-tdep.c (amd64_init_abi): Make argument default_tdesc
+	constant.
+	(amd64_x32_init_abi): Likewise.
+	* amd64-tdep.h (amd64_init_abi): Update declaration.
+	(amd64_x32_init_abi): Likewise.
+
+2017-07-25  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/21717
+	* arm-linux-nat.c (arm_linux_fetch_inferior_registers): Update
+	condition for FPSCR.
+	(arm_linux_store_inferior_registers): Likewise.
+
+2017-07-22  Tom Tromey  <tom@tromey.com>
+
+	* break-catch-syscall.c (struct catch_syscall_inferior_data)
+	<syscalls_counts>: Now a std::vector.
+	(get_catch_syscall_inferior_data): Use "new".
+	(catch_syscall_inferior_data_cleanup): Use "delete".
+	(insert_catch_syscall, remove_catch_syscall)
+	(clear_syscall_counts): Update.
+
+2017-07-22  Tom Tromey  <tom@tromey.com>
+
+	* break-catch-syscall.c (syscall_catchpoint)
+	<syscalls_to_be_caught>: Now a std::vector<int>
+	(~syscall_catchpoint): Remove.
+	(insert_catch_syscall, remove_catch_syscall)
+	(breakpoint_hit_catch_syscall, print_one_catch_syscall)
+	(print_mention_catch_syscall, print_recreate_catch_syscall):
+	Update.
+	(create_syscall_event_catchpoint): Change type of "filter"
+	parameter.
+	(catch_syscall_split_args): Return a std::vector.
+	(catch_syscall_command_1, catching_syscall_number_1): Update.
+
+2017-07-22  Tom Tromey  <tom@tromey.com>
+
+	* break-catch-throw.c (struct exception_catchpoint)
+	<exception_rx>: Now a std::string.
+	(~exception_catchpoint): Remove.
+	(print_one_detail_exception_catchpoint): Update.
+	(handle_gnu_v3_exceptions): Change type of except_rx.
+	(extract_exception_regexp): Return a std::string.
+	(catch_exception_command_1): Update.
+
+2017-07-22  Tom Tromey  <tom@tromey.com>
+
+	* break-catch-sig.c (gdb_signal_type): Remove typedef.
+	(struct signal_catchpoint) <signals_to_be_caught>: Now a
+	std::vector.
+	<catch_all>: Now a bool.
+	(~signal_catchpoint): Remove.
+	(signal_catchpoint_insert_location)
+	(signal_catchpoint_remove_location)
+	(signal_catchpoint_breakpoint_hit, signal_catchpoint_print_one)
+	(signal_catchpoint_print_mention)
+	(signal_catchpoint_print_recreate)
+	(signal_catchpoint_explains_signal): Update.
+	(create_signal_catchpoint): Change type of "filter" and
+	"catch_all".
+	(catch_signal_split_args): Return a std::vector.  Change type of
+	"catch_all".
+	(catch_signal_command): Update.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_language_defn): Make extern.
+	(_initialize_ada_language): Remove add_language call.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Make extern.
+	(_initialize_c_language): Delete.
+	* completer.c (compare_cstrings): Delete, moved to utils.h.
+	* d-lang.c (d_language_defn): Make extern.
+	(_initialize_d_language): Remove add_language calls.
+	* defs.h (enum language): Add comment.
+	* f-lang.c (f_language_defn): Make extern.
+	(_initialize_f_language): Remove add_language call.
+	* go-lang.c (go_language_defn): Make extern.
+	(_initialize_go_language): Remove add_language call.
+	* language.c: Include <algorithm>.
+	(languages): Redefine as const array.
+	(languages_size, languages_allocsize, DEFAULT_ALLOCSIZE): Delete.
+	(set_language_command): Handle "local".  Use for-range loop.
+	(set_language): Remove loop.
+	(language_enum): Rewrite.
+	(language_def, language_str): Remove loops.
+	(add_language): Delete.
+	(add_set_language_command): New, based on add_languages.
+	(skip_language_trampoline): Adjust.
+	(local_language_defn): Delete.
+	(language_gdbarch_post_init): Adjust.
+	(_initialize_language): Remove add_language calls.  Call
+	add_set_language_command.
+	* language.h (add_language): Delete.
+	(auto_language_defn)
+	(unknown_language_defn, minimal_language_defn, ada_language_defn)
+	(asm_language_defn, c_language_defn, cplus_language_defn)
+	(d_language_defn, f_language_defn, go_language_defn)
+	(m2_language_defn, objc_language_defn, opencl_language_defn)
+	(pascal_language_defn, rust_language_defn): Declare.
+	* m2-lang.c (m2_language_defn): Make extern.
+	(_initialize_m2_language): Remove add_language call.
+	* objc-lang.c (objc_language_defn): Make extern.
+	(_initialize_objc_language): Remove add_language call.
+	* opencl-lang.c (opencl_language_defn): Make extern.
+	(_initialize_opencl_language): Remove add_language call.
+	* p-lang.c (pascal_language_defn): Make extern.
+	(_initialize_pascal_language): Delete.
+	* rust-lang.c (rust_language_defn): Make extern.
+	(_initialize_rust_language): Delete.
+	* utils.h (compare_cstrings): New static inline function.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_to_fixed_type_1): Adjust.
+	(get_var_value): Constify parameters.
+	(get_int_var_value): Change prototype.
+	(to_fixed_range_type): Adjust.
+	* ada-lang.h (get_int_var_value): Change prototype.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (dw2_lookup_symbol): Use
+	SYMBOL_MATCHES_SEARCH_NAME.
+	* psymtab.c (psym_lookup_symbol): Use SYMBOL_MATCHES_SEARCH_NAME.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
+	* block.c (block_iter_name_step, block_iter_name_first)
+	(block_iter_name_next): Delete.
+	(block_lookup_symbol_primary): Adjust to use
+	dict_iter_match_first/dict_iter_match_next.
+	* block.h (block_iter_name_first, block_iter_name_next): Delete
+	declarations.
+	(ALL_BLOCK_SYMBOLS_WITH_NAME): Adjust to use
+	dict_iter_match_first/dict_iter_match_next.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
+	* cp-support.c (cp_find_first_component_aux): Add missing case for
+	end of string.
+
+2017-07-18  David Blaikie  <dblaikie@gmail.com>
+
+	* dwarf2read.c (create_cus_hash_table): Re-add lost initialization
+	of dwo_cu's dwo_file.
+
 2017-07-18  Yao Qi  <yao.qi@linaro.org>
 
 	* remote.c (store_registers_using_G): Remove one line comment.

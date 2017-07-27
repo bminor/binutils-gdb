@@ -473,6 +473,14 @@ _bfd_vms_slurp_eihd (bfd *abfd, unsigned int *eisd_offset,
 
   vms_debug2 ((8, "_bfd_vms_slurp_eihd\n"));
 
+  /* PR 21813: Check for an undersized record.  */
+  if (PRIV (recrd.buf_size) < sizeof (* eihd))
+    {
+      _bfd_error_handler (_("Corrupt EIHD record - size is too small"));
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
   size = bfd_getl32 (eihd->size);
   imgtype = bfd_getl32 (eihd->imgtype);
 
@@ -895,7 +903,7 @@ _bfd_vms_slurp_ehdr (bfd *abfd)
 
   vms_rec = PRIV (recrd.rec);
   /* PR 17512: file: 62736583.  */
-  end = vms_rec + PRIV (recrd.buf_size);
+  end = PRIV (recrd.buf) + PRIV (recrd.buf_size);
 
   vms_debug2 ((2, "HDR/EMH\n"));
 
@@ -1312,19 +1320,38 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	    if (old_flags & EGSY__V_DEF)
               {
                 struct vms_esdf *esdf = (struct vms_esdf *)vms_rec;
+		long psindx;
 
 		entry->value = bfd_getl64 (esdf->value);
 		if (PRIV (sections) == NULL)
 		  return FALSE;
-		entry->section = PRIV (sections)[bfd_getl32 (esdf->psindx)];
+
+		psindx = bfd_getl32 (esdf->psindx);
+		/* PR 21813: Check for an out of range index.  */
+		if (psindx < 0 || psindx >= (int) PRIV (section_count))
+		  {
+		    _bfd_error_handler (_("Corrupt EGSD record: its psindx field is too big (%#lx)"),
+					psindx);
+		    bfd_set_error (bfd_error_bad_value);
+		    return FALSE;
+		  }
+		entry->section = PRIV (sections)[psindx];
 
                 if (old_flags & EGSY__V_NORM)
                   {
                     PRIV (norm_sym_count)++;
 
                     entry->code_value = bfd_getl64 (esdf->code_address);
-                    entry->code_section =
-                      PRIV (sections)[bfd_getl32 (esdf->ca_psindx)];
+		    psindx = bfd_getl32 (esdf->ca_psindx);
+		/* PR 21813: Check for an out of range index.  */
+		    if (psindx < 0 || psindx >= (int) PRIV (section_count))
+		      {
+			_bfd_error_handler (_("Corrupt EGSD record: its psindx field is too big (%#lx)"),
+					    psindx);
+			bfd_set_error (bfd_error_bad_value);
+			return FALSE;
+		      }
+                    entry->code_section = PRIV (sections)[psindx];
                   }
               }
 	  }
@@ -1351,9 +1378,20 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 
             if (old_flags & EGSY__V_REL)
 	      {
+		long psindx;
+
 		if (PRIV (sections) == NULL)
 		  return FALSE;
-		entry->section = PRIV (sections)[bfd_getl32 (egst->psindx)];
+		psindx = bfd_getl32 (egst->psindx);
+		/* PR 21813: Check for an out of range index.  */
+		if (psindx < 0 || psindx >= (int) PRIV (section_count))
+		  {
+		    _bfd_error_handler (_("Corrupt EGSD record: its psindx field is too big (%#lx)"),
+					psindx);
+		    bfd_set_error (bfd_error_bad_value);
+		    return FALSE;
+		  }
+		entry->section = PRIV (sections)[psindx];
 	      }
             else
               entry->section = bfd_abs_section_ptr;
@@ -1446,6 +1484,9 @@ image_set_ptr (bfd *abfd, bfd_vma vma, int sect, struct bfd_link_info *info)
 
   if (PRIV (sections) == NULL)
     return;
+  if (sect < 0 || sect >= (int) PRIV (section_count))
+    return;
+
   sec = PRIV (sections)[sect];
 
   if (info)
@@ -2450,6 +2491,14 @@ _bfd_vms_slurp_eeom (bfd *abfd)
 
   vms_debug2 ((2, "EEOM\n"));
 
+  /* PR 21813: Check for an undersized record.  */
+  if (PRIV (recrd.buf_size) < sizeof (* eeom))
+    {
+      _bfd_error_handler (_("Corrupt EEOM record - size is too small"));
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
   PRIV (eom_data).eom_l_total_lps = bfd_getl32 (eeom->total_lps);
   PRIV (eom_data).eom_w_comcod = bfd_getl16 (eeom->comcod);
   if (PRIV (eom_data).eom_w_comcod > 1)
@@ -2630,6 +2679,9 @@ alpha_vms_object_p (bfd *abfd)
           PRIV (recrd.buf_size) = PRIV (recrd.rec_size);
         }
 
+      /* PR 21813: Check for a truncated record.  */
+      if (PRIV (recrd.rec_size < test_len))
+	goto error_ret;
       /* Read the remaining record.  */
       remaining = PRIV (recrd.rec_size) - test_len;
       to_read = MIN (VMS_BLOCK_SIZE - test_len, remaining);
@@ -5173,7 +5225,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
               }
             else if (cur_psidx >= 0)
 	      {
-		if (PRIV (sections) == NULL)
+		if (PRIV (sections) == NULL || cur_psidx >= (int) PRIV (section_count))
 		  return FALSE;
 		reloc->sym_ptr_ptr =
 		  PRIV (sections)[cur_psidx]->symbol_ptr_ptr;
@@ -5685,8 +5737,9 @@ evax_bfd_print_emh (FILE *file, unsigned char *rec, unsigned int rec_len)
 {
   struct vms_emh_common *emh = (struct vms_emh_common *)rec;
   unsigned int subtype;
+  int extra;
 
-  subtype = (unsigned)bfd_getl16 (emh->subtyp);
+  subtype = (unsigned) bfd_getl16 (emh->subtyp);
 
   /* xgettext:c-format */
   fprintf (file, _("  EMH %u (len=%u): "), subtype, rec_len);
@@ -5697,58 +5750,82 @@ evax_bfd_print_emh (FILE *file, unsigned char *rec, unsigned int rec_len)
       fprintf (file, _("   Error: The length is less than the length of an EMH record\n"));
       return;
     }
-  
+  extra = rec_len - sizeof (struct vms_emh_common);
+
   switch (subtype)
     {
     case EMH__C_MHD:
       {
-        struct vms_emh_mhd *mhd = (struct vms_emh_mhd *)rec;
-        const char *name;
+        struct vms_emh_mhd *mhd = (struct vms_emh_mhd *) rec;
+        const char * name;
+	const char * nextname;
+	const char * maxname;
 
+	/* PR 21840: Check for invalid lengths.  */
+	if (rec_len < sizeof (* mhd))
+	  {
+	    fprintf (file, _("   Error: The record length is less than the size of an EMH_MHD record\n"));
+	    return;
+	  }
         fprintf (file, _("Module header\n"));
         fprintf (file, _("   structure level: %u\n"), mhd->strlvl);
         fprintf (file, _("   max record size: %u\n"),
-                 (unsigned)bfd_getl32 (mhd->recsiz));
+                 (unsigned) bfd_getl32 (mhd->recsiz));
         name = (char *)(mhd + 1);
+	maxname = (char *) rec + rec_len;
+	if (name > maxname - 2)
+	  {
+	    fprintf (file, _("   Error: The module name is missing\n"));
+	    return;
+	  }
+	nextname = name + name[0] + 1;
+	if (nextname >= maxname)
+	  {
+	    fprintf (file, _("   Error: The module name is too long\n"));
+	    return;
+	  }
         fprintf (file, _("   module name    : %.*s\n"), name[0], name + 1);
-        name += name[0] + 1;
+        name = nextname;
+	if (name > maxname - 2)
+	  {
+	    fprintf (file, _("   Error: The module version is missing\n"));
+	    return;
+	  }
+	nextname = name + name[0] + 1;
+	if (nextname >= maxname)
+	  {
+	    fprintf (file, _("   Error: The module version is too long\n"));
+	    return;
+	  }
         fprintf (file, _("   module version : %.*s\n"), name[0], name + 1);
-        name += name[0] + 1;
-        fprintf (file, _("   compile date   : %.17s\n"), name);
+        name = nextname;
+	if ((maxname - name) < 17 && maxname[-1] != 0)
+	  fprintf (file, _("   Error: The compile date is truncated\n"));
+	else
+	  fprintf (file, _("   compile date   : %.17s\n"), name);
       }
       break;
+
     case EMH__C_LNM:
-      {
-        fprintf (file, _("Language Processor Name\n"));
-        fprintf (file, _("   language name: %.*s\n"),
-                 (int)(rec_len - sizeof (struct vms_emh_common)),
-                 (char *)rec + sizeof (struct vms_emh_common));
-      }
+      fprintf (file, _("Language Processor Name\n"));
+      fprintf (file, _("   language name: %.*s\n"), extra, (char *)(emh + 1));
       break;
+
     case EMH__C_SRC:
-      {
-        fprintf (file, _("Source Files Header\n"));
-        fprintf (file, _("   file: %.*s\n"),
-                 (int)(rec_len - sizeof (struct vms_emh_common)),
-                 (char *)rec + sizeof (struct vms_emh_common));
-      }
+      fprintf (file, _("Source Files Header\n"));
+      fprintf (file, _("   file: %.*s\n"), extra, (char *)(emh + 1));
       break;
+
     case EMH__C_TTL:
-      {
-        fprintf (file, _("Title Text Header\n"));
-        fprintf (file, _("   title: %.*s\n"),
-                 (int)(rec_len - sizeof (struct vms_emh_common)),
-                 (char *)rec + sizeof (struct vms_emh_common));
-      }
+      fprintf (file, _("Title Text Header\n"));
+      fprintf (file, _("   title: %.*s\n"), extra, (char *)(emh + 1));
       break;
+
     case EMH__C_CPR:
-      {
-        fprintf (file, _("Copyright Header\n"));
-        fprintf (file, _("   copyright: %.*s\n"),
-                 (int)(rec_len - sizeof (struct vms_emh_common)),
-                 (char *)rec + sizeof (struct vms_emh_common));
-      }
+      fprintf (file, _("Copyright Header\n"));
+      fprintf (file, _("   copyright: %.*s\n"), extra, (char *)(emh + 1));
       break;
+
     default:
       fprintf (file, _("unhandled emh subtype %u\n"), subtype);
       break;
@@ -6220,7 +6297,7 @@ evax_bfd_print_etir (FILE *file, const char *name,
           fprintf (file, _("OPR_ADD (add)\n"));
           break;
         case ETIR__C_OPR_SUB:
-          fprintf (file, _("OPR_SUB (substract)\n"));
+          fprintf (file, _("OPR_SUB (subtract)\n"));
           break;
         case ETIR__C_OPR_MUL:
           fprintf (file, _("OPR_MUL (multiply)\n"));

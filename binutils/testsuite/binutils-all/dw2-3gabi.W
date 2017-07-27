@@ -149,7 +149,7 @@ Raw dump of debug contents of section .debug_line:
   \[0x0000002d\]  Extended opcode 2: set Address to 0x0
   \[0x00000034\]  Advance Line by 3 to 4
   \[0x00000036\]  Copy
-  \[0x00000037\]  Copy
+  \[0x00000037\]  Copy \(view 1\)
   \[0x00000038\]  Extended opcode 2: set Address to 0x4
   \[0x0000003f\]  Extended opcode 1: End of Sequence
 

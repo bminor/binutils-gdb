@@ -3006,7 +3006,7 @@ static const int amd64_record_regmap[] =
 
 void
 amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
-		target_desc *default_tdesc)
+		const target_desc *default_tdesc)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const struct target_desc *tdesc = info.target_desc;
@@ -3198,7 +3198,7 @@ amd64_x32_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 
 void
 amd64_x32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
-		    target_desc *default_tdesc)
+		    const target_desc *default_tdesc)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 

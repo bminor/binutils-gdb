@@ -703,7 +703,7 @@ struct elf_m68k_got_entry
     struct
     {
       /* Offset from the start of .got section.  To calculate offset relative
-	 to GOT pointer one should substract got->offset from this value.  */
+	 to GOT pointer one should subtract got->offset from this value.  */
       bfd_vma offset;
 
       /* Pointer to the next GOT entry for this global symbol.

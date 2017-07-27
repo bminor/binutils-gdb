@@ -17,6 +17,9 @@
 QStartupWithShell
   Indicates whether the inferior must be started with a shell or not.
 
+* The "maintenance print c-tdesc" command now takes an optional
+  argument which is the file name of XML target description.
+
 * New commands
 
 set debug separate-debug-file

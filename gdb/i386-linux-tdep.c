@@ -45,13 +45,14 @@
 
 #include "record-full.h"
 #include "linux-record.h"
-#include "features/i386/i386-linux.c"
-#include "features/i386/i386-mmx-linux.c"
-#include "features/i386/i386-mpx-linux.c"
-#include "features/i386/i386-avx-mpx-linux.c"
-#include "features/i386/i386-avx-linux.c"
-#include "features/i386/i386-avx-avx512-linux.c"
-#include "features/i386/i386-avx-mpx-avx512-pku-linux.c"
+
+#include "features/i386/32bit-core.c"
+#include "features/i386/32bit-sse.c"
+#include "features/i386/32bit-linux.c"
+#include "features/i386/32bit-avx.c"
+#include "features/i386/32bit-mpx.c"
+#include "features/i386/32bit-avx512.c"
+#include "features/i386/32bit-pkeys.c"
 
 /* Return non-zero, when the register is in the corresponding register
    group.  Put the LINUX_ORIG_EAX register in the system group.  */
@@ -678,6 +679,57 @@ i386_linux_core_read_xcr0 (bfd *abfd)
   return xcr0;
 }
 
+/* See i386-linux-tdep.h.  */
+
+const struct target_desc *
+i386_linux_read_description (uint64_t xcr0)
+{
+  if (xcr0 == 0)
+    return NULL;
+
+  static struct target_desc *i386_linux_tdescs \
+    [2/*X87*/][2/*SSE*/][2/*AVX*/][2/*MPX*/][2/*AVX512*/][2/*PKRU*/] = {};
+  struct target_desc **tdesc;
+
+  tdesc = &i386_linux_tdescs[(xcr0 & X86_XSTATE_X87) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_SSE) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_AVX) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_MPX) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_AVX512) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_PKRU) ? 1 : 0];
+
+  if (*tdesc == NULL)
+    {
+      *tdesc = allocate_target_description ();
+      set_tdesc_architecture (*tdesc, bfd_scan_arch ("i386"));
+      set_tdesc_osabi (*tdesc, osabi_from_tdesc_string ("GNU/Linux"));
+
+      long regnum = 0;
+
+      if (xcr0 & X86_XSTATE_X87)
+	regnum = create_feature_i386_32bit_core (*tdesc, regnum);
+
+      if (xcr0 & X86_XSTATE_SSE)
+	regnum = create_feature_i386_32bit_sse (*tdesc, regnum);
+
+      regnum = create_feature_i386_32bit_linux (*tdesc, regnum);
+
+      if (xcr0 & X86_XSTATE_AVX)
+	regnum = create_feature_i386_32bit_avx (*tdesc, regnum);
+
+      if (xcr0 & X86_XSTATE_MPX)
+	regnum = create_feature_i386_32bit_mpx (*tdesc, regnum);
+
+      if (xcr0 & X86_XSTATE_AVX512)
+	regnum = create_feature_i386_32bit_avx512 (*tdesc, regnum);
+
+      if (xcr0 & X86_XSTATE_PKRU)
+	regnum = create_feature_i386_32bit_pkeys (*tdesc, regnum);
+    }
+
+  return *tdesc;
+}
+
 /* Get Linux/x86 target description from core dump.  */
 
 static const struct target_desc *
@@ -687,31 +739,15 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
 {
   /* Linux/i386.  */
   uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
+  const struct target_desc *tdesc = i386_linux_read_description (xcr0);
 
-  switch ((xcr0 & X86_XSTATE_ALL_MASK))
-    {
-    case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
-      return tdesc_i386_avx_mpx_avx512_pku_linux;
-    case X86_XSTATE_AVX_AVX512_MASK:
-      return tdesc_i386_avx_avx512_linux;
-    case X86_XSTATE_MPX_MASK:
-      return tdesc_i386_mpx_linux;
-    case X86_XSTATE_AVX_MPX_MASK:
-      return tdesc_i386_avx_mpx_linux;
-    case X86_XSTATE_AVX_MASK:
-      return tdesc_i386_avx_linux;
-    case X86_XSTATE_SSE_MASK:
-      return tdesc_i386_linux;
-    case X86_XSTATE_X87_MASK:
-      return tdesc_i386_mmx_linux;
-    default:
-      break;
-    }
+  if (tdesc != NULL)
+    return tdesc;
 
   if (bfd_get_section_by_name (abfd, ".reg-xfp") != NULL)
-    return tdesc_i386_linux;
+    return i386_linux_read_description (X86_XSTATE_SSE_MASK);
   else
-    return tdesc_i386_mmx_linux;
+    return i386_linux_read_description (X86_XSTATE_X87_MASK);
 }
 
 /* Similar to i386_supply_fpregset, but use XSAVE extended state.  */
@@ -835,7 +871,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_num_regs (gdbarch, I386_LINUX_NUM_REGS);
 
   if (! tdesc_has_registers (tdesc))
-    tdesc = tdesc_i386_linux;
+    tdesc = i386_linux_read_description (X86_XSTATE_SSE_MASK);
   tdep->tdesc = tdesc;
 
   feature = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.linux");
@@ -1081,12 +1117,27 @@ _initialize_i386_linux_tdep (void)
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_LINUX,
 			  i386_linux_init_abi);
 
-  /* Initialize the Linux target description.  */
-  initialize_tdesc_i386_linux ();
-  initialize_tdesc_i386_mmx_linux ();
-  initialize_tdesc_i386_avx_linux ();
-  initialize_tdesc_i386_mpx_linux ();
-  initialize_tdesc_i386_avx_mpx_linux ();
-  initialize_tdesc_i386_avx_avx512_linux ();
-  initialize_tdesc_i386_avx_mpx_avx512_pku_linux ();
+#if GDB_SELF_TEST
+  struct
+  {
+    const char *xml;
+    uint64_t mask;
+  } xml_masks[] = {
+    { "i386/i386-linux.xml", X86_XSTATE_SSE_MASK },
+    { "i386/i386-mmx-linux.xml", X86_XSTATE_X87_MASK },
+    { "i386/i386-avx-linux.xml", X86_XSTATE_AVX_MASK },
+    { "i386/i386-mpx-linux.xml", X86_XSTATE_MPX_MASK },
+    { "i386/i386-avx-mpx-linux.xml", X86_XSTATE_AVX_MPX_MASK },
+    { "i386/i386-avx-avx512-linux.xml", X86_XSTATE_AVX_AVX512_MASK },
+    { "i386/i386-avx-mpx-avx512-pku-linux.xml",
+      X86_XSTATE_AVX_MPX_AVX512_PKU_MASK },
+  };
+
+  for (auto &a : xml_masks)
+    {
+      auto tdesc = i386_linux_read_description (a.mask);
+
+      selftests::record_xml_tdesc (a.xml, tdesc);
+    }
+#endif /* GDB_SELF_TEST */
 }

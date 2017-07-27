@@ -1,3 +1,66 @@
+2017-07-25  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/tlsopt5.s: Add cfi.
+	* testsuite/ld-powerpc/tlsopt5.d: Update.
+	* testsuite/ld-powerpc/tlsopt5.wf: New file.
+	* testsuite/ld-powerpc/powerpc.exp: Perform new tlsopt5 test.
+
+2017-07-24  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/ld-arc/jli-overflow.d: Force testing for little
+	endian.
+	* testsuite/ld-arc/tls_gd-01.d: Fix string to match bigendian
+	systems.
+	* testsuite/ld-arc/tls_ie-01.d: Fix test for bigendian systems.
+
+2017-07-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-scripts/fill.d: Adjust `xfail' entries.  Add
+	`notarget' entries.  Update comments.
+	* testsuite/ld-scripts/fill16.d: New test.
+	* testsuite/ld-scripts/fill16_0.s: New test source.
+	* testsuite/ld-scripts/fill16_1.s: New test source.
+	* testsuite/ld-scripts/fill16_2.s: New test source.
+	* testsuite/ld-scripts/data.exp: Run the new test.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+	    John Eric Martin  <John.Martin@emmicro-us.com>
+
+	* emulparams/arcelf.sh (JLI_START_TABLE): Define.
+	* scripttempl/elfarc.sc: Handle jlitab section.
+	* scripttempl/elfarcv2.sc: Likewise.
+	* testsuite/ld-arc/arc.exp: Add JLI test.
+	* testsuite/ld-arc/jli-script.ld: New file.
+	* testsuite/ld-arc/jli-simple.dd: Likewise.
+	* testsuite/ld-arc/jli-simple.rd: Likewise.
+	* testsuite/ld-arc/jli-simple.s: Likewise.
+	* testsuite/ld-arc/jli-overflow.s: Likewise.
+	* testsuite/ld-arc/jli-overflow.d: Likewise.
+	* testsuite/ld-arc/jli-overflow.err: Likewise.
+
+2017-07-19  Tristan Gingold  <gingold@adacore.com>
+
+	* ldmain.c (main): Remove display of data size.
+
+2017-07-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/16656
+	* testsuite/ld-elf/binutils.exp (binutils_test): Make the
+	expectation for `.got' in GNU_RELRO segment target-specific.
+	Handle `.got.plt' separately.
+
+2017-07-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR ld/16656
+	* testsuite/ld-elf/binutils.exp (binutils_test): Make the
+	expectation for `.dynamic' in GNU_RELRO segment target-specific.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 21775
+	* ld.texinfo: Fix spelling typos.
+	* testsuite/ld-elfcomm/elfcomm.exp: Likewise.
+
 2017-07-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Run pie1 and pie1-nacl.

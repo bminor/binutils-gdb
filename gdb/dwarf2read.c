@@ -3907,10 +3907,10 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 	     information (but NAME might contain it).  */
 
 	  if (sym != NULL
-	      && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
+	      && SYMBOL_MATCHES_SEARCH_NAME (sym, name))
 	    return stab;
 	  if (with_opaque != NULL
-	      && strcmp_iw (SYMBOL_SEARCH_NAME (with_opaque), name) == 0)
+	      && SYMBOL_MATCHES_SEARCH_NAME (with_opaque, name))
 	    stab_best = stab;
 
 	  /* Keep looking through other CUs.  */
@@ -9808,6 +9808,7 @@ create_cus_hash_table (struct dwo_file &dwo_file, dwarf2_section_info &section,
       per_cu.is_debug_types = 0;
       per_cu.sect_off = sect_offset (info_ptr - section.buffer);
       per_cu.section = &section;
+      create_dwo_cu_data.dwo_file = &dwo_file;
 
       init_cutu_and_read_dies_no_follow (
 	  &per_cu, &dwo_file, create_dwo_cu_reader, &create_dwo_cu_data);

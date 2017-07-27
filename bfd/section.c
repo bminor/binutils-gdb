@@ -1240,7 +1240,7 @@ bfd_make_section_with_flags (bfd *abfd, const char *name,
   struct section_hash_entry *sh;
   asection *newsect;
 
-  if (abfd->output_has_begun)
+  if (abfd == NULL || name == NULL || abfd->output_has_begun)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return NULL;

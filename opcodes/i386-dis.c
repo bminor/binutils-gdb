@@ -6957,7 +6957,7 @@ static const struct dis386 x86_64_table[][2] = {
 
   /* X86_64_82 */
   {
-    /* Opcode 0x82 is an alias of of opcode 0x80 in 32-bit mode.  */
+    /* Opcode 0x82 is an alias of opcode 0x80 in 32-bit mode.  */
     { REG_TABLE (REG_80) },
   },
 

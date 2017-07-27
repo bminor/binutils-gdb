@@ -1,3 +1,25 @@
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* opcode/arc.h (SJLI): Add.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+	    John Eric Martin  <John.Martin@emmicro-us.com>
+
+	* elf/arc-reloc.def: Add JLI relocs howto.
+	* opcode/arc-func.h (replace_jli): New function.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 21775
+	* aout/adobe.h: Fix spelling typos.
+	* aout/aout64.h: Likewise.
+	* aout/hp300hpux.h: Likewise.
+	* elf/hppa.h: Likewise.
+	* gdb/remote-sim.h: Likewise.
+	* libiberty.h: Likewise.
+	* mach-o/arm.h: Likewise.
+	* opcode/v850.h: Likewise.
+
 2017-07-14  Ravi Bangoria  <ravi.bangoria@linux.vnet.ibm.com>
 
 	* dis-asm.h (struct disassemble_info): Change type of buffer_length

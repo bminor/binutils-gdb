@@ -1852,6 +1852,46 @@ xcoff64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+/* PR 21786:  The PE/COFF standard does not require NUL termination for any of
+   the ASCII fields in the archive headers.  So in order to be able to extract
+   numerical values we provide our own versions of strtol and strtoll which
+   take a maximum length as an additional parameter.  Also - just to save space,
+   we omit the endptr return parameter, since we know that it is never used.  */
+
+static long
+_bfd_strntol (const char * nptr, int base, unsigned int maxlen)
+{
+  char buf[24]; /* Should be enough.  */
+
+  BFD_ASSERT (maxlen < (sizeof (buf) - 1));
+
+  memcpy (buf, nptr, maxlen);
+  buf[maxlen] = 0;
+  return strtol (buf, NULL, base);
+}
+
+static long long
+_bfd_strntoll (const char * nptr, int base, unsigned int maxlen)
+{
+  char buf[32]; /* Should be enough.  */
+
+  BFD_ASSERT (maxlen < (sizeof (buf) - 1));
+
+  memcpy (buf, nptr, maxlen);
+  buf[maxlen] = 0;
+  return strtoll (buf, NULL, base);
+}
+
+/* Macro to read an ASCII value stored in an archive header field.  */
+#define GET_VALUE_IN_FIELD(VAR, FIELD)		  \
+  do						  \
+    {						  \
+      (VAR) = sizeof (VAR) > sizeof (long)	  \
+        ? _bfd_strntoll (FIELD, 10, sizeof FIELD) \
+	: _bfd_strntol (FIELD, 10, sizeof FIELD); \
+    }						  \
+  while (0)
+
 /* Read in the armap of an XCOFF archive.  */
 
 static bfd_boolean
@@ -1892,7 +1932,7 @@ xcoff64_slurp_armap (bfd *abfd)
     return FALSE;
 
   /* Skip the name (normally empty).  */
-  namlen = strtol (hdr.namlen, (char **) NULL, 10);
+  GET_VALUE_IN_FIELD (namlen, hdr.namlen);
   pos = ((namlen + 1) & ~(size_t) 1) + SXCOFFARFMAG;
   if (bfd_seek (abfd, pos, SEEK_CUR) != 0)
     return FALSE;

@@ -76,6 +76,7 @@ typedef enum
   PMU,
   POP,
   PUSH,
+  SJLI,
   STORE,
   SUB,
   ULTRAIP,

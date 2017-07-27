@@ -898,7 +898,7 @@ bfd_ecoff_debug_accumulate (void * handle,
       if (! bfd_link_relocatable (info))
 	{
 
-	  /* When are are hashing strings, we lie about the number of
+	  /* When we are hashing strings, we lie about the number of
 	     strings attached to each FDR.  We need to set cbSs
 	     because some versions of dbx apparently use it to decide
 	     how much of the string table to read in.  */

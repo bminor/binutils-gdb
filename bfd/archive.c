@@ -834,7 +834,12 @@ bfd_generic_archive_p (bfd *abfd)
   if (strncmp (armag, ARMAG, SARMAG) != 0
       && strncmp (armag, ARMAGB, SARMAG) != 0
       && ! bfd_is_thin_archive (abfd))
-    return NULL;
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      if (abfd->format == bfd_archive)
+	abfd->format = bfd_unknown;
+      return NULL;
+    }
 
   tdata_hold = bfd_ardata (abfd);
 

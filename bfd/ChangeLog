@@ -1,3 +1,153 @@
+2017-07-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 21840
+	* mach-o.c (bfd_mach_o_read_symtab_strtab): Fail if the symtab
+	size is -1.
+	* nlmcode.h (nlm_swap_auxiliary_headers_in): Replace assertion
+	with error return.
+	* section.c (bfd_make_section_with_flags): Fail if the name or bfd
+	are NULL.
+	* vms-alpha.c (bfd_make_section_with_flags): Correct computation
+	of end pointer.
+	(evax_bfd_print_emh): Check for invalid string lengths.
+
+2017-07-25  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
+2017-07-25  Benjamin Green  <bengreen5mx@gmail.com>
+
+	PR 21824
+	* elf32-msp430.c (msp430_elf_relax_section): Allow conversion of
+	16-bit absolute branches into 10-bit pc-relative branches on the
+	MSP430 as well as the MSP430X.
+
+2017-07-25  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct map_stub): Add tls_get_addr_opt_bctrl.
+	(stub_eh_frame_size): New function.
+	(ppc_size_one_stub): Set group tls_get_addr_opt_bctrl.
+	(group_sections): Init group tls_get_addr_opt_bctrl.
+	(ppc64_elf_size_stubs): Update sizing and initialization of
+	.eh_frame.  Iteration over stubs via group list.
+	(ppc64_elf_build_stubs): Iterate over stubs via group list.
+	(ppc64_elf_finish_dynamic_sections): Update finalization of
+	.eh_frame.
+
+2017-07-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 21813
+	* mach-o.c (bfd_mach_o_canonicalize_relocs): Pass the base address
+	of the relocs to the canonicalize_one_reloc routine.
+	* mach-o.h (struct bfd_mach_o_backend_data): Update the prototype
+	for the _bfd_mach_o_canonicalize_one_reloc field.
+	* mach-o-arm.c (bfd_mach_o_arm_canonicalize_one_reloc): Add
+	res_base parameter.  Use to check for corrupt pair relocs.
+	* mach-o-aarch64.c (bfd_mach_o_arm64_canonicalize_one_reloc):
+	Likewise.
+	* mach-o-i386.c (bfd_mach_o_i386_canonicalize_one_reloc):
+	Likewise.
+	* mach-o-x86-64.c (bfd_mach_o_x86_64_canonicalize_one_reloc):
+	Likewise.
+
+	* vms-alpha.c (_bfd_vms_slurp_eihd): Make sure that there is
+	enough data in the record before attempting to parse it.
+	(_bfd_vms_slurp_eeom): Likewise.
+
+	(_bfd_vms_slurp_egsd): Check for an invalid section index.
+	(image_set_ptr): Likewise.
+	(alpha_vms_slurp_relocs): Likewise.
+
+	(alpha_vms_object_p): Check for a truncated record.
+
+2017-07-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 21803
+	* reloc.c (_bfd_unrecognized_reloc): New function.  Reports
+	an unrecognized reloc and sets the bfd_error value.
+	* libbfd.h: Regenerate.
+	* elf32-arm.c (elf32_arm_final_link_relocate): Use the new
+	function.
+	* elf32-i386.c (elf_i386_relocate_section): Likewise.
+	* elf32-tilepro.c (tilepro_elf_relocate_section): Likewise.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_relocate_section): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_relocate_section): Likewise.
+
+2017-07-23  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_size_stubs): Correct advance to
+	restore of LR.
+
+2017-07-19  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	PR ld/18841
+	* elfnn-aarch64.c (elfNN_aarch64_reloc_type_class): Return
+	reloc_class_ifunc for ifunc symbols.
+
+2017-07-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 21787
+	* archive.c (bfd_generic_archive_p): If the bfd does not have the
+	correct magic bytes at the start, set the error to wrong format
+	and clear the format selector before returning NULL.
+
+2017-07-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 21786
+	* coff-rs6000.c (_bfd_strntol): New function.
+	(_bfd_strntoll): New function.
+	(GET_VALUE_IN_FIELD): New macro.
+	(EQ_VALUE_IN_FIELD): new macro.
+	(_bfd_xcoff_slurp_armap): Use new macros.
+	(_bfd_xcoff_archive_p): Likewise.
+	(_bfd_xcoff_read_ar_hdr): Likewise.
+	(_bfd_xcoff_openr_next_archived_file): Likewise.
+	(_bfd_xcoff_stat_arch_elt): Likewise.
+	* coff64-rs6000.c (_bfd_strntol): New function.
+	(_bfd_strntoll): New function.
+	(GET_VALUE_IN_FIELD): New macro.
+	(xcoff64_slurp_armap): Use new macros.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+	    John Eric Martin  <John.Martin@emmicro-us.com>
+
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elf32-arc.c (JLI): Define.
+	* reloc.c: Add JLI relocations.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 21775
+	* coff-sh.c: Fix spelling typos.
+	* compress.c: Likewise.
+	* cpu-pdp11.c: Likewise.
+	* ecofflink.c: Likewise.
+	* elf-m10300.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-nds32.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* som.c: Likewise.
+	* sunos.c: Likewise.
+	* vms-alpha.c: Likewise.
+	* xcofflink.c: Likewise.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21781
+	* coffcode.h (handle_COMDAT): Replace abort with an error message
+	and return.
+
 2017-07-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21782

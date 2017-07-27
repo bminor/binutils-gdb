@@ -1064,7 +1064,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
     this->set_processor_specific_flags(flags);
   }
 
-  // Offset to to save stack slot
+  // Offset to save stack slot
   int
   stk_toc () const
   { return this->abiversion() < 2 ? 40 : 24; }
@@ -3987,7 +3987,7 @@ static const unsigned char glink_eh_frame_fde_64v1[] =
   0,					// Augmentation size.
   elfcpp::DW_CFA_advance_loc + 1,
   elfcpp::DW_CFA_register, 65, 12,
-  elfcpp::DW_CFA_advance_loc + 4,
+  elfcpp::DW_CFA_advance_loc + 5,
   elfcpp::DW_CFA_restore_extended, 65
 };
 
@@ -3999,7 +3999,7 @@ static const unsigned char glink_eh_frame_fde_64v2[] =
   0,					// Augmentation size.
   elfcpp::DW_CFA_advance_loc + 1,
   elfcpp::DW_CFA_register, 65, 0,
-  elfcpp::DW_CFA_advance_loc + 4,
+  elfcpp::DW_CFA_advance_loc + 7,
   elfcpp::DW_CFA_restore_extended, 65
 };
 
