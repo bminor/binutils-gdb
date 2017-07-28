@@ -1,3 +1,9 @@
+2017-07-28  Andrew Waterman  <andrew@sifive.com>
+
+	* config/tc-riscv.c (riscv_set_arch): Handle the Q subset like
+	all other subsets.
+	Obviate use-after-free.
+
 2017-07-25  Nick Clifton  <nickc@redhat.com>
 
 	PR 21739
