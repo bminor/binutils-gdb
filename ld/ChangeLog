@@ -1,3 +1,33 @@
+2017-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ldgram.y (ldgram_had_keep): Make static.
+	(ldgram_vers_current_lang): Likewise.
+	(filename_spec): New rule.
+	(input_section_spec_no_keep): Use filename_spec.
+	(wildcard_maybe_exclude): New rule.
+	(wildcard_spec): Rename to...
+	(section_name_spec): ...this.
+	(section_NAME_list): Rename to...
+	(section_name_list): ...this.
+	(section_name_spec): Simplifiy and use wildcard_maybe_exclude.
+	* ldlang.c (placed_commons): Delete.
+	(lang_add_wild): No longer set placed_commons.
+	(print_wild_statement): Use full names for SORT specifiers.
+	* testsuite/ld-scripts/align.exp: Run new tests.
+	* testsuite/ld-scripts/align3.d: New file.
+	* testsuite/ld-scripts/align3.t: New file.
+	* testsuite/ld-scripts/align4.d: New file.
+	* testsuite/ld-scripts/align4.t: New file.
+	* testsuite/ld-scripts/align5.d: New file.
+	* testsuite/ld-scripts/align5.t: New file.
+	* testsuite/ld-scripts/exclude-file-5.d: New file.
+	* testsuite/ld-scripts/exclude-file-5.map: New file.
+	* testsuite/ld-scripts/exclude-file-5.t: New file.
+	* testsuite/ld-scripts/exclude-file-6.d: New file.
+	* testsuite/ld-scripts/exclude-file-6.map: New file.
+	* testsuite/ld-scripts/exclude-file-6.t: New file.
+	* NEWS: Mention the changes.
+
 2017-07-27  Georg-Johann Lay  <gjl@gcc.gnu.org>
 
 	PR ld/21849

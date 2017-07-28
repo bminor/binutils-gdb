@@ -1,5 +1,12 @@
 -*- text -*-
 
+* Tighten linker script grammar around file name specifiers to prevent the use
+  of SORT_BY_ALIGNMENT and SORT_BY_INIT_PRIORITY on filenames.  These would
+  previously be accepted but had no effect.
+
+* The EXCLUDE_FILE directive can now be placed within any SORT_* directive
+  within input section lists.
+
 Changes in 2.29:
 
 * Support for -z shstk in the x86 ELF linker to generate
