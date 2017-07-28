@@ -485,6 +485,22 @@ skip_tailcall_frames (struct frame_info *frame)
   return frame;
 }
 
+/* Construct a frame ID representing a frame where the stack address
+   exists, but is unavailable.  CODE_ADDR is the frame's constant code
+   address (typically the entry point).  The special identifier
+   address is set to indicate a wild card.  */
+
+static struct frame_id
+frame_id_build_unavailable_stack (CORE_ADDR code_addr)
+{
+  struct frame_id id = null_frame_id;
+
+  id.stack_status = FID_STACK_UNAVAILABLE;
+  id.code_addr = code_addr;
+  id.code_addr_p = 1;
+  return id;
+}
+
 /* Compute the frame's uniq ID that can be used to, later, re-find the
    frame.  */
 
@@ -613,19 +629,6 @@ frame_id_build_special (CORE_ADDR stack_addr, CORE_ADDR code_addr,
   id.code_addr_p = 1;
   id.special_addr = special_addr;
   id.special_addr_p = 1;
-  return id;
-}
-
-/* See frame.h.  */
-
-struct frame_id
-frame_id_build_unavailable_stack (CORE_ADDR code_addr)
-{
-  struct frame_id id = null_frame_id;
-
-  id.stack_status = FID_STACK_UNAVAILABLE;
-  id.code_addr = code_addr;
-  id.code_addr_p = 1;
   return id;
 }
 

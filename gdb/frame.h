@@ -198,12 +198,6 @@ extern struct frame_id frame_id_build_special (CORE_ADDR stack_addr,
 
 /* Construct a frame ID representing a frame where the stack address
    exists, but is unavailable.  CODE_ADDR is the frame's constant code
-   address (typically the entry point).  The special identifier
-   address is set to indicate a wild card.  */
-extern struct frame_id frame_id_build_unavailable_stack (CORE_ADDR code_addr);
-
-/* Construct a frame ID representing a frame where the stack address
-   exists, but is unavailable.  CODE_ADDR is the frame's constant code
    address (typically the entry point).  SPECIAL_ADDR is the special
    identifier address.  */
 extern struct frame_id
