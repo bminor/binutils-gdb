@@ -1,3 +1,9 @@
+2017-07-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/21857
+	* compressed_output.cc (Output_compressed_section::set_final_data_size):
+	Call put_ch_reserved to clear the reserved field for 64-bit ELF.
+
 2017-07-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* mips.cc (Mips_relocate_functions): Add "llu" suffix to
