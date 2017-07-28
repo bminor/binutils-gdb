@@ -1345,9 +1345,26 @@ class Chdr_write
   put_ch_addralign(typename Elf_types<size>::Elf_WXword v)
   { this->p_->ch_addralign = Convert<size, big_endian>::convert_host(v); }
 
+  void
+  put_ch_reserved(Elf_Word);
+
  private:
   internal::Chdr_data<size>* p_;
 };
+
+template<>
+inline void
+elfcpp::Chdr_write<64, true>::put_ch_reserved(Elf_Word v)
+{
+  this->p_->ch_reserved = v;
+}
+
+template<>
+inline void
+elfcpp::Chdr_write<64, false>::put_ch_reserved(Elf_Word v)
+{
+  this->p_->ch_reserved = v;
+}
 
 // Accessor class for an ELF segment header.
 

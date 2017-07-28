@@ -1,3 +1,10 @@
+2017-07-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/21857
+	* elfcpp.h (Chdr_write): Add put_ch_reserved.
+	(Chdr_write<64, true>::put_ch_reserved): New.
+	(Chdr_write<64, false>::put_ch_reserved): Likewise.
+
 2017-01-02  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
