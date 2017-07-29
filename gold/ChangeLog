@@ -1,3 +1,9 @@
+2017-07-29  Alan Modra  <amodra@gmail.com>
+
+	PR 21847
+	* powerpc.cc (Target_powerpc::scan_relocs): Default to
+	--no-plt-localentry.
+
 2017-07-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/21857

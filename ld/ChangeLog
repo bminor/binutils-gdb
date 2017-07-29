@@ -1,3 +1,7 @@
+2017-07-29  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (plt-localentry): Document.
+
 2017-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ldgram.y (ldgram_had_keep): Make static.

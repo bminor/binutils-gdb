@@ -7600,6 +7600,21 @@ barrier in the call stub, or use LD_BIND_NOW=1.  By default, @code{ld}
 looks for calls to commonly used functions that create threads, and if
 seen, adds the necessary barriers.  Use these options to change the
 default behaviour.
+
+@cindex PowerPC64 ELFv2 PLT localentry optimization
+@kindex --plt-localentry
+@kindex --no-plt-localentry
+@item --plt-localentry
+@itemx --no-localentry
+ELFv2 functions with localentry:0 are those with a single entry point,
+ie. global entry == local entry, and that have no requirement on r2
+(the TOC/GOT pointer) or r12, and guarantee r2 is unchanged on return.
+Such an external function can be called via the PLT without saving r2
+or restoring it on return, avoiding a common load-hit-store for small
+functions.   The optimization is attractive, with up to 40% reduction
+in execution time for a small function, but can result in symbol
+interposition failures.  Use with care.  @option{--no-plt-localentry}
+is the default.
 @end table
 
 @ifclear GENERIC
