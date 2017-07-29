@@ -7660,8 +7660,6 @@ Target_powerpc<size, big_endian>::scan_relocs(
 	{
 	  if (parameters->options().user_set_plt_localentry())
 	    plt_localentry0 = parameters->options().plt_localentry();
-	  else
-	    plt_localentry0 = symtab->lookup("GLIBC_2.26", NULL) != NULL;
 	}
       this->plt_localentry0_ = plt_localentry0;
       this->plt_localentry0_init_ = true;

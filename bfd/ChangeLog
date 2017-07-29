@@ -1,3 +1,11 @@
+2017-07-29  Alan Modra  <amodra@gmail.com>
+
+	PR 21847
+	* elf64-ppc.c (struct ppc_link_hash_entry): Add non_zero_localentry.
+	(ppc64_elf_merge_symbol): Set non_zero_localentry.
+	(is_elfv2_localentry0): Test non_zero_localentry.
+	(ppc64_elf_tls_setup): Default to --no-plt-localentry.
+
 2017-07-25  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
