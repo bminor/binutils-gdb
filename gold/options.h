@@ -1290,6 +1290,10 @@ class General_options
   DEFINE_uint(thread_count_final, options::TWO_DASHES, '\0', 0,
 	      N_("Number of threads to use in final pass"), N_("COUNT"));
 
+  DEFINE_bool(tls_optimize, options::TWO_DASHES, '\0', true,
+	      N_("(PowerPC/64 only) Optimize GD/LD/IE code to IE/LE"),
+	      N_("(PowerPC/64 only) Don'\''t try to optimize TLS accesses"));
+
   DEFINE_bool(toc_optimize, options::TWO_DASHES, '\0', true,
 	      N_("(PowerPC64 only) Optimize TOC code sequences"),
 	      N_("(PowerPC64 only) Don't optimize TOC code sequences"));

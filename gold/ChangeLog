@@ -1,5 +1,18 @@
 2017-07-31  Alan Modra  <amodra@gmail.com>
 
+	* options.h (no_tls_optimize): New powerpc option.
+	* powerpc.cc (Target_powerpc::abiversion, set_abiversion): Formatting.
+	(Target_powerpc::stk_toc): Formatting, fix comment.
+	(Target_powerpc::Track_tls::tls_get_addr_state): Rename from
+	tls_get_addr.
+	(Target_powerpc::optimize_tls_gd, optimize_tls_ld, optimize_tls_ie):
+	Return TLSOPT_NONE when !tls_optimize.
+	(Target_powerpc::add_global_pair_with_rel): Check
+	for existing reloc before reserving.
+	(Target_powerpc::add_local_tls_pair): Likewise.
+
+2017-07-31  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc::scan_relocs): Warn on --plt-localentry
 	without ld.so checks.
 

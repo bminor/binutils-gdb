@@ -1052,11 +1052,11 @@ class Target_powerpc : public Sized_target<size, big_endian>
   }
 
   int
-  abiversion () const
+  abiversion() const
   { return this->processor_specific_flags() & elfcpp::EF_PPC64_ABI; }
 
   void
-  set_abiversion (int ver)
+  set_abiversion(int ver)
   {
     elfcpp::Elf_Word flags = this->processor_specific_flags();
     flags &= ~elfcpp::EF_PPC64_ABI;
@@ -1064,9 +1064,9 @@ class Target_powerpc : public Sized_target<size, big_endian>
     this->set_processor_specific_flags(flags);
   }
 
-  // Offset to save stack slot
+  // Offset to toc save stack slot
   int
-  stk_toc () const
+  stk_toc() const
   { return this->abiversion() < 2 ? 40 : 24; }
 
  private:
@@ -1083,13 +1083,13 @@ class Target_powerpc : public Sized_target<size, big_endian>
     };
 
     Track_tls()
-      : tls_get_addr_(NOT_EXPECTED),
+      : tls_get_addr_state_(NOT_EXPECTED),
 	relinfo_(NULL), relnum_(0), r_offset_(0)
     { }
 
     ~Track_tls()
     {
-      if (this->tls_get_addr_ != NOT_EXPECTED)
+      if (this->tls_get_addr_state_ != NOT_EXPECTED)
 	this->missing();
     }
 
@@ -1107,7 +1107,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
 	size_t relnum,
 	Address r_offset)
     {
-      this->tls_get_addr_ = EXPECTED;
+      this->tls_get_addr_state_ = EXPECTED;
       this->relinfo_ = relinfo;
       this->relnum_ = relnum;
       this->r_offset_ = r_offset;
@@ -1115,11 +1115,11 @@ class Target_powerpc : public Sized_target<size, big_endian>
 
     void
     expect_tls_get_addr_call()
-    { this->tls_get_addr_ = EXPECTED; }
+    { this->tls_get_addr_state_ = EXPECTED; }
 
     void
     skip_next_tls_get_addr_call()
-    {this->tls_get_addr_ = SKIP; }
+    {this->tls_get_addr_state_ = SKIP; }
 
     Tls_get_addr
     maybe_skip_tls_get_addr_call(unsigned int r_type, const Symbol* gsym)
@@ -1128,8 +1128,8 @@ class Target_powerpc : public Sized_target<size, big_endian>
 			   || r_type == elfcpp::R_PPC_PLTREL24)
 			  && gsym != NULL
 			  && strcmp(gsym->name(), "__tls_get_addr") == 0);
-      Tls_get_addr last_tls = this->tls_get_addr_;
-      this->tls_get_addr_ = NOT_EXPECTED;
+      Tls_get_addr last_tls = this->tls_get_addr_state_;
+      this->tls_get_addr_state_ = NOT_EXPECTED;
       if (is_tls_call && last_tls != EXPECTED)
 	return last_tls;
       else if (!is_tls_call && last_tls != NOT_EXPECTED)
@@ -1152,7 +1152,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
     // allowing ld to safely optimize away the call.  We check that
     // every call to __tls_get_addr has a marker relocation, and that
     // every marker relocation is on a call to __tls_get_addr.
-    Tls_get_addr tls_get_addr_;
+    Tls_get_addr tls_get_addr_state_;
     // Info about the last reloc for error message.
     const Relocate_info<size, big_endian>* relinfo_;
     size_t relnum_;
@@ -1323,7 +1323,8 @@ class Target_powerpc : public Sized_target<size, big_endian>
   {
     // If we are generating a shared library, then we can't do anything
     // in the linker.
-    if (parameters->options().shared())
+    if (parameters->options().shared()
+	|| !parameters->options().tls_optimize())
       return tls::TLSOPT_NONE;
 
     if (!is_final)
@@ -1334,7 +1335,8 @@ class Target_powerpc : public Sized_target<size, big_endian>
   tls::Tls_optimization
   optimize_tls_ld()
   {
-    if (parameters->options().shared())
+    if (parameters->options().shared()
+	|| !parameters->options().tls_optimize())
       return tls::TLSOPT_NONE;
 
     return tls::TLSOPT_TO_LE;
@@ -1343,7 +1345,9 @@ class Target_powerpc : public Sized_target<size, big_endian>
   tls::Tls_optimization
   optimize_tls_ie(bool is_final)
   {
-    if (!is_final || parameters->options().shared())
+    if (!is_final
+	|| parameters->options().shared()
+	|| !parameters->options().tls_optimize())
       return tls::TLSOPT_NONE;
 
     return tls::TLSOPT_TO_LE;
@@ -2525,6 +2529,9 @@ public:
 			   Output_data_reloc_generic* rel_dyn,
 			   unsigned int r_type_1, unsigned int r_type_2)
   {
+    if (gsym->has_got_offset(got_type))
+      return;
+
     this->reserve_ent(2);
     Output_data_got<size, big_endian>::
       add_global_pair_with_rel(gsym, got_type, rel_dyn, r_type_1, r_type_2);
@@ -2556,6 +2563,9 @@ public:
 		     Output_data_reloc_generic* rel_dyn,
 		     unsigned int r_type)
   {
+    if (object->local_has_got_offset(sym_index, got_type))
+      return;
+
     this->reserve_ent(2);
     Output_data_got<size, big_endian>::
       add_local_tls_pair(object, sym_index, got_type, rel_dyn, r_type);
