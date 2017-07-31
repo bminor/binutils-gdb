@@ -1,3 +1,8 @@
+2017-07-31  John David Anglin  <danglin@gcc.gnu.org>
+
+	* config/tc-hppa.c (pa_ip): Clear `d' bit in branch on bit instructions
+	with a double-word condition and a fixed bit position greater than 31.
+
 2017-07-28  Andrew Waterman  <andrew@sifive.com>
 
 	* config/tc-riscv.c (riscv_set_arch): Handle the Q subset like
