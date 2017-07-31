@@ -1,3 +1,9 @@
+2017-07-31  Nick Clifton  <nickc@redhat.com>
+
+	PR 21850
+	* ansidecl.h (OVERRIDE): Protect check of __cplusplus value with
+	#idef __cplusplus.
+
 2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* opcode/arc.h (SJLI): Add.
