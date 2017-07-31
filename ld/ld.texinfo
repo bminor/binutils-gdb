@@ -7613,8 +7613,11 @@ Such an external function can be called via the PLT without saving r2
 or restoring it on return, avoiding a common load-hit-store for small
 functions.   The optimization is attractive, with up to 40% reduction
 in execution time for a small function, but can result in symbol
-interposition failures.  Use with care.  @option{--no-plt-localentry}
-is the default.
+interposition failures.  Also, minor changes in a shared library,
+including system libraries, can cause a function that was localentry:0
+to become localentry:8.  This will result in a dynamic loader
+complaint and failure to run.  The option is experimental, use with
+care.  @option{--no-plt-localentry} is the default.
 @end table
 
 @ifclear GENERIC
