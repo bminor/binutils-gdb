@@ -33,16 +33,11 @@
 #include "filestuff.h"
 #include "common/byte-vector.h"
 
-static const char *
-scan_expression_with_cleanup (const char **cmd, const char *def)
+static gdb::unique_xmalloc_ptr<char>
+scan_expression (const char **cmd, const char *def)
 {
   if ((*cmd) == NULL || (**cmd) == '\0')
-    {
-      char *exp = xstrdup (def);
-
-      make_cleanup (xfree, exp);
-      return exp;
-    }
+    return gdb::unique_xmalloc_ptr<char> (xstrdup (def));
   else
     {
       char *exp;
@@ -50,17 +45,16 @@ scan_expression_with_cleanup (const char **cmd, const char *def)
 
       end = (*cmd) + strcspn (*cmd, " \t");
       exp = savestring ((*cmd), end - (*cmd));
-      make_cleanup (xfree, exp);
       (*cmd) = skip_spaces_const (end);
-      return exp;
+      return gdb::unique_xmalloc_ptr<char> (exp);
     }
 }
 
 
-static char *
-scan_filename_with_cleanup (const char **cmd, const char *defname)
+static gdb::unique_xmalloc_ptr<char>
+scan_filename (const char **cmd, const char *defname)
 {
-  char *filename;
+  gdb::unique_xmalloc_ptr<char> filename;
   char *fullname;
 
   /* FIXME: Need to get the ``/a(ppend)'' flag from somewhere.  */
@@ -70,8 +64,7 @@ scan_filename_with_cleanup (const char **cmd, const char *defname)
     {
       if (defname == NULL)
 	error (_("Missing filename."));
-      filename = xstrdup (defname);
-      make_cleanup (xfree, filename);
+      filename.reset (xstrdup (defname));
     }
   else
     {
@@ -80,16 +73,12 @@ scan_filename_with_cleanup (const char **cmd, const char *defname)
 
       (*cmd) = skip_spaces_const (*cmd);
       end = *cmd + strcspn (*cmd, " \t");
-      filename = savestring ((*cmd), end - (*cmd));
-      make_cleanup (xfree, filename);
+      filename.reset (savestring ((*cmd), end - (*cmd)));
       (*cmd) = skip_spaces_const (end);
     }
   gdb_assert (filename != NULL);
 
-  fullname = tilde_expand (filename);
-  make_cleanup (xfree, fullname);
-  
-  return fullname;
+  return gdb::unique_xmalloc_ptr<char> (tilde_expand (filename.get ()));
 }
 
 static gdb_bfd_ref_ptr
@@ -189,28 +178,25 @@ dump_bfd_file (const char *filename, const char *mode,
 static void
 dump_memory_to_file (const char *cmd, const char *mode, const char *file_format)
 {
-  struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);
   CORE_ADDR lo;
   CORE_ADDR hi;
   ULONGEST count;
-  const char *filename;
-  const char *lo_exp;
   const char *hi_exp;
 
   /* Open the file.  */
-  filename = scan_filename_with_cleanup (&cmd, NULL);
+  gdb::unique_xmalloc_ptr<char> filename = scan_filename (&cmd, NULL);
 
   /* Find the low address.  */
   if (cmd == NULL || *cmd == '\0')
     error (_("Missing start address."));
-  lo_exp = scan_expression_with_cleanup (&cmd, NULL);
+  gdb::unique_xmalloc_ptr<char> lo_exp = scan_expression (&cmd, NULL);
 
   /* Find the second address - rest of line.  */
   if (cmd == NULL || *cmd == '\0')
     error (_("Missing stop address."));
   hi_exp = cmd;
 
-  lo = parse_and_eval_address (lo_exp);
+  lo = parse_and_eval_address (lo_exp.get ());
   hi = parse_and_eval_address (hi_exp);
   if (hi <= lo)
     error (_("Invalid memory address range (start >= end)."));
@@ -223,15 +209,9 @@ dump_memory_to_file (const char *cmd, const char *mode, const char *file_format)
   
   /* Have everything.  Open/write the data.  */
   if (file_format == NULL || strcmp (file_format, "binary") == 0)
-    {
-      dump_binary_file (filename, mode, buf.data (), count);
-    }
+    dump_binary_file (filename.get (), mode, buf.data (), count);
   else
-    {
-      dump_bfd_file (filename, mode, file_format, lo, buf.data (), count);
-    }
-
-  do_cleanups (old_cleanups);
+    dump_bfd_file (filename.get (), mode, file_format, lo, buf.data (), count);
 }
 
 static void
@@ -243,12 +223,10 @@ dump_memory_command (char *cmd, const char *mode)
 static void
 dump_value_to_file (const char *cmd, const char *mode, const char *file_format)
 {
-  struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);
   struct value *val;
-  const char *filename;
 
   /* Open the file.  */
-  filename = scan_filename_with_cleanup (&cmd, NULL);
+  gdb::unique_xmalloc_ptr<char> filename = scan_filename (&cmd, NULL);
 
   /* Find the value.  */
   if (cmd == NULL || *cmd == '\0')
@@ -259,10 +237,8 @@ dump_value_to_file (const char *cmd, const char *mode, const char *file_format)
 
   /* Have everything.  Open/write the data.  */
   if (file_format == NULL || strcmp (file_format, "binary") == 0)
-    {
-      dump_binary_file (filename, mode, value_contents (val), 
-			TYPE_LENGTH (value_type (val)));
-    }
+    dump_binary_file (filename.get (), mode, value_contents (val),
+		      TYPE_LENGTH (value_type (val)));
   else
     {
       CORE_ADDR vaddr;
@@ -277,12 +253,10 @@ dump_value_to_file (const char *cmd, const char *mode, const char *file_format)
 	  warning (_("value is not an lval: address assumed to be zero"));
 	}
 
-      dump_bfd_file (filename, mode, file_format, vaddr, 
+      dump_bfd_file (filename.get (), mode, file_format, vaddr,
 		     value_contents (val), 
 		     TYPE_LENGTH (value_type (val)));
     }
-
-  do_cleanups (old_cleanups);
 }
 
 static void
@@ -541,7 +515,6 @@ restore_binary_file (const char *filename, struct callback_data *data)
 static void
 restore_command (char *args_in, int from_tty)
 {
-  char *filename;
   struct callback_data data;
   bfd *ibfd;
   int binary_flag = 0;
@@ -555,7 +528,7 @@ restore_command (char *args_in, int from_tty)
   data.load_end    = 0;
 
   /* Parse the input arguments.  First is filename (required).  */
-  filename = scan_filename_with_cleanup (&args, NULL);
+  gdb::unique_xmalloc_ptr<char> filename = scan_filename (&args, NULL);
   if (args != NULL && *args != '\0')
     {
       static const char binary_string[] = "binary";
@@ -570,13 +543,13 @@ restore_command (char *args_in, int from_tty)
       /* Parse offset (optional).  */
       if (args != NULL && *args != '\0')
 	data.load_offset = binary_flag ?
-	  parse_and_eval_address (scan_expression_with_cleanup (&args, NULL)) :
-	  parse_and_eval_long (scan_expression_with_cleanup (&args, NULL));
+	  parse_and_eval_address (scan_expression (&args, NULL).get ()) :
+	  parse_and_eval_long (scan_expression (&args, NULL).get ());
       if (args != NULL && *args != '\0')
 	{
 	  /* Parse start address (optional).  */
 	  data.load_start = 
-	    parse_and_eval_long (scan_expression_with_cleanup (&args, NULL));
+	    parse_and_eval_long (scan_expression (&args, NULL).get ());
 	  if (args != NULL && *args != '\0')
 	    {
 	      /* Parse end address (optional).  */
@@ -589,18 +562,18 @@ restore_command (char *args_in, int from_tty)
 
   if (info_verbose)
     printf_filtered ("Restore file %s offset 0x%lx start 0x%lx end 0x%lx\n",
-		     filename, (unsigned long) data.load_offset, 
+		     filename.get (), (unsigned long) data.load_offset,
 		     (unsigned long) data.load_start, 
 		     (unsigned long) data.load_end);
 
   if (binary_flag)
     {
-      restore_binary_file (filename, &data);
+      restore_binary_file (filename.get (), &data);
     }
   else
     {
       /* Open the file for loading.  */
-      gdb_bfd_ref_ptr ibfd (bfd_openr_or_error (filename, NULL));
+      gdb_bfd_ref_ptr ibfd (bfd_openr_or_error (filename.get (), NULL));
 
       /* Process the sections.  */
       bfd_map_over_sections (ibfd.get (), restore_section_callback, &data);

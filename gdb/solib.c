@@ -546,14 +546,10 @@ static int
 solib_map_sections (struct so_list *so)
 {
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
-  char *filename;
   struct target_section *p;
-  struct cleanup *old_chain;
 
-  filename = tilde_expand (so->so_name);
-  old_chain = make_cleanup (xfree, filename);
-  gdb_bfd_ref_ptr abfd (ops->bfd_open (filename));
-  do_cleanups (old_chain);
+  gdb::unique_xmalloc_ptr<char> filename (tilde_expand (so->so_name));
+  gdb_bfd_ref_ptr abfd (ops->bfd_open (filename.get ()));
 
   if (abfd == NULL)
     return 0;
@@ -1301,28 +1297,24 @@ static void
 reload_shared_libraries_1 (int from_tty)
 {
   struct so_list *so;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   if (print_symbol_loading_p (from_tty, 0, 0))
     printf_unfiltered (_("Loading symbols for shared libraries.\n"));
 
   for (so = so_list_head; so != NULL; so = so->next)
     {
-      char *filename, *found_pathname = NULL;
+      char *found_pathname = NULL;
       int was_loaded = so->symbols_loaded;
       symfile_add_flags add_flags = SYMFILE_DEFER_BP_RESET;
 
       if (from_tty)
 	add_flags |= SYMFILE_VERBOSE;
 
-      filename = tilde_expand (so->so_original_name);
-      make_cleanup (xfree, filename);
-      gdb_bfd_ref_ptr abfd (solib_bfd_open (filename));
+      gdb::unique_xmalloc_ptr<char> filename
+	(tilde_expand (so->so_original_name));
+      gdb_bfd_ref_ptr abfd (solib_bfd_open (filename.get ()));
       if (abfd != NULL)
-	{
-	  found_pathname = xstrdup (bfd_get_filename (abfd.get ()));
-	  make_cleanup (xfree, found_pathname);
-	}
+	found_pathname = bfd_get_filename (abfd.get ());
 
       /* If this shared library is no longer associated with its previous
 	 symbol file, close that.  */
@@ -1364,8 +1356,6 @@ reload_shared_libraries_1 (int from_tty)
 	      solib_read_symbols (so, add_flags);
 	}
     }
-
-  do_cleanups (old_chain);
 }
 
 static void

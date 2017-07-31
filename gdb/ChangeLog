@@ -1,5 +1,31 @@
 2017-08-05  Tom Tromey  <tom@tromey.com>
 
+	* compile/compile-object-load.c (compile_object_load): Use
+	gdb::unique_xmalloc_ptr.
+	* cli/cli-dump.c (scan_filename): Rename from
+	scan_filename_with_cleanup.  Change return type.
+	(scan_expression): Rename from scan_expression_with_cleanup.
+	Change return type.
+	(dump_memory_to_file, dump_value_to_file, restore_command):
+	Use gdb::unique_xmalloc_ptr.  Update.
+	* cli/cli-cmds.c (find_and_open_script): Use
+	gdb::unique_xmalloc_ptr.
+	* tracefile-tfile.c (tfile_open): Use gdb::unique_xmalloc_ptr.
+	* symmisc.c (maintenance_print_symbols)
+	(maintenance_print_msymbols): Use gdb::unique_xmalloc_ptr.
+	* symfile.c (symfile_bfd_open, generic_load)
+	(add_symbol_file_command, remove_symbol_file_command): Use
+	gdb::unique_xmalloc_ptr.
+	* source.c (openp): Use gdb::unique_xmalloc_ptr.
+	* psymtab.c (maintenance_print_psymbols): Use
+	gdb::unique_xmalloc_ptr.
+	* corelow.c (core_open): Use gdb::unique_xmalloc_ptr.
+	* breakpoint.c (save_breakpoints): Use gdb::unique_xmalloc_ptr.
+	* solib.c (solib_map_sections): Use gdb::unique_xmalloc_ptr.
+	(reload_shared_libraries_1): Likewise.
+
+2017-08-05  Tom Tromey  <tom@tromey.com>
+
 	* rust-exp.y (rust_op_ptr, set_field): Remove typedefs.
 	(rust_op_vector, rust_set_vector): New typedefs.
 	(current_parser): New global.
