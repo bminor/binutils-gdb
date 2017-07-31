@@ -1,3 +1,8 @@
+2017-07-31  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::scan_relocs): Warn on --plt-localentry
+	without ld.so checks.
+
 2017-07-29  Alan Modra  <amodra@gmail.com>
 
 	PR 21847
