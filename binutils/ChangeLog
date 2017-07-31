@@ -1,3 +1,8 @@
+2017-07-31  Marty Plummer  <ntzrmtthihu777@gmail.com>
+
+	PR 21861
+	* winduni.c (codepages): Use cp1252 for codepage 0.
+
 2017-07-25  Nick Clifton  <nickc@redhat.com>
 
 	PR 21820
