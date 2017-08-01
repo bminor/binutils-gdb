@@ -4001,6 +4001,9 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 
       symtab_hdr = &elf_symtab_hdr (ibfd);
 
+      if (!is_s390_elf (ibfd))
+	continue;
+
       local_plt = elf_s390_local_plt (ibfd);
       if (local_plt != NULL)
 	for (i = 0; i < symtab_hdr->sh_info; i++)
