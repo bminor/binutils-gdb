@@ -1,3 +1,13 @@
+2017-08-01  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	Backport from mainline
+	2017-07-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* config/tc-s390.c (s390_parse_cpu): Add z14 as alternate CPU
+	name.
+	* doc/as.texinfo: Add z14 to CPU string list.
+	* doc/c-s390.texi: Likewise.
+
 2017-07-24  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
