@@ -3333,6 +3333,16 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
   if (size == 64 && again)
     this->brlt_section_->set_current_size(num_huge_branches);
 
+  for (typename Stub_tables::reverse_iterator p = this->stub_tables_.rbegin();
+       p != this->stub_tables_.rend();
+       ++p)
+    (*p)->remove_eh_frame(layout);
+
+  for (typename Stub_tables::iterator p = this->stub_tables_.begin();
+       p != this->stub_tables_.end();
+       ++p)
+    (*p)->add_eh_frame(layout);
+
   typedef Unordered_set<Output_section*> Output_sections;
   Output_sections os_need_update;
   for (typename Stub_tables::iterator p = this->stub_tables_.begin();
@@ -3342,7 +3352,6 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
       if ((*p)->size_update())
 	{
 	  again = true;
-	  (*p)->add_eh_frame(layout);
 	  os_need_update.insert((*p)->output_section());
 	}
     }
@@ -4244,25 +4253,39 @@ class Stub_table : public Output_relaxed_input_section
   void
   add_eh_frame(Layout* layout)
   {
-    if (!this->eh_frame_added_)
+    if (!parameters->options().ld_generated_unwind_info())
+      return;
+
+    // Since we add stub .eh_frame info late, it must be placed
+    // after all other linker generated .eh_frame info so that
+    // merge mapping need not be updated for input sections.
+    // There is no provision to use a different CIE to that used
+    // by .glink.
+    if (!this->targ_->has_glink())
+      return;
+
+    if (this->plt_size_ + this->branch_size_ + this->need_save_res_ == 0)
+      return;
+
+    layout->add_eh_frame_for_plt(this,
+				 Eh_cie<size>::eh_frame_cie,
+				 sizeof (Eh_cie<size>::eh_frame_cie),
+				 default_fde,
+				 sizeof (default_fde));
+    this->eh_frame_added_ = true;
+  }
+
+  void
+  remove_eh_frame(Layout* layout)
+  {
+    if (this->eh_frame_added_)
       {
-	if (!parameters->options().ld_generated_unwind_info())
-	  return;
-
-	// Since we add stub .eh_frame info late, it must be placed
-	// after all other linker generated .eh_frame info so that
-	// merge mapping need not be updated for input sections.
-	// There is no provision to use a different CIE to that used
-	// by .glink.
-	if (!this->targ_->has_glink())
-	  return;
-
-	layout->add_eh_frame_for_plt(this,
-				     Eh_cie<size>::eh_frame_cie,
-				     sizeof (Eh_cie<size>::eh_frame_cie),
-				     default_fde,
-				     sizeof (default_fde));
-	this->eh_frame_added_ = true;
+	layout->remove_eh_frame_for_plt(this,
+					Eh_cie<size>::eh_frame_cie,
+					sizeof (Eh_cie<size>::eh_frame_cie),
+					default_fde,
+					sizeof (default_fde));
+	this->eh_frame_added_ = false;
       }
   }
 

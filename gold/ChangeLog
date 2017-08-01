@@ -1,3 +1,16 @@
+2017-08-01  Alan Modra  <amodra@gmail.com>
+
+	* ehframe.cc (Fde::operator==): New.
+	(Cie::remove_fde, Eh_frame::remove_ehframe_for_plt): New.
+	* ehframe.h (Fde::operator==): Declare.
+	(Cie::remove_fde, Eh_frame::remove_ehframe_for_plt): Likewise.
+	* layout.cc (Layout::remove_eh_frame_for_plt): New.
+	* layout.h (Layout::remove_eh_frame_for_plt): Declare.
+	* powerpc.cc (Target_powerpc::do_relax): Remove old eh_frame FDEs.
+	(Stub_table::add_eh_frame): Delete eh_frame_added_ condition.
+	Don't add eh_frame for empty stub section.
+	(Stub_table::remove_eh_frame): New.
+
 2017-07-31  Alan Modra  <amodra@gmail.com>
 
 	* options.h (no_tls_optimize): New powerpc option.
