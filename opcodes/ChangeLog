@@ -1,3 +1,7 @@
+2017-08-22  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* riscv-opc.c (riscv_opcodes): Mark "c.nop" as an alias.
+
 2017-08-21  Alexander Fedotov <alexander.fedotov@nxp.com>
 	    Edmar Wienskoski <edmar.wienskoski@nxp.com>
 
