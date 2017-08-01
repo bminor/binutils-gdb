@@ -3745,7 +3745,9 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_PLTRELSZ:
-	      dyn.d_un.d_val = htab->elf.srelplt->size + htab->elf.irelplt->size;
+	      dyn.d_un.d_val = htab->elf.srelplt->size;
+	      if (htab->elf.irelplt)
+		dyn.d_un.d_val += htab->elf.irelplt->size;
 	      break;
 
 	    case DT_RELASZ:
@@ -3756,7 +3758,9 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 		 linker script arranges for .rela.plt to follow all
 		 other relocation sections, we don't have to worry
 		 about changing the DT_RELA entry.  */
-	      dyn.d_un.d_val -= htab->elf.srelplt->size + htab->elf.irelplt->size;
+	      dyn.d_un.d_val -= htab->elf.srelplt->size;
+	      if (htab->elf.irelplt)
+		dyn.d_un.d_val -= htab->elf.irelplt->size;
 	      break;
 	    }
 
