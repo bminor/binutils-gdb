@@ -131,6 +131,7 @@ recognized:
 @code{cortex-r5},
 @code{cortex-r7},
 @code{cortex-r8},
+@code{cortex-r52},
 @code{cortex-m33},
 @code{cortex-m23},
 @code{cortex-m7},
@@ -142,8 +143,6 @@ recognized:
 @code{exynos-m1},
 @code{marvell-pj4},
 @code{marvell-whitney},
-@code{falkor},
-@code{qdf24xx},
 @code{xgene1},
 @code{xgene2},
 @code{ep9312} (ARM920 with Cirrus Maverick coprocessor),
@@ -234,6 +233,7 @@ names are recognized:
 @code{armv8.1-a},
 @code{armv8.2-a},
 @code{armv8.3-a},
+@code{armv8-r},
 @code{iwmmxt}
 @code{iwmmxt2}
 and

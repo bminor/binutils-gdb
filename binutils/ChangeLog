@@ -1,3 +1,82 @@
+2017-06-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21665
+	* objdump.c (disassemble_section): Skip any section that is bigger
+	than the entire file.
+
+2017-06-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21659
+	* bucomm.c (get_file_size): Explicitly warn if the file is a
+	directory.
+
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* readelf.c (arm_attr_tag_CPU_arch): Fill value for ARMv8-R.
+
+2017-06-23  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21659
+	* strings.c (strings_file): Warn about attempts to run strings on
+	a directory.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (decode_x86_feature): Decode
+	GNU_PROPERTY_X86_FEATURE_1_SHSTK.
+	* testsuite/binutils-all/i386/shstk.d: New file.
+	* testsuite/binutils-all/i386/shstk.s: Likewise.
+	* testsuite/binutils-all/x86-64/shstk-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/shstk.d: Likewise.
+	* testsuite/binutils-all/x86-64/shstk.s: Likewise.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (decode_x86_feature): New.
+	(print_gnu_property_note): Call decode_x86_feature on
+	GNU_PROPERTY_X86_FEATURE_1_AND.
+	* testsuite/binutils-all/i386/empty.d: New file.
+	* testsuite/binutils-all/i386/empty.s: Likewise.
+	* testsuite/binutils-all/i386/ibt.d: Likewise.
+	* testsuite/binutils-all/i386/ibt.s: Likewise.
+	* testsuite/binutils-all/x86-64/empty-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/empty.d: Likewise.
+	* testsuite/binutils-all/x86-64/empty.s: Likewise.
+	* testsuite/binutils-all/x86-64/ibt-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/ibt.d: Likewise.
+	* testsuite/binutils-all/x86-64/ibt.s: Likewise.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (READ_ULEB): Use DWARF_VMA_FMT to report error.
+	(READ_SLEB): Likewise.
+
+2017-06-21  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21648
+	* dwarf.c (LEB): Rename to SKIP_ULEB and READ_ULEB.  Add check for
+	reading a value that is too big for the containing variable.
+	(SLEB): Rename to SKIP_SLEB and READ_SLEB.  Add similar check.
+	Replace uses of LEB and SLEB with appropriate new macro.
+	(display_debug_frames): Use an unsigned int for the 'reg'
+	variable.  Use a signed long for the 'l' variable.
+
+2017-06-20  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* readelf.c (get_s390_segment_type): Add support for the new
+	segment type PT_S390_PGSTE.
+	(get_segment_type): Call get_s390_segment_type.
+
+2017-06-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21619
+	* objdump.c (disassemble_bytes): Check that there is sufficient
+	data available before attempting to display it.
+
+2017-06-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* sysinfo.y: Free memory allocated by token NAME.
+
 2017-05-30  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* doc/binutils.texi: Document new cpu=... disassembler options for ARC.

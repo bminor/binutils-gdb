@@ -34,6 +34,7 @@
 @set POWERPC
 @set POWERPC64
 @set Renesas
+@set S/390
 @set SPU
 @set TICOFF
 @set WIN32
@@ -157,6 +158,9 @@ in the section entitled ``GNU Free Documentation License''.
 @end ifset
 @ifset POWERPC64
 * PowerPC64 ELF64::             ld and PowerPC64 64-bit ELF Support
+@end ifset
+@ifset S/390
+* S/390 ELF::			ld and S/390 ELF Support
 @end ifset
 @ifset SPU
 * SPU ELF::			ld and SPU ELF Support
@@ -1250,18 +1254,30 @@ relocation overflow check if there will be no dynamic relocation
 overflow at run-time.  Supported for x86_64.
 
 @item call-nop=prefix-addr
-@itemx call-nop=prefix-nop
 @itemx call-nop=suffix-nop
 @itemx call-nop=prefix-@var{byte}
 @itemx call-nop=suffix-@var{byte}
 Specify the 1-byte @code{NOP} padding when transforming indirect call
 to a locally defined function, foo, via its GOT slot.
 @option{call-nop=prefix-addr} generates @code{0x67 call foo}.
-@option{call-nop=prefix-nop} generates @code{0x90 call foo}.
 @option{call-nop=suffix-nop} generates @code{call foo 0x90}.
 @option{call-nop=prefix-@var{byte}} generates @code{@var{byte} call foo}.
 @option{call-nop=suffix-@var{byte}} generates @code{call foo @var{byte}}.
 Supported for i386 and x86_64.
+
+@item ibtplt
+Generate Intel Indirect Branch Tracking (IBT) enabled PLT entries.
+Supported for Linux/i386 and Linux/x86_64.
+
+@item IBT
+Generate GNU_PROPERTY_X86_FEATURE_1_IBT in .note.gnu.property section
+to indicate compatibility with IBT.  This also implies @option{ibtplt}.
+Supported for Linux/i386 and Linux/x86_64.
+
+@item shstk
+Generate GNU_PROPERTY_X86_FEATURE_1_SHSTK in .note.gnu.property section
+to indicate compatibility with Intel Shadow Stack.  Supported for
+Linux/i386 and Linux/x86_64.
 
 @end table
 
@@ -1485,6 +1501,18 @@ This eliminates the unused duplicate space in the shared library,
 and also prevents any possible confusion over resolving to the wrong
 duplicate when there are many dynamic modules with specialized search
 paths for runtime symbol resolution.
+
+@cindex group allocation in linker script
+@cindex section groups
+@cindex COMDAT
+@kindex --force-group-allocation
+@item --force-group-allocation
+This option causes the linker to place section group members like
+normal input sections, and to delete the section groups.  This is the
+default behaviour for a final link but this option can be used to
+change the behaviour of a relocatable link (@samp{-r}).  The script
+command @code{FORCE_GROUP_ALLOCATION} has the same
+effect. @xref{Miscellaneous Commands}.
 
 @cindex symbols, from command line
 @kindex --defsym=@var{symbol}=@var{exp}
@@ -3728,6 +3756,17 @@ This command has the same effect as the @samp{--no-define-common}
 command-line option: to make @code{ld} omit the assignment of addresses
 to common symbols even for a non-relocatable output file.
 
+@item FORCE_GROUP_ALLOCATION
+@kindex FORCE_GROUP_ALLOCATION
+@cindex group allocation in linker script
+@cindex section groups
+@cindex COMDAT
+This command has the same effect as the
+@samp{--force-group-allocation} command-line option: to make
+@command{ld} place section group members like normal input sections,
+and to delete the section groups even if a relocatable output file is
+specified (@samp{-r}).
+
 @item INSERT [ AFTER | BEFORE ] @var{output_section}
 @kindex INSERT
 @cindex insert user script into default script
@@ -4635,6 +4674,14 @@ SECTIONS @{
 @}
 @end group
 @end smallexample
+
+If an output section's name is the same as the input section's name
+and is representable as a C identifier, then the linker will
+automatically @pxref{PROVIDE} two symbols: __start_SECNAME and
+__stop_SECNAME, where SECNAME is the name of the section.  These
+indicate the start address and end address of the output section
+respectively.  Note: most section names are not representable as
+C identifiers because they contain a @samp{.} character.
 
 @node Output Section Data
 @subsection Output Section Data
@@ -5820,14 +5867,6 @@ The command line options @samp{--orphan-handling} and @samp{--unique}
 (@pxref{Options,,Command Line Options}) can be used to control which
 output sections an orphan is placed in.
 
-If an orphaned section's name is representable as a C identifier then
-the linker will automatically @pxref{PROVIDE} two symbols:
-__start_SECNAME and __stop_SECNAME, where SECNAME is the name of the
-section.  These indicate the start address and end address of the
-orphaned section respectively.  Note: most section names are not
-representable as C identifiers because they contain a @samp{.}
-character.
-
 @node Location Counter
 @subsection The Location Counter
 @kindex .
@@ -6529,6 +6568,9 @@ functionality are not listed.
 @end ifset
 @ifset POWERPC64
 * PowerPC64 ELF64::		@command{ld} and PowerPC64 64-bit ELF Support
+@end ifset
+@ifset S/390
+* S/390 ELF::			@command{ld} and S/390 ELF Support
 @end ifset
 @ifset SPU
 * SPU ELF::			@command{ld} and SPU ELF Support
@@ -7558,6 +7600,30 @@ barrier in the call stub, or use LD_BIND_NOW=1.  By default, @code{ld}
 looks for calls to commonly used functions that create threads, and if
 seen, adds the necessary barriers.  Use these options to change the
 default behaviour.
+@end table
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset S/390
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node S/390 ELF
+@section @command{ld} and S/390 ELF Support
+
+@cindex S/390 ELF options
+@table @option
+
+@cindex S/390
+@kindex --s390-pgste
+@item --s390-pgste
+This option marks the result file with a @code{PT_S390_PGSTE}
+segment.  The Linux kernel is supposed to allocate 4k page tables for
+binaries marked that way.
 @end table
 
 @ifclear GENERIC

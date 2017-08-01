@@ -59,17 +59,7 @@ for {set i 0} {$i < 32} {incr i 1} {
 
 #gdb_test "next" "" ""
 
-send_gdb "show endian\n"
-gdb_expect {
-    -re "(The target endianness is set automatically .currently )(big|little)( endian.*)$gdb_prompt $" {
-        pass "endianness"
-	set endianness $expect_out(2,string)
-    }
-    -re ".*$gdb_prompt $" {
-	fail "couldn't get endianness"
-    }
-    timeout		{ fail "(timeout) endianness" }
-}
+set endianness [get_endianness]
 
 # And then read the E500 registers back, to see that
 # a) the register write above worked, and

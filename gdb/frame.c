@@ -1252,10 +1252,27 @@ frame_unwind_register_signed (struct frame_info *frame, int regnum)
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int size = register_size (gdbarch, regnum);
-  gdb_byte buf[MAX_REGISTER_SIZE];
+  struct value *value = frame_unwind_register_value (frame, regnum);
 
-  frame_unwind_register (frame, regnum, buf);
-  return extract_signed_integer (buf, size, byte_order);
+  gdb_assert (value != NULL);
+
+  if (value_optimized_out (value))
+    {
+      throw_error (OPTIMIZED_OUT_ERROR,
+		   _("Register %d was not saved"), regnum);
+    }
+  if (!value_entirely_available (value))
+    {
+      throw_error (NOT_AVAILABLE_ERROR,
+		   _("Register %d is not available"), regnum);
+    }
+
+  LONGEST r = extract_signed_integer (value_contents_all (value), size,
+				      byte_order);
+
+  release_value (value);
+  value_free (value);
+  return r;
 }
 
 LONGEST

@@ -21,9 +21,12 @@
 #define DISASSEMBLE_H
 #include "dis-asm.h"
 
+extern int print_insn_aarch64		(bfd_vma, disassemble_info *);
 extern int print_insn_alpha		(bfd_vma, disassemble_info *);
 extern int print_insn_avr		(bfd_vma, disassemble_info *);
 extern int print_insn_bfin		(bfd_vma, disassemble_info *);
+extern int print_insn_big_arm		(bfd_vma, disassemble_info *);
+extern int print_insn_big_mips		(bfd_vma, disassemble_info *);
 extern int print_insn_big_nios2	(bfd_vma, disassemble_info *);
 extern int print_insn_big_powerpc	(bfd_vma, disassemble_info *);
 extern int print_insn_big_score         (bfd_vma, disassemble_info *);
@@ -42,14 +45,18 @@ extern int print_insn_h8300s		(bfd_vma, disassemble_info *);
 extern int print_insn_h8500		(bfd_vma, disassemble_info *);
 extern int print_insn_hppa		(bfd_vma, disassemble_info *);
 extern int print_insn_i370		(bfd_vma, disassemble_info *);
+extern int print_insn_i386		(bfd_vma, disassemble_info *);
 extern int print_insn_i386_att		(bfd_vma, disassemble_info *);
 extern int print_insn_i386_intel	(bfd_vma, disassemble_info *);
 extern int print_insn_i860		(bfd_vma, disassemble_info *);
 extern int print_insn_i960		(bfd_vma, disassemble_info *);
+extern int print_insn_ia64		(bfd_vma, disassemble_info *);
 extern int print_insn_ip2k		(bfd_vma, disassemble_info *);
 extern int print_insn_iq2000		(bfd_vma, disassemble_info *);
 extern int print_insn_little_nios2	(bfd_vma, disassemble_info *);
 extern int print_insn_riscv		(bfd_vma, disassemble_info *);
+extern int print_insn_little_arm	(bfd_vma, disassemble_info *);
+extern int print_insn_little_mips	(bfd_vma, disassemble_info *);
 extern int print_insn_little_powerpc	(bfd_vma, disassemble_info *);
 extern int print_insn_little_score      (bfd_vma, disassemble_info *);
 extern int print_insn_lm32		(bfd_vma, disassemble_info *);
@@ -78,6 +85,7 @@ extern int print_insn_pru		(bfd_vma, disassemble_info *);
 extern int print_insn_rs6000		(bfd_vma, disassemble_info *);
 extern int print_insn_s390		(bfd_vma, disassemble_info *);
 extern int print_insn_sh64		(bfd_vma, disassemble_info *);
+extern int print_insn_spu		(bfd_vma, disassemble_info *);
 extern int print_insn_tic30		(bfd_vma, disassemble_info *);
 extern int print_insn_tic4x		(bfd_vma, disassemble_info *);
 extern int print_insn_tic54x		(bfd_vma, disassemble_info *);

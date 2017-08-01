@@ -1,3 +1,105 @@
+2017-06-23  Andrew Waterman  <andrew@sifive.com>
+
+	* riscv-opc.c (riscv_opcodes): Mark I-type SLT instruction as an
+	alias; do not mark SLTI instruction as an alias.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (RM_0FAE_REG_5): Removed.
+	(PREFIX_MOD_3_0F01_REG_5_RM_1): Likewise.
+	(PREFIX_MOD_3_0F01_REG_5_RM_0): New.
+	(PREFIX_MOD_3_0FAE_REG_5): Likewise.
+	(prefix_table): Remove PREFIX_MOD_3_0F01_REG_5_RM_1.  Add
+	PREFIX_MOD_3_0F01_REG_5_RM_0.
+	(prefix_table): Update PREFIX_MOD_0_0FAE_REG_5.  Add
+	PREFIX_MOD_3_0FAE_REG_5.
+	(mod_table): Update MOD_0FAE_REG_5.
+	(rm_table): Update RM_0F01_REG_5.  Remove RM_0FAE_REG_5.
+	* i386-opc.tbl: Update incsspd, incsspq and setssbsy.
+	* i386-tbl.h: Regenerated.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (prefix_table): Replace savessp with saveprevssp.
+	* i386-opc.tbl: Likewise.
+	* i386-tbl.h: Regenerated.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (reg_table): Swap indirEv with NOTRACK on "call{&|}"
+	and "jmp{&|}".
+	(NOTRACK_Fixup): Support memory indirect branch with NOTRACK
+	prefix.
+
+2017-06-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21614
+	* score-dis.c (score_opcodes): Add sentinel.
+
+2017-06-16  Alan Modra  <amodra@gmail.com>
+
+	* rx-decode.c: Regenerate.
+
+2017-06-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/21594
+	* i386-dis.c (OP_E_register): Check valid bnd register.
+	(OP_G): Likewise.
+
+2017-06-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21595
+	* aarch64-dis.c (aarch64_ext_ldst_reglist): Check for an out of
+	range value.
+
+2017-06-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21588
+	* rl78-decode.opc (OP_BUF_LEN): Define.
+	(GETBYTE): Check for the index exceeding OP_BUF_LEN.
+	(rl78_decode_opcode): Use OP_BUF_LEN as the length of the op_buf
+	array.
+	* rl78-decode.c: Regenerate.
+
+2017-06-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21586
+	* bfin-dis.c (gregs): Clip index to prevent overflow.
+	(regs): Likewise.
+	(regs_lo): Likewise.
+	(regs_hi): Likewise.
+
+2017-06-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21576
+	* score7-dis.c (score_opcodes): Add sentinel.
+
+2017-06-14  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-dis.c: Include disassemble.h instead of dis-asm.h.
+	* arm-dis.c: Likewise.
+	* ia64-dis.c: Likewise.
+	* mips-dis.c: Likewise.
+	* spu-dis.c: Likewise.
+	* disassemble.h (print_insn_aarch64): New declaration, moved from
+	include/dis-asm.h.
+	(print_insn_big_arm, print_insn_big_mips): Likewise.
+	(print_insn_i386, print_insn_ia64): Likewise.
+	(print_insn_little_arm, print_insn_little_mips): Likewise.
+
+2017-06-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/21587
+	* rx-decode.opc: Include libiberty.h
+	(GET_SCALE): New macro - validates access to SCALE array.
+	(GET_PSCALE): New macro - validates access to PSCALE array.
+	(DIs, SIs, S2Is, rx_disp): Use new macros.
+	* rx-decode.c: Regenerate.
+
+2017-07-14  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* arm-dis.c (print_insn_arm): Remove bogus entry for bx.
+
 2017-05-30  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* arc-dis.c (enforced_isa_mask): Declare.

@@ -1721,7 +1721,7 @@ gdb_print_insn_spu (bfd_vma memaddr, struct disassemble_info *info)
   memcpy (&spu_info, info, sizeof (*info));
   spu_info.id = SPUADDR_SPU (memaddr);
   spu_info.print_address_func = spu_dis_asm_print_address;
-  return print_insn_spu (memaddr, &spu_info);
+  return default_print_insn (memaddr, &spu_info);
 }
 
 

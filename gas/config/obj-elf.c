@@ -1414,6 +1414,14 @@ obj_elf_symver (int ignore ATTRIBUTE_UNUSED)
   c = get_symbol_name (& name);
   lex_type[(unsigned char) '@'] = old_lexat;
 
+  if (S_IS_COMMON (sym))
+    {
+      as_bad (_("`%s' can't be versioned to common symbol '%s'"),
+	      name, S_GET_NAME (sym));
+      ignore_rest_of_line ();
+      return;
+    }
+
   if (symbol_get_obj (sym)->versioned_name == NULL)
     {
       symbol_get_obj (sym)->versioned_name = xstrdup (name);
@@ -2277,6 +2285,13 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 	      symp2 = symbol_find_or_make (sy_obj->versioned_name);
 
 	      /* Now we act as though we saw symp2 = sym.  */
+	      if (S_IS_COMMON (symp))
+		{
+		  as_bad (_("`%s' can't be versioned to common symbol '%s'"),
+			  sy_obj->versioned_name, S_GET_NAME (symp));
+		  *puntp = TRUE;
+		  return;
+		}
 
 	      S_SET_SEGMENT (symp2, S_GET_SEGMENT (symp));
 

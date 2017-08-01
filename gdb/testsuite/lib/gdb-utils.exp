@@ -34,6 +34,6 @@ proc gdb_init_commands {} {
 
 proc string_to_regexp {str} {
     set result $str
-    regsub -all {[]*+.|()^$\[\\]} $str {\\&} result
+    regsub -all {[]*+.|(){}^$\[\\]} $str {\\&} result
     return $result
 }

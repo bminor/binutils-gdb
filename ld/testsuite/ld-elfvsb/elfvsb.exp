@@ -236,6 +236,7 @@ proc visibility_run {visibility} {
     global support_protected
     global shared_needs_pic
     global PLT_CFLAGS
+    global NOPIE_CFLAGS
     global COMPRESS_LDFLAG
 
     if [ string match $visibility "hidden" ] {
@@ -285,8 +286,8 @@ proc visibility_run {visibility} {
 	# will need to do more relocation work.  However, note that not
 	# using -fpic will cause some of the tests to return different
 	# results.  Make sure that PLT is used since PLT is expected.
-	if { ![ld_compile "$CC -g $PLT_CFLAGS $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
-	     || ![ld_compile "$CC -g $PLT_CFLAGS $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
+	if { ![ld_compile "$CC -g $NOPIE_CFLAGS $PLT_CFLAGS $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
+	     || ![ld_compile "$CC -g $NOPIE_CFLAGS $PLT_CFLAGS $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
 	    unresolved "visibility ($visibility) (non PIC)"
 	} else { if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 	    visibility_test $visibility vnp "visibility ($visibility) (non PIC)" mainnp.o sh1np.o sh2np.o xcoff

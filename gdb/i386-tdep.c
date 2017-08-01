@@ -4011,7 +4011,7 @@ i386_print_insn (bfd_vma pc, struct disassemble_info *info)
 
   info->disassembler_options = disassembly_flavor;
 
-  return print_insn_i386 (pc, info);
+  return default_print_insn (pc, info);
 }
 
 

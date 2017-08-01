@@ -10,7 +10,11 @@ check:
 	cmpl	$func1, %eax
 	jne	.L3
 	movq	func1_p@GOTPCREL(%rip), %rdx
+#ifdef __LP64__
 	cmpq	%rax, (%rdx)
+#else
+	cmpl	%eax, (%rdx)
+#endif
 	jne	.L3
 	call	*func1@GOTPCREL(%rip)
 	cmpl	$1, %eax

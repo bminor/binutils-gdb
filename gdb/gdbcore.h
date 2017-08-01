@@ -29,12 +29,6 @@ struct regcache;
 #include "exec.h"
 #include "target.h"
 
-/* Return the name of the executable file as a string.
-   ERR nonzero means get error if there is none specified;
-   otherwise return 0 in that case.  */
-
-extern char *get_exec_file (int err);
-
 /* Nonzero if there is a core file.  */
 
 extern int have_core_file_p (void);

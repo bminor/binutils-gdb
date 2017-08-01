@@ -28,6 +28,7 @@
 #include "macroscope.h"
 #include "regcache.h"
 #include "common/function-view.h"
+#include "common/preprocessor.h"
 
 /* See compile-internal.h.  */
 
@@ -65,8 +66,7 @@ c_get_range_decl_name (const struct dynamic_prop *prop)
   return xstrprintf ("__gdb_prop_%s", host_address_to_string (prop));
 }
 
-#define STR(x) #x
-#define STRINGIFY(x) STR(x)
+
 
 /* Load the plug-in library FE_LIBCC and return the initialization function
    FE_CONTEXT.  */

@@ -4118,6 +4118,9 @@ struct ppc_link_hash_table
   unsigned int local_ifunc_resolver:1;
   unsigned int maybe_local_ifunc_resolver:1;
 
+  /* Whether plt calls for ELFv2 localentry:0 funcs have been optimized.  */
+  unsigned int has_plt_localentry0:1;
+
   /* Incremented every time we size stubs.  */
   unsigned int stub_iteration;
 
@@ -5005,7 +5008,7 @@ ppc64_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 				  bfd_boolean definition,
 				  bfd_boolean dynamic)
 {
-  if (definition && !dynamic)
+  if (definition && (!dynamic || !h->def_regular))
     h->other = ((isym->st_other & ~ELF_ST_VISIBILITY (-1))
 		| ELF_ST_VISIBILITY (h->other));
 }
@@ -6316,6 +6319,21 @@ ppc64_elf_maybe_function_sym (const asymbol *sym, asection *sec,
   if (size == 0)
     size = 1;
   return size;
+}
+
+/* Return true if symbol is a strong function defined in an ELFv2
+   object with st_other localentry bits of zero, ie. its local entry
+   point coincides with its global entry point.  */
+
+static bfd_boolean
+is_elfv2_localentry0 (struct elf_link_hash_entry *h)
+{
+  return (h != NULL
+	  && h->type == STT_FUNC
+	  && h->root.type == bfd_link_hash_defined
+	  && (STO_PPC64_LOCAL_MASK & h->other) == 0
+	  && is_ppc64_elf (h->root.u.def.section->owner)
+	  && abiversion (h->root.u.def.section->owner) >= 2);
 }
 
 /* Return true if symbol is defined in a regular object file.  */
@@ -8327,6 +8345,11 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
     htab->do_multi_toc = 0;
   else if (!htab->do_multi_toc)
     htab->params->no_multi_toc = 1;
+
+  if (htab->params->plt_localentry0 < 0)
+    htab->params->plt_localentry0
+      = elf_link_hash_lookup (&htab->elf, "GLIBC_2.26",
+			      FALSE, FALSE, FALSE) != NULL;
 
   htab->tls_get_addr = ((struct ppc_link_hash_entry *)
 			elf_link_hash_lookup (&htab->elf, ".__tls_get_addr",
@@ -10548,7 +10571,12 @@ plt_stub_size (struct ppc_link_hash_table *htab,
       && (stub_entry->h == htab->tls_get_addr_fd
 	  || stub_entry->h == htab->tls_get_addr)
       && htab->params->tls_get_addr_opt)
-    size += 13 * 4;
+    {
+      size += 7 * 4;
+      if (ALWAYS_EMIT_R2SAVE
+	  || stub_entry->stub_type == ppc_stub_plt_call_r2save)
+	size += 6 * 4;
+    }
   return size;
 }
 
@@ -10775,11 +10803,17 @@ build_tls_get_addr_stub (struct ppc_link_hash_table *htab,
   bfd_put_32 (obfd, ADD_R3_R12_R13, p),		p += 4;
   bfd_put_32 (obfd, BEQLR, p),			p += 4;
   bfd_put_32 (obfd, MR_R3_R0, p),		p += 4;
+  if (r != NULL)
+    r[0].r_offset += 7 * 4;
+  if (!ALWAYS_EMIT_R2SAVE
+      && stub_entry->stub_type != ppc_stub_plt_call_r2save)
+    return build_plt_stub (htab, stub_entry, p, offset, r);
+
   bfd_put_32 (obfd, MFLR_R11, p),		p += 4;
   bfd_put_32 (obfd, STD_R11_0R1 + STK_LINKER (htab), p), p += 4;
 
   if (r != NULL)
-    r[0].r_offset += 9 * 4;
+    r[0].r_offset += 2 * 4;
   p = build_plt_stub (htab, stub_entry, p, offset, r);
   bfd_put_32 (obfd, BCTRL, p - 4);
 
@@ -12598,17 +12632,24 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 			continue;
 		    }
 
-		  if (stub_type == ppc_stub_plt_call
-		      && irela + 1 < irelaend
-		      && irela[1].r_offset == irela->r_offset + 4
-		      && ELF64_R_TYPE (irela[1].r_info) == R_PPC64_TOCSAVE)
+		  if (stub_type == ppc_stub_plt_call)
 		    {
-		      if (!tocsave_find (htab, INSERT,
-					 &local_syms, irela + 1, input_bfd))
-			goto error_ret_free_internal;
+		      if (!htab->opd_abi
+			  && htab->params->plt_localentry0 != 0
+			  && is_elfv2_localentry0 (&hash->elf))
+			htab->has_plt_localentry0 = 1;
+		      else if (irela + 1 < irelaend
+			       && irela[1].r_offset == irela->r_offset + 4
+			       && (ELF64_R_TYPE (irela[1].r_info)
+				   == R_PPC64_TOCSAVE))
+			{
+			  if (!tocsave_find (htab, INSERT,
+					     &local_syms, irela + 1, input_bfd))
+			    goto error_ret_free_internal;
+			}
+		      else
+			stub_type = ppc_stub_plt_call_r2save;
 		    }
-		  else if (stub_type == ppc_stub_plt_call)
-		    stub_type = ppc_stub_plt_call_r2save;
 
 		  /* Support for grouping stub sections.  */
 		  id_sec = htab->sec_info[section->id].u.group->link_sec;
@@ -13159,6 +13200,8 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	  bfd_put_32 (htab->glink->owner, BCL_20_31, p);
 	  p += 4;
 	  bfd_put_32 (htab->glink->owner, MFLR_R11, p);
+	  p += 4;
+	  bfd_put_32 (htab->glink->owner, STD_R2_0R1 + 24, p);
 	  p += 4;
 	  bfd_put_32 (htab->glink->owner, LD_R2_0R11 | (-16 & 0xfffc), p);
 	  p += 4;
@@ -14170,10 +14213,19 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    {
 	      bfd_boolean can_plt_call = FALSE;
 
-	      /* All of these stubs will modify r2, so there must be a
+	      if (stub_entry->stub_type == ppc_stub_plt_call
+		  && !htab->opd_abi
+		  && htab->params->plt_localentry0 != 0
+		  && is_elfv2_localentry0 (&h->elf))
+		{
+		  /* The function doesn't use or change r2.  */
+		  can_plt_call = TRUE;
+		}
+
+	      /* All of these stubs may modify r2, so there must be a
 		 branch and link followed by a nop.  The nop is
 		 replaced by an insn to restore r2.  */
-	      if (rel->r_offset + 8 <= input_section->size)
+	      else if (rel->r_offset + 8 <= input_section->size)
 		{
 		  unsigned long br;
 
@@ -15636,6 +15688,8 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 	    case DT_PPC64_OPT:
 	      if (htab->do_multi_toc && htab->multi_toc_needed)
 		dyn.d_un.d_val |= PPC64_OPT_MULTI_TOC;
+	      if (htab->has_plt_localentry0)
+		dyn.d_un.d_val |= PPC64_OPT_LOCALENTRY;
 	      break;
 
 	    case DT_PPC64_OPDSZ:

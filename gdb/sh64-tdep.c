@@ -1528,12 +1528,12 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int base_regnum;
   int offset = 0;
-  gdb_byte temp_buffer[MAX_REGISTER_SIZE];
   enum register_status status;
 
   if (reg_nr >= DR0_REGNUM 
       && reg_nr <= DR_LAST_REGNUM)
     {
+      gdb_byte temp_buffer[8];
       base_regnum = sh64_dr_reg_base_num (gdbarch, reg_nr);
 
       /* Build the value in the provided buffer.  */ 
@@ -1580,6 +1580,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   else if (reg_nr >= R0_C_REGNUM 
 	   && reg_nr <= T_C_REGNUM)
     {
+      gdb_byte temp_buffer[8];
       base_regnum = sh64_compact_reg_base_num (gdbarch, reg_nr);
 
       /* Build the value in the provided buffer.  */ 
@@ -1607,6 +1608,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   else if (reg_nr >= DR0_C_REGNUM 
 	   && reg_nr <= DR_LAST_C_REGNUM)
     {
+      gdb_byte temp_buffer[8];
       base_regnum = sh64_compact_reg_base_num (gdbarch, reg_nr);
 
       /* DR_C regs are double precision registers obtained by
@@ -1639,8 +1641,8 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       int fpscr_base_regnum;
       int sr_base_regnum;
-      unsigned int fpscr_value;
-      unsigned int sr_value;
+      ULONGEST fpscr_value;
+      ULONGEST sr_value;
       unsigned int fpscr_c_value;
       unsigned int fpscr_c_part1_value;
       unsigned int fpscr_c_part2_value;
@@ -1662,18 +1664,14 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
             21-31     reserved
        */
       /* *INDENT-ON* */
-      /* Get FPSCR into a local buffer.  */
-      status = regcache_raw_read (regcache, fpscr_base_regnum, temp_buffer);
+      /* Get FPSCR as an int.  */
+      status = regcache->raw_read (fpscr_base_regnum, &fpscr_value);
       if (status != REG_VALID)
 	return status;
-      /* Get value as an int.  */
-      fpscr_value = extract_unsigned_integer (temp_buffer, 4, byte_order);
-      /* Get SR into a local buffer */
-      status = regcache_raw_read (regcache, sr_base_regnum, temp_buffer);
+      /* Get SR as an int.  */
+      status = regcache->raw_read (sr_base_regnum, &sr_value);
       if (status != REG_VALID)
 	return status;
-      /* Get value as an int.  */
-      sr_value = extract_unsigned_integer (temp_buffer, 4, byte_order);
       /* Build the new value.  */
       fpscr_c_part1_value = fpscr_value & 0x3fffd;
       fpscr_c_part2_value = (sr_value & 0x7000) << 6;
@@ -1704,11 +1702,11 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int base_regnum, portion;
   int offset;
-  gdb_byte temp_buffer[MAX_REGISTER_SIZE];
 
   if (reg_nr >= DR0_REGNUM
       && reg_nr <= DR_LAST_REGNUM)
     {
+      gdb_byte temp_buffer[8];
       base_regnum = sh64_dr_reg_base_num (gdbarch, reg_nr);
       /* We must pay attention to the endianness.  */
       sh64_register_convert_to_raw (gdbarch, register_type (gdbarch, reg_nr),
@@ -1752,6 +1750,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   else if (reg_nr >= R0_C_REGNUM 
 	   && reg_nr <= T_C_REGNUM)
     {
+      gdb_byte temp_buffer[8];
       base_regnum = sh64_compact_reg_base_num (gdbarch, reg_nr);
       /* reg_nr is 32 bit here, and base_regnum is 64 bits.  */
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
@@ -1779,6 +1778,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   else if (reg_nr >= DR0_C_REGNUM 
 	   && reg_nr <= DR_LAST_C_REGNUM)
     {
+      gdb_byte temp_buffer[8];
       base_regnum = sh64_compact_reg_base_num (gdbarch, reg_nr);
       for (portion = 0; portion < 2; portion++)
 	{
@@ -1813,10 +1813,10 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     {      
       int fpscr_base_regnum;
       int sr_base_regnum;
-      unsigned int fpscr_value;
-      unsigned int sr_value;
-      unsigned int old_fpscr_value;
-      unsigned int old_sr_value;
+      ULONGEST fpscr_value;
+      ULONGEST sr_value;
+      ULONGEST old_fpscr_value;
+      ULONGEST old_sr_value;
       unsigned int fpscr_c_value;
       unsigned int fpscr_mask;
       unsigned int sr_mask;
@@ -1847,19 +1847,15 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       fpscr_value = fpscr_c_value & fpscr_mask;
       sr_value = (fpscr_value & sr_mask) >> 6;
       
-      regcache_raw_read (regcache, fpscr_base_regnum, temp_buffer);
-      old_fpscr_value = extract_unsigned_integer (temp_buffer, 4, byte_order);
+      regcache->raw_read (fpscr_base_regnum, &old_fpscr_value);
       old_fpscr_value &= 0xfffc0002;
       fpscr_value |= old_fpscr_value;
-      store_unsigned_integer (temp_buffer, 4, byte_order, fpscr_value);
-      regcache_raw_write (regcache, fpscr_base_regnum, temp_buffer);
-      
-      regcache_raw_read (regcache, sr_base_regnum, temp_buffer);
-      old_sr_value = extract_unsigned_integer (temp_buffer, 4, byte_order);
+      regcache->raw_write (fpscr_base_regnum, fpscr_value);
+
+      regcache->raw_read (sr_base_regnum, &old_sr_value);
       old_sr_value &= 0xffff8fff;
       sr_value |= old_sr_value;
-      store_unsigned_integer (temp_buffer, 4, byte_order, sr_value);
-      regcache_raw_write (regcache, sr_base_regnum, temp_buffer);
+      regcache->raw_write (sr_base_regnum, sr_value);
     }
 
   else if (reg_nr == FPUL_C_REGNUM)
@@ -1949,7 +1945,7 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
   fprintf_filtered (file, "\t(raw ");
   print_hex_chars (file, raw_buffer,
 		   register_size (gdbarch, regnum),
-		   gdbarch_byte_order (gdbarch));
+		   gdbarch_byte_order (gdbarch), true);
   fprintf_filtered (file, ")");
   fprintf_filtered (file, "\n");
 }

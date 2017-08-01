@@ -101,12 +101,7 @@ if { ! [ runto checkpoint1 ] } then {
 
 # Get the endianness for the later use with endianless formats.
 
-gdb_test_multiple "show endian" "show endian" {
-    -re ".* (big|little) endian.*$gdb_prompt $" { 
-	set endian $expect_out(1,string) 
-	pass "endianness: $endian"
-    }
-}
+set endian [get_endianness]
 
 # Now generate some dump files.
 

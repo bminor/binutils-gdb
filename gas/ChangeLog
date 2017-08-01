@@ -1,3 +1,302 @@
+2017-06-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/21661
+	* config/obj-elf.c (obj_elf_symver): Don't allow .symver with
+	common symbol.
+	(elf_frob_symbol): Likewise.
+	* testsuite/gas/elf/elf.exp: Run pr21661.
+	* testsuite/gas/elf/pr21661.d: New file.
+	* testsuite/gas/elf/pr21661.s: Likewise.
+
+2017-06-26  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (fpu_any): Only define for ELF based targets.
+
+2017-06-26  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* /config/tc-arc.c (is_br_jmp_insn_p): Update macro with known
+	instructions to be accounted as jumps.
+	(assemble_insn): Check for limms into the delay slots.  Emit an
+	error if so.
+	* testsuite/gas/arc/asm-errors-3.d: New file.
+	* testsuite/gas/arc/asm-errors-3.err: Likewise.
+	* testsuite/gas/arc/asm-errors-3.s: Likewise.
+
+2017-06-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* NEWS: Mention support of ARM Cortex-R52 processor.
+	* config/tc-arm.c (arm_cpus): Add entry for ARM Cortex-R52 processor.
+	* doc/c-arm.texi: Mention support for -mcpu=cortex-r52.
+
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* NEWS: Mention support for ARMv8-R architecture.
+	* config/tc-arm.c (arm_archs): Add entry for ARMv8-R.
+	(arm_extensions): Restrict pan, ras and rdma extension to
+	ARMv8-A and make crypto, fp and simd extensions available to
+	ARMv8-R.
+	(cpu_arch_ver): Add entry for ARMv8-R.
+	(aeabi_set_public_attributes): Update gas_assert for Tag_DIV_use
+	logic.
+	* testsuite/gas/arm/armv8-a+fp.s: Rename into ...
+	* testsuite/gas/arm/armv8-ar+fp.s: This.  Remove .arch directive.
+	* testsuite/gas/arm/armv8-a+fp.d: Specify source to assemble and
+	architecture to assemble for.
+	* testsuite/gas/arm/armv8-r+fp.d: New.
+	* testsuite/gas/arm/armv8-a+simd.s: Rename into ...
+	* testsuite/gas/arm/armv8-ar+simd.s: This.  Remove .arch directive.
+	* testsuite/gas/arm/armv8-a+simd.d: Specify source to assemble and
+	architecture to assemble for.
+	* testsuite/gas/arm/armv8-r+simd.d: New.
+	* testsuite/gas/arm/armv8-a-bad.s: Rename into ...
+	* testsuite/gas/arm/armv8-ar-bad.s: This.  Remove .arch directive.
+	* testsuite/gas/arm/armv8-a-bad.l: Rename into ...
+	* testsuite/gas/arm/armv8-ar-bad.l: This.  Decrement line number by 1.
+	* testsuite/gas/arm/armv8-a-bad.d: Specify source to assemble,
+	architecture to assemble for and adjust error output file.
+	* testsuite/gas/arm/armv8-r-bad.d: New.
+	* testsuite/gas/arm/armv8-a-barrier.s: Rename into ...
+	* testsuite/gas/arm/armv8-ar-barrier.s: This.
+	* testsuite/gas/arm/armv8-a-barrier-arm.d: Adjust source.
+	* testsuite/gas/arm/armv8-a-barrier-thumb.d: Likewise.
+	* testsuite/gas/arm/armv8-r-barrier-arm.d: New.
+	* testsuite/gas/arm/armv8-r-barrier-thumb.d: New.
+	* testsuite/gas/arm/armv8-a-it-bad.s: Rename into ...
+	* testsuite/gas/arm/armv8-ar-it-bad.s: This.  Remove .arch directive.
+	* testsuite/gas/arm/armv8-a-it-bad.l: Rename into ...
+	* testsuite/gas/arm/armv8-ar-it-bad.l: This.  Decrement line number
+	by 1.
+	* testsuite/gas/arm/armv8-a-it-bad.d: Specify source to assemble,
+	architecture to assemble for and adjust error output file.
+	* testsuite/gas/arm/armv8-r-it-bad.d: New.
+	* testsuite/gas/arm/armv8-a.s: Rename into ...
+	* testsuite/gas/arm/armv8-ar.s: This.  Remove .arch directive.
+	* testsuite/gas/arm/armv8-a.d: Specify source to assemble and
+	architecture to assemble for.
+	* testsuite/gas/arm/armv8-r.d: New.
+	* testsuite/gas/arm/attr-march-armv8-r+crypto.d: New.
+	* testsuite/gas/arm/attr-march-armv8-r+fp.d: New.
+	* testsuite/gas/arm/attr-march-armv8-r+simd.d: New.
+	* testsuite/gas/arm/attr-march-armv8-r.d: New.
+	* testsuite/gas/arm/crc32.s: Rename into ...
+	* testsuite/gas/arm/crc32-armv8-ar.s: This.
+	* testsuite/gas/arm/crc32.d: Rename into ...
+	* testsuite/gas/arm/crc32-armv8-a.d: This.  Specify source to assemble.
+	* testsuite/gas/arm/crc32-armv8-r.d: New.
+	* testsuite/gas/arm/crc32-bad.s: Rename into ...
+	* testsuite/gas/arm/crc32-armv8-ar-bad.s: This.
+	* testsuite/gas/arm/crc32-bad.d: Rename into ...
+	* testsuite/gas/arm/crc32-armv8-a-bad.d: This.  Specify source to
+	assemble.
+	* testsuite/gas/arm/crc32-armv8-r-bad.d: New.
+	* testsuite/gas/arm/mask_1.s: Rename into ...
+	* testsuite/gas/arm/mask_1-armv8-ar.s: This.
+	* testsuite/gas/arm/mask_1.d: Rename into ...
+	* testsuite/gas/arm/mask_1-armv8-a.d: This.  Specify source to
+	assemble.
+	* testsuite/gas/arm/mask_1-armv8-r.d: new.
+
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (arm_ext_v6m): Delete.
+	(arm_ext_v7m): Delete.
+	(arm_ext_m): Remove ARM_EXT_OS from the set of feature defined M
+	profile.
+	(arm_arch_v6m_only): Delete.
+	(do_t_swi): Remove special case for ARMv6S-M.
+	(md_assemble): Display error message previously in do_t_swi when
+	SVC is not available.
+	(insns): Guard swi and svc by arm_ext_os for Thumb mode.
+	(aeabi_set_public_attributes): Remove special case for ARMv6S-M.
+
+2017-05-11  Andrew Waterman  <andrew@sifive.com>
+
+	* config/tc-riscv.c (riscv_ip): Changes as_warn to as_bad for improper
+	shift amounts.
+
+2017-06-22  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (arm_ext_v7m): Add ATTRIBUTE_UNUSED.
+
+2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (fpu_any): Defined from FPU_ANY.
+	(cpu_arch_ver): Add all architectures and sort by release date.
+	(have_ext_for_needed_feat_p): New.
+	(get_aeabi_cpu_arch_from_fset): New.
+	(aeabi_set_public_attributes): Call above function to determine
+	Tag_CPU_arch and Tag_CPU_arch_profile values.  Adapt Tag_ARM_ISA_use
+	and Tag_THUMB_ISA_use selection logic to check absence of feature bit
+	accordingly.
+	* testsuite/gas/arm/attr-march-armv1.d: Fix expected Tag_CPU_arch build
+	attribute value.
+	* testsuite/gas/arm/attr-march-armv2.d: Likewise.
+	* testsuite/gas/arm/attr-march-armv2a.d: Likewise.
+	* testsuite/gas/arm/attr-march-armv2s.d: Likewise.
+	* testsuite/gas/arm/attr-march-armv3.d: Likewise.
+	* testsuite/gas/arm/attr-march-armv3m.d: Likewise.
+	* testsuite/gas/arm/pr12198-2.d: Likewise.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/cet-intel.d: Updated.
+	* testsuite/gas/i386/cet.d: Likewise.
+	* testsuite/gas/i386/x86-64-cet-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-cet.d: Likewise.
+	* testsuite/gas/i386/cet.s: Update incsspd and setssbsy tests.
+	* testsuite/gas/i386/x86-64-cet.s: Likewise.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/cet-intel.d: Updated.
+	* testsuite/gas/i386/cet.d: Likewise.
+	* testsuite/gas/i386/x86-64-cet-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-cet.d: Likewise.
+	* testsuite/gas/i386/cet.s: Replace savessp with saveprevssp.
+	* testsuite/gas/i386/x86-64-cet.s: Likewise.
+
+2017-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (md_assemble): Update NOTRACK prefix check.
+	* testsuite/gas/i386/notrack-intel.d: Updated.
+	* testsuite/gas/i386/notrack.d: Likewise.
+	* testsuite/gas/i386/notrackbad.l: Likewise.
+	* testsuite/gas/i386/x86-64-notrack-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-notrack.d: Likewise.
+	* testsuite/gas/i386/x86-64-notrackbad.l: Likewise.
+	* testsuite/gas/i386/notrack.s: Add NOTRACK prefix tests with
+	memory indirect branch.
+	* testsuite/gas/i386/x86-64-notrack.s: Likewise.
+	* testsuite/gas/i386/notrackbad.s: Remove memory indirect branch
+	with NOTRACK prefix.
+	* testsuite/gas/i386/x86-64-notrackbad.s: Likewise.
+
+2017-06-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (arm_extensions): New duplicate idiv entry to enable
+	Thumb division for ARMv7 architecture.
+	(arm_parse_extension): Document expected behavior for duplicate
+	entries.
+	(s_arm_arch_extension): Likewise.
+	* testsuite/gas/arm/forbid-armv7-idiv-ext.d: New test.
+	* testsuite/gas/arm/forbid-armv7-idiv-ext.l: New expected output for
+	above test.
+
+2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (aeabi_set_public_attributes): Populate flags from
+	feature bits used or selected_cpu depending on whether a CPU was
+	selected by the user.
+
+2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (aeabi_set_public_attributes): Test *mcpu_ext_opt to
+	decide whether to set Tag_DSP_extension build attribute value.  Remove
+	now useless arm_arch variable.
+
+2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (dyn_mcpu_ext_opt): New static variable.
+	(dyn_march_ext_opt): Likewise.
+	(md_begin): Copy extension feature bits alongside architecture ones.
+	Merge extensions feature bits in selected_cpu and cpu_variant if there
+	is some.
+	(arm_parse_extension): Pass architecture and extension feature bits in
+	separate parameters, with architecture bits being read only.  Update
+	**opt_p directly rather than *ext_set and initialize it if needed.
+	(arm_parse_cpu): Stop merging architecture and extension feature bits
+	and instead use mcpu_cpu_opt and dyn_mcpu_ext_opt to memorize them
+	respectively.  Adapt to change in parameters of arm_parse_extension.
+	(arm_parse_arch): Adapt to change in parameters of arm_parse_extension.
+	(aeabi_set_attribute_string): Make function static.
+	(arm_md_post_relax): New function.
+	(s_arm_cpu): Stop merging architecture and extension feature bits and
+	instead use mcpu_cpu_opt and dyn_mcpu_ext_opt to memorize them
+	respectively.  Merge extension feature bits in cpu_variant
+	if there is any.
+	(s_arm_arch): Reset extension feature bit.  Set selected_cpu from
+	*mcpu_cpu_opt and cpu_variant from selected_cpu and *mfpu_opt for
+	consistency with s_arm_cpu.
+	(s_arm_arch_extension): Update *dyn_mcpu_ext_opt rather than
+	selected_cpu, allocating it before hand if needed.  Set selected_cpu
+	from it and then cpu_variant.
+	(s_arm_fpu): Merge *mcpu_ext_opt feature bits if any in cpu_variant.
+	* config/tc-arm.h (md_post_relax_hook): Set to arm_md_post_relax.
+	(aeabi_set_public_attributes): Delete external declaration.
+	(arm_md_post_relax): Declare externally.
+
+2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (struct arm_cpu_option_table): New ext field.
+	(ARM_CPU_OPT): Add parameter to set new ext field and reorder canonical
+	name field just after the name field.
+	(arm_cpus): Move extension feature bit from value field to ext field,
+	reorder parameter according to changes in ARM_CPU_OPT and reindent.
+	(arm_parse_cpu): Point mcpu_cpu_opt to a bitfield merging the value and
+	ext field from the selected arm_cpus entry.
+	(s_arm_cpu): Likewise.
+
+2017-06-21  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add cortex-a55 and cortex-a75.
+	* doc/c-aarch64.texi (-mcpu): Document cortex-a55 and cortex-a75.
+
+2017-06-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/21594
+	* testsuite/gas/i386/mpx.s: Add 2 tests with invalid bnd
+	register.
+	* testsuite/gas/i386/x86-64-mpx.s: Likewise.
+	* testsuite/gas/i386/mpx.d: Updated.
+	* testsuite/gas/i386/x86-64-mpx.d: Likewise.
+
+2017-06-14  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (density_supported, xtensa_fetch_width,
+	absolute_literals_supported): Leave definitions uninitialized.
+	(directive_state): Leave entries for directive_density and
+	directive_absolute_literals initialized to false.
+	(xg_init_global_config, xtensa_init): New functions.
+	* config/tc-xtensa.h (TARGET_BYTES_BIG_ENDIAN): Define as 0.
+	(HOST_SPECIAL_INIT): New definition.
+	(xtensa_init): New declaration.
+
+2017-06-07  Michael Collison  <michael.collison@arm.com>
+
+	* config/tc-aarch64.c (reg_entry_reg_names): Add IP0,
+	IP1, FP, and LR as register aliases of register 16, 17, 29
+	and 30 respectively.
+	* testsuite/gas/aarch64/diagnostic.l: Remove diagnostic
+	prohibiting register 'lr' which is now an alias.
+	* testsuite/gas/aarch64/diagnostic.s: Remove instruction
+	utilizing register 'lr' which is now an alias.
+
+2017-06-06  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (reject_bad_reg): Allow REG_SP on ARMv8-A.
+	(parse_operands): Allow REG_SP for OP_oRRnpcsp and OP_RRnpcsp on
+	ARMv8-A.
+	(do_co_reg): Allow REG_SP for Rd on ARMv8-A.
+	(do_t_add_sub): Likewise.
+	(do_t_mov_cmp): Likewise.
+	(do_t_tb): Likewise.
+	* testsuite/gas/arm/ld-sp-warn.l: Delete the warning on REG_SP as Rt for
+	ldrsb.
+	* testsuite/gas/arm/sp-pc-validations-bad-t-v8a.d: New test.
+	* testsuite/gas/arm/sp-pc-validations-bad-t-v8a.l: New test.
+	* testsuite/gas/arm/sp-pc-validations-bad-t.d: Specifies -march=armv7-a.
+	* testsuite/gas/arm/sp-pc-validations-bad-t.s: Remove ".arch armv7-a".
+	* testsuite/gas/arm/sp-usage-thumb2-relax-on-v7.d: New test.
+	* testsuite/gas/arm/sp-usage-thumb2-relax-on-v7.l: New test.
+	* testsuite/gas/arm/sp-usage-thumb2-relax-on-v8.d: New test.
+	* testsuite/gas/arm/sp-usage-thumb2-relax.s: New test.
+	* testsuite/gas/arm/strex-bad-t.d: Specifies -march=armv7-a.
+
+2017-06-05  Jim Wilson  <jim.wilson@linaro.org>
+
+	* config/tc-arm.c (arm_cpus): Delete falkor and qdf24xx entries.
+	* doc/c-arm.texi (-mcpu): Likewise.
+
 2017-05-30  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* config/tc-arc.c (cpu_types): Include arc-cpu.def

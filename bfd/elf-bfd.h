@@ -213,6 +213,9 @@ struct elf_link_hash_entry
   /* Symbol is defined by a shared library with non-default visibility
      in a read/write section.  */
   unsigned int protected_def : 1;
+  /* Symbol is __start_SECNAME or __stop_SECNAME to mark section
+     SECNAME.  */
+  unsigned int start_stop : 1;
 
   /* String table index in .dynstr if this is a dynamic symbol.  */
   unsigned long dynstr_index;
@@ -243,7 +246,15 @@ struct elf_link_hash_entry
     struct bfd_elf_version_tree *vertree;
   } verinfo;
 
-  struct elf_link_virtual_table_entry *vtable;
+  union
+  {
+    /* For __start_SECNAME and __stop_SECNAME symbols, record the first
+       input section whose section name is SECNAME.  */
+    asection *start_stop_section;
+
+    /* Vtable information. */
+    struct elf_link_virtual_table_entry *vtable;
+  } u2;
 };
 
 /* Will references to this symbol always reference the symbol
@@ -1437,8 +1448,8 @@ struct elf_backend_data
 						  unsigned int);
 
   /* Merge GNU properties.  Return TRUE if property is updated.  */
-  bfd_boolean (*merge_gnu_properties) (bfd *, elf_property *,
-				       elf_property *);
+  bfd_boolean (*merge_gnu_properties) (struct bfd_link_info *, bfd *,
+				       elf_property *, elf_property *);
 
   /* Set up GNU properties.  */
   bfd *(*setup_gnu_properties) (struct bfd_link_info *);
@@ -2262,6 +2273,9 @@ extern bfd_reloc_status_type bfd_elf_perform_complex_relocation
 extern bfd_boolean _bfd_elf_setup_sections
   (bfd *);
 
+extern struct bfd_link_hash_entry *bfd_elf_define_start_stop
+  (struct bfd_link_info *, const char *, asection *);
+
 extern void _bfd_elf_post_process_headers (bfd * , struct bfd_link_info *);
 
 extern const bfd_target *bfd_elf32_object_p
@@ -2444,9 +2458,6 @@ extern bfd_boolean bfd_elf_gc_common_finalize_got_offsets
 
 extern bfd_boolean bfd_elf_gc_common_final_link
   (bfd *, struct bfd_link_info *);
-
-extern asection *_bfd_elf_is_start_stop
-  (const struct bfd_link_info *, struct elf_link_hash_entry *);
 
 extern bfd_boolean bfd_elf_reloc_symbol_deleted_p
   (bfd_vma, void *);
@@ -2767,7 +2778,7 @@ extern asection _bfd_elf_large_com_section;
 	    memmove (rel, rel + count,					\
 		     (relend - rel - count) * sizeof (*rel));		\
 									\
-	    input_section->reloc_count--;				\
+	    input_section->reloc_count -= count;			\
 	    relend -= count;						\
 	    rel--;							\
 	    continue;							\

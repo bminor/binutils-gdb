@@ -32,6 +32,7 @@ struct symtab;
 #include "target/waitstatus.h"
 #include "cli/cli-utils.h"
 #include "common/refcounted-object.h"
+#include "common-gdbthread.h"
 
 /* Frontend view of the thread state.  Possible extensions: stepping,
    finishing, until(ling),...  */
@@ -492,10 +493,6 @@ extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
        (T) = (TMP))
 
 extern int thread_count (void);
-
-/* Switch from one thread to another.  Also sets the STOP_PC
-   global.  */
-extern void switch_to_thread (ptid_t ptid);
 
 /* Switch from one thread to another.  Does not read registers and
    sets STOP_PC to -1.  */

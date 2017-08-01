@@ -63,6 +63,7 @@
 
 #include "darwin-nat.h"
 #include "common/filestuff.h"
+#include "nat/fork-inferior.h"
 
 /* Quick overview.
    Darwin kernel is Mach + BSD derived kernel.  Note that they share the
@@ -1790,7 +1791,7 @@ darwin_ptrace_him (int pid)
 
   darwin_init_thread_list (inf);
 
-  startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
+  gdb_startup_inferior (pid, START_INFERIOR_TRAPS_EXPECTED);
 }
 
 static void
@@ -1833,13 +1834,23 @@ darwin_create_inferior (struct target_ops *ops,
 			const std::string &allargs,
 			char **env, int from_tty)
 {
-  /* Do the hard work.  */
-  fork_inferior (exec_file, allargs, env, darwin_ptrace_me, darwin_ptrace_him,
-		 darwin_pre_ptrace, NULL, darwin_execvp);
+  pid_t pid;
+  ptid_t ptid;
 
+  /* Do the hard work.  */
+  pid = fork_inferior (exec_file, allargs, env, darwin_ptrace_me,
+		       darwin_ptrace_him, darwin_pre_ptrace, NULL,
+		       darwin_execvp);
+
+  ptid = pid_to_ptid (pid);
   /* Return now in case of error.  */
   if (ptid_equal (inferior_ptid, null_ptid))
     return;
+
+  /* We have something that executes now.  We'll be running through
+     the shell at this point (if startup-with-shell is true), but the
+     pid shouldn't change.  */
+  add_thread_silent (ptid);
 }
 
 

@@ -351,12 +351,13 @@ if { ![is_remote host] && [which $CC] == 0 } {
 }
 
 # Pass -fplt to CC and CXX since -fno-plt doesn't work with S-records
-# tests.
-global PLT_CFLAGS
+# tests. Also add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if PIE doesn't work
+# with S-records.
+global PLT_CFLAGS NOPIE_CFLAGS NOPIE_LDFLAGS
 set old_CC "$CC"
-set CC "$CC $PLT_CFLAGS"
+set CC "$CC $PLT_CFLAGS $NOPIE_CFLAGS $NOPIE_LDFLAGS"
 set old_CXX "$CXX"
-set CXX "$CXX $PLT_CFLAGS"
+set CXX "$CXX $PLT_CFLAGS $NOPIE_CFLAGS $NOPIE_LDFLAGS"
 
 if { ![ld_compile $CC $srcdir/$subdir/sr1.c tmpdir/sr1.o] \
      || ![ld_compile $CC $srcdir/$subdir/sr2.c tmpdir/sr2.o] } {

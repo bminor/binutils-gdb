@@ -1,3 +1,956 @@
+2017-06-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* record-full.c (netorder16): Remove.
+
+2017-06-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/diagnostics.h: Define macros for GCC.
+	(DIAGNOSTIC_IGNORE_UNUSED_FUNCTION): New macro.
+	* common/vec.h: Include diagnostics.h.
+	(DIAGNOSTIC_IGNORE_UNUSED_VEC_FUNCTION): New macro.
+	(DEF_VEC_I, DEF_VEC_P, DEF_VEC_O): Ignore -Wunused-function
+	warning.
+
+2017-06-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/diagnostics.h (DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER):
+	New macro.
+	* ada-lex.l: Ignore deprecated register warnings.
+
+2017-06-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* main.c (get_init_files): Replace "SYSTEM_GDBINIT +
+	datadir_len" with "&SYSTEM_GDBINIT[datadir_len]".
+
+2017-06-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dtrace-probe.c (dtrace_process_dof_probe): Put semi-colon on
+	its own line.
+
+2017-06-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* nat/x86-dregs.c (x86_show_dr): Print registers one per line.
+
+2017-06-23  Alan Hayward  <alan.hayward@arm.com>
+
+	* xtensa-tdep.c (XTENSA_MAX_REGISTER_SIZE): Add.
+	(xtensa_register_write_masked): Use XTENSA_MAX_REGISTER_SIZE.
+	(xtensa_register_read_masked): Likewise.
+
+2017-06-22  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* common/environ.c (gdb_environ::unset): Update comment.
+
+2017-06-22  Alan Hayward  <alan.hayward@arm.com>
+
+	* python/py-unwind.c (pyuw_sniffer): Allocate space for
+	registers.
+
+2017-06-22  Alan Hayward  <alan.hayward@arm.com>
+
+	* record-full.c (record_full_exec_insn): Use byte_vector.
+
+2017-06-22  Yao Qi  <yao.qi@linaro.org>
+
+	* regformats/i386/amd64-avx-mpx-avx512-pku-linux.dat: Regenerated.
+	* regformats/i386/amd64-avx-mpx-avx512-pku.dat: Regenerated.
+
+2017-06-22  Alan Hayward  <alan.hayward@arm.com>
+
+	* remote.c (cached_reg): Move from here...
+	* regcache.h (cached_reg): ...to here.
+	* python/py-unwind.c (struct reg_info): Remove.
+	(cached_frame_info): Use cached_reg_t.
+	(pyuw_prev_register): Likewise.
+	(pyuw_sniffer): Use cached_reg_t and allocate registers.
+	(pyuw_dealloc_cache): Free all registers.
+
+2017-06-22  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	* unittests/environ-selftests.c (run_tests): Ignore -Wself-move
+	warning.
+	* common/diagnostics.h: New file.
+
+2017-06-22  Pedro Alves  <palves@redhat.com>
+
+	* common/agent.h: Add include guards.
+
+2017-06-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target.h (struct target_ops) <to_xfer_partial>: Update doc to
+	talk about addressable units instead of bytes.
+
+2017-06-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* common/environ.c (gdb_environ::unset): Use '::iterator' instead
+	of '::const_iterator'.
+
+2017-06-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	'unittests/environ-selftests.c'.
+	(SUBDIR_UNITTESTS_OBS): Add 'environ-selftests.o'.
+	* charset.c (find_charset_names): Declare object 'iconv_env'.
+	Update code to use 'iconv_env' object.  Remove call to
+	'free_environ'.
+	* common/environ.c: Include <utility>.
+	(make_environ): Delete function.
+	(free_environ): Delete function.
+	(gdb_environ::clear): New function.
+	(gdb_environ::operator=): New function.
+	(gdb_environ::get): Likewise.
+	(environ_vector): Delete function.
+	(set_in_environ): Delete function.
+	(gdb_environ::set): New function.
+	(unset_in_environ): Delete function.
+	(gdb_environ::unset): New function.
+	(gdb_environ::envp): Likewise.
+	* common/environ.h: Include <vector>.
+	(struct gdb_environ): Delete; transform into...
+	(class gdb_environ): ... this class.
+	(free_environ): Delete prototype.
+	(init_environ, get_in_environ, set_in_environ, unset_in_environ,
+	environ_vector): Likewise.
+	* infcmd.c (run_command_1): Update code to call
+	'envp' from 'gdb_environ' class.
+	(environment_info): Update code to call methods from 'gdb_environ'
+	class.
+	(unset_environment_command): Likewise.
+	(path_info): Likewise.
+	(path_command): Likewise.
+	* inferior.c (inferior::~inferior): Delete call to 'free_environ'.
+	(inferior::inferior): Initialize 'environment' using the host's
+	information.
+	* inferior.h: Remove forward declaration of 'struct gdb_environ'.
+	Include "environ.h".
+	(class inferior) <environment>: Change type from 'struct
+	gdb_environ' to 'gdb_environ'.
+	* mi/mi-cmd-env.c (mi_cmd_env_path): Update code to call
+	methods from 'gdb_environ' class.
+	* solib.c (solib_find_1): Likewise
+	* unittests/environ-selftests.c: New file.
+
+2017-06-20  Yao Qi  <yao.qi@linaro.org>
+
+	* features/i386/i386-linux.xml: Exchange the order of including
+	32bit-linux.xml and 32bit-sse.xml.
+	* features/i386/i386-linux.c: Regenerated.
+
+2017-06-20  Yao Qi  <yao.qi@linaro.org>
+
+	* target-descriptions.c (tdesc_reg): Add ctor, dtor.
+	Delete copy ctor and assignment operator.
+	(tdesc_type): Likewise.
+	(tdesc_feature): Likewise.
+	(tdesc_free_reg): Remove.
+	(tdesc_create_reg): Use new.
+	(tdesc_free_type): Remove.
+	(tdesc_create_vector): Use new.
+	(tdesc_create_union): Likewise.
+	(tdesc_create_flags): Likewise.
+	(tdesc_create_enum): Likewise.
+	(tdesc_free_feature): Delete.
+	(free_target_description): Use delete.
+
+2017-06-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* mips-tdep.c (print_gp_register_row): Don't error for unavailable
+	registers.
+
+2017-06-19  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (write_psymtabs_to_index): Construct file_closer
+	after gdb::unlinker.
+
+2017-06-19  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* mi/mi-cm-env.c (_initialize_mi_cmd_env): Use getenv instead of
+	gdb_environ to access an environment variable.
+
+2017-06-18  Thomas Petazzoni  <thomas.petazzoni@free-electrons.com>
+
+	* nat/linux-ptrace.c (linux_fork_to_function): Add cast to
+	gdb_byte*.
+
+2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* nat/fork-inferior.h (trace_start_error): Add ATTRIBUTE_PRINTF.
+
+2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure: Re-generate.
+	* warning.m4 (build_warnings): Add -Wno-mismatched-tags.
+
+2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure: Re-generate.
+	* warning.m4: Pass -Werror to compiler when checking for
+	supported warning flags.
+
+2017-06-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (COMPILE.pre): Add "-x c++".
+
+2017-06-16  Alan Hayward  <alan.hayward@arm.com>
+	    Pedro Alves  <palves@redhat.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* defs.h (RequireLongest): New.
+	(extract_integer): Declare function template.
+	(extract_signed_integer): Remove the declaration, but define it
+	static inline.
+	(extract_unsigned_integer): Likewise.
+	(store_integer): Declare function template.
+	(store_signed_integer): Remove the declaration, but define it
+	static inline.
+	(store_unsigned_integer): Likewise.
+	* findvar.c (extract_integer): New function template.
+	(extract_signed_integer): Remove.
+	(extract_unsigned_integer): Remove.
+	(extract_integer<LONGEST>, extract_integer<ULONGEST>): Explicit
+	instantiations.
+	(store_integer): New function template.
+	(store_signed_integer): Remove.
+	(store_unsigned_integer): Remove.
+	(store_integer): Explicit instantiations.
+	* regcache.c (regcache_raw_read_signed): Update.
+	(regcache::raw_read): New function.
+	(regcache::raw_read_signed): Remove.
+	(regcache::raw_read_unsigned): Remove.
+	(regcache_raw_read_unsigned): Update.
+	(regcache_raw_write_unsigned): Update.
+	(regcache::raw_write_signed): Remove.
+	(regcache::raw_write): New function.
+	(regcache_cooked_read_signed): Update.
+	(regcache::raw_write_unsigned): Remove.
+	(regcache::cooked_read_signed): Remove.
+	(regcache_cooked_read_unsigned): Update.
+	(regcache::cooked_read_unsigned): Remove.
+	(regcache_cooked_write_signed): Update.
+	(regcache_cooked_write_unsigned): Update.
+	* regcache.h (regcache) <raw_read_signed>: Remove.
+	<raw_write_signed, raw_read_unsigned, raw_write_unsigned>: Remove.
+	<raw_read, raw_write>: New.
+	<cooked_read_signed, cooked_write_signed>: Remove.
+	<cooked_write_unsigned, cooked_read_unsigned>: Remove.
+	<cooked_read, cooked_write>: New.
+	* sh64-tdep.c (sh64_pseudo_register_read): Update.
+	(sh64_pseudo_register_write): Update.
+
+2017-06-16  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* arc-tdep.c (arc_disassembler_options): New variable.
+	(arc_gdbarch_init): Set and use it. Use arc_delayed_print_insn instead
+	of default_print_insn.
+	(arc_delayed_print_insn): Set info->section when needed,
+	use default_print_insn to retrieve a disassembler.
+
+2017-06-14  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21574
+	* infcmd.c (_initialize_infcmd): Expand "help run" documentation
+	to mention $SHELL and startup-with-shell.
+
+2017-06-14  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* MAINTAINERS: Move Maxim Grigoriev to the Past Maintainers.
+
+2017-06-14  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_gdb_print_insn): Call
+	default_print_insn instead of print_insn_aarch64.
+	* arm-tdep.c (gdb_print_insn_arm): Call
+	default_print_insn instead of print_insn_big_arm
+	and print_insn_little_arm.
+	* i386-tdep.c (i386_print_insn): Call default_print_insn
+	instead of print_insn_i386.
+	* ia64-tdep.c (ia64_print_insn): Call
+	default_print_insn instead of print_insn_ia64.
+	* mips-tdep.c (gdb_print_insn_mips): Call
+	default_print_insn instead of print_insn_big_mips
+	and print_insn_little_mips.
+	* spu-tdep.c (gdb_print_insn_spu): Call default_print_insn
+	instead of print_insn_spu.
+
+2017-06-14  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c: Include "common/byte-vector.h".
+	(ada_value_primitive_packed_val): Use gdb::byte_vector.
+	* charset.c (wchar_iterator::iterate): Resize the vector instead
+	of reserving it.
+	* common/byte-vector.h: Include "common/def-vector.h".
+	(wchar_iterator::m_out): Now a gdb::def_vector<gdb_wchar_t>.
+	* cli/cli-dump.c: Include "common/byte-vector.h".
+	(dump_memory_to_file, restore_binary_file): Use gdb::byte_vector.
+	* common/byte-vector.h: New file.
+	* common/def-vector.h: New file.
+	* common/default-init-alloc.h: New file.
+	* dwarf2loc.c: Include "common/byte-vector.h".
+	(rw_pieced_value): Use gdb::byte_vector, and resize the vector
+	instead of reserving it.
+	* dwarf2read.c: Include "common/byte-vector.h".
+	(data_buf::m_vec): Now a gdb::byte_vector.
+	* gdb_regex.c: Include "common/def-vector.h".
+	(compiled_regex::compiled_regex): Use gdb::def_vector<char>.
+	* mi/mi-main.c: Include "common/byte-vector.h".
+	(mi_cmd_data_read_memory): Use gdb::byte_vector.
+	* printcmd.c: Include "common/byte-vector.h".
+	(print_scalar_formatted): Use gdb::byte_vector.
+	* valprint.c: Include "common/byte-vector.h".
+	(maybe_negate_by_bytes, print_decimal_chars): Use
+	gdb::byte_vector.
+
+2017-06-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* darwin-nat.c: Include "nat/fork-inferior.h".
+
+2017-06-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure.nat: Factor out Darwin bits that are not
+	architecture-specific.  Add fork-inferior.o.
+
+2017-06-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure.nat: Factor out AIX bits that are not
+	architecture-specific.  Add fork-inferior.o.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (rw_pieced_value): New.  Merge logic from...
+	(read_pieced_value, write_pieced_value): ...here.  Reduce to
+	wrappers that just call rw_pieced_value.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (write_pieced_value): When writing the data for a
+	memory piece, use write_memory_with_notification instead of
+	write_memory.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* valops.c (read_value_memory): Change embedded_offset to
+	represent a bit offset instead of a byte offset.
+	* value.h (read_value_memory): Adjust comment.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (read_pieced_value): Remove unnecessary variables
+	dest_offset_bits and source_offset_bits.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (read_pieced_value): Respect the piece offset, as
+	given by DW_OP_bit_piece.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (read_pieced_value): Move the buffer allocation and
+	some other preparations to the places where sufficient information
+	is available.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (bits_to_bytes): New function.
+	(read_pieced_value): Fix offset calculations for register pieces
+	on big-endian targets.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (read_pieced_value): Remove buffer_size variable.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (write_pieced_value): When writing to a bit-field,
+	transfer the source value's least significant bits, instead of its
+	lowest-addressed ones.  Rename type_len to max_offset.
+	(read_pieced_value): Mirror above changes to write_pieced_value as
+	applicable.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (write_pieced_value): In DWARF_VALUE_MEMORY,
+	truncate full bytes from dest_offset_bits before using it as an
+	offset into the buffer.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (write_pieced_value): Include transfer size in
+	byte-wise check.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (write_pieced_value): Fix copy/paste error in the
+	calculation of this_size.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (read_pieced_value): Respect parent value's offset
+	when targeting a bit-field.
+	(write_pieced_value): Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (struct piece_closure) <addr_size>: Remove field.
+	(allocate_piece_closure): Drop addr_size parameter.
+	(dwarf2_evaluate_loc_desc_full): Adjust call to
+	allocate_piece_closure.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	PR gdb/21226
+	* dwarf2loc.c (read_pieced_value): Anchor stack value pieces at
+	the LSB end, independent of endianness.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (write_pieced_value): Fix order of calculations for
+	size capping.
+
+2017-06-13  Yao Qi  <yao.qi@linaro.org>
+
+	* mips-linux-nat.c: Move include features/mips*-linux.c to
+	mips-linux-tdep.c.
+	(_initialize_mips_linux_nat): Move initialize_tdesc_mips* calls
+	to mips-linux-tdep.c.
+	* mips-linux-tdep.c: Include features/mips*-linux.c
+	(_initialize_mips_linux_tdep): Call initialize_tdesc_mips*
+	functions.
+	* mips-linux-tdep.h (tdesc_mips_linux): Declare.
+	(tdesc_mips_dsp_linux, tdesc_mips64_linux): Declare.
+	(tdesc_mips64_dsp_linux): Declare.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	* valprint.h (val_print_type_code_int): Remove.
+	* valprint.c (generic_val_print_int): Always call
+	val_print_scalar_formatted.
+	(val_print_type_code_int): Remove.
+	* printcmd.c (print_scalar_formatted): Handle options->format==0.
+	* f-valprint.c (f_val_print): Use val_print_scalar_formatted.
+	* c-valprint.c (c_val_print_int): Use val_print_scalar_formatted.
+	* ada-valprint.c (ada_val_print_num): Use
+	val_print_scalar_formatted.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	* printcmd.c (print_scalar_formatted): Unify the two switches.
+	Don't convert scalars to LONGEST.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	PR exp/16225:
+	* valprint.h (print_decimal_chars): Update.
+	* valprint.c (maybe_negate_by_bytes): New function.
+	(print_decimal_chars): Add "is_signed" argument.
+	* printcmd.c (print_scalar_formatted): Update.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	PR exp/16225:
+	* valprint.h (print_binary_chars, print_hex_chars): Update.
+	* valprint.c (val_print_type_code_int): Update.
+	(print_binary_chars): Add "zero_pad" argument.
+	(emit_octal_digit): New function.
+	(print_octal_chars): Don't zero-pad.
+	(print_decimal_chars): Likewise.
+	(print_hex_chars): Add "zero_pad" argument.
+	* sh64-tdep.c (sh64_do_fp_register): Update.
+	* regcache.c (regcache::dump): Update.
+	* printcmd.c (print_scalar_formatted): Update.
+	* infcmd.c (default_print_one_register_info): Update.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+	    Alan Hayward  <alan.hayward@arm.com>
+
+	* mips-tdep.c (MAX_MIPS_ABI_REGSIZE): New.
+	(mips_eabi_push_dummy_call): Rename local 'regsize' to
+	'abi_regsize'.  Rename local array 'valbuf' to 'ref_valbuf', and
+	use MAX_MIPS_ABI_REGSIZE instead of MAX_REGISTER_SIZE to size it.
+	Assert that abi_regsize bytes fit in 'ref_valbuf'.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (mapped_symtab::data): Now a vector of
+	symtab_index_entry instead of vector of
+	std::unique_ptr<symtab_index_entry>.  All users adjusted to check
+	whether an element's name is NULL instead of checking whether the
+	element itself is NULL.
+	(find_slot): Change return type.  Adjust.
+	(hash_expand, , add_index_entry, uniquify_cu_indices)
+	(write_hash_table): Adjust.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (recursively_count_psymbols): New function.
+	(write_psymtabs_to_index): Call it to compute number of psyms and
+	pass estimate size of psyms_seen to unordered_set's ctor.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (write_hash_table): Check if key already exists
+	before emplacing.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (data_buf::append_space): Rename to...
+	(data_buf::grow): ... this, and make private.  Adjust all callers.
+	(data_buf::append_uint): New method.
+	(add_address_entry, write_one_signatured_type)
+	(write_psymtabs_to_index): Use it.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (file_write(FILE *, const void *, size_t)): Delete.
+	(file_write (FILE *, const std::vector<Elem>&)): Delete.
+	(data_buf::file_write): Call ::fwrite directly.
+
+2017-06-12  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (uniquify_cu_indices): Use std::unique and
+	std::vector::erase.
+
+2017-06-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup: C++ify .gdb_index producer.
+	* dwarf2read.c: Include <unordered_set> and <unordered_map>.
+	(MAYBE_SWAP) [WORDS_BIGENDIAN]: Cast to offset_type.
+	(struct strtab_entry, hash_strtab_entry, eq_strtab_entry)
+	(create_strtab, add_string): Remove.
+	(file_write, data_buf): New.
+	(struct symtab_index_entry): Use std::vector for cu_indices.
+	(struct mapped_symtab): Use std::vector for data.
+	(hash_symtab_entry, eq_symtab_entry, delete_symtab_entry)
+	(create_symbol_hash_table, create_mapped_symtab, cleanup_mapped_symtab):
+	Remove.
+	(find_slot): Change return type.  Update it to the new data structures.
+	(hash_expand, add_index_entry): Update it to the new data structures.
+	(offset_type_compare): Remove.
+	(uniquify_cu_indices): Update it to the new data structures.
+	(c_str_view, c_str_view_hasher, vector_hasher): New.
+	(add_indices_to_cpool): Remove.
+	(write_hash_table): Update it to the new data structures.
+	(struct psymtab_cu_index_map, hash_psymtab_cu_index)
+	(eq_psymtab_cu_index): Remove.
+	(psym_index_map): New typedef.
+	(struct addrmap_index_data): Change addr_obstack pointer to data_buf
+	reference and std::unordered_map for cu_index_htab.
+	(add_address_entry, add_address_entry_worker, write_address_map)
+	(write_psymbols): Update it to the new data structures.
+	(write_obstack): Remove.
+	(struct signatured_type_index_data): Change types_list to a data_buf
+	reference and psyms_seen to a std::unordered_set reference.
+	(write_one_signatured_type, recursively_write_psymbols)
+	(write_psymtabs_to_index): Update it to the new data structures.
+
+2017-06-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS (Changes since GDB 8.0): Announce {set,show} debug
+	separate-debug-file commands.
+	* symfile.h (separate_debug_file_debug): New global.
+	* symfile.c (separate_debug_file_debug): New global.
+	(separate_debug_file_exists, find_separate_debug_file): Add
+	debug output.
+	(_initialize_symfile): Add "set debug separate-debug-file"
+	command.
+	* build-id.c (build_id_to_debug_bfd,
+	find_separate_debug_file_by_buildid): Add debug output.
+
+2017-06-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbarch.sh (displaced_step_free_closure): Remove.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Don't set
+	displaced_step_free_closure.
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Likewise.
+	* arm-linux-tdep.c (arm_linux_init_abi): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Likewise.
+	* rs6000-aix-tdep.c (rs6000_aix_init_osabi): Likewise.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Likewise.
+	* s390-linux-tdep.c (s390_gdbarch_init): Likewise.
+	* arch-utils.h (simple_displaced_step_free_closure): Remove.
+	* arch-utils.c (simple_displaced_step_free_closure): Remove.
+	* infrun.c (displaced_step_clear): Call xfree instead of
+	gdbarch_displaced_step_free_closure.
+
+2017-06-08  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* common/common-utils.c (stringify_argv): Check for "arg[0] !=
+	NULL".
+
+2017-06-08 Alan Hayward  <alan.hayward@arm.com>
+
+	* mn10300-tdep.c (MN10300_MAX_REGISTER_SIZE): Add.
+	(mn10300_extract_return_value): Use MN10300_MAX_REGISTER_SIZE.
+	(mn10300_push_dummy_call): Likewise.
+
+2017-06-08  Alan Hayward  <alan.hayward@arm.com>
+
+	* mi/mi-main.c (register_changed_p): Use value_contents_eq.
+
+2017-06-08  Alan Hayward  <alan.hayward@arm.com>
+
+	* mi/mi-main.c (register_changed_p): Use cooked_read_value.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* NEWS (Changes since GDB 8.0): Announce that GDBserver is now
+	able to start inferiors	using a shell.
+	(New remote packets): Announce new packet "QStartupWithShell".
+	* remote.c: Add PACKET_QStartupWithShell.
+	(extended_remote_create_inferior): Handle new
+	PACKET_QStartupWithShell.
+	(remote_protocol_features) <QStartupWithShell>: New entry for
+	PACKET_QStartupWithShell.
+	(_initialize_remote): Call "add_packet_config_cmd" for
+	QStartupShell.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add "common/common-inferior.h"
+	and "nat/fork-inferior.h".
+	* common/common-inferior.h: New file, with contents from
+	"gdb/inferior.h".
+	* commom/common-utils.c: Include "common-utils.h".
+	(stringify_argv): New function.
+	* common/common-utils.h (stringify_argv): New prototype.
+	* configure.nat: Add "fork-inferior.o" as a dependency for
+	"*linux*", "fbsd*" and "nbsd*" hosts.
+	* corefile.c (get_exec_file): Update comment.
+	* darwin-nat.c (darwin_ptrace_him): Call "gdb_startup_inferior"
+	instead of "startup_inferior".
+	(darwin_create_inferior): Call "add_thread_silent" after
+	"fork_inferior".
+	* fork-child.c: Cleanup unnecessary includes.
+	(SHELL_FILE): Move to "common/common-fork-child.c".
+	(environ): Likewise.
+	(exec_wrapper): Initialize.
+	(get_exec_wrapper): New function.
+	(breakup_args): Move to "common/common-fork-child.c"; rename to
+	"breakup_args_for_exec".
+	(escape_bang_in_quoted_argument): Move to
+	"common/common-fork-child.c".
+	(saved_ui): New variable.
+	(prefork_hook): New function.
+	(postfork_hook): Likewise.
+	(postfork_child_hook): Likewise.
+	(gdb_startup_inferior): Likewise.
+	(fork_inferior): Move to "common/common-fork-child.c".  Update
+	function to support gdbserver.
+	(startup_inferior): Likewise.
+	* gdbcore.h (get_exec_file): Remove declaration.
+	* gnu-nat.c (gnu_create_inferior): Call "gdb_startup_inferior"
+	instead of "startup_inferior".  Call "add_thread_silent" after
+	"fork_inferior".
+	* inf-ptrace.c: Include "nat/fork-inferior.h" and "utils.h".
+	(inf_ptrace_create_inferior): Call "gdb_startup_inferior"
+	instead of "startup_inferior".  Call "add_thread_silent" after
+	"fork_inferior".
+	* inferior.h: Include "common-inferior.h".
+	(trace_start_error): Move to "common/common-utils.h".
+	(trace_start_error_with_name): Likewise.
+	(fork_inferior): Move prototype to "nat/fork-inferior.h".
+	(startup_inferior): Likewise.
+	(gdb_startup_inferior): New prototype.
+	* nat/fork-inferior.c: New file, with contents from "fork-child.c".
+	* nat/fork-inferior.h: New file.
+	* procfs.c (procfs_init_inferior): Call "gdb_startup_inferior"
+	instead of "startup_inferior".  Call "add_thread_silent" after
+	"fork_inferior".
+	* target.h (target_terminal_init): Move prototype to
+	"target/target.h".
+	(target_terminal_inferior): Likewise.
+	(target_terminal_ours): Likewise.
+	* target/target.h (target_terminal_init): New prototype, moved
+	from "target.h".
+	(target_terminal_inferior): Likewise.
+	(target_terminal_ours): Likewise.
+	* utils.c (gdb_flush_out_err): New function.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add "common/common-gdbthread.h".
+	* common/common-gdbthread.h: New file, with parts from
+	"gdb/gdbthread.h".
+	* gdbthread.h: Include "common-gdbthread.h".
+	(switch_to_thread): Moved to "common/common-gdbthread.h".
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SFILES): Add "common/job-control.c".
+	(HFILES_NO_SRCDIR): Add "common/job-control.h".
+	(COMMON_OBS): Add "job-control.o".
+	* common/job-control.c: New file, with contents from
+	"gdb/inflow.c".
+	* common/job-control.h: New file, with contents from "terminal.h".
+	* fork-child.c: Include "job-control.h".
+	* inflow.c: Include "job-control.h".
+	(gdb_setpgid): Move to "common/common-inflow.c".
+	(_initialize_inflow): Move setting of "job_control" to
+	"handle_job_control".
+	* terminal.h (job_control): Moved to "common/common-terminal.h".
+	(gdb_setpgid): Likewise.
+	* top.c: Include "job_control.h".
+	* utils.c: Likewise.
+	(job_control): Moved to "job-control.c".
+
+2017-06-07  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SFILES): Add gdb_regex.c.
+	(COMMON_OBS): Add gdb_regex.o.
+	* ada-lang.c (ada_add_standard_exceptions)
+	(ada_add_exceptions_from_frame, name_matches_regex)
+	(ada_add_global_exceptions, ada_exceptions_list_1): Change regex
+	parameter type to compiled_regex.  Adjust.
+	(ada_exceptions_list): Use compiled_regex.
+	* break-catch-throw.c (exception_catchpoint::pattern): Now a
+	std::unique_ptr<compiled_regex>.
+	(exception_catchpoint::~exception_catchpoint): Remove regfree
+	call.
+	(check_status_exception_catchpoint): Adjust to use compiled_regex.
+	(handle_gnu_v3_exceptions): Adjust to use compiled_regex.
+	* breakpoint.c (solib_catchpoint::compiled): Now a
+	std::unique_ptr<compiled_regex>.
+	(solib_catchpoint::~solib_catchpoint): Remove regfree call.
+	(check_status_catch_solib): Adjust to use compiled_regex.
+	(add_solib_catchpoint): Adjust to use compiled_regex.
+	* cli/cli-cmds.c (apropos_command): Use compiled_regex.
+	* cli/cli-decode.c (apropos_cmd): Change regex parameter to
+	compiled_regex reference.  Adjust to use it.
+	* cli/cli-decode.h: Remove struct re_pattern_buffer forward
+	declaration.  Include "gdb_regex.h".
+	(apropos_cmd): Change regex parameter to compiled_regex reference.
+	* gdb_regex.c: New file.
+	* gdb_regex.h (make_regfree_cleanup, get_regcomp_error): Delete
+	declarations.
+	(class compiled_regex): New.
+	* linux-tdep.c: Include "common/gdb_optional.h".
+	(struct mapping_regexes): New, factored out from
+	mapping_is_anonymous_p, and adjusted to use compiled_regex.
+	(mapping_is_anonymous_p): Use mapping_regexes wrapped in a
+	gdb::optional and remove cleanups.  Adjust to compiled_regex.
+	* probe.c: Include "common/gdb_optional.h".
+	(collect_probes): Use compiled_regex and gdb::optional and remove
+	cleanups.
+	* skip.c: Include "common/gdb_optional.h".
+	(skiplist_entry::compiled_function_regexp): Now a
+	gdb::optional<compiled_regex>.
+	(skiplist_entry::compiled_function_regexp_is_valid): Delete field.
+	(free_skiplist_entry): Remove regfree call.
+	(compile_skip_regexp, skip_rfunction_p): Adjust to use
+	compiled_regex and gdb::optional.
+	* symtab.c: Include "common/gdb_optional.h".
+	(search_symbols): Use compiled_regex and gdb::optional.
+	* utils.c (do_regfree_cleanup, make_regfree_cleanup)
+	(get_regcomp_error, compile_rx_or_error): Delete.  Some bits moved
+	to gdb_regex.c.
+
+2017-06-07  Alan Hayward  <alan.hayward@arm.com>
+
+	* regcache.c (regcache::save): Avoid buffer use.
+	(regcache::dump): Likewise.
+
+2017-06-07  Alan Hayward  <alan.hayward@arm.com>
+
+	* sh-tdep.c (sh_pseudo_register_read): Remove
+	MAX_REGISTER_SIZE.
+	(sh_pseudo_register_write): Likewise.
+	* sh64-tdep.c (sh64_pseudo_register_read): Likewise.
+	(sh64_pseudo_register_write): Likewise
+
+2017-06-07  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (aarch64_store_return_value): Use
+	V_REGISTER_SIZE.
+	(aarch64_pseudo_read_value): Likewise.
+	(aarch64_pseudo_write): Likewise.
+
+2017-06-06  Yao Qi  <yao.qi@linaro.org>
+
+	* regformats/regdef.h (set_register_cache): Remove the
+	declaration.
+
+2017-06-06 Alan Hayward  <alan.hayward@arm.com>
+
+	* frame.c (frame_unwind_register_signed): Use
+	frame_unwind_register_value.
+
+2017-06-06  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/21553
+	* breakpoint.c (create_breakpoints_sal_default)
+	(init_breakpoint_sal, create_breakpoint_sal): Use
+	gdb::unique_xmalloc_ptr for string parameters.
+	(create_breakpoint): Constify 'extra_string' and 'cond_string'
+	parameters.  Replace cleanups with gdb::unique_xmalloc_ptr.
+	(base_breakpoint_create_breakpoints_sal)
+	(bkpt_create_breakpoints_sal, tracepoint_create_breakpoints_sal)
+	(strace_marker_create_breakpoints_sal)
+	(create_breakpoints_sal_default): Use gdb::unique_xmalloc_ptr for
+	string parameters.
+	* breakpoint.h (breakpoint_ops::create_breakpoints_sal): Use
+	gdb::unique_xmalloc_ptr for string parameters.
+	(create_breakpoint): Constify 'extra_string' and 'cond_string'
+	parameters.
+
+2017-06-06  Alan Hayward  <alan.hayward@arm.com>
+
+	* alpha-tdep.c (alpha_register_to_value): Use
+	get_frame_register_value.
+	(alpha_value_to_register): Use ALPHA_REGISTER_SIZE.
+
+2017-06-06  Alan Hayward  <alan.hayward@arm.com>
+
+	* ia64-tdep.c (IA64_MAX_FP_REGISTER_SIZE) Add.
+	(ia64_register_to_value): Use IA64_MAX_FP_REGISTER_SIZE.
+	(ia64_value_to_register): Likewise.
+	(ia64_extract_return_value): Likewise.
+	(ia64_store_return_value): Likewise.
+	(ia64_push_dummy_call): Likewise.
+
+2017-06-04  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 8.0 released.
+
+2017-06-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* x86-linux-nat.c (struct arch_lwp_info): Remove.
+
+2017-06-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-nat.c (linux_nat_post_attach_wait): Remove FIRST
+	parameter.
+	(linux_nat_attach): Adjust call to linux_nat_post_attach_wait.
+
+2017-06-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* event-loop.c (poll_timers): Unallocate timer using delete
+	instead of xfree.
+
+2017-06-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.h (struct breakpoint_ops) <dtor>: Remove.
+	(struct breakpoint) <~breakpoint>: New.
+	(struct watchpoint): Inherit from breakpoint.
+	<~watchpoint>: New.
+	<base>: Remove.
+	(struct tracepoint): Inherit from breakpoint.
+	<base>: Remove.
+	* breakpoint.c (longjmp_breakpoint_ops): Remove.
+	(struct longjmp_breakpoint): Inherit from breakpoint.
+	<~longjmp_breakpoint>: New.
+	<base>: Remove.
+	(new_breakpoint_from_type): Remove casts.
+	(watchpoint_in_thread_scope): Remove reference to base field.
+	(watchpoint_del_at_next_stop): Likewise.
+	(update_watchpoint): Likewise.
+	(watchpoint_check): Likewise.
+	(bpstat_check_watchpoint): Likewise.
+	(set_longjmp_breakpoint): Likewise.
+	(struct fork_catchpoint): Inherit from breakpoint.
+	<base>: Remove.
+	(struct solib_catchpoint): Inherit from breakpoint.
+	<~solib_catchpoint>: New.
+	<base>: Remove.
+	(dtor_catch_solib): Change to ...
+	(solib_catchpoint::~solib_catchpoint): ... this.
+	(breakpoint_hit_catch_solib): Remove reference to base field.
+	(add_solib_catchpoint): Likewise.
+	(create_fork_vfork_event_catchpoint): Likewise.
+	(struct exec_catchpoint): Inherit from breakpoint.
+	<~exec_catchpoint>: New.
+	<base>: Remove.
+	(dtor_catch_exec): Change to ...
+	(exec_catchpoint::~exec_catchpoint): ... this.
+	(dtor_watchpoint): Change to ...
+	(watchpoint::~watchpoint): ... this.
+	(watch_command_1): Remove reference to base field.
+	(catch_exec_command_1): Likewise.
+	(base_breakpoint_dtor): Change to ...
+	(breakpoint::~breakpoint): ... this.
+	(base_breakpoint_ops): Remove dtor field value.
+	(longjmp_bkpt_dtor): Change to ...
+	(longjmp_breakpoint::~longjmp_breakpoint): ... this.
+	(strace_marker_create_breakpoints_sal): Remove reference to base
+	field.
+	(delete_breakpoint): Don't manually call breakpoint destructor.
+	(create_tracepoint_from_upload): Remove reference to base field.
+	(trace_pass_set_count): Likewise.
+	(initialize_breakpoint_ops): Don't initialize
+	momentary_breakpoint_ops, don't set dtors.
+	* ada-lang.c (struct ada_catchpoint): Inherit from breakpoint.
+	<~ada_catchpoint>: New.
+	<base>: Remove.
+	(create_excep_cond_exprs): Remove reference to base field.
+	(dtor_exception): Change to ...
+	(ada_catchpoint::~ada_catchpoint): ... this.
+	(dtor_catch_exception): Remove.
+	(dtor_catch_exception_unhandled): Remove.
+	(dtor_catch_assert): Remove.
+	(create_ada_exception_catchpoint): Remove reference to base
+	field.
+	(initialize_ada_catchpoint_ops): Don't set dtors.
+	* break-catch-sig.c (struct signal_catchpoint): Inherit from
+	breakpoint.
+	<~signal_catchpoint>: New.
+	<base>: Remove.
+	(signal_catchpoint_dtor): Change to ...
+	(signal_catchpoint::~signal_catchpoint): ... this.
+	(create_signal_catchpoint): Remove reference to base field.
+	(initialize_signal_catchpoint_ops): Don't set dtor.
+	* break-catch-syscall.c (struct syscall_catchpoint): Inherit
+	from breakpoint.
+	<~syscall_catchpoint>: New.
+	<base>: Remove.
+	(dtor_catch_syscall): Change to ...
+	(syscall_catchpoint::~syscall_catchpoint): ... this.
+	(create_syscall_event_catchpoint): Remove reference to base
+	field.
+	(initialize_syscall_catchpoint_ops): Don't set dtor.
+	* break-catch-throw.c (struct exception_catchpoint): Inherit
+	from breakpoint.
+	<~exception_catchpoint>: New.
+	<base>: Remove.
+	(dtor_exception_catchpoint): Change to ...
+	(exception_catchpoint::~exception_catchpoint): ... this.
+	(handle_gnu_v3_exceptions): Remove reference to base field.
+	(initialize_throw_catchpoint_ops): Don't set dtor.
+	* ctf.c (ctf_get_traceframe_address): Remove reference to base
+	field.
+	* remote.c (remote_get_tracepoint_status): Likewise.
+	* tracefile-tfile.c (tfile_get_traceframe_address): Likewise.
+	* tracefile.c (tracefile_fetch_registers): Likewise.
+	* tracepoint.c (actions_command): Likewise.
+	(validate_actionline): Likewise.
+	(tfind_1): Likewise.
+	(get_traceframe_location): Likewise.
+	(find_matching_tracepoint_location): Likewise.
+	(parse_tracepoint_status): Likewise.
+	* mi/mi-cmd-break.c (mi_cmd_break_passcount): Likewise.
+
+2017-06-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.c (struct longjmp_breakpoint): New struct.
+	(is_tracepoint_type): Change return type to bool.
+	(is_longjmp_type): New function.
+	(new_breakpoint_from_type): Handle longjmp kinds of breakpoints.
+	(set_raw_breakpoint_without_location): Use
+	new_breakpoint_from_type.
+	(set_raw_breakpoint): Likewise.
+
+2017-06-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.c (new_breakpoint_from_type): New function.
+	(create_breakpoint_sal): Use new_breakpoint_from_type and
+	unique_ptr.
+	(create_breakpoint): Likewise.
+
 2017-05-31  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* memattr.c (mem_info_command): Rename to ...

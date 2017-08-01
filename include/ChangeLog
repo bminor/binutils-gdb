@@ -1,3 +1,66 @@
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf/arm.h (TAG_CPU_ARCH_V8R): New macro.
+	* opcode/arm.h (ARM_EXT2_V8A): New macro.
+	(ARM_AEXT2_V8A): Rename into ...
+	(ARM_AEXT2_V8AR): This.
+	(ARM_AEXT2_V8A): New macro.
+	(ARM_AEXT_V8R): New macro.
+	(ARM_AEXT2_V8R): New macro.
+	(ARM_ARCH_V8R): New macro.
+
+2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* opcode/arm.h (ARM_AEXT_V4TxM): Add ARM_EXT_OS bit to the set.
+	(ARM_AEXT_V4T): Likewise.
+	(ARM_AEXT_V5TxM): Likewise.
+	(ARM_AEXT_V5T): Likewise.
+	(ARM_AEXT_V6M): Mask off ARM_EXT_OS bit.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfdlink.h (bfd_link_info): Add shstk.
+	* elf/common.h (GNU_PROPERTY_X86_FEATURE_1_SHSTK): New.
+
+2017-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfdlink.h (bfd_link_info): Add ibtplt and ibt.
+	* elf/common.h (GNU_PROPERTY_X86_FEATURE_1_AND): New.
+	(GNU_PROPERTY_X86_FEATURE_1_IBT): Likewise.
+
+2017-06-21  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* opcode/arm.h (FPU_ANY): New macro.
+
+2017-06-20  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf/s390.h (PT_S390_PGSTE): Define macro.
+
+2017-06-16  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20022
+	PR ld/21557
+	PR ld/21562
+	PR ld/21571
+	* bfdlink.h (struct bfd_link_hash_entry): Delete undef.section.
+
+2017-06-14  Yao Qi  <yao.qi@linaro.org>
+
+	* dis-asm.h (print_insn_aarch64): Move it to opcodes/disassemble.h.
+	(print_insn_big_arm, print_insn_big_mips): Likewise.
+	(print_insn_i386, print_insn_ia64): Likewise.
+	(print_insn_little_arm, print_insn_little_mips): Likewise.
+	(print_insn_spu): Likewise.
+
+2017-06-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* bfdlink.h (struct bfd_link_info): Add new resolve_section_groups
+	flag.
+
+2017-06-01  Alan Modra  <amodra@gmail.com>
+
+	* elf/ppc64.h (PPC64_OPT_LOCALENTRY): Define.
+
 2017-05-31  Eli Zaretskii <eliz@gnu.org>
 
 	* environ.h: Add #ifndef guard.

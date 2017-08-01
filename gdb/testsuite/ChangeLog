@@ -1,3 +1,91 @@
+2017-06-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.exp (gdb_test): Using noncapturing parens for the $pattern
+	subpattern.
+
+2017-06-19  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdb.arch/powerpc-power9.exp: Update test case for new lnia
+	extended mnemonic.
+	* gdb.arch/powerpc-power9.s: Likewise.
+
+2017-06-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/var-access.exp: Use register name ecx instead of edx
+	on 32-bit x86 targets.  Exploit is_*_target macros where
+	appropriate.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/var-access.exp: Add test for non-byte-aligned
+	register pieces.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/var-access.exp: Add tests for accessing bit-fields
+	located in one or more DWARF pieces.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* lib/gdb.exp (get_endianness): New proc.
+	* gdb.arch/aarch64-fp.exp: Use it.
+	* gdb.arch/altivec-regs.exp: Likewise.
+	* gdb.arch/e500-regs.exp: Likewise.
+	* gdb.arch/vsx-regs.exp: Likewise.
+	* gdb.base/dump.exp: Likewise.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/gnu_vector.exp: Likewise.
+	* gdb.dwarf2/formdata16.exp: Likewise.
+	* gdb.dwarf2/implptrpiece.exp: Likewise.
+	* gdb.dwarf2/nonvar-access.exp: Likewise.
+	* gdb.python/py-inferior.exp: Likewise.
+	* gdb.trace/unavailable-dwarf-piece.exp: Likewise.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	PR gdb/21226
+	* gdb.dwarf2/nonvar-access.exp: Add checks for verifying that
+	stack value pieces are taken from the LSB end.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/var-pieces.exp: Add test case for modifying a
+	variable at nonzero offset.
+
+2017-06-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.dwarf2/var-access.c: New file.
+	* gdb.dwarf2/var-access.exp: New test.
+	* lib/gdb-utils.exp (string_to_regexp): Quote braces as well.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	* gdb.dwarf2/formdata16.exp: Add tests.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	* gdb.arch/altivec-regs.exp: Expect decimal results for uint128.
+
+2017-06-12  Tom Tromey  <tom@tromey.com>
+
+	PR exp/16225:
+	* gdb.reverse/i386-sse-reverse.exp: Update tests.
+	* gdb.arch/vsx-regs.exp: Update tests.
+	* gdb.arch/s390-vregs.exp (hex128): New proc.
+	Update test.
+	* gdb.arch/altivec-regs.exp: Update tests.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/startup-with-shell.c: New file.
+	* gdb.base/startup-with-shell.exp: Likewise.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.server/non-existing-program.exp: Update regex in order to
+	reflect the fact that gdbserver is now using fork_inferior (with a
+	shell) to startup the inferior.
+
 2017-05-30  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/watch-cond-infcall.exp: Don't run if target doesn't

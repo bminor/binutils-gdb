@@ -30,7 +30,6 @@ struct regcache;
 struct ui_out;
 struct terminal_info;
 struct target_desc_info;
-struct gdb_environ;
 struct continuation;
 struct inferior;
 
@@ -43,11 +42,16 @@ struct inferior;
 /* For struct frame_id.  */
 #include "frame.h"
 
+/* For gdb_environ.  */
+#include "environ.h"
+
 #include "progspace.h"
 #include "registry.h"
 
 #include "symfile-add-flags.h"
 #include "common/refcounted-object.h"
+
+#include "common-inferior.h"
 
 struct infcall_suspend_state;
 struct infcall_control_state;
@@ -136,28 +140,10 @@ extern void child_terminal_init_with_pgrp (int pgrp);
 
 /* From fork-child.c */
 
-/* Report an error that happened when starting to trace the inferior
-   (i.e., when the "traceme_fun" callback is called on fork_inferior)
-   and bail out.  This function does not return.  */
-
-extern void trace_start_error (const char *fmt, ...)
-  ATTRIBUTE_NORETURN;
-
-/* Like "trace_start_error", but the error message is constructed by
-   combining STRING with the system error message for errno.  This
-   function does not return.  */
-
-extern void trace_start_error_with_name (const char *string)
-  ATTRIBUTE_NORETURN;
-
-extern int fork_inferior (const char *, const std::string &, char **,
-			  void (*)(void),
-			  void (*)(int), void (*)(void), char *,
-                          void (*)(const char *,
-                                   char * const *, char * const *));
-
-
-extern void startup_inferior (int);
+/* Helper function to call STARTUP_INFERIOR with PID and NUM_TRAPS.
+   This function already calls set_executing.  Return the ptid_t from
+   STARTUP_INFERIOR.  */
+extern ptid_t gdb_startup_inferior (pid_t pid, int num_traps);
 
 extern char *construct_inferior_arguments (int, char **);
 
@@ -282,12 +268,6 @@ enum stop_kind
 #define ON_STACK 1
 #define AT_ENTRY_POINT 4
 
-/* Number of traps that happen between exec'ing the shell to run an
-   inferior and when we finally get to the inferior code, not counting
-   the exec for the shell.  This is 1 on all supported
-   implementations.  */
-#define START_INFERIOR_TRAPS_EXPECTED	1
-
 struct private_inferior;
 
 /* Inferior process specific part of `struct infcall_control_state'.
@@ -385,7 +365,7 @@ public:
 
   /* Environment to use for running inferior,
      in format described in environ.h.  */
-  gdb_environ *environment = NULL;
+  gdb_environ environment;
 
   /* True if this child process was attached rather than forked.  */
   bool attach_flag = false;

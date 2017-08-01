@@ -62,6 +62,7 @@
 #include "parser-defs.h"
 #include "completer.h"
 #include "progspace-and-thread.h"
+#include "common/gdb_optional.h"
 
 /* Forward declarations for local functions.  */
 
@@ -4301,9 +4302,7 @@ search_symbols (const char *regexp, enum search_domain kind,
   struct symbol_search *found;
   struct symbol_search *tail;
   int nfound;
-  /* This is true if PREG contains valid data, false otherwise.  */
-  bool preg_p;
-  regex_t preg;
+  gdb::optional<compiled_regex> preg;
 
   /* OLD_CHAIN .. RETVAL_CHAIN is always freed, RETVAL_CHAIN .. current
      CLEANUP_CHAIN is freed only in the case of an error.  */
@@ -4318,7 +4317,6 @@ search_symbols (const char *regexp, enum search_domain kind,
   ourtype4 = types4[kind];
 
   *matches = NULL;
-  preg_p = false;
 
   if (regexp != NULL)
     {
@@ -4357,18 +4355,9 @@ search_symbols (const char *regexp, enum search_domain kind,
 	    }
 	}
 
-      errcode = regcomp (&preg, regexp,
-			 REG_NOSUB | (case_sensitivity == case_sensitive_off
-				      ? REG_ICASE : 0));
-      if (errcode != 0)
-	{
-	  char *err = get_regcomp_error (errcode, &preg);
-
-	  make_cleanup (xfree, err);
-	  error (_("Invalid regexp (%s): %s"), err, regexp);
-	}
-      preg_p = true;
-      make_regfree_cleanup (&preg);
+      int cflags = REG_NOSUB | (case_sensitivity == case_sensitive_off
+				? REG_ICASE : 0);
+      preg.emplace (regexp, cflags, _("Invalid regexp"));
     }
 
   /* Search through the partial symtabs *first* for all symbols
@@ -4381,8 +4370,8 @@ search_symbols (const char *regexp, enum search_domain kind,
 			   },
 			   [&] (const char *symname)
 			   {
-			     return (!preg_p || regexec (&preg, symname,
-							 0, NULL, 0) == 0);
+			     return (!preg || preg->exec (symname,
+							  0, NULL, 0) == 0);
 			   },
 			   NULL,
 			   kind);
@@ -4417,9 +4406,9 @@ search_symbols (const char *regexp, enum search_domain kind,
 	    || MSYMBOL_TYPE (msymbol) == ourtype3
 	    || MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
-	    if (!preg_p
-		|| regexec (&preg, MSYMBOL_NATURAL_NAME (msymbol), 0,
-			    NULL, 0) == 0)
+	    if (!preg
+		|| preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
+			       NULL, 0) == 0)
 	      {
 		/* Note: An important side-effect of these lookup functions
 		   is to expand the symbol table if msymbol is found, for the
@@ -4461,9 +4450,9 @@ search_symbols (const char *regexp, enum search_domain kind,
 				       files, nfiles, 1))
 		     && file_matches (symtab_to_fullname (real_symtab),
 				      files, nfiles, 0)))
-		&& ((!preg_p
-		     || regexec (&preg, SYMBOL_NATURAL_NAME (sym), 0,
-				 NULL, 0) == 0)
+		&& ((!preg
+		     || preg->exec (SYMBOL_NATURAL_NAME (sym), 0,
+				    NULL, 0) == 0)
 		    && ((kind == VARIABLES_DOMAIN
 			 && SYMBOL_CLASS (sym) != LOC_TYPEDEF
 			 && SYMBOL_CLASS (sym) != LOC_UNRESOLVED
@@ -4519,9 +4508,8 @@ search_symbols (const char *regexp, enum search_domain kind,
 	    || MSYMBOL_TYPE (msymbol) == ourtype3
 	    || MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
-	    if (!preg_p
-		|| regexec (&preg, MSYMBOL_NATURAL_NAME (msymbol), 0,
-			    NULL, 0) == 0)
+	    if (!preg || preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
+				     NULL, 0) == 0)
 	      {
 		/* For functions we can do a quick check of whether the
 		   symbol might be found via find_pc_symtab.  */

@@ -170,9 +170,7 @@ validate_files (void)
     }
 }
 
-/* Return the name of the executable file as a string.
-   ERR nonzero means get error if there is none specified;
-   otherwise return 0 in that case.  */
+/* See common/common-inferior.h.  */
 
 char *
 get_exec_file (int err)

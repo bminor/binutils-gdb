@@ -789,6 +789,7 @@ _bfd_generic_get_section_contents (bfd *abfd,
 				   bfd_size_type count)
 {
   bfd_size_type sz;
+  file_ptr filesz;
   if (count == 0)
     return TRUE;
 
@@ -811,8 +812,15 @@ _bfd_generic_get_section_contents (bfd *abfd,
     sz = section->rawsize;
   else
     sz = section->size;
+  filesz = bfd_get_file_size (abfd);
+  if (filesz < 0)
+    {
+      /* This should never happen.  */
+      abort ();
+    }
   if (offset + count < count
-      || offset + count > sz)
+      || offset + count > sz
+      || (section->filepos + offset + count) > (bfd_size_type) filesz)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
@@ -835,6 +843,7 @@ _bfd_generic_get_section_contents_in_window
 {
 #ifdef USE_MMAP
   bfd_size_type sz;
+  file_ptr filesz;
 
   if (count == 0)
     return TRUE;
@@ -867,7 +876,14 @@ _bfd_generic_get_section_contents_in_window
     sz = section->rawsize;
   else
     sz = section->size;
+  filesz = bfd_get_file_size (abfd);
+  if (filesz < 0)
+    {
+      /* This should never happen.  */
+      abort ();
+    }
   if (offset + count > sz
+      || (section->filepos + offset + sz) > (bfd_size_type) filesz
       || ! bfd_get_file_window (abfd, section->filepos + offset, count, w,
 				TRUE))
     return FALSE;

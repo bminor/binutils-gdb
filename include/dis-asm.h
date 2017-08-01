@@ -238,19 +238,11 @@ typedef struct
 typedef int (*disassembler_ftype) (bfd_vma, disassemble_info *);
 
 /* Disassemblers used out side of opcodes library.  */
-extern int print_insn_aarch64		(bfd_vma, disassemble_info *);
-extern int print_insn_big_arm		(bfd_vma, disassemble_info *);
-extern int print_insn_big_mips		(bfd_vma, disassemble_info *);
-extern int print_insn_i386		(bfd_vma, disassemble_info *);
-extern int print_insn_ia64		(bfd_vma, disassemble_info *);
-extern int print_insn_little_arm	(bfd_vma, disassemble_info *);
-extern int print_insn_little_mips	(bfd_vma, disassemble_info *);
 extern int print_insn_m32c		(bfd_vma, disassemble_info *);
 extern int print_insn_mep		(bfd_vma, disassemble_info *);
 extern int print_insn_sh		(bfd_vma, disassemble_info *);
 extern int print_insn_sh64x_media	(bfd_vma, disassemble_info *);
 extern int print_insn_sparc		(bfd_vma, disassemble_info *);
-extern int print_insn_spu		(bfd_vma, disassemble_info *);
 extern int print_insn_rx		(bfd_vma, disassemble_info *);
 extern int print_insn_rl78		(bfd_vma, disassemble_info *);
 extern int print_insn_rl78_g10		(bfd_vma, disassemble_info *);

@@ -73,10 +73,13 @@
 #include "common/function-view.h"
 #include "common/gdb_optional.h"
 #include "common/underlying.h"
+#include "common/byte-vector.h"
 
 #include <fcntl.h>
 #include <sys/types.h>
 #include <algorithm>
+#include <unordered_set>
+#include <unordered_map>
 
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
@@ -2165,7 +2168,7 @@ byte_swap (offset_type value)
 #define MAYBE_SWAP(V)  byte_swap (V)
 
 #else
-#define MAYBE_SWAP(V) (V)
+#define MAYBE_SWAP(V) static_cast<offset_type> (V)
 #endif /* WORDS_BIGENDIAN */
 
 /* Read the given attribute value as an address, taking the attribute's
@@ -23582,69 +23585,58 @@ dwarf2_per_objfile_free (struct objfile *objfile, void *d)
 
 /* The "save gdb-index" command.  */
 
-/* The contents of the hash table we create when building the string
-   table.  */
-struct strtab_entry
+/* In-memory buffer to prepare data to be written later to a file.  */
+class data_buf
 {
-  offset_type offset;
-  const char *str;
+public:
+  /* Copy DATA to the end of the buffer.  */
+  template<typename T>
+  void append_data (const T &data)
+  {
+    std::copy (reinterpret_cast<const gdb_byte *> (&data),
+	       reinterpret_cast<const gdb_byte *> (&data + 1),
+	       grow (sizeof (data)));
+  }
+
+  /* Copy CSTR (a zero-terminated string) to the end of buffer.  The
+     terminating zero is appended too.  */
+  void append_cstr0 (const char *cstr)
+  {
+    const size_t size = strlen (cstr) + 1;
+    std::copy (cstr, cstr + size, grow (size));
+  }
+
+  /* Accept a host-format integer in VAL and append it to the buffer
+     as a target-format integer which is LEN bytes long.  */
+  void append_uint (size_t len, bfd_endian byte_order, ULONGEST val)
+  {
+    ::store_unsigned_integer (grow (len), len, byte_order, val);
+  }
+
+  /* Return the size of the buffer.  */
+  size_t size () const
+  {
+    return m_vec.size ();
+  }
+
+  /* Write the buffer to FILE.  */
+  void file_write (FILE *file) const
+  {
+    if (::fwrite (m_vec.data (), 1, m_vec.size (), file) != m_vec.size ())
+      error (_("couldn't write data to file"));
+  }
+
+private:
+  /* Grow SIZE bytes at the end of the buffer.  Returns a pointer to
+     the start of the new block.  */
+  gdb_byte *grow (size_t size)
+  {
+    m_vec.resize (m_vec.size () + size);
+    return &*m_vec.end () - size;
+  }
+
+  gdb::byte_vector m_vec;
 };
-
-/* Hash function for a strtab_entry.
-
-   Function is used only during write_hash_table so no index format backward
-   compatibility is needed.  */
-
-static hashval_t
-hash_strtab_entry (const void *e)
-{
-  const struct strtab_entry *entry = (const struct strtab_entry *) e;
-  return mapped_index_string_hash (INT_MAX, entry->str);
-}
-
-/* Equality function for a strtab_entry.  */
-
-static int
-eq_strtab_entry (const void *a, const void *b)
-{
-  const struct strtab_entry *ea = (const struct strtab_entry *) a;
-  const struct strtab_entry *eb = (const struct strtab_entry *) b;
-  return !strcmp (ea->str, eb->str);
-}
-
-/* Create a strtab_entry hash table.  */
-
-static htab_t
-create_strtab (void)
-{
-  return htab_create_alloc (100, hash_strtab_entry, eq_strtab_entry,
-			    xfree, xcalloc, xfree);
-}
-
-/* Add a string to the constant pool.  Return the string's offset in
-   host order.  */
-
-static offset_type
-add_string (htab_t table, struct obstack *cpool, const char *str)
-{
-  void **slot;
-  struct strtab_entry entry;
-  struct strtab_entry *result;
-
-  entry.str = str;
-  slot = htab_find_slot (table, &entry, INSERT);
-  if (*slot)
-    result = (struct strtab_entry *) *slot;
-  else
-    {
-      result = XNEW (struct strtab_entry);
-      result->offset = obstack_object_size (cpool);
-      result->str = str;
-      obstack_grow_str0 (cpool, str);
-      *slot = result;
-    }
-  return result->offset;
-}
 
 /* An entry in the symbol table.  */
 struct symtab_index_entry
@@ -23655,107 +23647,41 @@ struct symtab_index_entry
   offset_type index_offset;
   /* A sorted vector of the indices of all the CUs that hold an object
      of this name.  */
-  VEC (offset_type) *cu_indices;
+  std::vector<offset_type> cu_indices;
 };
 
 /* The symbol table.  This is a power-of-2-sized hash table.  */
 struct mapped_symtab
 {
-  offset_type n_elements;
-  offset_type size;
-  struct symtab_index_entry **data;
+  mapped_symtab ()
+  {
+    data.resize (1024);
+  }
+
+  offset_type n_elements = 0;
+  std::vector<symtab_index_entry> data;
 };
 
-/* Hash function for a symtab_index_entry.  */
-
-static hashval_t
-hash_symtab_entry (const void *e)
-{
-  const struct symtab_index_entry *entry
-    = (const struct symtab_index_entry *) e;
-  return iterative_hash (VEC_address (offset_type, entry->cu_indices),
-			 sizeof (offset_type) * VEC_length (offset_type,
-							    entry->cu_indices),
-			 0);
-}
-
-/* Equality function for a symtab_index_entry.  */
-
-static int
-eq_symtab_entry (const void *a, const void *b)
-{
-  const struct symtab_index_entry *ea = (const struct symtab_index_entry *) a;
-  const struct symtab_index_entry *eb = (const struct symtab_index_entry *) b;
-  int len = VEC_length (offset_type, ea->cu_indices);
-  if (len != VEC_length (offset_type, eb->cu_indices))
-    return 0;
-  return !memcmp (VEC_address (offset_type, ea->cu_indices),
-		  VEC_address (offset_type, eb->cu_indices),
-		  sizeof (offset_type) * len);
-}
-
-/* Destroy a symtab_index_entry.  */
-
-static void
-delete_symtab_entry (void *p)
-{
-  struct symtab_index_entry *entry = (struct symtab_index_entry *) p;
-  VEC_free (offset_type, entry->cu_indices);
-  xfree (entry);
-}
-
-/* Create a hash table holding symtab_index_entry objects.  */
-
-static htab_t
-create_symbol_hash_table (void)
-{
-  return htab_create_alloc (100, hash_symtab_entry, eq_symtab_entry,
-			    delete_symtab_entry, xcalloc, xfree);
-}
-
-/* Create a new mapped symtab object.  */
-
-static struct mapped_symtab *
-create_mapped_symtab (void)
-{
-  struct mapped_symtab *symtab = XNEW (struct mapped_symtab);
-  symtab->n_elements = 0;
-  symtab->size = 1024;
-  symtab->data = XCNEWVEC (struct symtab_index_entry *, symtab->size);
-  return symtab;
-}
-
-/* Destroy a mapped_symtab.  */
-
-static void
-cleanup_mapped_symtab (void *p)
-{
-  struct mapped_symtab *symtab = (struct mapped_symtab *) p;
-  /* The contents of the array are freed when the other hash table is
-     destroyed.  */
-  xfree (symtab->data);
-  xfree (symtab);
-}
-
-/* Find a slot in SYMTAB for the symbol NAME.  Returns a pointer to
+/* Find a slot in SYMTAB for the symbol NAME.  Returns a reference to
    the slot.
    
    Function is used only during write_hash_table so no index format backward
    compatibility is needed.  */
 
-static struct symtab_index_entry **
+static symtab_index_entry &
 find_slot (struct mapped_symtab *symtab, const char *name)
 {
   offset_type index, step, hash = mapped_index_string_hash (INT_MAX, name);
 
-  index = hash & (symtab->size - 1);
-  step = ((hash * 17) & (symtab->size - 1)) | 1;
+  index = hash & (symtab->data.size () - 1);
+  step = ((hash * 17) & (symtab->data.size () - 1)) | 1;
 
   for (;;)
     {
-      if (!symtab->data[index] || !strcmp (name, symtab->data[index]->name))
-	return &symtab->data[index];
-      index = (index + step) & (symtab->size - 1);
+      if (symtab->data[index].name == NULL
+	  || strcmp (name, symtab->data[index].name) == 0)
+	return symtab->data[index];
+      index = (index + step) & (symtab->data.size () - 1);
     }
 }
 
@@ -23764,24 +23690,17 @@ find_slot (struct mapped_symtab *symtab, const char *name)
 static void
 hash_expand (struct mapped_symtab *symtab)
 {
-  offset_type old_size = symtab->size;
-  offset_type i;
-  struct symtab_index_entry **old_entries = symtab->data;
+  auto old_entries = std::move (symtab->data);
 
-  symtab->size *= 2;
-  symtab->data = XCNEWVEC (struct symtab_index_entry *, symtab->size);
+  symtab->data.clear ();
+  symtab->data.resize (old_entries.size () * 2);
 
-  for (i = 0; i < old_size; ++i)
-    {
-      if (old_entries[i])
-	{
-	  struct symtab_index_entry **slot = find_slot (symtab,
-							old_entries[i]->name);
-	  *slot = old_entries[i];
-	}
-    }
-
-  xfree (old_entries);
+  for (auto &it : old_entries)
+    if (it.name != NULL)
+      {
+	auto &ref = find_slot (symtab, it.name);
+	ref = std::move (it);
+      }
 }
 
 /* Add an entry to SYMTAB.  NAME is the name of the symbol.
@@ -23793,20 +23712,17 @@ add_index_entry (struct mapped_symtab *symtab, const char *name,
 		 int is_static, gdb_index_symbol_kind kind,
 		 offset_type cu_index)
 {
-  struct symtab_index_entry **slot;
   offset_type cu_index_and_attrs;
 
   ++symtab->n_elements;
-  if (4 * symtab->n_elements / 3 >= symtab->size)
+  if (4 * symtab->n_elements / 3 >= symtab->data.size ())
     hash_expand (symtab);
 
-  slot = find_slot (symtab, name);
-  if (!*slot)
+  symtab_index_entry &slot = find_slot (symtab, name);
+  if (slot.name == NULL)
     {
-      *slot = XNEW (struct symtab_index_entry);
-      (*slot)->name = name;
+      slot.name = name;
       /* index_offset is set later.  */
-      (*slot)->cu_indices = NULL;
     }
 
   cu_index_and_attrs = 0;
@@ -23821,18 +23737,7 @@ add_index_entry (struct mapped_symtab *symtab, const char *name,
      the last entry pushed), but a symbol could have multiple kinds in one CU.
      To keep things simple we don't worry about the duplication here and
      sort and uniqufy the list after we've processed all symbols.  */
-  VEC_safe_push (offset_type, (*slot)->cu_indices, cu_index_and_attrs);
-}
-
-/* qsort helper routine for uniquify_cu_indices.  */
-
-static int
-offset_type_compare (const void *ap, const void *bp)
-{
-  offset_type a = *(offset_type *) ap;
-  offset_type b = *(offset_type *) bp;
-
-  return (a > b) - (b > a);
+  slot.cu_indices.push_back (cu_index_and_attrs);
 }
 
 /* Sort and remove duplicates of all symbols' cu_indices lists.  */
@@ -23840,112 +23745,116 @@ offset_type_compare (const void *ap, const void *bp)
 static void
 uniquify_cu_indices (struct mapped_symtab *symtab)
 {
-  int i;
-
-  for (i = 0; i < symtab->size; ++i)
+  for (auto &entry : symtab->data)
     {
-      struct symtab_index_entry *entry = symtab->data[i];
-
-      if (entry
-	  && entry->cu_indices != NULL)
+      if (entry.name != NULL && !entry.cu_indices.empty ())
 	{
-	  unsigned int next_to_insert, next_to_check;
-	  offset_type last_value;
-
-	  qsort (VEC_address (offset_type, entry->cu_indices),
-		 VEC_length (offset_type, entry->cu_indices),
-		 sizeof (offset_type), offset_type_compare);
-
-	  last_value = VEC_index (offset_type, entry->cu_indices, 0);
-	  next_to_insert = 1;
-	  for (next_to_check = 1;
-	       next_to_check < VEC_length (offset_type, entry->cu_indices);
-	       ++next_to_check)
-	    {
-	      if (VEC_index (offset_type, entry->cu_indices, next_to_check)
-		  != last_value)
-		{
-		  last_value = VEC_index (offset_type, entry->cu_indices,
-					  next_to_check);
-		  VEC_replace (offset_type, entry->cu_indices, next_to_insert,
-			       last_value);
-		  ++next_to_insert;
-		}
-	    }
-	  VEC_truncate (offset_type, entry->cu_indices, next_to_insert);
+	  auto &cu_indices = entry.cu_indices;
+	  std::sort (cu_indices.begin (), cu_indices.end ());
+	  auto from = std::unique (cu_indices.begin (), cu_indices.end ());
+	  cu_indices.erase (from, cu_indices.end ());
 	}
     }
 }
 
-/* Add a vector of indices to the constant pool.  */
-
-static offset_type
-add_indices_to_cpool (htab_t symbol_hash_table, struct obstack *cpool,
-		      struct symtab_index_entry *entry)
+/* A form of 'const char *' suitable for container keys.  Only the
+   pointer is stored.  The strings themselves are compared, not the
+   pointers.  */
+class c_str_view
 {
-  void **slot;
+public:
+  c_str_view (const char *cstr)
+    : m_cstr (cstr)
+  {}
 
-  slot = htab_find_slot (symbol_hash_table, entry, INSERT);
-  if (!*slot)
-    {
-      offset_type len = VEC_length (offset_type, entry->cu_indices);
-      offset_type val = MAYBE_SWAP (len);
-      offset_type iter;
-      int i;
+  bool operator== (const c_str_view &other) const
+  {
+    return strcmp (m_cstr, other.m_cstr) == 0;
+  }
 
-      *slot = entry;
-      entry->index_offset = obstack_object_size (cpool);
+private:
+  friend class c_str_view_hasher;
+  const char *const m_cstr;
+};
 
-      obstack_grow (cpool, &val, sizeof (val));
-      for (i = 0;
-	   VEC_iterate (offset_type, entry->cu_indices, i, iter);
-	   ++i)
-	{
-	  val = MAYBE_SWAP (iter);
-	  obstack_grow (cpool, &val, sizeof (val));
-	}
-    }
-  else
-    {
-      struct symtab_index_entry *old_entry
-	= (struct symtab_index_entry *) *slot;
-      entry->index_offset = old_entry->index_offset;
-      entry = old_entry;
-    }
-  return entry->index_offset;
-}
+/* A std::unordered_map::hasher for c_str_view that uses the right
+   hash function for strings in a mapped index.  */
+class c_str_view_hasher
+{
+public:
+  size_t operator () (const c_str_view &x) const
+  {
+    return mapped_index_string_hash (INT_MAX, x.m_cstr);
+  }
+};
 
-/* Write the mapped hash table SYMTAB to the obstack OUTPUT, with
-   constant pool entries going into the obstack CPOOL.  */
+/* A std::unordered_map::hasher for std::vector<>.  */
+template<typename T>
+class vector_hasher
+{
+public:
+  size_t operator () (const std::vector<T> &key) const
+  {
+    return iterative_hash (key.data (),
+			   sizeof (key.front ()) * key.size (), 0);
+  }
+};
+
+/* Write the mapped hash table SYMTAB to the data buffer OUTPUT, with
+   constant pool entries going into the data buffer CPOOL.  */
 
 static void
-write_hash_table (struct mapped_symtab *symtab,
-		  struct obstack *output, struct obstack *cpool)
+write_hash_table (mapped_symtab *symtab, data_buf &output, data_buf &cpool)
 {
-  offset_type i;
-  htab_t symbol_hash_table;
-  htab_t str_table;
+  {
+    /* Elements are sorted vectors of the indices of all the CUs that
+       hold an object of this name.  */
+    std::unordered_map<std::vector<offset_type>, offset_type,
+		       vector_hasher<offset_type>>
+      symbol_hash_table;
 
-  symbol_hash_table = create_symbol_hash_table ();
-  str_table = create_strtab ();
+    /* We add all the index vectors to the constant pool first, to
+       ensure alignment is ok.  */
+    for (symtab_index_entry &entry : symtab->data)
+      {
+	if (entry.name == NULL)
+	  continue;
+	gdb_assert (entry.index_offset == 0);
 
-  /* We add all the index vectors to the constant pool first, to
-     ensure alignment is ok.  */
-  for (i = 0; i < symtab->size; ++i)
-    {
-      if (symtab->data[i])
-	add_indices_to_cpool (symbol_hash_table, cpool, symtab->data[i]);
-    }
+	/* Finding before inserting is faster than always trying to
+	   insert, because inserting always allocates a node, does the
+	   lookup, and then destroys the new node if another node
+	   already had the same key.  C++17 try_emplace will avoid
+	   this.  */
+	const auto found
+	  = symbol_hash_table.find (entry.cu_indices);
+	if (found != symbol_hash_table.end ())
+	  {
+	    entry.index_offset = found->second;
+	    continue;
+	  }
+
+	symbol_hash_table.emplace (entry.cu_indices, cpool.size ());
+	entry.index_offset = cpool.size ();
+	cpool.append_data (MAYBE_SWAP (entry.cu_indices.size ()));
+	for (const auto index : entry.cu_indices)
+	  cpool.append_data (MAYBE_SWAP (index));
+      }
+  }
 
   /* Now write out the hash table.  */
-  for (i = 0; i < symtab->size; ++i)
+  std::unordered_map<c_str_view, offset_type, c_str_view_hasher> str_table;
+  for (const auto &entry : symtab->data)
     {
       offset_type str_off, vec_off;
 
-      if (symtab->data[i])
+      if (entry.name != NULL)
 	{
-	  str_off = add_string (str_table, cpool, symtab->data[i]->name);
-	  vec_off = symtab->data[i]->index_offset;
+	  const auto insertpair = str_table.emplace (entry.name, cpool.size ());
+	  if (insertpair.second)
+	    cpool.append_cstr0 (entry.name);
+	  str_off = insertpair.first->second;
+	  vec_off = entry.index_offset;
 	}
       else
 	{
@@ -23955,50 +23864,23 @@ write_hash_table (struct mapped_symtab *symtab,
 	  vec_off = 0;
 	}
 
-      str_off = MAYBE_SWAP (str_off);
-      vec_off = MAYBE_SWAP (vec_off);
-
-      obstack_grow (output, &str_off, sizeof (str_off));
-      obstack_grow (output, &vec_off, sizeof (vec_off));
+      output.append_data (MAYBE_SWAP (str_off));
+      output.append_data (MAYBE_SWAP (vec_off));
     }
-
-  htab_delete (str_table);
-  htab_delete (symbol_hash_table);
 }
 
-/* Struct to map psymtab to CU index in the index file.  */
-struct psymtab_cu_index_map
-{
-  struct partial_symtab *psymtab;
-  unsigned int cu_index;
-};
-
-static hashval_t
-hash_psymtab_cu_index (const void *item)
-{
-  const struct psymtab_cu_index_map *map
-    = (const struct psymtab_cu_index_map *) item;
-
-  return htab_hash_pointer (map->psymtab);
-}
-
-static int
-eq_psymtab_cu_index (const void *item_lhs, const void *item_rhs)
-{
-  const struct psymtab_cu_index_map *lhs
-    = (const struct psymtab_cu_index_map *) item_lhs;
-  const struct psymtab_cu_index_map *rhs
-    = (const struct psymtab_cu_index_map *) item_rhs;
-
-  return lhs->psymtab == rhs->psymtab;
-}
+typedef std::unordered_map<partial_symtab *, unsigned int> psym_index_map;
 
 /* Helper struct for building the address table.  */
 struct addrmap_index_data
 {
+  addrmap_index_data (data_buf &addr_vec_, psym_index_map &cu_index_htab_)
+    : addr_vec (addr_vec_), cu_index_htab (cu_index_htab_)
+  {}
+
   struct objfile *objfile;
-  struct obstack *addr_obstack;
-  htab_t cu_index_htab;
+  data_buf &addr_vec;
+  psym_index_map &cu_index_htab;
 
   /* Non-zero if the previous_* fields are valid.
      We can't write an entry until we see the next entry (since it is only then
@@ -24010,24 +23892,19 @@ struct addrmap_index_data
   CORE_ADDR previous_cu_start;
 };
 
-/* Write an address entry to OBSTACK.  */
+/* Write an address entry to ADDR_VEC.  */
 
 static void
-add_address_entry (struct objfile *objfile, struct obstack *obstack,
+add_address_entry (struct objfile *objfile, data_buf &addr_vec,
 		   CORE_ADDR start, CORE_ADDR end, unsigned int cu_index)
 {
-  offset_type cu_index_to_write;
-  gdb_byte addr[8];
   CORE_ADDR baseaddr;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
-  store_unsigned_integer (addr, 8, BFD_ENDIAN_LITTLE, start - baseaddr);
-  obstack_grow (obstack, addr, 8);
-  store_unsigned_integer (addr, 8, BFD_ENDIAN_LITTLE, end - baseaddr);
-  obstack_grow (obstack, addr, 8);
-  cu_index_to_write = MAYBE_SWAP (cu_index);
-  obstack_grow (obstack, &cu_index_to_write, sizeof (offset_type));
+  addr_vec.append_uint (8, BFD_ENDIAN_LITTLE, start - baseaddr);
+  addr_vec.append_uint (8, BFD_ENDIAN_LITTLE, end - baseaddr);
+  addr_vec.append_data (MAYBE_SWAP (cu_index));
 }
 
 /* Worker function for traversing an addrmap to build the address table.  */
@@ -24039,44 +23916,39 @@ add_address_entry_worker (void *datap, CORE_ADDR start_addr, void *obj)
   struct partial_symtab *pst = (struct partial_symtab *) obj;
 
   if (data->previous_valid)
-    add_address_entry (data->objfile, data->addr_obstack,
+    add_address_entry (data->objfile, data->addr_vec,
 		       data->previous_cu_start, start_addr,
 		       data->previous_cu_index);
 
   data->previous_cu_start = start_addr;
   if (pst != NULL)
     {
-      struct psymtab_cu_index_map find_map, *map;
-      find_map.psymtab = pst;
-      map = ((struct psymtab_cu_index_map *)
-	     htab_find (data->cu_index_htab, &find_map));
-      gdb_assert (map != NULL);
-      data->previous_cu_index = map->cu_index;
+      const auto it = data->cu_index_htab.find (pst);
+      gdb_assert (it != data->cu_index_htab.cend ());
+      data->previous_cu_index = it->second;
       data->previous_valid = 1;
     }
   else
-      data->previous_valid = 0;
+    data->previous_valid = 0;
 
   return 0;
 }
 
-/* Write OBJFILE's address map to OBSTACK.
+/* Write OBJFILE's address map to ADDR_VEC.
    CU_INDEX_HTAB is used to map addrmap entries to their CU indices
    in the index file.  */
 
 static void
-write_address_map (struct objfile *objfile, struct obstack *obstack,
-		   htab_t cu_index_htab)
+write_address_map (struct objfile *objfile, data_buf &addr_vec,
+		   psym_index_map &cu_index_htab)
 {
-  struct addrmap_index_data addrmap_index_data;
+  struct addrmap_index_data addrmap_index_data (addr_vec, cu_index_htab);
 
   /* When writing the address table, we have to cope with the fact that
      the addrmap iterator only provides the start of a region; we have to
      wait until the next invocation to get the start of the next region.  */
 
   addrmap_index_data.objfile = objfile;
-  addrmap_index_data.addr_obstack = obstack;
-  addrmap_index_data.cu_index_htab = cu_index_htab;
   addrmap_index_data.previous_valid = 0;
 
   addrmap_foreach (objfile->psymtabs_addrmap, add_address_entry_worker,
@@ -24088,7 +23960,7 @@ write_address_map (struct objfile *objfile, struct obstack *obstack,
      doesn't work here.  To cope we pass 0xff...ff, this is a rare situation
      anyway.  */
   if (addrmap_index_data.previous_valid)
-    add_address_entry (objfile, obstack,
+    add_address_entry (objfile, addr_vec,
 		       addrmap_index_data.previous_cu_start, (CORE_ADDR) -1,
 		       addrmap_index_data.previous_cu_index);
 }
@@ -24135,7 +24007,7 @@ symbol_kind (struct partial_symbol *psym)
 
 static void
 write_psymbols (struct mapped_symtab *symtab,
-		htab_t psyms_seen,
+		std::unordered_set<partial_symbol *> &psyms_seen,
 		struct partial_symbol **psymp,
 		int count,
 		offset_type cu_index,
@@ -24144,43 +24016,33 @@ write_psymbols (struct mapped_symtab *symtab,
   for (; count-- > 0; ++psymp)
     {
       struct partial_symbol *psym = *psymp;
-      void **slot;
 
       if (SYMBOL_LANGUAGE (psym) == language_ada)
 	error (_("Ada is not currently supported by the index"));
 
       /* Only add a given psymbol once.  */
-      slot = htab_find_slot (psyms_seen, psym, INSERT);
-      if (!*slot)
+      if (psyms_seen.insert (psym).second)
 	{
 	  gdb_index_symbol_kind kind = symbol_kind (psym);
 
-	  *slot = psym;
 	  add_index_entry (symtab, SYMBOL_SEARCH_NAME (psym),
 			   is_static, kind, cu_index);
 	}
     }
 }
 
-/* Write the contents of an ("unfinished") obstack to FILE.  Throw an
-   exception if there is an error.  */
-
-static void
-write_obstack (FILE *file, struct obstack *obstack)
-{
-  if (fwrite (obstack_base (obstack), 1, obstack_object_size (obstack),
-	      file)
-      != obstack_object_size (obstack))
-    error (_("couldn't data write to file"));
-}
-
 /* A helper struct used when iterating over debug_types.  */
 struct signatured_type_index_data
 {
+  signatured_type_index_data (data_buf &types_list_,
+                              std::unordered_set<partial_symbol *> &psyms_seen_)
+    : types_list (types_list_), psyms_seen (psyms_seen_)
+  {}
+
   struct objfile *objfile;
   struct mapped_symtab *symtab;
-  struct obstack *types_list;
-  htab_t psyms_seen;
+  data_buf &types_list;
+  std::unordered_set<partial_symbol *> &psyms_seen;
   int cu_index;
 };
 
@@ -24194,7 +24056,6 @@ write_one_signatured_type (void **slot, void *d)
     = (struct signatured_type_index_data *) d;
   struct signatured_type *entry = (struct signatured_type *) *slot;
   struct partial_symtab *psymtab = entry->per_cu.v.psymtab;
-  gdb_byte val[8];
 
   write_psymbols (info->symtab,
 		  info->psyms_seen,
@@ -24209,18 +24070,31 @@ write_one_signatured_type (void **slot, void *d)
 		  psymtab->n_static_syms, info->cu_index,
 		  1);
 
-  store_unsigned_integer (val, 8, BFD_ENDIAN_LITTLE,
-			  to_underlying (entry->per_cu.sect_off));
-  obstack_grow (info->types_list, val, 8);
-  store_unsigned_integer (val, 8, BFD_ENDIAN_LITTLE,
-			  to_underlying (entry->type_offset_in_tu));
-  obstack_grow (info->types_list, val, 8);
-  store_unsigned_integer (val, 8, BFD_ENDIAN_LITTLE, entry->signature);
-  obstack_grow (info->types_list, val, 8);
+  info->types_list.append_uint (8, BFD_ENDIAN_LITTLE,
+				to_underlying (entry->per_cu.sect_off));
+  info->types_list.append_uint (8, BFD_ENDIAN_LITTLE,
+				to_underlying (entry->type_offset_in_tu));
+  info->types_list.append_uint (8, BFD_ENDIAN_LITTLE, entry->signature);
 
   ++info->cu_index;
 
   return 1;
+}
+
+/* Recurse into all "included" dependencies and count their symbols as
+   if they appeared in this psymtab.  */
+
+static void
+recursively_count_psymbols (struct partial_symtab *psymtab,
+			    size_t &psyms_seen)
+{
+  for (int i = 0; i < psymtab->number_of_dependencies; ++i)
+    if (psymtab->dependencies[i]->user != NULL)
+      recursively_count_psymbols (psymtab->dependencies[i],
+				  psyms_seen);
+
+  psyms_seen += psymtab->n_global_syms;
+  psyms_seen += psymtab->n_static_syms;
 }
 
 /* Recurse into all "included" dependencies and write their symbols as
@@ -24230,7 +24104,7 @@ static void
 recursively_write_psymbols (struct objfile *objfile,
 			    struct partial_symtab *psymtab,
 			    struct mapped_symtab *symtab,
-			    htab_t psyms_seen,
+			    std::unordered_set<partial_symbol *> &psyms_seen,
 			    offset_type cu_index)
 {
   int i;
@@ -24252,22 +24126,25 @@ recursively_write_psymbols (struct objfile *objfile,
 		  1);
 }
 
+/* Closes FILE on scope exit.  */
+struct file_closer
+{
+  explicit file_closer (FILE *file)
+    : m_file (file)
+  {}
+
+  ~file_closer ()
+  { fclose (m_file); }
+
+private:
+  FILE *m_file;
+};
+
 /* Create an index file for OBJFILE in the directory DIR.  */
 
 static void
 write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 {
-  struct cleanup *cleanup;
-  char *filename;
-  struct obstack contents, addr_obstack, constant_pool, symtab_obstack;
-  struct obstack cu_list, types_cu_list;
-  int i;
-  FILE *out_file;
-  struct mapped_symtab *symtab;
-  offset_type val, size_of_contents, total_len;
-  struct stat st;
-  struct psymtab_cu_index_map *psymtab_cu_index_map;
-
   if (dwarf2_per_objfile->using_index)
     error (_("Cannot use an index to create the index"));
 
@@ -24277,58 +24154,61 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   if (!objfile->psymtabs || !objfile->psymtabs_addrmap)
     return;
 
+  struct stat st;
   if (stat (objfile_name (objfile), &st) < 0)
     perror_with_name (objfile_name (objfile));
 
-  filename = concat (dir, SLASH_STRING, lbasename (objfile_name (objfile)),
-		     INDEX_SUFFIX, (char *) NULL);
-  cleanup = make_cleanup (xfree, filename);
+  std::string filename (std::string (dir) + SLASH_STRING
+			+ lbasename (objfile_name (objfile)) + INDEX_SUFFIX);
 
-  out_file = gdb_fopen_cloexec (filename, "wb");
+  FILE *out_file = gdb_fopen_cloexec (filename.c_str (), "wb");
   if (!out_file)
-    error (_("Can't open `%s' for writing"), filename);
+    error (_("Can't open `%s' for writing"), filename.c_str ());
 
-  gdb::unlinker unlink_file (filename);
+  /* Order matters here; we want FILE to be closed before FILENAME is
+     unlinked, because on MS-Windows one cannot delete a file that is
+     still open.  (Don't call anything here that might throw until
+     file_closer is created.)  */
+  gdb::unlinker unlink_file (filename.c_str ());
+  file_closer close_out_file (out_file);
 
-  symtab = create_mapped_symtab ();
-  make_cleanup (cleanup_mapped_symtab, symtab);
-
-  obstack_init (&addr_obstack);
-  make_cleanup_obstack_free (&addr_obstack);
-
-  obstack_init (&cu_list);
-  make_cleanup_obstack_free (&cu_list);
-
-  obstack_init (&types_cu_list);
-  make_cleanup_obstack_free (&types_cu_list);
-
-  htab_up psyms_seen (htab_create_alloc (100, htab_hash_pointer,
-					 htab_eq_pointer,
-					 NULL, xcalloc, xfree));
+  mapped_symtab symtab;
+  data_buf cu_list;
 
   /* While we're scanning CU's create a table that maps a psymtab pointer
      (which is what addrmap records) to its index (which is what is recorded
      in the index file).  This will later be needed to write the address
      table.  */
-  htab_up cu_index_htab (htab_create_alloc (100,
-					    hash_psymtab_cu_index,
-					    eq_psymtab_cu_index,
-					    NULL, xcalloc, xfree));
-  psymtab_cu_index_map = XNEWVEC (struct psymtab_cu_index_map,
-				  dwarf2_per_objfile->n_comp_units);
-  make_cleanup (xfree, psymtab_cu_index_map);
+  psym_index_map cu_index_htab;
+  cu_index_htab.reserve (dwarf2_per_objfile->n_comp_units);
 
   /* The CU list is already sorted, so we don't need to do additional
      work here.  Also, the debug_types entries do not appear in
      all_comp_units, but only in their own hash table.  */
-  for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
+
+  /* The psyms_seen set is potentially going to be largish (~40k
+     elements when indexing a -g3 build of GDB itself).  Estimate the
+     number of elements in order to avoid too many rehashes, which
+     require rebuilding buckets and thus many trips to
+     malloc/free.  */
+  size_t psyms_count = 0;
+  for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
     {
       struct dwarf2_per_cu_data *per_cu
 	= dwarf2_per_objfile->all_comp_units[i];
       struct partial_symtab *psymtab = per_cu->v.psymtab;
-      gdb_byte val[8];
-      struct psymtab_cu_index_map *map;
-      void **slot;
+
+      if (psymtab != NULL && psymtab->user == NULL)
+	recursively_count_psymbols (psymtab, psyms_count);
+    }
+  /* Generating an index for gdb itself shows a ratio of
+     TOTAL_SEEN_SYMS/UNIQUE_SYMS or ~5.  4 seems like a good bet.  */
+  std::unordered_set<partial_symbol *> psyms_seen (psyms_count / 4);
+  for (int i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
+    {
+      struct dwarf2_per_cu_data *per_cu
+	= dwarf2_per_objfile->all_comp_units[i];
+      struct partial_symtab *psymtab = per_cu->v.psymtab;
 
       /* CU of a shared file from 'dwz -m' may be unused by this main file.
 	 It may be referenced from a local scope but in such case it does not
@@ -24337,36 +24217,30 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 	continue;
 
       if (psymtab->user == NULL)
-	recursively_write_psymbols (objfile, psymtab, symtab,
-				    psyms_seen.get (), i);
+	recursively_write_psymbols (objfile, psymtab, &symtab,
+				    psyms_seen, i);
 
-      map = &psymtab_cu_index_map[i];
-      map->psymtab = psymtab;
-      map->cu_index = i;
-      slot = htab_find_slot (cu_index_htab.get (), map, INSERT);
-      gdb_assert (slot != NULL);
-      gdb_assert (*slot == NULL);
-      *slot = map;
+      const auto insertpair = cu_index_htab.emplace (psymtab, i);
+      gdb_assert (insertpair.second);
 
-      store_unsigned_integer (val, 8, BFD_ENDIAN_LITTLE,
-			      to_underlying (per_cu->sect_off));
-      obstack_grow (&cu_list, val, 8);
-      store_unsigned_integer (val, 8, BFD_ENDIAN_LITTLE, per_cu->length);
-      obstack_grow (&cu_list, val, 8);
+      cu_list.append_uint (8, BFD_ENDIAN_LITTLE,
+			   to_underlying (per_cu->sect_off));
+      cu_list.append_uint (8, BFD_ENDIAN_LITTLE, per_cu->length);
     }
 
   /* Dump the address map.  */
-  write_address_map (objfile, &addr_obstack, cu_index_htab.get ());
+  data_buf addr_vec;
+  write_address_map (objfile, addr_vec, cu_index_htab);
 
   /* Write out the .debug_type entries, if any.  */
+  data_buf types_cu_list;
   if (dwarf2_per_objfile->signatured_types)
     {
-      struct signatured_type_index_data sig_data;
+      signatured_type_index_data sig_data (types_cu_list,
+					   psyms_seen);
 
       sig_data.objfile = objfile;
-      sig_data.symtab = symtab;
-      sig_data.types_list = &types_cu_list;
-      sig_data.psyms_seen = psyms_seen.get ();
+      sig_data.symtab = &symtab;
       sig_data.cu_index = dwarf2_per_objfile->n_comp_units;
       htab_traverse_noresize (dwarf2_per_objfile->signatured_types,
 			      write_one_signatured_type, &sig_data);
@@ -24374,63 +24248,49 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 
   /* Now that we've processed all symbols we can shrink their cu_indices
      lists.  */
-  uniquify_cu_indices (symtab);
+  uniquify_cu_indices (&symtab);
 
-  obstack_init (&constant_pool);
-  make_cleanup_obstack_free (&constant_pool);
-  obstack_init (&symtab_obstack);
-  make_cleanup_obstack_free (&symtab_obstack);
-  write_hash_table (symtab, &symtab_obstack, &constant_pool);
+  data_buf symtab_vec, constant_pool;
+  write_hash_table (&symtab, symtab_vec, constant_pool);
 
-  obstack_init (&contents);
-  make_cleanup_obstack_free (&contents);
-  size_of_contents = 6 * sizeof (offset_type);
-  total_len = size_of_contents;
+  data_buf contents;
+  const offset_type size_of_contents = 6 * sizeof (offset_type);
+  offset_type total_len = size_of_contents;
 
   /* The version number.  */
-  val = MAYBE_SWAP (8);
-  obstack_grow (&contents, &val, sizeof (val));
+  contents.append_data (MAYBE_SWAP (8));
 
   /* The offset of the CU list from the start of the file.  */
-  val = MAYBE_SWAP (total_len);
-  obstack_grow (&contents, &val, sizeof (val));
-  total_len += obstack_object_size (&cu_list);
+  contents.append_data (MAYBE_SWAP (total_len));
+  total_len += cu_list.size ();
 
   /* The offset of the types CU list from the start of the file.  */
-  val = MAYBE_SWAP (total_len);
-  obstack_grow (&contents, &val, sizeof (val));
-  total_len += obstack_object_size (&types_cu_list);
+  contents.append_data (MAYBE_SWAP (total_len));
+  total_len += types_cu_list.size ();
 
   /* The offset of the address table from the start of the file.  */
-  val = MAYBE_SWAP (total_len);
-  obstack_grow (&contents, &val, sizeof (val));
-  total_len += obstack_object_size (&addr_obstack);
+  contents.append_data (MAYBE_SWAP (total_len));
+  total_len += addr_vec.size ();
 
   /* The offset of the symbol table from the start of the file.  */
-  val = MAYBE_SWAP (total_len);
-  obstack_grow (&contents, &val, sizeof (val));
-  total_len += obstack_object_size (&symtab_obstack);
+  contents.append_data (MAYBE_SWAP (total_len));
+  total_len += symtab_vec.size ();
 
   /* The offset of the constant pool from the start of the file.  */
-  val = MAYBE_SWAP (total_len);
-  obstack_grow (&contents, &val, sizeof (val));
-  total_len += obstack_object_size (&constant_pool);
+  contents.append_data (MAYBE_SWAP (total_len));
+  total_len += constant_pool.size ();
 
-  gdb_assert (obstack_object_size (&contents) == size_of_contents);
+  gdb_assert (contents.size () == size_of_contents);
 
-  write_obstack (out_file, &contents);
-  write_obstack (out_file, &cu_list);
-  write_obstack (out_file, &types_cu_list);
-  write_obstack (out_file, &addr_obstack);
-  write_obstack (out_file, &symtab_obstack);
-  write_obstack (out_file, &constant_pool);
-
-  fclose (out_file);
+  contents.file_write (out_file);
+  cu_list.file_write (out_file);
+  types_cu_list.file_write (out_file);
+  addr_vec.file_write (out_file);
+  symtab_vec.file_write (out_file);
+  constant_pool.file_write (out_file);
 
   /* We want to keep the file.  */
   unlink_file.keep ();
-
-  do_cleanups (cleanup);
 }
 
 /* Implementation of the `save gdb-index' command.

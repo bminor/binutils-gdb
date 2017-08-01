@@ -2769,7 +2769,7 @@ This domain contains names of labels (for gotos).
 This domain holds a subset of the @code{SYMBOLS_VAR_DOMAIN}; it
 contains everything minus functions and types.
 
-@item SYMBOL_FUNCTION_DOMAIN
+@item SYMBOL_FUNCTIONS_DOMAIN
 This domain contains all functions.
 
 @item SYMBOL_TYPES_DOMAIN

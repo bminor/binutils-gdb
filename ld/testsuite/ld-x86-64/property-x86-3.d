@@ -1,4 +1,4 @@
-#as: --64
+#as: --64 -defsym __64_bit__=1
 #ld: -shared -m elf_x86_64
 #readelf: -n
 

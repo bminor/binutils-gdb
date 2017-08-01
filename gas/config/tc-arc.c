@@ -107,8 +107,18 @@ enum arc_rlx_types
 #define is_spfp_p(op)           (((sc) == SPX))
 #define is_dpfp_p(op)           (((sc) == DPX))
 #define is_fpuda_p(op)          (((sc) == DPA))
-#define is_br_jmp_insn_p(op)    (((op)->insn_class == BRANCH \
-				  || (op)->insn_class == JUMP))
+#define is_br_jmp_insn_p(op)    (((op)->insn_class == BRANCH		\
+				  || (op)->insn_class == JUMP		\
+				  || (op)->insn_class == BRCC		\
+				  || (op)->insn_class == BBIT0		\
+				  || (op)->insn_class == BBIT1		\
+				  || (op)->insn_class == BI		\
+				  || (op)->insn_class == EI		\
+				  || (op)->insn_class == ENTER		\
+				  || (op)->insn_class == JLI		\
+				  || (op)->insn_class == LOOP		\
+				  || (op)->insn_class == LEAVE		\
+				  ))
 #define is_kernel_insn_p(op)    (((op)->insn_class == KERNEL))
 #define is_nps400_p(op)         (((sc) == NPS400))
 
@@ -3280,10 +3290,7 @@ md_undefined_symbol (char *name)
      GOTPC reference to _GLOBAL_OFFSET_TABLE_.  */
   if (((*name == '_')
        && (*(name+1) == 'G')
-       && (strcmp (name, GLOBAL_OFFSET_TABLE_NAME) == 0))
-      || ((*name == '_')
-	  && (*(name+1) == 'D')
-	  && (strcmp (name, DYNAMIC_STRUCT_NAME) == 0)))
+       && (strcmp (name, GLOBAL_OFFSET_TABLE_NAME) == 0)))
     {
       if (!GOT_symbol)
 	{
@@ -4108,6 +4115,11 @@ assemble_insn (const struct arc_opcode *opcode,
   if (arc_last_insns[1].has_delay_slot
       && is_br_jmp_insn_p (arc_last_insns[0].opcode))
     as_bad (_("Insn %s has a jump/branch instruction %s in its delay slot."),
+	    arc_last_insns[1].opcode->name,
+	    arc_last_insns[0].opcode->name);
+  if (arc_last_insns[1].has_delay_slot
+      && arc_last_insns[0].has_limm)
+    as_bad (_("Insn %s has an instruction %s with limm in its delay slot."),
 	    arc_last_insns[1].opcode->name,
 	    arc_last_insns[0].opcode->name);
 }

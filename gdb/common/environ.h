@@ -17,33 +17,65 @@
 #if !defined (ENVIRON_H)
 #define ENVIRON_H 1
 
-/* We manipulate environments represented as these structures.  */
+#include <vector>
 
-struct gdb_environ
+/* Class that represents the environment variables as seen by the
+   inferior.  */
+
+class gdb_environ
+{
+public:
+  /* Regular constructor and destructor.  */
+  gdb_environ ()
   {
-    /* Number of usable slots allocated in VECTOR.
-       VECTOR always has one slot not counted here,
-       to hold the terminating zero.  */
-    int allocated;
-    /* A vector of slots, ALLOCATED + 1 of them.
-       The first few slots contain strings "VAR=VALUE"
-       and the next one contains zero.
-       Then come some unused slots.  */
-    char **vector;
-  };
+    /* Make sure that the vector contains at least a NULL element.
+       If/when we add more variables to it, NULL will always be the
+       last element.  */
+    m_environ_vector.push_back (NULL);
+  }
 
-extern struct gdb_environ *make_environ (void);
+  ~gdb_environ ()
+  {
+    clear ();
+  }
 
-extern void free_environ (struct gdb_environ *);
+  /* Move constructor.  */
+  gdb_environ (gdb_environ &&e)
+    : m_environ_vector (std::move (e.m_environ_vector))
+  {
+    /* Make sure that the moved-from vector is left at a valid
+       state (only one NULL element).  */
+    e.m_environ_vector.clear ();
+    e.m_environ_vector.push_back (NULL);
+  }
 
-extern void init_environ (struct gdb_environ *);
+  /* Move assignment.  */
+  gdb_environ &operator= (gdb_environ &&e);
 
-extern char *get_in_environ (const struct gdb_environ *, const char *);
+  /* Create a gdb_environ object using the host's environment
+     variables.  */
+  static gdb_environ from_host_environ ();
 
-extern void set_in_environ (struct gdb_environ *, const char *, const char *);
+  /* Clear the environment variables stored in the object.  */
+  void clear ();
 
-extern void unset_in_environ (struct gdb_environ *, const char *);
+  /* Return the value in the environment for the variable VAR.  The
+     returned pointer is only valid as long as the gdb_environ object
+     is not modified.  */
+  const char *get (const char *var) const;
 
-extern char **environ_vector (struct gdb_environ *);
+  /* Store VAR=VALUE in the environment.  */
+  void set (const char *var, const char *value);
+
+  /* Unset VAR in environment.  */
+  void unset (const char *var);
+
+  /* Return the environment vector represented as a 'char **'.  */
+  char **envp () const;
+
+private:
+  /* A vector containing the environment variables.  */
+  std::vector<char *> m_environ_vector;
+};
 
 #endif /* defined (ENVIRON_H) */

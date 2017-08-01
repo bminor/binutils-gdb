@@ -31,6 +31,8 @@
 #include "inf-ptrace.h"
 #include "inf-child.h"
 #include "gdbthread.h"
+#include "nat/fork-inferior.h"
+#include "utils.h"
 
 
 
@@ -93,7 +95,8 @@ inf_ptrace_create_inferior (struct target_ops *ops,
 			    const char *exec_file, const std::string &allargs,
 			    char **env, int from_tty)
 {
-  int pid;
+  pid_t pid;
+  ptid_t ptid;
 
   /* Do not change either targets above or the same target if already present.
      The reason is the target stack is shared across multiple inferiors.  */
@@ -110,13 +113,19 @@ inf_ptrace_create_inferior (struct target_ops *ops,
   pid = fork_inferior (exec_file, allargs, env, inf_ptrace_me, NULL,
 		       NULL, NULL, NULL);
 
+  ptid = pid_to_ptid (pid);
+  /* We have something that executes now.  We'll be running through
+     the shell at this point (if startup-with-shell is true), but the
+     pid shouldn't change.  */
+  add_thread_silent (ptid);
+
   discard_cleanups (back_to);
 
-  startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
+  gdb_startup_inferior (pid, START_INFERIOR_TRAPS_EXPECTED);
 
   /* On some targets, there must be some explicit actions taken after
      the inferior has been started up.  */
-  target_post_startup_inferior (pid_to_ptid (pid));
+  target_post_startup_inferior (ptid);
 }
 
 #ifdef PT_GET_PROCESS_STATE

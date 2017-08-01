@@ -38,16 +38,12 @@ typedef enum gdb_signal gdb_signal_type;
 DEF_VEC_I (gdb_signal_type);
 
 /* An instance of this type is used to represent a signal catchpoint.
-   It includes a "struct breakpoint" as a kind of base class; users
-   downcast to "struct breakpoint *" when needed.  A breakpoint is
-   really of this type iff its ops pointer points to
+   A breakpoint is really of this type iff its ops pointer points to
    SIGNAL_CATCHPOINT_OPS.  */
 
-struct signal_catchpoint
+struct signal_catchpoint : public breakpoint
 {
-  /* The base class.  */
-
-  struct breakpoint base;
+  ~signal_catchpoint () override;
 
   /* Signal numbers used for the 'catch signal' feature.  If no signal
      has been specified for filtering, its value is NULL.  Otherwise,
@@ -89,17 +85,11 @@ signal_to_name_or_int (enum gdb_signal sig)
 
 
 
-/* Implement the "dtor" breakpoint_ops method for signal
-   catchpoints.  */
+/* signal_catchpoint destructor.  */
 
-static void
-signal_catchpoint_dtor (struct breakpoint *b)
+signal_catchpoint::~signal_catchpoint ()
 {
-  struct signal_catchpoint *c = (struct signal_catchpoint *) b;
-
-  VEC_free (gdb_signal_type, c->signals_to_be_caught);
-
-  base_breakpoint_ops.dtor (b);
+  VEC_free (gdb_signal_type, this->signals_to_be_caught);
 }
 
 /* Implement the "insert_location" breakpoint_ops method for signal
@@ -372,11 +362,11 @@ create_signal_catchpoint (int tempflag, VEC (gdb_signal_type) *filter,
   struct gdbarch *gdbarch = get_current_arch ();
 
   c = new signal_catchpoint ();
-  init_catchpoint (&c->base, gdbarch, tempflag, NULL, &signal_catchpoint_ops);
+  init_catchpoint (c, gdbarch, tempflag, NULL, &signal_catchpoint_ops);
   c->signals_to_be_caught = filter;
   c->catch_all = catch_all;
 
-  install_breakpoint (0, &c->base, 1);
+  install_breakpoint (0, c, 1);
 }
 
 
@@ -473,7 +463,6 @@ initialize_signal_catchpoint_ops (void)
 
   ops = &signal_catchpoint_ops;
   *ops = base_breakpoint_ops;
-  ops->dtor = signal_catchpoint_dtor;
   ops->insert_location = signal_catchpoint_insert_location;
   ops->remove_location = signal_catchpoint_remove_location;
   ops->breakpoint_hit = signal_catchpoint_breakpoint_hit;

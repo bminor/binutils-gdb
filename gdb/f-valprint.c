@@ -311,7 +311,8 @@ f_val_print (struct type *type, int embedded_offset,
 	}
       else
 	{
-	  val_print_type_code_int (type, valaddr + embedded_offset, stream);
+	  val_print_scalar_formatted (type, embedded_offset,
+				      original_value, options, 0, stream);
 	  /* C and C++ has no single byte int type, char is used instead.
 	     Since we don't know whether the value is really intended to
 	     be used as an integer or a character, print the character

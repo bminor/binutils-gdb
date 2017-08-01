@@ -55,17 +55,20 @@ name_for_global_symbol (struct elf_link_hash_entry *h)
     Elf_Internal_Rela _rel;						\
     bfd_byte * _loc;							\
 									\
-    BFD_ASSERT (_htab->srel##SECTION &&_htab->srel##SECTION->contents); \
-    _loc = _htab->srel##SECTION->contents				\
-      + ((_htab->srel##SECTION->reloc_count)				\
-	 * sizeof (Elf32_External_Rela));				\
-    _htab->srel##SECTION->reloc_count++;				\
-    _rel.r_addend = ADDEND;						\
-    _rel.r_offset = (_htab->s##SECTION)->output_section->vma		\
-      + (_htab->s##SECTION)->output_offset + OFFSET;			\
-    BFD_ASSERT ((long) SYM_IDX != -1);					\
-    _rel.r_info = ELF32_R_INFO (SYM_IDX, TYPE);				\
-    bfd_elf32_swap_reloca_out (BFD, &_rel, _loc);			\
+    if (_htab->dynamic_sections_created == TRUE)				\
+      {									\
+	BFD_ASSERT (_htab->srel##SECTION &&_htab->srel##SECTION->contents); \
+    	_loc = _htab->srel##SECTION->contents				\
+    	  + ((_htab->srel##SECTION->reloc_count)			\
+    	     * sizeof (Elf32_External_Rela));				\
+    	_htab->srel##SECTION->reloc_count++;				\
+    	_rel.r_addend = ADDEND;						\
+    	_rel.r_offset = (_htab->s##SECTION)->output_section->vma	\
+    	  + (_htab->s##SECTION)->output_offset + OFFSET;		\
+    	BFD_ASSERT ((long) SYM_IDX != -1);				\
+    	_rel.r_info = ELF32_R_INFO (SYM_IDX, TYPE);			\
+    	bfd_elf32_swap_reloca_out (BFD, &_rel, _loc);			\
+      }									\
   }
 
 
@@ -1184,7 +1187,6 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 #define TLS_REL (bfd_signed_vma) \
   ((elf_hash_table (info))->tls_sec->output_section->vma)
 #define TLS_TBSS (8)
-#define TCB_SIZE (8)
 
 #define none (0)
 
@@ -1409,6 +1411,7 @@ elf_arc_relocate_section (bfd *		          output_bfd,
       asection *		    sec;
       struct elf_link_hash_entry *  h2;
       const char *                  msg;
+      bfd_boolean		    unresolved_reloc = FALSE;
 
       struct arc_relocation_data reloc_data =
       {
@@ -1496,6 +1499,14 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 	}
       else
 	{
+	  bfd_boolean warned, ignored;
+	  bfd_vma relocation ATTRIBUTE_UNUSED;
+
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned, ignored);
+
 	  /* TODO: This code is repeated from below.  We should
 	     clean it and remove duplications.
 	     Sec is used check for discarded sections.
@@ -1585,7 +1596,12 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
+	  {
+	    struct elf_link_hash_entry *h_old = h;
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	    if (h->got.glist == 0 && h_old->got.glist != h->got.glist)
+	      h->got.glist = h_old->got.glist;
+	  }
 
 	  /* TODO: Need to validate what was the intention.  */
 	  /* BFD_ASSERT ((h->dynindx == -1) || (h->forced_local != 0)); */
@@ -1705,16 +1721,22 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 	    }
 	}
 
+
+#define IS_ARC_PCREL_TYPE(TYPE) \
+  (   (TYPE == R_ARC_PC32)      \
+   || (TYPE == R_ARC_32_PCREL))
+
       switch (r_type)
 	{
 	  case R_ARC_32:
 	  case R_ARC_32_ME:
 	  case R_ARC_PC32:
 	  case R_ARC_32_PCREL:
-	    if ((bfd_link_pic (info))
-		&& ((r_type != R_ARC_PC32 && r_type != R_ARC_32_PCREL)
+	    if (bfd_link_pic (info)
+		&& (!IS_ARC_PCREL_TYPE (r_type)
 		    || (h != NULL
 			&& h->dynindx != -1
+			&& !h->def_regular
 			&& (!info->symbolic || !h->def_regular))))
 	      {
 		Elf_Internal_Rela outrel;
@@ -1731,16 +1753,13 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 							   info,
 							   input_section,
 							   rel->r_offset);
+
 		if (outrel.r_offset == (bfd_vma) -1)
 		  skip = TRUE;
 
 		outrel.r_addend = rel->r_addend;
 		outrel.r_offset += (input_section->output_section->vma
 				    + input_section->output_offset);
-
-#define IS_ARC_PCREL_TYPE(TYPE) \
-  (   (TYPE == R_ARC_PC32)      \
-   || (TYPE == R_ARC_32_PCREL))
 
 		if (skip)
 		  {
@@ -1749,10 +1768,10 @@ elf_arc_relocate_section (bfd *		          output_bfd,
 		  }
 		else if (h != NULL
 			 && h->dynindx != -1
-			 && ((IS_ARC_PCREL_TYPE (r_type))
-			 || !(bfd_link_executable (info)
-			      || SYMBOLIC_BIND (info, h))
-			 || ! h->def_regular))
+			 && (IS_ARC_PCREL_TYPE (r_type)
+			     || !(bfd_link_executable (info)
+				  || SYMBOLIC_BIND (info, h))
+			     || ! h->def_regular))
 		  {
 		    BFD_ASSERT (h != NULL);
 		    if ((input_section->flags & SEC_ALLOC) != 0)
@@ -1885,9 +1904,13 @@ elf_arc_check_relocs (bfd *			 abfd,
   const Elf_Internal_Rela *	rel_end;
   bfd *				dynobj;
   asection *			sreloc = NULL;
+  struct elf_link_hash_table *	htab = elf_hash_table (info);
 
   if (bfd_link_relocatable (info))
     return TRUE;
+
+  if (htab->dynobj == NULL)
+    htab->dynobj = abfd;
 
   dynobj = (elf_hash_table (info))->dynobj;
   symtab_hdr = &((elf_tdata (abfd))->symtab_hdr);
@@ -1910,15 +1933,6 @@ elf_arc_check_relocs (bfd *			 abfd,
 	}
       howto = arc_elf_howto (r_type);
 
-      if (dynobj == NULL
-	  && (is_reloc_for_GOT (howto)
-	      || is_reloc_for_TLS (howto)))
-	{
-	  dynobj = elf_hash_table (info)->dynobj = abfd;
-	  if (! _bfd_elf_create_got_section (abfd, info))
-	    return FALSE;
-	}
-
       /* Load symbol information.  */
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info) /* Is a local symbol.  */
@@ -1935,7 +1949,8 @@ elf_arc_check_relocs (bfd *			 abfd,
 	       and the dynamic linker can not resolve these.  However
 	       the error should not occur for e.g. debugging or
 	       non-readonly sections.  */
-	    if ((bfd_link_dll (info) && !bfd_link_pie (info))
+	    if (h != NULL
+		&& (bfd_link_dll (info) && !bfd_link_pie (info))
 		&& (sec->flags & SEC_ALLOC) != 0
 		&& (sec->flags & SEC_READONLY) != 0
 		&& ((sec->flags & SEC_CODE) != 0
@@ -1974,6 +1989,10 @@ elf_arc_check_relocs (bfd *			 abfd,
 	      {
 		if (sreloc == NULL)
 		  {
+		    if (info->dynamic
+			&& ! htab->dynamic_sections_created
+			&& ! _bfd_elf_link_create_dynamic_sections (abfd, info))
+		      return FALSE;
 		    sreloc = _bfd_elf_make_dynamic_reloc_section (sec, dynobj,
 								  2, abfd,
 								  /*rela*/
@@ -2001,6 +2020,9 @@ elf_arc_check_relocs (bfd *			 abfd,
       if (is_reloc_for_GOT (howto)
 	  || is_reloc_for_TLS (howto))
 	{
+	  if (! _bfd_elf_create_got_section (dynobj, info))
+	    return FALSE;
+
 	  arc_fill_got_info_for_reloc (
 		  arc_got_entry_type_for_reloc (howto),
 		  get_got_entry_list_for_symbol (abfd, r_symndx, h),
@@ -2627,7 +2649,8 @@ elf_arc_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  const char *name = s->name + 5;
 		  bfd *ibfd;
 		  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
-		    if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour)
+		    if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour
+			&& ibfd->flags & DYNAMIC)
 		      {
 			asection *target = bfd_get_section_by_name (ibfd, name);
 			if (target != NULL

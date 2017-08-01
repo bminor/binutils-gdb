@@ -833,18 +833,6 @@ m;int;displaced_step_hw_singlestep;struct displaced_step_closure *closure;closur
 # see the comments in infrun.c.
 M;void;displaced_step_fixup;struct displaced_step_closure *closure, CORE_ADDR from, CORE_ADDR to, struct regcache *regs;closure, from, to, regs;;NULL
 
-# Free a closure returned by gdbarch_displaced_step_copy_insn.
-#
-# If you provide gdbarch_displaced_step_copy_insn, you must provide
-# this function as well.
-#
-# If your architecture uses closures that don't need to be freed, then
-# you can use simple_displaced_step_free_closure here.
-#
-# For a general explanation of displaced stepping and how GDB uses it,
-# see the comments in infrun.c.
-m;void;displaced_step_free_closure;struct displaced_step_closure *closure;closure;;NULL;;(! gdbarch->displaced_step_free_closure) != (! gdbarch->displaced_step_copy_insn)
-
 # Return the address of an appropriate place to put displaced
 # instructions while we step over them.  There need only be one such
 # place, since we're only stepping one thread over a breakpoint at a

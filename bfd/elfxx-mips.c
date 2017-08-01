@@ -8102,7 +8102,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   extsymoff = (elf_bad_symtab (abfd)) ? 0 : symtab_hdr->sh_info;
 
   bed = get_elf_backend_data (abfd);
-  rel_end = relocs + sec->reloc_count * bed->s->int_rels_per_ext_rel;
+  rel_end = relocs + sec->reloc_count;
 
   /* Check for the mips16 stub sections.  */
 
@@ -10031,10 +10031,8 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   const Elf_Internal_Rela *relend;
   bfd_vma addend = 0;
   bfd_boolean use_saved_addend_p = FALSE;
-  const struct elf_backend_data *bed;
 
-  bed = get_elf_backend_data (output_bfd);
-  relend = relocs + input_section->reloc_count * bed->s->int_rels_per_ext_rel;
+  relend = relocs + input_section->reloc_count;
   for (rel = relocs; rel < relend; ++rel)
     {
       const char *name;
@@ -11865,15 +11863,15 @@ mips_set_isa_flags (bfd *abfd)
       val = E_MIPS_ARCH_2;
       break;
 
+    case bfd_mach_mips4010:
+      val = E_MIPS_ARCH_2 | E_MIPS_MACH_4010;
+      break;
+
     case bfd_mach_mips4000:
     case bfd_mach_mips4300:
     case bfd_mach_mips4400:
     case bfd_mach_mips4600:
       val = E_MIPS_ARCH_3;
-      break;
-
-    case bfd_mach_mips4010:
-      val = E_MIPS_ARCH_3 | E_MIPS_MACH_4010;
       break;
 
     case bfd_mach_mips4100:
@@ -14026,7 +14024,6 @@ static const struct mips_mach_extension mips_mach_extensions[] =
   { bfd_mach_mips4400, bfd_mach_mips4000 },
   { bfd_mach_mips4300, bfd_mach_mips4000 },
   { bfd_mach_mips4100, bfd_mach_mips4000 },
-  { bfd_mach_mips4010, bfd_mach_mips4000 },
   { bfd_mach_mips5900, bfd_mach_mips4000 },
 
   /* MIPS32 extensions.  */
@@ -14035,6 +14032,7 @@ static const struct mips_mach_extension mips_mach_extensions[] =
   /* MIPS II extensions.  */
   { bfd_mach_mips4000, bfd_mach_mips6000 },
   { bfd_mach_mipsisa32, bfd_mach_mips6000 },
+  { bfd_mach_mips4010, bfd_mach_mips6000 },
 
   /* MIPS I extensions.  */
   { bfd_mach_mips6000, bfd_mach_mips3000 },

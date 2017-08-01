@@ -218,9 +218,13 @@ _bfd_elf_link_create_dynstrtab (bfd *abfd, struct bfd_link_info *info)
       if ((abfd->flags & (DYNAMIC | BFD_PLUGIN)) != 0)
 	{
 	  bfd *ibfd;
+	  asection *s;
 	  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
 	    if ((ibfd->flags
-		 & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
+		 & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0
+		&& bfd_get_flavour (ibfd) == bfd_target_elf_flavour
+		&& !((s = ibfd->sections) != NULL
+		     && s->sec_info_type == SEC_INFO_TYPE_JUST_SYMS))
 	      {
 		abfd = ibfd;
 		break;
@@ -2450,8 +2454,7 @@ _bfd_elf_link_read_relocs (bfd *abfd,
     {
       bfd_size_type size;
 
-      size = o->reloc_count;
-      size *= bed->s->int_rels_per_ext_rel * sizeof (Elf_Internal_Rela);
+      size = (bfd_size_type) o->reloc_count * sizeof (Elf_Internal_Rela);
       if (keep_memory)
 	internal_relocs = alloc2 = (Elf_Internal_Rela *) bfd_alloc (abfd, size);
       else
@@ -5862,9 +5865,12 @@ bfd_boolean
 _bfd_elf_size_group_sections (struct bfd_link_info *info)
 {
   bfd *ibfd;
+  asection *s;
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour
+	&& (s = ibfd->sections) != NULL
+	&& s->sec_info_type != SEC_INFO_TYPE_JUST_SYMS
 	&& !_bfd_elf_fixup_group_sections (ibfd, bfd_abs_section_ptr))
       return FALSE;
   return TRUE;
@@ -6512,6 +6518,10 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	  if (inputobj->flags
 	      & (DYNAMIC | EXEC_P | BFD_PLUGIN | BFD_LINKER_CREATED))
 	    continue;
+	  s = inputobj->sections;
+	  if (s == NULL || s->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
+	    continue;
+
 	  s = bfd_get_section_by_name (inputobj, ".note.GNU-stack");
 	  if (s)
 	    {
@@ -6661,9 +6671,10 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	      bfd *sub;
 	      asection *o;
 
-	      for (sub = info->input_bfds; sub != NULL;
-		   sub = sub->link.next)
-		if (bfd_get_flavour (sub) == bfd_target_elf_flavour)
+	      for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
+		if (bfd_get_flavour (sub) == bfd_target_elf_flavour
+		    && (o = sub->sections) != NULL
+		    && o->sec_info_type != SEC_INFO_TYPE_JUST_SYMS)
 		  for (o = sub->sections; o != NULL; o = o->next)
 		    if (elf_section_data (o)->this_hdr.sh_type
 			== SHT_PREINIT_ARRAY)
@@ -6941,7 +6952,7 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	    = compute_bucket_count (info, hashcodes, nsyms, 0);
 	  free (hashcodes);
 
-	  if (bucketcount == 0)
+	  if (bucketcount == 0 && nsyms > 0)
 	    return FALSE;
 
 	  elf_hash_table (info)->bucketcount = bucketcount;
@@ -8548,7 +8559,8 @@ static bfd_boolean
 elf_link_adjust_relocs (bfd *abfd,
 			asection *sec,
 			struct bfd_elf_section_reloc_data *reldata,
-			bfd_boolean sort)
+			bfd_boolean sort,
+			struct bfd_link_info *info)
 {
   unsigned int i;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
@@ -8596,6 +8608,20 @@ elf_link_adjust_relocs (bfd *abfd,
       if (*rel_hash == NULL)
 	continue;
 
+      if ((*rel_hash)->indx == -2
+	  && info->gc_sections
+	  && ! info->gc_keep_exported)
+	{
+	  /* PR 21524: Let the user know if a symbol was removed by garbage collection.  */
+	  _bfd_error_handler (_("%B:%A: error: relocation references symbol %s which was removed by garbage collection."),
+			      abfd, sec,
+			      (*rel_hash)->root.root.string);
+	  _bfd_error_handler (_("%B:%A: error: try relinking with --gc-keep-exported enabled."),
+			      abfd, sec,
+			      (*rel_hash)->root.root.string);
+	  bfd_set_error (bfd_error_invalid_operation);
+	  return FALSE;
+	}
       BFD_ASSERT ((*rel_hash)->indx >= 0);
 
       (*swap_in) (abfd, erela, irela);
@@ -10278,7 +10304,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  continue;
 	}
 
-      if (bfd_link_relocatable (flinfo->info)
+      if (!flinfo->info->resolve_section_groups
 	  && (o->flags & (SEC_LINKER_CREATED | SEC_GROUP)) == SEC_GROUP)
 	{
 	  /* Deal with the group signature symbol.  */
@@ -10286,6 +10312,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  unsigned long symndx = sec_data->this_hdr.sh_info;
 	  asection *osec = o->output_section;
 
+	  BFD_ASSERT (bfd_link_relocatable (flinfo->info));
 	  if (symndx >= locsymcount
 	      || (elf_bad_symtab (input_bfd)
 		  && flinfo->sections[symndx] == NULL))
@@ -10402,7 +10429,8 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 				 ".fini_array") == 0))
 	      && (o->name[6] == 0 || o->name[6] == '.'))
 	    {
-	      if (o->size != o->reloc_count * address_size)
+	      if (o->size * bed->s->int_rels_per_ext_rel
+		  != o->reloc_count * address_size)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
@@ -10426,7 +10454,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	     relocs against removed link-once sections.  */
 
 	  rel = internal_relocs;
-	  relend = rel + o->reloc_count * bed->s->int_rels_per_ext_rel;
+	  relend = rel + o->reloc_count;
 	  for ( ; rel < relend; rel++)
 	    {
 	      unsigned long r_symndx = rel->r_info >> r_sym_shift;
@@ -10615,7 +10643,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	      /* Adjust the reloc addresses and symbol indices.  */
 
 	      irela = internal_relocs;
-	      irelaend = irela + o->reloc_count * bed->s->int_rels_per_ext_rel;
+	      irelaend = irela + o->reloc_count;
 	      rel_hash = esdo->rel.hashes + esdo->rel.count;
 	      /* We start processing the REL relocs, if any.  When we reach
 		 IRELAMID in the loop, we switch to the RELA relocs.  */
@@ -10700,7 +10728,6 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 			 used by a reloc.  */
 		      BFD_ASSERT (rh->indx < 0);
 		      rh->indx = -2;
-
 		      *rel_hash = rh;
 
 		      continue;
@@ -11789,8 +11816,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   if (max_internal_reloc_count != 0)
     {
-      amt = max_internal_reloc_count * bed->s->int_rels_per_ext_rel;
-      amt *= sizeof (Elf_Internal_Rela);
+      amt = max_internal_reloc_count * sizeof (Elf_Internal_Rela);
       flinfo.internal_relocs = (Elf_Internal_Rela *) bfd_malloc (amt);
       if (flinfo.internal_relocs == NULL)
 	goto error_return;
@@ -12168,15 +12194,16 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     {
       struct bfd_elf_section_data *esdo = elf_section_data (o);
       bfd_boolean sort;
+
       if ((o->flags & SEC_RELOC) == 0)
 	continue;
 
       sort = bed->sort_relocs_p == NULL || (*bed->sort_relocs_p) (o);
       if (esdo->rel.hdr != NULL
-	  && !elf_link_adjust_relocs (abfd, o, &esdo->rel, sort))
+	  && !elf_link_adjust_relocs (abfd, o, &esdo->rel, sort, info))
 	return FALSE;
       if (esdo->rela.hdr != NULL
-	  && !elf_link_adjust_relocs (abfd, o, &esdo->rela, sort))
+	  && !elf_link_adjust_relocs (abfd, o, &esdo->rela, sort, info))
 	return FALSE;
 
       /* Set the reloc_count field to 0 to prevent write_relocs from
@@ -12464,10 +12491,11 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (bfd_link_relocatable (info))
+  if (!info->resolve_section_groups)
     {
       bfd_boolean failed = FALSE;
 
+      BFD_ASSERT (bfd_link_relocatable (info));
       bfd_map_over_sections (abfd, bfd_elf_set_group_contents, &failed);
       if (failed)
 	goto error_return;
@@ -12573,8 +12601,6 @@ init_reloc_cookie_rels (struct elf_reloc_cookie *cookie,
 			struct bfd_link_info *info, bfd *abfd,
 			asection *sec)
 {
-  const struct elf_backend_data *bed;
-
   if (sec->reloc_count == 0)
     {
       cookie->rels = NULL;
@@ -12582,15 +12608,12 @@ init_reloc_cookie_rels (struct elf_reloc_cookie *cookie,
     }
   else
     {
-      bed = get_elf_backend_data (abfd);
-
       cookie->rels = _bfd_elf_link_read_relocs (abfd, sec, NULL, NULL,
 						info->keep_memory);
       if (cookie->rels == NULL)
 	return FALSE;
       cookie->rel = cookie->rels;
-      cookie->relend = (cookie->rels
-			+ sec->reloc_count * bed->s->int_rels_per_ext_rel);
+      cookie->relend = cookie->rels + sec->reloc_count;
     }
   cookie->rel = cookie->rels;
   return TRUE;
@@ -12687,55 +12710,6 @@ elf_gc_mark_debug_section (asection *sec ATTRIBUTE_UNUSED,
   return NULL;
 }
 
-/* For undefined __start_<name> and __stop_<name> symbols, return the
-   first input section matching <name>.  Return NULL otherwise.  */
-
-asection *
-_bfd_elf_is_start_stop (const struct bfd_link_info *info,
-			struct elf_link_hash_entry *h)
-{
-  asection *s;
-  const char *sec_name;
-
-  if (h->root.type != bfd_link_hash_undefined
-      && h->root.type != bfd_link_hash_undefweak)
-    return NULL;
-
-  s = h->root.u.undef.section;
-  if (s != NULL)
-    {
-      if (s == (asection *) 0 - 1)
-	return NULL;
-      return s;
-    }
-
-  sec_name = NULL;
-  if (strncmp (h->root.root.string, "__start_", 8) == 0)
-    sec_name = h->root.root.string + 8;
-  else if (strncmp (h->root.root.string, "__stop_", 7) == 0)
-    sec_name = h->root.root.string + 7;
-
-  if (sec_name != NULL && *sec_name != '\0')
-    {
-      bfd *i;
-
-      for (i = info->input_bfds; i != NULL; i = i->link.next)
-	{
-	  s = bfd_get_section_by_name (i, sec_name);
-	  if (s != NULL)
-	    {
-	      h->root.u.undef.section = s;
-	      break;
-	    }
-	}
-    }
-
-  if (s == NULL)
-    h->root.u.undef.section = (asection *) 0 - 1;
-
-  return s;
-}
-
 /* COOKIE->rel describes a relocation against section SEC, which is
    a section we've decided to keep.  Return the section that contains
    the relocation symbol, or NULL if no section contains it.  */
@@ -12776,15 +12750,12 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 
       if (start_stop != NULL)
 	{
-	  /* To work around a glibc bug, mark all XXX input sections
-	     when there is an as yet undefined reference to __start_XXX
-	     or __stop_XXX symbols.  The linker will later define such
-	     symbols for orphan input sections that have a name
-	     representable as a C identifier.  */
-	  asection *s = _bfd_elf_is_start_stop (info, h);
-
-	  if (s != NULL)
+	  /* To work around a glibc bug, mark XXX input sections
+	     when there is a reference to __start_XXX or __stop_XXX
+	     symbols.  */
+	  if (h->start_stop)
 	    {
+	      asection *s = h->u2.start_stop_section;
 	      *start_stop = !s->gc_mark;
 	      return s;
 	    }
@@ -12952,6 +12923,9 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 
       if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
 	continue;
+      isec = ibfd->sections;
+      if (isec == NULL || isec->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
+	continue;
 
       /* Ensure all linker created sections are kept,
 	 see if any other section is already marked,
@@ -13057,6 +13031,9 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
       if (bfd_get_flavour (sub) != bfd_target_elf_flavour
 	  || !(*bed->relocs_compatible) (sub->xvec, abfd->xvec))
 	continue;
+      o = sub->sections;
+      if (o == NULL || o->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
+	continue;
 
       for (o = sub->sections; o != NULL; o = o->next)
 	{
@@ -13125,26 +13102,28 @@ static bfd_boolean
 elf_gc_propagate_vtable_entries_used (struct elf_link_hash_entry *h, void *okp)
 {
   /* Those that are not vtables.  */
-  if (h->vtable == NULL || h->vtable->parent == NULL)
+  if (h->start_stop
+      || h->u2.vtable == NULL
+      || h->u2.vtable->parent == NULL)
     return TRUE;
 
   /* Those vtables that do not have parents, we cannot merge.  */
-  if (h->vtable->parent == (struct elf_link_hash_entry *) -1)
+  if (h->u2.vtable->parent == (struct elf_link_hash_entry *) -1)
     return TRUE;
 
   /* If we've already been done, exit.  */
-  if (h->vtable->used && h->vtable->used[-1])
+  if (h->u2.vtable->used && h->u2.vtable->used[-1])
     return TRUE;
 
   /* Make sure the parent's table is up to date.  */
-  elf_gc_propagate_vtable_entries_used (h->vtable->parent, okp);
+  elf_gc_propagate_vtable_entries_used (h->u2.vtable->parent, okp);
 
-  if (h->vtable->used == NULL)
+  if (h->u2.vtable->used == NULL)
     {
       /* None of this table's entries were referenced.  Re-use the
 	 parent's table.  */
-      h->vtable->used = h->vtable->parent->vtable->used;
-      h->vtable->size = h->vtable->parent->vtable->size;
+      h->u2.vtable->used = h->u2.vtable->parent->u2.vtable->used;
+      h->u2.vtable->size = h->u2.vtable->parent->u2.vtable->size;
     }
   else
     {
@@ -13152,9 +13131,9 @@ elf_gc_propagate_vtable_entries_used (struct elf_link_hash_entry *h, void *okp)
       bfd_boolean *cu, *pu;
 
       /* Or the parent's entries into ours.  */
-      cu = h->vtable->used;
+      cu = h->u2.vtable->used;
       cu[-1] = TRUE;
-      pu = h->vtable->parent->vtable->used;
+      pu = h->u2.vtable->parent->u2.vtable->used;
       if (pu != NULL)
 	{
 	  const struct elf_backend_data *bed;
@@ -13162,7 +13141,7 @@ elf_gc_propagate_vtable_entries_used (struct elf_link_hash_entry *h, void *okp)
 
 	  bed = get_elf_backend_data (h->root.u.def.section->owner);
 	  log_file_align = bed->s->log_file_align;
-	  n = h->vtable->parent->vtable->size >> log_file_align;
+	  n = h->u2.vtable->parent->u2.vtable->size >> log_file_align;
 	  while (n--)
 	    {
 	      if (*pu)
@@ -13187,7 +13166,9 @@ elf_gc_smash_unused_vtentry_relocs (struct elf_link_hash_entry *h, void *okp)
 
   /* Take care of both those symbols that do not describe vtables as
      well as those that are not loaded.  */
-  if (h->vtable == NULL || h->vtable->parent == NULL)
+  if (h->start_stop
+      || h->u2.vtable == NULL
+      || h->u2.vtable->parent == NULL)
     return TRUE;
 
   BFD_ASSERT (h->root.type == bfd_link_hash_defined
@@ -13203,17 +13184,17 @@ elf_gc_smash_unused_vtentry_relocs (struct elf_link_hash_entry *h, void *okp)
   bed = get_elf_backend_data (sec->owner);
   log_file_align = bed->s->log_file_align;
 
-  relend = relstart + sec->reloc_count * bed->s->int_rels_per_ext_rel;
+  relend = relstart + sec->reloc_count;
 
   for (rel = relstart; rel < relend; ++rel)
     if (rel->r_offset >= hstart && rel->r_offset < hend)
       {
 	/* If the entry is in use, do nothing.  */
-	if (h->vtable->used
-	    && (rel->r_offset - hstart) < h->vtable->size)
+	if (h->u2.vtable->used
+	    && (rel->r_offset - hstart) < h->u2.vtable->size)
 	  {
 	    bfd_vma entry = (rel->r_offset - hstart) >> log_file_align;
-	    if (h->vtable->used[entry])
+	    if (h->u2.vtable->used[entry])
 	      continue;
 	  }
 	/* Otherwise, kill it.  */
@@ -13290,6 +13271,9 @@ bfd_elf_parse_eh_frame_entries (bfd *abfd ATTRIBUTE_UNUSED,
 
       if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
 	continue;
+      sec = ibfd->sections;
+      if (sec == NULL || sec->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
+	continue;
 
       if (!init_reloc_cookie (&cookie, info, ibfd))
 	return FALSE;
@@ -13337,6 +13321,9 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       asection *sec;
       struct elf_reloc_cookie cookie;
 
+      sec = sub->sections;
+      if (sec == NULL || sec->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
+	continue;
       sec = bfd_get_section_by_name (sub, ".eh_frame");
       while (sec && init_reloc_cookie_for_section (&cookie, info, sec))
 	{
@@ -13371,6 +13358,10 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 
       if (bfd_get_flavour (sub) != bfd_target_elf_flavour
 	  || !(*bed->relocs_compatible) (sub->xvec, abfd->xvec))
+	continue;
+
+      o = sub->sections;
+      if (o == NULL || o->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
 	continue;
 
       /* Start at sections marked with SEC_KEEP (ref _bfd_elf_gc_keep).
@@ -13437,11 +13428,11 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
   return FALSE;
 
  win:
-  if (!child->vtable)
+  if (!child->u2.vtable)
     {
-      child->vtable = ((struct elf_link_virtual_table_entry *)
-		       bfd_zalloc (abfd, sizeof (*child->vtable)));
-      if (!child->vtable)
+      child->u2.vtable = ((struct elf_link_virtual_table_entry *)
+			  bfd_zalloc (abfd, sizeof (*child->u2.vtable)));
+      if (!child->u2.vtable)
 	return FALSE;
     }
   if (!h)
@@ -13451,10 +13442,10 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
 	 would be bad.  It isn't worth paging in the local symbols to be
 	 sure though; that case should simply be handled by the assembler.  */
 
-      child->vtable->parent = (struct elf_link_hash_entry *) -1;
+      child->u2.vtable->parent = (struct elf_link_hash_entry *) -1;
     }
   else
-    child->vtable->parent = h;
+    child->u2.vtable->parent = h;
 
   return TRUE;
 }
@@ -13470,18 +13461,18 @@ bfd_elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   unsigned int log_file_align = bed->s->log_file_align;
 
-  if (!h->vtable)
+  if (!h->u2.vtable)
     {
-      h->vtable = ((struct elf_link_virtual_table_entry *)
-		   bfd_zalloc (abfd, sizeof (*h->vtable)));
-      if (!h->vtable)
+      h->u2.vtable = ((struct elf_link_virtual_table_entry *)
+		      bfd_zalloc (abfd, sizeof (*h->u2.vtable)));
+      if (!h->u2.vtable)
 	return FALSE;
     }
 
-  if (addend >= h->vtable->size)
+  if (addend >= h->u2.vtable->size)
     {
       size_t size, bytes, file_align;
-      bfd_boolean *ptr = h->vtable->used;
+      bfd_boolean *ptr = h->u2.vtable->used;
 
       /* While the symbol is undefined, we have to be prepared to handle
 	 a zero size.  */
@@ -13512,7 +13503,7 @@ bfd_elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,
 	    {
 	      size_t oldbytes;
 
-	      oldbytes = (((h->vtable->size >> log_file_align) + 1)
+	      oldbytes = (((h->u2.vtable->size >> log_file_align) + 1)
 			  * sizeof (bfd_boolean));
 	      memset (((char *) ptr) + oldbytes, 0, bytes - oldbytes);
 	    }
@@ -13524,11 +13515,11 @@ bfd_elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,
 	return FALSE;
 
       /* And arrange for that done flag to be at index -1.  */
-      h->vtable->used = ptr + 1;
-      h->vtable->size = size;
+      h->u2.vtable->used = ptr + 1;
+      h->u2.vtable->size = size;
     }
 
-  h->vtable->used[addend >> log_file_align] = TRUE;
+  h->u2.vtable->used[addend >> log_file_align] = TRUE;
 
   return TRUE;
 }
@@ -13877,8 +13868,12 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)
     {
       const struct elf_backend_data *bed;
+      asection *s;
 
       if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+	continue;
+      s = abfd->sections;
+      if (s == NULL || s->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
 	continue;
 
       bed = get_elf_backend_data (abfd);
@@ -14227,4 +14222,26 @@ elf_append_rel (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
   bfd_byte *loc = s->contents + (s->reloc_count++ * bed->s->sizeof_rel);
   BFD_ASSERT (loc + bed->s->sizeof_rel <= s->contents + s->size);
   bed->s->swap_reloc_out (abfd, rel, loc);
+}
+
+/* Define __start, __stop, .startof. or .sizeof. symbol.  */
+
+struct bfd_link_hash_entry *
+bfd_elf_define_start_stop (struct bfd_link_info *info,
+			   const char *symbol, asection *sec)
+{
+  struct bfd_link_hash_entry *h;
+
+  h = bfd_generic_define_start_stop (info, symbol, sec);
+  if (h != NULL)
+    {
+      struct elf_link_hash_entry *eh = (struct elf_link_hash_entry *) h;
+      eh->start_stop = 1;
+      eh->u2.start_stop_section = sec;
+      _bfd_elf_link_hash_hide_symbol (info, eh, TRUE);
+      if (ELF_ST_VISIBILITY (eh->other) != STV_INTERNAL)
+	eh->other = ((eh->other & ~ELF_ST_VISIBILITY (-1))
+		     | STV_HIDDEN);
+    }
+  return h;
 }

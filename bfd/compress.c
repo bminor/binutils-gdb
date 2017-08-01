@@ -254,7 +254,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 		  /* xgettext:c-format */
 		  (_("error: %B(%A) is too large (%#lx bytes)"),
 		  abfd, sec, (long) sz);
-	    return FALSE;
+	      return FALSE;
 	    }
 	}
 

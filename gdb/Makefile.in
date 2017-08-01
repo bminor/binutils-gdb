@@ -114,7 +114,7 @@ depcomp = $(SHELL) $(srcdir)/../depcomp
 
 # Note that these are overridden by GNU make-specific code below if
 # GNU make is used.  The overrides implement dependency tracking.
-COMPILE.pre = $(CXX) $(CXX_DIALECT)
+COMPILE.pre = $(CXX) -x c++ $(CXX_DIALECT)
 COMPILE.post = -c -o $@
 COMPILE = $(COMPILE.pre) $(INTERNAL_CFLAGS) $(COMPILE.post)
 POSTCOMPILE = @true
@@ -534,6 +534,7 @@ SUBDIR_PYTHON_LDFLAGS =
 SUBDIR_PYTHON_CFLAGS =
 
 SUBDIR_UNITTESTS_SRCS = \
+	unittests/environ-selftests.c \
 	unittests/function-view-selftests.c \
 	unittests/offset-type-selftests.c \
 	unittests/optional-selftests.c \
@@ -541,6 +542,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/scoped_restore-selftests.c
 
 SUBDIR_UNITTESTS_OBS = \
+	environ-selftests.o \
 	function-view-selftests.o \
 	offset-type-selftests.o \
 	optional-selftests.o \
@@ -1112,6 +1114,7 @@ SFILES = \
 	gdb_bfd.c \
 	gdb-dlfcn.c \
 	gdb_obstack.c \
+	gdb_regex.c \
 	gdb_usleep.c \
 	gdbarch.c \
 	gdbarch-selftests.c \
@@ -1242,6 +1245,7 @@ SFILES = \
 	common/fileio.c \
 	common/filestuff.c \
 	common/format.c \
+	common/job-control.c \
 	common/gdb_vecs.c \
 	common/new-op.c \
 	common/print-utils.c \
@@ -1514,9 +1518,11 @@ HFILES_NO_SRCDIR = \
 	common/common-debug.h \
 	common/common-defs.h \
 	common/common-exceptions.h \
+	common/common-gdbthread.h \
 	common/common-regcache.h \
 	common/common-types.h \
 	common/common-utils.h \
+	common/job-control.h \
 	common/errors.h \
 	common/environ.h \
 	common/fileio.h \
@@ -1529,6 +1535,7 @@ HFILES_NO_SRCDIR = \
 	common/gdb_termios.h \
 	common/gdb_vecs.h \
 	common/gdb_wait.h \
+	common/common-inferior.h \
 	common/host-defs.h \
 	common/print-utils.h \
 	common/ptid.h \
@@ -1569,6 +1576,7 @@ HFILES_NO_SRCDIR = \
 	nat/amd64-linux-siginfo.h \
 	nat/gdb_ptrace.h \
 	nat/gdb_thread_db.h \
+	nat/fork-inferior.h \
 	nat/linux-btrace.h \
 	nat/linux-namespaces.h \
 	nat/linux-nat.h \
@@ -1671,6 +1679,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	common-agent.o \
 	common-debug.o \
 	common-exceptions.o \
+	job-control.o \
 	common-regcache.o \
 	common-utils.o \
 	complaints.o \
@@ -1725,6 +1734,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	gdb_bfd.o \
 	gdb-dlfcn.o \
 	gdb_obstack.o \
+	gdb_regex.o \
 	gdb_usleep.o \
 	gdb_vecs.o \
 	gdbarch.o \

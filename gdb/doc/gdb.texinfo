@@ -2153,6 +2153,7 @@ This command is available when debugging locally on most targets, excluding
 @sc{djgpp}, Cygwin, MS Windows, and QNX Neutrino.
 
 @kindex set startup-with-shell
+@anchor{set startup-with-shell}
 @item set startup-with-shell
 @itemx set startup-with-shell on
 @itemx set startup-with-shell off
@@ -20835,6 +20836,10 @@ are:
 @tab @code{QDisableRandomization}
 @tab @code{set disable-randomization}
 
+@item @code{startup-with-shell}
+@tab @code{QStartupWithShell}
+@tab @code{set startup-with-shell}
+
 @item @code{conditional-breakpoints-packet}
 @tab @code{Z0 and Z1}
 @tab @code{Support for target-side breakpoint condition evaluation}
@@ -24003,6 +24008,12 @@ the serial line to the remote machine.  The info is printed on the
 @value{GDBN} standard output stream. The default is off.
 @item show debug remote
 Displays the state of display of remote packets.
+
+@item set debug separate-debug-file
+Turns on or off display of debug output about separate debug file search.
+@item show debug separate-debug-file
+Displays the state of separate debug file search debug output.
+
 @item set debug serial
 Turns on or off display of @value{GDBN} serial debugging info. The
 default is off.
@@ -36458,6 +36469,40 @@ This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 This should only be done on targets that actually support disabling
 address space randomization.
+
+@item QStartupWithShell:@var{value}
+@cindex startup with shell, remote request
+@cindex @samp{QStartupWithShell} packet
+On UNIX-like targets, it is possible to start the inferior using a
+shell program.  This is the default behavior on both @value{GDBN} and
+@command{gdbserver} (@pxref{set startup-with-shell}).  This packet is
+used to inform @command{gdbserver} whether it should start the
+inferior using a shell or not.
+
+If @var{value} is @samp{0}, @command{gdbserver} will not use a shell
+to start the inferior.  If @var{value} is @samp{1},
+@command{gdbserver} will use a shell to start the inferior.  All other
+values are considered an error.
+
+This packet is only available in extended mode (@pxref{extended
+mode}).
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+
+@item E @var{nn}
+An error occurred.  The error number @var{nn} is given as hex digits.
+@end table
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).  This should only be done on targets that
+actually support starting the inferior using a shell.
+
+Use of this packet is controlled by the @code{set startup-with-shell}
+command; @pxref{set startup-with-shell}.
 
 @item qfThreadInfo
 @itemx qsThreadInfo

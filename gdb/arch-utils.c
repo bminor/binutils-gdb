@@ -60,14 +60,6 @@ simple_displaced_step_copy_insn (struct gdbarch *gdbarch,
   return (struct displaced_step_closure *) buf;
 }
 
-
-void
-simple_displaced_step_free_closure (struct gdbarch *gdbarch,
-                                    struct displaced_step_closure *closure)
-{
-  xfree (closure);
-}
-
 int
 default_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
 				      struct displaced_step_closure *closure)

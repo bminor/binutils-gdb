@@ -6014,12 +6014,12 @@ conjunction with BFD_RELOC_AARCH64_LD64_GOT_LO12_NC.  */
 
 /* Unsigned 12 bit byte offset for 64 bit load/store from the page of
 the GOT entry for this symbol.  Used in conjunction with
-BFD_RELOC_AARCH64_ADR_GOTPAGE.  Valid in LP64 ABI only.  */
+BFD_RELOC_AARCH64_ADR_GOT_PAGE.  Valid in LP64 ABI only.  */
   BFD_RELOC_AARCH64_LD64_GOT_LO12_NC,
 
 /* Unsigned 12 bit byte offset for 32 bit load/store from the page of
 the GOT entry for this symbol.  Used in conjunction with
-BFD_RELOC_AARCH64_ADR_GOTPAGE.  Valid in ILP32 ABI only.  */
+BFD_RELOC_AARCH64_ADR_GOT_PAGE.  Valid in ILP32 ABI only.  */
   BFD_RELOC_AARCH64_LD32_GOT_LO12_NC,
 
 /* Unsigned 16 bit byte offset for 64 bit load/store from the GOT entry
@@ -7593,7 +7593,8 @@ typedef struct bfd_target
   NAME##_bfd_is_group_section, \
   NAME##_bfd_discard_group, \
   NAME##_section_already_linked, \
-  NAME##_bfd_define_common_symbol
+  NAME##_bfd_define_common_symbol, \
+  NAME##_bfd_define_start_stop
 
   int         (*_bfd_sizeof_headers) (bfd *, struct bfd_link_info *);
   bfd_byte *  (*_bfd_get_relocated_section_contents)
@@ -7656,6 +7657,11 @@ typedef struct bfd_target
   /* Define a common symbol.  */
   bfd_boolean (*_bfd_define_common_symbol) (bfd *, struct bfd_link_info *,
                                             struct bfd_link_hash_entry *);
+
+  /* Define a __start, __stop, .startof. or .sizeof. symbol.  */
+  struct bfd_link_hash_entry *(*_bfd_define_start_stop) (struct bfd_link_info *,
+                                                         const char *,
+                                                         asection *);
 
   /* Routines to handle dynamic symbols and relocs.  */
 #define BFD_JUMP_TABLE_DYNAMIC(NAME) \
@@ -7735,6 +7741,13 @@ bfd_boolean bfd_generic_define_common_symbol
 
 #define bfd_define_common_symbol(output_bfd, info, h) \
        BFD_SEND (output_bfd, _bfd_define_common_symbol, (output_bfd, info, h))
+
+struct bfd_link_hash_entry *bfd_generic_define_start_stop
+   (struct bfd_link_info *info,
+    const char *symbol, asection *sec);
+
+#define bfd_define_start_stop(output_bfd, info, symbol, sec) \
+       BFD_SEND (output_bfd, _bfd_define_start_stop, (info, symbol, sec))
 
 struct bfd_elf_version_tree * bfd_find_version_for_sym
    (struct bfd_elf_version_tree *verdefs,

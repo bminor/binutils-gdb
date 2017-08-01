@@ -958,7 +958,7 @@ value_at_lazy (struct type *type, CORE_ADDR addr)
 }
 
 void
-read_value_memory (struct value *val, LONGEST embedded_offset,
+read_value_memory (struct value *val, LONGEST bit_offset,
 		   int stack, CORE_ADDR memaddr,
 		   gdb_byte *buffer, size_t length)
 {
@@ -984,8 +984,9 @@ read_value_memory (struct value *val, LONGEST embedded_offset,
       if (status == TARGET_XFER_OK)
 	/* nothing */;
       else if (status == TARGET_XFER_UNAVAILABLE)
-	mark_value_bytes_unavailable (val, embedded_offset + xfered_total,
-				      xfered_partial);
+	mark_value_bits_unavailable (val, (xfered_total * HOST_CHAR_BIT
+					   + bit_offset),
+				     xfered_partial * HOST_CHAR_BIT);
       else if (status == TARGET_XFER_EOF)
 	memory_error (TARGET_XFER_E_IO, memaddr + xfered_total);
       else

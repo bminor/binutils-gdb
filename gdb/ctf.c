@@ -1522,8 +1522,8 @@ ctf_get_traceframe_address (void)
       struct tracepoint *tp
 	= get_tracepoint_by_number_on_target (tpnum);
 
-      if (tp && tp->base.loc)
-	addr = tp->base.loc->address;
+      if (tp && tp->loc)
+	addr = tp->loc->address;
     }
 
   /* Restore the position.  */

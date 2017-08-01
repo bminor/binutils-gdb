@@ -1788,9 +1788,6 @@ ccp_output_result (gcc_type result)
   printf_unfiltered ("%lld\n", result);
 }
 
-#define STR(x) #x
-#define STRINGIFY(x) STR(x)
-
 #define DECLARE_FORWARD(OP,...)						\
   auto forward = [&] (const char *fmt, ...)				\
   {									\

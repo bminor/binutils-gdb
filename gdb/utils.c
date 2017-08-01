@@ -65,6 +65,7 @@
 #include "gdb_usleep.h"
 #include "interps.h"
 #include "gdb_regex.h"
+#include "job-control.h"
 
 #if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* ARI: PTR */
@@ -101,10 +102,6 @@ static std::chrono::steady_clock::duration prompt_for_continue_wait_time;
 /* A flag indicating whether to timestamp debugging messages.  */
 
 static int debug_timestamp = 0;
-
-/* Nonzero if we have job control.  */
-
-int job_control;
 
 /* Nonzero means that strings with character values >0x7F should be printed
    as octal escapes.  Zero means just print the value (e.g. it's an
@@ -1037,58 +1034,6 @@ make_hex_string (const gdb_byte *data, size_t length)
 }
 
 
-
-/* A cleanup function that calls regfree.  */
-
-static void
-do_regfree_cleanup (void *r)
-{
-  regfree ((regex_t *) r);
-}
-
-/* Create a new cleanup that frees the compiled regular expression R.  */
-
-struct cleanup *
-make_regfree_cleanup (regex_t *r)
-{
-  return make_cleanup (do_regfree_cleanup, r);
-}
-
-/* Return an xmalloc'd error message resulting from a regular
-   expression compilation failure.  */
-
-char *
-get_regcomp_error (int code, regex_t *rx)
-{
-  size_t length = regerror (code, rx, NULL, 0);
-  char *result = (char *) xmalloc (length);
-
-  regerror (code, rx, result, length);
-  return result;
-}
-
-/* Compile a regexp and throw an exception on error.  This returns a
-   cleanup to free the resulting pattern on success.  RX must not be
-   NULL.  */
-
-struct cleanup *
-compile_rx_or_error (regex_t *pattern, const char *rx, const char *message)
-{
-  int code;
-
-  gdb_assert (rx != NULL);
-
-  code = regcomp (pattern, rx, REG_NOSUB);
-  if (code != 0)
-    {
-      char *err = get_regcomp_error (code, pattern);
-
-      make_cleanup (xfree, err);
-      error (("%s: %s"), message, err);
-    }
-
-  return make_regfree_cleanup (pattern);
-}
 
 /* A cleanup that simply calls ui_unregister_input_event_handler.  */
 

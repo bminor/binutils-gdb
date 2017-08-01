@@ -512,10 +512,6 @@ enum print_stop_action
 
 struct breakpoint_ops
 {
-  /* Destructor.  Releases everything from SELF (but not SELF
-     itself).  */
-  void (*dtor) (struct breakpoint *self);
-
   /* Allocate a location for this breakpoint.  */
   struct bp_location * (*allocate_location) (struct breakpoint *);
 
@@ -608,7 +604,8 @@ struct breakpoint_ops
      This function is called inside `create_breakpoint'.  */
   void (*create_breakpoints_sal) (struct gdbarch *,
 				  struct linespec_result *,
-				  char *, char *,
+				  gdb::unique_xmalloc_ptr<char>,
+				  gdb::unique_xmalloc_ptr<char>,
 				  enum bptype, enum bpdisp, int, int,
 				  int, const struct breakpoint_ops *,
 				  int, int, int, unsigned);
@@ -680,6 +677,8 @@ extern int target_exact_watchpoints;
 
 struct breakpoint
 {
+  virtual ~breakpoint ();
+
   /* Methods associated with this breakpoint.  */
   const breakpoint_ops *ops = NULL;
 
@@ -783,14 +782,11 @@ struct breakpoint
   gdbscm_breakpoint_object *scm_bp_object = NULL;
 };
 
-/* An instance of this type is used to represent a watchpoint.  It
-   includes a "struct breakpoint" as a kind of base class; users
-   downcast to "struct breakpoint *" when needed.  */
+/* An instance of this type is used to represent a watchpoint.  */
 
-struct watchpoint
+struct watchpoint : public breakpoint
 {
-  /* The base class.  */
-  struct breakpoint base;
+  ~watchpoint () override;
 
   /* String form of exp to use for displaying to the user (malloc'd),
      or NULL if none.  */
@@ -867,14 +863,10 @@ extern int is_breakpoint (const struct breakpoint *bpt);
 extern int is_watchpoint (const struct breakpoint *bpt);
 
 /* An instance of this type is used to represent all kinds of
-   tracepoints.  It includes a "struct breakpoint" as a kind of base
-   class; users downcast to "struct breakpoint *" when needed.  */
+   tracepoints.  */
 
-struct tracepoint
+struct tracepoint : public breakpoint
 {
-  /* The base class.  */
-  struct breakpoint base;
-
   /* Number of times this tracepoint should single-step and collect
      additional data.  */
   long step_count;
@@ -1338,8 +1330,8 @@ enum breakpoint_create_flags
 
 extern int create_breakpoint (struct gdbarch *gdbarch,
 			      const struct event_location *location,
-			      char *cond_string, int thread,
-			      char *extra_string,
+			      const char *cond_string, int thread,
+			      const char *extra_string,
 			      int parse_extra,
 			      int tempflag, enum bptype wanted_type,
 			      int ignore_count,

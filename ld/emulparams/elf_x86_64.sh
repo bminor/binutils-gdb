@@ -3,6 +3,7 @@
 . ${srcdir}/emulparams/dynamic_undefined_weak.sh
 . ${srcdir}/emulparams/reloc_overflow.sh
 . ${srcdir}/emulparams/call_nop.sh
+. ${srcdir}/emulparams/cet.sh
 SCRIPT_NAME=elf
 ELFSIZE=64
 OUTPUT_FORMAT="elf64-x86-64"

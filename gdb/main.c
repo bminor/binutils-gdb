@@ -224,7 +224,7 @@ get_init_files (const char **system_gdbinit,
 	    {
 	      /* Append the part of SYSTEM_GDBINIT that follows GDB_DATADIR
 		 to gdb_datadir.  */
-	      char *tmp_sys_gdbinit = xstrdup (SYSTEM_GDBINIT + datadir_len);
+	      char *tmp_sys_gdbinit = xstrdup (&SYSTEM_GDBINIT[datadir_len]);
 	      char *p;
 
 	      for (p = tmp_sys_gdbinit; IS_DIR_SEPARATOR (*p); ++p)

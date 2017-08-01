@@ -72,13 +72,13 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 /* Flags to indicate whether the hardware supports the density and
    absolute literals options.  */
 
-bfd_boolean density_supported = XCHAL_HAVE_DENSITY;
-bfd_boolean absolute_literals_supported = XSHAL_USE_ABSOLUTE_LITERALS;
+bfd_boolean density_supported;
+bfd_boolean absolute_literals_supported;
 
 static vliw_insn cur_vinsn;
 
 unsigned xtensa_num_pipe_stages;
-unsigned xtensa_fetch_width = XCHAL_INST_FETCH_WIDTH;
+unsigned xtensa_fetch_width;
 
 static enum debug_info_type xt_saved_debug_type = DEBUG_NONE;
 
@@ -419,21 +419,13 @@ bfd_boolean directive_state[] =
 {
   FALSE,			/* none */
   FALSE,			/* literal */
-#if !XCHAL_HAVE_DENSITY
   FALSE,			/* density */
-#else
-  TRUE,				/* density */
-#endif
   TRUE,				/* transform */
   FALSE,			/* freeregs */
   FALSE,			/* longcalls */
   FALSE,			/* literal_prefix */
   FALSE,			/* schedule */
-#if XSHAL_USE_ABSOLUTE_LITERALS
-  TRUE				/* absolute_literals */
-#else
   FALSE				/* absolute_literals */
-#endif
 };
 
 /* A circular list of all potential and actual literal pool locations
@@ -5216,6 +5208,24 @@ md_number_to_chars (char *buf, valueT val, int n)
     number_to_chars_littleendian (buf, val, n);
 }
 
+static void
+xg_init_global_config (void)
+{
+  target_big_endian = XCHAL_HAVE_BE;
+
+  density_supported = XCHAL_HAVE_DENSITY;
+  absolute_literals_supported = XSHAL_USE_ABSOLUTE_LITERALS;
+  xtensa_fetch_width = XCHAL_INST_FETCH_WIDTH;
+
+  directive_state[directive_density] = XCHAL_HAVE_DENSITY;
+  directive_state[directive_absolute_literals] = XSHAL_USE_ABSOLUTE_LITERALS;
+}
+
+void
+xtensa_init (int argc ATTRIBUTE_UNUSED, char **argv ATTRIBUTE_UNUSED)
+{
+  xg_init_global_config ();
+}
 
 /* This function is called once, at assembler startup time.  It should
    set up all the tables, etc. that the MD part of the assembler will
