@@ -5,14 +5,14 @@
 # Tommy Pettersson <ptp@lysator.liu.se>, 2001, 2002, 2004.
 # Göran Uddeborg <goeran@uddeborg.se>, 2013, 2014, 2016, 2017.
 #
-# $Revision: 1.12 $
+# $Revision: 1.13 $
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: binutils 2.28.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2017-07-03 16:55+0200\n"
-"PO-Revision-Date: 2017-07-14 14:10+0200\n"
+"PO-Revision-Date: 2017-07-31 11:20+0200\n"
 "Last-Translator: Göran Uddeborg <goeran@uddeborg.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -1995,16 +1995,13 @@ msgid "(User defined location op 0x%x)"
 msgstr "(Användardefinierad plats-op 0x%x)"
 
 #: dwarf.c:1564
-#, fuzzy, c-format
-#| msgid "(Unknown location op)"
+#, c-format
 msgid "(Unknown location op 0x%x)"
-msgstr "(okänd plats-op)"
+msgstr "(Okänd plats-op 0x%x)"
 
 #: dwarf.c:1659
-#, fuzzy
-#| msgid "corrupt attribute\n"
 msgid "Corrupt attribute\n"
-msgstr "trasigt attribut\n"
+msgstr "Trasigt attribut\n"
 
 #: dwarf.c:1674
 msgid "Internal error: DWARF version is not 2, 3 or 4.\n"
@@ -2019,40 +2016,34 @@ msgid "Block ends prematurely\n"
 msgstr "Blocket tar slut i förtid\n"
 
 #: dwarf.c:1866 dwarf.c:1887 dwarf.c:1908 dwarf.c:1932
-#, fuzzy, c-format
-#| msgid "corrupt index table entry: %x\n"
+#, c-format
 msgid "Corrupt attribute block length: %lx\n"
-msgstr "trasigt strängtabellsindex: %x\n"
+msgstr "trasigt längd på attributblock: %lx\n"
 
 #: dwarf.c:1943
-#, fuzzy, c-format
-#| msgid " (indirect string, offset: 0x%s): %s"
+#, c-format
 msgid "%c(indirect string, offset: 0x%s): %s"
-msgstr " (indirekt sträng, avstånd: 0x%s): %s"
+msgstr "%c(indirekt sträng, avstånd: 0x%s): %s"
 
 #: dwarf.c:1950
-#, fuzzy, c-format
-#| msgid " (indirect string, offset: 0x%s): %s"
+#, c-format
 msgid "%c(indirect line string, offset: 0x%s): %s"
-msgstr " (indirekt sträng, avstånd: 0x%s): %s"
+msgstr "%c(indirekt radsträng, avstånd: 0x%s): %s"
 
 #: dwarf.c:1961
-#, fuzzy, c-format
-#| msgid " (indexed string: 0x%s): %s"
+#, c-format
 msgid "%c(indexed string: 0x%s): %s"
-msgstr " (indexerad sträng: 0x%s): %s"
+msgstr "%c(indexerad sträng: 0x%s): %s"
 
 #: dwarf.c:1969
-#, fuzzy, c-format
-#| msgid " (alt indirect string, offset: 0x%s)"
+#, c-format
 msgid "%c(alt indirect string, offset: 0x%s)"
-msgstr " (alt indirekt sträng, avstånd: 0x%s)"
+msgstr "%c(alt indirekt sträng, avstånd: 0x%s)"
 
 #: dwarf.c:1992
-#, fuzzy, c-format
-#| msgid " (addr_index: 0x%s): %s"
+#, c-format
 msgid "%c(addr_index: 0x%s): %s"
-msgstr " (addr_index: 0x%s): %s"
+msgstr "%c(addr_index: 0x%s): %s"
 
 #: dwarf.c:1998
 #, c-format
@@ -2150,10 +2141,9 @@ msgid " [without DW_AT_frame_base]"
 msgstr " [utan DW_AT_frame_base]"
 
 #: dwarf.c:2348
-#, fuzzy, c-format
-#| msgid "Offset %s used as value for DW_AT_import attribute of DIE at offset %lx is too big.\n"
+#, c-format
 msgid "Offset %s used as value for DW_AT_import attribute of DIE at offset 0x%lx is too big.\n"
-msgstr "Avståndet %s som används som ett värde till attributet DW_AT_import på DIE vid avståndet %lx är för stort.\n"
+msgstr "Avståndet %s som används som ett värde till attributet DW_AT_import på DIE vid avståndet 0x%lx är för stort.\n"
 
 #: dwarf.c:2358
 #, c-format
@@ -2176,16 +2166,14 @@ msgid "Corrupt unit length (0x%s) found in section %s\n"
 msgstr "Trasig enhetslängd (0x%s) upptäckt i sektionen %s\n"
 
 #: dwarf.c:2494
-#, fuzzy, c-format
-#| msgid "No comp units in %s section ?"
+#, c-format
 msgid "No comp units in %s section ?\n"
-msgstr "Inga comp-enheter i sektionen %s?"
+msgstr "Inga comp-enheter i sektionen %s?\n"
 
 #: dwarf.c:2503
-#, fuzzy, c-format
-#| msgid "Not enough memory for a debug info array of %u entries"
+#, c-format
 msgid "Not enough memory for a debug info array of %u entries\n"
-msgstr "Inte tillräckligt med minne för en vektor med felsökningsinfo med %u poster"
+msgstr "Inte tillräckligt med minne för en vektor med felsökningsinfo med %u poster\n"
 
 #: dwarf.c:2521 dwarf.c:4333 dwarf.c:4480 dwarf.c:4644 dwarf.c:4898
 #: dwarf.c:5488 dwarf.c:5587 dwarf.c:5656 dwarf.c:5809 dwarf.c:6159
@@ -2274,10 +2262,9 @@ msgid "Debug info is corrupted, length of CU at %s extends beyond end of section
 msgstr "Felsökningsinfo är trasig, längden på CU vid %s överskrider gränsen av sektionen (längd = %s)\n"
 
 #: dwarf.c:2700
-#, fuzzy, c-format
-#| msgid "Debug info is corrupted, length of CU at %s extends beyond end of section (length = %s)\n"
+#, c-format
 msgid "Debug info is corrupt.  CU at %s extends beyond end of section"
-msgstr "Felsökningsinfo är trasig, längden på CU vid %s överskrider gränsen av sektionen (längd = %s)\n"
+msgstr "Felsökningsinfo är trasig.  CU vid %s sträcker sig bortom slutet på sektionen"
 
 #: dwarf.c:2707
 #, c-format
@@ -2285,10 +2272,9 @@ msgid "CU at offset %s contains corrupt or unsupported version number: %d.\n"
 msgstr "CU vid avståndet %s innehåller trasiga eller ej stödda versionsnummer: %d.\n"
 
 #: dwarf.c:2716
-#, fuzzy, c-format
-#| msgid "CU at offset %s contains corrupt or unsupported version number: %d.\n"
+#, c-format
 msgid "CU at offset %s contains corrupt or unsupported unit type: %d.\n"
-msgstr "CU vid avståndet %s innehåller trasiga eller ej stödda versionsnummer: %d.\n"
+msgstr "CU vid avståndet %s innehåller en trasig eller ej stödd enhetstyp: %d.\n"
 
 #: dwarf.c:2726
 #, c-format
@@ -2296,10 +2282,9 @@ msgid "Debug info is corrupted, abbrev offset (%lx) is larger than abbrev sectio
 msgstr "Felsökningsinfo är trasig, abbrev-avstånd (%lx) är större än abbrev-sektionstorleken (%lx)\n"
 
 #: dwarf.c:2732
-#, fuzzy, c-format
-#| msgid "Debug info is corrupted, abbrev offset (%lx) is larger than abbrev section size (%lx)\n"
+#, c-format
 msgid "Debug info is corrupted, abbrev size (%lx) is larger than abbrev section size (%lx)\n"
-msgstr "Felsökningsinfo är trasig, abbrev-avstånd (%lx) är större än abbrev-sektionstorleken (%lx)\n"
+msgstr "Felsökningsinfo är trasig, abbrev-storlek (%lx) är större än abbrev-sektionstorleken (%lx)\n"
 
 #: dwarf.c:2778
 #, c-format
@@ -2326,22 +2311,18 @@ msgid " <%d><%lx>: ...\n"
 msgstr " <%d><%lx>: …\n"
 
 #: dwarf.c:2834
-#, fuzzy, c-format
-#| msgid "DIE at offset %lx refers to abbreviation number %lu which does not exist\n"
+#, c-format
 msgid "DIE at offset 0x%lx refers to abbreviation number %lu which does not exist\n"
-msgstr "DIE på avståndet %lx refererar till förkortning nummer %lu som inte finns\n"
+msgstr "DIE på avståndet 0x%lx refererar till förkortning nummer %lu som inte finns\n"
 
 #: dwarf.c:3000
-#, fuzzy, c-format
-#| msgid "The line info appears to be corrupt - the section is too small\n"
+#, c-format
 msgid "The length field (0x%lx) in the debug_line header is wrong - the section is too small\n"
-msgstr "Radinformationen verkar vara trasig - sektionen är för liten\n"
+msgstr "Längdfältet (0x%lx) i debug_line-huvudet är trasig — sektionen är för liten\n"
 
 #: dwarf.c:3014
-#, fuzzy
-#| msgid "Only DWARF version 2, 3 and 4 line info is currently supported.\n"
 msgid "Only DWARF version 2, 3, 4 and 5 line info is currently supported.\n"
-msgstr "Endast radinfo från DWARF 2, 3 och 4 hanteras för närvarande.\n"
+msgstr "Endast radinfo från DWARF 2, 3, 4 och 5 hanteras för närvarande.\n"
 
 #: dwarf.c:3026 dwarf.c:5414 dwarf.c:6100
 #, c-format
@@ -2353,10 +2334,9 @@ msgid "Invalid maximum operations per insn.\n"
 msgstr "Ogiltigt maximalt antal operationer per instruktion.\n"
 
 #: dwarf.c:3059
-#, fuzzy, c-format
-#| msgid "Debug info is corrupted, length of CU at %s extends beyond end of section (length = %s)\n"
+#, c-format
 msgid "Line length %s extends beyond end of section\n"
-msgstr "Felsökningsinfo är trasig, längden på CU vid %s överskrider gränsen av sektionen (längd = %s)\n"
+msgstr "Radlängden %s sträcker sig bortom slutet på sektionen\n"
 
 #: dwarf.c:3088
 #, c-format
@@ -2369,7 +2349,7 @@ msgid "Corrupt %s list\n"
 msgstr "Trasig %slista\n"
 
 #: dwarf.c:3103
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 " The %s Table is empty.\n"
@@ -2392,10 +2372,9 @@ msgid "  Entry"
 msgstr "  Post"
 
 #: dwarf.c:3125
-#, fuzzy, c-format
-#| msgid "Name"
+#, c-format
 msgid "\tName"
-msgstr "Namn"
+msgstr "\tNamn"
 
 #: dwarf.c:3128
 #, c-format
@@ -2418,10 +2397,9 @@ msgid "\tMD5"
 msgstr "\tMD5"
 
 #: dwarf.c:3140
-#, fuzzy, c-format
-#| msgid "unknown format type `%s'"
+#, c-format
 msgid "\t(Unknown format content type %s)"
-msgstr "okänd formattyp ”%s”"
+msgstr "\t(Okänd formatinnehållstyp %s)"
 
 #: dwarf.c:3176
 #, c-format
@@ -2518,13 +2496,13 @@ msgstr "  Op-kod %d har %d argument\n"
 # eventuellt felrapporteras.
 #: dwarf.c:3280
 msgid "Directory"
-msgstr "katalog"
+msgstr "Katalog"
 
 # Detta kommer bindas samman med "tabell" och liknande.  Borde
 # eventuellt felrapporteras.
 #: dwarf.c:3282
 msgid "File name"
-msgstr "filnamns"
+msgstr "Filnamns"
 
 #: dwarf.c:3287
 #, c-format
@@ -2676,32 +2654,21 @@ msgstr ""
 "\n"
 
 #: dwarf.c:3624
-#, fuzzy, c-format
-#| msgid "Debug info is corrupted, length of CU at %s extends beyond end of section (length = %s)\n"
+#, c-format
 msgid "opcode base of %d extends beyond end of section\n"
-msgstr "Felsökningsinfo är trasig, längden på CU vid %s överskrider gränsen av sektionen (längd = %s)\n"
+msgstr "op-kodbas på %d sträcker sig bortom slutet på sektionen\n"
 
 #: dwarf.c:3652 dwarf.c:3675 dwarf.c:3705
-#, fuzzy
-#| msgid "Corrupt header in the %s section.\n"
 msgid "Corrupt directories list\n"
-msgstr "Trasigt huvud i sektionen %s.\n"
+msgstr "Trasig kataloglista\n"
 
 #: dwarf.c:3725 dwarf.c:3748 dwarf.c:3795
-#, fuzzy
-#| msgid "Corrupt file name table entry\n"
 msgid "Corrupt file name list\n"
-msgstr "Trasig filnamnstabellpost\n"
+msgstr "Trasig filnamnslista\n"
 
 #: dwarf.c:3815
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| " The Directory Table is empty.\n"
 msgid "directory table ends unexpectedly\n"
-msgstr ""
-"\n"
-" Katalogtabellen är tom.\n"
+msgstr "katalogtabellen slutar oväntat\n"
 
 #: dwarf.c:3860
 msgid "file table ends unexpectedly\n"
@@ -2757,42 +2724,36 @@ msgstr ""
 " [Använd filtabellspost %d]\n"
 
 #: dwarf.c:4079
-#, fuzzy, c-format
-#| msgid "Line numbers for %s (%u)\n"
+#, c-format
 msgid "file index %u > number of files %u\n"
-msgstr "Radnummer för %s (%u)\n"
+msgstr "filindex %u > antalet filer %u\n"
 
 #: dwarf.c:4080
-#, fuzzy, c-format
-#| msgid "<corrupt string table index: %3ld>"
+#, c-format
 msgid ""
 "\n"
 " <over large file table index %u>"
-msgstr "<trasigt strängtabellsindex: %3ld>"
+msgstr ""
+"\n"
+" <för stort filtabellsindex %u>"
 
 #: dwarf.c:4086
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| " [Use directory table entry %d]\n"
+#, c-format
 msgid ""
 "\n"
 " [Use file %s in directory table entry %d]\n"
 msgstr ""
 "\n"
-" [Använd katalogtabellpost %d]\n"
+" [Använd filen %s i katalogtabellpost %d]\n"
 
 #: dwarf.c:4093
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| " [Use directory table entry %d]\n"
+#, c-format
 msgid ""
 "\n"
 " <over large directory table entry %u>\n"
 msgstr ""
 "\n"
-" [Använd katalogtabellpost %d]\n"
+" <för stor katalogtabellpost %u>\n"
 
 #: dwarf.c:4152
 #, c-format
@@ -2800,10 +2761,9 @@ msgid "  Set ISA to %lu\n"
 msgstr "  Sätt ISA till %lu\n"
 
 #: dwarf.c:4186
-#, fuzzy, c-format
-#| msgid "Corrupt file name table entry\n"
+#, c-format
 msgid "corrupt file index %u encountered\n"
-msgstr "Trasig filnamnstabellpost\n"
+msgstr "trasigt filindex %u påträffat\n"
 
 #: dwarf.c:4307
 msgid "no info"
@@ -2923,10 +2883,9 @@ msgid " DW_MACINFO_vendor_ext - constant : %d string : %s\n"
 msgstr " DW_MACINFO_vendor_ext - konstant : %d sträng : %s\n"
 
 #: dwarf.c:4657
-#, fuzzy, c-format
-#| msgid "Only GNU extension to DWARF 4 of %s is currently supported.\n"
+#, c-format
 msgid "Only GNU extension to DWARF 4 or 5 of %s is currently supported.\n"
-msgstr "Endast GNU-utökningar till DWARF 4 av %s stödjs för närvarande.\n"
+msgstr "Endast GNU-utökningar till DWARF 4 eller 5 av %s stödjs för närvarande.\n"
 
 #: dwarf.c:4667
 #, c-format
@@ -2949,16 +2908,14 @@ msgid "  Extension opcode arguments:\n"
 msgstr "  Argument till utökad op-kod:\n"
 
 #: dwarf.c:4694
-#, fuzzy, c-format
-#| msgid "    DW_MACRO_GNU_%02x has no arguments\n"
+#, c-format
 msgid "    DW_MACRO_%02x has no arguments\n"
-msgstr "    DW_MACRO_GNU_%02x har inga argument\n"
+msgstr "    DW_MACRO_%02x har inga argument\n"
 
 #: dwarf.c:4697
-#, fuzzy, c-format
-#| msgid "    DW_MACRO_GNU_%02x arguments: "
+#, c-format
 msgid "    DW_MACRO_%02x arguments: "
-msgstr "    DW_MACRO_GNU_%02x argument: "
+msgstr "    DW_MACRO_%02x argument: "
 
 #: dwarf.c:4723
 #, c-format
@@ -2970,76 +2927,63 @@ msgid ".debug_macro section not zero terminated\n"
 msgstr "sektionen .debug_macro är inte nollterminerad\n"
 
 #: dwarf.c:4761
-#, fuzzy
-#| msgid "DW_MACRO_GNU_start_file used, but no .debug_line offset provided.\n"
 msgid "DW_MACRO_start_file used, but no .debug_line offset provided.\n"
-msgstr "DW_MACRO_GNU_start_file använd, men inget .debug_line-avstånd givet.\n"
+msgstr "DW_MACRO_start_file använd, men inget .debug_line-avstånd givet.\n"
 
 #: dwarf.c:4767
-#, fuzzy, c-format
-#| msgid " DW_MACRO_GNU_start_file - lineno: %d filenum: %d\n"
+#, c-format
 msgid " DW_MACRO_start_file - lineno: %d filenum: %d\n"
-msgstr " DW_MACRO_GNU_start_file - radnr: %d filnr: %d\n"
+msgstr " DW_MACRO_start_file - radnr: %d filnr: %d\n"
 
 #: dwarf.c:4770
-#, fuzzy, c-format
-#| msgid " DW_MACRO_GNU_start_file - lineno: %d filenum: %d filename: %s%s%s\n"
+#, c-format
 msgid " DW_MACRO_start_file - lineno: %d filenum: %d filename: %s%s%s\n"
-msgstr " DW_MACRO_GNU_start_file - radnr: %d filnr: %d filnamn: %s%s%s\n"
+msgstr " DW_MACRO_start_file - radnr: %d filnr: %d filnamn: %s%s%s\n"
 
 #: dwarf.c:4778
-#, fuzzy, c-format
-#| msgid " DW_MACRO_GNU_end_file\n"
+#, c-format
 msgid " DW_MACRO_end_file\n"
-msgstr " DW_MACRO_GNU_end_file\n"
+msgstr " DW_MACRO_end_file\n"
 
 #: dwarf.c:4786
-#, fuzzy, c-format
-#| msgid " DW_MACRO_GNU_define - lineno : %d macro : %s\n"
+#, c-format
 msgid " DW_MACRO_define - lineno : %d macro : %s\n"
-msgstr " DW_MACRO_GNU_define - radnr : %d makro : %s\n"
+msgstr " DW_MACRO_define - radnr : %d makro : %s\n"
 
 #: dwarf.c:4795
-#, fuzzy, c-format
-#| msgid " DW_MACRO_GNU_undef - lineno : %d macro : %s\n"
+#, c-format
 msgid " DW_MACRO_undef - lineno : %d macro : %s\n"
-msgstr " DW_MACRO_GNU_undef - radnr : %d makro : %s\n"
+msgstr " DW_MACRO_undef - radnr : %d makro : %s\n"
 
 #: dwarf.c:4804
-#, fuzzy, c-format
-#| msgid " DW_MACRO_GNU_define - lineno : %d macro : %s\n"
+#, c-format
 msgid " DW_MACRO_define_strp - lineno : %d macro : %s\n"
-msgstr " DW_MACRO_GNU_define - radnr : %d makro : %s\n"
+msgstr " DW_MACRO_define_strp — radnr : %d makro : %s\n"
 
 #: dwarf.c:4813
-#, fuzzy, c-format
-#| msgid " DW_MACRO_GNU_undef - lineno : %d macro : %s\n"
+#, c-format
 msgid " DW_MACRO_undef_strp - lineno : %d macro : %s\n"
-msgstr " DW_MACRO_GNU_undef - radnr : %d makro : %s\n"
+msgstr " DW_MACRO_undef_strp — radnr : %d makro : %s\n"
 
 #: dwarf.c:4819
-#, fuzzy, c-format
-#| msgid " DW_MACRO_GNU_transparent_include - offset : 0x%lx\n"
+#, c-format
 msgid " DW_MACRO_import - offset : 0x%lx\n"
-msgstr " DW_MACRO_GNU_transparent_include - avstånd : 0x%lx\n"
+msgstr " DW_MACRO_import — avstånd : 0x%lx\n"
 
 #: dwarf.c:4827
-#, fuzzy, c-format
-#| msgid " DW_MACRO_GNU_undef_indirect_alt - lineno : %d macro offset : 0x%lx\n"
+#, c-format
 msgid " DW_MACRO_define_sup - lineno : %d macro offset : 0x%lx\n"
-msgstr " DW_MACRO_GNU_undef_indirect_alt — radnr : %d makroavstånd : 0x%lx\n"
+msgstr " DW_MACRO_define_sup — radnr : %d makroavstånd : 0x%lx\n"
 
 #: dwarf.c:4835
-#, fuzzy, c-format
-#| msgid " DW_MACRO_GNU_undef_indirect_alt - lineno : %d macro offset : 0x%lx\n"
+#, c-format
 msgid " DW_MACRO_undef_sup - lineno : %d macro offset : 0x%lx\n"
-msgstr " DW_MACRO_GNU_undef_indirect_alt — radnr : %d makroavstånd : 0x%lx\n"
+msgstr " DW_MACRO_GNU_undef_sup — radnr : %d makroavstånd : 0x%lx\n"
 
 #: dwarf.c:4841
-#, fuzzy, c-format
-#| msgid " DW_MACRO_GNU_transparent_include - offset : 0x%lx\n"
+#, c-format
 msgid " DW_MACRO_import_sup - offset : 0x%lx\n"
-msgstr " DW_MACRO_GNU_transparent_include - avstånd : 0x%lx\n"
+msgstr " DW_MACRO_import_sup — avstånd : 0x%lx\n"
 
 #: dwarf.c:4848
 #, c-format
@@ -3047,16 +2991,14 @@ msgid " Unknown macro opcode %02x seen\n"
 msgstr " Okänd makroopkod %02x upptäckt\n"
 
 #: dwarf.c:4860
-#, fuzzy, c-format
-#| msgid " DW_MACRO_GNU_%02x\n"
+#, c-format
 msgid " DW_MACRO_%02x\n"
-msgstr " DW_MACRO_GNU_%02x\n"
+msgstr " DW_MACRO_%02x\n"
 
 #: dwarf.c:4863
-#, fuzzy, c-format
-#| msgid " DW_MACRO_GNU_%02x -"
+#, c-format
 msgid " DW_MACRO_%02x -"
-msgstr " DW_MACRO_GNU_%02x -"
+msgstr " DW_MACRO_%02x —"
 
 #: dwarf.c:4912
 #, c-format
@@ -3111,16 +3053,14 @@ msgid "No debug information available for loclists lists of entry: %u\n"
 msgstr "Ingen felsökningsinformation tillgänglig för loc-listor för post: %u\n"
 
 #: dwarf.c:5157
-#, fuzzy, c-format
-#| msgid "Unknown location list entry type 0x%x.\n"
+#, c-format
 msgid "Invalid location list entry type %d\n"
-msgstr "Okänd typ av platslistpost 0x%x.\n"
+msgstr "Felaktig typ av platslistpost %d\n"
 
 #: dwarf.c:5239
-#, fuzzy, c-format
-#| msgid "no information for symbol number %ld\n"
+#, c-format
 msgid "No debug information for loc lists of entry: %u\n"
-msgstr "ingen information för symbol nummer %ld\n"
+msgstr "Ingen felsökningsinformation för platslista för post: %u\n"
 
 #: dwarf.c:5279
 #, c-format
@@ -3142,10 +3082,9 @@ msgstr ""
 "Sektionen %s är tom.\n"
 
 #: dwarf.c:5403
-#, fuzzy, c-format
-#| msgid "CU at offset %s contains corrupt or unsupported version number: %d.\n"
+#, c-format
 msgid "The %s section contains corrupt or unsupported version number: %d.\n"
-msgstr "CU vid avståndet %s innehåller trasiga eller ej stödda versionsnummer: %d.\n"
+msgstr "%s-sektionen innehåller trasiga eller ej stödda versionsnummer: %d.\n"
 
 #: dwarf.c:5423
 #, c-format
@@ -3177,10 +3116,9 @@ msgstr ""
 
 # Expression är en maskinkodsinstruktion
 #: dwarf.c:5491
-#, fuzzy, c-format
-#| msgid "    Offset   Begin    End      Expression\n"
+#, c-format
 msgid "    Offset   Begin            End              Expression\n"
-msgstr "    Avstånd  Start    Slut     Instruktion\n"
+msgstr "    Avstånd  Start            Slut             Instruktion\n"
 
 #: dwarf.c:5528
 #, c-format
@@ -3198,10 +3136,8 @@ msgid "Offset 0x%lx is bigger than .debug_loc section size.\n"
 msgstr "Avstånd 0x%lx är större än storleken på sektionen .debug_loc.\n"
 
 #: dwarf.c:5557
-#, fuzzy
-#| msgid "BCD float type not supported"
 msgid "DWO is not yet supported.\n"
-msgstr "flyttalstypen BCD hanteras inte"
+msgstr "DWO stödjs inte ännu.\n"
 
 #: dwarf.c:5566
 #, c-format
@@ -3270,10 +3206,9 @@ msgid "Excessive header length: %lx\n"
 msgstr "För stor huvudlängd: %lx\n"
 
 #: dwarf.c:5824
-#, fuzzy, c-format
-#| msgid "Corrupt unit length (0x%s) found in section %s\n"
+#, c-format
 msgid "Corrupt address base (%lx) found in debug section %u\n"
-msgstr "Trasig enhetslängd (0x%s) upptäckt i sektionen %s\n"
+msgstr "Trasig adressbas (%lx) upptäckt i felsökningssektion %u\n"
 
 #: dwarf.c:5840
 #, c-format
@@ -3299,28 +3234,23 @@ msgid "(start > end)"
 msgstr "(start > slut)"
 
 #: dwarf.c:5966
-#, fuzzy, c-format
-#| msgid "Location list starting at offset 0x%lx is not terminated.\n"
+#, c-format
 msgid "Range list starting at offset 0x%lx is not terminated.\n"
-msgstr "Platslistan som startar på avstånd 0x%lx är inte avslutad.\n"
+msgstr "Intervalllistan som startar på avstånd 0x%lx är inte avslutad.\n"
 
 #: dwarf.c:6002
-#, fuzzy, c-format
-#| msgid "Unknown location list entry type 0x%x.\n"
+#, c-format
 msgid "Invalid range list entry type %d\n"
-msgstr "Okänd typ av platslistpost 0x%x.\n"
+msgstr "Okänd typ av intervalllistpost %d\n"
 
 #: dwarf.c:6079
-#, fuzzy, c-format
-#| msgid "The line info appears to be corrupt - the section is too small\n"
+#, c-format
 msgid "The length field (0x%lx) in the debug_rnglists header is wrong - the section is too small\n"
-msgstr "Radinformationen verkar vara trasig - sektionen är för liten\n"
+msgstr "Längdfältet (0x%lx) i huvudet debug_rnglists är felaktigt — sektionen är för liten\n"
 
 #: dwarf.c:6090
-#, fuzzy
-#| msgid "Only DWARF version 2, 3 and 4 line info is currently supported.\n"
 msgid "Only DWARF version 5 debug_rnglists info is currently supported.\n"
-msgstr "Endast radinfo från DWARF 2, 3 och 4 hanteras för närvarande.\n"
+msgstr "Endast debug_rnglists-information från DWARF version 5 stödjs för närvarande.\n"
 
 #: dwarf.c:6109
 #, c-format
@@ -3365,10 +3295,9 @@ msgid "Unfeasibly large register number: %u\n"
 msgstr "Ohanterligt stort registerantal: %u\n"
 
 #: dwarf.c:6279
-#, fuzzy, c-format
-#| msgid "Out of memory allocating 0x%lx bytes for %s\n"
+#, c-format
 msgid "Out of memory allocating %u columns in dwarf frame arrays\n"
-msgstr "Slut på minne vid allokering av 0x%lx byte för %s\n"
+msgstr "Slut på minne vid allokering av %u kolumner i dwarf-ramvektorer\n"
 
 #: dwarf.c:6597
 msgid "No terminator for augmentation name\n"
@@ -3405,16 +3334,12 @@ msgid "Contents of the %s section:\n"
 msgstr "Innehåll i sektionen %s:\n"
 
 #: dwarf.c:6890
-#, fuzzy
-#| msgid "Failed to read in number of chains\n"
 msgid "Failed to read CIE information\n"
-msgstr "Lyckades inte läsa antal kedjor\n"
+msgstr "Lyckades inte läsa CIE-information\n"
 
 #: dwarf.c:6901 dwarf.c:6925 dwarf.c:6952
-#, fuzzy
-#| msgid "Invalid radix: %s\n"
 msgid "Invalid max register\n"
-msgstr "Ogiltig talbas: %s\n"
+msgstr "Ogiltigt maxregister\n"
 
 #. PR 17512: file: 9e196b3e.
 #: dwarf.c:6967
@@ -3423,10 +3348,9 @@ msgid "Probably corrupt segment size: %d - using 4 instead\n"
 msgstr "Troligen trasig segmentstorlek: %d — använder 4 istället\n"
 
 #: dwarf.c:6989
-#, fuzzy, c-format
-#| msgid "corrupt index table entry: %x\n"
+#, c-format
 msgid "Corrupt augmentation data length: %lx\n"
-msgstr "trasigt strängtabellsindex: %x\n"
+msgstr "Trasigt tilläggsdatalängd: %lx\n"
 
 #: dwarf.c:7116
 #, c-format
@@ -3459,10 +3383,9 @@ msgid "  DW_CFA_??? (User defined call frame op: %#x)\n"
 msgstr "  DW_CFA_??? (Användardefinierad anropsramop: %#x)\n"
 
 #: dwarf.c:7638
-#, fuzzy, c-format
-#| msgid "unsupported or unknown Dwarf Call Frame Instruction number: %#x\n"
+#, c-format
 msgid "Unsupported or unknown Dwarf Call Frame Instruction number: %#x\n"
-msgstr "ej stött eller okänt nummer på Dwarf anropsramsinstruktion: %#x\n"
+msgstr "Ej stött eller okänt nummer på Dwarf anropsramsinstruktion: %#x\n"
 
 #: dwarf.c:7697
 #, c-format
@@ -3475,10 +3398,8 @@ msgid "Version %ld\n"
 msgstr "Version %ld\n"
 
 #: dwarf.c:7711
-#, fuzzy
-#| msgid "Only DWARF version 2, 3 and 4 line info is currently supported.\n"
 msgid "Only DWARF version 5 .debug_names is currently supported.\n"
-msgstr "Endast radinfo från DWARF 2, 3 och 4 hanteras för närvarande.\n"
+msgstr "Endast .debug_names från DWARF 5 hanteras för närvarande.\n"
 
 #: dwarf.c:7718
 #, c-format
@@ -3495,46 +3416,29 @@ msgid "Augmentation string length %u must be rounded up to a multiple of 4 in .d
 msgstr "Tilläggsstränglängden %u måste avrundas upp till en multipel av 4 i .debug_names.\n"
 
 #: dwarf.c:7739
-#, fuzzy, c-format
-#| msgid "version string"
+#, c-format
 msgid "Augmentation string:"
-msgstr "versionssträng"
+msgstr "Tilläggssträng:"
 
 #: dwarf.c:7750
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| "CU table:\n"
+#, c-format
 msgid "CU table:\n"
-msgstr ""
-"\n"
-"CU-tabell:\n"
+msgstr "CU-tabell:\n"
 
 #: dwarf.c:7756 dwarf.c:7766
-#, fuzzy, c-format
-#| msgid "[%3u] 0x%lx - 0x%lx\n"
+#, c-format
 msgid "[%3u] 0x%lx\n"
-msgstr "[%3u] 0x%lx - 0x%lx\n"
+msgstr "[%3u] 0x%lx\n"
 
 #: dwarf.c:7760
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| "TU table:\n"
+#, c-format
 msgid "TU table:\n"
-msgstr ""
-"\n"
-"TU-tabell:\n"
+msgstr "TU-tabell:\n"
 
 #: dwarf.c:7770
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| "TU table:\n"
+#, c-format
 msgid "Foreign TU table:\n"
-msgstr ""
-"\n"
-"TU-tabell:\n"
+msgstr "Främmande TU-tabell:\n"
 
 #: dwarf.c:7776
 #, c-format
@@ -3576,10 +3480,9 @@ msgid "Undefined abbreviation tag %lu in unit 0x%lx in the debug_names\n"
 msgstr "Odefinierad förkortningstagg %lu i enhet 0x%lx i debug_names\n"
 
 #: dwarf.c:7989
-#, fuzzy, c-format
-#| msgid " Local entries:\n"
+#, c-format
 msgid " <no entries>"
-msgstr " Lokala poster:\n"
+msgstr " <inga poster>"
 
 #: dwarf.c:8019
 #, c-format
@@ -3679,10 +3582,9 @@ msgid "%lu\n"
 msgstr "%lu\n"
 
 #: dwarf.c:8167
-#, fuzzy, c-format
-#| msgid " <corrupt: %14ld>"
+#, c-format
 msgid "[%3u] <corrupt offset: %x>"
-msgstr " <trasig: %14ld>"
+msgstr "[%3u] <trasigt avstånd: %x>"
 
 #: dwarf.c:8168
 #, c-format
@@ -3717,26 +3619,19 @@ msgid "Internal error: out of space in the shndx pool.\n"
 msgstr "Internt fel: slut på utrymme i shndx-poolen.\n"
 
 #: dwarf.c:8331
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| "The %s section is empty.\n"
+#, c-format
 msgid "Section %s is empty\n"
-msgstr ""
-"\n"
-"Sektionen %s är tom.\n"
+msgstr "Sektionen %s är tom\n"
 
 #: dwarf.c:8337
-#, fuzzy, c-format
-#| msgid "Section %s too small for offset and size tables\n"
+#, c-format
 msgid "Section %s is too small to contain a CU/TU header\n"
-msgstr "Sektionen %s är för liten för avstånds- och storlekstabeller\n"
+msgstr "Sektionen %s är för liten för att innehålla ett CU-/TU-huvud\n"
 
 #: dwarf.c:8355
-#, fuzzy, c-format
-#| msgid "Section %s too small for shndx pool\n"
+#, c-format
 msgid "Section %s is too small for %d slots\n"
-msgstr "Sektionen %s är för liten för shndx-pool\n"
+msgstr "Sektionen %s är för liten för %d fack\n"
 
 #: dwarf.c:8363
 #, c-format
@@ -3782,10 +3677,9 @@ msgid "Section %s too small for shndx pool\n"
 msgstr "Sektionen %s är för liten för shndx-pool\n"
 
 #: dwarf.c:8448
-#, fuzzy, c-format
-#| msgid "  Number of columns:       %d\n"
+#, c-format
 msgid "Overlarge number of columns: %x\n"
-msgstr "  Antal kolumner:          %d\n"
+msgstr "För stort antal kolumner: %x\n"
 
 #: dwarf.c:8454
 #, c-format
@@ -3806,10 +3700,9 @@ msgid "dwo_id"
 msgstr "dwo_id"
 
 #: dwarf.c:8501
-#, fuzzy, c-format
-#| msgid "section %u: sh_link value of %u is larger than the number of sections\n"
+#, c-format
 msgid "Row index (%u) is larger than number of used entries (%u)\n"
-msgstr "sektion %u: sh_link-värdet på %u är större än antalet sektioner\n"
+msgstr "Radindexet (%u) är större än antalet använda poster (%u)\n"
 
 #: dwarf.c:8513
 #, c-format
@@ -3832,10 +3725,9 @@ msgid "  Size table\n"
 msgstr "  Storlekstabell\n"
 
 #: dwarf.c:8604
-#, fuzzy, c-format
-#| msgid "  Unsupported version\n"
+#, c-format
 msgid "  Unsupported version (%d)\n"
-msgstr "  Ej stödd version\n"
+msgstr "  Ej stödd version (%d)\n"
 
 #: dwarf.c:8676
 #, c-format
@@ -3887,10 +3779,9 @@ msgid "Abnormal length of thin archive member name: %lx\n"
 msgstr "Onormal längd på namn på medlem i tunt arkiv: %lx\n"
 
 #: elfcomm.c:474
-#, fuzzy, c-format
-#| msgid "%s: did not find a valid archive header\n"
+#, c-format
 msgid "%s: invalid archive header size: %ld\n"
-msgstr "%s hittade inte ett giltigt arkivhuvud\n"
+msgstr "%s: felaktig arkivhuvudsstorlek: %ld\n"
 
 #: elfcomm.c:487
 #, c-format
@@ -3908,10 +3799,9 @@ msgid "%s: failed to read archive index\n"
 msgstr "%s: lyckades inte läsa arkivindexet\n"
 
 #: elfcomm.c:525
-#, fuzzy, c-format
-#| msgid "%s: the archive index is supposed to have %ld entries of %d bytes, but the size is only %ld\n"
+#, c-format
 msgid "%s: the archive index is supposed to have 0x%lx entries of %d bytes, but the size is only 0x%lx\n"
-msgstr "%s: arkivindexet förväntades ha %ld poster på %d byte, men storleken är bara %ld\n"
+msgstr "%s: arkivindexet förväntades ha 0x%lx poster på %d byte, men storleken är bara 0x%lx\n"
 
 #: elfcomm.c:535
 msgid "Out of memory whilst trying to read archive symbol index\n"
@@ -3984,10 +3874,8 @@ msgid "Found long name index (%ld) beyond end of long name table\n"
 msgstr "Hittade ett index till långt namn (%ld) efter slutet på tabellen över långa namn\n"
 
 #: elfcomm.c:794
-#, fuzzy
-#| msgid "%s: bad archive file name\n"
 msgid "Invalid Thin archive member name\n"
-msgstr "%s: felaktigt arkivfilnamn\n"
+msgstr "Felaktigt medlemnamn i tunt arkiv\n"
 
 #: elfcomm.c:850
 #, c-format
@@ -4010,16 +3898,14 @@ msgid "%s: Unsupported EI_VERSION: %d is not %d\n"
 msgstr "%s: Ej stödd EI_VERSION: %d är inte %d\n"
 
 #: elfedit.c:129
-#, fuzzy, c-format
-#| msgid "%s: Unmatched EI_CLASS: %d is not %d\n"
+#, c-format
 msgid "%s: Unmatched input EI_CLASS: %d is not %d\n"
-msgstr "%s: Ej matchad EI_CLASS: %d är inte %d\n"
+msgstr "%s: Ej matchad indata-EI_CLASS: %d är inte %d\n"
 
 #: elfedit.c:138
-#, fuzzy, c-format
-#| msgid "%s: Unmatched EI_CLASS: %d is not %d\n"
+#, c-format
 msgid "%s: Unmatched output EI_CLASS: %d is not %d\n"
-msgstr "%s: Ej matchad EI_CLASS: %d är inte %d\n"
+msgstr "%s: Ej matchad utdata-EI_CLASS: %d är inte %d\n"
 
 #: elfedit.c:147
 #, c-format
@@ -4589,10 +4475,8 @@ msgid "writing stub"
 msgstr "skriver stubbe"
 
 #: nlmconv.c:1876
-#, fuzzy
-#| msgid "Unable to locate %s section!\n"
 msgid "Unable to locate PPC_TOC16 reloc information"
-msgstr "Kan inte hitta sektionen %s!\n"
+msgstr "Kan inte hitta PPC_TOC16-omlokaliseringsinformation"
 
 # FIXME
 #: nlmconv.c:1930
@@ -4612,10 +4496,9 @@ msgid "overflow when adjusting relocation against %s"
 msgstr "överspill vid justeringen av omlokalisering mot %s"
 
 #: nlmconv.c:2033
-#, fuzzy, c-format
-#| msgid "IEEE unsupported float type size %u\n"
+#, c-format
 msgid "Unsupported relocation size: %d"
-msgstr "IEEE klarar inte flyttalstyper av storlek %u\n"
+msgstr "Omlokaliseringsstorlek som ej stödjs: %d"
 
 #: nlmconv.c:2145
 #, c-format
@@ -4692,21 +4575,7 @@ msgid "      --plugin NAME      Load the specified plugin\n"
 msgstr "      --plugin NAMN      Ladda den angivna insticksmodulen\n"
 
 #: nm.c:267
-#, fuzzy, c-format
-#| msgid ""
-#| "  -S, --print-size       Print size of defined symbols\n"
-#| "  -s, --print-armap      Include index for symbols from archive members\n"
-#| "      --size-sort        Sort symbols by size\n"
-#| "      --special-syms     Include special symbols in the output\n"
-#| "      --synthetic        Display synthetic symbols as well\n"
-#| "  -t, --radix=RADIX      Use RADIX for printing symbol values\n"
-#| "      --target=BFDNAME   Specify the target object format as BFDNAME\n"
-#| "  -u, --undefined-only   Display only undefined symbols\n"
-#| "  -X 32_64               (ignored)\n"
-#| "  @FILE                  Read options from FILE\n"
-#| "  -h, --help             Display this information\n"
-#| "  -V, --version          Display this program's version number\n"
-#| "\n"
+#, c-format
 msgid ""
 "  -S, --print-size       Print size of defined symbols\n"
 "  -s, --print-armap      Include index for symbols from archive members\n"
@@ -4731,6 +4600,7 @@ msgstr ""
 "  -t, --radix=BAS        Skriv ut siffervärden i talbas BAS\n"
 "      --target=BFD-NAMN  Välj BFD-NAMN som målobjektets format\n"
 "  -u, --undefined-only   Visa endast odefinierade symboler\n"
+"      --with-symbol-versions  Visa versionssträngar efter symbolnamn\n"
 "  -X 32_64               (ignorerad)\n"
 "  @<fil>                 Läs flaggor från FIL\n"
 "  -h, --help             Visa denna hjälptext\n"
@@ -4763,10 +4633,9 @@ msgid "<unknown>: %d"
 msgstr "<okänd>: %d"
 
 #: nm.c:398
-#, fuzzy, c-format
-#| msgid "<unknown>: %d"
+#, c-format
 msgid "<unknown>: %d/%d"
-msgstr "<okänd>: %d"
+msgstr "<okänd>: %d/%d"
 
 #: nm.c:439
 #, c-format
@@ -4928,101 +4797,7 @@ msgstr ""
 "                                   Inaktivera beteendet -D (standard)\n"
 
 #: objcopy.c:551
-#, fuzzy, c-format
-#| msgid ""
-#| "  -j --only-section <name>         Only copy section <name> into the output\n"
-#| "     --add-gnu-debuglink=<file>    Add section .gnu_debuglink linking to <file>\n"
-#| "  -R --remove-section <name>       Remove section <name> from the output\n"
-#| "  -S --strip-all                   Remove all symbol and relocation information\n"
-#| "  -g --strip-debug                 Remove all debugging symbols & sections\n"
-#| "     --strip-dwo                   Remove all DWO sections\n"
-#| "     --strip-unneeded              Remove all symbols not needed by relocations\n"
-#| "  -N --strip-symbol <name>         Do not copy symbol <name>\n"
-#| "     --strip-unneeded-symbol <name>\n"
-#| "                                   Do not copy symbol <name> unless needed by\n"
-#| "                                     relocations\n"
-#| "     --only-keep-debug             Strip everything but the debug information\n"
-#| "     --extract-dwo                 Copy only DWO sections\n"
-#| "     --extract-symbol              Remove section contents but keep symbols\n"
-#| "  -K --keep-symbol <name>          Do not strip symbol <name>\n"
-#| "     --keep-file-symbols           Do not strip file symbol(s)\n"
-#| "     --localize-hidden             Turn all ELF hidden symbols into locals\n"
-#| "  -L --localize-symbol <name>      Force symbol <name> to be marked as a local\n"
-#| "     --globalize-symbol <name>     Force symbol <name> to be marked as a global\n"
-#| "  -G --keep-global-symbol <name>   Localize all symbols except <name>\n"
-#| "  -W --weaken-symbol <name>        Force symbol <name> to be marked as a weak\n"
-#| "     --weaken                      Force all global symbols to be marked as weak\n"
-#| "  -w --wildcard                    Permit wildcard in symbol comparison\n"
-#| "  -x --discard-all                 Remove all non-global symbols\n"
-#| "  -X --discard-locals              Remove any compiler-generated symbols\n"
-#| "  -i --interleave [<number>]       Only copy N out of every <number> bytes\n"
-#| "     --interleave-width <number>   Set N for --interleave\n"
-#| "  -b --byte <num>                  Select byte <num> in every interleaved block\n"
-#| "     --gap-fill <val>              Fill gaps between sections with <val>\n"
-#| "     --pad-to <addr>               Pad the last section up to address <addr>\n"
-#| "     --set-start <addr>            Set the start address to <addr>\n"
-#| "    {--change-start|--adjust-start} <incr>\n"
-#| "                                   Add <incr> to the start address\n"
-#| "    {--change-addresses|--adjust-vma} <incr>\n"
-#| "                                   Add <incr> to LMA, VMA and start addresses\n"
-#| "    {--change-section-address|--adjust-section-vma} <name>{=|+|-}<val>\n"
-#| "                                   Change LMA and VMA of section <name> by <val>\n"
-#| "     --change-section-lma <name>{=|+|-}<val>\n"
-#| "                                   Change the LMA of section <name> by <val>\n"
-#| "     --change-section-vma <name>{=|+|-}<val>\n"
-#| "                                   Change the VMA of section <name> by <val>\n"
-#| "    {--[no-]change-warnings|--[no-]adjust-warnings}\n"
-#| "                                   Warn if a named section does not exist\n"
-#| "     --set-section-flags <name>=<flags>\n"
-#| "                                   Set section <name>'s properties to <flags>\n"
-#| "     --add-section <name>=<file>   Add section <name> found in <file> to output\n"
-#| "     --dump-section <name>=<file>  Dump the contents of section <name> into <file>\n"
-#| "     --rename-section <old>=<new>[,<flags>] Rename section <old> to <new>\n"
-#| "     --long-section-names {enable|disable|keep}\n"
-#| "                                   Handle long section names in Coff objects.\n"
-#| "     --change-leading-char         Force output format's leading character style\n"
-#| "     --remove-leading-char         Remove leading character from global symbols\n"
-#| "     --reverse-bytes=<num>         Reverse <num> bytes at a time, in output sections with content\n"
-#| "     --redefine-sym <old>=<new>    Redefine symbol name <old> to <new>\n"
-#| "     --redefine-syms <file>        --redefine-sym for all symbol pairs \n"
-#| "                                     listed in <file>\n"
-#| "     --srec-len <number>           Restrict the length of generated Srecords\n"
-#| "     --srec-forceS3                Restrict the type of generated Srecords to S3\n"
-#| "     --strip-symbols <file>        -N for all symbols listed in <file>\n"
-#| "     --strip-unneeded-symbols <file>\n"
-#| "                                   --strip-unneeded-symbol for all symbols listed\n"
-#| "                                     in <file>\n"
-#| "     --keep-symbols <file>         -K for all symbols listed in <file>\n"
-#| "     --localize-symbols <file>     -L for all symbols listed in <file>\n"
-#| "     --globalize-symbols <file>    --globalize-symbol for all in <file>\n"
-#| "     --keep-global-symbols <file>  -G for all symbols listed in <file>\n"
-#| "     --weaken-symbols <file>       -W for all symbols listed in <file>\n"
-#| "     --alt-machine-code <index>    Use the target's <index>'th alternative machine\n"
-#| "     --writable-text               Mark the output text as writable\n"
-#| "     --readonly-text               Make the output text write protected\n"
-#| "     --pure                        Mark the output file as demand paged\n"
-#| "     --impure                      Mark the output file as impure\n"
-#| "     --prefix-symbols <prefix>     Add <prefix> to start of every symbol name\n"
-#| "     --prefix-sections <prefix>    Add <prefix> to start of every section name\n"
-#| "     --prefix-alloc-sections <prefix>\n"
-#| "                                   Add <prefix> to start of every allocatable\n"
-#| "                                     section name\n"
-#| "     --file-alignment <num>        Set PE file alignment to <num>\n"
-#| "     --heap <reserve>[,<commit>]   Set PE reserve/commit heap to <reserve>/\n"
-#| "                                   <commit>\n"
-#| "     --image-base <address>        Set PE image base to <address>\n"
-#| "     --section-alignment <num>     Set PE section alignment to <num>\n"
-#| "     --stack <reserve>[,<commit>]  Set PE reserve/commit stack to <reserve>/\n"
-#| "                                   <commit>\n"
-#| "     --subsystem <name>[:<version>]\n"
-#| "                                   Set PE subsystem to <name> [& <version>]\n"
-#| "     --compress-debug-sections     Compress DWARF debug sections using zlib\n"
-#| "     --decompress-debug-sections   Decompress DWARF debug sections using zlib\n"
-#| "  -v --verbose                     List all object files modified\n"
-#| "  @<file>                          Read options from <file>\n"
-#| "  -V --version                     Display this program's version number\n"
-#| "  -h --help                        Display this output\n"
-#| "     --info                        List object formats & architectures supported\n"
+#, c-format
 msgid ""
 "  -j --only-section <name>         Only copy section <name> into the output\n"
 "     --add-gnu-debuglink=<file>    Add section .gnu_debuglink linking to <file>\n"
@@ -5132,6 +4907,7 @@ msgstr ""
 "     --add-gnu-debuglink=<fil>     Lägg till en sektion .gnu_debuglink länkad\n"
 "                                     till <fil>\n"
 "  -R --remove-section <namn>       Ta bort sektion <namn> från utdata\n"
+"     --remove-relocations <namn>   Ta bort omlokaliseringar från sektion <namn>\n"
 "  -S --strip-all                   Ta bort all symbol- och omlokaliserings-\n"
 "                                     information\n"
 "  -g --strip-debug                 Ta bort alla felsökningssymboler & -sektioner\n"
@@ -5157,7 +4933,7 @@ msgstr ""
 "  -w --wildcard                    Tillåt jokrar i symboljämförelser\n"
 "  -x --discard-all                 Ta bort alla icke-globala symboler\n"
 "  -X --discard-locals              Ta bort alla kompilatorgenererade symboler\n"
-"  -i --interleave [<antal>]        Kopiera N av varje <antal> byte\n"
+"  -i --interleave[=<antal>]        Kopiera N av varje <antal> byte\n"
 "     --interleave-width <antal>    Sätt N för --interleave\n"
 "  -b --byte <num>                  Välj byte <num> i varje inflätat block\n"
 "     --gap-fill <värde>            Fyll gap mellan sektioner med  <värde>\n"
@@ -5180,6 +4956,9 @@ msgstr ""
 "                                   Sätt sektion <namn>s egenskaper till\n"
 "                                     <flaggor>\n"
 "     --add-section <namn>=<fil>    Lägg till sektion <namn> från <fil> i utdata\n"
+"     --update-section <namn>=<fil>\n"
+"                                   Uppdatera innehållet i sektionen <namn> med\n"
+"                                   innehållet som finns i filen <fil>\n"
 "     --dump-section <namn>=<fil>   Skriv innehållet i sektion <namn> i <fil>\n"
 "     --rename-section <gammal>=<ny>[,<flaggor>] Byt namn på sektion <gammal>\n"
 "                                     till <ny>\n"
@@ -5204,6 +4983,7 @@ msgstr ""
 "     --globalize-symbols <fil>     --globalize-symbol för alla i <fil>\n"
 "     --keep-global-symbols <fil>   -G för alla symboler uppräknade i <fil>\n"
 "     --weaken-symbols <fil>        -W för alla symboler uppräknade i <fil>\n"
+"     --add-symbol <namn>=[<sektion>:]<värde>[,<flaggor>]  Lägg till en symbol\n"
 "     --alt-machine-code <index>    Använd målets <index>:e alternativa maskin\n"
 "     --writable-text               Markera uttexten som skrivbar\n"
 "     --readonly-text               Gör uttexten skrivskyddad\n"
@@ -5227,10 +5007,17 @@ msgstr ""
 "                                     <reservera>/<förbind>\n"
 "     --subsystem <namn>[:<version>]\n"
 "                                   Sätt PE-undersystem till <namn> [& <version>]\n"
-"     --compress-debug-sections     Komprimera DWARF-felsökningssektioner med\n"
+"     --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi}]\n"
+"                                   Komprimera DWARF-felsökningssektioner med\n"
 "                                     zlib\n"
 "     --decompress-debug-sections   Dekomprimera DWARF-felsökningssektioner med\n"
 "                                     zlib\n"
+"     --elf-stt-common=[yes|no]     Generera ELF common-symboler med typen\n"
+"                                     STT_COMMON\n"
+"  -M  --merge-notes                Ta bort överflödiga poster i\n"
+"                                     noteringssektioner\n"
+"      --no-merge-notes             Försök inte ta bort överflödiga noteringar\n"
+"                                     (standard)\n"
 "  -v --verbose                     Räkna upp alla modifierade objektfiler\n"
 "  @<fil>                           Läs flaggor från <fil>\n"
 "  -V --version                     Visa programmets versionsnummer\n"
@@ -5261,25 +5048,7 @@ msgstr ""
 "  -p --preserve-dates              Kopiera ändrad-/åtkomststämplar till utdata\n"
 
 #: objcopy.c:686
-#, fuzzy, c-format
-#| msgid ""
-#| "  -R --remove-section=<name>       Remove section <name> from the output\n"
-#| "  -s --strip-all                   Remove all symbol and relocation information\n"
-#| "  -g -S -d --strip-debug           Remove all debugging symbols & sections\n"
-#| "     --strip-dwo                   Remove all DWO sections\n"
-#| "     --strip-unneeded              Remove all symbols not needed by relocations\n"
-#| "     --only-keep-debug             Strip everything but the debug information\n"
-#| "  -N --strip-symbol=<name>         Do not copy symbol <name>\n"
-#| "  -K --keep-symbol=<name>          Do not strip symbol <name>\n"
-#| "     --keep-file-symbols           Do not strip file symbol(s)\n"
-#| "  -w --wildcard                    Permit wildcard in symbol comparison\n"
-#| "  -x --discard-all                 Remove all non-global symbols\n"
-#| "  -X --discard-locals              Remove any compiler-generated symbols\n"
-#| "  -v --verbose                     List all object files modified\n"
-#| "  -V --version                     Display this program's version number\n"
-#| "  -h --help                        Display this output\n"
-#| "     --info                        List object formats & architectures supported\n"
-#| "  -o <file>                        Place stripped output into <file>\n"
+#, c-format
 msgid ""
 "  -R --remove-section=<name>       Also remove section <name> from the output\n"
 "     --remove-relocations <name>   Remove relocations from section <name>\n"
@@ -5302,13 +5071,18 @@ msgid ""
 "     --info                        List object formats & architectures supported\n"
 "  -o <file>                        Place stripped output into <file>\n"
 msgstr ""
-"  -R --remove-section=<namn>       Ta bort sektion <namn> från utdatan\n"
+"  -R --remove-section=<namn>       Ta även bort sektion <namn> från utdatan\n"
+"     --remove-relocations <namn>   Ta bort omlokaliseringar från sektion <namn>\n"
 "  -s --strip-all                   Ta bort all symbol- och omlokaliseringsinfo\n"
 "  -g -S -d --strip-debug           Ta bort alla felsökssymboler & -sektioner\n"
 "     --strip-dwo                   Ta bort alla DWO-sektioner\n"
 "     --strip-unneeded              Ta bort alla symboler som inte är\n"
 "                                   nödvändiga för relokeringen\n"
 "     --only-keep-debug             Ta bort allt utom felsökningsinformationen\n"
+"  -M  --merge-notes                Ta bort överflödiga poster i\n"
+"                                     noteringssektioner\n"
+"      --no-merge-notes             Försök inte ta bort överflödiga noteringar\n"
+"                                     (standard)\n"
 "  -N --strip-symbol=<namn>         Kopiera inte symbol <namn>\n"
 "  -K --keep-symbol=<namn>          Ta inte bort symbol <namn>\n"
 "     --keep-file-symbols           Ta inte bort filsymboler\n"
@@ -5332,10 +5106,9 @@ msgid "supported flags: %s"
 msgstr "flaggor som hanteras: %s"
 
 #: objcopy.c:833
-#, fuzzy, c-format
-#| msgid "unrecognized section flag `%s'"
+#, c-format
 msgid "unrecognized symbol flag `%s'"
-msgstr "okänd sektionsflagga ”%s”"
+msgstr "okänd symbolflagga ”%s”"
 
 #: objcopy.c:892
 #, c-format
@@ -5373,20 +5146,14 @@ msgid "error: section %s matches both remove and copy options"
 msgstr "fel: sektionen %s matchar både borttagnings- och kopieringsflaggorna"
 
 #: objcopy.c:1296
-#, fuzzy, c-format
-#| msgid "error: section %s matches both remove and copy options"
+#, c-format
 msgid "error: section %s matches both update and remove options"
-msgstr "fel: sektionen %s matchar både borttagnings- och kopieringsflaggorna"
+msgstr "fel: sektionen %s matchar både uppdaterings- och borttagningsflaggorna"
 
 #: objcopy.c:1448
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| "Section '%s' has no data to dump.\n"
+#, c-format
 msgid "Section %s not found"
-msgstr ""
-"\n"
-"Sektion ”%s” har ingen data att skriva ut.\n"
+msgstr "Sektionen %s finns inte"
 
 #: objcopy.c:1596
 #, c-format
@@ -5394,10 +5161,9 @@ msgid "not stripping symbol `%s' because it is named in a relocation"
 msgstr "tar inte bort symbolen ”%s” för den namnges i en omlokalisering"
 
 #: objcopy.c:1656
-#, fuzzy, c-format
-#| msgid "C++ reference not found"
+#, c-format
 msgid "'before=%s' not found"
-msgstr "hittade inte C++-referensen"
+msgstr "”before=%s” finns inte"
 
 #: objcopy.c:1695
 #, c-format
@@ -5482,10 +5248,9 @@ msgid "Unable to change endianness of input file(s)"
 msgstr "Kan inte ändra endian-typ på infilen(erna)"
 
 #: objcopy.c:2276
-#, fuzzy, c-format
-#| msgid "error: the input file '%s' is empty"
+#, c-format
 msgid "error: the input file '%s' has no sections"
-msgstr "fel: infilen ”%s” är tom"
+msgstr "fel: infilen ”%s” har inga sektioner"
 
 #: objcopy.c:2286
 #, c-format
@@ -5533,28 +5298,21 @@ msgid "can't create section `%s'"
 msgstr "kan inte skapa sektion ”%s”"
 
 #: objcopy.c:2552
-#, fuzzy, c-format
-#| msgid "error: %s both copied and removed"
+#, c-format
 msgid "error: %s not found, can't be updated"
-msgstr "fel: %s både kopierad och borttagen"
+msgstr "fel: %s finns inte, kan inte uppdateras"
 
 #: objcopy.c:2577
-#, fuzzy
-#| msgid "can't dump section - it is empty"
 msgid "warning: note section is empty"
-msgstr "kan inte skriva sektionen — den är tom"
+msgstr "varning: noteringssektionen är tom"
 
 #: objcopy.c:2582
-#, fuzzy
-#| msgid "Warning: could not locate '%s'.  reason: %s"
 msgid "warning: could not load note section"
-msgstr "Varning: kunde inte hitta ”%s”.  orsak: %s"
+msgstr "varning: kunde inte läsa in noteringssektionen"
 
 #: objcopy.c:2603
-#, fuzzy
-#| msgid "failed to set size"
 msgid "warning: failed to set merged notes size"
-msgstr "misslyckades att sätta storleken"
+msgstr "varning: misslyckades att sätta storleken på sammanslagna noteringar"
 
 #: objcopy.c:2624
 #, c-format
@@ -5604,16 +5362,9 @@ msgstr "kan inte lägga till utfyllnad"
 msgid "error: failed to copy merged notes into output"
 msgstr "fel: misslyckades att kopiera sammanslagna noteringar till utdata"
 
-#  BUGG: Fortsättningen är inte markerad för översättning i koden och innehåller '-citattecken.
 #: objcopy.c:2931
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "Could not find unwind info section for "
 msgid "could not find any mergeable note sections"
-msgstr ""
-"\n"
-"Kunde inte hitta utrullningssektion till "
+msgstr "kunde inte hitta några noteringssektioner som det gick att slå samman"
 
 #: objcopy.c:2943
 #, c-format
@@ -5746,16 +5497,14 @@ msgid "interleave width must be positive"
 msgstr "intervallbredden måste vara positiv"
 
 #: objcopy.c:4849
-#, fuzzy, c-format
-#| msgid "unrecognized --endian type `%s'"
+#, c-format
 msgid "unrecognized --compress-debug-sections type `%s'"
-msgstr "okänd --endian-typ ”%s”"
+msgstr "okänd --compress-debug-sections-typ ”%s”"
 
 #: objcopy.c:4870
-#, fuzzy, c-format
-#| msgid "unrecognized section flag `%s'"
+#, c-format
 msgid "unrecognized --elf-stt-common= option `%s'"
-msgstr "okänd sektionsflagga ”%s”"
+msgstr "okänd --elf-stt-common=-flagga ”%s”"
 
 #: objcopy.c:4886
 #, c-format
@@ -5921,33 +5670,7 @@ msgstr ""
 " Följande flaggor är frivilliga:\n"
 
 #: objdump.c:237
-#, fuzzy, c-format
-#| msgid ""
-#| "  -b, --target=BFDNAME           Specify the target object format as BFDNAME\n"
-#| "  -m, --architecture=MACHINE     Specify the target architecture as MACHINE\n"
-#| "  -j, --section=NAME             Only display information for section NAME\n"
-#| "  -M, --disassembler-options=OPT Pass text OPT on to the disassembler\n"
-#| "  -EB --endian=big               Assume big endian format when disassembling\n"
-#| "  -EL --endian=little            Assume little endian format when disassembling\n"
-#| "      --file-start-context       Include context from start of file (with -S)\n"
-#| "  -I, --include=DIR              Add DIR to search list for source files\n"
-#| "  -l, --line-numbers             Include line numbers and filenames in output\n"
-#| "  -F, --file-offsets             Include file offsets when displaying information\n"
-#| "  -C, --demangle[=STYLE]         Decode mangled/processed symbol names\n"
-#| "                                  The STYLE, if specified, can be `auto', `gnu',\n"
-#| "                                  `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n"
-#| "                                  or `gnat'\n"
-#| "  -w, --wide                     Format output for more than 80 columns\n"
-#| "  -z, --disassemble-zeroes       Do not skip blocks of zeroes when disassembling\n"
-#| "      --start-address=ADDR       Only process data whose address is >= ADDR\n"
-#| "      --stop-address=ADDR        Only process data whose address is <= ADDR\n"
-#| "      --prefix-addresses         Print complete address alongside disassembly\n"
-#| "      --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n"
-#| "      --insn-width=WIDTH         Display WIDTH bytes on a single line for -d\n"
-#| "      --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n"
-#| "      --special-syms             Include special symbols in symbol dumps\n"
-#| "      --prefix=PREFIX            Add PREFIX to absolute paths for -S\n"
-#| "      --prefix-strip=LEVEL       Strip initial directory names for -S\n"
+#, c-format
 msgid ""
 "  -b, --target=BFDNAME           Specify the target object format as BFDNAME\n"
 "  -m, --architecture=MACHINE     Specify the target architecture as MACHINE\n"
@@ -6001,6 +5724,8 @@ msgstr ""
 "      --adjust-vma=AVSTÅND       Lägg till AVSTÅND till alla visade\n"
 "                                  sektionsadresser\n"
 "      --special-syms             Ta med specialsymboler i symboldumpar\n"
+"      --inlines                  Skriv ut alla inline:ingar för källkodsraden\n"
+"                                  (med -l)\n"
 "      --prefix=PREFIX            Lägg till PREFIX till absoluta sökvägar för -S\n"
 "      --prefix-strip=NIVÅ        Ta bort inledande katalognamn för -S\n"
 
@@ -6049,10 +5774,9 @@ msgid "  Flags"
 msgstr "  Flaggor"
 
 #: objdump.c:618
-#, fuzzy, c-format
-#| msgid "cannot read symbol table"
+#, c-format
 msgid "failed to read symbol table from: %s"
-msgstr "kan inte läsa symboltabellen"
+msgstr "misslyckades att läsa symboltabellen ifrån: %s"
 
 #: objdump.c:619 objdump.c:3398
 msgid "error message was"
@@ -6079,10 +5803,9 @@ msgid "disassemble_fn returned length %d"
 msgstr "disassemble_fn returnerade längden %d"
 
 #: objdump.c:2183 objdump.c:3033
-#, fuzzy, c-format
-#| msgid "reading %s section of %s failed: %s"
+#, c-format
 msgid "Reading section %s failed because: %s"
-msgstr "Lyckades inte läsa sektionen %s i %s: %s"
+msgstr "Att läsa sektionen %s misslyckades för att: %s"
 
 #: objdump.c:2200
 #, c-format
@@ -6113,10 +5836,9 @@ msgstr ""
 "Kan inte hämta innehållet i sektionen ”%s”.\n"
 
 #: objdump.c:2654
-#, fuzzy, c-format
-#| msgid "%s: no recognized debugging information"
+#, c-format
 msgid "File %s does not contain any dwarf debug information\n"
-msgstr "%s: ingen känd felsökningsinformation"
+msgstr "Filen %s innehåller inte någon dwarf-felsökningsinformation\n"
 
 #: objdump.c:2712
 #, c-format
@@ -6195,10 +5917,9 @@ msgid "could not determine the type of symbol number %ld\n"
 msgstr "kunde inte bestämma typen på symbol nummer %ld\n"
 
 #: objdump.c:3397
-#, fuzzy, c-format
-#| msgid "%s: failed to read archive index\n"
+#, c-format
 msgid "failed to read relocs in: %s"
-msgstr "%s: lyckades inte läsa arkivindexet\n"
+msgstr "misslyckades att läsa omlokaliseringar i: %s"
 
 #: objdump.c:3497
 #, c-format
@@ -6256,16 +5977,7 @@ msgid "unrecognized --endian type `%s'"
 msgstr "okänd --endian-typ ”%s”"
 
 #: od-macho.c:73
-#, fuzzy, c-format
-#| msgid ""
-#| "For Mach-O files:\n"
-#| "  header         Display the file header\n"
-#| "  section        Display the segments and sections commands\n"
-#| "  map            Display the section map\n"
-#| "  load           Display the load commands\n"
-#| "  dysymtab       Display the dynamic symbol table\n"
-#| "  codesign       Display code signature\n"
-#| "  seg_split_info Display segment split info\n"
+#, c-format
 msgid ""
 "For Mach-O files:\n"
 "  header           Display the file header\n"
@@ -6282,13 +5994,18 @@ msgid ""
 "  dyld_info        Display dyld information\n"
 msgstr ""
 "För Mach-O-filer:\n"
-"  header         Visa filhuvudet\n"
-"  section        Visa segments- och sektionskommandona\n"
-"  map            Visa sektionskartan\n"
-"  load           Visa lastkommandona\n"
-"  dysymtab       Visa tabellen över dynamiska symboler\n"
-"  codesign       Visa kodsignatur\n"
-"  seg_split_info Visa segmentsdelningsinformation\n"
+"  header           Visa filhuvudet\n"
+"  section          Visa segments- och sektionskommandona\n"
+"  map              Visa sektionskartan\n"
+"  load             Visa lastkommandona\n"
+"  dysymtab         Visa tabellen över dynamiska symboler\n"
+"  codesign         Visa kodsignatur\n"
+"  seg_split_info   Visa segmentsdelningsinformation\n"
+"  compact_unwind   Visa kompakt upprullningsinformation\n"
+"  function_starts  Visa startadressen för funktioner\n"
+"  data_in_code     Visa data i kodposter\n"
+"  twolevel_hints   Visa tabellen med ledtrådar för tvånivås namnuppslagning\n"
+"  dyld_info        Visa dyld-information\n"
 
 #: od-macho.c:298
 msgid "Mach-O header:\n"
@@ -6320,10 +6037,9 @@ msgid " ncmds     : %08lx (%lu)\n"
 msgstr " nkmdn     : %08lx (%lu)\n"
 
 #: od-macho.c:307
-#, fuzzy, c-format
-#| msgid " sizeofcmds: %08lx\n"
+#, c-format
 msgid " sizeofcmds: %08lx (%lu)\n"
-msgstr " sizeofkmdn: %08lx\n"
+msgstr " sizeofkmdn: %08lx (%lu)\n"
 
 #: od-macho.c:308
 #, c-format
@@ -6348,34 +6064,24 @@ msgid " #: Segment name     Section name     Address\n"
 msgstr "nr: Segmentnamn      Sektionsnamn     Adress\n"
 
 #: od-macho.c:973
-#, fuzzy
-#| msgid "cannot read segment split info"
 msgid "cannot read rebase dyld info"
-msgstr "kan inte läsa segmentdelningsinformation"
+msgstr "kan inte läsa ombaserings dyld-information"
 
 #: od-macho.c:978
-#, fuzzy
-#| msgid "cannot read segment split info"
 msgid "cannot read bind dyld info"
-msgstr "kan inte läsa segmentdelningsinformation"
+msgstr "kan inte läsa bindnings-dyld-information"
 
 #: od-macho.c:983
-#, fuzzy
-#| msgid "cannot read segment split info"
 msgid "cannot read weak bind dyld info"
-msgstr "kan inte läsa segmentdelningsinformation"
+msgstr "kan inte läsa svag bindnings-dyld-information"
 
 #: od-macho.c:988
-#, fuzzy
-#| msgid "cannot read loader info table"
 msgid "cannot read lazy bind dyld info"
-msgstr "kan inte läsa laddningsinformationstabellen"
+msgstr "kan inte läsa lat bindnings-dyld-information"
 
 #: od-macho.c:993
-#, fuzzy
-#| msgid "cannot read symbol table"
 msgid "cannot read export symbols dyld info"
-msgstr "kan inte läsa symboltabellen"
+msgstr "kan inte läsa exportsymbols-dyld-information"
 
 #: od-macho.c:1073 od-macho.c:1080 od-macho.c:1154 od-macho.c:1206
 #, c-format
@@ -6512,22 +6218,16 @@ msgid "  Unhandled location type %u\n"
 msgstr "  Ej hanterad platstyp %u\n"
 
 #: od-macho.c:1309
-#, fuzzy
-#| msgid "cannot read section headers"
 msgid "cannot read function starts"
-msgstr "kan inte läsa sektionshuvuden"
+msgstr "kan inte läsa funktionsinledningar"
 
 #: od-macho.c:1373
-#, fuzzy
-#| msgid "cannot read header"
 msgid "cannot read data_in_code"
-msgstr "kan inte läsa huvudet"
+msgstr "kan inte läsa data_in_code"
 
 #: od-macho.c:1411
-#, fuzzy
-#| msgid "cannot read relocations"
 msgid "cannot read twolevel hints"
-msgstr "kan inte läsa omlokaliseringarna"
+msgstr "kan inte läsa tvånivåtips"
 
 #: od-xcoff.c:77
 #, c-format
@@ -7049,17 +6749,16 @@ msgstr "<inget-namn>"
 msgid "Size truncation prevents reading 0x%"
 msgstr "Storleksavhuggning förhindrar läsning av 0x%"
 
-# Felaktig sträng, rapporterad:
+# Denna och ett antal av de följande strängarna är felaktigt avhuggna.
+# Felet är rapporterat:
 # https://sourceware.org/bugzilla/show_bug.cgi?id=21732
 #: readelf.c:360
 msgid "Size overflow prevents reading 0x%"
 msgstr "Storleksavhuggning förhindrar läsning av 0x%"
 
 #: readelf.c:372
-#, fuzzy
-#| msgid "creating %s"
 msgid "Reading 0x%"
-msgstr "skapar %s"
+msgstr "Läser 0x%"
 
 #: readelf.c:381
 #, c-format
@@ -7067,16 +6766,12 @@ msgid "Unable to seek to 0x%lx for %s\n"
 msgstr "Kan inte söka till 0x%lx för %s\n"
 
 #: readelf.c:397
-#, fuzzy
-#| msgid "Out of memory allocating 0x%lx bytes for %s\n"
 msgid "Out of memory allocating 0x%"
-msgstr "Slut på minne vid allokering av 0x%lx byte för %s\n"
+msgstr "Slut på minne vid allokering av 0x%"
 
 #: readelf.c:409
-#, fuzzy
-#| msgid "Unable to read in 0x%lx bytes of %s\n"
 msgid "Unable to read in 0x%"
-msgstr "Kan inte läsa in 0x%lx byte av %s\n"
+msgstr "Kan inte läsa in 0x%"
 
 #: readelf.c:834
 msgid "Don't know about relocations on this machine architecture\n"
@@ -7145,10 +6840,9 @@ msgid "<unknown addend: %lx>"
 msgstr "<okänd addend: %lx>"
 
 #: readelf.c:1556
-#, fuzzy, c-format
-#| msgid " bad symbol index: %08lx"
+#, c-format
 msgid " bad symbol index: %08lx in reloc"
-msgstr " felaktigt symbolindex: %08lx"
+msgstr " felaktigt symbolindex: %08lx i omlokaliseringar"
 
 #: readelf.c:1657
 #, c-format
@@ -7234,22 +6928,17 @@ msgid "unknown mac"
 msgstr "okänd mac"
 
 #: readelf.c:3163
-#, fuzzy
-#| msgid "unknown BB type"
 msgid ", <unknown MeP cpu type>"
-msgstr "okänd BB-typ"
+msgstr ", <okänd MeP-cpu-typ>"
 
 #: readelf.c:3173
-#, fuzzy
-#| msgid "unknown BB type"
 msgid "<unknown MeP copro type>"
-msgstr "okänd BB-typ"
+msgstr "<okänd MeP-copro-typ>"
 
 #: readelf.c:3184
-#, fuzzy, c-format
-#| msgid "  <unknown tag %d>: "
+#, c-format
 msgid ", unknown flags bits: %#x"
-msgstr "  <okänd tagg %d>: "
+msgstr ",  okända flaggbitar: %#x"
 
 #: readelf.c:3193
 msgid ", relocatable"
@@ -7324,41 +7013,7 @@ msgid " Display information about the contents of ELF format files\n"
 msgstr " Visa information om innehållet i filer i ELF-format\n"
 
 #: readelf.c:4299
-#, fuzzy, c-format
-#| msgid ""
-#| " Options are:\n"
-#| "  -a --all               Equivalent to: -h -l -S -s -r -d -V -A -I\n"
-#| "  -h --file-header       Display the ELF file header\n"
-#| "  -l --program-headers   Display the program headers\n"
-#| "     --segments          An alias for --program-headers\n"
-#| "  -S --section-headers   Display the sections' header\n"
-#| "     --sections          An alias for --section-headers\n"
-#| "  -g --section-groups    Display the section groups\n"
-#| "  -t --section-details   Display the section details\n"
-#| "  -e --headers           Equivalent to: -h -l -S\n"
-#| "  -s --syms              Display the symbol table\n"
-#| "     --symbols           An alias for --syms\n"
-#| "  --dyn-syms             Display the dynamic symbol table\n"
-#| "  -n --notes             Display the core notes (if present)\n"
-#| "  -r --relocs            Display the relocations (if present)\n"
-#| "  -u --unwind            Display the unwind info (if present)\n"
-#| "  -d --dynamic           Display the dynamic section (if present)\n"
-#| "  -V --version-info      Display the version sections (if present)\n"
-#| "  -A --arch-specific     Display architecture specific information (if any)\n"
-#| "  -c --archive-index     Display the symbol/file index in an archive\n"
-#| "  -D --use-dynamic       Use the dynamic section info when displaying symbols\n"
-#| "  -x --hex-dump=<number|name>\n"
-#| "                         Dump the contents of section <number|name> as bytes\n"
-#| "  -p --string-dump=<number|name>\n"
-#| "                         Dump the contents of section <number|name> as strings\n"
-#| "  -R --relocated-dump=<number|name>\n"
-#| "                         Dump the contents of section <number|name> as relocated bytes\n"
-#| "  -w[lLiaprmfFsoRt] or\n"
-#| "  --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n"
-#| "               =frames-interp,=str,=loc,=Ranges,=pubtypes,\n"
-#| "               =gdb_index,=trace_info,=trace_abbrev,=trace_aranges,\n"
-#| "               =addr,=cu_index]\n"
-#| "                         Display the contents of DWARF2 debug sections\n"
+#, c-format
 msgid ""
 " Options are:\n"
 "  -a --all               Equivalent to: -h -l -S -s -r -d -V -A -I\n"
@@ -7422,6 +7077,7 @@ msgstr ""
 "                         Visa innehållet i sektion <nummer|namn> som strängar\n"
 "  -R --relocated-dump=<nummer|namn>\n"
 "                         Visa innehållet i sektion <nummer|namn> som omlokaliserade byte\n"
+"  -z --decompress        Dekomprimera sektionen före den visas\n"
 "  -w[lLiaprmfFsoRt] eller\n"
 "  --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n"
 "               =frames-interp,=str,=loc,=Ranges,?pubtypes,\n"
@@ -7646,16 +7302,13 @@ msgid "Too many program headers - %#x - the file is not that big\n"
 msgstr "För många programhuvuden — %#x — filen är inte så stor\n"
 
 #: readelf.c:4852
-#, fuzzy, c-format
-#| msgid "Out of memory reading long symbol names in archive\n"
+#, c-format
 msgid "Out of memory reading %u program headers\n"
-msgstr "Slut på minne när långa symbolnamn i arkivet lästes\n"
+msgstr "Slut på minne när %u programhuvuden lästes\n"
 
 #: readelf.c:4883
-#, fuzzy
-#| msgid "possibly corrupt ELF header - it has a non-zero program header offset, but no program headers"
 msgid "possibly corrupt ELF header - it has a non-zero program header offset, but no program headers\n"
-msgstr "möjligen trasigt ELF-huvud - det har ett avstånd till programhuvuden som inte är noll, men inga programhuvuden"
+msgstr "möjligen trasigt ELF-huvud — det har ett avstånd till programhuvuden som inte är noll, men inga programhuvuden\n"
 
 #: readelf.c:4888
 #, c-format
@@ -7768,14 +7421,9 @@ msgid "Unable to read program interpreter name\n"
 msgstr "Kan inte läsa namnet på programtolken\n"
 
 #: readelf.c:5119
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| "      [Requesting program interpreter: %s]"
+#, c-format
 msgid "      [Requesting program interpreter: %s]\n"
-msgstr ""
-"\n"
-"      [Begär programtolkare: %s]"
+msgstr "      [Begär programtolkare: %s]\n"
 
 #: readelf.c:5128
 #, c-format
@@ -7813,42 +7461,29 @@ msgid "section headers"
 msgstr "sektionshuvuden"
 
 #: readelf.c:5225 readelf.c:5287
-#, fuzzy, c-format
-#| msgid "Out of memory reading long symbol names in archive\n"
+#, c-format
 msgid "Out of memory reading %u section headers\n"
-msgstr "Slut på minne när långa symbolnamn i arkivet lästes\n"
+msgstr "Slut på minne när %u sektionshuvuden lästes\n"
 
-# Källkoden har en uppdelad sträng, som gör att meddelandet extraheras
-# felaktigt.  En rapport är skickad till <bug-binutils@gnu.org>.
 #: readelf.c:5244 readelf.c:5306
-#, fuzzy, c-format
-#| msgid "Section %d has invalid sh_entsize of %"
+#, c-format
 msgid "Section %u has an out of range sh_link value of %u\n"
-msgstr "Sektion %d har felaktig sh_entsize %"
+msgstr "Sektion %u har ett sh_link-värde utanför intervallet %u\n"
 
-# Källkoden har en uppdelad sträng, som gör att meddelandet extraheras
-# felaktigt.  En rapport är skickad till <bug-binutils@gnu.org>.
 #: readelf.c:5246 readelf.c:5308
-#, fuzzy, c-format
-#| msgid "Section %d has invalid sh_entsize of %"
+#, c-format
 msgid "Section %u has an out of range sh_info value of %u\n"
-msgstr "Sektion %d har felaktig sh_entsize %"
+msgstr "Sektion %u har ett sh_info-värde utanför intervallet %u\n"
 
-# Källkoden har en uppdelad sträng, som gör att meddelandet extraheras
-# felaktigt.  En rapport är skickad till <bug-binutils@gnu.org>.
 #: readelf.c:5337 readelf.c:5448
-#, fuzzy, c-format
-#| msgid "Section %d has invalid sh_entsize of %"
+#, c-format
 msgid "Section %s has an invalid sh_entsize of 0x%lx\n"
-msgstr "Sektion %d har felaktig sh_entsize %"
+msgstr "Sektionen %s har en felaktig sh_entsize på 0x%lx\n"
 
-# Källkoden har en uppdelad sträng, som gör att meddelandet extraheras
-# felaktigt.  En rapport är skickad till <bug-binutils@gnu.org>.
 #: readelf.c:5344 readelf.c:5456
-#, fuzzy, c-format
-#| msgid "Section %d has invalid sh_entsize of %"
+#, c-format
 msgid "Section %s has an invalid sh_size of 0x%lx\n"
-msgstr "Sektion %d har felaktig sh_entsize %"
+msgstr "Sektionen %s har en felaktig sh_size på 0x%lx\n"
 
 #: readelf.c:5353 readelf.c:5466
 #, c-format
@@ -7869,10 +7504,9 @@ msgid "Index section %s has an sh_size of 0x%lx - expected 0x%lx\n"
 msgstr "Indexsektionen %s har en sh_size på 0x%lx — 0x%lx förväntades\n"
 
 #: readelf.c:5394 readelf.c:5507
-#, fuzzy, c-format
-#| msgid "Out of memory reading long symbol names in archive\n"
+#, c-format
 msgid "Out of memory reading %lu symbols\n"
-msgstr "Slut på minne när långa symbolnamn i arkivet lästes\n"
+msgstr "Slut på minne när %lu sumbyler lästes\n"
 
 #: readelf.c:5682 readelf.c:5754 readelf.c:5772 readelf.c:5790
 msgid "Internal error: not enough buffer room for section flag info"
@@ -7910,20 +7544,16 @@ msgstr "Det finns %d sektionshuvuden, med början på offset 0x%lx:\n"
 msgid "string table"
 msgstr "strängtabell"
 
-# Källkoden har en uppdelad sträng, som gör att meddelandet extraheras
-# felaktigt.  En rapport är skickad till <bug-binutils@gnu.org>.
 #. Note: coded this way so that there is a single string for  	     translation.
 #: readelf.c:5961
-#, fuzzy, c-format
-#| msgid "Section %d has invalid sh_entsize of %"
+#, c-format
 msgid "Section %d has invalid sh_entsize of %s\n"
-msgstr "Sektion %d har felaktig sh_entsize %"
+msgstr "Sektion %d har en felaktig sh_entsize på %s\n"
 
 #: readelf.c:5962
-#, fuzzy, c-format
-#| msgid "(Using the expected size of %d for the rest of this dump)\n"
+#, c-format
 msgid "(Using the expected size of %u for the rest of this dump)\n"
-msgstr "(Använder den förväntade storleken på %d för resten av denna dump)\n"
+msgstr "(Använder den förväntade storleken på %u för resten av denna dump)\n"
 
 #: readelf.c:5983
 msgid "File contains multiple dynamic symbol tables\n"
@@ -8046,27 +7676,19 @@ msgid "section %u: sh_link value of %u is larger than the number of sections\n"
 msgstr "sektion %u: sh_link-värdet på %u är större än antalet sektioner\n"
 
 #: readelf.c:6430
-#, fuzzy
-#| msgid "menu header"
 msgid "compression header"
-msgstr "menyhuvud"
+msgstr "kompressionshuvud"
 
 #: readelf.c:6439
-#, fuzzy, c-format
-#| msgid "[<unknown>: 0x%x] "
+#, c-format
 msgid "       [<unknown>: 0x%x], "
-msgstr "[<okänd>: 0x%x] "
+msgstr "        [<okänd>: 0x%x], "
 
 #. The ordering of the letters shown here matches the ordering of the
 #. corresponding SHF_xxx values, and hence the order in which these
 #. letters will be displayed to the user.
 #: readelf.c:6453
-#, fuzzy, c-format
-#| msgid ""
-#| "Key to Flags:\n"
-#| "  W (write), A (alloc), X (execute), M (merge), S (strings)\n"
-#| "  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)\n"
-#| "  O (extra OS processing required) o (OS specific), p (processor specific)\n"
+#, c-format
 msgid ""
 "Key to Flags:\n"
 "  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n"
@@ -8075,9 +7697,10 @@ msgid ""
 "  "
 msgstr ""
 "Nyckel till flaggorna:\n"
-"  W (skriv), A (allokera), X (exekvera), M (förena), S (strängar)\n"
-"  I (info), L (länkordning), G (grupp), T (TLS), E (uteslut), x (okänd)\n"
-"  O (extra OS-bearbetning krävs) o (OS-specifik), p (processorspecifik)\n"
+"  W (skriv), A (allokera), X (exekvera), M (förena), S (strängar), I (info),\n"
+"  L (länkordning), O (extra OS-bearbetning krävs), G (grupp), T (TLS),\n"
+"  C (komprimerad, x (okänd), o (OS-specifik), E (uteslut),\n"
+"  "
 
 #: readelf.c:6460
 #, c-format
@@ -8108,10 +7731,9 @@ msgid "Section headers are not available!\n"
 msgstr "Sektionshuvuden är inte tillgängliga!\n"
 
 #: readelf.c:6538
-#, fuzzy, c-format
-#| msgid "Out of memory reading long symbol names in archive\n"
+#, c-format
 msgid "Out of memory reading %u section group headers\n"
-msgstr "Slut på minne när långa symbolnamn i arkivet lästes\n"
+msgstr "Slut på minne när %u sektionsgrupphuvuden lästes\n"
 
 #: readelf.c:6554
 #, c-format
@@ -8123,10 +7745,9 @@ msgstr ""
 "Det finns inga sektionsgrupper i denna fil.\n"
 
 #: readelf.c:6563
-#, fuzzy, c-format
-#| msgid "out of memory parsing relocs\n"
+#, c-format
 msgid "Out of memory reading %lu groups\n"
-msgstr "slut på minne vid tolkning av omlokaliseringar\n"
+msgstr "Slut på minne när %lu grupper lästes\n"
 
 #: readelf.c:6593
 #, c-format
@@ -8276,14 +7897,9 @@ msgstr ""
 "Det finns inga omlokaliseringar i denna fil.\n"
 
 #: readelf.c:7287
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| " [Use file table entry %d]\n"
+#, c-format
 msgid "Invalid offset %lx in table entry %ld\n"
-msgstr ""
-"\n"
-" [Använd filtabellspost %d]\n"
+msgstr "Felaktigt avstånd %lx i tabellspost %ld\n"
 
 #: readelf.c:7305
 #, c-format
@@ -8295,22 +7911,19 @@ msgid "unwind table"
 msgstr "utrullningstabell"
 
 #: readelf.c:7418
-#, fuzzy, c-format
-#| msgid "Skipping unexpected relocation type %s\n"
+#, c-format
 msgid "Skipping unknown relocation type: %u\n"
-msgstr "Hoppar över oväntad omlokaliseringstyp %s\n"
+msgstr "Hoppar över okänd omlokaliseringstyp: %u\n"
 
 #: readelf.c:7424
-#, fuzzy, c-format
-#| msgid "Skipping unexpected relocation type %s\n"
+#, c-format
 msgid "Skipping unexpected relocation type: %s\n"
-msgstr "Hoppar över oväntad omlokaliseringstyp %s\n"
+msgstr "Hoppar över oväntad omlokaliseringstyp: %s\n"
 
 #: readelf.c:7433
-#, fuzzy, c-format
-#| msgid "Skipping unexpected relocation at offset 0x%lx\n"
+#, c-format
 msgid "Skipping reloc with overlarge offset: %lx\n"
-msgstr "Hoppar över oväntad omlokalisering på avståndet 0x%lx\n"
+msgstr "Hoppar över omlokalisering med för stort avstånd: %lx\n"
 
 #: readelf.c:7484 readelf.c:7927
 msgid "Multiple auxillary string tables encountered\n"
@@ -8354,16 +7967,13 @@ msgid "Skipping unexpected relocation type %s\n"
 msgstr "Hoppar över oväntad omlokaliseringstyp %s\n"
 
 #: readelf.c:7947
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| "Unwind table index '%s' at offset 0x%lx contains %lu entries:\n"
+#, c-format
 msgid ""
 "\n"
 "Unwind section '%s' at offset 0x%lx contains %lu entries:\n"
 msgstr ""
 "\n"
-"Utrullat tabellindex ”%s” på avstånd 0x%lx innehåller %lu poster:\n"
+"Utrullad sektion ”%s” på avstånd 0x%lx innehåller %lu poster:\n"
 
 #: readelf.c:8079
 msgid "unwind data"
@@ -8375,10 +7985,9 @@ msgid "Skipping unexpected relocation at offset 0x%lx\n"
 msgstr "Hoppar över oväntad omlokalisering på avståndet 0x%lx\n"
 
 #: readelf.c:8174
-#, fuzzy, c-format
-#| msgid "Unknown ARM compact model index encountered\n"
+#, c-format
 msgid "Unknown section relocation type %d encountered\n"
-msgstr "Okänd index för ARM kompakt modell påträffat\n"
+msgstr "Okänd sektionsomlokaliseringstyp %d påträffad\n"
 
 #: readelf.c:8182
 #, c-format
@@ -8386,35 +7995,29 @@ msgid "Bad symbol index in unwind relocation (%lu > %lu)\n"
 msgstr "Felaktigt symbolindex i utrullningsomlokalisering (%lu > %lu)\n"
 
 #: readelf.c:8197
-#, fuzzy, c-format
-#| msgid "Skipping unexpected relocation type %s\n"
+#, c-format
 msgid "Skipping unknown ARM relocation type: %d\n"
-msgstr "Hoppar över oväntad omlokaliseringstyp %s\n"
+msgstr "Hoppar över okänd ARM-omlokaliseringstyp: %d\n"
 
 #: readelf.c:8207
-#, fuzzy, c-format
-#| msgid "Skipping unexpected relocation type %s\n"
+#, c-format
 msgid "Skipping unexpected ARM relocation type %s\n"
-msgstr "Hoppar över oväntad omlokaliseringstyp %s\n"
+msgstr "Hoppar över oväntad ARM-omlokaliseringstyp %s\n"
 
 #: readelf.c:8216
-#, fuzzy, c-format
-#| msgid "Skipping unexpected relocation type %s\n"
+#, c-format
 msgid "Skipping unknown C6000 relocation type: %d\n"
-msgstr "Hoppar över oväntad omlokaliseringstyp %s\n"
+msgstr "Hoppar över okänd C6000-omlokaliseringstyp: %d\n"
 
 #: readelf.c:8226
-#, fuzzy, c-format
-#| msgid "Skipping unexpected relocation type %s\n"
+#, c-format
 msgid "Skipping unexpected C6000 relocation type %s\n"
-msgstr "Hoppar över oväntad omlokaliseringstyp %s\n"
+msgstr "Hoppar över oväntad C6000-omlokaliseringstyp %s\n"
 
 #. This function currently only supports ARM and TI unwinders.
 #: readelf.c:8235
-#, fuzzy
-#| msgid "Only DWARF 2 and 3 pubnames are currently supported\n"
 msgid "Only TI and ARM unwinders are currently supported\n"
-msgstr "Endast DWARF 2 och 3 pub.-namn hanteras för närvarande\n"
+msgstr "Endast TI- och ARM-utrullare stödjs för närvarande\n"
 
 #: readelf.c:8298
 #, c-format
@@ -8442,10 +8045,8 @@ msgid "[Spare]"
 msgstr "[Reserv]"
 
 #: readelf.c:8435
-#, fuzzy
-#| msgid "corrupt tag\n"
 msgid "corrupt change to vsp"
-msgstr "trasig tagg\n"
+msgstr "trasig ändring av vsp"
 
 #: readelf.c:8516 readelf.c:8665
 #, c-format
@@ -8525,10 +8126,9 @@ msgid "  [reserved (%d)]\n"
 msgstr "  [reserverad (%d)]\n"
 
 #: readelf.c:8842
-#, fuzzy, c-format
-#| msgid "Unsupported architecture type %d encountered when decoding unwind table"
+#, c-format
 msgid "Unsupported architecture type %d encountered when decoding unwind table\n"
-msgstr "Arkitekturtyp %d som ej stödjs påträffad när utrullningstabellen avkodades"
+msgstr "Arkitekturtyp %d som ej stödjs påträffad när utrullningstabellen avkodades\n"
 
 #: readelf.c:8895
 #, c-format
@@ -8536,10 +8136,9 @@ msgid "corrupt index table entry: %x\n"
 msgstr "trasigt strängtabellsindex: %x\n"
 
 #: readelf.c:8935
-#, fuzzy, c-format
-#| msgid "skipping invalid relocation offset 0x%lx in section %s\n"
+#, c-format
 msgid "Unwind entry contains corrupt offset (0x%lx) into section %s\n"
-msgstr "hoppar över felaktigt omlokaliseringsavstånd 0x%lx i sektionen %s\n"
+msgstr "Utrullningspost innehåller trasigt avstånd (0x%lx) i sektionen %s\n"
 
 #: readelf.c:8951
 #, c-format
@@ -8547,10 +8146,9 @@ msgid "Could not locate .ARM.extab section containing 0x%lx.\n"
 msgstr "Kunde inte hitta sektionen .ARM.extab innehållande 0x%lx.\n"
 
 #: readelf.c:8996
-#, fuzzy, c-format
-#| msgid "Unsupported architecture type %d encountered when processing unwind table"
+#, c-format
 msgid "Unsupported architecture type %d encountered when processing unwind table\n"
-msgstr "Arkitekturtyp %d som ej stödjs påträffad när utrullningstabellen bearbetades"
+msgstr "Arkitekturtyp %d som ej stödjs påträffad när utrullningstabellen bearbetades\n"
 
 #: readelf.c:9018
 msgid "Multiple string tables found in file.\n"
@@ -8586,10 +8184,9 @@ msgstr "Gränssnittsversion: %s"
 
 #. Note: coded this way so that there is a single string for translation.
 #: readelf.c:9122
-#, fuzzy, c-format
-#| msgid "<corrupt: %"
+#, c-format
 msgid "<corrupt: %s>"
-msgstr "<trasig: %"
+msgstr "<trasig: %s>"
 
 #: readelf.c:9140
 #, c-format
@@ -8601,10 +8198,9 @@ msgid "dynamic section"
 msgstr "dynamisk sektion"
 
 #: readelf.c:9338 readelf.c:9387
-#, fuzzy, c-format
-#| msgid "Out of memory allocating 0x%lx bytes for %s\n"
+#, c-format
 msgid "Out of memory allocating space for %lu dynamic entries\n"
-msgstr "Slut på minne vid allokering av 0x%lx byte för %s\n"
+msgstr "Slut på minne vid allokering av utrymmer för %lu dynamiska poster\n"
 
 #: readelf.c:9447
 #, c-format
@@ -8635,11 +8231,11 @@ msgstr "Kan inte uppsöka slutet av filen\n"
 
 #: readelf.c:9548
 msgid "Unable to determine the length of the dynamic string table\n"
-msgstr "Kan inte fastställa längden på den dynamiska strängtabellen\n"
+msgstr "Kan inte fastställa längden på den dynamiska sträng-tabellen\n"
 
 #: readelf.c:9554
 msgid "dynamic string table"
-msgstr "dynamisk strängtabell"
+msgstr "dynamisk sträng-tabell"
 
 #: readelf.c:9576
 #, c-format
@@ -8651,22 +8247,18 @@ msgid "symbol information"
 msgstr "symbolinformation"
 
 #: readelf.c:9602
-#, fuzzy, c-format
-#| msgid "Out of memory allocating 0x%lx bytes for %s\n"
+#, c-format
 msgid "Out of memory allocating %lu byte for dynamic symbol info\n"
-msgstr "Slut på minne vid allokering av 0x%lx byte för %s\n"
+msgstr "Slut på minne vid allokering av %lu för information om dynamiska symboler\n"
 
 #: readelf.c:9621
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| "Dynamic section at offset 0x%lx contains %u entries:\n"
+#, c-format
 msgid ""
 "\n"
 "Dynamic section at offset 0x%lx contains %lu entries:\n"
 msgstr ""
 "\n"
-"Den dynamiska sektionen på avståndet 0x%lx innehåller %u poster:\n"
+"Den dynamiska sektionen på avståndet 0x%lx innehåller %lu poster:\n"
 
 #: readelf.c:9624
 #, c-format
@@ -8744,10 +8336,9 @@ msgid "Not needed object: [%s]\n"
 msgstr "onödigt objekt: [%s]\n"
 
 #: readelf.c:10045
-#, fuzzy, c-format
-#| msgid "<corrupt: %"
+#, c-format
 msgid "<corrupt time val: %lx"
-msgstr "<trasig: %"
+msgstr "<trasigt tidsvärde: %lx"
 
 #: readelf.c:10163
 #, c-format
@@ -8887,16 +8478,13 @@ msgid "version string table"
 msgstr "versionssträngtabell"
 
 #: readelf.c:10437
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| "Version symbols section '%s' contains %d entries:\n"
+#, c-format
 msgid ""
 "\n"
 "Version symbols section '%s' contains %lu entries:\n"
 msgstr ""
 "\n"
-"Versionsymbolssektion ”%s” innehåller %d poster:\n"
+"Versionsymbolssektion ”%s” innehåller %lu poster:\n"
 
 #: readelf.c:10440
 #, c-format
@@ -8953,16 +8541,14 @@ msgstr ""
 "Det fanns ingen versionsinformation i denna fil.\n"
 
 #: readelf.c:10738
-#, fuzzy, c-format
-#| msgid "Unrecognized form: %lu\n"
+#, c-format
 msgid "Unrecognized visibility value: %u"
-msgstr "Okänd formtyp: %lu\n"
+msgstr "Okänt synlighetsvärde: %u"
 
 #: readelf.c:10799
-#, fuzzy, c-format
-#| msgid "Unrecognized XCOFF type %d\n"
+#, c-format
 msgid "Unrecognized IA64 VMS ST Function type: %d\n"
-msgstr "Okänd XCOFF-typ %d\n"
+msgstr "Okänd IA64 VMS ST-funktionstyp %d\n"
 
 #: readelf.c:10823
 #, c-format
@@ -8980,46 +8566,36 @@ msgid "<other>: %x"
 msgstr "<annan>: %x"
 
 #: readelf.c:10917
-#, fuzzy, c-format
-#| msgid "Reading section failed"
+#, c-format
 msgid "bad section index[%3d]"
-msgstr "Lyckades inte läsa sektionen"
+msgstr "trasigt sektionsindex[%3d]"
 
-# Felaktig sträng, rapporterad:
+# Flera felaktiga strängar, rapporterade:
 # https://sourceware.org/bugzilla/show_bug.cgi?id=21732
 #: readelf.c:10938
 msgid "Size truncation prevents reading %"
 msgstr "Avhuggen storlek förhindrar läsning av %"
 
 #: readelf.c:10948
-#, fuzzy
-#| msgid "  Number of used entries:  %d\n"
 msgid "Invalid number of dynamic entries: %"
-msgstr "  Antal använda poster:    %d\n"
+msgstr "Felaktigt antal dynamiska poster: %"
 
 #: readelf.c:10956
-#, fuzzy
-#| msgid "Out of memory\n"
 msgid "Out of memory reading %"
-msgstr "Slut på minne\n"
+msgstr "Slut på minne när % lästes"
 
 #: readelf.c:10963
-#, fuzzy
-#| msgid "Unable to read in dynamic data\n"
 msgid "Unable to read in %"
-msgstr "Kan inte läsa in den dynamiska datan\n"
+msgstr "Kan inte läsa in %"
 
 #: readelf.c:10972
-#, fuzzy
-#| msgid "Out of memory allocating 0x%lx bytes for %s\n"
 msgid "Out of memory allocating space for %"
-msgstr "Slut på minne vid allokering av 0x%lx byte för %s\n"
+msgstr "Slut på minne vid allokering av utrymme för %"
 
 #: readelf.c:11000
-#, fuzzy, c-format
-#| msgid "no information for symbol number %ld\n"
+#, c-format
 msgid "<No info available for dynamic symbol number %lu>\n"
-msgstr "ingen information för symbol nummer %ld\n"
+msgstr "<Ingen information tillgänglig för den dynamiska symbolen nummer %lu>\n"
 
 #: readelf.c:11032
 #, c-format
@@ -9131,10 +8707,8 @@ msgstr ""
 "Histogram över hinkarnas listlängd (totalt %lu hinkar):\n"
 
 #: readelf.c:11578
-#, fuzzy
-#| msgid "Out of memory allocating dump request table.\n"
 msgid "Out of memory allocating space for histogram buckets\n"
-msgstr "Slut på minne vid allokering av tabell för önskade utskrifter.\n"
+msgstr "Slut på minne vid allokering av utrymme för histogramhinkar\n"
 
 #: readelf.c:11582 readelf.c:11658
 #, c-format
@@ -9146,10 +8720,8 @@ msgid "histogram chain is corrupt\n"
 msgstr "histogramkedjan är trasig\n"
 
 #: readelf.c:11608
-#, fuzzy
-#| msgid "Out of memory allocating 0x%lx bytes for %s\n"
 msgid "Out of memory allocating space for histogram counts\n"
-msgstr "Slut på minne vid allokering av 0x%lx byte för %s\n"
+msgstr "Slut på minne vid allokering utrymme för histogramräknare\n"
 
 #: readelf.c:11648
 #, c-format
@@ -9161,16 +8733,12 @@ msgstr ""
 "Histogram över ”.gnu.hash” hinkars listlängd (totalt %lu hinkar):\n"
 
 #: readelf.c:11654
-#, fuzzy
-#| msgid "Out of memory allocating dump request table.\n"
 msgid "Out of memory allocating space for gnu histogram buckets\n"
-msgstr "Slut på minne vid allokering av tabell för önskade utskrifter.\n"
+msgstr "Slut på minne vid allokering utrymme för gnu histogramhinkar\n"
 
 #: readelf.c:11680
-#, fuzzy
-#| msgid "Out of memory allocating dump request table.\n"
 msgid "Out of memory allocating space for gnu histogram counts\n"
-msgstr "Slut på minne vid allokering av tabell för önskade utskrifter.\n"
+msgstr "Slut på minne vid allokering av utrymme för gnu histogramräknare\n"
 
 #: readelf.c:11725
 #, c-format
@@ -9187,10 +8755,9 @@ msgid " Num: Name                           BoundTo     Flags\n"
 msgstr "  Nr: Namn                           Bind till   Flagg\n"
 
 #: readelf.c:11735
-#, fuzzy, c-format
-#| msgid "<corrupt>"
+#, c-format
 msgid "<corrupt index>"
-msgstr "<trasig>"
+msgstr "<trasigt index>"
 
 #: readelf.c:11739
 #, c-format
@@ -9214,10 +8781,8 @@ msgid "MSP430 sym diff reloc contains invalid offset: 0x%lx\n"
 msgstr "MSP430 symbolskillnadsomlokallisering innehåller ett felaktigt avstånd: 0x%lx\n"
 
 #: readelf.c:11878
-#, fuzzy
-#| msgid "Unhandled MSP430 reloc type found after SYM_DIFF reloc"
 msgid "Unhandled MSP430 reloc type found after SYM_DIFF reloc\n"
-msgstr "Ej hanterad MSP430-omlokaliseringstyp hittad efter SYM_DIFF-omlokalisering"
+msgstr "Ej hanterad MSP430-omlokaliseringstyp hittad efter SYM_DIFF-omlokalisering\n"
 
 #: readelf.c:11901
 #, c-format
@@ -9235,10 +8800,8 @@ msgid "MN10300 sym diff reloc contains invalid offset: 0x%lx\n"
 msgstr "MN10300-symbolskillnadsomlokalisering innehåller ett felaktigt avstånd: 0x%lx\n"
 
 #: readelf.c:11935
-#, fuzzy
-#| msgid "Unhandled MN10300 reloc type found after SYM_DIFF reloc"
 msgid "Unhandled MN10300 reloc type found after SYM_DIFF reloc\n"
-msgstr "Ej hanterad MN10300-omlokaliseringstyp hittad efter SYM_DIFF-omlokalisering"
+msgstr "Ej hanterad MN10300-omlokaliseringstyp hittad efter SYM_DIFF-omlokalisering\n"
 
 #: readelf.c:11958
 #, c-format
@@ -9307,10 +8870,9 @@ msgstr ""
 "Strängutskrift av sektion ”%s”:\n"
 
 #: readelf.c:12859 readelf.c:13005 readelf.c:13173
-#, fuzzy, c-format
-#| msgid "IEEE unsupported complex type size %u\n"
+#, c-format
 msgid "section '%s' has unsupported compress type: %d\n"
-msgstr "IEEE klarar inte komplextyper av storlek %u\n"
+msgstr "sektionen ”%s” har en komprimeringstyp som inte stödjs: %d\n"
 
 #: readelf.c:12865 readelf.c:13011 readelf.c:13179
 #, c-format
@@ -9318,10 +8880,9 @@ msgid "compressed section '%s' is corrupted\n"
 msgstr "den komprimerade sektionen ”%s” är trasig\n"
 
 #: readelf.c:12897 readelf.c:13045 readelf.c:13216
-#, fuzzy, c-format
-#| msgid "Unable to locate %s section!\n"
+#, c-format
 msgid "Unable to decompress section %s\n"
-msgstr "Kan inte hitta sektionen %s!\n"
+msgstr "Kan inte dekomprimera sektionen %s\n"
 
 #: readelf.c:12922
 #, c-format
@@ -9330,10 +8891,9 @@ msgstr "  Observera: Denna sektion har omlokaliseringar mot sig, men dessa har I
 
 #: readelf.c:12955 readelf.c:14008 readelf.c:14051 readelf.c:14099
 #: readelf.c:14131
-#, fuzzy, c-format
-#| msgid "<corrupt>"
+#, c-format
 msgid "<corrupt>\n"
-msgstr "<trasig>"
+msgstr "<trasig>\n"
 
 #: readelf.c:12963
 #, c-format
@@ -9398,16 +8958,13 @@ msgid "Section %d was not dumped because it does not exist!\n"
 msgstr "Sektion %d skrevs inte ut eftersom den inte finns!\n"
 
 #: readelf.c:13497
-#, fuzzy
-#| msgid "corrupt tag\n"
 msgid "<corrupt tag>\n"
-msgstr "trasig tagg\n"
+msgstr "<trasig tagg>\n"
 
 #: readelf.c:13512
-#, fuzzy, c-format
-#| msgid "<corrupt string table index: %3ld>"
+#, c-format
 msgid "<corrupt string tag>"
-msgstr "<trasigt strängtabellsindex: %3ld>"
+msgstr "<trasig strängtabellstagg>"
 
 #: readelf.c:13552
 #, c-format
@@ -9432,40 +8989,37 @@ msgstr "Linux/uclibc\n"
 #: readelf.c:13564
 #, c-format
 msgid "Linux/glibc\n"
-msgstr ""
+msgstr "Linux/glibc\n"
 
 #: readelf.c:13567 readelf.c:13651
-#, fuzzy, c-format
-#| msgid "unknown"
+#, c-format
 msgid "Unknown\n"
-msgstr "okänd"
+msgstr "Okänd\n"
 
 #: readelf.c:13580 readelf.c:13611 readelf.c:13642
 #, c-format
 msgid "Absent\n"
-msgstr ""
+msgstr "Frånvarande\n"
 
 #: readelf.c:13624
 msgid "yes"
-msgstr ""
+msgstr "ja"
 
 #: readelf.c:13624
-#, fuzzy
-#| msgid "none"
 msgid "no"
-msgstr "ingen"
+msgstr "nej"
 
 #: readelf.c:13665 readelf.c:13673
 msgid "default"
-msgstr ""
+msgstr "standard"
 
 #: readelf.c:13666
 msgid "smallest"
-msgstr ""
+msgstr "minsta"
 
 #: readelf.c:13672
 msgid "OPTFP"
-msgstr ""
+msgstr "OPTFP"
 
 #: readelf.c:13866 readelf.c:13880 readelf.c:13899 readelf.c:14407
 #: readelf.c:14698 readelf.c:14711 readelf.c:14724
@@ -9515,10 +9069,9 @@ msgid "8-byte, except leaf SP\n"
 msgstr "8-byte, utom löv-SP\n"
 
 #: readelf.c:13917 readelf.c:14005 readelf.c:14594
-#, fuzzy, c-format
-#| msgid "flag = %d, vendor = %s\n"
+#, c-format
 msgid "flag = %d, vendor = "
-msgstr "flagga = %d, leverantör = %s\n"
+msgstr "flagga = %d, leverantör = "
 
 #: readelf.c:13938
 #, c-format
@@ -9526,10 +9079,9 @@ msgid "True\n"
 msgstr "Sant\n"
 
 #: readelf.c:13960
-#, fuzzy, c-format
-#| msgid "<unknown: %x>"
+#, c-format
 msgid "<unknown: %d>\n"
-msgstr "<okänd: %x>"
+msgstr "<okänd: %d>\n"
 
 #: readelf.c:14009
 msgid "corrupt vendor attribute\n"
@@ -9538,77 +9090,72 @@ msgstr "trasigt leverantörsattribut\n"
 #: readelf.c:14061
 #, c-format
 msgid "unspecified hard/soft float, "
-msgstr ""
+msgstr "ospecificerade hårda/mjuka flyttal, "
 
 #: readelf.c:14064
-#, fuzzy, c-format
-#| msgid "Hard float\n"
+#, c-format
 msgid "hard float, "
-msgstr "Hårda flyttal\n"
+msgstr "hårda flyttal, "
 
 #: readelf.c:14067
-#, fuzzy, c-format
-#| msgid "Soft float\n"
+#, c-format
 msgid "soft float, "
-msgstr "Mjuka flyttal\n"
+msgstr "mjuka flytta, "
 
 #: readelf.c:14070
-#, fuzzy, c-format
-#| msgid "Single-precision hard float\n"
+#, c-format
 msgid "single-precision hard float, "
-msgstr "Enkelprecisions hårda flyttal\n"
+msgstr "enkelprecisions hårda flyttal, "
 
 #: readelf.c:14077
 #, c-format
 msgid "unspecified long double\n"
-msgstr ""
+msgstr "ospecificerade långa dubbla\n"
 
 #: readelf.c:14080
 #, c-format
 msgid "128-bit IBM long double\n"
-msgstr ""
+msgstr "128-bitars IBM långa dubbla\n"
 
 #: readelf.c:14083
 #, c-format
 msgid "64-bit long double\n"
-msgstr ""
+msgstr "64-bitars lång dubbel\n"
 
 #: readelf.c:14086
 #, c-format
 msgid "128-bit IEEE long double\n"
-msgstr ""
+msgstr "128-bitars IEEE långa dubbla\n"
 
 #: readelf.c:14109 readelf.c:14141
 #, c-format
 msgid "unspecified\n"
-msgstr ""
+msgstr "ospecificerad\n"
 
 #: readelf.c:14112
-#, fuzzy, c-format
-#| msgid "Generic\n"
+#, c-format
 msgid "generic\n"
-msgstr "Allmän\n"
+msgstr "allmän\n"
 
 #: readelf.c:14147
-#, fuzzy, c-format
-#| msgid "Memory\n"
+#, c-format
 msgid "memory\n"
-msgstr "Minne\n"
+msgstr "minne\n"
 
 #: readelf.c:14176
 #, c-format
 msgid "any\n"
-msgstr ""
+msgstr "vilken som helst\n"
 
 #: readelf.c:14179
 #, c-format
 msgid "software\n"
-msgstr ""
+msgstr "mjukvara\n"
 
 #: readelf.c:14182
 #, c-format
 msgid "hardware\n"
-msgstr ""
+msgstr "hårdvara\n"
 
 #: readelf.c:14308
 #, c-format
@@ -9631,33 +9178,29 @@ msgid "Soft float\n"
 msgstr "Mjuka flyttal\n"
 
 #: readelf.c:14320
-#, fuzzy, c-format
-#| msgid "Hard float (MIPS32r2 64-bit FPU)\n"
+#, c-format
 msgid "Hard float (MIPS32r2 64-bit FPU 12 callee-saved)\n"
-msgstr "Hårda flyttal (MIPS32r2 64-bitars FPU)\n"
+msgstr "Hårda flyttal (MIPS32r2 64-bitars FPU 12 anropssparad)\n"
 
 #: readelf.c:14323
-#, fuzzy, c-format
-#| msgid "Hard float (MIPS32r2 64-bit FPU)\n"
+#, c-format
 msgid "Hard float (32-bit CPU, Any FPU)\n"
-msgstr "Hårda flyttal (MIPS32r2 64-bitars FPU)\n"
+msgstr "Hårda flyttal (32-bitars CPU, godtycklig FPU)\n"
 
 #: readelf.c:14326
-#, fuzzy, c-format
-#| msgid "Hard float (MIPS32r2 64-bit FPU)\n"
+#, c-format
 msgid "Hard float (32-bit CPU, 64-bit FPU)\n"
-msgstr "Hårda flyttal (MIPS32r2 64-bitars FPU)\n"
+msgstr "Hårda flyttal (32-bitars CPU, 64-bitars FPU)\n"
 
 #: readelf.c:14329
-#, fuzzy, c-format
-#| msgid "Hard float (MIPS32r2 64-bit FPU)\n"
+#, c-format
 msgid "Hard float compat (32-bit CPU, 64-bit FPU)\n"
-msgstr "Hårda flyttal (MIPS32r2 64-bitars FPU)\n"
+msgstr "Hårda flyttalskompatibilitet (32-bitars CPU, 64-bitars FPU)\n"
 
 #: readelf.c:14332
 #, c-format
 msgid "NaN 2008 compatibility\n"
-msgstr ""
+msgstr "NaN 2008-kompatibilitet\n"
 
 #: readelf.c:14371
 #, c-format
@@ -9761,58 +9304,44 @@ msgstr "attribut"
 #: readelf.c:14800
 #, c-format
 msgid "Unknown attributes version '%c'(%d) - expecting 'A'\n"
-msgstr ""
+msgstr "Okänd attributversion ”%c”(%d) — ”A” förväntades\n"
 
 #: readelf.c:14819
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "The %s section is empty.\n"
 msgid "Tag section ends prematurely\n"
-msgstr ""
-"\n"
-"Sektionen %s är tom.\n"
+msgstr "Sektionen slutar för tidigt\n"
 
 #: readelf.c:14828
-#, fuzzy, c-format
-#| msgid "ERROR: Bad section length (%d > %d)\n"
+#, c-format
 msgid "Bad attribute length (%u > %u)\n"
-msgstr "FEL: Felaktig sektionslängd (%d > %d)\n"
+msgstr "Felaktig attributlängd (%u > %u)\n"
 
 #: readelf.c:14836
 #, c-format
 msgid "Attribute length of %u is too small\n"
-msgstr ""
+msgstr "Attributlängden på %u är för liten\n"
 
 #: readelf.c:14847
-#, fuzzy
-#| msgid "corrupt attribute\n"
 msgid "Corrupt attribute section name\n"
-msgstr "trasigt attribut\n"
+msgstr "Trasigt attributsektionsnamn\n"
 
 #: readelf.c:14852
-#, fuzzy, c-format
-#| msgid "Attribute Section: %s\n"
+#, c-format
 msgid "Attribute Section: "
-msgstr "Attributsektion: %s\n"
+msgstr "Attributsektion: "
 
 #: readelf.c:14879
-#, fuzzy
-#| msgid "There are %ld unused bytes at the end of section %s\n"
 msgid "Unused bytes at end of section\n"
-msgstr "Det finns %ld oanvända byte i slutet av sektionen %s\n"
+msgstr "Oanvända byte i slutet av sektionen\n"
 
 #: readelf.c:14889
-#, fuzzy, c-format
-#| msgid "ERROR: Bad subsection length (%d > %d)\n"
+#, c-format
 msgid "Bad subsection length (%u > %u)\n"
-msgstr "FEL: Felaktig delsektionslängd (%d > %d)\n"
+msgstr "Felaktig delsektionslängd (%u > %u)\n"
 
 #: readelf.c:14897
-#, fuzzy, c-format
-#| msgid "ERROR: Bad subsection length (%d > %d)\n"
+#, c-format
 msgid "Bad subsection length (%u < 6)\n"
-msgstr "FEL: Felaktig delsektionslängd (%d > %d)\n"
+msgstr "Felaktig delsektionslängd (%u > 6)\n"
 
 #: readelf.c:14912
 #, c-format
@@ -9835,32 +9364,25 @@ msgid "Unknown tag: %d\n"
 msgstr "Okänd tagg: %d\n"
 
 #: readelf.c:14955
-#, fuzzy, c-format
-#| msgid "  (Unknown inline attribute value: %s)"
+#, c-format
 msgid "  Unknown attribute:\n"
-msgstr "  (Okänt inline-attributvärde: %s)"
+msgstr "  Okänt attribut:\n"
 
 #: readelf.c:14997
 msgid "MIPS GOT entry extends beyond the end of available data\n"
-msgstr ""
+msgstr "MIPS GOT-post sträcker sig bortom slutet på tillgängliga data\n"
 
 #: readelf.c:15068 readelf.c:15140
-#, fuzzy
-#| msgid "unknown"
 msgid "Unknown"
-msgstr "okänd"
+msgstr "Okänd"
 
 #: readelf.c:15187
-#, fuzzy
-#| msgid "Corrupt header in the %s section.\n"
 msgid "Corrupt MIPS ABI Flags section.\n"
-msgstr "Trasigt huvud i sektionen %s.\n"
+msgstr "Trasig MIPS ABI-flaggsektion.\n"
 
 #: readelf.c:15193
-#, fuzzy
-#| msgid "NDS32 elf flags section"
 msgid "MIPS ABI Flags section"
-msgstr "NDS32 elf-flaggsektion"
+msgstr "MIPS ABI-flaggsektion"
 
 #: readelf.c:15252 readelf.c:15794
 msgid "Global Offset Table data"
@@ -9872,6 +9394,8 @@ msgid ""
 "\n"
 "Static GOT:\n"
 msgstr ""
+"\n"
+"Statisk GOT:\n"
 
 #: readelf.c:15257 readelf.c:15799
 #, c-format
@@ -9884,10 +9408,9 @@ msgid " Reserved entries:\n"
 msgstr " Reserverade poster:\n"
 
 #: readelf.c:15272
-#, fuzzy, c-format
-#| msgid "  %*s %10s %*s Purpose\n"
+#, c-format
 msgid "  %*s %10s %*s\n"
-msgstr "  %*s %10s %*s Syfte\n"
+msgstr "  %*s %10s %*s\n"
 
 #: readelf.c:15273 readelf.c:15303 readelf.c:15805 readelf.c:15833
 #: readelf.c:15851 readelf.c:15932 readelf.c:15941
@@ -9901,7 +9424,7 @@ msgstr "Åtkomst"
 
 #: readelf.c:15274 readelf.c:15304
 msgid "Value"
-msgstr ""
+msgstr "Värde"
 
 #: readelf.c:15301 readelf.c:15831
 #, c-format
@@ -9936,22 +9459,20 @@ msgstr " INGA"
 
 #: readelf.c:15472
 msgid "No MIPS_OPTIONS header found\n"
-msgstr ""
+msgstr "Inget MIPS_OPTIONS-huvud hittades\n"
 
 #: readelf.c:15477
 msgid "options"
 msgstr "flaggor"
 
 #: readelf.c:15484
-#, fuzzy
-#| msgid "Out of memory allocating 0x%lx bytes for %s\n"
 msgid "Out of memory allocating space for MIPS options\n"
-msgstr "Slut på minne vid allokering av 0x%lx byte för %s\n"
+msgstr "Slut på minne vid allokering av utrymme för MIPS-alternativ\n"
 
 #: readelf.c:15506
 #, c-format
 msgid "Invalid size (%u) for MIPS option\n"
-msgstr ""
+msgstr "felaktig storlek (%u) för MIPS-alternativ\n"
 
 #: readelf.c:15515
 #, c-format
@@ -9969,13 +9490,11 @@ msgstr "fann konfliktlista utan dynamisk symboltabell\n"
 #: readelf.c:15692
 #, c-format
 msgid "Overlarge number of conflicts detected: %lx\n"
-msgstr ""
+msgstr "För stort antal konflikter upptäckta: %lx\n"
 
 #: readelf.c:15700
-#, fuzzy
-#| msgid "Out of memory allocating 0x%lx bytes for %s\n"
 msgid "Out of memory allocating space for dynamic conflicts\n"
-msgstr "Slut på minne vid allokering av 0x%lx byte för %s\n"
+msgstr "Slut på minne vid allokering av utrymme för dynamiska konflikter\n"
 
 #: readelf.c:15710 readelf.c:15725
 msgid "conflict"
@@ -9995,10 +9514,9 @@ msgid "  Num:    Index       Value  Name"
 msgstr "  Num:    Index       Värde  Namn"
 
 #: readelf.c:15744
-#, fuzzy, c-format
-#| msgid "<corrupt string table index: %3ld>"
+#, c-format
 msgid "<corrupt symbol index>"
-msgstr "<trasigt strängtabellsindex: %3ld>"
+msgstr "<trasigt symbolindex>"
 
 #: readelf.c:15755 readelf.c:15880 readelf.c:15965
 #, c-format
@@ -10008,13 +9526,12 @@ msgstr "<trasig: %14ld>"
 #: readelf.c:15778
 #, c-format
 msgid "The GOT symbol offset (%lu) is greater than the symbol table size (%lu)\n"
-msgstr ""
+msgstr "GOT-symbolavståndet (%lu) är större än symboltabellens storlek (%lu)\n"
 
 #: readelf.c:15787
-#, fuzzy, c-format
-#| msgid "  nbr symbols:   %d\n"
+#, c-format
 msgid "Too many GOT symbols: %lu\n"
-msgstr "  ant symboler:  %d\n"
+msgstr "För många GOT-symboler: %lu\n"
 
 #: readelf.c:15798
 #, c-format
@@ -10064,15 +9581,14 @@ msgid "Name"
 msgstr "Namn"
 
 #: readelf.c:15867
-#, fuzzy, c-format
-#| msgid "bad dynamic symbol\n"
+#, c-format
 msgid "<no dynamic symbols>"
-msgstr "felaktig dynamisk symbol\n"
+msgstr "<inga dynamiska symboler>"
 
 #: readelf.c:15883
 #, c-format
 msgid "<symbol index %lu exceeds number of dynamic symbols>"
-msgstr ""
+msgstr "<symbolindex %lu överstiger antalet dynamiska symboler>"
 
 #: readelf.c:15925
 msgid "Procedure Linkage Table data"
@@ -10099,10 +9615,9 @@ msgid " Entries:\n"
 msgstr " Poster:\n"
 
 #: readelf.c:15953
-#, fuzzy, c-format
-#| msgid "<corrupt string table index: %3ld>"
+#, c-format
 msgid "<corrupt symbol index: %lu>"
-msgstr "<trasigt strängtabellsindex: %3ld>"
+msgstr "<trasigt symbolindex: %lu>"
 
 #: readelf.c:15991
 msgid "NDS32 elf flags section"
@@ -10206,26 +9721,20 @@ msgid "NT_S390_TDB (s390 transaction diagnostic block)"
 msgstr "NT_S390_TDB (s390 transactionsdiagnostikblock)"
 
 #: readelf.c:16159
-#, fuzzy
-#| msgid "NT_S390_CTRS (s390 control registers)"
 msgid "NT_S390_VXRS_LOW (s390 vector registers 0-15 upper half)"
-msgstr "NT_S390_CTRS (s390 kontrollregister)"
+msgstr "NT_S390_VXRS_LOW (s390 kontrollregister 0-15 övre halva)"
 
 #: readelf.c:16161
-#, fuzzy
-#| msgid "NT_S390_CTRS (s390 control registers)"
 msgid "NT_S390_VXRS_HIGH (s390 vector registers 16-31)"
-msgstr "NT_S390_CTRS (s390 kontrollregister)"
+msgstr "NT_S390_VXRS_HIGH (s390 kontrollregister 16-31)"
 
 #: readelf.c:16163
-#, fuzzy
-#| msgid "NT_S390_CTRS (s390 control registers)"
 msgid "NT_S390_GS_CB (s390 guarded-storage registers)"
-msgstr "NT_S390_CTRS (s390 kontrollregister)"
+msgstr "NT_S390_GS_CB (s390 vaktad lagrings-register)"
 
 #: readelf.c:16165
 msgid "NT_S390_GS_BC (s390 guarded-storage broadcast control)"
-msgstr ""
+msgstr "NT_S390_GS_BC (s390 spridningsstyrning av skyddad lagring)"
 
 #: readelf.c:16167
 msgid "NT_ARM_VFP (arm VFP registers)"
@@ -10285,11 +9794,11 @@ msgstr "NT_ARCH (arkitektur)"
 
 #: readelf.c:16201 readelf.c:16315
 msgid "NT_GNU_BUILD_ATTRIBUTE_OPEN"
-msgstr ""
+msgstr "NT_GNU_BUILD_ATTRIBUTE_OPEN"
 
 #: readelf.c:16203 readelf.c:16317
 msgid "NT_GNU_BUILD_ATTRIBUTE_FUNC"
-msgstr ""
+msgstr "NT_GNU_BUILD_ATTRIBUTE_FUNC"
 
 #: readelf.c:16208 readelf.c:16322 readelf.c:16662 readelf.c:16807
 #: readelf.c:16865 readelf.c:16942
@@ -10358,59 +9867,54 @@ msgstr "NT_GNU_GOLD_VERSION (guldversion)"
 
 #: readelf.c:16313
 msgid "NT_GNU_PROPERTY_TYPE_0"
-msgstr ""
+msgstr "NT_GNU_PROPERTY_TYPE_0"
 
 #: readelf.c:16411
-#, fuzzy, c-format
-#| msgid "    Provider: %s\n"
+#, c-format
 msgid "      Properties: "
-msgstr "    Leverantör: %s\n"
+msgstr "      Egenskaper: "
 
 #: readelf.c:16415
 #, c-format
 msgid "<corrupt GNU_PROPERTY_TYPE, size = %#lx>\n"
-msgstr ""
+msgstr "<trasig GNU_PROPERTY_TYPE, storlek = %#lx>\n"
 
+# datasz är ett namn på en variabel i koden
 #: readelf.c:16429
 #, c-format
 msgid "<corrupt type (%#x) datasz: %#x>\n"
-msgstr ""
+msgstr "<trasig typ (%#x) datasz: %#x>\n"
 
 #: readelf.c:16445 readelf.c:16453 readelf.c:16461 readelf.c:16478
 #: readelf.c:16486
-#, fuzzy, c-format
-#| msgid "<corrupt: %"
+#, c-format
 msgid "<corrupt length: %#x> "
-msgstr "<trasig: %"
+msgstr "<trasig längd: %#x> "
 
 #: readelf.c:16476
-#, fuzzy, c-format
-#| msgid "Data size"
+#, c-format
 msgid "stack size: "
-msgstr "Datastorlek"
+msgstr "stackstorlek: "
 
 #: readelf.c:16495
-#, fuzzy, c-format
-#| msgid "  <unknown tag %d>: "
+#, c-format
 msgid "<unknown type %#x data: "
-msgstr "  <okänd tagg %d>: "
+msgstr "<okänd typ %#x-data: "
 
 #: readelf.c:16497
-#, fuzzy, c-format
-#| msgid "<processor specific>: %d"
+#, c-format
 msgid "<procesor-specific type %#x data: "
-msgstr "<processorspecifik>: %d"
+msgstr "<processorspecifi typ %#x-data: "
 
 #: readelf.c:16499
 #, c-format
 msgid "<application-specific type %#x data: "
-msgstr ""
+msgstr "<programspecifik typ %#x-data: "
 
 #: readelf.c:16518
-#, fuzzy, c-format
-#| msgid "<corrupt: %9ld>"
+#, c-format
 msgid "<corrupt descsz: %#lx>\n"
-msgstr "<trasig: %9ld>"
+msgstr "<trasig descsz: %#lx>\n"
 
 #: readelf.c:16536
 #, c-format
@@ -10420,7 +9924,7 @@ msgstr "    Bygg-id: "
 #: readelf.c:16551
 #, c-format
 msgid "    <corrupt GNU_ABI_TAG>\n"
-msgstr ""
+msgstr "    <trasig GNU_ABI_TAG>\n"
 
 #: readelf.c:16588
 #, c-format
@@ -10440,123 +9944,115 @@ msgstr "    Version: "
 #: readelf.c:16613
 #, c-format
 msgid "      Hardware Capabilities: "
-msgstr ""
+msgstr "      Hårdvaruegenskaper: "
 
 #: readelf.c:16616
-#, fuzzy
-#| msgid "<corrupt>"
 msgid "<corrupt GNU_HWCAP>\n"
-msgstr "<trasig>"
+msgstr "<trasig GNU_HWCAP>\n"
 
 #: readelf.c:16621
 #, c-format
 msgid "num entries: %ld, enabled mask: %lx\n"
-msgstr ""
+msgstr "num entries: %ld, aktiverad mask: %lx\n"
 
 #: readelf.c:16637
-#, fuzzy, c-format
-#| msgid "%s section data"
+#, c-format
 msgid "    Description data: "
-msgstr "sektionsdata för %s"
+msgstr "    Beskrivningsdata: "
 
 #: readelf.c:16655
 msgid "Alignment of 8-byte objects"
-msgstr ""
+msgstr "Justering av 8-bytesobjekt"
 
 #: readelf.c:16656
 msgid "Sizeof double and long double"
-msgstr ""
+msgstr "Storlek på dubbla och långa dubbla"
 
 #: readelf.c:16657
 msgid "Type of FPU support needed"
-msgstr ""
+msgstr "Typ av FPU-stöd som behövs"
 
 #: readelf.c:16658
 msgid "Use of SIMD instructions"
-msgstr ""
+msgstr "Användning av SIMD-instruktioner"
 
 #: readelf.c:16659
 msgid "Use of cache"
-msgstr ""
+msgstr "Användning av cache"
 
 #: readelf.c:16660
 msgid "Use of MMU"
-msgstr ""
+msgstr "Användning av MMU"
 
 #: readelf.c:16696
-#, fuzzy, c-format
-#| msgid "4-byte\n"
+#, c-format
 msgid "4-bytes\n"
 msgstr "4-byte\n"
 
 #: readelf.c:16697
-#, fuzzy, c-format
-#| msgid "8-byte\n"
+#, c-format
 msgid "8-bytes\n"
 msgstr "8-byte\n"
 
 #: readelf.c:16704
 #, c-format
 msgid "FPU-2.0\n"
-msgstr ""
+msgstr "FPU-2.0\n"
 
 #: readelf.c:16705
 #, c-format
 msgid "FPU-3.0\n"
-msgstr ""
+msgstr "FPU-3.0\n"
 
 #: readelf.c:16714
 #, c-format
 msgid "yes\n"
-msgstr ""
+msgstr "ja\n"
 
 #: readelf.c:16724
-#, fuzzy, c-format
-#| msgid "Unknown AT value: %lx"
+#, c-format
 msgid "unknown value: %x\n"
-msgstr "Okänt AT-värde: %lx"
+msgstr "okänt värde: %x\n"
 
 #: readelf.c:16766
-#, fuzzy
-#| msgid "NT_TASKSTRUCT (task structure)"
 msgid "NT_THRMISC (thrmisc structure)"
-msgstr "NT_TASKSTRUCT (task-struktur)"
+msgstr "NT_THRMISC (thrmisc-struktur)"
 
 #: readelf.c:16768
 msgid "NT_PROCSTAT_PROC (proc data)"
-msgstr ""
+msgstr "NT_PROCSTAT_PROC (processdata)"
 
 #: readelf.c:16770
 msgid "NT_PROCSTAT_FILES (files data)"
-msgstr ""
+msgstr "NT_PROCSTAT_FILES (fildata)"
 
 #: readelf.c:16772
 msgid "NT_PROCSTAT_VMMAP (vmmap data)"
-msgstr ""
+msgstr "NT_PROCSTAT_VMMAP (vmmap-data)"
 
 #: readelf.c:16774
 msgid "NT_PROCSTAT_GROUPS (groups data)"
-msgstr ""
+msgstr "NT_PROCSTAT_GROUPS (gruppdata)"
 
 #: readelf.c:16776
 msgid "NT_PROCSTAT_UMASK (umask data)"
-msgstr ""
+msgstr "NT_PROCSTAT_UMASK (umask-data)"
 
 #: readelf.c:16778
 msgid "NT_PROCSTAT_RLIMIT (rlimit data)"
-msgstr ""
+msgstr "NT_PROCSTAT_RLIMIT (rlimit-data)"
 
 #: readelf.c:16780
 msgid "NT_PROCSTAT_OSREL (osreldate data)"
-msgstr ""
+msgstr "NT_PROCSTAT_OSREL (osreldate-data)"
 
 #: readelf.c:16782
 msgid "NT_PROCSTAT_PSSTRINGS (ps_strings data)"
-msgstr ""
+msgstr "NT_PROCSTAT_PSSTRINGS (ps_strings-data)"
 
 #: readelf.c:16784
 msgid "NT_PROCSTAT_AUXV (auxv data)"
-msgstr ""
+msgstr "NT_PROCSTAT_AUXV (auxv-data)"
 
 #. NetBSD core "procinfo" structure.
 #: readelf.c:16797
@@ -10741,139 +10237,120 @@ msgstr "    Länkar-id: %s\n"
 
 #: readelf.c:17132
 msgid "file"
-msgstr ""
+msgstr "fil"
 
 #: readelf.c:17132
-#, fuzzy
-#| msgid "function"
 msgid "func"
-msgstr "funktion"
+msgstr "funk"
 
 #: readelf.c:17133
-#, fuzzy
-#| msgid "no symbols\n"
 msgid "<no symbol found>)"
-msgstr "inga symboler\n"
+msgstr "<inga symboler hittade>)"
 
 #: readelf.c:17150
 #, c-format
 msgid "    Applies from offset %#lx\n"
-msgstr ""
+msgstr "    Gäller från avstånd %#lx\n"
 
 #: readelf.c:17155 readelf.c:17176
 #, c-format
 msgid "    Applies to func at %#lx"
-msgstr ""
+msgstr "    Gäller funktion vid %#lx"
 
 #: readelf.c:17162
-#, fuzzy, c-format
-#| msgid "    Invalid size\n"
+#, c-format
 msgid "    <invalid description size: %lx>\n"
-msgstr "    Felaktig storlek\n"
+msgstr "    <felaktig beskrivningsstorlek: %lx>\n"
 
 #: readelf.c:17163
-#, fuzzy, c-format
-#| msgid "    Invalid size\n"
+#, c-format
 msgid "    <invalid descsz>"
-msgstr "    Felaktig storlek\n"
+msgstr "    <felaktig descsz>"
 
 #: readelf.c:17171
 #, c-format
 msgid "    Applies from offset %#lx"
-msgstr ""
+msgstr "    Gäller från avstånd %#lx"
 
 #: readelf.c:17197
 #, c-format
 msgid "corrupt name field in GNU build attribute note: size = %ld\n"
-msgstr ""
+msgstr "trasigt namnfält i noteringar om GNU-byggattribut: storlek = %ld\n"
 
 #: readelf.c:17198
-#, fuzzy
-#| msgid "<corrupt>"
 msgid "  <corrupt name>"
-msgstr "<trasig>"
+msgstr "  <trasigt namn>"
 
 #: readelf.c:17222
 #, c-format
 msgid "unrecognised attribute type in name field: %d\n"
-msgstr ""
+msgstr "okänd attributtyp i namnfält: %d\n"
 
 #: readelf.c:17223
-#, fuzzy
-#| msgid "unknown BB type"
 msgid "<unknown name type>"
-msgstr "okänd BB-typ"
+msgstr "<okänd namntyp>"
 
 #: readelf.c:17233
-#, fuzzy
-#| msgid "version def"
 msgid "<version>"
-msgstr "versionsdef."
+msgstr "<version>"
 
 #: readelf.c:17238
-#, fuzzy
-#| msgid "stack overflow"
 msgid "<stack prot>"
-msgstr "överspill i stacken"
+msgstr "<stackskydd>"
 
 #: readelf.c:17243
 msgid "<relro>"
-msgstr ""
+msgstr "<skrivsk. omlok.>"
 
 #: readelf.c:17248
-#, fuzzy
-#| msgid "Data size"
 msgid "<stack size>"
-msgstr "Datastorlek"
+msgstr "<stackstorlek>"
 
 #: readelf.c:17253
 msgid "<tool>"
-msgstr ""
+msgstr "<verktyg>"
 
 #: readelf.c:17258
 msgid "<ABI>"
-msgstr ""
+msgstr "<ABI>"
 
 #: readelf.c:17263
 msgid "<PIC>"
-msgstr ""
+msgstr "<PIC>"
 
 #: readelf.c:17268
 msgid "<short enum>"
-msgstr ""
+msgstr "<kort uppr.>"
 
 #: readelf.c:17287
-#, fuzzy, c-format
-#| msgid "unrecognized section flag `%s'"
+#, c-format
 msgid "unrecognised byte in name field: %d\n"
-msgstr "okänd sektionsflagga ”%s”"
+msgstr "okänd byte i namnfältet: %d\n"
 
 #: readelf.c:17288
-#, fuzzy, c-format
-#| msgid "<unknown: %x>"
+#, c-format
 msgid "<unknown:_%d>"
-msgstr "<okänd: %x>"
+msgstr "<okänd:_%d>"
 
 #: readelf.c:17300
 #, c-format
 msgid "attribute does not have an expected type (%c)\n"
-msgstr ""
+msgstr "attributet har inte någon förväntad typ (%c)\n"
 
 #: readelf.c:17304
 #, c-format
 msgid "corrupt name field: namesz: %lu but parsing gets to %ld\n"
-msgstr ""
+msgstr "trasigt namnfält: namesz: %lu men tolkningen kommer till %ld\n"
 
 #: readelf.c:17333
 #, c-format
 msgid "corrupt numeric name field: too many bytes in the value: %x\n"
-msgstr ""
+msgstr "trasigt numeriskt namnfält: för många byte i värdet: %x\n"
 
 #: readelf.c:17495
-#, fuzzy, c-format
-#| msgid "section data"
+#, c-format
 msgid "   description data: "
-msgstr "sektionsdata"
+msgstr "   beskrivningsdata: "
 
 #: readelf.c:17531
 msgid "notes"
@@ -10885,6 +10362,8 @@ msgid ""
 "\n"
 "Displaying notes found in: %s\n"
 msgstr ""
+"\n"
+"Visar kommentarer hittade i: %s\n"
 
 #: readelf.c:17540
 #, c-format
@@ -10916,7 +10395,7 @@ msgstr "Trasig notering: endast %d byte återstår, inte tillräckligt för en f
 #: readelf.c:17573
 #, c-format
 msgid "Corrupt note: name size is too big: (got: %lx, expected no more than: %lx)\n"
-msgstr ""
+msgstr "Trasig kommentar: namnstorleken är för stor: (fick: %lx, förväntade mig inte mer än: %lx)\n"
 
 #: readelf.c:17613
 #, c-format
@@ -10929,51 +10408,41 @@ msgid " type: 0x%lx, namesize: 0x%08lx, descsize: 0x%08lx\n"
 msgstr " typ: 0x%lx, namnstorlek: 0x%08lx, beskrivningsstorlek: 0x%08lx\n"
 
 #: readelf.c:17631
-#, fuzzy
-#| msgid "Out of memory allocating dump request table.\n"
 msgid "Out of memory allocating space for inote name\n"
-msgstr "Slut på minne vid allokering av tabell för önskade utskrifter.\n"
+msgstr "Slut på minne vid allokering utrymme för inote-namn\n"
 
 #: readelf.c:17694
-#, fuzzy
-#| msgid "notes"
 msgid "v850 notes"
-msgstr "kommentarer"
+msgstr "v850-noteringar"
 
 #: readelf.c:17701
-#, fuzzy, c-format
-#| msgid ""
-#| "\n"
-#| "Displaying notes found at file offset 0x%08lx with length 0x%08lx:\n"
+#, c-format
 msgid ""
 "\n"
 "Displaying contents of Renesas V850 notes section at offset 0x%lx with length 0x%lx:\n"
 msgstr ""
 "\n"
-"Visar kommentarer hittade på avstånd 0x%08lx med längd 0x%08lx:\n"
+"Visar innehållet i Renesas V850 noteringssektion på avstånd 0x%lx med längd 0x%lx:\n"
 
 #: readelf.c:17718
 #, c-format
 msgid "Corrupt note: name size is too big: %lx\n"
-msgstr ""
+msgstr "Trasig kommentar: namnstorleken är för stor: %lx\n"
 
 #: readelf.c:17728
-#, fuzzy, c-format
-#| msgid "note with invalid namesz and/or descsz found at offset 0x%lx\n"
+#, c-format
 msgid "corrupt descsz found in note at offset 0x%lx\n"
-msgstr "notering med ogiltig namesz och/eller descsz hittad på avståndet 0x%lx\n"
+msgstr "trasig descsz hittad i notering på avståndet 0x%lx\n"
 
 #: readelf.c:17730 readelf.c:17743
-#, fuzzy, c-format
-#| msgid " type: 0x%lx, namesize: 0x%08lx, descsize: 0x%08lx\n"
+#, c-format
 msgid " type: 0x%lx, namesize: 0x%lx, descsize: 0x%lx\n"
-msgstr " typ: 0x%lx, namnstorlek: 0x%08lx, beskrivningsstorlek: 0x%08lx\n"
+msgstr " typ: 0x%lx, namnstorlek: 0x%lx, beskrivningsstorlek: 0x%lx\n"
 
 #: readelf.c:17741
-#, fuzzy, c-format
-#| msgid "note with invalid namesz and/or descsz found at offset 0x%lx\n"
+#, c-format
 msgid "corrupt namesz found in note at offset 0x%lx\n"
-msgstr "notering med ogiltig namesz och/eller descsz hittad på avståndet 0x%lx\n"
+msgstr "trasig namesz hittad i notering på avståndet 0x%lx\n"
 
 #: readelf.c:17818
 #, c-format
@@ -10981,10 +10450,9 @@ msgid "No note segments present in the core file.\n"
 msgstr "Det finns inga kommentarer i minnesfilen.\n"
 
 #: readelf.c:17826
-#, fuzzy, c-format
-#| msgid "  (Unknown inline attribute value: %s)"
+#, c-format
 msgid "  Unknown GNU attribute: %s\n"
-msgstr "  (Okänt inline-attributvärde: %s)"
+msgstr "  Okänt GNU-attribut: %s\n"
 
 #: readelf.c:17961
 msgid ""
@@ -11014,10 +10482,9 @@ msgid "%s: unable to dump the index as none was found\n"
 msgstr "%s: kan inte dumpa indexet eftersom det inte fanns något\n"
 
 #: readelf.c:18211
-#, fuzzy, c-format
-#| msgid "Index of archive %s: (%ld entries, 0x%lx bytes in the symbol table)\n"
+#, c-format
 msgid "Index of archive %s: (%lu entries, 0x%lx bytes in the symbol table)\n"
-msgstr "Index för arkiv %s: (%ld poster, 0x%lx byte i symboltabellen)\n"
+msgstr "Index för arkiv %s: (%lu poster, 0x%lx byte i symboltabellen)\n"
 
 #: readelf.c:18229
 #, c-format
@@ -11213,10 +10680,9 @@ msgid "unexpected version string"
 msgstr "oväntad versionssträng"
 
 #: resbin.c:964
-#, fuzzy, c-format
-#| msgid "version length %d does not match resource length %lu"
+#, c-format
 msgid "version length %lu greater than resource length %lu"
-msgstr "versionslängd %d överensstämmer inte med resurslängd %lu"
+msgstr "versionslängden %lu är större än resurslängden %lu"
 
 #: resbin.c:968
 #, c-format
@@ -11289,16 +10755,13 @@ msgid "unexpected version value length %ld"
 msgstr "oväntad längd %ld på värde för version"
 
 #: resbin.c:1171
-#, fuzzy
-#| msgid "unexpected version string"
 msgid "nul bytes found in version string"
-msgstr "oväntad versionssträng"
+msgstr "nul-byte hittad i versionssträngen"
 
 #: resbin.c:1174
-#, fuzzy, c-format
-#| msgid "unexpected version string"
+#, c-format
 msgid "unexpected version string character: %x"
-msgstr "oväntad versionssträng"
+msgstr "oväntat tecken i versionssträngen: %x"
 
 #: rescoff.c:123
 msgid "filename required for COFF input"
@@ -11312,7 +10775,7 @@ msgstr "%s: ingen resurssektion"
 #: rescoff.c:150
 #, c-format
 msgid "%s: .rsrc section is bigger than the file!"
-msgstr ""
+msgstr "%s: .rsrc-sektionen är större än filen!"
 
 #: rescoff.c:178
 #, c-format
@@ -11321,7 +10784,7 @@ msgstr "%s: %s: adress utanför begränsningen"
 
 #: rescoff.c:199
 msgid "Resources nest too deep"
-msgstr ""
+msgstr "Resurser nästas för djupt"
 
 #: rescoff.c:202
 msgid "directory"
@@ -11336,10 +10799,8 @@ msgid "directory entry name"
 msgstr "katalogpostnamn"
 
 #: rescoff.c:253
-#, fuzzy
-#| msgid "resource data"
 msgid "resource name"
-msgstr "resursdata"
+msgstr "resursnamn"
 
 #: rescoff.c:264
 msgid "named subdirectory"
@@ -11530,66 +10991,57 @@ msgstr "Ogiltig talbas: %s\n"
 
 #: srconv.c:130
 msgid "Checksum failure"
-msgstr ""
+msgstr "Kontrollsummefel"
 
 #. FIXME: Return error status.
 #: srconv.c:142
 msgid "Failed to write checksum"
-msgstr ""
+msgstr "Misslyckades att skriva kontrollsumman"
 
 #: srconv.c:182
-#, fuzzy, c-format
-#| msgid "IEEE unsupported integer type size %u\n"
+#, c-format
 msgid "Unsupported integer write size: %d"
-msgstr "IEEE klarar inte heltalstyper av storlek %u\n"
+msgstr "Storlek av heltal att skriva som inte stödjs: %d"
 
 #. FIXME: Return error status.
 #: srconv.c:268
-#, fuzzy
-#| msgid "Failed to read in number of buckets\n"
 msgid "Failed to write TR block"
-msgstr "Lyckades inte läsa antal hinkar\n"
+msgstr "Lyckades inte skriva TR-block"
 
 #: srconv.c:359
 #, c-format
 msgid "Unrecognized H8300 sub-architecture: %ld"
-msgstr ""
+msgstr "Okänd underarkitektur till H8300: %ld"
 
 #: srconv.c:377
-#, fuzzy, c-format
-#| msgid "Supported architectures:"
+#, c-format
 msgid "Unsupported architecture: %d"
-msgstr "Arkitekturer som hanteras:"
+msgstr "Ej stödd arkitektur: %d"
 
 #: srconv.c:831
-#, fuzzy, c-format
-#| msgid "Unrecognized XCOFF type %d\n"
+#, c-format
 msgid "Unrecognised type: %d"
-msgstr "Okänd XCOFF-typ %d\n"
+msgstr "Okänd typ: %d"
 
 #: srconv.c:960
-#, fuzzy, c-format
-#| msgid "Unrecognized XCOFF type %d\n"
+#, c-format
 msgid "Unrecognised coff symbol type: %d"
-msgstr "Okänd XCOFF-typ %d\n"
+msgstr "Okänd coff-symboltyp: %d"
 
 #: srconv.c:1022 srconv.c:1122
 #, c-format
 msgid "Unrecognised coff symbol visibility: %d"
-msgstr ""
+msgstr "Okänd synlighet för coff-symbol: %d"
 
 #: srconv.c:1048 srconv.c:1093
-#, fuzzy, c-format
-#| msgid "Unrecognized debug section: %s\n"
+#, c-format
 msgid "Unrecognised coff symbol location: %d"
-msgstr "Okänd felsökningssektion: %s\n"
+msgstr "Okänd coff-symbolplats: %d"
 
 #. FIXME: Return error status.
 #: srconv.c:1427
-#, fuzzy
-#| msgid "failed to create output section"
 msgid "Failed to write CS struct"
-msgstr "misslyckades att skapa en utsektion"
+msgstr "misslyckades att skriva en CS-post"
 
 #: srconv.c:1699
 #, c-format
@@ -11764,10 +11216,9 @@ msgid "invalid minimum string length %d"
 msgstr "ogiltig minsta stränglängd %d"
 
 #: strings.c:340
-#, fuzzy, c-format
-#| msgid "reading %s section of %s failed: %s"
+#, c-format
 msgid "%s: Reading section %s failed: %s"
-msgstr "Lyckades inte läsa sektionen %s i %s: %s"
+msgstr "%s: att läsa sektionen %s misslyckades: %s"
 
 #: strings.c:640
 #, c-format
@@ -11780,6 +11231,8 @@ msgid ""
 "  -a - --all                Scan the entire file, not just the data section [default]\n"
 "  -d --data                 Only scan the data sections in the file\n"
 msgstr ""
+"  -a - --all                Läs igenom hela filen, inte bara datasektionen [standard]\n"
+"  -d --data                 Läs bara igenom datasektionen i filen\n"
 
 #: strings.c:648
 #, c-format
@@ -11787,23 +11240,11 @@ msgid ""
 "  -a - --all                Scan the entire file, not just the data section\n"
 "  -d --data                 Only scan the data sections in the file [default]\n"
 msgstr ""
+"  -a - --all                Läs igenom hela filen, inte bara datasektionen\n"
+"  -d --data                 Läs bara igenom datasektionen i filen [standard]\n"
 
 #: strings.c:652
-#, fuzzy, c-format
-#| msgid ""
-#| " The options are:\n"
-#| "  -a - --all                Scan the entire file, not just the data section\n"
-#| "  -f --print-file-name      Print the name of the file before each string\n"
-#| "  -n --bytes=[number]       Locate & print any NUL-terminated sequence of at\n"
-#| "  -<number>                   least [number] characters (default 4).\n"
-#| "  -t --radix={o,d,x}        Print the location of the string in base 8, 10 or 16\n"
-#| "  -o                        An alias for --radix=o\n"
-#| "  -T --target=<BFDNAME>     Specify the binary file format\n"
-#| "  -e --encoding={s,S,b,l,B,L} Select character size and endianness:\n"
-#| "                            s = 7-bit, S = 8-bit, {b,l} = 16-bit, {B,L} = 32-bit\n"
-#| "  @<file>                   Read options from <file>\n"
-#| "  -h --help                 Display this information\n"
-#| "  -v -V --version           Print the program's version number\n"
+#, c-format
 msgid ""
 "  -f --print-file-name      Print the name of the file before each string\n"
 "  -n --bytes=[number]       Locate & print any NUL-terminated sequence of at\n"
@@ -11819,17 +11260,18 @@ msgid ""
 "  -h --help                 Display this information\n"
 "  -v -V --version           Print the program's version number\n"
 msgstr ""
-" Flaggorna är:\n"
-"  -a - --all                Undersök hela filen, inte bara datasektionen\n"
 "  -f --print-file-name      Skriv filens namn före varje sträng\n"
 "  -n --bytes=[antal]        Hitta och skriv ut varje NUL-terminerad sekvens\n"
 "  -<antal>                  med minst [antal] tecken (standard 4).\n"
 "  -t --radix={o,d,x}        Skriv strängens position i talbas 8, 10 eller 16\n"
+"  -w --include-all-whitespace Inkludera alla blanka som giltiga strängtecken\n"
 "  -o                        Synonym för --radix=o\n"
 "  -T --target=<BFDNAMN>     Välj binärfilens format\n"
 "  -e --encoding={s,S,b,l,B,L} Välj teckenstorlek och byteordning:\n"
 "                            s = 7-bit, S = 8-bit, {b,l} = 16-bit, {B,L} = 32-bit\n"
-"  @fil>                     Läs flaggor från <fil>\n"
+"  -s --output-separator=<string> Sträng som skall användas för att separera\n"
+"                              strängar i utdata.\n"
+"  @<fil>                    Läs flaggor från <fil>\n"
 "  -h --help                 Visa denna information\n"
 "  -v --version              Visa programmets versionsinformation\n"
 
@@ -11838,10 +11280,8 @@ msgid "*undefined*"
 msgstr "*odefinierad*"
 
 #: sysdump.c:57
-#, fuzzy
-#| msgid "<corrupt>"
 msgid "*corrupt*"
-msgstr "<trasig>"
+msgstr "trasig"
 
 #: sysdump.c:125
 #, c-format
@@ -11852,13 +11292,12 @@ msgstr "SUMMAN ÄR %x\n"
 #. Prevent infinite loops re-reading beyond the end of the buffer.
 #: sysdump.c:161
 msgid "ICE: getINT: Out of buffer space"
-msgstr ""
+msgstr "ICE: getINT: Slut på buffertutrymme"
 
 #: sysdump.c:185
-#, fuzzy, c-format
-#| msgid "unsupported menu version %d"
+#, c-format
 msgid "Unsupported read size: %d"
-msgstr "menyversion %d hanteras inte"
+msgstr "Lässtorleken stödjs inte: %d"
 
 #: sysdump.c:496
 #, c-format
@@ -12163,68 +11602,3 @@ msgstr "stab_int_type: felaktig storlek %u"
 #, c-format
 msgid "%s: warning: unknown size for field `%s' in struct"
 msgstr "%s: varning: okänd storleken på fält ”%s” i strukturen"
-
-#~ msgid "(DW_OP_GNU_implicit_pointer in frame info)"
-#~ msgstr "(DW_OP_GNU_implicit_pointer i raminformation)"
-
-#~ msgid " DW_MACRO_GNU_define_indirect - lineno : %d macro : %s\n"
-#~ msgstr " DW_MACRO_GNU_define_indirect - radnr : %d makro : %s\n"
-
-#~ msgid " DW_MACRO_GNU_undef_indirect - lineno : %d macro : %s\n"
-#~ msgstr " DW_MACRO_GNU_undef_indirect - radnr : %d makro : %s\n"
-
-#~ msgid " DW_MACRO_GNU_define_indirect_alt - lineno : %d macro offset : 0x%lx\n"
-#~ msgstr " DW_MACRO_GNU_define_indirect_alt — radnr : %d makroavstånd : 0x%lx\n"
-
-#~ msgid " DW_MACRO_GNU_transparent_include_alt - offset : 0x%lx\n"
-#~ msgstr " DW_MACRO_GNU_transparent_include_alt — avstånd : 0x%lx\n"
-
-#~ msgid "Unknown machine type: %d\n"
-#~ msgstr "Okänd maskintyp: %d\n"
-
-#~ msgid "Idx Name          Size      VMA       LMA       File off  Algn"
-#~ msgstr "Idx Namn          Storlek   VMA       LMA       Filoffs   Just"
-
-#~ msgid "Idx Name          Size      VMA               LMA               File off  Algn"
-#~ msgstr "Idx Namn          Storlek   VMA               LMA               Filoffs   Just"
-
-#~ msgid "sh_entsize is zero\n"
-#~ msgstr "sh_entsize är noll\n"
-
-#~ msgid "Invalid sh_entsize\n"
-#~ msgstr "Ogiltig sh_entsize\n"
-
-#~ msgid "File contains multiple symtab shndx tables\n"
-#~ msgstr "Filen innehåller flera symtab-shndx-tabeller\n"
-
-#~ msgid ""
-#~ "Key to Flags:\n"
-#~ "  W (write), A (alloc), X (execute), M (merge), S (strings), l (large)\n"
-#~ "  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)\n"
-#~ "  O (extra OS processing required) o (OS specific), p (processor specific)\n"
-#~ msgstr ""
-#~ "Nyckel till flaggorna:\n"
-#~ "  W (skriv), A (allokera), X (exekvera), M (förena), S (strängar), l (stor)\n"
-#~ "  I (info), L (länkordning), G (grupp), T (TLS), E (uteslut), x (okänd)\n"
-#~ "  O (extra OS-bearbetning krävs) o (OS-specifik), p (processorspecifik)\n"
-
-#~ msgid "'%s'"
-#~ msgstr "”%s”"
-
-#~ msgid "| <unknown>"
-#~ msgstr "| <okänd>"
-
-#~ msgid "flag = %d, vendor = <corrupt>\n"
-#~ msgstr "flagga = %d, leverantör = <trasig>\n"
-
-#~ msgid "Any\n"
-#~ msgstr "Vilken som helst\n"
-
-#~ msgid "corrupt Tag_GNU_Power_ABI_Struct_Return"
-#~ msgstr "trasig Tag_GNU_Power_ABI_Struct_Return"
-
-#~ msgid "  Unknown section contexts\n"
-#~ msgstr "  Okända sektionkontexter\n"
-
-#~ msgid "Unknown format '%c'\n"
-#~ msgstr "Okänt format ”%c”\n"
