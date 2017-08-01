@@ -1,3 +1,8 @@
+2017-08-01  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Use MIPS_FPU_TYPE to access
+	`->mips_fpu_type'.
+
 2017-07-31  Xavier Roirand  <roirand@adacore.com>
 
 	* solib-darwin.c (DYLD_VERSION_MAX): Increase value.

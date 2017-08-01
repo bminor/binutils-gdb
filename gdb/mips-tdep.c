@@ -8451,7 +8451,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	break;
       }
   else if (arches != NULL)
-    fpu_type = gdbarch_tdep (arches->gdbarch)->mips_fpu_type;
+    fpu_type = MIPS_FPU_TYPE (arches->gdbarch);
   else
     fpu_type = MIPS_FPU_DOUBLE;
   if (gdbarch_debug)
@@ -8491,7 +8491,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  != mips64_transfers_32bit_regs_p)
 	continue;
       /* Be pedantic about which FPU is selected.  */
-      if (gdbarch_tdep (arches->gdbarch)->mips_fpu_type != fpu_type)
+      if (MIPS_FPU_TYPE (arches->gdbarch) != fpu_type)
 	continue;
 
       if (tdesc_data != NULL)
