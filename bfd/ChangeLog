@@ -1,6 +1,15 @@
 2017-08-01  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	Backport from mainline
+	2017-08-01  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf32-s390.c (elf_s390_finish_dynamic_sections): Skip if it
+	isn't the S/390 specific elf data.
+	* elf64-s390.c (elf_s390_finish_dynamic_sections): Likewise.
+
+2017-08-01  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	Backport from mainline
 	2017-07-28  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* elf32-s390.c (elf_s390_finish_dynamic_sections): Add NULL
