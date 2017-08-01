@@ -1,3 +1,16 @@
+2017-08-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/21874
+	* config/tc-i386-intel.c (i386_intel_operand): Update segment
+	register check.
+	* testsuite/gas/i386/intelok.s: Replace "fs:gs:[eax]" with
+	"fs:[eax]".
+	* testsuite/gas/i386/inval-seg.s: Add tests for invalid segment
+	register.
+	* testsuite/gas/i386/x86-64-inval-seg.s: Likewise.
+	* testsuite/gas/i386/inval-seg.l: Updated.
+	* testsuite/gas/i386/x86-64-inval-seg.l: Likewise.
+
 2017-07-31  John David Anglin  <danglin@gcc.gnu.org>
 
 	* config/tc-hppa.c (pa_ip): Clear `d' bit in branch on bit instructions
