@@ -1,3 +1,9 @@
+2017-08-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 21884
+	* emultempl/elf32.em (_place_orphan): Skip non-ELF binaries when
+	looking for sections to merge.
+
 2017-07-31  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo (plt-localentry): Revise.
