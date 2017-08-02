@@ -1,3 +1,7 @@
+2017-08-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (_place_orphan): Revert the last change.
+
 2017-08-02  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* emultempl/xtensaelf.em (xtensa_wild_group_interleave_callback):

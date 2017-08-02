@@ -2150,8 +2150,6 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	   one of them has SHF_EXCLUDE.  Don't merge 2 sections with
 	   different sh_info.  */
 	if (os->bfd_section != NULL
-	    /* PR 21884: Don't merge non-ELF sections.  */
-	    && bfd_get_flavour (os->bfd_section->owner) == bfd_target_elf_flavour
 	    && (elf_section_data (os->bfd_section)->this_hdr.sh_info
 		== elf_section_data (s)->this_hdr.sh_info)
 	    && (os->bfd_section->flags == 0
