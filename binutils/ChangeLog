@@ -1,5 +1,11 @@
 2017-08-02  Nick Clifton  <nickc@redhat.com>
 
+	PR 21702
+	* arsup.c (ar_addmod): Add plugin support for the MRI ADDMOD
+	command.
+
+2017-08-02  Nick Clifton  <nickc@redhat.com>
+
 	* testsuite/binutils-all/objdump.exp (cpus_expected): Add am33-2.
 
 2017-08-02  Alan Modra  <amodra@gmail.com>
