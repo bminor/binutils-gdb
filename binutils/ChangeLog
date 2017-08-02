@@ -1,3 +1,7 @@
+2017-08-02  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/binutils-all/objdump.exp (cpus_expected): Add am33-2.
+
 2017-08-02  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (is_32bit_abs_reloc): Add R_IA64_SECREL32MSB and

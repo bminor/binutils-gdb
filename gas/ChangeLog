@@ -1,3 +1,20 @@
+2017-08-02  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/all/gas.exp: Add am33 to the skip lists of tests
+	passed over by the mn10300 target.
+	* testsuite/gas/elf/elf.exp: Likewise.
+	* testsuite/gas/elf/dwarf2-11.d: Correct skip of am33 target.
+	* testsuite/gas/elf/dwarf2-12.d: Likewise.
+	* testsuite/gas/elf/dwarf2-13.d: Likewise.
+	* testsuite/gas/elf/dwarf2-14.d: Likewise.
+	* testsuite/gas/elf/dwarf2-15.d: Likewise.
+	* testsuite/gas/elf/dwarf2-16.d: Likewise.
+	* testsuite/gas/elf/dwarf2-17.d: Likewise.
+	* testsuite/gas/elf/dwarf2-18.d: Likewise.
+	* testsuite/gas/elf/dwarf2-5.d: Likewise.
+	* testsuite/gas/elf/dwarf2-6.d: Likewise.
+	* testsuite/gas/elf/dwarf2-7.d: Likewise.
+
 2017-08-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/21874
