@@ -12069,8 +12069,10 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_H8_300H:
       return reloc_type == 1; /* R_H8_DIR32.  */
     case EM_IA_64:
-      return reloc_type == 0x65 /* R_IA64_SECREL32LSB.  */
-	|| reloc_type == 0x25;  /* R_IA64_DIR32LSB.  */
+      return (reloc_type == 0x64    /* R_IA64_SECREL32MSB.  */
+	      || reloc_type == 0x65 /* R_IA64_SECREL32LSB.  */
+	      || reloc_type == 0x24 /* R_IA64_DIR32MSB.  */
+	      || reloc_type == 0x25 /* R_IA64_DIR32LSB.  */);
     case EM_IP2K_OLD:
     case EM_IP2K:
       return reloc_type == 2; /* R_IP2K_32.  */
@@ -12283,7 +12285,8 @@ is_64bit_abs_reloc (unsigned int reloc_type)
     case EM_ALPHA:
       return reloc_type == 2; /* R_ALPHA_REFQUAD.  */
     case EM_IA_64:
-      return reloc_type == 0x27; /* R_IA64_DIR64LSB.  */
+      return (reloc_type == 0x26    /* R_IA64_DIR64MSB.  */
+	      || reloc_type == 0x27 /* R_IA64_DIR64LSB.  */);
     case EM_PARISC:
       return reloc_type == 80; /* R_PARISC_DIR64.  */
     case EM_PPC64:
@@ -12323,7 +12326,8 @@ is_64bit_pcrel_reloc (unsigned int reloc_type)
     case EM_ALPHA:
       return reloc_type == 11; /* R_ALPHA_SREL64.  */
     case EM_IA_64:
-      return reloc_type == 0x4f; /* R_IA64_PCREL64LSB.  */
+      return (reloc_type == 0x4e    /* R_IA64_PCREL64MSB.  */
+	      || reloc_type == 0x4f /* R_IA64_PCREL64LSB.  */);
     case EM_PARISC:
       return reloc_type == 72; /* R_PARISC_PCREL64.  */
     case EM_PPC64:
