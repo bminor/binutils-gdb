@@ -1,3 +1,8 @@
+2017-08-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (mips_fpu_type_str): New function.
+	(mips_dump_tdep): Call it.
+
 2017-08-01  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* mips-tdep.c (mips_gdbarch_init): Use MIPS_FPU_TYPE to access
