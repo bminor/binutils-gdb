@@ -2136,7 +2136,8 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
     }
 
   /* Look through the script to see where to place this section.  */
-  if (constraint == 0)
+  if (constraint == 0
+      && link_info.output_bfd->xvec->flavour == bfd_target_elf_flavour)
     for (os = lang_output_section_find (secname);
 	 os != NULL;
 	 os = next_matching_output_section_statement (os, 0))

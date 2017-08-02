@@ -1,3 +1,13 @@
+2017-08-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21884
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Check
+	ELF section header only for ELF output.
+	* testsuite/ld-elf/pr21884.d: New test.
+	* testsuite/ld-elf/pr21884.t: Likewise.
+	* testsuite/ld-elf/pr21884a.s: Likewise.
+	* testsuite/ld-elf/pr21884b.s: Likewise.
+
 2017-07-31  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo (plt-localentry): Revise.
