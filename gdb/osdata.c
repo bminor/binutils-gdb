@@ -337,8 +337,7 @@ info_osdata (const char *type)
 	}
     }
 
-  make_cleanup_ui_out_table_begin_end (uiout, ncols, nrows,
-				       "OSDataTable");
+  ui_out_emit_table table_emitter (uiout, ncols, nrows, "OSDataTable");
 
   /* With no columns/items, we just output an empty table, but we
      still output the table.  This matters for MI.  */

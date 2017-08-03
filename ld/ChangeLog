@@ -1,3 +1,99 @@
+2017-08-03  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/21884
+	* testsuite/ld-elf/pr21884.d: Add AVR, HPPA, IA64, M68HC1x and
+	SCORE to list of targets not supporting file format changes during
+	linking.
+	* testsuite/ld-unique/pr21529.d: Likewise.
+	* emultempl/avrelf.em (_before_allocation): Skip for non-ELF
+	output formats.
+	(avr_elf_create_output_section_statements): Fail if the output
+	format is not ELF.
+	(avr_finish): Do not access the ELF header in non-ELF format
+	output bfds.
+	* emultempl/m68hc1xelf.em (_before_allocation): Skip for non-ELF
+	output formats.
+	(m68hc11elf_create_output_section_statements): Fail if the putput
+	format is not ELF.
+	(m68hc11elf_after_allocation): Skip for non-ELF output formats.
+
+2017-08-03  Alan Modra  <amodra@gmail.com>
+
+	PR ld/21884
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Revert
+	last change.  Rename iself to elfinput.  Expand comments.  Condition
+	ELF checks on having both input and output ELF files.  Extract..
+	(elf_orphan_compatible): ..this new function.
+
+2017-08-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21884
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Check
+	ELF section header only for ELF output.
+	* testsuite/ld-elf/pr21884.d: New test.
+	* testsuite/ld-elf/pr21884.t: Likewise.
+	* testsuite/ld-elf/pr21884a.s: Likewise.
+	* testsuite/ld-elf/pr21884b.s: Likewise.
+
+2017-08-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (_place_orphan): Revert the last change.
+
+2017-08-02  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* emultempl/xtensaelf.em (xtensa_wild_group_interleave_callback):
+	Only check for by_name sorting.
+
+2017-08-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 21884
+	* emultempl/elf32.em (_place_orphan): Skip non-ELF binaries when
+	looking for sections to merge.
+
+2017-07-31  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (plt-localentry): Revise.
+
+2017-07-29  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (plt-localentry): Document.
+
+2017-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ldgram.y (ldgram_had_keep): Make static.
+	(ldgram_vers_current_lang): Likewise.
+	(filename_spec): New rule.
+	(input_section_spec_no_keep): Use filename_spec.
+	(wildcard_maybe_exclude): New rule.
+	(wildcard_spec): Rename to...
+	(section_name_spec): ...this.
+	(section_NAME_list): Rename to...
+	(section_name_list): ...this.
+	(section_name_spec): Simplifiy and use wildcard_maybe_exclude.
+	* ldlang.c (placed_commons): Delete.
+	(lang_add_wild): No longer set placed_commons.
+	(print_wild_statement): Use full names for SORT specifiers.
+	* testsuite/ld-scripts/align.exp: Run new tests.
+	* testsuite/ld-scripts/align3.d: New file.
+	* testsuite/ld-scripts/align3.t: New file.
+	* testsuite/ld-scripts/align4.d: New file.
+	* testsuite/ld-scripts/align4.t: New file.
+	* testsuite/ld-scripts/align5.d: New file.
+	* testsuite/ld-scripts/align5.t: New file.
+	* testsuite/ld-scripts/exclude-file-5.d: New file.
+	* testsuite/ld-scripts/exclude-file-5.map: New file.
+	* testsuite/ld-scripts/exclude-file-5.t: New file.
+	* testsuite/ld-scripts/exclude-file-6.d: New file.
+	* testsuite/ld-scripts/exclude-file-6.map: New file.
+	* testsuite/ld-scripts/exclude-file-6.t: New file.
+	* NEWS: Mention the changes.
+
+2017-07-27  Georg-Johann Lay  <gjl@gcc.gnu.org>
+
+	PR ld/21849
+	* scripttempl/avr.sc: Split .progmemx.* from .progmem.* and locate
+	former at a higher address.
+
 2017-07-25  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/tlsopt5.s: Add cfi.

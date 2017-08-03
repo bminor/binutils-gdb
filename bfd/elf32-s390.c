@@ -3941,7 +3941,9 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_PLTRELSZ:
-	      dyn.d_un.d_val = htab->elf.srelplt->size + htab->elf.irelplt->size;
+	      dyn.d_un.d_val = htab->elf.srelplt->size;
+	      if (htab->elf.irelplt)
+		dyn.d_un.d_val += htab->elf.irelplt->size;
 	      break;
 	    }
 
@@ -3998,6 +4000,9 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
       Elf_Internal_Shdr *symtab_hdr;
 
       symtab_hdr = &elf_symtab_hdr (ibfd);
+
+      if (!is_s390_elf (ibfd))
+	continue;
 
       local_plt = elf_s390_local_plt (ibfd);
       if (local_plt != NULL)

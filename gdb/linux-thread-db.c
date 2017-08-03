@@ -1623,45 +1623,49 @@ info_auto_load_libthread_db (char *args, int from_tty)
   if (info_count > 0 && args == auto_load_info_scripts_pattern_nl)
     uiout->text ("\n");
 
-  make_cleanup_ui_out_table_begin_end (uiout, 2, unique_filenames,
-				       "LinuxThreadDbTable");
+  {
+    ui_out_emit_table table_emitter (uiout, 2, unique_filenames,
+				     "LinuxThreadDbTable");
 
-  uiout->table_header (max_filename_len, ui_left, "filename", "Filename");
-  uiout->table_header (pids_len, ui_left, "PIDs", "Pids");
-  uiout->table_body ();
+    uiout->table_header (max_filename_len, ui_left, "filename", "Filename");
+    uiout->table_header (pids_len, ui_left, "PIDs", "Pids");
+    uiout->table_body ();
 
-  pids = (char *) xmalloc (max_pids_len + 1);
-  make_cleanup (xfree, pids);
+    pids = (char *) xmalloc (max_pids_len + 1);
+    make_cleanup (xfree, pids);
 
-  /* Note I is incremented inside the cycle, not at its end.  */
-  for (i = 0; i < info_count;)
-    {
-      ui_out_emit_tuple tuple_emitter (uiout, NULL);
-      char *pids_end;
+    /* Note I is incremented inside the cycle, not at its end.  */
+    for (i = 0; i < info_count;)
+      {
+	ui_out_emit_tuple tuple_emitter (uiout, NULL);
+	char *pids_end;
 
-      info = array[i];
-      uiout->field_string ("filename", info->filename);
-      pids_end = pids;
+	info = array[i];
+	uiout->field_string ("filename", info->filename);
+	pids_end = pids;
 
-      while (i < info_count && strcmp (info->filename, array[i]->filename) == 0)
-	{
-	  if (pids_end != pids)
-	    {
-	      *pids_end++ = ',';
-	      *pids_end++ = ' ';
-	    }
-	  pids_end += xsnprintf (pids_end, &pids[max_pids_len + 1] - pids_end,
-				 "%u", array[i]->pid);
-	  gdb_assert (pids_end < &pids[max_pids_len + 1]);
+	while (i < info_count && strcmp (info->filename,
+					 array[i]->filename) == 0)
+	  {
+	    if (pids_end != pids)
+	      {
+		*pids_end++ = ',';
+		*pids_end++ = ' ';
+	      }
+	    pids_end += xsnprintf (pids_end,
+				   &pids[max_pids_len + 1] - pids_end,
+				   "%u", array[i]->pid);
+	    gdb_assert (pids_end < &pids[max_pids_len + 1]);
 
-	  i++;
-	}
-      *pids_end = '\0';
+	    i++;
+	  }
+	*pids_end = '\0';
 
-      uiout->field_string ("pids", pids);
+	uiout->field_string ("pids", pids);
 
-      uiout->text ("\n");
-    }
+	uiout->text ("\n");
+      }
+  }
 
   do_cleanups (back_to);
 

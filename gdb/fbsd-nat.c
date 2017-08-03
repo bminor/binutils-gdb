@@ -161,7 +161,6 @@ fbsd_find_memory_regions (struct target_ops *self,
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   char *mapfilename;
-  FILE *mapfile;
   unsigned long start, end, size;
   char protection[4];
   int read, write, exec;
@@ -169,17 +168,16 @@ fbsd_find_memory_regions (struct target_ops *self,
 
   mapfilename = xstrprintf ("/proc/%ld/map", (long) pid);
   cleanup = make_cleanup (xfree, mapfilename);
-  mapfile = fopen (mapfilename, "r");
+  gdb_file_up mapfile = fopen (mapfilename, "r");
   if (mapfile == NULL)
     error (_("Couldn't open %s."), mapfilename);
-  make_cleanup_fclose (mapfile);
 
   if (info_verbose)
     fprintf_filtered (gdb_stdout, 
 		      "Reading memory regions from %s\n", mapfilename);
 
   /* Now iterate until end-of-file.  */
-  while (fbsd_read_mapping (mapfile, &start, &end, &protection[0]))
+  while (fbsd_read_mapping (mapfile.get (), &start, &end, &protection[0]))
     {
       size = end - start;
 

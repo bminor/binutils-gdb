@@ -1045,7 +1045,6 @@ info_sharedlibrary_command (char *pattern, int from_tty)
   int so_missing_debug_info = 0;
   int addr_width;
   int nr_libs;
-  struct cleanup *table_cleanup;
   struct gdbarch *gdbarch = target_gdbarch ();
   struct ui_out *uiout = current_uiout;
 
@@ -1062,8 +1061,8 @@ info_sharedlibrary_command (char *pattern, int from_tty)
 
   update_solib_list (from_tty);
 
-  /* make_cleanup_ui_out_table_begin_end needs to know the number of
-     rows, so we need to make two passes over the libs.  */
+  /* ui_out_emit_table table_emitter needs to know the number of rows,
+     so we need to make two passes over the libs.  */
 
   for (nr_libs = 0, so = so_list_head; so; so = so->next)
     {
@@ -1075,54 +1074,52 @@ info_sharedlibrary_command (char *pattern, int from_tty)
 	}
     }
 
-  table_cleanup =
-    make_cleanup_ui_out_table_begin_end (uiout, 4, nr_libs,
-					 "SharedLibraryTable");
+  {
+    ui_out_emit_table table_emitter (uiout, 4, nr_libs, "SharedLibraryTable");
 
-  /* The "- 1" is because ui_out adds one space between columns.  */
-  uiout->table_header (addr_width - 1, ui_left, "from", "From");
-  uiout->table_header (addr_width - 1, ui_left, "to", "To");
-  uiout->table_header (12 - 1, ui_left, "syms-read", "Syms Read");
-  uiout->table_header (0, ui_noalign, "name", "Shared Object Library");
+    /* The "- 1" is because ui_out adds one space between columns.  */
+    uiout->table_header (addr_width - 1, ui_left, "from", "From");
+    uiout->table_header (addr_width - 1, ui_left, "to", "To");
+    uiout->table_header (12 - 1, ui_left, "syms-read", "Syms Read");
+    uiout->table_header (0, ui_noalign, "name", "Shared Object Library");
 
-  uiout->table_body ();
+    uiout->table_body ();
 
-  ALL_SO_LIBS (so)
-    {
-      if (! so->so_name[0])
-	continue;
-      if (pattern && ! re_exec (so->so_name))
-	continue;
+    ALL_SO_LIBS (so)
+      {
+	if (! so->so_name[0])
+	  continue;
+	if (pattern && ! re_exec (so->so_name))
+	  continue;
 
-      ui_out_emit_tuple tuple_emitter (uiout, "lib");
+	ui_out_emit_tuple tuple_emitter (uiout, "lib");
 
-      if (so->addr_high != 0)
-	{
-	  uiout->field_core_addr ("from", gdbarch, so->addr_low);
-	  uiout->field_core_addr ("to", gdbarch, so->addr_high);
-	}
-      else
-	{
-	  uiout->field_skip ("from");
-	  uiout->field_skip ("to");
-	}
+	if (so->addr_high != 0)
+	  {
+	    uiout->field_core_addr ("from", gdbarch, so->addr_low);
+	    uiout->field_core_addr ("to", gdbarch, so->addr_high);
+	  }
+	else
+	  {
+	    uiout->field_skip ("from");
+	    uiout->field_skip ("to");
+	  }
 
-      if (! interp_ui_out (top_level_interpreter ())->is_mi_like_p ()
-	  && so->symbols_loaded
-	  && !objfile_has_symbols (so->objfile))
-	{
-	  so_missing_debug_info = 1;
-	  uiout->field_string ("syms-read", "Yes (*)");
-	}
-      else
-	uiout->field_string ("syms-read", so->symbols_loaded ? "Yes" : "No");
+	if (! interp_ui_out (top_level_interpreter ())->is_mi_like_p ()
+	    && so->symbols_loaded
+	    && !objfile_has_symbols (so->objfile))
+	  {
+	    so_missing_debug_info = 1;
+	    uiout->field_string ("syms-read", "Yes (*)");
+	  }
+	else
+	  uiout->field_string ("syms-read", so->symbols_loaded ? "Yes" : "No");
 
-      uiout->field_string ("name", so->so_name);
+	uiout->field_string ("name", so->so_name);
 
-      uiout->text ("\n");
-    }
-
-  do_cleanups (table_cleanup);
+	uiout->text ("\n");
+      }
+  }
 
   if (nr_libs == 0)
     {

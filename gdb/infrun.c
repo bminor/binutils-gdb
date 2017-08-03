@@ -8512,14 +8512,12 @@ sig_print_info (enum gdb_signal oursig)
 static void
 handle_command (char *args, int from_tty)
 {
-  char **argv;
   int digits, wordlen;
   int sigfirst, signum, siglast;
   enum gdb_signal oursig;
   int allsigs;
   int nsigs;
   unsigned char *sigs;
-  struct cleanup *old_chain;
 
   if (args == NULL)
     {
@@ -8534,24 +8532,23 @@ handle_command (char *args, int from_tty)
 
   /* Break the command line up into args.  */
 
-  argv = gdb_buildargv (args);
-  old_chain = make_cleanup_freeargv (argv);
+  gdb_argv built_argv (args);
 
   /* Walk through the args, looking for signal oursigs, signal names, and
      actions.  Signal numbers and signal names may be interspersed with
      actions, with the actions being performed for all signals cumulatively
      specified.  Signal ranges can be specified as <LOW>-<HIGH>.  */
 
-  while (*argv != NULL)
+  for (char *arg : built_argv)
     {
-      wordlen = strlen (*argv);
-      for (digits = 0; isdigit ((*argv)[digits]); digits++)
+      wordlen = strlen (arg);
+      for (digits = 0; isdigit (arg[digits]); digits++)
 	{;
 	}
       allsigs = 0;
       sigfirst = siglast = -1;
 
-      if (wordlen >= 1 && !strncmp (*argv, "all", wordlen))
+      if (wordlen >= 1 && !strncmp (arg, "all", wordlen))
 	{
 	  /* Apply action to all signals except those used by the
 	     debugger.  Silently skip those.  */
@@ -8559,37 +8556,37 @@ handle_command (char *args, int from_tty)
 	  sigfirst = 0;
 	  siglast = nsigs - 1;
 	}
-      else if (wordlen >= 1 && !strncmp (*argv, "stop", wordlen))
+      else if (wordlen >= 1 && !strncmp (arg, "stop", wordlen))
 	{
 	  SET_SIGS (nsigs, sigs, signal_stop);
 	  SET_SIGS (nsigs, sigs, signal_print);
 	}
-      else if (wordlen >= 1 && !strncmp (*argv, "ignore", wordlen))
+      else if (wordlen >= 1 && !strncmp (arg, "ignore", wordlen))
 	{
 	  UNSET_SIGS (nsigs, sigs, signal_program);
 	}
-      else if (wordlen >= 2 && !strncmp (*argv, "print", wordlen))
+      else if (wordlen >= 2 && !strncmp (arg, "print", wordlen))
 	{
 	  SET_SIGS (nsigs, sigs, signal_print);
 	}
-      else if (wordlen >= 2 && !strncmp (*argv, "pass", wordlen))
+      else if (wordlen >= 2 && !strncmp (arg, "pass", wordlen))
 	{
 	  SET_SIGS (nsigs, sigs, signal_program);
 	}
-      else if (wordlen >= 3 && !strncmp (*argv, "nostop", wordlen))
+      else if (wordlen >= 3 && !strncmp (arg, "nostop", wordlen))
 	{
 	  UNSET_SIGS (nsigs, sigs, signal_stop);
 	}
-      else if (wordlen >= 3 && !strncmp (*argv, "noignore", wordlen))
+      else if (wordlen >= 3 && !strncmp (arg, "noignore", wordlen))
 	{
 	  SET_SIGS (nsigs, sigs, signal_program);
 	}
-      else if (wordlen >= 4 && !strncmp (*argv, "noprint", wordlen))
+      else if (wordlen >= 4 && !strncmp (arg, "noprint", wordlen))
 	{
 	  UNSET_SIGS (nsigs, sigs, signal_print);
 	  UNSET_SIGS (nsigs, sigs, signal_stop);
 	}
-      else if (wordlen >= 4 && !strncmp (*argv, "nopass", wordlen))
+      else if (wordlen >= 4 && !strncmp (arg, "nopass", wordlen))
 	{
 	  UNSET_SIGS (nsigs, sigs, signal_program);
 	}
@@ -8602,11 +8599,11 @@ handle_command (char *args, int from_tty)
 	     SIGHUP, SIGINT, SIGALRM, etc. will work right anyway.  */
 
 	  sigfirst = siglast = (int)
-	    gdb_signal_from_command (atoi (*argv));
-	  if ((*argv)[digits] == '-')
+	    gdb_signal_from_command (atoi (arg));
+	  if (arg[digits] == '-')
 	    {
 	      siglast = (int)
-		gdb_signal_from_command (atoi ((*argv) + digits + 1));
+		gdb_signal_from_command (atoi (arg + digits + 1));
 	    }
 	  if (sigfirst > siglast)
 	    {
@@ -8618,7 +8615,7 @@ handle_command (char *args, int from_tty)
 	}
       else
 	{
-	  oursig = gdb_signal_from_name (*argv);
+	  oursig = gdb_signal_from_name (arg);
 	  if (oursig != GDB_SIGNAL_UNKNOWN)
 	    {
 	      sigfirst = siglast = (int) oursig;
@@ -8626,7 +8623,7 @@ handle_command (char *args, int from_tty)
 	  else
 	    {
 	      /* Not a number and not a recognized flag word => complain.  */
-	      error (_("Unrecognized or ambiguous flag word: \"%s\"."), *argv);
+	      error (_("Unrecognized or ambiguous flag word: \"%s\"."), arg);
 	    }
 	}
 
@@ -8664,8 +8661,6 @@ Are you sure you want to change it? "),
 	      break;
 	    }
 	}
-
-      argv++;
     }
 
   for (signum = 0; signum < nsigs; signum++)
@@ -8686,8 +8681,6 @@ Are you sure you want to change it? "),
 
 	break;
       }
-
-  do_cleanups (old_chain);
 }
 
 /* Complete the "handle" command.  */

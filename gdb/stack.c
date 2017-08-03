@@ -1877,8 +1877,8 @@ backtrace_command (char *arg, int from_tty)
       char **argv;
       int i;
 
-      argv = gdb_buildargv (arg);
-      make_cleanup_freeargv (argv);
+      gdb_argv built_argv (arg);
+      argv = built_argv.get ();
       argc = 0;
       for (i = 0; argv[i]; i++)
 	{

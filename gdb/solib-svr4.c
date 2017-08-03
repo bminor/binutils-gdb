@@ -1350,21 +1350,15 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 
   for (; lm != 0; prev_lm = lm, lm = next_lm)
     {
-      struct so_list *newobj;
-      struct cleanup *old_chain;
       int errcode;
       char *buffer;
 
-      newobj = XCNEW (struct so_list);
-      old_chain = make_cleanup_free_so (newobj);
+      so_list_up newobj (XCNEW (struct so_list));
 
       lm_info_svr4 *li = lm_info_read (lm);
       newobj->lm_info = li;
       if (li == NULL)
-	{
-	  do_cleanups (old_chain);
-	  return 0;
-	}
+	return 0;
 
       next_lm = li->l_next;
 
@@ -1373,7 +1367,6 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 	  warning (_("Corrupted shared library list: %s != %s"),
 		   paddress (target_gdbarch (), prev_lm),
 		   paddress (target_gdbarch (), li->l_prev));
-	  do_cleanups (old_chain);
 	  return 0;
 	}
 
@@ -1388,7 +1381,6 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 
 	  first_l_name = li->l_name;
 	  info->main_lm_addr = li->lm_addr;
-	  do_cleanups (old_chain);
 	  continue;
 	}
 
@@ -1404,7 +1396,6 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 	  if (first_l_name == 0 || li->l_name != first_l_name)
 	    warning (_("Can't read pathname for load map: %s."),
 		     safe_strerror (errcode));
-	  do_cleanups (old_chain);
 	  continue;
 	}
 
@@ -1416,15 +1407,12 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
       /* If this entry has no name, or its name matches the name
 	 for the main executable, don't include it in the list.  */
       if (! newobj->so_name[0] || match_main (newobj->so_name))
-	{
-	  do_cleanups (old_chain);
-	  continue;
-	}
+	continue;
 
-      discard_cleanups (old_chain);
       newobj->next = 0;
-      **link_ptr_ptr = newobj;
-      *link_ptr_ptr = &newobj->next;
+      /* Don't free it now.  */
+      **link_ptr_ptr = newobj.release ();
+      *link_ptr_ptr = &(**link_ptr_ptr)->next;
     }
 
   return 1;

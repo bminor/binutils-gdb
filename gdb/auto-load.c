@@ -786,7 +786,6 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 {
   char *filename, *debugfile;
   int len, retval;
-  FILE *input;
   struct cleanup *cleanups;
   const char *suffix = ext_lang_auto_load_suffix (language);
 
@@ -797,7 +796,7 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 
   cleanups = make_cleanup (xfree, filename);
 
-  input = gdb_fopen_cloexec (filename, "r");
+  gdb_file_up input = gdb_fopen_cloexec (filename, "r");
   debugfile = filename;
   if (debug_auto_load)
     fprintf_unfiltered (gdb_stdlog, _("auto-load: Attempted file \"%s\" %s.\n"),
@@ -845,8 +844,6 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
       int is_safe;
       struct auto_load_pspace_info *pspace_info;
 
-      make_cleanup_fclose (input);
-
       is_safe
 	= file_is_auto_load_safe (debugfile,
 				  _("auto-load: Loading %s script \"%s\""
@@ -875,7 +872,7 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 	     compiled in.  And the extension language is required to implement
 	     this function.  */
 	  gdb_assert (sourcer != NULL);
-	  sourcer (language, objfile, input, debugfile);
+	  sourcer (language, objfile, input.get (), debugfile);
 	}
 
       retval = 1;
@@ -931,10 +928,7 @@ source_script_file (struct auto_load_pspace_info *pspace_info,
 		    const char *section_name, unsigned int offset,
 		    const char *file)
 {
-  FILE *stream;
-  char *full_path;
-  int opened, in_hash_table;
-  struct cleanup *cleanups;
+  int in_hash_table;
   objfile_script_sourcer_func *sourcer;
 
   /* Skip this script if support is not compiled in.  */
@@ -956,27 +950,22 @@ source_script_file (struct auto_load_pspace_info *pspace_info,
       return;
     }
 
-  opened = find_and_open_script (file, 1 /*search_path*/,
-				 &stream, &full_path);
+  gdb::optional<open_script> opened = find_and_open_script (file,
+							    1 /*search_path*/);
 
-  cleanups = make_cleanup (null_cleanup, NULL);
   if (opened)
     {
-      make_cleanup_fclose (stream);
-      make_cleanup (xfree, full_path);
-
-      if (!file_is_auto_load_safe (full_path,
+      if (!file_is_auto_load_safe (opened->full_path.get (),
 				   _("auto-load: Loading %s script "
 				     "\"%s\" from section \"%s\" of "
 				     "objfile \"%s\".\n"),
-				   ext_lang_name (language), full_path,
+				   ext_lang_name (language),
+				   opened->full_path.get (),
 				   section_name, objfile_name (objfile)))
-	opened = 0;
+	opened.reset ();
     }
   else
     {
-      full_path = NULL;
-
       /* If one script isn't found it's not uncommon for more to not be
 	 found either.  We don't want to print a message for each script,
 	 too much noise.  Instead, we print the warning once and tell the
@@ -989,14 +978,16 @@ source_script_file (struct auto_load_pspace_info *pspace_info,
 					    section_name, offset);
     }
 
-  in_hash_table = maybe_add_script_file (pspace_info, opened, file, full_path,
+  in_hash_table = maybe_add_script_file (pspace_info, bool (opened), file,
+					 (opened
+					  ? opened->full_path.get ()
+					  : NULL),
 					 language);
 
   /* If this file is not currently loaded, load it.  */
   if (opened && !in_hash_table)
-    sourcer (language, objfile, stream, full_path);
-
-  do_cleanups (cleanups);
+    sourcer (language, objfile, opened->stream.get (),
+	     opened->full_path.get ());
 }
 
 /* Subroutine of source_section_scripts to simplify it.
@@ -1382,18 +1373,18 @@ auto_load_info_scripts (char *pattern, int from_tty,
   if (nr_scripts > 0 && pattern == auto_load_info_scripts_pattern_nl)
     uiout->text ("\n");
 
-  /* Note: This creates a cleanup to output the table end marker.  */
-  make_cleanup_ui_out_table_begin_end (uiout, 2, nr_scripts,
-				       "AutoLoadedScriptsTable");
+  {
+    ui_out_emit_table table_emitter (uiout, 2, nr_scripts,
+				     "AutoLoadedScriptsTable");
 
-  uiout->table_header (7, ui_left, "loaded", "Loaded");
-  uiout->table_header (70, ui_left, "script", "Script");
-  uiout->table_body ();
+    uiout->table_header (7, ui_left, "loaded", "Loaded");
+    uiout->table_header (70, ui_left, "script", "Script");
+    uiout->table_body ();
 
-  print_scripts (script_files);
-  print_scripts (script_texts);
+    print_scripts (script_files);
+    print_scripts (script_texts);
+  }
 
-  /* Finish up the table before checking for no matching scripts.  */
   do_cleanups (script_chain);
 
   if (nr_scripts == 0)

@@ -4013,6 +4013,10 @@ struct ppc_link_hash_entry
      with non-standard calling convention.  */
   unsigned int save_res:1;
 
+  /* Set if a duplicate symbol with non-zero localentry is detected,
+     even when the duplicate symbol does not provide a definition.  */
+  unsigned int non_zero_localentry:1;
+
   /* Contexts in which symbol is used in the GOT (or TOC).
      TLS_GD .. TLS_EXPLICIT bits are or'd into the mask as the
      corresponding relocs are encountered during check_relocs.
@@ -5021,7 +5025,7 @@ ppc64_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 
 static bfd_boolean
 ppc64_elf_merge_symbol (struct elf_link_hash_entry *h,
-			const Elf_Internal_Sym *isym ATTRIBUTE_UNUSED,
+			const Elf_Internal_Sym *isym,
 			asection **psec ATTRIBUTE_UNUSED,
 			bfd_boolean newdef ATTRIBUTE_UNUSED,
 			bfd_boolean olddef ATTRIBUTE_UNUSED,
@@ -5029,6 +5033,8 @@ ppc64_elf_merge_symbol (struct elf_link_hash_entry *h,
 			const asection *oldsec ATTRIBUTE_UNUSED)
 {
   ((struct ppc_link_hash_entry *) h)->fake = 0;
+  if ((STO_PPC64_LOCAL_MASK & isym->st_other) != 0)
+    ((struct ppc_link_hash_entry *) h)->non_zero_localentry = 1;
   return TRUE;
 }
 
@@ -6335,6 +6341,7 @@ is_elfv2_localentry0 (struct elf_link_hash_entry *h)
 	  && h->type == STT_FUNC
 	  && h->root.type == bfd_link_hash_defined
 	  && (STO_PPC64_LOCAL_MASK & h->other) == 0
+	  && !((struct ppc_link_hash_entry *) h)->non_zero_localentry
 	  && is_ppc64_elf (h->root.u.def.section->owner)
 	  && abiversion (h->root.u.def.section->owner) >= 2);
 }
@@ -8349,10 +8356,28 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
   else if (!htab->do_multi_toc)
     htab->params->no_multi_toc = 1;
 
+  /* Default to --no-plt-localentry, as this option can cause problems
+     with symbol interposition.  For example, glibc libpthread.so and
+     libc.so duplicate many pthread symbols, with a fallback
+     implementation in libc.so.  In some cases the fallback does more
+     work than the pthread implementation.  __pthread_condattr_destroy
+     is one such symbol: the libpthread.so implementation is
+     localentry:0 while the libc.so implementation is localentry:8.
+     An app that "cleverly" uses dlopen to only load necessary
+     libraries at runtime may omit loading libpthread.so when not
+     running multi-threaded, which then results in the libc.so
+     fallback symbols being used and ld.so complaining.  Now there
+     are workarounds in ld (see non_zero_localentry) to detect the
+     pthread situation, but that may not be the only case where
+     --plt-localentry can cause trouble.  */
   if (htab->params->plt_localentry0 < 0)
-    htab->params->plt_localentry0
-      = elf_link_hash_lookup (&htab->elf, "GLIBC_2.26",
-			      FALSE, FALSE, FALSE) != NULL;
+    htab->params->plt_localentry0 = 0;
+  if (htab->params->plt_localentry0
+      && elf_link_hash_lookup (&htab->elf, "GLIBC_2.26",
+			       FALSE, FALSE, FALSE) == NULL)
+    info->callbacks->einfo
+      (_("%P: warning: --plt-localentry is especially dangerous without "
+	 "ld.so support to detect ABI violations.\n"));
 
   htab->tls_get_addr = ((struct ppc_link_hash_entry *)
 			elf_link_hash_lookup (&htab->elf, ".__tls_get_addr",

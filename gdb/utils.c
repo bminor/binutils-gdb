@@ -136,36 +136,6 @@ show_pagination_enabled (struct ui_file *file, int from_tty,
    because while they use the "cleanup API" they are not part of the
    "cleanup API".  */
 
-static void
-do_freeargv (void *arg)
-{
-  freeargv ((char **) arg);
-}
-
-struct cleanup *
-make_cleanup_freeargv (char **arg)
-{
-  return make_cleanup (do_freeargv, arg);
-}
-
-/* Helper function which does the work for make_cleanup_fclose.  */
-
-static void
-do_fclose_cleanup (void *arg)
-{
-  FILE *file = (FILE *) arg;
-
-  fclose (file);
-}
-
-/* Return a new cleanup that closes FILE.  */
-
-struct cleanup *
-make_cleanup_fclose (FILE *file)
-{
-  return make_cleanup (do_fclose_cleanup, file);
-}
-
 /* Helper function for make_cleanup_ui_out_redirect_pop.  */
 
 static void
@@ -284,46 +254,6 @@ struct cleanup *
 make_cleanup_value_free (struct value *value)
 {
   return make_cleanup (do_value_free, value);
-}
-
-/* Helper for make_cleanup_free_so.  */
-
-static void
-do_free_so (void *arg)
-{
-  struct so_list *so = (struct so_list *) arg;
-
-  free_so (so);
-}
-
-/* Make cleanup handler calling free_so for SO.  */
-
-struct cleanup *
-make_cleanup_free_so (struct so_list *so)
-{
-  return make_cleanup (do_free_so, so);
-}
-
-/* Helper for make_cleanup_restore_current_language.  */
-
-static void
-do_restore_current_language (void *p)
-{
-  enum language saved_lang = (enum language) (uintptr_t) p;
-
-  set_language (saved_lang);
-}
-
-/* Remember the current value of CURRENT_LANGUAGE and make it restored when
-   the cleanup is run.  */
-
-struct cleanup *
-make_cleanup_restore_current_language (void)
-{
-  enum language saved_lang = current_language->la_language;
-
-  return make_cleanup (do_restore_current_language,
-		       (void *) (uintptr_t) saved_lang);
 }
 
 /* Helper function for make_cleanup_clear_parser_state.  */
@@ -2921,19 +2851,18 @@ ldirname (const char *filename)
   return dirname;
 }
 
-/* Call libiberty's buildargv, and return the result.
-   If buildargv fails due to out-of-memory, call nomem.
-   Therefore, the returned value is guaranteed to be non-NULL,
-   unless the parameter itself is NULL.  */
+/* See utils.h.  */
 
-char **
-gdb_buildargv (const char *s)
+void
+gdb_argv::reset (const char *s)
 {
   char **argv = buildargv (s);
 
   if (s != NULL && argv == NULL)
     malloc_failure (0);
-  return argv;
+
+  freeargv (m_argv);
+  m_argv = argv;
 }
 
 int

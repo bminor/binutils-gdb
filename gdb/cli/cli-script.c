@@ -372,26 +372,12 @@ execute_cmd_post_hook (struct cmd_list_element *c)
     }
 }
 
-/* Execute the command in CMD.  */
-static void
-do_restore_user_call_depth (void * call_depth)
-{	
-  int *depth = (int *) call_depth;
-
-  (*depth)--;
-  if ((*depth) == 0)
-    in_user_command = 0;
-}
-
-
 void
 execute_user_command (struct cmd_list_element *c, char *args)
 {
   struct ui *ui = current_ui;
   struct command_line *cmdlines;
-  struct cleanup *old_chain;
   enum command_control_type ret;
-  static int user_call_depth = 0;
   extern unsigned int max_user_call_depth;
 
   cmdlines = c->user_commands;
@@ -401,23 +387,18 @@ execute_user_command (struct cmd_list_element *c, char *args)
 
   scoped_user_args_level push_user_args (args);
 
-  if (++user_call_depth > max_user_call_depth)
+  if (user_args_stack.size () > max_user_call_depth)
     error (_("Max user call depth exceeded -- command aborted."));
-
-  old_chain = make_cleanup (do_restore_user_call_depth, &user_call_depth);
 
   /* Set the instream to 0, indicating execution of a
      user-defined function.  */
-  make_cleanup (do_restore_instream_cleanup, ui->instream);
-  ui->instream = NULL;
-
-  /* Also set the global in_user_command, so that NULL instream is
-     not confused with Insight.  */
-  in_user_command = 1;
+  scoped_restore restore_instream
+    = make_scoped_restore (&ui->instream, nullptr);
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
-  command_nest_depth++;
+  scoped_restore save_nesting
+    = make_scoped_restore (&command_nest_depth, command_nest_depth + 1);
   while (cmdlines)
     {
       ret = execute_control_command (cmdlines);
@@ -428,8 +409,6 @@ execute_user_command (struct cmd_list_element *c, char *args)
 	}
       cmdlines = cmdlines->next;
     }
-  command_nest_depth--;
-  do_cleanups (old_chain);
 }
 
 /* This function is called every time GDB prints a prompt.  It ensures
@@ -548,9 +527,9 @@ execute_control_command (struct command_line *cmd)
 	    current = *cmd->body_list;
 	    while (current)
 	      {
-		command_nest_depth++;
+		scoped_restore save_nesting
+		  = make_scoped_restore (&command_nest_depth, command_nest_depth + 1);
 		ret = execute_control_command (current);
-		command_nest_depth--;
 
 		/* If we got an error, or a "break" command, then stop
 		   looping.  */
@@ -607,9 +586,9 @@ execute_control_command (struct command_line *cmd)
 	/* Execute commands in the given arm.  */
 	while (current)
 	  {
-	    command_nest_depth++;
+	    scoped_restore save_nesting
+	      = make_scoped_restore (&command_nest_depth, command_nest_depth + 1);
 	    ret = execute_control_command (current);
-	    command_nest_depth--;
 
 	    /* If we got an error, get out.  */
 	    if (ret != simple_control)
@@ -1585,58 +1564,34 @@ document_command (char *comname, int from_tty)
   }
 }
 
-struct source_cleanup_lines_args
-{
-  int old_line;
-  const char *old_file;
-};
-
-static void
-source_cleanup_lines (void *args)
-{
-  struct source_cleanup_lines_args *p =
-    (struct source_cleanup_lines_args *) args;
-
-  source_line_number = p->old_line;
-  source_file_name = p->old_file;
-}
-
 /* Used to implement source_command.  */
 
 void
 script_from_file (FILE *stream, const char *file)
 {
-  struct cleanup *old_cleanups;
-  struct source_cleanup_lines_args old_lines;
-
   if (stream == NULL)
     internal_error (__FILE__, __LINE__, _("called with NULL file pointer!"));
 
-  old_lines.old_line = source_line_number;
-  old_lines.old_file = source_file_name;
-  old_cleanups = make_cleanup (source_cleanup_lines, &old_lines);
-  source_line_number = 0;
-  source_file_name = file;
+  scoped_restore restore_line_number
+    = make_scoped_restore (&source_line_number, 0);
+  scoped_restore resotre_file
+    = make_scoped_restore (&source_file_name, file);
 
-  {
-    scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
+  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
-    TRY
-      {
-	read_command_file (stream);
-      }
-    CATCH (e, RETURN_MASK_ERROR)
-      {
-	/* Re-throw the error, but with the file name information
-	   prepended.  */
-	throw_error (e.error,
-		     _("%s:%d: Error in sourced command file:\n%s"),
-		     source_file_name, source_line_number, e.message);
-      }
-    END_CATCH
-  }
-
-  do_cleanups (old_cleanups);
+  TRY
+    {
+      read_command_file (stream);
+    }
+  CATCH (e, RETURN_MASK_ERROR)
+    {
+      /* Re-throw the error, but with the file name information
+	 prepended.  */
+      throw_error (e.error,
+		   _("%s:%d: Error in sourced command file:\n%s"),
+		   source_file_name, source_line_number, e.message);
+    }
+  END_CATCH
 }
 
 /* Print the definition of user command C to STREAM.  Or, if C is a

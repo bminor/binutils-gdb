@@ -39,6 +39,7 @@
 #include "observer.h"
 #include "objfiles.h"
 #include "extension.h"
+#include "byte-vector.h"
 
 extern unsigned int overload_debug;
 /* Local functions.  */
@@ -2076,24 +2077,20 @@ search_struct_method (const char *name, struct value **arg1p,
 
 	  if (offset < 0 || offset >= TYPE_LENGTH (type))
 	    {
-	      gdb_byte *tmp;
-	      struct cleanup *back_to;
 	      CORE_ADDR address;
 
-	      tmp = (gdb_byte *) xmalloc (TYPE_LENGTH (baseclass));
-	      back_to = make_cleanup (xfree, tmp);
+	      gdb::byte_vector tmp (TYPE_LENGTH (baseclass));
 	      address = value_address (*arg1p);
 
 	      if (target_read_memory (address + offset,
-				      tmp, TYPE_LENGTH (baseclass)) != 0)
+				      tmp.data (), TYPE_LENGTH (baseclass)) != 0)
 		error (_("virtual baseclass botch"));
 
 	      base_val = value_from_contents_and_address (baseclass,
-							  tmp,
+							  tmp.data (),
 							  address + offset);
 	      base_valaddr = value_contents_for_printing (base_val);
 	      this_offset = 0;
-	      do_cleanups (back_to);
 	    }
 	  else
 	    {

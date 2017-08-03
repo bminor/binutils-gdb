@@ -67,7 +67,7 @@ struct gdb_dyld_all_image_infos
 
 /* Current all_image_infos version.  */
 #define DYLD_VERSION_MIN 1
-#define DYLD_VERSION_MAX 14
+#define DYLD_VERSION_MAX 15
 
 /* Per PSPACE specific data.  */
 struct darwin_info

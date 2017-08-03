@@ -707,13 +707,6 @@ TUI command to control the register window."), tuicmd);
 ** STATIC LOCAL FUNCTIONS                 **
 ******************************************/
 
-static void
-tui_restore_gdbout (void *ui)
-{
-  gdb_stdout = (struct ui_file*) ui;
-  pagination_enabled = 1;
-}
-
 /* Get the register from the frame and return a printable
    representation of it.  */
 
@@ -721,17 +714,14 @@ static char *
 tui_register_format (struct frame_info *frame, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct ui_file *old_stdout;
-  struct cleanup *cleanups;
-  char *p, *s;
-  char *ret;
 
   string_file stream;
 
-  pagination_enabled = 0;
-  old_stdout = gdb_stdout;
-  gdb_stdout = &stream;
-  cleanups = make_cleanup (tui_restore_gdbout, (void*) old_stdout);
+  scoped_restore save_pagination
+    = make_scoped_restore (&pagination_enabled, 0);
+  scoped_restore save_stdout
+    = make_scoped_restore (&gdb_stdout, &stream);
+
   gdbarch_print_registers_info (gdbarch, &stream, frame, regnum, 1);
 
   /* Remove the possible \n.  */
@@ -740,11 +730,7 @@ tui_register_format (struct frame_info *frame, int regnum)
     str.resize (str.size () - 1);
 
   /* Expand tabs into spaces, since ncurses on MS-Windows doesn't.  */
-  ret = tui_expand_tabs (str.c_str (), 0);
-
-  do_cleanups (cleanups);
-
-  return ret;
+  return tui_expand_tabs (str.c_str (), 0);
 }
 
 /* Get the register value from the given frame and format it for the

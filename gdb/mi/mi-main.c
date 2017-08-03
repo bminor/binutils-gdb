@@ -1659,8 +1659,6 @@ mi_cmd_data_write_memory (const char *command, char **argv, int argc)
   /* FIXME: ezannoni 2000-02-17 LONGEST could possibly not be big
      enough when using a compiler other than GCC.  */
   LONGEST value;
-  gdb_byte *buffer;
-  struct cleanup *old_chain;
   long offset = 0;
   int oind = 0;
   char *oarg;
@@ -1707,13 +1705,10 @@ mi_cmd_data_write_memory (const char *command, char **argv, int argc)
   /* Get the value as a number.  */
   value = parse_and_eval_address (argv[3]);
   /* Get the value into an array.  */
-  buffer = (gdb_byte *) xmalloc (word_size);
-  old_chain = make_cleanup (xfree, buffer);
-  store_signed_integer (buffer, word_size, byte_order, value);
+  gdb::byte_vector buffer (word_size);
+  store_signed_integer (buffer.data (), word_size, byte_order, value);
   /* Write it down to memory.  */
-  write_memory_with_notification (addr, buffer, word_size);
-  /* Free the buffer.  */
-  do_cleanups (old_chain);
+  write_memory_with_notification (addr, buffer.data (), word_size);
 }
 
 /* Implementation of the -data-write-memory-bytes command.
@@ -2243,9 +2238,10 @@ mi_cmd_execute (struct mi_parse *parse)
 	error (_("Invalid frame id: %d"), frame);
     }
 
+  gdb::optional<scoped_restore_current_language> lang_saver;
   if (parse->language != language_unknown)
     {
-      make_cleanup_restore_current_language ();
+      lang_saver.emplace ();
       set_language (parse->language);
     }
 

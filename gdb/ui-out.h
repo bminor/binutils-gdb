@@ -220,4 +220,30 @@ private:
 typedef ui_out_emit_type<ui_out_type_tuple> ui_out_emit_tuple;
 typedef ui_out_emit_type<ui_out_type_list> ui_out_emit_list;
 
+/* This is similar to make_cleanup_ui_out_table_begin_end, but written
+   as an RAII class.  */
+class ui_out_emit_table
+{
+public:
+
+  ui_out_emit_table (struct ui_out *uiout, int nr_cols, int nr_rows,
+		     const char *tblid)
+    : m_uiout (uiout)
+  {
+    m_uiout->table_begin (nr_cols, nr_rows, tblid);
+  }
+
+  ~ui_out_emit_table ()
+  {
+    m_uiout->table_end ();
+  }
+
+  ui_out_emit_table (const ui_out_emit_table &) = delete;
+  ui_out_emit_table &operator= (const ui_out_emit_table &) = delete;
+
+private:
+
+  struct ui_out *m_uiout;
+};
+
 #endif /* UI_OUT_H */

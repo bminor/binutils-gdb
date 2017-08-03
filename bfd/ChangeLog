@@ -1,3 +1,46 @@
+2017-08-02  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-isa.c (xtensa_isa_init): Don't update lookup table
+	entries for sysregs with negative indices.
+
+2017-08-01  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf32-s390.c (elf_s390_finish_dynamic_sections): Skip if it
+	isn't the S/390 specific elf data.
+	* elf64-s390.c (elf_s390_finish_dynamic_sections): Likewise.
+
+2017-07-31  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* elfxx-riscv.c (riscv_elf_add_sub_reloc): New function.
+	* (howto_table) [R_RISCV_ADD8]: Use riscv_elf_add_sub_reloc.
+	[R_RISCV_ADD16]: Likewise.
+	[R_RISCV_ADD32]: Likewise.
+	[R_RISCV_ADD64]: Likewise.
+	[R_RISCV_SUB6]: Likewise.
+	[R_RISCV_SUB8]: Likewise.
+	[R_RISCV_SUB16]: Likewise.
+	[R_RISCV_SUB32]: Likewise.
+	[R_RISCV_SUB64]: Likewise.
+
+2017-07-31  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_tls_setup): Warn on --plt-localentry
+	without ld.so checks.
+
+2017-07-29  Alan Modra  <amodra@gmail.com>
+
+	PR 21847
+	* elf64-ppc.c (struct ppc_link_hash_entry): Add non_zero_localentry.
+	(ppc64_elf_merge_symbol): Set non_zero_localentry.
+	(is_elfv2_localentry0): Test non_zero_localentry.
+	(ppc64_elf_tls_setup): Default to --no-plt-localentry.
+
+2017-07-28  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+        * elf32-s390.c (elf_s390_finish_dynamic_sections): Add NULL
+        pointer check for htab->elf.irelplt.
+        * elf64-s390.c (elf_s390_finish_dynamic_sections): Likewise.
+
 2017-07-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 21840

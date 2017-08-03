@@ -92,17 +92,6 @@ scan_filename_with_cleanup (const char **cmd, const char *defname)
   return fullname;
 }
 
-static FILE *
-fopen_with_cleanup (const char *filename, const char *mode)
-{
-  FILE *file = gdb_fopen_cloexec (filename, mode);
-
-  if (file == NULL)
-    perror_with_name (filename);
-  make_cleanup_fclose (file);
-  return file;
-}
-
 static gdb_bfd_ref_ptr
 bfd_openr_or_error (const char *filename, const char *target)
 {
@@ -168,11 +157,10 @@ static void
 dump_binary_file (const char *filename, const char *mode, 
 		  const bfd_byte *buf, ULONGEST len)
 {
-  FILE *file;
   int status;
 
-  file = fopen_with_cleanup (filename, mode);
-  status = fwrite (buf, len, 1, file);
+  gdb_file_up file = gdb_fopen_cloexec (filename, mode);
+  status = fwrite (buf, len, 1, file.get ());
   if (status != 1)
     perror_with_name (filename);
 }
@@ -446,8 +434,6 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
   bfd_vma sec_end    = sec_start + size;
   bfd_size_type sec_offset = 0;
   bfd_size_type sec_load_count = size;
-  struct cleanup *old_chain;
-  gdb_byte *buf;
   int ret;
 
   /* Ignore non-loadable sections, eg. from elf files.  */
@@ -475,9 +461,8 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
     sec_load_count -= sec_end - data->load_end;
 
   /* Get the data.  */
-  buf = (gdb_byte *) xmalloc (size);
-  old_chain = make_cleanup (xfree, buf);
-  if (!bfd_get_section_contents (ibfd, isec, buf, 0, size))
+  gdb::byte_vector buf (size);
+  if (!bfd_get_section_contents (ibfd, isec, buf.data (), 0, size))
     error (_("Failed to read bfd file %s: '%s'."), bfd_get_filename (ibfd), 
 	   bfd_errmsg (bfd_get_error ()));
 
@@ -499,24 +484,21 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
 
   /* Write the data.  */
   ret = target_write_memory (sec_start + sec_offset + data->load_offset, 
-			     buf + sec_offset, sec_load_count);
+			     &buf[sec_offset], sec_load_count);
   if (ret != 0)
     warning (_("restore: memory write failed (%s)."), safe_strerror (ret));
-  do_cleanups (old_chain);
-  return;
 }
 
 static void
 restore_binary_file (const char *filename, struct callback_data *data)
 {
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
-  FILE *file = fopen_with_cleanup (filename, FOPEN_RB);
+  gdb_file_up file = gdb_fopen_cloexec (filename, FOPEN_RB);
   long len;
 
   /* Get the file size for reading.  */
-  if (fseek (file, 0, SEEK_END) == 0)
+  if (fseek (file.get (), 0, SEEK_END) == 0)
     {
-      len = ftell (file);
+      len = ftell (file.get ());
       if (len < 0)
 	perror_with_name (filename);
     }
@@ -541,12 +523,12 @@ restore_binary_file (const char *filename, struct callback_data *data)
      (unsigned long) (data->load_start + data->load_offset + len));
 
   /* Now set the file pos to the requested load start pos.  */
-  if (fseek (file, data->load_start, SEEK_SET) != 0)
+  if (fseek (file.get (), data->load_start, SEEK_SET) != 0)
     perror_with_name (filename);
 
   /* Now allocate a buffer and read the file contents.  */
   gdb::byte_vector buf (len);
-  if (fread (buf.data (), 1, len, file) != len)
+  if (fread (buf.data (), 1, len, file.get ()) != len)
     perror_with_name (filename);
 
   /* Now write the buffer into target memory.  */
@@ -554,7 +536,6 @@ restore_binary_file (const char *filename, struct callback_data *data)
 			     buf.data (), len);
   if (len != 0)
     warning (_("restore: memory write failed (%s)."), safe_strerror (len));
-  do_cleanups (cleanup);
 }
 
 static void

@@ -286,6 +286,8 @@ Output_compressed_section::set_final_data_size()
 		  chdr.put_ch_type(elfcpp::ELFCOMPRESS_ZLIB);
 		  chdr.put_ch_size(uncompressed_size);
 		  chdr.put_ch_addralign(addralign);
+		  // Clear the reserved field.
+		  chdr.put_ch_reserved(0);
 		}
 	      else
 		{
@@ -293,6 +295,8 @@ Output_compressed_section::set_final_data_size()
 		  chdr.put_ch_type(elfcpp::ELFCOMPRESS_ZLIB);
 		  chdr.put_ch_size(uncompressed_size);
 		  chdr.put_ch_addralign(addralign);
+		  // Clear the reserved field.
+		  chdr.put_ch_reserved(0);
 		}
 	    }
 	  else

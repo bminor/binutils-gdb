@@ -218,7 +218,6 @@ extern void ui_unregister_input_event_handler (struct ui *ui);
 
 /* From top.c.  */
 extern char *saved_command_line;
-extern int in_user_command;
 extern int confirm;
 extern char gdb_dirbuf[1024];
 extern int inhibit_gdbinit;
@@ -290,8 +289,6 @@ extern void set_history (char *, int);
 extern void show_history (char *, int);
 
 extern void set_verbose (char *, int, struct cmd_list_element *);
-
-extern void do_restore_instream_cleanup (void *stream);
 
 extern char *handle_line_of_input (struct buffer *cmd_line_buffer,
 				   char *rl, int repeat,

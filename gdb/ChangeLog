@@ -1,3 +1,238 @@
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* utils.c (make_cleanup_freeargv, do_freeargv, gdb_buildargv):
+	Remove.
+	* utils.h (make_cleanup_freeargv, gdb_buildargv): Remove.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* python/py-param.c (compute_enum_values): Use gdb_argv.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* utils.h (struct gdb_argv_deleter): New.
+	(gdb_argv): New class.
+	* utils.c (gdb_argv::reset): New method.
+	* tracepoint.c (delete_trace_variable_command): Use gdb_argv.
+	* tracefile.c (tsave_command): Use gdb_argv.
+	* top.c (new_ui_command): Use gdb_argv.
+	* symmisc.c (maintenance_print_symbols)
+	(maintenance_print_msymbols, maintenance_expand_symtabs): Use gdb_argv.
+	* symfile.c (symbol_file_command, generic_load)
+	(remove_symbol_file_command): Use gdb_argv.
+	* stack.c (backtrace_command): Use gdb_argv.
+	* source.c (add_path, show_substitute_path_command)
+	(unset_substitute_path_command, set_substitute_path_command):
+	Use gdb_argv.
+	* skip.c (skip_command): Use gdb_argv.  Use gdb_buildargv.
+	* ser-mingw.c (pipe_windows_open): Use gdb_argv.
+	* remote.c (extended_remote_run, remote_put_command)
+	(remote_get_command, remote_delete_command): Use gdb_argv.
+	* remote-sim.c (gdbsim_load, gdbsim_create_inferior)
+	(gdbsim_open): Use gdb_argv.
+	* python/py-cmd.c (gdbpy_string_to_argv): Use gdb_argv.
+	* psymtab.c (maintenance_print_psymbols): Use gdb_argv.
+	* procfs.c (procfs_info_proc): Use gdb_argv.
+	* interps.c (interpreter_exec_cmd): Use gdb_argv.
+	* infrun.c (handle_command): Use gdb_argv.
+	* inferior.c (add_inferior_command, clone_inferior_command):
+	Use gdb_argv.
+	* guile/scm-string.c (gdbscm_string_to_argv): Use gdb_argv.
+	* exec.c (exec_file_command): Use gdb_argv.
+	* cli/cli-cmds.c (alias_command): Use gdb_argv.
+	* compile/compile.c (build_argc_argv): Use gdb_argv.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (gdbpy_decode_line): Use unique_xmalloc_ptr.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (compute_python_string): Return std::string.
+	(gdbpy_eval_from_control_command): Update.
+	(do_start_initialization): Use std::string.
+	* python/py-varobj.c (py_varobj_iter_next): Use string_printf, not
+	xstrprintf.
+	* python/py-breakpoint.c (local_setattro): Use string_printf, not
+	xstrprintf.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* top.h (do_restore_instream_cleanup): Remove.
+	* top.c (do_restore_instream_cleanup): Remove.
+	(read_command_file): Use scoped_restore.
+	* cli/cli-script.c (execute_user_command): Use scoped_restore.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-script.c (execute_user_command)
+	(execute_control_command): Use scoped_restore.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-script.c (do_restore_user_call_depth): Remove.
+	(execute_user_command): Remove user_call_depth; use
+	user_args_stack's size instead.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* top.h (in_user_command): Remove.
+	* top.c (in_user_command): Remove.
+	* cli/cli-script.c (do_restore_user_call_depth)
+	(execute_user_command): Update.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* valops.c (search_struct_method): Use gdb::byte_vector.
+	* valarith.c (value_concat): Use std::vector.
+	* target.c (memory_xfer_partial): Use gdb::byte_vector.
+	(simple_search_memory): Likewise.
+	* printcmd.c (find_string_backward): Use gdb::byte_vector.
+	* mi/mi-main.c (mi_cmd_data_write_memory): Use gdb::byte_vector.
+	* gcore.c (gcore_copy_callback): Use gdb::byte_vector.
+	* elfread.c (elf_rel_plt_read): Use std::string.
+	* cp-valprint.c (cp_print_value): Use gdb::byte_vector.
+	* cli/cli-dump.c (restore_section_callback): Use
+	gdb::byte_vector.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* jit.c (jit_reader_load_command): Use unique_xmalloc_ptr.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-regs.c (tui_restore_gdbout): Remove.
+	(tui_register_format): Use scoped_restore.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* reverse.c (exec_direction_default): Remove.
+	(exec_reverse_once): Use scoped_restore.
+	* remote.c (restore_remote_timeout): Remove.
+	(remote_flash_erase, remote_flash_write, remote_flash_done)
+	(readchar, remote_serial_write): Use scoped_restore.
+	* cli/cli-script.c (struct source_cleanup_lines_args)
+	(source_cleanup_lines): Remove.
+	(script_from_file): Use scoped_restore.
+	* cli/cli-cmds.c (source_verbose_cleanup): Remove.
+	(source_command): Use scoped_restore.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* utils.h (make_cleanup_free_so): Remove.
+	* utils.c (do_free_so, make_cleanup_free_so): Remove.
+	* solist.h (struct so_deleter): New.
+	(so_list_up): New typedef.
+	* solib-svr4.c (svr4_read_so_list): Use so_list_up.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* utils.h (make_cleanup_restore_current_language): Remove.
+	* utils.c (do_restore_current_language)
+	(make_cleanup_restore_current_language): Remove.
+	* parse.c (parse_exp_in_context_1)
+	(parse_expression_with_language): Use
+	scoped_restore_current_language.
+	* mi/mi-main.c (mi_cmd_execute): Use
+	scoped_restore_current_language.
+	* language.h (scoped_restore_current_language): New class.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile.c (cleanup_unlink_file): Remove.
+	(compile_to_object): Use gdb::unlinker.
+	(eval_compile_command): Likewise.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* utils.h (make_cleanup_fclose): Remove.
+	* utils.c (do_fclose_cleanup, make_cleanup_fclose): Remove.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* top.c (open_terminal_stream): Return gdb_file_up.
+	(new_ui_command): Update.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* source.c (print_source_lines_base, forward_search_command)
+	(reverse_search_command): Use gdb_file_up.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* fbsd-nat.c (fbsd_find_memory_regions): Update.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-cmds.c (find_and_open_script): Change return type.
+	Remove "streamp" and "full_path" parameters.
+	(source_script_with_search): Update.
+	* auto-load.c (source_script_file): Update.
+	* cli/cli-cmds.h (find_and_open_script): Change type.
+	(open_script): New struct.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* xml-support.c (xml_fetch_content_from_file): Update.
+	* ui-file.c (stdio_file::open): Update.
+	* tracefile-tfile.c (tfile_start): Update.
+	* remote.c (remote_file_put, remote_file_get): Update.
+	* nat/linux-procfs.c (linux_proc_get_int)
+	(linux_proc_pid_get_state, linux_proc_tid_get_name): Update.
+	* nat/linux-osdata.c (linux_common_core_of_thread): Update.
+	(command_from_pid, commandline_from_pid, linux_xfer_osdata_cpus)
+	(print_sockets, linux_xfer_osdata_shm, linux_xfer_osdata_sem)
+	(linux_xfer_osdata_msg, linux_xfer_osdata_modules): Update.
+	* nat/linux-btrace.c (linux_determine_kernel_start): Update.
+	* linux-nat.c (linux_proc_pending_signals): Update.
+	* dwarf2read.c (write_psymtabs_to_index): Use gdb_file_up.
+	(file_closer): Remove.
+	* compile/compile.c (compile_to_object): Update.
+	* common/filestuff.h (struct gdb_file_deleter): New.
+	(gdb_file_up): New typedef.
+	(gdb_fopen_cloexec): Change return type.
+	* common/filestuff.c (gdb_fopen_cloexec): Return gdb_file_up.
+	* cli/cli-dump.c (fopen_with_cleanup): Remove.
+	(dump_binary_file, restore_binary_file): Update.
+	* auto-load.c (auto_load_objfile_script_1): Update.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* tracepoint.c (tvariables_info_1): Use ui_out_emit_table.
+	(info_static_tracepoint_markers_command): Likewise.
+	* solib.c (info_sharedlibrary_command): Use ui_out_emit_table.
+	* skip.c (skip_info): Use ui_out_emit_table.
+	* progspace.c (print_program_space): Use ui_out_emit_table.
+	* osdata.c (info_osdata): Use ui_out_emit_table.
+	* mi/mi-cmd-info.c (mi_cmd_info_ada_exceptions): Use
+	ui_out_emit_table.
+	* linux-thread-db.c (info_auto_load_libthread_db): Use
+	ui_out_emit_table.
+	* inferior.c (print_inferior): Use ui_out_emit_table.
+	* gdb_bfd.c (maintenance_info_bfds): Use ui_out_emit_table.
+	* breakpoint.c (breakpoint_1): Use ui_out_emit_table.
+	* auto-load.c (auto_load_info_scripts): Use ui_out_emit_table.
+	* ada-tasks.c (print_ada_task_info): Use ui_out_emit_table.
+	* ui-out.h (class ui_out_emit_table): New.
+
+2017-08-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (mips_fpu_type_str): New function.
+	(mips_dump_tdep): Call it.
+
+2017-08-01  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Use MIPS_FPU_TYPE to access
+	`->mips_fpu_type'.
+
+2017-07-31  Xavier Roirand  <roirand@adacore.com>
+
+	* solib-darwin.c (DYLD_VERSION_MAX): Increase value.
+
+2017-07-27  Xavier Roirand  <roirand@adacore.com>
+
+	* MAINTAINERS (Write After Approval): Add Xavier Roirand.
+
 2017-07-26  Yao Qi  <yao.qi@linaro.org>
 
 	* cli/cli-cmds.c (maintenancechecklist): New variable.

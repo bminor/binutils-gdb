@@ -1,11 +1,11 @@
 #as:
 #readelf: -x.rodata -wlL
 #name: DWARF2 5
-# The am3 avr cr16 crx mn10 msp430 nds32 pru rl78 rx and xtensa targets do not evaluate the subtraction of symbols at assembly time
+# The am33 avr cr16 crx mn10 msp430 nds32 pru rl78 rx and xtensa targets do not evaluate the subtraction of symbols at assembly time.
 # The mep target tries to relay code sections which breaks symbolic view computations.
 # The riscv targets do not support the subtraction of symbols.
 # The tile targets require 8-byte instructions, but the test only simulates 4-byte instructions.
-#not-target: am3-* avr-* cr16-* crx-* mep-* mn10*-* msp430-* nds32*-* pru-* riscv*-* rl78-* rx-* tile*-* xtensa-*
+#not-target: am3*-* avr-* cr16-* crx-* mep-* mn10*-* msp430-* nds32*-* pru-* riscv*-* rl78-* rx-* tile*-* xtensa-*
 
 Hex dump of section '\.rodata':
   0x00000000 01010201 010203 *.*

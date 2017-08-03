@@ -217,8 +217,6 @@ skip_command (char *arg, int from_tty)
   const char *gfile = NULL;
   const char *function = NULL;
   const char *rfunction = NULL;
-  char **argv;
-  struct cleanup *cleanups;
   struct skiplist_entry *e;
   int i;
 
@@ -228,8 +226,7 @@ skip_command (char *arg, int from_tty)
       return;
     }
 
-  argv = buildargv (arg);
-  cleanups = make_cleanup_freeargv (argv);
+  gdb_argv argv (arg);
 
   for (i = 0; argv[i] != NULL; ++i)
     {
@@ -276,7 +273,6 @@ skip_command (char *arg, int from_tty)
 	     FUNCTION-NAME may be `foo (int)', and therefore we pass the
 	     complete original arg to skip_function command as if the user
 	     typed "skip function arg".  */
-	  do_cleanups (cleanups);
 	  skip_function_command (arg, from_tty);
 	  return;
 	}
@@ -336,8 +332,6 @@ skip_command (char *arg, int from_tty)
 			 lower_file_text, file_to_print);
       }
   }
-
-  do_cleanups (cleanups);
 }
 
 static void
@@ -346,7 +340,6 @@ skip_info (char *arg, int from_tty)
   struct skiplist_entry *e;
   int num_printable_entries = 0;
   struct value_print_options opts;
-  struct cleanup *tbl_chain;
 
   get_user_print_options (&opts);
 
@@ -367,9 +360,8 @@ skip_info (char *arg, int from_tty)
       return;
     }
 
-  tbl_chain = make_cleanup_ui_out_table_begin_end (current_uiout, 6,
-						   num_printable_entries,
-						   "SkiplistTable");
+  ui_out_emit_table table_emitter (current_uiout, 6, num_printable_entries,
+				   "SkiplistTable");
 
   current_uiout->table_header (5, ui_left, "number", "Num");   /* 1 */
   current_uiout->table_header (3, ui_left, "enabled", "Enb");  /* 2 */
@@ -411,8 +403,6 @@ skip_info (char *arg, int from_tty)
 
       current_uiout->text ("\n");
     }
-
-  do_cleanups (tbl_chain);
 }
 
 static void

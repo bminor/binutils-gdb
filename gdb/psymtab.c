@@ -1905,7 +1905,6 @@ dump_psymtab_addrmap (struct objfile *objfile, struct partial_symtab *psymtab,
 static void
 maintenance_print_psymbols (char *args, int from_tty)
 {
-  char **argv;
   struct ui_file *outfile = gdb_stdout;
   struct cleanup *cleanups;
   char *address_arg = NULL, *source_arg = NULL, *objfile_arg = NULL;
@@ -1917,8 +1916,8 @@ maintenance_print_psymbols (char *args, int from_tty)
 
   dont_repeat ();
 
-  argv = gdb_buildargv (args);
-  cleanups = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
+  cleanups = make_cleanup (null_cleanup, NULL);
 
   for (i = 0; argv != NULL && argv[i] != NULL; ++i)
     {

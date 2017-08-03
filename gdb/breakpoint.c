@@ -6808,7 +6808,6 @@ breakpoint_1 (char *args, int allflag,
   struct breakpoint *b;
   struct bp_location *last_loc = NULL;
   int nr_printable_breakpoints;
-  struct cleanup *bkpttbl_chain;
   struct value_print_options opts;
   int print_address_bits = 0;
   int print_type_col_width = 14;
@@ -6851,77 +6850,71 @@ breakpoint_1 (char *args, int allflag,
 	}
     }
 
-  if (opts.addressprint)
-    bkpttbl_chain 
-      = make_cleanup_ui_out_table_begin_end (uiout, 6,
-					     nr_printable_breakpoints,
-                                             "BreakpointTable");
-  else
-    bkpttbl_chain 
-      = make_cleanup_ui_out_table_begin_end (uiout, 5,
-					     nr_printable_breakpoints,
-                                             "BreakpointTable");
+  {
+    ui_out_emit_table table_emitter (uiout,
+				     opts.addressprint ? 6 : 5,
+				     nr_printable_breakpoints,
+				     "BreakpointTable");
 
-  if (nr_printable_breakpoints > 0)
-    annotate_breakpoints_headers ();
-  if (nr_printable_breakpoints > 0)
-    annotate_field (0);
-  uiout->table_header (7, ui_left, "number", "Num"); /* 1 */
-  if (nr_printable_breakpoints > 0)
-    annotate_field (1);
-  uiout->table_header (print_type_col_width, ui_left, "type", "Type"); /* 2 */
-  if (nr_printable_breakpoints > 0)
-    annotate_field (2);
-  uiout->table_header (4, ui_left, "disp", "Disp"); /* 3 */
-  if (nr_printable_breakpoints > 0)
-    annotate_field (3);
-  uiout->table_header (3, ui_left, "enabled", "Enb"); /* 4 */
-  if (opts.addressprint)
-    {
-      if (nr_printable_breakpoints > 0)
-	annotate_field (4);
-      if (print_address_bits <= 32)
-	uiout->table_header (10, ui_left, "addr", "Address"); /* 5 */
-      else
-	uiout->table_header (18, ui_left, "addr", "Address"); /* 5 */
-    }
-  if (nr_printable_breakpoints > 0)
-    annotate_field (5);
-  uiout->table_header (40, ui_noalign, "what", "What"); /* 6 */
-  uiout->table_body ();
-  if (nr_printable_breakpoints > 0)
-    annotate_breakpoints_table ();
+    if (nr_printable_breakpoints > 0)
+      annotate_breakpoints_headers ();
+    if (nr_printable_breakpoints > 0)
+      annotate_field (0);
+    uiout->table_header (7, ui_left, "number", "Num"); /* 1 */
+    if (nr_printable_breakpoints > 0)
+      annotate_field (1);
+    uiout->table_header (print_type_col_width, ui_left, "type", "Type"); /* 2 */
+    if (nr_printable_breakpoints > 0)
+      annotate_field (2);
+    uiout->table_header (4, ui_left, "disp", "Disp"); /* 3 */
+    if (nr_printable_breakpoints > 0)
+      annotate_field (3);
+    uiout->table_header (3, ui_left, "enabled", "Enb"); /* 4 */
+    if (opts.addressprint)
+      {
+	if (nr_printable_breakpoints > 0)
+	  annotate_field (4);
+	if (print_address_bits <= 32)
+	  uiout->table_header (10, ui_left, "addr", "Address"); /* 5 */
+	else
+	  uiout->table_header (18, ui_left, "addr", "Address"); /* 5 */
+      }
+    if (nr_printable_breakpoints > 0)
+      annotate_field (5);
+    uiout->table_header (40, ui_noalign, "what", "What"); /* 6 */
+    uiout->table_body ();
+    if (nr_printable_breakpoints > 0)
+      annotate_breakpoints_table ();
 
-  ALL_BREAKPOINTS (b)
-    {
-      QUIT;
-      /* If we have a filter, only list the breakpoints it accepts.  */
-      if (filter && !filter (b))
-	continue;
+    ALL_BREAKPOINTS (b)
+      {
+	QUIT;
+	/* If we have a filter, only list the breakpoints it accepts.  */
+	if (filter && !filter (b))
+	  continue;
 
-      /* If we have an "args" string, it is a list of breakpoints to 
-	 accept.  Skip the others.  */
+	/* If we have an "args" string, it is a list of breakpoints to 
+	   accept.  Skip the others.  */
 
-      if (args != NULL && *args != '\0')
-	{
-	  if (allflag)	/* maintenance info breakpoint */
-	    {
-	      if (parse_and_eval_long (args) != b->number)
-		continue;
-	    }
-	  else		/* all others */
-	    {
-	      if (!number_is_in_list (args, b->number))
-		continue;
-	    }
-	}
-      /* We only print out user settable breakpoints unless the
-	 allflag is set.  */
-      if (allflag || user_breakpoint_p (b))
-	print_one_breakpoint (b, &last_loc, allflag);
-    }
-
-  do_cleanups (bkpttbl_chain);
+	if (args != NULL && *args != '\0')
+	  {
+	    if (allflag)	/* maintenance info breakpoint */
+	      {
+		if (parse_and_eval_long (args) != b->number)
+		  continue;
+	      }
+	    else		/* all others */
+	      {
+		if (!number_is_in_list (args, b->number))
+		  continue;
+	      }
+	  }
+	/* We only print out user settable breakpoints unless the
+	   allflag is set.  */
+	if (allflag || user_breakpoint_p (b))
+	  print_one_breakpoint (b, &last_loc, allflag);
+      }
+  }
 
   if (nr_printable_breakpoints == 0)
     {
