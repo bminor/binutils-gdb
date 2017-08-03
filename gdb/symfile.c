@@ -2205,10 +2205,8 @@ add_symbol_file_command (char *args, int from_tty)
   struct gdbarch *gdbarch = get_current_arch ();
   gdb::unique_xmalloc_ptr<char> filename;
   char *arg;
-  int section_index = 0;
   int argcnt = 0;
   int sec_num = 0;
-  int i;
   int expecting_sec_name = 0;
   int expecting_sec_addr = 0;
   struct objfile *objf;
@@ -2225,12 +2223,8 @@ add_symbol_file_command (char *args, int from_tty)
   };
 
   struct section_addr_info *section_addrs;
-  struct sect_opt *sect_opts = NULL;
-  size_t num_sect_opts = 0;
+  std::vector<sect_opt> sect_opts;
   struct cleanup *my_cleanups = make_cleanup (null_cleanup, NULL);
-
-  num_sect_opts = 16;
-  sect_opts = XNEWVEC (struct sect_opt, num_sect_opts);
 
   dont_repeat ();
 
@@ -2251,16 +2245,8 @@ add_symbol_file_command (char *args, int from_tty)
 	{
 	  /* The second argument is always the text address at which
 	     to load the program.  */
-	  sect_opts[section_index].name = ".text";
-	  sect_opts[section_index].value = arg;
-	  if (++section_index >= num_sect_opts)
-	    {
-	      num_sect_opts *= 2;
-	      sect_opts = ((struct sect_opt *)
-			   xrealloc (sect_opts,
-				     num_sect_opts
-				     * sizeof (struct sect_opt)));
-	    }
+	  sect_opt sect = { ".text", arg };
+	  sect_opts.push_back (sect);
 	}
       else
 	{
@@ -2268,21 +2254,14 @@ add_symbol_file_command (char *args, int from_tty)
 	     to an option.  */
 	  if (expecting_sec_name)
 	    {
-	      sect_opts[section_index].name = arg;
+	      sect_opt sect = { arg, NULL };
+	      sect_opts.push_back (sect);
 	      expecting_sec_name = 0;
 	    }
 	  else if (expecting_sec_addr)
 	    {
-	      sect_opts[section_index].value = arg;
+	      sect_opts.back ().value = arg;
 	      expecting_sec_addr = 0;
-	      if (++section_index >= num_sect_opts)
-		{
-		  num_sect_opts *= 2;
-		  sect_opts = ((struct sect_opt *)
-			       xrealloc (sect_opts,
-					 num_sect_opts
-					 * sizeof (struct sect_opt)));
-		}
 	    }
 	  else if (strcmp (arg, "-readnow") == 0)
 	    flags |= OBJF_READNOW;
@@ -2301,7 +2280,7 @@ add_symbol_file_command (char *args, int from_tty)
      filename, and the second is the address where this file has been
      loaded.  Abort now if this address hasn't been provided by the
      user.  */
-  if (section_index < 1)
+  if (sect_opts.empty ())
     error (_("The address where %s has been loaded is missing"),
 	   filename.get ());
 
@@ -2313,13 +2292,13 @@ add_symbol_file_command (char *args, int from_tty)
 
   printf_unfiltered (_("add symbol table from file \"%s\" at\n"),
 		     filename.get ());
-  section_addrs = alloc_section_addr_info (section_index);
+  section_addrs = alloc_section_addr_info (sect_opts.size ());
   make_cleanup (xfree, section_addrs);
-  for (i = 0; i < section_index; i++)
+  for (sect_opt &sect : sect_opts)
     {
       CORE_ADDR addr;
-      const char *val = sect_opts[i].value;
-      const char *sec = sect_opts[i].name;
+      const char *val = sect.value;
+      const char *sec = sect.name;
 
       addr = parse_and_eval_address (val);
 
