@@ -1,3 +1,7 @@
+2017-08-03  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+
+	* MAINTAINERS (Write After Approval): Add Ruslan Kabatsayev.
+
 2017-08-03  Tom Tromey  <tom@tromey.com>
 
 	* utils.c (make_cleanup_freeargv, do_freeargv, gdb_buildargv):
