@@ -913,7 +913,7 @@ done:
       else if ((opts & OPF_RETURN_REALPATH) != 0)
 	*filename_opened = gdb_realpath (filename);
       else
-	*filename_opened = gdb_abspath (filename);
+	*filename_opened = gdb_abspath (filename).release ();
     }
 
   errno = last_errno;

@@ -128,10 +128,10 @@ set_gdb_data_directory (const char *new_datadir)
      isn't canonical, but that's ok.  */
   if (!IS_ABSOLUTE_PATH (gdb_datadir))
     {
-      char *abs_datadir = gdb_abspath (gdb_datadir);
+      gdb::unique_xmalloc_ptr<char> abs_datadir = gdb_abspath (gdb_datadir);
 
       xfree (gdb_datadir);
-      gdb_datadir = abs_datadir;
+      gdb_datadir = abs_datadir.release ();
     }
 }
 

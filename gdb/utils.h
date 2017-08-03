@@ -256,7 +256,7 @@ extern char *gdb_realpath (const char *);
 
 extern char *gdb_realpath_keepfile (const char *);
 
-extern char *gdb_abspath (const char *);
+extern gdb::unique_xmalloc_ptr<char> gdb_abspath (const char *);
 
 extern int gdb_filename_fnmatch (const char *pattern, const char *string,
 				 int flags);

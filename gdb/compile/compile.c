@@ -90,8 +90,6 @@ static void
 compile_file_command (char *arg, int from_tty)
 {
   enum compile_i_scope_types scope = COMPILE_I_SIMPLE_SCOPE;
-  char *buffer;
-  struct cleanup *cleanup;
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
@@ -115,12 +113,9 @@ compile_file_command (char *arg, int from_tty)
     error (_("Unknown argument specified."));
 
   arg = skip_spaces (arg);
-  arg = gdb_abspath (arg);
-  cleanup = make_cleanup (xfree, arg);
-  buffer = xstrprintf ("#include \"%s\"\n", arg);
-  make_cleanup (xfree, buffer);
-  eval_compile_command (NULL, buffer, scope, NULL);
-  do_cleanups (cleanup);
+  gdb::unique_xmalloc_ptr<char> abspath = gdb_abspath (arg);
+  std::string buffer = string_printf ("#include \"%s\"\n", abspath.get ());
+  eval_compile_command (NULL, buffer.c_str (), scope, NULL);
 }
 
 /* Handle the input from the 'compile code' command.  The

@@ -1,3 +1,13 @@
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile.c (compile_file_command): Use
+	gdb::unique_xmalloc_ptr, std::string.
+	* utils.c (gdb_abspath): Change return type.
+	* source.c (openp): Update.
+	* objfiles.c (allocate_objfile): Update.
+	* main.c (set_gdb_data_directory): Update.
+	* utils.h (gdb_abspath): Return a gdb::unique_xmalloc_ptr.
+
 2017-08-22  Zhouyi Zhou  <zhouzhouyi@gmail.com>
 
 	* cli-cmds.c (list_commands): List actual code around more than

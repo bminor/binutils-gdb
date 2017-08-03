@@ -386,22 +386,25 @@ allocate_objfile (bfd *abfd, const char *name, objfile_flags flags)
 
   objfile_alloc_data (objfile);
 
+  gdb::unique_xmalloc_ptr<char> name_holder;
   if (name == NULL)
     {
       gdb_assert (abfd == NULL);
       gdb_assert ((flags & OBJF_NOT_FILENAME) != 0);
-      expanded_name = xstrdup ("<<anonymous objfile>>");
+      expanded_name = "<<anonymous objfile>>";
     }
   else if ((flags & OBJF_NOT_FILENAME) != 0
 	   || is_target_filename (name))
-    expanded_name = xstrdup (name);
+    expanded_name = name;
   else
-    expanded_name = gdb_abspath (name);
+    {
+      name_holder = gdb_abspath (name);
+      expanded_name = name_holder.get ();
+    }
   objfile->original_name
     = (char *) obstack_copy0 (&objfile->objfile_obstack,
 			      expanded_name,
 			      strlen (expanded_name));
-  xfree (expanded_name);
 
   /* Update the per-objfile information that comes from the bfd, ensuring
      that any data that is reference is saved in the per-objfile data
