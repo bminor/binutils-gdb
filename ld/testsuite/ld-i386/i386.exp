@@ -438,6 +438,17 @@ run_dump_test "property-x86-shstk5"
 run_dump_test "pie1"
 run_dump_test "pie1-nacl"
 run_dump_test "pr21884"
+run_dump_test "gpoff-3"
+run_dump_test "gpoff-4"
+run_dump_test "gpoff-5"
+run_dump_test "gpoff-6"
+run_dump_test "gpoff-7"
+run_dump_test "gpoff-8a"
+run_dump_test "gpoff-8b"
+run_dump_test "gpoff-8c"
+run_dump_test "gpoff-8d"
+run_dump_test "gpoff-8e"
+run_dump_test "gpoff-8f"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
@@ -1264,6 +1275,67 @@ if { [isnative]
 		"weakundef1pie" \
 		"pass.out" \
 		"-fPIE" \
+	    ] \
+	]
+    }
+
+    if { [istarget "i?86-*-linux*"] } {
+	run_ld_link_exec_tests [list \
+	    [list \
+		"Run GPOFF 1" \
+		"" \
+		"" \
+		{gpoff-1a.S gpoff-1b.c} \
+		"gpoff-1" "pass.out" \
+	    ] \
+	    [list \
+		"Run GPOFF 1 (PIE)" \
+		"-pie" \
+		"" \
+		{gpoff-1a.S gpoff-1b.c} \
+		"gpoff-1-pie" "pass.out" "-fPIE" \
+	    ] \
+	    [list \
+		"Run GPOFF 1 (PIC)" \
+		"-pie" \
+		"" \
+		{gpoff-1a.S gpoff-1b.c} \
+		"gpoff-1-pic" "pass.out" "-fPIC" \
+	    ] \
+	    [list \
+		"Run GPOFF 1 (static)" \
+		"-static" \
+		"" \
+		{gpoff-1a.S gpoff-1b.c} \
+		"gpoff-1-static" "pass.out" \
+	    ] \
+	    [list \
+		"Run GPOFF 2" \
+		"" \
+		"" \
+		{gpoff-2a.S gpoff-2b.c} \
+		"gpoff-2" "pass.out" \
+	    ] \
+	    [list \
+		"Run GPOFF 2 (PIE)" \
+		"-pie" \
+		"" \
+		{gpoff-2a.S gpoff-2b.c} \
+		"gpoff-2-pie" "pass.out" "-fPIE" \
+	    ] \
+	    [list \
+		"Run GPOFF 2 (PIC)" \
+		"-pie" \
+		"" \
+		{gpoff-2a.S gpoff-2b.c} \
+		"gpoff-2-pic" "pass.out" "-fPIC" \
+	    ] \
+	    [list \
+		"Run GPOFF 2 (static)" \
+		"-static" \
+		"" \
+		{gpoff-2a.S gpoff-2b.c} \
+		"gpoff-2-static" "pass.out" \
 	    ] \
 	]
     }

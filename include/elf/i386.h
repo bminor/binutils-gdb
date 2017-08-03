@@ -68,6 +68,7 @@ START_RELOC_NUMBERS (elf_i386_reloc_type)
      RELOC_NUMBER (R_386_IRELATIVE,    42) /* Adjust indirectly by program base */
      /* Load from 32 bit GOT entry, relaxable.  */
      RELOC_NUMBER (R_386_GOT32X,       43)
+     RELOC_NUMBER (R_386_GPOFF,        44) /* 32 bit offset to __gp  */
 
      /* Used by Intel.  */
      RELOC_NUMBER (R_386_USED_BY_INTEL_200, 200)

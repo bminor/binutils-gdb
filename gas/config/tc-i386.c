@@ -672,6 +672,9 @@ static enum rc_type evexrcig = rne;
 /* Pre-defined "_GLOBAL_OFFSET_TABLE_".  */
 static symbolS *GOT_symbol;
 
+/* Pre-defined "__gp".  */
+static symbolS *GP_symbol;
+
 /* The dwarf2 return column, adjusted for 32 or 64 bit.  */
 unsigned int x86_dwarf2_return_column;
 
@@ -7776,6 +7779,9 @@ lex_got (enum bfd_reloc_code_real *rel,
     { STRING_COMMA_LEN ("GOTPCREL"), { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_GOTPCREL },
       OPERAND_TYPE_IMM32_32S_DISP32 },
+    { STRING_COMMA_LEN ("GPOFF"),    { BFD_RELOC_GPREL32,
+				       BFD_RELOC_GPREL32 },
+      OPERAND_TYPE_IMM32_32S_DISP32 },
     { STRING_COMMA_LEN ("TLSGD"),    { BFD_RELOC_386_TLS_GD,
 				       BFD_RELOC_X86_64_TLSGD    },
       OPERAND_TYPE_IMM32_32S_DISP32 },
@@ -7848,8 +7854,19 @@ lex_got (enum bfd_reloc_code_real *rel,
 		    *types = gotrel[j].types64;
 		}
 
-	      if (j != 0 && GOT_symbol == NULL)
-		GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
+	      if (j != 0)
+		{
+		  if (gotrel[j].rel[1] == BFD_RELOC_GPREL32)
+		    {
+		      if (GP_symbol == NULL)
+			GP_symbol = symbol_find_or_make (GLOBAL_POINTER_NAME);
+		    }
+		  else
+		    {
+		      if (GOT_symbol == NULL)
+			GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
+		    }
+		}
 
 	      /* The length of the first part of our input line.  */
 	      first = cp - input_line_pointer;
@@ -8505,6 +8522,10 @@ i386_displacement (char *disp_start, char *disp_end)
   gotfree_input_line = lex_got (&i.reloc[this_operand], NULL, &types);
   if (gotfree_input_line)
     input_line_pointer = gotfree_input_line;
+
+  if (i.reloc[this_operand] == BFD_RELOC_GPREL32
+      && i.types[this_operand].bitfield.baseindex)
+    as_bad (_("invalid GPOFF relocation"));
 
   exp_seg = expression (exp);
 
@@ -10740,6 +10761,21 @@ md_undefined_symbol (char *name)
 	};
       return GOT_symbol;
     }
+  else if (name[0] == GLOBAL_POINTER_NAME[0]
+	   && name[1] == GLOBAL_POINTER_NAME[1]
+	   && name[2] == GLOBAL_POINTER_NAME[2]
+	   && name[3] == GLOBAL_POINTER_NAME[3]
+	   && strcmp (name, GLOBAL_POINTER_NAME) == 0)
+    {
+      if (!GP_symbol)
+	{
+	  if (symbol_find (name))
+	    as_bad (_("GP already in symbol table"));
+	  GP_symbol = symbol_new (name, undefined_section,
+				  (valueT) 0, &zero_address_frag);
+	};
+      return GP_symbol;
+    }
   return 0;
 }
 
@@ -10899,6 +10935,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     case BFD_RELOC_X86_64_PLTOFF64:
     case BFD_RELOC_X86_64_GOTPC32_TLSDESC:
     case BFD_RELOC_X86_64_TLSDESC_CALL:
+    case BFD_RELOC_GPREL32:
     case BFD_RELOC_RVA:
     case BFD_RELOC_VTABLE_ENTRY:
     case BFD_RELOC_VTABLE_INHERIT:

@@ -128,6 +128,12 @@ extern const char *i386_comment_chars;
 #define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"
 #endif
 
+/* The name of the global pointer.  Allow this to be overridden if need
+   be.  */
+#ifndef GLOBAL_POINTER_NAME
+#define GLOBAL_POINTER_NAME "__gp"
+#endif
+
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) && !defined (LEX_AT)
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) x86_cons (EXP, NBYTES)
 #endif
