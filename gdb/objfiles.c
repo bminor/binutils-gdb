@@ -376,7 +376,7 @@ struct objfile *
 allocate_objfile (bfd *abfd, const char *name, objfile_flags flags)
 {
   struct objfile *objfile;
-  char *expanded_name;
+  const char *expanded_name;
 
   objfile = XCNEW (struct objfile);
   objfile->psymbol_cache = psymbol_bcache_init ();

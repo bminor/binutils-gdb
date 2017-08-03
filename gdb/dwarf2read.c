@@ -2717,10 +2717,10 @@ dwarf2_get_dwz_file (void)
   std::string abs_storage;
   if (!IS_ABSOLUTE_PATH (filename))
     {
-      char *abs = gdb_realpath (objfile_name (dwarf2_per_objfile->objfile));
+      gdb::unique_xmalloc_ptr<char> abs
+	= gdb_realpath (objfile_name (dwarf2_per_objfile->objfile));
 
-      make_cleanup (xfree, abs);
-      abs_storage = ldirname (abs) + SLASH_STRING + filename;
+      abs_storage = ldirname (abs.get ()) + SLASH_STRING + filename;
       filename = abs_storage.c_str ();
     }
 
@@ -3589,7 +3589,7 @@ dw2_get_real_path (struct objfile *objfile,
 				      qfn->num_file_names, const char *);
 
   if (qfn->real_names[index] == NULL)
-    qfn->real_names[index] = gdb_realpath (qfn->file_names[index]);
+    qfn->real_names[index] = gdb_realpath (qfn->file_names[index]).release ();
 
   return qfn->real_names[index];
 }
@@ -4383,13 +4383,11 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
 
   dwarf2_per_objfile->filenames_cache->traverse ([&] (const char *filename)
     {
-      const char *this_real_name;
+      gdb::unique_xmalloc_ptr<char> this_real_name;
 
       if (need_fullname)
 	this_real_name = gdb_realpath (filename);
-      else
-	this_real_name = NULL;
-      (*fun) (filename, this_real_name, data);
+      (*fun) (filename, this_real_name.get (), data);
     });
 }
 

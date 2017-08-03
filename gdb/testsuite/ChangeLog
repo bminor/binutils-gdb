@@ -1,3 +1,7 @@
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
+	* gdb.gdb/xfullpath.exp: Remove.
+
 2017-08-21  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19487

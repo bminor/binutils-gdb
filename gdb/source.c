@@ -911,7 +911,7 @@ done:
       if (fd < 0)
 	*filename_opened = NULL;
       else if ((opts & OPF_RETURN_REALPATH) != 0)
-	*filename_opened = gdb_realpath (filename);
+	*filename_opened = gdb_realpath (filename).release ();
       else
 	*filename_opened = gdb_abspath (filename).release ();
     }
@@ -1050,7 +1050,7 @@ find_and_open_source (const char *filename,
       result = gdb_open_cloexec (*fullname, OPEN_MODE, 0);
       if (result >= 0)
 	{
-	  char *lpath = gdb_realpath (*fullname);
+	  char *lpath = gdb_realpath (*fullname).release ();
 
 	  xfree (*fullname);
 	  *fullname = lpath;

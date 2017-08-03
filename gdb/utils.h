@@ -252,7 +252,7 @@ extern struct cleanup *make_bpstat_clear_actions_cleanup (void);
 
 /* Path utilities.  */
 
-extern char *gdb_realpath (const char *);
+extern gdb::unique_xmalloc_ptr<char> gdb_realpath (const char *);
 
 extern gdb::unique_xmalloc_ptr<char> gdb_realpath_keepfile (const char *);
 

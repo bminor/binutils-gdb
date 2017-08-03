@@ -468,7 +468,7 @@ iterate_over_symtabs (const char *name,
      absolutizing a relative path.  */
   if (IS_ABSOLUTE_PATH (name))
     {
-      real_path.reset (gdb_realpath (name));
+      real_path = gdb_realpath (name);
       gdb_assert (IS_ABSOLUTE_PATH (real_path.get ()));
     }
 

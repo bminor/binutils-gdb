@@ -249,15 +249,11 @@ exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty)
 void
 exec_file_attach (const char *filename, int from_tty)
 {
-  struct cleanup *cleanups;
-
   /* First, acquire a reference to the current exec_bfd.  We release
      this at the end of the function; but acquiring it now lets the
      BFD cache return it if this call refers to the same file.  */
   gdb_bfd_ref (exec_bfd);
   gdb_bfd_ref_ptr exec_bfd_holder (exec_bfd);
-
-  cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Remove any previous exec file.  */
   exec_close ();
@@ -274,7 +270,7 @@ exec_file_attach (const char *filename, int from_tty)
   else
     {
       int load_via_target = 0;
-      char *scratch_pathname, *canonical_pathname;
+      const char *scratch_pathname, *canonical_pathname;
       int scratch_chan;
       struct target_section *sections = NULL, *sections_end = NULL;
       char **matching;
@@ -287,6 +283,7 @@ exec_file_attach (const char *filename, int from_tty)
 	    load_via_target = 1;
 	}
 
+      gdb::unique_xmalloc_ptr<char> canonical_storage, scratch_storage;
       if (load_via_target)
 	{
 	  /* gdb_bfd_fopen does not support "target:" filenames.  */
@@ -295,19 +292,18 @@ exec_file_attach (const char *filename, int from_tty)
 		       "not supported for %s sysroots"),
 		     TARGET_SYSROOT_PREFIX);
 
-	  scratch_pathname = xstrdup (filename);
-	  make_cleanup (xfree, scratch_pathname);
-
+	  scratch_pathname = filename;
 	  scratch_chan = -1;
-
 	  canonical_pathname = scratch_pathname;
 	}
       else
 	{
+	  char *temp_pathname;
+
 	  scratch_chan = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST,
 				filename, write_files ?
 				O_RDWR | O_BINARY : O_RDONLY | O_BINARY,
-				&scratch_pathname);
+				&temp_pathname);
 #if defined(__GO32__) || defined(_WIN32) || defined(__CYGWIN__)
 	  if (scratch_chan < 0)
 	    {
@@ -318,18 +314,19 @@ exec_file_attach (const char *filename, int from_tty)
 				    exename, write_files ?
 				    O_RDWR | O_BINARY
 				    : O_RDONLY | O_BINARY,
-				    &scratch_pathname);
+				    &temp_pathname);
 	    }
 #endif
 	  if (scratch_chan < 0)
 	    perror_with_name (filename);
 
-	  make_cleanup (xfree, scratch_pathname);
+	  scratch_storage.reset (temp_pathname);
+	  scratch_pathname = temp_pathname;
 
 	  /* gdb_bfd_open (and its variants) prefers canonicalized
 	     pathname for better BFD caching.  */
-	  canonical_pathname = gdb_realpath (scratch_pathname);
-	  make_cleanup (xfree, canonical_pathname);
+	  canonical_storage = gdb_realpath (scratch_pathname);
+	  canonical_pathname = canonical_storage.get ();
 	}
 
       gdb_bfd_ref_ptr temp;
@@ -389,8 +386,6 @@ exec_file_attach (const char *filename, int from_tty)
       if (deprecated_exec_file_display_hook)
 	(*deprecated_exec_file_display_hook) (filename);
     }
-
-  do_cleanups (cleanups);
 
   bfd_cache_close_all ();
   observer_notify_executable_changed ();

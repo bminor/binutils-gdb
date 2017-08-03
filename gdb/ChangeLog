@@ -1,5 +1,28 @@
 2017-08-22  Tom Tromey  <tom@tromey.com>
 
+	* exec.c (exec_file_attach): Update.
+	* linux-thread-db.c (try_thread_db_load): Update.
+	* guile/scm-safe-call.c (gdbscm_safe_source_script): Update.
+	* utils.c (gdb_realpath): Change return type.
+	(gdb_realpath_keepfile): Update.
+	(gdb_realpath_check_trailer, gdb_realpath_tests): New functions.
+	(_initialize_utils): Register the new self test.
+	* source.c (openp): Update.
+	(find_and_open_source): Update.
+	* nto-tdep.c (nto_find_and_open_solib): Update.
+	* main.c (set_gdb_data_directory): Update.
+	(captured_main_1): Update.
+	* dwarf2read.c (dwarf2_get_dwz_file): Update
+	(dw2_map_symbol_filenames): Update.
+	* auto-load.c (auto_load_safe_path_vec_update): Update.
+	(filename_is_in_auto_load_safe_path_vec): Change type of
+	"filename_realp".
+	(auto_load_objfile_script): Update.
+	(file_is_auto_load_safe): Update.  Use std::string.
+	* utils.h (gdb_realpath): Return a gdb::unique_xmalloc_ptr.
+
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
 	* utils.c (gdb_realpath_keepfile): Return a
 	gdb::unique_xmalloc_ptr.
 	* exec.c (exec_file_attach): Update.
