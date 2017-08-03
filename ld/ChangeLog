@@ -1,3 +1,11 @@
+2017-08-03  Alan Modra  <amodra@gmail.com>
+
+	PR ld/21884
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Revert
+	last change.  Rename iself to elfinput.  Expand comments.  Condition
+	ELF checks on having both input and output ELF files.  Extract..
+	(elf_orphan_compatible): ..this new function.
+
 2017-08-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21884
