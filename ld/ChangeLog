@@ -1,3 +1,22 @@
+2017-08-03  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/21884
+	* testsuite/ld-elf/pr21884.d: Add AVR, HPPA, IA64, M68HC1x and
+	SCORE to list of targets not supporting file format changes during
+	linking.
+	* testsuite/ld-unique/pr21529.d: Likewise.
+	* emultempl/avrelf.em (_before_allocation): Skip for non-ELF
+	output formats.
+	(avr_elf_create_output_section_statements): Fail if the output
+	format is not ELF.
+	(avr_finish): Do not access the ELF header in non-ELF format
+	output bfds.
+	* emultempl/m68hc1xelf.em (_before_allocation): Skip for non-ELF
+	output formats.
+	(m68hc11elf_create_output_section_statements): Fail if the putput
+	format is not ELF.
+	(m68hc11elf_after_allocation): Skip for non-ELF output formats.
+
 2017-08-03  Alan Modra  <amodra@gmail.com>
 
 	PR ld/21884
