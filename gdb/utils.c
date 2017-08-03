@@ -2716,7 +2716,7 @@ gdb_realpath (const char *filename)
 /* Return a copy of FILENAME, with its directory prefix canonicalized
    by gdb_realpath.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 gdb_realpath_keepfile (const char *filename)
 {
   const char *base_name = lbasename (filename);
@@ -2727,7 +2727,7 @@ gdb_realpath_keepfile (const char *filename)
   /* Extract the basename of filename, and return immediately 
      a copy of filename if it does not contain any directory prefix.  */
   if (base_name == filename)
-    return xstrdup (filename);
+    return gdb::unique_xmalloc_ptr<char> (xstrdup (filename));
 
   dir_name = (char *) alloca ((size_t) (base_name - filename + 2));
   /* Allocate enough space to store the dir_name + plus one extra
@@ -2756,7 +2756,7 @@ gdb_realpath_keepfile (const char *filename)
     result = concat (real_path, SLASH_STRING, base_name, (char *) NULL);
 
   xfree (real_path);
-  return result;
+  return gdb::unique_xmalloc_ptr<char> (result);
 }
 
 /* Return PATH in absolute form, performing tilde-expansion if necessary.

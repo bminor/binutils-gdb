@@ -1,5 +1,13 @@
 2017-08-22  Tom Tromey  <tom@tromey.com>
 
+	* utils.c (gdb_realpath_keepfile): Return a
+	gdb::unique_xmalloc_ptr.
+	* exec.c (exec_file_attach): Update.
+	* utils.h (gdb_realpath_keepfile): Return a
+	gdb::unique_xmalloc_ptr.
+
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile.c (compile_file_command): Use
 	gdb::unique_xmalloc_ptr, std::string.
 	* utils.c (gdb_abspath): Change return type.

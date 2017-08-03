@@ -352,7 +352,7 @@ exec_file_attach (const char *filename, int from_tty)
       if (load_via_target)
 	exec_filename = xstrdup (bfd_get_filename (exec_bfd));
       else
-	exec_filename = gdb_realpath_keepfile (scratch_pathname);
+	exec_filename = gdb_realpath_keepfile (scratch_pathname).release ();
 
       if (!bfd_check_format_matches (exec_bfd, bfd_object, &matching))
 	{
