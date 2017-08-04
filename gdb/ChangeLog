@@ -1,3 +1,21 @@
+2017-08-05  Tom Tromey  <tom@tromey.com>
+
+	* rust-exp.y (rust_op_ptr, set_field): Remove typedefs.
+	(rust_op_vector, rust_set_vector): New typedefs.
+	(current_parser): New global.
+	(work_obstack): Change to pointer type.  Update all users.
+	(rust_ast, pstate): Remove globals.
+	(struct rust_parser): New.
+	(%union) <params, field_inits>: Change type.
+	(start, tuple_expr, unit_expr, struct_expr_list, literal)
+	(field_expr, expr_list, maybe_expr_list, type_list): Update.
+	(ast_call_ish, ast_path, ast_function_type, ast_tuple_type)
+	(convert_params_to_types, convert_params_to_expression): Change
+	type of "params".
+	(ast_string): Change type of "fields".
+	(rust_parse): Make a rust_parser.  Remove cleanups.
+	(rust_lex_tests): Make and install an auto_obstack.
+
 2017-08-04  Yao Qi  <yao.qi@linaro.org>
 
 	* configure.srv (ipa_x32_linux_regobj): New.
