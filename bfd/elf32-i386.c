@@ -995,10 +995,8 @@ struct elf_i386_link_hash_entry
   /* Don't call finish_dynamic_symbol on this symbol.  */
   unsigned int no_finish_dynamic_symbol : 1;
 
-  /* 0: symbol isn't ___tls_get_addr.
-     1: symbol is ___tls_get_addr.
-     2: symbol is unknown.  */
-  unsigned int tls_get_addr : 2;
+  /* TRUE if symbol symbol is __tls_get_addr.  */
+  unsigned int tls_get_addr : 1;
 
   /* Reference count of C/C++ function pointer relocations in read-write
      section which can be resolved at run-time.  */
@@ -1149,7 +1147,7 @@ elf_i386_link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->has_got_reloc = 0;
       eh->has_non_got_reloc = 0;
       eh->no_finish_dynamic_symbol = 0;
-      eh->tls_get_addr = 2;
+      eh->tls_get_addr = 0;
       eh->func_pointer_refcount = 0;
       eh->plt_got.offset = (bfd_vma) -1;
       eh->tlsdesc_got = (bfd_vma) -1;
@@ -1378,7 +1376,7 @@ elf_i386_check_tls_transition (asection *sec,
   struct elf_link_hash_entry *h;
   bfd_vma offset;
   bfd_byte *call;
-  bfd_boolean indirect_call, tls_get_addr;
+  bfd_boolean indirect_call;
 
   offset = rel->r_offset;
   switch (r_type)
@@ -1483,29 +1481,9 @@ elf_i386_check_tls_transition (asection *sec,
       if (r_symndx < symtab_hdr->sh_info)
 	return FALSE;
 
-      tls_get_addr = FALSE;
       h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-      if (h != NULL && h->root.root.string != NULL)
-	{
-	  struct elf_i386_link_hash_entry *eh
-	    = (struct elf_i386_link_hash_entry *) h;
-	  tls_get_addr = eh->tls_get_addr == 1;
-	  if (eh->tls_get_addr > 1)
-	    {
-	      /* Use strncmp to check ___tls_get_addr since
-		 ___tls_get_addr may be versioned.  */
-	      if (strncmp (h->root.root.string, "___tls_get_addr", 15)
-		  == 0)
-		{
-		  eh->tls_get_addr = 1;
-		  tls_get_addr = TRUE;
-		}
-	      else
-		eh->tls_get_addr = 0;
-	    }
-	}
-
-      if (!tls_get_addr)
+      if (h == NULL
+	  || !((struct elf_i386_link_hash_entry *) h)->tls_get_addr)
 	return FALSE;
       else if (indirect_call)
 	return (ELF32_R_TYPE (rel[1].r_info) == R_386_GOT32X);
@@ -1863,7 +1841,7 @@ convert_branch:
 	      modrm = 0xe8;
 	      /* To support TLS optimization, always use addr32 prefix
 		 for "call *___tls_get_addr@GOT(%reg)".  */
-	      if (eh && eh->tls_get_addr == 1)
+	      if (eh && eh->tls_get_addr)
 		{
 		  nop = 0x67;
 		  nop_offset = irel->r_offset - 2;
@@ -7148,6 +7126,23 @@ error_alignment:
   return pbfd;
 }
 
+static bfd_boolean
+elf_i386_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+{
+  if (!bfd_link_relocatable (info))
+    {
+      /* Check for ___tls_get_addr reference.  */
+      struct elf_link_hash_entry *h;
+      h = elf_link_hash_lookup (elf_hash_table (info), "___tls_get_addr",
+				FALSE, FALSE, FALSE);
+      if (h != NULL)
+	((struct elf_i386_link_hash_entry *) h)->tls_get_addr = 1;
+    }
+
+  /* Invoke the regular ELF backend linker to do all the work.  */
+  return _bfd_elf_link_check_relocs (abfd, info);
+}
+
 #define TARGET_LITTLE_SYM		i386_elf32_vec
 #define TARGET_LITTLE_NAME		"elf32-i386"
 #define ELF_ARCH			bfd_arch_i386
@@ -7178,6 +7173,7 @@ error_alignment:
 #define bfd_elf32_bfd_reloc_type_lookup	      elf_i386_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	      elf_i386_reloc_name_lookup
 #define bfd_elf32_get_synthetic_symtab	      elf_i386_get_synthetic_symtab
+#define bfd_elf32_bfd_link_check_relocs	      elf_i386_link_check_relocs
 
 #define elf_backend_adjust_dynamic_symbol     elf_i386_adjust_dynamic_symbol
 #define elf_backend_relocs_compatible	      _bfd_elf_relocs_compatible

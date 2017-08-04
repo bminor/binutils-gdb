@@ -1101,10 +1101,8 @@ struct elf_x86_64_link_hash_entry
   /* Don't call finish_dynamic_symbol on this symbol.  */
   unsigned int no_finish_dynamic_symbol : 1;
 
-  /* 0: symbol isn't __tls_get_addr.
-     1: symbol is __tls_get_addr.
-     2: symbol is unknown.  */
-  unsigned int tls_get_addr : 2;
+  /* TRUE if symbol symbol is __tls_get_addr.  */
+  unsigned int tls_get_addr : 1;
 
   /* Reference count of C/C++ function pointer relocations in read-write
      section which can be resolved at run-time.  */
@@ -1264,7 +1262,7 @@ elf_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->has_got_reloc = 0;
       eh->has_non_got_reloc = 0;
       eh->no_finish_dynamic_symbol = 0;
-      eh->tls_get_addr = 2;
+      eh->tls_get_addr = 0;
       eh->func_pointer_refcount = 0;
       eh->plt_second.offset = (bfd_vma) -1;
       eh->plt_got.offset = (bfd_vma) -1;
@@ -1527,7 +1525,7 @@ elf_x86_64_check_tls_transition (bfd *abfd,
   bfd_vma offset;
   struct elf_x86_64_link_hash_table *htab;
   bfd_byte *call;
-  bfd_boolean indirect_call, tls_get_addr;
+  bfd_boolean indirect_call;
 
   htab = elf_x86_64_hash_table (info);
   offset = rel->r_offset;
@@ -1667,29 +1665,9 @@ elf_x86_64_check_tls_transition (bfd *abfd,
       if (r_symndx < symtab_hdr->sh_info)
 	return FALSE;
 
-      tls_get_addr = FALSE;
       h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-      if (h != NULL && h->root.root.string != NULL)
-	{
-	  struct elf_x86_64_link_hash_entry *eh
-	    = (struct elf_x86_64_link_hash_entry *) h;
-	  tls_get_addr = eh->tls_get_addr == 1;
-	  if (eh->tls_get_addr > 1)
-	    {
-	      /* Use strncmp to check __tls_get_addr since
-		 __tls_get_addr may be versioned.  */
-	      if (strncmp (h->root.root.string, "__tls_get_addr", 14)
-		  == 0)
-		{
-		  eh->tls_get_addr = 1;
-		  tls_get_addr = TRUE;
-		}
-	      else
-		eh->tls_get_addr = 0;
-	    }
-	}
-
-      if (!tls_get_addr)
+      if (h == NULL
+	  || !((struct elf_x86_64_link_hash_entry *) h)->tls_get_addr)
 	return FALSE;
       else if (largepic)
 	return ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PLTOFF64;
@@ -2253,7 +2231,7 @@ convert:
 	  modrm = 0xe8;
 	  /* To support TLS optimization, always use addr32 prefix for
 	     "call *__tls_get_addr@GOTPCREL(%rip)".  */
-	  if (eh && eh->tls_get_addr == 1)
+	  if (eh && eh->tls_get_addr)
 	    {
 	      nop = 0x67;
 	      nop_offset = irel->r_offset - 2;
@@ -7715,6 +7693,23 @@ error_alignment:
   return pbfd;
 }
 
+static bfd_boolean
+elf_x86_64_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+{
+  if (!bfd_link_relocatable (info))
+    {
+      /* Check for __tls_get_addr reference.  */
+      struct elf_link_hash_entry *h;
+      h = elf_link_hash_lookup (elf_hash_table (info), "__tls_get_addr",
+				FALSE, FALSE, FALSE);
+      if (h != NULL)
+	((struct elf_x86_64_link_hash_entry *) h)->tls_get_addr = 1;
+    }
+
+  /* Invoke the regular ELF backend linker to do all the work.  */
+  return _bfd_elf_link_check_relocs (abfd, info);
+}
+
 static const struct bfd_elf_special_section
 elf_x86_64_special_sections[]=
 {
@@ -7779,6 +7774,7 @@ elf_x86_64_special_sections[]=
 #define elf_backend_object_p		    elf64_x86_64_elf_object_p
 #define bfd_elf64_mkobject		    elf_x86_64_mkobject
 #define bfd_elf64_get_synthetic_symtab	    elf_x86_64_get_synthetic_symtab
+#define bfd_elf64_bfd_link_check_relocs	    elf_x86_64_link_check_relocs
 
 #define elf_backend_section_from_shdr \
 	elf_x86_64_section_from_shdr
@@ -8078,6 +8074,8 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
   elf_x86_64_mkobject
 #define bfd_elf32_get_synthetic_symtab \
   elf_x86_64_get_synthetic_symtab
+#define bfd_elf32_bfd_link_check_relocs \
+  elf_x86_64_link_check_relocs
 
 #undef elf_backend_object_p
 #define elf_backend_object_p \
