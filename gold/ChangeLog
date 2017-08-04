@@ -1,3 +1,8 @@
+2017-08-03  James Clarke  <jrtc27@jrtc27.com>
+
+	* options.h (General_options): Set a non-NULL second help string
+	argument for relax to allow --no-relax.
+
 2017-08-01  Alan Modra  <amodra@gmail.com>
 
 	* ehframe.cc (Fde::operator==): New.
