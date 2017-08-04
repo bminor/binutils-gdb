@@ -121,6 +121,20 @@ aarch64_ins_reglane (const aarch64_operand *self, const aarch64_opnd_info *info,
 	  insert_field (FLD_imm5, code, value, 0);
 	}
     }
+  else if (inst->opcode->iclass == dotproduct)
+    {
+      unsigned reglane_index = info->reglane.index;
+      switch (info->qualifier)
+	{
+	case AARCH64_OPND_QLF_S_B:
+	  /* L:H */
+	  assert (reglane_index < 4);
+	  insert_fields (code, reglane_index, 0, 2, FLD_L, FLD_H);
+	  break;
+	default:
+	  assert (0);
+	}
+    }
   else
     {
       /* index for e.g. SQDMLAL <Va><d>, <Vb><n>, <Vm>.<Ts>[<index>]

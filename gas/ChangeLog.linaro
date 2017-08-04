@@ -2,6 +2,14 @@
 
 	Backport from master.
 
+	2017-06-28  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-aarch64.c (aarch64_reg_parse_32_64): Accept 4B.
+	(aarch64_features): Added dotprod.
+	* doc/c-aarch64.texi: Added dotprod.
+	* testsuite/gas/aarch64/dotproduct.d: New.
+	* testsuite/gas/aarch64/dotproduct.s: New.
+
 	2017-06-28  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-arm.c (fpu_neon_ext_dotprod): New variable.

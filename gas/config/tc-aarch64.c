@@ -790,7 +790,7 @@ aarch64_reg_parse_32_64 (char **ccp, aarch64_opnd_qualifier_t *qualifier)
    succeeds; otherwise return FALSE.
 
    Accept only one occurrence of:
-   8b 16b 2h 4h 8h 2s 4s 1d 2d
+   4b 8b 16b 2h 4h 8h 2s 4s 1d 2d
    b h s d q  */
 static bfd_boolean
 parse_vector_type_for_operand (aarch64_reg_type reg_type,
@@ -851,8 +851,10 @@ elt_size:
 	first_error (_("missing element size"));
       return FALSE;
     }
-  if (width != 0 && width * element_size != 64 && width * element_size != 128
-      && !(width == 2 && element_size == 16))
+  if (width != 0 && width * element_size != 64
+      && width * element_size != 128
+      && !(width == 2 && element_size == 16)
+      && !(width == 4 && element_size == 8))
     {
       first_error_fmt (_
 		       ("invalid element size %d and vector size combination %c"),
@@ -8449,6 +8451,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
 			AARCH64_FEATURE (AARCH64_FEATURE_F16
 					 | AARCH64_FEATURE_SIMD, 0)},
   {"rcpc",		AARCH64_FEATURE (AARCH64_FEATURE_RCPC, 0),
+			AARCH64_ARCH_NONE},
+  {"dotprod",		AARCH64_FEATURE (AARCH64_FEATURE_DOTPROD, 0),
 			AARCH64_ARCH_NONE},
   {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };
