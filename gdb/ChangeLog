@@ -1,5 +1,13 @@
 2017-08-04  Yao Qi  <yao.qi@linaro.org>
 
+	* configure.srv (ipa_x32_linux_regobj): New.
+	* linux-amd64-ipa.c (get_ipa_tdesc): Use X86_TDESC_AVX_AVX512
+	instead of X86_TDESC_AVX512.
+	(initialize_low_tracepoint): Call
+	init_registers_x32_avx_avx512_linux.
+
+2017-08-04  Yao Qi  <yao.qi@linaro.org>
+
 	* utils.h (gdb_argv): Add namespace std for nullptr_t.
 
 2017-08-03  Ruslan Kabatsayev  <b7.10110111@gmail.com>
