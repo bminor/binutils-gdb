@@ -185,12 +185,12 @@ public:
     return m_argv + count ();
   }
 
-  bool operator!= (nullptr_t)
+  bool operator!= (std::nullptr_t)
   {
     return m_argv != NULL;
   }
 
-  bool operator== (nullptr_t)
+  bool operator== (std::nullptr_t)
   {
     return m_argv == NULL;
   }
