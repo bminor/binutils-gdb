@@ -23,6 +23,7 @@ patches="
 	binutils-secondary.patch
 	binutils-pr21128.patch
 	binutils-pr21129.patch
+	binutils-x86-gpoff.patch
 "
 
 for p in $patches

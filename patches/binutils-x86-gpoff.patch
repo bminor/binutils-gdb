@@ -1,0 +1,2421 @@
+From 80d27d03fd16f97f709ce37e20607f09624b633d Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Thu, 3 Aug 2017 09:43:28 -0700
+Subject: [PATCH] x86: Add R_X86_64_GPOFF/R_386_GPOFF relocation
+
+On x86, a segment register is used as thread pointer to access thread
+local storage (TLS) with __thread.  TLS is an OS-dependent, user-space
+feature.
+
+Here is a proposal to add R_X86_64_GPOFF/R_386_GPOFF relocation to
+access symbol with an offset to global pointer, __gp.  The assembly
+syntax is
+
+1. Load value of foo relative to __gp, pointed by %seg, into %reg:
+
+	op %seg:foo@GPOFF, %reg
+
+2. Store value in %reg to foo relative to __gp, pointed by %seg:
+
+	op %reg, %seg:foo@GPOFF
+
+3. Compute offset of foo to __gp:
+
+	lea foo@GPOFF, %reg
+	.long foo@GPOFF
+
+Linker sets __gp to the middle of the section which contains definitions
+of symbols with GPOFF relocations and the maximum offset is [-2G, 2G).
+Run-time must initialize the segment register, %seg, with the address of
+global pointer, __gp.
+
+bfd/
+
+	* elf32-i386.c (elf_howto_table): Add R_386_GPOFF.
+	(R_386_ext2): Replace R_386_GOT32X with R_386_GPOFF.
+	(elf_i386_reloc_type_lookup): Support BFD_RELOC_GPREL32.
+	(elf_i386_link_hash_entry): Add has_gpoff_reloc.
+	(elf_i386_link_hash_table): Add gp.
+	(elf_i386_link_hash_newfunc): Initialize has_gpoff_reloc to 0.
+	(elf_i386_copy_indirect_symbol): Also copy has_gpoff_reloc.
+	(elf_i386_check_relocs): Add a fake local symbol and set
+	has_gpoff_reloc for GPOFF relocation.
+	(elf_i386_allocate_local_dynrelocs): Skip local symbol with
+	GPOFF relocation.
+	(elf_i386_finish_local_dynamic_symbol): Likewise.
+	(elf_i386_relocate_section): Process GPOFF relocation.
+	(elf_i386_link_check_relocs): Cache and hide __gp symbol.
+	(elf_i386_setup_gp): New function.
+	(elf_i386_setup_gp_from_local_symbol): Likewise.
+	(elf_i386_final_link): Likewise.
+	(bfd_elf32_bfd_final_link): New.
+	* elf64-x86-64.c (elf_howto_table): Add R_X86_64_GPOFF.
+	(R_X86_64_standard): Replace R_X86_64_REX_GOTPCRELX with
+	R_X86_64_GPOFF.
+	(x86_64_reloc_map): Add BFD_RELOC_GPREL32.
+	(elf_x86_64_link_hash_entry): Add has_gpoff_reloc.
+	(elf_x86_64_link_hash_table): Add gp.
+	(elf_x86_64_link_hash_newfunc): Initialize has_gpoff_reloc to 0.
+	(elf_x86_64_copy_indirect_symbol): Also copy has_gpoff_reloc.
+	(elf_x86_64_check_relocs): Add a fake local symbol and set
+	has_gpoff_reloc for GPOFF relocation.
+	(elf_x86_64_allocate_local_dynrelocs): Skip local symbol with
+	GPOFF relocation.
+	(elf_x86_64_finish_local_dynamic_symbol): Likewise.
+	(elf_x86_64_relocate_section): Process GPOFF relocation.
+	(elf_x86_64_link_check_relocs): Cache and hide __gp symbol.
+	(elf_x86_64_setup_gp): New function.
+	(elf_x86_64_setup_gp_from_local_symbol): Likewise.
+	(elf_x86_64_final_link): Likewise.
+	(bfd_elf64_bfd_final_link): New.
+	(bfd_elf32_bfd_final_link): Likewise.
+
+gas/
+
+	* config/tc-i386.c (GP_symbol): New.
+	(gotrel): Add "GPOFF".
+	(lex_got): Support BFD_RELOC_GPREL32.
+	(i386_displacement): Disallow BFD_RELOC_GPREL32 relocation
+	with base or index registers.
+	(md_undefined_symbol): Create GP_symbol if needed.
+	(tc_gen_reloc): Handle BFD_RELOC_GPREL32.
+	* config/tc-i386.h (GLOBAL_POINTER_NAME): New.
+	* testsuite/gas/i386/gpoff.d: New file.
+	* testsuite/gas/i386/gpoff.s: Likewise.
+	* testsuite/gas/i386/inval-gpoff.l: Likewise.
+	* testsuite/gas/i386/inval-gpoff.s: Likewise.
+	* testsuite/gas/i386/x86-64-gpoff.d: Likewise.
+	* testsuite/gas/i386/x86-64-gpoff.s: Likewise.
+	* testsuite/gas/i386/x86-64-inval-gpoff.l: Likewise.
+	* testsuite/gas/i386/x86-64-inval-gpoff.s: Likewise.
+	* testsuite/gas/i386/i386.exp: Run gpoff, inval-gpoff,
+	x86-64-gpoff and x86-64-inval-gpoff.
+
+include/
+
+	* elf/i386.h (R_386_GPOFF): New relocation.
+	* elf/x86-64.h (R_X86_64_GPOFF): Likewise.
+
+ld/
+
+	* testsuite/ld-i386/gpoff-1a.S: New file.
+	* testsuite/ld-i386/gpoff-1b.c: Likewise.
+	* testsuite/ld-i386/gpoff-2a.S: Likewise.
+	* testsuite/ld-i386/gpoff-2b.c: Likewise.
+	* testsuite/ld-i386/gpoff-3.d: Likewise.
+	* testsuite/ld-i386/gpoff-3.s: Likewise.
+	* testsuite/ld-i386/gpoff-4.d: Likewise.
+	* testsuite/ld-i386/gpoff-4.s: Likewise.
+	* testsuite/ld-i386/gpoff-5.d: Likewise.
+	* testsuite/ld-i386/gpoff-5.s: Likewise.
+	* testsuite/ld-i386/gpoff-6.d: Likewise.
+	* testsuite/ld-i386/gpoff-6.s: Likewise.
+	* testsuite/ld-i386/gpoff-7.d: Likewise.
+	* testsuite/ld-i386/gpoff-7.s: Likewise.
+	* testsuite/ld-i386/gpoff-8.s: Likewise.
+	* testsuite/ld-i386/gpoff-8.t: Likewise.
+	* testsuite/ld-i386/gpoff-8a.d: Likewise.
+	* testsuite/ld-i386/gpoff-8b.d: Likewise.
+	* testsuite/ld-i386/gpoff-8c.d: Likewise.
+	* testsuite/ld-i386/gpoff-8d.d: Likewise.
+	* testsuite/ld-i386/gpoff-8e.d: Likewise.
+	* testsuite/ld-i386/gpoff-8f.d: Likewise.
+	* testsuite/ld-x86-64/gpoff-1a.S: Likewise.
+	* testsuite/ld-x86-64/gpoff-1b.c: Likewise.
+	* testsuite/ld-x86-64/gpoff-2a.S: Likewise.
+	* testsuite/ld-x86-64/gpoff-2b.c: Likewise.
+	* testsuite/ld-x86-64/gpoff-3.d: Likewise.
+	* testsuite/ld-x86-64/gpoff-3.s: Likewise.
+	* testsuite/ld-x86-64/gpoff-4.d: Likewise.
+	* testsuite/ld-x86-64/gpoff-4.s: Likewise.
+	* testsuite/ld-x86-64/gpoff-5.d: Likewise.
+	* testsuite/ld-x86-64/gpoff-5.s: Likewise.
+	* testsuite/ld-x86-64/gpoff-6.d: Likewise.
+	* testsuite/ld-x86-64/gpoff-6.s: Likewise.
+	* testsuite/ld-x86-64/gpoff-7.d: Likewise.
+	* testsuite/ld-x86-64/gpoff-7.s: Likewise.
+	* testsuite/ld-x86-64/gpoff-8.s: Likewise.
+	* testsuite/ld-x86-64/gpoff-8.t: Likewise.
+	* testsuite/ld-x86-64/gpoff-8a.d: Likewise.
+	* testsuite/ld-x86-64/gpoff-8b.d: Likewise.
+	* testsuite/ld-x86-64/gpoff-8c.d: Likewise.
+	* testsuite/ld-x86-64/gpoff-8d.d: Likewise.
+	* testsuite/ld-x86-64/gpoff-8e.d: Likewise.
+	* testsuite/ld-x86-64/gpoff-8f.d: Likewise.
+	* testsuite/ld-i386/i386.exp: Run R_386_GPOFF tests.
+	* testsuite/ld-x86-64/x86-64.exp: Run R_X86_64_GPOFF tests.
+---
+ bfd/elf32-i386.c                            | 198 ++++++++++++++++++++++++++-
+ bfd/elf64-x86-64.c                          | 205 ++++++++++++++++++++++++++--
+ gas/config/tc-i386.c                        |  41 +++++-
+ gas/config/tc-i386.h                        |   6 +
+ gas/testsuite/gas/i386/gpoff.d              |  11 ++
+ gas/testsuite/gas/i386/gpoff.s              |   4 +
+ gas/testsuite/gas/i386/i386.exp             |   6 +
+ gas/testsuite/gas/i386/inval-gpoff.l        |  18 +++
+ gas/testsuite/gas/i386/inval-gpoff.s        |   5 +
+ gas/testsuite/gas/i386/x86-64-gpoff.d       |  11 ++
+ gas/testsuite/gas/i386/x86-64-gpoff.s       |   4 +
+ gas/testsuite/gas/i386/x86-64-inval-gpoff.l |  30 ++++
+ gas/testsuite/gas/i386/x86-64-inval-gpoff.s |   7 +
+ include/elf/i386.h                          |   1 +
+ include/elf/x86-64.h                        |   1 +
+ ld/testsuite/ld-i386/gpoff-1a.S             |  20 +++
+ ld/testsuite/ld-i386/gpoff-1b.c             |  79 +++++++++++
+ ld/testsuite/ld-i386/gpoff-2a.S             |  19 +++
+ ld/testsuite/ld-i386/gpoff-2b.c             |  78 +++++++++++
+ ld/testsuite/ld-i386/gpoff-3.d              |   3 +
+ ld/testsuite/ld-i386/gpoff-3.s              |   4 +
+ ld/testsuite/ld-i386/gpoff-4.d              |   3 +
+ ld/testsuite/ld-i386/gpoff-4.s              |  16 +++
+ ld/testsuite/ld-i386/gpoff-5.d              |   3 +
+ ld/testsuite/ld-i386/gpoff-5.s              |  18 +++
+ ld/testsuite/ld-i386/gpoff-6.d              |  12 ++
+ ld/testsuite/ld-i386/gpoff-6.s              |   9 ++
+ ld/testsuite/ld-i386/gpoff-7.d              |  16 +++
+ ld/testsuite/ld-i386/gpoff-7.s              |   9 ++
+ ld/testsuite/ld-i386/gpoff-8.s              |  10 ++
+ ld/testsuite/ld-i386/gpoff-8.t              |  39 ++++++
+ ld/testsuite/ld-i386/gpoff-8a.d             |  18 +++
+ ld/testsuite/ld-i386/gpoff-8b.d             |  18 +++
+ ld/testsuite/ld-i386/gpoff-8c.d             |  18 +++
+ ld/testsuite/ld-i386/gpoff-8d.d             |  18 +++
+ ld/testsuite/ld-i386/gpoff-8e.d             |  18 +++
+ ld/testsuite/ld-i386/gpoff-8f.d             |  18 +++
+ ld/testsuite/ld-i386/i386.exp               |  72 ++++++++++
+ ld/testsuite/ld-x86-64/gpoff-1a.S           |  20 +++
+ ld/testsuite/ld-x86-64/gpoff-1b.c           |  29 ++++
+ ld/testsuite/ld-x86-64/gpoff-2a.S           |  19 +++
+ ld/testsuite/ld-x86-64/gpoff-2b.c           |  27 ++++
+ ld/testsuite/ld-x86-64/gpoff-3.d            |   3 +
+ ld/testsuite/ld-x86-64/gpoff-3.s            |   4 +
+ ld/testsuite/ld-x86-64/gpoff-4.d            |   3 +
+ ld/testsuite/ld-x86-64/gpoff-4.s            |  16 +++
+ ld/testsuite/ld-x86-64/gpoff-5.d            |   3 +
+ ld/testsuite/ld-x86-64/gpoff-5.s            |  18 +++
+ ld/testsuite/ld-x86-64/gpoff-6.d            |  12 ++
+ ld/testsuite/ld-x86-64/gpoff-6.s            |   9 ++
+ ld/testsuite/ld-x86-64/gpoff-7.d            |  16 +++
+ ld/testsuite/ld-x86-64/gpoff-7.s            |   9 ++
+ ld/testsuite/ld-x86-64/gpoff-8.s            |  10 ++
+ ld/testsuite/ld-x86-64/gpoff-8.t            |  39 ++++++
+ ld/testsuite/ld-x86-64/gpoff-8a.d           |  18 +++
+ ld/testsuite/ld-x86-64/gpoff-8b.d           |  18 +++
+ ld/testsuite/ld-x86-64/gpoff-8c.d           |  18 +++
+ ld/testsuite/ld-x86-64/gpoff-8d.d           |  18 +++
+ ld/testsuite/ld-x86-64/gpoff-8e.d           |  18 +++
+ ld/testsuite/ld-x86-64/gpoff-8f.d           |  18 +++
+ ld/testsuite/ld-x86-64/x86-64.exp           |  72 ++++++++++
+ 61 files changed, 1466 insertions(+), 17 deletions(-)
+ create mode 100644 gas/testsuite/gas/i386/gpoff.d
+ create mode 100644 gas/testsuite/gas/i386/gpoff.s
+ create mode 100644 gas/testsuite/gas/i386/inval-gpoff.l
+ create mode 100644 gas/testsuite/gas/i386/inval-gpoff.s
+ create mode 100644 gas/testsuite/gas/i386/x86-64-gpoff.d
+ create mode 100644 gas/testsuite/gas/i386/x86-64-gpoff.s
+ create mode 100644 gas/testsuite/gas/i386/x86-64-inval-gpoff.l
+ create mode 100644 gas/testsuite/gas/i386/x86-64-inval-gpoff.s
+ create mode 100644 ld/testsuite/ld-i386/gpoff-1a.S
+ create mode 100644 ld/testsuite/ld-i386/gpoff-1b.c
+ create mode 100644 ld/testsuite/ld-i386/gpoff-2a.S
+ create mode 100644 ld/testsuite/ld-i386/gpoff-2b.c
+ create mode 100644 ld/testsuite/ld-i386/gpoff-3.d
+ create mode 100644 ld/testsuite/ld-i386/gpoff-3.s
+ create mode 100644 ld/testsuite/ld-i386/gpoff-4.d
+ create mode 100644 ld/testsuite/ld-i386/gpoff-4.s
+ create mode 100644 ld/testsuite/ld-i386/gpoff-5.d
+ create mode 100644 ld/testsuite/ld-i386/gpoff-5.s
+ create mode 100644 ld/testsuite/ld-i386/gpoff-6.d
+ create mode 100644 ld/testsuite/ld-i386/gpoff-6.s
+ create mode 100644 ld/testsuite/ld-i386/gpoff-7.d
+ create mode 100644 ld/testsuite/ld-i386/gpoff-7.s
+ create mode 100644 ld/testsuite/ld-i386/gpoff-8.s
+ create mode 100644 ld/testsuite/ld-i386/gpoff-8.t
+ create mode 100644 ld/testsuite/ld-i386/gpoff-8a.d
+ create mode 100644 ld/testsuite/ld-i386/gpoff-8b.d
+ create mode 100644 ld/testsuite/ld-i386/gpoff-8c.d
+ create mode 100644 ld/testsuite/ld-i386/gpoff-8d.d
+ create mode 100644 ld/testsuite/ld-i386/gpoff-8e.d
+ create mode 100644 ld/testsuite/ld-i386/gpoff-8f.d
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-1a.S
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-1b.c
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-2a.S
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-2b.c
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-3.d
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-3.s
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-4.d
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-4.s
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-5.d
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-5.s
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-6.d
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-6.s
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-7.d
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-7.s
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-8.s
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-8.t
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-8a.d
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-8b.d
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-8c.d
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-8d.d
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-8e.d
+ create mode 100644 ld/testsuite/ld-x86-64/gpoff-8f.d
+
+diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
+index f1fcd21072..2c6e36684d 100644
+--- a/bfd/elf32-i386.c
++++ b/bfd/elf32-i386.c
+@@ -150,9 +150,12 @@ static reloc_howto_type elf_howto_table[]=
+   HOWTO(R_386_GOT32X, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+ 	bfd_elf_generic_reloc, "R_386_GOT32X",
+ 	TRUE, 0xffffffff, 0xffffffff, FALSE),
++  HOWTO(R_386_GPOFF, 0, 2, 32, FALSE, 0, complain_overflow_signed,
++	bfd_elf_generic_reloc, "R_386_GPOFF",
++	TRUE, 0xffffffff, 0xffffffff, FALSE),
+ 
+   /* Another gap.  */
+-#define R_386_ext2 (R_386_GOT32X + 1 - R_386_tls_offset)
++#define R_386_ext2 (R_386_GPOFF + 1 - R_386_tls_offset)
+ #define R_386_vt_offset (R_386_GNU_VTINHERIT - R_386_ext2)
+ 
+ /* GNU extension to record C++ vtable hierarchy.  */
+@@ -340,6 +343,10 @@ elf_i386_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+       TRACE ("BFD_RELOC_386_GOT32X");
+       return &elf_howto_table[R_386_GOT32X - R_386_tls_offset];
+ 
++    case BFD_RELOC_GPREL32:
++      TRACE ("BFD_RELOC_GPREL32");
++      return &elf_howto_table[R_386_GPOFF - R_386_tls_offset];
++
+     case BFD_RELOC_VTABLE_INHERIT:
+       TRACE ("BFD_RELOC_VTABLE_INHERIT");
+       return &elf_howto_table[R_386_GNU_VTINHERIT - R_386_vt_offset];
+@@ -986,6 +993,9 @@ struct elf_i386_link_hash_entry
+   /* Symbol is referenced by R_386_GOTOFF relocation.  */
+   unsigned int gotoff_ref : 1;
+ 
++  /* TRUE if symbol has GPOFF relocations.  */
++  unsigned int has_gpoff_reloc : 1;
++
+   /* Symbol has GOT or PLT relocations.  */
+   unsigned int has_got_reloc : 1;
+ 
+@@ -1062,6 +1072,8 @@ struct elf_i386_link_hash_table
+   asection *plt_got;
+   asection *plt_got_eh_frame;
+ 
++  struct elf_link_hash_entry *gp;
++
+   /* Parameters describing PLT generation.  */
+   struct elf_i386_plt_layout plt;
+ 
+@@ -1144,6 +1156,7 @@ elf_i386_link_hash_newfunc (struct bfd_hash_entry *entry,
+       eh->dyn_relocs = NULL;
+       eh->tls_type = GOT_UNKNOWN;
+       eh->gotoff_ref = 0;
++      eh->has_gpoff_reloc = 0;
+       eh->has_got_reloc = 0;
+       eh->has_non_got_reloc = 0;
+       eh->no_finish_dynamic_symbol = 0;
+@@ -1330,6 +1343,7 @@ elf_i386_copy_indirect_symbol (struct bfd_link_info *info,
+      generate a R_386_COPY reloc.  */
+   edir->gotoff_ref |= eind->gotoff_ref;
+ 
++  edir->has_gpoff_reloc |= eind->has_gpoff_reloc;
+   edir->has_got_reloc |= eind->has_got_reloc;
+   edir->has_non_got_reloc |= eind->has_non_got_reloc;
+ 
+@@ -2041,17 +2055,26 @@ elf_i386_check_relocs (bfd *abfd,
+ 	  if (isym == NULL)
+ 	    goto error_return;
+ 
+-	  /* Check relocation against local STT_GNU_IFUNC symbol.  */
+-	  if (ELF32_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
++	  /* Check relocation against local STT_GNU_IFUNC symbol and
++	     GPOFF relocation.   */
++	  if (r_type == R_386_GPOFF
++	      || ELF32_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
+ 	    {
+ 	      h = elf_i386_get_local_sym_hash (htab, abfd, rel, TRUE);
+ 	      if (h == NULL)
+ 		goto error_return;
+ 
+-	      /* Fake a STT_GNU_IFUNC symbol.  */
+-	      h->root.root.string = bfd_elf_sym_name (abfd, symtab_hdr,
+-						      isym, NULL);
+-	      h->type = STT_GNU_IFUNC;
++	      if (r_type == R_386_GPOFF)
++		/* Prepare for GP section.  */
++		h->root.u.def.section
++		  = bfd_section_from_elf_index (abfd, isym->st_shndx);
++	      else
++		/* Fake a STT_GNU_IFUNC symbol.  */
++		h->root.root.string = bfd_elf_sym_name (abfd, symtab_hdr,
++
++							isym, NULL);
++
++	      h->type = ELF_ST_TYPE (isym->st_info);
+ 	      h->def_regular = 1;
+ 	      h->ref_regular = 1;
+ 	      h->forced_local = 1;
+@@ -2428,6 +2451,11 @@ do_size:
+ 	    goto error_return;
+ 	  break;
+ 
++	case R_386_GPOFF:
++	  if (eh != NULL)
++	    eh->has_gpoff_reloc = 1;
++	  break;
++
+ 	default:
+ 	  break;
+ 	}
+@@ -3128,6 +3156,10 @@ elf_i386_allocate_local_dynrelocs (void **slot, void *inf)
+   struct elf_link_hash_entry *h
+     = (struct elf_link_hash_entry *) *slot;
+ 
++  /* Skip local symbol with GPOFF relocation.  */
++  if (((struct elf_i386_link_hash_entry *) h)->has_gpoff_reloc)
++    return TRUE;
++
+   if (h->type != STT_GNU_IFUNC
+       || !h->def_regular
+       || !h->ref_regular
+@@ -5326,6 +5358,41 @@ disallow_got32:
+ 	    relocation = -elf_i386_tpoff (info, relocation);
+ 	  break;
+ 
++	case R_386_GPOFF:
++	  if (h == NULL || h->def_regular)
++	    {
++	      asection *def_sec;
++
++	      if (h != NULL)
++		def_sec = h->root.u.def.section;
++	      else
++		def_sec = local_sections[r_symndx];
++
++	      if (htab->gp->root.u.def.section
++		  != def_sec->output_section)
++		{
++		  if (h != NULL && h->root.root.string != NULL)
++		    _bfd_error_handler
++		      /* xgettext:c-format */
++		      (_("%B: symbol `%s' with GPOFF relocation "
++			 "defined in %B(%A) isn't in GP section `%A'"),
++		       input_bfd, h->root.root.string, def_sec->owner,
++		       def_sec, htab->gp->root.u.def.section);
++		  else
++		    _bfd_error_handler
++		      /* xgettext:c-format */
++		      (_("%B: GPOFF relocation at %#Lx in section "
++			 "`%A' must be against symbol defined in GP "
++			 "section `%A'"),
++		       input_bfd, rel->r_offset, input_section,
++		       htab->gp->root.u.def.section);
++		  return FALSE;
++		}
++	      relocation -= (htab->gp->root.u.def.section->vma
++			     + htab->gp->root.u.def.value);
++	    }
++	  break;
++
+ 	default:
+ 	  break;
+ 	}
+@@ -5854,6 +5921,10 @@ elf_i386_finish_local_dynamic_symbol (void **slot, void *inf)
+   struct bfd_link_info *info
+     = (struct bfd_link_info *) inf;
+ 
++  /* Skip local symbol with GPOFF relocation.  */
++  if (((struct elf_i386_link_hash_entry *) h)->has_gpoff_reloc)
++    return TRUE;
++
+   return elf_i386_finish_dynamic_symbol (info->output_bfd, info,
+ 					 h, NULL);
+ }
+@@ -7146,12 +7217,124 @@ elf_i386_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+ 				FALSE, FALSE, FALSE);
+       if (h != NULL)
+ 	((struct elf_i386_link_hash_entry *) h)->tls_get_addr = 1;
++
++      /* Cache and hide __gp symbol.  */
++      h = elf_link_hash_lookup (elf_hash_table (info), "__gp", FALSE,
++				FALSE, FALSE);
++      if (h != NULL)
++	{
++	  const struct elf_backend_data *bed;
++	  struct elf_i386_link_hash_table *htab;
++
++	  htab = elf_i386_hash_table (info);
++	  if (htab == NULL)
++	    return FALSE;
++
++	  htab->gp = h;
++	  /* It should be defined by elf_x86_64_setup_gp later.  */
++	  if (h->root.type != bfd_link_hash_defined
++	      && h->root.type != bfd_link_hash_defweak)
++	    h->def_regular = 1;
++	  h->other = STV_HIDDEN;
++	  bed = get_elf_backend_data (info->output_bfd);
++	  bed->elf_backend_hide_symbol (info, h, TRUE);
++	}
+     }
+ 
+   /* Invoke the regular ELF backend linker to do all the work.  */
+   return _bfd_elf_link_check_relocs (abfd, info);
+ }
+ 
++/* Set up GP section from symbols with GPOFF relocations.  */
++
++static bfd_boolean
++elf_i386_setup_gp (struct elf_link_hash_entry *h, void * inf)
++{
++  struct bfd_link_info *info;
++  struct elf_i386_link_hash_table *htab;
++  struct elf_i386_link_hash_entry *eh;
++  struct elf_link_hash_entry *gp;
++  asection *gpsection;
++  bfd_size_type gpsection_size;
++
++  eh = (struct elf_i386_link_hash_entry *) h;
++
++  /* Skip if there is no GPOFF relocation or symbol is undefined.  */
++  if (!eh->has_gpoff_reloc
++      || (h->root.type != bfd_link_hash_defined
++	  && h->root.type != bfd_link_hash_defweak))
++    return TRUE;
++
++  info = (struct bfd_link_info *) inf;
++  htab = elf_i386_hash_table (info);
++  if (htab == NULL)
++    return FALSE;
++
++  gpsection = h->root.u.def.section->output_section;
++  gpsection_size = bfd_get_section_size (gpsection);
++  gp = htab->gp;
++  gp->root.type = bfd_link_hash_defined;
++  gp->root.u.def.value = gpsection_size / 2;
++  gp->root.u.def.section = gpsection;
++  gp->root.linker_def = 1;
++
++  /* Found GP section.  No need to continue.  */
++  return FALSE;
++}
++
++/* Set up GP section from local symbols with GPOFF relocations.  */
++
++static bfd_boolean
++elf_i386_setup_gp_from_local_symbol (void **slot, void *inf)
++{
++  struct elf_link_hash_entry *h
++    = (struct elf_link_hash_entry *) *slot;
++  struct bfd_link_info *info
++    = (struct bfd_link_info *) inf;
++
++  return elf_i386_setup_gp (h, info);
++}
++
++/* Set up GP section for __gp symbol.  */
++
++static bfd_boolean
++elf_i386_final_link (bfd *abfd, struct bfd_link_info *info)
++{
++  if (!bfd_link_relocatable (info))
++    {
++      struct elf_link_hash_entry *gp;
++      struct elf_i386_link_hash_table *htab;
++
++      htab = elf_i386_hash_table (info);
++      if (htab == NULL)
++	return FALSE;
++
++      gp = htab->gp;
++      if (gp != NULL
++	  && gp->root.type != bfd_link_hash_defined
++	  && gp->root.type != bfd_link_hash_defweak)
++	{
++	  /* Set up __gp from a symbol with GPOFF relocations.  */
++	  elf_link_hash_traverse (&htab->elf,
++				  elf_i386_setup_gp,
++				  info);
++
++	  if (gp->root.type != bfd_link_hash_defined
++	      && gp->root.type != bfd_link_hash_defweak)
++	    {
++	      /* Set up __gp from a local symbol with GPOFF
++		 relocations.  */
++	      htab_traverse (htab->loc_hash_table,
++			     elf_i386_setup_gp_from_local_symbol,
++			     info);
++	    }
++	}
++    }
++
++  /* Invoke the regular ELF backend linker to do all the work.  */
++  return bfd_elf_final_link (abfd, info);
++}
++
+ #define TARGET_LITTLE_SYM		i386_elf32_vec
+ #define TARGET_LITTLE_NAME		"elf32-i386"
+ #define ELF_ARCH			bfd_arch_i386
+@@ -7183,6 +7366,7 @@ elf_i386_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+ #define bfd_elf32_bfd_reloc_name_lookup	      elf_i386_reloc_name_lookup
+ #define bfd_elf32_get_synthetic_symtab	      elf_i386_get_synthetic_symtab
+ #define bfd_elf32_bfd_link_check_relocs	      elf_i386_link_check_relocs
++#define bfd_elf32_bfd_final_link	      elf_i386_final_link
+ 
+ #define elf_backend_adjust_dynamic_symbol     elf_i386_adjust_dynamic_symbol
+ #define elf_backend_relocs_compatible	      _bfd_elf_relocs_compatible
+diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
+index 83643842ee..53369a8fc2 100644
+--- a/bfd/elf64-x86-64.c
++++ b/bfd/elf64-x86-64.c
+@@ -183,12 +183,15 @@ static reloc_howto_type x86_64_elf_howto_table[] =
+   HOWTO(R_X86_64_REX_GOTPCRELX, 0, 2, 32, TRUE, 0, complain_overflow_signed,
+ 	bfd_elf_generic_reloc, "R_X86_64_REX_GOTPCRELX", FALSE, 0xffffffff,
+ 	0xffffffff, TRUE),
++  HOWTO(R_X86_64_GPOFF, 0, 2, 32, FALSE, 0, complain_overflow_signed,
++	bfd_elf_generic_reloc, "R_X86_64_GPOFF",
++	FALSE, MINUS_ONE, MINUS_ONE, FALSE),
+ 
+   /* We have a gap in the reloc numbers here.
+      R_X86_64_standard counts the number up to this point, and
+      R_X86_64_vt_offset is the value to subtract from a reloc type of
+      R_X86_64_GNU_VT* to form an index into this table.  */
+-#define R_X86_64_standard (R_X86_64_REX_GOTPCRELX + 1)
++#define R_X86_64_standard (R_X86_64_GPOFF + 1)
+ #define R_X86_64_vt_offset (R_X86_64_GNU_VTINHERIT - R_X86_64_standard)
+ 
+ /* GNU extension to record C++ vtable hierarchy.  */
+@@ -264,6 +267,7 @@ static const struct elf_reloc_map x86_64_reloc_map[] =
+   { BFD_RELOC_X86_64_PLT32_BND,	R_X86_64_PLT32_BND, },
+   { BFD_RELOC_X86_64_GOTPCRELX, R_X86_64_GOTPCRELX, },
+   { BFD_RELOC_X86_64_REX_GOTPCRELX, R_X86_64_REX_GOTPCRELX, },
++  { BFD_RELOC_GPREL32,		R_X86_64_GPOFF, },
+   { BFD_RELOC_VTABLE_INHERIT,	R_X86_64_GNU_VTINHERIT, },
+   { BFD_RELOC_VTABLE_ENTRY,	R_X86_64_GNU_VTENTRY, },
+ };
+@@ -1092,6 +1096,9 @@ struct elf_x86_64_link_hash_entry
+      real definition and check it when allowing copy reloc in PIE.  */
+   unsigned int needs_copy : 1;
+ 
++  /* TRUE if symbol has GPOFF relocations.  */
++  unsigned int has_gpoff_reloc : 1;
++
+   /* TRUE if symbol has GOT or PLT relocations.  */
+   unsigned int has_got_reloc : 1;
+ 
+@@ -1169,6 +1176,8 @@ struct elf_x86_64_link_hash_table
+   asection *plt_got;
+   asection *plt_got_eh_frame;
+ 
++  struct elf_link_hash_entry *gp;
++
+   /* Parameters describing PLT generation, lazy or non-lazy.  */
+   struct elf_x86_64_plt_layout plt;
+ 
+@@ -1259,6 +1268,7 @@ elf_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
+       eh->dyn_relocs = NULL;
+       eh->tls_type = GOT_UNKNOWN;
+       eh->needs_copy = 0;
++      eh->has_gpoff_reloc = 0;
+       eh->has_got_reloc = 0;
+       eh->has_non_got_reloc = 0;
+       eh->no_finish_dynamic_symbol = 0;
+@@ -1421,6 +1431,7 @@ elf_x86_64_copy_indirect_symbol (struct bfd_link_info *info,
+   edir = (struct elf_x86_64_link_hash_entry *) dir;
+   eind = (struct elf_x86_64_link_hash_entry *) ind;
+ 
++  edir->has_gpoff_reloc |= eind->has_gpoff_reloc;
+   edir->has_got_reloc |= eind->has_got_reloc;
+   edir->has_non_got_reloc |= eind->has_non_got_reloc;
+ 
+@@ -2431,18 +2442,26 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ 	  if (isym == NULL)
+ 	    goto error_return;
+ 
+-	  /* Check relocation against local STT_GNU_IFUNC symbol.  */
+-	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
++	  /* Check relocation against local STT_GNU_IFUNC symbol and
++	     GPOFF relocation.  */
++	  if (r_type == R_X86_64_GPOFF
++	      || ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
+ 	    {
+ 	      h = elf_x86_64_get_local_sym_hash (htab, abfd, rel,
+ 						 TRUE);
+ 	      if (h == NULL)
+ 		goto error_return;
+ 
+-	      /* Fake a STT_GNU_IFUNC symbol.  */
+-	      h->root.root.string = bfd_elf_sym_name (abfd, symtab_hdr,
+-						      isym, NULL);
+-	      h->type = STT_GNU_IFUNC;
++	      if (r_type == R_X86_64_GPOFF)
++		/* Prepare for GP section.  */
++		h->root.u.def.section
++		  = bfd_section_from_elf_index (abfd, isym->st_shndx);
++	      else
++		/* Fake a STT_GNU_IFUNC symbol.  */
++		h->root.root.string = bfd_elf_sym_name (abfd, symtab_hdr,
++							isym, NULL);
++
++	      h->type = ELF_ST_TYPE (isym->st_info);
+ 	      h->def_regular = 1;
+ 	      h->ref_regular = 1;
+ 	      h->forced_local = 1;
+@@ -2869,6 +2888,11 @@ do_size:
+ 	    goto error_return;
+ 	  break;
+ 
++	case R_X86_64_GPOFF:
++	  if (eh != NULL)
++	    eh->has_gpoff_reloc = 1;
++	  break;
++
+ 	default:
+ 	  break;
+ 	}
+@@ -3526,6 +3550,10 @@ elf_x86_64_allocate_local_dynrelocs (void **slot, void *inf)
+   struct elf_link_hash_entry *h
+     = (struct elf_link_hash_entry *) *slot;
+ 
++  /* Skip local symbol with GPOFF relocation.  */
++  if (((struct elf_x86_64_link_hash_entry *) h)->has_gpoff_reloc)
++    return TRUE;
++
+   if (h->type != STT_GNU_IFUNC
+       || !h->def_regular
+       || !h->ref_regular
+@@ -5694,6 +5722,41 @@ direct:
+ 	  relocation -= elf_x86_64_dtpoff_base (info);
+ 	  break;
+ 
++	case R_X86_64_GPOFF:
++	  if (h == NULL || h->def_regular)
++	    {
++	      asection *def_sec;
++
++	      if (h != NULL)
++		def_sec = h->root.u.def.section;
++	      else
++		def_sec = local_sections[r_symndx];
++
++	      if (htab->gp->root.u.def.section
++		  != def_sec->output_section)
++		{
++		  if (h != NULL && h->root.root.string != NULL)
++		    _bfd_error_handler
++		      /* xgettext:c-format */
++		      (_("%B: symbol `%s' with GPOFF relocation "
++			 "defined in %B(%A) isn't in GP section `%A'"),
++		       input_bfd, h->root.root.string, def_sec->owner,
++		       def_sec, htab->gp->root.u.def.section);
++		  else
++		    _bfd_error_handler
++		      /* xgettext:c-format */
++		      (_("%B: GPOFF relocation at %#Lx in section "
++			 "`%A' must be against symbol defined in GP "
++			 "section `%A'"),
++		       input_bfd, rel->r_offset, input_section,
++		       htab->gp->root.u.def.section);
++		  return FALSE;
++		}
++	      relocation -= (htab->gp->root.u.def.section->vma
++			     + htab->gp->root.u.def.value);
++	    }
++	  break;
++
+ 	default:
+ 	  break;
+ 	}
+@@ -6203,8 +6266,12 @@ elf_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
+   struct bfd_link_info *info
+     = (struct bfd_link_info *) inf;
+ 
++  /* Skip local symbol with GPOFF relocation.  */
++  if (((struct elf_x86_64_link_hash_entry *) h)->has_gpoff_reloc)
++    return TRUE;
++
+   return elf_x86_64_finish_dynamic_symbol (info->output_bfd,
+-					     info, h, NULL);
++					   info, h, NULL);
+ }
+ 
+ /* Finish up undefined weak symbol handling in PIE.  Fill its PLT entry
+@@ -7705,12 +7772,131 @@ elf_x86_64_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+ 				FALSE, FALSE, FALSE);
+       if (h != NULL)
+ 	((struct elf_x86_64_link_hash_entry *) h)->tls_get_addr = 1;
++
++      /* Cache and hide __gp symbol.  */
++      h = elf_link_hash_lookup (elf_hash_table (info), "__gp", FALSE,
++				FALSE, FALSE);
++      if (h != NULL)
++	{
++	  const struct elf_backend_data *bed;
++	  struct elf_x86_64_link_hash_table *htab;
++
++	  htab = elf_x86_64_hash_table (info);
++	  if (htab == NULL)
++	    return FALSE;
++
++	  htab->gp = h;
++	  /* It should be defined by elf_x86_64_setup_gp later.  */
++	  if (h->root.type != bfd_link_hash_defined
++	      && h->root.type != bfd_link_hash_defweak)
++	    h->def_regular = 1;
++	  h->other = STV_HIDDEN;
++	  bed = get_elf_backend_data (info->output_bfd);
++	  bed->elf_backend_hide_symbol (info, h, TRUE);
++	}
+     }
+ 
+   /* Invoke the regular ELF backend linker to do all the work.  */
+   return _bfd_elf_link_check_relocs (abfd, info);
+ }
+ 
++/* Set up GP section from symbols with GPOFF relocations.  */
++
++static bfd_boolean
++elf_x86_64_setup_gp (struct elf_link_hash_entry *h, void * inf)
++{
++  struct bfd_link_info *info;
++  struct elf_x86_64_link_hash_table *htab;
++  struct elf_x86_64_link_hash_entry *eh;
++  struct elf_link_hash_entry *gp;
++  asection *gpsection;
++  bfd_size_type gpsection_size;
++
++  eh = (struct elf_x86_64_link_hash_entry *) h;
++
++  /* Skip if there is no GPOFF relocation or symbol is undefined.  */
++  if (!eh->has_gpoff_reloc
++      || (h->root.type != bfd_link_hash_defined
++	  && h->root.type != bfd_link_hash_defweak))
++    return TRUE;
++
++  info = (struct bfd_link_info *) inf;
++  htab = elf_x86_64_hash_table (info);
++  if (htab == NULL)
++    return FALSE;
++
++  gpsection = h->root.u.def.section->output_section;
++  gpsection_size = bfd_get_section_size (gpsection);
++  if (gpsection_size > 0xffffffff)
++    {
++      info->callbacks->einfo (_("%F%B: GP section `%A' size overflow\n"),
++			      info->output_bfd, gpsection);
++      return FALSE;
++    }
++
++  gp = htab->gp;
++  gp->root.type = bfd_link_hash_defined;
++  gp->root.u.def.value = gpsection_size / 2;
++  gp->root.u.def.section = gpsection;
++  gp->root.linker_def = 1;
++
++  /* Found GP section.  No need to continue.  */
++  return FALSE;
++}
++
++/* Set up GP section from local symbols with GPOFF relocations.  */
++
++static bfd_boolean
++elf_x86_64_setup_gp_from_local_symbol (void **slot, void *inf)
++{
++  struct elf_link_hash_entry *h
++    = (struct elf_link_hash_entry *) *slot;
++  struct bfd_link_info *info
++    = (struct bfd_link_info *) inf;
++
++  return elf_x86_64_setup_gp (h, info);
++}
++
++/* Set up GP section for __gp symbol.  */
++
++static bfd_boolean
++elf_x86_64_final_link (bfd *abfd, struct bfd_link_info *info)
++{
++  if (!bfd_link_relocatable (info))
++    {
++      struct elf_link_hash_entry *gp;
++      struct elf_x86_64_link_hash_table *htab;
++
++      htab = elf_x86_64_hash_table (info);
++      if (htab == NULL)
++	return FALSE;
++
++      gp = htab->gp;
++      if (gp != NULL
++	  && gp->root.type != bfd_link_hash_defined
++	  && gp->root.type != bfd_link_hash_defweak)
++	{
++	  /* Set up __gp from a symbol with GPOFF relocations.  */
++	  elf_link_hash_traverse (&htab->elf,
++				  elf_x86_64_setup_gp,
++				  info);
++
++	  if (gp->root.type != bfd_link_hash_defined
++	      && gp->root.type != bfd_link_hash_defweak)
++	    {
++	      /* Set up __gp from a local symbol with GPOFF
++		 relocations.  */
++	      htab_traverse (htab->loc_hash_table,
++			     elf_x86_64_setup_gp_from_local_symbol,
++			     info);
++	    }
++	}
++    }
++
++  /* Invoke the regular ELF backend linker to do all the work.  */
++  return bfd_elf_final_link (abfd, info);
++}
++
+ static const struct bfd_elf_special_section
+ elf_x86_64_special_sections[]=
+ {
+@@ -7776,6 +7962,7 @@ elf_x86_64_special_sections[]=
+ #define bfd_elf64_mkobject		    elf_x86_64_mkobject
+ #define bfd_elf64_get_synthetic_symtab	    elf_x86_64_get_synthetic_symtab
+ #define bfd_elf64_bfd_link_check_relocs	    elf_x86_64_link_check_relocs
++#define bfd_elf64_bfd_final_link	    elf_x86_64_final_link
+ 
+ #define elf_backend_section_from_shdr \
+ 	elf_x86_64_section_from_shdr
+@@ -8077,6 +8264,8 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
+   elf_x86_64_get_synthetic_symtab
+ #define bfd_elf32_bfd_link_check_relocs \
+   elf_x86_64_link_check_relocs
++#define bfd_elf32_bfd_final_link \
++  elf_x86_64_final_link
+ 
+ #undef elf_backend_object_p
+ #define elf_backend_object_p \
+diff --git a/gas/config/tc-i386.c b/gas/config/tc-i386.c
+index 456be9e07c..b91ad5611c 100644
+--- a/gas/config/tc-i386.c
++++ b/gas/config/tc-i386.c
+@@ -672,6 +672,9 @@ static enum rc_type evexrcig = rne;
+ /* Pre-defined "_GLOBAL_OFFSET_TABLE_".  */
+ static symbolS *GOT_symbol;
+ 
++/* Pre-defined "__gp".  */
++static symbolS *GP_symbol;
++
+ /* The dwarf2 return column, adjusted for 32 or 64 bit.  */
+ unsigned int x86_dwarf2_return_column;
+ 
+@@ -7776,6 +7779,9 @@ lex_got (enum bfd_reloc_code_real *rel,
+     { STRING_COMMA_LEN ("GOTPCREL"), { _dummy_first_bfd_reloc_code_real,
+ 				       BFD_RELOC_X86_64_GOTPCREL },
+       OPERAND_TYPE_IMM32_32S_DISP32 },
++    { STRING_COMMA_LEN ("GPOFF"),    { BFD_RELOC_GPREL32,
++				       BFD_RELOC_GPREL32 },
++      OPERAND_TYPE_IMM32_32S_DISP32 },
+     { STRING_COMMA_LEN ("TLSGD"),    { BFD_RELOC_386_TLS_GD,
+ 				       BFD_RELOC_X86_64_TLSGD    },
+       OPERAND_TYPE_IMM32_32S_DISP32 },
+@@ -7848,8 +7854,19 @@ lex_got (enum bfd_reloc_code_real *rel,
+ 		    *types = gotrel[j].types64;
+ 		}
+ 
+-	      if (j != 0 && GOT_symbol == NULL)
+-		GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
++	      if (j != 0)
++		{
++		  if (gotrel[j].rel[1] == BFD_RELOC_GPREL32)
++		    {
++		      if (GP_symbol == NULL)
++			GP_symbol = symbol_find_or_make (GLOBAL_POINTER_NAME);
++		    }
++		  else
++		    {
++		      if (GOT_symbol == NULL)
++			GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
++		    }
++		}
+ 
+ 	      /* The length of the first part of our input line.  */
+ 	      first = cp - input_line_pointer;
+@@ -8506,6 +8523,10 @@ i386_displacement (char *disp_start, char *disp_end)
+   if (gotfree_input_line)
+     input_line_pointer = gotfree_input_line;
+ 
++  if (i.reloc[this_operand] == BFD_RELOC_GPREL32
++      && i.types[this_operand].bitfield.baseindex)
++    as_bad (_("invalid GPOFF relocation"));
++
+   exp_seg = expression (exp);
+ 
+   SKIP_WHITESPACE ();
+@@ -10740,6 +10761,21 @@ md_undefined_symbol (char *name)
+ 	};
+       return GOT_symbol;
+     }
++  else if (name[0] == GLOBAL_POINTER_NAME[0]
++	   && name[1] == GLOBAL_POINTER_NAME[1]
++	   && name[2] == GLOBAL_POINTER_NAME[2]
++	   && name[3] == GLOBAL_POINTER_NAME[3]
++	   && strcmp (name, GLOBAL_POINTER_NAME) == 0)
++    {
++      if (!GP_symbol)
++	{
++	  if (symbol_find (name))
++	    as_bad (_("GP already in symbol table"));
++	  GP_symbol = symbol_new (name, undefined_section,
++				  (valueT) 0, &zero_address_frag);
++	};
++      return GP_symbol;
++    }
+   return 0;
+ }
+ 
+@@ -10899,6 +10935,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
+     case BFD_RELOC_X86_64_PLTOFF64:
+     case BFD_RELOC_X86_64_GOTPC32_TLSDESC:
+     case BFD_RELOC_X86_64_TLSDESC_CALL:
++    case BFD_RELOC_GPREL32:
+     case BFD_RELOC_RVA:
+     case BFD_RELOC_VTABLE_ENTRY:
+     case BFD_RELOC_VTABLE_INHERIT:
+diff --git a/gas/config/tc-i386.h b/gas/config/tc-i386.h
+index f54924c438..beaa4614dd 100644
+--- a/gas/config/tc-i386.h
++++ b/gas/config/tc-i386.h
+@@ -128,6 +128,12 @@ extern const char *i386_comment_chars;
+ #define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"
+ #endif
+ 
++/* The name of the global pointer.  Allow this to be overridden if need
++   be.  */
++#ifndef GLOBAL_POINTER_NAME
++#define GLOBAL_POINTER_NAME "__gp"
++#endif
++
+ #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) && !defined (LEX_AT)
+ #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) x86_cons (EXP, NBYTES)
+ #endif
+diff --git a/gas/testsuite/gas/i386/gpoff.d b/gas/testsuite/gas/i386/gpoff.d
+new file mode 100644
+index 0000000000..6a16ba49a7
+--- /dev/null
++++ b/gas/testsuite/gas/i386/gpoff.d
+@@ -0,0 +1,11 @@
++#objdump: -drw
++#name: i386 gpoff
++
++.*: +file format .*
++
++Disassembly of section .text:
++
++0+ <_start>:
++ +[a-f0-9]+:	8d 05 00 00 00 00    	lea    0x0,%eax	2: R_386_GPOFF	foo
++ +[a-f0-9]+:	64 a1 00 00 00 00    	mov    %fs:0x0,%eax	8: R_386_GPOFF	foo
++#pass
+diff --git a/gas/testsuite/gas/i386/gpoff.s b/gas/testsuite/gas/i386/gpoff.s
+new file mode 100644
+index 0000000000..4b786a2472
+--- /dev/null
++++ b/gas/testsuite/gas/i386/gpoff.s
+@@ -0,0 +1,4 @@
++	.text
++_start:
++	leal	foo@GPOFF, %eax
++	movl	%fs:foo@GPOFF, %eax
+diff --git a/gas/testsuite/gas/i386/i386.exp b/gas/testsuite/gas/i386/i386.exp
+index 67a7a13b25..542749d57b 100644
+--- a/gas/testsuite/gas/i386/i386.exp
++++ b/gas/testsuite/gas/i386/i386.exp
+@@ -455,6 +455,9 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]]
+ 
+ 	run_dump_test "addend"
+ 
++	run_dump_test "gpoff"
++	run_list_test "inval-gpoff" "-al"
++
+ 	if {![istarget "*-*-nacl*"]} then {
+ 	    run_dump_test "iamcu-1"
+ 	    run_dump_test "iamcu-2"
+@@ -868,6 +871,9 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
+ 	run_dump_test "x86-64-gotpcrel-no-relax"
+ 
+ 	run_dump_test "x86-64-addend"
++
++	run_dump_test "x86-64-gpoff"
++	run_list_test "x86-64-inval-gpoff" "-al"
+     }
+ 
+     set ASFLAGS "$old_ASFLAGS"
+diff --git a/gas/testsuite/gas/i386/inval-gpoff.l b/gas/testsuite/gas/i386/inval-gpoff.l
+new file mode 100644
+index 0000000000..3fad845e69
+--- /dev/null
++++ b/gas/testsuite/gas/i386/inval-gpoff.l
+@@ -0,0 +1,18 @@
++.*: Assembler messages:
++.*:3: Error: invalid GPOFF relocation
++.*:4: Error: invalid GPOFF relocation
++.*:5: Error: invalid GPOFF relocation
++GAS LISTING .*
++
++
++[ 	]*1[ 	]+\.text
++[ 	]*2[ 	]+_start:
++[ 	]*3[ 	]+\?\?\?\? 648B8000 		movl	%fs:foo@GPOFF\(%eax\), %eax
++\*\*\*\*  Error: invalid GPOFF relocation
++[ 	]*3[ 	]+000000
++[ 	]*4[ 	]+\?\?\?\? 8B844800 		movl	%ds:foo@GPOFF\(%eax, %ecx, 2\), %eax
++\*\*\*\*  Error: invalid GPOFF relocation
++[ 	]*4[ 	]+000000
++[ 	]*5[ 	]+\?\?\?\? 8B800000 		movl	foo@GPOFF\(%eax\), %eax
++\*\*\*\*  Error: invalid GPOFF relocation
++[ 	]*5[ 	]+0000
+diff --git a/gas/testsuite/gas/i386/inval-gpoff.s b/gas/testsuite/gas/i386/inval-gpoff.s
+new file mode 100644
+index 0000000000..7556de3518
+--- /dev/null
++++ b/gas/testsuite/gas/i386/inval-gpoff.s
+@@ -0,0 +1,5 @@
++	.text
++_start:
++	movl	%fs:foo@GPOFF(%eax), %eax
++	movl	%ds:foo@GPOFF(%eax, %ecx, 2), %eax
++	movl	foo@GPOFF(%eax), %eax
+diff --git a/gas/testsuite/gas/i386/x86-64-gpoff.d b/gas/testsuite/gas/i386/x86-64-gpoff.d
+new file mode 100644
+index 0000000000..2d5e8bd870
+--- /dev/null
++++ b/gas/testsuite/gas/i386/x86-64-gpoff.d
+@@ -0,0 +1,11 @@
++#objdump: -drw
++#name: x86-64 gpoff
++
++.*: +file format .*
++
++Disassembly of section .text:
++
++0+ <_start>:
++ +[a-f0-9]+:	8d 04 25 00 00 00 00 	lea    0x0,%eax	3: R_X86_64_GPOFF	foo
++ +[a-f0-9]+:	65 8b 04 25 00 00 00 00 	mov    %gs:0x0,%eax	b: R_X86_64_GPOFF	foo
++#pass
+diff --git a/gas/testsuite/gas/i386/x86-64-gpoff.s b/gas/testsuite/gas/i386/x86-64-gpoff.s
+new file mode 100644
+index 0000000000..ccd743506b
+--- /dev/null
++++ b/gas/testsuite/gas/i386/x86-64-gpoff.s
+@@ -0,0 +1,4 @@
++	.text
++_start:
++	leal	foo@GPOFF, %eax
++	movl	%gs:foo@GPOFF, %eax
+diff --git a/gas/testsuite/gas/i386/x86-64-inval-gpoff.l b/gas/testsuite/gas/i386/x86-64-inval-gpoff.l
+new file mode 100644
+index 0000000000..e64a8bde1e
+--- /dev/null
++++ b/gas/testsuite/gas/i386/x86-64-inval-gpoff.l
+@@ -0,0 +1,30 @@
++.*: Assembler messages:
++.*:3: Error: invalid GPOFF relocation
++.*:3: Error: non-pc-relative relocation for pc-relative field
++.*:4: Error: invalid GPOFF relocation
++.*:5: Error: invalid GPOFF relocation
++.*:6: Error: invalid GPOFF relocation
++.*:6: Error: non-pc-relative relocation for pc-relative field
++.*:7: Error: invalid GPOFF relocation
++GAS LISTING .*
++
++
++[ 	]*1[ 	]+\.text
++[ 	]*2[ 	]+_start:
++[ 	]*3[ 	]+\?\?\?\? 648B0500 		movl	%fs:foo@GPOFF\(%rip\), %eax
++\*\*\*\*  Error: invalid GPOFF relocation
++\*\*\*\*  Error: non-pc-relative relocation for pc-relative field
++[ 	]*3[ 	]+000000
++[ 	]*4[ 	]+\?\?\?\? 648B8000 		movl	%fs:foo@GPOFF\(%rax\), %eax
++\*\*\*\*  Error: invalid GPOFF relocation
++[ 	]*4[ 	]+000000
++[ 	]*5[ 	]+\?\?\?\? 8B844800 		movl	%ds:foo@GPOFF\(%rax, %rcx, 2\), %eax
++\*\*\*\*  Error: invalid GPOFF relocation
++[ 	]*5[ 	]+000000
++[ 	]*6[ 	]+\?\?\?\? 8B050000 		movl	foo@GPOFF\(%rip\), %eax
++\*\*\*\*  Error: invalid GPOFF relocation
++\*\*\*\*  Error: non-pc-relative relocation for pc-relative field
++[ 	]*6[ 	]+0000
++[ 	]*7[ 	]+\?\?\?\? 8B800000 		movl	foo@GPOFF\(%rax\), %eax
++\*\*\*\*  Error: invalid GPOFF relocation
++[ 	]*7[ 	]+0000
+diff --git a/gas/testsuite/gas/i386/x86-64-inval-gpoff.s b/gas/testsuite/gas/i386/x86-64-inval-gpoff.s
+new file mode 100644
+index 0000000000..8aacbf8480
+--- /dev/null
++++ b/gas/testsuite/gas/i386/x86-64-inval-gpoff.s
+@@ -0,0 +1,7 @@
++	.text
++_start:
++	movl	%fs:foo@GPOFF(%rip), %eax
++	movl	%fs:foo@GPOFF(%rax), %eax
++	movl	%ds:foo@GPOFF(%rax, %rcx, 2), %eax
++	movl	foo@GPOFF(%rip), %eax
++	movl	foo@GPOFF(%rax), %eax
+diff --git a/include/elf/i386.h b/include/elf/i386.h
+index 352e744f23..97a7e8bcc5 100644
+--- a/include/elf/i386.h
++++ b/include/elf/i386.h
+@@ -68,6 +68,7 @@ START_RELOC_NUMBERS (elf_i386_reloc_type)
+      RELOC_NUMBER (R_386_IRELATIVE,    42) /* Adjust indirectly by program base */
+      /* Load from 32 bit GOT entry, relaxable.  */
+      RELOC_NUMBER (R_386_GOT32X,       43)
++     RELOC_NUMBER (R_386_GPOFF,        44) /* 32 bit offset to __gp  */
+ 
+      /* Used by Intel.  */
+      RELOC_NUMBER (R_386_USED_BY_INTEL_200, 200)
+diff --git a/include/elf/x86-64.h b/include/elf/x86-64.h
+index 976f4fe347..280ab7819d 100644
+--- a/include/elf/x86-64.h
++++ b/include/elf/x86-64.h
+@@ -82,6 +82,7 @@ START_RELOC_NUMBERS (elf_x86_64_reloc_type)
+      /* Load from 32 bit signed pc relative offset to GOT entry with
+ 	REX prefix, relaxable.  */
+      RELOC_NUMBER (R_X86_64_REX_GOTPCRELX, 42)
++     RELOC_NUMBER (R_X86_64_GPOFF,    43)     /* 32 bit offset to __gp  */
+      RELOC_NUMBER (R_X86_64_GNU_VTINHERIT, 250)       /* GNU C++ hack  */
+      RELOC_NUMBER (R_X86_64_GNU_VTENTRY, 251)         /* GNU C++ hack  */
+ END_RELOC_NUMBERS (R_X86_64_max)
+diff --git a/ld/testsuite/ld-i386/gpoff-1a.S b/ld/testsuite/ld-i386/gpoff-1a.S
+new file mode 100644
+index 0000000000..5bb9bb5e67
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-1a.S
+@@ -0,0 +1,20 @@
++	.text
++	.globl get_foo
++get_foo:
++	movl	%fs:foo@GPOFF, %eax
++	ret
++
++	.globl get_foo_gpoff
++get_foo_gpoff:
++	leal	foo@GPOFF, %eax
++	ret
++
++	.data
++	.globl foo_gpoff
++foo_gpoff:
++	.long foo@GPOFF
++
++	.data
++	.globl foo
++foo:
++	.long 0x12345678
+diff --git a/ld/testsuite/ld-i386/gpoff-1b.c b/ld/testsuite/ld-i386/gpoff-1b.c
+new file mode 100644
+index 0000000000..418575a217
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-1b.c
+@@ -0,0 +1,79 @@
++#define _GNU_SOURCE
++#include <stdio.h>
++#include <unistd.h>
++#include <syscall.h>
++#include <asm/prctl.h>
++
++extern int foo;
++extern int __gp;
++extern int foo_gpoff;
++extern int get_foo (void);
++extern int get_foo_gpoff (void);
++
++/* Structure passed to 'set_thread_area' syscall.  */
++struct user_desc
++{
++  unsigned int entry_number;
++  unsigned long int base_addr;
++  unsigned int limit;
++  unsigned int seg_32bit:1;
++  unsigned int contents:2;
++  unsigned int read_exec_only:1;
++  unsigned int limit_in_pages:1;
++  unsigned int seg_not_present:1;
++  unsigned int useable:1;
++  unsigned int empty:25;
++};
++
++/* Initializing bit fields is slow.  We speed it up by using a union.  */
++union user_desc_init
++{
++  struct user_desc desc;
++  unsigned int vals[4];
++};
++
++int
++setup_gp (void *p)
++{
++  union user_desc_init segdescr;
++  int result;
++
++  /* Let the kernel pick a value for the 'entry_number' field.  */
++  segdescr.vals[0] = -1;
++  /* The 'base_addr' field.  */
++  segdescr.vals[1] = (unsigned long int) p;
++  /* The 'limit' field.  We use 4GB which is 0xfffff pages.  */
++  segdescr.vals[2] = 0xfffff;
++  /* Collapsed value of the bitfield:
++     .seg_32bit = 1
++     .contents = 0
++     .read_exec_only = 0
++     .limit_in_pages = 1
++     .seg_not_present = 0
++     .useable = 1 */
++  segdescr.vals[3] = 0x51;
++  result = syscall (SYS_set_thread_area, &segdescr.desc);
++  if (result == 0)
++    /* We know the index in the GDT, now load the segment register.
++       The use of the GDT is described by the value 3 in the lower
++       three bits of the segment descriptor value.
++       Note that we have to do this even if the numeric value of
++       the descriptor does not change.  Loading the segment register
++       causes the segment information from the GDT to be loaded
++       which is necessary since we have changed it.   */
++    asm ("movw %w0, %%fs" :: "q" (segdescr.desc.entry_number * 8 + 3));
++
++  return result;
++}
++
++int
++main ()
++{
++  if (setup_gp (&__gp) == 0
++      && foo == 0x12345678
++      && *(int *) ((char *) &__gp + foo_gpoff) == 0x12345678
++      && *(int *) ((char *) &__gp + get_foo_gpoff ()) == 0x12345678
++      && get_foo () == 0x12345678)
++    printf ("PASS\n");
++  return 0;
++}
+diff --git a/ld/testsuite/ld-i386/gpoff-2a.S b/ld/testsuite/ld-i386/gpoff-2a.S
+new file mode 100644
+index 0000000000..b54f316a8f
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-2a.S
+@@ -0,0 +1,19 @@
++	.text
++	.globl get_foo
++get_foo:
++	movl	%fs:foo@GPOFF, %eax
++	ret
++
++	.globl get_foo_gpoff
++get_foo_gpoff:
++	leal	foo@GPOFF, %eax
++	ret
++
++	.data
++	.globl foo_gpoff
++foo_gpoff:
++	.long foo@GPOFF
++
++	.data
++foo:
++	.long 0x12345678
+diff --git a/ld/testsuite/ld-i386/gpoff-2b.c b/ld/testsuite/ld-i386/gpoff-2b.c
+new file mode 100644
+index 0000000000..cfd050f5ab
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-2b.c
+@@ -0,0 +1,78 @@
++#define _GNU_SOURCE
++#include <stdio.h>
++#include <unistd.h>
++#include <syscall.h>
++#include <asm/prctl.h>
++
++extern int __gp;
++extern int foo_gpoff;
++extern int get_foo (void);
++extern int get_foo_gpoff (void);
++
++/* Structure passed to 'set_thread_area' syscall.  */
++struct user_desc
++{
++  unsigned int entry_number;
++  unsigned long int base_addr;
++  unsigned int limit;
++  unsigned int seg_32bit:1;
++  unsigned int contents:2;
++  unsigned int read_exec_only:1;
++  unsigned int limit_in_pages:1;
++  unsigned int seg_not_present:1;
++  unsigned int useable:1;
++  unsigned int empty:25;
++};
++
++/* Initializing bit fields is slow.  We speed it up by using a union.  */
++union user_desc_init
++{
++  struct user_desc desc;
++  unsigned int vals[4];
++};
++
++int
++setup_gp (void *p)
++{
++  union user_desc_init segdescr;
++  int result;
++
++  /* Let the kernel pick a value for the 'entry_number' field.  */
++  segdescr.vals[0] = -1;
++  /* The 'base_addr' field.  */
++  segdescr.vals[1] = (unsigned long int) p;
++  /* The 'limit' field.  We use 4GB which is 0xfffff pages.  */
++  segdescr.vals[2] = 0xfffff;
++  /* Collapsed value of the bitfield:
++     .seg_32bit = 1
++     .contents = 0
++     .read_exec_only = 0
++     .limit_in_pages = 1
++     .seg_not_present = 0
++     .useable = 1 */
++  segdescr.vals[3] = 0x51;
++  result = syscall (SYS_set_thread_area, &segdescr.desc);
++  if (result == 0)
++    /* We know the index in the GDT, now load the segment register.
++       The use of the GDT is described by the value 3 in the lower
++       three bits of the segment descriptor value.
++       Note that we have to do this even if the numeric value of
++       the descriptor does not change.  Loading the segment register
++       causes the segment information from the GDT to be loaded
++       which is necessary since we have changed it.   */
++    asm ("movw %w0, %%fs" :: "q" (segdescr.desc.entry_number * 8 + 3));
++
++  return result;
++}
++
++
++int
++main ()
++{
++  if (setup_gp (&__gp) == 0
++      && *(int *) ((char *) &__gp + foo_gpoff) == 0x12345678
++      && *(int *) ((char *) &__gp + get_foo_gpoff ()) == 0x12345678
++      && get_foo () == 0x12345678)
++    printf ("PASS\n");
++  return 0;
++}
+diff --git a/ld/testsuite/ld-i386/gpoff-3.d b/ld/testsuite/ld-i386/gpoff-3.d
+new file mode 100644
+index 0000000000..0952484cf9
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-3.d
+@@ -0,0 +1,3 @@
++#as: --32
++#ld: -melf_i386
++#error: undefined reference to `foo'
+diff --git a/ld/testsuite/ld-i386/gpoff-3.s b/ld/testsuite/ld-i386/gpoff-3.s
+new file mode 100644
+index 0000000000..91f9bf8b02
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-3.s
+@@ -0,0 +1,4 @@
++	.text
++	.globl _start
++_start:
++	movl	%fs:foo@GPOFF, %eax
+diff --git a/ld/testsuite/ld-i386/gpoff-4.d b/ld/testsuite/ld-i386/gpoff-4.d
+new file mode 100644
+index 0000000000..f87739cb76
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-4.d
+@@ -0,0 +1,3 @@
++#as: --32
++#ld: -melf_i386
++#error: GPOFF relocation at 0x2 in section `\.text' must be against symbol defined in GP section `\.rodata'
+diff --git a/ld/testsuite/ld-i386/gpoff-4.s b/ld/testsuite/ld-i386/gpoff-4.s
+new file mode 100644
+index 0000000000..f138afd089
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-4.s
+@@ -0,0 +1,16 @@
++	.text
++	.globl _start
++_start:
++	movl	%fs:foo@GPOFF, %eax
++
++	.data
++	.globl bar_gpoff
++bar_gpoff:
++	.long bar@GPOFF
++
++foo:
++	.long 0x12345678
++
++	.section .rodata,"a",@progbits
++bar:
++	.long 0x12345678
+diff --git a/ld/testsuite/ld-i386/gpoff-5.d b/ld/testsuite/ld-i386/gpoff-5.d
+new file mode 100644
+index 0000000000..0df1ca23e5
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-5.d
+@@ -0,0 +1,3 @@
++#as: --32
++#ld: -melf_i386
++#error: symbol `bar' with GPOFF relocation defined in .*\.o\(\.rodata\) isn't in GP section `\.data'
+diff --git a/ld/testsuite/ld-i386/gpoff-5.s b/ld/testsuite/ld-i386/gpoff-5.s
+new file mode 100644
+index 0000000000..4a9c8d1c93
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-5.s
+@@ -0,0 +1,18 @@
++	.text
++	.globl _start
++_start:
++	movl	%fs:foo@GPOFF, %eax
++
++	.data
++	.globl bar_gpoff
++bar_gpoff:
++	.long bar@GPOFF
++
++	.globl foo
++foo:
++	.long 0x12345678
++
++	.section .rodata,"a",@progbits
++	.globl bar
++bar:
++	.long 0x12345678
+diff --git a/ld/testsuite/ld-i386/gpoff-6.d b/ld/testsuite/ld-i386/gpoff-6.d
+new file mode 100644
+index 0000000000..00bdf7ad1a
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-6.d
+@@ -0,0 +1,12 @@
++#as: --32
++#ld: -melf_i386 --gc-sections
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:	c3                   	ret    
++#pass
+diff --git a/ld/testsuite/ld-i386/gpoff-6.s b/ld/testsuite/ld-i386/gpoff-6.s
+new file mode 100644
+index 0000000000..592c0ff3c3
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-6.s
+@@ -0,0 +1,9 @@
++	.text
++	.globl _start
++_start:
++	ret
++
++	.section .text.bar,"ax",@progbits
++	.globl bar
++bar:
++	movl	%fs:foo@GPOFF, %eax
+diff --git a/ld/testsuite/ld-i386/gpoff-7.d b/ld/testsuite/ld-i386/gpoff-7.d
+new file mode 100644
+index 0000000000..ecabaf159f
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-7.d
+@@ -0,0 +1,16 @@
++#as: --32
++#ld: -melf_i386
++#objdump: -dw --sym
++
++.*: +file format .*
++
++SYMBOL TABLE:
++#...
++[a-f0-9]+ l       .data	0+ __gp
++#...
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:[ \t]+64 a1 fe ff ff ff[ \t]+mov[ \t]+%fs:0xfffffffe,%eax
++#pass
+diff --git a/ld/testsuite/ld-i386/gpoff-7.s b/ld/testsuite/ld-i386/gpoff-7.s
+new file mode 100644
+index 0000000000..f5b220aa8a
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-7.s
+@@ -0,0 +1,9 @@
++	.text
++	.globl _start
++_start:
++	movl	%fs:foo@GPOFF, %eax
++
++	.data
++	.globl foo
++foo:
++	.long 0x12345678
+diff --git a/ld/testsuite/ld-i386/gpoff-8.s b/ld/testsuite/ld-i386/gpoff-8.s
+new file mode 100644
+index 0000000000..cffe6f06f5
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-8.s
+@@ -0,0 +1,10 @@
++	.text
++	.globl _start
++_start:
++	movl	%fs:foo@GPOFF, %eax
++	movl   __gp@GOT(%ebx), %eax
++
++	.data
++	.globl foo
++foo:
++	.long 0x12345678
+diff --git a/ld/testsuite/ld-i386/gpoff-8.t b/ld/testsuite/ld-i386/gpoff-8.t
+new file mode 100644
+index 0000000000..1f016440de
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-8.t
+@@ -0,0 +1,39 @@
++SECTIONS
++{
++  /* Read-only sections, merged into text segment: */
++  . = SEGMENT_START("text-segment", 0) + SIZEOF_HEADERS;
++  .hash           : { *(.hash) }
++  .gnu.hash       : { *(.gnu.hash) }
++  .dynsym         : { *(.dynsym) }
++  .dynstr         : { *(.dynstr) }
++  .init           : { *(.init) }
++  .text           : { *(.text) }
++  .fini           : { *(.fini) }
++  .rodata         : { *(.rodata) }
++  . = ALIGN (CONSTANT (MAXPAGESIZE)) - ((CONSTANT (MAXPAGESIZE) - .) & (CONSTANT (MAXPAGESIZE) - 1)); . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE));
++  .tdata	  : { *(.tdata) }
++  .tbss		  : { *(.tbss) }
++  .init_array     : { *(.init_array) }
++  .fini_array     : { *(.fini_array) }
++  .jcr            : { *(.jcr) }
++  .data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*) }
++  .dynamic        : { *(.dynamic) }
++  .bar            : { *(.bar) }
++  . = DATA_SEGMENT_RELRO_END (SIZEOF (.got.plt) >= 24 ? 24 : 0, .);
++  .got.plt        : { *(.got.plt) }
++  .data           :
++  {
++    __gp = .;
++    *(.data)
++  }
++  __bss_start = .;
++  .bss            :
++  {
++   *(.bss)
++   . = ALIGN(. != 0 ? 64 / 8 : 1);
++  }
++  . = ALIGN(64 / 8);
++  _end = .; PROVIDE (end = .);
++  . = DATA_SEGMENT_END (.);
++  /DISCARD/ : { *(.*) }
++}
+diff --git a/ld/testsuite/ld-i386/gpoff-8a.d b/ld/testsuite/ld-i386/gpoff-8a.d
+new file mode 100644
+index 0000000000..94128c955e
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-8a.d
+@@ -0,0 +1,18 @@
++#source: gpoff-8.s
++#as: --32 -mrelax-relocations=yes
++#ld: -melf_i386
++#objdump: -dw --sym
++
++.*: +file format .*
++
++SYMBOL TABLE:
++#...
++[a-f0-9]+ l       .data	0+ __gp
++#...
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:[ \t]+64 a1 fe ff ff ff[ \t]+mov[ \t]+%fs:0xfffffffe,%eax
++ +[a-f0-9]+:[ \t]+c7 c0 [a-f0-9 \t]+mov[ \t]+\$0x[a-f0-9]+,%eax
++#pass
+diff --git a/ld/testsuite/ld-i386/gpoff-8b.d b/ld/testsuite/ld-i386/gpoff-8b.d
+new file mode 100644
+index 0000000000..9969de39fa
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-8b.d
+@@ -0,0 +1,18 @@
++#source: gpoff-8.s
++#as: --32 -mrelax-relocations=yes
++#ld: -melf_i386 -pie
++#objdump: -dw --sym
++
++.*: +file format .*
++
++SYMBOL TABLE:
++#...
++[a-f0-9]+ l       .data	0+ __gp
++#...
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:[ \t]+64 a1 fe ff ff ff[ \t]+mov[ \t]+%fs:0xfffffffe,%eax
++ +[a-f0-9]+:[ \t]+8d 83 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%ebx\),%eax
++#pass
+diff --git a/ld/testsuite/ld-i386/gpoff-8c.d b/ld/testsuite/ld-i386/gpoff-8c.d
+new file mode 100644
+index 0000000000..c11ab46bb4
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-8c.d
+@@ -0,0 +1,18 @@
++#source: gpoff-8.s
++#as: --32 -mrelax-relocations=yes
++#ld: -melf_i386 -shared
++#objdump: -dw --sym
++
++.*: +file format .*
++
++SYMBOL TABLE:
++#...
++[a-f0-9]+ l       .data	0+ __gp
++#...
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:[ \t]+64 a1 fe ff ff ff[ \t]+mov[ \t]+%fs:0xfffffffe,%eax
++ +[a-f0-9]+:[ \t]+8d 83 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%ebx\),%eax
++#pass
+diff --git a/ld/testsuite/ld-i386/gpoff-8d.d b/ld/testsuite/ld-i386/gpoff-8d.d
+new file mode 100644
+index 0000000000..64d9fcf6c4
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-8d.d
+@@ -0,0 +1,18 @@
++#source: gpoff-8.s
++#as: --32 -mrelax-relocations=yes
++#ld: -melf_i386 -T gpoff-8.t
++#objdump: -dw --sym
++
++.*: +file format .*
++
++SYMBOL TABLE:
++#...
++[a-f0-9]+ l       .data	0+ __gp
++#...
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:[ \t]+64 a1 00 00 00 00[ \t]+mov[ \t]+%fs:0x0,%eax
++ +[a-f0-9]+:[ \t]+c7 c0 [a-f0-9 \t]+mov[ \t]+\$0x[a-f0-9]+,%eax
++#pass
+diff --git a/ld/testsuite/ld-i386/gpoff-8e.d b/ld/testsuite/ld-i386/gpoff-8e.d
+new file mode 100644
+index 0000000000..bfa25a2844
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-8e.d
+@@ -0,0 +1,18 @@
++#source: gpoff-8.s
++#as: --32 -mrelax-relocations=yes
++#ld: -melf_i386 -T gpoff-8.t -pie
++#objdump: -dw --sym
++
++.*: +file format .*
++
++SYMBOL TABLE:
++#...
++[a-f0-9]+ l       .data	0+ __gp
++#...
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:[ \t]+64 a1 00 00 00 00[ \t]+mov[ \t]+%fs:0x0,%eax
++ +[a-f0-9]+:[ \t]+8d 83 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%ebx\),%eax
++#pass
+diff --git a/ld/testsuite/ld-i386/gpoff-8f.d b/ld/testsuite/ld-i386/gpoff-8f.d
+new file mode 100644
+index 0000000000..6cc4a52403
+--- /dev/null
++++ b/ld/testsuite/ld-i386/gpoff-8f.d
+@@ -0,0 +1,18 @@
++#source: gpoff-8.s
++#as: --32 -mrelax-relocations=yes
++#ld: -melf_i386 -T gpoff-8.t -shared
++#objdump: -dw --sym
++
++.*: +file format .*
++
++SYMBOL TABLE:
++#...
++[a-f0-9]+ l       .data	0+ __gp
++#...
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:[ \t]+64 a1 00 00 00 00[ \t]+mov[ \t]+%fs:0x0,%eax
++ +[a-f0-9]+:[ \t]+8d 83 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%ebx\),%eax
++#pass
+diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
+index 2d7d532a49..12808802d1 100644
+--- a/ld/testsuite/ld-i386/i386.exp
++++ b/ld/testsuite/ld-i386/i386.exp
+@@ -437,6 +437,17 @@ run_dump_test "property-x86-shstk4"
+ run_dump_test "property-x86-shstk5"
+ run_dump_test "pie1"
+ run_dump_test "pie1-nacl"
++run_dump_test "gpoff-3"
++run_dump_test "gpoff-4"
++run_dump_test "gpoff-5"
++run_dump_test "gpoff-6"
++run_dump_test "gpoff-7"
++run_dump_test "gpoff-8a"
++run_dump_test "gpoff-8b"
++run_dump_test "gpoff-8c"
++run_dump_test "gpoff-8d"
++run_dump_test "gpoff-8e"
++run_dump_test "gpoff-8f"
+ 
+ if { !([istarget "i?86-*-linux*"]
+        || [istarget "i?86-*-gnu*"]
+@@ -1262,6 +1273,67 @@ if { [isnative]
+ 	    "-fPIE" \
+ 	] \
+     ]
++
++    if { [istarget "i?86-*-linux*"] } {
++	run_ld_link_exec_tests [list \
++	    [list \
++		"Run GPOFF 1" \
++		"" \
++		"" \
++		{gpoff-1a.S gpoff-1b.c} \
++		"gpoff-1" "pass.out" \
++	    ] \
++	    [list \
++		"Run GPOFF 1 (PIE)" \
++		"-pie" \
++		"" \
++		{gpoff-1a.S gpoff-1b.c} \
++		"gpoff-1-pie" "pass.out" "-fPIE" \
++	    ] \
++	    [list \
++		"Run GPOFF 1 (PIC)" \
++		"-pie" \
++		"" \
++		{gpoff-1a.S gpoff-1b.c} \
++		"gpoff-1-pic" "pass.out" "-fPIC" \
++	    ] \
++	    [list \
++		"Run GPOFF 1 (static)" \
++		"-static" \
++		"" \
++		{gpoff-1a.S gpoff-1b.c} \
++		"gpoff-1-static" "pass.out" \
++	    ] \
++	    [list \
++		"Run GPOFF 2" \
++		"" \
++		"" \
++		{gpoff-2a.S gpoff-2b.c} \
++		"gpoff-2" "pass.out" \
++	    ] \
++	    [list \
++		"Run GPOFF 2 (PIE)" \
++		"-pie" \
++		"" \
++		{gpoff-2a.S gpoff-2b.c} \
++		"gpoff-2-pie" "pass.out" "-fPIE" \
++	    ] \
++	    [list \
++		"Run GPOFF 2 (PIC)" \
++		"-pie" \
++		"" \
++		{gpoff-2a.S gpoff-2b.c} \
++		"gpoff-2-pic" "pass.out" "-fPIC" \
++	    ] \
++	    [list \
++		"Run GPOFF 2 (static)" \
++		"-static" \
++		"" \
++		{gpoff-2a.S gpoff-2b.c} \
++		"gpoff-2-static" "pass.out" \
++	    ] \
++	]
++    }
+ }
+ 
+ if { !([istarget "i?86-*-linux*"]
+diff --git a/ld/testsuite/ld-x86-64/gpoff-1a.S b/ld/testsuite/ld-x86-64/gpoff-1a.S
+new file mode 100644
+index 0000000000..24e9e649d9
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-1a.S
+@@ -0,0 +1,20 @@
++	.text
++	.globl get_foo
++get_foo:
++	movl	%gs:foo@GPOFF, %eax
++	ret
++
++	.globl get_foo_gpoff
++get_foo_gpoff:
++	leal	foo@GPOFF, %eax
++	ret
++
++	.data
++	.globl foo_gpoff
++foo_gpoff:
++	.long foo@GPOFF
++
++	.data
++	.globl foo
++foo:
++	.long 0x12345678
+diff --git a/ld/testsuite/ld-x86-64/gpoff-1b.c b/ld/testsuite/ld-x86-64/gpoff-1b.c
+new file mode 100644
+index 0000000000..185f265b07
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-1b.c
+@@ -0,0 +1,29 @@
++#define _GNU_SOURCE
++#include <stdio.h>
++#include <unistd.h>
++#include <syscall.h>
++#include <asm/prctl.h>
++
++extern int foo;
++extern int __gp;
++extern int foo_gpoff;
++extern int get_foo (void);
++extern int get_foo_gpoff (void);
++
++int
++setup_gp (void *p)
++{
++  return syscall (SYS_arch_prctl, ARCH_SET_GS, p);
++}
++
++int
++main ()
++{
++  if (setup_gp (&__gp) == 0
++      && foo == 0x12345678
++      && *(int *) ((char *) &__gp + foo_gpoff) == 0x12345678
++      && *(int *) ((char *) &__gp + get_foo_gpoff ()) == 0x12345678
++      && get_foo () == 0x12345678)
++    printf ("PASS\n");
++  return 0;
++}
+diff --git a/ld/testsuite/ld-x86-64/gpoff-2a.S b/ld/testsuite/ld-x86-64/gpoff-2a.S
+new file mode 100644
+index 0000000000..cb9f26755a
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-2a.S
+@@ -0,0 +1,19 @@
++	.text
++	.globl get_foo
++get_foo:
++	movl	%gs:foo@GPOFF, %eax
++	ret
++
++	.globl get_foo_gpoff
++get_foo_gpoff:
++	leal	foo@GPOFF, %eax
++	ret
++
++	.data
++	.globl foo_gpoff
++foo_gpoff:
++	.long foo@GPOFF
++
++	.data
++foo:
++	.long 0x12345678
+diff --git a/ld/testsuite/ld-x86-64/gpoff-2b.c b/ld/testsuite/ld-x86-64/gpoff-2b.c
+new file mode 100644
+index 0000000000..8b91e22721
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-2b.c
+@@ -0,0 +1,27 @@
++#define _GNU_SOURCE
++#include <stdio.h>
++#include <unistd.h>
++#include <syscall.h>
++#include <asm/prctl.h>
++
++extern int __gp;
++extern int foo_gpoff;
++extern int get_foo (void);
++extern int get_foo_gpoff (void);
++
++int
++setup_gp (void *p)
++{
++  return syscall (SYS_arch_prctl, ARCH_SET_GS, p);
++}
++
++int
++main ()
++{
++  if (setup_gp (&__gp) == 0
++      && *(int *) ((char *) &__gp + foo_gpoff) == 0x12345678
++      && *(int *) ((char *) &__gp + get_foo_gpoff ()) == 0x12345678
++      && get_foo () == 0x12345678)
++    printf ("PASS\n");
++  return 0;
++}
+diff --git a/ld/testsuite/ld-x86-64/gpoff-3.d b/ld/testsuite/ld-x86-64/gpoff-3.d
+new file mode 100644
+index 0000000000..c8a5e6f983
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-3.d
+@@ -0,0 +1,3 @@
++#as: --64
++#ld: -melf_x86_64
++#error: undefined reference to `foo'
+diff --git a/ld/testsuite/ld-x86-64/gpoff-3.s b/ld/testsuite/ld-x86-64/gpoff-3.s
+new file mode 100644
+index 0000000000..0513d3e4d3
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-3.s
+@@ -0,0 +1,4 @@
++	.text
++	.globl _start
++_start:
++	movl	%gs:foo@GPOFF, %eax
+diff --git a/ld/testsuite/ld-x86-64/gpoff-4.d b/ld/testsuite/ld-x86-64/gpoff-4.d
+new file mode 100644
+index 0000000000..f8fee15d1d
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-4.d
+@@ -0,0 +1,3 @@
++#as: --64
++#ld: -melf_x86_64
++#error: GPOFF relocation at 0x4 in section `\.text' must be against symbol defined in GP section `\.rodata'
+diff --git a/ld/testsuite/ld-x86-64/gpoff-4.s b/ld/testsuite/ld-x86-64/gpoff-4.s
+new file mode 100644
+index 0000000000..5f6cd4116e
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-4.s
+@@ -0,0 +1,16 @@
++	.text
++	.globl _start
++_start:
++	movl	%gs:foo@GPOFF, %eax
++
++	.data
++	.globl bar_gpoff
++bar_gpoff:
++	.long bar@GPOFF
++
++foo:
++	.long 0x12345678
++
++	.section .rodata,"a",@progbits
++bar:
++	.long 0x12345678
+diff --git a/ld/testsuite/ld-x86-64/gpoff-5.d b/ld/testsuite/ld-x86-64/gpoff-5.d
+new file mode 100644
+index 0000000000..ddc8498cff
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-5.d
+@@ -0,0 +1,3 @@
++#as: --64
++#ld: -melf_x86_64
++#error: symbol `bar' with GPOFF relocation defined in .*\.o\(\.rodata\) isn't in GP section `\.data'
+diff --git a/ld/testsuite/ld-x86-64/gpoff-5.s b/ld/testsuite/ld-x86-64/gpoff-5.s
+new file mode 100644
+index 0000000000..3a8e6781fc
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-5.s
+@@ -0,0 +1,18 @@
++	.text
++	.globl _start
++_start:
++	movl	%gs:foo@GPOFF, %eax
++
++	.data
++	.globl bar_gpoff
++bar_gpoff:
++	.long bar@GPOFF
++
++	.globl foo
++foo:
++	.long 0x12345678
++
++	.section .rodata,"a",@progbits
++	.globl bar
++bar:
++	.long 0x12345678
+diff --git a/ld/testsuite/ld-x86-64/gpoff-6.d b/ld/testsuite/ld-x86-64/gpoff-6.d
+new file mode 100644
+index 0000000000..1676b0d3ef
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-6.d
+@@ -0,0 +1,12 @@
++#as: --64
++#ld: -melf_x86_64 --gc-sections
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:	c3                   	retq   
++#pass
+diff --git a/ld/testsuite/ld-x86-64/gpoff-6.s b/ld/testsuite/ld-x86-64/gpoff-6.s
+new file mode 100644
+index 0000000000..3e632f3cea
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-6.s
+@@ -0,0 +1,9 @@
++	.text
++	.globl _start
++_start:
++	ret
++
++	.section .text.bar,"ax",@progbits
++	.globl bar
++bar:
++	movl	%gs:foo@GPOFF, %eax
+diff --git a/ld/testsuite/ld-x86-64/gpoff-7.d b/ld/testsuite/ld-x86-64/gpoff-7.d
+new file mode 100644
+index 0000000000..a6ebefa265
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-7.d
+@@ -0,0 +1,16 @@
++#as: --64
++#ld: -melf_x86_64
++#objdump: -dw --sym
++
++.*: +file format .*
++
++SYMBOL TABLE:
++#...
++[a-f0-9]+ l       .data	0+ __gp
++#...
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:[ \t]+65 8b 04 25 fe ff ff ff[ \t]+mov[ \t]+%gs:0xfffffffffffffffe,%eax
++#pass
+diff --git a/ld/testsuite/ld-x86-64/gpoff-7.s b/ld/testsuite/ld-x86-64/gpoff-7.s
+new file mode 100644
+index 0000000000..a900661811
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-7.s
+@@ -0,0 +1,9 @@
++	.text
++	.globl _start
++_start:
++	movl	%gs:foo@GPOFF, %eax
++
++	.data
++	.globl foo
++foo:
++	.long 0x12345678
+diff --git a/ld/testsuite/ld-x86-64/gpoff-8.s b/ld/testsuite/ld-x86-64/gpoff-8.s
+new file mode 100644
+index 0000000000..948bafc498
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-8.s
+@@ -0,0 +1,10 @@
++	.text
++	.globl _start
++_start:
++	movl	%gs:foo@GPOFF, %eax
++	movq   __gp@GOTPCREL(%rip), %rax
++
++	.data
++	.globl foo
++foo:
++	.long 0x12345678
+diff --git a/ld/testsuite/ld-x86-64/gpoff-8.t b/ld/testsuite/ld-x86-64/gpoff-8.t
+new file mode 100644
+index 0000000000..1f016440de
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-8.t
+@@ -0,0 +1,39 @@
++SECTIONS
++{
++  /* Read-only sections, merged into text segment: */
++  . = SEGMENT_START("text-segment", 0) + SIZEOF_HEADERS;
++  .hash           : { *(.hash) }
++  .gnu.hash       : { *(.gnu.hash) }
++  .dynsym         : { *(.dynsym) }
++  .dynstr         : { *(.dynstr) }
++  .init           : { *(.init) }
++  .text           : { *(.text) }
++  .fini           : { *(.fini) }
++  .rodata         : { *(.rodata) }
++  . = ALIGN (CONSTANT (MAXPAGESIZE)) - ((CONSTANT (MAXPAGESIZE) - .) & (CONSTANT (MAXPAGESIZE) - 1)); . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE));
++  .tdata	  : { *(.tdata) }
++  .tbss		  : { *(.tbss) }
++  .init_array     : { *(.init_array) }
++  .fini_array     : { *(.fini_array) }
++  .jcr            : { *(.jcr) }
++  .data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*) }
++  .dynamic        : { *(.dynamic) }
++  .bar            : { *(.bar) }
++  . = DATA_SEGMENT_RELRO_END (SIZEOF (.got.plt) >= 24 ? 24 : 0, .);
++  .got.plt        : { *(.got.plt) }
++  .data           :
++  {
++    __gp = .;
++    *(.data)
++  }
++  __bss_start = .;
++  .bss            :
++  {
++   *(.bss)
++   . = ALIGN(. != 0 ? 64 / 8 : 1);
++  }
++  . = ALIGN(64 / 8);
++  _end = .; PROVIDE (end = .);
++  . = DATA_SEGMENT_END (.);
++  /DISCARD/ : { *(.*) }
++}
+diff --git a/ld/testsuite/ld-x86-64/gpoff-8a.d b/ld/testsuite/ld-x86-64/gpoff-8a.d
+new file mode 100644
+index 0000000000..6c1640d34c
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-8a.d
+@@ -0,0 +1,18 @@
++#source: gpoff-8.s
++#as: --64 -mrelax-relocations=yes
++#ld: -melf_x86_64
++#objdump: -dw --sym
++
++.*: +file format .*
++
++SYMBOL TABLE:
++#...
++[a-f0-9]+ l       .data	0+ __gp
++#...
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:[ \t]+65 8b 04 25 fe ff ff ff[ \t]+mov[ \t]+%gs:0xfffffffffffffffe,%eax
++ +[a-f0-9]+:[ \t]+48 c7 c0 [a-f0-9 \t]+mov[ \t]+\$0x[a-f0-9]+,%rax
++#pass
+diff --git a/ld/testsuite/ld-x86-64/gpoff-8b.d b/ld/testsuite/ld-x86-64/gpoff-8b.d
+new file mode 100644
+index 0000000000..f163bc1d38
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-8b.d
+@@ -0,0 +1,18 @@
++#source: gpoff-8.s
++#as: --64 -mrelax-relocations=yes
++#ld: -melf_x86_64 -pie
++#objdump: -dw --sym
++
++.*: +file format .*
++
++SYMBOL TABLE:
++#...
++[a-f0-9]+ l       .data	0+ __gp
++#...
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:[ \t]+65 8b 04 25 fe ff ff ff[ \t]+mov[ \t]+%gs:0xfffffffffffffffe,%eax
++ +[a-f0-9]+:[ \t]+48 8d 05 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%rip\),%rax[ \t]+# [a-f0-9]+ <__gp>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/gpoff-8c.d b/ld/testsuite/ld-x86-64/gpoff-8c.d
+new file mode 100644
+index 0000000000..d5478bbb2a
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-8c.d
+@@ -0,0 +1,18 @@
++#source: gpoff-8.s
++#as: --64 -mrelax-relocations=yes
++#ld: -melf_x86_64 -shared
++#objdump: -dw --sym
++
++.*: +file format .*
++
++SYMBOL TABLE:
++#...
++[a-f0-9]+ l       .data	0+ __gp
++#...
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:[ \t]+65 8b 04 25 fe ff ff ff[ \t]+mov[ \t]+%gs:0xfffffffffffffffe,%eax
++ +[a-f0-9]+:[ \t]+48 8d 05 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%rip\),%rax[ \t]+# [a-f0-9]+ <__gp>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/gpoff-8d.d b/ld/testsuite/ld-x86-64/gpoff-8d.d
+new file mode 100644
+index 0000000000..2e0a330396
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-8d.d
+@@ -0,0 +1,18 @@
++#source: gpoff-8.s
++#as: --64 -mrelax-relocations=yes
++#ld: -melf_x86_64 -T gpoff-8.t
++#objdump: -dw --sym
++
++.*: +file format .*
++
++SYMBOL TABLE:
++#...
++[a-f0-9]+ l       .data	0+ __gp
++#...
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:[ \t]+65 8b 04 25 00 00 00 00[ \t]+mov[ \t]+%gs:0x0,%eax
++ +[a-f0-9]+:[ \t]+48 c7 c0 [a-f0-9 \t]+mov[ \t]+\$0x[a-f0-9]+,%rax
++#pass
+diff --git a/ld/testsuite/ld-x86-64/gpoff-8e.d b/ld/testsuite/ld-x86-64/gpoff-8e.d
+new file mode 100644
+index 0000000000..1a1c9d907e
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-8e.d
+@@ -0,0 +1,18 @@
++#source: gpoff-8.s
++#as: --64 -mrelax-relocations=yes
++#ld: -melf_x86_64 -T gpoff-8.t -pie
++#objdump: -dw --sym
++
++.*: +file format .*
++
++SYMBOL TABLE:
++#...
++[a-f0-9]+ l       .data	0+ __gp
++#...
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:[ \t]+65 8b 04 25 00 00 00 00[ \t]+mov[ \t]+%gs:0x0,%eax
++ +[a-f0-9]+:[ \t]+48 8d 05 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%rip\),%rax[ \t]+# [a-f0-9]+ <foo>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/gpoff-8f.d b/ld/testsuite/ld-x86-64/gpoff-8f.d
+new file mode 100644
+index 0000000000..fb8c3375b8
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/gpoff-8f.d
+@@ -0,0 +1,18 @@
++#source: gpoff-8.s
++#as: --64 -mrelax-relocations=yes
++#ld: -melf_x86_64 -T gpoff-8.t -shared
++#objdump: -dw --sym
++
++.*: +file format .*
++
++SYMBOL TABLE:
++#...
++[a-f0-9]+ l       .data	0+ __gp
++#...
++
++Disassembly of section .text:
++
++0+[a-f0-9]+ <_start>:
++ +[a-f0-9]+:[ \t]+65 8b 04 25 00 00 00 00[ \t]+mov[ \t]+%gs:0x0,%eax
++ +[a-f0-9]+:[ \t]+48 8d 05 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%rip\),%rax[ \t]+# [a-f0-9]+ <foo>
++#pass
+diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
+index ce29cc8634..e5e9e91c27 100644
+--- a/ld/testsuite/ld-x86-64/x86-64.exp
++++ b/ld/testsuite/ld-x86-64/x86-64.exp
+@@ -567,6 +567,17 @@ run_dump_test "pr20253-4f"
+ run_dump_test "pr20253-5a"
+ run_dump_test "pr20253-5b"
+ run_dump_test "tlsdesc2"
++run_dump_test "gpoff-3"
++run_dump_test "gpoff-4"
++run_dump_test "gpoff-5"
++run_dump_test "gpoff-6"
++run_dump_test "gpoff-7"
++run_dump_test "gpoff-8a"
++run_dump_test "gpoff-8b"
++run_dump_test "gpoff-8c"
++run_dump_test "gpoff-8d"
++run_dump_test "gpoff-8e"
++run_dump_test "gpoff-8f"
+ 
+ proc undefined_weak {cflags ldflags} {
+     set testname "Undefined weak symbol"
+@@ -1530,6 +1541,67 @@ if { [isnative] && [which $CC] != 0 } {
+ 	}
+     }
+ 
++    if { [istarget "x86_64-*-linux*"] } {
++	run_ld_link_exec_tests [list \
++	    [list \
++		"Run GPOFF 1" \
++		"" \
++		"" \
++		{gpoff-1a.S gpoff-1b.c} \
++		"gpoff-1" "pass.out" \
++	    ] \
++	    [list \
++		"Run GPOFF 1 (PIE)" \
++		"-pie" \
++		"" \
++		{gpoff-1a.S gpoff-1b.c} \
++		"gpoff-1-pie" "pass.out" "-fPIE" \
++	    ] \
++	    [list \
++		"Run GPOFF 1 (PIC)" \
++		"-pie" \
++		"" \
++		{gpoff-1a.S gpoff-1b.c} \
++		"gpoff-1-pic" "pass.out" "-fPIC" \
++	    ] \
++	    [list \
++		"Run GPOFF 1 (static)" \
++		"-static" \
++		"" \
++		{gpoff-1a.S gpoff-1b.c} \
++		"gpoff-1-static" "pass.out" \
++	    ] \
++	    [list \
++		"Run GPOFF 2" \
++		"" \
++		"" \
++		{gpoff-2a.S gpoff-2b.c} \
++		"gpoff-2" "pass.out" \
++	    ] \
++	    [list \
++		"Run GPOFF 2 (PIE)" \
++		"-pie" \
++		"" \
++		{gpoff-2a.S gpoff-2b.c} \
++		"gpoff-2-pie" "pass.out" "-fPIE" \
++	    ] \
++	    [list \
++		"Run GPOFF 2 (PIC)" \
++		"-pie" \
++		"" \
++		{gpoff-2a.S gpoff-2b.c} \
++		"gpoff-2-pic" "pass.out" "-fPIC" \
++	    ] \
++	    [list \
++		"Run GPOFF 2 (static)" \
++		"-static" \
++		"" \
++		{gpoff-2a.S gpoff-2b.c} \
++		"gpoff-2-static" "pass.out" \
++	    ] \
++	]
++    }
++
+     undefined_weak "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS"
+     undefined_weak "-fPIE" ""
+     undefined_weak "-fPIE" "-pie"
+-- 
+2.13.3
+
