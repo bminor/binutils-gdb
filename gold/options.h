@@ -1164,7 +1164,8 @@ class General_options
 	      N_("Generate relocatable output"), NULL);
 
   DEFINE_bool(relax, options::TWO_DASHES, '\0', false,
-	      N_("Relax branches on certain targets"), NULL);
+	      N_("Relax branches on certain targets"),
+	      N_("Do not relax branches"));
 
   DEFINE_string(retain_symbols_file, options::TWO_DASHES, '\0', NULL,
 		N_("keep only symbols listed in this file"), N_("FILE"));
