@@ -2889,16 +2889,14 @@ insert_bp_location (struct bp_location *bl,
 		{
 		  if (bp_err_message == NULL)
 		    {
-		      char *message
+		      std::string message
 			= memory_error_message (TARGET_XFER_E_IO,
 						bl->gdbarch, bl->address);
-		      struct cleanup *old_chain = make_cleanup (xfree, message);
 
 		      fprintf_unfiltered (tmp_error_stream,
 					  "Cannot insert breakpoint %d.\n"
 					  "%s\n",
-					  bl->owner->number, message);
-		      do_cleanups (old_chain);
+					  bl->owner->number, message.c_str ());
 		    }
 		  else
 		    {
