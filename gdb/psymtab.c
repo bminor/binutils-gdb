@@ -627,7 +627,7 @@ match_partial_symbol (struct objfile *objfile,
 
    The caller is responsible for freeing the return result.  */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 psymtab_search_name (const char *name)
 {
   switch (current_language->la_language)
@@ -639,7 +639,7 @@ psymtab_search_name (const char *name)
 	    char *ret = cp_remove_params (name);
 
 	    if (ret)
-	      return ret;
+	      return gdb::unique_xmalloc_ptr<char> (ret);
 	  }
       }
       break;
@@ -648,7 +648,7 @@ psymtab_search_name (const char *name)
       break;
     }
 
-  return xstrdup (name);
+  return gdb::unique_xmalloc_ptr<char> (xstrdup (name));
 }
 
 /* Look, in partial_symtab PST, for symbol whose natural name is NAME.
@@ -663,14 +663,11 @@ lookup_partial_symbol (struct objfile *objfile,
   struct partial_symbol **top, **real_top, **bottom, **center;
   int length = (global ? pst->n_global_syms : pst->n_static_syms);
   int do_linear_search = 1;
-  char *search_name;
-  struct cleanup *cleanup;
 
   if (length == 0)
     return NULL;
 
-  search_name = psymtab_search_name (name);
-  cleanup = make_cleanup (xfree, search_name);
+  gdb::unique_xmalloc_ptr<char> search_name = psymtab_search_name (name);
   start = (global ?
 	   objfile->global_psymbols.list + pst->globals_offset :
 	   objfile->static_psymbols.list + pst->statics_offset);
@@ -695,7 +692,7 @@ lookup_partial_symbol (struct objfile *objfile,
 	    internal_error (__FILE__, __LINE__,
 			    _("failed internal consistency check"));
 	  if (strcmp_iw_ordered (SYMBOL_SEARCH_NAME (*center),
-				 search_name) >= 0)
+				 search_name.get ()) >= 0)
 	    {
 	      top = center;
 	    }
@@ -710,20 +707,19 @@ lookup_partial_symbol (struct objfile *objfile,
 
       /* For `case_sensitivity == case_sensitive_off' strcmp_iw_ordered will
 	 search more exactly than what matches SYMBOL_MATCHES_SEARCH_NAME.  */
-      while (top >= start && SYMBOL_MATCHES_SEARCH_NAME (*top, search_name))
+      while (top >= start && SYMBOL_MATCHES_SEARCH_NAME (*top,
+							 search_name.get ()))
 	top--;
 
       /* Fixup to have a symbol which matches SYMBOL_MATCHES_SEARCH_NAME.  */
       top++;
 
-      while (top <= real_top && SYMBOL_MATCHES_SEARCH_NAME (*top, search_name))
+      while (top <= real_top
+	     && SYMBOL_MATCHES_SEARCH_NAME (*top, search_name.get ()))
 	{
 	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*top),
 				     SYMBOL_DOMAIN (*top), domain))
-	    {
-	      do_cleanups (cleanup);
-	      return *top;
-	    }
+	    return *top;
 	  top++;
 	}
     }
@@ -737,15 +733,11 @@ lookup_partial_symbol (struct objfile *objfile,
 	{
 	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*psym),
 				     SYMBOL_DOMAIN (*psym), domain)
-	      && SYMBOL_MATCHES_SEARCH_NAME (*psym, search_name))
-	    {
-	      do_cleanups (cleanup);
-	      return *psym;
-	    }
+	      && SYMBOL_MATCHES_SEARCH_NAME (*psym, search_name.get ()))
+	    return *psym;
 	}
     }
 
-  do_cleanups (cleanup);
   return NULL;
 }
 

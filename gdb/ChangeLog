@@ -1,5 +1,10 @@
 2017-08-22  Tom Tromey  <tom@tromey.com>
 
+	* psymtab.c (psymtab_search_name): Return a unique_xmalloc_ptr.
+	(lookup_partial_symbol): Update.
+
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
 	* source.h (rewrite_source_path): Return a unique_xmalloc_ptr.
 	* source.c (rewrite_source_path): Return a unique_xmalloc_ptr.
 	(find_and_open_source, symtab_to_fullname): Update.
