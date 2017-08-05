@@ -1,3 +1,8 @@
+2017-08-05  Alan Modra  <amodra@gmail.com>
+
+	* elf32-hppa.c (elf32_hppa_set_gp): Don't require an
+	hppa_link_hash_table.
+
 2017-08-02  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* xtensa-isa.c (xtensa_isa_init): Don't update lookup table
