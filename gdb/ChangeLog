@@ -1,5 +1,12 @@
 2017-08-22  Tom Tromey  <tom@tromey.com>
 
+	* source.h (rewrite_source_path): Return a unique_xmalloc_ptr.
+	* source.c (rewrite_source_path): Return a unique_xmalloc_ptr.
+	(find_and_open_source, symtab_to_fullname): Update.
+	* psymtab.c (psymtab_to_fullname): Update.
+
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
 	* exec.c (exec_file_attach): Update.
 	* linux-thread-db.c (try_thread_db_load): Update.
 	* guile/scm-safe-call.c (gdbscm_safe_source_script): Update.

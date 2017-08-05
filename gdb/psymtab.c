@@ -1199,23 +1199,20 @@ psymtab_to_fullname (struct partial_symtab *ps)
 	close (fd);
       else
 	{
-	  char *fullname;
-	  struct cleanup *back_to;
+	  gdb::unique_xmalloc_ptr<char> fullname;
 
 	  /* rewrite_source_path would be applied by find_and_open_source, we
 	     should report the pathname where GDB tried to find the file.  */
 
 	  if (ps->dirname == NULL || IS_ABSOLUTE_PATH (ps->filename))
-	    fullname = xstrdup (ps->filename);
+	    fullname.reset (xstrdup (ps->filename));
 	  else
-	    fullname = concat (ps->dirname, SLASH_STRING,
-			       ps->filename, (char *) NULL);
+	    fullname.reset (concat (ps->dirname, SLASH_STRING,
+				    ps->filename, (char *) NULL));
 
-	  back_to = make_cleanup (xfree, fullname);
-	  ps->fullname = rewrite_source_path (fullname);
+	  ps->fullname = rewrite_source_path (fullname.get ()).release ();
 	  if (ps->fullname == NULL)
-	    ps->fullname = xstrdup (fullname);
-	  do_cleanups (back_to);
+	    ps->fullname = fullname.release ();
 	}
     }
 
