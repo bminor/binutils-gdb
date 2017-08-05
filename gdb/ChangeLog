@@ -1,3 +1,19 @@
+2017-08-09  Tom Tromey  <tom@tromey.com>
+
+	* skip.c (skiplist_entry): New constructor.
+	(skiplist_entry::enabled, skiplist_entry::function_is_regexp)
+	(skiplist_entry::file_is_glob): Now bool.
+	(skiplist_entry::file, skiplist_entry::function): Now
+	std::string.
+	(make_skip_entry): Return a unique_ptr.  Use new.
+	(free_skiplist_entry, free_skiplist_entry_cleanup)
+	(make_free_skiplist_entry_cleanup): Remove.
+	(skip_command, skip_disable_command, add_skiplist_entry)
+	(skip_form_bytes, compile_skip_regexp, skip_command, skip_info)
+	(skip_file_p, skip_gfile_p, skip_function_p, skip_rfunction_p)
+	(function_name_is_marked_for_skip): Update.
+	(skip_delete_command): Update.  Use delete.
+
 2017-08-09  Jiong Wang  <jiong.wang@arm.com>
 
 	* aarch64-linux-tdep.c: Include "auxv.h" and "elf/common.h".
