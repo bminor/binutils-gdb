@@ -1,3 +1,8 @@
+2017-08-05  Alan Modra  <amodra@gmail.com>
+
+	* elf32-hppa.c (elf32_hppa_set_gp): Don't require an
+	hppa_link_hash_table.
+
 2017-07-25  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct map_stub): Add tls_get_addr_opt_bctrl.

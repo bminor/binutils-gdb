@@ -1,3 +1,7 @@
+2017-08-05  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-unique/pr21529.d: Don't xfail hppa.
+
 2017-08-03  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/21884
