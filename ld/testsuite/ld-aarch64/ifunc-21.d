@@ -1,5 +1,5 @@
 #source: ifunc-21.s
-#ld: -shared -z nocombreloc
+#ld: -shared --hash-style=sysv -z nocombreloc
 #objdump: -d -s -j .got.plt -j .text
 #target: aarch64*-*-*
 

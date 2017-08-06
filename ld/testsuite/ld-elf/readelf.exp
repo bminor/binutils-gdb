@@ -44,7 +44,7 @@ if [check_shared_lib_support] {
 	[list \
 	    "readelf version information" \
 	    "$LFLAGS --no-dynamic-linker -e 0 --export-dynamic -T ver_def.ld\
-	     --version-script=ver_def.ver" \
+	      --hash-style=sysv --version-script=ver_def.ver" \
 	    "" "" \
 	    {ver_def.s} \
 	    [list [list readelf --version-info ver_def$DUMP.vd]] \

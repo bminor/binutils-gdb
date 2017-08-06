@@ -1,5 +1,5 @@
 #source: got-1.s
-#ld: -shared
+#ld: -shared --hash-style=sysv
 #readelf: -d -r
 
 Dynamic section at offset .* contains 9 entries:

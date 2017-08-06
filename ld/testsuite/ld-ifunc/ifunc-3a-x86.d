@@ -1,5 +1,5 @@
 #source: ifunc-3-x86.s
-#ld: -shared
+#ld: -shared --hash-style=sysv
 #objdump: -dw
 #target: x86_64-*-* i?86-*-*
 

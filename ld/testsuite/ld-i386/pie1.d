@@ -12,6 +12,6 @@ SYMBOL TABLE:
 
 Disassembly of section .text:
 
-0+129 <_start>:
- +129:	8d 80 00 e0 ff ff    	lea    -0x2000\(%eax\),%eax
+.* <_start>:
+.*:	8d 80 00 e0 ff ff    	lea    -0x2000\(%eax\),%eax
 #pass

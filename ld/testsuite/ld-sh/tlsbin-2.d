@@ -1,7 +1,7 @@
 #source: tlsbinpic.s
 #source: tlsbin.s
 #as: -little
-#ld: -EL tmpdir/tlsbin-0-dso.so
+#ld: -EL --hash-style=sysv tmpdir/tlsbin-0-dso.so
 #readelf: -Ssrl
 #target: sh*-*-linux* sh*-*-netbsd*
 
