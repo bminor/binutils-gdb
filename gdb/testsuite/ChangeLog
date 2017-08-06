@@ -1,3 +1,8 @@
+2017-11-29  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/relocate.exp: Update invalid argument test.
+	Add new tests for invalid arguments.
+
 2017-11-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* gdb.cp/psymtab-parameter.cc (func): Change return type back to long.

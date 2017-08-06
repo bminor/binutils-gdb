@@ -31,10 +31,18 @@ gdb_reinitialize_dir $srcdir/$subdir
 
 #Check that invalid options are rejected.
 foreach x {"-raednow" "readnow" "foo" "-readnow s"} {
+    set word [lindex $x [expr [llength $x]-1]]
     gdb_test "add-symbol-file ${binfile} 0 $x" \
-	"USAGE: add-symbol-file <filename> <textaddress>.*-readnow.*-s <secname> <addr>.*" \
-	"add-symbol-file: unknown option $x"
+	"Unrecognized argument \"$word\"" \
+	"add-symbol-file: unknown option $word"
 }
+
+gdb_test "add-symbol-file ${binfile} 0 -s" \
+    "Missing section name after .-s." \
+    "add-symbol-file bare -s"
+gdb_test "add-symbol-file ${binfile} 0 -s .whatever" \
+    "Missing section address after .-s." \
+    "add-symbol-file missing address"
 
 # Load the object file.
 gdb_test "add-symbol-file ${binfile} 0" \

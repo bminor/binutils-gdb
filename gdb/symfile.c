@@ -2244,8 +2244,7 @@ add_symbol_file_command (const char *args, int from_tty)
 	      expecting_sec_addr = 1;
 	    }
 	  else
-	    error (_("USAGE: add-symbol-file <filename> <textaddress>"
-		     " [-readnow] [-s <secname> <addr>]*"));
+	    error (_("Unrecognized argument \"%s\""), arg);
 	}
     }
 
@@ -2256,6 +2255,11 @@ add_symbol_file_command (const char *args, int from_tty)
   if (sect_opts.empty ())
     error (_("The address where %s has been loaded is missing"),
 	   filename.get ());
+
+  if (expecting_sec_name)
+    error (_("Missing section name after \"-s\""));
+  else if (expecting_sec_addr)
+    error (_("Missing section address after \"-s\""));
 
   /* Print the prompt for the query below.  And save the arguments into
      a sect_addr_info structure to be passed around to other
@@ -3882,11 +3886,11 @@ to execute."), &cmdlist);
 
   c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command, _("\
 Load symbols from FILE, assuming FILE has been dynamically loaded.\n\
-Usage: add-symbol-file FILE ADDR [-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR>\
- ...]\nADDR is the starting address of the file's text.\n\
-The optional arguments are section-name section-address pairs and\n\
+Usage: add-symbol-file FILE ADDR [-readnow | -s SECT-NAME SECT-ADDR]...\n\
+ADDR is the starting address of the file's text.\n\
+Each '-s' argument provides a section name and address, and\n\
 should be specified if the data and bss segments are not contiguous\n\
-with the text.  SECT is a section name to be loaded at SECT_ADDR."),
+with the text.  SECT-NAME is a section name to be loaded at SECT-ADDR."),
 	       &cmdlist);
   set_cmd_completer (c, filename_completer);
 
