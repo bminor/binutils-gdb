@@ -1,3 +1,9 @@
+2017-09-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* utils.c (abort_with_message): Don't compare gdb_stderr to NULL,
+	check current_ui instead.
+	(internal_vproblem): Likewise.
+
 2017-09-09  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* thread.c (print_thread_info_1): Remove unnecessary calls to

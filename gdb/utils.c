@@ -316,7 +316,7 @@ error_stream (const string_file &stream)
 static void ATTRIBUTE_NORETURN
 abort_with_message (const char *msg)
 {
-  if (gdb_stderr == NULL)
+  if (current_ui == NULL)
     fputs (msg, stderr);
   else
     fputs_unfiltered (msg, gdb_stderr);
@@ -478,7 +478,7 @@ internal_vproblem (struct internal_problem *problem,
   }
 
   /* Fall back to abort_with_message if gdb_stderr is not set up.  */
-  if (gdb_stderr == NULL)
+  if (current_ui == NULL)
     {
       fputs (reason, stderr);
       abort_with_message ("\n");
