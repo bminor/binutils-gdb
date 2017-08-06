@@ -395,6 +395,9 @@ main (int argc, char **argv)
   if (argc == 2 && version_printed)
     xexit (0);
 
+  if (link_info.inhibit_common_definition && !bfd_link_dll (&link_info))
+    einfo (_("%P%F: --no-define-common may not be used without -shared\n"));
+
   if (!lang_has_input_file)
     {
       if (version_printed || command_line.print_output_format)

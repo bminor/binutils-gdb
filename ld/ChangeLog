@@ -1,3 +1,19 @@
+2017-08-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21903:
+	* ld.h (command_line): Remove inhibit_common_definition.
+	* ldgram.y: Replace command_line.inhibit_common_definition with
+	link_info.inhibit_common_definition.
+	* ldlang.c (lang_common): Likewise.
+	* lexsup.c (parse_args): Likewise.
+	* ldmain.c (main): Only allow --no-define-common with -shared.
+	* testsuite/ld-elf/pr21903.s: New file.
+	* testsuite/ld-elf/pr21903a.d: Likewise.
+	* testsuite/ld-elf/pr21903b.d: Likewise.
+	* testsuite/ld-elf/pr21903c.d: Likewise.
+	* testsuite/ld-elf/pr21903d.d: Likewise.
+	* testsuite/ld-elf/pr21903e.d: Likewise.
+
 2017-08-05  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-unique/pr21529.d: Don't xfail hppa.

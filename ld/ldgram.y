@@ -339,7 +339,7 @@ ifile_p1:
 	|	FORCE_GROUP_ALLOCATION
 		{ command_line.force_group_allocation = TRUE ; }
 	|	INHIBIT_COMMON_ALLOCATION
-		{ command_line.inhibit_common_definition = TRUE ; }
+		{ link_info.inhibit_common_definition = TRUE ; }
 	|	INPUT '(' input_list ')'
 	|	GROUP
 		  { lang_enter_group (); }

@@ -4250,6 +4250,11 @@ error_free_dyn:
 
       override = FALSE;
 
+      /* Treat common symbol as undefined for --no-define-common.  */
+      if (isym->st_shndx == SHN_COMMON
+	  && info->inhibit_common_definition)
+	isym->st_shndx = SHN_UNDEF;
+
       flags = BSF_NO_FLAGS;
       sec = NULL;
       value = isym->st_value;

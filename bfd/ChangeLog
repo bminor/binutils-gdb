@@ -1,3 +1,9 @@
+2017-08-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21903:
+	* elflink.c (elf_link_add_object_symbols): Treat common symbol
+	as undefined for --no-define-common.
+
 2017-08-05  Alan Modra  <amodra@gmail.com>
 
 	* elf32-hppa.c (elf32_hppa_set_gp): Don't require an

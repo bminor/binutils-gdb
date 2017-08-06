@@ -489,6 +489,9 @@ struct bfd_link_info
   /* TRUE if generate a 1-byte NOP as suffix for x86 call instruction.  */
   unsigned int call_nop_as_suffix : 1;
 
+  /* TRUE if common symbols should be treated as undefined.  */
+  unsigned int inhibit_common_definition : 1;
+
   /* The 1-byte NOP for x86 call instruction.  */
   char call_nop_byte;
 
