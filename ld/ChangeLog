@@ -1,3 +1,17 @@
+2017-08-08  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-aarch64/ifunc-1-local.d: Run ld with --hash-style=sysv.
+	* testsuite/ld-aarch64/ifunc-2-local.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-3a.d: Likewise.
+	* testsuite/ld-frv/fdpic-pie-1.d: Likewise.
+	* testsuite/ld-frv/fdpic-pie-2.d: Likewise.
+	* testsuite/ld-frv/fdpic-pie-7.d: Likewise.
+	* testsuite/ld-frv/fdpic-pie-8.d: Likewise.
+	* testsuite/ld-arm/arm-elf.exp: Add --hash-style=sysv to "Using
+	Thumb lib by another lib" test's ld options.
+	* testsuite/ld-elf/note-3.l: Match .gnu.hash.
+	* testsuite/ld-elf/note-3.t: Add .gnu.hash output section.
+
 2017-08-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/pr21903.s (start): Removed.

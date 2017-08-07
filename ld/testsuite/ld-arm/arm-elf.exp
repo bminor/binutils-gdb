@@ -333,7 +333,9 @@ set armelftests_nonacl {
      {{objdump -fdw mixed-app-v5.d} {objdump -Rw mixed-app.r}
       {readelf -Ds mixed-app.sym}}
      "mixed-app-v5"}
-    {"Using Thumb lib by another lib" "-shared tmpdir/mixed-lib.so" "" "" {use-thumb-lib.s}
+    {"Using Thumb lib by another lib"
+     "-shared --hash-style=sysv tmpdir/mixed-lib.so" ""
+     "" {use-thumb-lib.s}
      {{readelf -Ds use-thumb-lib.sym}}
      "use-thumb-lib.so"}
     {"TLS gnu shared library inlined trampoline"
