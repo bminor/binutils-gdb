@@ -1,5 +1,10 @@
 2017-08-07  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* arch-utils.c (default_print_insn): Remove arch/mach/endian
+	assertions.
+
+2017-08-07  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* gdbarch.sh (gdbarch_info): Replace the `tdep_info' member with
 	a union of `tdep_info', `tdesc_data' and `id'.
 	* aarch64-tdep.c (aarch64_gdbarch_init): Use `info.tdesc_data'
