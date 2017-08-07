@@ -12342,7 +12342,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    get_vma:
 	      o = bfd_get_linker_section (dynobj, name);
 	    do_vma:
-	      if (o == NULL)
+	      if (o == NULL || bfd_is_abs_section (o->output_section))
 		{
 		  _bfd_error_handler
 		    (_("could not find section %s"), name);
