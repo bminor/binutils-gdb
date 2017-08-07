@@ -1,3 +1,26 @@
+2017-08-07  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* gdbarch.sh (gdbarch_info): Replace the `tdep_info' member with
+	a union of `tdep_info', `tdesc_data' and `id'.
+	* aarch64-tdep.c (aarch64_gdbarch_init): Use `info.tdesc_data'
+	rather than `info.tdep_info'.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Likewise.
+	* i386-tdep.c (i386_gdbarch_init): Likewise.
+	* mips-linux-tdep.c (mips_linux_init_abi): Likewise.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	* nds32-tdep.c (nds32_gdbarch_init): Likewise.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Likewise.
+	* ppc-linux-tdep.c (ppu2spu_sniffer): Use `info.id' rather than
+	`info.tdep_info'.
+	(ppc_linux_init_abi): Use `info.tdesc_data' rather than
+	`info.tdep_info'.
+	* sparc-tdep.c (sparc32_gdbarch_init): Likewise.
+	* spu-multiarch.c (spu_gdbarch): Use `info.id' rather than
+	`info.tdep_info'.
+	* spu-tdep.c (spu_gdbarch_init): Likewise.
+	* gdbarch.h: Regenerate.
+
 2017-08-07  Leszek Swirski  <leszeks@google.com>
 
 	* dwarf2read.c (dwarf2_string_attr): Allow DW_FORM_GNU_strp_alt.
