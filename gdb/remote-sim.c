@@ -562,7 +562,6 @@ gdbsim_kill (struct target_ops *ops)
 static void
 gdbsim_load (struct target_ops *self, const char *args, int fromtty)
 {
-  char **argv;
   const char *prog;
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NEEDED);
@@ -727,8 +726,8 @@ gdbsim_open (const char *args, int from_tty)
       strcat (arg_buf, args);
     }
 
-  gdb_argv args (arg_buf);
-  sim_argv = args.get ();
+  gdb_argv argv (arg_buf);
+  sim_argv = argv.get ();
 
   init_callbacks ();
   gdbsim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback, exec_bfd, sim_argv);
@@ -739,7 +738,7 @@ gdbsim_open (const char *args, int from_tty)
       error (_("unable to create simulator instance"));
     }
 
-  args.release ();
+  argv.release ();
 
   /* Reset the pid numberings for this batch of sim instances.  */
   next_pid = INITIAL_PID;

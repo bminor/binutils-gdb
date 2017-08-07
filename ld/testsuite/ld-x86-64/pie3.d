@@ -1,5 +1,5 @@
 #as: --64
-#ld: -pie -melf_x86_64
+#ld: -pie -melf_x86_64 --hash-style=sysv
 #objdump: -dw
 #notarget: x86_64-*-nacl*
 

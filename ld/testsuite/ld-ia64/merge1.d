@@ -1,6 +1,6 @@
 #source: merge1.s
 #as: -x
-#ld: -shared
+#ld: -shared --hash-style=sysv
 #objdump: -d
 
 #...

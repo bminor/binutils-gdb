@@ -4254,6 +4254,12 @@ error_free_dyn:
       sec = NULL;
       value = isym->st_value;
       common = bed->common_definition (isym);
+      if (common && info->inhibit_common_definition)
+	{
+	  /* Treat common symbol as undefined for --no-define-common.  */
+	  isym->st_shndx = SHN_UNDEF;
+	  common = FALSE;
+	}
       discarded = FALSE;
 
       bind = ELF_ST_BIND (isym->st_info);
@@ -12337,7 +12343,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    get_vma:
 	      o = bfd_get_linker_section (dynobj, name);
 	    do_vma:
-	      if (o == NULL)
+	      if (o == NULL || bfd_is_abs_section (o->output_section))
 		{
 		  _bfd_error_handler
 		    (_("could not find section %s"), name);

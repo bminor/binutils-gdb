@@ -1,3 +1,53 @@
+2017-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (elf_link_add_object_symbols): Move common symbol
+	check after bed->common_definition.
+
+2017-08-07  Alan Modra  <amodra@gmail.com>
+
+	PR 21910
+	* elflink.c (bfd_elf_final_link): Don't segfault when sections
+	needed to define various dynamic tags have been discarded.
+
+2017-08-07  Nick Clifton  <nickc@redhat.com>
+
+	PR 21884
+	* elf32-i386.c (elf_i386_link_setup_gnu_properties): If the dynobj
+	has not been set then use the bfd returned by
+	_bfd_elf_link_setup_gnu_properties.  If that is null then search
+	through all the input bfds selecting the first normal, ELF format
+	one.
+	* elf64-x86-64.c (elf_x86_64_link_setup_gnu_properties): Likewise.
+
+2017-08-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_link_hash_entry): Change tls_get_addr
+	to 1 bit.
+	(elf_i386_link_hash_newfunc): Initialize tls_get_addr to 0.
+	(elf_i386_check_tls_transition): Check tls_get_addr directly.
+	(elf_i386_convert_load_reloc): Update tls_get_addr check.
+	(elf_i386_link_check_relocs): New function.
+	(bfd_elf32_bfd_link_check_relocs): New.
+	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Change tls_get_addr
+	to 1 bit.
+	(elf_x86_64_link_hash_newfunc): Initialize tls_get_addr to 0.
+	(elf_x86_64_check_tls_transition): Check tls_get_addr directly.
+	(elf_x86_64_convert_load_reloc): Update tls_get_addr check.
+	(elf_x86_64_link_check_relocs): New function.
+	(bfd_elf64_bfd_link_check_relocs): New.
+	(bfd_elf32_bfd_link_check_relocs): Likewise.
+
+2017-08-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21903:
+	* elflink.c (elf_link_add_object_symbols): Treat common symbol
+	as undefined for --no-define-common.
+
+2017-08-05  Alan Modra  <amodra@gmail.com>
+
+	* elf32-hppa.c (elf32_hppa_set_gp): Don't require an
+	hppa_link_hash_table.
+
 2017-08-02  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* xtensa-isa.c (xtensa_isa_init): Don't update lookup table

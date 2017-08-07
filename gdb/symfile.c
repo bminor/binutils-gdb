@@ -1714,32 +1714,28 @@ symfile_bfd_open (const char *name)
 
   if (!is_target_filename (name))
     {
-      char *expanded_name, *absolute_name;
+      char *absolute_name;
 
-      expanded_name = tilde_expand (name); /* Returns 1st new malloc'd copy.  */
+      gdb::unique_xmalloc_ptr<char> expanded_name (tilde_expand (name));
 
       /* Look down path for it, allocate 2nd new malloc'd copy.  */
       desc = openp (getenv ("PATH"),
 		    OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH,
-		    expanded_name, O_RDONLY | O_BINARY, &absolute_name);
+		    expanded_name.get (), O_RDONLY | O_BINARY, &absolute_name);
 #if defined(__GO32__) || defined(_WIN32) || defined (__CYGWIN__)
       if (desc < 0)
 	{
-	  char *exename = (char *) alloca (strlen (expanded_name) + 5);
+	  char *exename = (char *) alloca (strlen (expanded_name.get ()) + 5);
 
-	  strcat (strcpy (exename, expanded_name), ".exe");
+	  strcat (strcpy (exename, expanded_name.get ()), ".exe");
 	  desc = openp (getenv ("PATH"),
 			OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH,
 			exename, O_RDONLY | O_BINARY, &absolute_name);
 	}
 #endif
       if (desc < 0)
-	{
-	  make_cleanup (xfree, expanded_name);
-	  perror_with_name (expanded_name);
-	}
+	perror_with_name (expanded_name.get ());
 
-      xfree (expanded_name);
       make_cleanup (xfree, absolute_name);
       name = absolute_name;
     }
@@ -2055,7 +2051,6 @@ static void print_transfer_performance (struct ui_file *stream,
 void
 generic_load (const char *args, int from_tty)
 {
-  char *filename;
   struct cleanup *old_cleanups;
   struct load_section_data cbdata;
   struct load_progress_data total_progress;
@@ -2074,8 +2069,7 @@ generic_load (const char *args, int from_tty)
 
   gdb_argv argv (args);
 
-  filename = tilde_expand (argv[0]);
-  make_cleanup (xfree, filename);
+  gdb::unique_xmalloc_ptr<char> filename (tilde_expand (argv[0]));
 
   if (argv[1] != NULL)
     {
@@ -2093,16 +2087,13 @@ generic_load (const char *args, int from_tty)
     }
 
   /* Open the file for loading.  */
-  gdb_bfd_ref_ptr loadfile_bfd (gdb_bfd_open (filename, gnutarget, -1));
+  gdb_bfd_ref_ptr loadfile_bfd (gdb_bfd_open (filename.get (), gnutarget, -1));
   if (loadfile_bfd == NULL)
-    {
-      perror_with_name (filename);
-      return;
-    }
+    perror_with_name (filename.get ());
 
   if (!bfd_check_format (loadfile_bfd.get (), bfd_object))
     {
-      error (_("\"%s\" is not an object file: %s"), filename,
+      error (_("\"%s\" is not an object file: %s"), filename.get (),
 	     bfd_errmsg (bfd_get_error ()));
     }
 
@@ -2212,7 +2203,7 @@ static void
 add_symbol_file_command (char *args, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
-  char *filename = NULL;
+  gdb::unique_xmalloc_ptr<char> filename;
   char *arg;
   int section_index = 0;
   int argcnt = 0;
@@ -2254,8 +2245,7 @@ add_symbol_file_command (char *args, int from_tty)
       if (argcnt == 0)
 	{
 	  /* The first argument is the file name.  */
-	  filename = tilde_expand (arg);
-	  make_cleanup (xfree, filename);
+	  filename.reset (tilde_expand (arg));
 	}
       else if (argcnt == 1)
 	{
@@ -2312,7 +2302,8 @@ add_symbol_file_command (char *args, int from_tty)
      loaded.  Abort now if this address hasn't been provided by the
      user.  */
   if (section_index < 1)
-    error (_("The address where %s has been loaded is missing"), filename);
+    error (_("The address where %s has been loaded is missing"),
+	   filename.get ());
 
   /* Print the prompt for the query below.  And save the arguments into
      a sect_addr_info structure to be passed around to other
@@ -2320,7 +2311,8 @@ add_symbol_file_command (char *args, int from_tty)
      statements because hex_string returns a local static
      string.  */
 
-  printf_unfiltered (_("add symbol table from file \"%s\" at\n"), filename);
+  printf_unfiltered (_("add symbol table from file \"%s\" at\n"),
+		     filename.get ());
   section_addrs = alloc_section_addr_info (section_index);
   make_cleanup (xfree, section_addrs);
   for (i = 0; i < section_index; i++)
@@ -2350,7 +2342,7 @@ add_symbol_file_command (char *args, int from_tty)
   if (from_tty && (!query ("%s", "")))
     error (_("Not confirmed."));
 
-  objf = symbol_file_add (filename, add_flags, section_addrs, flags);
+  objf = symbol_file_add (filename.get (), add_flags, section_addrs, flags);
 
   add_target_sections_of_objfile (objf);
 
@@ -2367,15 +2359,12 @@ static void
 remove_symbol_file_command (char *args, int from_tty)
 {
   struct objfile *objf = NULL;
-  struct cleanup *my_cleanups;
   struct program_space *pspace = current_program_space;
 
   dont_repeat ();
 
   if (args == NULL)
     error (_("remove-symbol-file: no symbol file provided"));
-
-  my_cleanups = make_cleanup (null_cleanup, NULL);
 
   gdb_argv argv (args);
 
@@ -2403,20 +2392,18 @@ remove_symbol_file_command (char *args, int from_tty)
   else if (argv[0] != NULL)
     {
       /* Interpret the current argument as a file name.  */
-      char *filename;
 
       if (argv[1] != NULL)
 	error (_("Junk after %s"), argv[0]);
 
-      filename = tilde_expand (argv[0]);
-      make_cleanup (xfree, filename);
+      gdb::unique_xmalloc_ptr<char> filename (tilde_expand (argv[0]));
 
       ALL_OBJFILES (objf)
 	{
 	  if ((objf->flags & OBJF_USERLOADED) != 0
 	      && (objf->flags & OBJF_SHARED) != 0
 	      && objf->pspace == pspace
-	      && filename_cmp (filename, objfile_name (objf)) == 0)
+	      && filename_cmp (filename.get (), objfile_name (objf)) == 0)
 	    break;
 	}
     }
@@ -2431,8 +2418,6 @@ remove_symbol_file_command (char *args, int from_tty)
 
   free_objfile (objf);
   clear_symtab_users (0);
-
-  do_cleanups (my_cleanups);
 }
 
 /* Re-read symbols if a symbol-file has changed.  */

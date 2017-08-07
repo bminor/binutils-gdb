@@ -1,6 +1,6 @@
 #source: ibt-plt-2.s
 #as: --x32
-#ld: -shared -m elf32_x86_64 -z ibt
+#ld: -shared -m elf32_x86_64 -z ibt --hash-style=sysv
 #objdump: -dw
 
 .*: +file format .*

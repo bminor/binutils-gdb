@@ -1,3 +1,92 @@
+2017-08-07  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR breakpoints/21886
+	* mem-break.c (default_memory_insert_breakpoint): Use
+	`->placed_address' rather than `->reqstd_address' for the
+	breakpoint location.
+
+2017-08-07  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* arch-utils.c (default_print_insn): Remove arch/mach/endian
+	assertions.
+
+2017-08-07  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* gdbarch.sh (gdbarch_info): Replace the `tdep_info' member with
+	a union of `tdep_info', `tdesc_data' and `id'.
+	* aarch64-tdep.c (aarch64_gdbarch_init): Use `info.tdesc_data'
+	rather than `info.tdep_info'.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Likewise.
+	* i386-tdep.c (i386_gdbarch_init): Likewise.
+	* mips-linux-tdep.c (mips_linux_init_abi): Likewise.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	* nds32-tdep.c (nds32_gdbarch_init): Likewise.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Likewise.
+	* ppc-linux-tdep.c (ppu2spu_sniffer): Use `info.id' rather than
+	`info.tdep_info'.
+	(ppc_linux_init_abi): Use `info.tdesc_data' rather than
+	`info.tdep_info'.
+	* sparc-tdep.c (sparc32_gdbarch_init): Likewise.
+	* spu-multiarch.c (spu_gdbarch): Use `info.id' rather than
+	`info.tdep_info'.
+	* spu-tdep.c (spu_gdbarch_init): Likewise.
+	* gdbarch.h: Regenerate.
+
+2017-08-07  Leszek Swirski  <leszeks@google.com>
+
+	PR symtab/20899
+	* dwarf2read.c (dwarf2_string_attr): Allow DW_FORM_GNU_strp_alt.
+
+2017-08-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote-sim.c (gdbsim_load): Remove char **argv local variable.
+	(gdbsim_open): Rename gdb_argv args object to argv.
+
+2017-08-05  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile-object-load.c (compile_object_load): Use
+	gdb::unique_xmalloc_ptr.
+	* cli/cli-dump.c (scan_filename): Rename from
+	scan_filename_with_cleanup.  Change return type.
+	(scan_expression): Rename from scan_expression_with_cleanup.
+	Change return type.
+	(dump_memory_to_file, dump_value_to_file, restore_command):
+	Use gdb::unique_xmalloc_ptr.  Update.
+	* cli/cli-cmds.c (find_and_open_script): Use
+	gdb::unique_xmalloc_ptr.
+	* tracefile-tfile.c (tfile_open): Use gdb::unique_xmalloc_ptr.
+	* symmisc.c (maintenance_print_symbols)
+	(maintenance_print_msymbols): Use gdb::unique_xmalloc_ptr.
+	* symfile.c (symfile_bfd_open, generic_load)
+	(add_symbol_file_command, remove_symbol_file_command): Use
+	gdb::unique_xmalloc_ptr.
+	* source.c (openp): Use gdb::unique_xmalloc_ptr.
+	* psymtab.c (maintenance_print_psymbols): Use
+	gdb::unique_xmalloc_ptr.
+	* corelow.c (core_open): Use gdb::unique_xmalloc_ptr.
+	* breakpoint.c (save_breakpoints): Use gdb::unique_xmalloc_ptr.
+	* solib.c (solib_map_sections): Use gdb::unique_xmalloc_ptr.
+	(reload_shared_libraries_1): Likewise.
+
+2017-08-05  Tom Tromey  <tom@tromey.com>
+
+	* rust-exp.y (rust_op_ptr, set_field): Remove typedefs.
+	(rust_op_vector, rust_set_vector): New typedefs.
+	(current_parser): New global.
+	(work_obstack): Change to pointer type.  Update all users.
+	(rust_ast, pstate): Remove globals.
+	(struct rust_parser): New.
+	(%union) <params, field_inits>: Change type.
+	(start, tuple_expr, unit_expr, struct_expr_list, literal)
+	(field_expr, expr_list, maybe_expr_list, type_list): Update.
+	(ast_call_ish, ast_path, ast_function_type, ast_tuple_type)
+	(convert_params_to_types, convert_params_to_expression): Change
+	type of "params".
+	(ast_string): Change type of "fields".
+	(rust_parse): Make a rust_parser.  Remove cleanups.
+	(rust_lex_tests): Make and install an auto_obstack.
+
 2017-08-04  Yao Qi  <yao.qi@linaro.org>
 
 	* configure.srv (ipa_x32_linux_regobj): New.

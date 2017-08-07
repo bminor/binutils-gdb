@@ -6,7 +6,7 @@
 #source: tls-z.s
 #source: tls-hx1x2.s
 #as: --pic --no-underscore --em=criself
-#ld: --shared -m crislinux
+#ld: --shared -m crislinux --hash-style=sysv
 #objdump: -s -t -R -p -T
 
 # Check that we have proper NPTL/TLS markings and GOT for two

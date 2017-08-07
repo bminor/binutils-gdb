@@ -855,20 +855,18 @@ openp (const char *path, int opts, const char *string,
 	{
 	 /* See whether we need to expand the tilde.  */
 	  int newlen;
-	  char *tilde_expanded;
 
-	  tilde_expanded  = tilde_expand (dir);
+	  gdb::unique_xmalloc_ptr<char> tilde_expanded (tilde_expand (dir));
 
 	  /* First, realloc the filename buffer if too short.  */
-	  len = strlen (tilde_expanded);
+	  len = strlen (tilde_expanded.get ());
 	  newlen = len + strlen (string) + 2;
 	  if (newlen > alloclen)
 	    {
 	      alloclen = newlen;
 	      filename = (char *) alloca (alloclen);
 	    }
-	  strcpy (filename, tilde_expanded);
-	  xfree (tilde_expanded);
+	  strcpy (filename, tilde_expanded.get ());
 	}
       else
 	{

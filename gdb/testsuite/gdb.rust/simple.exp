@@ -197,14 +197,14 @@ gdb_test "print 5.." " = .*::ops::RangeFrom.* \\{start: 5\\}"
 gdb_test "print .." " = .*::ops::RangeFull"
 
 gdb_test "print str_some" \
-    " = core::option::Option<collections::string::String>::Some\\(collections::string::String .*"
-gdb_test "print str_none" " = core::option::Option<collections::string::String>::None"
+    " = core::option::Option<\[a-z\]+::string::String>::Some\\(\[a-z\]+::string::String .*"
+gdb_test "print str_none" " = core::option::Option<\[a-z\]+::string::String>::None"
 gdb_test "print int_some" " = core::option::Option::Some\\(1\\)"
 gdb_test "print int_none" " = core::option::Option::None"
 gdb_test "print box_some" " = core::option::Option<\[a-z:\]*Box<u8>>::Some\\(.*\\)"
 gdb_test "print box_none" " = core::option::Option<\[a-z:\]*Box<u8>>::None"
 gdb_test "print custom_some" \
-    " = simple::NonZeroOptimized::Value\\(collections::string::String .*"
+    " = simple::NonZeroOptimized::Value\\(\[a-z\]+::string::String .*"
 gdb_test "print custom_none" " = simple::NonZeroOptimized::Empty"
 
 proc test_one_slice {svar length base range} {

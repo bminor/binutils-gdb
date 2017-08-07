@@ -6260,7 +6260,7 @@ lang_check (void)
 static void
 lang_common (void)
 {
-  if (command_line.inhibit_common_definition)
+  if (link_info.inhibit_common_definition)
     return;
   if (bfd_link_relocatable (&link_info)
       && !command_line.force_common_definition)

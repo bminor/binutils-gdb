@@ -516,14 +516,11 @@ show_script_ext_mode (struct ui_file *file, int from_tty,
 gdb::optional<open_script>
 find_and_open_script (const char *script_file, int search_path)
 {
-  char *file;
   int fd;
-  struct cleanup *old_cleanups;
   int search_flags = OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH;
   gdb::optional<open_script> opened;
 
-  file = tilde_expand (script_file);
-  old_cleanups = make_cleanup (xfree, file);
+  gdb::unique_xmalloc_ptr<char> file (tilde_expand (script_file));
 
   if (search_path)
     search_flags |= OPF_SEARCH_IN_PATH;
@@ -532,18 +529,11 @@ find_and_open_script (const char *script_file, int search_path)
      files.  Put the full location in *FULL_PATHP.  */
   char *temp_path;
   fd = openp (source_path, search_flags,
-	      file, O_RDONLY, &temp_path);
+	      file.get (), O_RDONLY, &temp_path);
   gdb::unique_xmalloc_ptr<char> full_path (temp_path);
 
   if (fd == -1)
-    {
-      int save_errno = errno;
-      do_cleanups (old_cleanups);
-      errno = save_errno;
-      return opened;
-    }
-
-  do_cleanups (old_cleanups);
+    return opened;
 
   FILE *result = fdopen (fd, FOPEN_RT);
   if (result == NULL)

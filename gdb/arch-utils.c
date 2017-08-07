@@ -971,13 +971,6 @@ default_print_insn (bfd_vma memaddr, disassemble_info *info)
 {
   disassembler_ftype disassemble_fn;
 
-  if (exec_bfd != NULL)
-    {
-      gdb_assert (info->arch == bfd_get_arch (exec_bfd));
-      gdb_assert (info->endian == (bfd_big_endian (exec_bfd)
-				   ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE));
-      gdb_assert (info->mach == bfd_get_mach (exec_bfd));
-    }
   disassemble_fn = disassembler (info->arch, info->endian == BFD_ENDIAN_BIG,
 				 info->mach, exec_bfd);
 

@@ -3090,13 +3090,8 @@ elf32_hppa_set_gp (bfd *abfd, struct bfd_link_info *info)
   struct bfd_link_hash_entry *h;
   asection *sec = NULL;
   bfd_vma gp_val = 0;
-  struct elf32_hppa_link_hash_table *htab;
 
-  htab = hppa_link_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  h = bfd_link_hash_lookup (&htab->etab.root, "$global$", FALSE, FALSE, FALSE);
+  h = bfd_link_hash_lookup (info->hash, "$global$", FALSE, FALSE, FALSE);
 
   if (h != NULL
       && (h->type == bfd_link_hash_defined
@@ -3159,10 +3154,13 @@ elf32_hppa_set_gp (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (sec != NULL && sec->output_section != NULL)
-    gp_val += sec->output_section->vma + sec->output_offset;
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    {
+      if (sec != NULL && sec->output_section != NULL)
+	gp_val += sec->output_section->vma + sec->output_offset;
 
-  elf_gp (abfd) = gp_val;
+      elf_gp (abfd) = gp_val;
+    }
   return TRUE;
 }
 

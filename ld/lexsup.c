@@ -908,7 +908,7 @@ parse_args (unsigned argc, char **argv)
 	  input_flags.dynamic = FALSE;
 	  break;
 	case OPTION_NO_DEFINE_COMMON:
-	  command_line.inhibit_common_definition = TRUE;
+	  link_info.inhibit_common_definition = TRUE;
 	  break;
 	case OPTION_NO_DEMANGLE:
 	  demangling = FALSE;

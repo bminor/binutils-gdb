@@ -1,7 +1,7 @@
 #name: PR ld/21038 (.plt.got, -z now)
 #source: pr21038a.s
 #as: --64
-#ld: -z now -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info
+#ld: -z now -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info --hash-style=sysv
 #objdump: -dw -Wf
 
 .*: +file format .*

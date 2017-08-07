@@ -1474,7 +1474,21 @@ struct gdbarch_info
   bfd *abfd;
 
   /* Use default: NULL (ZERO).  */
-  void *tdep_info;
+  union
+    {
+      /* Architecture-specific information.  The generic form for targets
+	 that have extra requirements.  */
+      struct gdbarch_tdep_info *tdep_info;
+
+      /* Architecture-specific target description data.  Numerous targets
+	 need only this, so give them an easy way to hold it.  */
+      struct tdesc_arch_data *tdesc_data;
+
+      /* SPU file system ID.  This is a single integer, so using the
+	 generic form would only complicate code.  Other targets may
+	 reuse this member if suitable.  */
+      int *id;
+    };
 
   /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
   enum gdb_osabi osabi;
