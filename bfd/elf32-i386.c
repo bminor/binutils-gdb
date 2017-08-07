@@ -6886,20 +6886,29 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
      set it in check_relocs.  */
   if (dynobj == NULL)
     {
-      bfd *abfd;
+      if (pbfd != NULL)
+	{
+	  htab->elf.dynobj = pbfd;
+	  dynobj = pbfd;
+	}
+      else
+	{
+	  bfd *abfd;
 
-      /* Find a normal input file to hold linker created
-	 sections.  */
-      for (abfd = info->input_bfds;
-	   abfd != NULL;
-	   abfd = abfd->link.next)
-	if ((abfd->flags
-	     & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
-	  {
-	    htab->elf.dynobj = abfd;
-	    dynobj = abfd;
-	    break;
-	  }
+	  /* Find a normal input file to hold linker created
+	     sections.  */
+	  for (abfd = info->input_bfds;
+	       abfd != NULL;
+	       abfd = abfd->link.next)
+	    if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+		&& (abfd->flags
+		    & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
+	      {
+		htab->elf.dynobj = abfd;
+		dynobj = abfd;
+		break;
+	      }
+	}
     }
 
   /* Even when lazy binding is disabled by "-z now", the PLT0 entry may
@@ -6991,7 +7000,7 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
     return pbfd;
 
   /* Since create_dynamic_sections isn't always called, but GOT
-     relocations need GOT relocations, create them here so that we
+     relocations need GOT sections, create them here so that we
      don't need to do it in check_relocs.  */
   if (htab->elf.sgot == NULL
       && !_bfd_elf_create_got_section (dynobj, info))
