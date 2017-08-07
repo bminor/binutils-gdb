@@ -1,3 +1,9 @@
+2017-08-07  Alan Modra  <amodra@gmail.com>
+
+	PR 21910
+	* elflink.c (bfd_elf_final_link): Don't segfault when sections
+	needed to define various dynamic tags have been discarded.
+
 2017-08-05  Alan Modra  <amodra@gmail.com>
 
 	* elf32-hppa.c (elf32_hppa_set_gp): Don't require an
