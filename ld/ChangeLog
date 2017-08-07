@@ -1,3 +1,11 @@
+2017-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr21903.s (start): Removed.
+	(_start): Likewise.
+	(__start): Likewise.
+	(main): Likewise.
+	(bar): New.
+
 2017-08-07  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-alpha/alpha.exp: Add --hash-style=sysv to various

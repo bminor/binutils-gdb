@@ -4250,15 +4250,16 @@ error_free_dyn:
 
       override = FALSE;
 
-      /* Treat common symbol as undefined for --no-define-common.  */
-      if (isym->st_shndx == SHN_COMMON
-	  && info->inhibit_common_definition)
-	isym->st_shndx = SHN_UNDEF;
-
       flags = BSF_NO_FLAGS;
       sec = NULL;
       value = isym->st_value;
       common = bed->common_definition (isym);
+      if (common && info->inhibit_common_definition)
+	{
+	  /* Treat common symbol as undefined for --no-define-common.  */
+	  isym->st_shndx = SHN_UNDEF;
+	  common = FALSE;
+	}
       discarded = FALSE;
 
       bind = ELF_ST_BIND (isym->st_info);

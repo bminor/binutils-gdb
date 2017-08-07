@@ -1,3 +1,8 @@
+2017-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (elf_link_add_object_symbols): Move common symbol
+	check after bed->common_definition.
+
 2017-08-07  Alan Modra  <amodra@gmail.com>
 
 	PR 21910
