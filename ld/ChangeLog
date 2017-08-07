@@ -1,3 +1,12 @@
+2017-08-08  Romain Geissler  <romain.geissler@gmail.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Add --enable-default-hash-style option.
+	* ldmain.c (main): Set link_info.emit_hash to DEFAULT_EMIT_SYSV_HASH.
+	Set link_info.emit_gnu_hash to DEFAULT_EMIT_GNU_HASH.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2017-08-08  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-aarch64/ifunc-1-local.d: Run ld with --hash-style=sysv.

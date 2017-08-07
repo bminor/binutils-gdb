@@ -1,3 +1,11 @@
+2017-08-08  Romain Geissler  <romain.geissler@gmail.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Add --enable-default-hash-style option.
+	* options.h (hash_style): Use DEFAULT_HASH_STYLE as default value.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2017-08-03  James Clarke  <jrtc27@jrtc27.com>
 
 	* options.h (General_options): Set a non-NULL second help string
