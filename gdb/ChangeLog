@@ -1,3 +1,7 @@
+2017-08-07  Leszek Swirski  <leszeks@google.com>
+
+	* dwarf2read.c (dwarf2_string_attr): Allow DW_FORM_GNU_strp_alt.
+
 2017-08-07  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* remote-sim.c (gdbsim_load): Remove char **argv local variable.
