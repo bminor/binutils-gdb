@@ -1,3 +1,8 @@
+2017-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* disassemble.c (disassembler): Mark big and mach with
+	ATTRIBUTE_UNUSED.
+
 2017-08-07  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* disassemble.c (disassembler): Remove arch/mach/endian

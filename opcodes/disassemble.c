@@ -110,7 +110,9 @@
 #endif
 
 disassembler_ftype
-disassembler (enum bfd_architecture a, bfd_boolean big, unsigned long mach,
+disassembler (enum bfd_architecture a,
+	      bfd_boolean big ATTRIBUTE_UNUSED,
+	      unsigned long mach ATTRIBUTE_UNUSED,
 	      bfd *abfd ATTRIBUTE_UNUSED)
 {
   disassembler_ftype disassemble;
