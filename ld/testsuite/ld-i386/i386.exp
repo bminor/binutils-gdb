@@ -434,6 +434,7 @@ run_dump_test "property-x86-shstk3a"
 run_dump_test "property-x86-shstk3b"
 run_dump_test "property-x86-shstk4"
 run_dump_test "property-x86-shstk5"
+run_dump_test "pr21884"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
