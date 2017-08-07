@@ -1,3 +1,8 @@
+2017-08-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote-sim.c (gdbsim_load): Remove char **argv local variable.
+	(gdbsim_open): Rename gdb_argv args object to argv.
+
 2017-08-05  Tom Tromey  <tom@tromey.com>
 
 	* compile/compile-object-load.c (compile_object_load): Use
