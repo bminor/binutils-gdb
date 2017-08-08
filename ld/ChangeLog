@@ -1,3 +1,10 @@
+2017-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21923
+	* configure.ac (TESTBFDLIB): Replace --rpath with -Wl,--rpath
+	for --disable-static.
+	* configure: Regenerated.
+
 2017-08-08  Romain Geissler  <romain.geissler@gmail.com>
 	    Alan Modra  <amodra@gmail.com>
 
