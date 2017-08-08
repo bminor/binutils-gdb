@@ -896,32 +896,39 @@ _bfd_elf_setup_sections (bfd *abfd)
       n_elt = shdr->sh_size / 4;
 
       while (--n_elt != 0)
-	if ((++idx)->shdr->bfd_section)
-	  elf_sec_group (idx->shdr->bfd_section) = shdr->bfd_section;
-	else if (idx->shdr->sh_type == SHT_RELA
-		 || idx->shdr->sh_type == SHT_REL)
-	  /* We won't include relocation sections in section groups in
-	     output object files. We adjust the group section size here
-	     so that relocatable link will work correctly when
-	     relocation sections are in section group in input object
-	     files.  */
-	  shdr->bfd_section->size -= 4;
-	else
-	  {
-	    /* There are some unknown sections in the group.  */
-	    _bfd_error_handler
-	      /* xgettext:c-format */
-	      (_("%B: unknown type [%#x] section `%s' in group [%A]"),
-	       abfd,
-	       idx->shdr->sh_type,
-	       bfd_elf_string_from_elf_section (abfd,
-						(elf_elfheader (abfd)
-						 ->e_shstrndx),
-						idx->shdr->sh_name),
-	       shdr->bfd_section);
-	    result = FALSE;
-	  }
+	{
+	  ++ idx;
+
+	  if (idx->shdr == NULL)
+	    continue;
+	  else if (idx->shdr->bfd_section)
+	    elf_sec_group (idx->shdr->bfd_section) = shdr->bfd_section;
+	  else if (idx->shdr->sh_type == SHT_RELA
+		   || idx->shdr->sh_type == SHT_REL)
+	    /* We won't include relocation sections in section groups in
+	       output object files. We adjust the group section size here
+	       so that relocatable link will work correctly when
+	       relocation sections are in section group in input object
+	       files.  */
+	    shdr->bfd_section->size -= 4;
+	  else
+	    {
+	      /* There are some unknown sections in the group.  */
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%B: unknown type [%#x] section `%s' in group [%A]"),
+		 abfd,
+		 idx->shdr->sh_type,
+		 bfd_elf_string_from_elf_section (abfd,
+						  (elf_elfheader (abfd)
+						   ->e_shstrndx),
+						  idx->shdr->sh_name),
+		 shdr->bfd_section);
+	      result = FALSE;
+	    }
+	}
     }
+
   return result;
 }
 
@@ -8954,7 +8961,7 @@ elfcore_maybe_make_sect (bfd *abfd, char *name, asection *sect)
      such a section already exists.
    - For the multi-threaded case, a section named "NAME/PID", where
      PID is elfcore_make_pid (abfd).
-   Both pseudosections have identical contents. */
+   Both pseudosections have identical contents.  */
 bfd_boolean
 _bfd_elfcore_make_pseudosection (bfd *abfd,
 				 char *name,
@@ -9883,57 +9890,67 @@ elfcore_grok_freebsd_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
   size_t offset;
   size_t size;
+  size_t min_size;
 
-  /* Check for version 1 in pr_version. */
-  if (bfd_h_get_32 (abfd, (bfd_byte *) note->descdata) != 1)
-    return FALSE;
-  offset = 4;
-
-  /* Skip over pr_statussz.  */
+  /* Compute offset of pr_getregsz, skipping over pr_statussz.
+     Also compute minimum size of this note.  */
   switch (elf_elfheader (abfd)->e_ident[EI_CLASS])
     {
     case ELFCLASS32:
-      offset += 4;
+      offset = 4 + 4;
+      min_size = offset + (4 * 2) + 4 + 4 + 4;
       break;
 
     case ELFCLASS64:
-      offset += 4;	/* Padding before pr_statussz. */
-      offset += 8;
+      offset = 4 + 4 + 8;	/* Includes padding before pr_statussz.  */
+      min_size = offset + (8 * 2) + 4 + 4 + 4 + 4;
       break;
 
     default:
       return FALSE;
     }
 
+  if (note->descsz < min_size)
+    return FALSE;
+
+  /* Check for version 1 in pr_version.  */
+  if (bfd_h_get_32 (abfd, (bfd_byte *) note->descdata) != 1)
+    return FALSE;
+
   /* Extract size of pr_reg from pr_gregsetsz.  */
+  /* Skip over pr_gregsetsz and pr_fpregsetsz.  */
   if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS32)
-    size = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + offset);
+    {
+      size = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + offset);
+      offset += 4 * 2;
+    }
   else
-    size = bfd_h_get_64 (abfd, (bfd_byte *) note->descdata + offset);
+    {
+      size = bfd_h_get_64 (abfd, (bfd_byte *) note->descdata + offset);
+      offset += 8 * 2;
+    }
 
-  /* Skip over pr_gregsetsz and pr_fpregsetsz. */
-  if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS32)
-    offset += 4 * 2;
-  else
-    offset += 8 * 2;
-
-  /* Skip over pr_osreldate. */
+  /* Skip over pr_osreldate.  */
   offset += 4;
 
-  /* Read signal from pr_cursig. */
+  /* Read signal from pr_cursig.  */
   if (elf_tdata (abfd)->core->signal == 0)
     elf_tdata (abfd)->core->signal
       = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + offset);
   offset += 4;
 
-  /* Read TID from pr_pid. */
+  /* Read TID from pr_pid.  */
   elf_tdata (abfd)->core->lwpid
       = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + offset);
   offset += 4;
 
-  /* Padding before pr_reg. */
+  /* Padding before pr_reg.  */
   if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64)
     offset += 4;
+
+  /* Make sure that there is enough data remaining in the note.  */
+  if ((note->descsz - offset) < size)
+    return FALSE;
 
   /* Make a ".reg/999" section and a ".reg" section.  */
   return _bfd_elfcore_make_pseudosection (abfd, ".reg",
