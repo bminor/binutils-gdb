@@ -436,7 +436,7 @@ EMULATION_LIBPATH=$all_libpath
 AC_SUBST(EMULATION_LIBPATH)
 
 if test x${enable_static} = xno; then
-  TESTBFDLIB="--rpath ../bfd/.libs ../bfd/.libs/libbfd.so"
+  TESTBFDLIB="-Wl,--rpath,../bfd/.libs ../bfd/.libs/libbfd.so"
 else
   TESTBFDLIB="../bfd/.libs/libbfd.a"
 fi
