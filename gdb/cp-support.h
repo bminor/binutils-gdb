@@ -150,8 +150,8 @@ struct type *cp_find_type_baseclass_by_name (struct type *parent_type,
 extern std::unique_ptr<demangle_parse_info> cp_demangled_name_to_comp
      (const char *demangled_name, const char **errmsg);
 
-extern char *cp_comp_to_string (struct demangle_component *result,
-				int estimated_len);
+extern gdb::unique_xmalloc_ptr<char> cp_comp_to_string
+  (struct demangle_component *result, int estimated_len);
 
 extern void cp_merge_demangle_parse_infos (struct demangle_parse_info *,
 					   struct demangle_component *,

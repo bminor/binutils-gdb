@@ -1963,13 +1963,14 @@ allocate_info (void)
    cplus_demangle_print does not, specifically the global destructor
    and constructor labels.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 cp_comp_to_string (struct demangle_component *result, int estimated_len)
 {
   size_t err;
 
-  return cplus_demangle_print (DMGL_PARAMS | DMGL_ANSI, result, estimated_len,
-			       &err);
+  char *res = cplus_demangle_print (DMGL_PARAMS | DMGL_ANSI,
+				    result, estimated_len, &err);
+  return gdb::unique_xmalloc_ptr<char> (res);
 }
 
 /* Constructor for demangle_parse_info.  */

@@ -1,3 +1,19 @@
+2017-08-09  Pedro Alves  <palves@redhat.com>
+
+	* cp-name-parser.y (cp_comp_to_string): Return a
+	gdb::unique_xmalloc_ptr<char>.
+	* cp-support.c (replace_typedefs_qualified_name)
+	(replace_typedefs): Adjust to use gdb::unique_xmalloc_ptr<char>.
+	(cp_canonicalize_string_full): Use op= instead of explicit
+	convertion.
+	(cp_class_name_from_physname, method_name_from_physname)
+	(cp_func_name, cp_remove_params): Adjust to use
+	gdb::unique_xmalloc_ptr<char>.
+	* cp-support.h (cp_comp_to_string): Return a
+	gdb::unique_xmalloc_ptr<char>.
+	* python/py-type.c (typy_lookup_type): Adjust to use
+	gdb::unique_xmalloc_ptr<char>.
+
 2017-08-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf2read.c (dwarf2_string_attr): Fix a typo.
