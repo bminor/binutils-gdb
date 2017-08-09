@@ -1,3 +1,10 @@
+2017-08-09  Alex Lindsay  <alexlindsay239@gmail.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* cp-support.c (cp_canonicalize_string_full): Use
+	gdb::unique_xmalloc_ptr<char>.
+	(cp_canonicalize_string): Likewise.
+
 2017-08-09  Yao Qi  <yao.qi@linaro.org>
 
 	* features/Makefile (WHICH): Remove i386/ non-linux stuff.

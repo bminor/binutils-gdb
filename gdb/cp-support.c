@@ -527,9 +527,11 @@ cp_canonicalize_string_full (const char *string,
       replace_typedefs (info.get (), info->tree, finder, data);
 
       /* Convert the tree back into a string.  */
-      ret = cp_comp_to_string (info->tree, estimated_len);
-      gdb_assert (!ret.empty ());
+      gdb::unique_xmalloc_ptr<char> us (cp_comp_to_string (info->tree,
+							   estimated_len));
+      gdb_assert (us);
 
+      ret = us.get ();
       /* Finally, compare the original string with the computed
 	 name, returning NULL if they are the same.  */
       if (ret == string)
@@ -566,14 +568,17 @@ cp_canonicalize_string (const char *string)
     return std::string ();
 
   estimated_len = strlen (string) * 2;
-  std::string ret = cp_comp_to_string (info->tree, estimated_len);
+  gdb::unique_xmalloc_ptr<char> us (cp_comp_to_string (info->tree,
+						       estimated_len));
 
-  if (ret.empty ())
+  if (!us)
     {
       warning (_("internal error: string \"%s\" failed to be canonicalized"),
 	       string);
       return std::string ();
     }
+
+  std::string ret (us.get ());
 
   if (ret == string)
     return std::string ();
