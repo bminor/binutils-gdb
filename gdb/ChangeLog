@@ -1,3 +1,23 @@
+2017-08-09  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-tdep.h (tdesc_x32): Remove the declaration.
+	* amd64-tdep.c: Don't include features/i386/x32*.c.
+	(_initialize_amd64_tdep): Don't call initialize_tdesc_x32*
+	functions.
+	* features/Makefile (WHICH): Remove i386/x32, i386/x32-avx,
+	and i386/x32-avx-avx512.
+	(XMLTOC): Remove i386/x32-avx.xml, i386/x32-avx-avx512.xml,
+	and i386/x32.xml.
+	* features/i386/x32-avx-avx512.c: Removed.
+	* features/i386/x32-avx-avx512.xml: Removed.
+	* features/i386/x32-avx.c: Removed.
+	* features/i386/x32-avx.xml: Removed.
+	* features/i386/x32.c: Removed.
+	* features/i386/x32.xml: Removed.
+	* regformats/i386/x32-avx-avx512.dat: Removed.
+	* regformats/i386/x32-avx.dat: Removed.
+	* regformats/i386/x32.dat: Removed.
+
 2017-08-07  Maciej W. Rozycki  <macro@imgtec.com>
 
 	PR breakpoints/21886

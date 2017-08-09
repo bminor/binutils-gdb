@@ -59,9 +59,9 @@ WHICH = aarch64 \
 	i386/amd64-avx-mpx i386/amd64-avx-mpx-linux \
 	i386/amd64-avx-avx512 i386/amd64-avx-avx512-linux \
 	i386/amd64-avx-mpx-avx512-pku i386/amd64-avx-mpx-avx512-pku-linux \
-	i386/x32 i386/x32-linux \
-	i386/x32-avx i386/x32-avx-linux \
-	i386/x32-avx-avx512 i386/x32-avx-avx512-linux \
+	i386/x32-linux \
+	i386/x32-avx-linux \
+	i386/x32-avx-avx512-linux \
 	mips-linux mips-dsp-linux \
 	microblaze-with-stack-protect \
 	mips64-linux mips64-dsp-linux \
@@ -165,11 +165,8 @@ XMLTOC = \
 	i386/i386-avx-mpx.xml \
 	i386/i386.xml \
 	i386/x32-avx-linux.xml \
-	i386/x32-avx.xml \
 	i386/x32-avx-avx512-linux.xml \
-	i386/x32-avx-avx512.xml \
 	i386/x32-linux.xml \
-	i386/x32.xml \
 	microblaze-with-stack-protect.xml \
 	microblaze.xml \
 	mips-dsp-linux.xml \

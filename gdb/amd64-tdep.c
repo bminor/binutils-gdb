@@ -49,10 +49,6 @@
 #include "features/i386/amd64-avx-avx512.c"
 #include "features/i386/amd64-avx-mpx-avx512-pku.c"
 
-#include "features/i386/x32.c"
-#include "features/i386/x32-avx.c"
-#include "features/i386/x32-avx-avx512.c"
-
 #include "ax.h"
 #include "ax-gdb.h"
 
@@ -3245,10 +3241,6 @@ _initialize_amd64_tdep (void)
   initialize_tdesc_amd64_avx_mpx ();
   initialize_tdesc_amd64_avx_avx512 ();
   initialize_tdesc_amd64_avx_mpx_avx512_pku ();
-
-  initialize_tdesc_x32 ();
-  initialize_tdesc_x32_avx ();
-  initialize_tdesc_x32_avx_avx512 ();
 }
 
 
