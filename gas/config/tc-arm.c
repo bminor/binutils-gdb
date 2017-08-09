@@ -17598,8 +17598,6 @@ do_crc32_1 (unsigned int poly, unsigned int sz)
 
   if (Rd == REG_PC || Rn == REG_PC || Rm == REG_PC)
     as_warn (UNPRED_REG ("r15"));
-  if (thumb_mode && (Rd == REG_SP || Rn == REG_SP || Rm == REG_SP))
-    as_warn (UNPRED_REG ("r13"));
 }
 
 static void

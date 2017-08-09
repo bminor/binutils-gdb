@@ -1,3 +1,14 @@
+2017-08-09  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (do_crc32_1): Remove warning on REG_SP for thumb_mode.
+	* testsuite/gas/arm/crc32-armv8-a-bad.d: Update exepcted result.
+	* testsuite/gas/arm/crc32-armv8-r-bad.d: Likewise.
+	* testsuite/gas/arm/crc32-armv8-a.d: Likewise.
+	* testsuite/gas/arm/crc32-armv8-r.d: Likewise.
+	* testsuite/gas/arm/crc32-armv8-ar-bad.s: Update test case.
+	* testsuite/gas/arm/crc32-armv8-ar.s: Likewise.
+	* testsuite/gas/arm/crc32-bad.l: Update expected error message.
+
 2017-08-02  John David Anglin  <danglin@gcc.gnu.org>
 
 	Backport from mainline
