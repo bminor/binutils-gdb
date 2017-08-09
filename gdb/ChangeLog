@@ -1,5 +1,15 @@
 2017-07-25  Yao Qi  <yao.qi@linaro.org>
 
+	PR gdb/21555
+	* arch-utils.c (gdbarch_skip_prologue_noexcept): New function.
+	* arch-utils.h (gdbarch_skip_prologue_noexcept): Declare.
+	* infrun.c: Include arch-utils.h
+	(handle_step_into_function): Call gdbarch_skip_prologue_noexcept.
+	(handle_step_into_function_backward): Likewise.
+	* symtab.c (skip_prologue_sal): Likewise.
+
+2017-07-25  Yao Qi  <yao.qi@linaro.org>
+
 	PR tdep/21717
 	* arm-linux-nat.c (arm_linux_fetch_inferior_registers): Update
 	condition for FPSCR.

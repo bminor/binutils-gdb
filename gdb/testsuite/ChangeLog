@@ -1,3 +1,9 @@
+2017-07-25  Yao Qi  <yao.qi@linaro.org>
+
+	PR gdb/21555
+	* gdb.base/reread.exp: Wrap the whole test with two kinds of
+	compilation flags, with -fPIE and without -fPIE.
+
 2017-05-18  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* gdb.base/float.exp: Expect GDB prompt for targets without FPU.
