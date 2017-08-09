@@ -45,6 +45,8 @@
 
 #include "record-full.h"
 #include "linux-record.h"
+#include "auxv.h"
+#include "elf/common.h"
 
 /* Signal frame handling.
 
@@ -229,6 +231,20 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
       NULL, cb_data);
   cb (".reg2", AARCH64_LINUX_SIZEOF_FPREGSET, &aarch64_linux_fpregset,
       NULL, cb_data);
+}
+
+/* Implement the "core_read_description" gdbarch method.  */
+
+static const struct target_desc *
+aarch64_linux_core_read_description (struct gdbarch *gdbarch,
+				     struct target_ops *target, bfd *abfd)
+{
+  CORE_ADDR aarch64_hwcap = 0;
+
+  if (target_auxv_search (target, AT_HWCAP, &aarch64_hwcap) != 1)
+    return NULL;
+
+  return tdesc_aarch64;
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
@@ -1018,6 +1034,8 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, aarch64_linux_iterate_over_regset_sections);
+  set_gdbarch_core_read_description
+    (gdbarch, aarch64_linux_core_read_description);
 
   /* SystemTap related.  */
   set_gdbarch_stap_integer_prefixes (gdbarch, stap_integer_prefixes);
