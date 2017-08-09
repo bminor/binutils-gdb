@@ -1,5 +1,10 @@
 2017-08-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* configure.ac (TESTBFDLIB): Add a ',' after -Wl,--rpath.
+	* configure: Regenerated.
+
+2017-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/21923
 	* configure.ac (TESTBFDLIB): Replace --rpath with -Wl,--rpath
 	for --disable-static.
