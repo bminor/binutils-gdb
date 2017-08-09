@@ -1,5 +1,10 @@
 2017-08-09  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/config/default.exp (LD_CLASS): Check .libs/ld-new
+	for linker first.
+
+2017-08-09  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/config/default.exp (LD_CLASS): New.  Set to "64bit"
 	for 64-bit ELF linker.
 	* testsuite/ld-x86-64/pr17618.d (#notarget): Removed.
