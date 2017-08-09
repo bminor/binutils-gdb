@@ -1251,16 +1251,20 @@ if { [isnative]
 	    "pass.out" \
 	    "$NOPIE_CFLAGS" \
 	] \
-	[list \
-	    "Run weakundef1 with PIE" \
-	    "-pie" \
-	    "" \
-	    { weakundef1.c } \
-	    "weakundef1pie" \
-	    "pass.out" \
-	    "-fPIE" \
-	] \
     ]
+    if { [at_least_gcc_version 5 0] } {
+	run_ld_link_exec_tests [list \
+	    [list \
+		"Run weakundef1 with PIE" \
+		"-pie" \
+		"" \
+		{ weakundef1.c } \
+		"weakundef1pie" \
+		"pass.out" \
+		"-fPIE" \
+	    ] \
+	]
+    }
 }
 
 if { !([istarget "i?86-*-linux*"]
