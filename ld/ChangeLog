@@ -1,5 +1,13 @@
 2017-08-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/21924
+	* testsuite/ld-i386/i386.exp: Require GCC 5 or above for
+	"weakundef1 with PIE" test.
+	* testsuite/ld-x86-64/tls.exp: Require GCC 5 or above for
+	"tlsdesc1" and "tlsdesc1 with PIE" tests.
+
+2017-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* configure.ac (TESTBFDLIB): Add a ',' after -Wl,--rpath.
 	* configure: Regenerated.
 
