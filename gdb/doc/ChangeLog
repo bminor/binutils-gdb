@@ -1,3 +1,8 @@
+2017-08-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Packets): Fix Z0 cmd_list doc referring to
+	conditional expression.
+
 2017-07-31  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* agentexpr.texi (rot): Fix symbolic description, improve
