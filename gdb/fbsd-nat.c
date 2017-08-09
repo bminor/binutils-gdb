@@ -30,9 +30,11 @@
 #include <sys/ptrace.h>
 #include <sys/signal.h>
 #include <sys/sysctl.h>
-#ifdef HAVE_KINFO_GETVMMAP
 #include <sys/user.h>
+#ifdef HAVE_KINFO_GETVMMAP
 #include <libutil.h>
+#else
+#include "filestuff.h"
 #endif
 
 #include "elf-bfd.h"
@@ -168,7 +170,7 @@ fbsd_find_memory_regions (struct target_ops *self,
 
   mapfilename = xstrprintf ("/proc/%ld/map", (long) pid);
   cleanup = make_cleanup (xfree, mapfilename);
-  gdb_file_up mapfile = fopen (mapfilename, "r");
+  gdb_file_up mapfile (fopen (mapfilename, "r"));
   if (mapfile == NULL)
     error (_("Couldn't open %s."), mapfilename);
 

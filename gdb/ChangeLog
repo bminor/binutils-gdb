@@ -1,3 +1,9 @@
+2017-08-09  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c: [!HAVE_KINFO_GETVMMAP]: Include <sys/user.h> and
+	"filestuff.h".
+	(fbsd_find_memory_regions): Fix `mapfile' initialization.
+
 2017-08-09  Tom Tromey  <tom@tromey.com>
 
 	* skip.c (skiplist_entry): New constructor.
