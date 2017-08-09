@@ -1,3 +1,12 @@
+2017-09-06  John Baldwin  <jhb@FreeBSD.org>
+
+	* Makefile.in (ALL_64_TARGET_OBS): Add aarch64-fbsd-tdep.o.
+	(ALLDEPFILES): Add aarch64-fbsd-tdep.c.
+	* NEWS: Mention new FreeBSD/aarch64 target.
+	* configure.tgt: Add aarch64*-*-freebsd*.
+	* aarch64-fbsd-tdep.c: New file.
+	* aarch64-fbsd-tdep.h: New file.
+
 2017-09-06  Kamil Rytarowski  <n54@gmx.com>
 
 	* MAINTAINERS (Write After Approval): Add Kamil Rytarowski.

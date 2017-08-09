@@ -44,6 +44,11 @@ aarch64*-*-elf | aarch64*-*-rtems*)
 	gdb_target_obs="aarch64-tdep.o aarch64-newlib-tdep.o aarch64-insn.o"
 	;;
 
+aarch64*-*-freebsd*)
+	# Target: FreeBSD/aarch64
+	gdb_target_obs="aarch64-tdep.o aarch64-fbsd-tdep.o aarch64-insn.o"
+	;;
+
 aarch64*-*-linux*)
 	# Target: AArch64 linux
 	gdb_target_obs="aarch64-tdep.o aarch64-linux-tdep.o aarch64-insn.o \
