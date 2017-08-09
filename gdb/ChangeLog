@@ -1,5 +1,19 @@
 2017-08-09  Yao Qi  <yao.qi@linaro.org>
 
+	* features/Makefile (WHICH): Remove i386/ non-linux stuff.
+	* regformats/i386/amd64-avx-avx512.dat: Remove.
+	* regformats/i386/amd64-avx-mpx-avx512-pku.dat: Remove.
+	* regformats/i386/amd64-avx-mpx.dat:Remove.
+	* regformats/i386/amd64-avx.dat: Remove.
+	* regformats/i386/amd64-mpx.dat: Remove.
+	* regformats/i386/i386-avx-avx512.dat: Remove.
+	* regformats/i386/i386-avx-mpx-avx512-pku.dat: Remove.
+	* regformats/i386/i386-avx-mpx.dat: Remove.
+	* regformats/i386/i386-mmx.dat: Remove.
+	* regformats/i386/i386-mpx.dat: Remove.
+
+2017-08-09  Yao Qi  <yao.qi@linaro.org>
+
 	* amd64-tdep.h (tdesc_x32): Remove the declaration.
 	* amd64-tdep.c: Don't include features/i386/x32*.c.
 	(_initialize_amd64_tdep): Don't call initialize_tdesc_x32*

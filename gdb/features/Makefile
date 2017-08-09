@@ -47,18 +47,18 @@ WHICH = aarch64 \
 	arm/arm-with-iwmmxt arm/arm-with-vfpv2 arm/arm-with-vfpv3 \
 	arm/arm-with-neon \
 	i386/i386 i386/i386-linux \
-	i386/i386-mmx i386/i386-mmx-linux \
+	i386/i386-mmx-linux \
 	i386/amd64 i386/amd64-linux \
-	i386/i386-avx i386/i386-avx-linux \
-	i386/i386-mpx i386/i386-mpx-linux \
-	i386/i386-avx-mpx i386/i386-avx-mpx-linux \
-	i386/i386-avx-avx512 i386/i386-avx-avx512-linux \
-	i386/i386-avx-mpx-avx512-pku i386/i386-avx-mpx-avx512-pku-linux \
-	i386/amd64-avx i386/amd64-avx-linux \
-	i386/amd64-mpx i386/amd64-mpx-linux \
-	i386/amd64-avx-mpx i386/amd64-avx-mpx-linux \
-	i386/amd64-avx-avx512 i386/amd64-avx-avx512-linux \
-	i386/amd64-avx-mpx-avx512-pku i386/amd64-avx-mpx-avx512-pku-linux \
+	i386/i386-avx-linux \
+	i386/i386-mpx-linux \
+	i386/i386-avx-mpx-linux \
+	i386/i386-avx-avx512-linux \
+	i386/i386-avx-mpx-avx512-pku-linux \
+	i386/amd64-avx-linux \
+	i386/amd64-mpx-linux \
+	i386/amd64-avx-mpx-linux \
+	i386/amd64-avx-avx512-linux \
+	i386/amd64-avx-mpx-avx512-pku-linux \
 	i386/x32-linux \
 	i386/x32-avx-linux \
 	i386/x32-avx-avx512-linux \
