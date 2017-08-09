@@ -1,5 +1,16 @@
 2017-08-09  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c (struct fbsd_fork_info): Remove.
+	(fbsd_pending_children): Use std::list.
+	(fbsd_remember_child): Likewise.
+	(fbsd_is_child_pending): Likewise.
+	(fbsd_pending_vfork_done): Use std::forward_list.
+	(fbsd_add_vfork_done): Likewise.
+	(fbsd_is_vfork_done_pending): Likewise.
+	(fbsd_next_vfork_done): Likewise.
+
+2017-08-09  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-nat.c [HAVE_KINFO_GETVMMAP] (struct free_deleter): New.
 	(fbsd_find_memory_regions): Use free_deleter with std::unique_ptr.
 	[!HAVE_KINFO_GETVMMAP] (fbsd_find_memory_regions): Use std::string

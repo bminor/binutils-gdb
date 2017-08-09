@@ -41,6 +41,8 @@
 #include "elf-bfd.h"
 #include "fbsd-nat.h"
 
+#include <list>
+
 /* Return the name of a file that can be opened to get the symbols for
    the child process identified by PID.  */
 
@@ -712,13 +714,7 @@ fbsd_update_thread_list (struct target_ops *ops)
   sake.  FreeBSD versions newer than 9.1 contain both fixes.
 */
 
-struct fbsd_fork_info
-{
-  struct fbsd_fork_info *next;
-  ptid_t ptid;
-};
-
-static struct fbsd_fork_info *fbsd_pending_children;
+static std::list<ptid_t> fbsd_pending_children;
 
 /* Record a new child process event that is reported before the
    corresponding fork event in the parent.  */
@@ -726,11 +722,7 @@ static struct fbsd_fork_info *fbsd_pending_children;
 static void
 fbsd_remember_child (ptid_t pid)
 {
-  struct fbsd_fork_info *info = XCNEW (struct fbsd_fork_info);
-
-  info->ptid = pid;
-  info->next = fbsd_pending_children;
-  fbsd_pending_children = info;
+  fbsd_pending_children.push_front (pid);
 }
 
 /* Check for a previously-recorded new child process event for PID.
@@ -739,39 +731,26 @@ fbsd_remember_child (ptid_t pid)
 static ptid_t
 fbsd_is_child_pending (pid_t pid)
 {
-  struct fbsd_fork_info *info, *prev;
-  ptid_t ptid;
-
-  prev = NULL;
-  for (info = fbsd_pending_children; info; prev = info, info = info->next)
-    {
-      if (ptid_get_pid (info->ptid) == pid)
-	{
-	  if (prev == NULL)
-	    fbsd_pending_children = info->next;
-	  else
-	    prev->next = info->next;
-	  ptid = info->ptid;
-	  xfree (info);
-	  return ptid;
-	}
-    }
+  for (auto it = fbsd_pending_children.begin ();
+       it != fbsd_pending_children.end (); it++)
+    if (it->pid () == pid)
+      {
+	ptid_t ptid = *it;
+	fbsd_pending_children.erase (it);
+	return ptid;
+      }
   return null_ptid;
 }
 
 #ifndef PTRACE_VFORK
-static struct fbsd_fork_info *fbsd_pending_vfork_done;
+static std::forward_list<ptid_t> fbsd_pending_vfork_done;
 
 /* Record a pending vfork done event.  */
 
 static void
 fbsd_add_vfork_done (ptid_t pid)
 {
-  struct fbsd_fork_info *info = XCNEW (struct fbsd_fork_info);
-
-  info->ptid = pid;
-  info->next = fbsd_pending_vfork_done;
-  fbsd_pending_vfork_done = info;
+  fbsd_pending_vfork_done.push_front (pid);
 }
 
 /* Check for a pending vfork done event for a specific PID.  */
@@ -779,13 +758,10 @@ fbsd_add_vfork_done (ptid_t pid)
 static int
 fbsd_is_vfork_done_pending (pid_t pid)
 {
-  struct fbsd_fork_info *info;
-
-  for (info = fbsd_pending_vfork_done; info != NULL; info = info->next)
-    {
-      if (ptid_get_pid (info->ptid) == pid)
-	return 1;
-    }
+  for (auto it = fbsd_pending_vfork_done.begin ();
+       it != fbsd_pending_vfork_done.end (); it++)
+    if (it->pid () == pid)
+      return 1;
   return 0;
 }
 
@@ -795,15 +771,10 @@ fbsd_is_vfork_done_pending (pid_t pid)
 static ptid_t
 fbsd_next_vfork_done (void)
 {
-  struct fbsd_fork_info *info;
-  ptid_t ptid;
-
-  if (fbsd_pending_vfork_done != NULL)
+  if (!fbsd_pending_vfork_done.empty ())
     {
-      info = fbsd_pending_vfork_done;
-      fbsd_pending_vfork_done = info->next;
-      ptid = info->ptid;
-      xfree (info);
+      ptid_t ptid = fbsd_pending_vfork_done.front ();
+      fbsd_pending_vfork_done.pop_front ();
       return ptid;
     }
   return null_ptid;
