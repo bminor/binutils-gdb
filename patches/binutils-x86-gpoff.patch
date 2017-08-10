@@ -1,4 +1,4 @@
-From 80d27d03fd16f97f709ce37e20607f09624b633d Mon Sep 17 00:00:00 2001
+From 996ab985b8a31f029e00becac2fa046c9d504e8f Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Thu, 3 Aug 2017 09:43:28 -0700
 Subject: [PATCH] x86: Add R_X86_64_GPOFF/R_386_GPOFF relocation
@@ -1760,7 +1760,7 @@ index 0000000000..6cc4a52403
 + +[a-f0-9]+:[ \t]+8d 83 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%ebx\),%eax
 +#pass
 diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
-index 2d7d532a49..12808802d1 100644
+index 060a7e9dd4..4dd0aa27e4 100644
 --- a/ld/testsuite/ld-i386/i386.exp
 +++ b/ld/testsuite/ld-i386/i386.exp
 @@ -437,6 +437,17 @@ run_dump_test "property-x86-shstk4"
@@ -1781,10 +1781,10 @@ index 2d7d532a49..12808802d1 100644
  
  if { !([istarget "i?86-*-linux*"]
         || [istarget "i?86-*-gnu*"]
-@@ -1262,6 +1273,67 @@ if { [isnative]
- 	    "-fPIE" \
- 	] \
-     ]
+@@ -1266,6 +1277,67 @@ if { [isnative]
+ 	    ] \
+ 	]
+     }
 +
 +    if { [istarget "i?86-*-linux*"] } {
 +	run_ld_link_exec_tests [list \
@@ -2327,7 +2327,7 @@ index 0000000000..fb8c3375b8
 + +[a-f0-9]+:[ \t]+48 8d 05 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%rip\),%rax[ \t]+# [a-f0-9]+ <foo>
 +#pass
 diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
-index ce29cc8634..e5e9e91c27 100644
+index 0375da6aa6..214e23c176 100644
 --- a/ld/testsuite/ld-x86-64/x86-64.exp
 +++ b/ld/testsuite/ld-x86-64/x86-64.exp
 @@ -567,6 +567,17 @@ run_dump_test "pr20253-4f"
@@ -2417,5 +2417,5 @@ index ce29cc8634..e5e9e91c27 100644
      undefined_weak "-fPIE" ""
      undefined_weak "-fPIE" "-pie"
 -- 
-2.13.3
+2.13.4
 
