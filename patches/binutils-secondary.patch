@@ -1,4 +1,4 @@
-From d0fbc2b6dfb4c5a24b366feb8fc4e49f748ce1ae Mon Sep 17 00:00:00 2001
+From 5d0e35e54418aee42f655aa570a6f1c77962522d Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Mon, 4 Nov 2013 09:35:07 -0800
 Subject: [PATCH] Add STB_SECONDARY support
@@ -171,12 +171,12 @@ ld/testsuite/
  gas/doc/as.texinfo                   |   9 ++
  gas/symbols.c                        |  39 ++++++--
  gas/symbols.h                        |   2 +
- gas/testsuite/gas/elf/common5.d      |   2 +
- gas/testsuite/gas/elf/common5.l      |   2 +
- gas/testsuite/gas/elf/common5.s      |   2 +
  gas/testsuite/gas/elf/common6.d      |   2 +
  gas/testsuite/gas/elf/common6.l      |   2 +
  gas/testsuite/gas/elf/common6.s      |   2 +
+ gas/testsuite/gas/elf/common7.d      |   2 +
+ gas/testsuite/gas/elf/common7.l      |   2 +
+ gas/testsuite/gas/elf/common7.s      |   2 +
  gas/testsuite/gas/elf/elf.exp        |   5 +
  gas/testsuite/gas/elf/secondary1.e   |   4 +
  gas/testsuite/gas/elf/secondary1.s   |  33 +++++++
@@ -236,12 +236,12 @@ ld/testsuite/
  ld/testsuite/ld-elf/secondary8b.c    |  13 +++
  ld/testsuite/ld-elf/secondary8b.rd   |   5 +
  80 files changed, 862 insertions(+), 63 deletions(-)
- create mode 100644 gas/testsuite/gas/elf/common5.d
- create mode 100644 gas/testsuite/gas/elf/common5.l
- create mode 100644 gas/testsuite/gas/elf/common5.s
  create mode 100644 gas/testsuite/gas/elf/common6.d
  create mode 100644 gas/testsuite/gas/elf/common6.l
  create mode 100644 gas/testsuite/gas/elf/common6.s
+ create mode 100644 gas/testsuite/gas/elf/common7.d
+ create mode 100644 gas/testsuite/gas/elf/common7.l
+ create mode 100644 gas/testsuite/gas/elf/common7.s
  create mode 100644 gas/testsuite/gas/elf/secondary1.e
  create mode 100644 gas/testsuite/gas/elf/secondary1.s
  create mode 100644 gas/testsuite/gas/elf/secondary2.e
@@ -1213,30 +1213,6 @@ index a04ca1f8b3..934122fd83 100644
  extern void S_SET_WEAKREFR (symbolS *);
  extern void S_CLEAR_WEAKREFR (symbolS *);
  extern void S_SET_WEAKREFD (symbolS *);
-diff --git a/gas/testsuite/gas/elf/common5.d b/gas/testsuite/gas/elf/common5.d
-new file mode 100644
-index 0000000000..f7b1d80cad
---- /dev/null
-+++ b/gas/testsuite/gas/elf/common5.d
-@@ -0,0 +1,2 @@
-+#name: secondary and common directives
-+#error-output: common5.l
-diff --git a/gas/testsuite/gas/elf/common5.l b/gas/testsuite/gas/elf/common5.l
-new file mode 100644
-index 0000000000..58d5142fc8
---- /dev/null
-+++ b/gas/testsuite/gas/elf/common5.l
-@@ -0,0 +1,2 @@
-+[^:]*: Assembler messages:
-+[^:]*: Error: symbol `foobar' can not be both secondary and common
-diff --git a/gas/testsuite/gas/elf/common5.s b/gas/testsuite/gas/elf/common5.s
-new file mode 100644
-index 0000000000..df8b7ed7f5
---- /dev/null
-+++ b/gas/testsuite/gas/elf/common5.s
-@@ -0,0 +1,2 @@
-+	.secondary foobar
-+	.comm foobar,30
 diff --git a/gas/testsuite/gas/elf/common6.d b/gas/testsuite/gas/elf/common6.d
 new file mode 100644
 index 0000000000..7932ccf98b
@@ -1261,16 +1237,40 @@ index 0000000000..37bd0ce2c0
 @@ -0,0 +1,2 @@
 +	.comm foobar,30
 +	.secondary foobar
+diff --git a/gas/testsuite/gas/elf/common7.d b/gas/testsuite/gas/elf/common7.d
+new file mode 100644
+index 0000000000..4229b195c3
+--- /dev/null
++++ b/gas/testsuite/gas/elf/common7.d
+@@ -0,0 +1,2 @@
++#name: secondary and common directives
++#error-output: common7.l
+diff --git a/gas/testsuite/gas/elf/common7.l b/gas/testsuite/gas/elf/common7.l
+new file mode 100644
+index 0000000000..58d5142fc8
+--- /dev/null
++++ b/gas/testsuite/gas/elf/common7.l
+@@ -0,0 +1,2 @@
++[^:]*: Assembler messages:
++[^:]*: Error: symbol `foobar' can not be both secondary and common
+diff --git a/gas/testsuite/gas/elf/common7.s b/gas/testsuite/gas/elf/common7.s
+new file mode 100644
+index 0000000000..df8b7ed7f5
+--- /dev/null
++++ b/gas/testsuite/gas/elf/common7.s
+@@ -0,0 +1,2 @@
++	.secondary foobar
++	.comm foobar,30
 diff --git a/gas/testsuite/gas/elf/elf.exp b/gas/testsuite/gas/elf/elf.exp
-index 1284619dc2..7a64ac80bc 100644
+index 6737486296..c019dcff0d 100644
 --- a/gas/testsuite/gas/elf/elf.exp
 +++ b/gas/testsuite/gas/elf/elf.exp
-@@ -252,8 +252,13 @@ if { [is_elf_format] } then {
- 	run_dump_test "common3b"
- 	run_dump_test "common4a"
- 	run_dump_test "common4b"
-+	run_dump_test "common5"
+@@ -256,8 +256,13 @@ if { [is_elf_format] } then {
+ 	run_dump_test "common5b"
+ 	run_dump_test "common5c"
+ 	run_dump_test "common5d"
 +	run_dump_test "common6"
++	run_dump_test "common7"
      }
  
 +    run_elf_list_test "secondary1" "" "" "-s" "| grep \"secondary_\""
