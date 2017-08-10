@@ -1,3 +1,10 @@
+2017-08-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 21909
+	* prdbg.c (pr_int_type): Increase size of local string buffer.
+	(pr_float_type): Likewise.
+	(pr_bool_type): Likewise.
+
 2017-08-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 21702

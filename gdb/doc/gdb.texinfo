@@ -35966,7 +35966,7 @@ separators.  Each expression has the following form:
 
 @item X @var{len},@var{expr}
 @var{len} is the length of the bytecode expression and @var{expr} is the
-actual conditional expression in bytecode form.
+actual commands expression in bytecode form.
 
 @end table
 

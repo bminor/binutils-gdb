@@ -1,5 +1,5 @@
 #source: ifunc-3.s
-#ld: -shared
+#ld: -shared --hash-style=sysv
 #objdump: -dw
 #target: aarch64*-*-*
 

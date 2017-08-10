@@ -1,3 +1,24 @@
+2017-08-09  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv (srv_i386_regobj): Remove i386-avx.o,
+	i386-avx-avx512.o, i386-avx-mpx-avx512-pku.o, i386-mpx.o,
+	i386-avx-mpx.o and i386-mmx.o.
+	(srv_amd64_regobj): Remove amd64-avx.o, amd64-avx-avx512.o,
+	amd64-avx-mpx-avx512-pku.o, amd64-mpx.o and amd64-avx-mpx.o.
+	(srv_i386_xmlfiles): Remove i386/i386-avx.xml,
+	i386/i386-avx-avx512.xml, i386/i386-avx-mpx-avx512-pku.xml,
+	i386/i386-mpx.xml, i386/i386-avx-mpx.xml and i386/i386-mmx.xml.
+	(srv_amd64_xmlfile):i386/amd64-avx.xml, i386/amd64-avx-avx512.xml,
+	i386/amd64-avx-mpx-avx512-pku.xml, i386/amd64-mpx.xml,
+	i386/amd64-avx-mpx.xml.
+
+2017-08-09  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv (srv_amd64_regobj): Remove x32.o, x32-avx.o
+	and x32-avx-avx512.o.
+	(srv_amd64_xmlfiles): Remove i386/x32.xml, i386/x32-avx.xml
+	i386/x32-avx-avx512.xml.
+
 2017-07-26  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* tracepoint.h (enum class fast_tpoint_collect_result): New

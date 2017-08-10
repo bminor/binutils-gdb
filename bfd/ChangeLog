@@ -1,3 +1,19 @@
+2017-08-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 21916
+	* elf-attrs.c (_bfd_elf_parse_attributes): Complain about very
+	small section lengths.
+	* elf.c (_bfd_elf_setup_sections): Skip empty entries in the group
+	table.
+	(elfcore_grok_freebsd_prstatus): Add checks to make sure that
+	there is enough data present in the note.
+
+2017-08-08  Alan Modra  <amodra@gmail.com>
+
+	PR 21017
+	* elf32-microblaze.c (microblaze_elf_check_relocs): Don't bump
+	got.refcount for GOTOFF relocs, just create .got section.
+
 2017-08-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (elf_link_add_object_symbols): Move common symbol

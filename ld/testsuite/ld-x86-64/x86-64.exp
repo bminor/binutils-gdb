@@ -1572,7 +1572,11 @@ run_ld_link_tests [list \
 ]
 
 # Linux only tests
-run_dump_test "pr17618"
+global LD_CLASS
+if { "$LD_CLASS" == "64bit" } then {
+    # This test needs 64-bit linker.
+    run_dump_test "pr17618"
+}
 run_dump_test "pltgot-1"
 run_dump_test "pltgot-2"
 run_dump_test "pr20830a"

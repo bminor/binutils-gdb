@@ -2353,7 +2353,6 @@ microblaze_elf_check_relocs (bfd * abfd,
         dogottls:
           sec->has_tls_reloc = 1;
 	  /* Fall through.  */
-        case R_MICROBLAZE_GOTOFF_64:
         case R_MICROBLAZE_GOT_64:
           if (htab->elf.sgot == NULL)
             {
@@ -2373,6 +2372,17 @@ microblaze_elf_check_relocs (bfd * abfd,
 		return FALSE;
 	    }
           break;
+
+	case R_MICROBLAZE_GOTOFF_64:
+	case R_MICROBLAZE_GOTOFF_32:
+	  if (htab->elf.sgot == NULL)
+	    {
+	      if (htab->elf.dynobj == NULL)
+		htab->elf.dynobj = abfd;
+	      if (!_bfd_elf_create_got_section (htab->elf.dynobj, info))
+		return FALSE;
+	    }
+	  break;
 
         case R_MICROBLAZE_64:
         case R_MICROBLAZE_64_PCREL:

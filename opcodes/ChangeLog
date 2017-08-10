@@ -1,3 +1,10 @@
+2017-08-09  Jiong Wang  <jiong.wang@arm.com>
+
+	* arm-dis.c (thumb32_opcodes): Use format 'R' instead of 'S' for
+	register operands in CRC instructions.
+	(print_insn_thumb32): Remove "<bitfield>S" support.  Updated the
+	comments.
+
 2017-08-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* disassemble.c (disassembler): Mark big and mach with

@@ -1,3 +1,66 @@
+2017-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/pep.sc: Enclose __CTOR_LIST__, ___CTOR_LIST__,
+	__DTOR_LIST__ and ___DTOR_LIST__ in PROVIDE statements so that
+	they can be overrridden by crt input files.
+	* scripttempl/pe.sc: Likewise.
+
+2017-08-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/config/default.exp (LD_CLASS): Check .libs/ld-new
+	for linker first.
+
+2017-08-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/config/default.exp (LD_CLASS): New.  Set to "64bit"
+	for 64-bit ELF linker.
+	* testsuite/ld-x86-64/pr17618.d (#notarget): Removed.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr17618 only for 64-bit
+	linker.
+
+2017-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21924
+	* testsuite/ld-i386/i386.exp: Require GCC 5 or above for
+	"weakundef1 with PIE" test.
+	* testsuite/ld-x86-64/tls.exp: Require GCC 5 or above for
+	"tlsdesc1" and "tlsdesc1 with PIE" tests.
+
+2017-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (TESTBFDLIB): Add a ',' after -Wl,--rpath.
+	* configure: Regenerated.
+
+2017-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21923
+	* configure.ac (TESTBFDLIB): Replace --rpath with -Wl,--rpath
+	for --disable-static.
+	* configure: Regenerated.
+
+2017-08-08  Romain Geissler  <romain.geissler@gmail.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Add --enable-default-hash-style option.
+	* ldmain.c (main): Set link_info.emit_hash to DEFAULT_EMIT_SYSV_HASH.
+	Set link_info.emit_gnu_hash to DEFAULT_EMIT_GNU_HASH.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2017-08-08  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-aarch64/ifunc-1-local.d: Run ld with --hash-style=sysv.
+	* testsuite/ld-aarch64/ifunc-2-local.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-3a.d: Likewise.
+	* testsuite/ld-frv/fdpic-pie-1.d: Likewise.
+	* testsuite/ld-frv/fdpic-pie-2.d: Likewise.
+	* testsuite/ld-frv/fdpic-pie-7.d: Likewise.
+	* testsuite/ld-frv/fdpic-pie-8.d: Likewise.
+	* testsuite/ld-arm/arm-elf.exp: Add --hash-style=sysv to "Using
+	Thumb lib by another lib" test's ld options.
+	* testsuite/ld-elf/note-3.l: Match .gnu.hash.
+	* testsuite/ld-elf/note-3.t: Add .gnu.hash output section.
+
 2017-08-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/pr21903.s (start): Removed.

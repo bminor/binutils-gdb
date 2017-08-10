@@ -38,34 +38,44 @@
 
 struct skiplist_entry
 {
+  skiplist_entry (bool file_is_glob_, std::string &&file_,
+		  bool function_is_regexp_, std::string &&function_)
+    : number (-1),
+      file_is_glob (file_is_glob_),
+      file (std::move (file_)),
+      function_is_regexp (function_is_regexp_),
+      function (std::move (function_)),
+      enabled (true),
+      next (NULL)
+  {
+  }
+
   int number;
 
-  /* Non-zero if FILE is a glob-style pattern.
-     Otherewise it is the plain file name (possibly with directories).  */
-  int file_is_glob;
+  /* True if FILE is a glob-style pattern.
+     Otherwise it is the plain file name (possibly with directories).  */
+  bool file_is_glob;
 
-  /* The name of the file or NULL.
-     The skiplist entry owns this pointer.  */
-  char *file;
+  /* The name of the file or empty if no name.  */
+  std::string file;
 
-  /* Non-zero if FUNCTION is a regexp.
+  /* True if FUNCTION is a regexp.
      Otherwise it is a plain function name (possibly with arguments,
      for C++).  */
-  int function_is_regexp;
+  bool function_is_regexp;
 
-  /* The name of the function or NULL.
-     The skiplist entry owns this pointer.  */
-  char *function;
+  /* The name of the function or empty if no name.  */
+  std::string function;
 
   /* If this is a function regexp, the compiled form.  */
   gdb::optional<compiled_regex> compiled_function_regexp;
 
-  int enabled;
+  bool enabled;
 
   struct skiplist_entry *next;
 };
 
-static void add_skiplist_entry (struct skiplist_entry *e);
+static void add_skiplist_entry (std::unique_ptr<skiplist_entry> &&e);
 
 static struct skiplist_entry *skiplist_entry_chain;
 static int skiplist_entry_count;
@@ -80,53 +90,19 @@ static int skiplist_entry_count;
 
 /* Create a skip object.  */
 
-static struct skiplist_entry *
-make_skip_entry (int file_is_glob, const char *file,
-		 int function_is_regexp, const char *function)
+static std::unique_ptr<skiplist_entry>
+make_skip_entry (bool file_is_glob, std::string &&file,
+		 bool function_is_regexp, std::string &&function)
 {
-  struct skiplist_entry *e = XCNEW (struct skiplist_entry);
-
-  gdb_assert (file != NULL || function != NULL);
+  gdb_assert (!file.empty () || !function.empty ());
   if (file_is_glob)
-    gdb_assert (file != NULL);
+    gdb_assert (!file.empty ());
   if (function_is_regexp)
-    gdb_assert (function != NULL);
+    gdb_assert (!function.empty ());
 
-  if (file != NULL)
-    e->file = xstrdup (file);
-  if (function != NULL)
-    e->function = xstrdup (function);
-  e->file_is_glob = file_is_glob;
-  e->function_is_regexp = function_is_regexp;
-  e->enabled = 1;
-
-  return e;
-}
-
-/* Free a skiplist entry.  */
-
-static void
-free_skiplist_entry (struct skiplist_entry *e)
-{
-  xfree (e->file);
-  xfree (e->function);
-  xfree (e);
-}
-
-/* Wrapper to free_skiplist_entry for use as a cleanup.  */
-
-static void
-free_skiplist_entry_cleanup (void *e)
-{
-  free_skiplist_entry ((struct skiplist_entry *) e);
-}
-
-/* Create a cleanup to free skiplist entry E.  */
-
-static struct cleanup *
-make_free_skiplist_entry_cleanup (struct skiplist_entry *e)
-{
-  return make_cleanup (free_skiplist_entry_cleanup, e);
+  return std::unique_ptr<skiplist_entry>
+    (new skiplist_entry (file_is_glob, std::move (file),
+			 function_is_regexp, std::move (function)));
 }
 
 static void
@@ -150,7 +126,8 @@ skip_file_command (char *arg, int from_tty)
   else
     filename = arg;
 
-  add_skiplist_entry (make_skip_entry (0, filename, 0, NULL));
+  add_skiplist_entry (make_skip_entry (false, std::string (filename), false,
+				       std::string ()));
 
   printf_filtered (_("File %s will be skipped when stepping.\n"), filename);
 }
@@ -161,7 +138,8 @@ skip_file_command (char *arg, int from_tty)
 static void
 skip_function (const char *name)
 {
-  add_skiplist_entry (make_skip_entry (0, NULL, 0, name));
+  add_skiplist_entry (make_skip_entry (false, std::string (), false,
+				       std::string (name)));
 
   printf_filtered (_("Function %s will be skipped when stepping.\n"), name);
 }
@@ -204,8 +182,8 @@ compile_skip_regexp (struct skiplist_entry *e, const char *message)
   flags |= REG_EXTENDED;
 #endif
 
-  gdb_assert (e->function_is_regexp && e->function != NULL);
-  e->compiled_function_regexp.emplace (e->function, flags, message);
+  gdb_assert (e->function_is_regexp && !e->function.empty ());
+  e->compiled_function_regexp.emplace (e->function.c_str (), flags, message);
 }
 
 /* Process "skip ..." that does not match "skip file" or "skip function".  */
@@ -217,7 +195,6 @@ skip_command (char *arg, int from_tty)
   const char *gfile = NULL;
   const char *function = NULL;
   const char *rfunction = NULL;
-  struct skiplist_entry *e;
   int i;
 
   if (arg == NULL)
@@ -291,16 +268,23 @@ skip_command (char *arg, int from_tty)
   gdb_assert (file != NULL || gfile != NULL
 	      || function != NULL || rfunction != NULL);
 
-  e = make_skip_entry (gfile != NULL, file ? file : gfile,
-		       rfunction != NULL, function ? function : rfunction);
+  std::string entry_file;
+  if (file != NULL)
+    entry_file = file;
+  else if (gfile != NULL)
+    entry_file = gfile;
+  std::string entry_function;
+  if (function != NULL)
+    entry_function = function;
+  else if (rfunction != NULL)
+    entry_function = rfunction;
+  std::unique_ptr<skiplist_entry> e
+    = make_skip_entry (gfile != NULL, std::move (entry_file),
+		       rfunction != NULL, std::move (entry_function));
   if (rfunction != NULL)
-    {
-      struct cleanup *rf_cleanups = make_free_skiplist_entry_cleanup (e);
+    compile_skip_regexp (e.get (), _("regexp"));
 
-      compile_skip_regexp (e, _("regexp"));
-      discard_cleanups (rf_cleanups);
-    }
-  add_skiplist_entry (e);
+  add_skiplist_entry (std::move (e));
 
   /* I18N concerns drive some of the choices here (we can't piece together
      the output too much).  OTOH we want to keep this simple.  Therefore the
@@ -392,14 +376,16 @@ skip_info (char *arg, int from_tty)
 	current_uiout->field_string ("regexp", "n"); /* 3 */
 
       current_uiout->field_string ("file",
-			   e->file ? e->file : "<none>"); /* 4 */
+				   e->file.empty () ? "<none>"
+				   : e->file.c_str ()); /* 4 */
       if (e->function_is_regexp)
 	current_uiout->field_string ("regexp", "y"); /* 5 */
       else
 	current_uiout->field_string ("regexp", "n"); /* 5 */
 
-      current_uiout->field_string (
-	"function", e->function ? e->function : "<none>"); /* 6 */
+      current_uiout->field_string ("function",
+				   e->function.empty () ? "<none>"
+				   : e->function.c_str ()); /* 6 */
 
       current_uiout->text ("\n");
     }
@@ -414,7 +400,7 @@ skip_enable_command (char *arg, int from_tty)
   ALL_SKIPLIST_ENTRIES (e)
     if (arg == NULL || number_is_in_list (arg, e->number))
       {
-        e->enabled = 1;
+        e->enabled = true;
         found = 1;
       }
 
@@ -431,7 +417,7 @@ skip_disable_command (char *arg, int from_tty)
   ALL_SKIPLIST_ENTRIES (e)
     if (arg == NULL || number_is_in_list (arg, e->number))
       {
-	e->enabled = 0;
+	e->enabled = false;
         found = 1;
       }
 
@@ -454,7 +440,7 @@ skip_delete_command (char *arg, int from_tty)
 	else
 	  skiplist_entry_chain = e->next;
 
-	free_skiplist_entry (e);
+	delete e;
         found = 1;
       }
     else
@@ -469,7 +455,7 @@ skip_delete_command (char *arg, int from_tty)
 /* Add the given skiplist entry to our list, and set the entry's number.  */
 
 static void
-add_skiplist_entry (struct skiplist_entry *e)
+add_skiplist_entry (std::unique_ptr<skiplist_entry> &&e)
 {
   struct skiplist_entry *e1;
 
@@ -480,12 +466,12 @@ add_skiplist_entry (struct skiplist_entry *e)
 
   e1 = skiplist_entry_chain;
   if (e1 == NULL)
-    skiplist_entry_chain = e;
+    skiplist_entry_chain = e.release ();
   else
     {
       while (e1->next)
 	e1 = e1->next;
-      e1->next = e;
+      e1->next = e.release ();
     }
 }
 
@@ -495,28 +481,29 @@ static int
 skip_file_p (struct skiplist_entry *e,
 	     const struct symtab_and_line *function_sal)
 {
-  gdb_assert (e->file != NULL && !e->file_is_glob);
+  gdb_assert (!e->file.empty () && !e->file_is_glob);
 
   if (function_sal->symtab == NULL)
     return 0;
 
   /* Check first sole SYMTAB->FILENAME.  It may not be a substring of
      symtab_to_fullname as it may contain "./" etc.  */
-  if (compare_filenames_for_search (function_sal->symtab->filename, e->file))
+  if (compare_filenames_for_search (function_sal->symtab->filename,
+				    e->file.c_str ()))
     return 1;
 
   /* Before we invoke realpath, which can get expensive when many
      files are involved, do a quick comparison of the basenames.  */
   if (!basenames_may_differ
       && filename_cmp (lbasename (function_sal->symtab->filename),
-		       lbasename (e->file)) != 0)
+		       lbasename (e->file.c_str ())) != 0)
     return 0;
 
   /* Note: symtab_to_fullname caches its result, thus we don't have to.  */
   {
     const char *fullname = symtab_to_fullname (function_sal->symtab);
 
-    if (compare_filenames_for_search (fullname, e->file))
+    if (compare_filenames_for_search (fullname, e->file.c_str ()))
       return 1;
   }
 
@@ -529,14 +516,14 @@ static int
 skip_gfile_p (struct skiplist_entry *e,
 	      const struct symtab_and_line *function_sal)
 {
-  gdb_assert (e->file != NULL && e->file_is_glob);
+  gdb_assert (!e->file.empty () && e->file_is_glob);
 
   if (function_sal->symtab == NULL)
     return 0;
 
   /* Check first sole SYMTAB->FILENAME.  It may not be a substring of
      symtab_to_fullname as it may contain "./" etc.  */
-  if (gdb_filename_fnmatch (e->file, function_sal->symtab->filename,
+  if (gdb_filename_fnmatch (e->file.c_str (), function_sal->symtab->filename,
 			    FNM_FILE_NAME | FNM_NOESCAPE) == 0)
     return 1;
 
@@ -546,7 +533,7 @@ skip_gfile_p (struct skiplist_entry *e,
      If the basename of the glob pattern is something like "*.c" then this
      isn't much of a win.  Oh well.  */
   if (!basenames_may_differ
-      && gdb_filename_fnmatch (lbasename (e->file),
+      && gdb_filename_fnmatch (lbasename (e->file.c_str ()),
 			       lbasename (function_sal->symtab->filename),
 			       FNM_FILE_NAME | FNM_NOESCAPE) != 0)
     return 0;
@@ -555,7 +542,7 @@ skip_gfile_p (struct skiplist_entry *e,
   {
     const char *fullname = symtab_to_fullname (function_sal->symtab);
 
-    if (compare_glob_filenames_for_search (fullname, e->file))
+    if (compare_glob_filenames_for_search (fullname, e->file.c_str ()))
       return 1;
   }
 
@@ -567,8 +554,8 @@ skip_gfile_p (struct skiplist_entry *e,
 static int
 skip_function_p (struct skiplist_entry *e, const char *function_name)
 {
-  gdb_assert (e->function != NULL && !e->function_is_regexp);
-  return strcmp_iw (function_name, e->function) == 0;
+  gdb_assert (!e->function.empty () && !e->function_is_regexp);
+  return strcmp_iw (function_name, e->function.c_str ()) == 0;
 }
 
 /* Return non-zero if we're stopped at a function regexp to be skipped.  */
@@ -576,7 +563,7 @@ skip_function_p (struct skiplist_entry *e, const char *function_name)
 static int
 skip_rfunction_p (struct skiplist_entry *e, const char *function_name)
 {
-  gdb_assert (e->function != NULL && e->function_is_regexp
+  gdb_assert (!e->function.empty () && e->function_is_regexp
 	      && e->compiled_function_regexp);
   return (e->compiled_function_regexp->exec (function_name, 0, NULL, 0)
 	  == 0);
@@ -601,7 +588,7 @@ function_name_is_marked_for_skip (const char *function_name,
       if (!e->enabled)
 	continue;
 
-      if (e->file != NULL)
+      if (!e->file.empty ())
 	{
 	  if (e->file_is_glob)
 	    {
@@ -614,7 +601,7 @@ function_name_is_marked_for_skip (const char *function_name,
 		skip_by_file = 1;
 	    }
 	}
-      if (e->function != NULL)
+      if (!e->function.empty ())
 	{
 	  if (e->function_is_regexp)
 	    {
@@ -630,7 +617,7 @@ function_name_is_marked_for_skip (const char *function_name,
 
       /* If both file and function must match, make sure we don't errantly
 	 exit if only one of them match.  */
-      if (e->file != NULL && e->function != NULL)
+      if (!e->file.empty () && !e->function.empty ())
 	{
 	  if (skip_by_file && skip_by_function)
 	    return 1;
