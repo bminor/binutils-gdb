@@ -92,6 +92,10 @@ show debug separate-debug-file
     (gdb) p (float) var
     $3 = 3.14
 
+* New native configurations
+
+FreeBSD/aarch64			aarch64*-*-freebsd*
+
 * New targets
 
 FreeBSD/aarch64			aarch64*-*-freebsd*
