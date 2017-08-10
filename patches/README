@@ -20,6 +20,7 @@ patches="
 	binutils-lto-mixed-test.patch
 	binutils-lto-mixed-plugin.patch
 	binutils-pr12639.patch
+	binutils-pr21667.patch
 	binutils-secondary.patch
 	binutils-pr21128.patch
 	binutils-pr21129.patch

@@ -1,0 +1,199 @@
+From 93d02678c3c8c1f485d3b653cb8867c819c8a70c Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Thu, 10 Aug 2017 09:50:40 -0700
+Subject: [PATCH] Also disallow global alias of common symbol
+
+We can't create alias of common symbol.  Local alias of common symbol has
+been disallowed.  But global alias of common symbol is disallowed when the
+common symbol is seen first and silently dropped otherwise.  This patch
+disallows alias of common symbol in all cases.
+
+gas/
+
+	PR gas/21667
+	* read.c (pseudo_set): Update error message for alias of common
+	symbol.
+	* write.c (write_object_file): Disallow both local and global
+	aliases of common symbol.
+	* testsuite/gas/elf/common5a.d: New file.
+	* testsuite/gas/elf/common5a.l: Likewise.
+	* testsuite/gas/elf/common5a.s: Likewise.
+	* testsuite/gas/elf/common5b.d: Likewise.
+	* testsuite/gas/elf/common5b.l: Likewise.
+	* testsuite/gas/elf/common5b.s: Likewise.
+	* testsuite/gas/elf/common5c.d: Likewise.
+	* testsuite/gas/elf/common5c.s: Likewise.
+	* testsuite/gas/elf/common5d.d: Likewise.
+	* testsuite/gas/elf/common5d.s: Likewise.
+	* testsuite/gas/elf/elf.exp: Run common5a, common5b, common5c
+	and common5d.
+---
+ gas/read.c                       | 2 +-
+ gas/testsuite/gas/elf/common5a.d | 5 +++++
+ gas/testsuite/gas/elf/common5a.l | 2 ++
+ gas/testsuite/gas/elf/common5a.s | 3 +++
+ gas/testsuite/gas/elf/common5b.d | 5 +++++
+ gas/testsuite/gas/elf/common5b.l | 2 ++
+ gas/testsuite/gas/elf/common5b.s | 3 +++
+ gas/testsuite/gas/elf/common5c.d | 5 +++++
+ gas/testsuite/gas/elf/common5c.s | 2 ++
+ gas/testsuite/gas/elf/common5d.d | 5 +++++
+ gas/testsuite/gas/elf/common5d.s | 2 ++
+ gas/testsuite/gas/elf/elf.exp    | 4 ++++
+ gas/write.c                      | 5 ++---
+ 13 files changed, 41 insertions(+), 4 deletions(-)
+ create mode 100644 gas/testsuite/gas/elf/common5a.d
+ create mode 100644 gas/testsuite/gas/elf/common5a.l
+ create mode 100644 gas/testsuite/gas/elf/common5a.s
+ create mode 100644 gas/testsuite/gas/elf/common5b.d
+ create mode 100644 gas/testsuite/gas/elf/common5b.l
+ create mode 100644 gas/testsuite/gas/elf/common5b.s
+ create mode 100644 gas/testsuite/gas/elf/common5c.d
+ create mode 100644 gas/testsuite/gas/elf/common5c.s
+ create mode 100644 gas/testsuite/gas/elf/common5d.d
+ create mode 100644 gas/testsuite/gas/elf/common5d.s
+
+diff --git a/gas/read.c b/gas/read.c
+index 9627ef513b..0b0b05803c 100644
+--- a/gas/read.c
++++ b/gas/read.c
+@@ -3870,7 +3870,7 @@ pseudo_set (symbolS *symbolP)
+ 	  symbolS *s = exp.X_add_symbol;
+ 
+ 	  if (S_IS_COMMON (s))
+-	    as_bad (_("`%s' can't be equated to common symbol '%s'"),
++	    as_bad (_("`%s' can't be equated to common symbol `%s'"),
+ 		    S_GET_NAME (symbolP), S_GET_NAME (s));
+ 
+ 	  S_SET_SEGMENT (symbolP, seg);
+diff --git a/gas/testsuite/gas/elf/common5a.d b/gas/testsuite/gas/elf/common5a.d
+new file mode 100644
+index 0000000000..9c790e61af
+--- /dev/null
++++ b/gas/testsuite/gas/elf/common5a.d
+@@ -0,0 +1,5 @@
++#source: common5a.s
++#as: 
++#error-output: common5a.l
++#not-target: alpha-*-*
++# The Alpha target uses its own .set pseudo-insn.
+diff --git a/gas/testsuite/gas/elf/common5a.l b/gas/testsuite/gas/elf/common5a.l
+new file mode 100644
+index 0000000000..7574dc6a65
+--- /dev/null
++++ b/gas/testsuite/gas/elf/common5a.l
+@@ -0,0 +1,2 @@
++[^:]*: Assembler messages:
++[^:]*: Error: `foo1' can't be equated to common symbol `foo'
+diff --git a/gas/testsuite/gas/elf/common5a.s b/gas/testsuite/gas/elf/common5a.s
+new file mode 100644
+index 0000000000..d4b0acf36d
+--- /dev/null
++++ b/gas/testsuite/gas/elf/common5a.s
+@@ -0,0 +1,3 @@
++	.set	foo1,foo
++	.globl	foo1
++	.comm	foo,8,8
+diff --git a/gas/testsuite/gas/elf/common5b.d b/gas/testsuite/gas/elf/common5b.d
+new file mode 100644
+index 0000000000..b1dabdcb66
+--- /dev/null
++++ b/gas/testsuite/gas/elf/common5b.d
+@@ -0,0 +1,5 @@
++#source: common5b.s
++#as: 
++#error-output: common5b.l
++#not-target: alpha-*-*
++# The Alpha target uses its own .set pseudo-insn.
+diff --git a/gas/testsuite/gas/elf/common5b.l b/gas/testsuite/gas/elf/common5b.l
+new file mode 100644
+index 0000000000..171bed0693
+--- /dev/null
++++ b/gas/testsuite/gas/elf/common5b.l
+@@ -0,0 +1,2 @@
++[^:]*: Assembler messages:
++[^:]*:2: Error: `foo1' can't be equated to common symbol `foo'
+diff --git a/gas/testsuite/gas/elf/common5b.s b/gas/testsuite/gas/elf/common5b.s
+new file mode 100644
+index 0000000000..df79fcbca8
+--- /dev/null
++++ b/gas/testsuite/gas/elf/common5b.s
+@@ -0,0 +1,3 @@
++	.comm	foo,8,8
++	.set	foo1,foo
++	.globl	foo1
+diff --git a/gas/testsuite/gas/elf/common5c.d b/gas/testsuite/gas/elf/common5c.d
+new file mode 100644
+index 0000000000..1e106ad2e3
+--- /dev/null
++++ b/gas/testsuite/gas/elf/common5c.d
+@@ -0,0 +1,5 @@
++#source: common5c.s
++#as: 
++#error-output: common5a.l
++#not-target: alpha-*-*
++# The Alpha target uses its own .set pseudo-insn.
+diff --git a/gas/testsuite/gas/elf/common5c.s b/gas/testsuite/gas/elf/common5c.s
+new file mode 100644
+index 0000000000..fa9db8d584
+--- /dev/null
++++ b/gas/testsuite/gas/elf/common5c.s
+@@ -0,0 +1,2 @@
++	.set	foo1,foo
++	.comm	foo,8,8
+diff --git a/gas/testsuite/gas/elf/common5d.d b/gas/testsuite/gas/elf/common5d.d
+new file mode 100644
+index 0000000000..9f51636dbe
+--- /dev/null
++++ b/gas/testsuite/gas/elf/common5d.d
+@@ -0,0 +1,5 @@
++#source: common5d.s
++#as: 
++#error-output: common5b.l
++#not-target: alpha-*-*
++# The Alpha target uses its own .set pseudo-insn.
+diff --git a/gas/testsuite/gas/elf/common5d.s b/gas/testsuite/gas/elf/common5d.s
+new file mode 100644
+index 0000000000..6da5cb3bfe
+--- /dev/null
++++ b/gas/testsuite/gas/elf/common5d.s
+@@ -0,0 +1,2 @@
++	.comm	foo,8,8
++	.set	foo1,foo
+diff --git a/gas/testsuite/gas/elf/elf.exp b/gas/testsuite/gas/elf/elf.exp
+index 1284619dc2..6737486296 100644
+--- a/gas/testsuite/gas/elf/elf.exp
++++ b/gas/testsuite/gas/elf/elf.exp
+@@ -252,6 +252,10 @@ if { [is_elf_format] } then {
+ 	run_dump_test "common3b"
+ 	run_dump_test "common4a"
+ 	run_dump_test "common4b"
++	run_dump_test "common5a"
++	run_dump_test "common5b"
++	run_dump_test "common5c"
++	run_dump_test "common5d"
+     }
+ 
+     run_dump_test "strtab"
+diff --git a/gas/write.c b/gas/write.c
+index 8efdbc506f..4f6547dfb8 100644
+--- a/gas/write.c
++++ b/gas/write.c
+@@ -2107,12 +2107,11 @@ write_object_file (void)
+ 
+ 	      if (S_IS_COMMON (symp)
+ 		  && !TC_FAKE_LABEL (sname)
+-		  && !S_IS_WEAKREFR (symp)
+-		  && (!S_IS_EXTERNAL (symp) || S_IS_LOCAL (symp)))
++		  && !S_IS_WEAKREFR (symp))
+ 		{
+ 		  expressionS *e = symbol_get_value_expression (symp);
+ 
+-		  as_bad (_("Local symbol `%s' can't be equated to common symbol `%s'"),
++		  as_bad (_("`%s' can't be equated to common symbol `%s'"),
+ 			  sname, S_GET_NAME (e->X_add_symbol));
+ 		}
+ 	      if (S_GET_SEGMENT (symp) == reg_section)
+-- 
+2.13.4
+
