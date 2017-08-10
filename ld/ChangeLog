@@ -1,3 +1,10 @@
+2017-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/pep.sc: Enclose __CTOR_LIST__, ___CTOR_LIST__,
+	__DTOR_LIST__ and ___DTOR_LIST__ in PROVIDE statements so that
+	they can be overrridden by crt input files.
+	* scripttempl/pe.sc: Likewise.
+
 2017-08-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/config/default.exp (LD_CLASS): Check .libs/ld-new
