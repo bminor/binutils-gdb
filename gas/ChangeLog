@@ -1,3 +1,10 @@
+2017-08-10  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/21939
+	* config/obj-macho.c (obj_mach_o_set_indirect_symbols): Increase
+	size of indirect_syms array so that it is large enough to hold
+	every symbol if necessary.
+
 2017-08-09  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-arm.c (do_crc32_1): Remove warning on REG_SP for thumb_mode.
