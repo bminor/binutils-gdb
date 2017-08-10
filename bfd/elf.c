@@ -10997,7 +10997,7 @@ elf_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size)
 {
   char *buf;
 
-  if (size <= 0)
+  if (size == 0 || (size + 1) == 0)
     return TRUE;
 
   if (bfd_seek (abfd, offset, SEEK_SET) != 0)
