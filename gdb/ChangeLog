@@ -1,3 +1,7 @@
+2017-08-10  Pedro Alves  <palves@redhat.com>
+
+	* common/gdb_unique_ptr.h (xfree_deleter<T[]>): Define.
+
 2017-08-09  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c (struct fbsd_fork_info): Remove.
