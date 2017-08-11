@@ -6634,13 +6634,13 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 				 asymbol **dynsyms,
 				 asymbol **ret)
 {
-  long size, count, i, n;
+  long size, count, i, n, len;
   int j;
   unsigned int plt_got_offset, plt_entry_size, plt_got_insn_size;
   asymbol *s;
   bfd_byte *plt_contents;
   long dynrelcount, relsize;
-  arelent **dynrelbuf;
+  arelent **dynrelbuf, *p;
   const struct elf_x86_64_lazy_plt_layout *lazy_plt;
   const struct elf_x86_64_non_lazy_plt_layout *non_lazy_plt;
   const struct elf_x86_64_lazy_plt_layout *lazy_bnd_plt;
@@ -6821,6 +6821,17 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
     }
 
   size = count * sizeof (asymbol);
+
+  /* Allocate space for @plt suffixes.  */
+  n = 0;
+  for (i = 0; i < dynrelcount; i++)
+    {
+      p = dynrelbuf[i];
+      size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+      if (p->addend != 0)
+	size += sizeof ("+0x") - 1 + 8 + 8 * ABI_64_P (abfd);
+    }
+
   s = *ret = (asymbol *) bfd_zmalloc (size);
   if (s == NULL)
     {
@@ -6833,6 +6844,7 @@ bad_return:
     }
 
   /* Check for each PLT section.  */
+  names = (char *) (s + count);
   size = 0;
   n = 0;
   for (j = 0; plts[j].name != NULL; j++)
@@ -6865,7 +6877,6 @@ bad_return:
 	    int off;
 	    bfd_vma got_vma;
 	    long min, max, mid;
-	    arelent *p;
 
 	    /* Get the PC-relative offset, a signed 32-bit integer.  */
 	    off = H_GET_32 (abfd, (plt_contents + offset
@@ -6912,12 +6923,26 @@ bad_return:
 		s->section = plt;
 		s->the_bfd = plt->owner;
 		s->value = offset;
-		/* Store relocation for later use.  */
-		s->udata.p = p;
-		/* Add @plt to function name later.  */
-		size += strlen (s->name) + sizeof ("@plt");
+		s->udata.p = NULL;
+		s->name = names;
+		len = strlen ((*p->sym_ptr_ptr)->name);
+		memcpy (names, (*p->sym_ptr_ptr)->name, len);
+		names += len;
 		if (p->addend != 0)
-		  size += sizeof ("+0x") - 1 + 8 + 8 * ABI_64_P (abfd);
+		  {
+		    char buf[30], *a;
+
+		    memcpy (names, "+0x", sizeof ("+0x") - 1);
+		    names += sizeof ("+0x") - 1;
+		    bfd_sprintf_vma (abfd, buf, p->addend);
+		    for (a = buf; *a == '0'; ++a)
+		      ;
+		    size = strlen (a);
+		    memcpy (names, a, size);
+		    names += size;
+		  }
+		memcpy (names, "@plt", sizeof ("@plt"));
+		names += sizeof ("@plt");
 		n++;
 		s++;
 	      }
@@ -6930,40 +6955,6 @@ bad_return:
     goto bad_return;
 
   count = n;
-
-  /* Allocate space for @plt suffixes.  */
-  names = (char *) bfd_malloc (size);
-  if (s == NULL)
-    goto bad_return;
-
-  s = *ret;
-  for (i = 0; i < count; i++)
-    {
-      /* Add @plt to function name.  */
-      arelent *p = (arelent *) s->udata.p;
-      /* Clear it now.  */
-      s->udata.p = NULL;
-      size = strlen (s->name);
-      memcpy (names, s->name, size);
-      s->name = names;
-      names += size;
-      if (p->addend != 0)
-	{
-	  char buf[30], *a;
-
-	  memcpy (names, "+0x", sizeof ("+0x") - 1);
-	  names += sizeof ("+0x") - 1;
-	  bfd_sprintf_vma (abfd, buf, p->addend);
-	  for (a = buf; *a == '0'; ++a)
-	    ;
-	  size = strlen (a);
-	  memcpy (names, a, size);
-	  names += size;
-	}
-      memcpy (names, "@plt", sizeof ("@plt"));
-      names += sizeof ("@plt");
-      s++;
-    }
 
   for (j = 0; plts[j].name != NULL; j++)
     if (plts[j].contents != NULL)

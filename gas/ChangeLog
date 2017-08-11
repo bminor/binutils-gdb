@@ -1,3 +1,23 @@
+2017-08-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/21667
+	* read.c (pseudo_set): Update error message for alias of common
+	symbol.
+	* write.c (write_object_file): Disallow both local and global
+	aliases of common symbol.
+	* testsuite/gas/elf/common5a.d: New file.
+	* testsuite/gas/elf/common5a.l: Likewise.
+	* testsuite/gas/elf/common5a.s: Likewise.
+	* testsuite/gas/elf/common5b.d: Likewise.
+	* testsuite/gas/elf/common5b.l: Likewise.
+	* testsuite/gas/elf/common5b.s: Likewise.
+	* testsuite/gas/elf/common5c.d: Likewise.
+	* testsuite/gas/elf/common5c.s: Likewise.
+	* testsuite/gas/elf/common5d.d: Likewise.
+	* testsuite/gas/elf/common5d.s: Likewise.
+	* testsuite/gas/elf/elf.exp: Run common5a, common5b, common5c
+	and common5d.
+
 2017-08-10  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/21939

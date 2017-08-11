@@ -106,8 +106,11 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
     {
       res = unwinder->sniffer (unwinder, this_frame, this_cache);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  CATCH (ex, RETURN_MASK_ALL)
     {
+      /* Catch all exceptions, caused by either interrupt or error.
+	 Reset *THIS_CACHE.  */
+      *this_cache = NULL;
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{
 	  /* This usually means that not even the PC is available,
@@ -128,6 +131,8 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
     }
   else
     {
+      /* Don't set *THIS_CACHE to NULL here, because sniffer has to do
+	 so.  */
       do_cleanups (old_cleanup);
       return 0;
     }

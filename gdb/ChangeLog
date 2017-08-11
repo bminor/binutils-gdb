@@ -1,3 +1,99 @@
+2017-08-11  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (process_event_stop_test): Adjust
+	function_name_is_marked_for_skip call.
+	* skip.c: Include <list>.
+	(skiplist_entry): Make it a class with private fields, and
+	getters/setters.
+	(skiplist_entry_chain): Delete.
+	(skiplist_entries): New.
+	(skiplist_entry_count): Delete.
+	(highest_skiplist_entry_num): New.
+	(ALL_SKIPLIST_ENTRIES, ALL_SKIPLIST_ENTRIES_SAFE): Delete.
+	(add_skiplist_entry): Delete.
+	(skiplist_entry::skiplist_entry): New.
+	(skiplist_entry::add_entry): New.
+	(skip_file_command, skip_function): Adjust.
+	(compile_skip_regexp): Delete.
+	(skip_command): Don't compile regexp here.  Adjust to use
+	skiplist_entry::add_entry.
+	(skip_info): Adjust to use range-for and getters.
+	(skip_enable_command, skip_disable_command): Adjust to use
+	range-for and setters.
+	(skip_delete_command): Adjust to use std::list.
+	(add_skiplist_entry): Delete.
+	(skip_file_p): Delete, refactored as ...
+	(skiplist_entry::do_skip_file_p): ... this new method.
+	(skip_gfile_p): Delete, refactored as ...
+	(skiplist_entry::do_gskip_file_p): ... this new method.
+	(skip_function_p, skip_rfunction_p): Delete, refactored as ...
+	(skiplist_entry::skip_function_p): ... this new method.
+	(function_name_is_marked_for_skip): Now returns bool, and takes
+	the function sal by const reference.  Adjust to use range-for and
+	skiplist_entry methods.
+	(_initialize_step_skip): Remove references to
+	skiplist_entry_chain, skiplist_entry_count.
+	* skip.h (function_name_is_marked_for_skip): Now returns bool, and
+	takes the function sal by const reference.
+
+2017-08-11  Yao Qi  <yao.qi@linaro.org>
+
+	* dwarf2-frame.c (clear_pointer_cleanup): Remove.
+	(dwarf2_frame_cache): Remove reset_cache_cleanup.
+	(dwarf2_frame_cache):
+	* frame-unwind.c (frame_unwind_try_unwinder): Catch
+	RETURN_MASK_ALL and set *this_case to NULL.
+	* frame-unwind.h: Update comments.
+
+2017-08-11  Yao Qi  <yao.qi@linaro.org>
+
+	* dwarf2-frame.c (dwarf2_frame_state_alloc_regs): Remove.
+	(dwarf2_frame_state_copy_regs): Remove.
+	(dwarf2_frame_state_free_regs): Remove.
+	(dwarf2_frame_state::~dwarf2_frame_state): Remove.
+	(dwarf2_restore_rule): Call method .alloc_regs instead of
+	dwarf2_frame_state_alloc_regs.
+	(execute_cfa_program): Likewise.  Call dwarf2_frame_state_reg_info
+	constructor.  Call std::move.
+	(dwarf2_fetch_cfa_info): Don't call dwarf2_frame_state_copy_regs.
+	(dwarf2_frame_cache): Likewise.
+
+	[GDB_SELF_TEST]: Include selftest.h and
+	selftest-arch.h.
+	[GDB_SELF_TEST] (execute_cfa_program_test): New function.
+	(_initialize_dwarf2_frame) [GDB_SELF_TEST]: Register
+	execute_cfa_program_test.
+
+	* dwarf2-frame.h (dwarf2_frame_state_reg_info): Add ctor, dtor,
+	copy ctor, assignment operator, move assignment.
+	<alloc_regs>: New method.
+	<swap>: New method.
+	(struct dwarf2_frame_state): Delete dtor.
+	(dwarf2_frame_state_alloc_regs): Remove declaration.
+	* sparc-tdep.c (sparc_execute_dwarf_cfa_vendor_op): Don't call
+	dwarf2_frame_state_alloc_regs, use .alloc_regs instead.
+
+2017-08-11  Yao Qi  <yao.qi@linaro.org>
+
+	* dwarf2-frame.c (dwarf2_frame_state_free): Remove.
+	(dwarf2_frame_state::dwarf2_frame_state): New.
+	(dwarf2_frame_state::~dwarf2_frame_state): New.
+	(dwarf2_fetch_cfa_info): Update.
+	(dwarf2_frame_cache): Remove old_chain.  Change 'fs' to an object
+	rather than a pointer.  Update code.
+	* dwarf2-frame.h (struct dwarf2_frame_state): Declare ctor and
+	dtor.
+	<data_align, code_align, retaddr_column>: Change them to const.
+	<armcc_cfa_offsets_sf, armcc_cfa_offsets_reversed>: Change them
+	to bool.
+
+2017-08-11  Yao Qi  <yao.qi@linaro.org>
+
+	* dwarf2-frame.h (struct dwarf2_frame_state_reg) <exp_len>: Remove.
+	<loc.exp>: New field.
+	* dwarf2-frame.c (execute_cfa_program): Update.
+	(dwarf2_frame_prev_register): Update.
+
 2017-08-10  Pedro Alves  <palves@redhat.com>
 
 	* common/gdb_unique_ptr.h (xfree_deleter<T[]>): Define.
