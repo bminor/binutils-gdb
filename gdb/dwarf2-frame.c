@@ -960,20 +960,9 @@ struct dwarf2_frame_cache
   int entry_cfa_sp_offset_p;
 };
 
-/* A cleanup that sets a pointer to NULL.  */
-
-static void
-clear_pointer_cleanup (void *arg)
-{
-  void **ptr = (void **) arg;
-
-  *ptr = NULL;
-}
-
 static struct dwarf2_frame_cache *
 dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
-  struct cleanup *reset_cache_cleanup;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   const int num_regs = gdbarch_num_regs (gdbarch)
 		       + gdbarch_num_pseudo_regs (gdbarch);
@@ -989,7 +978,6 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = FRAME_OBSTACK_ZALLOC (struct dwarf2_frame_cache);
   cache->reg = FRAME_OBSTACK_CALLOC (num_regs, struct dwarf2_frame_state_reg);
   *this_cache = cache;
-  reset_cache_cleanup = make_cleanup (clear_pointer_cleanup, this_cache);
 
   /* Unwind the PC.
 
@@ -1078,7 +1066,6 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{
 	  cache->unavailable_retaddr = 1;
-	  discard_cleanups (reset_cache_cleanup);
 	  return cache;
 	}
 
@@ -1184,7 +1171,6 @@ incomplete CFI data; unspecified registers (e.g., %s) at %s"),
       && fs.regs.reg[fs.retaddr_column].how == DWARF2_FRAME_REG_UNDEFINED)
     cache->undefined_retaddr = 1;
 
-  discard_cleanups (reset_cache_cleanup);
   return cache;
 }
 

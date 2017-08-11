@@ -1,5 +1,14 @@
 2017-08-11  Yao Qi  <yao.qi@linaro.org>
 
+	* dwarf2-frame.c (clear_pointer_cleanup): Remove.
+	(dwarf2_frame_cache): Remove reset_cache_cleanup.
+	(dwarf2_frame_cache):
+	* frame-unwind.c (frame_unwind_try_unwinder): Catch
+	RETURN_MASK_ALL and set *this_case to NULL.
+	* frame-unwind.h: Update comments.
+
+2017-08-11  Yao Qi  <yao.qi@linaro.org>
+
 	* dwarf2-frame.c (dwarf2_frame_state_alloc_regs): Remove.
 	(dwarf2_frame_state_copy_regs): Remove.
 	(dwarf2_frame_state_free_regs): Remove.
