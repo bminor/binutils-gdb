@@ -1,3 +1,13 @@
+2017-08-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21884
+	* testsuite/ld-i386/i386.exp: Run pr21884.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr21884.d: New file.
+	* testsuite/ld-i386/pr21884.t: Likewise.
+	* testsuite/ld-x86-64/pr21884.d: Likewise.
+	* testsuite/ld-x86-64/pr21884.t: Likewise.
+
 2017-08-10  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/pep.sc: Enclose __CTOR_LIST__, ___CTOR_LIST__,
