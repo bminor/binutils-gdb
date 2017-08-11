@@ -1,3 +1,16 @@
+2017-08-11  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/elf32.em (handle_option): Accept the -z globalaudit
+	command line option.
+	* lexsup.c (elf_static_list_options): Add -z globalaudit.
+	* ld.texinfo: Document the support for the new command line
+	option.
+	* NEWS: Mention the new feature.
+	* testsuite/ld-elf/audit.exp: Add a test of the -z globalaudit
+	command line option.
+	* testsuite/ld-elf/globalaudit.rd: New file: Expected output from
+	readelf.
+
 2017-08-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21884

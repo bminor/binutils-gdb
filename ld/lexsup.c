@@ -1828,6 +1828,8 @@ elf_static_list_options (FILE *file)
   -z execstack                Mark executable as requiring executable stack\n"));
   fprintf (file, _("\
   -z noexecstack              Mark executable as not requiring executable stack\n"));
+  fprintf (file, _("\
+  -z globalaudit              Mark executable requiring global auditing\n"));
 }
 
 static void

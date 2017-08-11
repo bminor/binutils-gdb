@@ -1136,6 +1136,14 @@ This option is only meaningful when building a shared object.  It makes
 the symbols defined by this shared object available for symbol resolution
 of subsequently loaded libraries.
 
+@item globalaudit
+This option is only meaningful when building a dynamic executable.
+This option marks the executable as requiring global auditing by
+setting the @code{DF_1_GLOBAUDIT} bit in the @code{DT_FLAGS_1} dynamic
+tag.  Global auditing requires that any auditing library defined via
+the @option{--depaudit} or @option{-P} command line options be run for
+all dynamic objects loaded by the application. 
+
 @item initfirst
 This option is only meaningful when building a shared object.
 It marks the object so that its runtime initialization will occur
