@@ -1,3 +1,10 @@
+2017-08-11  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR breakpoints/21886
+	* mem-break.c (default_memory_insert_breakpoint): Use
+	`->placed_address' rather than `->reqstd_address' for the
+	breakpoint location.
+
 2017-07-25  Yao Qi  <yao.qi@linaro.org>
 
 	PR gdb/21555
