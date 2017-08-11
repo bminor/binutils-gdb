@@ -2064,7 +2064,6 @@ info_spu_event_command (char *args, int from_tty)
   struct frame_info *frame = get_selected_frame (NULL);
   ULONGEST event_status = 0;
   ULONGEST event_mask = 0;
-  struct cleanup *chain;
   gdb_byte buf[100];
   char annex[32];
   LONGEST len;
@@ -2091,7 +2090,7 @@ info_spu_event_command (char *args, int from_tty)
   buf[len] = '\0';
   event_mask = strtoulst ((char *) buf, NULL, 16);
  
-  chain = make_cleanup_ui_out_tuple_begin_end (current_uiout, "SPUInfoEvent");
+  ui_out_emit_tuple tuple_emitter (current_uiout, "SPUInfoEvent");
 
   if (current_uiout->is_mi_like_p ())
     {
@@ -2105,8 +2104,6 @@ info_spu_event_command (char *args, int from_tty)
       printf_filtered (_("Event Status 0x%s\n"), phex (event_status, 4));
       printf_filtered (_("Event Mask   0x%s\n"), phex (event_mask, 4));
     }
-
-  do_cleanups (chain);
 }
 
 static void
@@ -2121,7 +2118,6 @@ info_spu_signal_command (char *args, int from_tty)
   ULONGEST signal2 = 0;
   ULONGEST signal2_type = 0;
   int signal2_pending = 0;
-  struct cleanup *chain;
   char annex[32];
   gdb_byte buf[100];
   LONGEST len;
@@ -2168,7 +2164,7 @@ info_spu_signal_command (char *args, int from_tty)
   buf[len] = '\0';
   signal2_type = strtoulst ((char *) buf, NULL, 16);
 
-  chain = make_cleanup_ui_out_tuple_begin_end (current_uiout, "SPUInfoSignal");
+  ui_out_emit_tuple tuple_emitter (current_uiout, "SPUInfoSignal");
 
   if (current_uiout->is_mi_like_p ())
     {
@@ -2201,8 +2197,6 @@ info_spu_signal_command (char *args, int from_tty)
       else
 	printf_filtered (_("(Type Overwrite)\n"));
     }
-
-  do_cleanups (chain);
 }
 
 static void
@@ -2239,7 +2233,6 @@ info_spu_mailbox_command (char *args, int from_tty)
   struct frame_info *frame = get_selected_frame (NULL);
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct cleanup *chain;
   char annex[32];
   gdb_byte buf[1024];
   LONGEST len;
@@ -2250,7 +2243,7 @@ info_spu_mailbox_command (char *args, int from_tty)
 
   id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
 
-  chain = make_cleanup_ui_out_tuple_begin_end (current_uiout, "SPUInfoMailbox");
+  ui_out_emit_tuple tuple_emitter (current_uiout, "SPUInfoMailbox");
 
   xsnprintf (annex, sizeof annex, "%d/mbox_info", id);
   len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
@@ -2278,8 +2271,6 @@ info_spu_mailbox_command (char *args, int from_tty)
 
   info_spu_mailbox_list (buf, len / 4, byte_order,
 			 "wbox", "SPU Inbound Mailbox");
-
-  do_cleanups (chain);
 }
 
 static ULONGEST
@@ -2475,7 +2466,6 @@ info_spu_dma_command (char *args, int from_tty)
   ULONGEST dma_info_status;
   ULONGEST dma_info_stall_and_notify;
   ULONGEST dma_info_atomic_command_status;
-  struct cleanup *chain;
   char annex[32];
   gdb_byte buf[1024];
   LONGEST len;
@@ -2503,7 +2493,7 @@ info_spu_dma_command (char *args, int from_tty)
   dma_info_atomic_command_status
     = extract_unsigned_integer (buf + 32, 8, byte_order);
   
-  chain = make_cleanup_ui_out_tuple_begin_end (current_uiout, "SPUInfoDMA");
+  ui_out_emit_tuple tuple_emitter (current_uiout, "SPUInfoDMA");
 
   if (current_uiout->is_mi_like_p ())
     {
@@ -2542,7 +2532,6 @@ info_spu_dma_command (char *args, int from_tty)
     }
 
   info_spu_dma_cmdlist (buf + 40, 16, byte_order);
-  do_cleanups (chain);
 }
 
 static void
@@ -2554,7 +2543,6 @@ info_spu_proxydma_command (char *args, int from_tty)
   ULONGEST dma_info_type;
   ULONGEST dma_info_mask;
   ULONGEST dma_info_status;
-  struct cleanup *chain;
   char annex[32];
   gdb_byte buf[1024];
   LONGEST len;
@@ -2575,8 +2563,7 @@ info_spu_proxydma_command (char *args, int from_tty)
   dma_info_mask = extract_unsigned_integer (buf + 8, 8, byte_order);
   dma_info_status = extract_unsigned_integer (buf + 16, 8, byte_order);
   
-  chain = make_cleanup_ui_out_tuple_begin_end (current_uiout,
-					       "SPUInfoProxyDMA");
+  ui_out_emit_tuple tuple_emitter (current_uiout, "SPUInfoProxyDMA");
 
   if (current_uiout->is_mi_like_p ())
     {
@@ -2607,7 +2594,6 @@ info_spu_proxydma_command (char *args, int from_tty)
     }
 
   info_spu_dma_cmdlist (buf + 24, 8, byte_order);
-  do_cleanups (chain);
 }
 
 static void

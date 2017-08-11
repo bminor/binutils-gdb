@@ -3926,9 +3926,7 @@ flash_erase_command (char *cmd, int from_tty)
           found_flash_region = true;
           target_flash_erase (m->lo, m->hi - m->lo);
 
-	  struct cleanup *cleanup_tuple
-	      = make_cleanup_ui_out_tuple_begin_end (current_uiout,
-						     "erased-regions");
+	  ui_out_emit_tuple tuple_emitter (current_uiout, "erased-regions");
 
           current_uiout->message (_("Erasing flash memory region at address "));
           current_uiout->field_fmt ("address", "%s", paddress (gdbarch,
@@ -3936,7 +3934,6 @@ flash_erase_command (char *cmd, int from_tty)
           current_uiout->message (", size = ");
           current_uiout->field_fmt ("size", "%s", hex_string (m->hi - m->lo));
           current_uiout->message ("\n");
-          do_cleanups (cleanup_tuple);
         }
     }
 

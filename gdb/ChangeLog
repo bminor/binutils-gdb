@@ -1,5 +1,18 @@
 2017-09-09  Tom Tromey  <tom@tromey.com>
 
+	* target.c (flash_erase_command): Use ui_out_emit_tuple.
+	* stack.c (print_frame): Use ui_out_emit_tuple.
+	* spu-tdep.c (info_spu_event_command): Use ui_out_emit_tuple.
+	(info_spu_mailbox_command, info_spu_dma_command)
+	(info_spu_proxydma_command): Likewise.
+	* mi/mi-main.c (mi_cmd_trace_frame_collected): Use
+	ui_out_emit_tuple, gdb::byte_vector, bin2hex.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_shared_libraries): Use
+	ui_out_emit_tuple.
+	* breakpoint.c (print_it_watchpoint): Use ui_out_emit_tuple.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
 	* ui-out.h (make_cleanup_ui_out_table_begin_end): Remove.
 	(class ui_out_emit_table): Update comment.
 	* ui-out.c (do_cleanup_table_end)

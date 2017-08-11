@@ -1139,7 +1139,7 @@ print_frame (struct frame_info *frame, int print_level,
   struct ui_out *uiout = current_uiout;
   char *funname = NULL;
   enum language funlang = language_unknown;
-  struct cleanup *old_chain, *list_chain;
+  struct cleanup *old_chain;
   struct value_print_options opts;
   struct symbol *func;
   CORE_ADDR pc = 0;
@@ -1154,107 +1154,107 @@ print_frame (struct frame_info *frame, int print_level,
   annotate_frame_begin (print_level ? frame_relative_level (frame) : 0,
 			gdbarch, pc);
 
-  list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
+  {
+    ui_out_emit_tuple tuple_emitter (uiout, "frame");
 
-  if (print_level)
-    {
-      uiout->text ("#");
-      uiout->field_fmt_int (2, ui_left, "level",
-			    frame_relative_level (frame));
-    }
-  get_user_print_options (&opts);
-  if (opts.addressprint)
-    if (!sal.symtab
-	|| frame_show_address (frame, sal)
-	|| print_what == LOC_AND_ADDRESS)
+    if (print_level)
       {
-	annotate_frame_address ();
-	if (pc_p)
-	  uiout->field_core_addr ("addr", gdbarch, pc);
+	uiout->text ("#");
+	uiout->field_fmt_int (2, ui_left, "level",
+			      frame_relative_level (frame));
+      }
+    get_user_print_options (&opts);
+    if (opts.addressprint)
+      if (!sal.symtab
+	  || frame_show_address (frame, sal)
+	  || print_what == LOC_AND_ADDRESS)
+	{
+	  annotate_frame_address ();
+	  if (pc_p)
+	    uiout->field_core_addr ("addr", gdbarch, pc);
+	  else
+	    uiout->field_string ("addr", "<unavailable>");
+	  annotate_frame_address_end ();
+	  uiout->text (" in ");
+	}
+    annotate_frame_function_name ();
+
+    string_file stb;
+    fprintf_symbol_filtered (&stb, funname ? funname : "??",
+			     funlang, DMGL_ANSI);
+    uiout->field_stream ("func", stb);
+    uiout->wrap_hint ("   ");
+    annotate_frame_args ();
+      
+    uiout->text (" (");
+    if (print_args)
+      {
+	struct gdbarch *gdbarch = get_frame_arch (frame);
+	int numargs;
+
+	if (gdbarch_frame_num_args_p (gdbarch))
+	  {
+	    numargs = gdbarch_frame_num_args (gdbarch, frame);
+	    gdb_assert (numargs >= 0);
+	  }
 	else
-	  uiout->field_string ("addr", "<unavailable>");
-	annotate_frame_address_end ();
-	uiout->text (" in ");
-      }
-  annotate_frame_function_name ();
-
-  string_file stb;
-  fprintf_symbol_filtered (&stb, funname ? funname : "??",
-			   funlang, DMGL_ANSI);
-  uiout->field_stream ("func", stb);
-  uiout->wrap_hint ("   ");
-  annotate_frame_args ();
-      
-  uiout->text (" (");
-  if (print_args)
-    {
-      struct gdbarch *gdbarch = get_frame_arch (frame);
-      int numargs;
-
-      if (gdbarch_frame_num_args_p (gdbarch))
-	{
-	  numargs = gdbarch_frame_num_args (gdbarch, frame);
-	  gdb_assert (numargs >= 0);
-	}
-      else
-	numargs = -1;
+	  numargs = -1;
     
-      {
-	ui_out_emit_list list_emitter (uiout, "args");
-	TRY
-	  {
-	    print_frame_args (func, frame, numargs, gdb_stdout);
-	  }
-	CATCH (e, RETURN_MASK_ERROR)
-	  {
-	  }
-	END_CATCH
+	{
+	  ui_out_emit_list list_emitter (uiout, "args");
+	  TRY
+	    {
+	      print_frame_args (func, frame, numargs, gdb_stdout);
+	    }
+	  CATCH (e, RETURN_MASK_ERROR)
+	    {
+	    }
+	  END_CATCH
 
-	/* FIXME: ARGS must be a list.  If one argument is a string it
-	   will have " that will not be properly escaped.  */
+	    /* FIXME: ARGS must be a list.  If one argument is a string it
+	       will have " that will not be properly escaped.  */
+	    }
+	QUIT;
       }
-      QUIT;
-    }
-  uiout->text (")");
-  if (sal.symtab)
-    {
-      const char *filename_display;
+    uiout->text (")");
+    if (sal.symtab)
+      {
+	const char *filename_display;
       
-      filename_display = symtab_to_filename_for_display (sal.symtab);
-      annotate_frame_source_begin ();
-      uiout->wrap_hint ("   ");
-      uiout->text (" at ");
-      annotate_frame_source_file ();
-      uiout->field_string ("file", filename_display);
-      if (uiout->is_mi_like_p ())
-	{
-	  const char *fullname = symtab_to_fullname (sal.symtab);
+	filename_display = symtab_to_filename_for_display (sal.symtab);
+	annotate_frame_source_begin ();
+	uiout->wrap_hint ("   ");
+	uiout->text (" at ");
+	annotate_frame_source_file ();
+	uiout->field_string ("file", filename_display);
+	if (uiout->is_mi_like_p ())
+	  {
+	    const char *fullname = symtab_to_fullname (sal.symtab);
 
-	  uiout->field_string ("fullname", fullname);
-	}
-      annotate_frame_source_file_end ();
-      uiout->text (":");
-      annotate_frame_source_line ();
-      uiout->field_int ("line", sal.line);
-      annotate_frame_source_end ();
-    }
+	    uiout->field_string ("fullname", fullname);
+	  }
+	annotate_frame_source_file_end ();
+	uiout->text (":");
+	annotate_frame_source_line ();
+	uiout->field_int ("line", sal.line);
+	annotate_frame_source_end ();
+      }
 
-  if (pc_p && (funname == NULL || sal.symtab == NULL))
-    {
-      char *lib = solib_name_from_address (get_frame_program_space (frame),
-					   get_frame_pc (frame));
+    if (pc_p && (funname == NULL || sal.symtab == NULL))
+      {
+	char *lib = solib_name_from_address (get_frame_program_space (frame),
+					     get_frame_pc (frame));
 
-      if (lib)
-	{
-	  annotate_frame_where ();
-	  uiout->wrap_hint ("  ");
-	  uiout->text (" from ");
-	  uiout->field_string ("from", lib);
-	}
-    }
+	if (lib)
+	  {
+	    annotate_frame_where ();
+	    uiout->wrap_hint ("  ");
+	    uiout->text (" from ");
+	    uiout->field_string ("from", lib);
+	  }
+      }
+  }
 
-  /* do_cleanups will call ui_out_tuple_end() for us.  */
-  do_cleanups (list_chain);
   uiout->text ("\n");
   do_cleanups (old_chain);
 }
