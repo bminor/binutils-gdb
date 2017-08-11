@@ -1343,22 +1343,19 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
 	  }
 	else
 	  {
-	    struct cleanup *str_cleanup;
-	    char *contents;
+	    std::string contents;
 
 	    if (extra_info && name)
-	      contents = xstrprintf ("%s \"%s\" (%s)", target_id,
-				     name, extra_info);
+	      contents = string_printf ("%s \"%s\" (%s)", target_id,
+					name, extra_info);
 	    else if (extra_info)
-	      contents = xstrprintf ("%s (%s)", target_id, extra_info);
+	      contents = string_printf ("%s (%s)", target_id, extra_info);
 	    else if (name)
-	      contents = xstrprintf ("%s \"%s\"", target_id, name);
+	      contents = string_printf ("%s \"%s\"", target_id, name);
 	    else
-	      contents = xstrdup (target_id);
-	    str_cleanup = make_cleanup (xfree, contents);
+	      contents = target_id;
 
-	    uiout->field_string ("target-id", contents);
-	    do_cleanups (str_cleanup);
+	    uiout->field_string ("target-id", contents.c_str ());
 	  }
 
 	if (tp->state == THREAD_RUNNING)
@@ -1701,8 +1698,6 @@ tp_array_compar (const thread_info *a, const thread_info *b)
 static void
 thread_apply_all_command (char *cmd, int from_tty)
 {
-  char *saved_cmd;
-
   tp_array_compar_ascending = false;
   if (cmd != NULL
       && check_for_argument (&cmd, "-ascending", strlen ("-ascending")))
@@ -1718,8 +1713,7 @@ thread_apply_all_command (char *cmd, int from_tty)
 
   /* Save a copy of the command in case it is clobbered by
      execute_command.  */
-  saved_cmd = xstrdup (cmd);
-  make_cleanup (xfree, saved_cmd);
+  std::string saved_cmd = cmd;
 
   int tc = live_threads_count ();
   if (tc != 0)
@@ -1761,7 +1755,7 @@ thread_apply_all_command (char *cmd, int from_tty)
 	    execute_command (cmd, from_tty);
 
 	    /* Restore exact command used previously.  */
-	    strcpy (cmd, saved_cmd);
+	    strcpy (cmd, saved_cmd.c_str ());
 	  }
     }
 }
@@ -1772,8 +1766,6 @@ static void
 thread_apply_command (char *tidlist, int from_tty)
 {
   char *cmd = NULL;
-  struct cleanup *old_chain;
-  char *saved_cmd;
   tid_range_parser parser;
 
   if (tidlist == NULL || *tidlist == '\000')
@@ -1799,8 +1791,7 @@ thread_apply_command (char *tidlist, int from_tty)
 
   /* Save a copy of the command in case it is clobbered by
      execute_command.  */
-  saved_cmd = xstrdup (cmd);
-  old_chain = make_cleanup (xfree, saved_cmd);
+  std::string saved_cmd = cmd;
 
   scoped_restore_current_thread restore_thread;
 
@@ -1857,10 +1848,8 @@ thread_apply_command (char *tidlist, int from_tty)
       execute_command (cmd, from_tty);
 
       /* Restore exact command used previously.  */
-      strcpy (cmd, saved_cmd);
+      strcpy (cmd, saved_cmd.c_str ());
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Switch to the specified thread.  Will dispatch off to thread_apply_command
