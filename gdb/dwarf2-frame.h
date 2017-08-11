@@ -74,11 +74,14 @@ struct dwarf2_frame_state_reg
   union {
     LONGEST offset;
     ULONGEST reg;
-    const gdb_byte *exp;
+    struct
+    {
+      const gdb_byte *start;
+      ULONGEST len;
+    } exp;
     struct value *(*fn) (struct frame_info *this_frame, void **this_cache,
 			 int regnum);
   } loc;
-  ULONGEST exp_len;
   enum dwarf2_frame_reg_rule how;
 };
 

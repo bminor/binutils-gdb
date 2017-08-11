@@ -1,3 +1,10 @@
+2017-08-11  Yao Qi  <yao.qi@linaro.org>
+
+	* dwarf2-frame.h (struct dwarf2_frame_state_reg) <exp_len>: Remove.
+	<loc.exp>: New field.
+	* dwarf2-frame.c (execute_cfa_program): Update.
+	(dwarf2_frame_prev_register): Update.
+
 2017-08-10  Pedro Alves  <palves@redhat.com>
 
 	* common/gdb_unique_ptr.h (xfree_deleter<T[]>): Define.

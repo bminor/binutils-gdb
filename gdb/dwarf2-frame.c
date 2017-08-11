@@ -561,8 +561,8 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 	      reg = dwarf2_frame_adjust_regnum (gdbarch, reg, eh_frame_p);
 	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &utmp);
-	      fs->regs.reg[reg].loc.exp = insn_ptr;
-	      fs->regs.reg[reg].exp_len = utmp;
+	      fs->regs.reg[reg].loc.exp.start = insn_ptr;
+	      fs->regs.reg[reg].loc.exp.len = utmp;
 	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_EXP;
 	      insn_ptr += utmp;
 	      break;
@@ -599,8 +599,8 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &reg);
 	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &utmp);
-	      fs->regs.reg[reg].loc.exp = insn_ptr;
-	      fs->regs.reg[reg].exp_len = utmp;
+	      fs->regs.reg[reg].loc.exp.start = insn_ptr;
+	      fs->regs.reg[reg].loc.exp.len = utmp;
 	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_VAL_EXP;
 	      insn_ptr += utmp;
 	      break;
@@ -1286,8 +1286,8 @@ dwarf2_frame_prev_register (struct frame_info *this_frame, void **this_cache,
       return frame_unwind_got_register (this_frame, regnum, realnum);
 
     case DWARF2_FRAME_REG_SAVED_EXP:
-      addr = execute_stack_op (cache->reg[regnum].loc.exp,
-			       cache->reg[regnum].exp_len,
+      addr = execute_stack_op (cache->reg[regnum].loc.exp.start,
+			       cache->reg[regnum].loc.exp.len,
 			       cache->addr_size, cache->text_offset,
 			       this_frame, cache->cfa, 1);
       return frame_unwind_got_memory (this_frame, regnum, addr);
@@ -1297,8 +1297,8 @@ dwarf2_frame_prev_register (struct frame_info *this_frame, void **this_cache,
       return frame_unwind_got_constant (this_frame, regnum, addr);
 
     case DWARF2_FRAME_REG_SAVED_VAL_EXP:
-      addr = execute_stack_op (cache->reg[regnum].loc.exp,
-			       cache->reg[regnum].exp_len,
+      addr = execute_stack_op (cache->reg[regnum].loc.exp.start,
+			       cache->reg[regnum].loc.exp.len,
 			       cache->addr_size, cache->text_offset,
 			       this_frame, cache->cfa, 1);
       return frame_unwind_got_constant (this_frame, regnum, addr);
