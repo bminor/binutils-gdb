@@ -1,3 +1,10 @@
+2017-08-14  Tom Tromey  <tom@tromey.com>
+
+	* break-catch-throw.c (handle_gnu_v3_exceptions): Use std::move.
+	* break-catch-syscall.c (create_syscall_event_catchpoint): Use
+	std::move.
+	* break-catch-sig.c (create_signal_catchpoint): Use std::move.
+
 2017-08-11  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (process_event_stop_test): Adjust

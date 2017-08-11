@@ -382,7 +382,7 @@ handle_gnu_v3_exceptions (int tempflag, std::string &&except_rx,
      the right thing.  */
   cp->type = bp_breakpoint;
   cp->kind = ex_event;
-  cp->exception_rx = except_rx;
+  cp->exception_rx = std::move (except_rx);
   cp->pattern = std::move (pattern);
 
   re_set_exception_catchpoint (cp.get ());
