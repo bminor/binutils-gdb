@@ -1,5 +1,10 @@
 2017-09-09  Tom Tromey  <tom@tromey.com>
 
+	* disasm.c (gdb_pretty_print_disassembler::pretty_print_insn): Use
+	ui_out_emit_tuple.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
 	* target.c (flash_erase_command): Use ui_out_emit_tuple.
 	* stack.c (print_frame): Use ui_out_emit_tuple.
 	* spu-tdep.c (info_spu_event_command): Use ui_out_emit_tuple.
