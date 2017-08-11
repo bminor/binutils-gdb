@@ -1,5 +1,13 @@
 2017-09-09  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-main.c (output_cores): Use ui_out_emit_list.
+	(list_available_thread_groups, mi_cmd_list_thread_groups)
+	(mi_cmd_data_list_changed_registers, mi_cmd_data_read_memory)
+	(mi_cmd_data_read_memory_bytes, mi_cmd_trace_frame_collected):
+	Likewise.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
 	* disasm.c (gdb_pretty_print_disassembler::pretty_print_insn): Use
 	ui_out_emit_tuple.
 
