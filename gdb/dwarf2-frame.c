@@ -38,6 +38,10 @@
 #include "ax.h"
 #include "dwarf2loc.h"
 #include "dwarf2-frame-tailcall.h"
+#if GDB_SELF_TEST
+#include "selftest.h"
+#include "selftest-arch.h"
+#endif
 
 struct comp_unit;
 
@@ -169,68 +173,11 @@ static CORE_ADDR read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
    which is unused in that case.  */
 #define cfa_exp_len cfa_reg
 
-/* Assert that the register set RS is large enough to store gdbarch_num_regs
-   columns.  If necessary, enlarge the register set.  */
-
-void
-dwarf2_frame_state_alloc_regs (struct dwarf2_frame_state_reg_info *rs,
-			       int num_regs)
-{
-  size_t size = sizeof (struct dwarf2_frame_state_reg);
-
-  if (num_regs <= rs->num_regs)
-    return;
-
-  rs->reg = (struct dwarf2_frame_state_reg *)
-    xrealloc (rs->reg, num_regs * size);
-
-  /* Initialize newly allocated registers.  */
-  memset (rs->reg + rs->num_regs, 0, (num_regs - rs->num_regs) * size);
-  rs->num_regs = num_regs;
-}
-
-/* Copy the register columns in register set RS into newly allocated
-   memory and return a pointer to this newly created copy.  */
-
-static struct dwarf2_frame_state_reg *
-dwarf2_frame_state_copy_regs (struct dwarf2_frame_state_reg_info *rs)
-{
-  size_t size = rs->num_regs * sizeof (struct dwarf2_frame_state_reg);
-  struct dwarf2_frame_state_reg *reg;
-
-  reg = (struct dwarf2_frame_state_reg *) xmalloc (size);
-  memcpy (reg, rs->reg, size);
-
-  return reg;
-}
-
-/* Release the memory allocated to register set RS.  */
-
-static void
-dwarf2_frame_state_free_regs (struct dwarf2_frame_state_reg_info *rs)
-{
-  if (rs)
-    {
-      dwarf2_frame_state_free_regs (rs->prev);
-
-      xfree (rs->reg);
-      xfree (rs);
-    }
-}
-
 dwarf2_frame_state::dwarf2_frame_state (CORE_ADDR pc_, struct dwarf2_cie *cie)
   : pc (pc_), data_align (cie->data_alignment_factor),
     code_align (cie->code_alignment_factor),
     retaddr_column (cie->return_address_register)
 {
-}
-
-dwarf2_frame_state::~dwarf2_frame_state ()
-{
-  dwarf2_frame_state_free_regs (initial.prev);
-  dwarf2_frame_state_free_regs (regs.prev);
-  xfree (initial.reg);
-  xfree (regs.reg);
 }
 
 
@@ -255,7 +202,7 @@ dwarf2_restore_rule (struct gdbarch *gdbarch, ULONGEST reg_num,
 
   gdb_assert (fs->initial.reg);
   reg = dwarf2_frame_adjust_regnum (gdbarch, reg_num, eh_frame_p);
-  dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+  fs->regs.alloc_regs (reg + 1);
 
   /* Check if this register was explicitly initialized in the
   CIE initial instructions.  If not, default the rule to
@@ -409,7 +356,7 @@ execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 	  reg = dwarf2_frame_adjust_regnum (gdbarch, reg, eh_frame_p);
 	  insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &utmp);
 	  offset = utmp * fs->data_align;
-	  dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	  fs->regs.alloc_regs (reg + 1);
 	  fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_OFFSET;
 	  fs->regs.reg[reg].loc.offset = offset;
 	}
@@ -453,7 +400,7 @@ execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 	      reg = dwarf2_frame_adjust_regnum (gdbarch, reg, eh_frame_p);
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &utmp);
 	      offset = utmp * fs->data_align;
-	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.alloc_regs (reg + 1);
 	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_OFFSET;
 	      fs->regs.reg[reg].loc.offset = offset;
 	      break;
@@ -466,14 +413,14 @@ execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 	    case DW_CFA_undefined:
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &reg);
 	      reg = dwarf2_frame_adjust_regnum (gdbarch, reg, eh_frame_p);
-	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.alloc_regs (reg + 1);
 	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_UNDEFINED;
 	      break;
 
 	    case DW_CFA_same_value:
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &reg);
 	      reg = dwarf2_frame_adjust_regnum (gdbarch, reg, eh_frame_p);
-	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.alloc_regs (reg + 1);
 	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAME_VALUE;
 	      break;
 
@@ -482,7 +429,7 @@ execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 	      reg = dwarf2_frame_adjust_regnum (gdbarch, reg, eh_frame_p);
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &utmp);
 	      utmp = dwarf2_frame_adjust_regnum (gdbarch, utmp, eh_frame_p);
-	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.alloc_regs (reg + 1);
 	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_REG;
 	      fs->regs.reg[reg].loc.reg = utmp;
 	      break;
@@ -491,9 +438,7 @@ execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 	      {
 		struct dwarf2_frame_state_reg_info *new_rs;
 
-		new_rs = XNEW (struct dwarf2_frame_state_reg_info);
-		*new_rs = fs->regs;
-		fs->regs.reg = dwarf2_frame_state_copy_regs (&fs->regs);
+		new_rs = new dwarf2_frame_state_reg_info (fs->regs);
 		fs->regs.prev = new_rs;
 	      }
 	      break;
@@ -509,11 +454,7 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 			       paddress (gdbarch, fs->pc));
 		  }
 		else
-		  {
-		    xfree (fs->regs.reg);
-		    fs->regs = *old_rs;
-		    xfree (old_rs);
-		  }
+		  fs->regs = std::move (*old_rs);
 	      }
 	      break;
 
@@ -560,7 +501,7 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 	    case DW_CFA_expression:
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &reg);
 	      reg = dwarf2_frame_adjust_regnum (gdbarch, reg, eh_frame_p);
-	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.alloc_regs (reg + 1);
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &utmp);
 	      fs->regs.reg[reg].loc.exp.start = insn_ptr;
 	      fs->regs.reg[reg].loc.exp.len = utmp;
@@ -573,14 +514,14 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 	      reg = dwarf2_frame_adjust_regnum (gdbarch, reg, eh_frame_p);
 	      insn_ptr = safe_read_sleb128 (insn_ptr, insn_end, &offset);
 	      offset *= fs->data_align;
-	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.alloc_regs (reg + 1);
 	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_OFFSET;
 	      fs->regs.reg[reg].loc.offset = offset;
 	      break;
 
 	    case DW_CFA_val_offset:
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &reg);
-	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.alloc_regs (reg + 1);
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &utmp);
 	      offset = utmp * fs->data_align;
 	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_VAL_OFFSET;
@@ -589,7 +530,7 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 
 	    case DW_CFA_val_offset_sf:
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &reg);
-	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.alloc_regs (reg + 1);
 	      insn_ptr = safe_read_sleb128 (insn_ptr, insn_end, &offset);
 	      offset *= fs->data_align;
 	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_VAL_OFFSET;
@@ -598,7 +539,7 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 
 	    case DW_CFA_val_expression:
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &reg);
-	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.alloc_regs (reg + 1);
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &utmp);
 	      fs->regs.reg[reg].loc.exp.start = insn_ptr;
 	      fs->regs.reg[reg].loc.exp.len = utmp;
@@ -631,7 +572,7 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 	      reg = dwarf2_frame_adjust_regnum (gdbarch, reg, eh_frame_p);
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &utmp);
 	      offset = utmp * fs->data_align;
-	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.alloc_regs (reg + 1);
 	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_OFFSET;
 	      fs->regs.reg[reg].loc.offset = -offset;
 	      break;
@@ -655,12 +596,73 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
   if (fs->initial.reg == NULL)
     {
       /* Don't allow remember/restore between CIE and FDE programs.  */
-      dwarf2_frame_state_free_regs (fs->regs.prev);
+      delete fs->regs.prev;
       fs->regs.prev = NULL;
     }
 
   return insn_ptr;
 }
+
+#if GDB_SELF_TEST
+
+namespace selftests {
+
+/* Unit test to function execute_cfa_program.  */
+
+static void
+execute_cfa_program_test (struct gdbarch *gdbarch)
+{
+  struct dwarf2_fde fde;
+  struct dwarf2_cie cie;
+
+  memset (&fde, 0, sizeof fde);
+  memset (&cie, 0, sizeof cie);
+
+  cie.data_alignment_factor = -4;
+  cie.code_alignment_factor = 2;
+  fde.cie = &cie;
+
+  dwarf2_frame_state fs (0, fde.cie);
+
+  gdb_byte insns[] =
+    {
+      DW_CFA_def_cfa, 1, 4,  /* DW_CFA_def_cfa: r1 ofs 4 */
+      DW_CFA_offset | 0x2, 1,  /* DW_CFA_offset: r2 at cfa-4 */
+      DW_CFA_remember_state,
+      DW_CFA_restore_state,
+    };
+
+  const gdb_byte *insn_end = insns + sizeof (insns);
+  const gdb_byte *out = execute_cfa_program (&fde, insns, insn_end, gdbarch,
+					     0, &fs);
+
+  SELF_CHECK (out == insn_end);
+  SELF_CHECK (fs.pc == 0);
+
+  /* The instructions above only use r1 and r2, but the register numbers
+     used are adjusted by dwarf2_frame_adjust_regnum.  */
+  auto r1 = dwarf2_frame_adjust_regnum (gdbarch, 1, fde.eh_frame_p);
+  auto r2 = dwarf2_frame_adjust_regnum (gdbarch, 2, fde.eh_frame_p);
+
+  SELF_CHECK (fs.regs.num_regs == (std::max (r1, r2) + 1));
+
+  SELF_CHECK (fs.regs.reg[r2].how == DWARF2_FRAME_REG_SAVED_OFFSET);
+  SELF_CHECK (fs.regs.reg[r2].loc.offset == -4);
+
+  for (auto i = 0; i < fs.regs.num_regs; i++)
+    if (i != r2)
+      SELF_CHECK (fs.regs.reg[i].how == DWARF2_FRAME_REG_UNSPECIFIED);
+
+  SELF_CHECK (fs.regs.cfa_reg == 1);
+  SELF_CHECK (fs.regs.cfa_offset == 4);
+  SELF_CHECK (fs.regs.cfa_how == CFA_REG_OFFSET);
+  SELF_CHECK (fs.regs.cfa_exp == NULL);
+  SELF_CHECK (fs.regs.prev == NULL);
+}
+
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
+
 
 
 /* Architecture-specific operations.  */
@@ -884,7 +886,6 @@ dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
 
   /* Save the initialized register set.  */
   fs.initial = fs.regs;
-  fs.initial.reg = dwarf2_frame_state_copy_regs (&fs.regs);
 
   /* Then decode the insns in the FDE up to our target PC.  */
   execute_cfa_program (fde, fde->instructions, fde->end, gdbarch, pc, &fs);
@@ -1026,7 +1027,6 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   /* Save the initialized register set.  */
   fs.initial = fs.regs;
-  fs.initial.reg = dwarf2_frame_state_copy_regs (&fs.regs);
 
   if (get_frame_func_if_available (this_frame, &entry_pc))
     {
@@ -2418,4 +2418,8 @@ _initialize_dwarf2_frame (void)
 {
   dwarf2_frame_data = gdbarch_data_register_pre_init (dwarf2_frame_init);
   dwarf2_frame_objfile_data = register_objfile_data ();
+
+#if GDB_SELF_TEST
+  register_self_test_foreach_arch (selftests::execute_cfa_program_test);
+#endif
 }

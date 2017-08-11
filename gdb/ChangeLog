@@ -1,5 +1,33 @@
 2017-08-11  Yao Qi  <yao.qi@linaro.org>
 
+	* dwarf2-frame.c (dwarf2_frame_state_alloc_regs): Remove.
+	(dwarf2_frame_state_copy_regs): Remove.
+	(dwarf2_frame_state_free_regs): Remove.
+	(dwarf2_frame_state::~dwarf2_frame_state): Remove.
+	(dwarf2_restore_rule): Call method .alloc_regs instead of
+	dwarf2_frame_state_alloc_regs.
+	(execute_cfa_program): Likewise.  Call dwarf2_frame_state_reg_info
+	constructor.  Call std::move.
+	(dwarf2_fetch_cfa_info): Don't call dwarf2_frame_state_copy_regs.
+	(dwarf2_frame_cache): Likewise.
+
+	[GDB_SELF_TEST]: Include selftest.h and
+	selftest-arch.h.
+	[GDB_SELF_TEST] (execute_cfa_program_test): New function.
+	(_initialize_dwarf2_frame) [GDB_SELF_TEST]: Register
+	execute_cfa_program_test.
+
+	* dwarf2-frame.h (dwarf2_frame_state_reg_info): Add ctor, dtor,
+	copy ctor, assignment operator, move assignment.
+	<alloc_regs>: New method.
+	<swap>: New method.
+	(struct dwarf2_frame_state): Delete dtor.
+	(dwarf2_frame_state_alloc_regs): Remove declaration.
+	* sparc-tdep.c (sparc_execute_dwarf_cfa_vendor_op): Don't call
+	dwarf2_frame_state_alloc_regs, use .alloc_regs instead.
+
+2017-08-11  Yao Qi  <yao.qi@linaro.org>
+
 	* dwarf2-frame.c (dwarf2_frame_state_free): Remove.
 	(dwarf2_frame_state::dwarf2_frame_state): New.
 	(dwarf2_frame_state::~dwarf2_frame_state): New.

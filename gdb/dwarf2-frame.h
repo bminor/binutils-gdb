@@ -94,16 +94,85 @@ enum cfa_how_kind
 
 struct dwarf2_frame_state_reg_info
 {
-  struct dwarf2_frame_state_reg *reg;
-  int num_regs;
+  dwarf2_frame_state_reg_info () = default;
+  ~dwarf2_frame_state_reg_info ()
+  {
+    delete prev;
+    xfree (reg);
+  }
 
-  LONGEST cfa_offset;
-  ULONGEST cfa_reg;
-  enum cfa_how_kind cfa_how;
-  const gdb_byte *cfa_exp;
+  /* Copy constructor.  */
+  dwarf2_frame_state_reg_info (const dwarf2_frame_state_reg_info &src)
+    : num_regs (src.num_regs), cfa_offset (src.cfa_offset),
+      cfa_reg (src.cfa_reg), cfa_how (src.cfa_how), cfa_exp (src.cfa_exp),
+      prev (src.prev)
+  {
+    size_t size = src.num_regs * sizeof (struct dwarf2_frame_state_reg);
+
+    reg = (struct dwarf2_frame_state_reg *) xmalloc (size);
+    memcpy (reg, src.reg, size);
+  }
+
+  /* Assignment operator for both move-assignment and copy-assignment.  */
+  dwarf2_frame_state_reg_info&
+  operator= (dwarf2_frame_state_reg_info rhs)
+  {
+    swap (*this, rhs);
+    return *this;
+  }
+
+  /* Move constructor.  */
+  dwarf2_frame_state_reg_info (dwarf2_frame_state_reg_info &&rhs) noexcept
+    : reg (rhs.reg), num_regs (rhs.num_regs), cfa_offset (rhs.cfa_offset),
+      cfa_reg (rhs.cfa_reg), cfa_how (rhs.cfa_how), cfa_exp (rhs.cfa_exp),
+      prev (rhs.prev)
+  {
+    rhs.prev = nullptr;
+    rhs.reg = nullptr;
+  }
+
+/* Assert that the register set RS is large enough to store gdbarch_num_regs
+   columns.  If necessary, enlarge the register set.  */
+  void alloc_regs (int num_regs_requested)
+  {
+    if (num_regs_requested <= num_regs)
+      return;
+
+    size_t size = sizeof (struct dwarf2_frame_state_reg);
+
+    reg = (struct dwarf2_frame_state_reg *)
+      xrealloc (reg, num_regs_requested * size);
+
+    /* Initialize newly allocated registers.  */
+    memset (reg + num_regs, 0, (num_regs_requested - num_regs) * size);
+    num_regs = num_regs_requested;
+  }
+
+  struct dwarf2_frame_state_reg *reg = NULL;
+  int num_regs = 0;
+
+  LONGEST cfa_offset = 0;
+  ULONGEST cfa_reg = 0;
+  enum cfa_how_kind cfa_how = CFA_UNSET;
+  const gdb_byte *cfa_exp = NULL;
 
   /* Used to implement DW_CFA_remember_state.  */
-  struct dwarf2_frame_state_reg_info *prev;
+  struct dwarf2_frame_state_reg_info *prev = NULL;
+
+private:
+  friend void swap (dwarf2_frame_state_reg_info& lhs,
+		    dwarf2_frame_state_reg_info& rhs)
+  {
+    using std::swap;
+
+    swap (lhs.reg, rhs.reg);
+    swap (lhs.num_regs, rhs.num_regs);
+    swap (lhs.cfa_offset, rhs.cfa_offset);
+    swap (lhs.cfa_reg, rhs.cfa_reg);
+    swap (lhs.cfa_how, rhs.cfa_how);
+    swap (lhs.cfa_exp, rhs.cfa_exp);
+    swap (lhs.prev, rhs.prev);
+  }
 };
 
 struct dwarf2_cie;
@@ -113,7 +182,6 @@ struct dwarf2_cie;
 struct dwarf2_frame_state
 {
   dwarf2_frame_state (CORE_ADDR pc, struct dwarf2_cie *cie);
-  ~dwarf2_frame_state ();
 
   /* Each register save state can be described in terms of a CFA slot,
      another register, or a location expression.  */
@@ -179,12 +247,6 @@ extern const struct frame_base *
 /* Compute the DWARF CFA for a frame.  */
 
 CORE_ADDR dwarf2_frame_cfa (struct frame_info *this_frame);
-
-/* Assert that the register set RS is large enough to store gdbarch_num_regs
-   columns.  If necessary, enlarge the register set.  */
-
-void dwarf2_frame_state_alloc_regs (struct dwarf2_frame_state_reg_info *rs,
-				    int num_regs);
 
 /* Find the CFA information for PC.
 
