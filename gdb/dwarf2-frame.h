@@ -106,35 +106,40 @@ struct dwarf2_frame_state_reg_info
   struct dwarf2_frame_state_reg_info *prev;
 };
 
+struct dwarf2_cie;
+
 /* Structure describing a frame state.  */
 
 struct dwarf2_frame_state
 {
+  dwarf2_frame_state (CORE_ADDR pc, struct dwarf2_cie *cie);
+  ~dwarf2_frame_state ();
+
   /* Each register save state can be described in terms of a CFA slot,
      another register, or a location expression.  */
-  struct dwarf2_frame_state_reg_info regs;
+  struct dwarf2_frame_state_reg_info regs {};
 
   /* The PC described by the current frame state.  */
   CORE_ADDR pc;
 
   /* Initial register set from the CIE.
      Used to implement DW_CFA_restore.  */
-  struct dwarf2_frame_state_reg_info initial;
+  struct dwarf2_frame_state_reg_info initial {};
 
   /* The information we care about from the CIE.  */
-  LONGEST data_align;
-  ULONGEST code_align;
-  ULONGEST retaddr_column;
+  const LONGEST data_align;
+  const ULONGEST code_align;
+  const ULONGEST retaddr_column;
 
   /* Flags for known producer quirks.  */
 
   /* The ARM compilers, in DWARF2 mode, assume that DW_CFA_def_cfa
      and DW_CFA_def_cfa_offset takes a factored offset.  */
-  int armcc_cfa_offsets_sf;
+  bool armcc_cfa_offsets_sf = false;
 
   /* The ARM compilers, in DWARF2 or DWARF3 mode, may assume that
      the CFA is defined as REG - OFFSET rather than REG + OFFSET.  */
-  int armcc_cfa_offsets_reversed;
+  bool armcc_cfa_offsets_reversed = false;
 };
 
 /* Set the architecture-specific register state initialization

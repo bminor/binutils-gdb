@@ -218,18 +218,19 @@ dwarf2_frame_state_free_regs (struct dwarf2_frame_state_reg_info *rs)
     }
 }
 
-/* Release the memory allocated to the frame state FS.  */
-
-static void
-dwarf2_frame_state_free (void *p)
+dwarf2_frame_state::dwarf2_frame_state (CORE_ADDR pc_, struct dwarf2_cie *cie)
+  : pc (pc_), data_align (cie->data_alignment_factor),
+    code_align (cie->code_alignment_factor),
+    retaddr_column (cie->return_address_register)
 {
-  struct dwarf2_frame_state *fs = (struct dwarf2_frame_state *) p;
+}
 
-  dwarf2_frame_state_free_regs (fs->initial.prev);
-  dwarf2_frame_state_free_regs (fs->regs.prev);
-  xfree (fs->initial.reg);
-  xfree (fs->regs.reg);
-  xfree (fs);
+dwarf2_frame_state::~dwarf2_frame_state ()
+{
+  dwarf2_frame_state_free_regs (initial.prev);
+  dwarf2_frame_state_free_regs (regs.prev);
+  xfree (initial.reg);
+  xfree (regs.reg);
 }
 
 
@@ -865,21 +866,14 @@ dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
 {
   struct dwarf2_fde *fde;
   CORE_ADDR text_offset;
-  struct dwarf2_frame_state fs;
-
-  memset (&fs, 0, sizeof (struct dwarf2_frame_state));
-
-  fs.pc = pc;
+  CORE_ADDR pc1 = pc;
 
   /* Find the correct FDE.  */
-  fde = dwarf2_frame_find_fde (&fs.pc, &text_offset);
+  fde = dwarf2_frame_find_fde (&pc1, &text_offset);
   if (fde == NULL)
     error (_("Could not compute CFA; needed to translate this expression"));
 
-  /* Extract any interesting information from the CIE.  */
-  fs.data_align = fde->cie->data_alignment_factor;
-  fs.code_align = fde->cie->code_alignment_factor;
-  fs.retaddr_column = fde->cie->return_address_register;
+  dwarf2_frame_state fs (pc1, fde->cie);
 
   /* Check for "quirks" - known bugs in producers.  */
   dwarf2_frame_find_quirks (&fs, fde);
@@ -978,12 +972,11 @@ clear_pointer_cleanup (void *arg)
 static struct dwarf2_frame_cache *
 dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
-  struct cleanup *reset_cache_cleanup, *old_chain;
+  struct cleanup *reset_cache_cleanup;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   const int num_regs = gdbarch_num_regs (gdbarch)
 		       + gdbarch_num_pseudo_regs (gdbarch);
   struct dwarf2_frame_cache *cache;
-  struct dwarf2_frame_state *fs;
   struct dwarf2_fde *fde;
   CORE_ADDR entry_pc;
   const gdb_byte *instr;
@@ -996,10 +989,6 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache->reg = FRAME_OBSTACK_CALLOC (num_regs, struct dwarf2_frame_state_reg);
   *this_cache = cache;
   reset_cache_cleanup = make_cleanup (clear_pointer_cleanup, this_cache);
-
-  /* Allocate and initialize the frame state.  */
-  fs = XCNEW (struct dwarf2_frame_state);
-  old_chain = make_cleanup (dwarf2_frame_state_free, fs);
 
   /* Unwind the PC.
 
@@ -1016,41 +1005,40 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
      get_frame_address_in_block does just this.  It's not clear how
      reliable the method is though; there is the potential for the
      register state pre-call being different to that on return.  */
-  fs->pc = get_frame_address_in_block (this_frame);
+  CORE_ADDR pc1 = get_frame_address_in_block (this_frame);
 
   /* Find the correct FDE.  */
-  fde = dwarf2_frame_find_fde (&fs->pc, &cache->text_offset);
+  fde = dwarf2_frame_find_fde (&pc1, &cache->text_offset);
   gdb_assert (fde != NULL);
 
-  /* Extract any interesting information from the CIE.  */
-  fs->data_align = fde->cie->data_alignment_factor;
-  fs->code_align = fde->cie->code_alignment_factor;
-  fs->retaddr_column = fde->cie->return_address_register;
+  /* Allocate and initialize the frame state.  */
+  struct dwarf2_frame_state fs (pc1, fde->cie);
+
   cache->addr_size = fde->cie->addr_size;
 
   /* Check for "quirks" - known bugs in producers.  */
-  dwarf2_frame_find_quirks (fs, fde);
+  dwarf2_frame_find_quirks (&fs, fde);
 
   /* First decode all the insns in the CIE.  */
   execute_cfa_program (fde, fde->cie->initial_instructions,
 		       fde->cie->end, gdbarch,
-		       get_frame_address_in_block (this_frame), fs);
+		       get_frame_address_in_block (this_frame), &fs);
 
   /* Save the initialized register set.  */
-  fs->initial = fs->regs;
-  fs->initial.reg = dwarf2_frame_state_copy_regs (&fs->regs);
+  fs.initial = fs.regs;
+  fs.initial.reg = dwarf2_frame_state_copy_regs (&fs.regs);
 
   if (get_frame_func_if_available (this_frame, &entry_pc))
     {
       /* Decode the insns in the FDE up to the entry PC.  */
       instr = execute_cfa_program (fde, fde->instructions, fde->end, gdbarch,
-				   entry_pc, fs);
+				   entry_pc, &fs);
 
-      if (fs->regs.cfa_how == CFA_REG_OFFSET
-	  && (dwarf_reg_to_regnum (gdbarch, fs->regs.cfa_reg)
+      if (fs.regs.cfa_how == CFA_REG_OFFSET
+	  && (dwarf_reg_to_regnum (gdbarch, fs.regs.cfa_reg)
 	      == gdbarch_sp_regnum (gdbarch)))
 	{
-	  cache->entry_cfa_sp_offset = fs->regs.cfa_offset;
+	  cache->entry_cfa_sp_offset = fs.regs.cfa_offset;
 	  cache->entry_cfa_sp_offset_p = 1;
 	}
     }
@@ -1059,24 +1047,24 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   /* Then decode the insns in the FDE up to our target PC.  */
   execute_cfa_program (fde, instr, fde->end, gdbarch,
-		       get_frame_address_in_block (this_frame), fs);
+		       get_frame_address_in_block (this_frame), &fs);
 
   TRY
     {
       /* Calculate the CFA.  */
-      switch (fs->regs.cfa_how)
+      switch (fs.regs.cfa_how)
 	{
 	case CFA_REG_OFFSET:
-	  cache->cfa = read_addr_from_reg (this_frame, fs->regs.cfa_reg);
-	  if (fs->armcc_cfa_offsets_reversed)
-	    cache->cfa -= fs->regs.cfa_offset;
+	  cache->cfa = read_addr_from_reg (this_frame, fs.regs.cfa_reg);
+	  if (fs.armcc_cfa_offsets_reversed)
+	    cache->cfa -= fs.regs.cfa_offset;
 	  else
-	    cache->cfa += fs->regs.cfa_offset;
+	    cache->cfa += fs.regs.cfa_offset;
 	  break;
 
 	case CFA_EXP:
 	  cache->cfa =
-	    execute_stack_op (fs->regs.cfa_exp, fs->regs.cfa_exp_len,
+	    execute_stack_op (fs.regs.cfa_exp, fs.regs.cfa_exp_len,
 			      cache->addr_size, cache->text_offset,
 			      this_frame, 0, 0);
 	  break;
@@ -1090,7 +1078,6 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{
 	  cache->unavailable_retaddr = 1;
-	  do_cleanups (old_chain);
 	  discard_cleanups (reset_cache_cleanup);
 	  return cache;
 	}
@@ -1114,7 +1101,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   {
     int column;		/* CFI speak for "register number".  */
 
-    for (column = 0; column < fs->regs.num_regs; column++)
+    for (column = 0; column < fs.regs.num_regs; column++)
       {
 	/* Use the GDB register number as the destination index.  */
 	int regnum = dwarf_reg_to_regnum (gdbarch, column);
@@ -1134,16 +1121,16 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 	   problems when a debug info register falls outside of the
 	   table.  We need a way of iterating through all the valid
 	   DWARF2 register numbers.  */
-	if (fs->regs.reg[column].how == DWARF2_FRAME_REG_UNSPECIFIED)
+	if (fs.regs.reg[column].how == DWARF2_FRAME_REG_UNSPECIFIED)
 	  {
 	    if (cache->reg[regnum].how == DWARF2_FRAME_REG_UNSPECIFIED)
 	      complaint (&symfile_complaints, _("\
 incomplete CFI data; unspecified registers (e.g., %s) at %s"),
 			 gdbarch_register_name (gdbarch, regnum),
-			 paddress (gdbarch, fs->pc));
+			 paddress (gdbarch, fs.pc));
 	  }
 	else
-	  cache->reg[regnum] = fs->regs.reg[column];
+	  cache->reg[regnum] = fs.regs.reg[column];
       }
   }
 
@@ -1158,7 +1145,7 @@ incomplete CFI data; unspecified registers (e.g., %s) at %s"),
 	    || cache->reg[regnum].how == DWARF2_FRAME_REG_RA_OFFSET)
 	  {
 	    struct dwarf2_frame_state_reg *retaddr_reg =
-	      &fs->regs.reg[fs->retaddr_column];
+	      &fs.regs.reg[fs.retaddr_column];
 
 	    /* It seems rather bizarre to specify an "empty" column as
                the return adress column.  However, this is exactly
@@ -1167,7 +1154,7 @@ incomplete CFI data; unspecified registers (e.g., %s) at %s"),
                register corresponding to the return address column.
                Incidentally, that's how we should treat a return
                address column specifying "same value" too.  */
-	    if (fs->retaddr_column < fs->regs.num_regs
+	    if (fs.retaddr_column < fs.regs.num_regs
 		&& retaddr_reg->how != DWARF2_FRAME_REG_UNSPECIFIED
 		&& retaddr_reg->how != DWARF2_FRAME_REG_SAME_VALUE)
 	      {
@@ -1180,12 +1167,12 @@ incomplete CFI data; unspecified registers (e.g., %s) at %s"),
 	      {
 		if (cache->reg[regnum].how == DWARF2_FRAME_REG_RA)
 		  {
-		    cache->reg[regnum].loc.reg = fs->retaddr_column;
+		    cache->reg[regnum].loc.reg = fs.retaddr_column;
 		    cache->reg[regnum].how = DWARF2_FRAME_REG_SAVED_REG;
 		  }
 		else
 		  {
-		    cache->retaddr_reg.loc.reg = fs->retaddr_column;
+		    cache->retaddr_reg.loc.reg = fs.retaddr_column;
 		    cache->retaddr_reg.how = DWARF2_FRAME_REG_SAVED_REG;
 		  }
 	      }
@@ -1193,11 +1180,10 @@ incomplete CFI data; unspecified registers (e.g., %s) at %s"),
       }
   }
 
-  if (fs->retaddr_column < fs->regs.num_regs
-      && fs->regs.reg[fs->retaddr_column].how == DWARF2_FRAME_REG_UNDEFINED)
+  if (fs.retaddr_column < fs.regs.num_regs
+      && fs.regs.reg[fs.retaddr_column].how == DWARF2_FRAME_REG_UNDEFINED)
     cache->undefined_retaddr = 1;
 
-  do_cleanups (old_chain);
   discard_cleanups (reset_cache_cleanup);
   return cache;
 }
