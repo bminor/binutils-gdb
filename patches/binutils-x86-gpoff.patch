@@ -1,4 +1,4 @@
-From 996ab985b8a31f029e00becac2fa046c9d504e8f Mon Sep 17 00:00:00 2001
+From 8a03433660ddfa653228b57ae8d93c03e9a3f02b Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Thu, 3 Aug 2017 09:43:28 -0700
 Subject: [PATCH] x86: Add R_X86_64_GPOFF/R_386_GPOFF relocation
@@ -261,7 +261,7 @@ ld/
  create mode 100644 ld/testsuite/ld-x86-64/gpoff-8f.d
 
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index f1fcd21072..2c6e36684d 100644
+index d5477c4215..578dbe6e2c 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
 @@ -150,9 +150,12 @@ static reloc_howto_type elf_howto_table[]=
@@ -433,7 +433,7 @@ index f1fcd21072..2c6e36684d 100644
    return elf_i386_finish_dynamic_symbol (info->output_bfd, info,
  					 h, NULL);
  }
-@@ -7146,12 +7217,124 @@ elf_i386_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+@@ -7137,12 +7208,124 @@ elf_i386_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
  				FALSE, FALSE, FALSE);
        if (h != NULL)
  	((struct elf_i386_link_hash_entry *) h)->tls_get_addr = 1;
@@ -558,7 +558,7 @@ index f1fcd21072..2c6e36684d 100644
  #define TARGET_LITTLE_SYM		i386_elf32_vec
  #define TARGET_LITTLE_NAME		"elf32-i386"
  #define ELF_ARCH			bfd_arch_i386
-@@ -7183,6 +7366,7 @@ elf_i386_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+@@ -7174,6 +7357,7 @@ elf_i386_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
  #define bfd_elf32_bfd_reloc_name_lookup	      elf_i386_reloc_name_lookup
  #define bfd_elf32_get_synthetic_symtab	      elf_i386_get_synthetic_symtab
  #define bfd_elf32_bfd_link_check_relocs	      elf_i386_link_check_relocs
@@ -567,7 +567,7 @@ index f1fcd21072..2c6e36684d 100644
  #define elf_backend_adjust_dynamic_symbol     elf_i386_adjust_dynamic_symbol
  #define elf_backend_relocs_compatible	      _bfd_elf_relocs_compatible
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index 83643842ee..53369a8fc2 100644
+index 8a6bd6285c..6b120d39f1 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
 @@ -183,12 +183,15 @@ static reloc_howto_type x86_64_elf_howto_table[] =
@@ -742,7 +742,7 @@ index 83643842ee..53369a8fc2 100644
  }
  
  /* Finish up undefined weak symbol handling in PIE.  Fill its PLT entry
-@@ -7705,12 +7772,131 @@ elf_x86_64_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+@@ -7696,12 +7763,131 @@ elf_x86_64_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
  				FALSE, FALSE, FALSE);
        if (h != NULL)
  	((struct elf_x86_64_link_hash_entry *) h)->tls_get_addr = 1;
@@ -874,7 +874,7 @@ index 83643842ee..53369a8fc2 100644
  static const struct bfd_elf_special_section
  elf_x86_64_special_sections[]=
  {
-@@ -7776,6 +7962,7 @@ elf_x86_64_special_sections[]=
+@@ -7767,6 +7953,7 @@ elf_x86_64_special_sections[]=
  #define bfd_elf64_mkobject		    elf_x86_64_mkobject
  #define bfd_elf64_get_synthetic_symtab	    elf_x86_64_get_synthetic_symtab
  #define bfd_elf64_bfd_link_check_relocs	    elf_x86_64_link_check_relocs
@@ -882,7 +882,7 @@ index 83643842ee..53369a8fc2 100644
  
  #define elf_backend_section_from_shdr \
  	elf_x86_64_section_from_shdr
-@@ -8077,6 +8264,8 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
+@@ -8068,6 +8255,8 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
    elf_x86_64_get_synthetic_symtab
  #define bfd_elf32_bfd_link_check_relocs \
    elf_x86_64_link_check_relocs
@@ -1760,13 +1760,13 @@ index 0000000000..6cc4a52403
 + +[a-f0-9]+:[ \t]+8d 83 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%ebx\),%eax
 +#pass
 diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
-index 060a7e9dd4..4dd0aa27e4 100644
+index 34f03e0470..6d70d26be5 100644
 --- a/ld/testsuite/ld-i386/i386.exp
 +++ b/ld/testsuite/ld-i386/i386.exp
-@@ -437,6 +437,17 @@ run_dump_test "property-x86-shstk4"
- run_dump_test "property-x86-shstk5"
+@@ -438,6 +438,17 @@ run_dump_test "property-x86-shstk5"
  run_dump_test "pie1"
  run_dump_test "pie1-nacl"
+ run_dump_test "pr21884"
 +run_dump_test "gpoff-3"
 +run_dump_test "gpoff-4"
 +run_dump_test "gpoff-5"
@@ -1781,7 +1781,7 @@ index 060a7e9dd4..4dd0aa27e4 100644
  
  if { !([istarget "i?86-*-linux*"]
         || [istarget "i?86-*-gnu*"]
-@@ -1266,6 +1277,67 @@ if { [isnative]
+@@ -1267,6 +1278,67 @@ if { [isnative]
  	    ] \
  	]
      }
@@ -2327,10 +2327,10 @@ index 0000000000..fb8c3375b8
 + +[a-f0-9]+:[ \t]+48 8d 05 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%rip\),%rax[ \t]+# [a-f0-9]+ <foo>
 +#pass
 diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
-index 0375da6aa6..214e23c176 100644
+index 0009fe321b..131aab2710 100644
 --- a/ld/testsuite/ld-x86-64/x86-64.exp
 +++ b/ld/testsuite/ld-x86-64/x86-64.exp
-@@ -567,6 +567,17 @@ run_dump_test "pr20253-4f"
+@@ -568,6 +568,17 @@ run_dump_test "pr20253-4f"
  run_dump_test "pr20253-5a"
  run_dump_test "pr20253-5b"
  run_dump_test "tlsdesc2"
@@ -2348,7 +2348,7 @@ index 0375da6aa6..214e23c176 100644
  
  proc undefined_weak {cflags ldflags} {
      set testname "Undefined weak symbol"
-@@ -1530,6 +1541,67 @@ if { [isnative] && [which $CC] != 0 } {
+@@ -1531,6 +1542,67 @@ if { [isnative] && [which $CC] != 0 } {
  	}
      }
  
