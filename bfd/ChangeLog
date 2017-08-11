@@ -1,3 +1,10 @@
+2017-08-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/21943
+	* elf32-i386.c (elf_i386_get_synthetic_symtab): Allocate space
+	for @plt suffixes first.
+	* elf64-x86-64.c (elf_x86_64_get_synthetic_symtab): Likewise.
+
 2017-08-08  Nick Clifton  <nickc@redhat.com>
 
 	PR 21916
