@@ -1,3 +1,41 @@
+2017-08-11  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (process_event_stop_test): Adjust
+	function_name_is_marked_for_skip call.
+	* skip.c: Include <list>.
+	(skiplist_entry): Make it a class with private fields, and
+	getters/setters.
+	(skiplist_entry_chain): Delete.
+	(skiplist_entries): New.
+	(skiplist_entry_count): Delete.
+	(highest_skiplist_entry_num): New.
+	(ALL_SKIPLIST_ENTRIES, ALL_SKIPLIST_ENTRIES_SAFE): Delete.
+	(add_skiplist_entry): Delete.
+	(skiplist_entry::skiplist_entry): New.
+	(skiplist_entry::add_entry): New.
+	(skip_file_command, skip_function): Adjust.
+	(compile_skip_regexp): Delete.
+	(skip_command): Don't compile regexp here.  Adjust to use
+	skiplist_entry::add_entry.
+	(skip_info): Adjust to use range-for and getters.
+	(skip_enable_command, skip_disable_command): Adjust to use
+	range-for and setters.
+	(skip_delete_command): Adjust to use std::list.
+	(add_skiplist_entry): Delete.
+	(skip_file_p): Delete, refactored as ...
+	(skiplist_entry::do_skip_file_p): ... this new method.
+	(skip_gfile_p): Delete, refactored as ...
+	(skiplist_entry::do_gskip_file_p): ... this new method.
+	(skip_function_p, skip_rfunction_p): Delete, refactored as ...
+	(skiplist_entry::skip_function_p): ... this new method.
+	(function_name_is_marked_for_skip): Now returns bool, and takes
+	the function sal by const reference.  Adjust to use range-for and
+	skiplist_entry methods.
+	(_initialize_step_skip): Remove references to
+	skiplist_entry_chain, skiplist_entry_count.
+	* skip.h (function_name_is_marked_for_skip): Now returns bool, and
+	takes the function sal by const reference.
+
 2017-08-11  Yao Qi  <yao.qi@linaro.org>
 
 	* dwarf2-frame.c (clear_pointer_cleanup): Remove.
