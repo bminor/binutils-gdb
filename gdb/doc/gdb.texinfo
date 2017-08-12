@@ -2157,7 +2157,7 @@ This command is available when debugging locally on most targets, excluding
 @item set startup-with-shell
 @itemx set startup-with-shell on
 @itemx set startup-with-shell off
-@itemx show set startup-with-shell
+@itemx show startup-with-shell
 On Unix systems, by default, if a shell is available on your target,
 @value{GDBN}) uses it to start your program.  Arguments of the
 @code{run} command are passed to the shell, which does variable

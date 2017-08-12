@@ -1,3 +1,9 @@
+2017-08-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21925
+	* gdb.texinfo (Starting) <startup-with-shell>: Fix typo ("show
+	set...").
+
 2017-08-09  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (Packets): Fix Z0 cmd_list doc referring to
