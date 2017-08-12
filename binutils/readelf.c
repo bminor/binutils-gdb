@@ -17465,8 +17465,11 @@ process_note (Elf_Internal_Note *  pnote,
 
   printf ("  ");
 
-  if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
-      || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC)
+  if (((const_strneq (pnote->namedata, "GA")
+	&& strchr ("*$!+", pnote->namedata[2]) != NULL)
+       || strchr ("*$!+", pnote->namedata[0]) != NULL)
+      && (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
+	  || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC))
     print_gnu_build_attribute_name (pnote);
   else
     print_symbol (-20, name);
@@ -17484,8 +17487,11 @@ process_note (Elf_Internal_Note *  pnote,
     return print_stapsdt_note (pnote);
   else if (const_strneq (pnote->namedata, "CORE"))
     return print_core_note (pnote);
-  else if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
-	   || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC)
+  else if (((const_strneq (pnote->namedata, "GA")
+	     && strchr ("*$!+", pnote->namedata[2]) != NULL)
+	    || strchr ("*$!+", pnote->namedata[0]) != NULL)
+	   && (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
+	       || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC))
     return print_gnu_build_attribute_description (pnote, file);
 
   if (pnote->descsz)
