@@ -1,3 +1,8 @@
+2017-08-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (get_valueof): Don't capture end-of-line
+	characters.
+
 2017-08-05  Tom Tromey  <tom@tromey.com>
 
 	* gdb.rust/simple.exp: Allow String to appear in a different
