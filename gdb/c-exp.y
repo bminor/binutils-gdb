@@ -3232,6 +3232,7 @@ c_parse (struct parser_state *par_state)
   struct cleanup *back_to;
 
   /* Setting up the parser state.  */
+  scoped_restore pstate_restore = make_scoped_restore (&pstate);
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
@@ -3239,7 +3240,6 @@ c_parse (struct parser_state *par_state)
      assuming they'll be run here (below).  */
 
   back_to = make_cleanup (free_current_contents, &expression_macro_scope);
-  make_cleanup_clear_parser_state (&pstate);
 
   /* Set up the scope for macro expansion.  */
   expression_macro_scope = NULL;

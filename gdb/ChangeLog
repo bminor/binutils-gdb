@@ -1,3 +1,15 @@
+2017-09-05  Tom Tromey  <tom@tromey.com>
+
+	* utils.c (do_clear_parser_state): Remove.
+	(make_cleanup_clear_parser_state): Remove.
+	* p-exp.y (pascal_parse): Use scoped_restore.
+	* m2-exp.y (m2_parse): Use scoped_restore.
+	* f-exp.y (f_parse): Use scoped_restore.
+	* d-exp.y (d_parse): Use scoped_restore.
+	* c-exp.y (c_parse): Use scoped_restore.
+	* ada-exp.y (ada_parse): Use scoped_restore.
+	* utils.h (make_cleanup_clear_parser_state): Remove.
+
 2017-09-06  Keith Seitz  <keiths@redhat.com>
 
 	* dwarf2read.c (dw2_linkage_name_attr): New function.
