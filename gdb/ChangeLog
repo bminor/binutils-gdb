@@ -1,5 +1,9 @@
 2017-09-05  Tom Tromey  <tom@tromey.com>
 
+	* go-exp.y (go_parse): Don't create a cleanup.
+
+2017-09-05  Tom Tromey  <tom@tromey.com>
+
 	* d-exp.y (PrimaryExpression): Use std::string.
 	(d_parse): Don't create a cleanup.
 
