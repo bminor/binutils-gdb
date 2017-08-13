@@ -398,14 +398,14 @@ cd_command (char *dir, int from_tty)
   /* Found something other than leading repetitions of "/..".  */
   int found_real_path;
   char *p;
-  struct cleanup *cleanup;
 
   /* If the new directory is absolute, repeat is a no-op; if relative,
      repeat might be useful but is more likely to be a mistake.  */
   dont_repeat ();
 
-  dir = tilde_expand (dir != NULL ? dir : "~");
-  cleanup = make_cleanup (xfree, dir);
+  gdb::unique_xmalloc_ptr<char> dir_holder
+    (tilde_expand (dir != NULL ? dir : "~"));
+  dir = dir_holder.get ();
 
   if (chdir (dir) < 0)
     perror_with_name (dir);
@@ -430,17 +430,17 @@ cd_command (char *dir, int from_tty)
 	len--;
     }
 
-  dir = savestring (dir, len);
-  if (IS_ABSOLUTE_PATH (dir))
-    current_directory = dir;
+  dir_holder.reset (savestring (dir, len));
+  if (IS_ABSOLUTE_PATH (dir_holder.get ()))
+    current_directory = dir_holder.release ();
   else
     {
       if (IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1]))
-	current_directory = concat (current_directory, dir, (char *)NULL);
+	current_directory = concat (current_directory, dir_holder.get (),
+				    (char *) NULL);
       else
 	current_directory = concat (current_directory, SLASH_STRING,
-				    dir, (char *)NULL);
-      xfree (dir);
+				    dir_holder.get (), (char *) NULL);
     }
 
   /* Now simplify any occurrences of `.' and `..' in the pathname.  */
@@ -489,8 +489,6 @@ cd_command (char *dir, int from_tty)
 
   if (from_tty)
     pwd_command ((char *) 0, 1);
-
-  do_cleanups (cleanup);
 }
 
 /* Show the current value of the 'script-extension' option.  */

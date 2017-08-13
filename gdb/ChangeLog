@@ -1,5 +1,9 @@
 2017-09-03  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-cmds.c (cd_command): Use gdb::unique_xmalloc_ptr.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-interp.c (mi_cmd_interpreter_exec): Use std::string.
 
 2017-09-03  Tom Tromey  <tom@tromey.com>
