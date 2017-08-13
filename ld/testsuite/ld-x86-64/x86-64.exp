@@ -366,6 +366,7 @@ run_dump_test "property-x86-shstk4-x32"
 run_dump_test "property-x86-shstk5"
 run_dump_test "property-x86-shstk5-x32"
 run_dump_test "pr21884"
+run_dump_test "pr21884-nacl"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return
