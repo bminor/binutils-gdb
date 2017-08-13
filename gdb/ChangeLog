@@ -1,5 +1,9 @@
 2017-09-03  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-setshow.c (do_set_command): Use std::string.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-cmds.c (cd_command): Use gdb::unique_xmalloc_ptr.
 
 2017-09-03  Tom Tromey  <tom@tromey.com>
