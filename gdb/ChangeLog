@@ -1,5 +1,14 @@
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-script.c (restore_interp): Remove.
+	(read_command_lines): Use scoped_restore_interp.
+	* interps.c (scoped_restore_interp::set_temp): Rename from
+	interp_set_temp.
+	* interps.h (class scoped_restore_interp): New.
+	(interp_set_temp): Remove.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-cmd-catch.c (mi_cmd_catch_assert)
 	(mi_cmd_catch_exception, mi_catch_load_unload): Update.
 	* mi/mi-cmd-break.c (setup_breakpoint_reporting): Return a

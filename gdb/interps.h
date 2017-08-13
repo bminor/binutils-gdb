@@ -104,6 +104,32 @@ extern struct ui_out *interp_ui_out (struct interp *interp);
 extern const char *interp_name (struct interp *interp);
 extern struct interp *interp_set_temp (const char *name);
 
+/* Temporarily set the current interpreter, and reset it on
+   destruction.  */
+class scoped_restore_interp
+{
+public:
+
+  scoped_restore_interp (const char *name)
+    : m_interp (set_interp (name))
+  {
+  }
+
+  ~scoped_restore_interp ()
+  {
+    set_interp (interp_name (m_interp));
+  }
+
+  scoped_restore_interp (const scoped_restore_interp &) = delete;
+  scoped_restore_interp &operator= (const scoped_restore_interp &) = delete;
+
+private:
+
+  struct interp *set_interp (const char *name);
+
+  struct interp *m_interp;
+};
+
 extern int current_interp_named_p (const char *name);
 
 /* Call this function to give the current interpreter an opportunity
