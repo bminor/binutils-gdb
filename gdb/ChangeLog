@@ -1,5 +1,10 @@
 2017-09-05  Tom Tromey  <tom@tromey.com>
 
+	* d-exp.y (PrimaryExpression): Use std::string.
+	(d_parse): Don't create a cleanup.
+
+2017-09-05  Tom Tromey  <tom@tromey.com>
+
 	* utils.c (do_clear_parser_state): Remove.
 	(make_cleanup_clear_parser_state): Remove.
 	* p-exp.y (pascal_parse): Use scoped_restore.
