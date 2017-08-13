@@ -1,5 +1,15 @@
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-cmd-catch.c (mi_cmd_catch_assert)
+	(mi_cmd_catch_exception, mi_catch_load_unload): Update.
+	* mi/mi-cmd-break.c (setup_breakpoint_reporting): Return a
+	scoped_restore.
+	(mi_cmd_break_insert_1): Update.
+	* mi/mi-cmd-break.h (setup_breakpoint_reporting): Return a
+	scoped_restore.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
 	* demangle.c (demangle_command): Update.
 	* breakpoint.c (disable_command): Update.
 	(enable_command): Update.
