@@ -1,3 +1,8 @@
+2017-08-13  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-i386/pr21884.t: Remove unneeded format, arch and entry.
+	* testsuite/ld-x86-64/pr21884.t: Likewise.
+
 2017-08-11  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/elf32.em (handle_option): Accept the -z globalaudit
