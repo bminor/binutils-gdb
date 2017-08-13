@@ -1,5 +1,17 @@
 2017-09-09  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-interp.c (mi_user_selected_context_changed): Use
+	ui_out_redirect_pop.
+	* guile/scm-ports.c (ioscm_with_output_to_port_worker): Use
+	ui_out_redirect_pop.
+	* utils.c (do_ui_out_redirect_pop)
+	(make_cleanup_ui_out_redirect_pop): Remove.
+	* top.c (execute_command_to_string): Use ui_out_redirect_pop.
+	* utils.h (make_cleanup_ui_out_redirect_pop): Remove.
+	* ui-out.h (ui_out_redirect_pop): New class.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-main.c (output_cores): Use ui_out_emit_list.
 	(list_available_thread_groups, mi_cmd_list_thread_groups)
 	(mi_cmd_data_list_changed_registers, mi_cmd_data_read_memory)

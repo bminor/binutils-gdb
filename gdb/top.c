@@ -679,21 +679,23 @@ execute_command_to_string (char *p, int from_tty)
 
   string_file str_file;
 
-  current_uiout->redirect (&str_file);
-  make_cleanup_ui_out_redirect_pop (current_uiout);
+  {
+    current_uiout->redirect (&str_file);
+    ui_out_redirect_pop redirect_popper (current_uiout);
 
-  scoped_restore save_stdout
-    = make_scoped_restore (&gdb_stdout, &str_file);
-  scoped_restore save_stderr
-    = make_scoped_restore (&gdb_stderr, &str_file);
-  scoped_restore save_stdlog
-    = make_scoped_restore (&gdb_stdlog, &str_file);
-  scoped_restore save_stdtarg
-    = make_scoped_restore (&gdb_stdtarg, &str_file);
-  scoped_restore save_stdtargerr
-    = make_scoped_restore (&gdb_stdtargerr, &str_file);
+    scoped_restore save_stdout
+      = make_scoped_restore (&gdb_stdout, &str_file);
+    scoped_restore save_stderr
+      = make_scoped_restore (&gdb_stderr, &str_file);
+    scoped_restore save_stdlog
+      = make_scoped_restore (&gdb_stdlog, &str_file);
+    scoped_restore save_stdtarg
+      = make_scoped_restore (&gdb_stdtarg, &str_file);
+    scoped_restore save_stdtargerr
+      = make_scoped_restore (&gdb_stdtargerr, &str_file);
 
-  execute_command (p, from_tty);
+    execute_command (p, from_tty);
+  }
 
   do_cleanups (cleanup);
 

@@ -137,25 +137,6 @@ show_pagination_enabled (struct ui_file *file, int from_tty,
    because while they use the "cleanup API" they are not part of the
    "cleanup API".  */
 
-/* Helper function for make_cleanup_ui_out_redirect_pop.  */
-
-static void
-do_ui_out_redirect_pop (void *arg)
-{
-  struct ui_out *uiout = (struct ui_out *) arg;
-
-  uiout->redirect (NULL);
-}
-
-/* Return a new cleanup that pops the last redirection by ui_out_redirect
-   with NULL parameter.  */
-
-struct cleanup *
-make_cleanup_ui_out_redirect_pop (struct ui_out *uiout)
-{
-  return make_cleanup (do_ui_out_redirect_pop, uiout);
-}
-
 static void
 do_free_section_addr_info (void *arg)
 {

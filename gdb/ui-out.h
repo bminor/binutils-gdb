@@ -242,4 +242,27 @@ private:
   struct ui_out *m_uiout;
 };
 
+/* On destruction, pop the last redirection by calling the uiout's
+   redirect method with a NULL parameter.  */
+class ui_out_redirect_pop
+{
+public:
+
+  ui_out_redirect_pop (ui_out *uiout)
+    : m_uiout (uiout)
+  {
+  }
+
+  ~ui_out_redirect_pop ()
+  {
+    m_uiout->redirect (NULL);
+  }
+
+  ui_out_redirect_pop (const ui_out_redirect_pop &) = delete;
+  ui_out_redirect_pop &operator= (const ui_out_redirect_pop &) = delete;
+
+private:
+  struct ui_out *m_uiout;
+};
+
 #endif /* UI_OUT_H */
