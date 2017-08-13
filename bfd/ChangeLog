@@ -1,3 +1,11 @@
+2017-08-14  Alan Modra  <amodra@gmail.com>
+
+	PR 21441
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Don't add
+	alignment padding here.
+	* elflink.c (bfd_elf_discard_info): Add .eh_frame padding here
+	in a reverse pass over sections.
+
 2017-08-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/21943
