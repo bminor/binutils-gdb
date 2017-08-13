@@ -340,23 +340,36 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 
 /* Handle pre-post hooks.  */
 
-static void
-clear_hook_in_cleanup (void *data)
+class scoped_restore_hook_in
 {
-  struct cmd_list_element *c = (struct cmd_list_element *) data;
+public:
 
-  c->hook_in = 0; /* Allow hook to work again once it is complete.  */
-}
+  scoped_restore_hook_in (struct cmd_list_element *c)
+    : m_cmd (c)
+  {
+  }
+
+  ~scoped_restore_hook_in ()
+  {
+    m_cmd->hook_in = 0;
+  }
+
+  scoped_restore_hook_in (const scoped_restore_hook_in &) = delete;
+  scoped_restore_hook_in &operator= (const scoped_restore_hook_in &) = delete;
+
+private:
+
+  struct cmd_list_element *m_cmd;
+};
 
 void
 execute_cmd_pre_hook (struct cmd_list_element *c)
 {
   if ((c->hook_pre) && (!c->hook_in))
     {
-      struct cleanup *cleanups = make_cleanup (clear_hook_in_cleanup, c);
+      scoped_restore_hook_in restore_hook (c);
       c->hook_in = 1; /* Prevent recursive hooking.  */
       execute_user_command (c->hook_pre, (char *) 0);
-      do_cleanups (cleanups);
     }
 }
 
@@ -365,11 +378,9 @@ execute_cmd_post_hook (struct cmd_list_element *c)
 {
   if ((c->hook_post) && (!c->hook_in))
     {
-      struct cleanup *cleanups = make_cleanup (clear_hook_in_cleanup, c);
-
+      scoped_restore_hook_in restore_hook (c);
       c->hook_in = 1; /* Prevent recursive hooking.  */
       execute_user_command (c->hook_post, (char *) 0);
-      do_cleanups (cleanups);
     }
 }
 
