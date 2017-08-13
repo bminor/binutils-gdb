@@ -1,5 +1,10 @@
 2017-09-03  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-cmd-env.c (env_execute_cli_command): Use
+	gdb::unique_xmalloc_ptr.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
 	* thread.c (print_thread_info_1): Use string_printf.
 	(thread_apply_command, thread_apply_all_command): Use
 	std::string.
