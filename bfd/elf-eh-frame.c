@@ -1594,16 +1594,7 @@ _bfd_elf_discard_section_eh_frame
 	offset += size_of_output_cie_fde (ent);
       }
 
-  /* Pad the last FDE out to the output section alignment if there are
-     following sections, in order to ensure no padding between this
-     section and the next.  (Relies on the output section alignment
-     being the maximum of all input sections alignments, which is the
-     case unless someone is overriding alignment via scripts.)  */
   eh_alignment = 4;
-  if (sec->map_head.s != NULL
-      && (sec->map_head.s->size != 4
-	  || sec->map_head.s->map_head.s != NULL))
-    eh_alignment = 1 << sec->output_section->alignment_power;
   offset = (offset + eh_alignment - 1) & -eh_alignment;
   sec->rawsize = sec->size;
   sec->size = offset;
