@@ -123,18 +123,17 @@ convert_array (struct compile_c_instance *context, struct type *type)
       || TYPE_HIGH_BOUND_KIND (range) == PROP_LOCLIST)
     {
       gcc_type result;
-      char *upper_bound;
 
       if (TYPE_VECTOR (type))
 	return C_CTX (context)->c_ops->error (C_CTX (context),
 					      _("variably-sized vector type"
 						" is not supported"));
 
-      upper_bound = c_get_range_decl_name (&TYPE_RANGE_DATA (range)->high);
+      std::string upper_bound
+	= c_get_range_decl_name (&TYPE_RANGE_DATA (range)->high);
       result = C_CTX (context)->c_ops->build_vla_array_type (C_CTX (context),
 							     element_type,
-							     upper_bound);
-      xfree (upper_bound);
+							     upper_bound.c_str ());
       return result;
     }
   else

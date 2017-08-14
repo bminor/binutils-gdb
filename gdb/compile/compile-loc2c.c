@@ -515,15 +515,12 @@ pushf_register_address (int indent, string_file &stream,
 			unsigned char *registers_used,
 			struct gdbarch *gdbarch, int regnum)
 {
-  char *regname = compile_register_name_mangled (gdbarch, regnum);
-  struct cleanup *cleanups = make_cleanup (xfree, regname);
+  std::string regname = compile_register_name_mangled (gdbarch, regnum);
 
   registers_used[regnum] = 1;
   pushf (indent, stream,
 	 "(" GCC_UINTPTR ") &" COMPILE_I_SIMPLE_REGISTER_ARG_NAME "->%s",
-	 regname);
-
-  do_cleanups (cleanups);
+	 regname.c_str ());
 }
 
 /* Emit code that pushes a register's value on the stack.
@@ -536,19 +533,16 @@ pushf_register (int indent, string_file &stream,
 		unsigned char *registers_used,
 		struct gdbarch *gdbarch, int regnum, uint64_t offset)
 {
-  char *regname = compile_register_name_mangled (gdbarch, regnum);
-  struct cleanup *cleanups = make_cleanup (xfree, regname);
+  std::string regname = compile_register_name_mangled (gdbarch, regnum);
 
   registers_used[regnum] = 1;
   if (offset == 0)
     pushf (indent, stream, COMPILE_I_SIMPLE_REGISTER_ARG_NAME "->%s",
-	   regname);
+	   regname.c_str ());
   else
     pushf (indent, stream,
 	   COMPILE_I_SIMPLE_REGISTER_ARG_NAME "->%s + (" GCC_UINTPTR ") %s",
-	   regname, hex_string (offset));
-
-  do_cleanups (cleanups);
+	   regname.c_str (), hex_string (offset));
 }
 
 /* Compile a DWARF expression to C code.

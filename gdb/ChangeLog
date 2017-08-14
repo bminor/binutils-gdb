@@ -1,5 +1,24 @@
 2017-09-03  Tom Tromey  <tom@tromey.com>
 
+	* compile/compile.c (compile_register_name_mangled): Return
+	std::string.
+	* compile/compile-loc2c.c (pushf_register_address): Update.
+	(pushf_register): Update.
+	* compile/compile-c-types.c (convert_array): Update.
+	* compile/compile-c-symbols.c (generate_vla_size): Update.
+	(error_symbol_once): Use a gdb::unique_xmalloc_ptr.
+	(symbol_substitution_name): Return a gdb::unique_xmalloc_ptr.
+	(convert_one_symbol): Update.
+	(generate_c_for_for_one_variable): Update.
+	* compile/compile-c-support.c (c_get_range_decl_name): Return a
+	std::string.
+	(generate_register_struct): Update.
+	* compile/compile-internal.h (c_get_range_decl_name): Return a
+	std::string.
+	(compile_register_name_mangled): Return std::string.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
 	* utils.c (perror_string): Return a std::string.
 	(throw_perror_with_name, perror_warning_with_name): Update.
 
