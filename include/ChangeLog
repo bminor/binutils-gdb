@@ -1,3 +1,19 @@
+2017-08-14  Gustavo Romero  <gromero@linux.vnet.ibm.com>
+
+	* elf/common.h (NT_PPC_TAR): New macro.
+	(NT_PPC_PPR): Likewise.
+	(NT_PPC_DSCR): Likewise.
+	(NT_PPC_EBB): Likewise.
+	(NT_PPC_PMU): Likewise.
+	(NT_PPC_TM_CGPR): Likewise.
+	(NT_PPC_TM_CFPR): Likewise.
+	(NT_PPC_TM_CVMX): Likewise.
+	(NT_PPC_TM_CVSX): Likewise.
+	(NT_PPC_TM_SPR): Likewise.
+	(NT_PPC_TM_CTAR): Likewise.
+	(NT_PPC_TM_CPPR): Likewise.
+	(NT_PPC_TM_CDSCR): Likewise.
+
 2017-08-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21903:
