@@ -1,5 +1,10 @@
 2017-09-03  Tom Tromey  <tom@tromey.com>
 
+	* utils.c (perror_string): Return a std::string.
+	(throw_perror_with_name, perror_warning_with_name): Update.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
 	* demangle.c (demangle_command): Use std::string,
 	unique_xmalloc_ptr.
 
