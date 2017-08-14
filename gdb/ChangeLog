@@ -1,5 +1,9 @@
 2017-09-03  Tom Tromey  <tom@tromey.com>
 
+	* corefile.c (reopen_exec_file): Use std::string.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile.c (compile_register_name_mangled): Return
 	std::string.
 	* compile/compile-loc2c.c (pushf_register_address): Update.

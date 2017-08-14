@@ -130,29 +130,24 @@ specify_exec_file_hook (void (*hook) (const char *))
 void
 reopen_exec_file (void)
 {
-  char *filename;
   int res;
   struct stat st;
-  struct cleanup *cleanups;
 
   /* Don't do anything if there isn't an exec file.  */
   if (exec_bfd == NULL)
     return;
 
   /* If the timestamp of the exec file has changed, reopen it.  */
-  filename = xstrdup (bfd_get_filename (exec_bfd));
-  cleanups = make_cleanup (xfree, filename);
-  res = stat (filename, &st);
+  std::string filename = bfd_get_filename (exec_bfd);
+  res = stat (filename.c_str (), &st);
 
   if (res == 0 && exec_bfd_mtime && exec_bfd_mtime != st.st_mtime)
-    exec_file_attach (filename, 0);
+    exec_file_attach (filename.c_str (), 0);
   else
     /* If we accessed the file since last opening it, close it now;
        this stops GDB from holding the executable open after it
        exits.  */
     bfd_cache_close_all ();
-
-  do_cleanups (cleanups);
 }
 
 /* If we have both a core file and an exec file,
