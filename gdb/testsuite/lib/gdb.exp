@@ -3368,6 +3368,34 @@ proc gdb_wrapper_init { args } {
     set gdb_wrapper_target [current_target_name]
 }
 
+# Determine options that we always want to pass to the compiler.
+gdb_caching_proc universal_compile_options {
+    set me "universal_compile_options"
+    set options {}
+
+    set src [standard_temp_file ccopts[pid].c]
+    set obj [standard_temp_file ccopts[pid].o]
+
+    gdb_produce_source $src {
+	int foo(void) { return 0; }
+    }
+
+    # Try an option for disabling colored diagnostics.  Some compilers
+    # yield colored diagnostics by default (when run from a tty) unless
+    # such an option is specified.
+    set opt "additional_flags=-fdiagnostics-color=never"
+    set lines [target_compile $src $obj object [list "quiet" $opt]]
+    if [string match "" $lines] then {
+	# Seems to have worked; use the option.
+	lappend options $opt
+    }
+    file delete $src
+    file delete $obj
+
+    verbose "$me:  returning $options" 2
+    return $options
+}
+
 # Some targets need to always link a special object in.  Save its path here.
 global gdb_saved_set_unbuffered_mode_obj
 set gdb_saved_set_unbuffered_mode_obj ""
@@ -3419,7 +3447,7 @@ proc gdb_compile {source dest type options} {
 
     # Add platform-specific options if a shared library was specified using
     # "shlib=librarypath" in OPTIONS.
-    set new_options ""
+    set new_options [universal_compile_options]
     set shlib_found 0
     set shlib_load 0
     foreach opt $options {

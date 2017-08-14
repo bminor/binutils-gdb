@@ -1,3 +1,8 @@
+2017-08-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* lib/gdb.exp (universal_compile_options): New caching proc.
+	(gdb_compile): Suppress GCC's coloring of messages.
+
 2017-08-14  Tom Tromey  <tom@tromey.com>
 
 	PR gdb/21675:
