@@ -742,12 +742,22 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 	{
 	  Elf_Internal_Shdr *shdr = elf_tdata (abfd)->group_sect_ptr[i];
 	  Elf_Internal_Group *idx;
-	  unsigned int n_elt;
+	  bfd_size_type n_elt;
 
 	  if (shdr == NULL)
 	    continue;
 
 	  idx = (Elf_Internal_Group *) shdr->contents;
+	  if (idx == NULL || shdr->sh_size < 4)
+	    {
+	      /* See PR 21957 for a reproducer.  */
+	      /* xgettext:c-format */
+	      _bfd_error_handler (_("%B: group section '%A' has no contents"),
+				  abfd, shdr->bfd_section);
+	      elf_tdata (abfd)->group_sect_ptr[i] = NULL;
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
 	  n_elt = shdr->sh_size / 4;
 
 	  /* Look through this group's sections to see if current
@@ -801,7 +811,7 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
   if (elf_group_name (newsect) == NULL)
     {
       /* xgettext:c-format */
-      _bfd_error_handler (_("%B: no group info for section %A"),
+      _bfd_error_handler (_("%B: no group info for section '%A'"),
 			  abfd, newsect);
       return FALSE;
     }

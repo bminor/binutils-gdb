@@ -1,3 +1,10 @@
+2017-08-14  Nick Clifton  <nickc@redhat.com>
+
+	PR 21957
+	* elf.c (setup_group): Check for an empty or very small group
+	section.
+	* po/bfd.pot: Regenerate.
+
 2017-08-14  Alan Modra  <amodra@gmail.com>
 
 	PR 21441
