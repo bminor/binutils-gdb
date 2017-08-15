@@ -1,3 +1,9 @@
+2017-08-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21954
+	* gdb.base/environ.exp: Add test to check if 'unset environment'
+	works.
+
 2017-08-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* lib/gdb.exp (universal_compile_options): New caching proc.

@@ -1,3 +1,9 @@
+2017-08-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21954
+	* infcmd.c (unset_environment_command): Use the 'clear' method on
+	the environment instead of resetting it.
+
 2017-08-15  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c (fbsd_convert_siginfo): Fix compile on big-endian
