@@ -1,3 +1,7 @@
+2017-08-15  Stafford Horne  <shorne@gmail.com>
+
+	* xtensa-tdep.c (xtensa_init_reggroups): Use xstrdup for cpname.
+
 2017-08-15  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/21954
