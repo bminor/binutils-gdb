@@ -1,4 +1,4 @@
-From 8a03433660ddfa653228b57ae8d93c03e9a3f02b Mon Sep 17 00:00:00 2001
+From ae31c4dce3a87f32dd66ae96f7d0dee790198b6c Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Thu, 3 Aug 2017 09:43:28 -0700
 Subject: [PATCH] x86: Add R_X86_64_GPOFF/R_386_GPOFF relocation
@@ -1760,13 +1760,13 @@ index 0000000000..6cc4a52403
 + +[a-f0-9]+:[ \t]+8d 83 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%ebx\),%eax
 +#pass
 diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
-index 34f03e0470..6d70d26be5 100644
+index 27d622eab4..07c0503488 100644
 --- a/ld/testsuite/ld-i386/i386.exp
 +++ b/ld/testsuite/ld-i386/i386.exp
-@@ -438,6 +438,17 @@ run_dump_test "property-x86-shstk5"
- run_dump_test "pie1"
- run_dump_test "pie1-nacl"
- run_dump_test "pr21884"
+@@ -290,6 +290,17 @@ run_dump_test "abs"
+ run_dump_test "pcrel8"
+ run_dump_test "pcrel16"
+ run_dump_test "pcrel16abs"
 +run_dump_test "gpoff-3"
 +run_dump_test "gpoff-4"
 +run_dump_test "gpoff-5"
@@ -1778,10 +1778,10 @@ index 34f03e0470..6d70d26be5 100644
 +run_dump_test "gpoff-8d"
 +run_dump_test "gpoff-8e"
 +run_dump_test "gpoff-8f"
- 
- if { !([istarget "i?86-*-linux*"]
-        || [istarget "i?86-*-gnu*"]
-@@ -1267,6 +1278,67 @@ if { [isnative]
+ run_dump_test "alloc"
+ run_dump_test "warn1"
+ run_dump_test "tlsgd2"
+@@ -1268,6 +1279,67 @@ if { [isnative]
  	    ] \
  	]
      }
@@ -2327,13 +2327,13 @@ index 0000000000..fb8c3375b8
 + +[a-f0-9]+:[ \t]+48 8d 05 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%rip\),%rax[ \t]+# [a-f0-9]+ <foo>
 +#pass
 diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
-index 0009fe321b..131aab2710 100644
+index 46311577e4..e6612ccae7 100644
 --- a/ld/testsuite/ld-x86-64/x86-64.exp
 +++ b/ld/testsuite/ld-x86-64/x86-64.exp
-@@ -568,6 +568,17 @@ run_dump_test "pr20253-4f"
- run_dump_test "pr20253-5a"
- run_dump_test "pr20253-5b"
- run_dump_test "tlsdesc2"
+@@ -269,6 +269,17 @@ run_dump_test "abs"
+ run_dump_test "abs-l1om"
+ run_dump_test "pcrel8"
+ run_dump_test "pcrel16"
 +run_dump_test "gpoff-3"
 +run_dump_test "gpoff-4"
 +run_dump_test "gpoff-5"
@@ -2345,10 +2345,10 @@ index 0009fe321b..131aab2710 100644
 +run_dump_test "gpoff-8d"
 +run_dump_test "gpoff-8e"
 +run_dump_test "gpoff-8f"
- 
- proc undefined_weak {cflags ldflags} {
-     set testname "Undefined weak symbol"
-@@ -1531,6 +1542,67 @@ if { [isnative] && [which $CC] != 0 } {
+ run_dump_test "tlsgd2"
+ run_dump_test "tlsgd3"
+ run_dump_test "tlsgd12"
+@@ -1532,6 +1543,67 @@ if { [isnative] && [which $CC] != 0 } {
  	}
      }
  
@@ -2417,5 +2417,5 @@ index 0009fe321b..131aab2710 100644
      undefined_weak "-fPIE" ""
      undefined_weak "-fPIE" "-pie"
 -- 
-2.13.4
+2.13.5
 
