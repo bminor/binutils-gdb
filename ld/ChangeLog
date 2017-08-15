@@ -1,3 +1,27 @@
+2017-08-14  Alan Modra  <amodra@gmail.com>
+
+	PR 21441
+	* testsuite/ld-x86-64/pr21038a.d: Adjust.
+	* testsuite/ld-x86-64/pr21038a-now.d: Adjust.
+
+2017-08-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run pr21884-nacl.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr21884.d: Don't run on nacl targets.
+	* testsuite/ld-x86-64/pr21884.d: Likewise.
+	* testsuite/ld-i386/pr21884.t: Revert the last change.
+	* testsuite/ld-x86-64/pr21884.t: Likewise.
+	* testsuite/ld-i386/pr21884-nacl.d: New file.
+	* testsuite/ld-i386/pr21884-nacl.t: Likewise.
+	* testsuite/ld-x86-64/pr21884-nacl.d: Likewise.
+	* testsuite/ld-x86-64/pr21884-nacl.t: Likewise.
+
+2017-08-13  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-i386/pr21884.t: Remove unneeded format, arch and entry.
+	* testsuite/ld-x86-64/pr21884.t: Likewise.
+
 2017-08-11  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/elf32.em (handle_option): Accept the -z globalaudit

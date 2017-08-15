@@ -1,3 +1,27 @@
+2017-08-14  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (print_octal_chars): Use HOST_CHAR_BIT.
+	(print_binary_chars): Likewise.
+	(BITS_IN_BYTES): Remove.
+
+2017-08-14  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/21675
+	* valprint.c (LOW_ZERO): Change value to 034.
+	(print_octal_chars): Add static_asserts for octal constants.
+	* printcmd.c (print_scalar_formatted): Add 'd' case.
+
+2017-08-11  Tom Tromey  <tom@tromey.com>
+
+	* symfile.c (add_symbol_file_command): Use std::vector.
+
+2017-08-14  Tom Tromey  <tom@tromey.com>
+
+	* break-catch-throw.c (handle_gnu_v3_exceptions): Use std::move.
+	* break-catch-syscall.c (create_syscall_event_catchpoint): Use
+	std::move.
+	* break-catch-sig.c (create_signal_catchpoint): Use std::move.
+
 2017-08-11  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (process_event_stop_test): Adjust

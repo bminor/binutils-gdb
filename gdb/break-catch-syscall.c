@@ -375,7 +375,7 @@ create_syscall_event_catchpoint (int tempflag, std::vector<int> &&filter,
 
   c = new syscall_catchpoint ();
   init_catchpoint (c, gdbarch, tempflag, NULL, ops);
-  c->syscalls_to_be_caught = filter;
+  c->syscalls_to_be_caught = std::move (filter);
 
   install_breakpoint (0, c, 1);
 }

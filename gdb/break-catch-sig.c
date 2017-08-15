@@ -322,7 +322,7 @@ create_signal_catchpoint (int tempflag, std::vector<gdb_signal> &&filter,
 
   c = new signal_catchpoint ();
   init_catchpoint (c, gdbarch, tempflag, NULL, &signal_catchpoint_ops);
-  c->signals_to_be_caught = filter;
+  c->signals_to_be_caught = std::move (filter);
   c->catch_all = catch_all;
 
   install_breakpoint (0, c, 1);
