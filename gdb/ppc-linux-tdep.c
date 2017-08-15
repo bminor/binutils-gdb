@@ -1364,13 +1364,13 @@ ppu2spu_sniffer (const struct frame_unwind *self,
 	    = FRAME_OBSTACK_CALLOC (1, struct ppu2spu_cache);
 
 	  struct address_space *aspace = get_frame_address_space (this_frame);
-	  struct regcache *regcache = regcache_xmalloc (data.gdbarch, aspace);
-	  struct cleanup *cleanups = make_cleanup_regcache_xfree (regcache);
-	  regcache_save (regcache, ppu2spu_unwind_register, &data);
+	  regcache *backup = new regcache (data.gdbarch, aspace);
+	  struct cleanup *cleanups = make_cleanup_regcache_delete (backup);
+	  regcache_save (backup, ppu2spu_unwind_register, &data);
 	  discard_cleanups (cleanups);
 
 	  cache->frame_id = frame_id_build (base, func);
-	  cache->regcache = regcache;
+	  cache->regcache = backup;
 	  *this_prologue_cache = cache;
 	  return 1;
 	}
@@ -1383,7 +1383,7 @@ static void
 ppu2spu_dealloc_cache (struct frame_info *self, void *this_cache)
 {
   struct ppu2spu_cache *cache = (struct ppu2spu_cache *) this_cache;
-  regcache_xfree (cache->regcache);
+  delete cache->regcache;
 }
 
 static const struct frame_unwind ppu2spu_unwind = {

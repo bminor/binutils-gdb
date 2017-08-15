@@ -249,31 +249,18 @@ regcache_get_ptid (const struct regcache *regcache)
   return regcache->ptid ();
 }
 
-struct regcache *
-regcache_xmalloc (struct gdbarch *gdbarch, struct address_space *aspace)
-{
-  return new regcache (gdbarch, aspace);
-}
-
-void
-regcache_xfree (struct regcache *regcache)
-{
-  if (regcache == NULL)
-    return;
-
-  delete regcache;
-}
-
 static void
-do_regcache_xfree (void *data)
+do_regcache_delete (void *data)
 {
-  regcache_xfree ((struct regcache *) data);
+  if (data == NULL)
+    return;
+  delete (regcache *) data;
 }
 
 struct cleanup *
-make_cleanup_regcache_xfree (struct regcache *regcache)
+make_cleanup_regcache_delete (struct regcache *regcache)
 {
-  return make_cleanup (do_regcache_xfree, regcache);
+  return make_cleanup (do_regcache_delete, regcache);
 }
 
 /* Cleanup routines for invalidating a register.  */

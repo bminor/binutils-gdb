@@ -129,7 +129,7 @@ free_fork (struct fork_info *fp)
   if (fp)
     {
       if (fp->savedregs)
-	regcache_xfree (fp->savedregs);
+	delete fp->savedregs;
       if (fp->filepos)
 	xfree (fp->filepos);
       xfree (fp);
@@ -295,7 +295,7 @@ fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
   DIR *d;
 
   if (fp->savedregs)
-    regcache_xfree (fp->savedregs);
+    delete fp->savedregs;
 
   fp->savedregs = regcache_dup (get_current_regcache ());
   fp->clobber_regs = clobber_regs;

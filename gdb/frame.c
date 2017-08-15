@@ -1021,13 +1021,12 @@ struct regcache *
 frame_save_as_regcache (struct frame_info *this_frame)
 {
   struct address_space *aspace = get_frame_address_space (this_frame);
-  struct regcache *regcache = regcache_xmalloc (get_frame_arch (this_frame),
-						aspace);
-  struct cleanup *cleanups = make_cleanup_regcache_xfree (regcache);
+  regcache *backup = new regcache (get_frame_arch (this_frame), aspace);
+  struct cleanup *cleanups = make_cleanup_regcache_delete (backup);
 
-  regcache_save (regcache, do_frame_register_read, this_frame);
+  regcache_save (backup, do_frame_register_read, this_frame);
   discard_cleanups (cleanups);
-  return regcache;
+  return backup;
 }
 
 void
@@ -1063,7 +1062,7 @@ frame_pop (struct frame_info *this_frame)
      trying to extract the old values from the current regcache while
      at the same time writing new values into that same cache.  */
   scratch = frame_save_as_regcache (prev_frame);
-  cleanups = make_cleanup_regcache_xfree (scratch);
+  cleanups = make_cleanup_regcache_delete (scratch);
 
   /* FIXME: cagney/2003-03-16: It should be possible to tell the
      target's register cache that it is about to be hit with a burst

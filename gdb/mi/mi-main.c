@@ -1051,7 +1051,7 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
 
   prev_regs = this_regs;
   this_regs = frame_save_as_regcache (get_selected_frame (NULL));
-  cleanup = make_cleanup_regcache_xfree (prev_regs);
+  cleanup = make_cleanup_regcache_delete (prev_regs);
 
   /* Note that the test for a valid register must include checking the
      gdbarch_register_name because gdbarch_num_regs may be allocated

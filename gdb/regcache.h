@@ -36,10 +36,7 @@ extern target_regcache *get_thread_arch_aspace_regcache (ptid_t,
 							 struct gdbarch *,
 							 struct address_space *);
 
-void regcache_xfree (struct regcache *regcache);
-struct cleanup *make_cleanup_regcache_xfree (struct regcache *regcache);
-struct regcache *regcache_xmalloc (struct gdbarch *gdbarch,
-				   struct address_space *aspace);
+struct cleanup *make_cleanup_regcache_delete (regcache *regcache);
 
 /* Return REGCACHE's ptid.  */
 
@@ -261,12 +258,7 @@ public:
   regcache (const regcache &) = delete;
   void operator= (const regcache &) = delete;
 
-  /* class regcache is only extended in unit test, so only mark it
-     virtual when selftest is enabled.  */
-#if GDB_SELF_TEST
-  virtual
-#endif
-  ~regcache ()
+  virtual ~regcache ()
   {
     xfree (m_registers);
     xfree (m_register_status);

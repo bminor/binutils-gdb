@@ -8963,7 +8963,7 @@ make_cleanup_restore_infcall_suspend_state
 void
 discard_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 {
-  regcache_xfree (inf_state->registers);
+  delete inf_state->registers;
   xfree (inf_state->siginfo_data);
   xfree (inf_state);
 }
