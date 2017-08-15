@@ -27,11 +27,11 @@ namespace selftests {
 
 /* A read-write regcache which doesn't write the target.  */
 
-class regcache_test : public regcache
+class regcache_test : public target_regcache
 {
 public:
   explicit regcache_test (struct gdbarch *gdbarch)
-    : regcache (gdbarch, NULL, false)
+    : target_regcache (gdbarch, NULL)
   {
     set_ptid (inferior_ptid);
 

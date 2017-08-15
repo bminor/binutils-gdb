@@ -207,7 +207,15 @@ regcache::regcache (gdbarch *gdbarch, address_space *aspace_,
       m_register_status = XCNEWVEC (signed char,
 				    m_descr->sizeof_raw_register_status);
     }
+}
+
+target_regcache::target_regcache (gdbarch *gdbarch, address_space *aspace_)
+  : regcache (gdbarch, aspace_, false)
+{
   m_ptid = minus_one_ptid;
+
+  /* A target_regcache should never be readonly.  */
+  gdb_assert (!m_readonly_p);
 }
 
 static enum register_status
@@ -440,25 +448,25 @@ regcache::invalidate (int regnum)
    recording if the register values have been changed (eg. by the
    user).  Therefore all registers must be written back to the
    target when appropriate.  */
-std::forward_list<regcache *> regcache::current_regcache;
+std::forward_list<target_regcache *> target_regcache::current_regcache;
 
-struct regcache *
+target_regcache *
 get_thread_arch_aspace_regcache (ptid_t ptid, struct gdbarch *gdbarch,
 				 struct address_space *aspace)
 {
-  for (const auto &regcache : regcache::current_regcache)
+  for (const auto &regcache : target_regcache::current_regcache)
     if (ptid_equal (regcache->ptid (), ptid) && regcache->arch () == gdbarch)
       return regcache;
 
-  regcache *new_regcache = new regcache (gdbarch, aspace, false);
+  target_regcache *new_regcache = new target_regcache (gdbarch, aspace);
 
-  regcache::current_regcache.push_front (new_regcache);
+  target_regcache::current_regcache.push_front (new_regcache);
   new_regcache->set_ptid (ptid);
 
   return new_regcache;
 }
 
-struct regcache *
+target_regcache *
 get_thread_arch_regcache (ptid_t ptid, struct gdbarch *gdbarch)
 {
   struct address_space *aspace;
@@ -479,7 +487,7 @@ get_thread_arch_regcache (ptid_t ptid, struct gdbarch *gdbarch)
 static ptid_t current_thread_ptid;
 static struct gdbarch *current_thread_arch;
 
-struct regcache *
+target_regcache *
 get_thread_regcache (ptid_t ptid)
 {
   if (!current_thread_arch || !ptid_equal (current_thread_ptid, ptid))
@@ -491,7 +499,7 @@ get_thread_regcache (ptid_t ptid)
   return get_thread_arch_regcache (ptid, current_thread_arch);
 }
 
-struct regcache *
+target_regcache *
 get_current_regcache (void)
 {
   return get_thread_regcache (inferior_ptid);
@@ -502,7 +510,7 @@ get_current_regcache (void)
 struct regcache *
 get_thread_regcache_for_ptid (ptid_t ptid)
 {
-  return get_thread_regcache (ptid);
+  return (struct regcache*) get_thread_regcache (ptid);
 }
 
 /* Observer for the target_changed event.  */
@@ -516,9 +524,9 @@ regcache_observer_target_changed (struct target_ops *target)
 /* Update global variables old ptids to hold NEW_PTID if they were
    holding OLD_PTID.  */
 void
-regcache::regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
+target_regcache::regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 {
-  for (auto &regcache : regcache::current_regcache)
+  for (auto &regcache : target_regcache::current_regcache)
     {
       if (ptid_equal (regcache->ptid (), old_ptid))
 	regcache->set_ptid (new_ptid);
@@ -539,15 +547,15 @@ regcache::regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 void
 registers_changed_ptid (ptid_t ptid)
 {
-  for (auto oit = regcache::current_regcache.before_begin (),
+  for (auto oit = target_regcache::current_regcache.before_begin (),
 	 it = std::next (oit);
-       it != regcache::current_regcache.end ();
+       it != target_regcache::current_regcache.end ();
        )
     {
       if (ptid_match ((*it)->ptid (), ptid))
 	{
 	  delete *it;
-	  it = regcache::current_regcache.erase_after (oit);
+	  it = target_regcache::current_regcache.erase_after (oit);
 	}
       else
 	oit = it++;
@@ -1668,7 +1676,7 @@ maintenance_print_remote_registers (char *args, int from_tty)
 
 namespace selftests {
 
-class regcache_access : public regcache
+class regcache_access : public target_regcache
 {
 public:
 
@@ -1677,8 +1685,8 @@ public:
   static size_t
   current_regcache_size ()
   {
-    return std::distance (regcache::current_regcache.begin (),
-			  regcache::current_regcache.end ());
+    return std::distance (target_regcache::current_regcache.begin (),
+			  target_regcache::current_regcache.end ());
   }
 };
 
@@ -1692,7 +1700,7 @@ current_regcache_test (void)
 
   /* Get regcache from ptid1, a new regcache is added to
      current_regcache.  */
-  regcache *regcache = get_thread_arch_aspace_regcache (ptid1,
+  target_regcache *regcache = get_thread_arch_aspace_regcache (ptid1,
 							target_gdbarch (),
 							NULL);
 
@@ -1745,7 +1753,8 @@ _initialize_regcache (void)
     = gdbarch_data_register_post_init (init_regcache_descr);
 
   observer_attach_target_changed (regcache_observer_target_changed);
-  observer_attach_thread_ptid_changed (regcache::regcache_thread_ptid_changed);
+  observer_attach_thread_ptid_changed
+    (target_regcache::regcache_thread_ptid_changed);
 
   add_com ("flushregs", class_maintenance, reg_flush_command,
 	   _("Force gdb to flush its register cache (maintainer command)"));

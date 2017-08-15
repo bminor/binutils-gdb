@@ -24,14 +24,15 @@
 #include <forward_list>
 
 struct regcache;
+class target_regcache;
 struct regset;
 struct gdbarch;
 struct address_space;
 
-extern struct regcache *get_current_regcache (void);
-extern struct regcache *get_thread_regcache (ptid_t ptid);
-extern struct regcache *get_thread_arch_regcache (ptid_t, struct gdbarch *);
-extern struct regcache *get_thread_arch_aspace_regcache (ptid_t,
+extern target_regcache *get_current_regcache (void);
+extern target_regcache *get_thread_regcache (ptid_t ptid);
+extern target_regcache *get_thread_arch_regcache (ptid_t, struct gdbarch *);
+extern target_regcache *get_thread_arch_aspace_regcache (ptid_t,
 							 struct gdbarch *,
 							 struct address_space *);
 
@@ -240,7 +241,8 @@ typedef struct cached_reg
   gdb_byte *data;
 } cached_reg_t;
 
-/* The register cache for storing raw register values.  */
+
+/* A register cache.  This is not connected to a target and ptid is unset.  */
 
 class regcache
 {
@@ -344,40 +346,22 @@ public:
 
   void dump (ui_file *file, enum regcache_dump_what what_to_dump);
 
-  ptid_t ptid () const
+  virtual ptid_t ptid () const
   {
-    return m_ptid;
-  }
-
-  void set_ptid (const ptid_t ptid)
-  {
-    this->m_ptid = ptid;
+    /* Ptid of a non-target regcache is always -1.  */
+    return (ptid_t) -1;
   }
 
 /* Dump the contents of a register from the register cache to the target
    debug.  */
   void debug_print_register (const char *func, int regno);
 
-  static void regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid);
 protected:
   regcache (gdbarch *gdbarch, address_space *aspace_, bool readonly_p_);
 
-  static std::forward_list<regcache *> current_regcache;
-
-private:
   gdb_byte *register_buffer (int regnum) const;
 
   void restore (struct regcache *src);
-
-  enum register_status xfer_part (int regnum, int offset, int len, void *in,
-				  const void *out,
-				  decltype (regcache_raw_read) read,
-				  decltype (regcache_raw_write) write);
-
-  void transfer_regset (const struct regset *regset,
-			struct regcache *out_regcache,
-			int regnum, const void *in_buf,
-			void *out_buf, size_t size) const;
 
   struct regcache_descr *m_descr;
 
@@ -389,6 +373,7 @@ private:
      full [0 .. gdbarch_num_regs + gdbarch_num_pseudo_regs) while a read/write
      register cache can only hold [0 .. gdbarch_num_regs).  */
   gdb_byte *m_registers;
+
   /* Register cache status.  */
   signed char *m_register_status;
   /* Is this a read-only cache?  A read-only cache is used for saving
@@ -398,19 +383,61 @@ private:
      regcache_cpy().  The actual contents are determined by the
      reggroup_save and reggroup_restore methods.  */
   bool m_readonly_p;
-  /* If this is a read-write cache, which thread's registers is
-     it connected to?  */
-  ptid_t m_ptid;
 
-  friend struct regcache *
-  get_thread_arch_aspace_regcache (ptid_t ptid, struct gdbarch *gdbarch,
-				   struct address_space *aspace);
+private:
 
-  friend void
-  registers_changed_ptid (ptid_t ptid);
+  enum register_status xfer_part (int regnum, int offset, int len, void *in,
+				  const void *out,
+				  decltype (regcache_raw_read) read,
+				  decltype (regcache_raw_write) write);
+
+  void transfer_regset (const struct regset *regset,
+			struct regcache *out_regcache,
+			int regnum, const void *in_buf,
+			void *out_buf, size_t size) const;
+
+private:
 
   friend void
   regcache_cpy (struct regcache *dst, struct regcache *src);
+};
+
+
+/* A register cache that can be attached to a target. ptid can be set.  */
+
+class target_regcache : public regcache
+{
+public:
+
+  ptid_t ptid () const
+  {
+    return m_ptid;
+  }
+
+  static void regcache_thread_ptid_changed (ptid_t old_ptid,
+					    ptid_t new_ptid);
+
+protected:
+
+  /* Constructor is only called via get_thread_arch_aspace_regcache.  */
+  target_regcache (gdbarch *gdbarch, address_space *aspace_);
+
+  void set_ptid (const ptid_t ptid)
+  {
+    this->m_ptid = ptid;
+  }
+
+  static std::forward_list<target_regcache *> current_regcache;
+
+private:
+
+  /* The thread the cache is connected to, or -1 if not attached.  */
+  ptid_t m_ptid;
+
+  friend struct target_regcache * get_thread_arch_aspace_regcache
+    (ptid_t ptid, struct gdbarch *gdbarch, struct address_space *aspace);
+
+  friend void registers_changed_ptid (ptid_t ptid);
 };
 
 /* Duplicate the contents of a register cache to a read-only register
