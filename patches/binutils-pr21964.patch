@@ -1,0 +1,457 @@
+From 2a88e03330a3a87af1979cf4fe0a5262f83a31ba Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Mon, 14 Aug 2017 14:28:28 -0700
+Subject: [PATCH] Bind __start/__stop symbols as symbolic in shared object
+
+When building shared objects, bind __start and __stop symbols as symbolic
+to support dlsym.  Also override __start, __stop, .startof.  and .sizeof.
+symbols defined in a shared object.
+
+bfd/
+
+	PR ld/21964
+	* elf-bfd.h (SYMBOLIC_BIND): TRUE for __start/__stop symbols.
+	* elflink.c (bfd_elf_define_start_stop): Override symbol defined
+	in a shared object.  Don't mark __start/__stop symbols as hidden
+	in shared objects.
+
+ld/
+
+	PR ld/21964
+	* testsuite/ld-elf/pr21562a.d: Replace LOCAL with GLOBAL on
+	__start_scnfoo.
+	* testsuite/ld-elf/pr21562b.d: Likewise.
+	* testsuite/ld-elf/pr21562c.d: Likewise.
+	* testsuite/ld-elf/pr21562d.d: Likewise.
+	* testsuite/ld-elf/pr21562e.d: Likewise.
+	* testsuite/ld-elf/pr21562f.d: Likewise.
+	* testsuite/ld-elf/pr21562g.d: Likewise.
+	* testsuite/ld-elf/pr21562h.d: Likewise.
+	* testsuite/ld-elf/pr21562i.d: Likewise.
+	* testsuite/ld-elf/pr21562j.d: Likewise.
+	* testsuite/ld-elf/pr21562k.d: Likewise.
+	* testsuite/ld-elf/pr21562l.d: Likewise.
+	* testsuite/ld-elf/pr21562m.d: Likewise.
+	* testsuite/ld-elf/pr21562n.d: Likewise.
+	* testsuite/ld-elf/pr21964-1a.c: New file.
+	* testsuite/ld-elf/pr21964-1b.c: Likewise.
+	* testsuite/ld-elf/pr21964-2a.c: Likewise.
+	* testsuite/ld-elf/pr21964-2b.c: Likewise.
+	* testsuite/ld-elf/shared.exp: Run PR ld/21964 tests.
+	* testsuite/ld-elf/sizeofb.d: Replace LOCAL with GLOBAL on
+	__stop_scnfoo.
+	* testsuite/ld-elf/startofb.d: Replace LOCAL with GLOBAL on
+	__start_scnfoo.
+---
+ bfd/elf-bfd.h                    |  4 +++-
+ bfd/elflink.c                    | 33 +++++++++++++++++++++++++++++++--
+ ld/testsuite/ld-elf/pr21562a.d   |  2 +-
+ ld/testsuite/ld-elf/pr21562b.d   |  2 +-
+ ld/testsuite/ld-elf/pr21562c.d   |  2 +-
+ ld/testsuite/ld-elf/pr21562d.d   |  2 +-
+ ld/testsuite/ld-elf/pr21562e.d   |  2 +-
+ ld/testsuite/ld-elf/pr21562f.d   |  2 +-
+ ld/testsuite/ld-elf/pr21562g.d   |  2 +-
+ ld/testsuite/ld-elf/pr21562h.d   |  2 +-
+ ld/testsuite/ld-elf/pr21562i.d   |  2 +-
+ ld/testsuite/ld-elf/pr21562j.d   |  2 +-
+ ld/testsuite/ld-elf/pr21562k.d   |  2 +-
+ ld/testsuite/ld-elf/pr21562l.d   |  2 +-
+ ld/testsuite/ld-elf/pr21562m.d   |  2 +-
+ ld/testsuite/ld-elf/pr21562n.d   |  2 +-
+ ld/testsuite/ld-elf/pr21964-1a.c | 11 +++++++++++
+ ld/testsuite/ld-elf/pr21964-1b.c | 24 ++++++++++++++++++++++++
+ ld/testsuite/ld-elf/pr21964-2a.c | 11 +++++++++++
+ ld/testsuite/ld-elf/pr21964-2b.c | 27 +++++++++++++++++++++++++++
+ ld/testsuite/ld-elf/shared.exp   | 12 ++++++++++++
+ ld/testsuite/ld-elf/sizeofb.d    |  2 +-
+ ld/testsuite/ld-elf/startofb.d   |  2 +-
+ 23 files changed, 135 insertions(+), 19 deletions(-)
+ create mode 100644 ld/testsuite/ld-elf/pr21964-1a.c
+ create mode 100644 ld/testsuite/ld-elf/pr21964-1b.c
+ create mode 100644 ld/testsuite/ld-elf/pr21964-2a.c
+ create mode 100644 ld/testsuite/ld-elf/pr21964-2b.c
+
+diff --git a/bfd/elf-bfd.h b/bfd/elf-bfd.h
+index 92a8e02e59..83958e41e0 100644
+--- a/bfd/elf-bfd.h
++++ b/bfd/elf-bfd.h
+@@ -2802,7 +2802,9 @@ extern asection _bfd_elf_large_com_section;
+    library, if any.  A unique symbol can never be bound locally.  */
+ #define SYMBOLIC_BIND(INFO, H) \
+     (!(H)->unique_global \
+-     && ((INFO)->symbolic || ((INFO)->dynamic && !(H)->dynamic)))
++     && ((INFO)->symbolic \
++	 || (H)->start_stop \
++	 || ((INFO)->dynamic && !(H)->dynamic)))
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/bfd/elflink.c b/bfd/elflink.c
+index f9886dc645..d03160e201 100644
+--- a/bfd/elflink.c
++++ b/bfd/elflink.c
+@@ -14261,17 +14261,46 @@ bfd_elf_define_start_stop (struct bfd_link_info *info,
+ 			   const char *symbol, asection *sec)
+ {
+   struct bfd_link_hash_entry *h;
++  struct elf_link_hash_entry *eh;
+ 
+   h = bfd_generic_define_start_stop (info, symbol, sec);
+-  if (h != NULL)
++  eh = (struct elf_link_hash_entry *) h;
++  if (eh != NULL)
+     {
+-      struct elf_link_hash_entry *eh = (struct elf_link_hash_entry *) h;
+       eh->start_stop = 1;
+       eh->u2.start_stop_section = sec;
++    }
++  else
++    {
++      /* Override definition from a shared object.  */
++       h = bfd_link_hash_lookup (info->hash, symbol, FALSE, FALSE,
++				 FALSE);
++       eh = (struct elf_link_hash_entry *) h;
++       if (eh != NULL && eh->def_dynamic)
++	 {
++	   eh->root.type = bfd_link_hash_defined;
++	   eh->root.u.def.section = sec;
++	   eh->root.u.def.value = 0;
++	   eh->start_stop = 1;
++	   eh->u2.start_stop_section = sec;
++	   eh->def_dynamic = 0;
++	   eh->def_regular = 1;
++	 }
++       else
++	 h = NULL;
++    }
++
++  if (h != NULL
++      && ELF_ST_VISIBILITY (eh->other) != STV_INTERNAL
++      && (!bfd_link_dll (info) || symbol[0] == '.'))
++    {
++      /* When building shared objects, don't mark __start and __stop
++	 symbols as hidden to support dlsym.  */
+       _bfd_elf_link_hash_hide_symbol (info, eh, TRUE);
+       if (ELF_ST_VISIBILITY (eh->other) != STV_INTERNAL)
+ 	eh->other = ((eh->other & ~ELF_ST_VISIBILITY (-1))
+ 		     | STV_HIDDEN);
+     }
++
+   return h;
+ }
+diff --git a/ld/testsuite/ld-elf/pr21562a.d b/ld/testsuite/ld-elf/pr21562a.d
+index ecf013f432..520bd13ce4 100644
+--- a/ld/testsuite/ld-elf/pr21562a.d
++++ b/ld/testsuite/ld-elf/pr21562a.d
+@@ -8,5 +8,5 @@
+ #...
+   \[[ 0-9]+\] scnfoo[ \t]+PROGBITS[ \t]+[0-9a-f]+ +[0-9a-f]+ +0*10[ \t]+.*
+ #...
+- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?start_scnfoo
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?start_scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/pr21562b.d b/ld/testsuite/ld-elf/pr21562b.d
+index 063a141741..54341fd5d3 100644
+--- a/ld/testsuite/ld-elf/pr21562b.d
++++ b/ld/testsuite/ld-elf/pr21562b.d
+@@ -8,5 +8,5 @@
+ #...
+   \[[ 0-9]+\] scnfoo[ \t]+PROGBITS[ \t]+[0-9a-f]+ +[0-9a-f]+ +0*10[ \t]+.*
+ #...
+- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?stop_scnfoo
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?stop_scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/pr21562c.d b/ld/testsuite/ld-elf/pr21562c.d
+index 1d72a0d02f..f99c2b296b 100644
+--- a/ld/testsuite/ld-elf/pr21562c.d
++++ b/ld/testsuite/ld-elf/pr21562c.d
+@@ -9,5 +9,5 @@
+ #...
+   \[[ 0-9]+\] scnfoo[ \t]+PROGBITS[ \t]+[0-9a-f]+ +[0-9a-f]+ +0*10[ \t]+.*
+ #...
+- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?start_scnfoo
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?start_scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/pr21562d.d b/ld/testsuite/ld-elf/pr21562d.d
+index f752a2465a..d72bf4ee3e 100644
+--- a/ld/testsuite/ld-elf/pr21562d.d
++++ b/ld/testsuite/ld-elf/pr21562d.d
+@@ -9,5 +9,5 @@
+ #...
+   \[[ 0-9]+\] scnfoo[ \t]+PROGBITS[ \t]+[0-9a-f]+ +[0-9a-f]+ +0*10[ \t]+.*
+ #...
+- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?stop_scnfoo
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?stop_scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/pr21562e.d b/ld/testsuite/ld-elf/pr21562e.d
+index 769f2f8a4b..9229dc0f4f 100644
+--- a/ld/testsuite/ld-elf/pr21562e.d
++++ b/ld/testsuite/ld-elf/pr21562e.d
+@@ -6,5 +6,5 @@
+ #...
+   \[[ 0-9]+\] scnfoo[ \t]+PROGBITS[ \t]+[0-9a-f]+ +[0-9a-f]+ +0*10[ \t]+.*
+ #...
+- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?start_scnfoo
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?start_scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/pr21562f.d b/ld/testsuite/ld-elf/pr21562f.d
+index cb81c2a36b..16e3d2e9c4 100644
+--- a/ld/testsuite/ld-elf/pr21562f.d
++++ b/ld/testsuite/ld-elf/pr21562f.d
+@@ -6,5 +6,5 @@
+ #...
+   \[[ 0-9]+\] scnfoo[ \t]+PROGBITS[ \t]+[0-9a-f]+ +[0-9a-f]+ +0*10[ \t]+.*
+ #...
+- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?stop_scnfoo
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?stop_scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/pr21562g.d b/ld/testsuite/ld-elf/pr21562g.d
+index 9926416abe..59fd5b861c 100644
+--- a/ld/testsuite/ld-elf/pr21562g.d
++++ b/ld/testsuite/ld-elf/pr21562g.d
+@@ -6,5 +6,5 @@
+ #...
+   \[[ 0-9]+\] scnfoo[ \t]+PROGBITS[ \t]+[0-9a-f]+ +[0-9a-f]+ +0*10[ \t]+.*
+ #...
+- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?start_scnfoo
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?start_scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/pr21562h.d b/ld/testsuite/ld-elf/pr21562h.d
+index 1e723ba099..9be1c51f52 100644
+--- a/ld/testsuite/ld-elf/pr21562h.d
++++ b/ld/testsuite/ld-elf/pr21562h.d
+@@ -6,5 +6,5 @@
+ #...
+   \[[ 0-9]+\] scnfoo[ \t]+PROGBITS[ \t]+[0-9a-f]+ +[0-9a-f]+ +0*10[ \t]+.*
+ #...
+- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?stop_scnfoo
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?stop_scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/pr21562i.d b/ld/testsuite/ld-elf/pr21562i.d
+index f5b59c54b8..0e0d070b1d 100644
+--- a/ld/testsuite/ld-elf/pr21562i.d
++++ b/ld/testsuite/ld-elf/pr21562i.d
+@@ -9,5 +9,5 @@
+ #...
+   \[[ 0-9]+\] scnfoo[ \t]+PROGBITS[ \t]+[0-9a-f]+ +[0-9a-f]+ +0*10[ \t]+.*
+ #...
+- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?start_scnfoo
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?start_scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/pr21562j.d b/ld/testsuite/ld-elf/pr21562j.d
+index 70e311e231..c645da7585 100644
+--- a/ld/testsuite/ld-elf/pr21562j.d
++++ b/ld/testsuite/ld-elf/pr21562j.d
+@@ -9,5 +9,5 @@
+ #...
+   \[[ 0-9]+\] scnfoo[ \t]+PROGBITS[ \t]+[0-9a-f]+ +[0-9a-f]+ +0*10[ \t]+.*
+ #...
+- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?stop_scnfoo
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?stop_scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/pr21562k.d b/ld/testsuite/ld-elf/pr21562k.d
+index 4c62eb7966..b0f56a06f2 100644
+--- a/ld/testsuite/ld-elf/pr21562k.d
++++ b/ld/testsuite/ld-elf/pr21562k.d
+@@ -9,5 +9,5 @@
+ #...
+   \[[ 0-9]+\] \.foo[ \t]+PROGBITS[ \t]+[0-9a-f]+ +[0-9a-f]+ +0*10[ \t]+.*
+ #...
+- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?start_scnfoo
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?start_scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/pr21562l.d b/ld/testsuite/ld-elf/pr21562l.d
+index b0ba90dd3c..398556f26e 100644
+--- a/ld/testsuite/ld-elf/pr21562l.d
++++ b/ld/testsuite/ld-elf/pr21562l.d
+@@ -9,5 +9,5 @@
+ #...
+   \[[ 0-9]+\] \.foo[ \t]+PROGBITS[ \t]+[0-9a-f]+ +[0-9a-f]+ +0*10[ \t]+.*
+ #...
+- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?stop_scnfoo
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?stop_scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/pr21562m.d b/ld/testsuite/ld-elf/pr21562m.d
+index fbcf76f476..7305bdf11f 100644
+--- a/ld/testsuite/ld-elf/pr21562m.d
++++ b/ld/testsuite/ld-elf/pr21562m.d
+@@ -9,5 +9,5 @@
+ #...
+   \[[ 0-9]+\] \.foo[ \t]+PROGBITS[ \t]+[0-9a-f]+ +[0-9a-f]+ +0*10[ \t]+.*
+ #...
+- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?start_scnfoo
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?start_scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/pr21562n.d b/ld/testsuite/ld-elf/pr21562n.d
+index 2453169999..5a229923bd 100644
+--- a/ld/testsuite/ld-elf/pr21562n.d
++++ b/ld/testsuite/ld-elf/pr21562n.d
+@@ -9,5 +9,5 @@
+ #...
+   \[[ 0-9]+\] \.foo[ \t]+PROGBITS[ \t]+[0-9a-f]+ +[0-9a-f]+ +0*10[ \t]+.*
+ #...
+- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?stop_scnfoo
++ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?stop_scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/pr21964-1a.c b/ld/testsuite/ld-elf/pr21964-1a.c
+new file mode 100644
+index 0000000000..f2eae53552
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr21964-1a.c
+@@ -0,0 +1,11 @@
++extern int __start___verbose[];
++extern int __stop___verbose[];
++int foo (void)
++{
++  static int my_var __attribute__((used, section("__verbose"))) = 5;
++  if (__start___verbose == __stop___verbose
++      || __start___verbose[0] != 5)
++    return -1;
++  else
++    return 0;
++}
+diff --git a/ld/testsuite/ld-elf/pr21964-1b.c b/ld/testsuite/ld-elf/pr21964-1b.c
+new file mode 100644
+index 0000000000..440c937f78
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr21964-1b.c
+@@ -0,0 +1,24 @@
++#include <stdio.h>
++
++extern int foo (void);
++
++extern int __start___verbose[];
++extern int __stop___verbose[];
++static int my_var __attribute__((used, section("__verbose"))) = 6;
++int bar (void)
++{
++  if (__start___verbose == __stop___verbose)
++    return -1;
++
++  if (__start___verbose[0] != 6)
++    return -2;
++  else
++    return 0;
++}
++
++int main()
++{
++  if (bar () == 0 && foo () == 0)
++    printf ("PASS\n");
++  return 0;
++}
+diff --git a/ld/testsuite/ld-elf/pr21964-2a.c b/ld/testsuite/ld-elf/pr21964-2a.c
+new file mode 100644
+index 0000000000..617ce75eea
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr21964-2a.c
+@@ -0,0 +1,11 @@
++extern int __start___verbose[];
++extern int __stop___verbose[];
++int foo (void)
++{
++  static int my_var __attribute__((used, section("__verbose"))) = 5;
++  if (__start___verbose == __stop___verbose
++      && __start___verbose[0] != 5)
++    return -1;
++  else
++    return 0;
++}
+diff --git a/ld/testsuite/ld-elf/pr21964-2b.c b/ld/testsuite/ld-elf/pr21964-2b.c
+new file mode 100644
+index 0000000000..5f638a3dec
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr21964-2b.c
+@@ -0,0 +1,27 @@
++#include <dlfcn.h>
++#include <stdio.h>
++
++int main()
++{
++  void *dl;
++  void *sym;
++  int (*func) (void);
++
++  dl = dlopen("pr21964-2.so", RTLD_LAZY);
++  if (!dl)
++    return 1;
++
++  sym = dlsym(dl, "__start___verbose");
++  if (!sym)
++    return 2;
++
++  func = dlsym(dl, "foo");
++  if (!func)
++    return 3;
++  if (func () == 0)
++    printf ("PASS\n");
++
++  dlclose(dl);
++
++  return 0;
++}
+diff --git a/ld/testsuite/ld-elf/shared.exp b/ld/testsuite/ld-elf/shared.exp
+index 8b139ec874..0802fa24c6 100644
+--- a/ld/testsuite/ld-elf/shared.exp
++++ b/ld/testsuite/ld-elf/shared.exp
+@@ -423,6 +423,12 @@ set build_tests {
+   {"Build libpr19073.so"
+    "-shared -Wl,--version-script=pr19073.map tmpdir/pr19073a.o" "-fPIC"
+    {dummy.c} {{readelf {--dyn-syms --wide} pr19073.rd}} "libpr19073.so"}
++  {"Build pr21964-1.so"
++   "-shared" "-fPIC"
++   {pr21964-1a.c} {} "pr21964-1.so"}
++  {"Build pr21964-2.so"
++   "-shared" "-fPIC"
++   {pr21964-2a.c} {} "pr21964-2.so"}
+ }
+ 
+ run_cc_link_tests $build_tests
+@@ -540,6 +546,9 @@ set run_tests [list \
+     [list "Run pr18458" \
+      "-Wl,--no-as-needed,-z,now tmpdir/libpr18458a.so tmpdir/libpr18458b.so" "" \
+      {pr18458c.c} "pr18458" "pass.out" ] \
++    [list "Run pr21964-1" \
++     "-Wl,--no-as-needed,-rpath,tmpdir tmpdir/pr21964-1.so" "" \
++     {pr21964-1b.c} "pr21964-1" "pass.out" ] \
+ ]
+ 
+ # NetBSD ELF systems do not currently support the .*_array sections.
+@@ -586,6 +595,9 @@ set dlopen_run_tests [list \
+     [list "Run dl6d1 with --dynamic-list-data and dlopen on libdl6d.so" \
+      "-Wl,--no-as-needed,--dynamic-list-data $extralibs" "" \
+      {dl6dmain.c} "dl6d1" "dl6b.out" ] \
++    [list "Run pr21964-2" \
++     "-Wl,--no-as-needed,-rpath,tmpdir $extralibs" "" \
++     {pr21964-2b.c} "pr21964-2" "pass.out" ] \
+ ]
+ 
+ # Only run them when libdl is available.
+diff --git a/ld/testsuite/ld-elf/sizeofb.d b/ld/testsuite/ld-elf/sizeofb.d
+index ac4a6a474e..bde5ca22e0 100644
+--- a/ld/testsuite/ld-elf/sizeofb.d
++++ b/ld/testsuite/ld-elf/sizeofb.d
+@@ -7,7 +7,7 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
+  +Num: +Value +Size Type +Bind +Vis +Ndx Name
+  +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
+ #...
+- +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?stop_scnfoo
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?stop_scnfoo
+ #...
+  +[0-9]+: 0+10 + +0 +NOTYPE +LOCAL +DEFAULT +ABS +.sizeof.scnfoo
+ #pass
+diff --git a/ld/testsuite/ld-elf/startofb.d b/ld/testsuite/ld-elf/startofb.d
+index 5d659bb8e5..35a1bb6432 100644
+--- a/ld/testsuite/ld-elf/startofb.d
++++ b/ld/testsuite/ld-elf/startofb.d
+@@ -9,5 +9,5 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
+ #...
+  +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +LOCAL +DEFAULT +[0-9]+ +.startof.scnfoo
+ #...
+- +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +LOCAL +DEFAULT +[0-9]+ +___?start_scnfoo
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +___?start_scnfoo
+ #pass
+-- 
+2.13.5
+
