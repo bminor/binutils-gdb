@@ -1,3 +1,14 @@
+2017-08-15  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	Backport from mainline:
+	* config/tc-aarch64.c (REGDEF_ALIAS): Define
+	(reg_names): Update for ip0, ip1, fp, lr to use REGDEF_ALIAS
+	* doc/c-aarch64.texi: Update documentation on .req.
+	* testsuite/gas/diagnostic.s: Update
+	* testsuite/gas/diagnostic.l: Likewise
+	* testsuite/gas/register_aliases.s: New file.
+	* testsuite/gas/register_aliases.d: New file.
+
 2017-08-10  Nick Clifton  <nickc@redhat.com>
 
 	Backport from mainline:

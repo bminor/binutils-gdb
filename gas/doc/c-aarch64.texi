@@ -363,6 +363,9 @@ example:
         foo .req w0
 @end smallexample
 
+ip0, ip1, lr and fp are automatically defined to
+alias to X16, X17, X30 and X29 respectively.
+
 @c SSSSSSSSSSSSSSSSSSSSSSSSSS
 
 @c TTTTTTTTTTTTTTTTTTTTTTTTTT
