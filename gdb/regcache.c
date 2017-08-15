@@ -597,16 +597,14 @@ regcache_raw_update (struct regcache *regcache, int regnum)
 }
 
 void
-regcache::raw_update (int regnum)
+target_regcache::raw_update (int regnum)
 {
   gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
 
   /* Make certain that the register cache is up-to-date with respect
-     to the current thread.  This switching shouldn't be necessary
-     only there is still only one target side register cache.  Sigh!
-     On the bright side, at least there is a regcache object.  */
+     to the current thread.  */
 
-  if (!m_readonly_p && get_register_status (regnum) == REG_UNKNOWN)
+  if (get_register_status (regnum) == REG_UNKNOWN)
     {
       target_fetch_registers (this, regnum);
 
@@ -627,7 +625,16 @@ regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
 enum register_status
 regcache::raw_read (int regnum, gdb_byte *buf)
 {
+  raw_collect (regnum, buf);
+  return (enum register_status) m_register_status[regnum];
+}
+
+enum register_status
+target_regcache::raw_read (int regnum, gdb_byte *buf)
+{
   gdb_assert (buf != NULL);
+
+  /* Read register value from the target into the regcache.  */
   raw_update (regnum);
 
   if (m_register_status[regnum] != REG_VALID)
@@ -895,11 +902,25 @@ regcache_raw_write (struct regcache *regcache, int regnum,
 void
 regcache::raw_write (int regnum, const gdb_byte *buf)
 {
+  gdb_assert (buf != NULL);
+  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  gdb_assert (!m_readonly_p);
+
+  /* On the sparc, writing %g0 is a no-op, so we don't even want to
+     change the registers array if something writes to this register.  */
+  if (gdbarch_cannot_store_register (arch (), regnum))
+    return;
+
+  raw_set_cached_value (regnum, buf);
+}
+
+void
+target_regcache::raw_write (int regnum, const gdb_byte *buf)
+{
   struct cleanup *old_chain;
 
   gdb_assert (buf != NULL);
   gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
-  gdb_assert (!m_readonly_p);
 
   /* On the sparc, writing %g0 is a no-op, so we don't even want to
      change the registers array if something writes to this register.  */

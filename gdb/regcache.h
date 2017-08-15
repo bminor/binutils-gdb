@@ -242,7 +242,8 @@ typedef struct cached_reg
 } cached_reg_t;
 
 
-/* A register cache.  This is not connected to a target and ptid is unset.  */
+/* A register cache.  This is not connected to a target - reads and writes will
+   not be passed through to a target and ptid is unset.  */
 
 class regcache
 {
@@ -283,14 +284,8 @@ public:
   enum register_status cooked_read (int regnum, gdb_byte *buf);
   void cooked_write (int regnum, const gdb_byte *buf);
 
-  enum register_status raw_read (int regnum, gdb_byte *buf);
-
-  /* class regcache is only extended in unit test, so only mark it
-     virtual when selftest is enabled.  */
-#if GDB_SELF_TEST
-  virtual
-#endif
-  void raw_write (int regnum, const gdb_byte *buf);
+  virtual enum register_status raw_read (int regnum, gdb_byte *buf);
+  virtual void raw_write (int regnum, const gdb_byte *buf);
 
   template<typename T, typename = RequireLongest<T>>
   enum register_status raw_read (int regnum, T *val);
@@ -306,7 +301,7 @@ public:
   template<typename T, typename = RequireLongest<T>>
   void cooked_write (int regnum, T val);
 
-  void raw_update (int regnum);
+  virtual void raw_update (int regnum) {}
 
   void raw_collect (int regnum, void *buf) const;
 
@@ -403,11 +398,18 @@ private:
 };
 
 
-/* A register cache that can be attached to a target. ptid can be set.  */
+/* A register cache attached to a target.  Reads and writes of register values
+   will be passed through to the target and ptid can be set.  */
 
 class target_regcache : public regcache
 {
 public:
+
+  /* Overridden regcache methods.  These versions will pass the read/write
+     through to the target.  */
+  enum register_status raw_read (int regnum, gdb_byte *buf);
+  virtual void raw_write (int regnum, const gdb_byte *buf);
+  void raw_update (int regnum);
 
   ptid_t ptid () const
   {
