@@ -40,7 +40,8 @@ public:
 
   void raw_write (int regnum, const gdb_byte *buf) override
   {
-    raw_set_cached_value (regnum, buf);
+    /* Bypass writing to the target.  */
+    regcache::raw_write (regnum, buf);
   }
 };
 

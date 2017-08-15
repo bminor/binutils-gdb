@@ -604,8 +604,7 @@ regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
 enum register_status
 regcache::raw_read (int regnum, gdb_byte *buf)
 {
-  raw_collect (regnum, buf);
-  return (enum register_status) m_register_status[regnum];
+  return raw_get_cached_reg (regnum, buf);
 }
 
 enum register_status
@@ -616,13 +615,7 @@ target_regcache::raw_read (int regnum, gdb_byte *buf)
   /* Read register value from the target into the regcache.  */
   raw_update (regnum);
 
-  if (m_register_status[regnum] != REG_VALID)
-    memset (buf, 0, m_descr->sizeof_register[regnum]);
-  else
-    memcpy (buf, register_buffer (regnum),
-	    m_descr->sizeof_register[regnum]);
-
-  return (enum register_status) m_register_status[regnum];
+  return raw_get_cached_reg (regnum, buf);
 }
 
 enum register_status
@@ -852,21 +845,42 @@ regcache_cooked_write_unsigned (struct regcache *regcache, int regnum,
   regcache->cooked_write (regnum, val);
 }
 
-/* See regcache.h.  */
-
 void
-regcache_raw_set_cached_value (struct regcache *regcache, int regnum,
-			       const gdb_byte *buf)
+regcache::raw_set_cached_reg (int regnum, const gdb_byte *buf)
 {
-  regcache->raw_set_cached_value (regnum, buf);
+  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  gdb_assert (!m_readonly_p);
+
+  if (buf)
+    {
+      memcpy (register_buffer (regnum), buf, m_descr->sizeof_register[regnum]);
+      m_register_status[regnum] = REG_VALID;
+    }
+  else
+    {
+      /* This memset not strictly necessary, but better than garbage
+	 in case the register value manages to escape somewhere (due
+	 to a bug, no less).  */
+      memset (register_buffer (regnum), 0, m_descr->sizeof_register[regnum]);
+      m_register_status[regnum] = REG_UNAVAILABLE;
+    }
+
+  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
 }
 
-void
-regcache::raw_set_cached_value (int regnum, const gdb_byte *buf)
+enum register_status
+regcache::raw_get_cached_reg (int regnum, gdb_byte *buf) const
 {
-  memcpy (register_buffer (regnum), buf,
-	  m_descr->sizeof_register[regnum]);
-  m_register_status[regnum] = REG_VALID;
+  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  gdb_assert (buf != NULL);
+
+  if (m_register_status[regnum] != REG_VALID)
+    memset (buf, 0, m_descr->sizeof_register[regnum]);
+  else
+    memcpy (buf, register_buffer (regnum),
+	    m_descr->sizeof_register[regnum]);
+
+  return (enum register_status) m_register_status[regnum];
 }
 
 void
@@ -880,16 +894,14 @@ regcache_raw_write (struct regcache *regcache, int regnum,
 void
 regcache::raw_write (int regnum, const gdb_byte *buf)
 {
-  gdb_assert (buf != NULL);
   gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
-  gdb_assert (!m_readonly_p);
 
   /* On the sparc, writing %g0 is a no-op, so we don't even want to
      change the registers array if something writes to this register.  */
   if (gdbarch_cannot_store_register (arch (), regnum))
     return;
 
-  raw_set_cached_value (regnum, buf);
+  raw_set_cached_reg (regnum, buf);
 }
 
 void
@@ -913,7 +925,7 @@ target_regcache::raw_write (int regnum, const gdb_byte *buf)
     return;
 
   target_prepare_to_store (this);
-  raw_set_cached_value (regnum, buf);
+  raw_set_cached_reg (regnum, buf);
 
   /* Register a cleanup function for invalidating the register after it is
      written, in case of a failure.  */
@@ -1072,28 +1084,7 @@ regcache_raw_supply (struct regcache *regcache, int regnum, const void *buf)
 void
 regcache::raw_supply (int regnum, const void *buf)
 {
-  void *regbuf;
-  size_t size;
-
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
-  gdb_assert (!m_readonly_p);
-
-  regbuf = register_buffer (regnum);
-  size = m_descr->sizeof_register[regnum];
-
-  if (buf)
-    {
-      memcpy (regbuf, buf, size);
-      m_register_status[regnum] = REG_VALID;
-    }
-  else
-    {
-      /* This memset not strictly necessary, but better than garbage
-	 in case the register value manages to escape somewhere (due
-	 to a bug, no less).  */
-      memset (regbuf, 0, size);
-      m_register_status[regnum] = REG_UNAVAILABLE;
-    }
+  raw_set_cached_reg (regnum, (const gdb_byte*) buf);
 }
 
 /* Supply register REGNUM to REGCACHE.  Value to supply is an integer stored at
@@ -1153,15 +1144,7 @@ regcache_raw_collect (const struct regcache *regcache, int regnum, void *buf)
 void
 regcache::raw_collect (int regnum, void *buf) const
 {
-  const void *regbuf;
-  size_t size;
-
-  gdb_assert (buf != NULL);
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
-
-  regbuf = register_buffer (regnum);
-  size = m_descr->sizeof_register[regnum];
-  memcpy (buf, regbuf, size);
+  raw_get_cached_reg (regnum, (gdb_byte*) buf);
 }
 
 /* Transfer a single or all registers belonging to a certain register

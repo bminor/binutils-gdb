@@ -79,14 +79,6 @@ extern void regcache_raw_write_unsigned (struct regcache *regcache,
 extern LONGEST regcache_raw_get_signed (struct regcache *regcache,
 					int regnum);
 
-/* Set a raw register's value in the regcache's buffer.  Unlike
-   regcache_raw_write, this is not write-through.  The intention is
-   allowing to change the buffer contents of a read-only regcache
-   allocated with regcache_xmalloc.  */
-
-extern void regcache_raw_set_cached_value
-  (struct regcache *regcache, int regnum, const gdb_byte *buf);
-
 /* Partial transfer of raw registers.  These perform read, modify,
    write style operations.  The read variant returns the status of the
    register.  */
@@ -301,8 +293,6 @@ public:
 
   virtual enum register_status get_register_status (int regnum) const;
 
-  void raw_set_cached_value (int regnum, const gdb_byte *buf);
-
   void invalidate (int regnum);
 
   enum register_status raw_read_part (int regnum, int offset, int len,
@@ -338,6 +328,10 @@ public:
 protected:
 
   gdb_byte *register_buffer (int regnum) const;
+
+  /* Get/Set the cached contents of the regcache.  */
+  void raw_set_cached_reg (int regnum, const gdb_byte *buf);
+  enum register_status raw_get_cached_reg (int regnum, gdb_byte *buf) const;
 
   struct regcache_descr *m_descr;
 
