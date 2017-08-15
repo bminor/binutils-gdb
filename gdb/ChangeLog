@@ -1,3 +1,8 @@
+2017-08-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_convert_siginfo): Fix compile on big-endian
+	platforms.
+
 2017-08-14  Tom Tromey  <tom@tromey.com>
 
 	* valprint.c (print_octal_chars): Use HOST_CHAR_BIT.

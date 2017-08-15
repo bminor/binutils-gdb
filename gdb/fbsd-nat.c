@@ -314,7 +314,7 @@ fbsd_convert_siginfo (siginfo_t *si)
      32-bits of the pointer value.  */
 #if _BYTE_ORDER == _BIG_ENDIAN
   if (si->si_value.sival_int == 0)
-    si32->si_value.sival_ptr = (uintptr_t) si->si_value.sival_ptr;
+    si32.si_value.sival_ptr = (uintptr_t) si->si_value.sival_ptr;
   else
     si32.si_value.sival_int = si->si_value.sival_int;
 #else
