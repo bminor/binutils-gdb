@@ -1125,7 +1125,7 @@ jit_unwind_reg_set_impl (struct gdb_unwind_callbacks *cb, int dwarf_regnum,
       return;
     }
 
-  regcache_raw_set_cached_value (priv->regcache, gdb_reg, value->value);
+  priv->regcache->raw_supply (gdb_reg, value->value);
   value->free (value);
 }
 
@@ -1206,7 +1206,7 @@ jit_frame_sniffer (const struct frame_unwind *self,
 
   *cache = XCNEW (struct jit_unwind_private);
   priv_data = (struct jit_unwind_private *) *cache;
-  priv_data->regcache = new regcache (gdbarch, aspace);
+  priv_data->regcache = new regcache (gdbarch, aspace, false);
   priv_data->this_frame = this_frame;
 
   callbacks.priv_data = priv_data;
