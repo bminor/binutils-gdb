@@ -1275,7 +1275,7 @@ spu2ppu_sniffer (const struct frame_unwind *self,
 	{
 	  struct regcache *regcache;
 	  regcache = get_thread_arch_regcache (inferior_ptid, target_gdbarch ());
-	  cache->regcache = regcache_dup (regcache);
+	  cache->regcache = regcache->dup ();
 	  *this_prologue_cache = cache;
 	  return 1;
 	}

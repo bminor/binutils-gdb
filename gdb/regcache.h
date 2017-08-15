@@ -209,19 +209,9 @@ extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
    
 extern int register_size (struct gdbarch *gdbarch, int regnum);
 
-
-/* Save/restore a register cache.  The set of registers saved /
-   restored into the DST regcache determined by the save_reggroup /
-   restore_reggroup respectively.  COOKED_READ returns zero iff the
-   register's value can't be returned.  */
-
 typedef enum register_status (regcache_cooked_read_ftype) (void *src,
 							   int regnum,
 							   gdb_byte *buf);
-
-extern void regcache_save (struct regcache *dst,
-			   regcache_cooked_read_ftype *cooked_read,
-			   void *cooked_read_context);
 
 enum regcache_dump_what
 {
@@ -249,12 +239,6 @@ public:
     : regcache (gdbarch, aspace_, true)
   {}
 
-  struct readonly_t {};
-  static constexpr readonly_t readonly {};
-
-  /* Create a readonly regcache from a non-readonly regcache.  */
-  regcache (readonly_t, const regcache &src);
-
   regcache (const regcache &) = delete;
   void operator= (const regcache &) = delete;
 
@@ -271,7 +255,16 @@ public:
     return m_aspace;
   }
 
+  /* Duplicate self into a new regcache.  */
+  virtual regcache* dup ();
+
+  /* Copy the register contents from a target_regcache to self.
+     All cooked registers are read and cached.  */
   void save (regcache_cooked_read_ftype *cooked_read, void *src);
+
+  /* Copy register contents to a target_regcache. All cached cooked registers
+     are also restored.  */
+  void restore_to (target_regcache *dst);
 
   enum register_status cooked_read (int regnum, gdb_byte *buf);
   void cooked_write (int regnum, const gdb_byte *buf);
@@ -348,8 +341,6 @@ protected:
 
   gdb_byte *register_buffer (int regnum) const;
 
-  void restore (struct regcache *src);
-
   struct regcache_descr *m_descr;
 
   /* The address space of this register cache (for registers where it
@@ -363,12 +354,10 @@ protected:
 
   /* Register cache status.  */
   signed char *m_register_status;
-  /* Is this a read-only cache?  A read-only cache is used for saving
-     the target's register state (e.g, across an inferior function
-     call or just before forcing a function return).  A read-only
-     cache can only be updated via the methods regcache_dup() and
-     regcache_cpy().  The actual contents are determined by the
-     reggroup_save and reggroup_restore methods.  */
+
+  /* A read-only cache can not change it's register contents, except from
+     an target_regcache via the save () method.
+     A target_regcache cache can never be read-only.  */
   bool m_readonly_p;
 
 private:
@@ -385,8 +374,6 @@ private:
 
 private:
 
-  friend void
-  regcache_cpy (struct regcache *dst, struct regcache *src);
 };
 
 
@@ -396,6 +383,16 @@ private:
 class target_regcache : public regcache
 {
 public:
+
+  target_regcache (const target_regcache &) = delete;
+  void operator= (const target_regcache &) = delete;
+
+  /* Cannot be called on a target_regcache.  */
+  void save (regcache_cooked_read_ftype *cooked_read, void *src) = delete;
+  void restore_to (target_regcache *dst) = delete;
+
+  /* Duplicate self into a new regcache.  Result is not a target_regcache.  */
+  regcache* dup ();
 
   /* Overridden regcache methods.  These versions will pass the read/write
      through to the target.  */
@@ -433,14 +430,6 @@ private:
 
   friend void registers_changed_ptid (ptid_t ptid);
 };
-
-/* Duplicate the contents of a register cache to a read-only register
-   cache.  The operation is pass-through.  */
-extern struct regcache *regcache_dup (struct regcache *regcache);
-
-/* Writes to DEST will go through to the target.  SRC is a read-only
-   register cache.  */
-extern void regcache_cpy (struct regcache *dest, struct regcache *src);
 
 extern void registers_changed (void);
 extern void registers_changed_ptid (ptid_t);

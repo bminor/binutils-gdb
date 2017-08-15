@@ -226,13 +226,6 @@ do_cooked_read (void *src, int regnum, gdb_byte *buf)
   return regcache_cooked_read (regcache, regnum, buf);
 }
 
-regcache::regcache (readonly_t, const regcache &src)
-  : regcache (src.arch (), src.aspace (), true)
-{
-  gdb_assert (!src.m_readonly_p);
-  save (do_cooked_read, (void *) &src);
-}
-
 gdbarch *
 regcache::arch () const
 {
@@ -312,23 +305,11 @@ regcache::register_buffer (int regnum) const
 }
 
 void
-regcache_save (struct regcache *regcache,
-	       regcache_cooked_read_ftype *cooked_read, void *src)
-{
-  regcache->save (cooked_read, src);
-}
-
-void
-regcache::save (regcache_cooked_read_ftype *cooked_read,
-		void *src)
+regcache::save (regcache_cooked_read_ftype *cooked_read, void *src)
 {
   struct gdbarch *gdbarch = m_descr->gdbarch;
   int regnum;
 
-  /* The DST should be `read-only', if it wasn't then the save would
-     end up trying to write the register values back out to the
-     target.  */
-  gdb_assert (m_readonly_p);
   /* Clear the dest.  */
   memset (m_registers, 0, m_descr->sizeof_cooked_registers);
   memset (m_register_status, 0, m_descr->sizeof_cooked_register_status);
@@ -354,15 +335,14 @@ regcache::save (regcache_cooked_read_ftype *cooked_read,
 }
 
 void
-regcache::restore (struct regcache *src)
+regcache::restore_to (target_regcache *dst)
 {
   struct gdbarch *gdbarch = m_descr->gdbarch;
   int regnum;
+  gdb_assert (dst != NULL);
+  gdb_assert (dst->m_descr->gdbarch == m_descr->gdbarch);
+  gdb_assert (dst != this);
 
-  /* The dst had better not be read-only.  If it is, the `restore'
-     doesn't make much sense.  */
-  gdb_assert (!m_readonly_p);
-  gdb_assert (src->m_readonly_p);
   /* Copy over any registers, being careful to only restore those that
      were both saved and need to be restored.  The full [0 .. gdbarch_num_regs
      + gdbarch_num_pseudo_regs) range is checked since some architectures need
@@ -371,27 +351,33 @@ regcache::restore (struct regcache *src)
     {
       if (gdbarch_register_reggroup_p (gdbarch, regnum, restore_reggroup))
 	{
-	  if (src->m_register_status[regnum] == REG_VALID)
-	    cooked_write (regnum, src->register_buffer (regnum));
+	  if (m_register_status[regnum] == REG_VALID)
+	    dst->cooked_write (regnum, register_buffer (regnum));
 	}
     }
 }
 
-void
-regcache_cpy (struct regcache *dst, struct regcache *src)
+/* Duplicate detached regcache to a detached regcache.  */
+regcache*
+regcache::dup ()
 {
-  gdb_assert (src != NULL && dst != NULL);
-  gdb_assert (src->m_descr->gdbarch == dst->m_descr->gdbarch);
-  gdb_assert (src != dst);
-  gdb_assert (src->m_readonly_p && !dst->m_readonly_p);
+  regcache *new_regcache = new regcache (arch (), aspace ());
 
-  dst->restore (src);
+  memcpy (new_regcache->m_registers, m_registers,
+	  m_descr->sizeof_cooked_registers);
+  memcpy (new_regcache->m_register_status, m_register_status,
+	  m_descr->sizeof_cooked_register_status);
+
+  return new_regcache;
 }
 
-struct regcache *
-regcache_dup (struct regcache *src)
+/* Duplicate a target_regcache to a detached regcache.  */
+regcache*
+target_regcache::dup ()
 {
-  return new regcache (regcache::readonly, *src);
+  regcache *new_regcache = new regcache (arch (), aspace ());
+  new_regcache->save (do_cooked_read, (void *) this);
+  return new_regcache;
 }
 
 enum register_status

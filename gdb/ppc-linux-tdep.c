@@ -1366,7 +1366,7 @@ ppu2spu_sniffer (const struct frame_unwind *self,
 	  struct address_space *aspace = get_frame_address_space (this_frame);
 	  regcache *backup = new regcache (data.gdbarch, aspace);
 	  struct cleanup *cleanups = make_cleanup_regcache_delete (backup);
-	  regcache_save (backup, ppu2spu_unwind_register, &data);
+	  backup->save (ppu2spu_unwind_register, &data);
 	  discard_cleanups (cleanups);
 
 	  cache->frame_id = frame_id_build (base, func);

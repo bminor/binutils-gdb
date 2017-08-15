@@ -8911,7 +8911,7 @@ save_infcall_suspend_state (void)
 
   inf_state->stop_pc = stop_pc;
 
-  inf_state->registers = regcache_dup (regcache);
+  inf_state->registers = regcache->dup ();
 
   return inf_state;
 }
@@ -8922,7 +8922,7 @@ void
 restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 {
   struct thread_info *tp = inferior_thread ();
-  struct regcache *regcache = get_current_regcache ();
+  target_regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
   tp->suspend = inf_state->thread_suspend;
@@ -8942,7 +8942,7 @@ restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
      (and perhaps other times).  */
   if (target_has_execution)
     /* NB: The register write goes through to the target.  */
-    regcache_cpy (regcache, inf_state->registers);
+    inf_state->registers->restore_to (regcache);
 
   discard_infcall_suspend_state (inf_state);
 }

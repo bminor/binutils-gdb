@@ -1024,7 +1024,7 @@ frame_save_as_regcache (struct frame_info *this_frame)
   regcache *backup = new regcache (get_frame_arch (this_frame), aspace);
   struct cleanup *cleanups = make_cleanup_regcache_delete (backup);
 
-  regcache_save (backup, do_frame_register_read, this_frame);
+  backup->save (do_frame_register_read, this_frame);
   discard_cleanups (cleanups);
   return backup;
 }
@@ -1072,9 +1072,8 @@ frame_pop (struct frame_info *this_frame)
      Unfortunately, they don't implement it.  Their lack of a formal
      definition can lead to targets writing back bogus values
      (arguably a bug in the target code mind).  */
-  /* Now copy those saved registers into the current regcache.
-     Here, regcache_cpy() calls regcache_restore().  */
-  regcache_cpy (get_current_regcache (), scratch);
+  /* Now copy those saved registers into the current regcache.  */
+  scratch->restore_to (get_current_regcache ());
   do_cleanups (cleanups);
 
   /* We've made right mess of GDB's local state, just discard

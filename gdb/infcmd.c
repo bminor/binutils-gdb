@@ -1602,8 +1602,8 @@ advance_command (char *arg, int from_tty)
 struct value *
 get_return_value (struct value *function, struct type *value_type)
 {
-  regcache stop_regs (regcache::readonly, *get_current_regcache ());
-  struct gdbarch *gdbarch = stop_regs.arch ();
+  regcache *stop_regs = get_current_regcache ()->dup ();
+  struct gdbarch *gdbarch = stop_regs->arch ();
   struct value *value;
 
   value_type = check_typedef (value_type);
@@ -1623,7 +1623,7 @@ get_return_value (struct value *function, struct type *value_type)
     case RETURN_VALUE_ABI_RETURNS_ADDRESS:
     case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
       value = allocate_value (value_type);
-      gdbarch_return_value (gdbarch, function, value_type, &stop_regs,
+      gdbarch_return_value (gdbarch, function, value_type, stop_regs,
 			    value_contents_raw (value), NULL);
       break;
     case RETURN_VALUE_STRUCT_CONVENTION:
@@ -1633,6 +1633,7 @@ get_return_value (struct value *function, struct type *value_type)
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 
+  delete stop_regs;
   return value;
 }
 
