@@ -189,29 +189,32 @@ regcache_register_size (const struct regcache *regcache, int n)
 }
 
 regcache::regcache (gdbarch *gdbarch, address_space *aspace_,
-		    bool readonly_p_)
+		    bool readonly_p_, bool allocate_registers)
   : m_aspace (aspace_), m_readonly_p (readonly_p_)
 {
   gdb_assert (gdbarch != NULL);
   m_descr = regcache_descr (gdbarch);
 
-  if (m_readonly_p)
+  if (allocate_registers)
     {
+      /* Need extra space to store the additional cooked registers for when
+	 the detached regcache is used to save a regcache.  */
       m_registers = XCNEWVEC (gdb_byte, m_descr->sizeof_cooked_registers);
-      m_register_status = XCNEWVEC (signed char,
-				    m_descr->sizeof_cooked_register_status);
     }
-  else
-    {
-      m_registers = XCNEWVEC (gdb_byte, m_descr->sizeof_raw_registers);
-      m_register_status = XCNEWVEC (signed char,
-				    m_descr->sizeof_raw_register_status);
-    }
+
+  /* All status' are initialised to REG_UNKNOWN.  */
+  m_register_status = XCNEWVEC (signed char,
+				m_descr->sizeof_cooked_register_status);
 }
 
 target_regcache::target_regcache (gdbarch *gdbarch, address_space *aspace_)
-  : regcache (gdbarch, aspace_, false)
+  : regcache (gdbarch, aspace_, false, false)
 {
+  /* Only allocate the raw registers - cooked registers are not cached.
+     Note that the register status is still fully allocated, to allow the
+     checking of the state of any register.  */
+  m_registers = XCNEWVEC (gdb_byte, m_descr->sizeof_raw_registers);
+
   m_ptid = minus_one_ptid;
 
   /* A target_regcache should never be readonly.  */
@@ -359,9 +362,9 @@ regcache::restore_to (target_regcache *dst)
 
 /* Duplicate detached regcache to a detached regcache.  */
 regcache*
-regcache::dup ()
+regcache::dup (bool readonly_p)
 {
-  regcache *new_regcache = new regcache (arch (), aspace ());
+  regcache *new_regcache = new regcache (arch (), aspace (), readonly_p);
 
   memcpy (new_regcache->m_registers, m_registers,
 	  m_descr->sizeof_cooked_registers);
@@ -373,9 +376,9 @@ regcache::dup ()
 
 /* Duplicate a target_regcache to a detached regcache.  */
 regcache*
-target_regcache::dup ()
+target_regcache::dup (bool readonly_p)
 {
-  regcache *new_regcache = new regcache (arch (), aspace ());
+  regcache *new_regcache = new regcache (arch (), aspace (), readonly_p);
   new_regcache->save (do_cooked_read, (void *) this);
   return new_regcache;
 }
@@ -391,12 +394,15 @@ enum register_status
 regcache::get_register_status (int regnum) const
 {
   gdb_assert (regnum >= 0);
-  if (m_readonly_p)
-    gdb_assert (regnum < m_descr->nr_cooked_registers);
-  else
-    gdb_assert (regnum < m_descr->nr_raw_registers);
-
+  gdb_assert (regnum < m_descr->nr_cooked_registers);
   return (enum register_status) m_register_status[regnum];
+}
+
+enum register_status
+target_regcache::get_register_status (int regnum) const
+{
+  gdb_assert (regnum < m_descr->nr_raw_registers);
+  return regcache::get_register_status (regnum);
 }
 
 void
@@ -707,8 +713,7 @@ regcache::cooked_read (int regnum, gdb_byte *buf)
   gdb_assert (regnum < m_descr->nr_cooked_registers);
   if (regnum < m_descr->nr_raw_registers)
     return raw_read (regnum, buf);
-  else if (m_readonly_p
-	   && m_register_status[regnum] != REG_UNKNOWN)
+  else if (m_register_status[regnum] != REG_UNKNOWN)
     {
       /* Read-only register cache, perhaps the cooked value was
 	 cached?  */
@@ -760,7 +765,7 @@ regcache::cooked_read_value (int regnum)
   gdb_assert (regnum < m_descr->nr_cooked_registers);
 
   if (regnum < m_descr->nr_raw_registers
-      || (m_readonly_p && m_register_status[regnum] != REG_UNKNOWN)
+      || m_register_status[regnum] != REG_UNKNOWN
       || !gdbarch_pseudo_register_read_value_p (m_descr->gdbarch))
     {
       struct value *result;

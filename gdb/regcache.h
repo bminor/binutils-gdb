@@ -235,9 +235,8 @@ typedef struct cached_reg
 class regcache
 {
 public:
-  regcache (gdbarch *gdbarch, address_space *aspace_)
-    : regcache (gdbarch, aspace_, true)
-  {}
+  regcache (gdbarch *gdbarch, address_space *aspace_, bool readonly_p_ = true,
+	    bool allocate_registers = true);
 
   regcache (const regcache &) = delete;
   void operator= (const regcache &) = delete;
@@ -256,7 +255,7 @@ public:
   }
 
   /* Duplicate self into a new regcache.  */
-  virtual regcache* dup ();
+  virtual regcache* dup (bool readonly_p = true);
 
   /* Copy the register contents from a target_regcache to self.
      All cooked registers are read and cached.  */
@@ -300,7 +299,7 @@ public:
 
   void raw_supply_zeroed (int regnum);
 
-  enum register_status get_register_status (int regnum) const;
+  virtual enum register_status get_register_status (int regnum) const;
 
   void raw_set_cached_value (int regnum, const gdb_byte *buf);
 
@@ -337,7 +336,6 @@ public:
   void debug_print_register (const char *func, int regno);
 
 protected:
-  regcache (gdbarch *gdbarch, address_space *aspace_, bool readonly_p_);
 
   gdb_byte *register_buffer (int regnum) const;
 
@@ -392,13 +390,14 @@ public:
   void restore_to (target_regcache *dst) = delete;
 
   /* Duplicate self into a new regcache.  Result is not a target_regcache.  */
-  regcache* dup ();
+  regcache* dup (bool readonly_p = true);
 
   /* Overridden regcache methods.  These versions will pass the read/write
      through to the target.  */
   enum register_status raw_read (int regnum, gdb_byte *buf);
   virtual void raw_write (int regnum, const gdb_byte *buf);
   void raw_update (int regnum);
+  enum register_status get_register_status (int regnum) const;
 
   ptid_t ptid () const
   {
