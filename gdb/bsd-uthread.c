@@ -294,7 +294,7 @@ bsd_uthread_fetch_registers (struct target_ops *ops,
   CORE_ADDR addr = ptid_get_tid (ptid);
   struct target_ops *beneath = find_target_beneath (ops);
   CORE_ADDR active_addr;
-  struct cleanup *cleanup = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
   /* We are doing operations (e.g. reading memory) that rely on
      inferior_ptid.  */
@@ -315,8 +315,6 @@ bsd_uthread_fetch_registers (struct target_ops *ops,
       uthread_ops->supply_uthread (regcache, regnum,
 				   addr + bsd_uthread_thread_ctx_offset);
     }
-
-  do_cleanups (cleanup);
 }
 
 static void
@@ -330,7 +328,7 @@ bsd_uthread_store_registers (struct target_ops *ops,
   ptid_t ptid = regcache_get_ptid (regcache);
   CORE_ADDR addr = ptid_get_tid (ptid);
   CORE_ADDR active_addr;
-  struct cleanup *cleanup = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
   /* We are doing operations (e.g. reading memory) that rely on
      inferior_ptid.  */
@@ -349,8 +347,6 @@ bsd_uthread_store_registers (struct target_ops *ops,
          request to the layer beneath.  */
       beneath->to_store_registers (beneath, regcache, regnum);
     }
-
-  do_cleanups (cleanup);
 }
 
 static ptid_t

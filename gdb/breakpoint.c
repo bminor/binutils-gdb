@@ -3302,7 +3302,6 @@ remove_breakpoints_pid (int pid)
 int
 reattach_breakpoints (int pid)
 {
-  struct cleanup *old_chain;
   struct bp_location *bl, **blp_tmp;
   int val;
   int dummy1 = 0, dummy2 = 0, dummy3 = 0;
@@ -3314,8 +3313,8 @@ reattach_breakpoints (int pid)
     return 1;
 
   inf = find_inferior_pid (pid);
-  old_chain = save_inferior_ptid ();
 
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
   inferior_ptid = tp->ptid;
 
   string_file tmp_error_stream;
@@ -3330,13 +3329,9 @@ reattach_breakpoints (int pid)
 	bl->inserted = 0;
 	val = insert_bp_location (bl, &tmp_error_stream, &dummy1, &dummy2, &dummy3);
 	if (val != 0)
-	  {
-	    do_cleanups (old_chain);
-	    return val;
-	  }
+	  return val;
       }
   }
-  do_cleanups (old_chain);
   return 0;
 }
 
@@ -3913,7 +3908,7 @@ detach_breakpoints (ptid_t ptid)
 {
   struct bp_location *bl, **blp_tmp;
   int val = 0;
-  struct cleanup *old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
   struct inferior *inf = current_inferior ();
 
   if (ptid_get_pid (ptid) == ptid_get_pid (inferior_ptid))
@@ -3939,7 +3934,6 @@ detach_breakpoints (ptid_t ptid)
       val |= remove_breakpoint_1 (bl, DETACH_BREAKPOINT);
   }
 
-  do_cleanups (old_chain);
   return val;
 }
 

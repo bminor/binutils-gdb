@@ -477,7 +477,6 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
     {
       struct lwp_info *child_lp = NULL;
       int status = W_STOPCODE (0);
-      struct cleanup *old_chain;
       int has_vforked;
       ptid_t parent_ptid, child_ptid;
       int parent_pid, child_pid;
@@ -490,16 +489,15 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
       child_pid = ptid_get_lwp (child_ptid);
 
       /* We're already attached to the parent, by default.  */
-      old_chain = save_inferior_ptid ();
-      inferior_ptid = child_ptid;
-      child_lp = add_lwp (inferior_ptid);
+      child_lp = add_lwp (child_ptid);
       child_lp->stopped = 1;
       child_lp->last_resume_kind = resume_stop;
 
       /* Detach new forked process?  */
       if (detach_fork)
 	{
-	  make_cleanup (delete_lwp_cleanup, child_lp);
+	  struct cleanup *old_chain = make_cleanup (delete_lwp_cleanup,
+						    child_lp);
 
 	  if (linux_nat_prepare_to_resume != NULL)
 	    linux_nat_prepare_to_resume (child_lp);
@@ -513,7 +511,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
 	     once before detaching to clear the flags.  */
 
 	  if (!gdbarch_software_single_step_p (target_thread_architecture
-						   (child_lp->ptid)))
+					       (child_lp->ptid)))
 	    {
 	      linux_disable_event_reporting (child_pid);
 	      if (ptrace (PTRACE_SINGLESTEP, child_pid, 0, 0) < 0)
@@ -533,16 +531,17 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
 	      ptrace (PTRACE_DETACH, child_pid, 0, signo);
 	    }
 
-	  /* Resets value of inferior_ptid to parent ptid.  */
 	  do_cleanups (old_chain);
 	}
       else
 	{
+	  scoped_restore save_inferior_ptid
+	    = make_scoped_restore (&inferior_ptid);
+	  inferior_ptid = child_ptid;
+
 	  /* Let the thread_db layer learn about this new process.  */
 	  check_for_thread_db ();
 	}
-
-      do_cleanups (old_chain);
 
       if (has_vforked)
 	{
@@ -2458,12 +2457,10 @@ maybe_clear_ignore_sigint (struct lwp_info *lp)
 static int
 check_stopped_by_watchpoint (struct lwp_info *lp)
 {
-  struct cleanup *old_chain;
-
   if (linux_ops->to_stopped_by_watchpoint == NULL)
     return 0;
 
-  old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
   inferior_ptid = lp->ptid;
 
   if (linux_ops->to_stopped_by_watchpoint (linux_ops))
@@ -2477,8 +2474,6 @@ check_stopped_by_watchpoint (struct lwp_info *lp)
       else
 	lp->stopped_data_address_p = 0;
     }
-
-  do_cleanups (old_chain);
 
   return lp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
 }

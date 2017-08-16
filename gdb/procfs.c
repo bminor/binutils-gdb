@@ -5316,7 +5316,6 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
   gdb_gregset_t gregs;
   gdb_fpregset_t fpregs;
   unsigned long merged_pid;
-  struct cleanup *old_chain;
 
   merged_pid = ptid_get_lwp (ptid) << 16 | ptid_get_pid (ptid);
 
@@ -5325,7 +5324,7 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
      once it is implemented in this platform:
      gdbarch_iterate_over_regset_sections().  */
 
-  old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
   inferior_ptid = ptid;
   target_fetch_registers (regcache, -1);
 
@@ -5351,8 +5350,6 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
 					      note_size,
 					      &fpregs,
 					      sizeof (fpregs));
-
-  do_cleanups (old_chain);
 
   return note_data;
 }

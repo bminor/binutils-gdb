@@ -1,3 +1,28 @@
+2017-08-18  Tom Tromey  <tom@tromey.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* spu-multiarch.c (parse_spufs_run): Use scoped_restore.
+	* sol-thread.c (sol_thread_resume, sol_thread_wait)
+	(sol_thread_xfer_partial, rw_common): Use scoped_restore.
+	* procfs.c (procfs_do_thread_registers): Use scoped_restore.
+	* proc-service.c (ps_xfer_memory): Use scoped_restore.
+	* linux-tdep.c (linux_corefile_thread): Remove a cleanup.
+	(linux_get_siginfo_data): Add "thread" argument.  Use
+	scoped_restore.
+	* linux-nat.c (linux_child_follow_fork)
+	(check_stopped_by_watchpoint): Use scoped_restore.
+	* infrun.c (displaced_step_prepare_throw, write_memory_ptid)
+	(THREAD_STOPPED_BY, handle_signal_stop): Use scoped_restore.
+	(restore_inferior_ptid, save_inferior_ptid): Remove.
+	* btrace.c (btrace_fetch): Use scoped_restore.
+	* bsd-uthread.c (bsd_uthread_fetch_registers)
+	(bsd_uthread_store_registers): Use scoped_restore.
+	* breakpoint.c (reattach_breakpoints, detach_breakpoints): Use
+	scoped_restore.
+	* aix-thread.c (aix_thread_resume, aix_thread_wait)
+	(aix_thread_xfer_partial): Use scoped_restore.
+	* inferior.h (save_inferior_ptid): Remove.
+
 2017-08-18  Yao Qi  <yao.qi@linaro.org>
 
 	PR tdep/21818
