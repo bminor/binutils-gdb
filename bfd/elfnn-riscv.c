@@ -1651,9 +1651,50 @@ riscv_free_pcrel_relocs (riscv_pcrel_relocs *p)
 }
 
 static bfd_boolean
-riscv_record_pcrel_hi_reloc (riscv_pcrel_relocs *p, bfd_vma addr, bfd_vma value)
+riscv_zero_pcrel_hi_reloc (Elf_Internal_Rela *rel,
+			   struct bfd_link_info *info,
+			   bfd_vma pc,
+			   bfd_vma addr,
+			   bfd_byte *contents,
+			   const reloc_howto_type *howto,
+			   bfd *input_bfd)
 {
-  riscv_pcrel_hi_reloc entry = {addr, value - addr};
+  /* We may need to reference low addreses in PC-relative modes even when the
+   * PC is far away from these addresses.  For example, undefweak references
+   * need to produce the address 0 when linked.  As 0 is far from the arbitrary
+   * addresses that we can link PC-relative programs at, the linker can't
+   * actually relocate references to those symbols.  In order to allow these
+   * programs to work we simply convert the PC-relative auipc sequences to
+   * 0-relative lui sequences.  */
+  if (bfd_link_pic (info))
+    return FALSE;
+
+  /* If it's possible to reference the symbol using auipc we do so, as that's
+   * more in the spirit of the PC-relative relocations we're processing.  */
+  bfd_vma offset = addr - pc;
+  if (ARCH_SIZE == 32 || VALID_UTYPE_IMM (RISCV_CONST_HIGH_PART (offset)))
+    return FALSE;
+
+  /* If it's impossible to reference this with a LUI-based offset then don't
+   * bother to convert it at all so users still see the PC-relative relocation
+   * in the truncation message.  */
+  if (ARCH_SIZE > 32 && !VALID_UTYPE_IMM (RISCV_CONST_HIGH_PART (addr)))
+    return FALSE;
+
+  rel->r_info = ELFNN_R_INFO(addr, R_RISCV_HI20);
+
+  bfd_vma insn = bfd_get(howto->bitsize, input_bfd, contents + rel->r_offset);
+  insn = (insn & ~MASK_AUIPC) | MATCH_LUI;
+  bfd_put(howto->bitsize, input_bfd, insn, contents + rel->r_offset);
+  return TRUE;
+}
+
+static bfd_boolean
+riscv_record_pcrel_hi_reloc (riscv_pcrel_relocs *p, bfd_vma addr,
+			     bfd_vma value, bfd_boolean absolute)
+{
+  bfd_vma offset = absolute ? value : value - addr;
+  riscv_pcrel_hi_reloc entry = {addr, offset};
   riscv_pcrel_hi_reloc **slot =
     (riscv_pcrel_hi_reloc **) htab_find_slot (p->hi_relocs, &entry, INSERT);
 
@@ -1758,6 +1799,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
   Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (input_bfd);
   struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
   bfd_vma *local_got_offsets = elf_local_got_offsets (input_bfd);
+  bfd_boolean absolute;
 
   if (!riscv_init_pcrel_relocs (&pcrel_relocs))
     return FALSE;
@@ -1931,7 +1973,17 @@ riscv_elf_relocate_section (bfd *output_bfd,
 		}
 	    }
 	  relocation = sec_addr (htab->elf.sgot) + off;
-	  if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc, relocation))
+	  absolute = riscv_zero_pcrel_hi_reloc (rel,
+						info,
+						pc,
+						relocation,
+						contents,
+						howto,
+						input_bfd);
+	  r_type = ELFNN_R_TYPE (rel->r_info);
+	  howto = riscv_elf_rtype_to_howto (r_type);
+	  if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc,
+					    relocation, absolute))
 	    r = bfd_reloc_overflow;
 	  break;
 
@@ -2017,8 +2069,18 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  }
 
 	case R_RISCV_PCREL_HI20:
+	  absolute = riscv_zero_pcrel_hi_reloc (rel,
+						info,
+						pc,
+						relocation,
+						contents,
+						howto,
+						input_bfd);
+	  r_type = ELFNN_R_TYPE (rel->r_info);
+	  howto = riscv_elf_rtype_to_howto (r_type);
 	  if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc,
-					    relocation + rel->r_addend))
+					    relocation + rel->r_addend,
+					    absolute))
 	    r = bfd_reloc_overflow;
 	  break;
 
@@ -2214,7 +2276,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
 
 	  BFD_ASSERT (off < (bfd_vma) -2);
 	  relocation = sec_addr (htab->elf.sgot) + off + (is_ie ? ie_off : 0);
-	  if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc, relocation))
+	  if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc,
+					    relocation, FALSE))
 	    r = bfd_reloc_overflow;
 	  unresolved_reloc = FALSE;
 	  break;

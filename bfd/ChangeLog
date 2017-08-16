@@ -1,3 +1,11 @@
+2017-09-07  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* elfnn-riscv.c (riscv_zero_pcrel_hi_reloc): New function.
+	(riscv_record_pcrel_hi_reloc): Add absolute argument.
+	(riscv_elf_relocate_section): Call riscv_zero_pcrel_hi_reloc for
+	R_RISCV_PCREL_HI20 relocs, and pass the result to
+	riscv_record_pcrel_hi_reloc.
+
 2017-09-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_convert_load_reloc): Add an argument,
