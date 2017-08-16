@@ -1,3 +1,8 @@
+2017-08-16  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+
+	* gdb.texinfo (TUI Single Key Mode): Document the new shortcuts in
+	Single-Key mode.
+
 2017-08-12  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/21925

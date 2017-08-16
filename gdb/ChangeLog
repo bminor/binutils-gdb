@@ -1,3 +1,8 @@
+2017-08-16  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+
+	* tui/tui.c (tui_commands): Add "nexti" and "stepi" to the Single-Key
+	mode command list.
+
 2017-08-15  Stafford Horne  <shorne@gmail.com>
 
 	* MAINTAINERS (Write After Approval): Add Stafford Horne.
