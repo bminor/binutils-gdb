@@ -1,3 +1,9 @@
+2017-08-17  Nick Clifton  <nickc@redhat.com>
+
+	* po/pt_BR.po: New Brazilian Portuguese translation.
+	* configure.ac (ALL_LINGUAS): Add pt_BR.
+	* configure: Regenerate.
+
 2017-08-14  Alan Modra  <amodra@gmail.com>
 
 	PR 21441
