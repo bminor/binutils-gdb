@@ -1,3 +1,7 @@
+2017-08-17  Alex Lindsay  <alexlindsay239@gmail.com>  (tiny change)
+
+	* elfread.c (elf_read_minimal_symbols): xfree synthsyms.
+
 2017-08-17  Ruslan Kabatsayev  <b7.10110111@gmail.com>
 
 	* NEWS: Mention new shortcuts for nexti and stepi in TUI
