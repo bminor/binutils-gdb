@@ -12296,7 +12296,8 @@ is_64bit_abs_reloc (unsigned int reloc_type)
     case EM_SPARC32PLUS:
     case EM_SPARCV9:
     case EM_SPARC:
-      return reloc_type == 54; /* R_SPARC_UA64.  */
+      return reloc_type == 32 /* R_SPARC_64.  */
+	|| reloc_type == 54; /* R_SPARC_UA64.  */
     case EM_X86_64:
     case EM_L1OM:
     case EM_K1OM:

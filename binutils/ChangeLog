@@ -1,3 +1,14 @@
+2017-08-17  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/binutils-all/note-3-64.s: New test.  Checks assembly
+	and decoding of version2 GNU build attribute notes.
+	* testsuite/binutils-all/note-3-32.s: New test.  32-bit version of
+	the above test.
+	* testsuite/binutils-all/note-3-64.d: New test driver.
+	* testsuite/binutils-all/note-3-32.d: New test driver.
+	* testsuite/binutils-all/objcopy.exp: Run the new test.
+	* readelf.c (is_64bit_abs_reloc): Add R_SPARC_64.
+
 2017-08-14  Gustavo Romero  <gromero@linux.vnet.ibm.com>
 
 	* readelf.c (get_note_type): Handle PPC note types available
