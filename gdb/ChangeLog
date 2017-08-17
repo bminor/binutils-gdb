@@ -1,3 +1,17 @@
+2017-08-17  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (struct dwarf2_cu) <line_header_die_owner>: New
+	field.
+	(reset_die_in_process): Delete, replaced by ...
+	(process_die_scope): ... this new class.  Make it responsible for
+	freeing cu->line_header too.
+	(process_die): Use process_die_scope.
+	(handle_DW_AT_stmt_list): Record the line header's owner CU/DIE in
+	cu->line_header_die_owner.  Don't release the line header if it's
+	owned by the CU.
+	(setup_type_unit_groups): Make the CU/DIE own the line header.
+	Don't release the line header here.
+
 2017-08-17  Alex Lindsay  <alexlindsay239@gmail.com>  (tiny change)
 
 	* elfread.c (elf_read_minimal_symbols): xfree synthsyms.

@@ -546,6 +546,12 @@ struct dwarf2_cu
 
   /* Header data from the line table, during full symbol processing.  */
   struct line_header *line_header;
+  /* Non-NULL if LINE_HEADER is owned by this DWARF_CU.  Otherwise,
+     it's owned by dwarf2_per_objfile::line_header_hash.  If non-NULL,
+     this is the DW_TAG_compile_unit die for this CU.  We'll hold on
+     to the line header as long as this DIE is being processed.  See
+     process_die_scope.  */
+  die_info *line_header_die_owner;
 
   /* A list of methods which need to have physnames computed
      after all type information has been read.  */
@@ -8471,28 +8477,44 @@ process_imported_unit_die (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
-/* Reset the in_process bit of a die.  */
-
-static void
-reset_die_in_process (void *arg)
+/* RAII object that represents a process_die scope: i.e.,
+   starts/finishes processing a DIE.  */
+class process_die_scope
 {
-  struct die_info *die = (struct die_info *) arg;
+public:
+  process_die_scope (die_info *die, dwarf2_cu *cu)
+    : m_die (die), m_cu (cu)
+  {
+    /* We should only be processing DIEs not already in process.  */
+    gdb_assert (!m_die->in_process);
+    m_die->in_process = true;
+  }
 
-  die->in_process = 0;
-}
+  ~process_die_scope ()
+  {
+    m_die->in_process = false;
+
+    /* If we're done processing the DIE for the CU that owns the line
+       header, we don't need the line header anymore.  */
+    if (m_cu->line_header_die_owner == m_die)
+      {
+	delete m_cu->line_header;
+	m_cu->line_header = NULL;
+	m_cu->line_header_die_owner = NULL;
+      }
+  }
+
+private:
+  die_info *m_die;
+  dwarf2_cu *m_cu;
+};
 
 /* Process a die and its children.  */
 
 static void
 process_die (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct cleanup *in_process;
-
-  /* We should only be processing those not already in process.  */
-  gdb_assert (!die->in_process);
-
-  die->in_process = 1;
-  in_process = make_cleanup (reset_die_in_process,die);
+  process_die_scope scope (die, cu);
 
   switch (die->tag)
     {
@@ -8583,8 +8605,6 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       new_symbol (die, NULL, cu);
       break;
     }
-
-  do_cleanups (in_process);
 }
 
 /* DWARF name computation.  */
@@ -9362,7 +9382,9 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
   line_header_up lh = dwarf_decode_line_header (line_offset, cu);
   if (lh == NULL)
     return;
-  cu->line_header = lh.get ();
+
+  cu->line_header = lh.release ();
+  cu->line_header_die_owner = die;
 
   if (dwarf2_per_objfile->line_header_hash == NULL)
     slot = NULL;
@@ -9378,6 +9400,7 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
       /* This newly decoded line number information unit will be owned
 	 by line_header_hash hash table.  */
       *slot = cu->line_header;
+      cu->line_header_die_owner = NULL;
     }
   else
     {
@@ -9392,7 +9415,6 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
   dwarf_decode_lines (cu->line_header, comp_dir, cu, NULL, lowpc,
 		      decode_mapping);
 
-  lh.release ();
 }
 
 /* Process DW_TAG_compile_unit or DW_TAG_partial_unit.  */
@@ -9530,7 +9552,8 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
       return;
     }
 
-  cu->line_header = lh.get ();
+  cu->line_header = lh.release ();
+  cu->line_header_die_owner = die;
 
   if (first_time)
     {
@@ -9541,21 +9564,23 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
 	 process_full_type_unit still needs to know if this is the first
 	 time.  */
 
-      tu_group->num_symtabs = lh->file_names.size ();
-      tu_group->symtabs = XNEWVEC (struct symtab *, lh->file_names.size ());
+      tu_group->num_symtabs = cu->line_header->file_names.size ();
+      tu_group->symtabs = XNEWVEC (struct symtab *,
+				   cu->line_header->file_names.size ());
 
-      for (i = 0; i < lh->file_names.size (); ++i)
+      for (i = 0; i < cu->line_header->file_names.size (); ++i)
 	{
-	  file_entry &fe = lh->file_names[i];
+	  file_entry &fe = cu->line_header->file_names[i];
 
-	  dwarf2_start_subfile (fe.name, fe.include_dir (lh.get ()));
+	  dwarf2_start_subfile (fe.name, fe.include_dir (cu->line_header));
 
 	  if (current_subfile->symtab == NULL)
 	    {
-	      /* NOTE: start_subfile will recognize when it's been passed
-		 a file it has already seen.  So we can't assume there's a
-		 simple mapping from lh->file_names to subfiles, plus
-		 lh->file_names may contain dups.  */
+	      /* NOTE: start_subfile will recognize when it's been
+		 passed a file it has already seen.  So we can't
+		 assume there's a simple mapping from
+		 cu->line_header->file_names to subfiles, plus
+		 cu->line_header->file_names may contain dups.  */
 	      current_subfile->symtab
 		= allocate_symtab (cust, current_subfile->name);
 	    }
@@ -9568,15 +9593,13 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
     {
       restart_symtab (tu_group->compunit_symtab, "", 0);
 
-      for (i = 0; i < lh->file_names.size (); ++i)
+      for (i = 0; i < cu->line_header->file_names.size (); ++i)
 	{
-	  struct file_entry *fe = &lh->file_names[i];
+	  file_entry &fe = cu->line_header->file_names[i];
 
-	  fe->symtab = tu_group->symtabs[i];
+	  fe.symtab = tu_group->symtabs[i];
 	}
     }
-
-  lh.release ();
 
   /* The main symtab is allocated last.  Type units don't have DW_AT_name
      so they don't have a "real" (so to speak) symtab anyway.
