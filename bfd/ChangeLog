@@ -1,5 +1,11 @@
 2017-08-17  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
+	PR ld/18808
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Skip IFUNC
+	relocations in debug sections, change abort to _bfd_error_handler.
+
+2017-08-17  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
 	PR ld/18841
 	* elfnn-aarch64.c (elfNN_aarch64_reloc_type_class): Return
 	reloc_class_ifunc for ifunc symbols.
