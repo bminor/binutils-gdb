@@ -294,6 +294,8 @@ static const arm_feature_set crc_ext_armv8 =
   ARM_FEATURE_COPROC (CRC_EXT_ARMV8);
 static const arm_feature_set fpu_neon_ext_v8_1 =
   ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA);
+static const arm_feature_set fpu_neon_ext_dotprod =
+  ARM_FEATURE_COPROC (FPU_NEON_EXT_DOTPROD);
 
 static int mfloat_abi_opt = -1;
 /* Record user cpu selection for object attributes.  */
@@ -8977,7 +8979,7 @@ check_ldr_r15_aligned (void)
 	      && (inst.operands[0].reg == REG_PC
 	      && inst.operands[1].reg == REG_PC
 	      && (inst.reloc.exp.X_add_number & 0x3)),
-	      _("ldr to register 15 must be 4-byte alligned"));
+	      _("ldr to register 15 must be 4-byte aligned"));
 }
 
 static void
@@ -9140,6 +9142,11 @@ do_vmrs (void)
       return;
     }
 
+  /* MVFR2 is only valid at ARMv8-A.  */
+  if (inst.operands[1].reg == 5)
+    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		_(BAD_FPU));
+
   /* APSR_ sets isvec. All other refs to PC are illegal.  */
   if (!inst.operands[0].isvec && Rt == REG_PC)
     {
@@ -9165,6 +9172,11 @@ do_vmsr (void)
       inst.error = BAD_PC;
       return;
     }
+
+  /* MVFR2 is only valid for ARMv8-A.  */
+  if (inst.operands[0].reg == 5)
+    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+		_(BAD_FPU));
 
   /* If we get through parsing the register name, we just insert the number
      generated into the instruction without further validation.  */
@@ -15023,7 +15035,14 @@ do_neon_ceq (void)
    scalars, which are encoded in 5 bits, M : Rm.
    For 16-bit scalars, the register is encoded in Rm[2:0] and the index in
    M:Rm[3], and for 32-bit scalars, the register is encoded in Rm[3:0] and the
-   index in M.  */
+   index in M.
+
+   Dot Product instructions are similar to multiply instructions except elsize
+   should always be 32.
+
+   This function translates SCALAR, which is GAS's internal encoding of indexed
+   scalar register, to raw encoding.  There is also register and index range
+   check based on ELSIZE.  */
 
 static unsigned
 neon_scalar_for_mul (unsigned scalar, unsigned elsize)
@@ -17365,6 +17384,79 @@ do_vcadd (void)
   inst.instruction |= (size == 32) << 20;
 }
 
+/* Dot Product instructions encoding support.  */
+
+static void
+do_neon_dotproduct (int unsigned_p)
+{
+  enum neon_shape rs;
+  unsigned scalar_oprd2 = 0;
+  int high8;
+
+  if (inst.cond != COND_ALWAYS)
+    as_warn (_("Dot Product instructions cannot be conditional,  the behaviour "
+	       "is UNPREDICTABLE"));
+
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_armv8),
+	      _(BAD_FPU));
+
+  /* Dot Product instructions are in three-same D/Q register format or the third
+     operand can be a scalar index register.  */
+  if (inst.operands[2].isscalar)
+    {
+      scalar_oprd2 = neon_scalar_for_mul (inst.operands[2].reg, 32);
+      high8 = 0xfe000000;
+      rs = neon_select_shape (NS_DDS, NS_QQS, NS_NULL);
+    }
+  else
+    {
+      high8 = 0xfc000000;
+      rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
+    }
+
+  if (unsigned_p)
+    neon_check_type (3, rs, N_EQK, N_EQK, N_KEY | N_U8);
+  else
+    neon_check_type (3, rs, N_EQK, N_EQK, N_KEY | N_S8);
+
+  /* The "U" bit in traditional Three Same encoding is fixed to 0 for Dot
+     Product instruction, so we pass 0 as the "ubit" parameter.  And the
+     "Size" field are fixed to 0x2, so we pass 32 as the "size" parameter.  */
+  neon_three_same (neon_quad (rs), 0, 32);
+
+  /* Undo neon_dp_fixup.  Dot Product instructions are using a slightly
+     different NEON three-same encoding.  */
+  inst.instruction &= 0x00ffffff;
+  inst.instruction |= high8;
+  /* Encode 'U' bit which indicates signedness.  */
+  inst.instruction |= (unsigned_p ? 1 : 0) << 4;
+  /* Re-encode operand2 if it's indexed scalar operand.  What has been encoded
+     from inst.operand[2].reg in neon_three_same is GAS's internal encoding, not
+     the instruction encoding.  */
+  if (inst.operands[2].isscalar)
+    {
+      inst.instruction &= 0xffffffd0;
+      inst.instruction |= LOW4 (scalar_oprd2);
+      inst.instruction |= HI1 (scalar_oprd2) << 5;
+    }
+}
+
+/* Dot Product instructions for signed integer.  */
+
+static void
+do_neon_dotproduct_s (void)
+{
+  return do_neon_dotproduct (0);
+}
+
+/* Dot Product instructions for unsigned integer.  */
+
+static void
+do_neon_dotproduct_u (void)
+{
+  return do_neon_dotproduct (1);
+}
+
 /* Crypto v1 instructions.  */
 static void
 do_crypto_2op_1 (unsigned elttype, int op)
@@ -17506,8 +17598,6 @@ do_crc32_1 (unsigned int poly, unsigned int sz)
 
   if (Rd == REG_PC || Rn == REG_PC || Rm == REG_PC)
     as_warn (UNPRED_REG ("r15"));
-  if (thumb_mode && (Rd == REG_SP || Rn == REG_SP || Rm == REG_SP))
-    as_warn (UNPRED_REG ("r13"));
 }
 
 static void
@@ -18828,6 +18918,7 @@ static const struct reg_entry reg_names[] =
   REGDEF(FPINST,9,VFC), REGDEF(FPINST2,10,VFC),
   REGDEF(mvfr0,7,VFC), REGDEF(mvfr1,6,VFC),
   REGDEF(MVFR0,7,VFC), REGDEF(MVFR1,6,VFC),
+  REGDEF(mvfr2,5,VFC), REGDEF(MVFR2,5,VFC),
 
   /* Maverick DSP coprocessor registers.  */
   REGSET(mvf,MVF),  REGSET(mvd,MVD),  REGSET(mvfx,MVFX),  REGSET(mvdx,MVDX),
@@ -19912,6 +20003,13 @@ static const struct asm_opcode insns[] =
  NCE (vjcvt, eb90bc0, 2, (RVS, RVD), vjcvt),
  NUF (vcmla, 0, 4, (RNDQ, RNDQ, RNDQ_RNSC, EXPi), vcmla),
  NUF (vcadd, 0, 4, (RNDQ, RNDQ, RNDQ, EXPi), vcadd),
+
+#undef  ARM_VARIANT
+#define ARM_VARIANT   & fpu_neon_ext_dotprod
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & fpu_neon_ext_dotprod
+ NUF (vsdot, d00, 3, (RNDQ, RNDQ, RNDQ_RNSC), neon_dotproduct_s),
+ NUF (vudot, d00, 3, (RNDQ, RNDQ, RNDQ_RNSC), neon_dotproduct_u),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */
@@ -21905,12 +22003,17 @@ arm_init_frag (fragS * fragP, int max_chars ATTRIBUTE_UNUSED)
 void
 arm_init_frag (fragS * fragP, int max_chars)
 {
-  int frag_thumb_mode;
+  bfd_boolean frag_thumb_mode;
 
   /* If the current ARM vs THUMB mode has not already
      been recorded into this frag then do so now.  */
   if ((fragP->tc_frag_data.thumb_mode & MODE_RECORDED) == 0)
     fragP->tc_frag_data.thumb_mode = thumb_mode | MODE_RECORDED;
+
+  /* PR 21809: Do not set a mapping state for debug sections
+     - it just confuses other tools.  */
+  if (bfd_get_section_flags (NULL, now_seg) & SEC_DEBUGGING)
+    return;
 
   frag_thumb_mode = fragP->tc_frag_data.thumb_mode ^ MODE_RECORDED;
 
@@ -23442,7 +23545,7 @@ md_apply_fix (fixS *	fixP,
       /* We are going to store value (shifted right by two) in the
 	 instruction, in a 24 bit, signed field.  Bits 26 through 32 either
 	 all clear or all set and bit 0 must be clear.  For B/BL bit 1 must
-	 also be be clear.  */
+	 also be clear.  */
       if (value & temp)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("misaligned branch destination"));
@@ -25758,6 +25861,9 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-a53",	  "Cortex-A53",	       ARM_ARCH_V8A,
 	       ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
+  ARM_CPU_OPT ("cortex-a55",    "Cortex-A55",	       ARM_ARCH_V8_2A,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("cortex-a57",	  "Cortex-A57",	       ARM_ARCH_V8A,
 	       ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
@@ -25767,6 +25873,9 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("cortex-a73",	  "Cortex-A73",	       ARM_ARCH_V8A,
 	      ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
 	      FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
+  ARM_CPU_OPT ("cortex-a75",    "Cortex-A75",	       ARM_ARCH_V8_2A,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
   ARM_CPU_OPT ("cortex-r4",	  "Cortex-R4",	       ARM_ARCH_V7R,
 	       ARM_ARCH_NONE,
 	       FPU_NONE),
@@ -25950,6 +26059,9 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   ARM_EXT_OPT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 			 ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
+  ARM_EXT_OPT ("dotprod", FPU_ARCH_DOTPROD_NEON_VFP_ARMV8,
+			  ARM_FEATURE_COPROC (FPU_NEON_EXT_DOTPROD),
+			  ARM_ARCH_V8_2A),
   ARM_EXT_OPT ("dsp",	ARM_FEATURE_CORE_LOW (ARM_EXT_V5ExP | ARM_EXT_V6_DSP),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_V5ExP | ARM_EXT_V6_DSP),
 			ARM_FEATURE_CORE (ARM_EXT_V7M, ARM_EXT2_V8M)),

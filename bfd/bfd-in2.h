@@ -1240,9 +1240,9 @@ char *bfd_follow_build_id_debuglink (bfd *abfd, const char *dir);
 /* Extracted from bfdio.c.  */
 long bfd_get_mtime (bfd *abfd);
 
-file_ptr bfd_get_size (bfd *abfd);
+ufile_ptr bfd_get_size (bfd *abfd);
 
-file_ptr bfd_get_file_size (bfd *abfd);
+ufile_ptr bfd_get_file_size (bfd *abfd);
 
 void *bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
     int prot, int flags, file_ptr offset,
@@ -2059,6 +2059,7 @@ enum bfd_architecture
 #define bfd_mach_mips_octeon2          6502
 #define bfd_mach_mips_octeon3          6503
 #define bfd_mach_mips_xlr              887682   /* decimal 'XLR'  */
+#define bfd_mach_mips_interaptiv_mr2   736550   /* decimal 'IA2'  */
 #define bfd_mach_mipsisa32             32
 #define bfd_mach_mipsisa32r2           33
 #define bfd_mach_mipsisa32r3           34
@@ -3799,6 +3800,7 @@ pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_ARC_S25W_PCREL_PLT,
   BFD_RELOC_ARC_S21H_PCREL_PLT,
   BFD_RELOC_ARC_NPS_CMEM16,
+  BFD_RELOC_ARC_JLI_SECTOFF,
 
 /* ADI Blackfin 16 bit immediate absolute reloc.  */
   BFD_RELOC_BFIN_16_IMM,
@@ -4771,6 +4773,7 @@ number for the SBIC, SBIS, SBI and CBI instructions  */
   BFD_RELOC_RISCV_SET8,
   BFD_RELOC_RISCV_SET16,
   BFD_RELOC_RISCV_SET32,
+  BFD_RELOC_RISCV_32_PCREL,
 
 /* Renesas RL78 Relocations.  */
   BFD_RELOC_RL78_NEG8,

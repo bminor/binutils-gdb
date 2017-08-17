@@ -481,7 +481,7 @@ print_symbol (signed int width, const char *symbol)
 
   if (width < 0)
     {
-      /* Keep the width positive.  This also helps.  */
+      /* Keep the width positive.  This helps the code below.  */
       width = - width;
       extra_padding = TRUE;
     }
@@ -3334,6 +3334,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case E_MIPS_MACH_OCTEON2: strcat (buf, ", octeon2"); break;
 	    case E_MIPS_MACH_OCTEON3: strcat (buf, ", octeon3"); break;
 	    case E_MIPS_MACH_XLR:  strcat (buf, ", xlr"); break;
+	    case E_MIPS_MACH_IAMR2:  strcat (buf, ", interaptiv-mr2"); break;
 	    case 0:
 	    /* We simply ignore the field in this case to avoid confusion:
 	       MIPS ELF does not specify EF_MIPS_MACH, it is a GNU
@@ -6059,7 +6060,8 @@ process_section_headers (FILE * file)
 	request_dump_bynumber (i, DEBUG_DUMP);
       else if (do_debug_frames && streq (name, ".eh_frame"))
 	request_dump_bynumber (i, DEBUG_DUMP);
-      else if (do_gdb_index && streq (name, ".gdb_index"))
+      else if (do_gdb_index && (streq (name, ".gdb_index")
+				|| streq (name, ".debug_names")))
 	request_dump_bynumber (i, DEBUG_DUMP);
       /* Trace sections for Itanium VMS.  */
       else if ((do_debugging || do_trace_info || do_trace_abbrevs
@@ -6704,7 +6706,7 @@ process_section_groups (FILE * file)
 		      error (_("section [%5u] in group section [%5u] > maximum section [%5u]\n"),
 			     entry, i, elf_header.e_shnum - 1);
 		      if (num_group_errors == 10)
-			warn (_("Futher error messages about overlarge group section indicies suppressed\n"));
+			warn (_("Further error messages about overlarge group section indicies suppressed\n"));
 		    }
 		  continue;
 		}
@@ -12067,8 +12069,10 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_H8_300H:
       return reloc_type == 1; /* R_H8_DIR32.  */
     case EM_IA_64:
-      return reloc_type == 0x65 /* R_IA64_SECREL32LSB.  */
-	|| reloc_type == 0x25;  /* R_IA64_DIR32LSB.  */
+      return (reloc_type == 0x64    /* R_IA64_SECREL32MSB.  */
+	      || reloc_type == 0x65 /* R_IA64_SECREL32LSB.  */
+	      || reloc_type == 0x24 /* R_IA64_DIR32MSB.  */
+	      || reloc_type == 0x25 /* R_IA64_DIR32LSB.  */);
     case EM_IP2K_OLD:
     case EM_IP2K:
       return reloc_type == 2; /* R_IP2K_32.  */
@@ -12281,7 +12285,8 @@ is_64bit_abs_reloc (unsigned int reloc_type)
     case EM_ALPHA:
       return reloc_type == 2; /* R_ALPHA_REFQUAD.  */
     case EM_IA_64:
-      return reloc_type == 0x27; /* R_IA64_DIR64LSB.  */
+      return (reloc_type == 0x26    /* R_IA64_DIR64MSB.  */
+	      || reloc_type == 0x27 /* R_IA64_DIR64LSB.  */);
     case EM_PARISC:
       return reloc_type == 80; /* R_PARISC_DIR64.  */
     case EM_PPC64:
@@ -12321,7 +12326,8 @@ is_64bit_pcrel_reloc (unsigned int reloc_type)
     case EM_ALPHA:
       return reloc_type == 11; /* R_ALPHA_SREL64.  */
     case EM_IA_64:
-      return reloc_type == 0x4f; /* R_IA64_PCREL64LSB.  */
+      return (reloc_type == 0x4e    /* R_IA64_PCREL64MSB.  */
+	      || reloc_type == 0x4f /* R_IA64_PCREL64LSB.  */);
     case EM_PARISC:
       return reloc_type == 72; /* R_PARISC_PCREL64.  */
     case EM_PPC64:
@@ -12758,7 +12764,7 @@ get_section_contents (Elf_Internal_Shdr * section, FILE * file)
 
   if (num_bytes == 0 || section->sh_type == SHT_NOBITS)
     {
-      printf (_("\nSection '%s' has no data to dump.\n"),
+      printf (_("Section '%s' has no data to dump.\n"),
 	      printable_section_name (section));
       return NULL;
     }
@@ -12832,10 +12838,11 @@ dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
   unsigned char *      start;
   bfd_boolean          some_strings_shown;
 
-  real_start = start = (unsigned char *) get_section_contents (section,
-							       file);
+  real_start = start = (unsigned char *) get_section_contents (section, file);
   if (start == NULL)
-    return FALSE;
+    /* PR 21820: Do not fail if the section was empty.  */
+    return (section->sh_size == 0 || section->sh_type == SHT_NOBITS) ? TRUE : FALSE;
+
   num_bytes = section->sh_size;
 
   printf (_("\nString dump of section '%s':\n"), printable_section_name (section));
@@ -12981,7 +12988,8 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
 
   real_start = start = (unsigned char *) get_section_contents (section, file);
   if (start == NULL)
-    return FALSE;
+    /* PR 21820: Do not fail if the section was empty.  */
+    return (section->sh_size == 0 || section->sh_type == SHT_NOBITS) ? TRUE : FALSE;
 
   section_size = section->sh_size;
 
@@ -15131,6 +15139,9 @@ print_mips_isa_ext (unsigned int isa_ext)
     case AFL_EXT_LOONGSON_2F:
       fputs ("ST Microelectronics Loongson 2F", stdout);
       break;
+    case AFL_EXT_INTERAPTIV_MR2:
+      fputs ("Imagination interAptiv MR2", stdout);
+      break;
     default:
       fprintf (stdout, "%s (%d)", _("Unknown"), isa_ext);
     }
@@ -16126,6 +16137,32 @@ get_note_type (unsigned e_type)
 	return _("NT_PPC_VMX (ppc Altivec registers)");
       case NT_PPC_VSX:
 	return _("NT_PPC_VSX (ppc VSX registers)");
+      case NT_PPC_TAR:
+	return _("NT_PPC_TAR (ppc TAR register)");
+      case NT_PPC_PPR:
+	return _("NT_PPC_PPR (ppc PPR register)");
+      case NT_PPC_DSCR:
+	return _("NT_PPC_DSCR (ppc DSCR register)");
+      case NT_PPC_EBB:
+	return _("NT_PPC_EBB (ppc EBB registers)");
+      case NT_PPC_PMU:
+	return _("NT_PPC_PMU (ppc PMU registers)");
+      case NT_PPC_TM_CGPR:
+	return _("NT_PPC_TM_CGPR (ppc checkpointed GPR registers)");
+      case NT_PPC_TM_CFPR:
+	return _("NT_PPC_TM_CFPR (ppc checkpointed floating point registers)");
+      case NT_PPC_TM_CVMX:
+	return _("NT_PPC_TM_CVMX (ppc checkpointed Altivec registers)");
+      case NT_PPC_TM_CVSX:
+	return _("NT_PPC_TM_VSX (ppc checkpointed VSX registers)");
+      case NT_PPC_TM_SPR:
+	return _("NT_PPC_TM_SPR (ppc TM special purpose registers)");
+      case NT_PPC_TM_CTAR:
+	return _("NT_PPC_TM_CTAR (ppc checkpointed TAR register)");
+      case NT_PPC_TM_CPPR:
+	return _("NT_PPC_TM_CPPR (ppc checkpointed PPR register)");
+      case NT_PPC_TM_CDSCR:
+	return _("NT_PPC_TM_CDSCR (ppc checkpointed DSCR register)");
       case NT_386_TLS:
 	return _("NT_386_TLS (x86 TLS information)");
       case NT_386_IOPERM:
@@ -16154,6 +16191,10 @@ get_note_type (unsigned e_type)
 	return _("NT_S390_VXRS_LOW (s390 vector registers 0-15 upper half)");
       case NT_S390_VXRS_HIGH:
 	return _("NT_S390_VXRS_HIGH (s390 vector registers 16-31)");
+      case NT_S390_GS_CB:
+	return _("NT_S390_GS_CB (s390 guarded-storage registers)");
+      case NT_S390_GS_BC:
+	return _("NT_S390_GS_BC (s390 guarded-storage broadcast control)");
       case NT_ARM_VFP:
 	return _("NT_ARM_VFP (arm VFP registers)");
       case NT_ARM_TLS:
@@ -16208,7 +16249,11 @@ print_core_note (Elf_Internal_Note *pnote)
   unsigned char *descdata, *filenames, *descend;
 
   if (pnote->type != NT_FILE)
-    return TRUE;
+    {
+      if (do_wide)
+	printf ("\n");
+      return TRUE;
+    }
 
 #ifndef BFD64
   if (!is_32bit_elf)
@@ -16773,6 +16818,8 @@ get_freebsd_elfcore_note_type (unsigned e_type)
       return _("NT_PROCSTAT_PSSTRINGS (ps_strings data)");
     case NT_FREEBSD_PROCSTAT_AUXV:
       return _("NT_PROCSTAT_AUXV (auxv data)");
+    case NT_FREEBSD_PTLWPINFO:
+      return _("NT_PTLWPINFO (ptrace_lwpinfo structure)");
     }
   return get_note_type (e_type);
 }
@@ -17181,13 +17228,23 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
   const char * expected_types;
   const char * name = pnote->namedata;
   const char * text;
-  int          left;
+  signed int   left;
 
   if (name == NULL || pnote->namesz < 2)
     {
       error (_("corrupt name field in GNU build attribute note: size = %ld\n"), pnote->namesz);
       print_symbol (-20, _("  <corrupt name>"));
       return FALSE;
+    }
+
+  left = 20;
+
+  /* Version 2 of the spec adds a "GA" prefix to the name field.  */
+  if (name[0] == 'G' && name[1] == 'A')
+    {
+      printf ("GA");
+      name += 2;
+      left -= 2;
     }
 
   switch ((name_type = * name))
@@ -17197,6 +17254,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     case GNU_BUILD_ATTRIBUTE_TYPE_BOOL_TRUE:
     case GNU_BUILD_ATTRIBUTE_TYPE_BOOL_FALSE:
       printf ("%c", * name);
+      left --;
       break;
     default:
       error (_("unrecognised attribute type in name field: %d\n"), name_type);
@@ -17204,7 +17262,6 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       return FALSE;
     }
 
-  left = 19;
   ++ name;
   text = NULL;
 
@@ -17264,6 +17321,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       else
 	{
 	  static char tmpbuf [128];
+
 	  error (_("unrecognised byte in name field: %d\n"), * name);
 	  sprintf (tmpbuf, _("<unknown:_%d>"), * name);
 	  text = tmpbuf;
@@ -17274,10 +17332,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
     }
 
   if (text)
-    {
-      printf ("%s", text);
-      left -= strlen (text);
-    }
+    left -= printf ("%s", text);
 
   if (strchr (expected_types, name_type) == NULL)
     warn (_("attribute does not have an expected type (%c)\n"), name_type);
@@ -17448,8 +17503,11 @@ process_note (Elf_Internal_Note *  pnote,
 
   printf ("  ");
 
-  if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
-      || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC)
+  if (((const_strneq (pnote->namedata, "GA")
+	&& strchr ("*$!+", pnote->namedata[2]) != NULL)
+       || strchr ("*$!+", pnote->namedata[0]) != NULL)
+      && (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
+	  || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC))
     print_gnu_build_attribute_name (pnote);
   else
     print_symbol (-20, name);
@@ -17467,8 +17525,11 @@ process_note (Elf_Internal_Note *  pnote,
     return print_stapsdt_note (pnote);
   else if (const_strneq (pnote->namedata, "CORE"))
     return print_core_note (pnote);
-  else if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
-	   || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC)
+  else if (((const_strneq (pnote->namedata, "GA")
+	     && strchr ("*$!+", pnote->namedata[2]) != NULL)
+	    || strchr ("*$!+", pnote->namedata[0]) != NULL)
+	   && (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
+	       || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC))
     return print_gnu_build_attribute_description (pnote, file);
 
   if (pnote->descsz)
@@ -17478,6 +17539,8 @@ process_note (Elf_Internal_Note *  pnote,
       printf (_("   description data: "));
       for (i = 0; i < pnote->descsz; i++)
 	printf ("%02x ", pnote->descdata[i]);
+      if (!do_wide)
+	printf ("\n");
     }
 
   if (do_wide)

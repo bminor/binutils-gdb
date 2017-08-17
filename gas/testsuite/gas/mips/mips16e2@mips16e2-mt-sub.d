@@ -7,28 +7,16 @@
 
 Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> f0c0 3010 	ehb
-[0-9a-f]+ <[^>]*> f026      	extend	0x26
-[0-9a-f]+ <[^>]*> 6701      	move	s0,at
-[0-9a-f]+ <[^>]*> f026      	extend	0x26
-[0-9a-f]+ <[^>]*> 6701      	move	s0,at
-[0-9a-f]+ <[^>]*> f022      	extend	0x22
-[0-9a-f]+ <[^>]*> 6741      	move	v0,at
-[0-9a-f]+ <[^>]*> f027      	extend	0x27
-[0-9a-f]+ <[^>]*> 6701      	move	s0,at
-[0-9a-f]+ <[^>]*> f027      	extend	0x27
-[0-9a-f]+ <[^>]*> 6701      	move	s0,at
-[0-9a-f]+ <[^>]*> f023      	extend	0x23
-[0-9a-f]+ <[^>]*> 6741      	move	v0,at
-[0-9a-f]+ <[^>]*> f026      	extend	0x26
-[0-9a-f]+ <[^>]*> 6700      	move	s0,zero
-[0-9a-f]+ <[^>]*> f026      	extend	0x26
-[0-9a-f]+ <[^>]*> 6700      	move	s0,zero
-[0-9a-f]+ <[^>]*> f022      	extend	0x22
-[0-9a-f]+ <[^>]*> 6740      	move	v0,zero
-[0-9a-f]+ <[^>]*> f027      	extend	0x27
-[0-9a-f]+ <[^>]*> 6700      	move	s0,zero
-[0-9a-f]+ <[^>]*> f027      	extend	0x27
-[0-9a-f]+ <[^>]*> 6700      	move	s0,zero
-[0-9a-f]+ <[^>]*> f023      	extend	0x23
-[0-9a-f]+ <[^>]*> 6740      	move	v0,zero
+[0-9a-f]+ <[^>]*> f026 6701 	dmt
+[0-9a-f]+ <[^>]*> f026 6701 	dmt
+[0-9a-f]+ <[^>]*> f022 6741 	dmt	v0
+[0-9a-f]+ <[^>]*> f027 6701 	emt
+[0-9a-f]+ <[^>]*> f027 6701 	emt
+[0-9a-f]+ <[^>]*> f023 6741 	emt	v0
+[0-9a-f]+ <[^>]*> f026 6700 	dvpe
+[0-9a-f]+ <[^>]*> f026 6700 	dvpe
+[0-9a-f]+ <[^>]*> f022 6740 	dvpe	v0
+[0-9a-f]+ <[^>]*> f027 6700 	evpe
+[0-9a-f]+ <[^>]*> f027 6700 	evpe
+[0-9a-f]+ <[^>]*> f023 6740 	evpe	v0
 	\.\.\.

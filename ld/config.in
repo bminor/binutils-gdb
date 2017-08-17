@@ -7,6 +7,12 @@
 #endif
 #define __CONFIG_H__ 1
 
+/* Define to 1 if you want to emit gnu hash in the ELF linker by default. */
+#undef DEFAULT_EMIT_GNU_HASH
+
+/* Define to 1 if you want to emit sysv hash in the ELF linker by default. */
+#undef DEFAULT_EMIT_SYSV_HASH
+
 /* Define if you want compressed debug sections by default. */
 #undef DEFAULT_FLAG_COMPRESS_DEBUG
 

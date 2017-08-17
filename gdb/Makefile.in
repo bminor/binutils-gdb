@@ -1722,6 +1722,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	f-typeprint.o \
 	f-valprint.o \
 	fileio.o \
+	filename-seen-cache.o \
 	filestuff.o \
 	filesystem.o \
 	findcmd.o \

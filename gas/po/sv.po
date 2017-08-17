@@ -3,25 +3,25 @@
 # This file is distributed under the same license as the binutils package.
 # Sebastian Rasmussen <sebras@gmail.com>, 2017.
 #
-# bad -> felaktig?
-# illegal -> felaktig?
-# invalid -> ogiltig
+# bad -> felaktigt
+# illegal -> otillåtet
+# invalid -> ogiltigt
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: gas 2.26.51\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2014-11-04 15:27+1030\n"
-"PO-Revision-Date: 2017-01-22 18:02+0100\n"
+"PO-Revision-Date: 2017-07-02 19:50+0800\n"
 "Last-Translator: Sebastian Rasmussen <sebras@gmail.com>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
-"X-Bugs: Report translation errors to the Language-Team address.\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.11\n"
+"X-Generator: Poedit 2.0.2\n"
 
 #: app.c:490 app.c:504
 msgid "end of file in comment"
@@ -551,7 +551,7 @@ msgstr "för många fixar"
 #: config/tc-v850.c:2635 config/tc-v850.c:2669 config/tc-v850.c:2709
 #: config/tc-v850.c:2952 config/tc-z80.c:444
 msgid "illegal operand"
-msgstr "felaktig operand"
+msgstr "otillåten operand"
 
 #: cgen.c:423 config/tc-arc.c:1668 config/tc-avr.c:712 config/tc-d10v.c:463
 #: config/tc-d30v.c:455 config/tc-h8300.c:497 config/tc-i370.c:2126
@@ -4641,7 +4641,7 @@ msgstr "konstant utanför 8-bitarsintervall: %d"
 
 #: config/tc-avr.c:768 config/tc-score.c:1199 read.c:3729
 msgid "illegal expression"
-msgstr "felaktigt uttryck"
+msgstr "otillåtet uttryck"
 
 #: config/tc-avr.c:797 config/tc-avr.c:1753
 msgid "`)' required"
@@ -4764,7 +4764,7 @@ msgstr "kan inte hitta opkod "
 #: config/tc-avr.c:1663
 #, c-format
 msgid "illegal opcode %s for mcu %s"
-msgstr "felaktig opkod %s för mcu %s"
+msgstr "otillåten opkod %s för mcu %s"
 
 #: config/tc-avr.c:1691
 msgid "garbage at end of line"
@@ -4773,7 +4773,7 @@ msgstr "skräp vid radslut"
 #: config/tc-avr.c:1802
 #, c-format
 msgid "illegal %srelocation size: %d"
-msgstr "felaktig %s omlokaliseringsstorlek: %d"
+msgstr "otillåten %s-omlokaliseringsstorlek: %d"
 
 #: config/tc-bfin.c:95 config/tc-frv.c:1604 config/tc-frv.c:1614
 msgid "missing ')'"
@@ -4911,7 +4911,7 @@ msgstr "GOT felaktigt uttryck med %s."
 #: config/tc-cr16.c:1048
 #, c-format
 msgid "operand %d: illegal use expression: `%s`"
-msgstr "operand %d: felaktigt användningsuttryck: ”%s”"
+msgstr "operand %d: otillåtet användningsuttryck: ”%s”"
 
 #: config/tc-cr16.c:1113 config/tc-crx.c:1127
 #, c-format
@@ -4922,18 +4922,18 @@ msgstr "Okänt register: ”%d”"
 #: config/tc-cr16.c:1121 config/tc-crx.c:1135
 #, c-format
 msgid "Illegal register (`%s') in Instruction: `%s'"
-msgstr "Felaktigt register (”%s”) i instruktion: ”%s”"
+msgstr "Otillåtet register (”%s”) i instruktion: ”%s”"
 
 #: config/tc-cr16.c:1192 config/tc-cr16.c:1267 config/tc-crx.c:757
 #: config/tc-crx.c:777 config/tc-crx.c:792
 #, c-format
 msgid "Illegal register `%s' in Instruction `%s'"
-msgstr "Felaktigt register ”%s” i instruktion ”%s”"
+msgstr "Otillåtet register ”%s” i instruktion ”%s”"
 
 #: config/tc-cr16.c:1220 config/tc-cr16.c:1231
 #, c-format
 msgid "Illegal register pair `%s' in Instruction `%s'"
-msgstr "Felaktigt registerpar ”%s” i instruktion ”%s”"
+msgstr "Otillåtet registerpar ”%s” i instruktion ”%s”"
 
 #: config/tc-cr16.c:1256 config/tc-i960.c:832
 msgid "unmatched '['"
@@ -4946,7 +4946,7 @@ msgstr "skräp efter index-spec. överhoppat"
 #: config/tc-cr16.c:1410 config/tc-crx.c:936
 #, c-format
 msgid "Illegal operands (whitespace): `%s'"
-msgstr "Felaktiga operander (blanksteg): ”%s”"
+msgstr "Otillåtna operander (blanksteg): ”%s”"
 
 #: config/tc-cr16.c:1422 config/tc-cr16.c:1429 config/tc-cr16.c:1446
 #: config/tc-crx.c:948 config/tc-crx.c:955 config/tc-crx.c:972
@@ -4963,7 +4963,7 @@ msgstr "Okänt undantag: ”%s”"
 #: config/tc-cr16.c:1563 config/tc-crx.c:1094
 #, c-format
 msgid "Illegal `cinv' parameter: `%c'"
-msgstr "Felaktig ”cinv”-parameter: ”%c”"
+msgstr "Otillåten ”cinv”-parameter: ”%c”"
 
 #: config/tc-cr16.c:1584 config/tc-cr16.c:1623
 #, c-format
@@ -4974,13 +4974,13 @@ msgstr "Okänt registerpar: ”%d”"
 #: config/tc-cr16.c:1592
 #, c-format
 msgid "Illegal register pair (`%s') in Instruction: `%s'"
-msgstr "Felaktigt registerpar (”%s”) i instruktion: ”%s”"
+msgstr "Otillåtet registerpar (”%s”) i instruktion: ”%s”"
 
 #. Issue a error message when register  pair is illegal.
 #: config/tc-cr16.c:1631
 #, c-format
 msgid "Illegal index register pair (`%s') in Instruction: `%s'"
-msgstr "Felaktigt indexregisterpar (”%s”) i instruktion: ”%s”"
+msgstr "Otillåtet indexregisterpar (”%s”) i instruktion: ”%s”"
 
 #: config/tc-cr16.c:1670
 #, c-format
@@ -4991,7 +4991,7 @@ msgstr "Okänt processorregister : ”%d”"
 #: config/tc-cr16.c:1678
 #, c-format
 msgid "Illegal processor register (`%s') in Instruction: `%s'"
-msgstr "Felaktigt processorregister (”%s”) i instruktion: ”%s”"
+msgstr "Otillåtet processorregister (”%s”) i instruktion: ”%s”"
 
 #: config/tc-cr16.c:1726
 #, c-format
@@ -5002,7 +5002,7 @@ msgstr "Okänt processorregister (32-bitar) : ”%d”"
 #: config/tc-cr16.c:1734
 #, c-format
 msgid "Illegal 32 bit - processor register (`%s') in Instruction: `%s'"
-msgstr "Felaktigt 32-bitars processorregister (”%s”) i instruktion: ”%s”"
+msgstr "Otillåtet 32-bitars processorregister (”%s”) i instruktion: ”%s”"
 
 #: config/tc-cr16.c:2098 config/tc-crx.c:1662 config/tc-crx.c:1679
 #, c-format
@@ -5016,17 +5016,17 @@ msgstr "RA-register sparas två gånger."
 #: config/tc-cr16.c:2123
 #, c-format
 msgid "`%s' Illegal use of registers."
-msgstr "”%s” Felaktigt användning av register."
+msgstr "”%s” Otillåten användning av register."
 
 #: config/tc-cr16.c:2137
 #, c-format
 msgid "`%s' Illegal count-register combination."
-msgstr "”%s” Felaktig räkningsregisterkombination."
+msgstr "”%s” Otillåten räkningsregisterkombination."
 
 #: config/tc-cr16.c:2143
 #, c-format
 msgid "`%s' Illegal use of register."
-msgstr "”%s” Felaktig användning av register."
+msgstr "”%s” Otillåten användning av register."
 
 #: config/tc-cr16.c:2152 config/tc-crx.c:1671
 #, c-format
@@ -5045,7 +5045,7 @@ msgstr "Felaktig tantal operander"
 #: config/tc-cr16.c:2333 config/tc-crx.c:1578
 #, c-format
 msgid "Illegal type of operand (arg %d)"
-msgstr "Felaktig typ av operander (arg %d)"
+msgstr "Otillåten typ av operand (arg %d)"
 
 #: config/tc-cr16.c:2339 config/tc-crx.c:1584
 #, c-format
@@ -5061,7 +5061,7 @@ msgstr "Operand har udda förskjutning (arg %d)"
 #: config/tc-crx.c:1631
 #, c-format
 msgid "Illegal operand (arg %d)"
-msgstr "Felaktig operand (arg %d)"
+msgstr "Otillåten operand (arg %d)"
 
 #. Give an error if a frag containing code is not aligned to a 2-byte
 #. boundary.
@@ -5170,7 +5170,7 @@ msgstr "Oimplementerat register ”%s” angivet"
 #. opcode, so it must be an error.
 #: config/tc-cris.c:2099
 msgid "Illegal operands"
-msgstr "Felaktiga operander"
+msgstr "Otillåtna operander"
 
 #: config/tc-cris.c:2140 config/tc-cris.c:2180
 #, c-format
@@ -5392,17 +5392,17 @@ msgstr ".arch <ark> kräver en matchande --march=…-flagga"
 #: config/tc-crx.c:820
 #, c-format
 msgid "Illegal Scale - `%d'"
-msgstr "Felaktigt skala - ”%d”"
+msgstr "Otillåten skala - ”%d”"
 
 #: config/tc-crx.c:1262
 #, c-format
 msgid "Illegal Co-processor register in Instruction `%s' "
-msgstr "Felaktigt koprocessorregister i instruktion ”%s” "
+msgstr "Otillåtet koprocessorregister i instruktion ”%s” "
 
 #: config/tc-crx.c:1269
 #, c-format
 msgid "Illegal Co-processor special register in Instruction `%s' "
-msgstr "Felaktigt specialregister för koprocessor i instruktion ”%s”"
+msgstr "Otillåtet specialregister för koprocessor i instruktion ”%s”"
 
 #: config/tc-crx.c:1590
 #, c-format
@@ -5426,22 +5426,22 @@ msgstr "Ogiltigt register i registerlista"
 #: config/tc-crx.c:1787
 #, c-format
 msgid "Illegal register `%s' in cop-register list"
-msgstr "Felaktigt register ”%s” i kop-registerlista"
+msgstr "Otillåtet register ”%s” i kop-registerlista"
 
 #: config/tc-crx.c:1795
 #, c-format
 msgid "Illegal register `%s' in cop-special-register list"
-msgstr "Felaktigt register ”%s” i kop-specialregisterlista"
+msgstr "Otillåtet register ”%s” i kop-specialregisterlista"
 
 #: config/tc-crx.c:1814
 #, c-format
 msgid "Illegal register `%s' in user register list"
-msgstr "Felaktigt register ”%s” i användarregisterlista"
+msgstr "Otillåtet register ”%s” i användarregisterlista"
 
 #: config/tc-crx.c:1833
 #, c-format
 msgid "Illegal register `%s' in register list"
-msgstr "Felaktigt register ”%s” i registerlista"
+msgstr "Otillåtet register ”%s” i registerlista"
 
 #: config/tc-crx.c:1839
 #, c-format
@@ -5456,7 +5456,7 @@ msgstr "resten av raden överhoppad; första överhoppat tecken är ”%c”"
 #: config/tc-crx.c:1856
 #, c-format
 msgid "Illegal `mask16' operand, operation is undefined - `%s'"
-msgstr "Felaktig ”mask16”-operand, operation är odefinierad - ”%s”"
+msgstr "Otillåten ”mask16”-operand, operationen är odefinierad - ”%s”"
 
 #. HI can't be specified without LO (and vise-versa).
 #: config/tc-crx.c:1862
@@ -5575,7 +5575,7 @@ msgstr "värde utanför intervall"
 
 #: config/tc-d10v.c:1338
 msgid "illegal operand - register name found where none expected"
-msgstr "felaktig operand - registernamn hittat där inget förväntades"
+msgstr "otillåten operand - registernamn hittat där inget förväntades"
 
 #: config/tc-d10v.c:1373
 msgid "Register number must be EVEN"
@@ -6744,7 +6744,7 @@ msgstr "felaktig literalstorlek\n"
 
 #: config/tc-i370.c:1742
 msgid ".using: base address expression illegal or too complex"
-msgstr ".using: basadressuttryck felaktigt eller för komplext"
+msgstr ".using: basadressuttryck otillåtet eller för komplext"
 
 #: config/tc-i370.c:1777 config/tc-i370.c:1786
 #, c-format
@@ -7292,7 +7292,7 @@ msgstr "oimplementerat segment %s i operand"
 #: config/tc-i386.c:7991
 #, c-format
 msgid "illegal immediate register operand %s"
-msgstr "felaktig omedelbar registeroperand %s"
+msgstr "otillåten omedelbar registeroperand %s"
 
 #: config/tc-i386.c:8039
 #, c-format
@@ -7356,7 +7356,7 @@ msgstr "felaktigt registernamn ”%s”"
 
 #: config/tc-i386.c:8636
 msgid "immediate operand illegal with absolute jump"
-msgstr "omedelbar operand felaktig med absolut hopp"
+msgstr "omedelbar operand otillåten med absolut hopp"
 
 #: config/tc-i386.c:8664
 #, c-format
@@ -7723,7 +7723,7 @@ msgstr "Assembler har inte stöd för PIC än"
 #: config/tc-i860.c:955
 #, c-format
 msgid "Illegal operands for %s"
-msgstr "Felaktiga operander för %s"
+msgstr "Otillåtna operander för %s"
 
 #: config/tc-i860.c:972
 #, c-format
@@ -7821,7 +7821,7 @@ msgstr "ingen sådan sfr i denna arkitektur"
 
 #: config/tc-i960.c:789
 msgid "illegal literal"
-msgstr "felaktig literal"
+msgstr "otillåten literal"
 
 #: config/tc-i960.c:939
 msgid "invalid index register"
@@ -8144,7 +8144,7 @@ msgstr "Epilogantalet %lu överstiger antalet nästlade prologer (%u)"
 #: config/tc-ia64.c:3576
 #, c-format
 msgid "Illegal section name `%s' (causes unwind section name clash)"
-msgstr "Felaktigt sektionsnamn ”%s” (orsakar namnkollision med upprullningssektion)"
+msgstr "Otillåtet sektionsnamn ”%s” (orsakar namnkollision med upprullningssektion)"
 
 #: config/tc-ia64.c:3767
 msgid "First operand to .altrp not a valid branch register"
@@ -8433,7 +8433,7 @@ msgstr "Dubblerat likhetstecken (=) i instruktion"
 #: config/tc-ia64.c:6177
 #, c-format
 msgid "Illegal operand separator `%c'"
-msgstr "Felaktig operandseparator ”%c”"
+msgstr "Otillåten operandseparator ”%c”"
 
 #: config/tc-ia64.c:6292
 #, c-format
@@ -8688,7 +8688,7 @@ msgstr "Inte ett symboliskt uttryck"
 
 #: config/tc-ia64.c:7984 config/tc-ia64.c:7998
 msgid "Illegal combination of relocation functions"
-msgstr "Felaktig kombination av omlokaliseringsfunktioner"
+msgstr "Otillåten kombination av omlokaliseringsfunktioner"
 
 #: config/tc-ia64.c:8087
 msgid "No current frame"
@@ -8701,7 +8701,7 @@ msgstr "Registernummer utanför intervall 0..%u"
 
 #: config/tc-ia64.c:8127
 msgid "Standalone `#' is illegal"
-msgstr "Fristående ”#” är felaktigt"
+msgstr "Fristående ”#” är otillåtet"
 
 #: config/tc-ia64.c:8130
 msgid "Redundant `#' suffix operators"
@@ -9300,7 +9300,7 @@ msgstr "Saknar ”]” för att avsluta indexerat indirekt läge."
 #: config/tc-m68hc11.c:1333 config/tc-m68hc11.c:2963 config/tc-m68hc11.c:3075
 #: config/tc-m68hc11.c:3149 config/tc-m68hc11.c:3333 config/tc-m68hc11.c:3404
 msgid "Illegal operand."
-msgstr "Felaktig operand."
+msgstr "Otillåten operand."
 
 #. Looks like OP_R_R.
 #: config/tc-m68hc11.c:1338 config/tc-m68hc11.c:2968 config/tc-m68hc11.c:3080
@@ -10054,7 +10054,7 @@ msgstr "okänd opkod ”%s”"
 
 #: config/tc-mcore.c:930
 msgid "invalid register: r15 illegal"
-msgstr "ogiltigt register: r15 felaktigt"
+msgstr "ogiltigt register: r15 otillåtet"
 
 #: config/tc-mcore.c:979 config/tc-mcore.c:1560
 msgid "M340 specific opcode used when assembling for M210"
@@ -10100,7 +10100,7 @@ msgstr "förskjutning för stor (%d)"
 
 #: config/tc-mcore.c:1285
 msgid "Invalid register: r0 and r15 illegal"
-msgstr "ogiltigt register r0 och r15 är felaktiga"
+msgstr "ogiltigt register r0 och r15 är otillåtna"
 
 #: config/tc-mcore.c:1316
 msgid "bad starting register: r0 and r15 invalid"
@@ -12087,7 +12087,7 @@ msgstr "förväntade register"
 
 #: config/tc-moxie.c:123 config/tc-moxie.c:139
 msgid "illegal register number"
-msgstr "felaktigt registernummer"
+msgstr "otillåtet registernummer"
 
 #: config/tc-moxie.c:188 config/tc-pj.c:260
 #, c-format
@@ -12454,7 +12454,7 @@ msgstr "förväntade konstant eller registernamn som argument till RPT-inst"
 
 #: config/tc-msp430.c:2705
 msgid "Illegal emulated instruction "
-msgstr "Felaktig emulerad instruktion "
+msgstr "Otillåten emulerad instruktion "
 
 #: config/tc-msp430.c:2917
 #, c-format
@@ -12489,7 +12489,7 @@ msgstr "polymorfer är inte aktiverade. Använd flaggan -mP för att aktivera"
 
 #: config/tc-msp430.c:3161
 msgid "Illegal instruction or not implemented opcode."
-msgstr "Felaktig instruktion eller icke implementerad opkod."
+msgstr "Otillåten instruktion eller icke implementerad opkod."
 
 #: config/tc-msp430.c:3706
 #, c-format
@@ -12989,11 +12989,11 @@ msgstr "förväntade kontrollregister"
 
 #: config/tc-nios2.c:1358
 msgid "illegal use of control register"
-msgstr "felaktig användning av kontrollregister"
+msgstr "otillåten användning av kontrollregister"
 
 #: config/tc-nios2.c:1360
 msgid "illegal use of coprocessor register"
-msgstr "felaktig användning av koprocessorregister"
+msgstr "otillåten användning av koprocessorregister"
 
 #: config/tc-nios2.c:1362
 #, c-format
@@ -13071,17 +13071,17 @@ msgstr "Felaktigt .sektion-direktiv: vill ha a,s,w,x,M,S,G,T i sträng"
 #: config/tc-nios2.c:2799
 #, c-format
 msgid "Illegal operands: %%tls_ldo in %d-byte data field"
-msgstr "Felaktiga operander: %%tls_ldo i %d-byte datafält"
+msgstr "Otillåtna operander: %%tls_ldo i %d-byte datafält"
 
 #: config/tc-nios2.c:2811 config/tc-nios2.c:2829 config/tc-nios2.c:2836
 #, c-format
 msgid "Illegal operands: %%tls_ldo requires arguments in ()"
-msgstr "Felaktiga operander: %%tls_ldo kräver argument i ()"
+msgstr "Otillåtna operander: %%tls_ldo kräver argument i ()"
 
 #: config/tc-nios2.c:2843
 #, c-format
 msgid "Illegal operands: garbage after %%tls_ldo()"
-msgstr "Felaktiga operander: skräp efter %%tld_ldo()"
+msgstr "Otillåtna operander: skräp efter %%tld_ldo()"
 
 #: config/tc-ns32k.c:437
 msgid "Invalid syntax in PC-relative addressing mode"
@@ -13110,7 +13110,7 @@ msgstr "Skalat indexeringsadresseringsläge kombinerad med skalatindex"
 
 #: config/tc-ns32k.c:630
 msgid "Invalid or illegal addressing mode combined with scaled-index"
-msgstr "Ogiltigt eller felaktigt adresseringsläge kombinerat med skalat index"
+msgstr "Ogiltigt eller otillåtet adresseringsläge kombinerat med skalat index"
 
 #: config/tc-ns32k.c:753
 msgid "Premature end of suffix -- Defaulting to d"
@@ -13760,7 +13760,7 @@ msgstr "saknar värde"
 
 #: config/tc-ppc.c:4285
 msgid "illegal .stabx expression; zero assumed"
-msgstr "felaktigt .stabx-uttryck; noll antaget"
+msgstr "otillåtet .stabx-uttryck; noll antaget"
 
 #: config/tc-ppc.c:4317
 msgid "missing class"
@@ -14584,11 +14584,11 @@ msgstr "direktiv .littel påträffat när flaggan -little krävs"
 
 #: config/tc-sh.c:1422
 msgid "illegal double indirection"
-msgstr "felaktig dubbelindirektion"
+msgstr "otillåten dubbelindirektion"
 
 #: config/tc-sh.c:1431
 msgid "illegal register after @-"
-msgstr "felaktigt register efter @-"
+msgstr "otillåtet register efter @-"
 
 #: config/tc-sh.c:1447
 msgid "must be @(r0,...)"
@@ -14616,7 +14616,7 @@ msgstr "förväntade )"
 
 #: config/tc-sh.c:1551
 msgid "illegal register after @"
-msgstr "felaktigt register efter @"
+msgstr "otillåtet register efter @"
 
 #: config/tc-sh.c:2192
 #, c-format
@@ -15230,7 +15230,7 @@ msgstr "setx: temporärregister samma som destinationsregister"
 
 #: config/tc-sparc.c:1305
 msgid "setx: illegal temporary register g0"
-msgstr "setx: felaktigt temporärregister g0"
+msgstr "setx: otillåtet temporärregister g0"
 
 #: config/tc-sparc.c:1402
 msgid "FP branch in delay slot"
@@ -15322,17 +15322,17 @@ msgstr ": förväntade krypto-omedelbar"
 #: config/tc-sparc.c:2613
 #, c-format
 msgid "Illegal operands: %%%s requires arguments in ()"
-msgstr "Felaktiga operander: %%%s kräver argument i ()"
+msgstr "Otillåtna operander: %%%s kräver argument i ()"
 
 #: config/tc-sparc.c:2104
 #, c-format
 msgid "Illegal operands: %%%s cannot be used together with other relocs in the insn ()"
-msgstr "Felaktiga operander: %%%s kan inte användas tillsammans med andra omlokaliseringar i instr ()"
+msgstr "Otillåtna operander: %%%s kan inte användas tillsammans med andra omlokaliseringar i instr ()"
 
 #: config/tc-sparc.c:2115
 #, c-format
 msgid "Illegal operands: %%%s can be only used with call __tls_get_addr"
-msgstr "Felaktiga operander: %%%s kan endast användas med call __tls_get_addr"
+msgstr "Otillåtna operander: %%%s kan endast användas med call __tls_get_addr"
 
 #: config/tc-sparc.c:2322
 msgid "detected global register use not covered by .register pseudo-op"
@@ -15357,17 +15357,17 @@ msgstr ": Instruktion kräver att frs2 och frsd måste vara samma register"
 #: config/tc-sparc.c:2625
 #, c-format
 msgid "Illegal operands: Can't do arithmetics other than + and - involving %%%s()"
-msgstr "Felaktiga operander: Kan inte utföra aritmetik annan än + och - som inbegriper %%%s()"
+msgstr "Otillåtna operander: Kan inte utföra aritmetik annan än + och - som inbegriper %%%s()"
 
 #: config/tc-sparc.c:2742
 #, c-format
 msgid "Illegal operands: Can't add non-constant expression to %%%s()"
-msgstr "Felaktiga operander: Kan inte addera icke-konstant uttryck till %%%s()"
+msgstr "Otillåtna operander: Kan inte addera icke-konstant uttryck till %%%s()"
 
 #: config/tc-sparc.c:2752
 #, c-format
 msgid "Illegal operands: Can't do arithmetics involving %%%s() of a relocatable symbol"
-msgstr "Felaktiga operander: Kan inte utföra aritmetik som inbegriper %%%s() från en omlokaliserbar symbol"
+msgstr "Otillåtna operander: Kan inte utföra aritmetik som inbegriper %%%s() från en omlokaliserbar symbol"
 
 #: config/tc-sparc.c:2770
 msgid ": PC-relative operand can't be a constant"
@@ -15408,7 +15408,7 @@ msgstr ": ogiltigt cpreg-namn"
 #: config/tc-sparc.c:2999
 #, c-format
 msgid "Illegal operands%s"
-msgstr "Felaktiga operander%s"
+msgstr "Otillåtna operander%s"
 
 #: config/tc-sparc.c:3039
 #, c-format
@@ -15513,28 +15513,28 @@ msgstr "Registersymbol %s är redan definierad."
 #: config/tc-sparc.c:4639
 #, c-format
 msgid "Illegal operands: %%r_plt in %d-byte data field"
-msgstr "Felaktiga operander: %%r_plt i %d-byte datafält"
+msgstr "Otillåtna operander: %%r_plt i %d-byte datafält"
 
 #: config/tc-sparc.c:4649
 #, c-format
 msgid "Illegal operands: %%r_tls_dtpoff in %d-byte data field"
-msgstr "Felaktiga operander: %%r_tls_dtpoff i %d-byte datafält"
+msgstr "Otillåtna operander: %%r_tls_dtpoff i %d-byte datafält"
 
 #: config/tc-sparc.c:4686 config/tc-vax.c:3315
 #, c-format
 msgid "Illegal operands: Only %%r_%s%d allowed in %d-byte data fields"
-msgstr "Felaktiga operander: Endast %%r_%s%d tillåtet i %d-byte datafält"
+msgstr "Otillåtna operander: Endast %%r_%s%d tillåtet i %d-byte datafält"
 
 #: config/tc-sparc.c:4694 config/tc-sparc.c:4725 config/tc-sparc.c:4734
 #: config/tc-vax.c:3323 config/tc-vax.c:3354 config/tc-vax.c:3363
 #, c-format
 msgid "Illegal operands: %%r_%s%d requires arguments in ()"
-msgstr "Felaktiga operander: %%r_%s%d kräver argument i ()"
+msgstr "Otillåtna operander: %%r_%s%d kräver argument i ()"
 
 #: config/tc-sparc.c:4743 config/tc-vax.c:3372
 #, c-format
 msgid "Illegal operands: garbage after %%r_%s%d()"
-msgstr "Felaktiga operander: skräp efter %%r_%s%d()"
+msgstr "Otillåtna operander: skräp efter %%r_%s%d()"
 
 #: config/tc-sparc.h:63
 msgid "sparc convert_frag\n"
@@ -15653,7 +15653,7 @@ msgstr "Mer än ett AR-register funnet i indirekt referense"
 
 #: config/tc-tic30.c:487
 msgid "Illegal AR register in indirect reference"
-msgstr "Felaktigt AR-register i indirekt referens"
+msgstr "Otillåtet AR-register i indirekt referens"
 
 #: config/tc-tic30.c:507
 msgid "More than one displacement found in indirect reference"
@@ -15674,7 +15674,7 @@ msgstr "nödvändig förskjutning angavs inte i indirekt referens"
 
 #: config/tc-tic30.c:554
 msgid "illegal indirect reference"
-msgstr "felaktig indirekt referens"
+msgstr "otillåten indirekt referens"
 
 #: config/tc-tic30.c:560
 msgid "displacement must be an unsigned 8-bit number"
@@ -17194,7 +17194,7 @@ msgstr "höga bitar satta i uttryck för registerlista"
 
 #: config/tc-v850.c:1458 config/tc-v850.c:1515
 msgid "illegal register included in list"
-msgstr "felaktigt register inkluderat i lista"
+msgstr "otillåtet register inkluderat i lista"
 
 #: config/tc-v850.c:1464
 msgid "system registers cannot be included in list"
@@ -17830,7 +17830,7 @@ msgstr "fptr-uppfixning stöds inte"
 
 #: config/tc-xtensa.c:625
 msgid "illegal range of target hardware versions"
-msgstr "felaktigt intervall över versioner av målhårdvara"
+msgstr "otillåtet intervall över versioner av målhårdvara"
 
 #: config/tc-xtensa.c:788
 msgid "--density option is ignored"
@@ -18218,7 +18218,7 @@ msgstr "format '%s' tillåter %d luckor, men det finns %d opkoder"
 
 #: config/tc-xtensa.c:6286 config/tc-xtensa.c:6384
 msgid "illegal resource usage in bundle"
-msgstr "felaktig resursanvändning i bunt"
+msgstr "otillåten resursanvändning i bunt"
 
 #: config/tc-xtensa.c:6473
 #, c-format
@@ -18970,7 +18970,7 @@ msgstr "radnummer (%d) för .stab%c-direktiv får inte plats i indexfält (20 bi
 #: ecoff.c:3523
 #, c-format
 msgid "illegal .stab%c directive, bad character"
-msgstr "felaktigt .stab%c-direktiv, felaktigt tecken"
+msgstr "otillåtet .stab%c-direktiv, felaktigt tecken"
 
 #: ecoff.c:3982 ecoff.c:4171 ecoff.c:4196
 msgid ".begin/.bend in different segments"

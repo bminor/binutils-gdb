@@ -46,12 +46,6 @@
 #define itbl_init()
 #endif
 
-#ifdef HAVE_SBRK
-#ifdef NEED_DECLARATION_SBRK
-extern void *sbrk ();
-#endif
-#endif
-
 #ifdef USING_CGEN
 /* Perform any cgen specific initialisation for gas.  */
 extern void gas_cgen_begin (void);
@@ -125,9 +119,6 @@ static struct itbl_file_list *itbl_files;
 #endif
 
 static long start_time;
-#ifdef HAVE_SBRK
-char *start_sbrk;
-#endif
 
 static int flag_macro_alternate;
 
@@ -1043,17 +1034,10 @@ This program has absolutely no warranty.\n"));
 static void
 dump_statistics (void)
 {
-#ifdef HAVE_SBRK
-  char *lim = (char *) sbrk (0);
-#endif
   long run_time = get_run_time () - start_time;
 
   fprintf (stderr, _("%s: total time in assembly: %ld.%06ld\n"),
 	   myname, run_time / 1000000, run_time % 1000000);
-#ifdef HAVE_SBRK
-  fprintf (stderr, _("%s: data size %ld\n"),
-	   myname, (long) (lim - start_sbrk));
-#endif
 
   subsegs_print_statistics (stderr);
   write_print_statistics (stderr);
@@ -1187,9 +1171,6 @@ main (int argc, char ** argv)
 
   start_time = get_run_time ();
   signal_init ();
-#ifdef HAVE_SBRK
-  start_sbrk = (char *) sbrk (0);
-#endif
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");

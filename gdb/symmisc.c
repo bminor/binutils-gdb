@@ -407,16 +407,13 @@ dump_symtab (struct symtab *symtab, struct ui_file *outfile)
 static void
 maintenance_print_symbols (char *args, int from_tty)
 {
-  char **argv;
   struct ui_file *outfile = gdb_stdout;
-  struct cleanup *cleanups;
   char *address_arg = NULL, *source_arg = NULL, *objfile_arg = NULL;
   int i, outfile_idx;
 
   dont_repeat ();
 
-  argv = gdb_buildargv (args);
-  cleanups = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   for (i = 0; argv != NULL && argv[i] != NULL; ++i)
     {
@@ -461,14 +458,12 @@ maintenance_print_symbols (char *args, int from_tty)
 
   if (argv != NULL && argv[outfile_idx] != NULL)
     {
-      char *outfile_name;
-
       if (argv[outfile_idx + 1] != NULL)
 	error (_("Junk at end of command"));
-      outfile_name = tilde_expand (argv[outfile_idx]);
-      make_cleanup (xfree, outfile_name);
-      if (!arg_outfile.open (outfile_name, FOPEN_WT))
-	perror_with_name (outfile_name);
+      gdb::unique_xmalloc_ptr<char> outfile_name
+	(tilde_expand (argv[outfile_idx]));
+      if (!arg_outfile.open (outfile_name.get (), FOPEN_WT))
+	perror_with_name (outfile_name.get ());
       outfile = &arg_outfile;
     }
 
@@ -520,8 +515,6 @@ maintenance_print_symbols (char *args, int from_tty)
       if (source_arg != NULL && !found)
 	error (_("No symtab for source file: %s"), source_arg);
     }
-
-  do_cleanups (cleanups);
 }
 
 /* Print symbol ARGS->SYMBOL on ARGS->OUTFILE.  ARGS->DEPTH says how
@@ -709,17 +702,14 @@ print_symbol (void *args)
 static void
 maintenance_print_msymbols (char *args, int from_tty)
 {
-  char **argv;
   struct ui_file *outfile = gdb_stdout;
-  struct cleanup *cleanups;
   char *objfile_arg = NULL;
   struct objfile *objfile;
   int i, outfile_idx;
 
   dont_repeat ();
 
-  argv = gdb_buildargv (args);
-  cleanups = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   for (i = 0; argv != NULL && argv[i] != NULL; ++i)
     {
@@ -749,14 +739,12 @@ maintenance_print_msymbols (char *args, int from_tty)
 
   if (argv != NULL && argv[outfile_idx] != NULL)
     {
-      char *outfile_name;
-
       if (argv[outfile_idx + 1] != NULL)
 	error (_("Junk at end of command"));
-      outfile_name = tilde_expand (argv[outfile_idx]);
-      make_cleanup (xfree, outfile_name);
-      if (!arg_outfile.open (outfile_name, FOPEN_WT))
-	perror_with_name (outfile_name);
+      gdb::unique_xmalloc_ptr<char> outfile_name
+	(tilde_expand (argv[outfile_idx]));
+      if (!arg_outfile.open (outfile_name.get (), FOPEN_WT))
+	perror_with_name (outfile_name.get ());
       outfile = &arg_outfile;
     }
 
@@ -767,8 +755,6 @@ maintenance_print_msymbols (char *args, int from_tty)
 	|| compare_filenames_for_search (objfile_name (objfile), objfile_arg))
       dump_msymbols (objfile, outfile);
   }
-
-  do_cleanups (cleanups);
 }
 
 static void
@@ -944,14 +930,11 @@ maintenance_expand_symtabs (char *args, int from_tty)
 {
   struct program_space *pspace;
   struct objfile *objfile;
-  struct cleanup *cleanups;
-  char **argv;
   char *regexp = NULL;
 
   /* We use buildargv here so that we handle spaces in the regexp
      in a way that allows adding more arguments later.  */
-  argv = gdb_buildargv (args);
-  cleanups = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   if (argv != NULL)
     {
@@ -988,8 +971,6 @@ maintenance_expand_symtabs (char *args, int from_tty)
 	     ALL_DOMAIN);
 	}
     }
-
-  do_cleanups (cleanups);
 }
 
 

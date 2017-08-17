@@ -2394,9 +2394,9 @@ elf_link_read_relocs_from_section (bfd *abfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: bad reloc symbol index (0x%lx >= 0x%lx)"
-		   " for offset 0x%lx in section `%A'"),
-		 abfd, (unsigned long) r_symndx, (unsigned long) nsyms,
+		(_("%B: bad reloc symbol index (%#Lx >= %#lx)"
+		   " for offset %#Lx in section `%A'"),
+		 abfd, r_symndx, (unsigned long) nsyms,
 		 irela->r_offset, sec);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
@@ -2406,10 +2406,10 @@ elf_link_read_relocs_from_section (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: non-zero symbol index (0x%lx)"
-	       " for offset 0x%lx in section `%A'"
+	    (_("%B: non-zero symbol index (%#Lx)"
+	       " for offset %#Lx in section `%A'"
 	       " when the object file has no symbol table"),
-	     abfd, (unsigned long) r_symndx, (unsigned long) nsyms,
+	     abfd, r_symndx,
 	     irela->r_offset, sec);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
@@ -2935,7 +2935,7 @@ _bfd_elf_adjust_dynamic_copy (struct bfd_link_info *info,
   bfd_vma mask;
   asection *sec = h->root.u.def.section;
 
-  /* The section aligment of definition is the maximum alignment
+  /* The section alignment of the definition is the maximum alignment
      requirement of symbols defined in the section.  Since we don't
      know the symbol alignment requirement, we start with the
      maximum alignment and check low bits of the symbol address
@@ -4254,6 +4254,12 @@ error_free_dyn:
       sec = NULL;
       value = isym->st_value;
       common = bed->common_definition (isym);
+      if (common && info->inhibit_common_definition)
+	{
+	  /* Treat common symbol as undefined for --no-define-common.  */
+	  isym->st_shndx = SHN_UNDEF;
+	  common = FALSE;
+	}
       discarded = FALSE;
 
       bind = ELF_ST_BIND (isym->st_info);
@@ -4752,9 +4758,8 @@ error_free_dyn:
 		_bfd_error_handler
 		  /* xgettext:c-format */
 		  (_("Warning: size of symbol `%s' changed"
-		     " from %lu in %B to %lu in %B"),
-		   name, (unsigned long) h->size, old_bfd,
-		   (unsigned long) isym->st_size, abfd);
+		     " from %Lu in %B to %Lu in %B"),
+		   name, h->size, old_bfd, isym->st_size, abfd);
 
 	      h->size = isym->st_size;
 	    }
@@ -8617,8 +8622,7 @@ elf_link_adjust_relocs (bfd *abfd,
 			      abfd, sec,
 			      (*rel_hash)->root.root.string);
 	  _bfd_error_handler (_("%B:%A: error: try relinking with --gc-keep-exported enabled."),
-			      abfd, sec,
-			      (*rel_hash)->root.root.string);
+			      abfd, sec);
 	  bfd_set_error (bfd_error_invalid_operation);
 	  return FALSE;
 	}
@@ -10477,14 +10481,11 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		     we do not seg fault.  */
 		  if (h == NULL)
 		    {
-		      char buffer [32];
-
-		      sprintf_vma (buffer, rel->r_info);
 		      _bfd_error_handler
 			/* xgettext:c-format */
-			(_("error: %B contains a reloc (0x%s) for section %A "
+			(_("error: %B contains a reloc (%#Lx) for section %A "
 			   "that references a non-existent global symbol"),
-			 input_bfd, buffer, o);
+			 input_bfd, rel->r_info, o);
 		      bfd_set_error (bfd_error_bad_value);
 		      return FALSE;
 		    }
@@ -12342,7 +12343,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    get_vma:
 	      o = bfd_get_linker_section (dynobj, name);
 	    do_vma:
-	      if (o == NULL)
+	      if (o == NULL || bfd_is_abs_section (o->output_section))
 		{
 		  _bfd_error_handler
 		    (_("could not find section %s"), name);
@@ -13422,8 +13423,8 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
     }
 
   /* xgettext:c-format */
-  _bfd_error_handler (_("%B: %A+%lu: No symbol found for INHERIT"),
-		      abfd, sec, (unsigned long) offset);
+  _bfd_error_handler (_("%B: %A+%#Lx: No symbol found for INHERIT"),
+		      abfd, sec, offset);
   bfd_set_error (bfd_error_invalid_operation);
   return FALSE;
 
@@ -13835,6 +13836,7 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
     {
       asection *i;
       int eh_changed = 0;
+      unsigned int eh_alignment;
 
       for (i = o->map_head.s; i != NULL; i = i->map_head.s)
 	{
@@ -13859,6 +13861,34 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 	    }
 
 	  fini_reloc_cookie_for_section (&cookie, i);
+	}
+      eh_alignment = 1 << o->alignment_power;
+      if (eh_alignment > 4)
+	{
+	  /* Skip over zero terminator, and prevent empty sections
+	     from adding alignment padding at the end.  */
+	  for (i = o->map_tail.s; i != NULL; i = i->map_tail.s)
+	    if (i->size == 0)
+	      i->flags |= SEC_EXCLUDE;
+	    else if (i->size > 4)
+	      break;
+	  /* The last non-empty eh_frame section doesn't need padding.  */
+	  if (i != NULL)
+	    i = i->map_tail.s;
+	  /* Any prior sections must pad the last FDE out to the
+	     output section alignment.  Otherwise we might have zero
+	     padding between sections, which would be seen as a
+	     terminator.  */
+	  for (; i != NULL; i = i->map_tail.s)
+	    {
+	      bfd_size_type size = (i->size + eh_alignment - 1) & -eh_alignment;
+	      if (i->size != size)
+		{
+		  i->size = size;
+		  changed = 1;
+		  eh_changed = 1;
+		}
+	    }
 	}
       if (eh_changed)
 	elf_link_hash_traverse (elf_hash_table (info),

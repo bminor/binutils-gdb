@@ -57,7 +57,7 @@ static int unichar_isascii (const unichar *, rc_uint_type);
 /* Codepages mapped.  */
 static local_iconv_map codepages[] =
 {
-  { 0, "MS-ANSI" },
+  { 0, "cp1252" },
   { 1, "WINDOWS-1252" },
   { 437, "MS-ANSI" },
   { 737, "MS-GREEK" },

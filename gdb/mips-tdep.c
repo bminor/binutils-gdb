@@ -8451,7 +8451,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	break;
       }
   else if (arches != NULL)
-    fpu_type = gdbarch_tdep (arches->gdbarch)->mips_fpu_type;
+    fpu_type = MIPS_FPU_TYPE (arches->gdbarch);
   else
     fpu_type = MIPS_FPU_DOUBLE;
   if (gdbarch_debug)
@@ -8491,7 +8491,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  != mips64_transfers_32bit_regs_p)
 	continue;
       /* Be pedantic about which FPU is selected.  */
-      if (gdbarch_tdep (arches->gdbarch)->mips_fpu_type != fpu_type)
+      if (MIPS_FPU_TYPE (arches->gdbarch) != fpu_type)
 	continue;
 
       if (tdesc_data != NULL)
@@ -8785,7 +8785,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   mips_register_g_packet_guesses (gdbarch);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
-  info.tdep_info = tdesc_data;
+  info.tdesc_data = tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 
   /* The hook may have adjusted num_regs, fetch the final value and
@@ -8907,6 +8907,24 @@ show_mips_compression (struct ui_file *file, int from_tty,
 		    value);
 }
 
+/* Return a textual name for MIPS FPU type FPU_TYPE.  */
+
+static const char *
+mips_fpu_type_str (enum mips_fpu_type fpu_type)
+{
+  switch (fpu_type)
+    {
+    case MIPS_FPU_NONE:
+      return "none";
+    case MIPS_FPU_SINGLE:
+      return "single";
+    case MIPS_FPU_DOUBLE:
+      return "double";
+    default:
+      return "???";
+    }
+}
+
 static void
 mips_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
@@ -8957,19 +8975,13 @@ mips_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_DEFAULT_FPU_TYPE = %d (%s)\n",
 		      MIPS_DEFAULT_FPU_TYPE,
-		      (MIPS_DEFAULT_FPU_TYPE == MIPS_FPU_NONE ? "none"
-		       : MIPS_DEFAULT_FPU_TYPE == MIPS_FPU_SINGLE ? "single"
-		       : MIPS_DEFAULT_FPU_TYPE == MIPS_FPU_DOUBLE ? "double"
-		       : "???"));
+		      mips_fpu_type_str (MIPS_DEFAULT_FPU_TYPE));
   fprintf_unfiltered (file, "mips_dump_tdep: MIPS_EABI = %d\n",
 		      MIPS_EABI (gdbarch));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_FPU_TYPE = %d (%s)\n",
 		      MIPS_FPU_TYPE (gdbarch),
-		      (MIPS_FPU_TYPE (gdbarch) == MIPS_FPU_NONE ? "none"
-		       : MIPS_FPU_TYPE (gdbarch) == MIPS_FPU_SINGLE ? "single"
-		       : MIPS_FPU_TYPE (gdbarch) == MIPS_FPU_DOUBLE ? "double"
-		       : "???"));
+		      mips_fpu_type_str (MIPS_FPU_TYPE (gdbarch)));
 }
 
 extern initialize_file_ftype _initialize_mips_tdep; /* -Wmissing-prototypes */

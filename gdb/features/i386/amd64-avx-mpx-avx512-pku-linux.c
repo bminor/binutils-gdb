@@ -10,15 +10,15 @@ static void
 initialize_tdesc_amd64_avx_mpx_avx512_pku_linux (void)
 {
   struct target_desc *result = allocate_target_description ();
-  struct tdesc_feature *feature;
-  struct tdesc_type *field_type;
-  struct tdesc_type *type;
-
   set_tdesc_architecture (result, bfd_scan_arch ("i386:x86-64"));
 
   set_tdesc_osabi (result, osabi_from_tdesc_string ("GNU/Linux"));
 
+  struct tdesc_feature *feature;
+
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.core");
+  struct tdesc_type *field_type;
+  struct tdesc_type *type;
   type = tdesc_create_flags (feature, "i386_eflags", 4);
   tdesc_add_flag (type, 0, "CF");
   tdesc_add_flag (type, 1, "");
@@ -323,7 +323,7 @@ initialize_tdesc_amd64_avx_mpx_avx512_pku_linux (void)
   tdesc_create_reg (feature, "zmm31h", 153, 1, NULL, 256, "v2ui128");
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.pkeys");
-  tdesc_create_reg (feature, "pkru", 152, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "pkru", 154, 1, NULL, 32, "uint32");
 
   tdesc_amd64_avx_mpx_avx512_pku_linux = result;
 }

@@ -92,6 +92,7 @@ gas_test_error "assign-bad.s" "" "== assignment for symbol already set"
 # .equ works differently on some targets.
 # linkrelax-ing prevents most forward references from working.
 case $target_triplet in {
+    { am3*-*-* } { }
     { *c54x*-*-* } { }
     { cr16*-*-* } { }
     { crx*-*-* } { }
@@ -139,6 +140,7 @@ if { ![is_aout_format] } {
 # pdp11 gets unexpected reloc types.
 case $target_triplet in {
     { alpha*-*-* } { }
+    { am3*-*-* } { }
     { cr16*-*-* } { }
     { crx*-*-* } { }
     { h8300-*-* } { }
@@ -278,7 +280,7 @@ if {    ![istarget *c30*-*-*]
     # The vax fails because VMS can apparently actually handle this
     # case in relocs, so gas doesn't handle it itself.
     # msp430, mn10[23]00 and riscv emit two relocs to handle the difference of two symbols.
-    setup_xfail "mn10200-*-*" "mn10300*-*-*" "msp430*-*-*" "riscv*-*-*" "vax*-*-vms*"
+    setup_xfail "am3*-*-*" "mn10200-*-*" "mn10300*-*-*" "msp430*-*-*" "riscv*-*-*" "vax*-*-vms*"
     do_930509a
 }
 
@@ -394,6 +396,7 @@ if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] } {
     run_dump_test sleb128-7
     run_dump_test sleb128-8
 }
+run_dump_test sleb128-9
 
 # .byte is 32 bits on tic4x, and .p2align isn't supported on tic54x
 # .space is different on hppa*-hpux.

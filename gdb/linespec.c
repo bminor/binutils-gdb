@@ -46,6 +46,38 @@
 #include "location.h"
 #include "common/function-view.h"
 
+/* An enumeration of the various things a user might attempt to
+   complete for a linespec location.  */
+
+enum class linespec_complete_what
+{
+  /* Nothing, no possible completion.  */
+  NOTHING,
+
+  /* A function/method name.  Due to ambiguity between
+
+       (gdb) b source[TAB]
+       source_file.c
+       source_function
+
+     this can also indicate a source filename, iff we haven't seen a
+     separate source filename component, as in "b source.c:function".  */
+  FUNCTION,
+
+  /* A label symbol.  E.g., break file.c:function:LABEL.  */
+  LABEL,
+
+  /* An expression.  E.g., "break foo if EXPR", or "break *EXPR".  */
+  EXPRESSION,
+
+  /* A linespec keyword ("if"/"thread"/"task").
+     E.g., "break func threa<tab>".  */
+  KEYWORD,
+};
+
+typedef struct symbol *symbolp;
+DEF_VEC_P (symbolp);
+
 typedef struct type *typep;
 DEF_VEC_P (typep);
 
@@ -205,9 +237,9 @@ enum ls_token_type
 };
 typedef enum ls_token_type linespec_token_type;
 
-/* List of keywords  */
-
-static const char * const linespec_keywords[] = { "if", "thread", "task" };
+/* List of keywords.  This is NULL-terminated so that it can be used
+   as enum completer.  */
+const char * const linespec_keywords[] = { "if", "thread", "task", NULL };
 #define IF_KEYWORD_INDEX 0
 
 /* A token of the linespec lexer  */
@@ -260,6 +292,29 @@ struct ls_parser
   /* The result of the parse.  */
   struct linespec result;
 #define PARSER_RESULT(PPTR) (&(PPTR)->result)
+
+  /* What the parser believes the current word point should complete
+     to.  */
+  linespec_complete_what complete_what;
+
+  /* The completion word point.  The parser advances this as it skips
+     tokens.  At some point the input string will end or parsing will
+     fail, and then we attempt completion at the captured completion
+     word point, interpreting the string at completion_word as
+     COMPLETE_WHAT.  */
+  const char *completion_word;
+
+  /* If the current token was a quoted string, then this is the
+     quoting character (either " or ').  */
+  int completion_quote_char;
+
+  /* If the current token was a quoted string, then this points at the
+     end of the quoted string.  */
+  const char *completion_quote_end;
+
+  /* If parsing for completion, then this points at the completion
+     tracker.  Otherwise, this is NULL.  */
+  struct completion_tracker *completion_tracker;
 };
 typedef struct ls_parser linespec_parser;
 
@@ -289,7 +344,8 @@ static VEC (block_symbol_d) *find_label_symbols
      (struct linespec_state *self,
       VEC (block_symbol_d) *function_symbols,
       VEC (block_symbol_d) **label_funcs_ret,
-      const char *name);
+      const char *name,
+      bool completion_mode = false);
 
 static void find_linespec_symbols (struct linespec_state *self,
 				   VEC (symtab_ptr) *file_symtabs,
@@ -392,7 +448,7 @@ linespec_lexer_lex_keyword (const char *p)
 
   if (p != NULL)
     {
-      for (i = 0; i < ARRAY_SIZE (linespec_keywords); ++i)
+      for (i = 0; linespec_keywords[i] != NULL; ++i)
 	{
 	  int len = strlen (linespec_keywords[i]);
 
@@ -413,7 +469,7 @@ linespec_lexer_lex_keyword (const char *p)
 		{
 		  p += len;
 		  p = skip_spaces_const (p);
-		  for (j = 0; j < ARRAY_SIZE (linespec_keywords); ++j)
+		  for (j = 0; linespec_keywords[j] != NULL; ++j)
 		    {
 		      int nextlen = strlen (linespec_keywords[j]);
 
@@ -534,6 +590,30 @@ find_parameter_list_end (const char *input)
   return p;
 }
 
+/* If the [STRING, STRING_LEN) string ends with what looks like a
+   keyword, return the keyword start offset in STRING.  Return -1
+   otherwise.  */
+
+static size_t
+string_find_incomplete_keyword_at_end (const char * const *keywords,
+				       const char *string, size_t string_len)
+{
+  const char *end = string + string_len;
+  const char *p = end;
+
+  while (p > string && *p != ' ')
+    --p;
+  if (p > string)
+    {
+      p++;
+      size_t len = end - p;
+      for (size_t i = 0; keywords[i] != NULL; ++i)
+	if (strncmp (keywords[i], p, len) == 0)
+	  return p - string;
+    }
+
+  return -1;
+}
 
 /* Lex a string from the input in PARSER.  */
 
@@ -581,13 +661,31 @@ linespec_lexer_lex_string (linespec_parser *parser)
       /* Skip to the ending quote.  */
       end = skip_quote_char (PARSER_STREAM (parser), quote_char);
 
-      /* Error if the input did not terminate properly.  */
-      if (end == NULL)
-	error (_("unmatched quote"));
+      /* This helps the completer mode decide whether we have a
+	 complete string.  */
+      parser->completion_quote_char = quote_char;
+      parser->completion_quote_end = end;
 
-      /* Skip over the ending quote and mark the length of the string.  */
-      PARSER_STREAM (parser) = (char *) ++end;
-      LS_TOKEN_STOKEN (token).length = PARSER_STREAM (parser) - 2 - start;
+      /* Error if the input did not terminate properly, unless in
+	 completion mode.  */
+      if (end == NULL)
+	{
+	  if (parser->completion_tracker == NULL)
+	    error (_("unmatched quote"));
+
+	  /* In completion mode, we'll try to complete the incomplete
+	     token.  */
+	  token.type = LSTOKEN_STRING;
+	  while (*PARSER_STREAM (parser) != '\0')
+	    PARSER_STREAM (parser)++;
+	  LS_TOKEN_STOKEN (token).length = PARSER_STREAM (parser) - 1 - start;
+	}
+      else
+	{
+	  /* Skip over the ending quote and mark the length of the string.  */
+	  PARSER_STREAM (parser) = (char *) ++end;
+	  LS_TOKEN_STOKEN (token).length = PARSER_STREAM (parser) - 2 - start;
+	}
     }
   else
     {
@@ -665,14 +763,50 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	  else if (*PARSER_STREAM (parser) == '<'
 		   || *PARSER_STREAM (parser) == '(')
 	    {
-	      const char *p;
-
-	      p = find_parameter_list_end (PARSER_STREAM (parser));
-	      if (p != NULL)
+	      /* Don't interpret 'operator<' / 'operator<<' as a
+		 template parameter list though.  */
+	      if (*PARSER_STREAM (parser) == '<'
+		  && (PARSER_STATE (parser)->language->la_language
+		      == language_cplus)
+		  && (PARSER_STREAM (parser) - start) >= CP_OPERATOR_LEN)
 		{
-		  PARSER_STREAM (parser) = p;
-		  continue;
+		  const char *p = PARSER_STREAM (parser);
+
+		  while (p > start && isspace (p[-1]))
+		    p--;
+		  if (p - start >= CP_OPERATOR_LEN)
+		    {
+		      p -= CP_OPERATOR_LEN;
+		      if (strncmp (p, CP_OPERATOR_STR, CP_OPERATOR_LEN) == 0
+			  && (p == start
+			      || !(isalnum (p[-1]) || p[-1] == '_')))
+			{
+			  /* This is an operator name.  Keep going.  */
+			  ++(PARSER_STREAM (parser));
+			  if (*PARSER_STREAM (parser) == '<')
+			    ++(PARSER_STREAM (parser));
+			  continue;
+			}
+		    }
 		}
+
+	      const char *p = find_parameter_list_end (PARSER_STREAM (parser));
+	      PARSER_STREAM (parser) = p;
+
+	      /* Don't loop around to the normal \0 case above because
+		 we don't want to misinterpret a potential keyword at
+		 the end of the token when the string isn't
+		 "()<>"-balanced.  This handles "b
+		 function(thread<tab>" in completion mode.  */
+	      if (*p == '\0')
+		{
+		  LS_TOKEN_STOKEN (token).ptr = start;
+		  LS_TOKEN_STOKEN (token).length
+		    = PARSER_STREAM (parser) - start;
+		  return token;
+		}
+	      else
+		continue;
 	    }
 	  /* Commas are terminators, but not if they are part of an
 	     operator name.  */
@@ -680,10 +814,9 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	    {
 	      if ((PARSER_STATE (parser)->language->la_language
 		   == language_cplus)
-		  && (PARSER_STREAM (parser) - start) > 8
-		  /* strlen ("operator") */)
+		  && (PARSER_STREAM (parser) - start) > CP_OPERATOR_LEN)
 		{
-		  const char *p = strstr (start, "operator");
+		  const char *p = strstr (start, CP_OPERATOR_STR);
 
 		  if (p != NULL && is_operator_name (p))
 		    {
@@ -791,13 +924,48 @@ linespec_lexer_lex_one (linespec_parser *parser)
 }
 
 /* Consume the current token and return the next token in PARSER's
-   input stream.  */
+   input stream.  Also advance the completion word for completion
+   mode.  */
 
 static linespec_token
 linespec_lexer_consume_token (linespec_parser *parser)
 {
+  gdb_assert (parser->lexer.current.type != LSTOKEN_EOI);
+
+  bool advance_word = (parser->lexer.current.type != LSTOKEN_STRING
+		       || *PARSER_STREAM (parser) != '\0');
+
+  /* If we're moving past a string to some other token, it must be the
+     quote was terminated.  */
+  if (parser->completion_quote_char)
+    {
+      gdb_assert (parser->lexer.current.type == LSTOKEN_STRING);
+
+      /* If the string was the last (non-EOI) token, we're past the
+	 quote, but remember that for later.  */
+      if (*PARSER_STREAM (parser) != '\0')
+	{
+	  parser->completion_quote_char = '\0';
+	  parser->completion_quote_end = NULL;;
+	}
+    }
+
   parser->lexer.current.type = LSTOKEN_CONSUMED;
-  return linespec_lexer_lex_one (parser);
+  linespec_lexer_lex_one (parser);
+
+  if (parser->lexer.current.type == LSTOKEN_STRING)
+    {
+      /* Advance the completion word past a potential initial
+	 quote-char.  */
+      parser->completion_word = LS_TOKEN_STOKEN (parser->lexer.current).ptr;
+    }
+  else if (advance_word)
+    {
+      /* Advance the completion word past any whitespace.  */
+      parser->completion_word = PARSER_STREAM (parser);
+    }
+
+  return parser->lexer.current;
 }
 
 /* Return the next token without consuming the current token.  */
@@ -808,10 +976,16 @@ linespec_lexer_peek_token (linespec_parser *parser)
   linespec_token next;
   const char *saved_stream = PARSER_STREAM (parser);
   linespec_token saved_token = parser->lexer.current;
+  int saved_completion_quote_char = parser->completion_quote_char;
+  const char *saved_completion_quote_end = parser->completion_quote_end;
+  const char *saved_completion_word = parser->completion_word;
 
   next = linespec_lexer_consume_token (parser);
   PARSER_STREAM (parser) = saved_stream;
   parser->lexer.current = saved_token;
+  parser->completion_quote_char = saved_completion_quote_char;
+  parser->completion_quote_end = saved_completion_quote_end;
+  parser->completion_word = saved_completion_word;
   return next;
 }
 
@@ -1448,6 +1622,17 @@ source_file_not_found_error (const char *name)
   throw_error (NOT_FOUND_ERROR, _("No source file named %s."), name);
 }
 
+/* Unless at EIO, save the current stream position as completion word
+   point, and consume the next token.  */
+
+static linespec_token
+save_stream_and_consume_token (linespec_parser *parser)
+{
+  if (linespec_lexer_peek_token (parser).type != LSTOKEN_EOI)
+    parser->completion_word = PARSER_STREAM (parser);
+  return linespec_lexer_consume_token (parser);
+}
+
 /* See description in linespec.h.  */
 
 struct line_offset
@@ -1475,6 +1660,26 @@ linespec_parse_line_offset (const char *string)
   return line_offset;
 }
 
+/* In completion mode, if the user is still typing the number, there's
+   no possible completion to offer.  But if there's already input past
+   the number, setup to expect NEXT.  */
+
+static void
+set_completion_after_number (linespec_parser *parser,
+			     linespec_complete_what next)
+{
+  if (*PARSER_STREAM (parser) == ' ')
+    {
+      parser->completion_word = skip_spaces_const (PARSER_STREAM (parser) + 1);
+      parser->complete_what = next;
+    }
+  else
+    {
+      parser->completion_word = PARSER_STREAM (parser);
+      parser->complete_what = linespec_complete_what::NOTHING;
+    }
+}
+
 /* Parse the basic_spec in PARSER's input.  */
 
 static void
@@ -1490,11 +1695,20 @@ linespec_parse_basic (linespec_parser *parser)
   token = linespec_lexer_lex_one (parser);
 
   /* If it is EOI or KEYWORD, issue an error.  */
-  if (token.type == LSTOKEN_KEYWORD || token.type == LSTOKEN_EOI)
-    unexpected_linespec_error (parser);
+  if (token.type == LSTOKEN_KEYWORD)
+    {
+      parser->complete_what = linespec_complete_what::NOTHING;
+      unexpected_linespec_error (parser);
+    }
+  else if (token.type == LSTOKEN_EOI)
+    {
+      unexpected_linespec_error (parser);
+    }
   /* If it is a LSTOKEN_NUMBER, we have an offset.  */
   else if (token.type == LSTOKEN_NUMBER)
     {
+      set_completion_after_number (parser, linespec_complete_what::KEYWORD);
+
       /* Record the line offset and get the next token.  */
       name = copy_token_string (token);
       cleanup = make_cleanup (xfree, name);
@@ -1506,7 +1720,10 @@ linespec_parse_basic (linespec_parser *parser)
 
       /* If the next token is a comma, stop parsing and return.  */
       if (token.type == LSTOKEN_COMMA)
-	return;
+	{
+	  parser->complete_what = linespec_complete_what::NOTHING;
+	  return;
+	}
 
       /* If the next token is anything but EOI or KEYWORD, issue
 	 an error.  */
@@ -1519,12 +1736,58 @@ linespec_parse_basic (linespec_parser *parser)
 
   /* Next token must be LSTOKEN_STRING.  */
   if (token.type != LSTOKEN_STRING)
-    unexpected_linespec_error (parser);
+    {
+      parser->complete_what = linespec_complete_what::NOTHING;
+      unexpected_linespec_error (parser);
+    }
 
   /* The current token will contain the name of a function, method,
      or label.  */
-  name  = copy_token_string (token);
-  cleanup = make_cleanup (xfree, name);
+  name = copy_token_string (token);
+  cleanup = make_cleanup (free_current_contents, &name);
+
+  if (parser->completion_tracker != NULL)
+    {
+      /* If the function name ends with a ":", then this may be an
+	 incomplete "::" scope operator instead of a label separator.
+	 E.g.,
+	   "b klass:<tab>"
+	 which should expand to:
+	   "b klass::method()"
+
+	 Do a tentative completion assuming the later.  If we find
+	 completions, advance the stream past the colon token and make
+	 it part of the function name/token.  */
+
+      if (!parser->completion_quote_char
+	  && strcmp (PARSER_STREAM (parser), ":") == 0)
+	{
+	  completion_tracker tmp_tracker;
+	  const char *source_filename
+	    = PARSER_EXPLICIT (parser)->source_filename;
+
+	  linespec_complete_function (tmp_tracker,
+				      parser->completion_word,
+				      source_filename);
+
+	  if (tmp_tracker.have_completions ())
+	    {
+	      PARSER_STREAM (parser)++;
+	      LS_TOKEN_STOKEN (token).length++;
+
+	      xfree (name);
+	      name = savestring (parser->completion_word,
+				 (PARSER_STREAM (parser)
+				  - parser->completion_word));
+	    }
+	}
+
+      PARSER_EXPLICIT (parser)->function_name = name;
+      discard_cleanups (cleanup);
+    }
+  else
+    {
+      /* XXX Reindent before pushing.  */
 
   /* Try looking it up as a function/method.  */
   find_linespec_symbols (PARSER_STATE (parser),
@@ -1584,11 +1847,19 @@ linespec_parse_basic (linespec_parser *parser)
 	  return;
 	}
     }
+    }
+
+  int previous_qc = parser->completion_quote_char;
 
   /* Get the next token.  */
   token = linespec_lexer_consume_token (parser);
 
-  if (token.type == LSTOKEN_COLON)
+  if (token.type == LSTOKEN_EOI)
+    {
+      if (previous_qc && !parser->completion_quote_char)
+	parser->complete_what = linespec_complete_what::KEYWORD;
+    }
+  else if (token.type == LSTOKEN_COLON)
     {
       /* User specified a label or a lineno.  */
       token = linespec_lexer_consume_token (parser);
@@ -1597,17 +1868,56 @@ linespec_parse_basic (linespec_parser *parser)
 	{
 	  /* User specified an offset.  Record the line offset and
 	     get the next token.  */
+	  set_completion_after_number (parser, linespec_complete_what::KEYWORD);
+
 	  name = copy_token_string (token);
 	  cleanup = make_cleanup (xfree, name);
 	  PARSER_EXPLICIT (parser)->line_offset
 	    = linespec_parse_line_offset (name);
 	  do_cleanups (cleanup);
 
-	  /* Ge the next token.  */
+	  /* Get the next token.  */
 	  token = linespec_lexer_consume_token (parser);
+	}
+      else if (token.type == LSTOKEN_EOI && parser->completion_tracker != NULL)
+	{
+	  parser->complete_what = linespec_complete_what::LABEL;
 	}
       else if (token.type == LSTOKEN_STRING)
 	{
+	  parser->complete_what = linespec_complete_what::LABEL;
+
+	  /* If we have text after the label separated by whitespace
+	     (e.g., "b func():lab i<tab>"), don't consider it part of
+	     the label.  In completion mode that should complete to
+	     "if", in normal mode, the 'i' should be treated as
+	     garbage.  */
+	  if (parser->completion_quote_char == '\0')
+	    {
+	      const char *ptr = LS_TOKEN_STOKEN (token).ptr;
+	      for (size_t i = 0; i < LS_TOKEN_STOKEN (token).length; i++)
+		{
+		  if (ptr[i] == ' ')
+		    {
+		      LS_TOKEN_STOKEN (token).length = i;
+		      PARSER_STREAM (parser) = skip_spaces_const (ptr + i + 1);
+		      break;
+		    }
+		}
+	    }
+
+	  if (parser->completion_tracker != NULL)
+	    {
+	      if (PARSER_STREAM (parser)[-1] == ' ')
+		{
+		  parser->completion_word = PARSER_STREAM (parser);
+		  parser->complete_what = linespec_complete_what::KEYWORD;
+		}
+	    }
+	  else
+	    {
+	      /* XXX Reindent before pushing.  */
+
 	  /* Grab a copy of the label's name and look it up.  */
 	  name = copy_token_string (token);
 	  cleanup = make_cleanup (xfree, name);
@@ -1630,8 +1940,10 @@ linespec_parse_basic (linespec_parser *parser)
 				     name);
 	    }
 
+	    }
+
 	  /* Check for a line offset.  */
-	  token = linespec_lexer_consume_token (parser);
+	  token = save_stream_and_consume_token (parser);
 	  if (token.type == LSTOKEN_COLON)
 	    {
 	      /* Get the next token.  */
@@ -1641,7 +1953,7 @@ linespec_parse_basic (linespec_parser *parser)
 	      if (token.type != LSTOKEN_NUMBER)
 		unexpected_linespec_error (parser);
 
-	      /* Record the lione offset and get the next token.  */
+	      /* Record the line offset and get the next token.  */
 	      name = copy_token_string (token);
 	      cleanup = make_cleanup (xfree, name);
 
@@ -1989,32 +2301,34 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
   return sals;
 }
 
-/* Convert the explicit location EXPLICIT_LOC into SaLs.  */
+/* Build RESULT from the explicit location components SOURCE_FILENAME,
+   FUNCTION_NAME, LABEL_NAME and LINE_OFFSET.  */
 
-static struct symtabs_and_lines
-convert_explicit_location_to_sals (struct linespec_state *self,
-				   linespec_p result,
-				   const struct explicit_location *explicit_loc)
+static void
+convert_explicit_location_to_linespec (struct linespec_state *self,
+				       linespec_p result,
+				       const char *source_filename,
+				       const char *function_name,
+				       const char *label_name,
+				       struct line_offset line_offset)
 {
   VEC (block_symbol_d) *labels;
   VEC (block_symbol_d) *symbols;
   VEC (bound_minimal_symbol_d) *minimal_symbols;
 
-  if (explicit_loc->source_filename != NULL)
+  if (source_filename != NULL)
     {
       TRY
 	{
 	  result->file_symtabs
-	    = symtabs_from_filename (explicit_loc->source_filename,
-				     self->search_pspace);
+	    = symtabs_from_filename (source_filename, self->search_pspace);
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
-	  source_file_not_found_error (explicit_loc->source_filename);
+	  source_file_not_found_error (source_filename);
 	}
       END_CATCH
-      result->explicit_loc.source_filename
-	= xstrdup (explicit_loc->source_filename);
+      result->explicit_loc.source_filename = xstrdup (source_filename);
     }
   else
     {
@@ -2022,41 +2336,53 @@ convert_explicit_location_to_sals (struct linespec_state *self,
       VEC_safe_push (symtab_ptr, result->file_symtabs, NULL);
     }
 
-  if (explicit_loc->function_name != NULL)
+  if (function_name != NULL)
     {
       find_linespec_symbols (self, result->file_symtabs,
-			     explicit_loc->function_name, &symbols,
+			     function_name, &symbols,
 			     &minimal_symbols);
 
       if (symbols == NULL && minimal_symbols == NULL)
-	symbol_not_found_error (explicit_loc->function_name,
+	symbol_not_found_error (function_name,
 				result->explicit_loc.source_filename);
 
-      result->explicit_loc.function_name
-	= xstrdup (explicit_loc->function_name);
+      result->explicit_loc.function_name = xstrdup (function_name);
       result->function_symbols = symbols;
       result->minimal_symbols = minimal_symbols;
     }
 
-  if (explicit_loc->label_name != NULL)
+  if (label_name != NULL)
     {
       symbols = NULL;
       labels = find_label_symbols (self, result->function_symbols,
-				   &symbols, explicit_loc->label_name);
+				   &symbols, label_name);
 
       if (labels == NULL)
 	undefined_label_error (result->explicit_loc.function_name,
-			       explicit_loc->label_name);
+			       label_name);
 
-      result->explicit_loc.label_name = xstrdup (explicit_loc->label_name);
+      result->explicit_loc.label_name = xstrdup (label_name);
       result->labels.label_symbols = labels;
       result->labels.function_symbols = symbols;
     }
 
-  if (explicit_loc->line_offset.sign != LINE_OFFSET_UNKNOWN)
-    result->explicit_loc.line_offset = explicit_loc->line_offset;
+  if (line_offset.sign != LINE_OFFSET_UNKNOWN)
+    result->explicit_loc.line_offset = line_offset;
+}
 
-   return convert_linespec_to_sals (self, result);
+/* Convert the explicit location EXPLICIT_LOC into SaLs.  */
+
+static struct symtabs_and_lines
+convert_explicit_location_to_sals (struct linespec_state *self,
+				   linespec_p result,
+				   const struct explicit_location *explicit_loc)
+{
+  convert_explicit_location_to_linespec (self, result,
+					 explicit_loc->source_filename,
+					 explicit_loc->function_name,
+					 explicit_loc->label_name,
+					 explicit_loc->line_offset);
+  return convert_linespec_to_sals (self, result);
 }
 
 /* Parse a string that specifies a linespec.
@@ -2117,11 +2443,15 @@ parse_linespec (linespec_parser *parser, const char *arg)
   struct gdb_exception file_exception = exception_none;
   struct cleanup *cleanup;
 
+  values.nelts = 0;
+  values.sals = NULL;
+
   /* A special case to start.  It has become quite popular for
      IDEs to work around bugs in the previous parser by quoting
      the entire linespec, so we attempt to deal with this nicely.  */
   parser->is_quote_enclosed = 0;
-  if (!is_ada_operator (arg)
+  if (parser->completion_tracker == NULL
+      && !is_ada_operator (arg)
       && strchr (linespec_quote_characters, *arg) != NULL)
     {
       const char *end;
@@ -2138,20 +2468,34 @@ parse_linespec (linespec_parser *parser, const char *arg)
 
   parser->lexer.saved_arg = arg;
   parser->lexer.stream = arg;
+  parser->completion_word = arg;
+  parser->complete_what = linespec_complete_what::FUNCTION;
 
   /* Initialize the default symtab and line offset.  */
   initialize_defaults (&PARSER_STATE (parser)->default_symtab,
 		       &PARSER_STATE (parser)->default_line);
 
   /* Objective-C shortcut.  */
-  values = decode_objc (PARSER_STATE (parser), PARSER_RESULT (parser), arg);
-  if (values.sals != NULL)
-    return values;
+  if (parser->completion_tracker == NULL)
+    {
+      values = decode_objc (PARSER_STATE (parser), PARSER_RESULT (parser), arg);
+      if (values.sals != NULL)
+	return values;
+    }
+  else
+    {
+      /* "-"/"+" is either an objc selector, or a number.  There's
+	 nothing to complete the latter to, so just let the caller
+	 complete on functions, which finds objc selectors, if there's
+	 any.  */
+      if ((arg[0] == '-' || arg[0] == '+') && arg[1] == '\0')
+	return {};
+    }
 
   /* Start parsing.  */
 
   /* Get the first token.  */
-  token = linespec_lexer_lex_one (parser);
+  token = linespec_lexer_consume_token (parser);
 
   /* It must be either LSTOKEN_STRING or LSTOKEN_NUMBER.  */
   if (token.type == LSTOKEN_STRING && *LS_TOKEN_STOKEN (token).ptr == '$')
@@ -2159,7 +2503,8 @@ parse_linespec (linespec_parser *parser, const char *arg)
       char *var;
 
       /* A NULL entry means to use GLOBAL_DEFAULT_SYMTAB.  */
-      VEC_safe_push (symtab_ptr, PARSER_RESULT (parser)->file_symtabs, NULL);
+      if (parser->completion_tracker == NULL)
+	VEC_safe_push (symtab_ptr, PARSER_RESULT (parser)->file_symtabs, NULL);
 
       /* User specified a convenience variable or history value.  */
       var = copy_token_string (token);
@@ -2178,8 +2523,16 @@ parse_linespec (linespec_parser *parser, const char *arg)
 	  goto convert_to_sals;
 	}
     }
+  else if (token.type == LSTOKEN_EOI && parser->completion_tracker != NULL)
+    {
+      /* Let the default linespec_complete_what::FUNCTION kick in.  */
+      unexpected_linespec_error (parser);
+    }
   else if (token.type != LSTOKEN_STRING && token.type != LSTOKEN_NUMBER)
-    unexpected_linespec_error (parser);
+    {
+      parser->complete_what = linespec_complete_what::NOTHING;
+      unexpected_linespec_error (parser);
+    }
 
   /* Shortcut: If the next token is not LSTOKEN_COLON, we know that
      this token cannot represent a filename.  */
@@ -2227,8 +2580,9 @@ parse_linespec (linespec_parser *parser, const char *arg)
 	}
     }
   /* If the next token is not EOI, KEYWORD, or COMMA, issue an error.  */
-  else if (token.type != LSTOKEN_EOI && token.type != LSTOKEN_KEYWORD
-	   && token.type != LSTOKEN_COMMA)
+  else if (parser->completion_tracker == NULL
+	   && (token.type != LSTOKEN_EOI && token.type != LSTOKEN_KEYWORD
+	       && token.type != LSTOKEN_COMMA))
     {
       /* TOKEN is the _next_ token, not the one currently in the parser.
 	 Consuming the token will give the correct error message.  */
@@ -2244,7 +2598,8 @@ parse_linespec (linespec_parser *parser, const char *arg)
   /* Parse the rest of the linespec.  */
   linespec_parse_basic (parser);
 
-  if (PARSER_RESULT (parser)->function_symbols == NULL
+  if (parser->completion_tracker == NULL
+      && PARSER_RESULT (parser)->function_symbols == NULL
       && PARSER_RESULT (parser)->labels.label_symbols == NULL
       && PARSER_EXPLICIT (parser)->line_offset.sign == LINE_OFFSET_UNKNOWN
       && PARSER_RESULT (parser)->minimal_symbols == NULL)
@@ -2265,11 +2620,21 @@ parse_linespec (linespec_parser *parser, const char *arg)
      if necessary.  */
   token = linespec_lexer_lex_one (parser);
   if (token.type != LSTOKEN_EOI && token.type != LSTOKEN_KEYWORD)
-    PARSER_STREAM (parser) = LS_TOKEN_STOKEN (token).ptr;
+    unexpected_linespec_error (parser);
+  else if (token.type == LSTOKEN_KEYWORD)
+    {
+      /* Setup the completion word past the keyword.  Lexing never
+	 advances past a keyword automatically, so skip it
+	 manually.  */
+      parser->completion_word
+	= skip_spaces_const (skip_to_space_const (PARSER_STREAM (parser)));
+      parser->complete_what = linespec_complete_what::EXPRESSION;
+    }
 
   /* Convert the data in PARSER_RESULT to SALs.  */
-  values = convert_linespec_to_sals (PARSER_STATE (parser),
-				     PARSER_RESULT (parser));
+  if (parser->completion_tracker == NULL)
+    values = convert_linespec_to_sals (PARSER_STATE (parser),
+				       PARSER_RESULT (parser));
 
   return values;
 }
@@ -2385,6 +2750,344 @@ linespec_lex_to_end (char **stringp)
   while (token.type != LSTOKEN_EOI && token.type != LSTOKEN_KEYWORD);
 
   *stringp += PARSER_STREAM (&parser) - orig;
+  do_cleanups (cleanup);
+}
+
+/* See linespec.h.  */
+
+void
+linespec_complete_function (completion_tracker &tracker,
+			    const char *function,
+			    const char *source_filename)
+{
+  complete_symbol_mode mode = complete_symbol_mode::LINESPEC;
+
+  if (source_filename != NULL)
+    {
+      collect_file_symbol_completion_matches (tracker, mode,
+					      function, function,
+					      source_filename);
+    }
+  else
+    collect_symbol_completion_matches (tracker, mode, function, function);
+}
+
+/* Helper for complete_linespec to simplify it.  SOURCE_FILENAME is
+   only meaningful if COMPONENT is FUNCTION.  */
+
+static void
+complete_linespec_component (linespec_parser *parser,
+			     completion_tracker &tracker,
+			     const char *text,
+			     linespec_complete_what component,
+			     const char *source_filename)
+{
+  if (component == linespec_complete_what::KEYWORD)
+    {
+      complete_on_enum (tracker, linespec_keywords, text, text);
+    }
+  else if (component == linespec_complete_what::EXPRESSION)
+    {
+      const char *word
+	= advance_to_expression_complete_word_point (tracker, text);
+      complete_expression (tracker, text, word);
+    }
+  else if (component == linespec_complete_what::FUNCTION)
+    {
+      completion_list fn_list;
+
+      linespec_complete_function (tracker, text, source_filename);
+      if (source_filename == NULL)
+	{
+	  /* Haven't seen a source component, like in "b
+	     file.c:function[TAB]".  Maybe this wasn't a function, but
+	     a filename instead, like "b file.[TAB]".  */
+	  fn_list = complete_source_filenames (text);
+	}
+
+      /* If we only have a single filename completion, append a ':' for
+	 the user, since that's the only thing that can usefully follow
+	 the filename.  */
+      if (fn_list.size () == 1 && !tracker.have_completions ())
+	{
+	  char *fn = fn_list[0].release ();
+
+	  /* If we also need to append a quote char, it needs to be
+	     appended before the ':'.  Append it now, and make ':' the
+	     new "quote" char.  */
+	  if (tracker.quote_char ())
+	    {
+	      char quote_char_str[2] = { tracker.quote_char () };
+
+	      fn = reconcat (fn, fn, quote_char_str, (char *) NULL);
+	      tracker.set_quote_char (':');
+	    }
+	  else
+	    fn = reconcat (fn, fn, ":", (char *) NULL);
+	  fn_list[0].reset (fn);
+
+	  /* Tell readline to skip appending a space.  */
+	  tracker.set_suppress_append_ws (true);
+	}
+      tracker.add_completions (std::move (fn_list));
+    }
+}
+
+/* Helper for linespec_complete_label.  Find labels that match
+   LABEL_NAME in the function symbols listed in the PARSER, and add
+   them to the tracker.  */
+
+static void
+complete_label (completion_tracker &tracker,
+		linespec_parser *parser,
+		const char *label_name)
+{
+  VEC (block_symbol_d) *label_function_symbols = NULL;
+  VEC (block_symbol_d) *labels
+    = find_label_symbols (PARSER_STATE (parser),
+			  PARSER_RESULT (parser)->function_symbols,
+			  &label_function_symbols,
+			  label_name, true);
+
+  struct block_symbol *label;
+  for (int ix = 0;
+       VEC_iterate (block_symbol_d, labels, ix, label); ++ix)
+    {
+      char *match = xstrdup (SYMBOL_SEARCH_NAME (label->symbol));
+      tracker.add_completion (gdb::unique_xmalloc_ptr<char> (match));
+    }
+  VEC_free (block_symbol_d, labels);
+}
+
+/* See linespec.h.  */
+
+void
+linespec_complete_label (completion_tracker &tracker,
+			 const struct language_defn *language,
+			 const char *source_filename,
+			 const char *function_name,
+			 const char *label_name)
+{
+  linespec_parser parser;
+  struct cleanup *cleanup;
+
+  linespec_parser_new (&parser, 0, language, NULL, NULL, 0, NULL);
+  cleanup = make_cleanup (linespec_parser_delete, &parser);
+
+  line_offset unknown_offset = { 0, LINE_OFFSET_UNKNOWN };
+
+  TRY
+    {
+      convert_explicit_location_to_linespec (PARSER_STATE (&parser),
+					     PARSER_RESULT (&parser),
+					     source_filename,
+					     function_name,
+					     NULL, unknown_offset);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      do_cleanups (cleanup);
+      return;
+    }
+  END_CATCH
+
+  complete_label (tracker, &parser, label_name);
+
+  do_cleanups (cleanup);
+}
+
+/* See description in linespec.h.  */
+
+void
+linespec_complete (completion_tracker &tracker, const char *text)
+{
+  linespec_parser parser;
+  struct cleanup *cleanup;
+  const char *orig = text;
+
+  linespec_parser_new (&parser, 0, current_language, NULL, NULL, 0, NULL);
+  cleanup = make_cleanup (linespec_parser_delete, &parser);
+  parser.lexer.saved_arg = text;
+  PARSER_STREAM (&parser) = text;
+
+  parser.completion_tracker = &tracker;
+  PARSER_STATE (&parser)->is_linespec = 1;
+
+  /* Parse as much as possible.  parser.completion_word will hold
+     furthest completion point we managed to parse to.  */
+  TRY
+    {
+      parse_linespec (&parser, text);
+    }
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+    }
+  END_CATCH
+
+  if (parser.completion_quote_char != '\0'
+      && parser.completion_quote_end != NULL
+      && parser.completion_quote_end[1] == '\0')
+    {
+      /* If completing a quoted string with the cursor right at
+	 terminating quote char, complete the completion word without
+	 interpretation, so that readline advances the cursor one
+	 whitespace past the quote, even if there's no match.  This
+	 makes these cases behave the same:
+
+	   before: "b function()"
+	   after:  "b function() "
+
+	   before: "b 'function()'"
+	   after:  "b 'function()' "
+
+	 and trusts the user in this case:
+
+	   before: "b 'not_loaded_function_yet()'"
+	   after:  "b 'not_loaded_function_yet()' "
+      */
+      parser.complete_what = linespec_complete_what::NOTHING;
+      parser.completion_quote_char = '\0';
+
+      gdb::unique_xmalloc_ptr<char> text_copy
+	(xstrdup (parser.completion_word));
+      tracker.add_completion (std::move (text_copy));
+    }
+
+  tracker.set_quote_char (parser.completion_quote_char);
+
+  if (parser.complete_what == linespec_complete_what::LABEL)
+    {
+      parser.complete_what = linespec_complete_what::NOTHING;
+
+      const char *func_name = PARSER_EXPLICIT (&parser)->function_name;
+
+      VEC (block_symbol_d) *function_symbols;
+      VEC (bound_minimal_symbol_d) *minimal_symbols;
+      find_linespec_symbols (PARSER_STATE (&parser),
+			     PARSER_RESULT (&parser)->file_symtabs,
+			     func_name,
+			     &function_symbols, &minimal_symbols);
+
+      PARSER_RESULT (&parser)->function_symbols = function_symbols;
+      PARSER_RESULT (&parser)->minimal_symbols = minimal_symbols;
+
+      complete_label (tracker, &parser, parser.completion_word);
+    }
+  else if (parser.complete_what == linespec_complete_what::FUNCTION)
+    {
+      /* While parsing/lexing, we didn't know whether the completion
+	 word completes to a unique function/source name already or
+	 not.
+
+	 E.g.:
+	   "b function() <tab>"
+	 may need to complete either to:
+	   "b function() const"
+	 or to:
+	   "b function() if/thread/task"
+
+	 Or, this:
+	   "b foo t"
+	 may need to complete either to:
+	   "b foo template_fun<T>()"
+	 with "foo" being the template function's return type, or to:
+	   "b foo thread/task"
+
+	 Or, this:
+	   "b file<TAB>"
+	 may need to complete either to a source file name:
+	   "b file.c"
+	 or this, also a filename, but a unique completion:
+	   "b file.c:"
+	 or to a function name:
+	   "b file_function"
+
+	 Address that by completing assuming source or function, and
+	 seeing if we find a completion that matches exactly the
+	 completion word.  If so, then it must be a function (see note
+	 below) and we advance the completion word to the end of input
+	 and switch to KEYWORD completion mode.
+
+	 Note: if we find a unique completion for a source filename,
+	 then it won't match the completion word, because the LCD will
+	 contain a trailing ':'.  And if we're completing at or after
+	 the ':', then complete_linespec_component won't try to
+	 complete on source filenames.  */
+
+      const char *text = parser.completion_word;
+      const char *word = parser.completion_word;
+
+      complete_linespec_component (&parser, tracker,
+				   parser.completion_word,
+				   linespec_complete_what::FUNCTION,
+				   PARSER_EXPLICIT (&parser)->source_filename);
+
+      parser.complete_what = linespec_complete_what::NOTHING;
+
+      if (tracker.quote_char ())
+	{
+	  /* The function/file name was not close-quoted, so this
+	     can't be a keyword.  Note: complete_linespec_component
+	     may have swapped the original quote char for ':' when we
+	     get here, but that still indicates the same.  */
+	}
+      else if (!tracker.have_completions ())
+	{
+	  size_t key_start;
+	  size_t wordlen = strlen (parser.completion_word);
+
+	  key_start
+	    = string_find_incomplete_keyword_at_end (linespec_keywords,
+						     parser.completion_word,
+						     wordlen);
+
+	  if (key_start != -1
+	      || (wordlen > 0
+		  && parser.completion_word[wordlen - 1] == ' '))
+	    {
+	      parser.completion_word += key_start;
+	      parser.complete_what = linespec_complete_what::KEYWORD;
+	    }
+	}
+      else if (tracker.completes_to_completion_word (word))
+	{
+	  /* Skip the function and complete on keywords.  */
+	  parser.completion_word += strlen (word);
+	  parser.complete_what = linespec_complete_what::KEYWORD;
+	  tracker.discard_completions ();
+	}
+    }
+
+  tracker.advance_custom_word_point_by (parser.completion_word - orig);
+
+  complete_linespec_component (&parser, tracker,
+			       parser.completion_word,
+			       parser.complete_what,
+			       PARSER_EXPLICIT (&parser)->source_filename);
+
+  /* If we're past the "filename:function:label:offset" linespec, and
+     didn't find any match, then assume the user might want to create
+     a pending breakpoint anyway and offer the keyword
+     completions.  */
+  if (!parser.completion_quote_char
+      && (parser.complete_what == linespec_complete_what::FUNCTION
+	  || parser.complete_what == linespec_complete_what::LABEL
+	  || parser.complete_what == linespec_complete_what::NOTHING)
+      && !tracker.have_completions ())
+    {
+      const char *end
+	= parser.completion_word + strlen (parser.completion_word);
+
+      if (end > orig && end[-1] == ' ')
+	{
+	  tracker.advance_custom_word_point_by (end - parser.completion_word);
+
+	  complete_linespec_component (&parser, tracker, end,
+				       linespec_complete_what::KEYWORD,
+				       NULL);
+	}
+    }
+
   do_cleanups (cleanup);
 }
 
@@ -3374,22 +4077,77 @@ find_linespec_symbols (struct linespec_state *state,
     }
 }
 
-/* Return all labels named NAME in FUNCTION_SYMBOLS.  Return the
-   actual function symbol in which the label was found in LABEL_FUNC_RET.  */
+/* Helper for find_label_symbols.  Find all labels that match name
+   NAME in BLOCK.  Return all labels that match in FUNCTION_SYMBOLS.
+   Return the actual function symbol in which the label was found in
+   LABEL_FUNC_RET.  If COMPLETION_MODE is true, then NAME is
+   interpreted as a label name prefix.  Otherwise, only a label named
+   exactly NAME match.  */
+
+static void
+find_label_symbols_in_block (const struct block *block,
+			     const char *name, struct symbol *fn_sym,
+			     bool completion_mode,
+			     VEC (block_symbol_d) **result,
+			     VEC (block_symbol_d) **label_funcs_ret)
+{
+  if (completion_mode)
+    {
+      struct block_iterator iter;
+      struct symbol *sym;
+      size_t name_len = strlen (name);
+
+      int (*cmp) (const char *, const char *, size_t);
+      cmp = case_sensitivity == case_sensitive_on ? strncmp : strncasecmp;
+
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
+	{
+	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+				     SYMBOL_DOMAIN (sym), LABEL_DOMAIN)
+	      && cmp (SYMBOL_SEARCH_NAME (sym), name, name_len) == 0)
+	    {
+	      struct block_symbol label_bsym = {sym, block};
+	      struct block_symbol fn_bsym = {fn_sym, block};
+
+	      VEC_safe_push (block_symbol_d, *result, &label_bsym);
+	      VEC_safe_push (block_symbol_d, *label_funcs_ret, &fn_bsym);
+	    }
+	}
+    }
+  else
+    {
+      struct block_symbol label_sym
+	= lookup_symbol (name, block, LABEL_DOMAIN, 0);
+
+      if (label_sym.symbol != NULL)
+	{
+	  struct block_symbol fn_bsym = {fn_sym, block};
+
+	  VEC_safe_push (block_symbol_d, *result, &label_sym);
+	  VEC_safe_push (block_symbol_d, *label_funcs_ret, &fn_bsym);
+	}
+    }
+}
+
+/* Return all labels that match name NAME in FUNCTION_SYMBOLS.  Return
+   the actual function symbol in which the label was found in
+   LABEL_FUNC_RET.  If COMPLETION_MODE is true, then NAME is
+   interpreted as a label name prefix.  Otherwise, only labels named
+   exactly NAME match.  */
 
 static VEC (block_symbol_d) *
 find_label_symbols (struct linespec_state *self,
 		    VEC (block_symbol_d) *function_symbols,
-		    VEC (block_symbol_d) **label_funcs_ret, const char *name)
+		    VEC (block_symbol_d) **label_funcs_ret, const char *name,
+		    bool completion_mode)
 {
   int ix;
   const struct block *block;
-
+  struct symbol *fn_sym;
   VEC (block_symbol_d) *result = NULL;
 
   if (function_symbols == NULL)
     {
-      struct block_symbol block_sym;
       struct block_symbol fn_block_sym;
 
       set_current_program_space (self->program_space);
@@ -3401,16 +4159,10 @@ find_label_symbols (struct linespec_state *self,
 	;
       if (!block)
 	return NULL;
-      fn_block_sym.symbol = BLOCK_FUNCTION (block);
-      fn_block_sym.block = block;
+      fn_sym = BLOCK_FUNCTION (block);
 
-      block_sym = lookup_symbol (name, block, LABEL_DOMAIN, 0);
-
-      if (block_sym.symbol != NULL)
-	{
-	  VEC_safe_push (block_symbol_d, result, &block_sym);
-	  VEC_safe_push (block_symbol_d, *label_funcs_ret, &fn_block_sym);
-	}
+      find_label_symbols_in_block (block, name, fn_sym, completion_mode,
+				   &result, label_funcs_ret);
     }
   else
     {
@@ -3419,18 +4171,13 @@ find_label_symbols (struct linespec_state *self,
       for (ix = 0;
 	   VEC_iterate (block_symbol_d, function_symbols, ix, elt); ++ix)
 	{
-	  struct symbol *fn_sym = elt->symbol;
-	  struct block_symbol block_sym;
+	  fn_sym = elt->symbol;
 
 	  set_current_program_space (SYMTAB_PSPACE (symbol_symtab (fn_sym)));
 	  block = SYMBOL_BLOCK_VALUE (fn_sym);
-	  block_sym = lookup_symbol (name, block, LABEL_DOMAIN, 0);
 
-	  if (block_sym.symbol != NULL)
-	    {
-	      VEC_safe_push (block_symbol_d, result, &block_sym);
-	      VEC_safe_push (block_symbol_d, *label_funcs_ret, elt);
-	    }
+	  find_label_symbols_in_block (block, name, fn_sym, completion_mode,
+				       &result, label_funcs_ret);
 	}
     }
 

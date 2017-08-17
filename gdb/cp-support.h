@@ -48,6 +48,14 @@ struct using_direct;
 
 #define CP_ANONYMOUS_NAMESPACE_LEN 21
 
+/* A string representing the start of an operator name.  */
+
+#define CP_OPERATOR_STR "operator"
+
+/* The length of CP_OPERATOR_STR.  */
+
+#define CP_OPERATOR_LEN 8
+
 /* The result of parsing a name.  */
 
 struct demangle_parse_info
@@ -163,8 +171,8 @@ extern std::unique_ptr<demangle_parse_info>
 #define d_left(dc) (dc)->u.s_binary.left
 #define d_right(dc) (dc)->u.s_binary.right
 
-extern char *cp_comp_to_string (struct demangle_component *result,
-				int estimated_len);
+extern gdb::unique_xmalloc_ptr<char> cp_comp_to_string
+  (struct demangle_component *result, int estimated_len);
 
 extern void cp_merge_demangle_parse_infos (struct demangle_parse_info *,
 					   struct demangle_component *,

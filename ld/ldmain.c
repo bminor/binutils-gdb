@@ -50,12 +50,6 @@
 
 #include <string.h>
 
-#ifdef HAVE_SBRK
-#if !HAVE_DECL_SBRK
-extern void *sbrk ();
-#endif
-#endif
-
 #ifndef TARGET_SYSTEM_ROOT
 #define TARGET_SYSTEM_ROOT ""
 #endif
@@ -198,9 +192,6 @@ main (int argc, char **argv)
 {
   char *emulation;
   long start_time = get_run_time ();
-#ifdef HAVE_SBRK
-  char *start_sbrk = (char *) sbrk (0);
-#endif
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
@@ -282,7 +273,8 @@ main (int argc, char **argv)
   link_info.keep_memory = TRUE;
   link_info.combreloc = TRUE;
   link_info.strip_discarded = TRUE;
-  link_info.emit_hash = TRUE;
+  link_info.emit_hash = DEFAULT_EMIT_SYSV_HASH;
+  link_info.emit_gnu_hash = DEFAULT_EMIT_GNU_HASH;
   link_info.callbacks = &link_callbacks;
   link_info.input_bfds_tail = &link_info.input_bfds;
   /* SVR4 linkers seem to set DT_INIT and DT_FINI based on magic _init
@@ -403,6 +395,9 @@ main (int argc, char **argv)
      to provide version information.  */
   if (argc == 2 && version_printed)
     xexit (0);
+
+  if (link_info.inhibit_common_definition && !bfd_link_dll (&link_info))
+    einfo (_("%P%F: --no-define-common may not be used without -shared\n"));
 
   if (!lang_has_input_file)
     {
@@ -539,18 +534,11 @@ main (int argc, char **argv)
 
   if (config.stats)
     {
-#ifdef HAVE_SBRK
-      char *lim = (char *) sbrk (0);
-#endif
       long run_time = get_run_time () - start_time;
 
       fflush (stdout);
       fprintf (stderr, _("%s: total time in link: %ld.%06ld\n"),
 	       program_name, run_time / 1000000, run_time % 1000000);
-#ifdef HAVE_SBRK
-      fprintf (stderr, _("%s: data size %ld\n"), program_name,
-	       (long) (lim - start_sbrk));
-#endif
       fflush (stderr);
     }
 

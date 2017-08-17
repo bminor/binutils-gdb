@@ -1,7 +1,7 @@
 #name: PR ld/21038 (.plt.got, -z now)
 #source: pr21038a.s
 #as: --64
-#ld: -z now -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info
+#ld: -z now -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info --hash-style=sysv
 #objdump: -dw -Wf
 
 .*: +file format .*
@@ -41,11 +41,7 @@ Contents of the .eh_frame section:
   DW_CFA_nop
   DW_CFA_nop
 
-0+58 0000000000000014 0000005c FDE cie=00000000 pc=0000000000000230..0000000000000238
-  DW_CFA_nop
-  DW_CFA_nop
-  DW_CFA_nop
-  DW_CFA_nop
+0+58 0000000000000010 0000005c FDE cie=00000000 pc=0000000000000230..0000000000000238
   DW_CFA_nop
   DW_CFA_nop
   DW_CFA_nop

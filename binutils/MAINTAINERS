@@ -33,7 +33,6 @@ The following people have permission to check patches into the
 repository without obtaining approval first:
 
   Nick Clifton <nickc@redhat.com> (head maintainer)
-  Richard Henderson <rth@redhat.com>
   Ian Lance Taylor <ian@airs.com>
   Jeff Law <law@redhat.com>
   Jim Wilson <wilson@tuliptree.org>
@@ -56,7 +55,7 @@ maintainers for a given domain then responsibility falls to the first
 maintainer.  The first maintainer is free to devolve that
 responsibility among the other maintainers.
 
-  ALPHA            Richard Henderson <rth@redhat.com>
+  ALPHA            Richard Henderson <rth@twiddle.net>
   AARCH64	   Richard Earnshaw <rearnsha@arm.com>
   AARCH64	   Marcus Shawcroft <marcus.shawcroft@arm.com>
   ARM		   Nick Clifton <nickc@redhat.com>

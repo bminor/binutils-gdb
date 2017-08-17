@@ -2227,8 +2227,10 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 
 	/* Try to turn a 16-bit absolute branch into a 10-bit pc-relative
 	   branch.  */
-	if (uses_msp430x_relocs (abfd)
-	    && ELF32_R_TYPE (irel->r_info) == R_MSP430X_ABS16)
+	if ((uses_msp430x_relocs (abfd)
+	     && ELF32_R_TYPE (irel->r_info) == R_MSP430X_ABS16)
+	    || (! uses_msp430x_relocs (abfd)
+		&& ELF32_R_TYPE (irel->r_info) == R_MSP430_16))
 	  {
 	    bfd_vma value = symval;
 

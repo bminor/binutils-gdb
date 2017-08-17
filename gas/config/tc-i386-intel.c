@@ -932,13 +932,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
       if (intel_state.seg)
 	{
-	  for (;;)
-	    {
-	      expP = symbol_get_value_expression (intel_state.seg);
-	      if (expP->X_op != O_full_ptr)
-		break;
-	      intel_state.seg = expP->X_add_symbol;
-	    }
+	  expP = symbol_get_value_expression (intel_state.seg);
 	  if (expP->X_op != O_register)
 	    {
 	      as_bad (_("segment register name expected"));

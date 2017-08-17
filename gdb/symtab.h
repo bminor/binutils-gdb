@@ -25,6 +25,7 @@
 #include "gdbtypes.h"
 #include "common/enum-flags.h"
 #include "common/function-view.h"
+#include "completer.h"
 
 /* Opaque declarations.  */
 struct ui_file;
@@ -663,8 +664,8 @@ struct symbol_computed_ops
      the caller will generate the right code in the process of
      treating this as an lvalue or rvalue.  */
 
-  void (*tracepoint_var_ref) (struct symbol *symbol, struct gdbarch *gdbarch,
-			      struct agent_expr *ax, struct axs_value *value);
+  void (*tracepoint_var_ref) (struct symbol *symbol, struct agent_expr *ax,
+			      struct axs_value *value);
 
   /* Generate C code to compute the location of SYMBOL.  The C code is
      emitted to STREAM.  GDBARCH is the current architecture and PC is
@@ -1520,25 +1521,43 @@ extern void forget_cached_source_info (void);
 
 extern void select_source_symtab (struct symtab *);
 
-extern VEC (char_ptr) *default_make_symbol_completion_list_break_on
-  (const char *text, const char *word, const char *break_on,
+/* The reason we're calling into a completion match list collector
+   function.  */
+enum class complete_symbol_mode
+  {
+    /* Completing an expression.  */
+    EXPRESSION,
+
+    /* Completing a linespec.  */
+    LINESPEC,
+  };
+
+extern void default_collect_symbol_completion_matches_break_on
+  (completion_tracker &tracker,
+   complete_symbol_mode mode,
+   const char *text, const char *word, const char *break_on,
    enum type_code code);
-extern VEC (char_ptr) *default_make_symbol_completion_list (const char *,
-							    const char *,
-							    enum type_code);
-extern VEC (char_ptr) *make_symbol_completion_list (const char *, const char *);
-extern VEC (char_ptr) *make_symbol_completion_type (const char *, const char *,
+extern void default_collect_symbol_completion_matches
+  (completion_tracker &tracker,
+   complete_symbol_mode,
+   const char *,
+   const char *,
+   enum type_code);
+extern void collect_symbol_completion_matches (completion_tracker &tracker,
+					       complete_symbol_mode,
+					       const char *, const char *);
+extern void collect_symbol_completion_matches_type (completion_tracker &tracker,
+						    const char *, const char *,
 						    enum type_code);
-extern VEC (char_ptr) *make_symbol_completion_list_fn (struct cmd_list_element *,
-						       const char *,
-						       const char *);
 
-extern VEC (char_ptr) *make_file_symbol_completion_list (const char *,
-							 const char *,
-							 const char *);
+extern void collect_file_symbol_completion_matches (completion_tracker &tracker,
+						    complete_symbol_mode,
+						    const char *,
+						    const char *,
+						    const char *);
 
-extern VEC (char_ptr) *make_source_files_completion_list (const char *,
-							  const char *);
+extern completion_list
+  make_source_files_completion_list (const char *, const char *);
 
 /* symtab.c */
 

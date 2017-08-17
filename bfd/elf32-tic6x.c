@@ -2632,7 +2632,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	      if (h == NULL)
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%B, section %A: relocation %s with non-zero addend %d"
+		  (_("%B, section %A: relocation %s with non-zero addend %Ld"
 		     " against local symbol"),
 		   input_bfd,
 		   input_section,
@@ -2641,7 +2641,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	      else
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%B, section %A: relocation %s with non-zero addend %d"
+		  (_("%B, section %A: relocation %s with non-zero addend %Ld"
 		     " against symbol `%s'"),
 		   input_bfd,
 		   input_section,
@@ -2801,7 +2801,7 @@ elf32_tic6x_check_relocs (bfd *abfd, struct bfd_link_info *info,
   for (rel = relocs; rel < rel_end; rel++)
     {
       unsigned int r_type;
-      unsigned long r_symndx;
+      unsigned int r_symndx;
       struct elf_link_hash_entry *h;
       Elf_Internal_Sym *isym;
 

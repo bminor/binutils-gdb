@@ -611,7 +611,7 @@ static const bfd_byte elf_x86_64_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
 };
 
 /* The first entry in the x32 IBT-enabled lazy procedure linkage table
-   is the the same as the normal lazy PLT.  Subsequent entries for an
+   is the same as the normal lazy PLT.  Subsequent entries for an
    x32 IBT-enabled lazy procedure linkage table look like this.  */
 
 static const bfd_byte elf_x32_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
@@ -1101,10 +1101,8 @@ struct elf_x86_64_link_hash_entry
   /* Don't call finish_dynamic_symbol on this symbol.  */
   unsigned int no_finish_dynamic_symbol : 1;
 
-  /* 0: symbol isn't __tls_get_addr.
-     1: symbol is __tls_get_addr.
-     2: symbol is unknown.  */
-  unsigned int tls_get_addr : 2;
+  /* TRUE if symbol symbol is __tls_get_addr.  */
+  unsigned int tls_get_addr : 1;
 
   /* Reference count of C/C++ function pointer relocations in read-write
      section which can be resolved at run-time.  */
@@ -1264,7 +1262,7 @@ elf_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->has_got_reloc = 0;
       eh->has_non_got_reloc = 0;
       eh->no_finish_dynamic_symbol = 0;
-      eh->tls_get_addr = 2;
+      eh->tls_get_addr = 0;
       eh->func_pointer_refcount = 0;
       eh->plt_second.offset = (bfd_vma) -1;
       eh->plt_got.offset = (bfd_vma) -1;
@@ -1527,7 +1525,7 @@ elf_x86_64_check_tls_transition (bfd *abfd,
   bfd_vma offset;
   struct elf_x86_64_link_hash_table *htab;
   bfd_byte *call;
-  bfd_boolean indirect_call, tls_get_addr;
+  bfd_boolean indirect_call;
 
   htab = elf_x86_64_hash_table (info);
   offset = rel->r_offset;
@@ -1667,29 +1665,9 @@ elf_x86_64_check_tls_transition (bfd *abfd,
       if (r_symndx < symtab_hdr->sh_info)
 	return FALSE;
 
-      tls_get_addr = FALSE;
       h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-      if (h != NULL && h->root.root.string != NULL)
-	{
-	  struct elf_x86_64_link_hash_entry *eh
-	    = (struct elf_x86_64_link_hash_entry *) h;
-	  tls_get_addr = eh->tls_get_addr == 1;
-	  if (eh->tls_get_addr > 1)
-	    {
-	      /* Use strncmp to check __tls_get_addr since
-		 __tls_get_addr may be versioned.  */
-	      if (strncmp (h->root.root.string, "__tls_get_addr", 14)
-		  == 0)
-		{
-		  eh->tls_get_addr = 1;
-		  tls_get_addr = TRUE;
-		}
-	      else
-		eh->tls_get_addr = 0;
-	    }
-	}
-
-      if (!tls_get_addr)
+      if (h == NULL
+	  || !((struct elf_x86_64_link_hash_entry *) h)->tls_get_addr)
 	return FALSE;
       else if (largepic)
 	return ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PLTOFF64;
@@ -1885,10 +1863,9 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: TLS transition from %s to %s against `%s' at 0x%lx "
+	(_("%B: TLS transition from %s to %s against `%s' at %#Lx "
 	   "in section `%A' failed"),
-	 abfd, from->name, to->name, name,
-	 (unsigned long) rel->r_offset, sec);
+	 abfd, from->name, to->name, name, rel->r_offset, sec);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -2254,7 +2231,7 @@ convert:
 	  modrm = 0xe8;
 	  /* To support TLS optimization, always use addr32 prefix for
 	     "call *__tls_get_addr@GOTPCREL(%rip)".  */
-	  if (eh && eh->tls_get_addr == 1)
+	  if (eh && eh->tls_get_addr)
 	    {
 	      nop = 0x67;
 	      nop_offset = irel->r_offset - 2;
@@ -2428,7 +2405,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   for (rel = relocs; rel < rel_end; rel++)
     {
       unsigned int r_type;
-      unsigned long r_symndx;
+      unsigned int r_symndx;
       struct elf_link_hash_entry *h;
       struct elf_x86_64_link_hash_entry *eh;
       Elf_Internal_Sym *isym;
@@ -4315,14 +4292,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	}
 
       if (r_type >= (int) R_X86_64_standard)
-	{
-	  _bfd_error_handler
-	    /* xgettext:c-format */
-	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
-	     input_bfd, r_type, input_section);
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
-	}
+	return _bfd_unrecognized_reloc (input_bfd, input_section, r_type);
 
       if (r_type != (int) R_X86_64_32
 	  || ABI_64_P (output_bfd))
@@ -4574,7 +4544,7 @@ do_ifunc_pointer:
 		  _bfd_error_handler
 		    /* xgettext:c-format */
 		    (_("%B: relocation %s against STT_GNU_IFUNC "
-		       "symbol `%s' has non-zero addend: %d"),
+		       "symbol `%s' has non-zero addend: %Ld"),
 		     input_bfd, howto->name, name, rel->r_addend);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
@@ -4670,7 +4640,7 @@ do_ifunc_pointer:
 	case R_X86_64_GOTPCREL64:
 	  /* Use global offset table entry as symbol value.  */
 	case R_X86_64_GOTPLT64:
-	  /* This is obsolete and treated the the same as GOT64.  */
+	  /* This is obsolete and treated the same as GOT64.  */
 	  base_got = htab->elf.sgot;
 
 	  if (htab->elf.sgot == NULL)
@@ -4967,11 +4937,9 @@ do_ifunc_pointer:
 	      && (input_section->flags & SEC_READONLY) != 0
 	      && h != NULL
 	      && ((bfd_link_executable (info)
-		  && h->root.type == bfd_link_hash_undefweak
-		  && !resolved_to_zero)
-		  || (bfd_link_pic (info)
-		      && !(bfd_link_pie (info)
-			   && h->root.type == bfd_link_hash_undefined))))
+		   && h->root.type == bfd_link_hash_undefweak
+		   && !resolved_to_zero)
+		  || bfd_link_dll (info)))
 	    {
 	      bfd_boolean fail = FALSE;
 	      bfd_boolean branch
@@ -5116,22 +5084,13 @@ direct:
 			  else
 			    name = bfd_elf_sym_name (input_bfd, symtab_hdr,
 						     sym, NULL);
-			  if (addend < 0)
-			    _bfd_error_handler
-			      /* xgettext:c-format */
-			      (_("%B: addend -0x%x in relocation %s against "
-				 "symbol `%s' at 0x%lx in section `%A' is "
-				 "out of range"),
-			       input_bfd, addend, howto->name, name,
-			       (unsigned long) rel->r_offset, input_section);
-			  else
-			    _bfd_error_handler
-			      /* xgettext:c-format */
-			      (_("%B: addend 0x%x in relocation %s against "
-				 "symbol `%s' at 0x%lx in section `%A' is "
-				 "out of range"),
-			       input_bfd, addend, howto->name, name,
-			       (unsigned long) rel->r_offset, input_section);
+			  _bfd_error_handler
+			    /* xgettext:c-format */
+			    (_("%B: addend %s%#x in relocation %s against "
+			       "symbol `%s' at %#Lx in section `%A' is "
+			       "out of range"),
+			     input_bfd, addend < 0 ? "-" : "", addend,
+			     howto->name, name, rel->r_offset, input_section);
 			  bfd_set_error (bfd_error_bad_value);
 			  return FALSE;
 			}
@@ -5750,10 +5709,10 @@ direct:
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
-	     (long) rel->r_offset,
+	     rel->r_offset,
 	     howto->name,
 	     h->root.root.string);
 	  return FALSE;
@@ -5790,9 +5749,9 @@ check_relocation_error:
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
+		(_("%B(%A+%#Lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
-		 (long) rel->r_offset, name, (int) r);
+		 rel->r_offset, name, (int) r);
 	      return FALSE;
 	    }
 	}
@@ -6675,13 +6634,13 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 				 asymbol **dynsyms,
 				 asymbol **ret)
 {
-  long size, count, i, n;
+  long size, count, i, n, len;
   int j;
   unsigned int plt_got_offset, plt_entry_size, plt_got_insn_size;
   asymbol *s;
   bfd_byte *plt_contents;
   long dynrelcount, relsize;
-  arelent **dynrelbuf;
+  arelent **dynrelbuf, *p;
   const struct elf_x86_64_lazy_plt_layout *lazy_plt;
   const struct elf_x86_64_non_lazy_plt_layout *non_lazy_plt;
   const struct elf_x86_64_lazy_plt_layout *lazy_bnd_plt;
@@ -6862,6 +6821,17 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
     }
 
   size = count * sizeof (asymbol);
+
+  /* Allocate space for @plt suffixes.  */
+  n = 0;
+  for (i = 0; i < dynrelcount; i++)
+    {
+      p = dynrelbuf[i];
+      size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+      if (p->addend != 0)
+	size += sizeof ("+0x") - 1 + 8 + 8 * ABI_64_P (abfd);
+    }
+
   s = *ret = (asymbol *) bfd_zmalloc (size);
   if (s == NULL)
     {
@@ -6874,6 +6844,7 @@ bad_return:
     }
 
   /* Check for each PLT section.  */
+  names = (char *) (s + count);
   size = 0;
   n = 0;
   for (j = 0; plts[j].name != NULL; j++)
@@ -6906,7 +6877,6 @@ bad_return:
 	    int off;
 	    bfd_vma got_vma;
 	    long min, max, mid;
-	    arelent *p;
 
 	    /* Get the PC-relative offset, a signed 32-bit integer.  */
 	    off = H_GET_32 (abfd, (plt_contents + offset
@@ -6953,12 +6923,26 @@ bad_return:
 		s->section = plt;
 		s->the_bfd = plt->owner;
 		s->value = offset;
-		/* Store relocation for later use.  */
-		s->udata.p = p;
-		/* Add @plt to function name later.  */
-		size += strlen (s->name) + sizeof ("@plt");
+		s->udata.p = NULL;
+		s->name = names;
+		len = strlen ((*p->sym_ptr_ptr)->name);
+		memcpy (names, (*p->sym_ptr_ptr)->name, len);
+		names += len;
 		if (p->addend != 0)
-		  size += sizeof ("+0x") - 1 + 8 + 8 * ABI_64_P (abfd);
+		  {
+		    char buf[30], *a;
+
+		    memcpy (names, "+0x", sizeof ("+0x") - 1);
+		    names += sizeof ("+0x") - 1;
+		    bfd_sprintf_vma (abfd, buf, p->addend);
+		    for (a = buf; *a == '0'; ++a)
+		      ;
+		    size = strlen (a);
+		    memcpy (names, a, size);
+		    names += size;
+		  }
+		memcpy (names, "@plt", sizeof ("@plt"));
+		names += sizeof ("@plt");
 		n++;
 		s++;
 	      }
@@ -6971,40 +6955,6 @@ bad_return:
     goto bad_return;
 
   count = n;
-
-  /* Allocate space for @plt suffixes.  */
-  names = (char *) bfd_malloc (size);
-  if (s == NULL)
-    goto bad_return;
-
-  s = *ret;
-  for (i = 0; i < count; i++)
-    {
-      /* Add @plt to function name.  */
-      arelent *p = (arelent *) s->udata.p;
-      /* Clear it now.  */
-      s->udata.p = NULL;
-      size = strlen (s->name);
-      memcpy (names, s->name, size);
-      s->name = names;
-      names += size;
-      if (p->addend != 0)
-	{
-	  char buf[30], *a;
-
-	  memcpy (names, "+0x", sizeof ("+0x") - 1);
-	  names += sizeof ("+0x") - 1;
-	  bfd_sprintf_vma (abfd, buf, p->addend);
-	  for (a = buf; *a == '0'; ++a)
-	    ;
-	  size = strlen (a);
-	  memcpy (names, a, size);
-	  names += size;
-	}
-      memcpy (names, "@plt", sizeof ("@plt"));
-      names += sizeof ("@plt");
-      s++;
-    }
 
   for (j = 0; plts[j].name != NULL; j++)
     if (plts[j].contents != NULL)
@@ -7468,8 +7418,9 @@ error_alignment:
 	  for (abfd = info->input_bfds;
 	       abfd != NULL;
 	       abfd = abfd->link.next)
-	    if ((abfd->flags
-		 & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
+	    if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+		&& (abfd->flags
+		    & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
 	      {
 		htab->elf.dynobj = abfd;
 		dynobj = abfd;
@@ -7734,6 +7685,23 @@ error_alignment:
   return pbfd;
 }
 
+static bfd_boolean
+elf_x86_64_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+{
+  if (!bfd_link_relocatable (info))
+    {
+      /* Check for __tls_get_addr reference.  */
+      struct elf_link_hash_entry *h;
+      h = elf_link_hash_lookup (elf_hash_table (info), "__tls_get_addr",
+				FALSE, FALSE, FALSE);
+      if (h != NULL)
+	((struct elf_x86_64_link_hash_entry *) h)->tls_get_addr = 1;
+    }
+
+  /* Invoke the regular ELF backend linker to do all the work.  */
+  return _bfd_elf_link_check_relocs (abfd, info);
+}
+
 static const struct bfd_elf_special_section
 elf_x86_64_special_sections[]=
 {
@@ -7798,6 +7766,7 @@ elf_x86_64_special_sections[]=
 #define elf_backend_object_p		    elf64_x86_64_elf_object_p
 #define bfd_elf64_mkobject		    elf_x86_64_mkobject
 #define bfd_elf64_get_synthetic_symtab	    elf_x86_64_get_synthetic_symtab
+#define bfd_elf64_bfd_link_check_relocs	    elf_x86_64_link_check_relocs
 
 #define elf_backend_section_from_shdr \
 	elf_x86_64_section_from_shdr
@@ -8097,6 +8066,8 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
   elf_x86_64_mkobject
 #define bfd_elf32_get_synthetic_symtab \
   elf_x86_64_get_synthetic_symtab
+#define bfd_elf32_bfd_link_check_relocs \
+  elf_x86_64_link_check_relocs
 
 #undef elf_backend_object_p
 #define elf_backend_object_p \

@@ -529,10 +529,10 @@ psym_lookup_symbol (struct objfile *objfile,
 	   information (but NAME might contain it).  */
 
 	if (sym != NULL
-	    && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
+	    && SYMBOL_MATCHES_SEARCH_NAME (sym, name))
 	  return stab;
 	if (with_opaque != NULL
-	    && strcmp_iw (SYMBOL_SEARCH_NAME (with_opaque), name) == 0)
+	    && SYMBOL_MATCHES_SEARCH_NAME (with_opaque, name))
 	  stab_best = stab;
 
 	/* Keep looking through other psymtabs.  */
@@ -1905,9 +1905,7 @@ dump_psymtab_addrmap (struct objfile *objfile, struct partial_symtab *psymtab,
 static void
 maintenance_print_psymbols (char *args, int from_tty)
 {
-  char **argv;
   struct ui_file *outfile = gdb_stdout;
-  struct cleanup *cleanups;
   char *address_arg = NULL, *source_arg = NULL, *objfile_arg = NULL;
   struct objfile *objfile;
   struct partial_symtab *ps;
@@ -1917,8 +1915,7 @@ maintenance_print_psymbols (char *args, int from_tty)
 
   dont_repeat ();
 
-  argv = gdb_buildargv (args);
-  cleanups = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   for (i = 0; argv != NULL && argv[i] != NULL; ++i)
     {
@@ -1963,14 +1960,12 @@ maintenance_print_psymbols (char *args, int from_tty)
 
   if (argv != NULL && argv[outfile_idx] != NULL)
     {
-      char *outfile_name;
-
       if (argv[outfile_idx + 1] != NULL)
 	error (_("Junk at end of command"));
-      outfile_name = tilde_expand (argv[outfile_idx]);
-      make_cleanup (xfree, outfile_name);
-      if (!arg_outfile.open (outfile_name, FOPEN_WT))
-	perror_with_name (outfile_name);
+      gdb::unique_xmalloc_ptr<char> outfile_name
+	(tilde_expand (argv[outfile_idx]));
+      if (!arg_outfile.open (outfile_name.get (), FOPEN_WT))
+	perror_with_name (outfile_name.get ());
       outfile = &arg_outfile;
     }
 
@@ -2061,8 +2056,6 @@ maintenance_print_psymbols (char *args, int from_tty)
       if (source_arg != NULL)
 	error (_("No partial symtab for source file: %s"), source_arg);
     }
-
-  do_cleanups (cleanups);
 }
 
 /* List all the partial symbol tables whose names match REGEXP (optional).  */

@@ -53,6 +53,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module dirname-lgpl:
   # Code from module dosname:
   # Code from module double-slash-root:
+  # Code from module environ:
   # Code from module errno:
   # Code from module extensions:
   # Code from module extern-inline:
@@ -94,6 +95,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module rename:
   # Code from module rmdir:
   # Code from module same-inode:
+  # Code from module setenv:
   # Code from module signal-h:
   # Code from module snippet/_Noreturn:
   # Code from module snippet/arg-nonnull:
@@ -118,6 +120,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module sys_types:
   # Code from module time:
   # Code from module unistd:
+  # Code from module unsetenv:
   # Code from module update-copyright:
   # Code from module verify:
   # Code from module wchar:
@@ -160,6 +163,8 @@ AC_DEFUN([gl_INIT],
   gl_DIRENT_MODULE_INDICATOR([dirfd])
   gl_DIRNAME_LGPL
   gl_DOUBLE_SLASH_ROOT
+  gl_ENVIRON
+  gl_UNISTD_MODULE_INDICATOR([environ])
   gl_HEADER_ERRNO_H
   AC_REQUIRE([gl_EXTERN_INLINE])
   AC_C_FLEXIBLE_ARRAY_MEMBER
@@ -285,6 +290,11 @@ AC_DEFUN([gl_INIT],
     AC_LIBOBJ([rmdir])
   fi
   gl_UNISTD_MODULE_INDICATOR([rmdir])
+  gl_FUNC_SETENV
+  if test $HAVE_SETENV = 0 || test $REPLACE_SETENV = 1; then
+    AC_LIBOBJ([setenv])
+  fi
+  gl_STDLIB_MODULE_INDICATOR([setenv])
   gl_SIGNAL_H
   gt_TYPE_SSIZE_T
   gl_FUNC_STAT
@@ -328,6 +338,12 @@ AC_DEFUN([gl_INIT],
   AC_PROG_MKDIR_P
   gl_HEADER_TIME_H
   gl_UNISTD_H
+  gl_FUNC_UNSETENV
+  if test $HAVE_UNSETENV = 0 || test $REPLACE_UNSETENV = 1; then
+    AC_LIBOBJ([unsetenv])
+    gl_PREREQ_UNSETENV
+  fi
+  gl_STDLIB_MODULE_INDICATOR([unsetenv])
   gl_WCHAR_H
   gl_WCTYPE_H
   # End of code from modules
@@ -533,6 +549,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/rename.c
   lib/rmdir.c
   lib/same-inode.h
+  lib/setenv.c
   lib/signal.in.h
   lib/stat.c
   lib/stdbool.in.h
@@ -556,6 +573,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/time.in.h
   lib/unistd.c
   lib/unistd.in.h
+  lib/unsetenv.c
   lib/verify.h
   lib/wchar.in.h
   lib/wctype-h.c
@@ -571,6 +589,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/dirname.m4
   m4/double-slash-root.m4
   m4/eealloc.m4
+  m4/environ.m4
   m4/errno_h.m4
   m4/exponentd.m4
   m4/exponentl.m4
@@ -618,6 +637,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/readlink.m4
   m4/rename.m4
   m4/rmdir.m4
+  m4/setenv.m4
   m4/signal_h.m4
   m4/ssize_t.m4
   m4/stat.m4

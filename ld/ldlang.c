@@ -61,7 +61,6 @@ static struct obstack map_obstack;
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
 static const char *entry_symbol_default = "start";
-static bfd_boolean placed_commons = FALSE;
 static bfd_boolean map_head_is_link_order = FALSE;
 static lang_output_section_statement_type *default_common_section;
 static bfd_boolean map_option_f;
@@ -4414,7 +4413,7 @@ print_wild_statement (lang_wild_statement_type *w,
     }
 
   if (w->filenames_sorted)
-    minfo ("SORT(");
+    minfo ("SORT_BY_NAME(");
   if (w->filename != NULL)
     minfo ("%s", w->filename);
   else
@@ -4425,8 +4424,44 @@ print_wild_statement (lang_wild_statement_type *w,
   minfo ("(");
   for (sec = w->section_list; sec; sec = sec->next)
     {
-      if (sec->spec.sorted)
-	minfo ("SORT(");
+      int closing_paren = 0;
+
+      switch (sec->spec.sorted)
+        {
+        case none:
+          break;
+
+        case by_name:
+          minfo ("SORT_BY_NAME(");
+          closing_paren = 1;
+          break;
+
+        case by_alignment:
+          minfo ("SORT_BY_ALIGNMENT(");
+          closing_paren = 1;
+          break;
+
+        case by_name_alignment:
+          minfo ("SORT_BY_NAME(SORT_BY_ALIGNMENT(");
+          closing_paren = 2;
+          break;
+
+        case by_alignment_name:
+          minfo ("SORT_BY_ALIGNMENT(SORT_BY_NAME(");
+          closing_paren = 2;
+          break;
+
+        case by_none:
+          minfo ("SORT_NONE(");
+          closing_paren = 1;
+          break;
+
+        case by_init_priority:
+          minfo ("SORT_BY_INIT_PRIORITY(");
+          closing_paren = 1;
+          break;
+        }
+
       if (sec->spec.exclude_name_list != NULL)
 	{
 	  name_list *tmp;
@@ -4439,8 +4474,8 @@ print_wild_statement (lang_wild_statement_type *w,
 	minfo ("%s", sec->spec.name);
       else
 	minfo ("*");
-      if (sec->spec.sorted)
-	minfo (")");
+      for (;closing_paren > 0; closing_paren--)
+        minfo (")");
       if (sec->next)
 	minfo (" ");
     }
@@ -6225,7 +6260,7 @@ lang_check (void)
 static void
 lang_common (void)
 {
-  if (command_line.inhibit_common_definition)
+  if (link_info.inhibit_common_definition)
     return;
   if (bfd_link_relocatable (&link_info)
       && !command_line.force_common_definition)
@@ -7238,9 +7273,6 @@ lang_add_wild (struct wildcard_spec *filespec,
        curr != NULL;
        section_list = curr, curr = next)
     {
-      if (curr->spec.name != NULL && strcmp (curr->spec.name, "COMMON") == 0)
-	placed_commons = TRUE;
-
       next = curr->next;
       curr->next = section_list;
     }

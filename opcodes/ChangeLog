@@ -1,3 +1,335 @@
+2017-08-09  Jiong Wang  <jiong.wang@arm.com>
+
+	* arm-dis.c (thumb32_opcodes): Use format 'R' instead of 'S' for
+	register operands in CRC instructions.
+	(print_insn_thumb32): Remove "<bitfield>S" support.  Updated the
+	comments.
+
+2017-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* disassemble.c (disassembler): Mark big and mach with
+	ATTRIBUTE_UNUSED.
+
+2017-08-07  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* disassemble.c (disassembler): Remove arch/mach/endian
+	assertions.
+
+2017-07-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 21739
+	* arc-opc.c (insert_rhv2): Use lower case first letter in error
+	message.
+	(insert_r0): Likewise.
+	(insert_r1): Likewise.
+	(insert_r2): Likewise.
+	(insert_r3): Likewise.
+	(insert_sp): Likewise.
+	(insert_gp): Likewise.
+	(insert_pcl): Likewise.
+	(insert_blink): Likewise.
+	(insert_ilink1): Likewise.
+	(insert_ilink2): Likewise.
+	(insert_ras): Likewise.
+	(insert_rbs): Likewise.
+	(insert_rcs): Likewise.
+	(insert_simm3s): Likewise.
+	(insert_rrange): Likewise.
+	(insert_r13el): Likewise.
+	(insert_fpel): Likewise.
+	(insert_blinkel): Likewise.
+	(insert_pclel): Likewise.
+	(insert_nps_bitop_size_2b): Likewise.
+	(insert_nps_imm_offset): Likewise.
+	(insert_nps_imm_entry): Likewise.
+	(insert_nps_size_16bit): Likewise.
+	(insert_nps_##NAME##_pos): Likewise.
+	(insert_nps_##NAME): Likewise.
+	(insert_nps_bitop_ins_ext): Likewise.
+	(insert_nps_##NAME): Likewise.
+	(insert_nps_min_hofs): Likewise.
+	(insert_nps_##NAME): Likewise.
+	(insert_nps_rbdouble_64): Likewise.
+	(insert_nps_misc_imm_offset): Likewise.
+	* riscv-dis.c (print_riscv_disassembler_options): Fix typo in
+	option description.
+
+2017-07-24  Laurent Desnogues  <laurent.desnogues@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64-gen.c (print_decision_tree_1): Reverse the index of PATTERN to
+	correct the print.
+	* aarch64-dis-2.c: Regenerated.
+
+2017-07-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-mkopc.c (main): Enable z14 as CPU string in the opcode
+	table.
+
+2017-07-20  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: Updated German translation.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-regs.h (sec_stat): New aux register.
+	(aux_kernel_sp): Likewise.
+	(aux_sec_u_sp): Likewise.
+	(aux_sec_k_sp): Likewise.
+	(sec_vecbase_build): Likewise.
+	(nsc_table_top): Likewise.
+	(nsc_table_base): Likewise.
+	(ersec_stat): Likewise.
+	(aux_sec_except): Likewise.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-opc.c (extract_uimm12_20): New function.
+	(UIMM12_20): New operand.
+	(SIMM3_5_S): Adjust.
+	* arc-tbl.h (sjli): Add new instruction.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+	    John Eric Martin  <John.Martin@emmicro-us.com>
+
+	* arc-opc.c (UIMM10_6_S_JLIOFF): Define.
+	(UIMM3_23): Adjust accordingly.
+	* arc-regs.h: Add/correct jli_base register.
+	* arc-tbl.h (jli_s): Likewise.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 21775
+	* aarch64-opc.c: Fix spelling typos.
+	* i386-dis.c: Likewise.
+
+2017-07-14  Ravi Bangoria  <ravi.bangoria@linux.vnet.ibm.com>
+
+	* dis-buf.c (buffer_read_memory): Change type of end_addr_offset,
+	max_addr_offset and octets variables to size_t.
+
+2017-07-12  Alan Modra  <amodra@gmail.com>
+
+	* po/da.po: Update from translationproject.org/latest/opcodes/.
+	* po/de.po: Likewise.
+	* po/es.po: Likewise.
+	* po/fi.po: Likewise.
+	* po/fr.po: Likewise.
+	* po/id.po: Likewise.
+	* po/it.po: Likewise.
+	* po/nl.po: Likewise.
+	* po/pt_BR.po: Likewise.
+	* po/ro.po: Likewise.
+	* po/sv.po: Likewise.
+	* po/tr.po: Likewise.
+	* po/uk.po: Likewise.
+	* po/vi.po: Likewise.
+	* po/zh_CN.po: Likewise.
+
+2017-07-11  Yao Qi  <yao.qi@linaro.org>
+	    Alan Modra  <amodra@gmail.com>
+
+	* cgen.sh: Mark generated files read-only.
+	* epiphany-asm.c: Regenerate.
+	* epiphany-desc.c: Regenerate.
+	* epiphany-desc.h: Regenerate.
+	* epiphany-dis.c: Regenerate.
+	* epiphany-ibld.c: Regenerate.
+	* epiphany-opc.c: Regenerate.
+	* epiphany-opc.h: Regenerate.
+	* fr30-asm.c: Regenerate.
+	* fr30-desc.c: Regenerate.
+	* fr30-desc.h: Regenerate.
+	* fr30-dis.c: Regenerate.
+	* fr30-ibld.c: Regenerate.
+	* fr30-opc.c: Regenerate.
+	* fr30-opc.h: Regenerate.
+	* frv-asm.c: Regenerate.
+	* frv-desc.c: Regenerate.
+	* frv-desc.h: Regenerate.
+	* frv-dis.c: Regenerate.
+	* frv-ibld.c: Regenerate.
+	* frv-opc.c: Regenerate.
+	* frv-opc.h: Regenerate.
+	* ip2k-asm.c: Regenerate.
+	* ip2k-desc.c: Regenerate.
+	* ip2k-desc.h: Regenerate.
+	* ip2k-dis.c: Regenerate.
+	* ip2k-ibld.c: Regenerate.
+	* ip2k-opc.c: Regenerate.
+	* ip2k-opc.h: Regenerate.
+	* iq2000-asm.c: Regenerate.
+	* iq2000-desc.c: Regenerate.
+	* iq2000-desc.h: Regenerate.
+	* iq2000-dis.c: Regenerate.
+	* iq2000-ibld.c: Regenerate.
+	* iq2000-opc.c: Regenerate.
+	* iq2000-opc.h: Regenerate.
+	* lm32-asm.c: Regenerate.
+	* lm32-desc.c: Regenerate.
+	* lm32-desc.h: Regenerate.
+	* lm32-dis.c: Regenerate.
+	* lm32-ibld.c: Regenerate.
+	* lm32-opc.c: Regenerate.
+	* lm32-opc.h: Regenerate.
+	* lm32-opinst.c: Regenerate.
+	* m32c-asm.c: Regenerate.
+	* m32c-desc.c: Regenerate.
+	* m32c-desc.h: Regenerate.
+	* m32c-dis.c: Regenerate.
+	* m32c-ibld.c: Regenerate.
+	* m32c-opc.c: Regenerate.
+	* m32c-opc.h: Regenerate.
+	* m32r-asm.c: Regenerate.
+	* m32r-desc.c: Regenerate.
+	* m32r-desc.h: Regenerate.
+	* m32r-dis.c: Regenerate.
+	* m32r-ibld.c: Regenerate.
+	* m32r-opc.c: Regenerate.
+	* m32r-opc.h: Regenerate.
+	* m32r-opinst.c: Regenerate.
+	* mep-asm.c: Regenerate.
+	* mep-desc.c: Regenerate.
+	* mep-desc.h: Regenerate.
+	* mep-dis.c: Regenerate.
+	* mep-ibld.c: Regenerate.
+	* mep-opc.c: Regenerate.
+	* mep-opc.h: Regenerate.
+	* mt-asm.c: Regenerate.
+	* mt-desc.c: Regenerate.
+	* mt-desc.h: Regenerate.
+	* mt-dis.c: Regenerate.
+	* mt-ibld.c: Regenerate.
+	* mt-opc.c: Regenerate.
+	* mt-opc.h: Regenerate.
+	* or1k-asm.c: Regenerate.
+	* or1k-desc.c: Regenerate.
+	* or1k-desc.h: Regenerate.
+	* or1k-dis.c: Regenerate.
+	* or1k-ibld.c: Regenerate.
+	* or1k-opc.c: Regenerate.
+	* or1k-opc.h: Regenerate.
+	* or1k-opinst.c: Regenerate.
+	* xc16x-asm.c: Regenerate.
+	* xc16x-desc.c: Regenerate.
+	* xc16x-desc.h: Regenerate.
+	* xc16x-dis.c: Regenerate.
+	* xc16x-ibld.c: Regenerate.
+	* xc16x-opc.c: Regenerate.
+	* xc16x-opc.h: Regenerate.
+	* xstormy16-asm.c: Regenerate.
+	* xstormy16-desc.c: Regenerate.
+	* xstormy16-desc.h: Regenerate.
+	* xstormy16-dis.c: Regenerate.
+	* xstormy16-ibld.c: Regenerate.
+	* xstormy16-opc.c: Regenerate.
+	* xstormy16-opc.h: Regenerate.
+
+2017-07-07  Alan Modra  <amodra@gmail.com>
+
+	* cgen-dis.in: Include disassemble.h, not dis-asm.h.
+	* m32c-dis.c: Regenerate.
+	* mep-dis.c: Regenerate.
+
+2017-07-05  Borislav Petkov  <bp@suse.de>
+
+	* i386-dis.c: Enable ModRM.reg /6 aliases.
+
+2017-07-04  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+        * opcodes/arm-dis.c: Support MVFR2 in disassembly
+        with vmrs and vmsr.
+
+2017-07-04  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2017-07-03  Tristan Gingold  <gingold@adacore.com>
+
+	* po/opcodes.pot: Regenerate.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Move "lsa" and "dlsa"
+	entries to the MSA ASE instruction block.
+
+2017-06-30  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Maciej W. Rozycki  <macro@imgtec.com>
+
+	* micromips-opc.c (XPA, XPAVZ): New macros.
+	(micromips_opcodes): Add "mfhc0", "mfhgc0", "mthc0" and
+	"mthgc0".
+
+2017-06-30  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Maciej W. Rozycki  <macro@imgtec.com>
+
+	* micromips-opc.c (I36): New macro.
+	(micromips_opcodes): Add "eretnc".
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* mips-dis.c (mips_calculate_combination_ases): Handle the
+	ASE_XPA_VIRT flag.
+	(parse_mips_ase_option): New function.
+	(parse_mips_dis_option): Factor out ASE option handling to the
+	new function.  Call `mips_calculate_combination_ases'.
+	* mips-opc.c (XPAVZ): New macro.
+	(mips_builtin_opcodes): Correct ISA and ASE flags for "mfhc0",
+	"mfhgc0", "mthc0" and "mthgc0".
+
+2017-06-29  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-dis.c (mips_calculate_combination_ases): New function.
+	(mips_convert_abiflags_ases): Factor out ASE_MIPS16E2_MT
+	calculation to the new function.
+	(set_default_mips_dis_options): Call the new function.
+
+2017-06-29  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* arc-dis.c (parse_disassembler_options): Use
+	FOR_EACH_DISASSEMBLER_OPTION.
+
+2017-06-29  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* arc-dis.c (parse_option): Use disassembler_options_cmp to compare
+	disassembler option strings.
+	(parse_cpu_option): Likewise.
+
+2017-06-28  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-asm.c (aarch64_ins_reglane): Added 4B dotprod.
+	* aarch64-dis.c (aarch64_ext_reglane): Likewise.
+	* aarch64-tbl.h (QL_V3DOT, QL_V2DOT): New.
+	(aarch64_feature_dotprod, DOT_INSN): New.
+	(udot, sdot): New.
+	* aarch64-dis-2.c: Regenerated.
+
+2017-06-28  Jiong Wang  <jiong.wang@arm.com>
+
+	* arm-dis.c (coprocessor_opcodes): New entries for vsdot and vudot.
+
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* mips-formats.h (INT_BIAS): New macro.
+	(INT_ADJ): Redefine in INT_BIAS terms.
+	* mips-dis.c (mips_arch_choices): Add "interaptiv-mr2" entry.
+	(mips_print_save_restore): New function.
+	(print_insn_arg) <OP_SAVE_RESTORE_LIST>: Update comment.
+	(validate_insn_args) <OP_SAVE_RESTORE_LIST>: Remove `abort'
+	call.
+	(print_insn_args): Handle OP_SAVE_RESTORE_LIST.
+	(print_mips16_insn_arg): Call `mips_print_save_restore' for
+	OP_SAVE_RESTORE_LIST handling, factored out from here.
+	* mips-opc.c (decode_mips_operand) <'-'> <'m'>: New case.
+	(RD_31, RD_SP, WR_SP, MOD_SP, IAMR2): New macros.
+	(mips_builtin_opcodes): Add "restore" and "save" entries.
+	* mips16-opc.c (decode_mips16_operand) <'n', 'o'>: New cases.
+	(IAMR2): New macro.
+	(mips16_opcodes): Add "copyw" and "ucopyw" entries.
+
 2017-06-23  Andrew Waterman  <andrew@sifive.com>
 
 	* riscv-opc.c (riscv_opcodes): Mark I-type SLT instruction as an

@@ -359,12 +359,12 @@ tui_set_var_cmd (char *null_args, int from_tty, struct cmd_list_element *c)
    window names 'next' and 'prev' will also be considered as possible
    completions of the window name.  */
 
-static VEC (char_ptr) *
-window_name_completer (int include_next_prev_p,
+static void
+window_name_completer (completion_tracker &tracker,
+		       int include_next_prev_p,
 		       const char *text, const char *word)
 {
   VEC (const_char_ptr) *completion_name_vec = NULL;
-  VEC (char_ptr) *matches_vec;
   int win_type;
 
   for (win_type = SRC_WIN; win_type < MAX_MAJOR_WINDOWS; win_type++)
@@ -398,39 +398,39 @@ window_name_completer (int include_next_prev_p,
     }
 
   VEC_safe_push (const_char_ptr, completion_name_vec, NULL);
-  matches_vec
-    = complete_on_enum (VEC_address (const_char_ptr, completion_name_vec),
-			text, word);
+  complete_on_enum (tracker,
+		    VEC_address (const_char_ptr, completion_name_vec),
+		    text, word);
 
   VEC_free (const_char_ptr, completion_name_vec);
-
-  return matches_vec;
 }
 
 /* Complete possible window names to focus on.  TEXT is the complete text
    entered so far, WORD is the word currently being completed.  */
 
-static VEC (char_ptr) *
+static void
 focus_completer (struct cmd_list_element *ignore,
-		  const char *text, const char *word)
+		 completion_tracker &tracker,
+		 const char *text, const char *word)
 {
-  return window_name_completer (1, text, word);
+  window_name_completer (tracker, 1, text, word);
 }
 
 /* Complete possible window names for winheight command.  TEXT is the
    complete text entered so far, WORD is the word currently being
    completed.  */
 
-static VEC (char_ptr) *
+static void
 winheight_completer (struct cmd_list_element *ignore,
+		     completion_tracker &tracker,
 		     const char *text, const char *word)
 {
   /* The first word is the window name.  That we can complete.  Subsequent
      words can't be completed.  */
   if (word != text)
-    return NULL;
+    return;
 
-  return window_name_completer (0, text, word);
+  window_name_completer (tracker, 0, text, word);
 }
 
 /* Function to initialize gdb commands, for tui window

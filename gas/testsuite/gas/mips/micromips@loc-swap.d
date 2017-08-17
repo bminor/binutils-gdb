@@ -45,9 +45,9 @@ Raw dump of debug contents of section \.debug_line:
   \[0x.*\]  Special opcode 11: advance Address by 0 to 0x1 and Line by 6 to 7
   \[0x.*\]  Special opcode 35: advance Address by 2 to 0x3 and Line by 2 to 9
   \[0x.*\]  Special opcode 36: advance Address by 2 to 0x5 and Line by 3 to 12
-  \[0x.*\]  Special opcode 7: advance Address by 0 to 0x5 and Line by 2 to 14
+  \[0x.*\]  Special opcode 7: advance Address by 0 to 0x5 and Line by 2 to 14 \(view 1\)
   \[0x.*\]  Special opcode 64: advance Address by 4 to 0x9 and Line by 3 to 17
-  \[0x.*\]  Special opcode 7: advance Address by 0 to 0x9 and Line by 2 to 19
+  \[0x.*\]  Special opcode 7: advance Address by 0 to 0x9 and Line by 2 to 19 \(view 1\)
   \[0x.*\]  Special opcode 64: advance Address by 4 to 0xd and Line by 3 to 22
   \[0x.*\]  Special opcode 35: advance Address by 2 to 0xf and Line by 2 to 24
   \[0x.*\]  Special opcode 36: advance Address by 2 to 0x11 and Line by 3 to 27

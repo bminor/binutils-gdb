@@ -1,3 +1,114 @@
+2017-08-14  Gustavo Romero  <gromero@linux.vnet.ibm.com>
+
+	* elf/common.h (NT_PPC_TAR): New macro.
+	(NT_PPC_PPR): Likewise.
+	(NT_PPC_DSCR): Likewise.
+	(NT_PPC_EBB): Likewise.
+	(NT_PPC_PMU): Likewise.
+	(NT_PPC_TM_CGPR): Likewise.
+	(NT_PPC_TM_CFPR): Likewise.
+	(NT_PPC_TM_CVMX): Likewise.
+	(NT_PPC_TM_CVSX): Likewise.
+	(NT_PPC_TM_SPR): Likewise.
+	(NT_PPC_TM_CTAR): Likewise.
+	(NT_PPC_TM_CPPR): Likewise.
+	(NT_PPC_TM_CDSCR): Likewise.
+
+2017-08-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21903:
+	* bfdlink.h (bfd_link_info): Add inhibit_common_definition.
+
+2017-07-31  Nick Clifton  <nickc@redhat.com>
+
+	PR 21850
+	* ansidecl.h (OVERRIDE): Protect check of __cplusplus value with
+	#idef __cplusplus.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* opcode/arc.h (SJLI): Add.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+	    John Eric Martin  <John.Martin@emmicro-us.com>
+
+	* elf/arc-reloc.def: Add JLI relocs howto.
+	* opcode/arc-func.h (replace_jli): New function.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 21775
+	* aout/adobe.h: Fix spelling typos.
+	* aout/aout64.h: Likewise.
+	* aout/hp300hpux.h: Likewise.
+	* elf/hppa.h: Likewise.
+	* gdb/remote-sim.h: Likewise.
+	* libiberty.h: Likewise.
+	* mach-o/arm.h: Likewise.
+	* opcode/v850.h: Likewise.
+
+2017-07-14  Ravi Bangoria  <ravi.bangoria@linux.vnet.ibm.com>
+
+	* dis-asm.h (struct disassemble_info): Change type of buffer_length
+	field to size_t.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf/common.h (NT_FREEBSD_PTLWPINFO): Define.
+
+2017-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2.def (DW_IDX_compile_unit, DW_IDX_type_unit, DW_IDX_die_offset)
+	(DW_IDX_parent, DW_IDX_type_hash, DW_IDX_lo_user, DW_IDX_hi_user)
+	(DW_IDX_GNU_internal, DW_IDX_GNU_external): New.
+	* dwarf2.h (DW_IDX, DW_IDX_DUP, DW_FIRST_IDX, DW_END_IDX): New.
+	(enum dwarf_name_index_attribute): Remove.
+	(get_DW_IDX_name): New declaration.
+
+2017-06-30  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR gas/21683
+	* opcode/avr.h (AVR_INSN): Add one for __gcc_isr.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* opcode/mips.h (ASE_XPA_VIRT): New macro.
+
+2017-06-29  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* elf/common.h (NT_S390_GS_CB): New macro.
+	(NT_S390_GS_BC): Likewise.
+
+2017-06-28  Tamar Christina  <tamar.christina@arm.com>
+
+	* opcode/aarch64.h: (AARCH64_FEATURE_DOTPROD): New.
+	(aarch64_insn_class): Added dotprod.
+
+2017-06-28  Jiong Wang  <jiong.wang@arm.com>
+
+	* opcode/arm.h (FPU_NEON_EXT_DOTPROD): New macro.
+	(FPU_ARCH_DOTPROD_NEON_VFP_ARMV8): New macro.
+
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* elf/mips.h (E_MIPS_MACH_IAMR2): New macro.
+	(AFL_EXT_INTERAPTIV_MR2): Likewise.
+	* opcode/mips.h: Document new operand codes defined.
+	(INSN_INTERAPTIV_MR2): New macro.
+	(INSN_CHIP_MASK): Adjust accordingly.
+	(CPU_INTERAPTIV_MR2): New macro.
+	(cpu_is_member) <CPU_INTERAPTIV_MR2>: New case.
+	(MIPS16_ALL_ARGS): Rename to...
+	(MIPS_SVRS_ALL_ARGS): ... this.
+	(MIPS16_ALL_STATICS): Rename to...
+	(MIPS_SVRS_ALL_STATICS): ... this.
+
+2017-06-26  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* elf/riscv.h (R_RISCV_32_PCREL): New.
+
 2017-06-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf/arm.h (TAG_CPU_ARCH_V8R): New macro.

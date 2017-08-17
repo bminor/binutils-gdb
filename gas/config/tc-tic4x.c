@@ -2353,7 +2353,7 @@ tic4x_insn_check (tic4x_insn_t *tinsn)
       if (tinsn->operands[1].mode == M_REGISTER
 	  && tinsn->operands[tinsn->num_operands-1].mode == M_REGISTER
 	  && tinsn->operands[1].expr.X_add_number == tinsn->operands[tinsn->num_operands-1].expr.X_add_number )
-        as_warn (_("Equal parallell destination registers, one result will be discarded"));
+        as_warn (_("Equal parallel destination registers, one result will be discarded"));
     }
 }
 

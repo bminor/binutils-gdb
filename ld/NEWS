@@ -1,4 +1,16 @@
 -*- text -*-
+* Add -z globalaudit command line option to force audit libraries to be run
+  for every dynamic object loaded by an executable - provided that the loader
+  supports this functionality. 
+
+* Tighten linker script grammar around file name specifiers to prevent the use
+  of SORT_BY_ALIGNMENT and SORT_BY_INIT_PRIORITY on filenames.  These would
+  previously be accepted but had no effect.
+
+* The EXCLUDE_FILE directive can now be placed within any SORT_* directive
+  within input section lists.
+
+Changes in 2.29:
 
 * Support for -z shstk in the x86 ELF linker to generate
   GNU_PROPERTY_X86_FEATURE_1_SHSTK in ELF GNU program properties.

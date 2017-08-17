@@ -908,7 +908,7 @@ parse_args (unsigned argc, char **argv)
 	  input_flags.dynamic = FALSE;
 	  break;
 	case OPTION_NO_DEFINE_COMMON:
-	  command_line.inhibit_common_definition = TRUE;
+	  link_info.inhibit_common_definition = TRUE;
 	  break;
 	case OPTION_NO_DEMANGLE:
 	  demangling = FALSE;
@@ -1828,6 +1828,8 @@ elf_static_list_options (FILE *file)
   -z execstack                Mark executable as requiring executable stack\n"));
   fprintf (file, _("\
   -z noexecstack              Mark executable as not requiring executable stack\n"));
+  fprintf (file, _("\
+  -z globalaudit              Mark executable requiring global auditing\n"));
 }
 
 static void

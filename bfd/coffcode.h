@@ -997,7 +997,13 @@ handle_COMDAT (bfd * abfd,
 			|| isym.n_sclass == C_EXT)
 		       && BTYPE (isym.n_type) == T_NULL
 		       && isym.n_value == 0))
-		  abort ();
+		  {
+		    /* Malformed input files can trigger this test.
+		       cf PR 21781.  */
+		    _bfd_error_handler (_("%B: error: unexpected symbol '%s' in COMDAT section"),
+					abfd, symname);
+		    goto breakloop;
+		  }
 
 		/* FIXME LATER: MSVC generates section names
 		   like .text for comdats.  Gas generates
@@ -1311,7 +1317,7 @@ styp_to_sec_flags (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B (%s): Section flag %s (0x%x) ignored"),
+	    (_("%B (%s): Section flag %s (%#lx) ignored"),
 	     abfd, name, unhandled, flag);
 	  result = FALSE;
 	}
@@ -2599,23 +2605,15 @@ coff_print_aux (bfd *abfd ATTRIBUTE_UNUSED,
       if (SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp) != XTY_LD)
 	{
 	  BFD_ASSERT (! aux->fix_scnlen);
-#ifdef XCOFF64
-	  fprintf (file, "val %5lld",
-		   (long long) aux->u.auxent.x_csect.x_scnlen.l);
-#else
-	  fprintf (file, "val %5ld", (long) aux->u.auxent.x_csect.x_scnlen.l);
-#endif
+	  fprintf (file, "val %5" BFD_VMA_FMT "d",
+		   aux->u.auxent.x_csect.x_scnlen.l);
 	}
       else
 	{
 	  fprintf (file, "indx ");
 	  if (! aux->fix_scnlen)
-#ifdef XCOFF64
-	    fprintf (file, "%4lld",
-		     (long long) aux->u.auxent.x_csect.x_scnlen.l);
-#else
-	    fprintf (file, "%4ld", (long) aux->u.auxent.x_csect.x_scnlen.l);
-#endif
+	    fprintf (file, "%4" BFD_VMA_FMT "d",
+		     aux->u.auxent.x_csect.x_scnlen.l);
 	  else
 	    fprintf (file, "%4ld",
 		     (long) (aux->u.auxent.x_csect.x_scnlen.p - table_base));
@@ -3773,7 +3771,7 @@ coff_write_object_contents (bfd * abfd)
 		  _bfd_error_handler
 		    /* xgettext:c-format */
 		    (_("%B: section %A: string table overflow at offset %ld"),
-		    abfd, current, string_size);
+		    abfd, current, (unsigned long) string_size);
 		  return FALSE;
 		}
 
@@ -4615,7 +4613,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
       if (cache_ptr->line_number == 0)
 	{
 	  combined_entry_type * ent;
-	  bfd_vma symndx;
+	  unsigned long symndx;
 	  coff_symbol_type *sym;
 
 	  have_func = FALSE;
@@ -4625,7 +4623,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	      _bfd_error_handler
 		/* xgettext:c-format */
 		(_("%B: warning: illegal symbol index 0x%lx in line number entry %d"),
-		 abfd, (long) symndx, counter);
+		 abfd, symndx, counter);
 	      cache_ptr->line_number = -1;
 	      ret = FALSE;
 	      continue;
@@ -4639,7 +4637,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	      _bfd_error_handler
 		/* xgettext:c-format */
 		(_("%B: warning: illegal symbol index 0x%lx in line number entry %d"),
-		 abfd, (long) symndx, counter);
+		 abfd, symndx, counter);
 	      cache_ptr->line_number = -1;
 	      ret = FALSE;
 	      continue;
@@ -4819,6 +4817,9 @@ coff_slurp_symbol_table (bfd * abfd)
 #endif
 #ifdef RS6000COFF_C
 	    case C_HIDEXT:
+#if ! defined _AIX52 && ! defined AIX_WEAK_SUPPORT
+	    case C_AIX_WEAKEXT:
+#endif
 #endif
 #ifdef C_SYSTEM
 	    case C_SYSTEM:	/* System Wide variable.  */
@@ -4891,7 +4892,11 @@ coff_slurp_symbol_table (bfd * abfd)
 		  && src->u.syment.n_scnum > 0)
 		dst->symbol.flags = BSF_LOCAL;
 #endif
-	      if (src->u.syment.n_sclass == C_WEAKEXT)
+	      if (src->u.syment.n_sclass == C_WEAKEXT
+#ifdef RS6000COFF_C
+		  || src->u.syment.n_sclass == C_AIX_WEAKEXT
+#endif
+		  )
 		dst->symbol.flags |= BSF_WEAK;
 
 	      break;
@@ -5320,7 +5325,7 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 	      _bfd_error_handler
 		/* xgettext:c-format */
 		(_("%B: warning: illegal symbol index %ld in relocs"),
-		 abfd, (long) dst.r_symndx);
+		 abfd, dst.r_symndx);
 	      cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	      ptr = NULL;
 	    }
@@ -5359,8 +5364,8 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: illegal relocation type %d at address 0x%lx"),
-	     abfd, dst.r_type, (long) dst.r_vaddr);
+	    (_("%B: illegal relocation type %d at address %#Lx"),
+	     abfd, dst.r_type, dst.r_vaddr);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}

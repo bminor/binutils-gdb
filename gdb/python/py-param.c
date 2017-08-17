@@ -555,7 +555,6 @@ static int
 compute_enum_values (parmpy_object *self, PyObject *enum_values)
 {
   Py_ssize_t size, i;
-  struct cleanup *back_to;
 
   if (! enum_values)
     {
@@ -581,36 +580,27 @@ compute_enum_values (parmpy_object *self, PyObject *enum_values)
       return 0;
     }
 
-  self->enumeration = XCNEWVEC (const char *, size + 1);
-  back_to = make_cleanup (free_current_contents, &self->enumeration);
+  gdb_argv holder (XCNEWVEC (char *, size + 1));
+  char **enumeration = holder.get ();
 
   for (i = 0; i < size; ++i)
     {
       gdbpy_ref<> item (PySequence_GetItem (enum_values, i));
 
       if (item == NULL)
-	{
-	  do_cleanups (back_to);
-	  return 0;
-	}
+	return 0;
       if (! gdbpy_is_string (item.get ()))
 	{
-	  do_cleanups (back_to);
 	  PyErr_SetString (PyExc_RuntimeError,
 			   _("The enumeration item not a string."));
 	  return 0;
 	}
-      self->enumeration[i]
-	= python_string_to_host_string (item.get ()).release ();
-      if (self->enumeration[i] == NULL)
-	{
-	  do_cleanups (back_to);
-	  return 0;
-	}
-      make_cleanup (xfree, (char *) self->enumeration[i]);
+      enumeration[i] = python_string_to_host_string (item.get ()).release ();
+      if (enumeration[i] == NULL)
+	return 0;
     }
 
-  discard_cleanups (back_to);
+  self->enumeration = const_cast<const char**> (holder.release ());
   return 1;
 }
 

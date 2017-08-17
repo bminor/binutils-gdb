@@ -222,13 +222,6 @@ enum type_instance_flag_value
 
 #define TYPE_TARGET_STUB(t)	(TYPE_MAIN_TYPE (t)->flag_target_stub)
 
-/* * Static type.  If this is set, the corresponding type had 
-   a static modifier.
-   Note: This may be unnecessary, since static data members
-   are indicated by other means (bitpos == -1).  */
-
-#define TYPE_STATIC(t)		(TYPE_MAIN_TYPE (t)->flag_static)
-
 /* * This is a function type which appears to have a prototype.  We
    need this for function calls in order to tell us if it's necessary
    to coerce the args, or to just do the standard conversions.  This
@@ -855,14 +848,9 @@ struct fn_field
 
   unsigned int is_const:1;
   unsigned int is_volatile:1;
+  unsigned int is_public:1;
   unsigned int is_private:1;
   unsigned int is_protected:1;
-  unsigned int is_public:1;
-  unsigned int is_abstract:1;
-  unsigned int is_static:1;
-  unsigned int is_final:1;
-  unsigned int is_synchronized:1;
-  unsigned int is_native:1;
   unsigned int is_artificial:1;
 
   /* * A stub method only has some fields valid (but they are enough
@@ -881,11 +869,12 @@ struct fn_field
   /* * True if this function is aliased to an existing fn_field,
      false otherwise.  These functions should be skipped during symbol
      lookups or type printing.  */
+
   unsigned int is_alias : 1;
 
   /* * Unused.  */
 
-  unsigned int dummy:1;
+  unsigned int dummy:6;
 
   /* * Index into that baseclass's virtual function table, minus 2;
      else if static: VOFFSET_STATIC; else: 0.  */
@@ -1474,12 +1463,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_FN_FIELD_PRIVATE(thisfn, n) ((thisfn)[n].is_private)
 #define TYPE_FN_FIELD_PROTECTED(thisfn, n) ((thisfn)[n].is_protected)
 #define TYPE_FN_FIELD_PUBLIC(thisfn, n) ((thisfn)[n].is_public)
-#define TYPE_FN_FIELD_STATIC(thisfn, n) ((thisfn)[n].is_static)
-#define TYPE_FN_FIELD_FINAL(thisfn, n) ((thisfn)[n].is_final)
-#define TYPE_FN_FIELD_SYNCHRONIZED(thisfn, n) ((thisfn)[n].is_synchronized)
-#define TYPE_FN_FIELD_NATIVE(thisfn, n) ((thisfn)[n].is_native)
 #define TYPE_FN_FIELD_ARTIFICIAL(thisfn, n) ((thisfn)[n].is_artificial)
-#define TYPE_FN_FIELD_ABSTRACT(thisfn, n) ((thisfn)[n].is_abstract)
 #define TYPE_FN_FIELD_STUB(thisfn, n) ((thisfn)[n].is_stub)
 #define TYPE_FN_FIELD_CONSTRUCTOR(thisfn, n) ((thisfn)[n].is_constructor)
 #define TYPE_FN_FIELD_DESTRUCTOR(thisfn, n) ((thisfn)[n].is_destructor)

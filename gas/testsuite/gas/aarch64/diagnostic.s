@@ -295,3 +295,8 @@
 	orr	x0, x0, #0xff, mul #1
 	orr	x0, x0, #0xfe, mul #255
 	orr	x0, x0, #0xfc, mul #256
+
+	ip0 	.req 	x0
+	ip1	.req 	x1
+	lr	.req 	x2
+	fp	.req 	x3

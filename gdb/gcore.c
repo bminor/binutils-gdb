@@ -36,6 +36,7 @@
 #include "readline/tilde.h"
 #include <algorithm>
 #include "common/gdb_unlinker.h"
+#include "byte-vector.h"
 
 /* The largest amount of memory to read from the target at once.  We
    must throttle it to limit the amount of memory used by GDB during
@@ -548,8 +549,6 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
 {
   bfd_size_type size, total_size = bfd_section_size (obfd, osec);
   file_ptr offset = 0;
-  struct cleanup *old_chain = NULL;
-  gdb_byte *memhunk;
 
   /* Read-only sections are marked; we don't have to copy their contents.  */
   if ((bfd_get_section_flags (obfd, osec) & SEC_LOAD) == 0)
@@ -560,8 +559,7 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
     return;
 
   size = std::min (total_size, (bfd_size_type) MAX_COPY_BYTES);
-  memhunk = (gdb_byte *) xmalloc (size);
-  old_chain = make_cleanup (xfree, memhunk);
+  gdb::byte_vector memhunk (size);
 
   while (total_size > 0)
     {
@@ -569,7 +567,7 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
 	size = total_size;
 
       if (target_read_memory (bfd_section_vma (obfd, osec) + offset,
-			      memhunk, size) != 0)
+			      memhunk.data (), size) != 0)
 	{
 	  warning (_("Memory read failed for corefile "
 		     "section, %s bytes at %s."),
@@ -577,7 +575,8 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
 		   paddress (target_gdbarch (), bfd_section_vma (obfd, osec)));
 	  break;
 	}
-      if (!bfd_set_section_contents (obfd, osec, memhunk, offset, size))
+      if (!bfd_set_section_contents (obfd, osec, memhunk.data (),
+				     offset, size))
 	{
 	  warning (_("Failed to write corefile contents (%s)."),
 		   bfd_errmsg (bfd_get_error ()));
@@ -587,8 +586,6 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
       total_size -= size;
       offset += size;
     }
-
-  do_cleanups (old_chain);	/* Frees MEMHUNK.  */
 }
 
 static int

@@ -168,6 +168,10 @@ struct cmd_list_element *maintenanceinfolist;
 
 struct cmd_list_element *maintenanceprintlist;
 
+/* Chain containing all defined "maintenance check" subcommands.  */
+
+struct cmd_list_element *maintenancechecklist;
+
 struct cmd_list_element *setprintlist;
 
 struct cmd_list_element *showprintlist;
@@ -238,6 +242,7 @@ help_command (char *command, int from_tty)
   help_cmd (command, gdb_stdout);
 }
 
+
 /* Note: The "complete" command is used by Emacs to implement completion.
    [Is that why this function writes output with *_unfiltered?]  */
 
@@ -245,9 +250,6 @@ static void
 complete_command (char *arg_entry, int from_tty)
 {
   const char *arg = arg_entry;
-  int argpoint;
-  char *arg_prefix;
-  VEC (char_ptr) *completions;
 
   dont_repeat ();
 
@@ -265,57 +267,66 @@ complete_command (char *arg_entry, int from_tty)
 
   if (arg == NULL)
     arg = "";
-  argpoint = strlen (arg);
 
-  /* complete_line assumes that its first argument is somewhere
-     within, and except for filenames at the beginning of, the word to
-     be completed.  The following crude imitation of readline's
-     word-breaking tries to accomodate this.  */
-  const char *point = arg + argpoint;
-  while (point > arg)
+  completion_tracker tracker_handle_brkchars;
+  completion_tracker tracker_handle_completions;
+  completion_tracker *tracker;
+
+  int quote_char = '\0';
+  const char *word;
+
+  TRY
     {
-      if (strchr (rl_completer_word_break_characters, point[-1]) != 0)
-        break;
-      point--;
+      word = completion_find_completion_word (tracker_handle_brkchars,
+					      arg, &quote_char);
+
+      /* Completers that provide a custom word point in the
+	 handle_brkchars phase also compute their completions then.
+	 Completers that leave the completion word handling to readline
+	 must be called twice.  */
+      if (tracker_handle_brkchars.use_custom_word_point ())
+	tracker = &tracker_handle_brkchars;
+      else
+	{
+	  complete_line (tracker_handle_completions, word, arg, strlen (arg));
+	  tracker = &tracker_handle_completions;
+	}
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      return;
     }
 
-  arg_prefix = (char *) alloca (point - arg + 1);
-  memcpy (arg_prefix, arg, point - arg);
-  arg_prefix[point - arg] = 0;
+  std::string arg_prefix (arg, word - arg);
 
-  completions = complete_line (point, arg, argpoint);
+  completion_result result
+    = tracker->build_completion_result (word, word - arg, strlen (arg));
 
-  if (completions)
+  if (result.number_matches != 0)
     {
-      int ix, size = VEC_length (char_ptr, completions);
-      char *item, *prev = NULL;
-
-      qsort (VEC_address (char_ptr, completions), size,
-	     sizeof (char *), compare_strings);
-
-      /* We do extra processing here since we only want to print each
-	 unique item once.  */
-      for (ix = 0; VEC_iterate (char_ptr, completions, ix, item); ++ix)
+      if (result.number_matches == 1)
+	printf_unfiltered ("%s%s\n", arg_prefix.c_str (), result.match_list[0]);
+      else
 	{
-	  if (prev == NULL || strcmp (item, prev) != 0)
+	  result.sort_match_list ();
+
+	  for (size_t i = 0; i < result.number_matches; i++)
 	    {
-	      printf_unfiltered ("%s%s\n", arg_prefix, item);
-	      xfree (prev);
-	      prev = item;
+	      printf_unfiltered ("%s%s",
+				 arg_prefix.c_str (),
+				 result.match_list[i + 1]);
+	      if (quote_char)
+		printf_unfiltered ("%c", quote_char);
+	      printf_unfiltered ("\n");
 	    }
-	  else
-	    xfree (item);
 	}
 
-      xfree (prev);
-      VEC_free (char_ptr, completions);
-
-      if (size == max_completions)
+      if (result.number_matches == max_completions)
 	{
-	  /* ARG_PREFIX and POINT are included in the output so that emacs
+	  /* ARG_PREFIX and WORD are included in the output so that emacs
 	     will include the message in the output.  */
 	  printf_unfiltered (_("%s%s %s\n"),
-			     arg_prefix, point,
+			     arg_prefix.c_str (), word,
 			     get_max_completions_reached_message ());
 	}
     }
@@ -495,57 +506,47 @@ show_script_ext_mode (struct ui_file *file, int from_tty,
 
 /* Try to open SCRIPT_FILE.
    If successful, the full path name is stored in *FULL_PATHP,
-   the stream is stored in *STREAMP, and return 1.
-   The caller is responsible for freeing *FULL_PATHP.
-   If not successful, return 0; errno is set for the last file
+   and the stream is returned.
+   If not successful, return NULL; errno is set for the last file
    we tried to open.
 
    If SEARCH_PATH is non-zero, and the file isn't found in cwd,
    search for it in the source search path.  */
 
-int
-find_and_open_script (const char *script_file, int search_path,
-		      FILE **streamp, char **full_pathp)
+gdb::optional<open_script>
+find_and_open_script (const char *script_file, int search_path)
 {
-  char *file;
   int fd;
-  struct cleanup *old_cleanups;
   int search_flags = OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH;
+  gdb::optional<open_script> opened;
 
-  file = tilde_expand (script_file);
-  old_cleanups = make_cleanup (xfree, file);
+  gdb::unique_xmalloc_ptr<char> file (tilde_expand (script_file));
 
   if (search_path)
     search_flags |= OPF_SEARCH_IN_PATH;
 
   /* Search for and open 'file' on the search path used for source
      files.  Put the full location in *FULL_PATHP.  */
+  char *temp_path;
   fd = openp (source_path, search_flags,
-	      file, O_RDONLY, full_pathp);
+	      file.get (), O_RDONLY, &temp_path);
+  gdb::unique_xmalloc_ptr<char> full_path (temp_path);
 
   if (fd == -1)
-    {
-      int save_errno = errno;
-      do_cleanups (old_cleanups);
-      errno = save_errno;
-      return 0;
-    }
+    return opened;
 
-  do_cleanups (old_cleanups);
-
-  *streamp = fdopen (fd, FOPEN_RT);
-  if (*streamp == NULL)
+  FILE *result = fdopen (fd, FOPEN_RT);
+  if (result == NULL)
     {
       int save_errno = errno;
 
       close (fd);
-      if (full_pathp)
-	xfree (*full_pathp);
       errno = save_errno;
-      return 0;
     }
+  else
+    opened.emplace (gdb_file_up (result), std::move (full_path));
 
-  return 1;
+  return opened;
 }
 
 /* Load script FILE, which has already been opened as STREAM.
@@ -596,14 +597,12 @@ source_script_from_stream (FILE *stream, const char *file,
 static void
 source_script_with_search (const char *file, int from_tty, int search_path)
 {
-  FILE *stream;
-  char *full_path;
-  struct cleanup *old_cleanups;
 
   if (file == NULL || *file == 0)
     error (_("source command requires file name of file to source."));
 
-  if (!find_and_open_script (file, search_path, &stream, &full_path))
+  gdb::optional<open_script> opened = find_and_open_script (file, search_path);
+  if (!opened)
     {
       /* The script wasn't found, or was otherwise inaccessible.
          If the source command was invoked interactively, throw an
@@ -618,15 +617,13 @@ source_script_with_search (const char *file, int from_tty, int search_path)
 	}
     }
 
-  old_cleanups = make_cleanup (xfree, full_path);
-  make_cleanup_fclose (stream);
   /* The python support reopens the file, so we need to pass full_path here
      in case the file was found on the search path.  It's useful to do this
      anyway so that error messages show the actual file used.  But only do
      this if we (may have) used search_path, as printing the full path in
      errors for the non-search case can be more noise than signal.  */
-  source_script_from_stream (stream, file, search_path ? full_path : file);
-  do_cleanups (old_cleanups);
+  source_script_from_stream (opened->stream.get (), file,
+			     search_path ? opened->full_path.get () : file);
 }
 
 /* Wrapper around source_script_with_search to export it to main.c
@@ -638,26 +635,14 @@ source_script (const char *file, int from_tty)
   source_script_with_search (file, from_tty, 0);
 }
 
-/* Return the source_verbose global variable to its previous state
-   on exit from the source command, by whatever means.  */
-static void
-source_verbose_cleanup (void *old_value)
-{
-  source_verbose = *(int *)old_value;
-  xfree (old_value);
-}
-
 static void
 source_command (char *args, int from_tty)
 {
-  struct cleanup *old_cleanups;
   char *file = args;
   int *old_source_verbose = XNEW (int);
   int search_path = 0;
 
-  *old_source_verbose = source_verbose;
-  old_cleanups = make_cleanup (source_verbose_cleanup, 
-			       old_source_verbose);
+  scoped_restore save_source_verbose = make_scoped_restore (&source_verbose);
 
   /* -v causes the source command to run in verbose mode.
      -s causes the file to be searched in the source search path,
@@ -698,8 +683,6 @@ source_command (char *args, int from_tty)
     }
 
   source_script_with_search (file, from_tty, search_path);
-
-  do_cleanups (old_cleanups);
 }
 
 
@@ -1407,31 +1390,27 @@ alias_command (char *args, int from_tty)
 {
   int i, alias_argc, command_argc;
   int abbrev_flag = 0;
-  char *args2, *equals;
+  char *equals;
   const char *alias, *command;
-  char **alias_argv, **command_argv;
-  struct cleanup *cleanup;
 
   if (args == NULL || strchr (args, '=') == NULL)
     alias_usage_error ();
 
-  args2 = xstrdup (args);
-  cleanup = make_cleanup (xfree, args2);
-  equals = strchr (args2, '=');
-  *equals = '\0';
-  alias_argv = gdb_buildargv (args2);
-  make_cleanup_freeargv (alias_argv);
-  command_argv = gdb_buildargv (equals + 1);
-  make_cleanup_freeargv (command_argv);
+  equals = strchr (args, '=');
+  std::string args2 (args, equals - args);
 
-  for (i = 0; alias_argv[i] != NULL; )
+  gdb_argv built_alias_argv (args2.c_str ());
+  gdb_argv command_argv (equals + 1);
+
+  char **alias_argv = built_alias_argv.get ();
+  while (alias_argv[0] != NULL)
     {
-      if (strcmp (alias_argv[i], "-a") == 0)
+      if (strcmp (alias_argv[0], "-a") == 0)
 	{
 	  ++alias_argv;
 	  abbrev_flag = 1;
 	}
-      else if (strcmp (alias_argv[i], "--") == 0)
+      else if (strcmp (alias_argv[0], "--") == 0)
 	{
 	  ++alias_argv;
 	  break;
@@ -1456,12 +1435,13 @@ alias_command (char *args, int from_tty)
     }
 
   alias_argc = countargv (alias_argv);
-  command_argc = countargv (command_argv);
+  command_argc = command_argv.count ();
 
   /* COMMAND must exist.
      Reconstruct the command to remove any extraneous spaces,
      for better error messages.  */
-  std::string command_string (argv_to_string (command_argv, command_argc));
+  std::string command_string (argv_to_string (command_argv.get (),
+					      command_argc));
   command = command_string.c_str ();
   if (! valid_command_p (command))
     error (_("Invalid command to alias to: %s"), command);
@@ -1518,8 +1498,6 @@ alias_command (char *args, int from_tty)
 		     command_argv[command_argc - 1],
 		     class_alias, abbrev_flag, c_command->prefixlist);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Print a list of files and line numbers which a user may choose from

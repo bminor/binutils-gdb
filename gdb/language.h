@@ -138,7 +138,7 @@ struct language_arch_info
    transformed for lookup.  */
 
 typedef int (*symbol_name_cmp_ftype) (const char *symbol_search_name,
-					  const char *lookup_name);
+				      const char *lookup_name);
 
 /* Structure tying together assorted information about a language.  */
 
@@ -327,14 +327,17 @@ struct language_defn
     /* The list of characters forming word boundaries.  */
     const char *(*la_word_break_characters) (void);
 
-    /* Should return a vector of all symbols which are possible
+    /* Add to the completion tracker all symbols which are possible
        completions for TEXT.  WORD is the entire command on which the
        completion is being made.  If CODE is TYPE_CODE_UNDEF, then all
        symbols should be examined; otherwise, only STRUCT_DOMAIN
        symbols whose type has a code of CODE should be matched.  */
-    VEC (char_ptr) *(*la_make_symbol_completion_list) (const char *text,
-						       const char *word,
-						       enum type_code code);
+    void (*la_collect_symbol_completion_matches)
+      (completion_tracker &tracker,
+       complete_symbol_mode mode,
+       const char *text,
+       const char *word,
+       enum type_code code);
 
     /* The per-architecture (OS/ABI) language information.  */
     void (*la_language_arch_info) (struct gdbarch *,
@@ -573,10 +576,6 @@ extern const struct language_defn *language_def (enum language);
 
 extern const char *language_str (enum language);
 
-/* Add a language to the set known by GDB (at initialization time).  */
-
-extern void add_language (const struct language_defn *);
-
 /* Check for a language-specific trampoline.  */
 
 extern CORE_ADDR skip_language_trampoline (struct frame_info *, CORE_ADDR pc);
@@ -626,5 +625,50 @@ extern unsigned int default_compute_string_hash (const char *string);
 
 void c_get_string (struct value *value, gdb_byte **buffer, int *length,
 		   struct type **char_type, const char **charset);
+
+/* The languages supported by GDB.  */
+
+extern const struct language_defn auto_language_defn;
+extern const struct language_defn unknown_language_defn;
+extern const struct language_defn minimal_language_defn;
+
+extern const struct language_defn ada_language_defn;
+extern const struct language_defn asm_language_defn;
+extern const struct language_defn c_language_defn;
+extern const struct language_defn cplus_language_defn;
+extern const struct language_defn d_language_defn;
+extern const struct language_defn f_language_defn;
+extern const struct language_defn go_language_defn;
+extern const struct language_defn m2_language_defn;
+extern const struct language_defn objc_language_defn;
+extern const struct language_defn opencl_language_defn;
+extern const struct language_defn pascal_language_defn;
+extern const struct language_defn rust_language_defn;
+
+/* Save the current language and restore it upon destruction.  */
+
+class scoped_restore_current_language
+{
+public:
+
+  explicit scoped_restore_current_language ()
+    : m_lang (current_language->la_language)
+  {
+  }
+
+  ~scoped_restore_current_language ()
+  {
+    set_language (m_lang);
+  }
+
+  scoped_restore_current_language (const scoped_restore_current_language &)
+      = delete;
+  scoped_restore_current_language &operator=
+      (const scoped_restore_current_language &) = delete;
+
+private:
+
+  enum language m_lang;
+};
 
 #endif /* defined (LANGUAGE_H) */

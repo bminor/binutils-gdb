@@ -1,5 +1,5 @@
 #source: linkinfo1.s
-#ld: -shared
+#ld: -shared --hash-style=sysv
 #objcopy_linked_file: --strip-debug
 #readelf: -SW
 #target: x86_64-* i?86-*

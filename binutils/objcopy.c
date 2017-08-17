@@ -1915,10 +1915,13 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
   Elf_Internal_Note * pnotes;
   Elf_Internal_Note * pnote;
   bfd_size_type       remain = size;
-  unsigned            version_notes_seen = 0;
+  unsigned            version_1_seen = 0;
+  unsigned            version_2_seen = 0;
   bfd_boolean         duplicate_found = FALSE;
   const char *        err = NULL;
   bfd_byte *          in = contents;
+  int                 attribute_type_byte;
+  int                 val_start;
 
   /* Make a copy of the notes.
      Minimum size of a note is 12 bytes.  */
@@ -1968,8 +1971,18 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 	  goto done;
 	}
       
-      if (pnote->namesz > 1 && pnote->namedata[1] == GNU_BUILD_ATTRIBUTE_VERSION)
-	++ version_notes_seen;
+      if (pnote->namesz > 2
+	  && pnote->namedata[0] == '$'
+	  && pnote->namedata[1] == GNU_BUILD_ATTRIBUTE_VERSION
+	  && pnote->namedata[2] == '1')
+	++ version_1_seen;
+      else if (pnote->namesz > 4
+	  && pnote->namedata[0] == 'G'
+	  && pnote->namedata[1] == 'A'
+	  && pnote->namedata[2] == '$'
+	  && pnote->namedata[3] == GNU_BUILD_ATTRIBUTE_VERSION
+	  && pnote->namedata[4] == '2')
+	++ version_2_seen;
       pnote ++;
     }
 
@@ -1978,31 +1991,33 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
   /* Check that the notes are valid.  */
   if (remain != 0)
     {
-      err = _("corrupt GNU build attribute notes: data at end");
+      err = _("corrupt GNU build attribute notes: excess data at end");
       goto done;
     }
 
-  if (version_notes_seen == 0)
+  if (version_1_seen == 0 && version_2_seen == 0)
     {
-      err = _("bad GNU build attribute notes: no version note");
+      err = _("bad GNU build attribute notes: no known versions detected");
+      goto done;
+    }
+
+  if (version_1_seen > 0 && version_2_seen > 0)
+    {
+      err = _("bad GNU build attribute notes: multiple different versions");
       goto done;
     }
 
   /* Merging is only needed if there is more than one version note...  */
-  if (version_notes_seen == 1)
+  if (version_1_seen == 1 || version_2_seen == 1)
     goto done;
 
+  attribute_type_byte = version_1_seen ? 1 : 3;
+  val_start = attribute_type_byte + 1;
+
   /* The first note should be the first version note.  */
-  if (pnotes[0].namedata[1] != GNU_BUILD_ATTRIBUTE_VERSION)
+  if (pnotes[0].namedata[attribute_type_byte] != GNU_BUILD_ATTRIBUTE_VERSION)
     {
       err = _("bad GNU build attribute notes: first note not version note");
-      goto done;
-    }
-
-  if (pnotes[0].namedata[0] != GNU_BUILD_ATTRIBUTE_TYPE_STRING
-      || pnotes[0].namedata[2] != '1')
-    {
-      err = _("bad GNU build attribute notes: version note not v1");
       goto done;
     }
 
@@ -2037,9 +2052,9 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 	    prev_open = back;
 
 	  if (back->type == pnote->type
-	      && back->namedata[1] == pnote->namedata[1])
+	      && back->namedata[attribute_type_byte] == pnote->namedata[attribute_type_byte])
 	    {
-	      if (back->namedata[1] == GNU_BUILD_ATTRIBUTE_STACK_SIZE)
+	      if (back->namedata[attribute_type_byte] == GNU_BUILD_ATTRIBUTE_STACK_SIZE)
 		{
 		  unsigned char * name;
 		  unsigned long   note_val;
@@ -2048,22 +2063,28 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 		  unsigned int    bytes;
 		  unsigned long   byte;
 
-		  for (shift = 0, note_val = 0, bytes = pnote->namesz - 2, name = (unsigned char *) pnote->namedata + 2;
+		  for (shift = 0, note_val = 0,
+			 bytes = pnote->namesz - val_start,
+			 name = (unsigned char *) pnote->namedata + val_start;
 		       bytes--;)
 		    {
 		      byte = (* name ++) & 0xff;
 		      note_val |= byte << shift;
 		      shift += 8;
 		    }
-		  for (shift = 0, back_val = 0, bytes = back->namesz - 2, name = (unsigned char *) back->namedata + 2;
+
+		  for (shift = 0, back_val = 0,
+			 bytes = back->namesz - val_start,
+			 name = (unsigned char *) back->namedata + val_start;
 		       bytes--;)
 		    {
 		      byte = (* name ++) & 0xff;
 		      back_val |= byte << shift;
 		      shift += 8;
 		    }
+
 		  back_val += note_val;
-		  if (num_bytes (back_val) >= back->namesz - 2)
+		  if (num_bytes (back_val) >= back->namesz - val_start)
 		    {
 		      /* We have a problem - the new value requires more bytes of
 			 storage in the name field than are available.  Currently
@@ -2071,8 +2092,9 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 			 notes.  */
 		      continue;
 		    }
+
 		  /* Write the new val into back.  */
-		  name = (unsigned char *) back->namedata + 2;
+		  name = (unsigned char *) back->namedata + val_start;
 		  while (name < (unsigned char *) back->namedata + back->namesz)
 		    {
 		      byte = back_val & 0xff;
@@ -2096,9 +2118,9 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
 		}
 
 	      /* If we have found an attribute match then stop searching backwards.  */
-	      if (! ISPRINT (back->namedata[1])
+	      if (! ISPRINT (back->namedata[attribute_type_byte])
 		  /* Names are NUL terminated, so this is safe.  */
-		  || strcmp (back->namedata + 2, pnote->namedata + 2) == 0)
+		  || strcmp (back->namedata + val_start, pnote->namedata + val_start) == 0)
 		{
 		  /* Since we are keeping this note we must check to see if its
 		     description refers back to an earlier OPEN version note.  If so
@@ -2628,14 +2650,15 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	      continue;
 	    }
 
-	  bfd_byte * contents = xmalloc (size);
-	  if (bfd_get_section_contents (ibfd, osec, contents, 0, size))
+	  bfd_byte *contents;
+	  if (bfd_malloc_and_get_section (ibfd, osec, &contents))
 	    {
 	      if (fwrite (contents, 1, size, f) != size)
 		{
 		  non_fatal (_("error writing section contents to %s (error: %s)"),
 			     pdump->filename,
 			     strerror (errno));
+		  free (contents);
 		  return FALSE;
 		}
 	    }

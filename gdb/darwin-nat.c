@@ -367,29 +367,14 @@ darwin_check_new_threads (struct inferior *inf)
       if (new_ix < new_nbr && (old_ix == old_nbr || new_id < old_id))
 	{
 	  /* A thread was created.  */
-	  struct thread_info *tp;
 	  struct private_thread_info *pti;
 
 	  pti = XCNEW (struct private_thread_info);
 	  pti->gdb_port = new_id;
 	  pti->msg_state = DARWIN_RUNNING;
 
-	  if (old_nbr == 0 && new_ix == 0)
-	    {
-	      /* A ptid is create when the inferior is started (see
-		 fork-child.c) with lwp=tid=0.  This ptid will be renamed
-		 later by darwin_init_thread_list ().  */
-	      tp = find_thread_ptid (ptid_build (inf->pid, 0, 0));
-	      gdb_assert (tp);
-	      gdb_assert (tp->priv == NULL);
-	      tp->priv = pti;
-	    }
-	  else
-	    {
-	      /* Add the new thread.  */
-	      tp = add_thread_with_info
-		(ptid_build (inf->pid, 0, new_id), pti);
-	    }
+	  /* Add the new thread.  */
+	  add_thread_with_info (ptid_build (inf->pid, 0, new_id), pti);
 	  VEC_safe_push (darwin_thread_t, thread_vec, pti);
 	  new_ix++;
 	  continue;
@@ -1701,23 +1686,38 @@ darwin_attach_pid (struct inferior *inf)
     push_target (darwin_ops);
 }
 
+/* Get the thread_info object corresponding to this private_thread_info.  */
+
+static struct thread_info *
+thread_info_from_private_thread_info (private_thread_info *pti)
+{
+  struct thread_info *it;
+
+  ALL_THREADS (it)
+    {
+      if (it->priv->gdb_port == pti->gdb_port)
+	break;
+    }
+
+  gdb_assert (it != NULL);
+
+  return it;
+}
+
 static void
 darwin_init_thread_list (struct inferior *inf)
 {
-  darwin_thread_t *thread;
-  ptid_t new_ptid;
-
   darwin_check_new_threads (inf);
 
-  gdb_assert (inf->priv->threads
-	      && VEC_length (darwin_thread_t, inf->priv->threads) > 0);
-  thread = VEC_index (darwin_thread_t, inf->priv->threads, 0);
+  gdb_assert (inf->priv->threads != NULL);
+  gdb_assert (VEC_length (darwin_thread_t, inf->priv->threads) > 0);
 
-  /* Note: fork_inferior automatically add a thead but it uses a wrong ptid.
-     Fix up.  */
-  new_ptid = ptid_build (inf->pid, 0, thread->gdb_port);
-  thread_change_ptid (inferior_ptid, new_ptid);
-  inferior_ptid = new_ptid;
+  private_thread_info *first_pti
+    = VEC_index (darwin_thread_t, inf->priv->threads, 0);
+  struct thread_info *first_thread
+    = thread_info_from_private_thread_info (first_pti);
+
+  inferior_ptid = first_thread->ptid;
 }
 
 /* The child must synchronize with gdb: gdb must set the exception port
@@ -1834,23 +1834,10 @@ darwin_create_inferior (struct target_ops *ops,
 			const std::string &allargs,
 			char **env, int from_tty)
 {
-  pid_t pid;
-  ptid_t ptid;
-
   /* Do the hard work.  */
-  pid = fork_inferior (exec_file, allargs, env, darwin_ptrace_me,
-		       darwin_ptrace_him, darwin_pre_ptrace, NULL,
-		       darwin_execvp);
-
-  ptid = pid_to_ptid (pid);
-  /* Return now in case of error.  */
-  if (ptid_equal (inferior_ptid, null_ptid))
-    return;
-
-  /* We have something that executes now.  We'll be running through
-     the shell at this point (if startup-with-shell is true), but the
-     pid shouldn't change.  */
-  add_thread_silent (ptid);
+  fork_inferior (exec_file, allargs, env, darwin_ptrace_me,
+		 darwin_ptrace_him, darwin_pre_ptrace, NULL,
+		 darwin_execvp);
 }
 
 
@@ -1919,9 +1906,6 @@ darwin_attach (struct target_ops *ops, const char *args, int from_tty)
   inf = current_inferior ();
   inferior_appeared (inf, pid);
   inf->attach_flag = 1;
-
-  /* Always add a main thread.  */
-  add_thread_silent (inferior_ptid);
 
   darwin_attach_pid (inf);
 

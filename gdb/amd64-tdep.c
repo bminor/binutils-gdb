@@ -49,10 +49,6 @@
 #include "features/i386/amd64-avx-avx512.c"
 #include "features/i386/amd64-avx-mpx-avx512-pku.c"
 
-#include "features/i386/x32.c"
-#include "features/i386/x32-avx.c"
-#include "features/i386/x32-avx-avx512.c"
-
 #include "ax.h"
 #include "ax-gdb.h"
 
@@ -3005,7 +3001,8 @@ static const int amd64_record_regmap[] =
 };
 
 void
-amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
+		const target_desc *default_tdesc)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const struct target_desc *tdesc = info.target_desc;
@@ -3022,7 +3019,7 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->fpregset = &amd64_fpregset;
 
   if (! tdesc_has_registers (tdesc))
-    tdesc = tdesc_amd64;
+    tdesc = default_tdesc;
   tdep->tdesc = tdesc;
 
   tdep->num_core_regs = AMD64_NUM_GREGS + I387_NUM_REGS;
@@ -3196,16 +3193,12 @@ amd64_x32_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 }
 
 void
-amd64_x32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+amd64_x32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
+		    const target_desc *default_tdesc)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  const struct target_desc *tdesc = info.target_desc;
 
-  amd64_init_abi (info, gdbarch);
-
-  if (! tdesc_has_registers (tdesc))
-    tdesc = tdesc_x32;
-  tdep->tdesc = tdesc;
+  amd64_init_abi (info, gdbarch, default_tdesc);
 
   tdep->num_dword_regs = 17;
   set_tdesc_pseudo_register_type (gdbarch, amd64_x32_pseudo_register_type);
@@ -3248,10 +3241,6 @@ _initialize_amd64_tdep (void)
   initialize_tdesc_amd64_avx_mpx ();
   initialize_tdesc_amd64_avx_avx512 ();
   initialize_tdesc_amd64_avx_mpx_avx512_pku ();
-
-  initialize_tdesc_x32 ();
-  initialize_tdesc_x32_avx ();
-  initialize_tdesc_x32_avx_avx512 ();
 }
 
 

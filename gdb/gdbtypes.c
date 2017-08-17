@@ -4417,10 +4417,6 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_TARGET_STUB");
     }
-  if (TYPE_STATIC (type))
-    {
-      puts_filtered (" TYPE_STATIC");
-    }
   if (TYPE_PROTOTYPED (type))
     {
       puts_filtered (" TYPE_PROTOTYPED");

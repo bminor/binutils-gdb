@@ -1499,7 +1499,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: bad XTY_ER symbol `%s': class %d scnum %d scnlen %d"),
+		(_("%B: bad XTY_ER symbol `%s': class %d scnum %d scnlen %Ld"),
 		 abfd, name, sym.n_sclass, sym.n_scnum,
 		 aux.x_csect.x_scnlen.l);
 	      bfd_set_error (bfd_error_bad_value);
@@ -1529,7 +1529,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: XMC_TC0 symbol `%s' is class %d scnlen %d"),
+		    (_("%B: XMC_TC0 symbol `%s' is class %d scnlen %Ld"),
 		     abfd, name, sym.n_sclass, aux.x_csect.x_scnlen.l);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
@@ -2105,7 +2105,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: reloc %s:%d not in csect"),
+		    (_("%B: reloc %s:%Ld not in csect"),
 		     abfd, o->name, i);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
@@ -5112,9 +5112,9 @@ xcoff_find_tc0 (bfd *output_bfd, struct xcoff_final_link_info *flinfo)
       if (best_address > toc_start + 0x8000)
 	{
 	  _bfd_error_handler
-	    (_("TOC overflow: 0x%lx > 0x10000; try -mminimal-toc "
+	    (_("TOC overflow: %#Lx > 0x10000; try -mminimal-toc "
 	       "when compiling"),
-	     (unsigned long) (toc_end - toc_start));
+	     toc_end - toc_start);
 	  bfd_set_error (bfd_error_file_too_big);
 	  return FALSE;
 	}
@@ -5310,7 +5310,7 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
 	tocoff += h->descriptor->u.toc_offset;
 
       /* The first instruction in the glink code needs to be
-	 cooked to to hold the correct offset in the toc.  The
+	 cooked to hold the correct offset in the toc.  The
 	 rest are just output raw.  */
       bfd_put_32 (output_bfd,
 		  bfd_xcoff_glink_code(output_bfd, 0) | (tocoff & 0xffff), p);

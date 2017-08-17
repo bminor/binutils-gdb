@@ -1,5 +1,5 @@
 #as: --32
-#ld: -shared -m elf_i386
+#ld: -shared -m elf_i386 --hash-style=sysv
 #objdump: -dw
 
 .*: +file format .*

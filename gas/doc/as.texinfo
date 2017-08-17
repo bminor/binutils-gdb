@@ -1740,7 +1740,7 @@ Specify which s390 processor variant is the target, @samp{g5} (or
 @samp{arch3}), @samp{g6}, @samp{z900} (or @samp{arch5}), @samp{z990} (or
 @samp{arch6}), @samp{z9-109}, @samp{z9-ec} (or @samp{arch7}), @samp{z10} (or
 @samp{arch8}), @samp{z196} (or @samp{arch9}), @samp{zEC12} (or @samp{arch10}),
-@samp{z13} (or @samp{arch11}), or @samp{arch12}.
+@samp{z13} (or @samp{arch11}), or @samp{z14} (or @samp{arch12}).
 @item -mregnames
 @itemx -mno-regnames
 Allow or disallow symbolic names for registers.
@@ -5832,6 +5832,19 @@ state machine to @var{value}, which must be an unsigned integer.
 @item discriminator @var{value}
 This directive will set the @code{discriminator} register in the @code{.debug_line}
 state machine to @var{value}, which must be an unsigned integer.
+
+@item view @var{value}
+This option causes a row to be added to @code{.debug_line} in reference to the
+current address (which might not be the same as that of the following assembly
+instruction), and to associate @var{value} with the @code{view} register in the
+@code{.debug_line} state machine.  If @var{value} is a label, both the
+@code{view} register and the label are set to the number of prior @code{.loc}
+directives at the same program location.  If @var{value} is the literal
+@code{0}, the @code{view} register is set to zero, and the assembler asserts
+that there aren't any prior @code{.loc} directives at the same program
+location.  If @var{value} is the literal @code{-0}, the assembler arrange for
+the @code{view} register to be reset in this row, even if there are prior
+@code{.loc} directives at the same program location.
 
 @end table
 

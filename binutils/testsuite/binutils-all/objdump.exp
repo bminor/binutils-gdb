@@ -34,7 +34,7 @@ send_user "Version [binutil_version $OBJDUMP]"
 set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -i"]
 
 set cpus_expected [list]
-lappend cpus_expected aarch64 alpha arc ARC700 ARCv2 arm cris
+lappend cpus_expected aarch64 alpha am33-2 arc ARC700 ARCv2 arm cris
 lappend cpus_expected d10v d30v fr30 fr500 fr550 h8 hppa i386 i860 i960 iamcu ip2022
 lappend cpus_expected m16c m32c m32r m68hc11 m68hc12 m68k m88k MCore mep c5 h1 MicroBlaze
 lappend cpus_expected mips mn10200 mn10300 ms1 msp MSP430 nds32 n1h_v3 ns32k
@@ -75,18 +75,16 @@ if [is_remote host] {
     set testfile2 tmpdir/bintest2.o
 }
 
+# $testarchive exists only if it is supported.
+set testarchive tmpdir/bintest.a
+remote_file host file delete $testarchive
 if { ![istarget "alpha-*-*"] || [is_elf_format] } then {
-    remote_file host file delete tmpdir/bintest.a
     set got [binutils_run $AR "rc tmpdir/bintest.a $testfile2"]
     if ![string match "" $got] then {
 	fail "bintest.a"
 	remote_file host delete tmpdir/bintest.a
-    } else {
-	if [is_remote host] {
-	    set testarchive [remote_download host tmpdir/bintest.a]
-	} else {
-	    set testarchive tmpdir/bintest.a
-	}
+    } elseif [is_remote host] {
+	set testarchive [remote_download host tmpdir/bintest.a]
     }
     remote_file host delete tmpdir/bintest2.o
 }

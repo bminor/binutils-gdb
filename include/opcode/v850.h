@@ -230,10 +230,10 @@ extern const struct v850_operand v850_operands[];
 /* The operand has '%' prefix.  */
 #define V850_OPERAND_PERCENT	0x200000
 
-/* This operand is a cache oparation.  */
+/* This operand is a cache operation.  */
 #define V850_OPERAND_CACHEOP	0x400000
 
-/* This operand is a prefetch oparation.  */
+/* This operand is a prefetch operation.  */
 #define V850_OPERAND_PREFOP	0x800000
 
 /* A PC-relative displacement where a positive value indicates a backwards displacement.  */

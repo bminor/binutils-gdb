@@ -129,7 +129,7 @@ const size_t ARM_TCB_SIZE = 8;
 // Target::do_select_as_default_target() hook so that we do not spend time
 // building the table if we are not linking ARM objects.
 //
-// An alternative is to to process the information in arm-reloc.def in
+// An alternative is to process the information in arm-reloc.def in
 // compilation time and generate a representation of it in PODs only.  That
 // way we can avoid initialization when the linker starts.
 
@@ -11660,7 +11660,7 @@ Target_arm<big_endian>::merge_object_attributes(
 	      if (in_attr[elfcpp::Tag_MPextension_use].int_value()
 		  != in_attr[i].int_value())
 		{
-		  gold_error(_("%s has has both the current and legacy "
+		  gold_error(_("%s has both the current and legacy "
 			       "Tag_MPextension_use attributes"),
 			     name);
 		}
@@ -12775,7 +12775,7 @@ Target_arm<big_endian>::scan_span_for_cortex_a8_erratum(
 
 	      Arm_address target = (pc_for_insn + offset) | (is_blx ? 0 : 1);
 
-	      // Add a new stub if destination address in in the same page.
+	      // Add a new stub if destination address is in the same page.
 	      if (((address + i) & ~0xfffU) == (target & ~0xfffU))
 		{
 		  Cortex_a8_stub* stub =
@@ -12877,7 +12877,7 @@ Target_arm<big_endian>::fix_exidx_coverage(
     const Task* task)
 {
   // We need to look at all the input sections in output in ascending
-  // order of of output address.  We do that by building a sorted list
+  // order of output address.  We do that by building a sorted list
   // of output sections by addresses.  Then we looks at the output sections
   // in order.  The input sections in an output section are already sorted
   // by addresses within the output section.

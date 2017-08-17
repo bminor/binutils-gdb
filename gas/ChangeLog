@@ -1,3 +1,595 @@
+2017-08-15  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* config/tc-aarch64.c (REGDEF_ALIAS): Define
+	(reg_names): Update for ip0, ip1, fp, lr to use REGDEF_ALIAS
+	* doc/c-aarch64.texi: Update documentation on .req.
+	* testsuite/gas/diagnostic.s: Update
+	* testsuite/gas/diagnostic.l: Likewise
+	* testsuite/gas/register_aliases.s: New file.
+	* testsuite/gas/register_aliases.d: New file.
+
+2017-08-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/21667
+	* read.c (pseudo_set): Update error message for alias of common
+	symbol.
+	* write.c (write_object_file): Disallow both local and global
+	aliases of common symbol.
+	* testsuite/gas/elf/common5a.d: New file.
+	* testsuite/gas/elf/common5a.l: Likewise.
+	* testsuite/gas/elf/common5a.s: Likewise.
+	* testsuite/gas/elf/common5b.d: Likewise.
+	* testsuite/gas/elf/common5b.l: Likewise.
+	* testsuite/gas/elf/common5b.s: Likewise.
+	* testsuite/gas/elf/common5c.d: Likewise.
+	* testsuite/gas/elf/common5c.s: Likewise.
+	* testsuite/gas/elf/common5d.d: Likewise.
+	* testsuite/gas/elf/common5d.s: Likewise.
+	* testsuite/gas/elf/elf.exp: Run common5a, common5b, common5c
+	and common5d.
+
+2017-08-10  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/21939
+	* config/obj-macho.c (obj_mach_o_set_indirect_symbols): Increase
+	size of indirect_syms array so that it is large enough to hold
+	every symbol if necessary.
+
+2017-08-09  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (do_crc32_1): Remove warning on REG_SP for thumb_mode.
+	* testsuite/gas/arm/crc32-armv8-a-bad.d: Update exepcted result.
+	* testsuite/gas/arm/crc32-armv8-r-bad.d: Likewise.
+	* testsuite/gas/arm/crc32-armv8-a.d: Likewise.
+	* testsuite/gas/arm/crc32-armv8-r.d: Likewise.
+	* testsuite/gas/arm/crc32-armv8-ar-bad.s: Update test case.
+	* testsuite/gas/arm/crc32-armv8-ar.s: Likewise.
+	* testsuite/gas/arm/crc32-bad.l: Update expected error message.
+
+2017-08-02  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/all/gas.exp: Add am33 to the skip lists of tests
+	passed over by the mn10300 target.
+	* testsuite/gas/elf/elf.exp: Likewise.
+	* testsuite/gas/elf/dwarf2-11.d: Correct skip of am33 target.
+	* testsuite/gas/elf/dwarf2-12.d: Likewise.
+	* testsuite/gas/elf/dwarf2-13.d: Likewise.
+	* testsuite/gas/elf/dwarf2-14.d: Likewise.
+	* testsuite/gas/elf/dwarf2-15.d: Likewise.
+	* testsuite/gas/elf/dwarf2-16.d: Likewise.
+	* testsuite/gas/elf/dwarf2-17.d: Likewise.
+	* testsuite/gas/elf/dwarf2-18.d: Likewise.
+	* testsuite/gas/elf/dwarf2-5.d: Likewise.
+	* testsuite/gas/elf/dwarf2-6.d: Likewise.
+	* testsuite/gas/elf/dwarf2-7.d: Likewise.
+
+2017-08-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/21874
+	* config/tc-i386-intel.c (i386_intel_operand): Update segment
+	register check.
+	* testsuite/gas/i386/intelok.s: Replace "fs:gs:[eax]" with
+	"fs:[eax]".
+	* testsuite/gas/i386/inval-seg.s: Add tests for invalid segment
+	register.
+	* testsuite/gas/i386/x86-64-inval-seg.s: Likewise.
+	* testsuite/gas/i386/inval-seg.l: Updated.
+	* testsuite/gas/i386/x86-64-inval-seg.l: Likewise.
+
+2017-07-31  John David Anglin  <danglin@gcc.gnu.org>
+
+	* config/tc-hppa.c (pa_ip): Clear `d' bit in branch on bit instructions
+	with a double-word condition and a fixed bit position greater than 31.
+
+2017-07-28  Andrew Waterman  <andrew@sifive.com>
+
+	* config/tc-riscv.c (riscv_set_arch): Handle the Q subset like
+	all other subsets.
+	Obviate use-after-free.
+
+2017-07-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 21739
+	* testsuite/gas/arc/add_s-err.s: Update expected error message.
+
+2017-07-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 21809
+	* config/tc-aarch64.c (aarch64_init_frag): Do not set a mapping
+	state for frags in debug sections.
+	* config/tc-arm.c (arm_init_frag): Likewise.
+
+2017-07-24  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* dwarf2dbg.c (dwarf2dbg_final_check): Rename local variable exp
+	from expr.
+
+2017-07-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* config/tc-s390.c (s390_parse_cpu): Add z14 as alternate CPU
+	name.
+	* doc/as.texinfo: Add z14 to CPU string list.
+	* doc/c-s390.texi: Likewise.
+
+2017-07-21  Alexandre Oliva  <aoliva@redhat.com>
+
+	* dwarf2dbg.c (unused): Check offset of next in struct line_entry.
+	(current): Initialize view.
+	(force_reset_view, view_assert_failed): New variables.
+	(reverse_line_entry_list): New function.
+	(set_or_check_view): Likewise.
+	(dwarf2_gen_line_info_1): Call it.
+	(dwarf2_where): Set view to NULL.
+	(dwarf2_emit_insn): Return early when called before first file.
+	(dwarf2_directive_loc): Add view support.  Emit insn
+	immediately when view option is given.
+	(process_entries): Avoid set_address to reset view when a known
+	address change already implies the view reset.
+	(dwarf2dbg_final_check): New function.
+	* dwarf2dbg.h (struct dwarf2_line_info): Add view.
+	(dwarf2dbg_final_check): Declare.
+	* read.c (s_leb128): Parse expression as deferred.
+	* write.c (write_object_file): Check pending view asserts.
+	(cvt_frag_to_fill): Complain about undefined leb128 operand.
+	* doc/as.texinfo (.loc): Document view support.
+	* NEWS: Mention the new feature.
+	* testsuite/gas/all/gas.exp: Run sleb128-9.
+	* testsuite/gas/all/sleb128-9.d: New.
+	* testsuite/gas/all/sleb128-9.l: New.
+	* testsuite/gas/all/sleb128-9.s: New.
+	* testsuite/gas/elf/dwarf2-1.d: Add nonzero views.
+	* testsuite/gas/elf/dwarf2-2.d: Likewise.
+	* testsuite/gas/elf/dwarf2-5.d: New.
+	* testsuite/gas/elf/dwarf2-5.s: New.
+	* testsuite/gas/elf/dwarf2-6.d: New.
+	* testsuite/gas/elf/dwarf2-6.s: New.
+	* testsuite/gas/elf/dwarf2-7.d: New.
+	* testsuite/gas/elf/dwarf2-7.s: New.
+	* testsuite/gas/elf/dwarf2-8.d: New.
+	* testsuite/gas/elf/dwarf2-8.l: New.
+	* testsuite/gas/elf/dwarf2-8.s: New.
+	* testsuite/gas/elf/dwarf2-9.d: New.
+	* testsuite/gas/elf/dwarf2-9.l: New.
+	* testsuite/gas/elf/dwarf2-9.s: New.
+	* testsuite/gas/elf/dwarf2-10.d: New.
+	* testsuite/gas/elf/dwarf2-10.l: New.
+	* testsuite/gas/elf/dwarf2-10.s: New.
+	* testsuite/gas/elf/dwarf2-11.d: New.
+	* testsuite/gas/elf/dwarf2-11.s: New.
+	* testsuite/gas/elf/dwarf2-12.d: New.
+	* testsuite/gas/elf/dwarf2-12.s: New.
+	* testsuite/gas/elf/dwarf2-13.d: New.
+	* testsuite/gas/elf/dwarf2-13.s: New.
+	* testsuite/gas/elf/dwarf2-14.d: New.
+	* testsuite/gas/elf/dwarf2-14.s: New.
+	* testsuite/gas/elf/dwarf2-15.d: New.
+	* testsuite/gas/elf/dwarf2-15.s: New.
+	* testsuite/gas/elf/dwarf2-16.d: New.
+	* testsuite/gas/elf/dwarf2-16.s: New.
+	* testsuite/gas/elf/dwarf2-17.d: New.
+	* testsuite/gas/elf/dwarf2-17.s: New.
+	* testsuite/gas/elf/dwarf2-18.d: New.
+	* testsuite/gas/elf/dwarf2-18.s: New.
+	* testsuite/gas/elf/elf.exp: Run dwarf2-5..18 tests.
+	* testsuite/gas/i386/dw2-compress-1.d: Add nonzero views.
+	* testsuite/gas/i386/dw2-compressed-1.d: Likewise.
+	* testsuite/gas/i386/ilp32/lns/lns-duplicate.d: Likewise.
+	* testsuite/gas/lns/lns-big-delta.d: Likewise.
+	* testsuite/gas/lns/lns-duplicate.d: Likewise.
+	* testsuite/gas/mips/loc-swap-2.d: Likewise.
+	* testsuite/gas/mips/loc-swap-3.d: Likewise.
+	* testsuite/gas/mips/loc-swap.d: Likewise.
+	* testsuite/gas/mips/micromips@loc-swap-2.d: Likewise.
+	* testsuite/gas/mips/micromips@loc-swap.d: Likewise.
+	* testsuite/gas/mips/mips16@loc-swap-2.d: Likewise.
+	* testsuite/gas/mips/mips16@loc-swap.d: Likewise.
+	* testsuite/gas/mips/mips16e@loc-swap.d: Likewise.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/jli-1.d: New file.
+	* testsuite/gas/arc/jli-1.s: Likewise.
+	* testsuite/gas/arc/taux.d: Update for jli_base.
+
+2017-07-19  Tristan Gingold  <gingold@adacore.com>
+
+	* as.c (start_sbrk): Remove.
+	(main): Remove assignment.
+	(dump_statistics): Remove display of data size.
+
+2017-07-19  Tristan Gingold  <gingold@adacore.com>
+
+	* testsuite/gas/pe/seh-x64-err-2.s: New test.
+	* testsuite/gas/pe/seh-x64-err-2.l: New stderr output.
+	* testsuite/gas/pe/pe.exp: Add test.
+	* config/obj-coff-seh.c (obj_coff_seh_do_final): Don't try to end
+	seh part.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 21775
+	* config/tc-arm.c: Fix spelling typos.
+	* config/tc-mips.c: Likewise.
+	* config/tc-msp430.c: Likewise.
+	* config/tc-sh64.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* ecoff.c: Likewise.
+	* testsuite/gas/arm/ldr-bad.l: Likewise.
+	* testsuite/gas/arm/ldr-t-bad.l: Likewise.
+	* testsuite/gas/tic54x/opcodes.s: Likewise.
+	* testsuite/gas/msp340/errata_warns.l: Likewise.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/uk.po: Updated Ukranian translation.
+
+2017-07-17  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR 21472
+	* config/tc-avr.c (mcu_types): Add entries for: attiny212,
+	attiny214, attiny412, attiny414, attiny814, attiny1614,
+	attiny1616, attiny1617, attiny3214, attiny3216, attiny3217.
+	(md_show_usage): Adjust doc for "avrxmega3".
+	* doc/c-avr.texi (AVR options) [-mmcu=]: Adjust doc for avrxmega3.
+	Add MCUs: attiny212, attiny214, attiny412, attiny414, attiny416,
+	attiny417, attiny814, attiny816, attiny817, attiny1614,
+	attiny1616, attiny1617, attiny3214, attiny3216, attiny3217.
+
+2017-07-13  Jim Wilson  <jim.wilson@linaro.org>
+
+	* config/tc-arch64.c (aarch64_cpus): Add AARCH64_FEATURE_RDMA to
+	falkor and qdf24xx entries.
+
+2017-07-12  Alan Modra  <amodra@gmail.com>
+
+	* po/es.po: Update from translationproject.org/latest/gas/.
+	* po/fi.po: Likewise.
+	* po/fr.po: Likewise.
+	* po/id.po: Likewise.
+	* po/ja.po: Likewise.
+	* po/ru.po: Likewise.
+	* po/sv.po: Likewise.
+	* po/tr.po: Likewise.
+	* po/uk.po: Likewise.
+	* po/zh_CN.po: Likewise.
+
+2017-07-12  Nick Clifton  <nickc@redhat.com>
+
+	Fix compile time warnings using gcc 7.1.1.
+	* config/tc-pru.c (md_assemble): Add continue statement after
+	handling 'E' operand character.
+	* config/tc-v850.c (md_assemble): Initialise the 'insn' variable.
+
+2017-07-05  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add Cortex-A55 and Cortex-A75.
+	* doc/c-arm.texi (-mcpu): Document Cortex-A55 and Cortex-A75.
+
+2017-07-05  Borislav Petkov  <bp@suse.de>
+
+	* testsuite/gas/i386/opcode.s: Add tests for ModRM.reg == 6 variants.
+	* testsuite/gas/i386/opcode.d: ditto.
+	* testsuite/gas/i386/x86-64-opcode.s: Add x86_64 variants too.
+	* testsuite/gas/i386/x86-64-opcode.d: ditto.
+
+2017-07-04  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+        * config/tc-arm.c (arm_regs): Add MVFR2.
+        (do_vmrs): Constraint for MVFR2 and armv8.
+        (do_vmsr): Likewise.
+        * testsuite/gas/arm/armv8-a+fp.d: Update.
+        * testsuite/gas/arm/armv8-ar+fp.s: Likewise.
+        * testsuite/gas/arm/armv8-r+fp.d: Likewise.
+        * testsuite/gas/arm/vfp-bad.s: Likewise.
+        * testsuite/gas/arm/vfp-bad.l: Likewise.
+
+2017-07-04  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
+2017-07-04  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.29.
+
+2017-07-03  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/symver.d: Don't run on hppa64-hpux.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (md_convert_frag): Use a switch on the
+	microMIPS relaxation type rather than a chain of conditionals.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (md_convert_frag): Rewrite `fix_new_exp'
+	calls in terms of `fix_new'.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (md_convert_frag): Don't make a helper
+	expression symbol for `fix_new_exp' called with a non-zero
+	offset.
+	* testsuite/gas/mips/relax-offset.d: New test.
+	* testsuite/gas/mips/mips1@relax-offset.d: New test.
+	* testsuite/gas/mips/r3000@relax-offset.d: New test.
+	* testsuite/gas/mips/r3900@relax-offset.d: New test.
+	* testsuite/gas/mips/micromips@relax-offset.d: New test.
+	* testsuite/gas/mips/relax-offset.l: New stderr output.
+	* testsuite/gas/mips/relax-offset.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-06-30  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR gas/21683
+	* doc/c-avr.texi (AVR Options) <-mgcc-isr>: Document it.
+	(AVR Pseudo Instructions): New node.
+	* config/tc-avr.h (md_pre_output_hook): Define to avr_pre_output_hook.
+	(md_undefined_symbol): Define to avr_undefined_symbol.
+	(avr_pre_output_hook, avr_undefined_symbol): New protos.
+	* config/tc-avr.c (struc-symbol.h): Include it.
+	(ISR_CHUNK_Done, ISR_CHUNK_Prologue, ISR_CHUNK_Epilogue): New enums.
+	(avr_isr, avr_gccisr_opcode)
+	(avr_no_sreg_hash, avr_no_sreg): New static variables.
+	(avr_opt_s) <have_gccisr>: Add field.
+	(avr_opt): Add initializer for have_gccisr.
+	(enum options) <OPTION_HAVE_GCCISR>: Add enum.
+	(md_longopts) <"mgcc-isr">: Add entry.
+	(md_show_usage): Document -mgcc-isr.
+	(md_parse_option) [OPTION_HAVE_GCCISR]: Handle it.
+	(md_undefined_symbol): Remove.
+	(avr_undefined_symbol, avr_pre_output_hook): New fuctions.
+	(md_begin) <avr_no_sreg_hash, avr_gccisr_opcode>: Initialize them.
+	(avr_operand) <pregno>: Add argument and set *pregno if function
+	is called for a register constraint.
+	[N]: Handle constraint.
+	(avr_operands) <avr_operand>: Pass 5th parameter to calls.
+	[avr_opt.have_gccisr]: Call avr_update_gccisr.  Call
+	avr_gccisr_operands instead of avr_operands.
+	(avr_update_gccisr, avr_emit_insn, avr_patch_gccisr_frag)
+	(avr_gccisr_operands, avr_check_gccisr_done): New static functions.
+	* testsuite/gas/avr/gccisr-01.d: New test.
+	* testsuite/gas/avr/gccisr-01.s: New test.
+	* testsuite/gas/avr/gccisr-02.d: New test.
+	* testsuite/gas/avr/gccisr-02.s: New test.
+	* testsuite/gas/avr/gccisr-03.d: New test.
+	* testsuite/gas/avr/gccisr-03.s: New test.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (match_float_constant): Update description.
+	(match_operand): Likewise.
+
+2017-06-30  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips_ases): Add microMIPS XPA support.
+	* testsuite/gas/mips/micromips@xpa.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new test.  Enable
+	`xpa-virt-err' test for `micromips'.
+
+2017-06-30  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/micromips@r5.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
+2017-06-30  Maciej W. Rozycki  <macro@imgtec.com>
+	    Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* config/tc-mips.c (mips_set_ase): Handle the ASE_XPA_VIRT flag.
+	* testsuite/gas/mips/xpa.d: Remove `xpa' from `-M' in `objdump'
+	flags.  Add `-mvirt' to `as' flags.
+	* testsuite/gas/mips/xpa-err.d: New test.
+	* testsuite/gas/mips/xpa-virt-err.d: New test.
+	* testsuite/gas/mips/xpa-err.l: New stderr output.
+	* testsuite/gas/mips/xpa-virt-err.l: New stderr output.
+	* testsuite/gas/mips/xpa-err.s: New test source.
+	* testsuite/gas/mips/xpa-virt-err.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-06-29  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips16e2@mips16e2-mt-sub.d: Adjust for the
+	ASE_MIPS16E2_MT flag disassembler fix.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16e2-mt-sub.d:
+	Likewise.
+
+2017-06-29  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips_set_ase): Clear the ASE_MIPS16E2_MT
+	flag before recalculating.
+	* testsuite/gas/mips/mips16e2-mt-err.d: New test.
+	* testsuite/gas/mips/mips16e2-mt-err.l: New stderr output.
+	* testsuite/gas/mips/mips16e2-mt-err.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
+2017-06-28  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-aarch64.c (aarch64_reg_parse_32_64): Accept 4B.
+	(aarch64_features): Added dotprod.
+	* doc/c-aarch64.texi: Added dotprod.
+	* testsuite/gas/aarch64/dotproduct.d: New.
+	* testsuite/gas/aarch64/dotproduct.s: New.
+
+2017-06-28  Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (fpu_neon_ext_dotprod): New variable.
+	(neon_scalar_for_mul): Improve comments.
+	(do_neon_dotproduct): New function to encode Dot Product instructions.
+	(do_neon_dotproduct_s): Wrapper function for signed Dot Product
+	instructions.
+	(do_neon_dotproduct_u): Wrapper function for unsigned Dot Product
+	instructions.
+	(insns): New entries for vsdot and vudot.
+	(arm_extensions): New entry for "dotprod".
+	* doc/c-arm.texi: Document new "dotprod" extension.
+	* testsuite/gas/arm/dotprod.s: New test source.
+	* testsuite/gas/arm/dotprod-illegal.s: New test source.
+	* testsuite/gas/arm/dotprod.d: New test.
+	* testsuite/gas/arm/dotprod-thumb2.d: New test.
+	* testsuite/gas/arm/dotprod-illegal.d: New test.
+	* testsuite/gas/arm/dotprod-legacy-arch.d: New test.
+	* testsuite/gas/arm/dotprod-illegal.l: New error file.
+	* testsuite/gas/arm/dotprod-legacy-arch.l: New error file.
+
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/elf_mach_interaptiv-mr2.d: New test.
+	* testsuite/gas/mips/save-err.d: New test.
+	* testsuite/gas/mips/save-sub.d: New test.
+	* testsuite/gas/mips/interaptiv-mr2@save.d: New test.
+	* testsuite/gas/mips/mips1@save-sub.d: New test.
+	* testsuite/gas/mips/mips2@save-sub.d: New test.
+	* testsuite/gas/mips/mips3@save-sub.d: New test.
+	* testsuite/gas/mips/mips4@save-sub.d: New test.
+	* testsuite/gas/mips/mips5@save-sub.d: New test.
+	* testsuite/gas/mips/mips32@save-sub.d: New test.
+	* testsuite/gas/mips/mips64@save-sub.d: New test.
+	* testsuite/gas/mips/mips16@save-sub.d: New test.
+	* testsuite/gas/mips/mips16e@save-sub.d: New test.
+	* testsuite/gas/mips/r3000@save-sub.d: New test.
+	* testsuite/gas/mips/r3900@save-sub.d: New test.
+	* testsuite/gas/mips/r4000@save-sub.d: New test.
+	* testsuite/gas/mips/vr5400@save-sub.d: New test.
+	* testsuite/gas/mips/interaptiv-mr2@save-sub.d: New test.
+	* testsuite/gas/mips/sb1@save-sub.d: New test.
+	* testsuite/gas/mips/octeon2@save-sub.d: New test.
+	* testsuite/gas/mips/octeon3@save-sub.d: New test.
+	* testsuite/gas/mips/xlr@save-sub.d: New test.
+	* testsuite/gas/mips/r5900@save-sub.d: New test.
+	* testsuite/gas/mips/mips16e2-copy.d: New test.
+	* testsuite/gas/mips/mips16e2-copy-err.d: New test.
+	* testsuite/gas/mips/save.d: Remove `MIPS16e' from the `name'
+	option.  Adjust for trailing padding change.
+	* testsuite/gas/mips/mips16e2-copy-err.l: New stderr output.
+	* testsuite/gas/mips/save-sub.s: New test source.
+	* testsuite/gas/mips/mips16e2-copy.s: New test source.
+	* testsuite/gas/mips/mips16e2-copy-err.s: New test source.
+	* testsuite/gas/mips/save.s: Update description, change trailing
+	padding and remove trailing white space.
+	* testsuite/gas/mips/mips.exp: Expand `save' and `save-err'
+	tests across the regular MIPS interAptiv MR2 architecture.  Run
+	the new tests.
+
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips.exp (interaptiv-mr2): New architecture.
+	(mips16e2-interaptiv-mr2): Likewise.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-macro.d: New
+	test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-macro-t.d:
+	New test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-macro-e.d:
+	New test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-insn-t.d:
+	New test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-insn-e.d:
+	New test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16e-64.d: New
+	test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-sub.d: New
+	test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16e-sub.d: New
+	test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16e-64-sub.d:
+	New test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16e2-mt-sub.d:
+	New test.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-asmacro.d:
+	New test.
+	* testsuite/gas/mips/interaptiv-mr2@mcu.d: New test.
+	* testsuite/gas/mips/interaptiv-mr2@isa-override-1.d: New test.
+	* testsuite/gas/mips/interaptiv-mr2@isa-override-2.d: New test.
+	* testsuite/gas/mips/attr-gnu-4-5.d: Ignore any number of ASE
+	flag lines present rather than just one.
+	* testsuite/gas/mips/attr-gnu-4-6.d: Likewise.
+	* testsuite/gas/mips/attr-gnu-4-7.d: Likewise.
+	* testsuite/gas/mips/attr-none-o32-fp64-nooddspreg.d: Likewise.
+	* testsuite/gas/mips/attr-none-o32-fp64.d: Likewise.
+	* testsuite/gas/mips/attr-none-o32-fpxx.d: Likewise.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-macro.l: New
+	stderr output.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-macro-t.l:
+	New stderr output.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-macro-e.l:
+	New stderr output.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-insn-t.l:
+	New stderr output.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-insn-e.l:
+	New stderr output.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16-sub.l: New
+	stderr output.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16e-sub.l: New
+	stderr output.
+	* testsuite/gas/mips/mips16e2-interaptiv-mr2@mips16e-64-sub.l:
+	New stderr output.
+	* testsuite/gas/mips/interaptiv-mr2@isa-override-1.l: New stderr
+	output.
+	* testsuite/gas/mips/interaptiv-mr2@isa-override-2.l: New stderr
+	output.
+
+2017-06-28  Maciej W. Rozycki  <macro@imgtec.com>
+	    Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* config/tc-mips.c (validate_mips_insn): Handle
+	OP_SAVE_RESTORE_LIST specially.
+	(mips_encode_save_restore, mips16_encode_save_restore): New
+	functions.
+	(match_save_restore_list_operand): Factor out SAVE/RESTORE
+	operand insertion into the instruction word or halfword to these
+	new functions.
+	(mips_cpu_info_table): Add "interaptiv-mr2" entry.
+
+	* doc/c-mips.texi (MIPS Options): Add `interaptiv-mr2' to the
+	`-march=' argument list.
+
+2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips16e-save.d: Rename to...
+	* testsuite/gas/mips/save.d: ... this.
+	* testsuite/gas/mips/mips16e-save-err.d: Update the
+	`error-output' option and rename to...
+	* testsuite/gas/mips/save-err.d: ... this.
+	* testsuite/gas/mips/mips16e-save-err.l: Rename to...
+	* testsuite/gas/mips/save-err.l: ... this.
+	* testsuite/gas/mips/mips16e-save.s: Rename to...
+	* testsuite/gas/mips/save.s: ... this.
+	* testsuite/gas/mips/mips16e-save-err.s: Rename to...
+	* testsuite/gas/mips/save-err.s: ... this.
+	* testsuite/gas/mips/mips.exp: Rename `mips16e-save' and
+	`mips16e-save-err' invocations to `save' and `save-err'
+	respectively and reorder these tests away from MIPS16 tests.
+
+2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips16e-save.d: Remove `-mmips:isa32
+	-mmips:16' from `objdump' flags and `-march=mips32 -mips16' from
+	`as' flags.
+	* testsuite/gas/mips/mips16e-save-err.d: Remove `-march=mips32'
+	from `as' flags.
+	* testsuite/gas/mips/mips16e-save.s: Remove the `.set mips16'
+	pseudo-op.
+	* testsuite/gas/mips/mips16e-save-err.s: Likewise.
+	* testsuite/gas/mips/mips.exp: Run SAVE/RESTORE tests across all
+	MIPS16e architectures.
+
+2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips16e-save-err.d: New test.
+	* gas/testsuite/gas/mips/mips.exp: Fold `mips16e-save-err' list
+	test into the new test.
+
+2017-06-27  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/mips16e-save.d: Capitalize the `name'
+	option.
+
+2017-06-26  Kuan-Lin Chen  <rufus@andestech.com>
+
+	* config/tc-riscv.c (md_apply_fix) [BFD_RELOC_32]: Convert to a
+	R_RISCV_32_PCREL relocation.
+
 2017-06-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/21661

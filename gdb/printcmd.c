@@ -413,7 +413,9 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       && (options->format == 'o'
 	  || options->format == 'x'
 	  || options->format == 't'
-	  || options->format == 'z'))
+	  || options->format == 'z'
+	  || options->format == 'd'
+	  || options->format == 'u'))
     {
       LONGEST val_long = unpack_long (type, valaddr);
       converted_float_bytes.resize (TYPE_LENGTH (type));
@@ -427,11 +429,13 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
     case 'o':
       print_octal_chars (stream, valaddr, len, byte_order);
       break;
+    case 'd':
+      print_decimal_chars (stream, valaddr, len, true, byte_order);
+      break;
     case 'u':
       print_decimal_chars (stream, valaddr, len, false, byte_order);
       break;
     case 0:
-    case 'd':
       if (TYPE_CODE (type) != TYPE_CODE_FLT)
 	{
 	  print_decimal_chars (stream, valaddr, len, !TYPE_UNSIGNED (type),
@@ -898,8 +902,6 @@ find_string_backward (struct gdbarch *gdbarch,
                       int *strings_counted)
 {
   const int chunk_size = 0x20;
-  gdb_byte *buffer = NULL;
-  struct cleanup *cleanup = NULL;
   int read_error = 0;
   int chars_read = 0;
   int chars_to_read = chunk_size;
@@ -908,14 +910,13 @@ find_string_backward (struct gdbarch *gdbarch,
   CORE_ADDR string_start_addr = addr;
 
   gdb_assert (char_size == 1 || char_size == 2 || char_size == 4);
-  buffer = (gdb_byte *) xmalloc (chars_to_read * char_size);
-  cleanup = make_cleanup (xfree, buffer);
+  gdb::byte_vector buffer (chars_to_read * char_size);
   while (count > 0 && read_error == 0)
     {
       int i;
 
       addr -= chars_to_read * char_size;
-      chars_read = read_memory_backward (gdbarch, addr, buffer,
+      chars_read = read_memory_backward (gdbarch, addr, buffer.data (),
                                          chars_to_read * char_size);
       chars_read /= char_size;
       read_error = (chars_read == chars_to_read) ? 0 : 1;
@@ -924,7 +925,7 @@ find_string_backward (struct gdbarch *gdbarch,
         {
           int offset = (chars_to_read - i - 1) * char_size;
 
-          if (integer_is_zero (buffer + offset, char_size)
+          if (integer_is_zero (&buffer[offset], char_size)
               || chars_counted == options->print_max)
             {
               /* Found '\0' or reached print_max.  As OFFSET is the offset to
@@ -947,7 +948,6 @@ find_string_backward (struct gdbarch *gdbarch,
       string_start_addr -= chars_counted * char_size;
     }
 
-  do_cleanups (cleanup);
   return string_start_addr;
 }
 
@@ -2255,8 +2255,6 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
 					 "wchar_t", NULL, 0);
   int wcwidth = TYPE_LENGTH (wctype);
   gdb_byte *buf = (gdb_byte *) alloca (wcwidth);
-  struct obstack output;
-  struct cleanup *inner_cleanup;
 
   tem = value_as_address (value);
 
@@ -2275,8 +2273,7 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
     read_memory (tem, str, j);
   memset (&str[j], 0, wcwidth);
 
-  obstack_init (&output);
-  inner_cleanup = make_cleanup_obstack_free (&output);
+  auto_obstack output;
 
   convert_between_encodings (target_wide_charset (gdbarch),
 			     host_charset (),
@@ -2285,7 +2282,6 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
   obstack_grow_str0 (&output, "");
 
   fprintf_filtered (stream, format, obstack_base (&output));
-  do_cleanups (inner_cleanup);
 }
 
 /* Subroutine of ui_printf to simplify it.
@@ -2531,8 +2527,6 @@ ui_printf (const char *arg, struct ui_file *stream)
 	      struct type *wctype = lookup_typename (current_language, gdbarch,
 						     "wchar_t", NULL, 0);
 	      struct type *valtype;
-	      struct obstack output;
-	      struct cleanup *inner_cleanup;
 	      const gdb_byte *bytes;
 
 	      valtype = value_type (val_args[i]);
@@ -2542,8 +2536,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 
 	      bytes = value_contents (val_args[i]);
 
-	      obstack_init (&output);
-	      inner_cleanup = make_cleanup_obstack_free (&output);
+	      auto_obstack output;
 
 	      convert_between_encodings (target_wide_charset (gdbarch),
 					 host_charset (),
@@ -2554,7 +2547,6 @@ ui_printf (const char *arg, struct ui_file *stream)
 
 	      fprintf_filtered (stream, current_substring,
                                 obstack_base (&output));
-	      do_cleanups (inner_cleanup);
 	    }
 	    break;
 	  case double_arg:

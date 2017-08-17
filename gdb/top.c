@@ -129,10 +129,6 @@ show_confirm (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* Flag to indicate whether a user defined command is currently running.  */
-
-int in_user_command;
-
 /* Current working directory.  */
 
 char *current_directory;
@@ -346,16 +342,16 @@ make_delete_ui_cleanup (struct ui *ui)
 /* Open file named NAME for read/write, making sure not to make it the
    controlling terminal.  */
 
-static FILE *
+static gdb_file_up
 open_terminal_stream (const char *name)
 {
   int fd;
 
-  fd = open (name, O_RDWR | O_NOCTTY);
+  fd = gdb_open_cloexec (name, O_RDWR | O_NOCTTY, 0);
   if (fd < 0)
     perror_with_name  (_("opening terminal failed"));
 
-  return fdopen (fd, "w+");
+  return gdb_file_up (fdopen (fd, "w+"));
 }
 
 /* Implementation of the "new-ui" command.  */
@@ -365,21 +361,18 @@ new_ui_command (char *args, int from_tty)
 {
   struct ui *ui;
   struct interp *interp;
-  FILE *stream[3] = { NULL, NULL, NULL };
+  gdb_file_up stream[3];
   int i;
   int res;
   int argc;
-  char **argv;
   const char *interpreter_name;
   const char *tty_name;
-  struct cleanup *success_chain;
   struct cleanup *failure_chain;
 
   dont_repeat ();
 
-  argv = gdb_buildargv (args);
-  success_chain = make_cleanup_freeargv (argv);
-  argc = countargv (argv);
+  gdb_argv argv (args);
+  argc = argv.count ();
 
   if (argc < 2)
     error (_("usage: new-ui <interpreter> <tty>"));
@@ -390,18 +383,13 @@ new_ui_command (char *args, int from_tty)
   {
     scoped_restore save_ui = make_scoped_restore (&current_ui);
 
-    failure_chain = make_cleanup (null_cleanup, NULL);
-
     /* Open specified terminal, once for each of
        stdin/stdout/stderr.  */
     for (i = 0; i < 3; i++)
-      {
-	stream[i] = open_terminal_stream (tty_name);
-	make_cleanup_fclose (stream[i]);
-      }
+      stream[i] = open_terminal_stream (tty_name);
 
-    ui = new_ui (stream[0], stream[1], stream[2]);
-    make_cleanup (delete_ui_cleanup, ui);
+    ui = new_ui (stream[0].get (), stream[1].get (), stream[2].get ());
+    failure_chain = make_cleanup (delete_ui_cleanup, ui);
 
     ui->async = 1;
 
@@ -411,10 +399,12 @@ new_ui_command (char *args, int from_tty)
 
     interp_pre_command_loop (top_level_interpreter ());
 
-    discard_cleanups (failure_chain);
+    /* Make sure the files are not closed.  */
+    stream[0].release ();
+    stream[1].release ();
+    stream[2].release ();
 
-    /* This restores the previous UI and frees argv.  */
-    do_cleanups (success_chain);
+    discard_cleanups (failure_chain);
   }
 
   printf_unfiltered ("New UI allocated\n");
@@ -448,27 +438,14 @@ quit_cover (void)
    event-top.c into this file, top.c.  */
 /* static */ const char *source_file_name;
 
-/* Clean up on error during a "source" command (or execution of a
-   user-defined command).  */
-
-void
-do_restore_instream_cleanup (void *stream)
-{
-  struct ui *ui = current_ui;
-
-  /* Restore the previous input stream.  */
-  ui->instream = (FILE *) stream;
-}
-
 /* Read commands from STREAM.  */
 void
 read_command_file (FILE *stream)
 {
   struct ui *ui = current_ui;
-  struct cleanup *cleanups;
 
-  cleanups = make_cleanup (do_restore_instream_cleanup, ui->instream);
-  ui->instream = stream;
+  scoped_restore save_instream
+    = make_scoped_restore (&ui->instream, stream);
 
   /* Read commands from `instream' and execute them until end of file
      or error reading instream.  */
@@ -483,8 +460,6 @@ read_command_file (FILE *stream)
 	break;
       command_handler (command);
     }
-
-  do_cleanups (cleanups);
 }
 
 void (*pre_init_ui_hook) (void);
@@ -2023,7 +1998,7 @@ init_main (void)
 
   /* Setup important stuff for command line editing.  */
   rl_completion_word_break_hook = gdb_completion_word_break_characters;
-  rl_completion_entry_function = readline_line_completion_function;
+  rl_attempted_completion_function = gdb_rl_attempted_completion_function;
   set_rl_completer_word_break_characters (default_word_break_characters ());
   rl_completer_quote_characters = get_gdb_completer_quote_characters ();
   rl_completion_display_matches_hook = cli_display_match_list;

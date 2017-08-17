@@ -24,7 +24,7 @@ Symbol table '\.dynsym' contains 5 entries:
      1: 0+00000000     0 FUNC    GLOBAL DEFAULT  UND my_func
 #...
 
-Symbol table '\.symtab' contains 21 entries:
+Symbol table '\.symtab' contains .* entries:
 #...
-    16: 0+00000000     0 FUNC    GLOBAL DEFAULT  UND my_func
+.*: 0+00000000     0 FUNC    GLOBAL DEFAULT  UND my_func
 #pass

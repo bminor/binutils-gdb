@@ -81,7 +81,7 @@ check_sizeof "long double" ${sizeof_long_double}
 
 proc check_valueof { exp val } {
     gdb_test "next" "" ""
-    gdb_test "p value" " = ${val}" "check valueof \"$exp\""
+    gdb_test "p /d value" " = ${val}" "check valueof \"$exp\""
 }
 
 # Check that GDB and the target agree over the sign of a character.

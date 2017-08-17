@@ -181,8 +181,8 @@ get_ipa_tdesc (int idx)
       return tdesc_x32_linux;
     case X86_TDESC_AVX:
       return tdesc_x32_avx_linux;
-    case X86_TDESC_AVX512:
-      return tdesc_x32_avx512_linux;
+    case X86_TDESC_AVX_AVX512:
+      return tdesc_x32_avx_avx512_linux;
     default:
       break;
     }
@@ -279,7 +279,7 @@ initialize_low_tracepoint (void)
 #if defined __ILP32__
   init_registers_x32_linux ();
   init_registers_x32_avx_linux ();
-  init_registers_x32_avx512_linux ();
+  init_registers_x32_avx_avx512_linux ();
 #else
   init_registers_amd64_linux ();
   init_registers_amd64_avx_linux ();

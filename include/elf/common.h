@@ -570,6 +570,32 @@
 					/*   note name must be "LINUX".  */
 #define NT_PPC_VSX	0x102		/* PowerPC VSX registers */
 					/*   note name must be "LINUX".  */
+#define NT_PPC_TAR	0x103		/* PowerPC Target Address Register */
+					/*   note name must be "LINUX".  */
+#define NT_PPC_PPR	0x104		/* PowerPC Program Priority Register */
+					/*   note name must be "LINUX".  */
+#define NT_PPC_DSCR	0x105		/* PowerPC Data Stream Control Register */
+					/*   note name must be "LINUX".  */
+#define NT_PPC_EBB	0x106		/* PowerPC Event Based Branch Registers */
+					/*   note name must be "LINUX".  */
+#define NT_PPC_PMU	0x107		/* PowerPC Performance Monitor Registers */
+					/*   note name must be "LINUX".  */
+#define NT_PPC_TM_CGPR	0x108		/* PowerPC TM checkpointed GPR Registers */
+					/*   note name must be "LINUX".  */
+#define NT_PPC_TM_CFPR	0x109		/* PowerPC TM checkpointed FPR Registers */
+					/*   note name must be "LINUX".  */
+#define NT_PPC_TM_CVMX	0x10a		/* PowerPC TM checkpointed VMX Registers */
+					/*   note name must be "LINUX".  */
+#define NT_PPC_TM_CVSX	0x10b		/* PowerPC TM checkpointed VSX Registers */
+					/*   note name must be "LINUX".  */
+#define NT_PPC_TM_SPR	0x10c		/* PowerPC TM Special Purpose Registers */
+					/*   note name must be "LINUX".  */
+#define NT_PPC_TM_CTAR	0x10d		/* PowerPC TM checkpointed TAR */
+					/*   note name must be "LINUX".  */
+#define NT_PPC_TM_CPPR	0x10e		/* PowerPC TM checkpointed PPR */
+					/*   note name must be "LINUX".  */
+#define NT_PPC_TM_CDSCR	0x10f		/* PowerPC TM checkpointed Data SCR */
+					/*   note name must be "LINUX".  */
 #define NT_386_TLS	0x200		/* x86 TLS information */
 					/*   note name must be "LINUX".  */
 #define NT_386_IOPERM	0x201		/* x86 io permissions */
@@ -597,6 +623,10 @@
 #define NT_S390_VXRS_LOW	0x309	/* S390 vector registers 0-15 upper half */
 					/*   note name must be "LINUX".  */
 #define NT_S390_VXRS_HIGH	0x30a	/* S390 vector registers 16-31 */
+					/*   note name must be "LINUX".  */
+#define NT_S390_GS_CB	0x30b		/* s390 guarded storage registers */
+					/*   note name must be "LINUX".  */
+#define NT_S390_GS_BC	0x30c		/* s390 guarded storage broadcast control block */
 					/*   note name must be "LINUX".  */
 #define NT_ARM_VFP	0x400		/* ARM VFP registers */
 /* The following definitions should really use NT_AARCH_..., but defined
@@ -637,6 +667,7 @@
 #define	NT_FREEBSD_PROCSTAT_OSREL	14	/* Procstat osreldate data. */
 #define	NT_FREEBSD_PROCSTAT_PSSTRINGS	15	/* Procstat ps_strings data. */
 #define	NT_FREEBSD_PROCSTAT_AUXV	16	/* Procstat auxv data. */
+#define	NT_FREEBSD_PTLWPINFO	17	/* Thread ptrace miscellaneous info. */
 
 /* Note segments for core files on NetBSD systems.  Note name
    must start with "NetBSD-CORE".  */

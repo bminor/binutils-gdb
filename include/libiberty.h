@@ -3,7 +3,7 @@
    Copyright (C) 1997-2017 Free Software Foundation, Inc.
    
    Note - certain prototypes declared in this header file are for
-   functions whoes implementation copyright does not belong to the
+   functions whose implementation copyright does not belong to the
    FSF.  Those prototypes are present in this file for reference
    purposes only and their presence in this file should not construed
    as an indication of ownership by the FSF of the implementation of

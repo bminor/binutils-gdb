@@ -468,6 +468,12 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 	  if (section_len > len)
 	    section_len = len;
 	  len -= section_len;
+	  if (section_len <= 4)
+	    {
+	      _bfd_error_handler (_("%B: error: attribute section length too small: %ld"),
+				  abfd, section_len);
+	      break;
+	    }
 	  section_len -= 4;
 	  namelen = strnlen ((char *) p, section_len) + 1;
 	  if (namelen == 0 || namelen >= section_len)

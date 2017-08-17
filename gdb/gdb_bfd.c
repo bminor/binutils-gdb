@@ -976,18 +976,15 @@ print_one_bfd (void **slot, void *data)
 static void
 maintenance_info_bfds (char *arg, int from_tty)
 {
-  struct cleanup *cleanup;
   struct ui_out *uiout = current_uiout;
 
-  cleanup = make_cleanup_ui_out_table_begin_end (uiout, 3, -1, "bfds");
+  ui_out_emit_table table_emitter (uiout, 3, -1, "bfds");
   uiout->table_header (10, ui_left, "refcount", "Refcount");
   uiout->table_header (18, ui_left, "addr", "Address");
   uiout->table_header (40, ui_left, "filename", "Filename");
 
   uiout->table_body ();
   htab_traverse (all_bfds, print_one_bfd, uiout);
-
-  do_cleanups (cleanup);
 }
 
 /* -Wmissing-prototypes */

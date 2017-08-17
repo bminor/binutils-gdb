@@ -356,8 +356,8 @@ i370_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
-	 ibfd, (long) new_flags, (long) old_flags);
+	(_("%B: uses different e_flags (%#x) fields than previous modules (%#x)"),
+	 ibfd, new_flags, old_flags);
 
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -1053,9 +1053,9 @@ i370_elf_relocate_section (bfd *output_bfd,
   bfd_boolean ret = TRUE;
 
 #ifdef DEBUG
-  _bfd_error_handler ("i370_elf_relocate_section called for %B section %A, %ld relocations%s",
+  _bfd_error_handler ("i370_elf_relocate_section called for %B section %A, %u relocations%s",
 		      input_bfd, input_section,
-		      (long) input_section->reloc_count,
+		      input_section->reloc_count,
 		      (bfd_link_relocatable (info)) ? " (relocatable)" : "");
 #endif
 

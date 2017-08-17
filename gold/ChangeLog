@@ -1,3 +1,105 @@
+2017-08-08  Romain Geissler  <romain.geissler@gmail.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Add --enable-default-hash-style option.
+	* options.h (hash_style): Use DEFAULT_HASH_STYLE as default value.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2017-08-03  James Clarke  <jrtc27@jrtc27.com>
+
+	* options.h (General_options): Set a non-NULL second help string
+	argument for relax to allow --no-relax.
+
+2017-08-01  Alan Modra  <amodra@gmail.com>
+
+	* ehframe.cc (Fde::operator==): New.
+	(Cie::remove_fde, Eh_frame::remove_ehframe_for_plt): New.
+	* ehframe.h (Fde::operator==): Declare.
+	(Cie::remove_fde, Eh_frame::remove_ehframe_for_plt): Likewise.
+	* layout.cc (Layout::remove_eh_frame_for_plt): New.
+	* layout.h (Layout::remove_eh_frame_for_plt): Declare.
+	* powerpc.cc (Target_powerpc::do_relax): Remove old eh_frame FDEs.
+	(Stub_table::add_eh_frame): Delete eh_frame_added_ condition.
+	Don't add eh_frame for empty stub section.
+	(Stub_table::remove_eh_frame): New.
+
+2017-07-31  Alan Modra  <amodra@gmail.com>
+
+	* options.h (no_tls_optimize): New powerpc option.
+	* powerpc.cc (Target_powerpc::abiversion, set_abiversion): Formatting.
+	(Target_powerpc::stk_toc): Formatting, fix comment.
+	(Target_powerpc::Track_tls::tls_get_addr_state): Rename from
+	tls_get_addr.
+	(Target_powerpc::optimize_tls_gd, optimize_tls_ld, optimize_tls_ie):
+	Return TLSOPT_NONE when !tls_optimize.
+	(Target_powerpc::add_global_pair_with_rel): Check
+	for existing reloc before reserving.
+	(Target_powerpc::add_local_tls_pair): Likewise.
+
+2017-07-31  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::scan_relocs): Warn on --plt-localentry
+	without ld.so checks.
+
+2017-07-29  Alan Modra  <amodra@gmail.com>
+
+	PR 21847
+	* powerpc.cc (Target_powerpc::scan_relocs): Default to
+	--no-plt-localentry.
+
+2017-07-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/21857
+	* compressed_output.cc (Output_compressed_section::set_final_data_size):
+	Call put_ch_reserved to clear the reserved field for 64-bit ELF.
+
+2017-07-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* mips.cc (Mips_relocate_functions): Add "llu" suffix to
+	0x800080008000.
+
+2017-07-23  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (glink_eh_frame_fde_64v2): Correct advance to
+	restore of LR.
+	(glink_eh_frame_fde_64v1): Advance to restore of LR at latest
+	possible insn.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 21775
+	* aarch64.cc: Fix spelling typos.
+	* arm.cc: Likewise.
+	* layout.cc: Likewise.
+	* powerpc.cc: Likewise.
+	* x86_64.cc: Likewise.
+
+2017-07-12  Alan Modra  <amodra@gmail.com>
+
+	* po/es.po: Update from translationproject.org/latest/gold/.
+	* po/fi.po: Likewise.
+	* po/fr.po: Likewise.
+	* po/id.po: Likewise.
+	* po/it.po: Likewise.
+	* po/vi.po: Likewise.
+	* po/zh_CN.po: Likewise.
+	* po/ja.po: New file from translationproject.org.
+	* po/sv.po: Likewise.
+	* po/uk.po: Likewise.
+
+2017-07-06  Han Shen  <shenhan@google.com>
+
+	PR gold/21491
+	* aarch64.cc (Erratum_stub::invalidate_erratum_stub): New method.
+	(Erratum_stub::is_invalidated_erratum_stub): New method.
+	(Stub_table::relocate_reloc_stub): Renamed from "relocate_stub".
+	(Stub_table::relocate_reloc_stubs): Renamed from "relocate_stubs".
+	(Stub_table::relocate_erratum_stub): New method.
+	(AArch64_relobj::fix_errata_and_relocate_erratum_stubs): Renamed from
+	"fix_errata".
+	(Target_aarch64::relocate_reloc_stub): Renamed from "relocate_stub".
+
 2017-06-23  Alan Modra  <amodra@gmail.com>
 
 	* options.h (General_options): Add plt_localentry.

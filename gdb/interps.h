@@ -138,9 +138,10 @@ extern void interp_pre_command_loop (struct interp *interp);
 
 /* List the possible interpreters which could complete the given
    text.  */
-extern VEC (char_ptr) *interpreter_completer (struct cmd_list_element *ignore,
-					      const char *text,
-					      const char *word);
+extern void interpreter_completer (struct cmd_list_element *ignore,
+				   completion_tracker &tracker,
+				   const char *text,
+				   const char *word);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

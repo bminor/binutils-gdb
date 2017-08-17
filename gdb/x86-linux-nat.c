@@ -153,7 +153,7 @@ x86_linux_read_description (struct target_ops *ops)
 	{
 	  have_ptrace_getfpxregs = 0;
 	  have_ptrace_getregset = TRIBOOL_FALSE;
-	  return tdesc_i386_mmx_linux;
+	  return i386_linux_read_description (X86_XSTATE_X87_MASK);
 	}
     }
 #endif
@@ -230,21 +230,13 @@ x86_linux_read_description (struct target_ops *ops)
     }
   else
     {
-      switch (xcr0_features_bits)
-	{
-	case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
-	  return tdesc_i386_avx_mpx_avx512_pku_linux;
-	case X86_XSTATE_AVX_AVX512_MASK:
-	  return tdesc_i386_avx_avx512_linux;
-	case X86_XSTATE_MPX_MASK:
-	  return tdesc_i386_mpx_linux;
-	case X86_XSTATE_AVX_MPX_MASK:
-	  return tdesc_i386_avx_mpx_linux;
-	case X86_XSTATE_AVX_MASK:
-	  return tdesc_i386_avx_linux;
-	default:
-	  return tdesc_i386_linux;
-	}
+      const struct target_desc * tdesc
+	= i386_linux_read_description (xcr0_features_bits);
+
+      if (tdesc == NULL)
+	tdesc = i386_linux_read_description (X86_XSTATE_SSE_MASK);
+
+      return tdesc;
     }
 
   gdb_assert_not_reached ("failed to return tdesc");

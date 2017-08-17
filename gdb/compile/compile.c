@@ -39,6 +39,8 @@
 #include "osabi.h"
 #include "gdb_wait.h"
 #include "valprint.h"
+#include "common/gdb_optional.h"
+#include "common/gdb_unlinker.h"
 
 
 
@@ -283,15 +285,17 @@ get_expr_block_and_pc (CORE_ADDR *pc)
   return block;
 }
 
-/* Call gdb_buildargv, set its result for S into *ARGVP but calculate also the
-   number of parsed arguments into *ARGCP.  If gdb_buildargv has returned NULL
-   then *ARGCP is set to zero.  */
+/* Call buildargv (via gdb_argv), set its result for S into *ARGVP but
+   calculate also the number of parsed arguments into *ARGCP.  If
+   buildargv has returned NULL then *ARGCP is set to zero.  */
 
 static void
 build_argc_argv (const char *s, int *argcp, char ***argvp)
 {
-  *argvp = gdb_buildargv (s);
-  *argcp = countargv (*argvp);
+  gdb_argv args (s);
+
+  *argcp = args.count ();
+  *argvp = args.release ();
 }
 
 /* String for 'set compile-args' and 'show compile-args'.  */
@@ -457,16 +461,6 @@ cleanup_compile_instance (void *arg)
   delete inst;
 }
 
-/* A cleanup function to unlink a file.  */
-
-static void
-cleanup_unlink_file (void *arg)
-{
-  const char *filename = (const char *) arg;
-
-  unlink (filename);
-}
-
 /* A helper function suitable for use as the "print_callback" in the
    compiler object.  */
 
@@ -485,7 +479,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 		   enum compile_i_scope_types scope)
 {
   compile::compile_instance *compiler;
-  struct cleanup *cleanup, *inner_cleanup;
+  struct cleanup *cleanup;
   const struct block *expr_block;
   CORE_ADDR trash_pc, expr_pc;
   int argc;
@@ -569,7 +563,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 
   /* Set compiler command-line arguments.  */
   get_args (compiler, gdbarch, &argc, &argv);
-  make_cleanup_freeargv (argv);
+  gdb_argv argv_holder (argv);
 
   if (compiler->version ()>= GCC_FE_VERSION_1)
     error_message = compiler->set_arguments (argc, argv);
@@ -593,14 +587,18 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 
   compile_file_names fnames = get_new_file_names ();
 
-  src = gdb_fopen_cloexec (fnames.source_file (), "w");
-  if (src == NULL)
-    perror_with_name (_("Could not open source file for writing"));
-  inner_cleanup = make_cleanup (cleanup_unlink_file,
-				(void *) fnames.source_file ());
-  if (fputs (code.c_str (), src) == EOF)
-    perror_with_name (_("Could not write to source file"));
-  fclose (src);
+  gdb::optional<gdb::unlinker> source_remover;
+
+  {
+    gdb_file_up src = gdb_fopen_cloexec (fnames.source_file (), "w");
+    if (src == NULL)
+      perror_with_name (_("Could not open source file for writing"));
+
+    source_remover.emplace (fnames.source_file ());
+
+    if (fputs (code.c_str (), src.get ()) == EOF)
+      perror_with_name (_("Could not write to source file"));
+  }
 
   if (compile_debug)
     fprintf_unfiltered (gdb_stdlog, "source file produced: %s\n\n",
@@ -620,7 +618,9 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
     fprintf_unfiltered (gdb_stdlog, "object file produced: %s\n\n",
 			fnames.object_file ());
 
-  discard_cleanups (inner_cleanup);
+  /* Keep the source file.  */
+  source_remover->keep ();
+
   do_cleanups (cleanup);
 
   return fnames;
@@ -642,14 +642,13 @@ void
 eval_compile_command (struct command_line *cmd, const char *cmd_string,
 		      enum compile_i_scope_types scope, void *scope_data)
 {
-  struct cleanup *cleanup_unlink;
   struct compile_module *compile_module;
 
   compile_file_names fnames = compile_to_object (cmd, cmd_string, scope);
 
-  cleanup_unlink = make_cleanup (cleanup_unlink_file,
-				 (void *) fnames.object_file ());
-  make_cleanup (cleanup_unlink_file, (void *) fnames.source_file ());
+  gdb::unlinker object_remover (fnames.object_file ());
+  gdb::unlinker source_remover (fnames.source_file ());
+
   compile_module = compile_object_load (fnames, scope, scope_data);
   if (compile_module == NULL)
     {
@@ -658,7 +657,11 @@ eval_compile_command (struct command_line *cmd, const char *cmd_string,
 			    COMPILE_I_PRINT_VALUE_SCOPE, scope_data);
       return;
     }
-  discard_cleanups (cleanup_unlink);
+
+  /* Keep the files.  */
+  source_remover.keep ();
+  object_remover.keep ();
+
   compile_object_run (compile_module);
 }
 

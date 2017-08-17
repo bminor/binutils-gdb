@@ -1193,12 +1193,10 @@ mmix_elf_perform_relocation (asection *isec, reloc_howto_type *howto,
 	    _bfd_error_handler
 	      /* xgettext:c-format */
 	      (_("%B: Internal inconsistency error for value for\n\
- linker-allocated global register: linked: 0x%lx%08lx != relaxed: 0x%lx%08lx\n"),
+ linker-allocated global register: linked: %#Lx != relaxed: %#Lx"),
 	       isec->owner,
-	       (unsigned long) (value >> 32), (unsigned long) value,
-	       (unsigned long) (gregdata->reloc_request[bpo_index].value
-				>> 32),
-	       (unsigned long) gregdata->reloc_request[bpo_index].value);
+	       value,
+	       gregdata->reloc_request[bpo_index].value);
 	    bfd_set_error (bfd_error_bad_value);
 	    return bfd_reloc_overflow;
 	  }
@@ -1740,9 +1738,9 @@ mmix_final_link_relocate (reloc_howto_type *howto, asection *input_section,
 	    /* FIXME: Better error message.  */
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B: LOCAL directive: Register $%ld is not a local register."
-		 "  First global register is $%ld."),
-	       input_section->owner, (long) srel, (long) first_global);
+	      (_("%B: LOCAL directive: Register $%Ld is not a local register."
+		 "  First global register is $%Ld."),
+	       input_section->owner, srel, first_global);
 
 	    return bfd_reloc_overflow;
 	  }
@@ -2444,10 +2442,10 @@ _bfd_mmix_after_linker_allocation (bfd *abfd ATTRIBUTE_UNUSED,
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("Internal inconsistency: remaining %u != max %u.\n\
+	(_("Internal inconsistency: remaining %lu != max %lu.\n\
   Please report this bug."),
-	 gregdata->n_remaining_bpo_relocs_this_relaxation_round,
-	 gregdata->n_bpo_relocs);
+	 (unsigned long) gregdata->n_remaining_bpo_relocs_this_relaxation_round,
+	 (unsigned long) gregdata->n_bpo_relocs);
       return FALSE;
     }
 

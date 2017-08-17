@@ -534,7 +534,6 @@ static void
 print_inferior (struct ui_out *uiout, char *requested_inferiors)
 {
   struct inferior *inf;
-  struct cleanup *old_chain;
   int inf_count = 0;
 
   /* Compute number of inferiors we will print.  */
@@ -552,8 +551,7 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
       return;
     }
 
-  old_chain = make_cleanup_ui_out_table_begin_end (uiout, 4, inf_count,
-						   "inferiors");
+  ui_out_emit_table table_emitter (uiout, 4, inf_count, "inferiors");
   uiout->table_header (1, ui_left, "current", "");
   uiout->table_header (4, ui_left, "number", "Num");
   uiout->table_header (17, ui_left, "target-id", "Description");
@@ -597,8 +595,6 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
 
       uiout->text ("\n");
     }
-
-  do_cleanups (old_chain);
 }
 
 static void
@@ -799,20 +795,17 @@ static void
 add_inferior_command (char *args, int from_tty)
 {
   int i, copies = 1;
-  char *exec = NULL;
-  char **argv;
+  gdb::unique_xmalloc_ptr<char> exec;
   symfile_add_flags add_flags = 0;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   if (from_tty)
     add_flags |= SYMFILE_VERBOSE;
 
   if (args)
     {
-      argv = gdb_buildargv (args);
-      make_cleanup_freeargv (argv);
+      gdb_argv built_argv (args);
 
-      for (; *argv != NULL; argv++)
+      for (char **argv = built_argv.get (); *argv != NULL; argv++)
 	{
 	  if (**argv == '-')
 	    {
@@ -828,8 +821,7 @@ add_inferior_command (char *args, int from_tty)
 		  ++argv;
 		  if (!*argv)
 		    error (_("No argument to -exec"));
-		  exec = tilde_expand (*argv);
-		  make_cleanup (xfree, exec);
+		  exec.reset (tilde_expand (*argv));
 		}
 	    }
 	  else
@@ -853,12 +845,10 @@ add_inferior_command (char *args, int from_tty)
 	  set_current_inferior (inf);
 	  switch_to_thread (null_ptid);
 
-	  exec_file_attach (exec, from_tty);
-	  symbol_file_add_main (exec, add_flags);
+	  exec_file_attach (exec.get (), from_tty);
+	  symbol_file_add_main (exec.get (), add_flags);
 	}
     }
-
-  do_cleanups (old_chain);
 }
 
 /* clone-inferior [-copies N] [ID] */
@@ -867,15 +857,13 @@ static void
 clone_inferior_command (char *args, int from_tty)
 {
   int i, copies = 1;
-  char **argv;
   struct inferior *orginf = NULL;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   if (args)
     {
-      argv = gdb_buildargv (args);
-      make_cleanup_freeargv (argv);
+      gdb_argv built_argv (args);
 
+      char **argv = built_argv.get ();
       for (; *argv != NULL; argv++)
 	{
 	  if (**argv == '-')
@@ -946,8 +934,6 @@ clone_inferior_command (char *args, int from_tty)
       switch_to_thread (null_ptid);
       clone_program_space (pspace, orginf->pspace);
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Print notices when new inferiors are created and die.  */

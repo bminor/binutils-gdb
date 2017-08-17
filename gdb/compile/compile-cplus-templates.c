@@ -591,12 +591,10 @@ print_conversion_node (const struct demangle_component *comp,
 	case DEMANGLE_COMPONENT_QUAL_NAME:
 	  {
 	    /* Print out the qualified name.  */
-	    struct cleanup *back_to;
-	    char *ret = cp_comp_to_string (d_left (comp), 10);
+	    gdb::unique_xmalloc_ptr<char> ret
+	      = cp_comp_to_string (d_left (comp), 10);
 
-	    back_to = make_cleanup (xfree, ret);
-	    fprintf_unfiltered (stream, "%s::", ret);
-	    do_cleanups (back_to);
+	    fprintf_unfiltered (stream, "%s::", ret.get ());
 
 	    /* Follow the rest of the name.  */
 	    comp = d_right (comp);

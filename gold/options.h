@@ -925,7 +925,7 @@ class General_options
 		N_("Min fraction of empty buckets in dynamic hash"),
 		N_("FRACTION"));
 
-  DEFINE_enum(hash_style, options::TWO_DASHES, '\0', "sysv",
+  DEFINE_enum(hash_style, options::TWO_DASHES, '\0', DEFAULT_HASH_STYLE,
 	      N_("Dynamic hash style"), N_("[sysv,gnu,both]"),
 	      {"sysv", "gnu", "both"});
 
@@ -1164,7 +1164,8 @@ class General_options
 	      N_("Generate relocatable output"), NULL);
 
   DEFINE_bool(relax, options::TWO_DASHES, '\0', false,
-	      N_("Relax branches on certain targets"), NULL);
+	      N_("Relax branches on certain targets"),
+	      N_("Do not relax branches"));
 
   DEFINE_string(retain_symbols_file, options::TWO_DASHES, '\0', NULL,
 		N_("keep only symbols listed in this file"), N_("FILE"));
@@ -1289,6 +1290,10 @@ class General_options
 	      N_("Number of threads to use in middle pass"), N_("COUNT"));
   DEFINE_uint(thread_count_final, options::TWO_DASHES, '\0', 0,
 	      N_("Number of threads to use in final pass"), N_("COUNT"));
+
+  DEFINE_bool(tls_optimize, options::TWO_DASHES, '\0', true,
+	      N_("(PowerPC/64 only) Optimize GD/LD/IE code to IE/LE"),
+	      N_("(PowerPC/64 only) Don'\''t try to optimize TLS accesses"));
 
   DEFINE_bool(toc_optimize, options::TWO_DASHES, '\0', true,
 	      N_("(PowerPC64 only) Optimize TOC code sequences"),

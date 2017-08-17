@@ -1301,7 +1301,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		if (h == NULL)
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B, section %A: relocation %s with non-zero addend %d"
+		    (_("%B, section %A: relocation %s with non-zero addend %Ld"
 		       " against local symbol"),
 		     input_bfd,
 		     input_section,
@@ -1310,7 +1310,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		else
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B, section %A: relocation %s with non-zero addend %d"
+		    (_("%B, section %A: relocation %s with non-zero addend %Ld"
 		       " against symbol `%s'"),
 		     input_bfd,
 		     input_section,
@@ -1657,7 +1657,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		 to pass us these kinds of things.  */
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B, section %A: relocation %s with non-zero addend %d"
+		(_("%B, section %A: relocation %s with non-zero addend %Ld"
 		   " against symbol `%s'"),
 		 input_bfd,
 		 input_section,
@@ -1810,7 +1810,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		 things.  */
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B, section %A: relocation %s with non-zero addend %d"
+		(_("%B, section %A: relocation %s with non-zero addend %Ld"
 		   " against symbol `%s'"),
 		 input_bfd,
 		 input_section,
@@ -3230,7 +3230,7 @@ cris_elf_check_relocs (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B, section %A:\n  v10/v32 compatible object %s"
+		    (_("%B, section %A:\n  v10/v32 compatible object"
 		       " must not contain a PIC relocation"),
 		     abfd, sec);
 		  return FALSE;

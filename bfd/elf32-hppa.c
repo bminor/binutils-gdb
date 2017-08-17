@@ -836,10 +836,10 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+0x%lx): cannot reach %s, recompile with -ffunction-sections"),
+	    (_("%B(%A+%#Lx): cannot reach %s, recompile with -ffunction-sections"),
 	     hsh->target_section->owner,
 	     stub_sec,
-	     (long) hsh->stub_offset,
+	     hsh->stub_offset,
 	     hsh->bh_root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
@@ -3090,13 +3090,8 @@ elf32_hppa_set_gp (bfd *abfd, struct bfd_link_info *info)
   struct bfd_link_hash_entry *h;
   asection *sec = NULL;
   bfd_vma gp_val = 0;
-  struct elf32_hppa_link_hash_table *htab;
 
-  htab = hppa_link_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  h = bfd_link_hash_lookup (&htab->etab.root, "$global$", FALSE, FALSE, FALSE);
+  h = bfd_link_hash_lookup (info->hash, "$global$", FALSE, FALSE, FALSE);
 
   if (h != NULL
       && (h->type == bfd_link_hash_defined
@@ -3159,10 +3154,13 @@ elf32_hppa_set_gp (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (sec != NULL && sec->output_section != NULL)
-    gp_val += sec->output_section->vma + sec->output_offset;
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    {
+      if (sec != NULL && sec->output_section != NULL)
+	gp_val += sec->output_section->vma + sec->output_offset;
 
-  elf_gp (abfd) = gp_val;
+      elf_gp (abfd) = gp_val;
+    }
   return TRUE;
 }
 
@@ -3430,10 +3428,10 @@ final_link_relocate (asection *input_section,
 		   error.  */
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%B(%A+0x%lx): %s fixup for insn 0x%x is not supported in a non-shared link"),
+		  (_("%B(%A+%#Lx): %s fixup for insn %#x is not supported in a non-shared link"),
 		   input_bfd,
 		   input_section,
-		   (long) offset,
+		   offset,
 		   howto->name,
 		   insn);
 	    }
@@ -3596,10 +3594,10 @@ final_link_relocate (asection *input_section,
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B(%A+0x%lx): cannot reach %s, recompile with -ffunction-sections"),
+	(_("%B(%A+%#Lx): cannot reach %s, recompile with -ffunction-sections"),
 	 input_bfd,
 	 input_section,
-	 (long) offset,
+	 offset,
 	 hsh->bh_root.string);
       bfd_set_error (bfd_error_bad_value);
       return bfd_reloc_notsupported;
@@ -4287,10 +4285,10 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+0x%lx): cannot handle %s for %s"),
+		(_("%B(%A+%#Lx): cannot handle %s for %s"),
 		 input_bfd,
 		 input_section,
-		 (long) rela->r_offset,
+		 rela->r_offset,
 		 howto->name,
 		 sym_name);
 	      bfd_set_error (bfd_error_bad_value);

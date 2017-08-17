@@ -2230,7 +2230,7 @@ unset_environment_command (char *var, int from_tty)
       /* If there is no argument, delete all environment variables.
          Ask for confirmation if reading from the terminal.  */
       if (!from_tty || query (_("Delete all environment variables? ")))
-	current_inferior ()->environment = gdb_environ::from_host_environ ();
+	current_inferior ()->environment.clear ();
     }
   else
     current_inferior ()->environment.unset (var);

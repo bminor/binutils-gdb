@@ -277,7 +277,6 @@ core_open (const char *arg, int from_tty)
   char *temp;
   int scratch_chan;
   int flags;
-  char *filename;
 
   target_preopen (from_tty);
   if (!arg)
@@ -289,31 +288,25 @@ core_open (const char *arg, int from_tty)
 	error (_("No core file specified."));
     }
 
-  filename = tilde_expand (arg);
-  if (!IS_ABSOLUTE_PATH (filename))
-    {
-      temp = concat (current_directory, "/",
-		     filename, (char *) NULL);
-      xfree (filename);
-      filename = temp;
-    }
-
-  old_chain = make_cleanup (xfree, filename);
+  gdb::unique_xmalloc_ptr<char> filename (tilde_expand (arg));
+  if (!IS_ABSOLUTE_PATH (filename.get ()))
+    filename.reset (concat (current_directory, "/",
+			    filename.get (), (char *) NULL));
 
   flags = O_BINARY | O_LARGEFILE;
   if (write_files)
     flags |= O_RDWR;
   else
     flags |= O_RDONLY;
-  scratch_chan = gdb_open_cloexec (filename, flags, 0);
+  scratch_chan = gdb_open_cloexec (filename.get (), flags, 0);
   if (scratch_chan < 0)
-    perror_with_name (filename);
+    perror_with_name (filename.get ());
 
-  gdb_bfd_ref_ptr temp_bfd (gdb_bfd_fopen (filename, gnutarget,
+  gdb_bfd_ref_ptr temp_bfd (gdb_bfd_fopen (filename.get (), gnutarget,
 					   write_files ? FOPEN_RUB : FOPEN_RB,
 					   scratch_chan));
   if (temp_bfd == NULL)
-    perror_with_name (filename);
+    perror_with_name (filename.get ());
 
   if (!bfd_check_format (temp_bfd.get (), bfd_core)
       && !gdb_check_format (temp_bfd.get ()))
@@ -323,13 +316,12 @@ core_open (const char *arg, int from_tty)
          thing, on error it does not free all the storage associated
          with the bfd).  */
       error (_("\"%s\" is not a core dump: %s"),
-	     filename, bfd_errmsg (bfd_get_error ()));
+	     filename.get (), bfd_errmsg (bfd_get_error ()));
     }
 
   /* Looks semi-reasonable.  Toss the old core file and work on the
      new.  */
 
-  do_cleanups (old_chain);
   unpush_target (&core_ops);
   core_bfd = temp_bfd.release ();
   old_chain = make_cleanup (core_close_cleanup, 0 /*ignore*/);
@@ -484,51 +476,6 @@ core_detach (struct target_ops *ops, const char *args, int from_tty)
   if (from_tty)
     printf_filtered (_("No core file now.\n"));
 }
-
-/* Build either a single-thread or multi-threaded section name for
-   PTID.
-
-   If ptid's lwp member is zero, we want to do the single-threaded
-   thing: look for a section named NAME (as passed to the
-   constructor).  If ptid's lwp member is non-zero, we'll want do the
-   multi-threaded thing: look for a section named "NAME/LWP", where
-   LWP is the shortest ASCII decimal representation of ptid's lwp
-   member.  */
-
-class thread_section_name
-{
-public:
-  /* NAME is the single-threaded section name.  If PTID represents an
-     LWP, then the build section name is "NAME/LWP", otherwise it's
-     just "NAME" unmodified.  */
-  thread_section_name (const char *name, ptid_t ptid)
-  {
-    if (ptid.lwp_p ())
-      {
-	m_storage = string_printf ("%s/%ld", name, ptid.lwp ());
-	m_section_name = m_storage.c_str ();
-      }
-    else
-      m_section_name = name;
-  }
-
-  /* Return the computed section name.  The result is valid as long as
-     this thread_section_name object is live.  */
-  const char *c_str () const
-  { return m_section_name; }
-
-  /* Disable copy.  */
-  thread_section_name (const thread_section_name &) = delete;
-  void operator= (const thread_section_name &) = delete;
-
-private:
-  /* Either a pointer into M_STORAGE, or a pointer to the name passed
-     as parameter to the constructor.  */
-  const char *m_section_name;
-  /* If we need to build a new section name, this is where we store
-     it.  */
-  std::string m_storage;
-};
 
 /* Try to retrieve registers from a section in core_bfd, and supply
    them to core_vec->core_read_registers, as the register set numbered
@@ -711,25 +658,6 @@ add_to_spuid_list (bfd *abfd, asection *asect, void *list_p)
       list->written += 4;
     }
   list->pos += 4;
-}
-
-/* Read siginfo data from the core, if possible.  Returns -1 on
-   failure.  Otherwise, returns the number of bytes read.  ABFD is the
-   core file's BFD; READBUF, OFFSET, and LEN are all as specified by
-   the to_xfer_partial interface.  */
-
-static LONGEST
-get_core_siginfo (bfd *abfd, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
-{
-  thread_section_name section_name (".note.linuxcore.siginfo", inferior_ptid);
-  asection *section = bfd_get_section_by_name (abfd, section_name.c_str ());
-  if (section == NULL)
-    return -1;
-
-  if (!bfd_get_section_contents (abfd, section, readbuf, offset, len))
-    return -1;
-
-  return len;
 }
 
 static enum target_xfer_status
@@ -919,12 +847,20 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
     case TARGET_OBJECT_SIGNAL_INFO:
       if (readbuf)
 	{
-	  LONGEST l = get_core_siginfo (core_bfd, readbuf, offset, len);
-
-	  if (l > 0)
+	  if (core_gdbarch
+	      && gdbarch_core_xfer_siginfo_p (core_gdbarch))
 	    {
-	      *xfered_len = len;
-	      return TARGET_XFER_OK;
+	      LONGEST l = gdbarch_core_xfer_siginfo  (core_gdbarch, readbuf,
+						      offset, len);
+
+	      if (l >= 0)
+		{
+		  *xfered_len = l;
+		  if (l == 0)
+		    return TARGET_XFER_EOF;
+		  else
+		    return TARGET_XFER_OK;
+		}
 	    }
 	}
       return TARGET_XFER_E_IO;

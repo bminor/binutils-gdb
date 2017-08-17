@@ -29,3 +29,4 @@ if {[is_aout_format]} {
 
 run_dump_test data
 run_dump_test fill
+run_dump_test fill16

@@ -407,21 +407,14 @@ interpreter_exec_cmd (char *args, int from_tty)
 {
   struct ui_interp_info *ui_interp = get_current_interp_info ();
   struct interp *old_interp, *interp_to_use;
-  char **prules = NULL;
-  char **trule = NULL;
   unsigned int nrules;
   unsigned int i;
-  struct cleanup *cleanup;
 
   if (args == NULL)
     error_no_arg (_("interpreter-exec command"));
 
-  prules = gdb_buildargv (args);
-  cleanup = make_cleanup_freeargv (prules);
-
-  nrules = 0;
-  for (trule = prules; *trule != NULL; trule++)
-    nrules++;
+  gdb_argv prules (args);
+  nrules = prules.count ();
 
   if (nrules < 2)
     error (_("usage: interpreter-exec <interpreter> [ <command> ... ]"));
@@ -446,19 +439,17 @@ interpreter_exec_cmd (char *args, int from_tty)
     }
 
   interp_set (old_interp, 0);
-
-  do_cleanups (cleanup);
 }
 
 /* See interps.h.  */
 
-VEC (char_ptr) *
+void
 interpreter_completer (struct cmd_list_element *ignore,
+		       completion_tracker &tracker,
 		       const char *text, const char *word)
 {
   struct interp_factory *interp;
   int textlen;
-  VEC (char_ptr) *matches = NULL;
   int ix;
 
   textlen = strlen (text);
@@ -485,11 +476,9 @@ interpreter_completer (struct cmd_list_element *ignore,
 	      match[text - word] = '\0';
 	      strcat (match, interp->name);
 	    }
-	  VEC_safe_push (char_ptr, matches, match);
+	  tracker.add_completion (gdb::unique_xmalloc_ptr<char> (match));
 	}
     }
-
-  return matches;
 }
 
 struct interp *

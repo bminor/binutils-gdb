@@ -407,7 +407,6 @@ exec_file_attach (const char *filename, int from_tty)
 static void
 exec_file_command (char *args, int from_tty)
 {
-  char **argv;
   char *filename;
 
   if (from_tty && target_has_execution
@@ -417,13 +416,11 @@ exec_file_command (char *args, int from_tty)
 
   if (args)
     {
-      struct cleanup *cleanups;
-
       /* Scan through the args and pick up the first non option arg
          as the filename.  */
 
-      argv = gdb_buildargv (args);
-      cleanups = make_cleanup_freeargv (argv);
+      gdb_argv built_argv (args);
+      char **argv = built_argv.get ();
 
       for (; (*argv != NULL) && (**argv == '-'); argv++)
         {;
@@ -431,11 +428,8 @@ exec_file_command (char *args, int from_tty)
       if (*argv == NULL)
         error (_("No executable file name was specified"));
 
-      filename = tilde_expand (*argv);
-      make_cleanup (xfree, filename);
-      exec_file_attach (filename, from_tty);
-
-      do_cleanups (cleanups);
+      gdb::unique_xmalloc_ptr<char> filename (tilde_expand (*argv));
+      exec_file_attach (filename.get (), from_tty);
     }
   else
     exec_file_attach (NULL, from_tty);

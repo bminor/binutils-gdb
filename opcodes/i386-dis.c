@@ -3441,7 +3441,7 @@ static const struct dis386 reg_table[][8] = {
     { "rcrA",	{ Eb, Ib }, 0 },
     { "shlA",	{ Eb, Ib }, 0 },
     { "shrA",	{ Eb, Ib }, 0 },
-    { Bad_Opcode },
+    { "shlA",	{ Eb, Ib }, 0 },
     { "sarA",	{ Eb, Ib }, 0 },
   },
   /* REG_C1 */
@@ -3452,7 +3452,7 @@ static const struct dis386 reg_table[][8] = {
     { "rcrQ",	{ Ev, Ib }, 0 },
     { "shlQ",	{ Ev, Ib }, 0 },
     { "shrQ",	{ Ev, Ib }, 0 },
-    { Bad_Opcode },
+    { "shlQ",	{ Ev, Ib }, 0 },
     { "sarQ",	{ Ev, Ib }, 0 },
   },
   /* REG_C6 */
@@ -3485,7 +3485,7 @@ static const struct dis386 reg_table[][8] = {
     { "rcrA",	{ Eb, I1 }, 0 },
     { "shlA",	{ Eb, I1 }, 0 },
     { "shrA",	{ Eb, I1 }, 0 },
-    { Bad_Opcode },
+    { "shlA",	{ Eb, I1 }, 0 },
     { "sarA",	{ Eb, I1 }, 0 },
   },
   /* REG_D1 */
@@ -3496,7 +3496,7 @@ static const struct dis386 reg_table[][8] = {
     { "rcrQ",	{ Ev, I1 }, 0 },
     { "shlQ",	{ Ev, I1 }, 0 },
     { "shrQ",	{ Ev, I1 }, 0 },
-    { Bad_Opcode },
+    { "shlQ",	{ Ev, I1 }, 0 },
     { "sarQ",	{ Ev, I1 }, 0 },
   },
   /* REG_D2 */
@@ -3507,7 +3507,7 @@ static const struct dis386 reg_table[][8] = {
     { "rcrA",	{ Eb, CL }, 0 },
     { "shlA",	{ Eb, CL }, 0 },
     { "shrA",	{ Eb, CL }, 0 },
-    { Bad_Opcode },
+    { "shlA",	{ Eb, CL }, 0 },
     { "sarA",	{ Eb, CL }, 0 },
   },
   /* REG_D3 */
@@ -3518,7 +3518,7 @@ static const struct dis386 reg_table[][8] = {
     { "rcrQ",	{ Ev, CL }, 0 },
     { "shlQ",	{ Ev, CL }, 0 },
     { "shrQ",	{ Ev, CL }, 0 },
-    { Bad_Opcode },
+    { "shlQ",	{ Ev, CL }, 0 },
     { "sarQ",	{ Ev, CL }, 0 },
   },
   /* REG_F6 */
@@ -6957,7 +6957,7 @@ static const struct dis386 x86_64_table[][2] = {
 
   /* X86_64_82 */
   {
-    /* Opcode 0x82 is an alias of of opcode 0x80 in 32-bit mode.  */
+    /* Opcode 0x82 is an alias of opcode 0x80 in 32-bit mode.  */
     { REG_TABLE (REG_80) },
   },
 

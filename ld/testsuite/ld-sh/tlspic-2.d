@@ -1,7 +1,7 @@
 #source: tlspic1.s
 #source: tlspic2.s
 #as: -little
-#ld: -shared -EL
+#ld: -shared -EL --hash-style=sysv
 #readelf: -Ssrl
 #target: sh*-*-linux* sh*-*-netbsd*
 

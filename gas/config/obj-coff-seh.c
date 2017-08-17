@@ -483,10 +483,7 @@ void
 obj_coff_seh_do_final (void)
 {
   if (seh_ctx_cur != NULL)
-    {
-      as_bad (_("open SEH entry at end of file (missing .cfi_endproc)"));
-      do_seh_endproc ();
-    }
+    as_bad (_("open SEH entry at end of file (missing .seh_endproc)"));
 }
 
 /* Enter a prologue element into current context (x64).  */

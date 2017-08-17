@@ -282,16 +282,16 @@ gdb_test_no_output "set var \$[lindex $regname 0] = 81" \
     "init reg for s2.a"
 gdb_test_no_output "set var \$[lindex $regname 1] = 28" \
     "init reg for s2.c"
-gdb_test "print/d s2" " = \\{a = 81, b = 4, c = 28, d = 5\\}" \
+gdb_test "print/u s2" " = \\{a = 81, b = 4, c = 28, d = 5\\}" \
     "initialized s2 from mem and regs"
 gdb_test_no_output "set var s2.c += s2.a + s2.b - s2.d"
-gdb_test "print/d s2" " = \\{a = 81, b = 4, c = 108, d = 5\\}" \
+gdb_test "print/u s2" " = \\{a = 81, b = 4, c = 108, d = 5\\}" \
     "verify s2.c"
-gdb_test "print/d \$[lindex $regname 1]" " = 108" \
+gdb_test "print/u \$[lindex $regname 1]" " = 108" \
     "verify s2.c through reg"
 gdb_test_no_output "set var s2 = {191, 73, 231, 123}" \
     "re-initialize s2"
-gdb_test "print/d s2"  " = \\{a = 191, b = 73, c = 231, d = 123\\}" \
+gdb_test "print/u s2"  " = \\{a = 191, b = 73, c = 231, d = 123\\}" \
     "verify re-initialized s2"
 
 # Unaligned bitfield access through byte-aligned pieces.

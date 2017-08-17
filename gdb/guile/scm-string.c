@@ -241,7 +241,6 @@ static SCM
 gdbscm_string_to_argv (SCM string_scm)
 {
   char *string;
-  char **c_argv;
   int i;
   SCM result = SCM_EOL;
 
@@ -254,11 +253,10 @@ gdbscm_string_to_argv (SCM string_scm)
       return SCM_EOL;
     }
 
-  c_argv = gdb_buildargv (string);
-  for (i = 0; c_argv[i] != NULL; ++i)
-    result = scm_cons (gdbscm_scm_from_c_string (c_argv[i]), result);
+  gdb_argv c_argv (string);
+  for (char *arg : c_argv)
+    result = scm_cons (gdbscm_scm_from_c_string (arg), result);
 
-  freeargv (c_argv);
   xfree (string);
 
   return scm_reverse_x (result, SCM_EOL);

@@ -5581,7 +5581,7 @@ force_unlock_trace_buffer (void)
    case, if we want to move the thread out of the jump pad, we need to
    single-step it until this function returns 0.  */
 
-int
+fast_tpoint_collect_result
 fast_tracepoint_collecting (CORE_ADDR thread_area,
 			    CORE_ADDR stop_pc,
 			    struct fast_tpoint_collect_status *status)
@@ -5656,7 +5656,7 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
       if (tpoint == NULL)
 	{
 	  warning ("in jump pad, but no matching tpoint?");
-	  return 0;
+	  return fast_tpoint_collect_result::not_collecting;
 	}
       else
 	{
@@ -5684,7 +5684,7 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
       if (tpoint == NULL)
 	{
 	  warning ("in trampoline, but no matching tpoint?");
-	  return 0;
+	  return fast_tpoint_collect_result::not_collecting;
 	}
       else
 	{
@@ -5712,14 +5712,14 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
 	{
 	  trace_debug ("fast_tracepoint_collecting:"
 		       " failed reading 'collecting' in the inferior");
-	  return 0;
+	  return fast_tpoint_collect_result::not_collecting;
 	}
 
       if (!ipa_collecting)
 	{
 	  trace_debug ("fast_tracepoint_collecting: not collecting"
 		       " (and nobody is).");
-	  return 0;
+	  return fast_tpoint_collect_result::not_collecting;
 	}
 
       /* Some thread is collecting.  Check which.  */
@@ -5732,7 +5732,7 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
 	{
 	  trace_debug ("fast_tracepoint_collecting: not collecting "
 		       "(another thread is)");
-	  return 0;
+	  return fast_tpoint_collect_result::not_collecting;
 	}
 
       tpoint
@@ -5742,7 +5742,7 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
 	  warning ("fast_tracepoint_collecting: collecting, "
 		   "but tpoint %s not found?",
 		   paddress ((CORE_ADDR) ipa_collecting_obj.tpoint));
-	  return 0;
+	  return fast_tpoint_collect_result::not_collecting;
 	}
 
       /* The thread is within `gdb_collect', skip over the rest of
@@ -5769,7 +5769,7 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
 fast_tracepoint_collecting, returning continue-until-break at %s",
 		   paddress (tpoint->adjusted_insn_addr));
 
-      return 1; /* continue */
+      return fast_tpoint_collect_result::before_insn; /* continue */
     }
   else
     {
@@ -5780,7 +5780,7 @@ fast_tracepoint_collecting, returning continue-until-break at %s",
 		   paddress (tpoint->adjusted_insn_addr),
 		   paddress (tpoint->adjusted_insn_addr_end));
 
-      return 2; /* single-step */
+      return fast_tpoint_collect_result::at_insn; /* single-step */
     }
 }
 

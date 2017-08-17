@@ -132,9 +132,6 @@ typedef struct
   /* 1 => assign space to common symbols even if `relocatable_output'.  */
   bfd_boolean force_common_definition;
 
-  /* 1 => do not assign addresses to common symbols.  */
-  bfd_boolean inhibit_common_definition;
-
   /* If TRUE, build MIPS embedded PIC relocation tables in the output
      file.  */
   bfd_boolean embedded_relocs;

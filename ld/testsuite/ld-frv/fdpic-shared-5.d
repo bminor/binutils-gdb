@@ -1,7 +1,7 @@
 #name: FRV uClinux PIC relocs to undefined symbols, shared linking
 #source: fdpic5.s
 #objdump: -DRz -j .text -j .data -j .got -j .plt
-#ld: -shared
+#ld: -shared --hash-style=sysv
 
 .*:     file format elf.*frv.*
 

@@ -10,13 +10,13 @@ static void
 initialize_tdesc_amd64 (void)
 {
   struct target_desc *result = allocate_target_description ();
-  struct tdesc_feature *feature;
-  struct tdesc_type *field_type;
-  struct tdesc_type *type;
-
   set_tdesc_architecture (result, bfd_scan_arch ("i386:x86-64"));
 
+  struct tdesc_feature *feature;
+
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.core");
+  struct tdesc_type *field_type;
+  struct tdesc_type *type;
   type = tdesc_create_flags (feature, "i386_eflags", 4);
   tdesc_add_flag (type, 0, "CF");
   tdesc_add_flag (type, 1, "");
@@ -145,6 +145,10 @@ initialize_tdesc_amd64 (void)
   tdesc_create_reg (feature, "xmm14", 54, 1, NULL, 128, "vec128");
   tdesc_create_reg (feature, "xmm15", 55, 1, NULL, 128, "vec128");
   tdesc_create_reg (feature, "mxcsr", 56, 1, "vector", 32, "i386_mxcsr");
+
+  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.segments");
+  tdesc_create_reg (feature, "fs_base", 57, 1, NULL, 64, "int");
+  tdesc_create_reg (feature, "gs_base", 58, 1, NULL, 64, "int");
 
   tdesc_amd64 = result;
 }

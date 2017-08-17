@@ -484,16 +484,12 @@ add_path (char *dirname, char **which_path, int parse_separators)
 
   if (parse_separators)
     {
-      char **argv, **argvp;
-
       /* This will properly parse the space and tab separators
 	 and any quotes that may exist.  */
-      argv = gdb_buildargv (dirname);
+      gdb_argv argv (dirname);
 
-      for (argvp = argv; *argvp; argvp++)
-	dirnames_to_char_ptr_vec_append (&dir_vec, *argvp);
-
-      freeargv (argv);
+      for (char *arg : argv)
+	dirnames_to_char_ptr_vec_append (&dir_vec, arg);
     }
   else
     VEC_safe_push (char_ptr, dir_vec, xstrdup (dirname));
@@ -859,20 +855,18 @@ openp (const char *path, int opts, const char *string,
 	{
 	 /* See whether we need to expand the tilde.  */
 	  int newlen;
-	  char *tilde_expanded;
 
-	  tilde_expanded  = tilde_expand (dir);
+	  gdb::unique_xmalloc_ptr<char> tilde_expanded (tilde_expand (dir));
 
 	  /* First, realloc the filename buffer if too short.  */
-	  len = strlen (tilde_expanded);
+	  len = strlen (tilde_expanded.get ());
 	  newlen = len + strlen (string) + 2;
 	  if (newlen > alloclen)
 	    {
 	      alloclen = newlen;
 	      filename = (char *) alloca (alloclen);
 	    }
-	  strcpy (filename, tilde_expanded);
-	  xfree (tilde_expanded);
+	  strcpy (filename, tilde_expanded.get ());
 	}
       else
 	{
@@ -1353,9 +1347,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
   int c;
   int desc;
   int noprint = 0;
-  FILE *stream;
   int nlines = stopline - line;
-  struct cleanup *cleanup;
   struct ui_out *uiout = current_uiout;
 
   /* Regardless of whether we can open the file, set current_source_symtab.  */
@@ -1448,15 +1440,14 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
       perror_with_name (symtab_to_filename_for_display (s));
     }
 
-  stream = fdopen (desc, FDOPEN_MODE);
-  clearerr (stream);
-  cleanup = make_cleanup_fclose (stream);
+  gdb_file_up stream (fdopen (desc, FDOPEN_MODE));
+  clearerr (stream.get ());
 
   while (nlines-- > 0)
     {
       char buf[20];
 
-      c = fgetc (stream);
+      c = fgetc (stream.get ());
       if (c == EOF)
 	break;
       last_line_listed = current_source_line;
@@ -1479,12 +1470,12 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	  else if (c == '\r')
 	    {
 	      /* Skip a \r character, but only before a \n.  */
-	      int c1 = fgetc (stream);
+	      int c1 = fgetc (stream.get ());
 
 	      if (c1 != '\n')
 		printf_filtered ("^%c", c + 0100);
 	      if (c1 != EOF)
-		ungetc (c1, stream);
+		ungetc (c1, stream.get ());
 	    }
 	  else
 	    {
@@ -1492,10 +1483,8 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	      uiout->text (buf);
 	    }
 	}
-      while (c != '\n' && (c = fgetc (stream)) >= 0);
+      while (c != '\n' && (c = fgetc (stream.get ())) >= 0);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Show source lines from the file of symtab S, starting with line
@@ -1630,7 +1619,6 @@ forward_search_command (char *regex, int from_tty)
 {
   int c;
   int desc;
-  FILE *stream;
   int line;
   char *msg;
   struct cleanup *cleanups;
@@ -1659,9 +1647,8 @@ forward_search_command (char *regex, int from_tty)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
 
   discard_cleanups (cleanups);
-  stream = fdopen (desc, FDOPEN_MODE);
-  clearerr (stream);
-  cleanups = make_cleanup_fclose (stream);
+  gdb_file_up stream (fdopen (desc, FDOPEN_MODE));
+  clearerr (stream.get ());
   while (1)
     {
       static char *buf = NULL;
@@ -1672,7 +1659,7 @@ forward_search_command (char *regex, int from_tty)
       buf = (char *) xmalloc (cursize);
       p = buf;
 
-      c = fgetc (stream);
+      c = fgetc (stream.get ());
       if (c == EOF)
 	break;
       do
@@ -1686,7 +1673,7 @@ forward_search_command (char *regex, int from_tty)
 	      cursize = newsize;
 	    }
 	}
-      while (c != '\n' && (c = fgetc (stream)) >= 0);
+      while (c != '\n' && (c = fgetc (stream.get ())) >= 0);
 
       /* Remove the \r, if any, at the end of the line, otherwise
          regular expressions that end with $ or \n won't work.  */
@@ -1701,7 +1688,6 @@ forward_search_command (char *regex, int from_tty)
       if (re_exec (buf) > 0)
 	{
 	  /* Match!  */
-	  do_cleanups (cleanups);
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
 	  set_internalvar_integer (lookup_internalvar ("_"), line);
 	  current_source_line = std::max (line - lines_to_list / 2, 1);
@@ -1711,7 +1697,6 @@ forward_search_command (char *regex, int from_tty)
     }
 
   printf_filtered (_("Expression not found\n"));
-  do_cleanups (cleanups);
 }
 
 static void
@@ -1719,7 +1704,6 @@ reverse_search_command (char *regex, int from_tty)
 {
   int c;
   int desc;
-  FILE *stream;
   int line;
   char *msg;
   struct cleanup *cleanups;
@@ -1748,23 +1732,22 @@ reverse_search_command (char *regex, int from_tty)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
 
   discard_cleanups (cleanups);
-  stream = fdopen (desc, FDOPEN_MODE);
-  clearerr (stream);
-  cleanups = make_cleanup_fclose (stream);
+  gdb_file_up stream (fdopen (desc, FDOPEN_MODE));
+  clearerr (stream.get ());
   while (line > 1)
     {
 /* FIXME!!!  We walk right off the end of buf if we get a long line!!!  */
       char buf[4096];		/* Should be reasonable???  */
       char *p = buf;
 
-      c = fgetc (stream);
+      c = fgetc (stream.get ());
       if (c == EOF)
 	break;
       do
 	{
 	  *p++ = c;
 	}
-      while (c != '\n' && (c = fgetc (stream)) >= 0);
+      while (c != '\n' && (c = fgetc (stream.get ())) >= 0);
 
       /* Remove the \r, if any, at the end of the line, otherwise
          regular expressions that end with $ or \n won't work.  */
@@ -1779,25 +1762,23 @@ reverse_search_command (char *regex, int from_tty)
       if (re_exec (buf) > 0)
 	{
 	  /* Match!  */
-	  do_cleanups (cleanups);
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
 	  set_internalvar_integer (lookup_internalvar ("_"), line);
 	  current_source_line = std::max (line - lines_to_list / 2, 1);
 	  return;
 	}
       line--;
-      if (fseek (stream, current_source_symtab->line_charpos[line - 1], 0) < 0)
+      if (fseek (stream.get (),
+		 current_source_symtab->line_charpos[line - 1], 0) < 0)
 	{
 	  const char *filename;
 
-	  do_cleanups (cleanups);
 	  filename = symtab_to_filename_for_display (current_source_symtab);
 	  perror_with_name (filename);
 	}
     }
 
   printf_filtered (_("Expression not found\n"));
-  do_cleanups (cleanups);
   return;
 }
 
@@ -1896,12 +1877,9 @@ static void
 show_substitute_path_command (char *args, int from_tty)
 {
   struct substitute_path_rule *rule = substitute_path_rules;
-  char **argv;
   char *from = NULL;
-  struct cleanup *cleanup;
   
-  argv = gdb_buildargv (args);
-  cleanup = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   /* We expect zero or one argument.  */
 
@@ -1925,8 +1903,6 @@ show_substitute_path_command (char *args, int from_tty)
         printf_filtered ("  `%s' -> `%s'.\n", rule->from, rule->to);
       rule = rule->next;
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Implement the "unset substitute-path" command.  */
@@ -1935,14 +1911,12 @@ static void
 unset_substitute_path_command (char *args, int from_tty)
 {
   struct substitute_path_rule *rule = substitute_path_rules;
-  char **argv = gdb_buildargv (args);
+  gdb_argv argv (args);
   char *from = NULL;
   int rule_found = 0;
-  struct cleanup *cleanup;
 
   /* This function takes either 0 or 1 argument.  */
 
-  cleanup = make_cleanup_freeargv (argv);
   if (argv != NULL && argv[0] != NULL && argv[1] != NULL)
     error (_("Incorrect usage, too many arguments in command"));
 
@@ -1980,8 +1954,6 @@ unset_substitute_path_command (char *args, int from_tty)
     error (_("No substitution rule defined for `%s'"), from);
 
   forget_cached_source_info ();
-
-  do_cleanups (cleanup);
 }
 
 /* Add a new source path substitution rule.  */
@@ -1989,12 +1961,9 @@ unset_substitute_path_command (char *args, int from_tty)
 static void
 set_substitute_path_command (char *args, int from_tty)
 {
-  char **argv;
   struct substitute_path_rule *rule;
-  struct cleanup *cleanup;
   
-  argv = gdb_buildargv (args);
-  cleanup = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   if (argv == NULL || argv[0] == NULL || argv [1] == NULL)
     error (_("Incorrect usage, too few arguments in command"));
@@ -2021,8 +1990,6 @@ set_substitute_path_command (char *args, int from_tty)
 
   add_substitute_path_rule (argv[0], argv[1]);
   forget_cached_source_info ();
-
-  do_cleanups (cleanup);
 }
 
 

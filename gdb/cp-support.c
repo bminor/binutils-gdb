@@ -293,8 +293,6 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 				 canonicalization_ftype *finder,
 				 void *data)
 {
-  long len;
-  char *name;
   string_file buf;
   struct demangle_component *comp = ret_comp;
 
@@ -310,14 +308,14 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 	  struct demangle_component newobj;
 
 	  buf.write (d_left (comp)->u.s_name.s, d_left (comp)->u.s_name.len);
-	  len = buf.size ();
-	  name = (char *) obstack_copy0 (&info->obstack, buf.c_str (), len);
 	  newobj.type = DEMANGLE_COMPONENT_NAME;
-	  newobj.u.s_name.s = name;
-	  newobj.u.s_name.len = len;
+	  newobj.u.s_name.s
+	    = (char *) obstack_copy0 (&info->obstack,
+				      buf.c_str (), buf.size ());
+	  newobj.u.s_name.len = buf.size ();
 	  if (inspect_type (info, &newobj, finder, data))
 	    {
-	      char *n, *s;
+	      char *s;
 	      long slen;
 
 	      /* A typedef was substituted in NEW.  Convert it to a
@@ -325,15 +323,15 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 		 node.  */
 
 	      buf.clear ();
-	      n = cp_comp_to_string (&newobj, 100);
+	      gdb::unique_xmalloc_ptr<char> n
+		= cp_comp_to_string (&newobj, 100);
 	      if (n == NULL)
 		{
 		  /* If something went astray, abort typedef substitutions.  */
 		  return;
 		}
 
-	      s = copy_string_to_obstack (&info->obstack, n, &slen);
-	      xfree (n);
+	      s = copy_string_to_obstack (&info->obstack, n.get (), &slen);
 
 	      d_left (ret_comp)->type = DEMANGLE_COMPONENT_NAME;
 	      d_left (ret_comp)->u.s_name.s = s;
@@ -349,14 +347,14 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 	     typedefs in it.  Then print it to the stream to continue
 	     checking for more typedefs in the tree.  */
 	  replace_typedefs (info, d_left (comp), finder, data);
-	  name = cp_comp_to_string (d_left (comp), 100);
+	  gdb::unique_xmalloc_ptr<char> name
+	    = cp_comp_to_string (d_left (comp), 100);
 	  if (name == NULL)
 	    {
 	      /* If something went astray, abort typedef substitutions.  */
 	      return;
 	    }
-	  buf.puts (name);
-	  xfree (name);
+	  buf.puts (name.get ());
 	}
 
       buf.write ("::", 2);
@@ -370,15 +368,15 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
   if (comp->type == DEMANGLE_COMPONENT_NAME)
     {
       buf.write (comp->u.s_name.s, comp->u.s_name.len);
-      len = buf.size ();
-      name = (char *) obstack_copy0 (&info->obstack, buf.c_str (), len);
 
       /* Replace the top (DEMANGLE_COMPONENT_QUAL_NAME) node
 	 with a DEMANGLE_COMPONENT_NAME node containing the whole
 	 name.  */
       ret_comp->type = DEMANGLE_COMPONENT_NAME;
-      ret_comp->u.s_name.s = name;
-      ret_comp->u.s_name.len = len;
+      ret_comp->u.s_name.s
+	= (char *) obstack_copy0 (&info->obstack,
+				  buf.c_str (), buf.size ());
+      ret_comp->u.s_name.len = buf.size ();
       inspect_type (info, ret_comp, finder, data);
     }
   else
@@ -420,7 +418,8 @@ replace_typedefs (struct demangle_parse_info *info,
 	      || ret_comp->type == DEMANGLE_COMPONENT_TEMPLATE
 	      || ret_comp->type == DEMANGLE_COMPONENT_BUILTIN_TYPE))
 	{
-	  char *local_name = cp_comp_to_string (ret_comp, 10);
+	  gdb::unique_xmalloc_ptr<char> local_name
+	    = cp_comp_to_string (ret_comp, 10);
 
 	  if (local_name != NULL)
 	    {
@@ -429,14 +428,13 @@ replace_typedefs (struct demangle_parse_info *info,
 	      sym = NULL;
 	      TRY
 		{
-		  sym = lookup_symbol (local_name, 0, VAR_DOMAIN, 0).symbol;
+		  sym = lookup_symbol (local_name.get (), 0,
+				       VAR_DOMAIN, 0).symbol;
 		}
 	      CATCH (except, RETURN_MASK_ALL)
 		{
 		}
 	      END_CATCH
-
-	      xfree (local_name);
 
 	      if (sym != NULL)
 		{
@@ -524,9 +522,11 @@ cp_canonicalize_string_full (const char *string,
       replace_typedefs (info.get (), info->tree, finder, data);
 
       /* Convert the tree back into a string.  */
-      ret = cp_comp_to_string (info->tree, estimated_len);
-      gdb_assert (!ret.empty ());
+      gdb::unique_xmalloc_ptr<char> us = cp_comp_to_string (info->tree,
+							    estimated_len);
+      gdb_assert (us);
 
+      ret = us.get ();
       /* Finally, compare the original string with the computed
 	 name, returning NULL if they are the same.  */
       if (ret == string)
@@ -563,14 +563,17 @@ cp_canonicalize_string (const char *string)
     return std::string ();
 
   estimated_len = strlen (string) * 2;
-  std::string ret = cp_comp_to_string (info->tree, estimated_len);
+  gdb::unique_xmalloc_ptr<char> us (cp_comp_to_string (info->tree,
+						       estimated_len));
 
-  if (ret.empty ())
+  if (!us)
     {
       warning (_("internal error: string \"%s\" failed to be canonicalized"),
 	       string);
       return std::string ();
     }
+
+  std::string ret (us.get ());
 
   if (ret == string)
     return std::string ();
@@ -630,7 +633,9 @@ cp_mangled_name_to_comp (const char *mangled_name, int options)
 char *
 cp_class_name_from_physname (const char *physname)
 {
-  char *ret;
+  void *storage = NULL;
+  char *demangled_name = NULL;
+  gdb::unique_xmalloc_ptr<char> ret;
   struct demangle_component *ret_comp, *prev_comp, *cur_comp;
   std::unique_ptr<demangle_parse_info> info;
   int done;
@@ -698,7 +703,6 @@ cp_class_name_from_physname (const char *physname)
 	break;
       }
 
-  ret = NULL;
   if (cur_comp != NULL && prev_comp != NULL)
     {
       /* We want to discard the rightmost child of PREV_COMP.  */
@@ -708,7 +712,9 @@ cp_class_name_from_physname (const char *physname)
       ret = cp_comp_to_string (ret_comp, 10);
     }
 
-  return ret;
+  xfree (storage);
+  xfree (demangled_name);
+  return ret.release ();
 }
 
 /* Return the child of COMP which is the basename of a method,
@@ -775,7 +781,9 @@ unqualified_name_from_comp (struct demangle_component *comp)
 char *
 method_name_from_physname (const char *physname)
 {
-  char *ret;
+  void *storage = NULL;
+  char *demangled_name = NULL;
+  gdb::unique_xmalloc_ptr<char> ret;
   struct demangle_component *ret_comp;
   std::unique_ptr<demangle_parse_info> info;
 
@@ -785,13 +793,14 @@ method_name_from_physname (const char *physname)
 
   ret_comp = unqualified_name_from_comp (info->tree);
 
-  ret = NULL;
   if (ret_comp != NULL)
     /* The ten is completely arbitrary; we don't have a good
        estimate.  */
     ret = cp_comp_to_string (ret_comp, 10);
 
-  return ret;
+  xfree (storage);
+  xfree (demangled_name);
+  return ret.release ();
 }
 
 /* If FULL_NAME is the demangled name of a C++ function (including an
@@ -803,7 +812,7 @@ method_name_from_physname (const char *physname)
 char *
 cp_func_name (const char *full_name)
 {
-  char *ret;
+  gdb::unique_xmalloc_ptr<char> ret;
   struct demangle_component *ret_comp;
   std::unique_ptr<demangle_parse_info> info;
 
@@ -813,11 +822,10 @@ cp_func_name (const char *full_name)
 
   ret_comp = unqualified_name_from_comp (info->tree);
 
-  ret = NULL;
   if (ret_comp != NULL)
     ret = cp_comp_to_string (ret_comp, 10);
 
-  return ret;
+  return ret.release ();
 }
 
 /* See description in cp-support.h.  */
@@ -873,7 +881,7 @@ cp_remove_params (const char *demangled_name)
   int done = 0;
   struct demangle_component *ret_comp;
   std::unique_ptr<demangle_parse_info> info;
-  char *ret = NULL;
+  gdb::unique_xmalloc_ptr<char> ret;
 
   if (demangled_name == NULL)
     return NULL;
@@ -905,7 +913,7 @@ cp_remove_params (const char *demangled_name)
   if (ret_comp->type == DEMANGLE_COMPONENT_TYPED_NAME)
     ret = cp_comp_to_string (d_left (ret_comp), 10);
 
-  return ret;
+  return ret.release ();
 }
 
 /* Here are some random pieces of trivia to keep in mind while trying
@@ -960,10 +968,6 @@ cp_find_first_component (const char *name)
    it returns the length of the first component of NAME, but to make
    the recursion easier, it also stops if it reaches an unexpected ')'
    or '>' if the value of PERMISSIVE is nonzero.  */
-
-/* Let's optimize away calls to strlen("operator").  */
-
-#define LENGTH_OF_OPERATOR 8
 
 static unsigned int
 cp_find_first_component_aux (const char *name, int permissive)
@@ -1036,14 +1040,15 @@ cp_find_first_component_aux (const char *name, int permissive)
 	case 'o':
 	  /* Operator names can screw up the recursion.  */
 	  if (operator_possible
-	      && strncmp (name + index, "operator",
-			  LENGTH_OF_OPERATOR) == 0)
+	      && startswith (name + index, CP_OPERATOR_STR))
 	    {
-	      index += LENGTH_OF_OPERATOR;
+	      index += CP_OPERATOR_LEN;
 	      while (ISSPACE(name[index]))
 		++index;
 	      switch (name[index])
 		{
+		case '\0':
+		  return index;
 		  /* Skip over one less than the appropriate number of
 		     characters: the for loop will skip over the last
 		     one.  */

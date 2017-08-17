@@ -547,7 +547,7 @@ is_type_conversion_operator (struct type *type, int i, int j)
      some other way, feel free to rewrite this function.  */
   const char *name = TYPE_FN_FIELDLIST_NAME (type, i);
 
-  if (!startswith (name, "operator"))
+  if (!startswith (name, CP_OPERATOR_STR))
     return 0;
 
   name += 8;

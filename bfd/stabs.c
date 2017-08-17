@@ -276,7 +276,7 @@ _bfd_link_section_stabs (bfd *abfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+0x%lx): Stabs entry has invalid string index."),
+	    (_("%B(%A+%#lx): Stabs entry has invalid string index."),
 	     abfd, stabsec, (long) (sym - stabbuf));
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_return;

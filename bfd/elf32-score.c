@@ -227,14 +227,14 @@ static bfd_vma
 score3_bfd_getl48 (const void *p)
 {
   const bfd_byte *addr = p;
-  unsigned long long v;
+  bfd_uint64_t v;
 
-  v = (unsigned long long) addr[4];
-  v |= (unsigned long long) addr[5] << 8;
-  v |= (unsigned long long) addr[2] << 16;
-  v |= (unsigned long long) addr[3] << 24;
-  v |= (unsigned long long) addr[0] << 32;
-  v |= (unsigned long long) addr[1] << 40;
+  v = (bfd_uint64_t) addr[4];
+  v |= (bfd_uint64_t) addr[5] << 8;
+  v |= (bfd_uint64_t) addr[2] << 16;
+  v |= (bfd_uint64_t) addr[3] << 24;
+  v |= (bfd_uint64_t) addr[0] << 32;
+  v |= (bfd_uint64_t) addr[1] << 40;
   return v;
 }
 
@@ -2880,8 +2880,8 @@ s3_bfd_score_elf_check_relocs (bfd *abfd,
             {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-                (_("%B: CALL15 reloc at 0x%lx not against global symbol"),
-                 abfd, (unsigned long) rel->r_offset);
+                (_("%B: CALL15 reloc at %#Lx not against global symbol"),
+                 abfd, rel->r_offset);
               bfd_set_error (bfd_error_bad_value);
               return FALSE;
             }

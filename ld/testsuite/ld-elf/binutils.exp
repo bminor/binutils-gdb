@@ -81,13 +81,35 @@ proc binutils_test { prog_name ld_options test {test_name ""} {readelf_options "
     }
 
     if [string match "*-z relro*" $ld_options] {
+	# These targets set TEXT_DYNAMIC and therefore have `.dynamic'
+	# in the (read-only) text segment rather than data segment.
+	set relro_dynamic [expr !([istarget "hppa64*-*-*"] \
+				  || ([istarget "mips*-*-*"] \
+				      && ![istarget "*-*-vxworks*"]))]
+	# These targets have `.got' in regular data even though they do
+	# not have `.got' there.
+	set relro_gotplt [expr [istarget "mips*-*-*"]]
+	# These targets do not set NO_SMALL_DATA or DATA_GOT and therefore
+	# have `.got' in (read-write) small data rather than regular data.
+	set relro_got [expr !([istarget "alpha*-*-*"] \
+			      || [istarget "hppa*-*-linux-*"] \
+			      || [istarget "hppa*-*-netbsd*"] \
+			      || [istarget "hppa*-*-openbsd*"] \
+			      || [istarget "metag-*-*"] \
+			      || [istarget "mips*-*-*"] \
+			      || [istarget "nios2*-*-*"] \
+			      || [istarget "or1k-*-*"] \
+			      || [istarget "riscv*-*-*"] \
+			      || [istarget "sh*-*-*"] \
+			      || [istarget "x86_64-*-rdos*"])]
 	# Check if GNU_RELRO segment is generated.
 	set got [remote_exec host "grep GNU_RELRO tmpdir/$test.exp"]
 	if { ![string match "*GNU_RELRO*" $got] } then {
 	    set got [remote_exec host "cat tmpdir/$test.exp"]
 	    if { [string match "*.data.rel.ro*" $got]
-		 || [string match "*.dynamic*" $got]
-		 || [string match "*.got*" $got]
+		 || ($relro_dynamic && [string match "*.dynamic*" $got])
+		 || ($relro_gotplt && [string match "*.got.plt*" $got])
+		 || ($relro_got && [string match "*.got*" $got])
 		 || [string match "*.eh_frame*" $got]
 		 || [string match "*.gcc_except_table*" $got]
 		 || [string match "*.exception_ranges*" $got]

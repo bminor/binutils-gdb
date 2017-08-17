@@ -1342,7 +1342,7 @@ static int popping;
 
 /* Temporary storage for yylex; this holds symbol names as they are
    built up.  */
-static struct obstack name_obstack;
+static auto_obstack name_obstack;
 
 /* Classify an IDENTIFIER token.  The contents of the token are in `yylval'.
    Updates yylval and returns the new token type.  BLOCK is the block
@@ -1480,7 +1480,7 @@ yylex (void)
      first try building up a name until we find the qualified module.  */
   if (current.token == UNKNOWN_NAME)
     {
-      obstack_free (&name_obstack, obstack_base (&name_obstack));
+      name_obstack.clear ();
       obstack_grow (&name_obstack, current.value.sval.ptr,
 		    current.value.sval.length);
 
@@ -1533,7 +1533,7 @@ yylex (void)
   if (current.token != TYPENAME && current.token != '.')
     goto do_pop;
 
-  obstack_free (&name_obstack, obstack_base (&name_obstack));
+  name_obstack.clear ();
   checkpoint = 0;
   if (current.token == '.')
     search_block = NULL;
@@ -1627,6 +1627,8 @@ d_parse (struct parser_state *par_state)
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
+  /* Note that parsing (within yyparse) freely installs cleanups
+     assuming they're run here (below).  */
   back_to = make_cleanup (null_cleanup, NULL);
 
   scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
@@ -1639,8 +1641,7 @@ d_parse (struct parser_state *par_state)
 
   VEC_free (token_and_value, token_fifo);
   popping = 0;
-  obstack_init (&name_obstack);
-  make_cleanup_obstack_free (&name_obstack);
+  name_obstack.clear ();
 
   result = yyparse ();
   do_cleanups (back_to);

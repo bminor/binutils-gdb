@@ -1785,11 +1785,14 @@ elf32_avr_adjust_diff_reloc_value (bfd *abfd,
 
 
   if (shrinked_insn_address >= start_address
-      && shrinked_insn_address <= end_address)
+      && shrinked_insn_address < end_address)
   {
     /* Reduce the diff value by count bytes and write it back into section
        contents. */
     bfd_signed_vma new_diff = x < 0 ? x + count : x - count;
+
+    if (sym2_address > shrinked_insn_address)
+      irel->r_addend -= count;
 
     switch (ELF32_R_TYPE (irel->r_info))
     {

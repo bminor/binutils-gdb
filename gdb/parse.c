@@ -50,6 +50,7 @@
 #include "objfiles.h"
 #include "user-regs.h"
 #include <algorithm>
+#include "common/gdb_optional.h"
 
 /* Standard set of definitions for printing, dumping, prefixifying,
  * and evaluating expressions.  */
@@ -1136,7 +1137,7 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
 			const struct block *block,
 			int comma, int void_context_p, int *out_subexp)
 {
-  struct cleanup *old_chain, *inner_chain;
+  struct cleanup *old_chain;
   const struct language_defn *lang = NULL;
   struct parser_state ps;
   int subexp;
@@ -1214,7 +1215,8 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
      to the value matching SELECTED_FRAME as set by get_current_arch.  */
 
   initialize_expout (&ps, 10, lang, get_current_arch ());
-  inner_chain = make_cleanup_restore_current_language ();
+
+  scoped_restore_current_language lang_saver;
   set_language (lang->la_language);
 
   TRY
@@ -1250,7 +1252,6 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
   if (expressiondebug)
     dump_prefix_expression (ps.expout, gdb_stdlog);
 
-  do_cleanups (inner_chain);
   discard_cleanups (old_chain);
 
   *stringptr = lexptr;
@@ -1275,19 +1276,14 @@ parse_expression (const char *string)
 expression_up
 parse_expression_with_language (const char *string, enum language lang)
 {
-  struct cleanup *old_chain = NULL;
-
+  gdb::optional<scoped_restore_current_language> lang_saver;
   if (current_language->la_language != lang)
     {
-      old_chain = make_cleanup_restore_current_language ();
+      lang_saver.emplace ();
       set_language (lang);
     }
 
-  expression_up expr = parse_expression (string);
-
-  if (old_chain != NULL)
-    do_cleanups (old_chain);
-  return expr;
+  return parse_expression (string);
 }
 
 /* Parse STRING as an expression.  If parsing ends in the middle of a

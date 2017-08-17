@@ -2157,7 +2157,7 @@ This command is available when debugging locally on most targets, excluding
 @item set startup-with-shell
 @itemx set startup-with-shell on
 @itemx set startup-with-shell off
-@itemx show set startup-with-shell
+@itemx show startup-with-shell
 On Unix systems, by default, if a shell is available on your target,
 @value{GDBN}) uses it to start your program.  Arguments of the
 @code{run} command are passed to the shell, which does variable
@@ -34711,11 +34711,21 @@ checksum.
 Print the entire architecture configuration.  The optional argument
 @var{file} names the file where the output goes.
 
-@kindex maint print c-tdesc
+@kindex maint print c-tdesc @r{[}@var{file}@r{]}
 @item maint print c-tdesc
-Print the current target description (@pxref{Target Descriptions}) as
-a C source file.  The created source file can be used in @value{GDBN}
-when an XML parser is not available to parse the description.
+Print the target description (@pxref{Target Descriptions}) as
+a C source file.  By default, the target description is for the current
+target, but if the optional argument @var{file} is provided, that file
+is used to produce the description.  The @var{file} should be an XML
+document, of the form described in @ref{Target Description Format}.
+The created source file is built into @value{GDBN} when @value{GDBN} is
+built again.  This command is used by developers after they add or
+modify XML target descriptions.
+
+@kindex maint check xml-descriptions
+@item maint check xml-descriptions @var{dir}
+Check that the target descriptions dynamically created by @value{GDBN}
+equal the descriptions created from XML files found in @var{dir}.
 
 @kindex maint print dummy-frames
 @item maint print dummy-frames
@@ -35980,7 +35990,7 @@ separators.  Each expression has the following form:
 
 @item X @var{len},@var{expr}
 @var{len} is the length of the bytecode expression and @var{expr} is the
-actual conditional expression in bytecode form.
+actual commands expression in bytecode form.
 
 @end table
 

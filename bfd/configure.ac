@@ -143,7 +143,7 @@ bfd_default_target_size=32
 
 # host stuff:
 
-ALL_LINGUAS="fr tr ja es sv da zh_CN ro rw vi fi id ru uk sr"
+ALL_LINGUAS="da es fi fr hr id ja ro ru rw sr sv tr uk vi zh_CN"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
 
@@ -160,7 +160,8 @@ BFD_HOST_64_BIT=
 BFD_HOST_U_64_BIT=
 BFD_HOSTPTR_T="unsigned long"
 
-AC_CHECK_SIZEOF(long long)
+AC_TYPE_LONG_DOUBLE
+AC_CHECK_TYPES([long long], [AC_CHECK_SIZEOF(long long)])
 AC_CHECK_SIZEOF(void *)
 AC_CHECK_SIZEOF(long)
 

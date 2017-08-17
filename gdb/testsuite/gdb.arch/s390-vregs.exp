@@ -147,14 +147,12 @@ gdb_continue_to_breakpoint "change vrs"
 set vregs [capture_command_output "info registers vector" ""]
 
 # Format a 128-bit value, given individual 4-byte values, as hex.
-# Leading zeros are suppressed.
+# Suppress leading zeros.
 proc hex128 {a_high a_low b_high b_low} {
-    set result [format %08x%08x%08x%08x \
-		    [expr $a_high * ($i + 1) * $a_high ] \
-		    [expr $a_low * ($i + 1) * $a_low ] \
-		    [expr $b_high * (32 - $i) * $b_high * 32] \
-		    [expr $b_low * (32 - $i) * $b_low * 32] ]
-    return [regsub -- "^0*" $result ""]
+    set result [format "%x%08x%08x%08x" $a_high $a_low $b_high $b_low]
+    regsub -- "^0*" $result "" result
+    if { $result eq "" } { set result 0 }
+    return $result
 }
 
 set j 1
@@ -162,7 +160,11 @@ foreach {- r i val} [regexp -all -inline -line \
 			 {^(\D*)(\d+)\s+.*?uint128 = 0x([0-9a-f]+?)} $vregs] {
     if { $r ne "v" } {
 	fail "info registers vector: bad line $j"
-    } elseif { $val ne [hex128 $a_high $a_low $b_high $b_low] } {
+    } elseif { $val ne [hex128 \
+			    [expr $a_high * ($i + 1) * $a_high ] \
+			    [expr $a_low * ($i + 1) * $a_low ] \
+			    [expr $b_high * (32 - $i) * $b_high * 32] \
+			    [expr $b_low * (32 - $i) * $b_low * 32] ] } {
 	fail "compare \$v$i"
     }
     incr j 1

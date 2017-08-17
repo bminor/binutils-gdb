@@ -790,7 +790,7 @@ gdb_test_multiple "" $test {
     -re "break\.c.*break1\.c.*$gdb_prompt " {
 	send_gdb "1\t\n"
 	gdb_test_multiple "" $test {
-	    -re ".*Function \"$srcfile2\" not defined\..*$gdb_prompt " {
+	    -re "malformed linespec error: unexpected end of input\r\n$gdb_prompt " {
 		pass $test
 	    }
 	    -re "$gdb_prompt p$" {

@@ -34,6 +34,13 @@ struct xfree_deleter
   void operator() (T *ptr) const { xfree (ptr); }
 };
 
+/* Same, for arrays.  */
+template <typename T>
+struct xfree_deleter<T[]>
+{
+  void operator() (T *ptr) const { xfree (ptr); }
+};
+
 /* Import the standard unique_ptr to our namespace with a custom
    deleter.  */
 

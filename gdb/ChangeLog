@@ -1,3 +1,1776 @@
+2017-08-15  Stafford Horne  <shorne@gmail.com>
+
+	* MAINTAINERS (Write After Approval): Add Stafford Horne.
+
+2017-08-15  Stafford Horne  <shorne@gmail.com>
+
+	* xtensa-tdep.c (xtensa_init_reggroups): Use xstrdup for cpname.
+
+2017-08-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21954
+	* infcmd.c (unset_environment_command): Use the 'clear' method on
+	the environment instead of resetting it.
+
+2017-08-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_convert_siginfo): Fix compile on big-endian
+	platforms.
+
+2017-08-14  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (print_octal_chars): Use HOST_CHAR_BIT.
+	(print_binary_chars): Likewise.
+	(BITS_IN_BYTES): Remove.
+
+2017-08-14  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/21675
+	* valprint.c (LOW_ZERO): Change value to 034.
+	(print_octal_chars): Add static_asserts for octal constants.
+	* printcmd.c (print_scalar_formatted): Add 'd' case.
+
+2017-08-11  Tom Tromey  <tom@tromey.com>
+
+	* symfile.c (add_symbol_file_command): Use std::vector.
+
+2017-08-14  Tom Tromey  <tom@tromey.com>
+
+	* break-catch-throw.c (handle_gnu_v3_exceptions): Use std::move.
+	* break-catch-syscall.c (create_syscall_event_catchpoint): Use
+	std::move.
+	* break-catch-sig.c (create_signal_catchpoint): Use std::move.
+
+2017-08-11  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (process_event_stop_test): Adjust
+	function_name_is_marked_for_skip call.
+	* skip.c: Include <list>.
+	(skiplist_entry): Make it a class with private fields, and
+	getters/setters.
+	(skiplist_entry_chain): Delete.
+	(skiplist_entries): New.
+	(skiplist_entry_count): Delete.
+	(highest_skiplist_entry_num): New.
+	(ALL_SKIPLIST_ENTRIES, ALL_SKIPLIST_ENTRIES_SAFE): Delete.
+	(add_skiplist_entry): Delete.
+	(skiplist_entry::skiplist_entry): New.
+	(skiplist_entry::add_entry): New.
+	(skip_file_command, skip_function): Adjust.
+	(compile_skip_regexp): Delete.
+	(skip_command): Don't compile regexp here.  Adjust to use
+	skiplist_entry::add_entry.
+	(skip_info): Adjust to use range-for and getters.
+	(skip_enable_command, skip_disable_command): Adjust to use
+	range-for and setters.
+	(skip_delete_command): Adjust to use std::list.
+	(add_skiplist_entry): Delete.
+	(skip_file_p): Delete, refactored as ...
+	(skiplist_entry::do_skip_file_p): ... this new method.
+	(skip_gfile_p): Delete, refactored as ...
+	(skiplist_entry::do_gskip_file_p): ... this new method.
+	(skip_function_p, skip_rfunction_p): Delete, refactored as ...
+	(skiplist_entry::skip_function_p): ... this new method.
+	(function_name_is_marked_for_skip): Now returns bool, and takes
+	the function sal by const reference.  Adjust to use range-for and
+	skiplist_entry methods.
+	(_initialize_step_skip): Remove references to
+	skiplist_entry_chain, skiplist_entry_count.
+	* skip.h (function_name_is_marked_for_skip): Now returns bool, and
+	takes the function sal by const reference.
+
+2017-08-11  Yao Qi  <yao.qi@linaro.org>
+
+	* dwarf2-frame.c (clear_pointer_cleanup): Remove.
+	(dwarf2_frame_cache): Remove reset_cache_cleanup.
+	(dwarf2_frame_cache):
+	* frame-unwind.c (frame_unwind_try_unwinder): Catch
+	RETURN_MASK_ALL and set *this_case to NULL.
+	* frame-unwind.h: Update comments.
+
+2017-08-11  Yao Qi  <yao.qi@linaro.org>
+
+	* dwarf2-frame.c (dwarf2_frame_state_alloc_regs): Remove.
+	(dwarf2_frame_state_copy_regs): Remove.
+	(dwarf2_frame_state_free_regs): Remove.
+	(dwarf2_frame_state::~dwarf2_frame_state): Remove.
+	(dwarf2_restore_rule): Call method .alloc_regs instead of
+	dwarf2_frame_state_alloc_regs.
+	(execute_cfa_program): Likewise.  Call dwarf2_frame_state_reg_info
+	constructor.  Call std::move.
+	(dwarf2_fetch_cfa_info): Don't call dwarf2_frame_state_copy_regs.
+	(dwarf2_frame_cache): Likewise.
+
+	[GDB_SELF_TEST]: Include selftest.h and
+	selftest-arch.h.
+	[GDB_SELF_TEST] (execute_cfa_program_test): New function.
+	(_initialize_dwarf2_frame) [GDB_SELF_TEST]: Register
+	execute_cfa_program_test.
+
+	* dwarf2-frame.h (dwarf2_frame_state_reg_info): Add ctor, dtor,
+	copy ctor, assignment operator, move assignment.
+	<alloc_regs>: New method.
+	<swap>: New method.
+	(struct dwarf2_frame_state): Delete dtor.
+	(dwarf2_frame_state_alloc_regs): Remove declaration.
+	* sparc-tdep.c (sparc_execute_dwarf_cfa_vendor_op): Don't call
+	dwarf2_frame_state_alloc_regs, use .alloc_regs instead.
+
+2017-08-11  Yao Qi  <yao.qi@linaro.org>
+
+	* dwarf2-frame.c (dwarf2_frame_state_free): Remove.
+	(dwarf2_frame_state::dwarf2_frame_state): New.
+	(dwarf2_frame_state::~dwarf2_frame_state): New.
+	(dwarf2_fetch_cfa_info): Update.
+	(dwarf2_frame_cache): Remove old_chain.  Change 'fs' to an object
+	rather than a pointer.  Update code.
+	* dwarf2-frame.h (struct dwarf2_frame_state): Declare ctor and
+	dtor.
+	<data_align, code_align, retaddr_column>: Change them to const.
+	<armcc_cfa_offsets_sf, armcc_cfa_offsets_reversed>: Change them
+	to bool.
+
+2017-08-11  Yao Qi  <yao.qi@linaro.org>
+
+	* dwarf2-frame.h (struct dwarf2_frame_state_reg) <exp_len>: Remove.
+	<loc.exp>: New field.
+	* dwarf2-frame.c (execute_cfa_program): Update.
+	(dwarf2_frame_prev_register): Update.
+
+2017-08-10  Pedro Alves  <palves@redhat.com>
+
+	* common/gdb_unique_ptr.h (xfree_deleter<T[]>): Define.
+
+2017-08-09  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (struct fbsd_fork_info): Remove.
+	(fbsd_pending_children): Use std::list.
+	(fbsd_remember_child): Likewise.
+	(fbsd_is_child_pending): Likewise.
+	(fbsd_pending_vfork_done): Use std::forward_list.
+	(fbsd_add_vfork_done): Likewise.
+	(fbsd_is_vfork_done_pending): Likewise.
+	(fbsd_next_vfork_done): Likewise.
+
+2017-08-09  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c [HAVE_KINFO_GETVMMAP] (struct free_deleter): New.
+	(fbsd_find_memory_regions): Use free_deleter with std::unique_ptr.
+	[!HAVE_KINFO_GETVMMAP] (fbsd_find_memory_regions): Use std::string
+	for `mapfilename'.
+	(fbsd_xfer_partial): Use gdb::byte_vector.
+	(fbsd_add_threads): Likewise.
+
+2017-08-09  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c: [!HAVE_KINFO_GETVMMAP]: Include <sys/user.h> and
+	"filestuff.h".
+	(fbsd_find_memory_regions): Fix `mapfile' initialization.
+
+2017-08-09  Tom Tromey  <tom@tromey.com>
+
+	* skip.c (skiplist_entry): New constructor.
+	(skiplist_entry::enabled, skiplist_entry::function_is_regexp)
+	(skiplist_entry::file_is_glob): Now bool.
+	(skiplist_entry::file, skiplist_entry::function): Now
+	std::string.
+	(make_skip_entry): Return a unique_ptr.  Use new.
+	(free_skiplist_entry, free_skiplist_entry_cleanup)
+	(make_free_skiplist_entry_cleanup): Remove.
+	(skip_command, skip_disable_command, add_skiplist_entry)
+	(skip_form_bytes, compile_skip_regexp, skip_command, skip_info)
+	(skip_file_p, skip_gfile_p, skip_function_p, skip_rfunction_p)
+	(function_name_is_marked_for_skip): Update.
+	(skip_delete_command): Update.  Use delete.
+
+2017-08-09  Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64-linux-tdep.c: Include "auxv.h" and "elf/common.h".
+	(aarch64_linux_core_read_description): New function.
+	(aarch64_linux_init_abi): Register gdbarch_core_read_description.
+
+2017-08-09  Pedro Alves  <palves@redhat.com>
+
+	* cp-name-parser.y (cp_comp_to_string): Return a
+	gdb::unique_xmalloc_ptr<char>.
+	* cp-support.c (replace_typedefs_qualified_name)
+	(replace_typedefs): Adjust to use gdb::unique_xmalloc_ptr<char>.
+	(cp_canonicalize_string_full): Use op= instead of explicit
+	convertion.
+	(cp_class_name_from_physname, method_name_from_physname)
+	(cp_func_name, cp_remove_params): Adjust to use
+	gdb::unique_xmalloc_ptr<char>.
+	* cp-support.h (cp_comp_to_string): Return a
+	gdb::unique_xmalloc_ptr<char>.
+	* python/py-type.c (typy_lookup_type): Adjust to use
+	gdb::unique_xmalloc_ptr<char>.
+
+2017-08-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf2read.c (dwarf2_string_attr): Fix a typo.
+
+2017-08-09  Alex Lindsay  <alexlindsay239@gmail.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* cp-support.c (cp_canonicalize_string_full): Use
+	gdb::unique_xmalloc_ptr<char>.
+	(cp_canonicalize_string): Likewise.
+
+2017-08-09  Yao Qi  <yao.qi@linaro.org>
+
+	* features/Makefile (WHICH): Remove i386/ non-linux stuff.
+	* regformats/i386/amd64-avx-avx512.dat: Remove.
+	* regformats/i386/amd64-avx-mpx-avx512-pku.dat: Remove.
+	* regformats/i386/amd64-avx-mpx.dat:Remove.
+	* regformats/i386/amd64-avx.dat: Remove.
+	* regformats/i386/amd64-mpx.dat: Remove.
+	* regformats/i386/i386-avx-avx512.dat: Remove.
+	* regformats/i386/i386-avx-mpx-avx512-pku.dat: Remove.
+	* regformats/i386/i386-avx-mpx.dat: Remove.
+	* regformats/i386/i386-mmx.dat: Remove.
+	* regformats/i386/i386-mpx.dat: Remove.
+
+2017-08-09  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-tdep.h (tdesc_x32): Remove the declaration.
+	* amd64-tdep.c: Don't include features/i386/x32*.c.
+	(_initialize_amd64_tdep): Don't call initialize_tdesc_x32*
+	functions.
+	* features/Makefile (WHICH): Remove i386/x32, i386/x32-avx,
+	and i386/x32-avx-avx512.
+	(XMLTOC): Remove i386/x32-avx.xml, i386/x32-avx-avx512.xml,
+	and i386/x32.xml.
+	* features/i386/x32-avx-avx512.c: Removed.
+	* features/i386/x32-avx-avx512.xml: Removed.
+	* features/i386/x32-avx.c: Removed.
+	* features/i386/x32-avx.xml: Removed.
+	* features/i386/x32.c: Removed.
+	* features/i386/x32.xml: Removed.
+	* regformats/i386/x32-avx-avx512.dat: Removed.
+	* regformats/i386/x32-avx.dat: Removed.
+	* regformats/i386/x32.dat: Removed.
+
+2017-08-07  Maciej W. Rozycki  <macro@imgtec.com>
+
+	PR breakpoints/21886
+	* mem-break.c (default_memory_insert_breakpoint): Use
+	`->placed_address' rather than `->reqstd_address' for the
+	breakpoint location.
+
+2017-08-07  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* arch-utils.c (default_print_insn): Remove arch/mach/endian
+	assertions.
+
+2017-08-07  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* gdbarch.sh (gdbarch_info): Replace the `tdep_info' member with
+	a union of `tdep_info', `tdesc_data' and `id'.
+	* aarch64-tdep.c (aarch64_gdbarch_init): Use `info.tdesc_data'
+	rather than `info.tdep_info'.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Likewise.
+	* i386-tdep.c (i386_gdbarch_init): Likewise.
+	* mips-linux-tdep.c (mips_linux_init_abi): Likewise.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	* nds32-tdep.c (nds32_gdbarch_init): Likewise.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Likewise.
+	* ppc-linux-tdep.c (ppu2spu_sniffer): Use `info.id' rather than
+	`info.tdep_info'.
+	(ppc_linux_init_abi): Use `info.tdesc_data' rather than
+	`info.tdep_info'.
+	* sparc-tdep.c (sparc32_gdbarch_init): Likewise.
+	* spu-multiarch.c (spu_gdbarch): Use `info.id' rather than
+	`info.tdep_info'.
+	* spu-tdep.c (spu_gdbarch_init): Likewise.
+	* gdbarch.h: Regenerate.
+
+2017-08-07  Leszek Swirski  <leszeks@google.com>
+
+	PR symtab/20899
+	* dwarf2read.c (dwarf2_string_attr): Allow DW_FORM_GNU_strp_alt.
+
+2017-08-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote-sim.c (gdbsim_load): Remove char **argv local variable.
+	(gdbsim_open): Rename gdb_argv args object to argv.
+
+2017-08-05  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile-object-load.c (compile_object_load): Use
+	gdb::unique_xmalloc_ptr.
+	* cli/cli-dump.c (scan_filename): Rename from
+	scan_filename_with_cleanup.  Change return type.
+	(scan_expression): Rename from scan_expression_with_cleanup.
+	Change return type.
+	(dump_memory_to_file, dump_value_to_file, restore_command):
+	Use gdb::unique_xmalloc_ptr.  Update.
+	* cli/cli-cmds.c (find_and_open_script): Use
+	gdb::unique_xmalloc_ptr.
+	* tracefile-tfile.c (tfile_open): Use gdb::unique_xmalloc_ptr.
+	* symmisc.c (maintenance_print_symbols)
+	(maintenance_print_msymbols): Use gdb::unique_xmalloc_ptr.
+	* symfile.c (symfile_bfd_open, generic_load)
+	(add_symbol_file_command, remove_symbol_file_command): Use
+	gdb::unique_xmalloc_ptr.
+	* source.c (openp): Use gdb::unique_xmalloc_ptr.
+	* psymtab.c (maintenance_print_psymbols): Use
+	gdb::unique_xmalloc_ptr.
+	* corelow.c (core_open): Use gdb::unique_xmalloc_ptr.
+	* breakpoint.c (save_breakpoints): Use gdb::unique_xmalloc_ptr.
+	* solib.c (solib_map_sections): Use gdb::unique_xmalloc_ptr.
+	(reload_shared_libraries_1): Likewise.
+
+2017-08-05  Tom Tromey  <tom@tromey.com>
+
+	* rust-exp.y (rust_op_ptr, set_field): Remove typedefs.
+	(rust_op_vector, rust_set_vector): New typedefs.
+	(current_parser): New global.
+	(work_obstack): Change to pointer type.  Update all users.
+	(rust_ast, pstate): Remove globals.
+	(struct rust_parser): New.
+	(%union) <params, field_inits>: Change type.
+	(start, tuple_expr, unit_expr, struct_expr_list, literal)
+	(field_expr, expr_list, maybe_expr_list, type_list): Update.
+	(ast_call_ish, ast_path, ast_function_type, ast_tuple_type)
+	(convert_params_to_types, convert_params_to_expression): Change
+	type of "params".
+	(ast_string): Change type of "fields".
+	(rust_parse): Make a rust_parser.  Remove cleanups.
+	(rust_lex_tests): Make and install an auto_obstack.
+
+2017-08-04  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv (ipa_x32_linux_regobj): New.
+	* linux-amd64-ipa.c (get_ipa_tdesc): Use X86_TDESC_AVX_AVX512
+	instead of X86_TDESC_AVX512.
+	(initialize_low_tracepoint): Call
+	init_registers_x32_avx_avx512_linux.
+
+2017-08-04  Yao Qi  <yao.qi@linaro.org>
+
+	* utils.h (gdb_argv): Add namespace std for nullptr_t.
+
+2017-08-03  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+
+	* MAINTAINERS (Write After Approval): Add Ruslan Kabatsayev.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* utils.c (make_cleanup_freeargv, do_freeargv, gdb_buildargv):
+	Remove.
+	* utils.h (make_cleanup_freeargv, gdb_buildargv): Remove.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* python/py-param.c (compute_enum_values): Use gdb_argv.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* utils.h (struct gdb_argv_deleter): New.
+	(gdb_argv): New class.
+	* utils.c (gdb_argv::reset): New method.
+	* tracepoint.c (delete_trace_variable_command): Use gdb_argv.
+	* tracefile.c (tsave_command): Use gdb_argv.
+	* top.c (new_ui_command): Use gdb_argv.
+	* symmisc.c (maintenance_print_symbols)
+	(maintenance_print_msymbols, maintenance_expand_symtabs): Use gdb_argv.
+	* symfile.c (symbol_file_command, generic_load)
+	(remove_symbol_file_command): Use gdb_argv.
+	* stack.c (backtrace_command): Use gdb_argv.
+	* source.c (add_path, show_substitute_path_command)
+	(unset_substitute_path_command, set_substitute_path_command):
+	Use gdb_argv.
+	* skip.c (skip_command): Use gdb_argv.  Use gdb_buildargv.
+	* ser-mingw.c (pipe_windows_open): Use gdb_argv.
+	* remote.c (extended_remote_run, remote_put_command)
+	(remote_get_command, remote_delete_command): Use gdb_argv.
+	* remote-sim.c (gdbsim_load, gdbsim_create_inferior)
+	(gdbsim_open): Use gdb_argv.
+	* python/py-cmd.c (gdbpy_string_to_argv): Use gdb_argv.
+	* psymtab.c (maintenance_print_psymbols): Use gdb_argv.
+	* procfs.c (procfs_info_proc): Use gdb_argv.
+	* interps.c (interpreter_exec_cmd): Use gdb_argv.
+	* infrun.c (handle_command): Use gdb_argv.
+	* inferior.c (add_inferior_command, clone_inferior_command):
+	Use gdb_argv.
+	* guile/scm-string.c (gdbscm_string_to_argv): Use gdb_argv.
+	* exec.c (exec_file_command): Use gdb_argv.
+	* cli/cli-cmds.c (alias_command): Use gdb_argv.
+	* compile/compile.c (build_argc_argv): Use gdb_argv.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (gdbpy_decode_line): Use unique_xmalloc_ptr.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (compute_python_string): Return std::string.
+	(gdbpy_eval_from_control_command): Update.
+	(do_start_initialization): Use std::string.
+	* python/py-varobj.c (py_varobj_iter_next): Use string_printf, not
+	xstrprintf.
+	* python/py-breakpoint.c (local_setattro): Use string_printf, not
+	xstrprintf.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* top.h (do_restore_instream_cleanup): Remove.
+	* top.c (do_restore_instream_cleanup): Remove.
+	(read_command_file): Use scoped_restore.
+	* cli/cli-script.c (execute_user_command): Use scoped_restore.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-script.c (execute_user_command)
+	(execute_control_command): Use scoped_restore.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-script.c (do_restore_user_call_depth): Remove.
+	(execute_user_command): Remove user_call_depth; use
+	user_args_stack's size instead.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* top.h (in_user_command): Remove.
+	* top.c (in_user_command): Remove.
+	* cli/cli-script.c (do_restore_user_call_depth)
+	(execute_user_command): Update.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* valops.c (search_struct_method): Use gdb::byte_vector.
+	* valarith.c (value_concat): Use std::vector.
+	* target.c (memory_xfer_partial): Use gdb::byte_vector.
+	(simple_search_memory): Likewise.
+	* printcmd.c (find_string_backward): Use gdb::byte_vector.
+	* mi/mi-main.c (mi_cmd_data_write_memory): Use gdb::byte_vector.
+	* gcore.c (gcore_copy_callback): Use gdb::byte_vector.
+	* elfread.c (elf_rel_plt_read): Use std::string.
+	* cp-valprint.c (cp_print_value): Use gdb::byte_vector.
+	* cli/cli-dump.c (restore_section_callback): Use
+	gdb::byte_vector.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* jit.c (jit_reader_load_command): Use unique_xmalloc_ptr.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-regs.c (tui_restore_gdbout): Remove.
+	(tui_register_format): Use scoped_restore.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* reverse.c (exec_direction_default): Remove.
+	(exec_reverse_once): Use scoped_restore.
+	* remote.c (restore_remote_timeout): Remove.
+	(remote_flash_erase, remote_flash_write, remote_flash_done)
+	(readchar, remote_serial_write): Use scoped_restore.
+	* cli/cli-script.c (struct source_cleanup_lines_args)
+	(source_cleanup_lines): Remove.
+	(script_from_file): Use scoped_restore.
+	* cli/cli-cmds.c (source_verbose_cleanup): Remove.
+	(source_command): Use scoped_restore.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* utils.h (make_cleanup_free_so): Remove.
+	* utils.c (do_free_so, make_cleanup_free_so): Remove.
+	* solist.h (struct so_deleter): New.
+	(so_list_up): New typedef.
+	* solib-svr4.c (svr4_read_so_list): Use so_list_up.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* utils.h (make_cleanup_restore_current_language): Remove.
+	* utils.c (do_restore_current_language)
+	(make_cleanup_restore_current_language): Remove.
+	* parse.c (parse_exp_in_context_1)
+	(parse_expression_with_language): Use
+	scoped_restore_current_language.
+	* mi/mi-main.c (mi_cmd_execute): Use
+	scoped_restore_current_language.
+	* language.h (scoped_restore_current_language): New class.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile.c (cleanup_unlink_file): Remove.
+	(compile_to_object): Use gdb::unlinker.
+	(eval_compile_command): Likewise.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* utils.h (make_cleanup_fclose): Remove.
+	* utils.c (do_fclose_cleanup, make_cleanup_fclose): Remove.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* top.c (open_terminal_stream): Return gdb_file_up.
+	(new_ui_command): Update.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* source.c (print_source_lines_base, forward_search_command)
+	(reverse_search_command): Use gdb_file_up.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* fbsd-nat.c (fbsd_find_memory_regions): Update.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-cmds.c (find_and_open_script): Change return type.
+	Remove "streamp" and "full_path" parameters.
+	(source_script_with_search): Update.
+	* auto-load.c (source_script_file): Update.
+	* cli/cli-cmds.h (find_and_open_script): Change type.
+	(open_script): New struct.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* xml-support.c (xml_fetch_content_from_file): Update.
+	* ui-file.c (stdio_file::open): Update.
+	* tracefile-tfile.c (tfile_start): Update.
+	* remote.c (remote_file_put, remote_file_get): Update.
+	* nat/linux-procfs.c (linux_proc_get_int)
+	(linux_proc_pid_get_state, linux_proc_tid_get_name): Update.
+	* nat/linux-osdata.c (linux_common_core_of_thread): Update.
+	(command_from_pid, commandline_from_pid, linux_xfer_osdata_cpus)
+	(print_sockets, linux_xfer_osdata_shm, linux_xfer_osdata_sem)
+	(linux_xfer_osdata_msg, linux_xfer_osdata_modules): Update.
+	* nat/linux-btrace.c (linux_determine_kernel_start): Update.
+	* linux-nat.c (linux_proc_pending_signals): Update.
+	* dwarf2read.c (write_psymtabs_to_index): Use gdb_file_up.
+	(file_closer): Remove.
+	* compile/compile.c (compile_to_object): Update.
+	* common/filestuff.h (struct gdb_file_deleter): New.
+	(gdb_file_up): New typedef.
+	(gdb_fopen_cloexec): Change return type.
+	* common/filestuff.c (gdb_fopen_cloexec): Return gdb_file_up.
+	* cli/cli-dump.c (fopen_with_cleanup): Remove.
+	(dump_binary_file, restore_binary_file): Update.
+	* auto-load.c (auto_load_objfile_script_1): Update.
+
+2017-08-03  Tom Tromey  <tom@tromey.com>
+
+	* tracepoint.c (tvariables_info_1): Use ui_out_emit_table.
+	(info_static_tracepoint_markers_command): Likewise.
+	* solib.c (info_sharedlibrary_command): Use ui_out_emit_table.
+	* skip.c (skip_info): Use ui_out_emit_table.
+	* progspace.c (print_program_space): Use ui_out_emit_table.
+	* osdata.c (info_osdata): Use ui_out_emit_table.
+	* mi/mi-cmd-info.c (mi_cmd_info_ada_exceptions): Use
+	ui_out_emit_table.
+	* linux-thread-db.c (info_auto_load_libthread_db): Use
+	ui_out_emit_table.
+	* inferior.c (print_inferior): Use ui_out_emit_table.
+	* gdb_bfd.c (maintenance_info_bfds): Use ui_out_emit_table.
+	* breakpoint.c (breakpoint_1): Use ui_out_emit_table.
+	* auto-load.c (auto_load_info_scripts): Use ui_out_emit_table.
+	* ada-tasks.c (print_ada_task_info): Use ui_out_emit_table.
+	* ui-out.h (class ui_out_emit_table): New.
+
+2017-08-02  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (mips_fpu_type_str): New function.
+	(mips_dump_tdep): Call it.
+
+2017-08-01  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Use MIPS_FPU_TYPE to access
+	`->mips_fpu_type'.
+
+2017-07-31  Xavier Roirand  <roirand@adacore.com>
+
+	* solib-darwin.c (DYLD_VERSION_MAX): Increase value.
+
+2017-07-27  Xavier Roirand  <roirand@adacore.com>
+
+	* MAINTAINERS (Write After Approval): Add Xavier Roirand.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* cli/cli-cmds.c (maintenancechecklist): New variable.
+	* gdbcmd.h (maintenancechecklist): Declare it.
+	* i386-linux-tdep.c (_initialize_i386_linux_tdep) [GDB_SELF_TEST]:
+	Call i386_linux_read_description with different masks.
+	* maint.c (maintenance_check_command): New function.
+	(_initialize_maint_cmds): Call add_prefix_cmd.
+	* target-descriptions.c (tdesc_reg): override operator != and ==.
+	(tdesc_type): Likewise.
+	(tdesc_feature): Likewise.
+	(target_desc): Likewise.
+	[GDB_SELF_TEST] (selftests::record_xml_tdesc): New function.
+	(maintenance_check_xml_descriptions): New function.
+	(_initialize_target_descriptions) Add command "xml-descriptions".
+	* target-descriptions.h (selftests::record_xml_tdesc): Declare.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* i386-linux-tdep.c: Don't include features/i386/i386-*linux.c.
+	Include features/i386/32bit-*.c.
+	(i386_linux_read_description): Generate target description if it
+	doesn't exist.
+	(_initialize_i386_linux_tdep): Don't call _initialize_tdesc_i386
+	functions.
+	* features/i386/32bit-linux.c: Re-generated.
+	* features/i386/32bit-sse.c: Likewise.
+	* target-descriptions.c (print_c_feature::visit): Print code to
+	set register number if needed.
+	(print_c_feature) <m_next_regnum>: New field.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* features/Makefile (CFILES): Rename with TDESC_CFILES.
+	(FEATURE_XMLFILES): New.
+	(FEATURE_CFILES): New.
+	New rules.
+	(clean-cfiles): Remove generated c files.
+	* features/i386/32bit-avx.c: Generated.
+ 	* features/i386/32bit-avx512.c: Generated.
+ 	* features/i386/32bit-core.c: Generated.
+ 	* features/i386/32bit-linux.c: Generated.
+ 	* features/i386/32bit-mpx.c: Generated.
+ 	* features/i386/32bit-pkeys.c: Generated.
+ 	* features/i386/32bit-sse.c: Generated.
+ 	* target-descriptions.c: Include algorithm.
+	(tdesc_element_visitor): Add method visit_end.
+	(print_c_tdesc): Implement visit_end.
+	(print_c_tdesc:: m_filename_after_features): Move it to
+	protected.
+	(print_c_feature): New class.
+	(maint_print_c_tdesc_cmd): Use print_c_feature if XML file
+	name starts with "i386/32bit-".
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* target-descriptions.c (tdesc_element_visitor): New class.
+	(tdesc_element): New class.
+	(tdesc_reg): Inherit from tdesc_element.
+	(tdesc_reg::accept): New function.
+	(tdesc_type): Inherit from tdesc_element.
+	(tdesc_type::accept): New function.
+	(tdesc_feature): Inherit from tdesc_element.
+	(tdesc_feature::accept): New function.
+	(target_desc): Inherit from tdesc_element.
+	(target_desc::target_desc): New.
+	(target_desc::~target_desc): New.
+	(target_desc::accept): New.
+	(allocate_target_description): Use new.
+	(free_target_description): Use delete.
+	(print_c_tdesc): New class.
+	(maint_print_c_tdesc_cmd): Adjust.
+
+	* features/aarch64.c: Re-generated.
+	* features/arc-arcompact.c: Re-generated.
+	* features/arc-v2.c: Re-generated.
+	* features/arm/arm-with-iwmmxt.c: Re-generated.
+	* features/arm/arm-with-m.c: Re-generated.
+	* features/arm/arm-with-m-fpa-layout.c: Re-generated.
+	* features/arm/arm-with-m-vfp-d16.c: Re-generated.
+	* features/arm/arm-with-neon.c: Re-generated.
+	* features/arm/arm-with-vfpv2.c: Re-generated.
+	* features/arm/arm-with-vfpv3.c: Re-generated.
+	* features/i386/amd64-avx-avx512.c: Re-generated.
+	* features/i386/amd64-avx-avx512-linux.c: Re-generated.
+	* features/i386/amd64-avx.c: Re-generated.
+	* features/i386/amd64-avx-linux.c: Re-generated.
+	* features/i386/amd64-avx-mpx-avx512-pku.c: Re-generated.
+	* features/i386/amd64-avx-mpx-avx512-pku-linux.c: Re-generated.
+	* features/i386/amd64-avx-mpx.c: Re-generated.
+	* features/i386/amd64-avx-mpx-linux.c: Re-generated.
+	* features/i386/amd64.c: Re-generated.
+	* features/i386/amd64-linux.c: Re-generated.
+	* features/i386/amd64-mpx.c: Re-generated.
+	* features/i386/amd64-mpx-linux.c: Re-generated.
+	* features/i386/i386-avx-avx512.c: Re-generated.
+	* features/i386/i386-avx-avx512-linux.c: Re-generated.
+	* features/i386/i386-avx.c: Re-generated.
+	* features/i386/i386-avx-linux.c: Re-generated.
+	* features/i386/i386-avx-mpx-avx512-pku.c: Re-generated.
+	* features/i386/i386-avx-mpx-avx512-pku-linux.c: Re-generated.
+	* features/i386/i386-avx-mpx.c: Re-generated.
+	* features/i386/i386-avx-mpx-linux.c: Re-generated.
+	* features/i386/i386.c: Re-generated.
+	* features/i386/i386-linux.c: Re-generated.
+	* features/i386/i386-mmx.c: Re-generated.
+	* features/i386/i386-mmx-linux.c: Re-generated.
+	* features/i386/i386-mpx.c: Re-generated.
+	* features/i386/i386-mpx-linux.c: Re-generated.
+	* features/i386/x32-avx-avx512.c: Re-generated.
+	* features/i386/x32-avx-avx512-linux.c: Re-generated.
+	* features/i386/x32-avx.c: Re-generated.
+	* features/i386/x32-avx-linux.c: Re-generated.
+	* features/i386/x32.c: Re-generated.
+	* features/i386/x32-linux.c: Re-generated.
+	* features/microblaze.c: Re-generated.
+	* features/microblaze-with-stack-protect.c: Re-generated.
+	* features/mips64-dsp-linux.c: Re-generated.
+	* features/mips64-linux.c: Re-generated.
+	* features/mips-dsp-linux.c: Re-generated.
+	* features/mips-linux.c: Re-generated.
+	* features/nds32.c: Re-generated.
+	* features/nios2.c: Re-generated.
+	* features/nios2-linux.c: Re-generated.
+	* features/rs6000/powerpc-32.c: Re-generated.
+	* features/rs6000/powerpc-32l.c: Re-generated.
+	* features/rs6000/powerpc-403.c: Re-generated.
+	* features/rs6000/powerpc-403gc.c : Re-generated.
+	* features/rs6000/powerpc-405.c: Re-generated.
+	* features/rs6000/powerpc-505.c: Re-generated.
+	* features/rs6000/powerpc-601.c: Re-generated.
+	* features/rs6000/powerpc-602.c: Re-generated.
+	* features/rs6000/powerpc-603.c: Re-generated.
+	* features/rs6000/powerpc-604.c: Re-generated.
+	* features/rs6000/powerpc-64.c: Re-generated.
+	* features/rs6000/powerpc-64l.c: Re-generated.
+	* features/rs6000/powerpc-7400.c: Re-generated.
+	* features/rs6000/powerpc-750.c: Re-generated.
+	* features/rs6000/powerpc-860.c: Re-generated.
+	* features/rs6000/powerpc-altivec32.c: Re-generated.
+	* features/rs6000/powerpc-altivec32l.c: Re-generated.
+	* features/rs6000/powerpc-altivec64.c: Re-generated.
+	* features/rs6000/powerpc-altivec64l.c: Re-generated.
+	* features/rs6000/powerpc-cell32l.c: Re-generated.
+	* features/rs6000/powerpc-cell64l.c: Re-generated.
+	* features/rs6000/powerpc-e500.c: Re-generated.
+	* features/rs6000/powerpc-e500l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-32l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-64l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-altivec32l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-altivec64l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-vsx32l.c: Re-generated.
+	* features/rs6000/powerpc-isa205-vsx64l.c: Re-generated.
+	* features/rs6000/powerpc-vsx32.c: Re-generated.
+	* features/rs6000/powerpc-vsx32l.c: Re-generated.
+	* features/rs6000/powerpc-vsx64.c: Re-generated.
+	* features/rs6000/powerpc-vsx64l.c: Re-generated.
+	* features/rs6000/rs6000.c: Re-generated.
+	* features/s390-linux32.c: Re-generated.
+	* features/s390-linux32v1.c: Re-generated.
+	* features/s390-linux32v2.c: Re-generated.
+	* features/s390-linux64.c: Re-generated.
+	* features/s390-linux64v1.c: Re-generated.
+	* features/s390-linux64v2.c: Re-generated.
+	* features/s390-te-linux64.c: Re-generated.
+	* features/s390-tevx-linux64.c: Re-generated.
+	* features/s390-vx-linux64.c: Re-generated.
+	* features/s390x-linux64.c: Re-generated.
+	* features/s390x-linux64v1.c: Re-generated.
+	* features/s390x-linux64v2.c: Re-generated.
+	* features/s390x-te-linux64.c: Re-generated.
+	* features/s390x-tevx-linux64.c: Re-generated.
+	* features/s390x-vx-linux64.c: Re-generated.
+	* features/sparc/sparc32-solaris.c: Re-generated.
+	* features/sparc/sparc64-solaris.c: Re-generated.
+	* features/tic6x-c62x.c: Re-generated.
+	* features/tic6x-c62x-linux.c: Re-generated.
+	* features/tic6x-c64x.c: Re-generated.
+	* features/tic6x-c64x-linux.c: Re-generated.
+	* features/tic6x-c64xp.c: Re-generated.
+	* features/tic6x-c64xp-linux.c: Re-generated.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* i386-linux-tdep.c (i386_linux_read_description): New function.
+	(i386_linux_core_read_description): Call
+	i386_linux_read_description.
+	* i386-linux-tdep.h (i386_linux_read_description): Declare.
+	(tdesc_i386_linux, tdesc_i386_mmx_linux): Remove declarations.
+	(tdesc_i386_avx_linux, tdesc_i386_mpx_linux): Likewise
+	(tdesc_i386_avx_mpx_linux, tdesc_i386_avx_avx512_linux): Likewise.
+	(tdesc_i386_avx_mpx_avx512_pku_linux): Likewise.
+	* x86-linux-nat.c (x86_linux_read_description): Call
+	i386_linux_read_description.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* NEWS: Mention it.
+	* features/Makefile (%.c: %.xml): Pass the xml file name to
+	command "maint print c-tdesc".
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Get file
+	name from 'arg'.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* target-descriptions.c (target_desc): Add ctor and dtor.  Do
+	in-class initialization.
+	(tdesc_create_feature): Call new instead of XCNEW.
+	(free_target_description): Ue delete.
+
+2017-07-25  John Baldwin  <jhb@FreeBSD.org>
+
+	* configure.nat: Add "-lkvm" for NetBSD/sparc64 and fix typo.
+
+2017-07-25  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-tdep.c (amd64_init_abi): Make argument default_tdesc
+	constant.
+	(amd64_x32_init_abi): Likewise.
+	* amd64-tdep.h (amd64_init_abi): Update declaration.
+	(amd64_x32_init_abi): Likewise.
+
+2017-07-25  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/21717
+	* arm-linux-nat.c (arm_linux_fetch_inferior_registers): Update
+	condition for FPSCR.
+	(arm_linux_store_inferior_registers): Likewise.
+
+2017-07-22  Tom Tromey  <tom@tromey.com>
+
+	* break-catch-syscall.c (struct catch_syscall_inferior_data)
+	<syscalls_counts>: Now a std::vector.
+	(get_catch_syscall_inferior_data): Use "new".
+	(catch_syscall_inferior_data_cleanup): Use "delete".
+	(insert_catch_syscall, remove_catch_syscall)
+	(clear_syscall_counts): Update.
+
+2017-07-22  Tom Tromey  <tom@tromey.com>
+
+	* break-catch-syscall.c (syscall_catchpoint)
+	<syscalls_to_be_caught>: Now a std::vector<int>
+	(~syscall_catchpoint): Remove.
+	(insert_catch_syscall, remove_catch_syscall)
+	(breakpoint_hit_catch_syscall, print_one_catch_syscall)
+	(print_mention_catch_syscall, print_recreate_catch_syscall):
+	Update.
+	(create_syscall_event_catchpoint): Change type of "filter"
+	parameter.
+	(catch_syscall_split_args): Return a std::vector.
+	(catch_syscall_command_1, catching_syscall_number_1): Update.
+
+2017-07-22  Tom Tromey  <tom@tromey.com>
+
+	* break-catch-throw.c (struct exception_catchpoint)
+	<exception_rx>: Now a std::string.
+	(~exception_catchpoint): Remove.
+	(print_one_detail_exception_catchpoint): Update.
+	(handle_gnu_v3_exceptions): Change type of except_rx.
+	(extract_exception_regexp): Return a std::string.
+	(catch_exception_command_1): Update.
+
+2017-07-22  Tom Tromey  <tom@tromey.com>
+
+	* break-catch-sig.c (gdb_signal_type): Remove typedef.
+	(struct signal_catchpoint) <signals_to_be_caught>: Now a
+	std::vector.
+	<catch_all>: Now a bool.
+	(~signal_catchpoint): Remove.
+	(signal_catchpoint_insert_location)
+	(signal_catchpoint_remove_location)
+	(signal_catchpoint_breakpoint_hit, signal_catchpoint_print_one)
+	(signal_catchpoint_print_mention)
+	(signal_catchpoint_print_recreate)
+	(signal_catchpoint_explains_signal): Update.
+	(create_signal_catchpoint): Change type of "filter" and
+	"catch_all".
+	(catch_signal_split_args): Return a std::vector.  Change type of
+	"catch_all".
+	(catch_signal_command): Update.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_language_defn): Make extern.
+	(_initialize_ada_language): Remove add_language call.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Make extern.
+	(_initialize_c_language): Delete.
+	* completer.c (compare_cstrings): Delete, moved to utils.h.
+	* d-lang.c (d_language_defn): Make extern.
+	(_initialize_d_language): Remove add_language calls.
+	* defs.h (enum language): Add comment.
+	* f-lang.c (f_language_defn): Make extern.
+	(_initialize_f_language): Remove add_language call.
+	* go-lang.c (go_language_defn): Make extern.
+	(_initialize_go_language): Remove add_language call.
+	* language.c: Include <algorithm>.
+	(languages): Redefine as const array.
+	(languages_size, languages_allocsize, DEFAULT_ALLOCSIZE): Delete.
+	(set_language_command): Handle "local".  Use for-range loop.
+	(set_language): Remove loop.
+	(language_enum): Rewrite.
+	(language_def, language_str): Remove loops.
+	(add_language): Delete.
+	(add_set_language_command): New, based on add_languages.
+	(skip_language_trampoline): Adjust.
+	(local_language_defn): Delete.
+	(language_gdbarch_post_init): Adjust.
+	(_initialize_language): Remove add_language calls.  Call
+	add_set_language_command.
+	* language.h (add_language): Delete.
+	(auto_language_defn)
+	(unknown_language_defn, minimal_language_defn, ada_language_defn)
+	(asm_language_defn, c_language_defn, cplus_language_defn)
+	(d_language_defn, f_language_defn, go_language_defn)
+	(m2_language_defn, objc_language_defn, opencl_language_defn)
+	(pascal_language_defn, rust_language_defn): Declare.
+	* m2-lang.c (m2_language_defn): Make extern.
+	(_initialize_m2_language): Remove add_language call.
+	* objc-lang.c (objc_language_defn): Make extern.
+	(_initialize_objc_language): Remove add_language call.
+	* opencl-lang.c (opencl_language_defn): Make extern.
+	(_initialize_opencl_language): Remove add_language call.
+	* p-lang.c (pascal_language_defn): Make extern.
+	(_initialize_pascal_language): Delete.
+	* rust-lang.c (rust_language_defn): Make extern.
+	(_initialize_rust_language): Delete.
+	* utils.h (compare_cstrings): New static inline function.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_to_fixed_type_1): Adjust.
+	(get_var_value): Constify parameters.
+	(get_int_var_value): Change prototype.
+	(to_fixed_range_type): Adjust.
+	* ada-lang.h (get_int_var_value): Change prototype.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (dw2_lookup_symbol): Use
+	SYMBOL_MATCHES_SEARCH_NAME.
+	* psymtab.c (psym_lookup_symbol): Use SYMBOL_MATCHES_SEARCH_NAME.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
+	* block.c (block_iter_name_step, block_iter_name_first)
+	(block_iter_name_next): Delete.
+	(block_lookup_symbol_primary): Adjust to use
+	dict_iter_match_first/dict_iter_match_next.
+	* block.h (block_iter_name_first, block_iter_name_next): Delete
+	declarations.
+	(ALL_BLOCK_SYMBOLS_WITH_NAME): Adjust to use
+	dict_iter_match_first/dict_iter_match_next.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
+	* cp-support.c (cp_find_first_component_aux): Add missing case for
+	end of string.
+
+2017-07-18  David Blaikie  <dblaikie@gmail.com>
+
+	* dwarf2read.c (create_cus_hash_table): Re-add lost initialization
+	of dwo_cu's dwo_file.
+
+2017-07-18  Yao Qi  <yao.qi@linaro.org>
+
+	* remote.c (store_registers_using_G): Remove one line comment.
+
+2017-07-18  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache_cpy): Simplify it.
+	(regcache::cpy_no_passthrough): Remove it.
+	* regcache.h (cpy_no_passthrough): Remove it.
+	(regcache_dup, regcache_cpy): Update comments.
+
+2017-07-18  Pedro Alves  <palves@redhat.com>
+
+	* remote-sim.c (sim_command_completer): Adjust to work with a
+	completion_tracker instead of a VEC.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* completer.c (complete_source_filenames): New function.
+	(complete_address_and_linespec_locations): New function.
+	(location_completer): Use complete_address_and_linespec_locations.
+	(completion_tracker::build_completion_result): Honor the tracker's
+	request to suppress append.
+	* completer.h (completion_tracker::suppress_append_ws)
+	(completion_tracker::set_suppress_append_ws): New methods.
+	(completion_tracker::m_suppress_append_ws): New field.
+	(complete_source_filenames): New declaration.
+	* linespec.c (linespec_complete_what): New.
+	(struct ls_parser) <complete_what, completion_word,
+	completion_quote_char, completion_quote_end, completion_tracker>:
+	New fields.
+	(string_find_incomplete_keyword_at_end): New.
+	(linespec_lexer_lex_string): Record quote char.  If in completion
+	mode, don't throw.
+	(linespec_lexer_consume_token): Advance the completion word point.
+	(linespec_lexer_peek_token): Save/restore completion info.
+	(save_stream_and_consume_token): New.
+	(set_completion_after_number): New.
+	(linespec_parse_basic): Set what to complete next depending on
+	token.  Handle function and label completions specially.
+	(parse_linespec): Disable objc shortcut in completion mode.  Set
+	what to complete next depending on token type.  Skip keyword if in
+	completion mode.
+	(complete_linespec_component, linespec_complete): New.
+	* linespec.h (linespec_complete): Declare.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* linespec.c (linespec_lexer_lex_string, find_toplevel_char):
+	Handle 'operator<' / 'operator<<'.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* completer.c (collect_explicit_location_matches): Handle
+	MATCH_LABEL.
+	(convert_explicit_location_to_linespec): New, factored out from
+	...
+	(convert_explicit_location_to_sals): ... this.
+	(complete_label): New.
+	(linespec_complete_label, find_label_symbols_in_block): New.
+	(find_label_symbols): Add completion_mode parameter and adjust to
+	call find_label_symbols_in_block.
+	* linespec.h (linespec_complete_label): Declare.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_collect_symbol_completion_matches): Add
+	complete_symbol_mode parameter.
+	* cli/cli-cmds.c (complete_command): Get the completion result out
+	of the handle_brkchars tracker if used a custom word point.
+	* completer.c: Include "linespec.h".
+	(enum explicit_location_match_type) <MATCH_LINE>: New enumerator.
+	(advance_to_expression_complete_word_point): New.
+	(completion_tracker::completes_to_completion_word): New.
+	(complete_files_symbols): Pass down
+	complete_symbol_mode::EXPRESSION.
+	(explicit_options, probe_options): New.
+	(collect_explicit_location_matches): Complete on the
+	explictit_loc->foo instead of word.  Use
+	linespec_complete_function.  Handle MATCH_LINE.  Handle offering
+	keyword and options completions.
+	(backup_text_ptr): Delete.
+	(skip_keyword): New.
+	(complete_explicit_location): Remove 'word' parameter.  Add
+	language, quoted_arg_start and quoted_arg_end parameters.
+	Rewrite, parsing left to right.
+	(location_completer): Rewrite.
+	(location_completer_handle_brkchars): New function.
+	(symbol_completer): Pass down complete_symbol_mode::EXPRESSION.
+	(enum complete_line_internal_reason): Adjust comments.
+	(completion_tracker::discard_completions): New.
+	(completer_handle_brkchars_func_for_completer): Handle
+	location_completer.
+	(gdb_custom_word_point_brkchars)
+	(gdb_org_rl_basic_quote_characters): New.
+	(gdb_completion_word_break_characters_throw)
+	(completion_find_completion_word): Handle trackers that use a
+	custom word point.
+	(completion_tracker::advance_custom_word_point_by): New.
+	(completion_tracker::build_completion_result): Don't rely on
+	readline appending the quote char.
+	(gdb_rl_attempted_completion_function_throw): Handle trackers that
+	use a custom word point.
+	(gdb_rl_attempted_completion_function): Restore
+	rl_basic_quote_characters.
+	* completer.h (class completion_tracker): Extend intro comment.
+	(completion_tracker::set_quote_char)
+	(completion_tracker::quote_char)
+	(completion_tracker::set_use_custom_word_point)
+	(completion_tracker::use_custom_word_point)
+	(completion_tracker::custom_word_point)
+	(completion_tracker::set_custom_word_point)
+	(completion_tracker::advance_custom_word_point_by)
+	(completion_tracker::completes_to_completion_word)
+	(completion_tracker::discard_completions): New methods.
+	(completion_tracker::m_quote_char)
+	(completion_tracker::m_use_custom_word_point)
+	(completion_tracker::m_custom_word_point): New fields.
+	(advance_to_expression_complete_word_point): Declare.
+	* f-lang.c (f_collect_symbol_completion_matches): Add
+	complete_symbol_mode parameter.
+	* language.h (struct language_defn)
+	<la_collect_symbol_completion_matches>: Add complete_symbol_mode
+	parameter.
+	* linespec.c (linespec_keywords): Add NULL terminator.  Make extern.
+	(linespec_complete_function): New function.
+	(linespec_lexer_lex_keyword): Adjust.
+	* linespec.h (linespec_keywords, linespec_complete_function): New
+	declarations.
+	* location.c (find_end_quote): New function.
+	(explicit_location_lex_one): Add explicit_completion_info
+	parameter.  Save quoting info.  Don't throw if being called for
+	completion.  Don't handle Ada operators here.
+	(is_cp_operator, skip_op_false_positives, first_of)
+	(explicit_location_lex_one_function): New function.
+	(string_to_explicit_location): Replace 'dont_throw' parameter with
+	an explicit_completion_info pointer parameter.  Handle it.  Don't
+	use explicit_location_lex_one to lex function names.  Use
+	explicit_location_lex_one_function instead.
+	* location.h (struct explicit_completion_info): New.
+	(string_to_explicit_location): Replace 'dont_throw' parameter with
+	an explicit_completion_info pointer parameter.
+	* symtab.c (default_collect_symbol_completion_matches_break_on):
+	Add complete_symbol_mode parameter.  Handle LINESPEC mode.
+	(default_collect_symbol_completion_matches)
+	(collect_symbol_completion_matches): Add complete_symbol_mode
+	parameter.
+	(collect_symbol_completion_matches_type): Pass down
+	complete_symbol_mode::EXPRESSION.
+	(collect_file_symbol_completion_matches): Add complete_symbol_mode
+	parameter.  Handle LINESPEC mode.
+	* symtab.h (complete_symbol_mode): New.
+	(default_collect_symbol_completion_matches_break_on)
+	(default_collect_symbol_completion_matches)
+	(collect_symbol_completion_matches)
+	(collect_file_symbol_completion_matches): Add complete_symbol_mode
+	parameter.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* utils.c (enum class strncmp_iw_mode): New.
+	(strcmp_iw): Rename to ...
+	(strncmp_iw_with_mode): ... this.  Add string2_len and mode
+	parameters.  Handle them.
+	(strncmp_iw): New.
+	(strcmp_iw): Reimplement as wrapper around strncmp_iw_with_mode.
+	* utils.h (strncmp_iw): Declare.
+	(strcmp_iw): Move describing comments here.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* c-exp.y (operator_stoken): Use CP_OPERATOR_LEN and
+	CP_OPERATOR_STR.
+	* c-typeprint.c (is_type_conversion_operator): Use
+	CP_OPERATOR_STR.
+	* cp-support.c (LENGTH_OF_OPERATOR): Delete.
+	(cp_find_first_component_aux): Use CP_OPERATOR_STR and
+	CP_OPERATOR_LEN.
+	* cp-support.h (CP_OPERATOR_STR, CP_OPERATOR_LEN): New.
+	* gnu-v2-abi.c (gnuv2_is_operator_name): Use CP_OPERATOR_STR.
+	* gnu-v3-abi.c (gnuv3_is_operator_name): Use CP_OPERATOR_STR.
+	* linespec.c (linespec_lexer_lex_string): Use CP_OPERATOR_LEN and
+	CP_OPERATOR_STR.
+	* location.c: Include "cp-support.h".
+	(explicit_location_lex_one): Use CP_OPERATOR_LEN and
+	CP_OPERATOR_STR.
+	* symtab.c (operator_chars): Use CP_OPERATOR_STR and
+	CP_OPERATOR_LEN.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-cmds.c (complete_command): Use a completion tracker
+	along with completion_find_completion_word for handle_brkchars
+	phase.
+	* completer.c (RL_QF_SINGLE_QUOTE, RL_QF_DOUBLE_QUOTE)
+	(RL_QF_BACKSLASH, RL_QF_OTHER_QUOTE): New.
+	(struct gdb_rl_completion_word_info): New.
+	(gdb_rl_find_completion_word): New.
+	(completion_find_completion_word): New.
+	* completer.h (completion_find_completion_word): Declare.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (symbol_completion_match): Adjust comments.
+	(symbol_completion_add): Replace vector parameter with
+	completion_tracker parameter.  Use it.
+	(ada_make_symbol_completion_list): Rename to...
+	(ada_collect_symbol_completion_matches): ... this.  Add
+	completion_tracker parameter and use it.
+	(ada_language_defn): Adjust.
+	* break-catch-syscall.c (catch_syscall_completer): Adjust
+	prototype and work with completion_tracker instead of VEC.
+	* breakpoint.c (condition_completer): Adjust prototype and work
+	with completion_tracker instead of VEC.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Adjust to renames.
+	* cli/cli-cmds.c (complete_command): Rework using
+	completion_tracker.  Catch exceptions when completing.
+	* cli/cli-decode.c (integer_unlimited_completer)
+	(complete_on_cmdlist, complete_on_enum): Adjust prototype and work
+	with completion_tracker instead of VEC.
+	* command.h (struct completion_tracker): Forward declare.
+	(completer_ftype, completer_handle_brkchars_ftype): Change
+	types.
+	(complete_on_cmdlist, complete_on_enum): Adjust.
+	* completer.c: Include <algorithm>.
+	(struct gdb_completer_state): New.
+	(current_completion): New global.
+	(readline_line_completion_function): Delete.
+	(noop_completer, filename_completer)
+	(filename_completer_handle_brkchars, complete_files_symbols)
+	(linespec_location_completer): Adjust to work with a
+	completion_tracker instead of a VEC.
+	(string_or_empty): New.
+	(collect_explicit_location_matches): Adjust to work with a
+	completion_tracker instead of a VEC.
+	(explicit_location_completer): Rename to ...
+	(complete_explicit_location): ... this and adjust to work with a
+	completion_tracker instead of a VEC.
+	(location_completer): Adjust to work with a completion_tracker
+	instead of a VEC.
+	(add_struct_fields): Adjust to work with a completion_list instead
+	of VEC.
+	(expression_completer): Rename to ...
+	(complete_expression): ... this and adjust to work with a
+	completion_tracker instead of a VEC.  Use complete_files_symbols.
+	(expression_completer): Reimplement on top of complete_expression.
+	(symbol_completer): Adjust to work with a completion_tracker
+	instead of a VEC.
+	(enum complete_line_internal_reason): Add describing comments.
+	(complete_line_internal_normal_command): Adjust to work with a
+	completion_tracker instead of a VEC.
+	(complete_line_internal): Rename to ...
+	(complete_line_internal_1): ... this and adjust to work with a
+	completion_tracker instead of a VEC.  Assert TEXT is NULL in the
+	handle_brkchars phase.
+	(new_completion_tracker): Delete.
+	(complete_line_internal): Reimplement as TRY/CATCH wrapper around
+	complete_line_internal_1.
+	(free_completion_tracker): Delete.
+	(INITIAL_COMPLETION_HTAB_SIZE): New.
+	(completion_tracker::completion_tracker)
+	(completion_tracker::~completion_tracker): New.
+	(maybe_add_completion): Delete.
+	(completion_tracker::maybe_add_completion)
+	(completion_tracker::add_completion)
+	(completion_tracker::add_completions): New.
+	(throw_max_completions_reached_error): Delete.
+	(complete_line): Adjust to work with a completion_tracker instead
+	of a VEC.  Don't create a completion_tracker_t or check for max
+	completions here.
+	(command_completer, command_completer_handle_brkchars)
+	(signal_completer, reg_or_group_completer_1)
+	(reg_or_group_completer, default_completer_handle_brkchars):
+	Adjust to work with a completion_tracker.
+	(gdb_completion_word_break_characters_throw): New.
+	(gdb_completion_word_break_characters): Reimplement.
+	(line_completion_function): Delete.
+	(completion_tracker::recompute_lowest_common_denominator)
+	(expand_preserving_ws)
+	(completion_tracker::build_completion_result)
+	(completion_result::completion_result)
+	(completion_result::completion_result)
+	(completion_result::~completion_result)
+	(completion_result::completion_result)
+	(completion_result::release_match_list, compare_cstrings)
+	(completion_result::sort_match_list)
+	(completion_result::reset_match_list)
+	(gdb_rl_attempted_completion_function_throw)
+	(gdb_rl_attempted_completion_function): New.
+	* completer.h (completion_list, struct completion_result)
+	(class completion_tracker): New.
+	(complete_line): Add completion_tracker parameter.
+	(readline_line_completion_function): Delete.
+	(gdb_rl_attempted_completion_function): New.
+	(noop_completer, filename_completer, expression_completer)
+	(location_completer, symbol_completer, command_completer)
+	(signal_completer, reg_or_group_completer): Update prototypes.
+	(completion_tracker_t, new_completion_tracker)
+	(make_cleanup_free_completion_tracker): Delete.
+	(enum maybe_add_completion_enum): Delete.
+	(maybe_add_completion): Delete.
+	(throw_max_completions_reached_error): Delete.
+	* corefile.c (complete_set_gnutarget): Adjust to work with a
+	completion_tracker instead of a VEC.
+	* cp-abi.c (cp_abi_completer): Adjust to work with a
+	completion_tracker instead of a VEC.
+	* d-lang.c (d_language_defn): Adjust.
+	* disasm.c (disassembler_options_completer): Adjust to work with a
+	completion_tracker instead of a VEC.
+	* f-lang.c (f_make_symbol_completion_list): Rename to ...
+	(f_collect_symbol_completion_matches): ... this.  Adjust to work
+	with a completion_tracker instead of a VEC.
+	(f_language_defn): Adjust.
+	* go-lang.c (go_language_defn): Adjust.
+	* guile/scm-cmd.c (cmdscm_add_completion, cmdscm_completer):
+	Adjust to work with a completion_tracker instead of a VEC.
+	* infrun.c (handle_completer): Likewise.
+	* interps.c (interpreter_completer): Likewise.
+	* interps.h (interpreter_completer): Likewise.
+	* language.c (unknown_language_defn, auto_language_defn)
+	(local_language_defn): Adjust.
+	* language.h (language_defn::la_make_symbol_completion_list):
+	Rename to ...
+	(language_defn::la_collect_symbol_completion_matches): ... this
+	and adjust to work with a completion_tracker instead of a VEC.
+	* m2-lang.c (m2_language_defn): Adjust.
+	* objc-lang.c (objc_language_defn): Adjust.
+	* opencl-lang.c (opencl_language_defn): Adjust.
+	* p-lang.c (pascal_language_defn): Adjust.
+	* python/py-cmd.c (cmdpy_completer_helper): Handle NULL word.
+	(cmdpy_completer_handle_brkchars, cmdpy_completer): Adjust to work
+	with a completion_tracker.
+	* rust-lang.c (rust_language_defn): Adjust.
+	* symtab.c (free_completion_list, do_free_completion_list)
+	(return_val, completion_tracker): Delete.
+	(completion_list_add_name, completion_list_add_symbol)
+	(completion_list_add_msymbol, completion_list_objc_symbol)
+	(completion_list_add_fields, add_symtab_completions): Add
+	completion_tracker parameter and use it.
+	(default_make_symbol_completion_list_break_on_1): Rename to...
+	(default_collect_symbol_completion_matches_break_on): ... this.
+	Add completion_tracker parameter and use it instead of allocating
+	a completion tracker here.
+	(default_make_symbol_completion_list_break_on): Delete old
+	implementation.
+	(default_make_symbol_completion_list): Delete.
+	(default_collect_symbol_completion_matches): New.
+	(make_symbol_completion_list): Delete.
+	(collect_symbol_completion_matches): New.
+	(make_symbol_completion_type): Rename to ...
+	(collect_symbol_completion_matches_type): ... this.  Add
+	completion_tracker parameter and use it instead of VEC.
+	(make_file_symbol_completion_list_1): Rename to...
+	(collect_file_symbol_completion_matches): ... this.  Add
+	completion_tracker parameter and use it instead of VEC.
+	(make_file_symbol_completion_list): Delete.
+	(add_filename_to_list): Use completion_list instead of a VEC.
+	(add_partial_filename_data::list): Now a completion_list.
+	(make_source_files_completion_list): Work with a completion_list
+	instead of a VEC.
+	* symtab.h: Include "completer.h".
+	(default_make_symbol_completion_list_break_on)
+	(default_make_symbol_completion_list, make_symbol_completion_list)
+	(make_symbol_completion_type, make_file_symbol_completion_list)
+	(make_source_files_completion_list): Delete.
+	(default_collect_symbol_completion_matches_break_on)
+	(default_collect_symbol_completion_matches)
+	(collect_symbol_completion_matches)
+	(collect_symbol_completion_matches_type)
+	(collect_file_symbol_completion_matches)
+	(make_source_files_completion_list): New.
+	* top.c (init_main): Don't install a rl_completion_entry_function
+	hook.  Install a rl_attempted_completion_function hook instead.
+	* tui/tui-layout.c (layout_completer): Adjust to work with a
+	completion_tracker.
+	* tui/tui-regs.c (tui_reggroup_completer):
+	* tui/tui-win.c (window_name_completer, focus_completer)
+	(winheight_completer): Adjust to work with a completion_tracker.
+	* value.c: Include "completer.h".
+	(complete_internalvar): Adjust to work with a completion_tracker.
+	* value.h (complete_internalvar): Likewise.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-decode.c (set_cmd_completer_handle_brkchars): Adjust to
+	renames.
+	* cli/cli-decode.h (struct cmd_list_element) <completer>: Move
+	comments to completer_ftype's declaration.
+	<completer_handle_brkchars>: Change type to
+	completer_handle_brkchars_ftype.
+	* command.h (completer_ftype): Add describing comment and give
+	names to parameters.
+	(completer_ftype_void): Rename to ...
+	(completer_handle_brkchars_ftype) ... this.  Add describing comment.
+	(set_cmd_completer_handle_brkchars): Adjust.
+	* completer.c (filename_completer_handle_brkchars): New function.
+	(complete_line_internal_normal_command): New function, factored
+	out from ...
+	(complete_line_internal): ... here.
+	(command_completer_handle_brkchars)
+	(default_completer_handle_brkchars)
+	(completer_handle_brkchars_func_for_completer): New functions.
+	* completer.h (set_gdb_completion_word_break_characters): Delete
+	declaration.
+	(completer_handle_brkchars_func_for_completer): New declaration.
+	* python/py-cmd.c (cmdpy_completer_handle_brkchars): Adjust to use
+	completer_handle_brkchars_func_for_completer.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* completer.c (symbol_completer): New function, based on
+	make_symbol_completion_list_fn.
+	* completer.h (symbol_completer): New declaration.
+	* guile/scm-cmd.c (cmdscm_completers): Adjust.
+	* python/py-cmd.c (completers): Adjust.
+	* symtab.c (make_symbol_completion_list_fn): Delete.
+	* symtab.h (make_symbol_completion_list_fn): Delete.
+	* cli/cli-decode.c (add_cmd): Adjust.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (COMMON_OBS): Add filename-seen-cache.o.
+	* dwarf2read.c: Include "filename-seen-cache.h".
+	* dwarf2read.c (dwarf2_per_objfile) <filenames_cache>: New field.
+	(dw2_map_symbol_filenames): Build and use a filenames_seen_cache.
+	* filename-seen-cache.c: New file.
+	* filename-seen-cache.h: New file.
+	* symtab.c: Include "filename-seen-cache.h".
+	(struct filename_seen_cache, INITIAL_FILENAME_SEEN_CACHE_SIZE)
+	(create_filename_seen_cache, clear_filename_seen_cache)
+	(delete_filename_seen_cache, filename_seen): Delete, parts moved
+	to filename-seen-cache.h/filename-seen-cache.c.
+	(output_source_filename, sources_info)
+	(maybe_add_partial_symtab_filename)
+	(make_source_files_completion_list): Adjust to use
+	filename_seen_cache.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (dwarf2_per_objfile): In-class initialize all
+	fields.
+	(dwarf2_per_objfile::dwarf2_per_objfile(objfile*, const
+	dwarf2_debug_sections*)): New.
+	(dwarf2_per_objfile::dwarf2_per_objfile(const
+	dwarf2_per_objfile&)): Declare as deleted.
+	(dwarf2_per_objfile::operator=): Declare as deleted.
+	(dwarf2_per_objfile::dwarf2_per_objfile)
+	(dwarf2_per_objfile::~dwarf2_per_objfile)
+	(dwarf2_per_objfile::free_cached_comp_units): New.
+	(dwarf2_has_info): dwarf2_per_objfile initialization code moved to
+	ctor.  Call dwarf2_per_objfile's ctor manually.
+	(dwarf2_locate_sections): Deleted/refactored as ...
+	(dwarf2_per_objfile::locate_sections): ... this new method.
+	(free_cached_comp_units): Defer to
+	dwarf2_per_objfile::free_cached_comp_units.
+	(dwarf2_free_objfile): Call dwarf2_per_objfile's dtor manually.
+
+2017-07-14  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21764:
+	* rust-exp.y (convert_ast_to_expression): Add "want_type"
+	parameter.
+	<UNOP_SIZEOF>: Split into separate case.
+	<UNOP_VAR_VALUE>: Handle want_type.  Add error case.
+
+2017-07-14  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21763:
+	* symtab.c (symbol_matches_domain): Add language_rust to special
+	case.
+	* rust-exp.y (convert_ast_to_expression) <OP_VAR_VALUE>: Don't
+	treat LOC_TYPEDEF symbols as variables.
+
+2017-07-14  Pedro Alves  <palves@redhat.com>
+
+	* symtab.c (make_file_symbol_completion_list_1): Iterate over
+	symtabs matching all symtabs with SRCFILE as file name instead of
+	only considering the first hit, with lookup_symtab.
+
+2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ax-gdb.c (gen_aggregate_elt_ref): Remove operand_name and
+	operator_name parameters.
+	(gen_expr): Update function call.
+
+2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2loc.h (dwarf2_compile_expr_to_ax): Remove gdbarch
+	parameter.
+	* symtab.h (struct symbol_computed_ops::tracepoint_var_ref):
+	Likewise.
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax): Remove gdbarch
+	parameter, use agent_expr::gdbarch instead, update function
+	calls.
+	(locexpr_tracepoint_var_ref): Likewise.
+	(loclist_tracepoint_var_ref): Likewise.
+	* ax-gdb.c (gen_trace_static_fields): Likewise.
+	(gen_traced_pop): Likewise.
+	(gen_frame_args_address): Likewise.
+	(gen_frame_locals_address): Likewise.
+	(gen_var_ref): Likewise.
+	(gen_struct_ref_recursive): Likewise.
+	(gen_static_field): Likewise.
+	(gen_maybe_namespace_elt): Likewise.
+	(gen_expr): Likewise.
+	(gen_trace_for_var): Likewise.
+	(gen_trace_for_expr): Likewise.
+	(gen_trace_for_return_address): Likewise.
+
+2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ax-gdb.c (gen_deref, gen_address_of): Remove unused ax
+	parameter.
+	(gen_struct_ref, gen_expr, gen_expr_binop_rest): Update call.
+
+2017-07-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ax-gdb.c (gen_usual_unary): Remove exp parameter, get gdbarch
+	from ax, update calls.
+	(gen_usual_arithmetic): Likewise.
+	(gen_integral_promotions): Likewise.
+	(gen_bitfield_ref): Likewise.
+	(gen_primitive_field): Likewise.
+	(gen_struct_ref_recursive): Likewise.
+	(gen_struct_ref): Likewise.
+	(gen_maybe_namespace_elt): Likewise.
+	(gen_struct_elt_for_reference): Likewise.
+	(gen_namespace_elt): Likewise.
+	(gen_aggregate_elt_ref): Likewise.
+	(gen_expr): Get gdbarch from ax, update calls.
+	(gen_expr_binop_rest): Likewise.
+
+2017-07-13  Pedro Alves  <palves@redhat.com>
+
+	* amd64-darwin-tdep.c (x86_darwin_init_abi_64): Pass tdesc_amd64
+	as default tdesc.
+	* amd64-dicos-tdep.c (amd64_dicos_init_abi):
+	* amd64-fbsd-tdep.c (amd64fbsd_init_abi):
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Pass
+	tdesc_amd64_linux as default tdesc.  Get final tdesc from the
+	tdep.
+	(amd64_x32_linux_init_abi): Pass tdesc_x32_linux as default tdesc.
+	Get final tdesc from the tdep.
+	* amd64-nbsd-tdep.c (amd64nbsd_init_abi): Pass tdesc_amd64 as
+	default tdesc.
+	* amd64-obsd-tdep.c (amd64obsd_init_abi): Likewise.
+	* amd64-sol2-tdep.c (amd64_sol2_init_abi): Likewise.
+	* amd64-tdep.c (amd64_init_abi): Add 'default_tdesc' parameter.
+	Use it as default tdesc.
+	(amd64_x32_init_abi): Add 'default_tdesc' parameter, and pass it
+	down to amd_init_abi.  No longer handle fallback tdesc here.
+	* amd64-tdep.h (tdesc_x32): Declare.
+	(amd64_init_abi, amd64_x32_init_abi): Add 'default_tdesc'
+	parameter.
+	* amd64-windows-tdep.c (amd64_windows_init_abi): Pass tdesc_amd64
+	as default tdesc.
+
+2017-07-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-tdep.c (s390_process_record): Add support for
+	instructions new in arch12.
+
+2017-07-11  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64-bsd-nat.c (amd64bsd_fetch_inferior_registers): Use
+	PT_GETFSBASE and PT_GETGSBASE.
+	(amd64bsd_store_inferior_registers): Use PT_SETFSBASE and
+	PT_SETGSBASE.
+
+2017-07-11  John Baldwin  <jhb@FreeBSD.org>
+
+	* features/Makefile (amd64.dat, amd64-avx.dat, amd64-mpx.dat)
+	(amd64-avx-mpx.dat, amd64-avx-avx512.dat)
+	(amd64-avx-mpx-avx512-pku.dat): Add i386/64bit-segments.xml in
+	those rules.
+	* features/i386/amd64-avx-avx512.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-mpx-avx512-pku.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-mpx.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-mpx.xml: Add 64bit-segments.xml.
+	* features/i386/amd64.xml: Add 64bit-segments.xml.
+	* features/i386/amd64-avx-avx512.c: Regenerated.
+	* features/i386/amd64-avx-mpx-avx512-pku.c: Regenerated.
+	* features/i386/amd64-avx-mpx.c: Regenerated.
+	* features/i386/amd64-avx.c: Regenerated.
+	* features/i386/amd64-mpx.c: Regenerated.
+	* features/i386/amd64.c: Regenerated.
+	* regformats/i386/amd64-avx-avx512.dat: Regenerated.
+	* regformats/i386/amd64-avx-mpx-avx512-pku.dat: Regenerated.
+	* regformats/i386/amd64-avx-mpx.dat: Regenerated.
+	* regformats/i386/amd64-avx.dat: Regenerated.
+	* regformats/i386/amd64-mpx.dat: Regenerated.
+	* regformats/i386/amd64.dat: Regenerated.
+
+2017-07-10  Yao Qi  <yao.qi@linaro.org>
+
+	* features/i386/amd64-avx-avx512-linux.c: Re-generated.
+	* features/i386/amd64-avx-mpx-avx512-pku-linux.c: Re-generated.
+
+2017-07-10  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add setenv and
+	unsetenv.
+	* gnulib/aclocal.m4: Regenerate.
+	* gnulib/config.in: Regenerate.
+	* gnulib/configure: Regenerate.
+	* gnulib/import/Makefile.am: Regenerate.
+	* gnulib/import/Makefile.in: Regenerate.
+	* gnulib/import/m4/gnulib-cache.m4: Regenerate.
+	* gnulib/import/m4/gnulib-comp.m4: Regenerate.
+	* gnulib/import/m4/environ.m4: New file.
+	* gnulib/import/m4/setenv.m4: New file.
+	* gnulib/import/setenv.c: New file.
+	* gnulib/import/unsetenv.c: New file.
+
+2017-07-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* compile/compile-loc2c.c (do_compile_dwarf_expr_to_c): Read
+	address when op is DW_OP_addr.
+
+2017-07-09  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Reverse size
+	check and apply to outer type.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (LWPINFO_OFFSET, LWPINFO_PL_FLAGS)
+	(LWPINFO64_PL_SIGINFO, LWPINFO32_PL_SIGINFO, PL_FLAG_SI)
+	(SIZE64_SIGINFO_T, SIZE32_SIGINFO_T, fbsd_core_xfer_siginfo): New.
+	(fbsd_init_abi): Install gdbarch "core_xfer_siginfo" method.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_core_thread_name): Use thread_section_name.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* corelow.c (get_core_siginfo): Remove.
+	(core_xfer_partial): Use the gdbarch "core_xfer_siginfo" method
+	instead of get_core_siginfo.
+	* gdbarch.sh (core_xfer_siginfo): New gdbarch callback.
+	* gdbarch.h: Re-generate.
+	* gdbarch.c: Re-generate.
+	* linux-tdep.c (linux_core_xfer_siginfo): New.
+	(linux_init_abi): Install gdbarch "core_xfer_siginfo" method.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* corelow.c (thread_section_name): Move to ...
+	* gdbcore.h (thread_section_name): ... here.
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c [PT_LWPINFO && __LP64__] (union sigval32)
+	(struct siginfo32): New.
+	[PT_LWPINFO] (fbsd_siginfo_size, fbsd_convert_siginfo): New.
+	(fbsd_xfer_partial) [PT_LWPINFO]: Handle TARGET_OBJECT_SIGNAL_INFO
+	via ptrace(PT_LWPINFO).
+
+2017-07-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_gdbarch_data_handle, struct fbsd_gdbarch_data)
+	(init_fbsd_gdbarch_data, get_fbsd_gdbarch_data)
+	(fbsd_get_siginfo_type): New.
+	(fbsd_init_abi): Install gdbarch "get_siginfo_type" method.
+	(_initialize_fbsd_tdep): New.
+
+2017-07-06  David Blaikie  <dblaikie@gmail.com>
+
+	* dwarf2read.c (struct dwo_file): Use a htab of dwo_unit* (rather than
+	a singular dwo_unit*) to support multiple CUs in the same way that
+	multiple TUs are supported.
+	(create_cus_hash_table): Replace create_dwo_cu with a function for
+	parsing multiple CUs from a DWO file.
+	(open_and_init_dwo_file): Use create_cus_hash_table rather than
+	create_dwo_cu.
+	(lookup_dwo_cutu): Lookup CU in the hash table in the dwo_file with
+	htab_find, rather than comparing the signature to a singleton CU in
+	the dwo_file.
+
+2017-07-06  Pedro Alves  <palves@redhat.com>
+
+	* python/py-unwind.c (pyuw_dealloc_cache): Fix for loop condition.
+
+2017-07-04  Pedro Alves  <palves@redhat.com>
+
+	* gdbtypes.c (recursive_dump_type): Don't reference TYPE_STATIC.
+	* gdbtypes.h (TYPE_STATIC): Delete.
+	(struct fn_field) <is_public, is_abstract, is_static, is_final,
+	is_synchronized, is_native>: Delete.
+	<dummy>: Bump.
+	(TYPE_FN_FIELD_PUBLIC, TYPE_FN_FIELD_STATIC, TYPE_FN_FIELD_FINAL)
+	(TYPE_FN_FIELD_SYNCHRONIZED, TYPE_FN_FIELD_NATIVE)
+	(TYPE_FN_FIELD_ABSTRACT): Delete.
+
+2017-07-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* buffer.h (buffer_finish): Fix spelling mistakes.
+
+2017-07-01  Eli Zaretskii  <eliz@gnu.org>
+
+	* .dir-locals.el: Automatically switch to C-style comments in
+	versions of Emacs that support the feature.
+
+2017-06-30  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR cli/21688
+	* cli/cli-script.c (command_name_equals_not_inline): Remove function.
+	(process_next_line): New variable 'inline_cmd'.
+	Adjust 'if' clauses for "python", "compile" and "guile" to use
+	'command_name_equals' and check for '!inline_cmd'.
+
+2017-06-30  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR cli/21688
+	* cli/cli-script.c (command_name_equals_not_inline): New function.
+	(process_next_line): Adjust 'if' clauses for "python", "compile"
+	and "guile" to use command_name_equals_not_inline.
+
+2017-06-29  Pedro Alves  <palves@redhat.com>
+
+	* completer.c (expression_completer): Call
+	linespec_location_completer instead of location_completer.
+
+2017-06-29  Pedro Alves  <palves@redhat.com>
+
+	* completer.c (expression_completer): Remove code that recomputes
+	'text' from 'word'.
+
+2017-06-29  Yao Qi  <yao.qi@linaro.org>
+
+	* regformats/regdat.sh: Generate code with
+	"ifndef IN_PROCESS_AGENT".
+
+2017-06-28  Pedro Alves  <palves@redhat.com>
+
+	* command.h: Include "common/scoped_restore.h".
+
+2017-06-28  Yao Qi  <yao.qi@linaro.org>
+
+	* mi/mi-cmd-break.c (mi_argv_to_format): Use obstack_grow_str
+	instead of obstack_grow.
+
+2017-06-28  Doug Gilmore  <Doug.Gilmore@imgtec.com>
+
+	PR gdb/21337
+	* symfile.c (reread_symbols): Call objfiles_changed just before
+	read_symbols.
+
+2017-06-27  Pedro Alves  <palves@redhat.com>
+
+	* symtab.c (COMPLETION_LIST_ADD_SYMBOL)
+	(MCOMPLETION_LIST_ADD_SYMBOL): Delete macros, replace with ...
+	(completion_list_add_symbol, completion_list_add_msymbol):
+	... these new functions.
+	(add_symtab_completions)
+	(default_make_symbol_completion_list_break_on_1): Adjust.
+
+2017-06-27  Pedro Alves  <palves@redhat.com>
+
+	* objfiles.c (get_objfile_bfd_data): Call bfd_alloc instead of
+	bfd_zalloc.  Call objfile_per_bfd_storage's ctor.
+	(free_objfile_per_bfd_storage): Call objfile_per_bfd_storage's
+	dtor.
+	* objfiles.h (objfile_per_bfd_storage): Add ctor.  Make
+	'storage_obstack' field an auto_obstack.  In-class initialize all
+	non-bitfield fields.  Make minsyms_read bool.
+	* symfile.c (read_symbols): Adjust.
+
+2017-06-27  Alan Hayward  <alan.hayward@arm.com>
+
+	* remote-sim.c (gdbsim_fetch_register): Use byte_vector.
+	(gdbsim_store_register): Likewise.
+
+2017-06-27  Pedro Alves  <palves@redhat.com>
+
+	* c-exp.y (name_obstack): Now an auto_obstack.
+	(yylex): Use auto_obstack::clear.
+	(c_parse): Use auto_obstack::clear instead of reinitializing and
+	freeing the obstack.
+	* c-lang.c (evaluate_subexp_c): Use auto_obstack.
+	* d-exp.y (name_obstack): Now an auto_obstack.
+	(yylex): Use auto_obstack::clear.
+	(d_parse): Use auto_obstack::clear instead of reinitializing and
+	freeing the obstack.
+	* dwarf2loc.c (fetch_const_value_from_synthetic_pointer): Use
+	auto_obstack.
+	* dwarf2read.c (create_addrmap_from_index)
+	(dwarf2_build_psymtabs_hard)
+	(update_enumeration_type_from_children): Likewise.
+	* gdb_obstack.h (auto_obstack): New type.
+	* go-exp.y (name_obstack): Now an auto_obstack.
+	(build_packaged_name): Use auto_obstack::clear.
+	(go_parse): Use auto_obstack::clear instead of reinitializing and
+	freeing the obstack.
+	* linux-tdep.c (linux_make_mappings_corefile_notes): Use
+	auto_obstack.
+	* printcmd.c (printf_wide_c_string, ui_printf): Use auto_obstack.
+	* rust-exp.y (work_obstack): Now an auto_obstack.
+	(rust_parse, rust_lex_tests): Use auto_obstack::clear instead of
+	reinitializing and freeing the obstack.
+	* utils.c (do_obstack_free, make_cleanup_obstack_free): Delete.
+	(host_char_to_target): Use auto_obstack.
+	* utils.h (make_cleanup_obstack_free): Delete declaration.
+	* valprint.c (generic_emit_char, generic_printstr): Use
+	auto_obstack.
+
+2017-06-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* darwin-nat.c (darwin_check_new_threads): Don't handle dummy
+	thread.
+	(darwin_init_thread_list): Don't update dummy thread.
+	(darwin_create_inferior, darwin_attach): Don't add a dummy thread.
+
 2017-06-26  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* record-full.c (netorder16): Remove.

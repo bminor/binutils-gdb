@@ -335,7 +335,7 @@ extern const char *ada_type_name (struct type *);
 extern struct type *ada_find_parallel_type (struct type *,
                                             const char *suffix);
 
-extern LONGEST get_int_var_value (char *, int *);
+extern bool get_int_var_value (const char *, LONGEST &value);
 
 extern struct symbol *ada_find_renaming_symbol (struct symbol *name_sym,
                                                 const struct block *block);

@@ -142,12 +142,19 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
 	{
 	  storage
 	    = ((struct objfile_per_bfd_storage *)
-	       bfd_zalloc (abfd, sizeof (struct objfile_per_bfd_storage)));
+	       bfd_alloc (abfd, sizeof (struct objfile_per_bfd_storage)));
 	  set_bfd_data (abfd, objfiles_bfd_data, storage);
 	}
       else
-	storage = OBSTACK_ZALLOC (&objfile->objfile_obstack,
-				  struct objfile_per_bfd_storage);
+	{
+	  storage = (objfile_per_bfd_storage *)
+	    obstack_alloc (&objfile->objfile_obstack,
+			   sizeof (objfile_per_bfd_storage));
+	}
+
+      /* objfile_per_bfd_storage is not trivially constructible, must
+	 call the ctor manually.  */
+      storage = new (storage) objfile_per_bfd_storage ();
 
       /* Look up the gdbarch associated with the BFD.  */
       if (abfd != NULL)
@@ -171,7 +178,7 @@ free_objfile_per_bfd_storage (struct objfile_per_bfd_storage *storage)
   bcache_xfree (storage->macro_cache);
   if (storage->demangled_names_hash)
     htab_delete (storage->demangled_names_hash);
-  obstack_free (&storage->storage_obstack, 0);
+  storage->~objfile_per_bfd_storage ();
 }
 
 /* A wrapper for free_objfile_per_bfd_storage that can be passed as a

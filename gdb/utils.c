@@ -66,6 +66,7 @@
 #include "interps.h"
 #include "gdb_regex.h"
 #include "job-control.h"
+#include "cp-support.h"
 
 #if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* ARI: PTR */
@@ -135,54 +136,6 @@ show_pagination_enabled (struct ui_file *file, int from_tty,
    These are not defined in cleanups.c (nor declared in cleanups.h)
    because while they use the "cleanup API" they are not part of the
    "cleanup API".  */
-
-static void
-do_freeargv (void *arg)
-{
-  freeargv ((char **) arg);
-}
-
-struct cleanup *
-make_cleanup_freeargv (char **arg)
-{
-  return make_cleanup (do_freeargv, arg);
-}
-
-/* Helper function which does the work for make_cleanup_fclose.  */
-
-static void
-do_fclose_cleanup (void *arg)
-{
-  FILE *file = (FILE *) arg;
-
-  fclose (file);
-}
-
-/* Return a new cleanup that closes FILE.  */
-
-struct cleanup *
-make_cleanup_fclose (FILE *file)
-{
-  return make_cleanup (do_fclose_cleanup, file);
-}
-
-/* Helper function which does the work for make_cleanup_obstack_free.  */
-
-static void
-do_obstack_free (void *arg)
-{
-  struct obstack *ob = (struct obstack *) arg;
-
-  obstack_free (ob, NULL);
-}
-
-/* Return a new cleanup that frees OBSTACK.  */
-
-struct cleanup *
-make_cleanup_obstack_free (struct obstack *obstack)
-{
-  return make_cleanup (do_obstack_free, obstack);
-}
 
 /* Helper function for make_cleanup_ui_out_redirect_pop.  */
 
@@ -302,46 +255,6 @@ struct cleanup *
 make_cleanup_value_free (struct value *value)
 {
   return make_cleanup (do_value_free, value);
-}
-
-/* Helper for make_cleanup_free_so.  */
-
-static void
-do_free_so (void *arg)
-{
-  struct so_list *so = (struct so_list *) arg;
-
-  free_so (so);
-}
-
-/* Make cleanup handler calling free_so for SO.  */
-
-struct cleanup *
-make_cleanup_free_so (struct so_list *so)
-{
-  return make_cleanup (do_free_so, so);
-}
-
-/* Helper for make_cleanup_restore_current_language.  */
-
-static void
-do_restore_current_language (void *p)
-{
-  enum language saved_lang = (enum language) (uintptr_t) p;
-
-  set_language (saved_lang);
-}
-
-/* Remember the current value of CURRENT_LANGUAGE and make it restored when
-   the cleanup is run.  */
-
-struct cleanup *
-make_cleanup_restore_current_language (void)
-{
-  enum language saved_lang = current_language->la_language;
-
-  return make_cleanup (do_restore_current_language,
-		       (void *) (uintptr_t) saved_lang);
 }
 
 /* Helper function for make_cleanup_clear_parser_state.  */
@@ -1277,13 +1190,10 @@ query (const char *ctlstr, ...)
 static int
 host_char_to_target (struct gdbarch *gdbarch, int c, int *target_c)
 {
-  struct obstack host_data;
   char the_char = c;
-  struct cleanup *cleanups;
   int result = 0;
 
-  obstack_init (&host_data);
-  cleanups = make_cleanup_obstack_free (&host_data);
+  auto_obstack host_data;
 
   convert_between_encodings (target_charset (gdbarch), host_charset (),
 			     (gdb_byte *) &the_char, 1, 1,
@@ -1295,7 +1205,6 @@ host_char_to_target (struct gdbarch *gdbarch, int c, int *target_c)
       *target_c = *(char *) obstack_base (&host_data);
     }
 
-  do_cleanups (cleanups);
   return result;
 }
 
@@ -2385,41 +2294,72 @@ fprintf_symbol_filtered (struct ui_file *stream, const char *name,
     }
 }
 
-/* Do a strcmp() type operation on STRING1 and STRING2, ignoring any
-   differences in whitespace.  Returns 0 if they match, non-zero if they
-   don't (slightly different than strcmp()'s range of return values).
+/* Modes of operation for strncmp_iw_with_mode.  */
 
-   As an extra hack, string1=="FOO(ARGS)" matches string2=="FOO".
-   This "feature" is useful when searching for matching C++ function names
-   (such as if the user types 'break FOO', where FOO is a mangled C++
-   function).  */
-
-int
-strcmp_iw (const char *string1, const char *string2)
+enum class strncmp_iw_mode
 {
-  while ((*string1 != '\0') && (*string2 != '\0'))
+  /* Work like strncmp, while ignoring whitespace.  */
+  NORMAL,
+
+  /* Like NORMAL, but also apply the strcmp_iw hack.  I.e.,
+     string1=="FOO(PARAMS)" matches string2=="FOO".  */
+  MATCH_PARAMS,
+};
+
+/* Helper for strncmp_iw and strcmp_iw.  */
+
+static int
+strncmp_iw_with_mode (const char *string1, const char *string2,
+		      size_t string2_len, strncmp_iw_mode mode)
+{
+  const char *end_str2 = string2 + string2_len;
+
+  while (1)
     {
       while (isspace (*string1))
-	{
-	  string1++;
-	}
-      while (isspace (*string2))
-	{
-	  string2++;
-	}
+	string1++;
+      while (string2 < end_str2 && isspace (*string2))
+	string2++;
+      if (*string1 == '\0' || string2 == end_str2)
+	break;
       if (case_sensitivity == case_sensitive_on && *string1 != *string2)
 	break;
       if (case_sensitivity == case_sensitive_off
 	  && (tolower ((unsigned char) *string1)
 	      != tolower ((unsigned char) *string2)))
 	break;
-      if (*string1 != '\0')
-	{
-	  string1++;
-	  string2++;
-	}
+
+      string1++;
+      string2++;
     }
-  return (*string1 != '\0' && *string1 != '(') || (*string2 != '\0');
+
+  if (string2 == end_str2)
+    {
+      if (mode == strncmp_iw_mode::NORMAL)
+	return 0;
+      else
+	return (*string1 != '\0' && *string1 != '(');
+    }
+  else
+    return 1;
+}
+
+/* See utils.h.  */
+
+int
+strncmp_iw (const char *string1, const char *string2, size_t string2_len)
+{
+  return strncmp_iw_with_mode (string1, string2, string2_len,
+			       strncmp_iw_mode::NORMAL);
+}
+
+/* See utils.h.  */
+
+int
+strcmp_iw (const char *string1, const char *string2)
+{
+  return strncmp_iw_with_mode (string1, string2, strlen (string2),
+			       strncmp_iw_mode::MATCH_PARAMS);
 }
 
 /* This is like strcmp except that it ignores whitespace and treats
@@ -2912,19 +2852,18 @@ ldirname (const char *filename)
   return dirname;
 }
 
-/* Call libiberty's buildargv, and return the result.
-   If buildargv fails due to out-of-memory, call nomem.
-   Therefore, the returned value is guaranteed to be non-NULL,
-   unless the parameter itself is NULL.  */
+/* See utils.h.  */
 
-char **
-gdb_buildargv (const char *s)
+void
+gdb_argv::reset (const char *s)
 {
   char **argv = buildargv (s);
 
   if (s != NULL && argv == NULL)
     malloc_failure (0);
-  return argv;
+
+  freeargv (m_argv);
+  m_argv = argv;
 }
 
 int
@@ -3367,6 +3306,47 @@ find_toplevel_char (const char *s, char c)
 	depth++;
       else if ((*scan == ')' || *scan == '>') && depth > 0)
 	depth--;
+      else if (*scan == 'o' && !quoted && depth == 0)
+	{
+	  /* Handle C++ operator names.  */
+	  if (strncmp (scan, CP_OPERATOR_STR, CP_OPERATOR_LEN) == 0)
+	    {
+	      scan += CP_OPERATOR_LEN;
+	      if (*scan == c)
+		return scan;
+	      while (isspace (*scan))
+		{
+		  ++scan;
+		  if (*scan == c)
+		    return scan;
+		}
+	      if (*scan == '\0')
+		break;
+
+	      switch (*scan)
+		{
+		  /* Skip over one less than the appropriate number of
+		     characters: the for loop will skip over the last
+		     one.  */
+		case '<':
+		  if (scan[1] == '<')
+		    {
+		      scan++;
+		      if (*scan == c)
+			return scan;
+		    }
+		  break;
+		case '>':
+		  if (scan[1] == '>')
+		    {
+		      scan++;
+		      if (*scan == c)
+			return scan;
+		    }
+		  break;
+		}
+	    }
+	}
     }
 
   return 0;

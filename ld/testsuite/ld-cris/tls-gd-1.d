@@ -1,5 +1,5 @@
 #as: --pic --no-underscore --em=criself
-#ld: --shared -m crislinux
+#ld: --shared -m crislinux --hash-style=sysv
 #source: tls-gd-1.s
 #source: tls128.s
 #source: tls-x.s

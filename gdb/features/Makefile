@@ -47,21 +47,21 @@ WHICH = aarch64 \
 	arm/arm-with-iwmmxt arm/arm-with-vfpv2 arm/arm-with-vfpv3 \
 	arm/arm-with-neon \
 	i386/i386 i386/i386-linux \
-	i386/i386-mmx i386/i386-mmx-linux \
+	i386/i386-mmx-linux \
 	i386/amd64 i386/amd64-linux \
-	i386/i386-avx i386/i386-avx-linux \
-	i386/i386-mpx i386/i386-mpx-linux \
-	i386/i386-avx-mpx i386/i386-avx-mpx-linux \
-	i386/i386-avx-avx512 i386/i386-avx-avx512-linux \
-	i386/i386-avx-mpx-avx512-pku i386/i386-avx-mpx-avx512-pku-linux \
-	i386/amd64-avx i386/amd64-avx-linux \
-	i386/amd64-mpx i386/amd64-mpx-linux \
-	i386/amd64-avx-mpx i386/amd64-avx-mpx-linux \
-	i386/amd64-avx-avx512 i386/amd64-avx-avx512-linux \
-	i386/amd64-avx-mpx-avx512-pku i386/amd64-avx-mpx-avx512-pku-linux \
-	i386/x32 i386/x32-linux \
-	i386/x32-avx i386/x32-avx-linux \
-	i386/x32-avx-avx512 i386/x32-avx-avx512-linux \
+	i386/i386-avx-linux \
+	i386/i386-mpx-linux \
+	i386/i386-avx-mpx-linux \
+	i386/i386-avx-avx512-linux \
+	i386/i386-avx-mpx-avx512-pku-linux \
+	i386/amd64-avx-linux \
+	i386/amd64-mpx-linux \
+	i386/amd64-avx-mpx-linux \
+	i386/amd64-avx-avx512-linux \
+	i386/amd64-avx-mpx-avx512-pku-linux \
+	i386/x32-linux \
+	i386/x32-avx-linux \
+	i386/x32-avx-avx512-linux \
 	mips-linux mips-dsp-linux \
 	microblaze-with-stack-protect \
 	mips64-linux mips64-dsp-linux \
@@ -165,11 +165,8 @@ XMLTOC = \
 	i386/i386-avx-mpx.xml \
 	i386/i386.xml \
 	i386/x32-avx-linux.xml \
-	i386/x32-avx.xml \
 	i386/x32-avx-avx512-linux.xml \
-	i386/x32-avx-avx512.xml \
 	i386/x32-linux.xml \
-	i386/x32.xml \
 	microblaze-with-stack-protect.xml \
 	microblaze.xml \
 	mips-dsp-linux.xml \
@@ -235,7 +232,7 @@ XMLTOC = \
 	tic6x-c64xp-linux.xml \
 	tic6x-c64xp.xml
 
-CFILES = $(patsubst %.xml,%.c,$(XMLTOC))
+TDESC_CFILES = $(patsubst %.xml,%.c,$(XMLTOC))
 GDB = false
 
 all: $(OUTPUTS)
@@ -252,10 +249,38 @@ $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 	  $(XSLTPROC) gdbserver-regs.xsl - >> $(outdir)/$*.tmp
 	sh ../../move-if-change $(outdir)/$*.tmp $(outdir)/$*.dat
 
-cfiles: $(CFILES)
-%.c: %.xml
+FEATURE_XMLFILES = i386/32bit-core.xml \
+	i386/32bit-sse.xml \
+	i386/32bit-linux.xml \
+	i386/32bit-avx.xml \
+	i386/32bit-mpx.xml \
+	i386/32bit-avx512.xml \
+	i386/32bit-pkeys.xml
+
+FEATURE_CFILES = $(patsubst %.xml,%.c,$(FEATURE_XMLFILES))
+
+cfiles: $(TDESC_CFILES) $(FEATURE_CFILES)
+
+$(TDESC_CFILES): %.c: %.xml
+	$(GDB) -nx -q -batch -ex 'maint print c-tdesc $<' > $@.tmp
+	sh ../../move-if-change $@.tmp $@
+
+$(FEATURE_CFILES): %.c: %.xml.tmp
 	$(GDB) -nx -q -batch \
-	  -ex "set tdesc filename $<" -ex 'maint print c-tdesc' > $@.tmp
+	  -ex 'maint print c-tdesc $<' > $@.tmp
+	sh ../../move-if-change $@.tmp $@
+	rm $<
+
+# %.xml is the XML file for each target description feature, and
+# %.xml.tmp is the XML file target description which only includes
+# one target description feature.
+
+%.xml.tmp: %.xml
+	echo "<?xml version=\"1.0\"?>" > $@.tmp
+	echo "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">" >> $@.tmp
+	echo "<target>" >> $@.tmp
+	echo "  <xi:include href=\"$(notdir $<)\"/>" >> $@.tmp
+	echo "</target>" >> $@.tmp
 	sh ../../move-if-change $@.tmp $@
 
 # Other dependencies.
@@ -263,7 +288,8 @@ $(outdir)/arm/arm-with-iwmmxt.dat: arm/arm-core.xml arm/xscale-iwmmxt.xml
 $(outdir)/i386/i386.dat: i386/32bit-core.xml i386/32bit-sse.xml
 $(outdir)/i386/i386-linux.dat: i386/32bit-core.xml i386/32bit-sse.xml \
 			       i386/32bit-linux.xml
-$(outdir)/i386/amd64.dat: i386/64bit-core.xml i386/64bit-sse.xml
+$(outdir)/i386/amd64.dat: i386/64bit-core.xml i386/64bit-sse.xml \
+			       i386/64bit-segments.xml
 $(outdir)/i386/amd64-linux.dat: i386/64bit-core.xml i386/64bit-sse.xml \
 			       i386/64bit-linux.xml i386/64bit-segments.xml
 $(outdir)/i386/i386-avx.dat: i386/32bit-core.xml i386/32bit-avx.xml
@@ -289,7 +315,8 @@ $(outdir)/i386/i386-avx-mpx-avx512-pku-linux.dat: i386/32bit-core.xml \
 			       i386/32bit-pkeys.xml i386/32bit-linux.xml
 $(outdir)/i386/i386-mmx.dat: i386/32bit-core.xml 
 $(outdir)/i386/i386-mmx-linux.dat: i386/32bit-core.xml i386/32bit-linux.xml
-$(outdir)/i386/amd64-avx.dat: i386/64bit-core.xml i386/64bit-avx.xml
+$(outdir)/i386/amd64-avx.dat: i386/64bit-core.xml i386/64bit-avx.xml \
+			       i386/64bit-segments.xml
 $(outdir)/i386/amd64-avx-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
 			       i386/64bit-linux.xml i386/64bit-segments.xml
 $(outdir)/i386/amd64-mpx-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
@@ -297,16 +324,16 @@ $(outdir)/i386/amd64-mpx-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
 $(outdir)/i386/amd64-avx-mpx-linux.dat: i386/64bit-core.xml \
 			       i386/64bit-linux.xml i386/64bit-segments.xml i386/64bit-mpx.xml
 $(outdir)/i386/amd64-mpx.dat: i386/64bit-core.xml i386/64bit-avx.xml \
-			       i386/64bit-mpx.xml
+			       i386/64bit-segments.xml i386/64bit-mpx.xml
 $(outdir)/i386/amd64-avx-mpx.dat: i386/64bit-core.xml \
-			       i386/64bit-mpx.xml
+			       i386/64bit-segments.xml i386/64bit-mpx.xml
 $(outdir)/i386/amd64-avx-avx512.dat: i386/64bit-core.xml i386/64bit-avx.xml \
-			       i386/64bit-avx512.xml
+			       i386/64bit-avx512.xml i386/64bit-segments.xml
 $(outdir)/i386/amd64-avx-avx512-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
 			       i386/64bit-avx512.xml i386/64bit-linux.xml
 $(outdir)/i386/amd64-avx-mpx-avx512-pku.dat: i386/64bit-core.xml \
 			       i386/64bit-avx.xml i386/64bit-mpx.xml i386/64bit-avx512.xml \
-			       i386/64bit-pkeys.xml
+			       i386/64bit-pkeys.xml i386/64bit-segments.xml
 $(outdir)/i386/amd64-avx-mpx-avx512-pku-linux.dat: i386/64bit-core.xml \
 			       i386/64bit-avx.xml i386/64bit-mpx.xml i386/64bit-avx512.xml \
 			       i386/64bit-linux.xml i386/64bit-segments.xml \
@@ -326,7 +353,7 @@ $(outdir)/i386/x32-avx-avx512-linux.dat: i386/x32-core.xml i386/64bit-avx.xml \
 # 'all' doesn't build the C files, so don't delete them in 'clean'
 # either.
 clean-cfiles:
-	rm -f $(CFILES)
+	rm -f $(TDESC_CFILES) $(FEATURE_CFILES)
 
 clean:
 	rm -f $(OUTPUTS)
