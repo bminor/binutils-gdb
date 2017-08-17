@@ -1,3 +1,17 @@
+2017-08-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR 21961
+	* ldlang.c (lang_discard_section_p): New function.
+	(lang_add_section): Checks moved out into new function, which is
+	now called.
+	(lang_place_orphans): Call lang_discard_section_p instead of
+	duplicating some of the checks from lang_add_section.
+	* testsuite/ld-elf/orphan-11.d: New file.
+	* testsuite/ld-elf/orphan-11.ld: New file.
+	* testsuite/ld-elf/orphan-11.s: New file.
+	* testsuite/ld-elf/orphan-12.d: New file.
+	* testsuite/ld-elf/orphan-12.s: New file.
+
 2017-08-23  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-gc/pr19161.d: Don't xfail hppa.
