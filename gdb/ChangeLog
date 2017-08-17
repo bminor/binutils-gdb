@@ -1,5 +1,10 @@
 2017-08-17  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-cmds.c (source_command): Delete 'old_source_verbose'
+	local.
+
+2017-08-17  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (struct dwarf2_cu) <line_header_die_owner>: New
 	field.
 	(reset_die_in_process): Delete, replaced by ...
