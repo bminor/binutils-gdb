@@ -1,3 +1,8 @@
+2017-08-17  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+
+	* NEWS: Mention new shortcuts for nexti and stepi in TUI
+	Single-Key mode
+
 2017-08-16  Ruslan Kabatsayev  <b7.10110111@gmail.com>
 
 	* tui/tui.c (tui_commands): Add "nexti" and "stepi" to the Single-Key
