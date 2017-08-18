@@ -174,5 +174,5 @@ run_tests ()
 void
 _initialize_function_view_selftests ()
 {
-  register_self_test (selftests::function_view::run_tests);
+  selftests::register_test (selftests::function_view::run_tests);
 }

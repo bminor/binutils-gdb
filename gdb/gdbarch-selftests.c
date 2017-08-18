@@ -151,6 +151,6 @@ void
 _initialize_gdbarch_selftests (void)
 {
 #if GDB_SELF_TEST
-  register_self_test_foreach_arch (selftests::register_to_value_test);
+  selftests::register_test_foreach_arch (selftests::register_to_value_test);
 #endif
 }

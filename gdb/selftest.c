@@ -20,6 +20,9 @@
 #include "selftest.h"
 #include <vector>
 
+namespace selftests
+{
+
 /* All the tests that have been registered.  */
 
 static std::vector<self_test_function *> tests;
@@ -27,7 +30,7 @@ static std::vector<self_test_function *> tests;
 /* See selftest.h.  */
 
 void
-register_self_test (self_test_function *function)
+register_test (self_test_function *function)
 {
   tests.push_back (function);
 }
@@ -35,7 +38,7 @@ register_self_test (self_test_function *function)
 /* See selftest.h.  */
 
 void
-run_self_tests (void)
+run_tests (void)
 {
   int failed = 0;
 
@@ -62,3 +65,4 @@ run_self_tests (void)
   printf_filtered (_("Ran %lu unit tests, %d failed\n"),
 		   (long) tests.size (), failed);
 }
+} // namespace selftests

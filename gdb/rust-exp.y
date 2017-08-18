@@ -2781,6 +2781,6 @@ _initialize_rust_exp (void)
   gdb_assert (code == 0);
 
 #if GDB_SELF_TEST
-  register_self_test (rust_lex_tests);
+  selftests::register_test (rust_lex_tests);
 #endif
 }

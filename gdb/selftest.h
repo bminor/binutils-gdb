@@ -24,14 +24,19 @@
 
 typedef void self_test_function (void);
 
+namespace selftests
+{
+
 /* Register a new self-test.  */
 
-extern void register_self_test (self_test_function *function);
+extern void register_test (self_test_function *function);
 
 /* Run all the self tests.  This print a message describing the number
    of test and the number of failures.  */
 
-extern void run_self_tests (void);
+extern void run_tests (void);
+
+}
 
 /* Check that VALUE is true, and, if not, throw an exception.  */
 

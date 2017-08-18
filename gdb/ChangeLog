@@ -1,3 +1,30 @@
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
+	* selftest.c (register_self_test): Rename it to
+	selftests::register_test.
+	(run_self_tests): selftest::run_tests.
+	* selftest.h: Update declarations.
+	* selftest-arch.c (register_self_test_foreach_arch): Rename it to
+	selftests::register_test_foreach_arch.
+	* selftest-arch.h: Update declaration.
+	* aarch64-tdep.c: Update.
+	* arm-tdep.c: Likewise.
+	* disasm-selftests.c: Likewise.
+	* dwarf2loc.c: Likewise.
+	* dwarf2-frame.c: Likewise.
+	* findvar.c: Likewise.
+	* gdbarch-selftests.c: Likewise.
+	* maint.c (maintenance_selftest): Likewise.
+	* regcache.c: Likewise.
+	* rust-exp.y: Likewise.
+	* selftest-arch.c: Likewise.
+	* unittests/environ-selftests.c: Likewise.
+	* unittests/function-view-selftests.c: Likewise.
+	* unittests/offset-type-selftests.c: Likewise.
+	* unittests/optional-selftests.c: Likewise.
+	* unittests/scoped_restore-selftests.c: Likewise.
+	* utils-selftests.c: Likewise.
+
 2017-08-17  Pedro Alves  <palves@redhat.com>
 
 	* cli/cli-cmds.c (source_command): Delete 'old_source_verbose'
