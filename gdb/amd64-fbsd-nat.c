@@ -181,7 +181,7 @@ amd64fbsd_read_description (struct target_ops *ops)
   if (is64)
     return amd64_target_description (X86_XSTATE_SSE_MASK);
   else
-    return tdesc_i386;
+    return i386_target_description (X86_XSTATE_SSE_MASK);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
