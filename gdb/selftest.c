@@ -44,8 +44,6 @@ run_tests (void)
 
   for (int i = 0; i < tests.size (); ++i)
     {
-      QUIT;
-
       TRY
 	{
 	  tests[i] ();
@@ -53,7 +51,7 @@ run_tests (void)
       CATCH (ex, RETURN_MASK_ERROR)
 	{
 	  ++failed;
-	  exception_fprintf (gdb_stderr, ex, _("Self test failed: "));
+	  debug_printf ("Self test failed: %s\n", ex.message);
 	}
       END_CATCH
 
@@ -62,7 +60,7 @@ run_tests (void)
       reinit_frame_cache ();
     }
 
-  printf_filtered (_("Ran %lu unit tests, %d failed\n"),
-		   (long) tests.size (), failed);
+  debug_printf ("Ran %lu unit tests, %d failed\n",
+		(long) tests.size (), failed);
 }
 } // namespace selftests

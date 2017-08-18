@@ -1,5 +1,10 @@
 2017-08-18  Yao Qi  <yao.qi@linaro.org>
 
+	* selftest.c (run_tests): Don't call QUIT.  Call debug_printf
+	instead of exception_fprintf and printf_filtered.
+
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
 	* selftest.c (register_self_test): Rename it to
 	selftests::register_test.
 	(run_self_tests): selftest::run_tests.
