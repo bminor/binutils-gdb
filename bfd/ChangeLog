@@ -1,3 +1,11 @@
+2017-08-18  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
+
+	PR binutils/21962
+	* tekhex.c (getsym): Fix check for source pointer walking off the
+	end of the input buffer.
+
 2017-08-17  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	PR ld/18808
