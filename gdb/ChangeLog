@@ -1,5 +1,11 @@
 2017-08-18  Yao Qi  <yao.qi@linaro.org>
 
+	PR tdep/21818
+	* arm-tdep.c (gdb_print_insn_arm): Mark
+	USER_SPECIFIED_MACHINE_TYPE if exec_bfd isn't NULL.
+
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
 	* NEWS: Mention GDBserver's new option "--selftest".
 	* Makefile.in (SFILES): Remove selftest.c, add common/selftest.c.
 	* selftest.c: Move it to common/selftest.c.
