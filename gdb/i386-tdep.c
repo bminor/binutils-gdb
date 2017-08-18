@@ -8730,6 +8730,10 @@ i386_target_description (uint64_t xcr0)
       return tdesc_i386_mpx;
     case X86_XSTATE_AVX_MASK:
       return tdesc_i386_avx;
+    case X86_XSTATE_SSE_MASK:
+      return tdesc_i386;
+    case X86_XSTATE_X87_MASK:
+      return tdesc_i386_mmx;
     default:
       return tdesc_i386;
     }
