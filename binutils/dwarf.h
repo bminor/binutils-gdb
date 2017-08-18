@@ -170,9 +170,12 @@ typedef struct
   dwarf_vma	 ranges_base;
   /* This is an array of offsets to the location list table.  */
   dwarf_vma *    loc_offsets;
+  /* This is an array of offsets to the location view table.  */
+  dwarf_vma *    loc_views;
   int *          have_frame_base;
   unsigned int   num_loc_offsets;
   unsigned int   max_loc_offsets;
+  unsigned int   num_loc_views;
   /* List of .debug_ranges offsets seen in this .debug_info.  */
   dwarf_vma *    range_lists;
   unsigned int   num_range_lists;

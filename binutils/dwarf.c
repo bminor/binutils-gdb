@@ -77,6 +77,10 @@ unsigned long dwarf_start_die;
 
 int dwarf_check = 0;
 
+/* Convenient constant, to avoid having to cast -1 to dwarf_vma when
+   testing whether e.g. a locview list is present.  */
+static const dwarf_vma vm1 = -1;
+
 /* Collection of CU/TU section sets from .debug_cu_index and .debug_tu_index
    sections.  For version 1 package files, each set is stored in SHNDX_POOL
    as a zero-terminated list of section indexes comprising one set of debug
@@ -237,6 +241,26 @@ static void
 print_dwarf_vma (dwarf_vma value, unsigned num_bytes)
 {
   printf ("%s ", dwarf_vmatoa_1 (NULL, value, num_bytes));
+}
+
+/* Print a view number in hexadecimal value, with the same width
+   print_dwarf_vma would have printed it with the same num_bytes.
+   Print blanks for zero view, unless force is nonzero.  */
+
+static void
+print_dwarf_view (dwarf_vma value, unsigned num_bytes, int force)
+{
+  int len;
+  if (!num_bytes)
+    len = 4;
+  else
+    len = num_bytes * 2;
+
+  assert (value == (unsigned long)value);
+  if (value || force)
+    printf ("v%0*lx ", len - 1, (unsigned long)value);
+  else
+    printf ("%*s", len + 1, "");
 }
 
 /* Format a 64-bit value, given as two 32-bit values, in hex.
@@ -2012,6 +2036,7 @@ read_and_display_attr_value (unsigned long attribute,
 	  have_frame_base = 1;
 	  /* Fall through.  */
 	case DW_AT_location:
+	case DW_AT_GNU_locviews:
 	case DW_AT_string_length:
 	case DW_AT_return_addr:
 	case DW_AT_data_member_location:
@@ -2041,6 +2066,9 @@ read_and_display_attr_value (unsigned long attribute,
 		  debug_info_p->loc_offsets = (dwarf_vma *)
 		    xcrealloc (debug_info_p->loc_offsets,
 			       lmax, sizeof (*debug_info_p->loc_offsets));
+		  debug_info_p->loc_views = (dwarf_vma *)
+		    xcrealloc (debug_info_p->loc_views,
+			       lmax, sizeof (*debug_info_p->loc_views));
 		  debug_info_p->have_frame_base = (int *)
 		    xcrealloc (debug_info_p->have_frame_base,
 			       lmax, sizeof (*debug_info_p->have_frame_base));
@@ -2048,9 +2076,23 @@ read_and_display_attr_value (unsigned long attribute,
 		}
 	      if (this_set != NULL)
 		uvalue += this_set->section_offsets [DW_SECT_LOC];
-	      debug_info_p->loc_offsets [num] = uvalue;
 	      debug_info_p->have_frame_base [num] = have_frame_base;
-	      debug_info_p->num_loc_offsets++;
+	      if (attribute != DW_AT_GNU_locviews)
+		{
+		  debug_info_p->loc_offsets [num] = uvalue;
+		  debug_info_p->num_loc_offsets++;
+		  assert (debug_info_p->num_loc_offsets
+			  - debug_info_p->num_loc_views <= 1);
+		}
+	      else
+		{
+		  assert (debug_info_p->num_loc_views <= num);
+		  num = debug_info_p->num_loc_views;
+		  debug_info_p->loc_views [num] = uvalue;
+		  debug_info_p->num_loc_views++;
+		  assert (debug_info_p->num_loc_views
+			  - debug_info_p->num_loc_offsets <= 1);
+		}
 	    }
 	  break;
 
@@ -2858,20 +2900,21 @@ process_debug_info (struct dwarf_section *section,
 	      break;
 	    }
 
+	  debug_info *debug_info_p =
+	    (debug_information && unit < alloc_num_debug_info_entries)
+	    ? debug_information + unit : NULL;
+
+	  assert (!debug_info_p
+		  || (debug_info_p->num_loc_offsets
+		      == debug_info_p->num_loc_views));
+
 	  for (attr = entry->first_attr;
 	       attr && attr->attribute;
 	       attr = attr->next)
 	    {
-	      debug_info *arg;
-
 	      if (! do_loc && do_printing)
 		/* Show the offset from where the tag was extracted.  */
 		printf ("    <%lx>", (unsigned long)(tags - section_begin));
-
-	      if (debug_information && unit < alloc_num_debug_info_entries)
-		arg = debug_information + unit;
-	      else
-		arg = NULL;
 
 	      tags = read_and_display_attr (attr->attribute,
 					    attr->form,
@@ -2882,10 +2925,35 @@ process_debug_info (struct dwarf_section *section,
 					    compunit.cu_pointer_size,
 					    offset_size,
 					    compunit.cu_version,
-					    arg,
+					    debug_info_p,
 					    do_loc || ! do_printing,
 					    section,
 					    this_set);
+	    }
+
+	  /* If a locview attribute appears before a location one,
+	     make sure we don't associate it with an earlier
+	     loclist. */
+	  if (debug_info_p)
+	    switch (debug_info_p->num_loc_offsets - debug_info_p->num_loc_views)
+	      {
+	      case 1:
+		debug_info_p->loc_views [debug_info_p->num_loc_views] = vm1;
+		debug_info_p->num_loc_views++;
+		assert (debug_info_p->num_loc_views
+			== debug_info_p->num_loc_offsets);
+		break;
+
+	      case 0:
+		break;
+
+	      case -1:
+		warn(_("DIE has locviews without loclist\n"));
+		debug_info_p->num_loc_views--;
+		break;
+
+	      default:
+		assert (0);
 	    }
 
 	  if (entry->children)
@@ -5028,6 +5096,52 @@ is_max_address (dwarf_vma addr, unsigned int pointer_size)
   return ((addr & mask) == mask);
 }
 
+/* Display a view pair list starting at *VSTART_PTR and ending at
+   VLISTEND within SECTION.  */
+
+static void
+display_view_pair_list (struct dwarf_section *section,
+			unsigned char **vstart_ptr,
+			unsigned int debug_info_entry,
+			unsigned char *vlistend)
+{
+  unsigned char *vstart = *vstart_ptr;
+  unsigned char *section_end = section->start + section->size;
+  unsigned int pointer_size = debug_information [debug_info_entry].pointer_size;
+
+  if (vlistend < section_end)
+    section_end = vlistend;
+
+  putchar ('\n');
+
+  while (vstart < section_end)
+    {
+      dwarf_vma off = vstart - section->start;
+      dwarf_vma vbegin, vend;
+
+      unsigned int bytes_read;
+      vbegin = read_uleb128 (vstart, &bytes_read, section_end);
+      vstart += bytes_read;
+      if (vstart == section_end)
+	{
+	  vstart -= bytes_read;
+	  break;
+	}
+
+      vend = read_uleb128 (vstart, &bytes_read, section_end);
+      vstart += bytes_read;
+
+      printf ("    %8.8lx ", (unsigned long) off);
+
+      print_dwarf_view (vbegin, pointer_size, 1);
+      print_dwarf_view (vend, pointer_size, 1);
+      printf (_("location view pair\n"));
+    }
+
+  putchar ('\n');
+  *vstart_ptr = vstart;
+}
+
 /* Display a location list from a normal (ie, non-dwo) .debug_loc section.  */
 
 static void
@@ -5036,9 +5150,10 @@ display_loc_list (struct dwarf_section *section,
 		  unsigned int debug_info_entry,
 		  dwarf_vma offset,
 		  dwarf_vma base_address,
+		  unsigned char **vstart_ptr,
 		  int has_frame_base)
 {
-  unsigned char *start = *start_ptr;
+  unsigned char *start = *start_ptr, *vstart = *vstart_ptr;
   unsigned char *section_end = section->start + section->size;
   unsigned long cu_offset;
   unsigned int pointer_size;
@@ -5072,6 +5187,7 @@ display_loc_list (struct dwarf_section *section,
   while (1)
     {
       dwarf_vma off = offset + (start - *start_ptr);
+      dwarf_vma vbegin = vm1, vend = vm1;
 
       if (start + 2 * pointer_size > section_end)
 	{
@@ -5112,6 +5228,24 @@ display_loc_list (struct dwarf_section *section,
 	  continue;
 	}
 
+      if (vstart)
+	{
+	  unsigned int bytes_read;
+
+	  off = offset + (vstart - *start_ptr);
+
+	  vbegin = read_uleb128 (vstart, &bytes_read, section_end);
+	  vstart += bytes_read;
+	  print_dwarf_view (vbegin, pointer_size, 1);
+
+	  vend = read_uleb128 (vstart, &bytes_read, section_end);
+	  vstart += bytes_read;
+	  print_dwarf_view (vend, pointer_size, 1);
+
+	  printf (_("views at %8.8lx for:\n    %*s "),
+		  (unsigned long) off, 8, "");
+	}
+
       if (start + 2 > section_end)
 	{
 	  warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
@@ -5143,9 +5277,9 @@ display_loc_list (struct dwarf_section *section,
       if (need_frame_base && !has_frame_base)
 	printf (_(" [without DW_AT_frame_base]"));
 
-      if (begin == end)
+      if (begin == end && vbegin == vend)
 	fputs (_(" (start == end)"), stdout);
-      else if (begin > end)
+      else if (begin > end || (begin == end && vbegin > vend))
 	fputs (_(" (start > end)"), stdout);
 
       putchar ('\n');
@@ -5154,6 +5288,7 @@ display_loc_list (struct dwarf_section *section,
     }
 
   *start_ptr = start;
+  *vstart_ptr = vstart;
 }
 
 /* Display a location list from a normal (ie, non-dwo) .debug_loclists section.  */
@@ -5164,9 +5299,10 @@ display_loclists_list (struct dwarf_section *section,
 		       unsigned int debug_info_entry,
 		       dwarf_vma offset,
 		       dwarf_vma base_address,
+		       unsigned char **vstart_ptr,
 		       int has_frame_base)
 {
-  unsigned char *start = *start_ptr;
+  unsigned char *start = *start_ptr, *vstart = *vstart_ptr;
   unsigned char *section_end = section->start + section->size;
   unsigned long cu_offset;
   unsigned int pointer_size;
@@ -5175,8 +5311,8 @@ display_loclists_list (struct dwarf_section *section,
   unsigned int bytes_read;
 
   /* Initialize it due to a false compiler warning.  */
-  dwarf_vma begin = -1;
-  dwarf_vma end = -1;
+  dwarf_vma begin = -1, vbegin = -1;
+  dwarf_vma end = -1, vend = -1;
   dwarf_vma length;
   int need_frame_base;
 
@@ -5216,6 +5352,22 @@ display_loclists_list (struct dwarf_section *section,
 
       SAFE_BYTE_GET_AND_INC (llet, start, 1, section_end);
 
+      if (vstart && llet == DW_LLE_offset_pair)
+	{
+	  off = offset + (vstart - *start_ptr);
+
+	  vbegin = read_uleb128 (vstart, &bytes_read, section_end);
+	  vstart += bytes_read;
+	  print_dwarf_view (vbegin, pointer_size, 1);
+
+	  vend = read_uleb128 (vstart, &bytes_read, section_end);
+	  vstart += bytes_read;
+	  print_dwarf_view (vend, pointer_size, 1);
+
+	  printf (_("views at %8.8lx for:\n    %*s "),
+		  (unsigned long) off, 8, "");
+	}
+
       switch (llet)
 	{
 	case DW_LLE_end_of_list:
@@ -5233,6 +5385,21 @@ display_loclists_list (struct dwarf_section *section,
 	  print_dwarf_vma (base_address, pointer_size);
 	  printf (_("(base address)\n"));
 	  break;
+#ifdef DW_LLE_view_pair
+	case DW_LLE_view_pair:
+	  if (vstart)
+	    printf (_("View pair entry in loclist with locviews attribute\n"));
+	  vbegin = read_uleb128 (start, &bytes_read, section_end);
+	  start += bytes_read;
+	  print_dwarf_view (vbegin, pointer_size, 1);
+
+	  vend = read_uleb128 (start, &bytes_read, section_end);
+	  start += bytes_read;
+	  print_dwarf_view (vend, pointer_size, 1);
+
+	  printf (_("views for:\n"));
+	  continue;
+#endif
 	default:
 	  error (_("Invalid location list entry type %d\n"), llet);
 	  return;
@@ -5267,17 +5434,22 @@ display_loclists_list (struct dwarf_section *section,
       if (need_frame_base && !has_frame_base)
 	printf (_(" [without DW_AT_frame_base]"));
 
-      if (begin == end)
+      if (begin == end && vbegin == vend)
 	fputs (_(" (start == end)"), stdout);
-      else if (begin > end)
+      else if (begin > end || (begin == end && vbegin > vend))
 	fputs (_(" (start > end)"), stdout);
 
       putchar ('\n');
 
       start += length;
+      vbegin = vend = -1;
     }
 
+  if (vbegin != vm1 || vend != vm1)
+    printf (_("Trailing view pair not used in a range"));
+
   *start_ptr = start;
+  *vstart_ptr = vstart;
 }
 
 /* Print a .debug_addr table index in decimal, surrounded by square brackets,
@@ -5300,9 +5472,10 @@ display_loc_list_dwo (struct dwarf_section *section,
 		      unsigned char **start_ptr,
 		      unsigned int debug_info_entry,
 		      dwarf_vma offset,
+		      unsigned char **vstart_ptr,
 		      int has_frame_base)
 {
-  unsigned char *start = *start_ptr;
+  unsigned char *start = *start_ptr, *vstart = *vstart_ptr;
   unsigned char *section_end = section->start + section->size;
   unsigned long cu_offset;
   unsigned int pointer_size;
@@ -5345,17 +5518,47 @@ display_loc_list_dwo (struct dwarf_section *section,
 	}
 
       SAFE_BYTE_GET_AND_INC (entry_type, start, 1, section_end);
+
+      if (vstart)
+	switch (entry_type)
+	  {
+	  default:
+	    break;
+
+	  case 2:
+	  case 3:
+	  case 4:
+	    {
+	      dwarf_vma view;
+	      dwarf_vma off = offset + (vstart - *start_ptr);
+
+	      view = read_uleb128 (vstart, &bytes_read, section_end);
+	      vstart += bytes_read;
+	      print_dwarf_view (view, 8, 1);
+
+	      view = read_uleb128 (vstart, &bytes_read, section_end);
+	      vstart += bytes_read;
+	      print_dwarf_view (view, 8, 1);
+
+	      printf (_("views at %8.8lx for:\n    %*s "),
+		      (unsigned long) off, 8, "");
+
+	    }
+	    break;
+	  }
+
       switch (entry_type)
 	{
 	case 0: /* A terminating entry.  */
 	  *start_ptr = start;
+	  *vstart_ptr = vstart;
 	  printf (_("<End of list>\n"));
 	  return;
 	case 1: /* A base-address entry.  */
 	  idx = read_uleb128 (start, &bytes_read, section_end);
 	  start += bytes_read;
 	  print_addr_index (idx, 8);
-	  printf ("         ");
+	  printf ("%*s", 9 + (vstart ? 2 * 6 : 0), "");
 	  printf (_("(base address selection entry)\n"));
 	  continue;
 	case 2: /* A start/end entry.  */
@@ -5382,6 +5585,7 @@ display_loc_list_dwo (struct dwarf_section *section,
 	default:
 	  warn (_("Unknown location list entry type 0x%x.\n"), entry_type);
 	  *start_ptr = start;
+	  *vstart_ptr = vstart;
 	  return;
 	}
 
@@ -5418,11 +5622,13 @@ display_loc_list_dwo (struct dwarf_section *section,
     }
 
   *start_ptr = start;
+  *vstart_ptr = vstart;
 }
 
-/* Sort array of indexes in ascending order of loc_offsets[idx].  */
+/* Sort array of indexes in ascending order of loc_offsets[idx] and
+   loc_views.  */
 
-static dwarf_vma *loc_offsets;
+static dwarf_vma *loc_offsets, *loc_views;
 
 static int
 loc_offsets_compar (const void *ap, const void *bp)
@@ -5430,23 +5636,33 @@ loc_offsets_compar (const void *ap, const void *bp)
   dwarf_vma a = loc_offsets[*(const unsigned int *) ap];
   dwarf_vma b = loc_offsets[*(const unsigned int *) bp];
 
-  return (a > b) - (b > a);
+  int ret = (a > b) - (b > a);
+  if (ret)
+    return ret;
+
+  a = loc_views[*(const unsigned int *) ap];
+  b = loc_views[*(const unsigned int *) bp];
+
+  ret = (a > b) - (b > a);
+
+  return ret;
 }
 
 static int
 display_debug_loc (struct dwarf_section *section, void *file)
 {
-  unsigned char *start = section->start;
+  unsigned char *start = section->start, *vstart = NULL;
   unsigned long bytes;
   unsigned char *section_begin = start;
   unsigned int num_loc_list = 0;
   unsigned long last_offset = 0;
+  unsigned long last_view = 0;
   unsigned int first = 0;
   unsigned int i;
   unsigned int j;
   int seen_first_offset = 0;
   int locs_sorted = 1;
-  unsigned char *next;
+  unsigned char *next = start, *vnext = vstart;
   unsigned int *array = NULL;
   const char *suffix = strrchr (section->name, '.');
   int is_dwo = 0;
@@ -5534,6 +5750,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	    {
 	      /* This is the first location list.  */
 	      last_offset = debug_information [i].loc_offsets [0];
+	      last_view = debug_information [i].loc_views [0];
 	      first = i;
 	      seen_first_offset = 1;
 	      j = 1;
@@ -5544,12 +5761,16 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	  for (; j < num; j++)
 	    {
 	      if (last_offset >
-		  debug_information [i].loc_offsets [j])
+		  debug_information [i].loc_offsets [j]
+		  || (last_offset ==
+		      debug_information [i].loc_offsets [j]
+		      && last_view > debug_information [i].loc_views [j]))
 		{
 		  locs_sorted = 0;
 		  break;
 		}
 	      last_offset = debug_information [i].loc_offsets [j];
+	      last_view = debug_information [i].loc_views [j];
 	    }
 	}
     }
@@ -5558,7 +5779,8 @@ display_debug_loc (struct dwarf_section *section, void *file)
     error (_("No location lists in .debug_info section!\n"));
 
   if (debug_information [first].num_loc_offsets > 0
-      && debug_information [first].loc_offsets [0] != expected_start)
+      && debug_information [first].loc_offsets [0] != expected_start
+      && debug_information [first].loc_views [0] != expected_start)
     warn (_("Location lists in %s section start at 0x%s\n"),
 	  section->name,
 	  dwarf_vmatoa ("x", debug_information [first].loc_offsets [0]));
@@ -5573,7 +5795,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
   seen_first_offset = 0;
   for (i = first; i < num_debug_info_entries; i++)
     {
-      dwarf_vma offset;
+      dwarf_vma offset, voffset;
       dwarf_vma base_address;
       unsigned int k;
       int has_frame_base;
@@ -5583,24 +5805,42 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	  for (k = 0; k < debug_information [i].num_loc_offsets; k++)
 	    array[k] = k;
 	  loc_offsets = debug_information [i].loc_offsets;
+	  loc_views = debug_information [i].loc_views;
 	  qsort (array, debug_information [i].num_loc_offsets,
 		 sizeof (*array), loc_offsets_compar);
 	}
 
+      int adjacent_view_loclists = 1;
       for (k = 0; k < debug_information [i].num_loc_offsets; k++)
 	{
 	  j = locs_sorted ? k : array[k];
 	  if (k
-	      && debug_information [i].loc_offsets [locs_sorted
+	      && (debug_information [i].loc_offsets [locs_sorted
 						    ? k - 1 : array [k - 1]]
-		 == debug_information [i].loc_offsets [j])
+		  == debug_information [i].loc_offsets [j])
+	      && (debug_information [i].loc_views [locs_sorted
+						   ? k - 1 : array [k - 1]]
+		  == debug_information [i].loc_views [j]))
 	    continue;
 	  has_frame_base = debug_information [i].have_frame_base [j];
 	  offset = debug_information [i].loc_offsets [j];
 	  next = section_begin + offset;
+	  voffset = debug_information [i].loc_views [j];
+	  if (voffset != vm1)
+	    vnext = section_begin + voffset;
+	  else
+	    vnext = NULL;
 	  base_address = debug_information [i].base_address;
 
-	  if (!seen_first_offset)
+	  if (vnext && vnext < next)
+	    {
+	      vstart = vnext;
+	      display_view_pair_list (section, &vstart, i, next);
+	      if (start == vnext)
+		start = vstart;
+	    }
+
+	  if (!seen_first_offset || !adjacent_view_loclists)
 	    seen_first_offset = 1;
 	  else
 	    {
@@ -5614,6 +5854,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
 		      (unsigned long) offset);
 	    }
 	  start = next;
+	  vstart = vnext;
 
 	  if (offset >= bytes)
 	    {
@@ -5622,14 +5863,21 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	      continue;
 	    }
 
+	  if (vnext && voffset >= bytes)
+	    {
+	      warn (_("View Offset 0x%lx is bigger than .debug_loc section size.\n"),
+		    (unsigned long) voffset);
+	      continue;
+	    }
+
 	  if (!is_loclists)
 	    {
 	      if (is_dwo)
 		display_loc_list_dwo (section, &start, i, offset,
-				      has_frame_base);
+				      &vstart, has_frame_base);
 	      else
 		display_loc_list (section, &start, i, offset, base_address,
-				  has_frame_base);
+				  &vstart, has_frame_base);
 	    }
 	  else
 	    {
@@ -5637,8 +5885,25 @@ display_debug_loc (struct dwarf_section *section, void *file)
 		warn (_("DWO is not yet supported.\n"));
 	      else
 		display_loclists_list (section, &start, i, offset, base_address,
-				       has_frame_base);
+				       &vstart, has_frame_base);
 	    }
+
+	  /* FIXME: this arrangement is quite simplistic.  Nothing
+	     requires locview lists to be adjacent to corresponding
+	     loclists, and a single loclist could be augmented by
+	     different locview lists, and vice-versa, unlikely as it
+	     is that it would make sense to do so.  Hopefully we'll
+	     have view pair support built into loclists before we ever
+	     need to address all these possibilities.  */
+	  if (adjacent_view_loclists && vnext
+	      && vnext != start && vstart != next)
+	    {
+	      adjacent_view_loclists = 0;
+	      warn (_("Hole and overlap detection requires adjacent view lists and loclists.\n"));
+	    }
+
+	  if (vnext && vnext == start)
+	    display_view_pair_list (section, &start, i, vstart);
 	}
     }
 
