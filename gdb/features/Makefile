@@ -138,19 +138,6 @@ XMLTOC = \
 	arm/arm-with-neon.xml \
 	arm/arm-with-vfpv2.xml \
 	arm/arm-with-vfpv3.xml \
-	i386/amd64-avx.xml \
-	i386/amd64-avx-avx512.xml \
-	i386/amd64-avx-mpx-avx512-pku.xml \
-	i386/amd64-mpx.xml \
-	i386/amd64-avx-mpx.xml \
-	i386/amd64.xml \
-	i386/i386-avx.xml \
-	i386/i386-avx-avx512.xml \
-	i386/i386-avx-mpx-avx512-pku.xml \
-	i386/i386-mmx.xml \
-	i386/i386-mpx.xml \
-	i386/i386-avx-mpx.xml \
-	i386/i386.xml \
 	microblaze-with-stack-protect.xml \
 	microblaze.xml \
 	mips-dsp-linux.xml \

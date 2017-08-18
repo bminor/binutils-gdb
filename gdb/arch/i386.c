@@ -31,13 +31,14 @@
 /* Create i386 target descriptions according to XCR0.  */
 
 target_desc *
-i386_create_target_description (uint64_t xcr0)
+i386_create_target_description (uint64_t xcr0, bool is_linux)
 {
   target_desc *tdesc = allocate_target_description ();
 
 #ifndef IN_PROCESS_AGENT
   set_tdesc_architecture (tdesc, "i386");
-  set_tdesc_osabi (tdesc, "GNU/Linux");
+  if (is_linux)
+    set_tdesc_osabi (tdesc, "GNU/Linux");
 #endif
 
   long regnum = 0;
@@ -48,7 +49,8 @@ i386_create_target_description (uint64_t xcr0)
   if (xcr0 & X86_XSTATE_SSE)
     regnum = create_feature_i386_32bit_sse (tdesc, regnum);
 
-  regnum = create_feature_i386_32bit_linux (tdesc, regnum);
+  if (is_linux)
+    regnum = create_feature_i386_32bit_linux (tdesc, regnum);
 
   if (xcr0 & X86_XSTATE_AVX)
     regnum = create_feature_i386_32bit_avx (tdesc, regnum);

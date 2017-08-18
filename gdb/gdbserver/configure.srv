@@ -24,8 +24,6 @@
 # Default hostio_last_error implementation
 srv_hostio_err_objs="hostio-errno.o"
 
-srv_i386_regobj="i386.o"
-
 if $development; then
    srv_i386_linux_regobj="i386-linux.o i386-avx-linux.o i386-avx-avx512-linux.o i386-avx-mpx-avx512-pku-linux.o i386-mpx-linux.o i386-avx-mpx-linux.o i386-mmx-linux.o linux-x86-tdesc-selftest.o"
    srv_amd64_linux_regobj="amd64-linux.o amd64-avx-linux.o amd64-avx-avx512-linux.o amd64-avx-mpx-avx512-pku-linux.o amd64-mpx-linux.o amd64-avx-mpx-linux.o x32-linux.o x32-avx-linux.o x32-avx-avx512-linux.o"
@@ -33,8 +31,6 @@ else
    srv_i386_linux_regobj=""
    srv_amd64_linux_regobj=""
 fi
-
-srv_amd64_regobj="amd64.o"
 
 ipa_ppc_linux_regobj="powerpc-32l-ipa.o powerpc-altivec32l-ipa.o powerpc-cell32l-ipa.o powerpc-vsx32l-ipa.o powerpc-isa205-32l-ipa.o powerpc-isa205-altivec32l-ipa.o powerpc-isa205-vsx32l-ipa.o powerpc-e500l-ipa.o powerpc-64l-ipa.o powerpc-altivec64l-ipa.o powerpc-cell64l-ipa.o powerpc-vsx64l-ipa.o powerpc-isa205-64l-ipa.o powerpc-isa205-altivec64l-ipa.o powerpc-isa205-vsx64l-ipa.o"
 
@@ -115,8 +111,9 @@ case "${target}" in
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
 			;;
-  i[34567]86-*-cygwin*)	srv_regobj="$srv_i386_regobj"
+  i[34567]86-*-cygwin*)	srv_regobj=""
 			srv_tgtobj="x86-low.o x86-dregs.o win32-low.o win32-i386-low.o"
+			srv_tgtobj="${srv_tgtobj} arch-i386.o"
 			srv_xmlfiles="$srv_i386_xmlfiles"
 			;;
   i[34567]86-*-linux*)	srv_regobj="$srv_i386_linux_regobj"
@@ -138,16 +135,18 @@ case "${target}" in
 			ipa_obj="linux-i386-ipa.o linux-x86-tdesc-ipa.o"
 			ipa_obj="${ipa_obj} i386-ipa.o"
 			;;
-  i[34567]86-*-lynxos*)	srv_regobj="i386.o"
+  i[34567]86-*-lynxos*)	srv_regobj=""
 			srv_tgtobj="lynx-low.o lynx-i386-low.o fork-child.o fork-inferior.o"
+			srv_tgtobj="${srv_tgtobj} arch-i386.o"
 			srv_xmlfiles="i386/i386.xml"
 			srv_xmlfiles="${srv_xmlfiles} i386/32bit-core.xml"
 			srv_xmlfiles="${srv_xmlfiles} i386/32bit-sse.xml"
 			srv_lynxos=yes
 			;;
   i[34567]86-*-mingw32ce*)
-			srv_regobj="$srv_i386_regobj"
+			srv_regobj=""
 			srv_tgtobj="x86-low.o x86-dregs.o win32-low.o win32-i386-low.o"
+			srv_tgtobj="${srv_tgtobj} arch-i386.o"
 			srv_tgtobj="${srv_tgtobj} wincecompat.o"
 			srv_xmlfiles="$srv_i386_xmlfiles"
 			# hostio_last_error implementation is in win32-low.c
@@ -155,13 +154,14 @@ case "${target}" in
 			srv_mingw=yes
 			srv_mingwce=yes
 			;;
-  i[34567]86-*-mingw*)	srv_regobj="$srv_i386_regobj"
+  i[34567]86-*-mingw*)	srv_regobj=""
 			srv_tgtobj="x86-low.o x86-dregs.o win32-low.o win32-i386-low.o"
+			srv_tgtobj="${srv_tgtobj} arch-i386.o"
 			srv_xmlfiles="$srv_i386_xmlfiles"
 			srv_mingw=yes
 			;;
-  i[34567]86-*-nto*)	srv_regobj="$srv_i386_regobj"
-			srv_tgtobj="nto-low.o nto-x86-low.o"
+  i[34567]86-*-nto*)	srv_regobj=""
+			srv_tgtobj="nto-low.o nto-x86-low.o arch-i386.o"
 			srv_xmlfiles="$srv_i386_xmlfiles"
 			srv_qnx="yes"
 			;;
@@ -377,13 +377,15 @@ case "${target}" in
 			ipa_obj="linux-amd64-ipa.o linux-x86-tdesc-ipa.o"
 			ipa_obj="${ipa_obj} amd64-ipa.o"
 			;;
-  x86_64-*-mingw*)	srv_regobj="$srv_amd64_regobj"
+  x86_64-*-mingw*)	srv_regobj=""
 			srv_tgtobj="x86-low.o x86-dregs.o i387-fp.o win32-low.o win32-i386-low.o"
+			srv_tgtobj="${srv_tgtobj} arch-amd64.o"
 			srv_xmlfiles="$srv_i386_xmlfiles $srv_amd64_xmlfiles"
 			srv_mingw=yes
 			;;
-  x86_64-*-cygwin*)	srv_regobj="$srv_amd64_regobj"
+  x86_64-*-cygwin*)	srv_regobj=""
 			srv_tgtobj="x86-low.o x86-dregs.o i387-fp.o win32-low.o win32-i386-low.o"
+			srv_tgtobj="${srv_tgtobj} arch-amd64.o"
 			srv_xmlfiles="$srv_i386_xmlfiles"
 			;;
 

@@ -41,14 +41,8 @@
 #include "i387-tdep.h"
 #include "x86-xstate.h"
 #include <algorithm>
-
-#include "features/i386/amd64.c"
-#include "features/i386/amd64-avx.c"
-#include "features/i386/amd64-mpx.c"
-#include "features/i386/amd64-avx-mpx.c"
-#include "features/i386/amd64-avx-avx512.c"
-#include "features/i386/amd64-avx-mpx-avx512-pku.c"
-
+#include "target-descriptions.h"
+#include "arch/amd64.h"
 #include "ax.h"
 #include "ax-gdb.h"
 
@@ -3212,21 +3206,19 @@ amd64_x32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
 const struct target_desc *
 amd64_target_description (uint64_t xcr0)
 {
-  switch (xcr0 & X86_XSTATE_ALL_MASK)
-    {
-    case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
-      return tdesc_amd64_avx_mpx_avx512_pku;
-    case X86_XSTATE_AVX_AVX512_MASK:
-      return tdesc_amd64_avx_avx512;
-    case X86_XSTATE_MPX_MASK:
-      return tdesc_amd64_mpx;
-    case X86_XSTATE_AVX_MPX_MASK:
-      return tdesc_amd64_avx_mpx;
-    case X86_XSTATE_AVX_MASK:
-      return tdesc_amd64_avx;
-    default:
-      return tdesc_amd64;
-    }
+  static target_desc *amd64_tdescs \
+    [2/*AVX*/][2/*MPX*/][2/*AVX512*/][2/*PKRU*/] = {};
+  target_desc **tdesc;
+
+  tdesc = &amd64_tdescs[(xcr0 & X86_XSTATE_AVX) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_MPX) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_AVX512) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_PKRU) ? 1 : 0];
+
+  if (*tdesc == NULL)
+    *tdesc = amd64_create_target_description (xcr0, false, false);
+
+  return *tdesc;
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
@@ -3235,12 +3227,28 @@ void _initialize_amd64_tdep (void);
 void
 _initialize_amd64_tdep (void)
 {
-  initialize_tdesc_amd64 ();
-  initialize_tdesc_amd64_avx ();
-  initialize_tdesc_amd64_mpx ();
-  initialize_tdesc_amd64_avx_mpx ();
-  initialize_tdesc_amd64_avx_avx512 ();
-  initialize_tdesc_amd64_avx_mpx_avx512_pku ();
+#if GDB_SELF_TEST
+  struct
+  {
+    const char *xml;
+    uint64_t mask;
+  } xml_masks[] = {
+    { "i386/amd64.xml", X86_XSTATE_SSE_MASK },
+    { "i386/amd64-avx.xml", X86_XSTATE_AVX_MASK },
+    { "i386/amd64-mpx.xml", X86_XSTATE_MPX_MASK },
+    { "i386/amd64-avx-mpx.xml", X86_XSTATE_AVX_MPX_MASK },
+    { "i386/amd64-avx-avx512.xml", X86_XSTATE_AVX_AVX512_MASK },
+    { "i386/amd64-avx-mpx-avx512-pku.xml",
+      X86_XSTATE_AVX_MPX_AVX512_PKU_MASK },
+  };
+
+  for (auto &a : xml_masks)
+    {
+      auto tdesc = amd64_target_description (a.mask);
+
+      selftests::record_xml_tdesc (a.xml, tdesc);
+    }
+#endif /* GDB_SELF_TEST */
 }
 
 
