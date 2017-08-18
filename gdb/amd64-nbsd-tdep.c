@@ -25,6 +25,7 @@
 #include "symtab.h"
 
 #include "amd64-tdep.h"
+#include "x86-xstate.h"
 #include "nbsd-tdep.h"
 #include "solib-svr4.h"
 
@@ -103,7 +104,8 @@ amd64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (amd64nbsd_r_reg_offset);
   tdep->sizeof_gregset = 26 * 8;
 
-  amd64_init_abi (info, gdbarch, tdesc_amd64);
+  amd64_init_abi (info, gdbarch,
+		  amd64_target_description (X86_XSTATE_SSE_MASK));
 
   tdep->jb_pc_offset = 7 * 8;
 
