@@ -1,3 +1,11 @@
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (OBS): Add selftest.o.
+	* configure.ac: AC_DEFINE GDB_SELF_TEST if $development.
+	* configure, config.in: Re-generated.
+	* server.c: Include common/sefltest.h.
+	(captured_main): Handle option --selftest.
+
 2017-08-09  Yao Qi  <yao.qi@linaro.org>
 
 	* configure.srv (srv_i386_regobj): Remove i386-avx.o,

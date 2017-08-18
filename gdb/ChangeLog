@@ -1,5 +1,14 @@
 2017-08-18  Yao Qi  <yao.qi@linaro.org>
 
+	* NEWS: Mention GDBserver's new option "--selftest".
+	* Makefile.in (SFILES): Remove selftest.c, add common/selftest.c.
+	* selftest.c: Move it to common/selftest.c.
+	* selftest.h: Move it to common/selftest.h.
+	* selftest-arch.c (reset): New function.
+	(tests_with_arch): Call reset.
+
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
 	* selftest.c (run_tests): Don't call QUIT.  Call debug_printf
 	instead of exception_fprintf and printf_filtered.
 

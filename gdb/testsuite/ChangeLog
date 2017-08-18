@@ -1,3 +1,7 @@
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.server/unittest.exp: New.
+
 2017-08-15  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/21954

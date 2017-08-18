@@ -1178,7 +1178,6 @@ SFILES = \
 	reverse.c \
 	rust-exp.y \
 	rust-lang.c \
-	selftest.c \
 	selftest-arch.c \
 	sentinel-frame.c \
 	ser-base.c \
@@ -1244,6 +1243,7 @@ SFILES = \
 	common/ptid.c \
 	common/rsp-low.c \
 	common/run-time-clock.c \
+	common/selftest.c \
 	common/signals.c \
 	common/signals-state-save-restore.c \
 	common/vec.c \

@@ -16,51 +16,37 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "defs.h"
-#include "selftest.h"
-#include <vector>
+#ifndef SELFTEST_H
+#define SELFTEST_H
+
+/* A test is just a function that does some checks and throws an
+   exception if something has gone wrong.  */
+
+typedef void self_test_function (void);
 
 namespace selftests
 {
 
-/* All the tests that have been registered.  */
+/* Register a new self-test.  */
 
-static std::vector<self_test_function *> tests;
+extern void register_test (self_test_function *function);
 
-/* See selftest.h.  */
+/* Run all the self tests.  This print a message describing the number
+   of test and the number of failures.  */
 
-void
-register_test (self_test_function *function)
-{
-  tests.push_back (function);
+extern void run_tests (void);
+
+/* Reset GDB or GDBserver's internal state.  */
+extern void reset ();
+
 }
 
-/* See selftest.h.  */
+/* Check that VALUE is true, and, if not, throw an exception.  */
 
-void
-run_tests (void)
-{
-  int failed = 0;
+#define SELF_CHECK(VALUE)						\
+  do {									\
+    if (!(VALUE))							\
+      error (_("self-test failed at %s:%d"), __FILE__, __LINE__);	\
+  } while (0)
 
-  for (int i = 0; i < tests.size (); ++i)
-    {
-      TRY
-	{
-	  tests[i] ();
-	}
-      CATCH (ex, RETURN_MASK_ERROR)
-	{
-	  ++failed;
-	  debug_printf ("Self test failed: %s\n", ex.message);
-	}
-      END_CATCH
-
-      /* Clear GDB internal state.  */
-      registers_changed ();
-      reinit_frame_cache ();
-    }
-
-  debug_printf ("Ran %lu unit tests, %d failed\n",
-		(long) tests.size (), failed);
-}
-} // namespace selftests
+#endif /* SELFTEST_H */

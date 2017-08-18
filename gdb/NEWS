@@ -3,14 +3,19 @@
 
 *** Changes since GDB 8.0
 
-* On Unix systems, GDBserver now does globbing expansion and variable
-  substitution in inferior command line arguments.
+* New features in the GDB remote stub, GDBserver
 
-  This is done by starting inferiors using a shell, like GDB does.
-  See "set startup-with-shell" in the user manual for how to disable
-  this from GDB when using "target extended-remote".  When using
-  "target remote", you can disable the startup with shell by using the
-  new "--no-startup-with-shell" GDBserver command line option.
+  ** New "--selftest" command line option runs some GDBserver self
+     tests.  These self tests are disabled in releases.
+
+  ** On Unix systems, GDBserver now does globbing expansion and variable
+     substitution in inferior command line arguments.
+
+     This is done by starting inferiors using a shell, like GDB does.
+     See "set startup-with-shell" in the user manual for how to disable
+     this from GDB when using "target extended-remote".  When using
+     "target remote", you can disable the startup with shell by using the
+     new "--no-startup-with-shell" GDBserver command line option.
 
 * New remote packets
 

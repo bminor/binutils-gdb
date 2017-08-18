@@ -20253,6 +20253,15 @@ environment:
 $ gdbserver --wrapper env LD_PRELOAD=libtest.so -- :2222 ./testprog
 @end smallexample
 
+@cindex @option{--selftest}
+The @option{--selftest} option runs the self tests in @code{gdbserver}:
+
+@smallexample
+$ gdbserver --selftest
+Ran 2 unit tests, 0 failed
+@end smallexample
+
+These tests are disabled in release.
 @subsection Connecting to @code{gdbserver}
 
 The basic procedure for connecting to the remote target is:

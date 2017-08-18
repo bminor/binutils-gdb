@@ -33,6 +33,14 @@ register_test_foreach_arch (self_test_foreach_arch_function *function)
   gdbarch_tests.push_back (function);
 }
 
+void
+reset ()
+{
+  /* Clear GDB internal state.  */
+  registers_changed ();
+  reinit_frame_cache ();
+}
+
 static void
 tests_with_arch ()
 {
@@ -82,9 +90,7 @@ tests_with_arch ()
 	    }
 	  END_CATCH
 
-	  /* Clear GDB internal state.  */
-	  registers_changed ();
-	  reinit_frame_cache ();
+	  reset ();
 	}
     }
 

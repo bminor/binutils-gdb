@@ -16,34 +16,51 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef SELFTEST_H
-#define SELFTEST_H
-
-/* A test is just a function that does some checks and throws an
-   exception if something has gone wrong.  */
-
-typedef void self_test_function (void);
+#include "common-defs.h"
+#include "common-exceptions.h"
+#include "common-debug.h"
+#include "selftest.h"
+#include <vector>
 
 namespace selftests
 {
 
-/* Register a new self-test.  */
+/* All the tests that have been registered.  */
 
-extern void register_test (self_test_function *function);
+static std::vector<self_test_function *> tests;
 
-/* Run all the self tests.  This print a message describing the number
-   of test and the number of failures.  */
+/* See selftest.h.  */
 
-extern void run_tests (void);
-
+void
+register_test (self_test_function *function)
+{
+  tests.push_back (function);
 }
 
-/* Check that VALUE is true, and, if not, throw an exception.  */
+/* See selftest.h.  */
 
-#define SELF_CHECK(VALUE)						\
-  do {									\
-    if (!(VALUE))							\
-      error (_("self-test failed at %s:%d"), __FILE__, __LINE__);	\
-  } while (0)
+void
+run_tests (void)
+{
+  int failed = 0;
 
-#endif /* SELFTEST_H */
+  for (int i = 0; i < tests.size (); ++i)
+    {
+      TRY
+	{
+	  tests[i] ();
+	}
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  ++failed;
+	  debug_printf ("Self test failed: %s\n", ex.message);
+	}
+      END_CATCH
+
+      reset ();
+    }
+
+  debug_printf ("Ran %lu unit tests, %d failed\n",
+		(long) tests.size (), failed);
+}
+} // namespace selftests
