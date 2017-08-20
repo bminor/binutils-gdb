@@ -8464,16 +8464,13 @@ static struct breakpoint_ops catch_solib_breakpoint_ops;
 void
 add_solib_catchpoint (const char *arg, int is_load, int is_temp, int enabled)
 {
-  struct solib_catchpoint *c;
   struct gdbarch *gdbarch = get_current_arch ();
-  struct cleanup *cleanup;
 
   if (!arg)
     arg = "";
   arg = skip_spaces_const (arg);
 
-  c = new solib_catchpoint ();
-  cleanup = make_cleanup (xfree, c);
+  std::unique_ptr<solib_catchpoint> c (new solib_catchpoint ());
 
   if (*arg != '\0')
     {
@@ -8483,13 +8480,12 @@ add_solib_catchpoint (const char *arg, int is_load, int is_temp, int enabled)
     }
 
   c->is_load = is_load;
-  init_catchpoint (c, gdbarch, is_temp, NULL,
+  init_catchpoint (c.get (), gdbarch, is_temp, NULL,
 		   &catch_solib_breakpoint_ops);
 
   c->enable_state = enabled ? bp_enabled : bp_disabled;
 
-  discard_cleanups (cleanup);
-  install_breakpoint (0, c, 1);
+  install_breakpoint (0, c.release (), 1);
 }
 
 /* A helper function that does all the work for "catch load" and

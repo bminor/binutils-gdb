@@ -1,5 +1,9 @@
 2017-08-22  Tom Tromey  <tom@tromey.com>
 
+	* breakpoint.c (add_solib_catchpoint): Use std::unique_ptr.
+
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
 	* psymtab.c (psymtab_search_name): Return a unique_xmalloc_ptr.
 	(lookup_partial_symbol): Update.
 
