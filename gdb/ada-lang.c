@@ -13010,20 +13010,19 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 int disabled,
 				 int from_tty)
 {
-  struct ada_catchpoint *c;
   char *addr_string = NULL;
   const struct breakpoint_ops *ops = NULL;
   struct symtab_and_line sal
     = ada_exception_sal (ex_kind, excep_string, &addr_string, &ops);
 
-  c = new ada_catchpoint ();
-  init_ada_exception_breakpoint (c, gdbarch, sal, addr_string,
+  std::unique_ptr<ada_catchpoint> c (new ada_catchpoint ());
+  init_ada_exception_breakpoint (c.get (), gdbarch, sal, addr_string,
 				 ops, tempflag, disabled, from_tty);
   c->excep_string = excep_string;
-  create_excep_cond_exprs (c);
+  create_excep_cond_exprs (c.get ());
   if (cond_string != NULL)
-    set_breakpoint_condition (c, cond_string, from_tty);
-  install_breakpoint (0, c, 1);
+    set_breakpoint_condition (c.get (), cond_string, from_tty);
+  install_breakpoint (0, std::move (c), 1);
 }
 
 /* Implement the "catch exception" command.  */

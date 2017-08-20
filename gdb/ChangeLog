@@ -1,5 +1,27 @@
 2017-08-22  Tom Tromey  <tom@tromey.com>
 
+	* breakpoint.h (install_breakpoint): Update.
+	* breakpoint.c (add_solib_catchpoint): Update.
+	(install_breakpoint): Change argument to a std::unique_ptr.
+	(create_fork_vfork_event_catchpoint): Use std::unique_ptr.
+	(create_breakpoint_sal, create_breakpoint): Update.
+	(watch_command_1, catch_exec_command_1)
+	(strace_marker_create_breakpoints_sal): Use std::unique_ptr.
+	(add_to_breakpoint_chain): Change argument to a std::unique_ptr.
+	Return the breakpoint.
+	(set_raw_breakpoint_without_location, set_raw_breakpoint)
+	(new_single_step_breakpoint): Update.
+	* break-catch-throw.c (handle_gnu_v3_exceptions): Use
+	std::unique_ptr.
+	* break-catch-syscall.c (create_syscall_event_catchpoint): Use
+	std::unique_ptr.
+	* break-catch-sig.c (create_signal_catchpoint): Use
+	std::unique_ptr.
+	* ada-lang.c (create_ada_exception_catchpoint): Use
+	std::unique_ptr.
+
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
 	* breakpoint.c (add_solib_catchpoint): Use std::unique_ptr.
 
 2017-08-22  Tom Tromey  <tom@tromey.com>
