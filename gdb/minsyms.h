@@ -157,6 +157,10 @@ void terminate_minimal_symbol_table (struct objfile *objfile);
 
 
 
+/* Return whether MSYMBOL is a function/method.  */
+
+bool msymbol_is_text (minimal_symbol *msymbol);
+
 /* Compute a hash code for the string argument.  */
 
 unsigned int msymbol_hash (const char *);

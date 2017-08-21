@@ -3830,6 +3830,25 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
     /* Don't return END_PC, which is past the end of the function.  */
     return prologue_sal.pc;
 }
+
+/* See symtab.h.  */
+
+symbol *
+find_function_alias_target (bound_minimal_symbol msymbol)
+{
+  if (!msymbol_is_text (msymbol.minsym))
+    return NULL;
+
+  CORE_ADDR addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
+  symbol *sym = find_pc_function (addr);
+  if (sym != NULL
+      && SYMBOL_CLASS (sym) == LOC_BLOCK
+      && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) == addr)
+    return sym;
+
+  return NULL;
+}
+
 
 /* If P is of the form "operator[ \t]+..." where `...' is
    some legitimate operator text, return a pointer to the

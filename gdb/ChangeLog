@@ -1,5 +1,14 @@
 2017-08-21  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/19487
+	* c-exp.y (variable production): Handle function aliases.
+	* minsyms.c (msymbol_is_text): New function.
+	* minsyms.h (msymbol_is_text): Declare.
+	* symtab.c (find_function_alias_target): New function.
+	* symtab.h (find_function_alias_target): Declare.
+
+2017-08-21  Pedro Alves  <palves@redhat.com>
+
 	* eval.c (evaluate_subexp_standard) <OP_TYPE>: Don't dig past
 	typedefs.
 	* typeprint.c (whatis_exp): If handling "whatis", and expression
