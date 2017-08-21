@@ -215,6 +215,9 @@ extern const int vle_num_opcodes;
    the underlying machine instruction.  */
 #define PPC_OPCODE_RAW	     0x40000000000ull
 
+/* Opcode is supported by PowerPC LSP */
+#define PPC_OPCODE_LSP	     0x80000000000ull
+
 /* A macro to extract the major opcode from an instruction.  */
 #define PPC_OP(i) (((i) >> 26) & 0x3f)
 

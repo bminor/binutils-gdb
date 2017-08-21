@@ -60,6 +60,11 @@ if { [istarget powerpc*-*-*] } then {
 	    run_dump_test "vle-simple-4"
 	    run_dump_test "vle-simple-5"
 	    run_dump_test "vle-simple-6"
+
+	    #fail expected until get_powerpc_dialect() patch not applied
+	    setup_xfail "*-*-*"
+	    run_dump_test "lsp"
+	    run_dump_test "lsp-checks"
 	}
     }
 

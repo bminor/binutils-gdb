@@ -1,3 +1,13 @@
+2017-08-21  Alexander Fedotov <alexander.fedotov@nxp.com>
+	    Edmar Wienskoski <edmar.wienskoski@nxp.com
+
+	* testsuite/gas/ppc/lsp-checks.d,
+	* testsuite/gas/ppc/lsp-checks.l,
+	* testsuite/gas/ppc/lsp-checks.s: New test.
+	* testsuite/gas/ppc/lsp.d,
+	* testsuite/gas/ppc/lsp.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run new tests.
+
 2017-08-15  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
 	* config/tc-aarch64.c (REGDEF_ALIAS): Define
