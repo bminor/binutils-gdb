@@ -2802,7 +2802,9 @@ extern asection _bfd_elf_large_com_section;
    library, if any.  A unique symbol can never be bound locally.  */
 #define SYMBOLIC_BIND(INFO, H) \
     (!(H)->unique_global \
-     && ((INFO)->symbolic || ((INFO)->dynamic && !(H)->dynamic)))
+     && ((INFO)->symbolic \
+	 || (H)->start_stop \
+	 || ((INFO)->dynamic && !(H)->dynamic)))
 
 #ifdef __cplusplus
 }
