@@ -1,3 +1,7 @@
+2017-08-21  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_add_threads): Use array type for `lwps'.
+
 2017-08-21  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/19487
