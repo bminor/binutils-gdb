@@ -1,3 +1,10 @@
+2017-08-21  Alan Modra  <amodra@gmail.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21964
+	* elf-bfd.h (SYMBOLIC_BIND): Return TRUE for __start/__stop symbols.
+	* elflink.c (bfd_elf_define_start_stop): Rewrite.
+
 2017-08-07  Alan Modra  <amodra@gmail.com>
 
 	PR 21910

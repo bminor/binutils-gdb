@@ -14226,18 +14226,30 @@ struct bfd_link_hash_entry *
 bfd_elf_define_start_stop (struct bfd_link_info *info,
 			   const char *symbol, asection *sec)
 {
-  struct bfd_link_hash_entry *h;
+  struct elf_link_hash_entry *h;
 
-  h = bfd_generic_define_start_stop (info, symbol, sec);
-  if (h != NULL)
+  h = elf_link_hash_lookup (elf_hash_table (info), symbol,
+			    FALSE, FALSE, TRUE);
+  if (h != NULL
+      && (h->root.type == bfd_link_hash_undefined
+	  || h->root.type == bfd_link_hash_undefweak
+	  || (h->ref_regular && !h->def_regular)))
     {
-      struct elf_link_hash_entry *eh = (struct elf_link_hash_entry *) h;
-      eh->start_stop = 1;
-      eh->u2.start_stop_section = sec;
-      _bfd_elf_link_hash_hide_symbol (info, eh, TRUE);
-      if (ELF_ST_VISIBILITY (eh->other) != STV_INTERNAL)
-	eh->other = ((eh->other & ~ELF_ST_VISIBILITY (-1))
-		     | STV_HIDDEN);
+      h->root.type = bfd_link_hash_defined;
+      h->root.u.def.section = sec;
+      h->root.u.def.value = 0;
+      h->def_regular = 1;
+      h->def_dynamic = 0;
+      h->start_stop = 1;
+      h->u2.start_stop_section = sec;
+      if (symbol[0] == '.')
+	{
+	  /* .startof. and .sizeof. symbols are local.  */
+	  _bfd_elf_link_hash_hide_symbol (info, h, TRUE);
+	}
+      else if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+	h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_PROTECTED;
+      return &h->root;
     }
-  return h;
+  return NULL;
 }
