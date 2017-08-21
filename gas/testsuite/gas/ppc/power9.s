@@ -303,6 +303,7 @@ power9:
 	xscvdphp    41,51
 	xvcvhpsp    42,52
 	xvcvsphp    43,53
+	lnia        3
 	addpcis     3,0
 	subpcis     3,0
 	addpcis     4,1
@@ -382,3 +383,6 @@ power9:
 	mffscrni    30,0
 	mffscrni    30,3
 	mffsl       31
+	scv         0
+	scv         127
+	rfscv

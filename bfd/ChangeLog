@@ -1,3 +1,53 @@
+2017-03-09  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2016-09-26  Alan Modra  <amodra@gmail.com>
+	* elf-bfd.h (_bfd_elf_ppc_merge_fp_attributes): Declare.
+	* elf32-ppc.c (_bfd_elf_ppc_merge_fp_attributes): New function.
+	(ppc_elf_merge_obj_attributes): Use it.  Don't copy first file
+	attributes, merge them.  Don't warn about undefined tag bits,
+	or copy unknown values to output.
+	* elf64-ppc.c (ppc64_elf_merge_private_bfd_data): Call
+	_bfd_elf_ppc_merge_fp_attributes.
+
+2017-02-22  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_finish_dynamic_sections): Don't segfault
+	on .got or .plt output section being discarded by script.
+	* elf32-ppc.c (ppc_elf_finish_dynamic_sections): Likewise.  Move
+	vxworks splt temp.
+
+2017-02-21  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2016-12-06  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (ok_lo_toc_insn): Add r_type param.  Recognize
+	lq,lfq,lxv,lxsd,lxssp,lfdp,stq,stfq,stxv,stxsd,stxssp,stfdp.
+	Don't match lmd and stmd.
+
+2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21168
+	* elf32-i386.c (elf_i386_relocate_section): Allow
+	"lea foo@GOT, %reg" in PIC.
+
+2016-12-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* bfd/elfxx-mips.c (_bfd_mips_post_process_headers): Revert
+	2016-02-23 change and remove EI_ABIVERSION 5 support.
+
+2016-11-30  Alan Modra  <amodra@gmail.com>
+
+	PR ld/20886
+	* elf64-ppc.c (ppc64_elf_size_stubs): Make rawsize max size seen
+	on any pass past STUB_SHRINK_ITER.
+
+2016-10-31  Alan Modra  <amodra@gmail.com>
+
+	PR 20748
+	* elf32-microblaze.c (microblaze_elf_finish_dynamic_sections): Revert
+	2016-05-13 change.
+
 2016-10-10  Christophe Lyon  <christophe.lyon@linaro.org>
 	Backport from mainline
 	2016-09-28  Christophe Lyon  <christophe.lyon@linaro.org>

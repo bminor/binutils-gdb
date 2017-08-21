@@ -1069,6 +1069,9 @@ class General_options
   DEFINE_special(section_start, options::TWO_DASHES, '\0',
 		 N_("Set address of section"), N_("SECTION=ADDRESS"));
 
+  DEFINE_bool(secure_plt, options::TWO_DASHES , '\0', true,
+	      N_("(PowerPC only) Use new-style PLT"), NULL);
+
   DEFINE_optional_string(sort_common, options::TWO_DASHES, '\0', NULL,
 			 N_("Sort common symbols by alignment"),
 			 N_("[={ascending,descending}]"));
@@ -1097,10 +1100,13 @@ class General_options
 
   DEFINE_int(stub_group_size, options::TWO_DASHES , '\0', 1,
 	     N_("(ARM, PowerPC only) The maximum distance from instructions "
-		"in a group of sections to their stubs.  Negative values mean "
-		"stubs are always after (PowerPC before) the group.  1 means "
-		"use default size.\n"),
+		"in a group of sections to their stubs. Negative values mean "
+		"stubs are always after the group. 1 means use default size"),
 	     N_("SIZE"));
+
+  DEFINE_bool(stub_group_multi, options::TWO_DASHES, '\0', false,
+	      N_("(PowerPC only) Allow a group of stubs to serve multiple "
+		 "output sections"), NULL);
 
   DEFINE_bool(no_keep_memory, options::TWO_DASHES, '\0', false,
 	      N_("Use less memory and more disk I/O "

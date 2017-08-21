@@ -1,3 +1,134 @@
+2017-02-22  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	* powerpc.cc (Target_powerpc::make_iplt_section): Check that
+	output_section exists before attempting add_output_section_data.
+	(Target_powerpc::make_brlt_section): Likewise.
+
+	2017-02-03  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Powerpc_relobj::make_toc_relative): Don't crash
+	when no .toc section exists.
+
+	2017-01-13  H.J. Lu  <hongjiu.lu@intel.com>
+	PR gold/21040
+	* powerpc.cc (Powerpc_relobj<size, big_endian>::make_toc_relative):
+	Cast 0x80008000 to uint64_t.
+
+	2017-01-11  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (class Powerpc_copy_relocs): New.
+	(Powerpc_copy_relocs::emit): New function.
+	(Powerpc_relobj::relatoc_, toc_, no_toc_opt_): New variables.
+	(Powerpc_relobj::toc_shndx, set_no_toc_opt, no_toc_opt): New inlines.
+	(Powerpc_relobj::do_relocate_sections): New function.
+	(Powerpc_relobj::make_toc_relative): Likewise.
+	(Powerpc_relobj::do_find_special_sections): Stash away .rela.toc
+	and .toc too.
+	(ok_lo_toc_insn): Move earlier, and handle more insns.
+	(Target_powerpc::Scan::local): If optimizing toc accesses, set
+	no_toc_opt for entries we can't edit.  Check insn validity.
+	Emit "toc optimization is not supported" warning, downgraded
+	from error.
+	(Target_powerpc::Scan::global): Likewise.
+	(Target_powerpc::Relocate::relocate): Edit TOC indirect code
+	to TOC relative.  Don't emit "toc optimization is not supported"
+	error here.
+
+	2017-01-10  Cary Coutant  <ccoutant@gmail.com>
+	* aarch64.cc (AArch64_relobj::do_relocate_sections): Call
+	Sized_relobj_file::relocate_section_range().
+	* arm.cc (Arm_relobj::do_relocate_sections): Likewise.
+	* object.h (Sized_relobj_file::relocate_section_range): New method.
+	* reloc.cc (Sized_relobj_file::do_relocate_sections): Move
+	implementation...
+	(Sized_relobj_file::relocate_section_range): ...to new method.
+
+	2017-01-10  Alan Modra  <amodra@gmail.com>
+	* options.h: Add --secure-plt option.
+	* powerpc.cc (Target_powerpc::Scan::local): Detect and error
+	on -fPIC -mbss-plt code.
+	(Target_powerpc::Scan::global): Likewise.
+
+	2017-01-09  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Target_powerpc::make_plt_section): Point sh_info of
+	".rela.plt" at ".plt".
+
+	2017-01-07  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc: Use shorter equivalent elfcpp typedef for
+	Reltype and reloc_size throughout.
+	(Target_powerpc::symval_for_branch): Exclude dynamic symbols.
+	(Target_powerpc::Scan::local): Use local var r_sym.
+	(Target_powerpc::Scan::global: Likewise.
+	(Target_powerpc::Relocate::relocate): Delete shadowing r_sym.
+
+	2016-12-08  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Powerpc_relobj::stub_table): Return NULL rather
+	then asserting.
+
+	2016-12-08  Alan Modra  <amodra@gmail.com>
+	* options.h (--stub-group-multi): Fix typo.
+
+	2016-12-07  Alan Modra  <amodra@gmail.com>
+	* options.h (--stub-group-multi): New PowerPC option.
+	* powerpc.cc (Stub_control): Add multi_os_ var and param
+	to constructor.  Sort start_ var later.  Comment State.
+	(Stub_control::can_add_to_stub_group): Heed multi_os_.
+	(Target_powerpc::group_sections): Update.
+
+	2016-12-07  Alan Modra  <amodra@gmail.com>
+	PR gold/20878
+	* powerpc.cc (Stub_control): Replace stubs_always_before_branch_
+	with stubs_always_after_branch_, group_end_addr_ with
+	group_start_addr_.
+	(Stub_control::can_add_to_stub_group): Rewrite to suit scanning
+	sections by increasing address.
+	(Target_powerpc::group_sections): Scan that way.  Delete corner
+	case.
+	* options.h (--stub-group-size): Update help string.
+
+	2016-12-07  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Stub_table_owner): Provide constructor.
+	(Powerpc_relobj::set_stub_table): Resize fill with -1.
+	(Target_powerpc::Branch_info::make_stub): Provide target debug
+	output on returning false.
+
+	2016-12-01  Cary Coutant  <ccoutant@gmail.com>
+	PR gold/20807
+	* aarch64.cc (Target_aarch64::scan_reloc_section_for_stubs): Handle
+	section symbols correctly.
+	* arm.cc (Target_arm): Likewise.
+	* powerpc.cc (Target_powerpc): Likewise.
+
+	2016-08-31  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (class Stub_control): Delete stub14_group_size_
+	and has14_.  Add group_size_.
+	(Stub_control::can_add_to_stub_group): Adjust to suit.  Print
+	debug info when switching to adding sections before stubs.
+
+	2016-08-31  Alan Modra  <amodra@gmail.com>
+	* debug.h (DEBUG_TARGET): New.
+	(DEBUG_ALL): Add DEBUG_TARGET.
+	(gold_debug): Delete FORMAT param.
+	* powerpc.cc (Stub_control::can_add_to_stub_group): Print debug ourput.
+
+	2016-08-30  Alan Modra  <amodra@gmail.com>
+	PR 20523
+	* powerpc.cc (class Stub_control): Add has14_.  Comment owner_.
+	(Stub_control::can_add_to_stub_group): Correct grouping of
+	sections containing 14-bit external branches.  When returning
+	false, set state_ to reflect the fact that we have one section
+	for the next group.  Rewrite most of function for clarity.
+	Add and expand comments.
+	(Target_powerpc::do_relax): Print stub group size retry in hex.
+
+	2016-08-26  Han Shen  <shenhan@google.com>
+	PR gold/20529 - relaxing loop never ends.
+	* powerpc.cc (Stub_table::min_size_threshold_): New member to
+	limit size.
+	(Stub_table::set_min_size_threshold): New member function.
+	(Stub_table::set_address_and_size): Add code to only allow size
+	increase.
+	(Target_powerpc::do_relax): Add code to record last size.
+
 2016-09-26  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/20238

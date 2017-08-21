@@ -1,3 +1,43 @@
+2017-03-09  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2016-09-26  Alan Modra  <amodra@gmail.com>
+	* testsuite/ld-powerpc/attr-gnu-4-4.s: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-14.d: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-24.d: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-34.d: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-41.d: Delete.
+	* testsuite/ld-powerpc/attr-gnu-4-32.d: Adjust expected warning.
+	* testsuite/ld-powerpc/attr-gnu-8-23.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-01.d: Adjust expected output.
+	* testsuite/ld-powerpc/attr-gnu-4-02.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-03.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-10.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-11.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-20.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-22.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-33.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-8-11.d: Likewise.
+	* testsuite/ld-powerpc/powerpc.exp: Don't run deleted tests.
+
+2017-02-21  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2016-12-06  Alan Modra  <amodra@gmail.com>
+	* testsuite/ld-powerpc/tocopt7.s,
+	* testsuite/ld-powerpc/tocopt7.out,
+	* testsuite/ld-powerpc/tocopt7.d: New test.
+	* testsuite/ld-powerpc/tocopt8.s,
+	* testsuite/ld-powerpc/tocopt8.d: New test.
+	* testsuite/ld-powerpc/powerpc.exp: Run them.
+
+2017-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21168
+	* testsuite/ld-i386/i386.exp: Run pr21168.
+	* testsuite/ld-i386/pr21168a.c: New file.
+	* testsuite/ld-i386/pr21168b.S: Likewise.
+
 2016-10-14  Alan Modra  <amodra@gmail.com>
 
 	* scripttempl/DWARF.sc: Add .debug_addr.

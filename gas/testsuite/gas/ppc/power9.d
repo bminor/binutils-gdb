@@ -312,8 +312,9 @@ Disassembly of section \.text:
 .*:	(f1 31 9d 6f|6f 9d 31 f1) 	xscvdphp vs41,vs51
 .*:	(f1 58 a7 6f|6f a7 58 f1) 	xvcvhpsp vs42,vs52
 .*:	(f1 79 af 6f|6f af 79 f1) 	xvcvsphp vs43,vs53
-.*:	(4c 60 00 04|04 00 60 4c) 	addpcis r3,0
-.*:	(4c 60 00 04|04 00 60 4c) 	addpcis r3,0
+.*:	(4c 60 00 04|04 00 60 4c) 	lnia    r3
+.*:	(4c 60 00 04|04 00 60 4c) 	lnia    r3
+.*:	(4c 60 00 04|04 00 60 4c) 	lnia    r3
 .*:	(4c 80 00 05|05 00 80 4c) 	addpcis r4,1
 .*:	(4c 80 00 05|05 00 80 4c) 	addpcis r4,1
 .*:	(4c bf ff c4|c4 ff bf 4c) 	addpcis r5,-2
@@ -391,4 +392,7 @@ Disassembly of section \.text:
 .*:	(ff d7 04 8e|8e 04 d7 ff) 	mffscrni f30,0
 .*:	(ff d7 1c 8e|8e 1c d7 ff) 	mffscrni f30,3
 .*:	(ff f8 04 8e|8e 04 f8 ff) 	mffsl   f31
+.*:	(01 00 00 44|44 00 00 01) 	scv     0
+.*:	(e1 0f 00 44|44 00 0f e1) 	scv     127
+.*:	(a4 00 00 4c|4c 00 00 a4) 	rfscv
 #pass

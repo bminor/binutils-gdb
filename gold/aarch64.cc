@@ -2044,9 +2044,9 @@ AArch64_relobj<size, big_endian>::do_relocate_sections(
     const unsigned char* pshdrs, Output_file* of,
     typename Sized_relobj_file<size, big_endian>::Views* pviews)
 {
-  // Call parent to relocate sections.
-  Sized_relobj_file<size, big_endian>::do_relocate_sections(symtab, layout,
-							    pshdrs, of, pviews);
+  // Relocate the section data.
+  this->relocate_section_range(symtab, layout, pshdrs, of, pviews,
+			       1, this->shnum() - 1);
 
   // We do not generate stubs if doing a relocatable link.
   if (parameters->options().relocatable())
@@ -3865,6 +3865,8 @@ Target_aarch64<size, big_endian>::scan_reloc_section_for_stubs(
 	  if (!is_defined_in_discarded_section)
 	    {
 	      typedef Sized_relobj_file<size, big_endian> ObjType;
+	      if (psymval->is_section_symbol())
+		symval.set_is_section_symbol();
 	      typename ObjType::Compute_final_local_value_status status =
 		object->compute_final_local_value(r_sym, psymval, &symval,
 						  relinfo->symtab);

@@ -4647,8 +4647,76 @@ ppc_elf_check_relocs (bfd *abfd,
   return TRUE;
 }
 
+/* Warn for conflicting Tag_GNU_Power_ABI_FP attributes between IBFD
+   and OBFD, and merge non-conflicting ones.  */
+void
+_bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, bfd *obfd)
+{
+  obj_attribute *in_attr, *in_attrs;
+  obj_attribute *out_attr, *out_attrs;
 
-/* Merge object attributes from IBFD into OBFD.  Raise an error if
+  in_attrs = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
+  out_attrs = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
+
+  in_attr = &in_attrs[Tag_GNU_Power_ABI_FP];
+  out_attr = &out_attrs[Tag_GNU_Power_ABI_FP];
+
+  if (in_attr->i != out_attr->i)
+    {
+      int in_fp = in_attr->i & 3;
+      int out_fp = out_attr->i & 3;
+
+      if (in_fp == 0)
+	;
+      else if (out_fp == 0)
+	{
+	  out_attr->type = 1;
+	  out_attr->i ^= in_fp;
+	}
+      else if (out_fp != 2 && in_fp == 2)
+	_bfd_error_handler
+	  (_("Warning: %B uses hard float, %B uses soft float"), obfd, ibfd);
+      else if (out_fp == 2 && in_fp != 2)
+	_bfd_error_handler
+	  (_("Warning: %B uses hard float, %B uses soft float"), ibfd, obfd);
+      else if (out_fp == 1 && in_fp == 3)
+	_bfd_error_handler
+	  (_("Warning: %B uses double-precision hard float, "
+	     "%B uses single-precision hard float"), obfd, ibfd);
+      else if (out_fp == 3 && in_fp == 1)
+	_bfd_error_handler
+	  (_("Warning: %B uses double-precision hard float, "
+	     "%B uses single-precision hard float"), ibfd, obfd);
+
+      in_fp = in_attr->i & 0xc;
+      out_fp = out_attr->i & 0xc;
+      if (in_fp == 0)
+	;
+      else if (out_fp == 0)
+	{
+	  out_attr->type = 1;
+	  out_attr->i ^= in_fp;
+	}
+      else if (out_fp != 2 * 4 && in_fp == 2 * 4)
+	_bfd_error_handler
+	  (_("Warning: %B uses 64-bit long double, "
+	     "%B uses 128-bit long double"), ibfd, obfd);
+      else if (in_fp != 2 * 4 && out_fp == 2 * 4)
+	_bfd_error_handler
+	  (_("Warning: %B uses 64-bit long double, "
+	     "%B uses 128-bit long double"), obfd, ibfd);
+      else if (out_fp == 1 * 4 && in_fp == 3 * 4)
+	_bfd_error_handler
+	  (_("Warning: %B uses IBM long double, "
+	     "%B uses IEEE long double"), ibfd, obfd);
+      else if (out_fp == 3 * 4 && in_fp == 1 * 4)
+	_bfd_error_handler
+	  (_("Warning: %B uses IBM long double, "
+	     "%B uses IEEE long double"), obfd, ibfd);
+    }
+}
+
+/* Merge object attributes from IBFD into OBFD.  Warn if
    there are conflicting attributes.  */
 static bfd_boolean
 ppc_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
@@ -4656,59 +4724,10 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
   obj_attribute *in_attr, *in_attrs;
   obj_attribute *out_attr, *out_attrs;
 
-  if (!elf_known_obj_attributes_proc (obfd)[0].i)
-    {
-      /* This is the first object.  Copy the attributes.  */
-      _bfd_elf_copy_obj_attributes (ibfd, obfd);
-
-      /* Use the Tag_null value to indicate the attributes have been
-	 initialized.  */
-      elf_known_obj_attributes_proc (obfd)[0].i = 1;
-
-      return TRUE;
-    }
+  _bfd_elf_ppc_merge_fp_attributes (ibfd, obfd);
 
   in_attrs = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
   out_attrs = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
-
-  /* Check for conflicting Tag_GNU_Power_ABI_FP attributes and merge
-     non-conflicting ones.  */
-  in_attr = &in_attrs[Tag_GNU_Power_ABI_FP];
-  out_attr = &out_attrs[Tag_GNU_Power_ABI_FP];
-  if (in_attr->i != out_attr->i)
-    {
-      out_attr->type = 1;
-      if (out_attr->i == 0)
-	out_attr->i = in_attr->i;
-      else if (in_attr->i == 0)
-	;
-      else if (out_attr->i == 1 && in_attr->i == 2)
-	_bfd_error_handler
-	  (_("Warning: %B uses hard float, %B uses soft float"), obfd, ibfd);
-      else if (out_attr->i == 1 && in_attr->i == 3)
-	_bfd_error_handler
-	  (_("Warning: %B uses double-precision hard float, %B uses single-precision hard float"),
-	  obfd, ibfd);
-      else if (out_attr->i == 3 && in_attr->i == 1)
-	_bfd_error_handler
-	  (_("Warning: %B uses double-precision hard float, %B uses single-precision hard float"),
-	  ibfd, obfd);
-      else if (out_attr->i == 3 && in_attr->i == 2)
-	_bfd_error_handler
-	  (_("Warning: %B uses soft float, %B uses single-precision hard float"),
-	  ibfd, obfd);
-      else if (out_attr->i == 2 && (in_attr->i == 1 || in_attr->i == 3))
-	_bfd_error_handler
-	  (_("Warning: %B uses hard float, %B uses soft float"), ibfd, obfd);
-      else if (in_attr->i > 3)
-	_bfd_error_handler
-	  (_("Warning: %B uses unknown floating point ABI %d"), ibfd,
-	   in_attr->i);
-      else
-	_bfd_error_handler
-	  (_("Warning: %B uses unknown floating point ABI %d"), obfd,
-	   out_attr->i);
-    }
 
   /* Check for conflicting Tag_GNU_Power_ABI_Vector attributes and
      merge non-conflicting ones.  */
@@ -4716,48 +4735,36 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
   out_attr = &out_attrs[Tag_GNU_Power_ABI_Vector];
   if (in_attr->i != out_attr->i)
     {
-      const char *in_abi = NULL, *out_abi = NULL;
+      int in_vec = in_attr->i & 3;
+      int out_vec = out_attr->i & 3;
 
-      switch (in_attr->i)
-	{
-	case 1: in_abi = "generic"; break;
-	case 2: in_abi = "AltiVec"; break;
-	case 3: in_abi = "SPE"; break;
-	}
-
-      switch (out_attr->i)
-	{
-	case 1: out_abi = "generic"; break;
-	case 2: out_abi = "AltiVec"; break;
-	case 3: out_abi = "SPE"; break;
-	}
-
-      out_attr->type = 1;
-      if (out_attr->i == 0)
-	out_attr->i = in_attr->i;
-      else if (in_attr->i == 0)
+      if (in_vec == 0)
 	;
+      else if (out_vec == 0)
+	{
+	  out_attr->type = 1;
+	  out_attr->i = in_vec;
+	}
       /* For now, allow generic to transition to AltiVec or SPE
 	 without a warning.  If GCC marked files with their stack
 	 alignment and used don't-care markings for files which are
 	 not affected by the vector ABI, we could warn about this
 	 case too.  */
-      else if (out_attr->i == 1)
-	out_attr->i = in_attr->i;
-      else if (in_attr->i == 1)
+      else if (in_vec == 1)
 	;
-      else if (in_abi == NULL)
+      else if (out_vec == 1)
+	{
+	  out_attr->type = 1;
+	  out_attr->i = in_vec;
+	}
+      else if (out_vec < in_vec)
 	_bfd_error_handler
-	  (_("Warning: %B uses unknown vector ABI %d"), ibfd,
-	   in_attr->i);
-      else if (out_abi == NULL)
+	  (_("Warning: %B uses AltiVec vector ABI, %B uses SPE vector ABI"),
+	   obfd, ibfd);
+      else if (out_vec > in_vec)
 	_bfd_error_handler
-	  (_("Warning: %B uses unknown vector ABI %d"), obfd,
-	   in_attr->i);
-      else
-	_bfd_error_handler
-	  (_("Warning: %B uses vector ABI \"%s\", %B uses \"%s\""),
-	   ibfd, obfd, in_abi, out_abi);
+	  (_("Warning: %B uses AltiVec vector ABI, %B uses SPE vector ABI"),
+	   ibfd, obfd);
     }
 
   /* Check for conflicting Tag_GNU_Power_ABI_Struct_Return attributes
@@ -4766,25 +4773,24 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
   out_attr = &out_attrs[Tag_GNU_Power_ABI_Struct_Return];
   if (in_attr->i != out_attr->i)
     {
-      out_attr->type = 1;
-      if (out_attr->i == 0)
-       out_attr->i = in_attr->i;
-      else if (in_attr->i == 0)
+      int in_struct = in_attr->i & 3;
+      int out_struct = out_attr->i & 3;
+
+      if (in_struct == 0 || in_struct == 3)
        ;
-      else if (out_attr->i == 1 && in_attr->i == 2)
-       _bfd_error_handler
-         (_("Warning: %B uses r3/r4 for small structure returns, %B uses memory"), obfd, ibfd);
-      else if (out_attr->i == 2 && in_attr->i == 1)
-       _bfd_error_handler
-         (_("Warning: %B uses r3/r4 for small structure returns, %B uses memory"), ibfd, obfd);
-      else if (in_attr->i > 2)
-       _bfd_error_handler
-         (_("Warning: %B uses unknown small structure return convention %d"), ibfd,
-          in_attr->i);
-      else
-       _bfd_error_handler
-         (_("Warning: %B uses unknown small structure return convention %d"), obfd,
-          out_attr->i);
+      else if (out_struct == 0)
+	{
+	  out_attr->type = 1;
+	  out_attr->i = in_struct;
+	}
+      else if (out_struct < in_struct)
+	_bfd_error_handler
+	  (_("Warning: %B uses r3/r4 for small structure returns, "
+	     "%B uses memory"), obfd, ibfd);
+      else if (out_struct > in_struct)
+	_bfd_error_handler
+	  (_("Warning: %B uses r3/r4 for small structure returns, "
+	     "%B uses memory"), ibfd, obfd);
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
@@ -10303,11 +10309,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
   htab = ppc_elf_hash_table (info);
   dynobj = elf_hash_table (info)->dynobj;
   sdyn = bfd_get_linker_section (dynobj, ".dynamic");
-  if (htab->is_vxworks)
-    splt = bfd_get_linker_section (dynobj, ".plt");
-  else
-    splt = NULL;
-
   got = 0;
   if (htab->elf.hgot != NULL)
     got = SYM_VAL (htab->elf.hgot);
@@ -10370,7 +10371,8 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	}
     }
 
-  if (htab->got != NULL)
+  if (htab->got != NULL
+      && htab->got->output_section != bfd_abs_section_ptr)
     {
       if (htab->elf.hgot->root.u.def.section == htab->got
 	  || htab->elf.hgot->root.u.def.section == htab->sgotplt)
@@ -10410,7 +10412,12 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
     }
 
   /* Fill in the first entry in the VxWorks procedure linkage table.  */
-  if (splt && splt->size > 0)
+  splt = NULL;
+  if (htab->is_vxworks)
+    splt = bfd_get_linker_section (dynobj, ".plt");
+  if (splt != NULL
+      && splt->size != 0
+      && splt->output_section != bfd_abs_section_ptr)
     {
       /* Use the right PLT. */
       const bfd_vma *plt_entry = (bfd_link_pic (info)
