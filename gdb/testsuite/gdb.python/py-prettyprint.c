@@ -257,6 +257,15 @@ bug_14741()
   set_item(&c, 0, 5);
 }
 
+/* Some typedefs/variables for checking that GDB doesn't lose typedefs
+   when looking for a printer.  */
+typedef int int_type;
+typedef int_type int_type2;
+
+int an_int = -1;
+int_type an_int_type = 1;
+int_type2 an_int_type2 = 2;
+
 int
 main ()
 {

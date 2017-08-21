@@ -1,3 +1,13 @@
+2017-08-21  Pedro Alves  <palves@redhat.com>
+
+	* eval.c (evaluate_subexp_standard) <OP_TYPE>: Don't dig past
+	typedefs.
+	* typeprint.c (whatis_exp): If handling "whatis", and expression
+	is OP_TYPE, strip one typedef level.  Otherwise don't strip
+	typedefs here.
+	* valops.c (value_cast): Save "to" type before resolving
+	stubs/typedefs.  Use that type as resulting value's type.
+
 2017-08-18  Tom Tromey  <tom@tromey.com>
 	    Pedro Alves  <palves@redhat.com>
 
