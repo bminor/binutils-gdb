@@ -283,7 +283,7 @@
 	[!HAVE_KINFO_GETVMMAP] (fbsd_find_memory_regions): Use std::string
 	for `mapfilename'.
 	(fbsd_xfer_partial): Use gdb::byte_vector.
-	(fbsd_add_threads): Likewise.
+	(fbsd_add_threads): Use gdb::unique_xmalloc_ptr.
 
 2017-08-09  John Baldwin  <jhb@FreeBSD.org>
 
