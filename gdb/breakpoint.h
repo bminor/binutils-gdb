@@ -1082,6 +1082,13 @@ enum bp_print_how
 
 struct bpstats
   {
+    bpstats ();
+    bpstats (struct bp_location *bl, bpstat **bs_link_pointer);
+    ~bpstats ();
+
+    bpstats (const bpstats &);
+    bpstats &operator= (const bpstats &) = delete;
+
     /* Linked list because there can be more than one breakpoint at
        the same place, and a bpstat reflects the fact that all have
        been hit.  */

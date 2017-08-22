@@ -1,3 +1,13 @@
+2017-09-20  Tom Tromey  <tom@tromey.com>
+
+	* breakpoint.c (~bpstats): Rename from bpstat_free.  Update.
+	(bpstat_clear): Use delete.
+	(bpstats): New constructors.
+	(bpstat_copy, bpstat_stop_status): Use new.
+	(dprintf_after_condition_true): Update.
+	* breakpoint.h (bpstats::bpstats): Add constructors.
+	(bpstats::~bpstats): Add destructor.
+
 2017-09-20  Pedro Alves  <palves@redhat.com>
 
 	* eval.c (make_params): Delete, refactored as ...

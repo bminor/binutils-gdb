@@ -4452,14 +4452,13 @@ is_catchpoint (struct breakpoint *ep)
 /* Frees any storage that is part of a bpstat.  Does not walk the
    'next' chain.  */
 
-static void
-bpstat_free (bpstat bs)
+bpstats::~bpstats ()
 {
-  if (bs->old_val != NULL)
-    value_free (bs->old_val);
-  decref_counted_command_line (&bs->commands);
-  decref_bp_location (&bs->bp_location_at);
-  xfree (bs);
+  if (old_val != NULL)
+    value_free (old_val);
+  decref_counted_command_line (&commands);
+  if (bp_location_at != NULL)
+    decref_bp_location (&bp_location_at);
 }
 
 /* Clear a bpstat so that it says we are not at any breakpoint.
@@ -4477,10 +4476,29 @@ bpstat_clear (bpstat *bsp)
   while (p != NULL)
     {
       q = p->next;
-      bpstat_free (p);
+      delete p;
       p = q;
     }
   *bsp = NULL;
+}
+
+bpstats::bpstats (const bpstats &other)
+  : next (NULL),
+    bp_location_at (other.bp_location_at),
+    breakpoint_at (other.breakpoint_at),
+    commands (other.commands),
+    old_val (other.old_val),
+    print (other.print),
+    stop (other.stop),
+    print_it (other.print_it)
+{
+  if (old_val != NULL)
+    {
+      old_val = value_copy (old_val);
+      release_value (old_val);
+    }
+  incref_bp_location (bp_location_at);
+  incref_counted_command_line (commands);
 }
 
 /* Return a copy of a bpstat.  Like "bs1 = bs2" but all storage that
@@ -4498,15 +4516,7 @@ bpstat_copy (bpstat bs)
 
   for (; bs != NULL; bs = bs->next)
     {
-      tmp = (bpstat) xmalloc (sizeof (*tmp));
-      memcpy (tmp, bs, sizeof (*tmp));
-      incref_counted_command_line (tmp->commands);
-      incref_bp_location (tmp->bp_location_at);
-      if (bs->old_val != NULL)
-	{
-	  tmp->old_val = value_copy (bs->old_val);
-	  release_value (tmp->old_val);
-	}
+      tmp = new bpstats (*bs);
 
       if (p == NULL)
 	/* This is the first thing in the chain.  */
@@ -4995,23 +5005,31 @@ breakpoint_cond_eval (void *exp)
 
 /* Allocate a new bpstat.  Link it to the FIFO list by BS_LINK_POINTER.  */
 
-static bpstat
-bpstat_alloc (struct bp_location *bl, bpstat **bs_link_pointer)
+bpstats::bpstats (struct bp_location *bl, bpstat **bs_link_pointer)
+  : next (NULL),
+    bp_location_at (bl),
+    breakpoint_at (bl->owner),
+    commands (NULL),
+    old_val (NULL),
+    print (0),
+    stop (0),
+    print_it (print_it_normal)
 {
-  bpstat bs;
-
-  bs = (bpstat) xmalloc (sizeof (*bs));
-  bs->next = NULL;
-  **bs_link_pointer = bs;
-  *bs_link_pointer = &bs->next;
-  bs->breakpoint_at = bl->owner;
-  bs->bp_location_at = bl;
   incref_bp_location (bl);
-  /* If the condition is false, etc., don't do the commands.  */
-  bs->commands = NULL;
-  bs->old_val = NULL;
-  bs->print_it = print_it_normal;
-  return bs;
+  **bs_link_pointer = this;
+  *bs_link_pointer = &next;
+}
+
+bpstats::bpstats ()
+  : next (NULL),
+    bp_location_at (NULL),
+    breakpoint_at (NULL),
+    commands (NULL),
+    old_val (NULL),
+    print (0),
+    stop (0),
+    print_it (print_it_normal)
+{
 }
 
 /* The target has stopped with waitstatus WS.  Check if any hardware
@@ -5654,7 +5672,7 @@ bpstat_stop_status (struct address_space *aspace,
 	  /* Come here if it's a watchpoint, or if the break address
 	     matches.  */
 
-	  bs = bpstat_alloc (bl, &bs_link);	/* Alloc a bpstat to
+	  bs = new bpstats (bl, &bs_link);	/* Alloc a bpstat to
 						   explain stop.  */
 
 	  /* Assume we stop.  Should we find a watchpoint that is not
@@ -5685,7 +5703,7 @@ bpstat_stop_status (struct address_space *aspace,
 	  if (breakpoint_location_address_match (loc, aspace, bp_addr)
 	      && need_moribund_for_location_type (loc))
 	    {
-	      bs = bpstat_alloc (loc, &bs_link);
+	      bs = new bpstats (loc, &bs_link);
 	      /* For hits of moribund locations, we should just proceed.  */
 	      bs->stop = 0;
 	      bs->print = 0;
@@ -13413,8 +13431,7 @@ dprintf_print_recreate (struct breakpoint *tp, struct ui_file *fp)
 static void
 dprintf_after_condition_true (struct bpstats *bs)
 {
-  struct cleanup *old_chain;
-  struct bpstats tmp_bs = { NULL };
+  struct bpstats tmp_bs;
   struct bpstats *tmp_bs_p = &tmp_bs;
 
   /* dprintf's never cause a stop.  This wasn't set in the
@@ -13429,14 +13446,12 @@ dprintf_after_condition_true (struct bpstats *bs)
      commands here throws.  */
   tmp_bs.commands = bs->commands;
   bs->commands = NULL;
-  old_chain = make_cleanup_decref_counted_command_line (&tmp_bs.commands);
 
   bpstat_do_actions_1 (&tmp_bs_p);
 
   /* 'tmp_bs.commands' will usually be NULL by now, but
      bpstat_do_actions_1 may return early without processing the whole
      list.  */
-  do_cleanups (old_chain);
 }
 
 /* The breakpoint_ops structure to be used on static tracepoints with
