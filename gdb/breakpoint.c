@@ -105,9 +105,7 @@ static void disable_command (char *, int);
 static void enable_command (char *, int);
 
 static void map_breakpoint_numbers (const char *,
-				    void (*) (struct breakpoint *,
-					      void *),
-				    void *);
+				    gdb::function_view<void (breakpoint *)>);
 
 static void ignore_command (char *, int);
 
@@ -1358,88 +1356,16 @@ check_tracepoint_command (char *line, void *closure)
   validate_actionline (line, b);
 }
 
-/* A structure used to pass information through
-   map_breakpoint_numbers.  */
-
-struct commands_info
-{
-  /* True if the command was typed at a tty.  */
-  int from_tty;
-
-  /* The breakpoint range spec.  */
-  const char *arg;
-
-  /* Non-NULL if the body of the commands are being read from this
-     already-parsed command.  */
-  struct command_line *control;
-
-  /* The command lines read from the user, or NULL if they have not
-     yet been read.  */
-  struct counted_command_line *cmd;
-};
-
-/* A callback for map_breakpoint_numbers that sets the commands for
-   commands_command.  */
-
-static void
-do_map_commands_command (struct breakpoint *b, void *data)
-{
-  struct commands_info *info = (struct commands_info *) data;
-
-  if (info->cmd == NULL)
-    {
-      command_line_up l;
-
-      if (info->control != NULL)
-	l = copy_command_lines (info->control->body_list[0]);
-      else
-	{
-	  struct cleanup *old_chain;
-	  char *str;
-
-	  str = xstrprintf (_("Type commands for breakpoint(s) "
-			      "%s, one per line."),
-			    info->arg);
-
-	  old_chain = make_cleanup (xfree, str);
-
-	  l = read_command_lines (str,
-				  info->from_tty, 1,
-				  (is_tracepoint (b)
-				   ? check_tracepoint_command : 0),
-				  b);
-
-	  do_cleanups (old_chain);
-	}
-
-      info->cmd = alloc_counted_command_line (l.release ());
-    }
-
-  /* If a breakpoint was on the list more than once, we don't need to
-     do anything.  */
-  if (b->commands != info->cmd)
-    {
-      validate_commands_for_breakpoint (b, info->cmd->commands);
-      incref_counted_command_line (info->cmd);
-      decref_counted_command_line (&b->commands);
-      b->commands = info->cmd;
-      observer_notify_breakpoint_modified (b);
-    }
-}
-
 static void
 commands_command_1 (const char *arg, int from_tty,
 		    struct command_line *control)
 {
   struct cleanup *cleanups;
-  struct commands_info info;
+  struct counted_command_line *cmd = NULL;
 
-  info.from_tty = from_tty;
-  info.control = control;
-  info.cmd = NULL;
   /* If we read command lines from the user, then `info' will hold an
      extra reference to the commands that we must clean up.  */
-  cleanups = make_cleanup_decref_counted_command_line (&info.cmd);
+  cleanups = make_cleanup_decref_counted_command_line (&cmd);
 
   std::string new_arg;
 
@@ -1450,15 +1376,54 @@ commands_command_1 (const char *arg, int from_tty,
 				 breakpoint_count);
       else if (breakpoint_count > 0)
 	new_arg = string_printf ("%d", breakpoint_count);
+      arg = new_arg.c_str ();
     }
-  else
-    new_arg = arg;
 
-  info.arg = new_arg.c_str ();
+  map_breakpoint_numbers
+    (arg, [&] (breakpoint *b)
+     {
+       if (cmd == NULL)
+	 {
+	   command_line_up l;
 
-  map_breakpoint_numbers (info.arg, do_map_commands_command, &info);
+	   if (control != NULL)
+	     l = copy_command_lines (control->body_list[0]);
+	   else
+	     {
+	       struct cleanup *old_chain;
+	       char *str;
 
-  if (info.cmd == NULL)
+	       str = xstrprintf (_("Type commands for breakpoint(s) "
+				   "%s, one per line."),
+				 arg);
+
+	       old_chain = make_cleanup (xfree, str);
+
+	       l = read_command_lines (str,
+				       from_tty, 1,
+				       (is_tracepoint (b)
+					? check_tracepoint_command : 0),
+				       b);
+
+	       do_cleanups (old_chain);
+	     }
+
+	   cmd = alloc_counted_command_line (l.release ());
+	 }
+
+       /* If a breakpoint was on the list more than once, we don't need to
+	  do anything.  */
+       if (b->commands != cmd)
+	 {
+	   validate_commands_for_breakpoint (b, cmd->commands);
+	   incref_counted_command_line (cmd);
+	   decref_counted_command_line (&b->commands);
+	   b->commands = cmd;
+	   observer_notify_breakpoint_modified (b);
+	 }
+     });
+
+  if (cmd == NULL)
     error (_("No breakpoints specified."));
 
   do_cleanups (cleanups);
@@ -13667,9 +13632,7 @@ make_cleanup_delete_breakpoint (struct breakpoint *b)
 
 static void
 iterate_over_related_breakpoints (struct breakpoint *b,
-				  void (*function) (struct breakpoint *,
-						    void *),
-				  void *data)
+				  gdb::function_view<void (breakpoint *)> function)
 {
   struct breakpoint *related;
 
@@ -13684,7 +13647,7 @@ iterate_over_related_breakpoints (struct breakpoint *b,
       if (next == related)
 	{
 	  /* RELATED is the last ring entry.  */
-	  function (related, data);
+	  function (related);
 
 	  /* FUNCTION may have deleted it, so we'd never reach back to
 	     B.  There's nothing left to do anyway, so just break
@@ -13692,26 +13655,11 @@ iterate_over_related_breakpoints (struct breakpoint *b,
 	  break;
 	}
       else
-	function (related, data);
+	function (related);
 
       related = next;
     }
   while (related != b);
-}
-
-static void
-do_delete_breakpoint (struct breakpoint *b, void *ignore)
-{
-  delete_breakpoint (b);
-}
-
-/* A callback for map_breakpoint_numbers that calls
-   delete_breakpoint.  */
-
-static void
-do_map_delete_breakpoint (struct breakpoint *b, void *ignore)
-{
-  iterate_over_related_breakpoints (b, do_delete_breakpoint, NULL);
 }
 
 void
@@ -13745,7 +13693,11 @@ delete_command (char *arg, int from_tty)
 	}
     }
   else
-    map_breakpoint_numbers (arg, do_map_delete_breakpoint, NULL);
+    map_breakpoint_numbers
+      (arg, [&] (breakpoint *b)
+       {
+	 iterate_over_related_breakpoints (b, delete_breakpoint);
+       });
 }
 
 /* Return true if all locations of B bound to PSPACE are pending.  If
@@ -14463,9 +14415,7 @@ ignore_command (char *args, int from_tty)
 
 static void
 map_breakpoint_numbers (const char *args,
-			void (*function) (struct breakpoint *,
-					  void *),
-			void *data)
+			gdb::function_view<void (breakpoint *)> function)
 {
   int num;
   struct breakpoint *b, *tmp;
@@ -14491,7 +14441,7 @@ map_breakpoint_numbers (const char *args,
 	    if (b->number == num)
 	      {
 		match = true;
-		function (b, data);
+		function (b);
 		break;
 	      }
 	  if (!match)
@@ -14573,23 +14523,6 @@ disable_breakpoint (struct breakpoint *bpt)
   observer_notify_breakpoint_modified (bpt);
 }
 
-/* A callback for iterate_over_related_breakpoints.  */
-
-static void
-do_disable_breakpoint (struct breakpoint *b, void *ignore)
-{
-  disable_breakpoint (b);
-}
-
-/* A callback for map_breakpoint_numbers that calls
-   disable_breakpoint.  */
-
-static void
-do_map_disable_breakpoint (struct breakpoint *b, void *ignore)
-{
-  iterate_over_related_breakpoints (b, do_disable_breakpoint, NULL);
-}
-
 static void
 disable_command (char *args, int from_tty)
 {
@@ -14626,8 +14559,11 @@ disable_command (char *args, int from_tty)
 	      update_global_location_list (UGLL_DONT_INSERT);
 	    }
 	  else
-	    map_breakpoint_numbers (num.c_str (), do_map_disable_breakpoint,
-				    NULL);
+	    map_breakpoint_numbers
+	      (num.c_str (), [&] (breakpoint *b)
+	       {
+		 iterate_over_related_breakpoints (b, disable_breakpoint);
+	       });
 	  num = extract_arg (&args);
 	}
     }
@@ -14703,21 +14639,6 @@ enable_breakpoint (struct breakpoint *bpt)
   enable_breakpoint_disp (bpt, bpt->disposition, 0);
 }
 
-static void
-do_enable_breakpoint (struct breakpoint *bpt, void *arg)
-{
-  enable_breakpoint (bpt);
-}
-
-/* A callback for map_breakpoint_numbers that calls
-   enable_breakpoint.  */
-
-static void
-do_map_enable_breakpoint (struct breakpoint *b, void *ignore)
-{
-  iterate_over_related_breakpoints (b, do_enable_breakpoint, NULL);
-}
-
 /* The enable command enables the specified breakpoints (or all defined
    breakpoints) so they once again become (or continue to be) effective
    in stopping the inferior.  */
@@ -14758,50 +14679,28 @@ enable_command (char *args, int from_tty)
 	      update_global_location_list (UGLL_MAY_INSERT);
 	    }
 	  else
-	    map_breakpoint_numbers (num.c_str (), do_map_enable_breakpoint,
-				    NULL);
+	    map_breakpoint_numbers
+	      (num.c_str (), [&] (breakpoint *b)
+	       {
+		 iterate_over_related_breakpoints (b, enable_breakpoint);
+	       });
 	  num = extract_arg (&args);
 	}
     }
 }
 
-/* This struct packages up disposition data for application to multiple
-   breakpoints.  */
-
-struct disp_data
-{
-  enum bpdisp disp;
-  int count;
-};
-
-static void
-do_enable_breakpoint_disp (struct breakpoint *bpt, void *arg)
-{
-  struct disp_data disp_data = *(struct disp_data *) arg;
-
-  enable_breakpoint_disp (bpt, disp_data.disp, disp_data.count);
-}
-
-static void
-do_map_enable_once_breakpoint (struct breakpoint *bpt, void *ignore)
-{
-  struct disp_data disp = { disp_disable, 1 };
-
-  iterate_over_related_breakpoints (bpt, do_enable_breakpoint_disp, &disp);
-}
-
 static void
 enable_once_command (char *args, int from_tty)
 {
-  map_breakpoint_numbers (args, do_map_enable_once_breakpoint, NULL);
-}
-
-static void
-do_map_enable_count_breakpoint (struct breakpoint *bpt, void *countptr)
-{
-  struct disp_data disp = { disp_disable, *(int *) countptr };
-
-  iterate_over_related_breakpoints (bpt, do_enable_breakpoint_disp, &disp);
+  map_breakpoint_numbers
+    (args, [&] (breakpoint *b)
+     {
+       iterate_over_related_breakpoints
+	 (b, [&] (breakpoint *bpt)
+	  {
+	    enable_breakpoint_disp (bpt, disp_disable, 1);
+	  });
+     });
 }
 
 static void
@@ -14814,21 +14713,29 @@ enable_count_command (char *args, int from_tty)
 
   count = get_number (&args);
 
-  map_breakpoint_numbers (args, do_map_enable_count_breakpoint, &count);
-}
-
-static void
-do_map_enable_delete_breakpoint (struct breakpoint *bpt, void *ignore)
-{
-  struct disp_data disp = { disp_del, 1 };
-
-  iterate_over_related_breakpoints (bpt, do_enable_breakpoint_disp, &disp);
+  map_breakpoint_numbers
+    (args, [&] (breakpoint *b)
+     {
+       iterate_over_related_breakpoints
+	 (b, [&] (breakpoint *bpt)
+	  {
+	    enable_breakpoint_disp (bpt, disp_disable, count);
+	  });
+     });
 }
 
 static void
 enable_delete_command (char *args, int from_tty)
 {
-  map_breakpoint_numbers (args, do_map_enable_delete_breakpoint, NULL);
+  map_breakpoint_numbers
+    (args, [&] (breakpoint *b)
+     {
+       iterate_over_related_breakpoints
+	 (b, [&] (breakpoint *bpt)
+	  {
+	    enable_breakpoint_disp (bpt, disp_del, 1);
+	  });
+     });
 }
 
 static void
@@ -15228,7 +15135,11 @@ delete_trace_command (char *arg, int from_tty)
 	}
     }
   else
-    map_breakpoint_numbers (arg, do_map_delete_breakpoint, NULL);
+    map_breakpoint_numbers
+      (arg, [&] (breakpoint *b)
+       {
+	 iterate_over_related_breakpoints (b, delete_breakpoint);
+       });
 }
 
 /* Helper function for trace_pass_command.  */

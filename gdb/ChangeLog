@@ -1,5 +1,24 @@
 2017-09-20  Tom Tromey  <tom@tromey.com>
 
+	* breakpoint.c (struct commands_info, do_map_commands_command):
+	Remove.
+	(commands_command_1): Update.
+	(iterate_over_related_breakpoints): Take a function_view.
+	(do_delete_breakpoint, do_map_delete_breakpoint): Remove.
+	(delete_command): Update.
+	(map_breakpoint_numbers): Take a function_view.
+	(do_disable_breakpoint, do_map_delete_breakpoint): Remove.
+	(disable_command): Update.
+	(do_enable_breakpoint, do_map_enable_breakpoint): Remove.
+	(enable_command): Update.
+	(struct disp_data, do_enable_breakpoint_disp)
+	(do_map_enable_once_breakpoint, do_map_enable_count_breakpoint)
+	(do_map_enable_delete_breakpoint): Remove.
+	(enable_once_command, enable_count_command, enable_delete_command)
+	(delete_trace_variable_command): Update.
+
+2017-09-20  Tom Tromey  <tom@tromey.com>
+
 	* breakpoint.c (~bpstats): Rename from bpstat_free.  Update.
 	(bpstat_clear): Use delete.
 	(bpstats): New constructors.
