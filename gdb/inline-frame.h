@@ -31,7 +31,7 @@ extern const struct frame_unwind inline_frame_unwind;
    Frames for the hidden functions will not appear in the backtrace until the
    user steps into them.  */
 
-void skip_inline_frames (ptid_t ptid);
+void skip_inline_frames (ptid_t ptid, struct breakpoint *bpt);
 
 /* Forget about any hidden inlined functions in PTID, which is new or
    about to be resumed.  If PTID is minus_one_ptid, forget about all

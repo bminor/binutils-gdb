@@ -301,7 +301,7 @@ block_starting_point_at (CORE_ADDR pc, const struct block *block)
    user steps into them.  */
 
 void
-skip_inline_frames (ptid_t ptid)
+skip_inline_frames (ptid_t ptid, struct breakpoint *bpt)
 {
   CORE_ADDR this_pc;
   const struct block *frame_block, *cur_block;
@@ -327,7 +327,25 @@ skip_inline_frames (ptid_t ptid)
 	      if (BLOCK_START (cur_block) == this_pc
 		  || block_starting_point_at (this_pc, cur_block))
 		{
-		  skip_count++;
+		  bool skip_this_frame = true;
+
+		  if (bpt != NULL
+		      && user_breakpoint_p (bpt)
+		      && breakpoint_address_is_meaningful (bpt))
+		    {
+		      for (bp_location *loc = bpt->loc; loc != NULL;
+			   loc = loc->next)
+			{
+			  if (loc->address == this_pc)
+			    {
+			      skip_this_frame = false;
+			      break;
+			    }
+			}
+		    }
+
+		  if (skip_this_frame)
+		    skip_count++;
 		  last_sym = BLOCK_FUNCTION (cur_block);
 		}
 	      else
