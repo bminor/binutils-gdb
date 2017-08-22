@@ -121,7 +121,7 @@ extern void default_print_float_info (struct gdbarch *gdbarch,
 
 extern void child_terminal_info (struct target_ops *self, const char *, int);
 
-extern void term_info (char *, int);
+extern void info_terminal_command (char *, int);
 
 extern void child_terminal_ours (struct target_ops *self);
 

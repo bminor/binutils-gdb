@@ -1396,7 +1396,7 @@ parse_frame_specification (const char *frame_exp, int *selected_frame_p)
    ADDR_EXP.  Absolutely all information in the frame is printed.  */
 
 static void
-frame_info (char *addr_exp, int from_tty)
+info_frame_command (char *addr_exp, int from_tty)
 {
   struct frame_info *fi;
   struct symtab_and_line sal;
@@ -2132,7 +2132,7 @@ print_frame_local_vars (struct frame_info *frame, int num_tabs,
 }
 
 void
-locals_info (char *args, int from_tty)
+info_locals_command (char *args, int from_tty)
 {
   print_frame_local_vars (get_selected_frame (_("No frame selected.")),
 			  0, gdb_stdout);
@@ -2214,7 +2214,7 @@ print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
 }
 
 void
-args_info (char *ignore, int from_tty)
+info_args_command (char *ignore, int from_tty)
 {
   print_frame_arg_vars (get_selected_frame (_("No frame selected.")),
 			gdb_stdout);
@@ -2630,12 +2630,12 @@ on this backtrace.\n"));
   add_info ("stack", backtrace_command,
 	    _("Backtrace of the stack, or innermost COUNT frames."));
   add_info_alias ("s", "stack", 1);
-  add_info ("frame", frame_info,
+  add_info ("frame", info_frame_command,
 	    _("All about selected stack frame, or frame at ADDR."));
   add_info_alias ("f", "frame", 1);
-  add_info ("locals", locals_info,
+  add_info ("locals", info_locals_command,
 	    _("Local variables of current stack frame."));
-  add_info ("args", args_info,
+  add_info ("args", info_args_command,
 	    _("Argument variables of current stack frame."));
 
   if (dbx_commands)

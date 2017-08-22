@@ -307,7 +307,7 @@ bookmark_1 (int bnum)
 /* Implement "info bookmarks" command.  */
 
 static void
-bookmarks_info (char *args, int from_tty)
+info_bookmarks_command (char *args, int from_tty)
 {
   if (!bookmark_chain)
     printf_filtered (_("No bookmarks.\n"));
@@ -371,7 +371,7 @@ Execute backward until just before selected stack frame is called."));
 Set a bookmark in the program's execution history.\n\
 A bookmark represents a point in the execution history \n\
 that can be returned to at a later point in the debug session."));
-  add_info ("bookmarks", bookmarks_info, _("\
+  add_info ("bookmarks", info_bookmarks_command, _("\
 Status of user-settable bookmarks.\n\
 Bookmarks are user-settable markers representing a point in the \n\
 execution history that can be returned to later in the same debug \n\

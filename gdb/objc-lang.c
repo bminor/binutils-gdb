@@ -559,7 +559,7 @@ compare_selectors (const void *a, const void *b)
  */
 
 static void
-selectors_info (char *regexp, int from_tty)
+info_selectors_command (char *regexp, int from_tty)
 {
   struct objfile	*objfile;
   struct minimal_symbol *msymbol;
@@ -721,7 +721,7 @@ compare_classes (const void *a, const void *b)
  */
 
 static void
-classes_info (char *regexp, int from_tty)
+info_classes_command (char *regexp, int from_tty)
 {
   struct objfile	*objfile;
   struct minimal_symbol *msymbol;
@@ -1377,9 +1377,9 @@ extern initialize_file_ftype _initialize_objc_language;
 void
 _initialize_objc_language (void)
 {
-  add_info ("selectors", selectors_info,    /* INFO SELECTORS command.  */
+  add_info ("selectors", info_selectors_command,
 	    _("All Objective-C selectors, or those matching REGEXP."));
-  add_info ("classes", classes_info, 	    /* INFO CLASSES   command.  */
+  add_info ("classes", info_classes_command,
 	    _("All Objective-C classes, or those matching REGEXP."));
   add_com ("print-object", class_vars, print_object_command, 
 	   _("Ask an Objective-C object to print itself."));

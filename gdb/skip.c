@@ -353,7 +353,7 @@ skip_command (char *arg, int from_tty)
 }
 
 static void
-skip_info (char *arg, int from_tty)
+info_skip_command (char *arg, int from_tty)
 {
   int num_printable_entries = 0;
   struct value_print_options opts;
@@ -659,7 +659,7 @@ If you don't specify any numbers or ranges, we'll delete all skip entries.\n\n\
 Usage: skip delete [NUMBERS AND/OR RANGES]"),
            &skiplist);
 
-  add_info ("skip", skip_info, _("\
+  add_info ("skip", info_skip_command, _("\
 Display the status of skips.  You can specify numbers (e.g. \"skip info 1 3\"), \
 ranges (e.g. \"skip info 4-8\"), or both (e.g. \"skip info 1 3 4-8\").\n\n\
 If you don't specify any numbers or ranges, we'll show all skips.\n\n\

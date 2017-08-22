@@ -1290,7 +1290,7 @@ set_command (char *exp, int from_tty)
 }
 
 static void
-sym_info (char *arg, int from_tty)
+info_symbol_command (char *arg, int from_tty)
 {
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
@@ -1383,7 +1383,7 @@ sym_info (char *arg, int from_tty)
 }
 
 static void
-address_info (char *exp, int from_tty)
+info_address_command (char *exp, int from_tty)
 {
   struct gdbarch *gdbarch;
   int regno;
@@ -2050,7 +2050,7 @@ disable_current_display (void)
 }
 
 static void
-display_info (char *ignore, int from_tty)
+info_display_command (char *ignore, int from_tty)
 {
   struct display *d;
 
@@ -2673,10 +2673,10 @@ _initialize_printcmd (void)
 
   observer_attach_free_objfile (clear_dangling_display_expressions);
 
-  add_info ("address", address_info,
+  add_info ("address", info_address_command,
 	    _("Describe where symbol SYM is stored."));
 
-  add_info ("symbol", sym_info, _("\
+  add_info ("symbol", info_symbol_command, _("\
 Describe what symbol is at location ADDR.\n\
 Only for symbols with fixed locations (global or static scope)."));
 
@@ -2700,7 +2700,7 @@ with this command or \"print\"."));
 	   _("Print line number and file of definition of variable."));
 #endif
 
-  add_info ("display", display_info, _("\
+  add_info ("display", info_display_command, _("\
 Expressions to display when program stops, with code numbers."));
 
   add_cmd ("undisplay", class_vars, undisplay_command, _("\
