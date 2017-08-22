@@ -1,3 +1,8 @@
+2017-08-22  Pedro Alves  <palves@redhat.com>
+
+	* gdb.cp/overload.exp (line_range_pattern): New procedure.
+	(top level): Add "list all overloads" tests.
+
 2017-08-22  Tom Tromey  <tom@tromey.com>
 
 	* gdb.gdb/xfullpath.exp: Remove.
