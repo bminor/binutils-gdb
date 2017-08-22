@@ -1919,16 +1919,20 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
   return _bfd_elf_adjust_dynamic_copy (info, eh, sec);
 }
 
-/* Make an undefined weak symbol dynamic.  */
+/* If EH is undefined, make it dynamic if that makes sense.  */
 
 static bfd_boolean
-ensure_undef_weak_dynamic (struct bfd_link_info *info,
-			   struct elf_link_hash_entry *eh)
+ensure_undef_dynamic (struct bfd_link_info *info,
+		      struct elf_link_hash_entry *eh)
 {
-  if (eh->dynindx == -1
+  struct elf_link_hash_table *htab = elf_hash_table (info);
+
+  if (htab->dynamic_sections_created
+      && (eh->root.type == bfd_link_hash_undefweak
+	  || eh->root.type == bfd_link_hash_undefined)
+      && eh->dynindx == -1
       && !eh->forced_local
       && eh->type != STT_PARISC_MILLI
-      && eh->root.type == bfd_link_hash_undefweak
       && ELF_ST_VISIBILITY (eh->other) == STV_DEFAULT)
     return bfd_elf_link_record_dynamic_symbol (info, eh);
   return TRUE;
@@ -1957,7 +1961,7 @@ allocate_plt_static (struct elf_link_hash_entry *eh, void *inf)
   if (htab->etab.dynamic_sections_created
       && eh->plt.refcount > 0)
     {
-      if (!ensure_undef_weak_dynamic (info, eh))
+      if (!ensure_undef_dynamic (info, eh))
 	return FALSE;
 
       if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, bfd_link_pic (info), eh))
@@ -2034,7 +2038,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 
   if (eh->got.refcount > 0)
     {
-      if (!ensure_undef_weak_dynamic (info, eh))
+      if (!ensure_undef_dynamic (info, eh))
 	return FALSE;
 
       sec = htab->etab.sgot;
@@ -2070,8 +2074,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
      changes.  */
   if (bfd_link_pic (info))
     {
+      /* Discard relocs on undefined syms with non-default visibility.  */
+      if ((eh->root.type == bfd_link_hash_undefined
+	   || eh->root.type == bfd_link_hash_undefweak)
+	  && ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT)
+	hh->dyn_relocs = NULL;
+
 #if RELATIVE_DYNRELOCS
-      if (SYMBOL_CALLS_LOCAL (info, eh))
+      else if (SYMBOL_CALLS_LOCAL (info, eh))
 	{
 	  struct elf32_hppa_dyn_reloc_entry **hdh_pp;
 
@@ -2087,15 +2097,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 	}
 #endif
 
-      /* Also discard relocs on undefined weak syms with non-default
-	 visibility.  */
-      if (hh->dyn_relocs != NULL
-	  && eh->root.type == bfd_link_hash_undefweak)
+      if (hh->dyn_relocs != NULL)
 	{
-	  if (ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT)
-	    hh->dyn_relocs = NULL;
-
-	  else if (!ensure_undef_weak_dynamic (info, eh))
+	  if (!ensure_undef_dynamic (info, eh))
 	    return FALSE;
 	}
     }
@@ -2113,19 +2117,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 		   && (eh->root.type == bfd_link_hash_undefweak
 		       || eh->root.type == bfd_link_hash_undefined))))
 	{
-	  if (!ensure_undef_weak_dynamic (info, eh))
+	  if (!ensure_undef_dynamic (info, eh))
 	    return FALSE;
 
-	  /* If that succeeded, we know we'll be keeping all the
-	     relocs.  */
-	  if (eh->dynindx != -1)
-	    goto keep;
+	  if (eh->dynindx == -1)
+	    hh->dyn_relocs = NULL;
 	}
-
-      hh->dyn_relocs = NULL;
-      return TRUE;
-
-    keep: ;
+      else
+	hh->dyn_relocs = NULL;
     }
 
   /* Finally, allocate space.  */
