@@ -1,3 +1,3 @@
 #name: Test LSP operands checks
-#as: -mvle
+#as: -a32 -mvle
 #error-output: lsp-checks.l

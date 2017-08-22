@@ -1,4 +1,4 @@
-#as: -mvle
+#as: -a32 -mvle
 #objdump: -d -Mvle
 #name: Validate LSP instructions
 

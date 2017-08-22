@@ -1,3 +1,8 @@
+2017-08-22  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/lsp-checks.d: Assemble with -a32.
+	* testsuite/gas/ppc/lsp.d: Likewise.
+
 2017-08-21  Alexander Fedotov <alexander.fedotov@nxp.com>
 	    Edmar Wienskoski <edmar.wienskoski@nxp.com
 
