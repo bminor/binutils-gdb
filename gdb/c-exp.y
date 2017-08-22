@@ -1038,18 +1038,38 @@ variable:	name_not_typename
 			    }
 			  else
 			    {
-			      struct bound_minimal_symbol msymbol;
 			      char *arg = copy_name ($1.stoken);
 
-			      msymbol =
-				lookup_bound_minimal_symbol (arg);
-			      if (msymbol.minsym != NULL)
-				write_exp_msymbol (pstate, msymbol);
-			      else if (!have_full_symbols () && !have_partial_symbols ())
-				error (_("No symbol table is loaded.  Use the \"file\" command."));
+			      bound_minimal_symbol msymbol
+				= lookup_bound_minimal_symbol (arg);
+			      if (msymbol.minsym == NULL)
+				{
+				  if (!have_full_symbols () && !have_partial_symbols ())
+				    error (_("No symbol table is loaded.  Use the \"file\" command."));
+				  else
+				    error (_("No symbol \"%s\" in current context."),
+					   copy_name ($1.stoken));
+				}
+
+			      /* This minsym might be an alias for
+				 another function.  See if we can find
+				 the debug symbol for the target, and
+				 if so, use it instead, since it has
+				 return type / prototype info.  This
+				 is important for example for "p
+				 *__errno_location()".  */
+			      symbol *alias_target
+				= find_function_alias_target (msymbol);
+			      if (alias_target != NULL)
+				{
+				  write_exp_elt_opcode (pstate, OP_VAR_VALUE);
+				  write_exp_elt_block
+				    (pstate, SYMBOL_BLOCK_VALUE (alias_target));
+				  write_exp_elt_sym (pstate, alias_target);
+				  write_exp_elt_opcode (pstate, OP_VAR_VALUE);
+				}
 			      else
-				error (_("No symbol \"%s\" in current context."),
-				       copy_name ($1.stoken));
+				write_exp_msymbol (pstate, msymbol);
 			    }
 			}
 	;

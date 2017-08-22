@@ -370,14 +370,13 @@ static void
 create_syscall_event_catchpoint (int tempflag, std::vector<int> &&filter,
                                  const struct breakpoint_ops *ops)
 {
-  struct syscall_catchpoint *c;
   struct gdbarch *gdbarch = get_current_arch ();
 
-  c = new syscall_catchpoint ();
-  init_catchpoint (c, gdbarch, tempflag, NULL, ops);
+  std::unique_ptr<syscall_catchpoint> c (new syscall_catchpoint ());
+  init_catchpoint (c.get (), gdbarch, tempflag, NULL, ops);
   c->syscalls_to_be_caught = std::move (filter);
 
-  install_breakpoint (0, c, 1);
+  install_breakpoint (0, std::move (c), 1);
 }
 
 /* Splits the argument using space as delimiter.  */

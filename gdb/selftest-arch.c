@@ -23,15 +23,23 @@
 #include "selftest-arch.h"
 #include "arch-utils.h"
 
+namespace selftests {
+
 static std::vector<self_test_foreach_arch_function *> gdbarch_tests;
 
 void
-register_self_test_foreach_arch (self_test_foreach_arch_function *function)
+register_test_foreach_arch (self_test_foreach_arch_function *function)
 {
   gdbarch_tests.push_back (function);
 }
 
-namespace selftests {
+void
+reset ()
+{
+  /* Clear GDB internal state.  */
+  registers_changed ();
+  reinit_frame_cache ();
+}
 
 static void
 tests_with_arch ()
@@ -82,9 +90,7 @@ tests_with_arch ()
 	    }
 	  END_CATCH
 
-	  /* Clear GDB internal state.  */
-	  registers_changed ();
-	  reinit_frame_cache ();
+	  reset ();
 	}
     }
 
@@ -101,6 +107,6 @@ void
 _initialize_selftests_foreach_arch ()
 {
 #if GDB_SELF_TEST
-  register_self_test (selftests::tests_with_arch);
+  selftests::register_test (selftests::tests_with_arch);
 #endif
 }

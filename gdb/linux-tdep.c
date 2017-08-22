@@ -1649,14 +1649,15 @@ linux_collect_thread_registers (const struct regcache *regcache,
   return data.note_data;
 }
 
-/* Fetch the siginfo data for the current thread, if it exists.  If
+/* Fetch the siginfo data for the specified thread, if it exists.  If
    there is no data, or we could not read it, return NULL.  Otherwise,
    return a newly malloc'd buffer holding the data and fill in *SIZE
    with the size of the data.  The caller is responsible for freeing
    the data.  */
 
 static gdb_byte *
-linux_get_siginfo_data (struct gdbarch *gdbarch, LONGEST *size)
+linux_get_siginfo_data (thread_info *thread, struct gdbarch *gdbarch,
+			LONGEST *size)
 {
   struct type *siginfo_type;
   gdb_byte *buf;
@@ -1666,6 +1667,9 @@ linux_get_siginfo_data (struct gdbarch *gdbarch, LONGEST *size)
   if (!gdbarch_get_siginfo_type_p (gdbarch))
     return NULL;
   
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
+  inferior_ptid = thread->ptid;
+
   siginfo_type = gdbarch_get_siginfo_type (gdbarch);
 
   buf = (gdb_byte *) xmalloc (TYPE_LENGTH (siginfo_type));
@@ -1710,11 +1714,8 @@ linux_corefile_thread (struct thread_info *info,
 
   regcache = get_thread_arch_regcache (info->ptid, args->gdbarch);
 
-  old_chain = save_inferior_ptid ();
-  inferior_ptid = info->ptid;
   target_fetch_registers (regcache, -1);
-  siginfo_data = linux_get_siginfo_data (args->gdbarch, &siginfo_size);
-  do_cleanups (old_chain);
+  siginfo_data = linux_get_siginfo_data (info, args->gdbarch, &siginfo_size);
 
   old_chain = make_cleanup (xfree, siginfo_data);
 

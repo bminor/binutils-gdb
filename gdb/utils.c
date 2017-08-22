@@ -66,6 +66,7 @@
 #include "interps.h"
 #include "gdb_regex.h"
 #include "job-control.h"
+#include "common/selftest.h"
 
 #if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* ARI: PTR */
@@ -2662,7 +2663,7 @@ string_to_core_addr (const char *my_string)
   return addr;
 }
 
-char *
+gdb::unique_xmalloc_ptr<char>
 gdb_realpath (const char *filename)
 {
 /* On most hosts, we rely on canonicalize_file_name to compute
@@ -2698,36 +2699,71 @@ gdb_realpath (const char *filename)
        we might not be able to display the original casing in a given
        path.  */
     if (len > 0 && len < MAX_PATH)
-      return xstrdup (buf);
+      return gdb::unique_xmalloc_ptr<char> (xstrdup (buf));
   }
 #else
   {
     char *rp = canonicalize_file_name (filename);
 
     if (rp != NULL)
-      return rp;
+      return gdb::unique_xmalloc_ptr<char> (rp);
   }
 #endif
 
   /* This system is a lost cause, just dup the buffer.  */
-  return xstrdup (filename);
+  return gdb::unique_xmalloc_ptr<char> (xstrdup (filename));
 }
+
+#if GDB_SELF_TEST
+
+static void
+gdb_realpath_check_trailer (const char *input, const char *trailer)
+{
+  gdb::unique_xmalloc_ptr<char> result = gdb_realpath (input);
+
+  size_t len = strlen (result.get ());
+  size_t trail_len = strlen (trailer);
+
+  SELF_CHECK (len >= trail_len
+	      && strcmp (result.get () + len - trail_len, trailer) == 0);
+}
+
+static void
+gdb_realpath_tests ()
+{
+  /* A file which contains a directory prefix.  */
+  gdb_realpath_check_trailer ("./xfullpath.exp", "/xfullpath.exp");
+  /* A file which contains a directory prefix.  */
+  gdb_realpath_check_trailer ("../../defs.h", "/defs.h");
+  /* A one-character filename.  */
+  gdb_realpath_check_trailer ("./a", "/a");
+  /* A file in the root directory.  */
+  gdb_realpath_check_trailer ("/root_file_which_should_exist",
+			      "/root_file_which_should_exist");
+  /* A file which does not have a directory prefix.  */
+  gdb_realpath_check_trailer ("xfullpath.exp", "xfullpath.exp");
+  /* A one-char filename without any directory prefix.  */
+  gdb_realpath_check_trailer ("a", "a");
+  /* An empty filename.  */
+  gdb_realpath_check_trailer ("", "");
+}
+
+#endif /* GDB_SELF_TEST */
 
 /* Return a copy of FILENAME, with its directory prefix canonicalized
    by gdb_realpath.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 gdb_realpath_keepfile (const char *filename)
 {
   const char *base_name = lbasename (filename);
   char *dir_name;
-  char *real_path;
   char *result;
 
   /* Extract the basename of filename, and return immediately 
      a copy of filename if it does not contain any directory prefix.  */
   if (base_name == filename)
-    return xstrdup (filename);
+    return gdb::unique_xmalloc_ptr<char> (xstrdup (filename));
 
   dir_name = (char *) alloca ((size_t) (base_name - filename + 2));
   /* Allocate enough space to store the dir_name + plus one extra
@@ -2749,40 +2785,37 @@ gdb_realpath_keepfile (const char *filename)
   /* Canonicalize the directory prefix, and build the resulting
      filename.  If the dirname realpath already contains an ending
      directory separator, avoid doubling it.  */
-  real_path = gdb_realpath (dir_name);
+  gdb::unique_xmalloc_ptr<char> path_storage = gdb_realpath (dir_name);
+  const char *real_path = path_storage.get ();
   if (IS_DIR_SEPARATOR (real_path[strlen (real_path) - 1]))
     result = concat (real_path, base_name, (char *) NULL);
   else
     result = concat (real_path, SLASH_STRING, base_name, (char *) NULL);
 
-  xfree (real_path);
-  return result;
+  return gdb::unique_xmalloc_ptr<char> (result);
 }
 
 /* Return PATH in absolute form, performing tilde-expansion if necessary.
    PATH cannot be NULL or the empty string.
-   This does not resolve symlinks however, use gdb_realpath for that.
-   Space for the result is allocated with malloc.
-   If the path is already absolute, it is strdup'd.
-   If there is a problem computing the absolute path, the path is returned
-   unchanged (still strdup'd).  */
+   This does not resolve symlinks however, use gdb_realpath for that.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 gdb_abspath (const char *path)
 {
   gdb_assert (path != NULL && path[0] != '\0');
 
   if (path[0] == '~')
-    return tilde_expand (path);
+    return gdb::unique_xmalloc_ptr<char> (tilde_expand (path));
 
   if (IS_ABSOLUTE_PATH (path))
-    return xstrdup (path);
+    return gdb::unique_xmalloc_ptr<char> (xstrdup (path));
 
   /* Beware the // my son, the Emacs barfs, the botch that catch...  */
-  return concat (current_directory,
-	    IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
-		 ? "" : SLASH_STRING,
-		 path, (char *) NULL);
+  return gdb::unique_xmalloc_ptr<char>
+    (concat (current_directory,
+	     IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
+	     ? "" : SLASH_STRING,
+	     path, (char *) NULL));
 }
 
 ULONGEST
@@ -3286,4 +3319,8 @@ _initialize_utils (void)
   add_internal_problem_command (&internal_error_problem);
   add_internal_problem_command (&internal_warning_problem);
   add_internal_problem_command (&demangler_warning_problem);
+
+#if GDB_SELF_TEST
+  selftests::register_test (gdb_realpath_tests);
+#endif
 }

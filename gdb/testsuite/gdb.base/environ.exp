@@ -46,6 +46,9 @@ gdb_test "unset environment" "" "unset all environment variables" \
     "Delete all environment variables. .y or n. $" \
     "y"
 
+gdb_test_no_output "show environment" \
+    "all environment variables have been unset"
+
 # Verify that we can set a specific environment variable.
 test_set_show_env_var "EDITOR" "emacs" "set environment variable"
 

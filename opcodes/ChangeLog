@@ -1,3 +1,41 @@
+2017-08-22  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* riscv-opc.c (riscv_opcodes): Mark "c.nop" as an alias.
+
+2017-08-21  Alexander Fedotov <alexander.fedotov@nxp.com>
+	    Edmar Wienskoski <edmar.wienskoski@nxp.com>
+
+	* ppc-opc.c (insert_evuimm2_ex0): New function.
+	(extract_evuimm2_ex0): Likewise.
+	(insert_evuimm4_ex0): Likewise.
+	(extract_evuimm4_ex0): Likewise.
+	(insert_evuimm8_ex0): Likewise.
+	(extract_evuimm8_ex0): Likewise.
+	(insert_evuimm_lt16): Likewise.
+	(extract_evuimm_lt16): Likewise.
+	(insert_rD_rS_even): Likewise.
+	(extract_rD_rS_even): Likewise.
+	(insert_off_lsp): Likewise.
+	(extract_off_lsp): Likewise.
+	(RD_EVEN): New operand.
+	(RS_EVEN): Likewise.
+	(RSQ): Adjust.
+	(EVUIMM_LT16): New operand.
+	(HTM_SI): Adjust.
+	(EVUIMM_2_EX0): New operand.
+	(EVUIMM_4): Adjust.
+	(EVUIMM_4_EX0): New operand.
+	(EVUIMM_8): Adjust.
+	(EVUIMM_8_EX0): New operand.
+	(WS): Adjust.
+	(VX_OFF): New operand.
+	(VX_LSP): New macro.
+	(VX_LSP_MASK): Likewise.
+	(VX_LSP_OFF_MASK): Likewise.
+	(PPC_OPCODE_LSP): Likewise.
+	(vle_opcodes): Add LSP opcodes.
+	* ppc-dis.c (ppc_mopt): Add PPC_OPCODE_LSP flag to "vle" entry.
+
 2017-08-09  Jiong Wang  <jiong.wang@arm.com>
 
 	* arm-dis.c (thumb32_opcodes): Use format 'R' instead of 'S' for

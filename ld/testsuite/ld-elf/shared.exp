@@ -423,6 +423,18 @@ set build_tests {
   {"Build libpr19073.so"
    "-shared -Wl,--version-script=pr19073.map tmpdir/pr19073a.o" "-fPIC"
    {dummy.c} {{readelf {--dyn-syms --wide} pr19073.rd}} "libpr19073.so"}
+  {"Build pr21964-1a.so"
+   "-shared" "-fPIC"
+   {pr21964-1a.c} {} "pr21964-1a.so"}
+  {"Build pr21964-1b.so"
+   "-shared" "-fPIC"
+   {pr21964-1b.c} {} "pr21964-1b.so"}
+  {"Build pr21964-2a.so"
+   "-shared" "-fPIC"
+   {pr21964-2a.c} {} "pr21964-2a.so"}
+  {"Build pr21964-2b.so"
+   "-shared" "-fPIC"
+   {pr21964-2b.c} {} "pr21964-2b.so"}
 }
 
 run_cc_link_tests $build_tests
@@ -540,6 +552,9 @@ set run_tests [list \
     [list "Run pr18458" \
      "-Wl,--no-as-needed,-z,now tmpdir/libpr18458a.so tmpdir/libpr18458b.so" "" \
      {pr18458c.c} "pr18458" "pass.out" ] \
+    [list "Run pr21964-1" \
+     "-Wl,--no-as-needed,-rpath,tmpdir tmpdir/pr21964-1a.so tmpdir/pr21964-1b.so" "" \
+     {pr21964-1c.c} "pr21964-1" "pass.out" ] \
 ]
 
 # NetBSD ELF systems do not currently support the .*_array sections.
@@ -586,6 +601,9 @@ set dlopen_run_tests [list \
     [list "Run dl6d1 with --dynamic-list-data and dlopen on libdl6d.so" \
      "-Wl,--no-as-needed,--dynamic-list-data $extralibs" "" \
      {dl6dmain.c} "dl6d1" "dl6b.out" ] \
+    [list "Run pr21964-2" \
+     "-Wl,--no-as-needed,-rpath,tmpdir tmpdir/pr21964-2a.so $extralibs" "" \
+     {pr21964-2c.c} "pr21964-2" "pass.out" ] \
 ]
 
 # Only run them when libdl is available.

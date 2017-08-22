@@ -1,3 +1,48 @@
+2017-08-22  Pedro Alves  <palves@redhat.com>
+
+	* gdb.cp/overload.exp (line_range_pattern): New procedure.
+	(top level): Add "list all overloads" tests.
+
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
+	* gdb.gdb/xfullpath.exp: Remove.
+
+2017-08-21  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19487
+	* gdb.base/symbol-alias.c: New.
+	* gdb.base/symbol-alias2.c: New.
+	* gdb.base/symbol-alias.exp: New.
+
+2017-08-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/dfp-test.c
+	(d32_t, d64_t, d128_t, d32_t2, d64_t2, d128_t2, v_d32_t, v_d64_t)
+	(v_d128_t, v_d32_t2, v_d64_t2, v_d128_t2): New.
+	* gdb.base/dfp-test.exp: Add whatis/ptype/cast tests.
+	* gdb.base/gnu_vector.exp: Add whatis/ptype/cast tests.
+	* gdb.base/whatis-ptype-typedefs.c: New.
+	* gdb.base/whatis-ptype-typedefs.exp: New.
+	* gdb.python/py-prettyprint.c (int_type, int_type2): New typedefs.
+	(an_int, an_int_type, an_int_type2): New globals.
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Add tests
+	involving typedefs and cast expressions.
+	* gdb.python/py-prettyprint.py (class pp_int_typedef): New.
+	(lookup_typedefs_function): New.
+	(typedefs_pretty_printers_dict): New.
+	(top level): Register lookup_typedefs_function in
+	gdb.pretty_printers.
+
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.server/unittest.exp: New.
+
+2017-08-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21954
+	* gdb.base/environ.exp: Add test to check if 'unset environment'
+	works.
+
 2017-08-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* lib/gdb.exp (universal_compile_options): New caching proc.

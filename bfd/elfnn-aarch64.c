@@ -4981,9 +4981,27 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       const char *name;
       bfd_vma addend = 0;
 
-      if ((input_section->flags & SEC_ALLOC) == 0
-	  || h->plt.offset == (bfd_vma) -1)
-	abort ();
+      if ((input_section->flags & SEC_ALLOC) == 0)
+	{
+	  /* Dynamic relocs are not propagated for SEC_DEBUGGING
+	     sections because such sections are not SEC_ALLOC and
+	     thus ld.so will not process them.  */
+	  if ((input_section->flags & SEC_DEBUGGING) != 0)
+	    return bfd_reloc_ok;
+
+	  if (h->root.root.string)
+	    name = h->root.root.string;
+	  else
+	    name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym, NULL);
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	     input_bfd, input_section, rel->r_offset, howto->name, name);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+      else if (h->plt.offset == (bfd_vma) -1)
+	goto bad_ifunc_reloc;
 
       /* STT_GNU_IFUNC symbol must go through PLT.  */
       plt = globals->root.splt ? globals->root.splt : globals->root.iplt;
@@ -4992,6 +5010,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       switch (bfd_r_type)
 	{
 	default:
+bad_ifunc_reloc:
 	  if (h->root.root.string)
 	    name = h->root.root.string;
 	  else

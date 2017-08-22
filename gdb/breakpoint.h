@@ -1296,7 +1296,7 @@ extern void init_catchpoint (struct breakpoint *b,
    the internal breakpoint count.  If UPDATE_GLL is non-zero,
    update_global_location_list will be called.  */
 
-extern void install_breakpoint (int internal, struct breakpoint *b,
+extern void install_breakpoint (int internal, std::unique_ptr<breakpoint> &&b,
 				int update_gll);
 
 /* Flags that can be passed down to create_breakpoint, etc., to affect

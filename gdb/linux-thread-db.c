@@ -695,7 +695,7 @@ try_thread_db_load (const char *library, int check_auto_load_safe)
 
   /* Do not save system library name, that one is always trusted.  */
   if (strchr (library, '/') != NULL)
-    info->filename = gdb_realpath (library);
+    info->filename = gdb_realpath (library).release ();
 
   if (try_thread_db_load_1 (info))
     return 1;

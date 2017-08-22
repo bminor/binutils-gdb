@@ -12296,7 +12296,8 @@ is_64bit_abs_reloc (unsigned int reloc_type)
     case EM_SPARC32PLUS:
     case EM_SPARCV9:
     case EM_SPARC:
-      return reloc_type == 54; /* R_SPARC_UA64.  */
+      return reloc_type == 32 /* R_SPARC_64.  */
+	|| reloc_type == 54; /* R_SPARC_UA64.  */
     case EM_X86_64:
     case EM_L1OM:
     case EM_K1OM:
@@ -16137,6 +16138,32 @@ get_note_type (unsigned e_type)
 	return _("NT_PPC_VMX (ppc Altivec registers)");
       case NT_PPC_VSX:
 	return _("NT_PPC_VSX (ppc VSX registers)");
+      case NT_PPC_TAR:
+	return _("NT_PPC_TAR (ppc TAR register)");
+      case NT_PPC_PPR:
+	return _("NT_PPC_PPR (ppc PPR register)");
+      case NT_PPC_DSCR:
+	return _("NT_PPC_DSCR (ppc DSCR register)");
+      case NT_PPC_EBB:
+	return _("NT_PPC_EBB (ppc EBB registers)");
+      case NT_PPC_PMU:
+	return _("NT_PPC_PMU (ppc PMU registers)");
+      case NT_PPC_TM_CGPR:
+	return _("NT_PPC_TM_CGPR (ppc checkpointed GPR registers)");
+      case NT_PPC_TM_CFPR:
+	return _("NT_PPC_TM_CFPR (ppc checkpointed floating point registers)");
+      case NT_PPC_TM_CVMX:
+	return _("NT_PPC_TM_CVMX (ppc checkpointed Altivec registers)");
+      case NT_PPC_TM_CVSX:
+	return _("NT_PPC_TM_VSX (ppc checkpointed VSX registers)");
+      case NT_PPC_TM_SPR:
+	return _("NT_PPC_TM_SPR (ppc TM special purpose registers)");
+      case NT_PPC_TM_CTAR:
+	return _("NT_PPC_TM_CTAR (ppc checkpointed TAR register)");
+      case NT_PPC_TM_CPPR:
+	return _("NT_PPC_TM_CPPR (ppc checkpointed PPR register)");
+      case NT_PPC_TM_CDSCR:
+	return _("NT_PPC_TM_CDSCR (ppc checkpointed DSCR register)");
       case NT_386_TLS:
 	return _("NT_386_TLS (x86 TLS information)");
       case NT_386_IOPERM:

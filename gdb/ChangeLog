@@ -1,3 +1,234 @@
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
+	* breakpoint.h (install_breakpoint): Update.
+	* breakpoint.c (add_solib_catchpoint): Update.
+	(install_breakpoint): Change argument to a std::unique_ptr.
+	(create_fork_vfork_event_catchpoint): Use std::unique_ptr.
+	(create_breakpoint_sal, create_breakpoint): Update.
+	(watch_command_1, catch_exec_command_1)
+	(strace_marker_create_breakpoints_sal): Use std::unique_ptr.
+	(add_to_breakpoint_chain): Change argument to a std::unique_ptr.
+	Return the breakpoint.
+	(set_raw_breakpoint_without_location, set_raw_breakpoint)
+	(new_single_step_breakpoint): Update.
+	* break-catch-throw.c (handle_gnu_v3_exceptions): Use
+	std::unique_ptr.
+	* break-catch-syscall.c (create_syscall_event_catchpoint): Use
+	std::unique_ptr.
+	* break-catch-sig.c (create_signal_catchpoint): Use
+	std::unique_ptr.
+	* ada-lang.c (create_ada_exception_catchpoint): Use
+	std::unique_ptr.
+
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
+	* breakpoint.c (add_solib_catchpoint): Use std::unique_ptr.
+
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
+	* psymtab.c (psymtab_search_name): Return a unique_xmalloc_ptr.
+	(lookup_partial_symbol): Update.
+
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
+	* source.h (rewrite_source_path): Return a unique_xmalloc_ptr.
+	* source.c (rewrite_source_path): Return a unique_xmalloc_ptr.
+	(find_and_open_source, symtab_to_fullname): Update.
+	* psymtab.c (psymtab_to_fullname): Update.
+
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
+	* exec.c (exec_file_attach): Update.
+	* linux-thread-db.c (try_thread_db_load): Update.
+	* guile/scm-safe-call.c (gdbscm_safe_source_script): Update.
+	* utils.c (gdb_realpath): Change return type.
+	(gdb_realpath_keepfile): Update.
+	(gdb_realpath_check_trailer, gdb_realpath_tests): New functions.
+	(_initialize_utils): Register the new self test.
+	* source.c (openp): Update.
+	(find_and_open_source): Update.
+	* nto-tdep.c (nto_find_and_open_solib): Update.
+	* main.c (set_gdb_data_directory): Update.
+	(captured_main_1): Update.
+	* dwarf2read.c (dwarf2_get_dwz_file): Update
+	(dw2_map_symbol_filenames): Update.
+	* auto-load.c (auto_load_safe_path_vec_update): Update.
+	(filename_is_in_auto_load_safe_path_vec): Change type of
+	"filename_realp".
+	(auto_load_objfile_script): Update.
+	(file_is_auto_load_safe): Update.  Use std::string.
+	* utils.h (gdb_realpath): Return a gdb::unique_xmalloc_ptr.
+
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
+	* utils.c (gdb_realpath_keepfile): Return a
+	gdb::unique_xmalloc_ptr.
+	* exec.c (exec_file_attach): Update.
+	* utils.h (gdb_realpath_keepfile): Return a
+	gdb::unique_xmalloc_ptr.
+
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile.c (compile_file_command): Use
+	gdb::unique_xmalloc_ptr, std::string.
+	* utils.c (gdb_abspath): Change return type.
+	* source.c (openp): Update.
+	* objfiles.c (allocate_objfile): Update.
+	* main.c (set_gdb_data_directory): Update.
+	* utils.h (gdb_abspath): Return a gdb::unique_xmalloc_ptr.
+
+2017-08-22  Zhouyi Zhou  <zhouzhouyi@gmail.com>
+
+	* cli-cmds.c (list_commands): List actual code around more than
+	one location.
+
+2017-08-21  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_add_threads): Use array type for `lwps'.
+
+2017-08-21  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19487
+	* c-exp.y (variable production): Handle function aliases.
+	* minsyms.c (msymbol_is_text): New function.
+	* minsyms.h (msymbol_is_text): Declare.
+	* symtab.c (find_function_alias_target): New function.
+	* symtab.h (find_function_alias_target): Declare.
+
+2017-08-21  Pedro Alves  <palves@redhat.com>
+
+	* eval.c (evaluate_subexp_standard) <OP_TYPE>: Don't dig past
+	typedefs.
+	* typeprint.c (whatis_exp): If handling "whatis", and expression
+	is OP_TYPE, strip one typedef level.  Otherwise don't strip
+	typedefs here.
+	* valops.c (value_cast): Save "to" type before resolving
+	stubs/typedefs.  Use that type as resulting value's type.
+
+2017-08-18  Tom Tromey  <tom@tromey.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* spu-multiarch.c (parse_spufs_run): Use scoped_restore.
+	* sol-thread.c (sol_thread_resume, sol_thread_wait)
+	(sol_thread_xfer_partial, rw_common): Use scoped_restore.
+	* procfs.c (procfs_do_thread_registers): Use scoped_restore.
+	* proc-service.c (ps_xfer_memory): Use scoped_restore.
+	* linux-tdep.c (linux_corefile_thread): Remove a cleanup.
+	(linux_get_siginfo_data): Add "thread" argument.  Use
+	scoped_restore.
+	* linux-nat.c (linux_child_follow_fork)
+	(check_stopped_by_watchpoint): Use scoped_restore.
+	* infrun.c (displaced_step_prepare_throw, write_memory_ptid)
+	(THREAD_STOPPED_BY, handle_signal_stop): Use scoped_restore.
+	(restore_inferior_ptid, save_inferior_ptid): Remove.
+	* btrace.c (btrace_fetch): Use scoped_restore.
+	* bsd-uthread.c (bsd_uthread_fetch_registers)
+	(bsd_uthread_store_registers): Use scoped_restore.
+	* breakpoint.c (reattach_breakpoints, detach_breakpoints): Use
+	scoped_restore.
+	* aix-thread.c (aix_thread_resume, aix_thread_wait)
+	(aix_thread_xfer_partial): Use scoped_restore.
+	* inferior.h (save_inferior_ptid): Remove.
+
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/21818
+	* arm-tdep.c (gdb_print_insn_arm): Mark
+	USER_SPECIFIED_MACHINE_TYPE if exec_bfd isn't NULL.
+
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
+	* NEWS: Mention GDBserver's new option "--selftest".
+	* Makefile.in (SFILES): Remove selftest.c, add common/selftest.c.
+	* selftest.c: Move it to common/selftest.c.
+	* selftest.h: Move it to common/selftest.h.
+	* selftest-arch.c (reset): New function.
+	(tests_with_arch): Call reset.
+
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
+	* selftest.c (run_tests): Don't call QUIT.  Call debug_printf
+	instead of exception_fprintf and printf_filtered.
+
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
+	* selftest.c (register_self_test): Rename it to
+	selftests::register_test.
+	(run_self_tests): selftest::run_tests.
+	* selftest.h: Update declarations.
+	* selftest-arch.c (register_self_test_foreach_arch): Rename it to
+	selftests::register_test_foreach_arch.
+	* selftest-arch.h: Update declaration.
+	* aarch64-tdep.c: Update.
+	* arm-tdep.c: Likewise.
+	* disasm-selftests.c: Likewise.
+	* dwarf2loc.c: Likewise.
+	* dwarf2-frame.c: Likewise.
+	* findvar.c: Likewise.
+	* gdbarch-selftests.c: Likewise.
+	* maint.c (maintenance_selftest): Likewise.
+	* regcache.c: Likewise.
+	* rust-exp.y: Likewise.
+	* selftest-arch.c: Likewise.
+	* unittests/environ-selftests.c: Likewise.
+	* unittests/function-view-selftests.c: Likewise.
+	* unittests/offset-type-selftests.c: Likewise.
+	* unittests/optional-selftests.c: Likewise.
+	* unittests/scoped_restore-selftests.c: Likewise.
+	* utils-selftests.c: Likewise.
+
+2017-08-17  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-cmds.c (source_command): Delete 'old_source_verbose'
+	local.
+
+2017-08-17  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (struct dwarf2_cu) <line_header_die_owner>: New
+	field.
+	(reset_die_in_process): Delete, replaced by ...
+	(process_die_scope): ... this new class.  Make it responsible for
+	freeing cu->line_header too.
+	(process_die): Use process_die_scope.
+	(handle_DW_AT_stmt_list): Record the line header's owner CU/DIE in
+	cu->line_header_die_owner.  Don't release the line header if it's
+	owned by the CU.
+	(setup_type_unit_groups): Make the CU/DIE own the line header.
+	Don't release the line header here.
+
+2017-08-17  Alex Lindsay  <alexlindsay239@gmail.com>  (tiny change)
+
+	* elfread.c (elf_read_minimal_symbols): xfree synthsyms.
+
+2017-08-17  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+
+	* NEWS: Mention new shortcuts for nexti and stepi in TUI
+	Single-Key mode
+
+2017-08-16  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+
+	* tui/tui.c (tui_commands): Add "nexti" and "stepi" to the Single-Key
+	mode command list.
+
+2017-08-15  Stafford Horne  <shorne@gmail.com>
+
+	* MAINTAINERS (Write After Approval): Add Stafford Horne.
+
+2017-08-15  Stafford Horne  <shorne@gmail.com>
+
+	* xtensa-tdep.c (xtensa_init_reggroups): Use xstrdup for cpname.
+
+2017-08-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21954
+	* infcmd.c (unset_environment_command): Use the 'clear' method on
+	the environment instead of resetting it.
+
+2017-08-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_convert_siginfo): Fix compile on big-endian
+	platforms.
+
 2017-08-14  Tom Tromey  <tom@tromey.com>
 
 	* valprint.c (print_octal_chars): Use HOST_CHAR_BIT.
@@ -140,7 +371,7 @@
 	[!HAVE_KINFO_GETVMMAP] (fbsd_find_memory_regions): Use std::string
 	for `mapfilename'.
 	(fbsd_xfer_partial): Use gdb::byte_vector.
-	(fbsd_add_threads): Likewise.
+	(fbsd_add_threads): Use gdb::unique_xmalloc_ptr.
 
 2017-08-09  John Baldwin  <jhb@FreeBSD.org>
 

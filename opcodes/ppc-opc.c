@@ -131,6 +131,18 @@ static unsigned long insert_vleui (unsigned long, long, ppc_cpu_t, const char **
 static long extract_vleui (unsigned long, ppc_cpu_t, int *);
 static unsigned long insert_vleil (unsigned long, long, ppc_cpu_t, const char **);
 static long extract_vleil (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_evuimm2_ex0 (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_evuimm2_ex0 (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_evuimm4_ex0 (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_evuimm4_ex0 (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_evuimm8_ex0 (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_evuimm8_ex0 (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_evuimm_lt16 (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_evuimm_lt16 (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_rD_rS_even (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_rD_rS_even (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_off_lsp (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_off_lsp (unsigned long, ppc_cpu_t, int *);
 
 /* The operands table.
 
@@ -583,9 +595,13 @@ const struct powerpc_operand powerpc_operands[] =
 #define RD RS
   { 0x1f, 21, NULL, NULL, PPC_OPERAND_GPR },
 
+#define RD_EVEN RS + 1
+#define RS_EVEN RD_EVEN
+  { 0x1f, 21, insert_rD_rS_even, extract_rD_rS_even, PPC_OPERAND_GPR },
+
   /* The RS and RT fields of the DS form stq and DQ form lq instructions,
      which have special value restrictions.  */
-#define RSQ RS + 1
+#define RSQ RS_EVEN + 1
 #define RTQ RSQ
 #define Q_MASK (1 << 21)
   { 0x1e, 21, NULL, NULL, PPC_OPERAND_GPR },
@@ -643,8 +659,11 @@ const struct powerpc_operand powerpc_operands[] =
 #define FC SH
   { 0x1f, 11, NULL, NULL, 0 },
 
+#define EVUIMM_LT16 SH + 1
+  { 0x1f, 11, insert_evuimm_lt16, extract_evuimm_lt16, 0 },
+
   /* The SI field in a HTM X form instruction.  */
-#define HTM_SI SH + 1
+#define HTM_SI EVUIMM_LT16 + 1
   { 0x1f, 11, NULL, NULL, PPC_OPERAND_SIGNED },
 
   /* The SH field in an MD form instruction.  This is split.  */
@@ -794,16 +813,25 @@ const struct powerpc_operand powerpc_operands[] =
 #define EVUIMM_2 SHB + 1
   { 0x3e, 10, NULL, NULL, PPC_OPERAND_PARENS },
 
+#define EVUIMM_2_EX0 EVUIMM_2 + 1
+  { 0x3e, 10, insert_evuimm2_ex0, extract_evuimm2_ex0, PPC_OPERAND_PARENS },
+
   /* The other UIMM field in a word EVX form instruction.  */
-#define EVUIMM_4 EVUIMM_2 + 1
+#define EVUIMM_4 EVUIMM_2_EX0 + 1
   { 0x7c, 9, NULL, NULL, PPC_OPERAND_PARENS },
 
+#define EVUIMM_4_EX0 EVUIMM_4 + 1
+  { 0x7c, 9, insert_evuimm4_ex0, extract_evuimm4_ex0, PPC_OPERAND_PARENS },
+
   /* The other UIMM field in a double EVX form instruction.  */
-#define EVUIMM_8 EVUIMM_4 + 1
+#define EVUIMM_8 EVUIMM_4_EX0 + 1
   { 0xf8, 8, NULL, NULL, PPC_OPERAND_PARENS },
 
+#define EVUIMM_8_EX0 EVUIMM_8 + 1
+  { 0xf8, 8, insert_evuimm8_ex0, extract_evuimm8_ex0, PPC_OPERAND_PARENS },
+
   /* The WS or DRM field in an X form instruction.  */
-#define WS EVUIMM_8 + 1
+#define WS EVUIMM_8_EX0 + 1
 #define DRM WS
   { 0x7, 11, NULL, NULL, 0 },
 
@@ -970,6 +998,9 @@ const struct powerpc_operand powerpc_operands[] =
   /* The 8-bit IMM8 field in a XX1 form instruction.  */
 #define IMM8 IH + 1
   { 0xff, 11, NULL, NULL, PPC_OPERAND_SIGNOPT },
+
+#define VX_OFF IMM8 + 1
+  { 0x3, 0, insert_off_lsp, extract_off_lsp, 0 },
 };
 
 const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
@@ -2411,6 +2442,167 @@ extract_vleil (unsigned long insn,
   return ((insn >> 5) & 0xf800) | (insn & 0x7ff);
 }
 
+static unsigned long
+insert_evuimm2_ex0 (unsigned long insn,
+		    long value,
+		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+		    const char **errmsg)
+{
+  if (value > 0 && value <= 0x3e)
+    return insn | ((value & 0x3e) << 10);
+  else
+    {
+      *errmsg = _("UIMM = 00000 is illegal");
+      return 0;
+    }
+}
+
+static long
+extract_evuimm2_ex0 (unsigned long insn,
+		     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+		     int *invalid)
+{
+  long value = ((insn >> 10) & 0x3e);
+  if (value == 0)
+    *invalid = 1;
+
+  return value;
+}
+
+static unsigned long
+insert_evuimm4_ex0 (unsigned long insn,
+		    long value,
+		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+		    const char **errmsg)
+{
+  if (value > 0 && value <= 0x7c)
+    return insn | ((value & 0x7c) << 9);
+  else
+    {
+      *errmsg = _("UIMM = 00000 is illegal");
+      return 0;
+    }
+}
+
+static long
+extract_evuimm4_ex0 (unsigned long insn,
+		     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+		     int *invalid)
+{
+  long value = ((insn >> 9) & 0x7c);
+  if (value == 0)
+    *invalid = 1;
+
+  return value;
+}
+
+static unsigned long
+insert_evuimm8_ex0 (unsigned long insn,
+		    long value,
+		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+		    const char **errmsg)
+{
+  if (value > 0 && value <= 0xf8)
+    return insn | ((value & 0xf8) << 8);
+  else
+    {
+      *errmsg = _("UIMM = 00000 is illegal");
+      return 0;
+    }
+}
+
+static long
+extract_evuimm8_ex0 (unsigned long insn,
+		     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+		     int *invalid)
+{
+  long value = ((insn >> 8) & 0xf8);
+  if (value == 0)
+    *invalid = 1;
+
+  return value;
+}
+
+static unsigned long
+insert_evuimm_lt16 (unsigned long insn,
+		    long value,
+		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+		    const char **errmsg)
+{
+  if (value >= 0 && value <= 15)
+    return insn | ((value & 0xf) << 11);
+  else
+    {
+      *errmsg = _("UIMM values >15 are illegal");
+      return 0;
+    }
+}
+
+static long
+extract_evuimm_lt16 (unsigned long insn,
+		     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+		     int *invalid)
+{
+  long value = ((insn >> 11) & 0x1f);
+  if (value > 15)
+    *invalid = 1;
+
+  return value;
+}
+
+static unsigned long
+insert_rD_rS_even (unsigned long insn,
+		   long value,
+		   ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+		   const char **errmsg)
+{
+  if ((value & 0x1) == 0)
+    return insn | ((value & 0x1e) << 21);
+  else
+    {
+      *errmsg = _("GPR odd is illegal");
+      return 0;
+    }
+}
+
+static long
+extract_rD_rS_even (unsigned long insn,
+		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+		    int *invalid)
+{
+  long value = ((insn >> 21) & 0x1f);
+  if ((value & 0x1) != 0)
+    *invalid = 1;
+
+  return value;
+}
+
+static unsigned long
+insert_off_lsp (unsigned long insn,
+		long value,
+		ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+		const char **errmsg)
+{
+  if (value > 0 && value <= 0x3)
+    return insn | (value & 0x3);
+  else
+    {
+      *errmsg = _("invalid offset");
+      return 0;
+    }
+}
+
+static long
+extract_off_lsp (unsigned long insn,
+		 ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+		 int *invalid)
+{
+  long value = (insn & 0x3);
+  if (value == 0)
+    *invalid = 1;
+
+  return value;
+}
 
 /* Macros used to form opcodes.  */
 
@@ -2644,6 +2836,13 @@ extract_vleil (unsigned long insn,
 
 /* The mask for an VX form instruction.  */
 #define VX_MASK	VX(0x3f, 0x7ff)
+
+/* A VX LSP form instruction.  */
+#define VX_LSP(op, xop) (OP (op) | (((unsigned long)(xop)) & 0xffff))
+
+/* The mask for an VX LSP form instruction.  */
+#define VX_LSP_MASK	VX_LSP(0x3f, 0xffff)
+#define VX_LSP_OFF_MASK	VX_LSP(0x3f, 0x7fc)
 
 /* A VX_MASK with the VA field fixed.  */
 #define VXVA_MASK (VX_MASK | (0x1f << 16))
@@ -3125,6 +3324,7 @@ extract_vleil (unsigned long insn,
 #define PPCVLE  PPC_OPCODE_VLE
 #define PPCHTM  PPC_OPCODE_POWER8
 #define E200Z4  PPC_OPCODE_E200Z4
+#define PPCLSP  PPC_OPCODE_LSP
 /* The list of embedded processors that use the embedded operand ordering
    for the 3 operand dcbt and dcbtst instructions.  */
 #define DCBT_EO	(PPC_OPCODE_E500 | PPC_OPCODE_E500MC | PPC_OPCODE_476 \
@@ -7133,6 +7333,686 @@ const struct powerpc_opcode vle_opcodes[] = {
 {"se_cmpl",	SE_RR(3,1),	SE_RR_MASK,	PPCVLE,	0,		{RX, RY}},
 {"se_cmph",	SE_RR(3,2),	SE_RR_MASK,	PPCVLE,	0,		{RX, RY}},
 {"se_cmphl",	SE_RR(3,3),	SE_RR_MASK,	PPCVLE,	0,		{RX, RY}},
+
+/* by major opcode */
+{"zvaddih",	      VX(4, 0x200), VX_MASK,	PPCLSP, 0,		{RD, RA, EVUIMM}},
+{"zvsubifh",	      VX(4, 0x201), VX_MASK,	PPCLSP, 0,		{RD, RA, EVUIMM}},
+{"zvaddh",	      VX(4, 0x204), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvsubfh",	      VX(4, 0x205), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvaddsubfh",	      VX(4, 0x206), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvsubfaddh",	      VX(4, 0x207), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvaddhx",	      VX(4, 0x20C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvsubfhx",	      VX(4, 0x20D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvaddsubfhx",	      VX(4, 0x20E), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvsubfaddhx",	      VX(4, 0x20F), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zaddwus",	      VX(4, 0x210), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zsubfwus",	      VX(4, 0x211), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zaddwss",	      VX(4, 0x212), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zsubfwss",	      VX(4, 0x213), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvaddhus",	      VX(4, 0x214), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvsubfhus",	      VX(4, 0x215), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvaddhss",	      VX(4, 0x216), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvsubfhss",	      VX(4, 0x217), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvaddsubfhss",      VX(4, 0x21A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvsubfaddhss",      VX(4, 0x21B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvaddhxss",	      VX(4, 0x21C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvsubfhxss",	      VX(4, 0x21D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvaddsubfhxss",     VX(4, 0x21E), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvsubfaddhxss",     VX(4, 0x21F), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zaddheuw",	      VX(4, 0x220), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zsubfheuw",	      VX(4, 0x221), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zaddhesw",	      VX(4, 0x222), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zsubfhesw",	      VX(4, 0x223), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zaddhouw",	      VX(4, 0x224), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zsubfhouw",	      VX(4, 0x225), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zaddhosw",	      VX(4, 0x226), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zsubfhosw",	      VX(4, 0x227), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmergehih",	      VX(4, 0x22C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmergeloh",	      VX(4, 0x22D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmergehiloh",      VX(4, 0x22E), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmergelohih",      VX(4, 0x22F), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvcmpgthu",	      VX(4, 0x230), VX_MASK,	PPCLSP, 0,		{CRFD, RA, RB}},
+{"zvcmpgths",	      VX(4, 0x230), VX_MASK,	PPCLSP, 0,		{CRFD, RA, RB}},
+{"zvcmplthu",	      VX(4, 0x231), VX_MASK,	PPCLSP, 0,		{CRFD, RA, RB}},
+{"zvcmplths",	      VX(4, 0x231), VX_MASK,	PPCLSP, 0,		{CRFD, RA, RB}},
+{"zvcmpeqh",	      VX(4, 0x232), VX_MASK,	PPCLSP, 0,		{CRFD, RA, RB}},
+{"zpkswgshfrs",	      VX(4, 0x238), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zpkswgswfrs",	      VX(4, 0x239), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvpkshgwshfrs",     VX(4, 0x23A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvpkswshfrs",	      VX(4, 0x23B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvpkswuhs",	      VX(4, 0x23C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvpkswshs",	      VX(4, 0x23D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvpkuwuhs",	      VX(4, 0x23E), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvsplatih",	      VX_LSP(4, 0x23F), VX_LSP_MASK, PPCLSP, 0,		{RD, SIMM}},
+{"zvsplatfih",	      VX_LSP(4, 0xA3F), VX_LSP_MASK, PPCLSP, 0,		{RD, SIMM}},
+{"zcntlsw",	      VX_LSP(4, 0x2A3F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zvcntlzh",	      VX_LSP(4, 0x323F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zvcntlsh",	      VX_LSP(4, 0x3A3F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"znegws",	      VX_LSP(4, 0x4A3F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zvnegh",	      VX_LSP(4, 0x523F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zvneghs",	      VX_LSP(4, 0x5A3F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zvnegho",	      VX_LSP(4, 0x623F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zvneghos",	      VX_LSP(4, 0x6A3F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zrndwh",	      VX_LSP(4, 0x823F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zrndwhss",	      VX_LSP(4, 0x8A3F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zvabsh",	      VX_LSP(4, 0xA23F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zvabshs",	      VX_LSP(4, 0xAA3F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zabsw",	      VX_LSP(4, 0xB23F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zabsws",	      VX_LSP(4, 0xBA3F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zsatswuw",	      VX_LSP(4, 0xC23F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zsatuwsw",	      VX_LSP(4, 0xCA3F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zsatswuh",	      VX_LSP(4, 0xD23F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zsatswsh",	      VX_LSP(4, 0xDA3F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zvsatshuh",	      VX_LSP(4, 0xE23F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zvsatuhsh",	      VX_LSP(4, 0xEA3F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zsatuwuh",	      VX_LSP(4, 0xF23F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zsatuwsh",	      VX_LSP(4, 0xFA3F), VX_LSP_MASK, PPCLSP, 0,	{RD, RA}},
+{"zsatsduw",	      VX(4, 0x260), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zsatsdsw",	      VX(4, 0x261), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zsatuduw",	      VX(4, 0x262), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvselh",	      VX(4, 0x264), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zxtrw",	      VX(4, 0x264), VX_LSP_OFF_MASK, PPCLSP, 0,		{RD, RA, RB, VX_OFF}},
+{"zbrminc",	      VX(4, 0x268), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zcircinc",	      VX(4, 0x269), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zdivwsf",	      VX(4, 0x26B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvsrhu",	      VX(4, 0x270), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvsrhs",	      VX(4, 0x271), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvsrhiu",	      VX(4, 0x272), VX_MASK,	PPCLSP, 0,		{RD, RA, EVUIMM_LT16}},
+{"zvsrhis",	      VX(4, 0x273), VX_MASK,	PPCLSP, 0,		{RD, RA, EVUIMM_LT16}},
+{"zvslh",	      VX(4, 0x274), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvrlh",	      VX(4, 0x275), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvslhi",	      VX(4, 0x276), VX_MASK,	PPCLSP, 0,		{RD, RA, EVUIMM_LT16}},
+{"zvrlhi",	      VX(4, 0x277), VX_MASK,	PPCLSP, 0,		{RD, RA, EVUIMM_LT16}},
+{"zvslhus",	      VX(4, 0x278), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvslhss",	      VX(4, 0x279), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvslhius",	      VX(4, 0x27A), VX_MASK,	PPCLSP, 0,		{RD, RA, EVUIMM_LT16}},
+{"zvslhiss",	      VX(4, 0x27B), VX_MASK,	PPCLSP, 0,		{RD, RA, EVUIMM_LT16}},
+{"zslwus",	      VX(4, 0x27C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zslwss",	      VX(4, 0x27D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zslwius",	      VX(4, 0x27E), VX_MASK,	PPCLSP, 0,		{RD, RA, EVUIMM}},
+{"zslwiss",	      VX(4, 0x27F), VX_MASK,	PPCLSP, 0,		{RD, RA, EVUIMM}},
+{"zaddwgui",	      VX(4, 0x460), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zsubfwgui",	      VX(4, 0x461), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zaddd",	      VX(4, 0x462), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zsubfd",	      VX(4, 0x463), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvaddsubfw",	      VX(4, 0x464), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvsubfaddw",	      VX(4, 0x465), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvaddw",	      VX(4, 0x466), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvsubfw",	      VX(4, 0x467), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zaddwgsi",	      VX(4, 0x468), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zsubfwgsi",	      VX(4, 0x469), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zadddss",	      VX(4, 0x46A), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zsubfdss",	      VX(4, 0x46B), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvaddsubfwss",      VX(4, 0x46C), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvsubfaddwss",      VX(4, 0x46D), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvaddwss",	      VX(4, 0x46E), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvsubfwss",	      VX(4, 0x46F), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zaddwgsf",	      VX(4, 0x470), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zsubfwgsf",	      VX(4, 0x471), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zadddus",	      VX(4, 0x472), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zsubfdus",	      VX(4, 0x473), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvaddwus",	      VX(4, 0x476), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvsubfwus",	      VX(4, 0x477), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvunpkhgwsf",	      VX_LSP(4, 0x478), VX_LSP_MASK, PPCLSP, 0,		{RD_EVEN, RA}},
+{"zvunpkhsf",	      VX_LSP(4, 0xC78), VX_LSP_MASK, PPCLSP, 0,		{RD_EVEN, RA}},
+{"zvunpkhui",	      VX_LSP(4, 0x1478), VX_LSP_MASK, PPCLSP, 0,	{RD_EVEN, RA}},
+{"zvunpkhsi",	      VX_LSP(4, 0x1C78), VX_LSP_MASK, PPCLSP, 0,	{RD_EVEN, RA}},
+{"zunpkwgsf",	      VX_LSP(4, 0x2478), VX_LSP_MASK, PPCLSP, 0,	{RD_EVEN, RA}},
+{"zvdotphgwasmf",     VX(4, 0x488), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphgwasmfr",    VX(4, 0x489), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphgwasmfaa",   VX(4, 0x48A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphgwasmfraa",  VX(4, 0x48B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphgwasmfan",   VX(4, 0x48C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphgwasmfran",  VX(4, 0x48D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhulgwsmf",	      VX(4, 0x490), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulgwsmfr",      VX(4, 0x491), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulgwsmfaa",     VX(4, 0x492), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulgwsmfraa",    VX(4, 0x493), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulgwsmfan",     VX(4, 0x494), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulgwsmfran",    VX(4, 0x495), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulgwsmfanp",    VX(4, 0x496), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulgwsmfranp",   VX(4, 0x497), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhegwsmf",	      VX(4, 0x498), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhegwsmfr",	      VX(4, 0x499), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhegwsmfaa",	      VX(4, 0x49A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhegwsmfraa",      VX(4, 0x49B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhegwsmfan",	      VX(4, 0x49C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhegwsmfran",      VX(4, 0x49D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxgwasmf",    VX(4, 0x4A8), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxgwasmfr",   VX(4, 0x4A9), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxgwasmfaa",  VX(4, 0x4AA), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxgwasmfraa", VX(4, 0x4AB), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxgwasmfan",  VX(4, 0x4AC), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxgwasmfran", VX(4, 0x4AD), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhllgwsmf",	      VX(4, 0x4B0), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllgwsmfr",      VX(4, 0x4B1), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllgwsmfaa",     VX(4, 0x4B2), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllgwsmfraa",    VX(4, 0x4B3), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllgwsmfan",     VX(4, 0x4B4), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllgwsmfran",    VX(4, 0x4B5), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllgwsmfanp",    VX(4, 0x4B6), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllgwsmfranp",   VX(4, 0x4B7), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheogwsmf",	      VX(4, 0x4B8), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheogwsmfr",	      VX(4, 0x4B9), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheogwsmfaa",      VX(4, 0x4BA), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheogwsmfraa",     VX(4, 0x4BB), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheogwsmfan",      VX(4, 0x4BC), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheogwsmfran",     VX(4, 0x4BD), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphgwssmf",     VX(4, 0x4C8), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphgwssmfr",    VX(4, 0x4C9), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphgwssmfaa",   VX(4, 0x4CA), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphgwssmfraa",  VX(4, 0x4CB), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphgwssmfan",   VX(4, 0x4CC), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphgwssmfran",  VX(4, 0x4CD), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhuugwsmf",	      VX(4, 0x4D0), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuugwsmfr",      VX(4, 0x4D1), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuugwsmfaa",     VX(4, 0x4D2), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuugwsmfraa",    VX(4, 0x4D3), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuugwsmfan",     VX(4, 0x4D4), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuugwsmfran",    VX(4, 0x4D5), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuugwsmfanp",    VX(4, 0x4D6), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuugwsmfranp",   VX(4, 0x4D7), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhogwsmf",	      VX(4, 0x4D8), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhogwsmfr",	      VX(4, 0x4D9), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhogwsmfaa",	      VX(4, 0x4DA), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhogwsmfraa",      VX(4, 0x4DB), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhogwsmfan",	      VX(4, 0x4DC), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhogwsmfran",      VX(4, 0x4DD), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhxlgwsmf",	      VX(4, 0x4F0), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlgwsmfr",      VX(4, 0x4F1), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlgwsmfaa",     VX(4, 0x4F2), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlgwsmfraa",    VX(4, 0x4F3), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlgwsmfan",     VX(4, 0x4F4), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlgwsmfran",    VX(4, 0x4F5), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlgwsmfanp",    VX(4, 0x4F6), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlgwsmfranp",   VX(4, 0x4F7), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhegui",	      VX(4, 0x500), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgaui",	      VX(4, 0x501), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheguiaa",	      VX(4, 0x502), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgauiaa",     VX(4, 0x503), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheguian",	      VX(4, 0x504), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgauian",     VX(4, 0x505), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhegsi",	      VX(4, 0x508), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgasi",	      VX(4, 0x509), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhegsiaa",	      VX(4, 0x50A), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgasiaa",     VX(4, 0x50B), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhegsian",	      VX(4, 0x50C), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgasian",     VX(4, 0x50D), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhegsui",	      VX(4, 0x510), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgasui",      VX(4, 0x511), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhegsuiaa",	      VX(4, 0x512), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgasuiaa",    VX(4, 0x513), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhegsuian",	      VX(4, 0x514), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgasuian",    VX(4, 0x515), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhegsmf",	      VX(4, 0x518), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgasmf",      VX(4, 0x519), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhegsmfaa",	      VX(4, 0x51A), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgasmfaa",    VX(4, 0x51B), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhegsmfan",	      VX(4, 0x51C), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgasmfan",    VX(4, 0x51D), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheogui",	      VX(4, 0x520), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphxgaui",      VX(4, 0x521), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheoguiaa",	      VX(4, 0x522), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphxgauiaa",    VX(4, 0x523), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheoguian",	      VX(4, 0x524), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphxgauian",    VX(4, 0x525), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheogsi",	      VX(4, 0x528), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphxgasi",      VX(4, 0x529), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheogsiaa",	      VX(4, 0x52A), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphxgasiaa",    VX(4, 0x52B), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheogsian",	      VX(4, 0x52C), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphxgasian",    VX(4, 0x52D), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheogsui",	      VX(4, 0x530), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphxgasui",     VX(4, 0x531), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheogsuiaa",	      VX(4, 0x532), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphxgasuiaa",   VX(4, 0x533), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheogsuian",	      VX(4, 0x534), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphxgasuian",   VX(4, 0x535), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheogsmf",	      VX(4, 0x538), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphxgasmf",     VX(4, 0x539), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheogsmfaa",	      VX(4, 0x53A), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphxgasmfaa",   VX(4, 0x53B), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheogsmfan",	      VX(4, 0x53C), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphxgasmfan",   VX(4, 0x53D), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhogui",	      VX(4, 0x540), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgsui",	      VX(4, 0x541), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhoguiaa",	      VX(4, 0x542), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgsuiaa",     VX(4, 0x543), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhoguian",	      VX(4, 0x544), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgsuian",     VX(4, 0x545), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhogsi",	      VX(4, 0x548), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgssi",	      VX(4, 0x549), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhogsiaa",	      VX(4, 0x54A), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgssiaa",     VX(4, 0x54B), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhogsian",	      VX(4, 0x54C), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgssian",     VX(4, 0x54D), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhogsui",	      VX(4, 0x550), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgssui",      VX(4, 0x551), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhogsuiaa",	      VX(4, 0x552), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgssuiaa",    VX(4, 0x553), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhogsuian",	      VX(4, 0x554), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgssuian",    VX(4, 0x555), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhogsmf",	      VX(4, 0x558), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgssmf",      VX(4, 0x559), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhogsmfaa",	      VX(4, 0x55A), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgssmfaa",    VX(4, 0x55B), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmhogsmfan",	      VX(4, 0x55C), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvdotphgssmfan",    VX(4, 0x55D), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgui",	      VX(4, 0x560), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwguiaa",	      VX(4, 0x562), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwguiaas",	      VX(4, 0x563), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwguian",	      VX(4, 0x564), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwguians",	      VX(4, 0x565), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsi",	      VX(4, 0x568), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsiaa",	      VX(4, 0x56A), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsiaas",	      VX(4, 0x56B), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsian",	      VX(4, 0x56C), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsians",	      VX(4, 0x56D), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsui",	      VX(4, 0x570), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsuiaa",	      VX(4, 0x572), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsuiaas",	      VX(4, 0x573), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsuian",	      VX(4, 0x574), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsuians",	      VX(4, 0x575), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsmf",	      VX(4, 0x578), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsmfr",	      VX(4, 0x579), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsmfaa",	      VX(4, 0x57A), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsmfraa",	      VX(4, 0x57B), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsmfan",	      VX(4, 0x57C), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmwgsmfran",	      VX(4, 0x57D), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhului",	      VX(4, 0x580), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuluiaa",	      VX(4, 0x582), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuluiaas",	      VX(4, 0x583), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuluian",	      VX(4, 0x584), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuluians",	      VX(4, 0x585), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuluianp",	      VX(4, 0x586), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuluianps",      VX(4, 0x587), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsi",	      VX(4, 0x588), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsiaa",	      VX(4, 0x58A), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsiaas",	      VX(4, 0x58B), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsian",	      VX(4, 0x58C), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsians",	      VX(4, 0x58D), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsianp",	      VX(4, 0x58E), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsianps",      VX(4, 0x58F), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsui",	      VX(4, 0x590), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsuiaa",	      VX(4, 0x592), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsuiaas",      VX(4, 0x593), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsuian",	      VX(4, 0x594), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsuians",      VX(4, 0x595), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsuianp",      VX(4, 0x596), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsuianps",     VX(4, 0x597), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsf",	      VX(4, 0x598), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsfr",	      VX(4, 0x599), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsfaas",	      VX(4, 0x59A), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsfraas",      VX(4, 0x59B), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsfans",	      VX(4, 0x59C), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsfrans",      VX(4, 0x59D), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsfanps",      VX(4, 0x59E), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhulsfranps",     VX(4, 0x59F), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllui",	      VX(4, 0x5A0), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhlluiaa",	      VX(4, 0x5A2), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhlluiaas",	      VX(4, 0x5A3), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhlluian",	      VX(4, 0x5A4), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhlluians",	      VX(4, 0x5A5), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhlluianp",	      VX(4, 0x5A6), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhlluianps",      VX(4, 0x5A7), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsi",	      VX(4, 0x5A8), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsiaa",	      VX(4, 0x5AA), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsiaas",	      VX(4, 0x5AB), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsian",	      VX(4, 0x5AC), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsians",	      VX(4, 0x5AD), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsianp",	      VX(4, 0x5AE), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsianps",      VX(4, 0x5AF), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsui",	      VX(4, 0x5B0), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsuiaa",	      VX(4, 0x5B2), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsuiaas",      VX(4, 0x5B3), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsuian",	      VX(4, 0x5B4), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsuians",      VX(4, 0x5B5), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsuianp",      VX(4, 0x5B6), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsuianps",     VX(4, 0x5B7), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsf",	      VX(4, 0x5B8), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsfr",	      VX(4, 0x5B9), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsfaas",	      VX(4, 0x5BA), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsfraas",      VX(4, 0x5BB), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsfans",	      VX(4, 0x5BC), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsfrans",      VX(4, 0x5BD), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsfanps",      VX(4, 0x5BE), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhllsfranps",     VX(4, 0x5BF), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuuui",	      VX(4, 0x5C0), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuuuiaa",	      VX(4, 0x5C2), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuuuiaas",	      VX(4, 0x5C3), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuuuian",	      VX(4, 0x5C4), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuuuians",	      VX(4, 0x5C5), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuuuianp",	      VX(4, 0x5C6), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuuuianps",      VX(4, 0x5C7), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusi",	      VX(4, 0x5C8), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusiaa",	      VX(4, 0x5CA), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusiaas",	      VX(4, 0x5CB), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusian",	      VX(4, 0x5CC), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusians",	      VX(4, 0x5CD), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusianp",	      VX(4, 0x5CE), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusianps",      VX(4, 0x5CF), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusui",	      VX(4, 0x5D0), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusuiaa",	      VX(4, 0x5D2), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusuiaas",      VX(4, 0x5D3), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusuian",	      VX(4, 0x5D4), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusuians",      VX(4, 0x5D5), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusuianp",      VX(4, 0x5D6), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusuianps",     VX(4, 0x5D7), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusf",	      VX(4, 0x5D8), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusfr",	      VX(4, 0x5D9), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusfaas",	      VX(4, 0x5DA), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusfraas",      VX(4, 0x5DB), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusfans",	      VX(4, 0x5DC), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusfrans",      VX(4, 0x5DD), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusfanps",      VX(4, 0x5DE), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhuusfranps",     VX(4, 0x5DF), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlui",	      VX(4, 0x5E0), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxluiaa",	      VX(4, 0x5E2), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxluiaas",	      VX(4, 0x5E3), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxluian",	      VX(4, 0x5E4), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxluians",	      VX(4, 0x5E5), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxluianp",	      VX(4, 0x5E6), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxluianps",      VX(4, 0x5E7), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsi",	      VX(4, 0x5E8), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsiaa",	      VX(4, 0x5EA), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsiaas",	      VX(4, 0x5EB), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsian",	      VX(4, 0x5EC), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsians",	      VX(4, 0x5ED), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsianp",	      VX(4, 0x5EE), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsianps",      VX(4, 0x5EF), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsui",	      VX(4, 0x5F0), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsuiaa",	      VX(4, 0x5F2), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsuiaas",      VX(4, 0x5F3), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsuian",	      VX(4, 0x5F4), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsuians",      VX(4, 0x5F5), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsuianp",      VX(4, 0x5F6), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsuianps",     VX(4, 0x5F7), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsf",	      VX(4, 0x5F8), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsfr",	      VX(4, 0x5F9), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsfaas",	      VX(4, 0x5FA), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsfraas",      VX(4, 0x5FB), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsfans",	      VX(4, 0x5FC), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsfrans",      VX(4, 0x5FD), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsfanps",      VX(4, 0x5FE), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zvmhxlsfranps",     VX(4, 0x5FF), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zmheui",	      VX(4, 0x600), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheuiaa",	      VX(4, 0x602), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheuiaas",	      VX(4, 0x603), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheuian",	      VX(4, 0x604), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheuians",	      VX(4, 0x605), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesi",	      VX(4, 0x608), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesiaa",	      VX(4, 0x60A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesiaas",	      VX(4, 0x60B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesian",	      VX(4, 0x60C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesians",	      VX(4, 0x60D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesui",	      VX(4, 0x610), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesuiaa",	      VX(4, 0x612), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesuiaas",	      VX(4, 0x613), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesuian",	      VX(4, 0x614), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesuians",	      VX(4, 0x615), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesf",	      VX(4, 0x618), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesfr",	      VX(4, 0x619), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesfaas",	      VX(4, 0x61A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesfraas",	      VX(4, 0x61B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesfans",	      VX(4, 0x61C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhesfrans",	      VX(4, 0x61D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheoui",	      VX(4, 0x620), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheouiaa",	      VX(4, 0x622), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheouiaas",	      VX(4, 0x623), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheouian",	      VX(4, 0x624), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheouians",	      VX(4, 0x625), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosi",	      VX(4, 0x628), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosiaa",	      VX(4, 0x62A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosiaas",	      VX(4, 0x62B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosian",	      VX(4, 0x62C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosians",	      VX(4, 0x62D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosui",	      VX(4, 0x630), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosuiaa",	      VX(4, 0x632), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosuiaas",	      VX(4, 0x633), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosuian",	      VX(4, 0x634), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosuians",	      VX(4, 0x635), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosf",	      VX(4, 0x638), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosfr",	      VX(4, 0x639), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosfaas",	      VX(4, 0x63A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosfraas",	      VX(4, 0x63B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosfans",	      VX(4, 0x63C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmheosfrans",	      VX(4, 0x63D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhoui",	      VX(4, 0x640), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhouiaa",	      VX(4, 0x642), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhouiaas",	      VX(4, 0x643), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhouian",	      VX(4, 0x644), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhouians",	      VX(4, 0x645), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosi",	      VX(4, 0x648), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosiaa",	      VX(4, 0x64A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosiaas",	      VX(4, 0x64B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosian",	      VX(4, 0x64C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosians",	      VX(4, 0x64D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosui",	      VX(4, 0x650), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosuiaa",	      VX(4, 0x652), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosuiaas",	      VX(4, 0x653), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosuian",	      VX(4, 0x654), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosuians",	      VX(4, 0x655), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosf",	      VX(4, 0x658), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosfr",	      VX(4, 0x659), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosfaas",	      VX(4, 0x65A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosfraas",	      VX(4, 0x65B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosfans",	      VX(4, 0x65C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmhosfrans",	      VX(4, 0x65D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhuih",	      VX(4, 0x660), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhuihs",	      VX(4, 0x661), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhuiaah",	      VX(4, 0x662), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhuiaahs",	      VX(4, 0x663), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhuianh",	      VX(4, 0x664), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhuianhs",	      VX(4, 0x665), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhsihs",	      VX(4, 0x669), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhsiaahs",	      VX(4, 0x66B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhsianhs",	      VX(4, 0x66D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhsuihs",	      VX(4, 0x671), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhsuiaahs",	      VX(4, 0x673), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhsuianhs",	      VX(4, 0x675), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhsfh",	      VX(4, 0x678), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhsfrh",	      VX(4, 0x679), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhsfaahs",	      VX(4, 0x67A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhsfraahs",	      VX(4, 0x67B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhsfanhs",	      VX(4, 0x67C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvmhsfranhs",	      VX(4, 0x67D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphaui",	      VX(4, 0x680), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphauis",	      VX(4, 0x681), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphauiaa",      VX(4, 0x682), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphauiaas",     VX(4, 0x683), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphauian",      VX(4, 0x684), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphauians",     VX(4, 0x685), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasi",	      VX(4, 0x688), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasis",	      VX(4, 0x689), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasiaa",      VX(4, 0x68A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasiaas",     VX(4, 0x68B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasian",      VX(4, 0x68C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasians",     VX(4, 0x68D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasui",	      VX(4, 0x690), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasuis",      VX(4, 0x691), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasuiaa",     VX(4, 0x692), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasuiaas",    VX(4, 0x693), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasuian",     VX(4, 0x694), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasuians",    VX(4, 0x695), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasfs",	      VX(4, 0x698), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasfrs",      VX(4, 0x699), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasfaas",     VX(4, 0x69A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasfraas",    VX(4, 0x69B), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasfans",     VX(4, 0x69C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphasfrans",    VX(4, 0x69D), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxaui",	      VX(4, 0x6A0), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxauis",      VX(4, 0x6A1), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxauiaa",     VX(4, 0x6A2), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxauiaas",    VX(4, 0x6A3), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxauian",     VX(4, 0x6A4), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxauians",    VX(4, 0x6A5), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasi",	      VX(4, 0x6A8), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasis",      VX(4, 0x6A9), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasiaa",     VX(4, 0x6AA), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasiaas",    VX(4, 0x6AB), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasian",     VX(4, 0x6AC), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasians",    VX(4, 0x6AD), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasui",      VX(4, 0x6B0), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasuis",     VX(4, 0x6B1), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasuiaa",    VX(4, 0x6B2), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasuiaas",   VX(4, 0x6B3), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasuian",    VX(4, 0x6B4), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasuians",   VX(4, 0x6B5), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasfs",      VX(4, 0x6B8), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasfrs",     VX(4, 0x6B9), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasfaas",    VX(4, 0x6BA), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasfraas",   VX(4, 0x6BB), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasfans",    VX(4, 0x6BC), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphxasfrans",   VX(4, 0x6BD), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphsui",	      VX(4, 0x6C0), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphsuis",	      VX(4, 0x6C1), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphsuiaa",      VX(4, 0x6C2), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphsuiaas",     VX(4, 0x6C3), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphsuian",      VX(4, 0x6C4), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphsuians",     VX(4, 0x6C5), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssi",	      VX(4, 0x6C8), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssis",	      VX(4, 0x6C9), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssiaa",      VX(4, 0x6CA), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssiaas",     VX(4, 0x6CB), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssian",      VX(4, 0x6CC), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssians",     VX(4, 0x6CD), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssui",	      VX(4, 0x6D0), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssuis",      VX(4, 0x6D1), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssuiaa",     VX(4, 0x6D2), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssuiaas",    VX(4, 0x6D3), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssuian",     VX(4, 0x6D4), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssuians",    VX(4, 0x6D5), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssfs",	      VX(4, 0x6D8), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssfrs",      VX(4, 0x6D9), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssfaas",     VX(4, 0x6DA), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssfraas",    VX(4, 0x6DB), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssfans",     VX(4, 0x6DC), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zvdotphssfrans",    VX(4, 0x6DD), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwluis",	      VX(4, 0x6E1), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwluiaa",	      VX(4, 0x6E2), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwluiaas",	      VX(4, 0x6E3), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwluian",	      VX(4, 0x6E4), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwluians",	      VX(4, 0x6E5), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwlsis",	      VX(4, 0x6E9), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwlsiaas",	      VX(4, 0x6EB), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwlsians",	      VX(4, 0x6ED), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwlsuis",	      VX(4, 0x6F1), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwlsuiaas",	      VX(4, 0x6F3), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwlsuians",	      VX(4, 0x6F5), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwsf",	      VX(4, 0x6F8), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwsfr",	      VX(4, 0x6F9), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwsfaas",	      VX(4, 0x6FA), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwsfraas",	      VX(4, 0x6FB), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwsfans",	      VX(4, 0x6FC), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zmwsfrans",	      VX(4, 0x6FD), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlddx",	      VX(4, 0x300), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zldd",	      VX(4, 0x301), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_8, RA}},
+{"zldwx",	      VX(4, 0x302), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zldw",	      VX(4, 0x303), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_8, RA}},
+{"zldhx",	      VX(4, 0x304), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zldh",	      VX(4, 0x305), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_8, RA}},
+{"zlwgsfdx",	      VX(4, 0x308), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwgsfd",	      VX(4, 0x309), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4, RA}},
+{"zlwwosdx",	      VX(4, 0x30A), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwwosd",	      VX(4, 0x30B), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4, RA}},
+{"zlwhsplatwdx",      VX(4, 0x30C), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwhsplatwd",	      VX(4, 0x30D), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4, RA}},
+{"zlwhsplatdx",	      VX(4, 0x30E), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwhsplatd",	      VX(4, 0x30F), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4, RA}},
+{"zlwhgwsfdx",	      VX(4, 0x310), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwhgwsfd",	      VX(4, 0x311), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4, RA}},
+{"zlwhedx",	      VX(4, 0x312), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwhed",	      VX(4, 0x313), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4, RA}},
+{"zlwhosdx",	      VX(4, 0x314), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwhosd",	      VX(4, 0x315), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4, RA}},
+{"zlwhoudx",	      VX(4, 0x316), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwhoud",	      VX(4, 0x317), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4, RA}},
+{"zlwhx",	      VX(4, 0x318), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlwh",	      VX(4, 0x319), VX_MASK,	PPCLSP, 0,		{RD, EVUIMM_4, RA}},
+{"zlwwx",	      VX(4, 0x31A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlww",	      VX(4, 0x31B), VX_MASK,	PPCLSP, 0,		{RD, EVUIMM_4, RA}},
+{"zlhgwsfx",	      VX(4, 0x31C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlhgwsf",	      VX(4, 0x31D), VX_MASK,	PPCLSP, 0,		{RD, EVUIMM_2, RA}},
+{"zlhhsplatx",	      VX(4, 0x31E), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlhhsplat",	      VX(4, 0x31F), VX_MASK,	PPCLSP, 0,		{RD, EVUIMM_2, RA}},
+{"zstddx",	      VX(4, 0x320), VX_MASK,	PPCLSP, 0,		{RS_EVEN, RA, RB}},
+{"zstdd",	      VX(4, 0x321), VX_MASK,	PPCLSP, 0,		{RS_EVEN, EVUIMM_8, RA}},
+{"zstdwx",	      VX(4, 0x322), VX_MASK,	PPCLSP, 0,		{RS_EVEN, RA, RB}},
+{"zstdw",	      VX(4, 0x323), VX_MASK,	PPCLSP, 0,		{RS_EVEN, EVUIMM_8, RA}},
+{"zstdhx",	      VX(4, 0x324), VX_MASK,	PPCLSP, 0,		{RS_EVEN, RA, RB}},
+{"zstdh",	      VX(4, 0x325), VX_MASK,	PPCLSP, 0,		{RS_EVEN, EVUIMM_8, RA}},
+{"zstwhedx",	      VX(4, 0x328), VX_MASK,	PPCLSP, 0,		{RS_EVEN, RA, RB}},
+{"zstwhed",	      VX(4, 0x329), VX_MASK,	PPCLSP, 0,		{RS_EVEN, EVUIMM_4, RA}},
+{"zstwhodx",	      VX(4, 0x32A), VX_MASK,	PPCLSP, 0,		{RS_EVEN, RA, RB}},
+{"zstwhod",	      VX(4, 0x32B), VX_MASK,	PPCLSP, 0,		{RS_EVEN, EVUIMM_4, RA}},
+{"zlhhex",	      VX(4, 0x330), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlhhe",	      VX(4, 0x331), VX_MASK,	PPCLSP, 0,		{RD, EVUIMM_2, RA}},
+{"zlhhosx",	      VX(4, 0x332), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlhhos",	      VX(4, 0x333), VX_MASK,	PPCLSP, 0,		{RD, EVUIMM_2, RA}},
+{"zlhhoux",	      VX(4, 0x334), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlhhou",	      VX(4, 0x335), VX_MASK,	PPCLSP, 0,		{RD, EVUIMM_2, RA}},
+{"zsthex",	      VX(4, 0x338), VX_MASK,	PPCLSP, 0,		{RS, RA, RB}},
+{"zsthe",	      VX(4, 0x339), VX_MASK,	PPCLSP, 0,		{RS, EVUIMM_2, RA}},
+{"zsthox",	      VX(4, 0x33A), VX_MASK,	PPCLSP, 0,		{RS, RA, RB}},
+{"zstho",	      VX(4, 0x33B), VX_MASK,	PPCLSP, 0,		{RS, EVUIMM_2, RA}},
+{"zstwhx",	      VX(4, 0x33C), VX_MASK,	PPCLSP, 0,		{RS, RA, RB}},
+{"zstwh",	      VX(4, 0x33D), VX_MASK,	PPCLSP, 0,		{RS, EVUIMM_4, RA}},
+{"zstwwx",	      VX(4, 0x33E), VX_MASK,	PPCLSP, 0,		{RS, RA, RB}},
+{"zstww",	      VX(4, 0x33F), VX_MASK,	PPCLSP, 0,		{RS, EVUIMM_4, RA}},
+{"zlddmx",	      VX(4, 0x340), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlddu",	      VX(4, 0x341), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_8_EX0, RA}},
+{"zldwmx",	      VX(4, 0x342), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zldwu",	      VX(4, 0x343), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_8_EX0, RA}},
+{"zldhmx",	      VX(4, 0x344), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zldhu",	      VX(4, 0x345), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_8_EX0, RA}},
+{"zlwgsfdmx",	      VX(4, 0x348), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwgsfdu",	      VX(4, 0x349), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4_EX0, RA}},
+{"zlwwosdmx",	      VX(4, 0x34A), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwwosdu",	      VX(4, 0x34B), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4_EX0, RA}},
+{"zlwhsplatwdmx",     VX(4, 0x34C), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwhsplatwdu",      VX(4, 0x34D), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4_EX0, RA}},
+{"zlwhsplatdmx",      VX(4, 0x34E), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwhsplatdu",	      VX(4, 0x34F), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4_EX0, RA}},
+{"zlwhgwsfdmx",	      VX(4, 0x350), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwhgwsfdu",	      VX(4, 0x351), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4_EX0, RA}},
+{"zlwhedmx",	      VX(4, 0x352), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwhedu",	      VX(4, 0x353), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4_EX0, RA}},
+{"zlwhosdmx",	      VX(4, 0x354), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwhosdu",	      VX(4, 0x355), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4_EX0, RA}},
+{"zlwhoudmx",	      VX(4, 0x356), VX_MASK,	PPCLSP, 0,		{RD_EVEN, RA, RB}},
+{"zlwhoudu",	      VX(4, 0x357), VX_MASK,	PPCLSP, 0,		{RD_EVEN, EVUIMM_4_EX0, RA}},
+{"zlwhmx",	      VX(4, 0x358), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlwhu",	      VX(4, 0x359), VX_MASK,	PPCLSP, 0,		{RD, EVUIMM_4_EX0, RA}},
+{"zlwwmx",	      VX(4, 0x35A), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlwwu",	      VX(4, 0x35B), VX_MASK,	PPCLSP, 0,		{RD, EVUIMM_4_EX0, RA}},
+{"zlhgwsfmx",	      VX(4, 0x35C), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlhgwsfu",	      VX(4, 0x35D), VX_MASK,	PPCLSP, 0,		{RD, EVUIMM_2_EX0, RA}},
+{"zlhhsplatmx",	      VX(4, 0x35E), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlhhsplatu",	      VX(4, 0x35F), VX_MASK,	PPCLSP, 0,		{RD, EVUIMM_2_EX0, RA}},
+{"zstddmx",	      VX(4, 0x360), VX_MASK,	PPCLSP, 0,		{RS_EVEN, RA, RB}},
+{"zstddu",	      VX(4, 0x361), VX_MASK,	PPCLSP, 0,		{RS, EVUIMM_8_EX0, RA}},
+{"zstdwmx",	      VX(4, 0x362), VX_MASK,	PPCLSP, 0,		{RS_EVEN, RA, RB}},
+{"zstdwu",	      VX(4, 0x363), VX_MASK,	PPCLSP, 0,		{RS_EVEN, EVUIMM_8_EX0, RA}},
+{"zstdhmx",	      VX(4, 0x364), VX_MASK,	PPCLSP, 0,		{RS_EVEN, RA, RB}},
+{"zstdhu",	      VX(4, 0x365), VX_MASK,	PPCLSP, 0,		{RS_EVEN, EVUIMM_8_EX0, RA}},
+{"zstwhedmx",	      VX(4, 0x368), VX_MASK,	PPCLSP, 0,		{RS_EVEN, RA, RB}},
+{"zstwhedu",	      VX(4, 0x369), VX_MASK,	PPCLSP, 0,		{RS_EVEN, EVUIMM_4_EX0, RA}},
+{"zstwhodmx",	      VX(4, 0x36A), VX_MASK,	PPCLSP, 0,		{RS_EVEN, RA, RB}},
+{"zstwhodu",	      VX(4, 0x36B), VX_MASK,	PPCLSP, 0,		{RS_EVEN, EVUIMM_4_EX0, RA}},
+{"zlhhemx",	      VX(4, 0x370), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlhheu",	      VX(4, 0x371), VX_MASK,	PPCLSP, 0,		{RD, EVUIMM_2_EX0, RA}},
+{"zlhhosmx",	      VX(4, 0x372), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlhhosu",	      VX(4, 0x373), VX_MASK,	PPCLSP, 0,		{RD, EVUIMM_2_EX0, RA}},
+{"zlhhoumx",	      VX(4, 0x374), VX_MASK,	PPCLSP, 0,		{RD, RA, RB}},
+{"zlhhouu",	      VX(4, 0x375), VX_MASK,	PPCLSP, 0,		{RD, EVUIMM_2_EX0, RA}},
+{"zsthemx",	      VX(4, 0x378), VX_MASK,	PPCLSP, 0,		{RS, RA, RB}},
+{"zstheu",	      VX(4, 0x379), VX_MASK,	PPCLSP, 0,		{RS, EVUIMM_2_EX0, RA}},
+{"zsthomx",	      VX(4, 0x37A), VX_MASK,	PPCLSP, 0,		{RS, RA, RB}},
+{"zsthou",	      VX(4, 0x37B), VX_MASK,	PPCLSP, 0,		{RS, EVUIMM_2_EX0, RA}},
+{"zstwhmx",	      VX(4, 0x37C), VX_MASK,	PPCLSP, 0,		{RS, RA, RB}},
+{"zstwhu",	      VX(4, 0x37D), VX_MASK,	PPCLSP, 0,		{RS, EVUIMM_4_EX0, RA}},
+{"zstwwmx",	      VX(4, 0x37E), VX_MASK,	PPCLSP, 0,		{RS, RA, RB}},
+{"zstwwu",	      VX(4, 0x37F), VX_MASK,	PPCLSP, 0,		{RS, EVUIMM_4_EX0, RA}},
 
 {"e_cmpi",	SCI8BF(6,0,21),	SCI8BF_MASK,	PPCVLE,	0,		{CRD32, RA, SCLSCI8}},
 {"e_cmpwi",	SCI8BF(6,0,21),	SCI8BF_MASK,	PPCVLE,	0,		{CRD32, RA, SCLSCI8}},

@@ -1756,7 +1756,7 @@ displaced_step_dump_bytes (struct ui_file *file,
 static int
 displaced_step_prepare_throw (ptid_t ptid)
 {
-  struct cleanup *old_cleanups, *ignore_cleanups;
+  struct cleanup *ignore_cleanups;
   struct thread_info *tp = find_thread_ptid (ptid);
   struct regcache *regcache = get_thread_regcache (ptid);
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -1808,7 +1808,7 @@ displaced_step_prepare_throw (ptid_t ptid)
 
   displaced_step_clear (displaced);
 
-  old_cleanups = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
   inferior_ptid = ptid;
 
   original = regcache_read_pc (regcache);
@@ -1834,7 +1834,6 @@ displaced_step_prepare_throw (ptid_t ptid)
 			      "Stepping over breakpoint in-line instead.\n");
 	}
 
-      do_cleanups (old_cleanups);
       return -1;
     }
 
@@ -1864,7 +1863,7 @@ displaced_step_prepare_throw (ptid_t ptid)
       /* The architecture doesn't know how or want to displaced step
 	 this instruction or instruction sequence.  Fallback to
 	 stepping over the breakpoint in-line.  */
-      do_cleanups (old_cleanups);
+      do_cleanups (ignore_cleanups);
       return -1;
     }
 
@@ -1882,8 +1881,6 @@ displaced_step_prepare_throw (ptid_t ptid)
   regcache_write_pc (regcache, copy);
 
   discard_cleanups (ignore_cleanups);
-
-  do_cleanups (old_cleanups);
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog, "displaced: displaced pc to %s\n",
@@ -1941,11 +1938,10 @@ static void
 write_memory_ptid (ptid_t ptid, CORE_ADDR memaddr,
 		   const gdb_byte *myaddr, int len)
 {
-  struct cleanup *ptid_cleanup = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
   inferior_ptid = ptid;
   write_memory (memaddr, myaddr, len);
-  do_cleanups (ptid_cleanup);
 }
 
 /* Restore the contents of the copy area for thread PTID.  */
@@ -4366,17 +4362,10 @@ wait_one (struct target_waitstatus *ws)
 static int					\
 thread_stopped_by_ ## REASON (ptid_t ptid)	\
 {						\
-  struct cleanup *old_chain;			\
-  int res;					\
-						\
-  old_chain = save_inferior_ptid ();		\
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid); \
   inferior_ptid = ptid;				\
 						\
-  res = target_stopped_by_ ## REASON ();	\
-						\
-  do_cleanups (old_chain);			\
-						\
-  return res;					\
+  return target_stopped_by_ ## REASON ();	\
 }
 
 /* Generate thread_stopped_by_watchpoint.  */
@@ -5706,7 +5695,7 @@ handle_signal_stop (struct execution_control_state *ecs)
     {
       struct regcache *regcache = get_thread_regcache (ecs->ptid);
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
-      struct cleanup *old_chain = save_inferior_ptid ();
+      scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
       inferior_ptid = ecs->ptid;
 
@@ -5726,8 +5715,6 @@ handle_signal_stop (struct execution_control_state *ecs)
             fprintf_unfiltered (gdb_stdlog,
                                 "infrun: (no data address available)\n");
 	}
-
-      do_cleanups (old_chain);
     }
 
   /* This is originated from start_remote(), start_inferior() and
@@ -9116,32 +9103,6 @@ discard_infcall_control_state (struct infcall_control_state *inf_status)
   xfree (inf_status);
 }
 
-/* restore_inferior_ptid() will be used by the cleanup machinery
-   to restore the inferior_ptid value saved in a call to
-   save_inferior_ptid().  */
-
-static void
-restore_inferior_ptid (void *arg)
-{
-  ptid_t *saved_ptid_ptr = (ptid_t *) arg;
-
-  inferior_ptid = *saved_ptid_ptr;
-  xfree (arg);
-}
-
-/* Save the value of inferior_ptid so that it may be restored by a
-   later call to do_cleanups().  Returns the struct cleanup pointer
-   needed for later doing the cleanup.  */
-
-struct cleanup *
-save_inferior_ptid (void)
-{
-  ptid_t *saved_ptid_ptr = XNEW (ptid_t);
-
-  *saved_ptid_ptr = inferior_ptid;
-  return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
-}
-
 /* See infrun.h.  */
 
 void

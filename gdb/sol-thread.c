@@ -367,10 +367,9 @@ static void
 sol_thread_resume (struct target_ops *ops,
 		   ptid_t ptid, int step, enum gdb_signal signo)
 {
-  struct cleanup *old_chain;
   struct target_ops *beneath = find_target_beneath (ops);
 
-  old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
   inferior_ptid = thread_to_lwp (inferior_ptid, ptid_get_pid (main_ph.ptid));
   if (ptid_get_pid (inferior_ptid) == -1)
@@ -389,8 +388,6 @@ sol_thread_resume (struct target_ops *ops,
     }
 
   beneath->to_resume (beneath, ptid, step, signo);
-
-  do_cleanups (old_chain);
 }
 
 /* Wait for any threads to stop.  We may have to convert PTID from a
@@ -403,10 +400,9 @@ sol_thread_wait (struct target_ops *ops,
   ptid_t rtnval;
   ptid_t save_ptid;
   struct target_ops *beneath = find_target_beneath (ops);
-  struct cleanup *old_chain;
 
   save_ptid = inferior_ptid;
-  old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
   inferior_ptid = thread_to_lwp (inferior_ptid, ptid_get_pid (main_ph.ptid));
   if (ptid_get_pid (inferior_ptid) == -1)
@@ -444,8 +440,6 @@ sol_thread_wait (struct target_ops *ops,
   /* During process initialization, we may get here without the thread
      package being initialized, since that can only happen after we've
      found the shared libs.  */
-
-  do_cleanups (old_chain);
 
   return rtnval;
 }
@@ -569,11 +563,9 @@ sol_thread_xfer_partial (struct target_ops *ops, enum target_object object,
 			  const gdb_byte *writebuf,
 			 ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
-  enum target_xfer_status retval;
-  struct cleanup *old_chain;
   struct target_ops *beneath = find_target_beneath (ops);
 
-  old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
   if (ptid_tid_p (inferior_ptid) || !target_thread_alive (inferior_ptid))
     {
@@ -585,12 +577,8 @@ sol_thread_xfer_partial (struct target_ops *ops, enum target_object object,
       inferior_ptid = procfs_first_available ();
     }
 
-  retval = beneath->to_xfer_partial (beneath, object, annex, readbuf,
-				     writebuf, offset, len, xfered_len);
-
-  do_cleanups (old_chain);
-
-  return retval;
+  return beneath->to_xfer_partial (beneath, object, annex, readbuf,
+				   writebuf, offset, len, xfered_len);
 }
 
 static void
@@ -800,9 +788,8 @@ rw_common (int dowrite, const struct ps_prochandle *ph, gdb_ps_addr_t addr,
 	   gdb_byte *buf, int size)
 {
   int ret;
-  struct cleanup *old_chain;
 
-  old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
   if (ptid_tid_p (inferior_ptid) || !target_thread_alive (inferior_ptid))
     {
@@ -825,8 +812,6 @@ rw_common (int dowrite, const struct ps_prochandle *ph, gdb_ps_addr_t addr,
     ret = target_write_memory (addr, (gdb_byte *) buf, size);
   else
     ret = target_read_memory (addr, (gdb_byte *) buf, size);
-
-  do_cleanups (old_chain);
 
   return (ret == 0 ? PS_OK : PS_ERR);
 }

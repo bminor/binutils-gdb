@@ -619,7 +619,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"c.lw",      "C",   "Ct,Ck(Cs)",  MATCH_C_LW, MASK_C_LW, match_opcode, 0 },
 {"c.swsp",    "C",   "CV,CM(Cc)",  MATCH_C_SWSP, MASK_C_SWSP, match_opcode, 0 },
 {"c.sw",      "C",   "Ct,Ck(Cs)",  MATCH_C_SW, MASK_C_SW, match_opcode, 0 },
-{"c.nop",     "C",   "",  MATCH_C_ADDI, 0xffff, match_opcode, 0 },
+{"c.nop",     "C",   "",  MATCH_C_ADDI, 0xffff, match_opcode, INSN_ALIAS },
 {"c.mv",      "C",   "d,CV",  MATCH_C_MV, MASK_C_MV, match_c_add, 0 },
 {"c.lui",     "C",   "d,Cu",  MATCH_C_LUI, MASK_C_LUI, match_c_lui, 0 },
 {"c.li",      "C",   "d,Co",  MATCH_C_LI, MASK_C_LI, match_rd_nonzero, 0 },

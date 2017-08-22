@@ -16,9 +16,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "defs.h"
+#include "common-defs.h"
+#include "common-exceptions.h"
+#include "common-debug.h"
 #include "selftest.h"
 #include <vector>
+
+namespace selftests
+{
 
 /* All the tests that have been registered.  */
 
@@ -27,7 +32,7 @@ static std::vector<self_test_function *> tests;
 /* See selftest.h.  */
 
 void
-register_self_test (self_test_function *function)
+register_test (self_test_function *function)
 {
   tests.push_back (function);
 }
@@ -35,14 +40,12 @@ register_self_test (self_test_function *function)
 /* See selftest.h.  */
 
 void
-run_self_tests (void)
+run_tests (void)
 {
   int failed = 0;
 
   for (int i = 0; i < tests.size (); ++i)
     {
-      QUIT;
-
       TRY
 	{
 	  tests[i] ();
@@ -50,15 +53,14 @@ run_self_tests (void)
       CATCH (ex, RETURN_MASK_ERROR)
 	{
 	  ++failed;
-	  exception_fprintf (gdb_stderr, ex, _("Self test failed: "));
+	  debug_printf ("Self test failed: %s\n", ex.message);
 	}
       END_CATCH
 
-      /* Clear GDB internal state.  */
-      registers_changed ();
-      reinit_frame_cache ();
+      reset ();
     }
 
-  printf_filtered (_("Ran %lu unit tests, %d failed\n"),
-		   (long) tests.size (), failed);
+  debug_printf ("Ran %lu unit tests, %d failed\n",
+		(long) tests.size (), failed);
 }
+} // namespace selftests

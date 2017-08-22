@@ -443,12 +443,40 @@ whatis_exp (char *exp, int show)
 	}
 
       expression_up expr = parse_expression (exp);
-      val = evaluate_type (expr.get ());
+
+      /* The behavior of "whatis" depends on whether the user
+	 expression names a type directly, or a language expression
+	 (including variable names).  If the former, then "whatis"
+	 strips one level of typedefs, only.  If an expression,
+	 "whatis" prints the type of the expression without stripping
+	 any typedef level.  "ptype" always strips all levels of
+	 typedefs.  */
+      if (show == -1 && expr->elts[0].opcode == OP_TYPE)
+	{
+	  /* The user expression names a type directly.  */
+	  type = expr->elts[1].type;
+
+	  /* If this is a typedef, then find its immediate target.
+	     Use check_typedef to resolve stubs, but ignore its result
+	     because we do not want to dig past all typedefs.  */
+	  check_typedef (type);
+	  if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+	    type = TYPE_TARGET_TYPE (type);
+	}
+      else
+	{
+	  /* The user expression names a type indirectly by naming an
+	     object or expression of that type.  Find that
+	     indirectly-named type.  */
+	  val = evaluate_type (expr.get ());
+	  type = value_type (val);
+	}
     }
   else
-    val = access_value_history (0);
-
-  type = value_type (val);
+    {
+      val = access_value_history (0);
+      type = value_type (val);
+    }
 
   get_user_print_options (&opts);
   if (opts.objectprint)

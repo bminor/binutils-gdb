@@ -20253,6 +20253,15 @@ environment:
 $ gdbserver --wrapper env LD_PRELOAD=libtest.so -- :2222 ./testprog
 @end smallexample
 
+@cindex @option{--selftest}
+The @option{--selftest} option runs the self tests in @code{gdbserver}:
+
+@smallexample
+$ gdbserver --selftest
+Ran 2 unit tests, 0 failed
+@end smallexample
+
+These tests are disabled in release.
 @subsection Connecting to @code{gdbserver}
 
 The basic procedure for connecting to the remote target is:
@@ -25415,6 +25424,10 @@ finish
 @item n
 next
 
+@kindex o @r{(SingleKey TUI key)}
+@item o
+nexti.  The shortcut letter @samp{o} stands for ``step Over''.
+
 @kindex q @r{(SingleKey TUI key)}
 @item q
 exit the SingleKey mode.
@@ -25426,6 +25439,10 @@ run
 @kindex s @r{(SingleKey TUI key)}
 @item s
 step
+
+@kindex i @r{(SingleKey TUI key)}
+@item i
+stepi.  The shortcut letter @samp{i} stands for ``step Into''.
 
 @kindex u @r{(SingleKey TUI key)}
 @item u

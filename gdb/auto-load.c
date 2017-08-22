@@ -218,7 +218,7 @@ auto_load_safe_path_vec_update (void)
     {
       char *dir = VEC_index (char_ptr, auto_load_safe_path_vec, ix);
       char *expanded = tilde_expand (dir);
-      char *real_path = gdb_realpath (expanded);
+      gdb::unique_xmalloc_ptr<char> real_path = gdb_realpath (expanded);
 
       /* Ensure the current entry is at least tilde_expand-ed.  */
       VEC_replace (char_ptr, auto_load_safe_path_vec, ix, expanded);
@@ -238,16 +238,15 @@ auto_load_safe_path_vec_update (void)
       xfree (dir);
 
       /* If gdb_realpath returns a different content, append it.  */
-      if (strcmp (real_path, expanded) == 0)
-	xfree (real_path);
-      else
+      if (strcmp (real_path.get (), expanded) != 0)
 	{
-	  VEC_safe_push (char_ptr, auto_load_safe_path_vec, real_path);
-
 	  if (debug_auto_load)
 	    fprintf_unfiltered (gdb_stdlog,
 				_("auto-load: And canonicalized as \"%s\".\n"),
-				real_path);
+				real_path.get ());
+
+	  VEC_safe_push (char_ptr, auto_load_safe_path_vec,
+			 real_path.release ());
 	}
     }
 }
@@ -419,12 +418,11 @@ filename_is_in_pattern (const char *filename, const char *pattern)
 /* Return 1 if FILENAME belongs to one of directory components of
    AUTO_LOAD_SAFE_PATH_VEC.  Return 0 otherwise.
    auto_load_safe_path_vec_update is never called.
-   *FILENAME_REALP may be updated by gdb_realpath of FILENAME - it has to be
-   freed by the caller.  */
+   *FILENAME_REALP may be updated by gdb_realpath of FILENAME.  */
 
 static int
 filename_is_in_auto_load_safe_path_vec (const char *filename,
-					char **filename_realp)
+					gdb::unique_xmalloc_ptr<char> *filename_realp)
 {
   char *pattern;
   int ix;
@@ -439,17 +437,17 @@ filename_is_in_auto_load_safe_path_vec (const char *filename,
       if (*filename_realp == NULL)
 	{
 	  *filename_realp = gdb_realpath (filename);
-	  if (debug_auto_load && strcmp (*filename_realp, filename) != 0)
+	  if (debug_auto_load && strcmp (filename_realp->get (), filename) != 0)
 	    fprintf_unfiltered (gdb_stdlog,
 				_("auto-load: Resolved "
 				  "file \"%s\" as \"%s\".\n"),
-				filename, *filename_realp);
+				filename, filename_realp->get ());
 	}
 
-      if (strcmp (*filename_realp, filename) != 0)
+      if (strcmp (filename_realp->get (), filename) != 0)
 	for (ix = 0;
 	     VEC_iterate (char_ptr, auto_load_safe_path_vec, ix, pattern); ++ix)
-	  if (filename_is_in_pattern (*filename_realp, pattern))
+	  if (filename_is_in_pattern (filename_realp->get (), pattern))
 	    break;
     }
 
@@ -476,8 +474,7 @@ filename_is_in_auto_load_safe_path_vec (const char *filename,
 int
 file_is_auto_load_safe (const char *filename, const char *debug_fmt, ...)
 {
-  char *filename_real = NULL;
-  struct cleanup *back_to;
+  gdb::unique_xmalloc_ptr<char> filename_real;
   static int advice_printed = 0;
 
   if (debug_auto_load)
@@ -489,34 +486,24 @@ file_is_auto_load_safe (const char *filename, const char *debug_fmt, ...)
       va_end (debug_args);
     }
 
-  back_to = make_cleanup (free_current_contents, &filename_real);
-
   if (filename_is_in_auto_load_safe_path_vec (filename, &filename_real))
-    {
-      do_cleanups (back_to);
-      return 1;
-    }
+    return 1;
 
   auto_load_safe_path_vec_update ();
   if (filename_is_in_auto_load_safe_path_vec (filename, &filename_real))
-    {
-      do_cleanups (back_to);
-      return 1;
-    }
+    return 1;
 
   warning (_("File \"%s\" auto-loading has been declined by your "
 	     "`auto-load safe-path' set to \"%s\"."),
-	   filename_real, auto_load_safe_path);
+	   filename_real.get (), auto_load_safe_path);
 
   if (!advice_printed)
     {
       const char *homedir = getenv ("HOME");
-      char *homeinit;
 
       if (homedir == NULL)
 	homedir = "$HOME";
-      homeinit = xstrprintf ("%s/%s", homedir, gdbinit);
-      make_cleanup (xfree, homeinit);
+      std::string homeinit = string_printf ("%s/%s", homedir, gdbinit);
 
       printf_filtered (_("\
 To enable execution of this file add\n\
@@ -528,11 +515,11 @@ line to your configuration file \"%s\".\n\
 For more information about this security protection see the\n\
 \"Auto-loading safe path\" section in the GDB manual.  E.g., run from the shell:\n\
 \tinfo \"(gdb)Auto-loading safe path\"\n"),
-		       filename_real, homeinit, homeinit);
+		       filename_real.get (),
+		       homeinit.c_str (), homeinit.c_str ());
       advice_printed = 1;
     }
 
-  do_cleanups (back_to);
   return 0;
 }
 
@@ -891,30 +878,28 @@ void
 auto_load_objfile_script (struct objfile *objfile,
 			  const struct extension_language_defn *language)
 {
-  char *realname = gdb_realpath (objfile_name (objfile));
-  struct cleanup *cleanups = make_cleanup (xfree, realname);
+  gdb::unique_xmalloc_ptr<char> realname
+    = gdb_realpath (objfile_name (objfile));
 
-  if (!auto_load_objfile_script_1 (objfile, realname, language))
+  if (!auto_load_objfile_script_1 (objfile, realname.get (), language))
     {
       /* For Windows/DOS .exe executables, strip the .exe suffix, so that
 	 FOO-gdb.gdb could be used for FOO.exe, and try again.  */
 
-      size_t len = strlen (realname);
+      size_t len = strlen (realname.get ());
       const size_t lexe = sizeof (".exe") - 1;
 
-      if (len > lexe && strcasecmp (realname + len - lexe, ".exe") == 0)
+      if (len > lexe && strcasecmp (realname.get () + len - lexe, ".exe") == 0)
 	{
 	  len -= lexe;
-	  realname[len] = '\0';
+	  realname.get ()[len] = '\0';
 	  if (debug_auto_load)
 	    fprintf_unfiltered (gdb_stdlog, _("auto-load: Stripped .exe suffix, "
 					      "retrying with \"%s\".\n"),
-				realname);
-	  auto_load_objfile_script_1 (objfile, realname, language);
+				realname.get ());
+	  auto_load_objfile_script_1 (objfile, realname.get (), language);
 	}
     }
-
-  do_cleanups (cleanups);
 }
 
 /* Subroutine of source_section_scripts to simplify it.

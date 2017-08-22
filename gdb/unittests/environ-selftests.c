@@ -155,5 +155,5 @@ run_tests ()
 void
 _initialize_environ_selftests ()
 {
-  register_self_test (selftests::gdb_environ_tests::run_tests);
+  selftests::register_test (selftests::gdb_environ_tests::run_tests);
 }

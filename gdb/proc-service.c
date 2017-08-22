@@ -87,7 +87,7 @@ static ps_err_e
 ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr,
 		gdb_byte *buf, size_t len, int write)
 {
-  struct cleanup *old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
   int ret;
   CORE_ADDR core_addr = ps_addr_to_core_addr (addr);
 
@@ -97,8 +97,6 @@ ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr,
     ret = target_write_memory (core_addr, buf, len);
   else
     ret = target_read_memory (core_addr, buf, len);
-
-  do_cleanups (old_chain);
 
   return (ret == 0 ? PS_OK : PS_ERR);
 }

@@ -1776,6 +1776,6 @@ remote register number and buffer offset in the g/G packets.\n\
 Takes an optional file parameter."),
 	   &maintenanceprintlist);
 #if GDB_SELF_TEST
-  register_self_test (selftests::current_regcache_test);
+  selftests::register_test (selftests::current_regcache_test);
 #endif
 }

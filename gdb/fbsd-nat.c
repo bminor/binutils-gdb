@@ -314,7 +314,7 @@ fbsd_convert_siginfo (siginfo_t *si)
      32-bits of the pointer value.  */
 #if _BYTE_ORDER == _BIG_ENDIAN
   if (si->si_value.sival_int == 0)
-    si32->si_value.sival_ptr = (uintptr_t) si->si_value.sival_ptr;
+    si32.si_value.sival_ptr = (uintptr_t) si->si_value.sival_ptr;
   else
     si32.si_value.sival_int = si->si_value.sival_int;
 #else
@@ -632,7 +632,7 @@ fbsd_add_threads (pid_t pid)
   if (nlwps == -1)
     perror_with_name (("ptrace"));
 
-  gdb::unique_xmalloc_ptr<lwpid_t> lwps (XCNEWVEC (lwpid_t, nlwps));
+  gdb::unique_xmalloc_ptr<lwpid_t[]> lwps (XCNEWVEC (lwpid_t, nlwps));
 
   nlwps = ptrace (PT_GETLWPLIST, pid, (caddr_t) lwps.get (), nlwps);
   if (nlwps == -1)
@@ -640,8 +640,7 @@ fbsd_add_threads (pid_t pid)
 
   for (i = 0; i < nlwps; i++)
     {
-      lwpid_t lwp = lwps.get ()[i];
-      ptid_t ptid = ptid_build (pid, lwp, 0);
+      ptid_t ptid = ptid_build (pid, lwps[i], 0);
 
       if (!in_thread_list (ptid))
 	{
@@ -650,7 +649,7 @@ fbsd_add_threads (pid_t pid)
 
 	  /* Don't add exited threads.  Note that this is only called
 	     when attaching to a multi-threaded process.  */
-	  if (ptrace (PT_LWPINFO, lwp, (caddr_t) &pl, sizeof pl) == -1)
+	  if (ptrace (PT_LWPINFO, lwps[i], (caddr_t) &pl, sizeof pl) == -1)
 	    perror_with_name (("ptrace"));
 	  if (pl.pl_flags & PL_FLAG_EXITED)
 	    continue;
@@ -658,7 +657,7 @@ fbsd_add_threads (pid_t pid)
 	  if (debug_fbsd_lwp)
 	    fprintf_unfiltered (gdb_stdlog,
 				"FLWP: adding thread for LWP %u\n",
-				lwp);
+				lwps[i]);
 	  add_thread (ptid);
 	}
     }

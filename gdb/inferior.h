@@ -73,11 +73,6 @@ extern void discard_infcall_control_state (struct infcall_control_state *);
 extern struct regcache *
   get_infcall_suspend_state_regcache (struct infcall_suspend_state *);
 
-/* Save value of inferior_ptid so that it may be restored by
-   a later call to do_cleanups().  Returns the struct cleanup
-   pointer needed for later doing the cleanup.  */
-extern struct cleanup * save_inferior_ptid (void);
-
 extern void set_sigint_trap (void);
 
 extern void clear_sigint_trap (void);

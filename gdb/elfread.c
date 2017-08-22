@@ -1132,6 +1132,9 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 	synth_symbol_table[i] = synthsyms + i;
       elf_symtab_read (reader, objfile, ST_SYNTHETIC, synthcount,
 		       synth_symbol_table.get (), true);
+
+      xfree (synthsyms);
+      synthsyms = NULL;
     }
 
   /* Install any minimal symbols that have been collected as the current

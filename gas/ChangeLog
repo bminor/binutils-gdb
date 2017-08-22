@@ -1,3 +1,23 @@
+2017-08-21  Alexander Fedotov <alexander.fedotov@nxp.com>
+	    Edmar Wienskoski <edmar.wienskoski@nxp.com
+
+	* testsuite/gas/ppc/lsp-checks.d,
+	* testsuite/gas/ppc/lsp-checks.l,
+	* testsuite/gas/ppc/lsp-checks.s: New test.
+	* testsuite/gas/ppc/lsp.d,
+	* testsuite/gas/ppc/lsp.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run new tests.
+
+2017-08-15  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* config/tc-aarch64.c (REGDEF_ALIAS): Define
+	(reg_names): Update for ip0, ip1, fp, lr to use REGDEF_ALIAS
+	* doc/c-aarch64.texi: Update documentation on .req.
+	* testsuite/gas/diagnostic.s: Update
+	* testsuite/gas/diagnostic.l: Likewise
+	* testsuite/gas/register_aliases.s: New file.
+	* testsuite/gas/register_aliases.d: New file.
+
 2017-08-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/21667

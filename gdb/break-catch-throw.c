@@ -387,8 +387,7 @@ handle_gnu_v3_exceptions (int tempflag, std::string &&except_rx,
 
   re_set_exception_catchpoint (cp.get ());
 
-  install_breakpoint (0, cp.get (), 1);
-  cp.release ();
+  install_breakpoint (0, std::move (cp), 1);
 }
 
 /* Look for an "if" token in *STRING.  The "if" token must be preceded
