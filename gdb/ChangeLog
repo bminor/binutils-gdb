@@ -1,3 +1,10 @@
+2017-08-23  Pedro Alves  <palves@redhat.com>
+
+	PR remote/21852
+	* remote.c (add_current_inferior_and_thread): Set inferior_ptid
+	to null_ptid and switch to thread without reading the registers
+	after adding the inferior.
+
 2017-08-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* NEWS (Changes since GDB 8.0): Add set compile-gcc and show
