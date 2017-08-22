@@ -955,6 +955,8 @@ list_command (char *arg, int from_tty)
   if (!have_full_symbols () && !have_partial_symbols ())
     error (_("No symbol table is loaded.  Use the \"file\" command."));
 
+  sals.nelts = 0;
+  sals.sals = NULL;
   arg1 = arg;
   if (*arg1 == ',')
     dummy_beg = 1;
@@ -971,15 +973,8 @@ list_command (char *arg, int from_tty)
 	  /*  C++  */
 	  return;
 	}
-      if (sals.nelts > 1)
-	{
-	  ambiguous_line_spec (&sals);
-	  xfree (sals.sals);
-	  return;
-	}
 
       sal = sals.sals[0];
-      xfree (sals.sals);
     }
 
   /* Record whether the BEG arg is all digits.  */
@@ -992,6 +987,12 @@ list_command (char *arg, int from_tty)
   if (*arg1 == ',')
     {
       no_end = 0;
+      if (sals.nelts > 1)
+	{
+	  ambiguous_line_spec (&sals);
+	  xfree (sals.sals);
+	  return;
+	}
       arg1++;
       while (*arg1 == ' ' || *arg1 == '\t')
 	arg1++;
@@ -1010,11 +1011,15 @@ list_command (char *arg, int from_tty)
 
 	  filter_sals (&sals_end);
 	  if (sals_end.nelts == 0)
-	    return;
+	    {
+	      xfree (sals.sals);
+	      return;
+	    }
 	  if (sals_end.nelts > 1)
 	    {
 	      ambiguous_line_spec (&sals_end);
 	      xfree (sals_end.sals);
+	      xfree (sals.sals);
 	      return;
 	    }
 	  sal_end = sals_end.sals[0];
@@ -1080,14 +1085,23 @@ list_command (char *arg, int from_tty)
     error (_("No default source file yet.  Do \"help list\"."));
   else if (no_end)
     {
-      int first_line = sal.line - get_lines_to_list () / 2;
-
-      if (first_line < 1) first_line = 1;
-
-      print_source_lines (sal.symtab,
-		          first_line,
-			  first_line + get_lines_to_list (),
-			  0);
+      for (int i = 0; i < sals.nelts; i++)
+	{
+	  sal = sals.sals[i];
+	  int first_line = sal.line - get_lines_to_list () / 2;
+	  if (first_line < 1)
+	    first_line = 1;
+	  if (sals.nelts > 1)
+	    {
+	      printf_filtered (_("file: \"%s\", line number: %d\n"),
+			       symtab_to_filename_for_display (sal.symtab),
+			       sal.line);
+	    }
+	  print_source_lines (sal.symtab,
+			      first_line,
+			      first_line + get_lines_to_list (),
+			      0);
+	}
     }
   else
     print_source_lines (sal.symtab, sal.line,
@@ -1095,6 +1109,7 @@ list_command (char *arg, int from_tty)
 			 ? sal.line + get_lines_to_list ()
 			 : sal_end.line + 1),
 			0);
+  xfree (sals.sals);
 }
 
 /* Subroutine of disassemble_command to simplify it.
