@@ -1,3 +1,16 @@
+2017-08-22  H.J. Lu  <hongjiu.lu@intel.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/pr21964-1a.c (foo): Renamed to ...
+	(foo1): This.
+	* testsuite/ld-elf/pr21964-1b.c: Rewrite.
+	* testsuite/ld-elf/pr21964-1c.c: New file.
+	* testsuite/ld-elf/pr21964-2c.c: Likewise.
+	* testsuite/ld-elf/pr21964-2a.c (foo): Renamed to ...
+	(foo1): This.
+	* testsuite/ld-elf/pr21964-2b.c: Rewrite.
+	* testsuite/ld-elf/shared.exp: Update PR ld/21964 tests.
+
 2017-08-21  H.J. Lu  <hongjiu.lu@intel.com>
 	    Alan Modra  <amodra@gmail.com>
 

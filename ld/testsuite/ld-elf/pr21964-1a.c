@@ -1,6 +1,7 @@
 extern int __start___verbose[];
 extern int __stop___verbose[];
-int foo (void)
+int
+foo1 (void)
 {
   static int my_var __attribute__((used, section("__verbose"))) = 5;
   if (__start___verbose == __stop___verbose
