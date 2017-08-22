@@ -1,3 +1,7 @@
+2017-08-23  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-gc/pr19161.d: Don't xfail hppa.
+
 2017-08-22  H.J. Lu  <hongjiu.lu@intel.com>
 	    Alan Modra  <amodra@gmail.com>
 
