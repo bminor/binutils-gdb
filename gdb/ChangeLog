@@ -1,5 +1,21 @@
 2017-09-20  Tom Tromey  <tom@tromey.com>
 
+	* breakpoint.c (struct counted_command_line): Remove.
+	(breakpoint_commands): Update.
+	(alloc_counted_command_line, incref_counted_command_line)
+	(decref_counted_command_line, do_cleanup_counted_command_line)
+	(make_cleanup_decref_counted_command_line): Remove.
+	(breakpoint_set_commands, commands_command_1, ~bpstats, bpstats)
+	(bpstat_clear_actions, bpstat_do_actions_1, watchpoint_check)
+	(bpstat_stop_status, print_one_breakpoint_location, ~breakpoint)
+	(save_breakpoints): Update.
+	* breakpoint.h (counted_command_line): Now a typedef to
+	shared_ptr.
+	(struct breakpoint) <commands>: Now a counted_command_line.
+	(struct bpstats) <command>: Likewise.
+
+2017-09-20  Tom Tromey  <tom@tromey.com>
+
 	* breakpoint.c (struct commands_info, do_map_commands_command):
 	Remove.
 	(commands_command_1): Update.

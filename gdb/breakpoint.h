@@ -657,10 +657,9 @@ enum watchpoint_triggered
 typedef struct bp_location *bp_location_p;
 DEF_VEC_P(bp_location_p);
 
-/* A reference-counted struct command_line.  This lets multiple
-   breakpoints share a single command list.  This is an implementation
+/* A reference-counted struct command_line. This is an implementation
    detail to the breakpoints module.  */
-struct counted_command_line;
+typedef std::shared_ptr<command_line> counted_command_line;
 
 /* Some targets (e.g., embedded PowerPC) need two debug registers to set
    a watchpoint over a memory region.  If this flag is true, GDB will use
@@ -712,7 +711,7 @@ struct breakpoint
 
   /* Chain of command lines to execute when this breakpoint is
      hit.  */
-  counted_command_line *commands = NULL;
+  counted_command_line commands;
   /* Stack depth (address of frame).  If nonzero, break only if fp
      equals this.  */
   struct frame_id frame_id = null_frame_id;
@@ -1118,7 +1117,7 @@ struct bpstats
     struct breakpoint *breakpoint_at;
 
     /* The associated command list.  */
-    struct counted_command_line *commands;
+    counted_command_line commands;
 
     /* Old value associated with a watchpoint.  */
     struct value *old_val;

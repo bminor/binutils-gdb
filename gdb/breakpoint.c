@@ -359,21 +359,10 @@ static char *dprintf_channel;
    has disconnected.  */
 static int disconnected_dprintf = 1;
 
-/* A reference-counted struct command_line.  This lets multiple
-   breakpoints share a single command list.  */
-struct counted_command_line
-{
-  /* The reference count.  */
-  int refc;
-
-  /* The command list.  */
-  struct command_line *commands;
-};
-
 struct command_line *
 breakpoint_commands (struct breakpoint *b)
 {
-  return b->commands ? b->commands->commands : NULL;
+  return b->commands ? b->commands.get () : NULL;
 }
 
 /* Flag indicating that a command has proceeded the inferior past the
@@ -715,64 +704,6 @@ clear_breakpoint_hit_counts (void)
 
   ALL_BREAKPOINTS (b)
     b->hit_count = 0;
-}
-
-/* Allocate a new counted_command_line with reference count of 1.
-   The new structure owns COMMANDS.  */
-
-static struct counted_command_line *
-alloc_counted_command_line (struct command_line *commands)
-{
-  struct counted_command_line *result = XNEW (struct counted_command_line);
-
-  result->refc = 1;
-  result->commands = commands;
-
-  return result;
-}
-
-/* Increment reference count.  This does nothing if CMD is NULL.  */
-
-static void
-incref_counted_command_line (struct counted_command_line *cmd)
-{
-  if (cmd)
-    ++cmd->refc;
-}
-
-/* Decrement reference count.  If the reference count reaches 0,
-   destroy the counted_command_line.  Sets *CMDP to NULL.  This does
-   nothing if *CMDP is NULL.  */
-
-static void
-decref_counted_command_line (struct counted_command_line **cmdp)
-{
-  if (*cmdp)
-    {
-      if (--(*cmdp)->refc == 0)
-	{
-	  free_command_lines (&(*cmdp)->commands);
-	  xfree (*cmdp);
-	}
-      *cmdp = NULL;
-    }
-}
-
-/* A cleanup function that calls decref_counted_command_line.  */
-
-static void
-do_cleanup_counted_command_line (void *arg)
-{
-  decref_counted_command_line ((struct counted_command_line **) arg);
-}
-
-/* Create a cleanup that calls decref_counted_command_line on the
-   argument.  */
-
-static struct cleanup *
-make_cleanup_decref_counted_command_line (struct counted_command_line **cmdp)
-{
-  return make_cleanup (do_cleanup_counted_command_line, cmdp);
 }
 
 
@@ -1303,8 +1234,7 @@ breakpoint_set_commands (struct breakpoint *b,
 {
   validate_commands_for_breakpoint (b, commands.get ());
 
-  decref_counted_command_line (&b->commands);
-  b->commands = alloc_counted_command_line (commands.release ());
+  b->commands = std::move (commands);
   observer_notify_breakpoint_modified (b);
 }
 
@@ -1360,12 +1290,7 @@ static void
 commands_command_1 (const char *arg, int from_tty,
 		    struct command_line *control)
 {
-  struct cleanup *cleanups;
-  struct counted_command_line *cmd = NULL;
-
-  /* If we read command lines from the user, then `info' will hold an
-     extra reference to the commands that we must clean up.  */
-  cleanups = make_cleanup_decref_counted_command_line (&cmd);
+  counted_command_line cmd;
 
   std::string new_arg;
 
@@ -1384,10 +1309,8 @@ commands_command_1 (const char *arg, int from_tty,
      {
        if (cmd == NULL)
 	 {
-	   command_line_up l;
-
 	   if (control != NULL)
-	     l = copy_command_lines (control->body_list[0]);
+	     cmd = copy_command_lines (control->body_list[0]);
 	   else
 	     {
 	       struct cleanup *old_chain;
@@ -1399,25 +1322,21 @@ commands_command_1 (const char *arg, int from_tty,
 
 	       old_chain = make_cleanup (xfree, str);
 
-	       l = read_command_lines (str,
-				       from_tty, 1,
-				       (is_tracepoint (b)
-					? check_tracepoint_command : 0),
-				       b);
+	       cmd = read_command_lines (str,
+					 from_tty, 1,
+					 (is_tracepoint (b)
+					  ? check_tracepoint_command : 0),
+					 b);
 
 	       do_cleanups (old_chain);
 	     }
-
-	   cmd = alloc_counted_command_line (l.release ());
 	 }
 
        /* If a breakpoint was on the list more than once, we don't need to
 	  do anything.  */
        if (b->commands != cmd)
 	 {
-	   validate_commands_for_breakpoint (b, cmd->commands);
-	   incref_counted_command_line (cmd);
-	   decref_counted_command_line (&b->commands);
+	   validate_commands_for_breakpoint (b, cmd.get ());
 	   b->commands = cmd;
 	   observer_notify_breakpoint_modified (b);
 	 }
@@ -1425,8 +1344,6 @@ commands_command_1 (const char *arg, int from_tty,
 
   if (cmd == NULL)
     error (_("No breakpoints specified."));
-
-  do_cleanups (cleanups);
 }
 
 static void
@@ -4421,7 +4338,6 @@ bpstats::~bpstats ()
 {
   if (old_val != NULL)
     value_free (old_val);
-  decref_counted_command_line (&commands);
   if (bp_location_at != NULL)
     decref_bp_location (&bp_location_at);
 }
@@ -4463,7 +4379,6 @@ bpstats::bpstats (const bpstats &other)
       release_value (old_val);
     }
   incref_bp_location (bp_location_at);
-  incref_counted_command_line (commands);
 }
 
 /* Return a copy of a bpstat.  Like "bs1 = bs2" but all storage that
@@ -4582,7 +4497,7 @@ bpstat_clear_actions (void)
 
   for (bs = tp->control.stop_bpstat; bs != NULL; bs = bs->next)
     {
-      decref_counted_command_line (&bs->commands);
+      bs->commands = NULL;
 
       if (bs->old_val != NULL)
 	{
@@ -4661,9 +4576,7 @@ bpstat_do_actions_1 (bpstat *bsp)
   breakpoint_proceeded = 0;
   for (; bs != NULL; bs = bs->next)
     {
-      struct counted_command_line *ccmd;
-      struct command_line *cmd;
-      struct cleanup *this_cmd_tree_chain;
+      struct command_line *cmd = NULL;
 
       /* Take ownership of the BSP's command tree, if it has one.
 
@@ -4675,10 +4588,10 @@ bpstat_do_actions_1 (bpstat *bsp)
          commands are only executed once, we don't need to copy it; we
          can clear the pointer in the bpstat, and make sure we free
          the tree when we're done.  */
-      ccmd = bs->commands;
+      counted_command_line ccmd = bs->commands;
       bs->commands = NULL;
-      this_cmd_tree_chain = make_cleanup_decref_counted_command_line (&ccmd);
-      cmd = ccmd ? ccmd->commands : NULL;
+      if (ccmd != NULL)
+	cmd = ccmd.get ();
       if (command_line_is_silent (cmd))
 	{
 	  /* The action has been already done by bpstat_stop_status.  */
@@ -4694,9 +4607,6 @@ bpstat_do_actions_1 (bpstat *bsp)
 	  else
 	    cmd = cmd->next;
 	}
-
-      /* We can free this command tree now.  */
-      do_cleanups (this_cmd_tree_chain);
 
       if (breakpoint_proceeded)
 	{
@@ -5233,7 +5143,7 @@ watchpoint_check (void *p)
 	}
 
       /* Make sure the watchpoint's commands aren't executed.  */
-      decref_counted_command_line (&b->commands);
+      b->commands = NULL;
       watchpoint_del_at_next_stop (b);
 
       return WP_DELETED;
@@ -5723,9 +5633,8 @@ bpstat_stop_status (struct address_space *aspace,
 	      if (b->silent)
 		bs->print = 0;
 	      bs->commands = b->commands;
-	      incref_counted_command_line (bs->commands);
 	      if (command_line_is_silent (bs->commands
-					  ? bs->commands->commands : NULL))
+					  ? bs->commands.get () : NULL))
 		bs->print = 0;
 
 	      b->ops->after_condition_true (bs);
@@ -6588,7 +6497,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	}
     }
 
-  l = b->commands ? b->commands->commands : NULL;
+  l = b->commands ? b->commands.get () : NULL;
   if (!part_of_multiple && l)
     {
       annotate_field (9);
@@ -12625,7 +12534,6 @@ static const struct bp_location_ops bp_location_ops =
 
 breakpoint::~breakpoint ()
 {
-  decref_counted_command_line (&this->commands);
   xfree (this->cond_string);
   xfree (this->extra_string);
   xfree (this->filter);
@@ -15376,7 +15284,7 @@ save_breakpoints (char *filename, int from_tty,
 	current_uiout->redirect (&fp);
 	TRY
 	  {
-	    print_command_lines (current_uiout, tp->commands->commands, 2);
+	    print_command_lines (current_uiout, tp->commands.get (), 2);
 	  }
 	CATCH (ex, RETURN_MASK_ALL)
 	  {
