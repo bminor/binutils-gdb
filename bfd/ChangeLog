@@ -1,3 +1,13 @@
+2017-08-23  Alan Modra  <amodra@gmail.com>
+
+	PR 21988
+	* elf64-ppc.c (ensure_undef_dynamic): Rename from
+	ensure_undefweak_dynamic.  Handle undefined too.
+	* elf32-ppc.c (ensure_undef_dynamic): Likewise.
+	* elf32-hppa.c (ensure_undef_dynamic): Likewise.
+	(allocate_dynrelocs): Discard undefined non-default visibility
+	relocs first.  Make undefined syms dynamic.  Tidy goto.
+
 2017-08-21  Alan Modra  <amodra@gmail.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
