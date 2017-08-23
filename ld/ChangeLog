@@ -1,5 +1,11 @@
 2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/pr21903c.d: Add '\' before --.
+	* testsuite/ld-elf/pr21903d.d: Likewise.
+	* testsuite/ld-elf/pr21903e.d: Likewise.
+
+2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-x86-64/pie2.d: Updated.
 	* testsuite/ld-x86-64/pr19719.d: Likewise.
 	* testsuite/ld-x86-64/pr19807-2a.d: Likewise.
