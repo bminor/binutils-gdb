@@ -1,3 +1,22 @@
+2017-08-23  James Clarke  <jrtc27@jrtc27.com>
+
+	* config/tc-sparc.c (tc_gen_reloc): Convert BFD_RELOC_8/16/32/64
+	into the corresponding BFD_RELOC_8/16/32/64_PCREL relocation
+	when requested.
+	* config/tc-sparc.h (DIFF_EXPR_OK): Define to enable PC-relative
+	diff relocations.
+	(TC_FORCE_RELOCATION_SUB_LOCAL): Define to ensure only supported
+	relocations are made PC-relative.
+	(CFI_DIFF_EXPR_OK): Define to 0 to force BFD_RELOC_32_PCREL to
+	be used directly, since otherwise BFD_RELOC_SPARC_UA32 will be
+	used for .eh_frame which cannot in general be converted to a
+	BFD_RELOC_32_PCREL due to alignment requirements.
+
+2017-08-22  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/lsp-checks.d: Assemble with -a32.
+	* testsuite/gas/ppc/lsp.d: Likewise.
+
 2017-08-21  Alexander Fedotov <alexander.fedotov@nxp.com>
 	    Edmar Wienskoski <edmar.wienskoski@nxp.com
 

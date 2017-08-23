@@ -4044,7 +4044,7 @@ output_partial_symbol_filename (const char *filename, const char *fullname,
 }
 
 static void
-sources_info (char *ignore, int from_tty)
+info_sources_command (char *ignore, int from_tty)
 {
   struct compunit_symtab *cu;
   struct symtab *s;
@@ -4610,20 +4610,20 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
 }
 
 static void
-variables_info (char *regexp, int from_tty)
+info_variables_command (char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, VARIABLES_DOMAIN, from_tty);
 }
 
 static void
-functions_info (char *regexp, int from_tty)
+info_functions_command (char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, FUNCTIONS_DOMAIN, from_tty);
 }
 
 
 static void
-types_info (char *regexp, int from_tty)
+info_types_command (char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, TYPES_DOMAIN, from_tty);
 }
@@ -5893,13 +5893,13 @@ _initialize_symtab (void)
   symbol_cache_key
     = register_program_space_data_with_cleanup (NULL, symbol_cache_cleanup);
 
-  add_info ("variables", variables_info, _("\
+  add_info ("variables", info_variables_command, _("\
 All global and static variable names, or those matching REGEXP."));
   if (dbx_commands)
-    add_com ("whereis", class_info, variables_info, _("\
+    add_com ("whereis", class_info, info_variables_command, _("\
 All global and static variable names, or those matching REGEXP."));
 
-  add_info ("functions", functions_info,
+  add_info ("functions", info_functions_command,
 	    _("All function names, or those matching REGEXP."));
 
   /* FIXME:  This command has at least the following problems:
@@ -5910,10 +5910,10 @@ All global and static variable names, or those matching REGEXP."));
      print "struct foo *".
      I also think "ptype" or "whatis" is more likely to be useful (but if
      there is much disagreement "info types" can be fixed).  */
-  add_info ("types", types_info,
+  add_info ("types", info_types_command,
 	    _("All type names, or those matching REGEXP."));
 
-  add_info ("sources", sources_info,
+  add_info ("sources", info_sources_command,
 	    _("Source files in the program."));
 
   add_com ("rbreak", class_breakpoint, rbreak_command,

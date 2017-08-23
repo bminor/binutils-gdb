@@ -527,7 +527,7 @@ tvariables_info_1 (void)
 /* List all the trace state variables.  */
 
 static void
-tvariables_info (char *args, int from_tty)
+info_tvariables_command (char *args, int from_tty)
 {
   tvariables_info_1 ();
 }
@@ -2560,7 +2560,7 @@ tfind_outside_command (char *args, int from_tty)
 
 /* info scope command: list the locals for a scope.  */
 static void
-scope_info (char *args, int from_tty)
+info_scope_command (char *args, int from_tty)
 {
   struct symtabs_and_lines sals;
   struct symbol *sym;
@@ -2795,9 +2795,9 @@ trace_dump_actions (struct command_line *action,
 		  else if (0 == strncasecmp (action_exp, "$_ret", 5))
 		    ;
 		  else if (0 == strncasecmp (action_exp, "$loc", 4))
-		    locals_info (NULL, from_tty);
+		    info_locals_command (NULL, from_tty);
 		  else if (0 == strncasecmp (action_exp, "$arg", 4))
-		    args_info (NULL, from_tty);
+		    info_args_command (NULL, from_tty);
 		  else
 		    {		/* variable */
 		      if (next_comma != NULL)
@@ -4213,7 +4213,7 @@ _initialize_tracepoint (void)
   traceframe_number = -1;
   tracepoint_number = -1;
 
-  add_info ("scope", scope_info,
+  add_info ("scope", info_scope_command,
 	    _("List the variables local to a scope"));
 
   add_cmd ("tracepoints", class_trace, NULL,
@@ -4236,7 +4236,7 @@ Arguments are the names of the variables to delete.\n\
 If no arguments are supplied, delete all variables."), &deletelist);
   /* FIXME add a trace variable completer.  */
 
-  add_info ("tvariables", tvariables_info, _("\
+  add_info ("tvariables", info_tvariables_command, _("\
 Status of trace state variables and their values.\n\
 "));
 

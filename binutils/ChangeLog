@@ -1,3 +1,11 @@
+2017-08-23  Alan Modra  <amodra@gmail.com>
+
+	PR 21990
+	* readelf.c (process_version_sections <SHT_GNU_verneed>): Check
+	for invalid vn_next field before adding to idx.  Use unsigned
+	long for index vars.  Move index checks.
+	<SHT_GNU_verdef>: Likewise for vd_next.
+
 2017-08-17  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/binutils-all/note-3-64.s: New test.  Checks assembly

@@ -27,6 +27,10 @@ QStartupWithShell
 
 * New commands
 
+set|show compile-gcc
+  Set and show compilation command used for compiling and injecting code
+  with the 'compile' commands.
+
 set debug separate-debug-file
 show debug separate-debug-file
   Control the display of debug output about separate debug file search.

@@ -1,3 +1,16 @@
+2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run protected7.
+	* testsuite/ld-i386/protected7.d: New file.
+	* testsuite/ld-i386/protected7.s: Likewise.
+	* testsuite/ld-x86-64/protected8.d: Likewise.
+	* testsuite/ld-x86-64/protected8.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run protected8.
+
+2017-08-23  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-gc/pr19161.d: Don't xfail hppa.
+
 2017-08-22  H.J. Lu  <hongjiu.lu@intel.com>
 	    Alan Modra  <amodra@gmail.com>
 

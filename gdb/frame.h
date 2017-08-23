@@ -784,9 +784,9 @@ extern void read_frame_arg (struct symbol *sym, struct frame_info *frame,
 extern void read_frame_local (struct symbol *sym, struct frame_info *frame,
 			      struct frame_arg *argp);
 
-extern void args_info (char *, int);
+extern void info_args_command (char *, int);
 
-extern void locals_info (char *, int);
+extern void info_locals_command (char *, int);
 
 extern void return_command (char *, int);
 

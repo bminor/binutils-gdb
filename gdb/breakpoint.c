@@ -183,9 +183,9 @@ static int breakpoint_location_address_range_overlap (struct bp_location *,
 						      struct address_space *,
 						      CORE_ADDR, int);
 
-static void breakpoints_info (char *, int);
+static void info_breakpoints_command (char *, int);
 
-static void watchpoints_info (char *, int);
+static void info_watchpoints_command (char *, int);
 
 static int breakpoint_1 (char *, int, 
 			 int (*) (const struct breakpoint *));
@@ -279,7 +279,7 @@ static int is_hardware_watchpoint (const struct breakpoint *bpt);
 
 static void insert_breakpoint_locations (void);
 
-static void tracepoints_info (char *, int);
+static void info_tracepoints_command (char *, int);
 
 static void delete_trace_command (char *, int);
 
@@ -6958,7 +6958,7 @@ default_collect_info (void)
 }
   
 static void
-breakpoints_info (char *args, int from_tty)
+info_breakpoints_command (char *args, int from_tty)
 {
   breakpoint_1 (args, 0, NULL);
 
@@ -6966,7 +6966,7 @@ breakpoints_info (char *args, int from_tty)
 }
 
 static void
-watchpoints_info (char *args, int from_tty)
+info_watchpoints_command (char *args, int from_tty)
 {
   int num_printed = breakpoint_1 (args, 0, is_watchpoint);
   struct ui_out *uiout = current_uiout;
@@ -15222,7 +15222,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
    omitted.  */
 
 static void
-tracepoints_info (char *args, int from_tty)
+info_tracepoints_command (char *args, int from_tty)
 {
   struct ui_out *uiout = current_uiout;
   int num_printed;
@@ -16104,7 +16104,7 @@ Break in function/address or break at a line in the current file."),
 	       _("Break in function or address."), &stoplist);
       add_cmd ("at", class_breakpoint, stopat_command,
 	       _("Break at a line in the current file."), &stoplist);
-      add_com ("status", class_info, breakpoints_info, _("\
+      add_com ("status", class_info, info_breakpoints_command, _("\
 Status of user-settable breakpoints, or breakpoint number NUMBER.\n\
 The \"Type\" column indicates one of:\n\
 \tbreakpoint     - normal breakpoint\n\
@@ -16121,7 +16121,7 @@ Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set."));
     }
 
-  add_info ("breakpoints", breakpoints_info, _("\
+  add_info ("breakpoints", info_breakpoints_command, _("\
 Status of specified breakpoints (all user-settable breakpoints if no argument).\n\
 The \"Type\" column indicates one of:\n\
 \tbreakpoint     - normal breakpoint\n\
@@ -16227,7 +16227,7 @@ If -l or -location is given, this evaluates EXPRESSION and watches\n\
 the memory to which it refers."));
   set_cmd_completer (c, expression_completer);
 
-  add_info ("watchpoints", watchpoints_info, _("\
+  add_info ("watchpoints", info_watchpoints_command, _("\
 Status of specified watchpoints (all watchpoints if no argument)."));
 
   /* XXX: cagney/2005-02-23: This should be a boolean, and should
@@ -16289,7 +16289,7 @@ Do \"help breakpoints\" for info on other commands dealing with breakpoints.\n\
 Do \"help tracepoints\" for info on other tracepoint commands."));
   set_cmd_completer (c, location_completer);
 
-  add_info ("tracepoints", tracepoints_info, _("\
+  add_info ("tracepoints", info_tracepoints_command, _("\
 Status of specified tracepoints (all tracepoints if no argument).\n\
 Convenience variable \"$tpnum\" contains the number of the\n\
 last tracepoint set."));

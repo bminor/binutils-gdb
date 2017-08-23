@@ -10153,9 +10153,9 @@ process_version_sections (FILE * file)
 	case SHT_GNU_verdef:
 	  {
 	    Elf_External_Verdef * edefs;
-	    unsigned int idx;
-	    unsigned int cnt;
-	    unsigned int end;
+	    unsigned long idx;
+	    unsigned long cnt;
+	    unsigned long end;
 	    char * endbuf;
 
 	    found = TRUE;
@@ -10187,12 +10187,8 @@ process_version_sections (FILE * file)
 		Elf_Internal_Verdef ent;
 		Elf_External_Verdaux * eaux;
 		Elf_Internal_Verdaux aux;
-		unsigned int isum;
+		unsigned long isum;
 		int j;
-
-		/* Check for very large indices.  */
-		if (idx > (size_t) (endbuf - (char *) edefs))
-		  break;
 
 		vstart = ((char *) edefs) + idx;
 		if (vstart + sizeof (*edef) > endbuf)
@@ -10208,15 +10204,16 @@ process_version_sections (FILE * file)
 		ent.vd_aux     = BYTE_GET (edef->vd_aux);
 		ent.vd_next    = BYTE_GET (edef->vd_next);
 
-		printf (_("  %#06x: Rev: %d  Flags: %s"),
+		printf (_("  %#06lx: Rev: %d  Flags: %s"),
 			idx, ent.vd_version, get_ver_flags (ent.vd_flags));
 
 		printf (_("  Index: %d  Cnt: %d  "),
 			ent.vd_ndx, ent.vd_cnt);
 
-		/* Check for overflow and underflow.  */
-		if (ent.vd_aux + sizeof (* eaux) > (size_t) (endbuf - vstart)
-		    || (vstart + ent.vd_aux < vstart))
+		/* Check for overflow.  */
+		if (vstart + sizeof (*eaux) > endbuf)
+		  break;
+		if (ent.vd_aux > (size_t) (endbuf - (vstart + sizeof (*eaux))))
 		  break;
 
 		vstart += ent.vd_aux;
@@ -10250,10 +10247,10 @@ process_version_sections (FILE * file)
 		    aux.vda_next = BYTE_GET (eaux->vda_next);
 
 		    if (VALID_DYNAMIC_NAME (aux.vda_name))
-		      printf (_("  %#06x: Parent %d: %s\n"),
+		      printf (_("  %#06lx: Parent %d: %s\n"),
 			      isum, j, GET_DYNAMIC_NAME (aux.vda_name));
 		    else
-		      printf (_("  %#06x: Parent %d, name index: %ld\n"),
+		      printf (_("  %#06lx: Parent %d, name index: %ld\n"),
 			      isum, j, aux.vda_name);
 		  }
 
@@ -10262,7 +10259,7 @@ process_version_sections (FILE * file)
 
 		/* PR 17531:
 		   file: id:000001,src:000172+005151,op:splice,rep:2.  */
-		if (idx + ent.vd_next < idx)
+		if (ent.vd_next > (size_t) (endbuf - ((char *) edefs + idx)))
 		  break;
 
 		idx += ent.vd_next;
@@ -10278,8 +10275,8 @@ process_version_sections (FILE * file)
 	case SHT_GNU_verneed:
 	  {
 	    Elf_External_Verneed * eneed;
-	    unsigned int idx;
-	    unsigned int cnt;
+	    unsigned long idx;
+	    unsigned long cnt;
 	    char * endbuf;
 
 	    found = TRUE;
@@ -10305,12 +10302,9 @@ process_version_sections (FILE * file)
 	      {
 		Elf_External_Verneed * entry;
 		Elf_Internal_Verneed ent;
-		unsigned int isum;
+		unsigned long isum;
 		int j;
 		char * vstart;
-
-		if (idx > (size_t) (endbuf - (char *) eneed))
-		  break;
 
 		vstart = ((char *) eneed) + idx;
 		if (vstart + sizeof (*entry) > endbuf)
@@ -10324,7 +10318,7 @@ process_version_sections (FILE * file)
 		ent.vn_aux     = BYTE_GET (entry->vn_aux);
 		ent.vn_next    = BYTE_GET (entry->vn_next);
 
-		printf (_("  %#06x: Version: %d"), idx, ent.vn_version);
+		printf (_("  %#06lx: Version: %d"), idx, ent.vn_version);
 
 		if (VALID_DYNAMIC_NAME (ent.vn_file))
 		  printf (_("  File: %s"), GET_DYNAMIC_NAME (ent.vn_file));
@@ -10354,10 +10348,10 @@ process_version_sections (FILE * file)
 		    aux.vna_next  = BYTE_GET (eaux->vna_next);
 
 		    if (VALID_DYNAMIC_NAME (aux.vna_name))
-		      printf (_("  %#06x:   Name: %s"),
+		      printf (_("  %#06lx:   Name: %s"),
 			      isum, GET_DYNAMIC_NAME (aux.vna_name));
 		    else
-		      printf (_("  %#06x:   Name index: %lx"),
+		      printf (_("  %#06lx:   Name index: %lx"),
 			      isum, aux.vna_name);
 
 		    printf (_("  Flags: %s  Version: %d\n"),
@@ -10379,9 +10373,10 @@ process_version_sections (FILE * file)
 		if (j < ent.vn_cnt)
 		  warn (_("Missing Version Needs auxillary information\n"));
 
-		if (ent.vn_next == 0 && cnt < section->sh_info - 1)
+		if (ent.vn_next > (size_t) (endbuf - ((char *) eneed + idx))
+		    || (ent.vn_next == 0 && cnt < section->sh_info - 1))
 		  {
-		    warn (_("Corrupt Version Needs structure - offset to next structure is zero with entries still left to be processed\n"));
+		    warn (_("Invalid vn_next field of %lx\n"), ent.vn_next);
 		    cnt = section->sh_info;
 		    break;
 		  }

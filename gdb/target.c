@@ -48,7 +48,7 @@
 #include <algorithm>
 #include "byte-vector.h"
 
-static void target_info (char *, int);
+static void info_target_command (char *, int);
 
 static void generic_tls_error (void) ATTRIBUTE_NORETURN;
 
@@ -2125,7 +2125,7 @@ target_remove_breakpoint (struct gdbarch *gdbarch,
 }
 
 static void
-target_info (char *args, int from_tty)
+info_target_command (char *args, int from_tty)
 {
   struct target_ops *t;
   int has_all_mem = 0;
@@ -4131,8 +4131,8 @@ initialize_targets (void)
   init_dummy_target ();
   push_target (&dummy_target);
 
-  add_info ("target", target_info, targ_desc);
-  add_info ("files", target_info, targ_desc);
+  add_info ("target", info_target_command, targ_desc);
+  add_info ("files", info_target_command, targ_desc);
 
   add_setshow_zuinteger_cmd ("target", class_maintenance, &targetdebug, _("\
 Set target debugging."), _("\

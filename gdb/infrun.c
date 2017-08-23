@@ -70,7 +70,7 @@
 
 /* Prototypes for local functions */
 
-static void signals_info (char *, int);
+static void info_signals_command (char *, int);
 
 static void handle_command (char *, int);
 
@@ -8710,7 +8710,7 @@ Use \"info signals\" for a list of symbolic signals."));
    targets, all signals should be in the signal tables).  */
 
 static void
-signals_info (char *signum_exp, int from_tty)
+info_signals_command (char *signum_exp, int from_tty)
 {
   enum gdb_signal oursig;
 
@@ -9200,7 +9200,7 @@ _initialize_infrun (void)
   infrun_async_inferior_event_token
     = create_async_event_handler (infrun_async_inferior_event_handler, NULL);
 
-  add_info ("signals", signals_info, _("\
+  add_info ("signals", info_signals_command, _("\
 What debugger does when program gets various signals.\n\
 Specify a signal as argument to print info on that signal only."));
   add_info_alias ("handle", "signals", 0);

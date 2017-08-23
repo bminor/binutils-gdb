@@ -899,7 +899,7 @@ gdb_pipe (int pdes[2])
 }
 
 static void
-dos_info (char *arg, int from_tty)
+info_serial_command (char *arg, int from_tty)
 {
   struct dos_ttystate *port;
 #ifdef DOS_STATS
@@ -999,6 +999,6 @@ Show COM4 interrupt request."), NULL,
 			    NULL, /* FIXME: i18n: */
 			    &setlist, &showlist);
 
-  add_info ("serial", dos_info,
+  add_info ("serial", info_serial_command,
 	    _("Print DOS serial port status."));
 }

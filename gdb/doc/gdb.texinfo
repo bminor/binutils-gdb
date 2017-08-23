@@ -18154,13 +18154,15 @@ will print to the console.
 
 @subsection Compiler search for the @code{compile} command
 
-@value{GDBN} needs to find @value{NGCC} for the inferior being debugged which
-may not be obvious for remote targets of different architecture than where
-@value{GDBN} is running.  Environment variable @code{PATH} (@code{PATH} from
-shell that executed @value{GDBN}, not the one set by @value{GDBN}
-command @code{set environment}).  @xref{Environment}.  @code{PATH} on
+@value{GDBN} needs to find @value{NGCC} for the inferior being debugged
+which may not be obvious for remote targets of different architecture
+than where @value{GDBN} is running.  Environment variable @code{PATH} on
 @value{GDBN} host is searched for @value{NGCC} binary matching the
-target architecture and operating system.
+target architecture and operating system.  This search can be overriden
+by @code{set compile-gcc} @value{GDBN} command below.  @code{PATH} is
+taken from shell that executed @value{GDBN}, it is not the value set by
+@value{GDBN} command @code{set environment}).  @xref{Environment}.
+
 
 Specifically @code{PATH} is searched for binaries matching regular expression
 @code{@var{arch}(-[^-]*)?-@var{os}-gcc} according to the inferior target being
@@ -18169,6 +18171,28 @@ example both @code{i386} and @code{x86_64} targets look for pattern
 @code{(x86_64|i.86)} and both @code{s390} and @code{s390x} targets look
 for pattern @code{s390x?}.  @var{os} is currently supported only for
 pattern @code{linux(-gnu)?}.
+
+On Posix hosts the compiler driver @value{GDBN} needs to find also
+shared library @file{libcc1.so} from the compiler.  It is searched in
+default shared library search path (overridable with usual environment
+variable @code{LD_LIBRARY_PATH}), unrelated to @code{PATH} or @code{set
+compile-gcc} settings.  Contrary to it @file{libcc1plugin.so} is found
+according to the installation of the found compiler --- as possibly
+specified by the @code{set compile-gcc} command.
+
+@table @code
+@item set compile-gcc
+@cindex compile command driver filename override
+Set compilation command used for compiling and injecting code with the
+@code{compile} commands.  If this option is not set (it is set to
+an empty string), the search described above will occur --- that is the
+default.
+
+@item show compile-gcc
+Displays the current compile command @value{NGCC} driver filename.
+If set, it is the main command @command{gcc}, found usually for example
+under name @file{x86_64-linux-gnu-gcc}.
+@end table
 
 @node GDB Files
 @chapter @value{GDBN} Files
@@ -22474,6 +22498,7 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 * SPU::                Cell Broadband Engine SPU architecture
 * PowerPC::
 * Nios II::
+* Sparc64::
 @end menu
 
 @node AArch64
@@ -22856,6 +22881,78 @@ target code in @value{GDBN}.
 @item show debug nios2
 @kindex show debug nios2
 Show the current setting of Nios II debugging messages.
+@end table
+
+@node Sparc64
+@subsection Sparc64
+@cindex Sparc64 support
+@cindex Application Data Integrity
+@subsubsection ADI Support
+
+The M7 processor supports an Application Data Integrity (ADI) feature that 
+detects invalid data accesses.  When software allocates memory and enables 
+ADI on the allocated memory, it chooses a 4-bit version number, sets the 
+version in the upper 4 bits of the 64-bit pointer to that data, and stores 
+the 4-bit version in every cacheline of that data.  Hardware saves the latter 
+in spare bits in the cache and memory hierarchy.  On each load and store, 
+the processor compares the upper 4 VA (virtual address) bits to the 
+cacheline's version.  If there is a mismatch, the processor generates a 
+version mismatch trap which can be either precise or disrupting.  The trap 
+is an error condition which the kernel delivers to the process as a SIGSEGV 
+signal.
+
+Note that only 64-bit applications can use ADI and need to be built with
+ADI-enabled.
+
+Values of the ADI version tags, which are in granularity of a 
+cacheline (64 bytes), can be viewed or modified. 
+
+
+@table @code
+@kindex adi examine
+@item adi (examine | x) [ / @var{n} ] @var{addr}
+
+The @code{adi examine} command displays the value of one ADI version tag per 
+cacheline. 
+
+@var{n} is a decimal integer specifying the number in bytes; the default 
+is 1.  It specifies how much ADI version information, at the ratio of 1:ADI 
+block size, to display. 
+
+@var{addr} is the address in user address space where you want @value{GDBN} 
+to begin displaying the ADI version tags. 
+
+Below is an example of displaying ADI versions of variable "shmaddr".
+
+@smallexample
+(@value{GDBP}) adi x/100 shmaddr
+   0xfff800010002c000:     0 0
+@end smallexample
+
+@kindex adi assign
+@item adi (assign | a) [ / @var{n} ] @var{addr} = @var{tag}
+
+The @code{adi assign} command is used to assign new ADI version tag 
+to an address. 
+
+@var{n} is a decimal integer specifying the number in bytes; 
+the default is 1.  It specifies how much ADI version information, at the 
+ratio of 1:ADI block size, to modify. 
+
+@var{addr} is the address in user address space where you want @value{GDBN} 
+to begin modifying the ADI version tags. 
+
+@var{tag} is the new ADI version tag.
+
+For example, do the following to modify then verify ADI versions of 
+variable "shmaddr":
+
+@smallexample
+(@value{GDBP}) adi a/100 shmaddr = 7
+(@value{GDBP}) adi x/100 shmaddr
+   0xfff800010002c000:     7 7
+@end smallexample
+
 @end table
 
 @node Controlling GDB

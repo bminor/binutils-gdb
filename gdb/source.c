@@ -60,9 +60,9 @@ static void reverse_search_command (char *, int);
 
 static void forward_search_command (char *, int);
 
-static void line_info (char *, int);
+static void info_line_command (char *, int);
 
-static void source_info (char *, int);
+static void info_source_command (char *, int);
 
 /* Path of directories to search for source files.
    Same format as the PATH environment variable's value.  */
@@ -649,7 +649,7 @@ add_path (char *dirname, char **which_path, int parse_separators)
 
 
 static void
-source_info (char *ignore, int from_tty)
+info_source_command (char *ignore, int from_tty)
 {
   struct symtab *s = current_source_symtab;
   struct compunit_symtab *cust;
@@ -1490,7 +1490,7 @@ print_source_lines (struct symtab *s, int line, int stopline,
 /* Print info on range of pc's in a specified line.  */
 
 static void
-line_info (char *arg, int from_tty)
+info_line_command (char *arg, int from_tty)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -2025,10 +2025,10 @@ Setting the value to an empty string sets it to $cdir:$cwd, the default."),
 			    show_directories_command,
 			    &setlist, &showlist);
 
-  add_info ("source", source_info,
+  add_info ("source", info_source_command,
 	    _("Information about the current source file."));
 
-  add_info ("line", line_info, _("\
+  add_info ("line", info_line_command, _("\
 Core addresses of the code for a source line.\n\
 Line can be specified as\n\
   LINENUM, to list around that line in current file,\n\

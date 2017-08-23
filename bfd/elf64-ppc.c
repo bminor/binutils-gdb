@@ -9743,17 +9743,18 @@ merge_got_entries (struct got_entry **pent)
 	  }
 }
 
-/* If H is undefined weak, make it dynamic if that makes sense.  */
+/* If H is undefined, make it dynamic if that makes sense.  */
 
 static bfd_boolean
-ensure_undefweak_dynamic (struct bfd_link_info *info,
-			  struct elf_link_hash_entry *h)
+ensure_undef_dynamic (struct bfd_link_info *info,
+		      struct elf_link_hash_entry *h)
 {
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   if (htab->dynamic_sections_created
-      && info->dynamic_undefined_weak != 0
-      && h->root.type == bfd_link_hash_undefweak
+      && ((info->dynamic_undefined_weak != 0
+	   && h->root.type == bfd_link_hash_undefweak)
+	  || h->root.type == bfd_link_hash_undefined)
       && h->dynindx == -1
       && !h->forced_local
       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
@@ -9832,9 +9833,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   for (gent = h->got.glist; gent != NULL; gent = gent->next)
     if (!gent->is_indirect)
       {
-	/* Make sure this symbol is output as a dynamic symbol.
-	   Undefined weak syms won't yet be marked as dynamic.  */
-	if (!ensure_undefweak_dynamic (info, h))
+	/* Make sure this symbol is output as a dynamic symbol.  */
+	if (!ensure_undef_dynamic (info, h))
 	  return FALSE;
 
 	if (!is_ppc64_elf (gent->owner))
@@ -9888,9 +9888,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
 	  if (eh->dyn_relocs != NULL)
 	    {
-	      /* Make sure this symbol is output as a dynamic symbol.
-		 Undefined weak syms won't yet be marked as dynamic.  */
-	      if (!ensure_undefweak_dynamic (info, h))
+	      /* Make sure this symbol is output as a dynamic symbol.  */
+	      if (!ensure_undef_dynamic (info, h))
 		return FALSE;
 	    }
 	}
@@ -9925,9 +9924,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  if (!h->non_got_ref
 	      && !h->def_regular)
 	    {
-	      /* Make sure this symbol is output as a dynamic symbol.
-		 Undefined weak syms won't yet be marked as dynamic.  */
-	      if (!ensure_undefweak_dynamic (info, h))
+	      /* Make sure this symbol is output as a dynamic symbol.  */
+	      if (!ensure_undef_dynamic (info, h))
 		return FALSE;
 
 	      if (h->dynindx == -1)

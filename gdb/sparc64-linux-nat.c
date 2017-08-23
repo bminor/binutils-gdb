@@ -89,5 +89,8 @@ _initialize_sparc64_linux_nat (void)
   /* Register the target.  */
   linux_nat_add_target (t);
 
+  /* ADI support */
+  linux_nat_set_forget_process (t, sparc64_forget_process);
+
   sparc_gregmap = &sparc64_linux_ptrace_gregmap;
 }

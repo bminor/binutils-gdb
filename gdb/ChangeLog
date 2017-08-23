@@ -1,3 +1,143 @@
+2017-08-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (Changes since GDB 8.0): Add set compile-gcc and show
+	compile-gcc.
+	* compile/compile.c (compile_gcc, show_compile_gcc): New.
+	(compile_to_object): Implement compile_gcc.
+	(_initialize_compile): Install "set compile-gcc".  Initialize
+	compile_gcc.
+
+2017-08-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* compile/compile.c (compile_to_object): Conditionally call
+	set_verbose.  Conditionally call compile or compile_v0.
+
+2017-08-07  Weimin Pan  <weimin.pan@oracle.com>
+
+	* sparc64-tdep.h: (adi_normalize_address): New export.
+	* sparc-nat.h: (open_adi_tag_fd): New export.
+	* sparc64-linux-nat.c: (open_adi_tag_fd): New function.
+	* sparc64-linux-tdep.c:
+	(SEGV_ACCADI, SEGV_ADIDERR, SEGV_ADIPERR) New defines.
+	(sparc64_linux_handle_segmentation_fault): New function.
+	(sparc64_linux_init_abi): Register
+	sparc64_linux_handle_segmentation_fault
+	* sparc64-tdep.c: Include cli-utils.h,gdbcmd.h,auxv.h.
+	(sparc64_addr_bits_remove): New function.
+	(sparc64_init_abi): Register sparc64_addr_bits_remove.
+	(MAX_PROC_NAME_SIZE): New macro.
+	(AT_ADI_BLKSZ, AT_ADI_NBITS, AT_ADI_UEONADI) New defines.
+	(sparc64adilist): New variable.
+	(adi_proc_list): New variable.
+	(find_adi_info): New function.
+	(add_adi_info): New function.
+	(get_adi_info_proc): New function.
+	(get_adi_info): New function.
+	(info_adi_command): New function.
+	(read_maps_entry): New function.
+	(adi_available): New function.
+	(adi_normalize_address): New function.
+	(adi_align_address): New function.
+	(adi_convert_byte_count): New function.
+	(adi_tag_fd): New function.
+	(adi_is_addr_mapped): New function.
+	(adi_read_versions): New function.
+	(adi_write_versions): New function.
+	(adi_print_versions): New function.
+	(do_examine): New function.
+	(do_assign): New function.
+	(adi_examine_command): New function.
+	(adi_assign_command): New function.
+	(_initialize_sparc64_adi_tdep): New function.
+
+2017-08-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* breakpoint.c (breakpoints_info): Rename to ...
+	(info_breakpoints_command): ... this.
+	(watchpoints_info): Rename to ...
+	(info_watchpoints_command): ... this.
+	(tracepoints_info): Rename to ...
+	(info_tracepoints_command): ... this.
+	(_initialize_breakpoint): Adjust.
+	* dcache.c (dcache_info): Rename to ...
+	(info_display_command): ... this.
+	(_initialize_dcache): Adjust.
+	* frame.h (args_info): Rename to ...
+	(info_args_command): ... this.
+	(locals_info): Rename to ...
+	(info_locals_command): ... this.
+	* infcmd.c (nofp_registers_info): Rename to ...
+	(info_registers_command): ... this.
+	(float_info): Rename to ...
+	(info_float_command): ... this.
+	(program_info): Rename to ...
+	(info_program_command): ... this.
+	(all_registers_info): Rename to ...
+	(info_all_registers_command): ... this.
+	(vector_info): Rename to ...
+	(info_vector_command): ... this.
+	(float_info): Rename to ...
+	(info_float_command): ... this.
+	(_initialize_infcmd): Adjust.
+	* inferior.h (term_info): Rename to ...
+	(info_terminal_command): ... this.
+	* inflow.c (term_info): Rename to ...
+	(info_terminal_command): ... this.
+	(_initialize_inflow): Adjust.
+	* infrun.c (signals_info): Rename to ...
+	(info_signals_command): ... this.
+	(_initialize_infrun): Adjust.
+	* objc-lang.c (classes_info): Rename to ...
+	(info_classes_command): ... this.
+	(selectors_info): Rename to ...
+	(info_selectors_command): ... this.
+	(_initialize_objc_language): Adjust.
+	* printcmd.c (sym_info): Rename to ...
+	(info_symbol_command): ... this.
+	(address_info): Rename to ...
+	(info_address_command): ... this.
+	(display_info): Rename to ...
+	(info_display_command): ... this.
+	(_initialize_printcmd): Adjust.
+	* reverse.c (bookmarks_info): Rename to ...
+	(info_breakpoints_command): ... this.
+	(_initialize_reverse): Adjust.
+	* ser-go32.c (dos_info): Rename to ...
+	(info_serial_command): ... this.
+	(_initialize_ser_dos): Adjust.
+	* skip.c (skip_info): Rename to ...
+	(info_skip_command): ... this.
+	(_initialize_step_skip): Adjust.
+	* source.c (line_info): Rename to ...
+	(info_line_command): ... this.
+	(source_info): Rename to ...
+	(info_source_command)
+	* stack.c (frame_info): Rename to ...
+	(info_frame_command): ... this.
+	(locals_info): Rename to ...
+	(info_locals_command): ... this.
+	(args_info): Rename to ...
+	(info_args_command): ... this.
+	(_initialize_stack): Adjust.
+	* symtab.c (sources_info): Rename to ...
+	(info_sources_command): ... this.
+	(variables_info): Rename to ...
+	(info_variables_command): ... this.
+	(functions_info): Rename to ...
+	(info_functions_command): ... this.
+	(types_info): Rename to ...
+	(info_types_command): ... this.
+	(_initialize_symtab): Adjust.
+	* target.c (target_info): Rename to ...
+	(info_target_command): ... this.
+	(initialize_targets): Adjust.
+	* tracepoint.c (tvariables_info): Rename to ...
+	(info_tvariables_command): ... this.
+	(scope_info): Rename to ...
+	(info_scope_command): ... this.
+	(trace_dump_actions): Adjust.
+	(_initialize_tracepoint): Adjust.
+
 2017-08-22  Tom Tromey  <tom@tromey.com>
 
 	* breakpoint.h (install_breakpoint): Update.

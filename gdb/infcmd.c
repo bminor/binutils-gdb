@@ -62,7 +62,7 @@
 
 /* Local functions: */
 
-static void nofp_registers_info (char *, int);
+static void info_registers_command (char *, int);
 
 static void until_next_command (int);
 
@@ -74,7 +74,7 @@ static void path_command (char *, int);
 
 static void unset_command (char *, int);
 
-static void float_info (char *, int);
+static void info_float_command (char *, int);
 
 static void disconnect_command (char *, int);
 
@@ -84,7 +84,7 @@ static void set_environment_command (char *, int);
 
 static void environment_info (char *, int);
 
-static void program_info (char *, int);
+static void info_program_command (char *, int);
 
 static void finish_command (char *, int);
 
@@ -2060,7 +2060,7 @@ finish_command (char *arg, int from_tty)
 
 
 static void
-program_info (char *args, int from_tty)
+info_program_command (char *args, int from_tty)
 {
   bpstat bs;
   int num, stat;
@@ -2502,13 +2502,13 @@ registers_info (char *addr_exp, int fpregs)
 }
 
 static void
-all_registers_info (char *addr_exp, int from_tty)
+info_all_registers_command (char *addr_exp, int from_tty)
 {
   registers_info (addr_exp, 1);
 }
 
 static void
-nofp_registers_info (char *addr_exp, int from_tty)
+info_registers_command (char *addr_exp, int from_tty)
 {
   registers_info (addr_exp, 0);
 }
@@ -2543,7 +2543,7 @@ print_vector_info (struct ui_file *file,
 }
 
 static void
-vector_info (char *args, int from_tty)
+info_vector_command (char *args, int from_tty)
 {
   if (!target_has_registers)
     error (_("The program has no registers now."));
@@ -3090,7 +3090,7 @@ default_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 }
 
 static void
-float_info (char *args, int from_tty)
+info_float_command (char *args, int from_tty)
 {
   struct frame_info *frame;
 
@@ -3421,24 +3421,24 @@ If non-stop mode is enabled, interrupt only the current thread,\n\
 otherwise all the threads in the program are stopped.  To \n\
 interrupt all running threads in non-stop mode, use the -a option."));
 
-  c = add_info ("registers", nofp_registers_info, _("\
+  c = add_info ("registers", info_registers_command, _("\
 List of integer registers and their contents, for selected stack frame.\n\
 Register name as argument means describe only that register."));
   add_info_alias ("r", "registers", 1);
   set_cmd_completer (c, reg_or_group_completer);
 
-  c = add_info ("all-registers", all_registers_info, _("\
+  c = add_info ("all-registers", info_all_registers_command, _("\
 List of all registers and their contents, for selected stack frame.\n\
 Register name as argument means describe only that register."));
   set_cmd_completer (c, reg_or_group_completer);
 
-  add_info ("program", program_info,
+  add_info ("program", info_program_command,
 	    _("Execution status of the program."));
 
-  add_info ("float", float_info,
+  add_info ("float", info_float_command,
 	    _("Print the status of the floating point unit\n"));
 
-  add_info ("vector", vector_info,
+  add_info ("vector", info_vector_command,
 	    _("Print the status of the vector unit\n"));
 
   add_prefix_cmd ("proc", class_info, info_proc_cmd,

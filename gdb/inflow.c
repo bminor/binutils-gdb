@@ -536,7 +536,7 @@ copy_terminal_info (struct inferior *to, struct inferior *from)
 }
 
 void
-term_info (char *arg, int from_tty)
+info_terminal_command (char *arg, int from_tty)
 {
   target_terminal_info (arg, from_tty);
 }
@@ -820,7 +820,7 @@ initialize_stdin_serial (void)
 void
 _initialize_inflow (void)
 {
-  add_info ("terminal", term_info,
+  add_info ("terminal", info_terminal_command,
 	    _("Print inferior's saved terminal status."));
 
   terminal_is_ours = 1;

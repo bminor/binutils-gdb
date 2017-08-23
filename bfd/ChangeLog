@@ -1,3 +1,20 @@
+2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Set
+	extern_protected_data to FALSE if GNU_PROPERTY_NO_COPY_ON_PROTECTED
+	is set on any input relocatable file.
+	* elf64-x86-64.c (elf_x86_64_link_setup_gnu_properties): Likewise.
+
+2017-08-23  Alan Modra  <amodra@gmail.com>
+
+	PR 21988
+	* elf64-ppc.c (ensure_undef_dynamic): Rename from
+	ensure_undefweak_dynamic.  Handle undefined too.
+	* elf32-ppc.c (ensure_undef_dynamic): Likewise.
+	* elf32-hppa.c (ensure_undef_dynamic): Likewise.
+	(allocate_dynrelocs): Discard undefined non-default visibility
+	relocs first.  Make undefined syms dynamic.  Tidy goto.
+
 2017-08-21  Alan Modra  <amodra@gmail.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
