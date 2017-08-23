@@ -1,5 +1,13 @@
 2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf64-x86-64.c (elf_x86_64_need_pic): Add an argument for
+	bfd_link_info.  Report shared, PIE or PDE object based on
+	bfd_link_info.
+	(elf_x86_64_check_relocs): Update elf_x86_64_need_pic call.
+	(elf_x86_64_relocate_section): Likewise.
+
+2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_check_relocs): Increment PLT count only
 	for function symbols.
 	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
