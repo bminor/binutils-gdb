@@ -1,3 +1,8 @@
+2017-08-07  Weimin Pan  <weimin.pan@oracle.com>
+
+	* gdb.arch/sparc64-adi.exp: New file.
+	* gdb.arch/sparc64-adi.c: New file.
+
 2017-08-22  Pedro Alves  <palves@redhat.com>
 
 	* gdb.cp/overload.exp (line_range_pattern): New procedure.

@@ -1,3 +1,9 @@
+2017-08-07  Weimin Pan  <weimin.pan@oracle.com>
+
+	* gdb.texinfo (Architectures): Add new Sparc64 section to document
+	ADI support.
+	* NEWS: Add "adi examine" and "adi assign" commands.
+
 2017-08-18  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.texinfo (Server): Document "--selftest".

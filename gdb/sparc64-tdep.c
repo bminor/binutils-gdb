@@ -46,6 +46,505 @@
    sparc64_-prefix for 64-bit specific code and the sparc_-prefix for
    code can handle both.  */
 
+/* The M7 processor supports an Application Data Integrity (ADI) feature
+   that detects invalid data accesses.  When software allocates memory and 
+   enables ADI on the allocated memory, it chooses a 4-bit version number, 
+   sets the version in the upper 4 bits of the 64-bit pointer to that data, 
+   and stores the 4-bit version in every cacheline of the object.  Hardware 
+   saves the latter in spare bits in the cache and memory hierarchy. On each 
+   load and store, the processor compares the upper 4 VA (virtual address) bits 
+   to the cacheline's version. If there is a mismatch, the processor generates
+   a version mismatch trap which can be either precise or disrupting.
+   The trap is an error condition which the kernel delivers to the process
+   as a SIGSEGV signal.
+
+   The upper 4 bits of the VA represent a version and are not part of the
+   true address.  The processor clears these bits and sign extends bit 59
+   to generate the true address.
+
+   Note that 32-bit applications cannot use ADI. */
+
+
+#include <algorithm>
+#include "cli/cli-utils.h"
+#include "gdbcmd.h"
+#include "auxv.h"
+
+#define MAX_PROC_NAME_SIZE sizeof("/proc/99999/lwp/9999/adi/lstatus")
+
+/* ELF Auxiliary vectors */
+#ifndef AT_ADI_BLKSZ
+#define AT_ADI_BLKSZ    34
+#endif
+#ifndef AT_ADI_NBITS
+#define AT_ADI_NBITS    35
+#endif
+#ifndef AT_ADI_UEONADI
+#define AT_ADI_UEONADI  36
+#endif
+
+/* ADI command list.  */
+static struct cmd_list_element *sparc64adilist = NULL;
+
+/* ADI stat settings.  */
+typedef struct
+{
+  /* The ADI block size.  */
+  unsigned long blksize;
+
+  /* Number of bits used for an ADI version tag which can be
+   * used together with the shift value for an ADI version tag
+   * to encode or extract the ADI version value in a pointer.  */
+  unsigned long nbits;
+
+  /* The maximum ADI version tag value supported.  */
+  int max_version;
+
+  /* ADI version tag file.  */
+  int tag_fd = 0;
+
+  /* ADI availability check has been done.  */
+  bool checked_avail = false;
+
+  /* ADI is available.  */
+  bool is_avail = false;
+
+} adi_stat_t;
+
+/* Per-process ADI stat info.  */
+
+typedef struct sparc64_adi_info
+{
+  sparc64_adi_info (pid_t pid_)
+    : pid (pid_)
+  {}
+
+  /* The process identifier.  */
+  pid_t pid;
+
+  /* The ADI stat.  */
+  adi_stat_t stat = {};
+
+} sparc64_adi_info;
+
+static std::forward_list<sparc64_adi_info> adi_proc_list;
+
+
+/* Get ADI info for process PID, creating one if it doesn't exist.  */
+
+static sparc64_adi_info * 
+get_adi_info_proc (pid_t pid)
+{
+  auto found = std::find_if (adi_proc_list.begin (), adi_proc_list.end (),
+                             [&pid] (const sparc64_adi_info &info)
+                             {
+                               return info.pid == pid;
+                             });
+
+  if (found == adi_proc_list.end ())
+    {
+      adi_proc_list.emplace_front (pid);
+      return &adi_proc_list.front ();
+    }
+  else
+    {
+      return &(*found);
+    }
+}
+
+static adi_stat_t 
+get_adi_info (pid_t pid)
+{
+  sparc64_adi_info *proc;
+
+  proc = get_adi_info_proc (pid);
+  return proc->stat;
+}
+
+/* Is called when GDB is no longer debugging process PID.  It
+   deletes data structure that keeps track of the ADI stat.  */
+
+void
+sparc64_forget_process (pid_t pid)
+{
+  int target_errno;
+
+  for (auto pit = adi_proc_list.before_begin (),
+	 it = std::next (pit);
+       it != adi_proc_list.end ();
+       )
+    {
+      if ((*it).pid == pid)
+	{
+          if ((*it).stat.tag_fd > 0) 
+            target_fileio_close ((*it).stat.tag_fd, &target_errno);
+	  adi_proc_list.erase_after (pit);
+          break;
+	}
+      else
+	pit = it++;
+    }
+
+}
+
+static void
+info_adi_command (char *args, int from_tty)
+{
+  printf_unfiltered ("\"adi\" must be followed by \"examine\" "
+                     "or \"assign\".\n");
+  help_list (sparc64adilist, "adi ", all_commands, gdb_stdout);
+}
+
+/* Read attributes of a maps entry in /proc/[pid]/adi/maps.  */
+
+static void
+read_maps_entry (const char *line,
+              ULONGEST *addr, ULONGEST *endaddr)
+{
+  const char *p = line;
+
+  *addr = strtoulst (p, &p, 16);
+  if (*p == '-')
+    p++;
+
+  *endaddr = strtoulst (p, &p, 16);
+}
+
+/* Check if ADI is available.  */
+
+static bool
+adi_available (void)
+{
+  pid_t pid = ptid_get_pid (inferior_ptid);
+  sparc64_adi_info *proc = get_adi_info_proc (pid);
+
+  if (proc->stat.checked_avail)
+    return proc->stat.is_avail;
+
+  proc->stat.checked_avail = true;
+  if (target_auxv_search (&current_target, AT_ADI_BLKSZ, 
+                          &proc->stat.blksize) <= 0)
+    return false;
+  target_auxv_search (&current_target, AT_ADI_NBITS, &proc->stat.nbits);
+  proc->stat.max_version = (1 << proc->stat.nbits) - 2;
+  proc->stat.is_avail = true;
+
+  return proc->stat.is_avail;
+}
+
+/* Normalize a versioned address - a VA with ADI bits (63-60) set.  */
+
+static CORE_ADDR
+adi_normalize_address (CORE_ADDR addr)
+{
+  adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
+
+  if (ast.nbits)
+    return ((CORE_ADDR)(((long)addr << ast.nbits) >> ast.nbits));
+  return addr;
+}
+
+/* Align a normalized address - a VA with bit 59 sign extended into 
+   ADI bits.  */
+
+static CORE_ADDR
+adi_align_address (CORE_ADDR naddr)
+{
+  adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
+
+  return (naddr - (naddr % ast.blksize)) / ast.blksize;
+}
+
+/* Convert a byte count to count at a ratio of 1:adi_blksz.  */
+
+static int
+adi_convert_byte_count (CORE_ADDR naddr, int nbytes, CORE_ADDR locl)
+{
+  adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
+
+  return ((naddr + nbytes + ast.blksize - 1) / ast.blksize) - locl;
+}
+
+/* The /proc/[pid]/adi/tags file, which allows gdb to get/set ADI
+   version in a target process, maps linearly to the address space
+   of the target process at a ratio of 1:adi_blksz.
+
+   A read (or write) at offset K in the file returns (or modifies)
+   the ADI version tag stored in the cacheline containing address
+   K * adi_blksz, encoded as 1 version tag per byte.  The allowed
+   version tag values are between 0 and adi_stat.max_version.  */
+
+static int
+adi_tag_fd (void)
+{
+  pid_t pid = ptid_get_pid (inferior_ptid);
+  sparc64_adi_info *proc = get_adi_info_proc (pid);
+
+  if (proc->stat.tag_fd != 0)
+    return proc->stat.tag_fd;
+
+  char cl_name[MAX_PROC_NAME_SIZE];
+  snprintf (cl_name, sizeof(cl_name), "/proc/%d/adi/tags", pid);
+  int target_errno;
+  proc->stat.tag_fd = target_fileio_open (NULL, cl_name, O_RDWR|O_EXCL, 
+                                          0, &target_errno);
+  return proc->stat.tag_fd;
+}
+
+/* Check if an address set is ADI enabled, using /proc/[pid]/adi/maps
+   which was exported by the kernel and contains the currently ADI
+   mapped memory regions and their access permissions.  */
+
+static bool
+adi_is_addr_mapped (CORE_ADDR vaddr, size_t cnt)
+{
+  char filename[MAX_PROC_NAME_SIZE];
+  size_t i = 0;
+
+  pid_t pid = ptid_get_pid (inferior_ptid);
+  snprintf (filename, sizeof filename, "/proc/%d/adi/maps", pid);
+  char *data = target_fileio_read_stralloc (NULL, filename);
+  if (data)
+    {
+      struct cleanup *cleanup = make_cleanup (xfree, data);
+      adi_stat_t adi_stat = get_adi_info (pid);
+      char *line;
+      for (line = strtok (data, "\n"); line; line = strtok (NULL, "\n"))
+        {
+          ULONGEST addr, endaddr;
+
+          read_maps_entry (line, &addr, &endaddr);
+
+          while (((vaddr + i) * adi_stat.blksize) >= addr
+                 && ((vaddr + i) * adi_stat.blksize) < endaddr)
+            {
+              if (++i == cnt)
+                {
+                  do_cleanups (cleanup);
+                  return true;
+                }
+            }
+        }
+        do_cleanups (cleanup);
+      }
+    else
+      warning (_("unable to open /proc file '%s'"), filename);
+
+  return false;
+}
+
+/* Read ADI version tag value for memory locations starting at "VADDR"
+   for "SIZE" number of bytes.  */
+
+static int
+adi_read_versions (CORE_ADDR vaddr, size_t size, unsigned char *tags)
+{
+  int fd = adi_tag_fd ();
+  if (fd == -1)
+    return -1;
+
+  if (!adi_is_addr_mapped (vaddr, size))
+    {
+      adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
+      error(_("Address at 0x%lx is not in ADI maps"), vaddr*ast.blksize);
+    }
+
+  int target_errno;
+  return target_fileio_pread (fd, tags, size, vaddr, &target_errno);
+}
+
+/* Write ADI version tag for memory locations starting at "VADDR" for
+ "SIZE" number of bytes to "TAGS".  */
+
+static int
+adi_write_versions (CORE_ADDR vaddr, size_t size, unsigned char *tags)
+{
+  int fd = adi_tag_fd ();
+  if (fd == -1)
+    return -1;
+
+  if (!adi_is_addr_mapped (vaddr, size))
+    {
+      adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
+      error(_("Address at 0x%lx is not in ADI maps"), vaddr*ast.blksize);
+    }
+
+  int target_errno;
+  return target_fileio_pwrite (fd, tags, size, vaddr, &target_errno);
+}
+
+/* Print ADI version tag value in "TAGS" for memory locations starting
+   at "VADDR" with number of "CNT".  */
+
+static void
+adi_print_versions (CORE_ADDR vaddr, size_t cnt, unsigned char *tags)
+{
+  int v_idx = 0;
+  const int maxelts = 8;  /* # of elements per line */
+
+  adi_stat_t adi_stat = get_adi_info (ptid_get_pid (inferior_ptid));
+
+  while (cnt > 0)
+    {
+      QUIT;
+      printf_filtered ("0x%016lx:\t", vaddr * adi_stat.blksize);
+      for (int i = maxelts; i > 0 && cnt > 0; i--, cnt--)
+        {
+          if (tags[v_idx] == 0xff)    /* no version tag */
+            printf_filtered ("-");
+          else
+            printf_filtered ("%1X", tags[v_idx]);
+	  if (cnt > 1)
+            printf_filtered (" ");
+          ++v_idx;
+        }
+      printf_filtered ("\n");
+      gdb_flush (gdb_stdout);
+      vaddr += maxelts;
+    }
+}
+
+static void
+do_examine (CORE_ADDR start, int bcnt)
+{
+  CORE_ADDR vaddr = adi_normalize_address (start);
+  struct cleanup *cleanup;
+
+  CORE_ADDR vstart = adi_align_address (vaddr);
+  int cnt = adi_convert_byte_count (vaddr, bcnt, vstart);
+  unsigned char *buf = (unsigned char *) xmalloc (cnt);
+  cleanup = make_cleanup (xfree, buf);
+  int read_cnt = adi_read_versions (vstart, cnt, buf);
+  if (read_cnt == -1)
+    error (_("No ADI information"));
+  else if (read_cnt < cnt)
+    error(_("No ADI information at 0x%lx"), vaddr);
+
+  adi_print_versions (vstart, cnt, buf);
+
+  do_cleanups (cleanup);
+}
+
+static void
+do_assign (CORE_ADDR start, size_t bcnt, int version)
+{
+  CORE_ADDR vaddr = adi_normalize_address (start);
+
+  CORE_ADDR vstart = adi_align_address (vaddr);
+  int cnt = adi_convert_byte_count (vaddr, bcnt, vstart);
+  std::vector<unsigned char> buf (cnt, version);
+  int set_cnt = adi_write_versions (vstart, cnt, buf.data ());
+
+  if (set_cnt == -1)
+    error (_("No ADI information"));
+  else if (set_cnt < cnt)
+    error(_("No ADI information at 0x%lx"), vaddr);
+
+}
+
+/* ADI examine version tag command.
+
+   Command syntax:
+
+     adi (examine|x)/count <addr> */
+
+static void
+adi_examine_command (char *args, int from_tty)
+{
+  /* make sure program is active and adi is available */
+  if (!target_has_execution)
+    error (_("ADI command requires a live process/thread"));
+
+  if (!adi_available ())
+    error (_("No ADI information"));
+
+  pid_t pid = ptid_get_pid (inferior_ptid);
+  sparc64_adi_info *proc = get_adi_info_proc (pid);
+  int cnt = 1;
+  char *p = args;
+  if (p && *p == '/')
+    {
+      p++;
+      cnt = get_number (&p);
+    }
+
+  CORE_ADDR next_address = 0;
+  if (p != 0 && *p != 0)
+    next_address = parse_and_eval_address (p);
+  if (!cnt || !next_address)
+    error (_("Usage: adi examine|x[/count] <addr>"));
+
+  do_examine (next_address, cnt);
+}
+
+/* ADI assign version tag command.
+
+   Command syntax:
+
+     adi (assign|a)/count <addr> = <version>  */
+
+static void
+adi_assign_command (char *args, int from_tty)
+{
+  /* make sure program is active and adi is available */
+  if (!target_has_execution)
+    error (_("ADI command requires a live process/thread"));
+
+  if (!adi_available ())
+    error (_("No ADI information"));
+
+  char *exp = args;
+  if (exp == 0)
+    error_no_arg (_("Usage: adi assign|a[/count] <addr> = <version>"));
+
+  char *q = (char *) strchr (exp, '=');
+  if (q)
+    *q++ = 0;
+  else
+    error (_("Usage: adi assign|a[/count] <addr> = <version>"));
+
+  size_t cnt = 1;
+  char *p = args;
+  if (exp && *exp == '/')
+    {
+      p = exp + 1;
+      cnt = get_number (&p);
+    }
+
+  CORE_ADDR next_address = 0;
+  if (p != 0 && *p != 0)
+    next_address = parse_and_eval_address (p);
+  else
+    error (_("Usage: adi assign|a[/count] <addr> = <version>"));
+
+  int version = 0;
+  if (q != NULL)           /* parse version tag */
+    {
+      adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
+      version = parse_and_eval_long (q);
+      if (version < 0 || version > ast.max_version)
+        error (_("Invalid ADI version tag %d"), version);
+    }
+
+  do_assign (next_address, cnt, version);
+}
+
+void
+_initialize_sparc64_adi_tdep (void)
+{
+
+  add_prefix_cmd ("adi", class_support, info_adi_command,
+                  _("ADI version related commands."),
+                  &sparc64adilist, "adi ", 0, &cmdlist);
+  add_cmd ("examine", class_support, adi_examine_command,
+           _("Examine ADI versions."), &sparc64adilist);
+  add_alias_cmd ("x", "examine", no_class, 1, &sparc64adilist);
+  add_cmd ("assign", class_support, adi_assign_command,
+           _("Assign ADI versions."), &sparc64adilist);
+
+}
+
+
 /* The functions on this page are intended to be used to classify
    function arguments.  */
 
@@ -1290,6 +1789,14 @@ sparc64_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
     }
 }
 
+/* sparc64_addr_bits_remove - remove useless address bits  */
+
+static CORE_ADDR
+sparc64_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  return adi_normalize_address (addr);
+}
+
 void
 sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1342,6 +1849,8 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   frame_unwind_append_unwinder (gdbarch, &sparc64_frame_unwind);
   frame_base_set_default (gdbarch, &sparc64_frame_base);
+
+  set_gdbarch_addr_bits_remove (gdbarch, sparc64_addr_bits_remove);
 }
 
 

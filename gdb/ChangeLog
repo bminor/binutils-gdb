@@ -1,3 +1,41 @@
+2017-08-07  Weimin Pan  <weimin.pan@oracle.com>
+
+	* sparc64-tdep.h: (adi_normalize_address): New export.
+	* sparc-nat.h: (open_adi_tag_fd): New export.
+	* sparc64-linux-nat.c: (open_adi_tag_fd): New function.
+	* sparc64-linux-tdep.c:
+	(SEGV_ACCADI, SEGV_ADIDERR, SEGV_ADIPERR) New defines.
+	(sparc64_linux_handle_segmentation_fault): New function.
+	(sparc64_linux_init_abi): Register
+	sparc64_linux_handle_segmentation_fault
+	* sparc64-tdep.c: Include cli-utils.h,gdbcmd.h,auxv.h.
+	(sparc64_addr_bits_remove): New function.
+	(sparc64_init_abi): Register sparc64_addr_bits_remove.
+	(MAX_PROC_NAME_SIZE): New macro.
+	(AT_ADI_BLKSZ, AT_ADI_NBITS, AT_ADI_UEONADI) New defines.
+	(sparc64adilist): New variable.
+	(adi_proc_list): New variable.
+	(find_adi_info): New function.
+	(add_adi_info): New function.
+	(get_adi_info_proc): New function.
+	(get_adi_info): New function.
+	(info_adi_command): New function.
+	(read_maps_entry): New function.
+	(adi_available): New function.
+	(adi_normalize_address): New function.
+	(adi_align_address): New function.
+	(adi_convert_byte_count): New function.
+	(adi_tag_fd): New function.
+	(adi_is_addr_mapped): New function.
+	(adi_read_versions): New function.
+	(adi_write_versions): New function.
+	(adi_print_versions): New function.
+	(do_examine): New function.
+	(do_assign): New function.
+	(adi_examine_command): New function.
+	(adi_assign_command): New function.
+	(_initialize_sparc64_adi_tdep): New function.
+
 2017-08-22  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* breakpoint.c (breakpoints_info): Rename to ...
