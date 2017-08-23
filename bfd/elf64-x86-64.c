@@ -7302,71 +7302,91 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
   unsigned int plt_alignment, features;
   struct elf_x86_64_link_hash_table *htab;
   bfd *pbfd;
+  bfd *ebfd = NULL;
+  elf_property *prop;
 
   features = 0;
   if (info->ibt)
     features = GNU_PROPERTY_X86_FEATURE_1_IBT;
   if (info->shstk)
     features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
-  if (features)
+
+  /* Find a normal input file with GNU property note.  */
+  for (pbfd = info->input_bfds;
+       pbfd != NULL;
+       pbfd = pbfd->link.next)
+    if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
+	&& bfd_count_sections (pbfd) != 0)
+      {
+	ebfd = pbfd;
+
+	if (elf_properties (pbfd) != NULL)
+	  break;
+      }
+
+  if (ebfd != NULL)
     {
-      /* Turn on GNU_PROPERTY_X86_FEATURE_1_IBT and
-	 GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
-      bfd *ebfd = NULL;
-      elf_property *prop;
-
-      for (pbfd = info->input_bfds;
-	   pbfd != NULL;
-	   pbfd = pbfd->link.next)
-	if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
-	    && bfd_count_sections (pbfd) != 0)
-	  {
-	    ebfd = pbfd;
-
-	    if (elf_properties (pbfd) != NULL)
-	      {
-		/* Find a normal input file with GNU property note.  */
-		prop = _bfd_elf_get_property (pbfd,
-					      GNU_PROPERTY_X86_FEATURE_1_AND,
-					      4);
-		/* Add GNU_PROPERTY_X86_FEATURE_1_IBT and
-		   GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
-		prop->u.number |= features;
-		prop->pr_kind = property_number;
-		break;
-	      }
-	  }
-
-      if (pbfd == NULL && ebfd != NULL)
+      if (features)
 	{
-	  /* Create GNU_PROPERTY_X86_FEATURE_1_IBT if needed.  */
+	  /* If features is set, add GNU_PROPERTY_X86_FEATURE_1_IBT and
+	     GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
 	  prop = _bfd_elf_get_property (ebfd,
 					GNU_PROPERTY_X86_FEATURE_1_AND,
 					4);
-	  prop->u.number = features;
+	  prop->u.number |= features;
 	  prop->pr_kind = property_number;
 
-	  sec = bfd_make_section_with_flags (ebfd,
-					     NOTE_GNU_PROPERTY_SECTION_NAME,
-					     (SEC_ALLOC
-					      | SEC_LOAD
-					      | SEC_IN_MEMORY
-					      | SEC_READONLY
-					      | SEC_HAS_CONTENTS
-					      | SEC_DATA));
-	  if (sec == NULL)
-	    info->callbacks->einfo (_("%F: failed to create GNU property section\n"));
-
-	  if (!bfd_set_section_alignment (ebfd, sec,
-					  ABI_64_P (ebfd) ? 3 : 2))
+	  /* Create the GNU property note section if needed.  */
+	  if (pbfd == NULL)
 	    {
-error_alignment:
-	      info->callbacks->einfo (_("%F%A: failed to align section\n"),
-				      sec);
-	    }
+	      sec = bfd_make_section_with_flags (ebfd,
+						 NOTE_GNU_PROPERTY_SECTION_NAME,
+						 (SEC_ALLOC
+						  | SEC_LOAD
+						  | SEC_IN_MEMORY
+						  | SEC_READONLY
+						  | SEC_HAS_CONTENTS
+						  | SEC_DATA));
+	      if (sec == NULL)
+		info->callbacks->einfo (_("%F: failed to create GNU property section\n"));
 
-	  elf_section_type (sec) = SHT_NOTE;
+	      if (!bfd_set_section_alignment (ebfd, sec,
+					      ABI_64_P (ebfd) ? 3 : 2))
+		{
+error_alignment:
+		  info->callbacks->einfo (_("%F%A: failed to align section\n"),
+					  sec);
+		}
+
+	      elf_section_type (sec) = SHT_NOTE;
+	    }
 	}
+
+      /* Check GNU_PROPERTY_NO_COPY_ON_PROTECTED.  */
+      for (; pbfd != NULL; pbfd = pbfd->link.next)
+	if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
+	    && (pbfd->flags
+		& (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
+	  {
+	    elf_property_list *p;
+
+	    /* The property list is sorted in order of type.  */
+	    for (p = elf_properties (pbfd); p != NULL; p = p->next)
+	      {
+		if (GNU_PROPERTY_NO_COPY_ON_PROTECTED
+		    == p->property.pr_type)
+		  {
+		    /* Clear extern_protected_data if
+		       GNU_PROPERTY_NO_COPY_ON_PROTECTED is
+		       set on any input relocatable file.  */
+		    info->extern_protected_data = FALSE;
+		    break;
+		  }
+		else if (GNU_PROPERTY_NO_COPY_ON_PROTECTED
+			 < p->property.pr_type)
+		  break;
+	      }
+	  }
     }
 
   pbfd = _bfd_elf_link_setup_gnu_properties (info);
