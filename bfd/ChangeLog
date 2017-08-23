@@ -1,5 +1,11 @@
 2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_check_relocs): Increment PLT count only
+	for function symbols.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
+2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Set
 	extern_protected_data to FALSE if GNU_PROPERTY_NO_COPY_ON_PROTECTED
 	is set on any input relocatable file.

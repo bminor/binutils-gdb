@@ -2273,8 +2273,9 @@ do_relocation:
 	      /* We may need a .plt entry if the symbol is a function
 		 defined in a shared lib or is a STT_GNU_IFUNC function
 		 referenced from the code or read-only section.  */
-	      if (!h->def_regular
-		  || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
+	      if ((h->type == STT_FUNC || h->type == STT_GNU_IFUNC)
+		  && (!h->def_regular
+		      || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0))
 		h->plt.refcount += 1;
 
 	      if (r_type == R_386_PC32)
