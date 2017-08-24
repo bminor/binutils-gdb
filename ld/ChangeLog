@@ -1,5 +1,11 @@
 2017-08-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-i386/i386.exp (undefined_weak): Replace regexp
+	with string match.
+	* testsuite/ld-x86-64/x86-64.exp (undefined_weak): Likewise.
+
+2017-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-x86-64/x86-64.exp: Run pr22001-1b on x32.
 
 2017-08-24  H.J. Lu  <hongjiu.lu@intel.com>

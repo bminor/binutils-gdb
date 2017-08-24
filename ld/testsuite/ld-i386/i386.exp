@@ -468,8 +468,8 @@ proc undefined_weak {cflags ldflags} {
 	set testname "$testname ($cflags $ldflags)"
     }
 
-    if { [ regexp "\-fPIE" $cflags]
-	 && ![ regexp "\-z nodynamic-undefined-weak" $ldflags] } {
+    if { [string match "*-fPIE*" $cflags]
+	 && ![string match "*-z nodynamic-undefined-weak*" $ldflags] } {
 	set weak_symbol "Weak defined"
     } else {
 	set weak_symbol "Weak undefined"
