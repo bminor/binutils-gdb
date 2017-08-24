@@ -1,3 +1,9 @@
+2017-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Revert the last change.
+	Undefined symbols may not have a type.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
 2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_need_pic): Add an argument for
