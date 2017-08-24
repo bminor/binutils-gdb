@@ -1040,6 +1040,30 @@ if { [isnative] && [which $CC] != 0 } {
 	    {{readelf {-n} property-7.r}} \
 	    "property-7b.o" \
 	] \
+	[list \
+	    "Build pr22001-1.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { pr22001-1a.c } \
+	    {} \
+	    "pr22001-1.so" \
+	] \
+	[list \
+	    "Build pr22001-1a" \
+	    "$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+	    "$NOPIE_CFLAGS" \
+	    { pr22001-1b.c } \
+	    {{error_output "pr22001-1a.err"}} \
+	    "pr22001-1a" \
+	] \
+	[list \
+	    "Build pr22001-1b" \
+	    "$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+	    "$NOPIE_CFLAGS" \
+	    { pr22001-1c.c } \
+	    {{error_output "pr22001-1b.err"}} \
+	    "pr22001-1b" \
+	] \
     ]
 
     run_ld_link_exec_tests [list \
@@ -1215,6 +1239,42 @@ if { [isnative] && [which $CC] != 0 } {
 	    "" \
 	    {property-x86-2.S property-x86-1.S pass.c property-stack.S} \
 	    "property-5-static" "pass.out" \
+	] \
+	[list \
+	    "Run pr22001-1a (PIC 1)" \
+	    "$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+	    "" \
+	    { pr22001-1b.c } \
+	    "pr22001-1a-pic-1" \
+	    "pass.out" \
+	    "-fPIC" \
+	] \
+	[list \
+	    "Run pr22001-1a (PIC 2)" \
+	    "-pie -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+	    "" \
+	    { pr22001-1b.c } \
+	    "pr22001-1a-pic-2" \
+	    "pass.out" \
+	    "-fPIC" \
+	] \
+	[list \
+	    "Run pr22001-1b (PIC 1)" \
+	    "$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+	    "" \
+	    { pr22001-1c.c } \
+	    "pr22001-1b-pic-1" \
+	    "pass.out" \
+	    "-fPIC" \
+	] \
+	[list \
+	    "Run pr22001-1b (PIC 2)" \
+	    "-pie -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+	    "" \
+	    { pr22001-1c.c } \
+	    "pr22001-1b-pic-2" \
+	    "pass.out" \
+	    "-fPIC" \
 	] \
     ]
 

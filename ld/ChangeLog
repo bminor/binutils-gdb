@@ -1,3 +1,17 @@
+2017-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22001
+	* testsuite/ld-i386/i386.exp: Run -z nocopyreloc tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* ld/testsuite/ld-i386/pr22001-1a.c: New file.
+	* ld/testsuite/ld-i386/pr22001-1b.c: Likewise.
+	* ld/testsuite/ld-i386/pr22001-1c.S: Likewise.
+	* ld/testsuite/ld-x86-64/pr22001-1a.c: Likewise.
+	* ld/testsuite/ld-x86-64/pr22001-1a.err: Likewise.
+	* ld/testsuite/ld-x86-64/pr22001-1b.c: Likewise.
+	* ld/testsuite/ld-x86-64/pr22001-1b.err: Likewise.
+	* ld/testsuite/ld-x86-64/pr22001-1c.c: Likewise.
+
 2017-08-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR 21961

@@ -4942,13 +4942,17 @@ do_ifunc_pointer:
 	case R_X86_64_PC32:
 	case R_X86_64_PC32_BND:
 	  /* Don't complain about -fPIC if the symbol is undefined when
-	     building executable unless it is unresolved weak symbol.  */
+	     building executable unless it is unresolved weak symbol or
+	     -z nocopyreloc is used.  */
           if ((input_section->flags & SEC_ALLOC) != 0
 	      && (input_section->flags & SEC_READONLY) != 0
 	      && h != NULL
 	      && ((bfd_link_executable (info)
-		   && h->root.type == bfd_link_hash_undefweak
-		   && !resolved_to_zero)
+		   && ((h->root.type == bfd_link_hash_undefweak
+			&& !resolved_to_zero)
+		       || (info->nocopyreloc
+			   && h->def_dynamic
+			   && !(h->root.u.def.section->flags & SEC_CODE))))
 		  || bfd_link_dll (info)))
 	    {
 	      bfd_boolean fail = FALSE;
@@ -5717,15 +5721,26 @@ direct:
 	  && _bfd_elf_section_offset (output_bfd, info, input_section,
 				      rel->r_offset) != (bfd_vma) -1)
 	{
-	  _bfd_error_handler
-	    /* xgettext:c-format */
-	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
-	     input_bfd,
-	     input_section,
-	     rel->r_offset,
-	     howto->name,
-	     h->root.root.string);
-	  return FALSE;
+	  switch (r_type)
+	    {
+	    case R_X86_64_32S:
+	      if (info->nocopyreloc
+		  && !(h->root.u.def.section->flags & SEC_CODE))
+		return elf_x86_64_need_pic (info, input_bfd, input_section,
+					    h, NULL, NULL, howto);
+	      /* Fall through.  */
+
+	    default:
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+		 input_bfd,
+		 input_section,
+		 rel->r_offset,
+		 howto->name,
+		 h->root.root.string);
+	      return FALSE;
+	    }
 	}
 
 do_relocation:
