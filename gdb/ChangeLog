@@ -1,5 +1,12 @@
 2017-08-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR symtab/22003
+	* dwarf2read.c (dwarf2_const_value_attr, dump_die_shallow)
+	(dwarf2_get_attr_constant_value, dwarf2_fetch_constant_bytes)
+	(skip_form_bytes, attr_form_is_constant): Handle DW_FORM_implicit_const.
+
+2017-08-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2read.c (build_type_psymtabs_reader): New prototype.
 	(process_psymtab_comp_unit): Accept IS_DEBUG_TYPES.
 	(read_comp_units_from_section): New parameter abbrev_section, use
