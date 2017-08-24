@@ -1,0 +1,867 @@
+From 07a737ec705a119c1c2e1d49d9591bea78ef2531 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Wed, 23 Aug 2017 12:18:00 -0700
+Subject: [PATCH] Disallow copy relocation against protected data symbol
+
+We shpouldn't generate copy relocation to resolve reference to protected
+data symbol defined in shared object with the NO_COPY_ON_PROTECTED
+property.  This patch adds a bit to elf_link_hash_entry and elf_obj_tdata
+to track protected symbol defined in shared object as well as the bfd
+with the NO_COPY_ON_PROTECTED property.  extern_protected_data is set to
+FALSE if any input relocatable file contains the NO_COPY_ON_PROTECTED
+property.
+
+bfd/
+
+	PR ld/21997
+	* elf-bfd.h (elf_link_hash_entry): Add def_protected.
+	(elf_obj_tdata): Use ENUM_BITFIELD on object_id, dyn_lib_class
+	and has_gnu_symbols.  Change bad_symtab to bitfield.  Add a
+	has_no_copy_on_protected bitfield.
+	(elf_has_no_copy_on_protected): New.
+	(SYMBOL_NO_COPYRELOC): Likewise.
+	* elf-properties.c (_bfd_elf_parse_gnu_properties): Set
+	elf_has_no_copy_on_protected for GNU_PROPERTY_NO_COPY_ON_PROTECTED.
+	(elf_merge_gnu_property_list): Likewise.
+	(_bfd_elf_link_setup_gnu_properties): Set extern_protected_data
+	to FALSE for elf_has_no_copy_on_protected.
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Also check
+	SYMBOL_NO_COPYRELOC when checking info->nocopyreloc.
+	(elf_i386_link_setup_gnu_properties): Don't set
+	extern_protected_data here.
+	* elf64-x86-64.c (elf_x86_64_need_pic): Report protected symbol
+	for def_protected.
+	(elf_x86_64_adjust_dynamic_symbol): Also check SYMBOL_NO_COPYRELOC
+	when checking info->nocopyreloc.
+	(elf_x86_64_relocate_section): Also check for R_X86_64_PC32
+	relocation run-time overflow and unresolvable R_X86_64_32S
+	relocation against protected data symbol defined in shared object
+	with GNU_PROPERTY_NO_COPY_ON_PROTECTED.
+	(elf_x86_64_link_setup_gnu_properties): Don't set
+	extern_protected_data here.
+	* elflink.c (elf_link_add_object_symbols): Set def_protected
+	for definition.
+
+ld/
+
+	PR ld/21997
+	* testsuite/ld-i386/i386.exp: Run PR ld/21997 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr21997-1a.S: New file.
+	* testsuite/ld-i386/pr21997-1b.c: Likewise.
+	* testsuite/ld-i386/pr21997-1c.S: Likewise.
+	* testsuite/ld-x86-64/pr21997-1a.S: Likewise.
+	* testsuite/ld-x86-64/pr21997-1a.err: Likewise.
+	* testsuite/ld-x86-64/pr21997-1b.c: Likewise.
+	* testsuite/ld-x86-64/pr21997-1b.err: Likewise.
+	* testsuite/ld-x86-64/pr21997-1c.c: Likewise.
+---
+ bfd/elf-bfd.h                         |  31 ++++++++--
+ bfd/elf-properties.c                  |   9 +++
+ bfd/elf32-i386.c                      |  89 ++++++++++------------------
+ bfd/elf64-x86-64.c                    | 105 ++++++++++++++--------------------
+ bfd/elflink.c                         |   5 ++
+ ld/testsuite/ld-i386/i386.exp         |  51 +++++++++++++++++
+ ld/testsuite/ld-i386/pr21997-1a.S     |  35 ++++++++++++
+ ld/testsuite/ld-i386/pr21997-1b.c     |  16 ++++++
+ ld/testsuite/ld-i386/pr21997-1c.S     |  51 +++++++++++++++++
+ ld/testsuite/ld-x86-64/pr21997-1a.S   |  24 ++++++++
+ ld/testsuite/ld-x86-64/pr21997-1a.err |   2 +
+ ld/testsuite/ld-x86-64/pr21997-1b.c   |  13 +++++
+ ld/testsuite/ld-x86-64/pr21997-1b.err |   2 +
+ ld/testsuite/ld-x86-64/pr21997-1c.c   |  13 +++++
+ ld/testsuite/ld-x86-64/x86-64.exp     |  69 ++++++++++++++++++++++
+ 15 files changed, 390 insertions(+), 125 deletions(-)
+ create mode 100644 ld/testsuite/ld-i386/pr21997-1a.S
+ create mode 100644 ld/testsuite/ld-i386/pr21997-1b.c
+ create mode 100644 ld/testsuite/ld-i386/pr21997-1c.S
+ create mode 100644 ld/testsuite/ld-x86-64/pr21997-1a.S
+ create mode 100644 ld/testsuite/ld-x86-64/pr21997-1a.err
+ create mode 100644 ld/testsuite/ld-x86-64/pr21997-1b.c
+ create mode 100644 ld/testsuite/ld-x86-64/pr21997-1b.err
+ create mode 100644 ld/testsuite/ld-x86-64/pr21997-1c.c
+
+diff --git a/bfd/elf-bfd.h b/bfd/elf-bfd.h
+index 83958e41e0..7b7662c347 100644
+--- a/bfd/elf-bfd.h
++++ b/bfd/elf-bfd.h
+@@ -177,6 +177,8 @@ struct elf_link_hash_entry
+   unsigned int ref_dynamic : 1;
+   /* Symbol is defined by a shared object.  */
+   unsigned int def_dynamic : 1;
++  /* Symbol is defined as a protected symbol.  */
++  unsigned int def_protected : 1;
+   /* Symbol has a non-weak reference from a non-shared object (other than
+      the object in which it is defined).  */
+   unsigned int ref_regular_nonweak : 1;
+@@ -1887,21 +1889,27 @@ struct elf_obj_tdata
+ 
+   /* An identifier used to distinguish different target
+      specific extensions to this structure.  */
+-  enum elf_target_id object_id;
++  ENUM_BITFIELD (elf_target_id) object_id : 6;
+ 
+   /* Whether a dyanmic object was specified normally on the linker
+      command line, or was specified when --as-needed was in effect,
+      or was found via a DT_NEEDED entry.  */
+-  enum dynamic_lib_link_class dyn_lib_class;
++  ENUM_BITFIELD (dynamic_lib_link_class) dyn_lib_class : 4;
++
++  /* Whether if the bfd contains symbols that have the STT_GNU_IFUNC
++     symbol type or STB_GNU_UNIQUE binding.  */
++  ENUM_BITFIELD (elf_gnu_symbols) has_gnu_symbols : 3;
++
++  /* Whether if the bfd contains the GNU_PROPERTY_NO_COPY_ON_PROTECTED
++     property.  */
++  unsigned int has_no_copy_on_protected : 1;
+ 
+   /* Irix 5 often screws up the symbol table, sorting local symbols
+      after global symbols.  This flag is set if the symbol table in
+      this BFD appears to be screwed up.  If it is, we ignore the
+      sh_info field in the symbol table header, and always read all the
+      symbols.  */
+-  bfd_boolean bad_symtab;
+-
+-  enum elf_gnu_symbols has_gnu_symbols;
++  unsigned int bad_symtab : 1;
+ 
+   /* Information grabbed from an elf core file.  */
+   struct core_elf_obj_tdata *core;
+@@ -1956,6 +1964,8 @@ struct elf_obj_tdata
+ #define elf_other_obj_attributes_proc(bfd) \
+   (elf_other_obj_attributes (bfd) [OBJ_ATTR_PROC])
+ #define elf_properties(bfd) (elf_tdata (bfd) -> properties)
++#define elf_has_no_copy_on_protected(bfd) \
++  (elf_tdata(bfd) -> has_no_copy_on_protected)
+ 
+ extern void _bfd_elf_swap_verdef_in
+   (bfd *, const Elf_External_Verdef *, Elf_Internal_Verdef *);
+@@ -2806,6 +2816,17 @@ extern asection _bfd_elf_large_com_section;
+ 	 || (H)->start_stop \
+ 	 || ((INFO)->dynamic && !(H)->dynamic)))
+ 
++/* Should copy relocation be generated for a symbol.  Don't generate
++   copy relocation against a protected symbol defined in a shared
++   object with GNU_PROPERTY_NO_COPY_ON_PROTECTED.  */
++#define SYMBOL_NO_COPYRELOC(INFO, H) \
++  ((H)->def_protected \
++   && ((H)->root.type == bfd_link_hash_defined \
++       || (H)->root.type == bfd_link_hash_defweak) \
++   && elf_has_no_copy_on_protected ((H)->root.u.def.section->owner) \
++   && ((H)->root.u.def.section->owner->flags & DYNAMIC) != 0 \
++   && ((H)->root.u.def.section->flags & SEC_CODE) == 0)
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/bfd/elf-properties.c b/bfd/elf-properties.c
+index 13d620d9c4..f367aa6941 100644
+--- a/bfd/elf-properties.c
++++ b/bfd/elf-properties.c
+@@ -168,6 +168,7 @@ bad_size:
+ 		  return FALSE;
+ 		}
+ 	      prop = _bfd_elf_get_property (abfd, type, datasz);
++	      elf_has_no_copy_on_protected (abfd) = TRUE;
+ 	      prop->pr_kind = property_number;
+ 	      goto next;
+ 
+@@ -290,6 +291,9 @@ elf_merge_gnu_property_list (struct bfd_link_info *info, bfd *abfd,
+   for (p = *listp; p != NULL; p = p->next)
+     if (elf_merge_gnu_properties (info, abfd, NULL, &p->property))
+       {
++	if (p->property.pr_type == GNU_PROPERTY_NO_COPY_ON_PROTECTED)
++	  elf_has_no_copy_on_protected (abfd) = TRUE;
++
+ 	pr = _bfd_elf_get_property (abfd, p->property.pr_type,
+ 				    p->property.pr_datasz);
+ 	/* It must be a new property.  */
+@@ -489,6 +493,11 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
+ 
+       /* Cache the section contents for elf_link_input_bfd.  */
+       elf_section_data (sec)->this_hdr.contents = contents;
++
++      /* If GNU_PROPERTY_NO_COPY_ON_PROTECTED is set, protected data
++	 symbol is defined in the shared object.  */
++      if (elf_has_no_copy_on_protected (first_pbfd))
++	info->extern_protected_data = FALSE;
+     }
+ 
+   return first_pbfd;
+diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
+index 1009c17ff2..5f442e7108 100644
+--- a/bfd/elf32-i386.c
++++ b/bfd/elf32-i386.c
+@@ -2599,7 +2599,9 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
+ 		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
+       h->root.u.def.section = h->u.weakdef->root.u.def.section;
+       h->root.u.def.value = h->u.weakdef->root.u.def.value;
+-      if (ELIMINATE_COPY_RELOCS || info->nocopyreloc)
++      if (ELIMINATE_COPY_RELOCS
++	  || info->nocopyreloc
++	  || SYMBOL_NO_COPYRELOC (info, h))
+ 	h->non_got_ref = h->u.weakdef->non_got_ref;
+       return TRUE;
+     }
+@@ -2622,7 +2624,7 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
+     return TRUE;
+ 
+   /* If -z nocopyreloc was given, we won't generate them either.  */
+-  if (info->nocopyreloc)
++  if (info->nocopyreloc || SYMBOL_NO_COPYRELOC (info, h))
+     {
+       h->non_got_ref = 0;
+       return TRUE;
+@@ -6802,68 +6804,39 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
+ 	  break;
+       }
+ 
+-  if (ebfd != NULL)
++  if (ebfd != NULL && features)
+     {
+-      if (features)
++      /* If features is set, add GNU_PROPERTY_X86_FEATURE_1_IBT and
++	 GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
++      prop = _bfd_elf_get_property (ebfd,
++				    GNU_PROPERTY_X86_FEATURE_1_AND,
++				    4);
++      prop->u.number |= features;
++      prop->pr_kind = property_number;
++
++      /* Create the GNU property note section if needed.  */
++      if (pbfd == NULL)
+ 	{
+-	  /* If features is set, add GNU_PROPERTY_X86_FEATURE_1_IBT and
+-	     GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
+-	  prop = _bfd_elf_get_property (ebfd,
+-					GNU_PROPERTY_X86_FEATURE_1_AND,
+-					4);
+-	  prop->u.number |= features;
+-	  prop->pr_kind = property_number;
+-
+-	  /* Create the GNU property note section if needed.  */
+-	  if (pbfd == NULL)
+-	    {
+-	      sec = bfd_make_section_with_flags (ebfd,
+-						 NOTE_GNU_PROPERTY_SECTION_NAME,
+-						 (SEC_ALLOC
+-						  | SEC_LOAD
+-						  | SEC_IN_MEMORY
+-						  | SEC_READONLY
+-						  | SEC_HAS_CONTENTS
+-						  | SEC_DATA));
+-	      if (sec == NULL)
+-		info->callbacks->einfo (_("%F: failed to create GNU property section\n"));
++	  sec = bfd_make_section_with_flags (ebfd,
++					     NOTE_GNU_PROPERTY_SECTION_NAME,
++					     (SEC_ALLOC
++					      | SEC_LOAD
++					      | SEC_IN_MEMORY
++					      | SEC_READONLY
++					      | SEC_HAS_CONTENTS
++					      | SEC_DATA));
++	  if (sec == NULL)
++	    info->callbacks->einfo (_("%F: failed to create GNU property section\n"));
+ 
+-	      if (!bfd_set_section_alignment (ebfd, sec, 2))
+-		{
++	  if (!bfd_set_section_alignment (ebfd, sec, 2))
++	    {
+ error_alignment:
+-		  info->callbacks->einfo (_("%F%A: failed to align section\n"),
+-					  sec);
+-		}
+-
+-	      elf_section_type (sec) = SHT_NOTE;
++	      info->callbacks->einfo (_("%F%A: failed to align section\n"),
++				      sec);
+ 	    }
+-	}
+ 
+-      /* Check GNU_PROPERTY_NO_COPY_ON_PROTECTED.  */
+-      for (; pbfd != NULL; pbfd = pbfd->link.next)
+-	if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
+-	    && (pbfd->flags
+-		& (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
+-	  {
+-	    elf_property_list *p;
+-
+-	    /* The property list is sorted in order of type.  */
+-	    for (p = elf_properties (pbfd); p != NULL; p = p->next)
+-	      {
+-		if (GNU_PROPERTY_NO_COPY_ON_PROTECTED
+-		    == p->property.pr_type)
+-		  {
+-		    /* Clear extern_protected_data if
+-		       GNU_PROPERTY_NO_COPY_ON_PROTECTED is
+-		       set on any input relocatable file.  */
+-		    info->extern_protected_data = FALSE;
+-		    break;
+-		  }
+-		else if (GNU_PROPERTY_NO_COPY_ON_PROTECTED
+-			 < p->property.pr_type)
+-		  break;
+-	      }
+-	  }
++	  elf_section_type (sec) = SHT_NOTE;
++	}
+     }
+ 
+   pbfd = _bfd_elf_link_setup_gnu_properties (info);
+diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
+index e30428d6d8..2d64fa359c 100644
+--- a/bfd/elf64-x86-64.c
++++ b/bfd/elf64-x86-64.c
+@@ -1908,7 +1908,10 @@ elf_x86_64_need_pic (struct bfd_link_info *info,
+ 	  v = _("protected symbol ");
+ 	  break;
+ 	default:
+-	  v = _("symbol ");
++	  if (h->def_protected)
++	    v = _("protected symbol ");
++	  else
++	    v = _("symbol ");
+ 	  pic = _("; recompile with -fPIC");
+ 	  break;
+ 	}
+@@ -3052,7 +3055,9 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
+ 		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
+       h->root.u.def.section = h->u.weakdef->root.u.def.section;
+       h->root.u.def.value = h->u.weakdef->root.u.def.value;
+-      if (ELIMINATE_COPY_RELOCS || info->nocopyreloc)
++      if (ELIMINATE_COPY_RELOCS
++	  || info->nocopyreloc
++	  || SYMBOL_NO_COPYRELOC (info, h))
+ 	{
+ 	  eh = (struct elf_x86_64_link_hash_entry *) h;
+ 	  h->non_got_ref = h->u.weakdef->non_got_ref;
+@@ -3077,7 +3082,7 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
+     return TRUE;
+ 
+   /* If -z nocopyreloc was given, we won't generate them either.  */
+-  if (info->nocopyreloc)
++  if (info->nocopyreloc || SYMBOL_NO_COPYRELOC (info, h))
+     {
+       h->non_got_ref = 0;
+       return TRUE;
+@@ -4950,7 +4955,9 @@ do_ifunc_pointer:
+ 	      && ((bfd_link_executable (info)
+ 		   && ((h->root.type == bfd_link_hash_undefweak
+ 			&& !resolved_to_zero)
+-		       || (info->nocopyreloc
++		       || ((info->nocopyreloc
++			    || (h->def_protected
++				&& elf_has_no_copy_on_protected (h->root.u.def.section->owner)))
+ 			   && h->def_dynamic
+ 			   && !(h->root.u.def.section->flags & SEC_CODE))))
+ 		  || bfd_link_dll (info)))
+@@ -5724,7 +5731,10 @@ direct:
+ 	  switch (r_type)
+ 	    {
+ 	    case R_X86_64_32S:
+-	      if (info->nocopyreloc
++	      sec = h->root.u.def.section;
++	      if ((info->nocopyreloc
++		   || (h->def_protected
++		       && elf_has_no_copy_on_protected (h->root.u.def.section->owner)))
+ 		  && !(h->root.u.def.section->flags & SEC_CODE))
+ 		return elf_x86_64_need_pic (info, input_bfd, input_section,
+ 					    h, NULL, NULL, howto);
+@@ -7349,69 +7359,40 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
+ 	  break;
+       }
+ 
+-  if (ebfd != NULL)
++  if (ebfd != NULL && features)
+     {
+-      if (features)
++      /* If features is set, add GNU_PROPERTY_X86_FEATURE_1_IBT and
++	 GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
++      prop = _bfd_elf_get_property (ebfd,
++				    GNU_PROPERTY_X86_FEATURE_1_AND,
++				    4);
++      prop->u.number |= features;
++      prop->pr_kind = property_number;
++
++      /* Create the GNU property note section if needed.  */
++      if (pbfd == NULL)
+ 	{
+-	  /* If features is set, add GNU_PROPERTY_X86_FEATURE_1_IBT and
+-	     GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
+-	  prop = _bfd_elf_get_property (ebfd,
+-					GNU_PROPERTY_X86_FEATURE_1_AND,
+-					4);
+-	  prop->u.number |= features;
+-	  prop->pr_kind = property_number;
+-
+-	  /* Create the GNU property note section if needed.  */
+-	  if (pbfd == NULL)
+-	    {
+-	      sec = bfd_make_section_with_flags (ebfd,
+-						 NOTE_GNU_PROPERTY_SECTION_NAME,
+-						 (SEC_ALLOC
+-						  | SEC_LOAD
+-						  | SEC_IN_MEMORY
+-						  | SEC_READONLY
+-						  | SEC_HAS_CONTENTS
+-						  | SEC_DATA));
+-	      if (sec == NULL)
+-		info->callbacks->einfo (_("%F: failed to create GNU property section\n"));
++	  sec = bfd_make_section_with_flags (ebfd,
++					     NOTE_GNU_PROPERTY_SECTION_NAME,
++					     (SEC_ALLOC
++					      | SEC_LOAD
++					      | SEC_IN_MEMORY
++					      | SEC_READONLY
++					      | SEC_HAS_CONTENTS
++					      | SEC_DATA));
++	  if (sec == NULL)
++	    info->callbacks->einfo (_("%F: failed to create GNU property section\n"));
+ 
+-	      if (!bfd_set_section_alignment (ebfd, sec,
+-					      ABI_64_P (ebfd) ? 3 : 2))
+-		{
++	  if (!bfd_set_section_alignment (ebfd, sec,
++					  ABI_64_P (ebfd) ? 3 : 2))
++	    {
+ error_alignment:
+-		  info->callbacks->einfo (_("%F%A: failed to align section\n"),
+-					  sec);
+-		}
+-
+-	      elf_section_type (sec) = SHT_NOTE;
++	      info->callbacks->einfo (_("%F%A: failed to align section\n"),
++				      sec);
+ 	    }
+-	}
+-
+-      /* Check GNU_PROPERTY_NO_COPY_ON_PROTECTED.  */
+-      for (; pbfd != NULL; pbfd = pbfd->link.next)
+-	if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
+-	    && (pbfd->flags
+-		& (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
+-	  {
+-	    elf_property_list *p;
+ 
+-	    /* The property list is sorted in order of type.  */
+-	    for (p = elf_properties (pbfd); p != NULL; p = p->next)
+-	      {
+-		if (GNU_PROPERTY_NO_COPY_ON_PROTECTED
+-		    == p->property.pr_type)
+-		  {
+-		    /* Clear extern_protected_data if
+-		       GNU_PROPERTY_NO_COPY_ON_PROTECTED is
+-		       set on any input relocatable file.  */
+-		    info->extern_protected_data = FALSE;
+-		    break;
+-		  }
+-		else if (GNU_PROPERTY_NO_COPY_ON_PROTECTED
+-			 < p->property.pr_type)
+-		  break;
+-	      }
+-	  }
++	  elf_section_type (sec) = SHT_NOTE;
++	}
+     }
+ 
+   pbfd = _bfd_elf_link_setup_gnu_properties (info);
+diff --git a/bfd/elflink.c b/bfd/elflink.c
+index ceacb37e4c..0171b3b812 100644
+--- a/bfd/elflink.c
++++ b/bfd/elflink.c
+@@ -4638,6 +4638,8 @@ error_free_dyn:
+ 	      else
+ 		{
+ 		  h->def_regular = 1;
++		  h->def_protected = (ELF_ST_VISIBILITY (isym->st_other)
++				      == STV_PROTECTED);
+ 		  if (h->def_dynamic)
+ 		    {
+ 		      h->def_dynamic = 0;
+@@ -4664,6 +4666,9 @@ error_free_dyn:
+ 		{
+ 		  h->def_dynamic = 1;
+ 		  hi->def_dynamic = 1;
++		  h->def_protected = hi->def_protected
++		    = (ELF_ST_VISIBILITY (isym->st_other)
++		       == STV_PROTECTED);
+ 		}
+ 
+ 	      /* If the indirect symbol has been forced local, don't
+diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
+index c813a80551..bd1561024c 100644
+--- a/ld/testsuite/ld-i386/i386.exp
++++ b/ld/testsuite/ld-i386/i386.exp
+@@ -1254,6 +1254,14 @@ if { [isnative]
+ 	    {} \
+ 	    "pr22001-1.so" \
+ 	] \
++	[list \
++	    "Build pr21997-1.so" \
++	    "-shared" \
++	    "" \
++	    { property-stack.S property-no-copy.S pr21997-1a.S } \
++	    {} \
++	    "pr21997-1.so" \
++	] \
+     ]
+ 
+     run_ld_link_exec_tests [list \
+@@ -1309,6 +1317,49 @@ if { [isnative]
+ 	    "pass.out" \
+ 	    "-fPIC" \
+ 	] \
++	[list \
++	    "Run pr21997-1" \
++	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
++	    "" \
++	    { pr21997-1b.c } \
++	    "pr21997-1" \
++	    "pass.out" \
++	    "$NOPIE_CFLAGS" \
++	] \
++	[list \
++	    "Run pr21997-1 (PIC 1)" \
++	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
++	    "" \
++	    { pr21997-1b.c } \
++	    "pr21997-1-pic-1" \
++	    "pass.out" \
++	    "-fPIC" \
++	] \
++	[list \
++	    "Run pr21997-1 (PIC 2)" \
++	    "-pie -Wl,--no-as-needed tmpdir/pr21997-1.so" \
++	    "" \
++	    { pr21997-1b.c } \
++	    "pr21997-1-pic-2" \
++	    "pass.out" \
++	    "-fPIC" \
++	] \
++	[list \
++	    "Run pr21997-1 (PIE 1)" \
++	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
++	    "" \
++	    { pr21997-1c.S } \
++	    "pr21997-1-pie-1" \
++	    "pass.out" \
++	] \
++	[list \
++	    "Run pr21997-1 (PIE 2)" \
++	    "-pie -Wl,--no-as-needed tmpdir/pr21997-1.so" \
++	    "" \
++	    { pr21997-1c.S } \
++	    "pr21997-1-pie-2" \
++	    "pass.out" \
++	] \
+     ]
+ 
+     if { [at_least_gcc_version 5 0] } {
+diff --git a/ld/testsuite/ld-i386/pr21997-1a.S b/ld/testsuite/ld-i386/pr21997-1a.S
+new file mode 100644
+index 0000000000..aea17f833a
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr21997-1a.S
+@@ -0,0 +1,35 @@
++	.text
++	.p2align 4,,15
++	.globl	get_protected
++	.type	get_protected, @function
++get_protected:
++	call	__x86.get_pc_thunk.ax
++	addl	$_GLOBAL_OFFSET_TABLE_, %eax
++	movl	protected@GOTOFF(%eax), %eax
++	ret
++	.size	get_protected, .-get_protected
++	.p2align 4,,15
++	.globl	get_protected_p
++	.type	get_protected_p, @function
++get_protected_p:
++	call	__x86.get_pc_thunk.ax
++	addl	$_GLOBAL_OFFSET_TABLE_, %eax
++	leal	protected@GOTOFF(%eax), %eax
++	ret
++	.size	get_protected_p, .-get_protected_p
++	.protected	protected
++	.globl	protected
++	.data
++	.align 4
++	.type	protected, @object
++	.size	protected, 4
++protected:
++	.long	1
++	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
++	.globl	__x86.get_pc_thunk.ax
++	.hidden	__x86.get_pc_thunk.ax
++	.type	__x86.get_pc_thunk.ax, @function
++__x86.get_pc_thunk.ax:
++	movl	(%esp), %eax
++	ret
++	.section	.note.GNU-stack,"",@progbits
+diff --git a/ld/testsuite/ld-i386/pr21997-1b.c b/ld/testsuite/ld-i386/pr21997-1b.c
+new file mode 100644
+index 0000000000..576362ebe7
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr21997-1b.c
+@@ -0,0 +1,16 @@
++#include <stdio.h>
++
++extern int protected;
++extern int get_protected (void);
++extern int* get_protected_p (void);
++
++int
++main ()
++{
++
++  if (protected == get_protected ()
++      && &protected == get_protected_p ())
++    printf ("PASS\n");
++
++  return 0;
++}
+diff --git a/ld/testsuite/ld-i386/pr21997-1c.S b/ld/testsuite/ld-i386/pr21997-1c.S
+new file mode 100644
+index 0000000000..8534877491
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr21997-1c.S
+@@ -0,0 +1,51 @@
++	.section	.rodata.str1.1,"aMS",@progbits,1
++.LC0:
++	.string	"PASS"
++	.section	.text.startup,"ax",@progbits
++	.p2align 4,,15
++	.globl	main
++	.type	main, @function
++main:
++	leal	4(%esp), %ecx
++	andl	$-16, %esp
++	pushl	-4(%ecx)
++	pushl	%ebp
++	movl	%esp, %ebp
++	pushl	%esi
++	pushl	%ebx
++	pushl	%ecx
++	call	__x86.get_pc_thunk.bx
++	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
++	subl	$12, %esp
++	call	get_protected@PLT
++	movl	protected@GOT(%ebx), %esi
++	cmpl	(%esi), %eax
++	je	.L7
++.L3:
++	leal	-12(%ebp), %esp
++	xorl	%eax, %eax
++	popl	%ecx
++	popl	%ebx
++	popl	%esi
++	popl	%ebp
++	leal	-4(%ecx), %esp
++	ret
++.L7:
++	call	get_protected_p@PLT
++	cmpl	%esi, %eax
++	jne	.L3
++	leal	.LC0@GOTOFF(%ebx), %eax
++	subl	$12, %esp
++	pushl	%eax
++	call	puts@PLT
++	addl	$16, %esp
++	jmp	.L3
++	.size	main, .-main
++	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
++	.globl	__x86.get_pc_thunk.bx
++	.hidden	__x86.get_pc_thunk.bx
++	.type	__x86.get_pc_thunk.bx, @function
++__x86.get_pc_thunk.bx:
++	movl	(%esp), %ebx
++	ret
++	.section	.note.GNU-stack,"",@progbits
+diff --git a/ld/testsuite/ld-x86-64/pr21997-1a.S b/ld/testsuite/ld-x86-64/pr21997-1a.S
+new file mode 100644
+index 0000000000..cab99a9abd
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr21997-1a.S
+@@ -0,0 +1,24 @@
++	.text
++	.p2align 4,,15
++	.globl	get_protected
++	.type	get_protected, @function
++get_protected:
++	movl	protected(%rip), %eax
++	ret
++	.size	get_protected, .-get_protected
++	.p2align 4,,15
++	.globl	get_protected_p
++	.type	get_protected_p, @function
++get_protected_p:
++	leaq	protected(%rip), %rax
++	ret
++	.size	get_protected_p, .-get_protected_p
++	.protected	protected
++	.globl	protected
++	.data
++	.align 4
++	.type	protected, @object
++	.size	protected, 4
++protected:
++	.long	1
++	.section	.note.GNU-stack,"",@progbits
+diff --git a/ld/testsuite/ld-x86-64/pr21997-1a.err b/ld/testsuite/ld-x86-64/pr21997-1a.err
+new file mode 100644
+index 0000000000..5d663a31c3
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr21997-1a.err
+@@ -0,0 +1,2 @@
++.*relocation R_X86_64_PC32 against protected symbol `protected' can not be used when making a P(D|I)E object; recompile with -fPIC
++#...
+diff --git a/ld/testsuite/ld-x86-64/pr21997-1b.c b/ld/testsuite/ld-x86-64/pr21997-1b.c
+new file mode 100644
+index 0000000000..ffed117fdd
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr21997-1b.c
+@@ -0,0 +1,13 @@
++#include <stdio.h>
++
++extern int protected;
++extern int get_protected (void);
++
++int
++main ()
++{
++  if (protected == get_protected ())
++    printf ("PASS\n");
++
++  return 0;
++}
+diff --git a/ld/testsuite/ld-x86-64/pr21997-1b.err b/ld/testsuite/ld-x86-64/pr21997-1b.err
+new file mode 100644
+index 0000000000..365de67167
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr21997-1b.err
+@@ -0,0 +1,2 @@
++.*relocation R_X86_64_32S against protected symbol `protected' can not be used when making a P(D|I)E object; recompile with -fPIC
++#...
+diff --git a/ld/testsuite/ld-x86-64/pr21997-1c.c b/ld/testsuite/ld-x86-64/pr21997-1c.c
+new file mode 100644
+index 0000000000..6d7b9dc50d
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr21997-1c.c
+@@ -0,0 +1,13 @@
++#include <stdio.h>
++
++extern int protected;
++extern int* get_protected_p (void);
++
++int
++main ()
++{
++  if (&protected == get_protected_p ())
++    printf ("PASS\n");
++
++  return 0;
++}
+diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
+index 45e93b2c96..0e018c5577 100644
+--- a/ld/testsuite/ld-x86-64/x86-64.exp
++++ b/ld/testsuite/ld-x86-64/x86-64.exp
+@@ -1056,6 +1056,22 @@ if { [isnative] && [which $CC] != 0 } {
+ 	    {{error_output "pr22001-1a.err"}} \
+ 	    "pr22001-1a" \
+ 	] \
++	[list \
++	    "Build pr21997-1.so" \
++	    "-shared" \
++	    "" \
++	    { property-stack.S property-no-copy.S pr21997-1a.S } \
++	    {} \
++	    "pr21997-1.so" \
++	] \
++	[list \
++	    "Build pr21997-1a" \
++	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
++	    "$NOPIE_CFLAGS" \
++	    { pr21997-1b.c } \
++	    {{error_output "pr21997-1a.err"}} \
++	    "pr21997-1a" \
++	] \
+     ]
+ 
+     if  {[istarget "x86_64-*-linux*-gnux32"]} {
+@@ -1069,6 +1085,15 @@ if { [isnative] && [which $CC] != 0 } {
+ 		"pass.out" \
+ 		"$NOPIE_CFLAGS" \
+ 	    ] \
++	    [list \
++		"Run pr21997-1b" \
++		"$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
++		"" \
++		{ pr21997-1c.c } \
++		"pr21997-1b" \
++		"pass.out" \
++		"$NOPIE_CFLAGS" \
++	    ] \
+ 	]
+     } else {
+ 	run_cc_link_tests [list \
+@@ -1080,6 +1105,14 @@ if { [isnative] && [which $CC] != 0 } {
+ 		{{error_output "pr22001-1b.err"}} \
+ 		"pr22001-1b" \
+ 	    ] \
++	    [list \
++		"Build pr21997-1b" \
++		"$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
++		"$NOPIE_CFLAGS" \
++		{ pr21997-1c.c } \
++		{{error_output "pr21997-1b.err"}} \
++		"pr21997-1b" \
++	    ] \
+ 	]
+     }
+ 
+@@ -1293,6 +1326,42 @@ if { [isnative] && [which $CC] != 0 } {
+ 	    "pass.out" \
+ 	    "-fPIC" \
+ 	] \
++	[list \
++	    "Run pr21997-1a (PIC 1)" \
++	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
++	    "" \
++	    { pr21997-1b.c } \
++	    "pr21997-1a-pic-1" \
++	    "pass.out" \
++	    "-fPIC" \
++	] \
++	[list \
++	    "Run pr21997-1a (PIC 2)" \
++	    "-pie -Wl,--no-as-needed tmpdir/pr21997-1.so" \
++	    "" \
++	    { pr21997-1b.c } \
++	    "pr21997-1a-pic-2" \
++	    "pass.out" \
++	    "-fPIC" \
++	] \
++	[list \
++	    "Run pr21997-1b (PIC 1)" \
++	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
++	    "" \
++	    { pr21997-1c.c } \
++	    "pr21997-1b-pic-1" \
++	    "pass.out" \
++	    "-fPIC" \
++	] \
++	[list \
++	    "Run pr21997-1b (PIC 2)" \
++	    "-pie -Wl,--no-as-needed tmpdir/pr21997-1.so" \
++	    "" \
++	    { pr21997-1c.c } \
++	    "pr21997-1b-pic-2" \
++	    "pass.out" \
++	    "-fPIC" \
++	] \
+     ]
+ 
+     # Run-time tests which require working ifunc attribute support.
+-- 
+2.13.5
+
