@@ -1,4 +1,4 @@
-From ae31c4dce3a87f32dd66ae96f7d0dee790198b6c Mon Sep 17 00:00:00 2001
+From 6cc767b4e13372e18913ab4fbf59c86208d22313 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Thu, 3 Aug 2017 09:43:28 -0700
 Subject: [PATCH] x86: Add R_X86_64_GPOFF/R_386_GPOFF relocation
@@ -161,9 +161,9 @@ ld/
  include/elf/i386.h                          |   1 +
  include/elf/x86-64.h                        |   1 +
  ld/testsuite/ld-i386/gpoff-1a.S             |  20 +++
- ld/testsuite/ld-i386/gpoff-1b.c             |  79 +++++++++++
+ ld/testsuite/ld-i386/gpoff-1b.c             |  78 +++++++++++
  ld/testsuite/ld-i386/gpoff-2a.S             |  19 +++
- ld/testsuite/ld-i386/gpoff-2b.c             |  78 +++++++++++
+ ld/testsuite/ld-i386/gpoff-2b.c             |  77 +++++++++++
  ld/testsuite/ld-i386/gpoff-3.d              |   3 +
  ld/testsuite/ld-i386/gpoff-3.s              |   4 +
  ld/testsuite/ld-i386/gpoff-4.d              |   3 +
@@ -206,7 +206,7 @@ ld/
  ld/testsuite/ld-x86-64/gpoff-8e.d           |  18 +++
  ld/testsuite/ld-x86-64/gpoff-8f.d           |  18 +++
  ld/testsuite/ld-x86-64/x86-64.exp           |  72 ++++++++++
- 61 files changed, 1466 insertions(+), 17 deletions(-)
+ 61 files changed, 1464 insertions(+), 17 deletions(-)
  create mode 100644 gas/testsuite/gas/i386/gpoff.d
  create mode 100644 gas/testsuite/gas/i386/gpoff.s
  create mode 100644 gas/testsuite/gas/i386/inval-gpoff.l
@@ -261,7 +261,7 @@ ld/
  create mode 100644 ld/testsuite/ld-x86-64/gpoff-8f.d
 
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index d5477c4215..578dbe6e2c 100644
+index 1009c17ff2..5732b6b78e 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
 @@ -150,9 +150,12 @@ static reloc_howto_type elf_howto_table[]=
@@ -433,7 +433,7 @@ index d5477c4215..578dbe6e2c 100644
    return elf_i386_finish_dynamic_symbol (info->output_bfd, info,
  					 h, NULL);
  }
-@@ -7137,12 +7208,124 @@ elf_i386_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+@@ -7157,12 +7228,124 @@ elf_i386_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
  				FALSE, FALSE, FALSE);
        if (h != NULL)
  	((struct elf_i386_link_hash_entry *) h)->tls_get_addr = 1;
@@ -558,7 +558,7 @@ index d5477c4215..578dbe6e2c 100644
  #define TARGET_LITTLE_SYM		i386_elf32_vec
  #define TARGET_LITTLE_NAME		"elf32-i386"
  #define ELF_ARCH			bfd_arch_i386
-@@ -7174,6 +7357,7 @@ elf_i386_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+@@ -7194,6 +7377,7 @@ elf_i386_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
  #define bfd_elf32_bfd_reloc_name_lookup	      elf_i386_reloc_name_lookup
  #define bfd_elf32_get_synthetic_symtab	      elf_i386_get_synthetic_symtab
  #define bfd_elf32_bfd_link_check_relocs	      elf_i386_link_check_relocs
@@ -567,7 +567,7 @@ index d5477c4215..578dbe6e2c 100644
  #define elf_backend_adjust_dynamic_symbol     elf_i386_adjust_dynamic_symbol
  #define elf_backend_relocs_compatible	      _bfd_elf_relocs_compatible
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index 8a6bd6285c..6b120d39f1 100644
+index e30428d6d8..08e8fcd71e 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
 @@ -183,12 +183,15 @@ static reloc_howto_type x86_64_elf_howto_table[] =
@@ -630,7 +630,7 @@ index 8a6bd6285c..6b120d39f1 100644
    edir->has_got_reloc |= eind->has_got_reloc;
    edir->has_non_got_reloc |= eind->has_non_got_reloc;
  
-@@ -2431,18 +2442,26 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+@@ -2441,18 +2452,26 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
  	  if (isym == NULL)
  	    goto error_return;
  
@@ -663,7 +663,7 @@ index 8a6bd6285c..6b120d39f1 100644
  	      h->def_regular = 1;
  	      h->ref_regular = 1;
  	      h->forced_local = 1;
-@@ -2869,6 +2888,11 @@ do_size:
+@@ -2879,6 +2898,11 @@ do_size:
  	    goto error_return;
  	  break;
  
@@ -675,7 +675,7 @@ index 8a6bd6285c..6b120d39f1 100644
  	default:
  	  break;
  	}
-@@ -3526,6 +3550,10 @@ elf_x86_64_allocate_local_dynrelocs (void **slot, void *inf)
+@@ -3536,6 +3560,10 @@ elf_x86_64_allocate_local_dynrelocs (void **slot, void *inf)
    struct elf_link_hash_entry *h
      = (struct elf_link_hash_entry *) *slot;
  
@@ -686,7 +686,7 @@ index 8a6bd6285c..6b120d39f1 100644
    if (h->type != STT_GNU_IFUNC
        || !h->def_regular
        || !h->ref_regular
-@@ -5694,6 +5722,41 @@ direct:
+@@ -5708,6 +5736,41 @@ direct:
  	  relocation -= elf_x86_64_dtpoff_base (info);
  	  break;
  
@@ -728,7 +728,7 @@ index 8a6bd6285c..6b120d39f1 100644
  	default:
  	  break;
  	}
-@@ -6203,8 +6266,12 @@ elf_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
+@@ -6228,8 +6291,12 @@ elf_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
    struct bfd_link_info *info
      = (struct bfd_link_info *) inf;
  
@@ -742,7 +742,7 @@ index 8a6bd6285c..6b120d39f1 100644
  }
  
  /* Finish up undefined weak symbol handling in PIE.  Fill its PLT entry
-@@ -7696,12 +7763,131 @@ elf_x86_64_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+@@ -7741,12 +7808,131 @@ elf_x86_64_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
  				FALSE, FALSE, FALSE);
        if (h != NULL)
  	((struct elf_x86_64_link_hash_entry *) h)->tls_get_addr = 1;
@@ -874,7 +874,7 @@ index 8a6bd6285c..6b120d39f1 100644
  static const struct bfd_elf_special_section
  elf_x86_64_special_sections[]=
  {
-@@ -7767,6 +7953,7 @@ elf_x86_64_special_sections[]=
+@@ -7812,6 +7998,7 @@ elf_x86_64_special_sections[]=
  #define bfd_elf64_mkobject		    elf_x86_64_mkobject
  #define bfd_elf64_get_synthetic_symtab	    elf_x86_64_get_synthetic_symtab
  #define bfd_elf64_bfd_link_check_relocs	    elf_x86_64_link_check_relocs
@@ -882,7 +882,7 @@ index 8a6bd6285c..6b120d39f1 100644
  
  #define elf_backend_section_from_shdr \
  	elf_x86_64_section_from_shdr
-@@ -8068,6 +8255,8 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
+@@ -8113,6 +8300,8 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
    elf_x86_64_get_synthetic_symtab
  #define bfd_elf32_bfd_link_check_relocs \
    elf_x86_64_link_check_relocs
@@ -1209,15 +1209,14 @@ index 0000000000..5bb9bb5e67
 +	.long 0x12345678
 diff --git a/ld/testsuite/ld-i386/gpoff-1b.c b/ld/testsuite/ld-i386/gpoff-1b.c
 new file mode 100644
-index 0000000000..418575a217
+index 0000000000..30b19cc8ba
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/gpoff-1b.c
-@@ -0,0 +1,79 @@
+@@ -0,0 +1,78 @@
 +#define _GNU_SOURCE
 +#include <stdio.h>
 +#include <unistd.h>
 +#include <syscall.h>
-+#include <asm/prctl.h>
 +
 +extern int foo;
 +extern int __gp;
@@ -1319,15 +1318,14 @@ index 0000000000..b54f316a8f
 +	.long 0x12345678
 diff --git a/ld/testsuite/ld-i386/gpoff-2b.c b/ld/testsuite/ld-i386/gpoff-2b.c
 new file mode 100644
-index 0000000000..cfd050f5ab
+index 0000000000..2a4085a799
 --- /dev/null
 +++ b/ld/testsuite/ld-i386/gpoff-2b.c
-@@ -0,0 +1,78 @@
+@@ -0,0 +1,77 @@
 +#define _GNU_SOURCE
 +#include <stdio.h>
 +#include <unistd.h>
 +#include <syscall.h>
-+#include <asm/prctl.h>
 +
 +extern int __gp;
 +extern int foo_gpoff;
@@ -1760,7 +1758,7 @@ index 0000000000..6cc4a52403
 + +[a-f0-9]+:[ \t]+8d 83 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%ebx\),%eax
 +#pass
 diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
-index 27d622eab4..07c0503488 100644
+index c813a80551..2a6f871745 100644
 --- a/ld/testsuite/ld-i386/i386.exp
 +++ b/ld/testsuite/ld-i386/i386.exp
 @@ -290,6 +290,17 @@ run_dump_test "abs"
@@ -1781,7 +1779,7 @@ index 27d622eab4..07c0503488 100644
  run_dump_test "alloc"
  run_dump_test "warn1"
  run_dump_test "tlsgd2"
-@@ -1268,6 +1279,67 @@ if { [isnative]
+@@ -1324,6 +1335,67 @@ if { [isnative]
  	    ] \
  	]
      }
@@ -2327,7 +2325,7 @@ index 0000000000..fb8c3375b8
 + +[a-f0-9]+:[ \t]+48 8d 05 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%rip\),%rax[ \t]+# [a-f0-9]+ <foo>
 +#pass
 diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
-index 46311577e4..e6612ccae7 100644
+index 45e93b2c96..972eb3352f 100644
 --- a/ld/testsuite/ld-x86-64/x86-64.exp
 +++ b/ld/testsuite/ld-x86-64/x86-64.exp
 @@ -269,6 +269,17 @@ run_dump_test "abs"
@@ -2348,7 +2346,7 @@ index 46311577e4..e6612ccae7 100644
  run_dump_test "tlsgd2"
  run_dump_test "tlsgd3"
  run_dump_test "tlsgd12"
-@@ -1532,6 +1543,67 @@ if { [isnative] && [which $CC] != 0 } {
+@@ -1610,6 +1621,67 @@ if { [isnative] && [which $CC] != 0 } {
  	}
      }
  
