@@ -161,7 +161,6 @@ struct inferior_list_entry *
 			   void *arg);
 
 void *inferior_target_data (struct thread_info *);
-void set_inferior_target_data (struct thread_info *, void *);
 struct regcache *inferior_regcache_data (struct thread_info *);
 void set_inferior_regcache_data (struct thread_info *, struct regcache *);
 

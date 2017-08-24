@@ -314,12 +314,6 @@ inferior_target_data (struct thread_info *inferior)
   return inferior->target_data;
 }
 
-void
-set_inferior_target_data (struct thread_info *inferior, void *data)
-{
-  inferior->target_data = data;
-}
-
 struct regcache *
 inferior_regcache_data (struct thread_info *inferior)
 {
