@@ -19522,6 +19522,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
       break;
 
     case DW_FORM_sdata:
+    case DW_FORM_implicit_const:
       *value = DW_SND (attr);
       break;
 
@@ -20515,6 +20516,10 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  fprintf_unfiltered (f, 
 			      "unexpected attribute form: DW_FORM_indirect");
 	  break;
+	case DW_FORM_implicit_const:
+	  fprintf_unfiltered (f, "constant: %s",
+			      plongest (DW_SND (&die->attrs[i])));
+	  break;
 	default:
 	  fprintf_unfiltered (f, "unsupported attribute form: %d.",
 		   die->attrs[i].form);
@@ -20606,7 +20611,7 @@ dwarf2_get_ref_die_offset (const struct attribute *attr)
 static LONGEST
 dwarf2_get_attr_constant_value (const struct attribute *attr, int default_value)
 {
-  if (attr->form == DW_FORM_sdata)
+  if (attr->form == DW_FORM_sdata || attr->form == DW_FORM_implicit_const)
     return DW_SND (attr);
   else if (attr->form == DW_FORM_udata
            || attr->form == DW_FORM_data1
@@ -20941,6 +20946,7 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
       break;
 
     case DW_FORM_sdata:
+    case DW_FORM_implicit_const:
       type = die_type (die, cu);
       result = write_constant_as_bytes (obstack, byte_order,
 					type, DW_SND (attr), len);
@@ -21877,6 +21883,9 @@ skip_form_bytes (bfd *abfd, const gdb_byte *bytes, const gdb_byte *buffer_end,
 	}
       break;
 
+    case DW_FORM_implicit_const:
+      break;
+
     default:
       {
       complain:
@@ -22518,6 +22527,7 @@ attr_form_is_constant (const struct attribute *attr)
     case DW_FORM_data2:
     case DW_FORM_data4:
     case DW_FORM_data8:
+    case DW_FORM_implicit_const:
       return 1;
     default:
       return 0;
