@@ -1,3 +1,63 @@
+2017-08-23  Alexander Fedotov <alexander.fedotov@nxp.com>
+	    Edmar Wienskoski <edmar.wienskoski@nxp.com>
+
+	* ppc-dis.c (ppc_mopt): Add PPC_OPCODE_SPE2 and
+	PPC_OPCODE_EFS2 flag to "e200z4" entry.
+	New entries efs2 and spe2.
+	Add PPC_OPCODE_SPE2 and PPC_OPCODE_EFS2 flag to "vle" entry.
+	(SPE2_OPCD_SEGS): New macro.
+	(spe2_opcd_indices): New.
+	(disassemble_init_powerpc): Handle SPE2 opcodes.
+	(lookup_spe2): New function.
+	(print_insn_powerpc): call lookup_spe2.
+	* ppc-opc.c (insert_evuimm1_ex0): New function.
+	(extract_evuimm1_ex0): Likewise.
+	(insert_evuimm_lt8): Likewise.
+	(extract_evuimm_lt8): Likewise.
+	(insert_off_spe2): Likewise.
+	(extract_off_spe2): Likewise.
+	(insert_Ddd): Likewise.
+	(extract_Ddd): Likewise.
+	(DD): New operand.
+	(EVUIMM_LT8): Likewise.
+	(EVUIMM_LT16): Adjust.
+	(MMMM): New operand.
+	(EVUIMM_1): Likewise.
+	(EVUIMM_1_EX0): Likewise.
+	(EVUIMM_2): Adjust.
+	(NNN): New operand.
+	(VX_OFF_SPE2): Likewise.
+	(BBB): Likewise.
+	(DDD): Likewise.
+	(VX_MASK_DDD): New mask.
+	(HH): New operand.
+	(VX_RA_CONST): New macro.
+	(VX_RA_CONST_MASK): Likewise.
+	(VX_RB_CONST): Likewise.
+	(VX_RB_CONST_MASK): Likewise.
+	(VX_OFF_SPE2_MASK): Likewise.
+	(VX_SPE_CRFD): Likewise.
+	(VX_SPE_CRFD_MASK VX): Likewise.
+	(VX_SPE2_CLR): Likewise.
+	(VX_SPE2_CLR_MASK): Likewise.
+	(VX_SPE2_SPLATB): Likewise.
+	(VX_SPE2_SPLATB_MASK): Likewise.
+	(VX_SPE2_OCTET): Likewise.
+	(VX_SPE2_OCTET_MASK): Likewise.
+	(VX_SPE2_DDHH): Likewise.
+	(VX_SPE2_DDHH_MASK): Likewise.
+	(VX_SPE2_HH): Likewise.
+	(VX_SPE2_HH_MASK): Likewise.
+	(VX_SPE2_EVMAR): Likewise.
+	(VX_SPE2_EVMAR_MASK): Likewise.
+	(PPCSPE2): Likewise.
+	(PPCEFS2): Likewise.
+	(vle_opcodes): Add EFS2 and some missing SPE opcodes.
+	(powerpc_macros): Map old SPE instructions have new names
+	with the same opcodes. Add SPE2 instructions which just are
+	mapped to SPE2.
+	(spe2_opcodes): Add SPE2 opcodes.
+
 2017-08-23  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c: Formatting and comment fixes.  Move insert and

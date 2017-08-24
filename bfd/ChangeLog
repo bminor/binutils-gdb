@@ -1,3 +1,30 @@
+2017-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22001
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Check for
+	R_X86_64_PC32 relocation run-time overflow and unresolvable
+	R_X86_64_32S relocation with -z nocopyreloc.
+
+2017-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Revert the last change.
+	Undefined symbols may not have a type.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
+2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_need_pic): Add an argument for
+	bfd_link_info.  Report shared, PIE or PDE object based on
+	bfd_link_info.
+	(elf_x86_64_check_relocs): Update elf_x86_64_need_pic call.
+	(elf_x86_64_relocate_section): Likewise.
+
+2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Increment PLT count only
+	for function symbols.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
 2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Set

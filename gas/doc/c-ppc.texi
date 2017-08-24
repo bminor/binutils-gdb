@@ -99,6 +99,9 @@ Generate code for Freescale e6500 core complex.
 @item -mspe
 Generate code for Motorola SPE instructions.
 
+@item -mspe2
+Generate code for Freescale SPE2 instructions.
+
 @item -mtitan
 Generate code for AppliedMicro Titan core complex.
 

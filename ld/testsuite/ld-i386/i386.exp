@@ -468,8 +468,8 @@ proc undefined_weak {cflags ldflags} {
 	set testname "$testname ($cflags $ldflags)"
     }
 
-    if { [ regexp "\-fPIE" $cflags]
-	 && ![ regexp "\-z nodynamic-undefined-weak" $ldflags] } {
+    if { [string match "*-fPIE*" $cflags]
+	 && ![string match "*-z nodynamic-undefined-weak*" $ldflags] } {
 	set weak_symbol "Weak defined"
     } else {
 	set weak_symbol "Weak undefined"
@@ -1245,6 +1245,17 @@ if { [isnative]
 if { [isnative]
      && [istarget "i?86-*-*"]
      && [which $CC] != 0 } {
+    run_cc_link_tests [list \
+	[list \
+	    "Build pr22001-1.so" \
+	    "-shared" \
+	    "" \
+	    { pr22001-1a.c } \
+	    {} \
+	    "pr22001-1.so" \
+	] \
+    ]
+
     run_ld_link_exec_tests [list \
 	[list \
 	    "Run weakundef1 without PIE" \
@@ -1255,7 +1266,51 @@ if { [isnative]
 	    "pass.out" \
 	    "$NOPIE_CFLAGS" \
 	] \
+	[list \
+	    "Run pr22001-1" \
+	    "$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+	    "" \
+	    { pr22001-1b.c } \
+	    "pr22001-1" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run pr22001-1 (PIE 1)" \
+	    "$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+	    "" \
+	    { pr22001-1c.S } \
+	    "pr22001-1-pie-1" \
+	    "pass.out" \
+	] \
+	[list \
+	    "Run pr22001-1 (PIE 2)" \
+	    "-pie -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+	    "" \
+	    { pr22001-1c.S } \
+	    "pr22001-1-pie-2" \
+	    "pass.out" \
+	] \
+	[list \
+	    "Run pr22001-1 (PIC 1)" \
+	    "$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+	    "" \
+	    { pr22001-1b.c } \
+	    "pr22001-1-pic-1" \
+	    "pass.out" \
+	    "-fPIC" \
+	] \
+	[list \
+	    "Run pr22001-1 (PIC 2)" \
+	    "-pie -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+	    "" \
+	    { pr22001-1b.c } \
+	    "pr22001-1-pic-2" \
+	    "pass.out" \
+	    "-fPIC" \
+	] \
     ]
+
     if { [at_least_gcc_version 5 0] } {
 	run_ld_link_exec_tests [list \
 	    [list \

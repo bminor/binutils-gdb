@@ -1,3 +1,60 @@
+2017-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp (undefined_weak): Replace regexp
+	with string match.
+	* testsuite/ld-x86-64/x86-64.exp (undefined_weak): Likewise.
+
+2017-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/x86-64.exp: Run pr22001-1b on x32.
+
+2017-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22001
+	* testsuite/ld-i386/i386.exp: Run -z nocopyreloc tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr22001-1a.c: New file.
+	* testsuite/ld-i386/pr22001-1b.c: Likewise.
+	* testsuite/ld-i386/pr22001-1c.S: Likewise.
+	* testsuite/ld-x86-64/pr22001-1a.c: Likewise.
+	* testsuite/ld-x86-64/pr22001-1a.err: Likewise.
+	* testsuite/ld-x86-64/pr22001-1b.c: Likewise.
+	* testsuite/ld-x86-64/pr22001-1b.err: Likewise.
+	* testsuite/ld-x86-64/pr22001-1c.c: Likewise.
+
+2017-08-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR 21961
+	* ldlang.c (lang_discard_section_p): New function.
+	(lang_add_section): Checks moved out into new function, which is
+	now called.
+	(lang_place_orphans): Call lang_discard_section_p instead of
+	duplicating some of the checks from lang_add_section.
+	* testsuite/ld-elf/orphan-11.d: New file.
+	* testsuite/ld-elf/orphan-11.ld: New file.
+	* testsuite/ld-elf/orphan-11.s: New file.
+	* testsuite/ld-elf/orphan-12.d: New file.
+	* testsuite/ld-elf/orphan-12.s: New file.
+
+2017-08-24  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-undefined/fundef.s: New test.
+	* testsuite/ld-undefined/undefined.exp: Test that undefined
+	symbols in shared libraries are made dynamic.
+
+2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr21903c.d: Add '\' before --.
+	* testsuite/ld-elf/pr21903d.d: Likewise.
+	* testsuite/ld-elf/pr21903e.d: Likewise.
+
+2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/pie2.d: Updated.
+	* testsuite/ld-x86-64/pr19719.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2a.d: Likewise.
+	* testsuite/ld-x86-64/pr19969.d: Likewise.
+
 2017-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Run protected7.

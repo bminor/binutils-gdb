@@ -3831,19 +3831,16 @@ add_current_inferior_and_thread (char *wait_status)
 {
   struct remote_state *rs = get_remote_state ();
   int fake_pid_p = 0;
-  ptid_t ptid;
 
   inferior_ptid = null_ptid;
 
   /* Now, if we have thread information, update inferior_ptid.  */
-  ptid = get_current_thread (wait_status);
+  ptid_t curr_ptid = get_current_thread (wait_status);
 
-  if (!ptid_equal (ptid, null_ptid))
+  if (curr_ptid != null_ptid)
     {
       if (!remote_multi_process_p (rs))
 	fake_pid_p = 1;
-
-      inferior_ptid = ptid;
     }
   else
     {
@@ -3851,14 +3848,17 @@ add_current_inferior_and_thread (char *wait_status)
 	 (such as kill) won't work.  This variable serves (at least)
 	 double duty as both the pid of the target process (if it has
 	 such), and as a flag indicating that a target is active.  */
-      inferior_ptid = magic_null_ptid;
+      curr_ptid = magic_null_ptid;
       fake_pid_p = 1;
     }
 
-  remote_add_inferior (fake_pid_p, ptid_get_pid (inferior_ptid), -1, 1);
+  remote_add_inferior (fake_pid_p, ptid_get_pid (curr_ptid), -1, 1);
 
-  /* Add the main thread.  */
-  add_thread_silent (inferior_ptid);
+  /* Add the main thread and switch to it.  Don't try reading
+     registers yet, since we haven't fetched the target description
+     yet.  */
+  thread_info *tp = add_thread_silent (curr_ptid);
+  switch_to_thread_no_regs (tp);
 }
 
 /* Print info about a thread that was found already stopped on

@@ -2273,6 +2273,34 @@ section_already_linked (bfd *abfd, asection *sec, void *data)
     bfd_section_already_linked (abfd, sec, &link_info);
 }
 
+
+/* Returns true if SECTION is one we know will be discarded based on its
+   section flags, otherwise returns false.  */
+
+static bfd_boolean
+lang_discard_section_p (asection *section)
+{
+  bfd_boolean discard;
+  flagword flags = section->flags;
+
+  /* Discard sections marked with SEC_EXCLUDE.  */
+  discard = (flags & SEC_EXCLUDE) != 0;
+
+  /* Discard the group descriptor sections when we're finally placing the
+     sections from within the group.  */
+  if ((flags & SEC_GROUP) != 0
+      && link_info.resolve_section_groups)
+    discard = TRUE;
+
+  /* Discard debugging sections if we are stripping debugging
+     information.  */
+  if ((link_info.strip == strip_debugger || link_info.strip == strip_all)
+      && (flags & SEC_DEBUGGING) != 0)
+    discard = TRUE;
+
+  return discard;
+}
+
 /* The wild routines.
 
    These expand statements like *(.text) and foo.o to a list of
@@ -2294,24 +2322,12 @@ lang_add_section (lang_statement_list_type *ptr,
   lang_input_section_type *new_section;
   bfd *abfd = link_info.output_bfd;
 
-  /* Discard sections marked with SEC_EXCLUDE.  */
-  discard = (flags & SEC_EXCLUDE) != 0;
+  /* Is this section one we know should be discarded?  */
+  discard = lang_discard_section_p (section);
 
   /* Discard input sections which are assigned to a section named
      DISCARD_SECTION_NAME.  */
   if (strcmp (output->name, DISCARD_SECTION_NAME) == 0)
-    discard = TRUE;
-
-  /* Discard the group descriptor sections when we're finally placing the
-     sections from within the group.  */
-  if ((section->flags & SEC_GROUP) == SEC_GROUP
-      && link_info.resolve_section_groups)
-    discard = TRUE;
-
-  /* Discard debugging sections if we are stripping debugging
-     information.  */
-  if ((link_info.strip == strip_debugger || link_info.strip == strip_all)
-      && (flags & SEC_DEBUGGING) != 0)
     discard = TRUE;
 
   if (discard)
@@ -6446,7 +6462,7 @@ lang_place_orphans (void)
 
 	      if (file->flags.just_syms)
 		bfd_link_just_syms (file->the_bfd, s, &link_info);
-	      else if ((s->flags & SEC_EXCLUDE) != 0)
+	      else if (lang_discard_section_p (s))
 		s->output_section = bfd_abs_section_ptr;
 	      else if (strcmp (s->name, "COMMON") == 0)
 		{

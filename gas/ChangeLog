@@ -1,3 +1,27 @@
+2017-08-23  Alexander Fedotov <alexander.fedotov@nxp.com>
+	    Edmar Wienskoski <edmar.wienskoski@nxp.com
+
+	* config/tc-ppc.c:
+	(md_parse_option): Add mspe2 switch.
+	(md_show_usage): Document -mspe2.
+	(ppc_setup_opcodes): Handle spe2_opcodes.
+	* doc/as.texinfo: Document -mspe2.
+	* doc/c-ppc.texi: Likewise.
+	* testsuite/gas/ppc/efs.d: New file.
+	* testsuite/gas/ppc/efs.s: Likewise.
+	* testsuite/gas/ppc/efs2.d: Likewise.
+	* testsuite/gas/ppc/efs2.s: Likewise.
+	* testsuite/gas/ppc/ppc.exp: Run new tests.
+	* testsuite/gas/ppc/spe.d: New file.
+	* testsuite/gas/ppc/spe.s: Likewise.
+	* testsuite/gas/ppc/spe2-checks.d: Likewise.
+	* testsuite/gas/ppc/spe2-checks.l: Likewise.
+	* testsuite/gas/ppc/spe2-checks.s: Likewise.
+	* testsuite/gas/ppc/spe2.d: Likewise.
+	* testsuite/gas/ppc/spe2.s: Likewise.
+	* testsuite/gas/ppc/spe_ambiguous.d: Likewise.
+	* testsuite/gas/ppc/spe_ambiguous.s: Likewise.
+
 2017-08-23  James Clarke  <jrtc27@jrtc27.com>
 
 	* config/tc-sparc.c (tc_gen_reloc): Convert BFD_RELOC_8/16/32/64

@@ -1542,6 +1542,11 @@ static void dwarf2_find_base_address (struct die_info *die,
 static struct partial_symtab *create_partial_symtab
   (struct dwarf2_per_cu_data *per_cu, const char *name);
 
+static void build_type_psymtabs_reader (const struct die_reader_specs *reader,
+					const gdb_byte *info_ptr,
+					struct die_info *type_unit_die,
+					int has_children, void *data);
+
 static void dwarf2_build_psymtabs_hard (struct objfile *);
 
 static void scan_partial_symbols (struct partial_die_info *,
@@ -6319,8 +6324,6 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
 			   int want_partial_unit,
 			   enum language pretend_language)
 {
-  struct process_psymtab_comp_unit_data info;
-
   /* If this compilation unit was already read in, free the
      cached copy in order to read it in again.	This is
      necessary because we skipped some symbols when we first
@@ -6329,12 +6332,17 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
   if (this_cu->cu != NULL)
     free_one_cached_comp_unit (this_cu);
 
-  gdb_assert (! this_cu->is_debug_types);
-  info.want_partial_unit = want_partial_unit;
-  info.pretend_language = pretend_language;
-  init_cutu_and_read_dies (this_cu, NULL, 0, 0,
-			   process_psymtab_comp_unit_reader,
-			   &info);
+  if (this_cu->is_debug_types)
+    init_cutu_and_read_dies (this_cu, NULL, 0, 0, build_type_psymtabs_reader,
+			     NULL);
+  else
+    {
+      process_psymtab_comp_unit_data info;
+      info.want_partial_unit = want_partial_unit;
+      info.pretend_language = pretend_language;
+      init_cutu_and_read_dies (this_cu, NULL, 0, 0,
+			       process_psymtab_comp_unit_reader, &info);
+    }
 
   /* Age out any secondary CUs.  */
   age_cached_comp_units ();
@@ -6787,6 +6795,7 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu)
 static void
 read_comp_units_from_section (struct objfile *objfile,
 			      struct dwarf2_section_info *section,
+			      struct dwarf2_section_info *abbrev_section,
 			      unsigned int is_dwz,
 			      int *n_allocated,
 			      int *n_comp_units,
@@ -6806,20 +6815,33 @@ read_comp_units_from_section (struct objfile *objfile,
 
   while (info_ptr < section->buffer + section->size)
     {
-      unsigned int length, initial_length_size;
       struct dwarf2_per_cu_data *this_cu;
 
       sect_offset sect_off = (sect_offset) (info_ptr - section->buffer);
 
-      /* Read just enough information to find out where the next
-	 compilation unit is.  */
-      length = read_initial_length (abfd, info_ptr, &initial_length_size);
+      comp_unit_head cu_header;
+      read_and_check_comp_unit_head (&cu_header, section, abbrev_section,
+				     info_ptr, rcuh_kind::COMPILE);
 
       /* Save the compilation unit for later lookup.  */
-      this_cu = XOBNEW (&objfile->objfile_obstack, struct dwarf2_per_cu_data);
-      memset (this_cu, 0, sizeof (*this_cu));
+      if (cu_header.unit_type != DW_UT_type)
+	{
+	  this_cu = XOBNEW (&objfile->objfile_obstack,
+			    struct dwarf2_per_cu_data);
+	  memset (this_cu, 0, sizeof (*this_cu));
+	}
+      else
+	{
+	  auto sig_type = XOBNEW (&objfile->objfile_obstack,
+				  struct signatured_type);
+	  memset (sig_type, 0, sizeof (*sig_type));
+	  sig_type->signature = cu_header.signature;
+	  sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
+	  this_cu = &sig_type->per_cu;
+	}
+      this_cu->is_debug_types = (cu_header.unit_type == DW_UT_type);
       this_cu->sect_off = sect_off;
-      this_cu->length = length + initial_length_size;
+      this_cu->length = cu_header.length + cu_header.initial_length_size;
       this_cu->is_dwz = is_dwz;
       this_cu->objfile = objfile;
       this_cu->section = section;
@@ -6852,12 +6874,13 @@ create_all_comp_units (struct objfile *objfile)
   n_allocated = 10;
   all_comp_units = XNEWVEC (struct dwarf2_per_cu_data *, n_allocated);
 
-  read_comp_units_from_section (objfile, &dwarf2_per_objfile->info, 0,
+  read_comp_units_from_section (objfile, &dwarf2_per_objfile->info,
+				&dwarf2_per_objfile->abbrev, 0,
 				&n_allocated, &n_comp_units, &all_comp_units);
 
   dwz = dwarf2_get_dwz_file ();
   if (dwz != NULL)
-    read_comp_units_from_section (objfile, &dwz->info, 1,
+    read_comp_units_from_section (objfile, &dwz->info, &dwz->abbrev, 1,
 				  &n_allocated, &n_comp_units,
 				  &all_comp_units);
 
@@ -19499,6 +19522,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
       break;
 
     case DW_FORM_sdata:
+    case DW_FORM_implicit_const:
       *value = DW_SND (attr);
       break;
 
@@ -20492,6 +20516,10 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  fprintf_unfiltered (f, 
 			      "unexpected attribute form: DW_FORM_indirect");
 	  break;
+	case DW_FORM_implicit_const:
+	  fprintf_unfiltered (f, "constant: %s",
+			      plongest (DW_SND (&die->attrs[i])));
+	  break;
 	default:
 	  fprintf_unfiltered (f, "unsupported attribute form: %d.",
 		   die->attrs[i].form);
@@ -20583,7 +20611,7 @@ dwarf2_get_ref_die_offset (const struct attribute *attr)
 static LONGEST
 dwarf2_get_attr_constant_value (const struct attribute *attr, int default_value)
 {
-  if (attr->form == DW_FORM_sdata)
+  if (attr->form == DW_FORM_sdata || attr->form == DW_FORM_implicit_const)
     return DW_SND (attr);
   else if (attr->form == DW_FORM_udata
            || attr->form == DW_FORM_data1
@@ -20918,6 +20946,7 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
       break;
 
     case DW_FORM_sdata:
+    case DW_FORM_implicit_const:
       type = die_type (die, cu);
       result = write_constant_as_bytes (obstack, byte_order,
 					type, DW_SND (attr), len);
@@ -21854,6 +21883,9 @@ skip_form_bytes (bfd *abfd, const gdb_byte *bytes, const gdb_byte *buffer_end,
 	}
       break;
 
+    case DW_FORM_implicit_const:
+      break;
+
     default:
       {
       complain:
@@ -22495,6 +22527,7 @@ attr_form_is_constant (const struct attribute *attr)
     case DW_FORM_data2:
     case DW_FORM_data4:
     case DW_FORM_data8:
+    case DW_FORM_implicit_const:
       return 1;
     default:
       return 0;

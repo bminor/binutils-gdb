@@ -1,3 +1,13 @@
+2017-08-23  Alexander Fedotov <alexander.fedotov@nxp.com>
+	    Edmar Wienskoski <edmar.wienskoski@nxp.com>
+
+	* opcode/ppc.h:
+	(spe2_opcodes, spe2_num_opcodes): New.
+	(PPC_OPCODE_SPE2): New define.
+	(PPC_OPCODE_EFS2): Likewise.
+	(SPE2_XOP): Likewise.
+	(SPE2_XOP_TO_SEG): Likewise.
+
 2017-08-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gcc-interface.h (enum gcc_base_api_version): Update comment for
