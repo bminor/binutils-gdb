@@ -1,3 +1,11 @@
+2017-08-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (build_type_psymtabs_reader): New prototype.
+	(process_psymtab_comp_unit): Accept IS_DEBUG_TYPES.
+	(read_comp_units_from_section): New parameter abbrev_section, use
+	read_and_check_comp_unit_head, allocate signatured_type if needed.
+	(create_all_comp_units): Update read_comp_units_from_section caller.
+
 2017-08-23  Pedro Alves  <palves@redhat.com>
 
 	PR remote/21852
