@@ -1,4 +1,4 @@
-From 5d0e35e54418aee42f655aa570a6f1c77962522d Mon Sep 17 00:00:00 2001
+From 7242ac78a4810003344058680b19cfb43c2b20da Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Mon, 4 Nov 2013 09:35:07 -0800
 Subject: [PATCH] Add STB_SECONDARY support
@@ -320,10 +320,10 @@ index d126aed086..f673af45a4 100644
  
    /* A pointer to the section to which this symbol is
 diff --git a/bfd/elf.c b/bfd/elf.c
-index d702474bff..5d9eb06d6b 100644
+index 2aa2337724..59888c3cf1 100644
 --- a/bfd/elf.c
 +++ b/bfd/elf.c
-@@ -3933,7 +3933,10 @@ sym_is_global (bfd *abfd, asymbol *sym)
+@@ -3943,7 +3943,10 @@ sym_is_global (bfd *abfd, asymbol *sym)
    if (bed->elf_backend_sym_is_global)
      return (*bed->elf_backend_sym_is_global) (abfd, sym);
  
@@ -335,7 +335,7 @@ index d702474bff..5d9eb06d6b 100644
  	  || bfd_is_und_section (bfd_get_section (sym))
  	  || bfd_is_com_section (bfd_get_section (sym)));
  }
-@@ -7917,8 +7920,9 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
+@@ -7927,8 +7930,9 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
  	    }
  	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
  	}
@@ -346,7 +346,7 @@ index d702474bff..5d9eb06d6b 100644
  				    ? STB_WEAK
  				    : STB_GLOBAL),
  				   type);
-@@ -7932,6 +7936,8 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
+@@ -7942,6 +7946,8 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
  	    bind = STB_LOCAL;
  	  else if (flags & BSF_GNU_UNIQUE)
  	    bind = STB_GNU_UNIQUE;
@@ -401,7 +401,7 @@ index 6114b11e66..9b8ca953d3 100644
  	      sym->symbol.flags |= BSF_GNU_UNIQUE;
  	      break;
 diff --git a/bfd/elflink.c b/bfd/elflink.c
-index 424de21f0d..ad15e151ce 100644
+index 0171b3b812..07d14588bb 100644
 --- a/bfd/elflink.c
 +++ b/bfd/elflink.c
 @@ -1007,7 +1007,8 @@ elf_merge_st_other (bfd *abfd, struct elf_link_hash_entry *h,
@@ -714,11 +714,11 @@ index 424de21f0d..ad15e151ce 100644
 +	      else if (!h->def_dynamic || bind != STB_SECONDARY)
  		{
  		  h->def_regular = 1;
- 		  if (h->def_dynamic)
-@@ -4664,6 +4717,13 @@ error_free_dyn:
- 		{
- 		  h->def_dynamic = 1;
- 		  hi->def_dynamic = 1;
+ 		  h->def_protected = (ELF_ST_VISIBILITY (isym->st_other)
+@@ -4669,6 +4722,13 @@ error_free_dyn:
+ 		  h->def_protected = hi->def_protected
+ 		    = (ELF_ST_VISIBILITY (isym->st_other)
+ 		       == STV_PROTECTED);
 +		  /* Dynamic definition overrides regular old secondary
 +		     definition.  */
 +		  if (oldsecondary)
@@ -729,7 +729,7 @@ index 424de21f0d..ad15e151ce 100644
  		}
  
  	      /* If the indirect symbol has been forced local, don't
-@@ -4682,7 +4742,8 @@ error_free_dyn:
+@@ -4687,7 +4747,8 @@ error_free_dyn:
  	  if (definition
  	      || (!override && h->root.type == bfd_link_hash_common))
  	    if (!_bfd_elf_add_default_symbol (abfd, info, h, name, isym,
@@ -739,7 +739,7 @@ index 424de21f0d..ad15e151ce 100644
  	      goto error_free_vers;
  
  	  /* Check the alignment when a common symbol is involved. This
-@@ -5441,16 +5502,27 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
+@@ -5446,16 +5507,27 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
  		 map alone.  Instead we must read in the element's symbol
  		 table and check that to see what kind of symbol definition
  		 this is.  */
@@ -769,7 +769,7 @@ index 424de21f0d..ad15e151ce 100644
  
  	  /* We need to include this archive member.  */
  	  element = _bfd_get_elt_at_filepos (abfd, symdef->file_offset);
-@@ -9719,7 +9791,21 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -9724,7 +9796,21 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
      sym.st_info = ELF_ST_INFO (STB_GNU_UNIQUE, type);
    else if (h->root.type == bfd_link_hash_undefweak
  	   || h->root.type == bfd_link_hash_defweak)
@@ -792,7 +792,7 @@ index 424de21f0d..ad15e151ce 100644
    else
      sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
    sym.st_target_internal = h->target_internal;
-@@ -9757,7 +9843,8 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -9762,7 +9848,8 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
    if (sym.st_shndx == SHN_UNDEF
        && h->ref_regular
        && (ELF_ST_BIND (sym.st_info) == STB_GLOBAL
@@ -802,7 +802,7 @@ index 424de21f0d..ad15e151ce 100644
      {
        int bindtype;
        type = ELF_ST_TYPE (sym.st_info);
-@@ -9783,10 +9870,12 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -9788,10 +9875,12 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
      sym.st_size = 0;
  
    /* If a non-weak symbol with non-default visibility is not defined
@@ -961,10 +961,10 @@ index 5e03a8ae92..dd6d0cdc29 100644
  		|| bfd_is_und_section (sym->section)
  		|| bfd_is_com_section (sym->section));
 diff --git a/binutils/readelf.c b/binutils/readelf.c
-index 2b15f0f2cb..f49d560b3c 100644
+index 07cd2b01c9..1daf961dc6 100644
 --- a/binutils/readelf.c
 +++ b/binutils/readelf.c
-@@ -10651,6 +10651,7 @@ get_symbol_binding (unsigned int binding)
+@@ -10646,6 +10646,7 @@ get_symbol_binding (unsigned int binding)
      case STB_LOCAL:	return "LOCAL";
      case STB_GLOBAL:	return "GLOBAL";
      case STB_WEAK:	return "WEAK";
@@ -1070,7 +1070,7 @@ index 49d99a459c..083fe8d158 100644
  		     && symbol_used_in_reloc_p (symp) == 0)
  	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
 diff --git a/gas/doc/as.texinfo b/gas/doc/as.texinfo
-index 8aa83ef1eb..628a7a41a8 100644
+index 8c125fd7d6..d942bf1f66 100644
 --- a/gas/doc/as.texinfo
 +++ b/gas/doc/as.texinfo
 @@ -4490,6 +4490,7 @@ Some machine configurations provide additional directives.
@@ -1414,10 +1414,10 @@ index 2370c0d45a..093c9e7d8c 100644
       cause map file generation to use an O(N^2) algorithm and disable
       caching ELF symbol buffer.  */
 diff --git a/include/elf/common.h b/include/elf/common.h
-index 3a144f03bc..d206223337 100644
+index d08731cca1..a2b5f3784a 100644
 --- a/include/elf/common.h
 +++ b/include/elf/common.h
-@@ -793,6 +793,7 @@
+@@ -819,6 +819,7 @@
  #define STB_LOCAL	0		/* Symbol not visible outside obj */
  #define STB_GLOBAL	1		/* Symbol visible outside obj */
  #define STB_WEAK	2		/* Like globals, lower precedence */
@@ -1426,10 +1426,10 @@ index 3a144f03bc..d206223337 100644
  #define STB_GNU_UNIQUE	10		/* Symbol is unique in namespace */
  #define STB_HIOS	12		/* OS-specific semantics */
 diff --git a/ld/emultempl/elf32.em b/ld/emultempl/elf32.em
-index 9ac1840316..1a71cfd452 100644
+index 748f56b844..c3b312cb7c 100644
 --- a/ld/emultempl/elf32.em
 +++ b/ld/emultempl/elf32.em
-@@ -2731,6 +2731,8 @@ fragment <<EOF
+@@ -2735,6 +2735,8 @@ fragment <<EOF
  	link_info.error_textrel = FALSE;
        else if (strcmp (optarg, "textoff") == 0)
  	link_info.error_textrel = FALSE;
@@ -1439,10 +1439,10 @@ index 9ac1840316..1a71cfd452 100644
  fi
  
 diff --git a/ld/ld.texinfo b/ld/ld.texinfo
-index ebe7e7b7bd..0e5901ba24 100644
+index bbfa9fd4f4..69f5d79d1f 100644
 --- a/ld/ld.texinfo
 +++ b/ld/ld.texinfo
-@@ -1213,6 +1213,10 @@ Marks the object may contain $ORIGIN.
+@@ -1221,6 +1221,10 @@ Marks the object may contain $ORIGIN.
  @item relro
  Create an ELF @code{PT_GNU_RELRO} segment header in the object.
  
@@ -1466,7 +1466,7 @@ index 2b09f20413..d95179626e 100644
    link_info.input_bfds_tail = &link_info.input_bfds;
    /* SVR4 linkers seem to set DT_INIT and DT_FINI based on magic _init
 diff --git a/ld/lexsup.c b/ld/lexsup.c
-index effa277b16..85245eda89 100644
+index 1adb302a14..1c334f4a39 100644
 --- a/ld/lexsup.c
 +++ b/ld/lexsup.c
 @@ -1792,6 +1792,8 @@ elf_shlib_list_options (FILE *file)
@@ -2222,5 +2222,5 @@ index 0000000000..276c3ce72f
 + +[0-9]+: +0+ +0+ +FUNC +SECOND +DEFAULT +UND +_?bar@VERS_1 +\([0-9]+\)
 +#...
 -- 
-2.13.4
+2.13.5
 
