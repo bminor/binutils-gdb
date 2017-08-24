@@ -1056,15 +1056,32 @@ if { [isnative] && [which $CC] != 0 } {
 	    {{error_output "pr22001-1a.err"}} \
 	    "pr22001-1a" \
 	] \
-	[list \
-	    "Build pr22001-1b" \
-	    "$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
-	    "$NOPIE_CFLAGS" \
-	    { pr22001-1c.c } \
-	    {{error_output "pr22001-1b.err"}} \
-	    "pr22001-1b" \
-	] \
     ]
+
+    if  {[istarget "x86_64-*-linux*-gnux32"]} {
+	run_ld_link_exec_tests [list \
+	    [list \
+		"Run pr22001-1b" \
+		"$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+		"" \
+		{ pr22001-1c.c } \
+		"pr22001-1b" \
+		"pass.out" \
+		"$NOPIE_CFLAGS" \
+	    ] \
+	]
+    } else {
+	run_cc_link_tests [list \
+	    [list \
+		"Build pr22001-1b" \
+		"$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+		"$NOPIE_CFLAGS" \
+		{ pr22001-1c.c } \
+		{{error_output "pr22001-1b.err"}} \
+		"pr22001-1b" \
+	    ] \
+	]
+    }
 
     run_ld_link_exec_tests [list \
 	[list \
