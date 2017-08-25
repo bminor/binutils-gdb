@@ -197,7 +197,7 @@ static void
 free_one_thread (struct inferior_list_entry *inf)
 {
   struct thread_info *thread = get_thread (inf);
-  free_register_cache (inferior_regcache_data (thread));
+  free_register_cache (thread_regcache_data (thread));
   free (thread);
 }
 
@@ -309,21 +309,21 @@ find_inferior_id (struct inferior_list *list, ptid_t id)
 }
 
 void *
-inferior_target_data (struct thread_info *inferior)
+thread_target_data (struct thread_info *thread)
 {
-  return inferior->target_data;
+  return thread->target_data;
 }
 
 struct regcache *
-inferior_regcache_data (struct thread_info *inferior)
+thread_regcache_data (struct thread_info *thread)
 {
-  return inferior->regcache_data;
+  return thread->regcache_data;
 }
 
 void
-set_inferior_regcache_data (struct thread_info *inferior, struct regcache *data)
+set_thread_regcache_data (struct thread_info *thread, struct regcache *data)
 {
-  inferior->regcache_data = data;
+  thread->regcache_data = data;
 }
 
 /* Return true if LIST has exactly one entry.  */

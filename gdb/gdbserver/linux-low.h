@@ -252,7 +252,7 @@ struct linux_target_ops
 
 extern struct linux_target_ops the_low_target;
 
-#define get_thread_lwp(thr) ((struct lwp_info *) (inferior_target_data (thr)))
+#define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))
 #define get_lwp_thread(lwp) ((lwp)->thread)
 
 /* This struct is recorded in the target_data field of struct thread_info.
