@@ -976,7 +976,7 @@ proc run_dump_test { name {extra_options {}} } {
                  && (($cmdret == 0) == ($check_ld(terminal) == 0)) \
                  && ((($check_ld(source) == "regex") \
                       && ($check_ld(regex) == "") == ($comp_output == "") \
-                      && [regexp $check_ld(regex) $comp_output]) \
+                      && [regexp -- $check_ld(regex) $comp_output]) \
                      || (($check_ld(source) == "file") \
                          && (![regexp_diff "tmpdir/ld.messages" "$srcdir/$subdir/$check_ld(file)"]))) } {
                 # We have the expected output from ld.
