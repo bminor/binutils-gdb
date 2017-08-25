@@ -152,7 +152,7 @@ static struct symbol *find_old_style_renaming_symbol (const char *,
 						      const struct block *);
 
 static struct type *ada_lookup_struct_elt_type (struct type *, const char *,
-                                                int, int, int *);
+                                                int, int);
 
 static struct value *evaluate_subexp_type (struct expression *, int *);
 
@@ -6695,7 +6695,7 @@ ada_is_ignored_field (struct type *type, int field_num)
 int
 ada_is_tagged_type (struct type *type, int refok)
 {
-  return (ada_lookup_struct_elt_type (type, "_tag", refok, 1, NULL) != NULL);
+  return (ada_lookup_struct_elt_type (type, "_tag", refok, 1) != NULL);
 }
 
 /* True iff TYPE represents the type of X'Tag */
@@ -6721,7 +6721,7 @@ ada_is_tag_type (struct type *type)
 struct type *
 ada_tag_type (struct value *val)
 {
-  return ada_lookup_struct_elt_type (value_type (val), "_tag", 1, 0, NULL);
+  return ada_lookup_struct_elt_type (value_type (val), "_tag", 1, 0);
 }
 
 /* Return 1 if TAG follows the old scheme for Ada tags (used for Ada 95,
@@ -7066,7 +7066,7 @@ ada_variant_discrim_type (struct type *var_type, struct type *outer_type)
 {
   const char *name = ada_variant_discrim_name (var_type);
 
-  return ada_lookup_struct_elt_type (outer_type, name, 1, 1, NULL);
+  return ada_lookup_struct_elt_type (outer_type, name, 1, 1);
 }
 
 /* Assuming that TYPE is the type of a variant wrapper, and FIELD_NUM is a
@@ -7597,7 +7597,7 @@ type_as_string (struct type *type)
 
 static struct type *
 ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
-                            int noerr, int *dispp)
+                            int noerr)
 {
   int i;
 
@@ -7631,29 +7631,19 @@ ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
     {
       const char *t_field_name = TYPE_FIELD_NAME (type, i);
       struct type *t;
-      int disp;
 
       if (t_field_name == NULL)
         continue;
 
       else if (field_name_match (t_field_name, name))
-        {
-          if (dispp != NULL)
-            *dispp += TYPE_FIELD_BITPOS (type, i) / 8;
-          return TYPE_FIELD_TYPE (type, i);
-        }
+	return TYPE_FIELD_TYPE (type, i);
 
       else if (ada_is_wrapper_field (type, i))
         {
-          disp = 0;
           t = ada_lookup_struct_elt_type (TYPE_FIELD_TYPE (type, i), name,
-                                          0, 1, &disp);
+                                          0, 1);
           if (t != NULL)
-            {
-              if (dispp != NULL)
-                *dispp += disp + TYPE_FIELD_BITPOS (type, i) / 8;
-              return t;
-            }
+	    return t;
         }
 
       else if (ada_is_variant_part (type, i))
@@ -7669,21 +7659,17 @@ ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
 		 generates these for unchecked variant types.  Revisit
 	         if the compiler changes this practice.  */
 	      const char *v_field_name = TYPE_FIELD_NAME (field_type, j);
-              disp = 0;
+
 	      if (v_field_name != NULL 
 		  && field_name_match (v_field_name, name))
 		t = TYPE_FIELD_TYPE (field_type, j);
 	      else
 		t = ada_lookup_struct_elt_type (TYPE_FIELD_TYPE (field_type,
 								 j),
-						name, 0, 1, &disp);
+						name, 0, 1);
 
               if (t != NULL)
-                {
-                  if (dispp != NULL)
-                    *dispp += disp + TYPE_FIELD_BITPOS (type, i) / 8;
-                  return t;
-                }
+		return t;
             }
         }
 
@@ -7711,8 +7697,7 @@ is_unchecked_variant (struct type *var_type, struct type *outer_type)
 {
   const char *discrim_name = ada_variant_discrim_name (var_type);
 
-  return (ada_lookup_struct_elt_type (outer_type, discrim_name, 0, 1, NULL) 
-	  == NULL);
+  return (ada_lookup_struct_elt_type (outer_type, discrim_name, 0, 1) == NULL);
 }
 
 
@@ -11372,7 +11357,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             {
               type = ada_lookup_struct_elt_type (type1,
                                                  &exp->elts[pc + 2].string,
-                                                 1, 1, NULL);
+                                                 1, 1);
 
 	      /* If the field is not found, check if it exists in the
 		 extension of this object's type. This means that we
@@ -11392,7 +11377,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           else
             type =
               ada_lookup_struct_elt_type (type1, &exp->elts[pc + 2].string, 1,
-                                          0, NULL);
+                                          0);
 
           return value_zero (ada_aligned_type (type), lval_memory);
         }

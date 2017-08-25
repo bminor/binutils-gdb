@@ -1,3 +1,9 @@
+2017-08-25  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_lookup_struct_elt_type): Remove parameter "dispp".
+	Update all callers accordingly. Remove all code blocks handling
+	the case where DISPP is not NULL.
+
 2017-08-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR symtab/22003
