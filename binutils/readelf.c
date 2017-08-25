@@ -10155,7 +10155,6 @@ process_version_sections (FILE * file)
 	    Elf_External_Verdef * edefs;
 	    unsigned long idx;
 	    unsigned long cnt;
-	    unsigned long end;
 	    char * endbuf;
 
 	    found = TRUE;
@@ -10177,10 +10176,7 @@ process_version_sections (FILE * file)
 	      break;
 	    endbuf = (char *) edefs + section->sh_size;
 
-	    /* PR 17531: file: id:000001,src:000172+005151,op:splice,rep:2.  */
-	    end = (section->sh_info < section->sh_size
-		   ? section->sh_info : section->sh_size);
-	    for (idx = cnt = 0; cnt < end; ++cnt)
+	    for (idx = cnt = 0; cnt < section->sh_info; ++cnt)
 	      {
 		char * vstart;
 		Elf_External_Verdef * edef;
@@ -10211,13 +10207,13 @@ process_version_sections (FILE * file)
 			ent.vd_ndx, ent.vd_cnt);
 
 		/* Check for overflow.  */
-		if (vstart + sizeof (*eaux) > endbuf)
-		  break;
-		if (ent.vd_aux > (size_t) (endbuf - (vstart + sizeof (*eaux))))
+		if (ent.vd_aux > (size_t) (endbuf - vstart))
 		  break;
 
 		vstart += ent.vd_aux;
 
+		if (vstart + sizeof (*eaux) > endbuf)
+		  break;
 		eaux = (Elf_External_Verdaux *) vstart;
 
 		aux.vda_name = BYTE_GET (eaux->vda_name);
@@ -10232,6 +10228,14 @@ process_version_sections (FILE * file)
 
 		for (j = 1; j < ent.vd_cnt; j++)
 		  {
+		    if (aux.vda_next < sizeof (*eaux)
+			&& !(j == ent.vd_cnt - 1 && aux.vda_next == 0))
+		      {
+			warn (_("Invalid vda_next field of %lx\n"),
+			      aux.vda_next);
+			j = ent.vd_cnt;
+			break;
+		      }
 		    /* Check for overflow.  */
 		    if (aux.vda_next > (size_t) (endbuf - vstart))
 		      break;
@@ -10239,9 +10243,9 @@ process_version_sections (FILE * file)
 		    isum   += aux.vda_next;
 		    vstart += aux.vda_next;
 
-		    eaux = (Elf_External_Verdaux *) vstart;
 		    if (vstart + sizeof (*eaux) > endbuf)
 		      break;
+		    eaux = (Elf_External_Verdaux *) vstart;
 
 		    aux.vda_name = BYTE_GET (eaux->vda_name);
 		    aux.vda_next = BYTE_GET (eaux->vda_next);
@@ -10259,6 +10263,13 @@ process_version_sections (FILE * file)
 
 		/* PR 17531:
 		   file: id:000001,src:000172+005151,op:splice,rep:2.  */
+		if (ent.vd_next < sizeof (*edef)
+		    && !(cnt == section->sh_info - 1 && ent.vd_next == 0))
+		  {
+		    warn (_("Invalid vd_next field of %lx\n"), ent.vd_next);
+		    cnt = section->sh_info;
+		    break;
+		  }
 		if (ent.vd_next > (size_t) (endbuf - ((char *) edefs + idx)))
 		  break;
 
@@ -10357,15 +10368,17 @@ process_version_sections (FILE * file)
 		    printf (_("  Flags: %s  Version: %d\n"),
 			    get_ver_flags (aux.vna_flags), aux.vna_other);
 
-		    /* Check for overflow.  */
-		    if (aux.vna_next > (size_t) (endbuf - vstart)
-			|| (aux.vna_next == 0 && j < ent.vn_cnt - 1))
+		    if (aux.vna_next < sizeof (*eaux)
+			&& !(j == ent.vn_cnt - 1 && aux.vna_next == 0))
 		      {
 			warn (_("Invalid vna_next field of %lx\n"),
 			      aux.vna_next);
 			j = ent.vn_cnt;
 			break;
 		      }
+		    /* Check for overflow.  */
+		    if (aux.vna_next > (size_t) (endbuf - vstart))
+		      break;
 		    isum   += aux.vna_next;
 		    vstart += aux.vna_next;
 		  }
@@ -10373,13 +10386,15 @@ process_version_sections (FILE * file)
 		if (j < ent.vn_cnt)
 		  warn (_("Missing Version Needs auxillary information\n"));
 
-		if (ent.vn_next > (size_t) (endbuf - ((char *) eneed + idx))
-		    || (ent.vn_next == 0 && cnt < section->sh_info - 1))
+		if (ent.vn_next < sizeof (*entry)
+		    && !(cnt == section->sh_info - 1 && ent.vn_next == 0))
 		  {
 		    warn (_("Invalid vn_next field of %lx\n"), ent.vn_next);
 		    cnt = section->sh_info;
 		    break;
 		  }
+		if (ent.vn_next > (size_t) (endbuf - ((char *) eneed + idx)))
+		  break;
 		idx += ent.vn_next;
 	      }
 
