@@ -1,5 +1,13 @@
 2017-08-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/pr21903c.d: Remove '\' before --.
+	* testsuite/ld-elf/pr21903d.d: Likewise.
+	* testsuite/ld-elf/pr21903e.d: Likewise.
+	* testsuite/lib/ld-lib.exp (run_dump_test): Add "--" after
+	regexp.
+
+2017-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-i386/i386.exp (undefined_weak): Replace regexp
 	with string match.
 	* testsuite/ld-x86-64/x86-64.exp (undefined_weak): Likewise.

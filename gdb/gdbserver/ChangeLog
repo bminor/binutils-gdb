@@ -1,3 +1,34 @@
+2017-08-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* inferiors.h (inferior_target_data): Rename to ...
+	(thread_target_data): ... this.
+	(inferior_regcache_data): Rename to ...
+	(thread_regcache_data): ... this.
+	(set_inferior_regcache_data): Rename to ...
+	(set_thread_regcache_data): ... this.
+	* inferiors.c (inferior_target_data): Rename to ...
+	(thread_target_data): ... this.
+	(inferior_regcache_data): Rename to ...
+	(thread_regcache_data): ... this.
+	(set_inferior_regcache_data): Rename to ...
+	(set_thread_regcache_data): ... this.
+	(free_one_thread): Update.
+	* linux-low.h (get_thread_lwp): Update.
+	* regcache.c (get_thread_regcache): Update.
+	(regcache_invalidate_thread): Update.
+	(free_register_cache_thread): Update.
+	* win32-i386-low.c (update_debug_registers_callback): Update.
+	(win32_get_current_dr): Update.
+	* win32-low.c (thread_rec): Update.
+	(delete_thread_info): Update.
+	(continue_one_thread): Update.
+	(suspend_one_thread): Update.
+
+2017-08-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* inferiors.c (set_inferior_target_data): Remove.
+	* inferiors.h (set_inferior_target_data): Remove.
+
 2017-08-18  Yao Qi  <yao.qi@linaro.org>
 
 	* Makefile.in (OBS): Add selftest.o.

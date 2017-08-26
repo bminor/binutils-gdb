@@ -1101,7 +1101,7 @@ struct elf_x86_64_link_hash_entry
   /* Don't call finish_dynamic_symbol on this symbol.  */
   unsigned int no_finish_dynamic_symbol : 1;
 
-  /* TRUE if symbol symbol is __tls_get_addr.  */
+  /* TRUE if symbol is __tls_get_addr.  */
   unsigned int tls_get_addr : 1;
 
   /* Reference count of C/C++ function pointer relocations in read-write

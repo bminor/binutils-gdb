@@ -198,7 +198,7 @@ thread_rec (ptid_t ptid, int get_context)
   if (thread == NULL)
     return NULL;
 
-  th = (win32_thread_info *) inferior_target_data (thread);
+  th = (win32_thread_info *) thread_target_data (thread);
   if (get_context)
     win32_require_context (th);
   return th;
@@ -232,7 +232,7 @@ static void
 delete_thread_info (struct inferior_list_entry *entry)
 {
   struct thread_info *thread = (struct thread_info *) entry;
-  win32_thread_info *th = (win32_thread_info *) inferior_target_data (thread);
+  win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
 
   remove_thread (thread);
   CloseHandle (th->h);
@@ -433,7 +433,7 @@ continue_one_thread (struct inferior_list_entry *this_thread, void *id_ptr)
 {
   struct thread_info *thread = (struct thread_info *) this_thread;
   int thread_id = * (int *) id_ptr;
-  win32_thread_info *th = (win32_thread_info *) inferior_target_data (thread);
+  win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
 
   if (thread_id == -1 || thread_id == th->tid)
     {
@@ -1333,7 +1333,7 @@ static void
 suspend_one_thread (struct inferior_list_entry *entry)
 {
   struct thread_info *thread = (struct thread_info *) entry;
-  win32_thread_info *th = (win32_thread_info *) inferior_target_data (thread);
+  win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
 
   if (!th->suspended)
     {
