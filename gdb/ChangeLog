@@ -1,3 +1,13 @@
+2017-08-31  Weimin Pan  <weimin.pan@oracle.com>
+
+	* sparc64-tdep.c (adi_stat_t): Fix comment formatting.
+	(adi_available): Use a temp variable of type CORE_ADDR as argument
+	3 when calling target_auxv_search.
+	(adi_normalize_address): Use masks and xor operators to calculate
+	normalized address.
+	(adi_read_versions, adi_write_versions, adi_print_versions)
+	(do_examine, do_assign): Use paddress.
+
 2017-08-29  John Baldwin  <jhb@FreeBSD.org>
 
 	* mips-fbsd-nat.c (getfpregs_supplies): Return true for FIR.

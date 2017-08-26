@@ -93,8 +93,8 @@ typedef struct
   unsigned long blksize;
 
   /* Number of bits used for an ADI version tag which can be
-   * used together with the shift value for an ADI version tag
-   * to encode or extract the ADI version value in a pointer.  */
+     used together with the shift value for an ADI version tag
+     to encode or extract the ADI version value in a pointer.  */
   unsigned long nbits;
 
   /* The maximum ADI version tag value supported.  */
@@ -217,15 +217,17 @@ adi_available (void)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   sparc64_adi_info *proc = get_adi_info_proc (pid);
+  CORE_ADDR value;
 
   if (proc->stat.checked_avail)
     return proc->stat.is_avail;
 
   proc->stat.checked_avail = true;
-  if (target_auxv_search (&current_target, AT_ADI_BLKSZ, 
-                          &proc->stat.blksize) <= 0)
+  if (target_auxv_search (&current_target, AT_ADI_BLKSZ, &value) <= 0)
     return false;
-  target_auxv_search (&current_target, AT_ADI_NBITS, &proc->stat.nbits);
+  proc->stat.blksize = value;
+  target_auxv_search (&current_target, AT_ADI_NBITS, &value);
+  proc->stat.nbits = value;
   proc->stat.max_version = (1 << proc->stat.nbits) - 2;
   proc->stat.is_avail = true;
 
@@ -240,7 +242,14 @@ adi_normalize_address (CORE_ADDR addr)
   adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
 
   if (ast.nbits)
-    return ((CORE_ADDR)(((long)addr << ast.nbits) >> ast.nbits));
+    {
+      /* Clear upper bits.  */
+      addr &= ((uint64_t) -1) >> ast.nbits;
+
+      /* Sign extend.  */
+      CORE_ADDR signbit = (uint64_t) 1 << (64 - ast.nbits - 1);
+      return (addr ^ signbit) - signbit;
+    }
   return addr;
 }
 
@@ -346,7 +355,8 @@ adi_read_versions (CORE_ADDR vaddr, size_t size, unsigned char *tags)
   if (!adi_is_addr_mapped (vaddr, size))
     {
       adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
-      error(_("Address at 0x%lx is not in ADI maps"), vaddr*ast.blksize);
+      error(_("Address at %s is not in ADI maps"),
+            paddress (target_gdbarch (), vaddr * ast.blksize));
     }
 
   int target_errno;
@@ -366,7 +376,8 @@ adi_write_versions (CORE_ADDR vaddr, size_t size, unsigned char *tags)
   if (!adi_is_addr_mapped (vaddr, size))
     {
       adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
-      error(_("Address at 0x%lx is not in ADI maps"), vaddr*ast.blksize);
+      error(_("Address at %s is not in ADI maps"),
+            paddress (target_gdbarch (), vaddr * ast.blksize));
     }
 
   int target_errno;
@@ -387,7 +398,8 @@ adi_print_versions (CORE_ADDR vaddr, size_t cnt, unsigned char *tags)
   while (cnt > 0)
     {
       QUIT;
-      printf_filtered ("0x%016lx:\t", vaddr * adi_stat.blksize);
+      printf_filtered ("%s:\t",
+	               paddress (target_gdbarch (), vaddr * adi_stat.blksize));
       for (int i = maxelts; i > 0 && cnt > 0; i--, cnt--)
         {
           if (tags[v_idx] == 0xff)    /* no version tag */
@@ -418,7 +430,7 @@ do_examine (CORE_ADDR start, int bcnt)
   if (read_cnt == -1)
     error (_("No ADI information"));
   else if (read_cnt < cnt)
-    error(_("No ADI information at 0x%lx"), vaddr);
+    error(_("No ADI information at %s"), paddress (target_gdbarch (), vaddr));
 
   adi_print_versions (vstart, cnt, buf);
 
@@ -438,7 +450,7 @@ do_assign (CORE_ADDR start, size_t bcnt, int version)
   if (set_cnt == -1)
     error (_("No ADI information"));
   else if (set_cnt < cnt)
-    error(_("No ADI information at 0x%lx"), vaddr);
+    error(_("No ADI information at %s"), paddress (target_gdbarch (), vaddr));
 
 }
 
