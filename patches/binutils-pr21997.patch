@@ -1,36 +1,39 @@
-From 07a737ec705a119c1c2e1d49d9591bea78ef2531 Mon Sep 17 00:00:00 2001
+From a0dddfcf051d6cef596783d2bd08f827013b9975 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Wed, 23 Aug 2017 12:18:00 -0700
 Subject: [PATCH] Disallow copy relocation against protected data symbol
 
 We shpouldn't generate copy relocation to resolve reference to protected
 data symbol defined in shared object with the NO_COPY_ON_PROTECTED
-property.  This patch adds a bit to elf_link_hash_entry and elf_obj_tdata
-to track protected symbol defined in shared object as well as the bfd
-with the NO_COPY_ON_PROTECTED property.  extern_protected_data is set to
-FALSE if any input relocatable file contains the NO_COPY_ON_PROTECTED
-property.
+property.  This patch adds a bit to elf_obj_tdata as well as
+elf_i386_link_hash_entry and elf_x86_64_link_hash_entry to track the bfd
+with the NO_COPY_ON_PROTECTED property as well as protected symbol
+defined in shared object.  extern_protected_data is set to FALSE if any
+input relocatable file contains the NO_COPY_ON_PROTECTED property.
 
 bfd/
 
 	PR ld/21997
-	* elf-bfd.h (elf_link_hash_entry): Add def_protected.
-	(elf_obj_tdata): Use ENUM_BITFIELD on object_id, dyn_lib_class
-	and has_gnu_symbols.  Change bad_symtab to bitfield.  Add a
-	has_no_copy_on_protected bitfield.
+	* elf-bfd.h (elf_obj_tdata): Use ENUM_BITFIELD on object_id,
+	dyn_lib_class and has_gnu_symbols.  Change bad_symtab to bitfield.
+	Add a has_no_copy_on_protected bitfield.
 	(elf_has_no_copy_on_protected): New.
-	(SYMBOL_NO_COPYRELOC): Likewise.
 	* elf-properties.c (_bfd_elf_parse_gnu_properties): Set
 	elf_has_no_copy_on_protected for GNU_PROPERTY_NO_COPY_ON_PROTECTED.
 	(elf_merge_gnu_property_list): Likewise.
 	(_bfd_elf_link_setup_gnu_properties): Set extern_protected_data
 	to FALSE for elf_has_no_copy_on_protected.
-	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Also check
-	SYMBOL_NO_COPYRELOC when checking info->nocopyreloc.
+	* elf32-i386.c (SYMBOL_NO_COPYRELOC): New.
+	(elf_i386_link_hash_entry): Add def_protected.
+	(elf_i386_adjust_dynamic_symbol): Also check SYMBOL_NO_COPYRELOC
+	when checking info->nocopyreloc.
 	(elf_i386_link_setup_gnu_properties): Don't set
 	extern_protected_data here.
-	* elf64-x86-64.c (elf_x86_64_need_pic): Report protected symbol
-	for def_protected.
+	(elf_i386_merge_symbol_attribute): New function.
+	(elf_backend_merge_symbol_attribute): New.
+	* elf64-x86-64.c (SYMBOL_NO_COPYRELOC): New.
+	(elf_x86_64_link_hash_entry): Add def_protected.
+	(elf_x86_64_need_pic): Report protected symbol for def_protected.
 	(elf_x86_64_adjust_dynamic_symbol): Also check SYMBOL_NO_COPYRELOC
 	when checking info->nocopyreloc.
 	(elf_x86_64_relocate_section): Also check for R_X86_64_PC32
@@ -39,8 +42,8 @@ bfd/
 	with GNU_PROPERTY_NO_COPY_ON_PROTECTED.
 	(elf_x86_64_link_setup_gnu_properties): Don't set
 	extern_protected_data here.
-	* elflink.c (elf_link_add_object_symbols): Set def_protected
-	for definition.
+	(elf_x86_64_merge_symbol_attribute): New function.
+	(elf_backend_merge_symbol_attribute): New.
 
 ld/
 
@@ -56,22 +59,21 @@ ld/
 	* testsuite/ld-x86-64/pr21997-1b.err: Likewise.
 	* testsuite/ld-x86-64/pr21997-1c.c: Likewise.
 ---
- bfd/elf-bfd.h                         |  31 ++++++++--
+ bfd/elf-bfd.h                         |  18 +++--
  bfd/elf-properties.c                  |   9 +++
- bfd/elf32-i386.c                      |  89 ++++++++++------------------
- bfd/elf64-x86-64.c                    | 105 ++++++++++++++--------------------
- bfd/elflink.c                         |   5 ++
- ld/testsuite/ld-i386/i386.exp         |  51 +++++++++++++++++
- ld/testsuite/ld-i386/pr21997-1a.S     |  35 ++++++++++++
- ld/testsuite/ld-i386/pr21997-1b.c     |  16 ++++++
- ld/testsuite/ld-i386/pr21997-1c.S     |  51 +++++++++++++++++
- ld/testsuite/ld-x86-64/pr21997-1a.S   |  24 ++++++++
+ bfd/elf32-i386.c                      | 123 +++++++++++++++---------------
+ bfd/elf64-x86-64.c                    | 139 +++++++++++++++++++---------------
+ ld/testsuite/ld-i386/i386.exp         |  51 +++++++++++++
+ ld/testsuite/ld-i386/pr21997-1a.S     |  35 +++++++++
+ ld/testsuite/ld-i386/pr21997-1b.c     |  16 ++++
+ ld/testsuite/ld-i386/pr21997-1c.S     |  51 +++++++++++++
+ ld/testsuite/ld-x86-64/pr21997-1a.S   |  24 ++++++
  ld/testsuite/ld-x86-64/pr21997-1a.err |   2 +
- ld/testsuite/ld-x86-64/pr21997-1b.c   |  13 +++++
+ ld/testsuite/ld-x86-64/pr21997-1b.c   |  13 ++++
  ld/testsuite/ld-x86-64/pr21997-1b.err |   2 +
- ld/testsuite/ld-x86-64/pr21997-1c.c   |  13 +++++
- ld/testsuite/ld-x86-64/x86-64.exp     |  69 ++++++++++++++++++++++
- 15 files changed, 390 insertions(+), 125 deletions(-)
+ ld/testsuite/ld-x86-64/pr21997-1c.c   |  13 ++++
+ ld/testsuite/ld-x86-64/x86-64.exp     |  69 +++++++++++++++++
+ 14 files changed, 438 insertions(+), 127 deletions(-)
  create mode 100644 ld/testsuite/ld-i386/pr21997-1a.S
  create mode 100644 ld/testsuite/ld-i386/pr21997-1b.c
  create mode 100644 ld/testsuite/ld-i386/pr21997-1c.S
@@ -82,19 +84,10 @@ ld/
  create mode 100644 ld/testsuite/ld-x86-64/pr21997-1c.c
 
 diff --git a/bfd/elf-bfd.h b/bfd/elf-bfd.h
-index 83958e41e0..7b7662c347 100644
+index 83958e41e0..79b9dbc180 100644
 --- a/bfd/elf-bfd.h
 +++ b/bfd/elf-bfd.h
-@@ -177,6 +177,8 @@ struct elf_link_hash_entry
-   unsigned int ref_dynamic : 1;
-   /* Symbol is defined by a shared object.  */
-   unsigned int def_dynamic : 1;
-+  /* Symbol is defined as a protected symbol.  */
-+  unsigned int def_protected : 1;
-   /* Symbol has a non-weak reference from a non-shared object (other than
-      the object in which it is defined).  */
-   unsigned int ref_regular_nonweak : 1;
-@@ -1887,21 +1889,27 @@ struct elf_obj_tdata
+@@ -1887,21 +1887,27 @@ struct elf_obj_tdata
  
    /* An identifier used to distinguish different target
       specific extensions to this structure.  */
@@ -127,7 +120,7 @@ index 83958e41e0..7b7662c347 100644
  
    /* Information grabbed from an elf core file.  */
    struct core_elf_obj_tdata *core;
-@@ -1956,6 +1964,8 @@ struct elf_obj_tdata
+@@ -1956,6 +1962,8 @@ struct elf_obj_tdata
  #define elf_other_obj_attributes_proc(bfd) \
    (elf_other_obj_attributes (bfd) [OBJ_ATTR_PROC])
  #define elf_properties(bfd) (elf_tdata (bfd) -> properties)
@@ -136,24 +129,6 @@ index 83958e41e0..7b7662c347 100644
  
  extern void _bfd_elf_swap_verdef_in
    (bfd *, const Elf_External_Verdef *, Elf_Internal_Verdef *);
-@@ -2806,6 +2816,17 @@ extern asection _bfd_elf_large_com_section;
- 	 || (H)->start_stop \
- 	 || ((INFO)->dynamic && !(H)->dynamic)))
- 
-+/* Should copy relocation be generated for a symbol.  Don't generate
-+   copy relocation against a protected symbol defined in a shared
-+   object with GNU_PROPERTY_NO_COPY_ON_PROTECTED.  */
-+#define SYMBOL_NO_COPYRELOC(INFO, H) \
-+  ((H)->def_protected \
-+   && ((H)->root.type == bfd_link_hash_defined \
-+       || (H)->root.type == bfd_link_hash_defweak) \
-+   && elf_has_no_copy_on_protected ((H)->root.u.def.section->owner) \
-+   && ((H)->root.u.def.section->owner->flags & DYNAMIC) != 0 \
-+   && ((H)->root.u.def.section->flags & SEC_CODE) == 0)
-+
- #ifdef __cplusplus
- }
- #endif
 diff --git a/bfd/elf-properties.c b/bfd/elf-properties.c
 index 13d620d9c4..f367aa6941 100644
 --- a/bfd/elf-properties.c
@@ -189,30 +164,73 @@ index 13d620d9c4..f367aa6941 100644
  
    return first_pbfd;
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index 1009c17ff2..5f442e7108 100644
+index 179dc434dc..69b41a54f9 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
-@@ -2599,7 +2599,9 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
+@@ -956,6 +956,18 @@ static const struct elf_i386_backend_data elf_i386_arch_bed =
+ 	       || (EH)->has_non_got_reloc			\
+ 	       || !(INFO)->dynamic_undefined_weak))))
+ 
++/* Should copy relocation be generated for a symbol.  Don't generate
++   copy relocation against a protected symbol defined in a shared
++   object with GNU_PROPERTY_NO_COPY_ON_PROTECTED.  */
++#define SYMBOL_NO_COPYRELOC(INFO, EH) \
++  ((EH)->def_protected \
++   && ((EH)->elf.root.type == bfd_link_hash_defined \
++       || (EH)->elf.root.type == bfd_link_hash_defweak) \
++   && elf_has_no_copy_on_protected ((EH)->elf.root.u.def.section->owner) \
++   && ((EH)->elf.root.u.def.section->owner->flags & DYNAMIC) != 0 \
++   && ((EH)->elf.root.u.def.section->flags & SEC_CODE) == 0)
++
++
+ /* i386 ELF linker hash entry.  */
+ 
+ struct elf_i386_link_hash_entry
+@@ -998,6 +1010,9 @@ struct elf_i386_link_hash_entry
+   /* TRUE if symbol is __tls_get_addr.  */
+   unsigned int tls_get_addr : 1;
+ 
++  /* TRUE if symbol is defined as a protected symbol.  */
++  unsigned int def_protected : 1;
++
+   /* Reference count of C/C++ function pointer relocations in read-write
+      section which can be resolved at run-time.  */
+   bfd_signed_vma func_pointer_refcount;
+@@ -2590,6 +2605,8 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
+        the link may change h->type.  So fix it now.  */
+     h->plt.offset = (bfd_vma) -1;
+ 
++  eh = (struct elf_i386_link_hash_entry *) h;
++
+   /* If this is a weak symbol, and there is a real definition, the
+      processor independent code will have arranged for us to see the
+      real definition first, and we can just use the same value.  */
+@@ -2599,7 +2616,9 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
  		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
        h->root.u.def.section = h->u.weakdef->root.u.def.section;
        h->root.u.def.value = h->u.weakdef->root.u.def.value;
 -      if (ELIMINATE_COPY_RELOCS || info->nocopyreloc)
 +      if (ELIMINATE_COPY_RELOCS
 +	  || info->nocopyreloc
-+	  || SYMBOL_NO_COPYRELOC (info, h))
++	  || SYMBOL_NO_COPYRELOC (info, eh))
  	h->non_got_ref = h->u.weakdef->non_got_ref;
        return TRUE;
      }
-@@ -2622,7 +2624,7 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
+@@ -2617,12 +2636,11 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
+   /* If there are no references to this symbol that do not use the
+      GOT nor R_386_GOTOFF relocation, we don't need to generate a copy
+      reloc.  */
+-  eh = (struct elf_i386_link_hash_entry *) h;
+   if (!h->non_got_ref && !eh->gotoff_ref)
      return TRUE;
  
    /* If -z nocopyreloc was given, we won't generate them either.  */
 -  if (info->nocopyreloc)
-+  if (info->nocopyreloc || SYMBOL_NO_COPYRELOC (info, h))
++  if (info->nocopyreloc || SYMBOL_NO_COPYRELOC (info, eh))
      {
        h->non_got_ref = 0;
        return TRUE;
-@@ -6802,68 +6804,39 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
+@@ -6802,68 +6820,39 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
  	  break;
        }
  
@@ -308,66 +326,157 @@ index 1009c17ff2..5f442e7108 100644
      }
  
    pbfd = _bfd_elf_link_setup_gnu_properties (info);
+@@ -7163,6 +7152,21 @@ elf_i386_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+   return _bfd_elf_link_check_relocs (abfd, info);
+ }
+ 
++static void
++elf_i386_merge_symbol_attribute (struct elf_link_hash_entry *h,
++				 const Elf_Internal_Sym *isym,
++				 bfd_boolean definition,
++				 bfd_boolean dynamic ATTRIBUTE_UNUSED)
++{
++  if (definition)
++    {
++      struct elf_i386_link_hash_entry *eh
++	= (struct elf_i386_link_hash_entry *) h;
++      eh->def_protected = (ELF_ST_VISIBILITY (isym->st_other)
++			   == STV_PROTECTED);
++    }
++}
++
+ #define TARGET_LITTLE_SYM		i386_elf32_vec
+ #define TARGET_LITTLE_NAME		"elf32-i386"
+ #define ELF_ARCH			bfd_arch_i386
+@@ -7218,6 +7222,7 @@ elf_i386_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+ #define elf_backend_parse_gnu_properties      elf_i386_parse_gnu_properties
+ #define elf_backend_merge_gnu_properties      elf_i386_merge_gnu_properties
+ #define elf_backend_setup_gnu_properties      elf_i386_link_setup_gnu_properties
++#define elf_backend_merge_symbol_attribute    elf_i386_merge_symbol_attribute
+ 
+ #include "elf32-target.h"
+ 
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index e30428d6d8..2d64fa359c 100644
+index 1b8d9ee388..6e4c067732 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
-@@ -1908,7 +1908,10 @@ elf_x86_64_need_pic (struct bfd_link_info *info,
+@@ -1061,6 +1061,17 @@ static const struct elf_x86_64_backend_data elf_x86_64_arch_bed =
+ 	       || (EH)->has_non_got_reloc			\
+ 	       || !(INFO)->dynamic_undefined_weak))))
+ 
++/* Should copy relocation be generated for a symbol.  Don't generate
++   copy relocation against a protected symbol defined in a shared
++   object with GNU_PROPERTY_NO_COPY_ON_PROTECTED.  */
++#define SYMBOL_NO_COPYRELOC(INFO, EH) \
++  ((EH)->def_protected \
++   && ((EH)->elf.root.type == bfd_link_hash_defined \
++       || (EH)->elf.root.type == bfd_link_hash_defweak) \
++   && elf_has_no_copy_on_protected ((EH)->elf.root.u.def.section->owner) \
++   && ((EH)->elf.root.u.def.section->owner->flags & DYNAMIC) != 0 \
++   && ((EH)->elf.root.u.def.section->flags & SEC_CODE) == 0)
++
+ /* x86-64 ELF linker hash entry.  */
+ 
+ struct elf_x86_64_link_hash_entry
+@@ -1104,6 +1115,9 @@ struct elf_x86_64_link_hash_entry
+   /* TRUE if symbol is __tls_get_addr.  */
+   unsigned int tls_get_addr : 1;
+ 
++  /* TRUE if symbol is defined as a protected symbol.  */
++  unsigned int def_protected : 1;
++
+   /* Reference count of C/C++ function pointer relocations in read-write
+      section which can be resolved at run-time.  */
+   bfd_signed_vma func_pointer_refcount;
+@@ -1908,7 +1922,10 @@ elf_x86_64_need_pic (struct bfd_link_info *info,
  	  v = _("protected symbol ");
  	  break;
  	default:
 -	  v = _("symbol ");
-+	  if (h->def_protected)
++	  if (((struct elf_x86_64_link_hash_entry *) h)->def_protected)
 +	    v = _("protected symbol ");
 +	  else
 +	    v = _("symbol ");
  	  pic = _("; recompile with -fPIC");
  	  break;
  	}
-@@ -3052,7 +3055,9 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
+@@ -3043,6 +3060,8 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
+        the link may change h->type.  So fix it now.  */
+     h->plt.offset = (bfd_vma) -1;
+ 
++  eh = (struct elf_x86_64_link_hash_entry *) h;
++
+   /* If this is a weak symbol, and there is a real definition, the
+      processor independent code will have arranged for us to see the
+      real definition first, and we can just use the same value.	 */
+@@ -3052,9 +3071,10 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
  		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
        h->root.u.def.section = h->u.weakdef->root.u.def.section;
        h->root.u.def.value = h->u.weakdef->root.u.def.value;
 -      if (ELIMINATE_COPY_RELOCS || info->nocopyreloc)
 +      if (ELIMINATE_COPY_RELOCS
 +	  || info->nocopyreloc
-+	  || SYMBOL_NO_COPYRELOC (info, h))
++	  || SYMBOL_NO_COPYRELOC (info, eh))
  	{
- 	  eh = (struct elf_x86_64_link_hash_entry *) h;
+-	  eh = (struct elf_x86_64_link_hash_entry *) h;
  	  h->non_got_ref = h->u.weakdef->non_got_ref;
-@@ -3077,7 +3082,7 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
+ 	  eh->needs_copy = h->u.weakdef->needs_copy;
+ 	}
+@@ -3077,7 +3097,7 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
      return TRUE;
  
    /* If -z nocopyreloc was given, we won't generate them either.  */
 -  if (info->nocopyreloc)
-+  if (info->nocopyreloc || SYMBOL_NO_COPYRELOC (info, h))
++  if (info->nocopyreloc || SYMBOL_NO_COPYRELOC (info, eh))
      {
        h->non_got_ref = 0;
        return TRUE;
-@@ -4950,7 +4955,9 @@ do_ifunc_pointer:
+@@ -4950,7 +4970,9 @@ do_ifunc_pointer:
  	      && ((bfd_link_executable (info)
  		   && ((h->root.type == bfd_link_hash_undefweak
  			&& !resolved_to_zero)
 -		       || (info->nocopyreloc
 +		       || ((info->nocopyreloc
-+			    || (h->def_protected
++			    || (eh->def_protected
 +				&& elf_has_no_copy_on_protected (h->root.u.def.section->owner)))
  			   && h->def_dynamic
  			   && !(h->root.u.def.section->flags & SEC_CODE))))
  		  || bfd_link_dll (info)))
-@@ -5724,7 +5731,10 @@ direct:
+@@ -5724,7 +5746,10 @@ direct:
  	  switch (r_type)
  	    {
  	    case R_X86_64_32S:
 -	      if (info->nocopyreloc
 +	      sec = h->root.u.def.section;
 +	      if ((info->nocopyreloc
-+		   || (h->def_protected
++		   || (eh->def_protected
 +		       && elf_has_no_copy_on_protected (h->root.u.def.section->owner)))
  		  && !(h->root.u.def.section->flags & SEC_CODE))
  		return elf_x86_64_need_pic (info, input_bfd, input_section,
  					    h, NULL, NULL, howto);
-@@ -7349,69 +7359,40 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
+@@ -7137,6 +7162,21 @@ elf_x86_64_merge_symbol (struct elf_link_hash_entry *h,
+   return TRUE;
+ }
+ 
++static void
++elf_x86_64_merge_symbol_attribute (struct elf_link_hash_entry *h,
++				   const Elf_Internal_Sym *isym,
++				   bfd_boolean definition,
++				   bfd_boolean dynamic ATTRIBUTE_UNUSED)
++{
++  if (definition)
++    {
++      struct elf_x86_64_link_hash_entry *eh
++	= (struct elf_x86_64_link_hash_entry *) h;
++      eh->def_protected = (ELF_ST_VISIBILITY (isym->st_other)
++			   == STV_PROTECTED);
++    }
++}
++
+ static int
+ elf_x86_64_additional_program_headers (bfd *abfd,
+ 				       struct bfd_link_info *info ATTRIBUTE_UNUSED)
+@@ -7349,69 +7389,40 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
  	  break;
        }
  
@@ -465,29 +574,15 @@ index e30428d6d8..2d64fa359c 100644
      }
  
    pbfd = _bfd_elf_link_setup_gnu_properties (info);
-diff --git a/bfd/elflink.c b/bfd/elflink.c
-index ceacb37e4c..0171b3b812 100644
---- a/bfd/elflink.c
-+++ b/bfd/elflink.c
-@@ -4638,6 +4638,8 @@ error_free_dyn:
- 	      else
- 		{
- 		  h->def_regular = 1;
-+		  h->def_protected = (ELF_ST_VISIBILITY (isym->st_other)
-+				      == STV_PROTECTED);
- 		  if (h->def_dynamic)
- 		    {
- 		      h->def_dynamic = 0;
-@@ -4664,6 +4666,9 @@ error_free_dyn:
- 		{
- 		  h->def_dynamic = 1;
- 		  hi->def_dynamic = 1;
-+		  h->def_protected = hi->def_protected
-+		    = (ELF_ST_VISIBILITY (isym->st_other)
-+		       == STV_PROTECTED);
- 		}
- 
- 	      /* If the indirect symbol has been forced local, don't
+@@ -7830,6 +7841,8 @@ elf_x86_64_special_sections[]=
+   elf_x86_64_common_definition
+ #define elf_backend_merge_symbol \
+   elf_x86_64_merge_symbol
++#define elf_backend_merge_symbol_attribute \
++  elf_x86_64_merge_symbol_attribute
+ #define elf_backend_special_sections \
+   elf_x86_64_special_sections
+ #define elf_backend_additional_program_headers \
 diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
 index c813a80551..bd1561024c 100644
 --- a/ld/testsuite/ld-i386/i386.exp
