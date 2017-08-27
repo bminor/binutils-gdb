@@ -1,3 +1,37 @@
+2017-08-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21997
+	* elf-bfd.h (elf_obj_tdata): Use ENUM_BITFIELD on object_id,
+	dyn_lib_class and has_gnu_symbols.  Change bad_symtab to bitfield.
+	Add a has_no_copy_on_protected bitfield.
+	(elf_has_no_copy_on_protected): New.
+	* elf-properties.c (_bfd_elf_parse_gnu_properties): Set
+	elf_has_no_copy_on_protected for GNU_PROPERTY_NO_COPY_ON_PROTECTED.
+	(elf_merge_gnu_property_list): Likewise.
+	(_bfd_elf_link_setup_gnu_properties): Set extern_protected_data
+	to FALSE for elf_has_no_copy_on_protected.
+	* elf32-i386.c (SYMBOL_NO_COPYRELOC): New.
+	(elf_i386_link_hash_entry): Add def_protected.
+	(elf_i386_adjust_dynamic_symbol): Also check SYMBOL_NO_COPYRELOC
+	when checking info->nocopyreloc.
+	(elf_i386_link_setup_gnu_properties): Don't set
+	extern_protected_data here.
+	(elf_i386_merge_symbol_attribute): New function.
+	(elf_backend_merge_symbol_attribute): New.
+	* elf64-x86-64.c (SYMBOL_NO_COPYRELOC): New.
+	(elf_x86_64_link_hash_entry): Add def_protected.
+	(elf_x86_64_need_pic): Report protected symbol for def_protected.
+	(elf_x86_64_adjust_dynamic_symbol): Also check SYMBOL_NO_COPYRELOC
+	when checking info->nocopyreloc.
+	(elf_x86_64_relocate_section): Also check for R_X86_64_PC32
+	relocation run-time overflow and unresolvable R_X86_64_32S
+	relocation against protected data symbol defined in shared object
+	with GNU_PROPERTY_NO_COPY_ON_PROTECTED.
+	(elf_x86_64_link_setup_gnu_properties): Don't set
+	extern_protected_data here.
+	(elf_x86_64_merge_symbol_attribute): New function.
+	(elf_backend_merge_symbol_attribute): New.
+
 2017-08-26  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (must_be_dyn_reloc): Use bfd_link_dll.  Comment.

@@ -168,6 +168,7 @@ bad_size:
 		  return FALSE;
 		}
 	      prop = _bfd_elf_get_property (abfd, type, datasz);
+	      elf_has_no_copy_on_protected (abfd) = TRUE;
 	      prop->pr_kind = property_number;
 	      goto next;
 
@@ -290,6 +291,9 @@ elf_merge_gnu_property_list (struct bfd_link_info *info, bfd *abfd,
   for (p = *listp; p != NULL; p = p->next)
     if (elf_merge_gnu_properties (info, abfd, NULL, &p->property))
       {
+	if (p->property.pr_type == GNU_PROPERTY_NO_COPY_ON_PROTECTED)
+	  elf_has_no_copy_on_protected (abfd) = TRUE;
+
 	pr = _bfd_elf_get_property (abfd, p->property.pr_type,
 				    p->property.pr_datasz);
 	/* It must be a new property.  */
@@ -489,6 +493,11 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 
       /* Cache the section contents for elf_link_input_bfd.  */
       elf_section_data (sec)->this_hdr.contents = contents;
+
+      /* If GNU_PROPERTY_NO_COPY_ON_PROTECTED is set, protected data
+	 symbol is defined in the shared object.  */
+      if (elf_has_no_copy_on_protected (first_pbfd))
+	info->extern_protected_data = FALSE;
     }
 
   return first_pbfd;

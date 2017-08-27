@@ -1,3 +1,17 @@
+2017-08-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21997
+	* testsuite/ld-i386/i386.exp: Run PR ld/21997 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr21997-1a.S: New file.
+	* testsuite/ld-i386/pr21997-1b.c: Likewise.
+	* testsuite/ld-i386/pr21997-1c.S: Likewise.
+	* testsuite/ld-x86-64/pr21997-1a.S: Likewise.
+	* testsuite/ld-x86-64/pr21997-1a.err: Likewise.
+	* testsuite/ld-x86-64/pr21997-1b.c: Likewise.
+	* testsuite/ld-x86-64/pr21997-1b.err: Likewise.
+	* testsuite/ld-x86-64/pr21997-1c.c: Likewise.
+
 2017-08-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/pr21903c.d: Remove '\' before --.
