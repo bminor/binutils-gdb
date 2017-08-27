@@ -1,3 +1,9 @@
+2017-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_link_hash_newfunc): Initialize
+	def_protected.
+	* elf64-x86-64.c (elf_x86_64_link_hash_newfunc): Likewise.
+
 2017-08-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21997

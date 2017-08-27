@@ -1163,6 +1163,7 @@ elf_i386_link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->has_non_got_reloc = 0;
       eh->no_finish_dynamic_symbol = 0;
       eh->tls_get_addr = 0;
+      eh->def_protected = 0;
       eh->func_pointer_refcount = 0;
       eh->plt_got.offset = (bfd_vma) -1;
       eh->tlsdesc_got = (bfd_vma) -1;
