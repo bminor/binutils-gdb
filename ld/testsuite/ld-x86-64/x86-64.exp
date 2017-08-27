@@ -1056,6 +1056,22 @@ if { [isnative] && [which $CC] != 0 } {
 	    {{error_output "pr22001-1a.err"}} \
 	    "pr22001-1a" \
 	] \
+	[list \
+	    "Build pr21997-1.so" \
+	    "-shared" \
+	    "" \
+	    { property-stack.S property-no-copy.S pr21997-1a.S } \
+	    {} \
+	    "pr21997-1.so" \
+	] \
+	[list \
+	    "Build pr21997-1a" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+	    "$NOPIE_CFLAGS" \
+	    { pr21997-1b.c } \
+	    {{error_output "pr21997-1a.err"}} \
+	    "pr21997-1a" \
+	] \
     ]
 
     if  {[istarget "x86_64-*-linux*-gnux32"]} {
@@ -1069,6 +1085,15 @@ if { [isnative] && [which $CC] != 0 } {
 		"pass.out" \
 		"$NOPIE_CFLAGS" \
 	    ] \
+	    [list \
+		"Run pr21997-1b" \
+		"$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+		"" \
+		{ pr21997-1c.c } \
+		"pr21997-1b" \
+		"pass.out" \
+		"$NOPIE_CFLAGS" \
+	    ] \
 	]
     } else {
 	run_cc_link_tests [list \
@@ -1079,6 +1104,14 @@ if { [isnative] && [which $CC] != 0 } {
 		{ pr22001-1c.c } \
 		{{error_output "pr22001-1b.err"}} \
 		"pr22001-1b" \
+	    ] \
+	    [list \
+		"Build pr21997-1b" \
+		"$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+		"$NOPIE_CFLAGS" \
+		{ pr21997-1c.c } \
+		{{error_output "pr21997-1b.err"}} \
+		"pr21997-1b" \
 	    ] \
 	]
     }
@@ -1290,6 +1323,42 @@ if { [isnative] && [which $CC] != 0 } {
 	    "" \
 	    { pr22001-1c.c } \
 	    "pr22001-1b-pic-2" \
+	    "pass.out" \
+	    "-fPIC" \
+	] \
+	[list \
+	    "Run pr21997-1a (PIC 1)" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+	    "" \
+	    { pr21997-1b.c } \
+	    "pr21997-1a-pic-1" \
+	    "pass.out" \
+	    "-fPIC" \
+	] \
+	[list \
+	    "Run pr21997-1a (PIC 2)" \
+	    "-pie -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+	    "" \
+	    { pr21997-1b.c } \
+	    "pr21997-1a-pic-2" \
+	    "pass.out" \
+	    "-fPIC" \
+	] \
+	[list \
+	    "Run pr21997-1b (PIC 1)" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+	    "" \
+	    { pr21997-1c.c } \
+	    "pr21997-1b-pic-1" \
+	    "pass.out" \
+	    "-fPIC" \
+	] \
+	[list \
+	    "Run pr21997-1b (PIC 2)" \
+	    "-pie -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+	    "" \
+	    { pr21997-1c.c } \
+	    "pr21997-1b-pic-2" \
 	    "pass.out" \
 	    "-fPIC" \
 	] \

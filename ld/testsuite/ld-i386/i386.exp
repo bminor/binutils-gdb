@@ -1254,6 +1254,14 @@ if { [isnative]
 	    {} \
 	    "pr22001-1.so" \
 	] \
+	[list \
+	    "Build pr21997-1.so" \
+	    "-shared" \
+	    "" \
+	    { property-stack.S property-no-copy.S pr21997-1a.S } \
+	    {} \
+	    "pr21997-1.so" \
+	] \
     ]
 
     run_ld_link_exec_tests [list \
@@ -1308,6 +1316,49 @@ if { [isnative]
 	    "pr22001-1-pic-2" \
 	    "pass.out" \
 	    "-fPIC" \
+	] \
+	[list \
+	    "Run pr21997-1" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+	    "" \
+	    { pr21997-1b.c } \
+	    "pr21997-1" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run pr21997-1 (PIC 1)" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+	    "" \
+	    { pr21997-1b.c } \
+	    "pr21997-1-pic-1" \
+	    "pass.out" \
+	    "-fPIC" \
+	] \
+	[list \
+	    "Run pr21997-1 (PIC 2)" \
+	    "-pie -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+	    "" \
+	    { pr21997-1b.c } \
+	    "pr21997-1-pic-2" \
+	    "pass.out" \
+	    "-fPIC" \
+	] \
+	[list \
+	    "Run pr21997-1 (PIE 1)" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+	    "" \
+	    { pr21997-1c.S } \
+	    "pr21997-1-pie-1" \
+	    "pass.out" \
+	] \
+	[list \
+	    "Run pr21997-1 (PIE 2)" \
+	    "-pie -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+	    "" \
+	    { pr21997-1c.S } \
+	    "pr21997-1-pie-2" \
+	    "pass.out" \
 	] \
     ]
 
