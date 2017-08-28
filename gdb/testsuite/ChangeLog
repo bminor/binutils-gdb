@@ -1,3 +1,8 @@
+2017-08-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp (user_defined_command_case_sensitivity):
+	New proc, call it from toplevel.
+
 2017-08-23  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR remote/21852

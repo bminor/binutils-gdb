@@ -1,3 +1,8 @@
+2017-08-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* cli/cli-script.c (define_command): Don't convert command name
+	to lower case.
+
 2017-08-25  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_lookup_struct_elt_type): Remove parameter "dispp".

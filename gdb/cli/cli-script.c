@@ -1478,12 +1478,6 @@ define_command (char *comname, int from_tty)
 
   comname = xstrdup (comname);
 
-  /* If the rest of the commands will be case insensitive, this one
-     should behave in the same manner.  */
-  for (tem = comname; *tem; tem++)
-    if (isupper (*tem))
-      *tem = tolower (*tem);
-
   xsnprintf (tmpbuf, sizeof (tmpbuf),
 	     "Type commands for definition of \"%s\".", comfull);
   command_line_up cmds = read_command_lines (tmpbuf, from_tty, 1, 0, 0);
