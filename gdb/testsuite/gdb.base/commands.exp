@@ -352,6 +352,35 @@ proc_with_prefix user_defined_command_test {} {
 	"display user-defined empty command"
 }
 
+# Test that the case with which the command was defined is preserved.
+
+proc_with_prefix user_defined_command_case_sensitivity {} {
+    # Define a first command with mixed case name.
+    set test "define Homer-Simpson"
+    gdb_test_multiple $test $test {
+	    -re "End with"  {
+		pass $test
+	    }
+	}
+
+    gdb_test "print 123\nend" "" "enter commands 1"
+
+    # Define a second command, same name but different case.
+    set test "define HomeR-SimpsoN"
+    gdb_test_multiple $test $test {
+	    -re "End with"  {
+		pass $test
+	    }
+	}
+
+    gdb_test "print 456\nend" "" "enter commands 2"
+
+    gdb_test "Homer-Simpson" " = 123" "execute command"
+    gdb_test "HomeR-SimpsoN" " = 456" "execute command"
+    gdb_test "HOMER-SIMPSON" "Undefined command.*" "try to call in upper case"
+    gdb_test "homer-simpson" "Undefined command.*" "try to call in lower case"
+}
+
 # Test that "eval" in a user-defined command expands $argc/$argN.
 
 proc_with_prefix user_defined_command_args_eval {} {
@@ -1052,6 +1081,7 @@ if_while_breakpoint_command_test
 infrun_breakpoint_command_test
 breakpoint_command_test
 user_defined_command_test
+user_defined_command_case_sensitivity
 user_defined_command_args_eval
 user_defined_command_args_stack_test
 user_defined_command_manyargs_test

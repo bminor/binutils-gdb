@@ -1,3 +1,8 @@
+2017-08-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp (user_defined_command_case_sensitivity):
+	New proc, call it from toplevel.
+
 2017-07-25  Yao Qi  <yao.qi@linaro.org>
 
 	PR gdb/21555
