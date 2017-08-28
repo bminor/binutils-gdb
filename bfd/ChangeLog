@@ -1,5 +1,10 @@
 2017-08-28  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf-bfd.h (_bfd_elf_ifunc_get_synthetic_symtab): Removed.
+	* elf-ifunc.c (_bfd_elf_ifunc_get_synthetic_symtab): Likewise.
+
+2017-08-28  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/22018
 	* elf32-i386.c (elf_i386_get_synthetic_symtab): Check for valid
 	PLT section size.
