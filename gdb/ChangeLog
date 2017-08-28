@@ -1,5 +1,6 @@
 2017-08-28  Simon Marchi  <simon.marchi@ericsson.com>
 
+	PR gdb/21827
 	* cli/cli-script.c (define_command): Don't convert command name
 	to lower case.
 
