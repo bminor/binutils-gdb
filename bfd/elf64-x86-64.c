@@ -6763,7 +6763,7 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
   for (j = 0; plts[j].name != NULL; j++)
     {
       plt = bfd_get_section_by_name (abfd, plts[j].name);
-      if (plt == NULL)
+      if (plt == NULL || plt->size == 0)
 	continue;
 
       /* Get the PLT section contents.  */
@@ -6779,7 +6779,9 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 
       /* Check what kind of PLT it is.  */
       plt_type = plt_unknown;
-      if (plts[j].type == plt_unknown)
+      if (plts[j].type == plt_unknown
+	  && (plt->size >= (lazy_plt->plt_entry_size
+			    + lazy_plt->plt_entry_size)))
 	{
 	  /* Match lazy PLT first.  Need to check the first two
 	     instructions.   */
@@ -6807,7 +6809,8 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 	}
 
       if (non_lazy_plt != NULL
-	  && (plt_type == plt_unknown || plt_type == plt_non_lazy))
+	  && (plt_type == plt_unknown || plt_type == plt_non_lazy)
+	  && plt->size >= non_lazy_plt->plt_entry_size)
 	{
 	  /* Match non-lazy PLT.  */
 	  if (memcmp (plt_contents, non_lazy_plt->plt_entry,
@@ -6818,6 +6821,7 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
       if (plt_type == plt_unknown || plt_type == plt_second)
 	{
 	  if (non_lazy_bnd_plt != NULL
+	      && plt->size >= non_lazy_bnd_plt->plt_entry_size
 	      && (memcmp (plt_contents, non_lazy_bnd_plt->plt_entry,
 			  non_lazy_bnd_plt->plt_got_offset) == 0))
 	    {
@@ -6826,6 +6830,7 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 	      non_lazy_plt = non_lazy_bnd_plt;
 	    }
 	  else if (non_lazy_ibt_plt != NULL
+		   && plt->size >= non_lazy_ibt_plt->plt_entry_size
 		   && (memcmp (plt_contents,
 			       non_lazy_ibt_plt->plt_entry,
 			       non_lazy_ibt_plt->plt_got_offset) == 0))
@@ -6870,6 +6875,9 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 
       plts[j].contents = plt_contents;
     }
+
+  if (count == 0)
+    return -1;
 
   size = count * sizeof (asymbol);
 
