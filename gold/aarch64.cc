@@ -7563,15 +7563,15 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
 	    tls_got_offset_type = (tlsopt == tls::TLSOPT_TO_IE
 				   ? GOT_TYPE_TLS_OFFSET
 				   : GOT_TYPE_TLS_DESC);
-	    unsigned int got_tlsdesc_offset = 0;
+	    int got_tlsdesc_offset = 0;
 	    if (r_type != elfcpp::R_AARCH64_TLSDESC_CALL
 		&& tlsopt == tls::TLSOPT_NONE)
 	      {
 		// We created GOT entries in the .got.tlsdesc portion of the
 		// .got.plt section, but the offset stored in the symbol is the
 		// offset within .got.tlsdesc.
-		got_tlsdesc_offset = (target->got_->data_size()
-				      + target->got_plt_section()->data_size());
+		got_tlsdesc_offset = (target->got_tlsdesc_->address()
+				      - target->got_->address());
 	      }
 	    typename elfcpp::Elf_types<size>::Elf_Addr got_entry_address;
 	    if (gsym != NULL)

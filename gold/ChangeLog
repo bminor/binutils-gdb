@@ -1,3 +1,13 @@
+2017-08-28  Igor Kudrin  <ikudrin@accesssoftek.com>
+
+	* aarch64.cc (Target_aarch64::Relocate::relocate_tls):
+	Make got_tlsdesc_offset signed and fix its calculation.
+	* testsuite/Makefile.am (aarch64_tlsdesc): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/aarch64_tlsdesc.s: New test source file.
+	* testsuite/aarch64_tlsdesc.sh: New test script.
+	* testsuite/aarch64_tlsdesc.t: New test linker script.
+
 2017-08-28  Alan Modra  <amodra@gmail.com>
 
 	PR 21847
