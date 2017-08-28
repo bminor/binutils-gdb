@@ -266,8 +266,8 @@ Symbol_table::resolve(Sized_symbol<size>* to,
     {
       Sized_target<size, big_endian>* sized_target;
       sized_target = parameters->sized_target<size, big_endian>();
-      sized_target->resolve(to, sym, object, version);
-      return;
+      if (sized_target->resolve(to, sym, object, version))
+	return;
     }
 
   if (!object->is_dynamic())

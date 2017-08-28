@@ -81,6 +81,7 @@ Symbol::init_fields(const char* name, const char* version,
   this->undef_binding_weak_ = false;
   this->is_predefined_ = false;
   this->is_protected_ = false;
+  this->non_zero_localentry_ = false;
 }
 
 // Return the demangled version of the symbol's name, but only
