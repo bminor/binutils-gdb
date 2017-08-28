@@ -1,3 +1,18 @@
+2017-08-28  Alan Modra  <amodra@gmail.com>
+
+	PR 21847
+	* powerpc.cc (Target_powerpc::is_elfv2_localentry0): Test
+	non_zero_localentry.
+	(Target_powerpc::resolve): New function.
+	(powerpc_info): Set has_resolve for 64-bit.
+	* target.h (Sized_target::resolve): Return bool.
+	* resolve.cc (Symbol_table::resolve): Continue with normal
+	processing when target resolve returns false.
+	* symtab.h (Symbol::non_zero_localentry, set_non_zero_localentry):
+	New accessors.
+	(Symbol::non_zero_localentry_): New flag bit.
+	* symtab.cc (Symbol::init_fields): Init non_zero_localentry_.
+
 2017-08-08  Romain Geissler  <romain.geissler@gmail.com>
 	    Alan Modra  <amodra@gmail.com>
 
@@ -39,6 +54,7 @@
 
 2017-07-31  Alan Modra  <amodra@gmail.com>
 
+	PR 21847
 	* powerpc.cc (Target_powerpc::scan_relocs): Warn on --plt-localentry
 	without ld.so checks.
 

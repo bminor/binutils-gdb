@@ -883,6 +883,16 @@ class Symbol
   set_is_protected()
   { this->is_protected_ = true; }
 
+  // Return state of PowerPC64 ELFv2 specific flag.
+  bool
+  non_zero_localentry() const
+  { return this->non_zero_localentry_; }
+
+  // Set PowerPC64 ELFv2 specific flag.
+  void
+  set_non_zero_localentry()
+  { this->non_zero_localentry_ = true; }
+
  protected:
   // Instances of this class should always be created at a specific
   // size.
@@ -1084,6 +1094,8 @@ class Symbol
   // The visibility_ field will be STV_DEFAULT in this case because we
   // must treat it as such from outside the shared object.
   bool is_protected_  : 1;
+  // Used by PowerPC64 ELFv2 to track st_other localentry (bit 36).
+  bool non_zero_localentry_ : 1;
 };
 
 // The parts of a symbol which are size specific.  Using a template
