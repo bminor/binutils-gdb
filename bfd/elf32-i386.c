@@ -6372,7 +6372,7 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
   for (j = 0; plts[j].name != NULL; j++)
     {
       plt = bfd_get_section_by_name (abfd, plts[j].name);
-      if (plt == NULL)
+      if (plt == NULL || plt->size == 0)
 	continue;
 
       /* Get the PLT section contents.  */
@@ -6388,7 +6388,9 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 
       /* Check what kind of PLT it is.  */
       plt_type = plt_unknown;
-      if (plts[j].type == plt_unknown)
+      if (plts[j].type == plt_unknown
+	  && (plt->size >= (lazy_plt->plt0_entry_size
+			    + lazy_plt->plt_entry_size)))
 	{
 	  /* Match lazy PLT first.  */
 	  if (memcmp (plt_contents, lazy_plt->plt0_entry,
@@ -6397,7 +6399,7 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 	      /* The fist entry in the lazy IBT PLT is the same as the
 		 normal lazy PLT.  */
 	      if (lazy_ibt_plt != NULL
-		  && (memcmp (plt_contents + lazy_ibt_plt->plt_entry_size,
+		  && (memcmp (plt_contents + lazy_ibt_plt->plt0_entry_size,
 			      lazy_ibt_plt->plt_entry,
 			      lazy_ibt_plt->plt_got_offset) == 0))
 		plt_type = plt_lazy | plt_second;
@@ -6410,7 +6412,7 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 	      /* The fist entry in the PIC lazy IBT PLT is the same as
 		 the normal PIC lazy PLT.  */
 	      if (lazy_ibt_plt != NULL
-		  && (memcmp (plt_contents + lazy_ibt_plt->plt_entry_size,
+		  && (memcmp (plt_contents + lazy_ibt_plt->plt0_entry_size,
 			      lazy_ibt_plt->pic_plt_entry,
 			      lazy_ibt_plt->plt_got_offset) == 0))
 		plt_type = plt_lazy | plt_pic | plt_second;
@@ -6420,7 +6422,8 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 	}
 
       if (non_lazy_plt != NULL
-	  && (plt_type == plt_unknown || plt_type == plt_non_lazy))
+	  && (plt_type == plt_unknown || plt_type == plt_non_lazy)
+	  && plt->size >= non_lazy_plt->plt_entry_size)
 	{
 	  /* Match non-lazy PLT.  */
 	  if (memcmp (plt_contents, non_lazy_plt->plt_entry,
@@ -6432,7 +6435,8 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 	}
 
       if ((non_lazy_ibt_plt != NULL)
-	  && (plt_type == plt_unknown || plt_type == plt_second))
+	  && (plt_type == plt_unknown || plt_type == plt_second)
+	  && plt->size >= non_lazy_ibt_plt->plt_entry_size)
 	{
 	  if (memcmp (plt_contents,
 		      non_lazy_ibt_plt->plt_entry,
@@ -6489,6 +6493,9 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
       if ((plt_type & plt_pic))
 	got_addr = (bfd_vma) -1;
     }
+
+  if (count == 0)
+    return -1;
 
   size = count * sizeof (asymbol);
   s = *ret = (asymbol *) bfd_zmalloc (size);

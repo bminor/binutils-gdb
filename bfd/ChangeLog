@@ -1,3 +1,10 @@
+2017-09-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/22018
+	* elf32-i386.c (elf_i386_get_synthetic_symtab): Check for valid
+	PLT section size.
+	* elf64-x86-64.c (elf_x86_64_get_synthetic_symtab): Likewise.
+
 2017-09-05  Nick Clifton  <nickc@redhat.com>
 
 	Import from mainline:
