@@ -852,7 +852,7 @@ class Sized_target : public Target
   // pre-existing symbol.  SYM is the new symbol, seen in OBJECT.
   // VERSION is the version of SYM.  This will only be called if
   // has_resolve() returns true.
-  virtual void
+  virtual bool
   resolve(Symbol*, const elfcpp::Sym<size, big_endian>&, Object*,
 	  const char*)
   { gold_unreachable(); }

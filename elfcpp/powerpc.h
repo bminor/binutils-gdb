@@ -228,6 +228,12 @@ enum
   EF_PPC64_ABI = 3
 };
 
+// DT_PPC_OPT bits
+enum
+{
+  PPC_OPT_TLS = 1
+};
+
 // DT_PPC64_OPT bits
 enum
 {

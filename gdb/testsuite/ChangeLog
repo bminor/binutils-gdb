@@ -1,3 +1,21 @@
+2017-08-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp (gdbvar_simple_if_test,
+	gdbvar_simple_if_test, gdbvar_complex_if_while_test,
+	progvar_simple_if_test, progvar_simple_while_test,
+	progvar_complex_if_while_test, user_defined_command_test,
+	user_defined_command_args_eval,
+	user_defined_command_args_stack_test,
+	user_defined_command_manyargs_test, bp_deleted_in_command_test,
+	temporary_breakpoint_commands,
+	gdb_test_no_prompt, redefine_hook_test,
+	redefine_backtrace_test): Remove "global gdb_prompt".
+
+2017-08-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp (user_defined_command_case_sensitivity):
+	New proc, call it from toplevel.
+
 2017-08-23  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR remote/21852

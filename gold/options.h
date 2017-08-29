@@ -1294,6 +1294,9 @@ class General_options
   DEFINE_bool(tls_optimize, options::TWO_DASHES, '\0', true,
 	      N_("(PowerPC/64 only) Optimize GD/LD/IE code to IE/LE"),
 	      N_("(PowerPC/64 only) Don'\''t try to optimize TLS accesses"));
+  DEFINE_bool(tls_get_addr_optimize, options::TWO_DASHES, '\0', true,
+	      N_("(PowerPC/64 only) Use a special __tls_get_addr call"),
+	      N_("(PowerPC/64 only) Don't use a special __tls_get_addr call"));
 
   DEFINE_bool(toc_optimize, options::TWO_DASHES, '\0', true,
 	      N_("(PowerPC64 only) Optimize TOC code sequences"),

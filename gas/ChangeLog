@@ -1,3 +1,13 @@
+2017-08-29  Jozef Lawrynowicz  <jozef.l@somniumtech.com>
+
+	* config/tc-msp430.c (md_parse_option): Define high data and high
+	bss symbols if -mdata-region is passed.
+	Define -mdata-region open.
+	* doc/c-msp430.texi: Document -mdata-region.
+	* testsuite/gas/msp430/high-data-bss-sym.d: New test.
+	* testsuite/gas/msp430/high-data-bss-sym.s: New.
+	* testsuite/gas/msp430/msp430.exp: Add -mdata-region tests.
+
 2017-08-23  Alexander Fedotov <alexander.fedotov@nxp.com>
 	    Edmar Wienskoski <edmar.wienskoski@nxp.com
 

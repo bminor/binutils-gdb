@@ -1,3 +1,28 @@
+2017-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_get_synthetic_symtab): Simplify bad
+	return.
+	* elf64-x86-64.c (elf_x86_64_get_synthetic_symtab): Likewise.
+
+2017-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_get_synthetic_symtab): Check valid PLT
+	sections before checking dynamic relocations and free invalid
+	PLT section contents.
+	* elf64-x86-64.c (elf_x86_64_get_synthetic_symtab): Likewise.
+
+2017-08-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (_bfd_elf_ifunc_get_synthetic_symtab): Removed.
+	* elf-ifunc.c (_bfd_elf_ifunc_get_synthetic_symtab): Likewise.
+
+2017-08-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/22018
+	* elf32-i386.c (elf_i386_get_synthetic_symtab): Check for valid
+	PLT section size.
+	* elf64-x86-64.c (elf_x86_64_get_synthetic_symtab): Likewise.
+
 2017-08-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_link_hash_newfunc): Initialize

@@ -676,6 +676,8 @@ static bfd_boolean warn_interrupt_nops = TRUE;
 #define OPTION_MCPU 'c'
 #define OPTION_MOVE_DATA 'd'
 static bfd_boolean move_data = FALSE;
+#define OPTION_DATA_REGION 'r'
+static bfd_boolean upper_data_region_in_use = FALSE;
 
 enum
 {
@@ -1448,6 +1450,12 @@ md_parse_option (int c, const char * arg)
     case OPTION_MOVE_DATA:
       move_data = TRUE;
       return 1;
+
+    case OPTION_DATA_REGION:
+      if (strcmp (arg, "upper") == 0
+	  || strcmp (arg, "either") == 0)
+	upper_data_region_in_use = TRUE;
+      return 1;
     }
 
   return 0;
@@ -1478,14 +1486,19 @@ msp430_make_init_symbols (const char * name)
 
   /* Note - data assigned to the .either.data section may end up being
      placed in the .upper.data section if the .lower.data section is
-     full.  Hence the need to define the crt0 symbol.  */
+     full.  Hence the need to define the crt0 symbol.
+     The linker may create upper or either data sections, even when none exist
+     at the moment, so use the value of the data-region flag to determine if
+     the symbol is needed.  */
   if (strncmp (name, ".either.data", 12) == 0
-      || strncmp (name, ".upper.data", 11) == 0)
+      || strncmp (name, ".upper.data", 11) == 0
+      || upper_data_region_in_use)
     (void) symbol_find_or_make ("__crt0_move_highdata");
 
   /* See note about .either.data above.  */
   if (strncmp (name, ".upper.bss", 10) == 0
-      || strncmp (name, ".either.bss", 11) == 0)
+      || strncmp (name, ".either.bss", 11) == 0
+      || upper_data_region_in_use)
     (void) symbol_find_or_make ("__crt0_init_highbss");
 }
 
@@ -1570,6 +1583,7 @@ struct option md_longopts[] =
   {"mY", no_argument, NULL, OPTION_NO_WARN_INTR_NOPS},
   {"my", no_argument, NULL, OPTION_WARN_INTR_NOPS},
   {"md", no_argument, NULL, OPTION_MOVE_DATA},
+  {"mdata-region", required_argument, NULL, OPTION_DATA_REGION},
   {NULL, no_argument, NULL, 0}
 };
 
@@ -1601,6 +1615,9 @@ md_show_usage (FILE * stream)
 	   _("  -my - warn about missing NOPs after changing interrupts (default)\n"));
   fprintf (stream,
 	   _("  -md - Force copying of data from ROM to RAM at startup\n"));
+  fprintf (stream,
+	   _("  -mdata-region={none|lower|upper|either} - select region data will be\n"
+	     "    placed in.\n"));
 }
 
 symbolS *

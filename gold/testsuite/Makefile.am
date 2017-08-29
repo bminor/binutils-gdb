@@ -3829,6 +3829,17 @@ pr21430.stdout: pr21430
 
 MOSTLYCLEANFILES += pr21430
 
+check_SCRIPTS += aarch64_tlsdesc.sh
+check_DATA += aarch64_tlsdesc.stdout
+aarch64_tlsdesc.o: aarch64_tlsdesc.s
+	$(TEST_AS) -o $@ $<
+aarch64_tlsdesc: aarch64_tlsdesc.o $(srcdir)/aarch64_tlsdesc.t ../ld-new
+	../ld-new $< -shared -T $(srcdir)/aarch64_tlsdesc.t -o $@
+aarch64_tlsdesc.stdout: aarch64_tlsdesc
+	$(TEST_OBJDUMP) -dR -j.text -j.got.plt $< > $@
+
+MOSTLYCLEANFILES += aarch64_tlsdesc
+
 endif DEFAULT_TARGET_AARCH64
 
 if DEFAULT_TARGET_S390
