@@ -7260,6 +7260,29 @@ Denotes a portion of RAM located above @samp{.bss} section.
 The last two sections are used by gcc.
 @end table
 
+@table @option
+@cindex MSP430 Options
+@kindex --code-region
+@item --code-region=[either,lower,upper,none]
+This will transform .text* sections to [either,lower,upper].text* sections. The
+argument passed to GCC for -mcode-region is propagated to the linker
+using this option.
+
+@kindex --data-region
+@item --data-region=[either,lower,upper,none]
+This will transform .data*, .bss* and .rodata* sections to
+[either,lower,upper].[data,bss,rodata]* sections. The argument passed to GCC
+for -mdata-region is propagated to the linker using this option.
+
+@kindex --disable-sec-transformation
+@item --disable-sec-transformation
+Prevent the transformation of sections as specified by the @code{--code-region}
+and @code{--data-region} options.
+This is useful if you are compiling and linking using a single call to the GCC
+wrapper, and want to compile the source files using -m[code,data]-region but
+not transform the sections for prebuilt libraries and objects.
+@end table
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

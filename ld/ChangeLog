@@ -1,3 +1,36 @@
+2017-08-29  Jozef Lawrynowicz  <jozef.l@somniumtech.com>
+
+	* emultempl/msp430.em (change_output_section): New function.
+	(move_prefixed_section): New function.
+	(add_region_prefix): New function.
+	(msp430_elf_after_open): New function.
+	(gld${EMULATION_NAME}_add_options): Implement.
+	(gld${EMULATION_NAME}_list_options): Implement.
+	(gld${EMULATION_NAME}_handle_option): Implement.
+	* ld.texinfo: Document new options.
+	* testsuite/ld-msp430-elf/main-bss-lower.d: New.
+	* testsuite/ld-msp430-elf/main-bss-upper.d: New.
+	* testsuite/ld-msp430-elf/main-const-lower.d: New.
+	* testsuite/ld-msp430-elf/main-const-upper.d: New.
+	* testsuite/ld-msp430-elf/main-text-lower.d: New.
+	* testsuite/ld-msp430-elf/main-text-upper.d: New.
+	* testsuite/ld-msp430-elf/main-var-lower.d: New.
+	* testsuite/ld-msp430-elf/main-var-upper.d: New.
+	* testsuite/ld-msp430-elf/main-with-data-bss-unique-sec.s: New.
+	* testsuite/ld-msp430-elf/main-with-data-bss.s: New.
+	* testsuite/ld-msp430-elf/main-with-text-rodata-unique-sec.s: New.
+	* testsuite/ld-msp430-elf/main-with-text-rodata.s: New.
+	* testsuite/ld-msp430-elf/msp430-elf.exp: New.
+	* testsuite/ld-msp430-elf/msp430-no-lower.ld: New.
+	* testsuite/ld-msp430-elf/msp430.ld: New.
+	* emultempl/msp430.em (data_statement_size): New.
+	(eval_upper_either_sections): New.
+	(eval_lower_either_sections): New.
+	(intermediate_relax_sections): New.
+	(msp430_elf_after_allocation): New.
+	* emultempl/msp430.em (gld${EMULATION_NAME}_place_orphan): Always
+	place sections in the lower region.
+
 2017-08-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21997

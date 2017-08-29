@@ -24,4 +24,6 @@ if [expr [istarget "msp430-*-*"]]  then {
     run_dump_test "bad"
     run_dump_test "errata_warns"
     run_dump_test "errata_fixes"
+    run_dump_test "high-data-bss-sym" { { as "-mdata-region=upper" } }
+    run_dump_test "high-data-bss-sym" { { as "-mdata-region=either" } }
 }
