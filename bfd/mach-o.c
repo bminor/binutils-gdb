@@ -3749,6 +3749,9 @@ bfd_mach_o_read_symtab_strtab (bfd *abfd)
     }
   else
     {
+      /* See PR 21840 for a reproducer.  */
+      if ((sym->strsize + 1) == 0)
+	return FALSE;
       sym->strtab = bfd_alloc (abfd, sym->strsize + 1);
       if (sym->strtab == NULL)
         return FALSE;
