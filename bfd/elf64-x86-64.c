@@ -5778,7 +5778,7 @@ elf_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
     = (struct bfd_link_info *) inf;
 
   return elf_x86_64_finish_dynamic_symbol (info->output_bfd,
-					     info, h, NULL);
+					   info, h, NULL);
 }
 
 /* Finish up undefined weak symbol handling in PIE.  Fill its PLT entry
@@ -5797,7 +5797,7 @@ elf_x86_64_pie_finish_undefweak_symbol (struct bfd_hash_entry *bh,
     return TRUE;
 
   return elf_x86_64_finish_dynamic_symbol (info->output_bfd,
-					     info, h, NULL);
+					   info, h, NULL);
 }
 
 /* Used to decide how to sort relocs in an optimal manner for the
