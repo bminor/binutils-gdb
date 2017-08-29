@@ -1,4 +1,4 @@
-From 468eab8655ff24ff92e719692ce3acdcef297c96 Mon Sep 17 00:00:00 2001
+From f263b00f650c34e2ade31626f44ab1518834f702 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Thu, 3 Aug 2017 09:43:28 -0700
 Subject: [PATCH] x86: Add R_X86_64_GPOFF/R_386_GPOFF relocation
@@ -34,40 +34,32 @@ bfd/
 	* elf32-i386.c (elf_howto_table): Add R_386_GPOFF.
 	(R_386_ext2): Replace R_386_GOT32X with R_386_GPOFF.
 	(elf_i386_reloc_type_lookup): Support BFD_RELOC_GPREL32.
-	(elf_i386_link_hash_entry): Add has_gpoff_reloc.
-	(elf_i386_link_hash_table): Add gp.
-	(elf_i386_link_hash_newfunc): Initialize has_gpoff_reloc to 0.
-	(elf_i386_copy_indirect_symbol): Also copy has_gpoff_reloc.
 	(elf_i386_check_relocs): Add a fake local symbol and set
 	has_gpoff_reloc for GPOFF relocation.
 	(elf_i386_allocate_local_dynrelocs): Skip local symbol with
 	GPOFF relocation.
 	(elf_i386_finish_local_dynamic_symbol): Likewise.
 	(elf_i386_relocate_section): Process GPOFF relocation.
-	(elf_i386_link_check_relocs): Cache and hide __gp symbol.
-	(elf_i386_setup_gp): New function.
-	(elf_i386_setup_gp_from_local_symbol): Likewise.
-	(elf_i386_final_link): Likewise.
-	(bfd_elf32_bfd_final_link): New.
 	* elf64-x86-64.c (elf_howto_table): Add R_X86_64_GPOFF.
 	(R_X86_64_standard): Replace R_X86_64_REX_GOTPCRELX with
 	R_X86_64_GPOFF.
 	(x86_64_reloc_map): Add BFD_RELOC_GPREL32.
-	(elf_x86_64_link_hash_entry): Add has_gpoff_reloc.
-	(elf_x86_64_link_hash_table): Add gp.
-	(elf_x86_64_link_hash_newfunc): Initialize has_gpoff_reloc to 0.
-	(elf_x86_64_copy_indirect_symbol): Also copy has_gpoff_reloc.
 	(elf_x86_64_check_relocs): Add a fake local symbol and set
 	has_gpoff_reloc for GPOFF relocation.
 	(elf_x86_64_allocate_local_dynrelocs): Skip local symbol with
 	GPOFF relocation.
 	(elf_x86_64_finish_local_dynamic_symbol): Likewise.
 	(elf_x86_64_relocate_section): Process GPOFF relocation.
-	(elf_x86_64_link_check_relocs): Cache and hide __gp symbol.
-	(elf_x86_64_setup_gp): New function.
-	(elf_x86_64_setup_gp_from_local_symbol): Likewise.
-	(elf_x86_64_final_link): Likewise.
-	(bfd_elf64_bfd_final_link): New.
+	* elfxx-x86.c (_bfd_x86_elf_link_check_relocs): Cache and hide
+	__gp symbol.
+	(_bfd_x86_elf_copy_indirect_symbol): Also copy has_gpoff_reloc.
+	(elf_x86_setup_gp): New function.
+	(elf_x86_setup_gp_from_local_symbol): Likewise.
+	(_bfd_x86_elf_final_link): Likewise.
+	* elfxx-x86.h (elf_x86_link_hash_entry): Add has_gpoff_reloc.
+	(elf_x86_link_hash_table): Add gp.
+	(_bfd_x86_elf_final_link): New.
+	(bfd_elf64_bfd_final_link): Likewise.
 	(bfd_elf32_bfd_final_link): Likewise.
 
 gas/
@@ -145,68 +137,70 @@ ld/
 	* testsuite/ld-i386/i386.exp: Run R_386_GPOFF tests.
 	* testsuite/ld-x86-64/x86-64.exp: Run R_X86_64_GPOFF tests.
 ---
- bfd/elf32-i386.c                            | 198 ++++++++++++++++++++++++++-
- bfd/elf64-x86-64.c                          | 205 ++++++++++++++++++++++++++--
- gas/config/tc-i386.c                        |  41 +++++-
- gas/config/tc-i386.h                        |   6 +
- gas/testsuite/gas/i386/gpoff.d              |  11 ++
+ bfd/elf32-i386.c                            |  78 +++++++++++++++++--
+ bfd/elf64-x86-64.c                          |  74 ++++++++++++++++--
+ bfd/elfxx-x86.c                             | 115 ++++++++++++++++++++++++++++
+ bfd/elfxx-x86.h                             |  12 +++
+ gas/config/tc-i386.c                        |  41 +++++++++-
+ gas/config/tc-i386.h                        |   6 ++
+ gas/testsuite/gas/i386/gpoff.d              |  11 +++
  gas/testsuite/gas/i386/gpoff.s              |   4 +
- gas/testsuite/gas/i386/i386.exp             |   6 +
- gas/testsuite/gas/i386/inval-gpoff.l        |  18 +++
- gas/testsuite/gas/i386/inval-gpoff.s        |   5 +
- gas/testsuite/gas/i386/x86-64-gpoff.d       |  11 ++
+ gas/testsuite/gas/i386/i386.exp             |   6 ++
+ gas/testsuite/gas/i386/inval-gpoff.l        |  18 +++++
+ gas/testsuite/gas/i386/inval-gpoff.s        |   5 ++
+ gas/testsuite/gas/i386/x86-64-gpoff.d       |  11 +++
  gas/testsuite/gas/i386/x86-64-gpoff.s       |   4 +
- gas/testsuite/gas/i386/x86-64-inval-gpoff.l |  30 ++++
- gas/testsuite/gas/i386/x86-64-inval-gpoff.s |   7 +
+ gas/testsuite/gas/i386/x86-64-inval-gpoff.l |  30 ++++++++
+ gas/testsuite/gas/i386/x86-64-inval-gpoff.s |   7 ++
  include/elf/i386.h                          |   1 +
  include/elf/x86-64.h                        |   1 +
- ld/testsuite/ld-i386/gpoff-1a.S             |  20 +++
- ld/testsuite/ld-i386/gpoff-1b.c             |  78 +++++++++++
- ld/testsuite/ld-i386/gpoff-2a.S             |  19 +++
- ld/testsuite/ld-i386/gpoff-2b.c             |  77 +++++++++++
+ ld/testsuite/ld-i386/gpoff-1a.S             |  20 +++++
+ ld/testsuite/ld-i386/gpoff-1b.c             |  78 +++++++++++++++++++
+ ld/testsuite/ld-i386/gpoff-2a.S             |  19 +++++
+ ld/testsuite/ld-i386/gpoff-2b.c             |  77 +++++++++++++++++++
  ld/testsuite/ld-i386/gpoff-3.d              |   3 +
  ld/testsuite/ld-i386/gpoff-3.s              |   4 +
  ld/testsuite/ld-i386/gpoff-4.d              |   3 +
- ld/testsuite/ld-i386/gpoff-4.s              |  16 +++
+ ld/testsuite/ld-i386/gpoff-4.s              |  16 ++++
  ld/testsuite/ld-i386/gpoff-5.d              |   3 +
- ld/testsuite/ld-i386/gpoff-5.s              |  18 +++
- ld/testsuite/ld-i386/gpoff-6.d              |  12 ++
- ld/testsuite/ld-i386/gpoff-6.s              |   9 ++
- ld/testsuite/ld-i386/gpoff-7.d              |  16 +++
- ld/testsuite/ld-i386/gpoff-7.s              |   9 ++
- ld/testsuite/ld-i386/gpoff-8.s              |  10 ++
- ld/testsuite/ld-i386/gpoff-8.t              |  39 ++++++
- ld/testsuite/ld-i386/gpoff-8a.d             |  18 +++
- ld/testsuite/ld-i386/gpoff-8b.d             |  18 +++
- ld/testsuite/ld-i386/gpoff-8c.d             |  18 +++
- ld/testsuite/ld-i386/gpoff-8d.d             |  18 +++
- ld/testsuite/ld-i386/gpoff-8e.d             |  18 +++
- ld/testsuite/ld-i386/gpoff-8f.d             |  18 +++
- ld/testsuite/ld-i386/i386.exp               |  72 ++++++++++
- ld/testsuite/ld-x86-64/gpoff-1a.S           |  20 +++
- ld/testsuite/ld-x86-64/gpoff-1b.c           |  29 ++++
- ld/testsuite/ld-x86-64/gpoff-2a.S           |  19 +++
- ld/testsuite/ld-x86-64/gpoff-2b.c           |  27 ++++
+ ld/testsuite/ld-i386/gpoff-5.s              |  18 +++++
+ ld/testsuite/ld-i386/gpoff-6.d              |  12 +++
+ ld/testsuite/ld-i386/gpoff-6.s              |   9 +++
+ ld/testsuite/ld-i386/gpoff-7.d              |  16 ++++
+ ld/testsuite/ld-i386/gpoff-7.s              |   9 +++
+ ld/testsuite/ld-i386/gpoff-8.s              |  10 +++
+ ld/testsuite/ld-i386/gpoff-8.t              |  39 ++++++++++
+ ld/testsuite/ld-i386/gpoff-8a.d             |  18 +++++
+ ld/testsuite/ld-i386/gpoff-8b.d             |  18 +++++
+ ld/testsuite/ld-i386/gpoff-8c.d             |  18 +++++
+ ld/testsuite/ld-i386/gpoff-8d.d             |  18 +++++
+ ld/testsuite/ld-i386/gpoff-8e.d             |  18 +++++
+ ld/testsuite/ld-i386/gpoff-8f.d             |  18 +++++
+ ld/testsuite/ld-i386/i386.exp               |  72 +++++++++++++++++
+ ld/testsuite/ld-x86-64/gpoff-1a.S           |  20 +++++
+ ld/testsuite/ld-x86-64/gpoff-1b.c           |  29 +++++++
+ ld/testsuite/ld-x86-64/gpoff-2a.S           |  19 +++++
+ ld/testsuite/ld-x86-64/gpoff-2b.c           |  27 +++++++
  ld/testsuite/ld-x86-64/gpoff-3.d            |   3 +
  ld/testsuite/ld-x86-64/gpoff-3.s            |   4 +
  ld/testsuite/ld-x86-64/gpoff-4.d            |   3 +
- ld/testsuite/ld-x86-64/gpoff-4.s            |  16 +++
+ ld/testsuite/ld-x86-64/gpoff-4.s            |  16 ++++
  ld/testsuite/ld-x86-64/gpoff-5.d            |   3 +
- ld/testsuite/ld-x86-64/gpoff-5.s            |  18 +++
- ld/testsuite/ld-x86-64/gpoff-6.d            |  12 ++
- ld/testsuite/ld-x86-64/gpoff-6.s            |   9 ++
- ld/testsuite/ld-x86-64/gpoff-7.d            |  16 +++
- ld/testsuite/ld-x86-64/gpoff-7.s            |   9 ++
- ld/testsuite/ld-x86-64/gpoff-8.s            |  10 ++
- ld/testsuite/ld-x86-64/gpoff-8.t            |  39 ++++++
- ld/testsuite/ld-x86-64/gpoff-8a.d           |  18 +++
- ld/testsuite/ld-x86-64/gpoff-8b.d           |  18 +++
- ld/testsuite/ld-x86-64/gpoff-8c.d           |  18 +++
- ld/testsuite/ld-x86-64/gpoff-8d.d           |  18 +++
- ld/testsuite/ld-x86-64/gpoff-8e.d           |  18 +++
- ld/testsuite/ld-x86-64/gpoff-8f.d           |  18 +++
- ld/testsuite/ld-x86-64/x86-64.exp           |  72 ++++++++++
- 61 files changed, 1464 insertions(+), 17 deletions(-)
+ ld/testsuite/ld-x86-64/gpoff-5.s            |  18 +++++
+ ld/testsuite/ld-x86-64/gpoff-6.d            |  12 +++
+ ld/testsuite/ld-x86-64/gpoff-6.s            |   9 +++
+ ld/testsuite/ld-x86-64/gpoff-7.d            |  16 ++++
+ ld/testsuite/ld-x86-64/gpoff-7.s            |   9 +++
+ ld/testsuite/ld-x86-64/gpoff-8.s            |  10 +++
+ ld/testsuite/ld-x86-64/gpoff-8.t            |  39 ++++++++++
+ ld/testsuite/ld-x86-64/gpoff-8a.d           |  18 +++++
+ ld/testsuite/ld-x86-64/gpoff-8b.d           |  18 +++++
+ ld/testsuite/ld-x86-64/gpoff-8c.d           |  18 +++++
+ ld/testsuite/ld-x86-64/gpoff-8d.d           |  18 +++++
+ ld/testsuite/ld-x86-64/gpoff-8e.d           |  18 +++++
+ ld/testsuite/ld-x86-64/gpoff-8f.d           |  18 +++++
+ ld/testsuite/ld-x86-64/x86-64.exp           |  72 +++++++++++++++++
+ 63 files changed, 1341 insertions(+), 16 deletions(-)
  create mode 100644 gas/testsuite/gas/i386/gpoff.d
  create mode 100644 gas/testsuite/gas/i386/gpoff.s
  create mode 100644 gas/testsuite/gas/i386/inval-gpoff.l
@@ -261,10 +255,10 @@ ld/
  create mode 100644 ld/testsuite/ld-x86-64/gpoff-8f.d
 
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index 69b41a54f9..e76e048d70 100644
+index 4fcfff1bf2..823bd8a2f6 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
-@@ -150,9 +150,12 @@ static reloc_howto_type elf_howto_table[]=
+@@ -143,9 +143,12 @@ static reloc_howto_type elf_howto_table[]=
    HOWTO(R_386_GOT32X, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
  	bfd_elf_generic_reloc, "R_386_GOT32X",
  	TRUE, 0xffffffff, 0xffffffff, FALSE),
@@ -278,7 +272,7 @@ index 69b41a54f9..e76e048d70 100644
  #define R_386_vt_offset (R_386_GNU_VTINHERIT - R_386_ext2)
  
  /* GNU extension to record C++ vtable hierarchy.  */
-@@ -340,6 +343,10 @@ elf_i386_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+@@ -333,6 +336,10 @@ elf_i386_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
        TRACE ("BFD_RELOC_386_GOT32X");
        return &elf_howto_table[R_386_GOT32X - R_386_tls_offset];
  
@@ -289,42 +283,7 @@ index 69b41a54f9..e76e048d70 100644
      case BFD_RELOC_VTABLE_INHERIT:
        TRACE ("BFD_RELOC_VTABLE_INHERIT");
        return &elf_howto_table[R_386_GNU_VTINHERIT - R_386_vt_offset];
-@@ -998,6 +1005,9 @@ struct elf_i386_link_hash_entry
-   /* Symbol is referenced by R_386_GOTOFF relocation.  */
-   unsigned int gotoff_ref : 1;
- 
-+  /* TRUE if symbol has GPOFF relocations.  */
-+  unsigned int has_gpoff_reloc : 1;
-+
-   /* Symbol has GOT or PLT relocations.  */
-   unsigned int has_got_reloc : 1;
- 
-@@ -1077,6 +1087,8 @@ struct elf_i386_link_hash_table
-   asection *plt_got;
-   asection *plt_got_eh_frame;
- 
-+  struct elf_link_hash_entry *gp;
-+
-   /* Parameters describing PLT generation.  */
-   struct elf_i386_plt_layout plt;
- 
-@@ -1159,6 +1171,7 @@ elf_i386_link_hash_newfunc (struct bfd_hash_entry *entry,
-       eh->dyn_relocs = NULL;
-       eh->tls_type = GOT_UNKNOWN;
-       eh->gotoff_ref = 0;
-+      eh->has_gpoff_reloc = 0;
-       eh->has_got_reloc = 0;
-       eh->has_non_got_reloc = 0;
-       eh->no_finish_dynamic_symbol = 0;
-@@ -1345,6 +1358,7 @@ elf_i386_copy_indirect_symbol (struct bfd_link_info *info,
-      generate a R_386_COPY reloc.  */
-   edir->gotoff_ref |= eind->gotoff_ref;
- 
-+  edir->has_gpoff_reloc |= eind->has_gpoff_reloc;
-   edir->has_got_reloc |= eind->has_got_reloc;
-   edir->has_non_got_reloc |= eind->has_non_got_reloc;
- 
-@@ -2056,17 +2070,26 @@ elf_i386_check_relocs (bfd *abfd,
+@@ -1719,17 +1726,26 @@ elf_i386_check_relocs (bfd *abfd,
  	  if (isym == NULL)
  	    goto error_return;
  
@@ -335,7 +294,7 @@ index 69b41a54f9..e76e048d70 100644
 +	  if (r_type == R_386_GPOFF
 +	      || ELF32_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
  	    {
- 	      h = elf_i386_get_local_sym_hash (htab, abfd, rel, TRUE);
+ 	      h = _bfd_elf_x86_get_local_sym_hash (htab, abfd, rel, TRUE);
  	      if (h == NULL)
  		goto error_return;
  
@@ -357,7 +316,7 @@ index 69b41a54f9..e76e048d70 100644
  	      h->def_regular = 1;
  	      h->ref_regular = 1;
  	      h->forced_local = 1;
-@@ -2443,6 +2466,11 @@ do_size:
+@@ -2106,6 +2122,11 @@ do_size:
  	    goto error_return;
  	  break;
  
@@ -369,18 +328,18 @@ index 69b41a54f9..e76e048d70 100644
  	default:
  	  break;
  	}
-@@ -3146,6 +3174,10 @@ elf_i386_allocate_local_dynrelocs (void **slot, void *inf)
+@@ -2796,6 +2817,10 @@ elf_i386_allocate_local_dynrelocs (void **slot, void *inf)
    struct elf_link_hash_entry *h
      = (struct elf_link_hash_entry *) *slot;
  
 +  /* Skip local symbol with GPOFF relocation.  */
-+  if (((struct elf_i386_link_hash_entry *) h)->has_gpoff_reloc)
++  if (((struct elf_x86_link_hash_entry *) h)->has_gpoff_reloc)
 +    return TRUE;
 +
    if (h->type != STT_GNU_IFUNC
        || !h->def_regular
        || !h->ref_regular
-@@ -5344,6 +5376,41 @@ disallow_got32:
+@@ -4879,6 +4904,41 @@ disallow_got32:
  	    relocation = -elf_i386_tpoff (info, relocation);
  	  break;
  
@@ -422,156 +381,22 @@ index 69b41a54f9..e76e048d70 100644
  	default:
  	  break;
  	}
-@@ -5872,6 +5939,10 @@ elf_i386_finish_local_dynamic_symbol (void **slot, void *inf)
+@@ -5413,6 +5473,10 @@ elf_i386_finish_local_dynamic_symbol (void **slot, void *inf)
    struct bfd_link_info *info
      = (struct bfd_link_info *) inf;
  
 +  /* Skip local symbol with GPOFF relocation.  */
-+  if (((struct elf_i386_link_hash_entry *) h)->has_gpoff_reloc)
++  if (((struct elf_x86_link_hash_entry *) h)->has_gpoff_reloc)
 +    return TRUE;
 +
    return elf_i386_finish_dynamic_symbol (info->output_bfd, info,
  					 h, NULL);
  }
-@@ -7146,6 +7217,28 @@ elf_i386_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
- 				FALSE, FALSE, FALSE);
-       if (h != NULL)
- 	((struct elf_i386_link_hash_entry *) h)->tls_get_addr = 1;
-+
-+      /* Cache and hide __gp symbol.  */
-+      h = elf_link_hash_lookup (elf_hash_table (info), "__gp", FALSE,
-+				FALSE, FALSE);
-+      if (h != NULL)
-+	{
-+	  const struct elf_backend_data *bed;
-+	  struct elf_i386_link_hash_table *htab;
-+
-+	  htab = elf_i386_hash_table (info);
-+	  if (htab == NULL)
-+	    return FALSE;
-+
-+	  htab->gp = h;
-+	  /* It should be defined by elf_x86_64_setup_gp later.  */
-+	  if (h->root.type != bfd_link_hash_defined
-+	      && h->root.type != bfd_link_hash_defweak)
-+	    h->def_regular = 1;
-+	  h->other = STV_HIDDEN;
-+	  bed = get_elf_backend_data (info->output_bfd);
-+	  bed->elf_backend_hide_symbol (info, h, TRUE);
-+	}
-     }
- 
-   /* Invoke the regular ELF backend linker to do all the work.  */
-@@ -7167,6 +7260,96 @@ elf_i386_merge_symbol_attribute (struct elf_link_hash_entry *h,
-     }
- }
- 
-+/* Set up GP section from symbols with GPOFF relocations.  */
-+
-+static bfd_boolean
-+elf_i386_setup_gp (struct elf_link_hash_entry *h, void * inf)
-+{
-+  struct bfd_link_info *info;
-+  struct elf_i386_link_hash_table *htab;
-+  struct elf_i386_link_hash_entry *eh;
-+  struct elf_link_hash_entry *gp;
-+  asection *gpsection;
-+  bfd_size_type gpsection_size;
-+
-+  eh = (struct elf_i386_link_hash_entry *) h;
-+
-+  /* Skip if there is no GPOFF relocation or symbol is undefined.  */
-+  if (!eh->has_gpoff_reloc
-+      || (h->root.type != bfd_link_hash_defined
-+	  && h->root.type != bfd_link_hash_defweak))
-+    return TRUE;
-+
-+  info = (struct bfd_link_info *) inf;
-+  htab = elf_i386_hash_table (info);
-+  if (htab == NULL)
-+    return FALSE;
-+
-+  gpsection = h->root.u.def.section->output_section;
-+  gpsection_size = bfd_get_section_size (gpsection);
-+  gp = htab->gp;
-+  gp->root.type = bfd_link_hash_defined;
-+  gp->root.u.def.value = gpsection_size / 2;
-+  gp->root.u.def.section = gpsection;
-+  gp->root.linker_def = 1;
-+
-+  /* Found GP section.  No need to continue.  */
-+  return FALSE;
-+}
-+
-+/* Set up GP section from local symbols with GPOFF relocations.  */
-+
-+static bfd_boolean
-+elf_i386_setup_gp_from_local_symbol (void **slot, void *inf)
-+{
-+  struct elf_link_hash_entry *h
-+    = (struct elf_link_hash_entry *) *slot;
-+  struct bfd_link_info *info
-+    = (struct bfd_link_info *) inf;
-+
-+  return elf_i386_setup_gp (h, info);
-+}
-+
-+/* Set up GP section for __gp symbol.  */
-+
-+static bfd_boolean
-+elf_i386_final_link (bfd *abfd, struct bfd_link_info *info)
-+{
-+  if (!bfd_link_relocatable (info))
-+    {
-+      struct elf_link_hash_entry *gp;
-+      struct elf_i386_link_hash_table *htab;
-+
-+      htab = elf_i386_hash_table (info);
-+      if (htab == NULL)
-+	return FALSE;
-+
-+      gp = htab->gp;
-+      if (gp != NULL
-+	  && gp->root.type != bfd_link_hash_defined
-+	  && gp->root.type != bfd_link_hash_defweak)
-+	{
-+	  /* Set up __gp from a symbol with GPOFF relocations.  */
-+	  elf_link_hash_traverse (&htab->elf,
-+				  elf_i386_setup_gp,
-+				  info);
-+
-+	  if (gp->root.type != bfd_link_hash_defined
-+	      && gp->root.type != bfd_link_hash_defweak)
-+	    {
-+	      /* Set up __gp from a local symbol with GPOFF
-+		 relocations.  */
-+	      htab_traverse (htab->loc_hash_table,
-+			     elf_i386_setup_gp_from_local_symbol,
-+			     info);
-+	    }
-+	}
-+    }
-+
-+  /* Invoke the regular ELF backend linker to do all the work.  */
-+  return bfd_elf_final_link (abfd, info);
-+}
-+
- #define TARGET_LITTLE_SYM		i386_elf32_vec
- #define TARGET_LITTLE_NAME		"elf32-i386"
- #define ELF_ARCH			bfd_arch_i386
-@@ -7198,6 +7381,7 @@ elf_i386_merge_symbol_attribute (struct elf_link_hash_entry *h,
- #define bfd_elf32_bfd_reloc_name_lookup	      elf_i386_reloc_name_lookup
- #define bfd_elf32_get_synthetic_symtab	      elf_i386_get_synthetic_symtab
- #define bfd_elf32_bfd_link_check_relocs	      elf_i386_link_check_relocs
-+#define bfd_elf32_bfd_final_link	      elf_i386_final_link
- 
- #define elf_backend_adjust_dynamic_symbol     elf_i386_adjust_dynamic_symbol
- #define elf_backend_relocs_compatible	      _bfd_elf_relocs_compatible
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index 6e4c067732..68155b200e 100644
+index be8bf569bf..7876de2f45 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
-@@ -183,12 +183,15 @@ static reloc_howto_type x86_64_elf_howto_table[] =
+@@ -176,12 +176,15 @@ static reloc_howto_type x86_64_elf_howto_table[] =
    HOWTO(R_X86_64_REX_GOTPCRELX, 0, 2, 32, TRUE, 0, complain_overflow_signed,
  	bfd_elf_generic_reloc, "R_X86_64_REX_GOTPCRELX", FALSE, 0xffffffff,
  	0xffffffff, TRUE),
@@ -588,7 +413,7 @@ index 6e4c067732..68155b200e 100644
  #define R_X86_64_vt_offset (R_X86_64_GNU_VTINHERIT - R_X86_64_standard)
  
  /* GNU extension to record C++ vtable hierarchy.  */
-@@ -264,6 +267,7 @@ static const struct elf_reloc_map x86_64_reloc_map[] =
+@@ -257,6 +260,7 @@ static const struct elf_reloc_map x86_64_reloc_map[] =
    { BFD_RELOC_X86_64_PLT32_BND,	R_X86_64_PLT32_BND, },
    { BFD_RELOC_X86_64_GOTPCRELX, R_X86_64_GOTPCRELX, },
    { BFD_RELOC_X86_64_REX_GOTPCRELX, R_X86_64_REX_GOTPCRELX, },
@@ -596,42 +421,7 @@ index 6e4c067732..68155b200e 100644
    { BFD_RELOC_VTABLE_INHERIT,	R_X86_64_GNU_VTINHERIT, },
    { BFD_RELOC_VTABLE_ENTRY,	R_X86_64_GNU_VTENTRY, },
  };
-@@ -1103,6 +1107,9 @@ struct elf_x86_64_link_hash_entry
-      real definition and check it when allowing copy reloc in PIE.  */
-   unsigned int needs_copy : 1;
- 
-+  /* TRUE if symbol has GPOFF relocations.  */
-+  unsigned int has_gpoff_reloc : 1;
-+
-   /* TRUE if symbol has GOT or PLT relocations.  */
-   unsigned int has_got_reloc : 1;
- 
-@@ -1183,6 +1190,8 @@ struct elf_x86_64_link_hash_table
-   asection *plt_got;
-   asection *plt_got_eh_frame;
- 
-+  struct elf_link_hash_entry *gp;
-+
-   /* Parameters describing PLT generation, lazy or non-lazy.  */
-   struct elf_x86_64_plt_layout plt;
- 
-@@ -1273,6 +1282,7 @@ elf_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
-       eh->dyn_relocs = NULL;
-       eh->tls_type = GOT_UNKNOWN;
-       eh->needs_copy = 0;
-+      eh->has_gpoff_reloc = 0;
-       eh->has_got_reloc = 0;
-       eh->has_non_got_reloc = 0;
-       eh->no_finish_dynamic_symbol = 0;
-@@ -1435,6 +1445,7 @@ elf_x86_64_copy_indirect_symbol (struct bfd_link_info *info,
-   edir = (struct elf_x86_64_link_hash_entry *) dir;
-   eind = (struct elf_x86_64_link_hash_entry *) ind;
- 
-+  edir->has_gpoff_reloc |= eind->has_gpoff_reloc;
-   edir->has_got_reloc |= eind->has_got_reloc;
-   edir->has_non_got_reloc |= eind->has_non_got_reloc;
- 
-@@ -2458,18 +2469,26 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+@@ -2101,18 +2105,26 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
  	  if (isym == NULL)
  	    goto error_return;
  
@@ -642,8 +432,8 @@ index 6e4c067732..68155b200e 100644
 +	  if (r_type == R_X86_64_GPOFF
 +	      || ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
  	    {
- 	      h = elf_x86_64_get_local_sym_hash (htab, abfd, rel,
- 						 TRUE);
+ 	      h = _bfd_elf_x86_get_local_sym_hash (htab, abfd, rel,
+ 						   TRUE);
  	      if (h == NULL)
  		goto error_return;
  
@@ -664,7 +454,7 @@ index 6e4c067732..68155b200e 100644
  	      h->def_regular = 1;
  	      h->ref_regular = 1;
  	      h->forced_local = 1;
-@@ -2896,6 +2915,11 @@ do_size:
+@@ -2539,6 +2551,11 @@ do_size:
  	    goto error_return;
  	  break;
  
@@ -676,19 +466,19 @@ index 6e4c067732..68155b200e 100644
  	default:
  	  break;
  	}
-@@ -3556,6 +3580,10 @@ elf_x86_64_allocate_local_dynrelocs (void **slot, void *inf)
+@@ -3186,6 +3203,10 @@ elf_x86_64_allocate_local_dynrelocs (void **slot, void *inf)
    struct elf_link_hash_entry *h
      = (struct elf_link_hash_entry *) *slot;
  
 +  /* Skip local symbol with GPOFF relocation.  */
-+  if (((struct elf_x86_64_link_hash_entry *) h)->has_gpoff_reloc)
++  if (((struct elf_x86_link_hash_entry *) h)->has_gpoff_reloc)
 +    return TRUE;
 +
    if (h->type != STT_GNU_IFUNC
        || !h->def_regular
        || !h->ref_regular
-@@ -5730,6 +5758,41 @@ direct:
- 	  relocation -= elf_x86_64_dtpoff_base (info);
+@@ -5246,6 +5267,41 @@ direct:
+ 	  relocation -= _bfd_x86_elf_dtpoff_base (info);
  	  break;
  
 +	case R_X86_64_GPOFF:
@@ -729,65 +519,70 @@ index 6e4c067732..68155b200e 100644
  	default:
  	  break;
  	}
-@@ -6253,8 +6316,12 @@ elf_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
+@@ -5777,6 +5833,10 @@ elf_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
    struct bfd_link_info *info
      = (struct bfd_link_info *) inf;
  
 +  /* Skip local symbol with GPOFF relocation.  */
-+  if (((struct elf_x86_64_link_hash_entry *) h)->has_gpoff_reloc)
++  if (((struct elf_x86_link_hash_entry *) h)->has_gpoff_reloc)
 +    return TRUE;
 +
    return elf_x86_64_finish_dynamic_symbol (info->output_bfd,
--					     info, h, NULL);
-+					   info, h, NULL);
+ 					   info, h, NULL);
  }
- 
- /* Finish up undefined weak symbol handling in PIE.  Fill its PLT entry
-@@ -7752,12 +7819,131 @@ elf_x86_64_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
- 				FALSE, FALSE, FALSE);
-       if (h != NULL)
- 	((struct elf_x86_64_link_hash_entry *) h)->tls_get_addr = 1;
+diff --git a/bfd/elfxx-x86.c b/bfd/elfxx-x86.c
+index 1c8380ddf0..b490055665 100644
+--- a/bfd/elfxx-x86.c
++++ b/bfd/elfxx-x86.c
+@@ -263,6 +263,21 @@ _bfd_x86_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+ 				    FALSE, FALSE, FALSE);
+ 	  if (h != NULL)
+ 	    ((struct elf_x86_link_hash_entry *) h)->tls_get_addr = 1;
 +
-+      /* Cache and hide __gp symbol.  */
-+      h = elf_link_hash_lookup (elf_hash_table (info), "__gp", FALSE,
-+				FALSE, FALSE);
-+      if (h != NULL)
-+	{
-+	  const struct elf_backend_data *bed;
-+	  struct elf_x86_64_link_hash_table *htab;
-+
-+	  htab = elf_x86_64_hash_table (info);
-+	  if (htab == NULL)
-+	    return FALSE;
-+
-+	  htab->gp = h;
-+	  /* It should be defined by elf_x86_64_setup_gp later.  */
-+	  if (h->root.type != bfd_link_hash_defined
-+	      && h->root.type != bfd_link_hash_defweak)
-+	    h->def_regular = 1;
-+	  h->other = STV_HIDDEN;
-+	  bed = get_elf_backend_data (info->output_bfd);
-+	  bed->elf_backend_hide_symbol (info, h, TRUE);
-+	}
++	  /* Cache and hide __gp symbol.  */
++	  h = elf_link_hash_lookup (elf_hash_table (info), "__gp", FALSE,
++				    FALSE, FALSE);
++	  if (h != NULL)
++	    {
++	      htab->gp = h;
++	      /* It should be defined by elf_x86_64_setup_gp later.  */
++	      if (h->root.type != bfd_link_hash_defined
++		  && h->root.type != bfd_link_hash_defweak)
++		h->def_regular = 1;
++	      h->other = STV_HIDDEN;
++	      bed = get_elf_backend_data (info->output_bfd);
++	      bed->elf_backend_hide_symbol (info, h, TRUE);
++	    }
+ 	}
      }
  
-   /* Invoke the regular ELF backend linker to do all the work.  */
-   return _bfd_elf_link_check_relocs (abfd, info);
- }
+@@ -383,6 +398,7 @@ _bfd_x86_elf_copy_indirect_symbol (struct bfd_link_info *info,
+      generate a R_386_COPY reloc.  */
+   edir->gotoff_ref |= eind->gotoff_ref;
  
++  edir->has_gpoff_reloc |= eind->has_gpoff_reloc;
+   edir->has_got_reloc |= eind->has_got_reloc;
+   edir->has_non_got_reloc |= eind->has_non_got_reloc;
+ 
+@@ -578,3 +594,102 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
+ 
+   return updated;
+ }
++
 +/* Set up GP section from symbols with GPOFF relocations.  */
 +
 +static bfd_boolean
-+elf_x86_64_setup_gp (struct elf_link_hash_entry *h, void * inf)
++elf_x86_setup_gp (struct elf_link_hash_entry *h, void * inf)
 +{
 +  struct bfd_link_info *info;
-+  struct elf_x86_64_link_hash_table *htab;
-+  struct elf_x86_64_link_hash_entry *eh;
++  struct elf_x86_link_hash_table *htab;
++  struct elf_x86_link_hash_entry *eh;
 +  struct elf_link_hash_entry *gp;
 +  asection *gpsection;
 +  bfd_size_type gpsection_size;
++  const struct elf_backend_data *bed;
 +
-+  eh = (struct elf_x86_64_link_hash_entry *) h;
++  eh = (struct elf_x86_link_hash_entry *) h;
 +
 +  /* Skip if there is no GPOFF relocation or symbol is undefined.  */
 +  if (!eh->has_gpoff_reloc
@@ -796,13 +591,15 @@ index 6e4c067732..68155b200e 100644
 +    return TRUE;
 +
 +  info = (struct bfd_link_info *) inf;
-+  htab = elf_x86_64_hash_table (info);
++  bed = get_elf_backend_data (info->output_bfd);
++  htab = elf_x86_hash_table (info, bed->target_id);
 +  if (htab == NULL)
 +    return FALSE;
 +
 +  gpsection = h->root.u.def.section->output_section;
 +  gpsection_size = bfd_get_section_size (gpsection);
-+  if (gpsection_size > 0xffffffff)
++
++  if (bed->target_id == X86_64_ELF_DATA && gpsection_size > 0xffffffff)
 +    {
 +      info->callbacks->einfo (_("%F%B: GP section `%A' size overflow\n"),
 +			      info->output_bfd, gpsection);
@@ -822,27 +619,28 @@ index 6e4c067732..68155b200e 100644
 +/* Set up GP section from local symbols with GPOFF relocations.  */
 +
 +static bfd_boolean
-+elf_x86_64_setup_gp_from_local_symbol (void **slot, void *inf)
++elf_x86_setup_gp_from_local_symbol (void **slot, void *inf)
 +{
 +  struct elf_link_hash_entry *h
 +    = (struct elf_link_hash_entry *) *slot;
 +  struct bfd_link_info *info
 +    = (struct bfd_link_info *) inf;
 +
-+  return elf_x86_64_setup_gp (h, info);
++  return elf_x86_setup_gp (h, info);
 +}
 +
 +/* Set up GP section for __gp symbol.  */
 +
-+static bfd_boolean
-+elf_x86_64_final_link (bfd *abfd, struct bfd_link_info *info)
++bfd_boolean
++_bfd_x86_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 +{
 +  if (!bfd_link_relocatable (info))
 +    {
 +      struct elf_link_hash_entry *gp;
-+      struct elf_x86_64_link_hash_table *htab;
++      struct elf_x86_link_hash_table *htab;
++      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 +
-+      htab = elf_x86_64_hash_table (info);
++      htab = elf_x86_hash_table (info, bed->target_id);
 +      if (htab == NULL)
 +	return FALSE;
 +
@@ -852,9 +650,7 @@ index 6e4c067732..68155b200e 100644
 +	  && gp->root.type != bfd_link_hash_defweak)
 +	{
 +	  /* Set up __gp from a symbol with GPOFF relocations.  */
-+	  elf_link_hash_traverse (&htab->elf,
-+				  elf_x86_64_setup_gp,
-+				  info);
++	  elf_link_hash_traverse (&htab->elf, elf_x86_setup_gp, info);
 +
 +	  if (gp->root.type != bfd_link_hash_defined
 +	      && gp->root.type != bfd_link_hash_defweak)
@@ -862,7 +658,7 @@ index 6e4c067732..68155b200e 100644
 +	      /* Set up __gp from a local symbol with GPOFF
 +		 relocations.  */
 +	      htab_traverse (htab->loc_hash_table,
-+			     elf_x86_64_setup_gp_from_local_symbol,
++			     elf_x86_setup_gp_from_local_symbol,
 +			     info);
 +	    }
 +	}
@@ -871,27 +667,47 @@ index 6e4c067732..68155b200e 100644
 +  /* Invoke the regular ELF backend linker to do all the work.  */
 +  return bfd_elf_final_link (abfd, info);
 +}
+diff --git a/bfd/elfxx-x86.h b/bfd/elfxx-x86.h
+index 480189bfd4..5eaa44f25b 100644
+--- a/bfd/elfxx-x86.h
++++ b/bfd/elfxx-x86.h
+@@ -75,6 +75,9 @@ struct elf_x86_link_hash_entry
+ 
+   unsigned char tls_type;
+ 
++  /* TRUE if symbol has GPOFF relocations.  */
++  unsigned int has_gpoff_reloc : 1;
 +
- static const struct bfd_elf_special_section
- elf_x86_64_special_sections[]=
- {
-@@ -7823,6 +8009,7 @@ elf_x86_64_special_sections[]=
- #define bfd_elf64_mkobject		    elf_x86_64_mkobject
- #define bfd_elf64_get_synthetic_symtab	    elf_x86_64_get_synthetic_symtab
- #define bfd_elf64_bfd_link_check_relocs	    elf_x86_64_link_check_relocs
-+#define bfd_elf64_bfd_final_link	    elf_x86_64_final_link
+   /* TRUE if symbol has GOT or PLT relocations.  */
+   unsigned int has_got_reloc : 1;
  
- #define elf_backend_section_from_shdr \
- 	elf_x86_64_section_from_shdr
-@@ -8126,6 +8313,8 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
-   elf_x86_64_get_synthetic_symtab
+@@ -140,6 +143,8 @@ struct elf_x86_link_hash_table
+   asection *plt_got;
+   asection *plt_got_eh_frame;
+ 
++  struct elf_link_hash_entry *gp;
++
+   union
+   {
+     bfd_signed_vma refcount;
+@@ -260,10 +265,17 @@ extern enum elf_property_kind _bfd_x86_elf_parse_gnu_properties
+ extern bfd_boolean _bfd_x86_elf_merge_gnu_properties
+   (struct bfd_link_info *, bfd *, elf_property *, elf_property *);
+ 
++extern bfd_boolean _bfd_x86_elf_final_link
++  (bfd *, struct bfd_link_info *);
++
+ #define bfd_elf64_bfd_link_check_relocs	\
+   _bfd_x86_elf_link_check_relocs
  #define bfd_elf32_bfd_link_check_relocs \
-   elf_x86_64_link_check_relocs
+   _bfd_x86_elf_link_check_relocs
++#define bfd_elf64_bfd_final_link \
++  _bfd_x86_elf_final_link
 +#define bfd_elf32_bfd_final_link \
-+  elf_x86_64_final_link
++  _bfd_x86_elf_final_link
  
- #undef elf_backend_object_p
- #define elf_backend_object_p \
+ #define elf_backend_always_size_sections \
+   _bfd_x86_elf_always_size_sections
 diff --git a/gas/config/tc-i386.c b/gas/config/tc-i386.c
 index 456be9e07c..b91ad5611c 100644
 --- a/gas/config/tc-i386.c
