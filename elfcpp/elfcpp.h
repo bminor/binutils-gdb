@@ -768,6 +768,9 @@ enum DT
   // Specify the value of _GLOBAL_OFFSET_TABLE_.
   DT_PPC_GOT = 0x70000000,
 
+  // Specify whether various optimisations are possible.
+  DT_PPC_OPT = 0x70000001,
+
   // Specify the start of the .glink section.
   DT_PPC64_GLINK = 0x70000000,
 

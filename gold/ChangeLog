@@ -1,5 +1,46 @@
 2017-08-29  Alan Modra  <amodra@gmail.com>
 
+	* options.h (tls_get_addr_optimize): New option.
+	* symtab.h (Symbol::clear_in_reg, clone): New functions.
+	(Sized_symbol::clone): New function.
+	(Symbol_table::clone): New function.
+	* resolve.cc (Symbol::clone, Sized_symbol::clone): New functions.
+	* powerpc.cc (Target_powerpc::has_tls_get_addr_opt_,
+	tls_get_addr_, tls_get_addr_opt_): New vars.
+	(Target_powerpc::tls_get_addr_opt, tls_get_addr,
+	is_tls_get_addr_opt, replace_tls_get_addr,
+	set_has_tls_get_addr_opt, stk_linker): New functions.
+	(Target_powerpc::Track_tls::maybe_skip_tls_get_addr_call): Add
+	target param.  Update callers.  Compare symbols rather than names.
+	(Target_powerpc::do_define_standard_symbols): Init tls_get_addr_
+	and tls_get_addr_opt_.
+	(Target_powerpc::Branch_info::mark_pltcall): Translate tls_get_addr
+	sym to tls_get_addr_opt.
+	(Target_powerpc::Branch_info::make_stub): Likewise.
+	(Stub_table::define_stub_syms): Likewise.
+	(Target_powerpc::Scan::global): Likewise.
+	(Target_powerpc::Relocate::relocate): Likewise.
+	(add_3_12_2, add_3_12_13, bctrl, beqlr, cmpdi_11_0, cmpwi_11_0,
+	ld_11_1, ld_11_3, ld_12_3, lwz_11_3, lwz_12_3, mr_0_3, mr_3_0,
+	mtlr_11, std_11_1): New constants.
+	(Stub_table::eh_frame_added_): Delete.
+	(Stub_table::tls_get_addr_opt_bctrl_, plt_fde_len_, plt_fde_): New vars.
+	(Stub_table::init_plt_fde): New functions.
+	(Stub_table::add_eh_frame, replace_eh_frame): Move definition out
+	of line.  Init and use plt_fde_.
+	(Stub_table::plt_call_size): Return size for tls_get_addr stub.
+	Extract alignment code to..
+	(Stub_table::plt_call_align): ..this new function.  Adjust all callers.
+	(Stub_table::add_plt_call_entry): Set has_tls_get_addr_opt and
+	tls_get_addr_opt_bctrl, and align after that.
+	(Stub_table::do_write): Write out tls_get_addr stub.
+	(Target_powerpc::do_finalize_sections): Emit DT_PPC_OPT
+	PPC_OPT_TLS/PPC64_OPT_TLS bit.
+	(Target_powerpc::Relocate::relocate): Don't check for or modify
+	nop following bl for tls_get_addr stub.
+
+2017-08-29  Alan Modra  <amodra@gmail.com>
+
 	* symtab.h (Symbol): Split u_ into u1_ and u2_.  Adjust accessors
 	to suit.  Move plt_offset_ before got_offsets_.
 	* symtab.cc (Symbol::init_fields): Adjust for union change.

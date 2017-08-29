@@ -329,6 +329,11 @@ class Symbol
   set_in_reg()
   { this->in_reg_ = true; }
 
+  // Forget this symbol was seen in a regular object.
+  void
+  clear_in_reg()
+  { this->in_reg_ = false; }
+
   // Return whether this symbol has been seen in a dynamic object.
   bool
   in_dyn() const
@@ -893,6 +898,13 @@ class Symbol
   set_non_zero_localentry()
   { this->non_zero_localentry_ = true; }
 
+  // Completely override existing symbol.  Everything bar name_,
+  // version_, and is_forced_local_ flag are copied.  version_ is
+  // cleared if from->version_ is clear.  Returns true if this symbol
+  // should be forced local.
+  bool
+  clone(const Symbol* from);
+
  protected:
   // Instances of this class should always be created at a specific
   // size.
@@ -1181,6 +1193,13 @@ class Sized_symbol : public Symbol
   // file.
   void
   allocate_common(Output_data*, Value_type value);
+
+  // Completely override existing symbol.  Everything bar name_,
+  // version_, and is_forced_local_ flag are copied.  version_ is
+  // cleared if from->version_ is clear.  Returns true if this symbol
+  // should be forced local.
+  bool
+  clone(const Sized_symbol<size>* from);
 
  private:
   Sized_symbol(const Sized_symbol&);
@@ -1686,6 +1705,15 @@ class Symbol_table
   const Version_script_info&
   version_script() const
   { return version_script_; }
+
+  // Completely override existing symbol.
+  template<int size>
+  void
+  clone(Sized_symbol<size>* to, const Sized_symbol<size>* from)
+  {
+    if (to->clone(from))
+      this->force_local(to);
+  }
 
  private:
   Symbol_table(const Symbol_table&);
