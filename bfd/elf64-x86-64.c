@@ -6722,16 +6722,6 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
   if (relsize <= 0)
     return -1;
 
-  dynrelbuf = (arelent **) bfd_malloc (relsize);
-  if (dynrelbuf == NULL)
-    return -1;
-
-  dynrelcount = bfd_canonicalize_dynamic_reloc (abfd, dynrelbuf,
-						dynsyms);
-
-  /* Sort the relocs by address.  */
-  qsort (dynrelbuf, dynrelcount, sizeof (arelent *), compare_relocs);
-
   if (get_elf_x86_64_backend_data (abfd)->os == is_normal)
     {
       lazy_plt = &elf_x86_64_lazy_plt;
@@ -6842,7 +6832,10 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 	}
 
       if (plt_type == plt_unknown)
-	continue;
+	{
+	  free (plt_contents);
+	  continue;
+	}
 
       plts[j].sec = plt;
       plts[j].type = plt_type;
@@ -6878,6 +6871,16 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 
   if (count == 0)
     return -1;
+
+  dynrelbuf = (arelent **) bfd_malloc (relsize);
+  if (dynrelbuf == NULL)
+    return -1;
+
+  dynrelcount = bfd_canonicalize_dynamic_reloc (abfd, dynrelbuf,
+						dynsyms);
+
+  /* Sort the relocs by address.  */
+  qsort (dynrelbuf, dynrelcount, sizeof (arelent *), compare_relocs);
 
   size = count * sizeof (asymbol);
 
