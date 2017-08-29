@@ -1,3 +1,17 @@
+2017-08-29  Alan Modra  <amodra@gmail.com>
+
+	* symtab.h (Symbol): Split u_ into u1_ and u2_.  Adjust accessors
+	to suit.  Move plt_offset_ before got_offsets_.
+	* symtab.cc (Symbol::init_fields): Adjust for union change.
+	(Symbol::init_base_output_data): Likewise.
+	(Symbol::init_base_output_segment): Likewise.
+	(Symbol::allocate_base_common): Likewise.
+	(Symbol::output_section): Likewise.
+	(Symbol::set_output_section): Likewise.
+	(Symbol::set_output_segment): Likewise.
+	* resolve.cc (Symbol::override_base): Likewise.
+	(Symbol::override_base_with_special): Likewise.
+
 2017-08-28  Igor Kudrin  <ikudrin@accesssoftek.com>
 
 	* aarch64.cc (Target_aarch64::Relocate::relocate_tls):

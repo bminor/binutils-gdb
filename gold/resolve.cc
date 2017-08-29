@@ -92,9 +92,9 @@ Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
 		      Object* object, const char* version)
 {
   gold_assert(this->source_ == FROM_OBJECT);
-  this->u_.from_object.object = object;
+  this->u1_.object = object;
   this->override_version(version);
-  this->u_.from_object.shndx = st_shndx;
+  this->u2_.shndx = st_shndx;
   this->is_ordinary_shndx_ = is_ordinary;
   // Don't override st_type from plugin placeholder symbols.
   if (object->pluginobj() == NULL)
@@ -952,13 +952,10 @@ Symbol::override_base_with_special(const Symbol* from)
   switch (from->source_)
     {
     case FROM_OBJECT:
-      this->u_.from_object = from->u_.from_object;
-      break;
     case IN_OUTPUT_DATA:
-      this->u_.in_output_data = from->u_.in_output_data;
-      break;
     case IN_OUTPUT_SEGMENT:
-      this->u_.in_output_segment = from->u_.in_output_segment;
+      this->u1_ = from->u1_;
+      this->u2_ = from->u2_;
       break;
     case IS_CONSTANT:
     case IS_UNDEFINED:
