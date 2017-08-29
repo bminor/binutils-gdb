@@ -6896,14 +6896,7 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 
   s = *ret = (asymbol *) bfd_zmalloc (size);
   if (s == NULL)
-    {
-bad_return:
-      for (j = 0; plts[j].name != NULL; j++)
-	if (plts[j].contents != NULL)
-	  free (plts[j].contents);
-      free (dynrelbuf);
-      return -1;
-    }
+    goto bad_return;
 
   /* Check for each PLT section.  */
   names = (char *) (s + count);
@@ -7014,9 +7007,12 @@ bad_return:
 
   /* PLT entries with R_X86_64_TLSDESC relocations are skipped.  */
   if (n == 0)
-    goto bad_return;
-
-  count = n;
+    {
+bad_return:
+      count = -1;
+    }
+  else
+    count = n;
 
   for (j = 0; plts[j].name != NULL; j++)
     if (plts[j].contents != NULL)
