@@ -5433,7 +5433,7 @@ elf_i386_pie_finish_undefweak_symbol (struct bfd_hash_entry *bh,
     return TRUE;
 
   return elf_i386_finish_dynamic_symbol (info->output_bfd,
-					     info, h, NULL);
+					 info, h, NULL);
 }
 
 /* Used to decide how to sort relocs in an optimal manner for the
