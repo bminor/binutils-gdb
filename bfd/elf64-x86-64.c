@@ -1072,12 +1072,6 @@ struct elf_x86_64_link_hash_table
   const struct elf_x86_64_non_lazy_plt_layout *non_lazy_plt;
 };
 
-#define elf_x86_64_next_tls_desc_index(htab) \
-  ((struct elf_x86_64_link_hash_table *) (htab))->next_tls_desc_index
-
-#define elf_x86_64_srelplt2(htab) \
-  ((struct elf_x86_64_link_hash_table *) (htab))->srelplt2
-
 #define elf_x86_64_plt(htab) \
   ((struct elf_x86_64_link_hash_table *) (htab))->plt
 

@@ -1,3 +1,8 @@
+2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_next_tls_desc_index): Removed.
+	(elf_x86_64_srelplt2): Likewise.
+
 2017-08-30  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct ppc_link_hash_table): Add do_tls_opt.
