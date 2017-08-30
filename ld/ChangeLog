@@ -1,3 +1,13 @@
+2017-08-30  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/tls.d: Update.
+	* testsuite/ld-powerpc/tlsexe.d: Update.
+	* testsuite/ld-powerpc/tlsexetoc.d: Update.
+	* testsuite/ld-powerpc/tlsld.d: Update.
+	* testsuite/ld-powerpc/tlsmark.d: Update.
+	* testsuite/ld-powerpc/tlsopt4.d: Update.
+	* testsuite/ld-powerpc/tlstoc.d: Update.
+
 2017-08-30  Hans-Peter Nilsson  <hp@axis.com>
 
 	* testsuite/ld-cris/dso-pltdis1.d: Run ld with --hash-style=sysv.

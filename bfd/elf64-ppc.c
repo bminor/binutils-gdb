@@ -13916,7 +13916,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_GOT_TLSLD16_LO:
 	  if (tls_mask != 0 && (tls_mask & TLS_LD) == 0)
 	    {
-	      unsigned int insn1, insn2, insn3;
+	      unsigned int insn1, insn2;
 	      bfd_vma offset;
 
 	    tls_ldgd_opt:
@@ -13995,18 +13995,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      bfd_put_32 (input_bfd, insn1,
 			  contents + rel->r_offset - d_offset);
 	      if (offset != (bfd_vma) -1)
-		{
-		  insn3 = bfd_get_32 (input_bfd,
-				      contents + offset + 4);
-		  if (insn3 == NOP
-		      || insn3 == CROR_151515 || insn3 == CROR_313131)
-		    {
-		      rel[1].r_offset += 4;
-		      bfd_put_32 (input_bfd, insn2, contents + offset + 4);
-		      insn2 = NOP;
-		    }
-		  bfd_put_32 (input_bfd, insn2, contents + offset);
-		}
+		bfd_put_32 (input_bfd, insn2, contents + offset);
 	      if ((tls_mask & tls_gd) == 0
 		  && (tls_gd == 0 || toc_symndx != 0))
 		{
@@ -14020,7 +14009,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_TLSGD:
 	  if (tls_mask != 0 && (tls_mask & TLS_GD) == 0)
 	    {
-	      unsigned int insn2, insn3;
+	      unsigned int insn2;
 	      bfd_vma offset = rel->r_offset;
 
 	      if ((tls_mask & TLS_TPRELGD) != 0)
@@ -14045,15 +14034,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      /* Zap the reloc on the _tls_get_addr call too.  */
 	      BFD_ASSERT (offset == rel[1].r_offset);
 	      rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
-	      insn3 = bfd_get_32 (input_bfd,
-				  contents + offset + 4);
-	      if (insn3 == NOP
-		  || insn3 == CROR_151515 || insn3 == CROR_313131)
-		{
-		  rel->r_offset += 4;
-		  bfd_put_32 (input_bfd, insn2, contents + offset + 4);
-		  insn2 = NOP;
-		}
 	      bfd_put_32 (input_bfd, insn2, contents + offset);
 	      if ((tls_mask & TLS_TPRELGD) == 0 && toc_symndx != 0)
 		goto again;
@@ -14063,7 +14043,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_TLSLD:
 	  if (tls_mask != 0 && (tls_mask & TLS_LD) == 0)
 	    {
-	      unsigned int insn2, insn3;
+	      unsigned int insn2;
 	      bfd_vma offset = rel->r_offset;
 
 	      if (toc_symndx)
@@ -14088,15 +14068,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      BFD_ASSERT (offset == rel[1].r_offset);
 	      rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
 	      insn2 = 0x38630000;	/* addi 3,3,0 */
-	      insn3 = bfd_get_32 (input_bfd,
-				  contents + offset + 4);
-	      if (insn3 == NOP
-		  || insn3 == CROR_151515 || insn3 == CROR_313131)
-		{
-		  rel->r_offset += 4;
-		  bfd_put_32 (input_bfd, insn2, contents + offset + 4);
-		  insn2 = NOP;
-		}
 	      bfd_put_32 (input_bfd, insn2, contents + offset);
 	      goto again;
 	    }

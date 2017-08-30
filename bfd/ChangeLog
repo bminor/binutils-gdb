@@ -1,3 +1,9 @@
+2017-08-30  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): When optimizing
+	__tls_get_addr call sequences to LE, don't move the addi down
+	to the nop.  Replace the bl with addi and leave the nop alone.
+
 2017-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_pie_finish_undefweak_symbol):
