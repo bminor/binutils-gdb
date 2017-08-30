@@ -6414,6 +6414,7 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
       bfd_boolean ok = FALSE;
       bfd_vma opcode = x >> 16;
       bfd_vma jalx_opcode = 0;
+      bfd_vma sign_bit = 0;
       bfd_vma addr;
       bfd_vma dest;
 
@@ -6421,12 +6422,14 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
 	{
 	  ok = opcode == 0x4060;
 	  jalx_opcode = 0x3c;
+	  sign_bit = 0x10000;
 	  value <<= 1;
 	}
       else if (r_type == R_MIPS_PC16 || r_type == R_MIPS_GNU_REL16_S2)
 	{
 	  ok = opcode == 0x411;
 	  jalx_opcode = 0x1d;
+	  sign_bit = 0x20000;
 	  value <<= 2;
 	}
 
@@ -6436,7 +6439,8 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
 		  + input_section->output_offset
 		  + relocation->r_offset
 		  + 4);
-	  dest = addr + (((value & 0x3ffff) ^ 0x20000) - 0x20000);
+	  dest = (addr
+		  + (((value & ((sign_bit << 1) - 1)) ^ sign_bit) - sign_bit));
 
 	  if ((addr >> 28) << 28 != (dest >> 28) << 28)
 	    {
