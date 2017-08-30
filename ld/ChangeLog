@@ -1,5 +1,18 @@
 2017-08-30  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-powerpc/tls.s: Add calls with tls markers.
+	* testsuite/ld-powerpc/tls32.s: Likewise.
+	* testsuite/ld-powerpc/powerpc.exp: Run tls marker tests.
+	* testsuite/ld-powerpc/tls.d: Adjust for TPREL16_HA/LO optimization.
+	* testsuite/ld-powerpc/tlsexe.d: Likewise.
+	* testsuite/ld-powerpc/tlsexetoc.d: Likewise.
+	* testsuite/ld-powerpc/tlsld.d: Likewise.
+	* testsuite/ld-powerpc/tlsmark.d: Likewise.
+	* testsuite/ld-powerpc/tlsopt4.d: Likewise.
+	* testsuite/ld-powerpc/tlstoc.d: Likewise.
+
+2017-08-30  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-powerpc/tls.d: Update.
 	* testsuite/ld-powerpc/tlsexe.d: Update.
 	* testsuite/ld-powerpc/tlsexetoc.d: Update.

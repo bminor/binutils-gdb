@@ -8974,6 +8974,38 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	    }
 	  break;
 
+	case elfcpp::R_POWERPC_TPREL16_HA:
+	  if (parameters->options().tls_optimize() && value + 0x8000 < 0x10000)
+	    {
+	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
+	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
+	      if ((insn & ((0x3f << 26) | 0x1f << 16))
+		  != ((15u << 26) | ((size == 32 ? 2 : 13) << 16)))
+		;
+	      else
+		{
+		  elfcpp::Swap<32, big_endian>::writeval(iview, nop);
+		  return true;
+		}
+	    }
+	  break;
+
+	case elfcpp::R_PPC64_TPREL16_LO_DS:
+	  if (size == 32)
+	    // R_PPC_TLSGD, R_PPC_TLSLD
+	    break;
+	  // Fall through.
+	case elfcpp::R_POWERPC_TPREL16_LO:
+	  if (parameters->options().tls_optimize() && value + 0x8000 < 0x10000)
+	    {
+	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
+	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
+	      insn &= ~(0x1f << 16);
+	      insn |= (size == 32 ? 2 : 13) << 16;
+	      elfcpp::Swap<32, big_endian>::writeval(iview, insn);
+	    }
+	  break;
+
 	case elfcpp::R_PPC64_ENTRY:
 	  value = (target->got_section()->output_section()->address()
 		   + object->toc_base_offset());

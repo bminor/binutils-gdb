@@ -1,5 +1,17 @@
 2017-08-30  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (struct ppc_link_hash_table): Add do_tls_opt.
+	(ppc64_elf_tls_optimize): Set it.
+	(ppc64_elf_relocate_section): Nop addis on TPREL16_HA, and convert
+	insn on TPREL16_LO and TPREL16_LO_DS relocs to use r13 when
+	addis would add zero.
+	* elf32-ppc.c (struct ppc_elf_link_hash_table): Add do_tls_opt.
+	(ppc_elf_tls_optimize): Set it.
+	(ppc_elf_relocate_section): Nop addis on TPREL16_HA, and convert
+	insn on TPREL16_LO relocs to use r2 when addis would add zero.
+
+2017-08-30  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_relocate_section): When optimizing
 	__tls_get_addr call sequences to LE, don't move the addi down
 	to the nop.  Replace the bl with addi and leave the nop alone.

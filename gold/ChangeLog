@@ -1,3 +1,9 @@
+2017-08-30  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Nop addis on
+	TPREL16_HA, and convert insn on TPREL16_LO and TPREL16_LO_DS
+	relocs to use r2/r13 when addis would add zero.
+
 2017-08-29  Alan Modra  <amodra@gmail.com>
 
 	* options.h (tls_get_addr_optimize): New option.
