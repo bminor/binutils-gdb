@@ -776,6 +776,9 @@ bfd_close_all_done (bfd *abfd)
 
   ret = bfd_cache_close (abfd);
 
+  if (! BFD_SEND (abfd, _close_and_cleanup, (abfd)))
+    return FALSE;
+
   if (ret)
     _maybe_make_executable (abfd);
 

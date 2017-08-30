@@ -1,5 +1,10 @@
 2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/22032
+	* opncls.c (bfd_close_all_done): Call _close_and_cleanup.
+
+2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf64-x86-64.c (elf_x86_64_next_tls_desc_index): Removed.
 	(elf_x86_64_srelplt2): Likewise.
 
