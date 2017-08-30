@@ -1,6 +1,6 @@
 #source: tls-gd-2.s --pic
 #as: --no-underscore --em=criself
-#ld: -m crislinux --shared
+#ld: -m crislinux --shared --hash-style=sysv
 #readelf: -a -x 7
 
 # Undefined reference for a R_CRIS_32_GOT_GD in a DSO.  Not an error;

@@ -1,3 +1,111 @@
+2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (ELF_DYNAMIC_INTERPRETER): Removed.
+	(elf_i386_lazy_plt_layout): Likewise.
+	(elf_i386_non_lazy_plt_layout): Likewise.
+	(elf_i386_plt_layout): Likewise.
+	(elf_i386_link_hash_table): Likewise.
+	(elf_i386_next_tls_desc_index): Likewise.
+	(elf_i386_srelplt2): Likewise.
+	(elf_i386_plt): Likewise.
+	(elf_i386_lazy_plt): Likewise.
+	(elf_i386_non_lazy_plt): Likewise.
+	(elf_i386_link_hash_table_create): Likewise.
+	(bfd_elf32_bfd_link_hash_table_create): Likewise.
+	(elf_i386_lazy_plt): Updated.
+	(elf_i386_non_lazy_plt): Likewise.
+	(elf_i386_lazy_ibt_plt): Likewise.
+	(elf_i386_non_lazy_ibt_plt): Likewise.
+	(elf_i386_allocate_dynrelocs): Likewise.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	(elf_i386_finish_dynamic_sections): Likewise.
+	(elf_i386_get_synthetic_symtab): Likewise.
+	(elf_i386_link_setup_gnu_properties): Likewise.
+	(elf_i386_nacl_plt): Likewise.
+	* elf64-x86-64.c (ABI_64_P): Removed.
+	(ELF64_DYNAMIC_INTERPRETER): Likewise.
+	(ELF32_DYNAMIC_INTERPRETER): Likewise.
+	(elf_x86_64_lazy_plt_layout): Likewise.
+	(elf_x86_64_non_lazy_plt_layout): Likewise.
+	(elf_x86_64_plt_layout): Likewise.
+	(elf_x86_64_link_hash_table): Likewise.
+	(elf_x86_64_plt): Likewise.
+	(elf_x86_64_lazy_plt): Likewise.
+	(elf_x86_64_non_lazy_plt): Likewise.
+	(elf_x86_64_link_hash_table_create): Likewise.
+	(bfd_elf64_bfd_link_hash_table_create): Likewise.
+	(bfd_elf32_bfd_link_hash_table_create): Likewise.
+	(elf_x86_64_lazy_plt): Updated.
+	(elf_x86_64_non_lazy_plt): Likewise.
+	(elf_x86_64_lazy_bnd_plt): Likewise.
+	(elf_x86_64_non_lazy_bnd_plt): Likewise.
+	(elf_x86_64_lazy_ibt_plt): Likewise.
+	(elf_x32_lazy_ibt_plt): Likewise.
+	(elf_x86_64_non_lazy_ibt_plt): Likewise.
+	(elf_x32_non_lazy_ibt_plt): Likewise.
+	(elf_x86_64_allocate_dynrelocs): Likewise.
+	(elf_x86_64_size_dynamic_sections): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	(elf_x86_64_finish_dynamic_symbol): Likewise.
+	(elf_x86_64_finish_dynamic_sections): Likewise.
+	(elf_x86_64_get_synthetic_symtab): Likewise.
+	(elf_x86_64_link_setup_gnu_properties): Likewise.
+	(elf_x86_64_nacl_plt): Likewise.
+	* elfxx-x86.c: Include "objalloc.h", "elf/i386.h" and
+	"elf/x86-64.h".
+	(ELF32_DYNAMIC_INTERPRETER): New.
+	(ELF64_DYNAMIC_INTERPRETER): Likewise.
+	(ELFX32_DYNAMIC_INTERPRETER): Likewise.
+	(_bfd_x86_elf_link_hash_table_create): Likewise.
+	(_bfd_x86_elf_link_hash_table_free): Renamed to ...
+	(elf_x86_link_hash_table_free): This.  Make it static.
+	* elfxx-x86.h: Don't include "objalloc.h".
+	(ABI_64_P): New.
+	(elf_x86_lazy_plt_layout): Likewise.
+	(elf_x86_non_lazy_plt_layout): Likewise.
+	(elf_x86_plt_layout): Likewise.
+	(_bfd_x86_elf_link_hash_table_create): Likewise.
+	(bfd_elf64_bfd_link_hash_table_create): Likewise.
+	(bfd_elf32_bfd_link_hash_table_create): Likewise.
+	(elf_x86_link_hash_table): Add plt, lazy_plt, non_lazy_plt,
+	srelplt2 and next_tls_desc_index.
+	(_bfd_x86_elf_link_hash_table_free): Removed.
+
+2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_perform_relocation): Correct microMIPS
+	branch offset interpretation.
+
+2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/22032
+	* opncls.c (bfd_close_all_done): Call _close_and_cleanup.
+
+2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_next_tls_desc_index): Removed.
+	(elf_x86_64_srelplt2): Likewise.
+
+2017-08-30  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct ppc_link_hash_table): Add do_tls_opt.
+	(ppc64_elf_tls_optimize): Set it.
+	(ppc64_elf_relocate_section): Nop addis on TPREL16_HA, and convert
+	insn on TPREL16_LO and TPREL16_LO_DS relocs to use r13 when
+	addis would add zero.
+	* elf32-ppc.c (struct ppc_elf_link_hash_table): Add do_tls_opt.
+	(ppc_elf_tls_optimize): Set it.
+	(ppc_elf_relocate_section): Nop addis on TPREL16_HA, and convert
+	insn on TPREL16_LO relocs to use r2 when addis would add zero.
+
+2017-08-30  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): When optimizing
+	__tls_get_addr call sequences to LE, don't move the addi down
+	to the nop.  Replace the bl with addi and leave the nop alone.
+
 2017-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_pie_finish_undefweak_symbol):
@@ -5,6 +113,150 @@
 	* elf64-x86-64.c (elf_x86_64_finish_local_dynamic_symbol):
 	Likewise.
 	(elf_x86_64_pie_finish_undefweak_symbol): Likewise.
+
+2017-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (BFD32_BACKENDS): Add elfxx-x86.lo.
+	(BFD64_BACKENDS): Likewise.
+	(BFD32_BACKENDS_CFILES): Add elfxx-x86.c.
+	(BFD64_BACKENDS_CFILES): Likewise.
+	* Makefile.in: Regenerated.
+	* configure.ac (bfd_backends): Add elfxx-x86.lo together with
+	elf32-i386.lo and elf64-x86-64.lo.
+	* configure: Regenerated.
+	* elf32-i386.c: Include "elfxx-x86.h" instead of "sysdep.h",
+	"bfd.h", "bfdlink.h", "libbfd.h", "elf-bfd.h", "bfd_stdint.h",
+	"objalloc.h" and "hashtab.h".
+	(ELIMINATE_COPY_RELOCS): Removed.
+	(UNDEFINED_WEAK_RESOLVED_TO_ZERO):Likewise.
+	(SYMBOL_NO_COPYRELOC): Likewise.
+	(elf_i386_link_hash_entry): Likewise.
+	(GOT_UNKNOWN): Likewise.
+	(GOT_NORMAL): Likewise.
+	(GOT_TLS_GD): Likewise.
+	(elf_i386_hash_entry): Likewise.
+	(elf_i386_obj_tdata): Likewise.
+	(elf_i386_tdata): Likewise.
+	(elf_i386_local_got_tls_type): Likewise.
+	(elf_i386_local_tlsdesc_gotent): Likewise.
+	(elf_i386_hash_table): Likewise.
+	(elf_i386_link_hash_newfunc): Likewise.
+	(elf_i386_local_htab_hash): Likewise.
+	(elf_i386_local_htab_eq): Likewise.
+	(elf_i386_get_local_sym_hash): Likewise.
+	(elf_i386_link_hash_table_free): Likewise.
+	(elf_i386_copy_indirect_symbol): Likewise.
+	(elf_i386_fixup_symbol): Likewise.
+	(elf_i386_readonly_dynrelocs): Likewise.
+	(elf_i386_always_size_sections): Likewise.
+	(elf_i386_set_tls_module_base): Likewise.
+	(elf_i386_dtpoff_base): Likewise.
+	(compare_relocs): Likewise.
+	(elf_i386_hash_symbol): Likewise.
+	(elf_i386_parse_gnu_properties): Likewise.
+	(elf_i386_merge_gnu_properties): Likewise.
+	(elf_i386_link_check_relocs): Likewise.
+	(elf_i386_merge_symbol_attribute): Likewise.
+	(bfd_elf32_bfd_link_check_relocs): Likewise.
+	(elf_backend_copy_indirect_symbol): Likewise.
+	(elf_backend_always_size_sections): Likewise.
+	(elf_backend_omit_section_dynsym): Likewise.
+	(elf_backend_hash_symbol): Likewise.
+	(elf_backend_fixup_symbol): Likewise.
+	(elf_backend_parse_gnu_properties): Likewise.
+	(elf_backend_merge_gnu_properties): Likewise.
+	(elf_backend_merge_symbol_attribute): Likewise.
+	(elf_i386_mkobject): Updated.
+	(elf_i386_link_hash_table_create): Likewise.
+	(elf_i386_check_tls_transition): Likewise.
+	(elf_i386_tls_transition): Likewise.
+	(elf_i386_convert_load_reloc): Likewise.
+	(elf_i386_check_relocs): Likewise.
+	(elf_i386_adjust_dynamic_symbol): Likewise.
+	(elf_i386_allocate_dynrelocs): Likewise.
+	(elf_i386_convert_load): Likewise.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_symbol ): Likewise.
+	(elf_i386_finish_dynamic_sections): Likewise.
+	(elf_i386_output_arch_local_syms): Likewise.
+	(elf_i386_get_synthetic_symtab): Likewise.
+	(elf_i386_link_setup_gnu_properties): Likewise.
+	(elf_i386_link_hash_table): Use elf_x86_link_hash_table, instead
+	of elf_link_hash_table, as base.
+	(elf_i386_next_tls_desc_index): New.
+	(elf_i386_srelplt2): Likewise.
+	(elf_i386_plt): Likewise.
+	(elf_i386_lazy_plt): Likewise.
+	(elf_i386_non_lazy_plt): Likewise.
+	* elf32-x86-64.c: Include "elfxx-x86.h" instead of "sysdep.h",
+	"bfd.h", "bfdlink.h", "libbfd.h", "elf-bfd.h", "bfd_stdint.h",
+	"objalloc.h" and "hashtab.h".
+	(ELIMINATE_COPY_RELOCS): Removed.
+	(UNDEFINED_WEAK_RESOLVED_TO_ZERO):Likewise.
+	(SYMBOL_NO_COPYRELOC): Likewise.
+	(elf_x86_64_link_hash_entry): Likewise.
+	(GOT_UNKNOWN): Likewise.
+	(GOT_NORMAL): Likewise.
+	(GOT_TLS_GD): Likewise.
+	(elf_x86_64_hash_entry): Likewise.
+	(elf_x86_64_obj_tdata): Likewise.
+	(elf_x86_64_tdata): Likewise.
+	(elf_x86_64_local_got_tls_type): Likewise.
+	(elf_x86_64_local_tlsdesc_gotent): Likewise.
+	(elf_x86_64_hash_table): Likewise.
+	(elf_x86_64_link_hash_newfunc): Likewise.
+	(elf_x86_64_local_htab_hash): Likewise.
+	(elf_x86_64_local_htab_eq): Likewise.
+	(elf_x86_64_get_local_sym_hash): Likewise.
+	(elf_x86_64_link_hash_table_free): Likewise.
+	(elf_x86_64_copy_indirect_symbol): Likewise.
+	(elf_x86_64_fixup_symbol): Likewise.
+	(elf_x86_64_readonly_dynrelocs): Likewise.
+	(elf_x86_64_always_size_sections): Likewise.
+	(elf_x86_64_set_tls_module_base): Likewise.
+	(elf_x86_64_dtpoff_base): Likewise.
+	(compare_relocs): Likewise.
+	(elf_x86_64_merge_symbol_attribute): Likewise.
+	(elf_x86_64_hash_symbol): Likewise.
+	(elf_x86_64_parse_gnu_properties): Likewise.
+	(elf_x86_64_merge_gnu_properties): Likewise.
+	(elf_x86_64_link_check_relocs): Likewise.
+	(elf_backend_copy_indirect_symbol): Likewise.
+	(elf_backend_always_size_sections): Likewise.
+	(bfd_elf64_bfd_link_check_relocs): Likewise.
+	(elf_backend_merge_symbol_attribute): Likewise.
+	(elf_backend_hash_symbol): Likewise.
+	(elf_backend_omit_section_dynsym): Likewise.
+	(elf_backend_fixup_symbol): Likewise.
+	(elf_backend_parse_gnu_properties): Likewise.
+	(elf_backend_merge_gnu_properties): Likewise.
+	(bfd_elf32_bfd_link_check_relocs): Likewise.
+	(elf_x86_64_mkobject): Updated.
+	(elf_x86_64_link_hash_table_create): Likewise.
+	(elf_x86_64_check_tls_transition): Likewise.
+	(elf_x86_64_tls_transition): Likewise.
+	(elf_x86_64_convert_load_reloc): Likewise.
+	(elf_x86_64_check_relocs): Likewise.
+	(elf_x86_64_adjust_dynamic_symbol): Likewise.
+	(elf_x86_64_allocate_dynrelocs): Likewise.
+	(elf_x86_64_convert_load): Likewise.
+	(elf_x86_64_size_dynamic_sections): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	(elf_x86_64_finish_dynamic_symbol ): Likewise.
+	(elf_x86_64_finish_dynamic_sections): Likewise.
+	(elf_x86_64_output_arch_local_syms): Likewise.
+	(elf_x86_64_get_synthetic_symtab): Likewise.
+	(elf_x86_64_link_setup_gnu_properties): Likewise.
+	(elf_x86_64_link_hash_table): Use elf_x86_link_hash_table,
+	instead of elf_link_hash_table, as base.
+	(elf_x86_64_next_tls_desc_index): New.
+	(elf_x86_64_srelplt2): Likewise.
+	(elf_x86_64_plt): Likewise.
+	(elf_x86_64_lazy_plt): Likewise.
+	(elf_x86_64_non_lazy_plt): Likewise.
+	* elfxx-x86.c: New file.
+	* elfxx-x86.h: Likewise.
 
 2017-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 

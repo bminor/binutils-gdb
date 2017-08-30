@@ -1,6 +1,6 @@
 #source: tls-gdgotrelm.s --defsym r=8191
 #as: --no-underscore --em=criself --pic
-#ld: --shared -m crislinux
+#ld: --shared -m crislinux --hash-style=sysv
 #objdump: -s -j .got -R
 
 # Verify that the first and last R_CRIS_16_GOT_GD entries are ok just

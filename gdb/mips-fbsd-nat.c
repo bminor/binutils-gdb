@@ -46,7 +46,7 @@ static bool
 getfpregs_supplies (struct gdbarch *gdbarch, int regnum)
 {
   return (regnum >= mips_regnum (gdbarch)->fp0
-	  && regnum < mips_regnum (gdbarch)->fp_implementation_revision);
+	  && regnum <= mips_regnum (gdbarch)->fp_implementation_revision);
 }
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this

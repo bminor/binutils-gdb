@@ -5,7 +5,7 @@
 #source: tls-hx.s
 #source: dso-1.s
 #as: --pic --no-underscore --em=criself --march=v32
-#ld: --shared -m crislinux
+#ld: --shared -m crislinux --hash-style=sysv
 #readelf: -a
 
 # DSO with a R_CRIS_16_DTPREL and a R_CRIS_32_PLT_PCREL.  The .got.plt

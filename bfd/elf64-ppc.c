@@ -4120,6 +4120,9 @@ struct ppc_link_hash_table
   unsigned int second_toc_pass:1;
   unsigned int do_toc_opt:1;
 
+  /* Set if tls optimization is enabled.  */
+  unsigned int do_tls_opt:1;
+
   /* Set on error.  */
   unsigned int stub_error:1;
 
@@ -8925,6 +8928,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 
   if (toc_ref != NULL)
     free (toc_ref);
+  htab->do_tls_opt = 1;
   return TRUE;
 }
 
@@ -13916,7 +13920,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_GOT_TLSLD16_LO:
 	  if (tls_mask != 0 && (tls_mask & TLS_LD) == 0)
 	    {
-	      unsigned int insn1, insn2, insn3;
+	      unsigned int insn1, insn2;
 	      bfd_vma offset;
 
 	    tls_ldgd_opt:
@@ -13995,18 +13999,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      bfd_put_32 (input_bfd, insn1,
 			  contents + rel->r_offset - d_offset);
 	      if (offset != (bfd_vma) -1)
-		{
-		  insn3 = bfd_get_32 (input_bfd,
-				      contents + offset + 4);
-		  if (insn3 == NOP
-		      || insn3 == CROR_151515 || insn3 == CROR_313131)
-		    {
-		      rel[1].r_offset += 4;
-		      bfd_put_32 (input_bfd, insn2, contents + offset + 4);
-		      insn2 = NOP;
-		    }
-		  bfd_put_32 (input_bfd, insn2, contents + offset);
-		}
+		bfd_put_32 (input_bfd, insn2, contents + offset);
 	      if ((tls_mask & tls_gd) == 0
 		  && (tls_gd == 0 || toc_symndx != 0))
 		{
@@ -14020,7 +14013,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_TLSGD:
 	  if (tls_mask != 0 && (tls_mask & TLS_GD) == 0)
 	    {
-	      unsigned int insn2, insn3;
+	      unsigned int insn2;
 	      bfd_vma offset = rel->r_offset;
 
 	      if ((tls_mask & TLS_TPRELGD) != 0)
@@ -14045,15 +14038,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      /* Zap the reloc on the _tls_get_addr call too.  */
 	      BFD_ASSERT (offset == rel[1].r_offset);
 	      rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
-	      insn3 = bfd_get_32 (input_bfd,
-				  contents + offset + 4);
-	      if (insn3 == NOP
-		  || insn3 == CROR_151515 || insn3 == CROR_313131)
-		{
-		  rel->r_offset += 4;
-		  bfd_put_32 (input_bfd, insn2, contents + offset + 4);
-		  insn2 = NOP;
-		}
 	      bfd_put_32 (input_bfd, insn2, contents + offset);
 	      if ((tls_mask & TLS_TPRELGD) == 0 && toc_symndx != 0)
 		goto again;
@@ -14063,7 +14047,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_TLSLD:
 	  if (tls_mask != 0 && (tls_mask & TLS_LD) == 0)
 	    {
-	      unsigned int insn2, insn3;
+	      unsigned int insn2;
 	      bfd_vma offset = rel->r_offset;
 
 	      if (toc_symndx)
@@ -14088,15 +14072,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      BFD_ASSERT (offset == rel[1].r_offset);
 	      rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
 	      insn2 = 0x38630000;	/* addi 3,3,0 */
-	      insn3 = bfd_get_32 (input_bfd,
-				  contents + offset + 4);
-	      if (insn3 == NOP
-		  || insn3 == CROR_151515 || insn3 == CROR_313131)
-		{
-		  rel->r_offset += 4;
-		  bfd_put_32 (input_bfd, insn2, contents + offset + 4);
-		  insn2 = NOP;
-		}
 	      bfd_put_32 (input_bfd, insn2, contents + offset);
 	      goto again;
 	    }
@@ -15181,6 +15156,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       /* Multi-instruction sequences that access the TOC can be
 	 optimized, eg. addis ra,r2,0; addi rb,ra,x;
 	 to             nop;           addi rb,r2,x;  */
+      howto = ppc64_elf_howto_table[(int) r_type];
       switch (r_type)
 	{
 	default:
@@ -15242,10 +15218,37 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      bfd_put_32 (input_bfd, insn, p);
 	    }
 	  break;
+
+	case R_PPC64_TPREL16_HA:
+	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
+	    {
+	      bfd_byte *p = contents + (rel->r_offset & ~3);
+	      insn = bfd_get_32 (input_bfd, p);
+	      if ((insn & ((0x3f << 26) | 0x1f << 16))
+		  != ((15u << 26) | (13 << 16)) /* addis rt,13,imm */)
+		/* xgettext:c-format */
+		info->callbacks->minfo
+		  (_("%H: warning: %s unexpected insn %#x.\n"),
+		   input_bfd, input_section, rel->r_offset, howto->name, insn);
+	      else
+		bfd_put_32 (input_bfd, NOP, p);
+	    }
+	  break;
+
+	case R_PPC64_TPREL16_LO:
+	case R_PPC64_TPREL16_LO_DS:
+	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
+	    {
+	      bfd_byte *p = contents + (rel->r_offset & ~3);
+	      insn = bfd_get_32 (input_bfd, p);
+	      insn &= ~(0x1f << 16);
+	      insn |= 13 << 16;
+	      bfd_put_32 (input_bfd, insn, p);
+	    }
+	  break;
 	}
 
       /* Do any further special processing.  */
-      howto = ppc64_elf_howto_table[(int) r_type];
       switch (r_type)
 	{
 	default:

@@ -1,7 +1,7 @@
 #source: start1.s
 #source: tls-dso-tpoffgotcomm1.s
 #as: --no-underscore --pic --em=criself -I$srcdir/$subdir
-#ld: -m crislinux -shared
+#ld: -m crislinux -shared --hash-style=sysv
 #objdump: -d -h -s -t -r -R -p
 
 # Make sure we can link a file with TPOFFGOT relocs against common

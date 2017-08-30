@@ -24,8 +24,10 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "bfd_stdint.h"
-#include "objalloc.h"
 #include "hashtab.h"
+
+#define ABI_64_P(abfd) \
+  (get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64)
 
 /* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
    copying dynamic variables from a shared lib into an app's dynbss
@@ -118,6 +120,105 @@ struct elf_x86_link_hash_entry
   bfd_vma tlsdesc_got;
 };
 
+struct elf_x86_lazy_plt_layout
+{
+  /* The first entry in an absolute lazy procedure linkage table looks
+     like this.  */
+  const bfd_byte *plt0_entry;
+  unsigned int plt0_entry_size;          /* Size of PLT0 entry.  */
+
+  /* Later entries in an absolute lazy procedure linkage table look
+     like this.  */
+  const bfd_byte *plt_entry;
+  unsigned int plt_entry_size;          /* Size of each PLT entry.  */
+
+  /* Offsets into plt0_entry that are to be replaced with GOT[1] and
+     GOT[2].  */
+  unsigned int plt0_got1_offset;
+  unsigned int plt0_got2_offset;
+
+  /* Offset of the end of the PC-relative instruction containing
+     plt0_got2_offset.  This is for x86-64 only.  */
+  unsigned int plt0_got2_insn_end;
+
+  /* Offsets into plt_entry that are to be replaced with...  */
+  unsigned int plt_got_offset;    /* ... address of this symbol in .got. */
+  unsigned int plt_reloc_offset;  /* ... offset into relocation table. */
+  unsigned int plt_plt_offset;    /* ... offset to start of .plt. */
+
+  /* Length of the PC-relative instruction containing plt_got_offset.
+     This is used for x86-64 only.  */
+  unsigned int plt_got_insn_size;
+
+  /* Offset of the end of the PC-relative jump to plt0_entry.  This is
+     used for x86-64 only.  */
+  unsigned int plt_plt_insn_end;
+
+  /* Offset into plt_entry where the initial value of the GOT entry
+     points.  */
+  unsigned int plt_lazy_offset;
+
+  /* The first entry in a PIC lazy procedure linkage table looks like
+     this.  This is used for i386 only.  */
+  const bfd_byte *pic_plt0_entry;
+
+  /* Subsequent entries in a PIC lazy procedure linkage table look
+     like this.  This is used for i386 only.  */
+  const bfd_byte *pic_plt_entry;
+
+  /* .eh_frame covering the lazy .plt section.  */
+  const bfd_byte *eh_frame_plt;
+  unsigned int eh_frame_plt_size;
+};
+
+struct elf_x86_non_lazy_plt_layout
+{
+  /* Entries in an absolute non-lazy procedure linkage table look like
+     this.  */
+  const bfd_byte *plt_entry;
+  /* Entries in a PIC non-lazy procedure linkage table look like this.
+     This is used for i386 only.  */
+  const bfd_byte *pic_plt_entry;
+
+  unsigned int plt_entry_size;          /* Size of each PLT entry.  */
+
+  /* Offsets into plt_entry that are to be replaced with...  */
+  unsigned int plt_got_offset;    /* ... address of this symbol in .got. */
+
+  /* Length of the PC-relative instruction containing plt_got_offset.
+     This is used for x86-64 only.  */
+  unsigned int plt_got_insn_size;
+
+  /* .eh_frame covering the non-lazy .plt section.  */
+  const bfd_byte *eh_frame_plt;
+  unsigned int eh_frame_plt_size;
+};
+
+struct elf_x86_plt_layout
+{
+  /* The first entry in a lazy procedure linkage table looks like this.
+     This is only used for i386 where absolute PLT0 and PIC PLT0 are
+     different.  */
+  const bfd_byte *plt0_entry;
+  /* Entries in a procedure linkage table look like this.  */
+  const bfd_byte *plt_entry;
+  unsigned int plt_entry_size;          /* Size of each PLT entry.  */
+
+  /* 1 has PLT0.  */
+  unsigned int has_plt0;
+
+  /* Offsets into plt_entry that are to be replaced with...  */
+  unsigned int plt_got_offset;    /* ... address of this symbol in .got. */
+
+  /* Length of the PC-relative instruction containing plt_got_offset.
+     This is only used for x86-64.  */
+  unsigned int plt_got_insn_size;
+
+  /* .eh_frame covering the .plt section.  */
+  const bfd_byte *eh_frame_plt;
+  unsigned int eh_frame_plt_size;
+};
+
 /* The first 3 values in tls_type of x86 ELF linker hash entry.  */
 #define GOT_UNKNOWN	0
 #define GOT_NORMAL	1
@@ -139,6 +240,15 @@ struct elf_x86_link_hash_table
   asection *plt_second_eh_frame;
   asection *plt_got;
   asection *plt_got_eh_frame;
+
+  /* Parameters describing PLT generation, lazy or non-lazy.  */
+  struct elf_x86_plt_layout plt;
+
+  /* Parameters describing lazy PLT generation.  */
+  const struct elf_x86_lazy_plt_layout *lazy_plt;
+
+  /* Parameters describing non-lazy PLT generation.  */
+  const struct elf_x86_non_lazy_plt_layout *non_lazy_plt;
 
   union
   {
@@ -177,6 +287,14 @@ struct elf_x86_link_hash_table
   /* TRUE if there are dynamic relocs against IFUNC symbols that apply
      to read-only sections.  */
   bfd_boolean readonly_dynrelocs_against_ifunc;
+
+  /* The (unloaded but important) .rel.plt.unloaded section on VxWorks.
+     This is used for i386 only.  */
+  asection *srelplt2;
+
+  /* The index of the next unused R_386_TLS_DESC slot in .rel.plt.  This
+     is used for i386 only.  */
+  bfd_vma next_tls_desc_index;
 
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
@@ -228,7 +346,7 @@ extern int _bfd_x86_elf_local_htab_eq
 extern struct bfd_hash_entry * _bfd_x86_elf_link_hash_newfunc
   (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 
-extern void _bfd_x86_elf_link_hash_table_free
+extern struct bfd_link_hash_table * _bfd_x86_elf_link_hash_table_create
   (bfd *);
 
 extern int _bfd_x86_elf_compare_relocs
@@ -260,6 +378,10 @@ extern enum elf_property_kind _bfd_x86_elf_parse_gnu_properties
 extern bfd_boolean _bfd_x86_elf_merge_gnu_properties
   (struct bfd_link_info *, bfd *, elf_property *, elf_property *);
 
+#define bfd_elf64_bfd_link_hash_table_create \
+  _bfd_x86_elf_link_hash_table_create
+#define bfd_elf32_bfd_link_hash_table_create \
+  _bfd_x86_elf_link_hash_table_create
 #define bfd_elf64_bfd_link_check_relocs	\
   _bfd_x86_elf_link_check_relocs
 #define bfd_elf32_bfd_link_check_relocs \

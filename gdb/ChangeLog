@@ -1,3 +1,11 @@
+2017-08-29  John Baldwin  <jhb@FreeBSD.org>
+
+	* mips-fbsd-nat.c (getfpregs_supplies): Return true for FIR.
+	* mips-fbsd-tdep.c (mips_fbsd_supply_fpregs): Split supply of FSR
+	out of loop and add supply of FIR.
+	(mips_fbsd_collect_fpregs): Split collect of FSR out of loop and
+	add collect of FIR.
+
 2017-08-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/21827

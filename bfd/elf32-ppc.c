@@ -3345,6 +3345,9 @@ struct ppc_elf_link_hash_table
   unsigned int local_ifunc_resolver:1;
   unsigned int maybe_local_ifunc_resolver:1;
 
+  /* Set if tls optimization is enabled.  */
+  unsigned int do_tls_opt:1;
+
   /* The size of PLT entries.  */
   int plt_entry_size;
   /* The distance between adjacent PLT slots.  */
@@ -5631,6 +5634,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 	      symtab_hdr->contents = (unsigned char *) locsyms;
 	  }
       }
+  htab->do_tls_opt = 1;
   return TRUE;
 }
 
@@ -8426,10 +8430,44 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	}
 
       addend = rel->r_addend;
-      tls_type = 0;
       howto = NULL;
       if (r_type < R_PPC_max)
 	howto = ppc_elf_howto_table[r_type];
+
+      switch (r_type)
+	{
+	default:
+	  break;
+
+	case R_PPC_TPREL16_HA:
+	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
+	    {
+	      bfd_byte *p = contents + (rel->r_offset & ~3);
+	      unsigned int insn = bfd_get_32 (input_bfd, p);
+	      if ((insn & ((0x3f << 26) | 0x1f << 16))
+		  != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */)
+		/* xgettext:c-format */
+		info->callbacks->minfo
+		  (_("%H: warning: %s unexpected insn %#x.\n"),
+		   input_bfd, input_section, rel->r_offset, howto->name, insn);
+	      else
+		bfd_put_32 (input_bfd, NOP, p);
+	    }
+	  break;
+
+	case R_PPC_TPREL16_LO:
+	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
+	    {
+	      bfd_byte *p = contents + (rel->r_offset & ~3);
+	      unsigned int insn = bfd_get_32 (input_bfd, p);
+	      insn &= ~(0x1f << 16);
+	      insn |= 2 << 16;
+	      bfd_put_32 (input_bfd, insn, p);
+	    }
+	  break;
+	}
+
+      tls_type = 0;
       switch (r_type)
 	{
 	default:

@@ -5,7 +5,7 @@
 #source: tls-legd-16.s
 #source: tls-x1x2.s
 #as: --no-underscore --em=criself
-#ld: -m crislinux tmpdir/tls-dso-xz-1.so
+#ld: -m crislinux tmpdir/tls-dso-xz-1.so --hash-style=sysv
 #objdump: -s -h -t -T -R -r -p
 
 # Check that we have proper NPTL/TLS markings and GOT for an

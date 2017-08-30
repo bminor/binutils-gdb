@@ -18630,7 +18630,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 
 	  if (pcrel_op->include_isa_bit && !need_reloc)
 	    {
-	      if (!ELF_ST_IS_MIPS16 (S_GET_OTHER (fragp->fr_symbol)))
+	      if (!mips_ignore_branch_isa
+		  && !ELF_ST_IS_MIPS16 (S_GET_OTHER (fragp->fr_symbol)))
 		as_bad_where (fragp->fr_file, fragp->fr_line,
 			      _("branch to a symbol in another ISA mode"));
 	      else if ((fragp->fr_offset & 0x1) != 0)

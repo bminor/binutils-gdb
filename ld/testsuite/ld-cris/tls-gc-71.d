@@ -3,7 +3,7 @@
 #source: tls128g.s
 #source: tls-hx.s
 #as: --pic --no-underscore --em=criself -I$srcdir/$subdir
-#ld: --shared -m crislinux --gc-sections
+#ld: --shared -m crislinux --gc-sections --hash-style=sysv
 #objdump: -s -t -R -p -T
 
 # DSO with a single R_CRIS_16_DTPREL against a hidden symbol, gc:ed.

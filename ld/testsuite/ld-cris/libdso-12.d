@@ -2,7 +2,7 @@
 #source: dsov32-1.s
 #source: dsov32-2.s
 #as: --pic --no-underscore --march=v32 --em=criself
-#ld: --shared -m crislinux -z nocombreloc
+#ld: --shared -m crislinux -z nocombreloc --hash-style=sysv
 #objdump: -s -T
 
 # Check for common DSO contents; load of GOT register, branch to
