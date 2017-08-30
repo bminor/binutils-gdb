@@ -315,6 +315,27 @@ struct elf_x86_obj_tdata
   bfd_vma *local_tlsdesc_gotent;
 };
 
+enum elf_x86_plt_type
+{
+  plt_non_lazy = 0,
+  plt_lazy = 1 << 0,
+  plt_pic = 1 << 1,
+  plt_second = 1 << 2,
+  plt_unknown = -1
+};
+
+struct elf_x86_plt
+{
+  const char *name;
+  asection *sec;
+  bfd_byte *contents;
+  enum elf_x86_plt_type type;
+  unsigned int plt_got_offset;
+  unsigned int plt_entry_size;
+  unsigned int plt_got_insn_size;	/* Only used for x86-64.  */
+  long count;
+};
+
 #define elf_x86_tdata(abfd) \
   ((struct elf_x86_obj_tdata *) (abfd)->tdata.any)
 
@@ -371,6 +392,10 @@ extern bfd_boolean _bfd_x86_elf_fixup_symbol
 
 extern bfd_boolean _bfd_x86_elf_hash_symbol
   (struct elf_link_hash_entry *);
+
+extern long _bfd_x86_elf_get_synthetic_symtab
+  (bfd *, long, long, bfd_vma, struct elf_x86_plt [], asymbol **,
+   asymbol **);
 
 extern enum elf_property_kind _bfd_x86_elf_parse_gnu_properties
   (bfd *, unsigned int, bfd_byte *, unsigned int);

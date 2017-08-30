@@ -1,5 +1,29 @@
 2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_plt_type): Removed.
+	(elf_i386_plt): Likewise.
+	(elf_i386_get_synthetic_symtab): Updated.   Call
+	_bfd_x86_elf_get_synthetic_symtab.
+	* elf64-x86-64.c (elf_x86_64_plt_type): Removed.
+	(elf_x86_64_plt): Likewise.
+	(elf_x86_64_get_synthetic_symtab): Updated.  Call
+	_bfd_x86_elf_get_synthetic_symtab.
+	* elfxx-x86.c (elf_i386_get_plt_got_vma): New function.
+	(elf_x86_64_get_plt_got_vma): Likewise.
+	(elf_i386_valid_plt_reloc_p): Likewise.
+	(elf_x86_64_valid_plt_reloc_p): Likewise.
+	(_bfd_x86_elf_get_synthetic_symtab): Likewise.
+	* elfxx-x86.h (elf_x86_plt_type): New.
+	(elf_x86_plt): Likewise.
+	(_bfd_x86_elf_get_synthetic_symtab): Likewise.
+
+2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Check
+	target_id instead of elf_machine_code.
+
+2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (ELF_DYNAMIC_INTERPRETER): Removed.
 	(elf_i386_lazy_plt_layout): Likewise.
 	(elf_i386_non_lazy_plt_layout): Likewise.
