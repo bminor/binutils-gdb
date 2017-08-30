@@ -1,3 +1,16 @@
+2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/branch-local-n32-2.d: Use `branch-local-2.l'
+	for `error-output'.
+	* testsuite/gas/mips/branch-local-n64-2.d: Likewise.
+	* testsuite/gas/mips/branch-local-n32-3.d: Use `branch-local-3.l'
+	for `error-output'.
+	* testsuite/gas/mips/branch-local-n64-3.d: Likewise.
+	* testsuite/gas/mips/branch-local-n32-2.l: Remove file.
+	* testsuite/gas/mips/branch-local-n64-2.l: Remove file.
+	* testsuite/gas/mips/branch-local-n32-3.l: Remove file.
+	* testsuite/gas/mips/branch-local-n64-3.l: Remove file.
+
 2017-08-29  Jozef Lawrynowicz  <jozef.l@somniumtech.com>
 
 	* config/tc-msp430.c (md_parse_option): Define high data and high
