@@ -1,5 +1,31 @@
 2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* config/tc-mips.c (md_convert_frag): Respect
+	`mips_ignore_branch_isa'.
+	* testsuite/gas/mips/branch-local-5.d: New test.
+	* testsuite/gas/mips/branch-local-n32-5.d: New test.
+	* testsuite/gas/mips/branch-local-n64-5.d: New test.
+	* testsuite/gas/mips/branch-local-6.d: New test.
+	* testsuite/gas/mips/branch-local-n32-6.d: New test.
+	* testsuite/gas/mips/branch-local-n64-6.d: New test.
+	* testsuite/gas/mips/branch-local-7.d: New test.
+	* testsuite/gas/mips/branch-local-n32-7.d: New test.
+	* testsuite/gas/mips/branch-local-n64-7.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-5.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-n32-5.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-n64-5.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-6.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-n32-6.d: New test.
+	* testsuite/gas/mips/branch-local-ignore-n64-6.d: New test.
+	* testsuite/gas/mips/branch-local-5.l: New stderr output.
+	* testsuite/gas/mips/branch-local-6.l: New stderr output.
+	* testsuite/gas/mips/branch-local-5.s: New test source.
+	* testsuite/gas/mips/branch-local-6.s: New test source.
+	* testsuite/gas/mips/branch-local-7.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/gas/mips/branch-local-n32-2.d: Use `branch-local-2.l'
 	for `error-output'.
 	* testsuite/gas/mips/branch-local-n64-2.d: Likewise.
