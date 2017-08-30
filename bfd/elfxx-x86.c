@@ -19,6 +19,16 @@
    MA 02110-1301, USA.  */
 
 #include "elfxx-x86.h"
+#include "objalloc.h"
+#include "elf/i386.h"
+#include "elf/x86-64.h"
+
+/* The name of the dynamic interpreter.  This is put in the .interp
+   section.  */
+
+#define ELF32_DYNAMIC_INTERPRETER "/usr/lib/libc.so.1"
+#define ELF64_DYNAMIC_INTERPRETER "/lib/ld64.so.1"
+#define ELFX32_DYNAMIC_INTERPRETER "/lib/ldx32.so.1"
 
 /* _TLS_MODULE_BASE_ needs to be treated especially when linking
    executables.  Rather than setting it to the beginning of the TLS
@@ -217,8 +227,8 @@ _bfd_x86_elf_local_htab_eq (const void *ptr1, const void *ptr2)
 
 /* Destroy an x86 ELF linker hash table.  */
 
-void
-_bfd_x86_elf_link_hash_table_free (bfd *obfd)
+static void
+elf_x86_link_hash_table_free (bfd *obfd)
 {
   struct elf_x86_link_hash_table *htab
     = (struct elf_x86_link_hash_table *) obfd->link.hash;
@@ -228,6 +238,77 @@ _bfd_x86_elf_link_hash_table_free (bfd *obfd)
   if (htab->loc_hash_memory)
     objalloc_free ((struct objalloc *) htab->loc_hash_memory);
   _bfd_elf_link_hash_table_free (obfd);
+}
+
+/* Create an x86 ELF linker hash table.  */
+
+struct bfd_link_hash_table *
+_bfd_x86_elf_link_hash_table_create (bfd *abfd)
+{
+  struct elf_x86_link_hash_table *ret;
+  const struct elf_backend_data *bed;
+  bfd_size_type amt = sizeof (struct elf_x86_link_hash_table);
+
+  ret = (struct elf_x86_link_hash_table *) bfd_zmalloc (amt);
+  if (ret == NULL)
+    return NULL;
+
+  bed = get_elf_backend_data (abfd);
+  if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd,
+				      _bfd_x86_elf_link_hash_newfunc,
+				      sizeof (struct elf_x86_link_hash_entry),
+				      bed->target_id))
+    {
+      free (ret);
+      return NULL;
+    }
+
+#ifdef BFD64
+  if (ABI_64_P (abfd))
+    {
+      ret->r_info = elf64_r_info;
+      ret->r_sym = elf64_r_sym;
+      ret->pointer_r_type = R_X86_64_64;
+      ret->dynamic_interpreter = ELF64_DYNAMIC_INTERPRETER;
+      ret->dynamic_interpreter_size = sizeof ELF64_DYNAMIC_INTERPRETER;
+      ret->tls_get_addr = "__tls_get_addr";
+    }
+  else
+#endif
+    {
+      ret->r_info = elf32_r_info;
+      ret->r_sym = elf32_r_sym;
+      if (bed->elf_machine_code == EM_X86_64)
+	{
+	  ret->pointer_r_type = R_X86_64_32;
+	  ret->dynamic_interpreter = ELFX32_DYNAMIC_INTERPRETER;
+	  ret->dynamic_interpreter_size
+	    = sizeof ELFX32_DYNAMIC_INTERPRETER;
+	  ret->tls_get_addr = "__tls_get_addr";
+	}
+      else
+	{
+	  ret->pointer_r_type = R_386_32;
+	  ret->dynamic_interpreter = ELF32_DYNAMIC_INTERPRETER;
+	  ret->dynamic_interpreter_size
+	    = sizeof ELF32_DYNAMIC_INTERPRETER;
+	  ret->tls_get_addr = "___tls_get_addr";
+	}
+    }
+
+  ret->loc_hash_table = htab_try_create (1024,
+					 _bfd_x86_elf_local_htab_hash,
+					 _bfd_x86_elf_local_htab_eq,
+					 NULL);
+  ret->loc_hash_memory = objalloc_create ();
+  if (!ret->loc_hash_table || !ret->loc_hash_memory)
+    {
+      elf_x86_link_hash_table_free (abfd);
+      return NULL;
+    }
+  ret->elf.root.hash_table_free = elf_x86_link_hash_table_free;
+
+  return &ret->elf.root;
 }
 
 /* Sort relocs into address order.  */

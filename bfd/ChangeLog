@@ -1,3 +1,78 @@
+2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (ELF_DYNAMIC_INTERPRETER): Removed.
+	(elf_i386_lazy_plt_layout): Likewise.
+	(elf_i386_non_lazy_plt_layout): Likewise.
+	(elf_i386_plt_layout): Likewise.
+	(elf_i386_link_hash_table): Likewise.
+	(elf_i386_next_tls_desc_index): Likewise.
+	(elf_i386_srelplt2): Likewise.
+	(elf_i386_plt): Likewise.
+	(elf_i386_lazy_plt): Likewise.
+	(elf_i386_non_lazy_plt): Likewise.
+	(elf_i386_link_hash_table_create): Likewise.
+	(bfd_elf32_bfd_link_hash_table_create): Likewise.
+	(elf_i386_lazy_plt): Updated.
+	(elf_i386_non_lazy_plt): Likewise.
+	(elf_i386_lazy_ibt_plt): Likewise.
+	(elf_i386_non_lazy_ibt_plt): Likewise.
+	(elf_i386_allocate_dynrelocs): Likewise.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	(elf_i386_finish_dynamic_sections): Likewise.
+	(elf_i386_get_synthetic_symtab): Likewise.
+	(elf_i386_link_setup_gnu_properties): Likewise.
+	(elf_i386_nacl_plt): Likewise.
+	* elf64-x86-64.c (ABI_64_P): Removed.
+	(ELF64_DYNAMIC_INTERPRETER): Likewise.
+	(ELF32_DYNAMIC_INTERPRETER): Likewise.
+	(elf_x86_64_lazy_plt_layout): Likewise.
+	(elf_x86_64_non_lazy_plt_layout): Likewise.
+	(elf_x86_64_plt_layout): Likewise.
+	(elf_x86_64_link_hash_table): Likewise.
+	(elf_x86_64_plt): Likewise.
+	(elf_x86_64_lazy_plt): Likewise.
+	(elf_x86_64_non_lazy_plt): Likewise.
+	(elf_x86_64_link_hash_table_create): Likewise.
+	(bfd_elf64_bfd_link_hash_table_create): Likewise.
+	(bfd_elf32_bfd_link_hash_table_create): Likewise.
+	(elf_x86_64_lazy_plt): Updated.
+	(elf_x86_64_non_lazy_plt): Likewise.
+	(elf_x86_64_lazy_bnd_plt): Likewise.
+	(elf_x86_64_non_lazy_bnd_plt): Likewise.
+	(elf_x86_64_lazy_ibt_plt): Likewise.
+	(elf_x32_lazy_ibt_plt): Likewise.
+	(elf_x86_64_non_lazy_ibt_plt): Likewise.
+	(elf_x32_non_lazy_ibt_plt): Likewise.
+	(elf_x86_64_allocate_dynrelocs): Likewise.
+	(elf_x86_64_size_dynamic_sections): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	(elf_x86_64_finish_dynamic_symbol): Likewise.
+	(elf_x86_64_finish_dynamic_sections): Likewise.
+	(elf_x86_64_get_synthetic_symtab): Likewise.
+	(elf_x86_64_link_setup_gnu_properties): Likewise.
+	(elf_x86_64_nacl_plt): Likewise.
+	* elfxx-x86.c: Include "objalloc.h", "elf/i386.h" and
+	"elf/x86-64.h".
+	(ELF32_DYNAMIC_INTERPRETER): New.
+	(ELF64_DYNAMIC_INTERPRETER): Likewise.
+	(ELFX32_DYNAMIC_INTERPRETER): Likewise.
+	(_bfd_x86_elf_link_hash_table_create): Likewise.
+	(_bfd_x86_elf_link_hash_table_free): Renamed to ...
+	(elf_x86_link_hash_table_free): This.  Make it static.
+	* elfxx-x86.h: Don't include "objalloc.h".
+	(ABI_64_P): New.
+	(elf_x86_lazy_plt_layout): Likewise.
+	(elf_x86_non_lazy_plt_layout): Likewise.
+	(elf_x86_plt_layout): Likewise.
+	(_bfd_x86_elf_link_hash_table_create): Likewise.
+	(bfd_elf64_bfd_link_hash_table_create): Likewise.
+	(bfd_elf32_bfd_link_hash_table_create): Likewise.
+	(elf_x86_link_hash_table): Add plt, lazy_plt, non_lazy_plt,
+	srelplt2 and next_tls_desc_index.
+	(_bfd_x86_elf_link_hash_table_free): Removed.
+
 2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (mips_elf_perform_relocation): Correct microMIPS
