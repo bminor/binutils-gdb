@@ -1,3 +1,8 @@
+2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_perform_relocation): Correct microMIPS
+	branch offset interpretation.
+
 2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/22032
