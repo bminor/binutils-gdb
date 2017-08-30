@@ -278,7 +278,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
     {
       ret->r_info = elf32_r_info;
       ret->r_sym = elf32_r_sym;
-      if (bed->elf_machine_code == EM_X86_64)
+      if (bed->target_id == X86_64_ELF_DATA)
 	{
 	  ret->pointer_r_type = R_X86_64_32;
 	  ret->dynamic_interpreter = ELFX32_DYNAMIC_INTERPRETER;

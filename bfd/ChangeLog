@@ -1,5 +1,10 @@
 2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Check
+	target_id instead of elf_machine_code.
+
+2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (ELF_DYNAMIC_INTERPRETER): Removed.
 	(elf_i386_lazy_plt_layout): Likewise.
 	(elf_i386_non_lazy_plt_layout): Likewise.
