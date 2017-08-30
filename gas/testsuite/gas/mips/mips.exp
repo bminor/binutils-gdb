@@ -660,9 +660,12 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "branch-local-n64-7"
     }
     run_dump_test "branch-addend"
+    run_dump_test "branch-addend-micromips"
     if $has_newabi {
 	run_dump_test "branch-addend-n32"
+	run_dump_test "branch-addend-micromips-n32"
 	run_dump_test "branch-addend-n64"
+	run_dump_test "branch-addend-micromips-n64"
     }
     run_dump_test "branch-absolute"
     run_dump_test "branch-absolute-addend"

@@ -1,3 +1,8 @@
+2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_perform_relocation): Correct microMIPS
+	branch offset interpretation.
+
 2017-07-28  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	Backport from mainline

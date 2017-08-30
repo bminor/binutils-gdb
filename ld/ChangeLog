@@ -1,3 +1,26 @@
+2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/bal-jalx-addend-micromips.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-addend-micromips-n32.d: New
+	test.
+	* testsuite/ld-mips-elf/bal-jalx-addend-micromips-n64.d: New
+	test.
+	* testsuite/ld-mips-elf/bal-jalx-local-micromips.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-local-micromips-n32.d: New
+	test.
+	* testsuite/ld-mips-elf/bal-jalx-local-micromips-n64.d: New
+	test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-micromips.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-micromips-n32.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-micromips-n64.d: New test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-micromips.d: New
+	test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-micromips-n32.d: New
+	test.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-micromips-n64.d: New
+	test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
 2017-07-25  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.

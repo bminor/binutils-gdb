@@ -1,5 +1,13 @@
 2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/gas/mips/branch-addend-micromips.d: New test.
+	* testsuite/gas/mips/branch-addend-micromips-n32.d: New test.
+	* testsuite/gas/mips/branch-addend-micromips-n64.d: New test.
+	* testsuite/gas/mips/branch-addend-micromips.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* config/tc-mips.c (md_convert_frag): Respect
 	`mips_ignore_branch_isa'.
 	* testsuite/gas/mips/branch-local-5.d: New test.
