@@ -1,5 +1,10 @@
 2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* testsuite/ld-elf/orphan-11.ld: Also discard `.MIPS.options'
+	sections.
+
+2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/ld-mips-elf/bal-jalx-addend-micromips.d: New test.
 	* testsuite/ld-mips-elf/bal-jalx-addend-micromips-n32.d: New
 	test.

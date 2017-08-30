@@ -10,7 +10,7 @@ SECTIONS
   .rel : { *(.rel .rel.*) }
 
   /DISCARD/ : {
-            *(.reginfo) *(.MIPS.abiflags) *(.trampolines) *(.iplt*)
-            *(.note*) *(.got*) *(.igot*) *(.*.attributes) *(.*.info)
+            *(.reginfo) *(.MIPS.abiflags) *(.MIPS.options) *(.trampolines)
+            *(.iplt*) *(.note*) *(.got*) *(.igot*) *(.*.attributes) *(.*.info)
             *(.pdr) "linker stubs*"(*)  }
 }
