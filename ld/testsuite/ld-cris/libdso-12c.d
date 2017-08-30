@@ -3,7 +3,7 @@
 #source: dsov32-2.s
 #source: dso-1.s
 #as: --pic --no-underscore --march=v32 --em=criself
-#ld: --shared -m crislinux --version-script $srcdir/$subdir/hidedsofns2468
+#ld: --shared -m crislinux --version-script $srcdir/$subdir/hidedsofns2468 --hash-style=sysv
 #objdump: -s -T
 
 # Like libdso-12b.d, but dsofn is defined and the two called functions

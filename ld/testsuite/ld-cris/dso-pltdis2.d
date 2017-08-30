@@ -2,7 +2,7 @@
 #source: dsov32-2.s
 #source: dsofng.s
 #as: --pic --no-underscore --march=v32 --em=criself
-#ld: --shared -m crislinux
+#ld: --shared -m crislinux --hash-style=sysv
 #objdump: -d 
 
 # Complement to dso-pltdis1.d; merging the other .got.plt entry.

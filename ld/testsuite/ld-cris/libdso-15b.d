@@ -1,6 +1,6 @@
 #source: expdref2.s
 #as: --pic --no-underscore --em=criself
-#ld: --shared -m crislinux
+#ld: --shared -m crislinux --hash-style=sysv
 #ld_after_inputfiles: tmpdir/libdso-15.so
 #objdump: -s -T
 

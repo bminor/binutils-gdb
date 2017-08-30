@@ -2,7 +2,7 @@
 #source: dsofnf2.s
 #source: gotrel1.s
 #as: --pic --no-underscore --em=criself
-#ld: -m crislinux tmpdir/libdso-1.so
+#ld: -m crislinux tmpdir/libdso-1.so --hash-style=sysv
 #objdump: -sR
 
 # Make sure we don't merge a PLT-specific entry

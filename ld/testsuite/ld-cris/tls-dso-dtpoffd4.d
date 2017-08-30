@@ -4,7 +4,7 @@
 #source: tls128.s
 #source: tls-commx.s
 #as: --no-underscore --em=criself --pic -I$srcdir/$subdir
-#ld: -m crislinux --shared
+#ld: -m crislinux --shared --hash-style=sysv
 #objdump: -d -s -t -r -p
 
 # Linking a file with a DTPOFF from a .dtpoffd of a GD COMMON

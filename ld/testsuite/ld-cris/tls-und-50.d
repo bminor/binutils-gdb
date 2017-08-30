@@ -1,6 +1,6 @@
 #source: tls-ie-8.s --pic
 #as: --no-underscore --em=criself
-#ld: -m crislinux --shared
+#ld: -m crislinux --shared --hash-style=sysv
 #readelf: -a -x 7
 
 # Undefined reference for a R_CRIS_16_GOT_TPREL in a DSO.  Not an

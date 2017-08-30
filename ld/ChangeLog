@@ -1,3 +1,36 @@
+2017-08-30  Hans-Peter Nilsson  <hp@axis.com>
+
+	* testsuite/ld-cris/dso-pltdis1.d: Run ld with --hash-style=sysv.
+	* testsuite/ld-cris/dso-pltdis2.d,
+	testsuite/ld-cris/dso12-pltdis.d, testsuite/ld-cris/expdyn1.d,
+	testsuite/ld-cris/expdyn5.d, testsuite/ld-cris/expdyn6.d,
+	testsuite/ld-cris/expdyn7.d, testsuite/ld-cris/gotplt1.d,
+	testsuite/ld-cris/gotplt2.d, testsuite/ld-cris/gotplt3.d,
+	testsuite/ld-cris/hiddef1.d, testsuite/ld-cris/libdso-11.d,
+	testsuite/ld-cris/libdso-12.d, testsuite/ld-cris/libdso-12b.d,
+	testsuite/ld-cris/libdso-12c.d, testsuite/ld-cris/libdso-13.d,
+	testsuite/ld-cris/libdso-13b.d, testsuite/ld-cris/libdso-14.d,
+	testsuite/ld-cris/libdso-15.d, testsuite/ld-cris/libdso-15b.d,
+	testsuite/ld-cris/libdso-1b.d, testsuite/ld-cris/libdso-1c.d,
+	testsuite/ld-cris/libdso-1d.d, testsuite/ld-cris/libdso-4.d,
+	testsuite/ld-cris/pr16044.d, testsuite/ld-cris/pv32-1.d,
+	testsuite/ld-cris/tls-dso-dtpoffd2.d,
+	testsuite/ld-cris/tls-dso-dtpoffd4.d,
+	testsuite/ld-cris/tls-dso-tpoffgotcomm1.d,
+	testsuite/ld-cris/tls-dso-x1x2-1.d, testsuite/ld-cris/tls-gc-71.d,
+	testsuite/ld-cris/tls-ie-78.d, testsuite/ld-cris/tls-js1.d,
+	testsuite/ld-cris/tls-ldgdex-14.d,
+	testsuite/ld-cris/tls-ldgdex-15.d,
+	testsuite/ld-cris/tls-legdx-16.d,
+	testsuite/ld-cris/tls-legdx-17.d,
+	testsuite/ld-cris/tls-local-63.d,
+	testsuite/ld-cris/tls-local-64.d, testsuite/ld-cris/tls-ok-30.d,
+	testsuite/ld-cris/tls-ok-32.d, testsuite/ld-cris/tls-ok-34.d,
+	testsuite/ld-cris/tls-und-38.d, testsuite/ld-cris/tls-und-42.d,
+	testsuite/ld-cris/tls-und-46.d, testsuite/ld-cris/tls-und-50.d,
+	testsuite/ld-cris/weakref2.d, testsuite/ld-cris/weakref3.d,
+	testsuite/ld-cris/weakref4.d: Likewise.
+
 2017-08-29  Jozef Lawrynowicz  <jozef.l@somniumtech.com>
 
 	* emultempl/msp430.em (change_output_section): New function.
