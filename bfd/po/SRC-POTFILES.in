@@ -263,6 +263,8 @@ elfxx-mips.c
 elfxx-riscv.c
 elfxx-sparc.c
 elfxx-tilegx.c
+elfxx-x86.c
+elfxx-x86.c
 epoc-pe-arm.c
 epoc-pei-arm.c
 format.c

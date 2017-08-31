@@ -1,5 +1,9 @@
 2017-08-31  Alan Modra  <amodra@gmail.com>
 
+	* po/SRC-POTFILES.in: Regenerate.
+
+2017-08-31  Alan Modra  <amodra@gmail.com>
+
 	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Don't exit early
 	for a section containing just a terminator.  Allow multiple
 	terminators at end of section.
