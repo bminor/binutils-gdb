@@ -1,5 +1,14 @@
 2017-08-31  Alan Modra  <amodra@gmail.com>
 
+	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Don't exit early
+	for a section containing just a terminator.  Allow multiple
+	terminators at end of section.
+	* elflink.c (bfd_elf_discard_info): Iterate over .eh_frame
+	sections when not adding alignment.  Assert on terminator in
+	the middle of FDEs.
+
+2017-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 21441
 	PR 22048
 	* elflink.c (bfd_elf_discard_info): Don't pad embedded zero
