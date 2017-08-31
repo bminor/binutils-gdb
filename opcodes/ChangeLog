@@ -1,3 +1,8 @@
+2017-08-31  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32-dis.c (print_insn_ft32): Correct display of non-address
+	fields.
+
 2017-08-23  Alexander Fedotov <alexander.fedotov@nxp.com>
 	    Edmar Wienskoski <edmar.wienskoski@nxp.com>
 

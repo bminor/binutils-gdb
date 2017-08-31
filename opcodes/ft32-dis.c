@@ -32,6 +32,13 @@ extern const ft32_opc_info_t ft32_opc_info[128];
 static fprintf_ftype fpr;
 static void *stream;
 
+static int
+sign_extend(int bit, int value)
+{
+  int onebit = (1 << bit);
+  return (value & (onebit - 1)) - (value & onebit);
+}
+
 int
 print_insn_ft32 (bfd_vma addr, struct disassemble_info *info)
 {
@@ -118,7 +125,7 @@ print_insn_ft32 (bfd_vma addr, struct disassemble_info *info)
               case  FT32_FLD_RIMM:
                 imm = (iword >> FT32_FLD_RIMM_BIT) & ((1 << FT32_FLD_RIMM_SIZ) - 1);
                 if (imm & 0x400)
-                  info->print_address_func ((bfd_vma) imm & 0x3ff, info);
+                  fpr(stream, "%d", sign_extend(9, imm));
                 else
                   fpr(stream, "$r%d", imm & 0x1f);
                 break;
@@ -127,7 +134,7 @@ print_insn_ft32 (bfd_vma addr, struct disassemble_info *info)
                 break;
               case  FT32_FLD_K20:
                 imm = iword & ((1 << FT32_FLD_K20_SIZ) - 1);
-                info->print_address_func ((bfd_vma) imm, info);
+                fpr(stream, "%d", sign_extend(19, imm));
                 break;
               case  FT32_FLD_PA:
                 imm = (iword & ((1 << FT32_FLD_PA_SIZ) - 1)) << 2;
@@ -135,17 +142,15 @@ print_insn_ft32 (bfd_vma addr, struct disassemble_info *info)
                 break;
               case  FT32_FLD_AA:
                 imm = iword & ((1 << FT32_FLD_AA_SIZ) - 1);
-                info->print_address_func ((bfd_vma) imm, info);
-                break;
+                info->print_address_func ((1 << 23) | (bfd_vma) imm, info);
                 break;
               case  FT32_FLD_K16:
                 imm = iword & ((1 << FT32_FLD_K16_SIZ) - 1);
-                info->print_address_func ((bfd_vma) imm, info);
+                fpr(stream, "%d", imm);
                 break;
               case  FT32_FLD_K8:
                 imm = iword & ((1 << FT32_FLD_K8_SIZ) - 1);
-                info->print_address_func ((bfd_vma) imm, info);
-                break;
+                fpr(stream, "%d", sign_extend(7, imm));
                 break;
               case  FT32_FLD_R_D_POST:
                 fpr(stream, "$r%d", (iword >> FT32_FLD_R_D_BIT) & 0x1f);
