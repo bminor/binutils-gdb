@@ -1,3 +1,11 @@
+2017-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22048
+	* testsuite/ld-x86-64/pr22048.d: New file.
+	* testsuite/ld-x86-64/pr22048a.s: Likewise.
+	* testsuite/ld-x86-64/pr22048b.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr22048.
+
 2017-08-31  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/eh3.d: Update.
