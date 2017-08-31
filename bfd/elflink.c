@@ -13857,39 +13857,36 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 
 	  fini_reloc_cookie_for_section (&cookie, i);
 	}
+
       eh_alignment = 1 << o->alignment_power;
-      if (eh_alignment > 4)
-	{
-	  /* Skip over zero terminator, and prevent empty sections
-	     from adding alignment padding at the end.  */
-	  for (i = o->map_tail.s; i != NULL; i = i->map_tail.s)
-	    if (i->size == 0)
-	      i->flags |= SEC_EXCLUDE;
-	    else if (i->size > 4)
-	      break;
-	  /* The last non-empty eh_frame section doesn't need padding.  */
-	  if (i != NULL)
-	    i = i->map_tail.s;
-	  /* Any prior sections must pad the last FDE out to the
-	     output section alignment.  Otherwise we might have zero
-	     padding between sections, which would be seen as a
-	     terminator.  If there is a terminator in the middle of
-	     FDEs, don't increase its size as that will write bogus
-	     data of whatever was after the terminator in the input
-	     file, to the output file.  */
-	  for (; i != NULL; i = i->map_tail.s)
-	    if (i->size != 4)
+      /* Skip over zero terminator, and prevent empty sections from
+	 adding alignment padding at the end.  */
+      for (i = o->map_tail.s; i != NULL; i = i->map_tail.s)
+	if (i->size == 0)
+	  i->flags |= SEC_EXCLUDE;
+	else if (i->size > 4)
+	  break;
+      /* The last non-empty eh_frame section doesn't need padding.  */
+      if (i != NULL)
+	i = i->map_tail.s;
+      /* Any prior sections must pad the last FDE out to the output
+	 section alignment.  Otherwise we might have zero padding
+	 between sections, which would be seen as a terminator.  */
+      for (; i != NULL; i = i->map_tail.s)
+	if (i->size == 4)
+	  /* All but the last zero terminator should have been removed.  */
+	  BFD_FAIL ();
+	else
+	  {
+	    bfd_size_type size
+	      = (i->size + eh_alignment - 1) & -eh_alignment;
+	    if (i->size != size)
 	      {
-		bfd_size_type size
-		  = (i->size + eh_alignment - 1) & -eh_alignment;
-		if (i->size != size)
-		  {
-		    i->size = size;
-		    changed = 1;
-		    eh_changed = 1;
-		  }
+		i->size = size;
+		changed = 1;
+		eh_changed = 1;
 	      }
-	}
+	  }
       if (eh_changed)
 	elf_link_hash_traverse (elf_hash_table (info),
 				_bfd_elf_adjust_eh_frame_global_symbol, NULL);

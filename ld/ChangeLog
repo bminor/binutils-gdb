@@ -1,3 +1,8 @@
+2017-08-31  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/eh3.d: Update.
+	* testsuite/ld-elf/eh4.d: Update.
+
 2017-08-14  Alan Modra  <amodra@gmail.com>
 
 	PR 21441

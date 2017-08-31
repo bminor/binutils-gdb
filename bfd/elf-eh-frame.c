@@ -619,15 +619,6 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
   REQUIRE (bfd_malloc_and_get_section (abfd, sec, &ehbuf));
 
-  if (sec->size >= 4
-      && bfd_get_32 (abfd, ehbuf) == 0
-      && cookie->rel == cookie->relend)
-    {
-      /* Empty .eh_frame section.  */
-      free (ehbuf);
-      return;
-    }
-
   /* If .eh_frame section size doesn't fit into int, we cannot handle
      it (it would need to use 64-bit .eh_frame format anyway).  */
   REQUIRE (sec->size == (unsigned int) sec->size);
@@ -669,8 +660,11 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
   REQUIRE (sec_info);
 
   /* We need to have a "struct cie" for each CIE in this section.  */
-  local_cies = (struct cie *) bfd_zmalloc (num_cies * sizeof (*local_cies));
-  REQUIRE (local_cies);
+  if (num_cies)
+    {
+      local_cies = (struct cie *) bfd_zmalloc (num_cies * sizeof (*local_cies));
+      REQUIRE (local_cies);
+    }
 
   /* FIXME: octets_per_byte.  */
 #define ENSURE_NO_RELOCS(buf)				\
@@ -724,7 +718,9 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
       if (hdr_length == 0)
 	{
 	  /* A zero-length CIE should only be found at the end of
-	     the section.  */
+	     the section, but allow multiple terminators.  */
+	  while (skip_bytes (&buf, ehbuf + sec->size, 4))
+	    REQUIRE (bfd_get_32 (abfd, buf - 4) == 0);
 	  REQUIRE ((bfd_size_type) (buf - ehbuf) == sec->size);
 	  ENSURE_NO_RELOCS (buf);
 	  sec_info->count++;
