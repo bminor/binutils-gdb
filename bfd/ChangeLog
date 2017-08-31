@@ -1,3 +1,9 @@
+2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (bfd_backends): Add elf64.lo together with
+	elfxx-x86.lo for 64-bit BFD.
+	* configure: Regenerated.
+
 2017-08-31  James Bowman  <james.bowman@ftdichip.com>
 
 	* elf32-ft32.c (ft32_elf_howto_table): Use complain_overflow_dont
