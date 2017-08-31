@@ -13873,17 +13873,22 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 	  /* Any prior sections must pad the last FDE out to the
 	     output section alignment.  Otherwise we might have zero
 	     padding between sections, which would be seen as a
-	     terminator.  */
+	     terminator.  If there is a terminator in the middle of
+	     FDEs, don't increase its size as that will write bogus
+	     data of whatever was after the terminator in the input
+	     file, to the output file.  */
 	  for (; i != NULL; i = i->map_tail.s)
-	    {
-	      bfd_size_type size = (i->size + eh_alignment - 1) & -eh_alignment;
-	      if (i->size != size)
-		{
-		  i->size = size;
-		  changed = 1;
-		  eh_changed = 1;
-		}
-	    }
+	    if (i->size != 4)
+	      {
+		bfd_size_type size
+		  = (i->size + eh_alignment - 1) & -eh_alignment;
+		if (i->size != size)
+		  {
+		    i->size = size;
+		    changed = 1;
+		    eh_changed = 1;
+		  }
+	      }
 	}
       if (eh_changed)
 	elf_link_hash_traverse (elf_hash_table (info),
