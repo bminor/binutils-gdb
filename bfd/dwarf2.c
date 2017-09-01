@@ -2096,12 +2096,12 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
       offset_size = 8;
     }
 
-  if (lh.total_length > stash->dwarf_line_size)
+  if (unit->line_offset + lh.total_length > stash->dwarf_line_size)
     {
       _bfd_error_handler
 	/* xgettext: c-format */
-	(_("Dwarf Error: Line info data is bigger (%#Lx) than the section (%#Lx)"),
-	 lh.total_length, stash->dwarf_line_size);
+	(_("Dwarf Error: Line info data is bigger (%#Lx) than the space remaining in the section (%#Lx)"),
+	 lh.total_length, stash->dwarf_line_size - unit->line_offset);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }
