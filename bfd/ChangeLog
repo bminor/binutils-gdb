@@ -1,3 +1,9 @@
+2017-09-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 22058
+	* elf-attrs.c (_bfd_elf_parse_attributes): Ensure that the
+	attribute buffer is NUL terminated.
+
 2017-08-31  Nick Clifton  <nickc@redhat.com>
 
 	PR 22047
