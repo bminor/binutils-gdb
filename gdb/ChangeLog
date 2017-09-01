@@ -1,3 +1,9 @@
+2017-09-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/22046
+	* nat/linux-procfs.c (parse_proc_status_state): Fix PROC_STATE_STOPPED
+	detection.
+
 2017-08-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/21827
