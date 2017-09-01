@@ -848,8 +848,8 @@ static const struct elf_x86_lazy_plt_layout elf_x86_64_lazy_plt =
     6,                                  /* plt_got_insn_size */
     LAZY_PLT_ENTRY_SIZE,                /* plt_plt_insn_end */
     6,                                  /* plt_lazy_offset */
-    NULL,                               /* pic_plt0_entry */
-    NULL,                               /* pic_plt_entry */
+    elf_x86_64_lazy_plt0_entry,         /* pic_plt0_entry */
+    elf_x86_64_lazy_plt_entry,          /* pic_plt_entry */
     elf_x86_64_eh_frame_lazy_plt,       /* eh_frame_plt */
     sizeof (elf_x86_64_eh_frame_lazy_plt) /* eh_frame_plt_size */
   };
@@ -857,7 +857,7 @@ static const struct elf_x86_lazy_plt_layout elf_x86_64_lazy_plt =
 static const struct elf_x86_non_lazy_plt_layout elf_x86_64_non_lazy_plt =
   {
     elf_x86_64_non_lazy_plt_entry,      /* plt_entry */
-    NULL,                               /* pic_plt_entry */
+    elf_x86_64_non_lazy_plt_entry,      /* pic_plt_entry */
     NON_LAZY_PLT_ENTRY_SIZE,            /* plt_entry_size */
     2,                                  /* plt_got_offset */
     6,                                  /* plt_got_insn_size */
@@ -880,8 +880,8 @@ static const struct elf_x86_lazy_plt_layout elf_x86_64_lazy_bnd_plt =
     1+6,                                /* plt_got_insn_size */
     11,                                 /* plt_plt_insn_end */
     0,                                  /* plt_lazy_offset */
-    NULL,                               /* pic_plt0_entry */
-    NULL,                               /* pic_plt_entry */
+    elf_x86_64_lazy_bnd_plt0_entry,     /* pic_plt0_entry */
+    elf_x86_64_lazy_bnd_plt_entry,      /* pic_plt_entry */
     elf_x86_64_eh_frame_lazy_bnd_plt,   /* eh_frame_plt */
     sizeof (elf_x86_64_eh_frame_lazy_bnd_plt) /* eh_frame_plt_size */
   };
@@ -889,7 +889,7 @@ static const struct elf_x86_lazy_plt_layout elf_x86_64_lazy_bnd_plt =
 static const struct elf_x86_non_lazy_plt_layout elf_x86_64_non_lazy_bnd_plt =
   {
     elf_x86_64_non_lazy_bnd_plt_entry,  /* plt_entry */
-    NULL,                               /* pic_plt_entry */
+    elf_x86_64_non_lazy_bnd_plt_entry,  /* pic_plt_entry */
     NON_LAZY_PLT_ENTRY_SIZE,            /* plt_entry_size */
     1+2,                                /* plt_got_offset */
     1+6,                                /* plt_got_insn_size */
@@ -912,8 +912,8 @@ static const struct elf_x86_lazy_plt_layout elf_x86_64_lazy_ibt_plt =
     4+1+6,                              /* plt_got_insn_size */
     4+1+5+5,                            /* plt_plt_insn_end */
     0,                                  /* plt_lazy_offset */
-    NULL,                               /* pic_plt0_entry */
-    NULL,                               /* pic_plt_entry */
+    elf_x86_64_lazy_bnd_plt0_entry,     /* pic_plt0_entry */
+    elf_x86_64_lazy_ibt_plt_entry,      /* pic_plt_entry */
     elf_x86_64_eh_frame_lazy_ibt_plt,   /* eh_frame_plt */
     sizeof (elf_x86_64_eh_frame_lazy_ibt_plt) /* eh_frame_plt_size */
   };
@@ -933,8 +933,8 @@ static const struct elf_x86_lazy_plt_layout elf_x32_lazy_ibt_plt =
     4+6,                                /* plt_got_insn_size */
     4+5+5,                              /* plt_plt_insn_end */
     0,                                  /* plt_lazy_offset */
-    NULL,                               /* pic_plt0_entry */
-    NULL,                               /* pic_plt_entry */
+    elf_x86_64_lazy_plt0_entry,         /* pic_plt0_entry */
+    elf_x32_lazy_ibt_plt_entry,         /* pic_plt_entry */
     elf_x32_eh_frame_lazy_ibt_plt,      /* eh_frame_plt */
     sizeof (elf_x32_eh_frame_lazy_ibt_plt) /* eh_frame_plt_size */
   };
@@ -942,7 +942,7 @@ static const struct elf_x86_lazy_plt_layout elf_x32_lazy_ibt_plt =
 static const struct elf_x86_non_lazy_plt_layout elf_x86_64_non_lazy_ibt_plt =
   {
     elf_x86_64_non_lazy_ibt_plt_entry,  /* plt_entry */
-    NULL,                               /* pic_plt_entry */
+    elf_x86_64_non_lazy_ibt_plt_entry,  /* pic_plt_entry */
     LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
     4+1+2,                              /* plt_got_offset */
     4+1+6,                              /* plt_got_insn_size */
@@ -953,7 +953,7 @@ static const struct elf_x86_non_lazy_plt_layout elf_x86_64_non_lazy_ibt_plt =
 static const struct elf_x86_non_lazy_plt_layout elf_x32_non_lazy_ibt_plt =
   {
     elf_x32_non_lazy_ibt_plt_entry,     /* plt_entry */
-    NULL,                               /* pic_plt_entry */
+    elf_x32_non_lazy_ibt_plt_entry,     /* pic_plt_entry */
     LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
     4+2,                                /* plt_got_offset */
     4+6,                                /* plt_got_insn_size */
@@ -6380,386 +6380,44 @@ elf_x86_64_relocs_compatible (const bfd_target *input,
 static bfd *
 elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
 {
-  bfd_boolean normal_target;
-  bfd_boolean lazy_plt;
-  asection *sec, *pltsec;
-  bfd *dynobj;
-  bfd_boolean use_ibt_plt;
-  unsigned int plt_alignment, features;
-  struct elf_x86_link_hash_table *htab;
-  bfd *pbfd;
-  bfd *ebfd = NULL;
-  elf_property *prop;
+  struct elf_x86_plt_layout_table plt_layout;
 
-  features = 0;
-  if (info->ibt)
-    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
-  if (info->shstk)
-    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
-
-  /* Find a normal input file with GNU property note.  */
-  for (pbfd = info->input_bfds;
-       pbfd != NULL;
-       pbfd = pbfd->link.next)
-    if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
-	&& bfd_count_sections (pbfd) != 0)
-      {
-	ebfd = pbfd;
-
-	if (elf_properties (pbfd) != NULL)
-	  break;
-      }
-
-  if (ebfd != NULL && features)
+  plt_layout.is_vxworks = FALSE;
+  if (get_elf_x86_64_backend_data (info->output_bfd)->os == is_normal)
     {
-      /* If features is set, add GNU_PROPERTY_X86_FEATURE_1_IBT and
-	 GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
-      prop = _bfd_elf_get_property (ebfd,
-				    GNU_PROPERTY_X86_FEATURE_1_AND,
-				    4);
-      prop->u.number |= features;
-      prop->pr_kind = property_number;
-
-      /* Create the GNU property note section if needed.  */
-      if (pbfd == NULL)
+      if (info->bndplt)
 	{
-	  sec = bfd_make_section_with_flags (ebfd,
-					     NOTE_GNU_PROPERTY_SECTION_NAME,
-					     (SEC_ALLOC
-					      | SEC_LOAD
-					      | SEC_IN_MEMORY
-					      | SEC_READONLY
-					      | SEC_HAS_CONTENTS
-					      | SEC_DATA));
-	  if (sec == NULL)
-	    info->callbacks->einfo (_("%F: failed to create GNU property section\n"));
-
-	  if (!bfd_set_section_alignment (ebfd, sec,
-					  ABI_64_P (ebfd) ? 3 : 2))
-	    {
-error_alignment:
-	      info->callbacks->einfo (_("%F%A: failed to align section\n"),
-				      sec);
-	    }
-
-	  elf_section_type (sec) = SHT_NOTE;
-	}
-    }
-
-  pbfd = _bfd_elf_link_setup_gnu_properties (info);
-
-  if (bfd_link_relocatable (info))
-    return pbfd;
-
-  htab = elf_x86_hash_table (info, X86_64_ELF_DATA);
-  if (htab == NULL)
-    return pbfd;
-
-  use_ibt_plt = info->ibtplt || info->ibt;
-  if (!use_ibt_plt && pbfd != NULL)
-    {
-      /* Check if GNU_PROPERTY_X86_FEATURE_1_IBT is on.  */
-      elf_property_list *p;
-
-      /* The property list is sorted in order of type.  */
-      for (p = elf_properties (pbfd); p; p = p->next)
-	{
-	  if (GNU_PROPERTY_X86_FEATURE_1_AND == p->property.pr_type)
-	    {
-	      use_ibt_plt = !!(p->property.u.number
-			       & GNU_PROPERTY_X86_FEATURE_1_IBT);
-	      break;
-	    }
-	  else if (GNU_PROPERTY_X86_FEATURE_1_AND < p->property.pr_type)
-	    break;
-	}
-    }
-
-  dynobj = htab->elf.dynobj;
-
-  /* Set htab->elf.dynobj here so that there is no need to check and
-     set it in check_relocs.  */
-  if (dynobj == NULL)
-    {
-      if (pbfd != NULL)
-	{
-	  htab->elf.dynobj = pbfd;
-	  dynobj = pbfd;
+	  plt_layout.lazy_plt = &elf_x86_64_lazy_bnd_plt;
+	  plt_layout.non_lazy_plt = &elf_x86_64_non_lazy_bnd_plt;
 	}
       else
 	{
-	  bfd *abfd;
-
-	  /* Find a normal input file to hold linker created
-	     sections.  */
-	  for (abfd = info->input_bfds;
-	       abfd != NULL;
-	       abfd = abfd->link.next)
-	    if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
-		&& (abfd->flags
-		    & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
-	      {
-		htab->elf.dynobj = abfd;
-		dynobj = abfd;
-		break;
-	      }
+	  plt_layout.lazy_plt = &elf_x86_64_lazy_plt;
+	  plt_layout.non_lazy_plt = &elf_x86_64_non_lazy_plt;
 	}
-    }
 
-  /* Even when lazy binding is disabled by "-z now", the PLT0 entry may
-     still be used with LD_AUDIT or LD_PROFILE if PLT entry is used for
-     canonical function address.  */
-  htab->plt.has_plt0 = 1;
-
-  if (get_elf_x86_64_backend_data (info->output_bfd)->os
-      == is_normal)
-    {
-      if (use_ibt_plt)
+      if (ABI_64_P (info->output_bfd))
 	{
-	  if (ABI_64_P (dynobj))
-	    {
-	      htab->lazy_plt
-		= &elf_x86_64_lazy_ibt_plt;
-	      htab->non_lazy_plt
-		= &elf_x86_64_non_lazy_ibt_plt;
-	    }
-	  else
-	    {
-	      htab->lazy_plt
-		= &elf_x32_lazy_ibt_plt;
-	      htab->non_lazy_plt
-		= &elf_x32_non_lazy_ibt_plt;
-	    }
-	}
-      else if (info->bndplt)
-	{
-	  htab->lazy_plt = &elf_x86_64_lazy_bnd_plt;
-	  htab->non_lazy_plt = &elf_x86_64_non_lazy_bnd_plt;
+	  plt_layout.lazy_ibt_plt = &elf_x86_64_lazy_ibt_plt;
+	  plt_layout.non_lazy_ibt_plt = &elf_x86_64_non_lazy_ibt_plt;
 	}
       else
 	{
-	  htab->lazy_plt = &elf_x86_64_lazy_plt;
-	  htab->non_lazy_plt = &elf_x86_64_non_lazy_plt;
+	  plt_layout.lazy_ibt_plt = &elf_x32_lazy_ibt_plt;
+	  plt_layout.non_lazy_ibt_plt = &elf_x32_non_lazy_ibt_plt;
 	}
-      normal_target = TRUE;
+      plt_layout.normal_target = TRUE;
     }
   else
     {
-      htab->lazy_plt = &elf_x86_64_nacl_plt;
-      htab->non_lazy_plt = NULL;
-      normal_target = FALSE;
+      plt_layout.lazy_plt = &elf_x86_64_nacl_plt;
+      plt_layout.non_lazy_plt = NULL;
+      plt_layout.lazy_ibt_plt = NULL;
+      plt_layout.non_lazy_ibt_plt = NULL;
+      plt_layout.normal_target = FALSE;
     }
 
-  pltsec = htab->elf.splt;
-
-  /* If the non-lazy PLT is available, use it for all PLT entries if
-     there are no PLT0 or no .plt section.  */
-  if (htab->non_lazy_plt != NULL
-      && (!htab->plt.has_plt0 || pltsec == NULL))
-    {
-      lazy_plt = FALSE;
-      htab->plt.plt_entry = htab->non_lazy_plt->plt_entry;
-      htab->plt.plt_entry_size = htab->non_lazy_plt->plt_entry_size;
-      htab->plt.plt_got_offset = htab->non_lazy_plt->plt_got_offset;
-      htab->plt.plt_got_insn_size
-	= htab->non_lazy_plt->plt_got_insn_size;
-      htab->plt.eh_frame_plt_size
-	= htab->non_lazy_plt->eh_frame_plt_size;
-      htab->plt.eh_frame_plt = htab->non_lazy_plt->eh_frame_plt;
-    }
-  else
-    {
-      lazy_plt = TRUE;
-      htab->plt.plt_entry = htab->lazy_plt->plt_entry;
-      htab->plt.plt_entry_size = htab->lazy_plt->plt_entry_size;
-      htab->plt.plt_got_offset = htab->lazy_plt->plt_got_offset;
-      htab->plt.plt_got_insn_size
-	= htab->lazy_plt->plt_got_insn_size;
-      htab->plt.eh_frame_plt_size
-	= htab->lazy_plt->eh_frame_plt_size;
-      htab->plt.eh_frame_plt = htab->lazy_plt->eh_frame_plt;
-    }
-
-  /* This is unused for x86-64.  */
-  htab->plt.plt0_entry = NULL;
-
-  /* Return if there are no normal input files.  */
-  if (dynobj == NULL)
-    return pbfd;
-
-  /* Since create_dynamic_sections isn't always called, but GOT
-     relocations need GOT relocations, create them here so that we
-     don't need to do it in check_relocs.  */
-  if (htab->elf.sgot == NULL
-      && !_bfd_elf_create_got_section (dynobj, info))
-    info->callbacks->einfo (_("%F: failed to create GOT sections\n"));
-
-  /* Align .got and .got.plt sections to their entry size.  Do it here
-     instead of in create_dynamic_sections so that they are always
-     properly aligned even if create_dynamic_sections isn't called.  */
-  sec = htab->elf.sgot;
-  if (!bfd_set_section_alignment (dynobj, sec, 3))
-    goto error_alignment;
-
-  sec = htab->elf.sgotplt;
-  if (!bfd_set_section_alignment (dynobj, sec, 3))
-    goto error_alignment;
-
-  /* Create the ifunc sections here so that check_relocs can be
-     simplified.  */
-  if (!_bfd_elf_create_ifunc_sections (dynobj, info))
-    info->callbacks->einfo (_("%F: failed to create ifunc sections\n"));
-
-  plt_alignment = bfd_log2 (htab->plt.plt_entry_size);
-
-  if (pltsec != NULL)
-    {
-      /* Whe creating executable, set the contents of the .interp
-	 section to the interpreter.  */
-      if (bfd_link_executable (info) && !info->nointerp)
-	{
-	  asection *s = bfd_get_linker_section (dynobj, ".interp");
-	  if (s == NULL)
-	    abort ();
-	  s->size = htab->dynamic_interpreter_size;
-	  s->contents = (unsigned char *) htab->dynamic_interpreter;
-	  htab->interp = s;
-	}
-
-      /* Don't change PLT section alignment for NaCl since it uses
-	 64-byte PLT entry and sets PLT section alignment to 32
-	 bytes.  Don't create additional PLT sections for NaCl.  */
-      if (normal_target)
-	{
-	  const struct elf_backend_data *bed
-	    = get_elf_backend_data (dynobj);
-	  flagword pltflags = (bed->dynamic_sec_flags
-			       | SEC_ALLOC
-			       | SEC_CODE
-			       | SEC_LOAD
-			       | SEC_READONLY);
-	  unsigned int non_lazy_plt_alignment
-	    = bfd_log2 (htab->non_lazy_plt->plt_entry_size);
-
-	  sec = pltsec;
-	  if (!bfd_set_section_alignment (sec->owner, sec,
-					  plt_alignment))
-	    goto error_alignment;
-
-	  /* Create the GOT procedure linkage table.  */
-	  sec = bfd_make_section_anyway_with_flags (dynobj,
-						    ".plt.got",
-						    pltflags);
-	  if (sec == NULL)
-	    info->callbacks->einfo (_("%F: failed to create GOT PLT section\n"));
-
-	  if (!bfd_set_section_alignment (dynobj, sec,
-					  non_lazy_plt_alignment))
-	    goto error_alignment;
-
-	  htab->plt_got = sec;
-
-	  if (lazy_plt)
-	    {
-	      sec = NULL;
-
-	      if (use_ibt_plt)
-		{
-		  /* Create the second PLT for Intel IBT support.  IBT
-		     PLT is supported only for non-NaCl target and is
-		     is needed only for lazy binding.  */
-		  sec = bfd_make_section_anyway_with_flags (dynobj,
-							    ".plt.sec",
-							    pltflags);
-		  if (sec == NULL)
-		    info->callbacks->einfo (_("%F: failed to create IBT-enabled PLT section\n"));
-
-		  if (!bfd_set_section_alignment (dynobj, sec,
-						  plt_alignment))
-		    goto error_alignment;
-		}
-	      else if (info->bndplt && ABI_64_P (dynobj))
-		{
-		  /* Create the second PLT for Intel MPX support.  MPX
-		     PLT is supported only for non-NaCl target in 64-bit
-		     mode and is needed only for lazy binding.  */
-		  sec = bfd_make_section_anyway_with_flags (dynobj,
-							    ".plt.sec",
-							    pltflags);
-		  if (sec == NULL)
-		    info->callbacks->einfo (_("%F: failed to create BND PLT section\n"));
-
-		  if (!bfd_set_section_alignment (dynobj, sec,
-						  non_lazy_plt_alignment))
-		    goto error_alignment;
-		}
-
-	      htab->plt_second = sec;
-	    }
-	}
-
-      if (!info->no_ld_generated_unwind_info)
-	{
-	  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
-			    | SEC_HAS_CONTENTS | SEC_IN_MEMORY
-			    | SEC_LINKER_CREATED);
-
-	  sec = bfd_make_section_anyway_with_flags (dynobj,
-						    ".eh_frame",
-						    flags);
-	  if (sec == NULL)
-	    info->callbacks->einfo (_("%F: failed to create PLT .eh_frame section\n"));
-
-	  if (!bfd_set_section_alignment (dynobj, sec,
-					  ABI_64_P (dynobj) ? 3 : 2))
-	    goto error_alignment;
-
-	  htab->plt_eh_frame = sec;
-
-	  if (htab->plt_got != NULL)
-	    {
-	      sec = bfd_make_section_anyway_with_flags (dynobj,
-							".eh_frame",
-							flags);
-	      if (sec == NULL)
-		info->callbacks->einfo (_("%F: failed to create GOT PLT .eh_frame section\n"));
-
-	      if (!bfd_set_section_alignment (dynobj, sec,
-					      ABI_64_P (dynobj) ? 3 : 2))
-		goto error_alignment;
-
-	      htab->plt_got_eh_frame = sec;
-	    }
-
-	  if (htab->plt_second != NULL)
-	    {
-	      sec = bfd_make_section_anyway_with_flags (dynobj,
-							".eh_frame",
-							flags);
-	      if (sec == NULL)
-		info->callbacks->einfo (_("%F: failed to create the second PLT .eh_frame section\n"));
-
-	      if (!bfd_set_section_alignment (dynobj, sec,
-					      ABI_64_P (dynobj) ? 3 : 2))
-		goto error_alignment;
-
-	      htab->plt_second_eh_frame = sec;
-	    }
-	}
-    }
-
-  if (normal_target)
-    {
-      /* The .iplt section is used for IFUNC symbols in static
-	 executables.  */
-      sec = htab->elf.iplt;
-      if (sec != NULL
-	  && !bfd_set_section_alignment (sec->owner, sec,
-					 plt_alignment))
-	goto error_alignment;
-    }
-
-  return pbfd;
+  return _bfd_x86_elf_link_setup_gnu_properties (info, &plt_layout);
 }
 
 static const struct bfd_elf_special_section
@@ -7062,8 +6720,8 @@ static const struct elf_x86_lazy_plt_layout elf_x86_64_nacl_plt =
     7,                                       /* plt_got_insn_size */
     42,                                      /* plt_plt_insn_end */
     32,                                      /* plt_lazy_offset */
-    NULL,                                    /* pic_plt0_entry */
-    NULL,                                    /* pic_plt_entry */
+    elf_x86_64_nacl_plt0_entry,              /* pic_plt0_entry */
+    elf_x86_64_nacl_plt_entry,               /* pic_plt_entry */
     elf_x86_64_nacl_eh_frame_plt,            /* eh_frame_plt */
     sizeof (elf_x86_64_nacl_eh_frame_plt)    /* eh_frame_plt_size */
   };

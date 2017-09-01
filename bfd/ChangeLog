@@ -1,5 +1,30 @@
 2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Updated.
+	Call _bfd_x86_elf_link_setup_gnu_properties.
+	* elf64-x86-64.c (elf_x86_lazy_plt_layout): Initialize
+	pic_plt0_entry and pic_plt_entry fields with the non-PIC PLT
+	entries.
+	(elf_x86_64_non_lazy_plt): Likewise.
+	(elf_x86_64_lazy_bnd_plt): Likewise.
+	(elf_x86_64_non_lazy_bnd_plt): Likewise.
+	(elf_x86_64_lazy_ibt_plt): Likewise.
+	(elf_x32_lazy_ibt_plt): Likewise.
+	(elf_x86_64_non_lazy_ibt_plt): Likewise.
+	(elf_x32_non_lazy_ibt_plt): Likewise.
+	(elf_x86_64_nacl_plt): Likewise.
+	(elf_x86_64_link_setup_gnu_properties): Updated.  Call
+	_bfd_x86_elf_link_setup_gnu_properties.
+	* elfxx-x86.c: Include elf-vxworks.h".
+	(_bfd_x86_elf_link_setup_gnu_properties): New function.
+	* elfxx-x86.h (elf_x86_lazy_plt_layout): Remove "for i386 only"
+	comments for pic_plt0_entry and pic_plt_entry.
+	(elf_x86_non_lazy_plt_layout): Likewise.
+	(elf_x86_plt_layout_table): New.
+	(_bfd_x86_elf_link_setup_gnu_properties): Likewise.
+
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/22061
 	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Create
 	.eh_frame section for the second PLT.

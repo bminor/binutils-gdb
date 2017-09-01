@@ -159,11 +159,11 @@ struct elf_x86_lazy_plt_layout
   unsigned int plt_lazy_offset;
 
   /* The first entry in a PIC lazy procedure linkage table looks like
-     this.  This is used for i386 only.  */
+     this.  */
   const bfd_byte *pic_plt0_entry;
 
   /* Subsequent entries in a PIC lazy procedure linkage table look
-     like this.  This is used for i386 only.  */
+     like this.  */
   const bfd_byte *pic_plt_entry;
 
   /* .eh_frame covering the lazy .plt section.  */
@@ -176,8 +176,7 @@ struct elf_x86_non_lazy_plt_layout
   /* Entries in an absolute non-lazy procedure linkage table look like
      this.  */
   const bfd_byte *plt_entry;
-  /* Entries in a PIC non-lazy procedure linkage table look like this.
-     This is used for i386 only.  */
+  /* Entries in a PIC non-lazy procedure linkage table look like this.  */
   const bfd_byte *pic_plt_entry;
 
   unsigned int plt_entry_size;          /* Size of each PLT entry.  */
@@ -304,6 +303,27 @@ struct elf_x86_link_hash_table
   const char *tls_get_addr;
 };
 
+struct elf_x86_plt_layout_table
+{
+  /* The lazy PLT layout.  */
+  const struct elf_x86_lazy_plt_layout *lazy_plt;
+
+  /* The non-lazy PLT layout.  */
+  const struct elf_x86_non_lazy_plt_layout *non_lazy_plt;
+
+  /* The lazy PLT layout for IBT.  */
+  const struct elf_x86_lazy_plt_layout *lazy_ibt_plt;
+
+  /* The non-lazy PLT layout for IBT.  */
+  const struct elf_x86_non_lazy_plt_layout *non_lazy_ibt_plt;
+
+  /* TRUE if this is an normal x86 target.  */
+  bfd_boolean normal_target;
+
+  /* TRUE if this is a VxWorks x86 target.  */
+  bfd_boolean is_vxworks;
+};
+
 struct elf_x86_obj_tdata
 {
   struct elf_obj_tdata root;
@@ -402,6 +422,9 @@ extern enum elf_property_kind _bfd_x86_elf_parse_gnu_properties
 
 extern bfd_boolean _bfd_x86_elf_merge_gnu_properties
   (struct bfd_link_info *, bfd *, elf_property *, elf_property *);
+
+extern bfd * _bfd_x86_elf_link_setup_gnu_properties
+  (struct bfd_link_info *, struct elf_x86_plt_layout_table *);
 
 #define bfd_elf64_bfd_link_hash_table_create \
   _bfd_x86_elf_link_hash_table_create
