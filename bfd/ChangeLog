@@ -1,5 +1,11 @@
 2017-09-01  Nick Clifton  <nickc@redhat.com>
 
+	PR 21933
+	PR 22060
+	* elf.c (elf_read_notes): Check for a note size of -1.
+
+2017-09-01  Nick Clifton  <nickc@redhat.com>
+
 	PR 22058
 	* elf-attrs.c (_bfd_elf_parse_attributes): Ensure that the
 	attribute buffer is NUL terminated.
