@@ -31,6 +31,14 @@
 #define ELF64_DYNAMIC_INTERPRETER "/lib/ld64.so.1"
 #define ELFX32_DYNAMIC_INTERPRETER "/lib/ldx32.so.1"
 
+bfd_boolean
+_bfd_x86_elf_mkobject (bfd *abfd)
+{
+  return bfd_elf_allocate_object (abfd,
+				  sizeof (struct elf_x86_obj_tdata),
+				  get_elf_backend_data (abfd)->target_id);
+}
+
 /* _TLS_MODULE_BASE_ needs to be treated especially when linking
    executables.  Rather than setting it to the beginning of the TLS
    section, we have to set it to the end.    This function may be called

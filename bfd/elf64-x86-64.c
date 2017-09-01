@@ -985,13 +985,6 @@ static const struct elf_x86_64_backend_data elf_x86_64_arch_bed =
    && elf_tdata (bfd) != NULL				\
    && elf_object_id (bfd) == X86_64_ELF_DATA)
 
-static bfd_boolean
-elf_x86_64_mkobject (bfd *abfd)
-{
-  return bfd_elf_allocate_object (abfd, sizeof (struct elf_x86_obj_tdata),
-				  X86_64_ELF_DATA);
-}
-
 #define elf_x86_64_compute_jump_table_size(htab) \
   ((htab)->elf.srelplt->reloc_count * GOT_ENTRY_SIZE)
 
@@ -6478,7 +6471,6 @@ elf_x86_64_special_sections[]=
 #define elf_backend_size_dynamic_sections   elf_x86_64_size_dynamic_sections
 #define elf_backend_init_index_section	    _bfd_elf_init_1_index_section
 #define elf_backend_object_p		    elf64_x86_64_elf_object_p
-#define bfd_elf64_mkobject		    elf_x86_64_mkobject
 #define bfd_elf64_get_synthetic_symtab	    elf_x86_64_get_synthetic_symtab
 
 #define elf_backend_section_from_shdr \
@@ -6766,8 +6758,6 @@ elf32_x86_64_nacl_elf_object_p (bfd *abfd)
   elf_x86_64_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup \
   elf_x86_64_reloc_name_lookup
-#define bfd_elf32_mkobject \
-  elf_x86_64_mkobject
 #define bfd_elf32_get_synthetic_symtab \
   elf_x86_64_get_synthetic_symtab
 

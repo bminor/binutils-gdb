@@ -873,14 +873,6 @@ static const struct elf_i386_backend_data elf_i386_arch_bed =
    && elf_tdata (bfd) != NULL				\
    && elf_object_id (bfd) == I386_ELF_DATA)
 
-static bfd_boolean
-elf_i386_mkobject (bfd *abfd)
-{
-  return bfd_elf_allocate_object (abfd,
-				  sizeof (struct elf_x86_obj_tdata),
-				  I386_ELF_DATA);
-}
-
 #define elf_i386_compute_jump_table_size(htab) \
   ((htab)->elf.srelplt->reloc_count * 4)
 
@@ -5878,8 +5870,6 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 /* Support RELA for objdump of prelink objects.  */
 #define elf_info_to_howto		      elf_i386_info_to_howto_rel
 #define elf_info_to_howto_rel		      elf_i386_info_to_howto_rel
-
-#define bfd_elf32_mkobject		      elf_i386_mkobject
 
 #define bfd_elf32_bfd_is_local_label_name     elf_i386_is_local_label_name
 #define bfd_elf32_bfd_reloc_type_lookup	      elf_i386_reloc_type_lookup

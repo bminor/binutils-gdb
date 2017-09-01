@@ -1,5 +1,17 @@
 2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_mkobject): Removed.
+	(bfd_elf32_mkobject): Likewise.
+	* elf64-x86-64.c (elf_x86_64_mkobject): Likewise.
+	(bfd_elf64_mkobject): Likewise.
+	(bfd_elf32_mkobject): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_mkobject): New function.
+	(_bfd_x86_elf_mkobject): New.
+	(bfd_elf64_mkobject): Likewise.
+	(bfd_elf32_mkobject): Likewise.
+
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Updated.
 	Call _bfd_x86_elf_link_setup_gnu_properties.
 	* elf64-x86-64.c (elf_x86_lazy_plt_layout): Initialize

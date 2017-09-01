@@ -365,6 +365,9 @@ struct elf_x86_plt
 #define elf_x86_local_tlsdesc_gotent(abfd) \
   (elf_x86_tdata (abfd)->local_tlsdesc_gotent)
 
+extern bfd_boolean _bfd_x86_elf_mkobject
+  (bfd *);
+
 extern void _bfd_x86_elf_set_tls_module_base
   (struct bfd_link_info *);
 
@@ -426,6 +429,10 @@ extern bfd_boolean _bfd_x86_elf_merge_gnu_properties
 extern bfd * _bfd_x86_elf_link_setup_gnu_properties
   (struct bfd_link_info *, struct elf_x86_plt_layout_table *);
 
+#define bfd_elf64_mkobject \
+  _bfd_x86_elf_mkobject
+#define bfd_elf32_mkobject \
+  _bfd_x86_elf_mkobject
 #define bfd_elf64_bfd_link_hash_table_create \
   _bfd_x86_elf_link_hash_table_create
 #define bfd_elf32_bfd_link_hash_table_create \
