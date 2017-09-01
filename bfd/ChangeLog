@@ -1,5 +1,15 @@
 2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_gc_mark_hook): Removed.
+	(elf_backend_gc_mark_hook): Likewise.
+	* elf64-x86-64.c (elf_x86_64_gc_mark_hook): Likewise.
+	(elf_backend_gc_mark_hook): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_gc_mark_hook): New function.
+	* elfxx-x86.h (_bfd_x86_elf_gc_mark_hook): New.
+	(elf_backend_gc_mark_hook): Likewise.
+
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Removed.
 	(elf_backend_adjust_dynamic_symbol): Likewise.
 	* elf64-x86-64.c (elf_x86_64_adjust_dynamic_symbol): Likewise.

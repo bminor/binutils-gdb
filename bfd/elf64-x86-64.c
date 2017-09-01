@@ -2414,27 +2414,6 @@ error_return:
   return FALSE;
 }
 
-/* Return the section that should be marked against GC for a given
-   relocation.	*/
-
-static asection *
-elf_x86_64_gc_mark_hook (asection *sec,
-			 struct bfd_link_info *info,
-			 Elf_Internal_Rela *rel,
-			 struct elf_link_hash_entry *h,
-			 Elf_Internal_Sym *sym)
-{
-  if (h != NULL)
-    switch (ELF32_R_TYPE (rel->r_info))
-      {
-      case R_X86_64_GNU_VTINHERIT:
-      case R_X86_64_GNU_VTENTRY:
-	return NULL;
-      }
-
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
-}
-
 /* Allocate space in .plt, .got and associated reloc sections for
    dynamic relocs.  */
 
@@ -6266,7 +6245,6 @@ elf_x86_64_special_sections[]=
 #define elf_backend_finish_dynamic_sections elf_x86_64_finish_dynamic_sections
 #define elf_backend_finish_dynamic_symbol   elf_x86_64_finish_dynamic_symbol
 #define elf_backend_output_arch_local_syms  elf_x86_64_output_arch_local_syms
-#define elf_backend_gc_mark_hook	    elf_x86_64_gc_mark_hook
 #define elf_backend_grok_prstatus	    elf_x86_64_grok_prstatus
 #define elf_backend_grok_psinfo		    elf_x86_64_grok_psinfo
 #ifdef CORE_HEADER

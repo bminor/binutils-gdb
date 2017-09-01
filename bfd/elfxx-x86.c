@@ -744,6 +744,34 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
+/* Return the section that should be marked against GC for a given
+   relocation.	*/
+
+asection *
+_bfd_x86_elf_gc_mark_hook (asection *sec,
+			   struct bfd_link_info *info,
+			   Elf_Internal_Rela *rel,
+			   struct elf_link_hash_entry *h,
+			   Elf_Internal_Sym *sym)
+{
+  /* Compiler should optimize this out.  */
+  if (((unsigned int) R_X86_64_GNU_VTINHERIT
+       != (unsigned int) R_386_GNU_VTINHERIT)
+      || ((unsigned int) R_X86_64_GNU_VTENTRY
+	  != (unsigned int) R_386_GNU_VTENTRY))
+    abort ();
+
+  if (h != NULL)
+    switch (ELF32_R_TYPE (rel->r_info))
+      {
+      case R_X86_64_GNU_VTINHERIT:
+      case R_X86_64_GNU_VTENTRY:
+	return NULL;
+      }
+
+  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+}
+
 static bfd_vma
 elf_i386_get_plt_got_vma (struct elf_x86_plt *plt_p ATTRIBUTE_UNUSED,
 			  bfd_vma off,
