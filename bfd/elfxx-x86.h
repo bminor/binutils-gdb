@@ -287,6 +287,9 @@ struct elf_x86_link_hash_table
      to read-only sections.  */
   bfd_boolean readonly_dynrelocs_against_ifunc;
 
+  /* TRUE if this is a VxWorks x86 target.  */
+  bfd_boolean is_vxworks;
+
   /* The (unloaded but important) .rel.plt.unloaded section on VxWorks.
      This is used for i386 only.  */
   asection *srelplt2;
@@ -416,6 +419,9 @@ extern bfd_boolean _bfd_x86_elf_fixup_symbol
 extern bfd_boolean _bfd_x86_elf_hash_symbol
   (struct elf_link_hash_entry *);
 
+extern bfd_boolean _bfd_x86_elf_adjust_dynamic_symbol
+  (struct bfd_link_info *, struct elf_link_hash_entry *);
+
 extern long _bfd_x86_elf_get_synthetic_symtab
   (bfd *, long, long, bfd_vma, struct elf_x86_plt [], asymbol **,
    asymbol **);
@@ -452,6 +458,8 @@ extern bfd * _bfd_x86_elf_link_setup_gnu_properties
   _bfd_x86_elf_fixup_symbol
 #define elf_backend_hash_symbol \
   _bfd_x86_elf_hash_symbol
+#define elf_backend_adjust_dynamic_symbol \
+  _bfd_x86_elf_adjust_dynamic_symbol
 #define elf_backend_omit_section_dynsym \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 #define elf_backend_parse_gnu_properties \
