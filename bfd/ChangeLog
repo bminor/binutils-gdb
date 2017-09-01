@@ -11,7 +11,7 @@
 	(bfd_elf64_mkobject): Likewise.
 	(bfd_elf32_mkobject): Likewise.
 	* elfxx-x86.c (_bfd_x86_elf_mkobject): New function.
-	(_bfd_x86_elf_mkobject): New.
+	* elfxx-x86.h (_bfd_x86_elf_mkobject): New.
 	(bfd_elf64_mkobject): Likewise.
 	(bfd_elf32_mkobject): Likewise.
 
