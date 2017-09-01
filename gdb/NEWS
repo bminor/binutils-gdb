@@ -3,6 +3,18 @@
 
 *** Changes since GDB 8.0
 
+* On Unix systems, GDB now supports transmitting environment variables
+  that are to be set or unset to GDBserver.  These variables will
+  affect the environment to be passed to the remote inferior.
+
+  To inform GDB of environment variables that are to be transmitted to
+  GDBserver, use the "set environment" command.  Only user set
+  environment variables are sent to GDBserver.
+
+  To inform GDB of environment variables that are to be unset before
+  the remote inferior is started by the GDBserver, use the "unset
+  environment" command.
+
 * New features in the GDB remote stub, GDBserver
 
   ** New "--selftest" command line option runs some GDBserver self
@@ -17,7 +29,23 @@
      "target remote", you can disable the startup with shell by using the
      new "--no-startup-with-shell" GDBserver command line option.
 
+  ** On Unix systems, GDBserver now supports receiving environment
+     variables that are to be set or unset from GDB.  These variables
+     will affect the environment to be passed to the inferior.
+
 * New remote packets
+
+QEnvironmentHexEncoded
+  Inform GDBserver of an environment variable that is to be passed to
+  the inferior when starting it.
+
+QEnvironmentUnset
+  Inform GDBserver of an environment variable that is to be unset
+  before starting the remote inferior.
+
+QEnvironmentReset
+  Inform GDBserver that the environment should be reset (i.e.,
+  user-set environment variables should be unset).
 
 QStartupWithShell
   Indicates whether the inferior must be started with a shell or not.

@@ -1,3 +1,10 @@
+2017-08-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* server.c (handle_general_set): Handle QEnvironmentHexEncoded,
+	QEnvironmentUnset and QEnvironmentReset packets.
+	(handle_query): Inform remote that QEnvironmentHexEncoded,
+	QEnvironmentUnset and QEnvironmentReset are supported.
+
 2017-08-25  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* inferiors.h (inferior_target_data): Rename to ...

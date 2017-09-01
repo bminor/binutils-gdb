@@ -1,3 +1,92 @@
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Updated.
+	Call _bfd_x86_elf_link_setup_gnu_properties.
+	* elf64-x86-64.c (elf_x86_lazy_plt_layout): Initialize
+	pic_plt0_entry and pic_plt_entry fields with the non-PIC PLT
+	entries.
+	(elf_x86_64_non_lazy_plt): Likewise.
+	(elf_x86_64_lazy_bnd_plt): Likewise.
+	(elf_x86_64_non_lazy_bnd_plt): Likewise.
+	(elf_x86_64_lazy_ibt_plt): Likewise.
+	(elf_x32_lazy_ibt_plt): Likewise.
+	(elf_x86_64_non_lazy_ibt_plt): Likewise.
+	(elf_x32_non_lazy_ibt_plt): Likewise.
+	(elf_x86_64_nacl_plt): Likewise.
+	(elf_x86_64_link_setup_gnu_properties): Updated.  Call
+	_bfd_x86_elf_link_setup_gnu_properties.
+	* elfxx-x86.c: Include elf-vxworks.h".
+	(_bfd_x86_elf_link_setup_gnu_properties): New function.
+	* elfxx-x86.h (elf_x86_lazy_plt_layout): Remove "for i386 only"
+	comments for pic_plt0_entry and pic_plt_entry.
+	(elf_x86_non_lazy_plt_layout): Likewise.
+	(elf_x86_plt_layout_table): New.
+	(_bfd_x86_elf_link_setup_gnu_properties): Likewise.
+
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22061
+	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Create
+	.eh_frame section for the second PLT.
+	* elf64-x86-64.c (elf_x86_64_link_setup_gnu_properties): Correct
+	alignment of .eh_frame section for the second PLT.
+
+2017-09-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 22059
+	* dwarf2.c (decode_line_info): Fix test for an overlong line info
+	structure.
+
+2017-09-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 22058
+	* elf-attrs.c (_bfd_elf_parse_attributes): Ensure that the
+	attribute buffer is NUL terminated.
+
+2017-08-31  Nick Clifton  <nickc@redhat.com>
+
+	PR 22047
+	* dwarf2.c (read_section): If necessary add a terminating NUL byte
+	to dwarf string sections.
+
+2017-08-31  Alan Modra  <amodra@gmail.com>
+
+	* po/SRC-POTFILES.in: Regenerate.
+
+2017-08-31  Alan Modra  <amodra@gmail.com>
+
+	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Don't exit early
+	for a section containing just a terminator.  Allow multiple
+	terminators at end of section.
+	* elflink.c (bfd_elf_discard_info): Iterate over .eh_frame
+	sections when not adding alignment.  Assert on terminator in
+	the middle of FDEs.
+
+2017-08-31  Alan Modra  <amodra@gmail.com>
+
+	PR 21441
+	PR 22048
+	* elflink.c (bfd_elf_discard_info): Don't pad embedded zero
+	terminators.
+
+2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (bfd_backends): Add elf64.lo together with
+	elfxx-x86.lo for 64-bit BFD.
+	* configure: Regenerated.
+
+2017-08-31  James Bowman  <james.bowman@ftdichip.com>
+
+	* elf32-ft32.c (ft32_elf_howto_table): Use complain_overflow_dont
+	for R_FT32_18.
+
+2017-08-31  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/22032
+	* opncls.c (bfd_close_all_done): Don't call bfd_cache_close
+	before _close_and_cleanup.  Call iovec->bclose after.
+	(bfd_close): Remove code common to, and call, bfd_close_all_done.
+
 2017-08-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_plt_type): Removed.

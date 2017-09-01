@@ -1,3 +1,8 @@
+2017-09-01  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Enable DOTPROD for
+	cortex-a55 and cortx-a75.
+
 2017-08-30  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/gas/mips/branch-addend-micromips.d: New test.

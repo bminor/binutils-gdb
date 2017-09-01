@@ -139,7 +139,7 @@ static reloc_howto_type ft32_elf_howto_table [] =
 	 18,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
+	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FT32_18",		/* name */
 	 FALSE,		/* partial_inplace */

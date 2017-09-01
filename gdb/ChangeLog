@@ -1,3 +1,73 @@
+2017-09-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/22046
+	* nat/linux-procfs.c (parse_proc_status_state): Fix PROC_STATE_STOPPED
+	detection.
+
+2017-08-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* NEWS (Changes since GDB 8.0): Add entry mentioning new support
+	for setting/unsetting environment variables on the remote target.
+	(New remote packets): Add entries for QEnvironmentHexEncoded,
+	QEnvironmentUnset and QEnvironmentReset.
+	* common/environ.c (gdb_environ::operator=): Extend method to
+	handle m_user_set_env_list and m_user_unset_env_list.
+	(gdb_environ::clear): Likewise.
+	(match_var_in_string): Change type of first parameter from 'char
+	*' to 'const char *'.
+	(gdb_environ::set): Extend method to handle
+	m_user_set_env_list and m_user_unset_env_list.
+	(gdb_environ::unset): Likewise.
+	(gdb_environ::clear_user_set_env): New method.
+	(gdb_environ::user_set_envp): Likewise.
+	(gdb_environ::user_unset_envp): Likewise.
+	* common/environ.h (gdb_environ): Handle m_user_set_env_list and
+	m_user_unset_env_list on move constructor/assignment.
+	(unset): Add new default parameter 'update_unset_list = true'.
+	(clear_user_set_env): New method.
+	(user_set_envp): Likewise.
+	(user_unset_envp): Likewise.
+	(m_user_set_env_list): New std::set.
+	(m_user_unset_env_list): Likewise.
+	* common/rsp-low.c (hex2str): New function.
+	(bin2hex): New overload for bin2hex function.
+	* common/rsp-low.c (hex2str): New prototype.
+	(str2hex): New overload prototype.
+	* remote.c: Include "environ.h". Add QEnvironmentHexEncoded,
+	QEnvironmentUnset and QEnvironmentReset.
+	(remote_protocol_features): Add QEnvironmentHexEncoded,
+	QEnvironmentUnset and QEnvironmentReset packets.
+	(send_environment_packet): New function.
+	(extended_remote_environment_support): Likewise.
+	(extended_remote_create_inferior): Call
+	extended_remote_environment_support.
+	(_initialize_remote): Add QEnvironmentHexEncoded,
+	QEnvironmentUnset and QEnvironmentReset packet configs.
+	* unittests/environ-selftests.c (gdb_selftest_env_var):
+	New variable.
+	(test_vector_initialization): New function.
+	(test_init_from_host_environ): Likewise.
+	(test_reinit_from_host_environ): Likewise.
+	(test_set_A_unset_B_unset_A_cannot_find_A_can_find_B):
+	Likewise.
+	(test_unset_set_empty_vector): Likewise.
+	(test_vector_clear): Likewise.
+	(test_std_move): Likewise.
+	(test_move_constructor):
+	(test_self_move): Likewise.
+	(test_set_unset_reset): Likewise.
+	(run_tests): Rewrite in terms of the functions above.
+
+2017-08-31  Weimin Pan  <weimin.pan@oracle.com>
+
+	* sparc64-tdep.c (adi_stat_t): Fix comment formatting.
+	(adi_available): Use a temp variable of type CORE_ADDR as argument
+	3 when calling target_auxv_search.
+	(adi_normalize_address): Use masks and xor operators to calculate
+	normalized address.
+	(adi_read_versions, adi_write_versions, adi_print_versions)
+	(do_examine, do_assign): Use paddress.
+
 2017-08-29  John Baldwin  <jhb@FreeBSD.org>
 
 	* mips-fbsd-nat.c (getfpregs_supplies): Return true for FIR.
