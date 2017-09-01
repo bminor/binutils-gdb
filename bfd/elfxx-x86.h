@@ -317,7 +317,7 @@ struct elf_x86_plt_layout_table
   /* The non-lazy PLT layout for IBT.  */
   const struct elf_x86_non_lazy_plt_layout *non_lazy_ibt_plt;
 
-  /* TRUE if this is an normal x86 target.  */
+  /* TRUE if this is a normal x86 target.  */
   bfd_boolean normal_target;
 
   /* TRUE if this is a VxWorks x86 target.  */

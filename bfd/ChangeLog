@@ -1,5 +1,10 @@
 2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-x86.h (elf_x86_plt_layout_table): Fix a typo in
+	comments.
+
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_mkobject): Removed.
 	(bfd_elf32_mkobject): Likewise.
 	* elf64-x86-64.c (elf_x86_64_mkobject): Likewise.
