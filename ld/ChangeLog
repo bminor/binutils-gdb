@@ -1,3 +1,30 @@
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22061
+	* testsuite/ld-i386/ibt-plt-1.d: Updated.
+	* testsuite/ld-i386/ibt-plt-2a.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-2c.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3a.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3c.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-1-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2a-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2c-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3a-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3c-x32.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-2b.d: Pass --hash-style=sysv to ld
+	and dump unwind information.
+	* testsuite/ld-i386/ibt-plt-2d.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3b.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3d.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2b-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2b.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2d-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2d.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3b-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3b.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3d-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3d.d: Likewise.
+
 2017-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22048

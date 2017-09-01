@@ -6737,9 +6737,10 @@ error_alignment:
 							".eh_frame",
 							flags);
 	      if (sec == NULL)
-		info->callbacks->einfo (_("%F: failed to create BND PLT .eh_frame section\n"));
+		info->callbacks->einfo (_("%F: failed to create the second PLT .eh_frame section\n"));
 
-	      if (!bfd_set_section_alignment (dynobj, sec, 3))
+	      if (!bfd_set_section_alignment (dynobj, sec,
+					      ABI_64_P (dynobj) ? 3 : 2))
 		goto error_alignment;
 
 	      htab->plt_second_eh_frame = sec;
