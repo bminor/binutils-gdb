@@ -587,11 +587,6 @@ simple_object_elf_find_sections (simple_object_read *sobj,
 
   /* Read the section names.  */
 
-  if (eor->shstrndx == 0)
-    {
-      XDELETEVEC (shdrs);
-      return "ELF section header string table missing";
-    }
   shstrhdr = shdrs + (eor->shstrndx - 1) * shdr_size;
   name_size = ELF_FETCH_FIELD (type_functions, ei_class, Shdr,
 			       shstrhdr, sh_size, Elf_Addr);
@@ -1237,7 +1232,6 @@ simple_object_elf_copy_lto_debug_sections (simple_object_read *sobj,
       off_t offset;
       off_t length;
       int ret;
-      const char *errmsg;
       simple_object_write_section *dest;
       off_t flags;
       unsigned char *buf;
