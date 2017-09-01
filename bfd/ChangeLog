@@ -1,5 +1,11 @@
 2017-09-01  Nick Clifton  <nickc@redhat.com>
 
+	PR 22059
+	* dwarf2.c (decode_line_info): Fix test for an overlong line info
+	structure.
+
+2017-09-01  Nick Clifton  <nickc@redhat.com>
+
 	PR 21933
 	PR 22060
 	* elf.c (elf_read_notes): Check for a note size of -1.
