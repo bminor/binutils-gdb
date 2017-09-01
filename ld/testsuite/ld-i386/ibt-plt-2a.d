@@ -1,6 +1,6 @@
 #source: ibt-plt-2.s
 #as: --32
-#ld: -shared -m elf_i386 -z ibtplt
+#ld: -shared -m elf_i386 -z ibtplt --hash-style=sysv
 #objdump: -dw
 
 .*: +file format .*
@@ -38,7 +38,7 @@ Disassembly of section .text:
 0+200 <foo>:
  +[a-f0-9]+:	53                   	push   %ebx
  +[a-f0-9]+:	e8 18 00 00 00       	call   21e <__x86.get_pc_thunk.bx>
- +[a-f0-9]+:	81 c3 22 11 00 00    	add    \$0x1122,%ebx
+ +[a-f0-9]+:	81 c3 36 11 00 00    	add    \$0x1136,%ebx
  +[a-f0-9]+:	83 ec 08             	sub    \$0x8,%esp
  +[a-f0-9]+:	e8 dc ff ff ff       	call   1f0 <bar2@plt>
  +[a-f0-9]+:	e8 c7 ff ff ff       	call   1e0 <bar1@plt>

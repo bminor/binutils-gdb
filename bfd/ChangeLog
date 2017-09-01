@@ -1,3 +1,11 @@
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22061
+	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Create
+	.eh_frame section for the second PLT.
+	* elf64-x86-64.c (elf_x86_64_link_setup_gnu_properties): Correct
+	alignment of .eh_frame section for the second PLT.
+
 2017-09-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 22059

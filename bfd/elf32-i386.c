@@ -7142,6 +7142,20 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 
 	      htab->plt_got_eh_frame = sec;
 	    }
+
+	  if (htab->plt_second != NULL)
+	    {
+	      sec = bfd_make_section_anyway_with_flags (dynobj,
+							".eh_frame",
+							flags);
+	      if (sec == NULL)
+		info->callbacks->einfo (_("%F: failed to create the second PLT .eh_frame section\n"));
+
+	      if (!bfd_set_section_alignment (dynobj, sec, 2))
+		goto error_alignment;
+
+	      htab->plt_second_eh_frame = sec;
+	    }
 	}
     }
 
