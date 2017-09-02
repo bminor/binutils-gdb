@@ -968,11 +968,6 @@ static const struct elf_x86_64_backend_data elf_x86_64_arch_bed =
 
 #define	elf_backend_arch_data	&elf_x86_64_arch_bed
 
-#define is_x86_64_elf(bfd)				\
-  (bfd_get_flavour (bfd) == bfd_target_elf_flavour	\
-   && elf_tdata (bfd) != NULL				\
-   && elf_object_id (bfd) == X86_64_ELF_DATA)
-
 static bfd_boolean
 elf64_x86_64_elf_object_p (bfd *abfd)
 {
@@ -1877,14 +1872,14 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   if ((sec->flags & SEC_ALLOC) == 0)
     return TRUE;
 
-  BFD_ASSERT (is_x86_64_elf (abfd));
-
   htab = elf_x86_hash_table (info, X86_64_ELF_DATA);
   if (htab == NULL)
     {
       sec->check_relocs_failed = 1;
       return FALSE;
     }
+
+  BFD_ASSERT (is_x86_elf (abfd, htab));
 
   /* Get the section contents.  */
   if (elf_section_data (sec)->this_hdr.contents != NULL)
@@ -2971,7 +2966,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
       Elf_Internal_Shdr *symtab_hdr;
       asection *srel;
 
-      if (! is_x86_64_elf (ibfd))
+      if (! is_x86_elf (ibfd, htab))
 	continue;
 
       for (s = ibfd->sections; s != NULL; s = s->next)
@@ -3395,8 +3390,6 @@ elf_x86_64_relocate_section (bfd *output_bfd,
   Elf_Internal_Rela *relend;
   unsigned int plt_entry_size;
 
-  BFD_ASSERT (is_x86_64_elf (input_bfd));
-
   /* Skip if check_relocs failed.  */
   if (input_section->check_relocs_failed)
     return FALSE;
@@ -3404,6 +3397,9 @@ elf_x86_64_relocate_section (bfd *output_bfd,
   htab = elf_x86_hash_table (info, X86_64_ELF_DATA);
   if (htab == NULL)
     return FALSE;
+
+  BFD_ASSERT (is_x86_elf (input_bfd, htab));
+
   plt_entry_size = htab->plt.plt_entry_size;
   symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);

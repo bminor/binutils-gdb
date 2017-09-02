@@ -310,6 +310,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
 	  ret->tls_get_addr = "___tls_get_addr";
 	}
     }
+  ret->target_id = bed->target_id;
 
   ret->loc_hash_table = htab_try_create (1024,
 					 _bfd_x86_elf_local_htab_hash,

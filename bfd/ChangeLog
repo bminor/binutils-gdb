@@ -1,5 +1,21 @@
 2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (is_i386_elf): Removed.
+	(elf_i386_check_relocs): Replace is_i386_elf with is_x86_elf.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	* elf64-x86-64.c (is_x86_64_elf): Removed.
+	(elf_x86_64_check_relocs): Replace is_x86_64_elf with
+	is_x86_elf.
+	(elf_x86_64_size_dynamic_sections): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Initialize
+	target_id.
+	* elfxx-x86.h (elf_x86_link_hash_table): Add target_id.
+	(is_x86_elf): New.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_compute_jump_table_size): Removed.
 	(elf_i386_allocate_dynrelocs): Replace
 	elf_i386_compute_jump_table_size with

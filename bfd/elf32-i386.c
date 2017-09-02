@@ -853,11 +853,6 @@ static const struct elf_i386_backend_data elf_i386_arch_bed =
 
 #define	elf_backend_arch_data	&elf_i386_arch_bed
 
-#define is_i386_elf(bfd)				\
-  (bfd_get_flavour (bfd) == bfd_target_elf_flavour	\
-   && elf_tdata (bfd) != NULL				\
-   && elf_object_id (bfd) == I386_ELF_DATA)
-
 /* Return TRUE if the TLS access code sequence support transition
    from R_TYPE.  */
 
@@ -1487,14 +1482,14 @@ elf_i386_check_relocs (bfd *abfd,
   if ((sec->flags & SEC_ALLOC) == 0)
     return TRUE;
 
-  BFD_ASSERT (is_i386_elf (abfd));
-
   htab = elf_x86_hash_table (info, I386_ELF_DATA);
   if (htab == NULL)
     {
       sec->check_relocs_failed = 1;
       return FALSE;
     }
+
+  BFD_ASSERT (is_x86_elf (abfd, htab));
 
   /* Get the section contents.  */
   if (elf_section_data (sec)->this_hdr.contents != NULL)
@@ -2566,7 +2561,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
       Elf_Internal_Shdr *symtab_hdr;
       asection *srel;
 
-      if (! is_i386_elf (ibfd))
+      if (! is_x86_elf (ibfd, htab))
 	continue;
 
       for (s = ibfd->sections; s != NULL; s = s->next)
@@ -3005,8 +3000,6 @@ elf_i386_relocate_section (bfd *output_bfd,
   bfd_boolean is_vxworks_tls;
   unsigned plt_entry_size;
 
-  BFD_ASSERT (is_i386_elf (input_bfd));
-
   /* Skip if check_relocs failed.  */
   if (input_section->check_relocs_failed)
     return FALSE;
@@ -3014,6 +3007,9 @@ elf_i386_relocate_section (bfd *output_bfd,
   htab = elf_x86_hash_table (info, I386_ELF_DATA);
   if (htab == NULL)
     return FALSE;
+
+  BFD_ASSERT (is_x86_elf (input_bfd, htab));
+
   symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
   local_got_offsets = elf_local_got_offsets (input_bfd);

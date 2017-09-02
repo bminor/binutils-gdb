@@ -313,6 +313,7 @@ struct elf_x86_link_hash_table
 
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
+  enum elf_target_id target_id;
   unsigned int sizeof_reloc;
   unsigned int got_entry_size;
   unsigned int pointer_r_type;
@@ -385,6 +386,11 @@ struct elf_x86_plt
 
 #define elf_x86_compute_jump_table_size(htab) \
   ((htab)->elf.srelplt->reloc_count * (htab)->got_entry_size)
+
+#define is_x86_elf(bfd, htab)				\
+  (bfd_get_flavour (bfd) == bfd_target_elf_flavour	\
+   && elf_tdata (bfd) != NULL				\
+   && elf_object_id (bfd) == (htab)->target_id)
 
 extern bfd_boolean _bfd_x86_elf_mkobject
   (bfd *);
