@@ -1,5 +1,10 @@
 2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Set
+	sgotplt_jump_table_size with elf_x86_compute_jump_table_size.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (PLT_CIE_LENGTH, PLT_FDE_LENGTH,
 	PLT_FDE_START_OFFSET, PLT_FDE_LEN_OFFSET): Moved to ...
 	* elfxx-x86.h (PLT_CIE_LENGTH, PLT_FDE_LENGTH,

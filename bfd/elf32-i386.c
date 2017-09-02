@@ -2238,7 +2238,8 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
   if (htab->elf.srelplt)
     {
       htab->next_tls_desc_index = htab->elf.srelplt->reloc_count;
-      htab->sgotplt_jump_table_size = htab->next_tls_desc_index * 4;
+      htab->sgotplt_jump_table_size
+	= elf_x86_compute_jump_table_size (htab);
       htab->next_irelative_index = htab->elf.srelplt->reloc_count - 1;
     }
   else if (htab->elf.irelplt)
