@@ -1,5 +1,12 @@
 2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Initialize
+	sizeof_reloc.
+	(_bfd_x86_elf_adjust_dynamic_symbol): Use sizeof_reloc.
+	* elfxx-x86.h (elf_x86_link_hash_table): Add sizeof_reloc.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_allocate_dynrelocs): Check VxWorks
 	with htab->is_vxworks.
 	(elf_i386_size_dynamic_sections): Likewise.

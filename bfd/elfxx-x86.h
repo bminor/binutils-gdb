@@ -313,6 +313,7 @@ struct elf_x86_link_hash_table
 
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
+  unsigned int sizeof_reloc;
   unsigned int pointer_r_type;
   int dynamic_interpreter_size;
   const char *dynamic_interpreter;
