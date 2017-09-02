@@ -286,12 +286,6 @@ struct elf_x86_link_hash_table
   htab_t loc_hash_table;
   void * loc_hash_memory;
 
-  /* The offset into splt of the PLT entry for the TLS descriptor
-     resolver.  Special values are 0, if not necessary (or not found
-     to be necessary yet), and -1 if needed but not determined
-     yet.  */
-  bfd_vma tlsdesc_plt;
-
   /* The offset into sgot of the GOT entry used by the PLT entry
      above.  */
   bfd_vma tlsdesc_got;
@@ -305,7 +299,8 @@ struct elf_x86_link_hash_table
      to read-only sections.  */
   bfd_boolean readonly_dynrelocs_against_ifunc;
 
-  /* TRUE if this is a VxWorks x86 target.  */
+  /* TRUE if this is a VxWorks x86 target.  This is only used for
+     i386.  */
   bfd_boolean is_vxworks;
 
   /* The (unloaded but important) .rel.plt.unloaded section on VxWorks.
@@ -313,8 +308,14 @@ struct elf_x86_link_hash_table
   asection *srelplt2;
 
   /* The index of the next unused R_386_TLS_DESC slot in .rel.plt.  This
-     is used for i386 only.  */
+     is only used for i386.  */
   bfd_vma next_tls_desc_index;
+
+  /* The offset into splt of the PLT entry for the TLS descriptor
+     resolver.  Special values are 0, if not necessary (or not found
+     to be necessary yet), and -1 if needed but not determined
+     yet.  This is only used for x86-64.  */
+  bfd_vma tlsdesc_plt;
 
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);

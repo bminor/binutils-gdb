@@ -1,5 +1,10 @@
 2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-x86.h (elf_x86_link_hash_table): Rearrange fields and
+	update comments.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_size_dynamic_sections): Set
 	sgotplt_jump_table_size with elf_x86_compute_jump_table_size.
 
