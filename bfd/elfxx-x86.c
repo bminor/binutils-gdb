@@ -82,8 +82,8 @@ _bfd_x86_elf_dtpoff_base (struct bfd_link_info *info)
 /* Allocate space in .plt, .got and associated reloc sections for
    dynamic relocs.  */
 
-bfd_boolean
-_bfd_x86_elf_allocate_dynrelocs (struct elf_link_hash_entry *h,
+static bfd_boolean
+elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h,
 				 void *inf)
 {
   struct bfd_link_info *info;
@@ -573,8 +573,8 @@ _bfd_x86_elf_readonly_dynrelocs (struct elf_link_hash_entry *h,
 /* Allocate space in .plt, .got and associated reloc sections for
    local dynamic relocs.  */
 
-bfd_boolean
-_bfd_x86_elf_allocate_local_dynrelocs (void **slot, void *inf)
+static bfd_boolean
+elf_x86_allocate_local_dynreloc (void **slot, void *inf)
 {
   struct elf_link_hash_entry *h
     = (struct elf_link_hash_entry *) *slot;
@@ -586,7 +586,7 @@ _bfd_x86_elf_allocate_local_dynrelocs (void **slot, void *inf)
       || h->root.type != bfd_link_hash_defined)
     abort ();
 
-  return _bfd_x86_elf_allocate_dynrelocs (h, inf);
+  return elf_x86_allocate_dynrelocs (h, inf);
 }
 
 /* Find and/or create a hash entry for local symbol.  */
@@ -721,6 +721,20 @@ elf_x86_link_hash_table_free (bfd *obfd)
   _bfd_elf_link_hash_table_free (obfd);
 }
 
+static bfd_boolean
+elf_i386_is_reloc_section (const char *secname)
+{
+  return CONST_STRNEQ (secname, ".rel");
+}
+
+#ifdef BFD64
+static bfd_boolean
+elf_x86_64_is_reloc_section (const char *secname)
+{
+  return CONST_STRNEQ (secname, ".rela");
+}
+#endif
+
 /* Create an x86 ELF linker hash table.  */
 
 struct bfd_link_hash_table *
@@ -745,12 +759,21 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
     }
 
 #ifdef BFD64
+  /* NB: If BFD64 isn't defined, only i386 will be supported.  */
+  if (bed->target_id == X86_64_ELF_DATA)
+    {
+      ret->convert_load = _bfd_x86_64_elf_convert_load;
+      ret->is_reloc_section = elf_x86_64_is_reloc_section;
+      ret->dt_reloc = DT_RELA;
+      ret->dt_reloc_sz = DT_RELASZ;
+      ret->dt_reloc_ent = DT_RELAENT;
+      ret->got_entry_size = 8;
+    }
   if (ABI_64_P (abfd))
     {
       ret->r_info = elf64_r_info;
       ret->r_sym = elf64_r_sym;
       ret->sizeof_reloc = sizeof (Elf64_External_Rela);
-      ret->got_entry_size = 8;
       ret->pointer_r_type = R_X86_64_64;
       ret->dynamic_interpreter = ELF64_DYNAMIC_INTERPRETER;
       ret->dynamic_interpreter_size = sizeof ELF64_DYNAMIC_INTERPRETER;
@@ -764,7 +787,6 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
       if (bed->target_id == X86_64_ELF_DATA)
 	{
 	  ret->sizeof_reloc = sizeof (Elf32_External_Rela);
-	  ret->got_entry_size = 8;
 	  ret->pointer_r_type = R_X86_64_32;
 	  ret->dynamic_interpreter = ELFX32_DYNAMIC_INTERPRETER;
 	  ret->dynamic_interpreter_size
@@ -773,6 +795,11 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
 	}
       else
 	{
+	  ret->convert_load = _bfd_i386_elf_convert_load;
+	  ret->is_reloc_section = elf_i386_is_reloc_section;
+	  ret->dt_reloc = DT_REL;
+	  ret->dt_reloc_sz = DT_RELSZ;
+	  ret->dt_reloc_ent = DT_RELENT;
 	  ret->sizeof_reloc = sizeof (Elf32_External_Rel);
 	  ret->got_entry_size = 4;
 	  ret->pointer_r_type = R_386_32;
@@ -837,6 +864,432 @@ _bfd_x86_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
 
   /* Invoke the regular ELF backend linker to do all the work.  */
   return _bfd_elf_link_check_relocs (abfd, info);
+}
+
+/* Set the sizes of the dynamic sections.  */
+
+bfd_boolean
+_bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
+				    struct bfd_link_info *info)
+{
+  struct elf_x86_link_hash_table *htab;
+  bfd *dynobj;
+  asection *s;
+  bfd_boolean relocs;
+  bfd *ibfd;
+  const struct elf_backend_data *bed
+    = get_elf_backend_data (output_bfd);
+
+  htab = elf_x86_hash_table (info, bed->target_id);
+  if (htab == NULL)
+    return FALSE;
+  dynobj = htab->elf.dynobj;
+  if (dynobj == NULL)
+    abort ();
+
+  /* Set up .got offsets for local syms, and space for local dynamic
+     relocs.  */
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
+    {
+      bfd_signed_vma *local_got;
+      bfd_signed_vma *end_local_got;
+      char *local_tls_type;
+      bfd_vma *local_tlsdesc_gotent;
+      bfd_size_type locsymcount;
+      Elf_Internal_Shdr *symtab_hdr;
+      asection *srel;
+
+      if (! is_x86_elf (ibfd, htab))
+	continue;
+
+      for (s = ibfd->sections; s != NULL; s = s->next)
+	{
+	  struct elf_dyn_relocs *p;
+
+	  if (!htab->convert_load (ibfd, s, info))
+	    return FALSE;
+
+	  for (p = ((struct elf_dyn_relocs *)
+		     elf_section_data (s)->local_dynrel);
+	       p != NULL;
+	       p = p->next)
+	    {
+	      if (!bfd_is_abs_section (p->sec)
+		  && bfd_is_abs_section (p->sec->output_section))
+		{
+		  /* Input section has been discarded, either because
+		     it is a copy of a linkonce section or due to
+		     linker script /DISCARD/, so we'll be discarding
+		     the relocs too.  */
+		}
+	      else if (htab->is_vxworks
+		       && strcmp (p->sec->output_section->name,
+				  ".tls_vars") == 0)
+		{
+		  /* Relocations in vxworks .tls_vars sections are
+		     handled specially by the loader.  */
+		}
+	      else if (p->count != 0)
+		{
+		  srel = elf_section_data (p->sec)->sreloc;
+		  srel->size += p->count * htab->sizeof_reloc;
+		  if ((p->sec->output_section->flags & SEC_READONLY) != 0
+		      && (info->flags & DF_TEXTREL) == 0)
+		    {
+		      info->flags |= DF_TEXTREL;
+		      if ((info->warn_shared_textrel && bfd_link_pic (info))
+			  || info->error_textrel)
+			/* xgettext:c-format */
+			info->callbacks->einfo (_("%P: %B: warning: relocation in readonly section `%A'\n"),
+						p->sec->owner, p->sec);
+		    }
+		}
+	    }
+	}
+
+      local_got = elf_local_got_refcounts (ibfd);
+      if (!local_got)
+	continue;
+
+      symtab_hdr = &elf_symtab_hdr (ibfd);
+      locsymcount = symtab_hdr->sh_info;
+      end_local_got = local_got + locsymcount;
+      local_tls_type = elf_x86_local_got_tls_type (ibfd);
+      local_tlsdesc_gotent = elf_x86_local_tlsdesc_gotent (ibfd);
+      s = htab->elf.sgot;
+      srel = htab->elf.srelgot;
+      for (; local_got < end_local_got;
+	   ++local_got, ++local_tls_type, ++local_tlsdesc_gotent)
+	{
+	  *local_tlsdesc_gotent = (bfd_vma) -1;
+	  if (*local_got > 0)
+	    {
+	      if (GOT_TLS_GDESC_P (*local_tls_type))
+		{
+		  *local_tlsdesc_gotent = htab->elf.sgotplt->size
+		    - elf_x86_compute_jump_table_size (htab);
+		  htab->elf.sgotplt->size += 2 * htab->got_entry_size;
+		  *local_got = (bfd_vma) -2;
+		}
+	      if (! GOT_TLS_GDESC_P (*local_tls_type)
+		  || GOT_TLS_GD_P (*local_tls_type))
+		{
+		  *local_got = s->size;
+		  s->size += htab->got_entry_size;
+		  if (GOT_TLS_GD_P (*local_tls_type)
+		      || *local_tls_type == GOT_TLS_IE_BOTH)
+		    s->size += htab->got_entry_size;
+		}
+	      if (bfd_link_pic (info)
+		  || GOT_TLS_GD_ANY_P (*local_tls_type)
+		  || (*local_tls_type & GOT_TLS_IE))
+		{
+		  if (*local_tls_type == GOT_TLS_IE_BOTH)
+		    srel->size += 2 * htab->sizeof_reloc;
+		  else if (GOT_TLS_GD_P (*local_tls_type)
+			   || ! GOT_TLS_GDESC_P (*local_tls_type))
+		    srel->size += htab->sizeof_reloc;
+		  if (GOT_TLS_GDESC_P (*local_tls_type))
+		    {
+		      htab->elf.srelplt->size += htab->sizeof_reloc;
+		      if (bed->target_id == X86_64_ELF_DATA)
+			htab->tlsdesc_plt = (bfd_vma) -1;
+		    }
+		}
+	    }
+	  else
+	    *local_got = (bfd_vma) -1;
+	}
+    }
+
+  if (htab->tls_ld_or_ldm_got.refcount > 0)
+    {
+      /* Allocate 2 got entries and 1 dynamic reloc for R_386_TLS_LDM
+         or R_X86_64_TLSLD relocs.  */
+      htab->tls_ld_or_ldm_got.offset = htab->elf.sgot->size;
+      htab->elf.sgot->size += 2 * htab->got_entry_size;
+      htab->elf.srelgot->size += htab->sizeof_reloc;
+    }
+  else
+    htab->tls_ld_or_ldm_got.offset = -1;
+
+  /* Allocate global sym .plt and .got entries, and space for global
+     sym dynamic relocs.  */
+  elf_link_hash_traverse (&htab->elf, elf_x86_allocate_dynrelocs,
+			  info);
+
+  /* Allocate .plt and .got entries, and space for local symbols.  */
+  htab_traverse (htab->loc_hash_table, elf_x86_allocate_local_dynreloc,
+		 info);
+
+  /* For every jump slot reserved in the sgotplt, reloc_count is
+     incremented.  However, when we reserve space for TLS descriptors,
+     it's not incremented, so in order to compute the space reserved
+     for them, it suffices to multiply the reloc count by the jump
+     slot size.
+
+     PR ld/13302: We start next_irelative_index at the end of .rela.plt
+     so that R_{386,X86_64}_IRELATIVE entries come last.  */
+  if (htab->elf.srelplt)
+    {
+      htab->next_tls_desc_index = htab->elf.srelplt->reloc_count;
+      htab->sgotplt_jump_table_size
+	= elf_x86_compute_jump_table_size (htab);
+      htab->next_irelative_index = htab->elf.srelplt->reloc_count - 1;
+    }
+  else if (htab->elf.irelplt)
+    htab->next_irelative_index = htab->elf.irelplt->reloc_count - 1;
+
+  if (htab->tlsdesc_plt)
+    {
+      /* NB: tlsdesc_plt is set only for x86-64.  If we're not using
+	 lazy TLS relocations, don't generate the PLT and GOT entries
+	 they require.  */
+      if ((info->flags & DF_BIND_NOW))
+	htab->tlsdesc_plt = 0;
+      else
+	{
+	  htab->tlsdesc_got = htab->elf.sgot->size;
+	  htab->elf.sgot->size += htab->got_entry_size;
+	  /* Reserve room for the initial entry.
+	     FIXME: we could probably do away with it in this case.  */
+	  if (htab->elf.splt->size == 0)
+	    htab->elf.splt->size = htab->plt.plt_entry_size;
+	  htab->tlsdesc_plt = htab->elf.splt->size;
+	  htab->elf.splt->size += htab->plt.plt_entry_size;
+	}
+    }
+
+  if (htab->elf.sgotplt)
+    {
+      /* Don't allocate .got.plt section if there are no GOT nor PLT
+	 entries and there is no reference to _GLOBAL_OFFSET_TABLE_.  */
+      if ((htab->elf.hgot == NULL
+	   || !htab->elf.hgot->ref_regular_nonweak)
+	  && (htab->elf.sgotplt->size == bed->got_header_size)
+	  && (htab->elf.splt == NULL
+	      || htab->elf.splt->size == 0)
+	  && (htab->elf.sgot == NULL
+	      || htab->elf.sgot->size == 0)
+	  && (htab->elf.iplt == NULL
+	      || htab->elf.iplt->size == 0)
+	  && (htab->elf.igotplt == NULL
+	      || htab->elf.igotplt->size == 0))
+	htab->elf.sgotplt->size = 0;
+    }
+
+  if (_bfd_elf_eh_frame_present (info))
+    {
+      if (htab->plt_eh_frame != NULL
+	  && htab->elf.splt != NULL
+	  && htab->elf.splt->size != 0
+	  && !bfd_is_abs_section (htab->elf.splt->output_section))
+	htab->plt_eh_frame->size = htab->plt.eh_frame_plt_size;
+
+      if (htab->plt_got_eh_frame != NULL
+	  && htab->plt_got != NULL
+	  && htab->plt_got->size != 0
+	  && !bfd_is_abs_section (htab->plt_got->output_section))
+	htab->plt_got_eh_frame->size
+	  = htab->non_lazy_plt->eh_frame_plt_size;
+
+      /* Unwind info for the second PLT and .plt.got sections are
+	 identical.  */
+      if (htab->plt_second_eh_frame != NULL
+	  && htab->plt_second != NULL
+	  && htab->plt_second->size != 0
+	  && !bfd_is_abs_section (htab->plt_second->output_section))
+	htab->plt_second_eh_frame->size
+	  = htab->non_lazy_plt->eh_frame_plt_size;
+    }
+
+  /* We now have determined the sizes of the various dynamic sections.
+     Allocate memory for them.  */
+  relocs = FALSE;
+  for (s = dynobj->sections; s != NULL; s = s->next)
+    {
+      bfd_boolean strip_section = TRUE;
+
+      if ((s->flags & SEC_LINKER_CREATED) == 0)
+	continue;
+
+      if (s == htab->elf.splt
+	  || s == htab->elf.sgot)
+	{
+	  /* Strip this section if we don't need it; see the
+	     comment below.  */
+	  /* We'd like to strip these sections if they aren't needed, but if
+	     we've exported dynamic symbols from them we must leave them.
+	     It's too late to tell BFD to get rid of the symbols.  */
+
+	  if (htab->elf.hplt != NULL)
+	    strip_section = FALSE;
+	}
+      else if (s == htab->elf.sgotplt
+	       || s == htab->elf.iplt
+	       || s == htab->elf.igotplt
+	       || s == htab->plt_second
+	       || s == htab->plt_got
+	       || s == htab->plt_eh_frame
+	       || s == htab->plt_got_eh_frame
+	       || s == htab->plt_second_eh_frame
+	       || s == htab->elf.sdynbss
+	       || s == htab->elf.sdynrelro)
+	{
+	  /* Strip these too.  */
+	}
+      else if (htab->is_reloc_section (bfd_get_section_name (dynobj, s)))
+	{
+	  if (s->size != 0
+	      && s != htab->elf.srelplt
+	      && s != htab->srelplt2)
+	    relocs = TRUE;
+
+	  /* We use the reloc_count field as a counter if we need
+	     to copy relocs into the output file.  */
+	  if (s != htab->elf.srelplt)
+	    s->reloc_count = 0;
+	}
+      else
+	{
+	  /* It's not one of our sections, so don't allocate space.  */
+	  continue;
+	}
+
+      if (s->size == 0)
+	{
+	  /* If we don't need this section, strip it from the
+	     output file.  This is mostly to handle .rel.bss and
+	     .rel.plt.  We must create both sections in
+	     create_dynamic_sections, because they must be created
+	     before the linker maps input sections to output
+	     sections.  The linker does that before
+	     adjust_dynamic_symbol is called, and it is that
+	     function which decides whether anything needs to go
+	     into these sections.  */
+	  if (strip_section)
+	    s->flags |= SEC_EXCLUDE;
+	  continue;
+	}
+
+      if ((s->flags & SEC_HAS_CONTENTS) == 0)
+	continue;
+
+      /* Allocate memory for the section contents.  We use bfd_zalloc
+	 here in case unused entries are not reclaimed before the
+	 section's contents are written out.  This should not happen,
+	 but this way if it does, we get a R_386_NONE or R_X86_64_NONE
+	 reloc instead of garbage.  */
+      s->contents = (unsigned char *) bfd_zalloc (dynobj, s->size);
+      if (s->contents == NULL)
+	return FALSE;
+    }
+
+  if (htab->plt_eh_frame != NULL
+      && htab->plt_eh_frame->contents != NULL)
+    {
+      memcpy (htab->plt_eh_frame->contents,
+	      htab->plt.eh_frame_plt,
+	      htab->plt_eh_frame->size);
+      bfd_put_32 (dynobj, htab->elf.splt->size,
+		  htab->plt_eh_frame->contents + PLT_FDE_LEN_OFFSET);
+    }
+
+  if (htab->plt_got_eh_frame != NULL
+      && htab->plt_got_eh_frame->contents != NULL)
+    {
+      memcpy (htab->plt_got_eh_frame->contents,
+	      htab->non_lazy_plt->eh_frame_plt,
+	      htab->plt_got_eh_frame->size);
+      bfd_put_32 (dynobj, htab->plt_got->size,
+		  (htab->plt_got_eh_frame->contents
+		   + PLT_FDE_LEN_OFFSET));
+    }
+
+  if (htab->plt_second_eh_frame != NULL
+      && htab->plt_second_eh_frame->contents != NULL)
+    {
+      memcpy (htab->plt_second_eh_frame->contents,
+	      htab->non_lazy_plt->eh_frame_plt,
+	      htab->plt_second_eh_frame->size);
+      bfd_put_32 (dynobj, htab->plt_second->size,
+		  (htab->plt_second_eh_frame->contents
+		   + PLT_FDE_LEN_OFFSET));
+    }
+
+  if (htab->elf.dynamic_sections_created)
+    {
+      /* Add some entries to the .dynamic section.  We fill in the
+	 values later, in elf_{i386,x86_64}_finish_dynamic_sections,
+	 but we must add the entries now so that we get the correct
+	 size for the .dynamic section.  The DT_DEBUG entry is filled
+	 in by the dynamic linker and used by the debugger.  */
+#define add_dynamic_entry(TAG, VAL) \
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
+
+      if (bfd_link_executable (info))
+	{
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
+	    return FALSE;
+	}
+
+      if (htab->elf.splt->size != 0)
+	{
+	  /* DT_PLTGOT is used by prelink even if there is no PLT
+	     relocation.  */
+	  if (!add_dynamic_entry (DT_PLTGOT, 0))
+	    return FALSE;
+	}
+
+      if (htab->elf.srelplt->size != 0)
+	{
+	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, htab->dt_reloc)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
+	    return FALSE;
+	}
+
+      if (htab->tlsdesc_plt
+	  && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)
+	      || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
+	return FALSE;
+
+      if (relocs)
+	{
+	  if (!add_dynamic_entry (htab->dt_reloc, 0)
+	      || !add_dynamic_entry (htab->dt_reloc_sz, 0)
+	      || !add_dynamic_entry (htab->dt_reloc_ent,
+				     htab->sizeof_reloc))
+	    return FALSE;
+
+	  /* If any dynamic relocs apply to a read-only section,
+	     then we need a DT_TEXTREL entry.  */
+	  if ((info->flags & DF_TEXTREL) == 0)
+	    elf_link_hash_traverse (&htab->elf,
+				    _bfd_x86_elf_readonly_dynrelocs,
+				    info);
+
+	  if ((info->flags & DF_TEXTREL) != 0)
+	    {
+	      if (htab->readonly_dynrelocs_against_ifunc)
+		{
+		  info->callbacks->einfo
+		    (_("%P%X: read-only segment has dynamic IFUNC relocations; recompile with -fPIC\n"));
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
+
+	      if (!add_dynamic_entry (DT_TEXTREL, 0))
+		return FALSE;
+	    }
+	}
+      if (htab->is_vxworks
+	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
+	return FALSE;
+    }
+#undef add_dynamic_entry
+
+  return TRUE;
 }
 
 bfd_boolean

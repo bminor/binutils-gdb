@@ -319,8 +319,14 @@ struct elf_x86_link_hash_table
 
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
+  bfd_boolean (*convert_load) (bfd *, asection *,
+			       struct bfd_link_info *);
+  bfd_boolean (*is_reloc_section) (const char *);
   enum elf_target_id target_id;
   unsigned int sizeof_reloc;
+  unsigned int dt_reloc;
+  unsigned int dt_reloc_sz;
+  unsigned int dt_reloc_ent;
   unsigned int got_entry_size;
   unsigned int pointer_r_type;
   int dynamic_interpreter_size;
@@ -398,6 +404,12 @@ struct elf_x86_plt
    && elf_tdata (bfd) != NULL				\
    && elf_object_id (bfd) == (htab)->target_id)
 
+extern bfd_boolean _bfd_i386_elf_convert_load
+  (bfd *, asection *, struct bfd_link_info *);
+
+extern bfd_boolean _bfd_x86_64_elf_convert_load
+  (bfd *, asection *, struct bfd_link_info *);
+
 extern bfd_boolean _bfd_x86_elf_mkobject
   (bfd *);
 
@@ -406,12 +418,6 @@ extern void _bfd_x86_elf_set_tls_module_base
 
 extern bfd_vma _bfd_x86_elf_dtpoff_base
   (struct bfd_link_info *);
-
-extern bfd_boolean _bfd_x86_elf_allocate_dynrelocs
-  (struct elf_link_hash_entry *, void *);
-
-extern bfd_boolean _bfd_x86_elf_allocate_local_dynrelocs
-  (void **, void *);
 
 extern bfd_boolean _bfd_x86_elf_readonly_dynrelocs
   (struct elf_link_hash_entry *, void *);
@@ -436,6 +442,9 @@ extern int _bfd_x86_elf_compare_relocs
   (const void *, const void *);
 
 extern bfd_boolean _bfd_x86_elf_link_check_relocs
+  (bfd *, struct bfd_link_info *);
+
+extern bfd_boolean _bfd_x86_elf_size_dynamic_sections
   (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean _bfd_x86_elf_always_size_sections
@@ -488,6 +497,8 @@ extern bfd * _bfd_x86_elf_link_setup_gnu_properties
 #define bfd_elf32_bfd_link_check_relocs \
   _bfd_x86_elf_link_check_relocs
 
+#define elf_backend_size_dynamic_sections \
+  _bfd_x86_elf_size_dynamic_sections
 #define elf_backend_always_size_sections \
   _bfd_x86_elf_always_size_sections
 #define elf_backend_merge_symbol_attribute \
