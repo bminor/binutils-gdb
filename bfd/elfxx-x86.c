@@ -79,6 +79,459 @@ _bfd_x86_elf_dtpoff_base (struct bfd_link_info *info)
   return elf_hash_table (info)->tls_sec->vma;
 }
 
+/* Allocate space in .plt, .got and associated reloc sections for
+   dynamic relocs.  */
+
+bfd_boolean
+_bfd_x86_elf_allocate_dynrelocs (struct elf_link_hash_entry *h,
+				 void *inf)
+{
+  struct bfd_link_info *info;
+  struct elf_x86_link_hash_table *htab;
+  struct elf_x86_link_hash_entry *eh;
+  struct elf_dyn_relocs *p;
+  unsigned int plt_entry_size;
+  bfd_boolean resolved_to_zero;
+  const struct elf_backend_data *bed;
+
+  if (h->root.type == bfd_link_hash_indirect)
+    return TRUE;
+
+  eh = (struct elf_x86_link_hash_entry *) h;
+
+  info = (struct bfd_link_info *) inf;
+  bed = get_elf_backend_data (info->output_bfd);
+  htab = elf_x86_hash_table (info, bed->target_id);
+  if (htab == NULL)
+    return FALSE;
+
+  plt_entry_size = htab->plt.plt_entry_size;
+
+  resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
+						      bed->target_id,
+						      eh->has_got_reloc,
+						      eh);
+
+  /* Clear the reference count of function pointer relocations if
+     symbol isn't a normal function.  */
+  if (h->type != STT_FUNC)
+    eh->func_pointer_refcount = 0;
+
+  /* We can't use the GOT PLT if pointer equality is needed since
+     finish_dynamic_symbol won't clear symbol value and the dynamic
+     linker won't update the GOT slot.  We will get into an infinite
+     loop at run-time.  */
+  if (htab->plt_got != NULL
+      && h->type != STT_GNU_IFUNC
+      && !h->pointer_equality_needed
+      && h->plt.refcount > 0
+      && h->got.refcount > 0)
+    {
+      /* Don't use the regular PLT if there are both GOT and GOTPLT
+         reloctions.  */
+      h->plt.offset = (bfd_vma) -1;
+
+      /* Use the GOT PLT.  */
+      eh->plt_got.refcount = 1;
+    }
+
+  /* Since STT_GNU_IFUNC symbol must go through PLT, we handle it
+     here if it is defined and referenced in a non-shared object.  */
+  if (h->type == STT_GNU_IFUNC
+      && h->def_regular)
+    {
+      if (_bfd_elf_allocate_ifunc_dyn_relocs (info, h, &eh->dyn_relocs,
+					      &htab->readonly_dynrelocs_against_ifunc,
+					      plt_entry_size,
+					      (htab->plt.has_plt0
+					       * plt_entry_size),
+					       htab->got_entry_size,
+					       TRUE))
+	{
+	  asection *s = htab->plt_second;
+	  if (h->plt.offset != (bfd_vma) -1 && s != NULL)
+	    {
+	      /* Use the second PLT section if it is created.  */
+	      eh->plt_second.offset = s->size;
+
+	      /* Make room for this entry in the second PLT section.  */
+	      s->size += htab->non_lazy_plt->plt_entry_size;
+	    }
+
+	  return TRUE;
+	}
+      else
+	return FALSE;
+    }
+  /* Don't create the PLT entry if there are only function pointer
+     relocations which can be resolved at run-time.  */
+  else if (htab->elf.dynamic_sections_created
+	   && (h->plt.refcount > eh->func_pointer_refcount
+	       || eh->plt_got.refcount > 0))
+    {
+      bfd_boolean use_plt_got = eh->plt_got.refcount > 0;
+
+      /* Clear the reference count of function pointer relocations
+	 if PLT is used.  */
+      eh->func_pointer_refcount = 0;
+
+      /* Make sure this symbol is output as a dynamic symbol.
+	 Undefined weak syms won't yet be marked as dynamic.  */
+      if (h->dynindx == -1
+	  && !h->forced_local
+	  && !resolved_to_zero
+	  && h->root.type == bfd_link_hash_undefweak)
+	{
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
+	    return FALSE;
+	}
+
+      if (bfd_link_pic (info)
+	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
+	{
+	  asection *s = htab->elf.splt;
+	  asection *second_s = htab->plt_second;
+	  asection *got_s = htab->plt_got;
+
+	  /* If this is the first .plt entry, make room for the special
+	     first entry.  The .plt section is used by prelink to undo
+	     prelinking for dynamic relocations.  */
+	  if (s->size == 0)
+	    s->size = htab->plt.has_plt0 * plt_entry_size;
+
+	  if (use_plt_got)
+	    eh->plt_got.offset = got_s->size;
+	  else
+	    {
+	      h->plt.offset = s->size;
+	      if (second_s)
+		eh->plt_second.offset = second_s->size;
+	    }
+
+	  /* If this symbol is not defined in a regular file, and we are
+	     not generating a shared library, then set the symbol to this
+	     location in the .plt.  This is required to make function
+	     pointers compare as equal between the normal executable and
+	     the shared library.  */
+	  if (! bfd_link_pic (info)
+	      && !h->def_regular)
+	    {
+	      if (use_plt_got)
+		{
+		  /* We need to make a call to the entry of the GOT PLT
+		     instead of regular PLT entry.  */
+		  h->root.u.def.section = got_s;
+		  h->root.u.def.value = eh->plt_got.offset;
+		}
+	      else
+		{
+		  if (second_s)
+		    {
+		      /* We need to make a call to the entry of the
+			 second PLT instead of regular PLT entry.  */
+		      h->root.u.def.section = second_s;
+		      h->root.u.def.value = eh->plt_second.offset;
+		    }
+		  else
+		    {
+		      h->root.u.def.section = s;
+		      h->root.u.def.value = h->plt.offset;
+		    }
+		}
+	    }
+
+	  /* Make room for this entry.  */
+	  if (use_plt_got)
+	    got_s->size += htab->non_lazy_plt->plt_entry_size;
+	  else
+	    {
+	      s->size += plt_entry_size;
+	      if (second_s)
+		second_s->size += htab->non_lazy_plt->plt_entry_size;
+
+	      /* We also need to make an entry in the .got.plt section,
+		 which will be placed in the .got section by the linker
+		 script.  */
+	      htab->elf.sgotplt->size += htab->got_entry_size;
+
+	      /* There should be no PLT relocation against resolved
+		 undefined weak symbol in executable.  */
+	      if (!resolved_to_zero)
+		{
+		  /* We also need to make an entry in the .rel.plt
+		     section.  */
+		  htab->elf.srelplt->size += htab->sizeof_reloc;
+		  htab->elf.srelplt->reloc_count++;
+		}
+	    }
+
+	  if (htab->is_vxworks && !bfd_link_pic (info))
+	    {
+	      /* VxWorks has a second set of relocations for each PLT entry
+		 in executables.  They go in a separate relocation section,
+		 which is processed by the kernel loader.  */
+
+	      /* There are two relocations for the initial PLT entry: an
+		 R_386_32 relocation for _GLOBAL_OFFSET_TABLE_ + 4 and an
+		 R_386_32 relocation for _GLOBAL_OFFSET_TABLE_ + 8.  */
+
+	      asection *srelplt2 = htab->srelplt2;
+	      if (h->plt.offset == plt_entry_size)
+		srelplt2->size += (htab->sizeof_reloc * 2);
+
+	      /* There are two extra relocations for each subsequent PLT entry:
+		 an R_386_32 relocation for the GOT entry, and an R_386_32
+		 relocation for the PLT entry.  */
+
+	      srelplt2->size += (htab->sizeof_reloc * 2);
+	    }
+	}
+      else
+	{
+	  eh->plt_got.offset = (bfd_vma) -1;
+	  h->plt.offset = (bfd_vma) -1;
+	  h->needs_plt = 0;
+	}
+    }
+  else
+    {
+      eh->plt_got.offset = (bfd_vma) -1;
+      h->plt.offset = (bfd_vma) -1;
+      h->needs_plt = 0;
+    }
+
+  eh->tlsdesc_got = (bfd_vma) -1;
+
+  /* For i386, if R_386_TLS_{IE_32,IE,GOTIE} symbol is now local to the
+     binary, make it a R_386_TLS_LE_32 requiring no TLS entry.  For
+     x86-64, if R_X86_64_GOTTPOFF symbol is now local to the binary,
+     make it a R_X86_64_TPOFF32 requiring no GOT entry.  */
+  if (h->got.refcount > 0
+      && bfd_link_executable (info)
+      && h->dynindx == -1
+      && (elf_x86_hash_entry (h)->tls_type & GOT_TLS_IE))
+    h->got.offset = (bfd_vma) -1;
+  else if (h->got.refcount > 0)
+    {
+      asection *s;
+      bfd_boolean dyn;
+      int tls_type = elf_x86_hash_entry (h)->tls_type;
+
+      /* Make sure this symbol is output as a dynamic symbol.
+	 Undefined weak syms won't yet be marked as dynamic.  */
+      if (h->dynindx == -1
+	  && !h->forced_local
+	  && !resolved_to_zero
+	  && h->root.type == bfd_link_hash_undefweak)
+	{
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
+	    return FALSE;
+	}
+
+      s = htab->elf.sgot;
+      if (GOT_TLS_GDESC_P (tls_type))
+	{
+	  eh->tlsdesc_got = htab->elf.sgotplt->size
+	    - elf_x86_compute_jump_table_size (htab);
+	  htab->elf.sgotplt->size += 2 * htab->got_entry_size;
+	  h->got.offset = (bfd_vma) -2;
+	}
+      if (! GOT_TLS_GDESC_P (tls_type)
+	  || GOT_TLS_GD_P (tls_type))
+	{
+	  h->got.offset = s->size;
+	  s->size += htab->got_entry_size;
+	  /* R_386_TLS_GD and R_X86_64_TLSGD need 2 consecutive GOT
+	     slots.  */
+	  if (GOT_TLS_GD_P (tls_type) || tls_type == GOT_TLS_IE_BOTH)
+	    s->size += htab->got_entry_size;
+	}
+      dyn = htab->elf.dynamic_sections_created;
+      /* R_386_TLS_IE_32 needs one dynamic relocation,
+	 R_386_TLS_IE resp. R_386_TLS_GOTIE needs one dynamic relocation,
+	 (but if both R_386_TLS_IE_32 and R_386_TLS_IE is present, we
+	 need two), R_386_TLS_GD and R_X86_64_TLSGD need one if local
+	 symbol and two if global.  No dynamic relocation against
+	 resolved undefined weak symbol in executable.  */
+      if (tls_type == GOT_TLS_IE_BOTH)
+	htab->elf.srelgot->size += 2 * htab->sizeof_reloc;
+      else if ((GOT_TLS_GD_P (tls_type) && h->dynindx == -1)
+	       || (tls_type & GOT_TLS_IE))
+	htab->elf.srelgot->size += htab->sizeof_reloc;
+      else if (GOT_TLS_GD_P (tls_type))
+	htab->elf.srelgot->size += 2 * htab->sizeof_reloc;
+      else if (! GOT_TLS_GDESC_P (tls_type)
+	       && ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		    && !resolved_to_zero)
+		   || h->root.type != bfd_link_hash_undefweak)
+	       && (bfd_link_pic (info)
+		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
+	htab->elf.srelgot->size += htab->sizeof_reloc;
+      if (GOT_TLS_GDESC_P (tls_type))
+	htab->elf.srelplt->size += htab->sizeof_reloc;
+    }
+  else
+    h->got.offset = (bfd_vma) -1;
+
+  if (eh->dyn_relocs == NULL)
+    return TRUE;
+
+  /* In the shared -Bsymbolic case, discard space allocated for
+     dynamic pc-relative relocs against symbols which turn out to be
+     defined in regular objects.  For the normal shared case, discard
+     space for pc-relative relocs that have become local due to symbol
+     visibility changes.  */
+
+  if (bfd_link_pic (info))
+    {
+      /* Relocs that use pc_count are those that appear on a call
+	 insn, or certain REL relocs that can generated via assembly.
+	 We want calls to protected symbols to resolve directly to the
+	 function rather than going via the plt.  If people want
+	 function pointer comparisons to work as expected then they
+	 should avoid writing weird assembly.  */
+      if (SYMBOL_CALLS_LOCAL (info, h))
+	{
+	  struct elf_dyn_relocs **pp;
+
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	    {
+	      p->count -= p->pc_count;
+	      p->pc_count = 0;
+	      if (p->count == 0)
+		*pp = p->next;
+	      else
+		pp = &p->next;
+	    }
+	}
+
+      if (htab->is_vxworks)
+	{
+	  struct elf_dyn_relocs **pp;
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	    {
+	      if (strcmp (p->sec->output_section->name, ".tls_vars") == 0)
+		*pp = p->next;
+	      else
+		pp = &p->next;
+	    }
+	}
+
+      /* Also discard relocs on undefined weak syms with non-default
+	 visibility or in PIE.  */
+      if (eh->dyn_relocs != NULL)
+	{
+	  if (h->root.type == bfd_link_hash_undefweak)
+	    {
+	      /* Undefined weak symbol is never bound locally in shared
+		 library.  */
+	      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+		  || resolved_to_zero)
+		{
+		  if (bed->target_id == I386_ELF_DATA
+		      && h->non_got_ref)
+		    {
+		      /* Keep dynamic non-GOT/non-PLT relocation so
+			 that we can branch to 0 without PLT.  */
+		      struct elf_dyn_relocs **pp;
+
+		      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+			if (p->pc_count == 0)
+			  *pp = p->next;
+			else
+			  {
+			    /* Remove non-R_386_PC32 relocation.  */
+			    p->count = p->pc_count;
+			    pp = &p->next;
+			  }
+
+		      /* Make sure undefined weak symbols are output
+			 as dynamic symbols in PIEs for dynamic non-GOT
+			 non-PLT reloations.  */
+		      if (eh->dyn_relocs != NULL
+			  && !bfd_elf_link_record_dynamic_symbol (info, h))
+			return FALSE;
+		    }
+		  else
+		    eh->dyn_relocs = NULL;
+		}
+	      else if (h->dynindx == -1
+		       && !h->forced_local
+		       && !bfd_elf_link_record_dynamic_symbol (info, h))
+		return FALSE;
+	    }
+	  else if (bfd_link_executable (info)
+		   && (h->needs_copy || eh->needs_copy)
+		   && h->def_dynamic
+		   && !h->def_regular)
+	    {
+	      /* NB: needs_copy is set only for x86-64.  For PIE,
+		 discard space for pc-relative relocs against symbols
+		 which turn out to need copy relocs.  */
+	      struct elf_dyn_relocs **pp;
+
+	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+		{
+		  if (p->pc_count != 0)
+		    *pp = p->next;
+		  else
+		    pp = &p->next;
+		}
+	    }
+	}
+    }
+  else if (ELIMINATE_COPY_RELOCS)
+    {
+      /* For the non-shared case, discard space for relocs against
+	 symbols which turn out to need copy relocs or are not
+	 dynamic.  Keep dynamic relocations for run-time function
+	 pointer initialization.  */
+
+      if ((!h->non_got_ref
+	   || eh->func_pointer_refcount > 0
+	   || (h->root.type == bfd_link_hash_undefweak
+	       && !resolved_to_zero))
+	  && ((h->def_dynamic
+	       && !h->def_regular)
+	      || (htab->elf.dynamic_sections_created
+		  && (h->root.type == bfd_link_hash_undefweak
+		      || h->root.type == bfd_link_hash_undefined))))
+	{
+	  /* Make sure this symbol is output as a dynamic symbol.
+	     Undefined weak syms won't yet be marked as dynamic.  */
+	  if (h->dynindx == -1
+	      && !h->forced_local
+	      && !resolved_to_zero
+	      && h->root.type == bfd_link_hash_undefweak
+	      && ! bfd_elf_link_record_dynamic_symbol (info, h))
+	    return FALSE;
+
+	  /* If that succeeded, we know we'll be keeping all the
+	     relocs.  */
+	  if (h->dynindx != -1)
+	    goto keep;
+	}
+
+      eh->dyn_relocs = NULL;
+      eh->func_pointer_refcount = 0;
+
+    keep: ;
+    }
+
+  /* Finally, allocate space.  */
+  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+    {
+      asection *sreloc;
+
+      sreloc = elf_section_data (p->sec)->sreloc;
+
+      BFD_ASSERT (sreloc != NULL);
+      sreloc->size += p->count * htab->sizeof_reloc;
+    }
+
+  return TRUE;
+}
+
 /* Find any dynamic relocs that apply to read-only sections.  */
 
 bfd_boolean
@@ -115,6 +568,25 @@ _bfd_x86_elf_readonly_dynrelocs (struct elf_link_hash_entry *h,
 	}
     }
   return TRUE;
+}
+
+/* Allocate space in .plt, .got and associated reloc sections for
+   local dynamic relocs.  */
+
+bfd_boolean
+_bfd_x86_elf_allocate_local_dynrelocs (void **slot, void *inf)
+{
+  struct elf_link_hash_entry *h
+    = (struct elf_link_hash_entry *) *slot;
+
+  if (h->type != STT_GNU_IFUNC
+      || !h->def_regular
+      || !h->ref_regular
+      || !h->forced_local
+      || h->root.type != bfd_link_hash_defined)
+    abort ();
+
+  return _bfd_x86_elf_allocate_dynrelocs (h, inf);
 }
 
 /* Find and/or create a hash entry for local symbol.  */

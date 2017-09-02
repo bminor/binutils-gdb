@@ -401,6 +401,12 @@ extern void _bfd_x86_elf_set_tls_module_base
 extern bfd_vma _bfd_x86_elf_dtpoff_base
   (struct bfd_link_info *);
 
+extern bfd_boolean _bfd_x86_elf_allocate_dynrelocs
+  (struct elf_link_hash_entry *, void *);
+
+extern bfd_boolean _bfd_x86_elf_allocate_local_dynrelocs
+  (void **, void *);
+
 extern bfd_boolean _bfd_x86_elf_readonly_dynrelocs
   (struct elf_link_hash_entry *, void *);
 
