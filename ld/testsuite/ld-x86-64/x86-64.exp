@@ -1073,6 +1073,20 @@ if { [isnative] && [which $CC] != 0 } {
 	    {{error_output "pr21997-1a.err"}} \
 	    "pr21997-1a" \
 	] \
+	[list \
+	    "Build pr22064a.o" \
+	    "" \
+	    "" \
+	    { pr22064a.S } \
+	] \
+	[list \
+	    "Build pr22064.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { pr22064b.c } \
+	    {} \
+	    "pr22064.so" \
+	] \
     ]
 
     if  {[istarget "x86_64-*-linux*-gnux32"]} {
@@ -1362,6 +1376,15 @@ if { [isnative] && [which $CC] != 0 } {
 	    "pr21997-1b-pic-2" \
 	    "pass.out" \
 	    "-fPIC" \
+	] \
+	[list \
+	    "Run pr22064" \
+	    "-pie -Wl,--no-as-needed tmpdir/pr22064a.o tmpdir/pr22064.so" \
+	    "" \
+	    { dummy.s } \
+	    "pr22064-pie" \
+	    "pass.out" \
+	    "-fPIE" \
 	] \
     ]
 

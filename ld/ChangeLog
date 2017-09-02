@@ -1,3 +1,10 @@
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22064
+	* testsuite/ld-x86-64/pr22064a.S: New file.
+	* testsuite/ld-x86-64/pr22064b.c: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/22064 test.
+
 2017-09-02  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/msp430.em (eval_upper_either_sections): Make base_sec_name

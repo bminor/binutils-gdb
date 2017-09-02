@@ -1,3 +1,9 @@
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22064
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Check
+	ELF_COMMON_DEF_P for common symbols.
+
 2017-09-02  Alan Modra  <amodra@gmail.com>
 
 	* elf-eh-frame.c (offset_adjust): Avoid false positive gcc warning.
