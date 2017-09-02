@@ -1,3 +1,11 @@
+2017-09-02  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/msp430.em (eval_upper_either_sections): Make base_sec_name
+	a const char*.
+	(eval_lower_either_sections): Likewise.
+	(msp430_elf_after_allocation): Likewise, and don't needlessly concat
+	and free.  Warning fix.
+
 2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22061
