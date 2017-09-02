@@ -1,5 +1,14 @@
 2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (PLT_CIE_LENGTH, PLT_FDE_LENGTH,
+	PLT_FDE_START_OFFSET, PLT_FDE_LEN_OFFSET): Moved to ...
+	* elfxx-x86.h (PLT_CIE_LENGTH, PLT_FDE_LENGTH,
+	PLT_FDE_START_OFFSET, PLT_FDE_LEN_OFFSET): Here.
+	* elf64-x86-64.c (PLT_CIE_LENGTH, PLT_FDE_LENGTH,
+	PLT_FDE_START_OFFSET, PLT_FDE_LEN_OFFSET): Removed.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_allocate_dynrelocs): Removed.
 	(elf_i386_allocate_local_dynrelocs): Likewise.
 	(elf_i386_size_dynamic_sections): Replace

@@ -26,6 +26,11 @@
 #include "bfd_stdint.h"
 #include "hashtab.h"
 
+#define PLT_CIE_LENGTH		20
+#define PLT_FDE_LENGTH		36
+#define PLT_FDE_START_OFFSET	4 + PLT_CIE_LENGTH + 8
+#define PLT_FDE_LEN_OFFSET	4 + PLT_CIE_LENGTH + 12
+
 #define ABI_64_P(abfd) \
   (get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64)
 

@@ -647,10 +647,6 @@ static const bfd_byte elf_x32_non_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
 
 static const bfd_byte elf_x86_64_eh_frame_lazy_plt[] =
 {
-#define PLT_CIE_LENGTH		20
-#define PLT_FDE_LENGTH		36
-#define PLT_FDE_START_OFFSET	4 + PLT_CIE_LENGTH + 8
-#define PLT_FDE_LEN_OFFSET	4 + PLT_CIE_LENGTH + 12
   PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
   0, 0, 0, 0,			/* CIE ID */
   1,				/* CIE version */
