@@ -968,18 +968,6 @@ static const struct elf_x86_64_backend_data elf_x86_64_arch_bed =
 
 #define	elf_backend_arch_data	&elf_x86_64_arch_bed
 
-/* Values in tls_type of x86 ELF linker hash entry.  */
-#define GOT_TLS_IE	3
-#define GOT_TLS_GDESC	4
-#define GOT_TLS_GD_BOTH_P(type) \
-  ((type) == (GOT_TLS_GD | GOT_TLS_GDESC))
-#define GOT_TLS_GD_P(type) \
-  ((type) == GOT_TLS_GD || GOT_TLS_GD_BOTH_P (type))
-#define GOT_TLS_GDESC_P(type) \
-  ((type) == GOT_TLS_GDESC || GOT_TLS_GD_BOTH_P (type))
-#define GOT_TLS_GD_ANY_P(type) \
-  (GOT_TLS_GD_P (type) || GOT_TLS_GDESC_P (type))
-
 #define is_x86_64_elf(bfd)				\
   (bfd_get_flavour (bfd) == bfd_target_elf_flavour	\
    && elf_tdata (bfd) != NULL				\

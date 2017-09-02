@@ -218,10 +218,23 @@ struct elf_x86_plt_layout
   unsigned int eh_frame_plt_size;
 };
 
-/* The first 3 values in tls_type of x86 ELF linker hash entry.  */
+/* Values in tls_type of x86 ELF linker hash entry.  */
 #define GOT_UNKNOWN	0
 #define GOT_NORMAL	1
 #define GOT_TLS_GD	2
+#define GOT_TLS_IE	4
+#define GOT_TLS_IE_POS	5
+#define GOT_TLS_IE_NEG	6
+#define GOT_TLS_IE_BOTH 7
+#define GOT_TLS_GDESC	8
+#define GOT_TLS_GD_BOTH_P(type)	\
+  ((type) == (GOT_TLS_GD | GOT_TLS_GDESC))
+#define GOT_TLS_GD_P(type) \
+  ((type) == GOT_TLS_GD || GOT_TLS_GD_BOTH_P (type))
+#define GOT_TLS_GDESC_P(type) \
+  ((type) == GOT_TLS_GDESC || GOT_TLS_GD_BOTH_P (type))
+#define GOT_TLS_GD_ANY_P(type) \
+  (GOT_TLS_GD_P (type) || GOT_TLS_GDESC_P (type))
 
 #define elf_x86_hash_entry(ent) \
   ((struct elf_x86_link_hash_entry *)(ent))
