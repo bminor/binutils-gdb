@@ -858,9 +858,6 @@ static const struct elf_i386_backend_data elf_i386_arch_bed =
    && elf_tdata (bfd) != NULL				\
    && elf_object_id (bfd) == I386_ELF_DATA)
 
-#define elf_i386_compute_jump_table_size(htab) \
-  ((htab)->elf.srelplt->reloc_count * 4)
-
 /* Return TRUE if the TLS access code sequence support transition
    from R_TYPE.  */
 
@@ -2206,7 +2203,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       if (GOT_TLS_GDESC_P (tls_type))
 	{
 	  eh->tlsdesc_got = htab->elf.sgotplt->size
-	    - elf_i386_compute_jump_table_size (htab);
+	    - elf_x86_compute_jump_table_size (htab);
 	  htab->elf.sgotplt->size += 8;
 	  h->got.offset = (bfd_vma) -2;
 	}
@@ -2637,7 +2634,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	      if (GOT_TLS_GDESC_P (*local_tls_type))
 		{
 		  *local_tlsdesc_gotent = htab->elf.sgotplt->size
-		    - elf_i386_compute_jump_table_size (htab);
+		    - elf_x86_compute_jump_table_size (htab);
 		  htab->elf.sgotplt->size += 8;
 		  *local_got = (bfd_vma) -2;
 		}

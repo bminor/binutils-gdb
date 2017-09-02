@@ -278,6 +278,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
       ret->r_info = elf64_r_info;
       ret->r_sym = elf64_r_sym;
       ret->sizeof_reloc = sizeof (Elf64_External_Rela);
+      ret->got_entry_size = 8;
       ret->pointer_r_type = R_X86_64_64;
       ret->dynamic_interpreter = ELF64_DYNAMIC_INTERPRETER;
       ret->dynamic_interpreter_size = sizeof ELF64_DYNAMIC_INTERPRETER;
@@ -291,6 +292,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
       if (bed->target_id == X86_64_ELF_DATA)
 	{
 	  ret->sizeof_reloc = sizeof (Elf32_External_Rela);
+	  ret->got_entry_size = 8;
 	  ret->pointer_r_type = R_X86_64_32;
 	  ret->dynamic_interpreter = ELFX32_DYNAMIC_INTERPRETER;
 	  ret->dynamic_interpreter_size
@@ -300,6 +302,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
       else
 	{
 	  ret->sizeof_reloc = sizeof (Elf32_External_Rel);
+	  ret->got_entry_size = 4;
 	  ret->pointer_r_type = R_386_32;
 	  ret->dynamic_interpreter = ELF32_DYNAMIC_INTERPRETER;
 	  ret->dynamic_interpreter_size

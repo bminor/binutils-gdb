@@ -314,6 +314,7 @@ struct elf_x86_link_hash_table
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
   unsigned int sizeof_reloc;
+  unsigned int got_entry_size;
   unsigned int pointer_r_type;
   int dynamic_interpreter_size;
   const char *dynamic_interpreter;
@@ -381,6 +382,9 @@ struct elf_x86_plt
 
 #define elf_x86_local_tlsdesc_gotent(abfd) \
   (elf_x86_tdata (abfd)->local_tlsdesc_gotent)
+
+#define elf_x86_compute_jump_table_size(htab) \
+  ((htab)->elf.srelplt->reloc_count * (htab)->got_entry_size)
 
 extern bfd_boolean _bfd_x86_elf_mkobject
   (bfd *);

@@ -1,5 +1,22 @@
 2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_compute_jump_table_size): Removed.
+	(elf_i386_allocate_dynrelocs): Replace
+	elf_i386_compute_jump_table_size with
+	elf_x86_compute_jump_table_size.
+	(elf_i386_size_dynamic_sections): Likewise.
+	* elf64-x86-64.c (elf_x86_64_compute_jump_table_size): Removed.
+	(elf_x86_64_allocate_dynrelocs): Replace
+	elf_x86_64_compute_jump_table_size with
+	elf_x86_compute_jump_table_size.
+	(elf_x86_64_size_dynamic_sections): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Initialize
+	got_entry_size.
+	* elfxx-x86.h (elf_x86_link_hash_table): Add got_entry_size.
+	(elf_x86_compute_jump_table_size): New.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Initialize
 	sizeof_reloc.
 	(_bfd_x86_elf_adjust_dynamic_symbol): Use sizeof_reloc.

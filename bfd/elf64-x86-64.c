@@ -973,9 +973,6 @@ static const struct elf_x86_64_backend_data elf_x86_64_arch_bed =
    && elf_tdata (bfd) != NULL				\
    && elf_object_id (bfd) == X86_64_ELF_DATA)
 
-#define elf_x86_64_compute_jump_table_size(htab) \
-  ((htab)->elf.srelplt->reloc_count * GOT_ENTRY_SIZE)
-
 static bfd_boolean
 elf64_x86_64_elf_object_p (bfd *abfd)
 {
@@ -2632,7 +2629,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
       if (GOT_TLS_GDESC_P (tls_type))
 	{
 	  eh->tlsdesc_got = htab->elf.sgotplt->size
-	    - elf_x86_64_compute_jump_table_size (htab);
+	    - elf_x86_compute_jump_table_size (htab);
 	  htab->elf.sgotplt->size += 2 * GOT_ENTRY_SIZE;
 	  h->got.offset = (bfd_vma) -2;
 	}
@@ -3035,7 +3032,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	      if (GOT_TLS_GDESC_P (*local_tls_type))
 		{
 		  *local_tlsdesc_gotent = htab->elf.sgotplt->size
-		    - elf_x86_64_compute_jump_table_size (htab);
+		    - elf_x86_compute_jump_table_size (htab);
 		  htab->elf.sgotplt->size += 2 * GOT_ENTRY_SIZE;
 		  *local_got = (bfd_vma) -2;
 		}
@@ -3099,7 +3096,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
   if (htab->elf.srelplt)
     {
       htab->sgotplt_jump_table_size
-	= elf_x86_64_compute_jump_table_size (htab);
+	= elf_x86_compute_jump_table_size (htab);
       htab->next_irelative_index = htab->elf.srelplt->reloc_count - 1;
     }
   else if (htab->elf.irelplt)
