@@ -1039,6 +1039,20 @@ if { [isnative] && [which $CC] != 0 } {
 	    {{readelf {-n} property-7.r}} \
 	    "property-7b.o" \
 	] \
+	[list \
+	    "Build pr22064a.o" \
+	    "" \
+	    "" \
+	    { pr22064a.S } \
+	] \
+	[list \
+	    "Build pr22064.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { pr22064b.c } \
+	    {} \
+	    "pr22064.so" \
+	] \
     ]
 
     run_ld_link_exec_tests [list \
@@ -1214,6 +1228,15 @@ if { [isnative] && [which $CC] != 0 } {
 	    "" \
 	    {property-x86-2.S property-x86-1.S pass.c property-stack.S} \
 	    "property-5-static" "pass.out" \
+	] \
+	[list \
+	    "Run pr22064" \
+	    "-pie -Wl,--no-as-needed tmpdir/pr22064a.o tmpdir/pr22064.so" \
+	    "" \
+	    { dummy.s } \
+	    "pr22064-pie" \
+	    "pass.out" \
+	    "-fPIE" \
 	] \
     ]
 

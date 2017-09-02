@@ -1,5 +1,11 @@
 2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/22064
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Check
+	ELF_COMMON_DEF_P for common symbols.
+
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/22061
 	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Create
 	.eh_frame section for the second PLT.
