@@ -1971,7 +1971,6 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   struct elf_dyn_relocs *p;
   unsigned plt_entry_size;
   bfd_boolean resolved_to_zero;
-  const struct elf_i386_backend_data *bed;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -1982,8 +1981,6 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   htab = elf_x86_hash_table (info, I386_ELF_DATA);
   if (htab == NULL)
     return FALSE;
-
-  bed = get_elf_i386_backend_data (info->output_bfd);
 
   plt_entry_size = htab->plt.plt_entry_size;
 
@@ -2144,7 +2141,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		}
 	    }
 
-	  if (bed->os == is_vxworks && !bfd_link_pic (info))
+	  if (htab->is_vxworks && !bfd_link_pic (info))
 	    {
 	      /* VxWorks has a second set of relocations for each PLT entry
 		 in executables.  They go in a separate relocation section,
@@ -2281,7 +2278,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 	}
 
-      if (bed->os == is_vxworks)
+      if (htab->is_vxworks)
 	{
 	  struct elf_dyn_relocs **pp;
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
@@ -2595,8 +2592,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 		     linker script /DISCARD/, so we'll be discarding
 		     the relocs too.  */
 		}
-	      else if ((get_elf_i386_backend_data (output_bfd)->os
-			== is_vxworks)
+	      else if (htab->is_vxworks
 		       && strcmp (p->sec->output_section->name,
 				  ".tls_vars") == 0)
 		{
@@ -2927,7 +2923,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 		return FALSE;
 	    }
 	}
-      if (get_elf_i386_backend_data (output_bfd)->os == is_vxworks
+      if (htab->is_vxworks
 	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
 	return FALSE;
     }
@@ -3027,8 +3023,7 @@ elf_i386_relocate_section (bfd *output_bfd,
   local_tlsdesc_gotents = elf_x86_local_tlsdesc_gotent (input_bfd);
   /* We have to handle relocations in vxworks .tls_vars sections
      specially, because the dynamic loader is 'weird'.  */
-  is_vxworks_tls = ((get_elf_i386_backend_data (output_bfd)->os
-		     == is_vxworks)
+  is_vxworks_tls = (htab->is_vxworks
                     && bfd_link_pic (info)
 		    && !strcmp (input_section->output_section->name,
 				".tls_vars"));
@@ -4583,7 +4578,6 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 {
   struct elf_x86_link_hash_table *htab;
   unsigned plt_entry_size;
-  const struct elf_i386_backend_data *abed;
   struct elf_x86_link_hash_entry *eh;
   bfd_boolean local_undefweak;
   bfd_boolean use_plt_second;
@@ -4592,7 +4586,6 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
   if (htab == NULL)
     return FALSE;
 
-  abed = get_elf_i386_backend_data (output_bfd);
   plt_entry_size = htab->plt.plt_entry_size;
 
   /* Use the second PLT section only if there is .plt section.  */
@@ -4701,7 +4694,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 		      resolved_plt->contents + plt_offset
                       + htab->plt.plt_got_offset);
 
-	  if (abed->os == is_vxworks)
+	  if (htab->is_vxworks)
 	    {
 	      int s, k, reloc_index;
 
@@ -5119,7 +5112,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	  switch (dyn.d_tag)
 	    {
 	    default:
-	      if (abed->os == is_vxworks
+	      if (htab->is_vxworks
                   && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
 		break;
 	      continue;
@@ -5174,7 +5167,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 			      htab->elf.splt->contents
 			      + htab->lazy_plt->plt0_got2_offset);
 
-		  if (abed->os == is_vxworks)
+		  if (htab->is_vxworks)
 		    {
 		      Elf_Internal_Rela rel;
 		      int num_plts = (htab->elf.splt->size
