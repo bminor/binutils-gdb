@@ -1,3 +1,14 @@
+2017-09-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22071
+	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Set tlsdesc_plt
+	for x86-64 if GOT_TLS_GDESC_P is true.
+
+2017-09-03  Alan Modra  <amodra@gmail.com>
+
+	PR 22067
+	* elfxx-x86.h (elf_x86_hash_table): Check is_elf_hash_table first.
+
 2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Initialize

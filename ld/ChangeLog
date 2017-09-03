@@ -1,3 +1,10 @@
+2017-09-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22071
+	* testsuite/ld-x86-64/pr22071.d: New file.
+	* testsuite/ld-x86-64/pr22071.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr22071.
+
 2017-09-02  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.h (lang_input_statement_type): Expand comments.
