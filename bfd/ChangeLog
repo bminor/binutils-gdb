@@ -6,6 +6,35 @@
 
 2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_convert_load): Renamed to ...
+	(_bfd_i386_elf_convert_load): This.  Remove static.
+	(elf_i386_size_dynamic_sections): Removed.
+	(elf_backend_size_dynamic_sections): Likewise.
+	* elf64-x86-64.c (elf_x86_64_convert_load): Renamed to ...
+	(_bfd_x86_64_elf_convert_load): This.  Remove static.
+	(elf_x86_64_size_dynamic_sections): Removed.
+	(elf_backend_size_dynamic_sections): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_allocate_dynrelocs): Renamed to ...
+	(elf_x86_allocate_dynrelocs): This.  Make it static.
+	(_bfd_x86_elf_allocate_local_dynrelocs): Renamed to ...
+	(elf_x86_allocate_local_dynreloc): This.  Make it static.
+	(elf_i386_is_reloc_section): New function.
+	(elf_x86_64_is_reloc_section): Likewise.
+	(_bfd_x86_elf_link_hash_table_create): Initialize convert_load,
+	is_reloc_section, dt_reloc, dt_reloc_sz and dt_reloc_ent.
+	Rearrange got_entry_size initialization.
+	(_bfd_x86_elf_size_dynamic_sections): New function.
+	* elfxx-x86.h (elf_x86_link_hash_table): Add convert_load,
+	is_reloc_section, dt_reloc, dt_reloc_sz and dt_reloc_ent.
+	(_bfd_i386_elf_convert_load): New.
+	(_bfd_x86_64_elf_convert_load): Likewise.
+	(_bfd_x86_elf_size_dynamic_sections): Likewise.
+	(elf_backend_size_dynamic_sections): Likewise.
+	(_bfd_x86_elf_allocate_dynrelocs): Removed.
+	(_bfd_x86_elf_allocate_local_dynrelocs): Likewise.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-x86.h (elf_x86_link_hash_table): Rearrange fields and
 	update comments.
 
