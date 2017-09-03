@@ -1,4 +1,4 @@
-From 81238272a7781dabc9553c1422588a6442663769 Mon Sep 17 00:00:00 2001
+From 6d604c55dac074eb21b8d6808bc73dce1c09ac5a Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Thu, 3 Aug 2017 09:43:28 -0700
 Subject: [PATCH] x86: Add R_X86_64_GPOFF/R_386_GPOFF relocation
@@ -137,10 +137,10 @@ ld/
 	* testsuite/ld-i386/i386.exp: Run R_386_GPOFF tests.
 	* testsuite/ld-x86-64/x86-64.exp: Run R_X86_64_GPOFF tests.
 ---
- bfd/elf32-i386.c                            |  78 +++++++++++++++++--
- bfd/elf64-x86-64.c                          |  74 ++++++++++++++++--
- bfd/elfxx-x86.c                             | 115 ++++++++++++++++++++++++++++
- bfd/elfxx-x86.h                             |  13 ++++
+ bfd/elf32-i386.c                            |  74 +++++++++++++++--
+ bfd/elf64-x86-64.c                          |  70 ++++++++++++++--
+ bfd/elfxx-x86.c                             | 119 ++++++++++++++++++++++++++++
+ bfd/elfxx-x86.h                             |  13 +++
  gas/config/tc-i386.c                        |  41 +++++++++-
  gas/config/tc-i386.h                        |   6 ++
  gas/testsuite/gas/i386/gpoff.d              |  11 +++
@@ -150,14 +150,14 @@ ld/
  gas/testsuite/gas/i386/inval-gpoff.s        |   5 ++
  gas/testsuite/gas/i386/x86-64-gpoff.d       |  11 +++
  gas/testsuite/gas/i386/x86-64-gpoff.s       |   4 +
- gas/testsuite/gas/i386/x86-64-inval-gpoff.l |  30 ++++++++
+ gas/testsuite/gas/i386/x86-64-inval-gpoff.l |  30 +++++++
  gas/testsuite/gas/i386/x86-64-inval-gpoff.s |   7 ++
  include/elf/i386.h                          |   1 +
  include/elf/x86-64.h                        |   1 +
  ld/testsuite/ld-i386/gpoff-1a.S             |  20 +++++
- ld/testsuite/ld-i386/gpoff-1b.c             |  78 +++++++++++++++++++
+ ld/testsuite/ld-i386/gpoff-1b.c             |  78 ++++++++++++++++++
  ld/testsuite/ld-i386/gpoff-2a.S             |  19 +++++
- ld/testsuite/ld-i386/gpoff-2b.c             |  77 +++++++++++++++++++
+ ld/testsuite/ld-i386/gpoff-2b.c             |  77 ++++++++++++++++++
  ld/testsuite/ld-i386/gpoff-3.d              |   3 +
  ld/testsuite/ld-i386/gpoff-3.s              |   4 +
  ld/testsuite/ld-i386/gpoff-4.d              |   3 +
@@ -169,7 +169,7 @@ ld/
  ld/testsuite/ld-i386/gpoff-7.d              |  16 ++++
  ld/testsuite/ld-i386/gpoff-7.s              |   9 +++
  ld/testsuite/ld-i386/gpoff-8.s              |  10 +++
- ld/testsuite/ld-i386/gpoff-8.t              |  39 ++++++++++
+ ld/testsuite/ld-i386/gpoff-8.t              |  39 +++++++++
  ld/testsuite/ld-i386/gpoff-8a.d             |  18 +++++
  ld/testsuite/ld-i386/gpoff-8b.d             |  18 +++++
  ld/testsuite/ld-i386/gpoff-8c.d             |  18 +++++
@@ -192,7 +192,7 @@ ld/
  ld/testsuite/ld-x86-64/gpoff-7.d            |  16 ++++
  ld/testsuite/ld-x86-64/gpoff-7.s            |   9 +++
  ld/testsuite/ld-x86-64/gpoff-8.s            |  10 +++
- ld/testsuite/ld-x86-64/gpoff-8.t            |  39 ++++++++++
+ ld/testsuite/ld-x86-64/gpoff-8.t            |  39 +++++++++
  ld/testsuite/ld-x86-64/gpoff-8a.d           |  18 +++++
  ld/testsuite/ld-x86-64/gpoff-8b.d           |  18 +++++
  ld/testsuite/ld-x86-64/gpoff-8c.d           |  18 +++++
@@ -200,7 +200,7 @@ ld/
  ld/testsuite/ld-x86-64/gpoff-8e.d           |  18 +++++
  ld/testsuite/ld-x86-64/gpoff-8f.d           |  18 +++++
  ld/testsuite/ld-x86-64/x86-64.exp           |  72 +++++++++++++++++
- 63 files changed, 1342 insertions(+), 16 deletions(-)
+ 63 files changed, 1338 insertions(+), 16 deletions(-)
  create mode 100644 gas/testsuite/gas/i386/gpoff.d
  create mode 100644 gas/testsuite/gas/i386/gpoff.s
  create mode 100644 gas/testsuite/gas/i386/inval-gpoff.l
@@ -255,7 +255,7 @@ ld/
  create mode 100644 ld/testsuite/ld-x86-64/gpoff-8f.d
 
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index 8e41c6eef2..3709d319c8 100644
+index ce9cf3a205..8b19491bc7 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
 @@ -143,9 +143,12 @@ static reloc_howto_type elf_howto_table[]=
@@ -283,7 +283,7 @@ index 8e41c6eef2..3709d319c8 100644
      case BFD_RELOC_VTABLE_INHERIT:
        TRACE ("BFD_RELOC_VTABLE_INHERIT");
        return &elf_howto_table[R_386_GNU_VTINHERIT - R_386_vt_offset];
-@@ -1566,17 +1573,26 @@ elf_i386_check_relocs (bfd *abfd,
+@@ -1531,17 +1538,26 @@ elf_i386_check_relocs (bfd *abfd,
  	  if (isym == NULL)
  	    goto error_return;
  
@@ -316,7 +316,7 @@ index 8e41c6eef2..3709d319c8 100644
  	      h->def_regular = 1;
  	      h->ref_regular = 1;
  	      h->forced_local = 1;
-@@ -1953,6 +1969,11 @@ do_size:
+@@ -1918,6 +1934,11 @@ do_size:
  	    goto error_return;
  	  break;
  
@@ -328,18 +328,7 @@ index 8e41c6eef2..3709d319c8 100644
  	default:
  	  break;
  	}
-@@ -2639,6 +2660,10 @@ elf_i386_allocate_local_dynrelocs (void **slot, void *inf)
-   struct elf_link_hash_entry *h
-     = (struct elf_link_hash_entry *) *slot;
- 
-+  /* Skip local symbol with GPOFF relocation.  */
-+  if (((struct elf_x86_link_hash_entry *) h)->has_gpoff_reloc)
-+    return TRUE;
-+
-   if (h->type != STT_GNU_IFUNC
-       || !h->def_regular
-       || !h->ref_regular
-@@ -4720,6 +4745,41 @@ disallow_got32:
+@@ -3624,6 +3645,41 @@ disallow_got32:
  	    relocation = -elf_i386_tpoff (info, relocation);
  	  break;
  
@@ -381,7 +370,7 @@ index 8e41c6eef2..3709d319c8 100644
  	default:
  	  break;
  	}
-@@ -5248,6 +5308,10 @@ elf_i386_finish_local_dynamic_symbol (void **slot, void *inf)
+@@ -4150,6 +4206,10 @@ elf_i386_finish_local_dynamic_symbol (void **slot, void *inf)
    struct bfd_link_info *info
      = (struct bfd_link_info *) inf;
  
@@ -393,7 +382,7 @@ index 8e41c6eef2..3709d319c8 100644
  					 h, NULL);
  }
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index 3bf465b46f..36efc945b6 100644
+index fa295a5ca9..4201f7c7fd 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
 @@ -173,12 +173,15 @@ static reloc_howto_type x86_64_elf_howto_table[] =
@@ -421,7 +410,7 @@ index 3bf465b46f..36efc945b6 100644
    { BFD_RELOC_VTABLE_INHERIT,	R_X86_64_GNU_VTINHERIT, },
    { BFD_RELOC_VTABLE_ENTRY,	R_X86_64_GNU_VTENTRY, },
  };
-@@ -1952,18 +1956,26 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+@@ -1921,18 +1925,26 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
  	  if (isym == NULL)
  	    goto error_return;
  
@@ -454,7 +443,7 @@ index 3bf465b46f..36efc945b6 100644
  	      h->def_regular = 1;
  	      h->ref_regular = 1;
  	      h->forced_local = 1;
-@@ -2390,6 +2402,11 @@ do_size:
+@@ -2359,6 +2371,11 @@ do_size:
  	    goto error_return;
  	  break;
  
@@ -466,18 +455,7 @@ index 3bf465b46f..36efc945b6 100644
  	default:
  	  break;
  	}
-@@ -3033,6 +3050,10 @@ elf_x86_64_allocate_local_dynrelocs (void **slot, void *inf)
-   struct elf_link_hash_entry *h
-     = (struct elf_link_hash_entry *) *slot;
- 
-+  /* Skip local symbol with GPOFF relocation.  */
-+  if (((struct elf_x86_link_hash_entry *) h)->has_gpoff_reloc)
-+    return TRUE;
-+
-   if (h->type != STT_GNU_IFUNC
-       || !h->def_regular
-       || !h->ref_regular
-@@ -5088,6 +5109,41 @@ direct:
+@@ -4037,6 +4054,41 @@ direct:
  	  relocation -= _bfd_x86_elf_dtpoff_base (info);
  	  break;
  
@@ -519,7 +497,7 @@ index 3bf465b46f..36efc945b6 100644
  	default:
  	  break;
  	}
-@@ -5612,6 +5668,10 @@ elf_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
+@@ -4561,6 +4613,10 @@ elf_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
    struct bfd_link_info *info
      = (struct bfd_link_info *) inf;
  
@@ -531,10 +509,21 @@ index 3bf465b46f..36efc945b6 100644
  					   info, h, NULL);
  }
 diff --git a/bfd/elfxx-x86.c b/bfd/elfxx-x86.c
-index ccd6e1058a..cc7b224956 100644
+index cac451d208..6e05d6f929 100644
 --- a/bfd/elfxx-x86.c
 +++ b/bfd/elfxx-x86.c
-@@ -344,6 +344,21 @@ _bfd_x86_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+@@ -579,6 +579,10 @@ elf_x86_allocate_local_dynreloc (void **slot, void *inf)
+   struct elf_link_hash_entry *h
+     = (struct elf_link_hash_entry *) *slot;
+ 
++  /* Skip local symbol with GPOFF relocation.  */
++  if (((struct elf_x86_link_hash_entry *) h)->has_gpoff_reloc)
++    return TRUE;
++
+   if (h->type != STT_GNU_IFUNC
+       || !h->def_regular
+       || !h->ref_regular
+@@ -858,6 +862,21 @@ _bfd_x86_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
  				    FALSE, FALSE, FALSE);
  	  if (h != NULL)
  	    ((struct elf_x86_link_hash_entry *) h)->tls_get_addr = 1;
@@ -556,7 +545,7 @@ index ccd6e1058a..cc7b224956 100644
  	}
      }
  
-@@ -464,6 +479,7 @@ _bfd_x86_elf_copy_indirect_symbol (struct bfd_link_info *info,
+@@ -1404,6 +1423,7 @@ _bfd_x86_elf_copy_indirect_symbol (struct bfd_link_info *info,
       generate a R_386_COPY reloc.  */
    edir->gotoff_ref |= eind->gotoff_ref;
  
@@ -564,9 +553,9 @@ index ccd6e1058a..cc7b224956 100644
    edir->has_got_reloc |= eind->has_got_reloc;
    edir->has_non_got_reloc |= eind->has_non_got_reloc;
  
-@@ -659,3 +675,102 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
+@@ -2462,3 +2482,102 @@ error_alignment:
  
-   return updated;
+   return pbfd;
  }
 +
 +/* Set up GP section from symbols with GPOFF relocations.  */
@@ -668,10 +657,10 @@ index ccd6e1058a..cc7b224956 100644
 +  return bfd_elf_final_link (abfd, info);
 +}
 diff --git a/bfd/elfxx-x86.h b/bfd/elfxx-x86.h
-index 21e16a2f10..61c863bacf 100644
+index 61244f5dfe..2865fcd392 100644
 --- a/bfd/elfxx-x86.h
 +++ b/bfd/elfxx-x86.h
-@@ -77,6 +77,9 @@ struct elf_x86_link_hash_entry
+@@ -82,6 +82,9 @@ struct elf_x86_link_hash_entry
  
    unsigned char tls_type;
  
@@ -681,7 +670,7 @@ index 21e16a2f10..61c863bacf 100644
    /* TRUE if symbol has GOT or PLT relocations.  */
    unsigned int has_got_reloc : 1;
  
-@@ -250,6 +253,9 @@ struct elf_x86_link_hash_table
+@@ -267,6 +270,9 @@ struct elf_x86_link_hash_table
    /* Parameters describing non-lazy PLT generation.  */
    const struct elf_x86_non_lazy_plt_layout *non_lazy_plt;
  
@@ -691,17 +680,17 @@ index 21e16a2f10..61c863bacf 100644
    union
    {
      bfd_signed_vma refcount;
-@@ -378,6 +384,9 @@ extern enum elf_property_kind _bfd_x86_elf_parse_gnu_properties
- extern bfd_boolean _bfd_x86_elf_merge_gnu_properties
-   (struct bfd_link_info *, bfd *, elf_property *, elf_property *);
+@@ -484,6 +490,9 @@ extern bfd_boolean _bfd_x86_elf_merge_gnu_properties
+ extern bfd * _bfd_x86_elf_link_setup_gnu_properties
+   (struct bfd_link_info *, struct elf_x86_plt_layout_table *);
  
 +extern bfd_boolean _bfd_x86_elf_final_link
 +  (bfd *, struct bfd_link_info *);
 +
- #define bfd_elf64_bfd_link_hash_table_create \
-   _bfd_x86_elf_link_hash_table_create
- #define bfd_elf32_bfd_link_hash_table_create \
-@@ -386,6 +395,10 @@ extern bfd_boolean _bfd_x86_elf_merge_gnu_properties
+ #define bfd_elf64_mkobject \
+   _bfd_x86_elf_mkobject
+ #define bfd_elf32_mkobject \
+@@ -496,6 +505,10 @@ extern bfd * _bfd_x86_elf_link_setup_gnu_properties
    _bfd_x86_elf_link_check_relocs
  #define bfd_elf32_bfd_link_check_relocs \
    _bfd_x86_elf_link_check_relocs
@@ -710,8 +699,8 @@ index 21e16a2f10..61c863bacf 100644
 +#define bfd_elf32_bfd_final_link \
 +  _bfd_x86_elf_final_link
  
- #define elf_backend_always_size_sections \
-   _bfd_x86_elf_always_size_sections
+ #define elf_backend_size_dynamic_sections \
+   _bfd_x86_elf_size_dynamic_sections
 diff --git a/gas/config/tc-i386.c b/gas/config/tc-i386.c
 index 456be9e07c..b91ad5611c 100644
 --- a/gas/config/tc-i386.c
@@ -2146,7 +2135,7 @@ index 0000000000..fb8c3375b8
 + +[a-f0-9]+:[ \t]+48 8d 05 [a-f0-9 \t]+lea[ \t]+0x[a-f0-9]+\(%rip\),%rax[ \t]+# [a-f0-9]+ <foo>
 +#pass
 diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
-index 0e018c5577..feab9ce73b 100644
+index 83822dcfe9..4cd4bc8be3 100644
 --- a/ld/testsuite/ld-x86-64/x86-64.exp
 +++ b/ld/testsuite/ld-x86-64/x86-64.exp
 @@ -269,6 +269,17 @@ run_dump_test "abs"
@@ -2167,7 +2156,7 @@ index 0e018c5577..feab9ce73b 100644
  run_dump_test "tlsgd2"
  run_dump_test "tlsgd3"
  run_dump_test "tlsgd12"
-@@ -1679,6 +1690,67 @@ if { [isnative] && [which $CC] != 0 } {
+@@ -1703,6 +1714,67 @@ if { [isnative] && [which $CC] != 0 } {
  	}
      }
  
