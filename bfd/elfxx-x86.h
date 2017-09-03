@@ -26,6 +26,11 @@
 #include "bfd_stdint.h"
 #include "hashtab.h"
 
+#define PLT_CIE_LENGTH		20
+#define PLT_FDE_LENGTH		36
+#define PLT_FDE_START_OFFSET	4 + PLT_CIE_LENGTH + 8
+#define PLT_FDE_LEN_OFFSET	4 + PLT_CIE_LENGTH + 12
+
 #define ABI_64_P(abfd) \
   (get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64)
 
@@ -218,10 +223,23 @@ struct elf_x86_plt_layout
   unsigned int eh_frame_plt_size;
 };
 
-/* The first 3 values in tls_type of x86 ELF linker hash entry.  */
+/* Values in tls_type of x86 ELF linker hash entry.  */
 #define GOT_UNKNOWN	0
 #define GOT_NORMAL	1
 #define GOT_TLS_GD	2
+#define GOT_TLS_IE	4
+#define GOT_TLS_IE_POS	5
+#define GOT_TLS_IE_NEG	6
+#define GOT_TLS_IE_BOTH 7
+#define GOT_TLS_GDESC	8
+#define GOT_TLS_GD_BOTH_P(type)	\
+  ((type) == (GOT_TLS_GD | GOT_TLS_GDESC))
+#define GOT_TLS_GD_P(type) \
+  ((type) == GOT_TLS_GD || GOT_TLS_GD_BOTH_P (type))
+#define GOT_TLS_GDESC_P(type) \
+  ((type) == GOT_TLS_GDESC || GOT_TLS_GD_BOTH_P (type))
+#define GOT_TLS_GD_ANY_P(type) \
+  (GOT_TLS_GD_P (type) || GOT_TLS_GDESC_P (type))
 
 #define elf_x86_hash_entry(ent) \
   ((struct elf_x86_link_hash_entry *)(ent))
@@ -268,12 +286,6 @@ struct elf_x86_link_hash_table
   htab_t loc_hash_table;
   void * loc_hash_memory;
 
-  /* The offset into splt of the PLT entry for the TLS descriptor
-     resolver.  Special values are 0, if not necessary (or not found
-     to be necessary yet), and -1 if needed but not determined
-     yet.  */
-  bfd_vma tlsdesc_plt;
-
   /* The offset into sgot of the GOT entry used by the PLT entry
      above.  */
   bfd_vma tlsdesc_got;
@@ -287,16 +299,35 @@ struct elf_x86_link_hash_table
      to read-only sections.  */
   bfd_boolean readonly_dynrelocs_against_ifunc;
 
+  /* TRUE if this is a VxWorks x86 target.  This is only used for
+     i386.  */
+  bfd_boolean is_vxworks;
+
   /* The (unloaded but important) .rel.plt.unloaded section on VxWorks.
      This is used for i386 only.  */
   asection *srelplt2;
 
   /* The index of the next unused R_386_TLS_DESC slot in .rel.plt.  This
-     is used for i386 only.  */
+     is only used for i386.  */
   bfd_vma next_tls_desc_index;
+
+  /* The offset into splt of the PLT entry for the TLS descriptor
+     resolver.  Special values are 0, if not necessary (or not found
+     to be necessary yet), and -1 if needed but not determined
+     yet.  This is only used for x86-64.  */
+  bfd_vma tlsdesc_plt;
 
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
+  bfd_boolean (*convert_load) (bfd *, asection *,
+			       struct bfd_link_info *);
+  bfd_boolean (*is_reloc_section) (const char *);
+  enum elf_target_id target_id;
+  unsigned int sizeof_reloc;
+  unsigned int dt_reloc;
+  unsigned int dt_reloc_sz;
+  unsigned int dt_reloc_ent;
+  unsigned int got_entry_size;
   unsigned int pointer_r_type;
   int dynamic_interpreter_size;
   const char *dynamic_interpreter;
@@ -317,7 +348,7 @@ struct elf_x86_plt_layout_table
   /* The non-lazy PLT layout for IBT.  */
   const struct elf_x86_non_lazy_plt_layout *non_lazy_ibt_plt;
 
-  /* TRUE if this is an normal x86 target.  */
+  /* TRUE if this is a normal x86 target.  */
   bfd_boolean normal_target;
 
   /* TRUE if this is a VxWorks x86 target.  */
@@ -365,6 +396,23 @@ struct elf_x86_plt
 #define elf_x86_local_tlsdesc_gotent(abfd) \
   (elf_x86_tdata (abfd)->local_tlsdesc_gotent)
 
+#define elf_x86_compute_jump_table_size(htab) \
+  ((htab)->elf.srelplt->reloc_count * (htab)->got_entry_size)
+
+#define is_x86_elf(bfd, htab)				\
+  (bfd_get_flavour (bfd) == bfd_target_elf_flavour	\
+   && elf_tdata (bfd) != NULL				\
+   && elf_object_id (bfd) == (htab)->target_id)
+
+extern bfd_boolean _bfd_i386_elf_convert_load
+  (bfd *, asection *, struct bfd_link_info *);
+
+extern bfd_boolean _bfd_x86_64_elf_convert_load
+  (bfd *, asection *, struct bfd_link_info *);
+
+extern bfd_boolean _bfd_x86_elf_mkobject
+  (bfd *);
+
 extern void _bfd_x86_elf_set_tls_module_base
   (struct bfd_link_info *);
 
@@ -396,6 +444,9 @@ extern int _bfd_x86_elf_compare_relocs
 extern bfd_boolean _bfd_x86_elf_link_check_relocs
   (bfd *, struct bfd_link_info *);
 
+extern bfd_boolean _bfd_x86_elf_size_dynamic_sections
+  (bfd *, struct bfd_link_info *);
+
 extern bfd_boolean _bfd_x86_elf_always_size_sections
   (bfd *, struct bfd_link_info *);
 
@@ -413,6 +464,13 @@ extern bfd_boolean _bfd_x86_elf_fixup_symbol
 extern bfd_boolean _bfd_x86_elf_hash_symbol
   (struct elf_link_hash_entry *);
 
+extern bfd_boolean _bfd_x86_elf_adjust_dynamic_symbol
+  (struct bfd_link_info *, struct elf_link_hash_entry *);
+
+extern asection * _bfd_x86_elf_gc_mark_hook
+  (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
+   struct elf_link_hash_entry *, Elf_Internal_Sym *);
+
 extern long _bfd_x86_elf_get_synthetic_symtab
   (bfd *, long, long, bfd_vma, struct elf_x86_plt [], asymbol **,
    asymbol **);
@@ -426,6 +484,10 @@ extern bfd_boolean _bfd_x86_elf_merge_gnu_properties
 extern bfd * _bfd_x86_elf_link_setup_gnu_properties
   (struct bfd_link_info *, struct elf_x86_plt_layout_table *);
 
+#define bfd_elf64_mkobject \
+  _bfd_x86_elf_mkobject
+#define bfd_elf32_mkobject \
+  _bfd_x86_elf_mkobject
 #define bfd_elf64_bfd_link_hash_table_create \
   _bfd_x86_elf_link_hash_table_create
 #define bfd_elf32_bfd_link_hash_table_create \
@@ -435,6 +497,8 @@ extern bfd * _bfd_x86_elf_link_setup_gnu_properties
 #define bfd_elf32_bfd_link_check_relocs \
   _bfd_x86_elf_link_check_relocs
 
+#define elf_backend_size_dynamic_sections \
+  _bfd_x86_elf_size_dynamic_sections
 #define elf_backend_always_size_sections \
   _bfd_x86_elf_always_size_sections
 #define elf_backend_merge_symbol_attribute \
@@ -445,6 +509,10 @@ extern bfd * _bfd_x86_elf_link_setup_gnu_properties
   _bfd_x86_elf_fixup_symbol
 #define elf_backend_hash_symbol \
   _bfd_x86_elf_hash_symbol
+#define elf_backend_adjust_dynamic_symbol \
+  _bfd_x86_elf_adjust_dynamic_symbol
+#define elf_backend_gc_mark_hook \
+  _bfd_x86_elf_gc_mark_hook
 #define elf_backend_omit_section_dynsym \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 #define elf_backend_parse_gnu_properties \

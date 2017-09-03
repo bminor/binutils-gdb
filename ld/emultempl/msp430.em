@@ -557,7 +557,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
 static void
 eval_upper_either_sections (bfd *abfd, asection *s, void *data)
 {
-  char * base_sec_name;
+  const char * base_sec_name;
   const char * curr_name;
   char * either_name;
   int curr_region;
@@ -576,7 +576,7 @@ eval_upper_either_sections (bfd *abfd, asection *s, void *data)
   if (bfd_link_relocatable (&link_info))
     return;
 
-  base_sec_name = (char *) data;
+  base_sec_name = (const char *) data;
   curr_name = bfd_get_section_name (abfd, s);
 
   /* Only concerned with .either input sections in the upper output section.  */
@@ -639,7 +639,7 @@ eval_upper_either_sections (bfd *abfd, asection *s, void *data)
 static void
 eval_lower_either_sections (bfd *abfd, asection *s, void *data)
 {
-  char * base_sec_name;
+  const char * base_sec_name;
   const char * curr_name;
   char * either_name;
   int curr_region;
@@ -656,7 +656,7 @@ eval_lower_either_sections (bfd *abfd, asection *s, void *data)
   if (bfd_link_relocatable (&link_info))
     return;
 
-  base_sec_name = (char *) data;
+  base_sec_name = (const char *) data;
   curr_name = bfd_get_section_name (abfd, s);
 
   /* Only concerned with .either input sections in the lower or "default"
@@ -758,29 +758,30 @@ static void
 msp430_elf_after_allocation (void)
 {
   int relax_count = 0;
-  int i;
+  unsigned int i;
   /* Go over each section twice, once to place either sections that don't fit
      in lower into upper, and then again to move any sections in upper that
      fit in lower into lower.  */
   for (i = 0; i < 8; i++)
     {
       int placement_stage = (i < 4) ? LOWER_TO_UPPER : UPPER_TO_LOWER;
-      char * base_sec_name;
+      const char * base_sec_name;
       lang_output_section_statement_type * upper;
 
       switch (i % 4)
 	{
+	default:
 	case 0:
-	  base_sec_name = concat (".text", NULL);
+	  base_sec_name = ".text";
 	  break;
 	case 1:
-	  base_sec_name = concat (".data", NULL);
+	  base_sec_name = ".data";
 	  break;
 	case 2:
-	  base_sec_name = concat (".bss", NULL);
+	  base_sec_name = ".bss";
 	  break;
 	case 3:
-	  base_sec_name = concat (".rodata", NULL);
+	  base_sec_name = ".rodata";
 	  break;
 	}
       upper = lang_output_section_find (concat (".upper", base_sec_name, NULL));
@@ -806,7 +807,7 @@ msp430_elf_after_allocation (void)
 		   abfd = abfd->link.next)
 		{
 		  bfd_map_over_sections (abfd, eval_lower_either_sections,
-					 base_sec_name);
+					 (void *) base_sec_name);
 		}
 	    }
 	  else if (placement_stage == UPPER_TO_LOWER)
@@ -821,12 +822,11 @@ msp430_elf_after_allocation (void)
 		   abfd = abfd->link.next)
 		{
 		  bfd_map_over_sections (abfd, eval_upper_either_sections,
-					 base_sec_name);
+					 (void *) base_sec_name);
 		}
 	    }
 
 	}
-      free (base_sec_name);
     }
   gld${EMULATION_NAME}_after_allocation ();
 }

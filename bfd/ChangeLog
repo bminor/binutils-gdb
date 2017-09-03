@@ -1,3 +1,192 @@
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Initialize
+	tls_get_addr for x86-64 in one place.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (bfd_backends): Add elf64-x86-64.lo together
+	with elfxx-x86.lo for 64-bit BFD.
+	* configure: Regenerated.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_convert_load): Renamed to ...
+	(_bfd_i386_elf_convert_load): This.  Remove static.
+	(elf_i386_size_dynamic_sections): Removed.
+	(elf_backend_size_dynamic_sections): Likewise.
+	* elf64-x86-64.c (elf_x86_64_convert_load): Renamed to ...
+	(_bfd_x86_64_elf_convert_load): This.  Remove static.
+	(elf_x86_64_size_dynamic_sections): Removed.
+	(elf_backend_size_dynamic_sections): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_allocate_dynrelocs): Renamed to ...
+	(elf_x86_allocate_dynrelocs): This.  Make it static.
+	(_bfd_x86_elf_allocate_local_dynrelocs): Renamed to ...
+	(elf_x86_allocate_local_dynreloc): This.  Make it static.
+	(elf_i386_is_reloc_section): New function.
+	(elf_x86_64_is_reloc_section): Likewise.
+	(_bfd_x86_elf_link_hash_table_create): Initialize convert_load,
+	is_reloc_section, dt_reloc, dt_reloc_sz and dt_reloc_ent.
+	Rearrange got_entry_size initialization.
+	(_bfd_x86_elf_size_dynamic_sections): New function.
+	* elfxx-x86.h (elf_x86_link_hash_table): Add convert_load,
+	is_reloc_section, dt_reloc, dt_reloc_sz and dt_reloc_ent.
+	(_bfd_i386_elf_convert_load): New.
+	(_bfd_x86_64_elf_convert_load): Likewise.
+	(_bfd_x86_elf_size_dynamic_sections): Likewise.
+	(elf_backend_size_dynamic_sections): Likewise.
+	(_bfd_x86_elf_allocate_dynrelocs): Removed.
+	(_bfd_x86_elf_allocate_local_dynrelocs): Likewise.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.h (elf_x86_link_hash_table): Rearrange fields and
+	update comments.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Set
+	sgotplt_jump_table_size with elf_x86_compute_jump_table_size.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (PLT_CIE_LENGTH, PLT_FDE_LENGTH,
+	PLT_FDE_START_OFFSET, PLT_FDE_LEN_OFFSET): Moved to ...
+	* elfxx-x86.h (PLT_CIE_LENGTH, PLT_FDE_LENGTH,
+	PLT_FDE_START_OFFSET, PLT_FDE_LEN_OFFSET): Here.
+	* elf64-x86-64.c (PLT_CIE_LENGTH, PLT_FDE_LENGTH,
+	PLT_FDE_START_OFFSET, PLT_FDE_LEN_OFFSET): Removed.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Removed.
+	(elf_i386_allocate_local_dynrelocs): Likewise.
+	(elf_i386_size_dynamic_sections): Replace
+	elf_i386_allocate_dynrelocs/elf_i386_allocate_local_dynrelocs
+	with _bfd_x86_elf_allocate_dynrelocs and
+	_bfd_x86_elf_allocate_local_dynrelocs.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Removed.
+	(elf_x86_64_allocate_local_dynrelocs): Likewise.
+	(elf_x86_64_size_dynamic_sections): Replace
+	elf_x86_64_allocate_dynrelocs/elf_x86_64_allocate_local_dynrelocs
+	with _bfd_x86_elf_allocate_dynrelocs and
+	_bfd_x86_elf_allocate_local_dynrelocs.
+	* elfxx-x86.c (_bfd_x86_elf_allocate_dynrelocs): New function.
+	(_bfd_x86_elf_allocate_local_dynrelocs): Likewise.
+	* elfxx-x86.h (_bfd_x86_elf_allocate_dynrelocs): New prototype.
+	(_bfd_x86_elf_allocate_local_dynrelocs): Likewise.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (is_i386_elf): Removed.
+	(elf_i386_check_relocs): Replace is_i386_elf with is_x86_elf.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	* elf64-x86-64.c (is_x86_64_elf): Removed.
+	(elf_x86_64_check_relocs): Replace is_x86_64_elf with
+	is_x86_elf.
+	(elf_x86_64_size_dynamic_sections): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Initialize
+	target_id.
+	* elfxx-x86.h (elf_x86_link_hash_table): Add target_id.
+	(is_x86_elf): New.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_compute_jump_table_size): Removed.
+	(elf_i386_allocate_dynrelocs): Replace
+	elf_i386_compute_jump_table_size with
+	elf_x86_compute_jump_table_size.
+	(elf_i386_size_dynamic_sections): Likewise.
+	* elf64-x86-64.c (elf_x86_64_compute_jump_table_size): Removed.
+	(elf_x86_64_allocate_dynrelocs): Replace
+	elf_x86_64_compute_jump_table_size with
+	elf_x86_compute_jump_table_size.
+	(elf_x86_64_size_dynamic_sections): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Initialize
+	got_entry_size.
+	* elfxx-x86.h (elf_x86_link_hash_table): Add got_entry_size.
+	(elf_x86_compute_jump_table_size): New.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Initialize
+	sizeof_reloc.
+	(_bfd_x86_elf_adjust_dynamic_symbol): Use sizeof_reloc.
+	* elfxx-x86.h (elf_x86_link_hash_table): Add sizeof_reloc.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Check VxWorks
+	with htab->is_vxworks.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	(elf_i386_finish_dynamic_sections): Likewise.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (GOT_TLS_IE, GOT_TLS_IE_POS, GOT_TLS_IE_NEG,
+	GOT_TLS_IE_BOTH, GOT_TLS_GDESC, GOT_TLS_GD_BOTH_P,
+	GOT_TLS_GD_P, GOT_TLS_GDESC_P, GOT_TLS_GD_ANY_P): Moved to ...
+	* elfxx-x86.h (GOT_TLS_IE, GOT_TLS_IE_POS, GOT_TLS_IE_NEG,
+	GOT_TLS_IE_BOTH, GOT_TLS_GDESC, GOT_TLS_GD_BOTH_P,
+	GOT_TLS_GD_P, GOT_TLS_GDESC_P, GOT_TLS_GD_ANY_P): Here.
+	* elf64-x86-64.c (GOT_TLS_IE, GOT_TLS_GDESC, GOT_TLS_GD_BOTH_P,
+	GOT_TLS_GD_P, GOT_TLS_GDESC_P, GOT_TLS_GD_ANY_P): Removed.
+
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22064
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Check
+	ELF_COMMON_DEF_P for common symbols.
+
+2017-09-02  Alan Modra  <amodra@gmail.com>
+
+	* elf-eh-frame.c (offset_adjust): Avoid false positive gcc warning.
+	* elflink.c (bfd_elf_size_dynsym_hash_dynstr): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Likewise.
+
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_gc_mark_hook): Removed.
+	(elf_backend_gc_mark_hook): Likewise.
+	* elf64-x86-64.c (elf_x86_64_gc_mark_hook): Likewise.
+	(elf_backend_gc_mark_hook): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_gc_mark_hook): New function.
+	* elfxx-x86.h (_bfd_x86_elf_gc_mark_hook): New.
+	(elf_backend_gc_mark_hook): Likewise.
+
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Removed.
+	(elf_backend_adjust_dynamic_symbol): Likewise.
+	* elf64-x86-64.c (elf_x86_64_adjust_dynamic_symbol): Likewise.
+	(elf_backend_adjust_dynamic_symbol): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_adjust_dynamic_symbol): New function.
+	(_bfd_x86_elf_link_setup_gnu_properties): Copy is_vxworks.
+	* elfxx-x86.h (elf_x86_link_hash_table): Add is_vxworks.
+	(_bfd_x86_elf_adjust_dynamic_symbol): New.
+	(elf_backend_adjust_dynamic_symbol): Likewise.
+
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.h (elf_x86_plt_layout_table): Fix a typo in
+	comments.
+
+2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_mkobject): Removed.
+	(bfd_elf32_mkobject): Likewise.
+	* elf64-x86-64.c (elf_x86_64_mkobject): Likewise.
+	(bfd_elf64_mkobject): Likewise.
+	(bfd_elf32_mkobject): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_mkobject): New function.
+	* elfxx-x86.h (_bfd_x86_elf_mkobject): New.
+	(bfd_elf64_mkobject): Likewise.
+	(bfd_elf32_mkobject): Likewise.
+
 2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Updated.

@@ -6855,7 +6855,7 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 {
   const struct elf_backend_data *bed;
   unsigned long section_sym_count;
-  bfd_size_type dynsymcount;
+  bfd_size_type dynsymcount = 0;
 
   if (!is_elf_hash_table (info->hash))
     return TRUE;

@@ -1335,7 +1335,7 @@ offset_adjust (bfd_vma offset, const asection *sec)
   struct eh_frame_sec_info *sec_info
     = (struct eh_frame_sec_info *) elf_section_data (sec)->sec_info;
   unsigned int lo, hi, mid;
-  struct eh_cie_fde *ent;
+  struct eh_cie_fde *ent = NULL;
   bfd_signed_vma delta;
 
   lo = 0;

@@ -166,10 +166,9 @@
 static void
 target_debug_print_struct_target_waitstatus_p (struct target_waitstatus *status)
 {
-  char *str = target_waitstatus_to_string (status);
+  std::string str = target_waitstatus_to_string (status);
 
-  fputs_unfiltered (str, gdb_stdlog);
-  xfree (str);
+  fputs_unfiltered (str.c_str (), gdb_stdlog);
 }
 
 

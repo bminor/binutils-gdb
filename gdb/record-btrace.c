@@ -2478,7 +2478,7 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
       *status = btrace_step_no_resumed ();
 
       DEBUG ("wait ended by %s: %s", target_pid_to_str (null_ptid),
-	     target_waitstatus_to_string (status));
+	     target_waitstatus_to_string (status).c_str ());
 
       do_cleanups (cleanups);
       return null_ptid;
@@ -2570,7 +2570,7 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
   DEBUG ("wait ended by thread %s (%s): %s",
 	 print_thread_id (eventing),
 	 target_pid_to_str (eventing->ptid),
-	 target_waitstatus_to_string (status));
+	 target_waitstatus_to_string (status).c_str ());
 
   do_cleanups (cleanups);
   return eventing->ptid;

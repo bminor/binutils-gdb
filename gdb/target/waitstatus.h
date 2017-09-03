@@ -145,8 +145,7 @@ enum target_stop_reason
 
 /* Prototypes */
 
-/* Return a pretty printed form of target_waitstatus.
-   Space for the result is malloc'd, caller must free.  */
-extern char *target_waitstatus_to_string (const struct target_waitstatus *);
+/* Return a pretty printed form of target_waitstatus.  */
+std::string target_waitstatus_to_string (const struct target_waitstatus *);
 
 #endif /* WAITSTATUS_H */

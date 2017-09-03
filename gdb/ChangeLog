@@ -1,3 +1,17 @@
+2017-09-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target/waitstatus.h (target_waitstatus_to_string): Change
+	return type to std::string.
+	* target/waitstatus.c (target_waitstatus_to_string): Return
+	std::string.
+	* target.h (target_waitstatus_to_string): Remove declaration.
+	* infrun.c (resume, clear_proceed_status_thread,
+	print_target_wait_results, do_target_wait, save_waitstatus,
+	stop_all_threads): Adjust.
+	* record-btrace.c (record_btrace_wait): Adjust.
+	* target-debug.h
+	(target_debug_print_struct_target_waitstatus_p): Adjust.
+
 2017-09-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/22046

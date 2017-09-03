@@ -3181,14 +3181,12 @@ queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
 	{
 	  if (debug_threads)
 	    {
-	      char *status_string
+	      std::string status_string
 		= target_waitstatus_to_string (&thread->last_status);
 
 	      debug_printf ("Reporting thread %s as already stopped with %s\n",
 			    target_pid_to_str (entry->id),
-			    status_string);
-
-	      xfree (status_string);
+			    status_string.c_str ());
 	    }
 
 	  gdb_assert (thread->last_status.kind != TARGET_WAITKIND_IGNORE);

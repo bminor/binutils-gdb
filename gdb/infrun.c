@@ -2409,15 +2409,14 @@ resume (enum gdb_signal sig)
     {
       if (debug_infrun)
 	{
-	  char *statstr;
+	  std::string statstr
+	    = target_waitstatus_to_string (&tp->suspend.waitstatus);
 
-	  statstr = target_waitstatus_to_string (&tp->suspend.waitstatus);
 	  fprintf_unfiltered (gdb_stdlog,
-			      "infrun: resume: thread %s has pending wait status %s "
-			      "(currently_stepping=%d).\n",
-			      target_pid_to_str (tp->ptid),  statstr,
+			      "infrun: resume: thread %s has pending wait "
+			      "status %s (currently_stepping=%d).\n",
+			      target_pid_to_str (tp->ptid), statstr.c_str (),
 			      currently_stepping (tp));
-	  xfree (statstr);
 	}
 
       tp->resumed = 1;
@@ -2820,16 +2819,15 @@ clear_proceed_status_thread (struct thread_info *tp)
 	}
       else if (debug_infrun)
 	{
-	  char *statstr;
+	  std::string statstr
+	    = target_waitstatus_to_string (&tp->suspend.waitstatus);
 
-	  statstr = target_waitstatus_to_string (&tp->suspend.waitstatus);
 	  fprintf_unfiltered (gdb_stdlog,
 			      "infrun: clear_proceed_status_thread: thread %s "
 			      "has pending wait status %s "
 			      "(currently_stepping=%d).\n",
-			      target_pid_to_str (tp->ptid), statstr,
+			      target_pid_to_str (tp->ptid), statstr.c_str (),
 			      currently_stepping (tp));
-	  xfree (statstr);
 	}
     }
 
@@ -3418,7 +3416,7 @@ void
 print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
 			   const struct target_waitstatus *ws)
 {
-  char *status_string = target_waitstatus_to_string (ws);
+  std::string status_string = target_waitstatus_to_string (ws);
   string_file stb;
 
   /* The text is split over several lines because it was getting too long.
@@ -3438,13 +3436,11 @@ print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
 	      ptid_get_lwp (result_ptid),
 	      ptid_get_tid (result_ptid),
 	      target_pid_to_str (result_ptid));
-  stb.printf ("infrun:   %s\n", status_string);
+  stb.printf ("infrun:   %s\n", status_string.c_str ());
 
   /* This uses %s in part to handle %'s in the text, but also to avoid
      a gcc error: the format attribute requires a string literal.  */
   fprintf_unfiltered (gdb_stdlog, "%s", stb.c_str ());
-
-  xfree (status_string);
 }
 
 /* Select a thread at random, out of those which are resumed and have
@@ -3566,14 +3562,13 @@ do_target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
     {
       if (debug_infrun)
 	{
-	  char *statstr;
+	  std::string statstr
+	    = target_waitstatus_to_string (&tp->suspend.waitstatus);
 
-	  statstr = target_waitstatus_to_string (&tp->suspend.waitstatus);
 	  fprintf_unfiltered (gdb_stdlog,
 			      "infrun: Using pending wait status %s for %s.\n",
-			      statstr,
+			      statstr.c_str (),
 			      target_pid_to_str (tp->ptid));
-	  xfree (statstr);
 	}
 
       /* Now that we've selected our final event LWP, un-adjust its PC
@@ -4395,16 +4390,14 @@ save_waitstatus (struct thread_info *tp, struct target_waitstatus *ws)
 
   if (debug_infrun)
     {
-      char *statstr;
+      std::string statstr = target_waitstatus_to_string (ws);
 
-      statstr = target_waitstatus_to_string (ws);
       fprintf_unfiltered (gdb_stdlog,
 			  "infrun: saving status %s for %d.%ld.%ld\n",
-			  statstr,
+			  statstr.c_str (),
 			  ptid_get_pid (tp->ptid),
 			  ptid_get_lwp (tp->ptid),
 			  ptid_get_tid (tp->ptid));
-      xfree (statstr);
     }
 
   /* Record for later.  */
@@ -4634,17 +4627,15 @@ stop_all_threads (void)
 
 		  if (debug_infrun)
 		    {
-		      char *statstr;
+		      std::string statstr = target_waitstatus_to_string (&ws);
 
-		      statstr = target_waitstatus_to_string (&ws);
 		      fprintf_unfiltered (gdb_stdlog,
 					  "infrun: target_wait %s, saving "
 					  "status for %d.%ld.%ld\n",
-					  statstr,
+					  statstr.c_str (),
 					  ptid_get_pid (t->ptid),
 					  ptid_get_lwp (t->ptid),
 					  ptid_get_tid (t->ptid));
-		      xfree (statstr);
 		    }
 
 		  /* Record for later.  */
