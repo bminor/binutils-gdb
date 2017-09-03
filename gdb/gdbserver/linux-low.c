@@ -3733,12 +3733,11 @@ linux_wait_1 (ptid_t ptid,
     {
       if (event_child->waitstatus.kind != TARGET_WAITKIND_IGNORE)
 	{
-	  char *str;
+	  std::string str
+	    = target_waitstatus_to_string (&event_child->waitstatus);
 
-	  str = target_waitstatus_to_string (&event_child->waitstatus);
 	  debug_printf ("LWP %ld: extended event with waitstatus %s\n",
-			lwpid_of (get_lwp_thread (event_child)), str);
-	  xfree (str);
+			lwpid_of (get_lwp_thread (event_child)), str.c_str ());
 	}
       if (current_thread->last_resume_kind == resume_step)
 	{

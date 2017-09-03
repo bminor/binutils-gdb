@@ -108,10 +108,6 @@ struct syscall
     const char *name;
   };
 
-/* Return a pretty printed form of target_waitstatus.
-   Space for the result is malloc'd, caller must free.  */
-extern char *target_waitstatus_to_string (const struct target_waitstatus *);
-
 /* Return a pretty printed form of TARGET_OPTIONS.
    Space for the result is malloc'd, caller must free.  */
 extern char *target_options_to_string (int target_options);
