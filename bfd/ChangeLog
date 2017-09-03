@@ -1,5 +1,11 @@
 2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* configure.ac (bfd_backends): Add elf64-x86-64.lo together
+	with elfxx-x86.lo for 64-bit BFD.
+	* configure: Regenerated.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-x86.h (elf_x86_link_hash_table): Rearrange fields and
 	update comments.
 
