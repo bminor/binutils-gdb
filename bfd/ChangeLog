@@ -1,5 +1,10 @@
 2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Initialize
+	tls_get_addr for x86-64 in one place.
+
+2017-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* configure.ac (bfd_backends): Add elf64-x86-64.lo together
 	with elfxx-x86.lo for 64-bit BFD.
 	* configure: Regenerated.

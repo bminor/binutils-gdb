@@ -768,6 +768,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
       ret->dt_reloc_sz = DT_RELASZ;
       ret->dt_reloc_ent = DT_RELAENT;
       ret->got_entry_size = 8;
+      ret->tls_get_addr = "__tls_get_addr";
     }
   if (ABI_64_P (abfd))
     {
@@ -777,7 +778,6 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
       ret->pointer_r_type = R_X86_64_64;
       ret->dynamic_interpreter = ELF64_DYNAMIC_INTERPRETER;
       ret->dynamic_interpreter_size = sizeof ELF64_DYNAMIC_INTERPRETER;
-      ret->tls_get_addr = "__tls_get_addr";
     }
   else
 #endif
@@ -791,7 +791,6 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
 	  ret->dynamic_interpreter = ELFX32_DYNAMIC_INTERPRETER;
 	  ret->dynamic_interpreter_size
 	    = sizeof ELFX32_DYNAMIC_INTERPRETER;
-	  ret->tls_get_addr = "__tls_get_addr";
 	}
       else
 	{
