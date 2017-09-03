@@ -41,7 +41,8 @@
 #define ELIMINATE_COPY_RELOCS 1
 
 #define elf_x86_hash_table(p, id) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) == (id) \
+  (is_elf_hash_table ((p)->hash) \
+   && elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) == (id) \
     ? ((struct elf_x86_link_hash_table *) ((p)->hash)) : NULL)
 
 /* Is a undefined weak symbol which is resolved to 0.  Reference to an
