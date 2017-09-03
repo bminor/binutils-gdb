@@ -368,7 +368,11 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h,
 		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
 	htab->elf.srelgot->size += htab->sizeof_reloc;
       if (GOT_TLS_GDESC_P (tls_type))
-	htab->elf.srelplt->size += htab->sizeof_reloc;
+	{
+	  htab->elf.srelplt->size += htab->sizeof_reloc;
+	  if (bed->target_id == X86_64_ELF_DATA)
+	    htab->tlsdesc_plt = (bfd_vma) -1;
+	}
     }
   else
     h->got.offset = (bfd_vma) -1;
