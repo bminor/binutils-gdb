@@ -1,5 +1,10 @@
 2017-09-04  Yao Qi  <yao.qi@linaro.org>
 
+	* i386-fbsd-tdep.c (i386fbsd_core_read_xcr0): Return
+	X86_XSTATE_SSE_MASK instead of 0.
+
+2017-09-04  Yao Qi  <yao.qi@linaro.org>
+
 	* amd64-fbsd-nat.c (amd64fbsd_read_description): Call
 	i386_target_description.
 	* i386-fbsd-nat.c (i386fbsd_read_description): Call

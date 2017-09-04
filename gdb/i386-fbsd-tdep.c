@@ -248,14 +248,14 @@ i386fbsd_core_read_xcr0 (bfd *abfd)
 	    {
 	      warning (_("Couldn't read `xcr0' bytes from "
 			 "`.reg-xstate' section in core file."));
-	      return 0;
+	      return X86_XSTATE_SSE_MASK;
 	    }
 
 	  xcr0 = bfd_get_64 (abfd, contents);
 	}
     }
   else
-    xcr0 = 0;
+    xcr0 = X86_XSTATE_SSE_MASK;
 
   return xcr0;
 }
