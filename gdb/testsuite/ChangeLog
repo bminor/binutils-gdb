@@ -1,3 +1,12 @@
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/callfuncs.exp (do_function_calls): New parameter
+	"prototypes".  Test calling float functions via prototyped and
+	unprototyped function pointers.
+	(perform_all_tests): New parameter "prototypes".  Pass it down.
+	(top level): Pass down "prototypes" parameter to
+	perform_all_tests.
+
 2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/commands.exp (loop_break_test, loop_continue_test):

@@ -1,5 +1,10 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* gdbtypes.c (lookup_function_type_with_arguments): Mark function
+	types with more than one parameter as prototyped.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-cmds.c (print_disassembly, disassemble_current_function)
 	(disassemble_command): Use gdb_disassembly_flags instead of bare
 	int.

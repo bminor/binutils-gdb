@@ -547,6 +547,8 @@ lookup_function_type_with_arguments (struct type *type,
 	  gdb_assert (nparams == 0);
 	  TYPE_PROTOTYPED (fn) = 1;
 	}
+      else
+	TYPE_PROTOTYPED (fn) = 1;
     }
 
   TYPE_NFIELDS (fn) = nparams;
