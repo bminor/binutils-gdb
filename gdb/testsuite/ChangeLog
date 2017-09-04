@@ -1,3 +1,8 @@
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp: Call new procedure.
+	(define_if_without_arg_test): New procedure.
+
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/list-ambiguous.exp: New file.

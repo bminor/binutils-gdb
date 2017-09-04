@@ -1,5 +1,10 @@
 2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* cli/cli-script.c (build_command_line): For if/while commands,
+	check whether args is empty.
+
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* cli/cli-script.h (enum misc_command_type): Move from defs.h.
 	(enum command_control_type): Likewise.
 	(struct command_line): Likewise.

@@ -1011,6 +1011,21 @@ proc_with_prefix redefine_backtrace_test {} {
     gdb_test "bt" "hibob" "execute bt command"
 }
 
+# Test using "if" and "while" without args when building a command list.
+
+proc define_if_without_arg_test {} {
+    foreach cmd {if while} {
+	set test "define some_command_$cmd"
+	gdb_test_multiple $test $test {
+	    -re "End with"  {
+		pass $test
+	    }
+	}
+
+	gdb_test "$cmd" "if/while commands require arguments." "type $cmd without args"
+    }
+}
+
 # Test an input line split with a continuation character (backslash)
 # while entering a multi-line command (in a secondary prompt).
 
@@ -1076,5 +1091,6 @@ if_commands_test
 error_clears_commands_left
 redefine_hook_test
 backslash_in_multi_line_command_test
+define_if_without_arg_test
 # This one should come last, as it redefines "backtrace".
 redefine_backtrace_test
