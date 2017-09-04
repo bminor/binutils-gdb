@@ -1,3 +1,25 @@
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* cli/cli-script.h (enum misc_command_type): Move from defs.h.
+	(enum command_control_type): Likewise.
+	(struct command_line): Likewise.
+	(free_command_lines): Likewise.
+	(struct command_lines_deleter): Likewise.
+	(command_line_up): Likewise.
+	(read_command_lines): Likewise.
+	(read_command_lines_1): Likewise.
+	* defs.h (enum misc_command_type): Move to cli/cli-script.h.
+	(enum command_control_type): Likewise.
+	(struct command_line): Likewise.
+	(free_command_lines): Likewise.
+	(struct command_lines_deleter): Likewise.
+	(command_line_up): Likewise.
+	(read_command_lines): Likewise.
+	(read_command_lines_1): Likewise.
+	* breakpoint.h: Include cli/cli-script.h.
+	* extension-priv.h: Likewise.
+	* gdbcmd.h: Likewise.
+
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
 	* ada-lang.c (is_known_support_routine): Move sal declaration to

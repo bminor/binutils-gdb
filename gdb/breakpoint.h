@@ -29,6 +29,7 @@
 #include "location.h"
 #include <vector>
 #include "common/array-view.h"
+#include "cli/cli-script.h"
 
 struct value;
 struct block;
