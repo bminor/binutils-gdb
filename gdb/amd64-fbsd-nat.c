@@ -179,7 +179,7 @@ amd64fbsd_read_description (struct target_ops *ops)
     }
 #endif
   if (is64)
-    return tdesc_amd64;
+    return amd64_target_description (X86_XSTATE_SSE_MASK);
   else
     return tdesc_i386;
 }

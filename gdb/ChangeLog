@@ -1,3 +1,16 @@
+2017-09-04  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-darwin-tdep.c: Include "x86-xstate.h".
+	(x86_darwin_init_abi_64): Call amd64_target_description.
+	* amd64-dicos-tdep.c: Likewise.
+	* amd64-fbsd-nat.c: Likewise.
+	* amd64-fbsd-tdep.c: Likewise.
+	* amd64-nbsd-tdep.c: Likewise.
+	* amd64-obsd-tdep.c: Likewise.
+	* amd64-sol2-tdep.c: Likewise.
+	* amd64-windows-tdep.c: Likewise.
+	* amd64-tdep.h (tdesc_amd64): Remove the declaration.
+
 2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* btrace.h (btrace_insn_s, DEF_VEC_O (btrace_insn_s)): Remove.
