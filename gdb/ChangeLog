@@ -1,5 +1,13 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/array-view-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add array-view-selftests.o.
+	* common/array-view.h: New file.
+	* unittests/array-view-selftests.c: New file.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-cmds.c (edit_command): Pass message to
 	ambiguous_line_spec.
 	(list_command): Pass message to ambiguous_line_spec.  Say
