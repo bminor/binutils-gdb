@@ -676,6 +676,39 @@ make_params (int num_types, struct type **param_types)
   return type;
 }
 
+/* Helper for evaluating an OP_VAR_VALUE.  */
+
+static value *
+evaluate_var_value (enum noside noside, const block *blk, symbol *var)
+{
+  /* JYG: We used to just return value_zero of the symbol type if
+     we're asked to avoid side effects.  Otherwise we return
+     value_of_variable (...).  However I'm not sure if
+     value_of_variable () has any side effect.  We need a full value
+     object returned here for whatis_exp () to call evaluate_type ()
+     and then pass the full value to value_rtti_target_type () if we
+     are dealing with a pointer or reference to a base class and print
+     object is on.  */
+
+  struct value *ret = NULL;
+
+  TRY
+    {
+      ret = value_of_variable (var, blk);
+    }
+
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+      if (noside != EVAL_AVOID_SIDE_EFFECTS)
+	throw_exception (except);
+
+      ret = value_zero (SYMBOL_TYPE (var), not_lval);
+    }
+  END_CATCH
+
+  return ret;
+}
+
 /* Helper for evaluating an OP_VAR_MSYM_VALUE.  */
 
 static value *
@@ -763,37 +796,9 @@ evaluate_subexp_standard (struct type *expect_type,
       (*pos) += 3;
       if (noside == EVAL_SKIP)
 	return eval_skip_value (exp);
-
-      /* JYG: We used to just return value_zero of the symbol type
-	 if we're asked to avoid side effects.  Otherwise we return
-	 value_of_variable (...).  However I'm not sure if
-	 value_of_variable () has any side effect.
-	 We need a full value object returned here for whatis_exp ()
-	 to call evaluate_type () and then pass the full value to
-	 value_rtti_target_type () if we are dealing with a pointer
-	 or reference to a base class and print object is on.  */
-
-      {
-	struct value *ret = NULL;
-
-	TRY
-	  {
-	    ret = value_of_variable (exp->elts[pc + 2].symbol,
-				     exp->elts[pc + 1].block);
-	  }
-
-	CATCH (except, RETURN_MASK_ERROR)
-	  {
-	    if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	      ret = value_zero (SYMBOL_TYPE (exp->elts[pc + 2].symbol),
-				not_lval);
-	    else
-	      throw_exception (except);
-	  }
-	END_CATCH
-
-	return ret;
-      }
+      return evaluate_var_value (noside,
+				 exp->elts[pc + 1].block,
+				 exp->elts[pc + 2].symbol);
     case OP_VAR_MSYM_VALUE:
       (*pos) += 3;
       return evaluate_var_msym_value (noside,

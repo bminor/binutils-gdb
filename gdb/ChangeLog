@@ -1,5 +1,10 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* eval.c (evaluate_var_value): New function, factored out from ...
+	(evaluate_subexp_standard): ... here.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* eval.c (evaluate_subexp_standard) <UNOP_COMPLEMENT, UNOP_ADDR>:
 	Remove useless assignments to 'op'.
 
