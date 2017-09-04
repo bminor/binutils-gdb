@@ -891,7 +891,7 @@ btrace_call_history_insn_range (struct ui_out *uiout,
 {
   unsigned int begin, end, size;
 
-  size = VEC_length (btrace_insn_s, bfun->insn);
+  size = bfun->insn.size ();
   gdb_assert (size > 0);
 
   begin = bfun->insn_offset;
@@ -911,10 +911,8 @@ static void
 btrace_compute_src_line_range (const struct btrace_function *bfun,
 			       int *pbegin, int *pend)
 {
-  struct btrace_insn *insn;
   struct symtab *symtab;
   struct symbol *sym;
-  unsigned int idx;
   int begin, end;
 
   begin = INT_MAX;
@@ -926,11 +924,11 @@ btrace_compute_src_line_range (const struct btrace_function *bfun,
 
   symtab = symbol_symtab (sym);
 
-  for (idx = 0; VEC_iterate (btrace_insn_s, bfun->insn, idx, insn); ++idx)
+  for (const btrace_insn &insn : bfun->insn)
     {
       struct symtab_and_line sal;
 
-      sal = find_pc_line (insn->pc, 0);
+      sal = find_pc_line (insn.pc, 0);
       if (sal.symtab != symtab || sal.line == 0)
 	continue;
 
@@ -1615,7 +1613,6 @@ record_btrace_frame_prev_register (struct frame_info *this_frame,
 {
   const struct btrace_frame_cache *cache;
   const struct btrace_function *bfun, *caller;
-  const struct btrace_insn *insn;
   struct btrace_call_iterator it;
   struct gdbarch *gdbarch;
   CORE_ADDR pc;
@@ -1638,15 +1635,10 @@ record_btrace_frame_prev_register (struct frame_info *this_frame,
   caller = btrace_call_get (&it);
 
   if ((bfun->flags & BFUN_UP_LINKS_TO_RET) != 0)
-    {
-      insn = VEC_index (btrace_insn_s, caller->insn, 0);
-      pc = insn->pc;
-    }
+    pc = caller->insn.front ().pc;
   else
     {
-      insn = VEC_last (btrace_insn_s, caller->insn);
-      pc = insn->pc;
-
+      pc = caller->insn.back ().pc;
       pc += gdb_insn_length (gdbarch, pc);
     }
 

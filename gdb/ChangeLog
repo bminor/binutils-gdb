@@ -1,3 +1,23 @@
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* btrace.h (btrace_insn_s, DEF_VEC_O (btrace_insn_s)): Remove.
+	(btrace_function) <insn>: Change type to use std::vector.
+	* btrace.c (ftrace_debug, ftrace_call_num_insn,
+	ftrace_find_call, ftrace_new_gap, ftrace_update_function,
+	ftrace_update_insns, ftrace_compute_global_level_offset,
+	btrace_stitch_bts, btrace_clear, btrace_insn_get,
+	btrace_insn_end, btrace_insn_next, btrace_insn_prev): Adjust to
+	change to std::vector.
+	(ftrace_update_insns): Adjust to change to std::vector, change
+	type of INSN parameter.
+	(btrace_compute_ftrace_bts): Adjust call to ftrace_update_insns.
+	* record-btrace.c (btrace_call_history_insn_range,
+	btrace_compute_src_line_range,
+	record_btrace_frame_prev_register): Adjust to change to
+	std::vector.
+	* python/py-record-btrace.c (recpy_bt_func_instructions): Adjust
+	to change to std::vector.
+
 2017-09-03  Tom Tromey  <tom@tromey.com>
 
 	* corefile.c (reopen_exec_file): Use std::string.
