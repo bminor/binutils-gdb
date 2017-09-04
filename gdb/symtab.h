@@ -1418,28 +1418,26 @@ extern CORE_ADDR find_solib_trampoline_target (struct frame_info *, CORE_ADDR);
 struct symtab_and_line
 {
   /* The program space of this sal.  */
-  struct program_space *pspace;
+  struct program_space *pspace = NULL;
 
-  struct symtab *symtab;
-  struct obj_section *section;
+  struct symtab *symtab = NULL;
+  struct obj_section *section = NULL;
   /* Line number.  Line numbers start at 1 and proceed through symtab->nlines.
      0 is never a valid line number; it is used to indicate that line number
      information is not available.  */
-  int line;
+  int line = 0;
 
-  CORE_ADDR pc;
-  CORE_ADDR end;
-  int explicit_pc;
-  int explicit_line;
+  CORE_ADDR pc = 0;
+  CORE_ADDR end = 0;
+  bool explicit_pc = false;
+  bool explicit_line = false;
 
   /* The probe associated with this symtab_and_line.  */
-  struct probe *probe;
+  struct probe *probe = NULL;
   /* If PROBE is not NULL, then this is the objfile in which the probe
      originated.  */
-  struct objfile *objfile;
+  struct objfile *objfile = NULL;
 };
-
-extern void init_sal (struct symtab_and_line *sal);
 
 
 

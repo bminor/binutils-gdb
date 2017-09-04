@@ -917,12 +917,10 @@ elf_gnu_ifunc_resolver_stop (struct breakpoint *b)
 
   if (b_return == b)
     {
-      struct symtab_and_line sal;
-
       /* No need to call find_pc_line for symbols resolving as this is only
 	 a helper breakpointer never shown to the user.  */
 
-      init_sal (&sal);
+      symtab_and_line sal;
       sal.pspace = current_inferior ()->pspace;
       sal.pc = prev_pc;
       sal.section = find_pc_overlay (sal.pc);

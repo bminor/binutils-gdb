@@ -865,14 +865,13 @@ continue_command (char *args, int from_tty)
 static void
 set_step_frame (void)
 {
-  struct symtab_and_line sal;
-  CORE_ADDR pc;
-  struct frame_info *frame = get_current_frame ();
-  struct thread_info *tp = inferior_thread ();
+  frame_info *frame = get_current_frame ();
 
-  find_frame_sal (frame, &sal);
+  symtab_and_line sal = find_frame_sal (frame);
   set_step_info (frame, sal);
-  pc = get_frame_pc (frame);
+
+  CORE_ADDR pc = get_frame_pc (frame);
+  thread_info *tp = inferior_thread ();
   tp->control.step_start_function = find_pc_function (pc);
 }
 
@@ -1873,11 +1872,10 @@ finish_backward (struct finish_command_fsm *sm)
     {
       struct frame_info *frame = get_selected_frame (NULL);
       struct gdbarch *gdbarch = get_frame_arch (frame);
-      struct symtab_and_line sr_sal;
 
       /* Set a step-resume at the function's entry point.  Once that's
 	 hit, we'll do one more step backwards.  */
-      init_sal (&sr_sal);
+      symtab_and_line sr_sal;
       sr_sal.pc = sal.pc;
       sr_sal.pspace = get_frame_program_space (frame);
       insert_step_resume_breakpoint_at_sal (gdbarch,
@@ -1998,10 +1996,7 @@ finish_command (char *arg, int from_tty)
 	 called by that frame.  We don't use the magic "1" value for
 	 step_range_end, because then infrun will think this is nexti,
 	 and not step over the rest of this inlined function call.  */
-      struct symtab_and_line empty_sal;
-
-      init_sal (&empty_sal);
-      set_step_info (frame, empty_sal);
+      set_step_info (frame, {});
       tp->control.step_range_start = get_frame_pc (frame);
       tp->control.step_range_end = tp->control.step_range_start;
       tp->control.step_over_calls = STEP_OVER_ALL;

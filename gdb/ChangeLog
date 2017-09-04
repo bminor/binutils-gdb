@@ -1,5 +1,71 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (is_known_support_routine): Move sal declaration to
+	where it is initialized.
+	* breakpoint.c (create_internal_breakpoint, init_catchpoint)
+	(parse_breakpoint_sals, decode_static_tracepoint_spec)
+	(clear_command, update_static_tracepoint): Remove init_sal
+	references.  Move declarations closer to initializations.
+	* cli/cli-cmds.c (list_command): Move sal declarations closer to
+	initializations.
+	* elfread.c (elf_gnu_ifunc_resolver_stop): Remove init_sal
+	references.  Move sal declarations closer to initializations.
+	* frame.c (find_frame_sal): Return a symtab_and_line via function
+	return instead of output parameter.  Remove init_sal references.
+	* frame.h (find_frame_sal): Return a symtab_and_line via function
+	return instead of output parameter.
+	* guile/scm-frame.c (gdbscm_frame_sal): Adjust.
+	* guile/scm-symtab.c (stscm_make_sal_smob): Use in-place new
+	instead of memset.
+	(gdbscm_find_pc_line): Remove init_sal reference.
+	* infcall.c (call_function_by_hand_dummy): Remove init_sal
+	references.  Move declarations closer to initializations.
+	* infcmd.c (set_step_frame): Update.  Move declarations closer to
+	initializations.
+	(finish_backward): Remove init_sal references.  Move declarations
+	closer to initializations.
+	* infrun.c (process_event_stop_test, handle_step_into_function)
+	(insert_hp_step_resume_breakpoint_at_frame)
+	(insert_step_resume_breakpoint_at_caller): Likewise.
+	* linespec.c (create_sals_line_offset, decode_digits_ordinary)
+	(symbol_to_sal): Likewise.
+	* probe.c (parse_probes_in_pspace): Remove init_sal reference.
+	* python/py-frame.c (frapy_find_sal): Move sal declaration closer
+	to its initialization.
+	* reverse.c (save_bookmark_command): Use new/delete.  Remove
+	init_sal references.  Move declarations closer to initializations.
+	* source.c (get_current_source_symtab_and_line): Remove brace
+	initialization.
+	(set_current_source_symtab_and_line): Now takes the sal by const
+	reference.  Remove brace initialization.
+	(line_info): Remove init_sal reference.
+	* source.h (set_current_source_symtab_and_line): Now takes a
+	symtab_and_line via const reference.
+	* stack.c (set_current_sal_from_frame): Adjust.
+	(print_frame_info): Adjust.
+	(get_last_displayed_sal): Return the sal via function return
+	instead of via output parameter.  Simplify.
+	(frame_info): Adjust.
+	* stack.h (get_last_displayed_sal): Return the sal via function
+	return instead of via output parameter.
+	* symtab.c (init_sal): Delete.
+	(find_pc_sect_line): Remove init_sal references.  Move
+	declarations closer to initializations.
+	(find_function_start_sal): Remove init_sal references.  Move
+	declarations closer to initializations.
+	* symtab.h (struct symtab_and_line): In-class initialize all
+	fields.
+	* tracepoint.c (set_traceframe_context)
+	(print_one_static_tracepoint_marker): Remove init_sal references.
+	Move declarations closer to initializations.
+	* tui/tui-disasm.c (tui_show_disassem_and_update_source): Adjust.
+	* tui/tui-stack.c (tui_show_frame_info): Adjust.  Move
+	declarations closer to initializations.
+	* tui/tui-winsource.c (tui_update_source_window_as_is): Remove
+	init_sal references.  Adjust.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* ax-gdb.c (agent_command_1): Use range-for.
 	* break-catch-throw.c (re_set_exception_catchpoint): Update.
 	* breakpoint.c: Include "common/array-view.h".

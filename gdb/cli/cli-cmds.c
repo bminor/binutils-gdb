@@ -886,9 +886,6 @@ edit_command (char *arg, int from_tty)
 static void
 list_command (char *arg, int from_tty)
 {
-  struct symtab_and_line sal = { 0 };
-  struct symtab_and_line sal_end = { 0 };
-  struct symtab_and_line cursal = { 0 };
   struct symbol *sym;
   char *arg1;
   int no_end = 1;
@@ -901,7 +898,7 @@ list_command (char *arg, int from_tty)
   if (arg == NULL || ((arg[0] == '+' || arg[0] == '-') && arg[1] == '\0'))
     {
       set_default_source_symtab_and_line ();
-      cursal = get_current_source_symtab_and_line ();
+      symtab_and_line cursal = get_current_source_symtab_and_line ();
 
       /* If this is the first "list" since we've set the current
 	 source line, center the listing around that line.  */
@@ -954,6 +951,7 @@ list_command (char *arg, int from_tty)
     error (_("No symbol table is loaded.  Use the \"file\" command."));
 
   std::vector<symtab_and_line> sals;
+  symtab_and_line sal, sal_end;
 
   arg1 = arg;
   if (*arg1 == ',')

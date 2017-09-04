@@ -3358,16 +3358,12 @@ create_internal_breakpoint (struct gdbarch *gdbarch,
 			    CORE_ADDR address, enum bptype type,
 			    const struct breakpoint_ops *ops)
 {
-  struct symtab_and_line sal;
-  struct breakpoint *b;
-
-  init_sal (&sal);		/* Initialize to zeroes.  */
-
+  symtab_and_line sal;
   sal.pc = address;
   sal.section = find_pc_overlay (sal.pc);
   sal.pspace = current_program_space;
 
-  b = set_raw_breakpoint (gdbarch, sal, type, ops);
+  breakpoint *b = set_raw_breakpoint (gdbarch, sal, type, ops);
   b->number = internal_breakpoint_number--;
   b->disposition = disp_donttouch;
 
@@ -8525,9 +8521,7 @@ init_catchpoint (struct breakpoint *b,
 		 const char *cond_string,
 		 const struct breakpoint_ops *ops)
 {
-  struct symtab_and_line sal;
-
-  init_sal (&sal);
+  symtab_and_line sal;
   sal.pspace = current_program_space;
 
   init_raw_breakpoint (b, gdbarch, sal, bp_catchpoint, ops);
@@ -9379,18 +9373,14 @@ parse_breakpoint_sals (const struct event_location *location,
 	     breakpoint address.  */
 	  if (last_displayed_sal_is_valid ())
 	    {
-	      struct symtab_and_line sal;
-	      CORE_ADDR pc;
-
-	      init_sal (&sal);		/* Initialize to zeroes.  */
-
 	      /* Set sal's pspace, pc, symtab, and line to the values
 		 corresponding to the last call to print_frame_info.
 		 Be sure to reinitialize LINE with NOTCURRENT == 0
 		 as the breakpoint line number is inappropriate otherwise.
 		 find_pc_line would adjust PC, re-set it back.  */
-	      get_last_displayed_sal (&sal);
-	      pc = sal.pc;
+	      symtab_and_line sal = get_last_displayed_sal ();
+	      CORE_ADDR pc = sal.pc;
+
 	      sal = find_pc_line (pc, 0);
 
 	      /* "break" without arguments is equivalent to "break *PC"
@@ -9600,10 +9590,7 @@ decode_static_tracepoint_spec (const char **arg_p)
 
       marker = VEC_index (static_tracepoint_marker_p, markers, i);
 
-      symtab_and_line sal;
-      init_sal (&sal);
-
-      sal = find_pc_line (marker->address, 0);
+      symtab_and_line sal = find_pc_line (marker->address, 0);
       sal.pc = marker->address;
       sals.push_back (sal);
 
@@ -11799,12 +11786,10 @@ clear_command (char *arg, int from_tty)
     }
   else
     {
-      init_sal (&last_sal);		/* Initialize to zeroes.  */
-
       /* Set sal's line, symtab, pc, and pspace to the values
 	 corresponding to the last call to print_frame_info.  If the
 	 codepoint is not valid, this will set all the fields to 0.  */
-      get_last_displayed_sal (&last_sal);
+      last_sal = get_last_displayed_sal ();
       if (last_sal.symtab == 0)
 	error (_("No source file specified."));
 
@@ -13883,7 +13868,6 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 
       if (!VEC_empty(static_tracepoint_marker_p, markers))
 	{
-	  struct symtab_and_line sal2;
 	  struct symbol *sym;
 	  struct static_tracepoint_marker *tpmarker;
 	  struct ui_out *uiout = current_uiout;
@@ -13898,11 +13882,7 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 		     "found at previous line number"),
 		   b->number, tp->static_trace_marker_id);
 
-	  init_sal (&sal2);
-
-	  sal2.pc = tpmarker->address;
-
-	  sal2 = find_pc_line (tpmarker->address, 0);
+	  symtab_and_line sal2 = find_pc_line (tpmarker->address, 0);
 	  sym = find_pc_sect_function (tpmarker->address, NULL);
 	  uiout->text ("Now in ");
 	  if (sym)

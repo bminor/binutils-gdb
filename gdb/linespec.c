@@ -2126,10 +2126,7 @@ static std::vector<symtab_and_line>
 create_sals_line_offset (struct linespec_state *self,
 			 linespec_p ls)
 {
-  struct symtab_and_line val;
   int use_default = 0;
-
-  init_sal (&val);
 
   /* This is where we need to make sure we have good defaults.
      We must guarantee that this section of code is never executed
@@ -2155,6 +2152,7 @@ create_sals_line_offset (struct linespec_state *self,
       use_default = 1;
     }
 
+  symtab_and_line val;
   val.line = ls->explicit_loc.line_offset.offset;
   switch (ls->explicit_loc.line_offset.sign)
     {
@@ -4235,9 +4233,7 @@ decode_digits_ordinary (struct linespec_state *self,
       pcs = find_pcs_for_symtab_line (elt, line, best_entry);
       for (CORE_ADDR pc : pcs)
 	{
-	  struct symtab_and_line sal;
-
-	  init_sal (&sal);
+	  symtab_and_line sal;
 	  sal.pspace = SYMTAB_PSPACE (elt);
 	  sal.symtab = elt;
 	  sal.line = line;
@@ -4619,7 +4615,7 @@ symbol_to_sal (struct symtab_and_line *result,
     {
       if (SYMBOL_CLASS (sym) == LOC_LABEL && SYMBOL_VALUE_ADDRESS (sym) != 0)
 	{
-	  init_sal (result);
+	  *result = {};
 	  result->symtab = symbol_symtab (sym);
 	  result->line = SYMBOL_LINE (sym);
 	  result->pc = SYMBOL_VALUE_ADDRESS (sym);
@@ -4634,7 +4630,7 @@ symbol_to_sal (struct symtab_and_line *result,
       else if (SYMBOL_LINE (sym) != 0)
 	{
 	  /* We know its line number.  */
-	  init_sal (result);
+	  *result = {};
 	  result->symtab = symbol_symtab (sym);
 	  result->line = SYMBOL_LINE (sym);
 	  result->pspace = SYMTAB_PSPACE (result->symtab);

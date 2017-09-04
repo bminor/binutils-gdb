@@ -182,7 +182,7 @@ get_lines_to_list (void)
 struct symtab_and_line
 get_current_source_symtab_and_line (void)
 {
-  struct symtab_and_line cursal = { 0 };
+  symtab_and_line cursal;
 
   cursal.pspace = current_source_pspace;
   cursal.symtab = current_source_symtab;
@@ -218,9 +218,9 @@ set_default_source_symtab_and_line (void)
    NOTE: The returned sal pc and end fields are not valid.  */
    
 struct symtab_and_line
-set_current_source_symtab_and_line (const struct symtab_and_line *sal)
+set_current_source_symtab_and_line (const symtab_and_line &sal)
 {
-  struct symtab_and_line cursal = { 0 };
+  symtab_and_line cursal;
 
   cursal.pspace = current_source_pspace;
   cursal.symtab = current_source_symtab;
@@ -228,9 +228,9 @@ set_current_source_symtab_and_line (const struct symtab_and_line *sal)
   cursal.pc = 0;
   cursal.end = 0;
 
-  current_source_pspace = sal->pspace;
-  current_source_symtab = sal->symtab;
-  current_source_line = sal->line;
+  current_source_pspace = sal.pspace;
+  current_source_symtab = sal.symtab;
+  current_source_line = sal.line;
 
   /* Force the next "list" to center around the current line.  */
   clear_lines_listed_range ();
@@ -1498,7 +1498,6 @@ info_line_command (char *arg, int from_tty)
 
   if (arg == 0)
     {
-      init_sal (&curr_sal);		/* initialize to zeroes */
       curr_sal.symtab = current_source_symtab;
       curr_sal.pspace = current_program_space;
       if (last_line_listed != 0)

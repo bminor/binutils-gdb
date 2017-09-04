@@ -1051,17 +1051,16 @@ call_function_by_hand_dummy (struct value *function,
      inferior.  That way it breaks when it returns.  */
 
   {
-    struct breakpoint *bpt, *longjmp_b;
-    struct symtab_and_line sal;
-
-    init_sal (&sal);		/* initialize to zeroes */
+    symtab_and_line sal;
     sal.pspace = current_program_space;
     sal.pc = bp_addr;
     sal.section = find_pc_overlay (sal.pc);
+
     /* Sanity.  The exact same SP value is returned by
        PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
        dummy_id to form the frame ID's stack address.  */
-    bpt = set_momentary_breakpoint (gdbarch, sal, dummy_id, bp_call_dummy);
+    breakpoint *bpt = set_momentary_breakpoint (gdbarch, sal,
+						dummy_id, bp_call_dummy);
 
     /* set_momentary_breakpoint invalidates FRAME.  */
     frame = NULL;
@@ -1069,7 +1068,7 @@ call_function_by_hand_dummy (struct value *function,
     bpt->disposition = disp_del;
     gdb_assert (bpt->related_breakpoint == bpt);
 
-    longjmp_b = set_longjmp_breakpoint_for_call_dummy ();
+    breakpoint *longjmp_b = set_longjmp_breakpoint_for_call_dummy ();
     if (longjmp_b)
       {
 	/* Link BPT into the chain of LONGJMP_B.  */

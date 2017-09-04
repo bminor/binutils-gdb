@@ -253,7 +253,7 @@ set_traceframe_context (struct frame_info *trace_frame)
 {
   CORE_ADDR trace_pc;
   struct symbol *traceframe_fun;
-  struct symtab_and_line traceframe_sal;
+  symtab_and_line traceframe_sal;
 
   /* Save as globals for internal use.  */
   if (trace_frame != NULL
@@ -269,7 +269,6 @@ set_traceframe_context (struct frame_info *trace_frame)
     }
   else
     {
-      init_sal (&traceframe_sal);
       traceframe_fun = NULL;
       set_internalvar_integer (lookup_internalvar ("trace_line"), -1);
     }
@@ -3818,10 +3817,7 @@ print_one_static_tracepoint_marker (int count,
   struct ui_out *uiout = current_uiout;
   VEC(breakpoint_p) *tracepoints;
 
-  struct symtab_and_line sal;
-
-  init_sal (&sal);
-
+  symtab_and_line sal;
   sal.pc = marker->address;
 
   tracepoints = static_tracepoints_here (marker->address);

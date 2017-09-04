@@ -761,7 +761,7 @@ gdbscm_frame_sal (SCM self)
     {
       frame = frscm_frame_smob_to_frame (f_smob);
       if (frame != NULL)
-	find_frame_sal (frame, &sal);
+	sal = find_frame_sal (frame);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

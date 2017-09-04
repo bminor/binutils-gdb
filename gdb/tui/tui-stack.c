@@ -366,10 +366,9 @@ tui_show_frame_info (struct frame_info *fi)
       CORE_ADDR low;
       struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
       int source_already_displayed;
-      struct symtab_and_line sal;
       CORE_ADDR pc;
 
-      find_frame_sal (fi, &sal);
+      symtab_and_line sal = find_frame_sal (fi);
 
       source_already_displayed = sal.symtab != 0
         && tui_source_is_displayed (symtab_to_fullname (sal.symtab));

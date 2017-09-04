@@ -85,9 +85,6 @@ parse_probes_in_pspace (const struct probe_ops *probe_ops,
 	    continue;
 
 	  symtab_and_line sal;
-
-	  init_sal (&sal);
-
 	  sal.pc = get_probe_address (probe, objfile);
 	  sal.explicit_pc = 1;
 	  sal.section = find_pc_overlay (sal.pc);

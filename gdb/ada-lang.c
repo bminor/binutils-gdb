@@ -11980,7 +11980,6 @@ ada_exception_support_info_sniffer (void)
 static int
 is_known_support_routine (struct frame_info *frame)
 {
-  struct symtab_and_line sal;
   char *func_name;
   enum language func_lang;
   int i;
@@ -11989,7 +11988,7 @@ is_known_support_routine (struct frame_info *frame)
   /* If this code does not have any debugging information (no symtab),
      This cannot be any user code.  */
 
-  find_frame_sal (frame, &sal);
+  symtab_and_line sal = find_frame_sal (frame);
   if (sal.symtab == NULL)
     return 1;
 

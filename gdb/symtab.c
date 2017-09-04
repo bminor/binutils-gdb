@@ -947,14 +947,6 @@ symbol_search_name (const struct general_symbol_info *gsymbol)
   else
     return symbol_natural_name (gsymbol);
 }
-
-/* Initialize the structure fields to zero values.  */
-
-void
-init_sal (struct symtab_and_line *sal)
-{
-  memset (sal, 0, sizeof (*sal));
-}
 
 
 /* Return 1 if the two sections are the same, or if they could
@@ -2938,7 +2930,6 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   int len;
   int i;
   struct linetable_entry *item;
-  struct symtab_and_line val;
   const struct blockvector *bv;
   struct bound_minimal_symbol msymbol;
 
@@ -2964,10 +2955,6 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
      Quite likely that is the start of the following statement.
      But what we want is the statement containing the instruction.
      Fudge the pc to make sure we get that.  */
-
-  init_sal (&val);		/* initialize to zeroes */
-
-  val.pspace = current_program_space;
 
   /* It's tempting to assume that, if we can't find debugging info for
      any function enclosing PC, that we shouldn't search for line
@@ -3057,6 +3044,8 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	  return find_pc_line (BMSYMBOL_VALUE_ADDRESS (mfunsym), 0);
       }
 
+  symtab_and_line val;
+  val.pspace = current_program_space;
 
   cust = find_pc_sect_compunit_symtab (pc, section);
   if (cust == NULL)
@@ -3469,12 +3458,11 @@ find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
 struct symtab_and_line
 find_function_start_sal (struct symbol *sym, int funfirstline)
 {
-  struct symtab_and_line sal;
-  struct obj_section *section;
-
   fixup_symbol_section (sym, NULL);
-  section = SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym);
-  sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)), section, 0);
+
+  obj_section *section = SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym);
+  symtab_and_line sal
+    = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)), section, 0);
 
   if (funfirstline && sal.symtab != NULL
       && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
@@ -3494,7 +3482,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
      can find a line number for after the prologue.  */
   if (sal.pc < BLOCK_START (SYMBOL_BLOCK_VALUE (sym)))
     {
-      init_sal (&sal);
+      sal = {};
       sal.pspace = current_program_space;
       sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
       sal.section = section;

@@ -6558,9 +6558,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	{
 	  /* Set up a step-resume breakpoint at the address
 	     indicated by SKIP_SOLIB_RESOLVER.  */
-	  struct symtab_and_line sr_sal;
-
-	  init_sal (&sr_sal);
+	  symtab_and_line sr_sal;
 	  sr_sal.pc = pc_after_resolver;
 	  sr_sal.pspace = get_frame_program_space (frame);
 
@@ -6611,9 +6609,7 @@ process_event_stop_test (struct execution_control_state *ecs)
       if (real_stop_pc)
 	{
 	  /* And put the step-breakpoint there and go until there.  */
-	  struct symtab_and_line sr_sal;
-
-	  init_sal (&sr_sal);	/* initialize to zeroes */
+	  symtab_and_line sr_sal;
 	  sr_sal.pc = real_stop_pc;
 	  sr_sal.section = find_pc_overlay (sr_sal.pc);
 	  sr_sal.pspace = get_frame_program_space (frame);
@@ -6711,10 +6707,8 @@ process_event_stop_test (struct execution_control_state *ecs)
 		 to the caller.  */
 	      if (ecs->stop_func_start != stop_pc && ecs->stop_func_start != 0)
 		{
-		  struct symtab_and_line sr_sal;
-
 		  /* Normal function call return (static or dynamic).  */
-		  init_sal (&sr_sal);
+		  symtab_and_line sr_sal;
 		  sr_sal.pc = ecs->stop_func_start;
 		  sr_sal.pspace = get_frame_program_space (frame);
 		  insert_step_resume_breakpoint_at_sal (gdbarch,
@@ -6741,9 +6735,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 
       if (real_stop_pc != 0 && in_solib_dynsym_resolve_code (real_stop_pc))
 	{
-	  struct symtab_and_line sr_sal;
-
-	  init_sal (&sr_sal);
+	  symtab_and_line sr_sal;
 	  sr_sal.pc = ecs->stop_func_start;
 	  sr_sal.pspace = get_frame_program_space (frame);
 
@@ -6797,9 +6789,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	    {
 	      /* Set a breakpoint at callee's start address.
 		 From there we can step once and be back in the caller.  */
-	      struct symtab_and_line sr_sal;
-
-	      init_sal (&sr_sal);
+	      symtab_and_line sr_sal;
 	      sr_sal.pc = ecs->stop_func_start;
 	      sr_sal.pspace = get_frame_program_space (frame);
 	      insert_step_resume_breakpoint_at_sal (gdbarch,
@@ -6837,9 +6827,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  /* Stepped backward into the solib dynsym resolver.
 	     Set a breakpoint at its start and continue, then
 	     one more step will take us out.  */
-	  struct symtab_and_line sr_sal;
-
-	  init_sal (&sr_sal);
+	  symtab_and_line sr_sal;
 	  sr_sal.pc = ecs->stop_func_start;
 	  sr_sal.pspace = get_frame_program_space (frame);
 	  insert_step_resume_breakpoint_at_sal (gdbarch, 
@@ -6919,13 +6907,11 @@ process_event_stop_test (struct execution_control_state *ecs)
 		   ecs->event_thread->control.step_frame_id)
       && inline_skipped_frames (ecs->ptid))
     {
-      struct symtab_and_line call_sal;
-
       if (debug_infrun)
 	fprintf_unfiltered (gdb_stdlog,
 			    "infrun: stepped into inlined function\n");
 
-      find_frame_sal (get_current_frame (), &call_sal);
+      symtab_and_line call_sal = find_frame_sal (get_current_frame ());
 
       if (ecs->event_thread->control.step_over_calls != STEP_OVER_ALL)
 	{
@@ -7289,17 +7275,14 @@ static void
 handle_step_into_function (struct gdbarch *gdbarch,
 			   struct execution_control_state *ecs)
 {
-  struct compunit_symtab *cust;
-  struct symtab_and_line stop_func_sal, sr_sal;
-
   fill_in_stop_func (gdbarch, ecs);
 
-  cust = find_pc_compunit_symtab (stop_pc);
+  compunit_symtab *cust = find_pc_compunit_symtab (stop_pc);
   if (cust != NULL && compunit_language (cust) != language_asm)
     ecs->stop_func_start
       = gdbarch_skip_prologue_noexcept (gdbarch, ecs->stop_func_start);
 
-  stop_func_sal = find_pc_line (ecs->stop_func_start, 0);
+  symtab_and_line stop_func_sal = find_pc_line (ecs->stop_func_start, 0);
   /* Use the step_resume_break to step until the end of the prologue,
      even if that involves jumps (as it seems to on the vax under
      4.2).  */
@@ -7343,7 +7326,7 @@ handle_step_into_function (struct gdbarch *gdbarch,
   else
     {
       /* Put the step-breakpoint there and go until there.  */
-      init_sal (&sr_sal);	/* initialize to zeroes */
+      symtab_and_line sr_sal;
       sr_sal.pc = ecs->stop_func_start;
       sr_sal.section = find_pc_overlay (ecs->stop_func_start);
       sr_sal.pspace = get_frame_program_space (get_current_frame ());
@@ -7442,13 +7425,11 @@ insert_step_resume_breakpoint_at_sal (struct gdbarch *gdbarch,
 static void
 insert_hp_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
 {
-  struct symtab_and_line sr_sal;
-  struct gdbarch *gdbarch;
-
   gdb_assert (return_frame != NULL);
-  init_sal (&sr_sal);		/* initialize to zeros */
 
-  gdbarch = get_frame_arch (return_frame);
+  struct gdbarch *gdbarch = get_frame_arch (return_frame);
+
+  symtab_and_line sr_sal;
   sr_sal.pc = gdbarch_addr_bits_remove (gdbarch, get_frame_pc (return_frame));
   sr_sal.section = find_pc_overlay (sr_sal.pc);
   sr_sal.pspace = get_frame_program_space (return_frame);
@@ -7475,16 +7456,13 @@ insert_hp_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
 static void
 insert_step_resume_breakpoint_at_caller (struct frame_info *next_frame)
 {
-  struct symtab_and_line sr_sal;
-  struct gdbarch *gdbarch;
-
   /* We shouldn't have gotten here if we don't know where the call site
      is.  */
   gdb_assert (frame_id_p (frame_unwind_caller_id (next_frame)));
 
-  init_sal (&sr_sal);		/* initialize to zeros */
+  struct gdbarch *gdbarch = frame_unwind_caller_arch (next_frame);
 
-  gdbarch = frame_unwind_caller_arch (next_frame);
+  symtab_and_line sr_sal;
   sr_sal.pc = gdbarch_addr_bits_remove (gdbarch,
 					frame_unwind_caller_pc (next_frame));
   sr_sal.section = find_pc_overlay (sr_sal.pc);
