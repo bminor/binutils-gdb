@@ -78,6 +78,11 @@ void c_type_print_args (struct type *, struct ui_file *, int, enum language,
 
 void type_print_unknown_return_type (struct ui_file *stream);
 
+/* Throw an error indicating that the user tried to use a symbol that
+   has unknown type.  SYM_PRINT_NAME is the name of the symbol, to be
+   included in the error message.  */
+extern void error_unknown_type (const char *sym_print_name);
+
 extern void val_print_not_allocated (struct ui_file *stream);
 
 extern void val_print_not_associated (struct ui_file *stream);

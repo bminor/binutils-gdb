@@ -1,5 +1,31 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* ax-gdb.c: Include "typeprint.h".
+	(gen_expr_for_cast): New function.
+	(gen_expr) <OP_CAST, OP_CAST_TYPE>: Use it.
+	<OP_VAR_VALUE, OP_MSYM_VAR_VALUE>: Error out if the variable's
+	type is unknown.
+	* dwarf2read.c (new_symbol_full): Fallback to int instead of
+	nodebug_data_symbol.
+	* eval.c: Include "typeprint.h".
+	(evaluate_subexp_standard) <OP_VAR_VALUE, OP_VAR_MSYM_VALUE>:
+	Error out if symbol has unknown type.
+	<UNOP_CAST, UNOP_CAST_TYPE>: Common bits factored out to
+	evaluate_subexp_for_cast.
+	(evaluate_subexp_for_address, evaluate_subexp_for_sizeof): Handle
+	OP_VAR_MSYM_VALUE.
+	(evaluate_subexp_for_cast): New function.
+	* gdbtypes.c (init_nodebug_var_type): New function.
+	(objfile_type): Use it to initialize types of variables with no
+	debug info.
+	* typeprint.c (error_unknown_type): New.
+	* typeprint.h (error_unknown_type): New declaration.
+	* compile/compile-c-types.c (convert_type_basic): Handle
+	TYPE_CODE_ERROR; warn and fallback to int for variables with
+	unknown type.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* eval.c (evaluate_var_value): New function, factored out from ...
 	(evaluate_subexp_standard): ... here.
 

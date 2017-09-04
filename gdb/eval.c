@@ -39,6 +39,7 @@
 #include "valprint.h"
 #include "gdb_obstack.h"
 #include "objfiles.h"
+#include "typeprint.h"
 #include <ctype.h>
 
 /* This is defined in valops.c */
@@ -51,6 +52,10 @@ static struct value *evaluate_subexp_for_sizeof (struct expression *, int *,
 
 static struct value *evaluate_subexp_for_address (struct expression *,
 						  int *, enum noside);
+
+static value *evaluate_subexp_for_cast (expression *exp, int *pos,
+					enum noside noside,
+					struct type *type);
 
 static struct value *evaluate_struct_tuple (struct value *,
 					    struct expression *, int *,
@@ -796,14 +801,30 @@ evaluate_subexp_standard (struct type *expect_type,
       (*pos) += 3;
       if (noside == EVAL_SKIP)
 	return eval_skip_value (exp);
-      return evaluate_var_value (noside,
-				 exp->elts[pc + 1].block,
-				 exp->elts[pc + 2].symbol);
+
+      {
+	symbol *var = exp->elts[pc + 2].symbol;
+	if (TYPE_CODE (SYMBOL_TYPE (var)) == TYPE_CODE_ERROR)
+	  error_unknown_type (SYMBOL_PRINT_NAME (var));
+
+	return evaluate_var_value (noside, exp->elts[pc + 1].block, var);
+      }
+
     case OP_VAR_MSYM_VALUE:
-      (*pos) += 3;
-      return evaluate_var_msym_value (noside,
-				      exp->elts[pc + 1].objfile,
-				      exp->elts[pc + 2].msymbol);
+      {
+	(*pos) += 3;
+
+	minimal_symbol *msymbol = exp->elts[pc + 2].msymbol;
+	value *val = evaluate_var_msym_value (noside,
+					      exp->elts[pc + 1].objfile,
+					      msymbol);
+
+	type = value_type (val);
+	if (TYPE_CODE (type) == TYPE_CODE_ERROR
+	    && (noside != EVAL_AVOID_SIDE_EFFECTS || pc != 0))
+	  error_unknown_type (MSYMBOL_PRINT_NAME (msymbol));
+	return val;
+      }
 
     case OP_VAR_ENTRY_VALUE:
       (*pos) += 2;
@@ -2589,22 +2610,12 @@ evaluate_subexp_standard (struct type *expect_type,
     case UNOP_CAST:
       (*pos) += 2;
       type = exp->elts[pc + 1].type;
-      arg1 = evaluate_subexp (type, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      if (type != value_type (arg1))
-	arg1 = value_cast (type, arg1);
-      return arg1;
+      return evaluate_subexp_for_cast (exp, pos, noside, type);
 
     case UNOP_CAST_TYPE:
       arg1 = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
       type = value_type (arg1);
-      arg1 = evaluate_subexp (type, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      if (type != value_type (arg1))
-	arg1 = value_cast (type, arg1);
-      return arg1;
+      return evaluate_subexp_for_cast (exp, pos, noside, type);
 
     case UNOP_DYNAMIC_CAST:
       arg1 = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
@@ -2927,6 +2938,22 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
       else
 	return address_of_variable (var, exp->elts[pc + 1].block);
 
+    case OP_VAR_MSYM_VALUE:
+      {
+	(*pos) += 4;
+
+	value *val = evaluate_var_msym_value (noside,
+					      exp->elts[pc + 1].objfile,
+					      exp->elts[pc + 2].msymbol);
+	if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	  {
+	    struct type *type = lookup_pointer_type (value_type (val));
+	    return value_zero (type, not_lval);
+	  }
+	else
+	  return value_addr (val);
+      }
+
     case OP_SCOPE:
       tem = longest_to_int (exp->elts[pc + 2].longconst);
       (*pos) += 5 + BYTES_TO_EXP_ELEM (tem + 1);
@@ -3065,6 +3092,23 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 	(*pos) += 4;
       break;
 
+    case OP_VAR_MSYM_VALUE:
+      {
+	(*pos) += 4;
+
+	minimal_symbol *msymbol = exp->elts[pc + 2].msymbol;
+	value *val = evaluate_var_msym_value (noside,
+					      exp->elts[pc + 1].objfile,
+					      msymbol);
+
+	type = value_type (val);
+	if (TYPE_CODE (type) == TYPE_CODE_ERROR)
+	  error_unknown_type (MSYMBOL_PRINT_NAME (msymbol));
+
+	return value_from_longest (size_type, TYPE_LENGTH (type));
+      }
+      break;
+
       /* Deal with the special case if NOSIDE is EVAL_NORMAL and the resulting
 	 type of the subscript is a variable length array type. In this case we
 	 must re-evaluate the right hand side of the subcription to allow
@@ -3110,6 +3154,61 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
       && (TYPE_IS_REFERENCE (type)))
     type = check_typedef (TYPE_TARGET_TYPE (type));
   return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
+}
+
+/* Evaluate a subexpression of EXP, at index *POS, and return a value
+   for that subexpression cast to TO_TYPE.  Advance *POS over the
+   subexpression.  */
+
+static value *
+evaluate_subexp_for_cast (expression *exp, int *pos,
+			  enum noside noside,
+			  struct type *to_type)
+{
+  int pc = *pos;
+
+  /* Don't let symbols be evaluated with evaluate_subexp because that
+     throws an "unknown type" error for no-debug data symbols.
+     Instead, we want the cast to reinterpret the symbol.  */
+  if (exp->elts[pc].opcode == OP_VAR_MSYM_VALUE
+      || exp->elts[pc].opcode == OP_VAR_VALUE)
+    {
+      (*pos) += 4;
+
+      value *val;
+      if (exp->elts[pc].opcode == OP_VAR_MSYM_VALUE)
+	{
+	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	    return value_zero (to_type, not_lval);
+
+	  val = evaluate_var_msym_value (noside,
+					 exp->elts[pc + 1].objfile,
+					 exp->elts[pc + 2].msymbol);
+	}
+      else
+	val = evaluate_var_value (noside,
+				  exp->elts[pc + 1].block,
+				  exp->elts[pc + 2].symbol);
+
+      if (noside == EVAL_SKIP)
+	return eval_skip_value (exp);
+
+      val = value_cast (to_type, val);
+
+      /* Don't allow e.g. '&(int)var_with_no_debug_info'.  */
+      if (VALUE_LVAL (val) == lval_memory)
+	{
+	  if (value_lazy (val))
+	    value_fetch_lazy (val);
+	  VALUE_LVAL (val) = not_lval;
+	}
+      return val;
+    }
+
+  value *val = evaluate_subexp (to_type, exp, pos, noside);
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  return value_cast (to_type, val);
 }
 
 /* Parse a type expression in the string [P..P+LENGTH).  */

@@ -36,9 +36,10 @@ with_test_prefix "nodebug" {
 	return -1
     }
 
-    gdb_test_no_output "compile code resultvar = gnu_ifunc (10);"
+    gdb_test "compile code resultvar = gnu_ifunc (10);" \
+	"warning: variable has unknown type; assuming int"
 
-    gdb_test "p resultvar" " = 11"
+    gdb_test "p (int) resultvar" " = 11"
 
 }
 

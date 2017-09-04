@@ -394,6 +394,15 @@ type_print_unknown_return_type (struct ui_file *stream)
   fprintf_filtered (stream, _("<unknown return type>"));
 }
 
+/* See typeprint.h.  */
+
+void
+error_unknown_type (const char *sym_print_name)
+{
+  error (_("'%s' has unknown type; cast it to its declared type"),
+	 sym_print_name);
+}
+
 /* Print type of EXP, or last thing in value history if EXP == NULL.
    show is passed to type_print.  */
 

@@ -383,6 +383,21 @@ convert_type_basic (struct compile_c_instance *context, struct type *type)
 
     case TYPE_CODE_COMPLEX:
       return convert_complex (context, type);
+
+    case TYPE_CODE_ERROR:
+      {
+	/* Ideally, if we get here due to a cast expression, we'd use
+	   the cast-to type as the variable's type, like GDB's
+	   built-in parser does.  For now, assume "int" like GDB's
+	   built-in parser used to do, but at least warn.  */
+	struct type *fallback;
+	if (TYPE_OBJFILE_OWNED (type))
+	  fallback = objfile_type (TYPE_OWNER (type).objfile)->builtin_int;
+	else
+	  fallback = builtin_type (TYPE_OWNER (type).gdbarch)->builtin_int;
+	warning (_("variable has unknown type; assuming int"));
+	return convert_int (context, fallback);
+      }
     }
 
   return C_CTX (context)->c_ops->error (C_CTX (context),

@@ -19139,8 +19139,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	     variables with missing type entries.  Change the
 	     misleading `void' type to something sensible.  */
 	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_VOID)
-	    SYMBOL_TYPE (sym)
-	      = objfile_type (objfile)->nodebug_data_symbol;
+	    SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_int;
 
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
 	  /* In the case of DW_TAG_member, we should only be called for

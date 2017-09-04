@@ -1,5 +1,21 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* gdb.asm/asm-source.exp: Add casts to int.
+	* gdb.base/nodebug.c (dataglobal8, dataglobal32_1, dataglobal32_2)
+	(dataglobal64_1, dataglobal64_2): New globals.
+	* gdb.base/nodebug.exp: Test different expressions involving the
+	new globals, with print, whatis and ptype.  Add casts to int.
+	* gdb.base/solib-display.exp: Add casts to int.
+	* gdb.compile/compile-ifunc.exp: Expect warning.  Add cast to int.
+	* gdb.cp/m-static.exp: Add cast to int.
+	* gdb.dwarf2/dw2-skip-prologue.exp: Add cast to int.
+	* gdb.threads/tls-nodebug.exp: Check that gdb errors out printing
+	tls variable with no debug info without a cast.  Test with a cast
+	to int too.
+	* gdb.trace/entry-values.exp: Add casts.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/nodebug.exp: Test that ptype's error about functions
 	with unknown return type includes the function name too.
 

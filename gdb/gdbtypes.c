@@ -2770,6 +2770,16 @@ init_type (struct objfile *objfile, enum type_code code, int length,
   return type;
 }
 
+/* Allocate a TYPE_CODE_ERROR type structure associated with OBJFILE,
+   to use with variables that have no debug info.  NAME is the type
+   name.  */
+
+static struct type *
+init_nodebug_var_type (struct objfile *objfile, const char *name)
+{
+  return init_type (objfile, TYPE_CODE_ERROR, 0, name);
+}
+
 /* Allocate a TYPE_CODE_INT type structure associated with OBJFILE.
    BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
    the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
@@ -5325,14 +5335,11 @@ objfile_type (struct objfile *objfile)
 			 "<text from jump slot in .got.plt, no debug info>",
 			 objfile_type->nodebug_text_symbol);
   objfile_type->nodebug_data_symbol
-    = init_integer_type (objfile, gdbarch_int_bit (gdbarch), 0,
-			 "<data variable, no debug info>");
+    = init_nodebug_var_type (objfile, "<data variable, no debug info>");
   objfile_type->nodebug_unknown_symbol
-    = init_integer_type (objfile, TARGET_CHAR_BIT, 0,
-			 "<variable (not text or data), no debug info>");
+    = init_nodebug_var_type (objfile, "<variable (not text or data), no debug info>");
   objfile_type->nodebug_tls_symbol
-    = init_integer_type (objfile, gdbarch_int_bit (gdbarch), 0,
-			 "<thread local variable, no debug info>");
+    = init_nodebug_var_type (objfile, "<thread local variable, no debug info>");
 
   /* NOTE: on some targets, addresses and pointers are not necessarily
      the same.

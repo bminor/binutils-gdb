@@ -8,6 +8,13 @@ static int datalocal = 4;		/* Should go in local data */
 int bssglobal;				/* Should go in global bss */
 static int bsslocal;			/* Should go in local bss */
 
+/* Non-int-sized global data variables.  */
+uint8_t dataglobal8 = 0xff;
+uint32_t dataglobal32_1 = 0x7fffffff;
+uint32_t dataglobal32_2 = 0x000000ff;
+uint64_t dataglobal64_1 = 0x7fffffffffffffff;
+uint64_t dataglobal64_2 = 0x00000000000000ff;
+
 int
 inner (int x)
 {

@@ -42,7 +42,7 @@
 #include "linespec.h"
 #include "location.h"
 #include "objfiles.h"
-
+#include "typeprint.h"
 #include "valprint.h"
 #include "c-lang.h"
 
@@ -1765,6 +1765,40 @@ gen_sizeof (struct expression *exp, union exp_element **pc,
 }
 
 
+/* Generate bytecode for a cast to TO_TYPE.  Advance *PC over the
+   subexpression.  */
+
+static void
+gen_expr_for_cast (struct expression *exp, union exp_element **pc,
+		   struct agent_expr *ax, struct axs_value *value,
+		   struct type *to_type)
+{
+  enum exp_opcode op = (*pc)[0].opcode;
+
+  /* Don't let symbols be handled with gen_expr because that throws an
+     "unknown type" error for no-debug data symbols.  Instead, we want
+     the cast to reinterpret such symbols.  */
+  if (op == OP_VAR_MSYM_VALUE || op == OP_VAR_VALUE)
+    {
+      if (op == OP_VAR_VALUE)
+	{
+	  gen_var_ref (ax, value, (*pc)[2].symbol);
+
+	  if (value->optimized_out)
+	    error (_("`%s' has been optimized out, cannot use"),
+		   SYMBOL_PRINT_NAME ((*pc)[2].symbol));
+	}
+      else
+	gen_msym_var_ref (ax, value, (*pc)[2].msymbol, (*pc)[1].objfile);
+      if (TYPE_CODE (value->type) == TYPE_CODE_ERROR)
+	value->type = to_type;
+      (*pc) += 4;
+    }
+  else
+    gen_expr (exp, pc, ax, value);
+  gen_cast (ax, value, to_type);
+}
+
 /* Generating bytecode from GDB expressions: general recursive thingy  */
 
 /* XXX: i18n */
@@ -1978,11 +2012,18 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	error (_("`%s' has been optimized out, cannot use"),
 	       SYMBOL_PRINT_NAME ((*pc)[2].symbol));
 
+      if (TYPE_CODE (value->type) == TYPE_CODE_ERROR)
+	error_unknown_type (SYMBOL_PRINT_NAME ((*pc)[2].symbol));
+
       (*pc) += 4;
       break;
 
     case OP_VAR_MSYM_VALUE:
       gen_msym_var_ref (ax, value, (*pc)[2].msymbol, (*pc)[1].objfile);
+
+      if (TYPE_CODE (value->type) == TYPE_CODE_ERROR)
+	error_unknown_type (MSYMBOL_PRINT_NAME ((*pc)[2].msymbol));
+
       (*pc) += 4;
       break;
 
@@ -2043,8 +2084,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	struct type *type = (*pc)[1].type;
 
 	(*pc) += 3;
-	gen_expr (exp, pc, ax, value);
-	gen_cast (ax, value, type);
+	gen_expr_for_cast (exp, pc, ax, value, type);
       }
       break;
 
@@ -2059,9 +2099,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	val = evaluate_subexp (NULL, exp, &offset, EVAL_AVOID_SIDE_EFFECTS);
 	type = value_type (val);
 	*pc = &exp->elts[offset];
-
-	gen_expr (exp, pc, ax, value);
-	gen_cast (ax, value, type);
+	gen_expr_for_cast (exp, pc, ax, value, type);
       }
       break;
 

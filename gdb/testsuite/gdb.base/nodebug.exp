@@ -152,11 +152,57 @@ if [runto inner] then {
     # we may or may not have debug info for those (depending on
     # whether we have debug info for the C runtime, for example).
     gdb_test_no_output "macro define uint8 unsigned char"
+    gdb_test_no_output "macro define uint32 unsigned int"
+    gdb_test_no_output "macro define uint64 unsigned long long"
 
-    gdb_test "p dataglobal" "= 3"
-    gdb_test "whatis dataglobal" \
-	"<(data variable|variable), no debug info>|int"
-    gdb_test "ptype dataglobal" "<(data variable|variable), no debug info>|int"
+    set data_var_type "<data variable, no debug info>"
+    set unk_type_re "has unknown type.*to its declared type"
+    set ptr_math_re "Cannot perform pointer math on incomplete type \"$data_var_type\", try casting to a known type, or void \\*\\."
+    set not_mem_re "Attempt to take address of value not located in memory\\."
+
+    set dataglobal_unk_re "dataglobal.*$unk_type_re"
+
+	 #exp				#fmt #print						#ptype/whatis
+    foreach line {
+	{"dataglobal"			""   $dataglobal_unk_re					" = $data_var_type"}
+	{"(int) dataglobal"		""   "= 3"						" = int"}
+	{"sizeof(dataglobal)"		""   $dataglobal_unk_re					$dataglobal_unk_re}
+	{"sizeof(dataglobal + 1)"	""   $dataglobal_unk_re					$dataglobal_unk_re}
+	{"sizeof((int) dataglobal)"	""   " = $decimal"					" = int"}
+	{"dataglobal + 1"		""   $dataglobal_unk_re					$dataglobal_unk_re}
+	{"&dataglobal"			""   "\\($data_var_type \\*\\) $hex <dataglobal>"	" = $data_var_type \\*"}
+	{"&dataglobal + 1"		""   $ptr_math_re					$ptr_math_re}
+	{"(int *) &dataglobal + 1"	""   " = \\(int \\*\\) $hex <datalocal>"		"int \\*"}
+	{"&(int) dataglobal + 1"	""   $not_mem_re					$not_mem_re}
+	{"&dataglobal, &dataglobal"	""   "\\($data_var_type \\*\\) $hex <dataglobal>"	" = $data_var_type \\*"}
+	{"*dataglobal"			""   $dataglobal_unk_re					$dataglobal_unk_re}
+
+	{"dataglobal8"			"/x" $dataglobal_unk_re					" = $data_var_type"}
+	{"(uint8) dataglobal8"		"/x" " = 0xff"						"unsigned char"}
+
+	{"dataglobal32_1"		"/x" $dataglobal_unk_re					" = $data_var_type"}
+	{"(uint32) dataglobal32_1"	"/x" " = 0x7fffffff"					"unsigned int"}
+	{"dataglobal32_2"		"/x" $dataglobal_unk_re					" = $data_var_type"}
+	{"(uint32) dataglobal32_2"	"/x" " = 0xff"						"unsigned int"}
+
+	{"dataglobal64_1"		"/x" $dataglobal_unk_re					" = $data_var_type"}
+	{"(uint64) dataglobal64_1"	"/x" " = 0x7fffffffffffffff"				"unsigned long long"}
+	{"dataglobal64_2"		"/x" $dataglobal_unk_re					" = $data_var_type"}
+	{"(uint64) dataglobal64_2"	"/x" " = 0xff"						"unsigned long long"}
+    } {
+	set exp [lindex $line 0]
+	# Expand variables.
+	set fmt [subst -nobackslashes [lindex $line 1]]
+	set print [subst  -nobackslashes [lindex $line 2]]
+	set whatis [subst -nobackslashes [lindex $line 3]]
+	if {$fmt == ""} {
+	    gdb_test "p $exp" $print
+	} else {
+	    gdb_test "p $fmt $exp" $print
+	}
+	gdb_test "whatis $exp" $whatis
+	gdb_test "ptype $exp" $whatis
+    }
     
     # The only symbol xcoff puts out for statics is for the TOC entry.
     # Possible, but hairy, for gdb to deal.  Right now it doesn't, it
@@ -164,35 +210,39 @@ if [runto inner] then {
     setup_xfail "rs6000*-*-aix*"
     setup_xfail "powerpc*-*-aix*"
 
-    gdb_test "p datalocal" "= 4"
+    gdb_test "p datalocal" "datalocal.*$unk_type_re"
+    gdb_test "p (int) datalocal" "= 4"
 
     setup_xfail "rs6000*-*-aix*"
     setup_xfail "powerpc*-*-aix*"
 
-    gdb_test "whatis datalocal" "<(data variable|variable), no debug info>"
+    gdb_test "whatis datalocal" "datalocal.*$data_var_type"
 
     setup_xfail "rs6000*-*-aix*"
     setup_xfail "powerpc*-*-aix*"
 
-    gdb_test "ptype datalocal" "<(data variable|variable), no debug info>"
-    gdb_test "p bssglobal" "= 0"
-    gdb_test "whatis bssglobal" "<(data variable|variable), no debug info>|int"
-    gdb_test "ptype bssglobal" "<(data variable|variable), no debug info>|int"
+    gdb_test "ptype datalocal" "datalocal.*$data_var_type"
+
+    gdb_test "p bssglobal" "bssglobal.*$unk_type_re"
+    gdb_test "p (int) bssglobal" "= 0"
+    gdb_test "whatis bssglobal" $data_var_type
+    gdb_test "ptype bssglobal" $data_var_type
 
     setup_xfail "rs6000*-*-aix*"
     setup_xfail "powerpc*-*-aix*"
 
-    gdb_test "p bsslocal" "= 0"
+    gdb_test "p bsslocal" "bsslocal.*$unk_type_re"
+    gdb_test "p (int) bsslocal" "= 0"
 
     setup_xfail "rs6000*-*-aix*"
     setup_xfail "powerpc*-*-aix*"
 
-    gdb_test "whatis bsslocal" "<(data variable|variable), no debug info>"
+    gdb_test "whatis bsslocal" $data_var_type
 
     setup_xfail "rs6000*-*-aix*"
     setup_xfail "powerpc*-*-aix*"
 
-    gdb_test "ptype bsslocal" "<(data variable|variable), no debug info>"
+    gdb_test "ptype bsslocal" $data_var_type
 
     gdb_test "backtrace 10" "#0.*inner.*#1.*middle.*#2.*top.*#3.*main.*" \
 	"backtrace from inner in nodebug.exp"
