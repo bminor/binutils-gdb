@@ -5312,13 +5312,13 @@ objfile_type (struct objfile *objfile)
   objfile_type->nodebug_text_symbol
     = init_type (objfile, TYPE_CODE_FUNC, 1,
 		 "<text variable, no debug info>");
-  TYPE_TARGET_TYPE (objfile_type->nodebug_text_symbol)
-    = objfile_type->builtin_int;
   objfile_type->nodebug_text_gnu_ifunc_symbol
     = init_type (objfile, TYPE_CODE_FUNC, 1,
 		 "<text gnu-indirect-function variable, no debug info>");
+  /* Ifunc resolvers return a function address.  */
   TYPE_TARGET_TYPE (objfile_type->nodebug_text_gnu_ifunc_symbol)
-    = objfile_type->nodebug_text_symbol;
+    = init_integer_type (objfile, gdbarch_addr_bit (gdbarch), 1,
+			 "__IFUNC_RESOLVER_RET");
   TYPE_GNU_IFUNC (objfile_type->nodebug_text_gnu_ifunc_symbol) = 1;
   objfile_type->nodebug_got_plt_symbol
     = init_pointer_type (objfile, gdbarch_addr_bit (gdbarch),

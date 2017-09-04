@@ -53,7 +53,7 @@ proc dprintf_detach_test { breakpoint_always_inserted dprintf_style disconnected
 	# Get PID of test program.
 	set inferior_pid -1
 	set test "get inferior process ID"
-	gdb_test_multiple "call getpid ()" $test {
+	gdb_test_multiple "call (int) getpid ()" $test {
 	    -re ".* = ($decimal).*$gdb_prompt $" {
 		set inferior_pid $expect_out(1,string)
 		pass $test

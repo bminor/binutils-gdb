@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <stdint.h>
+
 /* Test that things still (sort of) work when compiled without -g.  */
 
 int dataglobal = 3;			/* Should go in global data */
@@ -42,4 +44,43 @@ int array_index (char *arr, int i)
   retval = arr[*x];
   free (x);
   return retval;
+}
+
+float
+multf (float v1, float v2)
+{
+  return v1 * v2;
+}
+
+float
+multf_noproto (v1, v2)
+  float v1, v2;
+{
+  return v1 * v2;
+}
+
+double
+mult (double v1, double v2)
+{
+  return v1 * v2;
+}
+
+double
+mult_noproto (v1, v2)
+  double v1, v2;
+{
+  return v1 * v2;
+}
+
+uint8_t
+add8 (uint8_t v1, uint8_t v2)
+{
+  return v1 + v2;
+}
+
+uint8_t
+add8_noproto (v1, v2)
+  uint8_t v1, v2;
+{
+  return v1 + v2;
 }

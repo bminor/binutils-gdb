@@ -340,6 +340,20 @@ push_dummy_code (struct gdbarch *gdbarch,
 				  regcache);
 }
 
+/* See infcall.h.  */
+
+void
+error_call_unknown_return_type (const char *func_name)
+{
+  if (func_name != NULL)
+    error (_("'%s' has unknown return type; "
+	     "cast the call to its declared return type"),
+	   func_name);
+  else
+    error (_("function has unknown return type; "
+	     "cast the call to its declared return type"));
+}
+
 /* Fetch the name of the function at FUNADDR.
    This is used in printing an error message for call_function_by_hand.
    BUF is used to print FUNADDR in hex if the function name cannot be
@@ -673,9 +687,12 @@ cleanup_delete_std_terminate_breakpoint (void *ignore)
 /* See infcall.h.  */
 
 struct value *
-call_function_by_hand (struct value *function, int nargs, struct value **args)
+call_function_by_hand (struct value *function,
+		       type *default_return_type,
+		       int nargs, struct value **args)
 {
-  return call_function_by_hand_dummy (function, nargs, args, NULL, NULL);
+  return call_function_by_hand_dummy (function, default_return_type,
+				      nargs, args, NULL, NULL);
 }
 
 /* All this stuff with a dummy frame may seem unnecessarily complicated
@@ -698,6 +715,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
 struct value *
 call_function_by_hand_dummy (struct value *function,
+			     type *default_return_type,
 			     int nargs, struct value **args,
 			     dummy_frame_dtor_ftype *dummy_dtor,
 			     void *dummy_dtor_data)
@@ -850,8 +868,16 @@ call_function_by_hand_dummy (struct value *function,
   }
 
   funaddr = find_function_addr (function, &values_type);
-  if (!values_type)
-    values_type = builtin_type (gdbarch)->builtin_int;
+  if (values_type == NULL)
+    values_type = default_return_type;
+  if (values_type == NULL)
+    {
+      const char *name = get_function_name (funaddr,
+					    name_buf, sizeof (name_buf));
+      error (_("'%s' has unknown return type; "
+	       "cast the call to its declared return type"),
+	     name);
+    }
 
   values_type = check_typedef (values_type);
 
@@ -955,6 +981,21 @@ call_function_by_hand_dummy (struct value *function,
 	   prototyped.  Can we respect TYPE_VARARGS?  Probably not.  */
 	if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
 	  prototyped = 1;
+	if (TYPE_TARGET_TYPE (ftype) == NULL && TYPE_NFIELDS (ftype) == 0
+	    && default_return_type != NULL)
+	  {
+	    /* Calling a no-debug function with the return type
+	       explicitly cast.  Assume the function is prototyped,
+	       with a prototype matching the types of the arguments.
+	       E.g., with:
+		 float mult (float v1, float v2) { return v1 * v2; }
+	       This:
+		 (gdb) p (float) mult (2.0f, 3.0f)
+	       Is a simpler alternative to:
+		 (gdb) p ((float (*) (float, float)) mult) (2.0f, 3.0f)
+	     */
+	    prototyped = 1;
+	  }
 	else if (i < TYPE_NFIELDS (ftype))
 	  prototyped = TYPE_PROTOTYPED (ftype);
 	else

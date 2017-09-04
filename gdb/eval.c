@@ -1147,12 +1147,12 @@ evaluate_subexp_standard (struct type *expect_type,
 	argvec[3] = value_from_longest (long_type, selector);
 	argvec[4] = 0;
 
-	ret = call_function_by_hand (argvec[0], 3, argvec + 1);
+	ret = call_function_by_hand (argvec[0], NULL, 3, argvec + 1);
 	if (gnu_runtime)
 	  {
 	    /* Function objc_msg_lookup returns a pointer.  */
 	    argvec[0] = ret;
-	    ret = call_function_by_hand (argvec[0], 3, argvec + 1);
+	    ret = call_function_by_hand (argvec[0], NULL, 3, argvec + 1);
 	  }
 	if (value_as_long (ret) == 0)
 	  error (_("Target does not respond to this message selector."));
@@ -1169,11 +1169,11 @@ evaluate_subexp_standard (struct type *expect_type,
 	argvec[3] = value_from_longest (long_type, selector);
 	argvec[4] = 0;
 
-	ret = call_function_by_hand (argvec[0], 3, argvec + 1);
+	ret = call_function_by_hand (argvec[0], NULL, 3, argvec + 1);
 	if (gnu_runtime)
 	  {
 	    argvec[0] = ret;
-	    ret = call_function_by_hand (argvec[0], 3, argvec + 1);
+	    ret = call_function_by_hand (argvec[0], NULL, 3, argvec + 1);
 	  }
 
 	/* ret should now be the selector.  */
@@ -1315,10 +1315,10 @@ evaluate_subexp_standard (struct type *expect_type,
 	    deprecated_set_value_type (argvec[0],
 				       lookup_pointer_type (lookup_function_type (value_type (argvec[0]))));
 	    argvec[0]
-	      = call_function_by_hand (argvec[0], nargs + 2, argvec + 1);
+	      = call_function_by_hand (argvec[0], NULL, nargs + 2, argvec + 1);
 	  }
 
-	ret = call_function_by_hand (argvec[0], nargs + 2, argvec + 1);
+	ret = call_function_by_hand (argvec[0], NULL, nargs + 2, argvec + 1);
 	return ret;
       }
       break;
@@ -1705,12 +1705,9 @@ evaluate_subexp_standard (struct type *expect_type,
 	error (_("Cannot evaluate function -- may be inlined"));
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
-	  /* If the return type doesn't look like a function type, call an
-	     error.  This can happen if somebody tries to turn a variable into
-	     a function call.  This is here because people often want to
-	     call, eg, strcmp, which gdb doesn't know is a function.  If
-	     gdb isn't asked for it's opinion (ie. through "whatis"),
-	     it won't offer it.  */
+	  /* If the return type doesn't look like a function type,
+	     call an error.  This can happen if somebody tries to turn
+	     a variable into a function call.  */
 
 	  struct type *ftype = value_type (argvec[0]);
 
@@ -1731,10 +1728,19 @@ evaluate_subexp_standard (struct type *expect_type,
 		error (_("Xmethod is missing return type."));
 	      return value_zero (return_type, not_lval);
 	    }
-	  else if (TYPE_GNU_IFUNC (ftype))
-	    return allocate_value (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (ftype)));
-	  else if (TYPE_TARGET_TYPE (ftype))
-	    return allocate_value (TYPE_TARGET_TYPE (ftype));
+	  else if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
+		   || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
+	    {
+	      struct type *return_type = TYPE_TARGET_TYPE (ftype);
+
+	      if (return_type == NULL)
+		return_type = expect_type;
+
+	      if (return_type == NULL)
+		error_call_unknown_return_type (NULL);
+
+	      return allocate_value (return_type);
+	    }
 	  else
 	    error (_("Expression of type other than "
 		     "\"Function returning ...\" used as function"));
@@ -1747,7 +1753,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	case TYPE_CODE_XMETHOD:
 	  return call_xmethod (argvec[0], nargs, argvec + 1);
 	default:
-	  return call_function_by_hand (argvec[0], nargs, argvec + 1);
+	  return call_function_by_hand (argvec[0],
+					expect_type, nargs, argvec + 1);
 	}
       /* pai: FIXME save value from call_function_by_hand, then adjust
 	 pc by adjust_fn_pc if +ve.  */

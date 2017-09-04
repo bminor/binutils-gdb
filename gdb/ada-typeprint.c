@@ -773,7 +773,8 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
 {
   int i, len = TYPE_NFIELDS (type);
 
-  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_VOID)
+  if (TYPE_TARGET_TYPE (type) != NULL
+      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_VOID)
     fprintf_filtered (stream, "procedure");
   else
     fprintf_filtered (stream, "function");
@@ -798,7 +799,9 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
       fprintf_filtered (stream, ")");
     }
 
-  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+  if (TYPE_TARGET_TYPE (type) == NULL)
+    fprintf_filtered (stream, " return <unknown return type>");
+  else if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
     {
       fprintf_filtered (stream, " return ");
       ada_print_type (TYPE_TARGET_TYPE (type), "", stream, 0, 0, flags);

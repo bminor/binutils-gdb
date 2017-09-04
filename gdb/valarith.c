@@ -505,7 +505,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
 	  return value_zero (return_type, VALUE_LVAL (arg1));
 	}
-      return call_function_by_hand (argvec[0], 2 - static_memfuncp,
+      return call_function_by_hand (argvec[0], NULL, 2 - static_memfuncp,
 				    argvec + 1);
     }
   throw_error (NOT_FOUND_ERROR,
@@ -624,7 +624,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
 	  return value_zero (return_type, VALUE_LVAL (arg1));
 	}
-      return call_function_by_hand (argvec[0], nargs, argvec + 1);
+      return call_function_by_hand (argvec[0], NULL, nargs, argvec + 1);
     }
   throw_error (NOT_FOUND_ERROR,
                _("member function %s not found"), tstr);

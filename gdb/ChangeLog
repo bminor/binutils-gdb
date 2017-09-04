@@ -1,5 +1,72 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (ada_evaluate_subexp) <TYPE_CODE_FUNC>: Don't handle
+	TYPE_GNU_IFUNC specially here.  Throw error if return type is
+	unknown.
+	* ada-typeprint.c (print_func_type): Handle functions with unknown
+	return type.
+	* c-typeprint.c (c_type_print_base): Handle functions and methods
+	with unknown return type.
+	* compile/compile-c-symbols.c (convert_symbol_bmsym)
+	<mst_text_gnu_ifunc>: Use nodebug_text_gnu_ifunc_symbol.
+	* compile/compile-c-types.c: Include "objfiles.h".
+	(convert_func): For functions with unknown return type, warn and
+	default to int.
+	* compile/compile-object-run.c (compile_object_run): Adjust call
+	to call_function_by_hand_dummy.
+	* elfread.c (elf_gnu_ifunc_resolve_addr): Adjust call to
+	call_function_by_hand.
+	* eval.c (evaluate_subexp_standard): Adjust calls to
+	call_function_by_hand.  Handle functions and methods with unknown
+	return type.  Pass expect_type to call_function_by_hand.
+	* f-typeprint.c (f_type_print_base): Handle functions with unknown
+	return type.
+	* gcore.c (call_target_sbrk): Adjust call to
+	call_function_by_hand.
+	* gdbtypes.c (objfile_type): Leave nodebug text symbol with NULL
+	return type instead of int.  Make nodebug_text_gnu_ifunc_symbol be
+	an integer address type instead of nodebug.
+	* guile/scm-value.c (gdbscm_value_call): Adjust call to
+	call_function_by_hand.
+	* infcall.c (error_call_unknown_return_type): New function.
+	(call_function_by_hand): New "default_return_type" parameter.
+	Pass it down.
+	(call_function_by_hand_dummy): New "default_return_type"
+	parameter.  Use it instead of defaulting to int.  If there's no
+	default and the return type is unknown, throw an error.  If
+	there's a default return type, and the called function has no
+	debug info, then assume the function is prototyped.
+	* infcall.h (call_function_by_hand, call_function_by_hand_dummy):
+	New "default_return_type" parameter.
+	(error_call_unknown_return_type): New declaration.
+	* linux-fork.c (call_lseek): Cast return type of lseek.
+	(inferior_call_waitpid, checkpoint_command): Adjust calls to
+	call_function_by_hand.
+	* linux-tdep.c (linux_infcall_mmap, linux_infcall_munmap): Adjust
+	calls to call_function_by_hand.
+	* m2-typeprint.c (m2_procedure): Handle functions with unknown
+	return type.
+	* objc-lang.c (lookup_objc_class, lookup_child_selector)
+	(value_nsstring, print_object_command): Adjust calls to
+	call_function_by_hand.
+	* p-typeprint.c (pascal_type_print_varspec_prefix): Handle
+	functions with unknown return type.
+	(pascal_type_print_func_varspec_suffix): New function.
+	(pascal_type_print_varspec_suffix) <TYPE_CODE_FUNC,
+	TYPE_CODE_METHOD>: Use it.
+	* python/py-value.c (valpy_call): Adjust call to
+	call_function_by_hand.
+	* rust-lang.c (rust_evaluate_funcall): Adjust call to
+	call_function_by_hand.
+	* valarith.c (value_x_binop, value_x_unop): Adjust calls to
+	call_function_by_hand.
+	* valops.c (value_allocate_space_in_inferior): Adjust call to
+	call_function_by_hand.
+	* typeprint.c (type_print_unknown_return_type): New function.
+	* typeprint.h (type_print_unknown_return_type): New declaration.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* gdbtypes.c (lookup_function_type_with_arguments): Mark function
 	types with more than one parameter as prototyped.
 

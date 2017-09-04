@@ -1,5 +1,29 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/break-main-file-remove-fail.exp (test_remove_bp): Cast
+	return type of munmap in infcall.
+	* gdb.base/break-probes.exp: Cast return type of foo in infcall.
+	* gdb.base/checkpoint.exp: Simplify using for loop.  Cast return
+	type of ftell in infcall.
+	* gdb.base/dprintf-detach.exp (dprintf_detach_test): Cast return
+	type of getpid in infcall.
+	* gdb.base/infcall-exec.exp: Cast return type of execlp in
+	infcall.
+	* gdb.base/info-os.exp: Cast return type of getpid in infcall.
+	Bail on failure to extract the pid.
+	* gdb.base/nodebug.c: #include <stdint.h>.
+	(multf, multf_noproto, mult, mult_noproto, add8, add8_noproto):
+	New functions.
+	* gdb.base/nodebug.exp (test_call_promotion): New procedure.
+	Change expected output of print/whatis/ptype with functions with
+	no debug info.  Test all supported languages.  Call
+	test_call_promotion.
+	* gdb.compile/compile.exp: Adjust expected output to expect
+	warning.
+	* gdb.threads/siginfo-threads.exp: Likewise.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/callfuncs.exp (do_function_calls): New parameter
 	"prototypes".  Test calling float functions via prototyped and
 	unprototyped function pointers.

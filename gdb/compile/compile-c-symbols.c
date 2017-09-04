@@ -376,9 +376,7 @@ convert_symbol_bmsym (struct compile_c_instance *context,
       break;
 
     case mst_text_gnu_ifunc:
-      /* nodebug_text_gnu_ifunc_symbol would cause:
-	 function return type cannot be function  */
-      type = objfile_type (objfile)->nodebug_text_symbol;
+      type = objfile_type (objfile)->nodebug_text_gnu_ifunc_symbol;
       kind = GCC_C_SYMBOL_FUNCTION;
       addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
       break;

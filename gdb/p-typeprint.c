@@ -227,7 +227,8 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_METHOD:
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+      if (TYPE_TARGET_TYPE (type) != NULL
+	  && TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
 	{
 	  fprintf_filtered (stream, "function  ");
 	}
@@ -255,7 +256,8 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
 
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+      if (TYPE_TARGET_TYPE (type) != NULL
+	  && TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
 	{
 	  fprintf_filtered (stream, "function  ");
 	}
@@ -334,6 +336,33 @@ pascal_print_func_args (struct type *type, struct ui_file *stream,
     }
 }
 
+/* Helper for pascal_type_print_varspec_suffix to print the suffix of
+   a function or method.  */
+
+static void
+pascal_type_print_func_varspec_suffix  (struct type *type, struct ui_file *stream,
+					int show, int passed_a_ptr,
+					int demangled_args,
+					const struct type_print_options *flags)
+{
+  if (TYPE_TARGET_TYPE (type) == NULL
+      || TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+    {
+      fprintf_filtered (stream, " : ");
+      pascal_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
+					stream, 0, 0, flags);
+
+      if (TYPE_TARGET_TYPE (type) == NULL)
+	type_print_unknown_return_type (stream);
+      else
+	pascal_type_print_base (TYPE_TARGET_TYPE (type), stream, show, 0,
+				flags);
+
+      pascal_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+					passed_a_ptr, 0, flags);
+    }
+}
+
 /* Print any array sizes, function arguments or close parentheses
    needed after the variable name (to describe its type).
    Args work like pascal_type_print_varspec_prefix.  */
@@ -365,16 +394,8 @@ pascal_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
       pascal_type_print_method_args ("",
 				     "",
 				     stream);
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
-	{
-	  fprintf_filtered (stream, " : ");
-	  pascal_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-					    stream, 0, 0, flags);
-	  pascal_type_print_base (TYPE_TARGET_TYPE (type), stream, show, 0,
-				  flags);
-	  pascal_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
-					    passed_a_ptr, 0, flags);
-	}
+      pascal_type_print_func_varspec_suffix (type, stream, show,
+					     passed_a_ptr, 0, flags);
       break;
 
     case TYPE_CODE_PTR:
@@ -388,16 +409,8 @@ pascal_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	fprintf_filtered (stream, ")");
       if (!demangled_args)
 	pascal_print_func_args (type, stream, flags);
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
-	{
-	  fprintf_filtered (stream, " : ");
-	  pascal_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-					    stream, 0, 0, flags);
-	  pascal_type_print_base (TYPE_TARGET_TYPE (type), stream, show, 0,
-				  flags);
-	  pascal_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
-					    passed_a_ptr, 0, flags);
-	}
+      pascal_type_print_func_varspec_suffix (type, stream, show,
+					     passed_a_ptr, 0, flags);
       break;
 
     case TYPE_CODE_UNDEF:

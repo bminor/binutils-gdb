@@ -21,6 +21,8 @@
 #include "defs.h"
 #include "gdbtypes.h"
 #include "compile-internal.h"
+#include "objfiles.h"
+
 /* An object that maps a gdb type to a gcc type.  */
 
 struct type_map_instance
@@ -233,9 +235,25 @@ convert_func (struct compile_c_instance *context, struct type *type)
   struct gcc_type_array array;
   int is_varargs = TYPE_VARARGS (type) || !TYPE_PROTOTYPED (type);
 
+  struct type *target_type = TYPE_TARGET_TYPE (type);
+
+  /* Functions with no debug info have no return type.  Ideally we'd
+     want to fallback to the type of the cast just before the
+     function, like GDB's built-in expression parser, but we don't
+     have access to that type here.  For now, fallback to int, like
+     GDB's parser used to do.  */
+  if (target_type == NULL)
+    {
+      if (TYPE_OBJFILE_OWNED (type))
+	target_type = objfile_type (TYPE_OWNER (type).objfile)->builtin_int;
+      else
+	target_type = builtin_type (TYPE_OWNER (type).gdbarch)->builtin_int;
+      warning (_("function has unknown return type; assuming int"));
+    }
+
   /* This approach means we can't make self-referential function
      types.  Those are impossible in C, though.  */
-  return_type = convert_type (context, TYPE_TARGET_TYPE (type));
+  return_type = convert_type (context, target_type);
 
   array.n_elements = TYPE_NFIELDS (type);
   array.elements = XNEWVEC (gcc_type, TYPE_NFIELDS (type));

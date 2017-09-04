@@ -925,7 +925,8 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
       scoped_value_mark free_values;
       struct value *return_value;
 
-      return_value = call_function_by_hand (function, args_count, vargs);
+      return_value = call_function_by_hand (function, NULL,
+					    args_count, vargs);
       result = value_to_value_object (return_value);
     }
   CATCH (except, RETURN_MASK_ALL)

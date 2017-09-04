@@ -386,6 +386,14 @@ type_to_string (struct type *type)
   return {};
 }
 
+/* See typeprint.h.  */
+
+void
+type_print_unknown_return_type (struct ui_file *stream)
+{
+  fprintf_filtered (stream, _("<unknown return type>"));
+}
+
 /* Print type of EXP, or last thing in value history if EXP == NULL.
    show is passed to type_print.  */
 
@@ -757,4 +765,3 @@ val_print_not_associated (struct ui_file *stream)
 {
   fprintf_filtered (stream, _("<not associated>"));
 }
-
