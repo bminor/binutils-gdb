@@ -901,6 +901,12 @@ operator_length_standard (const struct expression *expr, int endpos,
       oplen = 4;
       break;
 
+    case OP_FUNC_STATIC_VAR:
+      oplen = longest_to_int (expr->elts[endpos - 2].longconst);
+      oplen = 4 + BYTES_TO_EXP_ELEM (oplen + 1);
+      args = 1;
+      break;
+
     case OP_TYPE:
     case OP_BOOL:
     case OP_LAST:

@@ -1,5 +1,11 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/local-static.c: New.
+	* gdb.base/local-static.cc: New.
+	* gdb.base/local-static.exp:  New.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* gdb.asm/asm-source.exp: Add casts to int.
 	* gdb.base/nodebug.c (dataglobal8, dataglobal32_1, dataglobal32_2)
 	(dataglobal64_1, dataglobal64_2): New globals.

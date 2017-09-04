@@ -141,6 +141,14 @@ print_subexp_standard (struct expression *exp, int *pos,
       }
       return;
 
+    case OP_FUNC_STATIC_VAR:
+      {
+	tem = longest_to_int (exp->elts[pc + 1].longconst);
+	(*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
+	fputs_filtered (&exp->elts[pc + 1].string, stream);
+      }
+      return;
+
     case OP_VAR_ENTRY_VALUE:
       {
 	(*pos) += 2;
@@ -999,6 +1007,16 @@ dump_subexp_body_standard (struct expression *exp,
 	elt += 4 + BYTES_TO_EXP_ELEM (len + 1);
       }
       break;
+
+    case OP_FUNC_STATIC_VAR:
+      {
+	int len = longest_to_int (exp->elts[elt].longconst);
+	const char *var_name = &exp->elts[elt + 1].string;
+	fprintf_filtered (stream, "Field name: `%.*s'", len, var_name);
+	elt += 3 + BYTES_TO_EXP_ELEM (len + 1);
+      }
+      break;
+
     case TYPE_INSTANCE:
       {
 	LONGEST len;

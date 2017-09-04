@@ -1,0 +1,136 @@
+# Copyright 2017 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Tests for function local static variables, both C and C++.
+
+# This file is part of the gdb testsuite.
+
+standard_testfile .c
+
+# A list of scopes that have the static variables that we want to
+# print.  Each entry has, in order, the scope/function name, and the
+# prefix used by the static variables.  (The prefix exists to make it
+# easier to debug the test if something goes wrong.)
+
+     #SCOPE				#PREFIX
+set cxx_scopes_list {
+    {"S::method()"			"S_M"}
+    {"S::static_method()"		"S_SM"}
+    {"S::inline_method()"		"S_IM"}
+    {"S::static_inline_method()"	"S_SIM"}
+    {"S2<int>::method()"		"S2_M"}
+    {"S2<int>::static_method()"		"S2_SM"}
+    {"S2<int>::inline_method()"		"S2_IM"}
+    {"S2<int>::static_inline_method()"	"S2_SIM"}
+    {"free_func()"			"FF"}
+    {"free_inline_func()"		"FIF"}
+}
+
+set c_scopes_list {
+    {"free_func"			"FF"}
+    {"free_inline_func"			"FIF"}
+}
+
+# A list of all the static varibles defined in each scope.  The first
+# column is the name of the variable, without the prefix, and the
+# second column is a regex matching what printing the variable should
+# output.
+
+     #VAR		#PRINT
+set vars_list {
+    {"s_var_int"	" = 4"}
+    {"s_var_float"	" = 3.14.*"}
+    {"s_var_aggregate"	" = \\{i1 = 1, i2 = 2, i3 = 3\\}"}
+}
+
+proc do_test {lang} {
+    global c_scopes_list
+    global cxx_scopes_list
+    global vars_list
+    global srcfile testfile
+
+    set options {debug}
+
+    if {$lang == "c++"} {
+	if { [skip_cplus_tests] } {
+	    return
+	}
+	lappend options $lang
+	set src ${srcfile}c
+    } else {
+	set src ${srcfile}
+    }
+
+    if {[prepare_for_testing "failed to prepare" $testfile-$lang \
+	     [list $src] $options]} {
+	return -1
+    }
+
+    if ![runto_main] then {
+	fail "couldn't run to breakpoint"
+	return
+    }
+
+    gdb_test "show language" " currently [string_to_regexp $lang]\"\\."
+
+    if {$lang == "c"} {
+	set scopes_list $c_scopes_list
+    } else {
+	set scopes_list $cxx_scopes_list
+    }
+
+    # Print each variable using these syntaxes:
+    #
+    #  'func()'::var
+    #  func()::var
+
+    foreach scope_line $scopes_list  {
+	set scope [lindex $scope_line 0]
+	set var_prefix [lindex $scope_line 1]
+	foreach var_line $vars_list {
+	    set var [lindex $var_line 0]
+	    set print_re [lindex $var_line 1]
+
+	    gdb_test "print '${scope}'::${var_prefix}_${var}" $print_re
+	    gdb_test "print ${scope}::${var_prefix}_${var}" $print_re
+	}
+    }
+
+    # Now run to each function, and print its variables using the
+    # localy-visible name.
+    foreach scope_line $scopes_list {
+	set scope [lindex $scope_line 0]
+	set var_prefix [lindex $scope_line 1]
+
+	with_test_prefix "$scope" {
+	    delete_breakpoints
+	    gdb_breakpoint "$scope"
+	    gdb_continue_to_breakpoint "$scope"
+
+	    foreach var_line $vars_list {
+		set var [lindex $var_line 0]
+		set print_re [lindex $var_line 1]
+
+		gdb_test "print ${var_prefix}_${var}" $print_re
+	    }
+	}
+    }
+}
+
+foreach lang {"c" "c++"} {
+    with_test_prefix $lang {
+	do_test $lang
+    }
+}

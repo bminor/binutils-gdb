@@ -127,7 +127,7 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
 #endif
 %}
 
-%type <voidval> exp exp1 type_exp start variable qualified_name lcurly
+%type <voidval> exp exp1 type_exp start variable qualified_name lcurly function_method
 %type <lval> rcurly
 %type <tval> type typebase
 %type <tvec> nonempty_typelist func_mod parameter_typelist
@@ -498,6 +498,18 @@ exp	:	exp '('
 			  write_exp_elt_opcode (pstate, OP_FUNCALL); }
 	;
 
+/* This is here to disambiguate with the production for
+   "func()::static_var" further below, which uses
+   function_method_void.  */
+exp	:	exp '(' ')' %prec ARROW
+			{ start_arglist ();
+			  write_exp_elt_opcode (pstate, OP_FUNCALL);
+			  write_exp_elt_longcst (pstate,
+						 (LONGEST) end_arglist ());
+			  write_exp_elt_opcode (pstate, OP_FUNCALL); }
+	;
+
+
 exp	:	UNKNOWN_CPP_NAME '('
 			{
 			  /* This could potentially be a an argument defined
@@ -539,7 +551,7 @@ arglist	:	arglist ',' exp   %prec ABOVE_COMMA
 			{ arglist_len++; }
 	;
 
-exp     :       exp '(' parameter_typelist ')' const_or_volatile
+function_method:       exp '(' parameter_typelist ')' const_or_volatile
 			{ int i;
 			  VEC (type_ptr) *type_list = $3;
 			  struct type *type_elt;
@@ -554,6 +566,33 @@ exp     :       exp '(' parameter_typelist ')' const_or_volatile
 			  write_exp_elt_longcst(pstate, len);
 			  write_exp_elt_opcode (pstate, TYPE_INSTANCE);
 			  VEC_free (type_ptr, type_list);
+			}
+	;
+
+function_method_void:	    exp '(' ')' const_or_volatile
+		       { write_exp_elt_opcode (pstate, TYPE_INSTANCE);
+			 write_exp_elt_longcst (pstate, 0);
+			 write_exp_elt_longcst (pstate, 0);
+			 write_exp_elt_opcode (pstate, TYPE_INSTANCE);
+		       }
+       ;
+
+exp     :       function_method
+	;
+
+/* Normally we must interpret "func()" as a function call, instead of
+   a type.  The user needs to write func(void) to disambiguate.
+   However, in the "func()::static_var" case, there's no
+   ambiguity.  */
+function_method_void_or_typelist: function_method
+	|               function_method_void
+	;
+
+exp     :       function_method_void_or_typelist COLONCOLON name
+			{
+			  write_exp_elt_opcode (pstate, OP_FUNC_STATIC_VAR);
+			  write_exp_string (pstate, $3);
+			  write_exp_elt_opcode (pstate, OP_FUNC_STATIC_VAR);
 			}
 	;
 

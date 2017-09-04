@@ -1,5 +1,18 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	(%type <voidval>): Add function_method.
+	* c-exp.y (exp): New production for calls with no arguments.
+	(function_method, function_method_void_or_typelist): New
+	productions.
+	(exp): New production for "method()::static_var".
+	* eval.c (evaluate_subexp_standard): Handle OP_FUNC_STATIC_VAR.
+	* expprint.c (print_subexp_standard, dump_subexp_body_standard):
+	Handle OP_FUNC_STATIC_VAR.
+	* parse.c (operator_length_standard):
+	Handle OP_FUNC_STATIC_VAR.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* eval.c (evaluate_subexp_standard): Remove UNOP_MEMVAL_TLS
 	handling.
 	* expprint.c (print_subexp_standard, dump_subexp_body_standard):

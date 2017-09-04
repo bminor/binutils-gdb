@@ -847,6 +847,27 @@ evaluate_subexp_standard (struct type *expect_type,
 	return SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry (sym, frame);
       }
 
+    case OP_FUNC_STATIC_VAR:
+      tem = longest_to_int (exp->elts[pc + 1].longconst);
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
+      if (noside == EVAL_SKIP)
+	return eval_skip_value (exp);
+
+      {
+	value *func = evaluate_subexp_standard (NULL, exp, pos, noside);
+	CORE_ADDR addr = value_address (func);
+
+	const block *blk = block_for_pc (addr);
+	const char *var = &exp->elts[pc + 2].string;
+
+	struct block_symbol sym = lookup_symbol (var, blk, VAR_DOMAIN, NULL);
+
+	if (sym.symbol == NULL)
+	  error (_("No symbol \"%s\" in specified context."), var);
+
+	return evaluate_var_value (noside, sym.block, sym.symbol);
+      }
+
     case OP_LAST:
       (*pos) += 2;
       return
