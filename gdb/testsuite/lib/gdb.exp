@@ -3447,7 +3447,12 @@ proc gdb_compile {source dest type options} {
 
     # Add platform-specific options if a shared library was specified using
     # "shlib=librarypath" in OPTIONS.
-    set new_options [universal_compile_options]
+    if {[lsearch -exact $options rust] != -1} {
+	# -fdiagnostics-color is not a rustcc option.
+    } else {
+	set new_options [universal_compile_options]
+    }
+    set new_options {}
     set shlib_found 0
     set shlib_load 0
     foreach opt $options {

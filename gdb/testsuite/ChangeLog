@@ -1,3 +1,8 @@
+2017-09-05  Tom Tromey  <tom@tromey.com>
+
+	* lib/gdb.exp (gdb_compile): Don't use universal_compile_options
+	for rust.
+
 2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.multi/multi-arch-exec.exp: Test with different
