@@ -52,7 +52,7 @@ parse_probes_in_pspace (const struct probe_ops *probe_ops,
 			const char *objfile_namestr,
 			const char *provider,
 			const char *name,
-			struct symtabs_and_lines *result)
+			std::vector<symtab_and_line> *result)
 {
   struct objfile *objfile;
 
@@ -75,8 +75,6 @@ parse_probes_in_pspace (const struct probe_ops *probe_ops,
 
       for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)
 	{
-	  struct symtab_and_line *sal;
-
 	  if (probe_ops != &probe_ops_any && probe->pops != probe_ops)
 	    continue;
 
@@ -86,26 +84,25 @@ parse_probes_in_pspace (const struct probe_ops *probe_ops,
 	  if (strcmp (probe->name, name) != 0)
 	    continue;
 
-	  ++result->nelts;
-	  result->sals = XRESIZEVEC (struct symtab_and_line, result->sals,
-				     result->nelts);
-	  sal = &result->sals[result->nelts - 1];
+	  symtab_and_line sal;
 
-	  init_sal (sal);
+	  init_sal (&sal);
 
-	  sal->pc = get_probe_address (probe, objfile);
-	  sal->explicit_pc = 1;
-	  sal->section = find_pc_overlay (sal->pc);
-	  sal->pspace = search_pspace;
-	  sal->probe = probe;
-	  sal->objfile = objfile;
+	  sal.pc = get_probe_address (probe, objfile);
+	  sal.explicit_pc = 1;
+	  sal.section = find_pc_overlay (sal.pc);
+	  sal.pspace = search_pspace;
+	  sal.probe = probe;
+	  sal.objfile = objfile;
+
+	  result->push_back (std::move (sal));
 	}
     }
 }
 
 /* See definition in probe.h.  */
 
-struct symtabs_and_lines
+std::vector<symtab_and_line>
 parse_probes (const struct event_location *location,
 	      struct program_space *search_pspace,
 	      struct linespec_result *canonical)
@@ -113,12 +110,8 @@ parse_probes (const struct event_location *location,
   char *arg_end, *arg;
   char *objfile_namestr = NULL, *provider = NULL, *name, *p;
   struct cleanup *cleanup;
-  struct symtabs_and_lines result;
   const struct probe_ops *probe_ops;
   const char *arg_start, *cs;
-
-  result.sals = NULL;
-  result.nelts = 0;
 
   gdb_assert (event_location_type (location) == PROBE_LOCATION);
   arg_start = get_probe_location (location);
@@ -175,6 +168,7 @@ parse_probes (const struct event_location *location,
   if (objfile_namestr && *objfile_namestr == '\0')
     error (_("invalid objfile name"));
 
+  std::vector<symtab_and_line> result;
   if (search_pspace != NULL)
     {
       parse_probes_in_pspace (probe_ops, search_pspace, objfile_namestr,
@@ -189,7 +183,7 @@ parse_probes (const struct event_location *location,
 				provider, name, &result);
     }
 
-  if (result.nelts == 0)
+  if (result.empty ())
     {
       throw_error (NOT_FOUND_ERROR,
 		   _("No probe matching objfile=`%s', provider=`%s', name=`%s'"),

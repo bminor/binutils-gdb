@@ -2527,26 +2527,23 @@ func_command (char *arg, int from_tty)
 {
   struct frame_info *frame;
   int found = 0;
-  struct symtabs_and_lines sals;
-  int i;
   int level = 1;
   struct function_bounds *func_bounds = NULL;
-  struct cleanup *cleanups;
 
   if (arg == NULL)
     return;
 
   frame = get_current_frame ();
-  sals = decode_line_with_current_source (arg, DECODE_LINE_FUNFIRSTLINE);
-  cleanups = make_cleanup (xfree, sals.sals);
-  func_bounds = XNEWVEC (struct function_bounds, sals.nelts);
-  make_cleanup (xfree, func_bounds);
-  for (i = 0; (i < sals.nelts && !found); i++)
+  std::vector<symtab_and_line> sals
+    = decode_line_with_current_source (arg, DECODE_LINE_FUNFIRSTLINE);
+  func_bounds = XNEWVEC (struct function_bounds, sals.size ());
+  struct cleanup *cleanups = make_cleanup (xfree, func_bounds);
+  for (size_t i = 0; (i < sals.size () && !found); i++)
     {
-      if (sals.sals[i].pspace != current_program_space)
+      if (sals[i].pspace != current_program_space)
 	func_bounds[i].low = func_bounds[i].high = 0;
-      else if (sals.sals[i].pc == 0
-	       || find_pc_partial_function (sals.sals[i].pc, NULL,
+      else if (sals[i].pc == 0
+	       || find_pc_partial_function (sals[i].pc, NULL,
 					    &func_bounds[i].low,
 					    &func_bounds[i].high) == 0)
 	{
@@ -2556,7 +2553,7 @@ func_command (char *arg, int from_tty)
 
   do
     {
-      for (i = 0; (i < sals.nelts && !found); i++)
+      for (size_t i = 0; (i < sals.size () && !found); i++)
 	found = (get_frame_pc (frame) >= func_bounds[i].low
 		 && get_frame_pc (frame) < func_bounds[i].high);
       if (!found)

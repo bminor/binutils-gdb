@@ -2577,8 +2577,6 @@ agent_command_1 (char *exp, int eval)
   if (check_for_argument (&exp, "-at", sizeof ("-at") - 1))
     {
       struct linespec_result canonical;
-      int ix;
-      struct linespec_sals *iter;
 
       exp = skip_spaces (exp);
 
@@ -2592,13 +2590,9 @@ agent_command_1 (char *exp, int eval)
 	  exp++;
 	  exp = skip_spaces (exp);
 	}
-      for (ix = 0; VEC_iterate (linespec_sals, canonical.sals, ix, iter); ++ix)
-        {
-	  int i;
-
-	  for (i = 0; i < iter->sals.nelts; i++)
-	    agent_eval_command_one (exp, eval, iter->sals.sals[i].pc);
-        }
+      for (const auto &lsal : canonical.lsals)
+	for (const auto &sal : lsal.sals)
+	  agent_eval_command_one (exp, eval, sal.pc);
     }
   else
     agent_eval_command_one (exp, eval, get_frame_pc (get_current_frame ()));

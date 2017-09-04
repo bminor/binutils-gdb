@@ -173,7 +173,7 @@ struct linespec_state
   /* The 'canonical' value passed to decode_line_full, or NULL.  */
   struct linespec_result *canonical;
 
-  /* Canonical strings that mirror the symtabs_and_lines result.  */
+  /* Canonical strings that mirror the std::vector<symtab_and_line> result.  */
   struct linespec_canonical_name *canonical_names;
 
   /* This is a set of address_entry objects which is used to prevent
@@ -341,9 +341,9 @@ static void initialize_defaults (struct symtab **default_symtab,
 
 CORE_ADDR linespec_expression_to_pc (const char **exp_ptr);
 
-static struct symtabs_and_lines decode_objc (struct linespec_state *self,
-					     linespec_p ls,
-					     const char *arg);
+static std::vector<symtab_and_line> decode_objc (struct linespec_state *self,
+						 linespec_p ls,
+						 const char *arg);
 
 static VEC (symtab_ptr) *symtabs_from_filename (const char *,
 						struct program_space *pspace);
@@ -379,20 +379,20 @@ static VEC (symtab_ptr) *
   collect_symtabs_from_filename (const char *file,
 				 struct program_space *pspace);
 
-static void decode_digits_ordinary (struct linespec_state *self,
-				    linespec_p ls,
-				    int line,
-				    struct symtabs_and_lines *sals,
-				    struct linetable_entry **best_entry);
+static std::vector<symtab_and_line> decode_digits_ordinary
+  (struct linespec_state *self,
+   linespec_p ls,
+   int line,
+   linetable_entry **best_entry);
 
-static void decode_digits_list_mode (struct linespec_state *self,
-				     linespec_p ls,
-				     struct symtabs_and_lines *values,
-				     struct symtab_and_line val);
+static std::vector<symtab_and_line> decode_digits_list_mode
+  (struct linespec_state *self,
+   linespec_p ls,
+   struct symtab_and_line val);
 
 static void minsym_found (struct linespec_state *self, struct objfile *objfile,
 			  struct minimal_symbol *msymbol,
-			  struct symtabs_and_lines *result);
+			  std::vector<symtab_and_line> *result);
 
 static int compare_symbols (const void *a, const void *b);
 
@@ -996,17 +996,6 @@ linespec_lexer_peek_token (linespec_parser *parser)
 
 /* Helper functions.  */
 
-/* Add SAL to SALS.  */
-
-static void
-add_sal_to_sals_basic (struct symtabs_and_lines *sals,
-		       struct symtab_and_line *sal)
-{
-  ++sals->nelts;
-  sals->sals = XRESIZEVEC (struct symtab_and_line, sals->sals, sals->nelts);
-  sals->sals[sals->nelts - 1] = *sal;
-}
-
 /* Add SAL to SALS, and also update SELF->CANONICAL_NAMES to reflect
    the new sal, if needed.  If not NULL, SYMNAME is the name of the
    symbol to use when constructing the new canonical name.
@@ -1016,19 +1005,20 @@ add_sal_to_sals_basic (struct symtabs_and_lines *sals,
 
 static void
 add_sal_to_sals (struct linespec_state *self,
-		 struct symtabs_and_lines *sals,
+		 std::vector<symtab_and_line> *sals,
 		 struct symtab_and_line *sal,
 		 const char *symname, int literal_canonical)
 {
-  add_sal_to_sals_basic (sals, sal);
+  sals->push_back (*sal);
 
   if (self->canonical)
     {
       struct linespec_canonical_name *canonical;
 
       self->canonical_names = XRESIZEVEC (struct linespec_canonical_name,
-					  self->canonical_names, sals->nelts);
-      canonical = &self->canonical_names[sals->nelts - 1];
+					  self->canonical_names,
+					  sals->size ());
+      canonical = &self->canonical_names[sals->size () - 1];
       if (!literal_canonical && sal->symtab)
 	{
 	  symtab_to_fullname (sal->symtab);
@@ -1405,7 +1395,7 @@ canonical_to_fullform (const struct linespec_canonical_name *canonical)
 
 static void
 filter_results (struct linespec_state *self,
-		struct symtabs_and_lines *result,
+		std::vector<symtab_and_line> *result,
 		VEC (const_char_ptr) *filters)
 {
   int i;
@@ -1413,12 +1403,9 @@ filter_results (struct linespec_state *self,
 
   for (i = 0; VEC_iterate (const_char_ptr, filters, i, name); ++i)
     {
-      struct linespec_sals lsal;
-      int j;
+      linespec_sals lsal;
 
-      memset (&lsal, 0, sizeof (lsal));
-
-      for (j = 0; j < result->nelts; ++j)
+      for (size_t j = 0; j < result->size (); ++j)
 	{
 	  const struct linespec_canonical_name *canonical;
 	  char *fullform;
@@ -1429,15 +1416,15 @@ filter_results (struct linespec_state *self,
 	  cleanup = make_cleanup (xfree, fullform);
 
 	  if (strcmp (name, fullform) == 0)
-	    add_sal_to_sals_basic (&lsal.sals, &result->sals[j]);
+	    lsal.sals.push_back ((*result)[j]);
 
 	  do_cleanups (cleanup);
 	}
 
-      if (lsal.sals.nelts > 0)
+      if (!lsal.sals.empty ())
 	{
 	  lsal.canonical = xstrdup (name);
-	  VEC_safe_push (linespec_sals, self->canonical->sals, &lsal);
+	  self->canonical->lsals.push_back (std::move (lsal));
 	}
     }
 
@@ -1448,13 +1435,13 @@ filter_results (struct linespec_state *self,
 
 static void
 convert_results_to_lsals (struct linespec_state *self,
-			  struct symtabs_and_lines *result)
+			  std::vector<symtab_and_line> *result)
 {
   struct linespec_sals lsal;
 
   lsal.canonical = NULL;
-  lsal.sals = *result;
-  VEC_safe_push (linespec_sals, self->canonical->sals, &lsal);
+  lsal.sals = std::move (*result);
+  self->canonical->lsals.push_back (std::move (lsal));
 }
 
 /* A structure that contains two string representations of a struct
@@ -1502,7 +1489,7 @@ decode_line_2_compare_items (const void *ap, const void *bp)
 
 static void
 decode_line_2 (struct linespec_state *self,
-	       struct symtabs_and_lines *result,
+	       std::vector<symtab_and_line> *result,
 	       const char *select_mode)
 {
   char *args;
@@ -1515,12 +1502,12 @@ decode_line_2 (struct linespec_state *self,
 
   gdb_assert (select_mode != multiple_symbols_all);
   gdb_assert (self->canonical != NULL);
-  gdb_assert (result->nelts >= 1);
+  gdb_assert (!result->empty ());
 
   old_chain = make_cleanup (VEC_cleanup (const_char_ptr), &filters);
 
   /* Prepare ITEMS array.  */
-  items_count = result->nelts;
+  items_count = result->size ();
   items = XNEWVEC (struct decode_line_2_item, items_count);
   make_cleanup (xfree, items);
   for (i = 0; i < items_count; ++i)
@@ -2135,17 +2122,14 @@ canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
 
 /* Given a line offset in LS, construct the relevant SALs.  */
 
-static struct symtabs_and_lines
+static std::vector<symtab_and_line>
 create_sals_line_offset (struct linespec_state *self,
 			 linespec_p ls)
 {
-  struct symtabs_and_lines values;
   struct symtab_and_line val;
   int use_default = 0;
 
   init_sal (&val);
-  values.sals = NULL;
-  values.nelts = 0;
 
   /* This is where we need to make sure we have good defaults.
      We must guarantee that this section of code is never executed
@@ -2194,27 +2178,22 @@ create_sals_line_offset (struct linespec_state *self,
       break;			/* No need to adjust val.line.  */
     }
 
+  std::vector<symtab_and_line> values;
   if (self->list_mode)
-    decode_digits_list_mode (self, ls, &values, val);
+    values = decode_digits_list_mode (self, ls, val);
   else
     {
       struct linetable_entry *best_entry = NULL;
       int *filter;
       const struct block **blocks;
-      struct cleanup *cleanup;
-      struct symtabs_and_lines intermediate_results;
       int i, j;
 
-      intermediate_results.sals = NULL;
-      intermediate_results.nelts = 0;
-
-      decode_digits_ordinary (self, ls, val.line, &intermediate_results,
-			      &best_entry);
-      if (intermediate_results.nelts == 0 && best_entry != NULL)
-	decode_digits_ordinary (self, ls, best_entry->line,
-				&intermediate_results, &best_entry);
-
-      cleanup = make_cleanup (xfree, intermediate_results.sals);
+      std::vector<symtab_and_line> intermediate_results
+	= decode_digits_ordinary (self, ls, val.line, &best_entry);
+      if (intermediate_results.empty () && best_entry != NULL)
+	intermediate_results = decode_digits_ordinary (self, ls,
+						       best_entry->line,
+						       &best_entry);
 
       /* For optimized code, the compiler can scatter one source line
 	 across disjoint ranges of PC values, even when no duplicate
@@ -2226,24 +2205,24 @@ create_sals_line_offset (struct linespec_state *self,
 	 above, we see if there are other PCs that are in the same
 	 block.  If yes, the other PCs are filtered out.  */
 
-      filter = XNEWVEC (int, intermediate_results.nelts);
-      make_cleanup (xfree, filter);
-      blocks = XNEWVEC (const struct block *, intermediate_results.nelts);
+      filter = XNEWVEC (int, intermediate_results.size ());
+      struct cleanup *cleanup = make_cleanup (xfree, filter);
+      blocks = XNEWVEC (const struct block *, intermediate_results.size ());
       make_cleanup (xfree, blocks);
 
-      for (i = 0; i < intermediate_results.nelts; ++i)
+      for (i = 0; i < intermediate_results.size (); ++i)
 	{
-	  set_current_program_space (intermediate_results.sals[i].pspace);
+	  set_current_program_space (intermediate_results[i].pspace);
 
 	  filter[i] = 1;
-	  blocks[i] = block_for_pc_sect (intermediate_results.sals[i].pc,
-					 intermediate_results.sals[i].section);
+	  blocks[i] = block_for_pc_sect (intermediate_results[i].pc,
+					 intermediate_results[i].section);
 	}
 
-      for (i = 0; i < intermediate_results.nelts; ++i)
+      for (i = 0; i < intermediate_results.size (); ++i)
 	{
 	  if (blocks[i] != NULL)
-	    for (j = i + 1; j < intermediate_results.nelts; ++j)
+	    for (j = i + 1; j < intermediate_results.size (); ++j)
 	      {
 		if (blocks[j] == blocks[i])
 		  {
@@ -2253,7 +2232,7 @@ create_sals_line_offset (struct linespec_state *self,
 	      }
 	}
 
-      for (i = 0; i < intermediate_results.nelts; ++i)
+      for (i = 0; i < intermediate_results.size (); ++i)
 	if (filter[i])
 	  {
 	    struct symbol *sym = (blocks[i]
@@ -2261,18 +2240,18 @@ create_sals_line_offset (struct linespec_state *self,
 				  : NULL);
 
 	    if (self->funfirstline)
-	      skip_prologue_sal (&intermediate_results.sals[i]);
+	      skip_prologue_sal (&intermediate_results[i]);
 	    /* Make sure the line matches the request, not what was
 	       found.  */
-	    intermediate_results.sals[i].line = val.line;
-	    add_sal_to_sals (self, &values, &intermediate_results.sals[i],
+	    intermediate_results[i].line = val.line;
+	    add_sal_to_sals (self, &values, &intermediate_results[i],
 			     sym ? SYMBOL_NATURAL_NAME (sym) : NULL, 0);
 	  }
 
       do_cleanups (cleanup);
     }
 
-  if (values.nelts == 0)
+  if (values.empty ())
     {
       if (ls->explicit_loc.source_filename)
 	throw_error (NOT_FOUND_ERROR, _("No line %d in file \"%s\"."),
@@ -2287,17 +2266,16 @@ create_sals_line_offset (struct linespec_state *self,
 
 /* Convert the given ADDRESS into SaLs.  */
 
-static struct symtabs_and_lines
+static std::vector<symtab_and_line>
 convert_address_location_to_sals (struct linespec_state *self,
 				  CORE_ADDR address)
 {
-  struct symtab_and_line sal;
-  struct symtabs_and_lines sals = {NULL, 0};
-
-  sal = find_pc_line (address, 0);
+  symtab_and_line sal = find_pc_line (address, 0);
   sal.pc = address;
   sal.section = find_pc_overlay (address);
   sal.explicit_pc = 1;
+
+  std::vector<symtab_and_line> sals;
   add_sal_to_sals (self, &sals, &sal, core_addr_to_string (address), 1);
 
   return sals;
@@ -2305,10 +2283,10 @@ convert_address_location_to_sals (struct linespec_state *self,
 
 /* Create and return SALs from the linespec LS.  */
 
-static struct symtabs_and_lines
+static std::vector<symtab_and_line>
 convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 {
-  struct symtabs_and_lines sals = {NULL, 0};
+  std::vector<symtab_and_line> sals;
 
   if (ls->labels.label_symbols != NULL)
     {
@@ -2398,7 +2376,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 
   canonicalize_linespec (state, ls);
 
-  if (sals.nelts > 0 && state->canonical != NULL)
+  if (!sals.empty () && state->canonical != NULL)
     state->canonical->pre_expanded = 1;
 
   return sals;
@@ -2474,7 +2452,7 @@ convert_explicit_location_to_linespec (struct linespec_state *self,
 
 /* Convert the explicit location EXPLICIT_LOC into SaLs.  */
 
-static struct symtabs_and_lines
+static std::vector<symtab_and_line>
 convert_explicit_location_to_sals (struct linespec_state *self,
 				   linespec_p result,
 				   const struct explicit_location *explicit_loc)
@@ -2537,16 +2515,12 @@ convert_explicit_location_to_sals (struct linespec_state *self,
 
 /* Parse the linespec in ARG.  */
 
-static struct symtabs_and_lines
+static std::vector<symtab_and_line>
 parse_linespec (linespec_parser *parser, const char *arg)
 {
   linespec_token token;
-  struct symtabs_and_lines values;
   struct gdb_exception file_exception = exception_none;
   struct cleanup *cleanup;
-
-  values.nelts = 0;
-  values.sals = NULL;
 
   /* A special case to start.  It has become quite popular for
      IDEs to work around bugs in the previous parser by quoting
@@ -2580,8 +2554,9 @@ parse_linespec (linespec_parser *parser, const char *arg)
   /* Objective-C shortcut.  */
   if (parser->completion_tracker == NULL)
     {
-      values = decode_objc (PARSER_STATE (parser), PARSER_RESULT (parser), arg);
-      if (values.sals != NULL)
+      std::vector<symtab_and_line> values
+	= decode_objc (PARSER_STATE (parser), PARSER_RESULT (parser), arg);
+      if (!values.empty ())
 	return values;
     }
   else
@@ -2735,10 +2710,10 @@ parse_linespec (linespec_parser *parser, const char *arg)
 
   /* Convert the data in PARSER_RESULT to SALs.  */
   if (parser->completion_tracker == NULL)
-    values = convert_linespec_to_sals (PARSER_STATE (parser),
-				       PARSER_RESULT (parser));
+    return convert_linespec_to_sals (PARSER_STATE (parser),
+				     PARSER_RESULT (parser));
 
-  return values;
+  return {};
 }
 
 
@@ -3194,13 +3169,13 @@ linespec_complete (completion_tracker &tracker, const char *text)
 }
 
 /* A helper function for decode_line_full and decode_line_1 to
-   turn LOCATION into symtabs_and_lines.  */
+   turn LOCATION into std::vector<symtab_and_line>.  */
 
-static struct symtabs_and_lines
+static std::vector<symtab_and_line>
 event_location_to_sals (linespec_parser *parser,
 			const struct event_location *location)
 {
-  struct symtabs_and_lines result = {NULL, 0};
+  std::vector<symtab_and_line> result;
 
   switch (event_location_type (location))
     {
@@ -3276,7 +3251,6 @@ decode_line_full (const struct event_location *location, int flags,
 		  const char *select_mode,
 		  const char *filter)
 {
-  struct symtabs_and_lines result;
   struct cleanup *cleanups;
   VEC (const_char_ptr) *filters = NULL;
   linespec_parser parser;
@@ -3298,19 +3272,20 @@ decode_line_full (const struct event_location *location, int flags,
 
   scoped_restore_current_program_space restore_pspace;
 
-  result = event_location_to_sals (&parser, location);
+  std::vector<symtab_and_line> result = event_location_to_sals (&parser,
+								location);
   state = PARSER_STATE (&parser);
 
-  gdb_assert (result.nelts == 1 || canonical->pre_expanded);
+  gdb_assert (result.size () == 1 || canonical->pre_expanded);
   canonical->pre_expanded = 1;
 
   /* Arrange for allocated canonical names to be freed.  */
-  if (result.nelts > 0)
+  if (!result.empty ())
     {
       int i;
 
       make_cleanup (xfree, state->canonical_names);
-      for (i = 0; i < result.nelts; ++i)
+      for (i = 0; i < result.size (); ++i)
 	{
 	  gdb_assert (state->canonical_names[i].suffix != NULL);
 	  make_cleanup (xfree, state->canonical_names[i].suffix);
@@ -3344,13 +3319,12 @@ decode_line_full (const struct event_location *location, int flags,
 
 /* See linespec.h.  */
 
-struct symtabs_and_lines
+std::vector<symtab_and_line>
 decode_line_1 (const struct event_location *location, int flags,
 	       struct program_space *search_pspace,
 	       struct symtab *default_symtab,
 	       int default_line)
 {
-  struct symtabs_and_lines result;
   linespec_parser parser;
   struct cleanup *cleanups;
 
@@ -3361,7 +3335,8 @@ decode_line_1 (const struct event_location *location, int flags,
 
   scoped_restore_current_program_space restore_pspace;
 
-  result = event_location_to_sals (&parser, location);
+  std::vector<symtab_and_line> result = event_location_to_sals (&parser,
+								location);
 
   do_cleanups (cleanups);
   return result;
@@ -3369,23 +3344,20 @@ decode_line_1 (const struct event_location *location, int flags,
 
 /* See linespec.h.  */
 
-struct symtabs_and_lines
+std::vector<symtab_and_line>
 decode_line_with_current_source (char *string, int flags)
 {
-  struct symtabs_and_lines sals;
-  struct symtab_and_line cursal;
-
   if (string == 0)
     error (_("Empty line specification."));
 
   /* We use whatever is set as the current source line.  We do not try
      and get a default source symtab+line or it will recursively call us!  */
-  cursal = get_current_source_symtab_and_line ();
+  symtab_and_line cursal = get_current_source_symtab_and_line ();
 
   event_location_up location = string_to_event_location (&string,
 							 current_language);
-  sals = decode_line_1 (location.get (), flags, NULL,
-			cursal.symtab, cursal.line);
+  std::vector<symtab_and_line> sals
+    = decode_line_1 (location.get (), flags, NULL, cursal.symtab, cursal.line);
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
@@ -3395,23 +3367,21 @@ decode_line_with_current_source (char *string, int flags)
 
 /* See linespec.h.  */
 
-struct symtabs_and_lines
+std::vector<symtab_and_line>
 decode_line_with_last_displayed (char *string, int flags)
 {
-  struct symtabs_and_lines sals;
-
   if (string == 0)
     error (_("Empty line specification."));
 
   event_location_up location = string_to_event_location (&string,
 							 current_language);
-  if (last_displayed_sal_is_valid ())
-    sals = decode_line_1 (location.get (), flags, NULL,
-			  get_last_displayed_symtab (),
-			  get_last_displayed_line ());
-  else
-    sals = decode_line_1 (location.get (), flags, NULL,
-			  (struct symtab *) NULL, 0);
+  std::vector<symtab_and_line> sals
+    = (last_displayed_sal_is_valid ()
+       ? decode_line_1 (location.get (), flags, NULL,
+			get_last_displayed_symtab (),
+			get_last_displayed_line ())
+       : decode_line_1 (location.get (), flags, NULL,
+			(struct symtab *) NULL, 0));
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
@@ -3467,12 +3437,11 @@ linespec_expression_to_pc (const char **exp_ptr)
    than one method that could represent the selector, then use some of
    the existing C++ code to let the user choose one.  */
 
-static struct symtabs_and_lines
+static std::vector<symtab_and_line>
 decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
 {
   struct collect_info info;
   VEC (const_char_ptr) *symbol_names = NULL;
-  struct symtabs_and_lines values;
   const char *new_argptr;
   struct cleanup *cleanup = make_cleanup (VEC_cleanup (const_char_ptr),
 					  &symbol_names);
@@ -3483,18 +3452,17 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
   make_cleanup (VEC_cleanup (symtab_ptr), &info.file_symtabs);
   info.result.symbols = NULL;
   info.result.minimal_symbols = NULL;
-  values.nelts = 0;
-  values.sals = NULL;
 
   new_argptr = find_imps (arg, &symbol_names);
   if (VEC_empty (const_char_ptr, symbol_names))
     {
       do_cleanups (cleanup);
-      return values;
+      return {};
     }
 
   add_all_symbol_names_from_pspace (&info, NULL, symbol_names);
 
+  std::vector<symtab_and_line> values;
   if (!VEC_empty (symbolp, info.result.symbols)
       || !VEC_empty (bound_minimal_symbol_d, info.result.minimal_symbols))
     {
@@ -4208,16 +4176,17 @@ find_label_symbols (struct linespec_state *self,
 
 /* A helper for create_sals_line_offset that handles the 'list_mode' case.  */
 
-static void
+static std::vector<symtab_and_line>
 decode_digits_list_mode (struct linespec_state *self,
 			 linespec_p ls,
-			 struct symtabs_and_lines *values,
 			 struct symtab_and_line val)
 {
   int ix;
   struct symtab *elt;
 
   gdb_assert (self->list_mode);
+
+  std::vector<symtab_and_line> values;
 
   for (ix = 0; VEC_iterate (symtab_ptr, ls->file_symtabs, ix, elt);
        ++ix)
@@ -4235,23 +4204,25 @@ decode_digits_list_mode (struct linespec_state *self,
       val.pc = 0;
       val.explicit_line = 1;
 
-      add_sal_to_sals (self, values, &val, NULL, 0);
+      add_sal_to_sals (self, &values, &val, NULL, 0);
     }
+
+  return values;
 }
 
 /* A helper for create_sals_line_offset that iterates over the symtabs,
    adding lines to the VEC.  */
 
-static void
+static std::vector<symtab_and_line>
 decode_digits_ordinary (struct linespec_state *self,
 			linespec_p ls,
 			int line,
-			struct symtabs_and_lines *sals,
 			struct linetable_entry **best_entry)
 {
   int ix;
   struct symtab *elt;
 
+  std::vector<symtab_and_line> sals;
   for (ix = 0; VEC_iterate (symtab_ptr, ls->file_symtabs, ix, elt); ++ix)
     {
       std::vector<CORE_ADDR> pcs;
@@ -4271,9 +4242,11 @@ decode_digits_ordinary (struct linespec_state *self,
 	  sal.symtab = elt;
 	  sal.line = line;
 	  sal.pc = pc;
-	  add_sal_to_sals_basic (sals, &sal);
+	  sals.push_back (std::move (sal));
 	}
     }
+
+  return sals;
 }
 
 
@@ -4343,7 +4316,7 @@ linespec_parse_variable (struct linespec_state *self, const char *variable)
 static void
 minsym_found (struct linespec_state *self, struct objfile *objfile,
 	      struct minimal_symbol *msymbol,
-	      struct symtabs_and_lines *result)
+	      std::vector<symtab_and_line> *result)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   CORE_ADDR pc;
@@ -4674,15 +4647,8 @@ symbol_to_sal (struct symtab_and_line *result,
 
 linespec_result::~linespec_result ()
 {
-  int i;
-  struct linespec_sals *lsal;
-
-  for (i = 0; VEC_iterate (linespec_sals, sals, i, lsal); ++i)
-    {
-      xfree (lsal->canonical);
-      xfree (lsal->sals.sals);
-    }
-  VEC_free (linespec_sals, sals);
+  for (linespec_sals &lsal : lsals)
+    xfree (lsal.canonical);
 }
 
 /* Return the quote characters permitted by the linespec parser.  */

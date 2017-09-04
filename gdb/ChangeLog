@@ -1,5 +1,84 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* ax-gdb.c (agent_command_1): Use range-for.
+	* break-catch-throw.c (re_set_exception_catchpoint): Update.
+	* breakpoint.c: Include "common/array-view.h".
+	(init_breakpoint_sal, create_breakpoint_sal): Change sals
+	parameter from struct symtabs_and_lines to
+	array_view<symtab_and_line>.  Adjust.  Use range-for.  Update.
+	(breakpoint_sals_to_pc): Change sals parameter from struct
+	symtabs_and_lines to std::vector reference.
+	(check_fast_tracepoint_sals): Change sals parameter from struct
+	symtabs_and_lines to std::array_view.  Use range-for.
+	(decode_static_tracepoint_spec): Return a std::vector instead of
+	symtabs_and_lines.  Update.
+	(create_breakpoint): Update.
+	(break_range_command, until_break_command, clear_command): Update.
+	(base_breakpoint_decode_location, bkpt_decode_location)
+	(bkpt_probe_create_sals_from_location)
+	(bkpt_probe_decode_location, tracepoint_decode_location)
+	(tracepoint_probe_decode_location)
+	(strace_marker_create_sals_from_location): Return a std::vector
+	instead of symtabs_and_lines.
+	(strace_marker_create_breakpoints_sal): Update.
+	(strace_marker_decode_location): Return a std::vector instead of
+	symtabs_and_lines.  Update.
+	(update_breakpoint_locations): Change struct symtabs_and_lines
+	parameters to gdb::array_view.  Adjust.
+	(location_to_sals): Return a std::vector instead of
+	symtabs_and_lines.  Update.
+	(breakpoint_re_set_default): Use std::vector instead of struct
+	symtabs_and_lines.
+	(decode_location_default): Return a std::vector instead of
+	symtabs_and_lines.  Update.
+	* breakpoint.h: Include "common/array-view.h".
+	(struct breakpoint_ops) <decode_location>: Now returns a
+	std::vector instead of returning a symtabs_and_lines via output
+	parameter.
+	(update_breakpoint_locations): Change sals parameters to use
+	gdb::array_view.
+	* cli/cli-cmds.c (edit_command, list_command): Update to use
+	std::vector and gdb::array_view.
+	(ambiguous_line_spec): Adjust to use gdb::array_view and
+	range-for.
+	(compare_symtabs): Rename to ...
+	(cmp_symtabs): ... this.  Change parameters to symtab_and_line
+	const reference and adjust.
+	(filter_sals): Rewrite using std::vector and standard algorithms.
+	* elfread.c (elf_gnu_ifunc_resolver_return_stop): Simplify.
+	(jump_command): Update to use std::vector.
+	* linespec.c (struct linespec_state) <canonical_names>: Update
+	comment.
+	(add_sal_to_sals_basic): Delete.
+	(add_sal_to_sals, filter_results, convert_results_to_lsals)
+	(decode_line_2, create_sals_line_offset)
+	(convert_address_location_to_sals, convert_linespec_to_sals)
+	(convert_explicit_location_to_sals, parse_linespec)
+	(event_location_to_sals, decode_line_full, decode_line_1)
+	(decode_line_with_current_source)
+	(decode_line_with_last_displayed, decode_objc)
+	(decode_digits_list_mode, decode_digits_ordinary, minsym_found)
+	(linespec_result::~linespec_result): Adjust to use std::vector
+	instead of symtabs_and_lines.
+	* linespec.h (linespec_sals::sals): Now a std::vector.
+	(struct linespec_result): Use std::vector, bool, and in-class
+	initialization.
+	(decode_line_1, decode_line_with_current_source)
+	(decode_line_with_last_displayed): Return std::vector.
+	* macrocmd.c (info_macros_command): Use std::vector.
+	* mi/mi-main.c (mi_cmd_trace_find): Use std::vector.
+	* probe.c (parse_probes_in_pspace, parse_probes): Adjust to use
+	std::vector.
+	* probe.h (parse_probes): Return a std::vector.
+	* python/python.c (gdbpy_decode_line): Use std::vector and
+	gdb::array_view.
+	* source.c (select_source_symtab, line_info): Use std::vector.
+	* stack.c (func_command): Use std::vector.
+	* symtab.h (struct symtabs_and_lines): Delete.
+	* tracepoint.c (tfind_line_command, scope_info): Use std::vector.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
 	unittests/array-view-selftests.c.
 	(SUBDIR_UNITTESTS_OBS): Add array-view-selftests.o.

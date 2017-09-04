@@ -90,11 +90,11 @@ static void list_command (char *, int);
 
 /* Prototypes for local utility functions */
 
-static void ambiguous_line_spec (struct symtabs_and_lines *,
+static void ambiguous_line_spec (gdb::array_view<const symtab_and_line> sals,
 				 const char *format, ...)
   ATTRIBUTE_PRINTF (2, 3);
 
-static void filter_sals (struct symtabs_and_lines *);
+static void filter_sals (std::vector<symtab_and_line> &);
 
 
 /* Limit the call depth of user-defined commands */
@@ -786,7 +786,6 @@ shell_command (char *arg, int from_tty)
 static void
 edit_command (char *arg, int from_tty)
 {
-  struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   struct symbol *sym;
   const char *editor;
@@ -816,25 +815,24 @@ edit_command (char *arg, int from_tty)
       arg1 = arg;
       event_location_up location = string_to_event_location (&arg1,
 							     current_language);
-      sals = decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
-			    NULL, NULL, 0);
+      std::vector<symtab_and_line> sals = decode_line_1 (location.get (),
+							 DECODE_LINE_LIST_MODE,
+							 NULL, NULL, 0);
 
-      filter_sals (&sals);
-      if (! sals.nelts)
+      filter_sals (sals);
+      if (sals.empty ())
 	{
 	  /*  C++  */
 	  return;
 	}
-      if (sals.nelts > 1)
+      if (sals.size () > 1)
 	{
-	  ambiguous_line_spec (&sals,
+	  ambiguous_line_spec (sals,
 			       _("Specified line is ambiguous:\n"));
-	  xfree (sals.sals);
 	  return;
 	}
 
-      sal = sals.sals[0];
-      xfree (sals.sals);
+      sal = sals[0];
 
       if (*arg1)
         error (_("Junk at end of line specification."));
@@ -888,7 +886,6 @@ edit_command (char *arg, int from_tty)
 static void
 list_command (char *arg, int from_tty)
 {
-  struct symtabs_and_lines sals, sals_end;
   struct symtab_and_line sal = { 0 };
   struct symtab_and_line sal_end = { 0 };
   struct symtab_and_line cursal = { 0 };
@@ -956,8 +953,8 @@ list_command (char *arg, int from_tty)
   if (!have_full_symbols () && !have_partial_symbols ())
     error (_("No symbol table is loaded.  Use the \"file\" command."));
 
-  sals.nelts = 0;
-  sals.sals = NULL;
+  std::vector<symtab_and_line> sals;
+
   arg1 = arg;
   if (*arg1 == ',')
     dummy_beg = 1;
@@ -967,15 +964,14 @@ list_command (char *arg, int from_tty)
 							     current_language);
       sals = decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
 			    NULL, NULL, 0);
-
-      filter_sals (&sals);
-      if (!sals.nelts)
+      filter_sals (sals);
+      if (sals.empty ())
 	{
 	  /*  C++  */
 	  return;
 	}
 
-      sal = sals.sals[0];
+      sal = sals[0];
     }
 
   /* Record whether the BEG arg is all digits.  */
@@ -993,12 +989,11 @@ list_command (char *arg, int from_tty)
   if (*arg1 == ',')
     {
       no_end = 0;
-      if (sals.nelts > 1)
+      if (sals.size () > 1)
 	{
-	  ambiguous_line_spec (&sals,
+	  ambiguous_line_spec (sals,
 			       _("Specified first line '%.*s' is ambiguous:\n"),
 			       (int) beg_len, beg);
-	  xfree (sals.sals);
 	  return;
 	}
       arg1++;
@@ -1014,30 +1009,25 @@ list_command (char *arg, int from_tty)
 
 	  event_location_up location
 	    = string_to_event_location (&arg1, current_language);
-	  if (dummy_beg)
-	    sals_end = decode_line_1 (location.get (),
-				      DECODE_LINE_LIST_MODE, NULL, NULL, 0);
-	  else
-	    sals_end = decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
-				      NULL, sal.symtab, sal.line);
 
-	  filter_sals (&sals_end);
-	  if (sals_end.nelts == 0)
+	  std::vector<symtab_and_line> sals_end
+	    = (dummy_beg
+	       ? decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
+				NULL, NULL, 0)
+	       : decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
+				NULL, sal.symtab, sal.line));
+
+	  filter_sals (sals_end);
+	  if (sals_end.empty ())
+	    return;
+	  if (sals_end.size () > 1)
 	    {
-	      xfree (sals.sals);
-	      return;
-	    }
-	  if (sals_end.nelts > 1)
-	    {
-	      ambiguous_line_spec (&sals_end,
+	      ambiguous_line_spec (sals_end,
 				   _("Specified last line '%s' is ambiguous:\n"),
 				   end_arg);
-	      xfree (sals_end.sals);
-	      xfree (sals.sals);
 	      return;
 	    }
-	  sal_end = sals_end.sals[0];
-	  xfree (sals_end.sals);
+	  sal_end = sals_end[0];
 	}
     }
 
@@ -1099,13 +1089,13 @@ list_command (char *arg, int from_tty)
     error (_("No default source file yet.  Do \"help list\"."));
   else if (no_end)
     {
-      for (int i = 0; i < sals.nelts; i++)
+      for (int i = 0; i < sals.size (); i++)
 	{
-	  sal = sals.sals[i];
+	  sal = sals[i];
 	  int first_line = sal.line - get_lines_to_list () / 2;
 	  if (first_line < 1)
 	    first_line = 1;
-	  if (sals.nelts > 1)
+	  if (sals.size () > 1)
 	    {
 	      printf_filtered (_("file: \"%s\", line number: %d\n"),
 			       symtab_to_filename_for_display (sal.symtab),
@@ -1123,7 +1113,6 @@ list_command (char *arg, int from_tty)
 			 ? sal.line + get_lines_to_list ()
 			 : sal_end.line + 1),
 			0);
-  xfree (sals.sals);
 }
 
 /* Subroutine of disassemble_command to simplify it.
@@ -1530,36 +1519,34 @@ alias_command (char *args, int from_tty)
 
 /* Print a list of files and line numbers which a user may choose from
    in order to list a function which was specified ambiguously (as
-   with `list classname::overloadedfuncname', for example).  The
-   vector in SALS provides the filenames and line numbers.  FORMAT is
-   a printf-style format string used to tell the user what was
+   with `list classname::overloadedfuncname', for example).  The SALS
+   array provides the filenames and line numbers.  FORMAT is a
+   printf-style format string used to tell the user what was
    ambiguous.  */
 
 static void
-ambiguous_line_spec (struct symtabs_and_lines *sals, const char *format, ...)
+ambiguous_line_spec (gdb::array_view<const symtab_and_line> sals,
+		     const char *format, ...)
 {
-  int i;
-
   va_list ap;
   va_start (ap, format);
   vprintf_filtered (format, ap);
   va_end (ap);
 
-  for (i = 0; i < sals->nelts; ++i)
+  for (const auto &sal : sals)
     printf_filtered (_("file: \"%s\", line number: %d\n"),
-		     symtab_to_filename_for_display (sals->sals[i].symtab),
-		     sals->sals[i].line);
+		     symtab_to_filename_for_display (sal.symtab),
+		     sal.line);
 }
 
-/* Sort function for filter_sals.  */
+/* Comparison function for filter_sals.  Returns a qsort-style
+   result.  */
 
 static int
-compare_symtabs (const void *a, const void *b)
+cmp_symtabs (const symtab_and_line &sala, const symtab_and_line &salb)
 {
-  const struct symtab_and_line *sala = (const struct symtab_and_line *) a;
-  const struct symtab_and_line *salb = (const struct symtab_and_line *) b;
-  const char *dira = SYMTAB_DIRNAME (sala->symtab);
-  const char *dirb = SYMTAB_DIRNAME (salb->symtab);
+  const char *dira = SYMTAB_DIRNAME (sala.symtab);
+  const char *dirb = SYMTAB_DIRNAME (salb.symtab);
   int r;
 
   if (dira == NULL)
@@ -1579,58 +1566,37 @@ compare_symtabs (const void *a, const void *b)
 	return r;
     }
 
-  r = filename_cmp (sala->symtab->filename, salb->symtab->filename);
+  r = filename_cmp (sala.symtab->filename, salb.symtab->filename);
   if (r)
     return r;
 
-  if (sala->line < salb->line)
+  if (sala.line < salb.line)
     return -1;
-  return sala->line == salb->line ? 0 : 1;
+  return sala.line == salb.line ? 0 : 1;
 }
 
 /* Remove any SALs that do not match the current program space, or
    which appear to be "file:line" duplicates.  */
 
 static void
-filter_sals (struct symtabs_and_lines *sals)
+filter_sals (std::vector<symtab_and_line> &sals)
 {
-  int i, out, prev;
+  /* Remove SALs that do not match.  */
+  auto from = std::remove_if (sals.begin (), sals.end (),
+			      [&] (const symtab_and_line &sal)
+    { return (sal.pspace != current_program_space || sal.symtab == NULL); });
 
-  out = 0;
-  for (i = 0; i < sals->nelts; ++i)
-    {
-      if (sals->sals[i].pspace == current_program_space
-	  && sals->sals[i].symtab != NULL)
-	{
-	  sals->sals[out] = sals->sals[i];
-	  ++out;
-	}
-    }
-  sals->nelts = out;
+  /* Remove dups.  */
+  std::sort (sals.begin (), from,
+	     [] (const symtab_and_line &sala, const symtab_and_line &salb)
+   { return cmp_symtabs (sala, salb) < 0; });
 
-  qsort (sals->sals, sals->nelts, sizeof (struct symtab_and_line),
-	 compare_symtabs);
+  from = std::unique (sals.begin (), from,
+		      [&] (const symtab_and_line &sala,
+			   const symtab_and_line &salb)
+    { return cmp_symtabs (sala, salb) == 0; });
 
-  out = 1;
-  prev = 0;
-  for (i = 1; i < sals->nelts; ++i)
-    {
-      if (compare_symtabs (&sals->sals[prev], &sals->sals[i]))
-	{
-	  /* Symtabs differ.  */
-	  sals->sals[out] = sals->sals[i];
-	  prev = out;
-	  ++out;
-	}
-    }
-
-  if (sals->nelts == 0)
-    {
-      xfree (sals->sals);
-      sals->sals = NULL;
-    }
-  else
-    sals->nelts = out;
+  sals.erase (from, sals.end ());
 }
 
 static void

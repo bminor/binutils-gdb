@@ -258,8 +258,6 @@ clear_current_source_symtab_and_line (void)
 void
 select_source_symtab (struct symtab *s)
 {
-  struct symtabs_and_lines sals;
-  struct symtab_and_line sal;
   struct objfile *ofp;
   struct compunit_symtab *cu;
 
@@ -278,10 +276,10 @@ select_source_symtab (struct symtab *s)
      if one exists.  */
   if (lookup_symbol (main_name (), 0, VAR_DOMAIN, 0).symbol)
     {
-      sals = decode_line_with_current_source (main_name (),
-					      DECODE_LINE_FUNFIRSTLINE);
-      sal = sals.sals[0];
-      xfree (sals.sals);
+      std::vector<symtab_and_line> sals
+	= decode_line_with_current_source (main_name (),
+					   DECODE_LINE_FUNFIRSTLINE);
+      const symtab_and_line &sal = sals[0];
       current_source_pspace = sal.pspace;
       current_source_symtab = sal.symtab;
       current_source_line = std::max (sal.line - (lines_to_list - 1), 1);
@@ -1492,41 +1490,37 @@ print_source_lines (struct symtab *s, int line, int stopline,
 static void
 info_line_command (char *arg, int from_tty)
 {
-  struct symtabs_and_lines sals;
-  struct symtab_and_line sal;
   CORE_ADDR start_pc, end_pc;
-  int i;
-  struct cleanup *cleanups;
 
-  init_sal (&sal);		/* initialize to zeroes */
+  std::vector<symtab_and_line> decoded_sals;
+  symtab_and_line curr_sal;
+  gdb::array_view<symtab_and_line> sals;
 
   if (arg == 0)
     {
-      sal.symtab = current_source_symtab;
-      sal.pspace = current_program_space;
+      init_sal (&curr_sal);		/* initialize to zeroes */
+      curr_sal.symtab = current_source_symtab;
+      curr_sal.pspace = current_program_space;
       if (last_line_listed != 0)
-	sal.line = last_line_listed;
+	curr_sal.line = last_line_listed;
       else
-	sal.line = current_source_line;
+	curr_sal.line = current_source_line;
 
-      sals.nelts = 1;
-      sals.sals = XNEW (struct symtab_and_line);
-      sals.sals[0] = sal;
+      sals = curr_sal;
     }
   else
     {
-      sals = decode_line_with_last_displayed (arg, DECODE_LINE_LIST_MODE);
+      decoded_sals = decode_line_with_last_displayed (arg,
+						      DECODE_LINE_LIST_MODE);
+      sals = decoded_sals;
 
       dont_repeat ();
     }
 
-  cleanups = make_cleanup (xfree, sals.sals);
-
   /* C++  More than one line may have been specified, as when the user
      specifies an overloaded function name.  Print info on them all.  */
-  for (i = 0; i < sals.nelts; i++)
+  for (const auto &sal : sals)
     {
-      sal = sals.sals[i];
       if (sal.pspace != current_program_space)
 	continue;
 
@@ -1587,7 +1581,7 @@ info_line_command (char *arg, int from_tty)
 
 	  /* If this is the only line, show the source code.  If it could
 	     not find the file, don't do anything special.  */
-	  if (annotation_level && sals.nelts == 1)
+	  if (annotation_level && sals.size () == 1)
 	    identify_source_line (sal.symtab, sal.line, 0, start_pc);
 	}
       else
@@ -1597,7 +1591,6 @@ info_line_command (char *arg, int from_tty)
 	printf_filtered (_("Line number %d is out of range for \"%s\".\n"),
 			 sal.line, symtab_to_filename_for_display (sal.symtab));
     }
-  do_cleanups (cleanups);
 }
 
 /* Commands to search the source file for a regexp.  */

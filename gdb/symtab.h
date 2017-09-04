@@ -1441,11 +1441,6 @@ struct symtab_and_line
 
 extern void init_sal (struct symtab_and_line *sal);
 
-struct symtabs_and_lines
-{
-  struct symtab_and_line *sals;
-  int nelts;
-};
 
 
 /* Given a pc value, return line number it is in.  Second arg nonzero means

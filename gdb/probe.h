@@ -224,12 +224,14 @@ struct bound_probe
     struct objfile *objfile;
   };
 
-/* A helper for linespec that decodes a probe specification.  It returns a
-   symtabs_and_lines object and updates LOC or throws an error.  */
+/* A helper for linespec that decodes a probe specification.  It
+   returns a std::vector<symtab_and_line> object and updates LOC or
+   throws an error.  */
 
-extern struct symtabs_and_lines parse_probes (const struct event_location *loc,
-					      struct program_space *pspace,
-					      struct linespec_result *canon);
+extern std::vector<symtab_and_line> parse_probes
+  (const struct event_location *loc,
+   struct program_space *pspace,
+   struct linespec_result *canon);
 
 /* Helper function to register the proper probe_ops to a newly created probe.
    This function is mainly called from `sym_get_probes'.  */

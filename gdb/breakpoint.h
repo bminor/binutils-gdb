@@ -28,6 +28,7 @@
 #include "probe.h"
 #include "location.h"
 #include <vector>
+#include "common/array-view.h"
 
 struct value;
 struct block;
@@ -611,15 +612,15 @@ struct breakpoint_ops
 				  int, int, int, unsigned);
 
   /* Given the location (second parameter), this method decodes it and
-     provides the SAL locations related to it.  For ordinary
+     returns the SAL locations related to it.  For ordinary
      breakpoints, it calls `decode_line_full'.  If SEARCH_PSPACE is
      not NULL, symbol search is restricted to just that program space.
 
      This function is called inside `location_to_sals'.  */
-  void (*decode_location) (struct breakpoint *b,
-			   const struct event_location *location,
-			   struct program_space *search_pspace,
-			   struct symtabs_and_lines *sals);
+  std::vector<symtab_and_line> (*decode_location)
+    (struct breakpoint *b,
+     const struct event_location *location,
+     struct program_space *search_pspace);
 
   /* Return true if this breakpoint explains a signal.  See
      bpstat_explains_signal.  */
@@ -1202,10 +1203,11 @@ extern void until_break_command (char *, int, int);
 
 /* Initialize a struct bp_location.  */
 
-extern void update_breakpoint_locations (struct breakpoint *b,
-					 struct program_space *filter_pspace,
-					 struct symtabs_and_lines sals,
-					 struct symtabs_and_lines sals_end);
+extern void update_breakpoint_locations
+  (struct breakpoint *b,
+   struct program_space *filter_pspace,
+   gdb::array_view<const symtab_and_line> sals,
+   gdb::array_view<const symtab_and_line> sals_end);
 
 extern void breakpoint_re_set (void);
 

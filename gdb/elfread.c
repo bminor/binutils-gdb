@@ -953,8 +953,6 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   struct value *func_func;
   struct value *value;
   CORE_ADDR resolved_address, resolved_pc;
-  struct symtab_and_line sal;
-  struct symtabs_and_lines sals, sals_end;
 
   gdb_assert (b->type == bp_gnu_ifunc_resolver_return);
 
@@ -997,13 +995,9 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   elf_gnu_ifunc_record_cache (event_location_to_string (b->location.get ()),
 			      resolved_pc);
 
-  sal = find_pc_line (resolved_pc, 0);
-  sals.nelts = 1;
-  sals.sals = &sal;
-  sals_end.nelts = 0;
-
   b->type = bp_breakpoint;
-  update_breakpoint_locations (b, current_program_space, sals, sals_end);
+  update_breakpoint_locations (b, current_program_space,
+			       find_pc_line (resolved_pc, 0), {});
 }
 
 /* A helper function for elf_symfile_read that reads the minimal

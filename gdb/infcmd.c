@@ -1179,8 +1179,6 @@ jump_command (char *arg, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   CORE_ADDR addr;
-  struct symtabs_and_lines sals;
-  struct symtab_and_line sal;
   struct symbol *fn;
   struct symbol *sfn;
   int async_exec;
@@ -1200,17 +1198,15 @@ jump_command (char *arg, int from_tty)
   if (!arg)
     error_no_arg (_("starting address"));
 
-  sals = decode_line_with_last_displayed (arg, DECODE_LINE_FUNFIRSTLINE);
-  if (sals.nelts != 1)
-    {
-      error (_("Unreasonable jump request"));
-    }
-
-  sal = sals.sals[0];
-  xfree (sals.sals);
+  std::vector<symtab_and_line> sals
+    = decode_line_with_last_displayed (arg, DECODE_LINE_FUNFIRSTLINE);
+  if (sals.size () != 1)
+    error (_("Unreasonable jump request"));
 
   /* Done with ARGS.  */
   do_cleanups (args_chain);
+
+  symtab_and_line &sal = sals[0];
 
   if (sal.symtab == 0 && sal.pc == 0)
     error (_("No source file has been specified."));

@@ -279,11 +279,11 @@ info_macros_command (char *args, int from_tty)
     ms = default_macro_scope ();
   else
     {
-      struct symtabs_and_lines sals =
-	decode_line_with_current_source (args, 0);
+      std::vector<symtab_and_line> sals
+	= decode_line_with_current_source (args, 0);
 
-      if (sals.nelts)
-        ms = sal_macro_scope (sals.sals[0]);
+      if (!sals.empty ())
+	ms = sal_macro_scope (sals[0]);
     }
 
   if (! ms || ! ms->file || ! ms->file->table)
