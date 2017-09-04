@@ -1,3 +1,7 @@
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (.SECONDARY): Define target.
+
 2017-09-03  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* linux-low.c (linux_wait_1): Adjust.

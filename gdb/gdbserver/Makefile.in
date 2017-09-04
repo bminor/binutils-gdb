@@ -632,4 +632,7 @@ endif
 # Disable implicit make rules.
 include $(srcdir)/../disable-implicit-rules.mk
 
+# Do not delete intermediate files (e.g. *-generated.c).
+.SECONDARY:
+
 # This is the end of "Makefile.in".
