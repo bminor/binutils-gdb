@@ -74,6 +74,7 @@ struct inferior;
 #include "btrace.h"
 #include "record.h"
 #include "command.h"
+#include "disasm.h"
 
 #include "break-common.h" /* For enum target_hw_bp_type.  */
 
@@ -1200,7 +1201,8 @@ struct target_ops
        the current position.
        If SIZE < 0, disassemble abs (SIZE) preceding instructions; otherwise,
        disassemble SIZE succeeding instructions.  */
-    void (*to_insn_history) (struct target_ops *, int size, int flags)
+    void (*to_insn_history) (struct target_ops *, int size,
+			     gdb_disassembly_flags flags)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Disassemble SIZE instructions in the recorded execution trace around
@@ -1208,13 +1210,15 @@ struct target_ops
        If SIZE < 0, disassemble abs (SIZE) instructions before FROM; otherwise,
        disassemble SIZE instructions after FROM.  */
     void (*to_insn_history_from) (struct target_ops *,
-				  ULONGEST from, int size, int flags)
+				  ULONGEST from, int size,
+				  gdb_disassembly_flags flags)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Disassemble a section of the recorded execution trace from instruction
        BEGIN (inclusive) to instruction END (inclusive).  */
     void (*to_insn_history_range) (struct target_ops *,
-				   ULONGEST begin, ULONGEST end, int flags)
+				   ULONGEST begin, ULONGEST end,
+				   gdb_disassembly_flags flags)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Print a function trace of the recorded execution trace.
@@ -2509,13 +2513,15 @@ extern void target_goto_record_end (void);
 extern void target_goto_record (ULONGEST insn);
 
 /* See to_insn_history.  */
-extern void target_insn_history (int size, int flags);
+extern void target_insn_history (int size, gdb_disassembly_flags flags);
 
 /* See to_insn_history_from.  */
-extern void target_insn_history_from (ULONGEST from, int size, int flags);
+extern void target_insn_history_from (ULONGEST from, int size,
+				      gdb_disassembly_flags flags);
 
 /* See to_insn_history_range.  */
-extern void target_insn_history_range (ULONGEST begin, ULONGEST end, int flags);
+extern void target_insn_history_range (ULONGEST begin, ULONGEST end,
+				       gdb_disassembly_flags flags);
 
 /* See to_call_history.  */
 extern void target_call_history (int size, int flags);

@@ -1121,7 +1121,8 @@ list_command (char *arg, int from_tty)
 
 static void
 print_disassembly (struct gdbarch *gdbarch, const char *name,
-		   CORE_ADDR low, CORE_ADDR high, int flags)
+		   CORE_ADDR low, CORE_ADDR high,
+		   gdb_disassembly_flags flags)
 {
 #if defined(TUI)
   if (!tui_is_window_visible (DISASSEM_WIN))
@@ -1152,7 +1153,7 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
    Print a disassembly of the current function according to FLAGS.  */
 
 static void
-disassemble_current_function (int flags)
+disassemble_current_function (gdb_disassembly_flags flags)
 {
   struct frame_info *frame;
   struct gdbarch *gdbarch;
@@ -1207,7 +1208,7 @@ disassemble_command (char *arg, int from_tty)
   CORE_ADDR low, high;
   const char *name;
   CORE_ADDR pc;
-  int flags;
+  gdb_disassembly_flags flags;
   const char *p;
 
   p = arg;

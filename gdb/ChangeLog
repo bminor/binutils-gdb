@@ -1,3 +1,42 @@
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-cmds.c (print_disassembly, disassemble_current_function)
+	(disassemble_command): Use gdb_disassembly_flags instead of bare
+	int.
+	* disasm.c (gdb_pretty_print_disassembler::pretty_print_insn)
+	(dump_insns, do_mixed_source_and_assembly_deprecated)
+	(do_mixed_source_and_assembly, do_assembly_only, gdb_disassembly):
+	Use gdb_disassembly_flags instead of bare int.
+	* disasm.h (DISASSEMBLY_SOURCE_DEPRECATED, DISASSEMBLY_RAW_INSN)
+	(DISASSEMBLY_OMIT_FNAME, DISASSEMBLY_FILENAME)
+	(DISASSEMBLY_OMIT_PC, DISASSEMBLY_SOURCE)
+	(DISASSEMBLY_SPECULATIVE): No longer macros.  Instead they're...
+	(enum gdb_disassembly_flag): ... values of this new enumeration.
+	(gdb_disassembly_flags): Define.
+	(gdb_disassembly)
+	(gdb_pretty_print_disassembler::pretty_print_insn): Use it.
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Use
+	gdb_disassembly_flags instead of bare int.
+	* record-btrace.c (btrace_insn_history)
+	(record_btrace_insn_history, record_btrace_insn_history_range)
+	(record_btrace_insn_history_from): Use gdb_disassembly_flags
+	instead of bare int.
+	* record.c (get_insn_history_modifiers, cmd_record_insn_history):
+	Use gdb_disassembly_flags instead of bare int.
+	* target-debug.h (target_debug_print_gdb_disassembly_flags):
+	Define.
+	* target-delegates.c: Regenerate.
+	* target.c (target_insn_history, target_insn_history_from)
+	(target_insn_history_range): Use gdb_disassembly_flags instead of
+	bare int.
+	* target.h: Include "disasm.h".
+	(struct target_ops) <to_insn_history, to_insn_history_from,
+	to_insn_history_range>: Use gdb_disassembly_flags instead of bare
+	int.
+	(target_insn_history, target_insn_history_from)
+	(target_insn_history_range): Use gdb_disassembly_flags instead of
+	bare int.
+
 2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* cli/cli-script.c (build_command_line): For if/while commands,

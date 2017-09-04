@@ -3794,7 +3794,7 @@ target_goto_record (ULONGEST insn)
 /* See target.h.  */
 
 void
-target_insn_history (int size, int flags)
+target_insn_history (int size, gdb_disassembly_flags flags)
 {
   current_target.to_insn_history (&current_target, size, flags);
 }
@@ -3802,7 +3802,8 @@ target_insn_history (int size, int flags)
 /* See target.h.  */
 
 void
-target_insn_history_from (ULONGEST from, int size, int flags)
+target_insn_history_from (ULONGEST from, int size,
+			  gdb_disassembly_flags flags)
 {
   current_target.to_insn_history_from (&current_target, from, size, flags);
 }
@@ -3810,7 +3811,8 @@ target_insn_history_from (ULONGEST from, int size, int flags)
 /* See target.h.  */
 
 void
-target_insn_history_range (ULONGEST begin, ULONGEST end, int flags)
+target_insn_history_range (ULONGEST begin, ULONGEST end,
+			   gdb_disassembly_flags flags)
 {
   current_target.to_insn_history_range (&current_target, begin, end, flags);
 }

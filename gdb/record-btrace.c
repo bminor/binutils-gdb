@@ -630,15 +630,16 @@ static void
 btrace_insn_history (struct ui_out *uiout,
 		     const struct btrace_thread_info *btinfo,
 		     const struct btrace_insn_iterator *begin,
-		     const struct btrace_insn_iterator *end, int flags)
+		     const struct btrace_insn_iterator *end,
+		     gdb_disassembly_flags flags)
 {
   struct cleanup *cleanups, *ui_item_chain;
   struct gdbarch *gdbarch;
   struct btrace_insn_iterator it;
   struct btrace_line_range last_lines;
 
-  DEBUG ("itrace (0x%x): [%u; %u)", flags, btrace_insn_number (begin),
-	 btrace_insn_number (end));
+  DEBUG ("itrace (0x%x): [%u; %u)", (unsigned) flags,
+	 btrace_insn_number (begin), btrace_insn_number (end));
 
   flags |= DISASSEMBLY_SPECULATIVE;
 
@@ -720,7 +721,8 @@ btrace_insn_history (struct ui_out *uiout,
 /* The to_insn_history method of target record-btrace.  */
 
 static void
-record_btrace_insn_history (struct target_ops *self, int size, int flags)
+record_btrace_insn_history (struct target_ops *self, int size,
+			    gdb_disassembly_flags flags)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_insn_history *history;
@@ -740,7 +742,7 @@ record_btrace_insn_history (struct target_ops *self, int size, int flags)
     {
       struct btrace_insn_iterator *replay;
 
-      DEBUG ("insn-history (0x%x): %d", flags, size);
+      DEBUG ("insn-history (0x%x): %d", (unsigned) flags, size);
 
       /* If we're replaying, we start at the replay position.  Otherwise, we
 	 start at the tail of the trace.  */
@@ -772,7 +774,7 @@ record_btrace_insn_history (struct target_ops *self, int size, int flags)
       begin = history->begin;
       end = history->end;
 
-      DEBUG ("insn-history (0x%x): %d, prev: [%u; %u)", flags, size,
+      DEBUG ("insn-history (0x%x): %d, prev: [%u; %u)", (unsigned) flags, size,
 	     btrace_insn_number (&begin), btrace_insn_number (&end));
 
       if (size < 0)
@@ -804,7 +806,8 @@ record_btrace_insn_history (struct target_ops *self, int size, int flags)
 
 static void
 record_btrace_insn_history_range (struct target_ops *self,
-				  ULONGEST from, ULONGEST to, int flags)
+				  ULONGEST from, ULONGEST to,
+				  gdb_disassembly_flags flags)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_insn_history *history;
@@ -818,7 +821,7 @@ record_btrace_insn_history_range (struct target_ops *self,
   low = from;
   high = to;
 
-  DEBUG ("insn-history (0x%x): [%u; %u)", flags, low, high);
+  DEBUG ("insn-history (0x%x): [%u; %u)", (unsigned) flags, low, high);
 
   /* Check for wrap-arounds.  */
   if (low != from || high != to)
@@ -853,7 +856,8 @@ record_btrace_insn_history_range (struct target_ops *self,
 
 static void
 record_btrace_insn_history_from (struct target_ops *self,
-				 ULONGEST from, int size, int flags)
+				 ULONGEST from, int size,
+				 gdb_disassembly_flags flags)
 {
   ULONGEST begin, end, context;
 
