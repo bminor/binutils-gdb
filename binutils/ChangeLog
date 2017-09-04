@@ -1,3 +1,9 @@
+2017-09-05  Alexander Fedotov <alexander.fedotov@nxp.com>
+	    Edmar Wienskoski <edmar.wienskoski@nxp.com
+
+	* readelf.c (get_elf_section_flags): Add VLE.
+	(process_section_headers): Add VLE key to details.
+
 2017-08-25  Alan Modra  <amodra@gmail.com>
 
 	PR 21994

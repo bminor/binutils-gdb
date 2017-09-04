@@ -1,3 +1,11 @@
+2017-09-05  Alexander Fedotov <alexander.fedotov@nxp.com>
+	    Edmar Wienskoski <edmar.wienskoski@nxp.com
+
+	* elf32-ppc.c (ppc_elf_howto_raw): Add R_PPC_VLE_ADDR20.
+	(ppc_elf_check_relocs): Handle it.
+	(ppc_elf_vle_split20): New function.
+	(ppc_elf_relocate_section): Handle R_PPC_VLE_ADDR20.
+
 2017-09-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22071
