@@ -21,6 +21,11 @@
 	(GET_VALUE_IN_FIELD): New macro.
 	(xcoff64_slurp_armap): Use new macros.
 
+	PR 21787
+	* archive.c (bfd_generic_archive_p): If the bfd does not have the
+	correct magic bytes at the start, set the error to wrong format
+	and clear the format selector before returning NULL.
+
 2017-09-04  Alan Modra  <amodra@gmail.com>
 
 	PR 22067
