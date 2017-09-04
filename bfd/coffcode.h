@@ -997,7 +997,13 @@ handle_COMDAT (bfd * abfd,
 			|| isym.n_sclass == C_EXT)
 		       && BTYPE (isym.n_type) == T_NULL
 		       && isym.n_value == 0))
-		  abort ();
+		  {
+		    /* Malformed input files can trigger this test.
+		       cf PR 21781.  */
+		    _bfd_error_handler (_("%B: error: unexpected symbol '%s' in COMDAT section"),
+					abfd, symname);
+		    goto breakloop;
+		  }
 
 		/* FIXME LATER: MSVC generates section names
 		   like .text for comdats.  Gas generates
