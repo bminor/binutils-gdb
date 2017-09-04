@@ -90,7 +90,9 @@ static void list_command (char *, int);
 
 /* Prototypes for local utility functions */
 
-static void ambiguous_line_spec (struct symtabs_and_lines *);
+static void ambiguous_line_spec (struct symtabs_and_lines *,
+				 const char *format, ...)
+  ATTRIBUTE_PRINTF (2, 3);
 
 static void filter_sals (struct symtabs_and_lines *);
 
@@ -825,7 +827,8 @@ edit_command (char *arg, int from_tty)
 	}
       if (sals.nelts > 1)
 	{
-	  ambiguous_line_spec (&sals);
+	  ambiguous_line_spec (&sals,
+			       _("Specified line is ambiguous:\n"));
 	  xfree (sals.sals);
 	  return;
 	}
@@ -980,6 +983,11 @@ list_command (char *arg, int from_tty)
   for (p = arg; p != arg1 && *p >= '0' && *p <= '9'; p++);
   linenum_beg = (p == arg1);
 
+  /* Save the range of the first argument, in case we need to let the
+     user know it was ambiguous.  */
+  const char *beg = arg;
+  size_t beg_len = arg1 - beg;
+
   while (*arg1 == ' ' || *arg1 == '\t')
     arg1++;
   if (*arg1 == ',')
@@ -987,7 +995,9 @@ list_command (char *arg, int from_tty)
       no_end = 0;
       if (sals.nelts > 1)
 	{
-	  ambiguous_line_spec (&sals);
+	  ambiguous_line_spec (&sals,
+			       _("Specified first line '%.*s' is ambiguous:\n"),
+			       (int) beg_len, beg);
 	  xfree (sals.sals);
 	  return;
 	}
@@ -998,6 +1008,10 @@ list_command (char *arg, int from_tty)
 	dummy_end = 1;
       else
 	{
+	  /* Save the last argument, in case we need to let the user
+	     know it was ambiguous.  */
+	  const char *end_arg = arg1;
+
 	  event_location_up location
 	    = string_to_event_location (&arg1, current_language);
 	  if (dummy_beg)
@@ -1015,7 +1029,9 @@ list_command (char *arg, int from_tty)
 	    }
 	  if (sals_end.nelts > 1)
 	    {
-	      ambiguous_line_spec (&sals_end);
+	      ambiguous_line_spec (&sals_end,
+				   _("Specified last line '%s' is ambiguous:\n"),
+				   end_arg);
 	      xfree (sals_end.sals);
 	      xfree (sals.sals);
 	      return;
@@ -1030,7 +1046,7 @@ list_command (char *arg, int from_tty)
 
   if (!no_end && !dummy_beg && !dummy_end
       && sal.symtab != sal_end.symtab)
-    error (_("Specified start and end are in different files."));
+    error (_("Specified first and last lines are in different files."));
   if (dummy_beg && dummy_end)
     error (_("Two empty args do not say what lines to list."));
 
@@ -1515,12 +1531,19 @@ alias_command (char *args, int from_tty)
 /* Print a list of files and line numbers which a user may choose from
    in order to list a function which was specified ambiguously (as
    with `list classname::overloadedfuncname', for example).  The
-   vector in SALS provides the filenames and line numbers.  */
+   vector in SALS provides the filenames and line numbers.  FORMAT is
+   a printf-style format string used to tell the user what was
+   ambiguous.  */
 
 static void
-ambiguous_line_spec (struct symtabs_and_lines *sals)
+ambiguous_line_spec (struct symtabs_and_lines *sals, const char *format, ...)
 {
   int i;
+
+  va_list ap;
+  va_start (ap, format);
+  vprintf_filtered (format, ap);
+  va_end (ap);
 
   for (i = 0; i < sals->nelts; ++i)
     printf_filtered (_("file: \"%s\", line number: %d\n"),

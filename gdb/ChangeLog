@@ -1,5 +1,15 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-cmds.c (edit_command): Pass message to
+	ambiguous_line_spec.
+	(list_command): Pass message to ambiguous_line_spec.  Say
+	"first"/"last" instead of "start" and "end" to be consistent with
+	the manual.
+	(ambiguous_line_spec): Add 'format' and vararg parameters.  Use
+	them to print formatted message.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* btrace.c (ftrace_add_pt): Pass btrace_insn to
 	ftrace_update_insns by reference instead of pointer.
 
