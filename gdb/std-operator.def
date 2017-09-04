@@ -298,7 +298,16 @@ OP (OP_SCOPE)
      p 'S:method() const'::var
 
    then the C-specific handling directly in the parser takes over (see
-   "block/variable productions).  */
+   "block/variable productions).
+
+   Also, if the whole function+var is quoted like this:
+
+     p 'S:method() const::var'
+
+   then the whole quoted expression is interpreted as a single symbol
+   name and we don't use OP_FUNC_STATIC_VAR either.  In that case, the
+   C++-specific symbol lookup routines take care of the
+   function-local-static search.  */
 OP (OP_FUNC_STATIC_VAR)
 
 /* OP_TYPE is for parsing types, and used with the "ptype" command

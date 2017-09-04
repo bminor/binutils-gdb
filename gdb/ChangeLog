@@ -1,5 +1,11 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* cp-namespace.c (cp_search_static_and_baseclasses): Handle
+	function/method scopes; lookup the nested name as a function local
+	static variable.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	(%type <voidval>): Add function_method.
 	* c-exp.y (exp): New production for calls with no arguments.
 	(function_method, function_method_void_or_typelist): New

@@ -1,5 +1,11 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/local-static.exp: Also test with
+	class::method::variable wholly quoted.
+	* gdb.cp/m-static.exp (class::method::variable): Remove test.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/local-static.c: New.
 	* gdb.base/local-static.cc: New.
 	* gdb.base/local-static.exp:  New.

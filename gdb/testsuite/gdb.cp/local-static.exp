@@ -95,6 +95,11 @@ proc do_test {lang} {
     #
     #  'func()'::var
     #  func()::var
+    #  'func()::var'
+    #
+    # In C++, the latter case makes sure that symbol lookup finds the
+    # debug symbol instead of the minimal symbol with that exact same
+    # name.
 
     foreach scope_line $scopes_list  {
 	set scope [lindex $scope_line 0]
@@ -105,6 +110,13 @@ proc do_test {lang} {
 
 	    gdb_test "print '${scope}'::${var_prefix}_${var}" $print_re
 	    gdb_test "print ${scope}::${var_prefix}_${var}" $print_re
+
+	    set sym "${scope}::${var_prefix}_${var}"
+	    if {$lang == "c++"} {
+		gdb_test "print '${sym}'" $print_re
+	    } else {
+		gdb_test "print '${sym}'" "No symbol \"$sym\" in current context\\."
+	    }
 	}
     }
 
