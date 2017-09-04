@@ -1,3 +1,8 @@
+2017-09-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* spu-tdep.c (flush_ea_cache): Add missing argument to
+	call_function_by_hand.
+
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
 	* NEWS (Safer support for debugging with no debug info): New.

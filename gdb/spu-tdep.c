@@ -2036,7 +2036,7 @@ flush_ea_cache (void)
       type = lookup_pointer_type (type);
       addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
 
-      call_function_by_hand (value_from_pointer (type, addr), 0, NULL);
+      call_function_by_hand (value_from_pointer (type, addr), NULL, 0, NULL);
     }
 }
 
