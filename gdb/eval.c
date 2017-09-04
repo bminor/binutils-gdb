@@ -716,6 +716,7 @@ evaluate_subexp_standard (struct type *expect_type,
   int save_pos1;
   struct symbol *function = NULL;
   char *function_name = NULL;
+  const char *var_func_name = NULL;
 
   pc = (*pos)++;
   op = exp->elts[pc].opcode;
@@ -1545,6 +1546,17 @@ evaluate_subexp_standard (struct type *expect_type,
 	    }
 	  else
 	    {
+	      if (op == OP_VAR_MSYM_VALUE)
+		{
+		  symbol *sym = exp->elts[*pos + 2].symbol;
+		  var_func_name = SYMBOL_PRINT_NAME (sym);
+		}
+	      else if (op == OP_VAR_VALUE)
+		{
+		  minimal_symbol *msym = exp->elts[*pos + 2].msymbol;
+		  var_func_name = MSYMBOL_PRINT_NAME (msym);
+		}
+
 	      argvec[0] = evaluate_subexp_with_coercion (exp, pos, noside);
 	      type = value_type (argvec[0]);
 	      if (type && TYPE_CODE (type) == TYPE_CODE_PTR)
@@ -1761,7 +1773,7 @@ evaluate_subexp_standard (struct type *expect_type,
 		return_type = expect_type;
 
 	      if (return_type == NULL)
-		error_call_unknown_return_type (NULL);
+		error_call_unknown_return_type (var_func_name);
 
 	      return allocate_value (return_type);
 	    }

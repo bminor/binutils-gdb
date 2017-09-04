@@ -1,5 +1,10 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/nodebug.exp: Test that ptype's error about functions
+	with unknown return type includes the function name too.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/break-main-file-remove-fail.exp (test_remove_bp): Cast
 	return type of munmap in infcall.
 	* gdb.base/break-probes.exp: Cast return type of foo in infcall.

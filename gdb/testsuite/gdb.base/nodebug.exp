@@ -204,14 +204,10 @@ if [runto inner] then {
     
     # This test is not as obscure as it might look.  `p getenv ("TERM")'
     # is a real-world example, at least on many systems.
-
-    gdb_test {p/c array_index("abcdef",2)} \
-	"'array_index' has unknown return type; cast the call to its declared return type"
-    gdb_test {ptype array_index("abcdef",2)} \
-	"function has unknown return type; cast the call to its declared return type"
-    gdb_test {whatis array_index("abcdef",2)} \
-	"function has unknown return type; cast the call to its declared return type"
-
+    foreach cmd {"p/c" "ptype" "whatis"} {
+	gdb_test "$cmd array_index(\"abcdef\",2)" \
+	    "'array_index' has unknown return type; cast the call to its declared return type"
+    }
     if [target_info exists gdb,cannot_call_functions] {
 	unsupported "p/c (int) array_index(\"abcdef\",2)"
     } else {

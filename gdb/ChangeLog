@@ -1,5 +1,11 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* eval.c (evaluate_subexp_standard): <OP_FUNCALL>: Extract
+	function name from symbol/minsym and pass it to
+	error_call_unknown_return_type.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (resolve_subexp): Handle OP_VAR_MSYM_VALUE.
 	* ax-gdb.c (gen_msym_var_ref): New function.
 	(gen_expr): Handle OP_VAR_MSYM_VALUE.
