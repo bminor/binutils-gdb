@@ -1,5 +1,15 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* eval.c (evaluate_subexp_standard): Remove UNOP_MEMVAL_TLS
+	handling.
+	* expprint.c (print_subexp_standard, dump_subexp_body_standard):
+	Ditto.
+	* parse.c (operator_length_standard, operator_check_standard):
+	Ditto.
+	* std-operator.def (UNOP_MEMVAL_TLS): Delete.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* ax-gdb.c: Include "typeprint.h".
 	(gen_expr_for_cast): New function.
 	(gen_expr) <OP_CAST, OP_CAST_TYPE>: Use it.

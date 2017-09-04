@@ -2655,22 +2655,6 @@ evaluate_subexp_standard (struct type *expect_type,
       else
 	return value_at_lazy (type, value_as_address (arg1));
 
-    case UNOP_MEMVAL_TLS:
-      (*pos) += 3;
-      arg1 = evaluate_subexp (expect_type, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (exp->elts[pc + 2].type, lval_memory);
-      else
-	{
-	  CORE_ADDR tls_addr;
-
-	  tls_addr = target_translate_tls_address (exp->elts[pc + 1].objfile,
-						   value_as_address (arg1));
-	  return value_at_lazy (exp->elts[pc + 2].type, tls_addr);
-	}
-
     case UNOP_PREINCREMENT:
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
       if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)

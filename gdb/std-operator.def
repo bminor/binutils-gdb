@@ -218,13 +218,6 @@ OP (UNOP_REINTERPRET_CAST)
    following subexpression.  */
 OP (UNOP_MEMVAL)
 
-/* UNOP_MEMVAL_TLS is followed by a `struct objfile' pointer in the next
-   exp_element and a type pointer in the following exp_element.
-   With another UNOP_MEMVAL_TLS at the end, this makes four exp_elements.
-   It casts the contents of the word offsetted by the value of the
-   following subexpression from the TLS specified by `struct objfile'.  */
-OP (UNOP_MEMVAL_TLS)
-
 /* Like UNOP_MEMVAL, but the type is supplied as a subexpression.  */
 OP (UNOP_MEMVAL_TYPE)
 

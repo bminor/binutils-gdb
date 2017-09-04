@@ -950,11 +950,6 @@ operator_length_standard (const struct expression *expr, int endpos,
       args = 1;
       break;
 
-    case UNOP_MEMVAL_TLS:
-      oplen = 4;
-      args = 1;
-      break;
-
     case UNOP_ABS:
     case UNOP_CAP:
     case UNOP_CHR:
@@ -1831,11 +1826,6 @@ operator_check_standard (struct expression *exp, int pos,
 	      return 1;
 	  }
       }
-      break;
-
-    case UNOP_MEMVAL_TLS:
-      objfile = elts[pos + 1].objfile;
-      type = elts[pos + 2].type;
       break;
 
     case OP_VAR_VALUE:
