@@ -1,5 +1,9 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* NEWS (Safer support for debugging with no debug info): New.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* c-exp.y (function_method, function_method_void): Add current
 	instance flags to TYPE_INSTANCE.
 	* dwarf2read.c (check_modifier): New.

@@ -66,6 +66,32 @@ show debug separate-debug-file
 * TUI Single-Key mode now supports two new shortcut keys: `i' for stepi and
   `o' for nexti.
 
+* Safer/improved support for debugging with no debug info
+
+  GDB no longer assumes functions with no debug information return
+  'int'.
+
+  This means that GDB now refuses to call such functions unless you
+  tell it the function's type, by either casting the call to the
+  declared return type, or by casting the function to a function
+  pointer of the right type, and calling that:
+
+    (gdb) p getenv ("PATH")
+    'getenv' has unknown return type; cast the call to its declared return type
+    (gdb) p (char *) getenv ("PATH")
+    $1 = 0x7fffffffe "/usr/local/bin:/"...
+    (gdb) p ((char * (*) (const char *)) getenv) ("PATH")
+    $2 = 0x7fffffffe "/usr/local/bin:/"...
+
+  Similarly, GDB no longer assumes that global variables with no debug
+  info have type 'int', and refuses to print the variable's value
+  unless you tell it the variable's type:
+
+    (gdb) p var
+    'var' has unknown type; cast it to its declared type
+    (gdb) p (float) var
+    $3 = 3.14
+
 *** Changes in GDB 8.0
 
 * GDB now supports access to the PKU register on GNU/Linux. The register is

@@ -1,3 +1,13 @@
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Variables) <Program Variables>: Document inspecting
+	no-debug-info variables.
+	(Symbols) <Examining the Symbol Table>: Document inspecting
+	no-debug-info types.
+	(Calling) <Calling functions with no debug info>: New subsection,
+	documenting calling no-debug-info functions.
+	(Non-debug DLL Symbols) <Working with Minimal Symbols>: Update.
+
 2017-08-31  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.texinfo (set environment): Add @anchor.  Explain that
