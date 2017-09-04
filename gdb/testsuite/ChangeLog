@@ -1,5 +1,10 @@
 2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb.base/commands.exp: Call the new procedures.
+	(loop_break_test, loop_continue_test): New procedures.
+
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdb.base/commands.exp: Call new procedure.
 	(define_if_without_arg_test): New procedure.
 
