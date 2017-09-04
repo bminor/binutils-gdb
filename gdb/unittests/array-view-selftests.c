@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "selftest.h"
 #include "common/array-view.h"
+#include <array>
 
 namespace selftests {
 namespace array_view_tests {

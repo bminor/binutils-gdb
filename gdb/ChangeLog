@@ -1,5 +1,9 @@
 2017-09-04  John Baldwin  <jhb@FreeBSD.org>
 
+	* unittests/array-view-selftests.c: Add include of <array>.
+
+2017-09-04  John Baldwin  <jhb@FreeBSD.org>
+
 	* spu-tdep.c (flush_ea_cache): Add missing argument to
 	call_function_by_hand.
 
