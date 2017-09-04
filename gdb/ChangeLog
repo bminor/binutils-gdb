@@ -1,5 +1,10 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* eval.c (eval_skip_value): New function.
+	(evaluate_subexp_standard): Use it.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* eval.c (evaluate_subexp_standard): <OP_FUNCALL>: Extract
 	function name from symbol/minsym and pass it to
 	error_call_unknown_return_type.
