@@ -47,6 +47,11 @@
 	(alpha_vms_slurp_relocs): Likewise.
 	(alpha_vms_object_p): Check for a truncated record.
 
+	PR 21824
+	* elf32-msp430.c (msp430_elf_relax_section): Allow conversion of
+	16-bit absolute branches into 10-bit pc-relative branches on the
+	MSP430 as well as the MSP430X.
+
 2017-09-04  Alan Modra  <amodra@gmail.com>
 
 	PR 22067
