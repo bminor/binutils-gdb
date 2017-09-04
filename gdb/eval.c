@@ -642,18 +642,22 @@ ptrmath_type_p (const struct language_defn *lang, struct type *type)
     }
 }
 
-/* Constructs a fake method with the given parameter types.
-   This function is used by the parser to construct an "expected"
-   type for method overload resolution.  */
+/* Constructs a fake method with the given parameter types.  This
+   function is used by the parser to construct an "expected" type for
+   method overload resolution.  FLAGS is used as instance flags of the
+   new type, in order to be able to make the new type represent a
+   const/volatile overload.  */
 
 static struct type *
-make_params (int num_types, struct type **param_types)
+make_params (type_instance_flags flags,
+	     int num_types, struct type **param_types)
 {
   struct type *type = XCNEW (struct type);
   TYPE_MAIN_TYPE (type) = XCNEW (struct main_type);
   TYPE_LENGTH (type) = 1;
   TYPE_CODE (type) = TYPE_CODE_METHOD;
   TYPE_CHAIN (type) = type;
+  TYPE_INSTANCE_FLAGS (type) = flags;
   if (num_types > 0)
     {
       if (param_types[num_types - 1] == NULL)
@@ -2039,18 +2043,22 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
 
     case TYPE_INSTANCE:
-      nargs = longest_to_int (exp->elts[pc + 1].longconst);
-      arg_types = (struct type **) alloca (nargs * sizeof (struct type *));
-      for (ix = 0; ix < nargs; ++ix)
-	arg_types[ix] = exp->elts[pc + 1 + ix + 1].type;
+      {
+	type_instance_flags flags
+	  = (type_instance_flag_value) longest_to_int (exp->elts[pc + 1].longconst);
+	nargs = longest_to_int (exp->elts[pc + 2].longconst);
+	arg_types = (struct type **) alloca (nargs * sizeof (struct type *));
+	for (ix = 0; ix < nargs; ++ix)
+	  arg_types[ix] = exp->elts[pc + 2 + ix + 1].type;
 
-      expect_type = make_params (nargs, arg_types);
-      *(pos) += 3 + nargs;
-      arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
-      xfree (TYPE_FIELDS (expect_type));
-      xfree (TYPE_MAIN_TYPE (expect_type));
-      xfree (expect_type);
-      return arg1;
+	expect_type = make_params (flags, nargs, arg_types);
+	*(pos) += 4 + nargs;
+	arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
+	xfree (TYPE_FIELDS (expect_type));
+	xfree (TYPE_MAIN_TYPE (expect_type));
+	xfree (expect_type);
+	return arg1;
+      }
 
     case BINOP_CONCAT:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);

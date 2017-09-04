@@ -543,11 +543,15 @@ print_subexp_standard (struct expression *exp, int *pos,
 
     case TYPE_INSTANCE:
       {
-	LONGEST count = exp->elts[pc + 1].longconst;
+	type_instance_flags flags
+	  = (type_instance_flag_value) longest_to_int (exp->elts[pc + 1].longconst);
+	LONGEST count = exp->elts[pc + 2].longconst;
 
+	/* The FLAGS.  */
+	(*pos)++;
 	/* The COUNT.  */
 	(*pos)++;
-	fputs_unfiltered ("TypesInstance(", stream);
+	fputs_unfiltered ("TypeInstance(", stream);
 	while (count-- > 0)
 	  {
 	    type_print (exp->elts[(*pos)++].type, "", stream, 0);
@@ -558,6 +562,12 @@ print_subexp_standard (struct expression *exp, int *pos,
 	/* Ending COUNT and ending TYPE_INSTANCE.  */
 	(*pos) += 2;
 	print_subexp (exp, pos, stream, PREC_PREFIX);
+
+	if (flags & TYPE_INSTANCE_FLAG_CONST)
+	  fputs_unfiltered (",const", stream);
+	if (flags & TYPE_INSTANCE_FLAG_VOLATILE)
+	  fputs_unfiltered (",volatile", stream);
+
 	fputs_unfiltered (")", stream);
 	return;
       }
@@ -1019,9 +1029,9 @@ dump_subexp_body_standard (struct expression *exp,
 
     case TYPE_INSTANCE:
       {
-	LONGEST len;
-
-	len = exp->elts[elt++].longconst;
+	type_instance_flags flags
+	  = (type_instance_flag_value) longest_to_int (exp->elts[elt++].longconst);
+	LONGEST len = exp->elts[elt++].longconst;
 	fprintf_filtered (stream, "%s TypeInstance: ", plongest (len));
 	while (len-- > 0)
 	  {
@@ -1034,6 +1044,22 @@ dump_subexp_body_standard (struct expression *exp,
 	    if (len > 0)
 	      fputs_filtered (", ", stream);
 	  }
+
+	fprintf_filtered (stream, " Flags: %s (", hex_string (flags));
+	bool space = false;
+	auto print_one = [&] (const char *mod)
+	  {
+	    if (space)
+	      fputs_filtered (" ", stream);
+	    space = true;
+	    fprintf_filtered (stream, mod);
+	  };
+	if (flags & TYPE_INSTANCE_FLAG_CONST)
+	  print_one ("const");
+	if (flags & TYPE_INSTANCE_FLAG_VOLATILE)
+	  print_one ("volatile");
+	fprintf_filtered (stream, ")");
+
 	/* Ending LEN and ending TYPE_INSTANCE.  */
 	elt += 2;
 	elt = dump_subexp (exp, stream, elt);

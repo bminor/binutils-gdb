@@ -1,5 +1,17 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/func-static.c (S::method const, S::method volatile)
+	(S::method volatile const): New methods.
+	(c_s, v_s, cv_s): New instances.
+	(main): Call method() on them.
+	* gdb.base/func-static.exp (syntax_re, cannot_resolve_re): New variables.
+	(cannot_resolve): New procedure.
+	(cxx_scopes_list): Test cv methods.  Add print-scope-quote and
+	print-quote-unquoted columns.
+	(do_test): Test printing each scope too.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/local-static.exp: Also test with
 	class::method::variable wholly quoted.
 	* gdb.cp/m-static.exp (class::method::variable): Remove test.

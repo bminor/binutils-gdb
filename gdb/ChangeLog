@@ -1,5 +1,31 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* c-exp.y (function_method, function_method_void): Add current
+	instance flags to TYPE_INSTANCE.
+	* dwarf2read.c (check_modifier): New.
+	(compute_delayed_physnames): Assert that only C++ adds delayed
+	physnames.  Mark fn_fields as const/volatile depending on
+	physname.
+	* eval.c (make_params): New type_instance_flags parameter.  Use
+	it as the new type's instance flags.
+	(evaluate_subexp_standard) <TYPE_INSTANCE>: Extract the instance
+	flags element and pass it to make_params.
+	* expprint.c (print_subexp_standard) <TYPE_INSTANCE>: Handle
+	instance flags element.
+	(dump_subexp_body_standard) <TYPE_INSTANCE>: Likewise.
+	* gdbtypes.h: Include "enum-flags.h".
+	(type_instance_flags): New enum-flags type.
+	(TYPE_CONST, TYPE_VOLATILE, TYPE_RESTRICT, TYPE_ATOMIC)
+	(TYPE_CODE_SPACE, TYPE_DATA_SPACE): Return boolean.
+	* parse.c (operator_length_standard) <TYPE_INSTANCE>: Adjust.
+	(follow_type_instance_flags): New function.
+	(operator_check_standard) <TYPE_INSTANCE>: Adjust.
+	* parser-defs.h (follow_type_instance_flags): Declare.
+	* valops.c (value_struct_elt_for_reference): const/volatile must
+	match too.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* cp-namespace.c (cp_search_static_and_baseclasses): Handle
 	function/method scopes; lookup the nested name as a function local
 	static variable.

@@ -927,7 +927,7 @@ operator_length_standard (const struct expression *expr, int endpos,
       break;
 
     case TYPE_INSTANCE:
-      oplen = 4 + longest_to_int (expr->elts[endpos - 2].longconst);
+      oplen = 5 + longest_to_int (expr->elts[endpos - 2].longconst);
       args = 1;
       break;
 
@@ -1642,6 +1642,33 @@ push_typelist (VEC (type_ptr) *list)
   push_type (tp_function_with_arguments);
 }
 
+/* Pop the type stack and return a type_instance_flags that
+   corresponds the const/volatile qualifiers on the stack.  This is
+   called by the C++ parser when parsing methods types, and as such no
+   other kind of type in the type stack is expected.  */
+
+type_instance_flags
+follow_type_instance_flags ()
+{
+  type_instance_flags flags = 0;
+
+  for (;;)
+    switch (pop_type ())
+      {
+      case tp_end:
+	return flags;
+      case tp_const:
+	flags |= TYPE_INSTANCE_FLAG_CONST;
+	break;
+      case tp_volatile:
+	flags |= TYPE_INSTANCE_FLAG_VOLATILE;
+	break;
+      default:
+	gdb_assert_not_reached ("unrecognized tp_ value in follow_types");
+      }
+}
+
+
 /* Pop the type stack and return the type which corresponds to FOLLOW_TYPE
    as modified by all the stuff on the stack.  */
 struct type *
@@ -1821,11 +1848,11 @@ operator_check_standard (struct expression *exp, int pos,
 
     case TYPE_INSTANCE:
       {
-	LONGEST arg, nargs = elts[pos + 1].longconst;
+	LONGEST arg, nargs = elts[pos + 2].longconst;
 
 	for (arg = 0; arg < nargs; arg++)
 	  {
-	    struct type *type = elts[pos + 2 + arg].type;
+	    struct type *type = elts[pos + 3 + arg].type;
 	    struct objfile *objfile = TYPE_OBJFILE (type);
 
 	    if (objfile && (*objfile_func) (objfile, data))

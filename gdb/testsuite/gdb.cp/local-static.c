@@ -53,15 +53,40 @@ struct S
   }
 
   void method ();
+  void method () const;
+  void method () volatile;
+  void method () volatile const;
+
   static void static_method ();
 };
 
 S s;
+const S c_s = {};
+volatile S v_s = {};
+const volatile S cv_s = {};
 
 void
 S::method ()
 {
   DEF_STATICS (S_M);
+}
+
+void
+S::method () const
+{
+  DEF_STATICS (S_M_C);
+}
+
+void
+S::method () volatile
+{
+  DEF_STATICS (S_M_V);
+}
+
+void
+S::method () const volatile
+{
+  DEF_STATICS (S_M_CV);
 }
 
 void
@@ -127,6 +152,9 @@ main ()
 
 #ifdef __cplusplus
       s.method ();
+      c_s.method ();
+      v_s.method ();
+      cv_s.method ();
       s.inline_method ();
       S::static_method ();
       S::static_inline_method ();

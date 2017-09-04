@@ -558,6 +558,11 @@ function_method:       exp '(' parameter_typelist ')' const_or_volatile
 			  LONGEST len = VEC_length (type_ptr, type_list);
 
 			  write_exp_elt_opcode (pstate, TYPE_INSTANCE);
+			  /* Save the const/volatile qualifiers as
+			     recorded by the const_or_volatile
+			     production's actions.  */
+			  write_exp_elt_longcst (pstate,
+						 follow_type_instance_flags ());
 			  write_exp_elt_longcst (pstate, len);
 			  for (i = 0;
 			       VEC_iterate (type_ptr, type_list, i, type_elt);
@@ -571,6 +576,9 @@ function_method:       exp '(' parameter_typelist ')' const_or_volatile
 
 function_method_void:	    exp '(' ')' const_or_volatile
 		       { write_exp_elt_opcode (pstate, TYPE_INSTANCE);
+			 /* See above.  */
+			 write_exp_elt_longcst (pstate,
+						follow_type_instance_flags ());
 			 write_exp_elt_longcst (pstate, 0);
 			 write_exp_elt_longcst (pstate, 0);
 			 write_exp_elt_opcode (pstate, TYPE_INSTANCE);

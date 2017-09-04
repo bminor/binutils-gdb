@@ -3424,6 +3424,11 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    {
 	      for (j = 0; j < len; ++j)
 		{
+		  if (TYPE_CONST (intype) != TYPE_FN_FIELD_CONST (f, j))
+		    continue;
+		  if (TYPE_VOLATILE (intype) != TYPE_FN_FIELD_VOLATILE (f, j))
+		    continue;
+
 		  if (compare_parameters (TYPE_FN_FIELD_TYPE (f, j), intype, 0)
 		      || compare_parameters (TYPE_FN_FIELD_TYPE (f, j),
 					     intype, 1))
