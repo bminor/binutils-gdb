@@ -20,6 +20,8 @@
 #ifndef MINSYMS_H
 #define MINSYMS_H
 
+struct type;
+
 /* Several lookup functions return both a minimal symbol and the
    objfile in which it is found.  This structure is used in these
    cases.  */
@@ -274,5 +276,12 @@ void iterate_over_minimal_symbols (struct objfile *objf,
    of the function.  */
 
 CORE_ADDR minimal_symbol_upper_bound (struct bound_minimal_symbol minsym);
+
+/* Return the type of MSYMBOL, a minimal symbol of OBJFILE.  If
+   ADDRESS_P is not NULL, set it to the MSYMBOL's resolved
+   address.  */
+
+type *find_minsym_type_and_address (minimal_symbol *msymbol, objfile *objf,
+				    CORE_ADDR *address_p);
 
 #endif /* MINSYMS_H */

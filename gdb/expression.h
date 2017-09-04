@@ -64,6 +64,7 @@ union exp_element
   {
     enum exp_opcode opcode;
     struct symbol *symbol;
+    struct minimal_symbol *msymbol;
     LONGEST longconst;
     DOUBLEST doubleconst;
     gdb_byte decfloatconst[16];

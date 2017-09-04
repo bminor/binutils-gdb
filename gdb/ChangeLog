@@ -1,5 +1,27 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (resolve_subexp): Handle OP_VAR_MSYM_VALUE.
+	* ax-gdb.c (gen_msym_var_ref): New function.
+	(gen_expr): Handle OP_VAR_MSYM_VALUE.
+	* eval.c (evaluate_var_msym_value): New function.
+	* eval.c (evaluate_subexp_standard): Handle OP_VAR_MSYM_VALUE.
+	<OP_FUNCALL>: Extract function name from symbol/minsym and pass it
+	to call_function_by_hand.
+	* expprint.c (print_subexp_standard, dump_subexp_body_standard):
+	Handle OP_VAR_MSYM_VALUE.
+	(union exp_element) <msymbol>: New field.
+	* minsyms.h (struct type): Forward declare.
+	(find_minsym_type_and_address): Declare.
+	* parse.c (write_exp_elt_msym): New function.
+	(write_exp_msymbol): Delete, refactored as ...
+	(find_minsym_type_and_address): ... this new function.
+	(write_exp_msymbol): Reimplement using OP_VAR_MSYM_VALUE.
+	(operator_length_standard, operator_check_standard): Handle
+	OP_VAR_MSYM_VALUE.
+	* std-operator.def (OP_VAR_MSYM_VALUE): New.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (ada_evaluate_subexp) <TYPE_CODE_FUNC>: Don't handle
 	TYPE_GNU_IFUNC specially here.  Throw error if return type is
 	unknown.

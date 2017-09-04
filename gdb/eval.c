@@ -676,6 +676,25 @@ make_params (int num_types, struct type **param_types)
   return type;
 }
 
+/* Helper for evaluating an OP_VAR_MSYM_VALUE.  */
+
+static value *
+evaluate_var_msym_value (enum noside noside,
+			 struct objfile *objfile, minimal_symbol *msymbol)
+{
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      type *the_type = find_minsym_type_and_address (msymbol, objfile, NULL);
+      return value_zero (the_type, not_lval);
+    }
+  else
+    {
+      CORE_ADDR address;
+      type *the_type = find_minsym_type_and_address (msymbol, objfile, &address);
+      return value_at_lazy (the_type, address);
+    }
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -766,6 +785,11 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	return ret;
       }
+    case OP_VAR_MSYM_VALUE:
+      (*pos) += 3;
+      return evaluate_var_msym_value (noside,
+				      exp->elts[pc + 1].objfile,
+				      exp->elts[pc + 2].msymbol);
 
     case OP_VAR_ENTRY_VALUE:
       (*pos) += 2;

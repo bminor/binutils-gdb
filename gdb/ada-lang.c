@@ -3385,6 +3385,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
     case OP_LONG:
     case OP_DOUBLE:
     case OP_VAR_VALUE:
+    case OP_VAR_MSYM_VALUE:
       *pos += 4;
       break;
 

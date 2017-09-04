@@ -733,6 +733,23 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       break;
     }
 }
+
+/* Generate code for a minimal symbol variable reference to AX.  The
+   variable is the symbol MINSYM, of OBJFILE.  Set VALUE to describe
+   the result.  */
+
+static void
+gen_msym_var_ref (agent_expr *ax, axs_value *value,
+		  minimal_symbol *msymbol, objfile *objf)
+{
+  CORE_ADDR address;
+  type *t = find_minsym_type_and_address (msymbol, objf, &address);
+  value->type = t;
+  value->optimized_out = false;
+  ax_const_l (ax, address);
+  value->kind = axs_lvalue_memory;
+}
+
 
 
 
@@ -1961,6 +1978,11 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	error (_("`%s' has been optimized out, cannot use"),
 	       SYMBOL_PRINT_NAME ((*pc)[2].symbol));
 
+      (*pc) += 4;
+      break;
+
+    case OP_VAR_MSYM_VALUE:
+      gen_msym_var_ref (ax, value, (*pc)[2].msymbol, (*pc)[1].objfile);
       (*pc) += 4;
       break;
 
