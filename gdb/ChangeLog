@@ -1,5 +1,13 @@
 2017-09-04  Yao Qi  <yao.qi@linaro.org>
 
+	* amd64-fbsd-nat.c (amd64fbsd_read_description): Call
+	i386_target_description.
+	* i386-fbsd-nat.c (i386fbsd_read_description): Call
+	i386_target_description.
+	* i386-tdep.c (i386_gdbarch_init): Likewise.
+
+2017-09-04  Yao Qi  <yao.qi@linaro.org>
+
 	* amd64-darwin-tdep.c: Include "x86-xstate.h".
 	(x86_darwin_init_abi_64): Call amd64_target_description.
 	* amd64-dicos-tdep.c: Likewise.

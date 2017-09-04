@@ -8549,7 +8549,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Get the x86 target description from INFO.  */
   tdesc = info.target_desc;
   if (! tdesc_has_registers (tdesc))
-    tdesc = tdesc_i386;
+    tdesc = i386_target_description (X86_XSTATE_SSE_MASK);
   tdep->tdesc = tdesc;
 
   tdep->num_core_regs = I386_NUM_GREGS + I387_NUM_REGS;

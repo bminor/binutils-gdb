@@ -139,12 +139,10 @@ i386fbsd_read_description (struct target_ops *ops)
       xsave_probed = 1;
     }
 
-  if (x86bsd_xsave_len != 0)
-    {
-      return i386_target_description (xcr0);
-    }
-  else
-    return tdesc_i386;
+  if (x86bsd_xsave_len == 0)
+    xcr0 = X86_XSTATE_SSE_MASK;
+
+  return i386_target_description (xcr0);
 }
 #endif
 
