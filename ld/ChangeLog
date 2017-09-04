@@ -1,3 +1,14 @@
+2017-09-04  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
+
+	* testsuite/ld-elf/eh3.d: Update.
+	* testsuite/ld-elf/eh4.d: Update.
+
+	PR 21441
+	* testsuite/ld-x86-64/pr21038a.d: Adjust.
+	* testsuite/ld-x86-64/pr21038a-now.d: Adjust.
+
 2017-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22064
