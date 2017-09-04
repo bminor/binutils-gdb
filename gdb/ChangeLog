@@ -1,5 +1,10 @@
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
+	* eval.c (evaluate_subexp_standard) <UNOP_COMPLEMENT, UNOP_ADDR>:
+	Remove useless assignments to 'op'.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
 	* eval.c (eval_skip_value): New function.
 	(evaluate_subexp_standard): Use it.
 

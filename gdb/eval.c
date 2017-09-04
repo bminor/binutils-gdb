@@ -2493,7 +2493,6 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case UNOP_COMPLEMENT:
       /* C++: check for and handle destructor names.  */
-      op = exp->elts[*pos].opcode;
 
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
@@ -2560,8 +2559,6 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case UNOP_ADDR:
       /* C++: check for and handle pointer to members.  */
-
-      op = exp->elts[*pos].opcode;
 
       if (noside == EVAL_SKIP)
 	{
