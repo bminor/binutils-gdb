@@ -52,6 +52,14 @@
 	16-bit absolute branches into 10-bit pc-relative branches on the
 	MSP430 as well as the MSP430X.
 
+	PR 21916
+	* elf-attrs.c (_bfd_elf_parse_attributes): Complain about very
+	small section lengths.
+	* elf.c (_bfd_elf_setup_sections): Skip empty entries in the group
+	table.
+	(elfcore_grok_freebsd_prstatus): Add checks to make sure that
+	there is enough data present in the note.
+
 2017-09-04  Alan Modra  <amodra@gmail.com>
 
 	PR 22067
