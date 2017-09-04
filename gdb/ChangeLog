@@ -1,3 +1,8 @@
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* btrace.c (ftrace_add_pt): Pass btrace_insn to
+	ftrace_update_insns by reference instead of pointer.
+
 2017-09-04  Yao Qi  <yao.qi@linaro.org>
 
 	* i386-go32-tdep.c: Include x86-xstate.h.

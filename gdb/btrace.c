@@ -1325,8 +1325,7 @@ ftrace_add_pt (struct btrace_thread_info *btinfo,
 	  /* Maintain the function level offset.  */
 	  *plevel = std::min (*plevel, bfun->level);
 
-	  btrace_insn btinsn = pt_btrace_insn (insn);
-	  ftrace_update_insns (bfun, &btinsn);
+	  ftrace_update_insns (bfun, pt_btrace_insn (insn));
 	}
 
       if (status == -pte_eos)
