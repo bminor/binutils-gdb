@@ -1,3 +1,14 @@
+2017-09-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Remove the sec
+	argument.  Don't check relocation overflow.  Avoid relocation
+	overflow if --no-relax is used.  Set converted_reloc on symbol
+	if a GOTPCREL relocation is converted.
+	(elf_x86_64_relocate_section): Issue a fatal error and suggest
+	--no-relax if GOTPCREL relocation conversion leads to relocation
+	overflow.
+	* elfxx-x86.h (elf_x86_link_hash_entry): Add converted_reloc.
+
 2017-09-05  Alexander Fedotov <alexander.fedotov@nxp.com>
 	    Edmar Wienskoski <edmar.wienskoski@nxp.com
 
