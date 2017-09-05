@@ -1,3 +1,9 @@
+2017-09-05  Pedro Alves  <palves@redhat.com>
+
+	* eval.c (eval_call, evaluate_funcall): New functions, factored
+	out from ...
+	(evaluate_subexp_standard): ... this.
+
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
 	* amd64-tdep.c (amd64_target_description): Create target
