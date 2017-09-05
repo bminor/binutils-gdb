@@ -160,7 +160,6 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
       if (abfd != NULL)
 	storage->gdbarch = gdbarch_from_bfd (abfd);
 
-      obstack_init (&storage->storage_obstack);
       storage->filename_cache = bcache_xmalloc (NULL, NULL);
       storage->macro_cache = bcache_xmalloc (NULL, NULL);
       storage->language_of_main = language_unknown;

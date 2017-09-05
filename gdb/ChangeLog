@@ -1,3 +1,8 @@
+2017-09-05  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* objfiles.c (get_objfile_bfd_data): Remove useless obstack_init
+	call.
+
 2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* infrun.c (follow_exec): Call add_thread after
