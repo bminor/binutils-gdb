@@ -1,5 +1,10 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* configure.srv (srv_i386_linux_xmlfiles): Remove
+	i386/i386-XXX-linux.xml from it.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* configure.srv: Set srv_i386_linux_regobj empty if $development
 	is false.
 	* linux-i386-ipa.c (initialize_low_tracepoint): Don't call
