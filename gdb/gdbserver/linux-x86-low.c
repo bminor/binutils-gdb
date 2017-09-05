@@ -817,58 +817,17 @@ x86_linux_read_description (void)
   if (machine == EM_X86_64)
     {
 #ifdef __x86_64__
-      if (is_elf64)
+      const target_desc *tdesc = NULL;
+
+      if (xcr0_features)
 	{
-	  if (xcr0_features)
-	    {
-	      switch (xcr0 & X86_XSTATE_ALL_MASK)
-	        {
-		case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
-		  return tdesc_amd64_avx_mpx_avx512_pku_linux;
-
-		case X86_XSTATE_AVX_AVX512_MASK:
-		  return tdesc_amd64_avx_avx512_linux;
-
-		case X86_XSTATE_AVX_MPX_MASK:
-		  return tdesc_amd64_avx_mpx_linux;
-
-		case X86_XSTATE_MPX_MASK:
-		  return tdesc_amd64_mpx_linux;
-
-		case X86_XSTATE_AVX_MASK:
-		  return tdesc_amd64_avx_linux;
-
-		default:
-		  return tdesc_amd64_linux;
-		}
-	    }
-	  else
-	    return tdesc_amd64_linux;
+	  tdesc = amd64_linux_read_description (xcr0 & X86_XSTATE_ALL_MASK,
+						!is_elf64);
 	}
-      else
-	{
-	  if (xcr0_features)
-	    {
-	      switch (xcr0 & X86_XSTATE_ALL_MASK)
-	        {
-		case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
-		  /* No x32 MPX and PKU, fall back to avx_avx512.  */
-		  return tdesc_x32_avx_avx512_linux;
 
-		case X86_XSTATE_AVX_AVX512_MASK:
-		  return tdesc_x32_avx_avx512_linux;
-
-		case X86_XSTATE_MPX_MASK: /* No MPX on x32.  */
-		case X86_XSTATE_AVX_MASK:
-		  return tdesc_x32_avx_linux;
-
-		default:
-		  return tdesc_x32_linux;
-		}
-	    }
-	  else
-	    return tdesc_x32_linux;
-	}
+      if (tdesc == NULL)
+	tdesc = amd64_linux_read_description (X86_XSTATE_SSE_MASK, !is_elf64);
+      return tdesc;
 #endif
     }
   else
@@ -2881,19 +2840,7 @@ x86_get_ipa_tdesc_idx (void)
   const struct target_desc *tdesc = regcache->tdesc;
 
 #ifdef __x86_64__
-  if (tdesc == tdesc_amd64_linux || tdesc == tdesc_amd64_linux_no_xml
-      || tdesc == tdesc_x32_linux)
-    return X86_TDESC_SSE;
-  if (tdesc == tdesc_amd64_avx_linux || tdesc == tdesc_x32_avx_linux)
-    return X86_TDESC_AVX;
-  if (tdesc == tdesc_amd64_mpx_linux)
-    return X86_TDESC_MPX;
-  if (tdesc == tdesc_amd64_avx_mpx_linux)
-    return X86_TDESC_AVX_MPX;
-  if (tdesc == tdesc_amd64_avx_mpx_avx512_pku_linux || tdesc == tdesc_x32_avx_avx512_linux)
-    return X86_TDESC_AVX_MPX_AVX512_PKU;
-  if (tdesc == tdesc_amd64_avx_avx512_linux)
-    return X86_TDESC_AVX_AVX512;
+  return amd64_get_ipa_tdesc_idx (tdesc);
 #endif
 
   if (tdesc == tdesc_i386_linux_no_xml)
@@ -2953,19 +2900,10 @@ initialize_low_arch (void)
 {
   /* Initialize the Linux target descriptions.  */
 #ifdef __x86_64__
-  init_registers_amd64_linux ();
-  init_registers_amd64_avx_linux ();
-  init_registers_amd64_mpx_linux ();
-  init_registers_amd64_avx_mpx_linux ();
-  init_registers_amd64_avx_avx512_linux ();
-  init_registers_amd64_avx_mpx_avx512_pku_linux ();
-
-  init_registers_x32_linux ();
-  init_registers_x32_avx_linux ();
-  init_registers_x32_avx_avx512_linux ();
-
   tdesc_amd64_linux_no_xml = XNEW (struct target_desc);
-  copy_target_description (tdesc_amd64_linux_no_xml, tdesc_amd64_linux);
+  copy_target_description (tdesc_amd64_linux_no_xml,
+			   amd64_linux_read_description (X86_XSTATE_SSE_MASK,
+							 false));
   tdesc_amd64_linux_no_xml->xmltarget = xmltarget_amd64_linux_no_xml;
 #endif
 

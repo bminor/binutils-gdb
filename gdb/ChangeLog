@@ -1,5 +1,16 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* amd64-linux-tdep.c: Include arch/amd64.h.  Don't include
+	features/i386/*.c.
+	(amd64_linux_read_description): Call
+	amd64_create_target_description.
+	* arch/amd64.c: New file.
+	* arch/amd64.h: New file.
+	* configure.tgt (x86_64-*-linux*): Append amd64.o.
+	* Makefile.in (ALL_64_TARGET_OBS): Append amd64.o.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* amd64-linux-tdep.c: Don't include amd64-XXX-linux and
 	x32-XXX-linux.c.  Include 64bit-XX.c and x32-XX.c.
 	(amd64_linux_read_description): Create target descriptions.

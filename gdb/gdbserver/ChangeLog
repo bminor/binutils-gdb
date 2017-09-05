@@ -1,5 +1,30 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* Makefile.in (arch-amd64.o): New rule.
+	* configure.srv: Append arch-amd64.o.
+	* linux-amd64-ipa.c: Include common/x86-xstate.h.
+	(get_ipa_tdesc): Call amd64_linux_read_description.
+	(initialize_low_tracepoint): Don't call init_registers_x32_XXX
+	and init_registers_amd64_XXX.
+	* linux-x86-low.c (x86_linux_read_description): Call
+	amd64_linux_read_description.
+	(x86_get_ipa_tdesc_idx): Call amd64_get_ipa_tdesc_idx.
+	(initialize_low_arch): Don't call init_registers_x32_XXX and
+	init_registers_amd64_XXX.
+	* linux-x86-tdesc-selftest.c: Declare init_registers_amd64_XXX
+	and tdesc_amd64_XXX.
+	[__x86_64__] (amd64_tdesc_test): New function.
+	(initialize_low_tdesc) [__x86_64__]: Call init_registers_x32_XXX
+	and init_registers_amd64_XXX.
+	* linux-x86-tdesc.c: Include arch/amd64.h.
+	(xcr0_to_tdesc_idx): New function.
+	(i386_linux_read_description): New function.
+	(amd64_get_ipa_tdesc_idx): New function.
+	* linux-x86-tdesc.h (amd64_get_ipa_tdesc_idx): Declare.
+	(amd64_get_ipa_tdesc): Declare.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* configure.srv (srv_i386_linux_xmlfiles): Remove
 	i386/i386-XXX-linux.xml from it.
 

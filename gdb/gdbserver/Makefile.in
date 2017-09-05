@@ -532,6 +532,10 @@ arch-i386.o: ../arch/i386.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
+arch-amd64.o: ../arch/amd64.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
 # Rules for objects that go in the in-process agent.
 
 %-ipa.o: %-generated.c

@@ -22,6 +22,51 @@
 #include "linux-x86-tdesc.h"
 #include "arch/i386.h"
 #include "common/x86-xstate.h"
+#ifdef __x86_64__
+#include "arch/amd64.h"
+#endif
+
+/* Return the right x86_linux_tdesc index for a given XCR0.  Return
+   X86_TDESC_LAST if can't find a match.  */
+
+static enum x86_linux_tdesc
+xcr0_to_tdesc_idx (uint64_t xcr0, bool is_x32)
+{
+  if (xcr0 & X86_XSTATE_PKRU)
+    {
+      if (is_x32)
+	{
+	  /* No x32 MPX and PKU, fall back to avx_avx512.  */
+	  return X86_TDESC_AVX_AVX512;
+	}
+      else
+	return X86_TDESC_AVX_MPX_AVX512_PKU;
+    }
+  else if (xcr0 & X86_XSTATE_AVX512)
+    return X86_TDESC_AVX_AVX512;
+  else if ((xcr0 & X86_XSTATE_AVX_MPX_MASK) == X86_XSTATE_AVX_MPX_MASK)
+    {
+      if (is_x32) /* No MPX on x32.  */
+	return X86_TDESC_AVX;
+      else
+	return X86_TDESC_AVX_MPX;
+    }
+  else if (xcr0 & X86_XSTATE_MPX)
+    {
+      if (is_x32) /* No MPX on x32.  */
+	return X86_TDESC_AVX;
+      else
+	return X86_TDESC_MPX;
+    }
+  else if (xcr0 & X86_XSTATE_AVX)
+    return X86_TDESC_AVX;
+  else if (xcr0 & X86_XSTATE_SSE)
+    return X86_TDESC_SSE;
+  else if (xcr0 & X86_XSTATE_X87)
+    return X86_TDESC_MMX;
+  else
+    return X86_TDESC_LAST;
+}
 
 static struct target_desc *i386_tdescs[X86_TDESC_LAST] = { };
 
@@ -32,25 +77,12 @@ static struct target_desc *i386_tdescs[X86_TDESC_LAST] = { };
 const struct target_desc *
 i386_linux_read_description (uint64_t xcr0)
 {
-  struct target_desc **tdesc = NULL;
+  enum x86_linux_tdesc idx = xcr0_to_tdesc_idx (xcr0, false);
 
-  if (xcr0 & X86_XSTATE_PKRU)
-     tdesc = &i386_tdescs[X86_TDESC_AVX_MPX_AVX512_PKU];
-  else if (xcr0 & X86_XSTATE_AVX512)
-    tdesc = &i386_tdescs[X86_TDESC_AVX_AVX512];
-  else if ((xcr0 & X86_XSTATE_AVX_MPX_MASK) == X86_XSTATE_AVX_MPX_MASK)
-    tdesc = &i386_tdescs[X86_TDESC_AVX_MPX];
-  else if (xcr0 & X86_XSTATE_MPX)
-    tdesc = &i386_tdescs[X86_TDESC_MPX];
-  else if (xcr0 & X86_XSTATE_AVX)
-    tdesc = &i386_tdescs[X86_TDESC_AVX];
-  else if (xcr0 & X86_XSTATE_SSE)
-    tdesc = &i386_tdescs[X86_TDESC_SSE];
-  else if (xcr0 & X86_XSTATE_X87)
-    tdesc = &i386_tdescs[X86_TDESC_MMX];
-
-  if (tdesc == NULL)
+  if (idx == X86_TDESC_LAST)
     return NULL;
+
+  struct target_desc **tdesc = &i386_tdescs[idx];
 
   if (*tdesc == NULL)
     {
@@ -68,7 +100,44 @@ i386_linux_read_description (uint64_t xcr0)
 }
 #endif
 
+#ifdef __x86_64__
+
+static target_desc *amd64_tdescs[X86_TDESC_LAST] = { };
+static target_desc *x32_tdescs[X86_TDESC_LAST] = { };
+
+const struct target_desc *
+amd64_linux_read_description (uint64_t xcr0, bool is_x32)
+{
+  enum x86_linux_tdesc idx = xcr0_to_tdesc_idx (xcr0, is_x32);
+
+  if (idx == X86_TDESC_LAST)
+    return NULL;
+
+  struct target_desc **tdesc = NULL;
+
+  if (is_x32)
+    tdesc = &x32_tdescs[idx];
+  else
+    tdesc = &amd64_tdescs[idx];
+
+  if (*tdesc == NULL)
+    {
+      *tdesc = amd64_create_target_description (xcr0, is_x32);
+
+      init_target_desc (*tdesc);
+
 #ifndef IN_PROCESS_AGENT
+      static const char *expedite_regs_amd64[] = { "rbp", "rsp", "rip", NULL };
+      (*tdesc)->expedite_regs = expedite_regs_amd64;
+#endif
+    }
+  return *tdesc;
+}
+
+#endif
+
+#ifndef IN_PROCESS_AGENT
+
 int
 i386_get_ipa_tdesc_idx (const struct target_desc *tdesc)
 {
@@ -82,4 +151,23 @@ i386_get_ipa_tdesc_idx (const struct target_desc *tdesc)
   return X86_TDESC_MMX;
 }
 
+#if defined __x86_64__
+int
+amd64_get_ipa_tdesc_idx (const struct target_desc *tdesc)
+{
+  for (int i = 0; i < X86_TDESC_LAST; i++)
+    {
+      if (tdesc == amd64_tdescs[i])
+	return i;
+    }
+  for (int i = 0; i < X86_TDESC_LAST; i++)
+    {
+      if (tdesc == x32_tdescs[i])
+	return i;
+    }
+
+  return X86_TDESC_SSE;
+}
+
+#endif
 #endif

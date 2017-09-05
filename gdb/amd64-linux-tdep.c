@@ -39,18 +39,8 @@
 #include "solib-svr4.h"
 #include "xml-syscall.h"
 #include "glibc-tdep.h"
+#include "arch/amd64.h"
 #include "target-descriptions.h"
-
-#include "features/i386/64bit-avx.c"
-#include "features/i386/64bit-avx512.c"
-#include "features/i386/64bit-core.c"
-#include "features/i386/64bit-linux.c"
-#include "features/i386/64bit-mpx.c"
-#include "features/i386/64bit-pkeys.c"
-#include "features/i386/64bit-segments.c"
-#include "features/i386/64bit-sse.c"
-
-#include "features/i386/x32-core.c"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_AMD64 "syscalls/amd64-linux.xml"
@@ -1599,37 +1589,7 @@ amd64_linux_read_description (uint64_t xcr0_features_bit, bool is_x32)
     }
 
   if (*tdesc == NULL)
-    {
-      *tdesc = allocate_target_description ();
-
-      set_tdesc_architecture (*tdesc,
-			      is_x32 ? "i386:x64-32" : "i386:x86-64");
-
-      set_tdesc_osabi (*tdesc, osabi_from_tdesc_string ("GNU/Linux"));
-
-      long regnum = 0;
-
-      if (is_x32)
-	regnum = create_feature_i386_x32_core (*tdesc, regnum);
-      else
-	regnum = create_feature_i386_64bit_core (*tdesc, regnum);
-
-      regnum = create_feature_i386_64bit_sse (*tdesc, regnum);
-      regnum = create_feature_i386_64bit_linux (*tdesc, regnum);
-      regnum = create_feature_i386_64bit_segments (*tdesc, regnum);
-
-      if (xcr0_features_bit & X86_XSTATE_AVX)
-	regnum = create_feature_i386_64bit_avx (*tdesc, regnum);
-
-      if ((xcr0_features_bit & X86_XSTATE_MPX) && !is_x32)
-	regnum = create_feature_i386_64bit_mpx (*tdesc, regnum);
-
-      if (xcr0_features_bit & X86_XSTATE_AVX512)
-	regnum = create_feature_i386_64bit_avx512 (*tdesc, regnum);
-
-      if ((xcr0_features_bit & X86_XSTATE_PKRU) && !is_x32)
-	regnum = create_feature_i386_64bit_pkeys (*tdesc, regnum);
-    }
+    *tdesc = amd64_create_target_description (xcr0_features_bit, is_x32);
 
   return *tdesc;
 }
