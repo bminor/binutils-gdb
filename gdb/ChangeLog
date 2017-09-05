@@ -1,3 +1,7 @@
+2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (process_g_packet): Update error message.
+
 2017-09-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/22046
