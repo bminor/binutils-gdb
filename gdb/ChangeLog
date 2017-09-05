@@ -1,3 +1,8 @@
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.tgt (gdb_target_obs): Add i386.o for x86_64-*
+	targets.
+
 2017-09-05  Pedro Alves  <palves@redhat.com>
 
 	* eval.c (eval_call, evaluate_funcall): New functions, factored
