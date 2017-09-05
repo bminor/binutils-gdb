@@ -1,5 +1,13 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-x86-tdesc.c: Include selftest.h.
+	(i386_tdesc_test): New function.
+	(initialize_low_tdesc): Call selftests::register_test.
+	* tdesc.h: Include regdef.h.
+	(target_desc): Override operator == and !=.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* configure.srv (srv_tgtobj): Append linux-x86-tdesc.o.
 	(ipa_obj): Likewise.
 	* linux-i386-ipa.c: Include common/x86-xstate.h

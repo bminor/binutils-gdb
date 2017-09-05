@@ -1,5 +1,9 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* regformats/regdef.h (struct reg): Override operator == and !=.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* arch/tdesc.h: New file.
 	* regformats/regdat.sh: Generate code using tdesc_create_reg.
 	* target-descriptions.c: Update comments.
