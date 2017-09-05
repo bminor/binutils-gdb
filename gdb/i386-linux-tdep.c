@@ -46,13 +46,7 @@
 #include "record-full.h"
 #include "linux-record.h"
 
-#include "features/i386/32bit-core.c"
-#include "features/i386/32bit-sse.c"
-#include "features/i386/32bit-linux.c"
-#include "features/i386/32bit-avx.c"
-#include "features/i386/32bit-mpx.c"
-#include "features/i386/32bit-avx512.c"
-#include "features/i386/32bit-pkeys.c"
+#include "arch/i386.h"
 #include "target-descriptions.h"
 
 /* Return non-zero, when the register is in the corresponding register
@@ -700,33 +694,7 @@ i386_linux_read_description (uint64_t xcr0)
     [(xcr0 & X86_XSTATE_PKRU) ? 1 : 0];
 
   if (*tdesc == NULL)
-    {
-      *tdesc = allocate_target_description ();
-      set_tdesc_architecture (*tdesc, bfd_scan_arch ("i386"));
-      set_tdesc_osabi (*tdesc, osabi_from_tdesc_string ("GNU/Linux"));
-
-      long regnum = 0;
-
-      if (xcr0 & X86_XSTATE_X87)
-	regnum = create_feature_i386_32bit_core (*tdesc, regnum);
-
-      if (xcr0 & X86_XSTATE_SSE)
-	regnum = create_feature_i386_32bit_sse (*tdesc, regnum);
-
-      regnum = create_feature_i386_32bit_linux (*tdesc, regnum);
-
-      if (xcr0 & X86_XSTATE_AVX)
-	regnum = create_feature_i386_32bit_avx (*tdesc, regnum);
-
-      if (xcr0 & X86_XSTATE_MPX)
-	regnum = create_feature_i386_32bit_mpx (*tdesc, regnum);
-
-      if (xcr0 & X86_XSTATE_AVX512)
-	regnum = create_feature_i386_32bit_avx512 (*tdesc, regnum);
-
-      if (xcr0 & X86_XSTATE_PKRU)
-	regnum = create_feature_i386_32bit_pkeys (*tdesc, regnum);
-    }
+    *tdesc = i386_create_target_description (xcr0);
 
   return *tdesc;
 }

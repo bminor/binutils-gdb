@@ -201,7 +201,6 @@ int tdesc_register_in_reggroup_p (struct gdbarch *gdbarch, int regno,
 
 /* Methods for constructing a target description.  */
 
-struct target_desc *allocate_target_description (void);
 struct cleanup *make_cleanup_free_target_description (struct target_desc *);
 void set_tdesc_architecture (struct target_desc *,
 			     const struct bfd_arch_info *);

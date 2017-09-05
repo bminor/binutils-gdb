@@ -1,5 +1,24 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* Makefile.in (ALL_TARGET_OBS): Add i386.o.
+	(SFILES): Add arch/i386.c.
+	(HFILES_NO_SRCDIR): Add arch/i386.h.
+	* arch/i386.c: New file.
+	* arch/i386.h: New file.
+	* arch/tdesc.h (allocate_target_description): Declare.
+	(set_tdesc_architecture): Declare.
+	(set_tdesc_osabi): Declare.
+	* configure.tgt (i[34567]86-*-linux*): Add i386.o.
+	* i386-linux-tdep.c: Don't include ../features/i386/32bit-XXX.c.
+	include arch/i386.h.
+	(i386_linux_read_description): Remove code and call
+	i386_create_target_description.
+	(set_tdesc_architecture): New function.
+	(set_tdesc_osabi): New function.
+	* target-descriptions.h (allocate_target_description): Remove.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* arch/tdesc.h (tdesc_create_feature): Add an argument xml.
 	* target-descriptions.c (tdesc_create_feature): Likewise, and
 	adjust code.

@@ -122,6 +122,7 @@ case "${target}" in
 			    srv_xmlfiles="${srv_xmlfiles} $srv_amd64_linux_xmlfiles"
 			    srv_tgtobj="amd64-linux-siginfo.o"
 			fi
+			srv_tgtobj="${srv_tgtobj} arch-i386.o"
 			srv_tgtobj="${srv_tgtobj} $srv_linux_obj linux-x86-low.o x86-low.o x86-dregs.o i387-fp.o"
 			srv_tgtobj="${srv_tgtobj} linux-x86-tdesc.o"
 			srv_tgtobj="${srv_tgtobj} linux-btrace.o x86-linux.o"
@@ -131,6 +132,7 @@ case "${target}" in
 			srv_linux_thread_db=yes
 			srv_linux_btrace=yes
 			ipa_obj="${ipa_i386_linux_regobj} linux-i386-ipa.o linux-x86-tdesc-ipa.o"
+			ipa_obj="${ipa_obj} i386-ipa.o"
 			;;
   i[34567]86-*-lynxos*)	srv_regobj="i386.o"
 			srv_tgtobj="lynx-low.o lynx-i386-low.o fork-child.o fork-inferior.o"
@@ -358,6 +360,7 @@ case "${target}" in
 			;;
   x86_64-*-linux*)	srv_regobj="$srv_amd64_linux_regobj $srv_i386_linux_regobj"
 			srv_tgtobj="$srv_linux_obj linux-x86-low.o x86-low.o x86-dregs.o i387-fp.o"
+			srv_tgtobj="${srv_tgtobj} arch-i386.o"
 			srv_tgtobj="${srv_tgtobj} linux-x86-tdesc.o"
 			srv_tgtobj="${srv_tgtobj} linux-btrace.o x86-linux.o"
 			srv_tgtobj="${srv_tgtobj} x86-linux-dregs.o"

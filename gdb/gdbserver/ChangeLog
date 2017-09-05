@@ -1,5 +1,18 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* Makefile.in (arch-i386.o): New rule.
+	* configure.srv (i[34567]86-*-linux*): Add arch-i386.o.
+	(x86_64-*-linux*): Likewise.
+	* linux-x86-tdesc.c: Don't include ../features/i386/32bit-XXX.c,
+	include arch/i386.h.
+	(i386_linux_read_description): Remove code and call
+	i386_create_target_description.
+	* tdesc.c (allocate_target_description): New function.
+	* tdesc.h (set_tdesc_architecture): Remove declaration.
+	(set_tdesc_osabi): Likewise.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-x86-tdesc.c: Don't include <inttypes.h>.
 	(i386_linux_read_description) [!IN_PROCESS_AGENT]: Call
 	set_tdesc_architecture and set_tdesc_osabi.  Remove code setting
