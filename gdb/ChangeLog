@@ -1,5 +1,18 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* arch/tdesc.h (tdesc_create_feature): Add an argument xml.
+	* target-descriptions.c (tdesc_create_feature): Likewise, and
+	adjust code.
+	* features/i386/32bit-avx.c: Re-generated.
+	* features/i386/32bit-avx512.c: Re-generated.
+	* features/i386/32bit-core.c: Re-generated.
+	* features/i386/32bit-linux.c: Re-generated.
+	* features/i386/32bit-mpx.c: Re-generated.
+	* features/i386/32bit-pkeys.c: Re-generated.
+	* features/i386/32bit-sse.c: Re-generated.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* regformats/regdef.h (struct reg): Override operator == and !=.
 
 2017-09-05  Yao Qi  <yao.qi@linaro.org>

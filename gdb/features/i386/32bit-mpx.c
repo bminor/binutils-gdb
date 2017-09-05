@@ -8,7 +8,7 @@ create_feature_i386_32bit_mpx (struct target_desc *result, long regnum)
 {
   struct tdesc_feature *feature;
 
-  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.mpx");
+  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.mpx", "32bit-mpx.xml");
   struct tdesc_type *field_type;
   struct tdesc_type *type;
   type = tdesc_create_struct (feature, "br128");

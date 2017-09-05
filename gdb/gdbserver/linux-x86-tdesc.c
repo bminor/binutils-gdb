@@ -21,7 +21,6 @@
 #include "tdesc.h"
 #include "linux-x86-tdesc.h"
 #include "x86-xstate.h"
-#include <inttypes.h>
 
 #if defined __i386__ || !defined IN_PROCESS_AGENT
 #include "../features/i386/32bit-core.c"
@@ -145,6 +144,11 @@ i386_linux_read_description (uint64_t xcr0)
     {
       *tdesc = new target_desc ();
 
+#ifndef IN_PROCESS_AGENT
+      set_tdesc_architecture (*tdesc, "i386");
+      set_tdesc_osabi (*tdesc, "GNU/Linux");
+#endif
+
       long regnum = 0;
 
       if (xcr0 & X86_XSTATE_X87)
@@ -172,24 +176,6 @@ i386_linux_read_description (uint64_t xcr0)
 #ifndef IN_PROCESS_AGENT
       static const char *expedite_regs_i386[] = { "ebp", "esp", "eip", NULL };
       (*tdesc)->expedite_regs = expedite_regs_i386;
-
-      if (xcr0 & X86_XSTATE_PKRU)
-	(*tdesc)->xmltarget = "i386-avx-mpx-avx512-pku-linux.xml";
-      else if (xcr0 & X86_XSTATE_AVX512)
-	(*tdesc)->xmltarget = "i386-avx-avx512-linux.xml";
-      else if ((xcr0 & X86_XSTATE_AVX_MPX_MASK) == X86_XSTATE_AVX_MPX_MASK)
-	(*tdesc)->xmltarget = "i386-avx-mpx-linux.xml";
-      else if (xcr0 & X86_XSTATE_MPX)
-	(*tdesc)->xmltarget = "i386-mpx-linux.xml";
-      else if (xcr0 & X86_XSTATE_AVX)
-	(*tdesc)->xmltarget = "i386-avx-linux.xml";
-      else if (xcr0 & X86_XSTATE_SSE)
-	(*tdesc)->xmltarget = "i386-linux.xml";
-      else if (xcr0 & X86_XSTATE_X87)
-	(*tdesc)->xmltarget = "i386-mmx-linux.xml";
-      else
-	internal_error (__FILE__, __LINE__,
-			"unknown xcr0: %" PRIu64, xcr0);
 #endif
     }
 

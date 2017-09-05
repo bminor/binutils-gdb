@@ -61,6 +61,62 @@ current_target_desc (void)
 
   return current_process ()->tdesc;
 }
+
+void
+set_tdesc_architecture (struct target_desc *target_desc,
+			const char *name)
+{
+  target_desc->arch = xstrdup (name);
+}
+
+void
+set_tdesc_osabi (struct target_desc *target_desc, const char *name)
+{
+  target_desc->osabi = xstrdup (name);
+}
+
+/* Return a string which is of XML format, including XML target
+   description to be sent to GDB.  */
+
+const char *
+tdesc_get_features_xml (target_desc *tdesc)
+{
+  /* Either .xmltarget or .features is not NULL.  */
+  gdb_assert (tdesc->xmltarget != NULL
+	      || (tdesc->features != NULL
+		  && tdesc->arch != NULL
+		  && tdesc->osabi != NULL));
+
+  if (tdesc->xmltarget == NULL)
+    {
+      std::string buffer ("@<?xml version=\"1.0\"?>");
+
+      buffer += "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">";
+      buffer += "<target>";
+      buffer += "<architecture>";
+      buffer += tdesc->arch;
+      buffer += "</architecture>";
+
+      buffer += "<osabi>";
+      buffer += tdesc->osabi;
+      buffer += "</osabi>";
+
+      char *xml;
+
+      for (int i = 0; VEC_iterate (char_ptr, tdesc->features, i, xml); i++)
+	{
+	  buffer += "<xi:include href=\"";
+	  buffer += xml;
+	  buffer += "\"/>";
+	}
+
+      buffer += "</target>";
+
+      tdesc->xmltarget = xstrdup (buffer.c_str ());
+    }
+
+  return tdesc->xmltarget;
+}
 #endif
 
 struct tdesc_type
@@ -69,8 +125,12 @@ struct tdesc_type
 /* See arch/tdesc.h.  */
 
 struct tdesc_feature *
-tdesc_create_feature (struct target_desc *tdesc, const char *name)
+tdesc_create_feature (struct target_desc *tdesc, const char *name,
+		      const char *xml)
 {
+#ifndef IN_PROCESS_AGENT
+  VEC_safe_push (char_ptr, tdesc->features, xstrdup (xml));
+#endif
   return tdesc;
 }
 
