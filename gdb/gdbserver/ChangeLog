@@ -1,5 +1,10 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-x86-low.c (x86_get_ipa_tdesc_idx): Use X86_TDESC_MMX
+	instead of 0.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* Makefile.in (IPA_OBJS): Add vec-ipa.o
 	* regcache.c (get_thread_regcache): Use VEC_length.
 	(init_register_cache): Likewise.
