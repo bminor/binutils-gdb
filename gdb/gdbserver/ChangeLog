@@ -1,5 +1,12 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* configure.srv: Empty srv_amd64_linux_regobj if $development is
+	false.
+	(ipa_amd64_linux_regobj): Remove.
+	(ipa_x32_linux_regobj): Remove.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* Makefile.in (arch-amd64.o): New rule.
 	* configure.srv: Append arch-amd64.o.
 	* linux-amd64-ipa.c: Include common/x86-xstate.h.
