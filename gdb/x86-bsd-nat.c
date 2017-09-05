@@ -51,10 +51,15 @@ x86bsd_mourn_inferior (struct target_ops *ops)
   super_mourn_inferior (ops);
 }
 
-/* Not all versions of FreeBSD/i386 that support the debug registers
-   have this macro.  */
+/* Helper macro to access debug register X.  FreeBSD/amd64 and modern
+   versions of FreeBSD/i386 provide this macro in system headers.  Define
+   a local version for systems that do not provide it.  */
 #ifndef DBREG_DRX
+#ifdef __NetBSD__
+#define DBREG_DRX(d, x) ((d)->dr[x])
+#else
 #define DBREG_DRX(d, x) ((&d->dr0)[x])
+#endif
 #endif
 
 static unsigned long

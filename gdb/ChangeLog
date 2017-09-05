@@ -1,5 +1,11 @@
 2017-09-04  John Baldwin  <jhb@FreeBSD.org>
 
+	* configure.nat: Add "x86-nat.o x86-dregs.o" for NetBSD/amd64 and
+	NetBSD/i386.
+	* x86-bsd-nat.c [!DBREG_DRX && __NetBSD__]: Define DBREG_DRX.
+
+2017-09-04  John Baldwin  <jhb@FreeBSD.org>
+
 	* bsd-kvm.o: Make <sys/user.h> conditional on HAVE_SYS_USER_H.
 
 2017-09-04  John Baldwin  <jhb@FreeBSD.org>
