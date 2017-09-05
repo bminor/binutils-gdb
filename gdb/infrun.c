@@ -5326,8 +5326,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       if (!ptid_equal (ecs->ptid, inferior_ptid))
 	context_switch (ecs->ptid);
 
-      stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
-
       /* Do whatever is necessary to the parent branch of the vfork.  */
       handle_vfork_child_exec_or_exit (1);
 
@@ -5335,6 +5333,8 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
          Must do this now, before trying to determine whether to
          stop.  */
       follow_exec (inferior_ptid, ecs->ws.value.execd_pathname);
+
+      stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
       /* In follow_exec we may have deleted the original thread and
 	 created a new one.  Make sure that the event thread is the
