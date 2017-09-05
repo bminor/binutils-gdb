@@ -1,3 +1,12 @@
+2017-09-05  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
+
+	PR binutils/22032
+	* opncls.c (bfd_close_all_done): Don't call bfd_cache_close
+	before _close_and_cleanup.  Call iovec->bclose after.
+	(bfd_close): Remove code common to, and call, bfd_close_all_done.
+
 2017-09-04  Nick Clifton  <nickc@redhat.com>
 
 	Import from mainline:
