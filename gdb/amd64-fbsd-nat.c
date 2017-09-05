@@ -34,6 +34,7 @@
 #include "amd64-nat.h"
 #include "x86-bsd-nat.h"
 #include "x86-nat.h"
+#include "x86-xstate.h"
 
 
 /* Offset in `struct reg' where MEMBER is stored.  */

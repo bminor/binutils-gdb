@@ -1,5 +1,10 @@
 2017-09-04  John Baldwin  <jhb@FreeBSD.org>
 
+	* amd64-fbsd-nat.c: Add include of "x86-xstate.h".
+	* i386-fbsd-nat.c: Likewise.
+
+2017-09-04  John Baldwin  <jhb@FreeBSD.org>
+
 	* unittests/array-view-selftests.c: Add include of <array>.
 
 2017-09-04  John Baldwin  <jhb@FreeBSD.org>
