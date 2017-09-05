@@ -1,5 +1,40 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* amd64-tdep.c (amd64_target_description): Create target
+	descriptions.
+	(_initialize_amd64_tdep): Don't call functions
+	initialize_tdesc_amd64_*.  Add self tests.
+	* arch/amd64.c (amd64_create_target_description): Add parameter
+	is_linux.  Call set_tdesc_osabi if is_linux is true.
+	* arch/amd64.h (amd64_create_target_description): Update the
+	declaration.
+	* arch/i386.c (i386_create_target_description): Add parameter
+	is_linux.  Call set_tdesc_osabi if is_linux is true.
+	* arch/i386.h (i386_create_target_description): Update
+	declaration.
+	* configure.tgt: Add i386.o to gdb_target_obs.
+	* features/Makefile (XMLTOC): Remove i386/*.xml.
+	* features/i386/amd64-avx-avx512.c: Remove.
+	* features/i386/amd64-avx-mpx-avx512-pku.c: Remove.
+	* features/i386/amd64-avx-mpx.c: Remove.
+	* features/i386/amd64-avx.c: Remove.
+	* features/i386/amd64-mpx.c: Remove.
+	* features/i386/amd64.c: Remove.
+	* features/i386/i386-avx-avx512.c: Remove.
+	* features/i386/i386-avx-mpx-avx512-pku.c: Remove.
+	* features/i386/i386-avx-mpx.c: Remove.
+	* features/i386/i386-avx.c: Remove.
+	* features/i386/i386-mmx.c: Remove.
+	* features/i386/i386-mpx.c: Remove.
+	* features/i386/i386.c: Remove.
+	* i386-tdep.c: Don't include features/i386/i386*.c., include
+	target-descriptions.h and arch/i386.h.
+	(i386_target_description): Create target descriptions.
+	(i386_gdbarch_init): Don't call initialize_tdesc_i386_*
+	functions.  Do self tests.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* features/Makefile (XMLTOC): Remove i386/amd64XXX-linux.xml.
 	* features/i386/amd64-avx-avx512-linux.c: Removed.
 	* features/i386/amd64-avx-linux.c: Removed.

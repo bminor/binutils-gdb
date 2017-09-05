@@ -18,4 +18,4 @@
 #include "tdesc.h"
 #include <stdint.h>
 
-target_desc *i386_create_target_description (uint64_t xcr0);
+target_desc *i386_create_target_description (uint64_t xcr0, bool is_linux);

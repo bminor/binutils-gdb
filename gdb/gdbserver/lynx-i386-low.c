@@ -19,6 +19,8 @@
 #include "lynx-low.h"
 #include <limits.h>
 #include <sys/ptrace.h>
+#include "x86-xstate.h"
+#include "arch/i386.h"
 
 /* The following two typedefs are defined in a .h file which is not
    in the standard include path (/sys/include/family/x86/ucontext.h),
@@ -117,10 +119,6 @@ enum lynx_i386_gdb_regnum
   I386_MXCSR_REGNUM = I386_XMM0_REGNUM + 8,
   I386_SENTINEL_REGUM
 };
-
-/* Defined in auto-generated file i386.c.  */
-extern void init_registers_i386 (void);
-extern const struct target_desc *tdesc_i386;
 
 /* The fill_function for the general-purpose register set.  */
 
@@ -295,8 +293,7 @@ lynx_i386_store_fpregset (struct regcache *regcache, const char *buf)
 static void
 lynx_i386_arch_setup (void)
 {
-  init_registers_i386 ();
-  lynx_tdesc = tdesc_i386;
+  lynx_tdesc = i386_create_target_description (X86_XSTATE_SSE_MASK, false);
 }
 
 /* Description of all the x86-lynx register sets.  */

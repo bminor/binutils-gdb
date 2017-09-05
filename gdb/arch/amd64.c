@@ -31,17 +31,19 @@
 #include "../features/i386/x32-core.c"
 
 /* Create amd64 target descriptions according to XCR0.  If IS_X32 is
-   true, create the x32 ones.  */
+   true, create the x32 ones.  If IS_LINUX is true, create target
+   descriptions for Linux.  */
 
 target_desc *
-amd64_create_target_description (uint64_t xcr0, bool is_x32)
+amd64_create_target_description (uint64_t xcr0, bool is_x32, bool is_linux)
 {
   target_desc *tdesc = allocate_target_description ();
 
 #ifndef IN_PROCESS_AGENT
   set_tdesc_architecture (tdesc, is_x32 ? "i386:x64-32" : "i386:x86-64");
 
-  set_tdesc_osabi (tdesc, "GNU/Linux");
+  if (is_linux)
+    set_tdesc_osabi (tdesc, "GNU/Linux");
 #endif
 
   long regnum = 0;
@@ -52,7 +54,8 @@ amd64_create_target_description (uint64_t xcr0, bool is_x32)
     regnum = create_feature_i386_64bit_core (tdesc, regnum);
 
   regnum = create_feature_i386_64bit_sse (tdesc, regnum);
-  regnum = create_feature_i386_64bit_linux (tdesc, regnum);
+  if (is_linux)
+    regnum = create_feature_i386_64bit_linux (tdesc, regnum);
   regnum = create_feature_i386_64bit_segments (tdesc, regnum);
 
   if (xcr0 & X86_XSTATE_AVX)

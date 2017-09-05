@@ -1,5 +1,20 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* configure.srv (srv_i386_regobj): Remove.
+	(srv_amd64_regobj): Remove.
+	(srv_regobj): Set it to "" for x86 non-linux targets.
+	* linux-x86-tdesc.c (i386_linux_read_description):
+	* lynx-i386-low.c: Include x86-xstate.h and arch/i386.h.
+	(init_registers_i386): Remove the declaration.
+	(tdesc_i386): Remove the declaration.
+	(lynx_i386_arch_setup): Call i386_create_target_description.
+	* nto-x86-low.c: Likewise.
+	* win32-i386-low.c [__x86_64__]: include arch/amd64.h.
+	[!__x86_64__]: include arch/i386.h.
+	(i386_arch_setup) [__x86_64__]: Call amd64_create_target_description.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* configure.srv (srv_amd64_linux_xmlfiles): Remove
 	i386/amd64-XXX-linux from it.
 

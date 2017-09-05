@@ -1589,7 +1589,7 @@ amd64_linux_read_description (uint64_t xcr0_features_bit, bool is_x32)
     }
 
   if (*tdesc == NULL)
-    *tdesc = amd64_create_target_description (xcr0_features_bit, is_x32);
+    *tdesc = amd64_create_target_description (xcr0_features_bit, is_x32, true);
 
   return *tdesc;
 }
