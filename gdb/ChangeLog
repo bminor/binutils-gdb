@@ -1,5 +1,18 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* features/Makefile (XMLTOC): Remove i386/amd64XXX-linux.xml.
+	* features/i386/amd64-avx-avx512-linux.c: Removed.
+	* features/i386/amd64-avx-linux.c: Removed.
+	* features/i386/amd64-avx-mpx-avx512-pku-linux.c: Removed.
+	* features/i386/amd64-avx-mpx-linux.c: Removed.
+	* features/i386/amd64-linux.c: Removed.
+	* features/i386/amd64-mpx-linux.c: Removed.
+	* features/i386/x32-avx-avx512-linux.c: Removed.
+	* features/i386/x32-avx-linux.c: Removed.
+	* features/i386/x32-linux.c: Removed.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* amd64-linux-tdep.c: Include arch/amd64.h.  Don't include
 	features/i386/*.c.
 	(amd64_linux_read_description): Call
