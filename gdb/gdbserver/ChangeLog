@@ -1,5 +1,10 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* configure.srv (srv_amd64_linux_xmlfiles): Remove
+	i386/amd64-XXX-linux from it.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* configure.srv: Empty srv_amd64_linux_regobj if $development is
 	false.
 	(ipa_amd64_linux_regobj): Remove.
