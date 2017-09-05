@@ -1052,7 +1052,7 @@ dump_subexp_body_standard (struct expression *exp,
 	    if (space)
 	      fputs_filtered (" ", stream);
 	    space = true;
-	    fprintf_filtered (stream, mod);
+	    fprintf_filtered (stream, "%s", mod);
 	  };
 	if (flags & TYPE_INSTANCE_FLAG_CONST)
 	  print_one ("const");

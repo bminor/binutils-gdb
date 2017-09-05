@@ -1,3 +1,8 @@
+2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* expprint.c (dump_subexp_body_standard): Use constant format
+	string in fprintf_filtered call.
+
 2017-09-04  John Baldwin  <jhb@FreeBSD.org>
 
 	* configure.nat: Add "x86-nat.o x86-dregs.o" for NetBSD/amd64 and
