@@ -37,7 +37,9 @@
 #include "readline/readline.h"
 #include <sys/param.h>
 #include <sys/proc.h>
+#ifdef HAVE_SYS_USER_H
 #include <sys/user.h>
+#endif
 
 #include "bsd-kvm.h"
 

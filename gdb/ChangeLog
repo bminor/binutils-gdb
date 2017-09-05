@@ -1,5 +1,9 @@
 2017-09-04  John Baldwin  <jhb@FreeBSD.org>
 
+	* bsd-kvm.o: Make <sys/user.h> conditional on HAVE_SYS_USER_H.
+
+2017-09-04  John Baldwin  <jhb@FreeBSD.org>
+
 	* bsd-kvm.o: Define _KMEMUSER.
 	* configure.ac: Define _KMEMUSER when checking for "struct lwp".
 	* configure: Regenerate.
