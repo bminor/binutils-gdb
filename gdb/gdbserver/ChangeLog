@@ -1,5 +1,16 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* configure.srv: Set srv_i386_linux_regobj empty if $development
+	is false.
+	* linux-i386-ipa.c (initialize_low_tracepoint): Don't call
+	initialize_low_tdesc.
+	* linux-x86-low.c (initialize_low_arch): Wrap initialize_low_tdesc
+	with #if initialize_low_tdesc.
+	* linux-x86-tdesc-selftest.c: New file.
+	* linux-x86-tdesc.c: Move code to linux-x86-tdesc-selftest.c.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* Makefile.in (arch-i386.o): New rule.
 	* configure.srv (i[34567]86-*-linux*): Add arch-i386.o.
 	(x86_64-*-linux*): Likewise.
