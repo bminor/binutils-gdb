@@ -1,5 +1,10 @@
 2017-09-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Properly set
+	converted_reloc.
+
+2017-09-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Remove the sec
 	argument.  Don't check relocation overflow.  Avoid relocation
 	overflow if --no-relax is used.  Set converted_reloc on symbol

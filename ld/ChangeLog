@@ -1,5 +1,11 @@
 2017-09-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-x86-64/pr19609-5d.d: Updated.
+	* testsuite/ld-x86-64/pr19609-7a.d: Likewise.
+	* testsuite/ld-x86-64/pr19609-7c.d: Likewise.
+
+2017-09-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-x86-64/pr19609-4e.d: Updated.
 	* testsuite/ld-x86-64/pr19609-6a.d: Likewise.
 

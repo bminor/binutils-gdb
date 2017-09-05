@@ -1597,10 +1597,10 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
   if (no_overflow)
     return TRUE;
 
+convert:
   if (h != NULL)
     ((struct elf_x86_link_hash_entry *) h)->converted_reloc = 1;
 
-convert:
   if (opcode == 0xff)
     {
       /* We have "call/jmp *foo@GOTPCREL(%rip)".  */
