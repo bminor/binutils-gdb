@@ -1,3 +1,30 @@
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	PR python/15622:
+	* NEWS: Add entry.
+	* python/python.c (do_start_initialization): Initialize new event
+	types.
+	* python/python-internal.h (gdbpy_initialize_new_inferior_event)
+	(gdbpy_initialize_inferior_deleted_event)
+	(gdbpy_initialize_new_thread_event): Declare.
+	* python/py-threadevent.c (create_thread_event_object): Add option
+	"thread" parameter.
+	* python/py-inferior.c (new_thread_event_object_type)
+	(new_inferior_event_object_type)
+	(inferior_deleted_event_object_type): Declare.
+	(python_new_inferior, python_inferior_deleted): New functions.
+	(add_thread_object): Emit new_thread event.
+	(gdbpy_initialize_inferior): Attach new functions to corresponding
+	observers.
+	(new_thread, new_inferior, inferior_deleted): Define new event
+	types.
+	* python/py-evts.c (gdbpy_initialize_py_events): Add new
+	registries.
+	* python/py-events.h (events_object) <new_inferior,
+	inferior_deleted, new_thread>: New fields.
+	* python/py-event.h (create_thread_event_breakpoint): Add optional
+	"thread" parameter.
+
 2017-09-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* utils.c (abort_with_message): Don't compare gdb_stderr to NULL,

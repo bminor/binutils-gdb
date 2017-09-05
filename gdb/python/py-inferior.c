@@ -30,6 +30,13 @@
 #include "py-event.h"
 #include "py-stopevent.h"
 
+extern PyTypeObject new_thread_event_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
+extern PyTypeObject new_inferior_event_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
+extern PyTypeObject inferior_deleted_event_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
+
 struct threadlist_entry {
   thread_object *thread_obj;
   struct threadlist_entry *next;
@@ -235,6 +242,60 @@ inferior_to_inferior_object (struct inferior *inferior)
   return (PyObject *) inf_obj;
 }
 
+/* Called when a new inferior is created.  Notifies any Python event
+   listeners.  */
+static void
+python_new_inferior (struct inferior *inf)
+{
+  if (!gdb_python_initialized)
+    return;
+
+  gdbpy_enter enter_py (python_gdbarch, python_language);
+
+  if (evregpy_no_listeners_p (gdb_py_events.new_inferior))
+    return;
+
+  gdbpy_ref<> inf_obj (inferior_to_inferior_object (inf));
+  if (inf_obj == NULL)
+    {
+      gdbpy_print_stack ();
+      return;
+    }
+
+  gdbpy_ref<> event (create_event_object (&new_inferior_event_object_type));
+  if (event == NULL
+      || evpy_add_attribute (event.get (), "inferior", inf_obj.get ()) < 0
+      || evpy_emit_event (event.get (), gdb_py_events.new_inferior) < 0)
+    gdbpy_print_stack ();
+}
+
+/* Called when an inferior is removed.  Notifies any Python event
+   listeners.  */
+static void
+python_inferior_deleted (struct inferior *inf)
+{
+  if (!gdb_python_initialized)
+    return;
+
+  gdbpy_enter enter_py (python_gdbarch, python_language);
+
+  if (evregpy_no_listeners_p (gdb_py_events.inferior_deleted))
+    return;
+
+  gdbpy_ref<> inf_obj (inferior_to_inferior_object (inf));
+  if (inf_obj == NULL)
+    {
+      gdbpy_print_stack ();
+      return;
+    }
+
+  gdbpy_ref<> event (create_event_object (&inferior_deleted_event_object_type));
+  if (event == NULL
+      || evpy_add_attribute (event.get (), "inferior", inf_obj.get ()) < 0
+      || evpy_emit_event (event.get (), gdb_py_events.inferior_deleted) < 0)
+    gdbpy_print_stack ();
+}
+
 /* Finds the Python Inferior object for the given PID.  Returns a
    reference, or NULL if PID does not match any inferior object. */
 
@@ -298,6 +359,15 @@ add_thread_object (struct thread_info *tp)
 
   inf_obj->threads = entry;
   inf_obj->nthreads++;
+
+  if (evregpy_no_listeners_p (gdb_py_events.new_thread))
+    return;
+
+  gdbpy_ref<> event (create_thread_event_object (&new_thread_event_object_type,
+						 (PyObject *) thread_obj));
+  if (event == NULL
+      || evpy_emit_event (event.get (), gdb_py_events.new_thread) < 0)
+    gdbpy_print_stack ();
 }
 
 static void
@@ -823,6 +893,8 @@ gdbpy_initialize_inferior (void)
   observer_attach_register_changed (python_on_register_change);
   observer_attach_inferior_exit (python_inferior_exit);
   observer_attach_new_objfile (python_new_objfile);
+  observer_attach_inferior_added (python_new_inferior);
+  observer_attach_inferior_removed (python_inferior_deleted);
 
   membuf_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&membuf_object_type) < 0)
@@ -970,3 +1042,19 @@ PyTypeObject membuf_object_type = {
   0,				  /* tp_init */
   0,				  /* tp_alloc */
 };
+
+GDBPY_NEW_EVENT_TYPE (new_thread,
+		      "gdb.NewThreadEvent",
+		      "NewThreadEvent",
+		      "GDB new thread event object",
+		      thread_event_object_type);
+GDBPY_NEW_EVENT_TYPE (new_inferior,
+		      "gdb.NewInferiorEvent",
+		      "NewInferiorEvent",
+		      "GDB new inferior event object",
+		      event_object_type);
+GDBPY_NEW_EVENT_TYPE (inferior_deleted,
+		      "gdb.InferiorDeletedEvent",
+		      "InferiorDeletedEvent",
+		      "GDB inferior deleted event object",
+		      event_object_type);

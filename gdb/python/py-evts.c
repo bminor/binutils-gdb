@@ -89,6 +89,15 @@ gdbpy_initialize_py_events (void)
   if (add_new_registry (&gdb_py_events.clear_objfiles, "clear_objfiles") < 0)
     return -1;
 
+  if (add_new_registry (&gdb_py_events.new_inferior, "new_inferior") < 0)
+    return -1;
+
+  if (add_new_registry (&gdb_py_events.inferior_deleted, "inferior_deleted") < 0)
+    return -1;
+
+  if (add_new_registry (&gdb_py_events.new_thread, "new_thread") < 0)
+    return -1;
+
   if (add_new_registry (&gdb_py_events.breakpoint_created,
 			"breakpoint_created") < 0)
     return -1;

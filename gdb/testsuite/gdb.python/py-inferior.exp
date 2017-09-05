@@ -214,11 +214,32 @@ with_test_prefix "is_valid" {
     gdb_test "python print (inf_list\[0\].is_valid())" "True" \
 	"check inferior validity 1"
 
+    gdb_py_test_multiple "install new inferior event handler" \
+	"python" "" \
+	"my_inferior_count = 1" "" \
+	"def new_inf_handler(evt):" "" \
+	"  global my_inferior_count" "" \
+	"  if evt.inferior is not None:" "" \
+	"    my_inferior_count = my_inferior_count + 1" "" \
+	"gdb.events.new_inferior.connect(new_inf_handler)" "" \
+	"end" ""
+    gdb_py_test_multiple "install inferior deleted event handler" \
+	"python" "" \
+	"def del_inf_handler(evt):" "" \
+	"  global my_inferior_count" "" \
+	"  if evt.inferior is not None:" "" \
+	"    my_inferior_count = my_inferior_count - 1" "" \
+	"gdb.events.inferior_deleted.connect(del_inf_handler)" "" \
+	"end" ""
+
     gdb_test "add-inferior" "Added inferior 2.*" "add empty inferior 2"
     gdb_py_test_silent_cmd "python inf_list = gdb.inferiors()" "get new list" 1
     gdb_test "python print (len(inf_list))" "2" "get inferior list length 2"
     gdb_test "python print (inf_list\[0\].is_valid())" "True" \
 	"check inferior validity 2"
+
+    gdb_test "python print (my_inferior_count)" "2" \
+	"test new-inferior event handler"
 
     gdb_test "python print (inf_list\[1\].is_valid())" "True" \
 	"check inferior validity 3"
@@ -229,6 +250,9 @@ with_test_prefix "is_valid" {
 
     gdb_test "python print (inf_list\[1\].is_valid())" "False" \
 	"check inferior validity 5"
+
+    gdb_test "python print (my_inferior_count)" "1" \
+	"test inferior-deleted event handler"
 }
 
 # Test gdb.selected_inferior()

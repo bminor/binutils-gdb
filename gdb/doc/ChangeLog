@@ -1,3 +1,7 @@
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Events In Python): Document new events.
+
 2017-09-04  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Variables) <Program Variables>: Document inspecting

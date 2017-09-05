@@ -30,12 +30,24 @@ clean_restart ${testfile}
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
 
+gdb_py_test_multiple "install new_thread event handler" \
+    "python" "" \
+    "seen_a_thread = False" "" \
+    "def thread_handler(evt):" "" \
+    "  if evt.inferior_thread is not None:" "" \
+    "    global seen_a_thread" "" \
+    "    seen_a_thread = True" "" \
+    "gdb.events.new_thread.connect(thread_handler)" "" \
+    "end" ""
+
 # The following tests require execution.
 
 if ![runto_main] then {
     fail "can't run to main"
     return 0
 }
+
+gdb_test "python print(seen_a_thread)" "True"
 
 # Test basic gdb.Inferior attributes and methods.
 

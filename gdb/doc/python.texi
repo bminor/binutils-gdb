@@ -2989,6 +2989,39 @@ invalid state; that is, the @code{is_valid} method will return
 This event carries no payload.  It is emitted each time @value{GDBN}
 presents a prompt to the user.
 
+@item events.new_inferior
+This is emitted when a new inferior is created.  Note that the
+inferior is not necessarily running; in fact, it may not even have an
+associated executable.
+
+The event is of type @code{gdb.NewInferiorEvent}.  This has a single
+attribute:
+
+@defvar NewInferiorEvent.inferior
+The new inferior, a @code{gdb.Inferior} object.
+@end defvar
+
+@item events.inferior_deleted
+This is emitted when an inferior has been deleted.  Note that this is
+not the same as process exit; it is notified when the inferior itself
+is removed, say via @code{remove-inferiors}.
+
+The event is of type @code{gdb.InferiorDeletedEvent}.  This has a single
+attribute:
+
+@defvar NewInferiorEvent.inferior
+The inferior that is being removed, a @code{gdb.Inferior} object.
+@end defvar
+
+@item events.new_thread
+This is emitted when @value{GDBN} notices a new thread.  The event is of
+type @code{gdb.NewThreadEvent}, which extends @code{gdb.ThreadEvent}.
+This has a single attribute:
+
+@defvar NewThreadEvent.inferior_thread
+The new thread.
+@end defvar
+
 @end table
 
 @node Threads In Python

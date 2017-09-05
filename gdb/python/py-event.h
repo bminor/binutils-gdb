@@ -125,7 +125,8 @@ extern int evpy_emit_event (PyObject *event,
                             eventregistry_object *registry);
 
 extern PyObject *create_event_object (PyTypeObject *py_type);
-extern PyObject *create_thread_event_object (PyTypeObject *py_type);
+extern PyObject *create_thread_event_object (PyTypeObject *py_type,
+					     PyObject *thread = nullptr);
 extern int emit_new_objfile_event (struct objfile *objfile);
 extern int emit_clear_objfiles_event (void);
 
