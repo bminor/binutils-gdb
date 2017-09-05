@@ -1,3 +1,9 @@
+2017-09-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 21995
+	* readelf.c (process_mips_specific): Add checks for a NULL data
+	pointer.
+
 2017-09-05  Alexander Fedotov <alexander.fedotov@nxp.com>
 	    Edmar Wienskoski <edmar.wienskoski@nxp.com
 
