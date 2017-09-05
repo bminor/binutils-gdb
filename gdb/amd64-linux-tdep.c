@@ -1589,7 +1589,7 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
     {
     case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
       if (gdbarch_ptr_bit (gdbarch) == 32)
-	  /* No MPX on x32, fallback to AVX-AVX512.  */
+	/* No MPX, PKU on x32, fallback to AVX-AVX512.  */
 	return tdesc_x32_avx_avx512_linux;
       else
 	return tdesc_amd64_avx_mpx_avx512_pku_linux;
@@ -1600,13 +1600,13 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
 	return tdesc_amd64_avx_avx512_linux;
     case X86_XSTATE_MPX_MASK:
       if (gdbarch_ptr_bit (gdbarch) == 32)
-	  /* No MPX on x32, fallback to AVX-AVX512.  */
+	/* No MPX on x32, fallback to AVX.  */
 	return tdesc_x32_avx_linux;
       else
 	return tdesc_amd64_mpx_linux;
     case X86_XSTATE_AVX_MPX_MASK:
       if (gdbarch_ptr_bit (gdbarch) == 32)
-	  /* No MPX on x32, fallback to AVX-AVX512.  */
+	/* No MPX on x32, fallback to AVX.  */
 	return tdesc_x32_avx_linux;
       else
 	return tdesc_amd64_avx_mpx_linux;

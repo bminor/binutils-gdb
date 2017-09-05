@@ -1,5 +1,10 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* amd64-linux-tdep.c (amd64_linux_core_read_description): Update
+	comments.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* features/Makefile (XMLTOC): Remove i386/i386-XX-linux.xml.
 	* features/i386/i386-avx-avx512-linux.c: Remove.
 	* features/i386/i386-avx-linux.c: Remove.
