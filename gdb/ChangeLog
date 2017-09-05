@@ -1,5 +1,10 @@
 2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* infrun.c (follow_exec): Call add_thread after
+	target_find_description.
+
+2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* infrun.c (handle_inferior_event_1): When exec'ing, read
 	stop_pc after follow_exec.
 

@@ -1211,7 +1211,6 @@ follow_exec (ptid_t ptid, char *exec_file_target)
 
       set_current_inferior (inf);
       set_current_program_space (inf->pspace);
-      add_thread (ptid);
     }
   else
     {
@@ -1242,6 +1241,11 @@ follow_exec (ptid_t ptid, char *exec_file_target)
      the new one 64-bit), and before anything involving memory or
      registers.  */
   target_find_description ();
+
+  /* The add_thread call ends up reading registers, so do it after updating the
+     target description.  */
+  if (follow_exec_mode_string == follow_exec_mode_new)
+    add_thread (ptid);
 
   solib_create_inferior_hook (0);
 
