@@ -1,5 +1,16 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* features/Makefile (XMLTOC): Remove i386/i386-XX-linux.xml.
+	* features/i386/i386-avx-avx512-linux.c: Remove.
+	* features/i386/i386-avx-linux.c: Remove.
+	* features/i386/i386-avx-mpx-avx512-pku-linux.c: Remove.
+	* features/i386/i386-avx-mpx-linux.c: Remove.
+	* features/i386/i386-linux.c: Remove.
+	* features/i386/i386-mmx-linux.c: Remove.
+	* features/i386/i386-mpx-linux.c: Remove.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* Makefile.in (ALL_TARGET_OBS): Add i386.o.
 	(SFILES): Add arch/i386.c.
 	(HFILES_NO_SRCDIR): Add arch/i386.h.

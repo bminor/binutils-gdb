@@ -150,18 +150,11 @@ XMLTOC = \
 	i386/amd64-avx-mpx-linux.xml \
 	i386/amd64-avx-mpx.xml \
 	i386/amd64.xml \
-	i386/i386-avx-linux.xml \
 	i386/i386-avx.xml \
-	i386/i386-avx-avx512-linux.xml \
 	i386/i386-avx-avx512.xml \
-	i386/i386-avx-mpx-avx512-pku-linux.xml \
 	i386/i386-avx-mpx-avx512-pku.xml \
-	i386/i386-linux.xml \
-	i386/i386-mmx-linux.xml \
 	i386/i386-mmx.xml \
-	i386/i386-mpx-linux.xml \
 	i386/i386-mpx.xml \
-	i386/i386-avx-mpx-linux.xml \
 	i386/i386-avx-mpx.xml \
 	i386/i386.xml \
 	i386/x32-avx-linux.xml \
