@@ -6,6 +6,37 @@
 	* readelf.c (process_mips_specific): Add checks for a NULL data
 	pointer.
 
+	PR 21861
+	* winduni.c (codepages): Use cp1252 for codepage 0.
+
+	PR 21813
+	* rddbg.c (read_symbol_stabs_debugging_info): Check for an empty
+	string whilst concatenating symbol names.
+
+	PR 21909
+	* prdbg.c (pr_int_type): Increase size of local string buffer.
+	(pr_float_type): Likewise.
+	(pr_bool_type): Likewise.
+
+	PR 21820
+	* readelf.c (dump_section_as_strings): Do not fail if the section
+	was empty.
+	(dump_section_as_bytes): Likewise.
+
+	PR 21990
+	* readelf.c (process_version_sections <SHT_GNU_verneed>): Check
+	for invalid vn_next field before adding to idx.  Use unsigned
+	long for index vars.  Move index checks.
+	<SHT_GNU_verdef>: Likewise for vd_next.
+
+	PR 21994
+	* readelf.c (process_version_sections <SHT_GNU_verdef>): Check
+	vd_aux and vda_next for sanity.  Delete "end".  Correct overflow
+	checks.
+	(process_version_sections <SHT_GNU_verneed>): Correct overflow
+	check.  Don't report invalid vna_next on overflow.  Do report
+	invalid vna_next on size less than aux info.
+
 2017-08-12  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_note): Qualify NT_GNU_BUILD_ATTRIBUTE notes
