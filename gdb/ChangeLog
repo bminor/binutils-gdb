@@ -1,3 +1,7 @@
+2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (process_g_packet): Update error message.
+
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
 	* configure.tgt (gdb_target_obs): Add i386.o for x86_64-*
