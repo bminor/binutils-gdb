@@ -15296,7 +15296,7 @@ process_mips_specific (FILE * file)
 	      printf ("\n");
 	    }
 
-	  if (ent < end)
+	  if (data != NULL && ent < end)
 	    {
 	      printf (_(" Local entries:\n"));
 	      printf ("  %*s %10s %*s\n",
@@ -15826,7 +15826,7 @@ process_mips_specific (FILE * file)
 	}
       printf ("\n");
 
-      if (ent < local_end)
+      if (data != NULL && ent < local_end)
 	{
 	  printf (_(" Local entries:\n"));
 	  printf ("  %*s %10s %*s\n",
@@ -15842,7 +15842,7 @@ process_mips_specific (FILE * file)
 	  printf ("\n");
 	}
 
-      if (gotsym < symtabno)
+      if (data != NULL && gotsym < symtabno)
 	{
 	  int sym_width;
 

@@ -1,3 +1,11 @@
+2017-09-05  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
+
+	PR 21995
+	* readelf.c (process_mips_specific): Add checks for a NULL data
+	pointer.
+
 2017-08-12  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_note): Qualify NT_GNU_BUILD_ATTRIBUTE notes
