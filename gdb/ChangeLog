@@ -1,5 +1,26 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* amd64-linux-tdep.c: Don't include amd64-XXX-linux and
+	x32-XXX-linux.c.  Include 64bit-XX.c and x32-XX.c.
+	(amd64_linux_read_description): Create target descriptions.
+	(_initialize_amd64_linux_tdep): Don't call initialize_tdesc_XXX
+	functions.  Add unit tests.
+	* features/Makefile (FEATURE_XMLFILES): Append 64bit-XXX.xml and
+	x32-core.xml.
+	* features/i386/64bit-avx.c: Generated.
+	* features/i386/64bit-avx512.c: Generated.
+	* features/i386/64bit-core.c: Generated.
+	* features/i386/64bit-linux.c: Generated.
+	* features/i386/64bit-mpx.c: Generated.
+	* features/i386/64bit-pkeys.c: Generated.
+	* features/i386/64bit-segments.c: Generated.
+	* features/i386/64bit-sse.c: Generated.
+	* features/i386/x32-core.c: Generated.
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Print feature
+	c files for amd64-linux and x32-linux.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* amd64-linux-tdep.c (amd64_linux_read_description): New
 	function.
 	(amd64_linux_core_read_description): Call
