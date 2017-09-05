@@ -23,12 +23,13 @@ void
 init_target_desc (struct target_desc *tdesc)
 {
   int offset, i;
+  struct reg *reg;
 
   offset = 0;
-  for (i = 0; i < tdesc->num_registers; i++)
+  for (i = 0; VEC_iterate (tdesc_reg_p, tdesc->reg_defs, i, reg); i++)
     {
-      tdesc->reg_defs[i].offset = offset;
-      offset += tdesc->reg_defs[i].size;
+      reg->offset = offset;
+      offset += reg->size;
     }
 
   tdesc->registers_size = offset / 8;
@@ -40,14 +41,13 @@ init_target_desc (struct target_desc *tdesc)
 
 #ifndef IN_PROCESS_AGENT
 
-static const struct target_desc default_description = { 0 };
+static const struct target_desc default_description = { NULL, 0, NULL, NULL };
 
 void
 copy_target_description (struct target_desc *dest,
 			 const struct target_desc *src)
 {
   dest->reg_defs = src->reg_defs;
-  dest->num_registers = src->num_registers;
   dest->expedite_regs = src->expedite_regs;
   dest->registers_size = src->registers_size;
   dest->xmltarget = src->xmltarget;

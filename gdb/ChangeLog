@@ -1,5 +1,9 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* regformats/regdat.sh: Update generated code.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* regformats/regdat.sh: Adjust code order.
 
 2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>

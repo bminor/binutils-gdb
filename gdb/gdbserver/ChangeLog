@@ -1,3 +1,23 @@
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (IPA_OBJS): Add vec-ipa.o
+	* regcache.c (get_thread_regcache): Use VEC_length.
+	(init_register_cache): Likewise.
+	(regcache_cpy): Likewise.
+	(registers_to_string): Iterate reg_defs via VEC_iterate.
+	(find_regno): Likewise.
+	(find_register_by_number): Use VEC_index.
+	(register_size): Call find_register_by_number.
+	(register_data): Call find_register_by_number.
+	(supply_regblock): Use VEC_length.
+	(regcache_raw_read_unsigned): Likewise.
+	* tdesc.c (init_target_desc): Iterate reg_defs via
+	VEC_iterate.
+	(default_description): Update initializer.
+	(copy_target_description): Don't update field num_registers.
+	* tdesc.h (struct target_desc) <reg_defs>: Change it to VEC.
+	<num_registers>: Remove.
+
 2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* Makefile.in (.SECONDARY): Define target.
