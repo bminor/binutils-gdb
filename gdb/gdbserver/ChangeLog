@@ -1,5 +1,23 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* configure.srv (srv_tgtobj): Append linux-x86-tdesc.o.
+	(ipa_obj): Likewise.
+	* linux-i386-ipa.c: Include common/x86-xstate.h
+	(get_ipa_tdesc): Call i386_linux_read_description.
+	(initialize_low_tracepoint): Don't call  init_registers_XXX
+	functions, call initialize_low_tdesc instead.
+	* linux-x86-low.c (x86_linux_read_description): Call
+	i386_linux_read_description.
+	(initialize_low_arch): Don't call init_registers_i386_XXX
+	functions, call initialize_low_tdesc.
+	* linux-x86-tdesc.c: New file.
+	* linux-x86-tdesc.h (x86_linux_tdesc): New X86_TDESC_LAST.
+	(i386_get_ipa_tdesc_idx): Declare.
+	(i386_get_ipa_tdesc): Declare.
+	(initialize_low_tdesc): Declare.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-x86-low.c (x86_get_ipa_tdesc_idx): Use X86_TDESC_MMX
 	instead of 0.
 

@@ -19,14 +19,20 @@
 #ifndef TDESC_H
 #define TDESC_H
 
+#include "arch/tdesc.h"
+
 struct reg;
 
 typedef struct reg *tdesc_reg_p;
 DEF_VEC_P(tdesc_reg_p);
 
-/* A target description.  */
+struct tdesc_feature
+{};
 
-struct target_desc
+/* A target description.  Inherit from tdesc_feature so that target_desc
+   can be used as tdesc_feature.  */
+
+struct target_desc : tdesc_feature
 {
   /* A vector of elements of register definitions that
      describe the inferior's register set.  */
@@ -38,13 +44,28 @@ struct target_desc
 #ifndef IN_PROCESS_AGENT
   /* An array of register names.  These are the "expedite" registers:
      registers whose values are sent along with stop replies.  */
-  const char **expedite_regs;
+  const char **expedite_regs = NULL;
 
   /* Defines what to return when looking for the "target.xml" file in
      response to qXfer:features:read.  Its contents can either be
      verbatim XML code (prefixed with a '@') or else the name of the
      actual XML file to be used in place of "target.xml".  */
-  const char *xmltarget;
+  const char *xmltarget = NULL;
+
+public:
+  target_desc ()
+    : reg_defs (NULL), registers_size (0)
+  {}
+
+  ~target_desc ()
+  {
+    int i;
+    struct reg *reg;
+
+    for (i = 0; VEC_iterate (tdesc_reg_p, reg_defs, i, reg); i++)
+      xfree (reg);
+    VEC_free (tdesc_reg_p, reg_defs);
+  }
 #endif
 };
 

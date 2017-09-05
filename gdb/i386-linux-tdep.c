@@ -53,6 +53,7 @@
 #include "features/i386/32bit-mpx.c"
 #include "features/i386/32bit-avx512.c"
 #include "features/i386/32bit-pkeys.c"
+#include "target-descriptions.h"
 
 /* Return non-zero, when the register is in the corresponding register
    group.  Put the LINUX_ORIG_EAX register in the system group.  */

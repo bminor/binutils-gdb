@@ -1,5 +1,20 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* arch/tdesc.h: New file.
+	* regformats/regdat.sh: Generate code using tdesc_create_reg.
+	* target-descriptions.c: Update comments.
+	* target-descriptions.h: Include "arch/tdesc.h".  Remove the
+	declarations.
+	* features/i386/32bit-avx.c: Re-generated.
+	* features/i386/32bit-avx512.c: Re-generated.
+	* features/i386/32bit-core.c: Re-generated.
+	* features/i386/32bit-linux.c: Re-generated.
+	* features/i386/32bit-mpx.c: Re-generated.
+	* features/i386/32bit-pkeys.c: Re-generated.
+	* features/i386/32bit-sse.c: Re-generated.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* regformats/regdat.sh: Update generated code.
 
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
