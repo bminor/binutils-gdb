@@ -1,5 +1,17 @@
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
+	* amd64-linux-tdep.c (amd64_linux_read_description): New
+	function.
+	(amd64_linux_core_read_description): Call
+	amd64_linux_read_description.
+	(amd64_linux_init_abi): Likewise.
+	(amd64_x32_linux_init_abi): Likewise.
+	* amd64-linux-tdep.h (amd64_linux_read_description): Declare.
+	* x86-linux-nat.c (x86_linux_read_description): Call
+	amd64_linux_read_description.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
 	* amd64-linux-tdep.c (amd64_linux_core_read_description): Update
 	comments.
 
