@@ -196,6 +196,9 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 	FALSE)
 };
 
+/* Set if a relocation is converted from a GOTPCREL relocation.  */
+#define R_X86_64_converted_reloc_bit (1 << 7)
+
 #define IS_X86_64_PCREL_TYPE(TYPE)	\
   (   ((TYPE) == R_X86_64_PC8)		\
    || ((TYPE) == R_X86_64_PC16)		\
@@ -337,6 +340,9 @@ elf_x86_64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   unsigned r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
+  if (r_type != (unsigned int) R_X86_64_GNU_VTINHERIT
+      && r_type != (unsigned int) R_X86_64_GNU_VTENTRY)
+    r_type &= ~R_X86_64_converted_reloc_bit;
   cache_ptr->howto = elf_x86_64_rtype_to_howto (abfd, r_type);
   BFD_ASSERT (r_type == cache_ptr->howto->type);
 }
@@ -1145,13 +1151,17 @@ elf_x86_64_check_tls_transition (bfd *abfd,
       if (h == NULL
 	  || !((struct elf_x86_link_hash_entry *) h)->tls_get_addr)
 	return FALSE;
-      else if (largepic)
-	return ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PLTOFF64;
-      else if (indirect_call)
-	return ELF32_R_TYPE (rel[1].r_info) == R_X86_64_GOTPCRELX;
       else
-	return (ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PC32
-		|| ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PLT32);
+	{
+	  r_type = (ELF32_R_TYPE (rel[1].r_info)
+		    & ~R_X86_64_converted_reloc_bit);
+	  if (largepic)
+	    return r_type == R_X86_64_PLTOFF64;
+	  else if (indirect_call)
+	    return r_type == R_X86_64_GOTPCRELX;
+	  else
+	    return (r_type == R_X86_64_PC32 || r_type == R_X86_64_PLT32);
+	}
 
     case R_X86_64_GOTTPOFF:
       /* Check transition from IE access model:
@@ -1598,9 +1608,6 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
     return TRUE;
 
 convert:
-  if (h != NULL)
-    ((struct elf_x86_link_hash_entry *) h)->converted_reloc = 1;
-
   if (opcode == 0xff)
     {
       /* We have "call/jmp *foo@GOTPCREL(%rip)".  */
@@ -1742,7 +1749,8 @@ rewrite_modrm_rex:
       bfd_put_8 (abfd, opcode, contents + roff - 2);
     }
 
-  irel->r_info = htab->r_info (r_symndx, r_type);
+  irel->r_info = htab->r_info (r_symndx,
+			       r_type | R_X86_64_converted_reloc_bit);
 
   *converted = TRUE;
 
@@ -2527,6 +2535,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
       bfd_vma st_size;
       bfd_boolean resolved_to_zero;
       bfd_boolean relative_reloc;
+      bfd_boolean converted_reloc;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type == (int) R_X86_64_GNU_VTINHERIT
@@ -2536,6 +2545,9 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	    *wrel = *rel;
 	  continue;
 	}
+
+      converted_reloc = (r_type & R_X86_64_converted_reloc_bit) != 0;
+      r_type &= ~R_X86_64_converted_reloc_bit;
 
       if (r_type >= (int) R_X86_64_standard)
 	return _bfd_unrecognized_reloc (input_bfd, input_section, r_type);
@@ -4011,7 +4023,7 @@ check_relocation_error:
 
 	  if (r == bfd_reloc_overflow)
 	    {
-	      if (eh != NULL && eh->converted_reloc)
+	      if (converted_reloc)
 		{
 		  info->callbacks->einfo
 		    (_("%F%P: failed to convert GOTPCREL relocation; relink with --no-relax\n"));
@@ -5249,6 +5261,14 @@ static bfd *
 elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
 {
   struct elf_x86_plt_layout_table plt_layout;
+
+  if ((int) R_X86_64_standard >= (int) R_X86_64_converted_reloc_bit
+      || (int) R_X86_64_max <= (int) R_X86_64_converted_reloc_bit
+      || ((int) (R_X86_64_GNU_VTINHERIT | R_X86_64_converted_reloc_bit)
+	  != (int) R_X86_64_GNU_VTINHERIT)
+      || ((int) (R_X86_64_GNU_VTENTRY | R_X86_64_converted_reloc_bit)
+	  != (int) R_X86_64_GNU_VTENTRY))
+    abort ();
 
   plt_layout.is_vxworks = FALSE;
   if (get_elf_x86_64_backend_data (info->output_bfd)->os == is_normal)

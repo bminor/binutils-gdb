@@ -110,11 +110,6 @@ struct elf_x86_link_hash_entry
      is only used by x86-64.  */
   unsigned int needs_copy : 1;
 
-  /* TRUE if a symbol with GOTPCREL relocations which have been converted
-     to R_X86_64_PC32, R_X86_64_32 or R_X86_64_32S.  This is only used by
-     x86-64 for now.  */
-  unsigned int converted_reloc : 1;
-
   /* Reference count of C/C++ function pointer relocations in read-write
      section which can be resolved at run-time.  */
   bfd_signed_vma func_pointer_refcount;

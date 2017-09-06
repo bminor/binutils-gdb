@@ -1,5 +1,21 @@
 2017-09-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf64-x86-64.c (R_X86_64_converted_reloc_bit): New.
+	(elf_x86_64_info_to_howto): Get the real relocation type by
+	masking out R_X86_64_converted_reloc_bit.
+	(elf_x86_64_check_tls_transition): Get the real relocation type
+	by masking out R_X86_64_converted_reloc_bit.
+	(elf_x86_64_convert_load_reloc): Set R_X86_64_converted_reloc_bit
+	instead of setting converted_reloc.
+	(elf_x86_64_relocate_section): Check R_X86_64_converted_reloc_bit
+	instead of converted_reloc. Get the real relocation type by
+	masking out R_X86_64_converted_reloc_bit.
+	(elf_x86_64_link_setup_gnu_properties): Verify that the value of
+	R_X86_64_converted_reloc_bit is valid.
+	* elfxx-x86.h (converted_reloc): Removed.
+
+2017-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_relocate_section): Don't change r_type
 	when calling elf_i386_tls_transition.  Don't use ELF32_R_TYPE
 	to get the relocation type again.
