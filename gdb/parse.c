@@ -491,10 +491,18 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
 {
   bound_minimal_symbol bound_msym = {msymbol, objfile};
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  CORE_ADDR addr = BMSYMBOL_VALUE_ADDRESS (bound_msym);
   struct obj_section *section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
   enum minimal_symbol_type type = MSYMBOL_TYPE (msymbol);
   CORE_ADDR pc;
+
+  bool is_tls = (section != NULL
+		 && section->the_bfd_section->flags & SEC_THREAD_LOCAL);
+
+  /* Addresses of TLS symbols are really offsets into a
+     per-objfile/per-thread storage block.  */
+  CORE_ADDR addr = (is_tls
+		    ? MSYMBOL_VALUE_RAW_ADDRESS (bound_msym.minsym)
+		    : BMSYMBOL_VALUE_ADDRESS (bound_msym));
 
   /* The minimal symbol might point to a function descriptor;
      resolve it to the actual code address instead.  */
@@ -525,7 +533,7 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
   if (overlay_debugging)
     addr = symbol_overlayed_address (addr, section);
 
-  if (section && section->the_bfd_section->flags & SEC_THREAD_LOCAL)
+  if (is_tls)
     {
       /* Skip translation if caller does not need the address.  */
       if (address_p != NULL)

@@ -1,3 +1,8 @@
+2017-09-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/tls-nodebug-pie.c: New file.
+	* gdb.threads/tls-nodebug-pie.exp: New file.
+
 2017-09-05  Tom Tromey  <tom@tromey.com>
 
 	* lib/gdb.exp (gdb_compile): Don't use universal_compile_options
