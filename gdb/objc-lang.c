@@ -130,7 +130,8 @@ lookup_objc_class (struct gdbarch *gdbarch, const char *classname)
 
   classval = value_string (classname, strlen (classname) + 1, char_type);
   classval = value_coerce_array (classval);
-  return (CORE_ADDR) value_as_long (call_function_by_hand (function, 
+  return (CORE_ADDR) value_as_long (call_function_by_hand (function,
+							   NULL,
 							   1, &classval));
 }
 
@@ -160,7 +161,7 @@ lookup_child_selector (struct gdbarch *gdbarch, const char *selname)
   selstring = value_coerce_array (value_string (selname, 
 						strlen (selname) + 1,
 						char_type));
-  return value_as_long (call_function_by_hand (function, 1, &selstring));
+  return value_as_long (call_function_by_hand (function, NULL, 1, &selstring));
 }
 
 struct value * 
@@ -181,12 +182,13 @@ value_nsstring (struct gdbarch *gdbarch, char *ptr, int len)
   if (lookup_minimal_symbol("_NSNewStringFromCString", 0, 0).minsym)
     {
       function = find_function_in_inferior("_NSNewStringFromCString", NULL);
-      nsstringValue = call_function_by_hand(function, 1, &stringValue[2]);
+      nsstringValue = call_function_by_hand(function,
+					    NULL, 1, &stringValue[2]);
     }
   else if (lookup_minimal_symbol("istr", 0, 0).minsym)
     {
       function = find_function_in_inferior("istr", NULL);
-      nsstringValue = call_function_by_hand(function, 1, &stringValue[2]);
+      nsstringValue = call_function_by_hand(function, NULL, 1, &stringValue[2]);
     }
   else if (lookup_minimal_symbol("+[NSString stringWithCString:]", 0, 0).minsym)
     {
@@ -198,7 +200,7 @@ value_nsstring (struct gdbarch *gdbarch, char *ptr, int len)
 	(type, lookup_objc_class (gdbarch, "NSString"));
       stringValue[1] = value_from_longest 
 	(type, lookup_child_selector (gdbarch, "stringWithCString:"));
-      nsstringValue = call_function_by_hand(function, 3, &stringValue[0]);
+      nsstringValue = call_function_by_hand(function, NULL, 3, &stringValue[0]);
     }
   else
     error (_("NSString: internal error -- no way to create new NSString"));
@@ -1209,7 +1211,7 @@ print_object_command (char *args, int from_tty)
   if (function == NULL)
     error (_("Unable to locate _NSPrintForDebugger in child process"));
 
-  description = call_function_by_hand (function, 1, &object);
+  description = call_function_by_hand (function, NULL, 1, &object);
 
   string_addr = value_as_long (description);
   if (string_addr == 0)

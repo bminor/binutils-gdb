@@ -3854,20 +3854,20 @@ debug_goto_record (struct target_ops *self, ULONGEST arg1)
 }
 
 static void
-delegate_insn_history (struct target_ops *self, int arg1, int arg2)
+delegate_insn_history (struct target_ops *self, int arg1, gdb_disassembly_flags arg2)
 {
   self = self->beneath;
   self->to_insn_history (self, arg1, arg2);
 }
 
 static void
-tdefault_insn_history (struct target_ops *self, int arg1, int arg2)
+tdefault_insn_history (struct target_ops *self, int arg1, gdb_disassembly_flags arg2)
 {
   tcomplain ();
 }
 
 static void
-debug_insn_history (struct target_ops *self, int arg1, int arg2)
+debug_insn_history (struct target_ops *self, int arg1, gdb_disassembly_flags arg2)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_insn_history (...)\n", debug_target.to_shortname);
   debug_target.to_insn_history (&debug_target, arg1, arg2);
@@ -3876,25 +3876,25 @@ debug_insn_history (struct target_ops *self, int arg1, int arg2)
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg1);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg2);
+  target_debug_print_gdb_disassembly_flags (arg2);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
 static void
-delegate_insn_history_from (struct target_ops *self, ULONGEST arg1, int arg2, int arg3)
+delegate_insn_history_from (struct target_ops *self, ULONGEST arg1, int arg2, gdb_disassembly_flags arg3)
 {
   self = self->beneath;
   self->to_insn_history_from (self, arg1, arg2, arg3);
 }
 
 static void
-tdefault_insn_history_from (struct target_ops *self, ULONGEST arg1, int arg2, int arg3)
+tdefault_insn_history_from (struct target_ops *self, ULONGEST arg1, int arg2, gdb_disassembly_flags arg3)
 {
   tcomplain ();
 }
 
 static void
-debug_insn_history_from (struct target_ops *self, ULONGEST arg1, int arg2, int arg3)
+debug_insn_history_from (struct target_ops *self, ULONGEST arg1, int arg2, gdb_disassembly_flags arg3)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_insn_history_from (...)\n", debug_target.to_shortname);
   debug_target.to_insn_history_from (&debug_target, arg1, arg2, arg3);
@@ -3905,25 +3905,25 @@ debug_insn_history_from (struct target_ops *self, ULONGEST arg1, int arg2, int a
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  target_debug_print_gdb_disassembly_flags (arg3);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
 static void
-delegate_insn_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2, int arg3)
+delegate_insn_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2, gdb_disassembly_flags arg3)
 {
   self = self->beneath;
   self->to_insn_history_range (self, arg1, arg2, arg3);
 }
 
 static void
-tdefault_insn_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2, int arg3)
+tdefault_insn_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2, gdb_disassembly_flags arg3)
 {
   tcomplain ();
 }
 
 static void
-debug_insn_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2, int arg3)
+debug_insn_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2, gdb_disassembly_flags arg3)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_insn_history_range (...)\n", debug_target.to_shortname);
   debug_target.to_insn_history_range (&debug_target, arg1, arg2, arg3);
@@ -3934,7 +3934,7 @@ debug_insn_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2,
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_ULONGEST (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  target_debug_print_gdb_disassembly_flags (arg3);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 

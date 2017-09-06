@@ -526,6 +526,7 @@ SUBDIR_PYTHON_LDFLAGS =
 SUBDIR_PYTHON_CFLAGS =
 
 SUBDIR_UNITTESTS_SRCS = \
+	unittests/array-view-selftests.c \
 	unittests/environ-selftests.c \
 	unittests/function-view-selftests.c \
 	unittests/offset-type-selftests.c \
@@ -534,6 +535,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/scoped_restore-selftests.c
 
 SUBDIR_UNITTESTS_OBS = \
+	array-view-selftests.o \
 	environ-selftests.o \
 	function-view-selftests.o \
 	offset-type-selftests.o \
@@ -761,6 +763,7 @@ ALL_64_TARGET_OBS = \
 	alpha-nbsd-tdep.o \
 	alpha-obsd-tdep.o \
 	alpha-tdep.o \
+	amd64.o \
 	amd64-darwin-tdep.o \
 	amd64-dicos-tdep.o \
 	amd64-fbsd-tdep.o \
@@ -812,6 +815,7 @@ ALL_TARGET_OBS = \
 	hppa-nbsd-tdep.o \
 	hppa-obsd-tdep.o \
 	hppa-tdep.o \
+	i386.o \
 	i386-bsd-tdep.o \
 	i386-cygwin-tdep.o \
 	i386-darwin-tdep.o \
@@ -1030,6 +1034,7 @@ SFILES = \
 	agent.c \
 	annotate.c \
 	arch-utils.c \
+	arch/i386.c \
 	auto-load.c \
 	auxv.c \
 	ax-gdb.c \
@@ -1500,6 +1505,7 @@ HFILES_NO_SRCDIR = \
 	xtensa-tdep.h \
 	arch/aarch64-insn.h \
 	arch/arm.h \
+	arch/i386.h \
 	cli/cli-cmds.h \
 	cli/cli-decode.h \
 	cli/cli-script.h \

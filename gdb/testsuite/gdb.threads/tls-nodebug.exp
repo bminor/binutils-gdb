@@ -33,7 +33,10 @@ if ![runto_main] then {
 }
 
 # Formerly: Cannot access memory at address 0x0
-gdb_test "p thread_local" "= 42" "thread local storage"
+gdb_test "p thread_local" "'thread_local' has unknown type; cast it to its declared type" \
+    "thread local storage, unknown type"
+gdb_test "p (int) thread_local" "= 42" \
+    "thread local storage, cast"
 
 # Done!
 #

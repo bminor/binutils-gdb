@@ -2988,13 +2988,10 @@ val_print_string (struct type *elttype, const char *encoding,
 
   if (err != 0)
     {
-      char *str;
-
-      str = memory_error_message (TARGET_XFER_E_IO, gdbarch, addr);
-      make_cleanup (xfree, str);
+      std::string str = memory_error_message (TARGET_XFER_E_IO, gdbarch, addr);
 
       fprintf_filtered (stream, "<error: ");
-      fputs_filtered (str, stream);
+      fputs_filtered (str.c_str (), stream);
       fprintf_filtered (stream, ">");
     }
 

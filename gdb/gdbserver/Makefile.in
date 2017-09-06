@@ -400,6 +400,7 @@ IPA_OBJS = \
 	tdesc-ipa.o \
 	tracepoint-ipa.o \
 	utils-ipa.o \
+	vec-ipa.o \
 	${IPA_DEPFILES}
 
 IPA_LIB = libinproctrace.so
@@ -527,6 +528,14 @@ ax.o: ax.c
 	$(COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
 	$(POSTCOMPILE)
 
+arch-i386.o: ../arch/i386.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+arch-amd64.o: ../arch/amd64.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
 # Rules for objects that go in the in-process agent.
 
 %-ipa.o: %-generated.c
@@ -549,6 +558,10 @@ ax.o: ax.c
 	$(POSTCOMPILE)
 
 %-ipa.o: ../common/%.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+
+%-ipa.o: ../arch/%.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
@@ -631,5 +644,8 @@ endif
 
 # Disable implicit make rules.
 include $(srcdir)/../disable-implicit-rules.mk
+
+# Do not delete intermediate files (e.g. *-generated.c).
+.SECONDARY:
 
 # This is the end of "Makefile.in".

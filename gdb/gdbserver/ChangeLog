@@ -1,3 +1,158 @@
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv (srv_i386_regobj): Remove.
+	(srv_amd64_regobj): Remove.
+	(srv_regobj): Set it to "" for x86 non-linux targets.
+	* linux-x86-tdesc.c (i386_linux_read_description):
+	* lynx-i386-low.c: Include x86-xstate.h and arch/i386.h.
+	(init_registers_i386): Remove the declaration.
+	(tdesc_i386): Remove the declaration.
+	(lynx_i386_arch_setup): Call i386_create_target_description.
+	* nto-x86-low.c: Likewise.
+	* win32-i386-low.c [__x86_64__]: include arch/amd64.h.
+	[!__x86_64__]: include arch/i386.h.
+	(i386_arch_setup) [__x86_64__]: Call amd64_create_target_description.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv (srv_amd64_linux_xmlfiles): Remove
+	i386/amd64-XXX-linux from it.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv: Empty srv_amd64_linux_regobj if $development is
+	false.
+	(ipa_amd64_linux_regobj): Remove.
+	(ipa_x32_linux_regobj): Remove.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (arch-amd64.o): New rule.
+	* configure.srv: Append arch-amd64.o.
+	* linux-amd64-ipa.c: Include common/x86-xstate.h.
+	(get_ipa_tdesc): Call amd64_linux_read_description.
+	(initialize_low_tracepoint): Don't call init_registers_x32_XXX
+	and init_registers_amd64_XXX.
+	* linux-x86-low.c (x86_linux_read_description): Call
+	amd64_linux_read_description.
+	(x86_get_ipa_tdesc_idx): Call amd64_get_ipa_tdesc_idx.
+	(initialize_low_arch): Don't call init_registers_x32_XXX and
+	init_registers_amd64_XXX.
+	* linux-x86-tdesc-selftest.c: Declare init_registers_amd64_XXX
+	and tdesc_amd64_XXX.
+	[__x86_64__] (amd64_tdesc_test): New function.
+	(initialize_low_tdesc) [__x86_64__]: Call init_registers_x32_XXX
+	and init_registers_amd64_XXX.
+	* linux-x86-tdesc.c: Include arch/amd64.h.
+	(xcr0_to_tdesc_idx): New function.
+	(i386_linux_read_description): New function.
+	(amd64_get_ipa_tdesc_idx): New function.
+	* linux-x86-tdesc.h (amd64_get_ipa_tdesc_idx): Declare.
+	(amd64_get_ipa_tdesc): Declare.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv (srv_i386_linux_xmlfiles): Remove
+	i386/i386-XXX-linux.xml from it.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv: Set srv_i386_linux_regobj empty if $development
+	is false.
+	* linux-i386-ipa.c (initialize_low_tracepoint): Don't call
+	initialize_low_tdesc.
+	* linux-x86-low.c (initialize_low_arch): Wrap initialize_low_tdesc
+	with #if initialize_low_tdesc.
+	* linux-x86-tdesc-selftest.c: New file.
+	* linux-x86-tdesc.c: Move code to linux-x86-tdesc-selftest.c.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (arch-i386.o): New rule.
+	* configure.srv (i[34567]86-*-linux*): Add arch-i386.o.
+	(x86_64-*-linux*): Likewise.
+	* linux-x86-tdesc.c: Don't include ../features/i386/32bit-XXX.c,
+	include arch/i386.h.
+	(i386_linux_read_description): Remove code and call
+	i386_create_target_description.
+	* tdesc.c (allocate_target_description): New function.
+	* tdesc.h (set_tdesc_architecture): Remove declaration.
+	(set_tdesc_osabi): Likewise.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-x86-tdesc.c: Don't include <inttypes.h>.
+	(i386_linux_read_description) [!IN_PROCESS_AGENT]: Call
+	set_tdesc_architecture and set_tdesc_osabi.  Remove code setting
+	.xmltarget.
+	* server.c (get_features_xml): Call tdesc_get_features_xml.
+	* tdesc.c (set_tdesc_architecture): New function.
+	(set_tdesc_osabi): New function.
+	(tdesc_get_features_xml): New function.
+	(tdesc_create_feature): Add an argument.
+	* tdesc.h (struct target_desc) <features>: New field.
+	<arch, osabi>: New field.
+	(~target_desc): xfree features, arch, and osabi.
+	(target_desc::oerator==): Don't compare .xmltarget.
+	[!IN_PROCESS_AGENT] (set_tdesc_architecture): Declare.
+	(set_tdesc_osabi): Likewise.
+	(tdesc_get_features_xml): Likewise.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-x86-tdesc.c: Include selftest.h.
+	(i386_tdesc_test): New function.
+	(initialize_low_tdesc): Call selftests::register_test.
+	* tdesc.h: Include regdef.h.
+	(target_desc): Override operator == and !=.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv (srv_tgtobj): Append linux-x86-tdesc.o.
+	(ipa_obj): Likewise.
+	* linux-i386-ipa.c: Include common/x86-xstate.h
+	(get_ipa_tdesc): Call i386_linux_read_description.
+	(initialize_low_tracepoint): Don't call  init_registers_XXX
+	functions, call initialize_low_tdesc instead.
+	* linux-x86-low.c (x86_linux_read_description): Call
+	i386_linux_read_description.
+	(initialize_low_arch): Don't call init_registers_i386_XXX
+	functions, call initialize_low_tdesc.
+	* linux-x86-tdesc.c: New file.
+	* linux-x86-tdesc.h (x86_linux_tdesc): New X86_TDESC_LAST.
+	(i386_get_ipa_tdesc_idx): Declare.
+	(i386_get_ipa_tdesc): Declare.
+	(initialize_low_tdesc): Declare.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-x86-low.c (x86_get_ipa_tdesc_idx): Use X86_TDESC_MMX
+	instead of 0.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (IPA_OBJS): Add vec-ipa.o
+	* regcache.c (get_thread_regcache): Use VEC_length.
+	(init_register_cache): Likewise.
+	(regcache_cpy): Likewise.
+	(registers_to_string): Iterate reg_defs via VEC_iterate.
+	(find_regno): Likewise.
+	(find_register_by_number): Use VEC_index.
+	(register_size): Call find_register_by_number.
+	(register_data): Call find_register_by_number.
+	(supply_regblock): Use VEC_length.
+	(regcache_raw_read_unsigned): Likewise.
+	* tdesc.c (init_target_desc): Iterate reg_defs via
+	VEC_iterate.
+	(default_description): Update initializer.
+	(copy_target_description): Don't update field num_registers.
+	* tdesc.h (struct target_desc) <reg_defs>: Change it to VEC.
+	<num_registers>: Remove.
+
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (.SECONDARY): Define target.
+
 2017-09-03  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* linux-low.c (linux_wait_1): Adjust.

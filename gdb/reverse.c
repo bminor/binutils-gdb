@@ -121,7 +121,6 @@ save_bookmark_command (char *args, int from_tty)
 {
   /* Get target's idea of a bookmark.  */
   gdb_byte *bookmark_id = target_get_bookmark (args, from_tty);
-  struct bookmark *b, *b1;
   struct gdbarch *gdbarch = get_regcache_arch (get_current_regcache ());
 
   /* CR should not cause another identical bookmark.  */
@@ -131,9 +130,8 @@ save_bookmark_command (char *args, int from_tty)
     error (_("target_get_bookmark failed."));
 
   /* Set up a bookmark struct.  */
-  b = XCNEW (struct bookmark);
+  bookmark *b = new bookmark ();
   b->number = ++bookmark_count;
-  init_sal (&b->sal);
   b->pc = regcache_read_pc (get_current_regcache ());
   b->sal = find_pc_line (b->pc, 0);
   b->sal.pspace = get_frame_program_space (get_current_frame ());
@@ -143,7 +141,7 @@ save_bookmark_command (char *args, int from_tty)
   /* Add this bookmark to the end of the chain, so that a list
      of bookmarks will come out in order of increasing numbers.  */
 
-  b1 = bookmark_chain;
+  bookmark *b1 = bookmark_chain;
   if (b1 == 0)
     bookmark_chain = b;
   else
@@ -183,7 +181,7 @@ delete_one_bookmark (int num)
 	    break;
 	  }
       xfree (b->opaque_data);
-      xfree (b);
+      delete b;
       return 1;		/* success */
     }
   return 0;		/* failure */

@@ -184,9 +184,7 @@ check_status_exception_catchpoint (struct bpstats *bs)
 static void
 re_set_exception_catchpoint (struct breakpoint *self)
 {
-  struct symtabs_and_lines sals = {0};
-  struct symtabs_and_lines sals_end = {0};
-  struct cleanup *cleanup;
+  std::vector<symtab_and_line> sals;
   enum exception_event_kind kind = classify_exception_breakpoint (self);
   struct program_space *filter_pspace = current_program_space;
 
@@ -209,8 +207,8 @@ re_set_exception_catchpoint (struct breakpoint *self)
 	  explicit_loc.function_name
 	    = ASTRDUP (exception_functions[kind].function);
 	  event_location_up location = new_explicit_location (&explicit_loc);
-	  self->ops->decode_location (self, location.get (), filter_pspace,
-				      &sals);
+	  sals = self->ops->decode_location (self, location.get (),
+					     filter_pspace);
 	}
       CATCH (ex, RETURN_MASK_ERROR)
 	{
@@ -223,9 +221,7 @@ re_set_exception_catchpoint (struct breakpoint *self)
     }
   END_CATCH
 
-  cleanup = make_cleanup (xfree, sals.sals);
-  update_breakpoint_locations (self, filter_pspace, sals, sals_end);
-  do_cleanups (cleanup);
+  update_breakpoint_locations (self, filter_pspace, sals, {});
 }
 
 static enum print_stop_action

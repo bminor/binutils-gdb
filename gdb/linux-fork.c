@@ -248,7 +248,7 @@ call_lseek (int fd, off_t offset, int whence)
 {
   char exp[80];
 
-  snprintf (&exp[0], sizeof (exp), "lseek (%d, %ld, %d)",
+  snprintf (&exp[0], sizeof (exp), "(long) lseek (%d, %ld, %d)",
 	    fd, (long) offset, whence);
   return (off_t) parse_and_eval_long (&exp[0]);
 }
@@ -492,7 +492,7 @@ inferior_call_waitpid (ptid_t pptid, int pid)
   argv[2] = value_from_longest (builtin_type (gdbarch)->builtin_int, 0);
   argv[3] = 0;
 
-  retv = call_function_by_hand (waitpid_fn, 3, argv);
+  retv = call_function_by_hand (waitpid_fn, NULL, 3, argv);
   if (value_as_long (retv) < 0)
     goto out;
 
@@ -707,7 +707,7 @@ checkpoint_command (char *args, int from_tty)
     scoped_restore save_pid
       = make_scoped_restore (&checkpointing_pid, ptid_get_pid (inferior_ptid));
 
-    ret = call_function_by_hand (fork_fn, 0, &ret);
+    ret = call_function_by_hand (fork_fn, NULL, 0, &ret);
   }
 
   if (!ret)	/* Probably can't happen.  */

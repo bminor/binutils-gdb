@@ -138,35 +138,6 @@ XMLTOC = \
 	arm/arm-with-neon.xml \
 	arm/arm-with-vfpv2.xml \
 	arm/arm-with-vfpv3.xml \
-	i386/amd64-avx-linux.xml \
-	i386/amd64-avx.xml \
-	i386/amd64-avx-avx512-linux.xml \
-	i386/amd64-avx-avx512.xml \
-	i386/amd64-avx-mpx-avx512-pku-linux.xml \
-	i386/amd64-avx-mpx-avx512-pku.xml \
-	i386/amd64-linux.xml \
-	i386/amd64-mpx-linux.xml \
-	i386/amd64-mpx.xml \
-	i386/amd64-avx-mpx-linux.xml \
-	i386/amd64-avx-mpx.xml \
-	i386/amd64.xml \
-	i386/i386-avx-linux.xml \
-	i386/i386-avx.xml \
-	i386/i386-avx-avx512-linux.xml \
-	i386/i386-avx-avx512.xml \
-	i386/i386-avx-mpx-avx512-pku-linux.xml \
-	i386/i386-avx-mpx-avx512-pku.xml \
-	i386/i386-linux.xml \
-	i386/i386-mmx-linux.xml \
-	i386/i386-mmx.xml \
-	i386/i386-mpx-linux.xml \
-	i386/i386-mpx.xml \
-	i386/i386-avx-mpx-linux.xml \
-	i386/i386-avx-mpx.xml \
-	i386/i386.xml \
-	i386/x32-avx-linux.xml \
-	i386/x32-avx-avx512-linux.xml \
-	i386/x32-linux.xml \
 	microblaze-with-stack-protect.xml \
 	microblaze.xml \
 	mips-dsp-linux.xml \
@@ -255,7 +226,16 @@ FEATURE_XMLFILES = i386/32bit-core.xml \
 	i386/32bit-avx.xml \
 	i386/32bit-mpx.xml \
 	i386/32bit-avx512.xml \
-	i386/32bit-pkeys.xml
+	i386/32bit-pkeys.xml \
+	i386/64bit-avx512.xml \
+	i386/64bit-core.xml \
+	i386/64bit-mpx.xml \
+	i386/64bit-segments.xml \
+	i386/64bit-avx.xml \
+	i386/64bit-linux.xml \
+	i386/64bit-pkeys.xml \
+	i386/64bit-sse.xml \
+	i386/x32-core.xml
 
 FEATURE_CFILES = $(patsubst %.xml,%.c,$(FEATURE_XMLFILES))
 

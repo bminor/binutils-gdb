@@ -206,8 +206,6 @@ mi_cmd_interpreter_exec (const char *command, char **argv, int argc)
 {
   struct interp *interp_to_use;
   int i;
-  char *mi_error_message = NULL;
-  struct cleanup *old_chain;
 
   if (argc < 2)
     error (_("-interpreter-exec: "
@@ -231,24 +229,22 @@ mi_cmd_interpreter_exec (const char *command, char **argv, int argc)
 
   /* Now run the code.  */
 
-  old_chain = make_cleanup (null_cleanup, 0);
+  std::string mi_error_message;
   for (i = 1; i < argc; i++)
     {
       struct gdb_exception e = interp_exec (interp_to_use, argv[i]);
 
       if (e.reason < 0)
 	{
-	  mi_error_message = xstrdup (e.message);
-	  make_cleanup (xfree, mi_error_message);
+	  mi_error_message = e.message;
 	  break;
 	}
     }
 
   mi_remove_notify_hooks ();
 
-  if (mi_error_message != NULL)
-    error ("%s", mi_error_message);
-  do_cleanups (old_chain);
+  if (!mi_error_message.empty ())
+    error ("%s", mi_error_message.c_str ());
 }
 
 /* This inserts a number of hooks that are meant to produce

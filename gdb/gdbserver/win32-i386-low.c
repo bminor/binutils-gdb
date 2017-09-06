@@ -18,6 +18,11 @@
 #include "server.h"
 #include "win32-low.h"
 #include "x86-low.h"
+#include "x86-xstate.h"
+#ifdef __x86_64__
+#include "arch/amd64.h"
+#endif
+#include "arch/i386.h"
 
 #ifndef CONTEXT_EXTENDED_REGISTERS
 #define CONTEXT_EXTENDED_REGISTERS 0
@@ -27,16 +32,6 @@
 #define FOP_REGNUM 31
 
 #define FLAG_TRACE_BIT 0x100
-
-#ifdef __x86_64__
-/* Defined in auto-generated build-time file gdb/gdbserver/amd64.c.  */
-void init_registers_amd64 (void);
-extern const struct target_desc *tdesc_amd64;
-#else
-/* Defined in auto-generated build-time file gdb/gdbserver/i386.c.  */
-void init_registers_i386 (void);
-extern const struct target_desc *tdesc_i386;
-#endif
 
 static struct x86_debug_reg_state debug_reg_state;
 
@@ -449,11 +444,10 @@ static void
 i386_arch_setup (void)
 {
 #ifdef __x86_64__
-  init_registers_amd64 ();
-  win32_tdesc = tdesc_amd64;
+  win32_tdesc = amd64_create_target_description (X86_XSTATE_SSE_MASK, false,
+						 false);
 #else
-  init_registers_i386 ();
-  win32_tdesc = tdesc_i386;
+  win32_tdesc = i386_create_target_description (X86_XSTATE_SSE_MASK, false);
 #endif
 }
 

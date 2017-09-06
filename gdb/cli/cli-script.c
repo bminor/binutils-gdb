@@ -147,7 +147,8 @@ build_command_line (enum command_control_type type, const char *args)
 {
   struct command_line *cmd;
 
-  if (args == NULL && (type == if_control || type == while_control))
+  if ((args == NULL || *args == '\0')
+      && (type == if_control || type == while_control))
     error (_("if/while commands require arguments."));
   gdb_assert (args != NULL);
 

@@ -1,3 +1,793 @@
+2017-09-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* parse.c (find_minsym_type_and_address): Don't relocate addresses
+	of TLS symbols.
+
+2017-09-05  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* objfiles.c (get_objfile_bfd_data): Remove useless obstack_init
+	call.
+
+2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* infrun.c (follow_exec): Call add_thread after
+	target_find_description.
+
+2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* infrun.c (handle_inferior_event_1): When exec'ing, read
+	stop_pc after follow_exec.
+
+2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (process_g_packet): Update error message.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.tgt (gdb_target_obs): Add i386.o for x86_64-*
+	targets.
+
+2017-09-05  Pedro Alves  <palves@redhat.com>
+
+	* eval.c (eval_call, evaluate_funcall): New functions, factored
+	out from ...
+	(evaluate_subexp_standard): ... this.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-tdep.c (amd64_target_description): Create target
+	descriptions.
+	(_initialize_amd64_tdep): Don't call functions
+	initialize_tdesc_amd64_*.  Add self tests.
+	* arch/amd64.c (amd64_create_target_description): Add parameter
+	is_linux.  Call set_tdesc_osabi if is_linux is true.
+	* arch/amd64.h (amd64_create_target_description): Update the
+	declaration.
+	* arch/i386.c (i386_create_target_description): Add parameter
+	is_linux.  Call set_tdesc_osabi if is_linux is true.
+	* arch/i386.h (i386_create_target_description): Update
+	declaration.
+	* configure.tgt: Add i386.o to gdb_target_obs.
+	* features/Makefile (XMLTOC): Remove i386/*.xml.
+	* features/i386/amd64-avx-avx512.c: Remove.
+	* features/i386/amd64-avx-mpx-avx512-pku.c: Remove.
+	* features/i386/amd64-avx-mpx.c: Remove.
+	* features/i386/amd64-avx.c: Remove.
+	* features/i386/amd64-mpx.c: Remove.
+	* features/i386/amd64.c: Remove.
+	* features/i386/i386-avx-avx512.c: Remove.
+	* features/i386/i386-avx-mpx-avx512-pku.c: Remove.
+	* features/i386/i386-avx-mpx.c: Remove.
+	* features/i386/i386-avx.c: Remove.
+	* features/i386/i386-mmx.c: Remove.
+	* features/i386/i386-mpx.c: Remove.
+	* features/i386/i386.c: Remove.
+	* i386-tdep.c: Don't include features/i386/i386*.c., include
+	target-descriptions.h and arch/i386.h.
+	(i386_target_description): Create target descriptions.
+	(i386_gdbarch_init): Don't call initialize_tdesc_i386_*
+	functions.  Do self tests.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* features/Makefile (XMLTOC): Remove i386/amd64XXX-linux.xml.
+	* features/i386/amd64-avx-avx512-linux.c: Removed.
+	* features/i386/amd64-avx-linux.c: Removed.
+	* features/i386/amd64-avx-mpx-avx512-pku-linux.c: Removed.
+	* features/i386/amd64-avx-mpx-linux.c: Removed.
+	* features/i386/amd64-linux.c: Removed.
+	* features/i386/amd64-mpx-linux.c: Removed.
+	* features/i386/x32-avx-avx512-linux.c: Removed.
+	* features/i386/x32-avx-linux.c: Removed.
+	* features/i386/x32-linux.c: Removed.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-linux-tdep.c: Include arch/amd64.h.  Don't include
+	features/i386/*.c.
+	(amd64_linux_read_description): Call
+	amd64_create_target_description.
+	* arch/amd64.c: New file.
+	* arch/amd64.h: New file.
+	* configure.tgt (x86_64-*-linux*): Append amd64.o.
+	* Makefile.in (ALL_64_TARGET_OBS): Append amd64.o.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-linux-tdep.c: Don't include amd64-XXX-linux and
+	x32-XXX-linux.c.  Include 64bit-XX.c and x32-XX.c.
+	(amd64_linux_read_description): Create target descriptions.
+	(_initialize_amd64_linux_tdep): Don't call initialize_tdesc_XXX
+	functions.  Add unit tests.
+	* features/Makefile (FEATURE_XMLFILES): Append 64bit-XXX.xml and
+	x32-core.xml.
+	* features/i386/64bit-avx.c: Generated.
+	* features/i386/64bit-avx512.c: Generated.
+	* features/i386/64bit-core.c: Generated.
+	* features/i386/64bit-linux.c: Generated.
+	* features/i386/64bit-mpx.c: Generated.
+	* features/i386/64bit-pkeys.c: Generated.
+	* features/i386/64bit-segments.c: Generated.
+	* features/i386/64bit-sse.c: Generated.
+	* features/i386/x32-core.c: Generated.
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Print feature
+	c files for amd64-linux and x32-linux.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-linux-tdep.c (amd64_linux_read_description): New
+	function.
+	(amd64_linux_core_read_description): Call
+	amd64_linux_read_description.
+	(amd64_linux_init_abi): Likewise.
+	(amd64_x32_linux_init_abi): Likewise.
+	* amd64-linux-tdep.h (amd64_linux_read_description): Declare.
+	* x86-linux-nat.c (x86_linux_read_description): Call
+	amd64_linux_read_description.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-linux-tdep.c (amd64_linux_core_read_description): Update
+	comments.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* features/Makefile (XMLTOC): Remove i386/i386-XX-linux.xml.
+	* features/i386/i386-avx-avx512-linux.c: Remove.
+	* features/i386/i386-avx-linux.c: Remove.
+	* features/i386/i386-avx-mpx-avx512-pku-linux.c: Remove.
+	* features/i386/i386-avx-mpx-linux.c: Remove.
+	* features/i386/i386-linux.c: Remove.
+	* features/i386/i386-mmx-linux.c: Remove.
+	* features/i386/i386-mpx-linux.c: Remove.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (ALL_TARGET_OBS): Add i386.o.
+	(SFILES): Add arch/i386.c.
+	(HFILES_NO_SRCDIR): Add arch/i386.h.
+	* arch/i386.c: New file.
+	* arch/i386.h: New file.
+	* arch/tdesc.h (allocate_target_description): Declare.
+	(set_tdesc_architecture): Declare.
+	(set_tdesc_osabi): Declare.
+	* configure.tgt (i[34567]86-*-linux*): Add i386.o.
+	* i386-linux-tdep.c: Don't include ../features/i386/32bit-XXX.c.
+	include arch/i386.h.
+	(i386_linux_read_description): Remove code and call
+	i386_create_target_description.
+	(set_tdesc_architecture): New function.
+	(set_tdesc_osabi): New function.
+	* target-descriptions.h (allocate_target_description): Remove.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/tdesc.h (tdesc_create_feature): Add an argument xml.
+	* target-descriptions.c (tdesc_create_feature): Likewise, and
+	adjust code.
+	* features/i386/32bit-avx.c: Re-generated.
+	* features/i386/32bit-avx512.c: Re-generated.
+	* features/i386/32bit-core.c: Re-generated.
+	* features/i386/32bit-linux.c: Re-generated.
+	* features/i386/32bit-mpx.c: Re-generated.
+	* features/i386/32bit-pkeys.c: Re-generated.
+	* features/i386/32bit-sse.c: Re-generated.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* regformats/regdef.h (struct reg): Override operator == and !=.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/tdesc.h: New file.
+	* regformats/regdat.sh: Generate code using tdesc_create_reg.
+	* target-descriptions.c: Update comments.
+	* target-descriptions.h: Include "arch/tdesc.h".  Remove the
+	declarations.
+	* features/i386/32bit-avx.c: Re-generated.
+	* features/i386/32bit-avx512.c: Re-generated.
+	* features/i386/32bit-core.c: Re-generated.
+	* features/i386/32bit-linux.c: Re-generated.
+	* features/i386/32bit-mpx.c: Re-generated.
+	* features/i386/32bit-pkeys.c: Re-generated.
+	* features/i386/32bit-sse.c: Re-generated.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* regformats/regdat.sh: Update generated code.
+
+2017-09-05  Yao Qi  <yao.qi@linaro.org>
+
+	* regformats/regdat.sh: Adjust code order.
+
+2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* expprint.c (dump_subexp_body_standard): Use constant format
+	string in fprintf_filtered call.
+
+2017-09-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* configure.nat: Add "x86-nat.o x86-dregs.o" for NetBSD/amd64 and
+	NetBSD/i386.
+	* x86-bsd-nat.c [!DBREG_DRX && __NetBSD__]: Define DBREG_DRX.
+
+2017-09-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* bsd-kvm.o: Make <sys/user.h> conditional on HAVE_SYS_USER_H.
+
+2017-09-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* bsd-kvm.o: Define _KMEMUSER.
+	* configure.ac: Define _KMEMUSER when checking for "struct lwp".
+	* configure: Regenerate.
+
+2017-09-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64-fbsd-nat.c: Add include of "x86-xstate.h".
+	* i386-fbsd-nat.c: Likewise.
+
+2017-09-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* unittests/array-view-selftests.c: Add include of <array>.
+
+2017-09-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* spu-tdep.c (flush_ea_cache): Add missing argument to
+	call_function_by_hand.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* NEWS (Safer support for debugging with no debug info): New.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* c-exp.y (function_method, function_method_void): Add current
+	instance flags to TYPE_INSTANCE.
+	* dwarf2read.c (check_modifier): New.
+	(compute_delayed_physnames): Assert that only C++ adds delayed
+	physnames.  Mark fn_fields as const/volatile depending on
+	physname.
+	* eval.c (make_params): New type_instance_flags parameter.  Use
+	it as the new type's instance flags.
+	(evaluate_subexp_standard) <TYPE_INSTANCE>: Extract the instance
+	flags element and pass it to make_params.
+	* expprint.c (print_subexp_standard) <TYPE_INSTANCE>: Handle
+	instance flags element.
+	(dump_subexp_body_standard) <TYPE_INSTANCE>: Likewise.
+	* gdbtypes.h: Include "enum-flags.h".
+	(type_instance_flags): New enum-flags type.
+	(TYPE_CONST, TYPE_VOLATILE, TYPE_RESTRICT, TYPE_ATOMIC)
+	(TYPE_CODE_SPACE, TYPE_DATA_SPACE): Return boolean.
+	* parse.c (operator_length_standard) <TYPE_INSTANCE>: Adjust.
+	(follow_type_instance_flags): New function.
+	(operator_check_standard) <TYPE_INSTANCE>: Adjust.
+	* parser-defs.h (follow_type_instance_flags): Declare.
+	* valops.c (value_struct_elt_for_reference): const/volatile must
+	match too.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* cp-namespace.c (cp_search_static_and_baseclasses): Handle
+	function/method scopes; lookup the nested name as a function local
+	static variable.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	(%type <voidval>): Add function_method.
+	* c-exp.y (exp): New production for calls with no arguments.
+	(function_method, function_method_void_or_typelist): New
+	productions.
+	(exp): New production for "method()::static_var".
+	* eval.c (evaluate_subexp_standard): Handle OP_FUNC_STATIC_VAR.
+	* expprint.c (print_subexp_standard, dump_subexp_body_standard):
+	Handle OP_FUNC_STATIC_VAR.
+	* parse.c (operator_length_standard):
+	Handle OP_FUNC_STATIC_VAR.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* eval.c (evaluate_subexp_standard): Remove UNOP_MEMVAL_TLS
+	handling.
+	* expprint.c (print_subexp_standard, dump_subexp_body_standard):
+	Ditto.
+	* parse.c (operator_length_standard, operator_check_standard):
+	Ditto.
+	* std-operator.def (UNOP_MEMVAL_TLS): Delete.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* ax-gdb.c: Include "typeprint.h".
+	(gen_expr_for_cast): New function.
+	(gen_expr) <OP_CAST, OP_CAST_TYPE>: Use it.
+	<OP_VAR_VALUE, OP_MSYM_VAR_VALUE>: Error out if the variable's
+	type is unknown.
+	* dwarf2read.c (new_symbol_full): Fallback to int instead of
+	nodebug_data_symbol.
+	* eval.c: Include "typeprint.h".
+	(evaluate_subexp_standard) <OP_VAR_VALUE, OP_VAR_MSYM_VALUE>:
+	Error out if symbol has unknown type.
+	<UNOP_CAST, UNOP_CAST_TYPE>: Common bits factored out to
+	evaluate_subexp_for_cast.
+	(evaluate_subexp_for_address, evaluate_subexp_for_sizeof): Handle
+	OP_VAR_MSYM_VALUE.
+	(evaluate_subexp_for_cast): New function.
+	* gdbtypes.c (init_nodebug_var_type): New function.
+	(objfile_type): Use it to initialize types of variables with no
+	debug info.
+	* typeprint.c (error_unknown_type): New.
+	* typeprint.h (error_unknown_type): New declaration.
+	* compile/compile-c-types.c (convert_type_basic): Handle
+	TYPE_CODE_ERROR; warn and fallback to int for variables with
+	unknown type.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* eval.c (evaluate_var_value): New function, factored out from ...
+	(evaluate_subexp_standard): ... here.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* eval.c (evaluate_subexp_standard) <UNOP_COMPLEMENT, UNOP_ADDR>:
+	Remove useless assignments to 'op'.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* eval.c (eval_skip_value): New function.
+	(evaluate_subexp_standard): Use it.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* eval.c (evaluate_subexp_standard): <OP_FUNCALL>: Extract
+	function name from symbol/minsym and pass it to
+	error_call_unknown_return_type.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (resolve_subexp): Handle OP_VAR_MSYM_VALUE.
+	* ax-gdb.c (gen_msym_var_ref): New function.
+	(gen_expr): Handle OP_VAR_MSYM_VALUE.
+	* eval.c (evaluate_var_msym_value): New function.
+	* eval.c (evaluate_subexp_standard): Handle OP_VAR_MSYM_VALUE.
+	<OP_FUNCALL>: Extract function name from symbol/minsym and pass it
+	to call_function_by_hand.
+	* expprint.c (print_subexp_standard, dump_subexp_body_standard):
+	Handle OP_VAR_MSYM_VALUE.
+	(union exp_element) <msymbol>: New field.
+	* minsyms.h (struct type): Forward declare.
+	(find_minsym_type_and_address): Declare.
+	* parse.c (write_exp_elt_msym): New function.
+	(write_exp_msymbol): Delete, refactored as ...
+	(find_minsym_type_and_address): ... this new function.
+	(write_exp_msymbol): Reimplement using OP_VAR_MSYM_VALUE.
+	(operator_length_standard, operator_check_standard): Handle
+	OP_VAR_MSYM_VALUE.
+	* std-operator.def (OP_VAR_MSYM_VALUE): New.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_evaluate_subexp) <TYPE_CODE_FUNC>: Don't handle
+	TYPE_GNU_IFUNC specially here.  Throw error if return type is
+	unknown.
+	* ada-typeprint.c (print_func_type): Handle functions with unknown
+	return type.
+	* c-typeprint.c (c_type_print_base): Handle functions and methods
+	with unknown return type.
+	* compile/compile-c-symbols.c (convert_symbol_bmsym)
+	<mst_text_gnu_ifunc>: Use nodebug_text_gnu_ifunc_symbol.
+	* compile/compile-c-types.c: Include "objfiles.h".
+	(convert_func): For functions with unknown return type, warn and
+	default to int.
+	* compile/compile-object-run.c (compile_object_run): Adjust call
+	to call_function_by_hand_dummy.
+	* elfread.c (elf_gnu_ifunc_resolve_addr): Adjust call to
+	call_function_by_hand.
+	* eval.c (evaluate_subexp_standard): Adjust calls to
+	call_function_by_hand.  Handle functions and methods with unknown
+	return type.  Pass expect_type to call_function_by_hand.
+	* f-typeprint.c (f_type_print_base): Handle functions with unknown
+	return type.
+	* gcore.c (call_target_sbrk): Adjust call to
+	call_function_by_hand.
+	* gdbtypes.c (objfile_type): Leave nodebug text symbol with NULL
+	return type instead of int.  Make nodebug_text_gnu_ifunc_symbol be
+	an integer address type instead of nodebug.
+	* guile/scm-value.c (gdbscm_value_call): Adjust call to
+	call_function_by_hand.
+	* infcall.c (error_call_unknown_return_type): New function.
+	(call_function_by_hand): New "default_return_type" parameter.
+	Pass it down.
+	(call_function_by_hand_dummy): New "default_return_type"
+	parameter.  Use it instead of defaulting to int.  If there's no
+	default and the return type is unknown, throw an error.  If
+	there's a default return type, and the called function has no
+	debug info, then assume the function is prototyped.
+	* infcall.h (call_function_by_hand, call_function_by_hand_dummy):
+	New "default_return_type" parameter.
+	(error_call_unknown_return_type): New declaration.
+	* linux-fork.c (call_lseek): Cast return type of lseek.
+	(inferior_call_waitpid, checkpoint_command): Adjust calls to
+	call_function_by_hand.
+	* linux-tdep.c (linux_infcall_mmap, linux_infcall_munmap): Adjust
+	calls to call_function_by_hand.
+	* m2-typeprint.c (m2_procedure): Handle functions with unknown
+	return type.
+	* objc-lang.c (lookup_objc_class, lookup_child_selector)
+	(value_nsstring, print_object_command): Adjust calls to
+	call_function_by_hand.
+	* p-typeprint.c (pascal_type_print_varspec_prefix): Handle
+	functions with unknown return type.
+	(pascal_type_print_func_varspec_suffix): New function.
+	(pascal_type_print_varspec_suffix) <TYPE_CODE_FUNC,
+	TYPE_CODE_METHOD>: Use it.
+	* python/py-value.c (valpy_call): Adjust call to
+	call_function_by_hand.
+	* rust-lang.c (rust_evaluate_funcall): Adjust call to
+	call_function_by_hand.
+	* valarith.c (value_x_binop, value_x_unop): Adjust calls to
+	call_function_by_hand.
+	* valops.c (value_allocate_space_in_inferior): Adjust call to
+	call_function_by_hand.
+	* typeprint.c (type_print_unknown_return_type): New function.
+	* typeprint.h (type_print_unknown_return_type): New declaration.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdbtypes.c (lookup_function_type_with_arguments): Mark function
+	types with more than one parameter as prototyped.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-cmds.c (print_disassembly, disassemble_current_function)
+	(disassemble_command): Use gdb_disassembly_flags instead of bare
+	int.
+	* disasm.c (gdb_pretty_print_disassembler::pretty_print_insn)
+	(dump_insns, do_mixed_source_and_assembly_deprecated)
+	(do_mixed_source_and_assembly, do_assembly_only, gdb_disassembly):
+	Use gdb_disassembly_flags instead of bare int.
+	* disasm.h (DISASSEMBLY_SOURCE_DEPRECATED, DISASSEMBLY_RAW_INSN)
+	(DISASSEMBLY_OMIT_FNAME, DISASSEMBLY_FILENAME)
+	(DISASSEMBLY_OMIT_PC, DISASSEMBLY_SOURCE)
+	(DISASSEMBLY_SPECULATIVE): No longer macros.  Instead they're...
+	(enum gdb_disassembly_flag): ... values of this new enumeration.
+	(gdb_disassembly_flags): Define.
+	(gdb_disassembly)
+	(gdb_pretty_print_disassembler::pretty_print_insn): Use it.
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Use
+	gdb_disassembly_flags instead of bare int.
+	* record-btrace.c (btrace_insn_history)
+	(record_btrace_insn_history, record_btrace_insn_history_range)
+	(record_btrace_insn_history_from): Use gdb_disassembly_flags
+	instead of bare int.
+	* record.c (get_insn_history_modifiers, cmd_record_insn_history):
+	Use gdb_disassembly_flags instead of bare int.
+	* target-debug.h (target_debug_print_gdb_disassembly_flags):
+	Define.
+	* target-delegates.c: Regenerate.
+	* target.c (target_insn_history, target_insn_history_from)
+	(target_insn_history_range): Use gdb_disassembly_flags instead of
+	bare int.
+	* target.h: Include "disasm.h".
+	(struct target_ops) <to_insn_history, to_insn_history_from,
+	to_insn_history_range>: Use gdb_disassembly_flags instead of bare
+	int.
+	(target_insn_history, target_insn_history_from)
+	(target_insn_history_range): Use gdb_disassembly_flags instead of
+	bare int.
+
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* cli/cli-script.c (build_command_line): For if/while commands,
+	check whether args is empty.
+
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* cli/cli-script.h (enum misc_command_type): Move from defs.h.
+	(enum command_control_type): Likewise.
+	(struct command_line): Likewise.
+	(free_command_lines): Likewise.
+	(struct command_lines_deleter): Likewise.
+	(command_line_up): Likewise.
+	(read_command_lines): Likewise.
+	(read_command_lines_1): Likewise.
+	* defs.h (enum misc_command_type): Move to cli/cli-script.h.
+	(enum command_control_type): Likewise.
+	(struct command_line): Likewise.
+	(free_command_lines): Likewise.
+	(struct command_lines_deleter): Likewise.
+	(command_line_up): Likewise.
+	(read_command_lines): Likewise.
+	(read_command_lines_1): Likewise.
+	* breakpoint.h: Include cli/cli-script.h.
+	* extension-priv.h: Likewise.
+	* gdbcmd.h: Likewise.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (is_known_support_routine): Move sal declaration to
+	where it is initialized.
+	* breakpoint.c (create_internal_breakpoint, init_catchpoint)
+	(parse_breakpoint_sals, decode_static_tracepoint_spec)
+	(clear_command, update_static_tracepoint): Remove init_sal
+	references.  Move declarations closer to initializations.
+	* cli/cli-cmds.c (list_command): Move sal declarations closer to
+	initializations.
+	* elfread.c (elf_gnu_ifunc_resolver_stop): Remove init_sal
+	references.  Move sal declarations closer to initializations.
+	* frame.c (find_frame_sal): Return a symtab_and_line via function
+	return instead of output parameter.  Remove init_sal references.
+	* frame.h (find_frame_sal): Return a symtab_and_line via function
+	return instead of output parameter.
+	* guile/scm-frame.c (gdbscm_frame_sal): Adjust.
+	* guile/scm-symtab.c (stscm_make_sal_smob): Use in-place new
+	instead of memset.
+	(gdbscm_find_pc_line): Remove init_sal reference.
+	* infcall.c (call_function_by_hand_dummy): Remove init_sal
+	references.  Move declarations closer to initializations.
+	* infcmd.c (set_step_frame): Update.  Move declarations closer to
+	initializations.
+	(finish_backward): Remove init_sal references.  Move declarations
+	closer to initializations.
+	* infrun.c (process_event_stop_test, handle_step_into_function)
+	(insert_hp_step_resume_breakpoint_at_frame)
+	(insert_step_resume_breakpoint_at_caller): Likewise.
+	* linespec.c (create_sals_line_offset, decode_digits_ordinary)
+	(symbol_to_sal): Likewise.
+	* probe.c (parse_probes_in_pspace): Remove init_sal reference.
+	* python/py-frame.c (frapy_find_sal): Move sal declaration closer
+	to its initialization.
+	* reverse.c (save_bookmark_command): Use new/delete.  Remove
+	init_sal references.  Move declarations closer to initializations.
+	* source.c (get_current_source_symtab_and_line): Remove brace
+	initialization.
+	(set_current_source_symtab_and_line): Now takes the sal by const
+	reference.  Remove brace initialization.
+	(line_info): Remove init_sal reference.
+	* source.h (set_current_source_symtab_and_line): Now takes a
+	symtab_and_line via const reference.
+	* stack.c (set_current_sal_from_frame): Adjust.
+	(print_frame_info): Adjust.
+	(get_last_displayed_sal): Return the sal via function return
+	instead of via output parameter.  Simplify.
+	(frame_info): Adjust.
+	* stack.h (get_last_displayed_sal): Return the sal via function
+	return instead of via output parameter.
+	* symtab.c (init_sal): Delete.
+	(find_pc_sect_line): Remove init_sal references.  Move
+	declarations closer to initializations.
+	(find_function_start_sal): Remove init_sal references.  Move
+	declarations closer to initializations.
+	* symtab.h (struct symtab_and_line): In-class initialize all
+	fields.
+	* tracepoint.c (set_traceframe_context)
+	(print_one_static_tracepoint_marker): Remove init_sal references.
+	Move declarations closer to initializations.
+	* tui/tui-disasm.c (tui_show_disassem_and_update_source): Adjust.
+	* tui/tui-stack.c (tui_show_frame_info): Adjust.  Move
+	declarations closer to initializations.
+	* tui/tui-winsource.c (tui_update_source_window_as_is): Remove
+	init_sal references.  Adjust.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* ax-gdb.c (agent_command_1): Use range-for.
+	* break-catch-throw.c (re_set_exception_catchpoint): Update.
+	* breakpoint.c: Include "common/array-view.h".
+	(init_breakpoint_sal, create_breakpoint_sal): Change sals
+	parameter from struct symtabs_and_lines to
+	array_view<symtab_and_line>.  Adjust.  Use range-for.  Update.
+	(breakpoint_sals_to_pc): Change sals parameter from struct
+	symtabs_and_lines to std::vector reference.
+	(check_fast_tracepoint_sals): Change sals parameter from struct
+	symtabs_and_lines to std::array_view.  Use range-for.
+	(decode_static_tracepoint_spec): Return a std::vector instead of
+	symtabs_and_lines.  Update.
+	(create_breakpoint): Update.
+	(break_range_command, until_break_command, clear_command): Update.
+	(base_breakpoint_decode_location, bkpt_decode_location)
+	(bkpt_probe_create_sals_from_location)
+	(bkpt_probe_decode_location, tracepoint_decode_location)
+	(tracepoint_probe_decode_location)
+	(strace_marker_create_sals_from_location): Return a std::vector
+	instead of symtabs_and_lines.
+	(strace_marker_create_breakpoints_sal): Update.
+	(strace_marker_decode_location): Return a std::vector instead of
+	symtabs_and_lines.  Update.
+	(update_breakpoint_locations): Change struct symtabs_and_lines
+	parameters to gdb::array_view.  Adjust.
+	(location_to_sals): Return a std::vector instead of
+	symtabs_and_lines.  Update.
+	(breakpoint_re_set_default): Use std::vector instead of struct
+	symtabs_and_lines.
+	(decode_location_default): Return a std::vector instead of
+	symtabs_and_lines.  Update.
+	* breakpoint.h: Include "common/array-view.h".
+	(struct breakpoint_ops) <decode_location>: Now returns a
+	std::vector instead of returning a symtabs_and_lines via output
+	parameter.
+	(update_breakpoint_locations): Change sals parameters to use
+	gdb::array_view.
+	* cli/cli-cmds.c (edit_command, list_command): Update to use
+	std::vector and gdb::array_view.
+	(ambiguous_line_spec): Adjust to use gdb::array_view and
+	range-for.
+	(compare_symtabs): Rename to ...
+	(cmp_symtabs): ... this.  Change parameters to symtab_and_line
+	const reference and adjust.
+	(filter_sals): Rewrite using std::vector and standard algorithms.
+	* elfread.c (elf_gnu_ifunc_resolver_return_stop): Simplify.
+	(jump_command): Update to use std::vector.
+	* linespec.c (struct linespec_state) <canonical_names>: Update
+	comment.
+	(add_sal_to_sals_basic): Delete.
+	(add_sal_to_sals, filter_results, convert_results_to_lsals)
+	(decode_line_2, create_sals_line_offset)
+	(convert_address_location_to_sals, convert_linespec_to_sals)
+	(convert_explicit_location_to_sals, parse_linespec)
+	(event_location_to_sals, decode_line_full, decode_line_1)
+	(decode_line_with_current_source)
+	(decode_line_with_last_displayed, decode_objc)
+	(decode_digits_list_mode, decode_digits_ordinary, minsym_found)
+	(linespec_result::~linespec_result): Adjust to use std::vector
+	instead of symtabs_and_lines.
+	* linespec.h (linespec_sals::sals): Now a std::vector.
+	(struct linespec_result): Use std::vector, bool, and in-class
+	initialization.
+	(decode_line_1, decode_line_with_current_source)
+	(decode_line_with_last_displayed): Return std::vector.
+	* macrocmd.c (info_macros_command): Use std::vector.
+	* mi/mi-main.c (mi_cmd_trace_find): Use std::vector.
+	* probe.c (parse_probes_in_pspace, parse_probes): Adjust to use
+	std::vector.
+	* probe.h (parse_probes): Return a std::vector.
+	* python/python.c (gdbpy_decode_line): Use std::vector and
+	gdb::array_view.
+	* source.c (select_source_symtab, line_info): Use std::vector.
+	* stack.c (func_command): Use std::vector.
+	* symtab.h (struct symtabs_and_lines): Delete.
+	* tracepoint.c (tfind_line_command, scope_info): Use std::vector.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/array-view-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add array-view-selftests.o.
+	* common/array-view.h: New file.
+	* unittests/array-view-selftests.c: New file.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-cmds.c (edit_command): Pass message to
+	ambiguous_line_spec.
+	(list_command): Pass message to ambiguous_line_spec.  Say
+	"first"/"last" instead of "start" and "end" to be consistent with
+	the manual.
+	(ambiguous_line_spec): Add 'format' and vararg parameters.  Use
+	them to print formatted message.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* btrace.c (ftrace_add_pt): Pass btrace_insn to
+	ftrace_update_insns by reference instead of pointer.
+
+2017-09-04  Yao Qi  <yao.qi@linaro.org>
+
+	* i386-go32-tdep.c: Include x86-xstate.h.
+	(i386_go32_init_abi): Call i386_target_description.
+	* i386-tdep.c (i386_target_description): Return tdesc_i386_mmx
+	if xcr0 is X86_XSTATE_X87_MASK.
+	* i386-tdep.h (tdesc_i386): Remove the declaration.
+	(tdesc_i386_mmx): Likewise.
+
+2017-09-04  Yao Qi  <yao.qi@linaro.org>
+
+	* i386-fbsd-tdep.c (i386fbsd_core_read_xcr0): Return
+	X86_XSTATE_SSE_MASK instead of 0.
+
+2017-09-04  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-fbsd-nat.c (amd64fbsd_read_description): Call
+	i386_target_description.
+	* i386-fbsd-nat.c (i386fbsd_read_description): Call
+	i386_target_description.
+	* i386-tdep.c (i386_gdbarch_init): Likewise.
+
+2017-09-04  Yao Qi  <yao.qi@linaro.org>
+
+	* amd64-darwin-tdep.c: Include "x86-xstate.h".
+	(x86_darwin_init_abi_64): Call amd64_target_description.
+	* amd64-dicos-tdep.c: Likewise.
+	* amd64-fbsd-nat.c: Likewise.
+	* amd64-fbsd-tdep.c: Likewise.
+	* amd64-nbsd-tdep.c: Likewise.
+	* amd64-obsd-tdep.c: Likewise.
+	* amd64-sol2-tdep.c: Likewise.
+	* amd64-windows-tdep.c: Likewise.
+	* amd64-tdep.h (tdesc_amd64): Remove the declaration.
+
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* btrace.h (btrace_insn_s, DEF_VEC_O (btrace_insn_s)): Remove.
+	(btrace_function) <insn>: Change type to use std::vector.
+	* btrace.c (ftrace_debug, ftrace_call_num_insn,
+	ftrace_find_call, ftrace_new_gap, ftrace_update_function,
+	ftrace_update_insns, ftrace_compute_global_level_offset,
+	btrace_stitch_bts, btrace_clear, btrace_insn_get,
+	btrace_insn_end, btrace_insn_next, btrace_insn_prev): Adjust to
+	change to std::vector.
+	(ftrace_update_insns): Adjust to change to std::vector, change
+	type of INSN parameter.
+	(btrace_compute_ftrace_bts): Adjust call to ftrace_update_insns.
+	* record-btrace.c (btrace_call_history_insn_range,
+	btrace_compute_src_line_range,
+	record_btrace_frame_prev_register): Adjust to change to
+	std::vector.
+	* python/py-record-btrace.c (recpy_bt_func_instructions): Adjust
+	to change to std::vector.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
+	* corefile.c (reopen_exec_file): Use std::string.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile.c (compile_register_name_mangled): Return
+	std::string.
+	* compile/compile-loc2c.c (pushf_register_address): Update.
+	(pushf_register): Update.
+	* compile/compile-c-types.c (convert_array): Update.
+	* compile/compile-c-symbols.c (generate_vla_size): Update.
+	(error_symbol_once): Use a gdb::unique_xmalloc_ptr.
+	(symbol_substitution_name): Return a gdb::unique_xmalloc_ptr.
+	(convert_one_symbol): Update.
+	(generate_c_for_for_one_variable): Update.
+	* compile/compile-c-support.c (c_get_range_decl_name): Return a
+	std::string.
+	(generate_register_struct): Update.
+	* compile/compile-internal.h (c_get_range_decl_name): Return a
+	std::string.
+	(compile_register_name_mangled): Return std::string.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
+	* utils.c (perror_string): Return a std::string.
+	(throw_perror_with_name, perror_warning_with_name): Update.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
+	* demangle.c (demangle_command): Use std::string,
+	unique_xmalloc_ptr.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-setshow.c (do_set_command): Use std::string.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-cmds.c (cd_command): Use gdb::unique_xmalloc_ptr.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Use std::string.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-cmd-env.c (env_execute_cli_command): Use
+	gdb::unique_xmalloc_ptr.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
+	* thread.c (print_thread_info_1): Use string_printf.
+	(thread_apply_command, thread_apply_all_command): Use
+	std::string.
+
+2017-09-03  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (val_print_string): Update.
+	* gdbcore.h (memory_error_message): Return std::string.
+	* corefile.c (memory_error_message): Return std::string.
+	(memory_error): Update.
+	* breakpoint.c (insert_bp_location): Update.
+
 2017-09-03  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* target/waitstatus.h (target_waitstatus_to_string): Change

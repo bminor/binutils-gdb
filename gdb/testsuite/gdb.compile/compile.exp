@@ -296,12 +296,14 @@ gdb_test "p globalvar" " = 77" "expect 77"
 
 # Test reference to minimal_symbol, not (full) symbol.
 
-gdb_test_no_output "compile code globalvar = func_nodebug (75);" \
+gdb_test "compile code globalvar = func_nodebug (75);" \
+    "warning: function has unknown return type; assuming int" \
     "call func_nodebug"
 gdb_test "p globalvar" " = -75" "expect -75"
-gdb_test_no_output \
-  "compile code int (*funcp) (int) = func_nodebug; globalvar = funcp (76);" \
-  "call func_nodebug indirectly"
+gdb_test \
+    "compile code int (*funcp) (int) = func_nodebug; globalvar = funcp (76);" \
+    "warning: function has unknown return type; assuming int" \
+    "call func_nodebug indirectly"
 gdb_test "p globalvar" " = -76" "expect -76"
 
 

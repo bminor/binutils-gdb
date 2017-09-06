@@ -723,11 +723,9 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 void
 set_current_sal_from_frame (struct frame_info *frame)
 {
-  struct symtab_and_line sal;
-
-  find_frame_sal (frame, &sal);
+  symtab_and_line sal = find_frame_sal (frame);
   if (sal.symtab != NULL)
-    set_current_source_symtab_and_line (&sal);
+    set_current_source_symtab_and_line (sal);
 }
 
 /* If ON, GDB will display disassembly of the next source line when
@@ -789,7 +787,6 @@ print_frame_info (struct frame_info *frame, int print_level,
 		  int set_current_sal)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct symtab_and_line sal;
   int source_print;
   int location_print;
   struct ui_out *uiout = current_uiout;
@@ -852,7 +849,7 @@ print_frame_info (struct frame_info *frame, int print_level,
      the next frame is a SIGTRAMP_FRAME or a DUMMY_FRAME, then the
      next frame was not entered as the result of a call, and we want
      to get the line containing FRAME->pc.  */
-  find_frame_sal (frame, &sal);
+  symtab_and_line sal = find_frame_sal (frame);
 
   location_print = (print_what == LOCATION 
 		    || print_what == LOC_AND_ADDRESS
@@ -1017,23 +1014,20 @@ get_last_displayed_line (void)
 
 /* Get the last sal we displayed, if it's valid.  */
 
-void
-get_last_displayed_sal (struct symtab_and_line *sal)
+symtab_and_line
+get_last_displayed_sal ()
 {
+  symtab_and_line sal;
+
   if (last_displayed_sal_valid)
     {
-      sal->pspace = last_displayed_pspace;
-      sal->pc = last_displayed_addr;
-      sal->symtab = last_displayed_symtab;
-      sal->line = last_displayed_line;
+      sal.pspace = last_displayed_pspace;
+      sal.pc = last_displayed_addr;
+      sal.symtab = last_displayed_symtab;
+      sal.line = last_displayed_line;
     }
-  else
-    {
-      sal->pspace = 0;
-      sal->pc = 0;
-      sal->symtab = 0;
-      sal->line = 0;
-    }
+
+  return sal;
 }
 
 
@@ -1399,7 +1393,6 @@ static void
 info_frame_command (char *addr_exp, int from_tty)
 {
   struct frame_info *fi;
-  struct symtab_and_line sal;
   struct symbol *func;
   struct symtab *s;
   struct frame_info *calling_frame_info;
@@ -1434,8 +1427,8 @@ info_frame_command (char *addr_exp, int from_tty)
     pc_regname = "pc";
 
   frame_pc_p = get_frame_pc_if_available (fi, &frame_pc);
-  find_frame_sal (fi, &sal);
   func = get_frame_function (fi);
+  symtab_and_line sal = find_frame_sal (fi);
   s = sal.symtab;
   if (func)
     {
@@ -2527,26 +2520,23 @@ func_command (char *arg, int from_tty)
 {
   struct frame_info *frame;
   int found = 0;
-  struct symtabs_and_lines sals;
-  int i;
   int level = 1;
   struct function_bounds *func_bounds = NULL;
-  struct cleanup *cleanups;
 
   if (arg == NULL)
     return;
 
   frame = get_current_frame ();
-  sals = decode_line_with_current_source (arg, DECODE_LINE_FUNFIRSTLINE);
-  cleanups = make_cleanup (xfree, sals.sals);
-  func_bounds = XNEWVEC (struct function_bounds, sals.nelts);
-  make_cleanup (xfree, func_bounds);
-  for (i = 0; (i < sals.nelts && !found); i++)
+  std::vector<symtab_and_line> sals
+    = decode_line_with_current_source (arg, DECODE_LINE_FUNFIRSTLINE);
+  func_bounds = XNEWVEC (struct function_bounds, sals.size ());
+  struct cleanup *cleanups = make_cleanup (xfree, func_bounds);
+  for (size_t i = 0; (i < sals.size () && !found); i++)
     {
-      if (sals.sals[i].pspace != current_program_space)
+      if (sals[i].pspace != current_program_space)
 	func_bounds[i].low = func_bounds[i].high = 0;
-      else if (sals.sals[i].pc == 0
-	       || find_pc_partial_function (sals.sals[i].pc, NULL,
+      else if (sals[i].pc == 0
+	       || find_pc_partial_function (sals[i].pc, NULL,
 					    &func_bounds[i].low,
 					    &func_bounds[i].high) == 0)
 	{
@@ -2556,7 +2546,7 @@ func_command (char *arg, int from_tty)
 
   do
     {
-      for (i = 0; (i < sals.nelts && !found); i++)
+      for (size_t i = 0; (i < sals.size () && !found); i++)
 	found = (get_frame_pc (frame) >= func_bounds[i].low
 		 && get_frame_pc (frame) < func_bounds[i].high);
       if (!found)

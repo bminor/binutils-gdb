@@ -226,6 +226,9 @@ extern int ppc_section_flags (flagword, bfd_vma, int);
 #define tc_comment_chars ppc_comment_chars
 extern const char *ppc_comment_chars;
 
+#define md_elf_section_letter		ppc_elf_section_letter
+extern bfd_vma ppc_elf_section_letter (int, const char **);
+
 /* Keep relocations relative to the GOT, or non-PC relative.  */
 #define tc_fix_adjustable(FIX) ppc_fix_adjustable (FIX)
 extern int ppc_fix_adjustable (struct fix *);

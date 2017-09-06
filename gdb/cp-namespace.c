@@ -246,40 +246,44 @@ cp_search_static_and_baseclasses (const char *name,
 				  unsigned int prefix_len,
 				  int is_in_anonymous)
 {
-  struct block_symbol sym;
-  struct block_symbol klass_sym;
-  struct type *klass_type;
-
   /* Check for malformed input.  */
   if (prefix_len + 2 > strlen (name) || name[prefix_len + 1] != ':')
     return null_block_symbol;
 
-  /* Find the name of the class and the name of the method, variable, etc.  */
-
-  /* The class name is everything up to and including PREFIX_LEN.  */
-  std::string klass (name, prefix_len);
+  /* The class, namespace or function name is everything up to and
+     including PREFIX_LEN.  */
+  std::string scope (name, prefix_len);
 
   /* The rest of the name is everything else past the initial scope
      operator.  */
-  std::string nested (name + prefix_len + 2);
+  const char *nested = name + prefix_len + 2;
 
-  /* Lookup a class named KLASS.  If none is found, there is nothing
-     more that can be done.  KLASS could be a namespace, so always look
-     in VAR_DOMAIN.  This works for classes too because of
-     symbol_matches_domain (which should be replaced with something else,
-     but it's what we have today).  */
-  klass_sym = lookup_global_symbol (klass.c_str (), block, VAR_DOMAIN);
-  if (klass_sym.symbol == NULL)
+  /* Lookup the scope symbol.  If none is found, there is nothing more
+     that can be done.  SCOPE could be a namespace, so always look in
+     VAR_DOMAIN.  This works for classes too because of
+     symbol_matches_domain (which should be replaced with something
+     else, but it's what we have today).  */
+  block_symbol scope_sym = lookup_symbol_in_static_block (scope.c_str (),
+							  block, VAR_DOMAIN);
+  if (scope_sym.symbol == NULL)
+    scope_sym = lookup_global_symbol (scope.c_str (), block, VAR_DOMAIN);
+  if (scope_sym.symbol == NULL)
     return null_block_symbol;
-  klass_type = SYMBOL_TYPE (klass_sym.symbol);
 
-  /* Look for a symbol named NESTED in this class.
+  struct type *scope_type = SYMBOL_TYPE (scope_sym.symbol);
+
+  /* If the scope is a function/method, then look up NESTED as a local
+     static variable.  E.g., "print 'function()::static_var'".  */
+  if (TYPE_CODE (scope_type) == TYPE_CODE_FUNC
+      || TYPE_CODE (scope_type) == TYPE_CODE_METHOD)
+    return lookup_symbol (nested, SYMBOL_BLOCK_VALUE (scope_sym.symbol),
+			  VAR_DOMAIN, NULL);
+
+  /* Look for a symbol named NESTED in this class/namespace.
      The caller is assumed to have already have done a basic lookup of NAME.
      So we pass zero for BASIC_LOOKUP to cp_lookup_nested_symbol_1 here.  */
-  sym = cp_lookup_nested_symbol_1 (klass_type, nested.c_str (), name,
-				   block, domain, 0, is_in_anonymous);
-
-  return sym;
+  return cp_lookup_nested_symbol_1 (scope_type, nested, name,
+				    block, domain, 0, is_in_anonymous);
 }
 
 /* Look up NAME in the C++ namespace NAMESPACE.  Other arguments are

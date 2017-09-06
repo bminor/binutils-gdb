@@ -1,3 +1,119 @@
+2017-09-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/tls-nodebug-pie.c: New file.
+	* gdb.threads/tls-nodebug-pie.exp: New file.
+
+2017-09-05  Tom Tromey  <tom@tromey.com>
+
+	* lib/gdb.exp (gdb_compile): Don't use universal_compile_options
+	for rust.
+
+2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.multi/multi-arch-exec.exp: Test with different
+	"follow-exec-mode" settings.
+	(do_test): New procedure.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/func-static.c (S::method const, S::method volatile)
+	(S::method volatile const): New methods.
+	(c_s, v_s, cv_s): New instances.
+	(main): Call method() on them.
+	* gdb.base/func-static.exp (syntax_re, cannot_resolve_re): New variables.
+	(cannot_resolve): New procedure.
+	(cxx_scopes_list): Test cv methods.  Add print-scope-quote and
+	print-quote-unquoted columns.
+	(do_test): Test printing each scope too.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/local-static.exp: Also test with
+	class::method::variable wholly quoted.
+	* gdb.cp/m-static.exp (class::method::variable): Remove test.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/local-static.c: New.
+	* gdb.base/local-static.cc: New.
+	* gdb.base/local-static.exp:  New.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add casts to int.
+	* gdb.base/nodebug.c (dataglobal8, dataglobal32_1, dataglobal32_2)
+	(dataglobal64_1, dataglobal64_2): New globals.
+	* gdb.base/nodebug.exp: Test different expressions involving the
+	new globals, with print, whatis and ptype.  Add casts to int.
+	* gdb.base/solib-display.exp: Add casts to int.
+	* gdb.compile/compile-ifunc.exp: Expect warning.  Add cast to int.
+	* gdb.cp/m-static.exp: Add cast to int.
+	* gdb.dwarf2/dw2-skip-prologue.exp: Add cast to int.
+	* gdb.threads/tls-nodebug.exp: Check that gdb errors out printing
+	tls variable with no debug info without a cast.  Test with a cast
+	to int too.
+	* gdb.trace/entry-values.exp: Add casts.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/nodebug.exp: Test that ptype's error about functions
+	with unknown return type includes the function name too.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/break-main-file-remove-fail.exp (test_remove_bp): Cast
+	return type of munmap in infcall.
+	* gdb.base/break-probes.exp: Cast return type of foo in infcall.
+	* gdb.base/checkpoint.exp: Simplify using for loop.  Cast return
+	type of ftell in infcall.
+	* gdb.base/dprintf-detach.exp (dprintf_detach_test): Cast return
+	type of getpid in infcall.
+	* gdb.base/infcall-exec.exp: Cast return type of execlp in
+	infcall.
+	* gdb.base/info-os.exp: Cast return type of getpid in infcall.
+	Bail on failure to extract the pid.
+	* gdb.base/nodebug.c: #include <stdint.h>.
+	(multf, multf_noproto, mult, mult_noproto, add8, add8_noproto):
+	New functions.
+	* gdb.base/nodebug.exp (test_call_promotion): New procedure.
+	Change expected output of print/whatis/ptype with functions with
+	no debug info.  Test all supported languages.  Call
+	test_call_promotion.
+	* gdb.compile/compile.exp: Adjust expected output to expect
+	warning.
+	* gdb.threads/siginfo-threads.exp: Likewise.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/callfuncs.exp (do_function_calls): New parameter
+	"prototypes".  Test calling float functions via prototyped and
+	unprototyped function pointers.
+	(perform_all_tests): New parameter "prototypes".  Pass it down.
+	(top level): Pass down "prototypes" parameter to
+	perform_all_tests.
+
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp (loop_break_test, loop_continue_test):
+	Test with nested loops.
+
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp: Call the new procedures.
+	(loop_break_test, loop_continue_test): New procedures.
+
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp: Call new procedure.
+	(define_if_without_arg_test): New procedure.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/list-ambiguous.exp: New file.
+	* gdb.base/list-ambiguous0.c: New file.
+	* gdb.base/list-ambiguous1.c: New file.
+	* gdb.base/list.exp (test_list_range): Adjust expected output.
+
 2017-08-31  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/share-env-with-gdbserver.c: New file.

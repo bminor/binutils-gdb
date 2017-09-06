@@ -45,6 +45,6 @@ struct program_space* get_last_displayed_pspace (void);
 CORE_ADDR get_last_displayed_addr (void);
 struct symtab* get_last_displayed_symtab (void);
 int get_last_displayed_line (void);
-void get_last_displayed_sal (struct symtab_and_line *sal);
+symtab_and_line get_last_displayed_sal ();
 
 #endif /* #ifndef STACK_H */

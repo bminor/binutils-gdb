@@ -1011,6 +1011,81 @@ proc_with_prefix redefine_backtrace_test {} {
     gdb_test "bt" "hibob" "execute bt command"
 }
 
+# Test using "if" and "while" without args when building a command list.
+
+proc define_if_without_arg_test {} {
+    foreach cmd {if while} {
+	set test "define some_command_$cmd"
+	gdb_test_multiple $test $test {
+	    -re "End with"  {
+		pass $test
+	    }
+	}
+
+	gdb_test "$cmd" "if/while commands require arguments." "type $cmd without args"
+    }
+}
+
+# Test the loop_break command.
+
+proc_with_prefix loop_break_test {} {
+    gdb_test_no_output "set \$a = 0" "initialize \$a"
+    gdb_test_no_output "set \$total = 0" "initialize \$total"
+
+    gdb_test \
+	[multi_line_input \
+	     "while \$a < 5" \
+	     "  if \$a == 4" \
+	     "    loop_break" \
+	     "  end" \
+	     "  set \$b = 0" \
+	     "  while \$b < 5" \
+	     "    if \$b == 2" \
+	     "      loop_break" \
+	     "    end" \
+	     "    set \$total = \$total + 1" \
+	     "    set \$b = \$b + 1" \
+	     "  end" \
+	     "  set \$a = \$a + 1" \
+	     "end"] \
+	"" \
+	"run while loop"
+
+    gdb_test "print \$a" " = 4" "validate \$a"
+    gdb_test "print \$b" " = 2" "validate \$b"
+    gdb_test "print \$total" " = 8" "validate \$total"
+}
+
+# Test the loop_continue command.
+
+proc_with_prefix loop_continue_test {} {
+    gdb_test_no_output "set \$a = 0" "initialize \$a"
+    gdb_test_no_output "set \$total = 0" "initialize \$total"
+
+    gdb_test \
+	[multi_line_input \
+	     "while \$a < 5" \
+	     "  set \$a = \$a + 1" \
+	     "  set \$b = 0" \
+	     "  if \$a == 4" \
+	     "    loop_continue" \
+	     "  end" \
+	     "  while \$b < 5" \
+	     "    set \$b = \$b + 1" \
+	     "    if \$b == 2" \
+	     "      loop_continue" \
+	     "    end" \
+	     "    set \$total = \$total + 1" \
+	     "  end" \
+	     "end"] \
+	"" \
+	"run while loop"
+
+    gdb_test "print \$a" " = 5" "validate \$a"
+    gdb_test "print \$b" " = 5" "validate \$b"
+    gdb_test "print \$total" " = 16" "validate \$total"
+}
+
 # Test an input line split with a continuation character (backslash)
 # while entering a multi-line command (in a secondary prompt).
 
@@ -1076,5 +1151,8 @@ if_commands_test
 error_clears_commands_left
 redefine_hook_test
 backslash_in_multi_line_command_test
+define_if_without_arg_test
+loop_break_test
+loop_continue_test
 # This one should come last, as it redefines "backtrace".
 redefine_backtrace_test

@@ -48,17 +48,13 @@ env_execute_cli_command (const char *cmd, const char *args)
 {
   if (cmd != 0)
     {
-      struct cleanup *old_cleanups;
-      char *run;
+      gdb::unique_xmalloc_ptr<char> run;
 
       if (args != NULL)
-	run = xstrprintf ("%s %s", cmd, args);
+	run.reset (xstrprintf ("%s %s", cmd, args));
       else
-	run = xstrdup (cmd);
-      old_cleanups = make_cleanup (xfree, run);
-      execute_command ( /*ui */ run, 0 /*from_tty */ );
-      do_cleanups (old_cleanups);
-      return;
+	run.reset (xstrdup (cmd));
+      execute_command ( /*ui */ run.get (), 0 /*from_tty */ );
     }
 }
 

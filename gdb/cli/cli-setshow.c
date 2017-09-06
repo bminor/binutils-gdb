@@ -367,24 +367,16 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	   message.  */
 	if (arg == NULL)
 	  {
-	    char *msg;
-	    int msg_len = 0;
-
-	    for (i = 0; c->enums[i]; i++)
-	      msg_len += strlen (c->enums[i]) + 2;
-
-	    msg = (char *) xmalloc (msg_len);
-	    *msg = '\0';
-	    make_cleanup (xfree, msg);
+	    std::string msg;
 
 	    for (i = 0; c->enums[i]; i++)
 	      {
 		if (i != 0)
-		  strcat (msg, ", ");
-		strcat (msg, c->enums[i]);
+		  msg += ", ";
+		msg += c->enums[i];
 	      }
 	    error (_("Requires an argument. Valid arguments are %s."), 
-		   msg);
+		   msg.c_str ());
 	  }
 
 	p = strchr (arg, ' ');

@@ -253,7 +253,7 @@ set_traceframe_context (struct frame_info *trace_frame)
 {
   CORE_ADDR trace_pc;
   struct symbol *traceframe_fun;
-  struct symtab_and_line traceframe_sal;
+  symtab_and_line traceframe_sal;
 
   /* Save as globals for internal use.  */
   if (trace_frame != NULL
@@ -269,7 +269,6 @@ set_traceframe_context (struct frame_info *trace_frame)
     }
   else
     {
-      init_sal (&traceframe_sal);
       traceframe_fun = NULL;
       set_internalvar_integer (lookup_internalvar ("trace_line"), -1);
     }
@@ -2433,30 +2432,24 @@ tfind_tracepoint_command (char *args, int from_tty)
 static void
 tfind_line_command (char *args, int from_tty)
 {
-  static CORE_ADDR start_pc, end_pc;
-  struct symtabs_and_lines sals;
-  struct symtab_and_line sal;
-  struct cleanup *old_chain;
-
   check_trace_running (current_trace_status ());
 
+  symtab_and_line sal;
   if (args == 0 || *args == 0)
     {
       sal = find_pc_line (get_frame_pc (get_current_frame ()), 0);
-      sals.nelts = 1;
-      sals.sals = XNEW (struct symtab_and_line);
-      sals.sals[0] = sal;
     }
   else
     {
-      sals = decode_line_with_current_source (args, DECODE_LINE_FUNFIRSTLINE);
-      sal = sals.sals[0];
+      std::vector<symtab_and_line> sals
+	= decode_line_with_current_source (args, DECODE_LINE_FUNFIRSTLINE);
+      sal = sals[0];
     }
-  
-  old_chain = make_cleanup (xfree, sals.sals);
+
   if (sal.symtab == 0)
     error (_("No line number information available."));
 
+  CORE_ADDR start_pc, end_pc;
   if (sal.line > 0 && find_line_pc_range (sal, &start_pc, &end_pc))
     {
       if (start_pc == end_pc)
@@ -2491,7 +2484,6 @@ tfind_line_command (char *args, int from_tty)
     tfind_1 (tfind_range, 0, start_pc, end_pc - 1, from_tty);
   else
     tfind_1 (tfind_outside, 0, start_pc, end_pc - 1, from_tty);
-  do_cleanups (old_chain);
 }
 
 /* tfind range command */
@@ -2562,7 +2554,6 @@ tfind_outside_command (char *args, int from_tty)
 static void
 info_scope_command (char *args, int from_tty)
 {
-  struct symtabs_and_lines sals;
   struct symbol *sym;
   struct bound_minimal_symbol msym;
   const struct block *block;
@@ -2579,17 +2570,18 @@ info_scope_command (char *args, int from_tty)
 
   event_location_up location = string_to_event_location (&args,
 							 current_language);
-  sals = decode_line_1 (location.get (), DECODE_LINE_FUNFIRSTLINE,
-			NULL, NULL, 0);
-  if (sals.nelts == 0)
+  std::vector<symtab_and_line> sals
+    = decode_line_1 (location.get (), DECODE_LINE_FUNFIRSTLINE,
+		     NULL, NULL, 0);
+  if (sals.empty ())
     {
       /* Presumably decode_line_1 has already warned.  */
       return;
     }
 
   /* Resolve line numbers to PC.  */
-  resolve_sal_pc (&sals.sals[0]);
-  block = block_for_pc (sals.sals[0].pc);
+  resolve_sal_pc (&sals[0]);
+  block = block_for_pc (sals[0].pc);
 
   while (block != 0)
     {
@@ -3825,10 +3817,7 @@ print_one_static_tracepoint_marker (int count,
   struct ui_out *uiout = current_uiout;
   VEC(breakpoint_p) *tracepoints;
 
-  struct symtab_and_line sal;
-
-  init_sal (&sal);
-
+  symtab_and_line sal;
   sal.pc = marker->address;
 
   tracepoints = static_tracepoints_here (marker->address);

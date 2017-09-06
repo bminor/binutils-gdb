@@ -339,9 +339,6 @@ enum record_i386_regnum
 /* Size of the largest register.  */
 #define I386_MAX_REGISTER_SIZE	64
 
-extern struct target_desc *tdesc_i386;
-extern struct target_desc *tdesc_i386_mmx;
-
 /* Types for i386-specific registers.  */
 extern struct type *i387_ext_type (struct gdbarch *gdbarch);
 

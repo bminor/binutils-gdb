@@ -648,12 +648,12 @@ eval_compile_command (struct command_line *cmd, const char *cmd_string,
 
 /* See compile/compile-internal.h.  */
 
-char *
+std::string
 compile_register_name_mangled (struct gdbarch *gdbarch, int regnum)
 {
   const char *regname = gdbarch_register_name (gdbarch, regnum);
 
-  return xstrprintf ("__%s", regname);
+  return string_printf ("__%s", regname);
 }
 
 /* See compile/compile-internal.h.  */

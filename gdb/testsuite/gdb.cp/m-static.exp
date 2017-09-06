@@ -52,11 +52,6 @@ gdb_continue_to_breakpoint "end of constructors"
 
 # One.
 
-# simple object, static const int, accessing via 'class::method::variable'
-# Regression test for PR c++/15203 and PR c++/15210
-gdb_test "print 'gnu_obj_1::method()::sintvar'" "\\$\[0-9\]+ = 4" \
-    "simple object, static const int, accessing via 'class::method::variable"
-
 # simple object, static const bool
 gdb_test "print test1.test" "\\$\[0-9\]* = true" "simple object, static const bool"
 

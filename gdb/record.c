@@ -470,10 +470,10 @@ no_chunk (char *arg)
 
 /* Read instruction-history modifiers from an argument string.  */
 
-static int
+static gdb_disassembly_flags
 get_insn_history_modifiers (char **arg)
 {
-  int modifiers;
+  gdb_disassembly_flags modifiers;
   char *args;
 
   modifiers = 0;
@@ -551,13 +551,11 @@ command_size_to_target_size (unsigned int size)
 static void
 cmd_record_insn_history (char *arg, int from_tty)
 {
-  int flags, size;
-
   require_record_target ();
 
-  flags = get_insn_history_modifiers (&arg);
+  gdb_disassembly_flags flags = get_insn_history_modifiers (&arg);
 
-  size = command_size_to_target_size (record_insn_history_size);
+  int size = command_size_to_target_size (record_insn_history_size);
 
   if (arg == NULL || *arg == 0 || strcmp (arg, "+") == 0)
     target_insn_history (size, flags);

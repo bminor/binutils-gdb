@@ -3385,6 +3385,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
     case OP_LONG:
     case OP_DOUBLE:
     case OP_VAR_VALUE:
+    case OP_VAR_MSYM_VALUE:
       *pos += 4;
       break;
 
@@ -10789,13 +10790,11 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         case TYPE_CODE_FUNC:
           if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	    {
-	      struct type *rtype = TYPE_TARGET_TYPE (type);
-
-	      if (TYPE_GNU_IFUNC (type))
-		return allocate_value (TYPE_TARGET_TYPE (rtype));
-	      return allocate_value (rtype);
+	      if (TYPE_TARGET_TYPE (type) == NULL)
+		error_call_unknown_return_type (NULL);
+	      return allocate_value (TYPE_TARGET_TYPE (type));
 	    }
-          return call_function_by_hand (argvec[0], nargs, argvec + 1);
+	  return call_function_by_hand (argvec[0], NULL, nargs, argvec + 1);
 	case TYPE_CODE_INTERNAL_FUNCTION:
 	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	    /* We don't know anything about what the internal
@@ -11980,7 +11979,6 @@ ada_exception_support_info_sniffer (void)
 static int
 is_known_support_routine (struct frame_info *frame)
 {
-  struct symtab_and_line sal;
   char *func_name;
   enum language func_lang;
   int i;
@@ -11989,7 +11987,7 @@ is_known_support_routine (struct frame_info *frame)
   /* If this code does not have any debugging information (no symtab),
      This cannot be any user code.  */
 
-  find_frame_sal (frame, &sal);
+  symtab_and_line sal = find_frame_sal (frame);
   if (sal.symtab == NULL)
     return 1;
 

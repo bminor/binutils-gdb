@@ -547,6 +547,8 @@ lookup_function_type_with_arguments (struct type *type,
 	  gdb_assert (nparams == 0);
 	  TYPE_PROTOTYPED (fn) = 1;
 	}
+      else
+	TYPE_PROTOTYPED (fn) = 1;
     }
 
   TYPE_NFIELDS (fn) = nparams;
@@ -2766,6 +2768,16 @@ init_type (struct objfile *objfile, enum type_code code, int length,
   TYPE_NAME (type) = name;
 
   return type;
+}
+
+/* Allocate a TYPE_CODE_ERROR type structure associated with OBJFILE,
+   to use with variables that have no debug info.  NAME is the type
+   name.  */
+
+static struct type *
+init_nodebug_var_type (struct objfile *objfile, const char *name)
+{
+  return init_type (objfile, TYPE_CODE_ERROR, 0, name);
 }
 
 /* Allocate a TYPE_CODE_INT type structure associated with OBJFILE.
@@ -5310,27 +5322,24 @@ objfile_type (struct objfile *objfile)
   objfile_type->nodebug_text_symbol
     = init_type (objfile, TYPE_CODE_FUNC, 1,
 		 "<text variable, no debug info>");
-  TYPE_TARGET_TYPE (objfile_type->nodebug_text_symbol)
-    = objfile_type->builtin_int;
   objfile_type->nodebug_text_gnu_ifunc_symbol
     = init_type (objfile, TYPE_CODE_FUNC, 1,
 		 "<text gnu-indirect-function variable, no debug info>");
+  /* Ifunc resolvers return a function address.  */
   TYPE_TARGET_TYPE (objfile_type->nodebug_text_gnu_ifunc_symbol)
-    = objfile_type->nodebug_text_symbol;
+    = init_integer_type (objfile, gdbarch_addr_bit (gdbarch), 1,
+			 "__IFUNC_RESOLVER_RET");
   TYPE_GNU_IFUNC (objfile_type->nodebug_text_gnu_ifunc_symbol) = 1;
   objfile_type->nodebug_got_plt_symbol
     = init_pointer_type (objfile, gdbarch_addr_bit (gdbarch),
 			 "<text from jump slot in .got.plt, no debug info>",
 			 objfile_type->nodebug_text_symbol);
   objfile_type->nodebug_data_symbol
-    = init_integer_type (objfile, gdbarch_int_bit (gdbarch), 0,
-			 "<data variable, no debug info>");
+    = init_nodebug_var_type (objfile, "<data variable, no debug info>");
   objfile_type->nodebug_unknown_symbol
-    = init_integer_type (objfile, TARGET_CHAR_BIT, 0,
-			 "<variable (not text or data), no debug info>");
+    = init_nodebug_var_type (objfile, "<variable (not text or data), no debug info>");
   objfile_type->nodebug_tls_symbol
-    = init_integer_type (objfile, gdbarch_int_bit (gdbarch), 0,
-			 "<thread local variable, no debug info>");
+    = init_nodebug_var_type (objfile, "<thread local variable, no debug info>");
 
   /* NOTE: on some targets, addresses and pointers are not necessarily
      the same.

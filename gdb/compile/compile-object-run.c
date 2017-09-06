@@ -172,7 +172,8 @@ compile_object_run (struct compile_module *module)
 	  ++current_arg;
 	}
       gdb_assert (current_arg == TYPE_NFIELDS (func_type));
-      call_function_by_hand_dummy (func_val, TYPE_NFIELDS (func_type), vargs,
+      call_function_by_hand_dummy (func_val,
+				   NULL, TYPE_NFIELDS (func_type), vargs,
 				   do_module_cleanup, data);
     }
   CATCH (ex, RETURN_MASK_ERROR)

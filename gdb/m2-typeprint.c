@@ -280,7 +280,8 @@ m2_procedure (struct type *type, struct ui_file *stream,
 {
   fprintf_filtered (stream, "PROCEDURE ");
   m2_type_name (type, stream);
-  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+  if (TYPE_TARGET_TYPE (type) == NULL
+      || TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
     {
       int i, len = TYPE_NFIELDS (type);
 
@@ -294,11 +295,11 @@ m2_procedure (struct type *type, struct ui_file *stream,
 	    }
 	  m2_print_type (TYPE_FIELD_TYPE (type, i), "", stream, -1, 0, flags);
 	}
+      fprintf_filtered (stream, ") : ");
       if (TYPE_TARGET_TYPE (type) != NULL)
-	{
-	  fprintf_filtered (stream, " : ");
-	  m2_print_type (TYPE_TARGET_TYPE (type), "", stream, 0, 0, flags);
-	}
+	m2_print_type (TYPE_TARGET_TYPE (type), "", stream, 0, 0, flags);
+      else
+	type_print_unknown_return_type (stream);
     }
 }
 

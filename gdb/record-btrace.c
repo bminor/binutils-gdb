@@ -630,15 +630,16 @@ static void
 btrace_insn_history (struct ui_out *uiout,
 		     const struct btrace_thread_info *btinfo,
 		     const struct btrace_insn_iterator *begin,
-		     const struct btrace_insn_iterator *end, int flags)
+		     const struct btrace_insn_iterator *end,
+		     gdb_disassembly_flags flags)
 {
   struct cleanup *cleanups, *ui_item_chain;
   struct gdbarch *gdbarch;
   struct btrace_insn_iterator it;
   struct btrace_line_range last_lines;
 
-  DEBUG ("itrace (0x%x): [%u; %u)", flags, btrace_insn_number (begin),
-	 btrace_insn_number (end));
+  DEBUG ("itrace (0x%x): [%u; %u)", (unsigned) flags,
+	 btrace_insn_number (begin), btrace_insn_number (end));
 
   flags |= DISASSEMBLY_SPECULATIVE;
 
@@ -720,7 +721,8 @@ btrace_insn_history (struct ui_out *uiout,
 /* The to_insn_history method of target record-btrace.  */
 
 static void
-record_btrace_insn_history (struct target_ops *self, int size, int flags)
+record_btrace_insn_history (struct target_ops *self, int size,
+			    gdb_disassembly_flags flags)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_insn_history *history;
@@ -740,7 +742,7 @@ record_btrace_insn_history (struct target_ops *self, int size, int flags)
     {
       struct btrace_insn_iterator *replay;
 
-      DEBUG ("insn-history (0x%x): %d", flags, size);
+      DEBUG ("insn-history (0x%x): %d", (unsigned) flags, size);
 
       /* If we're replaying, we start at the replay position.  Otherwise, we
 	 start at the tail of the trace.  */
@@ -772,7 +774,7 @@ record_btrace_insn_history (struct target_ops *self, int size, int flags)
       begin = history->begin;
       end = history->end;
 
-      DEBUG ("insn-history (0x%x): %d, prev: [%u; %u)", flags, size,
+      DEBUG ("insn-history (0x%x): %d, prev: [%u; %u)", (unsigned) flags, size,
 	     btrace_insn_number (&begin), btrace_insn_number (&end));
 
       if (size < 0)
@@ -804,7 +806,8 @@ record_btrace_insn_history (struct target_ops *self, int size, int flags)
 
 static void
 record_btrace_insn_history_range (struct target_ops *self,
-				  ULONGEST from, ULONGEST to, int flags)
+				  ULONGEST from, ULONGEST to,
+				  gdb_disassembly_flags flags)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_insn_history *history;
@@ -818,7 +821,7 @@ record_btrace_insn_history_range (struct target_ops *self,
   low = from;
   high = to;
 
-  DEBUG ("insn-history (0x%x): [%u; %u)", flags, low, high);
+  DEBUG ("insn-history (0x%x): [%u; %u)", (unsigned) flags, low, high);
 
   /* Check for wrap-arounds.  */
   if (low != from || high != to)
@@ -853,7 +856,8 @@ record_btrace_insn_history_range (struct target_ops *self,
 
 static void
 record_btrace_insn_history_from (struct target_ops *self,
-				 ULONGEST from, int size, int flags)
+				 ULONGEST from, int size,
+				 gdb_disassembly_flags flags)
 {
   ULONGEST begin, end, context;
 
@@ -891,7 +895,7 @@ btrace_call_history_insn_range (struct ui_out *uiout,
 {
   unsigned int begin, end, size;
 
-  size = VEC_length (btrace_insn_s, bfun->insn);
+  size = bfun->insn.size ();
   gdb_assert (size > 0);
 
   begin = bfun->insn_offset;
@@ -911,10 +915,8 @@ static void
 btrace_compute_src_line_range (const struct btrace_function *bfun,
 			       int *pbegin, int *pend)
 {
-  struct btrace_insn *insn;
   struct symtab *symtab;
   struct symbol *sym;
-  unsigned int idx;
   int begin, end;
 
   begin = INT_MAX;
@@ -926,11 +928,11 @@ btrace_compute_src_line_range (const struct btrace_function *bfun,
 
   symtab = symbol_symtab (sym);
 
-  for (idx = 0; VEC_iterate (btrace_insn_s, bfun->insn, idx, insn); ++idx)
+  for (const btrace_insn &insn : bfun->insn)
     {
       struct symtab_and_line sal;
 
-      sal = find_pc_line (insn->pc, 0);
+      sal = find_pc_line (insn.pc, 0);
       if (sal.symtab != symtab || sal.line == 0)
 	continue;
 
@@ -1615,7 +1617,6 @@ record_btrace_frame_prev_register (struct frame_info *this_frame,
 {
   const struct btrace_frame_cache *cache;
   const struct btrace_function *bfun, *caller;
-  const struct btrace_insn *insn;
   struct btrace_call_iterator it;
   struct gdbarch *gdbarch;
   CORE_ADDR pc;
@@ -1638,15 +1639,10 @@ record_btrace_frame_prev_register (struct frame_info *this_frame,
   caller = btrace_call_get (&it);
 
   if ((bfun->flags & BFUN_UP_LINKS_TO_RET) != 0)
-    {
-      insn = VEC_index (btrace_insn_s, caller->insn, 0);
-      pc = insn->pc;
-    }
+    pc = caller->insn.front ().pc;
   else
     {
-      insn = VEC_last (btrace_insn_s, caller->insn);
-      pc = insn->pc;
-
+      pc = caller->insn.back ().pc;
       pc += gdb_insn_length (gdbarch, pc);
     }
 

@@ -28,6 +28,7 @@
 
 #include "sol2-tdep.h"
 #include "amd64-tdep.h"
+#include "x86-xstate.h"
 #include "solib-svr4.h"
 
 /* Mapping between the general-purpose registers in gregset_t format
@@ -99,7 +100,8 @@ amd64_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (amd64_sol2_gregset_reg_offset);
   tdep->sizeof_gregset = 28 * 8;
 
-  amd64_init_abi (info, gdbarch, tdesc_amd64);
+  amd64_init_abi (info, gdbarch,
+		  amd64_target_description (X86_XSTATE_SSE_MASK));
 
   tdep->sigtramp_p = amd64_sol2_sigtramp_p;
   tdep->sigcontext_addr = amd64_sol2_mcontext_addr;

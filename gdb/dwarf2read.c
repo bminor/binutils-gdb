@@ -8042,6 +8042,23 @@ free_delayed_list (void *ptr)
     }
 }
 
+/* Check whether [PHYSNAME, PHYSNAME+LEN) ends with a modifier like
+   "const" / "volatile".  If so, decrements LEN by the length of the
+   modifier and return true.  Otherwise return false.  */
+
+template<size_t N>
+static bool
+check_modifier (const char *physname, size_t &len, const char (&mod)[N])
+{
+  size_t mod_len = sizeof (mod) - 1;
+  if (len > mod_len && startswith (physname + (len - mod_len), mod))
+    {
+      len -= mod_len;
+      return true;
+    }
+  return false;
+}
+
 /* Compute the physnames of any methods on the CU's method list.
 
    The computation of method physnames is delayed in order to avoid the
@@ -8053,6 +8070,12 @@ compute_delayed_physnames (struct dwarf2_cu *cu)
 {
   int i;
   struct delayed_method_info *mi;
+
+  /* Only C++ delays computing physnames.  */
+  if (VEC_empty (delayed_method_info, cu->method_list))
+    return;
+  gdb_assert (cu->language == language_cplus);
+
   for (i = 0; VEC_iterate (delayed_method_info, cu->method_list, i, mi) ; ++i)
     {
       const char *physname;
@@ -8061,6 +8084,26 @@ compute_delayed_physnames (struct dwarf2_cu *cu)
       physname = dwarf2_physname (mi->name, mi->die, cu);
       TYPE_FN_FIELD_PHYSNAME (fn_flp->fn_fields, mi->index)
 	= physname ? physname : "";
+
+      /* Since there's no tag to indicate whether a method is a
+	 const/volatile overload, extract that information out of the
+	 demangled name.  */
+      if (physname != NULL)
+	{
+	  size_t len = strlen (physname);
+
+	  while (1)
+	    {
+	      if (physname[len] == ')') /* shortcut */
+		break;
+	      else if (check_modifier (physname, len, " const"))
+		TYPE_FN_FIELD_CONST (fn_flp->fn_fields, mi->index) = 1;
+	      else if (check_modifier (physname, len, " volatile"))
+		TYPE_FN_FIELD_VOLATILE (fn_flp->fn_fields, mi->index) = 1;
+	      else
+		break;
+	    }
+	}
     }
 }
 
@@ -19139,8 +19182,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	     variables with missing type entries.  Change the
 	     misleading `void' type to something sensible.  */
 	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_VOID)
-	    SYMBOL_TYPE (sym)
-	      = objfile_type (objfile)->nodebug_data_symbol;
+	    SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_int;
 
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
 	  /* In the case of DW_TAG_member, we should only be called for

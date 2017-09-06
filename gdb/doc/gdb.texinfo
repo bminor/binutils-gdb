@@ -9124,6 +9124,22 @@ If you ask to print an object whose contents are unknown to
 by the debug information, @value{GDBN} will say @samp{<incomplete
 type>}.  @xref{Symbols, incomplete type}, for more about this.
 
+@cindex no debug info variables
+If you try to examine or use the value of a (global) variable for
+which @value{GDBN} has no type information, e.g., because the program
+includes no debug information, @value{GDBN} displays an error message.
+@xref{Symbols, unknown type}, for more about unknown types.  If you
+cast the variable to its declared type, @value{GDBN} gets the
+variable's value using the cast-to type as the variable's type.  For
+example, in a C program:
+
+@smallexample
+  (@value{GDBP}) p var
+  'var' has unknown type; cast it to its declared type
+  (@value{GDBP}) p (float) var
+  $1 = 3.14
+@end smallexample
+
 If you append @kbd{@@entry} string to a function parameter name you get its
 value at the time the function got called.  If the value is not available an
 error message is printed.  Entry values are available only with some compilers.
@@ -17093,6 +17109,24 @@ but no definition for @code{struct foo} itself, @value{GDBN} will say:
 ``Incomplete type'' is C terminology for data types that are not
 completely specified.
 
+@cindex unknown type
+Othertimes, information about a variable's type is completely absent
+from the debug information included in the program.  This most often
+happens when the program or library where the variable is defined
+includes no debug information at all.  @value{GDBN} knows the variable
+exists from inspecting the linker/loader symbol table (e.g., the ELF
+dynamic symbol table), but such symbols do not contain type
+information.  Inspecting the type of a (global) variable for which
+@value{GDBN} has no type information shows:
+
+@smallexample
+  (@value{GDBP}) ptype var
+  type = <data variable, no debug info>
+@end smallexample
+
+@xref{Variables, no debug info variables}, for how to print the values
+of such variables.
+
 @kindex info types
 @item info types @var{regexp}
 @itemx info types
@@ -17808,14 +17842,73 @@ Show the current setting of stack unwinding in the functions called by
 
 @end table
 
-@cindex weak alias functions
-Sometimes, a function you wish to call is actually a @dfn{weak alias}
-for another function.  In such case, @value{GDBN} might not pick up
-the type information, including the types of the function arguments,
-which causes @value{GDBN} to call the inferior function incorrectly.
-As a result, the called function will function erroneously and may
-even crash.  A solution to that is to use the name of the aliased
-function instead.
+@subsection Calling functions with no debug info
+
+@cindex no debug info functions
+Sometimes, a function you wish to call is missing debug information.
+In such case, @value{GDBN} does not know the type of the function,
+including the types of the function's parameters.  To avoid calling
+the inferior function incorrectly, which could result in the called
+function functioning erroneously and even crash, @value{GDBN} refuses
+to call the function unless you tell it the type of the function.
+
+For prototyped (i.e.@: ANSI/ISO style) functions, there are two ways
+to do that.  The simplest is to cast the call to the function's
+declared return type.  For example:
+
+@smallexample
+(@value{GDBP}) p getenv ("PATH")
+'getenv' has unknown return type; cast the call to its declared return type
+(@value{GDBP}) p (char *) getenv ("PATH")
+$1 = 0x7fffffffe7ba "/usr/local/bin:/"...
+@end smallexample
+
+Casting the return type of a no-debug function is equivalent to
+casting the function to a pointer to a prototyped function that has a
+prototype that matches the types of the passed-in arguments, and
+calling that.  I.e., the call above is equivalent to:
+
+@smallexample
+(@value{GDBP}) p ((char * (*) (const char *)) getenv) ("PATH")
+@end smallexample
+
+@noindent
+and given this prototyped C or C++ function with float parameters:
+
+@smallexample
+float multiply (float v1, float v2) @{ return v1 * v2; @}
+@end smallexample
+
+@noindent
+these calls are equivalent:
+
+@smallexample
+(@value{GDBP}) p (float) multiply (2.0f, 3.0f)
+(@value{GDBP}) p ((float (*) (float, float)) multiply) (2.0f, 3.0f)
+@end smallexample
+
+If the function you wish to call is declared as unprototyped (i.e.@:
+old K&R style), you must use the cast-to-function-pointer syntax, so
+that @value{GDBN} knows that it needs to apply default argument
+promotions (promote float arguments to double).  @xref{ABI, float
+promotion}.  For example, given this unprototyped C function with
+float parameters, and no debug info:
+
+@smallexample
+float
+multiply_noproto (v1, v2)
+  float v1, v2;
+@{
+  return v1 * v2;
+@}
+@end smallexample
+
+@noindent
+you call it like this:
+
+@smallexample
+  (@value{GDBP}) p ((float (*) ()) multiply_noproto) (2.0f, 3.0f)
+@end smallexample
 
 @node Patching
 @section Patching Programs
@@ -21847,12 +21940,12 @@ problem:
 
 @smallexample
 (@value{GDBP}) print 'cygwin1!__argv'
-$1 = 268572168
+'cygwin1!__argv' has unknown type; cast it to its declared type
 @end smallexample
 
 @smallexample
 (@value{GDBP}) x 'cygwin1!__argv'
-0x10021610:      "\230y\""
+'cygwin1!__argv' has unknown type; cast it to its declared type
 @end smallexample
 
 And two possible solutions:

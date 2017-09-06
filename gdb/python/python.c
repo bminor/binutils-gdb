@@ -647,10 +647,6 @@ gdbpy_solib_name (PyObject *self, PyObject *args)
 static PyObject *
 gdbpy_decode_line (PyObject *self, PyObject *args)
 {
-  struct gdb_exception except = exception_none;
-  struct symtabs_and_lines sals = { NULL, 0 }; /* Initialize to
-						  appease gcc.  */
-  struct symtab_and_line sal;
   char *arg = NULL;
   gdbpy_ref<> result;
   gdbpy_ref<> unparsed;
@@ -659,54 +655,43 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   if (! PyArg_ParseTuple (args, "|s", &arg))
     return NULL;
 
-  sals.sals = NULL;
-
   if (arg != NULL)
     location = string_to_event_location_basic (&arg, python_language);
 
+  std::vector<symtab_and_line> decoded_sals;
+  symtab_and_line def_sal;
+  gdb::array_view<symtab_and_line> sals;
   TRY
     {
       if (location != NULL)
-	sals = decode_line_1 (location.get (), 0, NULL, NULL, 0);
+	{
+	  decoded_sals = decode_line_1 (location.get (), 0, NULL, NULL, 0);
+	  sals = decoded_sals;
+	}
       else
 	{
 	  set_default_source_symtab_and_line ();
-	  sal = get_current_source_symtab_and_line ();
-	  sals.sals = &sal;
-	  sals.nelts = 1;
+	  def_sal = get_current_source_symtab_and_line ();
+	  sals = def_sal;
 	}
     }
   CATCH (ex, RETURN_MASK_ALL)
     {
-      except = ex;
+      /* We know this will always throw.  */
+      gdbpy_convert_exception (ex);
+      return NULL;
     }
   END_CATCH
 
-  /* Ensure that the sals data is freed, when needed.  */
-  gdb::unique_xmalloc_ptr<struct symtab_and_line> free_sals;
-  if (sals.sals != NULL && sals.sals != &sal)
-    free_sals.reset (sals.sals);
-
-  if (except.reason < 0)
+  if (!sals.empty ())
     {
-      /* We know this will always throw.  */
-      gdbpy_convert_exception (except);
-      return NULL;
-    }
-
-  if (sals.nelts)
-    {
-      int i;
-
-      result.reset (PyTuple_New (sals.nelts));
+      result.reset (PyTuple_New (sals.size ()));
       if (result == NULL)
 	return NULL;
-      for (i = 0; i < sals.nelts; ++i)
+      for (size_t i = 0; i < sals.size (); ++i)
 	{
-	  PyObject *obj;
-
-	  obj = symtab_and_line_to_sal_object (sals.sals[i]);
-	  if (! obj)
+	  PyObject *obj = symtab_and_line_to_sal_object (sals[i]);
+	  if (obj == NULL)
 	    return NULL;
 
 	  PyTuple_SetItem (result.get (), i, obj);

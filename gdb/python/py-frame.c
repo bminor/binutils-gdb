@@ -468,14 +468,13 @@ static PyObject *
 frapy_find_sal (PyObject *self, PyObject *args)
 {
   struct frame_info *frame;
-  struct symtab_and_line sal;
   PyObject *sal_obj = NULL;   /* Initialize to appease gcc warning.  */
 
   TRY
     {
       FRAPY_REQUIRE_VALID (self, frame);
 
-      find_frame_sal (frame, &sal);
+      symtab_and_line sal = find_frame_sal (frame);
       sal_obj = symtab_and_line_to_sal_object (sal);
     }
   CATCH (except, RETURN_MASK_ALL)

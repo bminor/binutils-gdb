@@ -17,6 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#define _KMEMUSER
 #include "defs.h"
 #include "cli/cli-cmds.h"
 #include "command.h"
@@ -36,7 +37,9 @@
 #include "readline/readline.h"
 #include <sys/param.h>
 #include <sys/proc.h>
+#ifdef HAVE_SYS_USER_H
 #include <sys/user.h>
+#endif
 
 #include "bsd-kvm.h"
 

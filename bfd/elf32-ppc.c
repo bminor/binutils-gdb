@@ -1656,6 +1656,21 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0x3e007ff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
+  /* e_li split20 format.  */
+  HOWTO (R_PPC_VLE_ADDR20,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 20,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_PPC_VLE_ADDR20",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x1f07ff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
   HOWTO (R_PPC_IRELATIVE,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -4268,6 +4283,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_VLE_HI16D:
 	case R_PPC_VLE_HA16A:
 	case R_PPC_VLE_HA16D:
+	case R_PPC_VLE_ADDR20:
 	  break;
 
 	case R_PPC_EMB_SDA2REL:
@@ -4986,6 +5002,23 @@ ppc_elf_vle_split16 (bfd *input_bfd,
   insn |= value & 0x7ff;
   bfd_put_32 (input_bfd, insn, loc);
 }
+
+static void
+ppc_elf_vle_split20 (bfd *output_bfd, bfd_byte *loc, bfd_vma value)
+{
+  unsigned int insn;
+
+  insn = bfd_get_32 (output_bfd, loc);
+  /* We have an li20 field, bits 17..20, 11..15, 21..31.  */
+  /* Top 4 bits of value to 17..20.  */
+  insn |= (value & 0xf0000) >> 5;
+  /* Next 5 bits of the value to 11..15.  */
+  insn |= (value & 0xf800) << 5;
+  /* And the final 11 bits of the value to bits 21 to 31.  */
+  insn |= value & 0x7ff;
+  bfd_put_32 (output_bfd, insn, loc);
+}
+
 
 /* Choose which PLT scheme to use, and set .plt flags appropriately.
    Returns -1 on error, 0 for old PLT, 1 for new PLT.  */
@@ -9511,6 +9544,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      }
 	  }
 	  goto copy_reloc;
+
+	case R_PPC_VLE_ADDR20:
+	  ppc_elf_vle_split20 (output_bfd, contents + rel->r_offset, relocation);
+	  continue;
 
 	  /* Relocate against the beginning of the section.  */
 	case R_PPC_SECTOFF:

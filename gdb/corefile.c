@@ -130,29 +130,24 @@ specify_exec_file_hook (void (*hook) (const char *))
 void
 reopen_exec_file (void)
 {
-  char *filename;
   int res;
   struct stat st;
-  struct cleanup *cleanups;
 
   /* Don't do anything if there isn't an exec file.  */
   if (exec_bfd == NULL)
     return;
 
   /* If the timestamp of the exec file has changed, reopen it.  */
-  filename = xstrdup (bfd_get_filename (exec_bfd));
-  cleanups = make_cleanup (xfree, filename);
-  res = stat (filename, &st);
+  std::string filename = bfd_get_filename (exec_bfd);
+  res = stat (filename.c_str (), &st);
 
   if (res == 0 && exec_bfd_mtime && exec_bfd_mtime != st.st_mtime)
-    exec_file_attach (filename, 0);
+    exec_file_attach (filename.c_str (), 0);
   else
     /* If we accessed the file since last opening it, close it now;
        this stops GDB from holding the executable open after it
        exits.  */
     bfd_cache_close_all ();
-
-  do_cleanups (cleanups);
 }
 
 /* If we have both a core file and an exec file,
@@ -186,7 +181,7 @@ Use the \"file\" or \"exec-file\" command."));
 }
 
 
-char *
+std::string
 memory_error_message (enum target_xfer_status err,
 		      struct gdbarch *gdbarch, CORE_ADDR memaddr)
 {
@@ -195,11 +190,11 @@ memory_error_message (enum target_xfer_status err,
     case TARGET_XFER_E_IO:
       /* Actually, address between memaddr and memaddr + len was out of
 	 bounds.  */
-      return xstrprintf (_("Cannot access memory at address %s"),
-			 paddress (gdbarch, memaddr));
+      return string_printf (_("Cannot access memory at address %s"),
+			    paddress (gdbarch, memaddr));
     case TARGET_XFER_UNAVAILABLE:
-      return xstrprintf (_("Memory at address %s unavailable."),
-			 paddress (gdbarch, memaddr));
+      return string_printf (_("Memory at address %s unavailable."),
+			    paddress (gdbarch, memaddr));
     default:
       internal_error (__FILE__, __LINE__,
 		      "unhandled target_xfer_status: %s (%s)",
@@ -213,12 +208,10 @@ memory_error_message (enum target_xfer_status err,
 void
 memory_error (enum target_xfer_status err, CORE_ADDR memaddr)
 {
-  char *str;
   enum errors exception = GDB_NO_ERROR;
 
   /* Build error string.  */
-  str = memory_error_message (err, target_gdbarch (), memaddr);
-  make_cleanup (xfree, str);
+  std::string str = memory_error_message (err, target_gdbarch (), memaddr);
 
   /* Choose the right error to throw.  */
   switch (err)
@@ -232,7 +225,7 @@ memory_error (enum target_xfer_status err, CORE_ADDR memaddr)
     }
 
   /* Throw it.  */
-  throw_error (exception, ("%s"), str);
+  throw_error (exception, ("%s"), str.c_str ());
 }
 
 /* Helper function.  */

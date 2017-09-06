@@ -191,7 +191,7 @@ compare_lines (const void *mle1p, const void *mle2p)
 int
 gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
 						  const struct disasm_insn *insn,
-						  int flags)
+						  gdb_disassembly_flags flags)
 {
   /* parts of the symbolic representation of the address */
   int unmapped;
@@ -295,7 +295,7 @@ gdb_pretty_print_disassembler::pretty_print_insn (struct ui_out *uiout,
 static int
 dump_insns (struct gdbarch *gdbarch,
 	    struct ui_out *uiout, CORE_ADDR low, CORE_ADDR high,
-	    int how_many, int flags, CORE_ADDR *end_pc)
+	    int how_many, gdb_disassembly_flags flags, CORE_ADDR *end_pc)
 {
   struct disasm_insn insn;
   int num_displayed = 0;
@@ -338,7 +338,7 @@ do_mixed_source_and_assembly_deprecated
   (struct gdbarch *gdbarch, struct ui_out *uiout,
    struct symtab *symtab,
    CORE_ADDR low, CORE_ADDR high,
-   int how_many, int flags)
+   int how_many, gdb_disassembly_flags flags)
 {
   int newlines = 0;
   int nlines;
@@ -498,7 +498,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 			      struct ui_out *uiout,
 			      struct symtab *main_symtab,
 			      CORE_ADDR low, CORE_ADDR high,
-			      int how_many, int flags)
+			      int how_many, gdb_disassembly_flags flags)
 {
   const struct linetable_entry *le, *first_le;
   int i, nlines;
@@ -730,7 +730,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 static void
 do_assembly_only (struct gdbarch *gdbarch, struct ui_out *uiout,
 		  CORE_ADDR low, CORE_ADDR high,
-		  int how_many, int flags)
+		  int how_many, gdb_disassembly_flags flags)
 {
   ui_out_emit_list list_emitter (uiout, "asm_insns");
 
@@ -803,7 +803,7 @@ gdb_disassembler::print_insn (CORE_ADDR memaddr,
 
 void
 gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
-		 int flags, int how_many,
+		 gdb_disassembly_flags flags, int how_many,
 		 CORE_ADDR low, CORE_ADDR high)
 {
   struct symtab *symtab;

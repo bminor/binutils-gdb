@@ -877,7 +877,7 @@ elf_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
   target_auxv_search (&current_target, AT_HWCAP, &hwcap);
   hwcap_val = value_from_longest (builtin_type (gdbarch)
 				  ->builtin_unsigned_long, hwcap);
-  address_val = call_function_by_hand (function, 1, &hwcap_val);
+  address_val = call_function_by_hand (function, NULL, 1, &hwcap_val);
   address = value_as_address (address_val);
   address = gdbarch_convert_from_func_ptr_addr (gdbarch, address,
 						&current_target);
@@ -917,12 +917,10 @@ elf_gnu_ifunc_resolver_stop (struct breakpoint *b)
 
   if (b_return == b)
     {
-      struct symtab_and_line sal;
-
       /* No need to call find_pc_line for symbols resolving as this is only
 	 a helper breakpointer never shown to the user.  */
 
-      init_sal (&sal);
+      symtab_and_line sal;
       sal.pspace = current_inferior ()->pspace;
       sal.pc = prev_pc;
       sal.section = find_pc_overlay (sal.pc);
@@ -953,8 +951,6 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   struct value *func_func;
   struct value *value;
   CORE_ADDR resolved_address, resolved_pc;
-  struct symtab_and_line sal;
-  struct symtabs_and_lines sals, sals_end;
 
   gdb_assert (b->type == bp_gnu_ifunc_resolver_return);
 
@@ -997,13 +993,9 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   elf_gnu_ifunc_record_cache (event_location_to_string (b->location.get ()),
 			      resolved_pc);
 
-  sal = find_pc_line (resolved_pc, 0);
-  sals.nelts = 1;
-  sals.sals = &sal;
-  sals_end.nelts = 0;
-
   b->type = bp_breakpoint;
-  update_breakpoint_locations (b, current_program_space, sals, sals_end);
+  update_breakpoint_locations (b, current_program_space,
+			       find_pc_line (resolved_pc, 0), {});
 }
 
 /* A helper function for elf_symfile_read that reads the minimal

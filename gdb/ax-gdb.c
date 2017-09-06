@@ -42,7 +42,7 @@
 #include "linespec.h"
 #include "location.h"
 #include "objfiles.h"
-
+#include "typeprint.h"
 #include "valprint.h"
 #include "c-lang.h"
 
@@ -733,6 +733,23 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       break;
     }
 }
+
+/* Generate code for a minimal symbol variable reference to AX.  The
+   variable is the symbol MINSYM, of OBJFILE.  Set VALUE to describe
+   the result.  */
+
+static void
+gen_msym_var_ref (agent_expr *ax, axs_value *value,
+		  minimal_symbol *msymbol, objfile *objf)
+{
+  CORE_ADDR address;
+  type *t = find_minsym_type_and_address (msymbol, objf, &address);
+  value->type = t;
+  value->optimized_out = false;
+  ax_const_l (ax, address);
+  value->kind = axs_lvalue_memory;
+}
+
 
 
 
@@ -1748,6 +1765,40 @@ gen_sizeof (struct expression *exp, union exp_element **pc,
 }
 
 
+/* Generate bytecode for a cast to TO_TYPE.  Advance *PC over the
+   subexpression.  */
+
+static void
+gen_expr_for_cast (struct expression *exp, union exp_element **pc,
+		   struct agent_expr *ax, struct axs_value *value,
+		   struct type *to_type)
+{
+  enum exp_opcode op = (*pc)[0].opcode;
+
+  /* Don't let symbols be handled with gen_expr because that throws an
+     "unknown type" error for no-debug data symbols.  Instead, we want
+     the cast to reinterpret such symbols.  */
+  if (op == OP_VAR_MSYM_VALUE || op == OP_VAR_VALUE)
+    {
+      if (op == OP_VAR_VALUE)
+	{
+	  gen_var_ref (ax, value, (*pc)[2].symbol);
+
+	  if (value->optimized_out)
+	    error (_("`%s' has been optimized out, cannot use"),
+		   SYMBOL_PRINT_NAME ((*pc)[2].symbol));
+	}
+      else
+	gen_msym_var_ref (ax, value, (*pc)[2].msymbol, (*pc)[1].objfile);
+      if (TYPE_CODE (value->type) == TYPE_CODE_ERROR)
+	value->type = to_type;
+      (*pc) += 4;
+    }
+  else
+    gen_expr (exp, pc, ax, value);
+  gen_cast (ax, value, to_type);
+}
+
 /* Generating bytecode from GDB expressions: general recursive thingy  */
 
 /* XXX: i18n */
@@ -1961,6 +2012,18 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	error (_("`%s' has been optimized out, cannot use"),
 	       SYMBOL_PRINT_NAME ((*pc)[2].symbol));
 
+      if (TYPE_CODE (value->type) == TYPE_CODE_ERROR)
+	error_unknown_type (SYMBOL_PRINT_NAME ((*pc)[2].symbol));
+
+      (*pc) += 4;
+      break;
+
+    case OP_VAR_MSYM_VALUE:
+      gen_msym_var_ref (ax, value, (*pc)[2].msymbol, (*pc)[1].objfile);
+
+      if (TYPE_CODE (value->type) == TYPE_CODE_ERROR)
+	error_unknown_type (MSYMBOL_PRINT_NAME ((*pc)[2].msymbol));
+
       (*pc) += 4;
       break;
 
@@ -2021,8 +2084,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	struct type *type = (*pc)[1].type;
 
 	(*pc) += 3;
-	gen_expr (exp, pc, ax, value);
-	gen_cast (ax, value, type);
+	gen_expr_for_cast (exp, pc, ax, value, type);
       }
       break;
 
@@ -2037,9 +2099,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	val = evaluate_subexp (NULL, exp, &offset, EVAL_AVOID_SIDE_EFFECTS);
 	type = value_type (val);
 	*pc = &exp->elts[offset];
-
-	gen_expr (exp, pc, ax, value);
-	gen_cast (ax, value, type);
+	gen_expr_for_cast (exp, pc, ax, value, type);
       }
       break;
 
@@ -2577,8 +2637,6 @@ agent_command_1 (char *exp, int eval)
   if (check_for_argument (&exp, "-at", sizeof ("-at") - 1))
     {
       struct linespec_result canonical;
-      int ix;
-      struct linespec_sals *iter;
 
       exp = skip_spaces (exp);
 
@@ -2592,13 +2650,9 @@ agent_command_1 (char *exp, int eval)
 	  exp++;
 	  exp = skip_spaces (exp);
 	}
-      for (ix = 0; VEC_iterate (linespec_sals, canonical.sals, ix, iter); ++ix)
-        {
-	  int i;
-
-	  for (i = 0; i < iter->sals.nelts; i++)
-	    agent_eval_command_one (exp, eval, iter->sals.sals[i].pc);
-        }
+      for (const auto &lsal : canonical.lsals)
+	for (const auto &sal : lsal.sals)
+	  agent_eval_command_one (exp, eval, sal.pc);
     }
   else
     agent_eval_command_one (exp, eval, get_frame_pc (get_current_frame ()));

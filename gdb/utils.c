@@ -751,23 +751,15 @@ add_internal_problem_command (struct internal_problem *problem)
 }
 
 /* Return a newly allocated string, containing the PREFIX followed
-   by the system error message for errno (separated by a colon).
+   by the system error message for errno (separated by a colon).  */
 
-   The result must be deallocated after use.  */
-
-static char *
+static std::string
 perror_string (const char *prefix)
 {
   char *err;
-  char *combined;
 
   err = safe_strerror (errno);
-  combined = (char *) xmalloc (strlen (err) + strlen (prefix) + 3);
-  strcpy (combined, prefix);
-  strcat (combined, ": ");
-  strcat (combined, err);
-
-  return combined;
+  return std::string (prefix) + ": " + err;
 }
 
 /* Print the system error message for errno, and also mention STRING
@@ -777,10 +769,7 @@ perror_string (const char *prefix)
 void
 throw_perror_with_name (enum errors errcode, const char *string)
 {
-  char *combined;
-
-  combined = perror_string (string);
-  make_cleanup (xfree, combined);
+  std::string combined = perror_string (string);
 
   /* I understand setting these is a matter of taste.  Still, some people
      may clear errno but not know about bfd_error.  Doing this here is not
@@ -788,7 +777,7 @@ throw_perror_with_name (enum errors errcode, const char *string)
   bfd_set_error (bfd_error_no_error);
   errno = 0;
 
-  throw_error (errcode, _("%s."), combined);
+  throw_error (errcode, _("%s."), combined.c_str ());
 }
 
 /* See throw_perror_with_name, ERRCODE defaults here to GENERIC_ERROR.  */
@@ -805,11 +794,8 @@ perror_with_name (const char *string)
 void
 perror_warning_with_name (const char *string)
 {
-  char *combined;
-
-  combined = perror_string (string);
-  warning (_("%s"), combined);
-  xfree (combined);
+  std::string combined = perror_string (string);
+  warning (_("%s"), combined.c_str ());
 }
 
 /* Print the system error message for ERRCODE, and also mention STRING

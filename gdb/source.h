@@ -91,7 +91,8 @@ extern void set_default_source_symtab_and_line (void);
    (the returned sal pc and end fields are not valid.)
    and set the current default to whatever is in SAL.
    NOTE: The returned sal pc and end fields are not valid.  */
-extern struct symtab_and_line set_current_source_symtab_and_line (const struct symtab_and_line *);
+extern symtab_and_line set_current_source_symtab_and_line
+  (const symtab_and_line &sal);
 
 /* Reset any information stored about a default file and line to print.  */
 extern void clear_current_source_symtab_and_line (void);

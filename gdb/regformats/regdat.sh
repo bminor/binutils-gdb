@@ -123,7 +123,15 @@ while do_read
 do
   if test "${type}" = "name"; then
     name="${entry}"
-    echo "static struct reg regs_${name}[] = {"
+
+    echo "const struct target_desc *tdesc_${name};"
+    echo ""
+    echo "void"
+    echo "init_registers_${name} (void)"
+    echo "{"
+    echo "  static struct target_desc tdesc_${name}_s;"
+    echo "  struct target_desc *result = &tdesc_${name}_s;"
+
     continue
   elif test "${type}" = "xmltarget"; then
     xmltarget="${entry}"
@@ -141,13 +149,14 @@ do
     echo "$0: $1 does not specify \`\`name''." 1>&2
     exit 1
   else
-    echo "  { \"${entry}\", ${offset}, ${type} },"
+    echo "  tdesc_create_reg ((struct tdesc_feature *) result, \"${entry}\","
+    echo "  0, 0, NULL, ${type}, NULL);"
+
     offset=`expr ${offset} + ${type}`
     i=`expr $i + 1`
   fi
 done
 
-echo "};"
 echo
 echo "static const char *expedite_regs_${name}[] = { \"`echo ${expedite} | sed 's/,/", "/g'`\", 0 };"
 if test "${xmltarget}" = x; then
@@ -169,17 +178,6 @@ fi
 echo
 
 cat <<EOF
-const struct target_desc *tdesc_${name};
-
-void
-init_registers_${name} (void)
-{
-  static struct target_desc tdesc_${name}_s;
-  struct target_desc *result = &tdesc_${name}_s;
-
-  result->reg_defs = regs_${name};
-  result->num_registers = sizeof (regs_${name}) / sizeof (regs_${name}[0]);
-
 #ifndef IN_PROCESS_AGENT
   result->expedite_regs = expedite_regs_${name};
   result->xmltarget = xmltarget_${name};

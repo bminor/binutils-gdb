@@ -1,3 +1,11 @@
+2017-09-05  Alexander Fedotov <alexander.fedotov@nxp.com>
+	    Edmar Wienskoski <edmar.wienskoski@nxp.com
+
+	* config/tc-ppc.c (md_parse_option): Handle "mno-vle" flag.
+	(ppc_elf_section_letter): New function.
+	* config/tc-ppc.h (md_elf_section_letter): New.
+	* testsuite/gas/elf/section10.d: Adjust for VLE.
+
 2017-09-01  Tamar Christina  <tamar.christina@arm.com>
 
 	* config/tc-aarch64.c (aarch64_cpus): Enable DOTPROD for

@@ -35,9 +35,15 @@ extern CORE_ADDR find_function_addr (struct value *function,
    representing what the function returned.  May fail to return, if a
    breakpoint or signal is hit during the execution of the function.
 
+   DFEAULT_RETURN_TYPE is used as function return type if the return
+   type is unknown.  This is used when calling functions with no debug
+   info.
+
    ARGS is modified to contain coerced values.  */
 
-extern struct value *call_function_by_hand (struct value *function, int nargs,
+extern struct value *call_function_by_hand (struct value *function,
+					    type *default_return_type,
+					    int nargs,
 					    struct value **args);
 
 /* Similar to call_function_by_hand and additional call
@@ -45,9 +51,18 @@ extern struct value *call_function_by_hand (struct value *function, int nargs,
    created inferior call dummy frame.  */
 
 extern struct value *
-  call_function_by_hand_dummy (struct value *function, int nargs,
+  call_function_by_hand_dummy (struct value *function,
+			       type *default_return_type,
+			       int nargs,
 			       struct value **args,
 			       dummy_frame_dtor_ftype *dummy_dtor,
 			       void *dummy_dtor_data);
+
+/* Throw an error indicating that the user tried to call a function
+   that has unknown return type.  FUNC_NAME is the name of the
+   function to be included in the error message; may be NULL, in which
+   case the error message doesn't include a function name.  */
+
+extern void error_call_unknown_return_type (const char *func_name);
 
 #endif

@@ -20,14 +20,19 @@
 #define DISASM_H
 
 #include "dis-asm.h"
+#include "common/enum-flags.h"
 
-#define DISASSEMBLY_SOURCE_DEPRECATED (0x1 << 0)
-#define DISASSEMBLY_RAW_INSN	(0x1 << 1)
-#define DISASSEMBLY_OMIT_FNAME	(0x1 << 2)
-#define DISASSEMBLY_FILENAME	(0x1 << 3)
-#define DISASSEMBLY_OMIT_PC	(0x1 << 4)
-#define DISASSEMBLY_SOURCE	(0x1 << 5)
-#define DISASSEMBLY_SPECULATIVE	(0x1 << 6)
+enum gdb_disassembly_flag
+  {
+    DISASSEMBLY_SOURCE_DEPRECATED = (0x1 << 0),
+    DISASSEMBLY_RAW_INSN = (0x1 << 1),
+    DISASSEMBLY_OMIT_FNAME = (0x1 << 2),
+    DISASSEMBLY_FILENAME = (0x1 << 3),
+    DISASSEMBLY_OMIT_PC = (0x1 << 4),
+    DISASSEMBLY_SOURCE = (0x1 << 5),
+    DISASSEMBLY_SPECULATIVE = (0x1 << 6),
+  };
+DEF_ENUM_FLAGS_TYPE (enum gdb_disassembly_flag, gdb_disassembly_flags);
 
 struct gdbarch;
 struct ui_out;
@@ -87,7 +92,7 @@ struct disasm_insn
 };
 
 extern void gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
-			     int flags, int how_many,
+			     gdb_disassembly_flags flags, int how_many,
 			     CORE_ADDR low, CORE_ADDR high);
 
 /* Print the instruction at address MEMADDR in debugged memory,
@@ -109,7 +114,7 @@ public:
   /* Prints the instruction INSN into UIOUT and returns the length of
      the printed instruction in bytes.  */
   int pretty_print_insn (struct ui_out *uiout, const struct disasm_insn *insn,
-			 int flags);
+			 gdb_disassembly_flags flags);
 
 private:
   /* Returns the architecture used for disassembling.  */

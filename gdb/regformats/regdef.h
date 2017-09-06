@@ -34,6 +34,18 @@ struct reg
 
   /* The size (in bits) of the value of this register, as transmitted.  */
   int size;
+
+  bool operator== (const reg &other) const
+  {
+    return (strcmp (name, other.name) == 0
+	    && offset == other.offset
+	    && size == other.size);
+  }
+
+  bool operator!= (const reg &other) const
+  {
+    return !(*this == other);
+  }
 };
 
 #endif /* REGDEF_H */

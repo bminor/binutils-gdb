@@ -192,7 +192,7 @@ value_allocate_space_in_inferior (int len)
   struct value *blocklen;
 
   blocklen = value_from_longest (builtin_type (gdbarch)->builtin_int, len);
-  val = call_function_by_hand (val, 1, &blocklen);
+  val = call_function_by_hand (val, NULL, 1, &blocklen);
   if (value_logical_not (val))
     {
       if (!target_has_execution)
@@ -3424,6 +3424,11 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    {
 	      for (j = 0; j < len; ++j)
 		{
+		  if (TYPE_CONST (intype) != TYPE_FN_FIELD_CONST (f, j))
+		    continue;
+		  if (TYPE_VOLATILE (intype) != TYPE_FN_FIELD_VOLATILE (f, j))
+		    continue;
+
 		  if (compare_parameters (TYPE_FN_FIELD_TYPE (f, j), intype, 0)
 		      || compare_parameters (TYPE_FN_FIELD_TYPE (f, j),
 					     intype, 1))

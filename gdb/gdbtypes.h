@@ -46,6 +46,7 @@
 
 #include "hashtab.h"
 #include "common/offset-type.h"
+#include "common/enum-flags.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -196,6 +197,8 @@ enum type_instance_flag_value
   TYPE_INSTANCE_FLAG_ATOMIC = (1 << 8)
 };
 
+DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
+
 /* * Unsigned integer type.  If this is not set for a TYPE_CODE_INT,
    the type is signed (unless TYPE_NOSIGN (below) is set).  */
 
@@ -304,25 +307,25 @@ enum type_instance_flag_value
 /* * Constant type.  If this is set, the corresponding type has a
    const modifier.  */
 
-#define TYPE_CONST(t) (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_CONST)
+#define TYPE_CONST(t) ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_CONST) != 0)
 
 /* * Volatile type.  If this is set, the corresponding type has a
    volatile modifier.  */
 
 #define TYPE_VOLATILE(t) \
-  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_VOLATILE)
+  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_VOLATILE) != 0)
 
 /* * Restrict type.  If this is set, the corresponding type has a
    restrict modifier.  */
 
 #define TYPE_RESTRICT(t) \
-  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_RESTRICT)
+  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_RESTRICT) != 0)
 
 /* * Atomic type.  If this is set, the corresponding type has an
    _Atomic modifier.  */
 
 #define TYPE_ATOMIC(t) \
-  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_ATOMIC)
+  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_ATOMIC) != 0)
 
 /* * True if this type represents either an lvalue or lvalue reference type.  */
 
@@ -349,10 +352,10 @@ enum type_instance_flag_value
    is instruction space, and for data objects is data memory.  */
 
 #define TYPE_CODE_SPACE(t) \
-  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_CODE_SPACE)
+  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_CODE_SPACE) != 0)
 
 #define TYPE_DATA_SPACE(t) \
-  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_DATA_SPACE)
+  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_DATA_SPACE) != 0)
 
 /* * Address class flags.  Some environments provide for pointers
    whose size is different from that of a normal pointer or address

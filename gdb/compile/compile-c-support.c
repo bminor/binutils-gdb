@@ -58,10 +58,10 @@ c_get_mode_for_size (int size)
 
 /* See compile-internal.h.  */
 
-char *
+std::string
 c_get_range_decl_name (const struct dynamic_prop *prop)
 {
-  return xstrprintf ("__gdb_prop_%s", host_address_to_string (prop));
+  return string_printf ("__gdb_prop_%s", host_address_to_string (prop));
 }
 
 
@@ -263,8 +263,7 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 	if (registers_used[i])
 	  {
 	    struct type *regtype = check_typedef (register_type (gdbarch, i));
-	    char *regname = compile_register_name_mangled (gdbarch, i);
-	    struct cleanup *cleanups = make_cleanup (xfree, regname);
+	    std::string regname = compile_register_name_mangled (gdbarch, i);
 
 	    seen = 1;
 
@@ -282,7 +281,8 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 	    switch (TYPE_CODE (regtype))
 	      {
 	      case TYPE_CODE_PTR:
-		fprintf_filtered (stream, "__gdb_uintptr %s", regname);
+		fprintf_filtered (stream, "__gdb_uintptr %s",
+				  regname.c_str ());
 		break;
 
 	      case TYPE_CODE_INT:
@@ -297,7 +297,7 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 		      fprintf_unfiltered (stream,
 					  "int %s"
 					  " __attribute__ ((__mode__(__%s__)))",
-					  regname,
+					  regname.c_str (),
 					  mode);
 		      break;
 		    }
@@ -310,12 +310,10 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 				    "  unsigned char %s[%d]"
 				    " __attribute__((__aligned__("
 				    "__BIGGEST_ALIGNMENT__)))",
-				    regname,
+				    regname.c_str (),
 				    TYPE_LENGTH (regtype));
 	      }
 	    fputs_unfiltered (";\n", stream);
-
-	    do_cleanups (cleanups);
 	  }
       }
 

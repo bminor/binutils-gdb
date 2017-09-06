@@ -23,6 +23,7 @@
 
 #include "extension.h"
 #include <signal.h>
+#include "cli/cli-script.h"
 
 /* The return code for some API calls.  */
 

@@ -2526,29 +2526,22 @@ mi_cmd_trace_find (const char *command, char **argv, int argc)
     }
   else if (strcmp (mode, "line") == 0)
     {
-      struct symtabs_and_lines sals;
-      struct symtab_and_line sal;
-      static CORE_ADDR start_pc, end_pc;
-      struct cleanup *back_to;
-
       if (argc != 2)
 	error (_("Line is required"));
 
-      sals = decode_line_with_current_source (argv[1],
-					      DECODE_LINE_FUNFIRSTLINE);
-      back_to = make_cleanup (xfree, sals.sals);
-
-      sal = sals.sals[0];
+      std::vector<symtab_and_line> sals
+	= decode_line_with_current_source (argv[1],
+					   DECODE_LINE_FUNFIRSTLINE);
+      const symtab_and_line &sal = sals[0];
 
       if (sal.symtab == 0)
 	error (_("Could not find the specified line"));
 
+      CORE_ADDR start_pc, end_pc;
       if (sal.line > 0 && find_line_pc_range (sal, &start_pc, &end_pc))
 	tfind_1 (tfind_range, 0, start_pc, end_pc - 1, 0);
       else
 	error (_("Could not find the specified line"));
-
-      do_cleanups (back_to);
     }
   else
     error (_("Invalid mode '%s'"), mode);

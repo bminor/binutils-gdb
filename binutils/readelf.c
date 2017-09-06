@@ -5587,6 +5587,8 @@ get_elf_section_flags (bfd_vma sh_flags)
       /* 23 */ { STRING_COMMA_LEN ("COMDEF") },
       /* GNU specific.  */
       /* 24 */ { STRING_COMMA_LEN ("GNU_MBIND") },
+      /* VLE specific.  */
+      /* 25 */ { STRING_COMMA_LEN ("VLE") },
     };
 
   if (do_section_details)
@@ -5667,6 +5669,10 @@ get_elf_section_flags (bfd_vma sh_flags)
 		    default: break;
 		    }
 		  break;
+		case EM_PPC:
+		  if (flag == SHF_PPC_VLE)
+		    sindex = 25;
+		  break;
 
 		default:
 		  break;
@@ -5724,6 +5730,9 @@ get_elf_section_flags (bfd_vma sh_flags)
 	      else if (elf_header.e_machine == EM_ARM
 		       && flag == SHF_ARM_PURECODE)
 		  *p = 'y';
+	      else if (elf_header.e_machine == EM_PPC
+		       && flag == SHF_PPC_VLE)
+		  *p = 'v';
 	      else if (flag & SHF_MASKOS)
 		{
 		  *p = 'o';
@@ -6460,6 +6469,8 @@ process_section_headers (FILE * file)
 	printf (_("l (large), "));
       else if (elf_header.e_machine == EM_ARM)
 	printf (_("y (purecode), "));
+      else if (elf_header.e_machine == EM_PPC)
+	printf (_("v (VLE), "));
       printf ("p (processor specific)\n");
     }
 
@@ -15313,7 +15324,7 @@ process_mips_specific (FILE * file)
 	      printf ("\n");
 	    }
 
-	  if (ent < end)
+	  if (data != NULL && ent < end)
 	    {
 	      printf (_(" Local entries:\n"));
 	      printf ("  %*s %10s %*s\n",
@@ -15843,7 +15854,7 @@ process_mips_specific (FILE * file)
 	}
       printf ("\n");
 
-      if (ent < local_end)
+      if (data != NULL && ent < local_end)
 	{
 	  printf (_(" Local entries:\n"));
 	  printf ("  %*s %10s %*s\n",
@@ -15859,7 +15870,7 @@ process_mips_specific (FILE * file)
 	  printf ("\n");
 	}
 
-      if (gotsym < symtabno)
+      if (data != NULL && gotsym < symtabno)
 	{
 	  int sym_width;
 

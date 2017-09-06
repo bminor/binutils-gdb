@@ -1206,6 +1206,16 @@ md_parse_option (int c, const char *arg)
 	    }
 	}
 
+      else if (strcmp (arg, "no-vle") == 0)
+	{
+	  sticky &= ~PPC_OPCODE_VLE;
+
+	  new_cpu = ppc_parse_cpu (ppc_cpu, &sticky, "booke");
+	  new_cpu &= ~PPC_OPCODE_VLE;
+
+	  ppc_cpu = new_cpu;
+	}
+
       else if (strcmp (arg, "regnames") == 0)
 	reg_names_p = TRUE;
 
@@ -3682,6 +3692,16 @@ ppc_section_flags (flagword flags, bfd_vma attr ATTRIBUTE_UNUSED, int type)
     flags |= SEC_ALLOC | SEC_LOAD | SEC_SORT_ENTRIES;
 
   return flags;
+}
+
+bfd_vma
+ppc_elf_section_letter (int letter, const char **ptrmsg)
+{
+  if (letter == 'v')
+    return SHF_PPC_VLE;
+
+  *ptrmsg = _("bad .section directive: want a,e,v,w,x,M,S,G,T in string");
+  return -1;
 }
 #endif /* OBJ_ELF */
 

@@ -46,53 +46,43 @@ struct linespec_sals
      destructor.  */
   char *canonical;
 
-  /* Sals.  The 'sals' field is destroyed by the linespec_result
-     destructor.  */
-  struct symtabs_and_lines sals;
+  /* Sals.  */
+  std::vector<symtab_and_line> sals;
 };
-
-typedef struct linespec_sals linespec_sals;
-DEF_VEC_O (linespec_sals);
 
 /* An instance of this may be filled in by decode_line_1.  The caller
    must make copies of any data that it needs to keep.  */
 
 struct linespec_result
 {
-  linespec_result ()
-    : special_display (0),
-      pre_expanded (0),
-      sals (NULL)
-  {
-  }
-
+  linespec_result () = default;
   ~linespec_result ();
 
   linespec_result (const linespec_result &) = delete;
   linespec_result &operator= (const linespec_result &) = delete;
 
-  /* If non-zero, the linespec should be displayed to the user.  This
+  /* If true, the linespec should be displayed to the user.  This
      is used by "unusual" linespecs where the ordinary `info break'
      display mechanism would do the wrong thing.  */
-  int special_display;
+  bool special_display = false;
 
-  /* If non-zero, the linespec result should be considered to be a
+  /* If true, the linespec result should be considered to be a
      "pre-expanded" multi-location linespec.  A pre-expanded linespec
      holds all matching locations in a single linespec_sals
      object.  */
-  int pre_expanded;
+  bool pre_expanded = false;
 
   /* If PRE_EXPANDED is non-zero, this is set to the location entered
      by the user.  */
   event_location_up location;
 
   /* The sals.  The vector will be freed by the destructor.  */
-  VEC (linespec_sals) *sals;
+  std::vector<linespec_sals> lsals;
 };
 
 /* Decode a linespec using the provided default symtab and line.  */
 
-extern struct symtabs_and_lines
+extern std::vector<symtab_and_line>
 	decode_line_1 (const struct event_location *location, int flags,
 		       struct program_space *search_pspace,
 		       struct symtab *default_symtab, int default_line);
@@ -147,12 +137,12 @@ extern void decode_line_full (const struct event_location *location, int flags,
    source symtab and line as defaults.
    This is for commands like "list" and "breakpoint".  */
 
-extern struct symtabs_and_lines decode_line_with_current_source (char *, int);
+extern std::vector<symtab_and_line> decode_line_with_current_source (char *, int);
 
 /* Given a string, return the line specified by it, using the last displayed
    codepoint's values as defaults, or nothing if they aren't valid.  */
 
-extern struct symtabs_and_lines decode_line_with_last_displayed (char *, int);
+extern std::vector<symtab_and_line> decode_line_with_last_displayed (char *, int);
 
 /* Does P represent one of the keywords?  If so, return
    the keyword.  If not, return NULL.  */
