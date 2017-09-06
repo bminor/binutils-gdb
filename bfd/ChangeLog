@@ -1,3 +1,12 @@
+2017-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Don't change r_type
+	when calling elf_i386_tls_transition.  Don't use ELF32_R_TYPE
+	to get the relocation type again.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Don't change
+	r_type when calling elf_x86_64_tls_transition.  Don't use
+	ELF32_R_TYPE to get the relocation type again.
+
 2017-09-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Properly set

@@ -2511,7 +2511,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; wrel++, rel++)
     {
-      unsigned int r_type;
+      unsigned int r_type, r_type_tls;
       reloc_howto_type *howto;
       unsigned long r_symndx;
       struct elf_link_hash_entry *h;
@@ -3413,20 +3413,21 @@ direct:
 	  else if (h != NULL)
 	    tls_type = elf_x86_hash_entry (h)->tls_type;
 
+	  r_type_tls = r_type;
 	  if (! elf_x86_64_tls_transition (info, input_bfd,
 					   input_section, contents,
 					   symtab_hdr, sym_hashes,
-					   &r_type, tls_type, rel,
+					   &r_type_tls, tls_type, rel,
 					   relend, h, r_symndx, TRUE))
 	    return FALSE;
 
-	  if (r_type == R_X86_64_TPOFF32)
+	  if (r_type_tls == R_X86_64_TPOFF32)
 	    {
 	      bfd_vma roff = rel->r_offset;
 
 	      BFD_ASSERT (! unresolved_reloc);
 
-	      if (ELF32_R_TYPE (rel->r_info) == R_X86_64_TLSGD)
+	      if (r_type == R_X86_64_TLSGD)
 		{
 		  /* GD->LE transition.  For 64bit, change
 			.byte 0x66; leaq foo@tlsgd(%rip), %rdi
@@ -3489,7 +3490,7 @@ direct:
 		  wrel++;
 		  continue;
 		}
-	      else if (ELF32_R_TYPE (rel->r_info) == R_X86_64_GOTPC32_TLSDESC)
+	      else if (r_type == R_X86_64_GOTPC32_TLSDESC)
 		{
 		  /* GDesc -> LE transition.
 		     It's originally something like:
@@ -3512,7 +3513,7 @@ direct:
 			      contents + roff);
 		  continue;
 		}
-	      else if (ELF32_R_TYPE (rel->r_info) == R_X86_64_TLSDESC_CALL)
+	      else if (r_type == R_X86_64_TLSDESC_CALL)
 		{
 		  /* GDesc -> LE transition.
 		     It's originally:
@@ -3523,7 +3524,7 @@ direct:
 		  bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
 		  continue;
 		}
-	      else if (ELF32_R_TYPE (rel->r_info) == R_X86_64_GOTTPOFF)
+	      else if (r_type == R_X86_64_GOTTPOFF)
 		{
 		  /* IE->LE transition:
 		     For 64bit, originally it can be one of:
@@ -3701,7 +3702,7 @@ direct:
 	  if (off >= (bfd_vma) -2
 	      && ! GOT_TLS_GDESC_P (tls_type))
 	    abort ();
-	  if (r_type == ELF32_R_TYPE (rel->r_info))
+	  if (r_type_tls == r_type)
 	    {
 	      if (r_type == R_X86_64_GOTPC32_TLSDESC
 		  || r_type == R_X86_64_TLSDESC_CALL)
@@ -3717,7 +3718,7 @@ direct:
 	    {
 	      bfd_vma roff = rel->r_offset;
 
-	      if (ELF32_R_TYPE (rel->r_info) == R_X86_64_TLSGD)
+	      if (r_type == R_X86_64_TLSGD)
 		{
 		  /* GD->IE transition.  For 64bit, change
 			.byte 0x66; leaq foo@tlsgd(%rip), %rdi
@@ -3786,7 +3787,7 @@ direct:
 		  wrel++;
 		  continue;
 		}
-	      else if (ELF32_R_TYPE (rel->r_info) == R_X86_64_GOTPC32_TLSDESC)
+	      else if (r_type == R_X86_64_GOTPC32_TLSDESC)
 		{
 		  /* GDesc -> IE transition.
 		     It's originally something like:
@@ -3811,7 +3812,7 @@ direct:
 			      contents + roff);
 		  continue;
 		}
-	      else if (ELF32_R_TYPE (rel->r_info) == R_X86_64_TLSDESC_CALL)
+	      else if (r_type == R_X86_64_TLSDESC_CALL)
 		{
 		  /* GDesc -> IE transition.
 		     It's originally:

@@ -2182,7 +2182,7 @@ elf_i386_relocate_section (bfd *output_bfd,
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; wrel++, rel++)
     {
-      unsigned int r_type;
+      unsigned int r_type, r_type_tls;
       reloc_howto_type *howto;
       unsigned long r_symndx;
       struct elf_link_hash_entry *h;
@@ -3029,17 +3029,18 @@ disallow_got32:
 	  if (tls_type == GOT_TLS_IE)
 	    tls_type = GOT_TLS_IE_NEG;
 
+	   r_type_tls = r_type;
 	  if (! elf_i386_tls_transition (info, input_bfd,
 					 input_section, contents,
 					 symtab_hdr, sym_hashes,
-					 &r_type, tls_type, rel,
+					 &r_type_tls, tls_type, rel,
 					 relend, h, r_symndx, TRUE))
 	    return FALSE;
 
-	  if (r_type == R_386_TLS_LE_32)
+	  if (r_type_tls == R_386_TLS_LE_32)
 	    {
 	      BFD_ASSERT (! unresolved_reloc);
-	      if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GD)
+	      if (r_type == R_386_TLS_GD)
 		{
 		  unsigned int type;
 		  bfd_vma roff;
@@ -3082,7 +3083,7 @@ disallow_got32:
 		  wrel++;
 		  continue;
 		}
-	      else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GOTDESC)
+	      else if (r_type == R_386_TLS_GOTDESC)
 		{
 		  /* GDesc -> LE transition.
 		     It's originally something like:
@@ -3107,7 +3108,7 @@ disallow_got32:
 			      contents + roff);
 		  continue;
 		}
-	      else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_DESC_CALL)
+	      else if (r_type == R_386_TLS_DESC_CALL)
 		{
 		  /* GDesc -> LE transition.
 		     It's originally:
@@ -3122,7 +3123,7 @@ disallow_got32:
 		  bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
 		  continue;
 		}
-	      else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_IE)
+	      else if (r_type == R_386_TLS_IE)
 		{
 		  unsigned int val;
 
@@ -3216,7 +3217,7 @@ disallow_got32:
 		    }
 		  else
 		    BFD_FAIL ();
-		  if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GOTIE)
+		  if (r_type == R_386_TLS_GOTIE)
 		    bfd_put_32 (output_bfd, -elf_i386_tpoff (info, relocation),
 				contents + rel->r_offset);
 		  else
@@ -3359,13 +3360,13 @@ disallow_got32:
 	  if (off >= (bfd_vma) -2
 	      && ! GOT_TLS_GDESC_P (tls_type))
 	    abort ();
-	  if (r_type == R_386_TLS_GOTDESC
-	      || r_type == R_386_TLS_DESC_CALL)
+	  if (r_type_tls == R_386_TLS_GOTDESC
+	      || r_type_tls == R_386_TLS_DESC_CALL)
 	    {
 	      relocation = htab->sgotplt_jump_table_size + offplt;
 	      unresolved_reloc = FALSE;
 	    }
-	  else if (r_type == ELF32_R_TYPE (rel->r_info))
+	  else if (r_type_tls == r_type)
 	    {
 	      bfd_vma g_o_t = htab->elf.sgotplt->output_section->vma
 			      + htab->elf.sgotplt->output_offset;
@@ -3378,7 +3379,7 @@ disallow_got32:
 		relocation += g_o_t;
 	      unresolved_reloc = FALSE;
 	    }
-	  else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GD)
+	  else if (r_type == R_386_TLS_GD)
 	    {
 	      unsigned int val, type;
 	      bfd_vma roff;
@@ -3434,7 +3435,7 @@ disallow_got32:
 	      wrel++;
 	      continue;
 	    }
-	  else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GOTDESC)
+	  else if (r_type == R_386_TLS_GOTDESC)
 	    {
 	      /* GDesc -> IE transition.
 		 It's originally something like:
@@ -3473,7 +3474,7 @@ disallow_got32:
 			  contents + roff);
 	      continue;
 	    }
-	  else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_DESC_CALL)
+	  else if (r_type == R_386_TLS_DESC_CALL)
 	    {
 	      /* GDesc -> IE transition.
 		 It's originally:
