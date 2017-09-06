@@ -1,5 +1,9 @@
 2017-09-06  Kamil Rytarowski  <n54@gmx.com>
 
+	* config/djgpp/djconfig.sh: Correct shell portability issue.
+
+2017-09-06  Kamil Rytarowski  <n54@gmx.com>
+
 	* configure.nat: Define HAVE_NATIVE_GCORE_HOST on NetBSD.
 
 2017-09-06  John Baldwin  <jhb@FreeBSD.org>
