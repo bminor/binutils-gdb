@@ -1,3 +1,7 @@
+2017-09-06  Kamil Rytarowski  <n54@gmx.com>
+
+	* MAINTAINERS (Write After Approval): Add Kamil Rytarowski.
+
 2017-09-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* parse.c (find_minsym_type_and_address): Don't relocate addresses
