@@ -45,6 +45,7 @@
 #include "stack.h"
 #include "location.h"
 #include "common/function-view.h"
+#include "common/def-vector.h"
 
 /* An enumeration of the various things a user might attempt to
    complete for a linespec location.  */
@@ -2182,8 +2183,6 @@ create_sals_line_offset (struct linespec_state *self,
   else
     {
       struct linetable_entry *best_entry = NULL;
-      int *filter;
-      const struct block **blocks;
       int i, j;
 
       std::vector<symtab_and_line> intermediate_results
@@ -2203,10 +2202,8 @@ create_sals_line_offset (struct linespec_state *self,
 	 above, we see if there are other PCs that are in the same
 	 block.  If yes, the other PCs are filtered out.  */
 
-      filter = XNEWVEC (int, intermediate_results.size ());
-      struct cleanup *cleanup = make_cleanup (xfree, filter);
-      blocks = XNEWVEC (const struct block *, intermediate_results.size ());
-      make_cleanup (xfree, blocks);
+      gdb::def_vector<int> filter (intermediate_results.size ());
+      gdb::def_vector<const block *> blocks (intermediate_results.size ());
 
       for (i = 0; i < intermediate_results.size (); ++i)
 	{
@@ -2245,8 +2242,6 @@ create_sals_line_offset (struct linespec_state *self,
 	    add_sal_to_sals (self, &values, &intermediate_results[i],
 			     sym ? SYMBOL_NATURAL_NAME (sym) : NULL, 0);
 	  }
-
-      do_cleanups (cleanup);
     }
 
   if (values.empty ())
