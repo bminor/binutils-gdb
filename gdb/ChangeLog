@@ -1,3 +1,11 @@
+2017-09-06  Keith Seitz  <keiths@redhat.com>
+
+	* dwarf2read.c (dw2_linkage_name_attr): New function.
+	(dw2_linkage_name): New function.
+	(dwarf2_compute_name, dwarf2_physname, read_call_site_scope)
+	(guess_full_die_structure_name, dwarf2_name): Use dw2_linkage_name.
+	(anonymous_struct_prefix, dwarf2_name): Use dw2_linkage_name_attr.
+
 2017-09-06  Kamil Rytarowski  <n54@gmx.com>
 
 	* config/djgpp/djconfig.sh: Correct shell portability issue.
