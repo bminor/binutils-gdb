@@ -1,5 +1,14 @@
 2017-09-09  Tom Tromey  <tom@tromey.com>
 
+	* namespace.h (add_using_directive): Update.
+	* namespace.c (add_using_directive): Change type of excludes to
+	std::vector.
+	* dwarf2read.c (read_import_statement): Use std::vector.
+	(read_namespace): Update.
+	* cp-namespace.c (cp_scan_for_anonymous_namespaces): Update.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
 	* linespec.c (create_sals_line_offset): Use gdb::def_vector.
 
 2017-09-09  Tom Tromey  <tom@tromey.com>
