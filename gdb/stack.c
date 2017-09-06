@@ -52,6 +52,7 @@
 #include "symfile.h"
 #include "extension.h"
 #include "observer.h"
+#include "common/def-vector.h"
 
 /* The possible choices of "set print frame-arguments", and the value
    of this setting.  */
@@ -2521,7 +2522,6 @@ func_command (char *arg, int from_tty)
   struct frame_info *frame;
   int found = 0;
   int level = 1;
-  struct function_bounds *func_bounds = NULL;
 
   if (arg == NULL)
     return;
@@ -2529,8 +2529,7 @@ func_command (char *arg, int from_tty)
   frame = get_current_frame ();
   std::vector<symtab_and_line> sals
     = decode_line_with_current_source (arg, DECODE_LINE_FUNFIRSTLINE);
-  func_bounds = XNEWVEC (struct function_bounds, sals.size ());
-  struct cleanup *cleanups = make_cleanup (xfree, func_bounds);
+  gdb::def_vector<function_bounds> func_bounds (sals.size ());
   for (size_t i = 0; (i < sals.size () && !found); i++)
     {
       if (sals[i].pspace != current_program_space)
@@ -2556,8 +2555,6 @@ func_command (char *arg, int from_tty)
 	}
     }
   while (!found && level == 0);
-
-  do_cleanups (cleanups);
 
   if (!found)
     printf_filtered (_("'%s' not within current stack frame.\n"), arg);
