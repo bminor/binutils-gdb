@@ -1,5 +1,9 @@
 2017-09-07  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 8.0.1 released.
+
+2017-09-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS (Changes in GDB 7.11): Remove entry for QStartupWithShell.
 
 2017-09-05  Tom Tromey  <tom@tromey.com>
