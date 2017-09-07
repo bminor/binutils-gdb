@@ -1,4 +1,4 @@
-From eaaeac29bb451b010577c85c97455d747a9d770f Mon Sep 17 00:00:00 2001
+From fa35c8f6dc904bc603571211f81a7c3b141ac013 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Tue, 5 Sep 2017 14:53:37 -0700
 Subject: [PATCH] x86: Remove _bfd_{i386,x86_64}_elf_convert_load
@@ -9,8 +9,10 @@ to elf_x86_link_hash_entry to indicate if symbol references are always
 local with a new function to check if symbol references are always local,
 which wroks in check_relocs.
 
-	* elf32-i386.c (elf_i386_convert_load_reloc): Replace
-	SYMBOL_REFERENCES_LOCAL with SYMBOL_REFERENCES_LOCAL_P.
+	* elf32-i386.c (elf_i386_convert_load_reloc): Add an argument,
+	r_type_p.  Remove the converted argument.  Replace
+	SYMBOL_REFERENCES_LOCAL with SYMBOL_REFERENCES_LOCAL_P.  Return
+	the new relocation type via r_type_p.
 	(elf_i386_relocate_section): Likewise.
 	(elf_i386_finish_dynamic_symbol): Likewise.
 	(need_convert_load): Removed.
@@ -22,6 +24,7 @@ which wroks in check_relocs.
 	(check_relocs_failed): Updated.
 	(elf_x86_64_convert_load_reloc): Add an argument, r_type_p.
 	Replace SYMBOL_REFERENCES_LOCAL with SYMBOL_REFERENCES_LOCAL_P.
+	Return the new relocation type via r_type_p.
 	(elf_x86_64_check_relocs): Call elf_x86_64_convert_load_reloc,
 	instead of setting need_convert_load.
 	(elf_x86_64_check_relocs): Don't check PIC if relocation has
@@ -43,16 +46,36 @@ which wroks in check_relocs.
 	(_bfd_x86_64_elf_convert_load): Likewise.
 	(_bfd_x86_elf_link_symbol_references_local): New.
 ---
- bfd/elf32-i386.c   | 161 ++++++---------------------------------------------
- bfd/elf64-x86-64.c | 167 +++++++----------------------------------------------
+ bfd/elf32-i386.c   | 168 +++++++---------------------------------------------
+ bfd/elf64-x86-64.c | 170 ++++++++---------------------------------------------
  bfd/elfxx-x86.c    |  44 ++++++++++++--
  bfd/elfxx-x86.h    |  23 +++++---
- 4 files changed, 94 insertions(+), 301 deletions(-)
+ 4 files changed, 98 insertions(+), 307 deletions(-)
 
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index 78a5dc4c68..f1352e1d17 100644
+index 78a5dc4c68..cee5182c16 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
+@@ -1211,9 +1211,9 @@ static
+ bfd_boolean
+ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
+ 			     bfd_byte *contents,
++			     unsigned int *r_type_p,
+ 			     Elf_Internal_Rela *irel,
+ 			     struct elf_link_hash_entry *h,
+-			     bfd_boolean *converted,
+ 			     struct bfd_link_info *link_info)
+ {
+   struct elf_x86_link_hash_table *htab;
+@@ -1241,7 +1241,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
+   htab = elf_x86_hash_table (link_info, I386_ELF_DATA);
+   is_pic = bfd_link_pic (link_info);
+ 
+-  r_type = ELF32_R_TYPE (irel->r_info);
++  r_type = *r_type_p;
+   r_symndx = ELF32_R_SYM (irel->r_info);
+ 
+   modrm = bfd_get_8 (abfd, contents + roff - 1);
 @@ -1316,7 +1316,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
        /* We have "call/jmp *foo@GOT[(%reg)]".  */
        if ((h->root.type == bfd_link_hash_defined
@@ -62,7 +85,17 @@ index 78a5dc4c68..f1352e1d17 100644
  	{
  	  /* The function is locally defined.   */
  convert_branch:
-@@ -1385,7 +1385,7 @@ convert_branch:
+@@ -1363,8 +1363,7 @@ convert_branch:
+ 	     need to adjust addend by -4.  */
+ 	  bfd_put_32 (abfd, -4, contents + irel->r_offset);
+ 	  irel->r_info = ELF32_R_INFO (r_symndx, R_386_PC32);
+-
+-	  *converted = TRUE;
++	  *r_type_p = R_386_PC32;
+ 	}
+     }
+   else
+@@ -1385,7 +1384,7 @@ convert_branch:
  	  || ((h->def_regular
  	       || h->root.type == bfd_link_hash_defined
  	       || h->root.type == bfd_link_hash_defweak)
@@ -71,7 +104,17 @@ index 78a5dc4c68..f1352e1d17 100644
  	{
  convert_load:
  	  if (opcode == 0x8b)
-@@ -1445,8 +1445,7 @@ convert_load:
+@@ -1435,8 +1434,7 @@ convert_load:
+ 
+ 	  bfd_put_8 (abfd, opcode, contents + roff - 2);
+ 	  irel->r_info = ELF32_R_INFO (r_symndx, r_type);
+-
+-	  *converted = TRUE;
++	  *r_type_p = r_type;
+ 	}
+     }
+ 
+@@ -1445,8 +1443,7 @@ convert_load:
  
  /* Rename some of the generic section flags to better document how they
     are used here.  */
@@ -81,26 +124,23 @@ index 78a5dc4c68..f1352e1d17 100644
  
  /* Look through the relocs for a section during the first phase, and
     calculate needed space in the global offset table, procedure linkage
-@@ -1574,6 +1573,18 @@ elf_i386_check_relocs (bfd *abfd,
+@@ -1574,6 +1571,15 @@ elf_i386_check_relocs (bfd *abfd,
  	      |= elf_gnu_symbol_ifunc;
  	}
  
 +      if (r_type == R_386_GOT32X
 +	  && (h == NULL || h->type != STT_GNU_IFUNC))
 +	{
-+	  bfd_boolean converted = FALSE;
 +	  Elf_Internal_Rela *irel = (Elf_Internal_Rela *) rel;
 +	  if (!elf_i386_convert_load_reloc (abfd, symtab_hdr, contents,
-+					    irel, h, &converted, info))
++					    &r_type, irel, h, info))
 +	    goto error_return;
-+	  if (converted)
-+	    r_type = ELF32_R_TYPE (irel->r_info);
 +	}
 +
        if (! elf_i386_tls_transition (info, abfd, sec, contents,
  				     symtab_hdr, sym_hashes,
  				     &r_type, GOT_UNKNOWN,
-@@ -1921,10 +1932,6 @@ do_size:
+@@ -1921,10 +1927,6 @@ do_size:
  	default:
  	  break;
  	}
@@ -111,7 +151,7 @@ index 78a5dc4c68..f1352e1d17 100644
      }
  
    if (elf_section_data (sec)->this_hdr.contents != contents)
-@@ -1947,136 +1954,6 @@ error_return:
+@@ -1947,136 +1949,6 @@ error_return:
    return FALSE;
  }
  
@@ -248,7 +288,7 @@ index 78a5dc4c68..f1352e1d17 100644
  /* Set the correct type for an x86 ELF section.  We do this by the
     section name, which is a hack, but ought to work.  */
  
-@@ -2672,7 +2549,7 @@ r_386_got32:
+@@ -2672,7 +2544,7 @@ r_386_got32:
  						     bfd_link_pic (info),
  						     h)
  		  || (bfd_link_pic (info)
@@ -257,7 +297,7 @@ index 78a5dc4c68..f1352e1d17 100644
  		  || (ELF_ST_VISIBILITY (h->other)
  		      && h->root.type == bfd_link_hash_undefweak))
  		{
-@@ -2831,7 +2708,7 @@ disallow_got32:
+@@ -2831,7 +2703,7 @@ disallow_got32:
  		  bfd_set_error (bfd_error_bad_value);
  		  return FALSE;
  		}
@@ -266,7 +306,7 @@ index 78a5dc4c68..f1352e1d17 100644
  		       && (h->type == STT_FUNC
  			   || h->type == STT_OBJECT)
  		       && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
-@@ -4045,7 +3922,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+@@ -4045,7 +3917,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
  		     in static executable.  */
  		  relgot = htab->elf.irelplt;
  		}
@@ -275,7 +315,7 @@ index 78a5dc4c68..f1352e1d17 100644
  		{
  		  info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
  					  h->root.root.string,
-@@ -4095,7 +3972,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+@@ -4095,7 +3967,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
  	    }
  	}
        else if (bfd_link_pic (info)
@@ -285,7 +325,7 @@ index 78a5dc4c68..f1352e1d17 100644
  	  BFD_ASSERT((h->got.offset & 1) != 0);
  	  rel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index 8f1ac1a358..051fa36ead 100644
+index 8f1ac1a358..a2a4be84d6 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
 @@ -1362,8 +1362,7 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
@@ -340,7 +380,7 @@ index 8f1ac1a358..051fa36ead 100644
  
        r_symndx = htab->r_sym (rel->r_info);
        r_type = ELF32_R_TYPE (rel->r_info);
-@@ -1912,6 +1914,16 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+@@ -1912,6 +1914,19 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
  	      |= elf_gnu_symbol_ifunc;
  	}
  
@@ -348,16 +388,19 @@ index 8f1ac1a358..051fa36ead 100644
 +      if ((r_type == R_X86_64_GOTPCREL
 +	   || r_type == R_X86_64_GOTPCRELX
 +	   || r_type == R_X86_64_REX_GOTPCRELX)
-+	  && (h == NULL || h->type != STT_GNU_IFUNC)
-+	  && !elf_x86_64_convert_load_reloc (abfd, contents, &r_type,
-+					     (Elf_Internal_Rela *) rel,
-+					     h, &converted_reloc, info))
-+	goto error_return;
++	  && (h == NULL || h->type != STT_GNU_IFUNC))
++	{
++	  Elf_Internal_Rela *irel = (Elf_Internal_Rela *) rel;
++	  if (!elf_x86_64_convert_load_reloc (abfd, contents, &r_type,
++					      irel, h, &converted_reloc,
++					      info))
++	    goto error_return;
++	}
 +
        if (! elf_x86_64_tls_transition (info, abfd, sec, contents,
  				       symtab_hdr, sym_hashes,
  				       &r_type, GOT_UNKNOWN,
-@@ -2087,6 +2099,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+@@ -2087,6 +2102,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
  	     sections we don't care about, such as debug sections or
  	     when relocation overflow check is disabled.  */
  	  if (!info->no_reloc_overflow_check
@@ -365,7 +408,7 @@ index 8f1ac1a358..051fa36ead 100644
  	      && (bfd_link_pic (info)
  		  || (bfd_link_executable (info)
  		      && h != NULL
-@@ -2280,12 +2293,6 @@ do_size:
+@@ -2280,12 +2296,6 @@ do_size:
  	default:
  	  break;
  	}
@@ -378,7 +421,7 @@ index 8f1ac1a358..051fa36ead 100644
      }
  
    if (elf_section_data (sec)->this_hdr.contents != contents)
-@@ -2308,136 +2315,6 @@ error_return:
+@@ -2308,136 +2318,6 @@ error_return:
    return FALSE;
  }
  
@@ -515,7 +558,7 @@ index 8f1ac1a358..051fa36ead 100644
  /* Return the relocation value for @tpoff relocation
     if STT_TLS virtual address is ADDRESS.  */
  
-@@ -2929,7 +2806,7 @@ do_ifunc_pointer:
+@@ -2929,7 +2809,7 @@ do_ifunc_pointer:
  
  	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), h)
  		  || (bfd_link_pic (info)
@@ -524,7 +567,7 @@ index 8f1ac1a358..051fa36ead 100644
  		  || (ELF_ST_VISIBILITY (h->other)
  		      && h->root.type == bfd_link_hash_undefweak))
  		{
-@@ -3064,7 +2941,7 @@ do_ifunc_pointer:
+@@ -3064,7 +2944,7 @@ do_ifunc_pointer:
  		  return FALSE;
  		}
  	      else if (!bfd_link_executable (info)
@@ -533,7 +576,7 @@ index 8f1ac1a358..051fa36ead 100644
  		       && (h->type == STT_FUNC
  			   || h->type == STT_OBJECT)
  		       && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
-@@ -3212,7 +3089,7 @@ do_ifunc_pointer:
+@@ -3212,7 +3092,7 @@ do_ifunc_pointer:
  		    || r_type == R_X86_64_PC32_BND)
  		   && is_32bit_relative_branch (contents, rel->r_offset));
  
@@ -542,7 +585,7 @@ index 8f1ac1a358..051fa36ead 100644
  		{
  		  /* Symbol is referenced locally.  Make sure it is
  		     defined locally or for a branch.  */
-@@ -4379,7 +4256,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -4379,7 +4259,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  		     in static executable.  */
  		  relgot = htab->elf.irelplt;
  		}
@@ -551,7 +594,7 @@ index 8f1ac1a358..051fa36ead 100644
  		{
  		  info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
  					  output_bfd,
-@@ -4429,7 +4306,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -4429,7 +4309,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  	    }
  	}
        else if (bfd_link_pic (info)
