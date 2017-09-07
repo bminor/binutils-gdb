@@ -506,9 +506,6 @@ show max-value-size
 
 * New remote packets
 
-QStartupWithShell
-  Indicates whether the inferior must be started with a shell or not.
-
 exec stop reason
   Indicates that an exec system call was executed.
 
