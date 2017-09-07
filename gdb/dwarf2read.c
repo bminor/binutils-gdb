@@ -8732,6 +8732,38 @@ die_needs_namespace (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
+/* Return the DIE's linkage name attribute, either DW_AT_linkage_name
+   or DW_AT_MIPS_linkage_name.  Returns NULL if the attribute is not
+   defined for the given DIE.  */
+
+static struct attribute *
+dw2_linkage_name_attr (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct attribute *attr;
+
+  attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
+  if (attr == NULL)
+    attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
+
+  return attr;
+}
+
+/* Return the DIE's linkage name as a string, either DW_AT_linkage_name
+   or DW_AT_MIPS_linkage_name.  Returns NULL if the attribute is not
+   defined for the given DIE.  */
+
+static const char *
+dw2_linkage_name (struct die_info *die, struct dwarf2_cu *cu)
+{
+  const char *linkage_name;
+
+  linkage_name = dwarf2_string_attr (die, DW_AT_linkage_name, cu);
+  if (linkage_name == NULL)
+    linkage_name = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
+
+  return linkage_name;
+}
+
 /* Compute the fully qualified name of DIE in CU.  If PHYSNAME is nonzero,
    compute the physname for the object, which include a method's:
    - formal parameters (C++),
@@ -8771,11 +8803,8 @@ dwarf2_compute_name (const char *name,
 	 to be able to reference.  Ideally, we want the user to be able
 	 to reference this entity using either natural or linkage name,
 	 but we haven't started looking at this enhancement yet.  */
-      const char *linkage_name;
+      const char *linkage_name = dw2_linkage_name (die, cu);
 
-      linkage_name = dwarf2_string_attr (die, DW_AT_linkage_name, cu);
-      if (linkage_name == NULL)
-	linkage_name = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
       if (linkage_name != NULL)
 	return linkage_name;
     }
@@ -9016,9 +9045,7 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
 
   back_to = make_cleanup (null_cleanup, NULL);
 
-  mangled = dwarf2_string_attr (die, DW_AT_linkage_name, cu);
-  if (mangled == NULL)
-    mangled = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
+  mangled = dw2_linkage_name (die, cu);
 
   /* rustc emits invalid values for DW_AT_linkage_name.  Ignore these.
      See https://github.com/rust-lang/rust/issues/32925.  */
@@ -12053,13 +12080,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  const char *target_physname;
 
 	  /* Prefer the mangled name; otherwise compute the demangled one.  */
-	  target_physname = dwarf2_string_attr (target_die,
-						DW_AT_linkage_name,
-						target_cu);
-	  if (target_physname == NULL)
-	    target_physname = dwarf2_string_attr (target_die,
-						 DW_AT_MIPS_linkage_name,
-						 target_cu);
+	  target_physname = dw2_linkage_name (target_die, target_cu);
 	  if (target_physname == NULL)
 	    target_physname = dwarf2_physname (NULL, target_die, target_cu);
 	  if (target_physname == NULL)
@@ -19924,12 +19945,8 @@ guess_full_die_structure_name (struct die_info *die, struct dwarf2_cu *cu)
     {
       if (child->tag == DW_TAG_subprogram)
 	{
-	  const char *linkage_name;
+	  const char *linkage_name = dw2_linkage_name (child, cu);
 
-	  linkage_name = dwarf2_string_attr (child, DW_AT_linkage_name, cu);
-	  if (linkage_name == NULL)
-	    linkage_name = dwarf2_string_attr (child, DW_AT_MIPS_linkage_name,
-	                                       cu);
 	  if (linkage_name != NULL)
 	    {
 	      char *actual_name
@@ -19984,9 +20001,7 @@ anonymous_struct_prefix (struct die_info *die, struct dwarf2_cu *cu)
   if (dwarf2_string_attr (die, DW_AT_name, cu) != NULL)
     return NULL;
 
-  attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
-  if (attr == NULL)
-    attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
+  attr = dw2_linkage_name_attr (die, cu);
   if (attr == NULL || DW_STRING (attr) == NULL)
     return NULL;
 
@@ -20312,10 +20327,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  char *demangled = NULL;
 
-	  attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
-	  if (attr == NULL)
-	    attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
-
+	  attr = dw2_linkage_name_attr (die, cu);
 	  if (attr == NULL || DW_STRING (attr) == NULL)
 	    return NULL;
 

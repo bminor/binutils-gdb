@@ -111,8 +111,6 @@ show_parserdebug (struct ui_file *file, int from_tty,
 }
 
 
-static void free_funcalls (void *ignore);
-
 static int prefixify_subexp (struct expression *, struct expression *, int,
 			     int);
 
@@ -128,13 +126,7 @@ void _initialize_parse (void);
 /* Data structure for saving values of arglist_len for function calls whose
    arguments contain other function calls.  */
 
-struct funcall
-  {
-    struct funcall *next;
-    int arglist_len;
-  };
-
-static struct funcall *funcall_chain;
+static std::vector<int> *funcall_chain;
 
 /* Begin counting arguments for a function call,
    saving the data about any containing call.  */
@@ -142,13 +134,8 @@ static struct funcall *funcall_chain;
 void
 start_arglist (void)
 {
-  struct funcall *newobj;
-
-  newobj = XNEW (struct funcall);
-  newobj->next = funcall_chain;
-  newobj->arglist_len = arglist_len;
+  funcall_chain->push_back (arglist_len);
   arglist_len = 0;
-  funcall_chain = newobj;
 }
 
 /* Return the number of arguments in a function call just terminated,
@@ -158,28 +145,11 @@ int
 end_arglist (void)
 {
   int val = arglist_len;
-  struct funcall *call = funcall_chain;
-
-  funcall_chain = call->next;
-  arglist_len = call->arglist_len;
-  xfree (call);
+  arglist_len = funcall_chain->back ();
+  funcall_chain->pop_back ();
   return val;
 }
 
-/* Free everything in the funcall chain.
-   Used when there is an error inside parsing.  */
-
-static void
-free_funcalls (void *ignore)
-{
-  struct funcall *call, *next;
-
-  for (call = funcall_chain; call; call = next)
-    {
-      next = call->next;
-      xfree (call);
-    }
-}
 
 
 /* See definition in parser-defs.h.  */
@@ -1160,7 +1130,6 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
 			const struct block *block,
 			int comma, int void_context_p, int *out_subexp)
 {
-  struct cleanup *old_chain;
   const struct language_defn *lang = NULL;
   struct parser_state ps;
   int subexp;
@@ -1180,8 +1149,9 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
   if (lexptr == 0 || *lexptr == 0)
     error_no_arg (_("expression to compute"));
 
-  old_chain = make_cleanup (free_funcalls, 0 /*ignore*/);
-  funcall_chain = 0;
+  std::vector<int> funcalls;
+  scoped_restore save_funcall_chain = make_scoped_restore (&funcall_chain,
+							   &funcalls);
 
   expression_context_block = block;
 
@@ -1274,8 +1244,6 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
 
   if (expressiondebug)
     dump_prefix_expression (ps.expout, gdb_stdlog);
-
-  discard_cleanups (old_chain);
 
   *stringptr = lexptr;
   return expression_up (ps.expout);

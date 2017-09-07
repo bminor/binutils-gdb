@@ -1,3 +1,68 @@
+2017-09-05  Tom Tromey  <tom@tromey.com>
+
+	* parse.c (funcall_chain): Now a std::vector.
+	(start_arglist, end_arglist): Simplify.
+	(free_funcalls): Remove.
+	(parse_exp_in_context_1): Remove cleanup.
+
+2017-09-05  Tom Tromey  <tom@tromey.com>
+
+	* go-exp.y (go_parse): Don't create a cleanup.
+
+2017-09-05  Tom Tromey  <tom@tromey.com>
+
+	* d-exp.y (PrimaryExpression): Use std::string.
+	(d_parse): Don't create a cleanup.
+
+2017-09-05  Tom Tromey  <tom@tromey.com>
+
+	* utils.c (do_clear_parser_state): Remove.
+	(make_cleanup_clear_parser_state): Remove.
+	* p-exp.y (pascal_parse): Use scoped_restore.
+	* m2-exp.y (m2_parse): Use scoped_restore.
+	* f-exp.y (f_parse): Use scoped_restore.
+	* d-exp.y (d_parse): Use scoped_restore.
+	* c-exp.y (c_parse): Use scoped_restore.
+	* ada-exp.y (ada_parse): Use scoped_restore.
+	* utils.h (make_cleanup_clear_parser_state): Remove.
+
+2017-09-06  Keith Seitz  <keiths@redhat.com>
+
+	* dwarf2read.c (dw2_linkage_name_attr): New function.
+	(dw2_linkage_name): New function.
+	(dwarf2_compute_name, dwarf2_physname, read_call_site_scope)
+	(guess_full_die_structure_name, dwarf2_name): Use dw2_linkage_name.
+	(anonymous_struct_prefix, dwarf2_name): Use dw2_linkage_name_attr.
+
+2017-09-06  Kamil Rytarowski  <n54@gmx.com>
+
+	* config/djgpp/djconfig.sh: Correct shell portability issue.
+
+2017-09-06  Kamil Rytarowski  <n54@gmx.com>
+
+	* configure.nat: Define HAVE_NATIVE_GCORE_HOST on NetBSD.
+
+2017-09-06  John Baldwin  <jhb@FreeBSD.org>
+
+	* Makefile.in (ALLDEPFILES): Add mips-fbsd-nat.c.
+	* NEWS: Mention new FreeBSD/mips native configuration.
+	* configure.host: Add aarch64*-*-freebsd*.
+	* configure.nat: Likewise.
+	* aarch64-fbsd-nat.c: New file.
+
+2017-09-06  John Baldwin  <jhb@FreeBSD.org>
+
+	* Makefile.in (ALL_64_TARGET_OBS): Add aarch64-fbsd-tdep.o.
+	(ALLDEPFILES): Add aarch64-fbsd-tdep.c.
+	* NEWS: Mention new FreeBSD/aarch64 target.
+	* configure.tgt: Add aarch64*-*-freebsd*.
+	* aarch64-fbsd-tdep.c: New file.
+	* aarch64-fbsd-tdep.h: New file.
+
+2017-09-06  Kamil Rytarowski  <n54@gmx.com>
+
+	* MAINTAINERS (Write After Approval): Add Kamil Rytarowski.
+
 2017-09-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* parse.c (find_minsym_type_and_address): Don't relocate addresses

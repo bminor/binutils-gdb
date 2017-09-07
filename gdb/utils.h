@@ -236,10 +236,6 @@ struct htab_deleter
 /* A unique_ptr wrapper for htab_t.  */
 typedef std::unique_ptr<htab, htab_deleter> htab_up;
 
-struct parser_state;
-extern struct cleanup *make_cleanup_clear_parser_state
-  (struct parser_state **p);
-
 extern void free_current_contents (void *);
 
 extern void init_page_info (void);

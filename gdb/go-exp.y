@@ -1560,20 +1560,13 @@ yylex (void)
 int
 go_parse (struct parser_state *par_state)
 {
-  int result;
-  struct cleanup *back_to;
-
   /* Setting up the parser state.  */
+  scoped_restore pstate_restore = make_scoped_restore (&pstate);
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
-  /* Note that parsing (within yyparse) freely installs cleanups
-     assuming they'll be run here (below).  */
-  back_to = make_cleanup (null_cleanup, NULL);
-
   scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
 							parser_debug);
-  make_cleanup_clear_parser_state (&pstate);
 
   /* Initialize some state used by the lexer.  */
   last_was_structop = 0;
@@ -1583,9 +1576,7 @@ go_parse (struct parser_state *par_state)
   popping = 0;
   name_obstack.clear ();
 
-  result = yyparse ();
-  do_cleanups (back_to);
-  return result;
+  return yyparse ();
 }
 
 void
