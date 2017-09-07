@@ -45,6 +45,10 @@
    && elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) == (id) \
     ? ((struct elf_x86_link_hash_table *) ((p)->hash)) : NULL)
 
+/* Will references to this symbol always be local in this object?  */
+#define SYMBOL_REFERENCES_LOCAL_P(INFO, H) \
+  _bfd_x86_elf_link_symbol_references_local ((INFO), (H))
+
 /* Is a undefined weak symbol which is resolved to 0.  Reference to an
    undefined weak symbol is resolved to 0 when building executable if
    it isn't dynamic and
@@ -54,7 +58,7 @@
  */
 #define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, ID, GOT_RELOC, EH) \
   ((EH)->elf.root.type == bfd_link_hash_undefweak		 \
-   && ((EH)->elf.forced_local					 \
+   && (SYMBOL_REFERENCES_LOCAL_P ((INFO), &(EH)->elf)		 \
        || (bfd_link_executable (INFO)				 \
 	   && (elf_x86_hash_table ((INFO), (ID))->interp == NULL \
 	       || !(GOT_RELOC)					 \
@@ -97,6 +101,12 @@ struct elf_x86_link_hash_entry
 
   /* TRUE if symbol is defined as a protected symbol.  */
   unsigned int def_protected : 1;
+
+  /* 0: Symbol references are unknown.
+     1: Symbol references aren't local.
+     2: Symbol references are local.
+   */
+  unsigned int local_ref : 2;
 
   /* Symbol is referenced by R_386_GOTOFF relocation.  This is only used
      by i386.  */
@@ -320,8 +330,6 @@ struct elf_x86_link_hash_table
 
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
-  bfd_boolean (*convert_load) (bfd *, asection *,
-			       struct bfd_link_info *);
   bfd_boolean (*is_reloc_section) (const char *);
   enum elf_target_id target_id;
   unsigned int sizeof_reloc;
@@ -405,12 +413,6 @@ struct elf_x86_plt
    && elf_tdata (bfd) != NULL				\
    && elf_object_id (bfd) == (htab)->target_id)
 
-extern bfd_boolean _bfd_i386_elf_convert_load
-  (bfd *, asection *, struct bfd_link_info *);
-
-extern bfd_boolean _bfd_x86_64_elf_convert_load
-  (bfd *, asection *, struct bfd_link_info *);
-
 extern bfd_boolean _bfd_x86_elf_mkobject
   (bfd *);
 
@@ -466,6 +468,9 @@ extern bfd_boolean _bfd_x86_elf_hash_symbol
   (struct elf_link_hash_entry *);
 
 extern bfd_boolean _bfd_x86_elf_adjust_dynamic_symbol
+  (struct bfd_link_info *, struct elf_link_hash_entry *);
+
+extern bfd_boolean _bfd_x86_elf_link_symbol_references_local
   (struct bfd_link_info *, struct elf_link_hash_entry *);
 
 extern asection * _bfd_x86_elf_gc_mark_hook

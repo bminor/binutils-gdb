@@ -1211,9 +1211,9 @@ static
 bfd_boolean
 elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 			     bfd_byte *contents,
+			     unsigned int *r_type_p,
 			     Elf_Internal_Rela *irel,
 			     struct elf_link_hash_entry *h,
-			     bfd_boolean *converted,
 			     struct bfd_link_info *link_info)
 {
   struct elf_x86_link_hash_table *htab;
@@ -1241,7 +1241,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
   htab = elf_x86_hash_table (link_info, I386_ELF_DATA);
   is_pic = bfd_link_pic (link_info);
 
-  r_type = ELF32_R_TYPE (irel->r_info);
+  r_type = *r_type_p;
   r_symndx = ELF32_R_SYM (irel->r_info);
 
   modrm = bfd_get_8 (abfd, contents + roff - 1);
@@ -1316,7 +1316,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
       /* We have "call/jmp *foo@GOT[(%reg)]".  */
       if ((h->root.type == bfd_link_hash_defined
 	   || h->root.type == bfd_link_hash_defweak)
-	  && SYMBOL_REFERENCES_LOCAL (link_info, h))
+	  && SYMBOL_REFERENCES_LOCAL_P (link_info, h))
 	{
 	  /* The function is locally defined.   */
 convert_branch:
@@ -1363,8 +1363,7 @@ convert_branch:
 	     need to adjust addend by -4.  */
 	  bfd_put_32 (abfd, -4, contents + irel->r_offset);
 	  irel->r_info = ELF32_R_INFO (r_symndx, R_386_PC32);
-
-	  *converted = TRUE;
+	  *r_type_p = R_386_PC32;
 	}
     }
   else
@@ -1385,7 +1384,7 @@ convert_branch:
 	  || ((h->def_regular
 	       || h->root.type == bfd_link_hash_defined
 	       || h->root.type == bfd_link_hash_defweak)
-	      && SYMBOL_REFERENCES_LOCAL (link_info, h)))
+	      && SYMBOL_REFERENCES_LOCAL_P (link_info, h)))
 	{
 convert_load:
 	  if (opcode == 0x8b)
@@ -1435,8 +1434,7 @@ convert_load:
 
 	  bfd_put_8 (abfd, opcode, contents + roff - 2);
 	  irel->r_info = ELF32_R_INFO (r_symndx, r_type);
-
-	  *converted = TRUE;
+	  *r_type_p = r_type;
 	}
     }
 
@@ -1445,8 +1443,7 @@ convert_load:
 
 /* Rename some of the generic section flags to better document how they
    are used here.  */
-#define need_convert_load	sec_flg0
-#define check_relocs_failed	sec_flg1
+#define check_relocs_failed	sec_flg0
 
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure linkage
@@ -1572,6 +1569,15 @@ elf_i386_check_relocs (bfd *abfd,
 	  if (h->type == STT_GNU_IFUNC)
 	    elf_tdata (info->output_bfd)->has_gnu_symbols
 	      |= elf_gnu_symbol_ifunc;
+	}
+
+      if (r_type == R_386_GOT32X
+	  && (h == NULL || h->type != STT_GNU_IFUNC))
+	{
+	  Elf_Internal_Rela *irel = (Elf_Internal_Rela *) rel;
+	  if (!elf_i386_convert_load_reloc (abfd, symtab_hdr, contents,
+					    &r_type, irel, h, info))
+	    goto error_return;
 	}
 
       if (! elf_i386_tls_transition (info, abfd, sec, contents,
@@ -1921,10 +1927,6 @@ do_size:
 	default:
 	  break;
 	}
-
-      if (r_type == R_386_GOT32X
-	  && (h == NULL || h->type != STT_GNU_IFUNC))
-	sec->need_convert_load = 1;
     }
 
   if (elf_section_data (sec)->this_hdr.contents != contents)
@@ -1944,136 +1946,6 @@ error_return:
   if (elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
   sec->check_relocs_failed = 1;
-  return FALSE;
-}
-
-/* Convert load via the GOT slot to load immediate.  */
-
-bfd_boolean
-_bfd_i386_elf_convert_load (bfd *abfd, asection *sec,
-			    struct bfd_link_info *link_info)
-{
-  struct elf_x86_link_hash_table *htab;
-  Elf_Internal_Shdr *symtab_hdr;
-  Elf_Internal_Rela *internal_relocs;
-  Elf_Internal_Rela *irel, *irelend;
-  bfd_byte *contents;
-  bfd_boolean changed;
-  bfd_signed_vma *local_got_refcounts;
-
-  /* Don't even try to convert non-ELF outputs.  */
-  if (!is_elf_hash_table (link_info->hash))
-    return FALSE;
-
-  /* Nothing to do if there is no need or no output.  */
-  if ((sec->flags & (SEC_CODE | SEC_RELOC)) != (SEC_CODE | SEC_RELOC)
-      || sec->need_convert_load == 0
-      || bfd_is_abs_section (sec->output_section))
-    return TRUE;
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-
-  /* Load the relocations for this section.  */
-  internal_relocs = (_bfd_elf_link_read_relocs
-		     (abfd, sec, NULL, (Elf_Internal_Rela *) NULL,
-		      link_info->keep_memory));
-  if (internal_relocs == NULL)
-    return FALSE;
-
-  changed = FALSE;
-  htab = elf_x86_hash_table (link_info, I386_ELF_DATA);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  /* Get the section contents.  */
-  if (elf_section_data (sec)->this_hdr.contents != NULL)
-    contents = elf_section_data (sec)->this_hdr.contents;
-  else
-    {
-      if (!bfd_malloc_and_get_section (abfd, sec, &contents))
-	goto error_return;
-    }
-
-  irelend = internal_relocs + sec->reloc_count;
-  for (irel = internal_relocs; irel < irelend; irel++)
-    {
-      unsigned int r_type = ELF32_R_TYPE (irel->r_info);
-      unsigned int r_symndx;
-      struct elf_link_hash_entry *h;
-      bfd_boolean converted;
-
-      /* Don't convert R_386_GOT32 since we can't tell if it is applied
-	 to "mov $foo@GOT, %reg" which isn't a load via GOT.  */
-      if (r_type != R_386_GOT32X)
-	continue;
-
-      r_symndx = ELF32_R_SYM (irel->r_info);
-      if (r_symndx < symtab_hdr->sh_info)
-	h = _bfd_elf_x86_get_local_sym_hash (htab, sec->owner,
-					     (const Elf_Internal_Rela *) irel,
-					     FALSE);
-      else
-	{
-	  h = elf_sym_hashes (abfd)[r_symndx - symtab_hdr->sh_info];
-	   while (h->root.type == bfd_link_hash_indirect
-		  || h->root.type == bfd_link_hash_warning)
-	     h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	}
-
-      /* STT_GNU_IFUNC must keep GOT32 relocations.  */
-      if (h != NULL && h->type == STT_GNU_IFUNC)
-	continue;
-
-      converted = FALSE;
-      if (!elf_i386_convert_load_reloc (abfd, symtab_hdr, contents,
-					irel, h, &converted, link_info))
-	goto error_return;
-
-      if (converted)
-	{
-	  changed = converted;
-	  if (h)
-	    {
-	      if (h->got.refcount > 0)
-		h->got.refcount -= 1;
-	    }
-	  else
-	    {
-	      if (local_got_refcounts != NULL
-		  && local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx] -= 1;
-	    }
-	}
-    }
-
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
-    {
-      if (!changed && !link_info->keep_memory)
-	free (contents);
-      else
-	{
-	  /* Cache the section contents for elf_link_input_bfd.  */
-	  elf_section_data (sec)->this_hdr.contents = contents;
-	}
-    }
-
-  if (elf_section_data (sec)->relocs != internal_relocs)
-    {
-      if (!changed)
-	free (internal_relocs);
-      else
-	elf_section_data (sec)->relocs = internal_relocs;
-    }
-
-  return TRUE;
-
- error_return:
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
-    free (contents);
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
-    free (internal_relocs);
   return FALSE;
 }
 
@@ -2672,7 +2544,7 @@ r_386_got32:
 						     bfd_link_pic (info),
 						     h)
 		  || (bfd_link_pic (info)
-		      && SYMBOL_REFERENCES_LOCAL (info, h))
+		      && SYMBOL_REFERENCES_LOCAL_P (info, h))
 		  || (ELF_ST_VISIBILITY (h->other)
 		      && h->root.type == bfd_link_hash_undefweak))
 		{
@@ -2831,7 +2703,7 @@ disallow_got32:
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
-	      else if (!SYMBOL_REFERENCES_LOCAL (info, h)
+	      else if (!SYMBOL_REFERENCES_LOCAL_P (info, h)
 		       && (h->type == STT_FUNC
 			   || h->type == STT_OBJECT)
 		       && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
@@ -4045,7 +3917,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 		     in static executable.  */
 		  relgot = htab->elf.irelplt;
 		}
-	      if (SYMBOL_REFERENCES_LOCAL (info, h))
+	      if (SYMBOL_REFERENCES_LOCAL_P (info, h))
 		{
 		  info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
 					  h->root.root.string,
@@ -4095,7 +3967,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 	    }
 	}
       else if (bfd_link_pic (info)
-	       && SYMBOL_REFERENCES_LOCAL (info, h))
+	       && SYMBOL_REFERENCES_LOCAL_P (info, h))
 	{
 	  BFD_ASSERT((h->got.offset & 1) != 0);
 	  rel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);

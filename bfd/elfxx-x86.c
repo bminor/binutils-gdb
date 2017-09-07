@@ -766,7 +766,6 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
   /* NB: If BFD64 isn't defined, only i386 will be supported.  */
   if (bed->target_id == X86_64_ELF_DATA)
     {
-      ret->convert_load = _bfd_x86_64_elf_convert_load;
       ret->is_reloc_section = elf_x86_64_is_reloc_section;
       ret->dt_reloc = DT_RELA;
       ret->dt_reloc_sz = DT_RELASZ;
@@ -798,7 +797,6 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
 	}
       else
 	{
-	  ret->convert_load = _bfd_i386_elf_convert_load;
 	  ret->is_reloc_section = elf_i386_is_reloc_section;
 	  ret->dt_reloc = DT_REL;
 	  ret->dt_reloc_sz = DT_RELSZ;
@@ -908,9 +906,6 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
 	  struct elf_dyn_relocs *p;
-
-	  if (!htab->convert_load (ibfd, s, info))
-	    return FALSE;
 
 	  for (p = ((struct elf_dyn_relocs *)
 		     elf_section_data (s)->local_dynrel);
@@ -1675,6 +1670,45 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     }
 
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
+}
+
+/* Return TRUE if a symbol is referenced locally.  It is similar to
+   SYMBOL_REFERENCES_LOCAL, but it also checks version script.  It
+   works in check_relocs.  */
+
+bfd_boolean
+_bfd_x86_elf_link_symbol_references_local (struct bfd_link_info *info,
+					   struct elf_link_hash_entry *h)
+{
+  struct elf_x86_link_hash_entry *eh
+    = (struct elf_x86_link_hash_entry *) h;
+
+  if (eh->local_ref > 1)
+    return TRUE;
+
+  if (eh->local_ref == 1)
+    return FALSE;
+
+  /* Unversioned symbols defined in regular objects can be forced local
+     by linker version script.  A weak undefined symbol can fored local
+     if it has non-default visibility or "-z nodynamic-undefined-weak"
+     is used.  */
+  if (SYMBOL_REFERENCES_LOCAL (info, h)
+      || ((ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	   || info->dynamic_undefined_weak == 0)
+	  && h->root.type == bfd_link_hash_undefweak)
+      || ((h->def_regular || ELF_COMMON_DEF_P (h))
+	  && h->versioned == unversioned
+	  && info->version_info != NULL
+	  && bfd_hide_sym_by_version (info->version_info,
+				      h->root.root.string)))
+    {
+      eh->local_ref = 2;
+      return TRUE;
+    }
+
+  eh->local_ref = 1;
+  return FALSE;
 }
 
 /* Return the section that should be marked against GC for a given
