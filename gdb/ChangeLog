@@ -1,3 +1,8 @@
+2017-09-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Set GDB version number to 8.0.1.
+	* PROBLEMS: Likewise.
+
 2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* infrun.c (follow_exec): Call add_thread after
