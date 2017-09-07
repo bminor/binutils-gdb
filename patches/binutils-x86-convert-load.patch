@@ -1,15 +1,18 @@
-From 06c3ce976a425a0dd492cf8c82969fb916227dd7 Mon Sep 17 00:00:00 2001
+From eaaeac29bb451b010577c85c97455d747a9d770f Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Tue, 5 Sep 2017 14:53:37 -0700
 Subject: [PATCH] x86: Remove _bfd_{i386,x86_64}_elf_convert_load
 
 Instead of converting GOT relocations when sizing dynamic sections, we
-convert GOT relocations during relocation check.  A new function is
-added to check if a symbol is forced local by linker version script.
+convert GOT relocations during relocation check.  Add a field, local_ref,
+to elf_x86_link_hash_entry to indicate if symbol references are always
+local with a new function to check if symbol references are always local,
+which wroks in check_relocs.
 
 	* elf32-i386.c (elf_i386_convert_load_reloc): Replace
-	SYMBOL_REFERENCES_LOCAL with
-	_bfd_x86_elf_link_symbol_references_local.
+	SYMBOL_REFERENCES_LOCAL with SYMBOL_REFERENCES_LOCAL_P.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_symbol): Likewise.
 	(need_convert_load): Removed.
 	(check_relocs_failed): Updated.
 	(elf_i386_check_relocs): Call elf_i386_convert_load_reloc,
@@ -17,40 +20,54 @@ added to check if a symbol is forced local by linker version script.
 	(_bfd_i386_elf_convert_load): Removed.
 	* elf64-x86-64.c (need_convert_load): Removed.
 	(check_relocs_failed): Updated.
-	(elf_x86_64_convert_load_reloc): Replace SYMBOL_REFERENCES_LOCAL
-	with _bfd_x86_elf_link_symbol_references_local.
+	(elf_x86_64_convert_load_reloc): Add an argument, r_type_p.
+	Replace SYMBOL_REFERENCES_LOCAL with SYMBOL_REFERENCES_LOCAL_P.
 	(elf_x86_64_check_relocs): Call elf_x86_64_convert_load_reloc,
 	instead of setting need_convert_load.
 	(elf_x86_64_check_relocs): Don't check PIC if relocation has
 	been converted.
 	(_bfd_x86_64_elf_convert_load): Removed.
+	(elf_x86_64_relocate_section): Replace SYMBOL_REFERENCES_LOCAL
+	with SYMBOL_REFERENCES_LOCAL_P.
+	(elf_x86_64_finish_dynamic_symbol): Likewise.
 	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Don't
 	set convert_load.
 	(_bfd_x86_elf_size_dynamic_sections): Don't call convert_load.
 	(_bfd_x86_elf_link_symbol_references_local): New function.
-	* elfxx-x86.h (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Replace
-	elf.forced_local with _bfd_x86_elf_link_symbol_references_local.
+	* elfxx-x86.h (SYMBOL_REFERENCES_LOCAL_P): New.
+	(UNDEFINED_WEAK_RESOLVED_TO_ZERO): Replace elf.forced_local with
+	SYMBOL_REFERENCES_LOCAL_P.
+	(elf_x86_link_hash_entry): Add local_ref.
 	(elf_x86_link_hash_table): Remove convert_load.
 	(_bfd_i386_elf_convert_load): Removed.
 	(_bfd_x86_64_elf_convert_load): Likewise.
 	(_bfd_x86_elf_link_symbol_references_local): New.
 ---
- bfd/elf32-i386.c   | 151 +++++---------------------------------------------
- bfd/elf64-x86-64.c | 158 +++++++----------------------------------------------
- bfd/elfxx-x86.c    |  34 ++++++++++--
- bfd/elfxx-x86.h    |  30 +++++-----
- 4 files changed, 76 insertions(+), 297 deletions(-)
+ bfd/elf32-i386.c   | 161 ++++++---------------------------------------------
+ bfd/elf64-x86-64.c | 167 +++++++----------------------------------------------
+ bfd/elfxx-x86.c    |  44 ++++++++++++--
+ bfd/elfxx-x86.h    |  23 +++++---
+ 4 files changed, 94 insertions(+), 301 deletions(-)
 
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index 78a5dc4c68..986b64fcb2 100644
+index 78a5dc4c68..f1352e1d17 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
+@@ -1316,7 +1316,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
+       /* We have "call/jmp *foo@GOT[(%reg)]".  */
+       if ((h->root.type == bfd_link_hash_defined
+ 	   || h->root.type == bfd_link_hash_defweak)
+-	  && SYMBOL_REFERENCES_LOCAL (link_info, h))
++	  && SYMBOL_REFERENCES_LOCAL_P (link_info, h))
+ 	{
+ 	  /* The function is locally defined.   */
+ convert_branch:
 @@ -1385,7 +1385,7 @@ convert_branch:
  	  || ((h->def_regular
  	       || h->root.type == bfd_link_hash_defined
  	       || h->root.type == bfd_link_hash_defweak)
 -	      && SYMBOL_REFERENCES_LOCAL (link_info, h)))
-+	      && _bfd_x86_elf_link_symbol_references_local (link_info, h)))
++	      && SYMBOL_REFERENCES_LOCAL_P (link_info, h)))
  	{
  convert_load:
  	  if (opcode == 0x8b)
@@ -231,8 +248,44 @@ index 78a5dc4c68..986b64fcb2 100644
  /* Set the correct type for an x86 ELF section.  We do this by the
     section name, which is a hack, but ought to work.  */
  
+@@ -2672,7 +2549,7 @@ r_386_got32:
+ 						     bfd_link_pic (info),
+ 						     h)
+ 		  || (bfd_link_pic (info)
+-		      && SYMBOL_REFERENCES_LOCAL (info, h))
++		      && SYMBOL_REFERENCES_LOCAL_P (info, h))
+ 		  || (ELF_ST_VISIBILITY (h->other)
+ 		      && h->root.type == bfd_link_hash_undefweak))
+ 		{
+@@ -2831,7 +2708,7 @@ disallow_got32:
+ 		  bfd_set_error (bfd_error_bad_value);
+ 		  return FALSE;
+ 		}
+-	      else if (!SYMBOL_REFERENCES_LOCAL (info, h)
++	      else if (!SYMBOL_REFERENCES_LOCAL_P (info, h)
+ 		       && (h->type == STT_FUNC
+ 			   || h->type == STT_OBJECT)
+ 		       && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
+@@ -4045,7 +3922,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+ 		     in static executable.  */
+ 		  relgot = htab->elf.irelplt;
+ 		}
+-	      if (SYMBOL_REFERENCES_LOCAL (info, h))
++	      if (SYMBOL_REFERENCES_LOCAL_P (info, h))
+ 		{
+ 		  info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
+ 					  h->root.root.string,
+@@ -4095,7 +3972,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+ 	    }
+ 	}
+       else if (bfd_link_pic (info)
+-	       && SYMBOL_REFERENCES_LOCAL (info, h))
++	       && SYMBOL_REFERENCES_LOCAL_P (info, h))
+ 	{
+ 	  BFD_ASSERT((h->got.offset & 1) != 0);
+ 	  rel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index 8f1ac1a358..24064c4d54 100644
+index 8f1ac1a358..051fa36ead 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
 @@ -1362,8 +1362,7 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
@@ -245,16 +298,41 @@ index 8f1ac1a358..24064c4d54 100644
  
  static bfd_boolean
  elf_x86_64_need_pic (struct bfd_link_info *info,
-@@ -1572,7 +1571,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
+@@ -1450,6 +1449,7 @@ elf_x86_64_need_pic (struct bfd_link_info *info,
+ static bfd_boolean
+ elf_x86_64_convert_load_reloc (bfd *abfd,
+ 			       bfd_byte *contents,
++			       unsigned int *r_type_p,
+ 			       Elf_Internal_Rela *irel,
+ 			       struct elf_link_hash_entry *h,
+ 			       bfd_boolean *converted,
+@@ -1464,7 +1464,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
+   bfd_signed_vma raddend;
+   unsigned int opcode;
+   unsigned int modrm;
+-  unsigned int r_type = ELF32_R_TYPE (irel->r_info);
++  unsigned int r_type = *r_type_p;
+   unsigned int r_symndx;
+   bfd_vma roff = irel->r_offset;
+ 
+@@ -1572,7 +1572,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
  		    || h->root.type == bfd_link_hash_defined
  		    || h->root.type == bfd_link_hash_defweak)
  		   && h != htab->elf.hdynamic
 -		   && SYMBOL_REFERENCES_LOCAL (link_info, h)))
-+		   && _bfd_x86_elf_link_symbol_references_local (link_info, h)))
++		   && SYMBOL_REFERENCES_LOCAL_P (link_info, h)))
  	{
  	  /* bfd_link_hash_new or bfd_link_hash_undefined is
  	     set by an assignment in a linker script in
-@@ -1819,6 +1818,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+@@ -1749,6 +1749,7 @@ rewrite_modrm_rex:
+       bfd_put_8 (abfd, opcode, contents + roff - 2);
+     }
+ 
++  *r_type_p = r_type;
+   irel->r_info = htab->r_info (r_symndx,
+ 			       r_type | R_X86_64_converted_reloc_bit);
+ 
+@@ -1819,6 +1820,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
        Elf_Internal_Sym *isym;
        const char *name;
        bfd_boolean size_reloc;
@@ -262,7 +340,7 @@ index 8f1ac1a358..24064c4d54 100644
  
        r_symndx = htab->r_sym (rel->r_info);
        r_type = ELF32_R_TYPE (rel->r_info);
-@@ -1912,6 +1912,21 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+@@ -1912,6 +1914,16 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
  	      |= elf_gnu_symbol_ifunc;
  	}
  
@@ -270,21 +348,16 @@ index 8f1ac1a358..24064c4d54 100644
 +      if ((r_type == R_X86_64_GOTPCREL
 +	   || r_type == R_X86_64_GOTPCRELX
 +	   || r_type == R_X86_64_REX_GOTPCRELX)
-+	  && (h == NULL || h->type != STT_GNU_IFUNC))
-+	{
-+	  Elf_Internal_Rela *irel = (Elf_Internal_Rela *) rel;
-+	  if (!elf_x86_64_convert_load_reloc (abfd, contents, irel, h,
-+					      &converted_reloc, info))
-+	    goto error_return;
-+	  if (converted_reloc)
-+	    r_type = (ELF32_R_TYPE (irel->r_info)
-+		      & ~R_X86_64_converted_reloc_bit);
-+	}
++	  && (h == NULL || h->type != STT_GNU_IFUNC)
++	  && !elf_x86_64_convert_load_reloc (abfd, contents, &r_type,
++					     (Elf_Internal_Rela *) rel,
++					     h, &converted_reloc, info))
++	goto error_return;
 +
        if (! elf_x86_64_tls_transition (info, abfd, sec, contents,
  				       symtab_hdr, sym_hashes,
  				       &r_type, GOT_UNKNOWN,
-@@ -2087,6 +2102,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+@@ -2087,6 +2099,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
  	     sections we don't care about, such as debug sections or
  	     when relocation overflow check is disabled.  */
  	  if (!info->no_reloc_overflow_check
@@ -292,7 +365,7 @@ index 8f1ac1a358..24064c4d54 100644
  	      && (bfd_link_pic (info)
  		  || (bfd_link_executable (info)
  		      && h != NULL
-@@ -2280,12 +2296,6 @@ do_size:
+@@ -2280,12 +2293,6 @@ do_size:
  	default:
  	  break;
  	}
@@ -305,7 +378,7 @@ index 8f1ac1a358..24064c4d54 100644
      }
  
    if (elf_section_data (sec)->this_hdr.contents != contents)
-@@ -2308,136 +2318,6 @@ error_return:
+@@ -2308,136 +2315,6 @@ error_return:
    return FALSE;
  }
  
@@ -442,8 +515,53 @@ index 8f1ac1a358..24064c4d54 100644
  /* Return the relocation value for @tpoff relocation
     if STT_TLS virtual address is ADDRESS.  */
  
+@@ -2929,7 +2806,7 @@ do_ifunc_pointer:
+ 
+ 	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), h)
+ 		  || (bfd_link_pic (info)
+-		      && SYMBOL_REFERENCES_LOCAL (info, h))
++		      && SYMBOL_REFERENCES_LOCAL_P (info, h))
+ 		  || (ELF_ST_VISIBILITY (h->other)
+ 		      && h->root.type == bfd_link_hash_undefweak))
+ 		{
+@@ -3064,7 +2941,7 @@ do_ifunc_pointer:
+ 		  return FALSE;
+ 		}
+ 	      else if (!bfd_link_executable (info)
+-		       && !SYMBOL_REFERENCES_LOCAL (info, h)
++		       && !SYMBOL_REFERENCES_LOCAL_P (info, h)
+ 		       && (h->type == STT_FUNC
+ 			   || h->type == STT_OBJECT)
+ 		       && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
+@@ -3212,7 +3089,7 @@ do_ifunc_pointer:
+ 		    || r_type == R_X86_64_PC32_BND)
+ 		   && is_32bit_relative_branch (contents, rel->r_offset));
+ 
+-	      if (SYMBOL_REFERENCES_LOCAL (info, h))
++	      if (SYMBOL_REFERENCES_LOCAL_P (info, h))
+ 		{
+ 		  /* Symbol is referenced locally.  Make sure it is
+ 		     defined locally or for a branch.  */
+@@ -4379,7 +4256,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+ 		     in static executable.  */
+ 		  relgot = htab->elf.irelplt;
+ 		}
+-	      if (SYMBOL_REFERENCES_LOCAL (info, h))
++	      if (SYMBOL_REFERENCES_LOCAL_P (info, h))
+ 		{
+ 		  info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
+ 					  output_bfd,
+@@ -4429,7 +4306,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+ 	    }
+ 	}
+       else if (bfd_link_pic (info)
+-	       && SYMBOL_REFERENCES_LOCAL (info, h))
++	       && SYMBOL_REFERENCES_LOCAL_P (info, h))
+ 	{
+ 	  if (!(h->def_regular || ELF_COMMON_DEF_P (h)))
+ 	    return FALSE;
 diff --git a/bfd/elfxx-x86.c b/bfd/elfxx-x86.c
-index a7e9eda47f..9ede394b77 100644
+index a7e9eda47f..4f6b09e1d0 100644
 --- a/bfd/elfxx-x86.c
 +++ b/bfd/elfxx-x86.c
 @@ -766,7 +766,6 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
@@ -472,12 +590,13 @@ index a7e9eda47f..9ede394b77 100644
  	  for (p = ((struct elf_dyn_relocs *)
  		     elf_section_data (s)->local_dynrel);
  	       p != NULL;
-@@ -1677,6 +1672,35 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
+@@ -1677,6 +1672,45 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
    return _bfd_elf_adjust_dynamic_copy (info, h, s);
  }
  
 +/* Return TRUE if a symbol is referenced locally.  It is similar to
-+   SYMBOL_REFERENCES_LOCAL, but it also checks version script.  */
++   SYMBOL_REFERENCES_LOCAL, but it also checks version script.  It
++   works in check_relocs.  */
 +
 +bfd_boolean
 +_bfd_x86_elf_link_symbol_references_local (struct bfd_link_info *info,
@@ -486,22 +605,31 @@ index a7e9eda47f..9ede394b77 100644
 +  struct elf_x86_link_hash_entry *eh
 +    = (struct elf_x86_link_hash_entry *) h;
 +
-+  if (eh->local_ref)
++  if (eh->local_ref > 1)
 +    return TRUE;
 +
++  if (eh->local_ref == 1)
++    return FALSE;
++
++  /* Unversioned symbols defined in regular objects can be forced local
++     by linker version script.  A weak undefined symbol can fored local
++     if it has non-default visibility or "-z nodynamic-undefined-weak"
++     is used.  */
 +  if (SYMBOL_REFERENCES_LOCAL (info, h)
++      || ((ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
++	   || info->dynamic_undefined_weak == 0)
++	  && h->root.type == bfd_link_hash_undefweak)
 +      || ((h->def_regular || ELF_COMMON_DEF_P (h))
 +	  && h->versioned == unversioned
 +	  && info->version_info != NULL
 +	  && bfd_hide_sym_by_version (info->version_info,
 +				      h->root.root.string)))
 +    {
-+      /* Only unversioned symbols defined in regular objects can be
-+         forced local by linker version script.  */
-+      eh->local_ref = 1;
++      eh->local_ref = 2;
 +      return TRUE;
 +    }
 +
++  eh->local_ref = 1;
 +  return FALSE;
 +}
 +
@@ -509,43 +637,43 @@ index a7e9eda47f..9ede394b77 100644
     relocation.	*/
  
 diff --git a/bfd/elfxx-x86.h b/bfd/elfxx-x86.h
-index 9c0dcbbe87..596f84708a 100644
+index 9c0dcbbe87..5d0a28a3eb 100644
 --- a/bfd/elfxx-x86.h
 +++ b/bfd/elfxx-x86.h
-@@ -52,14 +52,14 @@
-    2. Has no GOT/PLT relocation.
-    Local undefined weak symbol is always resolved to 0.
-  */
--#define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, ID, GOT_RELOC, EH) \
--  ((EH)->elf.root.type == bfd_link_hash_undefweak		 \
--   && ((EH)->elf.forced_local					 \
--       || (bfd_link_executable (INFO)				 \
--	   && (elf_x86_hash_table ((INFO), (ID))->interp == NULL \
--	       || !(GOT_RELOC)					 \
--	       || (EH)->has_non_got_reloc			 \
--	       || !(INFO)->dynamic_undefined_weak))))
-+#define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, ID, GOT_RELOC, EH)	\
-+  ((EH)->elf.root.type == bfd_link_hash_undefweak			\
-+   && ((bfd_link_executable (INFO)					\
-+	&& (elf_x86_hash_table ((INFO), (ID))->interp == NULL		\
-+	    || !(GOT_RELOC)						\
-+	    || (EH)->has_non_got_reloc					\
-+	    || !(INFO)->dynamic_undefined_weak))			\
-+       || _bfd_x86_elf_link_symbol_references_local ((INFO), &(EH)->elf)))
+@@ -45,6 +45,10 @@
+    && elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) == (id) \
+     ? ((struct elf_x86_link_hash_table *) ((p)->hash)) : NULL)
  
- /* Should copy relocation be generated for a symbol.  Don't generate
-    copy relocation against a protected symbol defined in a shared
-@@ -98,6 +98,9 @@ struct elf_x86_link_hash_entry
++/* Will references to this symbol always be local in this object?  */
++#define SYMBOL_REFERENCES_LOCAL_P(INFO, H) \
++  _bfd_x86_elf_link_symbol_references_local ((INFO), (H))
++
+ /* Is a undefined weak symbol which is resolved to 0.  Reference to an
+    undefined weak symbol is resolved to 0 when building executable if
+    it isn't dynamic and
+@@ -54,7 +58,7 @@
+  */
+ #define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, ID, GOT_RELOC, EH) \
+   ((EH)->elf.root.type == bfd_link_hash_undefweak		 \
+-   && ((EH)->elf.forced_local					 \
++   && (SYMBOL_REFERENCES_LOCAL_P ((INFO), &(EH)->elf)		 \
+        || (bfd_link_executable (INFO)				 \
+ 	   && (elf_x86_hash_table ((INFO), (ID))->interp == NULL \
+ 	       || !(GOT_RELOC)					 \
+@@ -98,6 +102,12 @@ struct elf_x86_link_hash_entry
    /* TRUE if symbol is defined as a protected symbol.  */
    unsigned int def_protected : 1;
  
-+  /* Symbol is referenced locally.  */
-+  unsigned int local_ref : 1;
++  /* 0: Symbol references are unknown.
++     1: Symbol references aren't local.
++     2: Symbol references are local.
++   */
++  unsigned int local_ref : 2;
 +
    /* Symbol is referenced by R_386_GOTOFF relocation.  This is only used
       by i386.  */
    unsigned int gotoff_ref : 1;
-@@ -320,8 +323,6 @@ struct elf_x86_link_hash_table
+@@ -320,8 +330,6 @@ struct elf_x86_link_hash_table
  
    bfd_vma (*r_info) (bfd_vma, bfd_vma);
    bfd_vma (*r_sym) (bfd_vma);
@@ -554,7 +682,7 @@ index 9c0dcbbe87..596f84708a 100644
    bfd_boolean (*is_reloc_section) (const char *);
    enum elf_target_id target_id;
    unsigned int sizeof_reloc;
-@@ -405,12 +406,6 @@ struct elf_x86_plt
+@@ -405,12 +413,6 @@ struct elf_x86_plt
     && elf_tdata (bfd) != NULL				\
     && elf_object_id (bfd) == (htab)->target_id)
  
@@ -567,7 +695,7 @@ index 9c0dcbbe87..596f84708a 100644
  extern bfd_boolean _bfd_x86_elf_mkobject
    (bfd *);
  
-@@ -468,6 +463,9 @@ extern bfd_boolean _bfd_x86_elf_hash_symbol
+@@ -468,6 +470,9 @@ extern bfd_boolean _bfd_x86_elf_hash_symbol
  extern bfd_boolean _bfd_x86_elf_adjust_dynamic_symbol
    (struct bfd_link_info *, struct elf_link_hash_entry *);
  
