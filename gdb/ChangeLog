@@ -1,3 +1,10 @@
+2017-09-08  Frank Penczek  <frank.penczek@intel.com>
+            Christoph Weinmann  <christoph.t.weinmann@intel.com>
+            Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* f-typeprint.c (f_type_print_base): Use fprintfi_filtered
+	to maintain proper indentation when printing pointers/refs.
+
 2017-09-07  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 8.0.1 released.
