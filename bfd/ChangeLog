@@ -1,3 +1,16 @@
+2017-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Replace
+	elf_x86_plt_layout_table with elf_x86_init_table.
+	* elf64-x86-64.c (elf_x86_64_link_setup_gnu_properties):
+	Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_link_setup_gnu_properties):
+	Likewise.
+	* elfxx-x86.h (elf_x86_plt_layout_table): Renamed to ...
+	(elf_x86_init_table): This.
+	(_bfd_x86_elf_link_setup_gnu_properties): Replace
+	elf_x86_plt_layout_table with elf_x86_init_table.
+
 2017-09-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.ac (bfd_backends): Don't add elf64-x86-64.lo nor

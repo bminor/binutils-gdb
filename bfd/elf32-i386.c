@@ -4600,38 +4600,38 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 static bfd *
 elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 {
-  struct elf_x86_plt_layout_table plt_layout;
+  struct elf_x86_init_table init_table;
 
-  plt_layout.normal_target = FALSE;
-  plt_layout.is_vxworks = FALSE;
+  init_table.normal_target = FALSE;
+  init_table.is_vxworks = FALSE;
   switch (get_elf_i386_backend_data (info->output_bfd)->os)
     {
     case is_normal:
-      plt_layout.lazy_plt = &elf_i386_lazy_plt;
-      plt_layout.non_lazy_plt = &elf_i386_non_lazy_plt;
-      plt_layout.lazy_ibt_plt = &elf_i386_lazy_ibt_plt;
-      plt_layout.non_lazy_ibt_plt = &elf_i386_non_lazy_ibt_plt;
-      plt_layout.normal_target = TRUE;
+      init_table.lazy_plt = &elf_i386_lazy_plt;
+      init_table.non_lazy_plt = &elf_i386_non_lazy_plt;
+      init_table.lazy_ibt_plt = &elf_i386_lazy_ibt_plt;
+      init_table.non_lazy_ibt_plt = &elf_i386_non_lazy_ibt_plt;
+      init_table.normal_target = TRUE;
       break;
     case is_vxworks:
-      plt_layout.lazy_plt = &elf_i386_lazy_plt;
-      plt_layout.non_lazy_plt = NULL;
-      plt_layout.lazy_ibt_plt = NULL;
-      plt_layout.non_lazy_ibt_plt = NULL;
-      plt_layout.is_vxworks = TRUE;
+      init_table.lazy_plt = &elf_i386_lazy_plt;
+      init_table.non_lazy_plt = NULL;
+      init_table.lazy_ibt_plt = NULL;
+      init_table.non_lazy_ibt_plt = NULL;
+      init_table.is_vxworks = TRUE;
       break;
     case is_nacl:
-      plt_layout.lazy_plt = &elf_i386_nacl_plt;
-      plt_layout.non_lazy_plt = NULL;
-      plt_layout.lazy_ibt_plt = NULL;
-      plt_layout.non_lazy_ibt_plt = NULL;
+      init_table.lazy_plt = &elf_i386_nacl_plt;
+      init_table.non_lazy_plt = NULL;
+      init_table.lazy_ibt_plt = NULL;
+      init_table.non_lazy_ibt_plt = NULL;
       break;
     }
 
-  plt_layout.r_info = elf32_r_info;
-  plt_layout.r_sym = elf32_r_sym;
+  init_table.r_info = elf32_r_info;
+  init_table.r_sym = elf32_r_sym;
 
-  return _bfd_x86_elf_link_setup_gnu_properties (info, &plt_layout);
+  return _bfd_x86_elf_link_setup_gnu_properties (info, &init_table);
 }
 
 #define TARGET_LITTLE_SYM		i386_elf32_vec

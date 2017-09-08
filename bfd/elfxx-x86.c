@@ -2106,8 +2106,7 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 
 bfd *
 _bfd_x86_elf_link_setup_gnu_properties
-  (struct bfd_link_info *info,
-   struct elf_x86_plt_layout_table *plt_layout)
+  (struct bfd_link_info *info, struct elf_x86_init_table *init_table)
 {
   bfd_boolean normal_target;
   bfd_boolean lazy_plt;
@@ -2185,9 +2184,9 @@ error_alignment:
   if (htab == NULL)
     return pbfd;
 
-  htab->is_vxworks = plt_layout->is_vxworks;
-  htab->r_info = plt_layout->r_info;
-  htab->r_sym = plt_layout->r_sym;
+  htab->is_vxworks = init_table->is_vxworks;
+  htab->r_info = init_table->r_info;
+  htab->r_sym = init_table->r_sym;
 
   if (bfd_link_relocatable (info))
     return pbfd;
@@ -2247,24 +2246,24 @@ error_alignment:
      still be used with LD_AUDIT or LD_PROFILE if PLT entry is used for
      canonical function address.  */
   htab->plt.has_plt0 = 1;
-  normal_target = plt_layout->normal_target;
+  normal_target = init_table->normal_target;
 
   if (normal_target)
     {
       if (use_ibt_plt)
 	{
-	  htab->lazy_plt = plt_layout->lazy_ibt_plt;
-	  htab->non_lazy_plt = plt_layout->non_lazy_ibt_plt;
+	  htab->lazy_plt = init_table->lazy_ibt_plt;
+	  htab->non_lazy_plt = init_table->non_lazy_ibt_plt;
 	}
       else
 	{
-	  htab->lazy_plt = plt_layout->lazy_plt;
-	  htab->non_lazy_plt = plt_layout->non_lazy_plt;
+	  htab->lazy_plt = init_table->lazy_plt;
+	  htab->non_lazy_plt = init_table->non_lazy_plt;
 	}
     }
   else
     {
-      htab->lazy_plt = plt_layout->lazy_plt;
+      htab->lazy_plt = init_table->lazy_plt;
       htab->non_lazy_plt = NULL;
     }
 

@@ -5140,7 +5140,7 @@ elf_x86_64_relocs_compatible (const bfd_target *input,
 static bfd *
 elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
 {
-  struct elf_x86_plt_layout_table plt_layout;
+  struct elf_x86_init_table init_table;
 
   if ((int) R_X86_64_standard >= (int) R_X86_64_converted_reloc_bit
       || (int) R_X86_64_max <= (int) R_X86_64_converted_reloc_bit
@@ -5150,53 +5150,53 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
 	  != (int) R_X86_64_GNU_VTENTRY))
     abort ();
 
-  plt_layout.is_vxworks = FALSE;
+  init_table.is_vxworks = FALSE;
   if (get_elf_x86_64_backend_data (info->output_bfd)->os == is_normal)
     {
       if (info->bndplt)
 	{
-	  plt_layout.lazy_plt = &elf_x86_64_lazy_bnd_plt;
-	  plt_layout.non_lazy_plt = &elf_x86_64_non_lazy_bnd_plt;
+	  init_table.lazy_plt = &elf_x86_64_lazy_bnd_plt;
+	  init_table.non_lazy_plt = &elf_x86_64_non_lazy_bnd_plt;
 	}
       else
 	{
-	  plt_layout.lazy_plt = &elf_x86_64_lazy_plt;
-	  plt_layout.non_lazy_plt = &elf_x86_64_non_lazy_plt;
+	  init_table.lazy_plt = &elf_x86_64_lazy_plt;
+	  init_table.non_lazy_plt = &elf_x86_64_non_lazy_plt;
 	}
 
       if (ABI_64_P (info->output_bfd))
 	{
-	  plt_layout.lazy_ibt_plt = &elf_x86_64_lazy_ibt_plt;
-	  plt_layout.non_lazy_ibt_plt = &elf_x86_64_non_lazy_ibt_plt;
+	  init_table.lazy_ibt_plt = &elf_x86_64_lazy_ibt_plt;
+	  init_table.non_lazy_ibt_plt = &elf_x86_64_non_lazy_ibt_plt;
 	}
       else
 	{
-	  plt_layout.lazy_ibt_plt = &elf_x32_lazy_ibt_plt;
-	  plt_layout.non_lazy_ibt_plt = &elf_x32_non_lazy_ibt_plt;
+	  init_table.lazy_ibt_plt = &elf_x32_lazy_ibt_plt;
+	  init_table.non_lazy_ibt_plt = &elf_x32_non_lazy_ibt_plt;
 	}
-      plt_layout.normal_target = TRUE;
+      init_table.normal_target = TRUE;
     }
   else
     {
-      plt_layout.lazy_plt = &elf_x86_64_nacl_plt;
-      plt_layout.non_lazy_plt = NULL;
-      plt_layout.lazy_ibt_plt = NULL;
-      plt_layout.non_lazy_ibt_plt = NULL;
-      plt_layout.normal_target = FALSE;
+      init_table.lazy_plt = &elf_x86_64_nacl_plt;
+      init_table.non_lazy_plt = NULL;
+      init_table.lazy_ibt_plt = NULL;
+      init_table.non_lazy_ibt_plt = NULL;
+      init_table.normal_target = FALSE;
     }
 
   if (ABI_64_P (info->output_bfd))
     {
-      plt_layout.r_info = elf64_r_info;
-      plt_layout.r_sym = elf64_r_sym;
+      init_table.r_info = elf64_r_info;
+      init_table.r_sym = elf64_r_sym;
     }
   else
     {
-      plt_layout.r_info = elf32_r_info;
-      plt_layout.r_sym = elf32_r_sym;
+      init_table.r_info = elf32_r_info;
+      init_table.r_sym = elf32_r_sym;
     }
 
-  return _bfd_x86_elf_link_setup_gnu_properties (info, &plt_layout);
+  return _bfd_x86_elf_link_setup_gnu_properties (info, &init_table);
 }
 
 static const struct bfd_elf_special_section

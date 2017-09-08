@@ -343,7 +343,7 @@ struct elf_x86_link_hash_table
   const char *tls_get_addr;
 };
 
-struct elf_x86_plt_layout_table
+struct elf_x86_init_table
 {
   /* The lazy PLT layout.  */
   const struct elf_x86_lazy_plt_layout *lazy_plt;
@@ -491,7 +491,7 @@ extern bfd_boolean _bfd_x86_elf_merge_gnu_properties
   (struct bfd_link_info *, bfd *, elf_property *, elf_property *);
 
 extern bfd * _bfd_x86_elf_link_setup_gnu_properties
-  (struct bfd_link_info *, struct elf_x86_plt_layout_table *);
+  (struct bfd_link_info *, struct elf_x86_init_table *);
 
 #define bfd_elf64_mkobject \
   _bfd_x86_elf_mkobject
