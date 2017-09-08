@@ -108,8 +108,8 @@ struct elf_x86_link_hash_entry
    */
   unsigned int local_ref : 2;
 
-  /* Symbol is referenced by R_386_GOTOFF relocation.  This is only used
-     by i386.  */
+  /* Terue if symbol is referenced by R_386_GOTOFF relocation.  This is
+     only used by i386.  */
   unsigned int gotoff_ref : 1;
 
   /* TRUE if a weak symbol with a real definition needs a copy reloc.

@@ -1,5 +1,9 @@
 2017-09-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-x86.h: Update comments.
+
+2017-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Replace
 	elf_x86_plt_layout_table with elf_x86_init_table.
 	* elf64-x86-64.c (elf_x86_64_link_setup_gnu_properties):
