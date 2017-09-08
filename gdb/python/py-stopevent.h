@@ -22,15 +22,15 @@
 
 #include "py-event.h"
 
-extern PyObject *create_stop_event_object (PyTypeObject *py_type);
+extern gdbpy_ref<> create_stop_event_object (PyTypeObject *py_type);
 extern void stop_evpy_dealloc (PyObject *self);
 
 extern int emit_stop_event (struct bpstats *bs,
                             enum gdb_signal stop_signal);
 
-extern PyObject *create_breakpoint_event_object (PyObject *breakpoint_list,
-                                                 PyObject *first_bp);
+extern gdbpy_ref<> create_breakpoint_event_object (PyObject *breakpoint_list,
+						   PyObject *first_bp);
 
-extern PyObject *create_signal_event_object (enum gdb_signal stop_signal);
+extern gdbpy_ref<> create_signal_event_object (enum gdb_signal stop_signal);
 
 #endif /* GDB_PY_STOPEVENT_H */

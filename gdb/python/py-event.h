@@ -124,9 +124,9 @@ extern int emit_memory_changed_event (CORE_ADDR addr, ssize_t len);
 extern int evpy_emit_event (PyObject *event,
                             eventregistry_object *registry);
 
-extern PyObject *create_event_object (PyTypeObject *py_type);
-extern PyObject *create_thread_event_object (PyTypeObject *py_type,
-					     PyObject *thread = nullptr);
+extern gdbpy_ref<> create_event_object (PyTypeObject *py_type);
+extern gdbpy_ref<> create_thread_event_object (PyTypeObject *py_type,
+					       PyObject *thread = nullptr);
 extern int emit_new_objfile_event (struct objfile *objfile);
 extern int emit_clear_objfiles_event (void);
 

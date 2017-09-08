@@ -47,7 +47,7 @@ get_event_thread (void)
   return thread;
 }
 
-PyObject *
+gdbpy_ref<>
 create_thread_event_object (PyTypeObject *py_type, PyObject *thread)
 {
   gdbpy_ref<> thread_event_obj (create_event_object (py_type));
@@ -66,7 +66,7 @@ create_thread_event_object (PyTypeObject *py_type, PyObject *thread)
                           thread) < 0)
     return NULL;
 
-  return thread_event_obj.release ();
+  return thread_event_obj;
 }
 
 GDBPY_NEW_EVENT_TYPE (thread,

@@ -27,7 +27,7 @@ evpy_dealloc (PyObject *self)
   Py_TYPE (self)->tp_free (self);
 }
 
-PyObject *
+gdbpy_ref<>
 create_event_object (PyTypeObject *py_type)
 {
   gdbpy_ref<event_object> event_obj (PyObject_New (event_object, py_type));
@@ -38,7 +38,7 @@ create_event_object (PyTypeObject *py_type)
   if (!event_obj->dict)
     return NULL;
 
-  return (PyObject*) event_obj.release ();
+  return gdbpy_ref<> ((PyObject *) event_obj.release ());
 }
 
 /* Add the attribute ATTR to the event object EVENT.  In

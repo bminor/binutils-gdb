@@ -43,10 +43,10 @@ create_inferior_call_event_object (inferior_call_kind flag, ptid_t ptid,
   switch (flag)
     {
     case INFERIOR_CALL_PRE:
-      event.reset (create_event_object (&inferior_call_pre_event_object_type));
+      event = create_event_object (&inferior_call_pre_event_object_type);
       break;
     case INFERIOR_CALL_POST:
-      event.reset (create_event_object (&inferior_call_post_event_object_type));
+      event = create_event_object (&inferior_call_post_event_object_type);
       break;
     default:
       gdb_assert_not_reached ("invalid inferior_call_kind");

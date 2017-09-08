@@ -24,7 +24,7 @@
 extern PyTypeObject continue_event_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
 
-static PyObject *
+static gdbpy_ref<>
 create_continue_event_object (void)
 {
   return create_thread_event_object (&continue_event_object_type);

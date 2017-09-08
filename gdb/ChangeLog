@@ -1,5 +1,26 @@
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
+	* python/py-threadevent.c (create_thread_event_object): Return
+	gdbpy_ref.
+	* python/py-stopevent.h (create_stop_event_object)
+	(create_breakpoint_event_object, create_signal_event_object):
+	Update.
+	* python/py-stopevent.c (create_stop_event_object): Return
+	gdbpy_ref.
+	(emit_stop_event): Update.
+	* python/py-signalevent.c (create_signal_event_object): Return
+	gdbpy_ref.
+	* python/py-infevents.c (create_inferior_call_event_object):
+	Update.
+	* python/py-event.h (create_event_object)
+	(create_thread_event_object): Update.
+	* python/py-event.c (create_event_object): Return gdbpy_ref.
+	* python/py-continueevent.c: Return gdbpy_ref.
+	* python/py-bpevent.c (create_breakpoint_event_object): Return
+	gdbpy_ref.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
 	PR python/15622:
 	* NEWS: Add entry.
 	* python/python.c (do_start_initialization): Initialize new event

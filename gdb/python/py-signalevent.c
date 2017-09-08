@@ -23,7 +23,7 @@
 extern PyTypeObject signal_event_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
 
-PyObject *
+gdbpy_ref<>
 create_signal_event_object (enum gdb_signal stop_signal)
 {
   const char *signal_name;
@@ -43,7 +43,7 @@ create_signal_event_object (enum gdb_signal stop_signal)
                           signal_name_obj.get ()) < 0)
     return NULL;
 
-  return signal_event_obj.release ();
+  return signal_event_obj;
 }
 
 GDBPY_NEW_EVENT_TYPE (signal,
