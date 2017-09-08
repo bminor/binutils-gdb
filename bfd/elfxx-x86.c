@@ -731,13 +731,11 @@ elf_i386_is_reloc_section (const char *secname)
   return CONST_STRNEQ (secname, ".rel");
 }
 
-#ifdef BFD64
 static bfd_boolean
 elf_x86_64_is_reloc_section (const char *secname)
 {
   return CONST_STRNEQ (secname, ".rela");
 }
-#endif
 
 /* Create an x86 ELF linker hash table.  */
 
@@ -762,11 +760,8 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
-#ifdef BFD64
-  /* NB: If BFD64 isn't defined, only i386 will be supported.  */
   if (bed->target_id == X86_64_ELF_DATA)
     {
-      ret->convert_load = _bfd_x86_64_elf_convert_load;
       ret->is_reloc_section = elf_x86_64_is_reloc_section;
       ret->dt_reloc = DT_RELA;
       ret->dt_reloc_sz = DT_RELASZ;
@@ -776,18 +771,13 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
     }
   if (ABI_64_P (abfd))
     {
-      ret->r_info = elf64_r_info;
-      ret->r_sym = elf64_r_sym;
       ret->sizeof_reloc = sizeof (Elf64_External_Rela);
       ret->pointer_r_type = R_X86_64_64;
       ret->dynamic_interpreter = ELF64_DYNAMIC_INTERPRETER;
       ret->dynamic_interpreter_size = sizeof ELF64_DYNAMIC_INTERPRETER;
     }
   else
-#endif
     {
-      ret->r_info = elf32_r_info;
-      ret->r_sym = elf32_r_sym;
       if (bed->target_id == X86_64_ELF_DATA)
 	{
 	  ret->sizeof_reloc = sizeof (Elf32_External_Rela);
@@ -798,7 +788,6 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
 	}
       else
 	{
-	  ret->convert_load = _bfd_i386_elf_convert_load;
 	  ret->is_reloc_section = elf_i386_is_reloc_section;
 	  ret->dt_reloc = DT_REL;
 	  ret->dt_reloc_sz = DT_RELSZ;
@@ -908,9 +897,6 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
 	  struct elf_dyn_relocs *p;
-
-	  if (!htab->convert_load (ibfd, s, info))
-	    return FALSE;
 
 	  for (p = ((struct elf_dyn_relocs *)
 		     elf_section_data (s)->local_dynrel);
@@ -1677,6 +1663,45 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
+/* Return TRUE if a symbol is referenced locally.  It is similar to
+   SYMBOL_REFERENCES_LOCAL, but it also checks version script.  It
+   works in check_relocs.  */
+
+bfd_boolean
+_bfd_x86_elf_link_symbol_references_local (struct bfd_link_info *info,
+					   struct elf_link_hash_entry *h)
+{
+  struct elf_x86_link_hash_entry *eh
+    = (struct elf_x86_link_hash_entry *) h;
+
+  if (eh->local_ref > 1)
+    return TRUE;
+
+  if (eh->local_ref == 1)
+    return FALSE;
+
+  /* Unversioned symbols defined in regular objects can be forced local
+     by linker version script.  A weak undefined symbol can fored local
+     if it has non-default visibility or "-z nodynamic-undefined-weak"
+     is used.  */
+  if (SYMBOL_REFERENCES_LOCAL (info, h)
+      || ((ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	   || info->dynamic_undefined_weak == 0)
+	  && h->root.type == bfd_link_hash_undefweak)
+      || ((h->def_regular || ELF_COMMON_DEF_P (h))
+	  && h->versioned == unversioned
+	  && info->version_info != NULL
+	  && bfd_hide_sym_by_version (info->version_info,
+				      h->root.root.string)))
+    {
+      eh->local_ref = 2;
+      return TRUE;
+    }
+
+  eh->local_ref = 1;
+  return FALSE;
+}
+
 /* Return the section that should be marked against GC for a given
    relocation.	*/
 
@@ -2081,8 +2106,7 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 
 bfd *
 _bfd_x86_elf_link_setup_gnu_properties
-  (struct bfd_link_info *info,
-   struct elf_x86_plt_layout_table *plt_layout)
+  (struct bfd_link_info *info, struct elf_x86_init_table *init_table)
 {
   bfd_boolean normal_target;
   bfd_boolean lazy_plt;
@@ -2154,16 +2178,18 @@ error_alignment:
 
   pbfd = _bfd_elf_link_setup_gnu_properties (info);
 
-  if (bfd_link_relocatable (info))
-    return pbfd;
-
   bed = get_elf_backend_data (info->output_bfd);
 
   htab = elf_x86_hash_table (info, bed->target_id);
   if (htab == NULL)
     return pbfd;
 
-  htab->is_vxworks = plt_layout->is_vxworks;
+  htab->is_vxworks = init_table->is_vxworks;
+  htab->r_info = init_table->r_info;
+  htab->r_sym = init_table->r_sym;
+
+  if (bfd_link_relocatable (info))
+    return pbfd;
 
   use_ibt_plt = info->ibtplt || info->ibt;
   if (!use_ibt_plt && pbfd != NULL)
@@ -2220,24 +2246,24 @@ error_alignment:
      still be used with LD_AUDIT or LD_PROFILE if PLT entry is used for
      canonical function address.  */
   htab->plt.has_plt0 = 1;
-  normal_target = plt_layout->normal_target;
+  normal_target = init_table->normal_target;
 
   if (normal_target)
     {
       if (use_ibt_plt)
 	{
-	  htab->lazy_plt = plt_layout->lazy_ibt_plt;
-	  htab->non_lazy_plt = plt_layout->non_lazy_ibt_plt;
+	  htab->lazy_plt = init_table->lazy_ibt_plt;
+	  htab->non_lazy_plt = init_table->non_lazy_ibt_plt;
 	}
       else
 	{
-	  htab->lazy_plt = plt_layout->lazy_plt;
-	  htab->non_lazy_plt = plt_layout->non_lazy_plt;
+	  htab->lazy_plt = init_table->lazy_plt;
+	  htab->non_lazy_plt = init_table->non_lazy_plt;
 	}
     }
   else
     {
-      htab->lazy_plt = plt_layout->lazy_plt;
+      htab->lazy_plt = init_table->lazy_plt;
       htab->non_lazy_plt = NULL;
     }
 

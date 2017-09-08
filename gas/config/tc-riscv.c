@@ -2274,30 +2274,21 @@ bfd_boolean
 riscv_frag_align_code (int n)
 {
   bfd_vma bytes = (bfd_vma) 1 << n;
-  bfd_vma min_text_alignment_order = riscv_opts.rvc ? 1 : 2;
-  bfd_vma min_text_alignment = (bfd_vma) 1 << min_text_alignment_order;
-
-  /* First, get back to minimal alignment.  */
-  frag_align_code (min_text_alignment_order, 0);
+  bfd_vma worst_case_bytes = bytes - 2;
+  char *nops = frag_more (worst_case_bytes);
+  expressionS ex;
 
   /* When not relaxing, riscv_handle_align handles code alignment.  */
   if (!riscv_opts.relax)
     return FALSE;
 
-  if (bytes > min_text_alignment)
-    {
-      bfd_vma worst_case_bytes = bytes - min_text_alignment;
-      char *nops = frag_more (worst_case_bytes);
-      expressionS ex;
+  ex.X_op = O_constant;
+  ex.X_add_number = worst_case_bytes;
 
-      ex.X_op = O_constant;
-      ex.X_add_number = worst_case_bytes;
+  riscv_make_nops (nops, worst_case_bytes);
 
-      riscv_make_nops (nops, worst_case_bytes);
-
-      fix_new_exp (frag_now, nops - frag_now->fr_literal, 0,
-		   &ex, FALSE, BFD_RELOC_RISCV_ALIGN);
-    }
+  fix_new_exp (frag_now, nops - frag_now->fr_literal, 0,
+	       &ex, FALSE, BFD_RELOC_RISCV_ALIGN);
 
   return TRUE;
 }

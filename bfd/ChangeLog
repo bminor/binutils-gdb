@@ -1,3 +1,88 @@
+2017-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.h: Update comments.
+
+2017-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Replace
+	elf_x86_plt_layout_table with elf_x86_init_table.
+	* elf64-x86-64.c (elf_x86_64_link_setup_gnu_properties):
+	Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_link_setup_gnu_properties):
+	Likewise.
+	* elfxx-x86.h (elf_x86_plt_layout_table): Renamed to ...
+	(elf_x86_init_table): This.
+	(_bfd_x86_elf_link_setup_gnu_properties): Replace
+	elf_x86_plt_layout_table with elf_x86_init_table.
+
+2017-09-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (bfd_backends): Don't add elf64-x86-64.lo nor
+	elf64.lo together with elfxx-x86.lo for 64-bit BFD.
+	* configure: Regenerated.
+	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Set r_info
+	and r_sym fields of plt_layout.
+	* elf64-x86-64.c (elf_x86_64_link_setup_gnu_properties):
+	Likewise.
+	* elfxx-x86.c (elf_x86_64_is_reloc_section): Remove BFD64 check.
+	(_bfd_x86_elf_link_hash_table_create): Likewise.  Don't set
+	r_info nor r_sym fields.
+	(_bfd_x86_elf_link_setup_gnu_properties): Set r_info and r_sym
+	fields of htab.
+	* elfxx-x86.h (elf_x86_plt_layout_table): Add r_info and r_sym.
+
+2017-09-07  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* (_bfd_riscv_relax_align): Call bfd_set_error and
+	print an error message when unable to relax a .align directive.
+
+2017-09-07  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* elfnn-riscv.c (riscv_zero_pcrel_hi_reloc): New function.
+	(riscv_record_pcrel_hi_reloc): Add absolute argument.
+	(riscv_elf_relocate_section): Call riscv_zero_pcrel_hi_reloc for
+	R_RISCV_PCREL_HI20 relocs, and pass the result to
+	riscv_record_pcrel_hi_reloc.
+
+2017-09-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_convert_load_reloc): Add an argument,
+	r_type_p.  Remove the converted argument.  Replace
+	SYMBOL_REFERENCES_LOCAL with SYMBOL_REFERENCES_LOCAL_P.  Return
+	the new relocation type via r_type_p.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	(need_convert_load): Removed.
+	(check_relocs_failed): Updated.
+	(elf_i386_check_relocs): Call elf_i386_convert_load_reloc,
+	instead of setting need_convert_load.
+	(_bfd_i386_elf_convert_load): Removed.
+	* elf64-x86-64.c (need_convert_load): Removed.
+	(check_relocs_failed): Updated.
+	(elf_x86_64_convert_load_reloc): Add an argument, r_type_p.
+	Replace SYMBOL_REFERENCES_LOCAL with SYMBOL_REFERENCES_LOCAL_P.
+	Return the new relocation type via r_type_p.
+	(elf_x86_64_check_relocs): Call elf_x86_64_convert_load_reloc,
+	instead of setting need_convert_load.
+	(elf_x86_64_check_relocs): Don't check PIC if relocation has
+	been converted.
+	(_bfd_x86_64_elf_convert_load): Removed.
+	(elf_x86_64_relocate_section): Replace SYMBOL_REFERENCES_LOCAL
+	with SYMBOL_REFERENCES_LOCAL_P.
+	(elf_x86_64_finish_dynamic_symbol): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Don't
+	set convert_load.
+	(_bfd_x86_elf_size_dynamic_sections): Don't call convert_load.
+	(_bfd_x86_elf_link_symbol_references_local): New function.
+	* elfxx-x86.h (SYMBOL_REFERENCES_LOCAL_P): New.
+	(UNDEFINED_WEAK_RESOLVED_TO_ZERO): Replace elf.forced_local with
+	SYMBOL_REFERENCES_LOCAL_P.
+	(elf_x86_link_hash_entry): Add local_ref.
+	(elf_x86_link_hash_table): Remove convert_load.
+	(_bfd_i386_elf_convert_load): Removed.
+	(_bfd_x86_64_elf_convert_load): Likewise.
+	(_bfd_x86_elf_link_symbol_references_local): New.
+
 2017-09-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (R_X86_64_converted_reloc_bit): New.
