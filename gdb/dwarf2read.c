@@ -1485,10 +1485,6 @@ struct field_info
     /* Set if the accesibility of one of the fields is not public.  */
     int non_public_fields;
 
-    /* Member function fields array, entries are allocated in the order they
-       are encountered in the object file.  */
-    struct nextfnfield *fnfields;
-
     /* Member function fieldlist array, contains name of possibly overloaded
        member function, number of overloaded member functions and a pointer
        to the head of the member function field chain.  */
