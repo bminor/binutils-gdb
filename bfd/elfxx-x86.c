@@ -731,13 +731,11 @@ elf_i386_is_reloc_section (const char *secname)
   return CONST_STRNEQ (secname, ".rel");
 }
 
-#ifdef BFD64
 static bfd_boolean
 elf_x86_64_is_reloc_section (const char *secname)
 {
   return CONST_STRNEQ (secname, ".rela");
 }
-#endif
 
 /* Create an x86 ELF linker hash table.  */
 
@@ -762,8 +760,6 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
-#ifdef BFD64
-  /* NB: If BFD64 isn't defined, only i386 will be supported.  */
   if (bed->target_id == X86_64_ELF_DATA)
     {
       ret->is_reloc_section = elf_x86_64_is_reloc_section;
@@ -775,18 +771,13 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
     }
   if (ABI_64_P (abfd))
     {
-      ret->r_info = elf64_r_info;
-      ret->r_sym = elf64_r_sym;
       ret->sizeof_reloc = sizeof (Elf64_External_Rela);
       ret->pointer_r_type = R_X86_64_64;
       ret->dynamic_interpreter = ELF64_DYNAMIC_INTERPRETER;
       ret->dynamic_interpreter_size = sizeof ELF64_DYNAMIC_INTERPRETER;
     }
   else
-#endif
     {
-      ret->r_info = elf32_r_info;
-      ret->r_sym = elf32_r_sym;
       if (bed->target_id == X86_64_ELF_DATA)
 	{
 	  ret->sizeof_reloc = sizeof (Elf32_External_Rela);
@@ -2188,9 +2179,6 @@ error_alignment:
 
   pbfd = _bfd_elf_link_setup_gnu_properties (info);
 
-  if (bfd_link_relocatable (info))
-    return pbfd;
-
   bed = get_elf_backend_data (info->output_bfd);
 
   htab = elf_x86_hash_table (info, bed->target_id);
@@ -2198,6 +2186,11 @@ error_alignment:
     return pbfd;
 
   htab->is_vxworks = plt_layout->is_vxworks;
+  htab->r_info = plt_layout->r_info;
+  htab->r_sym = plt_layout->r_sym;
+
+  if (bfd_link_relocatable (info))
+    return pbfd;
 
   use_ibt_plt = info->ibtplt || info->ibt;
   if (!use_ibt_plt && pbfd != NULL)

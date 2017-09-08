@@ -825,13 +825,6 @@ case ${host64}-${target64}-${want64} in
     ;;
 esac
 
-# elfxx-x86.lo needs elf64-x86-64.lo and elf64.lo with 64-bit BFD.
-case "${bfd_backends}-${wordsize}" in
-  *elfxx-x86.lo*-64*)
-    bfd_backends="${bfd_backends} elf64-x86-64.lo elf64.lo"
-    ;;
-esac
-
 tdefaults=""
 test -n "${defvec}" && tdefaults="${tdefaults} -DDEFAULT_VECTOR=${defvec}"
 test -n "${selvecs}" && tdefaults="${tdefaults} -DSELECT_VECS='${selvecs}'"

@@ -4628,6 +4628,9 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
       break;
     }
 
+  plt_layout.r_info = elf32_r_info;
+  plt_layout.r_sym = elf32_r_sym;
+
   return _bfd_x86_elf_link_setup_gnu_properties (info, &plt_layout);
 }
 

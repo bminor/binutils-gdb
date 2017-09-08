@@ -1,3 +1,19 @@
+2017-09-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (bfd_backends): Don't add elf64-x86-64.lo nor
+	elf64.lo together with elfxx-x86.lo for 64-bit BFD.
+	* configure: Regenerated.
+	* elf32-i386.c (elf_i386_link_setup_gnu_properties): Set r_info
+	and r_sym fields of plt_layout.
+	* elf64-x86-64.c (elf_x86_64_link_setup_gnu_properties):
+	Likewise.
+	* elfxx-x86.c (elf_x86_64_is_reloc_section): Remove BFD64 check.
+	(_bfd_x86_elf_link_hash_table_create): Likewise.  Don't set
+	r_info nor r_sym fields.
+	(_bfd_x86_elf_link_setup_gnu_properties): Set r_info and r_sym
+	fields of htab.
+	* elfxx-x86.h (elf_x86_plt_layout_table): Add r_info and r_sym.
+
 2017-09-07  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* (_bfd_riscv_relax_align): Call bfd_set_error and

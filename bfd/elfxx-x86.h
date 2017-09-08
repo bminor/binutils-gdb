@@ -362,6 +362,9 @@ struct elf_x86_plt_layout_table
 
   /* TRUE if this is a VxWorks x86 target.  */
   bfd_boolean is_vxworks;
+
+  bfd_vma (*r_info) (bfd_vma, bfd_vma);
+  bfd_vma (*r_sym) (bfd_vma);
 };
 
 struct elf_x86_obj_tdata
