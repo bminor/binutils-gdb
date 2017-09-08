@@ -61,7 +61,7 @@ gdb_test "print &vla1" \
 gdb_test "print vla1(3, 6, 9)" " = 1311" "print allocated vla1(3,6,9)"
 gdb_test "print vla1(1, 3, 8)" " = 1311" "print allocated vla1(1,3,8)"
 gdb_test "print vla1(9, 9, 9) = 999" " = 999" \
-  "print allocated vla1(9,9,9)=1"
+  "print allocated vla1(9,9,9)=999"
 
 # Try to access values in allocated VLA after specific assignment
 gdb_breakpoint [gdb_get_line_number "vla1-filled"]
