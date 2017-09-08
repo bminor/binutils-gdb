@@ -30,13 +30,6 @@
 #include "py-event.h"
 #include "py-stopevent.h"
 
-extern PyTypeObject new_thread_event_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
-extern PyTypeObject new_inferior_event_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
-extern PyTypeObject inferior_deleted_event_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
-
 struct threadlist_entry {
   thread_object *thread_obj;
   struct threadlist_entry *next;
@@ -1042,19 +1035,3 @@ PyTypeObject membuf_object_type = {
   0,				  /* tp_init */
   0,				  /* tp_alloc */
 };
-
-GDBPY_NEW_EVENT_TYPE (new_thread,
-		      "gdb.NewThreadEvent",
-		      "NewThreadEvent",
-		      "GDB new thread event object",
-		      thread_event_object_type);
-GDBPY_NEW_EVENT_TYPE (new_inferior,
-		      "gdb.NewInferiorEvent",
-		      "NewInferiorEvent",
-		      "GDB new inferior event object",
-		      event_object_type);
-GDBPY_NEW_EVENT_TYPE (inferior_deleted,
-		      "gdb.InferiorDeletedEvent",
-		      "InferiorDeletedEvent",
-		      "GDB inferior deleted event object",
-		      event_object_type);

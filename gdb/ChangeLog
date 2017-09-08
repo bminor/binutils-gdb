@@ -1,5 +1,41 @@
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
+	* python/python.c (do_start_initialization): Use
+	py-event-types.def to initialize types.
+	Define all object type structures.
+	* python/python-internal.h: Don't declare event initialization
+	functions.
+	* python/py-threadevent.c (thread_event_object_type): Don't
+	define.
+	* python/py-stopevent.c (stop_event_object_type): Don't define.
+	* python/py-signalevent.c (signal_event_object_type): Don't
+	declare or define.
+	* python/py-newobjfileevent.c (new_objfile_event_object_type)
+	(clear_objfiles_event_object_type): Don't declare or define.
+	* python/py-infevents.c (inferior_call_pre_event_object_type)
+	(inferior_call_post_event_object_type)
+	(register_changed_event_object_type)
+	(memory_changed_event_object_type): Don't declare or define.
+	* python/py-inferior.c (new_thread_event_object_type)
+	(new_inferior_event_object_type)
+	(inferior_deleted_event_object_type): Don't declare or define.
+	* python/py-exitedevent.c (exited_event_object_type): Don't
+	declare or define.
+	* python/py-evts.c (gdbpy_initialize_py_events): Use
+	py-all-events.def.
+	* python/py-events.h (thread_event_object_type): Don't declare.
+	(events_object): Use py-all-events.def.
+	* python/py-event.h (GDBPY_NEW_EVENT_TYPE): Remove.  Use
+	py-event-types.def.
+	* python/py-event-types.def: New file.
+	* python/py-continueevent.c (create_continue_event_object): Don't
+	declare or define.
+	* python/py-bpevent.c (breakpoint_event_object_type): Don't
+	declare or define.
+	* python/py-all-events.def: New file.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
 	* python/py-threadevent.c (create_thread_event_object): Return
 	gdbpy_ref.
 	* python/py-stopevent.h (create_stop_event_object)

@@ -96,9 +96,3 @@ emit_stop_event (struct bpstats *bs, enum gdb_signal stop_signal)
 
   return evpy_emit_event (stop_event_obj.get (), gdb_py_events.stop);
 }
-
-GDBPY_NEW_EVENT_TYPE (stop,
-                      "gdb.StopEvent",
-                      "StopEvent",
-                      "GDB stop event object",
-                      thread_event_object_type);

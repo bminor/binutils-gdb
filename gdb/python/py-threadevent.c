@@ -68,9 +68,3 @@ create_thread_event_object (PyTypeObject *py_type, PyObject *thread)
 
   return thread_event_obj;
 }
-
-GDBPY_NEW_EVENT_TYPE (thread,
-                      "gdb.ThreadEvent",
-                      "ThreadEvent",
-                      "GDB thread event object",
-                      event_object_type);

@@ -21,9 +21,6 @@
 #include "py-stopevent.h"
 #include "py-ref.h"
 
-extern PyTypeObject breakpoint_event_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
-
 /* Create and initialize a BreakpointEvent object.  This acquires new
    references to BREAKPOINT_LIST and FIRST_BP.  */
 
@@ -47,9 +44,3 @@ create_breakpoint_event_object (PyObject *breakpoint_list, PyObject *first_bp)
 
   return breakpoint_event_obj;
 }
-
-GDBPY_NEW_EVENT_TYPE (breakpoint,
-                      "gdb.BreakpointEvent",
-                      "BreakpointEvent",
-                      "GDB breakpoint stop event object",
-                      stop_event_object_type);
