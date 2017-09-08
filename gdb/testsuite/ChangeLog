@@ -1,3 +1,9 @@
+2017-09-08  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/vla-value.exp: Use type names defined in libfortran.
+	* gdb.mi/mi-var-child-f.exp: Likewise.
+	* gdb.mi/mi-vla-fortran.exp: Likewise.
+
 2017-09-08  Frank Penczek  <frank.penczek@intel.com>
             Christoph Weinmann  <christoph.t.weinmann@intel.com>
             Bernhard Heckel  <bernhard.heckel@intel.com>
