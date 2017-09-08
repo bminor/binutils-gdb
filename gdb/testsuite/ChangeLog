@@ -1,3 +1,8 @@
+2017-09-08  Christoph Weinmann  <christoph.t.weinmann@intel.com>
+
+	* gdb.fortran/printing-types.exp: New file.
+	* gdb.fortran/printing-types.exp: New file.
+
 2017-09-08  Bernhard Heckel  <bernhard.heckel@intel.com>
 
 	* gdb.fortran/vla-ptype.exp: Fix typos.
