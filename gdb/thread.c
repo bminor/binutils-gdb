@@ -1276,16 +1276,12 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
 	    return;
 	  }
 
-	table_emitter.emplace (uiout,
-			       (show_global_ids || uiout->is_mi_like_p ())
-			       ? 5 : 4,
+	table_emitter.emplace (uiout, show_global_ids ? 5 : 4,
 			       n_threads, "threads");
 
 	uiout->table_header (1, ui_left, "current", "");
-
-	if (!uiout->is_mi_like_p ())
-	  uiout->table_header (4, ui_left, "id-in-tg", "Id");
-	if (show_global_ids || uiout->is_mi_like_p ())
+	uiout->table_header (4, ui_left, "id-in-tg", "Id");
+	if (show_global_ids)
 	  uiout->table_header (4, ui_left, "id", "GId");
 	uiout->table_header (17, ui_left, "target-id", "Target Id");
 	uiout->table_header (1, ui_left, "frame", "Frame");
@@ -1311,10 +1307,9 @@ print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
 	      uiout->field_string ("current", "*");
 	    else
 	      uiout->field_skip ("current");
-	  }
 
-	if (!uiout->is_mi_like_p ())
-	  uiout->field_string ("id-in-tg", print_thread_id (tp));
+	    uiout->field_string ("id-in-tg", print_thread_id (tp));
+	  }
 
 	if (show_global_ids || uiout->is_mi_like_p ())
 	  uiout->field_int ("id", tp->global_num);
