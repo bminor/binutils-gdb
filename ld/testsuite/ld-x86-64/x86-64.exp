@@ -369,6 +369,14 @@ run_dump_test "property-x86-shstk5-x32"
 run_dump_test "pr21884"
 run_dump_test "pr21884-nacl"
 run_dump_test "pr22071"
+run_dump_test "pr22115-1a"
+run_dump_test "pr22115-1a-x32"
+run_dump_test "pr22115-1b"
+run_dump_test "pr22115-1b-x32"
+run_dump_test "pr22115-1c"
+run_dump_test "pr22115-1c-x32"
+run_dump_test "pr22115-1d"
+run_dump_test "pr22115-1d-x32"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return

@@ -1,3 +1,23 @@
+2017-09-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22115
+	* ld-i386/i386.exp: Run PR ld/22115 tests,
+	* ld/testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr22115-1.s: New file.
+	* testsuite/ld-i386/pr22115-1a.d: Likewise.
+	* testsuite/ld-i386/pr22115-1b.d: Likewise.
+	* testsuite/ld-i386/pr22115-1c.d: Likewise.
+	* testsuite/ld-i386/pr22115-1d.d: Likewise.
+	* testsuite/ld-x86-64/pr22115-1.s: Likewise.
+	* testsuite/ld-x86-64/pr22115-1a-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr22115-1a.d: Likewise.
+	* testsuite/ld-x86-64/pr22115-1b-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr22115-1b.d: Likewise.
+	* testsuite/ld-x86-64/pr22115-1c-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr22115-1c.d: Likewise.
+	* testsuite/ld-x86-64/pr22115-1d-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr22115-1d.d: Likewise.
+
 2017-09-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/pr19609-2a.d: Updated.

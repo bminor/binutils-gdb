@@ -108,6 +108,9 @@ struct elf_x86_link_hash_entry
    */
   unsigned int local_ref : 2;
 
+  /* TRUE if symbol is defined by linker.  */
+  unsigned int linker_def : 1;
+
   /* Terue if symbol is referenced by R_386_GOTOFF relocation.  This is
      only used by i386.  */
   unsigned int gotoff_ref : 1;

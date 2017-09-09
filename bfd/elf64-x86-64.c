@@ -1537,11 +1537,15 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	 GOTPCRELX relocations since we need to modify REX byte.
 	 It is OK convert mov with R_X86_64_GOTPCREL to
 	 R_X86_64_PC32.  */
+      bfd_boolean local_ref;
+      struct elf_x86_link_hash_entry *eh = elf_x86_hash_entry (h);
+
+      /* NB: Also set linker_def via SYMBOL_REFERENCES_LOCAL_P.  */
+      local_ref = SYMBOL_REFERENCES_LOCAL_P (link_info, h);
       if ((relocx || opcode == 0x8b)
-	  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (link_info,
-					      X86_64_ELF_DATA,
-					      TRUE,
-					      elf_x86_hash_entry (h)))
+	  && (h->root.type == bfd_link_hash_undefweak
+	      && !eh->linker_def
+	      && local_ref))
 	{
 	  if (opcode == 0xff)
 	    {
@@ -1568,11 +1572,12 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
       /* Avoid optimizing GOTPCREL relocations againt _DYNAMIC since
 	 ld.so may use its link-time address.  */
       else if (h->start_stop
+	       || eh->linker_def
 	       || ((h->def_regular
 		    || h->root.type == bfd_link_hash_defined
 		    || h->root.type == bfd_link_hash_defweak)
 		   && h != htab->elf.hdynamic
-		   && SYMBOL_REFERENCES_LOCAL_P (link_info, h)))
+		   && local_ref))
 	{
 	  /* bfd_link_hash_new or bfd_link_hash_undefined is
 	     set by an assignment in a linker script in
@@ -1580,6 +1585,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	     on __start_SECNAME/__stop_SECNAME which mark section
 	     SECNAME.  */
 	  if (h->start_stop
+	      || eh->linker_def
 	      || (h->def_regular
 		  && (h->root.type == bfd_link_hash_new
 		      || h->root.type == bfd_link_hash_undefined
