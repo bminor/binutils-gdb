@@ -66,11 +66,8 @@
 #define HLE_PREFIX	REP_PREFIX
 #define BND_PREFIX	REP_PREFIX
 #define LOCK_PREFIX	5
-/* Only one of NOTRACK_PREFIX and SEG_PREFIX can be used at the same
-   time.  */
-#define NOTRACK_PREFIX	6
-#define REX_PREFIX	7       /* must come last.  */
-#define MAX_PREFIXES	8	/* max prefixes per opcode */
+#define REX_PREFIX	6       /* must come last.  */
+#define MAX_PREFIXES	7	/* max prefixes per opcode */
 
 /* we define the syntax here (modulo base,index,scale syntax) */
 #define REGISTER_PREFIX '%'
@@ -3978,42 +3975,24 @@ parse_insn (char *line, char *mnemonic)
 	  else
 	    {
 	      /* Add prefix, checking for repeated prefixes.  */
-	      enum PREFIX_GROUP p
-		= add_prefix (current_templates->start->base_opcode);
-	      if (p == PREFIX_DS
-		  && current_templates->start->cpu_flags.bitfield.cpucet)
+	      switch (add_prefix (current_templates->start->base_opcode))
 		{
-		  i.notrack_prefix = current_templates->start->name;
-		  /* Move NOTRACK_PREFIX_OPCODE to NOTRACK_PREFIX slot so
-		     that it is placed before others.  */
-		  i.prefix[SEG_PREFIX] = 0;
-		  i.prefix[NOTRACK_PREFIX] = NOTRACK_PREFIX_OPCODE;
-		}
-	      else
-		{
-		  switch (p)
-		    {
-		    case PREFIX_EXIST:
-		      return NULL;
-		    case PREFIX_REP:
-		      if (current_templates->start->cpu_flags.bitfield.cpuhle)
-			i.hle_prefix = current_templates->start->name;
-		      else if (current_templates->start->cpu_flags.bitfield.cpumpx)
-			i.bnd_prefix = current_templates->start->name;
-		      else
-			i.rep_prefix = current_templates->start->name;
-		      break;
-		    default:
-		      break;
-		    }
-
-		  if (i.notrack_prefix != NULL)
-		    {
-		      /* There must be no other prefixes after NOTRACK
-			 prefix.  */
-		      as_bad (_("expecting no other prefixes after `notrack'"));
-		      return NULL;
-		    }
+		case PREFIX_EXIST:
+		  return NULL;
+		case PREFIX_DS:
+		  if (current_templates->start->cpu_flags.bitfield.cpucet)
+		    i.notrack_prefix = current_templates->start->name;
+		  break;
+		case PREFIX_REP:
+		  if (current_templates->start->cpu_flags.bitfield.cpuhle)
+		    i.hle_prefix = current_templates->start->name;
+		  else if (current_templates->start->cpu_flags.bitfield.cpumpx)
+		    i.bnd_prefix = current_templates->start->name;
+		  else
+		    i.rep_prefix = current_templates->start->name;
+		  break;
+		default:
+		  break;
 		}
 	    }
 	  /* Skip past PREFIX_SEPARATOR and reset token_start.  */

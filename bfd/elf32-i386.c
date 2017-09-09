@@ -1229,6 +1229,8 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
   unsigned int r_type;
   unsigned int r_symndx;
   bfd_vma roff = irel->r_offset;
+  bfd_boolean local_ref;
+  struct elf_x86_link_hash_entry *eh;
 
   if (roff < 2)
     return TRUE;
@@ -1276,6 +1278,8 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
      register.  */
   to_reloc_32 = !is_pic || baseless;
 
+  eh = elf_x86_hash_entry (h);
+
   /* Try to convert R_386_GOT32X.  Get the symbol referred to by the
      reloc.  */
   if (h == NULL)
@@ -1290,10 +1294,14 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 	goto convert_load;
     }
 
+  /* NB: Also set linker_def via SYMBOL_REFERENCES_LOCAL_P.  */
+  local_ref = SYMBOL_REFERENCES_LOCAL_P (link_info, h);
+
   /* Undefined weak symbol is only bound locally in executable
      and its reference is resolved as 0.  */
-  if (UNDEFINED_WEAK_RESOLVED_TO_ZERO (link_info, I386_ELF_DATA, TRUE,
-				       elf_x86_hash_entry (h)))
+  if (h->root.type == bfd_link_hash_undefweak
+      && !eh->linker_def
+      && local_ref)
     {
       if (opcode == 0xff)
 	{
@@ -1316,16 +1324,13 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
       /* We have "call/jmp *foo@GOT[(%reg)]".  */
       if ((h->root.type == bfd_link_hash_defined
 	   || h->root.type == bfd_link_hash_defweak)
-	  && SYMBOL_REFERENCES_LOCAL_P (link_info, h))
+	  && local_ref)
 	{
 	  /* The function is locally defined.   */
 convert_branch:
 	  /* Convert R_386_GOT32X to R_386_PC32.  */
 	  if (modrm == 0x15 || (modrm & 0xf8) == 0x90)
 	    {
-	      struct elf_x86_link_hash_entry *eh
-		= (struct elf_x86_link_hash_entry *) h;
-
 	      /* Convert to "nop call foo".  ADDR_PREFIX_OPCODE
 		 is a nop prefix.  */
 	      modrm = 0xe8;
@@ -1381,10 +1386,11 @@ convert_branch:
 	 bfd_elf_record_link_assignment.  start_stop is set on
 	 __start_SECNAME/__stop_SECNAME which mark section SECNAME.  */
       if (h->start_stop
+	  || eh->linker_def
 	  || ((h->def_regular
 	       || h->root.type == bfd_link_hash_defined
 	       || h->root.type == bfd_link_hash_defweak)
-	      && SYMBOL_REFERENCES_LOCAL_P (link_info, h)))
+	      && local_ref))
 	{
 convert_load:
 	  if (opcode == 0x8b)
@@ -2460,10 +2466,7 @@ do_ifunc_pointer:
 	}
 
       resolved_to_zero = (eh != NULL
-			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
-							      I386_ELF_DATA,
-							      eh->has_got_reloc,
-							      eh));
+			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh));
 
       switch (r_type)
 	{
@@ -3617,9 +3620,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
   /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
      resolved undefined weak symbols in executable so that their
      references have value 0 at run-time.  */
-  local_undefweak = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, I386_ELF_DATA,
-						     eh->has_got_reloc,
-						     eh);
+  local_undefweak = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
 
   if (h->plt.offset != (bfd_vma) -1)
     {

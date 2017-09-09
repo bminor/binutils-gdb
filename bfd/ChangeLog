@@ -1,3 +1,34 @@
+2017-09-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Update usage of
+	UNDEFINED_WEAK_RESOLVED_TO_ZERO.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+	(elf_x86_64_finish_dynamic_symbol): Likewise.
+	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Likewise.
+	(_bfd_x86_elf_fixup_symbol): Likewise.
+
+2017-09-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.c (_bfd_x86_elf_link_symbol_references_local): Don't
+	check has_non_got_reloc.
+
+2017-09-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22115
+	* elf32-i386.c (elf_i386_convert_load_reloc): Check linker_def.
+	Don't use UNDEFINED_WEAK_RESOLVED_TO_ZERO.
+	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Check
+	linker_def.  Don't use UNDEFINED_WEAK_RESOLVED_TO_ZERO.
+	* elfxx-x86.c (_bfd_x86_elf_link_check_relocs): Set local_ref
+	and linker_def on __ehdr_start if it is referenced and not
+	defined.
+	(_bfd_x86_elf_link_symbol_references_local): Also set local_ref
+	and return TRUE when building executable, if a symbol has
+	non-GOT/non-PLT relocations in text section or there is no
+	dynamic linker.
+	* elfxx-x86.h (elf_x86_link_hash_entry): Add linker_def.
+
 2017-09-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-x86.h: Update comments.

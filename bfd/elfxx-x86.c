@@ -107,10 +107,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h,
 
   plt_entry_size = htab->plt.plt_entry_size;
 
-  resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
-						      bed->target_id,
-						      eh->has_got_reloc,
-						      eh);
+  resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
 
   /* Clear the reference count of function pointer relocations if
      symbol isn't a normal function.  */
@@ -845,12 +842,28 @@ _bfd_x86_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
       htab = elf_x86_hash_table (info, bed->target_id);
       if (htab)
 	{
-	  struct elf_link_hash_entry *h
-	    = elf_link_hash_lookup (elf_hash_table (info),
+	  struct elf_link_hash_entry *h;
+
+	  h = elf_link_hash_lookup (elf_hash_table (info),
 				    htab->tls_get_addr,
 				    FALSE, FALSE, FALSE);
 	  if (h != NULL)
-	    ((struct elf_x86_link_hash_entry *) h)->tls_get_addr = 1;
+	    elf_x86_hash_entry (h)->tls_get_addr = 1;
+
+	  /* "__ehdr_start" will be defined by linker as a hidden symbol
+	     later if it is referenced and not defined.  */
+	  h = elf_link_hash_lookup (elf_hash_table (info),
+				    "__ehdr_start",
+				    FALSE, FALSE, FALSE);
+	  if (h != NULL
+	      && (h->root.type == bfd_link_hash_new
+		  || h->root.type == bfd_link_hash_undefined
+		  || h->root.type == bfd_link_hash_undefweak
+		  || h->root.type == bfd_link_hash_common))
+	    {
+	      elf_x86_hash_entry (h)->local_ref = 2;
+	      elf_x86_hash_entry (h)->linker_def = 1;
+	    }
 	}
     }
 
@@ -1430,19 +1443,12 @@ bfd_boolean
 _bfd_x86_elf_fixup_symbol (struct bfd_link_info *info,
 			   struct elf_link_hash_entry *h)
 {
-  if (h->dynindx != -1)
+  if (h->dynindx != -1
+      && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, elf_x86_hash_entry (h)))
     {
-      const struct elf_backend_data *bed
-	= get_elf_backend_data (info->output_bfd);
-      if (UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
-					   bed->target_id,
-					   elf_x86_hash_entry (h)->has_got_reloc,
-					   elf_x86_hash_entry (h)))
-	{
-	  h->dynindx = -1;
-	  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
-				  h->dynstr_index);
-	}
+      h->dynindx = -1;
+      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
+			      h->dynstr_index);
     }
   return TRUE;
 }
@@ -1671,8 +1677,9 @@ bfd_boolean
 _bfd_x86_elf_link_symbol_references_local (struct bfd_link_info *info,
 					   struct elf_link_hash_entry *h)
 {
-  struct elf_x86_link_hash_entry *eh
-    = (struct elf_x86_link_hash_entry *) h;
+  struct elf_x86_link_hash_entry *eh = elf_x86_hash_entry (h);
+  struct elf_x86_link_hash_table *htab
+    = (struct elf_x86_link_hash_table *) info->hash;
 
   if (eh->local_ref > 1)
     return TRUE;
@@ -1681,13 +1688,18 @@ _bfd_x86_elf_link_symbol_references_local (struct bfd_link_info *info,
     return FALSE;
 
   /* Unversioned symbols defined in regular objects can be forced local
-     by linker version script.  A weak undefined symbol can fored local
-     if it has non-default visibility or "-z nodynamic-undefined-weak"
-     is used.  */
+     by linker version script.  A weak undefined symbol is forced local
+     if
+     1. It has non-default visibility.  Or
+     2. When building executable, there is no dynamic linker.  Or
+     3. or "-z nodynamic-undefined-weak" is used.
+   */
   if (SYMBOL_REFERENCES_LOCAL (info, h)
-      || ((ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-	   || info->dynamic_undefined_weak == 0)
-	  && h->root.type == bfd_link_hash_undefweak)
+      || (h->root.type == bfd_link_hash_undefweak
+	  && (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || (bfd_link_executable (info)
+		  && htab->interp == NULL)
+	      || info->dynamic_undefined_weak == 0))
       || ((h->def_regular || ELF_COMMON_DEF_P (h))
 	  && h->versioned == unversioned
 	  && info->version_info != NULL

@@ -3169,7 +3169,6 @@ static int last_data_prefix;
 static int last_addr_prefix;
 static int last_rex_prefix;
 static int last_seg_prefix;
-static int last_active_prefix;
 static int fwait_prefix;
 /* The active segment register prefix.  */
 static int active_seg_prefix;
@@ -12303,7 +12302,6 @@ ckprefix (void)
   last_addr_prefix = -1;
   last_rex_prefix = -1;
   last_seg_prefix = -1;
-  last_active_prefix = -1;
   fwait_prefix = -1;
   active_seg_prefix = 0;
   for (i = 0; i < (int) ARRAY_SIZE (all_prefixes); i++)
@@ -12416,10 +12414,7 @@ ckprefix (void)
 	  return 1;
 	}
       if (*codep != FWAIT_OPCODE)
-	{
-	  last_active_prefix = i;
-	  all_prefixes[i++] = *codep;
-	}
+	all_prefixes[i++] = *codep;
       rex = newrex;
       codep++;
       length++;
@@ -16820,17 +16815,8 @@ NOTRACK_Fixup (int bytemode ATTRIBUTE_UNUSED,
   if (active_seg_prefix == PREFIX_DS
       && (address_mode != mode_64bit || last_data_prefix < 0))
     {
-      /* NOTRACK prefix is only valid on indirect branch instructions
-         and it must be the last prefix before REX prefix and opcode.
+      /* NOTRACK prefix is only valid on indirect branch instructions.
 	 NB: DATA prefix is unsupported for Intel64.  */
-      if (last_active_prefix >= 0)
-	{
-	  int notrack_prefix = last_active_prefix;
-	  if (last_rex_prefix == last_active_prefix)
-	    notrack_prefix--;
-	  if (all_prefixes[notrack_prefix] != NOTRACK_PREFIX_OPCODE)
-	    return;
-	}
       active_seg_prefix = 0;
       all_prefixes[last_seg_prefix] = NOTRACK_PREFIX;
     }
