@@ -1701,15 +1701,14 @@ _bfd_x86_elf_link_symbol_references_local (struct bfd_link_info *info,
      by linker version script.  A weak undefined symbol is forced local
      if
      1. It has non-default visibility.  Or
-     2. When building executable, it has non-GOT/non-PLT relocations
-	in text section or there is no dynamic linker.  Or
+     2. When building executable, there is no dynamic linker.  Or
      3. or "-z nodynamic-undefined-weak" is used.
    */
   if (SYMBOL_REFERENCES_LOCAL (info, h)
       || (h->root.type == bfd_link_hash_undefweak
 	  && (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
 	      || (bfd_link_executable (info)
-		  && (htab->interp == NULL || eh->has_non_got_reloc))
+		  && htab->interp == NULL)
 	      || info->dynamic_undefined_weak == 0))
       || ((h->def_regular || ELF_COMMON_DEF_P (h))
 	  && h->versioned == unversioned

@@ -1,5 +1,10 @@
 2017-09-09  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-x86.c (_bfd_x86_elf_link_symbol_references_local): Don't
+	check has_non_got_reloc.
+
+2017-09-09  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/22115
 	* elf32-i386.c (elf_i386_convert_load_reloc): Check linker_def.
 	Don't use UNDEFINED_WEAK_RESOLVED_TO_ZERO.
