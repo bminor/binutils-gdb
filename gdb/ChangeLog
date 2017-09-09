@@ -1,5 +1,16 @@
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (is_known_support_routine): Update.
+	(ada_unhandled_exception_name_addr_from_raise): Update.
+	* guile/scm-frame.c (gdbscm_frame_name): Update.
+	* python/py-frame.c (frapy_name): Update.
+	(frapy_function): Update.
+	* stack.h (find_frame_funname): Update.
+	* stack.c (find_frame_funname): Return unique_xmalloc_ptr.
+	(print_frame): Update.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
 	* findcmd.c (put_bits): Take a gdb::byte_vector.
 	(parse_find_args): Return gdb::byte_vector.  "args" now const.
 	Remove "pattern_bufp" and "pattern_lenp" parameters.  Remove

@@ -1032,16 +1032,16 @@ get_last_displayed_sal ()
 }
 
 
-/* Attempt to obtain the FUNNAME, FUNLANG and optionally FUNCP of the function
-   corresponding to FRAME.  FUNNAME needs to be freed by the caller.  */
+/* Attempt to obtain the name, FUNLANG and optionally FUNCP of the function
+   corresponding to FRAME.  */
 
-void
-find_frame_funname (struct frame_info *frame, char **funname,
-		    enum language *funlang, struct symbol **funcp)
+gdb::unique_xmalloc_ptr<char>
+find_frame_funname (struct frame_info *frame, enum language *funlang,
+		    struct symbol **funcp)
 {
   struct symbol *func;
+  gdb::unique_xmalloc_ptr<char> funname;
 
-  *funname = NULL;
   *funlang = language_unknown;
   if (funcp)
     *funcp = NULL;
@@ -1084,7 +1084,7 @@ find_frame_funname (struct frame_info *frame, char **funname,
 	  /* We also don't know anything about the function besides
 	     its address and name.  */
 	  func = 0;
-	  *funname = xstrdup (MSYMBOL_PRINT_NAME (msymbol.minsym));
+	  funname.reset (xstrdup (MSYMBOL_PRINT_NAME (msymbol.minsym)));
 	  *funlang = MSYMBOL_LANGUAGE (msymbol.minsym);
 	}
       else
@@ -1104,14 +1104,13 @@ find_frame_funname (struct frame_info *frame, char **funname,
 	      char *func_only = cp_remove_params (print_name);
 
 	      if (func_only)
-		*funname = func_only;
+		funname.reset (func_only);
 	    }
 
-	  /* If we didn't hit the C++ case above, set *funname here.
-	     This approach is taken to avoid having to install a
-	     cleanup in case cp_remove_params can throw.  */
-	  if (*funname == NULL)
-	    *funname = xstrdup (print_name);
+	  /* If we didn't hit the C++ case above, set *funname
+	     here.  */
+	  if (funname == NULL)
+	    funname.reset (xstrdup (print_name));
 	}
     }
   else
@@ -1120,15 +1119,17 @@ find_frame_funname (struct frame_info *frame, char **funname,
       CORE_ADDR pc;
 
       if (!get_frame_address_in_block_if_available (frame, &pc))
-	return;
+	return funname;
 
       msymbol = lookup_minimal_symbol_by_pc (pc);
       if (msymbol.minsym != NULL)
 	{
-	  *funname = xstrdup (MSYMBOL_PRINT_NAME (msymbol.minsym));
+	  funname.reset (xstrdup (MSYMBOL_PRINT_NAME (msymbol.minsym)));
 	  *funlang = MSYMBOL_LANGUAGE (msymbol.minsym);
 	}
     }
+
+  return funname;
 }
 
 static void
@@ -1138,9 +1139,7 @@ print_frame (struct frame_info *frame, int print_level,
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct ui_out *uiout = current_uiout;
-  char *funname = NULL;
   enum language funlang = language_unknown;
-  struct cleanup *old_chain;
   struct value_print_options opts;
   struct symbol *func;
   CORE_ADDR pc = 0;
@@ -1148,9 +1147,8 @@ print_frame (struct frame_info *frame, int print_level,
 
   pc_p = get_frame_pc_if_available (frame, &pc);
 
-
-  find_frame_funname (frame, &funname, &funlang, &func);
-  old_chain = make_cleanup (xfree, funname);
+  gdb::unique_xmalloc_ptr<char> funname
+    = find_frame_funname (frame, &funlang, &func);
 
   annotate_frame_begin (print_level ? frame_relative_level (frame) : 0,
 			gdbarch, pc);
@@ -1181,7 +1179,7 @@ print_frame (struct frame_info *frame, int print_level,
     annotate_frame_function_name ();
 
     string_file stb;
-    fprintf_symbol_filtered (&stb, funname ? funname : "??",
+    fprintf_symbol_filtered (&stb, funname ? funname.get () : "??",
 			     funlang, DMGL_ANSI);
     uiout->field_stream ("func", stb);
     uiout->wrap_hint ("   ");
@@ -1257,7 +1255,6 @@ print_frame (struct frame_info *frame, int print_level,
   }
 
   uiout->text ("\n");
-  do_cleanups (old_chain);
 }
 
 

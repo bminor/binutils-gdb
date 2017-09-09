@@ -11979,7 +11979,6 @@ ada_exception_support_info_sniffer (void)
 static int
 is_known_support_routine (struct frame_info *frame)
 {
-  char *func_name;
   enum language func_lang;
   int i;
   const char *fullname;
@@ -12018,21 +12017,18 @@ is_known_support_routine (struct frame_info *frame)
 
   /* Check whether the function is a GNAT-generated entity.  */
 
-  find_frame_funname (frame, &func_name, &func_lang, NULL);
+  gdb::unique_xmalloc_ptr<char> func_name
+    = find_frame_funname (frame, &func_lang, NULL);
   if (func_name == NULL)
     return 1;
 
   for (i = 0; known_auxiliary_function_name_patterns[i] != NULL; i += 1)
     {
       re_comp (known_auxiliary_function_name_patterns[i]);
-      if (re_exec (func_name))
-	{
-	  xfree (func_name);
-	  return 1;
-	}
+      if (re_exec (func_name.get ()))
+	return 1;
     }
 
-  xfree (func_name);
   return 0;
 }
 
@@ -12076,7 +12072,6 @@ ada_unhandled_exception_name_addr_from_raise (void)
   int frame_level;
   struct frame_info *fi;
   struct ada_inferior_data *data = get_ada_inferior_data (current_inferior ());
-  struct cleanup *old_chain;
 
   /* To determine the name of this exception, we need to select
      the frame corresponding to RAISE_SYM_NAME.  This frame is
@@ -12087,24 +12082,20 @@ ada_unhandled_exception_name_addr_from_raise (void)
     if (fi != NULL)
       fi = get_prev_frame (fi); 
 
-  old_chain = make_cleanup (null_cleanup, NULL);
   while (fi != NULL)
     {
-      char *func_name;
       enum language func_lang;
 
-      find_frame_funname (fi, &func_name, &func_lang, NULL);
+      gdb::unique_xmalloc_ptr<char> func_name
+	= find_frame_funname (fi, &func_lang, NULL);
       if (func_name != NULL)
 	{
-	  make_cleanup (xfree, func_name);
-
-          if (strcmp (func_name,
+          if (strcmp (func_name.get (),
 		      data->exception_info->catch_exception_sym) == 0)
 	    break; /* We found the frame we were looking for...  */
 	  fi = get_prev_frame (fi);
 	}
     }
-  do_cleanups (old_chain);
 
   if (fi == NULL)
     return 0;
