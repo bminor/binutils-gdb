@@ -1,5 +1,13 @@
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
+	* findcmd.c (put_bits): Take a gdb::byte_vector.
+	(parse_find_args): Return gdb::byte_vector.  "args" now const.
+	Remove "pattern_bufp" and "pattern_lenp" parameters.  Remove
+	cleanups.
+	(find_command): Update.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-script.c (class scoped_restore_hook_in): New.
 	(clear_hook_in_cleanup): Remove.
 	(execute_cmd_pre_hook, execute_cmd_post_hook): Use
