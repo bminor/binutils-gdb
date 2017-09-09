@@ -7572,10 +7572,12 @@ off this feature.
 @item --plt-align
 @itemx --no-plt-align
 Use these options to control whether individual PLT call stubs are
-padded so that they don't cross a 32-byte boundary, or to the
-specified power of two boundary when using @code{--plt-align=}.  Note
-that this isn't alignment in the usual sense.  By default PLT call
-stubs are packed tightly.
+aligned to a 32-byte boundary, or to the specified power of two
+boundary when using @code{--plt-align=}.  A negative value may be
+specified to pad PLT call stubs so that they do not cross the
+specified power of two boundary (or the minimum number of boundaries
+if a PLT stub is so large that it must cross a boundary).  By default
+PLT call stubs are aligned to 32-byte boundaries.
 
 @cindex PowerPC64 PLT call stub static chain
 @kindex --plt-static-chain
