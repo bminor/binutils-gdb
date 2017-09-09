@@ -2766,10 +2766,7 @@ do_ifunc_pointer:
 	}
 
       resolved_to_zero = (eh != NULL
-			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
-							      X86_64_ELF_DATA,
-							      eh->has_got_reloc,
-							      eh));
+			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh));
 
       /* When generating a shared object, the relocations handled here are
 	 copied into the output file to be resolved at run time.  */
@@ -3985,10 +3982,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
   /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
      resolved undefined weak symbols in executable so that their
      references have value 0 at run-time.  */
-  local_undefweak = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
-						     X86_64_ELF_DATA,
-						     eh->has_got_reloc,
-						     eh);
+  local_undefweak = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
 
   if (h->plt.offset != (bfd_vma) -1)
     {

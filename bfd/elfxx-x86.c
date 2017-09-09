@@ -107,10 +107,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h,
 
   plt_entry_size = htab->plt.plt_entry_size;
 
-  resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
-						      bed->target_id,
-						      eh->has_got_reloc,
-						      eh);
+  resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
 
   /* Clear the reference count of function pointer relocations if
      symbol isn't a normal function.  */
@@ -1446,19 +1443,12 @@ bfd_boolean
 _bfd_x86_elf_fixup_symbol (struct bfd_link_info *info,
 			   struct elf_link_hash_entry *h)
 {
-  if (h->dynindx != -1)
+  if (h->dynindx != -1
+      && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, elf_x86_hash_entry (h)))
     {
-      const struct elf_backend_data *bed
-	= get_elf_backend_data (info->output_bfd);
-      if (UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
-					   bed->target_id,
-					   elf_x86_hash_entry (h)->has_got_reloc,
-					   elf_x86_hash_entry (h)))
-	{
-	  h->dynindx = -1;
-	  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
-				  h->dynstr_index);
-	}
+      h->dynindx = -1;
+      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
+			      h->dynstr_index);
     }
   return TRUE;
 }

@@ -56,14 +56,12 @@
    2. Has no GOT/PLT relocation.
    Local undefined weak symbol is always resolved to 0.
  */
-#define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, ID, GOT_RELOC, EH) \
+#define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, EH) \
   ((EH)->elf.root.type == bfd_link_hash_undefweak		 \
    && (SYMBOL_REFERENCES_LOCAL_P ((INFO), &(EH)->elf)		 \
        || (bfd_link_executable (INFO)				 \
-	   && (elf_x86_hash_table ((INFO), (ID))->interp == NULL \
-	       || !(GOT_RELOC)					 \
-	       || (EH)->has_non_got_reloc			 \
-	       || !(INFO)->dynamic_undefined_weak))))
+	   && (!(EH)->has_got_reloc				 \
+	       || (EH)->has_non_got_reloc))))
 
 /* Should copy relocation be generated for a symbol.  Don't generate
    copy relocation against a protected symbol defined in a shared
