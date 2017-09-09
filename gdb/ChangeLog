@@ -1,5 +1,9 @@
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
+	* ctf.c (ctf_start): Use std::string.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (is_known_support_routine): Update.
 	(ada_unhandled_exception_name_addr_from_raise): Update.
 	* guile/scm-frame.c (gdbscm_frame_name): Update.

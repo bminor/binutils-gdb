@@ -311,8 +311,6 @@ ctf_target_save (struct trace_file_writer *self,
 static void
 ctf_start (struct trace_file_writer *self, const char *dirname)
 {
-  char *file_name;
-  struct cleanup *old_chain;
   struct ctf_trace_file_writer *writer
     = (struct ctf_trace_file_writer *) self;
   int i;
@@ -325,24 +323,20 @@ ctf_start (struct trace_file_writer *self, const char *dirname)
 
   memset (&writer->tcs, '\0', sizeof (writer->tcs));
 
-  file_name = xstrprintf ("%s/%s", dirname, CTF_METADATA_NAME);
-  old_chain = make_cleanup (xfree, file_name);
+  std::string file_name = string_printf ("%s/%s", dirname, CTF_METADATA_NAME);
 
-  writer->tcs.metadata_fd = fopen (file_name, "w");
+  writer->tcs.metadata_fd = fopen (file_name.c_str (), "w");
   if (writer->tcs.metadata_fd == NULL)
     error (_("Unable to open file '%s' for saving trace data (%s)"),
-	   file_name, safe_strerror (errno));
-  do_cleanups (old_chain);
+	   file_name.c_str (), safe_strerror (errno));
 
   ctf_save_metadata_header (&writer->tcs);
 
-  file_name = xstrprintf ("%s/%s", dirname, CTF_DATASTREAM_NAME);
-  old_chain = make_cleanup (xfree, file_name);
-  writer->tcs.datastream_fd = fopen (file_name, "w");
+  file_name = string_printf ("%s/%s", dirname, CTF_DATASTREAM_NAME);
+  writer->tcs.datastream_fd = fopen (file_name.c_str (), "w");
   if (writer->tcs.datastream_fd == NULL)
     error (_("Unable to open file '%s' for saving trace data (%s)"),
-	   file_name, safe_strerror (errno));
-  do_cleanups (old_chain);
+	   file_name.c_str (), safe_strerror (errno));
 }
 
 /* This is the implementation of trace_file_write_ops method
