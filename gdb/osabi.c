@@ -653,8 +653,6 @@ show_osabi (struct ui_file *file, int from_tty, struct cmd_list_element *c,
     fprintf_filtered (file, _("The default OS ABI is \"%s\".\n"),
 		      gdbarch_osabi_name (GDB_OSABI_DEFAULT));
 }
-
-extern initialize_file_ftype _initialize_gdb_osabi; /* -Wmissing-prototype */
 
 void
 _initialize_gdb_osabi (void)

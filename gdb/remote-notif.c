@@ -270,9 +270,6 @@ remote_notif_state_xfree (struct remote_notif_state *state)
   xfree (state);
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_notif;
-
 void
 _initialize_notif (void)
 {

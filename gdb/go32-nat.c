@@ -2058,9 +2058,6 @@ go32_info_dos_command (char *args, int from_tty)
   help_list (info_dos_cmdlist, "info dos ", class_info, gdb_stdout);
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_go32_nat;
-
 void
 _initialize_go32_nat (void)
 {

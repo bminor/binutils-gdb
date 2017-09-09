@@ -256,9 +256,6 @@ ia64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				      ia64_linux_stap_is_single_operand);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_ia64_linux_tdep;
-
 void
 _initialize_ia64_linux_tdep (void)
 {

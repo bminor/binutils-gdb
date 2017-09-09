@@ -1665,10 +1665,6 @@ show_max_user_call_depth (struct ui_file *file, int from_tty,
 		    value);
 }
 
-
-
-initialize_file_ftype _initialize_cli_cmds;
-
 void
 _initialize_cli_cmds (void)
 {

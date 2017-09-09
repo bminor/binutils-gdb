@@ -623,8 +623,6 @@ binary_append_command (char *cmd, int from_tty)
 	     gdb_stdout);
 }
 
-extern initialize_file_ftype _initialize_cli_dump; /* -Wmissing-prototypes */
-
 void
 _initialize_cli_dump (void)
 {

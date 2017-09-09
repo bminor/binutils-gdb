@@ -23,8 +23,6 @@
 #include "gdbcmd.h"
 #include "cli/cli-utils.h"
 
-extern void _initialize_serial (void);
-
 /* Is serial being debugged?  */
 
 static unsigned int global_serial_debug_p;

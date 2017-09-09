@@ -1628,9 +1628,6 @@ first_component_command (char *arg, int from_tty)
   printf_unfiltered ("%s\n", prefix);
 }
 
-extern initialize_file_ftype _initialize_cp_support; /* -Wmissing-prototypes */
-
-
 /* Implement "info vtbl".  */
 
 static void

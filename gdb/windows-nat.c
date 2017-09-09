@@ -2959,9 +2959,6 @@ windows_target (void)
   return t;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_windows_nat;
-
 void
 _initialize_windows_nat (void)
 {
@@ -3130,9 +3127,6 @@ windows_thread_alive (struct target_ops *ops, ptid_t ptid)
     ? FALSE : TRUE;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_check_for_gdb_ini;
-
 void
 _initialize_check_for_gdb_ini (void)
 {
@@ -3227,9 +3221,6 @@ bad_GetConsoleFontSize (HANDLE w, DWORD nFont)
   return size;
 }
  
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_loadable;
-
 /* Load any functions which may not be available in ancient versions
    of Windows.  */
 

@@ -92,8 +92,6 @@ static struct block_symbol
 /* See symtab.h.  */
 const struct block_symbol null_block_symbol = { NULL, NULL };
 
-extern initialize_file_ftype _initialize_symtab;
-
 /* Program space key for finding name and language of "main".  */
 
 static const struct program_space_data *main_progspace_key;

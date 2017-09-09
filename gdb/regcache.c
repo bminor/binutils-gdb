@@ -1736,8 +1736,6 @@ current_regcache_test (void)
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
 
-extern initialize_file_ftype _initialize_regcache; /* -Wmissing-prototype */
-
 void
 _initialize_regcache (void)
 {

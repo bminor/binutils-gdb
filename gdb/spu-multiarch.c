@@ -402,9 +402,6 @@ init_spu_ops (void)
   spu_ops.to_magic = OPS_MAGIC;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_spu_multiarch;
-
 void
 _initialize_spu_multiarch (void)
 {

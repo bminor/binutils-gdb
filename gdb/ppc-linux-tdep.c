@@ -1833,9 +1833,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
   ppc_init_linux_record_tdep (&ppc64_linux_record_tdep, 8);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_ppc_linux_tdep;
-
 void
 _initialize_ppc_linux_tdep (void)
 {

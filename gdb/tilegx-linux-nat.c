@@ -154,9 +154,6 @@ store_inferior_registers (struct target_ops *ops,
     perror_with_name (_("Couldn't write registers"));
 }
 
-
-extern initialize_file_ftype _initialize_tile_linux_nat;
-
 void
 _initialize_tile_linux_nat (void)
 {

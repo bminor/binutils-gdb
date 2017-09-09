@@ -3293,8 +3293,6 @@ elf_lookup_lib_symbol (struct objfile *objfile,
   return lookup_global_symbol_from_objfile (objfile, name, domain);
 }
 
-extern initialize_file_ftype _initialize_svr4_solib; /* -Wmissing-prototypes */
-
 void
 _initialize_svr4_solib (void)
 {

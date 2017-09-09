@@ -44,8 +44,6 @@
 #include "cli/cli-utils.h"
 #include "cli/cli-setshow.h"
 
-extern void _initialize_maint_cmds (void);
-
 static void maintenance_command (char *, int);
 
 static void maintenance_internal_error (char *args, int from_tty);

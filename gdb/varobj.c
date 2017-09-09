@@ -2638,8 +2638,7 @@ varobj_invalidate (void)
 {
   all_root_varobjs (varobj_invalidate_iter, NULL);
 }
-
-extern void _initialize_varobj (void);
+
 void
 _initialize_varobj (void)
 {

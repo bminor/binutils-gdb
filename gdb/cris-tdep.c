@@ -3866,8 +3866,6 @@ static struct core_fns cris_elf_core_fns =
   NULL                                  /* next */
 };
 
-extern initialize_file_ftype _initialize_cris_tdep; /* -Wmissing-prototypes */
-
 void
 _initialize_cris_tdep (void)
 {

@@ -2338,9 +2338,6 @@ darwin_supports_multi_process (struct target_ops *self)
   return 1;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_darwin_inferior;
-
 void
 _initialize_darwin_inferior (void)
 {

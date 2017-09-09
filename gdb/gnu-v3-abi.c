@@ -1358,8 +1358,6 @@ init_gnuv3_ops (void)
   gnu_v3_abi_ops.pass_by_reference = gnuv3_pass_by_reference;
 }
 
-extern initialize_file_ftype _initialize_gnu_v3_abi; /* -Wmissing-prototypes */
-
 void
 _initialize_gnu_v3_abi (void)
 {

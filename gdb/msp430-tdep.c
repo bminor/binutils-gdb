@@ -1021,9 +1021,6 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_msp430_tdep;
-
 /* Register the initialization routine.  */
 
 void

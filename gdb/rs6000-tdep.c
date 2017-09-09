@@ -6751,9 +6751,6 @@ ppc_insn_ds_field (unsigned int insn)
 
 /* Initialization code.  */
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_rs6000_tdep;
-
 void
 _initialize_rs6000_tdep (void)
 {

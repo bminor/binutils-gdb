@@ -106,10 +106,6 @@ mipsnbsd_store_inferior_registers (struct target_ops *ops,
 	perror_with_name (_("Couldn't write floating point status"));
     }
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_mipsnbsd_nat (void);
 
 void
 _initialize_mipsnbsd_nat (void)

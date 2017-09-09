@@ -24104,8 +24104,6 @@ show_check_physname (struct ui_file *file, int from_tty,
 		    value);
 }
 
-void _initialize_dwarf2_read (void);
-
 void
 _initialize_dwarf2_read (void)
 {

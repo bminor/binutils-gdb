@@ -48,10 +48,6 @@
 
 /* Definition of struct thread_info exported to gdbthread.h.  */
 
-/* Prototypes for exported functions.  */
-
-void _initialize_thread (void);
-
 /* Prototypes for local functions.  */
 
 struct thread_info *thread_list = NULL;

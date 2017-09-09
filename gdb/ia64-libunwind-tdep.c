@@ -592,9 +592,6 @@ libunwind_is_initialized (void)
   return libunwind_initialized;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_libunwind_frame (void);
-
 void
 _initialize_libunwind_frame (void)
 {

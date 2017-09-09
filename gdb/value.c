@@ -43,10 +43,6 @@
 #include <algorithm>
 #include "completer.h"
 
-/* Prototypes for exported functions.  */
-
-void _initialize_values (void);
-
 /* Definition of a user function.  */
 struct internal_function
 {

@@ -8984,8 +8984,6 @@ mips_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 		      mips_fpu_type_str (MIPS_FPU_TYPE (gdbarch)));
 }
 
-extern initialize_file_ftype _initialize_mips_tdep; /* -Wmissing-prototypes */
-
 void
 _initialize_mips_tdep (void)
 {

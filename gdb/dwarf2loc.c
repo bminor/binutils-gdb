@@ -4667,9 +4667,6 @@ const struct symbol_computed_ops dwarf2_loclist_funcs = {
   loclist_generate_c_location
 };
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_dwarf2loc;
-
 void
 _initialize_dwarf2loc (void)
 {

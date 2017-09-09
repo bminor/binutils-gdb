@@ -9589,8 +9589,6 @@ static void arm_record_test (void);
 }
 #endif
 
-extern initialize_file_ftype _initialize_arm_tdep; /* -Wmissing-prototypes */
-
 void
 _initialize_arm_tdep (void)
 {

@@ -95,8 +95,6 @@ static void set_schedlock_func (char *args, int from_tty,
 
 static int currently_stepping (struct thread_info *tp);
 
-void _initialize_infrun (void);
-
 void nullify_last_target_wait_ptid (void);
 
 static void insert_hp_step_resume_breakpoint_at_frame (struct frame_info *);

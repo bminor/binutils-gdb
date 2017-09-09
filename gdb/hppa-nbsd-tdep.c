@@ -205,10 +205,6 @@ hppanbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tramp_frame_prepend_unwinder (gdbarch, &hppanbsd_sigtramp_si4);
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_hppanbsd_tdep;
 
 void
 _initialize_hppanbsd_tdep (void)

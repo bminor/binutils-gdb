@@ -87,10 +87,6 @@ i386obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
   return 1;
 }
-
-
-/* Prevent warning from -Wmissing-prototypes.  */
-void _initialize_i386obsd_nat (void);
 
 void
 _initialize_i386obsd_nat (void)

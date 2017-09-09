@@ -13990,9 +13990,6 @@ extern const struct language_defn ada_language_defn = {
   LANG_MAGIC
 };
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_ada_language;
-
 /* Command-list for the "set/show ada" prefix command.  */
 static struct cmd_list_element *set_ada_list;
 static struct cmd_list_element *show_ada_list;

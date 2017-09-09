@@ -39,8 +39,6 @@
 
 #define RUSTSTYPE YYSTYPE
 
-extern initialize_file_ftype _initialize_rust_exp;
-
 struct rust_op;
 typedef std::vector<const struct rust_op *> rust_op_vector;
 

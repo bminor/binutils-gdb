@@ -1411,8 +1411,6 @@ mi_interp_factory (const char *name)
   return new mi_interp (name);
 }
 
-extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */
-
 void
 _initialize_mi_interp (void)
 {

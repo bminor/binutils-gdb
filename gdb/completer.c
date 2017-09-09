@@ -2775,8 +2775,6 @@ gdb_display_match_list (char **matches, int len, int max,
 	}
     }
 }
-
-extern initialize_file_ftype _initialize_completer; /* -Wmissing-prototypes */
 
 void
 _initialize_completer (void)

@@ -74,8 +74,6 @@ get_current_interp_info (void)
 
 /* The magic initialization routine for this module.  */
 
-void _initialize_interpreter (void);
-
 static struct interp *interp_lookup_existing (struct ui *ui,
 					      const char *name);
 

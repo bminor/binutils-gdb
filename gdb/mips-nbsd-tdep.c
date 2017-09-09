@@ -372,10 +372,6 @@ mipsnbsd_init_abi (struct gdbarch_info info,
 	       mipsnbsd_ilp32_fetch_link_map_offsets :
 	       mipsnbsd_lp64_fetch_link_map_offsets));
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_mipsnbsd_tdep;
 
 void
 _initialize_mipsnbsd_tdep (void)

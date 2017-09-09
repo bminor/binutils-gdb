@@ -317,9 +317,6 @@ find_command (char *args, int from_tty)
   do_cleanups (old_cleanups);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_mem_search;
-
 void
 _initialize_mem_search (void)
 {

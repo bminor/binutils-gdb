@@ -1716,10 +1716,6 @@ void
 proc_prettyprint_actionset (struct sigaction *actions, int verbose)
 {
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_proc_events (void);
 
 void
 _initialize_proc_events (void)

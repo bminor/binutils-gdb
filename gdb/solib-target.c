@@ -470,9 +470,6 @@ solib_target_in_dynsym_resolve_code (CORE_ADDR pc)
 
 struct target_so_ops solib_target_so_ops;
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_solib_target;
-
 void
 _initialize_solib_target (void)
 {

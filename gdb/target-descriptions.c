@@ -2389,9 +2389,6 @@ maintenance_check_xml_descriptions (char *dir, int from_tty)
 		   (long) selftests::xml_tdesc.size (), failed);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_target_descriptions;
-
 void
 _initialize_target_descriptions (void)
 {

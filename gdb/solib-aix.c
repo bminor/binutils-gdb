@@ -775,9 +775,6 @@ show_solib_aix_debug (struct ui_file *file, int from_tty,
 /* The target_so_ops for AIX targets.  */
 struct target_so_ops solib_aix_so_ops;
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_solib_aix;
-
 void
 _initialize_solib_aix (void)
 {

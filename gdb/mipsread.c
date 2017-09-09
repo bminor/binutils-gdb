@@ -413,9 +413,6 @@ static const struct sym_fns ecoff_sym_fns =
   &psym_functions
 };
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_mipsread (void);
-
 void
 _initialize_mipsread (void)
 {

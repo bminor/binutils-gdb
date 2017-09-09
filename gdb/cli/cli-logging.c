@@ -203,9 +203,6 @@ show_logging_command (char *args, int from_tty)
     printf_unfiltered (_("Output will be logged and displayed.\n"));
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_cli_logging;
-
 void
 _initialize_cli_logging (void)
 {

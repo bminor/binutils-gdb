@@ -217,8 +217,6 @@ demangle_command (char *args, int from_tty)
     error (_("Can't demangle \"%s\""), name);
 }
 
-extern initialize_file_ftype _initialize_demangler; /* -Wmissing-prototypes */
-
 void
 _initialize_demangler (void)
 {

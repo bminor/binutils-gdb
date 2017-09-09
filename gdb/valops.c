@@ -101,8 +101,6 @@ static void find_method_list (struct value **, const char *,
 			      VEC (xmethod_worker_ptr) **,
 			      struct type **, LONGEST *);
 
-void _initialize_valops (void);
-
 #if 0
 /* Flag for whether we want to abandon failed expression evals by
    default.  */

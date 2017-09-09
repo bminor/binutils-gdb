@@ -908,8 +908,6 @@ info_probes_dtrace_command (char *arg, int from_tty)
   info_probes_for_ops (arg, from_tty, &dtrace_probe_ops);
 }
 
-void _initialize_dtrace_probe (void);
-
 void
 _initialize_dtrace_probe (void)
 {

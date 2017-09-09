@@ -2756,11 +2756,9 @@ maint_agent_printf_command (char *exp, int from_tty)
   do_cleanups (old_chain);
   dont_repeat ();
 }
-
 
 /* Initialization code.  */
 
-void _initialize_ax_gdb (void);
 void
 _initialize_ax_gdb (void)
 {

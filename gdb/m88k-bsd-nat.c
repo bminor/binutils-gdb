@@ -94,10 +94,6 @@ m88kbsd_store_inferior_registers (struct target_ops *ops,
 	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't write registers"));
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_m88kbsd_nat (void);
 
 void
 _initialize_m88kbsd_nat (void)

@@ -1214,9 +1214,6 @@ init_sol_thread_ops (void)
   sol_thread_ops.to_magic = OPS_MAGIC;
 }
 
-/* Silence -Wmissing-prototypes.  */
-extern void _initialize_sol_thread (void);
-
 void
 _initialize_sol_thread (void)
 {

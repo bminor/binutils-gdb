@@ -207,9 +207,6 @@ memory_error_test (struct gdbarch *gdbarch)
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
 
-/* Suppress warning from -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_disasm_selftests;
-
 void
 _initialize_disasm_selftests (void)
 {

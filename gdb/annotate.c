@@ -30,8 +30,6 @@
 
 /* Prototypes for local functions.  */
 
-extern void _initialize_annotate (void);
-
 static void print_value_flags (struct type *);
 
 static void breakpoint_changed (struct breakpoint *b);

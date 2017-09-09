@@ -1996,9 +1996,6 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.arg7 = ARM_A1_REGNUM + 6;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_arm_linux_tdep;
-
 void
 _initialize_arm_linux_tdep (void)
 {

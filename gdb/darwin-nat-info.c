@@ -841,9 +841,6 @@ info_mach_exceptions_command (char *args, int from_tty)
     }
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_darwin_info_commands;
-
 void
 _initialize_darwin_info_commands (void)
 {

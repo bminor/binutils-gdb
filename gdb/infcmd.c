@@ -100,8 +100,6 @@ static void step_command (char *, int);
 
 static void run_command (char *, int);
 
-void _initialize_infcmd (void);
-
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution) error (_("The program is not being run."));
 

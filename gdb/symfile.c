@@ -116,8 +116,6 @@ static void info_ext_lang_command (char *args, int from_tty);
 
 static void symfile_find_segment_sections (struct objfile *objfile);
 
-void _initialize_symfile (void);
-
 /* List of all available sym_fns.  On gdb startup, each object file reader
    calls add_symtab_fns() to register information on each format it is
    prepared to read.  */

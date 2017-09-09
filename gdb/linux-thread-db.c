@@ -1696,9 +1696,6 @@ init_thread_db_ops (void)
   complete_target_initialization (&thread_db_ops);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_thread_db;
-
 void
 _initialize_thread_db (void)
 {

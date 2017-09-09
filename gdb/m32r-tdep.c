@@ -44,8 +44,6 @@
 
 /* Local functions */
 
-extern void _initialize_m32r_tdep (void);
-
 static CORE_ADDR
 m32r_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 {

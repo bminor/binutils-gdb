@@ -44,8 +44,6 @@
 
 /* Prototypes */
 
-extern void _initialize_remote_sim (void);
-
 static void init_callbacks (void);
 
 static void end_callbacks (void);

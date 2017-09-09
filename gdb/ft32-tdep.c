@@ -45,10 +45,6 @@
 
 #define RAM_BIAS  0x800000  /* Bias added to RAM addresses.  */
 
-/* Local functions.  */
-
-extern void _initialize_ft32_tdep (void);
-
 /* Use an invalid address -1 as 'not available' marker.  */
 enum { REG_UNAVAIL = (CORE_ADDR) (-1) };
 

@@ -342,9 +342,6 @@ builtin_d_type (struct gdbarch *gdbarch)
   return (const struct builtin_d_type *) gdbarch_data (gdbarch, d_type_data);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_d_language;
-
 void
 _initialize_d_language (void)
 {

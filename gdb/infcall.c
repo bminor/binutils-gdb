@@ -1412,10 +1412,6 @@ When the function is done executing, GDB will silently stop."),
   /* The above code errors out, so ...  */
   gdb_assert_not_reached ("... should not be here");
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_infcall (void);
 
 void
 _initialize_infcall (void)

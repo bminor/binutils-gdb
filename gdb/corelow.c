@@ -88,8 +88,6 @@ static void add_to_thread_list (bfd *, asection *, void *);
 
 static void init_core_ops (void);
 
-void _initialize_corelow (void);
-
 static struct target_ops core_ops;
 
 /* An arbitrary identifier for the core inferior.  */

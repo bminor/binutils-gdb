@@ -87,7 +87,6 @@ int running_result_record_printed = 1;
    command was issued.  */
 int mi_proceeded;
 
-extern void _initialize_mi_main (void);
 static void mi_cmd_execute (struct mi_parse *parse);
 
 static void mi_execute_cli_command (const char *cmd, int args_p,

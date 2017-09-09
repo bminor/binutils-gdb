@@ -465,9 +465,6 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				    sparc32_linux_gdb_signal_to_target);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_sparc_linux_tdep (void);
-
 void
 _initialize_sparc_linux_tdep (void)
 {

@@ -409,9 +409,6 @@ i386_gnu_dr_get_control (void)
 }
 #endif /* i386_DEBUG_STATE */
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_i386gnu_nat;
-
 void
 _initialize_i386gnu_nat (void)
 {

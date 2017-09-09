@@ -1052,9 +1052,6 @@ disassembler_options_completer (struct cmd_list_element *ignore,
 
 /* Initialization code.  */
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_disasm;
-
 void
 _initialize_disasm (void)
 {

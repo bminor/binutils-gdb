@@ -1533,8 +1533,6 @@ init_procfs_targets (void)
 
 #define OSTYPE_NTO 1
 
-extern initialize_file_ftype _initialize_procfs;
-
 void
 _initialize_procfs (void)
 {

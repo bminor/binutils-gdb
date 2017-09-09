@@ -5266,10 +5266,6 @@ proc_untrace_sysexit_cmd (char *args, int from_tty)
   proc_trace_syscalls (args, from_tty, PR_SYSEXIT, FLAG_RESET);
 }
 
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_procfs (void);
-
 void
 _initialize_procfs (void)
 {

@@ -185,8 +185,6 @@ static char *mem2hex (gdb_byte *, char *, int);
 static struct command_line *
   all_tracepoint_actions_and_cleanup (struct breakpoint *t);
 
-extern void _initialize_tracepoint (void);
-
 static struct trace_status trace_status;
 
 const char *stop_reason_names[] = {

@@ -1165,9 +1165,6 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_rx_tdep;
-
 /* Register the above initialization routine.  */
 
 void

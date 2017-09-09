@@ -37,8 +37,6 @@
 #include "readline/tilde.h"
 #include "progspace-and-thread.h"
 
-void _initialize_inferiors (void);
-
 /* Keep a registry of per-inferior data-pointers required by other GDB
    modules.  */
 

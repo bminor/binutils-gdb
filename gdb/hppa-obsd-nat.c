@@ -246,9 +246,6 @@ hppaobsd_store_registers (struct target_ops *ops,
     }
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_hppaobsd_nat (void);
-
 void
 _initialize_hppaobsd_nat (void)
 {

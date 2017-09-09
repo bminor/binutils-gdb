@@ -85,9 +85,6 @@ arm_netbsd_elf_init_abi (struct gdbarch_info info,
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_arm_netbsd_tdep;
-
 void
 _initialize_arm_netbsd_tdep (void)
 {

@@ -1283,8 +1283,6 @@ arm_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
   *child_state = *parent_state;
 }
 
-void _initialize_arm_linux_nat (void);
-
 void
 _initialize_arm_linux_nat (void)
 {

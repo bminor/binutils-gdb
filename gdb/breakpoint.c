@@ -551,8 +551,6 @@ gdb_evaluates_breakpoint_condition_p (void)
   return (mode == condition_evaluation_host);
 }
 
-void _initialize_breakpoint (void);
-
 /* Are we executing breakpoint commands?  */
 static int executing_breakpoint_commands;
 

@@ -756,8 +756,6 @@ mips_linux_close (struct target_ops *self)
     super_close (self);
 }
 
-void _initialize_mips_linux_nat (void);
-
 void
 _initialize_mips_linux_nat (void)
 {

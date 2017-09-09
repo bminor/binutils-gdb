@@ -161,9 +161,6 @@ bfin_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                   bfin_linux_get_syscall_number);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_bfin_linux_tdep;
-
 void
 _initialize_bfin_linux_tdep (void)
 {

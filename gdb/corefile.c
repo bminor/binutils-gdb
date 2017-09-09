@@ -33,10 +33,6 @@
 #include "observer.h"
 #include "cli/cli-utils.h"
 
-/* Local function declarations.  */
-
-extern void _initialize_core (void);
-
 /* You can have any number of hooks for `exec_file_command' command to
    call.  If there's only one hook, it is set in exec_file_display
    hook.  If there are two or more hooks, they are set in

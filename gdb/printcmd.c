@@ -158,10 +158,6 @@ static int display_number;
        B ? (TMP = B->next, 1): 0;		\
        B = TMP)
 
-/* Prototypes for exported functions.  */
-
-void _initialize_printcmd (void);
-
 /* Prototypes for local functions.  */
 
 static void do_one_display (struct display *);

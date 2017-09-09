@@ -2245,10 +2245,6 @@ maintenance_check_psymtabs (char *ignore, int from_tty)
   }
 }
 
-
-
-extern initialize_file_ftype _initialize_psymtab;
-
 void
 _initialize_psymtab (void)
 {

@@ -127,8 +127,6 @@ static struct dcache_block *dcache_alloc (DCACHE *dcache, CORE_ADDR addr);
 
 static void info_dcache_command (char *exp, int tty);
 
-void _initialize_dcache (void);
-
 static int dcache_enabled_p = 0; /* OBSOLETE */
 
 static void

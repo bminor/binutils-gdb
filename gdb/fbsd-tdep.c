@@ -524,9 +524,6 @@ fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_get_syscall_number (gdbarch, fbsd_get_syscall_number);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_fbsd_tdep;
-
 void
 _initialize_fbsd_tdep (void)
 {

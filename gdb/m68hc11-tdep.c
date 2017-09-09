@@ -1543,9 +1543,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   return gdbarch;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_m68hc11_tdep;
-
 void
 _initialize_m68hc11_tdep (void)
 {

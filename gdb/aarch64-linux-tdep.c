@@ -1227,9 +1227,6 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					    aarch64_displaced_step_hw_singlestep);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_aarch64_linux_tdep;
-
 void
 _initialize_aarch64_linux_tdep (void)
 {

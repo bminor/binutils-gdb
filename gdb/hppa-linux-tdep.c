@@ -483,10 +483,6 @@ hppa_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
       NULL, cb_data);
   cb (".reg2", 64 * 4, &hppa_linux_fpregset, NULL, cb_data);
 }
-
-
-/* Forward declarations.  */
-extern initialize_file_ftype _initialize_hppa_linux_tdep;
 
 static void
 hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)

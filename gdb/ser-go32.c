@@ -927,9 +927,6 @@ info_serial_command (char *arg, int from_tty)
 #endif
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_ser_dos;
-
 void
 _initialize_ser_dos (void)
 {

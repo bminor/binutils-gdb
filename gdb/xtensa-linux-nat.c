@@ -338,8 +338,6 @@ ps_get_thread_area (struct ps_prochandle *ph,
   return PS_OK;
 }
 
-void _initialize_xtensa_linux_nat (void);
-
 void
 _initialize_xtensa_linux_nat (void)
 {

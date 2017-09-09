@@ -42,8 +42,6 @@
 #define O_NOCTTY 0
 #endif
 
-extern void _initialize_inflow (void);
-
 static void pass_signal (int);
 
 static void child_terminal_ours_1 (int);

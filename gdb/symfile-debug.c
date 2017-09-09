@@ -673,8 +673,6 @@ show_debug_symfile (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Symfile debugging is %s.\n"), value);
 }
 
-initialize_file_ftype _initialize_symfile_debug;
-
 void
 _initialize_symfile_debug (void)
 {

@@ -3484,7 +3484,6 @@ show_maint_btrace_pt_skip_pad  (struct ui_file *file, int from_tty,
 
 /* Initialize btrace maintenance commands.  */
 
-void _initialize_btrace (void);
 void
 _initialize_btrace (void)
 {

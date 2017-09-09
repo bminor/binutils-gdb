@@ -1055,8 +1055,6 @@ xml_fetch_content_from_file (const char *filename, void *baton)
   return text;
 }
 
-void _initialize_xml_support (void);
-
 void
 _initialize_xml_support (void)
 {

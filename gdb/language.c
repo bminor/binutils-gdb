@@ -46,8 +46,6 @@
 #include "c-lang.h"
 #include <algorithm>
 
-extern void _initialize_language (void);
-
 static void unk_lang_error (const char *);
 
 static int unk_lang_parser (struct parser_state *);

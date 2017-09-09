@@ -38,9 +38,6 @@
 struct fork_info *fork_list;
 static int highest_fork_num;
 
-/* Prevent warning from -Wmissing-prototypes.  */
-extern void _initialize_linux_fork (void);
-
 /* Fork list data structure:  */
 struct fork_info
 {

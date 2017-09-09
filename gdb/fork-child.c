@@ -159,9 +159,6 @@ show_startup_with_shell (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_fork_child;
-
 void
 _initialize_fork_child (void)
 {

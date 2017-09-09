@@ -479,9 +479,6 @@ windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_solib_ops (gdbarch, &solib_target_so_ops);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_windows_tdep;
-
 /* Implementation of `tlb' variable.  */
 
 static const struct internalvar_funcs tlb_funcs =

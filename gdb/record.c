@@ -773,9 +773,6 @@ set_record_call_history_size (char *args, int from_tty,
 			 &record_call_history_size);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_record;
-
 void
 _initialize_record (void)
 {

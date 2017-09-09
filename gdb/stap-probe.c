@@ -1713,8 +1713,6 @@ info_probes_stap_command (char *arg, int from_tty)
   info_probes_for_ops (arg, from_tty, &stap_probe_ops);
 }
 
-void _initialize_stap_probe (void);
-
 void
 _initialize_stap_probe (void)
 {

@@ -1618,10 +1618,6 @@ show_user_1 (struct cmd_list_element *c, const char *prefix, const char *name,
   fputs_filtered ("\n", stream);
 }
 
-
-
-initialize_file_ftype _initialize_cli_script;
-
 void
 _initialize_cli_script (void)
 {

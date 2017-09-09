@@ -702,10 +702,6 @@ i386_linux_resume (struct target_ops *ops,
   if (ptrace (request, pid, 0, gdb_signal_to_host (signal)) == -1)
     perror_with_name (("ptrace"));
 }
-
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_i386_linux_nat;
 
 void
 _initialize_i386_linux_nat (void)

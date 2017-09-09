@@ -635,8 +635,6 @@ initialize_syscall_catchpoint_ops (void)
   ops->print_recreate = print_recreate_catch_syscall;
 }
 
-initialize_file_ftype _initialize_break_catch_syscall;
-
 void
 _initialize_break_catch_syscall (void)
 {

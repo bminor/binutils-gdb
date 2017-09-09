@@ -891,9 +891,6 @@ pascal_object_print_static_field (struct value *val,
   common_val_print (val, stream, recurse, &opts, current_language);
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_pascal_valprint;
-
 void
 _initialize_pascal_valprint (void)
 {

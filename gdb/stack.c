@@ -2564,10 +2564,6 @@ func_command (char *arg, int from_tty)
   else if (frame != get_selected_frame (NULL))
     select_and_print_frame (frame);
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_stack (void);
 
 void
 _initialize_stack (void)

@@ -1445,9 +1445,6 @@ abort_expression:
   gdb_assert (this->recursion_depth >= 0);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_dwarf2expr;
-
 void
 _initialize_dwarf2expr (void)
 {

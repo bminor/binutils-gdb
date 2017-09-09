@@ -207,9 +207,6 @@ tic6x_uclinux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				&tic6x_linux_rt_sigreturn_tramp_frame);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_tic6x_linux_tdep;
-
 void
 _initialize_tic6x_linux_tdep (void)
 {

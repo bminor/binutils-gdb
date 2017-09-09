@@ -675,8 +675,6 @@ compile_register_name_demangle (struct gdbarch *gdbarch,
   error (_("Cannot find gdbarch register \"%s\"."), regname);
 }
 
-extern initialize_file_ftype _initialize_compile;
-
 void
 _initialize_compile (void)
 {

@@ -266,8 +266,6 @@ tui_remove_hooks (void)
   tui_register_changed_observer = NULL;
 }
 
-void _initialize_tui_hooks (void);
-
 void
 _initialize_tui_hooks (void)
 {

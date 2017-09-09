@@ -1472,12 +1472,6 @@ finalize_python (void *ignore)
 
   restore_active_ext_lang (previous_active);
 }
-#endif
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_python;
-
-#ifdef HAVE_PYTHON
 
 static bool
 do_start_initialization ()

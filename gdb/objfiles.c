@@ -1630,9 +1630,6 @@ objfile_flavour_name (struct objfile *objfile)
   return NULL;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_objfiles;
-
 void
 _initialize_objfiles (void)
 {

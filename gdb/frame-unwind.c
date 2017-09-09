@@ -288,9 +288,6 @@ frame_unwind_got_address (struct frame_info *frame, int regnum,
   return reg_val;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_frame_unwind;
-
 void
 _initialize_frame_unwind (void)
 {

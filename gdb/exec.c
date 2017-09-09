@@ -57,8 +57,6 @@ static void exec_files_info (struct target_ops *);
 
 static void init_exec_ops (void);
 
-void _initialize_exec (void);
-
 /* The target vector for executable files.  */
 
 static struct target_ops exec_ops;

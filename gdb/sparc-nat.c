@@ -338,10 +338,6 @@ sparc_target (void)
   return t;
 }
 
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc_nat (void);
-
 void
 _initialize_sparc_nat (void)
 {

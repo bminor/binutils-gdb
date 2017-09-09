@@ -314,10 +314,6 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparcnbsd_tdep (void);
-
 void
 _initialize_sparcnbsd_tdep (void)
 {

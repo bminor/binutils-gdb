@@ -1089,9 +1089,6 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_solib_ops (gdbarch, &solib_aix_so_ops);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_rs6000_aix_tdep;
-
 void
 _initialize_rs6000_aix_tdep (void)
 {

@@ -537,8 +537,6 @@ initialize_throw_catchpoint_ops (void)
   ops->check_status = check_status_exception_catchpoint;
 }
 
-initialize_file_ftype _initialize_break_catch_throw;
-
 void
 _initialize_break_catch_throw (void)
 {

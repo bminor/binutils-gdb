@@ -1731,10 +1731,6 @@ Specify the filename of the CTF directory.";
 
 #endif
 
-/* -Wmissing-prototypes */
-
-extern initialize_file_ftype _initialize_ctf;
-
 /* module initialization */
 
 void

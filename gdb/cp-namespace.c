@@ -1082,9 +1082,6 @@ maintenance_cplus_namespace (char *args, int from_tty)
   printf_unfiltered (_("The `maint namespace' command was removed.\n"));
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_cp_namespace;
-
 void
 _initialize_cp_namespace (void)
 {

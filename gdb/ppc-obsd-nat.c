@@ -180,10 +180,6 @@ ppcobsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
   return 1;
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_ppcobsd_nat (void);
 
 void
 _initialize_ppcobsd_nat (void)

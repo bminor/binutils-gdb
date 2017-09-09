@@ -54,8 +54,6 @@ FILE *std_err;
 
 static int block_depth (struct block *);
 
-void _initialize_symmisc (void);
-
 struct print_symbol_args
   {
     struct gdbarch *gdbarch;

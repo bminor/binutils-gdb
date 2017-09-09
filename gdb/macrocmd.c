@@ -481,10 +481,7 @@ macro_list_command (char *exp, int from_tty)
   macro_for_each (macro_user_macros, print_one_macro);
 }
 
-
 /* Initializing the `macrocmd' module.  */
-
-extern initialize_file_ftype _initialize_macrocmd; /* -Wmissing-prototypes */
 
 void
 _initialize_macrocmd (void)

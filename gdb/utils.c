@@ -3278,9 +3278,6 @@ strip_leading_path_elements (const char *path, int n)
   return p;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_utils;
-
 void
 _initialize_utils (void)
 {

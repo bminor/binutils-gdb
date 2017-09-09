@@ -1025,8 +1025,6 @@ static const struct internalvar_funcs probe_funcs =
 
 VEC (probe_ops_cp) *all_probe_ops;
 
-void _initialize_probe (void);
-
 void
 _initialize_probe (void)
 {

@@ -1076,9 +1076,6 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					 i386_linux_handle_segmentation_fault);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_i386_linux_tdep (void);
-
 void
 _initialize_i386_linux_tdep (void)
 {

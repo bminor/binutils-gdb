@@ -48,8 +48,6 @@
 #include "location.h"
 #include "auxv.h"
 
-extern void _initialize_elfread (void);
-
 /* Forward declarations.  */
 extern const struct sym_fns elf_sym_fns_gdb_index;
 extern const struct sym_fns elf_sym_fns_lazy_psyms;
