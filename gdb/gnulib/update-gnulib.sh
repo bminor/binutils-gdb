@@ -37,6 +37,8 @@ IMPORTED_GNULIB_MODULES="\
     errno \
     fnmatch-gnu \
     frexpl \
+    getcwd \
+    glob \
     inttypes \
     lstat \
     limits-h \

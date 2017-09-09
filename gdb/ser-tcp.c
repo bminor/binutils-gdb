@@ -42,6 +42,10 @@
 #ifndef ETIMEDOUT
 #define ETIMEDOUT WSAETIMEDOUT
 #endif
+/* Gnulib defines close too, but gnulib's replacement
+   doesn't call closesocket unless we import the
+   socketlib module.  */
+#undef close
 #define close(fd) closesocket (fd)
 #define ioctl ioctlsocket
 #else
