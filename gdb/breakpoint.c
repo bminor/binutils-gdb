@@ -8994,8 +8994,6 @@ program_breakpoint_here_p (struct gdbarch *gdbarch, CORE_ADDR address)
   CORE_ADDR addr;
   const gdb_byte *bpoint;
   gdb_byte *target_mem;
-  struct cleanup *cleanup;
-  int retval = 0;
 
   addr = address;
   bpoint = gdbarch_breakpoint_from_pc (gdbarch, &addr, &len);
@@ -9009,15 +9007,14 @@ program_breakpoint_here_p (struct gdbarch *gdbarch, CORE_ADDR address)
   /* Enable the automatic memory restoration from breakpoints while
      we read the memory.  Otherwise we could say about our temporary
      breakpoints they are permanent.  */
-  cleanup = make_show_memory_breakpoints_cleanup (0);
+  scoped_restore restore_memory
+    = make_scoped_restore_show_memory_breakpoints (0);
 
   if (target_read_memory (address, target_mem, len) == 0
       && memcmp (target_mem, bpoint, len) == 0)
-    retval = 1;
+    return 1;
 
-  do_cleanups (cleanup);
-
-  return retval;
+  return 0;
 }
 
 /* Return 1 if LOC is pointing to a permanent breakpoint,

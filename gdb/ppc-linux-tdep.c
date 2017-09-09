@@ -218,13 +218,13 @@ ppc_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
   int val;
   int bplen;
   gdb_byte old_contents[BREAKPOINT_MAX];
-  struct cleanup *cleanup;
 
   /* Determine appropriate breakpoint contents and size for this address.  */
   bp = gdbarch_breakpoint_from_pc (gdbarch, &addr, &bplen);
 
   /* Make sure we see the memory breakpoints.  */
-  cleanup = make_show_memory_breakpoints_cleanup (1);
+  scoped_restore restore_memory
+    = make_scoped_restore_show_memory_breakpoints (1);
   val = target_read_memory (addr, old_contents, bplen);
 
   /* If our breakpoint is no longer at the address, this means that the
@@ -233,7 +233,6 @@ ppc_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
   if (val == 0 && memcmp (bp, old_contents, bplen) == 0)
     val = target_write_raw_memory (addr, bp_tgt->shadow_contents, bplen);
 
-  do_cleanups (cleanup);
   return val;
 }
 

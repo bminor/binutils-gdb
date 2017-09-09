@@ -42,6 +42,7 @@ struct inferior;
 
 #include "infrun.h" /* For enum exec_direction_kind.  */
 #include "breakpoint.h" /* For enum bptype.  */
+#include "common/scoped_restore.h"
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -2441,9 +2442,10 @@ extern int remote_timeout;
 
 
 
-/* Set the show memory breakpoints mode to show, and installs a cleanup
-   to restore it back to the current value.  */
-extern struct cleanup *make_show_memory_breakpoints_cleanup (int show);
+/* Set the show memory breakpoints mode to show, and return a
+   scoped_restore to restore it back to the current value.  */
+extern scoped_restore_tmpl<int>
+    make_scoped_restore_show_memory_breakpoints (int show);
 
 extern int may_write_registers;
 extern int may_write_memory;

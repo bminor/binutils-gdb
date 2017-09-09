@@ -1,5 +1,20 @@
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
+	* breakpoint.c (program_breakpoint_here_p): Update.
+	* target.c (make_scoped_restore_show_memory_breakpoints): Rename
+	from make_show_memory_breakpoints_cleanup.  Return a
+	scoped_restore_tmpl<int>.
+	(restore_show_memory_breakpoints): Remove.
+	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint): Update.
+	* mem-break.c (memory_validate_breakpoint): Update.
+	* ia64-tdep.c (ia64_memory_insert_breakpoint): Update.
+	(ia64_memory_remove_breakpoint): Update.
+	(ia64_breakpoint_from_pc): Update.
+	* target.h (make_scoped_restore_show_memory_breakpoints): Rename
+	from make_show_memory_breakpoints_cleanup.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
 	* d-namespace.c (d_lookup_symbol): Use std::string.
 	(find_symbol_in_baseclass): Likewise.
 

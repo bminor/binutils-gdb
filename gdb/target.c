@@ -1302,20 +1302,10 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
   return res;
 }
 
-static void
-restore_show_memory_breakpoints (void *arg)
+scoped_restore_tmpl<int>
+make_scoped_restore_show_memory_breakpoints (int show)
 {
-  show_memory_breakpoints = (uintptr_t) arg;
-}
-
-struct cleanup *
-make_show_memory_breakpoints_cleanup (int show)
-{
-  int current = show_memory_breakpoints;
-
-  show_memory_breakpoints = show;
-  return make_cleanup (restore_show_memory_breakpoints,
-		       (void *) (uintptr_t) current);
+  return make_scoped_restore (&show_memory_breakpoints, show);
 }
 
 /* For docs see target.h, to_xfer_partial.  */
