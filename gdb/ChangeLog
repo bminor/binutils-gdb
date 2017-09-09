@@ -1,5 +1,10 @@
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
+	* d-namespace.c (d_lookup_symbol): Use std::string.
+	(find_symbol_in_baseclass): Likewise.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
 	* ctf.c (ctf_start): Use std::string.
 
 2017-09-11  Tom Tromey  <tom@tromey.com>
