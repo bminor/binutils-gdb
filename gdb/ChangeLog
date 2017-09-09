@@ -1,3 +1,8 @@
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
+	* thread.c (print_thread_info_1): Use ui_out_emit_table,
+	ui_out_emit_list, gdb::optional.
+
 2017-09-09  John Baldwin  <jhb@FreeBSD.org>
 
 	* aarch64-linux-nat.c: Remove _initialize_aarch64_linux_nat
