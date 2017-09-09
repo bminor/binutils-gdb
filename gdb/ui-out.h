@@ -66,10 +66,6 @@ enum ui_out_type
     ui_out_type_list
   };
 
-extern struct cleanup *make_cleanup_ui_out_table_begin_end (struct ui_out *ui_out,
-                                                            int nr_cols,
-							    int nr_rows,
-							    const char *tblid);
 /* Compatibility wrappers.  */
 
 extern struct cleanup *make_cleanup_ui_out_list_begin_end (struct ui_out *uiout,
@@ -220,8 +216,8 @@ private:
 typedef ui_out_emit_type<ui_out_type_tuple> ui_out_emit_tuple;
 typedef ui_out_emit_type<ui_out_type_list> ui_out_emit_list;
 
-/* This is similar to make_cleanup_ui_out_table_begin_end, but written
-   as an RAII class.  */
+/* Start a new table on construction, and end the table on
+   destruction.  */
 class ui_out_emit_table
 {
 public:

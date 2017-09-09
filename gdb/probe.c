@@ -616,90 +616,92 @@ info_probes_for_ops (const char *arg, int from_tty,
   else
     ui_out_extra_fields = get_number_extra_fields (pops);
 
-  make_cleanup_ui_out_table_begin_end (current_uiout,
-				       5 + ui_out_extra_fields,
-				       VEC_length (bound_probe_s, probes),
-				       "StaticProbes");
+  {
+    ui_out_emit_table table_emitter (current_uiout,
+				     5 + ui_out_extra_fields,
+				     VEC_length (bound_probe_s, probes),
+				     "StaticProbes");
 
-  if (!VEC_empty (bound_probe_s, probes))
-    qsort (VEC_address (bound_probe_s, probes),
-	   VEC_length (bound_probe_s, probes),
-	   sizeof (bound_probe_s), compare_probes);
+    if (!VEC_empty (bound_probe_s, probes))
+      qsort (VEC_address (bound_probe_s, probes),
+	     VEC_length (bound_probe_s, probes),
+	     sizeof (bound_probe_s), compare_probes);
 
-  /* What's the size of an address in our architecture?  */
-  size_addr = gdbarch_addr_bit (gdbarch) == 64 ? 18 : 10;
+    /* What's the size of an address in our architecture?  */
+    size_addr = gdbarch_addr_bit (gdbarch) == 64 ? 18 : 10;
 
-  /* Determining the maximum size of each field (`type', `provider',
-     `name' and `objname').  */
-  for (i = 0; VEC_iterate (bound_probe_s, probes, i, probe); ++i)
-    {
-      const char *probe_type = probe->probe->pops->type_name (probe->probe);
+    /* Determining the maximum size of each field (`type', `provider',
+       `name' and `objname').  */
+    for (i = 0; VEC_iterate (bound_probe_s, probes, i, probe); ++i)
+      {
+	const char *probe_type = probe->probe->pops->type_name (probe->probe);
 
-      size_type = std::max (strlen (probe_type), size_type);
-      size_name = std::max (strlen (probe->probe->name), size_name);
-      size_provider = std::max (strlen (probe->probe->provider), size_provider);
-      size_objname = std::max (strlen (objfile_name (probe->objfile)),
-			       size_objname);
-    }
+	size_type = std::max (strlen (probe_type), size_type);
+	size_name = std::max (strlen (probe->probe->name), size_name);
+	size_provider = std::max (strlen (probe->probe->provider), size_provider);
+	size_objname = std::max (strlen (objfile_name (probe->objfile)),
+				 size_objname);
+      }
 
-  current_uiout->table_header (size_type, ui_left, "type", _("Type"));
-  current_uiout->table_header (size_provider, ui_left, "provider",
-			       _("Provider"));
-  current_uiout->table_header (size_name, ui_left, "name", _("Name"));
-  current_uiout->table_header (size_addr, ui_left, "addr", _("Where"));
+    current_uiout->table_header (size_type, ui_left, "type", _("Type"));
+    current_uiout->table_header (size_provider, ui_left, "provider",
+				 _("Provider"));
+    current_uiout->table_header (size_name, ui_left, "name", _("Name"));
+    current_uiout->table_header (size_addr, ui_left, "addr", _("Where"));
 
-  if (pops == NULL)
-    {
-      const struct probe_ops *po;
-      int ix;
+    if (pops == NULL)
+      {
+	const struct probe_ops *po;
+	int ix;
 
-      /* We have to generate the table header for each new probe type
-	 that we will print.  Note that this excludes probe types not
-	 having any defined probe with the search criteria.  */
-      for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, po); ++ix)
-	if (exists_probe_with_pops (probes, po))
-	  gen_ui_out_table_header_info (probes, po);
-    }
-  else
-    gen_ui_out_table_header_info (probes, pops);
+	/* We have to generate the table header for each new probe type
+	   that we will print.  Note that this excludes probe types not
+	   having any defined probe with the search criteria.  */
+	for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, po); ++ix)
+	  if (exists_probe_with_pops (probes, po))
+	    gen_ui_out_table_header_info (probes, po);
+      }
+    else
+      gen_ui_out_table_header_info (probes, pops);
 
-  current_uiout->table_header (size_objname, ui_left, "object", _("Object"));
-  current_uiout->table_body ();
+    current_uiout->table_header (size_objname, ui_left, "object", _("Object"));
+    current_uiout->table_body ();
 
-  for (i = 0; VEC_iterate (bound_probe_s, probes, i, probe); ++i)
-    {
-      const char *probe_type = probe->probe->pops->type_name (probe->probe);
+    for (i = 0; VEC_iterate (bound_probe_s, probes, i, probe); ++i)
+      {
+	const char *probe_type = probe->probe->pops->type_name (probe->probe);
 
-      ui_out_emit_tuple tuple_emitter (current_uiout, "probe");
+	ui_out_emit_tuple tuple_emitter (current_uiout, "probe");
 
-      current_uiout->field_string ("type",probe_type);
-      current_uiout->field_string ("provider", probe->probe->provider);
-      current_uiout->field_string ("name", probe->probe->name);
-      current_uiout->field_core_addr (
-	"addr", probe->probe->arch,
-	get_probe_address (probe->probe, probe->objfile));
+	current_uiout->field_string ("type",probe_type);
+	current_uiout->field_string ("provider", probe->probe->provider);
+	current_uiout->field_string ("name", probe->probe->name);
+	current_uiout->field_core_addr (
+					"addr", probe->probe->arch,
+					get_probe_address (probe->probe, probe->objfile));
 
-      if (pops == NULL)
-	{
-	  const struct probe_ops *po;
-	  int ix;
+	if (pops == NULL)
+	  {
+	    const struct probe_ops *po;
+	    int ix;
 
-	  for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, po);
-	       ++ix)
-	    if (probe->probe->pops == po)
-	      print_ui_out_info (probe->probe);
-	    else if (exists_probe_with_pops (probes, po))
-	      print_ui_out_not_applicables (po);
-	}
-      else
-	print_ui_out_info (probe->probe);
+	    for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, po);
+		 ++ix)
+	      if (probe->probe->pops == po)
+		print_ui_out_info (probe->probe);
+	      else if (exists_probe_with_pops (probes, po))
+		print_ui_out_not_applicables (po);
+	  }
+	else
+	  print_ui_out_info (probe->probe);
 
-      current_uiout->field_string ("object",
-			   objfile_name (probe->objfile));
-      current_uiout->text ("\n");
-    }
+	current_uiout->field_string ("object",
+				     objfile_name (probe->objfile));
+	current_uiout->text ("\n");
+      }
 
-  any_found = !VEC_empty (bound_probe_s, probes);
+    any_found = !VEC_empty (bound_probe_s, probes);
+  }
   do_cleanups (cleanup);
 
   if (!any_found)

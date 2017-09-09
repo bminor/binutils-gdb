@@ -1,5 +1,17 @@
 2017-09-09  Tom Tromey  <tom@tromey.com>
 
+	* ui-out.h (make_cleanup_ui_out_table_begin_end): Remove.
+	(class ui_out_emit_table): Update comment.
+	* ui-out.c (do_cleanup_table_end)
+	(make_cleanup_ui_out_table_begin_end): Remove.
+	* spu-tdep.c (info_spu_mailbox_list): Use ui_out_emit_table.
+	(info_spu_dma_cmdlist): Likewise.
+	* probe.c (info_probes_for_ops): Use ui_out_emit_table.
+	* darwin-nat-info.c (darwin_debug_regions_recurse): Use
+	ui_out_emit_table.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
 	* thread.c (print_thread_info_1): Use ui_out_emit_table,
 	ui_out_emit_list, gdb::optional.
 

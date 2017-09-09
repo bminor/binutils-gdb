@@ -2209,31 +2209,28 @@ static void
 info_spu_mailbox_list (gdb_byte *buf, int nr, enum bfd_endian byte_order,
 		       const char *field, const char *msg)
 {
-  struct cleanup *chain;
   int i;
 
   if (nr <= 0)
     return;
 
-  chain = make_cleanup_ui_out_table_begin_end (current_uiout, 1, nr, "mbox");
+  ui_out_emit_table table_emitter (current_uiout, 1, nr, "mbox");
 
   current_uiout->table_header (32, ui_left, field, msg);
   current_uiout->table_body ();
 
   for (i = 0; i < nr; i++)
     {
-      struct cleanup *val_chain;
-      ULONGEST val;
-      val_chain = make_cleanup_ui_out_tuple_begin_end (current_uiout, "mbox");
-      val = extract_unsigned_integer (buf + 4*i, 4, byte_order);
-      current_uiout->field_fmt (field, "0x%s", phex (val, 4));
-      do_cleanups (val_chain);
+      {
+	ULONGEST val;
+	ui_out_emit_tuple tuple_emitter (current_uiout, "mbox");
+	val = extract_unsigned_integer (buf + 4*i, 4, byte_order);
+	current_uiout->field_fmt (field, "0x%s", phex (val, 4));
+      }
 
       if (!current_uiout->is_mi_like_p ())
 	printf_filtered ("\n");
     }
-
-  do_cleanups (chain);
 }
 
 static void
@@ -2333,7 +2330,6 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
 
   int *seq = XALLOCAVEC (int, nr);
   int done = 0;
-  struct cleanup *chain;
   int i, j;
 
 
@@ -2371,8 +2367,7 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
   nr = i;
 
 
-  chain = make_cleanup_ui_out_table_begin_end (current_uiout, 10, nr,
-					       "dma_cmd");
+  ui_out_emit_table table_emitter (current_uiout, 10, nr, "dma_cmd");
 
   current_uiout->table_header (7, ui_left, "opcode", "Opcode");
   current_uiout->table_header (3, ui_left, "tag", "Tag");
@@ -2389,7 +2384,6 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
 
   for (i = 0; i < nr; i++)
     {
-      struct cleanup *cmd_chain;
       ULONGEST mfc_cq_dw0;
       ULONGEST mfc_cq_dw1;
       ULONGEST mfc_cq_dw2;
@@ -2425,51 +2419,49 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
       ea_valid_p = spu_mfc_get_bitfield (mfc_cq_dw2, 39, 39);
       cmd_error_p = spu_mfc_get_bitfield (mfc_cq_dw2, 40, 40);
 
-      cmd_chain = make_cleanup_ui_out_tuple_begin_end (current_uiout, "cmd");
+      {
+	ui_out_emit_tuple tuple_emitter (current_uiout, "cmd");
 
-      if (spu_mfc_opcode[mfc_cmd_opcode])
-	current_uiout->field_string ("opcode", spu_mfc_opcode[mfc_cmd_opcode]);
-      else
-	current_uiout->field_int ("opcode", mfc_cmd_opcode);
+	if (spu_mfc_opcode[mfc_cmd_opcode])
+	  current_uiout->field_string ("opcode", spu_mfc_opcode[mfc_cmd_opcode]);
+	else
+	  current_uiout->field_int ("opcode", mfc_cmd_opcode);
 
-      current_uiout->field_int ("tag", mfc_cmd_tag);
-      current_uiout->field_int ("tid", tclass_id);
-      current_uiout->field_int ("rid", rclass_id);
+	current_uiout->field_int ("tag", mfc_cmd_tag);
+	current_uiout->field_int ("tid", tclass_id);
+	current_uiout->field_int ("rid", rclass_id);
 
-      if (ea_valid_p)
-	current_uiout->field_fmt ("ea", "0x%s", phex (mfc_ea, 8));
-      else
-	current_uiout->field_skip ("ea");
+	if (ea_valid_p)
+	  current_uiout->field_fmt ("ea", "0x%s", phex (mfc_ea, 8));
+	else
+	  current_uiout->field_skip ("ea");
 
-      current_uiout->field_fmt ("lsa", "0x%05x", mfc_lsa << 4);
-      if (qw_valid_p)
-	current_uiout->field_fmt ("size", "0x%05x", mfc_size << 4);
-      else
-	current_uiout->field_fmt ("size", "0x%05x", mfc_size);
+	current_uiout->field_fmt ("lsa", "0x%05x", mfc_lsa << 4);
+	if (qw_valid_p)
+	  current_uiout->field_fmt ("size", "0x%05x", mfc_size << 4);
+	else
+	  current_uiout->field_fmt ("size", "0x%05x", mfc_size);
 
-      if (list_valid_p)
-	{
-	  current_uiout->field_fmt ("lstaddr", "0x%05x", list_lsa << 3);
-	  current_uiout->field_fmt ("lstsize", "0x%05x", list_size << 3);
-	}
-      else
-	{
-	  current_uiout->field_skip ("lstaddr");
-	  current_uiout->field_skip ("lstsize");
-	}
+	if (list_valid_p)
+	  {
+	    current_uiout->field_fmt ("lstaddr", "0x%05x", list_lsa << 3);
+	    current_uiout->field_fmt ("lstsize", "0x%05x", list_size << 3);
+	  }
+	else
+	  {
+	    current_uiout->field_skip ("lstaddr");
+	    current_uiout->field_skip ("lstsize");
+	  }
 
-      if (cmd_error_p)
-	current_uiout->field_string ("error_p", "*");
-      else
-	current_uiout->field_skip ("error_p");
-
-      do_cleanups (cmd_chain);
+	if (cmd_error_p)
+	  current_uiout->field_string ("error_p", "*");
+	else
+	  current_uiout->field_skip ("error_p");
+      }
 
       if (!current_uiout->is_mi_like_p ())
 	printf_filtered ("\n");
     }
-
-  do_cleanups (chain);
 }
 
 static void
