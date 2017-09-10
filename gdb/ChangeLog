@@ -1,5 +1,10 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* gdbcore.h (core_file_command): Update.
+	* corefile.c (core_file_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* user-regs.c (maintenance_print_user_registers): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>

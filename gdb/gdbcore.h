@@ -141,7 +141,7 @@ extern struct target_ops *core_target;
 
 extern int write_files;
 
-extern void core_file_command (char *filename, int from_tty);
+extern void core_file_command (const char *filename, int from_tty);
 
 extern void exec_file_attach (const char *filename, int from_tty);
 
