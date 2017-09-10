@@ -1,5 +1,13 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* symmisc.c (maintenance_print_symbols)
+	(maintenance_print_msymbols, maintenance_print_objfiles)
+	(maintenance_info_symtabs, maintenance_check_symtabs)
+	(maintenance_expand_symtabs, maintenance_info_line_tables):
+	Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* top.c (new_ui_command): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>

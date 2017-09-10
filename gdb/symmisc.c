@@ -403,7 +403,7 @@ dump_symtab (struct symtab *symtab, struct ui_file *outfile)
 }
 
 static void
-maintenance_print_symbols (char *args, int from_tty)
+maintenance_print_symbols (const char *args, int from_tty)
 {
   struct ui_file *outfile = gdb_stdout;
   char *address_arg = NULL, *source_arg = NULL, *objfile_arg = NULL;
@@ -698,7 +698,7 @@ print_symbol (void *args)
 }
 
 static void
-maintenance_print_msymbols (char *args, int from_tty)
+maintenance_print_msymbols (const char *args, int from_tty)
 {
   struct ui_file *outfile = gdb_stdout;
   char *objfile_arg = NULL;
@@ -756,7 +756,7 @@ maintenance_print_msymbols (char *args, int from_tty)
 }
 
 static void
-maintenance_print_objfiles (char *regexp, int from_tty)
+maintenance_print_objfiles (const char *regexp, int from_tty)
 {
   struct program_space *pspace;
   struct objfile *objfile;
@@ -779,7 +779,7 @@ maintenance_print_objfiles (char *regexp, int from_tty)
 /* List all the symbol tables whose names match REGEXP (optional).  */
 
 static void
-maintenance_info_symtabs (char *regexp, int from_tty)
+maintenance_info_symtabs (const char *regexp, int from_tty)
 {
   struct program_space *pspace;
   struct objfile *objfile;
@@ -873,7 +873,7 @@ maintenance_info_symtabs (char *regexp, int from_tty)
    Use "maint check-psymtabs" for that.  */
 
 static void
-maintenance_check_symtabs (char *ignore, int from_tty)
+maintenance_check_symtabs (const char *ignore, int from_tty)
 {
   struct program_space *pspace;
   struct objfile *objfile;
@@ -924,7 +924,7 @@ maintenance_check_symtabs (char *ignore, int from_tty)
 /* Expand all symbol tables whose name matches an optional regexp.  */
 
 static void
-maintenance_expand_symtabs (char *args, int from_tty)
+maintenance_expand_symtabs (const char *args, int from_tty)
 {
   struct program_space *pspace;
   struct objfile *objfile;
@@ -1038,7 +1038,7 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
 /* Implement the 'maint info line-table' command.  */
 
 static void
-maintenance_info_line_tables (char *regexp, int from_tty)
+maintenance_info_line_tables (const char *regexp, int from_tty)
 {
   struct program_space *pspace;
   struct objfile *objfile;
