@@ -478,7 +478,7 @@ range_error (const char *string,...)
 /* Return the language enum for a given language string.  */
 
 enum language
-language_enum (char *str)
+language_enum (const char *str)
 {
   for (const auto &lang : languages)
     if (strcmp (lang->la_name, str) == 0)

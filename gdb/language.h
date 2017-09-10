@@ -562,7 +562,7 @@ extern int value_true (struct value *);
 
 /* Misc:  The string representing a particular enum language.  */
 
-extern enum language language_enum (char *str);
+extern enum language language_enum (const char *str);
 
 extern const struct language_defn *language_def (enum language);
 

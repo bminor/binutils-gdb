@@ -1,5 +1,10 @@
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
+	* language.h (language_enum): Make argument const.
+	* language.c (language_enum): Make argument const.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
 	* common/common-utils.h (skip_to_space): Remove macro, redeclare
 	as function.
 	(skip_to_space): Rename from skip_to_space_const.
