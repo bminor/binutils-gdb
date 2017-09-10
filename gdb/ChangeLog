@@ -1,5 +1,11 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* spu-tdep.c (info_spu_event_command, info_spu_signal_command)
+	(info_spu_mailbox_command, info_spu_dma_command)
+	(info_spu_proxydma_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-logging.c (set_logging_on, set_logging_off): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>

@@ -2059,7 +2059,7 @@ spu_attach_normal_stop (struct bpstats *bs, int print_frame)
 /* "info spu" commands.  */
 
 static void
-info_spu_event_command (char *args, int from_tty)
+info_spu_event_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   ULONGEST event_status = 0;
@@ -2107,7 +2107,7 @@ info_spu_event_command (char *args, int from_tty)
 }
 
 static void
-info_spu_signal_command (char *args, int from_tty)
+info_spu_signal_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -2228,7 +2228,7 @@ info_spu_mailbox_list (gdb_byte *buf, int nr, enum bfd_endian byte_order,
 }
 
 static void
-info_spu_mailbox_command (char *args, int from_tty)
+info_spu_mailbox_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -2456,7 +2456,7 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
 }
 
 static void
-info_spu_dma_command (char *args, int from_tty)
+info_spu_dma_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -2535,7 +2535,7 @@ info_spu_dma_command (char *args, int from_tty)
 }
 
 static void
-info_spu_proxydma_command (char *args, int from_tty)
+info_spu_proxydma_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   struct gdbarch *gdbarch = get_frame_arch (frame);
