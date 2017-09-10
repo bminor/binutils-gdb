@@ -1,5 +1,10 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-cmds.c (show_version, show_configuration)
+	(source_command, show_user): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* target.c (maintenance_print_target_stack): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>

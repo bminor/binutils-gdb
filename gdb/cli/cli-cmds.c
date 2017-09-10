@@ -66,8 +66,6 @@ static void echo_command (char *, int);
 
 static void pwd_command (char *, int);
 
-static void show_version (char *, int);
-
 static void help_command (char *, int);
 
 static void show_command (char *, int);
@@ -77,8 +75,6 @@ static void info_command (char *, int);
 static void show_debug (char *, int);
 
 static void set_debug (char *, int);
-
-static void show_user (char *, int);
 
 static void make_command (char *, int);
 
@@ -343,14 +339,14 @@ is_complete_command (struct cmd_list_element *c)
 }
 
 static void
-show_version (char *args, int from_tty)
+show_version (const char *args, int from_tty)
 {
   print_gdb_version (gdb_stdout);
   printf_filtered ("\n");
 }
 
 static void
-show_configuration (char *args, int from_tty)
+show_configuration (const char *args, int from_tty)
 {
   print_gdb_configuration (gdb_stdout);
 }
@@ -645,9 +641,9 @@ source_script (const char *file, int from_tty)
 }
 
 static void
-source_command (char *args, int from_tty)
+source_command (const char *args, int from_tty)
 {
-  char *file = args;
+  const char *file = args;
   int search_path = 0;
 
   scoped_restore save_source_verbose = make_scoped_restore (&source_verbose);
@@ -1310,7 +1306,7 @@ make_command (char *arg, int from_tty)
 }
 
 static void
-show_user (char *args, int from_tty)
+show_user (const char *args, int from_tty)
 {
   struct cmd_list_element *c;
   extern struct cmd_list_element *cmdlist;
