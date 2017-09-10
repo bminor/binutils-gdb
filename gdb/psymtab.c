@@ -1892,7 +1892,7 @@ dump_psymtab_addrmap (struct objfile *objfile, struct partial_symtab *psymtab,
 }
 
 static void
-maintenance_print_psymbols (char *args, int from_tty)
+maintenance_print_psymbols (const char *args, int from_tty)
 {
   struct ui_file *outfile = gdb_stdout;
   char *address_arg = NULL, *source_arg = NULL, *objfile_arg = NULL;
@@ -2050,7 +2050,7 @@ maintenance_print_psymbols (char *args, int from_tty)
 /* List all the partial symbol tables whose names match REGEXP (optional).  */
 
 static void
-maintenance_info_psymtabs (char *regexp, int from_tty)
+maintenance_info_psymtabs (const char *regexp, int from_tty)
 {
   struct program_space *pspace;
   struct objfile *objfile;
@@ -2156,7 +2156,7 @@ maintenance_info_psymtabs (char *regexp, int from_tty)
 /* Check consistency of currently expanded psymtabs vs symtabs.  */
 
 static void
-maintenance_check_psymtabs (char *ignore, int from_tty)
+maintenance_check_psymtabs (const char *ignore, int from_tty)
 {
   struct symbol *sym;
   struct partial_symbol **psym;
