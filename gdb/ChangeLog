@@ -1,5 +1,10 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* record-btrace.c (cmd_record_btrace_bts_start)
+	(cmd_record_btrace_pt_start): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* symmisc.c (maintenance_print_symbols)
 	(maintenance_print_msymbols, maintenance_print_objfiles)
 	(maintenance_info_symtabs, maintenance_check_symtabs)

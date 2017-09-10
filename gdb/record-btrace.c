@@ -2883,7 +2883,7 @@ init_record_btrace_ops (void)
 /* Start recording in BTS format.  */
 
 static void
-cmd_record_btrace_bts_start (char *args, int from_tty)
+cmd_record_btrace_bts_start (const char *args, int from_tty)
 {
   if (args != NULL && *args != 0)
     error (_("Invalid argument."));
@@ -2905,7 +2905,7 @@ cmd_record_btrace_bts_start (char *args, int from_tty)
 /* Start recording in Intel Processor Trace format.  */
 
 static void
-cmd_record_btrace_pt_start (char *args, int from_tty)
+cmd_record_btrace_pt_start (const char *args, int from_tty)
 {
   if (args != NULL && *args != 0)
     error (_("Invalid argument."));
