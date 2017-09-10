@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* windows-tdep.c (display_tib): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* linux-fork.c (delete_checkpoint_command)
 	(detach_checkpoint_command): Constify.
 

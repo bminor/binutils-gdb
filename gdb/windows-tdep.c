@@ -361,7 +361,7 @@ display_one_tib (ptid_t ptid)
 /* Display thread information block of the current thread.  */
 
 static void
-display_tib (char * args, int from_tty)
+display_tib (const char * args, int from_tty)
 {
   if (!ptid_equal (inferior_ptid, null_ptid))
     display_one_tib (inferior_ptid);
