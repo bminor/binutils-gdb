@@ -386,7 +386,7 @@ Remaining arguments are interpreted by the target protocol.  For more\n\
 information on the arguments for a particular protocol, type\n\
 `help target ' followed by the protocol name."),
 		    &targetlist, "target ", 0, &cmdlist);
-  c = add_cmd (t->to_shortname, no_class, NULL, t->to_doc, &targetlist);
+  c = add_cmd (t->to_shortname, no_class, t->to_doc, &targetlist);
   set_cmd_sfunc (c, open_target);
   set_cmd_context (c, t);
   if (completer != NULL)
@@ -411,7 +411,7 @@ add_deprecated_target_alias (struct target_ops *t, const char *alias)
 
   /* If we use add_alias_cmd, here, we do not get the deprecated warning,
      see PR cli/15104.  */
-  c = add_cmd (alias, no_class, NULL, t->to_doc, &targetlist);
+  c = add_cmd (alias, no_class, t->to_doc, &targetlist);
   set_cmd_sfunc (c, open_target);
   set_cmd_context (c, t);
   alt = xstrprintf ("target %s", t->to_shortname);

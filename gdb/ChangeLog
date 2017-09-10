@@ -1,5 +1,24 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-decode.c (add_cmd, set_cmd_cfunc): New function
+	overloads.
+	(do_add_cmd): Rename from add_cmd.  Don't call set_cmd_cfunc.
+	(do_const_cfunc): New function.
+	(cmd_cfunc_eq): New overload.
+	(cli_user_command_p): Check do_const_cfunc.
+	* cli/cli-decode.h (struct cmd_list_element) <function>: New field
+	const_cfunc.
+	* command.h (add_cmd): Add const overload and no-function
+	overload.
+	(set_cmd_cfunc): Add const overload.
+	(cmd_const_cfunc_ftype): Declare.
+	(cmd_cfunc_eq): Add const overload.
+	* breakpoint.c, cli-cmds.c, cli-dump.c, guile/scm-cmd.c,
+	python/py-cmd.c, target.c, tracepoint.c: Use no-function add_cmd
+	overload.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* macroexp.c (get_next_token_for_substitution): New function.
 	(substitute_args): Call it.  Check for __VA_OPT__.
 

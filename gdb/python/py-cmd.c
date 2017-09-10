@@ -612,7 +612,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 				pfx_name, allow_unknown, cmd_list);
 	}
       else
-	cmd = add_cmd (cmd_name, (enum command_class) cmdtype, NULL,
+	cmd = add_cmd (cmd_name, (enum command_class) cmdtype,
 		       docstring, cmd_list);
 
       /* There appears to be no API to set this.  */

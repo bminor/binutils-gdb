@@ -4203,7 +4203,7 @@ _initialize_tracepoint (void)
   add_info ("scope", info_scope_command,
 	    _("List the variables local to a scope"));
 
-  add_cmd ("tracepoints", class_trace, NULL,
+  add_cmd ("tracepoints", class_trace,
 	   _("Tracing of program execution without stopping the program."),
 	   &cmdlist);
 

@@ -360,7 +360,7 @@ add_dump_command (const char *name,
   struct cmd_list_element *c;
   struct dump_context *d;
 
-  c = add_cmd (name, all_commands, NULL, descr, &dump_cmdlist);
+  c = add_cmd (name, all_commands, descr, &dump_cmdlist);
   c->completer =  filename_completer;
   d = XNEW (struct dump_context);
   d->func = func;
@@ -368,7 +368,7 @@ add_dump_command (const char *name,
   set_cmd_context (c, d);
   c->func = call_dump_func;
 
-  c = add_cmd (name, all_commands, NULL, descr, &append_cmdlist);
+  c = add_cmd (name, all_commands, descr, &append_cmdlist);
   c->completer =  filename_completer;
   d = XNEW (struct dump_context);
   d->func = func;
