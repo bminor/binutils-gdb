@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* interps.c (interpreter_exec_cmd): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* record-full.c (cmd_record_full_restore): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>

@@ -401,7 +401,7 @@ clear_interpreter_hooks (void)
 }
 
 static void
-interpreter_exec_cmd (char *args, int from_tty)
+interpreter_exec_cmd (const char *args, int from_tty)
 {
   struct ui_interp_info *ui_interp = get_current_interp_info ();
   struct interp *old_interp, *interp_to_use;
