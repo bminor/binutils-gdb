@@ -1,3 +1,22 @@
+2017-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* regcache.c (get_thread_regcache): Update code to use "std::vector"
+	instead of "VEC" for "target_desc.reg_defs".
+	(regcache_cpy): Likewise.
+	(registers_to_string): Likewise.
+	(registers_from_string): Likewise.
+	(find_regno): Likewise.
+	(supply_regblock): Likewise.
+	(regcache_raw_read_unsigned): Likewise.
+	* tdesc.c (init_target_desc): Likewise.
+	(tdesc_create_reg): Likewise.
+	* tdesc.h: Remove declaration of "tdesc_reg_p".  Include <vector>.
+	(struct target_desc) <reg_defs>: Convert to "std::vector".
+	(target_desc): Do not initialize "reg_defs".
+	(~target_desc): Update code to use "std::vector" instead of "VEC"
+	for "target_desc.reg_defs".
+	(operator==): Likewise.
+
 2017-09-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* inferiors.h (thread_to_gdb_id): Remove.

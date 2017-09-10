@@ -22,11 +22,9 @@
 void
 init_target_desc (struct target_desc *tdesc)
 {
-  int offset, i;
-  struct reg *reg;
+  int offset = 0;
 
-  offset = 0;
-  for (i = 0; VEC_iterate (tdesc_reg_p, tdesc->reg_defs, i, reg); i++)
+  for (reg *reg : tdesc->reg_defs)
     {
       reg->offset = offset;
       offset += reg->size;
@@ -193,23 +191,23 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 {
   struct target_desc *tdesc = (struct target_desc *) feature;
 
-  while (VEC_length (tdesc_reg_p, tdesc->reg_defs) < regnum)
+  while (tdesc->reg_defs.size () < regnum)
     {
       struct reg *reg = XCNEW (struct reg);
 
       reg->name = "";
       reg->size = 0;
-      VEC_safe_push (tdesc_reg_p, tdesc->reg_defs, reg);
+      tdesc->reg_defs.push_back (reg);
     }
 
   gdb_assert (regnum == 0
-	      || regnum == VEC_length (tdesc_reg_p, tdesc->reg_defs));
+	      || regnum == tdesc->reg_defs.size ());
 
   struct reg *reg = XCNEW (struct reg);
 
   reg->name = name;
   reg->size = bitsize;
-  VEC_safe_push (tdesc_reg_p, tdesc->reg_defs, reg);
+  tdesc->reg_defs.push_back (reg);
 }
 
 /* See arch/tdesc.h.  */

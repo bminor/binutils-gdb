@@ -22,9 +22,7 @@
 #include "arch/tdesc.h"
 
 #include "regdef.h"
-
-typedef struct reg *tdesc_reg_p;
-DEF_VEC_P(tdesc_reg_p);
+#include <vector>
 
 struct tdesc_feature
 {};
@@ -36,7 +34,7 @@ struct target_desc : tdesc_feature
 {
   /* A vector of elements of register definitions that
      describe the inferior's register set.  */
-  VEC(tdesc_reg_p) *reg_defs;
+  std::vector<struct reg *> reg_defs;
 
   /* The register cache size, in bytes.  */
   int registers_size;
@@ -66,17 +64,15 @@ struct target_desc : tdesc_feature
 
 public:
   target_desc ()
-    : reg_defs (NULL), registers_size (0)
+    : registers_size (0)
   {}
 
   ~target_desc ()
   {
     int i;
-    struct reg *reg;
 
-    for (i = 0; VEC_iterate (tdesc_reg_p, reg_defs, i, reg); i++)
+    for (reg *reg : reg_defs)
       xfree (reg);
-    VEC_free (tdesc_reg_p, reg_defs);
 
     xfree ((char *) arch);
     xfree ((char *) osabi);
@@ -90,18 +86,13 @@ public:
 
   bool operator== (const target_desc &other) const
   {
-    if (VEC_length (tdesc_reg_p, reg_defs)
-	!= VEC_length (tdesc_reg_p, other.reg_defs))
+    if (reg_defs.size () != other.reg_defs.size ())
       return false;
 
-    struct reg *reg;
-
-    for (int ix = 0;
-	 VEC_iterate (tdesc_reg_p, reg_defs, ix, reg);
-	 ix++)
+    for (int i = 0; i < reg_defs.size (); ++i)
       {
-	struct reg *reg2
-	  = VEC_index (tdesc_reg_p, other.reg_defs, ix);
+	struct reg *reg = reg_defs[i];
+	struct reg *reg2 = other.reg_defs[i];
 
 	if (reg != reg2 && *reg != *reg2)
 	  return false;
