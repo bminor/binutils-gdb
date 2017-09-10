@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* gdb_bfd.c (maintenance_info_bfds): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-decode.c (add_cmd, set_cmd_cfunc): New function
 	overloads.
 	(do_add_cmd): Rename from add_cmd.  Don't call set_cmd_cfunc.

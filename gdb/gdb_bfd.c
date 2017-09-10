@@ -974,7 +974,7 @@ print_one_bfd (void **slot, void *data)
 /* Implement the 'maint info bfd' command.  */
 
 static void
-maintenance_info_bfds (char *arg, int from_tty)
+maintenance_info_bfds (const char *arg, int from_tty)
 {
   struct ui_out *uiout = current_uiout;
 
