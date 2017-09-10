@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* dummy-frame.c (maintenance_print_dummy_frames): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_enable_command, tui_disable_command): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>
