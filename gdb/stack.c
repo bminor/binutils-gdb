@@ -1285,7 +1285,7 @@ parse_frame_specification (const char *frame_exp, int *selected_frame_p)
 	  const char *p;
 
 	  /* Skip leading white space, bail of EOL.  */
-	  frame_exp = skip_spaces_const (frame_exp);
+	  frame_exp = skip_spaces (frame_exp);
 	  if (!*frame_exp)
 	    break;
 

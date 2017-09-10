@@ -1048,8 +1048,8 @@ condition_completer (struct cmd_list_element *cmd,
 {
   const char *space;
 
-  text = skip_spaces_const (text);
-  space = skip_to_space_const (text);
+  text = skip_spaces (text);
+  space = skip_to_space (text);
   if (*space == '\0')
     {
       int len;
@@ -1084,7 +1084,7 @@ condition_completer (struct cmd_list_element *cmd,
     }
 
   /* We're completing the expression part.  */
-  text = skip_spaces_const (space);
+  text = skip_spaces (space);
   expression_completer (cmd, tracker, text, word);
 }
 
@@ -2431,7 +2431,7 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 
   if (*cmdrest == ',')
     ++cmdrest;
-  cmdrest = skip_spaces_const (cmdrest);
+  cmdrest = skip_spaces (cmdrest);
 
   if (*cmdrest++ != '"')
     error (_("No format string following the location"));
@@ -2447,14 +2447,14 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
   if (*cmdrest++ != '"')
     error (_("Bad format string, non-terminated '\"'."));
   
-  cmdrest = skip_spaces_const (cmdrest);
+  cmdrest = skip_spaces (cmdrest);
 
   if (!(*cmdrest == ',' || *cmdrest == '\0'))
     error (_("Invalid argument syntax"));
 
   if (*cmdrest == ',')
     cmdrest++;
-  cmdrest = skip_spaces_const (cmdrest);
+  cmdrest = skip_spaces (cmdrest);
 
   /* For each argument, make an expression.  */
 
@@ -8460,7 +8460,7 @@ add_solib_catchpoint (const char *arg, int is_load, int is_temp, int enabled)
 
   if (!arg)
     arg = "";
-  arg = skip_spaces_const (arg);
+  arg = skip_spaces (arg);
 
   std::unique_ptr<solib_catchpoint> c (new solib_catchpoint ());
 
@@ -9204,9 +9204,9 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 		  const char *endp;
 		  char *marker_str;
 
-		  p = skip_spaces_const (p);
+		  p = skip_spaces (p);
 
-		  endp = skip_to_space_const (p);
+		  endp = skip_to_space (p);
 
 		  marker_str = savestring (p, endp - p);
 		  t->static_trace_marker_id = marker_str;
@@ -9504,7 +9504,7 @@ find_condition_and_thread (const char *tok, CORE_ADDR pc,
       const char *cond_start = NULL;
       const char *cond_end = NULL;
 
-      tok = skip_spaces_const (tok);
+      tok = skip_spaces (tok);
 
       if ((*tok == '"' || *tok == ',') && rest)
 	{
@@ -9512,7 +9512,7 @@ find_condition_and_thread (const char *tok, CORE_ADDR pc,
 	  return;
 	}
 
-      end_tok = skip_to_space_const (tok);
+      end_tok = skip_to_space (tok);
 
       toklen = end_tok - tok;
 
@@ -9569,9 +9569,9 @@ decode_static_tracepoint_spec (const char **arg_p)
   char *marker_str;
   int i;
 
-  p = skip_spaces_const (p);
+  p = skip_spaces (p);
 
-  endp = skip_to_space_const (p);
+  endp = skip_to_space (p);
 
   marker_str = savestring (p, endp - p);
   old_chain = make_cleanup (xfree, marker_str);
@@ -11064,8 +11064,8 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   else if (val != NULL)
     release_value (val);
 
-  tok = skip_spaces_const (arg);
-  end_tok = skip_to_space_const (tok);
+  tok = skip_spaces (arg);
+  end_tok = skip_to_space (tok);
 
   toklen = end_tok - tok;
   if (toklen >= 1 && strncmp (tok, "if", toklen) == 0)
@@ -11583,7 +11583,7 @@ ep_parse_optional_if_clause (const char **arg)
 
   /* Skip any extra leading whitespace, and record the start of the
      condition string.  */
-  *arg = skip_spaces_const (*arg);
+  *arg = skip_spaces (*arg);
   cond_string = *arg;
 
   /* Assume that the condition occupies the remainder of the arg
@@ -11619,7 +11619,7 @@ catch_fork_command_1 (char *arg_entry, int from_tty,
 
   if (!arg)
     arg = "";
-  arg = skip_spaces_const (arg);
+  arg = skip_spaces (arg);
 
   /* The allowed syntax is:
      catch [v]fork
@@ -11664,7 +11664,7 @@ catch_exec_command_1 (char *arg_entry, int from_tty,
 
   if (!arg)
     arg = "";
-  arg = skip_spaces_const (arg);
+  arg = skip_spaces (arg);
 
   /* The allowed syntax is:
      catch exec

@@ -746,7 +746,7 @@ string_to_explicit_location (const char **argp,
       len = strlen (opt.get ());
 
       /* Get the argument string.  */
-      *argp = skip_spaces_const (*argp);
+      *argp = skip_spaces (*argp);
 
       /* All options have a required argument.  Checking for this
 	 required argument is deferred until later.  */
@@ -779,7 +779,7 @@ string_to_explicit_location (const char **argp,
       else if (strncmp (opt.get (), "-line", len) == 0)
 	{
 	  set_oarg (explicit_location_lex_one (argp, language, NULL));
-	  *argp = skip_spaces_const (*argp);
+	  *argp = skip_spaces (*argp);
 	  if (have_oarg)
 	    {
 	      EL_EXPLICIT (location)->line_offset
@@ -808,7 +808,7 @@ string_to_explicit_location (const char **argp,
 	  return location;
 	}
 
-      *argp = skip_spaces_const (*argp);
+      *argp = skip_spaces (*argp);
 
       /* It's a little lame to error after the fact, but in this
 	 case, it provides a much better user experience to issue

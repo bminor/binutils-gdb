@@ -1515,7 +1515,7 @@ lex_number (void)
   gdb_assert (subexps[0].rm_eo > 0);
   if (lexptr[subexps[0].rm_eo - 1] == '.')
     {
-      const char *next = skip_spaces_const (&lexptr[subexps[0].rm_eo]);
+      const char *next = skip_spaces (&lexptr[subexps[0].rm_eo]);
 
       if (rust_identifier_start_p (*next) || *next == '.')
 	{

@@ -96,7 +96,7 @@ enum proc_state
 static enum proc_state
 parse_proc_status_state (const char *state)
 {
-  state = skip_spaces_const (state);
+  state = skip_spaces (state);
 
   switch (state[0])
     {

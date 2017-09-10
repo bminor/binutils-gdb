@@ -618,7 +618,7 @@ decode_agent_options (const char *exp, int *trace_string)
   else
     error (_("Undefined collection format \"%c\"."), *exp);
 
-  exp = skip_spaces_const (exp);
+  exp = skip_spaces (exp);
 
   return exp;
 }
@@ -685,7 +685,7 @@ validate_actionline (const char *line, struct breakpoint *b)
   if (line == NULL)
     return;
 
-  p = skip_spaces_const (line);
+  p = skip_spaces (line);
 
   /* Symbol lookup etc.  */
   if (*p == '\0')	/* empty line: just prompt for another line.  */
@@ -708,7 +708,7 @@ validate_actionline (const char *line, struct breakpoint *b)
       do
 	{			/* Repeat over a comma-separated list.  */
 	  QUIT;			/* Allow user to bail out with ^C.  */
-	  p = skip_spaces_const (p);
+	  p = skip_spaces (p);
 
 	  if (*p == '$')	/* Look for special pseudo-symbols.  */
 	    {
@@ -771,7 +771,7 @@ validate_actionline (const char *line, struct breakpoint *b)
       do
 	{			/* Repeat over a comma-separated list.  */
 	  QUIT;			/* Allow user to bail out with ^C.  */
-	  p = skip_spaces_const (p);
+	  p = skip_spaces (p);
 
 	  tmp_p = p;
 	  for (loc = t->loc; loc; loc = loc->next)
@@ -801,7 +801,7 @@ validate_actionline (const char *line, struct breakpoint *b)
     {
       char *endp;
 
-      p = skip_spaces_const (p);
+      p = skip_spaces (p);
       t->step_count = strtol (p, &endp, 0);
       if (endp == p || t->step_count == 0)
 	error (_("while-stepping step count `%s' is malformed."), line);
@@ -1311,7 +1311,7 @@ encode_actions_1 (struct command_line *action,
     {
       QUIT;			/* Allow user to bail out with ^C.  */
       action_exp = action->line;
-      action_exp = skip_spaces_const (action_exp);
+      action_exp = skip_spaces (action_exp);
 
       cmd = lookup_cmd (&action_exp, cmdlist, "", -1, 1);
       if (cmd == 0)
@@ -1327,7 +1327,7 @@ encode_actions_1 (struct command_line *action,
 	  do
 	    {			/* Repeat over a comma-separated list.  */
 	      QUIT;		/* Allow user to bail out with ^C.  */
-	      action_exp = skip_spaces_const (action_exp);
+	      action_exp = skip_spaces (action_exp);
 
 	      if (0 == strncasecmp ("$reg", action_exp, 4))
 		{
@@ -1487,7 +1487,7 @@ encode_actions_1 (struct command_line *action,
 	  do
 	    {			/* Repeat over a comma-separated list.  */
 	      QUIT;		/* Allow user to bail out with ^C.  */
-	      action_exp = skip_spaces_const (action_exp);
+	      action_exp = skip_spaces (action_exp);
 
 		{
 		  struct cleanup *old_chain1 = NULL;
@@ -2733,7 +2733,7 @@ trace_dump_actions (struct command_line *action,
 
       QUIT;			/* Allow user to bail out with ^C.  */
       action_exp = action->line;
-      action_exp = skip_spaces_const (action_exp);
+      action_exp = skip_spaces (action_exp);
 
       /* The collection actions to be done while stepping are
          bracketed by the commands "while-stepping" and "end".  */
@@ -2776,7 +2776,7 @@ trace_dump_actions (struct command_line *action,
 		  QUIT;		/* Allow user to bail out with ^C.  */
 		  if (*action_exp == ',')
 		    action_exp++;
-		  action_exp = skip_spaces_const (action_exp);
+		  action_exp = skip_spaces (action_exp);
 
 		  next_comma = strchr (action_exp, ',');
 

@@ -1211,7 +1211,7 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
 	       regname, p->saved_arg);
 
       ++tmp;
-      tmp = skip_spaces_const (tmp);
+      tmp = skip_spaces (tmp);
       if (*tmp == '#' || *tmp == '$')
 	++tmp;
 

@@ -1560,7 +1560,7 @@ info_auto_load_libthread_db (char *args, int from_tty)
   char *pids;
   int i;
 
-  cs = skip_spaces_const (cs);
+  cs = skip_spaces (cs);
   if (*cs)
     error (_("'info auto-load libthread-db' does not accept any parameters"));
 

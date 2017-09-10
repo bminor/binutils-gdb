@@ -1044,7 +1044,7 @@ disassembler_options_completer (struct cmd_list_element *ignore,
       const char *separator = strrchr (text, ',');
       if (separator != NULL)
 	text = separator + 1;
-      text = skip_spaces_const (text);
+      text = skip_spaces (text);
       complete_on_enum (tracker, opts->name, text, word);
     }
 }

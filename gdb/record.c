@@ -431,7 +431,7 @@ get_insn_number (char **arg)
   const char *begin, *end, *pos;
 
   begin = *arg;
-  pos = skip_spaces_const (begin);
+  pos = skip_spaces (begin);
 
   if (!isdigit (*pos))
     error (_("Expected positive number, got: %s."), pos);

@@ -1240,7 +1240,7 @@ disassemble_command (char *arg, int from_tty)
 	    }
 	}
 
-      p = skip_spaces_const (p);
+      p = skip_spaces (p);
     }
 
   if ((flags & (DISASSEMBLY_SOURCE_DEPRECATED | DISASSEMBLY_SOURCE))
@@ -1277,7 +1277,7 @@ disassemble_command (char *arg, int from_tty)
       /* Two arguments.  */
       int incl_flag = 0;
       low = pc;
-      p = skip_spaces_const (p);
+      p = skip_spaces (p);
       if (p[0] == '+')
 	{
 	  ++p;

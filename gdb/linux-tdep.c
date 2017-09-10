@@ -440,7 +440,7 @@ read_mapping (const char *line,
     p++;
   *endaddr = strtoulst (p, &p, 16);
 
-  p = skip_spaces_const (p);
+  p = skip_spaces (p);
   *permissions = p;
   while (*p && !isspace (*p))
     p++;
@@ -448,7 +448,7 @@ read_mapping (const char *line,
 
   *offset = strtoulst (p, &p, 16);
 
-  p = skip_spaces_const (p);
+  p = skip_spaces (p);
   *device = p;
   while (*p && !isspace (*p))
     p++;
@@ -456,7 +456,7 @@ read_mapping (const char *line,
 
   *inode = strtoulst (p, &p, 10);
 
-  p = skip_spaces_const (p);
+  p = skip_spaces (p);
   *filename = p;
 }
 
@@ -740,7 +740,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
       pid = current_inferior ()->pid;
     }
 
-  args = skip_spaces_const (args);
+  args = skip_spaces (args);
   if (args && args[0])
     error (_("Too many parameters: %s"), args);
 
@@ -870,7 +870,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 	  printf_filtered (_("Process: %s\n"),
 			   pulongest (strtoulst (p, &p, 10)));
 
-	  p = skip_spaces_const (p);
+	  p = skip_spaces (p);
 	  if (*p == '(')
 	    {
 	      /* ps command also relies on no trailing fields
@@ -884,7 +884,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 		}
 	    }
 
-	  p = skip_spaces_const (p);
+	  p = skip_spaces (p);
 	  if (*p)
 	    printf_filtered (_("State: %c\n"), *p++);
 

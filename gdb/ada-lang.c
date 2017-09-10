@@ -12732,13 +12732,13 @@ ada_get_next_arg (const char **argsp)
   const char *end;
   char *result;
 
-  args = skip_spaces_const (args);
+  args = skip_spaces (args);
   if (args[0] == '\0')
     return NULL; /* No more arguments.  */
   
   /* Find the end of the current argument.  */
 
-  end = skip_to_space_const (args);
+  end = skip_to_space (args);
 
   /* Adjust ARGSP to point to the start of the next argument.  */
 
@@ -12785,12 +12785,12 @@ catch_ada_exception_command_split (const char *args,
 
   /* Check to see if we have a condition.  */
 
-  args = skip_spaces_const (args);
+  args = skip_spaces (args);
   if (startswith (args, "if")
       && (isspace (args[2]) || args[2] == '\0'))
     {
       args += 2;
-      args = skip_spaces_const (args);
+      args = skip_spaces (args);
 
       if (args[0] == '\0')
         error (_("Condition missing after `if' keyword"));
@@ -13044,14 +13044,14 @@ catch_ada_exception_command (char *arg_entry, int from_tty,
 static void
 catch_ada_assert_command_split (const char *args, char **cond_string)
 {
-  args = skip_spaces_const (args);
+  args = skip_spaces (args);
 
   /* Check whether a condition was provided.  */
   if (startswith (args, "if")
       && (isspace (args[2]) || args[2] == '\0'))
     {
       args += 2;
-      args = skip_spaces_const (args);
+      args = skip_spaces (args);
       if (args[0] == '\0')
         error (_("condition missing after `if' keyword"));
       *cond_string = xstrdup (args);

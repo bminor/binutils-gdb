@@ -1,5 +1,26 @@
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
+	* common/common-utils.h (skip_to_space): Remove macro, redeclare
+	as function.
+	(skip_to_space): Rename from skip_to_space_const.
+	* common/common-utils.c (skip_to_space): New function.
+	(skip_to_space): Rename from skip_to_space_const.
+	* cli/cli-utils.h (get_number): Rename from get_number_const.
+	(extract_arg): Rename from extract_arg_const.
+	* cli/cli-utils.c (get_number): Rename from get_number_const.
+	(extract_arg): Rename from extract_arg_const.
+	(number_or_range_parser::get_number): Use ::get_number.
+	* aarch64-linux-tdep.c, ada-lang.c, arm-linux-tdep.c, ax-gdb.c,
+	break-catch-throw.c, breakpoint.c, cli/cli-cmds.c, cli/cli-dump.c,
+	cli/cli-script.c, cli/cli-setshow.c, compile/compile.c,
+	completer.c, demangle.c, disasm.c, findcmd.c, linespec.c,
+	linux-tdep.c, linux-thread-db.c, location.c, mi/mi-parse.c,
+	minsyms.c, nat/linux-procfs.c, printcmd.c, probe.c,
+	python/py-breakpoint.c, record.c, rust-exp.y, serial.c, stack.c,
+	stap-probe.c, tid-parse.c, tracepoint.c: Update all callers.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
 	* python/python.c (do_start_initialization): Use
 	py-event-types.def to initialize types.
 	Define all object type structures.

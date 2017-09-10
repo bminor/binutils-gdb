@@ -888,7 +888,7 @@ line_first_arg (const char *p)
 {
   const char *first_arg = p + find_command_name_length (p);
 
-  return skip_spaces_const (first_arg); 
+  return skip_spaces (first_arg); 
 }
 
 /* Process one input line.  If the command is an "end", return such an
@@ -932,7 +932,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
       const char *cmd_name = p;
       struct cmd_list_element *cmd
 	= lookup_cmd_1 (&cmd_name, cmdlist, NULL, 1);
-      cmd_name = skip_spaces_const (cmd_name);
+      cmd_name = skip_spaces (cmd_name);
       bool inline_cmd = *cmd_name != '\0';
 
       /* If commands are parsed, we skip initial spaces.  Otherwise,

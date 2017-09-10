@@ -474,7 +474,7 @@ linespec_lexer_lex_keyword (const char *p)
 	      if (i != IF_KEYWORD_INDEX)
 		{
 		  p += len;
-		  p = skip_spaces_const (p);
+		  p = skip_spaces (p);
 		  for (j = 0; linespec_keywords[j] != NULL; ++j)
 		    {
 		      int nextlen = strlen (linespec_keywords[j]);
@@ -709,7 +709,7 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	{
 	  if (isspace (*PARSER_STREAM (parser)))
 	    {
-	      p = skip_spaces_const (PARSER_STREAM (parser));
+	      p = skip_spaces (PARSER_STREAM (parser));
 	      /* When we get here we know we've found something followed by
 		 a space (we skip over parens and templates below).
 		 So if we find a keyword now, we know it is a keyword and not,
@@ -856,7 +856,7 @@ linespec_lexer_lex_one (linespec_parser *parser)
   if (parser->lexer.current.type == LSTOKEN_CONSUMED)
     {
       /* Skip any whitespace.  */
-      PARSER_STREAM (parser) = skip_spaces_const (PARSER_STREAM (parser));
+      PARSER_STREAM (parser) = skip_spaces (PARSER_STREAM (parser));
 
       /* Check for a keyword, they end the linespec.  */
       keyword = linespec_lexer_lex_keyword (PARSER_STREAM (parser));
@@ -1770,7 +1770,7 @@ set_completion_after_number (linespec_parser *parser,
 {
   if (*PARSER_STREAM (parser) == ' ')
     {
-      parser->completion_word = skip_spaces_const (PARSER_STREAM (parser) + 1);
+      parser->completion_word = skip_spaces (PARSER_STREAM (parser) + 1);
       parser->complete_what = next;
     }
   else
@@ -2000,7 +2000,7 @@ linespec_parse_basic (linespec_parser *parser)
 		  if (ptr[i] == ' ')
 		    {
 		      LS_TOKEN_STOKEN (token).length = i;
-		      PARSER_STREAM (parser) = skip_spaces_const (ptr + i + 1);
+		      PARSER_STREAM (parser) = skip_spaces (ptr + i + 1);
 		      break;
 		    }
 		}
@@ -2697,7 +2697,7 @@ parse_linespec (linespec_parser *parser, const char *arg)
 	 advances past a keyword automatically, so skip it
 	 manually.  */
       parser->completion_word
-	= skip_spaces_const (skip_to_space_const (PARSER_STREAM (parser)));
+	= skip_spaces (skip_to_space (PARSER_STREAM (parser)));
       parser->complete_what = linespec_complete_what::EXPRESSION;
     }
 

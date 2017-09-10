@@ -45,7 +45,7 @@ scan_expression (const char **cmd, const char *def)
 
       end = (*cmd) + strcspn (*cmd, " \t");
       exp = savestring ((*cmd), end - (*cmd));
-      (*cmd) = skip_spaces_const (end);
+      (*cmd) = skip_spaces (end);
       return gdb::unique_xmalloc_ptr<char> (exp);
     }
 }
@@ -71,10 +71,10 @@ scan_filename (const char **cmd, const char *defname)
       /* FIXME: should parse a possibly quoted string.  */
       const char *end;
 
-      (*cmd) = skip_spaces_const (*cmd);
+      (*cmd) = skip_spaces (*cmd);
       end = *cmd + strcspn (*cmd, " \t");
       filename.reset (savestring ((*cmd), end - (*cmd)));
-      (*cmd) = skip_spaces_const (end);
+      (*cmd) = skip_spaces (end);
     }
   gdb_assert (filename != NULL);
 
@@ -538,7 +538,7 @@ restore_command (char *args_in, int from_tty)
 	{
 	  binary_flag = 1;
 	  args += strlen (binary_string);
-	  args = skip_spaces_const (args);
+	  args = skip_spaces (args);
 	}
       /* Parse offset (optional).  */
       if (args != NULL && *args != '\0')

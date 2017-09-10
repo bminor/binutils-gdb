@@ -90,7 +90,7 @@ msymbol_hash_iw (const char *string)
 
   while (*string && *string != '(')
     {
-      string = skip_spaces_const (string);
+      string = skip_spaces (string);
       if (*string && *string != '(')
 	{
 	  hash = SYMBOL_HASH_NEXT (hash, *string);

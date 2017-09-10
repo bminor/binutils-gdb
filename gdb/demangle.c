@@ -174,20 +174,20 @@ demangle_command (char *args, int from_tty)
   while (processing_args
 	 && *arg_start == '-')
     {
-      const char *p = skip_to_space_const (arg_start);
+      const char *p = skip_to_space (arg_start);
 
       if (strncmp (arg_start, "-l", p - arg_start) == 0)
-	lang_name.reset (extract_arg_const (&p));
+	lang_name.reset (extract_arg (&p));
       else if (strncmp (arg_start, "--", p - arg_start) == 0)
 	processing_args = 0;
       else
 	{
-	  gdb::unique_xmalloc_ptr<char> option (extract_arg_const (&p));
+	  gdb::unique_xmalloc_ptr<char> option (extract_arg (&p));
 	  error (_("Unrecognized option '%s' to demangle command.  "
 		   "Try \"help demangle\"."), option.get ());
 	}
 
-      arg_start = skip_spaces_const (p);
+      arg_start = skip_spaces (p);
     }
 
   name = arg_start;

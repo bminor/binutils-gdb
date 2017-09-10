@@ -134,7 +134,7 @@ is_unlimited_literal (const char *arg)
 {
   size_t len = sizeof ("unlimited") - 1;
 
-  arg = skip_spaces_const (arg);
+  arg = skip_spaces (arg);
 
   return (strncmp (arg, "unlimited", len) == 0
 	  && (isspace (arg[len]) || arg[len] == '\0'));

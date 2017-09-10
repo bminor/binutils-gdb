@@ -558,12 +558,12 @@ parse_probe_linespec (const char *str, char **provider,
 {
   *probe_name = *objname = NULL;
 
-  *provider = extract_arg_const (&str);
+  *provider = extract_arg (&str);
   if (*provider != NULL)
     {
-      *probe_name = extract_arg_const (&str);
+      *probe_name = extract_arg (&str);
       if (*probe_name != NULL)
-	*objname = extract_arg_const (&str);
+	*objname = extract_arg (&str);
     }
 }
 

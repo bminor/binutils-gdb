@@ -305,7 +305,7 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
 	       regname, p->saved_arg);
 
       ++tmp;
-      tmp = skip_spaces_const (tmp);
+      tmp = skip_spaces (tmp);
       /* Now we expect a number.  It can begin with '#' or simply
 	 a digit.  */
       if (*tmp == '#')
