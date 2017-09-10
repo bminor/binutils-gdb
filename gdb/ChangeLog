@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* cp-abi.c (set_cp_abi_cmd, show_cp_abi_cmd): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* arc-tdep.c (dump_arc_instruction_command): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>
