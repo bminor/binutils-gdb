@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_reg_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* skip.c (skip_file_command, skip_function_command)
 	(skip_enable_command, skip_disable_command, skip_delete_command):
 	Constify.

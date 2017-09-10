@@ -600,7 +600,7 @@ tui_reg_prev (struct gdbarch *gdbarch)
    not already on display.  */
 
 static void
-tui_reg_command (char *args, int from_tty)
+tui_reg_command (const char *args, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
 
