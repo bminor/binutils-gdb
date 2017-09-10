@@ -14489,20 +14489,17 @@ map_breakpoint_numbers (const char *args,
 }
 
 static struct bp_location *
-find_location_by_number (char *number)
+find_location_by_number (const char *number)
 {
-  char *dot = strchr (number, '.');
-  char *p1;
+  const char *p1;
   int bp_num;
   int loc_num;
   struct breakpoint *b;
   struct bp_location *loc;  
 
-  *dot = '\0';
-
   p1 = number;
-  bp_num = get_number (&p1);
-  if (bp_num == 0)
+  bp_num = get_number_trailer (&p1, '.');
+  if (bp_num == 0 || p1[0] != '.')
     error (_("Bad breakpoint number '%s'"), number);
 
   ALL_BREAKPOINTS (b)
@@ -14514,7 +14511,9 @@ find_location_by_number (char *number)
   if (!b || b->number != bp_num)
     error (_("Bad breakpoint number '%s'"), number);
   
-  p1 = dot+1;
+  /* Skip the dot.  */
+  ++p1;
+  const char *save = p1;
   loc_num = get_number (&p1);
   if (loc_num == 0)
     error (_("Bad breakpoint location number '%s'"), number);
@@ -14524,7 +14523,7 @@ find_location_by_number (char *number)
   for (;loc_num && loc; --loc_num, loc = loc->next)
     ;
   if (!loc)
-    error (_("Bad breakpoint location number '%s'"), dot+1);
+    error (_("Bad breakpoint location number '%s'"), save);
     
   return loc;  
 }
@@ -14592,13 +14591,13 @@ disable_command (char *args, int from_tty)
     }
   else
     {
-      char *num = extract_arg (&args);
+      std::string num = extract_arg (&args);
 
-      while (num)
+      while (!num.empty ())
 	{
-	  if (strchr (num, '.'))
+	  if (num.find ('.') != std::string::npos)
 	    {
-	      struct bp_location *loc = find_location_by_number (num);
+	      struct bp_location *loc = find_location_by_number (num.c_str ());
 
 	      if (loc)
 		{
@@ -14615,7 +14614,8 @@ disable_command (char *args, int from_tty)
 	      update_global_location_list (UGLL_DONT_INSERT);
 	    }
 	  else
-	    map_breakpoint_numbers (num, do_map_disable_breakpoint, NULL);
+	    map_breakpoint_numbers (num.c_str (), do_map_disable_breakpoint,
+				    NULL);
 	  num = extract_arg (&args);
 	}
     }
@@ -14723,13 +14723,13 @@ enable_command (char *args, int from_tty)
     }
   else
     {
-      char *num = extract_arg (&args);
+      std::string num = extract_arg (&args);
 
-      while (num)
+      while (!num.empty ())
 	{
-	  if (strchr (num, '.'))
+	  if (num.find ('.') != std::string::npos)
 	    {
-	      struct bp_location *loc = find_location_by_number (num);
+	      struct bp_location *loc = find_location_by_number (num.c_str ());
 
 	      if (loc)
 		{
@@ -14746,7 +14746,8 @@ enable_command (char *args, int from_tty)
 	      update_global_location_list (UGLL_MAY_INSERT);
 	    }
 	  else
-	    map_breakpoint_numbers (num, do_map_enable_breakpoint, NULL);
+	    map_breakpoint_numbers (num.c_str (), do_map_enable_breakpoint,
+				    NULL);
 	  num = extract_arg (&args);
 	}
     }

@@ -347,20 +347,14 @@ mi_parse (const char *cmd, char **token)
 	}
       else if (strncmp (chp, "--language ", ls) == 0)
 	{
-	  char *lang_name;
-	  struct cleanup *old_chain;
-
 	  option = "--language";
 	  chp += ls;
-	  lang_name = extract_arg (&chp);
-	  old_chain = make_cleanup (xfree, lang_name);
+	  std::string lang_name = extract_arg (&chp);
 
-	  parse->language = language_enum (lang_name);
+	  parse->language = language_enum (lang_name.c_str ());
 	  if (parse->language == language_unknown
 	      || parse->language == language_auto)
-	    error (_("Invalid --language argument: %s"), lang_name);
-
-	  do_cleanups (old_chain);
+	    error (_("Invalid --language argument: %s"), lang_name.c_str ());
 	}
       else
 	break;

@@ -1,5 +1,22 @@
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
+	* demangle.c (demangle_command): Update.
+	* breakpoint.c (disable_command): Update.
+	(enable_command): Update.
+	(find_location_by_number): Make "number" const.  Use
+	get_number_trailer.
+	* cli/cli-utils.c (extract_arg): Return std::string.
+	* probe.c (parse_probe_linespec): Update.  Change types.
+	(collect_probes): Take string arguments.
+	(parse_probe_linespec): Likewise.
+	(info_probes_for_ops): Update.
+	(enable_probes_command): Update.
+	(disable_probes_command): Update.
+	* break-catch-sig.c (catch_signal_split_args): Update.
+	* mi/mi-parse.c (mi_parse): Update.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
 	* language.h (language_enum): Make argument const.
 	* language.c (language_enum): Make argument const.
 

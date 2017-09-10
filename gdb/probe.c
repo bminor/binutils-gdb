@@ -275,8 +275,8 @@ find_probe_by_pc (CORE_ADDR pc)
    Each argument is a regexp, or NULL, which matches anything.  */
 
 static VEC (bound_probe_s) *
-collect_probes (char *objname, char *provider, char *probe_name,
-		const struct probe_ops *pops)
+collect_probes (const std::string &objname, const std::string &provider,
+		const std::string &probe_name, const struct probe_ops *pops)
 {
   struct objfile *objfile;
   VEC (bound_probe_s) *result = NULL;
@@ -285,12 +285,15 @@ collect_probes (char *objname, char *provider, char *probe_name,
 
   cleanup = make_cleanup (VEC_cleanup (bound_probe_s), &result);
 
-  if (provider != NULL)
-    prov_pat.emplace (provider, REG_NOSUB, _("Invalid provider regexp"));
-  if (probe_name != NULL)
-    probe_pat.emplace (probe_name, REG_NOSUB, _("Invalid probe regexp"));
-  if (objname != NULL)
-    obj_pat.emplace (objname, REG_NOSUB, _("Invalid object file regexp"));
+  if (!provider.empty ())
+    prov_pat.emplace (provider.c_str (), REG_NOSUB,
+		      _("Invalid provider regexp"));
+  if (!probe_name.empty ())
+    probe_pat.emplace (probe_name.c_str (), REG_NOSUB,
+		       _("Invalid probe regexp"));
+  if (!objname.empty ())
+    obj_pat.emplace (objname.c_str (), REG_NOSUB,
+		     _("Invalid object file regexp"));
 
   ALL_OBJFILES (objfile)
     {
@@ -301,7 +304,7 @@ collect_probes (char *objname, char *provider, char *probe_name,
       if (! objfile->sf || ! objfile->sf->sym_probe_fns)
 	continue;
 
-      if (objname)
+      if (obj_pat)
 	{
 	  if (obj_pat->exec (objfile_name (objfile), 0, NULL, 0) != 0)
 	    continue;
@@ -316,11 +319,11 @@ collect_probes (char *objname, char *provider, char *probe_name,
 	  if (pops != NULL && probe->pops != pops)
 	    continue;
 
-	  if (provider
+	  if (prov_pat
 	      && prov_pat->exec (probe->provider, 0, NULL, 0) != 0)
 	    continue;
 
-	  if (probe_name
+	  if (probe_pat
 	      && probe_pat->exec (probe->name, 0, NULL, 0) != 0)
 	    continue;
 
@@ -553,16 +556,16 @@ exists_probe_with_pops (VEC (bound_probe_s) *probes,
    [PROBE [OBJNAME]]] from the provided string STR.  */
 
 static void
-parse_probe_linespec (const char *str, char **provider,
-		      char **probe_name, char **objname)
+parse_probe_linespec (const char *str, std::string *provider,
+		      std::string *probe_name, std::string *objname)
 {
-  *probe_name = *objname = NULL;
+  *probe_name = *objname = "";
 
   *provider = extract_arg (&str);
-  if (*provider != NULL)
+  if (!provider->empty ())
     {
       *probe_name = extract_arg (&str);
-      if (*probe_name != NULL)
+      if (!probe_name->empty ())
 	*objname = extract_arg (&str);
     }
 }
@@ -573,7 +576,7 @@ void
 info_probes_for_ops (const char *arg, int from_tty,
 		     const struct probe_ops *pops)
 {
-  char *provider, *probe_name = NULL, *objname = NULL;
+  std::string provider, probe_name, objname;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   VEC (bound_probe_s) *probes;
   int i, any_found;
@@ -587,9 +590,6 @@ info_probes_for_ops (const char *arg, int from_tty,
   struct gdbarch *gdbarch = get_current_arch ();
 
   parse_probe_linespec (arg, &provider, &probe_name, &objname);
-  make_cleanup (xfree, provider);
-  make_cleanup (xfree, probe_name);
-  make_cleanup (xfree, objname);
 
   probes = collect_probes (objname, provider, probe_name, pops);
   make_cleanup (VEC_cleanup (probe_p), &probes);
@@ -721,16 +721,13 @@ info_probes_command (char *arg, int from_tty)
 static void
 enable_probes_command (char *arg, int from_tty)
 {
-  char *provider, *probe_name = NULL, *objname = NULL;
+  std::string provider, probe_name, objname;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   VEC (bound_probe_s) *probes;
   struct bound_probe *probe;
   int i;
 
   parse_probe_linespec ((const char *) arg, &provider, &probe_name, &objname);
-  make_cleanup (xfree, provider);
-  make_cleanup (xfree, probe_name);
-  make_cleanup (xfree, objname);
 
   probes = collect_probes (objname, provider, probe_name, NULL);
   if (VEC_empty (bound_probe_s, probes))
@@ -765,16 +762,13 @@ enable_probes_command (char *arg, int from_tty)
 static void
 disable_probes_command (char *arg, int from_tty)
 {
-  char *provider, *probe_name = NULL, *objname = NULL;
+  std::string provider, probe_name, objname;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   VEC (bound_probe_s) *probes;
   struct bound_probe *probe;
   int i;
 
   parse_probe_linespec ((const char *) arg, &provider, &probe_name, &objname);
-  make_cleanup (xfree, provider);
-  make_cleanup (xfree, probe_name);
-  make_cleanup (xfree, objname);
 
   probes = collect_probes (objname, provider, probe_name, NULL /* pops */);
   if (VEC_empty (bound_probe_s, probes))

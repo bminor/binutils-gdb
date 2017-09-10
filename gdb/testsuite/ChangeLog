@@ -1,5 +1,9 @@
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
+	* gdb.base/ena-dis-br.exp (test_ena_dis_br): Update test.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
 	* gdb.python/py-infthread.exp: Add tests for new_thread event.
 	* gdb.python/py-inferior.exp: Add tests for new inferior events.
 

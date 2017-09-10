@@ -343,12 +343,12 @@ catch_signal_split_args (char *arg, bool *catch_all)
       gdb_signal signal_number;
       char *endptr;
 
-      gdb::unique_xmalloc_ptr<char> one_arg (extract_arg (&arg));
-      if (one_arg == NULL)
+      std::string one_arg = extract_arg (&arg);
+      if (one_arg.empty ())
 	break;
 
       /* Check for the special flag "all".  */
-      if (strcmp (one_arg.get (), "all") == 0)
+      if (one_arg == "all")
 	{
 	  arg = skip_spaces (arg);
 	  if (*arg != '\0' || !first)
@@ -361,14 +361,14 @@ catch_signal_split_args (char *arg, bool *catch_all)
       first = false;
 
       /* Check if the user provided a signal name or a number.  */
-      num = (int) strtol (one_arg.get (), &endptr, 0);
+      num = (int) strtol (one_arg.c_str (), &endptr, 0);
       if (*endptr == '\0')
 	signal_number = gdb_signal_from_command (num);
       else
 	{
-	  signal_number = gdb_signal_from_name (one_arg.get ());
+	  signal_number = gdb_signal_from_name (one_arg.c_str ());
 	  if (signal_number == GDB_SIGNAL_UNKNOWN)
-	    error (_("Unknown signal name '%s'."), one_arg.get ());
+	    error (_("Unknown signal name '%s'."), one_arg.c_str ());
 	}
 
       result.push_back (signal_number);
