@@ -215,7 +215,7 @@ dump_memory_to_file (const char *cmd, const char *mode, const char *file_format)
 }
 
 static void
-dump_memory_command (char *cmd, const char *mode)
+dump_memory_command (const char *cmd, const char *mode)
 {
   dump_memory_to_file (cmd, mode, "binary");
 }
@@ -260,86 +260,86 @@ dump_value_to_file (const char *cmd, const char *mode, const char *file_format)
 }
 
 static void
-dump_value_command (char *cmd, const char *mode)
+dump_value_command (const char *cmd, const char *mode)
 {
   dump_value_to_file (cmd, mode, "binary");
 }
 
 static void
-dump_srec_memory (char *args, int from_tty)
+dump_srec_memory (const char *args, int from_tty)
 {
   dump_memory_to_file (args, FOPEN_WB, "srec");
 }
 
 static void
-dump_srec_value (char *args, int from_tty)
+dump_srec_value (const char *args, int from_tty)
 {
   dump_value_to_file (args, FOPEN_WB, "srec");
 }
 
 static void
-dump_ihex_memory (char *args, int from_tty)
+dump_ihex_memory (const char *args, int from_tty)
 {
   dump_memory_to_file (args, FOPEN_WB, "ihex");
 }
 
 static void
-dump_ihex_value (char *args, int from_tty)
+dump_ihex_value (const char *args, int from_tty)
 {
   dump_value_to_file (args, FOPEN_WB, "ihex");
 }
 
 static void
-dump_verilog_memory (char *args, int from_tty)
+dump_verilog_memory (const char *args, int from_tty)
 {
   dump_memory_to_file (args, FOPEN_WB, "verilog");
 }
 
 static void
-dump_verilog_value (char *args, int from_tty)
+dump_verilog_value (const char *args, int from_tty)
 {
   dump_value_to_file (args, FOPEN_WB, "verilog");
 }
 
 static void
-dump_tekhex_memory (char *args, int from_tty)
+dump_tekhex_memory (const char *args, int from_tty)
 {
   dump_memory_to_file (args, FOPEN_WB, "tekhex");
 }
 
 static void
-dump_tekhex_value (char *args, int from_tty)
+dump_tekhex_value (const char *args, int from_tty)
 {
   dump_value_to_file (args, FOPEN_WB, "tekhex");
 }
 
 static void
-dump_binary_memory (char *args, int from_tty)
+dump_binary_memory (const char *args, int from_tty)
 {
   dump_memory_to_file (args, FOPEN_WB, "binary");
 }
 
 static void
-dump_binary_value (char *args, int from_tty)
+dump_binary_value (const char *args, int from_tty)
 {
   dump_value_to_file (args, FOPEN_WB, "binary");
 }
 
 static void
-append_binary_memory (char *args, int from_tty)
+append_binary_memory (const char *args, int from_tty)
 {
   dump_memory_to_file (args, FOPEN_AB, "binary");
 }
 
 static void
-append_binary_value (char *args, int from_tty)
+append_binary_value (const char *args, int from_tty)
 {
   dump_value_to_file (args, FOPEN_AB, "binary");
 }
 
 struct dump_context
 {
-  void (*func) (char *cmd, const char *mode);
+  void (*func) (const char *cmd, const char *mode);
   const char *mode;
 };
 
@@ -353,7 +353,7 @@ call_dump_func (struct cmd_list_element *c, char *args, int from_tty)
 
 static void
 add_dump_command (const char *name,
-		  void (*func) (char *args, const char *mode),
+		  void (*func) (const char *args, const char *mode),
 		  const char *descr)
 
 {

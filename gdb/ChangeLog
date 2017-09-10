@@ -1,5 +1,16 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-dump.c (dump_memory_command, dump_value_command)
+	(dump_srec_memory, dump_srec_value, dump_ihex_memory)
+	(dump_ihex_value, dump_verilog_memory, dump_verilog_value)
+	(dump_tekhex_memory, dump_tekhex_value, dump_binary_memory)
+	(dump_binary_value, append_binary_memory, append_binary_value):
+	Constify.
+	(struct dump_context) <func>: Constify.
+	(add_dump_command): Update.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-cmds.c (show_version, show_configuration)
 	(source_command, show_user): Constify.
 
