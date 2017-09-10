@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c (tui_enable_command, tui_disable_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_reg_command): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>
