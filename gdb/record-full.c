@@ -2533,7 +2533,7 @@ bfdcore_write (bfd *obfd, asection *osec, void *buf, int len, int *offset)
    corefile format, with an extra section for our data.  */
 
 static void
-cmd_record_full_restore (char *args, int from_tty)
+cmd_record_full_restore (const char *args, int from_tty)
 {
   core_file_command (args, from_tty);
   record_full_open (args, from_tty);
