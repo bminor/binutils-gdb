@@ -1,5 +1,11 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* command.h (not_just_help_class_command): Update.
+	* cli/cli-decode.h (not_just_help_class_command): Update.
+	* cli/cli-decode.c (not_just_help_class_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* gdb_bfd.c (maintenance_info_bfds): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>

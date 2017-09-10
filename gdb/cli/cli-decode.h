@@ -228,7 +228,7 @@ extern void apropos_cmd (struct ui_file *, struct cmd_list_element *,
    function field NULL, the command is interpreted as a help topic, or
    as a class of commands.  */
 
-extern void not_just_help_class_command (char *arg, int from_tty);
+extern void not_just_help_class_command (const char *arg, int from_tty);
 
 /* Exported to cli/cli-setshow.c */
 

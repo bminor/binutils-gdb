@@ -440,7 +440,7 @@ add_abbrev_prefix_cmd (const char *name, enum command_class theclass,
 
 /* This is an empty "cfunc".  */
 void
-not_just_help_class_command (char *args, int from_tty)
+not_just_help_class_command (const char *args, int from_tty)
 {
 }
 

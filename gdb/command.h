@@ -459,7 +459,7 @@ extern scoped_restore_tmpl<int> prevent_dont_repeat (void);
    function field NULL, the command is interpreted as a help topic, or
    as a class of commands.  */
 
-extern void not_just_help_class_command (char *, int);
+extern void not_just_help_class_command (const char *, int);
 
 /* Check function pointer.  */
 extern int cmd_func_p (struct cmd_list_element *cmd);
