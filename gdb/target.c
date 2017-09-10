@@ -3892,7 +3892,7 @@ flash_erase_command (char *cmd, int from_tty)
 /* Print the name of each layers of our target stack.  */
 
 static void
-maintenance_print_target_stack (char *cmd, int from_tty)
+maintenance_print_target_stack (const char *cmd, int from_tty)
 {
   struct target_ops *t;
 

@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* target.c (maintenance_print_target_stack): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* interps.c (interpreter_exec_cmd): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>
