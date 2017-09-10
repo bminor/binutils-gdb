@@ -1899,7 +1899,7 @@ show_tdesc_filename_cmd (struct ui_file *file, int from_tty,
 }
 
 static void
-unset_tdesc_filename_cmd (char *args, int from_tty)
+unset_tdesc_filename_cmd (const char *args, int from_tty)
 {
   xfree (target_description_filename);
   target_description_filename = NULL;
@@ -2288,7 +2288,7 @@ private:
 };
 
 static void
-maint_print_c_tdesc_cmd (char *args, int from_tty)
+maint_print_c_tdesc_cmd (const char *args, int from_tty)
 {
   const struct target_desc *tdesc;
   const char *filename;
@@ -2362,7 +2362,7 @@ record_xml_tdesc (const char *xml_file, const struct target_desc *tdesc)
    found in the specified directory DIR.  */
 
 static void
-maintenance_check_xml_descriptions (char *dir, int from_tty)
+maintenance_check_xml_descriptions (const char *dir, int from_tty)
 {
   if (dir == NULL)
     error (_("Missing dir name"));

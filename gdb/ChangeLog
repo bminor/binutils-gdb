@@ -1,5 +1,11 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* target-descriptions.c (unset_tdesc_filename_cmd)
+	(maint_print_c_tdesc_cmd, maintenance_check_xml_descriptions):
+	Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* dummy-frame.c (maintenance_print_dummy_frames): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>
