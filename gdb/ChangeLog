@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* cp-namespace.c (maintenance_cplus_namespace): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* cp-support.c (first_component_command): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>
