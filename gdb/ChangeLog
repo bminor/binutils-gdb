@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-logging.c (set_logging_on, set_logging_off): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-script.c (user_defined_command): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>

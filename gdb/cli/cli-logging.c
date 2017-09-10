@@ -146,9 +146,9 @@ handle_redirections (int from_tty)
 }
 
 static void
-set_logging_on (char *args, int from_tty)
+set_logging_on (const char *args, int from_tty)
 {
-  char *rest = args;
+  const char *rest = args;
 
   if (rest && *rest)
     {
@@ -159,7 +159,7 @@ set_logging_on (char *args, int from_tty)
 }
 
 static void 
-set_logging_off (char *args, int from_tty)
+set_logging_off (const char *args, int from_tty)
 {
   if (saved_filename == NULL)
     return;
