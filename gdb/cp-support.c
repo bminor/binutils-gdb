@@ -68,7 +68,6 @@ struct cmd_list_element *maint_cplus_cmd_list = NULL;
 /* The actual commands.  */
 
 static void maint_cplus_command (char *arg, int from_tty);
-static void first_component_command (char *arg, int from_tty);
 
 /* A list of typedefs which should not be substituted by replace_typedefs.  */
 static const char * const ignore_typedefs[] =
@@ -1611,7 +1610,7 @@ maint_cplus_command (char *arg, int from_tty)
    cp_find_first_component.  */
 
 static void
-first_component_command (char *arg, int from_tty)
+first_component_command (const char *arg, int from_tty)
 {
   int len;  
   char *prefix; 

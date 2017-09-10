@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* cp-support.c (first_component_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* psymtab.c (maintenance_print_psymbols)
 	(maintenance_info_psymtabs, maintenance_check_psymtabs):
 	Constify.
