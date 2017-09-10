@@ -503,7 +503,7 @@ out:
 /* Fork list <-> user interface.  */
 
 static void
-delete_checkpoint_command (char *args, int from_tty)
+delete_checkpoint_command (const char *args, int from_tty)
 {
   ptid_t ptid, pptid;
   struct fork_info *fi;
@@ -544,7 +544,7 @@ Please switch to another checkpoint before deleting the current one"));
 }
 
 static void
-detach_checkpoint_command (char *args, int from_tty)
+detach_checkpoint_command (const char *args, int from_tty)
 {
   ptid_t ptid;
 
