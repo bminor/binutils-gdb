@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* dtrace-probe.c (info_probes_dtrace_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* command.h (not_just_help_class_command): Update.
 	* cli/cli-decode.h (not_just_help_class_command): Update.
 	* cli/cli-decode.c (not_just_help_class_command): Constify.

@@ -904,7 +904,7 @@ const struct probe_ops dtrace_probe_ops =
 /* Implementation of the `info probes dtrace' command.  */
 
 static void
-info_probes_dtrace_command (char *arg, int from_tty)
+info_probes_dtrace_command (const char *arg, int from_tty)
 {
   info_probes_for_ops (arg, from_tty, &dtrace_probe_ops);
 }
