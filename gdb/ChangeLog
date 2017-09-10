@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-script.c (user_defined_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-dump.c (dump_memory_command, dump_value_command)
 	(dump_srec_memory, dump_srec_value, dump_ihex_memory)
 	(dump_ihex_value, dump_verilog_memory, dump_verilog_value)
