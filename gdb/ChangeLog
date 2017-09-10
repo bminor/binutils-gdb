@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* value.c (show_convenience): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* gdbcore.h (core_file_command): Update.
 	* corefile.c (core_file_command): Constify.
 

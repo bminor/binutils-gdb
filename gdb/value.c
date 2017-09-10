@@ -885,8 +885,6 @@ value_contents_eq (const struct value *val1, LONGEST offset1,
 
 static void show_values (char *, int);
 
-static void show_convenience (char *, int);
-
 
 /* The value-history records all the values printed
    by print commands during this session.  Each chunk
@@ -2661,7 +2659,7 @@ preserve_values (struct objfile *objfile)
 }
 
 static void
-show_convenience (char *ignore, int from_tty)
+show_convenience (const char *ignore, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   struct internalvar *var;
