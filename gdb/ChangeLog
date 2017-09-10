@@ -1,5 +1,13 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (add_symbol_file_command)
+	(remove_symbol_file_command, list_overlays_command)
+	(map_overlay_command, unmap_overlay_command)
+	(overlay_auto_command, overlay_manual_command)
+	(overlay_off_command, overlay_load_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* spu-tdep.c (info_spu_event_command, info_spu_signal_command)
 	(info_spu_mailbox_command, info_spu_dma_command)
 	(info_spu_proxydma_command): Constify.
