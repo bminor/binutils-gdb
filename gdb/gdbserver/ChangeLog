@@ -1,5 +1,10 @@
 2017-09-10  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* regcache.c (get_thread_regcache): Guard calls to "memset"
+          with "!VEC_empty".
+
+2017-09-10  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* linux-low.c (handle_extended_wait): Use
 	"allocate_target_description" instead of "XNEW".
 	* linux-x86-low.c (initialize_low_arch): Likewise.
