@@ -354,7 +354,7 @@ open_terminal_stream (const char *name)
 /* Implementation of the "new-ui" command.  */
 
 static void
-new_ui_command (char *args, int from_tty)
+new_ui_command (const char *args, int from_tty)
 {
   struct ui *ui;
   struct interp *interp;

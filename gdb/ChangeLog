@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* top.c (new_ui_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (add_symbol_file_command)
 	(remove_symbol_file_command, list_overlays_command)
 	(map_overlay_command, unmap_overlay_command)
