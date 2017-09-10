@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* valprint.c (set_radix, show_radix): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* dtrace-probe.c (info_probes_dtrace_command): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>
