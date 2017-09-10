@@ -1,3 +1,9 @@
+2017-09-10  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* linux-low.c (handle_extended_wait): Use
+	"allocate_target_description" instead of "XNEW".
+	* linux-x86-low.c (initialize_low_arch): Likewise.
+
 2017-09-05  Yao Qi  <yao.qi@linaro.org>
 
 	* configure.srv (srv_i386_regobj): Remove.

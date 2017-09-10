@@ -2900,7 +2900,7 @@ initialize_low_arch (void)
 {
   /* Initialize the Linux target descriptions.  */
 #ifdef __x86_64__
-  tdesc_amd64_linux_no_xml = XNEW (struct target_desc);
+  tdesc_amd64_linux_no_xml = allocate_target_description ();
   copy_target_description (tdesc_amd64_linux_no_xml,
 			   amd64_linux_read_description (X86_XSTATE_SSE_MASK,
 							 false));
@@ -2911,7 +2911,7 @@ initialize_low_arch (void)
   initialize_low_tdesc ();
 #endif
 
-  tdesc_i386_linux_no_xml = XNEW (struct target_desc);
+  tdesc_i386_linux_no_xml = allocate_target_description ();
   copy_target_description (tdesc_i386_linux_no_xml,
 			   i386_linux_read_description (X86_XSTATE_SSE_MASK));
   tdesc_i386_linux_no_xml->xmltarget = xmltarget_i386_linux_no_xml;

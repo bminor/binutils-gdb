@@ -570,7 +570,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 
 	  clone_all_breakpoints (child_thr, event_thr);
 
-	  tdesc = XNEW (struct target_desc);
+	  tdesc = allocate_target_description ();
 	  copy_target_description (tdesc, parent_proc->tdesc);
 	  child_proc->tdesc = tdesc;
 
