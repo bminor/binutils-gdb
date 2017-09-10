@@ -2119,7 +2119,7 @@ maintenance_print_arc_command (char *args, int from_tty)
    disassemble.  */
 
 static void
-dump_arc_instruction_command (char *args, int from_tty)
+dump_arc_instruction_command (const char *args, int from_tty)
 {
   struct value *val;
   if (args != NULL && strlen (args) > 0)
