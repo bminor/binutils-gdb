@@ -103,6 +103,10 @@ static void run_command (char *, int);
 
 static char *inferior_args_scratch;
 
+/* Scratch area where the new cwd will be stored by 'set cwd'.  */
+
+static char *inferior_cwd_scratch;
+
 /* Scratch area where 'set inferior-tty' will store user-provided value.
    We'll immediate copy it into per-inferior storage.  */
 
@@ -236,6 +240,60 @@ show_args_command (struct ui_file *file, int from_tty,
   /* Note that we ignore the passed-in value in favor of computing it
      directly.  */
   deprecated_show_value_hack (file, from_tty, c, get_inferior_args ());
+}
+
+/* Set the inferior current working directory.  If CWD is NULL, unset
+   the directory.  */
+
+static void
+set_inferior_cwd (const char *cwd)
+{
+  struct inferior *inf = current_inferior ();
+
+  gdb_assert (inf != NULL);
+
+  if (cwd == NULL)
+    inf->cwd.reset ();
+  else
+    inf->cwd.reset (xstrdup (cwd));
+}
+
+/* See common/common-inferior.h.  */
+
+const char *
+get_inferior_cwd ()
+{
+  return current_inferior ()->cwd.get ();
+}
+
+/* Handle the 'set cwd' command.  */
+
+static void
+set_cwd_command (char *args, int from_tty, struct cmd_list_element *c)
+{
+  if (*inferior_cwd_scratch == '\0')
+    set_inferior_cwd (NULL);
+  else
+    set_inferior_cwd (inferior_cwd_scratch);
+}
+
+/* Handle the 'show cwd' command.  */
+
+static void
+show_cwd_command (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c, const char *value)
+{
+  const char *cwd = get_inferior_cwd ();
+
+  if (cwd == NULL)
+    fprintf_filtered (gdb_stdout,
+		      _("\
+You have not set the inferior's current working directory.\n\
+The inferior will inherit GDB's cwd.\n"));
+  else
+    fprintf_filtered (gdb_stdout,
+		      _("Current working directory that will be used "
+			"when starting the inferior is \"%s\".\n"), cwd);
 }
 
 
@@ -3248,6 +3306,25 @@ Show argument list to give program being debugged when it is started."), _("\
 Follow this command with any number of args, to be passed to the program."),
 				   set_args_command,
 				   show_args_command,
+				   &setlist, &showlist);
+  c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  gdb_assert (c != NULL);
+  set_cmd_completer (c, filename_completer);
+
+  cmd_name = "cwd";
+  add_setshow_string_noescape_cmd (cmd_name, class_run,
+				   &inferior_cwd_scratch, _("\
+Set the current working directory to be used when the inferior is started.\n\
+Changing this setting does not have any effect on inferiors that are\n\
+already running."),
+				   _("\
+Show the current working directory that is used when the inferior is started."),
+				   _("\
+Use this command to change the current working directory that will be used\n\
+when the inferior is started.  This setting does not affect GDB's current\n\
+working directory."),
+				   set_cwd_command,
+				   show_cwd_command,
 				   &setlist, &showlist);
   c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
   gdb_assert (c != NULL);

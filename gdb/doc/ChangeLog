@@ -1,3 +1,11 @@
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Starting your Program) <The working directory.>:
+	Mention new "set cwd" command.
+	(Working Directory) <Your Program's Working Directory>:
+	Rephrase to explain that "set cwd" exists and is the default
+	way to change the inferior's cwd.
+
 2017-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.texinfo (S/390 and System z Features): Document the new

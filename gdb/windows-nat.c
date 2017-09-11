@@ -66,6 +66,7 @@
 #include "x86-nat.h"
 #include "complaints.h"
 #include "inf-child.h"
+#include "gdb_tilde_expand.h"
 
 #define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
 #define DebugActiveProcessStop		dyn_DebugActiveProcessStop
@@ -2428,6 +2429,7 @@ windows_create_inferior (struct target_ops *ops, const char *exec_file,
 #ifdef __CYGWIN__
   cygwin_buf_t real_path[__PMAX];
   cygwin_buf_t shell[__PMAX]; /* Path to shell */
+  cygwin_buf_t infcwd[__PMAX];
   const char *sh;
   cygwin_buf_t *toexec;
   cygwin_buf_t *cygallargs;
@@ -2464,6 +2466,17 @@ windows_create_inferior (struct target_ops *ops, const char *exec_file,
 
   if (!exec_file)
     error (_("No executable specified, use `target exec'."));
+
+  const char *inferior_cwd = get_inferior_cwd ();
+  std::string expanded_infcwd;
+  if (inferior_cwd != NULL)
+    {
+      expanded_infcwd = gdb_tilde_expand (inferior_cwd);
+      /* Mirror slashes on inferior's cwd.  */
+      std::replace (expanded_infcwd.begin (), expanded_infcwd.end (),
+		    '/', '\\');
+      inferior_cwd = expanded_infcwd.c_str ();
+    }
 
   memset (&si, 0, sizeof (si));
   si.cb = sizeof (si);
@@ -2513,6 +2526,11 @@ windows_create_inferior (struct target_ops *ops, const char *exec_file,
       toexec = shell;
       flags |= DEBUG_PROCESS;
     }
+
+  if (inferior_cwd != NULL
+      && cygwin_conv_path (CCP_POSIX_TO_WIN_W, inferior_cwd,
+			   infcwd, strlen (inferior_cwd)) < 0)
+    error (_("Error converting inferior cwd: %d"), errno);
 
 #ifdef __USEWIDE
   args = (cygwin_buf_t *) alloca ((wcslen (toexec) + wcslen (cygallargs) + 2)
@@ -2574,7 +2592,8 @@ windows_create_inferior (struct target_ops *ops, const char *exec_file,
 		       TRUE,	/* inherit handles */
 		       flags,	/* start flags */
 		       w32_env,	/* environment */
-		       NULL,	/* current directory */
+		       inferior_cwd != NULL ? infcwd : NULL, /* current
+								directory */
 		       &si,
 		       &pi);
   if (w32_env)
@@ -2697,7 +2716,7 @@ windows_create_inferior (struct target_ops *ops, const char *exec_file,
 			TRUE,	/* inherit handles */
 			flags,	/* start flags */
 			w32env,	/* environment */
-			NULL,	/* current directory */
+			inferior_cwd, /* current directory */
 			&si,
 			&pi);
   if (tty != INVALID_HANDLE_VALUE)

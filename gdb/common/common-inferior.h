@@ -30,4 +30,8 @@ extern const char *get_exec_wrapper ();
    otherwise return 0 in that case.  */
 extern char *get_exec_file (int err);
 
+/* Return the inferior's current working directory.  If nothing has
+   been set, then return NULL.  */
+extern const char *get_inferior_cwd ();
+
 #endif /* ! COMMON_INFERIOR_H */

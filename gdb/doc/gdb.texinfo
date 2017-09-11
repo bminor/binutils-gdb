@@ -2057,8 +2057,9 @@ environment} to change parts of the environment that affect
 your program.  @xref{Environment, ,Your Program's Environment}.
 
 @item The @emph{working directory.}
-Your program inherits its working directory from @value{GDBN}.  You can set
-the @value{GDBN} working directory with the @code{cd} command in @value{GDBN}.
+You can set your program's working directory with the command
+@kbd{set cwd}.  If you do not set any working directory with this
+command, your program will inherit @value{GDBN}'s working directory.
 @xref{Working Directory, ,Your Program's Working Directory}.
 
 @item The @emph{standard input and output.}
@@ -2434,22 +2435,50 @@ variables to files that are only run when you sign on, such as
 @section Your Program's Working Directory
 
 @cindex working directory (of your program)
-Each time you start your program with @code{run}, it inherits its
-working directory from the current working directory of @value{GDBN}.
-The @value{GDBN} working directory is initially whatever it inherited
-from its parent process (typically the shell), but you can specify a new
-working directory in @value{GDBN} with the @code{cd} command.
-
-The @value{GDBN} working directory also serves as a default for the commands
-that specify files for @value{GDBN} to operate on.  @xref{Files, ,Commands to
-Specify Files}.
+Each time you start your program with @code{run}, the inferior will be
+initialized with the current working directory specified by the
+@kbd{set cwd} command.  If no directory has been specified by this
+command, then the inferior will inherit @value{GDBN}'s current working
+directory as its working directory.
 
 @table @code
+@kindex set cwd
+@cindex change inferior's working directory
+@anchor{set cwd command}
+@item set cwd @r{[}@var{directory}@r{]}
+Set the inferior's working directory to @var{directory}, which will be
+@code{glob}-expanded in order to resolve tildes (@file{~}).  If no
+argument has been specified, the command clears the setting and resets
+it to an empty state.  This setting has no effect on @value{GDBN}'s
+working directory, and it only takes effect the next time you start
+the inferior.  The @file{~} in @var{directory} is a short for the
+@dfn{home directory}, usually pointed to by the @env{HOME} environment
+variable.  On MS-Windows, if @env{HOME} is not defined, @value{GDBN}
+uses the concatenation of @env{HOMEDRIVE} and @env{HOMEPATH} as
+fallback.
+
+You can also change @value{GDBN}'s current working directory by using
+the @code{cd} command.
+@xref{cd command}
+
+@kindex show cwd
+@cindex show inferior's working directory
+@item show cwd
+Show the inferior's working directory.  If no directory has been
+specified by @kbd{set cwd}, then the default inferior's working
+directory is the same as @value{GDBN}'s working directory.
+
 @kindex cd
-@cindex change working directory
+@cindex change @value{GDBN}'s working directory
+@anchor{cd command}
 @item cd @r{[}@var{directory}@r{]}
 Set the @value{GDBN} working directory to @var{directory}.  If not
 given, @var{directory} uses @file{'~'}.
+
+The @value{GDBN} working directory serves as a default for the
+commands that specify files for @value{GDBN} to operate on.
+@xref{Files, ,Commands to Specify Files}.
+@xref{set cwd command}
 
 @kindex pwd
 @item pwd

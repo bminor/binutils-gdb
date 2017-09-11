@@ -1727,9 +1727,11 @@ The commands below can be used to select other frames by number or address."),
 Print working directory.  This is used for your program as well."));
 
   c = add_cmd ("cd", class_files, cd_command, _("\
-Set working directory to DIR for debugger and program being debugged.\n\
-The change does not take effect for the program being debugged\n\
-until the next time it is started."), &cmdlist);
+Set working directory to DIR for debugger.\n\
+The debugger's current working directory specifies where scripts and other\n\
+files that can be loaded by GDB are located.\n\
+In order to change the inferior's current working directory, the recommended\n\
+way is to use the \"set cwd\" command."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   add_com ("echo", class_support, echo_command, _("\

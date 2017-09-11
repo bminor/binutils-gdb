@@ -355,6 +355,10 @@ public:
      should never be freed.  */
   char **argv = NULL;
 
+  /* The current working directory that will be used when starting
+     this inferior.  */
+  gdb::unique_xmalloc_ptr<char> cwd;
+
   /* The name of terminal device to use for I/O.  */
   char *terminal = NULL;
 

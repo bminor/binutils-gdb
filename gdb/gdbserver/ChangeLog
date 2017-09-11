@@ -1,5 +1,11 @@
 2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* inferiors.c (current_inferior_cwd): New global variable.
+	(get_inferior_cwd): New function.
+	* inferiors.h (struct process_info) <cwd>: New field.
+
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* Makefile.in (SFILES): Add $(srcdir)/common/gdb_tilde_expand.c.
 	(OBS): Add gdb_tilde_expand.o.
 

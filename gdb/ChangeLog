@@ -1,5 +1,23 @@
 2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* NEWS (New commands): Mention "set/show cwd".
+	* cli/cli-cmds.c (_initialize_cli_cmds): Mention "set cwd" on
+	"cd" command's help text.
+	* common/common-inferior.h (get_inferior_cwd): New prototype.
+	* infcmd.c (inferior_cwd_scratch): New global variable.
+	(set_inferior_cwd): New function.
+	(get_inferior_cwd): Likewise.
+	(set_cwd_command): Likewise.
+	(show_cwd_command): Likewise.
+	(_initialize_infcmd): Add "set/show cwd" commands.
+	* inferior.h (class inferior) <cwd>: New field.
+	* nat/fork-inferior.c: Include "gdb_tilde_expand.h".
+	(fork_inferior): Change inferior's cwd before its execution.
+	* windows-nat.c (windows_create_inferior): Pass inferior's cwd
+	to CreateProcess.
+
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* Makefile.in (SFILES): Add gdb_tilde_expand.c.
 	(HFILES_NO_SRCDIR): Add gdb_tilde_expand.h.
 	(COMMON_OBS): Add gdb_tilde_expand.o.

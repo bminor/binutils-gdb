@@ -67,6 +67,9 @@ QStartupWithShell
 
 * New commands
 
+set|show cwd
+  Set and show the current working directory for the inferior.
+
 set|show compile-gcc
   Set and show compilation command used for compiling and injecting code
   with the 'compile' commands.

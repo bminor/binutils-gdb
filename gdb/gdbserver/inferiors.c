@@ -29,6 +29,9 @@ struct thread_info *current_thread;
 
 #define get_thread(inf) ((struct thread_info *)(inf))
 
+/* The current working directory used to start the inferior.  */
+static const char *current_inferior_cwd = NULL;
+
 void
 add_inferior_to_list (struct inferior_list *list,
 		      struct inferior_list_entry *new_inferior)
@@ -444,4 +447,12 @@ switch_to_thread (ptid_t ptid)
 {
   gdb_assert (ptid != minus_one_ptid);
   current_thread = find_thread_ptid (ptid);
+}
+
+/* See common/common-inferior.h.  */
+
+const char *
+get_inferior_cwd ()
+{
+  return current_inferior_cwd;
 }
