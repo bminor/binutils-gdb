@@ -1,3 +1,9 @@
+2017-09-09  Kamil Rytarowski  <n54@gmx.com>
+
+	* nds32-asm.c: Rename __BIT() to N32_BIT().
+	* nds32-asm.h: Likewise.
+	* nds32-dis.c: Likewise.
+
 2017-09-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (last_active_prefix): Removed.
