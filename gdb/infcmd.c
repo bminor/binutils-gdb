@@ -518,12 +518,25 @@ prepare_execution_command (struct target_ops *target, int background)
     }
 }
 
-/* Implement the "run" command.  If TBREAK_AT_MAIN is set, then insert
-   a temporary breakpoint at the begining of the main program before
-   running the program.  */
+/* Determine how the new inferior will behave.  */
+
+enum run_how
+  {
+    /* Run program without any explicit stop during startup.  */
+    RUN_NORMAL,
+
+    /* Stop at the beginning of the program's main function.  */
+    RUN_STOP_AT_MAIN,
+
+    /* Stop at the first instruction of the program.  */
+    RUN_STOP_AT_FIRST_INSN
+  };
+
+/* Implement the "run" command.  Force a stop during program start if
+   requested by RUN_HOW.  */
 
 static void
-run_command_1 (char *args, int from_tty, int tbreak_at_main)
+run_command_1 (char *args, int from_tty, enum run_how run_how)
 {
   const char *exec_file;
   struct cleanup *old_chain;
@@ -532,6 +545,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
   struct target_ops *run_target;
   int async_exec;
   struct cleanup *args_chain;
+  CORE_ADDR pc;
 
   dont_repeat ();
 
@@ -569,8 +583,8 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   /* Done.  Can now set breakpoints, change inferior args, etc.  */
 
-  /* Insert the temporary breakpoint if a location was specified.  */
-  if (tbreak_at_main)
+  /* Insert temporary breakpoint in main function if requested.  */
+  if (run_how == RUN_STOP_AT_MAIN)
     tbreak_command (main_name (), 0);
 
   exec_file = get_exec_file (0);
@@ -630,6 +644,15 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
      has done its thing; now we are setting up the running program.  */
   post_create_inferior (&current_target, 0);
 
+  /* Queue a pending event so that the program stops immediately.  */
+  if (run_how == RUN_STOP_AT_FIRST_INSN)
+    {
+      thread_info *thr = inferior_thread ();
+      thr->suspend.waitstatus_pending_p = 1;
+      thr->suspend.waitstatus.kind = TARGET_WAITKIND_STOPPED;
+      thr->suspend.waitstatus.value.sig = GDB_SIGNAL_0;
+    }
+
   /* Start the target running.  Do not use -1 continuation as it would skip
      breakpoint right at the entry point.  */
   proceed (regcache_read_pc (get_current_regcache ()), GDB_SIGNAL_0);
@@ -642,7 +665,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 static void
 run_command (char *args, int from_tty)
 {
-  run_command_1 (args, from_tty, 0);
+  run_command_1 (args, from_tty, RUN_NORMAL);
 }
 
 /* Start the execution of the program up until the beginning of the main
@@ -658,7 +681,16 @@ start_command (char *args, int from_tty)
     error (_("No symbol table loaded.  Use the \"file\" command."));
 
   /* Run the program until reaching the main procedure...  */
-  run_command_1 (args, from_tty, 1);
+  run_command_1 (args, from_tty, RUN_STOP_AT_MAIN);
+}
+
+/* Start the execution of the program stopping at the first
+   instruction.  */
+
+static void
+starti_command (char *args, int from_tty)
+{
+  run_command_1 (args, from_tty, RUN_STOP_AT_FIRST_INSN);
 } 
 
 static int
@@ -3178,6 +3210,22 @@ info_proc_cmd_all (char *args, int from_tty)
   info_proc_cmd_1 (args, IP_ALL, from_tty);
 }
 
+/* This help string is used for the run, start, and starti commands.
+   It is defined as a macro to prevent duplication.  */
+
+#define RUN_ARGS_HELP \
+"You may specify arguments to give it.\n\
+Args may include \"*\", or \"[...]\"; they are expanded using the\n\
+shell that will start the program (specified by the \"$SHELL\" environment\n\
+variable).  Input and output redirection with \">\", \"<\", or \">>\"\n\
+are also allowed.\n\
+\n\
+With no arguments, uses arguments last specified (with \"run\" or \n\
+\"set args\").  To cancel previous arguments and run with no arguments,\n\
+use \"set args\" without arguments.\n\
+\n\
+To start the inferior without using a shell, use \"set startup-with-shell off\"."
+
 void
 _initialize_infcmd (void)
 {
@@ -3384,24 +3432,19 @@ Specifying -a and an ignore count simultaneously is an error."));
   add_com_alias ("fg", "cont", class_run, 1);
 
   c = add_com ("run", class_run, run_command, _("\
-Start debugged program.  You may specify arguments to give it.\n\
-Args may include \"*\", or \"[...]\"; they are expanded using the\n\
-shell that will start the program (specified by the \"$SHELL\"\
-environment\nvariable).  Input and output redirection with \">\",\
-\"<\", or \">>\"\nare also allowed.\n\n\
-With no arguments, uses arguments last specified (with \"run\" \
-or \"set args\").\n\
-To cancel previous arguments and run with no arguments,\n\
-use \"set args\" without arguments.\n\
-To start the inferior without using a shell, use \"set \
-startup-with-shell off\"."));
+Start debugged program.\n"
+RUN_ARGS_HELP));
   set_cmd_completer (c, filename_completer);
   add_com_alias ("r", "run", class_run, 1);
 
   c = add_com ("start", class_run, start_command, _("\
-Run the debugged program until the beginning of the main procedure.\n\
-You may specify arguments to give to your program, just as with the\n\
-\"run\" command."));
+Start the debugged program stopping at the beginning of the main procedure.\n"
+RUN_ARGS_HELP));
+  set_cmd_completer (c, filename_completer);
+
+  c = add_com ("starti", class_run, starti_command, _("\
+Start the debugged program stopping at the first instruction.\n"
+RUN_ARGS_HELP));
   set_cmd_completer (c, filename_completer);
 
   add_com ("interrupt", class_run, interrupt_command,

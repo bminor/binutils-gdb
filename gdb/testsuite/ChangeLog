@@ -1,3 +1,9 @@
+2017-09-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.base/starti.c: New file.
+	* gdb.base/starti.exp: New file.
+	* lib/gdb.exp (gdb_starti_cmd): New procedure.
+
 2017-09-14  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/nodebug.exp (nodebug_runto): New procedure.

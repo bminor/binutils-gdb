@@ -370,6 +370,43 @@ proc gdb_start_cmd {args} {
     return -1
 }
 
+# Generic starti command.  Return 0 if we could start the program, -1
+# if we could not.
+#
+# N.B. This function does not wait for gdb to return to the prompt,
+# that is the caller's responsibility.
+
+proc gdb_starti_cmd {args} {
+    global gdb_prompt use_gdb_stub
+
+    foreach command [gdb_init_commands] {
+	send_gdb "$command\n"
+	gdb_expect 30 {
+	    -re "$gdb_prompt $" { }
+	    default {
+		perror "gdb_init_command for target failed"
+		return -1
+	    }
+	}
+    }
+
+    if $use_gdb_stub {
+	return -1
+    }
+
+    send_gdb "starti $args\n"
+    gdb_expect 60 {
+	-re "The program .* has been started already.*y or n. $" {
+	    send_gdb "y\n"
+	    exp_continue
+	}
+	-re "Starting program: \[^\r\n\]*" {
+	    return 0
+	}
+    }
+    return -1
+}
+
 # Set a breakpoint at FUNCTION.  If there is an additional argument it is
 # a list of options; the supported options are allow-pending, temporary,
 # message, no-message, and passfail.

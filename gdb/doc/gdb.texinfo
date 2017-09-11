@@ -2117,10 +2117,20 @@ reused if no argument is provided during subsequent calls to
 @samp{start} or @samp{run}.
 
 It is sometimes necessary to debug the program during elaboration.  In
-these cases, using the @code{start} command would stop the execution of
-your program too late, as the program would have already completed the
-elaboration phase.  Under these circumstances, insert breakpoints in your
-elaboration code before running your program.
+these cases, using the @code{start} command would stop the execution
+of your program too late, as the program would have already completed
+the elaboration phase.  Under these circumstances, either insert
+breakpoints in your elaboration code before running your program or
+use the @code{starti} command.
+
+@kindex starti
+@item starti
+@cindex run to first instruction
+The @samp{starti} command does the equivalent of setting a temporary
+breakpoint at the first instruction of a program's execution and then
+invoking the @samp{run} command.  For programs containing an
+elaboration phase, the @code{starti} command will stop execution at
+the start of the elaboration phase.
 
 @anchor{set exec-wrapper}
 @kindex set exec-wrapper

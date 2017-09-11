@@ -75,6 +75,9 @@ show debug separate-debug-file
 maint info selftests
   List the registered selftests.
 
+starti
+  Start the debugged program stopping at the first instruction.
+
 * TUI Single-Key mode now supports two new shortcut keys: `i' for stepi and
   `o' for nexti.
 

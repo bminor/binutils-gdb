@@ -1,3 +1,16 @@
+2017-09-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* NEWS (Changes since GDB 8.0): Add starti.
+	* infcmd.c (enum run_break): New.
+	(run_command_1): Queue pending event for RUN_STOP_AT_FIRST_INSN
+	case.
+	(run_command): Use enum run_how.
+	(start_command): Likewise.
+	(starti_command): New function.
+	(RUN_ARGS_HELP): New macro.
+	(_initialize_infcmd): Use RUN_ARGS_HELP for run and start
+	commands.  Add starti command.
+
 2017-09-19  Yao Qi  <yao.qi@linaro.org>
 
 	* Makefile.in (monitor.o): Remove the rule.
