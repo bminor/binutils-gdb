@@ -74,11 +74,12 @@ mi_cmd_env_pwd (const char *command, char **argv, int argc)
      
   /* Otherwise the mi level is 2 or higher.  */
 
-  if (! getcwd (gdb_dirbuf, sizeof (gdb_dirbuf)))
+  gdb::unique_xmalloc_ptr<char> cwd (getcwd (NULL, 0));
+  if (cwd == NULL)
     error (_("-environment-pwd: error finding name of working directory: %s"),
            safe_strerror (errno));
-    
-  uiout->field_string ("cwd", gdb_dirbuf);
+
+  uiout->field_string ("cwd", cwd.get ());
 }
 
 /* Change working directory.  */

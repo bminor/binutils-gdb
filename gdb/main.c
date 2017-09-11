@@ -549,10 +549,9 @@ captured_main_1 (struct captured_main_args *context)
     (xstrprintf ("%s: warning: ", gdb_program_name));
   warning_pre_print = tmp_warn_preprint.get ();
 
-  if (! getcwd (gdb_dirbuf, sizeof (gdb_dirbuf)))
+  current_directory = getcwd (NULL, 0);
+  if (current_directory == NULL)
     perror_warning_with_name (_("error finding working directory"));
-
-  current_directory = gdb_dirbuf;
 
   /* Set the sysroot path.  */
   gdb_sysroot = relocate_gdb_directory (TARGET_SYSTEM_ROOT,

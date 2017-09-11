@@ -133,9 +133,6 @@ show_confirm (struct ui_file *file, int from_tty,
 
 char *current_directory;
 
-/* The directory name is actually stored here (usually).  */
-char gdb_dirbuf[1024];
-
 /* The last command line executed on the console.  Used for command
    repetitions.  */
 char *saved_command_line;

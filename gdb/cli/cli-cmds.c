@@ -384,13 +384,16 @@ pwd_command (char *args, int from_tty)
 {
   if (args)
     error (_("The \"pwd\" command does not take an argument: %s"), args);
-  if (! getcwd (gdb_dirbuf, sizeof (gdb_dirbuf)))
+
+  gdb::unique_xmalloc_ptr<char> cwd (getcwd (NULL, 0));
+
+  if (cwd == NULL)
     error (_("Error finding name of working directory: %s"),
            safe_strerror (errno));
 
-  if (strcmp (gdb_dirbuf, current_directory) != 0)
+  if (strcmp (cwd.get (), current_directory) != 0)
     printf_unfiltered (_("Working directory %s\n (canonically %s).\n"),
-		       current_directory, gdb_dirbuf);
+		       current_directory, cwd.get ());
   else
     printf_unfiltered (_("Working directory %s.\n"), current_directory);
 }
@@ -418,7 +421,8 @@ cd_command (char *dir, int from_tty)
   /* There's too much mess with DOSish names like "d:", "d:.",
      "d:./foo" etc.  Instead of having lots of special #ifdef'ed code,
      simply get the canonicalized name of the current directory.  */
-  dir = getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
+  gdb::unique_xmalloc_ptr<char> cwd (getcwd (NULL, 0));
+  dir = cwd.get ();
 #endif
 
   len = strlen (dir);
@@ -436,7 +440,10 @@ cd_command (char *dir, int from_tty)
 
   dir_holder.reset (savestring (dir, len));
   if (IS_ABSOLUTE_PATH (dir_holder.get ()))
-    current_directory = dir_holder.release ();
+    {
+      xfree (current_directory);
+      current_directory = dir_holder.release ();
+    }
   else
     {
       if (IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1]))

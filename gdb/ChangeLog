@@ -1,5 +1,15 @@
 2017-09-22  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* cli/cli-cmds.c (pwd_command): Use "getcwd (NULL, 0)".
+	(cd_command): Likewise.  Free "current_directory" before
+	assigning to it.
+	* main.c (captured_main_1): Use "getcwd (NULL, 0)".
+	* mi/mi-cmd-env.c (mi_cmd_env_pwd): Likewise.
+	* top.c (gdb_dirbuf): Remove global declaration.
+	* top.h (gdb_dirbuf): Likewise.
+
+2017-09-22  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* gnulib/aclocal.m4: Regenerate.
 	* gnulib/config.in: Regenerate.
 	* gnulib/configure: Regenerate.
