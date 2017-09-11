@@ -1248,6 +1248,7 @@ SFILES = \
 	common/filestuff.c \
 	common/format.c \
 	common/job-control.c \
+	common/gdb_tilde_expand.c \
 	common/gdb_vecs.c \
 	common/new-op.c \
 	common/print-utils.c \
@@ -1532,6 +1533,7 @@ HFILES_NO_SRCDIR = \
 	common/fileio.h \
 	common/format.h \
 	common/gdb_assert.h \
+	common/gdb_tilde_expand.h \
 	common/gdb_locale.h \
 	common/gdb_setjmp.h \
 	common/gdb_signals.h \
@@ -1737,6 +1739,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	frame-unwind.o \
 	gcore.o \
 	gdb_bfd.o \
+	gdb_tilde_expand.o \
 	gdb-dlfcn.o \
 	gdb_obstack.o \
 	gdb_regex.o \

@@ -205,6 +205,7 @@ SFILES = \
 	$(srcdir)/common/fileio.c \
 	$(srcdir)/common/filestuff.c \
 	$(srcdir)/common/job-control.c \
+	$(srcdir)/common/gdb_tilde_expand.c \
 	$(srcdir)/common/gdb_vecs.c \
 	$(srcdir)/common/new-op.c \
 	$(srcdir)/common/print-utils.c \
@@ -247,6 +248,7 @@ OBS = \
 	fileio.o \
 	filestuff.o \
 	format.o \
+	gdb_tilde_expand.o \
 	gdb_vecs.o \
 	hostio.o \
 	inferiors.o \

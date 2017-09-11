@@ -1,3 +1,8 @@
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SFILES): Add $(srcdir)/common/gdb_tilde_expand.c.
+	(OBS): Add gdb_tilde_expand.o.
+
 2017-10-02  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* lynx-i386-low.c (lynx_i386_arch_setup): Call init_target_desc.

@@ -1,3 +1,11 @@
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (SFILES): Add gdb_tilde_expand.c.
+	(HFILES_NO_SRCDIR): Add gdb_tilde_expand.h.
+	(COMMON_OBS): Add gdb_tilde_expand.o.
+	* common/gdb_tilde_expand.c: New file.
+	* common/gdb_tilde_expand.h: Likewise.
+
 2017-10-03  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* gdbarch.sh (objfile): Remove duplicate declaration.
