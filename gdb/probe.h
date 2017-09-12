@@ -214,15 +214,26 @@ struct probe
    their point of use.  */
 
 struct bound_probe
-  {
-    /* The probe.  */
+{
+  /* Create an empty bound_probe object.  */
 
-    struct probe *probe;
+  bound_probe ()
+  {}
 
-    /* The objfile in which the probe originated.  */
+  /* Create and initialize a bound_probe object using PROBE and OBJFILE.  */
 
-    struct objfile *objfile;
-  };
+  bound_probe (struct probe *probe_, struct objfile *objfile_)
+  : probe (probe_), objfile (objfile_)
+  {}
+
+  /* The probe.  */
+
+  struct probe *probe = NULL;
+
+  /* The objfile in which the probe originated.  */
+
+  struct objfile *objfile = NULL;
+};
 
 /* A helper for linespec that decodes a probe specification.  It
    returns a std::vector<symtab_and_line> object and updates LOC or
