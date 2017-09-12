@@ -1,5 +1,10 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* ax-gdb.c (maint_agent_printf_command, agent_command)
+	(agent_eval_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* tracepoint.c (info_scope_command): Constify.
 	* python/python.c (gdbpy_decode_line): Constify.
 	* python/py-breakpoint.c (bppy_init): Constify.
