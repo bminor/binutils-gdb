@@ -1,5 +1,13 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* record.c (cmd_record_delete, cmd_record_stop, cmd_record_save)
+	(cmd_record_goto_begin, cmd_record_goto_end, get_insn_number)
+	(get_context_size, no_chunk, get_insn_history_modifiers)
+	(cmd_record_insn_history, get_call_history_modifiers)
+	(cmd_record_call_history): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* source.c (show_substitute_path_command)
 	(unset_substitute_path_command, set_substitute_path_command):
 	Constify.
