@@ -1,3 +1,9 @@
+2017-09-20  Tom Tromey  <tom@tromey.com>
+
+	* main.c (catch_command_errors): Rename from
+	catch_command_errors_const.
+	(captured_main_1): Update.
+
 2017-09-20  Pedro Alves  <palves@redhat.com>
 
 	* cli/cli-cmds.c (list_command): Use print_sal_location.
