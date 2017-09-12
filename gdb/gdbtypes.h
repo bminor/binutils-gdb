@@ -1931,7 +1931,7 @@ extern int is_scalar_type_recursive (struct type *);
 
 extern int class_or_union_p (const struct type *);
 
-extern void maintenance_print_type (char *, int);
+extern void maintenance_print_type (const char *, int);
 
 extern htab_t create_copied_types_hash (struct objfile *objfile);
 

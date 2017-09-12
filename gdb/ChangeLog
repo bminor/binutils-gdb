@@ -1,5 +1,16 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* typeprint.c (maintenance_print_type): Constify.
+	* maint.c (maintenance_dump_me, maintenance_demangle)
+	(maintenance_time_display, maintenance_info_sections)
+	(maintenance_print_statistics, maintenance_deprecate)
+	(maintenance_undeprecate): Constify.
+	(maintenance_do_deprecate): Constify.  Use std::string.
+	(maintenance_selftest): Constify.
+	* gdbtypes.h (maintenance_print_type): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* hppa-tdep.c (unwind_command): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>

@@ -48,19 +48,13 @@ static void maintenance_command (char *, int);
 
 static void maintenance_internal_error (char *args, int from_tty);
 
-static void maintenance_demangle (char *, int);
-
-static void maintenance_time_display (char *, int);
-
 static void maintenance_space_display (char *, int);
 
 static void maintenance_info_command (char *, int);
 
-static void maintenance_info_sections (char *, int);
-
 static void maintenance_print_command (char *, int);
 
-static void maintenance_do_deprecate (char *, int);
+static void maintenance_do_deprecate (const char *, int);
 
 /* Set this to the maximum number of seconds to wait instead of waiting forever
    in target_wait().  If this timer times out, then it generates an error and
@@ -88,7 +82,7 @@ maintenance_command (char *args, int from_tty)
 
 #ifndef _WIN32
 static void
-maintenance_dump_me (char *args, int from_tty)
+maintenance_dump_me (const char *args, int from_tty)
 {
   if (query (_("Should GDB dump core? ")))
     {
@@ -140,13 +134,13 @@ maintenance_demangler_warning (char *args, int from_tty)
    "mt demangler-warning" which artificially creates an internal gdb error.  */
 
 static void
-maintenance_demangle (char *args, int from_tty)
+maintenance_demangle (const char *args, int from_tty)
 {
   printf_filtered (_("This command has been moved to \"demangle\".\n"));
 }
 
 static void
-maintenance_time_display (char *args, int from_tty)
+maintenance_time_display (const char *args, int from_tty)
 {
   if (args == NULL || *args == '\0')
     printf_unfiltered (_("\"maintenance time\" takes a numeric argument.\n"));
@@ -354,7 +348,7 @@ print_objfile_section_info (bfd *abfd,
 }
 
 static void
-maintenance_info_sections (char *arg, int from_tty)
+maintenance_info_sections (const char *arg, int from_tty)
 {
   if (exec_bfd)
     {
@@ -385,7 +379,7 @@ maintenance_info_sections (char *arg, int from_tty)
 	    }
 	}
       else 
-	bfd_map_over_sections (exec_bfd, print_bfd_section_info, arg);
+	bfd_map_over_sections (exec_bfd, print_bfd_section_info, (void *) arg);
     }
 
   if (core_bfd)
@@ -394,12 +388,12 @@ maintenance_info_sections (char *arg, int from_tty)
       printf_filtered ("    `%s', ", bfd_get_filename (core_bfd));
       wrap_here ("        ");
       printf_filtered (_("file type %s.\n"), bfd_get_target (core_bfd));
-      bfd_map_over_sections (core_bfd, print_bfd_section_info, arg);
+      bfd_map_over_sections (core_bfd, print_bfd_section_info, (void *) arg);
     }
 }
 
 static void
-maintenance_print_statistics (char *args, int from_tty)
+maintenance_print_statistics (const char *args, int from_tty)
 {
   print_objfile_statistics ();
   print_symbol_bcache_statistics ();
@@ -525,7 +519,7 @@ maintenance_translate_address (char *arg, int from_tty)
    offered.  */
 
 static void
-maintenance_deprecate (char *args, int from_tty)
+maintenance_deprecate (const char *args, int from_tty)
 {
   if (args == NULL || *args == '\0')
     {
@@ -535,12 +529,11 @@ enclosed in quotes.\n"));
     }
 
   maintenance_do_deprecate (args, 1);
-
 }
 
 
 static void
-maintenance_undeprecate (char *args, int from_tty)
+maintenance_undeprecate (const char *args, int from_tty)
 {
   if (args == NULL || *args == '\0')
     {
@@ -549,7 +542,6 @@ the command you want to undeprecate.\n"));
     }
 
   maintenance_do_deprecate (args, 0);
-
 }
 
 /* You really shouldn't be using this.  It is just for the testsuite.
@@ -560,14 +552,14 @@ the command you want to undeprecate.\n"));
    replacement.  */
 
 static void
-maintenance_do_deprecate (char *text, int deprecate)
+maintenance_do_deprecate (const char *text, int deprecate)
 {
   struct cmd_list_element *alias = NULL;
   struct cmd_list_element *prefix_cmd = NULL;
   struct cmd_list_element *cmd = NULL;
 
-  char *start_ptr = NULL;
-  char *end_ptr = NULL;
+  const char *start_ptr = NULL;
+  const char *end_ptr = NULL;
   int len;
   char *replacement = NULL;
 
@@ -591,8 +583,7 @@ maintenance_do_deprecate (char *text, int deprecate)
 	  if (end_ptr != NULL)
 	    {
 	      len = end_ptr - start_ptr;
-	      start_ptr[len] = '\0';
-	      replacement = xstrdup (start_ptr);
+	      replacement = savestring (start_ptr, len);
 	    }
 	}
     }
@@ -955,7 +946,7 @@ show_per_command_cmd (char *args, int from_tty)
 /* The "maintenance selftest" command.  */
 
 static void
-maintenance_selftest (char *args, int from_tty)
+maintenance_selftest (const char *args, int from_tty)
 {
   selftests::run_tests (args);
 }
