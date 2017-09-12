@@ -1,5 +1,18 @@
 2017-09-12  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* probe.h (probe_ops_cp): Remove typedef.
+	(DEF_VEC_P (probe_ops_cp)): Remove.
+	(all_probe_ops): Change type to std::vector.
+	* probe.c (info_probes_for_ops): Adjust to vector change.
+	(probe_linespec_to_ops): Likewise.
+	(all_probe_ops): Change type to std::vector.
+	(_initialize_probe): Adjust to vector change.
+	* dtrace-probe.c (_initialize_dtrace_probe): Likewise.
+	* elfread.c (elf_get_probes): Likewise.
+	* stap-probe.c (_initialize_stap_probe): Likewise.
+
+2017-09-12  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* probe.h (struct bound_probe): Define constructors.
 	* probe.c (bound_probe_s): Remove typedef.
 	(DEF_VEC_O (bound_probe_s)): Remove VEC.

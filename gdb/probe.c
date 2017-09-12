@@ -565,9 +565,6 @@ info_probes_for_ops (const char *arg, int from_tty,
 
   if (pops == NULL)
     {
-      const struct probe_ops *po;
-      int ix;
-
       /* If the probe_ops is NULL, it means the user has requested a "simple"
 	 `info probes', i.e., she wants to print all information about all
 	 probes.  For that, we have to identify how many extra fields we will
@@ -578,7 +575,7 @@ info_probes_for_ops (const char *arg, int from_tty,
 	 that number.  But note that we ignore the probe_ops for which no probes
 	 are defined with the given search criteria.  */
 
-      for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, po); ++ix)
+      for (const probe_ops *po : all_probe_ops)
 	if (exists_probe_with_pops (probes, po))
 	  ui_out_extra_fields += get_number_extra_fields (po);
     }
@@ -616,13 +613,10 @@ info_probes_for_ops (const char *arg, int from_tty,
 
     if (pops == NULL)
       {
-	const struct probe_ops *po;
-	int ix;
-
 	/* We have to generate the table header for each new probe type
 	   that we will print.  Note that this excludes probe types not
 	   having any defined probe with the search criteria.  */
-	for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, po); ++ix)
+	for (const probe_ops *po : all_probe_ops)
 	  if (exists_probe_with_pops (probes, po))
 	    gen_ui_out_table_header_info (probes, po);
       }
@@ -647,11 +641,7 @@ info_probes_for_ops (const char *arg, int from_tty,
 
 	if (pops == NULL)
 	  {
-	    const struct probe_ops *po;
-	    int ix;
-
-	    for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, po);
-		 ++ix)
+	    for (const probe_ops *po : all_probe_ops)
 	      if (probe.probe->pops == po)
 		print_ui_out_info (probe.probe);
 	      else if (exists_probe_with_pops (probes, po))
@@ -816,12 +806,9 @@ probe_safe_evaluate_at_pc (struct frame_info *frame, unsigned n)
 const struct probe_ops *
 probe_linespec_to_ops (const char **linespecp)
 {
-  int ix;
-  const struct probe_ops *probe_ops;
-
-  for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, probe_ops); ix++)
-    if (probe_ops->is_linespec (linespecp))
-      return probe_ops;
+  for (const probe_ops *ops : all_probe_ops)
+    if (ops->is_linespec (linespecp))
+      return ops;
 
   return NULL;
 }
@@ -980,12 +967,12 @@ static const struct internalvar_funcs probe_funcs =
 };
 
 
-VEC (probe_ops_cp) *all_probe_ops;
+std::vector<const probe_ops *> all_probe_ops;
 
 void
 _initialize_probe (void)
 {
-  VEC_safe_push (probe_ops_cp, all_probe_ops, &probe_ops_any);
+  all_probe_ops.push_back (&probe_ops_any);
 
   create_internalvar_type_lazy ("_probe_argc", &probe_funcs,
 				(void *) (uintptr_t) -1);

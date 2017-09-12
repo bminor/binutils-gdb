@@ -912,7 +912,7 @@ info_probes_dtrace_command (char *arg, int from_tty)
 void
 _initialize_dtrace_probe (void)
 {
-  VEC_safe_push (probe_ops_cp, all_probe_ops, &dtrace_probe_ops);
+  all_probe_ops.push_back (&dtrace_probe_ops);
 
   add_cmd ("dtrace", class_info, info_probes_dtrace_command,
 	   _("\

@@ -1319,15 +1319,12 @@ elf_get_probes (struct objfile *objfile)
 
   if (probes_per_bfd == NULL)
     {
-      int ix;
-      const struct probe_ops *probe_ops;
       probes_per_bfd = new std::vector<probe *>;
 
       /* Here we try to gather information about all types of probes from the
 	 objfile.  */
-      for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, probe_ops);
-	   ix++)
-	probe_ops->get_probes (probes_per_bfd, objfile);
+      for (const probe_ops *ops : all_probe_ops)
+	ops->get_probes (probes_per_bfd, objfile);
 
       set_bfd_data (objfile->obfd, probe_key, probes_per_bfd);
     }

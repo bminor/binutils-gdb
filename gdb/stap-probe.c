@@ -1716,7 +1716,7 @@ info_probes_stap_command (char *arg, int from_tty)
 void
 _initialize_stap_probe (void)
 {
-  VEC_safe_push (probe_ops_cp, all_probe_ops, &stap_probe_ops);
+  all_probe_ops.push_back (&stap_probe_ops);
 
   add_setshow_zuinteger_cmd ("stap-expression", class_maintenance,
 			     &stap_expression_debug,

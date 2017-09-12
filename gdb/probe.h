@@ -160,9 +160,7 @@ struct probe_ops
 
 /* Definition of a vector of probe_ops.  */
 
-typedef const struct probe_ops *probe_ops_cp;
-DEF_VEC_P (probe_ops_cp);
-extern VEC (probe_ops_cp) *all_probe_ops;
+extern std::vector<const probe_ops *> all_probe_ops;
 
 /* The probe_ops associated with the generic probe.  */
 
