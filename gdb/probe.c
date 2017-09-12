@@ -58,10 +58,6 @@ parse_probes_in_pspace (const struct probe_ops *probe_ops,
 
   ALL_PSPACE_OBJFILES (search_pspace, objfile)
     {
-      VEC (probe_p) *probes;
-      struct probe *probe;
-      int ix;
-
       if (!objfile->sf || !objfile->sf->sym_probe_fns)
 	continue;
 
@@ -71,9 +67,10 @@ parse_probes_in_pspace (const struct probe_ops *probe_ops,
 			   objfile_namestr) != 0)
 	continue;
 
-      probes = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
+      const std::vector<probe *> &probes
+	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
 
-      for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)
+      for (struct probe *probe : probes)
 	{
 	  if (probe_ops != &probe_ops_any && probe->pops != probe_ops)
 	    continue;
@@ -211,15 +208,14 @@ VEC (probe_p) *
 find_probes_in_objfile (struct objfile *objfile, const char *provider,
 			const char *name)
 {
-  VEC (probe_p) *probes, *result = NULL;
-  int ix;
-  struct probe *probe;
+  VEC (probe_p) *result = NULL;
 
   if (!objfile->sf || !objfile->sf->sym_probe_fns)
     return NULL;
 
-  probes = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
-  for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)
+  const std::vector<probe *> &probes
+    = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
+  for (struct probe *probe : probes)
     {
       if (strcmp (probe->provider, provider) != 0)
 	continue;
@@ -246,17 +242,14 @@ find_probe_by_pc (CORE_ADDR pc)
 
   ALL_OBJFILES (objfile)
   {
-    VEC (probe_p) *probes;
-    int ix;
-    struct probe *probe;
-
     if (!objfile->sf || !objfile->sf->sym_probe_fns
 	|| objfile->sect_index_text == -1)
       continue;
 
     /* If this proves too inefficient, we can replace with a hash.  */
-    probes = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
-    for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)
+    const std::vector<probe *> &probes
+      = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
+    for (struct probe *probe : probes)
       if (get_probe_address (probe, objfile) == pc)
 	{
 	  result.objfile = objfile;
@@ -297,10 +290,6 @@ collect_probes (const std::string &objname, const std::string &provider,
 
   ALL_OBJFILES (objfile)
     {
-      VEC (probe_p) *probes;
-      struct probe *probe;
-      int ix;
-
       if (! objfile->sf || ! objfile->sf->sym_probe_fns)
 	continue;
 
@@ -310,9 +299,10 @@ collect_probes (const std::string &objname, const std::string &provider,
 	    continue;
 	}
 
-      probes = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
+      const std::vector<probe *> &probes
+	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
 
-      for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)
+      for (struct probe *probe : probes)
 	{
 	  struct bound_probe bound;
 
@@ -901,7 +891,7 @@ probe_any_is_linespec (const char **linespecp)
 /* Dummy method used for `probe_ops_any'.  */
 
 static void
-probe_any_get_probes (VEC (probe_p) **probesp, struct objfile *objfile)
+probe_any_get_probes (std::vector<probe *> *probesp, struct objfile *objfile)
 {
   /* No probes can be provided by this dummy backend.  */
 }

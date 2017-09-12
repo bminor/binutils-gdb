@@ -313,7 +313,8 @@ struct dtrace_dof_probe
 
 static void
 dtrace_process_dof_probe (struct objfile *objfile,
-			  struct gdbarch *gdbarch, VEC (probe_p) **probesp,
+			  struct gdbarch *gdbarch,
+			  std::vector<probe *> *probesp,
 			  struct dtrace_dof_hdr *dof,
 			  struct dtrace_dof_probe *probe,
 			  struct dtrace_dof_provider *provider,
@@ -448,7 +449,7 @@ dtrace_process_dof_probe (struct objfile *objfile,
       ret->enablers = VEC_copy (dtrace_probe_enabler_s, enablers);
 
       /* Successfully created probe.  */
-      VEC_safe_push (probe_p, *probesp, (struct probe *) ret);
+      probesp->push_back ((struct probe *) ret);
     }
 
   do_cleanups (cleanup);
@@ -461,7 +462,7 @@ dtrace_process_dof_probe (struct objfile *objfile,
 
 static void
 dtrace_process_dof (asection *sect, struct objfile *objfile,
-		    VEC (probe_p) **probesp, struct dtrace_dof_hdr *dof)
+		    std::vector<probe *> *probesp, struct dtrace_dof_hdr *dof)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct dtrace_dof_sect *section;
@@ -620,7 +621,7 @@ dtrace_get_arg (struct dtrace_probe *probe, unsigned n,
 /* Implementation of the get_probes method.  */
 
 static void
-dtrace_get_probes (VEC (probe_p) **probesp, struct objfile *objfile)
+dtrace_get_probes (std::vector<probe *> *probesp, struct objfile *objfile)
 {
   bfd *abfd = objfile->obfd;
   asection *sect = NULL;

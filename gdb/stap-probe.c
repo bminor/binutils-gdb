@@ -1472,7 +1472,7 @@ stap_clear_semaphore (struct probe *probe_generic, struct objfile *objfile,
 
 static void
 handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
-		   VEC (probe_p) **probesp, CORE_ADDR base)
+		   std::vector<probe *> *probesp, CORE_ADDR base)
 {
   bfd *abfd = objfile->obfd;
   int size = bfd_get_arch_size (abfd) / 8;
@@ -1543,7 +1543,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
   ret->args_u.text = probe_args;
 
   /* Successfully created probe.  */
-  VEC_safe_push (probe_p, *probesp, (struct probe *) ret);
+  probesp->push_back ((struct probe *) ret);
 }
 
 /* Helper function which tries to find the base address of the SystemTap
@@ -1588,7 +1588,7 @@ get_stap_base_address (bfd *obfd, bfd_vma *base)
    SystemTap probes from OBJFILE.  */
 
 static void
-stap_get_probes (VEC (probe_p) **probesp, struct objfile *objfile)
+stap_get_probes (std::vector<probe *> *probesp, struct objfile *objfile)
 {
   /* If we are here, then this is the first time we are parsing the
      SystemTap probe's information.  We basically have to count how many
@@ -1597,7 +1597,7 @@ stap_get_probes (VEC (probe_p) **probesp, struct objfile *objfile)
   bfd *obfd = objfile->obfd;
   bfd_vma base;
   struct sdt_note *iter;
-  unsigned save_probesp_len = VEC_length (probe_p, *probesp);
+  unsigned save_probesp_len = probesp->size ();
 
   if (objfile->separate_debug_objfile_backlink != NULL)
     {
@@ -1628,7 +1628,7 @@ stap_get_probes (VEC (probe_p) **probesp, struct objfile *objfile)
       handle_stap_probe (objfile, iter, probesp, base);
     }
 
-  if (save_probesp_len == VEC_length (probe_p, *probesp))
+  if (save_probesp_len == probesp->size ())
     {
       /* If we are here, it means we have failed to parse every known
 	 probe.  */

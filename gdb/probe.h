@@ -64,7 +64,7 @@ struct probe_ops
 
     /* Function that should fill PROBES with known probes from OBJFILE.  */
 
-    void (*get_probes) (VEC (probe_p) **probes, struct objfile *objfile);
+    void (*get_probes) (std::vector<probe *> *probes, struct objfile *objfile);
 
     /* Compute the probe's relocated address.  OBJFILE is the objfile
        in which the probe originated.  */

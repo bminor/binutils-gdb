@@ -1309,35 +1309,30 @@ elf_symfile_init (struct objfile *objfile)
 
 /* Implementation of `sym_get_probes', as documented in symfile.h.  */
 
-static VEC (probe_p) *
+static const std::vector<probe *> &
 elf_get_probes (struct objfile *objfile)
 {
-  VEC (probe_p) *probes_per_bfd;
+  std::vector<probe *> *probes_per_bfd;
 
   /* Have we parsed this objfile's probes already?  */
-  probes_per_bfd = (VEC (probe_p) *) bfd_data (objfile->obfd, probe_key);
+  probes_per_bfd = (std::vector<probe *> *) bfd_data (objfile->obfd, probe_key);
 
-  if (!probes_per_bfd)
+  if (probes_per_bfd == NULL)
     {
       int ix;
       const struct probe_ops *probe_ops;
+      probes_per_bfd = new std::vector<probe *>;
 
       /* Here we try to gather information about all types of probes from the
 	 objfile.  */
       for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, probe_ops);
 	   ix++)
-	probe_ops->get_probes (&probes_per_bfd, objfile);
-
-      if (probes_per_bfd == NULL)
-	{
-	  VEC_reserve (probe_p, probes_per_bfd, 1);
-	  gdb_assert (probes_per_bfd != NULL);
-	}
+	probe_ops->get_probes (probes_per_bfd, objfile);
 
       set_bfd_data (objfile->obfd, probe_key, probes_per_bfd);
     }
 
-  return probes_per_bfd;
+  return *probes_per_bfd;
 }
 
 /* Helper function used to free the space allocated for storing SystemTap
@@ -1346,14 +1341,12 @@ elf_get_probes (struct objfile *objfile)
 static void
 probe_key_free (bfd *abfd, void *d)
 {
-  int ix;
-  VEC (probe_p) *probes = (VEC (probe_p) *) d;
-  struct probe *probe;
+  std::vector<probe *> *probes = (std::vector<probe *> *) d;
 
-  for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)
+  for (struct probe *probe : *probes)
     probe->pops->destroy (probe);
 
-  VEC_free (probe_p, probes);
+  delete probes;
 }
 
 
