@@ -1,5 +1,11 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* source.c (show_substitute_path_command)
+	(unset_substitute_path_command, set_substitute_path_command):
+	Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* typeprint.c (maintenance_print_type): Constify.
 	* maint.c (maintenance_dump_me, maintenance_demangle)
 	(maintenance_time_display, maintenance_info_sections)

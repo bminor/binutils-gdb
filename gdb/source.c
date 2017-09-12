@@ -1850,7 +1850,7 @@ delete_substitute_path_rule (struct substitute_path_rule *rule)
 /* Implement the "show substitute-path" command.  */
 
 static void
-show_substitute_path_command (char *args, int from_tty)
+show_substitute_path_command (const char *args, int from_tty)
 {
   struct substitute_path_rule *rule = substitute_path_rules;
   char *from = NULL;
@@ -1884,7 +1884,7 @@ show_substitute_path_command (char *args, int from_tty)
 /* Implement the "unset substitute-path" command.  */
 
 static void
-unset_substitute_path_command (char *args, int from_tty)
+unset_substitute_path_command (const char *args, int from_tty)
 {
   struct substitute_path_rule *rule = substitute_path_rules;
   gdb_argv argv (args);
@@ -1935,7 +1935,7 @@ unset_substitute_path_command (char *args, int from_tty)
 /* Add a new source path substitution rule.  */
 
 static void
-set_substitute_path_command (char *args, int from_tty)
+set_substitute_path_command (const char *args, int from_tty)
 {
   struct substitute_path_rule *rule;
   
