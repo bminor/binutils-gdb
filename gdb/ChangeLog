@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* ada-tasks.c (task_command_1, task_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (maintenance_print_symbol_cache)
 	(maintenance_flush_symbol_cache)
 	(maintenance_print_symbol_cache_statistics): Constify.
