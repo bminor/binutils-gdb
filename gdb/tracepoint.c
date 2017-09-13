@@ -165,18 +165,6 @@ char *trace_notes = NULL;
 
 char *trace_stop_notes = NULL;
 
-/* ======= Important command functions: ======= */
-static void actions_command (char *, int);
-static void tstart_command (char *, int);
-static void tstop_command (char *, int);
-static void tstatus_command (char *, int);
-static void tfind_pc_command (char *, int);
-static void tfind_tracepoint_command (char *, int);
-static void tfind_line_command (char *, int);
-static void tfind_range_command (char *, int);
-static void tfind_outside_command (char *, int);
-static void tdump_command (char *, int);
-
 /* support routines */
 
 struct collection_list;
@@ -442,7 +430,7 @@ trace_variable_command (char *args, int from_tty)
 }
 
 static void
-delete_trace_variable_command (char *args, int from_tty)
+delete_trace_variable_command (const char *args, int from_tty)
 {
   if (args == NULL)
     {
@@ -2362,21 +2350,21 @@ tfind_command (char *args, int from_tty)
 
 /* tfind end */
 static void
-tfind_end_command (char *args, int from_tty)
+tfind_end_command (const char *args, int from_tty)
 {
   tfind_command_1 ("-1", from_tty);
 }
 
 /* tfind start */
 static void
-tfind_start_command (char *args, int from_tty)
+tfind_start_command (const char *args, int from_tty)
 {
   tfind_command_1 ("0", from_tty);
 }
 
 /* tfind pc command */
 static void
-tfind_pc_command (char *args, int from_tty)
+tfind_pc_command (const char *args, int from_tty)
 {
   CORE_ADDR pc;
 
@@ -2392,7 +2380,7 @@ tfind_pc_command (char *args, int from_tty)
 
 /* tfind tracepoint command */
 static void
-tfind_tracepoint_command (char *args, int from_tty)
+tfind_tracepoint_command (const char *args, int from_tty)
 {
   int tdp;
   struct tracepoint *tp;
@@ -2428,7 +2416,7 @@ tfind_tracepoint_command (char *args, int from_tty)
    corresponding to a source line OTHER THAN THE CURRENT ONE.  */
 
 static void
-tfind_line_command (char *args, int from_tty)
+tfind_line_command (const char *args, int from_tty)
 {
   check_trace_running (current_trace_status ());
 
@@ -2486,10 +2474,10 @@ tfind_line_command (char *args, int from_tty)
 
 /* tfind range command */
 static void
-tfind_range_command (char *args, int from_tty)
+tfind_range_command (const char *args, int from_tty)
 {
   static CORE_ADDR start, stop;
-  char *tmp;
+  const char *tmp;
 
   check_trace_running (current_trace_status ());
 
@@ -2501,9 +2489,10 @@ tfind_range_command (char *args, int from_tty)
 
   if (0 != (tmp = strchr (args, ',')))
     {
-      *tmp++ = '\0';	/* Terminate start address.  */
+      std::string start_addr (args, tmp);
+      ++tmp;
       tmp = skip_spaces (tmp);
-      start = parse_and_eval_address (args);
+      start = parse_and_eval_address (start_addr.c_str ());
       stop = parse_and_eval_address (tmp);
     }
   else
@@ -2517,10 +2506,10 @@ tfind_range_command (char *args, int from_tty)
 
 /* tfind outside command */
 static void
-tfind_outside_command (char *args, int from_tty)
+tfind_outside_command (const char *args, int from_tty)
 {
   CORE_ADDR start, stop;
-  char *tmp;
+  const char *tmp;
 
   if (current_trace_status ()->running
       && current_trace_status ()->filename == NULL)
@@ -2534,9 +2523,10 @@ tfind_outside_command (char *args, int from_tty)
 
   if (0 != (tmp = strchr (args, ',')))
     {
-      *tmp++ = '\0';	/* Terminate start address.  */
+      std::string start_addr (args, tmp);
+      ++tmp;
       tmp = skip_spaces (tmp);
-      start = parse_and_eval_address (args);
+      start = parse_and_eval_address (start_addr.c_str ());
       stop = parse_and_eval_address (tmp);
     }
   else

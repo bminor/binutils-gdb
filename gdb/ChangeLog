@@ -1,5 +1,12 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* tracepoint.c (delete_trace_variable_command)
+	(tfind_end_command, tfind_start_command, tfind_pc_command)
+	(tfind_tracepoint_command, tfind_line_command)
+	(tfind_range_command, tfind_outside_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* ax-gdb.c (maint_agent_printf_command, agent_command)
 	(agent_eval_command): Constify.
 
