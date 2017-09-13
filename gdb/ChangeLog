@@ -1,5 +1,10 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* probe.c (enable_probes_command, disable_probes_command):
+	Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (symbol_file_command): Constify.
 	* gdbcore.h (deprecated_file_changed_hook): Constify.
 	* exec.c (deprecated_file_changed_hook, exec_file_command)

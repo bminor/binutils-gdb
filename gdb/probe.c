@@ -674,7 +674,7 @@ info_probes_command (char *arg, int from_tty)
 /* Implementation of the `enable probes' command.  */
 
 static void
-enable_probes_command (char *arg, int from_tty)
+enable_probes_command (const char *arg, int from_tty)
 {
   std::string provider, probe_name, objname;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
@@ -713,7 +713,7 @@ enable_probes_command (char *arg, int from_tty)
 /* Implementation of the `disable probes' command.  */
 
 static void
-disable_probes_command (char *arg, int from_tty)
+disable_probes_command (const char *arg, int from_tty)
 {
   std::string provider, probe_name, objname;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
