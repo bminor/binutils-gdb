@@ -1,5 +1,13 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* remote.c (set_memory_packet_size)
+	(set_memory_write_packet_size, show_memory_write_packet_size)
+	(set_memory_read_packet_size, show_memory_read_packet_size)
+	(compare_sections_command, packet_command, remote_put_command)
+	(remote_get_command, remote_delete_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* mips-tdep.c (show_mipsfpu_command, set_mipsfpu_single_command)
 	(set_mipsfpu_double_command, set_mipsfpu_none_command)
 	(set_mipsfpu_auto_command): Constify.
