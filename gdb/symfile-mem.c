@@ -145,7 +145,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
 
 
 static void
-add_symbol_file_from_memory_command (char *args, int from_tty)
+add_symbol_file_from_memory_command (const char *args, int from_tty)
 {
   CORE_ADDR addr;
   struct bfd *templ;
