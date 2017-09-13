@@ -1,5 +1,10 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-cmds.h (cd_command): Constify.
+	* cli/cli-cmds.c (cd_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* thread.c (thread_name_command, thread_find_command): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>

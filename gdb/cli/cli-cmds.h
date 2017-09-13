@@ -110,7 +110,7 @@ int is_complete_command (struct cmd_list_element *cmd);
 
 /* Exported to gdb/main.c */
 
-extern void cd_command (char *, int);
+extern void cd_command (const char *, int);
 
 /* Exported to gdb/top.c and gdb/main.c */
 

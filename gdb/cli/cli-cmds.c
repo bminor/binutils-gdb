@@ -395,7 +395,7 @@ pwd_command (char *args, int from_tty)
 }
 
 void
-cd_command (char *dir, int from_tty)
+cd_command (const char *dir, int from_tty)
 {
   int len;
   /* Found something other than leading repetitions of "/..".  */
