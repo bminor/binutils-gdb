@@ -8874,7 +8874,7 @@ i386_mpx_print_bounds (const CORE_ADDR bt_entry[4])
 /* Implement the command "show mpx bound".  */
 
 static void
-i386_mpx_info_bounds (char *args, int from_tty)
+i386_mpx_info_bounds (const char *args, int from_tty)
 {
   CORE_ADDR bd_base = 0;
   CORE_ADDR addr;
@@ -8916,7 +8916,7 @@ i386_mpx_info_bounds (char *args, int from_tty)
 /* Implement the command "set mpx bound".  */
 
 static void
-i386_mpx_set_bounds (char *args, int from_tty)
+i386_mpx_set_bounds (const char *args, int from_tty)
 {
   CORE_ADDR bd_base = 0;
   CORE_ADDR addr, lower, upper;
