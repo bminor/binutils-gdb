@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* reggroups.c (maintenance_print_reggroups): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (save_gdb_index_command): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>
