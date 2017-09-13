@@ -102,6 +102,8 @@ ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr,
 }
 
 
+extern unsigned int libthread_db_debug;
+
 /* Search for the symbol named NAME within the object named OBJ within
    the target process PH.  If the symbol is found the address of the
    symbol is stored in SYM_ADDR.  */
@@ -119,9 +121,20 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
   /* FIXME: kettenis/2000-09-03: What should we do with OBJ?  */
   bound_minimal_symbol ms = lookup_minimal_symbol (name, NULL, NULL);
   if (ms.minsym == NULL)
-    return PS_NOSYM;
+    {
+      if (libthread_db_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "ps_pglobal_lookup: name=\"%s\" => PS_NOSYM\n",
+			    name);
+      return PS_NOSYM;
+    }
 
-  *sym_addr = core_addr_to_ps_addr (BMSYMBOL_VALUE_ADDRESS (ms));
+  CORE_ADDR ms_addr = BMSYMBOL_VALUE_ADDRESS (ms);
+  if (libthread_db_debug)
+    fprintf_unfiltered (gdb_stdlog,
+			"ps_pglobal_lookup: name=\"%s\" => PS_OK, %s\n", name,
+			paddress (target_gdbarch (), ms_addr));
+  *sym_addr = core_addr_to_ps_addr (ms_addr);
   return PS_OK;
 }
 

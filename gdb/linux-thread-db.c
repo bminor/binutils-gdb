@@ -104,7 +104,7 @@ set_libthread_db_search_path (char *ignored, int from_tty,
 
 /* If non-zero, print details of libthread_db processing.  */
 
-static unsigned int libthread_db_debug;
+unsigned int libthread_db_debug;
 
 static void
 show_libthread_db_debug (struct ui_file *file, int from_tty,
@@ -354,13 +354,19 @@ thread_from_lwp (ptid_t ptid)
   err = info->td_ta_map_lwp2thr_p (info->thread_agent, ptid_get_lwp (ptid),
 				   &th);
   if (err != TD_OK)
-    error (_("Cannot find user-level thread for LWP %ld: %s"),
-	   ptid_get_lwp (ptid), thread_db_err_str (err));
+    {
+      warning (_("Cannot find user-level thread for LWP %ld: %s"),
+	       ptid_get_lwp (ptid), thread_db_err_str (err));
+      return NULL;
+    }
 
   err = info->td_thr_get_info_p (&th, &ti);
   if (err != TD_OK)
-    error (_("thread_get_info_callback: cannot get thread info: %s"),
-	   thread_db_err_str (err));
+    {
+      warning (_("thread_get_info_callback: cannot get thread info: %s"),
+	       thread_db_err_str (err));
+      return NULL;
+    }
 
   /* Fill the cache.  */
   tp = find_thread_ptid (ptid);
@@ -1429,13 +1435,28 @@ thread_db_get_thread_local_address (struct target_ops *ops,
   if (thread_info != NULL && thread_info->priv == NULL)
     thread_info = thread_from_lwp (ptid);
 
-  if (thread_info != NULL && thread_info->priv != NULL)
+  if (true)
     {
       td_err_e err;
       psaddr_t address;
       struct thread_db_info *info;
 
       info = get_thread_db_info (ptid_get_pid (ptid));
+
+      /* Handle executables that don't link with pthread.  We still
+	 use libthread_db.so with those in order to be able to access
+	 TLS variables.  This bakes in awareness that the main
+	 thread's special handle is "0".  Should maybe make
+	 td_ta_map_lwp2thr return that handle instead for non-threaded
+	 programs.  */
+      td_thrhandle_t main_thr_th {};
+      main_thr_th.th_ta_p = info->thread_agent;
+
+      td_thrhandle_t *th;
+      if (thread_info == NULL || thread_info->priv == NULL)
+	th = &main_thr_th;
+      else
+	th = &thread_info->priv->th;
 
       /* Finally, get the address of the variable.  */
       if (lm != 0)
@@ -1448,7 +1469,8 @@ thread_db_get_thread_local_address (struct target_ops *ops,
 	  /* Note the cast through uintptr_t: this interface only works if
 	     a target address fits in a psaddr_t, which is a host pointer.
 	     So a 32-bit debugger can not access 64-bit TLS through this.  */
-	  err = info->td_thr_tls_get_addr_p (&thread_info->priv->th,
+
+	  err = info->td_thr_tls_get_addr_p (th,
 					     (psaddr_t)(uintptr_t) lm,
 					     offset, &address);
 	}
@@ -1466,8 +1488,7 @@ thread_db_get_thread_local_address (struct target_ops *ops,
 	     PR libc/16831 due to GDB PR threads/16954 LOAD_MODULE is also NULL.
 	     The constant number 1 depends on GNU __libc_setup_tls
 	     initialization of l_tls_modid to 1.  */
-	  err = info->td_thr_tlsbase_p (&thread_info->priv->th,
-					1, &address);
+	  err = info->td_thr_tlsbase_p (th, 1, &address);
 	  address = (char *) address + offset;
 	}
 
