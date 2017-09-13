@@ -1,5 +1,11 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (maintenance_print_symbol_cache)
+	(maintenance_flush_symbol_cache)
+	(maintenance_print_symbol_cache_statistics): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* inferior.c (detach_inferior_command, kill_inferior_command)
 	(inferior_command): Constify.
 

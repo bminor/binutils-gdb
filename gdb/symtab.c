@@ -1500,7 +1500,7 @@ symbol_cache_dump (const struct symbol_cache *cache)
 /* The "mt print symbol-cache" command.  */
 
 static void
-maintenance_print_symbol_cache (char *args, int from_tty)
+maintenance_print_symbol_cache (const char *args, int from_tty)
 {
   struct program_space *pspace;
 
@@ -1527,7 +1527,7 @@ maintenance_print_symbol_cache (char *args, int from_tty)
 /* The "mt flush-symbol-cache" command.  */
 
 static void
-maintenance_flush_symbol_cache (char *args, int from_tty)
+maintenance_flush_symbol_cache (const char *args, int from_tty)
 {
   struct program_space *pspace;
 
@@ -1572,7 +1572,7 @@ symbol_cache_stats (struct symbol_cache *cache)
 /* The "mt print symbol-cache-statistics" command.  */
 
 static void
-maintenance_print_symbol_cache_statistics (char *args, int from_tty)
+maintenance_print_symbol_cache_statistics (const char *args, int from_tty)
 {
   struct program_space *pspace;
 
