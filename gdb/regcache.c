@@ -1593,7 +1593,7 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 }
 
 static void
-regcache_print (char *args, enum regcache_dump_what what_to_dump)
+regcache_print (const char *args, enum regcache_dump_what what_to_dump)
 {
   if (args == NULL)
     get_current_regcache ()->dump (gdb_stdout, what_to_dump);
@@ -1608,31 +1608,31 @@ regcache_print (char *args, enum regcache_dump_what what_to_dump)
 }
 
 static void
-maintenance_print_registers (char *args, int from_tty)
+maintenance_print_registers (const char *args, int from_tty)
 {
   regcache_print (args, regcache_dump_none);
 }
 
 static void
-maintenance_print_raw_registers (char *args, int from_tty)
+maintenance_print_raw_registers (const char *args, int from_tty)
 {
   regcache_print (args, regcache_dump_raw);
 }
 
 static void
-maintenance_print_cooked_registers (char *args, int from_tty)
+maintenance_print_cooked_registers (const char *args, int from_tty)
 {
   regcache_print (args, regcache_dump_cooked);
 }
 
 static void
-maintenance_print_register_groups (char *args, int from_tty)
+maintenance_print_register_groups (const char *args, int from_tty)
 {
   regcache_print (args, regcache_dump_groups);
 }
 
 static void
-maintenance_print_remote_registers (char *args, int from_tty)
+maintenance_print_remote_registers (const char *args, int from_tty)
 {
   regcache_print (args, regcache_dump_remote);
 }

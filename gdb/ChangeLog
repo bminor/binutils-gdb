@@ -1,5 +1,13 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* regcache.c (regcache_print, maintenance_print_registers)
+	(maintenance_print_raw_registers)
+	(maintenance_print_cooked_registers)
+	(maintenance_print_register_groups)
+	(maintenance_print_remote_registers): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* printcmd.c (map_display_numbers, undisplay_command)
 	(enable_disable_display_command, enable_display_command)
 	(disable_display_command): Constify.
