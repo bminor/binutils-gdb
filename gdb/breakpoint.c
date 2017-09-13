@@ -94,12 +94,6 @@ enum exception_event_kind
 
 /* Prototypes for local functions.  */
 
-static void enable_delete_command (char *, int);
-
-static void enable_once_command (char *, int);
-
-static void enable_count_command (char *, int);
-
 static void disable_command (char *, int);
 
 static void enable_command (char *, int);
@@ -184,9 +178,6 @@ static void info_breakpoints_command (char *, int);
 
 static void info_watchpoints_command (char *, int);
 
-static int breakpoint_1 (char *, int, 
-			 int (*) (const struct breakpoint *));
-
 static int breakpoint_cond_eval (void *);
 
 static void cleanup_executing_breakpoints (void *);
@@ -201,8 +192,6 @@ static int remove_breakpoint_1 (struct bp_location *, enum remove_bp_reason);
 static enum print_stop_action print_bp_stop_message (bpstat bs);
 
 static int watchpoint_check (void *);
-
-static void maintenance_info_breakpoints (char *, int);
 
 static int hw_breakpoint_used_count (void);
 
@@ -220,10 +209,6 @@ static void enable_breakpoint_disp (struct breakpoint *, enum bpdisp,
 				    int count);
 
 static void stop_command (char *arg, int from_tty);
-
-static void stopin_command (char *arg, int from_tty);
-
-static void stopat_command (char *arg, int from_tty);
 
 static void tcatch_command (char *arg, int from_tty);
 
@@ -277,8 +262,6 @@ static int is_hardware_watchpoint (const struct breakpoint *bpt);
 static void insert_breakpoint_locations (void);
 
 static void info_tracepoints_command (char *, int);
-
-static void delete_trace_command (char *, int);
 
 static void enable_trace_command (char *, int);
 
@@ -6679,7 +6662,7 @@ pending_breakpoint_p (struct breakpoint *b)
    breakpoints listed.  */
 
 static int
-breakpoint_1 (char *args, int allflag, 
+breakpoint_1 (const char *args, int allflag, 
 	      int (*filter) (const struct breakpoint *))
 {
   struct breakpoint *b;
@@ -6864,7 +6847,7 @@ info_watchpoints_command (char *args, int from_tty)
 }
 
 static void
-maintenance_info_breakpoints (char *args, int from_tty)
+maintenance_info_breakpoints (const char *args, int from_tty)
 {
   breakpoint_1 (args, 1, NULL);
 
@@ -9795,7 +9778,7 @@ Usage: stop in <function | address>\n\
 }
 
 static void
-stopin_command (char *arg, int from_tty)
+stopin_command (const char *arg, int from_tty)
 {
   int badInput = 0;
 
@@ -9803,7 +9786,7 @@ stopin_command (char *arg, int from_tty)
     badInput = 1;
   else if (*arg != '*')
     {
-      char *argptr = arg;
+      const char *argptr = arg;
       int hasColon = 0;
 
       /* Look for a ':'.  If this is a line number specification, then
@@ -9828,7 +9811,7 @@ stopin_command (char *arg, int from_tty)
 }
 
 static void
-stopat_command (char *arg, int from_tty)
+stopat_command (const char *arg, int from_tty)
 {
   int badInput = 0;
 
@@ -9836,7 +9819,7 @@ stopat_command (char *arg, int from_tty)
     badInput = 1;
   else
     {
-      char *argptr = arg;
+      const char *argptr = arg;
       int hasColon = 0;
 
       /* Look for a ':'.  If there is a '::' then get out, otherwise
@@ -13568,7 +13551,7 @@ iterate_over_related_breakpoints (struct breakpoint *b,
   while (related != b);
 }
 
-void
+static void
 delete_command (char *arg, int from_tty)
 {
   struct breakpoint *b, *b_tmp;
@@ -14596,7 +14579,7 @@ enable_command (char *args, int from_tty)
 }
 
 static void
-enable_once_command (char *args, int from_tty)
+enable_once_command (const char *args, int from_tty)
 {
   map_breakpoint_numbers
     (args, [&] (breakpoint *b)
@@ -14610,7 +14593,7 @@ enable_once_command (char *args, int from_tty)
 }
 
 static void
-enable_count_command (char *args, int from_tty)
+enable_count_command (const char *args, int from_tty)
 {
   int count;
 
@@ -14631,7 +14614,7 @@ enable_count_command (char *args, int from_tty)
 }
 
 static void
-enable_delete_command (char *args, int from_tty)
+enable_delete_command (const char *args, int from_tty)
 {
   map_breakpoint_numbers
     (args, [&] (breakpoint *b)
@@ -15014,7 +14997,7 @@ disable_trace_command (char *args, int from_tty)
 
 /* Remove a tracepoint (or all if no argument).  */
 static void
-delete_trace_command (char *arg, int from_tty)
+delete_trace_command (const char *arg, int from_tty)
 {
   struct breakpoint *b, *b_tmp;
 
@@ -15208,7 +15191,7 @@ print_recreate_thread (struct breakpoint *b, struct ui_file *fp)
    non-zero.  */
 
 static void
-save_breakpoints (char *filename, int from_tty,
+save_breakpoints (const char *filename, int from_tty,
 		  int (*filter) (const struct breakpoint *))
 {
   struct breakpoint *tp;
@@ -15326,7 +15309,7 @@ save_breakpoints (char *filename, int from_tty,
 /* The `save breakpoints' command.  */
 
 static void
-save_breakpoints_command (char *args, int from_tty)
+save_breakpoints_command (const char *args, int from_tty)
 {
   save_breakpoints (args, from_tty, NULL);
 }
@@ -15334,7 +15317,7 @@ save_breakpoints_command (char *args, int from_tty)
 /* The `save tracepoints' command.  */
 
 static void
-save_tracepoints_command (char *args, int from_tty)
+save_tracepoints_command (const char *args, int from_tty)
 {
   save_breakpoints (args, from_tty, is_tracepoint);
 }

@@ -1,5 +1,14 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* breakpoint.h (delete_command): Don't declare.
+	* breakpoint.c (delete_command, enable_once_command)
+	(enable_count_command, enable_delete_command, breakpoint_1)
+	(maintenance_info_breakpoints, stopin_command, stopat_command)
+	(delete_command, delete_trace_command, save_breakpoints)
+	(save_breakpoints_command, save_tracepoints_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* macrocmd.c (macro_expand_command, macro_expand_once_command)
 	(skip_ws, extract_identifier, macro_define_command)
 	(macro_undef_command, macro_list_command): Constify.

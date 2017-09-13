@@ -1521,10 +1521,6 @@ extern int is_catchpoint (struct breakpoint *);
 extern void add_solib_catchpoint (const char *arg, int is_load, int is_temp,
                                   int enabled);
 
-/* Enable breakpoints and delete when hit.  Called with ARG == NULL
-   deletes all breakpoints.  */
-extern void delete_command (char *arg, int from_tty);
-
 /* Create and insert a new software single step breakpoint for the
    current thread.  May be called multiple times; each time will add a
    new location to the set of potential addresses the next instruction
