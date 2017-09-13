@@ -1,5 +1,13 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* infcmd.c (environment_info, set_environment_command)
+	(unset_environment_command, path_info, info_proc_cmd_1)
+	(info_proc_cmd_mappings, info_proc_cmd_stat)
+	(info_proc_cmd_status, info_proc_cmd_cwd, info_proc_cmd_cmdline)
+	(info_proc_cmd_exe, info_proc_cmd_all): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* i386-tdep.c (i386_mpx_info_bounds, i386_mpx_set_bounds):
 	Constify.
 

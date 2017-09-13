@@ -68,8 +68,6 @@ static void until_next_command (int);
 
 static void until_command (char *, int);
 
-static void path_info (char *, int);
-
 static void path_command (char *, int);
 
 static void unset_command (char *, int);
@@ -77,12 +75,6 @@ static void unset_command (char *, int);
 static void info_float_command (char *, int);
 
 static void disconnect_command (char *, int);
-
-static void unset_environment_command (char *, int);
-
-static void set_environment_command (char *, int);
-
-static void environment_info (char *, int);
 
 static void info_program_command (char *, int);
 
@@ -2148,7 +2140,7 @@ info_program_command (char *args, int from_tty)
 }
 
 static void
-environment_info (char *var, int from_tty)
+environment_info (const char *var, int from_tty)
 {
   if (var)
     {
@@ -2181,9 +2173,9 @@ environment_info (char *var, int from_tty)
 }
 
 static void
-set_environment_command (char *arg, int from_tty)
+set_environment_command (const char *arg, int from_tty)
 {
-  char *p, *val, *var;
+  const char *p, *val;
   int nullset = 0;
 
   if (arg == 0)
@@ -2230,21 +2222,20 @@ set_environment_command (char *arg, int from_tty)
   while (p != arg && (p[-1] == ' ' || p[-1] == '\t'))
     p--;
 
-  var = savestring (arg, p - arg);
+  std::string var (arg, p - arg);
   if (nullset)
     {
       printf_filtered (_("Setting environment variable "
 			 "\"%s\" to null value.\n"),
-		       var);
-      current_inferior ()->environment.set (var, "");
+		       var.c_str ());
+      current_inferior ()->environment.set (var.c_str (), "");
     }
   else
-    current_inferior ()->environment.set (var, val);
-  xfree (var);
+    current_inferior ()->environment.set (var.c_str (), val);
 }
 
 static void
-unset_environment_command (char *var, int from_tty)
+unset_environment_command (const char *var, int from_tty)
 {
   if (var == 0)
     {
@@ -2262,7 +2253,7 @@ unset_environment_command (char *var, int from_tty)
 static const char path_var_name[] = "PATH";
 
 static void
-path_info (char *args, int from_tty)
+path_info (const char *args, int from_tty)
 {
   puts_filtered ("Executable and object file path: ");
   puts_filtered (current_inferior ()->environment.get (path_var_name));
@@ -3133,7 +3124,7 @@ unset_command (char *args, int from_tty)
 /* Implement `info proc' family of commands.  */
 
 static void
-info_proc_cmd_1 (char *args, enum info_proc_what what, int from_tty)
+info_proc_cmd_1 (const char *args, enum info_proc_what what, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
 
@@ -3157,7 +3148,7 @@ info_proc_cmd (char *args, int from_tty)
 /* Implement `info proc mappings'.  */
 
 static void
-info_proc_cmd_mappings (char *args, int from_tty)
+info_proc_cmd_mappings (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_MAPPINGS, from_tty);
 }
@@ -3165,7 +3156,7 @@ info_proc_cmd_mappings (char *args, int from_tty)
 /* Implement `info proc stat'.  */
 
 static void
-info_proc_cmd_stat (char *args, int from_tty)
+info_proc_cmd_stat (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_STAT, from_tty);
 }
@@ -3173,7 +3164,7 @@ info_proc_cmd_stat (char *args, int from_tty)
 /* Implement `info proc status'.  */
 
 static void
-info_proc_cmd_status (char *args, int from_tty)
+info_proc_cmd_status (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_STATUS, from_tty);
 }
@@ -3181,7 +3172,7 @@ info_proc_cmd_status (char *args, int from_tty)
 /* Implement `info proc cwd'.  */
 
 static void
-info_proc_cmd_cwd (char *args, int from_tty)
+info_proc_cmd_cwd (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_CWD, from_tty);
 }
@@ -3189,7 +3180,7 @@ info_proc_cmd_cwd (char *args, int from_tty)
 /* Implement `info proc cmdline'.  */
 
 static void
-info_proc_cmd_cmdline (char *args, int from_tty)
+info_proc_cmd_cmdline (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_CMDLINE, from_tty);
 }
@@ -3197,7 +3188,7 @@ info_proc_cmd_cmdline (char *args, int from_tty)
 /* Implement `info proc exe'.  */
 
 static void
-info_proc_cmd_exe (char *args, int from_tty)
+info_proc_cmd_exe (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_EXE, from_tty);
 }
@@ -3205,7 +3196,7 @@ info_proc_cmd_exe (char *args, int from_tty)
 /* Implement `info proc all'.  */
 
 static void
-info_proc_cmd_all (char *args, int from_tty)
+info_proc_cmd_all (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_ALL, from_tty);
 }
