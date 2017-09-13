@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* thread.c (thread_name_command, thread_find_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* probe.c (enable_probes_command, disable_probes_command):
 	Constify.
 

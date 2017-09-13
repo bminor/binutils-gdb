@@ -1912,7 +1912,7 @@ thread_command (char *tidstr, int from_tty)
 /* Implementation of `thread name'.  */
 
 static void
-thread_name_command (char *arg, int from_tty)
+thread_name_command (const char *arg, int from_tty)
 {
   struct thread_info *info;
 
@@ -1929,7 +1929,7 @@ thread_name_command (char *arg, int from_tty)
 /* Find thread ids with a name, target pid, or extra info matching ARG.  */
 
 static void
-thread_find_command (char *arg, int from_tty)
+thread_find_command (const char *arg, int from_tty)
 {
   struct thread_info *tp;
   const char *tmp;
