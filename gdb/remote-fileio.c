@@ -1272,7 +1272,7 @@ remote_fileio_to_host_stat (struct fio_stat *fst, struct stat *st)
 
 
 static void
-set_system_call_allowed (char *args, int from_tty)
+set_system_call_allowed (const char *args, int from_tty)
 {
   if (args)
     {
@@ -1289,7 +1289,7 @@ set_system_call_allowed (char *args, int from_tty)
 }
 
 static void
-show_system_call_allowed (char *args, int from_tty)
+show_system_call_allowed (const char *args, int from_tty)
 {
   if (args)
     error (_("Garbage after \"show remote "

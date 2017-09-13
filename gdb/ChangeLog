@@ -1,5 +1,10 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* remote-fileio.c (set_system_call_allowed)
+	(show_system_call_allowed): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* tracepoint.c (delete_trace_variable_command)
 	(tfind_end_command, tfind_start_command, tfind_pc_command)
 	(tfind_tracepoint_command, tfind_line_command)
