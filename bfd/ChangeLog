@@ -1,3 +1,7 @@
+2017-09-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.h: Fix a typo in comments.
+
 2017-09-09  Kamil Rytarowski  <n54@gmx.com>
 
 	* elf32-nds32.c: Rename __BIT() to N32_BIT().
