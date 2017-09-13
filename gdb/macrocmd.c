@@ -53,7 +53,7 @@ macro_inform_no_debuginfo (void)
 }
 
 static void
-macro_expand_command (char *exp, int from_tty)
+macro_expand_command (const char *exp, int from_tty)
 {
   struct macro_scope *ms = NULL;
   char *expanded = NULL;
@@ -88,7 +88,7 @@ macro_expand_command (char *exp, int from_tty)
 
 
 static void
-macro_expand_once_command (char *exp, int from_tty)
+macro_expand_once_command (const char *exp, int from_tty)
 {
   struct macro_scope *ms = NULL;
   char *expanded = NULL;
@@ -298,7 +298,7 @@ info_macros_command (char *args, int from_tty)
 /* User-defined macros.  */
 
 static void
-skip_ws (char **expp)
+skip_ws (const char **expp)
 {
   while (macro_is_whitespace (**expp))
     ++*expp;
@@ -312,10 +312,10 @@ skip_ws (char **expp)
    parameters.  */
 
 static char *
-extract_identifier (char **expp, int is_parameter)
+extract_identifier (const char **expp, int is_parameter)
 {
   char *result;
-  char *p = *expp;
+  const char *p = *expp;
   unsigned int len;
 
   if (is_parameter && startswith (p, "..."))
@@ -358,7 +358,7 @@ free_macro_definition_ptr (void *ptr)
 }
 
 static void
-macro_define_command (char *exp, int from_tty)
+macro_define_command (const char *exp, int from_tty)
 {
   struct macro_definition new_macro;
   char *name = NULL;
@@ -440,7 +440,7 @@ macro_define_command (char *exp, int from_tty)
 
 
 static void
-macro_undef_command (char *exp, int from_tty)
+macro_undef_command (const char *exp, int from_tty)
 {
   char *name;
 
@@ -476,7 +476,7 @@ print_one_macro (const char *name, const struct macro_definition *macro,
 
 
 static void
-macro_list_command (char *exp, int from_tty)
+macro_list_command (const char *exp, int from_tty)
 {
   macro_for_each (macro_user_macros, print_one_macro);
 }

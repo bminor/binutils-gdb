@@ -1,5 +1,11 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* macrocmd.c (macro_expand_command, macro_expand_once_command)
+	(skip_ws, extract_identifier, macro_define_command)
+	(macro_undef_command, macro_list_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* infcmd.c (environment_info, set_environment_command)
 	(unset_environment_command, path_info, info_proc_cmd_1)
 	(info_proc_cmd_mappings, info_proc_cmd_stat)
