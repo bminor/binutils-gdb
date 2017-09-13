@@ -1206,7 +1206,7 @@ extern int breakpoint_address_match (struct address_space *aspace1,
 				     struct address_space *aspace2,
 				     CORE_ADDR addr2);
 
-extern void until_break_command (char *, int, int);
+extern void until_break_command (const char *, int, int);
 
 /* Initialize a struct bp_location.  */
 
@@ -1255,9 +1255,9 @@ extern void break_command (char *, int);
 extern void hbreak_command_wrapper (char *, int);
 extern void thbreak_command_wrapper (char *, int);
 extern void rbreak_command_wrapper (char *, int);
-extern void watch_command_wrapper (char *, int, int);
-extern void awatch_command_wrapper (char *, int, int);
-extern void rwatch_command_wrapper (char *, int, int);
+extern void watch_command_wrapper (const char *, int, int);
+extern void awatch_command_wrapper (const char *, int, int);
+extern void rwatch_command_wrapper (const char *, int, int);
 extern void tbreak_command (char *, int);
 
 extern struct breakpoint_ops base_breakpoint_ops;
@@ -1288,7 +1288,7 @@ extern void
   init_ada_exception_breakpoint (struct breakpoint *b,
 				 struct gdbarch *gdbarch,
 				 struct symtab_and_line sal,
-				 char *addr_string,
+				 const char *addr_string,
 				 const struct breakpoint_ops *ops,
 				 int tempflag,
 				 int enabled,

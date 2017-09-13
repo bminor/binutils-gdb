@@ -2793,7 +2793,7 @@ linespec_parser_delete (void *arg)
 /* See description in linespec.h.  */
 
 void
-linespec_lex_to_end (char **stringp)
+linespec_lex_to_end (const char **stringp)
 {
   linespec_parser parser;
   struct cleanup *cleanup;
@@ -3338,7 +3338,7 @@ decode_line_1 (const struct event_location *location, int flags,
 /* See linespec.h.  */
 
 std::vector<symtab_and_line>
-decode_line_with_current_source (char *string, int flags)
+decode_line_with_current_source (const char *string, int flags)
 {
   if (string == 0)
     error (_("Empty line specification."));
@@ -3361,7 +3361,7 @@ decode_line_with_current_source (char *string, int flags)
 /* See linespec.h.  */
 
 std::vector<symtab_and_line>
-decode_line_with_last_displayed (char *string, int flags)
+decode_line_with_last_displayed (const char *string, int flags)
 {
   if (string == 0)
     error (_("Empty line specification."));
@@ -3472,19 +3472,21 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
 
       if (self->canonical)
 	{
-	  char *str;
+	  std::string holder;
+	  const char *str;
 
 	  self->canonical->pre_expanded = 1;
 
 	  if (ls->explicit_loc.source_filename)
 	    {
-	      str = xstrprintf ("%s:%s",
-				ls->explicit_loc.source_filename, saved_arg);
+	      holder = string_printf ("%s:%s",
+				      ls->explicit_loc.source_filename,
+				      saved_arg);
+	      str = holder.c_str ();
 	    }
 	  else
-	    str = xstrdup (saved_arg);
+	    str = saved_arg;
 
-	  make_cleanup (xfree, str);
 	  self->canonical->location = new_linespec_location (&str);
 	}
     }

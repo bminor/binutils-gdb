@@ -2550,17 +2550,18 @@ tfind_outside_command (char *args, int from_tty)
 
 /* info scope command: list the locals for a scope.  */
 static void
-info_scope_command (char *args, int from_tty)
+info_scope_command (char *args_in, int from_tty)
 {
   struct symbol *sym;
   struct bound_minimal_symbol msym;
   const struct block *block;
   const char *symname;
-  char *save_args = args;
+  const char *save_args = args_in;
   struct block_iterator iter;
   int j, count = 0;
   struct gdbarch *gdbarch;
   int regno;
+  const char *args = args_in;
 
   if (args == 0 || *args == 0)
     error (_("requires an argument (function, "

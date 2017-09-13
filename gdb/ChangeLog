@@ -1,5 +1,37 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* tracepoint.c (info_scope_command): Constify.
+	* python/python.c (gdbpy_decode_line): Constify.
+	* python/py-breakpoint.c (bppy_init): Constify.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Constify.
+	* location.h: (new_linespec_location)
+	(string_to_event_location_basic, string_to_event_location):
+	Constify.
+	* location.c (new_linespec_location)
+	(string_to_event_location_basic, string_to_event_location):
+	Constify.
+	* linespec.h (decode_line_with_current_source)
+	(decode_line_with_last_displayed, linespec_lex_to_end): Constify.
+	* linespec.c (linespec_lex_to_end)
+	(decode_line_with_current_source)
+	(decode_line_with_last_displayed): Constify.
+	* guile/scm-breakpoint.c (gdbscm_register_breakpoint_x):
+	Constify.
+	* cli/cli-cmds.c (edit_command, list_command): Constify.
+	* breakpoint.h (until_break_command, watch_command_wrapper)
+	(awatch_command_wrapper, rwatch_command_wrapper)
+	(init_ada_exception_breakpoint): Constify.
+	* breakpoint.c (break_command_1, dprintf_command)
+	(break_range_command, watch_command_wrapper)
+	(rwatch_command_wrapper, awatch_command_wrapper)
+	(until_break_command, init_ada_exception_breakpoint)
+	(strace_marker_create_sals_from_location, trace_command)
+	(ftrace_command, strace_command, struct tracepoint): Constify.
+	* ax-gdb.c (agent_command_1): Constify.
+	* ada-lang.c (ada_exception_sal): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* record.c (cmd_record_delete, cmd_record_stop, cmd_record_save)
 	(cmd_record_goto_begin, cmd_record_goto_end, get_insn_number)
 	(get_context_size, no_chunk, get_insn_history_modifiers)

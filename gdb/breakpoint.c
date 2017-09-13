@@ -138,8 +138,6 @@ static void catch_command (char *, int);
 
 static int can_use_hardware_watchpoint (struct value *);
 
-static void break_command_1 (char *, int, int);
-
 static void mention (struct breakpoint *);
 
 static struct breakpoint *set_raw_breakpoint_without_location (struct gdbarch *,
@@ -9679,7 +9677,7 @@ create_breakpoint (struct gdbarch *gdbarch,
    and BP_TEMPFLAG.  */
 
 static void
-break_command_1 (char *arg, int flag, int from_tty)
+break_command_1 (const char *arg, int flag, int from_tty)
 {
   int tempflag = flag & BP_TEMPFLAG;
   enum bptype type_wanted = (flag & BP_HARDWAREFLAG
@@ -9867,8 +9865,9 @@ stopat_command (char *arg, int from_tty)
    line.  */
 
 static void
-dprintf_command (char *arg, int from_tty)
+dprintf_command (char *arg_in, int from_tty)
 {
+  const char *arg = arg_in;
   event_location_up location = string_to_event_location (&arg, current_language);
 
   /* If non-NULL, ARG should have been advanced past the location;
@@ -10082,9 +10081,11 @@ find_breakpoint_range_end (struct symtab_and_line sal)
 /* Implement the "break-range" CLI command.  */
 
 static void
-break_range_command (char *arg, int from_tty)
+break_range_command (char *arg_in, int from_tty)
 {
-  char *arg_start, *addr_string_start;
+  const char *arg = arg_in;
+  const char *arg_start;
+  char *addr_string_start;
   struct linespec_result canonical_start, canonical_end;
   int bp_count, can_use_bp, length;
   CORE_ADDR end;
@@ -11189,7 +11190,7 @@ can_use_hardware_watchpoint (struct value *v)
 }
 
 void
-watch_command_wrapper (char *arg, int from_tty, int internal)
+watch_command_wrapper (const char *arg, int from_tty, int internal)
 {
   watch_command_1 (arg, hw_write, from_tty, 0, internal);
 }
@@ -11220,7 +11221,7 @@ watch_command (char *arg, int from_tty)
 }
 
 void
-rwatch_command_wrapper (char *arg, int from_tty, int internal)
+rwatch_command_wrapper (const char *arg, int from_tty, int internal)
 {
   watch_command_1 (arg, hw_read, from_tty, 0, internal);
 }
@@ -11232,7 +11233,7 @@ rwatch_command (char *arg, int from_tty)
 }
 
 void
-awatch_command_wrapper (char *arg, int from_tty, int internal)
+awatch_command_wrapper (const char *arg, int from_tty, int internal)
 {
   watch_command_1 (arg, hw_access, from_tty, 0, internal);
 }
@@ -11353,7 +11354,7 @@ until_break_fsm_async_reply_reason (struct thread_fsm *self)
 }
 
 void
-until_break_command (char *arg, int from_tty, int anywhere)
+until_break_command (const char *arg, int from_tty, int anywhere)
 {
   struct frame_info *frame;
   struct gdbarch *frame_gdbarch;
@@ -11577,7 +11578,7 @@ void
 init_ada_exception_breakpoint (struct breakpoint *b,
 			       struct gdbarch *gdbarch,
 			       struct symtab_and_line sal,
-			       char *addr_string,
+			       const char *addr_string,
 			       const struct breakpoint_ops *ops,
 			       int tempflag,
 			       int enabled,
@@ -13337,16 +13338,13 @@ strace_marker_create_sals_from_location (const struct event_location *location,
 {
   struct linespec_sals lsal;
   const char *arg_start, *arg;
-  char *str;
-  struct cleanup *cleanup;
 
   arg = arg_start = get_linespec_location (location);
   lsal.sals = decode_static_tracepoint_spec (&arg);
 
-  str = savestring (arg_start, arg - arg_start);
-  cleanup = make_cleanup (xfree, str);
-  canonical->location = new_linespec_location (&str);
-  do_cleanups (cleanup);
+  std::string str (arg_start, arg - arg_start);
+  const char *ptr = str.c_str ();
+  canonical->location = new_linespec_location (&ptr);
 
   lsal.canonical
     = xstrdup (event_location_to_string (canonical->location.get ()));
@@ -14786,8 +14784,9 @@ set_tracepoint_count (int num)
 }
 
 static void
-trace_command (char *arg, int from_tty)
+trace_command (char *arg_in, int from_tty)
 {
+  const char *arg = arg_in;
   struct breakpoint_ops *ops;
 
   event_location_up location = string_to_event_location (&arg,
@@ -14812,8 +14811,9 @@ trace_command (char *arg, int from_tty)
 }
 
 static void
-ftrace_command (char *arg, int from_tty)
+ftrace_command (char *arg_in, int from_tty)
 {
+  const char *arg = arg_in;
   event_location_up location = string_to_event_location (&arg,
 							 current_language);
   create_breakpoint (get_current_arch (),
@@ -14832,8 +14832,9 @@ ftrace_command (char *arg, int from_tty)
 /* strace command implementation.  Creates a static tracepoint.  */
 
 static void
-strace_command (char *arg, int from_tty)
+strace_command (char *arg_in, int from_tty)
 {
+  const char *arg = arg_in;
   struct breakpoint_ops *ops;
   event_location_up location;
   struct cleanup *back_to;
@@ -14891,7 +14892,8 @@ read_uploaded_action (void)
 struct tracepoint *
 create_tracepoint_from_upload (struct uploaded_tp *utp)
 {
-  char *addr_str, small_buf[100];
+  const char *addr_str;
+  char small_buf[100];
   struct tracepoint *tp;
 
   if (utp->at_string)

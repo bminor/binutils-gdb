@@ -136,12 +136,14 @@ extern void decode_line_full (const struct event_location *location, int flags,
    source symtab and line as defaults.
    This is for commands like "list" and "breakpoint".  */
 
-extern std::vector<symtab_and_line> decode_line_with_current_source (char *, int);
+extern std::vector<symtab_and_line> decode_line_with_current_source
+    (const char *, int);
 
 /* Given a string, return the line specified by it, using the last displayed
    codepoint's values as defaults, or nothing if they aren't valid.  */
 
-extern std::vector<symtab_and_line> decode_line_with_last_displayed (char *, int);
+extern std::vector<symtab_and_line> decode_line_with_last_displayed
+    (const char *, int);
 
 /* Does P represent one of the keywords?  If so, return
    the keyword.  If not, return NULL.  */
@@ -171,7 +173,7 @@ extern const char *find_toplevel_char (const char *s, char c);
 /* Find the end of the (first) linespec pointed to by *STRINGP.
    STRINGP will be advanced to this point.  */
 
-extern void linespec_lex_to_end (char **stringp);
+extern void linespec_lex_to_end (const char **stringp);
 
 extern const char * const linespec_keywords[];
 

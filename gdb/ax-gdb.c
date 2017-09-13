@@ -2622,7 +2622,7 @@ agent_eval_command_one (const char *exp, int eval, CORE_ADDR pc)
 }
 
 static void
-agent_command_1 (char *exp, int eval)
+agent_command_1 (const char *exp, int eval)
 {
   /* We don't deal with overlay debugging at the moment.  We need to
      think more carefully about this.  If you copy this code into

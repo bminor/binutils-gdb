@@ -12925,7 +12925,7 @@ ada_exception_catchpoint_cond_string (const char *excep_string)
 
 static struct symtab_and_line
 ada_exception_sal (enum ada_exception_catchpoint_kind ex, char *excep_string,
-		   char **addr_string, const struct breakpoint_ops **ops)
+		   const char **addr_string, const struct breakpoint_ops **ops)
 {
   const char *sym_name;
   struct symbol *sym;
@@ -12984,7 +12984,7 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 int disabled,
 				 int from_tty)
 {
-  char *addr_string = NULL;
+  const char *addr_string = NULL;
   const struct breakpoint_ops *ops = NULL;
   struct symtab_and_line sal
     = ada_exception_sal (ex_kind, excep_string, &addr_string, &ops);

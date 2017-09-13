@@ -165,7 +165,7 @@ mi_argv_to_format (char **argv, int argc)
 static void
 mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
 {
-  char *address = NULL;
+  const char *address = NULL;
   int hardware = 0;
   int temp_p = 0;
   int thread = -1;

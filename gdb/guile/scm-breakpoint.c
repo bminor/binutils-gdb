@@ -412,7 +412,7 @@ gdbscm_register_breakpoint_x (SCM self)
   breakpoint_smob *bp_smob
     = bpscm_get_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct gdb_exception except = exception_none;
-  char *location, *copy;
+  const char *location, *copy;
 
   /* We only support registering breakpoints created with make-breakpoint.  */
   if (!bp_smob->is_scheme_bkpt)

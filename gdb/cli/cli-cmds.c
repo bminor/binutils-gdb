@@ -814,7 +814,7 @@ edit_command (char *arg, int from_tty)
     }
   else
     {
-      char *arg1;
+      const char *arg1;
 
       /* Now should only be one argument -- decode it in SAL.  */
       arg1 = arg;
@@ -892,7 +892,7 @@ static void
 list_command (char *arg, int from_tty)
 {
   struct symbol *sym;
-  char *arg1;
+  const char *arg1;
   int no_end = 1;
   int dummy_end = 0;
   int dummy_beg = 0;
