@@ -3180,9 +3180,10 @@ btrace_maint_print_packets (struct btrace_thread_info *btinfo,
 /* Read a number from an argument string.  */
 
 static unsigned int
-get_uint (char **arg)
+get_uint (const char **arg)
 {
-  char *begin, *end, *pos;
+  const char *begin, *pos;
+  char *end;
   unsigned long number;
 
   begin = *arg;
@@ -3203,23 +3204,23 @@ get_uint (char **arg)
 /* Read a context size from an argument string.  */
 
 static int
-get_context_size (char **arg)
+get_context_size (const char **arg)
 {
-  char *pos;
-  int number;
-
-  pos = skip_spaces (*arg);
+  const char *pos = skip_spaces (*arg);
 
   if (!isdigit (*pos))
     error (_("Expected positive number, got: %s."), pos);
 
-  return strtol (pos, arg, 10);
+  char *end;
+  long result = strtol (pos, &end, 10);
+  *arg = end;
+  return result;
 }
 
 /* Complain about junk at the end of an argument string.  */
 
 static void
-no_chunk (char *arg)
+no_chunk (const char *arg)
 {
   if (*arg != 0)
     error (_("Junk after argument: %s."), arg);
@@ -3228,7 +3229,7 @@ no_chunk (char *arg)
 /* The "maintenance btrace packet-history" command.  */
 
 static void
-maint_btrace_packet_history_cmd (char *arg, int from_tty)
+maint_btrace_packet_history_cmd (const char *arg, int from_tty)
 {
   struct btrace_thread_info *btinfo;
   struct thread_info *tp;
@@ -3333,7 +3334,7 @@ maint_btrace_packet_history_cmd (char *arg, int from_tty)
 /* The "maintenance btrace clear-packet-history" command.  */
 
 static void
-maint_btrace_clear_packet_history_cmd (char *args, int from_tty)
+maint_btrace_clear_packet_history_cmd (const char *args, int from_tty)
 {
   struct btrace_thread_info *btinfo;
   struct thread_info *tp;
@@ -3355,7 +3356,7 @@ maint_btrace_clear_packet_history_cmd (char *args, int from_tty)
 /* The "maintenance btrace clear" command.  */
 
 static void
-maint_btrace_clear_cmd (char *args, int from_tty)
+maint_btrace_clear_cmd (const char *args, int from_tty)
 {
   struct btrace_thread_info *btinfo;
   struct thread_info *tp;
@@ -3418,7 +3419,7 @@ maint_btrace_pt_show_cmd (char *args, int from_tty)
 /* The "maintenance info btrace" command.  */
 
 static void
-maint_info_btrace_cmd (char *args, int from_tty)
+maint_info_btrace_cmd (const char *args, int from_tty)
 {
   struct btrace_thread_info *btinfo;
   struct thread_info *tp;

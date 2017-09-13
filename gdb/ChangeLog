@@ -1,5 +1,12 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* btrace.c (get_uint, get_context_size, no_chunk)
+	(maint_btrace_packet_history_cmd)
+	(maint_btrace_clear_packet_history_cmd, maint_btrace_clear_cmd)
+	(maint_info_btrace_cmd): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* reverse.c (delete_bookmark_command): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>
