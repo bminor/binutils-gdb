@@ -345,7 +345,7 @@ valid_program_space_id (int num)
    indicating which the program space to print information about.  */
 
 static void
-maintenance_info_program_spaces_command (char *args, int from_tty)
+maintenance_info_program_spaces_command (const char *args, int from_tty)
 {
   int requested = -1;
 

@@ -1,5 +1,10 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* progspace.c (maintenance_info_program_spaces_command):
+	Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile.c (check_raw_argument, compile_file_command)
 	(compile_code_command, compile_print_command): Constify.
 
