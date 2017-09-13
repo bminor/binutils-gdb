@@ -6894,7 +6894,7 @@ set_mips_command (char *args, int from_tty)
 /* Commands to show/set the MIPS FPU type.  */
 
 static void
-show_mipsfpu_command (char *args, int from_tty)
+show_mipsfpu_command (const char *args, int from_tty)
 {
   const char *fpu;
 
@@ -6939,7 +6939,7 @@ set_mipsfpu_command (char *args, int from_tty)
 }
 
 static void
-set_mipsfpu_single_command (char *args, int from_tty)
+set_mipsfpu_single_command (const char *args, int from_tty)
 {
   struct gdbarch_info info;
   gdbarch_info_init (&info);
@@ -6953,7 +6953,7 @@ set_mipsfpu_single_command (char *args, int from_tty)
 }
 
 static void
-set_mipsfpu_double_command (char *args, int from_tty)
+set_mipsfpu_double_command (const char *args, int from_tty)
 {
   struct gdbarch_info info;
   gdbarch_info_init (&info);
@@ -6967,7 +6967,7 @@ set_mipsfpu_double_command (char *args, int from_tty)
 }
 
 static void
-set_mipsfpu_none_command (char *args, int from_tty)
+set_mipsfpu_none_command (const char *args, int from_tty)
 {
   struct gdbarch_info info;
   gdbarch_info_init (&info);
@@ -6981,7 +6981,7 @@ set_mipsfpu_none_command (char *args, int from_tty)
 }
 
 static void
-set_mipsfpu_auto_command (char *args, int from_tty)
+set_mipsfpu_auto_command (const char *args, int from_tty)
 {
   mips_fpu_type_auto = 1;
 }

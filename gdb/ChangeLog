@@ -1,5 +1,11 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* mips-tdep.c (show_mipsfpu_command, set_mipsfpu_single_command)
+	(set_mipsfpu_double_command, set_mipsfpu_none_command)
+	(set_mipsfpu_auto_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-cmds.h (cd_command): Constify.
 	* cli/cli-cmds.c (cd_command): Constify.
 
