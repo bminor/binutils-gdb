@@ -24028,7 +24028,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
    GDB manual.  Any changes here must be documented there.  */
 
 static void
-save_gdb_index_command (char *arg, int from_tty)
+save_gdb_index_command (const char *arg, int from_tty)
 {
   struct objfile *objfile;
 
