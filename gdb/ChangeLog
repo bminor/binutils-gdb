@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* reverse.c (delete_bookmark_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* remote.c (set_memory_packet_size)
 	(set_memory_write_packet_size, show_memory_write_packet_size)
 	(set_memory_read_packet_size, show_memory_read_packet_size)
