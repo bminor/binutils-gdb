@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* demangle.c (demangle_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* progspace.c (maintenance_info_program_spaces_command):
 	Constify.
 
