@@ -298,7 +298,7 @@ EXTERN_C char *re_comp (const char *);
 
 /* From symfile.c */
 
-extern void symbol_file_command (char *, int);
+extern void symbol_file_command (const char *, int);
 
 /* * Remote targets may wish to use this as their load function.  */
 extern void generic_load (const char *name, int from_tty);
