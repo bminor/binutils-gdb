@@ -1,5 +1,9 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* stap-probe.c (info_probes_stap_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* fork-child.c (unset_exec_wrapper_command): Constify.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>
