@@ -1,5 +1,11 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* printcmd.c (map_display_numbers, undisplay_command)
+	(enable_disable_display_command, enable_display_command)
+	(disable_display_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* breakpoint.h (delete_command): Don't declare.
 	* breakpoint.c (delete_command, enable_once_command)
 	(enable_count_command, enable_delete_command, breakpoint_1)

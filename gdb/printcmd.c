@@ -1795,7 +1795,7 @@ delete_display (struct display *display)
    ARGS.  DATA is passed unmodified to FUNCTION.  */
 
 static void
-map_display_numbers (char *args,
+map_display_numbers (const char *args,
 		     void (*function) (struct display *,
 				       void *),
 		     void *data)
@@ -1840,7 +1840,7 @@ do_delete_display (struct display *d, void *data)
 /* "undisplay" command.  */
 
 static void
-undisplay_command (char *args, int from_tty)
+undisplay_command (const char *args, int from_tty)
 {
   if (args == NULL)
     {
@@ -2085,7 +2085,7 @@ do_enable_disable_display (struct display *d, void *data)
    commands.  ENABLE decides what to do.  */
 
 static void
-enable_disable_display_command (char *args, int from_tty, int enable)
+enable_disable_display_command (const char *args, int from_tty, int enable)
 {
   if (args == NULL)
     {
@@ -2102,7 +2102,7 @@ enable_disable_display_command (char *args, int from_tty, int enable)
 /* The "enable display" command.  */
 
 static void
-enable_display_command (char *args, int from_tty)
+enable_display_command (const char *args, int from_tty)
 {
   enable_disable_display_command (args, from_tty, 1);
 }
@@ -2110,7 +2110,7 @@ enable_display_command (char *args, int from_tty)
 /* The "disable display" command.  */
 
 static void
-disable_display_command (char *args, int from_tty)
+disable_display_command (const char *args, int from_tty)
 {
   enable_disable_display_command (args, from_tty, 0);
 }
