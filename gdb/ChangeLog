@@ -1,5 +1,10 @@
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
+	* inferior.c (detach_inferior_command, kill_inferior_command)
+	(inferior_command): Constify.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
 	* regcache.c (regcache_print, maintenance_print_registers)
 	(maintenance_print_raw_registers)
 	(maintenance_print_cooked_registers)
