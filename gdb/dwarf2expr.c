@@ -272,7 +272,7 @@ dwarf_expr_context::fetch_in_stack_memory (int n)
 
 /* Return true if the expression stack is empty.  */
 
-int
+bool
 dwarf_expr_context::stack_empty_p () const
 {
   return this->stack_len == 0;

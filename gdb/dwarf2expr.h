@@ -251,7 +251,7 @@ private:
   struct type *address_type () const;
   void grow_stack (size_t need);
   void push (struct value *value, bool in_stack_memory);
-  int stack_empty_p () const;
+  bool stack_empty_p () const;
   void add_piece (ULONGEST size, ULONGEST offset);
   void execute_stack_op (const gdb_byte *op_ptr, const gdb_byte *op_end);
   void pop ();

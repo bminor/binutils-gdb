@@ -1,5 +1,11 @@
 2017-09-14  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* dwarf2expr.h (dwarf_expr_context) <stack_empty_p>: Change
+	return type to bool.
+	* dwarf2expr.c (dwarf_expr_context::stack_empty_p): Likewise.
+
+2017-09-14  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* dwarf2expr.h (dwarf_expr_piece) <v.mem.in_stack_memory>:
 	Change type to bool.
 	(dwarf_stack_value) <in_stack_memory>: Likewise.
