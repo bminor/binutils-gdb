@@ -1,3 +1,11 @@
+2017-09-14  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
+
+	PR binutils/22113
+	* peXXigen.c (pe_print_idata): Extend check for HintName vector
+	entries.
+
 2017-08-21  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	Import from mainline:
