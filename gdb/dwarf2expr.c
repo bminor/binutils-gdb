@@ -130,7 +130,7 @@ dwarf_expr_context::grow_stack (size_t need)
 /* Push VALUE onto the stack.  */
 
 void
-dwarf_expr_context::push (struct value *value, int in_stack_memory)
+dwarf_expr_context::push (struct value *value, bool in_stack_memory)
 {
   struct dwarf_stack_value *v;
 
@@ -143,7 +143,7 @@ dwarf_expr_context::push (struct value *value, int in_stack_memory)
 /* Push VALUE onto the stack.  */
 
 void
-dwarf_expr_context::push_address (CORE_ADDR value, int in_stack_memory)
+dwarf_expr_context::push_address (CORE_ADDR value, bool in_stack_memory)
 {
   push (value_from_ulongest (address_type (), value), in_stack_memory);
 }
@@ -260,7 +260,7 @@ dwarf_expr_context::fetch_address (int n)
 
 /* Retrieve the in_stack_memory flag of the N'th item on the stack.  */
 
-int
+bool
 dwarf_expr_context::fetch_in_stack_memory (int n)
 {
   if (this->stack_len <= n)
@@ -599,12 +599,12 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
       enum dwarf_location_atom op = (enum dwarf_location_atom) *op_ptr++;
       ULONGEST result;
       /* Assume the value is not in stack memory.
-	 Code that knows otherwise sets this to 1.
+	 Code that knows otherwise sets this to true.
 	 Some arithmetic on stack addresses can probably be assumed to still
 	 be a stack address, but we skip this complication for now.
 	 This is just an optimization, so it's always ok to punt
-	 and leave this as 0.  */
-      int in_stack_memory = 0;
+	 and leave this as false.  */
+      bool in_stack_memory = false;
       uint64_t uoffset, reg;
       int64_t offset;
       struct value *result_val = NULL;
@@ -897,7 +897,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 		       "base using explicit value operator"));
 	    result = result + offset;
 	    result_val = value_from_ulongest (address_type, result);
-	    in_stack_memory = 1;
+	    in_stack_memory = true;
 	    this->stack_len = before_stack_len;
 	    this->location = DWARF_VALUE_MEMORY;
 	  }
@@ -1187,7 +1187,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_call_frame_cfa:
 	  result = this->get_frame_cfa ();
 	  result_val = value_from_ulongest (address_type, result);
-	  in_stack_memory = 1;
+	  in_stack_memory = true;
 	  break;
 
 	case DW_OP_GNU_push_tls_address:

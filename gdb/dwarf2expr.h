@@ -62,7 +62,7 @@ struct dwarf_expr_piece
       CORE_ADDR addr;
       /* Non-zero if the piece is known to be in memory and on
 	 the program's stack.  */
-      int in_stack_memory;
+      bool in_stack_memory;
     } mem;
 
     /* The piece's register number, for DWARF_VALUE_REGISTER pieces.  */
@@ -102,12 +102,11 @@ struct dwarf_stack_value
 {
   struct value *value;
 
-  /* Non-zero if the piece is in memory and is known to be
-     on the program's stack.  It is always ok to set this to zero.
-     This is used, for example, to optimize memory access from the target.
-     It can vastly speed up backtraces on long latency connections when
-     "set stack-cache on".  */
-  int in_stack_memory;
+  /* True if the piece is in memory and is known to be on the program's stack.
+     It is always ok to set this to zero.  This is used, for example, to
+     optimize memory access from the target.  It can vastly speed up backtraces
+     on long latency connections when "set stack-cache on".  */
+  bool in_stack_memory;
 };
 
 /* The expression evaluator works with a dwarf_expr_context, describing
@@ -117,11 +116,11 @@ struct dwarf_expr_context
   dwarf_expr_context ();
   virtual ~dwarf_expr_context ();
 
-  void push_address (CORE_ADDR value, int in_stack_memory);
+  void push_address (CORE_ADDR value, bool in_stack_memory);
   void eval (const gdb_byte *addr, size_t len);
   struct value *fetch (int n);
   CORE_ADDR fetch_address (int n);
-  int fetch_in_stack_memory (int n);
+  bool fetch_in_stack_memory (int n);
 
   /* The stack of values, allocated with xmalloc.  */
   struct dwarf_stack_value *stack;
@@ -251,7 +250,7 @@ private:
 
   struct type *address_type () const;
   void grow_stack (size_t need);
-  void push (struct value *value, int in_stack_memory);
+  void push (struct value *value, bool in_stack_memory);
   int stack_empty_p () const;
   void add_piece (ULONGEST size, ULONGEST offset);
   void execute_stack_op (const gdb_byte *op_ptr, const gdb_byte *op_end);

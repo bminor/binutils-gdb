@@ -1,5 +1,22 @@
 2017-09-14  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* dwarf2expr.h (dwarf_expr_piece) <v.mem.in_stack_memory>:
+	Change type to bool.
+	(dwarf_stack_value) <in_stack_memory>: Likewise.
+	(dwarf_expr_context) <push_address>: Change parameter type to
+	bool.
+	<fetch_in_stack_memory>: Change return type to bool.
+	<push>: Change parameter type to bool.
+	* dwarf2expr.c (dwarf_expr_context::push): Change parameter type
+	to bool.
+	(dwarf_expr_context::push_address): Likewise.
+	(dwarf_expr_context::fetch_in_stack_memory): Change return type
+	to bool.
+	(dwarf_expr_context::execute_stack_op): Adjust.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Adjust.
+
+2017-09-14  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* dwarf2expr.h (struct dwarf_expr_piece): Move up.
 	(struct dwarf_expr_context) <n_pieces>: Remove.
 	<pieces>: Change type to std::vector.

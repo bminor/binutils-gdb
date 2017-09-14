@@ -2441,7 +2441,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	  {
 	    struct type *ptr_type;
 	    CORE_ADDR address = ctx.fetch_address (0);
-	    int in_stack_memory = ctx.fetch_in_stack_memory (0);
+	    bool in_stack_memory = ctx.fetch_in_stack_memory (0);
 
 	    /* DW_OP_deref_size (and possibly other operations too) may
 	       create a pointer instead of an address.  Ideally, the
