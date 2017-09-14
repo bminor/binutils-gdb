@@ -1,3 +1,3 @@
 #...
-.*\(FLAGS_1\).*Flags: GLOBAUDIT
+.*\(FLAGS_1\).*Flags: .*GLOBAUDIT.*
 #pass
