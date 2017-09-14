@@ -1,3 +1,8 @@
+2017-07-18  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	Import from mainline:
+	* dwarf.c (display_debug_names): Initialize hash_prev.
+
 2017-09-05  Nick Clifton  <nickc@redhat.com>
 
 	Import from mainline:
