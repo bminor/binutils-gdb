@@ -2712,8 +2712,21 @@ mmix_elf_relax_section (bfd *abfd,
 	  indx = ELF64_R_SYM (irel->r_info) - symtab_hdr->sh_info;
 	  h = elf_sym_hashes (abfd)[indx];
 	  BFD_ASSERT (h != NULL);
-	  if (h->root.type != bfd_link_hash_defined
-	      && h->root.type != bfd_link_hash_defweak)
+	  if (h->root.type == bfd_link_hash_undefweak)
+	    /* FIXME: for R_MMIX_PUSHJ_STUBBABLE, there are alternatives to
+	       the canonical value 0 for an unresolved weak symbol to
+	       consider: as the debug-friendly approach, resolve to "abort"
+	       (or a port-specific function), or as the space-friendly
+	       approach resolve to the next instruction (like some other
+	       ports, notably ARM and AArch64).  These alternatives require
+	       matching code in mmix_elf_perform_relocation or its caller.  */
+	    symval = 0;
+	  else if (h->root.type == bfd_link_hash_defined
+		   || h->root.type == bfd_link_hash_defweak)
+	    symval = (h->root.u.def.value
+		      + h->root.u.def.section->output_section->vma
+		      + h->root.u.def.section->output_offset);
+	  else
 	    {
 	      /* This appears to be a reference to an undefined symbol.  Just
 		 ignore it--it will be caught by the regular reloc processing.
@@ -2727,10 +2740,6 @@ mmix_elf_relax_section (bfd *abfd,
 		}
 	      continue;
 	    }
-
-	  symval = (h->root.u.def.value
-		    + h->root.u.def.section->output_section->vma
-		    + h->root.u.def.section->output_offset);
 	}
 
       if (ELF64_R_TYPE (irel->r_info) == (int) R_MMIX_PUSHJ_STUBBABLE)
@@ -2867,6 +2876,8 @@ mmix_elf_relax_section (bfd *abfd,
 	  symtab_hdr->contents = (unsigned char *) isymbuf;
 	}
     }
+
+  BFD_ASSERT(pjsno == mmix_elf_section_data (sec)->pjs.n_pushj_relocs);
 
   if (internal_relocs != NULL
       && elf_section_data (sec)->relocs != internal_relocs)
