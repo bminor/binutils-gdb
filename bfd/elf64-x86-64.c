@@ -1780,6 +1780,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
   bfd_byte *contents;
+  bfd_boolean converted;
 
   if (bfd_link_relocatable (info))
     return TRUE;
@@ -1813,6 +1814,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
+
+  converted = FALSE;
 
   sreloc = NULL;
 
@@ -1931,6 +1934,9 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 					      irel, h, &converted_reloc,
 					      info))
 	    goto error_return;
+
+	  if (converted_reloc)
+	    converted = TRUE;
 	}
 
       if (! elf_x86_64_tls_transition (info, abfd, sec, contents,
@@ -2306,14 +2312,19 @@ do_size:
 
   if (elf_section_data (sec)->this_hdr.contents != contents)
     {
-      if (!info->keep_memory)
+      if (!converted && !info->keep_memory)
 	free (contents);
       else
 	{
-	  /* Cache the section contents for elf_link_input_bfd.  */
+	  /* Cache the section contents for elf_link_input_bfd if any
+	     load is converted or --no-keep-memory isn't used.  */
 	  elf_section_data (sec)->this_hdr.contents = contents;
 	}
     }
+
+  /* Cache relocations if any load is converted.  */
+  if (elf_section_data (sec)->relocs != relocs && converted)
+    elf_section_data (sec)->relocs = (Elf_Internal_Rela *) relocs;
 
   return TRUE;
 
