@@ -100,6 +100,10 @@ struct dwarf_expr_piece
 
 struct dwarf_stack_value
 {
+  dwarf_stack_value (struct value *value_, int in_stack_memory_)
+  : value (value_), in_stack_memory (in_stack_memory_)
+  {}
+
   struct value *value;
 
   /* True if the piece is in memory and is known to be on the program's stack.
@@ -114,7 +118,7 @@ struct dwarf_stack_value
 struct dwarf_expr_context
 {
   dwarf_expr_context ();
-  virtual ~dwarf_expr_context ();
+  virtual ~dwarf_expr_context () = default;
 
   void push_address (CORE_ADDR value, bool in_stack_memory);
   void eval (const gdb_byte *addr, size_t len);
@@ -122,12 +126,8 @@ struct dwarf_expr_context
   CORE_ADDR fetch_address (int n);
   bool fetch_in_stack_memory (int n);
 
-  /* The stack of values, allocated with xmalloc.  */
-  struct dwarf_stack_value *stack;
-
-  /* The number of values currently pushed on the stack, and the
-     number of elements allocated to the stack.  */
-  int stack_len, stack_allocated;
+  /* The stack of values.  */
+  std::vector<dwarf_stack_value> stack;
 
   /* Target architecture to use for address operations.  */
   struct gdbarch *gdbarch;
@@ -249,7 +249,6 @@ struct dwarf_expr_context
 private:
 
   struct type *address_type () const;
-  void grow_stack (size_t need);
   void push (struct value *value, bool in_stack_memory);
   bool stack_empty_p () const;
   void add_piece (ULONGEST size, ULONGEST offset);

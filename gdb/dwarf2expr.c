@@ -88,10 +88,7 @@ dwarf_expr_context::address_type () const
 /* Create a new context for the expression evaluator.  */
 
 dwarf_expr_context::dwarf_expr_context ()
-: stack (NULL),
-  stack_len (0),
-  stack_allocated (10),
-  gdbarch (NULL),
+: gdbarch (NULL),
   addr_size (0),
   ref_addr_size (0),
   offset (0),
@@ -102,29 +99,6 @@ dwarf_expr_context::dwarf_expr_context ()
   data (NULL),
   initialized (0)
 {
-  this->stack = XNEWVEC (struct dwarf_stack_value, this->stack_allocated);
-}
-
-/* Clean up a dwarf_expr_context.  */
-
-dwarf_expr_context::~dwarf_expr_context ()
-{
-  xfree (this->stack);
-}
-
-/* Expand the memory allocated stack to contain at least
-   NEED more elements than are currently used.  */
-
-void
-dwarf_expr_context::grow_stack (size_t need)
-{
-  if (this->stack_len + need > this->stack_allocated)
-    {
-      size_t newlen = this->stack_len + need + 10;
-
-      this->stack = XRESIZEVEC (struct dwarf_stack_value, this->stack, newlen);
-      this->stack_allocated = newlen;
-    }
 }
 
 /* Push VALUE onto the stack.  */
@@ -132,12 +106,7 @@ dwarf_expr_context::grow_stack (size_t need)
 void
 dwarf_expr_context::push (struct value *value, bool in_stack_memory)
 {
-  struct dwarf_stack_value *v;
-
-  grow_stack (1);
-  v = &this->stack[this->stack_len++];
-  v->value = value;
-  v->in_stack_memory = in_stack_memory;
+  stack.emplace_back (value, in_stack_memory);
 }
 
 /* Push VALUE onto the stack.  */
@@ -153,9 +122,10 @@ dwarf_expr_context::push_address (CORE_ADDR value, bool in_stack_memory)
 void
 dwarf_expr_context::pop ()
 {
-  if (this->stack_len <= 0)
+  if (stack.empty ())
     error (_("dwarf expression stack underflow"));
-  this->stack_len--;
+
+  stack.pop_back ();
 }
 
 /* Retrieve the N'th item on the stack.  */
@@ -163,11 +133,11 @@ dwarf_expr_context::pop ()
 struct value *
 dwarf_expr_context::fetch (int n)
 {
-  if (this->stack_len <= n)
+  if (stack.size () <= n)
      error (_("Asked for position %d of stack, "
-	      "stack only has %d elements on it."),
-	    n, this->stack_len);
-  return this->stack[this->stack_len - (1 + n)].value;
+	      "stack only has %zu elements on it."),
+	    n, stack.size ());
+  return stack[stack.size () - (1 + n)].value;
 }
 
 /* Require that TYPE be an integral type; throw an exception if not.  */
@@ -263,11 +233,11 @@ dwarf_expr_context::fetch_address (int n)
 bool
 dwarf_expr_context::fetch_in_stack_memory (int n)
 {
-  if (this->stack_len <= n)
+  if (stack.size () <= n)
      error (_("Asked for position %d of stack, "
-	      "stack only has %d elements on it."),
-	    n, this->stack_len);
-  return this->stack[this->stack_len - (1 + n)].in_stack_memory;
+	      "stack only has %zu elements on it."),
+	    n, stack.size ());
+  return stack[stack.size () - (1 + n)].in_stack_memory;
 }
 
 /* Return true if the expression stack is empty.  */
@@ -275,7 +245,7 @@ dwarf_expr_context::fetch_in_stack_memory (int n)
 bool
 dwarf_expr_context::stack_empty_p () const
 {
-  return this->stack_len == 0;
+  return stack.empty ();
 }
 
 /* Add a new piece to the dwarf_expr_context's piece list.  */
@@ -875,14 +845,16 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  {
 	    const gdb_byte *datastart;
 	    size_t datalen;
-	    unsigned int before_stack_len;
 
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
+
 	    /* Rather than create a whole new context, we simply
-	       record the stack length before execution, then reset it
-	       afterwards, effectively erasing whatever the recursive
-	       call put there.  */
-	    before_stack_len = this->stack_len;
+	       backup the current stack locally and install a new empty stack,
+	       then reset it afterwards, effectively erasing whatever the
+	       recursive call put there.  */
+	    std::vector<dwarf_stack_value> saved_stack = std::move (stack);
+	    stack.clear ();
+
 	    /* FIXME: cagney/2003-03-26: This code should be using
                get_frame_base_address(), and then implement a dwarf2
                specific this_base method.  */
@@ -898,7 +870,10 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    result = result + offset;
 	    result_val = value_from_ulongest (address_type, result);
 	    in_stack_memory = true;
-	    this->stack_len = before_stack_len;
+
+	    /* Restore the content of the original stack.  */
+	    stack = std::move (saved_stack);
+
 	    this->location = DWARF_VALUE_MEMORY;
 	  }
 	  break;
@@ -920,16 +895,14 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  
 	case DW_OP_swap:
 	  {
-	    struct dwarf_stack_value t1, t2;
-
-	    if (this->stack_len < 2)
+	    if (stack.size () < 2)
 	       error (_("Not enough elements for "
-			"DW_OP_swap.  Need 2, have %d."),
-		      this->stack_len);
-	    t1 = this->stack[this->stack_len - 1];
-	    t2 = this->stack[this->stack_len - 2];
-	    this->stack[this->stack_len - 1] = t2;
-	    this->stack[this->stack_len - 2] = t1;
+			"DW_OP_swap.  Need 2, have %zu."),
+		      stack.size ());
+
+	    dwarf_stack_value &t1 = stack[stack.size () - 1];
+	    dwarf_stack_value &t2 = stack[stack.size () - 2];
+	    std::swap (t1, t2);
 	    goto no_push;
 	  }
 
@@ -940,18 +913,15 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	case DW_OP_rot:
 	  {
-	    struct dwarf_stack_value t1, t2, t3;
-
-	    if (this->stack_len < 3)
+	    if (stack.size () < 3)
 	       error (_("Not enough elements for "
-			"DW_OP_rot.  Need 3, have %d."),
-		      this->stack_len);
-	    t1 = this->stack[this->stack_len - 1];
-	    t2 = this->stack[this->stack_len - 2];
-	    t3 = this->stack[this->stack_len - 3];
-	    this->stack[this->stack_len - 1] = t2;
-	    this->stack[this->stack_len - 2] = t3;
-	    this->stack[this->stack_len - 3] = t1;
+			"DW_OP_rot.  Need 3, have %zu."),
+		      stack.size ());
+
+	    dwarf_stack_value temp = stack[stack.size () - 1];
+	    stack[stack.size () - 1] = stack[stack.size () - 2];
+	    stack[stack.size () - 2] = stack[stack.size () - 3];
+	    stack[stack.size () - 3] = temp;
 	    goto no_push;
 	  }
 
