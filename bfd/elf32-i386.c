@@ -1214,6 +1214,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 			     unsigned int *r_type_p,
 			     Elf_Internal_Rela *irel,
 			     struct elf_link_hash_entry *h,
+			     bfd_boolean *converted,
 			     struct bfd_link_info *link_info)
 {
   struct elf_x86_link_hash_table *htab;
@@ -1369,6 +1370,7 @@ convert_branch:
 	  bfd_put_32 (abfd, -4, contents + irel->r_offset);
 	  irel->r_info = ELF32_R_INFO (r_symndx, R_386_PC32);
 	  *r_type_p = R_386_PC32;
+	  *converted = TRUE;
 	}
     }
   else
@@ -1441,6 +1443,7 @@ convert_load:
 	  bfd_put_8 (abfd, opcode, contents + roff - 2);
 	  irel->r_info = ELF32_R_INFO (r_symndx, r_type);
 	  *r_type_p = r_type;
+	  *converted = TRUE;
 	}
     }
 
@@ -1468,6 +1471,7 @@ elf_i386_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
   bfd_byte *contents;
+  bfd_boolean converted;
 
   if (bfd_link_relocatable (info))
     return TRUE;
@@ -1501,6 +1505,8 @@ elf_i386_check_relocs (bfd *abfd,
 
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
+
+  converted = FALSE;
 
   sreloc = NULL;
 
@@ -1582,7 +1588,8 @@ elf_i386_check_relocs (bfd *abfd,
 	{
 	  Elf_Internal_Rela *irel = (Elf_Internal_Rela *) rel;
 	  if (!elf_i386_convert_load_reloc (abfd, symtab_hdr, contents,
-					    &r_type, irel, h, info))
+					    &r_type, irel, h,
+					    &converted, info))
 	    goto error_return;
 	}
 
@@ -1937,14 +1944,19 @@ do_size:
 
   if (elf_section_data (sec)->this_hdr.contents != contents)
     {
-      if (!info->keep_memory)
+      if (!converted && !info->keep_memory)
 	free (contents);
       else
 	{
-	  /* Cache the section contents for elf_link_input_bfd.  */
+	  /* Cache the section contents for elf_link_input_bfd if any
+	     load is converted or --no-keep-memory isn't used.  */
 	  elf_section_data (sec)->this_hdr.contents = contents;
 	}
     }
+
+  /* Cache relocations if any load is converted.  */
+  if (elf_section_data (sec)->relocs != relocs && converted)
+    elf_section_data (sec)->relocs = (Elf_Internal_Rela *) relocs;
 
   return TRUE;
 

@@ -39,6 +39,21 @@ if  { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != "
 
 clean_restart $binfile
 
+# Run to FUNC and unload symbols from system shared libraries, to
+# avoid conflicts with the minsyms in the program.  E.g.,
+# intl/plural-exp.h has 'enum expression_operator {..., mult, ...}'.
+
+proc nodebug_runto {func} {
+    with_test_prefix $func {
+	if ![runto $func] {
+	    return false
+	}
+	gdb_test_no_output "nosharedlibrary" \
+	    "unload symbols from system libraries"
+	return true
+    }
+}
+
 # Test calling no-debug functions involving argument types that may
 # require coercion/promotion, both prototyped and unprototyped, both
 # return-type-cast style, and function-pointer-cast styles.
@@ -73,7 +88,7 @@ proc test_call_promotion {} {
     gdb_test "p /d ((uint8 (*) ()) add8_noproto)((uint8) 2, (uint8) 3)" " = 5"
 }
 
-if [runto inner] then {
+if [nodebug_runto inner] then {
     
     # Expect to find global/local symbols in each of text/data/bss.
     
@@ -273,7 +288,7 @@ if [runto inner] then {
 
     # Now, try that we can give names of file-local symbols which happen
     # to be unique, and have it still work
-    if [runto middle] then {
+    if [nodebug_runto middle] then {
 	gdb_test "backtrace 10" "#0.*middle.*#1.*top.*#2.*main.*" \
 	    "backtrace from middle in nodebug.exp"
     }

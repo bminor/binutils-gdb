@@ -1,3 +1,13 @@
+2017-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22135
+	* elf32-i386.c (elf_i386_convert_load_reloc): Add an argument
+	to indicate if conversion is performed.
+	(elf_i386_check_relocs): Cache section contents and relocations
+	if conversion is performed.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Cache section
+	contents and relocations if conversion is performed.
+
 2017-09-14  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/22113

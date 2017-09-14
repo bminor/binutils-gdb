@@ -1,3 +1,19 @@
+2017-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22139
+	* testsuite/ld-elf/globalaudit.rd: Allow additional bits in
+	DT_FLAGS_1.
+
+2017-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22135
+	* testsuite/ld-i386/i386.exp: Run pr22135.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr22135.d: New file.
+	* testsuite/ld-i386/pr22135.s: Likewise.
+	* testsuite/ld-x86-64/pr22135.d: Likewise.
+	* testsuite/ld-x86-64/pr22135.s: Likewise.
+
 2017-09-09  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo (--plt-align): Describe new behaviour of option.
