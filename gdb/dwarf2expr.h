@@ -49,6 +49,53 @@ enum dwarf_value_location
   DWARF_VALUE_IMPLICIT_POINTER
 };
 
+/* A piece of an object, as recorded by DW_OP_piece or DW_OP_bit_piece.  */
+struct dwarf_expr_piece
+{
+  enum dwarf_value_location location;
+
+  union
+  {
+    struct
+    {
+      /* This piece's address, for DWARF_VALUE_MEMORY pieces.  */
+      CORE_ADDR addr;
+      /* Non-zero if the piece is known to be in memory and on
+	 the program's stack.  */
+      int in_stack_memory;
+    } mem;
+
+    /* The piece's register number, for DWARF_VALUE_REGISTER pieces.  */
+    int regno;
+
+    /* The piece's literal value, for DWARF_VALUE_STACK pieces.  */
+    struct value *value;
+
+    struct
+    {
+      /* A pointer to the data making up this piece,
+	 for DWARF_VALUE_LITERAL pieces.  */
+      const gdb_byte *data;
+      /* The length of the available data.  */
+      ULONGEST length;
+    } literal;
+
+    /* Used for DWARF_VALUE_IMPLICIT_POINTER.  */
+    struct
+    {
+      /* The referent DIE from DW_OP_implicit_pointer.  */
+      sect_offset die_sect_off;
+      /* The byte offset into the resulting data.  */
+      LONGEST offset;
+    } ptr;
+  } v;
+
+  /* The length of the piece, in bits.  */
+  ULONGEST size;
+  /* The piece offset, in bits.  */
+  ULONGEST offset;
+};
+
 /* The dwarf expression stack.  */
 
 struct dwarf_stack_value
@@ -114,8 +161,7 @@ struct dwarf_expr_context
      initialized; zero otherwise.  */
   int initialized;
 
-  /* An array of pieces.  PIECES points to its first element;
-     NUM_PIECES is its length.
+  /* A vector of pieces.
 
      Each time DW_OP_piece is executed, we add a new element to the
      end of this array, recording the current top of the stack, the
@@ -137,8 +183,7 @@ struct dwarf_expr_context
      no DW_OP_piece operations have no value to place in a piece's
      'size' field; the size comes from the surrounding data.  So the
      two cases need to be handled separately.)  */
-  int num_pieces;
-  struct dwarf_expr_piece *pieces;
+  std::vector<dwarf_expr_piece> pieces;
 
   /* Return the value of register number REGNUM (a DWARF register number),
      read as an address.  */
@@ -211,54 +256,6 @@ private:
   void add_piece (ULONGEST size, ULONGEST offset);
   void execute_stack_op (const gdb_byte *op_ptr, const gdb_byte *op_end);
   void pop ();
-};
-
-
-/* A piece of an object, as recorded by DW_OP_piece or DW_OP_bit_piece.  */
-struct dwarf_expr_piece
-{
-  enum dwarf_value_location location;
-
-  union
-  {
-    struct
-    {
-      /* This piece's address, for DWARF_VALUE_MEMORY pieces.  */
-      CORE_ADDR addr;
-      /* Non-zero if the piece is known to be in memory and on
-	 the program's stack.  */
-      int in_stack_memory;
-    } mem;
-
-    /* The piece's register number, for DWARF_VALUE_REGISTER pieces.  */
-    int regno;
-
-    /* The piece's literal value, for DWARF_VALUE_STACK pieces.  */
-    struct value *value;
-
-    struct
-    {
-      /* A pointer to the data making up this piece,
-	 for DWARF_VALUE_LITERAL pieces.  */
-      const gdb_byte *data;
-      /* The length of the available data.  */
-      ULONGEST length;
-    } literal;
-
-    /* Used for DWARF_VALUE_IMPLICIT_POINTER.  */
-    struct
-    {
-      /* The referent DIE from DW_OP_implicit_pointer.  */
-      sect_offset die_sect_off;
-      /* The byte offset into the resulting data.  */
-      LONGEST offset;
-    } ptr;
-  } v;
-
-  /* The length of the piece, in bits.  */
-  ULONGEST size;
-  /* The piece offset, in bits.  */
-  ULONGEST offset;
 };
 
 void dwarf_expr_require_composition (const gdb_byte *, const gdb_byte *,

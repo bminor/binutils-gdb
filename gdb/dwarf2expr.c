@@ -100,9 +100,7 @@ dwarf_expr_context::dwarf_expr_context ()
   location (DWARF_VALUE_MEMORY),
   len (0),
   data (NULL),
-  initialized (0),
-  num_pieces (0),
-  pieces (NULL)
+  initialized (0)
 {
   this->stack = XNEWVEC (struct dwarf_stack_value, this->stack_allocated);
 }
@@ -112,7 +110,6 @@ dwarf_expr_context::dwarf_expr_context ()
 dwarf_expr_context::~dwarf_expr_context ()
 {
   xfree (this->stack);
-  xfree (this->pieces);
 }
 
 /* Expand the memory allocated stack to contain at least
@@ -285,47 +282,42 @@ dwarf_expr_context::stack_empty_p () const
 void
 dwarf_expr_context::add_piece (ULONGEST size, ULONGEST offset)
 {
-  struct dwarf_expr_piece *p;
+  this->pieces.emplace_back ();
+  dwarf_expr_piece &p = this->pieces.back ();
 
-  this->num_pieces++;
+  p.location = this->location;
+  p.size = size;
+  p.offset = offset;
 
-  this->pieces
-    = XRESIZEVEC (struct dwarf_expr_piece, this->pieces, this->num_pieces);
-
-  p = &this->pieces[this->num_pieces - 1];
-  p->location = this->location;
-  p->size = size;
-  p->offset = offset;
-
-  if (p->location == DWARF_VALUE_LITERAL)
+  if (p.location == DWARF_VALUE_LITERAL)
     {
-      p->v.literal.data = this->data;
-      p->v.literal.length = this->len;
+      p.v.literal.data = this->data;
+      p.v.literal.length = this->len;
     }
   else if (stack_empty_p ())
     {
-      p->location = DWARF_VALUE_OPTIMIZED_OUT;
+      p.location = DWARF_VALUE_OPTIMIZED_OUT;
       /* Also reset the context's location, for our callers.  This is
 	 a somewhat strange approach, but this lets us avoid setting
 	 the location to DWARF_VALUE_MEMORY in all the individual
 	 cases in the evaluator.  */
       this->location = DWARF_VALUE_OPTIMIZED_OUT;
     }
-  else if (p->location == DWARF_VALUE_MEMORY)
+  else if (p.location == DWARF_VALUE_MEMORY)
     {
-      p->v.mem.addr = fetch_address (0);
-      p->v.mem.in_stack_memory = fetch_in_stack_memory (0);
+      p.v.mem.addr = fetch_address (0);
+      p.v.mem.in_stack_memory = fetch_in_stack_memory (0);
     }
-  else if (p->location == DWARF_VALUE_IMPLICIT_POINTER)
+  else if (p.location == DWARF_VALUE_IMPLICIT_POINTER)
     {
-      p->v.ptr.die_sect_off = (sect_offset) this->len;
-      p->v.ptr.offset = value_as_long (fetch (0));
+      p.v.ptr.die_sect_off = (sect_offset) this->len;
+      p.v.ptr.offset = value_as_long (fetch (0));
     }
-  else if (p->location == DWARF_VALUE_REGISTER)
-    p->v.regno = value_as_long (fetch (0));
+  else if (p.location == DWARF_VALUE_REGISTER)
+    p.v.regno = value_as_long (fetch (0));
   else
     {
-      p->v.value = fetch (0);
+      p.v.value = fetch (0);
     }
 }
 

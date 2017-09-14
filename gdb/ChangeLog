@@ -1,3 +1,27 @@
+2017-09-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2expr.h (struct dwarf_expr_piece): Move up.
+	(struct dwarf_expr_context) <n_pieces>: Remove.
+	<pieces>: Change type to std::vector.
+	* dwarf2expr.c (dwarf_expr_context::dwarf_expr_context): Adjust.
+	(dwarf_expr_context::~dwarf_expr_context): Don't manually free
+	pieces.
+	(dwarf_expr_context::add_piece): Adjust.
+	* dwarf2loc.c (struct piece_closure): Initialize fields.
+	<n_pieces>: Remove.
+	<pieces>: Change type to std::vector.
+	(allocate_piece_closure): Adjust, change parameter to
+	std::vector rvalue and std::move it to piece_closure.
+	(rw_pieced_value): Adjust.
+	(check_pieced_synthetic_pointer): Adjust.
+	(indirect_synthetic_pointer): Adjust.
+	(coerce_pieced_ref): Adjust.
+	(free_pieced_value_closure):  Adjust.  Use delete to free
+	piece_closure.
+	(dwarf2_evaluate_loc_desc_full): Adjust.  std::move ctx.pieces
+	to allocate_piece_closure.
+	(dwarf2_loc_desc_get_symbol_read_needs): Adjust.
+
 2017-09-12  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* probe.h (probe_ops_cp): Remove typedef.
