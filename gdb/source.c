@@ -48,10 +48,6 @@
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
 
-/* Prototypes for exported functions.  */
-
-void _initialize_source (void);
-
 /* Prototypes for local functions.  */
 
 static int get_filename_and_charpos (struct symtab *, char **);

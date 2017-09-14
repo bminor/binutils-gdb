@@ -1132,8 +1132,6 @@ init_tfile_ops (void)
   tfile_ops.to_traceframe_info = tfile_traceframe_info;
 }
 
-extern initialize_file_ftype _initialize_tracefile_tfile;
-
 void
 _initialize_tracefile_tfile (void)
 {

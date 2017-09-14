@@ -1336,9 +1336,6 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_tic6x_tdep;
-
 void
 _initialize_tic6x_tdep (void)
 {

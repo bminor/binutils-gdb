@@ -2473,8 +2473,6 @@ ppc_linux_read_description (struct target_ops *ops)
   return isa205? tdesc_powerpc_isa205_32l : tdesc_powerpc_32l;
 }
 
-void _initialize_ppc_linux_nat (void);
-
 void
 _initialize_ppc_linux_nat (void)
 {

@@ -588,12 +588,7 @@ addrmap_create_mutable (struct obstack *obstack)
   return (struct addrmap *) map;
 }
 
-
-
 /* Initialization.  */
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_addrmap;
 
 void
 _initialize_addrmap (void)

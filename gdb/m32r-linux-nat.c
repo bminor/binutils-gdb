@@ -231,8 +231,6 @@ m32r_linux_store_inferior_registers (struct target_ops *ops,
 		  _("Got request to store bad register number %d."), regno);
 }
 
-void _initialize_m32r_linux_nat (void);
-
 void
 _initialize_m32r_linux_nat (void)
 {

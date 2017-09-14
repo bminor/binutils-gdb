@@ -51,9 +51,6 @@ set_can_use_agent (char *args, int from_tty, struct cmd_list_element *c)
     can_use_agent = can_use_agent_off;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_agent;
-
 #include "observer.h"
 #include "objfiles.h"
 

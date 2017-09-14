@@ -187,9 +187,6 @@ alphabsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 }
 
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_alphabsd_nat (void);
-
 void
 _initialize_alphabsd_nat (void)
 {

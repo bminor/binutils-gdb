@@ -417,10 +417,6 @@ i386fbsd4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				     i386fbsd_core_read_description);
 }
 
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_i386fbsd_tdep (void);
-
 void
 _initialize_i386fbsd_tdep (void)
 {

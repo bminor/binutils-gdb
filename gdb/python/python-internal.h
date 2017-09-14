@@ -373,8 +373,6 @@ extern PyTypeObject symbol_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("symbol_object");
 extern PyTypeObject event_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
-extern PyTypeObject stop_event_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
 extern PyTypeObject breakpoint_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("breakpoint_object");
 extern PyTypeObject frame_object_type
@@ -605,30 +603,6 @@ int gdbpy_initialize_eventregistry (void)
 int gdbpy_initialize_event (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_py_events (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_stop_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_signal_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_breakpoint_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_continue_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_inferior_call_pre_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_inferior_call_post_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_register_changed_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_memory_changed_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_exited_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_thread_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_new_objfile_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_clear_objfiles_event (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_arch (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;

@@ -1479,16 +1479,13 @@ value_of_dwarf_block_entry (struct type *type, struct frame_info *frame,
 struct piece_closure
 {
   /* Reference count.  */
-  int refc;
+  int refc = 0;
 
   /* The CU from which this closure's expression came.  */
-  struct dwarf2_per_cu_data *per_cu;
+  struct dwarf2_per_cu_data *per_cu = NULL;
 
-  /* The number of pieces used to describe this variable.  */
-  int n_pieces;
-
-  /* The pieces themselves.  */
-  struct dwarf_expr_piece *pieces;
+  /* The pieces describing this variable.  */
+  std::vector<dwarf_expr_piece> pieces;
 
   /* Frame ID of frame to which a register value is relative, used
      only by DWARF_VALUE_REGISTER.  */
@@ -1500,25 +1497,23 @@ struct piece_closure
 
 static struct piece_closure *
 allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
-			int n_pieces, struct dwarf_expr_piece *pieces,
+			std::vector<dwarf_expr_piece> &&pieces,
 			struct frame_info *frame)
 {
-  struct piece_closure *c = XCNEW (struct piece_closure);
+  struct piece_closure *c = new piece_closure;
   int i;
 
   c->refc = 1;
   c->per_cu = per_cu;
-  c->n_pieces = n_pieces;
-  c->pieces = XCNEWVEC (struct dwarf_expr_piece, n_pieces);
+  c->pieces = std::move (pieces);
   if (frame == NULL)
     c->frame_id = null_frame_id;
   else
     c->frame_id = get_frame_id (frame);
 
-  memcpy (c->pieces, pieces, n_pieces * sizeof (struct dwarf_expr_piece));
-  for (i = 0; i < n_pieces; ++i)
-    if (c->pieces[i].location == DWARF_VALUE_STACK)
-      value_incref (c->pieces[i].v.value);
+  for (dwarf_expr_piece &piece : c->pieces)
+    if (piece.location == DWARF_VALUE_STACK)
+      value_incref (piece.v.value);
 
   return c;
 }
@@ -1816,10 +1811,10 @@ rw_pieced_value (struct value *v, struct value *from)
     max_offset = 8 * TYPE_LENGTH (value_type (v));
 
   /* Advance to the first non-skipped piece.  */
-  for (i = 0; i < c->n_pieces && bits_to_skip >= c->pieces[i].size; i++)
+  for (i = 0; i < c->pieces.size () && bits_to_skip >= c->pieces[i].size; i++)
     bits_to_skip -= c->pieces[i].size;
 
-  for (; i < c->n_pieces && offset < max_offset; i++)
+  for (; i < c->pieces.size () && offset < max_offset; i++)
     {
       struct dwarf_expr_piece *p = &c->pieces[i];
       size_t this_size_bits, this_size;
@@ -2079,7 +2074,7 @@ check_pieced_synthetic_pointer (const struct value *value, LONGEST bit_offset,
   if (value_bitsize (value))
     bit_offset += value_bitpos (value);
 
-  for (i = 0; i < c->n_pieces && bit_length > 0; i++)
+  for (i = 0; i < c->pieces.size () && bit_length > 0; i++)
     {
       struct dwarf_expr_piece *p = &c->pieces[i];
       size_t this_size_bits = p->size;
@@ -2200,7 +2195,7 @@ indirect_pieced_value (struct value *value)
   if (value_bitsize (value))
     bit_offset += value_bitpos (value);
 
-  for (i = 0; i < c->n_pieces && bit_length > 0; i++)
+  for (i = 0; i < c->pieces.size () && bit_length > 0; i++)
     {
       struct dwarf_expr_piece *p = &c->pieces[i];
       size_t this_size_bits = p->size;
@@ -2271,11 +2266,12 @@ coerce_pieced_ref (const struct value *value)
       /* gdb represents synthetic pointers as pieced values with a single
 	 piece.  */
       gdb_assert (closure != NULL);
-      gdb_assert (closure->n_pieces == 1);
+      gdb_assert (closure->pieces.size () == 1);
 
-      return indirect_synthetic_pointer (closure->pieces->v.ptr.die_sect_off,
-					 closure->pieces->v.ptr.offset,
-					 closure->per_cu, frame, type);
+      return indirect_synthetic_pointer
+	(closure->pieces[0].v.ptr.die_sect_off,
+	 closure->pieces[0].v.ptr.offset,
+	 closure->per_cu, frame, type);
     }
   else
     {
@@ -2303,14 +2299,11 @@ free_pieced_value_closure (struct value *v)
   --c->refc;
   if (c->refc == 0)
     {
-      int i;
+      for (dwarf_expr_piece &p : c->pieces)
+	if (p.location == DWARF_VALUE_STACK)
+	  value_free (p.v.value);
 
-      for (i = 0; i < c->n_pieces; ++i)
-	if (c->pieces[i].location == DWARF_VALUE_STACK)
-	  value_free (c->pieces[i].v.value);
-
-      xfree (c->pieces);
-      xfree (c);
+      delete c;
     }
 }
 
@@ -2390,21 +2383,20 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
     }
   END_CATCH
 
-  if (ctx.num_pieces > 0)
+  if (ctx.pieces.size () > 0)
     {
       struct piece_closure *c;
       ULONGEST bit_size = 0;
       int i;
 
-      for (i = 0; i < ctx.num_pieces; ++i)
-	bit_size += ctx.pieces[i].size;
+      for (dwarf_expr_piece &piece : ctx.pieces)
+	bit_size += piece.size;
       /* Complain if the expression is larger than the size of the
 	 outer type.  */
       if (bit_size > 8 * TYPE_LENGTH (type))
 	invalid_synthetic_pointer ();
 
-      c = allocate_piece_closure (per_cu, ctx.num_pieces, ctx.pieces,
-				  frame);
+      c = allocate_piece_closure (per_cu, std::move (ctx.pieces), frame);
       /* We must clean up the value chain after creating the piece
 	 closure but before allocating the result.  */
       free_values.free_to_mark ();
@@ -2449,7 +2441,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	  {
 	    struct type *ptr_type;
 	    CORE_ADDR address = ctx.fetch_address (0);
-	    int in_stack_memory = ctx.fetch_in_stack_memory (0);
+	    bool in_stack_memory = ctx.fetch_in_stack_memory (0);
 
 	    /* DW_OP_deref_size (and possibly other operations too) may
 	       create a pointer instead of an address.  Ideally, the
@@ -2866,16 +2858,11 @@ dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
 
   in_reg = ctx.location == DWARF_VALUE_REGISTER;
 
-  if (ctx.num_pieces > 0)
-    {
-      int i;
-
-      /* If the location has several pieces, and any of them are in
-         registers, then we will need a frame to fetch them from.  */
-      for (i = 0; i < ctx.num_pieces; i++)
-        if (ctx.pieces[i].location == DWARF_VALUE_REGISTER)
-          in_reg = 1;
-    }
+  /* If the location has several pieces, and any of them are in
+     registers, then we will need a frame to fetch them from.  */
+  for (dwarf_expr_piece &p : ctx.pieces)
+    if (p.location == DWARF_VALUE_REGISTER)
+      in_reg = 1;
 
   if (in_reg)
     ctx.needs = SYMBOL_NEEDS_FRAME;
@@ -4666,9 +4653,6 @@ const struct symbol_computed_ops dwarf2_loclist_funcs = {
   loclist_tracepoint_var_ref,
   loclist_generate_c_location
 };
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_dwarf2loc;
 
 void
 _initialize_dwarf2loc (void)

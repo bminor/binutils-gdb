@@ -1501,10 +1501,6 @@ jit_gdbarch_data_init (struct obstack *obstack)
   return data;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-
-extern void _initialize_jit (void);
-
 void
 _initialize_jit (void)
 {

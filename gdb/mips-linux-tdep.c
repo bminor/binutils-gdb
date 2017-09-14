@@ -1727,9 +1727,6 @@ mips_linux_init_abi (struct gdbarch_info info,
     }
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_mips_linux_tdep;
-
 void
 _initialize_mips_linux_tdep (void)
 {

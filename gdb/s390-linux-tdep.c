@@ -8141,9 +8141,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-
-extern initialize_file_ftype _initialize_s390_tdep; /* -Wmissing-prototypes */
-
 void
 _initialize_s390_tdep (void)
 {

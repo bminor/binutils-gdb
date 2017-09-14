@@ -21,10 +21,7 @@
 #include "py-event.h"
 #include "py-ref.h"
 
-extern PyTypeObject continue_event_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
-
-static PyObject *
+static gdbpy_ref<>
 create_continue_event_object (void)
 {
   return create_thread_event_object (&continue_event_object_type);
@@ -45,9 +42,3 @@ emit_continue_event (ptid_t ptid)
     return evpy_emit_event (event.get (), gdb_py_events.cont);
   return -1;
 }
-
-GDBPY_NEW_EVENT_TYPE (continue,
-                      "gdb.ContinueEvent",
-                      "ContinueEvent",
-                      "GDB continue event object",
-                      thread_event_object_type);

@@ -987,9 +987,6 @@ maintenance_info_bfds (char *arg, int from_tty)
   htab_traverse (all_bfds, print_one_bfd, uiout);
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_gdb_bfd;
-
 void
 _initialize_gdb_bfd (void)
 {

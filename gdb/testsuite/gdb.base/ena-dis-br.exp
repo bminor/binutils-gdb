@@ -369,7 +369,7 @@ proc test_ena_dis_br { what } {
 
     # Now enable(disable) $b1 fooo.1, it should give error on fooo.
     gdb_test "$what $b1 fooo.1" \
-       "Bad breakpoint number 'fooo'" \
+       "Bad breakpoint number 'fooo\\.1'" \
        "$what \$b1 fooo.1"
 
     # $b1 should be enabled(disabled).

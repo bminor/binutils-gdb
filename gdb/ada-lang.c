@@ -11979,7 +11979,6 @@ ada_exception_support_info_sniffer (void)
 static int
 is_known_support_routine (struct frame_info *frame)
 {
-  char *func_name;
   enum language func_lang;
   int i;
   const char *fullname;
@@ -12018,21 +12017,18 @@ is_known_support_routine (struct frame_info *frame)
 
   /* Check whether the function is a GNAT-generated entity.  */
 
-  find_frame_funname (frame, &func_name, &func_lang, NULL);
+  gdb::unique_xmalloc_ptr<char> func_name
+    = find_frame_funname (frame, &func_lang, NULL);
   if (func_name == NULL)
     return 1;
 
   for (i = 0; known_auxiliary_function_name_patterns[i] != NULL; i += 1)
     {
       re_comp (known_auxiliary_function_name_patterns[i]);
-      if (re_exec (func_name))
-	{
-	  xfree (func_name);
-	  return 1;
-	}
+      if (re_exec (func_name.get ()))
+	return 1;
     }
 
-  xfree (func_name);
   return 0;
 }
 
@@ -12076,7 +12072,6 @@ ada_unhandled_exception_name_addr_from_raise (void)
   int frame_level;
   struct frame_info *fi;
   struct ada_inferior_data *data = get_ada_inferior_data (current_inferior ());
-  struct cleanup *old_chain;
 
   /* To determine the name of this exception, we need to select
      the frame corresponding to RAISE_SYM_NAME.  This frame is
@@ -12087,24 +12082,20 @@ ada_unhandled_exception_name_addr_from_raise (void)
     if (fi != NULL)
       fi = get_prev_frame (fi); 
 
-  old_chain = make_cleanup (null_cleanup, NULL);
   while (fi != NULL)
     {
-      char *func_name;
       enum language func_lang;
 
-      find_frame_funname (fi, &func_name, &func_lang, NULL);
+      gdb::unique_xmalloc_ptr<char> func_name
+	= find_frame_funname (fi, &func_lang, NULL);
       if (func_name != NULL)
 	{
-	  make_cleanup (xfree, func_name);
-
-          if (strcmp (func_name,
+          if (strcmp (func_name.get (),
 		      data->exception_info->catch_exception_sym) == 0)
 	    break; /* We found the frame we were looking for...  */
 	  fi = get_prev_frame (fi);
 	}
     }
-  do_cleanups (old_chain);
 
   if (fi == NULL)
     return 0;
@@ -12732,13 +12723,13 @@ ada_get_next_arg (const char **argsp)
   const char *end;
   char *result;
 
-  args = skip_spaces_const (args);
+  args = skip_spaces (args);
   if (args[0] == '\0')
     return NULL; /* No more arguments.  */
   
   /* Find the end of the current argument.  */
 
-  end = skip_to_space_const (args);
+  end = skip_to_space (args);
 
   /* Adjust ARGSP to point to the start of the next argument.  */
 
@@ -12785,12 +12776,12 @@ catch_ada_exception_command_split (const char *args,
 
   /* Check to see if we have a condition.  */
 
-  args = skip_spaces_const (args);
+  args = skip_spaces (args);
   if (startswith (args, "if")
       && (isspace (args[2]) || args[2] == '\0'))
     {
       args += 2;
-      args = skip_spaces_const (args);
+      args = skip_spaces (args);
 
       if (args[0] == '\0')
         error (_("Condition missing after `if' keyword"));
@@ -13044,14 +13035,14 @@ catch_ada_exception_command (char *arg_entry, int from_tty,
 static void
 catch_ada_assert_command_split (const char *args, char **cond_string)
 {
-  args = skip_spaces_const (args);
+  args = skip_spaces (args);
 
   /* Check whether a condition was provided.  */
   if (startswith (args, "if")
       && (isspace (args[2]) || args[2] == '\0'))
     {
       args += 2;
-      args = skip_spaces_const (args);
+      args = skip_spaces (args);
       if (args[0] == '\0')
         error (_("condition missing after `if' keyword"));
       *cond_string = xstrdup (args);
@@ -13989,9 +13980,6 @@ extern const struct language_defn ada_language_defn = {
   NULL,
   LANG_MAGIC
 };
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_ada_language;
 
 /* Command-list for the "set/show ada" prefix command.  */
 static struct cmd_list_element *set_ada_list;

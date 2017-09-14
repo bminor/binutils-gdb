@@ -1600,8 +1600,6 @@ remove_user_added_objfile (struct objfile *objfile)
     }
 }
 
-extern initialize_file_ftype _initialize_solib; /* -Wmissing-prototypes */
-
 void
 _initialize_solib (void)
 {

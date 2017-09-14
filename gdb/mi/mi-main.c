@@ -61,6 +61,7 @@
 #include "run-time-clock.h"
 #include <chrono>
 #include "progspace-and-thread.h"
+#include "common/rsp-low.h"
 
 enum
   {
@@ -87,7 +88,6 @@ int running_result_record_printed = 1;
    command was issued.  */
 int mi_proceeded;
 
-extern void _initialize_mi_main (void);
 static void mi_cmd_execute (struct mi_parse *parse);
 
 static void mi_execute_cli_command (const char *cmd, int args_p,
@@ -714,17 +714,12 @@ print_one_inferior (struct inferior *inferior, void *xdata)
 static void
 output_cores (struct ui_out *uiout, const char *field_name, const char *xcores)
 {
-  struct cleanup *back_to = make_cleanup_ui_out_list_begin_end (uiout,
-								field_name);
-  char *cores = xstrdup (xcores);
-  char *p = cores;
-
-  make_cleanup (xfree, cores);
+  ui_out_emit_list list_emitter (uiout, field_name);
+  gdb::unique_xmalloc_ptr<char> cores (xstrdup (xcores));
+  char *p = cores.get ();
 
   for (p = strtok (p, ","); p;  p = strtok (NULL, ","))
     uiout->field_string (NULL, p);
-
-  do_cleanups (back_to);
 }
 
 static void
@@ -818,7 +813,7 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
 	}
     }
 
-  make_cleanup_ui_out_list_begin_end (uiout, "groups");
+  ui_out_emit_list list_emitter (uiout, "groups");
 
   for (ix_items = 0;
        VEC_iterate (osdata_item_s, data->items,
@@ -861,7 +856,7 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
 	      struct osdata_item *child;
 	      int ix_child;
 
-	      make_cleanup_ui_out_list_begin_end (uiout, "threads");
+	      ui_out_emit_list thread_list_emitter (uiout, "threads");
 
 	      for (ix_child = 0;
 		   VEC_iterate (osdata_item_s, children, ix_child, child);
@@ -976,7 +971,7 @@ mi_cmd_list_thread_groups (const char *command, char **argv, int argc)
 	 print everything, or several explicit ids.  In both cases,
 	 we print more than one group, and have to use 'groups'
 	 as the top-level element.  */
-      make_cleanup_ui_out_list_begin_end (uiout, "groups");
+      ui_out_emit_list list_emitter (uiout, "groups");
       update_thread_list ();
       iterate_over_inferiors (print_one_inferior, &data);
     }
@@ -1063,7 +1058,7 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
   gdbarch = get_regcache_arch (this_regs);
   numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
-  make_cleanup_ui_out_list_begin_end (uiout, "changed-registers");
+  ui_out_emit_list list_emitter (uiout, "changed-registers");
 
   if (argc == 0)
     {
@@ -1490,43 +1485,43 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
   {
     int row;
     int row_byte;
-    struct cleanup *cleanup_list;
 
     string_file stream;
 
-    cleanup_list = make_cleanup_ui_out_list_begin_end (uiout, "memory");
+    ui_out_emit_list list_emitter (uiout, "memory");
     for (row = 0, row_byte = 0;
 	 row < nr_rows;
 	 row++, row_byte += nr_cols * word_size)
       {
 	int col;
 	int col_byte;
-	struct cleanup *cleanup_list_data;
 	struct value_print_options opts;
 
 	ui_out_emit_tuple tuple_emitter (uiout, NULL);
 	uiout->field_core_addr ("addr", gdbarch, addr + row_byte);
 	/* ui_out_field_core_addr_symbolic (uiout, "saddr", addr +
 	   row_byte); */
-	cleanup_list_data = make_cleanup_ui_out_list_begin_end (uiout, "data");
-	get_formatted_print_options (&opts, word_format);
-	for (col = 0, col_byte = row_byte;
-	     col < nr_cols;
-	     col++, col_byte += word_size)
-	  {
-	    if (col_byte + word_size > nr_bytes)
-	      {
-		uiout->field_string (NULL, "N/A");
-	      }
-	    else
-	      {
-		stream.clear ();
-		print_scalar_formatted (&mbuf[col_byte], word_type, &opts,
-					word_asize, &stream);
-		uiout->field_stream (NULL, stream);
-	      }
-	  }
-	do_cleanups (cleanup_list_data);
+	{
+	  ui_out_emit_list list_data_emitter (uiout, "data");
+	  get_formatted_print_options (&opts, word_format);
+	  for (col = 0, col_byte = row_byte;
+	       col < nr_cols;
+	       col++, col_byte += word_size)
+	    {
+	      if (col_byte + word_size > nr_bytes)
+		{
+		  uiout->field_string (NULL, "N/A");
+		}
+	      else
+		{
+		  stream.clear ();
+		  print_scalar_formatted (&mbuf[col_byte], word_type, &opts,
+					  word_asize, &stream);
+		  uiout->field_stream (NULL, stream);
+		}
+	    }
+	}
+
 	if (aschar)
 	  {
 	    int byte;
@@ -1545,7 +1540,6 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
 	    uiout->field_stream ("ascii", stream);
 	  }
       }
-    do_cleanups (cleanup_list);
   }
 }
 
@@ -1603,7 +1597,7 @@ mi_cmd_data_read_memory_bytes (const char *command, char **argv, int argc)
   if (VEC_length (memory_read_result_s, result) == 0)
     error (_("Unable to read memory."));
 
-  make_cleanup_ui_out_list_begin_end (uiout, "memory");
+  ui_out_emit_list list_emitter (uiout, "memory");
   for (ix = 0;
        VEC_iterate (memory_read_result_s, result, ix, read_result);
        ++ix)
@@ -2820,15 +2814,15 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
   /* Trace state variables.  */
   {
-    struct cleanup *list_cleanup;
+    struct cleanup *cleanups;
     int tvar;
     char *tsvname;
     int i;
 
-    list_cleanup = make_cleanup_ui_out_list_begin_end (uiout, "tvars");
+    ui_out_emit_list list_emitter (uiout, "tvars");
 
     tsvname = NULL;
-    make_cleanup (free_current_contents, &tsvname);
+    cleanups = make_cleanup (free_current_contents, &tsvname);
 
     for (i = 0; VEC_iterate (int, tinfo->tvars, i, tvar); i++)
       {
@@ -2856,56 +2850,45 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 	  }
       }
 
-    do_cleanups (list_cleanup);
+    do_cleanups (cleanups);
   }
 
   /* Memory.  */
   {
-    struct cleanup *list_cleanup;
+    struct cleanup *cleanups;
     VEC(mem_range_s) *available_memory = NULL;
     struct mem_range *r;
     int i;
 
     traceframe_available_memory (&available_memory, 0, ULONGEST_MAX);
-    make_cleanup (VEC_cleanup(mem_range_s), &available_memory);
+    cleanups = make_cleanup (VEC_cleanup(mem_range_s), &available_memory);
 
-    list_cleanup = make_cleanup_ui_out_list_begin_end (uiout, "memory");
+    ui_out_emit_list list_emitter (uiout, "memory");
 
     for (i = 0; VEC_iterate (mem_range_s, available_memory, i, r); i++)
       {
-	struct cleanup *cleanup_child;
-	gdb_byte *data;
 	struct gdbarch *gdbarch = target_gdbarch ();
 
-	cleanup_child = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+	ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
 	uiout->field_core_addr ("address", gdbarch, r->start);
 	uiout->field_int ("length", r->length);
 
-	data = (gdb_byte *) xmalloc (r->length);
-	make_cleanup (xfree, data);
+	gdb::byte_vector data (r->length);
 
 	if (memory_contents)
 	  {
-	    if (target_read_memory (r->start, data, r->length) == 0)
+	    if (target_read_memory (r->start, data.data (), r->length) == 0)
 	      {
-		int m;
-		char *data_str, *p;
-
-		data_str = (char *) xmalloc (r->length * 2 + 1);
-		make_cleanup (xfree, data_str);
-
-		for (m = 0, p = data_str; m < r->length; ++m, p += 2)
-		  sprintf (p, "%02x", data[m]);
-		uiout->field_string ("contents", data_str);
+		std::string data_str = bin2hex (data.data (), r->length);
+		uiout->field_string ("contents", data_str.c_str ());
 	      }
 	    else
 	      uiout->field_skip ("contents");
 	  }
-	do_cleanups (cleanup_child);
       }
 
-    do_cleanups (list_cleanup);
+    do_cleanups (cleanups);
   }
 }
 

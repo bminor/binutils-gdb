@@ -402,7 +402,7 @@ extract_exception_regexp (const char **string)
   const char *start;
   const char *last, *last_space;
 
-  start = skip_spaces_const (*string);
+  start = skip_spaces (*string);
 
   last = start;
   last_space = start;
@@ -416,7 +416,7 @@ extract_exception_regexp (const char **string)
 
       /* No "if" token here.  Skip to the next word start.  */
       last_space = skip_to_space (last);
-      last = skip_spaces_const (last_space);
+      last = skip_spaces (last_space);
     }
 
   *string = last;
@@ -438,7 +438,7 @@ catch_exception_command_1 (enum exception_event_kind ex_event,
 
   if (!arg)
     arg = "";
-  arg = skip_spaces_const (arg);
+  arg = skip_spaces (arg);
 
   std::string except_rx = extract_exception_regexp (&arg);
 
@@ -536,8 +536,6 @@ initialize_throw_catchpoint_ops (void)
   ops->print_one_detail = print_one_detail_exception_catchpoint;
   ops->check_status = check_status_exception_catchpoint;
 }
-
-initialize_file_ftype _initialize_break_catch_throw;
 
 void
 _initialize_break_catch_throw (void)

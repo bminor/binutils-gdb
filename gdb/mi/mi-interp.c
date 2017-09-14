@@ -1314,10 +1314,9 @@ mi_user_selected_context_changed (user_selected_what selection)
       mi_uiout = interp_ui_out (top_level_interpreter ());
 
       mi_uiout->redirect (mi->event_channel);
+      ui_out_redirect_pop redirect_popper (mi_uiout);
 
-      old_chain = make_cleanup_ui_out_redirect_pop (mi_uiout);
-
-      make_cleanup_restore_target_terminal ();
+      old_chain = make_cleanup_restore_target_terminal ();
       target_terminal_ours_for_output ();
 
       if (selection & USER_SELECTED_INFERIOR)
@@ -1410,8 +1409,6 @@ mi_interp_factory (const char *name)
 {
   return new mi_interp (name);
 }
-
-extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */
 
 void
 _initialize_mi_interp (void)

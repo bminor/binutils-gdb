@@ -1,3 +1,7 @@
+2017-09-06  Kamil Rytarowski  <n54@gmx.com>
+
+	* opcode/nds32.h: Rename __BIT() to N32_BIT().
+
 2017-09-05  Alexander Fedotov <alexander.fedotov@nxp.com>
 	    Edmar Wienskoski <edmar.wienskoski@nxp.com
 

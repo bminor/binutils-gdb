@@ -99,8 +99,6 @@ static int hardwire_flush_input (struct serial *);
 static int hardwire_send_break (struct serial *);
 static int hardwire_setstopbits (struct serial *, int);
 
-void _initialize_ser_hardwire (void);
-
 /* Open up a real live device for serial I/O.  */
 
 static int

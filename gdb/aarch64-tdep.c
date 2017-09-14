@@ -3047,9 +3047,6 @@ static void aarch64_process_record_test (void);
 }
 #endif
 
-/* Suppress warning from -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_aarch64_tdep;
-
 void
 _initialize_aarch64_tdep (void)
 {

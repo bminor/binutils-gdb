@@ -15,6 +15,12 @@
   the remote inferior is started by the GDBserver, use the "unset
   environment" command.
 
+* Python Scripting
+
+  ** New events gdb.new_inferior, gdb.inferior_deleted, and
+     gdb.new_thread are emitted.  See the manual for further
+     description of these.
+
 * New features in the GDB remote stub, GDBserver
 
   ** New "--selftest" command line option runs some GDBserver self

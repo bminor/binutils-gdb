@@ -431,7 +431,7 @@ get_insn_number (char **arg)
   const char *begin, *end, *pos;
 
   begin = *arg;
-  pos = skip_spaces_const (begin);
+  pos = skip_spaces (begin);
 
   if (!isdigit (*pos))
     error (_("Expected positive number, got: %s."), pos);
@@ -772,9 +772,6 @@ set_record_call_history_size (char *args, int from_tty,
   validate_history_size (&record_call_history_size_setshow_var,
 			 &record_call_history_size);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_record;
 
 void
 _initialize_record (void)

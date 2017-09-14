@@ -2816,9 +2816,6 @@ show_record_full_command (char *args, int from_tty)
   cmd_show_list (show_record_full_cmdlist, from_tty, "");
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_record_full;
-
 void
 _initialize_record_full (void)
 {

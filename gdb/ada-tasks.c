@@ -1422,9 +1422,6 @@ ada_tasks_new_objfile_observer (struct objfile *objfile)
       ada_tasks_invalidate_inferior_data (inf);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_tasks;
-
 void
 _initialize_tasks (void)
 {

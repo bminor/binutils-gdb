@@ -98,9 +98,6 @@ fill_fpregset (const struct regcache *regcache,
   sparc_collect_fpregset (&sparc_sol2_fpregmap, regcache, regnum, fpregs);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_sparc_sol2_nat;
-
 void
 _initialize_sparc_sol2_nat (void)
 {

@@ -414,8 +414,6 @@ info_osdata_command (char *arg, int from_tty)
   info_osdata (arg);
 }
 
-extern initialize_file_ftype _initialize_osdata; /* -Wmissing-prototypes */
-
 void
 _initialize_osdata (void)
 {

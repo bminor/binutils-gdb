@@ -547,9 +547,6 @@ bsd_uthread_target (void)
   return t;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_bsd_uthread;
-
 void
 _initialize_bsd_uthread (void)
 {

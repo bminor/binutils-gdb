@@ -147,9 +147,6 @@ i386fbsd_read_description (struct target_ops *ops)
 }
 #endif
 
-/* Prevent warning from -Wmissing-prototypes.  */
-void _initialize_i386fbsd_nat (void);
-
 void
 _initialize_i386fbsd_nat (void)
 {

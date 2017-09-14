@@ -1615,8 +1615,6 @@ avr_io_reg_read_command (char *args, int from_tty)
     }
 }
 
-extern initialize_file_ftype _initialize_avr_tdep; /* -Wmissing-prototypes */
-
 void
 _initialize_avr_tdep (void)
 {

@@ -74,8 +74,6 @@ static struct obstack dont_print_vb_obstack;
 static struct obstack dont_print_statmem_obstack;
 static struct obstack dont_print_stat_array_obstack;
 
-extern void _initialize_cp_valprint (void);
-
 static void cp_print_static_field (struct type *, struct value *,
 				   struct ui_file *, int,
 				   const struct value_print_options *);

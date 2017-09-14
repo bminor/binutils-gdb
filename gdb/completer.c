@@ -699,7 +699,7 @@ collect_explicit_location_matches (completion_tracker &tracker,
 	     keyword.  */
 	  if (keyword != word)
 	    {
-	      keyword = skip_spaces_const (keyword);
+	      keyword = skip_spaces (keyword);
 
 	      tracker.advance_custom_word_point_by (keyword - word);
 	      complete_on_enum (tracker, linespec_keywords, keyword, keyword);
@@ -729,7 +729,7 @@ skip_keyword (completion_tracker &tracker,
 	      const char * const *keywords, const char **text_p)
 {
   const char *text = *text_p;
-  const char *after = skip_to_space_const (text);
+  const char *after = skip_to_space (text);
   size_t len = after - text;
 
   if (text[len] != ' ')
@@ -1903,7 +1903,7 @@ expand_preserving_ws (const char *orig, size_t orig_len,
 	{
 	  while (p_orig < orig_end && *p_orig == ' ')
 	    res += *p_orig++;
-	  p_lcd = skip_spaces_const (p_lcd);
+	  p_lcd = skip_spaces (p_lcd);
 	}
       else
 	{
@@ -2775,8 +2775,6 @@ gdb_display_match_list (char **matches, int len, int max,
 	}
     }
 }
-
-extern initialize_file_ftype _initialize_completer; /* -Wmissing-prototypes */
 
 void
 _initialize_completer (void)

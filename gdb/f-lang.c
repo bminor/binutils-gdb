@@ -37,8 +37,6 @@
 
 /* Local functions */
 
-extern void _initialize_f_language (void);
-
 static void f_printchar (int c, struct type *type, struct ui_file * stream);
 static void f_emit_char (int c, struct type *type,
 			 struct ui_file * stream, int quoter);

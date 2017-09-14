@@ -69,9 +69,6 @@ fill_fpregset (const struct regcache *regcache,
   sparc64_collect_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc64_linux_nat (void);
-
 void
 _initialize_sparc64_linux_nat (void)
 {

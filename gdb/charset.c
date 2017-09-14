@@ -705,10 +705,7 @@ wchar_iterator::iterate (enum wchar_iterate_result *out_result,
   return -1;
 }
 
-
 /* The charset.c module initialization function.  */
-
-extern initialize_file_ftype _initialize_charset; /* -Wmissing-prototype */
 
 static VEC (char_ptr) *charsets;
 

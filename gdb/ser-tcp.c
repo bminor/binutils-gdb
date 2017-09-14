@@ -60,8 +60,6 @@
 typedef int socklen_t;
 #endif
 
-void _initialize_ser_tcp (void);
-
 /* For "set tcp" and "show tcp".  */
 
 static struct cmd_list_element *tcp_set_cmdlist;

@@ -1245,9 +1245,6 @@ amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_auto_wide_charset (gdbarch, amd64_windows_auto_wide_charset);
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_amd64_windows_tdep;
-
 void
 _initialize_amd64_windows_tdep (void)
 {

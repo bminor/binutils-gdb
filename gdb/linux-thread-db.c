@@ -1560,7 +1560,7 @@ info_auto_load_libthread_db (char *args, int from_tty)
   char *pids;
   int i;
 
-  cs = skip_spaces_const (cs);
+  cs = skip_spaces (cs);
   if (*cs)
     error (_("'info auto-load libthread-db' does not accept any parameters"));
 
@@ -1695,9 +1695,6 @@ init_thread_db_ops (void)
 
   complete_target_initialization (&thread_db_ops);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_thread_db;
 
 void
 _initialize_thread_db (void)

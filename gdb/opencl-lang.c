@@ -27,8 +27,6 @@
 #include "varobj.h"
 #include "c-lang.h"
 
-extern void _initialize_opencl_language (void);
-
 /* This macro generates enum values from a given type.  */
 
 #define OCL_P_TYPE(TYPE)\
@@ -1177,9 +1175,6 @@ build_opencl_types (struct gdbarch *gdbarch)
 
   return types;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_opencl_language;
 
 void
 _initialize_opencl_language (void)

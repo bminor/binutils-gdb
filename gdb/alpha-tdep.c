@@ -1850,8 +1850,6 @@ alpha_dwarf2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
 }
 
-extern initialize_file_ftype _initialize_alpha_tdep; /* -Wmissing-prototypes */
-
 void
 _initialize_alpha_tdep (void)
 {

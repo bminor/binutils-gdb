@@ -1061,8 +1061,6 @@ ext_lang_before_prompt (const char *current_gdb_prompt)
     }
 }
 
-extern initialize_file_ftype _initialize_extension;
-
 void
 _initialize_extension (void)
 {

@@ -209,8 +209,6 @@ static void remote_query_supported (void);
 
 static void remote_check_symbols (void);
 
-void _initialize_remote (void);
-
 struct stop_reply;
 static void stop_reply_xfree (struct stop_reply *);
 static void remote_parse_stop_reply (char *, struct stop_reply *);

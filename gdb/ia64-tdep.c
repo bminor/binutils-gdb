@@ -644,7 +644,6 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
   long long instr_breakpoint;
   int val;
   int templ;
-  struct cleanup *cleanup;
 
   if (slotnum > 2)
     error (_("Can't insert breakpoint for slot numbers greater than 2."));
@@ -656,13 +655,11 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
      Otherwise, we could possibly store into the shadow parts of the adjacent
      placed breakpoints.  It is due to our SHADOW_CONTENTS overlapping the real
      breakpoint instruction bits region.  */
-  cleanup = make_show_memory_breakpoints_cleanup (0);
+  scoped_restore restore_memory_0
+    = make_scoped_restore_show_memory_breakpoints (0);
   val = target_read_memory (addr, bundle, BUNDLE_LEN);
   if (val != 0)
-    {
-      do_cleanups (cleanup);
-      return val;
-    }
+    return val;
 
   /* SHADOW_SLOTNUM saves the original slot number as expected by the caller
      for addressing the SHADOW_CONTENTS placement.  */
@@ -703,13 +700,11 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
      restoration mechanism kicks in and we would possibly remove parts of the
      adjacent placed breakpoints.  It is due to our SHADOW_CONTENTS overlapping
      the real breakpoint instruction bits region.  */
-  make_show_memory_breakpoints_cleanup (1);
+  scoped_restore restore_memory_1
+    = make_scoped_restore_show_memory_breakpoints (1);
   val = target_read_memory (addr, bundle, BUNDLE_LEN);
   if (val != 0)
-    {
-      do_cleanups (cleanup);
-      return val;
-    }
+    return val;
 
   /* Breakpoints already present in the code will get deteacted and not get
      reinserted by bp_loc_is_permanent.  Multiple breakpoints at the same
@@ -725,7 +720,6 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
   val = target_write_memory (addr + shadow_slotnum, bundle + shadow_slotnum,
 			     bp_tgt->shadow_len);
 
-  do_cleanups (cleanup);
   return val;
 }
 
@@ -739,7 +733,6 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
   long long instr_breakpoint, instr_saved;
   int val;
   int templ;
-  struct cleanup *cleanup;
 
   addr &= ~0x0f;
 
@@ -748,13 +741,11 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
      mechanism kicks in and we would possibly remove parts of the adjacent
      placed breakpoints.  It is due to our SHADOW_CONTENTS overlapping the real
      breakpoint instruction bits region.  */
-  cleanup = make_show_memory_breakpoints_cleanup (1);
+  scoped_restore restore_memory_1
+    = make_scoped_restore_show_memory_breakpoints (1);
   val = target_read_memory (addr, bundle_mem, BUNDLE_LEN);
   if (val != 0)
-    {
-      do_cleanups (cleanup);
-      return val;
-    }
+    return val;
 
   /* SHADOW_SLOTNUM saves the original slot number as expected by the caller
      for addressing the SHADOW_CONTENTS placement.  */
@@ -772,7 +763,6 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
       warning (_("Cannot remove breakpoint at address %s from non-existing "
 		 "X-type slot, memory has changed underneath"),
 	       paddress (gdbarch, bp_tgt->placed_address));
-      do_cleanups (cleanup);
       return -1;
     }
   if (template_encoding_table[templ][slotnum] == L)
@@ -792,7 +782,6 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
       warning (_("Cannot remove breakpoint at address %s, "
 		 "no break instruction at such address."),
 	       paddress (gdbarch, bp_tgt->placed_address));
-      do_cleanups (cleanup);
       return -1;
     }
 
@@ -808,7 +797,6 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
   replace_slotN_contents (bundle_mem, instr_saved, slotnum);
   val = target_write_raw_memory (addr, bundle_mem, BUNDLE_LEN);
 
-  do_cleanups (cleanup);
   return val;
 }
 
@@ -837,7 +825,6 @@ ia64_breakpoint_from_pc (struct gdbarch *gdbarch,
   long long instr_fetched;
   int val;
   int templ;
-  struct cleanup *cleanup;
 
   if (slotnum > 2)
     error (_("Can't insert breakpoint for slot numbers greater than 2."));
@@ -846,9 +833,11 @@ ia64_breakpoint_from_pc (struct gdbarch *gdbarch,
 
   /* Enable the automatic memory restoration from breakpoints while
      we read our instruction bundle to match bp_loc_is_permanent.  */
-  cleanup = make_show_memory_breakpoints_cleanup (0);
-  val = target_read_memory (addr, bundle, BUNDLE_LEN);
-  do_cleanups (cleanup);
+  {
+    scoped_restore restore_memory_0
+      = make_scoped_restore_show_memory_breakpoints (0);
+    val = target_read_memory (addr, bundle, BUNDLE_LEN);
+  }
 
   /* The memory might be unreachable.  This can happen, for instance,
      when the user inserts a breakpoint at an invalid address.  */
@@ -4037,8 +4026,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
-
-extern initialize_file_ftype _initialize_ia64_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_ia64_tdep (void)

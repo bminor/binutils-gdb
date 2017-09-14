@@ -417,8 +417,6 @@ maintenance_print_dummy_frames (char *args, int from_tty)
     }
 }
 
-extern void _initialize_dummy_frame (void);
-
 void
 _initialize_dummy_frame (void)
 {

@@ -134,9 +134,6 @@ tilegx_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_tilegx_linux_tdep;
-
 void
 _initialize_tilegx_linux_tdep (void)
 {

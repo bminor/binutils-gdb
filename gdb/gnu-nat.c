@@ -3480,11 +3480,6 @@ to the thread's initial suspend-count when gdb notices the threads."),
 	   &thread_cmd_list);
 }
 
-
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_gnu_nat;
-
 void
 _initialize_gnu_nat (void)
 {

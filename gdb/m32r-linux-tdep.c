@@ -470,9 +470,6 @@ m32r_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                              svr4_fetch_objfile_link_map);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_m32r_linux_tdep (void);
-
 void
 _initialize_m32r_linux_tdep (void)
 {

@@ -39,8 +39,6 @@
 
 #define RUSTSTYPE YYSTYPE
 
-extern initialize_file_ftype _initialize_rust_exp;
-
 struct rust_op;
 typedef std::vector<const struct rust_op *> rust_op_vector;
 
@@ -1517,7 +1515,7 @@ lex_number (void)
   gdb_assert (subexps[0].rm_eo > 0);
   if (lexptr[subexps[0].rm_eo - 1] == '.')
     {
-      const char *next = skip_spaces_const (&lexptr[subexps[0].rm_eo]);
+      const char *next = skip_spaces (&lexptr[subexps[0].rm_eo]);
 
       if (rust_identifier_start_p (*next) || *next == '.')
 	{

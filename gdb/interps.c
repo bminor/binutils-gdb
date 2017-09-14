@@ -74,8 +74,6 @@ get_current_interp_info (void)
 
 /* The magic initialization routine for this module.  */
 
-void _initialize_interpreter (void);
-
 static struct interp *interp_lookup_existing (struct ui *ui,
 					      const char *name);
 
@@ -290,7 +288,7 @@ current_interp_set_logging (ui_file_up logfile,
 
 /* Temporarily overrides the current interpreter.  */
 struct interp *
-interp_set_temp (const char *name)
+scoped_restore_interp::set_interp (const char *name)
 {
   struct ui_interp_info *ui_interp = get_current_interp_info ();
   struct interp *interp = interp_lookup (current_ui, name);

@@ -5368,8 +5368,6 @@ objfile_type (struct objfile *objfile)
   return objfile_type;
 }
 
-extern initialize_file_ftype _initialize_gdbtypes;
-
 void
 _initialize_gdbtypes (void)
 {

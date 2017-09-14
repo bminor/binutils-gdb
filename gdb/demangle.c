@@ -170,24 +170,24 @@ demangle_command (char *args, int from_tty)
   std::string arg_buf = args != NULL ? args : "";
   arg_start = arg_buf.c_str ();
 
-  gdb::unique_xmalloc_ptr<char> lang_name;
+  std::string lang_name;
   while (processing_args
 	 && *arg_start == '-')
     {
-      const char *p = skip_to_space_const (arg_start);
+      const char *p = skip_to_space (arg_start);
 
       if (strncmp (arg_start, "-l", p - arg_start) == 0)
-	lang_name.reset (extract_arg_const (&p));
+	lang_name = extract_arg (&p);
       else if (strncmp (arg_start, "--", p - arg_start) == 0)
 	processing_args = 0;
       else
 	{
-	  gdb::unique_xmalloc_ptr<char> option (extract_arg_const (&p));
+	  std::string option = extract_arg (&p);
 	  error (_("Unrecognized option '%s' to demangle command.  "
-		   "Try \"help demangle\"."), option.get ());
+		   "Try \"help demangle\"."), option.c_str ());
 	}
 
-      arg_start = skip_spaces_const (p);
+      arg_start = skip_spaces (p);
     }
 
   name = arg_start;
@@ -195,13 +195,13 @@ demangle_command (char *args, int from_tty)
   if (*name == '\0')
     error (_("Usage: demangle [-l language] [--] name"));
 
-  if (lang_name != NULL)
+  if (!lang_name.empty ())
     {
       enum language lang_enum;
 
-      lang_enum = language_enum (lang_name.get ());
+      lang_enum = language_enum (lang_name.c_str ());
       if (lang_enum == language_unknown)
-	error (_("Unknown language \"%s\""), lang_name.get ());
+	error (_("Unknown language \"%s\""), lang_name.c_str ());
       lang = language_def (lang_enum);
     }
   else
@@ -216,8 +216,6 @@ demangle_command (char *args, int from_tty)
   else
     error (_("Can't demangle \"%s\""), name);
 }
-
-extern initialize_file_ftype _initialize_demangler; /* -Wmissing-prototypes */
 
 void
 _initialize_demangler (void)

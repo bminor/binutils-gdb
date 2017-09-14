@@ -1302,20 +1302,10 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
   return res;
 }
 
-static void
-restore_show_memory_breakpoints (void *arg)
+scoped_restore_tmpl<int>
+make_scoped_restore_show_memory_breakpoints (int show)
 {
-  show_memory_breakpoints = (uintptr_t) arg;
-}
-
-struct cleanup *
-make_show_memory_breakpoints_cleanup (int show)
-{
-  int current = show_memory_breakpoints;
-
-  show_memory_breakpoints = show;
-  return make_cleanup (restore_show_memory_breakpoints,
-		       (void *) (uintptr_t) current);
+  return make_scoped_restore (&show_memory_breakpoints, show);
 }
 
 /* For docs see target.h, to_xfer_partial.  */
@@ -3926,9 +3916,7 @@ flash_erase_command (char *cmd, int from_tty)
           found_flash_region = true;
           target_flash_erase (m->lo, m->hi - m->lo);
 
-	  struct cleanup *cleanup_tuple
-	      = make_cleanup_ui_out_tuple_begin_end (current_uiout,
-						     "erased-regions");
+	  ui_out_emit_tuple tuple_emitter (current_uiout, "erased-regions");
 
           current_uiout->message (_("Erasing flash memory region at address "));
           current_uiout->field_fmt ("address", "%s", paddress (gdbarch,
@@ -3936,7 +3924,6 @@ flash_erase_command (char *cmd, int from_tty)
           current_uiout->message (", size = ");
           current_uiout->field_fmt ("size", "%s", hex_string (m->hi - m->lo));
           current_uiout->message ("\n");
-          do_cleanups (cleanup_tuple);
         }
     }
 

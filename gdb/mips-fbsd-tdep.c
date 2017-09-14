@@ -534,10 +534,6 @@ mips_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	       mips_fbsd_ilp32_fetch_link_map_offsets :
 	       mips_fbsd_lp64_fetch_link_map_offsets));
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_mips_fbsd_tdep (void);
 
 void
 _initialize_mips_fbsd_tdep (void)

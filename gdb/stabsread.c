@@ -52,8 +52,6 @@
 #include "stabsread.h"		/* Our own declarations */
 #undef	EXTERN
 
-extern void _initialize_stabsread (void);
-
 struct nextfield
 {
   struct nextfield *next;

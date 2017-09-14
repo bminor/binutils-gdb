@@ -4952,9 +4952,6 @@ current_lwp_ptid (void)
   return inferior_ptid;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_linux_nat;
-
 void
 _initialize_linux_nat (void)
 {

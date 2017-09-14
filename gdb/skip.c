@@ -600,9 +600,6 @@ function_name_is_marked_for_skip (const char *function_name,
   return false;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_step_skip;
-
 void
 _initialize_step_skip (void)
 {

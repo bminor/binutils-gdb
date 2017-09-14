@@ -996,9 +996,6 @@ gdbarch_skip_prologue_noexcept (gdbarch *gdbarch, CORE_ADDR pc) noexcept
   return new_pc;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_gdbarch_utils;
-
 void
 _initialize_gdbarch_utils (void)
 {

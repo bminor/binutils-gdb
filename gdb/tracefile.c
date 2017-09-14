@@ -495,8 +495,6 @@ init_tracefile_ops (struct target_ops *ops)
   ops->to_magic = OPS_MAGIC;
 }
 
-extern initialize_file_ftype _initialize_tracefile;
-
 void
 _initialize_tracefile (void)
 {

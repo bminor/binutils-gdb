@@ -21,10 +21,11 @@
 #ifndef MI_CMD_BREAK_H
 #define MI_CMD_BREAK_H
 
+#include "common/scoped_restore.h"
 
 /* Setup the reporting of the insertion of a new breakpoint or
    catchpoint.  */
-struct cleanup *setup_breakpoint_reporting (void);
+scoped_restore_tmpl<int> setup_breakpoint_reporting (void);
 
 #endif
 

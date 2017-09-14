@@ -10610,17 +10610,30 @@ plt_stub_size (struct ppc_link_hash_table *htab,
   return size;
 }
 
-/* If this stub would cross fewer 2**plt_stub_align boundaries if we align,
-   then return the padding needed to do so.  */
+/* Depending on the sign of plt_stub_align:
+   If positive, return the padding to align to a 2**plt_stub_align
+   boundary.
+   If negative, if this stub would cross fewer 2**plt_stub_align
+   boundaries if we align, then return the padding needed to do so.  */
+
 static inline unsigned int
 plt_stub_pad (struct ppc_link_hash_table *htab,
 	      struct ppc_stub_hash_entry *stub_entry,
 	      bfd_vma plt_off)
 {
-  int stub_align = 1 << htab->params->plt_stub_align;
+  int stub_align;
   unsigned stub_size = plt_stub_size (htab, stub_entry, plt_off);
   bfd_vma stub_off = stub_entry->group->stub_sec->size;
 
+  if (htab->params->plt_stub_align >= 0)
+    {
+      stub_align = 1 << htab->params->plt_stub_align;
+      if ((stub_off & (stub_align - 1)) != 0)
+	return stub_align - (stub_off & (stub_align - 1));
+      return 0;
+    }
+
+  stub_align = 1 << -htab->params->plt_stub_align;
   if (((stub_off + stub_size - 1) & -stub_align) - (stub_off & -stub_align)
       > ((stub_size - 1) & -stub_align))
     return stub_align - (stub_off & (stub_align - 1));

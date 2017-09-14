@@ -533,9 +533,6 @@ nto_inferior_data (struct inferior *const inferior)
   return inf_data;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_nto_tdep;
-
 void
 _initialize_nto_tdep (void)
 {

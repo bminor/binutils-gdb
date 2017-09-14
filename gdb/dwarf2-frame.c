@@ -2396,9 +2396,6 @@ dwarf2_build_frame_info (struct objfile *objfile)
   set_objfile_data (objfile, dwarf2_frame_objfile_data, fde_table2);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_dwarf2_frame (void);
-
 void
 _initialize_dwarf2_frame (void)
 {

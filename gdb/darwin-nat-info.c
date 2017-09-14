@@ -617,10 +617,9 @@ darwin_debug_regions_recurse (task_t task)
   vm_region_submap_short_info_data_64_t r_info;
   kern_return_t kret;
   int ret;
-  struct cleanup *table_chain;
   struct ui_out *uiout = current_uiout;
 
-  table_chain = make_cleanup_ui_out_table_begin_end (uiout, 9, -1, "regions");
+  ui_out_emit_table table_emitter (uiout, 9, -1, "regions");
 
   if (gdbarch_addr_bit (target_gdbarch ()) <= 32)
     {
@@ -647,7 +646,6 @@ darwin_debug_regions_recurse (task_t task)
   while (1)
     {
       const char *tag;
-      struct cleanup *row_chain;
 
       r_info_size = VM_REGION_SUBMAP_SHORT_INFO_COUNT_64;
       r_size = -1;
@@ -656,28 +654,29 @@ darwin_debug_regions_recurse (task_t task)
 				     &r_info_size);
       if (kret != KERN_SUCCESS)
 	break;
-      row_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "regions-row");
 
-      uiout->field_core_addr ("start", target_gdbarch (), r_start);
-      uiout->field_core_addr ("end", target_gdbarch (), r_start + r_size);
-      uiout->field_string ("min-prot",
-			   unparse_protection (r_info.protection));
-      uiout->field_string ("max-prot",
-			   unparse_protection (r_info.max_protection));
-      uiout->field_string ("inheritence",
-			   unparse_inheritance (r_info.inheritance));
-      uiout->field_string ("share-mode",
-			   unparse_share_mode (r_info.share_mode));
-      uiout->field_int ("depth", r_depth);
-      uiout->field_string ("submap",
-			   r_info.is_submap ? _("sm ") : _("obj"));
-      tag = unparse_user_tag (r_info.user_tag);
-      if (tag)
-	uiout->field_string ("tag", tag);
-      else
-	uiout->field_int ("tag", r_info.user_tag);
+      {
+	ui_out_emit_tuple tuple_emitter (uiout, "regions-row");
 
-      do_cleanups (row_chain);
+	uiout->field_core_addr ("start", target_gdbarch (), r_start);
+	uiout->field_core_addr ("end", target_gdbarch (), r_start + r_size);
+	uiout->field_string ("min-prot",
+			     unparse_protection (r_info.protection));
+	uiout->field_string ("max-prot",
+			     unparse_protection (r_info.max_protection));
+	uiout->field_string ("inheritence",
+			     unparse_inheritance (r_info.inheritance));
+	uiout->field_string ("share-mode",
+			     unparse_share_mode (r_info.share_mode));
+	uiout->field_int ("depth", r_depth);
+	uiout->field_string ("submap",
+			     r_info.is_submap ? _("sm ") : _("obj"));
+	tag = unparse_user_tag (r_info.user_tag);
+	if (tag)
+	  uiout->field_string ("tag", tag);
+	else
+	  uiout->field_int ("tag", r_info.user_tag);
+      }
 
       if (!uiout->is_mi_like_p ())
 	uiout->text ("\n");
@@ -687,8 +686,6 @@ darwin_debug_regions_recurse (task_t task)
       else
 	r_start += r_size;
     }
-  do_cleanups (table_chain);
-
 }
 
 
@@ -840,9 +837,6 @@ info_mach_exceptions_command (char *args, int from_tty)
       disp_exception (&info);
     }
 }
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_darwin_info_commands;
 
 void
 _initialize_darwin_info_commands (void)

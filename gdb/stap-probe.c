@@ -769,7 +769,7 @@ stap_parse_single_operand (struct stap_parse_info *p)
 	 We handle the register displacement here, and the other cases
 	 recursively.  */
       if (p->inside_paren_p)
-	tmp = skip_spaces_const (tmp);
+	tmp = skip_spaces (tmp);
 
       while (isdigit (*tmp))
 	{
@@ -818,7 +818,7 @@ stap_parse_single_operand (struct stap_parse_info *p)
       tmp = endp;
 
       if (p->inside_paren_p)
-	tmp = skip_spaces_const (tmp);
+	tmp = skip_spaces (tmp);
 
       /* If "stap_is_integer_prefix" returns true, it means we can
 	 accept integers without a prefix here.  But we also need to
@@ -901,7 +901,7 @@ stap_parse_argument_conditionally (struct stap_parse_info *p)
 	 have to parse it as it was a separate expression, without
 	 left-side or precedence.  */
       ++p->arg;
-      p->arg = skip_spaces_const (p->arg);
+      p->arg = skip_spaces (p->arg);
       ++p->inside_paren_p;
 
       stap_parse_argument_1 (p, 0, STAP_OPERAND_PREC_NONE);
@@ -913,7 +913,7 @@ stap_parse_argument_conditionally (struct stap_parse_info *p)
 
       ++p->arg;
       if (p->inside_paren_p)
-	p->arg = skip_spaces_const (p->arg);
+	p->arg = skip_spaces (p->arg);
     }
   else
     error (_("Cannot parse expression `%s'."), p->saved_arg);
@@ -935,7 +935,7 @@ stap_parse_argument_1 (struct stap_parse_info *p, int has_lhs,
   gdb_assert (p->arg != NULL);
 
   if (p->inside_paren_p)
-    p->arg = skip_spaces_const (p->arg);
+    p->arg = skip_spaces (p->arg);
 
   if (!has_lhs)
     {
@@ -981,7 +981,7 @@ stap_parse_argument_1 (struct stap_parse_info *p, int has_lhs,
 
       p->arg = tmp_exp_buf;
       if (p->inside_paren_p)
-	p->arg = skip_spaces_const (p->arg);
+	p->arg = skip_spaces (p->arg);
 
       /* Parse the right-side of the expression.  */
       stap_parse_argument_conditionally (p);
@@ -1074,7 +1074,7 @@ stap_parse_argument (const char **arg, struct type *atype,
 
   reallocate_expout (&p.pstate);
 
-  p.arg = skip_spaces_const (p.arg);
+  p.arg = skip_spaces (p.arg);
   *arg = p.arg;
 
   /* We can safely return EXPOUT here.  */
@@ -1189,7 +1189,7 @@ stap_parse_probe_arguments (struct stap_probe *probe, struct gdbarch *gdbarch)
       arg.aexpr = expr;
 
       /* Start it over again.  */
-      cur = skip_spaces_const (cur);
+      cur = skip_spaces (cur);
 
       VEC_safe_push (stap_probe_arg_s, probe->args_u.vec, &arg);
     }
@@ -1472,7 +1472,7 @@ stap_clear_semaphore (struct probe *probe_generic, struct objfile *objfile,
 
 static void
 handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
-		   VEC (probe_p) **probesp, CORE_ADDR base)
+		   std::vector<probe *> *probesp, CORE_ADDR base)
 {
   bfd *abfd = objfile->obfd;
   int size = bfd_get_arch_size (abfd) / 8;
@@ -1543,7 +1543,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
   ret->args_u.text = probe_args;
 
   /* Successfully created probe.  */
-  VEC_safe_push (probe_p, *probesp, (struct probe *) ret);
+  probesp->push_back ((struct probe *) ret);
 }
 
 /* Helper function which tries to find the base address of the SystemTap
@@ -1588,7 +1588,7 @@ get_stap_base_address (bfd *obfd, bfd_vma *base)
    SystemTap probes from OBJFILE.  */
 
 static void
-stap_get_probes (VEC (probe_p) **probesp, struct objfile *objfile)
+stap_get_probes (std::vector<probe *> *probesp, struct objfile *objfile)
 {
   /* If we are here, then this is the first time we are parsing the
      SystemTap probe's information.  We basically have to count how many
@@ -1597,7 +1597,7 @@ stap_get_probes (VEC (probe_p) **probesp, struct objfile *objfile)
   bfd *obfd = objfile->obfd;
   bfd_vma base;
   struct sdt_note *iter;
-  unsigned save_probesp_len = VEC_length (probe_p, *probesp);
+  unsigned save_probesp_len = probesp->size ();
 
   if (objfile->separate_debug_objfile_backlink != NULL)
     {
@@ -1628,7 +1628,7 @@ stap_get_probes (VEC (probe_p) **probesp, struct objfile *objfile)
       handle_stap_probe (objfile, iter, probesp, base);
     }
 
-  if (save_probesp_len == VEC_length (probe_p, *probesp))
+  if (save_probesp_len == probesp->size ())
     {
       /* If we are here, it means we have failed to parse every known
 	 probe.  */
@@ -1713,12 +1713,10 @@ info_probes_stap_command (char *arg, int from_tty)
   info_probes_for_ops (arg, from_tty, &stap_probe_ops);
 }
 
-void _initialize_stap_probe (void);
-
 void
 _initialize_stap_probe (void)
 {
-  VEC_safe_push (probe_ops_cp, all_probe_ops, &stap_probe_ops);
+  all_probe_ops.push_back (&stap_probe_ops);
 
   add_setshow_zuinteger_cmd ("stap-expression", class_maintenance,
 			     &stap_expression_debug,

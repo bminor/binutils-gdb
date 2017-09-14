@@ -104,8 +104,6 @@ static void val_print_type_code_flags (struct type *type,
 				       const gdb_byte *valaddr,
 				       struct ui_file *stream);
 
-void _initialize_valprint (void);
-
 #define PRINT_MAX_DEFAULT 200	/* Start print_max off at this value.  */
 
 struct value_print_options user_print_options =

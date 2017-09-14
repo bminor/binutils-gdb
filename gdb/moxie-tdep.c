@@ -41,10 +41,6 @@
 #include "moxie-tdep.h"
 #include <algorithm>
 
-/* Local functions.  */
-
-extern void _initialize_moxie_tdep (void);
-
 /* Use an invalid address value as 'not available' marker.  */
 enum { REG_UNAVAIL = (CORE_ADDR) -1 };
 

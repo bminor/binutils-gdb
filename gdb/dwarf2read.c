@@ -9221,8 +9221,7 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
   const char *import_alias;
   const char *imported_declaration = NULL;
   const char *import_prefix;
-  VEC (const_char_ptr) *excludes = NULL;
-  struct cleanup *cleanups;
+  std::vector<const char *> excludes;
 
   import_attr = dwarf2_attr (die, DW_AT_import, cu);
   if (import_attr == NULL)
@@ -9296,8 +9295,6 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
   else
     canonical_name = imported_name;
 
-  cleanups = make_cleanup (VEC_cleanup (const_char_ptr), &excludes);
-
   if (die->tag == DW_TAG_imported_module && cu->language == language_fortran)
     for (child_die = die->child; child_die && child_die->tag;
 	 child_die = sibling_die (child_die))
@@ -9337,7 +9334,7 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
 	    continue;
 	  }
 
-	VEC_safe_push (const_char_ptr, excludes, imported_name);
+	excludes.push_back (imported_name);
 
 	process_die (child_die, cu);
       }
@@ -9350,8 +9347,6 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
 		       excludes,
 		       0,
 		       &objfile->objfile_obstack);
-
-  do_cleanups (cleanups);
 }
 
 /* Check for possibly missing DW_AT_comp_dir with relative .debug_line
@@ -14617,9 +14612,10 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  const char *previous_prefix = determine_prefix (die, cu);
 
+	  std::vector<const char *> excludes;
 	  add_using_directive (using_directives (cu->language),
 			       previous_prefix, TYPE_NAME (type), NULL,
-			       NULL, NULL, 0, &objfile->objfile_obstack);
+			       NULL, excludes, 0, &objfile->objfile_obstack);
 	}
     }
 
@@ -24103,8 +24099,6 @@ show_check_physname (struct ui_file *file, int from_tty,
 		    _("Whether to check \"physname\" is %s.\n"),
 		    value);
 }
-
-void _initialize_dwarf2_read (void);
 
 void
 _initialize_dwarf2_read (void)

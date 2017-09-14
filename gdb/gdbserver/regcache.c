@@ -53,8 +53,9 @@ get_thread_regcache (struct thread_info *thread, int fetch)
 
       current_thread = thread;
       /* Invalidate all registers, to prevent stale left-overs.  */
-      memset (regcache->register_status, REG_UNAVAILABLE,
-	      VEC_length (tdesc_reg_p, regcache->tdesc->reg_defs));
+      if (!VEC_empty (tdesc_reg_p, regcache->tdesc->reg_defs))
+	memset (regcache->register_status, REG_UNAVAILABLE,
+		VEC_length (tdesc_reg_p, regcache->tdesc->reg_defs));
       fetch_inferior_registers (regcache, -1);
       current_thread = saved_thread;
       regcache->registers_valid = 1;
@@ -146,8 +147,9 @@ init_register_cache (struct regcache *regcache,
       regcache->registers_owned = 1;
       regcache->register_status
 	= (unsigned char *) xmalloc (VEC_length (tdesc_reg_p, tdesc->reg_defs));
-      memset ((void *) regcache->register_status, REG_UNAVAILABLE,
-	      VEC_length (tdesc_reg_p, tdesc->reg_defs));
+      if (!VEC_empty (tdesc_reg_p, tdesc->reg_defs))
+	memset ((void *) regcache->register_status, REG_UNAVAILABLE,
+		VEC_length (tdesc_reg_p, tdesc->reg_defs));
 #else
       gdb_assert_not_reached ("can't allocate memory from the heap");
 #endif

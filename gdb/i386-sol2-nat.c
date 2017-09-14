@@ -130,9 +130,6 @@ fill_fpregset (const struct regcache *regcache,
 
 #endif
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_amd64_sol2_nat (void);
-
 void
 _initialize_amd64_sol2_nat (void)
 {

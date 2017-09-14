@@ -2444,8 +2444,6 @@ set_sh_command (char *args, int from_tty)
   help_list (setshcmdlist, "set sh ", all_commands, gdb_stdout);
 }
 
-extern initialize_file_ftype _initialize_sh_tdep;  /* -Wmissing-prototypes */
-
 void
 _initialize_sh_tdep (void)
 {

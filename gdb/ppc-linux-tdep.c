@@ -218,13 +218,13 @@ ppc_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
   int val;
   int bplen;
   gdb_byte old_contents[BREAKPOINT_MAX];
-  struct cleanup *cleanup;
 
   /* Determine appropriate breakpoint contents and size for this address.  */
   bp = gdbarch_breakpoint_from_pc (gdbarch, &addr, &bplen);
 
   /* Make sure we see the memory breakpoints.  */
-  cleanup = make_show_memory_breakpoints_cleanup (1);
+  scoped_restore restore_memory
+    = make_scoped_restore_show_memory_breakpoints (1);
   val = target_read_memory (addr, old_contents, bplen);
 
   /* If our breakpoint is no longer at the address, this means that the
@@ -233,7 +233,6 @@ ppc_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
   if (val == 0 && memcmp (bp, old_contents, bplen) == 0)
     val = target_write_raw_memory (addr, bp_tgt->shadow_contents, bplen);
 
-  do_cleanups (cleanup);
   return val;
 }
 
@@ -1832,9 +1831,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
   ppc_init_linux_record_tdep (&ppc_linux_record_tdep, 4);
   ppc_init_linux_record_tdep (&ppc64_linux_record_tdep, 8);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_ppc_linux_tdep;
 
 void
 _initialize_ppc_linux_tdep (void)

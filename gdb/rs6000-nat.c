@@ -655,8 +655,6 @@ rs6000_xfer_shared_libraries
     }
 }
 
-void _initialize_rs6000_nat (void);
-
 void
 _initialize_rs6000_nat (void)
 {

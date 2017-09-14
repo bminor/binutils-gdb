@@ -542,9 +542,6 @@ spu_solib_loaded (struct so_list *so)
     }
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_spu_solib;
-
 void
 _initialize_spu_solib (void)
 {

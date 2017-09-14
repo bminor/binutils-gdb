@@ -1373,9 +1373,6 @@ find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc)
   return 0;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_objc_language;
-
 void
 _initialize_objc_language (void)
 {
@@ -1615,9 +1612,6 @@ resolve_msgsend_super_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
     return 1;
   return 0;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_objc_lang;
 
 void
 _initialize_objc_lang (void)

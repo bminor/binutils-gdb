@@ -891,8 +891,6 @@ ia64_linux_status_is_event (int status)
 				 || WSTOPSIG (status) == SIGILL);
 }
 
-void _initialize_ia64_linux_nat (void);
-
 void
 _initialize_ia64_linux_nat (void)
 {

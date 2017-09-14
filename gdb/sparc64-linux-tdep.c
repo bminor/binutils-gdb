@@ -408,10 +408,6 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_handle_segmentation_fault (gdbarch,
 					 sparc64_linux_handle_segmentation_fault);
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_sparc64_linux_tdep (void);
 
 void
 _initialize_sparc64_linux_tdep (void)

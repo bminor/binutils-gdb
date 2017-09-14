@@ -46,9 +46,6 @@ cris_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_cris_linux_tdep;
-
 void
 _initialize_cris_linux_tdep (void)
 {

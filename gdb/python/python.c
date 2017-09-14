@@ -1472,12 +1472,6 @@ finalize_python (void *ignore)
 
   restore_active_ext_lang (previous_active);
 }
-#endif
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_python;
-
-#ifdef HAVE_PYTHON
 
 static bool
 do_start_initialization ()
@@ -1597,22 +1591,16 @@ do_start_initialization ()
       || gdbpy_initialize_eventregistry () < 0
       || gdbpy_initialize_py_events () < 0
       || gdbpy_initialize_event () < 0
-      || gdbpy_initialize_stop_event () < 0
-      || gdbpy_initialize_signal_event () < 0
-      || gdbpy_initialize_breakpoint_event () < 0
-      || gdbpy_initialize_continue_event () < 0
-      || gdbpy_initialize_inferior_call_pre_event () < 0
-      || gdbpy_initialize_inferior_call_post_event () < 0
-      || gdbpy_initialize_register_changed_event () < 0
-      || gdbpy_initialize_memory_changed_event () < 0
-      || gdbpy_initialize_exited_event () < 0
-      || gdbpy_initialize_thread_event () < 0
-      || gdbpy_initialize_new_objfile_event ()  < 0
-      || gdbpy_initialize_clear_objfiles_event ()  < 0
       || gdbpy_initialize_arch () < 0
       || gdbpy_initialize_xmethods () < 0
       || gdbpy_initialize_unwind () < 0)
     return false;
+
+#define GDB_PY_DEFINE_EVENT_TYPE(name, py_name, doc, base)	\
+  if (gdbpy_initialize_event_generic (&name##_event_object_type, py_name) < 0) \
+    return false;
+#include "py-event-types.def"
+#undef GDB_PY_DEFINE_EVENT_TYPE
 
   gdbpy_to_string_cst = PyString_FromString ("to_string");
   if (gdbpy_to_string_cst == NULL)
@@ -1966,4 +1954,51 @@ struct PyModuleDef python_GdbModuleDef =
   NULL
 };
 #endif
+
+/* Define all the event objects.  */
+#define GDB_PY_DEFINE_EVENT_TYPE(name, py_name, doc, base) \
+  PyTypeObject name##_event_object_type		    \
+        CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object") \
+    = { \
+      PyVarObject_HEAD_INIT (NULL, 0)				\
+      "gdb." py_name,                             /* tp_name */ \
+      sizeof (event_object),                      /* tp_basicsize */ \
+      0,                                          /* tp_itemsize */ \
+      evpy_dealloc,                               /* tp_dealloc */ \
+      0,                                          /* tp_print */ \
+      0,                                          /* tp_getattr */ \
+      0,                                          /* tp_setattr */ \
+      0,                                          /* tp_compare */ \
+      0,                                          /* tp_repr */ \
+      0,                                          /* tp_as_number */ \
+      0,                                          /* tp_as_sequence */ \
+      0,                                          /* tp_as_mapping */ \
+      0,                                          /* tp_hash  */ \
+      0,                                          /* tp_call */ \
+      0,                                          /* tp_str */ \
+      0,                                          /* tp_getattro */ \
+      0,                                          /* tp_setattro */ \
+      0,                                          /* tp_as_buffer */ \
+      Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   /* tp_flags */ \
+      doc,                                        /* tp_doc */ \
+      0,                                          /* tp_traverse */ \
+      0,                                          /* tp_clear */ \
+      0,                                          /* tp_richcompare */ \
+      0,                                          /* tp_weaklistoffset */ \
+      0,                                          /* tp_iter */ \
+      0,                                          /* tp_iternext */ \
+      0,                                          /* tp_methods */ \
+      0,                                          /* tp_members */ \
+      0,                                          /* tp_getset */ \
+      &base,                                      /* tp_base */ \
+      0,                                          /* tp_dict */ \
+      0,                                          /* tp_descr_get */ \
+      0,                                          /* tp_descr_set */ \
+      0,                                          /* tp_dictoffset */ \
+      0,                                          /* tp_init */ \
+      0                                           /* tp_alloc */ \
+    };
+#include "py-event-types.def"
+#undef GDB_PY_DEFINE_EVENT_TYPE
+
 #endif /* HAVE_PYTHON */

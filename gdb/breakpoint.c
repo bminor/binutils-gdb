@@ -82,6 +82,7 @@
 #include <algorithm>
 #include "progspace-and-thread.h"
 #include "common/array-view.h"
+#include "common/gdb_optional.h"
 
 /* Enums for exception-handling support.  */
 enum exception_event_kind
@@ -550,8 +551,6 @@ gdb_evaluates_breakpoint_condition_p (void)
 
   return (mode == condition_evaluation_host);
 }
-
-void _initialize_breakpoint (void);
 
 /* Are we executing breakpoint commands?  */
 static int executing_breakpoint_commands;
@@ -1049,8 +1048,8 @@ condition_completer (struct cmd_list_element *cmd,
 {
   const char *space;
 
-  text = skip_spaces_const (text);
-  space = skip_to_space_const (text);
+  text = skip_spaces (text);
+  space = skip_to_space (text);
   if (*space == '\0')
     {
       int len;
@@ -1085,7 +1084,7 @@ condition_completer (struct cmd_list_element *cmd,
     }
 
   /* We're completing the expression part.  */
-  text = skip_spaces_const (space);
+  text = skip_spaces (space);
   expression_completer (cmd, tracker, text, word);
 }
 
@@ -2432,7 +2431,7 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 
   if (*cmdrest == ',')
     ++cmdrest;
-  cmdrest = skip_spaces_const (cmdrest);
+  cmdrest = skip_spaces (cmdrest);
 
   if (*cmdrest++ != '"')
     error (_("No format string following the location"));
@@ -2448,14 +2447,14 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
   if (*cmdrest++ != '"')
     error (_("Bad format string, non-terminated '\"'."));
   
-  cmdrest = skip_spaces_const (cmdrest);
+  cmdrest = skip_spaces (cmdrest);
 
   if (!(*cmdrest == ',' || *cmdrest == '\0'))
     error (_("Invalid argument syntax"));
 
   if (*cmdrest == ',')
     cmdrest++;
-  cmdrest = skip_spaces_const (cmdrest);
+  cmdrest = skip_spaces (cmdrest);
 
   /* For each argument, make an expression.  */
 
@@ -8461,7 +8460,7 @@ add_solib_catchpoint (const char *arg, int is_load, int is_temp, int enabled)
 
   if (!arg)
     arg = "";
-  arg = skip_spaces_const (arg);
+  arg = skip_spaces (arg);
 
   std::unique_ptr<solib_catchpoint> c (new solib_catchpoint ());
 
@@ -8995,8 +8994,6 @@ program_breakpoint_here_p (struct gdbarch *gdbarch, CORE_ADDR address)
   CORE_ADDR addr;
   const gdb_byte *bpoint;
   gdb_byte *target_mem;
-  struct cleanup *cleanup;
-  int retval = 0;
 
   addr = address;
   bpoint = gdbarch_breakpoint_from_pc (gdbarch, &addr, &len);
@@ -9010,15 +9007,14 @@ program_breakpoint_here_p (struct gdbarch *gdbarch, CORE_ADDR address)
   /* Enable the automatic memory restoration from breakpoints while
      we read the memory.  Otherwise we could say about our temporary
      breakpoints they are permanent.  */
-  cleanup = make_show_memory_breakpoints_cleanup (0);
+  scoped_restore restore_memory
+    = make_scoped_restore_show_memory_breakpoints (0);
 
   if (target_read_memory (address, target_mem, len) == 0
       && memcmp (target_mem, bpoint, len) == 0)
-    retval = 1;
+    return 1;
 
-  do_cleanups (cleanup);
-
-  return retval;
+  return 0;
 }
 
 /* Return 1 if LOC is pointing to a permanent breakpoint,
@@ -9205,9 +9201,9 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 		  const char *endp;
 		  char *marker_str;
 
-		  p = skip_spaces_const (p);
+		  p = skip_spaces (p);
 
-		  endp = skip_to_space_const (p);
+		  endp = skip_to_space (p);
 
 		  marker_str = savestring (p, endp - p);
 		  t->static_trace_marker_id = marker_str;
@@ -9505,7 +9501,7 @@ find_condition_and_thread (const char *tok, CORE_ADDR pc,
       const char *cond_start = NULL;
       const char *cond_end = NULL;
 
-      tok = skip_spaces_const (tok);
+      tok = skip_spaces (tok);
 
       if ((*tok == '"' || *tok == ',') && rest)
 	{
@@ -9513,7 +9509,7 @@ find_condition_and_thread (const char *tok, CORE_ADDR pc,
 	  return;
 	}
 
-      end_tok = skip_to_space_const (tok);
+      end_tok = skip_to_space (tok);
 
       toklen = end_tok - tok;
 
@@ -9570,9 +9566,9 @@ decode_static_tracepoint_spec (const char **arg_p)
   char *marker_str;
   int i;
 
-  p = skip_spaces_const (p);
+  p = skip_spaces (p);
 
-  endp = skip_to_space_const (p);
+  endp = skip_to_space (p);
 
   marker_str = savestring (p, endp - p);
   old_chain = make_cleanup (xfree, marker_str);
@@ -10538,7 +10534,6 @@ works_in_software_mode_watchpoint (const struct breakpoint *b)
 static enum print_stop_action
 print_it_watchpoint (bpstat bs)
 {
-  struct cleanup *old_chain;
   struct breakpoint *b;
   enum print_stop_action result;
   struct watchpoint *w;
@@ -10549,13 +10544,12 @@ print_it_watchpoint (bpstat bs)
   b = bs->breakpoint_at;
   w = (struct watchpoint *) b;
 
-  old_chain = make_cleanup (null_cleanup, NULL);
-
   annotate_watchpoint (b->number);
   maybe_print_thread_hit_breakpoint (uiout);
 
   string_file stb;
 
+  gdb::optional<ui_out_emit_tuple> tuple_emitter;
   switch (b->type)
     {
     case bp_watchpoint:
@@ -10564,7 +10558,7 @@ print_it_watchpoint (bpstat bs)
 	uiout->field_string
 	  ("reason", async_reason_lookup (EXEC_ASYNC_WATCHPOINT_TRIGGER));
       mention (b);
-      make_cleanup_ui_out_tuple_begin_end (uiout, "value");
+      tuple_emitter.emplace (uiout, "value");
       uiout->text ("\nOld value = ");
       watchpoint_value_print (bs->old_val, &stb);
       uiout->field_stream ("old", stb);
@@ -10581,7 +10575,7 @@ print_it_watchpoint (bpstat bs)
 	uiout->field_string
 	  ("reason", async_reason_lookup (EXEC_ASYNC_READ_WATCHPOINT_TRIGGER));
       mention (b);
-      make_cleanup_ui_out_tuple_begin_end (uiout, "value");
+      tuple_emitter.emplace (uiout, "value");
       uiout->text ("\nValue = ");
       watchpoint_value_print (w->val, &stb);
       uiout->field_stream ("value", stb);
@@ -10597,7 +10591,7 @@ print_it_watchpoint (bpstat bs)
 	      ("reason",
 	       async_reason_lookup (EXEC_ASYNC_ACCESS_WATCHPOINT_TRIGGER));
 	  mention (b);
-	  make_cleanup_ui_out_tuple_begin_end (uiout, "value");
+	  tuple_emitter.emplace (uiout, "value");
 	  uiout->text ("\nOld value = ");
 	  watchpoint_value_print (bs->old_val, &stb);
 	  uiout->field_stream ("old", stb);
@@ -10610,7 +10604,7 @@ print_it_watchpoint (bpstat bs)
 	    uiout->field_string
 	      ("reason",
 	       async_reason_lookup (EXEC_ASYNC_ACCESS_WATCHPOINT_TRIGGER));
-	  make_cleanup_ui_out_tuple_begin_end (uiout, "value");
+	  tuple_emitter.emplace (uiout, "value");
 	  uiout->text ("\nValue = ");
 	}
       watchpoint_value_print (w->val, &stb);
@@ -10622,7 +10616,6 @@ print_it_watchpoint (bpstat bs)
       result = PRINT_UNKNOWN;
     }
 
-  do_cleanups (old_chain);
   return result;
 }
 
@@ -11068,8 +11061,8 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   else if (val != NULL)
     release_value (val);
 
-  tok = skip_spaces_const (arg);
-  end_tok = skip_to_space_const (tok);
+  tok = skip_spaces (arg);
+  end_tok = skip_to_space (tok);
 
   toklen = end_tok - tok;
   if (toklen >= 1 && strncmp (tok, "if", toklen) == 0)
@@ -11587,7 +11580,7 @@ ep_parse_optional_if_clause (const char **arg)
 
   /* Skip any extra leading whitespace, and record the start of the
      condition string.  */
-  *arg = skip_spaces_const (*arg);
+  *arg = skip_spaces (*arg);
   cond_string = *arg;
 
   /* Assume that the condition occupies the remainder of the arg
@@ -11623,7 +11616,7 @@ catch_fork_command_1 (char *arg_entry, int from_tty,
 
   if (!arg)
     arg = "";
-  arg = skip_spaces_const (arg);
+  arg = skip_spaces (arg);
 
   /* The allowed syntax is:
      catch [v]fork
@@ -11668,7 +11661,7 @@ catch_exec_command_1 (char *arg_entry, int from_tty,
 
   if (!arg)
     arg = "";
-  arg = skip_spaces_const (arg);
+  arg = skip_spaces (arg);
 
   /* The allowed syntax is:
      catch exec
@@ -14493,20 +14486,17 @@ map_breakpoint_numbers (const char *args,
 }
 
 static struct bp_location *
-find_location_by_number (char *number)
+find_location_by_number (const char *number)
 {
-  char *dot = strchr (number, '.');
-  char *p1;
+  const char *p1;
   int bp_num;
   int loc_num;
   struct breakpoint *b;
   struct bp_location *loc;  
 
-  *dot = '\0';
-
   p1 = number;
-  bp_num = get_number (&p1);
-  if (bp_num == 0)
+  bp_num = get_number_trailer (&p1, '.');
+  if (bp_num == 0 || p1[0] != '.')
     error (_("Bad breakpoint number '%s'"), number);
 
   ALL_BREAKPOINTS (b)
@@ -14518,7 +14508,9 @@ find_location_by_number (char *number)
   if (!b || b->number != bp_num)
     error (_("Bad breakpoint number '%s'"), number);
   
-  p1 = dot+1;
+  /* Skip the dot.  */
+  ++p1;
+  const char *save = p1;
   loc_num = get_number (&p1);
   if (loc_num == 0)
     error (_("Bad breakpoint location number '%s'"), number);
@@ -14528,7 +14520,7 @@ find_location_by_number (char *number)
   for (;loc_num && loc; --loc_num, loc = loc->next)
     ;
   if (!loc)
-    error (_("Bad breakpoint location number '%s'"), dot+1);
+    error (_("Bad breakpoint location number '%s'"), save);
     
   return loc;  
 }
@@ -14596,13 +14588,13 @@ disable_command (char *args, int from_tty)
     }
   else
     {
-      char *num = extract_arg (&args);
+      std::string num = extract_arg (&args);
 
-      while (num)
+      while (!num.empty ())
 	{
-	  if (strchr (num, '.'))
+	  if (num.find ('.') != std::string::npos)
 	    {
-	      struct bp_location *loc = find_location_by_number (num);
+	      struct bp_location *loc = find_location_by_number (num.c_str ());
 
 	      if (loc)
 		{
@@ -14619,7 +14611,8 @@ disable_command (char *args, int from_tty)
 	      update_global_location_list (UGLL_DONT_INSERT);
 	    }
 	  else
-	    map_breakpoint_numbers (num, do_map_disable_breakpoint, NULL);
+	    map_breakpoint_numbers (num.c_str (), do_map_disable_breakpoint,
+				    NULL);
 	  num = extract_arg (&args);
 	}
     }
@@ -14727,13 +14720,13 @@ enable_command (char *args, int from_tty)
     }
   else
     {
-      char *num = extract_arg (&args);
+      std::string num = extract_arg (&args);
 
-      while (num)
+      while (!num.empty ())
 	{
-	  if (strchr (num, '.'))
+	  if (num.find ('.') != std::string::npos)
 	    {
-	      struct bp_location *loc = find_location_by_number (num);
+	      struct bp_location *loc = find_location_by_number (num.c_str ());
 
 	      if (loc)
 		{
@@ -14750,7 +14743,8 @@ enable_command (char *args, int from_tty)
 	      update_global_location_list (UGLL_MAY_INSERT);
 	    }
 	  else
-	    map_breakpoint_numbers (num, do_map_enable_breakpoint, NULL);
+	    map_breakpoint_numbers (num.c_str (), do_map_enable_breakpoint,
+				    NULL);
 	  num = extract_arg (&args);
 	}
     }

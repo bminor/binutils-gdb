@@ -2525,8 +2525,6 @@ target_gdbarch (void)
   return current_inferior ()->gdbarch;
 }
 
-extern void _initialize_gdbarch (void);
-
 void
 _initialize_gdbarch (void)
 {

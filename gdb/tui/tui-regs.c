@@ -687,9 +687,6 @@ tui_reggroup_completer (struct cmd_list_element *ignore,
     }
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_tui_regs;
-
 void
 _initialize_tui_regs (void)
 {

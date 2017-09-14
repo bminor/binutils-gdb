@@ -671,9 +671,6 @@ tui_get_command_dimension (unsigned int *width,
   return 1;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_tui;
-
 void
 _initialize_tui (void)
 {

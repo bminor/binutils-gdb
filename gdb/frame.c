@@ -2927,8 +2927,6 @@ frame_prepare_for_sniffer (struct frame_info *frame,
   return make_cleanup (frame_cleanup_after_sniffer, frame);
 }
 
-extern initialize_file_ftype _initialize_frame; /* -Wmissing-prototypes */
-
 static struct cmd_list_element *set_backtrace_cmdlist;
 static struct cmd_list_element *show_backtrace_cmdlist;
 

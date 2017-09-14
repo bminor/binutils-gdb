@@ -1216,9 +1216,6 @@ fbsd_nat_add_target (struct target_ops *t)
   add_target (t);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_fbsd_nat;
-
 void
 _initialize_fbsd_nat (void)
 {

@@ -314,11 +314,8 @@ struct quick_symbol_functions
 
 struct sym_probe_fns
 {
-  /* If non-NULL, return an array of probe objects.
-
-     The returned value does not have to be freed and it has lifetime of the
-     OBJFILE.  */
-  VEC (probe_p) *(*sym_get_probes) (struct objfile *);
+  /* If non-NULL, return a reference to vector of probe objects.  */
+  const std::vector<probe *> &(*sym_get_probes) (struct objfile *);
 };
 
 /* Structure to keep track of symbol reading functions for various

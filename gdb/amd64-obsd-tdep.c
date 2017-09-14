@@ -447,10 +447,6 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Unwind kernel trap frames correctly.  */
   frame_unwind_prepend_unwinder (gdbarch, &amd64obsd_trapframe_unwind);
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_amd64obsd_tdep (void);
 
 void
 _initialize_amd64obsd_tdep (void)

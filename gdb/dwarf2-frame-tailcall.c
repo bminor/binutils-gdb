@@ -464,9 +464,6 @@ const struct frame_unwind dwarf2_tailcall_frame_unwind =
   tailcall_frame_prev_arch
 };
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_tailcall_frame;
-
 void
 _initialize_tailcall_frame (void)
 {

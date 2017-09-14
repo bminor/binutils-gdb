@@ -158,10 +158,6 @@ static int display_number;
        B ? (TMP = B->next, 1): 0;		\
        B = TMP)
 
-/* Prototypes for exported functions.  */
-
-void _initialize_printcmd (void);
-
 /* Prototypes for local functions.  */
 
 static void do_one_display (struct display *);
@@ -2451,7 +2447,7 @@ ui_printf (const char *arg, struct ui_file *stream)
   if (s == 0)
     error_no_arg (_("format-control string and values to print"));
 
-  s = skip_spaces_const (s);
+  s = skip_spaces (s);
 
   /* A format string should follow, enveloped in double quotes.  */
   if (*s++ != '"')
@@ -2464,14 +2460,14 @@ ui_printf (const char *arg, struct ui_file *stream)
   if (*s++ != '"')
     error (_("Bad format string, non-terminated '\"'."));
   
-  s = skip_spaces_const (s);
+  s = skip_spaces (s);
 
   if (*s != ',' && *s != 0)
     error (_("Invalid argument syntax"));
 
   if (*s == ',')
     s++;
-  s = skip_spaces_const (s);
+  s = skip_spaces (s);
 
   {
     int nargs = 0;

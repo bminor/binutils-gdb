@@ -37,8 +37,6 @@
 #include "extension.h"
 #include "completer.h"
 
-extern void _initialize_typeprint (void);
-
 static void ptype_command (char *, int);
 
 static void whatis_command (char *, int);

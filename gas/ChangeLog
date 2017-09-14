@@ -1,3 +1,9 @@
+2017-09-14  Alan Modra  <amodra@gmail.com>
+
+	PR 22127
+	* write.c (resolve_reloc_expr_symbols): Don't segfault when
+	sec has been set to NULL.
+
 2017-09-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (NOTRACK_PREFIX): Removed.

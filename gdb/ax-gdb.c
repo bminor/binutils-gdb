@@ -2702,7 +2702,7 @@ maint_agent_printf_command (char *exp, int from_tty)
 
   cmdrest = exp;
 
-  cmdrest = skip_spaces_const (cmdrest);
+  cmdrest = skip_spaces (cmdrest);
 
   if (*cmdrest++ != '"')
     error (_("Must start with a format string."));
@@ -2718,14 +2718,14 @@ maint_agent_printf_command (char *exp, int from_tty)
   if (*cmdrest++ != '"')
     error (_("Bad format string, non-terminated '\"'."));
   
-  cmdrest = skip_spaces_const (cmdrest);
+  cmdrest = skip_spaces (cmdrest);
 
   if (*cmdrest != ',' && *cmdrest != 0)
     error (_("Invalid argument syntax"));
 
   if (*cmdrest == ',')
     cmdrest++;
-  cmdrest = skip_spaces_const (cmdrest);
+  cmdrest = skip_spaces (cmdrest);
 
   nargs = 0;
   while (*cmdrest != '\0')
@@ -2756,11 +2756,9 @@ maint_agent_printf_command (char *exp, int from_tty)
   do_cleanups (old_chain);
   dont_repeat ();
 }
-
 
 /* Initialization code.  */
 
-void _initialize_ax_gdb (void);
 void
 _initialize_ax_gdb (void)
 {

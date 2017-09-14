@@ -212,9 +212,6 @@ sh_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     }
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_sh_linux_tdep (void);
-
 void
 _initialize_sh_linux_tdep (void)
 {

@@ -3221,9 +3221,6 @@ amd64_target_description (uint64_t xcr0)
   return *tdesc;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_amd64_tdep (void);
-
 void
 _initialize_amd64_tdep (void)
 {

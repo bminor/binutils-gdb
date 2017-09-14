@@ -648,9 +648,6 @@ darwin_bfd_open (char *pathname)
 
 struct target_so_ops darwin_so_ops;
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_darwin_solib;
-
 void
 _initialize_darwin_solib (void)
 {

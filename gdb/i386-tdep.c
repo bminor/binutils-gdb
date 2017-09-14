@@ -8984,9 +8984,6 @@ show_mpx_cmd (char *args, int from_tty)
   cmd_show_list (mpx_show_cmdlist, from_tty, "");
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_i386_tdep (void);
-
 void
 _initialize_i386_tdep (void)
 {

@@ -246,10 +246,6 @@ sparc32obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   bsd_uthread_set_collect_uthread (gdbarch, sparc32obsd_collect_uthread);
 }
 
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc32obsd_tdep (void);
-
 void
 _initialize_sparc32obsd_tdep (void)
 {

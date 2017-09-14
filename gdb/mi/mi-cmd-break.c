@@ -64,26 +64,22 @@ enum bp_type
   };
 
 /* Arrange for all new breakpoints and catchpoints to be reported to
-   CURRENT_UIOUT until the cleanup returned by this function is run.
+   CURRENT_UIOUT until the destructor of the returned scoped_restore
+   is run.
 
    Note that MI output will be probably invalid if more than one
    breakpoint is created inside one MI command.  */
 
-struct cleanup *
+scoped_restore_tmpl<int>
 setup_breakpoint_reporting (void)
 {
-  struct cleanup *rev_flag;
-
   if (! mi_breakpoint_observers_installed)
     {
       observer_attach_breakpoint_created (breakpoint_notify);
       mi_breakpoint_observers_installed = 1;
     }
 
-  rev_flag = make_cleanup_restore_integer (&mi_can_breakpoint_notify);
-  mi_can_breakpoint_notify = 1;
-
-  return rev_flag;
+  return make_scoped_restore (&mi_can_breakpoint_notify, 1);
 }
 
 
@@ -301,7 +297,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
     }
 
   /* Now we have what we need, let's insert the breakpoint!  */
-  setup_breakpoint_reporting ();
+  scoped_restore restore_breakpoint_reporting = setup_breakpoint_reporting ();
 
   if (tracepoint)
     {

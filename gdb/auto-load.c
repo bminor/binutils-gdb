@@ -1567,8 +1567,6 @@ found and/or loaded."),
   return &retval;
 }
 
-void _initialize_auto_load (void);
-
 void
 _initialize_auto_load (void)
 {

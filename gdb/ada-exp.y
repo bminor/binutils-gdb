@@ -1480,9 +1480,6 @@ type_system_address (struct parser_state *par_state)
   return  type != NULL ? type : parse_type (par_state)->builtin_data_ptr;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_ada_exp;
-
 void
 _initialize_ada_exp (void)
 {

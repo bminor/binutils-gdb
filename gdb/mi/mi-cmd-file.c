@@ -153,10 +153,7 @@ mi_cmd_file_list_shared_libraries (const char *command, char **argv, int argc)
       if (pattern != NULL && !re_exec (so->so_name))
 	continue;
 
-      struct cleanup *tuple_clean_up
-        = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
       mi_output_solib_attribs (uiout, so);
-
-      do_cleanups (tuple_clean_up);
     }
 }

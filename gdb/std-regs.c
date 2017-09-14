@@ -89,8 +89,6 @@ value_of_builtin_frame_ps_reg (struct frame_info *frame, const void *baton)
   error (_("Standard register ``$ps'' is not available for this target"));
 }
 
-extern initialize_file_ftype _initialize_frame_reg; /* -Wmissing-prototypes */
-
 void
 _initialize_frame_reg (void)
 {

@@ -55,8 +55,6 @@
 #define N32_FLDI_SP \
 	N32_TYPE2 (LDC, 0, REG_SP, 0)
 
-extern void _initialize_nds32_tdep (void);
-
 /* Use an invalid address value as 'not available' marker.  */
 enum { REG_UNAVAIL = (CORE_ADDR) -1 };
 

@@ -2253,10 +2253,6 @@ const struct sparc_fpregmap sparc32_bsd_fpregmap =
   0 * 4,			/* %f0 */
   32 * 4,			/* %fsr */
 };
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc_tdep (void);
 
 void
 _initialize_sparc_tdep (void)

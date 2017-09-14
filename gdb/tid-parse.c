@@ -229,7 +229,7 @@ tid_range_parser::get_tid_or_range (int *inf_num,
 	{
 	  /* Setup the number range parser to return numbers in the
 	     whole [1,INT_MAX] range.  */
-	  m_range_parser.setup_range (1, INT_MAX, skip_spaces_const (p + 1));
+	  m_range_parser.setup_range (1, INT_MAX, skip_spaces (p + 1));
 	  m_state = STATE_STAR_RANGE;
 	}
       else

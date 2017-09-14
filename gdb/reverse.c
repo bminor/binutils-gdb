@@ -322,10 +322,6 @@ info_bookmarks_command (char *args, int from_tty)
     }
 }
 
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_reverse;
-
 void
 _initialize_reverse (void)
 {

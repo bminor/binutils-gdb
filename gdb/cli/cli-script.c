@@ -340,23 +340,36 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 
 /* Handle pre-post hooks.  */
 
-static void
-clear_hook_in_cleanup (void *data)
+class scoped_restore_hook_in
 {
-  struct cmd_list_element *c = (struct cmd_list_element *) data;
+public:
 
-  c->hook_in = 0; /* Allow hook to work again once it is complete.  */
-}
+  scoped_restore_hook_in (struct cmd_list_element *c)
+    : m_cmd (c)
+  {
+  }
+
+  ~scoped_restore_hook_in ()
+  {
+    m_cmd->hook_in = 0;
+  }
+
+  scoped_restore_hook_in (const scoped_restore_hook_in &) = delete;
+  scoped_restore_hook_in &operator= (const scoped_restore_hook_in &) = delete;
+
+private:
+
+  struct cmd_list_element *m_cmd;
+};
 
 void
 execute_cmd_pre_hook (struct cmd_list_element *c)
 {
   if ((c->hook_pre) && (!c->hook_in))
     {
-      struct cleanup *cleanups = make_cleanup (clear_hook_in_cleanup, c);
+      scoped_restore_hook_in restore_hook (c);
       c->hook_in = 1; /* Prevent recursive hooking.  */
       execute_user_command (c->hook_pre, (char *) 0);
-      do_cleanups (cleanups);
     }
 }
 
@@ -365,11 +378,9 @@ execute_cmd_post_hook (struct cmd_list_element *c)
 {
   if ((c->hook_post) && (!c->hook_in))
     {
-      struct cleanup *cleanups = make_cleanup (clear_hook_in_cleanup, c);
-
+      scoped_restore_hook_in restore_hook (c);
       c->hook_in = 1; /* Prevent recursive hooking.  */
       execute_user_command (c->hook_post, (char *) 0);
-      do_cleanups (cleanups);
     }
 }
 
@@ -888,7 +899,7 @@ line_first_arg (const char *p)
 {
   const char *first_arg = p + find_command_name_length (p);
 
-  return skip_spaces_const (first_arg); 
+  return skip_spaces (first_arg); 
 }
 
 /* Process one input line.  If the command is an "end", return such an
@@ -932,7 +943,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
       const char *cmd_name = p;
       struct cmd_list_element *cmd
 	= lookup_cmd_1 (&cmd_name, cmdlist, NULL, 1);
-      cmd_name = skip_spaces_const (cmd_name);
+      cmd_name = skip_spaces (cmd_name);
       bool inline_cmd = *cmd_name != '\0';
 
       /* If commands are parsed, we skip initial spaces.  Otherwise,
@@ -1158,12 +1169,6 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
   return ret;
 }
 
-static void
-restore_interp (void *arg)
-{
-  interp_set_temp (interp_name ((struct interp *)arg));
-}
-
 /* Read lines from the input stream and accumulate them in a chain of
    struct command_line's, which is then returned.  For input from a
    terminal, the special command "end" is used to mark the end of the
@@ -1203,12 +1208,10 @@ read_command_lines (char *prompt_arg, int from_tty, int parse_commands,
 				 validator, closure);
   else
     {
-      struct interp *old_interp = interp_set_temp (INTERP_CONSOLE);
-      struct cleanup *old_chain = make_cleanup (restore_interp, old_interp);
+      scoped_restore_interp interp_restorer (INTERP_CONSOLE);
 
       head = read_command_lines_1 (read_next_line, parse_commands,
 				   validator, closure);
-      do_cleanups (old_chain);
     }
 
   if (from_tty && input_interactive_p (current_ui)
@@ -1617,10 +1620,6 @@ show_user_1 (struct cmd_list_element *c, const char *prefix, const char *name,
   print_command_lines (current_uiout, cmdlines, 1);
   fputs_filtered ("\n", stream);
 }
-
-
-
-initialize_file_ftype _initialize_cli_script;
 
 void
 _initialize_cli_script (void)

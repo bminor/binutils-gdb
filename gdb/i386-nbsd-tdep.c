@@ -316,9 +316,6 @@ i386nbsdelf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->struct_return = pcc_struct_return;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_i386nbsd_tdep;
-
 void
 _initialize_i386nbsd_tdep (void)
 {

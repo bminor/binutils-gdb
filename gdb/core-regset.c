@@ -111,9 +111,6 @@ static struct core_fns regset_core_fns =
   NULL					/* next */
 };
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_core_regset (void);
-
 void
 _initialize_core_regset (void)
 {

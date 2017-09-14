@@ -93,8 +93,9 @@ cp_scan_for_anonymous_namespaces (const struct symbol *const symbol,
 		 anonymous namespace.  So add symbols in it to the
 		 namespace given by the previous component if there is
 		 one, or to the global namespace if there isn't.  */
+	      std::vector<const char *> excludes;
 	      add_using_directive (&local_using_directives,
-				   dest, src, NULL, NULL, NULL, 1,
+				   dest, src, NULL, NULL, excludes, 1,
 				   &objfile->objfile_obstack);
 	    }
 	  /* The "+ 2" is for the "::".  */
@@ -1081,9 +1082,6 @@ maintenance_cplus_namespace (char *args, int from_tty)
 {
   printf_unfiltered (_("The `maint namespace' command was removed.\n"));
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_cp_namespace;
 
 void
 _initialize_cp_namespace (void)

@@ -64,7 +64,7 @@ struct probe_ops
 
     /* Function that should fill PROBES with known probes from OBJFILE.  */
 
-    void (*get_probes) (VEC (probe_p) **probes, struct objfile *objfile);
+    void (*get_probes) (std::vector<probe *> *probes, struct objfile *objfile);
 
     /* Compute the probe's relocated address.  OBJFILE is the objfile
        in which the probe originated.  */
@@ -160,9 +160,7 @@ struct probe_ops
 
 /* Definition of a vector of probe_ops.  */
 
-typedef const struct probe_ops *probe_ops_cp;
-DEF_VEC_P (probe_ops_cp);
-extern VEC (probe_ops_cp) *all_probe_ops;
+extern std::vector<const probe_ops *> all_probe_ops;
 
 /* The probe_ops associated with the generic probe.  */
 
@@ -214,15 +212,26 @@ struct probe
    their point of use.  */
 
 struct bound_probe
-  {
-    /* The probe.  */
+{
+  /* Create an empty bound_probe object.  */
 
-    struct probe *probe;
+  bound_probe ()
+  {}
 
-    /* The objfile in which the probe originated.  */
+  /* Create and initialize a bound_probe object using PROBE and OBJFILE.  */
 
-    struct objfile *objfile;
-  };
+  bound_probe (struct probe *probe_, struct objfile *objfile_)
+  : probe (probe_), objfile (objfile_)
+  {}
+
+  /* The probe.  */
+
+  struct probe *probe = NULL;
+
+  /* The objfile in which the probe originated.  */
+
+  struct objfile *objfile = NULL;
+};
 
 /* A helper for linespec that decodes a probe specification.  It
    returns a std::vector<symtab_and_line> object and updates LOC or

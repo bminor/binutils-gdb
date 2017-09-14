@@ -1,3 +1,787 @@
+2017-09-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2expr.h (dwarf_expr_context) <stack_empty_p>: Change
+	return type to bool.
+	* dwarf2expr.c (dwarf_expr_context::stack_empty_p): Likewise.
+
+2017-09-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2expr.h (dwarf_expr_piece) <v.mem.in_stack_memory>:
+	Change type to bool.
+	(dwarf_stack_value) <in_stack_memory>: Likewise.
+	(dwarf_expr_context) <push_address>: Change parameter type to
+	bool.
+	<fetch_in_stack_memory>: Change return type to bool.
+	<push>: Change parameter type to bool.
+	* dwarf2expr.c (dwarf_expr_context::push): Change parameter type
+	to bool.
+	(dwarf_expr_context::push_address): Likewise.
+	(dwarf_expr_context::fetch_in_stack_memory): Change return type
+	to bool.
+	(dwarf_expr_context::execute_stack_op): Adjust.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Adjust.
+
+2017-09-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2expr.h (struct dwarf_expr_piece): Move up.
+	(struct dwarf_expr_context) <n_pieces>: Remove.
+	<pieces>: Change type to std::vector.
+	* dwarf2expr.c (dwarf_expr_context::dwarf_expr_context): Adjust.
+	(dwarf_expr_context::~dwarf_expr_context): Don't manually free
+	pieces.
+	(dwarf_expr_context::add_piece): Adjust.
+	* dwarf2loc.c (struct piece_closure): Initialize fields.
+	<n_pieces>: Remove.
+	<pieces>: Change type to std::vector.
+	(allocate_piece_closure): Adjust, change parameter to
+	std::vector rvalue and std::move it to piece_closure.
+	(rw_pieced_value): Adjust.
+	(check_pieced_synthetic_pointer): Adjust.
+	(indirect_synthetic_pointer): Adjust.
+	(coerce_pieced_ref): Adjust.
+	(free_pieced_value_closure):  Adjust.  Use delete to free
+	piece_closure.
+	(dwarf2_evaluate_loc_desc_full): Adjust.  std::move ctx.pieces
+	to allocate_piece_closure.
+	(dwarf2_loc_desc_get_symbol_read_needs): Adjust.
+
+2017-09-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* probe.h (probe_ops_cp): Remove typedef.
+	(DEF_VEC_P (probe_ops_cp)): Remove.
+	(all_probe_ops): Change type to std::vector.
+	* probe.c (info_probes_for_ops): Adjust to vector change.
+	(probe_linespec_to_ops): Likewise.
+	(all_probe_ops): Change type to std::vector.
+	(_initialize_probe): Adjust to vector change.
+	* dtrace-probe.c (_initialize_dtrace_probe): Likewise.
+	* elfread.c (elf_get_probes): Likewise.
+	* stap-probe.c (_initialize_stap_probe): Likewise.
+
+2017-09-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* probe.h (struct bound_probe): Define constructors.
+	* probe.c (bound_probe_s): Remove typedef.
+	(DEF_VEC_O (bound_probe_s)): Remove VEC.
+	(collect_probes): Change return type to std::vector, remove
+	cleanup.
+	(compare_probes): Return bool, change parameter type.  Change
+	semantic to "less than".
+	(gen_ui_out_table_header_info): Change parameter to std::vector
+	and update.
+	(exists_probe_with_pops): Likewise.
+	(info_probes_for_ops): Update to std::vector change.
+	(enable_probes_command): Likewise.
+	(disable_probes_command): Likewise.
+
+2017-09-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* probe.h (struct probe_ops) <get_probes>: Change parameter from
+	vec to std::vector.
+	* probe.c (parse_probes_in_pspace): Update.
+	(find_probes_in_objfile): Update.
+	(find_probe_by_pc): Update.
+	(collect_probes): Update.
+	(probe_any_get_probes): Update.
+	* symfile.h (struct sym_probe_fns) <sym_get_probes> Change
+	return type to reference to std::vector.
+	* dtrace-probe.c (dtrace_process_dof_probe): Change parameter to
+	std::vector and update.
+	(dtrace_process_dof): Likewise.
+	(dtrace_get_probes): Likewise.
+	* elfread.c (elf_get_probes): Change return type to std::vector,
+	store an std::vector in bfd_data.
+	(probe_key_free): Update to std::vector.
+	* stap-probe.c (handle_stap_probe): Change parameter to
+	std::vector and update.
+	(stap_get_probes): Likewise.
+	* symfile-debug.c (debug_sym_get_probes): Change return type to
+	std::vector and update.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* breakpoint.c (program_breakpoint_here_p): Update.
+	* target.c (make_scoped_restore_show_memory_breakpoints): Rename
+	from make_show_memory_breakpoints_cleanup.  Return a
+	scoped_restore_tmpl<int>.
+	(restore_show_memory_breakpoints): Remove.
+	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint): Update.
+	* mem-break.c (memory_validate_breakpoint): Update.
+	* ia64-tdep.c (ia64_memory_insert_breakpoint): Update.
+	(ia64_memory_remove_breakpoint): Update.
+	(ia64_breakpoint_from_pc): Update.
+	* target.h (make_scoped_restore_show_memory_breakpoints): Rename
+	from make_show_memory_breakpoints_cleanup.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* d-namespace.c (d_lookup_symbol): Use std::string.
+	(find_symbol_in_baseclass): Likewise.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* ctf.c (ctf_start): Use std::string.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* ada-lang.c (is_known_support_routine): Update.
+	(ada_unhandled_exception_name_addr_from_raise): Update.
+	* guile/scm-frame.c (gdbscm_frame_name): Update.
+	* python/py-frame.c (frapy_name): Update.
+	(frapy_function): Update.
+	* stack.h (find_frame_funname): Update.
+	* stack.c (find_frame_funname): Return unique_xmalloc_ptr.
+	(print_frame): Update.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* findcmd.c (put_bits): Take a gdb::byte_vector.
+	(parse_find_args): Return gdb::byte_vector.  "args" now const.
+	Remove "pattern_bufp" and "pattern_lenp" parameters.  Remove
+	cleanups.
+	(find_command): Update.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-script.c (class scoped_restore_hook_in): New.
+	(clear_hook_in_cleanup): Remove.
+	(execute_cmd_pre_hook, execute_cmd_post_hook): Use
+	scoped_restore_hook_in.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-script.c (restore_interp): Remove.
+	(read_command_lines): Use scoped_restore_interp.
+	* interps.c (scoped_restore_interp::set_temp): Rename from
+	interp_set_temp.
+	* interps.h (class scoped_restore_interp): New.
+	(interp_set_temp): Remove.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-cmd-catch.c (mi_cmd_catch_assert)
+	(mi_cmd_catch_exception, mi_catch_load_unload): Update.
+	* mi/mi-cmd-break.c (setup_breakpoint_reporting): Return a
+	scoped_restore.
+	(mi_cmd_break_insert_1): Update.
+	* mi/mi-cmd-break.h (setup_breakpoint_reporting): Return a
+	scoped_restore.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* demangle.c (demangle_command): Update.
+	* breakpoint.c (disable_command): Update.
+	(enable_command): Update.
+	(find_location_by_number): Make "number" const.  Use
+	get_number_trailer.
+	* cli/cli-utils.c (extract_arg): Return std::string.
+	* probe.c (parse_probe_linespec): Update.  Change types.
+	(collect_probes): Take string arguments.
+	(parse_probe_linespec): Likewise.
+	(info_probes_for_ops): Update.
+	(enable_probes_command): Update.
+	(disable_probes_command): Update.
+	* break-catch-sig.c (catch_signal_split_args): Update.
+	* mi/mi-parse.c (mi_parse): Update.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* language.h (language_enum): Make argument const.
+	* language.c (language_enum): Make argument const.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* common/common-utils.h (skip_to_space): Remove macro, redeclare
+	as function.
+	(skip_to_space): Rename from skip_to_space_const.
+	* common/common-utils.c (skip_to_space): New function.
+	(skip_to_space): Rename from skip_to_space_const.
+	* cli/cli-utils.h (get_number): Rename from get_number_const.
+	(extract_arg): Rename from extract_arg_const.
+	* cli/cli-utils.c (get_number): Rename from get_number_const.
+	(extract_arg): Rename from extract_arg_const.
+	(number_or_range_parser::get_number): Use ::get_number.
+	* aarch64-linux-tdep.c, ada-lang.c, arm-linux-tdep.c, ax-gdb.c,
+	break-catch-throw.c, breakpoint.c, cli/cli-cmds.c, cli/cli-dump.c,
+	cli/cli-script.c, cli/cli-setshow.c, compile/compile.c,
+	completer.c, demangle.c, disasm.c, findcmd.c, linespec.c,
+	linux-tdep.c, linux-thread-db.c, location.c, mi/mi-parse.c,
+	minsyms.c, nat/linux-procfs.c, printcmd.c, probe.c,
+	python/py-breakpoint.c, record.c, rust-exp.y, serial.c, stack.c,
+	stap-probe.c, tid-parse.c, tracepoint.c: Update all callers.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (do_start_initialization): Use
+	py-event-types.def to initialize types.
+	Define all object type structures.
+	* python/python-internal.h: Don't declare event initialization
+	functions.
+	* python/py-threadevent.c (thread_event_object_type): Don't
+	define.
+	* python/py-stopevent.c (stop_event_object_type): Don't define.
+	* python/py-signalevent.c (signal_event_object_type): Don't
+	declare or define.
+	* python/py-newobjfileevent.c (new_objfile_event_object_type)
+	(clear_objfiles_event_object_type): Don't declare or define.
+	* python/py-infevents.c (inferior_call_pre_event_object_type)
+	(inferior_call_post_event_object_type)
+	(register_changed_event_object_type)
+	(memory_changed_event_object_type): Don't declare or define.
+	* python/py-inferior.c (new_thread_event_object_type)
+	(new_inferior_event_object_type)
+	(inferior_deleted_event_object_type): Don't declare or define.
+	* python/py-exitedevent.c (exited_event_object_type): Don't
+	declare or define.
+	* python/py-evts.c (gdbpy_initialize_py_events): Use
+	py-all-events.def.
+	* python/py-events.h (thread_event_object_type): Don't declare.
+	(events_object): Use py-all-events.def.
+	* python/py-event.h (GDBPY_NEW_EVENT_TYPE): Remove.  Use
+	py-event-types.def.
+	* python/py-event-types.def: New file.
+	* python/py-continueevent.c (create_continue_event_object): Don't
+	declare or define.
+	* python/py-bpevent.c (breakpoint_event_object_type): Don't
+	declare or define.
+	* python/py-all-events.def: New file.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* python/py-threadevent.c (create_thread_event_object): Return
+	gdbpy_ref.
+	* python/py-stopevent.h (create_stop_event_object)
+	(create_breakpoint_event_object, create_signal_event_object):
+	Update.
+	* python/py-stopevent.c (create_stop_event_object): Return
+	gdbpy_ref.
+	(emit_stop_event): Update.
+	* python/py-signalevent.c (create_signal_event_object): Return
+	gdbpy_ref.
+	* python/py-infevents.c (create_inferior_call_event_object):
+	Update.
+	* python/py-event.h (create_event_object)
+	(create_thread_event_object): Update.
+	* python/py-event.c (create_event_object): Return gdbpy_ref.
+	* python/py-continueevent.c: Return gdbpy_ref.
+	* python/py-bpevent.c (create_breakpoint_event_object): Return
+	gdbpy_ref.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	PR python/15622:
+	* NEWS: Add entry.
+	* python/python.c (do_start_initialization): Initialize new event
+	types.
+	* python/python-internal.h (gdbpy_initialize_new_inferior_event)
+	(gdbpy_initialize_inferior_deleted_event)
+	(gdbpy_initialize_new_thread_event): Declare.
+	* python/py-threadevent.c (create_thread_event_object): Add option
+	"thread" parameter.
+	* python/py-inferior.c (new_thread_event_object_type)
+	(new_inferior_event_object_type)
+	(inferior_deleted_event_object_type): Declare.
+	(python_new_inferior, python_inferior_deleted): New functions.
+	(add_thread_object): Emit new_thread event.
+	(gdbpy_initialize_inferior): Attach new functions to corresponding
+	observers.
+	(new_thread, new_inferior, inferior_deleted): Define new event
+	types.
+	* python/py-evts.c (gdbpy_initialize_py_events): Add new
+	registries.
+	* python/py-events.h (events_object) <new_inferior,
+	inferior_deleted, new_thread>: New fields.
+	* python/py-event.h (create_thread_event_breakpoint): Add optional
+	"thread" parameter.
+
+2017-09-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* utils.c (abort_with_message): Don't compare gdb_stderr to NULL,
+	check current_ui instead.
+	(internal_vproblem): Likewise.
+
+2017-09-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* thread.c (print_thread_info_1): Remove unnecessary calls to
+	uiout->is_mi_like_p.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
+	* namespace.h (add_using_directive): Update.
+	* namespace.c (add_using_directive): Change type of excludes to
+	std::vector.
+	* dwarf2read.c (read_import_statement): Use std::vector.
+	(read_namespace): Update.
+	* cp-namespace.c (cp_scan_for_anonymous_namespaces): Update.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
+	* linespec.c (create_sals_line_offset): Use gdb::def_vector.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
+	* p-valprint.c (pascal_object_print_value): Use gdb::byte_vector.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
+	* stack.c (func_command): Use gdb::def_vector.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-cmd-var.c (mi_cmd_var_list_children): Use gdb::optional,
+	ui_out_emit_list, ui_out_emit_tuple.
+	(mi_cmd_var_update): Likewise.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-interp.c (mi_user_selected_context_changed): Use
+	ui_out_redirect_pop.
+	* guile/scm-ports.c (ioscm_with_output_to_port_worker): Use
+	ui_out_redirect_pop.
+	* utils.c (do_ui_out_redirect_pop)
+	(make_cleanup_ui_out_redirect_pop): Remove.
+	* top.c (execute_command_to_string): Use ui_out_redirect_pop.
+	* utils.h (make_cleanup_ui_out_redirect_pop): Remove.
+	* ui-out.h (ui_out_redirect_pop): New class.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-main.c (output_cores): Use ui_out_emit_list.
+	(list_available_thread_groups, mi_cmd_list_thread_groups)
+	(mi_cmd_data_list_changed_registers, mi_cmd_data_read_memory)
+	(mi_cmd_data_read_memory_bytes, mi_cmd_trace_frame_collected):
+	Likewise.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
+	* disasm.c (gdb_pretty_print_disassembler::pretty_print_insn): Use
+	ui_out_emit_tuple.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
+	* target.c (flash_erase_command): Use ui_out_emit_tuple.
+	* stack.c (print_frame): Use ui_out_emit_tuple.
+	* spu-tdep.c (info_spu_event_command): Use ui_out_emit_tuple.
+	(info_spu_mailbox_command, info_spu_dma_command)
+	(info_spu_proxydma_command): Likewise.
+	* mi/mi-main.c (mi_cmd_trace_frame_collected): Use
+	ui_out_emit_tuple, gdb::byte_vector, bin2hex.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_shared_libraries): Use
+	ui_out_emit_tuple.
+	* breakpoint.c (print_it_watchpoint): Use ui_out_emit_tuple.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
+	* ui-out.h (make_cleanup_ui_out_table_begin_end): Remove.
+	(class ui_out_emit_table): Update comment.
+	* ui-out.c (do_cleanup_table_end)
+	(make_cleanup_ui_out_table_begin_end): Remove.
+	* spu-tdep.c (info_spu_mailbox_list): Use ui_out_emit_table.
+	(info_spu_dma_cmdlist): Likewise.
+	* probe.c (info_probes_for_ops): Use ui_out_emit_table.
+	* darwin-nat-info.c (darwin_debug_regions_recurse): Use
+	ui_out_emit_table.
+
+2017-09-09  Tom Tromey  <tom@tromey.com>
+
+	* thread.c (print_thread_info_1): Use ui_out_emit_table,
+	ui_out_emit_list, gdb::optional.
+
+2017-09-09  John Baldwin  <jhb@FreeBSD.org>
+
+	* aarch64-linux-nat.c: Remove _initialize_aarch64_linux_nat
+	prototype.
+	* aarch64-linux-tdep.c: Remove _initialize_aarch64_linux_tdep
+	prototype.
+	* aarch64-newlib-tdep.c: Remove _initialize_aarch64_newlib_tdep
+	prototype.
+	* aarch64-tdep.c: Remove _initialize_aarch64_tdep prototype.
+	* ada-exp.y: Remove _initialize_ada_exp prototype.
+	* ada-lang.c: Remove _initialize_ada_language prototype.
+	* ada-tasks.c: Remove _initialize_tasks prototype.
+	* addrmap.c: Remove _initialize_addrmap prototype.
+	* agent.c: Remove _initialize_agent prototype.
+	* aix-thread.c: Remove _initialize_aix_thread prototype.
+	* alpha-bsd-nat.c: Remove _initialize_alphabsd_nat prototype.
+	* alpha-linux-nat.c: Remove _initialize_alpha_linux_nat prototype.
+	* alpha-linux-tdep.c: Remove _initialize_alpha_linux_tdep
+	prototype.
+	* alpha-nbsd-tdep.c: Remove _initialize_alphanbsd_tdep prototype.
+	* alpha-obsd-tdep.c: Remove _initialize_alphaobsd_tdep prototype.
+	* alpha-tdep.c: Remove _initialize_alpha_tdep prototype.
+	* amd64-darwin-tdep.c: Remove _initialize_amd64_darwin_tdep
+	prototype.
+	* amd64-dicos-tdep.c: Remove _initialize_amd64_dicos_tdep
+	prototype.
+	* amd64-fbsd-nat.c: Remove _initialize_amd64fbsd_nat prototype.
+	* amd64-fbsd-tdep.c: Remove _initialize_amd64fbsd_tdep prototype.
+	* amd64-linux-nat.c: Remove _initialize_amd64_linux_nat prototype.
+	* amd64-linux-tdep.c: Remove _initialize_amd64_linux_tdep
+	prototype.
+	* amd64-nbsd-nat.c: Remove _initialize_amd64nbsd_nat prototype.
+	* amd64-nbsd-tdep.c: Remove _initialize_amd64nbsd_tdep prototype.
+	* amd64-obsd-nat.c: Remove _initialize_amd64obsd_nat prototype.
+	* amd64-obsd-tdep.c: Remove _initialize_amd64obsd_tdep prototype.
+	* amd64-sol2-tdep.c: Remove _initialize_amd64_sol2_tdep prototype.
+	* amd64-tdep.c: Remove _initialize_amd64_tdep prototype.
+	* amd64-windows-nat.c: Remove _initialize_amd64_windows_nat
+	prototype.
+	* amd64-windows-tdep.c: Remove _initialize_amd64_windows_tdep
+	prototype.
+	* annotate.c: Remove _initialize_annotate prototype.
+	* arc-newlib-tdep.c: Remove _initialize_arc_newlib_tdep prototype.
+	* arc-tdep.c: Remove _initialize_arc_tdep prototype.
+	* arch-utils.c: Remove _initialize_gdbarch_utils prototype.
+	* arm-linux-nat.c: Remove _initialize_arm_linux_nat prototype.
+	* arm-linux-tdep.c: Remove _initialize_arm_linux_tdep prototype.
+	* arm-nbsd-tdep.c: Remove _initialize_arm_netbsd_tdep prototype.
+	* arm-obsd-tdep.c: Remove _initialize_armobsd_tdep prototype.
+	* arm-symbian-tdep.c: Remove _initialize_arm_symbian_tdep
+	prototype.
+	* arm-tdep.c: Remove _initialize_arm_tdep prototype.
+	* arm-wince-tdep.c: Remove _initialize_arm_wince_tdep prototype.
+	* auto-load.c: Remove _initialize_auto_load prototype.
+	* auxv.c: Remove _initialize_auxv prototype.
+	* avr-tdep.c: Remove _initialize_avr_tdep prototype.
+	* ax-gdb.c: Remove _initialize_ax_gdb prototype.
+	* bfin-linux-tdep.c: Remove _initialize_bfin_linux_tdep prototype.
+	* bfin-tdep.c: Remove _initialize_bfin_tdep prototype.
+	* break-catch-sig.c: Remove _initialize_break_catch_sig prototype.
+	* break-catch-syscall.c: Remove _initialize_break_catch_syscall
+	prototype.
+	* break-catch-throw.c: Remove _initialize_break_catch_throw
+	prototype.
+	* breakpoint.c: Remove _initialize_breakpoint prototype.
+	* bsd-uthread.c: Remove _initialize_bsd_uthread prototype.
+	* btrace.c: Remove _initialize_btrace prototype.
+	* charset.c: Remove _initialize_charset prototype.
+	* cli/cli-cmds.c: Remove _initialize_cli_cmds prototype.
+	* cli/cli-dump.c: Remove _initialize_cli_dump prototype.
+	* cli/cli-interp.c: Remove _initialize_cli_interp prototype.
+	* cli/cli-logging.c: Remove _initialize_cli_logging prototype.
+	* cli/cli-script.c: Remove _initialize_cli_script prototype.
+	* coff-pe-read.c: Remove _initialize_coff_pe_read prototype.
+	* coffread.c: Remove _initialize_coffread prototype.
+	* compile/compile.c: Remove _initialize_compile prototype.
+	* complaints.c: Remove _initialize_complaints prototype.
+	* completer.c: Remove _initialize_completer prototype.
+	* copying.awk: Remove _initialize_copying prototype.
+	* copying.c: Regenerate.
+	* core-regset.c: Remove _initialize_core_regset prototype.
+	* corefile.c: Remove _initialize_core prototype.
+	* corelow.c: Remove _initialize_corelow prototype.
+	* cp-abi.c: Remove _initialize_cp_abi prototype.
+	* cp-namespace.c: Remove _initialize_cp_namespace prototype.
+	* cp-support.c: Remove _initialize_cp_support prototype.
+	* cp-valprint.c: Remove _initialize_cp_valprint prototype.
+	* cris-linux-tdep.c: Remove _initialize_cris_linux_tdep prototype.
+	* cris-tdep.c: Remove _initialize_cris_tdep prototype.
+	* ctf.c: Remove _initialize_ctf prototype.
+	* d-lang.c: Remove _initialize_d_language prototype.
+	* darwin-nat-info.c: Remove _initialize_darwin_info_commands
+	prototype.
+	* darwin-nat.c: Remove _initialize_darwin_inferior prototype.
+	* dbxread.c: Remove _initialize_dbxread prototype.
+	* dcache.c: Remove _initialize_dcache prototype.
+	* demangle.c: Remove _initialize_demangler prototype.
+	* disasm-selftests.c: Remove _initialize_disasm_selftests
+	prototype.
+	* disasm.c: Remove _initialize_disasm prototype.
+	* dtrace-probe.c: Remove _initialize_dtrace_probe prototype.
+	* dummy-frame.c: Remove _initialize_dummy_frame prototype.
+	* dwarf2-frame-tailcall.c: Remove _initialize_tailcall_frame
+	prototype.
+	* dwarf2-frame.c: Remove _initialize_dwarf2_frame prototype.
+	* dwarf2expr.c: Remove _initialize_dwarf2expr prototype.
+	* dwarf2loc.c: Remove _initialize_dwarf2loc prototype.
+	* dwarf2read.c: Remove _initialize_dwarf2_read prototype.
+	* elfread.c: Remove _initialize_elfread prototype.
+	* exec.c: Remove _initialize_exec prototype.
+	* extension.c: Remove _initialize_extension prototype.
+	* f-lang.c: Remove _initialize_f_language prototype.
+	* f-valprint.c: Remove _initialize_f_valprint prototype.
+	* fbsd-nat.c: Remove _initialize_fbsd_nat prototype.
+	* fbsd-tdep.c: Remove _initialize_fbsd_tdep prototype.
+	* filesystem.c: Remove _initialize_filesystem prototype.
+	* findcmd.c: Remove _initialize_mem_search prototype.
+	* fork-child.c: Remove _initialize_fork_child prototype.
+	* frame-base.c: Remove _initialize_frame_base prototype.
+	* frame-unwind.c: Remove _initialize_frame_unwind prototype.
+	* frame.c: Remove _initialize_frame prototype.
+	* frv-linux-tdep.c: Remove _initialize_frv_linux_tdep prototype.
+	* frv-tdep.c: Remove _initialize_frv_tdep prototype.
+	* ft32-tdep.c: Remove _initialize_ft32_tdep prototype.
+	* gcore.c: Remove _initialize_gcore prototype.
+	* gdb_bfd.c: Remove _initialize_gdb_bfd prototype.
+	* gdbarch.c: Regenerate.
+	* gdbarch.sh: Remove _initialize_gdbarch prototype.
+	* gdbtypes.c: Remove _initialize_gdbtypes prototype.
+	* gnu-nat.c: Remove _initialize_gnu_nat prototype.
+	* gnu-v2-abi.c: Remove _initialize_gnu_v2_abi prototype.
+	* gnu-v3-abi.c: Remove _initialize_gnu_v3_abi prototype.
+	* go-lang.c: Remove _initialize_go_language prototype.
+	* go32-nat.c: Remove _initialize_go32_nat prototype.
+	* guile/guile.c: Remove _initialize_guile prototype.
+	* h8300-tdep.c: Remove _initialize_h8300_tdep prototype.
+	* hppa-linux-nat.c: Remove _initialize_hppa_linux_nat prototype.
+	* hppa-linux-tdep.c: Remove _initialize_hppa_linux_tdep prototype.
+	* hppa-nbsd-nat.c: Remove _initialize_hppanbsd_nat prototype.
+	* hppa-nbsd-tdep.c: Remove _initialize_hppanbsd_tdep prototype.
+	* hppa-obsd-nat.c: Remove _initialize_hppaobsd_nat prototype.
+	* hppa-obsd-tdep.c: Remove _initialize_hppaobsd_tdep prototype.
+	* hppa-tdep.c: Remove _initialize_hppa_tdep prototype.
+	* i386-bsd-nat.c: Remove _initialize_i386bsd_nat prototype.
+	* i386-cygwin-tdep.c: Remove _initialize_i386_cygwin_tdep
+	prototype.
+	* i386-darwin-tdep.c: Remove _initialize_i386_darwin_tdep
+	prototype.
+	* i386-dicos-tdep.c: Remove _initialize_i386_dicos_tdep prototype.
+	* i386-fbsd-nat.c: Remove _initialize_i386fbsd_nat prototype.
+	* i386-fbsd-tdep.c: Remove _initialize_i386fbsd_tdep prototype.
+	* i386-gnu-nat.c: Remove _initialize_i386gnu_nat prototype.
+	* i386-gnu-tdep.c: Remove _initialize_i386gnu_tdep prototype.
+	* i386-linux-nat.c: Remove _initialize_i386_linux_nat prototype.
+	* i386-linux-tdep.c: Remove _initialize_i386_linux_tdep prototype.
+	* i386-nbsd-nat.c: Remove _initialize_i386nbsd_nat prototype.
+	* i386-nbsd-tdep.c: Remove _initialize_i386nbsd_tdep prototype.
+	* i386-nto-tdep.c: Remove _initialize_i386nto_tdep prototype.
+	* i386-obsd-nat.c: Remove _initialize_i386obsd_nat prototype.
+	* i386-obsd-tdep.c: Remove _initialize_i386obsd_tdep prototype.
+	* i386-sol2-nat.c: Remove _initialize_amd64_sol2_nat prototype.
+	* i386-sol2-tdep.c: Remove _initialize_amd64_sol2_tdep prototype.
+	* i386-tdep.c: Remove _initialize_i386_tdep prototype.
+	* i386-windows-nat.c: Remove _initialize_i386_windows_nat
+	prototype.
+	* ia64-libunwind-tdep.c: Remove _initialize_libunwind_frame
+	prototype.
+	* ia64-linux-nat.c: Remove _initialize_ia64_linux_nat prototype.
+	* ia64-linux-tdep.c: Remove _initialize_ia64_linux_tdep prototype.
+	* ia64-tdep.c: Remove _initialize_ia64_tdep prototype.
+	* ia64-vms-tdep.c: Remove _initialize_ia64_vms_tdep prototype.
+	* infcall.c: Remove _initialize_infcall prototype.
+	* infcmd.c: Remove _initialize_infcmd prototype.
+	* inferior.c: Remove _initialize_inferiors prototype.
+	* inflow.c: Remove _initialize_inflow prototype.
+	* infrun.c: Remove _initialize_infrun prototype.
+	* interps.c: Remove _initialize_interpreter prototype.
+	* iq2000-tdep.c: Remove _initialize_iq2000_tdep prototype.
+	* jit.c: Remove _initialize_jit prototype.
+	* language.c: Remove _initialize_language prototype.
+	* linux-fork.c: Remove _initialize_linux_fork prototype.
+	* linux-nat.c: Remove _initialize_linux_nat prototype.
+	* linux-tdep.c: Remove _initialize_linux_tdep prototype.
+	* linux-thread-db.c: Remove _initialize_thread_db prototype.
+	* lm32-tdep.c: Remove _initialize_lm32_tdep prototype.
+	* m2-lang.c: Remove _initialize_m2_language prototype.
+	* m32c-tdep.c: Remove _initialize_m32c_tdep prototype.
+	* m32r-linux-nat.c: Remove _initialize_m32r_linux_nat prototype.
+	* m32r-linux-tdep.c: Remove _initialize_m32r_linux_tdep prototype.
+	* m32r-tdep.c: Remove _initialize_m32r_tdep prototype.
+	* m68hc11-tdep.c: Remove _initialize_m68hc11_tdep prototype.
+	* m68k-bsd-nat.c: Remove _initialize_m68kbsd_nat prototype.
+	* m68k-bsd-tdep.c: Remove _initialize_m68kbsd_tdep prototype.
+	* m68k-linux-nat.c: Remove _initialize_m68k_linux_tdep prototype.
+	* m68k-linux-tdep.c: Remove _initialize_m68k_linux_tdep prototype.
+	* m68k-tdep.c: Remove _initialize_m68k_tdep prototype.
+	* m88k-bsd-nat.c: Remove _initialize_m68kbsd_nat prototype.
+	* m88k-tdep.c: Remove _initialize_m68kbsd_tdep prototype.
+	* machoread.c: Remove _initialize_machoread prototype.
+	* macrocmd.c: Remove _initialize_macrocmd prototype.
+	* macroscope.c: Remove _initialize_macroscope prototype.
+	* maint.c: Remove _initialize_maint_cmds prototype.
+	* mdebugread.c: Remove _initialize_mdebugread prototype.
+	* memattr.c: Remove _initialize_mem prototype.
+	* mep-tdep.c: Remove _initialize_mep_tdep prototype.
+	* mi/mi-cmd-env.c: Remove _initialize_mi_cmd_env prototype.
+	* mi/mi-cmds.c: Remove _initialize_mi_cmds prototype.
+	* mi/mi-interp.c: Remove _initialize_mi_interp prototype.
+	* mi/mi-main.c: Remove _initialize_mi_main prototype.
+	* microblaze-linux-tdep.c: Remove
+	_initialize_microblaze_linux_tdep prototype.
+	* microblaze-tdep.c: Remove _initialize_microblaze_tdep prototype.
+	* mips-fbsd-nat.c: Remove _initialize_mips_fbsd_nat prototype.
+	* mips-fbsd-tdep.c: Remove _initialize_mips_fbsd_tdep prototype.
+	* mips-linux-nat.c: Remove _initialize_mips_linux_nat prototype.
+	* mips-linux-tdep.c: Remove _initialize_mips_linux_tdep prototype.
+	* mips-nbsd-nat.c: Remove _initialize_mipsnbsd_nat prototype.
+	* mips-nbsd-tdep.c: Remove _initialize_mipsnbsd_tdep prototype.
+	* mips-sde-tdep.c: Remove _initialize_mips_sde_tdep prototype.
+	* mips-tdep.c: Remove _initialize_mips_tdep prototype.
+	* mips64-obsd-nat.c: Remove _initialize_mips64obsd_nat prototype.
+	* mips64-obsd-tdep.c: Remove _initialize_mips64obsd_tdep
+	prototype.
+	* mipsread.c: Remove _initialize_mipsread prototype.
+	* mn10300-linux-tdep.c: Remove _initialize_mn10300_linux_tdep
+	prototype.
+	* mn10300-tdep.c: Remove _initialize_mn10300_tdep prototype.
+	* moxie-tdep.c: Remove _initialize_moxie_tdep prototype.
+	* msp430-tdep.c: Remove _initialize_msp430_tdep prototype.
+	* mt-tdep.c: Remove _initialize_mt_tdep prototype.
+	* nds32-tdep.c: Remove _initialize_nds32_tdep prototype.
+	* nios2-linux-tdep.c: Remove _initialize_nios2_linux_tdep
+	prototype.
+	* nios2-tdep.c: Remove _initialize_nios2_tdep prototype.
+	* nto-procfs.c: Remove _initialize_procfs prototype.
+	* nto-tdep.c: Remove _initialize_nto_tdep prototype.
+	* objc-lang.c: Remove _initialize_objc_language prototype.
+	* objfiles.c: Remove _initialize_objfiles prototype.
+	* observer.c: Remove observer_test_first_notification_function,
+	observer_test_second_notification_function,
+	observer_test_third_notification_function, and
+	_initialize_observer prototypes.
+	* opencl-lang.c: Remove _initialize_opencl_language prototypes.
+	* osabi.c: Remove _initialize_gdb_osabi prototype.
+	* osdata.c: Remove _initialize_osdata prototype.
+	* p-valprint.c: Remove _initialize_pascal_valprint prototype.
+	* parse.c: Remove _initialize_parse prototype.
+	* ppc-fbsd-nat.c: Remove _initialize_ppcfbsd_nat prototype.
+	* ppc-fbsd-tdep.c: Remove _initialize_ppcfbsd_tdep prototype.
+	* ppc-linux-nat.c: Remove _initialize_ppc_linux_nat prototype.
+	* ppc-linux-tdep.c: Remove _initialize_ppc_linux_tdep prototype.
+	* ppc-nbsd-nat.c: Remove _initialize_ppcnbsd_nat prototype.
+	* ppc-nbsd-tdep.c: Remove _initialize_ppcnbsd_tdep prototype.
+	* ppc-obsd-nat.c: Remove _initialize_ppcobsd_nat prototype.
+	* ppc-obsd-tdep.c: Remove _initialize_ppcobsd_tdep prototype.
+	* printcmd.c: Remove _initialize_printcmd prototype.
+	* probe.c: Remove _initialize_probe prototype.
+	* proc-api.c: Remove _initialize_proc_api prototype.
+	* proc-events.c: Remove _initialize_proc_events prototype.
+	* proc-service.c: Remove _initialize_proc_service prototype.
+	* procfs.c: Remove _initialize_procfs prototype.
+	* psymtab.c: Remove _initialize_psymtab prototype.
+	* python/python.c: Remove _initialize_python prototype.
+	* ravenscar-thread.c: Remove _initialize_ravenscar prototype.
+	* record-btrace.c: Remove _initialize_record_btrace prototype.
+	* record-full.c: Remove _initialize_record_full prototype.
+	* record.c: Remove _initialize_record prototype.
+	* regcache.c: Remove _initialize_regcache prototype.
+	* reggroups.c: Remove _initialize_reggroup prototype.
+	* remote-notif.c: Remove _initialize_notif prototype.
+	* remote-sim.c: Remove _initialize_remote_sim prototype.
+	* remote.c: Remove _initialize_remote prototype.
+	* reverse.c: Remove _initialize_reverse prototype.
+	* rl78-tdep.c: Remove _initialize_rl78_tdep prototype.
+	* rs6000-aix-tdep.c: Remove _initialize_rs6000_aix_tdep prototype.
+	* rs6000-lynx178-tdep.c: Remove _initialize_rs6000_lynx178_tdep
+	prototype.
+	* rs6000-nat.c: Remove _initialize_rs6000_nat prototype.
+	* rs6000-tdep.c: Remove _initialize_rs6000_tdep prototype.
+	* rust-exp.y: Remove _initialize_rust_exp prototype.
+	* rx-tdep.c: Remove _initialize_rx_tdep prototype.
+	* s390-linux-nat.c: Remove _initialize_s390_nat prototype.
+	* s390-linux-tdep.c: Remove _initialize_s390_tdep prototype.
+	* score-tdep.c: Remove _initialize_score_tdep prototype.
+	* selftest-arch.c: Remove _initialize_selftests_foreach_arch
+	prototype.
+	* ser-go32.c: Remove _initialize_ser_dos prototype.
+	* ser-mingw.c: Remove _initialize_ser_windows prototype.
+	* ser-pipe.c: Remove _initialize_ser_pipe prototype.
+	* ser-tcp.c: Remove _initialize_ser_tcp prototype.
+	* ser-unix.c: Remove _initialize_ser_hardwire prototype.
+	* serial.c: Remove _initialize_serial prototype.
+	* sh-linux-tdep.c: Remove _initialize_sh_linux_tdep prototype.
+	* sh-nbsd-nat.c: Remove _initialize_shnbsd_nat prototype.
+	* sh-nbsd-tdep.c: Remove _initialize_shnbsd_tdep prototype.
+	* sh-tdep.c: Remove _initialize_sh_tdep prototype.
+	* skip.c: Remove _initialize_step_skip prototype.
+	* sol-thread.c: Remove _initialize_sol_thread prototype.
+	* solib-aix.c: Remove _initialize_solib_aix prototype.
+	* solib-darwin.c: Remove _initialize_darwin_solib prototype.
+	* solib-dsbt.c: Remove _initialize_dsbt_solib prototype.
+	* solib-frv.c: Remove _initialize_frv_solib prototype.
+	* solib-spu.c: Remove _initialize_spu_solib prototype.
+	* solib-svr4.c: Remove _initialize_svr4_solib prototype.
+	* solib-target.c: Remove _initialize_solib_target prototype.
+	* solib.c: Remove _initialize_solib prototype.
+	* source.c: Remove _initialize_source prototype.
+	* sparc-linux-nat.c: Remove _initialize_sparc_linux_nat prototype.
+	* sparc-linux-tdep.c: Remove _initialize_sparc_linux_tdep
+	prototype.
+	* sparc-nat.c: Remove _initialize_sparc_nat prototype.
+	* sparc-nbsd-nat.c: Remove _initialize_sparcnbsd_nat prototype.
+	* sparc-nbsd-tdep.c: Remove _initialize_sparcnbsd_tdep prototype.
+	* sparc-obsd-tdep.c: Remove _initialize_sparc32obsd_tdep
+	prototype.
+	* sparc-sol2-nat.c: Remove _initialize_sparc_sol2_nat prototype.
+	* sparc-sol2-tdep.c: Remove _initialize_sparc_sol2_tdep prototype.
+	* sparc-tdep.c: Remove _initialize_sparc_tdep prototype.
+	* sparc64-fbsd-nat.c: Remove _initialize_sparc64fbsd_nat
+	prototype.
+	* sparc64-fbsd-tdep.c: Remove _initialize_sparc64fbsd_tdep
+	prototype.
+	* sparc64-linux-nat.c: Remove _initialize_sparc64_linux_nat
+	prototype.
+	* sparc64-linux-tdep.c: Remove _initialize_sparc64_linux_tdep
+	prototype.
+	* sparc64-nat.c: Remove _initialize_sparc64_nat prototype.
+	* sparc64-nbsd-nat.c: Remove _initialize_sparc64nbsd_nat
+	prototype.
+	* sparc64-nbsd-tdep.c: Remove _initialize_sparc64nbsd_tdep
+	prototype.
+	* sparc64-obsd-nat.c: Remove _initialize_sparc64obsd_nat
+	prototype.
+	* sparc64-obsd-tdep.c: Remove _initialize_sparc64obsd_tdep
+	prototype.
+	* sparc64-sol2-tdep.c: Remove _initialize_sparc64_sol2_tdep
+	prototype.
+	* spu-linux-nat.c: Remove _initialize_spu_nat prototype.
+	* spu-multiarch.c: Remove _initialize_spu_multiarch prototype.
+	* spu-tdep.c: Remove _initialize_spu_tdep prototype.
+	* stabsread.c: Remove _initialize_stabsread prototype.
+	* stack.c: Remove _initialize_stack prototype.
+	* stap-probe.c: Remove _initialize_stap_probe prototype.
+	* std-regs.c: Remove _initialize_frame_reg prototype.
+	* symfile-debug.c: Remove _initialize_symfile_debug prototype.
+	* symfile-mem.c: Remove _initialize_symfile_mem prototype.
+	* symfile.c: Remove _initialize_symfile prototype.
+	* symmisc.c: Remove _initialize_symmisc prototype.
+	* symtab.c: Remove _initialize_symtab prototype.
+	* target-dcache.c: Remove _initialize_target_dcache prototype.
+	* target-descriptions.c: Remove _initialize_target_descriptions
+	prototype.
+	* thread.c: Remove _initialize_thread prototype.
+	* tic6x-linux-tdep.c: Remove _initialize_tic6x_linux_tdep
+	prototype.
+	* tic6x-tdep.c: Remove _initialize_tic6x_tdep prototype.
+	* tilegx-linux-nat.c: Remove _initialize_tile_linux_nat prototype.
+	* tilegx-linux-tdep.c: Remove _initialize_tilegx_linux_tdep
+	prototype.
+	* tilegx-tdep.c: Remove _initialize_tilegx_tdep prototype.
+	* tracefile-tfile.c: Remove _initialize_tracefile_tfile prototype.
+	* tracefile.c: Remove _initialize_tracefile prototype.
+	* tracepoint.c: Remove _initialize_tracepoint prototype.
+	* tui/tui-hooks.c: Remove _initialize_tui_hooks prototype.
+	* tui/tui-interp.c: Remove _initialize_tui_interp prototype.
+	* tui/tui-layout.c: Remove _initialize_tui_layout prototype.
+	* tui/tui-regs.c: Remove _initialize_tui_regs prototype.
+	* tui/tui-stack.c: Remove _initialize_tui_stack prototype.
+	* tui/tui-win.c: Remove _initialize_tui_win prototype.
+	* tui/tui.c: Remove _initialize_tui prototype.
+	* typeprint.c: Remove _initialize_typeprint prototype.
+	* user-regs.c: Remove _initialize_user_regs prototype.
+	* utils.c: Remove _initialize_utils prototype.
+	* v850-tdep.c: Remove _initialize_v850_tdep prototype.
+	* valarith.c: Remove _initialize_valarith prototype.
+	* valops.c: Remove _initialize_valops prototype.
+	* valprint.c: Remove _initialize_valprint prototype.
+	* value.c: Remove _initialize_values prototype.
+	* varobj.c: Remove _initialize_varobj prototype.
+	* vax-bsd-nat.c: Remove _initialize_vaxbsd_nat prototype.
+	* vax-nbsd-tdep.c: Remove _initialize_vaxnbsd_tdep prototype.
+	* vax-tdep.c: Remove _initialize_vax_tdep prototype.
+	* windows-nat.c: Remove _initialize_windows_nat,
+	_initialize_check_for_gdb_ini, and _initialize_loadable
+	prototypes.
+	* windows-tdep.c: Remove _initialize_windows_tdep prototype.
+	* xcoffread.c: Remove _initialize_xcoffread prototype.
+	* xml-support.c: Remove _initialize_xml_support prototype.
+	* xstormy16-tdep.c: Remove _initialize_xstormy16_tdep prototype.
+	* xtensa-linux-nat.c: Remove _initialize_xtensa_linux_nat
+	prototype.
+	* xtensa-linux-tdep.c: Remove _initialize_xtensa_linux_tdep
+	prototype.
+	* xtensa-tdep.c: Remove _initialize_xtensa_tdep prototype.
+
 2017-09-08  Keith Seitz  <keiths@redhat.com>
 
 	* dwarf2read.c (struct field_info) <fnfields>: Remove unused

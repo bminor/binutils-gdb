@@ -724,7 +724,7 @@ resolve_reloc_expr_symbols (void)
 	      as_bad_where (r->file, r->line, _("invalid reloc expression"));
 	      sec = NULL;
 	    }
-	  else if (sym != NULL)
+	  else if (sym != NULL && sec != NULL)
 	    {
 	      /* Convert relocs against local symbols to refer to the
 	         corresponding section symbol plus offset instead.  Keep

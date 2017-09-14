@@ -276,9 +276,6 @@ alphanbsd_init_abi (struct gdbarch_info info,
 }
 
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_alphanbsd_tdep (void);
-
 void
 _initialize_alphanbsd_tdep (void)
 {

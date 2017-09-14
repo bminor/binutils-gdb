@@ -28,7 +28,6 @@
 #include "c-lang.h"
 #include "valprint.h"
 
-extern void _initialize_m2_language (void);
 static void m2_printchar (int, struct type *, struct ui_file *);
 static void m2_emit_char (int, struct type *, struct ui_file *, int);
 

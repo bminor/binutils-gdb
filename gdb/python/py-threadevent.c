@@ -47,29 +47,24 @@ get_event_thread (void)
   return thread;
 }
 
-PyObject *
-create_thread_event_object (PyTypeObject *py_type)
+gdbpy_ref<>
+create_thread_event_object (PyTypeObject *py_type, PyObject *thread)
 {
-  PyObject *thread = NULL;
-
   gdbpy_ref<> thread_event_obj (create_event_object (py_type));
   if (thread_event_obj == NULL)
     return NULL;
 
-  thread = get_event_thread ();
-  if (!thread)
-    return NULL;
+  if (thread == NULL)
+    {
+      thread = get_event_thread ();
+      if (!thread)
+	return NULL;
+    }
 
   if (evpy_add_attribute (thread_event_obj.get (),
                           "inferior_thread",
                           thread) < 0)
     return NULL;
 
-  return thread_event_obj.release ();
+  return thread_event_obj;
 }
-
-GDBPY_NEW_EVENT_TYPE (thread,
-                      "gdb.ThreadEvent",
-                      "ThreadEvent",
-                      "GDB thread event object",
-                      event_object_type);

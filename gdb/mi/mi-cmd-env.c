@@ -34,8 +34,6 @@
 
 static void env_mod_path (char *dirname, char **which_path);
 
-extern void _initialize_mi_cmd_env (void);
-
 static const char path_var_name[] = "PATH";
 static char *orig_path = NULL;
 

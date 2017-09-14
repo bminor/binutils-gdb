@@ -108,15 +108,12 @@ d_lookup_symbol (const struct language_defn *langdef,
 
   if (search)
     {
-      char *classname, *nested;
+      std::string classname, nested;
       unsigned int prefix_len;
-      struct cleanup *cleanup;
       struct block_symbol class_sym;
 
       /* A simple lookup failed.  Check if the symbol was defined in
 	 a base class.  */
-
-      cleanup = make_cleanup (null_cleanup, NULL);
 
       /* Find the name of the class and the name of the method,
 	 variable, etc.  */
@@ -130,42 +127,31 @@ d_lookup_symbol (const struct language_defn *langdef,
 
 	  lang_this = lookup_language_this (language_def (language_d), block);
 	  if (lang_this.symbol == NULL)
-	    {
-	      do_cleanups (cleanup);
-	      return null_block_symbol;
-	    }
+	    return null_block_symbol;
 
 	  type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (lang_this.symbol)));
-	  classname = xstrdup (TYPE_NAME (type));
-	  nested = xstrdup (name);
+	  classname = TYPE_NAME (type);
+	  nested = name;
 	}
       else
 	{
 	  /* The class name is everything up to and including PREFIX_LEN.  */
-	  classname = savestring (name, prefix_len);
+	  classname = std::string (name, prefix_len);
 
 	  /* The rest of the name is everything else past the initial scope
 	     operator.  */
-	  nested = xstrdup (name + prefix_len + 1);
+	  nested = std::string (name + prefix_len + 1);
 	}
-
-      /* Add cleanups to free memory for these strings.  */
-      make_cleanup (xfree, classname);
-      make_cleanup (xfree, nested);
 
       /* Lookup a class named CLASSNAME.  If none is found, there is nothing
 	 more that can be done.  */
-      class_sym = lookup_global_symbol (classname, block, domain);
+      class_sym = lookup_global_symbol (classname.c_str (), block, domain);
       if (class_sym.symbol == NULL)
-	{
-	  do_cleanups (cleanup);
-	  return null_block_symbol;
-	}
+	return null_block_symbol;
 
       /* Look for a symbol named NESTED in this class.  */
       sym = d_lookup_nested_symbol (SYMBOL_TYPE (class_sym.symbol),
-				    nested, block);
-      do_cleanups (cleanup);
+				    nested.c_str (), block);
     }
 
   return sym;
@@ -260,18 +246,14 @@ static struct block_symbol
 find_symbol_in_baseclass (struct type *parent_type, const char *name,
 			  const struct block *block)
 {
-  char *concatenated_name = NULL;
   struct block_symbol sym;
-  struct cleanup *cleanup;
   int i;
 
   sym.symbol = NULL;
   sym.block = NULL;
-  cleanup = make_cleanup (free_current_contents, &concatenated_name);
 
   for (i = 0; i < TYPE_N_BASECLASSES (parent_type); ++i)
     {
-      size_t len;
       struct type *base_type = TYPE_BASECLASS (parent_type, i);
       const char *base_name = TYPE_BASECLASS_NAME (parent_type, i);
 
@@ -287,10 +269,8 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
       /* Now search all static file-level symbols.  We have to do this for
 	 things like typedefs in the class.  First search in this symtab,
 	 what we want is possibly there.  */
-      len = strlen (base_name) + strlen (name) + 2;
-      concatenated_name = (char *) xrealloc (concatenated_name, len);
-      xsnprintf (concatenated_name, len, "%s.%s", base_name, name);
-      sym = lookup_symbol_in_static_block (concatenated_name, block,
+      std::string concatenated_name = std::string (base_name) + "." + name;
+      sym = lookup_symbol_in_static_block (concatenated_name.c_str (), block,
 					   VAR_DOMAIN);
       if (sym.symbol != NULL)
 	break;
@@ -298,7 +278,7 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
       /* Nope.  We now have to search all static blocks in all objfiles,
 	 even if block != NULL, because there's no guarantees as to which
 	 symtab the symbol we want is in.  */
-      sym = lookup_static_symbol (concatenated_name, VAR_DOMAIN);
+      sym = lookup_static_symbol (concatenated_name.c_str (), VAR_DOMAIN);
       if (sym.symbol != NULL)
 	break;
 
@@ -312,7 +292,6 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
 	}
     }
 
-  do_cleanups (cleanup);
   return sym;
 }
 

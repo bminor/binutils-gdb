@@ -168,9 +168,6 @@ code_cache_enabled_p (void)
   return code_cache_enabled;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_target_dcache;
-
 void
 _initialize_target_dcache (void)
 {

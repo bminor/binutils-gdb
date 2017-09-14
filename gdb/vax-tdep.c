@@ -514,9 +514,6 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return (gdbarch);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_vax_tdep (void);
-
 void
 _initialize_vax_tdep (void)
 {

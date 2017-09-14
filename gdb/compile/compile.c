@@ -367,7 +367,7 @@ get_selected_pc_producer_options (void)
 
   cs = symtab->producer;
   while (*cs != 0 && *cs != '-')
-    cs = skip_spaces_const (skip_to_space_const (cs));
+    cs = skip_spaces (skip_to_space (cs));
   if (*cs != '-')
     return NULL;
   return cs;
@@ -674,8 +674,6 @@ compile_register_name_demangle (struct gdbarch *gdbarch,
 
   error (_("Cannot find gdbarch register \"%s\"."), regname);
 }
-
-extern initialize_file_ftype _initialize_compile;
 
 void
 _initialize_compile (void)

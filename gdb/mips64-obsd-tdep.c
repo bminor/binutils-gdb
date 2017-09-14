@@ -158,10 +158,6 @@ mips64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, svr4_lp64_fetch_link_map_offsets);
 }
 
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_mips64obsd_tdep (void);
-
 void
 _initialize_mips64obsd_tdep (void)
 {

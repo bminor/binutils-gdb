@@ -100,9 +100,6 @@ tests_with_arch ()
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
 
-/* Suppress warning from -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_selftests_foreach_arch;
-
 void
 _initialize_selftests_foreach_arch ()
 {

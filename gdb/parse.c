@@ -121,8 +121,6 @@ static expression_up parse_exp_in_context_1 (const char **, CORE_ADDR,
 					     const struct block *, int,
 					     int, int *);
 
-void _initialize_parse (void);
-
 /* Data structure for saving values of arglist_len for function calls whose
    arguments contain other function calls.  */
 

@@ -480,9 +480,6 @@ frv_linux_elf_osabi_sniffer (bfd *abfd)
     return GDB_OSABI_UNKNOWN;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_frv_linux_tdep (void);
-
 void
 _initialize_frv_linux_tdep (void)
 {

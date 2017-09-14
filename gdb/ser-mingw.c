@@ -31,8 +31,6 @@
 
 #include "command.h"
 
-void _initialize_ser_windows (void);
-
 struct ser_windows_state
 {
   int in_progress;

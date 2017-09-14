@@ -436,9 +436,6 @@ winheight_completer (struct cmd_list_element *ignore,
 /* Function to initialize gdb commands, for tui window
    manipulation.  */
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_tui_win;
-
 void
 _initialize_tui_win (void)
 {

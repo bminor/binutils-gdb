@@ -33,9 +33,9 @@ extern int get_number_trailer (const char **pp, int trailer);
 
 /* Convenience.  Like get_number_trailer, but with no TRAILER.  */
 
-extern int get_number_const (const char **);
+extern int get_number (const char **);
 
-/* Like get_number_const, but takes a non-const "char **".  */
+/* Like the above, but takes a non-const "char **".  */
 
 extern int get_number (char **);
 
@@ -149,17 +149,14 @@ remove_trailing_whitespace (const char *start, char *s)
 }
 
 /* A helper function to extract an argument from *ARG.  An argument is
-   delimited by whitespace.  The return value is either NULL if no
-   argument was found, or an xmalloc'd string.  */
+   delimited by whitespace.  The return value is empty if no argument
+   was found.  */
 
-extern char *extract_arg (char **arg);
+extern std::string extract_arg (char **arg);
 
-/* A const-correct version of "extract_arg".
+/* A const-correct version of the above.  */
 
-   Since the returned value is xmalloc'd, it eventually needs to be
-   xfree'ed, which prevents us from making it const as well.  */
-
-extern char *extract_arg_const (const char **arg);
+extern std::string extract_arg (const char **arg);
 
 /* A helper function that looks for an argument at the start of a
    string.  The argument must also either be at the end of the string,
