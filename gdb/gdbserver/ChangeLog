@@ -1,5 +1,12 @@
 2017-09-15  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* server.c (require_running): Rename to ...
+	(require_running_or_return): ... this ...
+	(require_running_or_break): ... and this.
+	(handle_query, process_serial_event): Adjust.
+
+2017-09-15  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* linux-low.c (linux_set_resume_request): Remove unused
 	variables.
 

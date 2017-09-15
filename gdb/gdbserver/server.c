@@ -42,6 +42,20 @@
 
 #include "common/selftest.h"
 
+#define require_running_or_return(BUF)		\
+  if (!target_running ())			\
+    {						\
+      write_enn (BUF);				\
+      return;					\
+    }
+
+#define require_running_or_break(BUF)		\
+  if (!target_running ())			\
+    {						\
+      write_enn (BUF);				\
+      break;					\
+    }
+
 /* The environment to pass to the inferior when creating it.  */
 
 static gdb_environ our_environ;
@@ -1143,13 +1157,6 @@ handle_search_memory (char *own_buf, int packet_len)
   free (pattern);
 }
 
-#define require_running(BUF)			\
-  if (!target_running ())			\
-    {						\
-      write_enn (BUF);				\
-      return;					\
-    }
-
 /* Parse options to --debug-format= and "monitor set debug-format".
    ARG is the text after "--debug-format=" or "monitor set debug-format".
    IS_MONITOR is non-zero if we're invoked via "monitor set debug-format".
@@ -2071,7 +2078,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
   if (strcmp ("qC", own_buf) == 0 && !disable_packet_qC)
     {
       ptid_t gdb_id;
-      require_running (own_buf);
+      require_running_or_return (own_buf);
 
       if (!ptid_equal (general_thread, null_ptid)
 	  && !ptid_equal (general_thread, minus_one_ptid))
@@ -2142,7 +2149,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	{
 	  ptid_t gdb_id;
 
-	  require_running (own_buf);
+	  require_running_or_return (own_buf);
 	  thread_ptr = get_first_inferior (&all_threads);
 
 	  *own_buf++ = 'm';
@@ -2156,7 +2163,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	{
 	  ptid_t gdb_id;
 
-	  require_running (own_buf);
+	  require_running_or_return (own_buf);
 	  if (thread_ptr != NULL)
 	    {
 	      *own_buf++ = 'm';
@@ -2178,7 +2185,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
     {
       CORE_ADDR text, data;
 
-      require_running (own_buf);
+      require_running_or_return (own_buf);
       if (the_target->read_offsets (&text, &data))
 	sprintf (own_buf, "Text=%lX;Data=%lX;Bss=%lX",
 		 (long)text, (long)data, (long)data);
@@ -2415,7 +2422,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       int i, err;
       ptid_t ptid = null_ptid;
 
-      require_running (own_buf);
+      require_running_or_return (own_buf);
 
       for (i = 0; i < 3; i++)
 	{
@@ -2528,7 +2535,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
   if (startswith (own_buf, "qSearch:memory:"))
     {
-      require_running (own_buf);
+      require_running_or_return (own_buf);
       handle_search_memory (own_buf, packet_len);
       return;
     }
@@ -2546,7 +2553,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	}
       else
 	{
-	  require_running (own_buf);
+	  require_running_or_return (own_buf);
 	  process = current_process ();
 	}
 
@@ -2568,7 +2575,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       int len;
       unsigned long long crc;
 
-      require_running (own_buf);
+      require_running_or_return (own_buf);
       comma = unpack_varlen_hex (own_buf + 5, &base);
       if (*comma++ != ',')
 	{
@@ -3441,15 +3448,6 @@ gdbserver_show_disableable (FILE *stream)
 	   "  threads     \tAll of the above\n");
 }
 
-
-#undef require_running
-#define require_running(BUF)			\
-  if (!target_running ())			\
-    {						\
-      write_enn (BUF);				\
-      break;					\
-    }
-
 static void
 kill_inferior_callback (struct inferior_list_entry *entry)
 {
@@ -4039,7 +4037,7 @@ process_serial_event (void)
       handle_general_set (own_buf);
       break;
     case 'D':
-      require_running (own_buf);
+      require_running_or_break (own_buf);
 
       if (multi_process)
 	{
@@ -4138,7 +4136,7 @@ process_serial_event (void)
 	  ptid_t gdb_id, thread_id;
 	  int pid;
 
-	  require_running (own_buf);
+	  require_running_or_break (own_buf);
 
 	  gdb_id = read_ptid (&own_buf[2], NULL);
 
@@ -4203,7 +4201,7 @@ process_serial_event (void)
 	}
       break;
     case 'g':
-      require_running (own_buf);
+      require_running_or_break (own_buf);
       if (current_traceframe >= 0)
 	{
 	  struct regcache *regcache
@@ -4230,7 +4228,7 @@ process_serial_event (void)
 	}
       break;
     case 'G':
-      require_running (own_buf);
+      require_running_or_break (own_buf);
       if (current_traceframe >= 0)
 	write_enn (own_buf);
       else
@@ -4248,7 +4246,7 @@ process_serial_event (void)
 	}
       break;
     case 'm':
-      require_running (own_buf);
+      require_running_or_break (own_buf);
       decode_m_packet (&own_buf[1], &mem_addr, &len);
       res = gdb_read_memory (mem_addr, mem_buf, len);
       if (res < 0)
@@ -4257,7 +4255,7 @@ process_serial_event (void)
 	bin2hex (mem_buf, own_buf, res);
       break;
     case 'M':
-      require_running (own_buf);
+      require_running_or_break (own_buf);
       decode_M_packet (&own_buf[1], &mem_addr, &len, &mem_buf);
       if (gdb_write_memory (mem_addr, mem_buf, len) == 0)
 	write_ok (own_buf);
@@ -4265,7 +4263,7 @@ process_serial_event (void)
 	write_enn (own_buf);
       break;
     case 'X':
-      require_running (own_buf);
+      require_running_or_break (own_buf);
       if (decode_X_packet (&own_buf[1], packet_len - 1,
 			   &mem_addr, &len, &mem_buf) < 0
 	  || gdb_write_memory (mem_addr, mem_buf, len) != 0)
@@ -4274,7 +4272,7 @@ process_serial_event (void)
 	write_ok (own_buf);
       break;
     case 'C':
-      require_running (own_buf);
+      require_running_or_break (own_buf);
       hex2bin (own_buf + 1, &sig, 1);
       if (gdb_signal_to_host_p ((enum gdb_signal) sig))
 	signal = gdb_signal_to_host ((enum gdb_signal) sig);
@@ -4283,7 +4281,7 @@ process_serial_event (void)
       myresume (own_buf, 0, signal);
       break;
     case 'S':
-      require_running (own_buf);
+      require_running_or_break (own_buf);
       hex2bin (own_buf + 1, &sig, 1);
       if (gdb_signal_to_host_p ((enum gdb_signal) sig))
 	signal = gdb_signal_to_host ((enum gdb_signal) sig);
@@ -4292,12 +4290,12 @@ process_serial_event (void)
       myresume (own_buf, 1, signal);
       break;
     case 'c':
-      require_running (own_buf);
+      require_running_or_break (own_buf);
       signal = 0;
       myresume (own_buf, 0, signal);
       break;
     case 's':
-      require_running (own_buf);
+      require_running_or_break (own_buf);
       signal = 0;
       myresume (own_buf, 1, signal);
       break;
@@ -4371,7 +4369,7 @@ process_serial_event (void)
       {
 	ptid_t gdb_id, thread_id;
 
-	require_running (own_buf);
+	require_running_or_break (own_buf);
 
 	gdb_id = read_ptid (&own_buf[1], NULL);
 	thread_id = gdb_id_to_thread_id (gdb_id);
