@@ -1,3 +1,8 @@
+2017-09-15  Alan Modra  <amodra@gmail.com>
+
+	PR 22118
+	* testsuite/ld-aarch64/erratum843419.d: Correct regexp.
+
 2017-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22139
