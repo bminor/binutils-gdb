@@ -173,14 +173,6 @@ find_any_thread_of_pid (int pid)
   return (struct thread_info *) entry;
 }
 
-ptid_t
-gdb_id_to_thread_id (ptid_t gdb_id)
-{
-  struct thread_info *thread = find_thread_ptid (gdb_id);
-
-  return thread ? thread->entry.id : null_ptid;
-}
-
 static void
 free_one_thread (struct inferior_list_entry *inf)
 {

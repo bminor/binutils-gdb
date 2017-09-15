@@ -4139,23 +4139,16 @@ process_serial_event (void)
     case 'H':
       if (own_buf[1] == 'c' || own_buf[1] == 'g' || own_buf[1] == 's')
 	{
-	  ptid_t gdb_id, thread_id;
-	  int pid;
-
 	  require_running_or_break (own_buf);
 
-	  gdb_id = read_ptid (&own_buf[2], NULL);
+	  ptid_t thread_id = read_ptid (&own_buf[2], NULL);
 
-	  pid = ptid_get_pid (gdb_id);
-
-	  if (ptid_equal (gdb_id, null_ptid)
-	      || ptid_equal (gdb_id, minus_one_ptid))
+	  if (thread_id == null_ptid || thread_id == minus_one_ptid)
 	    thread_id = null_ptid;
-	  else if (pid != 0
-		   && ptid_equal (pid_to_ptid (pid),
-				  gdb_id))
+	  else if (thread_id.is_pid ())
 	    {
-	      thread_info *thread = find_any_thread_of_pid (pid);
+	      /* The ptid represents a pid.  */
+	      thread_info *thread = find_any_thread_of_pid (thread_id.pid ());
 
 	      if (thread == NULL)
 		{
@@ -4167,8 +4160,8 @@ process_serial_event (void)
 	    }
 	  else
 	    {
-	      thread_id = gdb_id_to_thread_id (gdb_id);
-	      if (ptid_equal (thread_id, null_ptid))
+	      /* The ptid represents a lwp/tid.  */
+	      if (find_thread_ptid (thread_id) == NULL)
 		{
 		  write_enn (own_buf);
 		  break;
@@ -4373,13 +4366,10 @@ process_serial_event (void)
 
     case 'T':
       {
-	ptid_t gdb_id, thread_id;
-
 	require_running_or_break (own_buf);
 
-	gdb_id = read_ptid (&own_buf[1], NULL);
-	thread_id = gdb_id_to_thread_id (gdb_id);
-	if (ptid_equal (thread_id, null_ptid))
+	ptid_t thread_id = read_ptid (&own_buf[1], NULL);
+	if (find_thread_ptid (thread_id) == NULL)
 	  {
 	    write_enn (own_buf);
 	    break;

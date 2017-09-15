@@ -1,5 +1,12 @@
 2017-09-15  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* inferiors.h (gdb_id_to_thread_id): Remove.
+	* inferiors.c (gdb_id_to_thread_id): Remove.
+	* server.c (process_serial_event): Adjust to gdb_id_to_thread_id
+	removal.  Move pid declaration closer to where it's used.
+
+2017-09-15  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* server.c (handle_detach): New function.
 	(process_serial_event): Move code out, call handle_detach.
 
