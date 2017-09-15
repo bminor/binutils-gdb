@@ -4206,6 +4206,8 @@ strip_main (int argc, char *argv[])
 	  break;
 	case OPTION_ONLY_KEEP_DEBUG:
 	  strip_symbols = STRIP_NONDEBUG;
+	  /* Also remove invalid .dynamic section.  */
+	  handle_remove_section_option (".dynamic");
 	  break;
 	case OPTION_KEEP_FILE_SYMBOLS:
 	  keep_file_symbols = 1;
@@ -4582,6 +4584,8 @@ copy_main (int argc, char *argv[])
 
 	case OPTION_ONLY_KEEP_DEBUG:
 	  strip_symbols = STRIP_NONDEBUG;
+	  /* Also remove invalid .dynamic section.  */
+	  handle_remove_section_option (".dynamic");
 	  break;
 
 	case OPTION_KEEP_FILE_SYMBOLS:

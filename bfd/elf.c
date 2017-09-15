@@ -6721,6 +6721,11 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	    }
 	}
 
+      /* Remove the segment from output if all sections in input have
+	 been removed.  */
+      if (first_section != NULL && section_count == 0)
+	continue;
+
       /* Allocate a segment map big enough to contain
 	 all of the sections we have selected.  */
       amt = sizeof (struct elf_segment_map);
