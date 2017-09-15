@@ -82,8 +82,18 @@ do_proto_toplev()
 	-e '/^	install-texinfo /d' \
 	<Makefile.in >tmp
     mv -f tmp Makefile.in
-    #
-    ./configure --target=i386-pc-linux-gnu --enable-gold --enable-ld
+    # configure.  --enable-gold is needed to ensure .c/.h from .y are
+    # built in the gold dir.  The disables speed the build a little.
+    enables=
+    disables=
+    for dir in binutils gas gdb gold gprof ld libdecnumber readline sim; do
+	case " $tool $support_files " in
+	    *" $dir "*) enables="$enables --enable-$dir" ;;
+	    *) disables="$disables --disable-$dir" ;;
+	esac
+    done
+    echo "==> configure --target=i386-pc-linux-gnu $disables $enables"
+    ./configure --target=i386-pc-linux-gnu $disables $enables
     $MAKE configure-host configure-target \
 	ALL_GCC="" ALL_GCC_C="" ALL_GCC_CXX="" \
 	CC_FOR_TARGET="$CC" CXX_FOR_TARGET="$CXX"
