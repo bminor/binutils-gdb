@@ -1,3 +1,9 @@
+2017-09-15  Alan Modra  <amodra@gmail.com>
+
+	PR 22116
+	* archive.c (bfd_ar_hdr_from_filesystem): Detect when status.st_size
+	overflows bfd_size_type.
+
 2017-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22135
