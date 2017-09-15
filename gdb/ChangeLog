@@ -1,3 +1,8 @@
+2017-09-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2read.c (copy_string): Remove.
+	(parse_macro_definition): Replace copy_string with savestring.
+
 2017-09-15  Yao Qi  <yao.qi@linaro.org>
 
 	* configure.tgt (i[34567]86-*-darwin*): Append amd64.o to

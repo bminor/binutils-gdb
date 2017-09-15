@@ -21685,20 +21685,6 @@ macro_start_file (int file, int line,
   return current_file;
 }
 
-
-/* Copy the LEN characters at BUF to a xmalloc'ed block of memory,
-   followed by a null byte.  */
-static char *
-copy_string (const char *buf, int len)
-{
-  char *s = (char *) xmalloc (len + 1);
-
-  memcpy (s, buf, len);
-  s[len] = '\0';
-  return s;
-}
-
-
 static const char *
 consume_improper_spaces (const char *p, const char *body)
 {
@@ -21758,7 +21744,7 @@ parse_macro_definition (struct macro_source_file *file, int line,
     {
       /* It's an object-like macro.  */
       int name_len = p - body;
-      char *name = copy_string (body, name_len);
+      char *name = savestring (body, name_len);
       const char *replacement;
 
       if (*p == ' ')
@@ -21776,7 +21762,7 @@ parse_macro_definition (struct macro_source_file *file, int line,
   else if (*p == '(')
     {
       /* It's a function-like macro.  */
-      char *name = copy_string (body, p - body);
+      char *name = savestring (body, p - body);
       int argc = 0;
       int argv_size = 1;
       char **argv = XNEWVEC (char *, argv_size);
@@ -21805,7 +21791,7 @@ parse_macro_definition (struct macro_source_file *file, int line,
                   argv = XRESIZEVEC (char *, argv, argv_size);
                 }
 
-              argv[argc++] = copy_string (arg_start, p - arg_start);
+              argv[argc++] = savestring (arg_start, p - arg_start);
             }
 
           p = consume_improper_spaces (p, body);
