@@ -1,3 +1,11 @@
+2017-09-15  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.tgt (i[34567]86-*-darwin*): Append amd64.o to
+	gdb_target_obs.
+	(i[34567]86-*-solaris2.1[0-9]* | x86_64-*-solaris2.1[0-9]*):
+	Likewise.
+	(i[34567]86-*-linux*): Likewise.
+
 2017-09-14  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* dwarf2expr.h (dwarf_stack_value): Add constructor.
