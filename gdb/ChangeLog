@@ -1,3 +1,8 @@
+2017-09-15  Pedro Alves  <palves@redhat.com>
+
+	* compile/compile-c-types.c (convert_enum, convert_int)
+	(convert_float): Adjust to refer to int_type_v0 and float_type_v0.
+
 2017-09-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* dwarf2read.c (copy_string): Remove.
