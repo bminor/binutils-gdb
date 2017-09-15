@@ -1,5 +1,10 @@
 2017-09-15  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* server.c (handle_detach): New function.
+	(process_serial_event): Move code out, call handle_detach.
+
+2017-09-15  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* server.c (require_running): Rename to ...
 	(require_running_or_return): ... this ...
 	(require_running_or_break): ... and this.

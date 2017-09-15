@@ -1157,6 +1157,100 @@ handle_search_memory (char *own_buf, int packet_len)
   free (pattern);
 }
 
+/* Handle the "D" packet.  */
+
+static void
+handle_detach (char *own_buf)
+{
+  require_running_or_return (own_buf);
+
+  int pid;
+
+  if (multi_process)
+    {
+      /* skip 'D;' */
+      pid = strtol (&own_buf[2], NULL, 16);
+    }
+  else
+    pid = ptid_get_pid (current_ptid);
+
+  if ((tracing && disconnected_tracing) || any_persistent_commands ())
+    {
+      struct process_info *process = find_process_pid (pid);
+
+      if (process == NULL)
+	{
+	  write_enn (own_buf);
+	  return;
+	}
+
+      if (tracing && disconnected_tracing)
+	fprintf (stderr,
+		 "Disconnected tracing in effect, "
+		 "leaving gdbserver attached to the process\n");
+
+      if (any_persistent_commands ())
+	fprintf (stderr,
+		 "Persistent commands are present, "
+		 "leaving gdbserver attached to the process\n");
+
+      /* Make sure we're in non-stop/async mode, so we we can both
+	 wait for an async socket accept, and handle async target
+	 events simultaneously.  There's also no point either in
+	 having the target stop all threads, when we're going to
+	 pass signals down without informing GDB.  */
+      if (!non_stop)
+	{
+	  if (debug_threads)
+	    debug_printf ("Forcing non-stop mode\n");
+
+	  non_stop = 1;
+	  start_non_stop (1);
+	}
+
+      process->gdb_detached = 1;
+
+      /* Detaching implicitly resumes all threads.  */
+      target_continue_no_signal (minus_one_ptid);
+
+      write_ok (own_buf);
+      return;
+    }
+
+  fprintf (stderr, "Detaching from process %d\n", pid);
+  stop_tracing ();
+  if (detach_inferior (pid) != 0)
+    write_enn (own_buf);
+  else
+    {
+      discard_queued_stop_replies (pid_to_ptid (pid));
+      write_ok (own_buf);
+
+      if (extended_protocol || target_running ())
+	{
+	  /* There is still at least one inferior remaining or
+	     we are in extended mode, so don't terminate gdbserver,
+	     and instead treat this like a normal program exit.  */
+	  last_status.kind = TARGET_WAITKIND_EXITED;
+	  last_status.value.integer = 0;
+	  last_ptid = pid_to_ptid (pid);
+
+	  current_thread = NULL;
+	}
+      else
+	{
+	  putpkt (own_buf);
+	  remote_close ();
+
+	  /* If we are attached, then we can exit.  Otherwise, we
+	     need to hang around doing nothing, until the child is
+	     gone.  */
+	  join_inferior (pid);
+	  exit (0);
+	}
+    }
+}
+
 /* Parse options to --debug-format= and "monitor set debug-format".
    ARG is the text after "--debug-format=" or "monitor set debug-format".
    IS_MONITOR is non-zero if we're invoked via "monitor set debug-format".
@@ -4003,13 +4097,10 @@ process_point_options (struct gdb_breakpoint *bp, char **packet)
 static int
 process_serial_event (void)
 {
-  char ch;
-  int i = 0;
   int signal;
   unsigned int len;
   int res;
   CORE_ADDR mem_addr;
-  int pid;
   unsigned char sig;
   int packet_len;
   int new_packet_len = -1;
@@ -4026,8 +4117,7 @@ process_serial_event (void)
     }
   response_needed = 1;
 
-  i = 0;
-  ch = own_buf[i++];
+  char ch = own_buf[0];
   switch (ch)
     {
     case 'q':
@@ -4037,91 +4127,7 @@ process_serial_event (void)
       handle_general_set (own_buf);
       break;
     case 'D':
-      require_running_or_break (own_buf);
-
-      if (multi_process)
-	{
-	  i++; /* skip ';' */
-	  pid = strtol (&own_buf[i], NULL, 16);
-	}
-      else
-	pid = ptid_get_pid (current_ptid);
-
-      if ((tracing && disconnected_tracing) || any_persistent_commands ())
-	{
-	  struct process_info *process = find_process_pid (pid);
-
-	  if (process == NULL)
-	    {
-	      write_enn (own_buf);
-	      break;
-	    }
-
-	  if (tracing && disconnected_tracing)
-	    fprintf (stderr,
-		     "Disconnected tracing in effect, "
-		     "leaving gdbserver attached to the process\n");
-
-	  if (any_persistent_commands ())
-	    fprintf (stderr,
-		     "Persistent commands are present, "
-		     "leaving gdbserver attached to the process\n");
-
-	  /* Make sure we're in non-stop/async mode, so we we can both
-	     wait for an async socket accept, and handle async target
-	     events simultaneously.  There's also no point either in
-	     having the target stop all threads, when we're going to
-	     pass signals down without informing GDB.  */
-	  if (!non_stop)
-	    {
-	      if (debug_threads)
-		debug_printf ("Forcing non-stop mode\n");
-
-	      non_stop = 1;
-	      start_non_stop (1);
-	    }
-
-	  process->gdb_detached = 1;
-
-	  /* Detaching implicitly resumes all threads.  */
-	  target_continue_no_signal (minus_one_ptid);
-
-	  write_ok (own_buf);
-	  break; /* from switch/case */
-	}
-
-      fprintf (stderr, "Detaching from process %d\n", pid);
-      stop_tracing ();
-      if (detach_inferior (pid) != 0)
-	write_enn (own_buf);
-      else
-	{
-	  discard_queued_stop_replies (pid_to_ptid (pid));
-	  write_ok (own_buf);
-
-	  if (extended_protocol || target_running ())
-	    {
-	      /* There is still at least one inferior remaining or
-		 we are in extended mode, so don't terminate gdbserver,
-		 and instead treat this like a normal program exit.  */
-	      last_status.kind = TARGET_WAITKIND_EXITED;
-	      last_status.value.integer = 0;
-	      last_ptid = pid_to_ptid (pid);
-
-	      current_thread = NULL;
-	    }
-	  else
-	    {
-	      putpkt (own_buf);
-	      remote_close ();
-
-	      /* If we are attached, then we can exit.  Otherwise, we
-		 need to hang around doing nothing, until the child is
-		 gone.  */
-	      join_inferior (pid);
-	      exit (0);
-	    }
-	}
+      handle_detach (own_buf);
       break;
     case '!':
       extended_protocol = 1;
