@@ -19,6 +19,7 @@
 #ifndef GDB_THREAD_H
 #define GDB_THREAD_H
 
+#include "common-gdbthread.h"
 #include "inferiors.h"
 
 struct btrace_target_info;

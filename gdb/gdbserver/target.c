@@ -138,7 +138,7 @@ done_accessing_memory (void)
 
   /* Restore the previous selected thread.  */
   general_thread = prev_general_thread;
-  current_thread = find_thread_ptid (general_thread);
+  switch_to_thread (general_thread);
 }
 
 int

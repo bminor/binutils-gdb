@@ -23,6 +23,7 @@
 #include "tdesc.h"
 #include "dll.h"
 #include "rsp-low.h"
+#include "gdbthread.h"
 #include <ctype.h>
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -1188,7 +1189,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 
 	saved_thread = current_thread;
 
-	current_thread = find_thread_ptid (ptid);
+	switch_to_thread (ptid);
 
 	regp = current_target_desc ()->expedite_regs;
 

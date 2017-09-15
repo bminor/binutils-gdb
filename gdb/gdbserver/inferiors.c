@@ -442,6 +442,6 @@ make_cleanup_restore_current_thread (void)
 void
 switch_to_thread (ptid_t ptid)
 {
-  if (!ptid_equal (ptid, minus_one_ptid))
-    current_thread = find_thread_ptid (ptid);
+  gdb_assert (ptid != minus_one_ptid);
+  current_thread = find_thread_ptid (ptid);
 }

@@ -1,3 +1,12 @@
+2017-09-26  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdbthread.h: Include "common-gdbthread.h".
+	* inferiors.c (switch_to_thread): Use "gdb_assert" instead of
+	"if" when validating the ptid.
+	* remote-utils.c: Include "gdbthread.h".
+	(prepare_resume_reply): Use "switch_to_thread".
+	* target.c (done_accessing_memory): Likewise.
+
 2017-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* configure.srv (s390*-*-linux*): Add s390-gs-linux64.o and
