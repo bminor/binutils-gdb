@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2017-07-03 16:55+0200\n"
+"POT-Creation-Date: 2017-09-15 12:37+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #. Invalid option.
-#: aarch64-dis.c:81 arc-dis.c:775 arm-dis.c:6132
+#: aarch64-dis.c:81 arc-dis.c:775 arm-dis.c:6131
 #, c-format
 msgid "Unrecognised disassembler option: %s\n"
 msgstr ""
@@ -482,48 +482,48 @@ msgstr ""
 msgid "Invalid position, should be 0,4, 8,...124."
 msgstr ""
 
-#: arm-dis.c:3202
+#: arm-dis.c:3205
 msgid "Select raw register names"
 msgstr ""
 
-#: arm-dis.c:3204
+#: arm-dis.c:3207
 msgid "Select register names used by GCC"
 msgstr ""
 
-#: arm-dis.c:3206
+#: arm-dis.c:3209
 msgid "Select register names used in ARM's ISA documentation"
 msgstr ""
 
-#: arm-dis.c:3208
+#: arm-dis.c:3211
 msgid "Assume all insns are Thumb insns"
 msgstr ""
 
-#: arm-dis.c:3209
+#: arm-dis.c:3212
 msgid "Examine preceding label to determine an insn's type"
 msgstr ""
 
-#: arm-dis.c:3210
+#: arm-dis.c:3213
 msgid "Select register names used in the APCS"
 msgstr ""
 
-#: arm-dis.c:3212
+#: arm-dis.c:3215
 msgid "Select register names used in the ATPCS"
 msgstr ""
 
-#: arm-dis.c:3214
+#: arm-dis.c:3217
 msgid "Select special register names used in the ATPCS"
 msgstr ""
 
-#: arm-dis.c:3612
+#: arm-dis.c:3615
 msgid "<illegal precision>"
 msgstr ""
 
-#: arm-dis.c:6125
+#: arm-dis.c:6124
 #, c-format
 msgid "Unrecognised register name set: %s\n"
 msgstr ""
 
-#: arm-dis.c:6829
+#: arm-dis.c:6828
 #, c-format
 msgid ""
 "\n"
@@ -632,12 +632,12 @@ msgstr ""
 #: ip2k-asm.c:789 ip2k-asm.c:896 iq2000-asm.c:644 iq2000-asm.c:648
 #: iq2000-asm.c:737 iq2000-asm.c:844 lm32-asm.c:534 lm32-asm.c:538
 #: lm32-asm.c:627 lm32-asm.c:734 m32c-asm.c:1769 m32c-asm.c:1773
-#: m32c-asm.c:1862 m32c-asm.c:1969 m32r-asm.c:513 m32r-asm.c:517
-#: m32r-asm.c:606 m32r-asm.c:713 mep-asm.c:1472 mep-asm.c:1476 mep-asm.c:1565
-#: mep-asm.c:1672 mt-asm.c:780 mt-asm.c:784 mt-asm.c:873 mt-asm.c:980
-#: or1k-asm.c:688 or1k-asm.c:692 or1k-asm.c:781 or1k-asm.c:888 xc16x-asm.c:561
-#: xc16x-asm.c:565 xc16x-asm.c:654 xc16x-asm.c:761 xstormy16-asm.c:461
-#: xstormy16-asm.c:465 xstormy16-asm.c:554 xstormy16-asm.c:661
+#: m32c-asm.c:1862 m32c-asm.c:1969 m32r-asm.c:513 m32r-asm.c:517 m32r-asm.c:606
+#: m32r-asm.c:713 mep-asm.c:1472 mep-asm.c:1476 mep-asm.c:1565 mep-asm.c:1672
+#: mt-asm.c:780 mt-asm.c:784 mt-asm.c:873 mt-asm.c:980 or1k-asm.c:688
+#: or1k-asm.c:692 or1k-asm.c:781 or1k-asm.c:888 xc16x-asm.c:561 xc16x-asm.c:565
+#: xc16x-asm.c:654 xc16x-asm.c:761 xstormy16-asm.c:461 xstormy16-asm.c:465
+#: xstormy16-asm.c:554 xstormy16-asm.c:661
 msgid "unrecognized instruction"
 msgstr ""
 
@@ -695,9 +695,8 @@ msgid "*unknown*"
 msgstr ""
 
 #: epiphany-dis.c:277 fr30-dis.c:298 frv-dis.c:395 ip2k-dis.c:287
-#: iq2000-dis.c:188 lm32-dis.c:146 m32c-dis.c:890 m32r-dis.c:278
-#: mep-dis.c:1186 mt-dis.c:289 or1k-dis.c:140 xc16x-dis.c:419
-#: xstormy16-dis.c:167
+#: iq2000-dis.c:188 lm32-dis.c:146 m32c-dis.c:890 m32r-dis.c:278 mep-dis.c:1186
+#: mt-dis.c:289 or1k-dis.c:140 xc16x-dis.c:419 xstormy16-dis.c:167
 #, c-format
 msgid "Unrecognized field %d while printing insn.\n"
 msgstr ""
@@ -819,11 +818,11 @@ msgstr ""
 msgid "%02x\t\t*unknown*"
 msgstr ""
 
-#: i386-dis.c:12280
+#: i386-dis.c:12279
 msgid "<internal disassembler error>"
 msgstr ""
 
-#: i386-dis.c:12579
+#: i386-dis.c:12574
 #, c-format
 msgid ""
 "\n"
@@ -832,86 +831,86 @@ msgid ""
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 
-#: i386-dis.c:12583
+#: i386-dis.c:12578
 #, c-format
 msgid "  x86-64      Disassemble in 64bit mode\n"
 msgstr ""
 
-#: i386-dis.c:12584
+#: i386-dis.c:12579
 #, c-format
 msgid "  i386        Disassemble in 32bit mode\n"
 msgstr ""
 
-#: i386-dis.c:12585
+#: i386-dis.c:12580
 #, c-format
 msgid "  i8086       Disassemble in 16bit mode\n"
 msgstr ""
 
-#: i386-dis.c:12586
+#: i386-dis.c:12581
 #, c-format
 msgid "  att         Display instruction in AT&T syntax\n"
 msgstr ""
 
-#: i386-dis.c:12587
+#: i386-dis.c:12582
 #, c-format
 msgid "  intel       Display instruction in Intel syntax\n"
 msgstr ""
 
-#: i386-dis.c:12588
+#: i386-dis.c:12583
 #, c-format
 msgid ""
 "  att-mnemonic\n"
 "              Display instruction in AT&T mnemonic\n"
 msgstr ""
 
-#: i386-dis.c:12590
+#: i386-dis.c:12585
 #, c-format
 msgid ""
 "  intel-mnemonic\n"
 "              Display instruction in Intel mnemonic\n"
 msgstr ""
 
-#: i386-dis.c:12592
+#: i386-dis.c:12587
 #, c-format
 msgid "  addr64      Assume 64bit address size\n"
 msgstr ""
 
-#: i386-dis.c:12593
+#: i386-dis.c:12588
 #, c-format
 msgid "  addr32      Assume 32bit address size\n"
 msgstr ""
 
-#: i386-dis.c:12594
+#: i386-dis.c:12589
 #, c-format
 msgid "  addr16      Assume 16bit address size\n"
 msgstr ""
 
-#: i386-dis.c:12595
+#: i386-dis.c:12590
 #, c-format
 msgid "  data32      Assume 32bit data size\n"
 msgstr ""
 
-#: i386-dis.c:12596
+#: i386-dis.c:12591
 #, c-format
 msgid "  data16      Assume 16bit data size\n"
 msgstr ""
 
-#: i386-dis.c:12597
+#: i386-dis.c:12592
 #, c-format
 msgid "  suffix      Always display instruction suffix in AT&T syntax\n"
 msgstr ""
 
-#: i386-dis.c:12598
+#: i386-dis.c:12593
 #, c-format
 msgid "  amd64       Display instruction in AMD64 ISA\n"
 msgstr ""
 
-#: i386-dis.c:12599
+#: i386-dis.c:12594
 #, c-format
 msgid "  intel64     Display instruction in Intel64 ISA\n"
 msgstr ""
 
-#: i386-dis.c:13150
+#: i386-dis.c:13145
 msgid "64-bit address is disabled"
 msgstr ""
 

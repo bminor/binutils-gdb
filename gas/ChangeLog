@@ -1,3 +1,10 @@
+2017-09-15  Nick Clifton  <nickc@redhat.com>
+
+	2.29.1 Release
+
+	* configure: Regenerate.
+	* po/gas.pot: Regenerate.
+
 2017-09-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (NOTRACK_PREFIX): Removed.

@@ -1,3 +1,10 @@
+2017-09-15  Nick Clifton  <nickc@redhat.com>
+
+	2.29.1 Release
+
+	* Makefile.in: Regenerate.
+	* po/gold.pot: Regenerate.
+
 2017-08-28  Alan Modra  <amodra@gmail.com>
 
 	PR 21847

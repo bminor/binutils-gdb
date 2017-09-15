@@ -1,3 +1,10 @@
+2017-09-15  Nick Clifton  <nickc@redhat.com>
+
+	2.29.1 Release
+
+	* configure: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
 2017-09-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (last_active_prefix): Removed.

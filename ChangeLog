@@ -1,3 +1,7 @@
+2017-09-15  Nick Clifton  <nickc@redhat.com>
+
+	2.29.1 Release
+
 2017-04-13  Andrew Jenner  <andrew@codesourcery.com>
 
 	* config.sub: Sync with master version in config project.
