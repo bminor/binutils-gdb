@@ -733,25 +733,12 @@ thread_db_init (void)
   return 0;
 }
 
-static int
-any_thread_of (struct inferior_list_entry *entry, void *args)
-{
-  int *pid_p = (int *) args;
-
-  if (ptid_get_pid (entry->id) == *pid_p)
-    return 1;
-
-  return 0;
-}
-
 static void
 switch_to_process (struct process_info *proc)
 {
   int pid = pid_of (proc);
 
-  current_thread =
-    (struct thread_info *) find_inferior (&all_threads,
-					  any_thread_of, &pid);
+  current_thread = find_any_thread_of_pid (pid);
 }
 
 /* Disconnect from libthread_db and free resources.  */

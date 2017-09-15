@@ -141,25 +141,13 @@ find_thread_ptid (ptid_t ptid)
   return (struct thread_info *) find_inferior_id (&all_threads, ptid);
 }
 
-/* Predicate function for matching thread entry's pid to the given
-   pid value passed by address in ARGS.  */
-
-static int
-thread_pid_matches_callback (struct inferior_list_entry *entry, void *args)
-{
-  return (ptid_get_pid (entry->id) == *(pid_t *)args);
-}
-
 /* Find a thread associated with the given PROCESS, or NULL if no
    such thread exists.  */
 
 static struct thread_info *
 find_thread_process (const struct process_info *const process)
 {
-  pid_t pid = ptid_get_pid (ptid_of (process));
-
-  return (struct thread_info *)
-    find_inferior (&all_threads, thread_pid_matches_callback, &pid);
+  return find_any_thread_of_pid (process->entry.id.pid ());
 }
 
 /* Helper for find_any_thread_of_pid.  Returns true if a thread

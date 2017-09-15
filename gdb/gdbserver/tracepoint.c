@@ -3956,17 +3956,6 @@ cmd_qtstmat (char *packet)
     run_inferior_command (packet, strlen (packet) + 1);
 }
 
-/* Helper for gdb_agent_about_to_close.
-   Return non-zero if thread ENTRY is in the same process in DATA.  */
-
-static int
-same_process_p (struct inferior_list_entry *entry, void *data)
-{
-  int *pid = (int *) data;
-
-  return ptid_get_pid (entry->id) == *pid;
-}
-
 /* Sent the agent a command to close it.  */
 
 void
@@ -3981,8 +3970,7 @@ gdb_agent_about_to_close (int pid)
       saved_thread = current_thread;
 
       /* Find any thread which belongs to process PID.  */
-      current_thread = (struct thread_info *)
-	find_inferior (&all_threads, same_process_p, &pid);
+      current_thread = find_any_thread_of_pid (pid);
 
       strcpy (buf, "close");
 

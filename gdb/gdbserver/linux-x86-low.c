@@ -846,17 +846,6 @@ x86_linux_read_description (void)
   gdb_assert_not_reached ("failed to return tdesc");
 }
 
-/* Callback for find_inferior.  Stops iteration when a thread with a
-   given PID is found.  */
-
-static int
-same_process_callback (struct inferior_list_entry *entry, void *data)
-{
-  int pid = *(int *) data;
-
-  return (ptid_get_pid (entry->id) == pid);
-}
-
 /* Callback for for_each_inferior.  Calls the arch_setup routine for
    each process.  */
 
@@ -866,9 +855,7 @@ x86_arch_setup_process_callback (struct inferior_list_entry *entry)
   int pid = ptid_get_pid (entry->id);
 
   /* Look up any thread of this processes.  */
-  current_thread
-    = (struct thread_info *) find_inferior (&all_threads,
-					    same_process_callback, &pid);
+  current_thread = find_any_thread_of_pid (pid);
 
   the_low_target.arch_setup ();
 }

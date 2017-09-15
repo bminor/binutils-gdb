@@ -1,3 +1,20 @@
+2017-09-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* server.c (first_thread_of): Remove.
+	(process_serial_event): Replace usage of first_thread_of with
+	find_any_thread_of_pid.
+	* tracepoint.c (same_process_p): Remove.
+	(gdb_agent_about_to_close): Replace usage of same_process_p with
+	find_any_thread_of_pid.
+	* linux-x86-low.c (same_process_callback): Remove.
+	(x86_arch_setup_process_callback): Replace usage of
+	same_process_callback with find_any_thread_of_pid.
+	* thread-db.c (any_thread_of): Remove.
+	(switch_to_process): Replace usage of any_thread_of with
+	find_any_thread_of_pid.
+	* inferiors.c (thread_pid_matches_callback): Remove.
+	(find_thread_process): Adjust to use find_any_thread_of_pid.
+
 2017-09-10  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* regcache.c (get_thread_regcache): Guard calls to "memset"

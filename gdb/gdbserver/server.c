@@ -3450,17 +3450,6 @@ gdbserver_show_disableable (FILE *stream)
       break;					\
     }
 
-static int
-first_thread_of (struct inferior_list_entry *entry, void *args)
-{
-  int pid = * (int *) args;
-
-  if (ptid_get_pid (entry->id) == pid)
-    return 1;
-
-  return 0;
-}
-
 static void
 kill_inferior_callback (struct inferior_list_entry *entry)
 {
@@ -4162,11 +4151,9 @@ process_serial_event (void)
 		   && ptid_equal (pid_to_ptid (pid),
 				  gdb_id))
 	    {
-	      struct thread_info *thread =
-		(struct thread_info *) find_inferior (&all_threads,
-						      first_thread_of,
-						      &pid);
-	      if (!thread)
+	      thread_info *thread = find_any_thread_of_pid (pid);
+
+	      if (thread == NULL)
 		{
 		  write_enn (own_buf);
 		  break;
