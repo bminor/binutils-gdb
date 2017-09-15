@@ -143,8 +143,6 @@ struct process_info *find_process_pid (int pid);
 int have_started_inferiors_p (void);
 int have_attached_inferiors_p (void);
 
-ptid_t thread_to_gdb_id (struct thread_info *);
-
 void clear_inferiors (void);
 struct inferior_list_entry *find_inferior
      (struct inferior_list *,

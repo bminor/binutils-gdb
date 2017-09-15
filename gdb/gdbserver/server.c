@@ -1687,7 +1687,7 @@ handle_qxfer_threads_worker (struct inferior_list_entry *inf, void *arg)
 {
   struct thread_info *thread = (struct thread_info *) inf;
   struct buffer *buffer = (struct buffer *) arg;
-  ptid_t ptid = thread_to_gdb_id (thread);
+  ptid_t ptid = ptid_of (thread);
   char ptid_s[100];
   int core = target_core_of_thread (ptid);
   char core_s[21];
@@ -2171,21 +2171,20 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
   /* Reply the current thread id.  */
   if (strcmp ("qC", own_buf) == 0 && !disable_packet_qC)
     {
-      ptid_t gdb_id;
+      ptid_t ptid;
       require_running_or_return (own_buf);
 
-      if (!ptid_equal (general_thread, null_ptid)
-	  && !ptid_equal (general_thread, minus_one_ptid))
-	gdb_id = general_thread;
+      if (general_thread != null_ptid && general_thread != minus_one_ptid)
+	ptid = general_thread;
       else
 	{
 	  thread_ptr = get_first_inferior (&all_threads);
-	  gdb_id = thread_to_gdb_id ((struct thread_info *)thread_ptr);
+	  ptid = thread_ptr->id;
 	}
 
       sprintf (own_buf, "QC");
       own_buf += 2;
-      write_ptid (own_buf, gdb_id);
+      write_ptid (own_buf, ptid);
       return;
     }
 
@@ -2241,28 +2240,22 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
     {
       if (strcmp ("qfThreadInfo", own_buf) == 0)
 	{
-	  ptid_t gdb_id;
-
 	  require_running_or_return (own_buf);
 	  thread_ptr = get_first_inferior (&all_threads);
 
 	  *own_buf++ = 'm';
-	  gdb_id = thread_to_gdb_id ((struct thread_info *)thread_ptr);
-	  write_ptid (own_buf, gdb_id);
+	  write_ptid (own_buf, thread_ptr->id);
 	  thread_ptr = thread_ptr->next;
 	  return;
 	}
 
       if (strcmp ("qsThreadInfo", own_buf) == 0)
 	{
-	  ptid_t gdb_id;
-
 	  require_running_or_return (own_buf);
 	  if (thread_ptr != NULL)
 	    {
 	      *own_buf++ = 'm';
-	      gdb_id = thread_to_gdb_id ((struct thread_info *)thread_ptr);
-	      write_ptid (own_buf, gdb_id);
+	      write_ptid (own_buf, thread_ptr->id);
 	      thread_ptr = thread_ptr->next;
 	      return;
 	    }

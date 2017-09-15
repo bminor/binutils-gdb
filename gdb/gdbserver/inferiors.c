@@ -121,12 +121,6 @@ add_thread (ptid_t thread_id, void *target_data)
   return new_thread;
 }
 
-ptid_t
-thread_to_gdb_id (struct thread_info *thread)
-{
-  return thread->entry.id;
-}
-
 /* Wrapper around get_first_inferior to return a struct thread_info *.  */
 
 struct thread_info *

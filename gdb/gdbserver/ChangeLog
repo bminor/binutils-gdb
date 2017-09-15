@@ -1,5 +1,16 @@
 2017-09-15  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* inferiors.h (thread_to_gdb_id): Remove.
+	* inferiors.c (thread_to_gdb_id): Remove.
+	* server.c (handle_qxfer_threads_worker, handle_query): Adjust.
+	* lynx-low.c (lynx_resume, lynx_wait_1, lynx_fetch_registers,
+	lynx_store_registers, lynx_read_memory, lynx_write_memory):
+	Likewise.
+	* nto-low.c (nto_fetch_registers, nto_store_registers,
+	nto_stopped_by_watchpoint, nto_stopped_data_address): Likewise.
+
+2017-09-15  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* inferiors.h (gdb_id_to_thread_id): Remove.
 	* inferiors.c (gdb_id_to_thread_id): Remove.
 	* server.c (process_serial_event): Adjust to gdb_id_to_thread_id
