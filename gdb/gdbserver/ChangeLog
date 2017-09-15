@@ -1,5 +1,10 @@
 2017-09-15  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* linux-low.c (linux_set_resume_request): Remove unused
+	variables.
+
+2017-09-15  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* server.c (first_thread_of): Remove.
 	(process_serial_event): Replace usage of first_thread_of with
 	find_any_thread_of_pid.

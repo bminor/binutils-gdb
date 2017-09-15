@@ -4711,7 +4711,6 @@ linux_set_resume_request (struct inferior_list_entry *entry, void *arg)
 	     does not yet know are new fork children.  */
 	  if (lwp->fork_relative != NULL)
 	    {
-	      struct inferior_list_entry *inf, *tmp;
 	      struct lwp_info *rel = lwp->fork_relative;
 
 	      if (rel->status_pending_p
