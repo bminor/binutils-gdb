@@ -1,5 +1,11 @@
 2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* server.c (accumulate_file_name_length): Remove.
+	(emit_dll_description): Adjust to std::string change.
+	(handle_qxfer_libraries): Use std::string to hold document.
+
+2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* linux-low.c (linux_qxfer_libraries_svr4): Adjust to change of
 	return type of xml_escape_text.
 	* server.c (emit_dll_description): Likewise.

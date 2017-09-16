@@ -1509,43 +1509,18 @@ handle_qxfer_features (const char *annex,
 }
 
 /* Worker routine for handle_qxfer_libraries.
-   Add to the length pointed to by ARG a conservative estimate of the
-   length needed to transmit the file name of INF.  */
-
-static void
-accumulate_file_name_length (struct inferior_list_entry *inf, void *arg)
-{
-  struct dll_info *dll = (struct dll_info *) inf;
-  unsigned int *total_len = (unsigned int *) arg;
-
-  /* Over-estimate the necessary memory.  Assume that every character
-     in the library name must be escaped.  */
-  *total_len += 128 + 6 * strlen (dll->name);
-}
-
-/* Worker routine for handle_qxfer_libraries.
    Emit the XML to describe the library in INF.  */
 
 static void
 emit_dll_description (struct inferior_list_entry *inf, void *arg)
 {
   struct dll_info *dll = (struct dll_info *) inf;
-  char **p_ptr = (char **) arg;
-  char *p = *p_ptr;
-
-  strcpy (p, "  <library name=\"");
-  p = p + strlen (p);
+  std::string *document = (std::string *) arg;
   std::string name = xml_escape_text (dll->name);
-  strcpy (p, name.c_str ());
-  p = p + strlen (p);
-  strcpy (p, "\"><segment address=\"");
-  p = p + strlen (p);
-  sprintf (p, "0x%lx", (long) dll->base_addr);
-  p = p + strlen (p);
-  strcpy (p, "\"/></library>\n");
-  p = p + strlen (p);
 
-  *p_ptr = p;
+  *document += string_printf
+    ("  <library name=\"%s\"><segment address=\"0x%lx\"/></library>\n",
+     name.c_str (), (long) dll->base_addr);
 }
 
 /* Handle qXfer:libraries:read.  */
@@ -1555,43 +1530,26 @@ handle_qxfer_libraries (const char *annex,
 			gdb_byte *readbuf, const gdb_byte *writebuf,
 			ULONGEST offset, LONGEST len)
 {
-  unsigned int total_len;
-  char *document, *p;
-
   if (writebuf != NULL)
     return -2;
 
   if (annex[0] != '\0' || current_thread == NULL)
     return -1;
 
-  total_len = 64;
-  for_each_inferior_with_data (&all_dlls, accumulate_file_name_length,
-			       &total_len);
+  std::string document = "<library-list version=\"1.0\">\n";
 
-  document = (char *) malloc (total_len);
-  if (document == NULL)
+  for_each_inferior_with_data (&all_dlls, emit_dll_description, &document);
+
+  document += "</library-list>\n";
+
+  if (offset > document.length ())
     return -1;
 
-  strcpy (document, "<library-list version=\"1.0\">\n");
-  p = document + strlen (document);
+  if (offset + len > document.length ())
+    len = document.length () - offset;
 
-  for_each_inferior_with_data (&all_dlls, emit_dll_description, &p);
+  memcpy (readbuf, &document[offset], len);
 
-  strcpy (p, "</library-list>\n");
-
-  total_len = strlen (document);
-
-  if (offset > total_len)
-    {
-      free (document);
-      return -1;
-    }
-
-  if (offset + len > total_len)
-    len = total_len - offset;
-
-  memcpy (readbuf, document + offset, len);
-  free (document);
   return len;
 }
 
