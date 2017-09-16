@@ -2325,7 +2325,6 @@ mi_load_progress (const char *section_name,
   static char *previous_sect_name = NULL;
   int new_section;
   struct ui_out *saved_uiout;
-  struct ui_out *uiout;
   struct mi_interp *mi = (struct mi_interp *) current_interpreter ();
 
   /* This function is called through deprecated_show_load_progress
@@ -2333,17 +2332,19 @@ mi_load_progress (const char *section_name,
      of this function.  */
   saved_uiout = current_uiout;
 
+  std::unique_ptr<ui_out> uiout;
+
   if (current_interp_named_p (INTERP_MI)
       || current_interp_named_p (INTERP_MI2))
-    current_uiout = mi_out_new (2);
+    uiout.reset (mi_out_new (2));
   else if (current_interp_named_p (INTERP_MI1))
-    current_uiout = mi_out_new (1);
+    uiout.reset (mi_out_new (1));
   else if (current_interp_named_p (INTERP_MI3))
-    current_uiout = mi_out_new (3);
+    uiout.reset (mi_out_new (3));
   else
     return;
 
-  uiout = current_uiout;
+  current_uiout = uiout.get ();
 
   new_section = (previous_sect_name ?
 		 strcmp (previous_sect_name, section_name) : 1);
@@ -2356,12 +2357,12 @@ mi_load_progress (const char *section_name,
 	fputs_unfiltered (current_token, mi->raw_stdout);
       fputs_unfiltered ("+download", mi->raw_stdout);
       {
-	ui_out_emit_tuple tuple_emitter (uiout, NULL);
+	ui_out_emit_tuple tuple_emitter (uiout.get (), NULL);
 	uiout->field_string ("section", section_name);
 	uiout->field_int ("section-size", total_section);
 	uiout->field_int ("total-size", grand_total);
       }
-      mi_out_put (uiout, mi->raw_stdout);
+      mi_out_put (uiout.get (), mi->raw_stdout);
       fputs_unfiltered ("\n", mi->raw_stdout);
       gdb_flush (mi->raw_stdout);
     }
@@ -2374,19 +2375,18 @@ mi_load_progress (const char *section_name,
 	fputs_unfiltered (current_token, mi->raw_stdout);
       fputs_unfiltered ("+download", mi->raw_stdout);
       {
-	ui_out_emit_tuple tuple_emitter (uiout, NULL);
+	ui_out_emit_tuple tuple_emitter (uiout.get (), NULL);
 	uiout->field_string ("section", section_name);
 	uiout->field_int ("section-sent", sent_so_far);
 	uiout->field_int ("section-size", total_section);
 	uiout->field_int ("total-sent", total_sent);
 	uiout->field_int ("total-size", grand_total);
       }
-      mi_out_put (uiout, mi->raw_stdout);
+      mi_out_put (uiout.get (), mi->raw_stdout);
       fputs_unfiltered ("\n", mi->raw_stdout);
       gdb_flush (mi->raw_stdout);
     }
 
-  xfree (uiout);
   current_uiout = saved_uiout;
 }
 

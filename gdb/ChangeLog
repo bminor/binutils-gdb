@@ -1,3 +1,8 @@
+2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* mi/mi-main.c (mi_load_progress): Make uiout variable
+	a unique_ptr.
+
 2017-09-15  Pedro Alves  <palves@redhat.com>
 
 	* compile/compile-c-types.c (convert_enum, convert_int)
