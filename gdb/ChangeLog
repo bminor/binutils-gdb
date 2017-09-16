@@ -1,5 +1,10 @@
 2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* mi/mi-main.c (mi_load_progress): Restore current_uiout using a
+	scoped_restore.
+
+2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* mi/mi-main.c (mi_load_progress): Make uiout variable
 	a unique_ptr.
 

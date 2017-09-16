@@ -2324,13 +2324,11 @@ mi_load_progress (const char *section_name,
   static steady_clock::time_point last_update;
   static char *previous_sect_name = NULL;
   int new_section;
-  struct ui_out *saved_uiout;
   struct mi_interp *mi = (struct mi_interp *) current_interpreter ();
 
   /* This function is called through deprecated_show_load_progress
      which means uiout may not be correct.  Fix it for the duration
      of this function.  */
-  saved_uiout = current_uiout;
 
   std::unique_ptr<ui_out> uiout;
 
@@ -2344,7 +2342,8 @@ mi_load_progress (const char *section_name,
   else
     return;
 
-  current_uiout = uiout.get ();
+  scoped_restore save_uiout
+    = make_scoped_restore (&current_uiout, uiout.get ());
 
   new_section = (previous_sect_name ?
 		 strcmp (previous_sect_name, section_name) : 1);
@@ -2386,8 +2385,6 @@ mi_load_progress (const char *section_name,
       fputs_unfiltered ("\n", mi->raw_stdout);
       gdb_flush (mi->raw_stdout);
     }
-
-  current_uiout = saved_uiout;
 }
 
 static void
