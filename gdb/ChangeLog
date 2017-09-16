@@ -1,5 +1,11 @@
 2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add new source file.
+	(SUBDIR_UNITTESTS_OBS): Add new object file.
+	* unittests/xml-utils-selftests.c: New file.
+
+2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* common/selftest.h (selftest): New struct/interface.
 	(register_test): Add name parameter, add new overload.
 	(run_tests): Add filter parameter.
