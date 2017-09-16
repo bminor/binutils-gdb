@@ -1095,6 +1095,8 @@ void
 _initialize_findvar (void)
 {
 #if GDB_SELF_TEST
-  selftests::register_test (selftests::findvar_tests::copy_integer_to_size_test);
+  selftests::register_test
+    ("copy_integer_to_size",
+     selftests::findvar_tests::copy_integer_to_size_test);
 #endif
 }

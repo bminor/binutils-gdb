@@ -4671,6 +4671,6 @@ _initialize_dwarf2loc (void)
 			     &setdebuglist, &showdebuglist);
 
 #if GDB_SELF_TEST
-  selftests::register_test (selftests::copy_bitwise_tests);
+  selftests::register_test ("copy_bitwise", selftests::copy_bitwise_tests);
 #endif
 }

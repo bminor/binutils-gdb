@@ -2403,6 +2403,7 @@ _initialize_dwarf2_frame (void)
   dwarf2_frame_objfile_data = register_objfile_data ();
 
 #if GDB_SELF_TEST
-  selftests::register_test_foreach_arch (selftests::execute_cfa_program_test);
+  selftests::register_test_foreach_arch ("execute_cfa_program",
+					 selftests::execute_cfa_program_test);
 #endif
 }

@@ -3065,8 +3065,10 @@ When on, AArch64 specific debugging is enabled."),
 			    &setdebuglist, &showdebuglist);
 
 #if GDB_SELF_TEST
-  selftests::register_test (selftests::aarch64_analyze_prologue_test);
-  selftests::register_test (selftests::aarch64_process_record_test);
+  selftests::register_test ("aarch64-analyze-prologue",
+			    selftests::aarch64_analyze_prologue_test);
+  selftests::register_test ("aarch64-process-record",
+			    selftests::aarch64_process_record_test);
 #endif
 }
 

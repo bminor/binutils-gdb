@@ -106,5 +106,6 @@ run_tests ()
 void
 _initialize_scoped_restore_selftests ()
 {
-  selftests::register_test (selftests::scoped_restore_tests::run_tests);
+  selftests::register_test ("scoped_restore",
+			    selftests::scoped_restore_tests::run_tests);
 }

@@ -3661,6 +3661,7 @@ captured_main (int argc, char *argv[])
   volatile int attach = 0;
   int was_running;
   bool selftest = false;
+  const char *selftest_filter = NULL;
 
   while (*next_arg != NULL && **next_arg == '-')
     {
@@ -3781,6 +3782,11 @@ captured_main (int argc, char *argv[])
 	run_once = 1;
       else if (strcmp (*next_arg, "--selftest") == 0)
 	selftest = true;
+      else if (startswith (*next_arg, "--selftest="))
+	{
+	  selftest = true;
+	  selftest_filter = *next_arg + strlen ("--selftest=");
+	}
       else
 	{
 	  fprintf (stderr, "Unknown argument: %s\n", *next_arg);
@@ -3857,7 +3863,7 @@ captured_main (int argc, char *argv[])
 
   if (selftest)
     {
-      selftests::run_tests ();
+      selftests::run_tests (selftest_filter);
       throw_quit ("Quit");
     }
 

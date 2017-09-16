@@ -1,3 +1,10 @@
+2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* server.c (captured_main): Accept argument for --selftest.
+	Update run_tests call.
+	* linux-x86-tdesc-selftest.c (initialize_low_tdesc): Add names
+	when registering selftests.
+
 2017-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* regcache.c (get_thread_regcache): Update code to use "std::vector"

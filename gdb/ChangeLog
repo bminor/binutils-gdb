@@ -1,5 +1,62 @@
 2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* common/selftest.h (selftest): New struct/interface.
+	(register_test): Add name parameter, add new overload.
+	(run_tests): Add filter parameter.
+	(for_each_selftest_ftype): New typedef.
+	(for_each_selftest): New declaration.
+	* common/selftest.c (tests): Change type to
+	map<string, unique_ptr<selftest>>.
+	(simple_selftest): New struct.
+	(register_test): New function.
+	(register_test): Add name parameter and use it.
+	(run_tests): Add filter parameter and use it.  Add prints.
+	Adjust to vector -> map change.
+	* aarch64-tdep.c (_initialize_aarch64_tdep): Add names when
+	registering selftests.
+	* arm-tdep.c (_initialize_arm_tdep): Likewise.
+	* disasm-selftests.c (_initialize_disasm_selftests): Likewise.
+	* dwarf2-frame.c (_initialize_dwarf2_frame): Likewise.
+	* dwarf2loc.c (_initialize_dwarf2loc): Likewise.
+	* findvar.c (_initialize_findvar): Likewise.
+	* gdbarch-selftests.c (_initialize_gdbarch_selftests): Likewise.
+	* maint.c (maintenance_selftest): Update call to run_tests.
+	(maintenance_info_selftests): New function.
+	(_initialize_maint_cmds): Register "maintenance info selftests"
+	command.  Update "maintenance selftest" doc.
+	* regcache.c (_initialize_regcache): Add names when registering
+	selftests.
+	* rust-exp.y (_initialize_rust_exp): Likewise.
+	* selftest-arch.c (gdbarch_selftest): New struct.
+	(gdbarch_tests): Remove.
+	(register_test_foreach_arch): Add name parameter.  Call
+	register_test.
+	(tests_with_arch): Remove, move most content to
+	gdbarch_selftest::operator().
+	(_initialize_selftests_foreach_arch): Remove.
+	* selftest-arch.h (register_test_foreach_arch): Add name
+	parameter.
+	(run_tests_with_arch): New declaration.
+	* utils-selftests.c (_initialize_utils_selftests): Add names
+	when registering selftests.
+	* utils.c (_initialize_utils): Likewise.
+	* unittests/array-view-selftests.c
+	(_initialize_array_view_selftests): Likewise.
+	* unittests/environ-selftests.c (_initialize_environ_selftests):
+	Likewise.
+	* unittests/function-view-selftests.c
+	(_initialize_function_view_selftests): Likewise.
+	* unittests/offset-type-selftests.c
+	(_initialize_offset_type_selftests): Likewise.
+	* unittests/optional-selftests.c
+	(_initialize_optional_selftests): Likewise.
+	* unittests/scoped_restore-selftests.c
+	(_initialize_scoped_restore_selftests): Likewise.
+	* NEWS: Document "maintenance selftest" and "maint info
+	selftests".
+
+2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* mi/mi-main.c (mi_load_progress): Restore current_uiout using a
 	scoped_restore.
 

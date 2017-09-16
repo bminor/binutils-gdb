@@ -59,6 +59,9 @@ QStartupWithShell
 * The "maintenance print c-tdesc" command now takes an optional
   argument which is the file name of XML target description.
 
+* The "maintenance selftest" command now takes an optional argument to
+  filter the tests to be run.
+
 * New commands
 
 set|show compile-gcc
@@ -68,6 +71,9 @@ set|show compile-gcc
 set debug separate-debug-file
 show debug separate-debug-file
   Control the display of debug output about separate debug file search.
+
+maint info selftests
+  List the registered selftests.
 
 * TUI Single-Key mode now supports two new shortcut keys: `i' for stepi and
   `o' for nexti.

@@ -957,7 +957,16 @@ show_per_command_cmd (char *args, int from_tty)
 static void
 maintenance_selftest (char *args, int from_tty)
 {
-  selftests::run_tests ();
+  selftests::run_tests (args);
+}
+
+static void
+maintenance_info_selftests (char *arg, int from_tty)
+{
+  printf_filtered ("Registered selftests:\n");
+  selftests::for_each_selftest ([] (const std::string &name) {
+    printf_filtered (" - %s\n", name.c_str ());
+  });
 }
 
 
@@ -1140,10 +1149,13 @@ If you decide you want to use it: maintenance undeprecate 'commandname'"),
 
   add_cmd ("selftest", class_maintenance, maintenance_selftest, _("\
 Run gdb's unit tests.\n\
-Usage: maintenance selftest\n\
+Usage: maintenance selftest [filter]\n\
 This will run any unit tests that were built in to gdb.\n\
-gdb will abort if any test fails."),
+If a filter is given, only the tests with that value in their name will ran."),
 	   &maintenancelist);
+
+  add_cmd ("selftests", class_maintenance, maintenance_info_selftests,
+	 _("List the registered selftests."), &maintenanceinfolist);
 
   add_setshow_zinteger_cmd ("watchdog", class_maintenance, &watchdog, _("\
 Set watchdog timer."), _("\

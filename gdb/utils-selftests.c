@@ -55,6 +55,6 @@ void
 _initialize_utils_selftests (void)
 {
 #if GDB_SELF_TEST
-  selftests::register_test (selftests::common_utils_tests);
+  selftests::register_test ("common-utils", selftests::common_utils_tests);
 #endif
 }

@@ -3267,6 +3267,6 @@ _initialize_utils (void)
   add_internal_problem_command (&demangler_warning_problem);
 
 #if GDB_SELF_TEST
-  selftests::register_test (gdb_realpath_tests);
+  selftests::register_test ("gdb_realpath", gdb_realpath_tests);
 #endif
 }

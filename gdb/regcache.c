@@ -1773,7 +1773,8 @@ Print the internal register configuration including each register's\n\
 remote register number and buffer offset in the g/G packets.\n\
 Takes an optional file parameter."),
 	   &maintenanceprintlist);
+
 #if GDB_SELF_TEST
-  selftests::register_test (selftests::current_regcache_test);
+  selftests::register_test ("current_regcache", selftests::current_regcache_test);
 #endif
 }

@@ -1,3 +1,8 @@
+2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Maintenance Commands): Document filter parameter
+	of "maint selftest".  Document "maint info selftests" command.
+
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
 	* python.texi (Events In Python): Document new events.
