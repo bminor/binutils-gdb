@@ -7288,7 +7288,6 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 	    {
 	      /* 6x the size for xml_escape_text below.  */
 	      size_t len = 6 * strlen ((char *) libname);
-	      char *name;
 
 	      if (!header_done)
 		{
@@ -7307,12 +7306,11 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 		  p = document + document_len;
 		}
 
-	      name = xml_escape_text ((char *) libname);
+	      std::string name = xml_escape_text ((char *) libname);
 	      p += sprintf (p, "<library name=\"%s\" lm=\"0x%lx\" "
 			    "l_addr=\"0x%lx\" l_ld=\"0x%lx\"/>",
-			    name, (unsigned long) lm_addr,
+			    name.c_str (), (unsigned long) lm_addr,
 			    (unsigned long) l_addr, (unsigned long) l_ld);
-	      free (name);
 	    }
 	}
 

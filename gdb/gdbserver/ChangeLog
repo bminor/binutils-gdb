@@ -1,5 +1,11 @@
 2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* linux-low.c (linux_qxfer_libraries_svr4): Adjust to change of
+	return type of xml_escape_text.
+	* server.c (emit_dll_description): Likewise.
+
+2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* server.c (captured_main): Accept argument for --selftest.
 	Update run_tests call.
 	* linux-x86-tdesc-selftest.c (initialize_low_tdesc): Add names

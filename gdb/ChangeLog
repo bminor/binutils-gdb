@@ -1,5 +1,17 @@
 2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* common/buffer.c (buffer_xml_printf): Adjust.
+	* common/xml-utils.c (xml_escape_text): Change return type to
+	std::string, update code accordingly.
+	* common/xml-utils.h (xml_escape_text): Change return type to
+	std::string.
+	* rs6000-aix-tdep.c (rs6000_aix_shared_library_to_xml): Adjust.
+	* windows-tdep.c (windows_xfer_shared_library): Adjust.
+	* unittests/xml-utils-selftests.c (test_xml_escape_text):
+	Adjust.
+
+2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add new source file.
 	(SUBDIR_UNITTESTS_OBS): Add new object file.
 	* unittests/xml-utils-selftests.c: New file.

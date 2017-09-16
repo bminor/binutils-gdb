@@ -1532,13 +1532,11 @@ emit_dll_description (struct inferior_list_entry *inf, void *arg)
   struct dll_info *dll = (struct dll_info *) inf;
   char **p_ptr = (char **) arg;
   char *p = *p_ptr;
-  char *name;
 
   strcpy (p, "  <library name=\"");
   p = p + strlen (p);
-  name = xml_escape_text (dll->name);
-  strcpy (p, name);
-  free (name);
+  std::string name = xml_escape_text (dll->name);
+  strcpy (p, name.c_str ());
   p = p + strlen (p);
   strcpy (p, "\"><segment address=\"");
   p = p + strlen (p);

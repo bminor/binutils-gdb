@@ -371,13 +371,11 @@ void
 windows_xfer_shared_library (const char* so_name, CORE_ADDR load_addr,
 			     struct gdbarch *gdbarch, struct obstack *obstack)
 {
-  char *p;
   CORE_ADDR text_offset;
 
   obstack_grow_str (obstack, "<library name=\"");
-  p = xml_escape_text (so_name);
-  obstack_grow_str (obstack, p);
-  xfree (p);
+  std::string p = xml_escape_text (so_name);
+  obstack_grow_str (obstack, p.c_str ());
   obstack_grow_str (obstack, "\"><segment address=\"");
   gdb_bfd_ref_ptr dll (gdb_bfd_open (so_name, gnutarget, -1));
   /* The following calls are OK even if dll is NULL.

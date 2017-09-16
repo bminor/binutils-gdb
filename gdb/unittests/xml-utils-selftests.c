@@ -28,11 +28,9 @@ static void test_xml_escape_text ()
 {
   const char *input = "<this isn't=\"xml\"> &";
   const char *expected_output = "&lt;this isn&apos;t=&quot;xml&quot;&gt; &amp;";
-  char *actual_output = xml_escape_text (input);
+  std::string actual_output = xml_escape_text (input);
 
-  SELF_CHECK (strcmp (actual_output, expected_output) == 0);
-
-  xfree (actual_output);
+  SELF_CHECK (actual_output == expected_output);
 }
 
 }
