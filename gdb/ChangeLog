@@ -1,3 +1,8 @@
+2017-09-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2expr.c (dwarf_expr_context::execute_stack_op): Remove
+	label abort_expression.
+
 2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/buffer.c (buffer_xml_printf): Adjust.

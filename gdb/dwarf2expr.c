@@ -1402,7 +1402,6 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
   if (this->location == DWARF_VALUE_IMPLICIT_POINTER)
     add_piece (8 * this->addr_size, 0);
 
-abort_expression:
   this->recursion_depth--;
   gdb_assert (this->recursion_depth >= 0);
 }
