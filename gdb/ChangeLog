@@ -1,3 +1,8 @@
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
+	* macroexp.c (get_next_token_for_substitution): New function.
+	(substitute_args): Call it.  Check for __VA_OPT__.
+
 2017-09-26  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 	    Pedro Alves <palves@redhat.com>
 

@@ -1,3 +1,7 @@
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/macscp.exp: Add __VA_OPT__ tests.
+
 2017-09-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 	    Pedro Alves  <palves@redhat.com>
 
