@@ -1807,6 +1807,8 @@ _bfd_x86_elf_get_synthetic_symtab (bfd *abfd,
 
   dynrelcount = bfd_canonicalize_dynamic_reloc (abfd, dynrelbuf,
 						dynsyms);
+  if (dynrelcount < 0)
+    return -1;
 
   /* Sort the relocs by address.  */
   qsort (dynrelbuf, dynrelcount, sizeof (arelent *),

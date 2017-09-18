@@ -1,3 +1,9 @@
+2017-09-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22148
+	* elfxx-x86.c (_bfd_x86_elf_get_synthetic_symtab): Check error
+	return from bfd_canonicalize_dynamic_reloc.
+
 2017-09-15  Alan Modra  <amodra@gmail.com>
 
 	PR 22116
