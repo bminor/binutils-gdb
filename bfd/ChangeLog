@@ -1,3 +1,10 @@
+2017-09-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22148
+	* elf32-i386.c (elf_i386_get_synthetic_symtab): Check error
+	return from bfd_canonicalize_dynamic_reloc.
+	* elf64-x86-64.c (elf_x86_64_get_synthetic_symtab): Likewise.
+
 2017-09-15  Nick Clifton  <nickc@redhat.com>
 
 	2.29.1 Release
