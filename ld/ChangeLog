@@ -1,3 +1,18 @@
+2017-09-19  Nick Clifton  <nickc@redhat.com>
+
+	2.29.1 Release
+
+	* configure: Regenerate.
+	* po/ld.pot: Regenerate.
+
+2017-09-19  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
+
+	* emultempl/xtensaelf.em (xtensa_wild_group_interleave_callback):
+	Only check for by_name sorting.
+
+
 2017-08-31  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/eh3.d: Update.
@@ -16,13 +31,6 @@
 	"weakundef1 with PIE" test.
 	* testsuite/ld-x86-64/tls.exp: Require GCC 5 or above for
 	"tlsdesc1" and "tlsdesc1 with PIE" tests.
-
-2017-09-15  Nick Clifton  <nickc@redhat.com>
-
-	2.29.1 Release
-
-	* configure: Regenerate.
-	* po/ld.pot: Regenerate.
 
 2017-08-21  Hans-Peter Nilsson  <hp@bitrange.com>
 

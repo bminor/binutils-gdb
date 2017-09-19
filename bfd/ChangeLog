@@ -1,3 +1,18 @@
+2017-09-19  Nick Clifton  <nickc@redhat.com>
+
+	2.29.1 Release
+
+	* version.m4: Bump version to 2.29.1
+	* configure: Regenerate.
+	* po/bfd.pot: Regenerate.
+
+2017-09-19  Nick Clifton  <nickc@redhat.com>
+
+	Import from maiknline:
+
+	* xtensa-isa.c (xtensa_isa_init): Don't update lookup table
+	entries for sysregs with negative indices.
+
 2017-09-19  Alan Modra  <amodra@gmail.com>
 
 	PR 21441
@@ -40,14 +55,6 @@
 	* elf32-i386.c (elf_i386_get_synthetic_symtab): Check error
 	return from bfd_canonicalize_dynamic_reloc.
 	* elf64-x86-64.c (elf_x86_64_get_synthetic_symtab): Likewise.
-
-2017-09-15  Nick Clifton  <nickc@redhat.com>
-
-	2.29.1 Release
-
-	* version.m4: Bump version to 2.29.1
-	* configure: Regenerate.
-	* po/bfd.pot: Regenerate.
 
 2017-09-14  Nick Clifton  <nickc@redhat.com>
 
