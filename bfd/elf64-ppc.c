@@ -13407,12 +13407,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	  break;
       }
 
-  /* Note that the glink_eh_frame check here is not only testing that
-     the generated size matched the calculated size but also that
-     bfd_elf_discard_info didn't make any changes to the section.  */
-  if (group != NULL
-      || (htab->glink_eh_frame != NULL
-	  && htab->glink_eh_frame->rawsize != htab->glink_eh_frame->size))
+  if (group != NULL)
     {
       htab->stub_error = TRUE;
       info->callbacks->einfo (_("%P: stubs don't match calculated size\n"));
