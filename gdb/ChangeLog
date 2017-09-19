@@ -1,5 +1,9 @@
 2017-09-19  Yao Qi  <yao.qi@linaro.org>
 
+	* Makefile.in (monitor.o): Remove the rule.
+
+2017-09-19  Yao Qi  <yao.qi@linaro.org>
+
 	* annotate.h (struct annotate_arg_emitter): Use
 	DISABLE_COPY_AND_ASSIGN.
 	* common/refcounted-object.h (refcounted_object): Likewise.

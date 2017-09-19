@@ -2711,17 +2711,6 @@ ALLDEPFILES = \
 # Some files need explicit build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.
 
-# FIXME: cagney/2003-08-10: "monitor.c" gets -Wformat-nonliteral
-# errors.  It turns out that that is the least of monitor.c's
-# problems.  The function print_vsprintf appears to be using
-# va_arg(long) to extract CORE_ADDR parameters - something that
-# definitly will not work.  "monitor.c" needs to be rewritten so that
-# it doesn't use format strings and instead uses callbacks.
-monitor.o: $(srcdir)/monitor.c
-	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_FORMAT) \
-		$(COMPILE.post) $(srcdir)/monitor.c
-	$(POSTCOMPILE)
-
 # Do not try to build "printcmd.c" with -Wformat-nonliteral.  It manually
 # checks format strings.
 printcmd.o: $(srcdir)/printcmd.c
