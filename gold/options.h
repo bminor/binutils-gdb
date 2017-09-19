@@ -1234,9 +1234,10 @@ class General_options
 		"stubs are always after the group. 1 means use default size"),
 	     N_("SIZE"));
 
-  DEFINE_bool(stub_group_multi, options::TWO_DASHES, '\0', false,
+  DEFINE_bool(stub_group_multi, options::TWO_DASHES, '\0', true,
 	      N_("(PowerPC only) Allow a group of stubs to serve multiple "
-		 "output sections"), NULL);
+		 "output sections"),
+	      N_("(PowerPC only) Each output section has its own stubs"));
 
   DEFINE_uint(split_stack_adjust_size, options::TWO_DASHES, '\0', 0x4000,
 	      N_("Stack size when -fsplit-stack function calls non-split"),
