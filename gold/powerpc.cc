@@ -3065,11 +3065,17 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 	target->glink_section()->add_global_entry(gsym);
       else
 	{
-	  if (stub_table == NULL)
+	  if (stub_table == NULL
+	      && !(size == 32
+		   && gsym != NULL
+		   && !parameters->options().output_is_position_independent()
+		   && !is_branch_reloc(this->r_type_)))
 	    stub_table = this->object_->stub_table(this->shndx_);
 	  if (stub_table == NULL)
 	    {
-	      // This is a ref from a data section to an ifunc symbol.
+	      // This is a ref from a data section to an ifunc symbol,
+	      // or a non-branch reloc for which we always want to use
+	      // one set of stubs for resolving function addresses.
 	      stub_table = ifunc_stub_table;
 	    }
 	  gold_assert(stub_table != NULL);
@@ -8052,11 +8058,20 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	}
       else
 	{
-	  Stub_table<size, big_endian>* stub_table
-	    = object->stub_table(relinfo->data_shndx);
+	  Stub_table<size, big_endian>* stub_table = NULL;
+	  if (target->stub_tables().size() == 1)
+	    stub_table = target->stub_tables()[0];
+	  if (stub_table == NULL
+	      && !(size == 32
+		   && gsym != NULL
+		   && !parameters->options().output_is_position_independent()
+		   && !is_branch_reloc(r_type)))
+	    stub_table = object->stub_table(relinfo->data_shndx);
 	  if (stub_table == NULL)
 	    {
-	      // This is a ref from a data section to an ifunc symbol.
+	      // This is a ref from a data section to an ifunc symbol,
+	      // or a non-branch reloc for which we always want to use
+	      // one set of stubs for resolving function addresses.
 	      if (target->stub_tables().size() != 0)
 		stub_table = target->stub_tables()[0];
 	    }
