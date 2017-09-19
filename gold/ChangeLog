@@ -1,3 +1,9 @@
+2017-09-20  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Branch_info::make_stub): Put
+	stubs for ppc32 non-branch relocs in first stub table.
+	(Target_powerpc::Relocate::relocate): Resolve similarly.
+
 2017-09-19  Alan Modra  <amodra@gmail.com>
 
 	* options.h (stub-group-multi): Default to true.  Add
