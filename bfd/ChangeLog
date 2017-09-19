@@ -1,3 +1,11 @@
+2017-09-19  Alan Modra  <amodra@gmail.com>
+
+	PR 22150
+	* elflink.c (bfd_elf_size_dynamic_sections): Garbage collect
+	symbols before calculating verrefs.  Don't renumber dynsyms
+	after gc.  Exclude .gnu.version when zero or one dynsym.
+	Localize some vars and reindent.
+
 2017-09-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22148
