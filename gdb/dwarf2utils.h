@@ -25,4 +25,7 @@ extern int producer_is_gcc_ge_4 (const char *producer);
 /* See documentation in the utils.c file.  */
 extern int producer_is_gcc (const char *producer, int *major, int *minor);
 
+/* See documentation in the utils.c file.  */
+extern bool producer_is_icc (const char *producer, int *major, int *minor);
+
 #endif

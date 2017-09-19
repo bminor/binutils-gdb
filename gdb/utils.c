@@ -2945,6 +2945,7 @@ make_bpstat_clear_actions_cleanup (void)
 }
 
 
+
 /* Helper for make_cleanup_free_char_ptr_vec.  */
 
 static void
