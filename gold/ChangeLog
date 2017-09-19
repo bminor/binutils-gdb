@@ -1,3 +1,8 @@
+2017-09-19  Alan Modra  <amodra@gmail.com>
+
+	* options.h (stub-group-multi): Default to true.  Add
+	--no-stub-group-multi.
+
 2017-08-30  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Relocate::relocate): Nop addis on
