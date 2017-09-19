@@ -1,3 +1,5 @@
+2017-09-04  Nick Clifton  <nickc@redhat.com>
+
 2017-09-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22148
@@ -119,12 +121,6 @@
 	table.
 	(elfcore_grok_freebsd_prstatus): Add checks to make sure that
 	there is enough data present in the note.
-
-	PR 21441
-	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Don't add
-	alignment padding here.
-	* elflink.c (bfd_elf_discard_info): Add .eh_frame padding here
-	in a reverse pass over sections.
 
 2017-09-04  Alan Modra  <amodra@gmail.com>
 
