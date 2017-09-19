@@ -8,7 +8,7 @@
 
 2017-09-19  Nick Clifton  <nickc@redhat.com>
 
-	Import from maiknline:
+	Import from mainline:
 
 	* xtensa-isa.c (xtensa_isa_init): Don't update lookup table
 	entries for sysregs with negative indices.

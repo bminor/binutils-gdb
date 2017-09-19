@@ -12,7 +12,6 @@
 	* emultempl/xtensaelf.em (xtensa_wild_group_interleave_callback):
 	Only check for by_name sorting.
 
-
 2017-08-31  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/eh3.d: Update.
