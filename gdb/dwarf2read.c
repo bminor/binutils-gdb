@@ -232,9 +232,7 @@ struct dwarf2_per_objfile
 
   ~dwarf2_per_objfile ();
 
-  /* Disable copy.  */
-  dwarf2_per_objfile (const dwarf2_per_objfile &) = delete;
-  void operator= (const dwarf2_per_objfile &) = delete;
+  DISABLE_COPY_AND_ASSIGN (dwarf2_per_objfile);
 
   /* Free all cached compilation units.  */
   void free_cached_comp_units ();

@@ -624,8 +624,7 @@ class gdbpy_enter
 
   ~gdbpy_enter ();
 
-  gdbpy_enter (const gdbpy_enter &) = delete;
-  gdbpy_enter &operator= (const gdbpy_enter &) = delete;
+  DISABLE_COPY_AND_ASSIGN (gdbpy_enter);
 
  private:
 

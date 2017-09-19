@@ -258,9 +258,7 @@ public:
   const char *c_str () const
   { return m_section_name; }
 
-  /* Disable copy.  */
-  thread_section_name (const thread_section_name &) = delete;
-  void operator= (const thread_section_name &) = delete;
+  DISABLE_COPY_AND_ASSIGN (thread_section_name);
 
 private:
   /* Either a pointer into M_STORAGE, or a pointer to the name passed

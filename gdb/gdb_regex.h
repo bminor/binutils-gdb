@@ -43,9 +43,7 @@ public:
 
   ~compiled_regex ();
 
-  /* Disable copy.  */
-  compiled_regex (const compiled_regex&) = delete;
-  void operator= (const compiled_regex&) = delete;
+  DISABLE_COPY_AND_ASSIGN (compiled_regex);
 
   /* Wrapper around ::regexec.  */
   int exec (const char *string,

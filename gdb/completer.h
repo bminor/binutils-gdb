@@ -85,9 +85,7 @@ struct completion_result
   /* Destroy a result.  */
   ~completion_result ();
 
-  /* Disable copying, since we don't need it.  */
-  completion_result (const completion_result &rhs) = delete;
-  void operator= (const completion_result &rhs) = delete;
+  DISABLE_COPY_AND_ASSIGN (completion_result);
 
   /* Move a result.  */
   completion_result (completion_result &&rhs);
@@ -146,9 +144,7 @@ public:
   completion_tracker ();
   ~completion_tracker ();
 
-  /* Disable copy.  */
-  completion_tracker (const completion_tracker &rhs) = delete;
-  void operator= (const completion_tracker &rhs) = delete;
+  DISABLE_COPY_AND_ASSIGN (completion_tracker);
 
   /* Add the completion NAME to the list of generated completions if
      it is not there already.  If too many completions were already

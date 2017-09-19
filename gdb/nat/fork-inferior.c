@@ -56,9 +56,7 @@ public:
   }
 
 private:
-  /* Disable copying.  */
-  execv_argv (const execv_argv &) = delete;
-  void operator= (const execv_argv &) = delete;
+  DISABLE_COPY_AND_ASSIGN (execv_argv);
 
   /* Helper methods for constructing the argument vector.  */
 

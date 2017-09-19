@@ -163,8 +163,7 @@ struct jit_reader
     functions->destroy (functions);
   }
 
-  jit_reader (const jit_reader &) = delete;
-  jit_reader &operator= (const jit_reader &) = delete;
+  DISABLE_COPY_AND_ASSIGN (jit_reader);
 
   struct gdb_reader_funcs *functions;
   gdb_dlhandle_up handle;

@@ -597,11 +597,7 @@ public:
   scoped_restore_current_thread ();
   ~scoped_restore_current_thread ();
 
-  /* Disable copy.  */
-  scoped_restore_current_thread
-    (const scoped_restore_current_thread &) = delete;
-  void operator=
-    (const scoped_restore_current_thread &) = delete;
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_current_thread);
 
 private:
   thread_info *m_thread;

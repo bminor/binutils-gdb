@@ -81,8 +81,7 @@ struct annotate_arg_emitter
   annotate_arg_emitter () { annotate_arg_begin (); }
   ~annotate_arg_emitter () { annotate_arg_end (); }
 
-  annotate_arg_emitter (const annotate_arg_emitter &) = delete;
-  annotate_arg_emitter &operator= (const annotate_arg_emitter &) = delete;
+  DISABLE_COPY_AND_ASSIGN (annotate_arg_emitter);
 };
 
 extern void annotate_source (char *, int, int, int,

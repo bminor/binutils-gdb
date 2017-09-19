@@ -93,9 +93,7 @@ typedef struct tdesc_reg : tdesc_element
     xfree (group);
   }
 
-  /* Disable copying.  */
-  tdesc_reg (const tdesc_reg &) = delete;
-  tdesc_reg &operator= (const tdesc_reg &) = delete;
+  DISABLE_COPY_AND_ASSIGN (tdesc_reg);
 
   /* The name of this register.  In standard features, it may be
      recognized by the architecture support code, or it may be purely
@@ -229,9 +227,8 @@ typedef struct tdesc_type : tdesc_element
       }
     xfree ((char *) name);
   }
-  /* Disable copying.  */
-  tdesc_type (const tdesc_type &) = delete;
-  tdesc_type &operator= (const tdesc_type &) = delete;
+
+  DISABLE_COPY_AND_ASSIGN (tdesc_type);
 
   /* The name of this type.  If this type is a built-in type, this is
      a pointer to a constant string.  Otherwise, it's a
@@ -302,9 +299,7 @@ typedef struct tdesc_feature : tdesc_element
     xfree (name);
   }
 
-  /* Disable copying.  */
-  tdesc_feature (const tdesc_feature &) = delete;
-  tdesc_feature &operator= (const tdesc_feature &) = delete;
+  DISABLE_COPY_AND_ASSIGN (tdesc_feature);
 
   /* The name of this feature.  It may be recognized by the architecture
      support code.  */

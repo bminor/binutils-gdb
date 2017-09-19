@@ -255,8 +255,7 @@ public:
   /* Create a readonly regcache from a non-readonly regcache.  */
   regcache (readonly_t, const regcache &src);
 
-  regcache (const regcache &) = delete;
-  void operator= (const regcache &) = delete;
+  DISABLE_COPY_AND_ASSIGN (regcache);
 
   /* class regcache is only extended in unit test, so only mark it
      virtual when selftest is enabled.  */

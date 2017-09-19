@@ -58,8 +58,7 @@ struct linespec_result
   linespec_result () = default;
   ~linespec_result ();
 
-  linespec_result (const linespec_result &) = delete;
-  linespec_result &operator= (const linespec_result &) = delete;
+  DISABLE_COPY_AND_ASSIGN (linespec_result);
 
   /* If true, the linespec should be displayed to the user.  This
      is used by "unusual" linespecs where the ordinary `info break'
