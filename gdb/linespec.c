@@ -4623,6 +4623,7 @@ symbol_to_sal (struct symtab_and_line *result,
 	{
 	  *result = {};
 	  result->symtab = symbol_symtab (sym);
+	  result->symbol = sym;
 	  result->line = SYMBOL_LINE (sym);
 	  result->pc = SYMBOL_VALUE_ADDRESS (sym);
 	  result->pspace = SYMTAB_PSPACE (result->symtab);
@@ -4638,6 +4639,7 @@ symbol_to_sal (struct symtab_and_line *result,
 	  /* We know its line number.  */
 	  *result = {};
 	  result->symtab = symbol_symtab (sym);
+	  result->symbol = sym;
 	  result->line = SYMBOL_LINE (sym);
 	  result->pc = SYMBOL_VALUE_ADDRESS (sym);
 	  result->pspace = SYMTAB_PSPACE (result->symtab);

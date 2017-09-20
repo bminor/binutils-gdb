@@ -1,5 +1,14 @@
 2017-09-20  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-cmds.c (list_command): Use print_sal_location.
+	(print_sal_location): New function.
+	(ambiguous_line_spec): Use print_sal_location.
+	* linespec.c (symbol_to_sal): Record the symbol in the sal.
+	* symtab.c (find_function_start_sal): Likewise.
+	* symtab.h (symtab_and_line::symbol): New field.
+
+2017-09-20  Pedro Alves  <palves@redhat.com>
+
 	* linespec.c (minsym_found): Handle non-text minsyms.
 	(symbol_to_sal): Record a sal.pc for non-block, non-label symbols.
 

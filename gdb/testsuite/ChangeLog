@@ -1,5 +1,11 @@
 2017-09-20  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/list-ambiguous.exp (test_list_ambiguous_symbol): Expect
+	symbol names in gdb's output.
+	* gdb.cp/overload.exp ("list all overloads"): Likewise.
+
+2017-09-20  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/list-ambiguous.exp (test_list_ambiguous_function):
 	Rename to ...
 	(test_list_ambiguous_symbol): ... this and add a symbol name

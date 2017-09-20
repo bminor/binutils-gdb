@@ -1421,6 +1421,7 @@ struct symtab_and_line
   struct program_space *pspace = NULL;
 
   struct symtab *symtab = NULL;
+  struct symbol *symbol = NULL;
   struct obj_section *section = NULL;
   /* Line number.  Line numbers start at 1 and proceed through symtab->nlines.
      0 is never a valid line number; it is used to indicate that line number

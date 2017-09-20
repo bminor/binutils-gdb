@@ -3461,6 +3461,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
   obj_section *section = SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym);
   symtab_and_line sal
     = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)), section, 0);
+  sal.symbol = sym;
 
   if (funfirstline && sal.symtab != NULL
       && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
@@ -3484,6 +3485,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
       sal.pspace = current_program_space;
       sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
       sal.section = section;
+      sal.symbol = sym;
     }
 
   if (funfirstline)

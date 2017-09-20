@@ -90,6 +90,8 @@ static void list_command (char *, int);
 
 /* Prototypes for local utility functions */
 
+static void print_sal_location (const symtab_and_line &sal);
+
 static void ambiguous_line_spec (gdb::array_view<const symtab_and_line> sals,
 				 const char *format, ...)
   ATTRIBUTE_PRINTF (2, 3);
@@ -1094,11 +1096,7 @@ list_command (char *arg, int from_tty)
 	  if (first_line < 1)
 	    first_line = 1;
 	  if (sals.size () > 1)
-	    {
-	      printf_filtered (_("file: \"%s\", line number: %d\n"),
-			       symtab_to_filename_for_display (sal.symtab),
-			       sal.line);
-	    }
+	    print_sal_location (sal);
 	  print_source_lines (sal.symtab,
 			      first_line,
 			      first_line + get_lines_to_list (),
@@ -1516,6 +1514,23 @@ alias_command (char *args, int from_tty)
     }
 }
 
+/* Print the file / line number / symbol name of the location
+   specified by SAL.  */
+
+static void
+print_sal_location (const symtab_and_line &sal)
+{
+  scoped_restore_current_program_space restore_pspace;
+  set_current_program_space (sal.pspace);
+
+  const char *sym_name = NULL;
+  if (sal.symbol != NULL)
+    sym_name = SYMBOL_PRINT_NAME (sal.symbol);
+  printf_filtered (_("file: \"%s\", line number: %d, symbol: \"%s\"\n"),
+		   symtab_to_filename_for_display (sal.symtab),
+		   sal.line, sym_name != NULL ? sym_name : "???");
+}
+
 /* Print a list of files and line numbers which a user may choose from
    in order to list a function which was specified ambiguously (as
    with `list classname::overloadedfuncname', for example).  The SALS
@@ -1533,9 +1548,7 @@ ambiguous_line_spec (gdb::array_view<const symtab_and_line> sals,
   va_end (ap);
 
   for (const auto &sal : sals)
-    printf_filtered (_("file: \"%s\", line number: %d\n"),
-		     symtab_to_filename_for_display (sal.symtab),
-		     sal.line);
+    print_sal_location (sal);
 }
 
 /* Comparison function for filter_sals.  Returns a qsort-style
