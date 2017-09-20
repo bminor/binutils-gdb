@@ -4933,7 +4933,7 @@ remote_query_supported (void)
      instead.
 
    - The target has been resumed in the foreground
-     (target_terminal_is_ours is false) with a synchronous resume
+     (target_terminal::is_ours is false) with a synchronous resume
      packet, and we're blocked waiting for the stop reply, thus a
      Ctrl-C should be immediately sent to the target.
 
@@ -4964,11 +4964,11 @@ remote_serial_quit_handler (void)
 	    remote_unpush_and_throw ();
 	}
       /* If ^C has already been sent once, offer to disconnect.  */
-      else if (!target_terminal_is_ours () && rs->ctrlc_pending_p)
+      else if (!target_terminal::is_ours () && rs->ctrlc_pending_p)
 	interrupt_query ();
       /* All-stop protocol, and blocked waiting for stop reply.  Send
 	 an interrupt request.  */
-      else if (!target_terminal_is_ours () && rs->waiting_for_stop_reply)
+      else if (!target_terminal::is_ours () && rs->waiting_for_stop_reply)
 	target_interrupt (inferior_ptid);
       else
 	rs->got_ctrlc_during_io = 1;
@@ -6280,7 +6280,7 @@ interrupt_query (void)
 static void
 remote_terminal_inferior (struct target_ops *self)
 {
-  /* FIXME: cagney/1999-09-27: Make calls to target_terminal_*()
+  /* FIXME: cagney/1999-09-27: Make calls to target_terminal::*()
      idempotent.  The event-loop GDB talking to an asynchronous target
      with a synchronous command calls this function from both
      event-top.c and infrun.c/infcmd.c.  Once GDB stops trying to
@@ -7412,12 +7412,12 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 	{
 	  /* Zero length reply means that we tried 'S' or 'C' and the
 	     remote system doesn't support it.  */
-	  target_terminal_ours_for_output ();
+	  target_terminal::ours_for_output ();
 	  printf_filtered
 	    ("Can't send signals to this remote system.  %s not sent.\n",
 	     gdb_signal_to_name (rs->last_sent_signal));
 	  rs->last_sent_signal = GDB_SIGNAL_0;
-	  target_terminal_inferior ();
+	  target_terminal::inferior ();
 
 	  strcpy (buf, rs->last_sent_step ? "s" : "c");
 	  putpkt (buf);

@@ -478,7 +478,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	      /* Ensure that we have a process ptid.  */
 	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (child_ptid));
 
-	      target_terminal_ours_for_output ();
+	      target_terminal::ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
 				_("Detaching after %s from child %s.\n"),
 				has_vforked ? "vfork" : "fork",
@@ -563,7 +563,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
       if (info_verbose || debug_infrun)
 	{
-	  target_terminal_ours_for_output ();
+	  target_terminal::ours_for_output ();
 	  fprintf_filtered (gdb_stdlog,
 			    _("Attaching after %s %s to child %s.\n"),
 			    target_pid_to_str (parent_ptid),
@@ -611,7 +611,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	      /* Ensure that we have a process ptid.  */
 	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (child_ptid));
 
-	      target_terminal_ours_for_output ();
+	      target_terminal::ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
 				_("Detaching after fork from "
 				  "child %s.\n"),
@@ -970,7 +970,7 @@ handle_vfork_child_exec_or_exit (int exec)
 
 	  if (debug_infrun || info_verbose)
 	    {
-	      target_terminal_ours_for_output ();
+	      target_terminal::ours_for_output ();
 
 	      if (exec)
 		{
@@ -2339,7 +2339,7 @@ do_target_resume (ptid_t resume_ptid, int step, enum gdb_signal sig)
   gdb_assert (!tp->stop_requested);
 
   /* Install inferior's terminal modes.  */
-  target_terminal_inferior ();
+  target_terminal::inferior ();
 
   /* Avoid confusing the next resume, if the next stop/resume
      happens to apply to another thread.  */
@@ -3818,7 +3818,7 @@ check_curr_ui_sync_execution_done (void)
       && ui->async
       && !gdb_in_secondary_prompt_p (ui))
     {
-      target_terminal_ours ();
+      target_terminal::ours ();
       observer_notify_sync_execution_done ();
       ui_register_input_event_handler (ui);
     }
@@ -5056,7 +5056,7 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
       set_current_inferior (find_inferior_ptid (ecs->ptid));
       set_current_program_space (current_inferior ()->pspace);
       handle_vfork_child_exec_or_exit (0);
-      target_terminal_ours ();	/* Must do this before mourn anyway.  */
+      target_terminal::ours ();	/* Must do this before mourn anyway.  */
 
       /* Clearing any previous state of convenience variables.  */
       clear_exit_convenience_vars ();
@@ -6098,9 +6098,9 @@ handle_signal_stop (struct execution_control_state *ecs)
       if (signal_print[ecs->event_thread->suspend.stop_signal])
 	{
 	  /* The signal table tells us to print about this signal.  */
-	  target_terminal_ours_for_output ();
+	  target_terminal::ours_for_output ();
 	  observer_notify_signal_received (ecs->event_thread->suspend.stop_signal);
-	  target_terminal_inferior ();
+	  target_terminal::inferior ();
 	}
 
       /* Clear the signal if it should not be passed.  */
@@ -8084,7 +8084,7 @@ maybe_remove_breakpoints (void)
     {
       if (remove_breakpoints ())
 	{
-	  target_terminal_ours_for_output ();
+	  target_terminal::ours_for_output ();
 	  printf_filtered (_("Cannot remove breakpoints because "
 			     "program is no longer writable.\nFurther "
 			     "execution is probably impossible.\n"));
@@ -8241,7 +8241,7 @@ normal_stop (void)
     {
       SWITCH_THRU_ALL_UIS ()
 	{
-	  target_terminal_ours_for_output ();
+	  target_terminal::ours_for_output ();
 	  printf_filtered (_("[Switching to %s]\n"),
 			   target_pid_to_str (inferior_ptid));
 	  annotate_thread_changed ();
@@ -8254,7 +8254,7 @@ normal_stop (void)
       SWITCH_THRU_ALL_UIS ()
 	if (current_ui->prompt_state == PROMPT_BLOCKED)
 	  {
-	    target_terminal_ours_for_output ();
+	    target_terminal::ours_for_output ();
 	    printf_filtered (_("No unwaited-for children left.\n"));
 	  }
     }

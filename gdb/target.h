@@ -1533,40 +1533,10 @@ extern int target_remove_breakpoint (struct gdbarch *gdbarch,
 				     struct bp_target_info *bp_tgt,
 				     enum remove_bp_reason reason);
 
-/* Returns true if the terminal settings of the inferior are in
-   effect.  */
-
-extern int target_terminal_is_inferior (void);
-
-/* Returns true if our terminal settings are in effect.  */
-
-extern int target_terminal_is_ours (void);
-
-/* For target_terminal_init, target_terminal_inferior and
-   target_terminal_ours, see target/target.h.  */
-
-/* Put some of our terminal settings into effect, enough to get proper
-   results from our output, but do not change into or out of RAW mode
-   so that no input is discarded.  This is a no-op if terminal_ours
-   was most recently called.  This is a no-op unless called with the main
-   UI as current UI.  */
-
-extern void target_terminal_ours_for_output (void);
-
 /* Return true if the target stack has a non-default
   "to_terminal_ours" method.  */
 
 extern int target_supports_terminal_ours (void);
-
-/* Make a cleanup that restores the state of the terminal to the current
-   state.  */
-extern struct cleanup *make_cleanup_restore_target_terminal (void);
-
-/* Print useful information about our terminal status, if such a thing
-   exists.  */
-
-#define target_terminal_info(arg, from_tty) \
-     (*current_target.to_terminal_info) (&current_target, arg, from_tty)
 
 /* Kill the inferior process.   Make it go away.  */
 

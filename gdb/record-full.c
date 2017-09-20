@@ -1218,7 +1218,7 @@ record_full_wait_1 (struct target_ops *ops,
          And in GDB replay mode, GDB doesn't need to be in terminal_inferior
          mode, because inferior will not executed.
          Then set it to terminal_ours to make GDB get the signal.  */
-      target_terminal_ours ();
+      target_terminal::ours ();
 
       /* In EXEC_FORWARD mode, record_full_list points to the tail of prev
          instruction.  */

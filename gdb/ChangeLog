@@ -1,5 +1,76 @@
 2017-09-20  Tom Tromey  <tom@tromey.com>
 
+	* windows-nat.c (get_windows_debug_event, windows_wait)
+	(do_initial_windows_stuff, windows_attach): Update.
+	* utils.c (vwarning, internal_vproblem): Update.
+	(ui_unregister_input_event_handler_cleanup)
+	(prepare_to_handle_input): Remove.
+	(class scoped_input_handler): New.
+	(defaulted_query, prompt_for_continue): Update.
+	* tui/tui-hooks.c (tui_refresh_frame_and_register_information):
+	Update.
+	* top.c (undo_terminal_modifications_before_exit): Update.
+	* target/target.h (target_terminal_init, target_terminal_inferior)
+	(target_terminal_ours): Don't declare.
+	(class target_terminal): New.
+	* target.h (target_terminal_is_inferior, target_terminal_is_ours)
+	(target_terminal_ours_for_output)
+	(make_cleanup_restore_target_terminal): Don't declare.
+	(target_terminal_info): Remove.
+	* target.c (enum terminal_state, terminal_state): Remove.
+	(target_terminal::terminal_state): Define.
+	(target_terminal::init): Rename from target_terminal_init.
+	(target_terminal::inferior): Rename from
+	target_terminal_inferior.
+	(target_terminal::ours): Rename from target_terminal_ours.
+	(target_terminal::ours_for_output): Rename from
+	target_terminal_ours_for_output.
+	(target_terminal::info): New method.
+	(cleanup_restore_target_terminal)
+	(make_cleanup_restore_target_terminal): Remove.
+	* solib.c (handle_solib_event): Update.
+	* remote.c (remote_serial_quit_handler): Update.
+	(remote_terminal_inferior, remote_wait_as): Update.
+	* record-full.c (record_full_wait_1): Update.
+	* nto-procfs.c (procfs_create_inferior): Update.
+	* nat/fork-inferior.c (startup_inferior): Update.
+	* mi/mi-interp.c (mi_new_thread, mi_thread_exit)
+	(mi_record_changed, mi_inferior_added, mi_inferior_appeared)
+	(mi_inferior_exit, mi_inferior_removed, mi_traceframe_changed)
+	(mi_tsv_created, mi_tsv_deleted, mi_tsv_modified)
+	(mi_breakpoint_created, mi_breakpoint_deleted)
+	(mi_breakpoint_modified, mi_on_resume, mi_solib_loaded)
+	(mi_solib_unloaded, mi_command_param_changed, mi_memory_changed)
+	(mi_user_selected_context_changed, report_initial_inferior):
+	Update.
+	* linux-nat.c (linux_nat_attach, linux_nat_terminal_ours)
+	(linux_nat_terminal_inferior): Update.
+	* infrun.c (follow_fork_inferior)
+	(handle_vfork_child_exec_or_exit, do_target_resume)
+	(check_curr_ui_sync_execution_done, handle_inferior_event_1)
+	(handle_signal_stop, maybe_remove_breakpoints, normal_stop):
+	Update.
+	* inflow.c (child_terminal_init, info_terminal_command): Update.
+	* infcmd.c (post_create_inferior, continue_1, prepare_one_step)
+	(attach_command): Update.
+	* infcall.c (call_thread_fsm_should_stop): Update.
+	* gnu-nat.c (gnu_attach): Update.
+	* extension.c (struct active_ext_lang_state)
+	(restore_active_ext_lang): Update.
+	* exceptions.c (print_flush): Update.
+	* event-top.c (async_enable_stdin, default_quit_handler): Update.
+	(struct quit_handler_cleanup_data, restore_quit_handler)
+	(restore_quit_handler_dtor, make_cleanup_override_quit_handler):
+	Remove.
+	* cp-support.c (gdb_demangle): Update.
+	* breakpoint.c (update_inserted_breakpoint_locations)
+	(insert_breakpoint_locations, handle_jit_event)
+	(disable_breakpoints_in_unloaded_shlib): Update.
+	* annotate.c (annotate_breakpoints_invalid)
+	(annotate_frames_invalid): Update.
+
+2017-09-20  Tom Tromey  <tom@tromey.com>
+
 	* main.c (catch_command_errors): Rename from
 	catch_command_errors_const.
 	(captured_main_1): Update.

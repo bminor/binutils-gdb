@@ -3126,7 +3126,7 @@ update_inserted_breakpoint_locations (void)
 
   if (error_flag)
     {
-      target_terminal_ours_for_output ();
+      target_terminal::ours_for_output ();
       error_stream (tmp_error_stream);
     }
 }
@@ -3225,7 +3225,7 @@ insert_breakpoint_locations (void)
 	  tmp_error_stream.printf ("Could not insert hardware breakpoints:\n\
 You may have requested too many hardware breakpoints/watchpoints.\n");
 	}
-      target_terminal_ours_for_output ();
+      target_terminal::ours_for_output ();
       error_stream (tmp_error_stream);
     }
 }
@@ -5792,14 +5792,14 @@ handle_jit_event (void)
 
   /* Switch terminal for any messages produced by
      breakpoint_re_set.  */
-  target_terminal_ours_for_output ();
+  target_terminal::ours_for_output ();
 
   frame = get_current_frame ();
   gdbarch = get_frame_arch (frame);
 
   jit_event_handler (gdbarch);
 
-  target_terminal_inferior ();
+  target_terminal::inferior ();
 }
 
 /* Prepare WHAT final decision for infrun.  */
@@ -7925,7 +7925,7 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 
 	if (!disabled_shlib_breaks)
 	  {
-	    target_terminal_ours_for_output ();
+	    target_terminal::ours_for_output ();
 	    warning (_("Temporarily disabling breakpoints "
 		       "for unloaded shared library \"%s\""),
 		     solib->so_name);

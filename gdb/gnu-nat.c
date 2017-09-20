@@ -2230,7 +2230,7 @@ gnu_attach (struct target_ops *ops, const char *args, int from_tty)
 
   /* We have to initialize the terminal settings now, since the code
      below might try to restore them.  */
-  target_terminal_init ();
+  target_terminal::init ();
 
   /* If the process was stopped before we attached, make it continue the next
      time the user does a continue.  */

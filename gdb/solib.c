@@ -1285,9 +1285,9 @@ handle_solib_event (void)
   /* Check for any newly added shared libraries if we're supposed to
      be adding them automatically.  Switch terminal for any messages
      produced by breakpoint_re_set.  */
-  target_terminal_ours_for_output ();
+  target_terminal::ours_for_output ();
   solib_add (NULL, 0, auto_solib_add);
-  target_terminal_inferior ();
+  target_terminal::inferior ();
 }
 
 /* Reload shared libraries, but avoid reloading the same symbol file

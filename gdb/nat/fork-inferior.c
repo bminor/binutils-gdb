@@ -502,7 +502,7 @@ startup_inferior (pid_t pid, int ntraps,
 	    break;
 
 	  case TARGET_WAITKIND_SIGNALLED:
-	    target_terminal_ours ();
+	    target_terminal::ours ();
 	    target_mourn_inferior (event_ptid);
 	    error (_("During startup program terminated with signal %s, %s."),
 		   gdb_signal_to_name (ws.value.sig),
@@ -510,7 +510,7 @@ startup_inferior (pid_t pid, int ntraps,
 	    return resume_ptid;
 
 	  case TARGET_WAITKIND_EXITED:
-	    target_terminal_ours ();
+	    target_terminal::ours ();
 	    target_mourn_inferior (event_ptid);
 	    if (ws.value.integer)
 	      error (_("During startup program exited with code %d."),
@@ -549,10 +549,10 @@ startup_inferior (pid_t pid, int ntraps,
 
 	      /* Set up the "saved terminal modes" of the inferior
 	         based on what modes we are starting it with.  */
-	      target_terminal_init ();
+	      target_terminal::init ();
 
 	      /* Install inferior's terminal modes.  */
-	      target_terminal_inferior ();
+	      target_terminal::inferior ();
 
 	      terminal_initted = 1;
 	    }

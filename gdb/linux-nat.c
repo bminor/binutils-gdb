@@ -1251,7 +1251,7 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
 	{
 	  int exit_code = WEXITSTATUS (status);
 
-	  target_terminal_ours ();
+	  target_terminal::ours ();
 	  target_mourn_inferior (inferior_ptid);
 	  if (exit_code == 0)
 	    error (_("Unable to attach: program exited normally."));
@@ -1263,7 +1263,7 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
 	{
 	  enum gdb_signal signo;
 
-	  target_terminal_ours ();
+	  target_terminal::ours ();
 	  target_mourn_inferior (inferior_ptid);
 
 	  signo = gdb_signal_from_host (WTERMSIG (status));
@@ -4458,13 +4458,13 @@ linux_nat_terminal_inferior (struct target_ops *self)
   set_sigint_trap ();
 }
 
-/* target_terminal_ours implementation.
+/* target_terminal::ours implementation.
 
    This is a wrapper around child_terminal_ours to add async support (and
-   implement the target_terminal_ours vs target_terminal_ours_for_output
+   implement the target_terminal::ours vs target_terminal::ours_for_output
    distinction).  child_terminal_ours is currently no different than
    child_terminal_ours_for_output.
-   We leave target_terminal_ours_for_output alone, leaving it to
+   We leave target_terminal::ours_for_output alone, leaving it to
    child_terminal_ours_for_output.  */
 
 static void

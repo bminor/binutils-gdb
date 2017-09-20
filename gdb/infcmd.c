@@ -411,7 +411,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
 {
 
   /* Be sure we own the terminal in case write operations are performed.  */ 
-  target_terminal_ours_for_output ();
+  target_terminal::ours_for_output ();
 
   /* If the target hasn't taken care of this already, do it now.
      Targets which need to access registers during to_open,
@@ -783,7 +783,7 @@ continue_1 (int all_threads)
 	      Continuing.
 	      <no thread was resumed, but the inferior now owns the terminal>
 	  */
-	  target_terminal_inferior ();
+	  target_terminal::inferior ();
 	}
     }
   else
@@ -1172,7 +1172,7 @@ prepare_one_step (struct step_command_fsm *sm)
 					    &tp->control.step_range_end) == 0)
 		error (_("Cannot find bounds of current function"));
 
-	      target_terminal_ours_for_output ();
+	      target_terminal::ours_for_output ();
 	      printf_filtered (_("Single stepping until exit from function %s,"
 				 "\nwhich has no line number information.\n"),
 			       name);
@@ -2839,7 +2839,7 @@ attach_command (char *args, int from_tty)
 
   /* Set up the "saved terminal modes" of the inferior
      based on what modes we are starting it with.  */
-  target_terminal_init ();
+  target_terminal::init ();
 
   /* Install inferior's terminal modes.  This may look like a no-op,
      as we've just saved them above, however, this does more than
@@ -2855,7 +2855,7 @@ attach_command (char *args, int from_tty)
        while we're in the event loop waiting for that stop.  That is,
        before the attach continuation runs and the command is really
        finished.  */
-  target_terminal_inferior ();
+  target_terminal::inferior ();
 
   /* Set up execution context to know that we should return from
      wait_for_inferior as soon as the target reports a stop.  */

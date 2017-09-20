@@ -433,53 +433,25 @@ target_load (const char *arg, int from_tty)
   (*current_target.to_load) (&current_target, arg, from_tty);
 }
 
-/* Possible terminal states.  */
+/* Define it.  */
 
-enum terminal_state
-  {
-    /* The inferior's terminal settings are in effect.  */
-    terminal_is_inferior = 0,
+enum target_terminal::terminal_state target_terminal::terminal_state
+  = target_terminal::terminal_is_ours;
 
-    /* Some of our terminal settings are in effect, enough to get
-       proper output.  */
-    terminal_is_ours_for_output = 1,
-
-    /* Our terminal settings are in effect, for output and input.  */
-    terminal_is_ours = 2
-  };
-
-static enum terminal_state terminal_state = terminal_is_ours;
-
-/* See target.h.  */
+/* See target/target.h.  */
 
 void
-target_terminal_init (void)
+target_terminal::init (void)
 {
   (*current_target.to_terminal_init) (&current_target);
 
   terminal_state = terminal_is_ours;
 }
 
-/* See target.h.  */
-
-int
-target_terminal_is_inferior (void)
-{
-  return (terminal_state == terminal_is_inferior);
-}
-
-/* See target.h.  */
-
-int
-target_terminal_is_ours (void)
-{
-  return (terminal_state == terminal_is_ours);
-}
-
-/* See target.h.  */
+/* See target/target.h.  */
 
 void
-target_terminal_inferior (void)
+target_terminal::inferior (void)
 {
   struct ui *ui = current_ui;
 
@@ -490,8 +462,8 @@ target_terminal_inferior (void)
 
   /* Since we always run the inferior in the main console (unless "set
      inferior-tty" is in effect), when some UI other than the main one
-     calls target_terminal_inferior/target_terminal_inferior, then we
-     leave the main UI's terminal settings as is.  */
+     calls target_terminal::inferior, then we leave the main UI's
+     terminal settings as is.  */
   if (ui != main_ui)
     return;
 
@@ -509,14 +481,14 @@ target_terminal_inferior (void)
     target_pass_ctrlc ();
 }
 
-/* See target.h.  */
+/* See target/target.h.  */
 
 void
-target_terminal_ours (void)
+target_terminal::ours ()
 {
   struct ui *ui = current_ui;
 
-  /* See target_terminal_inferior.  */
+  /* See target_terminal::inferior.  */
   if (ui != main_ui)
     return;
 
@@ -527,14 +499,14 @@ target_terminal_ours (void)
   terminal_state = terminal_is_ours;
 }
 
-/* See target.h.  */
+/* See target/target.h.  */
 
 void
-target_terminal_ours_for_output (void)
+target_terminal::ours_for_output ()
 {
   struct ui *ui = current_ui;
 
-  /* See target_terminal_inferior.  */
+  /* See target_terminal::inferior.  */
   if (ui != main_ui)
     return;
 
@@ -542,6 +514,14 @@ target_terminal_ours_for_output (void)
     return;
   (*current_target.to_terminal_ours_for_output) (&current_target);
   terminal_state = terminal_is_ours_for_output;
+}
+
+/* See target/target.h.  */
+
+void
+target_terminal::info (const char *arg, int from_tty)
+{
+  (*current_target.to_terminal_info) (&current_target, arg, from_tty);
 }
 
 /* See target.h.  */
@@ -559,40 +539,6 @@ target_supports_terminal_ours (void)
     }
 
   return 0;
-}
-
-/* Restore the terminal to its previous state (helper for
-   make_cleanup_restore_target_terminal). */
-
-static void
-cleanup_restore_target_terminal (void *arg)
-{
-  enum terminal_state *previous_state = (enum terminal_state *) arg;
-
-  switch (*previous_state)
-    {
-    case terminal_is_ours:
-      target_terminal_ours ();
-      break;
-    case terminal_is_ours_for_output:
-      target_terminal_ours_for_output ();
-      break;
-    case terminal_is_inferior:
-      target_terminal_inferior ();
-      break;
-    }
-}
-
-/* See target.h. */
-
-struct cleanup *
-make_cleanup_restore_target_terminal (void)
-{
-  enum terminal_state *ts = XNEW (enum terminal_state);
-
-  *ts = terminal_state;
-
-  return make_cleanup_dtor (cleanup_restore_target_terminal, ts, xfree);
 }
 
 static void

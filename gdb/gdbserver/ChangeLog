@@ -1,3 +1,12 @@
+2017-09-20  Tom Tromey  <tom@tromey.com>
+
+	* target.c (target_terminal::terminal_state): Define.
+	(target_terminal::init): Rename from target_terminal_init.
+	(target_terminal::inferior): Rename from
+	target_terminal_inferior.
+	(target_terminal::ours): Rename from target_terminal_ours.
+	(target_terminal::ours_for_output, target_terminal::info): New.
+
 2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* server.c (accumulate_file_name_length): Remove.

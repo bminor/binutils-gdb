@@ -388,10 +388,15 @@ default_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
   return size;
 }
 
+/* Define it.  */
+
+enum target_terminal::terminal_state target_terminal::terminal_state
+  = target_terminal::terminal_is_ours;
+
 /* See target/target.h.  */
 
 void
-target_terminal_init ()
+target_terminal::init ()
 {
   /* Placeholder needed because of fork_inferior.  Not necessary on
      GDBserver.  */
@@ -400,7 +405,7 @@ target_terminal_init ()
 /* See target/target.h.  */
 
 void
-target_terminal_inferior ()
+target_terminal::inferior ()
 {
   /* Placeholder needed because of fork_inferior.  Not necessary on
      GDBserver.  */
@@ -409,8 +414,24 @@ target_terminal_inferior ()
 /* See target/target.h.  */
 
 void
-target_terminal_ours ()
+target_terminal::ours ()
 {
   /* Placeholder needed because of fork_inferior.  Not necessary on
      GDBserver.  */
+}
+
+/* See target/target.h.  */
+
+void
+target_terminal::ours_for_output (void)
+{
+  /* Placeholder.  */
+}
+
+/* See target/target.h.  */
+
+void
+target_terminal::info (const char *arg, int from_tty)
+{
+  /* Placeholder.  */
 }

@@ -67,6 +67,7 @@
 #include "gdb_regex.h"
 #include "job-control.h"
 #include "common/selftest.h"
+#include "common/gdb_optional.h"
 
 #if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* ARI: PTR */
@@ -276,12 +277,11 @@ vwarning (const char *string, va_list args)
     (*deprecated_warning_hook) (string, args);
   else
     {
-      struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-
+      gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
       if (target_supports_terminal_ours ())
 	{
-	  make_cleanup_restore_target_terminal ();
-	  target_terminal_ours_for_output ();
+	  term_state.emplace ();
+	  target_terminal::ours_for_output ();
 	}
       if (filtered_printing_initialized ())
 	wrap_here ("");		/* Force out any buffered output.  */
@@ -290,8 +290,6 @@ vwarning (const char *string, va_list args)
 	fputs_unfiltered (warning_pre_print, gdb_stderr);
       vfprintf_unfiltered (gdb_stderr, string, args);
       fprintf_unfiltered (gdb_stderr, "\n");
-
-      do_cleanups (old_chain);
     }
 }
 
@@ -485,10 +483,11 @@ internal_vproblem (struct internal_problem *problem,
     }
 
   /* Try to get the message out and at the start of a new line.  */
+  gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
   if (target_supports_terminal_ours ())
     {
-      make_cleanup_restore_target_terminal ();
-      target_terminal_ours_for_output ();
+      term_state.emplace ();
+      target_terminal::ours_for_output ();
     }
   if (filtered_printing_initialized ())
     begin_line ();
@@ -897,32 +896,43 @@ make_hex_string (const gdb_byte *data, size_t length)
 
 
 
-/* A cleanup that simply calls ui_unregister_input_event_handler.  */
+/* An RAII class that sets up to handle input and then tears down
+   during destruction.  */
 
-static void
-ui_unregister_input_event_handler_cleanup (void *ui)
+class scoped_input_handler
 {
-  ui_unregister_input_event_handler ((struct ui *) ui);
-}
+public:
 
-/* Set up to handle input.  */
+  scoped_input_handler ()
+    : m_quit_handler (make_scoped_restore (&quit_handler,
+					   default_quit_handler)),
+      m_ui (NULL)
+  {
+    target_terminal::ours ();
+    ui_register_input_event_handler (current_ui);
+    if (current_ui->prompt_state == PROMPT_BLOCKED)
+      m_ui = current_ui;
+  }
 
-static struct cleanup *
-prepare_to_handle_input (void)
-{
-  struct cleanup *old_chain;
+  ~scoped_input_handler ()
+  {
+    if (m_ui != NULL)
+      ui_unregister_input_event_handler (m_ui);
+  }
 
-  old_chain = make_cleanup_restore_target_terminal ();
-  target_terminal_ours ();
+  DISABLE_COPY_AND_ASSIGN (scoped_input_handler);
 
-  ui_register_input_event_handler (current_ui);
-  if (current_ui->prompt_state == PROMPT_BLOCKED)
-    make_cleanup (ui_unregister_input_event_handler_cleanup, current_ui);
+private:
 
-  make_cleanup_override_quit_handler (default_quit_handler);
+  /* Save and restore the terminal state.  */
+  target_terminal::scoped_restore_terminal_state m_term_state;
 
-  return old_chain;
-}
+  /* Save and restore the quit handler.  */
+  scoped_restore m_quit_handler;
+
+  /* The saved UI, if non-NULL.  */
+  struct ui *m_ui;
+};
 
 
 
@@ -987,9 +997,8 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       /* Restrict queries to the main UI.  */
       || current_ui != main_ui)
     {
-      old_chain = make_cleanup_restore_target_terminal ();
-
-      target_terminal_ours_for_output ();
+      target_terminal::scoped_restore_terminal_state term_state;
+      target_terminal::ours_for_output ();
       wrap_here ("");
       vfprintf_filtered (gdb_stdout, ctlstr, args);
 
@@ -998,18 +1007,13 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 		       y_string, n_string, def_answer);
       gdb_flush (gdb_stdout);
 
-      do_cleanups (old_chain);
       return def_value;
     }
 
   if (deprecated_query_hook)
     {
-      int res;
-
-      old_chain = make_cleanup_restore_target_terminal ();
-      res = deprecated_query_hook (ctlstr, args);
-      do_cleanups (old_chain);
-      return res;
+      target_terminal::scoped_restore_terminal_state term_state;
+      return deprecated_query_hook (ctlstr, args);
     }
 
   /* Format the question outside of the loop, to avoid reusing args.  */
@@ -1026,7 +1030,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   using namespace std::chrono;
   steady_clock::time_point prompt_started = steady_clock::now ();
 
-  prepare_to_handle_input ();
+  scoped_input_handler prepare_input;
 
   while (1)
     {
@@ -1590,7 +1594,7 @@ prompt_for_continue (void)
      beyond the end of the screen.  */
   reinitialize_more_filter ();
 
-  prepare_to_handle_input ();
+  scoped_input_handler prepare_input;
 
   /* Call gdb_readline_wrapper, not readline, in order to keep an
      event loop running.  */

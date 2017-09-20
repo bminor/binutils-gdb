@@ -1571,7 +1571,7 @@ undo_terminal_modifications_before_exit (void)
 {
   struct ui *saved_top_level = current_ui;
 
-  target_terminal_ours ();
+  target_terminal::ours ();
 
   current_ui = main_ui;
 

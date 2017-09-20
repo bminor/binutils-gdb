@@ -1285,7 +1285,7 @@ procfs_create_inferior (struct target_ops *ops, const char *exec_file,
     }
   if (!target_is_pushed (ops))
     push_target (ops);
-  target_terminal_init ();
+  target_terminal::init ();
 
   if (exec_bfd != NULL
       || (symfile_objfile != NULL && symfile_objfile->obfd != NULL))
