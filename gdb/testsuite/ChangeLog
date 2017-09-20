@@ -1,5 +1,10 @@
 2019-12-10  Kevin Buettner  <kevinb@redhat.com>
 
+	* gdb.threads/omp-par-scope.c: New file.
+	* gdb/threads/omp-par-scope.exp: New file.
+
+2019-12-10  Kevin Buettner  <kevinb@redhat.com>
+
 	* lib/gdb.exp (support_nested_function_tests): New proc.
 
 2019-12-10  Kevin Buettner  <kevinb@redhat.com>
