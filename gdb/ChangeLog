@@ -1,5 +1,10 @@
 2017-09-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
+	* features/Makefile (i386-avx-mpx-avx512-pku.dat): Add missing
+	backslash.
+
+2017-09-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
 	* gdb.arch/i386-avx512.c (move_zmm_data_to_reg): Use
 	vmovups instead vmovaps.
 	(move_zmm_data_to_memory): Use vmovups instead vmovaps.
