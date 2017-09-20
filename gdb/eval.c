@@ -642,18 +642,33 @@ ptrmath_type_p (const struct language_defn *lang, struct type *type)
     }
 }
 
-/* Constructs a fake method with the given parameter types.  This
-   function is used by the parser to construct an "expected" type for
+/* Represents a fake method with the given parameter types.  This is
+   used by the parser to construct a temporary "expected" type for
    method overload resolution.  FLAGS is used as instance flags of the
    new type, in order to be able to make the new type represent a
    const/volatile overload.  */
 
-static struct type *
-make_params (type_instance_flags flags,
-	     int num_types, struct type **param_types)
+class fake_method
 {
-  struct type *type = XCNEW (struct type);
-  TYPE_MAIN_TYPE (type) = XCNEW (struct main_type);
+public:
+  fake_method (type_instance_flags flags,
+	       int num_types, struct type **param_types);
+  ~fake_method ();
+
+  /* The constructed type.  */
+  struct type *type () { return &m_type; }
+
+private:
+  struct type m_type {};
+  main_type m_main_type {};
+};
+
+fake_method::fake_method (type_instance_flags flags,
+			  int num_types, struct type **param_types)
+{
+  struct type *type = &m_type;
+
+  TYPE_MAIN_TYPE (type) = &m_main_type;
   TYPE_LENGTH (type) = 1;
   TYPE_CODE (type) = TYPE_CODE_METHOD;
   TYPE_CHAIN (type) = type;
@@ -681,8 +696,11 @@ make_params (type_instance_flags flags,
 
   while (num_types-- > 0)
     TYPE_FIELD_TYPE (type, num_types) = param_types[num_types];
+}
 
-  return type;
+fake_method::~fake_method ()
+{
+  xfree (TYPE_FIELDS (&m_type));
 }
 
 /* Helper for evaluating an OP_VAR_VALUE.  */
@@ -2076,13 +2094,9 @@ evaluate_subexp_standard (struct type *expect_type,
 	for (ix = 0; ix < nargs; ++ix)
 	  arg_types[ix] = exp->elts[pc + 2 + ix + 1].type;
 
-	expect_type = make_params (flags, nargs, arg_types);
+	fake_method expect_type (flags, nargs, arg_types);
 	*(pos) += 4 + nargs;
-	arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
-	xfree (TYPE_FIELDS (expect_type));
-	xfree (TYPE_MAIN_TYPE (expect_type));
-	xfree (expect_type);
-	return arg1;
+	return evaluate_subexp_standard (expect_type.type (), exp, pos, noside);
       }
 
     case BINOP_CONCAT:

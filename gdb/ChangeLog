@@ -1,3 +1,10 @@
+2017-09-20  Pedro Alves  <palves@redhat.com>
+
+	* eval.c (make_params): Delete, refactored as ...
+	(class fake_method): ... this new type's ctor.
+	(fake_method::~fake_method): New.
+	(evaluate_subexp_standard): Use 'fake_method'.
+
 2017-09-20  Tom Tromey  <tom@tromey.com>
 
 	* windows-nat.c (get_windows_debug_event, windows_wait)
