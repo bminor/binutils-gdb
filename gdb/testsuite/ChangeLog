@@ -1,3 +1,19 @@
+2017-09-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/list-ambiguous.exp (test_list_ambiguous_function):
+	Rename to ...
+	(test_list_ambiguous_symbol): ... this and add a symbol name
+	parameter.  Adjust.
+	(test_list_ambiguous_function): Reimplement on top of
+	test_list_ambiguous_symbol and also test listing ambiguous
+	variables.
+	* gdb.base/list-ambiguous0.c (ambiguous): Rename to ...
+	(ambiguous_fun): ... this.
+	(ambiguous_var): New.
+	* gdb.base/list-ambiguous1.c (ambiguous): Rename to ...
+	(ambiguous_fun): ... this.
+	(ambiguous_var): New.
+
 2017-09-19  John Baldwin  <jhb@FreeBSD.org>
 
 	* gdb.base/starti.c: New file.

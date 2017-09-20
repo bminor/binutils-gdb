@@ -1,3 +1,8 @@
+2017-09-20  Pedro Alves  <palves@redhat.com>
+
+	* linespec.c (minsym_found): Handle non-text minsyms.
+	(symbol_to_sal): Record a sal.pc for non-block, non-label symbols.
+
 2017-09-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* features/Makefile (i386-avx-mpx-avx512-pku.dat): Add missing

@@ -4313,35 +4313,46 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
   CORE_ADDR pc;
   struct symtab_and_line sal;
 
-  sal = find_pc_sect_line (MSYMBOL_VALUE_ADDRESS (objfile, msymbol),
-			   (struct obj_section *) 0, 0);
-  sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
-
-  /* The minimal symbol might point to a function descriptor;
-     resolve it to the actual code address instead.  */
-  pc = gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc, &current_target);
-  if (pc != sal.pc)
-    sal = find_pc_sect_line (pc, NULL, 0);
-
-  if (self->funfirstline)
+  if (msymbol_is_text (msymbol))
     {
-      if (sal.symtab != NULL
-	  && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
-	      || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
+      sal = find_pc_sect_line (MSYMBOL_VALUE_ADDRESS (objfile, msymbol),
+			       (struct obj_section *) 0, 0);
+      sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
+
+      /* The minimal symbol might point to a function descriptor;
+	 resolve it to the actual code address instead.  */
+      pc = gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc,
+					       &current_target);
+      if (pc != sal.pc)
+	sal = find_pc_sect_line (pc, NULL, 0);
+
+      if (self->funfirstline)
 	{
-	  /* If gdbarch_convert_from_func_ptr_addr does not apply then
-	     sal.SECTION, sal.LINE&co. will stay correct from above.
-	     If gdbarch_convert_from_func_ptr_addr applies then
-	     sal.SECTION is cleared from above and sal.LINE&co. will
-	     stay correct from the last find_pc_sect_line above.  */
-	  sal.pc = MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
-	  sal.pc = gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc,
-						       &current_target);
-	  if (gdbarch_skip_entrypoint_p (gdbarch))
-	    sal.pc = gdbarch_skip_entrypoint (gdbarch, sal.pc);
+	  if (sal.symtab != NULL
+	      && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
+		  || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
+	    {
+	      /* If gdbarch_convert_from_func_ptr_addr does not apply then
+		 sal.SECTION, sal.LINE&co. will stay correct from above.
+		 If gdbarch_convert_from_func_ptr_addr applies then
+		 sal.SECTION is cleared from above and sal.LINE&co. will
+		 stay correct from the last find_pc_sect_line above.  */
+	      sal.pc = MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
+	      sal.pc = gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc,
+							   &current_target);
+	      if (gdbarch_skip_entrypoint_p (gdbarch))
+		sal.pc = gdbarch_skip_entrypoint (gdbarch, sal.pc);
+	    }
+	  else
+	    skip_prologue_sal (&sal);
 	}
-      else
-	skip_prologue_sal (&sal);
+    }
+  else
+    {
+      sal.objfile = objfile;
+      sal.pc = MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
+      sal.pspace = current_program_space;
+      sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
     }
 
   if (maybe_add_address (self->addr_set, objfile->pspace, sal.pc))
@@ -4628,6 +4639,7 @@ symbol_to_sal (struct symtab_and_line *result,
 	  *result = {};
 	  result->symtab = symbol_symtab (sym);
 	  result->line = SYMBOL_LINE (sym);
+	  result->pc = SYMBOL_VALUE_ADDRESS (sym);
 	  result->pspace = SYMTAB_PSPACE (result->symtab);
 	  return 1;
 	}
