@@ -1,3 +1,12 @@
+2017-09-20  Teresa Johnson  <tejohnson@google.com>
+
+	* plugin.cc (is_visible_from_outside): Check for export dynamic symbol
+        option and list.
+	* testsuite/Makefile.am (plugin_test_12): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/export_dynamic_plugin.cc: New test source.
+	* testsuite/plugin_test_12.sh: New test script.
+
 2017-09-20  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Branch_info::make_stub): Put
