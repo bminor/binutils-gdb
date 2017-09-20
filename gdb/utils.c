@@ -2944,60 +2944,6 @@ make_bpstat_clear_actions_cleanup (void)
   return make_cleanup (do_bpstat_clear_actions_cleanup, NULL);
 }
 
-/* Check for GCC >= 4.x according to the symtab->producer string.  Return minor
-   version (x) of 4.x in such case.  If it is not GCC or it is GCC older than
-   4.x return -1.  If it is GCC 5.x or higher return INT_MAX.  */
-
-int
-producer_is_gcc_ge_4 (const char *producer)
-{
-  int major, minor;
-
-  if (! producer_is_gcc (producer, &major, &minor))
-    return -1;
-  if (major < 4)
-    return -1;
-  if (major > 4)
-    return INT_MAX;
-  return minor;
-}
-
-/* Returns nonzero if the given PRODUCER string is GCC and sets the MAJOR
-   and MINOR versions when not NULL.  Returns zero if the given PRODUCER
-   is NULL or it isn't GCC.  */
-
-int
-producer_is_gcc (const char *producer, int *major, int *minor)
-{
-  const char *cs;
-
-  if (producer != NULL && startswith (producer, "GNU "))
-    {
-      int maj, min;
-
-      if (major == NULL)
-	major = &maj;
-      if (minor == NULL)
-	minor = &min;
-
-      /* Skip any identifier after "GNU " - such as "C11" or "C++".
-	 A full producer string might look like:
-	 "GNU C 4.7.2"
-	 "GNU Fortran 4.8.2 20140120 (Red Hat 4.8.2-16) -mtune=generic ..."
-	 "GNU C++14 5.0.0 20150123 (experimental)"
-      */
-      cs = &producer[strlen ("GNU ")];
-      while (*cs && !isspace (*cs))
-        cs++;
-      if (*cs && isspace (*cs))
-        cs++;
-      if (sscanf (cs, "%d.%d", major, minor) == 2)
-	return 1;
-    }
-
-  /* Not recognized as GCC.  */
-  return 0;
-}
 
 /* Helper for make_cleanup_free_char_ptr_vec.  */
 

@@ -1088,6 +1088,7 @@ SFILES = \
 	dtrace-probe.c \
 	dummy-frame.c \
 	dwarf2-frame.c \
+	dwarf2utils.c \
 	dwarf2-frame-tailcall.c \
 	dwarf2expr.c \
 	dwarf2loc.c \
@@ -1707,6 +1708,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	dummy-frame.o \
 	dwarf2-frame.o \
 	dwarf2-frame-tailcall.o \
+	dwarf2utils.o \
 	dwarf2expr.o \
 	dwarf2loc.o \
 	dwarf2read.o \

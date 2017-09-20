@@ -43,6 +43,7 @@
 #include <algorithm>
 #include "target-descriptions.h"
 #include "arch/amd64.h"
+#include "dwarf2utils.h"
 #include "ax.h"
 #include "ax-gdb.h"
 
