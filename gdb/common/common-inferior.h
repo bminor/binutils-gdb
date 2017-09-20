@@ -34,4 +34,8 @@ extern char *get_exec_file (int err);
    been set, then return NULL.  */
 extern const char *get_inferior_cwd ();
 
+/* Set the inferior current working directory.  If CWD is NULL, unset
+   the directory.  */
+extern void set_inferior_cwd (const char *cwd);
+
 #endif /* ! COMMON_INFERIOR_H */

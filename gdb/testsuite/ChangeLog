@@ -1,5 +1,10 @@
 2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* gdb.base/set-cwd.exp: Make it available on
+	native-extended-gdbserver.
+
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* gdb.base/set-cwd.c: New file.
 	* gdb.base/set-cwd.exp: Likewise.
 

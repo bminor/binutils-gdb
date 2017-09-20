@@ -1430,6 +1430,7 @@ enum {
   PACKET_QPassSignals,
   PACKET_QCatchSyscalls,
   PACKET_QProgramSignals,
+  PACKET_QSetWorkingDir,
   PACKET_QStartupWithShell,
   PACKET_QEnvironmentHexEncoded,
   PACKET_QEnvironmentReset,
@@ -4662,6 +4663,8 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_QCatchSyscalls },
   { "QProgramSignals", PACKET_DISABLE, remote_supported_packet,
     PACKET_QProgramSignals },
+  { "QSetWorkingDir", PACKET_DISABLE, remote_supported_packet,
+    PACKET_QSetWorkingDir },
   { "QStartupWithShell", PACKET_DISABLE, remote_supported_packet,
     PACKET_QStartupWithShell },
   { "QEnvironmentHexEncoded", PACKET_DISABLE, remote_supported_packet,
@@ -9641,6 +9644,45 @@ extended_remote_environment_support (struct remote_state *rs)
       send_environment_packet (rs, "unset", "QEnvironmentUnset", el.c_str ());
 }
 
+/* Helper function to set the current working directory for the
+   inferior in the remote target.  */
+
+static void
+extended_remote_set_inferior_cwd (struct remote_state *rs)
+{
+  if (packet_support (PACKET_QSetWorkingDir) != PACKET_DISABLE)
+    {
+      const char *inferior_cwd = get_inferior_cwd ();
+
+      if (inferior_cwd != NULL)
+	{
+	  std::string hexpath = bin2hex ((const gdb_byte *) inferior_cwd,
+					 strlen (inferior_cwd));
+
+	  xsnprintf (rs->buf, get_remote_packet_size (),
+		     "QSetWorkingDir:%s", hexpath.c_str ());
+	}
+      else
+	{
+	  /* An empty inferior_cwd means that the user wants us to
+	     reset the remote server's inferior's cwd.  */
+	  xsnprintf (rs->buf, get_remote_packet_size (),
+		     "QSetWorkingDir:");
+	}
+
+      putpkt (rs->buf);
+      getpkt (&rs->buf, &rs->buf_size, 0);
+      if (packet_ok (rs->buf,
+		     &remote_protocol_packets[PACKET_QSetWorkingDir])
+	  != PACKET_OK)
+	error (_("\
+Remote replied unexpectedly while setting the inferior's working\n\
+directory: %s"),
+	       rs->buf);
+
+    }
+}
+
 /* In the extended protocol we want to be able to do things like
    "run" and have them basically work as expected.  So we need
    a special create_inferior function.  We support changing the
@@ -9682,6 +9724,8 @@ Remote replied unexpectedly while setting startup-with-shell: %s"),
     }
 
   extended_remote_environment_support (rs);
+
+  extended_remote_set_inferior_cwd (rs);
 
   /* Now restart the remote server.  */
   run_worked = extended_remote_run (args) != -1;
@@ -14189,6 +14233,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_QProgramSignals],
 			 "QProgramSignals", "program-signals", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_QSetWorkingDir],
+			 "QSetWorkingDir", "set-working-dir", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_QStartupWithShell],
 			 "QStartupWithShell", "startup-with-shell", 0);

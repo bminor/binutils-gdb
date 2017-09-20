@@ -869,6 +869,35 @@ handle_general_set (char *own_buf)
       return;
     }
 
+  if (startswith (own_buf, "QSetWorkingDir:"))
+    {
+      const char *p = own_buf + strlen ("QSetWorkingDir:");
+
+      if (*p != '\0')
+	{
+	  std::string path = hex2str (p);
+
+	  set_inferior_cwd (path.c_str ());
+
+	  if (remote_debug)
+	    debug_printf (_("[Set the inferior's current directory to %s]\n"),
+			  path.c_str ());
+	}
+      else
+	{
+	  /* An empty argument means that we should clear out any
+	     previously set cwd for the inferior.  */
+	  set_inferior_cwd (NULL);
+
+	  if (remote_debug)
+	    debug_printf (_("\
+[Unset the inferior's current directory; will use gdbserver's cwd]\n"));
+	}
+      write_ok (own_buf);
+
+      return;
+    }
+
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
   own_buf[0] = 0;
@@ -2351,7 +2380,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       sprintf (own_buf,
 	       "PacketSize=%x;QPassSignals+;QProgramSignals+;"
 	       "QStartupWithShell+;QEnvironmentHexEncoded+;"
-	       "QEnvironmentReset+;QEnvironmentUnset+",
+	       "QEnvironmentReset+;QEnvironmentUnset+;"
+	       "QSetWorkingDir+",
 	       PBUFSIZ - 1);
 
       if (target_supports_catch_syscall ())

@@ -2059,8 +2059,10 @@ your program.  @xref{Environment, ,Your Program's Environment}.
 @item The @emph{working directory.}
 You can set your program's working directory with the command
 @kbd{set cwd}.  If you do not set any working directory with this
-command, your program will inherit @value{GDBN}'s working directory.
-@xref{Working Directory, ,Your Program's Working Directory}.
+command, your program will inherit @value{GDBN}'s working directory if
+native debugging, or the remote server's working directory if remote
+debugging.  @xref{Working Directory, ,Your Program's Working
+Directory}.
 
 @item The @emph{standard input and output.}
 Your program normally uses the same device for standard input and
@@ -2439,7 +2441,9 @@ Each time you start your program with @code{run}, the inferior will be
 initialized with the current working directory specified by the
 @kbd{set cwd} command.  If no directory has been specified by this
 command, then the inferior will inherit @value{GDBN}'s current working
-directory as its working directory.
+directory as its working directory if native debugging, or it will
+inherit the remote server's current working directory if remote
+debugging.
 
 @table @code
 @kindex set cwd
@@ -21003,6 +21007,10 @@ are:
 @tab @code{QEnvironmentReset}
 @tab @code{Reset the inferior environment (i.e., unset user-set variables)}
 
+@item @code{set-working-dir}
+@tab @code{QSetWorkingDir}
+@tab @code{set cwd}
+
 @item @code{conditional-breakpoints-packet}
 @tab @code{Z0 and Z1}
 @tab @code{Support for target-side breakpoint condition evaluation}
@@ -36859,6 +36867,28 @@ by supplying an appropriate @samp{qSupported} response
 (@pxref{qSupported}).  This should only be done on targets that
 actually support passing environment variables to the starting
 inferior.
+
+@item QSetWorkingDir:@r{[}@var{directory}@r{]}
+@anchor{QSetWorkingDir packet}
+@cindex set working directory, remote request
+@cindex @samp{QSetWorkingDir} packet
+This packet is used to inform the remote server of the intended
+current working directory for programs that are going to be executed.
+
+The packet is composed by @var{directory}, an hex encoded
+representation of the directory that the remote inferior will use as
+its current working directory.  If @var{directory} is an empty string,
+the remote server should reset the inferior's current working
+directory to its original, empty value.
+
+This packet is only available in extended mode (@pxref{extended
+mode}).
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+@end table
 
 @item qfThreadInfo
 @itemx qsThreadInfo

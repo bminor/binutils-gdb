@@ -26,6 +26,12 @@
 
 * New features in the GDB remote stub, GDBserver
 
+  ** GDBserver is now able to start inferior processes with a
+     specified initial working directory.
+
+     The user can set the desired working directory to be used from
+     GDB using the new "set cwd" command.
+
   ** New "--selftest" command line option runs some GDBserver self
      tests.  These self tests are disabled in releases.
 
@@ -58,6 +64,10 @@ QEnvironmentReset
 
 QStartupWithShell
   Indicates whether the inferior must be started with a shell or not.
+
+QSetWorkingDir
+  Tell GDBserver that the inferior to be started should use a specific
+  working directory.
 
 * The "maintenance print c-tdesc" command now takes an optional
   argument which is the file name of XML target description.

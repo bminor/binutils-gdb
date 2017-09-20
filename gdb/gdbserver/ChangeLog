@@ -1,5 +1,13 @@
 2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* inferiors.c (set_inferior_cwd): New function.
+	* server.c (handle_general_set): Handle QSetWorkingDir packet.
+	(handle_query): Inform that QSetWorkingDir is supported.
+	* win32-low.c (create_process): Pass the inferior's cwd to
+	CreateProcess.
+
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* inferiors.c (current_inferior_cwd): New global variable.
 	(get_inferior_cwd): New function.
 	* inferiors.h (struct process_info) <cwd>: New field.

@@ -32,6 +32,7 @@
 #include <tlhelp32.h>
 #include <psapi.h>
 #include <process.h>
+#include "gdb_tilde_expand.h"
 
 #ifndef USE_WIN32API
 #include <sys/cygwin.h>
@@ -562,10 +563,12 @@ static BOOL
 create_process (const char *program, char *args,
 		DWORD flags, PROCESS_INFORMATION *pi)
 {
+  const char *inferior_cwd = get_inferior_cwd ();
+  std::string expanded_infcwd = gdb_tilde_expand (inferior_cwd);
   BOOL ret;
 
 #ifdef _WIN32_WCE
-  wchar_t *p, *wprogram, *wargs;
+  wchar_t *p, *wprogram, *wargs, *wcwd = NULL;
   size_t argslen;
 
   wprogram = alloca ((strlen (program) + 1) * sizeof (wchar_t));
@@ -579,6 +582,19 @@ create_process (const char *program, char *args,
   wargs = alloca ((argslen + 1) * sizeof (wchar_t));
   mbstowcs (wargs, args, argslen + 1);
 
+  if (inferior_cwd != NULL)
+    {
+      std::replace (expanded_infcwd.begin (), expanded_infcwd.end (),
+		    '/', '\\');
+      wcwd = alloca ((expanded_infcwd.size () + 1) * sizeof (wchar_t));
+      if (mbstowcs (wcwd, expanded_infcwd.c_str (),
+		    expanded_infcwd.size () + 1) == NULL)
+	{
+	  error (_("\
+Could not convert the expanded inferior cwd to wide-char."));
+	}
+    }
+
   ret = CreateProcessW (wprogram, /* image name */
 			wargs,    /* command line */
 			NULL,     /* security, not supported */
@@ -586,7 +602,7 @@ create_process (const char *program, char *args,
 			FALSE,    /* inherit handles, not supported */
 			flags,    /* start flags */
 			NULL,     /* environment, not supported */
-			NULL,     /* current directory, not supported */
+			wcwd,     /* current directory */
 			NULL,     /* start info, not supported */
 			pi);      /* proc info */
 #else
@@ -599,7 +615,7 @@ create_process (const char *program, char *args,
 			TRUE,     /* inherit handles */
 			flags,    /* start flags */
 			NULL,     /* environment */
-			NULL,     /* current directory */
+			expanded_infcwd.c_str (), /* current directory */
 			&si,      /* start info */
 			pi);      /* proc info */
 #endif

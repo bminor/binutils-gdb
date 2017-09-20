@@ -1,6 +1,17 @@
 2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.texinfo (Starting your Program) <The working directory.>:
+	Mention remote debugging.
+	(Working Directory) <Your Program's Working Directory>:
+	Likewise.
+	(Connecting) <Remote Packet>: Add "set-working-dir"
+	and "QSetWorkingDir" to the table.
+	(Remote Protocol) <QSetWorkingDir>: New item, explaining the
+	packet.
+
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Starting your Program) <The working directory.>:
 	Mention new "set cwd" command.
 	(Working Directory) <Your Program's Working Directory>:
 	Rephrase to explain that "set cwd" exists and is the default

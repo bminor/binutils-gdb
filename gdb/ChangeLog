@@ -1,5 +1,22 @@
 2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* NEWS (Changes since GDB 8.0): Add entry about new
+	'set-cwd-on-gdbserver' feature.
+	(New remote packets): Add entry for QSetWorkingDir.
+	* common/common-inferior.h (set_inferior_cwd): New prototype.
+	* infcmd.c (set_inferior_cwd): Remove "static".
+	(show_cwd_command): Expand text to include remote debugging.
+	* remote.c: Add PACKET_QSetWorkingDir.
+	(remote_protocol_features) <QSetWorkingDir>: New entry for
+	PACKET_QSetWorkingDir.
+	(extended_remote_set_inferior_cwd): New function.
+	(extended_remote_create_inferior): Call
+	"extended_remote_set_inferior_cwd".
+	(_initialize_remote): Call "add_packet_config_cmd" for
+	QSetWorkingDir.
+
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* NEWS (New commands): Mention "set/show cwd".
 	* cli/cli-cmds.c (_initialize_cli_cmds): Mention "set cwd" on
 	"cd" command's help text.

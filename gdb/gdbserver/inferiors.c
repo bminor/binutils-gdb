@@ -456,3 +456,15 @@ get_inferior_cwd ()
 {
   return current_inferior_cwd;
 }
+
+/* See common/common-inferior.h.  */
+
+void
+set_inferior_cwd (const char *cwd)
+{
+  xfree ((void *) current_inferior_cwd);
+  if (cwd != NULL)
+    current_inferior_cwd = xstrdup (cwd);
+  else
+    current_inferior_cwd = NULL;
+}
