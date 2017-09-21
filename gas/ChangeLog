@@ -1,3 +1,8 @@
+2017-09-21  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/elf_mach_5900.d: New test.
+	* testsuite/gas/mips/mips.exp: Run it.
+
 2017-09-15  Nick Clifton  <nickc@redhat.com>
 
 	2.29.1 Release

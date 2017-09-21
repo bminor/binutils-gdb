@@ -1,3 +1,7 @@
+2017-09-21  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* readelf.c (get_machine_flags) <E_MIPS_MACH_5900>: New case.
+
 2017-09-15  Nick Clifton  <nickc@redhat.com>
 
 	2.29.1 Release

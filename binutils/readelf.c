@@ -3325,6 +3325,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case E_MIPS_MACH_4650: strcat (buf, ", 4650"); break;
 	    case E_MIPS_MACH_5400: strcat (buf, ", 5400"); break;
 	    case E_MIPS_MACH_5500: strcat (buf, ", 5500"); break;
+	    case E_MIPS_MACH_5900: strcat (buf, ", 5900"); break;
 	    case E_MIPS_MACH_SB1:  strcat (buf, ", sb1");  break;
 	    case E_MIPS_MACH_9000: strcat (buf, ", 9000"); break;
   	    case E_MIPS_MACH_LS2E: strcat (buf, ", loongson-2e"); break;
