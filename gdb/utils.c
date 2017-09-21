@@ -904,8 +904,7 @@ class scoped_input_handler
 public:
 
   scoped_input_handler ()
-    : m_quit_handler (make_scoped_restore (&quit_handler,
-					   default_quit_handler)),
+    : m_quit_handler (&quit_handler, default_quit_handler),
       m_ui (NULL)
   {
     target_terminal::ours ();
@@ -928,7 +927,7 @@ private:
   target_terminal::scoped_restore_terminal_state m_term_state;
 
   /* Save and restore the quit handler.  */
-  scoped_restore m_quit_handler;
+  scoped_restore_tmpl<quit_handler_ftype *> m_quit_handler;
 
   /* The saved UI, if non-NULL.  */
   struct ui *m_ui;
