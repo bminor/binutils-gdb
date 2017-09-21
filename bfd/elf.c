@@ -9698,14 +9698,14 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
     case NT_S390_GS_CB:
       if (note->namesz == 6
 	  && strcmp (note->namedata, "LINUX") == 0)
-	return elfcore_grok_s390_gs_bc (abfd, note);
+	return elfcore_grok_s390_gs_cb (abfd, note);
       else
 	return TRUE;
 
     case NT_S390_GS_BC:
       if (note->namesz == 6
 	  && strcmp (note->namedata, "LINUX") == 0)
-	return elfcore_grok_s390_gs_cb (abfd, note);
+	return elfcore_grok_s390_gs_bc (abfd, note);
       else
 	return TRUE;
 

@@ -1,3 +1,9 @@
+2017-09-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* elf.c (elfcore_grok_note): For the cases NT_S390_GS_CB and
+	NT_S390_GS_BC, correct the previously swapped invocations of
+	elfcore_grok_s390_gs_bc and elfcore_grok_s390_gs_cb.
+
 2017-09-19  Alan Modra  <amodra@gmail.com>
 
 	PR 21441
