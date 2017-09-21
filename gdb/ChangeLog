@@ -1,3 +1,8 @@
+2017-09-21  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.tgt (aarch64*-*-freebsd*): Add fbsd-tdep.o solib-svr4.o
+	to gdb_target_obs.
+
 2017-09-20  Tom Tromey  <tom@tromey.com>
 
 	* breakpoint.c (struct counted_command_line): Remove.
