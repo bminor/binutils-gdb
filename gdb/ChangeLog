@@ -1,5 +1,9 @@
 2017-09-21  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* nat/linux-waitpid.c (linux_debug): Add ATTRIBUTE_PRINTF.
+
+2017-09-21  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* microblaze-tdep.c (microblaze_debug): Add ATTRIBUTE_PRINTF.
 
 2017-09-21  Yao Qi  <yao.qi@linaro.org>
