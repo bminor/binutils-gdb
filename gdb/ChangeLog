@@ -1,3 +1,8 @@
+2017-09-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* guile/scm-value.c (gdbscm_value_address): Initialize address,
+	get rid of res_val.
+
 2017-09-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* configure.nat <i386sol2,i386>: Add fork-inferior.o to NATDEPFILES.

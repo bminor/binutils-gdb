@@ -421,23 +421,18 @@ gdbscm_value_address (SCM self)
 
   if (SCM_UNBNDP (v_smob->address))
     {
-      struct value *res_val = NULL;
       struct cleanup *cleanup
 	= make_cleanup_value_free_to_mark (value_mark ());
-      SCM address;
+      SCM address = SCM_BOOL_F;
 
       TRY
 	{
-	  res_val = value_addr (value);
+	  address = vlscm_scm_from_value (value_addr (value));
 	}
       CATCH (except, RETURN_MASK_ALL)
 	{
-	  address = SCM_BOOL_F;
 	}
       END_CATCH
-
-      if (res_val != NULL)
-	address = vlscm_scm_from_value (res_val);
 
       do_cleanups (cleanup);
 
