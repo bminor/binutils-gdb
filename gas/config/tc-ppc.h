@@ -325,3 +325,4 @@ extern int ppc_dwarf2_line_min_insn_length;
 #define DWARF2_LINE_MIN_INSN_LENGTH     ppc_dwarf2_line_min_insn_length
 #define DWARF2_DEFAULT_RETURN_COLUMN    0x41
 #define DWARF2_CIE_DATA_ALIGNMENT       ppc_cie_data_alignment
+#define EH_FRAME_ALIGNMENT		2
