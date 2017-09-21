@@ -1,3 +1,7 @@
+2017-09-21  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* aarch64-opc.c (expand_fp_imm): Initialize 'imm'.
+
 2017-09-09  Kamil Rytarowski  <n54@gmx.com>
 
 	* nds32-asm.c: Rename __BIT() to N32_BIT().

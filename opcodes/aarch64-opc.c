@@ -2847,7 +2847,7 @@ typedef union
 static uint64_t
 expand_fp_imm (int size, uint32_t imm8)
 {
-  uint64_t imm;
+  uint64_t imm = 0;
   uint32_t imm8_7, imm8_6_0, imm8_6, imm8_6_repl4;
 
   imm8_7 = (imm8 >> 7) & 0x01;	/* imm8<7>   */
