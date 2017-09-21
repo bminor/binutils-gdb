@@ -1,3 +1,14 @@
+2017-09-21  James Cowgill  <James.Cowgill@imgtec.com>
+
+	PR gas/21762
+	* config/tc-mips.c (s_mips_stab): Insert call to
+	file_mips_check_options.
+	* testsuite/gas/mips/micromips@stabs-symbol-type.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+	* testsuite/gas/mips/mips16@stabs-symbol-type.d: New test.
+	* testsuite/gas/mips/stabs-symbol-type.d: New test.
+	* testsuite/gas/mips/stabs-symbol-type.s: New test source.
+
 2017-09-21  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.h (EH_FRAME_ALIGNMENT): Define.

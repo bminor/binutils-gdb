@@ -2034,6 +2034,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "org-11"
     run_dump_test "org-12"
 
+    run_dump_test_arches "stabs-symbol-type" [mips_arch_list_all]
+
     run_dump_test_arches "r6"		[mips_arch_list_matching mips32r6]
     if $has_newabi {
 	run_dump_test_arches "r6-n32"	[mips_arch_list_matching mips64r6]
