@@ -24,14 +24,9 @@
 struct target_ops *the_target;
 
 int
-set_desired_thread (int use_general)
+set_desired_thread ()
 {
-  struct thread_info *found;
-
-  if (use_general == 1)
-    found = find_thread_ptid (general_thread);
-  else
-    found = find_thread_ptid (cont_thread);
+  thread_info *found = find_thread_ptid (general_thread);
 
   current_thread = found;
   return (current_thread != NULL);

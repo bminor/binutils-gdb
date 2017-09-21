@@ -698,7 +698,7 @@ int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 int write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 			   int len);
 
-int set_desired_thread (int id);
+int set_desired_thread ();
 
 const char *target_pid_to_str (ptid_t);
 

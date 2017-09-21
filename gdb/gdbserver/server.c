@@ -969,7 +969,7 @@ gdb_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
   res = prepare_to_access_memory ();
   if (res == 0)
     {
-      if (set_desired_thread (1))
+      if (set_desired_thread ())
 	res = read_inferior_memory (memaddr, myaddr, len);
       else
 	res = 1;
@@ -996,7 +996,7 @@ gdb_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
       ret = prepare_to_access_memory ();
       if (ret == 0)
 	{
-	  if (set_desired_thread (1))
+	  if (set_desired_thread ())
 	    ret = write_inferior_memory (memaddr, myaddr, len);
 	  else
 	    ret = EIO;
@@ -3398,7 +3398,7 @@ handle_status (char *own_buf)
 	  /* GDB assumes the current thread is the thread we're
 	     reporting the status for.  */
 	  general_thread = thread->id;
-	  set_desired_thread (1);
+	  set_desired_thread ();
 
 	  gdb_assert (tp->last_status.kind != TARGET_WAITKIND_IGNORE);
 	  prepare_resume_reply (own_buf, tp->entry.id, &tp->last_status);
@@ -4139,7 +4139,7 @@ process_serial_event (void)
 		}
 
 	      general_thread = thread_id;
-	      set_desired_thread (1);
+	      set_desired_thread ();
 	      gdb_assert (current_thread != NULL);
 	    }
 	  else if (own_buf[1] == 'c')
@@ -4172,7 +4172,7 @@ process_serial_event (void)
 	{
 	  struct regcache *regcache;
 
-	  if (!set_desired_thread (1))
+	  if (!set_desired_thread ())
 	    write_enn (own_buf);
 	  else
 	    {
@@ -4189,7 +4189,7 @@ process_serial_event (void)
 	{
 	  struct regcache *regcache;
 
-	  if (!set_desired_thread (1))
+	  if (!set_desired_thread ())
 	    write_enn (own_buf);
 	  else
 	    {
@@ -4420,7 +4420,7 @@ handle_serial_event (int err, gdb_client_data client_data)
 
   /* Be sure to not change the selected thread behind GDB's back.
      Important in the non-stop mode asynchronous protocol.  */
-  set_desired_thread (1);
+  set_desired_thread ();
 
   return 0;
 }
@@ -4515,7 +4515,7 @@ handle_target_event (int err, gdb_client_data client_data)
 
   /* Be sure to not change the selected thread behind GDB's back.
      Important in the non-stop mode asynchronous protocol.  */
-  set_desired_thread (1);
+  set_desired_thread ();
 
   return 0;
 }

@@ -1,3 +1,12 @@
+2017-09-21  Pedro Alves  <palves@redhat.com>
+
+	* server.c (gdb_read_memory, handle_status, process_serial_event)
+	(handle_serial_event, handle_target_event): Adjust to
+	set_desired_thread prototype change.
+	* target.c (set_desired_thread): Remove 'use_general' parameter
+	and adjust.
+	* target.h (set_desired_thread): Remove 'use_general' parameter.
+
 2017-09-20  Tom Tromey  <tom@tromey.com>
 
 	* target.c (target_terminal::terminal_state): Define.
