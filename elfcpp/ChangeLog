@@ -1,3 +1,7 @@
+2017-09-18  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.h (elfcpp): Add definition of DW_CFA_DUP.
+
 2017-08-29  Alan Modra  <amodra@gmail.com>
 
 	* elfcpp.h (DT_PPC_OPT): Define.
