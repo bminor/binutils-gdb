@@ -1,3 +1,12 @@
+2017-09-22  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/readelf.exp: Don't perror and exit on
+	bintest.s assembly failure.  Report tests unresolved instead.
+	Likewise for version note test, pr18374, decompress, and dw5
+	tests.
+	(readelf_test): Set testname to include both option and binary
+	file name.  Use for pass/fail.
+
 2017-09-21  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* readelf.c (get_machine_flags) <E_MIPS_MACH_5900>: New case.
