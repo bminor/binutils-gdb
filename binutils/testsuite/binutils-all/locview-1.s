@@ -65,7 +65,7 @@
 	.byte	0x1	/* DW_AT_decl_line */
 	.4byte	.LIint-.LIbase	/* DW_AT_type */
 	.4byte	.LFB0	/* DW_AT_low_pc */
-	.4byte	.LFE0-.LFB0	/* DW_AT_high_pc */
+	.4byte	1 /* .LFE0-.LFB0 */	/* DW_AT_high_pc */
 	.uleb128 0x1	/* DW_AT_frame_base */
 	.byte	0x9c	/* DW_OP_call_frame_cfa */
 			/* DW_AT_GNU_all_call_sites */

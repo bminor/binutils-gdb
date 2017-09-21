@@ -66,7 +66,7 @@
 	.byte	0x1	/* DW_AT_decl_line */
 	.4byte	.LIint-.LIbase	/* DW_AT_type */
 	.4byte	.LFB0	/* DW_AT_low_pc */
-	.4byte	.LFE0-.LFB0	/* DW_AT_high_pc */
+	.4byte	1 /* .LFE0-.LFB0 */	/* DW_AT_high_pc */
 	.uleb128 0x1	/* DW_AT_frame_base */
 	.byte	0x9c	/* DW_OP_call_frame_cfa */
 			/* DW_AT_call_all_calls */
@@ -239,14 +239,14 @@
 	.byte	0x6	/* DW_LLE_base_address (*.LLST0) */
 	.4byte	.LVL0	/* Base address (*.LLST0) */
 	.byte	0x4	/* DW_LLE_offset_pair (*.LLST0) */
-	.uleb128 .LVL0-.LVL0	/* Location list begin address (*.LLST0) */
-	.uleb128 .LVL0-.LVL0	/* Location list end address (*.LLST0) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list begin address (*.LLST0) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list end address (*.LLST0) */
 	.uleb128 0x2	/* Location expression size */
 	.byte	0x30	/* DW_OP_lit0 */
 	.byte	0x9f	/* DW_OP_stack_value */
 	.byte	0x4	/* DW_LLE_offset_pair (*.LLST0) */
-	.uleb128 .LVL0-.LVL0	/* Location list begin address (*.LLST0) */
-	.uleb128 .LFE0-.LVL0	/* Location list end address (*.LLST0) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list begin address (*.LLST0) */
+	.uleb128 1 /* .LFE0-.LVL0 */	/* Location list end address (*.LLST0) */
 	.uleb128 0x2	/* Location expression size */
 	.byte	0x32	/* DW_OP_lit2 */
 	.byte	0x9f	/* DW_OP_stack_value */
@@ -255,14 +255,14 @@
 	.byte	0x6	/* DW_LLE_base_address (*.LLST1) */
 	.4byte	.LVL0	/* Base address (*.LLST1) */
 	.byte	0x4	/* DW_LLE_offset_pair (*.LLST1) */
-	.uleb128 .LVL0-.LVL0	/* Location list begin address (*.LLST1) */
-	.uleb128 .LVL0-.LVL0	/* Location list end address (*.LLST1) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list begin address (*.LLST1) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list end address (*.LLST1) */
 	.uleb128 0x2	/* Location expression size */
 	.byte	0x31	/* DW_OP_lit1 */
 	.byte	0x9f	/* DW_OP_stack_value */
 	.byte	0x4	/* DW_LLE_offset_pair (*.LLST1) */
-	.uleb128 .LVL0-.LVL0	/* Location list begin address (*.LLST1) */
-	.uleb128 .LFE0-.LVL0	/* Location list end address (*.LLST1) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list begin address (*.LLST1) */
+	.uleb128 1 /* .LFE0-.LVL0 */	/* Location list end address (*.LLST1) */
 	.uleb128 0x2	/* Location expression size */
 	.byte	0x33	/* DW_OP_lit3 */
 	.byte	0x9f	/* DW_OP_stack_value */
@@ -283,20 +283,20 @@
 	.byte	0x6	/* DW_LLE_base_address (*.LLST2) */
 	.4byte	.LVL0	/* Base address (*.LLST2) */
 	.byte	0x4	/* DW_LLE_offset_pair (*.LLST2) */
-	.uleb128 .LVL0-.LVL0	/* Location list begin address (*.LLST2) */
-	.uleb128 .LVL0-.LVL0	/* Location list end address (*.LLST2) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list begin address (*.LLST2) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list end address (*.LLST2) */
 	.uleb128 0x2	/* Location expression size */
 	.byte	0x34	/* DW_OP_lit4 */
 	.byte	0x9f	/* DW_OP_stack_value */
 	.byte	0x4	/* DW_LLE_offset_pair (*.LLST2) */
-	.uleb128 .LVL0-.LVL0	/* Location list begin address (*.LLST2) */
-	.uleb128 .LVL0-.LVL0	/* Location list end address (*.LLST2) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list begin address (*.LLST2) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list end address (*.LLST2) */
 	.uleb128 0x2	/* Location expression size */
 	.byte	0x35	/* DW_OP_lit5 */
 	.byte	0x9f	/* DW_OP_stack_value */
 	.byte	0x4	/* DW_LLE_offset_pair (*.LLST2) */
-	.uleb128 .LVL0-.LVL0	/* Location list begin address (*.LLST2) */
-	.uleb128 .LFE0-.LVL0	/* Location list end address (*.LLST2) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list begin address (*.LLST2) */
+	.uleb128 1 /* .LFE0-.LVL0 */	/* Location list end address (*.LLST2) */
 	.uleb128 0x2	/* Location expression size */
 	.byte	0x36	/* DW_OP_lit6 */
 	.byte	0x9f	/* DW_OP_stack_value */
@@ -308,8 +308,8 @@
 	.uleb128 0x6	/* View list begin (*.LLST3) */
 	.uleb128 0x7	/* View list end (*.LVUS3) */
 	.byte	0x4	/* DW_LLE_offset_pair (*.LLST3) */
-	.uleb128 .LVL0-.LVL0	/* Location list begin address (*.LLST3) */
-	.uleb128 .LVL0-.LVL0	/* Location list end address (*.LLST3) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list begin address (*.LLST3) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list end address (*.LLST3) */
 	.uleb128 0x2	/* Location expression size */
 	.byte	0x34	/* DW_OP_lit4 */
 	.byte	0x9f	/* DW_OP_stack_value */
@@ -317,8 +317,8 @@
 	.uleb128 0x7	/* View list begin (*.LLST3) */
 	.uleb128 0x8	/* View list end (*.LVUS3) */
 	.byte	0x4	/* DW_LLE_offset_pair (*.LLST3) */
-	.uleb128 .LVL0-.LVL0	/* Location list begin address (*.LLST3) */
-	.uleb128 .LVL0-.LVL0	/* Location list end address (*.LLST3) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list begin address (*.LLST3) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list end address (*.LLST3) */
 	.uleb128 0x2	/* Location expression size */
 	.byte	0x35	/* DW_OP_lit5 */
 	.byte	0x9f	/* DW_OP_stack_value */
@@ -326,8 +326,8 @@
 	.uleb128 0x8	/* View list begin (*.LLST3) */
 	.uleb128 0x0	/* View list end (*.LVUS3) */
 	.byte	0x4	/* DW_LLE_offset_pair (*.LLST3) */
-	.uleb128 .LVL0-.LVL0	/* Location list begin address (*.LLST3) */
-	.uleb128 .LFE0-.LVL0	/* Location list end address (*.LLST3) */
+	.uleb128 0 /* .LVL0-.LVL0 */	/* Location list begin address (*.LLST3) */
+	.uleb128 1 /* .LFE0-.LVL0 */	/* Location list end address (*.LLST3) */
 	.uleb128 0x2	/* Location expression size */
 	.byte	0x36	/* DW_OP_lit6 */
 	.byte	0x9f	/* DW_OP_stack_value */
