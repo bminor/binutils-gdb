@@ -271,8 +271,9 @@ public:
 
   void raw_set_cached_value (int regnum, const gdb_byte *buf);
 
-protected:
   gdb_byte *register_buffer (int regnum) const;
+
+protected:
   struct regcache_descr *m_descr;
 
 private:

@@ -168,7 +168,7 @@ struct record_full_core_buf_entry
 };
 
 /* Record buf with core target.  */
-static gdb_byte *record_full_core_regbuf = NULL;
+static reg_buffer *record_full_core_regbuf = NULL;
 static struct target_section *record_full_core_start;
 static struct target_section *record_full_core_end;
 static struct record_full_core_buf_entry *record_full_core_buf_list = NULL;
@@ -780,16 +780,16 @@ record_full_core_open_1 (const char *name, int from_tty)
 
   /* Get record_full_core_regbuf.  */
   target_fetch_registers (regcache, -1);
-  record_full_core_regbuf = (gdb_byte *) xmalloc (MAX_REGISTER_SIZE * regnum);
+  record_full_core_regbuf = new reg_buffer (get_regcache_arch (regcache),
+					    false);
   for (i = 0; i < regnum; i ++)
-    regcache_raw_collect (regcache, i,
-			  record_full_core_regbuf + MAX_REGISTER_SIZE * i);
+    record_full_core_regbuf->raw_supply (i, regcache->register_buffer (i));
 
   /* Get record_full_core_start and record_full_core_end.  */
   if (build_section_table (core_bfd, &record_full_core_start,
 			   &record_full_core_end))
     {
-      xfree (record_full_core_regbuf);
+      delete record_full_core_regbuf;
       record_full_core_regbuf = NULL;
       error (_("\"%s\": Can't find sections: %s"),
 	     bfd_get_filename (core_bfd), bfd_errmsg (bfd_get_error ()));
@@ -871,7 +871,7 @@ record_full_close (struct target_ops *self)
   /* Release record_full_core_regbuf.  */
   if (record_full_core_regbuf)
     {
-      xfree (record_full_core_regbuf);
+      delete record_full_core_regbuf;
       record_full_core_regbuf = NULL;
     }
 
@@ -2034,11 +2034,11 @@ record_full_core_fetch_registers (struct target_ops *ops,
 
       for (i = 0; i < num; i ++)
         regcache_raw_supply (regcache, i,
-                             record_full_core_regbuf + MAX_REGISTER_SIZE * i);
+			     record_full_core_regbuf->register_buffer (i));
     }
   else
     regcache_raw_supply (regcache, regno,
-                         record_full_core_regbuf + MAX_REGISTER_SIZE * regno);
+			 record_full_core_regbuf->register_buffer (regno));
 }
 
 /* "to_prepare_to_store" method for prec over corefile.  */
@@ -2057,8 +2057,8 @@ record_full_core_store_registers (struct target_ops *ops,
                              int regno)
 {
   if (record_full_gdb_operation_disable)
-    regcache_raw_collect (regcache, regno,
-                          record_full_core_regbuf + MAX_REGISTER_SIZE * regno);
+    record_full_core_regbuf->raw_supply (regno,
+					 regcache->register_buffer (regno));
   else
     error (_("You can't do that without a process to debug."));
 }
