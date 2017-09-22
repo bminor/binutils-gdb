@@ -1182,10 +1182,10 @@ reg_buffer::raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
 }
 
 void
-regcache::transfer_regset (const struct regset *regset,
-			   struct regcache *out_regcache,
-			   int regnum, const void *in_buf,
-			   void *out_buf, size_t size) const
+reg_buffer::transfer_regset (const struct regset *regset,
+			     struct reg_buffer *out_regcache,
+			     int regnum, const void *in_buf,
+			     void *out_buf, size_t size) const
 {
   const struct regcache_map_entry *map;
   int offs = 0, count;
@@ -1249,8 +1249,8 @@ regcache_supply_regset (const struct regset *regset,
 }
 
 void
-regcache::supply_regset (const struct regset *regset,
-			 int regnum, const void *buf, size_t size)
+reg_buffer::supply_regset (const struct regset *regset,
+			   int regnum, const void *buf, size_t size)
 {
   transfer_regset (regset, this, regnum, buf, NULL, size);
 }
@@ -1268,8 +1268,8 @@ regcache_collect_regset (const struct regset *regset,
 }
 
 void
-regcache::collect_regset (const struct regset *regset,
-			 int regnum, void *buf, size_t size) const
+reg_buffer::collect_regset (const struct regset *regset,
+			    int regnum, void *buf, size_t size) const
 {
   transfer_regset (regset, NULL, regnum, NULL, buf, size);
 }

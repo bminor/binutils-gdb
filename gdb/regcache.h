@@ -273,11 +273,22 @@ public:
 
   gdb_byte *register_buffer (int regnum) const;
 
+  void supply_regset (const struct regset *regset,
+		      int regnum, const void *buf, size_t size);
+
+  void collect_regset (const struct regset *regset, int regnum,
+		       void *buf, size_t size) const;
+
 protected:
   struct regcache_descr *m_descr;
 
 private:
   void validate (int regnum) const;
+
+  void transfer_regset (const struct regset *regset,
+			struct reg_buffer *out_regcache,
+			int regnum, const void *in_buf,
+			void *out_buf, size_t size) const;
 
   bool m_has_pseudo;
   /* The register buffers.  */
@@ -348,13 +359,6 @@ public:
   void cooked_write_part (int regnum, int offset, int len,
 			  const gdb_byte *buf);
 
-  void supply_regset (const struct regset *regset,
-		      int regnum, const void *buf, size_t size);
-
-
-  void collect_regset (const struct regset *regset, int regnum,
-		       void *buf, size_t size) const;
-
   void dump (ui_file *file, enum regcache_dump_what what_to_dump);
 
   ptid_t ptid () const
@@ -382,11 +386,6 @@ private:
 
   enum register_status xfer_part (int regnum, int offset, int len, void *in,
 				  const void *out, bool is_raw);
-
-  void transfer_regset (const struct regset *regset,
-			struct regcache *out_regcache,
-			int regnum, const void *in_buf,
-			void *out_buf, size_t size) const;
 
   /* The address space of this register cache (for registers where it
      makes sense, like PC or SP).  */
