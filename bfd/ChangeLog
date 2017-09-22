@@ -1,3 +1,8 @@
+2017-09-22  Pedro Alves  <palves@redhat.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* version.h: Add comment.
+
 2017-09-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* elf.c (elfcore_grok_note): For the cases NT_S390_GS_CB and
