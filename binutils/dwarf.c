@@ -5757,8 +5757,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	    {
 	      if (last_offset >
 		  debug_information [i].loc_offsets [j]
-		  || (last_offset ==
-		      debug_information [i].loc_offsets [j]
+		  || (last_offset == debug_information [i].loc_offsets [j]
 		      && last_view > debug_information [i].loc_views [j]))
 		{
 		  locs_sorted = 0;
