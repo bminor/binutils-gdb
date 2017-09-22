@@ -1618,7 +1618,7 @@ Target::Target_info Target_powerpc<64, true>::powerpc_info =
   false,		// has_make_symbol
   true,			// has_resolve
   false,		// has_code_fill
-  true,			// is_default_stack_executable
+  false,		// is_default_stack_executable
   false,		// can_icf_inline_merge_sections
   '\0',			// wrap_char
   "/usr/lib/ld.so.1",	// dynamic_linker
@@ -1646,7 +1646,7 @@ Target::Target_info Target_powerpc<64, false>::powerpc_info =
   false,		// has_make_symbol
   true,			// has_resolve
   false,		// has_code_fill
-  true,			// is_default_stack_executable
+  false,		// is_default_stack_executable
   false,		// can_icf_inline_merge_sections
   '\0',			// wrap_char
   "/usr/lib/ld.so.1",	// dynamic_linker
