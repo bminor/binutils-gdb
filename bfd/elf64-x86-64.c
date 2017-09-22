@@ -6717,7 +6717,7 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 
   dynrelcount = bfd_canonicalize_dynamic_reloc (abfd, dynrelbuf,
 						dynsyms);
-  if (dynrelcount < 0)
+  if (dynrelcount <= 0)
     return -1;
 
   /* Sort the relocs by address.  */
