@@ -3523,7 +3523,7 @@ const Target::Target_info Target_aarch64<64, false>::aarch64_info =
   false,		// has_make_symbol
   false,		// has_resolve
   false,		// has_code_fill
-  true,			// is_default_stack_executable
+  false,		// is_default_stack_executable
   true,			// can_icf_inline_merge_sections
   '\0',			// wrap_char
   "/lib/ld.so.1",	// program interpreter
@@ -3551,7 +3551,7 @@ const Target::Target_info Target_aarch64<32, false>::aarch64_info =
   false,		// has_make_symbol
   false,		// has_resolve
   false,		// has_code_fill
-  true,			// is_default_stack_executable
+  false,		// is_default_stack_executable
   false,		// can_icf_inline_merge_sections
   '\0',			// wrap_char
   "/lib/ld.so.1",	// program interpreter
@@ -3579,7 +3579,7 @@ const Target::Target_info Target_aarch64<64, true>::aarch64_info =
   false,		// has_make_symbol
   false,		// has_resolve
   false,		// has_code_fill
-  true,			// is_default_stack_executable
+  false,		// is_default_stack_executable
   true,			// can_icf_inline_merge_sections
   '\0',			// wrap_char
   "/lib/ld.so.1",	// program interpreter
@@ -3607,7 +3607,7 @@ const Target::Target_info Target_aarch64<32, true>::aarch64_info =
   false,		// has_make_symbol
   false,		// has_resolve
   false,		// has_code_fill
-  true,			// is_default_stack_executable
+  false,		// is_default_stack_executable
   false,		// can_icf_inline_merge_sections
   '\0',			// wrap_char
   "/lib/ld.so.1",	// program interpreter

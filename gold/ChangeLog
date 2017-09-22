@@ -1,3 +1,8 @@
+2017-09-22  Jim Wilson  <jim.wilson@linaro.org>
+
+	* aarch64.cc (Target_aarch64::aarch64_info): Set
+	is_default_stack_executable to false.
+
 2017-09-22  Alan Modra  <amodra@gmail.com>
 
 	* resolve.cc (clone): Fix got_offset_list test.
