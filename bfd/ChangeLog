@@ -1,6 +1,6 @@
 2017-09-22  H.J. Lu  <hongjiu.lu@intel.com>
 
-	PR ld/22163
+	PR binutils/22163
 	* elfxx-x86.c (_bfd_x86_elf_get_synthetic_symtab): Also return
 	-1 if bfd_canonicalize_dynamic_reloc returns 0.
 
