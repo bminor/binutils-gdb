@@ -1,3 +1,8 @@
+2017-09-22  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc<64,*>::powerpc_info): Set
+	is_default_stack_executable false.
+
 2017-09-20  Teresa Johnson  <tejohnson@google.com>
 
 	* plugin.cc (is_visible_from_outside): Check for export dynamic symbol
