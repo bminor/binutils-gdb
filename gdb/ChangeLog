@@ -1,3 +1,16 @@
+2017-09-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* configure.nat <i386sol2,i386>: Add fork-inferior.o to NATDEPFILES.
+	<sol2,sparc>: Likewise.
+	<sol2-64,i386>: Likewise.
+
+	* warning.m4 (AM_GDB_WARNINGS): Disable -Wunknown-pragmas,
+	-Wdeprecated-declarations on *-*-solaris*.
+	* configure: Regenerate.
+
+	* procfs.c: Include "nat/inferior.h".
+	(procfs_info_proc): Fix typo.
+
 2017-09-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* remote.c (vector): Include.

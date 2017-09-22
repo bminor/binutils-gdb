@@ -30,6 +30,7 @@
 #include "gdbthread.h"
 #include "regcache.h"
 #include "inf-child.h"
+#include "nat/fork-inferior.h"
 #include "filestuff.h"
 
 #if defined (NEW_PROC_API)
@@ -5121,7 +5122,7 @@ procfs_info_proc (struct target_ops *ops, const char *args,
 
   old_chain = make_cleanup (null_cleanup, 0);
   gdb_argv built_argv (args);
-  for (char *arg : argv)
+  for (char *arg : built_argv)
     {
       if (isdigit (arg[0]))
 	{
