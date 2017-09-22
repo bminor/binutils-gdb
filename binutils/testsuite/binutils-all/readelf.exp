@@ -379,6 +379,33 @@ if {![binutils_assemble $srcdir/$subdir/pr18374.s tmpdir/pr18374.o]} then {
 }
 
 
+# locview - Check dumping of location lists with location views.
+if {![binutils_assemble $srcdir/$subdir/locview-1.s tmpdir/locview-1.o]} then {
+    unresolved "readelf --debug-dump=loc locview-1 (failed to assemble)"
+} else {
+
+    if ![is_remote host] {
+	set tempfile tmpdir/locview-1.o
+    } else {
+	set tempfile [remote_download host tmpdir/locview-1.o]
+    }
+
+    readelf_test --debug-dump=loc $tempfile readelf.locview-1  {}
+}
+if {![binutils_assemble $srcdir/$subdir/locview-2.s tmpdir/locview-2.o]} then {
+    unresolved "readelf --debug-dump=loc locview-2 (failed to assemble)"
+} else {
+
+    if ![is_remote host] {
+	set tempfile tmpdir/locview-2.o
+    } else {
+	set tempfile [remote_download host tmpdir/locview-2.o]
+    }
+
+    readelf_test --debug-dump=loc $tempfile readelf.locview-2  {}
+}
+
+
 # Check that decompressed dumps work.
 if {![binutils_assemble $srcdir/$subdir/z.s tmpdir/z.o]} then {
     unresolved "readelf --decompress --hex-dump .debug_loc z (failed to assemble)"
@@ -417,6 +444,6 @@ if ![istarget "riscv*-*-*"] then {
 	readelf_find_size $tempfile
 
 	# Make sure that readelf can decode the contents.
-	readelf_test -wiaoRlL $tempfile dw5.W {}
+	readelf_test -wiaoRlL $tempfile dw5.W { nds32*-elf }
     }
 }

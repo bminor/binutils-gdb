@@ -1,3 +1,10 @@
+2017-09-22  Alexandre Oliva <aoliva@redhat.com>
+
+	* dwarf2.def (DW_AT_GNU_locviews): New.
+	* dwarf2.h (enum dwarf_location_list_entry_type): Add
+	DW_LLE_GNU_view_pair.
+	(DW_LLE_view_pair): Define.
+
 2017-09-15  Pedro Alves  <palves@redhat.com>
 
 	Sync with mainline gcc sources (r252823)
