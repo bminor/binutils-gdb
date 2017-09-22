@@ -6970,6 +6970,10 @@ bad_return:
 		  size += sizeof ("+0x") - 1 + 8 + 8 * ABI_64_P (abfd);
 		n++;
 		s++;
+		/* There should be only one entry in PLT for a given
+		   symbol.  Set howto to NULL after processing a PLT
+		   entry to guard against corrupted PLT.  */
+		p->howto = NULL;
 	      }
 	    offset += plt_entry_size;
 	  }

@@ -1,5 +1,12 @@
 2017-09-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/22170
+	* elf32-i386.c (elf_i386_get_synthetic_symtab): Guard against
+	corrupted PLT.
+	* elf64-x86-64.c (elf_x86_64_get_synthetic_symtab): Likewise.
+
+2017-09-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/22163
 	* elf32-i386.c (elf_i386_get_synthetic_symtab): Also return -1
 	if bfd_canonicalize_dynamic_reloc returns 0.
