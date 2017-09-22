@@ -1962,6 +1962,10 @@ _bfd_x86_elf_get_synthetic_symtab (bfd *abfd,
 		names += sizeof ("@plt");
 		n++;
 		s++;
+		/* There should be only one entry in PLT for a given
+		   symbol.  Set howto to NULL after processing a PLT
+		   entry to guard against corrupted PLT.  */
+		p->howto = NULL;
 	      }
 	    offset += plt_entry_size;
 	  }
