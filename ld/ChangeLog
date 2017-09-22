@@ -1,3 +1,12 @@
+2017-09-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22150
+	* testsuite/ld-elf/pr22150.vd: New file.
+	* testsuite/ld-elf/pr22150.ver: Likewise.
+	* testsuite/ld-elf/pr22150a.s: Likewise.
+	* testsuite/ld-elf/pr22150b.s: Likewise.
+	* testsuite/ld-elf/shared.exp: Run PR ld/22150 tests.
+
 2017-09-21  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/tlsopt5.wf: Update for reduced alignment.
