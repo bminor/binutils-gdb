@@ -256,9 +256,9 @@ print_dwarf_view (dwarf_vma value, unsigned num_bytes, int force)
   else
     len = num_bytes * 2;
 
-  assert (value == (unsigned long)value);
+  assert (value == (unsigned long) value);
   if (value || force)
-    printf ("v%0*lx ", len - 1, (unsigned long)value);
+    printf ("v%0*lx ", len - 1, (unsigned long) value);
   else
     printf ("%*s", len + 1, "");
 }
