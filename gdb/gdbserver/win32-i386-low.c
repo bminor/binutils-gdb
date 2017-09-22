@@ -23,6 +23,7 @@
 #include "arch/amd64.h"
 #endif
 #include "arch/i386.h"
+#include "tdesc.h"
 
 #ifndef CONTEXT_EXTENDED_REGISTERS
 #define CONTEXT_EXTENDED_REGISTERS 0
@@ -443,12 +444,18 @@ static const unsigned char i386_win32_breakpoint = 0xcc;
 static void
 i386_arch_setup (void)
 {
+  struct target_desc *tdesc;
+
 #ifdef __x86_64__
-  win32_tdesc = amd64_create_target_description (X86_XSTATE_SSE_MASK, false,
+  tdesc = amd64_create_target_description (X86_XSTATE_SSE_MASK, false,
 						 false);
 #else
-  win32_tdesc = i386_create_target_description (X86_XSTATE_SSE_MASK, false);
+  tdesc = i386_create_target_description (X86_XSTATE_SSE_MASK, false);
 #endif
+
+  init_target_desc (tdesc);
+
+  win32_tdesc = tdesc;
 }
 
 struct win32_target_ops the_low_target = {

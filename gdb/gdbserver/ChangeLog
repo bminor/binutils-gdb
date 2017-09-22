@@ -1,3 +1,7 @@
+2017-09-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* win32-i386-low.c (i386_arch_setup): Call init_target_desc.
+
 2017-09-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* linux-low.h (struct lwp_info): Add new field, thread_handle.
