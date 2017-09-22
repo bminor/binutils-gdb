@@ -928,8 +928,8 @@ Symbol::clone(const Symbol* from)
   // We aren't prepared to merge such.
   gold_assert(!this->has_symtab_index() && !from->has_symtab_index());
   gold_assert(!this->has_dynsym_index() && !from->has_dynsym_index());
-  gold_assert(this->got_offset_list()->get_list() == NULL
-	      && from->got_offset_list()->get_list() == NULL);
+  gold_assert(this->got_offset_list() == NULL
+	      && from->got_offset_list() == NULL);
   gold_assert(!this->has_plt_offset() && !from->has_plt_offset());
 
   if (!from->version_)

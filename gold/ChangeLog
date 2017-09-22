@@ -1,5 +1,9 @@
 2017-09-22  Alan Modra  <amodra@gmail.com>
 
+	* resolve.cc (clone): Fix got_offset_list test.
+
+2017-09-22  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc<64,*>::powerpc_info): Set
 	is_default_stack_executable false.
 
