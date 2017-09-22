@@ -282,7 +282,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	setup_xfail "aarch64*-*-linux*"
 	shared_test shnp "shared (non PIC, load offset)" \
 		mainnp.o sh1np.o sh2np.o shared \
-		"-T $srcdir/$subdir/elf-offset.ld"
+		"-Wl,-T,$srcdir/$subdir/elf-offset.ld,--hash-style=sysv"
     } }
 
     # Now compile the code using -fpic.

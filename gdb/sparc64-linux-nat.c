@@ -69,9 +69,6 @@ fill_fpregset (const struct regcache *regcache,
   sparc64_collect_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc64_linux_nat (void);
-
 void
 _initialize_sparc64_linux_nat (void)
 {
@@ -88,6 +85,9 @@ _initialize_sparc64_linux_nat (void)
 
   /* Register the target.  */
   linux_nat_add_target (t);
+
+  /* ADI support */
+  linux_nat_set_forget_process (t, sparc64_forget_process);
 
   sparc_gregmap = &sparc64_linux_ptrace_gregmap;
 }

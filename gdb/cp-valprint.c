@@ -35,6 +35,7 @@
 #include "language.h"
 #include "extension.h"
 #include "typeprint.h"
+#include "byte-vector.h"
 
 /* Controls printing of vtbl's.  */
 static void
@@ -72,8 +73,6 @@ show_static_field_print (struct ui_file *file, int from_tty,
 static struct obstack dont_print_vb_obstack;
 static struct obstack dont_print_statmem_obstack;
 static struct obstack dont_print_stat_array_obstack;
-
-extern void _initialize_cp_valprint (void);
 
 static void cp_print_static_field (struct type *, struct value *,
 				   struct ui_file *, int,
@@ -534,23 +533,18 @@ cp_print_value (struct type *type, struct type *real_type,
 	      if ((boffset + offset) < 0
 		  || (boffset + offset) >= TYPE_LENGTH (real_type))
 		{
-		  gdb_byte *buf;
-		  struct cleanup *back_to;
+		  gdb::byte_vector buf (TYPE_LENGTH (baseclass));
 
-		  buf = (gdb_byte *) xmalloc (TYPE_LENGTH (baseclass));
-		  back_to = make_cleanup (xfree, buf);
-
-		  if (target_read_memory (address + boffset, buf,
+		  if (target_read_memory (address + boffset, buf.data (),
 					  TYPE_LENGTH (baseclass)) != 0)
 		    skip = 1;
 		  base_val = value_from_contents_and_address (baseclass,
-							      buf,
+							      buf.data (),
 							      address + boffset);
 		  baseclass = value_type (base_val);
 		  thisoffset = 0;
 		  boffset = 0;
 		  thistype = baseclass;
-		  do_cleanups (back_to);
 		}
 	      else
 		{

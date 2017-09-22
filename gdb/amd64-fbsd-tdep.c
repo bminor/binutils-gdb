@@ -217,7 +217,8 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (amd64fbsd_r_reg_offset);
   tdep->sizeof_gregset = 22 * 8;
 
-  amd64_init_abi (info, gdbarch);
+  amd64_init_abi (info, gdbarch,
+		  amd64_target_description (X86_XSTATE_SSE_MASK));
 
   tdep->sigtramp_p = amd64fbsd_sigtramp_p;
   tdep->sigtramp_start = amd64fbsd_sigtramp_start_addr;
@@ -239,10 +240,6 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_lp64_fetch_link_map_offsets);
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_amd64fbsd_tdep (void);
 
 void
 _initialize_amd64fbsd_tdep (void)

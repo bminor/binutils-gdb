@@ -120,8 +120,6 @@ frame_base_find_by_frame (struct frame_info *this_frame)
   return table->default_base;
 }
 
-extern initialize_file_ftype _initialize_frame_base; /* -Wmissing-prototypes */
-
 void
 _initialize_frame_base (void)
 {

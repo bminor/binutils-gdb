@@ -174,5 +174,5 @@ run_tests ()
 void
 _initialize_offset_type_selftests ()
 {
-  register_self_test (selftests::offset_type::run_tests);
+  selftests::register_test ("offset_type", selftests::offset_type::run_tests);
 }

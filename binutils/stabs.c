@@ -995,7 +995,7 @@ parse_stab_string (void *dhandle, struct stab_handle *info, int stabtype,
       break;
 
     case 'T':
-      /* Struct, union, or enum tag.  For GNU C++, this can be be followed
+      /* Struct, union, or enum tag.  For GNU C++, this can be followed
 	 by 't' which means we are typedef'ing it as well.  */
       if (*p != 't')
 	{

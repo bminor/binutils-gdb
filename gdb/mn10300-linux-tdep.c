@@ -718,9 +718,6 @@ am33_linux_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tramp_frame_prepend_unwinder (gdbarch, &am33_linux_rt_sigframe);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_mn10300_linux_tdep;
-
 void
 _initialize_mn10300_linux_tdep (void)
 {

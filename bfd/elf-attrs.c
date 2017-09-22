@@ -438,7 +438,7 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
   /* PR 17512: file: 2844a11d.  */
   if (hdr->sh_size == 0)
     return;
-  contents = (bfd_byte *) bfd_malloc (hdr->sh_size);
+  contents = (bfd_byte *) bfd_malloc (hdr->sh_size + 1);
   if (!contents)
     return;
   if (!bfd_get_section_contents (abfd, hdr->bfd_section, contents, 0,
@@ -447,6 +447,8 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
       free (contents);
       return;
     }
+  /* Ensure that the buffer is NUL terminated.  */
+  contents[hdr->sh_size] = 0;
   p = contents;
   p_end = p + hdr->sh_size;
   std_sec = get_elf_backend_data (abfd)->obj_attrs_vendor;
@@ -468,6 +470,12 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 	  if (section_len > len)
 	    section_len = len;
 	  len -= section_len;
+	  if (section_len <= 4)
+	    {
+	      _bfd_error_handler (_("%B: error: attribute section length too small: %ld"),
+				  abfd, section_len);
+	      break;
+	    }
 	  section_len -= 4;
 	  namelen = strnlen ((char *) p, section_len) + 1;
 	  if (namelen == 0 || namelen >= section_len)

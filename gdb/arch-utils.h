@@ -268,4 +268,10 @@ extern void default_guess_tracepoint_registers (struct gdbarch *gdbarch,
 
 extern int default_print_insn (bfd_vma memaddr, disassemble_info *info);
 
+/* Wrapper to gdbarch_skip_prologue, but doesn't throw exception.  Catch
+   exception thrown from gdbarch_skip_prologue, and return PC.  */
+
+extern CORE_ADDR gdbarch_skip_prologue_noexcept (gdbarch *gdbarch,
+						 CORE_ADDR pc) noexcept;
+
 #endif

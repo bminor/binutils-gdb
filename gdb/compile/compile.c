@@ -39,6 +39,8 @@
 #include "osabi.h"
 #include "gdb_wait.h"
 #include "valprint.h"
+#include "common/gdb_optional.h"
+#include "common/gdb_unlinker.h"
 
 
 
@@ -88,8 +90,6 @@ static void
 compile_file_command (char *arg, int from_tty)
 {
   enum compile_i_scope_types scope = COMPILE_I_SIMPLE_SCOPE;
-  char *buffer;
-  struct cleanup *cleanup;
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
@@ -113,12 +113,9 @@ compile_file_command (char *arg, int from_tty)
     error (_("Unknown argument specified."));
 
   arg = skip_spaces (arg);
-  arg = gdb_abspath (arg);
-  cleanup = make_cleanup (xfree, arg);
-  buffer = xstrprintf ("#include \"%s\"\n", arg);
-  make_cleanup (xfree, buffer);
-  eval_compile_command (NULL, buffer, scope, NULL);
-  do_cleanups (cleanup);
+  gdb::unique_xmalloc_ptr<char> abspath = gdb_abspath (arg);
+  std::string buffer = string_printf ("#include \"%s\"\n", abspath.get ());
+  eval_compile_command (NULL, buffer.c_str (), scope, NULL);
 }
 
 /* Handle the input from the 'compile code' command.  The
@@ -283,15 +280,17 @@ get_expr_block_and_pc (CORE_ADDR *pc)
   return block;
 }
 
-/* Call gdb_buildargv, set its result for S into *ARGVP but calculate also the
-   number of parsed arguments into *ARGCP.  If gdb_buildargv has returned NULL
-   then *ARGCP is set to zero.  */
+/* Call buildargv (via gdb_argv), set its result for S into *ARGVP but
+   calculate also the number of parsed arguments into *ARGCP.  If
+   buildargv has returned NULL then *ARGCP is set to zero.  */
 
 static void
 build_argc_argv (const char *s, int *argcp, char ***argvp)
 {
-  *argvp = gdb_buildargv (s);
-  *argcp = countargv (*argvp);
+  gdb_argv args (s);
+
+  *argcp = args.count ();
+  *argvp = args.release ();
 }
 
 /* String for 'set compile-args' and 'show compile-args'.  */
@@ -336,6 +335,19 @@ append_args (int *argcp, char ***argvp, int argc, char **argv)
   (*argvp)[(*argcp)] = NULL;
 }
 
+/* String for 'set compile-gcc' and 'show compile-gcc'.  */
+static char *compile_gcc;
+
+/* Implement 'show compile-gcc'.  */
+
+static void
+show_compile_gcc (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Compile command GCC driver filename is \"%s\".\n"),
+		    value);
+}
+
 /* Return DW_AT_producer parsed for get_selected_frame () (if any).
    Return NULL otherwise.
 
@@ -355,7 +367,7 @@ get_selected_pc_producer_options (void)
 
   cs = symtab->producer;
   while (*cs != 0 && *cs != '-')
-    cs = skip_spaces_const (skip_to_space_const (cs));
+    cs = skip_spaces (skip_to_space (cs));
   if (*cs != '-')
     return NULL;
   return cs;
@@ -427,16 +439,6 @@ cleanup_compile_instance (void *arg)
   inst->destroy (inst);
 }
 
-/* A cleanup function to unlink a file.  */
-
-static void
-cleanup_unlink_file (void *arg)
-{
-  const char *filename = (const char *) arg;
-
-  unlink (filename);
-}
-
 /* A helper function suitable for use as the "print_callback" in the
    compiler object.  */
 
@@ -455,7 +457,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 		   enum compile_i_scope_types scope)
 {
   struct compile_instance *compiler;
-  struct cleanup *cleanup, *inner_cleanup;
+  struct cleanup *cleanup;
   const struct block *expr_block;
   CORE_ADDR trash_pc, expr_pc;
   int argc;
@@ -463,8 +465,6 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   int ok;
   FILE *src;
   struct gdbarch *gdbarch = get_current_arch ();
-  const char *os_rx;
-  const char *arch_rx;
   char *triplet_rx;
   char *error_message;
 
@@ -516,19 +516,39 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   if (compile_debug)
     fprintf_unfiltered (gdb_stdlog, "debug output:\n\n%s", code.c_str ());
 
-  os_rx = osabi_triplet_regexp (gdbarch_osabi (gdbarch));
-  arch_rx = gdbarch_gnu_triplet_regexp (gdbarch);
+  if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
+    compiler->fe->ops->set_verbose (compiler->fe, compile_debug);
 
-  /* Allow triplets with or without vendor set.  */
-  triplet_rx = concat (arch_rx, "(-[^-]*)?-", os_rx, (char *) NULL);
-  make_cleanup (xfree, triplet_rx);
+  if (compile_gcc[0] != 0)
+    {
+      if (compiler->fe->ops->version < GCC_FE_VERSION_1)
+	error (_("Command 'set compile-gcc' requires GCC version 6 or higher "
+		 "(libcc1 interface version 1 or higher)"));
+
+      compiler->fe->ops->set_driver_filename (compiler->fe, compile_gcc);
+    }
+  else
+    {
+      const char *os_rx = osabi_triplet_regexp (gdbarch_osabi (gdbarch));
+      const char *arch_rx = gdbarch_gnu_triplet_regexp (gdbarch);
+
+      /* Allow triplets with or without vendor set.  */
+      triplet_rx = concat (arch_rx, "(-[^-]*)?-", os_rx, (char *) NULL);
+      make_cleanup (xfree, triplet_rx);
+
+      if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
+	compiler->fe->ops->set_triplet_regexp (compiler->fe, triplet_rx);
+    }
 
   /* Set compiler command-line arguments.  */
   get_args (compiler, gdbarch, &argc, &argv);
-  make_cleanup_freeargv (argv);
+  gdb_argv argv_holder (argv);
 
-  error_message = compiler->fe->ops->set_arguments (compiler->fe, triplet_rx,
-						    argc, argv);
+  if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
+    error_message = compiler->fe->ops->set_arguments (compiler->fe, argc, argv);
+  else
+    error_message = compiler->fe->ops->set_arguments_v0 (compiler->fe, triplet_rx,
+							 argc, argv);
   if (error_message != NULL)
     {
       make_cleanup (xfree, error_message);
@@ -547,14 +567,18 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 
   compile_file_names fnames = get_new_file_names ();
 
-  src = gdb_fopen_cloexec (fnames.source_file (), "w");
-  if (src == NULL)
-    perror_with_name (_("Could not open source file for writing"));
-  inner_cleanup = make_cleanup (cleanup_unlink_file,
-				(void *) fnames.source_file ());
-  if (fputs (code.c_str (), src) == EOF)
-    perror_with_name (_("Could not write to source file"));
-  fclose (src);
+  gdb::optional<gdb::unlinker> source_remover;
+
+  {
+    gdb_file_up src = gdb_fopen_cloexec (fnames.source_file (), "w");
+    if (src == NULL)
+      perror_with_name (_("Could not open source file for writing"));
+
+    source_remover.emplace (fnames.source_file ());
+
+    if (fputs (code.c_str (), src.get ()) == EOF)
+      perror_with_name (_("Could not write to source file"));
+  }
 
   if (compile_debug)
     fprintf_unfiltered (gdb_stdlog, "source file produced: %s\n\n",
@@ -563,15 +587,21 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   /* Call the compiler and start the compilation process.  */
   compiler->fe->ops->set_source_file (compiler->fe, fnames.source_file ());
 
-  if (!compiler->fe->ops->compile (compiler->fe, fnames.object_file (),
-				   compile_debug))
+  if (compiler->fe->ops->version >= GCC_FE_VERSION_1)
+    ok = compiler->fe->ops->compile (compiler->fe, fnames.object_file ());
+  else
+    ok = compiler->fe->ops->compile_v0 (compiler->fe, fnames.object_file (),
+					compile_debug);
+  if (!ok)
     error (_("Compilation failed."));
 
   if (compile_debug)
     fprintf_unfiltered (gdb_stdlog, "object file produced: %s\n\n",
 			fnames.object_file ());
 
-  discard_cleanups (inner_cleanup);
+  /* Keep the source file.  */
+  source_remover->keep ();
+
   do_cleanups (cleanup);
 
   return fnames;
@@ -593,14 +623,13 @@ void
 eval_compile_command (struct command_line *cmd, const char *cmd_string,
 		      enum compile_i_scope_types scope, void *scope_data)
 {
-  struct cleanup *cleanup_unlink;
   struct compile_module *compile_module;
 
   compile_file_names fnames = compile_to_object (cmd, cmd_string, scope);
 
-  cleanup_unlink = make_cleanup (cleanup_unlink_file,
-				 (void *) fnames.object_file ());
-  make_cleanup (cleanup_unlink_file, (void *) fnames.source_file ());
+  gdb::unlinker object_remover (fnames.object_file ());
+  gdb::unlinker source_remover (fnames.source_file ());
+
   compile_module = compile_object_load (fnames, scope, scope_data);
   if (compile_module == NULL)
     {
@@ -609,18 +638,22 @@ eval_compile_command (struct command_line *cmd, const char *cmd_string,
 			    COMPILE_I_PRINT_VALUE_SCOPE, scope_data);
       return;
     }
-  discard_cleanups (cleanup_unlink);
+
+  /* Keep the files.  */
+  source_remover.keep ();
+  object_remover.keep ();
+
   compile_object_run (compile_module);
 }
 
 /* See compile/compile-internal.h.  */
 
-char *
+std::string
 compile_register_name_mangled (struct gdbarch *gdbarch, int regnum)
 {
   const char *regname = gdbarch_register_name (gdbarch, regnum);
 
-  return xstrprintf ("__%s", regname);
+  return string_printf ("__%s", regname);
 }
 
 /* See compile/compile-internal.h.  */
@@ -641,8 +674,6 @@ compile_register_name_demangle (struct gdbarch *gdbarch,
 
   error (_("Cannot find gdbarch register \"%s\"."), regname);
 }
-
-extern initialize_file_ftype _initialize_compile;
 
 void
 _initialize_compile (void)
@@ -737,4 +768,17 @@ String quoting is parsed like in shell, for example:\n\
 			 " -fno-stack-protector"
   );
   set_compile_args (compile_args, 0, NULL);
+
+  add_setshow_optional_filename_cmd ("compile-gcc", class_support,
+				     &compile_gcc,
+				     _("Set compile command "
+				       "GCC driver filename"),
+				     _("Show compile command "
+				       "GCC driver filename"),
+				     _("\
+It should be absolute filename of the gcc executable.\n\
+If empty the default target triplet will be searched in $PATH."),
+				     NULL, show_compile_gcc, &setlist,
+				     &showlist);
+  compile_gcc = xstrdup ("");
 }

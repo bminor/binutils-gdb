@@ -2699,7 +2699,6 @@ static const struct opcode16 thumb_opcodes[] =
        %<bitfield>W	print bitfield*4 in decimal
        %<bitfield>r	print bitfield as an ARM register
        %<bitfield>R	as %<>r but r15 is UNPREDICTABLE
-       %<bitfield>S	as %<>R but r13 is UNPREDICTABLE
        %<bitfield>c	print bitfield as a condition code
 
        %<bitfield>'c	print specified char iff bitfield is all ones
@@ -2767,17 +2766,17 @@ static const struct opcode32 thumb32_opcodes[] =
 
   /* CRC32 instructions.  */
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
-    0xfac0f080, 0xfff0f0f0, "crc32b\t%8-11S, %16-19S, %0-3S"},
+    0xfac0f080, 0xfff0f0f0, "crc32b\t%8-11R, %16-19R, %0-3R"},
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
-    0xfac0f090, 0xfff0f0f0, "crc32h\t%9-11S, %16-19S, %0-3S"},
+    0xfac0f090, 0xfff0f0f0, "crc32h\t%9-11R, %16-19R, %0-3R"},
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
-    0xfac0f0a0, 0xfff0f0f0, "crc32w\t%8-11S, %16-19S, %0-3S"},
+    0xfac0f0a0, 0xfff0f0f0, "crc32w\t%8-11R, %16-19R, %0-3R"},
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
-    0xfad0f080, 0xfff0f0f0, "crc32cb\t%8-11S, %16-19S, %0-3S"},
+    0xfad0f080, 0xfff0f0f0, "crc32cb\t%8-11R, %16-19R, %0-3R"},
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
-    0xfad0f090, 0xfff0f0f0, "crc32ch\t%8-11S, %16-19S, %0-3S"},
+    0xfad0f090, 0xfff0f0f0, "crc32ch\t%8-11R, %16-19R, %0-3R"},
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
-    0xfad0f0a0, 0xfff0f0f0, "crc32cw\t%8-11S, %16-19S, %0-3S"},
+    0xfad0f0a0, 0xfff0f0f0, "crc32cw\t%8-11R, %16-19R, %0-3R"},
 
   /* V7 instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V7), 0xf910f000, 0xff70f000, "pli%c\t%a"},
@@ -5987,10 +5986,6 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		      value_in_comment = val * 4;
 		      break;
 
-		    case 'S':
-		      if (val == 13)
-			is_unpredictable = TRUE;
-		      /* Fall through.  */
 		    case 'R':
 		      if (val == 15)
 			is_unpredictable = TRUE;

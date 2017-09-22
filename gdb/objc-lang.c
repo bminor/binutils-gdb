@@ -130,7 +130,8 @@ lookup_objc_class (struct gdbarch *gdbarch, const char *classname)
 
   classval = value_string (classname, strlen (classname) + 1, char_type);
   classval = value_coerce_array (classval);
-  return (CORE_ADDR) value_as_long (call_function_by_hand (function, 
+  return (CORE_ADDR) value_as_long (call_function_by_hand (function,
+							   NULL,
 							   1, &classval));
 }
 
@@ -160,7 +161,7 @@ lookup_child_selector (struct gdbarch *gdbarch, const char *selname)
   selstring = value_coerce_array (value_string (selname, 
 						strlen (selname) + 1,
 						char_type));
-  return value_as_long (call_function_by_hand (function, 1, &selstring));
+  return value_as_long (call_function_by_hand (function, NULL, 1, &selstring));
 }
 
 struct value * 
@@ -181,12 +182,13 @@ value_nsstring (struct gdbarch *gdbarch, char *ptr, int len)
   if (lookup_minimal_symbol("_NSNewStringFromCString", 0, 0).minsym)
     {
       function = find_function_in_inferior("_NSNewStringFromCString", NULL);
-      nsstringValue = call_function_by_hand(function, 1, &stringValue[2]);
+      nsstringValue = call_function_by_hand(function,
+					    NULL, 1, &stringValue[2]);
     }
   else if (lookup_minimal_symbol("istr", 0, 0).minsym)
     {
       function = find_function_in_inferior("istr", NULL);
-      nsstringValue = call_function_by_hand(function, 1, &stringValue[2]);
+      nsstringValue = call_function_by_hand(function, NULL, 1, &stringValue[2]);
     }
   else if (lookup_minimal_symbol("+[NSString stringWithCString:]", 0, 0).minsym)
     {
@@ -198,7 +200,7 @@ value_nsstring (struct gdbarch *gdbarch, char *ptr, int len)
 	(type, lookup_objc_class (gdbarch, "NSString"));
       stringValue[1] = value_from_longest 
 	(type, lookup_child_selector (gdbarch, "stringWithCString:"));
-      nsstringValue = call_function_by_hand(function, 3, &stringValue[0]);
+      nsstringValue = call_function_by_hand(function, NULL, 3, &stringValue[0]);
     }
   else
     error (_("NSString: internal error -- no way to create new NSString"));
@@ -364,7 +366,7 @@ static const char *objc_extensions[] =
   ".m", NULL
 };
 
-const struct language_defn objc_language_defn = {
+extern const struct language_defn objc_language_defn = {
   "objective-c",		/* Language name */
   "Objective-C",
   language_objc,
@@ -397,7 +399,7 @@ const struct language_defn objc_language_defn = {
   1,				/* C-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   c_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
@@ -559,7 +561,7 @@ compare_selectors (const void *a, const void *b)
  */
 
 static void
-selectors_info (char *regexp, int from_tty)
+info_selectors_command (char *regexp, int from_tty)
 {
   struct objfile	*objfile;
   struct minimal_symbol *msymbol;
@@ -721,7 +723,7 @@ compare_classes (const void *a, const void *b)
  */
 
 static void
-classes_info (char *regexp, int from_tty)
+info_classes_command (char *regexp, int from_tty)
 {
   struct objfile	*objfile;
   struct minimal_symbol *msymbol;
@@ -1209,7 +1211,7 @@ print_object_command (char *args, int from_tty)
   if (function == NULL)
     error (_("Unable to locate _NSPrintForDebugger in child process"));
 
-  description = call_function_by_hand (function, 1, &object);
+  description = call_function_by_hand (function, NULL, 1, &object);
 
   string_addr = value_as_long (description);
   if (string_addr == 0)
@@ -1371,16 +1373,12 @@ find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc)
   return 0;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_objc_language;
-
 void
 _initialize_objc_language (void)
 {
-  add_language (&objc_language_defn);
-  add_info ("selectors", selectors_info,    /* INFO SELECTORS command.  */
+  add_info ("selectors", info_selectors_command,
 	    _("All Objective-C selectors, or those matching REGEXP."));
-  add_info ("classes", classes_info, 	    /* INFO CLASSES   command.  */
+  add_info ("classes", info_classes_command,
 	    _("All Objective-C classes, or those matching REGEXP."));
   add_com ("print-object", class_vars, print_object_command, 
 	   _("Ask an Objective-C object to print itself."));
@@ -1614,9 +1612,6 @@ resolve_msgsend_super_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
     return 1;
   return 0;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_objc_lang;
 
 void
 _initialize_objc_lang (void)

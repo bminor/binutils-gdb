@@ -61,7 +61,6 @@ static struct obstack map_obstack;
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
 static const char *entry_symbol_default = "start";
-static bfd_boolean placed_commons = FALSE;
 static bfd_boolean map_head_is_link_order = FALSE;
 static lang_output_section_statement_type *default_common_section;
 static bfd_boolean map_option_f;
@@ -2274,6 +2273,34 @@ section_already_linked (bfd *abfd, asection *sec, void *data)
     bfd_section_already_linked (abfd, sec, &link_info);
 }
 
+
+/* Returns true if SECTION is one we know will be discarded based on its
+   section flags, otherwise returns false.  */
+
+static bfd_boolean
+lang_discard_section_p (asection *section)
+{
+  bfd_boolean discard;
+  flagword flags = section->flags;
+
+  /* Discard sections marked with SEC_EXCLUDE.  */
+  discard = (flags & SEC_EXCLUDE) != 0;
+
+  /* Discard the group descriptor sections when we're finally placing the
+     sections from within the group.  */
+  if ((flags & SEC_GROUP) != 0
+      && link_info.resolve_section_groups)
+    discard = TRUE;
+
+  /* Discard debugging sections if we are stripping debugging
+     information.  */
+  if ((link_info.strip == strip_debugger || link_info.strip == strip_all)
+      && (flags & SEC_DEBUGGING) != 0)
+    discard = TRUE;
+
+  return discard;
+}
+
 /* The wild routines.
 
    These expand statements like *(.text) and foo.o to a list of
@@ -2295,24 +2322,12 @@ lang_add_section (lang_statement_list_type *ptr,
   lang_input_section_type *new_section;
   bfd *abfd = link_info.output_bfd;
 
-  /* Discard sections marked with SEC_EXCLUDE.  */
-  discard = (flags & SEC_EXCLUDE) != 0;
+  /* Is this section one we know should be discarded?  */
+  discard = lang_discard_section_p (section);
 
   /* Discard input sections which are assigned to a section named
      DISCARD_SECTION_NAME.  */
   if (strcmp (output->name, DISCARD_SECTION_NAME) == 0)
-    discard = TRUE;
-
-  /* Discard the group descriptor sections when we're finally placing the
-     sections from within the group.  */
-  if ((section->flags & SEC_GROUP) == SEC_GROUP
-      && link_info.resolve_section_groups)
-    discard = TRUE;
-
-  /* Discard debugging sections if we are stripping debugging
-     information.  */
-  if ((link_info.strip == strip_debugger || link_info.strip == strip_all)
-      && (flags & SEC_DEBUGGING) != 0)
     discard = TRUE;
 
   if (discard)
@@ -2819,6 +2834,7 @@ load_symbols (lang_input_statement_type *entry,
     case bfd_archive:
       check_excluded_libs (entry->the_bfd);
 
+      entry->the_bfd->usrdata = entry;
       if (entry->flags.whole_archive)
 	{
 	  bfd *member = NULL;
@@ -4414,7 +4430,7 @@ print_wild_statement (lang_wild_statement_type *w,
     }
 
   if (w->filenames_sorted)
-    minfo ("SORT(");
+    minfo ("SORT_BY_NAME(");
   if (w->filename != NULL)
     minfo ("%s", w->filename);
   else
@@ -4425,8 +4441,44 @@ print_wild_statement (lang_wild_statement_type *w,
   minfo ("(");
   for (sec = w->section_list; sec; sec = sec->next)
     {
-      if (sec->spec.sorted)
-	minfo ("SORT(");
+      int closing_paren = 0;
+
+      switch (sec->spec.sorted)
+        {
+        case none:
+          break;
+
+        case by_name:
+          minfo ("SORT_BY_NAME(");
+          closing_paren = 1;
+          break;
+
+        case by_alignment:
+          minfo ("SORT_BY_ALIGNMENT(");
+          closing_paren = 1;
+          break;
+
+        case by_name_alignment:
+          minfo ("SORT_BY_NAME(SORT_BY_ALIGNMENT(");
+          closing_paren = 2;
+          break;
+
+        case by_alignment_name:
+          minfo ("SORT_BY_ALIGNMENT(SORT_BY_NAME(");
+          closing_paren = 2;
+          break;
+
+        case by_none:
+          minfo ("SORT_NONE(");
+          closing_paren = 1;
+          break;
+
+        case by_init_priority:
+          minfo ("SORT_BY_INIT_PRIORITY(");
+          closing_paren = 1;
+          break;
+        }
+
       if (sec->spec.exclude_name_list != NULL)
 	{
 	  name_list *tmp;
@@ -4439,8 +4491,8 @@ print_wild_statement (lang_wild_statement_type *w,
 	minfo ("%s", sec->spec.name);
       else
 	minfo ("*");
-      if (sec->spec.sorted)
-	minfo (")");
+      for (;closing_paren > 0; closing_paren--)
+        minfo (")");
       if (sec->next)
 	minfo (" ");
     }
@@ -6225,7 +6277,7 @@ lang_check (void)
 static void
 lang_common (void)
 {
-  if (command_line.inhibit_common_definition)
+  if (link_info.inhibit_common_definition)
     return;
   if (bfd_link_relocatable (&link_info)
       && !command_line.force_common_definition)
@@ -6411,7 +6463,7 @@ lang_place_orphans (void)
 
 	      if (file->flags.just_syms)
 		bfd_link_just_syms (file->the_bfd, s, &link_info);
-	      else if ((s->flags & SEC_EXCLUDE) != 0)
+	      else if (lang_discard_section_p (s))
 		s->output_section = bfd_abs_section_ptr;
 	      else if (strcmp (s->name, "COMMON") == 0)
 		{
@@ -6492,9 +6544,9 @@ lang_for_each_input_file (void (*func) (lang_input_statement_type *))
 {
   lang_input_statement_type *f;
 
-  for (f = (lang_input_statement_type *) input_file_chain.head;
+  for (f = &input_file_chain.head->input_statement;
        f != NULL;
-       f = (lang_input_statement_type *) f->next_real_file)
+       f = &f->next_real_file->input_statement)
     func (f);
 }
 
@@ -6891,6 +6943,51 @@ find_replacements_insert_point (void)
   return lastobject;
 }
 
+/* Find where to insert ADD, an archive element or shared library
+   added during a rescan.  */
+
+static lang_statement_union_type **
+find_rescan_insertion (lang_input_statement_type *add)
+{
+  bfd *add_bfd = add->the_bfd;
+  lang_input_statement_type *f;
+  lang_input_statement_type *last_loaded = NULL;
+  lang_input_statement_type *before = NULL;
+  lang_statement_union_type **iter = NULL;
+
+  if (add_bfd->my_archive != NULL)
+    add_bfd = add_bfd->my_archive;
+
+  /* First look through the input file chain, to find an object file
+     before the one we've rescanned.  Normal object files always
+     appear on both the input file chain and the file chain, so this
+     lets us get quickly to somewhere near the correct place on the
+     file chain if it is full of archive elements.  Archives don't
+     appear on the file chain, but if an element has been extracted
+     then their input_statement->next points at it.  */
+  for (f = &input_file_chain.head->input_statement;
+       f != NULL;
+       f = &f->next_real_file->input_statement)
+    {
+      if (f->the_bfd == add_bfd)
+	{
+	  before = last_loaded;
+	  if (f->next != NULL)
+	    return &f->next->input_statement.next;
+	}
+      if (f->the_bfd != NULL && f->next != NULL)
+	last_loaded = f;
+    }
+
+  for (iter = before ? &before->next : &file_chain.head->input_statement.next;
+       *iter != NULL;
+       iter = &(*iter)->input_statement.next)
+    if ((*iter)->input_statement.the_bfd->my_archive == NULL)
+      break;
+
+  return iter;
+}
+
 /* Insert SRCLIST into DESTLIST after given element by chaining
    on FIELD as the next-pointer.  (Counterintuitively does not need
    a pointer to the actual after-node itself, just its chain field.)  */
@@ -7061,7 +7158,36 @@ lang_process (void)
 	    lang_list_insert_after (&file_chain, &files, &file_chain.head);
 
 	  /* Rescan archives in case new undefined symbols have appeared.  */
+	  files = file_chain;
 	  open_input_bfds (statement_list.head, OPEN_BFD_RESCAN);
+	  lang_list_remove_tail (&file_chain, &files);
+	  while (files.head != NULL)
+	    {
+	      lang_statement_union_type **insert;
+	      lang_statement_union_type **iter, *temp;
+	      bfd *my_arch;
+
+	      insert = find_rescan_insertion (&files.head->input_statement);
+	      /* All elements from an archive can be added at once.  */
+	      iter = &files.head->input_statement.next;
+	      my_arch = files.head->input_statement.the_bfd->my_archive;
+	      if (my_arch != NULL)
+		for (; *iter != NULL; iter = &(*iter)->input_statement.next)
+		  if ((*iter)->input_statement.the_bfd->my_archive != my_arch)
+		    break;
+	      temp = *insert;
+	      *insert = files.head;
+	      files.head = *iter;
+	      *iter = temp;
+	      if (my_arch != NULL)
+		{
+		  lang_input_statement_type *parent = my_arch->usrdata;
+		  if (parent != NULL)
+		    parent->next = (lang_statement_union_type *)
+		      ((char *) iter
+		       - offsetof (lang_input_statement_type, next));
+		}
+	    }
 	}
     }
 #endif /* ENABLE_PLUGINS */
@@ -7238,9 +7364,6 @@ lang_add_wild (struct wildcard_spec *filespec,
        curr != NULL;
        section_list = curr, curr = next)
     {
-      if (curr->spec.name != NULL && strcmp (curr->spec.name, "COMMON") == 0)
-	placed_commons = TRUE;
-
       next = curr->next;
       curr->next = section_list;
     }

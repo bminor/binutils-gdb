@@ -336,10 +336,6 @@ ppcfbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					     svr4_fetch_objfile_link_map);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-
-void _initialize_ppcfbsd_tdep (void);
-
 void
 _initialize_ppcfbsd_tdep (void)
 {

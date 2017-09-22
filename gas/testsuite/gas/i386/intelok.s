@@ -150,7 +150,7 @@ start:
 	mov	eax, [eax[ecx]]
 	mov	eax, [[eax][ecx]]
 	mov	eax, es:[eax]
-	mov	eax, fs:gs:[eax]
+	mov	eax, fs:[eax]
 
 	# expressions
 

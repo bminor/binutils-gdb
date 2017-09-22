@@ -5456,7 +5456,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	{
 	  /* If this is a dynamic link, we should have created a
 	     _DYNAMIC_LINK symbol or _DYNAMIC_LINKING(for normal mips) symbol
-	     in in _bfd_mips_elf_create_dynamic_sections.
+	     in _bfd_mips_elf_create_dynamic_sections.
 	     Otherwise, we should define the symbol with a value of 0.
 	     FIXME: It should probably get into the symbol table
 	     somehow as well.  */
@@ -6414,6 +6414,7 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
       bfd_boolean ok = FALSE;
       bfd_vma opcode = x >> 16;
       bfd_vma jalx_opcode = 0;
+      bfd_vma sign_bit = 0;
       bfd_vma addr;
       bfd_vma dest;
 
@@ -6421,12 +6422,14 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
 	{
 	  ok = opcode == 0x4060;
 	  jalx_opcode = 0x3c;
+	  sign_bit = 0x10000;
 	  value <<= 1;
 	}
       else if (r_type == R_MIPS_PC16 || r_type == R_MIPS_GNU_REL16_S2)
 	{
 	  ok = opcode == 0x411;
 	  jalx_opcode = 0x1d;
+	  sign_bit = 0x20000;
 	  value <<= 2;
 	}
 
@@ -6436,7 +6439,8 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
 		  + input_section->output_offset
 		  + relocation->r_offset
 		  + 4);
-	  dest = addr + (((value & 0x3ffff) ^ 0x20000) - 0x20000);
+	  dest = (addr
+		  + (((value & ((sign_bit << 1) - 1)) ^ sign_bit) - sign_bit));
 
 	  if ((addr >> 28) << 28 != (dest >> 28) << 28)
 	    {
@@ -6955,7 +6959,7 @@ _bfd_mips_elf_symbol_processing (bfd *abfd, asymbol *asym)
 	  {
 	    asym->section = section;
 	    /* MIPS_TEXT is a bit special, the address is not an offset
-	       to the base of the .text section.  So substract the section
+	       to the base of the .text section.  So subtract the section
 	       base address to make it an offset.  */
 	    asym->value -= section->vma;
 	  }
@@ -6970,7 +6974,7 @@ _bfd_mips_elf_symbol_processing (bfd *abfd, asymbol *asym)
 	  {
 	    asym->section = section;
 	    /* MIPS_DATA is a bit special, the address is not an offset
-	       to the base of the .data section.  So substract the section
+	       to the base of the .data section.  So subtract the section
 	       base address to make it an offset.  */
 	    asym->value -= section->vma;
 	  }
@@ -8456,8 +8460,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: GOT reloc at 0x%lx not expected in executables"),
-		 abfd, (unsigned long) rel->r_offset);
+		(_("%B: GOT reloc at %#Lx not expected in executables"),
+		 abfd, rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -8594,8 +8598,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B: CALL16 reloc at 0x%lx not against global symbol"),
-		 abfd, (unsigned long) rel->r_offset);
+		(_("%B: CALL16 reloc at %#Lx not against global symbol"),
+		 abfd, rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -10137,7 +10141,7 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      _bfd_error_handler
 			/* xgettext:c-format */
 			(_("%B: Can't find matching LO16 reloc against `%s'"
-			   " for %s at 0x%lx in section `%A'"),
+			   " for %s at %#Lx in section `%A'"),
 			 input_bfd, name,
 			 howto->name, rel->r_offset, input_section);
 		    }
@@ -10680,11 +10684,11 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B: `%A' offset of %ld from `%A' "
+		    (_("%B: `%A' offset of %Ld from `%A' "
 		       "beyond the range of ADDIUPC"),
 		     output_bfd,
 		     htab->root.sgotplt->output_section,
-		     (long) gotpc_offset,
+		     gotpc_offset,
 		     htab->root.splt->output_section);
 		  bfd_set_error (bfd_error_no_error);
 		  return FALSE;
@@ -11248,10 +11252,10 @@ mips_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: `%A' offset of %ld from `%A' beyond the range of ADDIUPC"),
+	    (_("%B: `%A' offset of %Ld from `%A' beyond the range of ADDIUPC"),
 	     output_bfd,
 	     htab->root.sgotplt->output_section,
-	     (long) gotpc_offset,
+	     gotpc_offset,
 	     htab->root.splt->output_section);
 	  bfd_set_error (bfd_error_no_error);
 	  return FALSE;
@@ -15124,10 +15128,9 @@ mips_elf_merge_obj_e_flags (bfd *ibfd, struct bfd_link_info *info)
     {
       /* xgettext:c-format */
       _bfd_error_handler
-	(_("%B: uses different e_flags (0x%lx) fields than previous modules "
-	   "(0x%lx)"),
-	 ibfd, (unsigned long) new_flags,
-	 (unsigned long) old_flags);
+	(_("%B: uses different e_flags (%#x) fields than previous modules "
+	   "(%#x)"),
+	 ibfd, new_flags, old_flags);
       ok = FALSE;
     }
 
@@ -15427,7 +15430,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	_bfd_error_handler
 	  (_("%B: warning: Unexpected flag in the flags2 field of "
 	     ".MIPS.abiflags (0x%lx)"), ibfd,
-	   (unsigned long) in_abiflags.flags2);
+	   in_abiflags.flags2);
     }
   else
     {

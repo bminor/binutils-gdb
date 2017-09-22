@@ -3870,7 +3870,7 @@ pseudo_set (symbolS *symbolP)
 	  symbolS *s = exp.X_add_symbol;
 
 	  if (S_IS_COMMON (s))
-	    as_bad (_("`%s' can't be equated to common symbol '%s'"),
+	    as_bad (_("`%s' can't be equated to common symbol `%s'"),
 		    S_GET_NAME (symbolP), S_GET_NAME (s));
 
 	  S_SET_SEGMENT (symbolP, seg);

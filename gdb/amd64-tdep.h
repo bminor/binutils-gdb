@@ -87,8 +87,6 @@ enum amd64_regnum
 
 #define AMD64_NUM_REGS		(AMD64_GSBASE_REGNUM + 1)
 
-extern struct target_desc *tdesc_amd64;
-
 extern struct displaced_step_closure *amd64_displaced_step_copy_insn
   (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to,
    struct regcache *regs);
@@ -97,9 +95,17 @@ extern void amd64_displaced_step_fixup (struct gdbarch *gdbarch,
 					CORE_ADDR from, CORE_ADDR to,
 					struct regcache *regs);
 
-extern void amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
+/* Initialize the ABI for amd64.  Uses DEFAULT_TDESC as fallback
+   tdesc, if INFO does not specify one.  */
+extern void amd64_init_abi (struct gdbarch_info info,
+			    struct gdbarch *gdbarch,
+			    const target_desc *default_tdesc);
+
+/* Initialize the ABI for x32.  Uses DEFAULT_TDESC as fallback tdesc,
+   if INFO does not specify one.  */
 extern void amd64_x32_init_abi (struct gdbarch_info info,
-				struct gdbarch *gdbarch);
+				struct gdbarch *gdbarch,
+				const target_desc *default_tdesc);
 extern const struct target_desc *amd64_target_description (uint64_t xcr0);
 
 /* Fill register REGNUM in REGCACHE with the appropriate

@@ -44,8 +44,6 @@
 #include "cli/cli-utils.h"
 #include "cli/cli-setshow.h"
 
-extern void _initialize_maint_cmds (void);
-
 static void maintenance_command (char *, int);
 
 static void maintenance_internal_error (char *args, int from_tty);
@@ -175,6 +173,19 @@ maintenance_info_command (char *arg, int from_tty)
   printf_unfiltered (_("\"maintenance info\" must be followed "
 		       "by the name of an info command.\n"));
   help_list (maintenanceinfolist, "maintenance info ", all_commands,
+	     gdb_stdout);
+}
+
+/* The "maintenance check" command is defined as a prefix, with
+   allow_unknown 0.  Therefore, its own definition is called only for
+   "maintenance check" with no args.  */
+
+static void
+maintenance_check_command (char *arg, int from_tty)
+{
+  printf_unfiltered (_("\"maintenance check\" must be followed "
+		       "by the name of a check command.\n"));
+  help_list (maintenancechecklist, "maintenance check ", all_commands,
 	     gdb_stdout);
 }
 
@@ -946,7 +957,16 @@ show_per_command_cmd (char *args, int from_tty)
 static void
 maintenance_selftest (char *args, int from_tty)
 {
-  run_self_tests ();
+  selftests::run_tests (args);
+}
+
+static void
+maintenance_info_selftests (char *arg, int from_tty)
+{
+  printf_filtered ("Registered selftests:\n");
+  selftests::for_each_selftest ([] (const std::string &name) {
+    printf_filtered (" - %s\n", name.c_str ());
+  });
 }
 
 
@@ -1104,6 +1124,11 @@ Print the internal architecture configuration.\n\
 Takes an optional file parameter."),
 	   &maintenanceprintlist);
 
+  add_prefix_cmd ("check", class_maintenance, maintenance_check_command, _("\
+Commands for checking internal gdb state."),
+		  &maintenancechecklist, "maintenance check ", 0,
+		  &maintenancelist);
+
   add_cmd ("translate-address", class_maintenance,
 	   maintenance_translate_address,
 	   _("Translate a section name and address to a symbol."),
@@ -1124,10 +1149,13 @@ If you decide you want to use it: maintenance undeprecate 'commandname'"),
 
   add_cmd ("selftest", class_maintenance, maintenance_selftest, _("\
 Run gdb's unit tests.\n\
-Usage: maintenance selftest\n\
+Usage: maintenance selftest [filter]\n\
 This will run any unit tests that were built in to gdb.\n\
-gdb will abort if any test fails."),
+If a filter is given, only the tests with that value in their name will ran."),
 	   &maintenancelist);
+
+  add_cmd ("selftests", class_maintenance, maintenance_info_selftests,
+	 _("List the registered selftests."), &maintenanceinfolist);
 
   add_setshow_zinteger_cmd ("watchdog", class_maintenance, &watchdog, _("\
 Set watchdog timer."), _("\

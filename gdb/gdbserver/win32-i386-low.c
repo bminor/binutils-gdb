@@ -18,6 +18,12 @@
 #include "server.h"
 #include "win32-low.h"
 #include "x86-low.h"
+#include "x86-xstate.h"
+#ifdef __x86_64__
+#include "arch/amd64.h"
+#endif
+#include "arch/i386.h"
+#include "tdesc.h"
 
 #ifndef CONTEXT_EXTENDED_REGISTERS
 #define CONTEXT_EXTENDED_REGISTERS 0
@@ -28,16 +34,6 @@
 
 #define FLAG_TRACE_BIT 0x100
 
-#ifdef __x86_64__
-/* Defined in auto-generated build-time file gdb/gdbserver/amd64.c.  */
-void init_registers_amd64 (void);
-extern const struct target_desc *tdesc_amd64;
-#else
-/* Defined in auto-generated build-time file gdb/gdbserver/i386.c.  */
-void init_registers_i386 (void);
-extern const struct target_desc *tdesc_i386;
-#endif
-
 static struct x86_debug_reg_state debug_reg_state;
 
 static int
@@ -45,7 +41,7 @@ update_debug_registers_callback (struct inferior_list_entry *entry,
 				 void *pid_p)
 {
   struct thread_info *thr = (struct thread_info *) entry;
-  win32_thread_info *th = (win32_thread_info *) inferior_target_data (thr);
+  win32_thread_info *th = (win32_thread_info *) thread_target_data (thr);
   int pid = *(int *) pid_p;
 
   /* Only update the threads of this process.  */
@@ -90,7 +86,7 @@ static DWORD64
 win32_get_current_dr (int dr)
 {
   win32_thread_info *th
-    = (win32_thread_info *) inferior_target_data (current_thread);
+    = (win32_thread_info *) thread_target_data (current_thread);
 
   win32_require_context (th);
 
@@ -448,13 +444,18 @@ static const unsigned char i386_win32_breakpoint = 0xcc;
 static void
 i386_arch_setup (void)
 {
+  struct target_desc *tdesc;
+
 #ifdef __x86_64__
-  init_registers_amd64 ();
-  win32_tdesc = tdesc_amd64;
+  tdesc = amd64_create_target_description (X86_XSTATE_SSE_MASK, false,
+						 false);
 #else
-  init_registers_i386 ();
-  win32_tdesc = tdesc_i386;
+  tdesc = i386_create_target_description (X86_XSTATE_SSE_MASK, false);
 #endif
+
+  init_target_desc (tdesc);
+
+  win32_tdesc = tdesc;
 }
 
 struct win32_target_ops the_low_target = {

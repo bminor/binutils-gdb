@@ -34,6 +34,7 @@
 #include "amd64-nat.h"
 #include "x86-bsd-nat.h"
 #include "x86-nat.h"
+#include "x86-xstate.h"
 
 
 /* Offset in `struct reg' where MEMBER is stored.  */
@@ -179,13 +180,10 @@ amd64fbsd_read_description (struct target_ops *ops)
     }
 #endif
   if (is64)
-    return tdesc_amd64;
+    return amd64_target_description (X86_XSTATE_SSE_MASK);
   else
-    return tdesc_i386;
+    return i386_target_description (X86_XSTATE_SSE_MASK);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_amd64fbsd_nat (void);
 
 void
 _initialize_amd64fbsd_nat (void)

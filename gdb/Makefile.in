@@ -526,20 +526,24 @@ SUBDIR_PYTHON_LDFLAGS =
 SUBDIR_PYTHON_CFLAGS =
 
 SUBDIR_UNITTESTS_SRCS = \
+	unittests/array-view-selftests.c \
 	unittests/environ-selftests.c \
 	unittests/function-view-selftests.c \
 	unittests/offset-type-selftests.c \
 	unittests/optional-selftests.c \
 	unittests/ptid-selftests.c \
-	unittests/scoped_restore-selftests.c
+	unittests/scoped_restore-selftests.c \
+	unittests/xml-utils-selftests.c
 
 SUBDIR_UNITTESTS_OBS = \
+	array-view-selftests.o \
 	environ-selftests.o \
 	function-view-selftests.o \
 	offset-type-selftests.o \
 	optional-selftests.o \
 	ptid-selftests.o \
-	scoped_restore-selftests.o
+	scoped_restore-selftests.o \
+	xml-utils-selftests.o
 
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
@@ -751,6 +755,7 @@ TARGET_OBS = @TARGET_OBS@
 # All target-dependent objects files that require 64-bit CORE_ADDR
 # (used with --enable-targets=all --enable-64-bit-bfd).
 ALL_64_TARGET_OBS = \
+	aarch64-fbsd-tdep.o \
 	aarch64-insn.o \
 	aarch64-linux-tdep.o \
 	aarch64-newlib-tdep.o \
@@ -761,6 +766,7 @@ ALL_64_TARGET_OBS = \
 	alpha-nbsd-tdep.o \
 	alpha-obsd-tdep.o \
 	alpha-tdep.o \
+	amd64.o \
 	amd64-darwin-tdep.o \
 	amd64-dicos-tdep.o \
 	amd64-fbsd-tdep.o \
@@ -812,6 +818,7 @@ ALL_TARGET_OBS = \
 	hppa-nbsd-tdep.o \
 	hppa-obsd-tdep.o \
 	hppa-tdep.o \
+	i386.o \
 	i386-bsd-tdep.o \
 	i386-cygwin-tdep.o \
 	i386-darwin-tdep.o \
@@ -1030,6 +1037,7 @@ SFILES = \
 	agent.c \
 	annotate.c \
 	arch-utils.c \
+	arch/i386.c \
 	auto-load.c \
 	auxv.c \
 	ax-gdb.c \
@@ -1178,7 +1186,6 @@ SFILES = \
 	reverse.c \
 	rust-exp.y \
 	rust-lang.c \
-	selftest.c \
 	selftest-arch.c \
 	sentinel-frame.c \
 	ser-base.c \
@@ -1244,6 +1251,7 @@ SFILES = \
 	common/ptid.c \
 	common/rsp-low.c \
 	common/run-time-clock.c \
+	common/selftest.c \
 	common/signals.c \
 	common/signals-state-save-restore.c \
 	common/vec.c \
@@ -1500,6 +1508,7 @@ HFILES_NO_SRCDIR = \
 	xtensa-tdep.h \
 	arch/aarch64-insn.h \
 	arch/arm.h \
+	arch/i386.h \
 	cli/cli-cmds.h \
 	cli/cli-decode.h \
 	cli/cli-script.h \
@@ -1714,6 +1723,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	f-typeprint.o \
 	f-valprint.o \
 	fileio.o \
+	filename-seen-cache.o \
 	filestuff.o \
 	filesystem.o \
 	findcmd.o \
@@ -2489,6 +2499,8 @@ force_update:
 MAKEOVERRIDES =
 
 ALLDEPFILES = \
+	aarch64-fbsd-nat.c \
+	aarch64-fbsd-tdep.c \
 	aarch64-linux-nat.c \
 	aarch64-linux-tdep.c \
 	aarch64-newlib-tdep.c \
@@ -2698,17 +2710,6 @@ ALLDEPFILES = \
 
 # Some files need explicit build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.
-
-# FIXME: cagney/2003-08-10: "monitor.c" gets -Wformat-nonliteral
-# errors.  It turns out that that is the least of monitor.c's
-# problems.  The function print_vsprintf appears to be using
-# va_arg(long) to extract CORE_ADDR parameters - something that
-# definitly will not work.  "monitor.c" needs to be rewritten so that
-# it doesn't use format strings and instead uses callbacks.
-monitor.o: $(srcdir)/monitor.c
-	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_FORMAT) \
-		$(COMPILE.post) $(srcdir)/monitor.c
-	$(POSTCOMPILE)
 
 # Do not try to build "printcmd.c" with -Wformat-nonliteral.  It manually
 # checks format strings.

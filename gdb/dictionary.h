@@ -123,25 +123,6 @@ extern struct symbol *dict_iterator_first (const struct dictionary *dict,
 extern struct symbol *dict_iterator_next (struct dict_iterator *iterator);
 
 /* Initialize ITERATOR to point at the first symbol in DICT whose
-   SYMBOL_SEARCH_NAME is NAME (as tested using strcmp_iw), and return
-   that first symbol, or NULL if there are no such symbols.  */
-
-extern struct symbol *dict_iter_name_first (const struct dictionary *dict,
-					    const char *name,
-					    struct dict_iterator *iterator);
-
-/* Advance ITERATOR to point at the next symbol in DICT whose
-   SYMBOL_SEARCH_NAME is NAME (as tested using strcmp_iw), or NULL if
-   there are no more such symbols.  Don't call this if you've
-   previously received NULL from dict_iterator_first or
-   dict_iterator_next on this iteration.  And don't call it unless
-   ITERATOR was created by a previous call to dict_iter_name_first
-   with the same NAME.  */
-
-extern struct symbol *dict_iter_name_next (const char *name,
-					   struct dict_iterator *iterator);
-
-/* Initialize ITERATOR to point at the first symbol in DICT whose
    SYMBOL_SEARCH_NAME is NAME, as tested using COMPARE (which must use
    the same conventions as strcmp_iw and be compatible with any
    dictionary hashing function), and return that first symbol, or NULL

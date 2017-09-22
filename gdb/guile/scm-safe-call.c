@@ -438,19 +438,18 @@ gdbscm_safe_source_script (const char *filename)
      %load-path, but we don't want %load-path to be searched.  At least not
      by default.  This function is invoked by the "source" GDB command which
      already has its own path search support.  */
-  char *abs_filename = NULL;
+  gdb::unique_xmalloc_ptr<char> abs_filename;
   const char *result;
 
   if (!IS_ABSOLUTE_PATH (filename))
     {
       abs_filename = gdb_realpath (filename);
-      filename = abs_filename;
+      filename = abs_filename.get ();
     }
 
   result = gdbscm_with_guile (scscm_source_scheme_script,
 			      (void *) filename);
 
-  xfree (abs_filename);
   if (result != NULL)
     return xstrdup (result);
   return NULL;

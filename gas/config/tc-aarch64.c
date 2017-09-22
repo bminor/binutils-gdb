@@ -6772,6 +6772,7 @@ aarch64_canonicalize_symbol_name (char *name)
    also have mixed-case names.	*/
 
 #define REGDEF(s,n,t) { #s, n, REG_TYPE_##t, TRUE }
+#define REGDEF_ALIAS(s, n, t) { #s, n, REG_TYPE_##t, FALSE}
 #define REGNUM(p,n,t) REGDEF(p##n, n, t)
 #define REGSET16(p,t) \
   REGNUM(p, 0,t), REGNUM(p, 1,t), REGNUM(p, 2,t), REGNUM(p, 3,t), \
@@ -6793,16 +6794,15 @@ static const reg_entry reg_names[] = {
   REGSET31 (x, R_64), REGSET31 (X, R_64),
   REGSET31 (w, R_32), REGSET31 (W, R_32),
 
+  REGDEF_ALIAS (ip0, 16, R_64), REGDEF_ALIAS (IP0, 16, R_64),
+  REGDEF_ALIAS (ip1, 17, R_64), REGDEF_ALIAS (IP1, 16, R_64),
+  REGDEF_ALIAS (fp, 29, R_64), REGDEF_ALIAS (FP, 29, R_64),
+  REGDEF_ALIAS (lr, 30, R_64), REGDEF_ALIAS (LR, 30, R_64),
   REGDEF (wsp, 31, SP_32), REGDEF (WSP, 31, SP_32),
   REGDEF (sp, 31, SP_64), REGDEF (SP, 31, SP_64),
 
   REGDEF (wzr, 31, Z_32), REGDEF (WZR, 31, Z_32),
   REGDEF (xzr, 31, Z_64), REGDEF (XZR, 31, Z_64),
-
-  REGDEF (ip0, 16, R_64), REGDEF (IP0, 16, R_64),
-  REGDEF (ip1, 17, R_64), REGDEF (IP1, 17, R_64),
-  REGDEF (fp, 29, R_64), REGDEF (FP, 29, R_64),
-  REGDEF (lr, 30, R_64), REGDEF (LR, 30, R_64),
 
   /* Floating-point single precision registers.  */
   REGSET (s, FP_S), REGSET (S, FP_S),
@@ -6830,6 +6830,7 @@ static const reg_entry reg_names[] = {
 };
 
 #undef REGDEF
+#undef REGDEF_ALIAS
 #undef REGNUM
 #undef REGSET16
 #undef REGSET31
@@ -6990,6 +6991,11 @@ aarch64_init_frag (fragS * fragP, int max_chars)
      later if the alignment ends up empty.  */
   if (!fragP->tc_frag_data.recorded)
     fragP->tc_frag_data.recorded = 1;
+
+  /* PR 21809: Do not set a mapping state for debug sections
+     - it just confuses other tools.  */
+  if (bfd_get_section_flags (NULL, now_seg) & SEC_DEBUGGING)
+    return;
 
   switch (fragP->fr_type)
     {
@@ -8398,19 +8404,21 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
   {"cortex-a73", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				  AARCH64_FEATURE_CRC), "Cortex-A73"},
   {"cortex-a55", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
-				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16),
+				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16 | AARCH64_FEATURE_DOTPROD),
 				  "Cortex-A55"},
   {"cortex-a75", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
-				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16),
+				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16 | AARCH64_FEATURE_DOTPROD),
 				  "Cortex-A75"},
   {"exynos-m1", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				 AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
 				"Samsung Exynos M1"},
   {"falkor", AARCH64_FEATURE (AARCH64_ARCH_V8,
-			      AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
+			      AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO
+			      | AARCH64_FEATURE_RDMA),
    "Qualcomm Falkor"},
   {"qdf24xx", AARCH64_FEATURE (AARCH64_ARCH_V8,
-			       AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
+			       AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO
+			       | AARCH64_FEATURE_RDMA),
    "Qualcomm QDF24XX"},
   {"thunderx", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),

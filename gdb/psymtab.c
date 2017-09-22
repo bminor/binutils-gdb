@@ -529,10 +529,10 @@ psym_lookup_symbol (struct objfile *objfile,
 	   information (but NAME might contain it).  */
 
 	if (sym != NULL
-	    && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
+	    && SYMBOL_MATCHES_SEARCH_NAME (sym, name))
 	  return stab;
 	if (with_opaque != NULL
-	    && strcmp_iw (SYMBOL_SEARCH_NAME (with_opaque), name) == 0)
+	    && SYMBOL_MATCHES_SEARCH_NAME (with_opaque, name))
 	  stab_best = stab;
 
 	/* Keep looking through other psymtabs.  */
@@ -627,7 +627,7 @@ match_partial_symbol (struct objfile *objfile,
 
    The caller is responsible for freeing the return result.  */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 psymtab_search_name (const char *name)
 {
   switch (current_language->la_language)
@@ -639,7 +639,7 @@ psymtab_search_name (const char *name)
 	    char *ret = cp_remove_params (name);
 
 	    if (ret)
-	      return ret;
+	      return gdb::unique_xmalloc_ptr<char> (ret);
 	  }
       }
       break;
@@ -648,7 +648,7 @@ psymtab_search_name (const char *name)
       break;
     }
 
-  return xstrdup (name);
+  return gdb::unique_xmalloc_ptr<char> (xstrdup (name));
 }
 
 /* Look, in partial_symtab PST, for symbol whose natural name is NAME.
@@ -663,14 +663,11 @@ lookup_partial_symbol (struct objfile *objfile,
   struct partial_symbol **top, **real_top, **bottom, **center;
   int length = (global ? pst->n_global_syms : pst->n_static_syms);
   int do_linear_search = 1;
-  char *search_name;
-  struct cleanup *cleanup;
 
   if (length == 0)
     return NULL;
 
-  search_name = psymtab_search_name (name);
-  cleanup = make_cleanup (xfree, search_name);
+  gdb::unique_xmalloc_ptr<char> search_name = psymtab_search_name (name);
   start = (global ?
 	   objfile->global_psymbols.list + pst->globals_offset :
 	   objfile->static_psymbols.list + pst->statics_offset);
@@ -695,7 +692,7 @@ lookup_partial_symbol (struct objfile *objfile,
 	    internal_error (__FILE__, __LINE__,
 			    _("failed internal consistency check"));
 	  if (strcmp_iw_ordered (SYMBOL_SEARCH_NAME (*center),
-				 search_name) >= 0)
+				 search_name.get ()) >= 0)
 	    {
 	      top = center;
 	    }
@@ -710,20 +707,19 @@ lookup_partial_symbol (struct objfile *objfile,
 
       /* For `case_sensitivity == case_sensitive_off' strcmp_iw_ordered will
 	 search more exactly than what matches SYMBOL_MATCHES_SEARCH_NAME.  */
-      while (top >= start && SYMBOL_MATCHES_SEARCH_NAME (*top, search_name))
+      while (top >= start && SYMBOL_MATCHES_SEARCH_NAME (*top,
+							 search_name.get ()))
 	top--;
 
       /* Fixup to have a symbol which matches SYMBOL_MATCHES_SEARCH_NAME.  */
       top++;
 
-      while (top <= real_top && SYMBOL_MATCHES_SEARCH_NAME (*top, search_name))
+      while (top <= real_top
+	     && SYMBOL_MATCHES_SEARCH_NAME (*top, search_name.get ()))
 	{
 	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*top),
 				     SYMBOL_DOMAIN (*top), domain))
-	    {
-	      do_cleanups (cleanup);
-	      return *top;
-	    }
+	    return *top;
 	  top++;
 	}
     }
@@ -737,15 +733,11 @@ lookup_partial_symbol (struct objfile *objfile,
 	{
 	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*psym),
 				     SYMBOL_DOMAIN (*psym), domain)
-	      && SYMBOL_MATCHES_SEARCH_NAME (*psym, search_name))
-	    {
-	      do_cleanups (cleanup);
-	      return *psym;
-	    }
+	      && SYMBOL_MATCHES_SEARCH_NAME (*psym, search_name.get ()))
+	    return *psym;
 	}
     }
 
-  do_cleanups (cleanup);
   return NULL;
 }
 
@@ -1199,23 +1191,20 @@ psymtab_to_fullname (struct partial_symtab *ps)
 	close (fd);
       else
 	{
-	  char *fullname;
-	  struct cleanup *back_to;
+	  gdb::unique_xmalloc_ptr<char> fullname;
 
 	  /* rewrite_source_path would be applied by find_and_open_source, we
 	     should report the pathname where GDB tried to find the file.  */
 
 	  if (ps->dirname == NULL || IS_ABSOLUTE_PATH (ps->filename))
-	    fullname = xstrdup (ps->filename);
+	    fullname.reset (xstrdup (ps->filename));
 	  else
-	    fullname = concat (ps->dirname, SLASH_STRING,
-			       ps->filename, (char *) NULL);
+	    fullname.reset (concat (ps->dirname, SLASH_STRING,
+				    ps->filename, (char *) NULL));
 
-	  back_to = make_cleanup (xfree, fullname);
-	  ps->fullname = rewrite_source_path (fullname);
+	  ps->fullname = rewrite_source_path (fullname.get ()).release ();
 	  if (ps->fullname == NULL)
-	    ps->fullname = xstrdup (fullname);
-	  do_cleanups (back_to);
+	    ps->fullname = fullname.release ();
 	}
     }
 
@@ -1905,9 +1894,7 @@ dump_psymtab_addrmap (struct objfile *objfile, struct partial_symtab *psymtab,
 static void
 maintenance_print_psymbols (char *args, int from_tty)
 {
-  char **argv;
   struct ui_file *outfile = gdb_stdout;
-  struct cleanup *cleanups;
   char *address_arg = NULL, *source_arg = NULL, *objfile_arg = NULL;
   struct objfile *objfile;
   struct partial_symtab *ps;
@@ -1917,8 +1904,7 @@ maintenance_print_psymbols (char *args, int from_tty)
 
   dont_repeat ();
 
-  argv = gdb_buildargv (args);
-  cleanups = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   for (i = 0; argv != NULL && argv[i] != NULL; ++i)
     {
@@ -1963,14 +1949,12 @@ maintenance_print_psymbols (char *args, int from_tty)
 
   if (argv != NULL && argv[outfile_idx] != NULL)
     {
-      char *outfile_name;
-
       if (argv[outfile_idx + 1] != NULL)
 	error (_("Junk at end of command"));
-      outfile_name = tilde_expand (argv[outfile_idx]);
-      make_cleanup (xfree, outfile_name);
-      if (!arg_outfile.open (outfile_name, FOPEN_WT))
-	perror_with_name (outfile_name);
+      gdb::unique_xmalloc_ptr<char> outfile_name
+	(tilde_expand (argv[outfile_idx]));
+      if (!arg_outfile.open (outfile_name.get (), FOPEN_WT))
+	perror_with_name (outfile_name.get ());
       outfile = &arg_outfile;
     }
 
@@ -2061,8 +2045,6 @@ maintenance_print_psymbols (char *args, int from_tty)
       if (source_arg != NULL)
 	error (_("No partial symtab for source file: %s"), source_arg);
     }
-
-  do_cleanups (cleanups);
 }
 
 /* List all the partial symbol tables whose names match REGEXP (optional).  */
@@ -2262,10 +2244,6 @@ maintenance_check_psymtabs (char *ignore, int from_tty)
       }
   }
 }
-
-
-
-extern initialize_file_ftype _initialize_psymtab;
 
 void
 _initialize_psymtab (void)

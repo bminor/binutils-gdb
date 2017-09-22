@@ -47,8 +47,8 @@ namespace gold
 
 // Class Symbol.
 
-// Initialize fields in Symbol.  This initializes everything except u_
-// and source_.
+// Initialize fields in Symbol.  This initializes everything except
+// u1_, u2_ and source_.
 
 void
 Symbol::init_fields(const char* name, const char* version,
@@ -81,6 +81,7 @@ Symbol::init_fields(const char* name, const char* version,
   this->undef_binding_weak_ = false;
   this->is_predefined_ = false;
   this->is_protected_ = false;
+  this->non_zero_localentry_ = false;
 }
 
 // Return the demangled version of the symbol's name, but only
@@ -119,8 +120,8 @@ Symbol::init_base_object(const char* name, const char* version, Object* object,
 {
   this->init_fields(name, version, sym.get_st_type(), sym.get_st_bind(),
 		    sym.get_st_visibility(), sym.get_st_nonvis());
-  this->u_.from_object.object = object;
-  this->u_.from_object.shndx = st_shndx;
+  this->u1_.object = object;
+  this->u2_.shndx = st_shndx;
   this->is_ordinary_shndx_ = is_ordinary;
   this->source_ = FROM_OBJECT;
   this->in_reg_ = !object->is_dynamic();
@@ -139,8 +140,8 @@ Symbol::init_base_output_data(const char* name, const char* version,
 			      bool is_predefined)
 {
   this->init_fields(name, version, type, binding, visibility, nonvis);
-  this->u_.in_output_data.output_data = od;
-  this->u_.in_output_data.offset_is_from_end = offset_is_from_end;
+  this->u1_.output_data = od;
+  this->u2_.offset_is_from_end = offset_is_from_end;
   this->source_ = IN_OUTPUT_DATA;
   this->in_reg_ = true;
   this->in_real_elf_ = true;
@@ -159,8 +160,8 @@ Symbol::init_base_output_segment(const char* name, const char* version,
 				 bool is_predefined)
 {
   this->init_fields(name, version, type, binding, visibility, nonvis);
-  this->u_.in_output_segment.output_segment = os;
-  this->u_.in_output_segment.offset_base = offset_base;
+  this->u1_.output_segment = os;
+  this->u2_.offset_base = offset_base;
   this->source_ = IN_OUTPUT_SEGMENT;
   this->in_reg_ = true;
   this->in_real_elf_ = true;
@@ -205,8 +206,8 @@ Symbol::allocate_base_common(Output_data* od)
 {
   gold_assert(this->is_common());
   this->source_ = IN_OUTPUT_DATA;
-  this->u_.in_output_data.output_data = od;
-  this->u_.in_output_data.offset_is_from_end = false;
+  this->u1_.output_data = od;
+  this->u2_.offset_is_from_end = false;
 }
 
 // Initialize the fields in Sized_symbol for SYM in OBJECT.
@@ -487,19 +488,19 @@ Symbol::output_section() const
     {
     case FROM_OBJECT:
       {
-	unsigned int shndx = this->u_.from_object.shndx;
+	unsigned int shndx = this->u2_.shndx;
 	if (shndx != elfcpp::SHN_UNDEF && this->is_ordinary_shndx_)
 	  {
-	    gold_assert(!this->u_.from_object.object->is_dynamic());
-	    gold_assert(this->u_.from_object.object->pluginobj() == NULL);
-	    Relobj* relobj = static_cast<Relobj*>(this->u_.from_object.object);
+	    gold_assert(!this->u1_.object->is_dynamic());
+	    gold_assert(this->u1_.object->pluginobj() == NULL);
+	    Relobj* relobj = static_cast<Relobj*>(this->u1_.object);
 	    return relobj->output_section(shndx);
 	  }
 	return NULL;
       }
 
     case IN_OUTPUT_DATA:
-      return this->u_.in_output_data.output_data->output_section();
+      return this->u1_.output_data->output_section();
 
     case IN_OUTPUT_SEGMENT:
     case IS_CONSTANT:
@@ -526,8 +527,8 @@ Symbol::set_output_section(Output_section* os)
       break;
     case IS_CONSTANT:
       this->source_ = IN_OUTPUT_DATA;
-      this->u_.in_output_data.output_data = os;
-      this->u_.in_output_data.offset_is_from_end = false;
+      this->u1_.output_data = os;
+      this->u2_.offset_is_from_end = false;
       break;
     case IN_OUTPUT_SEGMENT:
     case IS_UNDEFINED:
@@ -545,8 +546,8 @@ Symbol::set_output_segment(Output_segment* os, Segment_offset_base base)
 {
   gold_assert(this->is_predefined_);
   this->source_ = IN_OUTPUT_SEGMENT;
-  this->u_.in_output_segment.output_segment = os;
-  this->u_.in_output_segment.offset_base = base;
+  this->u1_.output_segment = os;
+  this->u2_.offset_base = base;
 }
 
 // Set the symbol to undefined.  This is used for pre-defined

@@ -1,3 +1,4 @@
+/* DO NOT EDIT!  -*- buffer-read-only: t -*- vi:set ro:  */
 /* Instruction opcode header for xc16x.
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.

@@ -2,7 +2,7 @@
 #source: expdref1.s
 #source: expdyn1.s
 #as: --pic --no-underscore --em=criself -I$srcdir/$subdir
-#ld: --shared -m crislinux --gc-sections
+#ld: --shared -m crislinux --gc-sections --hash-style=sysv
 #objdump: -s -t -R -p -T
 
 # Exercise PIC relocs through changed GC sweep function.

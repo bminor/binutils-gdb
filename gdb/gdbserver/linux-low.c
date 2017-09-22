@@ -570,7 +570,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 
 	  clone_all_breakpoints (child_thr, event_thr);
 
-	  tdesc = XNEW (struct target_desc);
+	  tdesc = allocate_target_description ();
 	  copy_target_description (tdesc, parent_proc->tdesc);
 	  child_proc->tdesc = tdesc;
 
@@ -655,6 +655,8 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	  new_lwp->status_pending_p = 1;
 	  new_lwp->status_pending = status;
 	}
+
+      thread_db_notice_clone (get_thread_process (event_thr), ptid);
 
       /* Don't report the event.  */
       return 1;
@@ -2082,7 +2084,9 @@ handle_tracepoints (struct lwp_info *lwp)
   lwp_suspended_decr (lwp);
 
   gdb_assert (lwp->suspended == 0);
-  gdb_assert (!stabilizing_threads || lwp->collecting_fast_tracepoint);
+  gdb_assert (!stabilizing_threads
+	      || (lwp->collecting_fast_tracepoint
+		  != fast_tpoint_collect_result::not_collecting));
 
   if (tpoint_related_event)
     {
@@ -2094,10 +2098,10 @@ handle_tracepoints (struct lwp_info *lwp)
   return 0;
 }
 
-/* Convenience wrapper.  Returns true if LWP is presently collecting a
-   fast tracepoint.  */
+/* Convenience wrapper.  Returns information about LWP's fast tracepoint
+   collection status.  */
 
-static int
+static fast_tpoint_collect_result
 linux_fast_tracepoint_collecting (struct lwp_info *lwp,
 				  struct fast_tpoint_collect_status *status)
 {
@@ -2105,14 +2109,14 @@ linux_fast_tracepoint_collecting (struct lwp_info *lwp,
   struct thread_info *thread = get_lwp_thread (lwp);
 
   if (the_low_target.get_thread_area == NULL)
-    return 0;
+    return fast_tpoint_collect_result::not_collecting;
 
   /* Get the thread area address.  This is used to recognize which
      thread is which when tracing with the in-process agent library.
      We don't read anything from the address, and treat it as opaque;
      it's the address itself that we assume is unique per-thread.  */
   if ((*the_low_target.get_thread_area) (lwpid_of (thread), &thread_area) == -1)
-    return 0;
+    return fast_tpoint_collect_result::not_collecting;
 
   return fast_tracepoint_collecting (thread_area, lwp->stop_pc, status);
 }
@@ -2136,14 +2140,14 @@ maybe_move_out_of_jump_pad (struct lwp_info *lwp, int *wstat)
       && agent_loaded_p ())
     {
       struct fast_tpoint_collect_status status;
-      int r;
 
       if (debug_threads)
 	debug_printf ("Checking whether LWP %ld needs to move out of the "
 		      "jump pad.\n",
 		      lwpid_of (current_thread));
 
-      r = linux_fast_tracepoint_collecting (lwp, &status);
+      fast_tpoint_collect_result r
+	= linux_fast_tracepoint_collecting (lwp, &status);
 
       if (wstat == NULL
 	  || (WSTOPSIG (*wstat) != SIGILL
@@ -2153,9 +2157,10 @@ maybe_move_out_of_jump_pad (struct lwp_info *lwp, int *wstat)
 	{
 	  lwp->collecting_fast_tracepoint = r;
 
-	  if (r != 0)
+	  if (r != fast_tpoint_collect_result::not_collecting)
 	    {
-	      if (r == 1 && lwp->exit_jump_pad_bkpt == NULL)
+	      if (r == fast_tpoint_collect_result::before_insn
+		  && lwp->exit_jump_pad_bkpt == NULL)
 		{
 		  /* Haven't executed the original instruction yet.
 		     Set breakpoint there, and wait till it's hit,
@@ -2181,9 +2186,10 @@ maybe_move_out_of_jump_pad (struct lwp_info *lwp, int *wstat)
 	     reporting to GDB.  Otherwise, it's an IPA lib bug: just
 	     report the signal to GDB, and pray for the best.  */
 
-	  lwp->collecting_fast_tracepoint = 0;
+	  lwp->collecting_fast_tracepoint
+	    = fast_tpoint_collect_result::not_collecting;
 
-	  if (r != 0
+	  if (r != fast_tpoint_collect_result::not_collecting
 	      && (status.adjusted_insn_addr <= lwp->stop_pc
 		  && lwp->stop_pc < status.adjusted_insn_addr_end))
 	    {
@@ -2715,7 +2721,8 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 
       if (stopping_threads == NOT_STOPPING_THREADS
 	  && requested_child->status_pending_p
-	  && requested_child->collecting_fast_tracepoint)
+	  && (requested_child->collecting_fast_tracepoint
+	      != fast_tpoint_collect_result::not_collecting))
 	{
 	  enqueue_one_deferred_signal (requested_child,
 				       &requested_child->status_pending);
@@ -3467,20 +3474,22 @@ linux_wait_1 (ptid_t ptid,
 	}
     }
 
-  if (event_child->collecting_fast_tracepoint)
+  if (event_child->collecting_fast_tracepoint
+      != fast_tpoint_collect_result::not_collecting)
     {
       if (debug_threads)
 	debug_printf ("LWP %ld was trying to move out of the jump pad (%d). "
 		      "Check if we're already there.\n",
 		      lwpid_of (current_thread),
-		      event_child->collecting_fast_tracepoint);
+		      (int) event_child->collecting_fast_tracepoint);
 
       trace_event = 1;
 
       event_child->collecting_fast_tracepoint
 	= linux_fast_tracepoint_collecting (event_child, NULL);
 
-      if (event_child->collecting_fast_tracepoint != 1)
+      if (event_child->collecting_fast_tracepoint
+	  != fast_tpoint_collect_result::before_insn)
 	{
 	  /* No longer need this breakpoint.  */
 	  if (event_child->exit_jump_pad_bkpt != NULL)
@@ -3507,7 +3516,8 @@ linux_wait_1 (ptid_t ptid,
 	    }
 	}
 
-      if (event_child->collecting_fast_tracepoint == 0)
+      if (event_child->collecting_fast_tracepoint
+	  == fast_tpoint_collect_result::not_collecting)
 	{
 	  if (debug_threads)
 	    debug_printf ("fast tracepoint finished "
@@ -3725,12 +3735,11 @@ linux_wait_1 (ptid_t ptid,
     {
       if (event_child->waitstatus.kind != TARGET_WAITKIND_IGNORE)
 	{
-	  char *str;
+	  std::string str
+	    = target_waitstatus_to_string (&event_child->waitstatus);
 
-	  str = target_waitstatus_to_string (&event_child->waitstatus);
 	  debug_printf ("LWP %ld: extended event with waitstatus %s\n",
-			lwpid_of (get_lwp_thread (event_child)), str);
-	  xfree (str);
+			lwpid_of (get_lwp_thread (event_child)), str.c_str ());
 	}
       if (current_thread->last_resume_kind == resume_step)
 	{
@@ -4192,7 +4201,8 @@ stuck_in_jump_pad_callback (struct inferior_list_entry *entry, void *data)
 	  && (gdb_breakpoint_here (lwp->stop_pc)
 	      || lwp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT
 	      || thread->last_resume_kind == resume_step)
-	  && linux_fast_tracepoint_collecting (lwp, NULL));
+	  && (linux_fast_tracepoint_collecting (lwp, NULL)
+	      != fast_tpoint_collect_result::not_collecting));
 }
 
 static void
@@ -4369,7 +4379,8 @@ single_step (struct lwp_info* lwp)
 static int
 lwp_signal_can_be_delivered (struct lwp_info *lwp)
 {
-  return !lwp->collecting_fast_tracepoint;
+  return (lwp->collecting_fast_tracepoint
+	  == fast_tpoint_collect_result::not_collecting);
 }
 
 /* Resume execution of LWP.  If STEP is nonzero, single-step it.  If
@@ -4381,7 +4392,6 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 {
   struct thread_info *thread = get_lwp_thread (lwp);
   struct thread_info *saved_thread;
-  int fast_tp_collecting;
   int ptrace_request;
   struct process_info *proc = get_thread_process (thread);
 
@@ -4397,9 +4407,12 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 
   gdb_assert (lwp->waitstatus.kind == TARGET_WAITKIND_IGNORE);
 
-  fast_tp_collecting = lwp->collecting_fast_tracepoint;
+  fast_tpoint_collect_result fast_tp_collecting
+    = lwp->collecting_fast_tracepoint;
 
-  gdb_assert (!stabilizing_threads || fast_tp_collecting);
+  gdb_assert (!stabilizing_threads
+	      || (fast_tp_collecting
+		  != fast_tpoint_collect_result::not_collecting));
 
   /* Cancel actions that rely on GDB not changing the PC (e.g., the
      user used the "jump" command, or "set $pc = foo").  */
@@ -4455,7 +4468,7 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 
       if (can_hardware_single_step ())
 	{
-	  if (fast_tp_collecting == 0)
+	  if (fast_tp_collecting == fast_tpoint_collect_result::not_collecting)
 	    {
 	      if (step == 0)
 		warning ("BAD - reinserting but not stepping.");
@@ -4468,14 +4481,14 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
       step = maybe_hw_step (thread);
     }
 
-  if (fast_tp_collecting == 1)
+  if (fast_tp_collecting == fast_tpoint_collect_result::before_insn)
     {
       if (debug_threads)
 	debug_printf ("lwp %ld wants to get out of fast tracepoint jump pad"
 		      " (exit-jump-pad-bkpt)\n",
 		      lwpid_of (thread));
     }
-  else if (fast_tp_collecting == 2)
+  else if (fast_tp_collecting == fast_tpoint_collect_result::at_insn)
     {
       if (debug_threads)
 	debug_printf ("lwp %ld wants to get out of fast tracepoint jump pad"
@@ -4700,7 +4713,6 @@ linux_set_resume_request (struct inferior_list_entry *entry, void *arg)
 	     does not yet know are new fork children.  */
 	  if (lwp->fork_relative != NULL)
 	    {
-	      struct inferior_list_entry *inf, *tmp;
 	      struct lwp_info *rel = lwp->fork_relative;
 
 	      if (rel->status_pending_p
@@ -5294,7 +5306,8 @@ proceed_one_lwp (struct inferior_list_entry *entry, void *except)
 
   if (thread->last_resume_kind == resume_stop
       && lwp->pending_signals_to_report == NULL
-      && lwp->collecting_fast_tracepoint == 0)
+      && (lwp->collecting_fast_tracepoint
+	  == fast_tpoint_collect_result::not_collecting))
     {
       /* We haven't reported this LWP as stopped yet (otherwise, the
 	 last_status.kind check above would catch it, and we wouldn't
@@ -7277,7 +7290,6 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 	    {
 	      /* 6x the size for xml_escape_text below.  */
 	      size_t len = 6 * strlen ((char *) libname);
-	      char *name;
 
 	      if (!header_done)
 		{
@@ -7296,12 +7308,11 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 		  p = document + document_len;
 		}
 
-	      name = xml_escape_text ((char *) libname);
+	      std::string name = xml_escape_text ((char *) libname);
 	      p += sprintf (p, "<library name=\"%s\" lm=\"0x%lx\" "
 			    "l_addr=\"0x%lx\" l_ld=\"0x%lx\"/>",
-			    name, (unsigned long) lm_addr,
+			    name.c_str (), (unsigned long) lm_addr,
 			    (unsigned long) l_addr, (unsigned long) l_ld);
-	      free (name);
 	    }
 	}
 
@@ -7694,6 +7705,11 @@ static struct target_ops linux_target_ops = {
   linux_supports_software_single_step,
   linux_supports_catch_syscall,
   linux_get_ipa_tdesc_idx,
+#if USE_THREAD_DB
+  thread_db_thread_handle,
+#else
+  NULL,
+#endif
 };
 
 #ifdef HAVE_LINUX_REGSETS

@@ -4,7 +4,7 @@
 #source: tls-ldgd-15.s
 #source: tls-hx1x2.s
 #as: --pic --no-underscore --em=criself
-#ld: --shared -m crislinux tmpdir/tls-dso-xz-1.so
+#ld: --shared -m crislinux --hash-style=sysv tmpdir/tls-dso-xz-1.so
 #objdump: -s -h -t -T -R -r -p
 
 # Check that we have proper NPTL/TLS markings and GOT for two

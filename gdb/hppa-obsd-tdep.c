@@ -164,10 +164,6 @@ hppaobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, hppaobsd_iterate_over_regset_sections);
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_hppabsd_tdep (void);
 
 void
 _initialize_hppabsd_tdep (void)

@@ -5012,7 +5012,7 @@ som_set_reloc_info (unsigned char *fixup,
 		  push (v);
 		}
 	      else
-		/* An operator.  Pop two two values from the stack and
+		/* An operator.  Pop two values from the stack and
 		   use them as operands to the given operation.  Push
 		   the result of the operation back on the stack.  */
 		switch (c)

@@ -797,6 +797,7 @@ enable_threads
 enable_plugins
 enable_relro
 enable_targets
+enable_default_hash_style
 with_lib_path
 enable_dependency_tracking
 enable_nls
@@ -1447,6 +1448,8 @@ Optional Features:
   --enable-plugins        linker plugins
   --enable-relro          enable -z relro in ELF linker by default
   --enable-targets        alternative target configurations
+  --enable-default-hash-style={sysv,gnu,both}
+                          use this default hash style
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
   --disable-nls           do not use Native Language Support
@@ -3409,6 +3412,30 @@ if test -n "$enable_targets"; then
     fi
   done
 fi
+
+# Decide which "--hash-style" to use by default
+# Provide a configure time option to override our default.
+# Check whether --enable-default-hash-style was given.
+if test "${enable_default_hash_style+set}" = set; then :
+  enableval=$enable_default_hash_style; case "${enable_default_hash_style}" in
+  sysv | gnu | both) ;;
+  *) as_fn_error "bad value ${enable_default_hash_style} for enable-default-hash-style option" "$LINENO" 5 ;;
+esac
+else
+  case "${target}" in
+  # Enable gnu hash only on GNU targets, but not mips
+  mips*-*-*) enable_default_hash_style=sysv ;;
+  *-*-gnu* | *-*-linux* | *-*-nacl*) enable_default_hash_style=both ;;
+  *) enable_default_hash_style=sysv ;;
+esac
+fi
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_HASH_STYLE "${enable_default_hash_style}"
+_ACEOF
+
 
 # See which specific instantiations we need.
 targetobjs=

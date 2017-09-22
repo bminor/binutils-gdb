@@ -10,11 +10,9 @@ static void
 initialize_tdesc_powerpc_vsx32l (void)
 {
   struct target_desc *result = allocate_target_description ();
-  struct tdesc_feature *feature;
-  struct tdesc_type *field_type;
-  struct tdesc_type *type;
-
   set_tdesc_architecture (result, bfd_scan_arch ("powerpc:common"));
+
+  struct tdesc_feature *feature;
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.power.core");
   tdesc_create_reg (feature, "r0", 0, 1, NULL, 32, "uint32");
@@ -96,6 +94,7 @@ initialize_tdesc_powerpc_vsx32l (void)
   tdesc_create_reg (feature, "trap", 72, 1, NULL, 32, "int");
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.power.altivec");
+  struct tdesc_type *field_type;
   field_type = tdesc_named_type (feature, "ieee_single");
   tdesc_create_vector (feature, "v4f", field_type, 4);
 
@@ -108,6 +107,7 @@ initialize_tdesc_powerpc_vsx32l (void)
   field_type = tdesc_named_type (feature, "int8");
   tdesc_create_vector (feature, "v16i8", field_type, 16);
 
+  struct tdesc_type *type;
   type = tdesc_create_union (feature, "vec128");
   field_type = tdesc_named_type (feature, "uint128");
   tdesc_add_field (type, "uint128", field_type);

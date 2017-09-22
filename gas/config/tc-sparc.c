@@ -3946,8 +3946,33 @@ tc_gen_reloc (asection *section, fixS *fixp)
 
   switch (fixp->fx_r_type)
     {
+    case BFD_RELOC_8:
     case BFD_RELOC_16:
     case BFD_RELOC_32:
+    case BFD_RELOC_64:
+      if (fixp->fx_pcrel)
+	{
+	  switch (fixp->fx_size)
+	    {
+	    default:
+	      as_bad_where (fixp->fx_file, fixp->fx_line,
+			    _("can not do %d byte pc-relative relocation"),
+			    fixp->fx_size);
+	      code = fixp->fx_r_type;
+	      fixp->fx_pcrel = 0;
+	      break;
+	    case 1: code = BFD_RELOC_8_PCREL;  break;
+	    case 2: code = BFD_RELOC_16_PCREL; break;
+	    case 4: code = BFD_RELOC_32_PCREL; break;
+#ifdef BFD64
+	    case 8: code = BFD_RELOC_64_PCREL; break;
+#endif
+	    }
+	  if (fixp->fx_pcrel)
+	    fixp->fx_addnumber = fixp->fx_offset;
+	  break;
+	}
+      /* Fall through.  */
     case BFD_RELOC_HI22:
     case BFD_RELOC_LO10:
     case BFD_RELOC_32_PCREL_S2:
@@ -3960,7 +3985,6 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_SPARC_WDISP16:
     case BFD_RELOC_SPARC_WDISP19:
     case BFD_RELOC_SPARC_WDISP22:
-    case BFD_RELOC_64:
     case BFD_RELOC_SPARC_5:
     case BFD_RELOC_SPARC_6:
     case BFD_RELOC_SPARC_7:

@@ -57,7 +57,8 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
   struct ui_out *uiout = current_uiout;
   CORE_ADDR start;
 
-  int mode, disasm_flags;
+  int mode;
+  gdb_disassembly_flags disasm_flags;
   struct symtab *s;
 
   /* Which options have we processed ... */

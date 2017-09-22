@@ -60,6 +60,9 @@ set build_tests {
   {"Run with -lusesaudit -lusesaudit2"
      "-Ltmpdir/ -lusesaudit -lusesaudit2" ""
      {main.c} {{"readelf" {-d} "depaudit2.rd"}} "useslibusesaudit2.out"}
+  {"Link with -z globalaudit"
+     "-Wl,-Paudit.so -Wl,-z,globalaudit" ""
+     {main.c} {{"readelf" {-d} "globalaudit.rd"}} "globalaudit.out"}	
 }
 
 run_cc_link_tests $build_tests

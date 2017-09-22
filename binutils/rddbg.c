@@ -303,7 +303,8 @@ read_symbol_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
 	    return FALSE;
 	  f = NULL;
 
-	  while (s[strlen (s) - 1] == '\\'
+	  while (strlen (s) > 0
+		 && s[strlen (s) - 1] == '\\'
 		 && ps + 1 < symend)
 	    {
 	      char *sc, *n;

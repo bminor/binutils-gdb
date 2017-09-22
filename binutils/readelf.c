@@ -3325,6 +3325,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case E_MIPS_MACH_4650: strcat (buf, ", 4650"); break;
 	    case E_MIPS_MACH_5400: strcat (buf, ", 5400"); break;
 	    case E_MIPS_MACH_5500: strcat (buf, ", 5500"); break;
+	    case E_MIPS_MACH_5900: strcat (buf, ", 5900"); break;
 	    case E_MIPS_MACH_SB1:  strcat (buf, ", sb1");  break;
 	    case E_MIPS_MACH_9000: strcat (buf, ", 9000"); break;
   	    case E_MIPS_MACH_LS2E: strcat (buf, ", loongson-2e"); break;
@@ -5587,6 +5588,8 @@ get_elf_section_flags (bfd_vma sh_flags)
       /* 23 */ { STRING_COMMA_LEN ("COMDEF") },
       /* GNU specific.  */
       /* 24 */ { STRING_COMMA_LEN ("GNU_MBIND") },
+      /* VLE specific.  */
+      /* 25 */ { STRING_COMMA_LEN ("VLE") },
     };
 
   if (do_section_details)
@@ -5667,6 +5670,10 @@ get_elf_section_flags (bfd_vma sh_flags)
 		    default: break;
 		    }
 		  break;
+		case EM_PPC:
+		  if (flag == SHF_PPC_VLE)
+		    sindex = 25;
+		  break;
 
 		default:
 		  break;
@@ -5724,6 +5731,9 @@ get_elf_section_flags (bfd_vma sh_flags)
 	      else if (elf_header.e_machine == EM_ARM
 		       && flag == SHF_ARM_PURECODE)
 		  *p = 'y';
+	      else if (elf_header.e_machine == EM_PPC
+		       && flag == SHF_PPC_VLE)
+		  *p = 'v';
 	      else if (flag & SHF_MASKOS)
 		{
 		  *p = 'o';
@@ -6460,6 +6470,8 @@ process_section_headers (FILE * file)
 	printf (_("l (large), "));
       else if (elf_header.e_machine == EM_ARM)
 	printf (_("y (purecode), "));
+      else if (elf_header.e_machine == EM_PPC)
+	printf (_("v (VLE), "));
       printf ("p (processor specific)\n");
     }
 
@@ -6706,7 +6718,7 @@ process_section_groups (FILE * file)
 		      error (_("section [%5u] in group section [%5u] > maximum section [%5u]\n"),
 			     entry, i, elf_header.e_shnum - 1);
 		      if (num_group_errors == 10)
-			warn (_("Futher error messages about overlarge group section indicies suppressed\n"));
+			warn (_("Further error messages about overlarge group section indicies suppressed\n"));
 		    }
 		  continue;
 		}
@@ -10153,9 +10165,8 @@ process_version_sections (FILE * file)
 	case SHT_GNU_verdef:
 	  {
 	    Elf_External_Verdef * edefs;
-	    unsigned int idx;
-	    unsigned int cnt;
-	    unsigned int end;
+	    unsigned long idx;
+	    unsigned long cnt;
 	    char * endbuf;
 
 	    found = TRUE;
@@ -10177,22 +10188,15 @@ process_version_sections (FILE * file)
 	      break;
 	    endbuf = (char *) edefs + section->sh_size;
 
-	    /* PR 17531: file: id:000001,src:000172+005151,op:splice,rep:2.  */
-	    end = (section->sh_info < section->sh_size
-		   ? section->sh_info : section->sh_size);
-	    for (idx = cnt = 0; cnt < end; ++cnt)
+	    for (idx = cnt = 0; cnt < section->sh_info; ++cnt)
 	      {
 		char * vstart;
 		Elf_External_Verdef * edef;
 		Elf_Internal_Verdef ent;
 		Elf_External_Verdaux * eaux;
 		Elf_Internal_Verdaux aux;
-		unsigned int isum;
+		unsigned long isum;
 		int j;
-
-		/* Check for very large indices.  */
-		if (idx > (size_t) (endbuf - (char *) edefs))
-		  break;
 
 		vstart = ((char *) edefs) + idx;
 		if (vstart + sizeof (*edef) > endbuf)
@@ -10208,19 +10212,20 @@ process_version_sections (FILE * file)
 		ent.vd_aux     = BYTE_GET (edef->vd_aux);
 		ent.vd_next    = BYTE_GET (edef->vd_next);
 
-		printf (_("  %#06x: Rev: %d  Flags: %s"),
+		printf (_("  %#06lx: Rev: %d  Flags: %s"),
 			idx, ent.vd_version, get_ver_flags (ent.vd_flags));
 
 		printf (_("  Index: %d  Cnt: %d  "),
 			ent.vd_ndx, ent.vd_cnt);
 
-		/* Check for overflow and underflow.  */
-		if (ent.vd_aux + sizeof (* eaux) > (size_t) (endbuf - vstart)
-		    || (vstart + ent.vd_aux < vstart))
+		/* Check for overflow.  */
+		if (ent.vd_aux > (size_t) (endbuf - vstart))
 		  break;
 
 		vstart += ent.vd_aux;
 
+		if (vstart + sizeof (*eaux) > endbuf)
+		  break;
 		eaux = (Elf_External_Verdaux *) vstart;
 
 		aux.vda_name = BYTE_GET (eaux->vda_name);
@@ -10235,6 +10240,14 @@ process_version_sections (FILE * file)
 
 		for (j = 1; j < ent.vd_cnt; j++)
 		  {
+		    if (aux.vda_next < sizeof (*eaux)
+			&& !(j == ent.vd_cnt - 1 && aux.vda_next == 0))
+		      {
+			warn (_("Invalid vda_next field of %lx\n"),
+			      aux.vda_next);
+			j = ent.vd_cnt;
+			break;
+		      }
 		    /* Check for overflow.  */
 		    if (aux.vda_next > (size_t) (endbuf - vstart))
 		      break;
@@ -10242,18 +10255,18 @@ process_version_sections (FILE * file)
 		    isum   += aux.vda_next;
 		    vstart += aux.vda_next;
 
-		    eaux = (Elf_External_Verdaux *) vstart;
 		    if (vstart + sizeof (*eaux) > endbuf)
 		      break;
+		    eaux = (Elf_External_Verdaux *) vstart;
 
 		    aux.vda_name = BYTE_GET (eaux->vda_name);
 		    aux.vda_next = BYTE_GET (eaux->vda_next);
 
 		    if (VALID_DYNAMIC_NAME (aux.vda_name))
-		      printf (_("  %#06x: Parent %d: %s\n"),
+		      printf (_("  %#06lx: Parent %d: %s\n"),
 			      isum, j, GET_DYNAMIC_NAME (aux.vda_name));
 		    else
-		      printf (_("  %#06x: Parent %d, name index: %ld\n"),
+		      printf (_("  %#06lx: Parent %d, name index: %ld\n"),
 			      isum, j, aux.vda_name);
 		  }
 
@@ -10262,7 +10275,14 @@ process_version_sections (FILE * file)
 
 		/* PR 17531:
 		   file: id:000001,src:000172+005151,op:splice,rep:2.  */
-		if (idx + ent.vd_next < idx)
+		if (ent.vd_next < sizeof (*edef)
+		    && !(cnt == section->sh_info - 1 && ent.vd_next == 0))
+		  {
+		    warn (_("Invalid vd_next field of %lx\n"), ent.vd_next);
+		    cnt = section->sh_info;
+		    break;
+		  }
+		if (ent.vd_next > (size_t) (endbuf - ((char *) edefs + idx)))
 		  break;
 
 		idx += ent.vd_next;
@@ -10278,8 +10298,8 @@ process_version_sections (FILE * file)
 	case SHT_GNU_verneed:
 	  {
 	    Elf_External_Verneed * eneed;
-	    unsigned int idx;
-	    unsigned int cnt;
+	    unsigned long idx;
+	    unsigned long cnt;
 	    char * endbuf;
 
 	    found = TRUE;
@@ -10305,12 +10325,9 @@ process_version_sections (FILE * file)
 	      {
 		Elf_External_Verneed * entry;
 		Elf_Internal_Verneed ent;
-		unsigned int isum;
+		unsigned long isum;
 		int j;
 		char * vstart;
-
-		if (idx > (size_t) (endbuf - (char *) eneed))
-		  break;
 
 		vstart = ((char *) eneed) + idx;
 		if (vstart + sizeof (*entry) > endbuf)
@@ -10324,7 +10341,7 @@ process_version_sections (FILE * file)
 		ent.vn_aux     = BYTE_GET (entry->vn_aux);
 		ent.vn_next    = BYTE_GET (entry->vn_next);
 
-		printf (_("  %#06x: Version: %d"), idx, ent.vn_version);
+		printf (_("  %#06lx: Version: %d"), idx, ent.vn_version);
 
 		if (VALID_DYNAMIC_NAME (ent.vn_file))
 		  printf (_("  File: %s"), GET_DYNAMIC_NAME (ent.vn_file));
@@ -10354,24 +10371,26 @@ process_version_sections (FILE * file)
 		    aux.vna_next  = BYTE_GET (eaux->vna_next);
 
 		    if (VALID_DYNAMIC_NAME (aux.vna_name))
-		      printf (_("  %#06x:   Name: %s"),
+		      printf (_("  %#06lx:   Name: %s"),
 			      isum, GET_DYNAMIC_NAME (aux.vna_name));
 		    else
-		      printf (_("  %#06x:   Name index: %lx"),
+		      printf (_("  %#06lx:   Name index: %lx"),
 			      isum, aux.vna_name);
 
 		    printf (_("  Flags: %s  Version: %d\n"),
 			    get_ver_flags (aux.vna_flags), aux.vna_other);
 
-		    /* Check for overflow.  */
-		    if (aux.vna_next > (size_t) (endbuf - vstart)
-			|| (aux.vna_next == 0 && j < ent.vn_cnt - 1))
+		    if (aux.vna_next < sizeof (*eaux)
+			&& !(j == ent.vn_cnt - 1 && aux.vna_next == 0))
 		      {
 			warn (_("Invalid vna_next field of %lx\n"),
 			      aux.vna_next);
 			j = ent.vn_cnt;
 			break;
 		      }
+		    /* Check for overflow.  */
+		    if (aux.vna_next > (size_t) (endbuf - vstart))
+		      break;
 		    isum   += aux.vna_next;
 		    vstart += aux.vna_next;
 		  }
@@ -10379,12 +10398,15 @@ process_version_sections (FILE * file)
 		if (j < ent.vn_cnt)
 		  warn (_("Missing Version Needs auxillary information\n"));
 
-		if (ent.vn_next == 0 && cnt < section->sh_info - 1)
+		if (ent.vn_next < sizeof (*entry)
+		    && !(cnt == section->sh_info - 1 && ent.vn_next == 0))
 		  {
-		    warn (_("Corrupt Version Needs structure - offset to next structure is zero with entries still left to be processed\n"));
+		    warn (_("Invalid vn_next field of %lx\n"), ent.vn_next);
 		    cnt = section->sh_info;
 		    break;
 		  }
+		if (ent.vn_next > (size_t) (endbuf - ((char *) eneed + idx)))
+		  break;
 		idx += ent.vn_next;
 	      }
 
@@ -12069,8 +12091,10 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_H8_300H:
       return reloc_type == 1; /* R_H8_DIR32.  */
     case EM_IA_64:
-      return reloc_type == 0x65 /* R_IA64_SECREL32LSB.  */
-	|| reloc_type == 0x25;  /* R_IA64_DIR32LSB.  */
+      return (reloc_type == 0x64    /* R_IA64_SECREL32MSB.  */
+	      || reloc_type == 0x65 /* R_IA64_SECREL32LSB.  */
+	      || reloc_type == 0x24 /* R_IA64_DIR32MSB.  */
+	      || reloc_type == 0x25 /* R_IA64_DIR32LSB.  */);
     case EM_IP2K_OLD:
     case EM_IP2K:
       return reloc_type == 2; /* R_IP2K_32.  */
@@ -12283,7 +12307,8 @@ is_64bit_abs_reloc (unsigned int reloc_type)
     case EM_ALPHA:
       return reloc_type == 2; /* R_ALPHA_REFQUAD.  */
     case EM_IA_64:
-      return reloc_type == 0x27; /* R_IA64_DIR64LSB.  */
+      return (reloc_type == 0x26    /* R_IA64_DIR64MSB.  */
+	      || reloc_type == 0x27 /* R_IA64_DIR64LSB.  */);
     case EM_PARISC:
       return reloc_type == 80; /* R_PARISC_DIR64.  */
     case EM_PPC64:
@@ -12293,7 +12318,8 @@ is_64bit_abs_reloc (unsigned int reloc_type)
     case EM_SPARC32PLUS:
     case EM_SPARCV9:
     case EM_SPARC:
-      return reloc_type == 54; /* R_SPARC_UA64.  */
+      return reloc_type == 32 /* R_SPARC_64.  */
+	|| reloc_type == 54; /* R_SPARC_UA64.  */
     case EM_X86_64:
     case EM_L1OM:
     case EM_K1OM:
@@ -12323,7 +12349,8 @@ is_64bit_pcrel_reloc (unsigned int reloc_type)
     case EM_ALPHA:
       return reloc_type == 11; /* R_ALPHA_SREL64.  */
     case EM_IA_64:
-      return reloc_type == 0x4f; /* R_IA64_PCREL64LSB.  */
+      return (reloc_type == 0x4e    /* R_IA64_PCREL64MSB.  */
+	      || reloc_type == 0x4f /* R_IA64_PCREL64LSB.  */);
     case EM_PARISC:
       return reloc_type == 72; /* R_PARISC_PCREL64.  */
     case EM_PPC64:
@@ -12760,7 +12787,7 @@ get_section_contents (Elf_Internal_Shdr * section, FILE * file)
 
   if (num_bytes == 0 || section->sh_type == SHT_NOBITS)
     {
-      printf (_("\nSection '%s' has no data to dump.\n"),
+      printf (_("Section '%s' has no data to dump.\n"),
 	      printable_section_name (section));
       return NULL;
     }
@@ -12834,10 +12861,11 @@ dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
   unsigned char *      start;
   bfd_boolean          some_strings_shown;
 
-  real_start = start = (unsigned char *) get_section_contents (section,
-							       file);
+  real_start = start = (unsigned char *) get_section_contents (section, file);
   if (start == NULL)
-    return FALSE;
+    /* PR 21820: Do not fail if the section was empty.  */
+    return (section->sh_size == 0 || section->sh_type == SHT_NOBITS) ? TRUE : FALSE;
+
   num_bytes = section->sh_size;
 
   printf (_("\nString dump of section '%s':\n"), printable_section_name (section));
@@ -12983,7 +13011,8 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
 
   real_start = start = (unsigned char *) get_section_contents (section, file);
   if (start == NULL)
-    return FALSE;
+    /* PR 21820: Do not fail if the section was empty.  */
+    return (section->sh_size == 0 || section->sh_type == SHT_NOBITS) ? TRUE : FALSE;
 
   section_size = section->sh_size;
 
@@ -15296,7 +15325,7 @@ process_mips_specific (FILE * file)
 	      printf ("\n");
 	    }
 
-	  if (ent < end)
+	  if (data != NULL && ent < end)
 	    {
 	      printf (_(" Local entries:\n"));
 	      printf ("  %*s %10s %*s\n",
@@ -15826,7 +15855,7 @@ process_mips_specific (FILE * file)
 	}
       printf ("\n");
 
-      if (ent < local_end)
+      if (data != NULL && ent < local_end)
 	{
 	  printf (_(" Local entries:\n"));
 	  printf ("  %*s %10s %*s\n",
@@ -15842,7 +15871,7 @@ process_mips_specific (FILE * file)
 	  printf ("\n");
 	}
 
-      if (gotsym < symtabno)
+      if (data != NULL && gotsym < symtabno)
 	{
 	  int sym_width;
 
@@ -16131,6 +16160,32 @@ get_note_type (unsigned e_type)
 	return _("NT_PPC_VMX (ppc Altivec registers)");
       case NT_PPC_VSX:
 	return _("NT_PPC_VSX (ppc VSX registers)");
+      case NT_PPC_TAR:
+	return _("NT_PPC_TAR (ppc TAR register)");
+      case NT_PPC_PPR:
+	return _("NT_PPC_PPR (ppc PPR register)");
+      case NT_PPC_DSCR:
+	return _("NT_PPC_DSCR (ppc DSCR register)");
+      case NT_PPC_EBB:
+	return _("NT_PPC_EBB (ppc EBB registers)");
+      case NT_PPC_PMU:
+	return _("NT_PPC_PMU (ppc PMU registers)");
+      case NT_PPC_TM_CGPR:
+	return _("NT_PPC_TM_CGPR (ppc checkpointed GPR registers)");
+      case NT_PPC_TM_CFPR:
+	return _("NT_PPC_TM_CFPR (ppc checkpointed floating point registers)");
+      case NT_PPC_TM_CVMX:
+	return _("NT_PPC_TM_CVMX (ppc checkpointed Altivec registers)");
+      case NT_PPC_TM_CVSX:
+	return _("NT_PPC_TM_VSX (ppc checkpointed VSX registers)");
+      case NT_PPC_TM_SPR:
+	return _("NT_PPC_TM_SPR (ppc TM special purpose registers)");
+      case NT_PPC_TM_CTAR:
+	return _("NT_PPC_TM_CTAR (ppc checkpointed TAR register)");
+      case NT_PPC_TM_CPPR:
+	return _("NT_PPC_TM_CPPR (ppc checkpointed PPR register)");
+      case NT_PPC_TM_CDSCR:
+	return _("NT_PPC_TM_CDSCR (ppc checkpointed DSCR register)");
       case NT_386_TLS:
 	return _("NT_386_TLS (x86 TLS information)");
       case NT_386_IOPERM:
@@ -16217,7 +16272,11 @@ print_core_note (Elf_Internal_Note *pnote)
   unsigned char *descdata, *filenames, *descend;
 
   if (pnote->type != NT_FILE)
-    return TRUE;
+    {
+      if (do_wide)
+	printf ("\n");
+      return TRUE;
+    }
 
 #ifndef BFD64
   if (!is_32bit_elf)
@@ -16782,6 +16841,8 @@ get_freebsd_elfcore_note_type (unsigned e_type)
       return _("NT_PROCSTAT_PSSTRINGS (ps_strings data)");
     case NT_FREEBSD_PROCSTAT_AUXV:
       return _("NT_PROCSTAT_AUXV (auxv data)");
+    case NT_FREEBSD_PTLWPINFO:
+      return _("NT_PTLWPINFO (ptrace_lwpinfo structure)");
     }
   return get_note_type (e_type);
 }
@@ -17465,8 +17526,11 @@ process_note (Elf_Internal_Note *  pnote,
 
   printf ("  ");
 
-  if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
-      || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC)
+  if (((const_strneq (pnote->namedata, "GA")
+	&& strchr ("*$!+", pnote->namedata[2]) != NULL)
+       || strchr ("*$!+", pnote->namedata[0]) != NULL)
+      && (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
+	  || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC))
     print_gnu_build_attribute_name (pnote);
   else
     print_symbol (-20, name);
@@ -17484,8 +17548,11 @@ process_note (Elf_Internal_Note *  pnote,
     return print_stapsdt_note (pnote);
   else if (const_strneq (pnote->namedata, "CORE"))
     return print_core_note (pnote);
-  else if (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
-	   || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC)
+  else if (((const_strneq (pnote->namedata, "GA")
+	     && strchr ("*$!+", pnote->namedata[2]) != NULL)
+	    || strchr ("*$!+", pnote->namedata[0]) != NULL)
+	   && (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
+	       || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC))
     return print_gnu_build_attribute_description (pnote, file);
 
   if (pnote->descsz)
@@ -17495,6 +17562,8 @@ process_note (Elf_Internal_Note *  pnote,
       printf (_("   description data: "));
       for (i = 0; i < pnote->descsz; i++)
 	printf ("%02x ", pnote->descdata[i]);
+      if (!do_wide)
+	printf ("\n");
     }
 
   if (do_wide)

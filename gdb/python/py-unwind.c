@@ -595,7 +595,7 @@ pyuw_dealloc_cache (struct frame_info *this_frame, void *cache)
   TRACE_PY_UNWIND (3, "%s: enter", __FUNCTION__);
   cached_frame_info *cached_frame = (cached_frame_info *) cache;
 
-  for (int i = 0; cached_frame->reg_count; i++)
+  for (int i = 0; i < cached_frame->reg_count; i++)
     xfree (cached_frame->reg[i].data);
 
   xfree (cache);

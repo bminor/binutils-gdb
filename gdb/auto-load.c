@@ -218,7 +218,7 @@ auto_load_safe_path_vec_update (void)
     {
       char *dir = VEC_index (char_ptr, auto_load_safe_path_vec, ix);
       char *expanded = tilde_expand (dir);
-      char *real_path = gdb_realpath (expanded);
+      gdb::unique_xmalloc_ptr<char> real_path = gdb_realpath (expanded);
 
       /* Ensure the current entry is at least tilde_expand-ed.  */
       VEC_replace (char_ptr, auto_load_safe_path_vec, ix, expanded);
@@ -238,16 +238,15 @@ auto_load_safe_path_vec_update (void)
       xfree (dir);
 
       /* If gdb_realpath returns a different content, append it.  */
-      if (strcmp (real_path, expanded) == 0)
-	xfree (real_path);
-      else
+      if (strcmp (real_path.get (), expanded) != 0)
 	{
-	  VEC_safe_push (char_ptr, auto_load_safe_path_vec, real_path);
-
 	  if (debug_auto_load)
 	    fprintf_unfiltered (gdb_stdlog,
 				_("auto-load: And canonicalized as \"%s\".\n"),
-				real_path);
+				real_path.get ());
+
+	  VEC_safe_push (char_ptr, auto_load_safe_path_vec,
+			 real_path.release ());
 	}
     }
 }
@@ -419,12 +418,11 @@ filename_is_in_pattern (const char *filename, const char *pattern)
 /* Return 1 if FILENAME belongs to one of directory components of
    AUTO_LOAD_SAFE_PATH_VEC.  Return 0 otherwise.
    auto_load_safe_path_vec_update is never called.
-   *FILENAME_REALP may be updated by gdb_realpath of FILENAME - it has to be
-   freed by the caller.  */
+   *FILENAME_REALP may be updated by gdb_realpath of FILENAME.  */
 
 static int
 filename_is_in_auto_load_safe_path_vec (const char *filename,
-					char **filename_realp)
+					gdb::unique_xmalloc_ptr<char> *filename_realp)
 {
   char *pattern;
   int ix;
@@ -439,17 +437,17 @@ filename_is_in_auto_load_safe_path_vec (const char *filename,
       if (*filename_realp == NULL)
 	{
 	  *filename_realp = gdb_realpath (filename);
-	  if (debug_auto_load && strcmp (*filename_realp, filename) != 0)
+	  if (debug_auto_load && strcmp (filename_realp->get (), filename) != 0)
 	    fprintf_unfiltered (gdb_stdlog,
 				_("auto-load: Resolved "
 				  "file \"%s\" as \"%s\".\n"),
-				filename, *filename_realp);
+				filename, filename_realp->get ());
 	}
 
-      if (strcmp (*filename_realp, filename) != 0)
+      if (strcmp (filename_realp->get (), filename) != 0)
 	for (ix = 0;
 	     VEC_iterate (char_ptr, auto_load_safe_path_vec, ix, pattern); ++ix)
-	  if (filename_is_in_pattern (*filename_realp, pattern))
+	  if (filename_is_in_pattern (filename_realp->get (), pattern))
 	    break;
     }
 
@@ -476,8 +474,7 @@ filename_is_in_auto_load_safe_path_vec (const char *filename,
 int
 file_is_auto_load_safe (const char *filename, const char *debug_fmt, ...)
 {
-  char *filename_real = NULL;
-  struct cleanup *back_to;
+  gdb::unique_xmalloc_ptr<char> filename_real;
   static int advice_printed = 0;
 
   if (debug_auto_load)
@@ -489,34 +486,24 @@ file_is_auto_load_safe (const char *filename, const char *debug_fmt, ...)
       va_end (debug_args);
     }
 
-  back_to = make_cleanup (free_current_contents, &filename_real);
-
   if (filename_is_in_auto_load_safe_path_vec (filename, &filename_real))
-    {
-      do_cleanups (back_to);
-      return 1;
-    }
+    return 1;
 
   auto_load_safe_path_vec_update ();
   if (filename_is_in_auto_load_safe_path_vec (filename, &filename_real))
-    {
-      do_cleanups (back_to);
-      return 1;
-    }
+    return 1;
 
   warning (_("File \"%s\" auto-loading has been declined by your "
 	     "`auto-load safe-path' set to \"%s\"."),
-	   filename_real, auto_load_safe_path);
+	   filename_real.get (), auto_load_safe_path);
 
   if (!advice_printed)
     {
       const char *homedir = getenv ("HOME");
-      char *homeinit;
 
       if (homedir == NULL)
 	homedir = "$HOME";
-      homeinit = xstrprintf ("%s/%s", homedir, gdbinit);
-      make_cleanup (xfree, homeinit);
+      std::string homeinit = string_printf ("%s/%s", homedir, gdbinit);
 
       printf_filtered (_("\
 To enable execution of this file add\n\
@@ -528,11 +515,11 @@ line to your configuration file \"%s\".\n\
 For more information about this security protection see the\n\
 \"Auto-loading safe path\" section in the GDB manual.  E.g., run from the shell:\n\
 \tinfo \"(gdb)Auto-loading safe path\"\n"),
-		       filename_real, homeinit, homeinit);
+		       filename_real.get (),
+		       homeinit.c_str (), homeinit.c_str ());
       advice_printed = 1;
     }
 
-  do_cleanups (back_to);
   return 0;
 }
 
@@ -786,7 +773,6 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 {
   char *filename, *debugfile;
   int len, retval;
-  FILE *input;
   struct cleanup *cleanups;
   const char *suffix = ext_lang_auto_load_suffix (language);
 
@@ -797,7 +783,7 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 
   cleanups = make_cleanup (xfree, filename);
 
-  input = gdb_fopen_cloexec (filename, "r");
+  gdb_file_up input = gdb_fopen_cloexec (filename, "r");
   debugfile = filename;
   if (debug_auto_load)
     fprintf_unfiltered (gdb_stdlog, _("auto-load: Attempted file \"%s\" %s.\n"),
@@ -845,8 +831,6 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
       int is_safe;
       struct auto_load_pspace_info *pspace_info;
 
-      make_cleanup_fclose (input);
-
       is_safe
 	= file_is_auto_load_safe (debugfile,
 				  _("auto-load: Loading %s script \"%s\""
@@ -875,7 +859,7 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 	     compiled in.  And the extension language is required to implement
 	     this function.  */
 	  gdb_assert (sourcer != NULL);
-	  sourcer (language, objfile, input, debugfile);
+	  sourcer (language, objfile, input.get (), debugfile);
 	}
 
       retval = 1;
@@ -894,30 +878,28 @@ void
 auto_load_objfile_script (struct objfile *objfile,
 			  const struct extension_language_defn *language)
 {
-  char *realname = gdb_realpath (objfile_name (objfile));
-  struct cleanup *cleanups = make_cleanup (xfree, realname);
+  gdb::unique_xmalloc_ptr<char> realname
+    = gdb_realpath (objfile_name (objfile));
 
-  if (!auto_load_objfile_script_1 (objfile, realname, language))
+  if (!auto_load_objfile_script_1 (objfile, realname.get (), language))
     {
       /* For Windows/DOS .exe executables, strip the .exe suffix, so that
 	 FOO-gdb.gdb could be used for FOO.exe, and try again.  */
 
-      size_t len = strlen (realname);
+      size_t len = strlen (realname.get ());
       const size_t lexe = sizeof (".exe") - 1;
 
-      if (len > lexe && strcasecmp (realname + len - lexe, ".exe") == 0)
+      if (len > lexe && strcasecmp (realname.get () + len - lexe, ".exe") == 0)
 	{
 	  len -= lexe;
-	  realname[len] = '\0';
+	  realname.get ()[len] = '\0';
 	  if (debug_auto_load)
 	    fprintf_unfiltered (gdb_stdlog, _("auto-load: Stripped .exe suffix, "
 					      "retrying with \"%s\".\n"),
-				realname);
-	  auto_load_objfile_script_1 (objfile, realname, language);
+				realname.get ());
+	  auto_load_objfile_script_1 (objfile, realname.get (), language);
 	}
     }
-
-  do_cleanups (cleanups);
 }
 
 /* Subroutine of source_section_scripts to simplify it.
@@ -931,10 +913,7 @@ source_script_file (struct auto_load_pspace_info *pspace_info,
 		    const char *section_name, unsigned int offset,
 		    const char *file)
 {
-  FILE *stream;
-  char *full_path;
-  int opened, in_hash_table;
-  struct cleanup *cleanups;
+  int in_hash_table;
   objfile_script_sourcer_func *sourcer;
 
   /* Skip this script if support is not compiled in.  */
@@ -956,27 +935,22 @@ source_script_file (struct auto_load_pspace_info *pspace_info,
       return;
     }
 
-  opened = find_and_open_script (file, 1 /*search_path*/,
-				 &stream, &full_path);
+  gdb::optional<open_script> opened = find_and_open_script (file,
+							    1 /*search_path*/);
 
-  cleanups = make_cleanup (null_cleanup, NULL);
   if (opened)
     {
-      make_cleanup_fclose (stream);
-      make_cleanup (xfree, full_path);
-
-      if (!file_is_auto_load_safe (full_path,
+      if (!file_is_auto_load_safe (opened->full_path.get (),
 				   _("auto-load: Loading %s script "
 				     "\"%s\" from section \"%s\" of "
 				     "objfile \"%s\".\n"),
-				   ext_lang_name (language), full_path,
+				   ext_lang_name (language),
+				   opened->full_path.get (),
 				   section_name, objfile_name (objfile)))
-	opened = 0;
+	opened.reset ();
     }
   else
     {
-      full_path = NULL;
-
       /* If one script isn't found it's not uncommon for more to not be
 	 found either.  We don't want to print a message for each script,
 	 too much noise.  Instead, we print the warning once and tell the
@@ -989,14 +963,16 @@ source_script_file (struct auto_load_pspace_info *pspace_info,
 					    section_name, offset);
     }
 
-  in_hash_table = maybe_add_script_file (pspace_info, opened, file, full_path,
+  in_hash_table = maybe_add_script_file (pspace_info, bool (opened), file,
+					 (opened
+					  ? opened->full_path.get ()
+					  : NULL),
 					 language);
 
   /* If this file is not currently loaded, load it.  */
   if (opened && !in_hash_table)
-    sourcer (language, objfile, stream, full_path);
-
-  do_cleanups (cleanups);
+    sourcer (language, objfile, opened->stream.get (),
+	     opened->full_path.get ());
 }
 
 /* Subroutine of source_section_scripts to simplify it.
@@ -1382,18 +1358,18 @@ auto_load_info_scripts (char *pattern, int from_tty,
   if (nr_scripts > 0 && pattern == auto_load_info_scripts_pattern_nl)
     uiout->text ("\n");
 
-  /* Note: This creates a cleanup to output the table end marker.  */
-  make_cleanup_ui_out_table_begin_end (uiout, 2, nr_scripts,
-				       "AutoLoadedScriptsTable");
+  {
+    ui_out_emit_table table_emitter (uiout, 2, nr_scripts,
+				     "AutoLoadedScriptsTable");
 
-  uiout->table_header (7, ui_left, "loaded", "Loaded");
-  uiout->table_header (70, ui_left, "script", "Script");
-  uiout->table_body ();
+    uiout->table_header (7, ui_left, "loaded", "Loaded");
+    uiout->table_header (70, ui_left, "script", "Script");
+    uiout->table_body ();
 
-  print_scripts (script_files);
-  print_scripts (script_texts);
+    print_scripts (script_files);
+    print_scripts (script_texts);
+  }
 
-  /* Finish up the table before checking for no matching scripts.  */
   do_cleanups (script_chain);
 
   if (nr_scripts == 0)
@@ -1590,8 +1566,6 @@ found and/or loaded."),
 
   return &retval;
 }
-
-void _initialize_auto_load (void);
 
 void
 _initialize_auto_load (void)

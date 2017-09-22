@@ -1054,9 +1054,6 @@ show_dsbt_debug (struct ui_file *file, int from_tty,
 
 struct target_so_ops dsbt_so_ops;
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_dsbt_solib;
-
 void
 _initialize_dsbt_solib (void)
 {

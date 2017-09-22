@@ -46,7 +46,7 @@ static bool
 getfpregs_supplies (struct gdbarch *gdbarch, int regnum)
 {
   return (regnum >= mips_regnum (gdbarch)->fp0
-	  && regnum < mips_regnum (gdbarch)->fp_implementation_revision);
+	  && regnum <= mips_regnum (gdbarch)->fp_implementation_revision);
 }
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
@@ -119,10 +119,6 @@ mips_fbsd_store_inferior_registers (struct target_ops *ops,
 	perror_with_name (_("Couldn't write floating point status"));
     }
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_mips_fbsd_nat (void);
 
 void
 _initialize_mips_fbsd_nat (void)

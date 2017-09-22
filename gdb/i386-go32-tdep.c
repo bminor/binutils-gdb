@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "i386-tdep.h"
+#include "x86-xstate.h"
 #include "target-descriptions.h"
 #include "osabi.h"
 
@@ -34,7 +35,7 @@ i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* DJGPP does not support the SSE registers.  */
   if (!tdesc_has_registers (info.target_desc))
-    tdep->tdesc = tdesc_i386_mmx;
+    tdep->tdesc = i386_target_description (X86_XSTATE_X87_MASK);
 
   /* Native compiler is GCC, which uses the SVR4 register numbering
      even in COFF and STABS.  See the comment in i386_gdbarch_init,

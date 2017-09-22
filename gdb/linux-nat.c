@@ -477,7 +477,6 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
     {
       struct lwp_info *child_lp = NULL;
       int status = W_STOPCODE (0);
-      struct cleanup *old_chain;
       int has_vforked;
       ptid_t parent_ptid, child_ptid;
       int parent_pid, child_pid;
@@ -490,16 +489,15 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
       child_pid = ptid_get_lwp (child_ptid);
 
       /* We're already attached to the parent, by default.  */
-      old_chain = save_inferior_ptid ();
-      inferior_ptid = child_ptid;
-      child_lp = add_lwp (inferior_ptid);
+      child_lp = add_lwp (child_ptid);
       child_lp->stopped = 1;
       child_lp->last_resume_kind = resume_stop;
 
       /* Detach new forked process?  */
       if (detach_fork)
 	{
-	  make_cleanup (delete_lwp_cleanup, child_lp);
+	  struct cleanup *old_chain = make_cleanup (delete_lwp_cleanup,
+						    child_lp);
 
 	  if (linux_nat_prepare_to_resume != NULL)
 	    linux_nat_prepare_to_resume (child_lp);
@@ -513,7 +511,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
 	     once before detaching to clear the flags.  */
 
 	  if (!gdbarch_software_single_step_p (target_thread_architecture
-						   (child_lp->ptid)))
+					       (child_lp->ptid)))
 	    {
 	      linux_disable_event_reporting (child_pid);
 	      if (ptrace (PTRACE_SINGLESTEP, child_pid, 0, 0) < 0)
@@ -533,16 +531,17 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
 	      ptrace (PTRACE_DETACH, child_pid, 0, signo);
 	    }
 
-	  /* Resets value of inferior_ptid to parent ptid.  */
 	  do_cleanups (old_chain);
 	}
       else
 	{
+	  scoped_restore save_inferior_ptid
+	    = make_scoped_restore (&inferior_ptid);
+	  inferior_ptid = child_ptid;
+
 	  /* Let the thread_db layer learn about this new process.  */
 	  check_for_thread_db ();
 	}
-
-      do_cleanups (old_chain);
 
       if (has_vforked)
 	{
@@ -1252,7 +1251,7 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
 	{
 	  int exit_code = WEXITSTATUS (status);
 
-	  target_terminal_ours ();
+	  target_terminal::ours ();
 	  target_mourn_inferior (inferior_ptid);
 	  if (exit_code == 0)
 	    error (_("Unable to attach: program exited normally."));
@@ -1264,7 +1263,7 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
 	{
 	  enum gdb_signal signo;
 
-	  target_terminal_ours ();
+	  target_terminal::ours ();
 	  target_mourn_inferior (inferior_ptid);
 
 	  signo = gdb_signal_from_host (WTERMSIG (status));
@@ -2458,12 +2457,10 @@ maybe_clear_ignore_sigint (struct lwp_info *lp)
 static int
 check_stopped_by_watchpoint (struct lwp_info *lp)
 {
-  struct cleanup *old_chain;
-
   if (linux_ops->to_stopped_by_watchpoint == NULL)
     return 0;
 
-  old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
   inferior_ptid = lp->ptid;
 
   if (linux_ops->to_stopped_by_watchpoint (linux_ops))
@@ -2477,8 +2474,6 @@ check_stopped_by_watchpoint (struct lwp_info *lp)
       else
 	lp->stopped_data_address_p = 0;
     }
-
-  do_cleanups (old_chain);
 
   return lp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
 }
@@ -4187,20 +4182,17 @@ void
 linux_proc_pending_signals (int pid, sigset_t *pending,
 			    sigset_t *blocked, sigset_t *ignored)
 {
-  FILE *procfile;
   char buffer[PATH_MAX], fname[PATH_MAX];
-  struct cleanup *cleanup;
 
   sigemptyset (pending);
   sigemptyset (blocked);
   sigemptyset (ignored);
   xsnprintf (fname, sizeof fname, "/proc/%d/status", pid);
-  procfile = gdb_fopen_cloexec (fname, "r");
+  gdb_file_up procfile = gdb_fopen_cloexec (fname, "r");
   if (procfile == NULL)
     error (_("Could not open %s"), fname);
-  cleanup = make_cleanup_fclose (procfile);
 
-  while (fgets (buffer, PATH_MAX, procfile) != NULL)
+  while (fgets (buffer, PATH_MAX, procfile.get ()) != NULL)
     {
       /* Normal queued signals are on the SigPnd line in the status
 	 file.  However, 2.6 kernels also have a "shared" pending
@@ -4219,8 +4211,6 @@ linux_proc_pending_signals (int pid, sigset_t *pending,
       else if (startswith (buffer, "SigIgn:\t"))
 	add_line_to_sigset (buffer + 8, ignored);
     }
-
-  do_cleanups (cleanup);
 }
 
 static enum target_xfer_status
@@ -4468,13 +4458,13 @@ linux_nat_terminal_inferior (struct target_ops *self)
   set_sigint_trap ();
 }
 
-/* target_terminal_ours implementation.
+/* target_terminal::ours implementation.
 
    This is a wrapper around child_terminal_ours to add async support (and
-   implement the target_terminal_ours vs target_terminal_ours_for_output
+   implement the target_terminal::ours vs target_terminal::ours_for_output
    distinction).  child_terminal_ours is currently no different than
    child_terminal_ours_for_output.
-   We leave target_terminal_ours_for_output alone, leaving it to
+   We leave target_terminal::ours_for_output alone, leaving it to
    child_terminal_ours_for_output.  */
 
 static void
@@ -4961,9 +4951,6 @@ current_lwp_ptid (void)
   gdb_assert (ptid_lwp_p (inferior_ptid));
   return inferior_ptid;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_linux_nat;
 
 void
 _initialize_linux_nat (void)

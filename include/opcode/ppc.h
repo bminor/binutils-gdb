@@ -70,6 +70,8 @@ extern const struct powerpc_opcode powerpc_opcodes[];
 extern const int powerpc_num_opcodes;
 extern const struct powerpc_opcode vle_opcodes[];
 extern const int vle_num_opcodes;
+extern const struct powerpc_opcode spe2_opcodes[];
+extern const int spe2_num_opcodes;
 
 /* Values defined for the flags field of a struct powerpc_opcode.  */
 
@@ -215,6 +217,15 @@ extern const int vle_num_opcodes;
    the underlying machine instruction.  */
 #define PPC_OPCODE_RAW	     0x40000000000ull
 
+/* Opcode is supported by PowerPC LSP */
+#define PPC_OPCODE_LSP	     0x80000000000ull
+
+/* Opcode is only supported by Freescale SPE2 APU.  */
+#define PPC_OPCODE_SPE2	    0x100000000000ull
+
+/* Opcode is supported by EFS2.  */
+#define PPC_OPCODE_EFS2	    0x200000000000ull
+
 /* A macro to extract the major opcode from an instruction.  */
 #define PPC_OP(i) (((i) >> 26) & 0x3f)
 
@@ -226,6 +237,12 @@ extern const int vle_num_opcodes;
 
 /* A macro to convert a VLE opcode to a VLE opcode segment.  */
 #define VLE_OP_TO_SEG(i) ((i) >> 1)
+
+/* A macro to extract the extended opcode from a SPE2 instruction.  */
+#define SPE2_XOP(i) ((i) & 0x7ff)
+
+/* A macro to convert a SPE2 extended opcode to a SPE2 xopcode segment.  */
+#define SPE2_XOP_TO_SEG(i) ((i) >> 7)
 
 /* The operands table is an array of struct powerpc_operand.  */
 

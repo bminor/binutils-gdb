@@ -187,10 +187,6 @@ ppcnbsd_init_abi (struct gdbarch_info info,
   tramp_frame_prepend_unwinder (gdbarch, &ppcnbsd_sigtramp);
   tramp_frame_prepend_unwinder (gdbarch, &ppcnbsd2_sigtramp);
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_ppcnbsd_tdep (void);
 
 void
 _initialize_ppcnbsd_tdep (void)

@@ -6529,7 +6529,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   info.target_desc = tdesc;
-  info.tdep_info = tdesc_data;
+  info.tdesc_data = tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 
   switch (info.osabi)
@@ -6750,9 +6750,6 @@ ppc_insn_ds_field (unsigned int insn)
 }
 
 /* Initialization code.  */
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_rs6000_tdep;
 
 void
 _initialize_rs6000_tdep (void)

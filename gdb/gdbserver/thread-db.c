@@ -200,6 +200,7 @@ find_one_thread (ptid_t ptid)
 
   lwp->thread_known = 1;
   lwp->th = th;
+  lwp->thread_handle = ti.ti_tid;
 
   return 1;
 }
@@ -231,6 +232,7 @@ attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
   gdb_assert (lwp != NULL);
   lwp->thread_known = 1;
   lwp->th = *th_p;
+  lwp->thread_handle = ti_p->ti_tid;
 
   return 1;
 }
@@ -437,6 +439,36 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
     }
   else
     return err;
+}
+
+/* See linux-low.h.  */
+
+bool
+thread_db_thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len)
+{
+  struct thread_db *thread_db;
+  struct lwp_info *lwp;
+  struct thread_info *thread
+    = (struct thread_info *) find_inferior_id (&all_threads, ptid);
+
+  if (thread == NULL)
+    return false;
+
+  thread_db = get_thread_process (thread)->priv->thread_db;
+
+  if (thread_db == NULL)
+    return false;
+
+  lwp = get_thread_lwp (thread);
+
+  if (!lwp->thread_known && !find_one_thread (thread->entry.id))
+    return false;
+
+  gdb_assert (lwp->thread_known);
+
+  *handle = (gdb_byte *) &lwp->thread_handle;
+  *handle_len = sizeof (lwp->thread_handle);
+  return true;
 }
 
 #ifdef USE_LIBTHREAD_DB_DIRECTLY
@@ -733,25 +765,12 @@ thread_db_init (void)
   return 0;
 }
 
-static int
-any_thread_of (struct inferior_list_entry *entry, void *args)
-{
-  int *pid_p = (int *) args;
-
-  if (ptid_get_pid (entry->id) == *pid_p)
-    return 1;
-
-  return 0;
-}
-
 static void
 switch_to_process (struct process_info *proc)
 {
   int pid = pid_of (proc);
 
-  current_thread =
-    (struct thread_info *) find_inferior (&all_threads,
-					  any_thread_of, &pid);
+  current_thread = find_any_thread_of_pid (pid);
 }
 
 /* Disconnect from libthread_db and free resources.  */
@@ -863,4 +882,20 @@ thread_db_handle_monitor_command (char *mon)
 
   /* Tell server.c to perform default processing.  */
   return 0;
+}
+
+/* See linux-low.h.  */
+
+void
+thread_db_notice_clone (struct process_info *proc, ptid_t ptid)
+{
+  struct thread_db *thread_db = proc->priv->thread_db;
+
+  /* If the thread layer isn't initialized, return.  It may just
+     be that the program uses clone, but does not use libthread_db.  */
+  if (thread_db == NULL || !thread_db->all_symbols_looked_up)
+    return;
+
+  if (!find_one_thread (ptid))
+    warning ("Cannot find thread after clone.\n");
 }

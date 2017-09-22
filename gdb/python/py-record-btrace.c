@@ -376,7 +376,7 @@ recpy_bt_func_instructions (PyObject *self, void *closure)
   if (func == NULL)
     return NULL;
 
-  len = VEC_length (btrace_insn_s, func->insn);
+  len = func->insn.size ();
 
   /* Gaps count as one instruction.  */
   if (len == 0)

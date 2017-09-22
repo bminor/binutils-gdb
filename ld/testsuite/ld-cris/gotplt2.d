@@ -2,7 +2,7 @@
 #source: dsofnf.s
 #source: gotrel1.s
 #as: --pic --no-underscore --em=criself
-#ld: -shared -m crislinux -z nocombreloc
+#ld: -shared -m crislinux -z nocombreloc --hash-style=sysv
 #objdump: -sR
 
 # Make sure we merge a PLT-specific entry (usually

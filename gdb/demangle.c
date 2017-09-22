@@ -161,38 +161,30 @@ is_cplus_marker (int c)
 static void
 demangle_command (char *args, int from_tty)
 {
-  char *demangled, *name, *lang_name = NULL;
-  char *arg_buf, *arg_start;
+  char *demangled;
+  const char *name;
+  const char *arg_start;
   int processing_args = 1;
   const struct language_defn *lang;
-  struct cleanup *cleanups;
 
-  arg_buf = xstrdup (args != NULL ? args : "");
-  cleanups = make_cleanup (xfree, arg_buf);
-  arg_start = arg_buf;
+  std::string arg_buf = args != NULL ? args : "";
+  arg_start = arg_buf.c_str ();
 
+  std::string lang_name;
   while (processing_args
 	 && *arg_start == '-')
     {
-      char *p = skip_to_space (arg_start);
+      const char *p = skip_to_space (arg_start);
 
       if (strncmp (arg_start, "-l", p - arg_start) == 0)
-	{
-	  char *lang_name_end;
-
-	  lang_name = skip_spaces (p);
-	  lang_name_end = skip_to_space (lang_name);
-	  lang_name = savestring (lang_name, lang_name_end - lang_name);
-	  make_cleanup (xfree, lang_name);
-	  p = lang_name_end;
-	}
+	lang_name = extract_arg (&p);
       else if (strncmp (arg_start, "--", p - arg_start) == 0)
 	processing_args = 0;
       else
 	{
-	  *p = '\0';
+	  std::string option = extract_arg (&p);
 	  error (_("Unrecognized option '%s' to demangle command.  "
-		   "Try \"help demangle\"."), arg_start);
+		   "Try \"help demangle\"."), option.c_str ());
 	}
 
       arg_start = skip_spaces (p);
@@ -203,13 +195,13 @@ demangle_command (char *args, int from_tty)
   if (*name == '\0')
     error (_("Usage: demangle [-l language] [--] name"));
 
-  if (lang_name != NULL)
+  if (!lang_name.empty ())
     {
       enum language lang_enum;
 
-      lang_enum = language_enum (lang_name);
+      lang_enum = language_enum (lang_name.c_str ());
       if (lang_enum == language_unknown)
-	error (_("Unknown language \"%s\""), lang_name);
+	error (_("Unknown language \"%s\""), lang_name.c_str ());
       lang = language_def (lang_enum);
     }
   else
@@ -223,11 +215,7 @@ demangle_command (char *args, int from_tty)
     }
   else
     error (_("Can't demangle \"%s\""), name);
-
-  do_cleanups (cleanups);
 }
-
-extern initialize_file_ftype _initialize_demangler; /* -Wmissing-prototypes */
 
 void
 _initialize_demangler (void)

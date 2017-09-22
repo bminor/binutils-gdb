@@ -90,5 +90,5 @@ run_tests ()
 void
 _initialize_optional_selftests ()
 {
-  register_self_test (selftests::optional::run_tests);
+  selftests::register_test ("optional", selftests::optional::run_tests);
 }

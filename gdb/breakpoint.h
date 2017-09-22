@@ -28,6 +28,8 @@
 #include "probe.h"
 #include "location.h"
 #include <vector>
+#include "common/array-view.h"
+#include "cli/cli-script.h"
 
 struct value;
 struct block;
@@ -611,15 +613,15 @@ struct breakpoint_ops
 				  int, int, int, unsigned);
 
   /* Given the location (second parameter), this method decodes it and
-     provides the SAL locations related to it.  For ordinary
+     returns the SAL locations related to it.  For ordinary
      breakpoints, it calls `decode_line_full'.  If SEARCH_PSPACE is
      not NULL, symbol search is restricted to just that program space.
 
      This function is called inside `location_to_sals'.  */
-  void (*decode_location) (struct breakpoint *b,
-			   const struct event_location *location,
-			   struct program_space *search_pspace,
-			   struct symtabs_and_lines *sals);
+  std::vector<symtab_and_line> (*decode_location)
+    (struct breakpoint *b,
+     const struct event_location *location,
+     struct program_space *search_pspace);
 
   /* Return true if this breakpoint explains a signal.  See
      bpstat_explains_signal.  */
@@ -655,10 +657,9 @@ enum watchpoint_triggered
 typedef struct bp_location *bp_location_p;
 DEF_VEC_P(bp_location_p);
 
-/* A reference-counted struct command_line.  This lets multiple
-   breakpoints share a single command list.  This is an implementation
+/* A reference-counted struct command_line. This is an implementation
    detail to the breakpoints module.  */
-struct counted_command_line;
+typedef std::shared_ptr<command_line> counted_command_line;
 
 /* Some targets (e.g., embedded PowerPC) need two debug registers to set
    a watchpoint over a memory region.  If this flag is true, GDB will use
@@ -710,7 +711,7 @@ struct breakpoint
 
   /* Chain of command lines to execute when this breakpoint is
      hit.  */
-  counted_command_line *commands = NULL;
+  counted_command_line commands;
   /* Stack depth (address of frame).  If nonzero, break only if fp
      equals this.  */
   struct frame_id frame_id = null_frame_id;
@@ -1080,6 +1081,13 @@ enum bp_print_how
 
 struct bpstats
   {
+    bpstats ();
+    bpstats (struct bp_location *bl, bpstat **bs_link_pointer);
+    ~bpstats ();
+
+    bpstats (const bpstats &);
+    bpstats &operator= (const bpstats &) = delete;
+
     /* Linked list because there can be more than one breakpoint at
        the same place, and a bpstat reflects the fact that all have
        been hit.  */
@@ -1109,7 +1117,7 @@ struct bpstats
     struct breakpoint *breakpoint_at;
 
     /* The associated command list.  */
-    struct counted_command_line *commands;
+    counted_command_line commands;
 
     /* Old value associated with a watchpoint.  */
     struct value *old_val;
@@ -1202,10 +1210,11 @@ extern void until_break_command (char *, int, int);
 
 /* Initialize a struct bp_location.  */
 
-extern void update_breakpoint_locations (struct breakpoint *b,
-					 struct program_space *filter_pspace,
-					 struct symtabs_and_lines sals,
-					 struct symtabs_and_lines sals_end);
+extern void update_breakpoint_locations
+  (struct breakpoint *b,
+   struct program_space *filter_pspace,
+   gdb::array_view<const symtab_and_line> sals,
+   gdb::array_view<const symtab_and_line> sals_end);
 
 extern void breakpoint_re_set (void);
 
@@ -1296,7 +1305,7 @@ extern void init_catchpoint (struct breakpoint *b,
    the internal breakpoint count.  If UPDATE_GLL is non-zero,
    update_global_location_list will be called.  */
 
-extern void install_breakpoint (int internal, struct breakpoint *b,
+extern void install_breakpoint (int internal, std::unique_ptr<breakpoint> &&b,
 				int update_gll);
 
 /* Flags that can be passed down to create_breakpoint, etc., to affect

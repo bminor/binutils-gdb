@@ -5040,10 +5040,10 @@ spu_elf_relocate_section (bfd *output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%s+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%B(%s+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     bfd_get_section_name (input_bfd, input_section),
-	     (long) rel->r_offset,
+	     rel->r_offset,
 	     howto->name,
 	     sym_name);
 	  ret = FALSE;

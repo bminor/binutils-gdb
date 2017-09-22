@@ -1873,7 +1873,7 @@ elf_metag_relocate_section (bfd *output_bfd,
 			/* PR 20675 */
 			if (bfd_link_pic (info))
 			  _bfd_error_handler (_("%B(%A): multiple TLS models are not supported"),
-					      input_bfd, input_section, name);
+					      input_bfd, input_section);
 			else
 			  _bfd_error_handler (_("%B(%A): shared library symbol %s encountered whilst performing a static link"),
 					      input_bfd, input_section, name);
@@ -1928,9 +1928,8 @@ elf_metag_relocate_section (bfd *output_bfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+0x%lx): R_METAG_TLS_LE/IENONPIC relocation not permitted in shared object"),
-		 input_bfd, input_section,
-		 (long) rel->r_offset, howto->name);
+		(_("%B(%A+%#Lx): %s relocation not permitted in shared object"),
+		 input_bfd, input_section, rel->r_offset, howto->name);
 	      return FALSE;
 	    }
 	  else

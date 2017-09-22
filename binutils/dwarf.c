@@ -40,9 +40,6 @@ static const char *regname (unsigned int regno, int row);
 static int have_frame_base;
 static int need_base_address;
 
-static unsigned int last_pointer_size = 0;
-static int warned_about_missing_comp_units = FALSE;
-
 static unsigned int num_debug_info_entries = 0;
 static unsigned int alloc_num_debug_info_entries = 0;
 static debug_info *debug_information = NULL;
@@ -221,7 +218,10 @@ dwarf_vmatoa_1 (const char *fmtch, dwarf_vma value, unsigned num_bytes)
     {
       char fmt[32];
 
-      sprintf (fmt, "%%%s%s", DWARF_VMA_FMT, fmtch);
+      if (fmtch)
+	sprintf (fmt, "%%%s%s", DWARF_VMA_FMT, fmtch);
+      else
+	sprintf (fmt, "%%%s", DWARF_VMA_FMT);
       snprintf (ret, sizeof (buf[0].place), fmt, value);
       return ret;
     }
@@ -2988,11 +2988,6 @@ process_debug_info (struct dwarf_section *section,
 static unsigned int
 load_debug_info (void * file)
 {
-  /* Reset the last pointer size so that we can issue correct error
-     messages if we are displaying the contents of more than one section.  */
-  last_pointer_size = 0;
-  warned_about_missing_comp_units = FALSE;
-
   /* If we have already tried and failed to load the .debug_info
      section then do not bother to repeat the task.  */
   if (num_debug_info_entries == DEBUG_INFO_UNAVAILABLE)
@@ -3156,7 +3151,7 @@ display_formatted_table (unsigned char *data,
       data += bytes_read;
       if (data == end)
 	{
-	  warn (_("Corrupt %s entry format table entry\n"), what);
+	  warn (_("Corrupt %s format table entry\n"), what);
 	  return data;
 	}
     }
@@ -8158,7 +8153,7 @@ display_debug_names (struct dwarf_section *section, void *file)
       printf (_("Used %zu of %lu buckets.\n"), buckets_filled,
 	      (unsigned long) bucket_count);
 
-      uint32_t hash_prev;
+      uint32_t hash_prev = 0;
       size_t hash_clash_count = 0;
       size_t longest_clash = 0;
       size_t this_length = 0;
@@ -8428,7 +8423,7 @@ display_gdb_index (struct dwarf_section *section,
   /* PR 17531: file: 18a47d3d.  */
   if (symbol_table_offset < address_table_offset)
     {
-      warn (_("Symbol table offset (%xl) is less then Address table offset (%x)\n"),
+      warn (_("Symbol table offset (%x) is less then Address table offset (%x)\n"),
 	    symbol_table_offset, address_table_offset);
       return 0;
     }

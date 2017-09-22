@@ -170,7 +170,7 @@ insert_rhv2 (unsigned long long  insn,
 	     const char **       errmsg)
 {
   if (value == 0x1E)
-    *errmsg = _("Register R30 is a limm indicator");
+    *errmsg = _("register R30 is a limm indicator");
   return insn |= ((value & 0x07) << 5) | ((value >> 3) & 0x03);
 }
 
@@ -189,7 +189,7 @@ insert_r0 (unsigned long long  insn,
 	   const char **       errmsg)
 {
   if (value != 0)
-    *errmsg = _("Register must be R0");
+    *errmsg = _("register must be R0");
   return insn;
 }
 
@@ -207,7 +207,7 @@ insert_r1 (unsigned long long  insn,
 	   const char **       errmsg)
 {
   if (value != 1)
-    *errmsg = _("Register must be R1");
+    *errmsg = _("register must be R1");
   return insn;
 }
 
@@ -224,7 +224,7 @@ insert_r2 (unsigned long long  insn,
 	   const char **       errmsg)
 {
   if (value != 2)
-    *errmsg = _("Register must be R2");
+    *errmsg = _("register must be R2");
   return insn;
 }
 
@@ -241,7 +241,7 @@ insert_r3 (unsigned long long  insn,
 	   const char **       errmsg)
 {
   if (value != 3)
-    *errmsg = _("Register must be R3");
+    *errmsg = _("register must be R3");
   return insn;
 }
 
@@ -258,7 +258,7 @@ insert_sp (unsigned long long  insn,
 	   const char **       errmsg)
 {
   if (value != 28)
-    *errmsg = _("Register must be SP");
+    *errmsg = _("register must be SP");
   return insn;
 }
 
@@ -275,7 +275,7 @@ insert_gp (unsigned long long  insn,
 	   const char **       errmsg)
 {
   if (value != 26)
-    *errmsg = _("Register must be GP");
+    *errmsg = _("register must be GP");
   return insn;
 }
 
@@ -292,7 +292,7 @@ insert_pcl (unsigned long long  insn,
 	    const char **       errmsg)
 {
   if (value != 63)
-    *errmsg = _("Register must be PCL");
+    *errmsg = _("register must be PCL");
   return insn;
 }
 
@@ -309,7 +309,7 @@ insert_blink (unsigned long long  insn,
 	      const char **       errmsg)
 {
   if (value != 31)
-    *errmsg = _("Register must be BLINK");
+    *errmsg = _("register must be BLINK");
   return insn;
 }
 
@@ -326,7 +326,7 @@ insert_ilink1 (unsigned long long  insn,
 	       const char **       errmsg)
 {
   if (value != 29)
-    *errmsg = _("Register must be ILINK1");
+    *errmsg = _("register must be ILINK1");
   return insn;
 }
 
@@ -343,7 +343,7 @@ insert_ilink2 (unsigned long long  insn,
 	       const char **       errmsg)
 {
   if (value != 30)
-    *errmsg = _("Register must be ILINK2");
+    *errmsg = _("register must be ILINK2");
   return insn;
 }
 
@@ -374,7 +374,7 @@ insert_ras (unsigned long long  insn,
       insn |= (value - 8);
       break;
     default:
-      *errmsg = _("Register must be either r0-r3 or r12-r15");
+      *errmsg = _("register must be either r0-r3 or r12-r15");
       break;
     }
   return insn;
@@ -412,7 +412,7 @@ insert_rbs (unsigned long long  insn,
       insn |= ((value - 8)) << 8;
       break;
     default:
-      *errmsg = _("Register must be either r0-r3 or r12-r15");
+      *errmsg = _("register must be either r0-r3 or r12-r15");
       break;
     }
   return insn;
@@ -450,7 +450,7 @@ insert_rcs (unsigned long long  insn,
       insn |= ((value - 8)) << 5;
       break;
     default:
-      *errmsg = _("Register must be either r0-r3 or r12-r15");
+      *errmsg = _("register must be either r0-r3 or r12-r15");
       break;
     }
   return insn;
@@ -501,7 +501,7 @@ insert_simm3s (unsigned long long  insn,
       tmp = 0x06;
       break;
     default:
-      *errmsg = _("Accepted values are from -1 to 6");
+      *errmsg = _("accepted values are from -1 to 6");
       break;
     }
 
@@ -530,9 +530,9 @@ insert_rrange (unsigned long long  insn,
   int reg2 = value & 0xFFFF;
 
   if (reg1 != 13)
-    *errmsg = _("First register of the range should be r13");
+    *errmsg = _("first register of the range should be r13");
   else if (reg2 < 13 || reg2 > 26)
-    *errmsg = _("Last register of the range doesn't fit");
+    *errmsg = _("last register of the range doesn't fit");
   else
     insn |= ((reg2 - 12) & 0x0F) << 1;
   return insn;
@@ -552,7 +552,7 @@ insert_r13el (unsigned long long insn,
 {
   if (value != 13)
     {
-      *errmsg = _("Invalid register number, should be fp");
+      *errmsg = _("invalid register number, should be fp");
       return insn;
     }
 
@@ -567,7 +567,7 @@ insert_fpel (unsigned long long  insn,
 {
   if (value != 27)
     {
-      *errmsg = _("Invalid register number, should be fp");
+      *errmsg = _("invalid register number, should be fp");
       return insn;
     }
 
@@ -589,7 +589,7 @@ insert_blinkel (unsigned long long  insn,
 {
   if (value != 31)
     {
-      *errmsg = _("Invalid register number, should be blink");
+      *errmsg = _("invalid register number, should be blink");
       return insn;
     }
 
@@ -611,7 +611,7 @@ insert_pclel (unsigned long long  insn,
 {
   if (value != 63)
     {
-      *errmsg = _("Invalid register number, should be pcl");
+      *errmsg = _("invalid register number, should be pcl");
       return insn;
     }
 
@@ -715,7 +715,7 @@ insert_nps_3bit_reg_at_##OFFSET##_##NAME		         \
       insn |= (value - 8) << (OFFSET);                           \
       break;                                                     \
     default:                                                     \
-      *errmsg = _("Register must be either r0-r3 or r12-r15");   \
+      *errmsg = _("register must be either r0-r3 or r12-r15");   \
       break;                                                     \
     }                                                            \
   return insn;                                                   \
@@ -763,7 +763,7 @@ insert_nps_bitop_size_2b (unsigned long long  insn,
       break;
     default:
       value = 0;
-      *errmsg = _("Invalid size, should be 1, 2, 4, or 8");
+      *errmsg = _("invalid size, should be 1, 2, 4, or 8");
       break;
     }
 
@@ -874,7 +874,7 @@ insert_nps_imm_offset (unsigned long long  insn,
       value = value >> 4;
       break;
     default:
-      *errmsg = _("Invalid position, should be 0, 16, 32, 48 or 64.");
+      *errmsg = _("invalid position, should be 0, 16, 32, 48 or 64.");
       value = 0;
     }
   insn |= (value << 10);
@@ -908,7 +908,7 @@ insert_nps_imm_entry (unsigned long long  insn,
     value = 3;
     break;
     default:
-      *errmsg = _("Invalid position, should be 16, 32, 64 or 128.");
+      *errmsg = _("invalid position, should be 16, 32, 64 or 128.");
       value = 0;
     }
   insn |= (value << 2);
@@ -930,7 +930,7 @@ insert_nps_size_16bit (unsigned long long  insn,
 {
   if ((value < 1) || (value > 64))
     {
-      *errmsg = _("Invalid size value must be on range 1-64.");
+      *errmsg = _("invalid size value must be on range 1-64.");
       value = 0;
     }
   value = value & 0x3f;
@@ -961,7 +961,7 @@ insert_nps_##NAME##_pos (unsigned long long  insn,	      \
      value = value / 8;                                       \
      break;                                                   \
    default:                                                   \
-     *errmsg = _("Invalid position, should be 0, 8, 16, or 24");       \
+     *errmsg = _("invalid position, should be 0, 8, 16, or 24");       \
      value = 0;                                               \
   }                                                           \
   insn |= (value << SHIFT);                                   \
@@ -986,7 +986,7 @@ insert_nps_##NAME (unsigned long long  insn,				\
   {                                                                     \
     if (value < LOWER || value > UPPER)                                 \
       {                                                                 \
-        *errmsg = _("Invalid size, value must be "                      \
+        *errmsg = _("invalid size, value must be "                      \
                     #LOWER " to " #UPPER ".");                          \
         return insn;                                                    \
       }                                                                 \
@@ -1122,7 +1122,7 @@ insert_nps_bitop_ins_ext (unsigned long long  insn,
                           const char **       errmsg)
 {
   if (value < 0 || value > 28)
-    *errmsg = _("Value must be in the range 0 to 28");
+    *errmsg = _("value must be in the range 0 to 28");
   return insn | (value << 20);
 }
 
@@ -1144,7 +1144,7 @@ insert_nps_##NAME (unsigned long long  insn,				\
 		   const char **       errmsg)				\
 {                                                                       \
   if (value < 1 || value > UPPER)                                       \
-    *errmsg = _("Value must be in the range 1 to " #UPPER);             \
+    *errmsg = _("value must be in the range 1 to " #UPPER);             \
   if (value == UPPER)                                                   \
     value = 0;                                                          \
   return insn | (value << SHIFT);                                       \
@@ -1174,9 +1174,9 @@ insert_nps_min_hofs (unsigned long long  insn,
                      const char **       errmsg)
 {
   if (value < 0 || value > 240)
-    *errmsg = _("Value must be in the range 0 to 240");
+    *errmsg = _("value must be in the range 0 to 240");
   if ((value % 16) != 0)
-    *errmsg = _("Value must be a multiple of 16");
+    *errmsg = _("value must be a multiple of 16");
   value = value / 16;
   return insn | (value << 6);
 }
@@ -1196,7 +1196,7 @@ insert_nps_##NAME (unsigned long long  insn,			       \
                    const char **       errmsg)			       \
 {                                                                      \
   if (value != ARC_NPS400_ADDRTYPE_##VALUE)                            \
-    *errmsg = _("Invalid address type for operand");                   \
+    *errmsg = _("invalid address type for operand");                   \
   return insn;                                                         \
 }                                                                      \
                                                                        \
@@ -1230,7 +1230,7 @@ insert_nps_rbdouble_64 (unsigned long long  insn,
                         const char **       errmsg)
 {
   if (value < 0 || value > 31)
-    *errmsg = _("Value must be in the range 0 to 31");
+    *errmsg = _("value must be in the range 0 to 31");
   return insn | (value << 43) | (value << 48);
 }
 
@@ -1255,7 +1255,7 @@ insert_nps_misc_imm_offset (unsigned long long  insn,
 {
   if (value & 0x3)
     {
-      *errmsg = _("Invalid position, should be 0,4, 8,...124.");
+      *errmsg = _("invalid position, should be one of: 0,4,8,...124.");
       value = 0;
     }
   insn |= (value << 6);
@@ -1267,6 +1267,18 @@ extract_nps_misc_imm_offset (unsigned long long  insn,
 			     bfd_boolean *       invalid ATTRIBUTE_UNUSED)
 {
   return ((insn >> 8) & 0x1f) * 4;
+}
+
+static long long int
+extract_uimm12_20 (unsigned long long insn ATTRIBUTE_UNUSED,
+		   bfd_boolean * invalid ATTRIBUTE_UNUSED)
+{
+  int value = 0;
+
+  value |= ((insn >> 6) & 0x003f) << 0;
+  value |= ((insn >> 0) & 0x003f) << 6;
+
+  return value;
 }
 
 /* Include the generic extract/insert functions.  Order is important
@@ -1934,8 +1946,12 @@ const struct arc_operand arc_operands[] =
   {12, 0, -SIMM12_20R, ARC_OPERAND_SIGNED | ARC_OPERAND_PCREL,
    insert_simm12_20, extract_simm12_20},
 
+  /* UIMM12_20 mask = 00000000000000000000111111222222.  */
+#define UIMM12_20	(SIMM12_20R + 1)
+  {12, 0, 0, ARC_OPERAND_UNSIGNED, insert_simm12_20, extract_uimm12_20},
+
   /* SIMM3_5_S mask = 0000011100000000.  */
-#define SIMM3_5_S	(SIMM12_20R + 1)
+#define SIMM3_5_S	(UIMM12_20 + 1)
   {3, 0, 0, ARC_OPERAND_SIGNED | ARC_OPERAND_NCHK,
    insert_simm3s, extract_simm3s},
 
@@ -2039,8 +2055,14 @@ const struct arc_operand arc_operands[] =
    | ARC_OPERAND_TRUNCATE | ARC_OPERAND_PCREL, insert_simm8_a16_9_s,
    extract_simm8_a16_9_s},
 
+/* UIMM10_6_S_JLIOFF mask = 0000001111111111.  */
+#define UIMM10_6_S_JLIOFF     (SIMM8_A16_9_S + 1)
+  {12, 0, BFD_RELOC_ARC_JLI_SECTOFF, ARC_OPERAND_UNSIGNED
+   | ARC_OPERAND_ALIGNED32 | ARC_OPERAND_TRUNCATE, insert_uimm10_6_s,
+   extract_uimm10_6_s},
+
   /* UIMM3_23 mask = 00000000000000000000000111000000.  */
-#define UIMM3_23       (SIMM8_A16_9_S + 1)
+#define UIMM3_23       (UIMM10_6_S_JLIOFF + 1)
   {3, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm3_23, extract_uimm3_23},
 
   /* UIMM10_6_S mask = 0000001111111111.  */

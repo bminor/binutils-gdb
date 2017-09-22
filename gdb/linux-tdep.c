@@ -440,7 +440,7 @@ read_mapping (const char *line,
     p++;
   *endaddr = strtoulst (p, &p, 16);
 
-  p = skip_spaces_const (p);
+  p = skip_spaces (p);
   *permissions = p;
   while (*p && !isspace (*p))
     p++;
@@ -448,7 +448,7 @@ read_mapping (const char *line,
 
   *offset = strtoulst (p, &p, 16);
 
-  p = skip_spaces_const (p);
+  p = skip_spaces (p);
   *device = p;
   while (*p && !isspace (*p))
     p++;
@@ -456,7 +456,7 @@ read_mapping (const char *line,
 
   *inode = strtoulst (p, &p, 10);
 
-  p = skip_spaces_const (p);
+  p = skip_spaces (p);
   *filename = p;
 }
 
@@ -740,7 +740,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
       pid = current_inferior ()->pid;
     }
 
-  args = skip_spaces_const (args);
+  args = skip_spaces (args);
   if (args && args[0])
     error (_("Too many parameters: %s"), args);
 
@@ -870,7 +870,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 	  printf_filtered (_("Process: %s\n"),
 			   pulongest (strtoulst (p, &p, 10)));
 
-	  p = skip_spaces_const (p);
+	  p = skip_spaces (p);
 	  if (*p == '(')
 	    {
 	      /* ps command also relies on no trailing fields
@@ -884,7 +884,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 		}
 	    }
 
-	  p = skip_spaces_const (p);
+	  p = skip_spaces (p);
 	  if (*p)
 	    printf_filtered (_("State: %c\n"), *p++);
 
@@ -1125,6 +1125,26 @@ linux_core_info_proc (struct gdbarch *gdbarch, const char *args,
 
   if (!exe_f && !mappings_f)
     error (_("unable to handle request"));
+}
+
+/* Read siginfo data from the core, if possible.  Returns -1 on
+   failure.  Otherwise, returns the number of bytes read.  READBUF,
+   OFFSET, and LEN are all as specified by the to_xfer_partial
+   interface.  */
+
+static LONGEST
+linux_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf,
+			 ULONGEST offset, ULONGEST len)
+{
+  thread_section_name section_name (".note.linuxcore.siginfo", inferior_ptid);
+  asection *section = bfd_get_section_by_name (core_bfd, section_name.c_str ());
+  if (section == NULL)
+    return -1;
+
+  if (!bfd_get_section_contents (core_bfd, section, readbuf, offset, len))
+    return -1;
+
+  return len;
 }
 
 typedef int linux_find_memory_region_ftype (ULONGEST vaddr, ULONGEST size,
@@ -1629,14 +1649,15 @@ linux_collect_thread_registers (const struct regcache *regcache,
   return data.note_data;
 }
 
-/* Fetch the siginfo data for the current thread, if it exists.  If
+/* Fetch the siginfo data for the specified thread, if it exists.  If
    there is no data, or we could not read it, return NULL.  Otherwise,
    return a newly malloc'd buffer holding the data and fill in *SIZE
    with the size of the data.  The caller is responsible for freeing
    the data.  */
 
 static gdb_byte *
-linux_get_siginfo_data (struct gdbarch *gdbarch, LONGEST *size)
+linux_get_siginfo_data (thread_info *thread, struct gdbarch *gdbarch,
+			LONGEST *size)
 {
   struct type *siginfo_type;
   gdb_byte *buf;
@@ -1646,6 +1667,9 @@ linux_get_siginfo_data (struct gdbarch *gdbarch, LONGEST *size)
   if (!gdbarch_get_siginfo_type_p (gdbarch))
     return NULL;
   
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
+  inferior_ptid = thread->ptid;
+
   siginfo_type = gdbarch_get_siginfo_type (gdbarch);
 
   buf = (gdb_byte *) xmalloc (TYPE_LENGTH (siginfo_type));
@@ -1690,11 +1714,8 @@ linux_corefile_thread (struct thread_info *info,
 
   regcache = get_thread_arch_regcache (info->ptid, args->gdbarch);
 
-  old_chain = save_inferior_ptid ();
-  inferior_ptid = info->ptid;
   target_fetch_registers (regcache, -1);
-  siginfo_data = linux_get_siginfo_data (args->gdbarch, &siginfo_size);
-  do_cleanups (old_chain);
+  siginfo_data = linux_get_siginfo_data (info, args->gdbarch, &siginfo_size);
 
   old_chain = make_cleanup (xfree, siginfo_data);
 
@@ -2427,7 +2448,7 @@ linux_infcall_mmap (CORE_ADDR size, unsigned prot)
   arg[ARG_FD] = value_from_longest (builtin_type (gdbarch)->builtin_int, -1);
   arg[ARG_OFFSET] = value_from_longest (builtin_type (gdbarch)->builtin_int64,
 					0);
-  addr_val = call_function_by_hand (mmap_val, ARG_LAST, arg);
+  addr_val = call_function_by_hand (mmap_val, NULL, ARG_LAST, arg);
   retval = value_as_address (addr_val);
   if (retval == (CORE_ADDR) -1)
     error (_("Failed inferior mmap call for %s bytes, errno is changed."),
@@ -2456,7 +2477,7 @@ linux_infcall_munmap (CORE_ADDR addr, CORE_ADDR size)
   /* Assuming sizeof (unsigned long) == sizeof (size_t).  */
   arg[ARG_LENGTH] = value_from_ulongest
 		    (builtin_type (gdbarch)->builtin_unsigned_long, size);
-  retval_val = call_function_by_hand (munmap_val, ARG_LAST, arg);
+  retval_val = call_function_by_hand (munmap_val, NULL, ARG_LAST, arg);
   retval = value_as_long (retval_val);
   if (retval != 0)
     warning (_("Failed inferior munmap call at %s for %s bytes, "
@@ -2516,6 +2537,7 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_core_pid_to_str (gdbarch, linux_core_pid_to_str);
   set_gdbarch_info_proc (gdbarch, linux_info_proc);
   set_gdbarch_core_info_proc (gdbarch, linux_core_info_proc);
+  set_gdbarch_core_xfer_siginfo (gdbarch, linux_core_xfer_siginfo);
   set_gdbarch_find_memory_regions (gdbarch, linux_find_memory_regions);
   set_gdbarch_make_corefile_notes (gdbarch, linux_make_corefile_notes);
   set_gdbarch_has_shared_address_space (gdbarch,
@@ -2529,9 +2551,6 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_infcall_munmap (gdbarch, linux_infcall_munmap);
   set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_linux_tdep;
 
 void
 _initialize_linux_tdep (void)

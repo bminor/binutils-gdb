@@ -156,9 +156,6 @@ standard_macro_lookup (const char *name, void *baton)
   return result;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_macroscope;
-
 void
 _initialize_macroscope (void)
 {

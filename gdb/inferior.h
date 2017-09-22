@@ -73,11 +73,6 @@ extern void discard_infcall_control_state (struct infcall_control_state *);
 extern struct regcache *
   get_infcall_suspend_state_regcache (struct infcall_suspend_state *);
 
-/* Save value of inferior_ptid so that it may be restored by
-   a later call to do_cleanups().  Returns the struct cleanup
-   pointer needed for later doing the cleanup.  */
-extern struct cleanup * save_inferior_ptid (void);
-
 extern void set_sigint_trap (void);
 
 extern void clear_sigint_trap (void);
@@ -126,7 +121,7 @@ extern void default_print_float_info (struct gdbarch *gdbarch,
 
 extern void child_terminal_info (struct target_ops *self, const char *, int);
 
-extern void term_info (char *, int);
+extern void info_terminal_command (char *, int);
 
 extern void child_terminal_ours (struct target_ops *self);
 
@@ -532,11 +527,7 @@ public:
   ~scoped_restore_current_inferior ()
   { set_current_inferior (m_saved_inf); }
 
-  /* Disable copy.  */
-  scoped_restore_current_inferior
-    (const scoped_restore_current_inferior &) = delete;
-  void operator=
-    (const scoped_restore_current_inferior &) = delete;
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_current_inferior);
 
 private:
   inferior *m_saved_inf;

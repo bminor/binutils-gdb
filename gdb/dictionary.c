@@ -530,20 +530,6 @@ dict_iterator_next (struct dict_iterator *iterator)
 }
 
 struct symbol *
-dict_iter_name_first (const struct dictionary *dict,
-		      const char *name,
-		      struct dict_iterator *iterator)
-{
-  return dict_iter_match_first (dict, name, strcmp_iw, iterator);
-}
-
-struct symbol *
-dict_iter_name_next (const char *name, struct dict_iterator *iterator)
-{
-  return dict_iter_match_next (name, strcmp_iw, iterator);
-}
-
-struct symbol *
 dict_iter_match_first (const struct dictionary *dict,
 		       const char *name, symbol_compare_ftype *compare,
 		       struct dict_iterator *iterator)

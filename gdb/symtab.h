@@ -25,6 +25,7 @@
 #include "gdbtypes.h"
 #include "common/enum-flags.h"
 #include "common/function-view.h"
+#include "completer.h"
 
 /* Opaque declarations.  */
 struct ui_file;
@@ -663,8 +664,8 @@ struct symbol_computed_ops
      the caller will generate the right code in the process of
      treating this as an lvalue or rvalue.  */
 
-  void (*tracepoint_var_ref) (struct symbol *symbol, struct gdbarch *gdbarch,
-			      struct agent_expr *ax, struct axs_value *value);
+  void (*tracepoint_var_ref) (struct symbol *symbol, struct agent_expr *ax,
+			      struct axs_value *value);
 
   /* Generate C code to compute the location of SYMBOL.  The C code is
      emitted to STREAM.  GDBARCH is the current architecture and PC is
@@ -1417,34 +1418,28 @@ extern CORE_ADDR find_solib_trampoline_target (struct frame_info *, CORE_ADDR);
 struct symtab_and_line
 {
   /* The program space of this sal.  */
-  struct program_space *pspace;
+  struct program_space *pspace = NULL;
 
-  struct symtab *symtab;
-  struct obj_section *section;
+  struct symtab *symtab = NULL;
+  struct symbol *symbol = NULL;
+  struct obj_section *section = NULL;
   /* Line number.  Line numbers start at 1 and proceed through symtab->nlines.
      0 is never a valid line number; it is used to indicate that line number
      information is not available.  */
-  int line;
+  int line = 0;
 
-  CORE_ADDR pc;
-  CORE_ADDR end;
-  int explicit_pc;
-  int explicit_line;
+  CORE_ADDR pc = 0;
+  CORE_ADDR end = 0;
+  bool explicit_pc = false;
+  bool explicit_line = false;
 
   /* The probe associated with this symtab_and_line.  */
-  struct probe *probe;
+  struct probe *probe = NULL;
   /* If PROBE is not NULL, then this is the objfile in which the probe
      originated.  */
-  struct objfile *objfile;
+  struct objfile *objfile = NULL;
 };
 
-extern void init_sal (struct symtab_and_line *sal);
-
-struct symtabs_and_lines
-{
-  struct symtab_and_line *sals;
-  int nelts;
-};
 
 
 /* Given a pc value, return line number it is in.  Second arg nonzero means
@@ -1498,25 +1493,43 @@ extern void forget_cached_source_info (void);
 
 extern void select_source_symtab (struct symtab *);
 
-extern VEC (char_ptr) *default_make_symbol_completion_list_break_on
-  (const char *text, const char *word, const char *break_on,
+/* The reason we're calling into a completion match list collector
+   function.  */
+enum class complete_symbol_mode
+  {
+    /* Completing an expression.  */
+    EXPRESSION,
+
+    /* Completing a linespec.  */
+    LINESPEC,
+  };
+
+extern void default_collect_symbol_completion_matches_break_on
+  (completion_tracker &tracker,
+   complete_symbol_mode mode,
+   const char *text, const char *word, const char *break_on,
    enum type_code code);
-extern VEC (char_ptr) *default_make_symbol_completion_list (const char *,
-							    const char *,
-							    enum type_code);
-extern VEC (char_ptr) *make_symbol_completion_list (const char *, const char *);
-extern VEC (char_ptr) *make_symbol_completion_type (const char *, const char *,
+extern void default_collect_symbol_completion_matches
+  (completion_tracker &tracker,
+   complete_symbol_mode,
+   const char *,
+   const char *,
+   enum type_code);
+extern void collect_symbol_completion_matches (completion_tracker &tracker,
+					       complete_symbol_mode,
+					       const char *, const char *);
+extern void collect_symbol_completion_matches_type (completion_tracker &tracker,
+						    const char *, const char *,
 						    enum type_code);
-extern VEC (char_ptr) *make_symbol_completion_list_fn (struct cmd_list_element *,
-						       const char *,
-						       const char *);
 
-extern VEC (char_ptr) *make_file_symbol_completion_list (const char *,
-							 const char *,
-							 const char *);
+extern void collect_file_symbol_completion_matches (completion_tracker &tracker,
+						    complete_symbol_mode,
+						    const char *,
+						    const char *,
+						    const char *);
 
-extern VEC (char_ptr) *make_source_files_completion_list (const char *,
-							  const char *);
+extern completion_list
+  make_source_files_completion_list (const char *, const char *);
 
 /* symtab.c */
 
@@ -1536,6 +1549,13 @@ extern CORE_ADDR skip_prologue_using_sal (struct gdbarch *gdbarch,
 
 extern struct symbol *fixup_symbol_section (struct symbol *,
 					    struct objfile *);
+
+/* If MSYMBOL is an text symbol, look for a function debug symbol with
+   the same address.  Returns NULL if not found.  This is necessary in
+   case a function is an alias to some other function, because debug
+   information is only emitted for the alias target function's
+   definition, not for the alias.  */
+extern symbol *find_function_alias_target (bound_minimal_symbol msymbol);
 
 /* Symbol searching */
 /* Note: struct symbol_search, search_symbols, et.al. are declared here,

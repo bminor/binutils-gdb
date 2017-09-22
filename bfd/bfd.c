@@ -725,9 +725,18 @@ _doprnt (FILE *stream, const char *format, va_list ap)
 		  {
 		    /* L modifier for bfd_vma or bfd_size_type may be
 		       either long long or long.  */
-		    if ((BFD_ARCH_SIZE < 64 || BFD_HOST_64BIT_LONG)
-			&& sptr[-2] == 'L')
-		      wide_width = 1;
+		    if (sptr[-2] == 'L')
+		      {
+			sptr[-2] = 'l';
+			if (BFD_ARCH_SIZE < 64 || BFD_HOST_64BIT_LONG)
+			  wide_width = 1;
+			else
+			  {
+			    sptr[-1] = 'l';
+			    *sptr++ = ptr[-1];
+			    *sptr = '\0';
+			  }
+		      }
 
 		    switch (wide_width)
 		      {
@@ -739,17 +748,14 @@ _doprnt (FILE *stream, const char *format, va_list ap)
 			break;
 		      case 2:
 		      default:
-#if defined (__GNUC__) || defined (HAVE_LONG_LONG)
-# if defined (__MSVCRT__)
-			sptr--;
-			while (sptr[-1] == 'L' || sptr[-1] == 'l')
-			  sptr--;
-			*sptr++ = 'I';
-			*sptr++ = '6';
-			*sptr++ = '4';
+#if defined (__MSVCRT__)
+			sptr[-3] = 'I';
+			sptr[-2] = '6';
+			sptr[-1] = '4';
 			*sptr++ = ptr[-1];
 			*sptr = '\0';
-# endif
+#endif
+#if defined (__GNUC__) || defined (HAVE_LONG_LONG)
 			PRINT_TYPE (long long);
 #else
 			/* Fake it and hope for the best.  */

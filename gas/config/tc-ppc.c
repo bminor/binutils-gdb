@@ -1206,6 +1206,16 @@ md_parse_option (int c, const char *arg)
 	    }
 	}
 
+      else if (strcmp (arg, "no-vle") == 0)
+	{
+	  sticky &= ~PPC_OPCODE_VLE;
+
+	  new_cpu = ppc_parse_cpu (ppc_cpu, &sticky, "booke");
+	  new_cpu &= ~PPC_OPCODE_VLE;
+
+	  ppc_cpu = new_cpu;
+	}
+
       else if (strcmp (arg, "regnames") == 0)
 	reg_names_p = TRUE;
 
@@ -1257,6 +1267,10 @@ md_parse_option (int c, const char *arg)
 	{
 	  msolaris = FALSE;
 	  ppc_comment_chars = ppc_eabi_comment_chars;
+	}
+      else if (strcmp (arg, "spe2") == 0)
+	{
+	  ppc_cpu |= PPC_OPCODE_SPE2;
 	}
 #endif
       else
@@ -1353,6 +1367,7 @@ PowerPC options:\n\
 -me5500,                generate code for Freescale e5500 core complex\n\
 -me6500,                generate code for Freescale e6500 core complex\n\
 -mspe                   generate code for Motorola SPE instructions\n\
+-mspe2                  generate code for Freescale SPE2 instructions\n\
 -mvle                   generate code for Freescale VLE instructions\n\
 -mtitan                 generate code for AppliedMicro Titan core complex\n\
 -mregnames              Allow symbolic names for registers\n\
@@ -1686,6 +1701,54 @@ ppc_setup_opcodes (void)
 	      bad_insn = TRUE;
 	    }
 	}
+    }
+
+  /* SPE2 instructions */
+  if ((ppc_cpu & PPC_OPCODE_SPE2) == PPC_OPCODE_SPE2)
+    {
+      op_end = spe2_opcodes + spe2_num_opcodes;
+      for (op = spe2_opcodes; op < op_end; op++)
+	{
+	  if (ENABLE_CHECKING)
+	    {
+	      if (op != spe2_opcodes)
+		{
+		unsigned old_seg, new_seg;
+
+		old_seg = VLE_OP (op[-1].opcode, op[-1].mask);
+		old_seg = VLE_OP_TO_SEG (old_seg);
+		new_seg = VLE_OP (op[0].opcode, op[0].mask);
+		new_seg = VLE_OP_TO_SEG (new_seg);
+
+		/* The major opcodes had better be sorted.  Code in the
+		    disassembler assumes the insns are sorted according to
+		    major opcode.  */
+		if (new_seg < old_seg)
+		  {
+		  as_bad (_("major opcode is not sorted for %s"), op->name);
+		  bad_insn = TRUE;
+		  }
+		}
+
+	      bad_insn |= insn_validate (op);
+	    }
+
+	  if ((ppc_cpu & op->flags) != 0 && !(ppc_cpu & op->deprecated))
+	    {
+	      const char *retval;
+
+	      retval = hash_insert (ppc_hash, op->name, (void *) op);
+	      if (retval != NULL)
+		{
+		  as_bad (_("duplicate instruction %s"),
+			  op->name);
+		  bad_insn = TRUE;
+		}
+	    }
+	}
+
+      for (op = spe2_opcodes; op < op_end; op++)
+	hash_insert (ppc_hash, op->name, (void *) op);
     }
 
   /* Insert the macros into a hash table.  */
@@ -3629,6 +3692,16 @@ ppc_section_flags (flagword flags, bfd_vma attr ATTRIBUTE_UNUSED, int type)
     flags |= SEC_ALLOC | SEC_LOAD | SEC_SORT_ENTRIES;
 
   return flags;
+}
+
+bfd_vma
+ppc_elf_section_letter (int letter, const char **ptrmsg)
+{
+  if (letter == 'v')
+    return SHF_PPC_VLE;
+
+  *ptrmsg = _("bad .section directive: want a,e,v,w,x,M,S,G,T in string");
+  return -1;
 }
 #endif /* OBJ_ELF */
 

@@ -22,6 +22,7 @@
 #include <sys/mman.h>
 #include "tracepoint.h"
 #include "linux-x86-tdesc.h"
+#include "common/x86-xstate.h"
 
 /* Defined in auto-generated file amd64-linux.c.  */
 void init_registers_amd64_linux (void);
@@ -174,38 +175,37 @@ supply_static_tracepoint_registers (struct regcache *regcache,
 const struct target_desc *
 get_ipa_tdesc (int idx)
 {
+  if (idx >= X86_TDESC_LAST)
+    {
+      internal_error (__FILE__, __LINE__,
+		      "unknown ipa tdesc index: %d", idx);
+    }
+
 #if defined __ILP32__
   switch (idx)
     {
     case X86_TDESC_SSE:
-      return tdesc_x32_linux;
+      return amd64_linux_read_description (X86_XSTATE_SSE_MASK, true);
     case X86_TDESC_AVX:
-      return tdesc_x32_avx_linux;
-    case X86_TDESC_AVX512:
-      return tdesc_x32_avx512_linux;
+      return amd64_linux_read_description (X86_XSTATE_AVX_MASK, true);
+    case X86_TDESC_AVX_AVX512:
+      return amd64_linux_read_description (X86_XSTATE_AVX_AVX512_MASK, true);
     default:
       break;
     }
 #else
-  switch (idx)
-    {
-    case X86_TDESC_SSE:
-      return tdesc_amd64_linux;
-    case X86_TDESC_AVX:
-      return tdesc_amd64_avx_linux;
-    case X86_TDESC_MPX:
-      return tdesc_amd64_mpx_linux;
-    case X86_TDESC_AVX_MPX:
-      return tdesc_amd64_avx_mpx_linux;
-    case X86_TDESC_AVX_MPX_AVX512_PKU:
-      return tdesc_amd64_avx_mpx_avx512_pku_linux;
-    case X86_TDESC_AVX_AVX512:
-      return tdesc_amd64_avx_avx512_linux;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      "unknown ipa tdesc index: %d", idx);
-      return tdesc_amd64_linux;
-    }
+  /* Map the tdesc index to xcr0 mask.  */
+  uint64_t idx2mask[X86_TDESC_LAST] = {
+    X86_XSTATE_X87_MASK,
+    X86_XSTATE_SSE_MASK,
+    X86_XSTATE_AVX_MASK,
+    X86_XSTATE_MPX_MASK,
+    X86_XSTATE_AVX_MPX_MASK,
+    X86_XSTATE_AVX_AVX512_MASK,
+    X86_XSTATE_AVX_MPX_AVX512_PKU_MASK,
+  };
+
+  return amd64_linux_read_description (idx2mask[idx], false);
 #endif
 
   internal_error (__FILE__, __LINE__,
@@ -276,16 +276,4 @@ alloc_jump_pad_buffer (size_t size)
 void
 initialize_low_tracepoint (void)
 {
-#if defined __ILP32__
-  init_registers_x32_linux ();
-  init_registers_x32_avx_linux ();
-  init_registers_x32_avx512_linux ();
-#else
-  init_registers_amd64_linux ();
-  init_registers_amd64_avx_linux ();
-  init_registers_amd64_mpx_linux ();
-  init_registers_amd64_avx_mpx_linux ();
-  init_registers_amd64_avx_avx512_linux ();
-  init_registers_amd64_avx_mpx_avx512_pku_linux ();
-#endif
 }

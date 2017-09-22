@@ -152,7 +152,7 @@ static struct symbol *find_old_style_renaming_symbol (const char *,
 						      const struct block *);
 
 static struct type *ada_lookup_struct_elt_type (struct type *, const char *,
-                                                int, int, int *);
+                                                int, int);
 
 static struct value *evaluate_subexp_type (struct expression *, int *);
 
@@ -193,8 +193,6 @@ static void move_bits (gdb_byte *, int, const gdb_byte *, int, int, int);
 
 static struct value *coerce_unspec_val_to_type (struct value *,
                                                 struct type *);
-
-static struct value *get_var_value (char *, char *);
 
 static int lesseq_defined_than (struct symbol *, struct symbol *);
 
@@ -3387,6 +3385,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
     case OP_LONG:
     case OP_DOUBLE:
     case OP_VAR_VALUE:
+    case OP_VAR_MSYM_VALUE:
       *pos += 4;
       break;
 
@@ -6440,10 +6439,10 @@ symbol_completion_match (const char *sym_name,
   return sym_name;
 }
 
-/* A companion function to ada_make_symbol_completion_list().
+/* A companion function to ada_collect_symbol_completion_matches().
    Check if SYM_NAME represents a symbol which name would be suitable
-   to complete TEXT (TEXT_LEN is the length of TEXT), in which case
-   it is appended at the end of the given string vector SV.
+   to complete TEXT (TEXT_LEN is the length of TEXT), in which case it
+   is added as a completion match to TRACKER.
 
    ORIG_TEXT is the string original string from the user command
    that needs to be completed.  WORD is the entire command on which
@@ -6456,8 +6455,8 @@ symbol_completion_match (const char *sym_name,
    encoded).  */
 
 static void
-symbol_completion_add (VEC(char_ptr) **sv,
-                       const char *sym_name,
+symbol_completion_add (completion_tracker &tracker,
+		       const char *sym_name,
                        const char *text, int text_len,
                        const char *orig_text, const char *word,
                        int wild_match_p, int encoded_p)
@@ -6492,21 +6491,22 @@ symbol_completion_add (VEC(char_ptr) **sv,
       strcat (completion, match);
     }
 
-  VEC_safe_push (char_ptr, *sv, completion);
+  tracker.add_completion (gdb::unique_xmalloc_ptr<char> (completion));
 }
 
-/* Return a list of possible symbol names completing TEXT0.  WORD is
-   the entire command on which completion is made.  */
+/* Add the list of possible symbol names completing TEXT0 to TRACKER.
+   WORD is the entire command on which completion is made.  */
 
-static VEC (char_ptr) *
-ada_make_symbol_completion_list (const char *text0, const char *word,
-				 enum type_code code)
+static void
+ada_collect_symbol_completion_matches (completion_tracker &tracker,
+				       complete_symbol_mode mode,
+				       const char *text0, const char *word,
+				       enum type_code code)
 {
   char *text;
   int text_len;
   int wild_match_p;
   int encoded_p;
-  VEC(char_ptr) *completions = VEC_alloc (char_ptr, 128);
   struct symbol *sym;
   struct compunit_symtab *s;
   struct minimal_symbol *msymbol;
@@ -6562,7 +6562,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
   ALL_MSYMBOLS (objfile, msymbol)
   {
     QUIT;
-    symbol_completion_add (&completions, MSYMBOL_LINKAGE_NAME (msymbol),
+    symbol_completion_add (tracker, MSYMBOL_LINKAGE_NAME (msymbol),
 			   text, text_len, text0, word, wild_match_p,
 			   encoded_p);
   }
@@ -6577,7 +6577,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
 
       ALL_BLOCK_SYMBOLS (b, iter, sym)
       {
-        symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
+	symbol_completion_add (tracker, SYMBOL_LINKAGE_NAME (sym),
                                text, text_len, text0, word,
                                wild_match_p, encoded_p);
       }
@@ -6592,7 +6592,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
     b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), GLOBAL_BLOCK);
     ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
+      symbol_completion_add (tracker, SYMBOL_LINKAGE_NAME (sym),
                              text, text_len, text0, word,
                              wild_match_p, encoded_p);
     }
@@ -6607,14 +6607,13 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
       continue;
     ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
+      symbol_completion_add (tracker, SYMBOL_LINKAGE_NAME (sym),
                              text, text_len, text0, word,
                              wild_match_p, encoded_p);
     }
   }
 
   do_cleanups (old_chain);
-  return completions;
 }
 
                                 /* Field Access */
@@ -6697,7 +6696,7 @@ ada_is_ignored_field (struct type *type, int field_num)
 int
 ada_is_tagged_type (struct type *type, int refok)
 {
-  return (ada_lookup_struct_elt_type (type, "_tag", refok, 1, NULL) != NULL);
+  return (ada_lookup_struct_elt_type (type, "_tag", refok, 1) != NULL);
 }
 
 /* True iff TYPE represents the type of X'Tag */
@@ -6723,7 +6722,7 @@ ada_is_tag_type (struct type *type)
 struct type *
 ada_tag_type (struct value *val)
 {
-  return ada_lookup_struct_elt_type (value_type (val), "_tag", 1, 0, NULL);
+  return ada_lookup_struct_elt_type (value_type (val), "_tag", 1, 0);
 }
 
 /* Return 1 if TAG follows the old scheme for Ada tags (used for Ada 95,
@@ -7068,7 +7067,7 @@ ada_variant_discrim_type (struct type *var_type, struct type *outer_type)
 {
   const char *name = ada_variant_discrim_name (var_type);
 
-  return ada_lookup_struct_elt_type (outer_type, name, 1, 1, NULL);
+  return ada_lookup_struct_elt_type (outer_type, name, 1, 1);
 }
 
 /* Assuming that TYPE is the type of a variant wrapper, and FIELD_NUM is a
@@ -7599,7 +7598,7 @@ type_as_string (struct type *type)
 
 static struct type *
 ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
-                            int noerr, int *dispp)
+                            int noerr)
 {
   int i;
 
@@ -7633,29 +7632,19 @@ ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
     {
       const char *t_field_name = TYPE_FIELD_NAME (type, i);
       struct type *t;
-      int disp;
 
       if (t_field_name == NULL)
         continue;
 
       else if (field_name_match (t_field_name, name))
-        {
-          if (dispp != NULL)
-            *dispp += TYPE_FIELD_BITPOS (type, i) / 8;
-          return TYPE_FIELD_TYPE (type, i);
-        }
+	return TYPE_FIELD_TYPE (type, i);
 
       else if (ada_is_wrapper_field (type, i))
         {
-          disp = 0;
           t = ada_lookup_struct_elt_type (TYPE_FIELD_TYPE (type, i), name,
-                                          0, 1, &disp);
+                                          0, 1);
           if (t != NULL)
-            {
-              if (dispp != NULL)
-                *dispp += disp + TYPE_FIELD_BITPOS (type, i) / 8;
-              return t;
-            }
+	    return t;
         }
 
       else if (ada_is_variant_part (type, i))
@@ -7671,21 +7660,17 @@ ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
 		 generates these for unchecked variant types.  Revisit
 	         if the compiler changes this practice.  */
 	      const char *v_field_name = TYPE_FIELD_NAME (field_type, j);
-              disp = 0;
+
 	      if (v_field_name != NULL 
 		  && field_name_match (v_field_name, name))
 		t = TYPE_FIELD_TYPE (field_type, j);
 	      else
 		t = ada_lookup_struct_elt_type (TYPE_FIELD_TYPE (field_type,
 								 j),
-						name, 0, 1, &disp);
+						name, 0, 1);
 
               if (t != NULL)
-                {
-                  if (dispp != NULL)
-                    *dispp += disp + TYPE_FIELD_BITPOS (type, i) / 8;
-                  return t;
-                }
+		return t;
             }
         }
 
@@ -7713,8 +7698,7 @@ is_unchecked_variant (struct type *var_type, struct type *outer_type)
 {
   const char *discrim_name = ada_variant_discrim_name (var_type);
 
-  return (ada_lookup_struct_elt_type (outer_type, discrim_name, 0, 1, NULL) 
-	  == NULL);
+  return (ada_lookup_struct_elt_type (outer_type, discrim_name, 0, 1) == NULL);
 }
 
 
@@ -8989,12 +8973,11 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
             const char *name = ada_type_name (fixed_record_type);
             char *xvz_name
 	      = (char *) alloca (strlen (name) + 7 /* "___XVZ\0" */);
-            int xvz_found = 0;
             LONGEST size;
 
             xsnprintf (xvz_name, strlen (name) + 7, "%s___XVZ", name);
-            size = get_int_var_value (xvz_name, &xvz_found);
-            if (xvz_found && TYPE_LENGTH (fixed_record_type) != size)
+            if (get_int_var_value (xvz_name, size)
+		&& TYPE_LENGTH (fixed_record_type) != size)
               {
                 fixed_record_type = copy_type (fixed_record_type);
                 TYPE_LENGTH (fixed_record_type) = size;
@@ -10807,13 +10790,11 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         case TYPE_CODE_FUNC:
           if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	    {
-	      struct type *rtype = TYPE_TARGET_TYPE (type);
-
-	      if (TYPE_GNU_IFUNC (type))
-		return allocate_value (TYPE_TARGET_TYPE (rtype));
-	      return allocate_value (rtype);
+	      if (TYPE_TARGET_TYPE (type) == NULL)
+		error_call_unknown_return_type (NULL);
+	      return allocate_value (TYPE_TARGET_TYPE (type));
 	    }
-          return call_function_by_hand (argvec[0], nargs, argvec + 1);
+	  return call_function_by_hand (argvec[0], NULL, nargs, argvec + 1);
 	case TYPE_CODE_INTERNAL_FUNCTION:
 	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	    /* We don't know anything about what the internal
@@ -11375,7 +11356,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             {
               type = ada_lookup_struct_elt_type (type1,
                                                  &exp->elts[pc + 2].string,
-                                                 1, 1, NULL);
+                                                 1, 1);
 
 	      /* If the field is not found, check if it exists in the
 		 extension of this object's type. This means that we
@@ -11395,7 +11376,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           else
             type =
               ada_lookup_struct_elt_type (type1, &exp->elts[pc + 2].string, 1,
-                                          0, NULL);
+                                          0);
 
           return value_zero (ada_aligned_type (type), lval_memory);
         }
@@ -11614,7 +11595,7 @@ scan_discrim_bound (const char *str, int k, struct value *dval, LONGEST * px,
    otherwise causes an error with message ERR_MSG.  */
 
 static struct value *
-get_var_value (char *name, char *err_msg)
+get_var_value (const char *name, const char *err_msg)
 {
   struct block_symbol *syms;
   int nsyms;
@@ -11633,27 +11614,20 @@ get_var_value (char *name, char *err_msg)
   return value_of_variable (syms[0].symbol, syms[0].block);
 }
 
-/* Value of integer variable named NAME in the current environment.  If
-   no such variable found, returns 0, and sets *FLAG to 0.  If
-   successful, sets *FLAG to 1.  */
+/* Value of integer variable named NAME in the current environment.
+   If no such variable is found, returns false.  Otherwise, sets VALUE
+   to the variable's value and returns true.  */
 
-LONGEST
-get_int_var_value (char *name, int *flag)
+bool
+get_int_var_value (const char *name, LONGEST &value)
 {
   struct value *var_val = get_var_value (name, 0);
 
   if (var_val == 0)
-    {
-      if (flag != NULL)
-        *flag = 0;
-      return 0;
-    }
-  else
-    {
-      if (flag != NULL)
-        *flag = 1;
-      return value_as_long (var_val);
-    }
+    return false;
+
+  value = value_as_long (var_val);
+  return true;
 }
 
 
@@ -11725,11 +11699,8 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
         }
       else
         {
-          int ok;
-
           strcpy (name_buf + prefix_len, "___L");
-          L = get_int_var_value (name_buf, &ok);
-          if (!ok)
+          if (!get_int_var_value (name_buf, L))
             {
               lim_warning (_("Unknown lower bound, using 1."));
               L = 1;
@@ -11744,11 +11715,8 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
         }
       else
         {
-          int ok;
-
           strcpy (name_buf + prefix_len, "___U");
-          U = get_int_var_value (name_buf, &ok);
-          if (!ok)
+          if (!get_int_var_value (name_buf, U))
             {
               lim_warning (_("Unknown upper bound, using %ld."), (long) L);
               U = L;
@@ -12011,8 +11979,6 @@ ada_exception_support_info_sniffer (void)
 static int
 is_known_support_routine (struct frame_info *frame)
 {
-  struct symtab_and_line sal;
-  char *func_name;
   enum language func_lang;
   int i;
   const char *fullname;
@@ -12020,7 +11986,7 @@ is_known_support_routine (struct frame_info *frame)
   /* If this code does not have any debugging information (no symtab),
      This cannot be any user code.  */
 
-  find_frame_sal (frame, &sal);
+  symtab_and_line sal = find_frame_sal (frame);
   if (sal.symtab == NULL)
     return 1;
 
@@ -12051,21 +12017,18 @@ is_known_support_routine (struct frame_info *frame)
 
   /* Check whether the function is a GNAT-generated entity.  */
 
-  find_frame_funname (frame, &func_name, &func_lang, NULL);
+  gdb::unique_xmalloc_ptr<char> func_name
+    = find_frame_funname (frame, &func_lang, NULL);
   if (func_name == NULL)
     return 1;
 
   for (i = 0; known_auxiliary_function_name_patterns[i] != NULL; i += 1)
     {
       re_comp (known_auxiliary_function_name_patterns[i]);
-      if (re_exec (func_name))
-	{
-	  xfree (func_name);
-	  return 1;
-	}
+      if (re_exec (func_name.get ()))
+	return 1;
     }
 
-  xfree (func_name);
   return 0;
 }
 
@@ -12109,7 +12072,6 @@ ada_unhandled_exception_name_addr_from_raise (void)
   int frame_level;
   struct frame_info *fi;
   struct ada_inferior_data *data = get_ada_inferior_data (current_inferior ());
-  struct cleanup *old_chain;
 
   /* To determine the name of this exception, we need to select
      the frame corresponding to RAISE_SYM_NAME.  This frame is
@@ -12120,24 +12082,20 @@ ada_unhandled_exception_name_addr_from_raise (void)
     if (fi != NULL)
       fi = get_prev_frame (fi); 
 
-  old_chain = make_cleanup (null_cleanup, NULL);
   while (fi != NULL)
     {
-      char *func_name;
       enum language func_lang;
 
-      find_frame_funname (fi, &func_name, &func_lang, NULL);
+      gdb::unique_xmalloc_ptr<char> func_name
+	= find_frame_funname (fi, &func_lang, NULL);
       if (func_name != NULL)
 	{
-	  make_cleanup (xfree, func_name);
-
-          if (strcmp (func_name,
+          if (strcmp (func_name.get (),
 		      data->exception_info->catch_exception_sym) == 0)
 	    break; /* We found the frame we were looking for...  */
 	  fi = get_prev_frame (fi);
 	}
     }
-  do_cleanups (old_chain);
 
   if (fi == NULL)
     return 0;
@@ -12765,13 +12723,13 @@ ada_get_next_arg (const char **argsp)
   const char *end;
   char *result;
 
-  args = skip_spaces_const (args);
+  args = skip_spaces (args);
   if (args[0] == '\0')
     return NULL; /* No more arguments.  */
   
   /* Find the end of the current argument.  */
 
-  end = skip_to_space_const (args);
+  end = skip_to_space (args);
 
   /* Adjust ARGSP to point to the start of the next argument.  */
 
@@ -12818,12 +12776,12 @@ catch_ada_exception_command_split (const char *args,
 
   /* Check to see if we have a condition.  */
 
-  args = skip_spaces_const (args);
+  args = skip_spaces (args);
   if (startswith (args, "if")
       && (isspace (args[2]) || args[2] == '\0'))
     {
       args += 2;
-      args = skip_spaces_const (args);
+      args = skip_spaces (args);
 
       if (args[0] == '\0')
         error (_("Condition missing after `if' keyword"));
@@ -13026,20 +12984,19 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 int disabled,
 				 int from_tty)
 {
-  struct ada_catchpoint *c;
   char *addr_string = NULL;
   const struct breakpoint_ops *ops = NULL;
   struct symtab_and_line sal
     = ada_exception_sal (ex_kind, excep_string, &addr_string, &ops);
 
-  c = new ada_catchpoint ();
-  init_ada_exception_breakpoint (c, gdbarch, sal, addr_string,
+  std::unique_ptr<ada_catchpoint> c (new ada_catchpoint ());
+  init_ada_exception_breakpoint (c.get (), gdbarch, sal, addr_string,
 				 ops, tempflag, disabled, from_tty);
   c->excep_string = excep_string;
-  create_excep_cond_exprs (c);
+  create_excep_cond_exprs (c.get ());
   if (cond_string != NULL)
-    set_breakpoint_condition (c, cond_string, from_tty);
-  install_breakpoint (0, c, 1);
+    set_breakpoint_condition (c.get (), cond_string, from_tty);
+  install_breakpoint (0, std::move (c), 1);
 }
 
 /* Implement the "catch exception" command.  */
@@ -13078,14 +13035,14 @@ catch_ada_exception_command (char *arg_entry, int from_tty,
 static void
 catch_ada_assert_command_split (const char *args, char **cond_string)
 {
-  args = skip_spaces_const (args);
+  args = skip_spaces (args);
 
   /* Check whether a condition was provided.  */
   if (startswith (args, "if")
       && (isspace (args[2]) || args[2] == '\0'))
     {
       args += 2;
-      args = skip_spaces_const (args);
+      args = skip_spaces (args);
       if (args[0] == '\0')
         error (_("condition missing after `if' keyword"));
       *cond_string = xstrdup (args);
@@ -13976,7 +13933,7 @@ static const char *ada_extensions[] =
   ".adb", ".ads", ".a", ".ada", ".dg", NULL
 };
 
-const struct language_defn ada_language_defn = {
+extern const struct language_defn ada_language_defn = {
   "ada",                        /* Language name */
   "Ada",
   language_ada,
@@ -14010,7 +13967,7 @@ const struct language_defn ada_language_defn = {
   0,                            /* c-style arrays */
   1,                            /* String lower bound */
   ada_get_gdb_completer_word_break_characters,
-  ada_make_symbol_completion_list,
+  ada_collect_symbol_completion_matches,
   ada_language_arch_info,
   ada_print_array_index,
   default_pass_by_reference,
@@ -14023,9 +13980,6 @@ const struct language_defn ada_language_defn = {
   NULL,
   LANG_MAGIC
 };
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_ada_language;
 
 /* Command-list for the "set/show ada" prefix command.  */
 static struct cmd_list_element *set_ada_list;
@@ -14106,8 +14060,6 @@ ada_free_objfile_observer (struct objfile *objfile)
 void
 _initialize_ada_language (void)
 {
-  add_language (&ada_language_defn);
-
   initialize_ada_catchpoint_ops ();
 
   add_prefix_cmd ("ada", no_class, set_ada_command,

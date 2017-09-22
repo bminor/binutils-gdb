@@ -36,9 +36,6 @@
 #define TRUNCATION_TOWARDS_ZERO ((-5 / 2) == -2)
 #endif
 
-void _initialize_valarith (void);
-
-
 /* Given a pointer, return the size of its target.
    If the pointer type is void *, then return 1.
    If the target type is incomplete, then error out.
@@ -505,7 +502,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
 	  return value_zero (return_type, VALUE_LVAL (arg1));
 	}
-      return call_function_by_hand (argvec[0], 2 - static_memfuncp,
+      return call_function_by_hand (argvec[0], NULL, 2 - static_memfuncp,
 				    argvec + 1);
     }
   throw_error (NOT_FOUND_ERROR,
@@ -624,7 +621,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
 	  return value_zero (return_type, VALUE_LVAL (arg1));
 	}
-      return call_function_by_hand (argvec[0], nargs, argvec + 1);
+      return call_function_by_hand (argvec[0], NULL, nargs, argvec + 1);
     }
   throw_error (NOT_FOUND_ERROR,
                _("member function %s not found"), tstr);
@@ -697,12 +694,9 @@ value_concat (struct value *arg1, struct value *arg2)
       if (TYPE_CODE (type2) == TYPE_CODE_STRING
 	  || TYPE_CODE (type2) == TYPE_CODE_CHAR)
 	{
-	  struct cleanup *back_to;
-
 	  count = longest_to_int (value_as_long (inval1));
 	  inval2len = TYPE_LENGTH (type2);
-	  ptr = (char *) xmalloc (count * inval2len);
-	  back_to = make_cleanup (xfree, ptr);
+	  std::vector<char> ptr (count * inval2len);
 	  if (TYPE_CODE (type2) == TYPE_CODE_CHAR)
 	    {
 	      char_type = type2;
@@ -711,7 +705,7 @@ value_concat (struct value *arg1, struct value *arg2)
 					   value_contents (inval2));
 	      for (idx = 0; idx < count; idx++)
 		{
-		  *(ptr + idx) = inchar;
+		  ptr[idx] = inchar;
 		}
 	    }
 	  else
@@ -720,12 +714,11 @@ value_concat (struct value *arg1, struct value *arg2)
 
 	      for (idx = 0; idx < count; idx++)
 		{
-		  memcpy (ptr + (idx * inval2len), value_contents (inval2),
+		  memcpy (&ptr[idx * inval2len], value_contents (inval2),
 			  inval2len);
 		}
 	    }
-	  outval = value_string (ptr, count * inval2len, char_type);
-	  do_cleanups (back_to);
+	  outval = value_string (ptr.data (), count * inval2len, char_type);
 	}
       else if (TYPE_CODE (type2) == TYPE_CODE_BOOL)
 	{
@@ -739,8 +732,6 @@ value_concat (struct value *arg1, struct value *arg2)
   else if (TYPE_CODE (type1) == TYPE_CODE_STRING
 	   || TYPE_CODE (type1) == TYPE_CODE_CHAR)
     {
-      struct cleanup *back_to;
-
       /* We have two character strings to concatenate.  */
       if (TYPE_CODE (type2) != TYPE_CODE_STRING
 	  && TYPE_CODE (type2) != TYPE_CODE_CHAR)
@@ -749,31 +740,29 @@ value_concat (struct value *arg1, struct value *arg2)
 	}
       inval1len = TYPE_LENGTH (type1);
       inval2len = TYPE_LENGTH (type2);
-      ptr = (char *) xmalloc (inval1len + inval2len);
-      back_to = make_cleanup (xfree, ptr);
+      std::vector<char> ptr (inval1len + inval2len);
       if (TYPE_CODE (type1) == TYPE_CODE_CHAR)
 	{
 	  char_type = type1;
 
-	  *ptr = (char) unpack_long (type1, value_contents (inval1));
+	  ptr[0] = (char) unpack_long (type1, value_contents (inval1));
 	}
       else
 	{
 	  char_type = TYPE_TARGET_TYPE (type1);
 
-	  memcpy (ptr, value_contents (inval1), inval1len);
+	  memcpy (ptr.data (), value_contents (inval1), inval1len);
 	}
       if (TYPE_CODE (type2) == TYPE_CODE_CHAR)
 	{
-	  *(ptr + inval1len) =
+	  ptr[inval1len] =
 	    (char) unpack_long (type2, value_contents (inval2));
 	}
       else
 	{
-	  memcpy (ptr + inval1len, value_contents (inval2), inval2len);
+	  memcpy (&ptr[inval1len], value_contents (inval2), inval2len);
 	}
-      outval = value_string (ptr, inval1len + inval2len, char_type);
-      do_cleanups (back_to);
+      outval = value_string (ptr.data (), inval1len + inval2len, char_type);
     }
   else if (TYPE_CODE (type1) == TYPE_CODE_BOOL)
     {

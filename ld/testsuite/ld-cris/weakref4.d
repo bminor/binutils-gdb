@@ -1,7 +1,7 @@
 #source: start1.s
 #source: expdref4.s
 #as: --no-underscore --em=criself
-#ld: -m crislinux
+#ld: -m crislinux --hash-style=sysv
 #ld_after_inputfiles: tmpdir/libdso-15.so
 #readelf: -a -x 11
 

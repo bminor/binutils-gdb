@@ -34,7 +34,7 @@
 /* Print debugging output based on the format string FORMAT and
    its parameters.  */
 
-static inline void
+static inline void ATTRIBUTE_PRINTF (1,2)
 linux_debug (const char *format, ...)
 {
 #ifdef GDBSERVER

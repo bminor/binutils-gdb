@@ -22,8 +22,6 @@
 #include "command.h"
 #include "gdbcmd.h"
 
-extern void _initialize_complaints (void);
-
 /* Should each complaint message be self explanatory, or should we
    assume that a series of complaints is being produced?  */
 

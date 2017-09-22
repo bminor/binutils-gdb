@@ -304,18 +304,23 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     case TYPE_CODE_ARRAY:
-    case TYPE_CODE_FUNC:
       f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+      break;
+    case TYPE_CODE_FUNC:
+      if (TYPE_TARGET_TYPE (type) == NULL)
+	type_print_unknown_return_type (stream);
+      else
+	f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
       break;
 
     case TYPE_CODE_PTR:
-      fprintf_filtered (stream, "PTR TO -> ( ");
-      f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+      fprintfi_filtered (level, stream, "PTR TO -> ( ");
+      f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, 0);
       break;
 
     case TYPE_CODE_REF:
-      fprintf_filtered (stream, "REF TO -> ( ");
-      f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+      fprintfi_filtered (level, stream, "REF TO -> ( ");
+      f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, 0);
       break;
 
     case TYPE_CODE_VOID:

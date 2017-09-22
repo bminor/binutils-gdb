@@ -179,6 +179,11 @@ SECTIONS
   .eh_frame : { KEEP (*(.eh_frame)) } ${RELOCATING+> ${TEXT_MEMORY}}
   .gcc_except_table : { *(.gcc_except_table) *(.gcc_except_table.*) } ${RELOCATING+> ${TEXT_MEMORY}}
   .plt : { *(.plt) } ${RELOCATING+> ${TEXT_MEMORY}}
+  .jlitab :
+  {
+    ${RELOCATING+${JLI_START_TABLE}}
+     jlitab*.o:(.jlitab*) *(.jlitab*)
+  } ${RELOCATING+> ${TEXT_MEMORY}}
 
   .rodata ${RELOCATING-0} :
   {

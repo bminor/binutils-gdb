@@ -38,6 +38,7 @@
 #include "cp-abi.h"
 #include "cp-support.h"
 #include "objfiles.h"
+#include "common/byte-vector.h"
 
 
 /* Decorations for Pascal.  */
@@ -730,6 +731,7 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
       const gdb_byte *base_valaddr = NULL;
       LONGEST thisoffset;
       int skip = 0;
+      gdb::byte_vector buf;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -769,20 +771,15 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
 
 	  if (boffset < 0 || boffset >= TYPE_LENGTH (type))
 	    {
-	      gdb_byte *buf;
-	      struct cleanup *back_to;
+	      buf.resize (TYPE_LENGTH (baseclass));
 
-	      buf = (gdb_byte *) xmalloc (TYPE_LENGTH (baseclass));
-	      back_to = make_cleanup (xfree, buf);
-
-	      base_valaddr = buf;
-	      if (target_read_memory (address + boffset, buf,
+	      base_valaddr = buf.data ();
+	      if (target_read_memory (address + boffset, buf.data (),
 				      TYPE_LENGTH (baseclass)) != 0)
 		skip = 1;
 	      address = address + boffset;
 	      thisoffset = 0;
 	      boffset = 0;
-	      do_cleanups (back_to);
 	    }
 	  else
 	    base_valaddr = valaddr;
@@ -890,9 +887,6 @@ pascal_object_print_static_field (struct value *val,
   opts.deref_ref = 0;
   common_val_print (val, stream, recurse, &opts, current_language);
 }
-
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_pascal_valprint;
 
 void
 _initialize_pascal_valprint (void)

@@ -155,6 +155,16 @@ proc test_float_rejected {} {
     test_print_reject "p 1.1ll"
 }
 
+# Regression test for PR gdb/21675
+proc test_radices {} {
+    gdb_test "print/o 16777211" " = 077777773"
+    gdb_test "print/d 1.5" " = 1"
+    gdb_test "print/u 1.5" " = 1"
+
+    gdb_test "print/u (char) -1" " = 255"
+    gdb_test "print/d (unsigned char) -1" " = -1"
+}
+
 proc test_print_all_chars {} {
     global gdb_prompt
 
@@ -981,3 +991,4 @@ test_printf
 test_printf_with_dfp
 test_print_symbol
 test_repeat_bytes
+test_radices

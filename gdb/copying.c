@@ -10,8 +10,6 @@ static void show_copying_command (char *, int);
 
 static void show_warranty_command (char *, int);
 
-void _initialize_copying (void);
-
 static void
 show_copying_command (char *ignore, int from_tty)
 {

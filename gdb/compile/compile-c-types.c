@@ -21,6 +21,8 @@
 #include "defs.h"
 #include "gdbtypes.h"
 #include "compile-internal.h"
+#include "objfiles.h"
+
 /* An object that maps a gdb type to a gcc type.  */
 
 struct type_map_instance
@@ -123,18 +125,17 @@ convert_array (struct compile_c_instance *context, struct type *type)
       || TYPE_HIGH_BOUND_KIND (range) == PROP_LOCLIST)
     {
       gcc_type result;
-      char *upper_bound;
 
       if (TYPE_VECTOR (type))
 	return C_CTX (context)->c_ops->error (C_CTX (context),
 					      _("variably-sized vector type"
 						" is not supported"));
 
-      upper_bound = c_get_range_decl_name (&TYPE_RANGE_DATA (range)->high);
+      std::string upper_bound
+	= c_get_range_decl_name (&TYPE_RANGE_DATA (range)->high);
       result = C_CTX (context)->c_ops->build_vla_array_type (C_CTX (context),
 							     element_type,
-							     upper_bound);
-      xfree (upper_bound);
+							     upper_bound.c_str ());
       return result;
     }
   else
@@ -206,9 +207,9 @@ convert_enum (struct compile_c_instance *context, struct type *type)
   int i;
   struct gcc_c_context *ctx = C_CTX (context);
 
-  int_type = ctx->c_ops->int_type (ctx,
-				   TYPE_UNSIGNED (type),
-				   TYPE_LENGTH (type));
+  int_type = ctx->c_ops->int_type_v0 (ctx,
+				      TYPE_UNSIGNED (type),
+				      TYPE_LENGTH (type));
 
   result = ctx->c_ops->build_enum_type (ctx, int_type);
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
@@ -234,9 +235,25 @@ convert_func (struct compile_c_instance *context, struct type *type)
   struct gcc_type_array array;
   int is_varargs = TYPE_VARARGS (type) || !TYPE_PROTOTYPED (type);
 
+  struct type *target_type = TYPE_TARGET_TYPE (type);
+
+  /* Functions with no debug info have no return type.  Ideally we'd
+     want to fallback to the type of the cast just before the
+     function, like GDB's built-in expression parser, but we don't
+     have access to that type here.  For now, fallback to int, like
+     GDB's parser used to do.  */
+  if (target_type == NULL)
+    {
+      if (TYPE_OBJFILE_OWNED (type))
+	target_type = objfile_type (TYPE_OWNER (type).objfile)->builtin_int;
+      else
+	target_type = builtin_type (TYPE_OWNER (type).gdbarch)->builtin_int;
+      warning (_("function has unknown return type; assuming int"));
+    }
+
   /* This approach means we can't make self-referential function
      types.  Those are impossible in C, though.  */
-  return_type = convert_type (context, TYPE_TARGET_TYPE (type));
+  return_type = convert_type (context, target_type);
 
   array.n_elements = TYPE_NFIELDS (type);
   array.elements = XNEWVEC (gcc_type, TYPE_NFIELDS (type));
@@ -256,9 +273,9 @@ convert_func (struct compile_c_instance *context, struct type *type)
 static gcc_type
 convert_int (struct compile_c_instance *context, struct type *type)
 {
-  return C_CTX (context)->c_ops->int_type (C_CTX (context),
-					   TYPE_UNSIGNED (type),
-					   TYPE_LENGTH (type));
+  return C_CTX (context)->c_ops->int_type_v0 (C_CTX (context),
+					      TYPE_UNSIGNED (type),
+					      TYPE_LENGTH (type));
 }
 
 /* Convert a floating-point type to its gcc representation.  */
@@ -266,8 +283,8 @@ convert_int (struct compile_c_instance *context, struct type *type)
 static gcc_type
 convert_float (struct compile_c_instance *context, struct type *type)
 {
-  return C_CTX (context)->c_ops->float_type (C_CTX (context),
-					     TYPE_LENGTH (type));
+  return C_CTX (context)->c_ops->float_type_v0 (C_CTX (context),
+						TYPE_LENGTH (type));
 }
 
 /* Convert the 'void' type to its gcc representation.  */
@@ -366,6 +383,21 @@ convert_type_basic (struct compile_c_instance *context, struct type *type)
 
     case TYPE_CODE_COMPLEX:
       return convert_complex (context, type);
+
+    case TYPE_CODE_ERROR:
+      {
+	/* Ideally, if we get here due to a cast expression, we'd use
+	   the cast-to type as the variable's type, like GDB's
+	   built-in parser does.  For now, assume "int" like GDB's
+	   built-in parser used to do, but at least warn.  */
+	struct type *fallback;
+	if (TYPE_OBJFILE_OWNED (type))
+	  fallback = objfile_type (TYPE_OWNER (type).objfile)->builtin_int;
+	else
+	  fallback = builtin_type (TYPE_OWNER (type).gdbarch)->builtin_int;
+	warning (_("variable has unknown type; assuming int"));
+	return convert_int (context, fallback);
+      }
     }
 
   return C_CTX (context)->c_ops->error (C_CTX (context),

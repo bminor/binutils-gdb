@@ -156,7 +156,7 @@ ieee_write_id (bfd *abfd, const char *id)
     {
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: string too long (%d chars, max 65535)"), abfd, length);
+	(_("%B: string too long (%ld chars, max 65535)"), abfd, (long) length);
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
     }
@@ -224,7 +224,7 @@ read_id (common_header_type *ieee)
   if (ieee->input_p + length >= ieee->end_p)
     {
       _bfd_error_handler (_("IEEE parser: string length: %#lx longer than buffer: %#lx"),
-			  length, (long) (ieee->end_p - ieee->input_p));
+			  (long) length, (long) (ieee->end_p - ieee->input_p));
       bfd_set_error (bfd_error_invalid_operation);
       return NULL;
     }
@@ -859,8 +859,8 @@ ieee_slurp_external_symbols (bfd *abfd)
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B: unexpected ATN type %d in external part"),
-			 abfd, (int) value);
+		      (_("%B: unexpected ATN type %Ld in external part"),
+			 abfd, value);
 		    bfd_set_error (bfd_error_bad_value);
 		    return FALSE;
 		  }

@@ -267,10 +267,6 @@ sparc64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_lp64_fetch_link_map_offsets);
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc64nbsd_tdep (void);
 
 void
 _initialize_sparc64nbsd_tdep (void)

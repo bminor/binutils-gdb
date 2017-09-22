@@ -279,11 +279,11 @@ info_macros_command (char *args, int from_tty)
     ms = default_macro_scope ();
   else
     {
-      struct symtabs_and_lines sals =
-	decode_line_with_current_source (args, 0);
+      std::vector<symtab_and_line> sals
+	= decode_line_with_current_source (args, 0);
 
-      if (sals.nelts)
-        ms = sal_macro_scope (sals.sals[0]);
+      if (!sals.empty ())
+	ms = sal_macro_scope (sals[0]);
     }
 
   if (! ms || ! ms->file || ! ms->file->table)
@@ -481,10 +481,7 @@ macro_list_command (char *exp, int from_tty)
   macro_for_each (macro_user_macros, print_one_macro);
 }
 
-
 /* Initializing the `macrocmd' module.  */
-
-extern initialize_file_ftype _initialize_macrocmd; /* -Wmissing-prototypes */
 
 void
 _initialize_macrocmd (void)

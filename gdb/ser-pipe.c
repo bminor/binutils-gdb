@@ -36,8 +36,6 @@
 static int pipe_open (struct serial *scb, const char *name);
 static void pipe_close (struct serial *scb);
 
-extern void _initialize_ser_pipe (void);
-
 struct pipe_state
   {
     int pid;

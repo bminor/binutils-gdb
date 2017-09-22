@@ -76,9 +76,6 @@ is \"%s\".\n"),
 		      value);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_filesystem;
-
 void
 _initialize_filesystem (void)
 {

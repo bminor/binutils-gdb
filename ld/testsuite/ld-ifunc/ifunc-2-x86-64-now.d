@@ -1,6 +1,6 @@
 #source: ifunc-2-x86-64.s
 #as: --64
-#ld: -z now -shared -melf_x86_64
+#ld: -z now -shared -melf_x86_64 --hash-style=sysv
 #objdump: -dw
 #target: x86_64-*-*
 #notarget: x86_64-*-nacl*

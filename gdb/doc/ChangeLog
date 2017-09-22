@@ -1,3 +1,101 @@
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.texinfo (qXfer:threads:read): Add documentation for handle
+	attribute.
+
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* python.texi (Inferiors In Python): Add description for method
+	Inferior.thread_from_thread_handle.
+
+2017-09-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Starting your Program): Add description of
+	starti command.  Mention starti command as an alternative for
+	debugging the elaboration phase.
+
+2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Maintenance Commands): Document filter parameter
+	of "maint selftest".  Document "maint info selftests" command.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Events In Python): Document new events.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Variables) <Program Variables>: Document inspecting
+	no-debug-info variables.
+	(Symbols) <Examining the Symbol Table>: Document inspecting
+	no-debug-info types.
+	(Calling) <Calling functions with no debug info>: New subsection,
+	documenting calling no-debug-info functions.
+	(Non-debug DLL Symbols) <Working with Minimal Symbols>: Update.
+
+2017-08-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (set environment): Add @anchor.  Explain that
+	environment variables set by the user are sent to GDBserver.
+	(unset environment): Likewise, but for unsetting variables.
+	(Connecting) <Remote Packet>: Add "environment-hex-encoded",
+	"QEnvironmentHexEncoded", "environment-unset", "QEnvironmentUnset",
+	"environment-reset" and "QEnvironmentReset" to the table.
+	(Remote Protocol) <QEnvironmentHexEncoded, QEnvironmentUnset,
+	QEnvironmentReset>: New item, explaining the packet.
+
+2017-08-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Compiling and Injecting Code): Add to subsection
+	"Compiler search for the compile command" descriptions of set
+	compile-gcc and show compile-gcc.
+
+2017-08-07  Weimin Pan  <weimin.pan@oracle.com>
+
+	* gdb.texinfo (Architectures): Add new Sparc64 section to document
+	ADI support.
+	* NEWS: Add "adi examine" and "adi assign" commands.
+
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Server): Document "--selftest".
+
+2017-08-16  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+
+	* gdb.texinfo (TUI Single Key Mode): Document the new shortcuts in
+	Single-Key mode.
+
+2017-08-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21925
+	* gdb.texinfo (Starting) <startup-with-shell>: Fix typo ("show
+	set...").
+
+2017-08-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Packets): Fix Z0 cmd_list doc referring to
+	conditional expression.
+
+2017-07-31  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* agentexpr.texi (rot): Fix symbolic description, improve
+	textual description.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Maintenance Commands): Document command
+	"maint check xml-descriptions".
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Maintenance Commands): Document optional
+	argument of "maint print c-tdesc".
+
+2017-07-18  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Maintenance Commands): Improve the doc to
+	command "maint print c-tdesc".
+
 2017-06-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/21606

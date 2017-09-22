@@ -39,8 +39,6 @@
 #include "frv-tdep.h"
 #include "objfiles.h"
 
-extern void _initialize_frv_tdep (void);
-
 struct frv_unwind_cache		/* was struct frame_extra_info */
   {
     /* The previous frame's inner-most stack address.  Used as this

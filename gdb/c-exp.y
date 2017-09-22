@@ -127,7 +127,7 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
 #endif
 %}
 
-%type <voidval> exp exp1 type_exp start variable qualified_name lcurly
+%type <voidval> exp exp1 type_exp start variable qualified_name lcurly function_method
 %type <lval> rcurly
 %type <tval> type typebase
 %type <tvec> nonempty_typelist func_mod parameter_typelist
@@ -498,6 +498,18 @@ exp	:	exp '('
 			  write_exp_elt_opcode (pstate, OP_FUNCALL); }
 	;
 
+/* This is here to disambiguate with the production for
+   "func()::static_var" further below, which uses
+   function_method_void.  */
+exp	:	exp '(' ')' %prec ARROW
+			{ start_arglist ();
+			  write_exp_elt_opcode (pstate, OP_FUNCALL);
+			  write_exp_elt_longcst (pstate,
+						 (LONGEST) end_arglist ());
+			  write_exp_elt_opcode (pstate, OP_FUNCALL); }
+	;
+
+
 exp	:	UNKNOWN_CPP_NAME '('
 			{
 			  /* This could potentially be a an argument defined
@@ -539,13 +551,18 @@ arglist	:	arglist ',' exp   %prec ABOVE_COMMA
 			{ arglist_len++; }
 	;
 
-exp     :       exp '(' parameter_typelist ')' const_or_volatile
+function_method:       exp '(' parameter_typelist ')' const_or_volatile
 			{ int i;
 			  VEC (type_ptr) *type_list = $3;
 			  struct type *type_elt;
 			  LONGEST len = VEC_length (type_ptr, type_list);
 
 			  write_exp_elt_opcode (pstate, TYPE_INSTANCE);
+			  /* Save the const/volatile qualifiers as
+			     recorded by the const_or_volatile
+			     production's actions.  */
+			  write_exp_elt_longcst (pstate,
+						 follow_type_instance_flags ());
 			  write_exp_elt_longcst (pstate, len);
 			  for (i = 0;
 			       VEC_iterate (type_ptr, type_list, i, type_elt);
@@ -554,6 +571,36 @@ exp     :       exp '(' parameter_typelist ')' const_or_volatile
 			  write_exp_elt_longcst(pstate, len);
 			  write_exp_elt_opcode (pstate, TYPE_INSTANCE);
 			  VEC_free (type_ptr, type_list);
+			}
+	;
+
+function_method_void:	    exp '(' ')' const_or_volatile
+		       { write_exp_elt_opcode (pstate, TYPE_INSTANCE);
+			 /* See above.  */
+			 write_exp_elt_longcst (pstate,
+						follow_type_instance_flags ());
+			 write_exp_elt_longcst (pstate, 0);
+			 write_exp_elt_longcst (pstate, 0);
+			 write_exp_elt_opcode (pstate, TYPE_INSTANCE);
+		       }
+       ;
+
+exp     :       function_method
+	;
+
+/* Normally we must interpret "func()" as a function call, instead of
+   a type.  The user needs to write func(void) to disambiguate.
+   However, in the "func()::static_var" case, there's no
+   ambiguity.  */
+function_method_void_or_typelist: function_method
+	|               function_method_void
+	;
+
+exp     :       function_method_void_or_typelist COLONCOLON name
+			{
+			  write_exp_elt_opcode (pstate, OP_FUNC_STATIC_VAR);
+			  write_exp_string (pstate, $3);
+			  write_exp_elt_opcode (pstate, OP_FUNC_STATIC_VAR);
 			}
 	;
 
@@ -1038,18 +1085,38 @@ variable:	name_not_typename
 			    }
 			  else
 			    {
-			      struct bound_minimal_symbol msymbol;
 			      char *arg = copy_name ($1.stoken);
 
-			      msymbol =
-				lookup_bound_minimal_symbol (arg);
-			      if (msymbol.minsym != NULL)
-				write_exp_msymbol (pstate, msymbol);
-			      else if (!have_full_symbols () && !have_partial_symbols ())
-				error (_("No symbol table is loaded.  Use the \"file\" command."));
+			      bound_minimal_symbol msymbol
+				= lookup_bound_minimal_symbol (arg);
+			      if (msymbol.minsym == NULL)
+				{
+				  if (!have_full_symbols () && !have_partial_symbols ())
+				    error (_("No symbol table is loaded.  Use the \"file\" command."));
+				  else
+				    error (_("No symbol \"%s\" in current context."),
+					   copy_name ($1.stoken));
+				}
+
+			      /* This minsym might be an alias for
+				 another function.  See if we can find
+				 the debug symbol for the target, and
+				 if so, use it instead, since it has
+				 return type / prototype info.  This
+				 is important for example for "p
+				 *__errno_location()".  */
+			      symbol *alias_target
+				= find_function_alias_target (msymbol);
+			      if (alias_target != NULL)
+				{
+				  write_exp_elt_opcode (pstate, OP_VAR_VALUE);
+				  write_exp_elt_block
+				    (pstate, SYMBOL_BLOCK_VALUE (alias_target));
+				  write_exp_elt_sym (pstate, alias_target);
+				  write_exp_elt_opcode (pstate, OP_VAR_VALUE);
+				}
 			      else
-				error (_("No symbol \"%s\" in current context."),
-				       copy_name ($1.stoken));
+				write_exp_msymbol (pstate, msymbol);
 			    }
 			}
 	;
@@ -1625,13 +1692,12 @@ write_destructor_name (struct parser_state *par_state, struct stoken token)
 static struct stoken
 operator_stoken (const char *op)
 {
-  static const char *operator_string = "operator";
   struct stoken st = { NULL, 0 };
   char *buf;
 
-  st.length = strlen (operator_string) + strlen (op);
+  st.length = CP_OPERATOR_LEN + strlen (op);
   buf = (char *) malloc (st.length + 1);
-  strcpy (buf, operator_string);
+  strcpy (buf, CP_OPERATOR_STR);
   strcat (buf, op);
   st.ptr = buf;
 
@@ -3166,6 +3232,7 @@ c_parse (struct parser_state *par_state)
   struct cleanup *back_to;
 
   /* Setting up the parser state.  */
+  scoped_restore pstate_restore = make_scoped_restore (&pstate);
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
@@ -3173,7 +3240,6 @@ c_parse (struct parser_state *par_state)
      assuming they'll be run here (below).  */
 
   back_to = make_cleanup (free_current_contents, &expression_macro_scope);
-  make_cleanup_clear_parser_state (&pstate);
 
   /* Set up the scope for macro expansion.  */
   expression_macro_scope = NULL;

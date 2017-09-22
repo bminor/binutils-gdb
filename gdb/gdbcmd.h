@@ -26,6 +26,7 @@
 
 #include "command.h"
 #include "ui-out.h"
+#include "cli/cli-script.h"
 
 /* Chain containing all defined commands.  */
 
@@ -94,6 +95,10 @@ extern struct cmd_list_element *maintenanceinfolist;
 /* Chain containing all defined "maintenance print" subcommands.  */
 
 extern struct cmd_list_element *maintenanceprintlist;
+
+/* Chain containing all defined "maintenance check" subcommands.  */
+
+extern struct cmd_list_element *maintenancechecklist;
 
 /* Chain containing all defined "maintenance set" subcommands.  */
 

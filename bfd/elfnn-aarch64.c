@@ -3281,7 +3281,7 @@ aarch64_mem_op_p (uint32_t insn, unsigned int *rt, unsigned int *rt2,
   uint32_t v = 0;
   uint32_t opc_v = 0;
 
-  /* Bail out quickly if INSN doesn't fall into the the load-store
+  /* Bail out quickly if INSN doesn't fall into the load-store
      encoding space.  */
   if (!AARCH64_LDST (insn))
     return FALSE;
@@ -4944,7 +4944,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     = elfNN_aarch64_bfd_reloc_from_howto (howto);
   unsigned long r_symndx;
   bfd_byte *hit_data = contents + rel->r_offset;
-  bfd_vma place, off, got_entry_addr;
+  bfd_vma place, off, got_entry_addr = 0;
   bfd_signed_vma signed_addend;
   struct elf_aarch64_link_hash_table *globals;
   bfd_boolean weak_undef_p;
@@ -4981,9 +4981,27 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       const char *name;
       bfd_vma addend = 0;
 
-      if ((input_section->flags & SEC_ALLOC) == 0
-	  || h->plt.offset == (bfd_vma) -1)
-	abort ();
+      if ((input_section->flags & SEC_ALLOC) == 0)
+	{
+	  /* Dynamic relocs are not propagated for SEC_DEBUGGING
+	     sections because such sections are not SEC_ALLOC and
+	     thus ld.so will not process them.  */
+	  if ((input_section->flags & SEC_DEBUGGING) != 0)
+	    return bfd_reloc_ok;
+
+	  if (h->root.root.string)
+	    name = h->root.root.string;
+	  else
+	    name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym, NULL);
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	     input_bfd, input_section, rel->r_offset, howto->name, name);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+      else if (h->plt.offset == (bfd_vma) -1)
+	goto bad_ifunc_reloc;
 
       /* STT_GNU_IFUNC symbol must go through PLT.  */
       plt = globals->root.splt ? globals->root.splt : globals->root.iplt;
@@ -4992,6 +5010,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       switch (bfd_r_type)
 	{
 	default:
+bad_ifunc_reloc:
 	  if (h->root.root.string)
 	    name = h->root.root.string;
 	  else
@@ -5016,7 +5035,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	      _bfd_error_handler
 		/* xgettext:c-format */
 		(_("%B: relocation %s against STT_GNU_IFUNC "
-		   "symbol `%s' has non-zero addend: %d"),
+		   "symbol `%s' has non-zero addend: %Ld"),
 		 input_bfd, howto->name, name, rel->r_addend);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
@@ -6072,17 +6091,11 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
       r_symndx = ELFNN_R_SYM (rel->r_info);
       r_type = ELFNN_R_TYPE (rel->r_info);
 
-      bfd_reloc.howto = elfNN_aarch64_howto_from_type (r_type);
-      howto = bfd_reloc.howto;
+      howto = bfd_reloc.howto = elfNN_aarch64_howto_from_type (r_type);
 
       if (howto == NULL)
-	{
-	  /* xgettext:c-format */
-	  _bfd_error_handler
-	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
-	     input_bfd, r_type, input_section);
-	  return FALSE;
-	}
+	return _bfd_unrecognized_reloc (input_bfd, input_section, r_type);
+
       bfd_r_type = elfNN_aarch64_bfd_reloc_from_howto (howto);
 
       h = NULL;
@@ -6162,11 +6175,11 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	  _bfd_error_handler
 	    ((sym_type == STT_TLS
 	      /* xgettext:c-format */
-	      ? _("%B(%A+0x%lx): %s used with TLS symbol %s")
+	      ? _("%B(%A+%#Lx): %s used with TLS symbol %s")
 	      /* xgettext:c-format */
-	      : _("%B(%A+0x%lx): %s used with non-TLS symbol %s")),
+	      : _("%B(%A+%#Lx): %s used with non-TLS symbol %s")),
 	     input_bfd,
-	     input_section, (long) rel->r_offset, howto->name, name);
+	     input_section, rel->r_offset, howto->name, name);
 	}
 
       /* We relax only if we can see that there can be a valid transition
@@ -6434,8 +6447,8 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
-	     input_bfd, input_section, (long) rel->r_offset, howto->name,
+	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
+	     input_bfd, input_section, rel->r_offset, howto->name,
 	     h->root.root.string);
 	  return FALSE;
 	}
@@ -7101,7 +7114,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   for (rel = relocs; rel < rel_end; rel++)
     {
       struct elf_link_hash_entry *h;
-      unsigned long r_symndx;
+      unsigned int r_symndx;
       unsigned int r_type;
       bfd_reloc_code_real_type bfd_r_type;
       Elf_Internal_Sym *isym;
@@ -7634,8 +7647,39 @@ elfNN_aarch64_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
 				const asection *rel_sec ATTRIBUTE_UNUSED,
 				const Elf_Internal_Rela *rela)
 {
+  struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
+
+  if (htab->root.dynsym != NULL
+      && htab->root.dynsym->contents != NULL)
+    {
+      /* Check relocation against STT_GNU_IFUNC symbol if there are
+	 dynamic symbols.  */
+      bfd *abfd = info->output_bfd;
+      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+      unsigned long r_symndx = ELFNN_R_SYM (rela->r_info);
+      if (r_symndx != STN_UNDEF)
+	{
+	  Elf_Internal_Sym sym;
+	  if (!bed->s->swap_symbol_in (abfd,
+				       (htab->root.dynsym->contents
+					+ r_symndx * bed->s->sizeof_sym),
+				       0, &sym))
+	    {
+	      /* xgettext:c-format */
+	      _bfd_error_handler (_("%B symbol number %lu references"
+				    " nonexistent SHT_SYMTAB_SHNDX section"),
+				    abfd, r_symndx);
+	      /* Ideally an error class should be returned here.  */
+	    }
+	  else if (ELF_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
+	    return reloc_class_ifunc;
+	}
+    }
+
   switch ((int) ELFNN_R_TYPE (rela->r_info))
     {
+    case AARCH64_R (IRELATIVE):
+      return reloc_class_ifunc;
     case AARCH64_R (RELATIVE):
       return reloc_class_relative;
     case AARCH64_R (JUMP_SLOT):

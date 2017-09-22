@@ -163,8 +163,7 @@ struct jit_reader
     functions->destroy (functions);
   }
 
-  jit_reader (const jit_reader &) = delete;
-  jit_reader &operator= (const jit_reader &) = delete;
+  DISABLE_COPY_AND_ASSIGN (jit_reader);
 
   struct gdb_reader_funcs *functions;
   gdb_dlhandle_up handle;
@@ -211,29 +210,20 @@ jit_reader_load (const char *file_name)
 static void
 jit_reader_load_command (char *args, int from_tty)
 {
-  char *so_name;
-  struct cleanup *prev_cleanup;
-
   if (args == NULL)
     error (_("No reader name provided."));
-  args = tilde_expand (args);
-  prev_cleanup = make_cleanup (xfree, args);
+  gdb::unique_xmalloc_ptr<char> file (tilde_expand (args));
 
   if (loaded_jit_reader != NULL)
     error (_("JIT reader already loaded.  Run jit-reader-unload first."));
 
-  if (IS_ABSOLUTE_PATH (args))
-    so_name = args;
-  else
-    {
-      so_name = xstrprintf ("%s%s%s", jit_reader_dir, SLASH_STRING, args);
-      make_cleanup (xfree, so_name);
-    }
+  if (!IS_ABSOLUTE_PATH (file.get ()))
+    file.reset (xstrprintf ("%s%s%s", jit_reader_dir, SLASH_STRING,
+			    file.get ()));
 
-  loaded_jit_reader = jit_reader_load (so_name);
+  loaded_jit_reader = jit_reader_load (file.get ());
   reinit_frame_cache ();
   jit_inferior_created_hook ();
-  do_cleanups (prev_cleanup);
 }
 
 /* Provides the jit-reader-unload command.  */
@@ -1509,10 +1499,6 @@ jit_gdbarch_data_init (struct obstack *obstack)
 
   return data;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-
-extern void _initialize_jit (void);
 
 void
 _initialize_jit (void)

@@ -88,7 +88,6 @@ buffer_xml_printf (struct buffer *buffer, const char *format, ...)
       if (percent)
 	{
 	  char buf[32];
-	  char *p;
 	  char *str = buf;
 	  const char *f_old = f;
 	  
@@ -163,9 +162,8 @@ buffer_xml_printf (struct buffer *buffer, const char *format, ...)
 	  if (str)
 	    {
 	      buffer_grow (buffer, prev, f_old - prev - 1);
-	      p = xml_escape_text (str);
-	      buffer_grow_str (buffer, p);
-	      xfree (p);
+	      std::string p = xml_escape_text (str);
+	      buffer_grow_str (buffer, p.c_str ());
 	      prev = f + 1;
 	    }
 	  percent = 0;

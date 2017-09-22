@@ -75,18 +75,16 @@ if [is_remote host] {
     set testfile2 tmpdir/bintest2.o
 }
 
+# $testarchive exists only if it is supported.
+set testarchive tmpdir/bintest.a
+remote_file host file delete $testarchive
 if { ![istarget "alpha-*-*"] || [is_elf_format] } then {
-    remote_file host file delete tmpdir/bintest.a
     set got [binutils_run $AR "rc tmpdir/bintest.a $testfile2"]
     if ![string match "" $got] then {
 	fail "bintest.a"
 	remote_file host delete tmpdir/bintest.a
-    } else {
-	if [is_remote host] {
-	    set testarchive [remote_download host tmpdir/bintest.a]
-	} else {
-	    set testarchive tmpdir/bintest.a
-	}
+    } elseif [is_remote host] {
+	set testarchive [remote_download host tmpdir/bintest.a]
     }
     remote_file host delete tmpdir/bintest2.o
 }

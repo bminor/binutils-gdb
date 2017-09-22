@@ -529,7 +529,7 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
       {
 	/* xgettext:c-format */
 	_bfd_error_handler
-	  (_("%B: aout header specifies an invalid number of data-directory entries: %d"),
+	  (_("%B: aout header specifies an invalid number of data-directory entries: %ld"),
 	   abfd, a->NumberOfRvaAndSizes);
 	bfd_set_error (bfd_error_bad_value);
 
@@ -1514,7 +1514,7 @@ pe_print_idata (bfd * abfd, void * vfile)
 			 member_high, member,
 			 WithoutHighBit (member_high), member);
 	      /* PR binutils/17512: Handle corrupt PE data.  */
-	      else if (amt + 2 >= datasize)
+	      else if (amt >= datasize || amt + 2 >= datasize)
 		fprintf (file, _("\t<corrupt: 0x%04lx>"), member);
 	      else
 		{
@@ -1548,11 +1548,12 @@ pe_print_idata (bfd * abfd, void * vfile)
 		break;
 
 	      amt = member - adj;
+
 	      if (HighBitSet (member))
 		fprintf (file, "\t%04lx\t %4lu  <none>",
 			 member, WithoutHighBit (member));
 	      /* PR binutils/17512: Handle corrupt PE data.  */
-	      else if (amt + 2 >= datasize)
+	      else if (amt >= datasize || amt + 2 >= datasize)
 		fprintf (file, _("\t<corrupt: 0x%04lx>"), member);
 	      else
 		{
@@ -2985,7 +2986,7 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	      > bfd_get_section_size (section))
 	    {
 	      /* xgettext:c-format */
-	      _bfd_error_handler (_("%B: Data Directory size (%lx) exceeds space left in section (%lx)"),
+	      _bfd_error_handler (_("%B: Data Directory size (%lx) exceeds space left in section (%Lx)"),
 				  obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
 				  bfd_get_section_size (section) - (addr - section->vma));
 	      return FALSE;

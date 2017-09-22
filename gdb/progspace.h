@@ -273,11 +273,7 @@ public:
   ~scoped_restore_current_program_space ()
   { set_current_program_space (m_saved_pspace); }
 
-  /* Disable copy.  */
-  scoped_restore_current_program_space
-    (const scoped_restore_current_program_space &) = delete;
-  void operator=
-    (const scoped_restore_current_program_space &) = delete;
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_current_program_space);
 
 private:
   program_space *m_saved_pspace;

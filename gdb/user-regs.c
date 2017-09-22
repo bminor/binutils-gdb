@@ -237,8 +237,6 @@ maintenance_print_user_registers (char *args, int from_tty)
     fprintf_unfiltered (gdb_stdout, " %-11s %3d\n", reg->name, regnum);
 }
 
-extern initialize_file_ftype _initialize_user_regs; /* -Wmissing-prototypes */
-
 void
 _initialize_user_regs (void)
 {

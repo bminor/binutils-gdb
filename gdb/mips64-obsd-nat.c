@@ -108,10 +108,6 @@ mips64obsd_store_inferior_registers (struct target_ops *ops,
   if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't write registers"));
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_mips64obsd_nat (void);
 
 void
 _initialize_mips64obsd_nat (void)

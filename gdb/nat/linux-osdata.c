@@ -61,7 +61,6 @@ int
 linux_common_core_of_thread (ptid_t ptid)
 {
   char filename[sizeof ("/proc//task//stat") + 2 * MAX_PID_T_STRLEN];
-  FILE *f;
   char *content = NULL;
   char *p;
   char *ts = 0;
@@ -71,7 +70,7 @@ linux_common_core_of_thread (ptid_t ptid)
 
   sprintf (filename, "/proc/%lld/task/%lld/stat",
 	   (PID_T) ptid_get_pid (ptid), (PID_T) ptid_get_lwp (ptid));
-  f = gdb_fopen_cloexec (filename, "r");
+  gdb_file_up f = gdb_fopen_cloexec (filename, "r");
   if (!f)
     return -1;
 
@@ -79,7 +78,7 @@ linux_common_core_of_thread (ptid_t ptid)
     {
       int n;
       content = (char *) xrealloc (content, content_read + 1024);
-      n = fread (content + content_read, 1, 1024, f);
+      n = fread (content + content_read, 1, 1024, f.get ());
       content_read += n;
       if (n < 1024)
 	{
@@ -104,7 +103,6 @@ linux_common_core_of_thread (ptid_t ptid)
     core = -1;
 
   xfree (content);
-  fclose (f);
 
   return core;
 }
@@ -117,7 +115,7 @@ static void
 command_from_pid (char *command, int maxlen, PID_T pid)
 {
   char *stat_path = xstrprintf ("/proc/%lld/stat", pid); 
-  FILE *fp = gdb_fopen_cloexec (stat_path, "r");
+  gdb_file_up fp = gdb_fopen_cloexec (stat_path, "r");
   
   command[0] = '\0';
  
@@ -128,15 +126,13 @@ command_from_pid (char *command, int maxlen, PID_T pid)
 	 (for the brackets).  */
       char cmd[18];
       PID_T stat_pid;
-      int items_read = fscanf (fp, "%lld %17s", &stat_pid, cmd);
+      int items_read = fscanf (fp.get (), "%lld %17s", &stat_pid, cmd);
 	  
       if (items_read == 2 && pid == stat_pid)
 	{
 	  cmd[strlen (cmd) - 1] = '\0'; /* Remove trailing parenthesis.  */
 	  strncpy (command, cmd + 1, maxlen); /* Ignore leading parenthesis.  */
 	}
-
-      fclose (fp);
     }
   else
     {
@@ -157,16 +153,16 @@ commandline_from_pid (PID_T pid)
 {
   char *pathname = xstrprintf ("/proc/%lld/cmdline", pid);
   char *commandline = NULL;
-  FILE *f = gdb_fopen_cloexec (pathname, "r");
+  gdb_file_up f = gdb_fopen_cloexec (pathname, "r");
 
   if (f)
     {
       size_t len = 0;
 
-      while (!feof (f))
+      while (!feof (f.get ()))
 	{
 	  char buf[1024];
-	  size_t read_bytes = fread (buf, 1, sizeof (buf), f);
+	  size_t read_bytes = fread (buf, 1, sizeof (buf), f.get ());
      
 	  if (read_bytes)
 	    {
@@ -175,8 +171,6 @@ commandline_from_pid (PID_T pid)
 	      len += read_bytes;
 	    }
 	}
-
-      fclose (f);
 
       if (commandline)
 	{
@@ -675,7 +669,6 @@ linux_xfer_osdata_cpus (gdb_byte *readbuf,
 
   if (offset == 0)
     {
-      FILE *fp;
       int first_item = 1;
 
       if (len_avail != -1 && len_avail != 0)
@@ -685,14 +678,14 @@ linux_xfer_osdata_cpus (gdb_byte *readbuf,
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"cpus\">\n");
 
-      fp = gdb_fopen_cloexec ("/proc/cpuinfo", "r");
+      gdb_file_up fp = gdb_fopen_cloexec ("/proc/cpuinfo", "r");
       if (fp != NULL)
 	{
 	  char buf[8192];
 
 	  do
 	    {
-	      if (fgets (buf, sizeof (buf), fp))
+	      if (fgets (buf, sizeof (buf), fp.get ()))
 		{
 		  char *key, *value;
 		  int i = 0;
@@ -732,12 +725,10 @@ linux_xfer_osdata_cpus (gdb_byte *readbuf,
 				     value);
 		}
 	    }
-	  while (!feof (fp));
+	  while (!feof (fp.get ()));
 
 	  if (first_item == 0)
 	    buffer_grow_str (&buffer, "</item>");
-
-	  fclose (fp);
 	}
 
       buffer_grow_str0 (&buffer, "</osdata>\n");
@@ -942,7 +933,6 @@ static void
 print_sockets (unsigned short family, int tcp, struct buffer *buffer)
 {
   const char *proc_file;
-  FILE *fp;
 
   if (family == AF_INET)
     proc_file = tcp ? "/proc/net/tcp" : "/proc/net/udp";
@@ -951,14 +941,14 @@ print_sockets (unsigned short family, int tcp, struct buffer *buffer)
   else
     return;
 
-  fp = gdb_fopen_cloexec (proc_file, "r");
+  gdb_file_up fp = gdb_fopen_cloexec (proc_file, "r");
   if (fp)
     {
       char buf[8192];
 
       do
 	{
-	  if (fgets (buf, sizeof (buf), fp))
+	  if (fgets (buf, sizeof (buf), fp.get ()))
 	    {
 	      uid_t uid;
 	      unsigned int local_port, remote_port, state;
@@ -1064,9 +1054,7 @@ print_sockets (unsigned short family, int tcp, struct buffer *buffer)
 		}
 	    }
 	}
-      while (!feof (fp));
-
-      fclose (fp);
+      while (!feof (fp.get ()));
     }
 }
 
@@ -1163,8 +1151,6 @@ linux_xfer_osdata_shm (gdb_byte *readbuf,
 
   if (offset == 0)
     {
-      FILE *fp;
-
       if (len_avail != -1 && len_avail != 0)
 	buffer_free (&buffer);
       len_avail = 0;
@@ -1172,14 +1158,14 @@ linux_xfer_osdata_shm (gdb_byte *readbuf,
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"shared memory\">\n");
 
-      fp = gdb_fopen_cloexec ("/proc/sysvipc/shm", "r");
+      gdb_file_up fp = gdb_fopen_cloexec ("/proc/sysvipc/shm", "r");
       if (fp)
 	{
 	  char buf[8192];
 
 	  do
 	    {
-	      if (fgets (buf, sizeof (buf), fp))
+	      if (fgets (buf, sizeof (buf), fp.get ()))
 		{
 		  key_t key;
 		  uid_t uid, cuid;
@@ -1252,9 +1238,7 @@ linux_xfer_osdata_shm (gdb_byte *readbuf,
 		    }
 		}
 	    }
-	  while (!feof (fp));
-
-	  fclose (fp);
+	  while (!feof (fp.get ()));
 	}
       
       buffer_grow_str0 (&buffer, "</osdata>\n");
@@ -1291,8 +1275,6 @@ linux_xfer_osdata_sem (gdb_byte *readbuf,
 
   if (offset == 0)
     {
-      FILE *fp;
-      
       if (len_avail != -1 && len_avail != 0)
 	buffer_free (&buffer);
       len_avail = 0;
@@ -1300,14 +1282,14 @@ linux_xfer_osdata_sem (gdb_byte *readbuf,
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"semaphores\">\n");
 
-      fp = gdb_fopen_cloexec ("/proc/sysvipc/sem", "r");
+      gdb_file_up fp = gdb_fopen_cloexec ("/proc/sysvipc/sem", "r");
       if (fp)
 	{
 	  char buf[8192];
 	  
 	  do
 	    {
-	      if (fgets (buf, sizeof (buf), fp))
+	      if (fgets (buf, sizeof (buf), fp.get ()))
 		{
 		  key_t key;
 		  uid_t uid, cuid;
@@ -1364,9 +1346,7 @@ linux_xfer_osdata_sem (gdb_byte *readbuf,
 		    }
 		}
 	    }
-	  while (!feof (fp));
-
-	  fclose (fp);
+	  while (!feof (fp.get ()));
 	}
 
       buffer_grow_str0 (&buffer, "</osdata>\n");
@@ -1403,8 +1383,6 @@ linux_xfer_osdata_msg (gdb_byte *readbuf,
 
   if (offset == 0)
     {
-      FILE *fp;
-      
       if (len_avail != -1 && len_avail != 0)
 	buffer_free (&buffer);
       len_avail = 0;
@@ -1412,14 +1390,14 @@ linux_xfer_osdata_msg (gdb_byte *readbuf,
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"message queues\">\n");
       
-      fp = gdb_fopen_cloexec ("/proc/sysvipc/msg", "r");
+      gdb_file_up fp = gdb_fopen_cloexec ("/proc/sysvipc/msg", "r");
       if (fp)
 	{
 	  char buf[8192];
 	  
 	  do
 	    {
-	      if (fgets (buf, sizeof (buf), fp))
+	      if (fgets (buf, sizeof (buf), fp.get ()))
 		{
 		  key_t key;
 		  PID_T lspid, lrpid;
@@ -1490,9 +1468,7 @@ linux_xfer_osdata_msg (gdb_byte *readbuf,
 		    }
 		}
 	    }
-	  while (!feof (fp));
-
-	  fclose (fp);
+	  while (!feof (fp.get ()));
 	}
 
       buffer_grow_str0 (&buffer, "</osdata>\n");
@@ -1529,8 +1505,6 @@ linux_xfer_osdata_modules (gdb_byte *readbuf,
 
   if (offset == 0)
     {
-      FILE *fp;
-
       if (len_avail != -1 && len_avail != 0)
 	buffer_free (&buffer);
       len_avail = 0;
@@ -1538,14 +1512,14 @@ linux_xfer_osdata_modules (gdb_byte *readbuf,
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"modules\">\n");
 
-      fp = gdb_fopen_cloexec ("/proc/modules", "r");
+      gdb_file_up fp = gdb_fopen_cloexec ("/proc/modules", "r");
       if (fp)
 	{
 	  char buf[8192];
 	  
 	  do
 	    {
-	      if (fgets (buf, sizeof (buf), fp))
+	      if (fgets (buf, sizeof (buf), fp.get ()))
 		{
 		  char *name, *dependencies, *status, *tmp;
 		  unsigned int size;
@@ -1600,9 +1574,7 @@ linux_xfer_osdata_modules (gdb_byte *readbuf,
 			address);
 		}
 	    }
-	  while (!feof (fp));
-
-	  fclose (fp);
+	  while (!feof (fp.get ()));
 	}
 
       buffer_grow_str0 (&buffer, "</osdata>\n");

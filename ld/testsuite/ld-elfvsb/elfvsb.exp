@@ -377,7 +377,7 @@ proc visibility_run {visibility} {
 
 	    visibility_test $visibility vnp "visibility ($visibility) (non PIC, load offset)" \
 		mainnp.o sh1np.o sh2np.o elfvsb \
-		"-T $srcdir/$subdir/elf-offset.ld"
+		"-Wl,-T,$srcdir/$subdir/elf-offset.ld,--hash-style=sysv"
 	} }
 
 	# Now compile the code using -fpic.

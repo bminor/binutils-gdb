@@ -5216,9 +5216,7 @@ pa_ip (char *str)
 	      s = expr_end;
 	      CHECK_FIELD (num, 63, 0, strict);
 	      if (num & 0x20)
-		;
-	      else
-		opcode |= (1 << 13);
+		opcode &= ~(1 << 13);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num & 0x1f, 21);
 
 	    /* Handle a 5 bit immediate at 10.  */

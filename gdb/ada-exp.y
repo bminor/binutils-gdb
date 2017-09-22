@@ -733,10 +733,8 @@ static struct obstack temp_parse_space;
 int
 ada_parse (struct parser_state *par_state)
 {
-  int result;
-  struct cleanup *c = make_cleanup_clear_parser_state (&pstate);
-
   /* Setting up the parser state.  */
+  scoped_restore pstate_restore = make_scoped_restore (&pstate);
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
@@ -745,9 +743,7 @@ ada_parse (struct parser_state *par_state)
   obstack_free (&temp_parse_space, NULL);
   obstack_init (&temp_parse_space);
 
-  result = yyparse ();
-  do_cleanups (c);
-  return result;
+  return yyparse ();
 }
 
 void
@@ -1483,9 +1479,6 @@ type_system_address (struct parser_state *par_state)
 				      "system__address");
   return  type != NULL ? type : parse_type (par_state)->builtin_data_ptr;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_ada_exp;
 
 void
 _initialize_ada_exp (void)

@@ -2506,8 +2506,8 @@ get_frame_address_in_block_if_available (struct frame_info *this_frame,
   return 1;
 }
 
-void
-find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
+symtab_and_line
+find_frame_sal (frame_info *frame)
 {
   struct frame_info *next_frame;
   int notcurrent;
@@ -2528,21 +2528,21 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
 
       /* If frame is inline, it certainly has symbols.  */
       gdb_assert (sym);
-      init_sal (sal);
+
+      symtab_and_line sal;
       if (SYMBOL_LINE (sym) != 0)
 	{
-	  sal->symtab = symbol_symtab (sym);
-	  sal->line = SYMBOL_LINE (sym);
+	  sal.symtab = symbol_symtab (sym);
+	  sal.line = SYMBOL_LINE (sym);
 	}
       else
 	/* If the symbol does not have a location, we don't know where
 	   the call site is.  Do not pretend to.  This is jarring, but
 	   we can't do much better.  */
-	sal->pc = get_frame_pc (frame);
+	sal.pc = get_frame_pc (frame);
 
-      sal->pspace = get_frame_program_space (frame);
-
-      return;
+      sal.pspace = get_frame_program_space (frame);
+      return sal;
     }
 
   /* If FRAME is not the innermost frame, that normally means that
@@ -2555,13 +2555,10 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
      instruction/line, consequently, for such cases, want to get the
      line containing fi->pc.  */
   if (!get_frame_pc_if_available (frame, &pc))
-    {
-      init_sal (sal);
-      return;
-    }
+    return {};
 
   notcurrent = (pc != get_frame_address_in_block (frame));
-  (*sal) = find_pc_line (pc, notcurrent);
+  return find_pc_line (pc, notcurrent);
 }
 
 /* Per "frame.h", return the ``address'' of the frame.  Code should
@@ -2929,8 +2926,6 @@ frame_prepare_for_sniffer (struct frame_info *frame,
   frame->unwind = unwind;
   return make_cleanup (frame_cleanup_after_sniffer, frame);
 }
-
-extern initialize_file_ftype _initialize_frame; /* -Wmissing-prototypes */
 
 static struct cmd_list_element *set_backtrace_cmdlist;
 static struct cmd_list_element *show_backtrace_cmdlist;

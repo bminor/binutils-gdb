@@ -71,6 +71,12 @@ avr_elf_${EMULATION_NAME}_before_allocation (void)
 
   gld${EMULATION_NAME}_before_allocation ();
 
+  if (bfd_get_flavour (link_info.output_bfd) != bfd_target_elf_flavour)
+    {
+      avr_no_stubs = TRUE;
+      return;
+    }
+
   /* We only need stubs for avr6, avrxmega6, and avrxmega7. */
   if (strcmp ("${EMULATION_NAME}","avr6")
       && strcmp ("${EMULATION_NAME}","avrxmega6")
@@ -107,6 +113,12 @@ static void
 avr_elf_create_output_section_statements (void)
 {
   flagword flags;
+
+  if (bfd_get_flavour (link_info.output_bfd) != bfd_target_elf_flavour)
+    {
+      einfo ("%X%P: changing output format whilst linking is not supported\n");
+      return;
+    }
 
   stub_file = lang_add_input_file ("linker stubs",
                                    lang_input_file_is_fake_enum,
@@ -204,10 +216,14 @@ avr_finish (void)
     }
 
   abfd = link_info.output_bfd;
-  if (avr_link_relax)
-    elf_elfheader (abfd)->e_flags |= EF_AVR_LINKRELAX_PREPARED;
-  else
-    elf_elfheader (abfd)->e_flags &= ~EF_AVR_LINKRELAX_PREPARED;
+
+  if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour)
+    {
+      if (avr_link_relax)
+	elf_elfheader (abfd)->e_flags |= EF_AVR_LINKRELAX_PREPARED;
+      else
+	elf_elfheader (abfd)->e_flags &= ~EF_AVR_LINKRELAX_PREPARED;
+    }
 
   finish_default ();
 }

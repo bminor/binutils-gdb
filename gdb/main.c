@@ -120,7 +120,7 @@ set_gdb_data_directory (const char *new_datadir)
     warning (_("%s is not a directory."), new_datadir);
 
   xfree (gdb_datadir);
-  gdb_datadir = gdb_realpath (new_datadir);
+  gdb_datadir = gdb_realpath (new_datadir).release ();
 
   /* gdb_realpath won't return an absolute path if the path doesn't exist,
      but we still want to record an absolute path here.  If the user entered
@@ -128,10 +128,10 @@ set_gdb_data_directory (const char *new_datadir)
      isn't canonical, but that's ok.  */
   if (!IS_ABSOLUTE_PATH (gdb_datadir))
     {
-      char *abs_datadir = gdb_abspath (gdb_datadir);
+      gdb::unique_xmalloc_ptr<char> abs_datadir = gdb_abspath (gdb_datadir);
 
       xfree (gdb_datadir);
-      gdb_datadir = abs_datadir;
+      gdb_datadir = abs_datadir.release ();
     }
 }
 
@@ -340,8 +340,7 @@ captured_command_loop (void *data)
   return 1;
 }
 
-/* Handle command errors thrown from within
-   catch_command_errors/catch_command_errors_const.  */
+/* Handle command errors thrown from within catch_command_errors.  */
 
 static int
 handle_command_errors (struct gdb_exception e)
@@ -386,15 +385,16 @@ catch_command_errors (catch_command_errors_ftype *command,
   return 1;
 }
 
-/* Type of the command callback passed to catch_command_errors_const.  */
+/* Type of the command callback passed to the const
+   catch_command_errors.  */
 
 typedef void (catch_command_errors_const_ftype) (const char *, int);
 
-/* Like catch_command_errors, but works with const command and args.  */
+/* Const-correct catch_command_errors.  */
 
 static int
-catch_command_errors_const (catch_command_errors_const_ftype *command,
-			    const char *arg, int from_tty)
+catch_command_errors (catch_command_errors_const_ftype command,
+		      const char *arg, int from_tty)
 {
   TRY
     {
@@ -549,10 +549,9 @@ captured_main_1 (struct captured_main_args *context)
     (xstrprintf ("%s: warning: ", gdb_program_name));
   warning_pre_print = tmp_warn_preprint.get ();
 
-  if (! getcwd (gdb_dirbuf, sizeof (gdb_dirbuf)))
+  current_directory = getcwd (NULL, 0);
+  if (current_directory == NULL)
     perror_warning_with_name (_("error finding working directory"));
-
-  current_directory = gdb_dirbuf;
 
   /* Set the sysroot path.  */
   gdb_sysroot = relocate_gdb_directory (TARGET_SYSTEM_ROOT,
@@ -982,7 +981,7 @@ captured_main_1 (struct captured_main_args *context)
      processed; it sets global parameters, which are independent of
      what file you are debugging or what directory you are in.  */
   if (system_gdbinit && !inhibit_gdbinit)
-    catch_command_errors_const (source_script, system_gdbinit, 0);
+    catch_command_errors (source_script, system_gdbinit, 0);
 
   /* Read and execute $HOME/.gdbinit file, if it exists.  This is done
      *before* all the command line arguments are processed; it sets
@@ -990,7 +989,7 @@ captured_main_1 (struct captured_main_args *context)
      debugging or what directory you are in.  */
 
   if (home_gdbinit && !inhibit_gdbinit && !inhibit_home_gdbinit)
-    catch_command_errors_const (source_script, home_gdbinit, 0);
+    catch_command_errors (source_script, home_gdbinit, 0);
 
   /* Process '-ix' and '-iex' options early.  */
   for (i = 0; i < cmdarg_vec.size (); i++)
@@ -1000,8 +999,8 @@ captured_main_1 (struct captured_main_args *context)
       switch (cmdarg_p.type)
 	{
 	case CMDARG_INIT_FILE:
-	  catch_command_errors_const (source_script, cmdarg_p.string,
-				      !batch_flag);
+	  catch_command_errors (source_script, cmdarg_p.string,
+				!batch_flag);
 	  break;
 	case CMDARG_INIT_COMMAND:
 	  catch_command_errors (execute_command, cmdarg_p.string,
@@ -1032,19 +1031,19 @@ captured_main_1 (struct captured_main_args *context)
       /* The exec file and the symbol-file are the same.  If we can't
          open it, better only print one error message.
          catch_command_errors returns non-zero on success!  */
-      if (catch_command_errors_const (exec_file_attach, execarg,
-				      !batch_flag))
-	catch_command_errors_const (symbol_file_add_main_adapter, symarg,
-				    !batch_flag);
+      if (catch_command_errors (exec_file_attach, execarg,
+				!batch_flag))
+	catch_command_errors (symbol_file_add_main_adapter, symarg,
+			      !batch_flag);
     }
   else
     {
       if (execarg != NULL)
-	catch_command_errors_const (exec_file_attach, execarg,
-				    !batch_flag);
+	catch_command_errors (exec_file_attach, execarg,
+			      !batch_flag);
       if (symarg != NULL)
-	catch_command_errors_const (symbol_file_add_main_adapter, symarg,
-				    !batch_flag);
+	catch_command_errors (symbol_file_add_main_adapter, symarg,
+			      !batch_flag);
     }
 
   if (corearg && pidarg)
@@ -1083,7 +1082,8 @@ captured_main_1 (struct captured_main_args *context)
      the same as the $HOME/.gdbinit file (it should exist, also).  */
   if (local_gdbinit)
     {
-      auto_load_local_gdbinit_pathname = gdb_realpath (local_gdbinit);
+      auto_load_local_gdbinit_pathname
+	= gdb_realpath (local_gdbinit).release ();
 
       if (!inhibit_gdbinit && auto_load_local_gdbinit
 	  && file_is_auto_load_safe (local_gdbinit,
@@ -1093,7 +1093,7 @@ captured_main_1 (struct captured_main_args *context)
 	{
 	  auto_load_local_gdbinit_loaded = 1;
 
-	  catch_command_errors_const (source_script, local_gdbinit, 0);
+	  catch_command_errors (source_script, local_gdbinit, 0);
 	}
     }
 
@@ -1113,8 +1113,8 @@ captured_main_1 (struct captured_main_args *context)
       switch (cmdarg_p.type)
 	{
 	case CMDARG_FILE:
-	  catch_command_errors_const (source_script, cmdarg_p.string,
-				      !batch_flag);
+	  catch_command_errors (source_script, cmdarg_p.string,
+				!batch_flag);
 	  break;
 	case CMDARG_COMMAND:
 	  catch_command_errors (execute_command, cmdarg_p.string,

@@ -158,10 +158,6 @@ static int display_number;
        B ? (TMP = B->next, 1): 0;		\
        B = TMP)
 
-/* Prototypes for exported functions.  */
-
-void _initialize_printcmd (void);
-
 /* Prototypes for local functions.  */
 
 static void do_one_display (struct display *);
@@ -413,7 +409,9 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       && (options->format == 'o'
 	  || options->format == 'x'
 	  || options->format == 't'
-	  || options->format == 'z'))
+	  || options->format == 'z'
+	  || options->format == 'd'
+	  || options->format == 'u'))
     {
       LONGEST val_long = unpack_long (type, valaddr);
       converted_float_bytes.resize (TYPE_LENGTH (type));
@@ -427,11 +425,13 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
     case 'o':
       print_octal_chars (stream, valaddr, len, byte_order);
       break;
+    case 'd':
+      print_decimal_chars (stream, valaddr, len, true, byte_order);
+      break;
     case 'u':
       print_decimal_chars (stream, valaddr, len, false, byte_order);
       break;
     case 0:
-    case 'd':
       if (TYPE_CODE (type) != TYPE_CODE_FLT)
 	{
 	  print_decimal_chars (stream, valaddr, len, !TYPE_UNSIGNED (type),
@@ -898,8 +898,6 @@ find_string_backward (struct gdbarch *gdbarch,
                       int *strings_counted)
 {
   const int chunk_size = 0x20;
-  gdb_byte *buffer = NULL;
-  struct cleanup *cleanup = NULL;
   int read_error = 0;
   int chars_read = 0;
   int chars_to_read = chunk_size;
@@ -908,14 +906,13 @@ find_string_backward (struct gdbarch *gdbarch,
   CORE_ADDR string_start_addr = addr;
 
   gdb_assert (char_size == 1 || char_size == 2 || char_size == 4);
-  buffer = (gdb_byte *) xmalloc (chars_to_read * char_size);
-  cleanup = make_cleanup (xfree, buffer);
+  gdb::byte_vector buffer (chars_to_read * char_size);
   while (count > 0 && read_error == 0)
     {
       int i;
 
       addr -= chars_to_read * char_size;
-      chars_read = read_memory_backward (gdbarch, addr, buffer,
+      chars_read = read_memory_backward (gdbarch, addr, buffer.data (),
                                          chars_to_read * char_size);
       chars_read /= char_size;
       read_error = (chars_read == chars_to_read) ? 0 : 1;
@@ -924,7 +921,7 @@ find_string_backward (struct gdbarch *gdbarch,
         {
           int offset = (chars_to_read - i - 1) * char_size;
 
-          if (integer_is_zero (buffer + offset, char_size)
+          if (integer_is_zero (&buffer[offset], char_size)
               || chars_counted == options->print_max)
             {
               /* Found '\0' or reached print_max.  As OFFSET is the offset to
@@ -947,7 +944,6 @@ find_string_backward (struct gdbarch *gdbarch,
       string_start_addr -= chars_counted * char_size;
     }
 
-  do_cleanups (cleanup);
   return string_start_addr;
 }
 
@@ -1290,7 +1286,7 @@ set_command (char *exp, int from_tty)
 }
 
 static void
-sym_info (char *arg, int from_tty)
+info_symbol_command (char *arg, int from_tty)
 {
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
@@ -1383,7 +1379,7 @@ sym_info (char *arg, int from_tty)
 }
 
 static void
-address_info (char *exp, int from_tty)
+info_address_command (char *exp, int from_tty)
 {
   struct gdbarch *gdbarch;
   int regno;
@@ -2050,7 +2046,7 @@ disable_current_display (void)
 }
 
 static void
-display_info (char *ignore, int from_tty)
+info_display_command (char *ignore, int from_tty)
 {
   struct display *d;
 
@@ -2451,7 +2447,7 @@ ui_printf (const char *arg, struct ui_file *stream)
   if (s == 0)
     error_no_arg (_("format-control string and values to print"));
 
-  s = skip_spaces_const (s);
+  s = skip_spaces (s);
 
   /* A format string should follow, enveloped in double quotes.  */
   if (*s++ != '"')
@@ -2464,14 +2460,14 @@ ui_printf (const char *arg, struct ui_file *stream)
   if (*s++ != '"')
     error (_("Bad format string, non-terminated '\"'."));
   
-  s = skip_spaces_const (s);
+  s = skip_spaces (s);
 
   if (*s != ',' && *s != 0)
     error (_("Invalid argument syntax"));
 
   if (*s == ',')
     s++;
-  s = skip_spaces_const (s);
+  s = skip_spaces (s);
 
   {
     int nargs = 0;
@@ -2673,10 +2669,10 @@ _initialize_printcmd (void)
 
   observer_attach_free_objfile (clear_dangling_display_expressions);
 
-  add_info ("address", address_info,
+  add_info ("address", info_address_command,
 	    _("Describe where symbol SYM is stored."));
 
-  add_info ("symbol", sym_info, _("\
+  add_info ("symbol", info_symbol_command, _("\
 Describe what symbol is at location ADDR.\n\
 Only for symbols with fixed locations (global or static scope)."));
 
@@ -2700,7 +2696,7 @@ with this command or \"print\"."));
 	   _("Print line number and file of definition of variable."));
 #endif
 
-  add_info ("display", display_info, _("\
+  add_info ("display", info_display_command, _("\
 Expressions to display when program stops, with code numbers."));
 
   add_cmd ("undisplay", class_vars, undisplay_command, _("\

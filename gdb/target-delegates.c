@@ -1583,6 +1583,39 @@ debug_thread_name (struct target_ops *self, struct thread_info *arg1)
   return result;
 }
 
+static struct thread_info *
+delegate_thread_handle_to_thread_info (struct target_ops *self, const gdb_byte *arg1, int arg2, struct inferior *arg3)
+{
+  self = self->beneath;
+  return self->to_thread_handle_to_thread_info (self, arg1, arg2, arg3);
+}
+
+static struct thread_info *
+tdefault_thread_handle_to_thread_info (struct target_ops *self, const gdb_byte *arg1, int arg2, struct inferior *arg3)
+{
+  return NULL;
+}
+
+static struct thread_info *
+debug_thread_handle_to_thread_info (struct target_ops *self, const gdb_byte *arg1, int arg2, struct inferior *arg3)
+{
+  struct thread_info * result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_thread_handle_to_thread_info (...)\n", debug_target.to_shortname);
+  result = debug_target.to_thread_handle_to_thread_info (&debug_target, arg1, arg2, arg3);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_thread_handle_to_thread_info (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_const_gdb_byte_p (arg1);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_int (arg2);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_struct_inferior_p (arg3);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_struct_thread_info_p (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
 static void
 delegate_stop (struct target_ops *self, ptid_t arg1)
 {
@@ -3854,20 +3887,20 @@ debug_goto_record (struct target_ops *self, ULONGEST arg1)
 }
 
 static void
-delegate_insn_history (struct target_ops *self, int arg1, int arg2)
+delegate_insn_history (struct target_ops *self, int arg1, gdb_disassembly_flags arg2)
 {
   self = self->beneath;
   self->to_insn_history (self, arg1, arg2);
 }
 
 static void
-tdefault_insn_history (struct target_ops *self, int arg1, int arg2)
+tdefault_insn_history (struct target_ops *self, int arg1, gdb_disassembly_flags arg2)
 {
   tcomplain ();
 }
 
 static void
-debug_insn_history (struct target_ops *self, int arg1, int arg2)
+debug_insn_history (struct target_ops *self, int arg1, gdb_disassembly_flags arg2)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_insn_history (...)\n", debug_target.to_shortname);
   debug_target.to_insn_history (&debug_target, arg1, arg2);
@@ -3876,25 +3909,25 @@ debug_insn_history (struct target_ops *self, int arg1, int arg2)
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg1);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg2);
+  target_debug_print_gdb_disassembly_flags (arg2);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
 static void
-delegate_insn_history_from (struct target_ops *self, ULONGEST arg1, int arg2, int arg3)
+delegate_insn_history_from (struct target_ops *self, ULONGEST arg1, int arg2, gdb_disassembly_flags arg3)
 {
   self = self->beneath;
   self->to_insn_history_from (self, arg1, arg2, arg3);
 }
 
 static void
-tdefault_insn_history_from (struct target_ops *self, ULONGEST arg1, int arg2, int arg3)
+tdefault_insn_history_from (struct target_ops *self, ULONGEST arg1, int arg2, gdb_disassembly_flags arg3)
 {
   tcomplain ();
 }
 
 static void
-debug_insn_history_from (struct target_ops *self, ULONGEST arg1, int arg2, int arg3)
+debug_insn_history_from (struct target_ops *self, ULONGEST arg1, int arg2, gdb_disassembly_flags arg3)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_insn_history_from (...)\n", debug_target.to_shortname);
   debug_target.to_insn_history_from (&debug_target, arg1, arg2, arg3);
@@ -3905,25 +3938,25 @@ debug_insn_history_from (struct target_ops *self, ULONGEST arg1, int arg2, int a
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  target_debug_print_gdb_disassembly_flags (arg3);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
 static void
-delegate_insn_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2, int arg3)
+delegate_insn_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2, gdb_disassembly_flags arg3)
 {
   self = self->beneath;
   self->to_insn_history_range (self, arg1, arg2, arg3);
 }
 
 static void
-tdefault_insn_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2, int arg3)
+tdefault_insn_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2, gdb_disassembly_flags arg3)
 {
   tcomplain ();
 }
 
 static void
-debug_insn_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2, int arg3)
+debug_insn_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2, gdb_disassembly_flags arg3)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_insn_history_range (...)\n", debug_target.to_shortname);
   debug_target.to_insn_history_range (&debug_target, arg1, arg2, arg3);
@@ -3934,7 +3967,7 @@ debug_insn_history_range (struct target_ops *self, ULONGEST arg1, ULONGEST arg2,
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_ULONGEST (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  target_debug_print_gdb_disassembly_flags (arg3);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
@@ -4267,6 +4300,8 @@ install_delegators (struct target_ops *ops)
     ops->to_extra_thread_info = delegate_extra_thread_info;
   if (ops->to_thread_name == NULL)
     ops->to_thread_name = delegate_thread_name;
+  if (ops->to_thread_handle_to_thread_info == NULL)
+    ops->to_thread_handle_to_thread_info = delegate_thread_handle_to_thread_info;
   if (ops->to_stop == NULL)
     ops->to_stop = delegate_stop;
   if (ops->to_interrupt == NULL)
@@ -4522,6 +4557,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_pid_to_str = default_pid_to_str;
   ops->to_extra_thread_info = tdefault_extra_thread_info;
   ops->to_thread_name = tdefault_thread_name;
+  ops->to_thread_handle_to_thread_info = tdefault_thread_handle_to_thread_info;
   ops->to_stop = tdefault_stop;
   ops->to_interrupt = tdefault_interrupt;
   ops->to_pass_ctrlc = default_target_pass_ctrlc;
@@ -4681,6 +4717,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_pid_to_str = debug_pid_to_str;
   ops->to_extra_thread_info = debug_extra_thread_info;
   ops->to_thread_name = debug_thread_name;
+  ops->to_thread_handle_to_thread_info = debug_thread_handle_to_thread_info;
   ops->to_stop = debug_stop;
   ops->to_interrupt = debug_interrupt;
   ops->to_pass_ctrlc = debug_pass_ctrlc;

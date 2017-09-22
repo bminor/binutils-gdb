@@ -42,6 +42,10 @@
 #ifndef ETIMEDOUT
 #define ETIMEDOUT WSAETIMEDOUT
 #endif
+/* Gnulib defines close too, but gnulib's replacement
+   doesn't call closesocket unless we import the
+   socketlib module.  */
+#undef close
 #define close(fd) closesocket (fd)
 #define ioctl ioctlsocket
 #else
@@ -59,8 +63,6 @@
 #ifndef HAVE_SOCKLEN_T
 typedef int socklen_t;
 #endif
-
-void _initialize_ser_tcp (void);
 
 /* For "set tcp" and "show tcp".  */
 

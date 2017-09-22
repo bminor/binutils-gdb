@@ -118,14 +118,13 @@ tui_refresh_frame_and_register_information (int registers_too_p)
 {
   struct frame_info *fi;
   CORE_ADDR pc;
-  struct cleanup *old_chain;
   int frame_info_changed_p;
 
   if (!has_stack_frames ())
     return;
 
-  old_chain = make_cleanup_restore_target_terminal ();
-  target_terminal_ours_for_output ();
+  target_terminal::scoped_restore_terminal_state term_state;
+  target_terminal::ours_for_output ();
 
   fi = get_selected_frame (NULL);
   /* Ensure that symbols for this frame are read in.  Also, determine
@@ -156,8 +155,6 @@ tui_refresh_frame_and_register_information (int registers_too_p)
       tui_check_data_values (fi);
       tui_refreshing_registers = 0;
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Dummy callback for deprecated_print_frame_info_listing_hook which is called
@@ -265,8 +262,6 @@ tui_remove_hooks (void)
   observer_detach_register_changed (tui_register_changed_observer);
   tui_register_changed_observer = NULL;
 }
-
-void _initialize_tui_hooks (void);
 
 void
 _initialize_tui_hooks (void)

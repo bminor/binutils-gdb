@@ -143,9 +143,6 @@ struct process_info *find_process_pid (int pid);
 int have_started_inferiors_p (void);
 int have_attached_inferiors_p (void);
 
-ptid_t thread_to_gdb_id (struct thread_info *);
-ptid_t gdb_id_to_thread_id (ptid_t);
-
 void clear_inferiors (void);
 struct inferior_list_entry *find_inferior
      (struct inferior_list *,
@@ -160,9 +157,8 @@ struct inferior_list_entry *
 					void *),
 			   void *arg);
 
-void *inferior_target_data (struct thread_info *);
-void set_inferior_target_data (struct thread_info *, void *);
-struct regcache *inferior_regcache_data (struct thread_info *);
-void set_inferior_regcache_data (struct thread_info *, struct regcache *);
+void *thread_target_data (struct thread_info *);
+struct regcache *thread_regcache_data (struct thread_info *);
+void set_thread_regcache_data (struct thread_info *, struct regcache *);
 
 #endif /* INFERIORS_H */

@@ -23,8 +23,6 @@
 #include "mi-cmds.h"
 #include "mi-main.h"
 
-extern void _initialize_mi_cmds (void);
-
 struct mi_cmd;
 static struct mi_cmd **lookup_table (const char *command);
 static void build_table (struct mi_cmd *commands);

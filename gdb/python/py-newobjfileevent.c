@@ -20,11 +20,6 @@
 #include "defs.h"
 #include "py-event.h"
 
-extern PyTypeObject new_objfile_event_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
-extern PyTypeObject clear_objfiles_event_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
-
 static PyObject *
 create_new_objfile_event_object (struct objfile *objfile)
 {
@@ -62,11 +57,6 @@ emit_new_objfile_event (struct objfile *objfile)
   return -1;
 }
 
-GDBPY_NEW_EVENT_TYPE (new_objfile,
-                      "gdb.NewObjFileEvent",
-                      "NewObjFileEvent",
-                      "GDB new object file event object",
-                      event_object_type);
 
 /* Subroutine of emit_clear_objfiles_event to simplify it.  */
 
@@ -107,9 +97,3 @@ emit_clear_objfiles_event (void)
     return evpy_emit_event (event.get (), gdb_py_events.clear_objfiles);
   return -1;
 }
-
-GDBPY_NEW_EVENT_TYPE (clear_objfiles,
-		      "gdb.ClearObjFilesEvent",
-		      "ClearObjFilesEvent",
-		      "GDB clear object files event object",
-		      event_object_type);

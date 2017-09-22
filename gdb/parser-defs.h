@@ -266,6 +266,8 @@ extern const char *op_name_standard (enum exp_opcode);
 
 extern struct type *follow_types (struct type *);
 
+extern type_instance_flags follow_type_instance_flags ();
+
 extern void null_post_parser (struct expression **, int);
 
 extern int parse_float (const char *p, int len, DOUBLEST *d,

@@ -68,6 +68,7 @@ case ${gdb_host} in
 	;;
     nbsd*)
 	NATDEPFILES='fork-child.o fork-inferior.o inf-ptrace.o'
+	HAVE_NATIVE_GCORE_HOST=1
 	;;
     obsd*)
 	NATDEPFILES='fork-child.o fork-inferior.o inf-ptrace.o'
@@ -144,6 +145,11 @@ case ${gdb_host} in
 	;;
     fbsd)
 	case ${gdb_host_cpu} in
+	    aarch64)
+		# Host: FreeBSD/aarch64
+		NATDEPFILES="${NATDEPFILES} aarch64-fbsd-nat.o"
+		LOADLIBES=
+		;;
 	    i386)
 		# Host: FreeBSD/i386
 		NATDEPFILES="${NATDEPFILES} x86-nat.o x86-dregs.o \
@@ -210,7 +216,8 @@ case ${gdb_host} in
 	case ${gdb_host_cpu} in
 	    i386)
 		# Host: Solaris x86
-		NATDEPFILES='fork-child.o i386-v4-nat.o i386-sol2-nat.o \
+		NATDEPFILES='fork-child.o fork-inferior.o \
+		i386-v4-nat.o i386-sol2-nat.o \
 		procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o'
 		HAVE_NATIVE_GCORE_HOST=1
 		;;
@@ -338,18 +345,19 @@ case ${gdb_host} in
 	case ${gdb_host_cpu} in
 	    i386)
 		# Host: NetBSD/amd64
-		NATDEPFILES="${NATDEPFILES} nbsd-nat.o amd64-nat.o \
-		x86-bsd-nat.o amd64-bsd-nat.o amd64-nbsd-nat.o"
+		NATDEPFILES="${NATDEPFILES} nbsd-nat.o amd64-nat.o x86-nat.o \
+		x86-dregs.o x86-bsd-nat.o amd64-bsd-nat.o amd64-nbsd-nat.o"
 		;;
 	    sparc)
 		# Host: NetBSD/sparc64
 		NATDEPFILES="${NATDEPFILES} sparc64-nbsd-nat.o sparc-nat.o \
 		bsd-kvm.o"
+		LOADLIBES='-lkvm'
 		;;
 
 	esac
 	;;
-    nbdself)
+    nbsdelf)
 	case ${gdb_host_cpu} in
 	    arm)
 		# Host: NetBSD/arm
@@ -357,8 +365,8 @@ case ${gdb_host} in
 		;;
 	    i386)
 		# Host: NetBSD/i386 ELF
-		NATDEPFILES="${NATDEPFILES} nbsd-nat.o x86-bsd-nat.o \
-		i386-bsd-nat.o i386-nbsd-nat.o bsd-kvm.o"
+		NATDEPFILES="${NATDEPFILES} nbsd-nat.o x86-nat.o x86-dregs.o \
+		x86-bsd-nat.o i386-bsd-nat.o i386-nbsd-nat.o bsd-kvm.o"
 		LOADLIBES='-lkvm'
 		;;
 	    m68k)
@@ -457,7 +465,7 @@ case ${gdb_host} in
 		# Host: Solaris SPARC & UltraSPARC
 		NAT_FILE='nm-sol2.h'
 		NATDEPFILES='sparc-sol2-nat.o \
-		fork-child.o \
+		fork-child.o fork-inferior.o \
 		procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o'
 		HAVE_NATIVE_GCORE_HOST=1
 		;;
@@ -467,7 +475,8 @@ case ${gdb_host} in
 	case ${gdb_host_cpu} in
 	    i386)
 		# Host: Solaris x86_64
-		NATDEPFILES='fork-child.o amd64-nat.o i386-v4-nat.o i386-sol2-nat.o \
+		NATDEPFILES='fork-child.o fork-inferior.o \
+		amd64-nat.o i386-v4-nat.o i386-sol2-nat.o \
 		procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o'
 		HAVE_NATIVE_GCORE_HOST=1
 		;;

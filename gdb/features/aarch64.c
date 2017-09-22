@@ -10,13 +10,13 @@ static void
 initialize_tdesc_aarch64 (void)
 {
   struct target_desc *result = allocate_target_description ();
-  struct tdesc_feature *feature;
-  struct tdesc_type *field_type;
-  struct tdesc_type *type;
-
   set_tdesc_architecture (result, bfd_scan_arch ("aarch64"));
 
+  struct tdesc_feature *feature;
+
   feature = tdesc_create_feature (result, "org.gnu.gdb.aarch64.core");
+  struct tdesc_type *field_type;
+  struct tdesc_type *type;
   type = tdesc_create_flags (feature, "cpsr_flags", 4);
   tdesc_add_flag (type, 0, "SP");
   tdesc_add_flag (type, 1, "");

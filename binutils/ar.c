@@ -738,9 +738,6 @@ main (int argc, char **argv)
 
   arg_index = 0;
 
-  if (argv[arg_index] == NULL)
-    usage (0);
-
   if (mri_mode)
     {
       default_deterministic ();
@@ -749,6 +746,12 @@ main (int argc, char **argv)
   else
     {
       bfd *arch;
+
+      /* Fail if no files are specified on the command line.
+	 (But not for MRI mode which allows for reading arguments
+	 and filenames from stdin).  */
+      if (argv[arg_index] == NULL)
+	usage (0);
 
       /* We don't use do_quick_append any more.  Too many systems
 	 expect ar to always rebuild the symbol table even when q is

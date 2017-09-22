@@ -1,3 +1,396 @@
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.python/py-thrhandle.c, gdb.python/py-thrhandle.exp: New
+	files.
+
+2017-09-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/list-ambiguous.exp (test_list_ambiguous_symbol): Expect
+	symbol names in gdb's output.
+	* gdb.cp/overload.exp ("list all overloads"): Likewise.
+
+2017-09-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/list-ambiguous.exp (test_list_ambiguous_function):
+	Rename to ...
+	(test_list_ambiguous_symbol): ... this and add a symbol name
+	parameter.  Adjust.
+	(test_list_ambiguous_function): Reimplement on top of
+	test_list_ambiguous_symbol and also test listing ambiguous
+	variables.
+	* gdb.base/list-ambiguous0.c (ambiguous): Rename to ...
+	(ambiguous_fun): ... this.
+	(ambiguous_var): New.
+	* gdb.base/list-ambiguous1.c (ambiguous): Rename to ...
+	(ambiguous_fun): ... this.
+	(ambiguous_var): New.
+
+2017-09-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.base/starti.c: New file.
+	* gdb.base/starti.exp: New file.
+	* lib/gdb.exp (gdb_starti_cmd): New procedure.
+
+2017-09-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/nodebug.exp (nodebug_runto): New procedure.
+	(top level): Use it instead of runto.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/ena-dis-br.exp (test_ena_dis_br): Update test.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* gdb.python/py-infthread.exp: Add tests for new_thread event.
+	* gdb.python/py-inferior.exp: Add tests for new inferior events.
+
+2017-09-08  Christoph Weinmann  <christoph.t.weinmann@intel.com>
+
+	* gdb.fortran/printing-types.exp: New file.
+	* gdb.fortran/printing-types.exp: New file.
+
+2017-09-08  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/vla-ptype.exp: Fix typos.
+	* gdb.fortran/vla-value.exp: Same.
+
+2017-09-08  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/vla-value.exp: Use type names defined in libfortran.
+	* gdb.mi/mi-var-child-f.exp: Likewise.
+	* gdb.mi/mi-vla-fortran.exp: Likewise.
+
+2017-09-08  Frank Penczek  <frank.penczek@intel.com>
+            Christoph Weinmann  <christoph.t.weinmann@intel.com>
+            Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/ptr-indentation.f90: New file.
+	* gdb.fortran/ptr-indentation.exp: New file.
+
+2017-09-05  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/22010:
+	* gdb.base/sizeof.exp (check_valueof): Cast char constant to int.
+
+2017-09-06  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* gdb.arch/thumb2-it.exp: Cast call to assembly defined function.
+
+2017-09-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/tls-nodebug-pie.c: New file.
+	* gdb.threads/tls-nodebug-pie.exp: New file.
+
+2017-09-05  Tom Tromey  <tom@tromey.com>
+
+	* lib/gdb.exp (gdb_compile): Don't use universal_compile_options
+	for rust.
+
+2017-09-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.multi/multi-arch-exec.exp: Test with different
+	"follow-exec-mode" settings.
+	(do_test): New procedure.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/func-static.c (S::method const, S::method volatile)
+	(S::method volatile const): New methods.
+	(c_s, v_s, cv_s): New instances.
+	(main): Call method() on them.
+	* gdb.base/func-static.exp (syntax_re, cannot_resolve_re): New variables.
+	(cannot_resolve): New procedure.
+	(cxx_scopes_list): Test cv methods.  Add print-scope-quote and
+	print-quote-unquoted columns.
+	(do_test): Test printing each scope too.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/local-static.exp: Also test with
+	class::method::variable wholly quoted.
+	* gdb.cp/m-static.exp (class::method::variable): Remove test.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/local-static.c: New.
+	* gdb.base/local-static.cc: New.
+	* gdb.base/local-static.exp:  New.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add casts to int.
+	* gdb.base/nodebug.c (dataglobal8, dataglobal32_1, dataglobal32_2)
+	(dataglobal64_1, dataglobal64_2): New globals.
+	* gdb.base/nodebug.exp: Test different expressions involving the
+	new globals, with print, whatis and ptype.  Add casts to int.
+	* gdb.base/solib-display.exp: Add casts to int.
+	* gdb.compile/compile-ifunc.exp: Expect warning.  Add cast to int.
+	* gdb.cp/m-static.exp: Add cast to int.
+	* gdb.dwarf2/dw2-skip-prologue.exp: Add cast to int.
+	* gdb.threads/tls-nodebug.exp: Check that gdb errors out printing
+	tls variable with no debug info without a cast.  Test with a cast
+	to int too.
+	* gdb.trace/entry-values.exp: Add casts.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/nodebug.exp: Test that ptype's error about functions
+	with unknown return type includes the function name too.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/break-main-file-remove-fail.exp (test_remove_bp): Cast
+	return type of munmap in infcall.
+	* gdb.base/break-probes.exp: Cast return type of foo in infcall.
+	* gdb.base/checkpoint.exp: Simplify using for loop.  Cast return
+	type of ftell in infcall.
+	* gdb.base/dprintf-detach.exp (dprintf_detach_test): Cast return
+	type of getpid in infcall.
+	* gdb.base/infcall-exec.exp: Cast return type of execlp in
+	infcall.
+	* gdb.base/info-os.exp: Cast return type of getpid in infcall.
+	Bail on failure to extract the pid.
+	* gdb.base/nodebug.c: #include <stdint.h>.
+	(multf, multf_noproto, mult, mult_noproto, add8, add8_noproto):
+	New functions.
+	* gdb.base/nodebug.exp (test_call_promotion): New procedure.
+	Change expected output of print/whatis/ptype with functions with
+	no debug info.  Test all supported languages.  Call
+	test_call_promotion.
+	* gdb.compile/compile.exp: Adjust expected output to expect
+	warning.
+	* gdb.threads/siginfo-threads.exp: Likewise.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/callfuncs.exp (do_function_calls): New parameter
+	"prototypes".  Test calling float functions via prototyped and
+	unprototyped function pointers.
+	(perform_all_tests): New parameter "prototypes".  Pass it down.
+	(top level): Pass down "prototypes" parameter to
+	perform_all_tests.
+
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp (loop_break_test, loop_continue_test):
+	Test with nested loops.
+
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp: Call the new procedures.
+	(loop_break_test, loop_continue_test): New procedures.
+
+2017-09-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp: Call new procedure.
+	(define_if_without_arg_test): New procedure.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/list-ambiguous.exp: New file.
+	* gdb.base/list-ambiguous0.c: New file.
+	* gdb.base/list-ambiguous1.c: New file.
+	* gdb.base/list.exp (test_list_range): Adjust expected output.
+
+2017-08-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/share-env-with-gdbserver.c: New file.
+	* gdb.base/share-env-with-gdbserver.exp: Likewise.
+
+2017-08-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp (gdbvar_simple_if_test,
+	gdbvar_simple_if_test, gdbvar_complex_if_while_test,
+	progvar_simple_if_test, progvar_simple_while_test,
+	progvar_complex_if_while_test, user_defined_command_test,
+	user_defined_command_args_eval,
+	user_defined_command_args_stack_test,
+	user_defined_command_manyargs_test, bp_deleted_in_command_test,
+	temporary_breakpoint_commands,
+	gdb_test_no_prompt, redefine_hook_test,
+	redefine_backtrace_test): Remove "global gdb_prompt".
+
+2017-08-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/commands.exp (user_defined_command_case_sensitivity):
+	New proc, call it from toplevel.
+
+2017-08-23  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR remote/21852
+	* gdb.server/normal.c: New file, copied from gdb.base.
+	* gdb.server/run-without-local-binary.exp: New file.
+
+2017-08-07  Weimin Pan  <weimin.pan@oracle.com>
+
+	* gdb.arch/sparc64-adi.exp: New file.
+	* gdb.arch/sparc64-adi.c: New file.
+
+2017-08-22  Pedro Alves  <palves@redhat.com>
+
+	* gdb.cp/overload.exp (line_range_pattern): New procedure.
+	(top level): Add "list all overloads" tests.
+
+2017-08-22  Tom Tromey  <tom@tromey.com>
+
+	* gdb.gdb/xfullpath.exp: Remove.
+
+2017-08-21  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19487
+	* gdb.base/symbol-alias.c: New.
+	* gdb.base/symbol-alias2.c: New.
+	* gdb.base/symbol-alias.exp: New.
+
+2017-08-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/dfp-test.c
+	(d32_t, d64_t, d128_t, d32_t2, d64_t2, d128_t2, v_d32_t, v_d64_t)
+	(v_d128_t, v_d32_t2, v_d64_t2, v_d128_t2): New.
+	* gdb.base/dfp-test.exp: Add whatis/ptype/cast tests.
+	* gdb.base/gnu_vector.exp: Add whatis/ptype/cast tests.
+	* gdb.base/whatis-ptype-typedefs.c: New.
+	* gdb.base/whatis-ptype-typedefs.exp: New.
+	* gdb.python/py-prettyprint.c (int_type, int_type2): New typedefs.
+	(an_int, an_int_type, an_int_type2): New globals.
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Add tests
+	involving typedefs and cast expressions.
+	* gdb.python/py-prettyprint.py (class pp_int_typedef): New.
+	(lookup_typedefs_function): New.
+	(typedefs_pretty_printers_dict): New.
+	(top level): Register lookup_typedefs_function in
+	gdb.pretty_printers.
+
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.server/unittest.exp: New.
+
+2017-08-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21954
+	* gdb.base/environ.exp: Add test to check if 'unset environment'
+	works.
+
+2017-08-14  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* lib/gdb.exp (universal_compile_options): New caching proc.
+	(gdb_compile): Suppress GCC's coloring of messages.
+
+2017-08-14  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/21675:
+	* gdb.base/printcmds.exp (test_radices): New function.
+	* gdb.dwarf2/var-access.exp: Use p/u, not p/d.
+	* gdb.base/sizeof.exp (check_valueof): Use p/d.
+	* lib/gdb.exp (get_integer_valueof): Use p/d.
+
+2017-08-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (get_valueof): Don't capture end-of-line
+	characters.
+
+2017-08-05  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.exp: Allow String to appear in a different
+	namespace.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.gdb/unittest.exp: Invoke command
+	"maintenance check xml-descriptions".
+
+2017-07-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.arch/s390-vregs.exp: Calculate parameters to hex128 in the
+	calling context.
+	(hex128): Drop erroneous calculation of parameters.
+
+2017-07-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-unwind.exp: Disable stack protection when
+	building test file.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/default.exp (set language): Adjust expected output.
+
+2017-07-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/dmsym.c (pck__foo__bar__minsym): Rename to ...
+	(test_minsym): ... this, and make static.
+	(get_pck__foo__bar__minsym): Rename to ...
+	(get_test_minsym): ... this.
+	* gdb.base/dmsym.exp (): Remove "set language ada" call.  Adjust
+	symbol names and comments.
+	* gdb.base/dmsym_main.c (get_pck__foo__bar__minsym): Rename to ...
+	(get_test_minsym): ... this.
+	(pck__foo__bar__minsym__2): Rename to ...
+	(test_minsym): ... this.
+	(main): Adjust.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/completion.exp: Adjust expected output.
+	* gdb.linespec/ls-errs.exp: Don't send tab characters, now that
+	the completer works.
+
+2017-07-17  Pedro Alves  <palves@redhat.com>
+
+	* gdb.linespec/ls-errs.exp (do_test): Adjust expected output.
+
+2017-07-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.mi/mi-vla-fortran.exp: Make test names unique.
+
+2017-07-14  Tom Tromey  <tom@tromey.com>
+
+	PR rust/21764:
+	* gdb.rust/simple.exp: Add tests.
+
+2017-07-14  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.exp: Add regression test for PR rust/21763.
+
+2017-07-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.linespec/base/one/thefile.cc (z1): New function.
+	* gdb.linespec/base/two/thefile.cc (z2): New function.
+	* gdb.linespec/linespec.exp: Add tests.
+
+2017-07-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.mi/mi-vla-fortran.exp: Correct even more parameter passing
+	to mi_create_breakpoint.
+
+2017-07-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.mi/mi-vla-fortran.exp: Correct parameter passing to
+	mi_create_breakpoint.
+
+2017-07-11  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/demangle.exp: Update for demangling changes.
+
+2017-07-09  Tom Tromey  <tom@tromey.com>
+
+	* gdb.dwarf2/shortpiece.exp: New file.
+
+2017-07-06  David Blaikie  <dblaikie@gmail.com>
+
+	* gdb.dwarf2/fission-multi-cu.S: Test containing multiple CUs in a DWO,
+	built from fissiont-multi-cu{1,2}.c.
+	* gdb.dwarf2/fission-multi-cu.exp: Test similar to fission-base.exp,
+	except putting 'main' and 'func' in separate CUs in the same DWO file.
+	* gdb.dwarf2/fission-multi-cu1.c: First CU for the multi-CU-single-DWO
+	test.
+	* gdb.dwarf2/fission-multi-cu2.c: Second CU in the multi-CU-single-DWO
+	test.
+
+2017-07-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.python/py-unwind.exp: Test flushregs.
+
 2017-06-30  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR cli/21688

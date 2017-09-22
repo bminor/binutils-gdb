@@ -37,7 +37,7 @@ static struct ppc64_elf_params params = { NULL,
 					  &ppc_add_stub_section,
 					  &ppc_layout_sections_again,
 					  1, -1, 0,
-					  ${DEFAULT_PLT_STATIC_CHAIN-0}, -1, 0,
+					  ${DEFAULT_PLT_STATIC_CHAIN-0}, -1, 5,
 					  -1, 0, -1, -1, 0};
 
 /* Fake input file for stubs.  */

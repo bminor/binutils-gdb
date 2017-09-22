@@ -112,9 +112,11 @@ static reloc_howto_type i386_howto_table[]=
 };
 
 static bfd_boolean
-bfd_mach_o_i386_canonicalize_one_reloc (bfd *abfd,
-				        struct mach_o_reloc_info_external *raw,
-					arelent *res, asymbol **syms)
+bfd_mach_o_i386_canonicalize_one_reloc (bfd *       abfd,
+				        struct mach_o_reloc_info_external * raw,
+					arelent *   res,
+					asymbol **  syms,
+					arelent *   res_base)
 {
   bfd_mach_o_reloc_info reloc;
 
@@ -126,6 +128,9 @@ bfd_mach_o_i386_canonicalize_one_reloc (bfd *abfd,
       switch (reloc.r_type)
         {
         case BFD_MACH_O_GENERIC_RELOC_PAIR:
+	  /* PR 21813: Check for a corrupt PAIR reloc at the start.  */
+	  if (res == res_base)
+	    return FALSE;
           if (reloc.r_length == 2)
             {
 	      res->howto = &i386_howto_table[7];
@@ -164,7 +169,7 @@ bfd_mach_o_i386_canonicalize_one_reloc (bfd *abfd,
             }
           return FALSE;
         default:
-          return FALSE;
+	  break;
         }
     }
   else
@@ -192,11 +197,11 @@ bfd_mach_o_i386_canonicalize_one_reloc (bfd *abfd,
             default:
               return FALSE;
             }
-          break;
         default:
-          return FALSE;
+          break;
         }
     }
+  return FALSE;
 }
 
 static bfd_boolean
@@ -391,9 +396,9 @@ const mach_o_segment_name_xlat mach_o_i386_segsec_names_xlat[] =
     { NULL, NULL }
   };
 
-#define bfd_mach_o_canonicalize_one_reloc bfd_mach_o_i386_canonicalize_one_reloc
-#define bfd_mach_o_swap_reloc_out bfd_mach_o_i386_swap_reloc_out
-#define bfd_mach_o_print_thread bfd_mach_o_i386_print_thread
+#define bfd_mach_o_canonicalize_one_reloc  bfd_mach_o_i386_canonicalize_one_reloc
+#define bfd_mach_o_swap_reloc_out          bfd_mach_o_i386_swap_reloc_out
+#define bfd_mach_o_print_thread            bfd_mach_o_i386_print_thread
 
 #define bfd_mach_o_tgt_seg_table mach_o_i386_segsec_names_xlat
 #define bfd_mach_o_section_type_valid_for_tgt NULL

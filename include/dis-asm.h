@@ -158,7 +158,7 @@ typedef struct disassemble_info
   /* These are for buffer_read_memory.  */
   bfd_byte *buffer;
   bfd_vma buffer_vma;
-  unsigned int buffer_length;
+  size_t buffer_length;
 
   /* This variable may be set by the instruction decoder.  It suggests
       the number of bytes objdump should display on a single line.  If

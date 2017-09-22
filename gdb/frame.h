@@ -408,8 +408,7 @@ extern int get_frame_func_if_available (struct frame_info *fi, CORE_ADDR *);
    find_frame_symtab(), find_frame_function().  Each will need to be
    carefully considered to determine if the real intent was for it to
    apply to the PC or the adjusted PC.  */
-extern void find_frame_sal (struct frame_info *frame,
-			    struct symtab_and_line *sal);
+extern symtab_and_line find_frame_sal (frame_info *frame);
 
 /* Set the current source and line to the location given by frame
    FRAME, if possible.  */
@@ -784,9 +783,9 @@ extern void read_frame_arg (struct symbol *sym, struct frame_info *frame,
 extern void read_frame_local (struct symbol *sym, struct frame_info *frame,
 			      struct frame_arg *argp);
 
-extern void args_info (char *, int);
+extern void info_args_command (char *, int);
 
-extern void locals_info (char *, int);
+extern void info_locals_command (char *, int);
 
 extern void return_command (char *, int);
 

@@ -687,8 +687,6 @@ static void
 dummy_cmd (char *args, int from_tty)
 {
 }
-
-extern initialize_file_ftype _initialize_mem; /* -Wmissing-prototype */
 
 static struct cmd_list_element *mem_set_cmdlist;
 static struct cmd_list_element *mem_show_cmdlist;

@@ -68,10 +68,6 @@ sparc64_fpregset_supplies_p (struct gdbarch *gdbarch, int regnum)
 
   return 0;
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc64_nat (void);
 
 void
 _initialize_sparc64_nat (void)

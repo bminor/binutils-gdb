@@ -1645,7 +1645,7 @@ _bfd_coff_get_external_symbols (bfd *abfd)
   if (syms == NULL)
     {
       /* PR 21013: Provide an error message when the alloc fails.  */
-      _bfd_error_handler (_("%B: Not enough memory to allocate space for %lu symbols"),
+      _bfd_error_handler (_("%B: Not enough memory to allocate space for %Lu symbols"),
 			  abfd, size);
       return FALSE;
     }
@@ -1713,7 +1713,7 @@ _bfd_coff_read_string_table (bfd *abfd)
     {
       _bfd_error_handler
 	/* xgettext: c-format */
-	(_("%B: bad string table size %lu"), abfd, (unsigned long) strsize);
+	(_("%B: bad string table size %Lu"), abfd, strsize);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }

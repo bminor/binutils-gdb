@@ -566,6 +566,29 @@ read_section (bfd *           abfd,
 					  0, *section_size))
 	    return FALSE;
 	}
+
+      /* Paranoia - if we are reading in a string section, make sure that it
+	 is NUL terminated.  This is to prevent string functions from running
+	 off the end of the buffer.  Note - knowing the size of the buffer is
+	 not enough as some functions, eg strchr, do not have a range limited
+	 equivalent.
+
+	 FIXME: We ought to use a flag in the dwarf_debug_sections[] table to
+	 determine the nature of a debug section, rather than checking the
+	 section name as we do here.  */
+      if (*section_size > 0
+	  && (*section_buffer)[*section_size - 1] != 0
+	  && (strstr (section_name, "_str") || strstr (section_name, "names")))
+	{
+	  bfd_byte * new_buffer = malloc (*section_size + 1);
+
+	  _bfd_error_handler (_("warning: dwarf string section '%s' is not NUL terminated"),
+			      section_name);
+	  memcpy (new_buffer, *section_buffer, *section_size);
+	  new_buffer[*section_size] = 0;
+	  free (*section_buffer);
+	  *section_buffer = new_buffer;
+	}
     }
 
   /* It is possible to get a bad value for the offset into the section
@@ -573,9 +596,9 @@ read_section (bfd *           abfd,
   if (offset != 0 && offset >= *section_size)
     {
       /* xgettext: c-format */
-      _bfd_error_handler (_("Dwarf Error: Offset (%lu)"
-			    " greater than or equal to %s size (%lu)."),
-			  (long) offset, section_name, *section_size);
+      _bfd_error_handler (_("Dwarf Error: Offset (%llu)"
+			    " greater than or equal to %s size (%Lu)."),
+			  (long long) offset, section_name, *section_size);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -1943,8 +1966,8 @@ read_formatted_entries (struct comp_unit *unit, bfd_byte **bufp,
 	      break;
 	    default:
 	      _bfd_error_handler
-		(_("Dwarf Error: Unknown format content type %lu."),
-		 (unsigned long) content_type);
+		(_("Dwarf Error: Unknown format content type %Lu."),
+		 content_type);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -2047,8 +2070,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
   if (stash->dwarf_line_size < 16)
     {
       _bfd_error_handler
-	(_("Dwarf Error: Line info section is too small (%ld)"),
-	 (long) stash->dwarf_line_size);
+	(_("Dwarf Error: Line info section is too small (%Ld)"),
+	 stash->dwarf_line_size);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }
@@ -2073,12 +2096,12 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
       offset_size = 8;
     }
 
-  if (lh.total_length > stash->dwarf_line_size)
+  if (unit->line_offset + lh.total_length > stash->dwarf_line_size)
     {
       _bfd_error_handler
 	/* xgettext: c-format */
-	(_("Dwarf Error: Line info data is bigger (0x%lx) than the section (0x%lx)"),
-	 (long) lh.total_length, (long) stash->dwarf_line_size);
+	(_("Dwarf Error: Line info data is bigger (%#Lx) than the space remaining in the section (%#Lx)"),
+	 lh.total_length, stash->dwarf_line_size - unit->line_offset);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }
@@ -2854,7 +2877,8 @@ find_abstract_instance_name (struct comp_unit *unit,
       if (info_ptr == NULL)
 	{
 	  _bfd_error_handler
-	    (_("Dwarf Error: Unable to read alt ref %u."), die_ref);
+	    (_("Dwarf Error: Unable to read alt ref %llu."),
+	     (long long) die_ref);
 	  bfd_set_error (bfd_error_bad_value);
 	  return NULL;
 	}

@@ -396,9 +396,6 @@ amd64_linux_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
     return 0;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_amd64_linux_nat (void);
-
 void
 _initialize_amd64_linux_nat (void)
 {

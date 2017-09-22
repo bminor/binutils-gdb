@@ -237,25 +237,6 @@ extern struct symbol *block_iterator_first (const struct block *block,
 extern struct symbol *block_iterator_next (struct block_iterator *iterator);
 
 /* Initialize ITERATOR to point at the first symbol in BLOCK whose
-   SYMBOL_SEARCH_NAME is NAME (as tested using strcmp_iw), and return
-   that first symbol, or NULL if there are no such symbols.  */
-
-extern struct symbol *block_iter_name_first (const struct block *block,
-					     const char *name,
-					     struct block_iterator *iterator);
-
-/* Advance ITERATOR to point at the next symbol in BLOCK whose
-   SYMBOL_SEARCH_NAME is NAME (as tested using strcmp_iw), or NULL if
-   there are no more such symbols.  Don't call this if you've
-   previously received NULL from block_iterator_first or
-   block_iterator_next on this iteration.  And don't call it unless
-   ITERATOR was created by a previous call to block_iter_name_first
-   with the same NAME.  */
-
-extern struct symbol *block_iter_name_next (const char *name,
-					    struct block_iterator *iterator);
-
-/* Initialize ITERATOR to point at the first symbol in BLOCK whose
    SYMBOL_SEARCH_NAME is NAME, as tested using COMPARE (which must use
    the same conventions as strcmp_iw and be compatible with any
    block hashing function), and return that first symbol, or NULL
@@ -340,8 +321,9 @@ extern int block_find_non_opaque_type_preferred (struct symbol *sym,
    must be a struct block_iterator.  SYM points to the current symbol.  */
 
 #define ALL_BLOCK_SYMBOLS_WITH_NAME(block, name, iter, sym)		\
-  for ((sym) = block_iter_name_first ((block), (name), &(iter));	\
+  for ((sym) = block_iter_match_first ((block), (name),			\
+				       strcmp_iw, &(iter));		\
        (sym) != NULL;							\
-       (sym) = block_iter_name_next ((name), &(iter)))
+       (sym) = block_iter_match_next ((name), strcmp_iw, &(iter)))
 
 #endif /* BLOCK_H */

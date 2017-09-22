@@ -101,7 +101,7 @@ proc test_sort_common {} {
 
 test_sort_common
 
-set test1	"size/aligment change of common symbols"
+set test1	"size/alignment change of common symbols"
 set test1w1	"$test1 (warning 1)"
 set test1w2	"$test1 (warning 2)"
 set test1c1	"$test1 (change 1)"

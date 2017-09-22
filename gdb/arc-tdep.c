@@ -2135,9 +2135,6 @@ dump_arc_instruction_command (char *args, int from_tty)
   arc_insn_dump (insn);
 }
 
-/* Suppress warning from -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_arc_tdep;
-
 void
 _initialize_arc_tdep (void)
 {

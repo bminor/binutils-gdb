@@ -851,9 +851,6 @@ bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_bfin_tdep;
-
 void
 _initialize_bfin_tdep (void)
 {

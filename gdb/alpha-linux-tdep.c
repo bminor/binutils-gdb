@@ -388,9 +388,6 @@ alpha_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				    alpha_linux_gdb_signal_to_target);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_alpha_linux_tdep;
-
 void
 _initialize_alpha_linux_tdep (void)
 {

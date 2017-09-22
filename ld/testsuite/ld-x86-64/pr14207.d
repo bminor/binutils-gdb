@@ -1,6 +1,6 @@
 #name: PR ld/14207
 #as: --64
-#ld: -melf_x86_64 -shared -z relro -z now
+#ld: -melf_x86_64 -shared -z relro -z now --hash-style=sysv
 #readelf: -l --wide
 #target: x86_64-*-linux*
 

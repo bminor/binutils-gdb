@@ -39,13 +39,17 @@ if ![runto_main] then {
 }
 
 # Get PID of test program.
-set inferior_pid -1
+set inferior_pid ""
 set test "get inferior process ID"
-gdb_test_multiple "call getpid()" $test {
+gdb_test_multiple "call (int) getpid()" $test {
     -re ".* = ($decimal).*$gdb_prompt $" {
 	set inferior_pid $expect_out(1,string)
 	pass $test
     }
+}
+if {$inferior_pid == ""} {
+    untested "failed to get pid"
+    return
 }
 
 gdb_breakpoint ${srcfile}:[gdb_get_line_number "Set breakpoint here"]

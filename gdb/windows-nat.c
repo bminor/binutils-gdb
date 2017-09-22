@@ -1519,7 +1519,7 @@ get_windows_debug_event (struct target_ops *ops,
 		     "EXIT_PROCESS_DEBUG_EVENT"));
       if (!windows_initialization_done)
 	{
-	  target_terminal_ours ();
+	  target_terminal::ours ();
 	  target_mourn_inferior (inferior_ptid);
 	  error (_("During startup program exited with code 0x%x."),
 		 (unsigned int) current_event.u.ExitProcess.dwExitCode);
@@ -1626,7 +1626,7 @@ windows_wait (struct target_ops *ops,
 {
   int pid = -1;
 
-  target_terminal_ours ();
+  target_terminal::ours ();
 
   /* We loop when we get a non-standard exception rather than return
      with a SPURIOUS because resume can try and step or modify things,
@@ -1771,8 +1771,8 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
      current thread until we report an event out of windows_wait.  */
   inferior_ptid = pid_to_ptid (pid);
 
-  target_terminal_init ();
-  target_terminal_inferior ();
+  target_terminal::init ();
+  target_terminal::inferior ();
 
   windows_initialization_done = 0;
 
@@ -1912,7 +1912,7 @@ windows_attach (struct target_ops *ops, const char *args, int from_tty)
     }
 
   do_initial_windows_stuff (ops, pid, 1);
-  target_terminal_ours ();
+  target_terminal::ours ();
 }
 
 static void
@@ -2959,9 +2959,6 @@ windows_target (void)
   return t;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_windows_nat;
-
 void
 _initialize_windows_nat (void)
 {
@@ -3130,9 +3127,6 @@ windows_thread_alive (struct target_ops *ops, ptid_t ptid)
     ? FALSE : TRUE;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_check_for_gdb_ini;
-
 void
 _initialize_check_for_gdb_ini (void)
 {
@@ -3227,9 +3221,6 @@ bad_GetConsoleFontSize (HANDLE w, DWORD nFont)
   return size;
 }
  
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_loadable;
-
 /* Load any functions which may not be available in ancient versions
    of Windows.  */
 

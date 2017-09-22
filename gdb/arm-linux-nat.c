@@ -402,7 +402,8 @@ arm_linux_fetch_inferior_registers (struct target_ops *ops,
 	fetch_wmmx_regs (regcache);
       else if (tdep->vfp_register_count > 0
 	       && regno >= ARM_D0_REGNUM
-	       && regno <= ARM_D0_REGNUM + tdep->vfp_register_count)
+	       && (regno < ARM_D0_REGNUM + tdep->vfp_register_count
+		   || regno == ARM_FPSCR_REGNUM))
 	fetch_vfp_regs (regcache);
     }
 }
@@ -439,7 +440,8 @@ arm_linux_store_inferior_registers (struct target_ops *ops,
 	store_wmmx_regs (regcache);
       else if (tdep->vfp_register_count > 0
 	       && regno >= ARM_D0_REGNUM
-	       && regno <= ARM_D0_REGNUM + tdep->vfp_register_count)
+	       && (regno < ARM_D0_REGNUM + tdep->vfp_register_count
+		   || regno == ARM_FPSCR_REGNUM))
 	store_vfp_regs (regcache);
     }
 }
@@ -1280,8 +1282,6 @@ arm_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
   child_state = arm_linux_get_debug_reg_state (child_pid);
   *child_state = *parent_state;
 }
-
-void _initialize_arm_linux_nat (void);
 
 void
 _initialize_arm_linux_nat (void)

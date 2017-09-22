@@ -567,9 +567,6 @@ info_auxv_command (char *cmd, int from_tty)
     }
 }
 
-
-extern initialize_file_ftype _initialize_auxv; /* -Wmissing-prototypes; */
-
 void
 _initialize_auxv (void)
 {

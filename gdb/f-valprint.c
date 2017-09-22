@@ -34,7 +34,6 @@
 #include "block.h"
 #include "dictionary.h"
 
-extern void _initialize_f_valprint (void);
 static void info_common_command (char *, int);
 static void f77_get_dynamic_length_of_aggregate (struct type *);
 
@@ -310,22 +309,8 @@ f_val_print (struct type *type, int embedded_offset,
 				      original_value, &opts, 0, stream);
 	}
       else
-	{
-	  val_print_scalar_formatted (type, embedded_offset,
-				      original_value, options, 0, stream);
-	  /* C and C++ has no single byte int type, char is used instead.
-	     Since we don't know whether the value is really intended to
-	     be used as an integer or a character, print the character
-	     equivalent as well.  */
-	  if (TYPE_LENGTH (type) == 1)
-	    {
-	      LONGEST c;
-
-	      fputs_filtered (" ", stream);
-	      c = unpack_long (type, valaddr + embedded_offset);
-	      LA_PRINT_CHAR ((unsigned char) c, type, stream);
-	    }
-	}
+	val_print_scalar_formatted (type, embedded_offset,
+				    original_value, options, 0, stream);
       break;
 
     case TYPE_CODE_STRUCT:

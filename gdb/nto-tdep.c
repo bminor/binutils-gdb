@@ -142,7 +142,7 @@ nto_find_and_open_solib (const char *solib, unsigned o_flags,
       if (temp_pathname)
 	{
 	  if (ret >= 0)
-	    *temp_pathname = gdb_realpath (arch_path);
+	    *temp_pathname = gdb_realpath (arch_path).release ();
 	  else
 	    *temp_pathname = NULL;
 	}
@@ -532,9 +532,6 @@ nto_inferior_data (struct inferior *const inferior)
 
   return inf_data;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_nto_tdep;
 
 void
 _initialize_nto_tdep (void)

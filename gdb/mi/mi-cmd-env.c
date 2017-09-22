@@ -34,8 +34,6 @@
 
 static void env_mod_path (char *dirname, char **which_path);
 
-extern void _initialize_mi_cmd_env (void);
-
 static const char path_var_name[] = "PATH";
 static char *orig_path = NULL;
 
@@ -48,17 +46,13 @@ env_execute_cli_command (const char *cmd, const char *args)
 {
   if (cmd != 0)
     {
-      struct cleanup *old_cleanups;
-      char *run;
+      gdb::unique_xmalloc_ptr<char> run;
 
       if (args != NULL)
-	run = xstrprintf ("%s %s", cmd, args);
+	run.reset (xstrprintf ("%s %s", cmd, args));
       else
-	run = xstrdup (cmd);
-      old_cleanups = make_cleanup (xfree, run);
-      execute_command ( /*ui */ run, 0 /*from_tty */ );
-      do_cleanups (old_cleanups);
-      return;
+	run.reset (xstrdup (cmd));
+      execute_command ( /*ui */ run.get (), 0 /*from_tty */ );
     }
 }
 
@@ -80,11 +74,12 @@ mi_cmd_env_pwd (const char *command, char **argv, int argc)
      
   /* Otherwise the mi level is 2 or higher.  */
 
-  if (! getcwd (gdb_dirbuf, sizeof (gdb_dirbuf)))
+  gdb::unique_xmalloc_ptr<char> cwd (getcwd (NULL, 0));
+  if (cwd == NULL)
     error (_("-environment-pwd: error finding name of working directory: %s"),
            safe_strerror (errno));
-    
-  uiout->field_string ("cwd", gdb_dirbuf);
+
+  uiout->field_string ("cwd", cwd.get ());
 }
 
 /* Change working directory.  */

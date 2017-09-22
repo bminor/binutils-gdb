@@ -51,8 +51,9 @@ mi_cmd_info_ada_exceptions (const char *command, char **argv, int argc)
   exceptions = ada_exceptions_list (regexp);
   old_chain = make_cleanup (VEC_cleanup (ada_exc_info), &exceptions);
 
-  make_cleanup_ui_out_table_begin_end
-    (uiout, 2, VEC_length (ada_exc_info, exceptions), "ada-exceptions");
+  ui_out_emit_table table_emitter (uiout, 2,
+				   VEC_length (ada_exc_info, exceptions),
+				   "ada-exceptions");
   uiout->table_header (1, ui_left, "name", "Name");
   uiout->table_header (1, ui_left, "address", "Address");
   uiout->table_body ();

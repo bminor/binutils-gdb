@@ -1,6 +1,6 @@
 #source: ibt-plt-3.s
 #as: --x32
-#ld: -shared -m elf32_x86_64 -z ibtplt
+#ld: -shared -m elf32_x86_64 -z ibtplt --hash-style=sysv
 #objdump: -dw
 
 .*: +file format .*
@@ -9,8 +9,8 @@
 Disassembly of section .plt:
 
 0+1a0 <.plt>:
- +[a-f0-9]+:	ff 35 52 01 20 00    	pushq  0x200152\(%rip\)        # 2002f8 <_GLOBAL_OFFSET_TABLE_\+0x8>
- +[a-f0-9]+:	ff 25 54 01 20 00    	jmpq   \*0x200154\(%rip\)        # 200300 <_GLOBAL_OFFSET_TABLE_\+0x10>
+ +[a-f0-9]+:	ff 35 4a 01 20 00    	pushq  0x20014a\(%rip\)        # 2002f0 <_GLOBAL_OFFSET_TABLE_\+0x8>
+ +[a-f0-9]+:	ff 25 4c 01 20 00    	jmpq   \*0x20014c\(%rip\)        # 2002f8 <_GLOBAL_OFFSET_TABLE_\+0x10>
  +[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%rax\)
  +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
  +[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
@@ -25,12 +25,12 @@ Disassembly of section .plt.sec:
 
 0+1d0 <bar1@plt>:
  +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
- +[a-f0-9]+:	ff 25 2e 01 20 00    	jmpq   \*0x20012e\(%rip\)        # 200308 <bar1>
+ +[a-f0-9]+:	ff 25 26 01 20 00    	jmpq   \*0x200126\(%rip\)        # 200300 <bar1>
  +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%rax,%rax,1\)
 
 0+1e0 <bar2@plt>:
  +[a-f0-9]+:	f3 0f 1e fa          	endbr64 
- +[a-f0-9]+:	ff 25 26 01 20 00    	jmpq   \*0x200126\(%rip\)        # 200310 <bar2>
+ +[a-f0-9]+:	ff 25 1e 01 20 00    	jmpq   \*0x20011e\(%rip\)        # 200308 <bar2>
  +[a-f0-9]+:	66 0f 1f 44 00 00    	nopw   0x0\(%rax,%rax,1\)
 
 Disassembly of section .text:

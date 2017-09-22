@@ -1,3 +1,4 @@
+/* DO NOT EDIT!  -*- buffer-read-only: t -*- vi:set ro:  */
 /* CPU data for epiphany.
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.

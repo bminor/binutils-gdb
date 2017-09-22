@@ -2298,7 +2298,7 @@ md_assemble (char *str)
   const unsigned char *opindex_ptr;
   int next_opindex;
   int relaxable = 0;
-  unsigned long insn;
+  unsigned long insn = 0;
   unsigned long insn_size;
   char *f = NULL;
   int i;
@@ -3065,7 +3065,6 @@ md_assemble (char *str)
   dwarf2_emit_insn (0);
 
   /* Write out the instruction.  */
-
   if (relaxable && fc > 0)
     {
       insn_size = 2;

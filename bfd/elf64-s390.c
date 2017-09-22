@@ -863,7 +863,7 @@ elf_s390_check_relocs (bfd *abfd,
   for (rel = relocs; rel < rel_end; rel++)
     {
       unsigned int r_type;
-      unsigned long r_symndx;
+      unsigned int r_symndx;
       struct elf_link_hash_entry *h;
       Elf_Internal_Sym *isym;
 
@@ -2254,10 +2254,10 @@ invalid_tls_insn (bfd *input_bfd,
   howto = elf_howto_table + ELF64_R_TYPE (rel->r_info);
   _bfd_error_handler
     /* xgettext:c-format */
-    (_("%B(%A+0x%lx): invalid instruction for TLS relocation %s"),
+    (_("%B(%A+%#Lx): invalid instruction for TLS relocation %s"),
      input_bfd,
      input_section,
-     (long) rel->r_offset,
+     rel->r_offset,
      howto->name);
   bfd_set_error (bfd_error_bad_value);
 }
@@ -3293,10 +3293,10 @@ elf_s390_relocate_section (bfd *output_bfd,
 				      rel->r_offset) != (bfd_vma) -1)
 	_bfd_error_handler
 	  /* xgettext:c-format */
-	  (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	  (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	   input_bfd,
 	   input_section,
-	   (long) rel->r_offset,
+	   rel->r_offset,
 	   howto->name,
 	   h->root.root.string);
 
@@ -3350,9 +3350,9 @@ elf_s390_relocate_section (bfd *output_bfd,
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
+		(_("%B(%A+%#Lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
-		 (long) rel->r_offset, name, (int) r);
+		 rel->r_offset, name, (int) r);
 	      return FALSE;
 	    }
 	}
@@ -3745,7 +3745,9 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_PLTRELSZ:
-	      dyn.d_un.d_val = htab->elf.srelplt->size + htab->elf.irelplt->size;
+	      dyn.d_un.d_val = htab->elf.srelplt->size;
+	      if (htab->elf.irelplt)
+		dyn.d_un.d_val += htab->elf.irelplt->size;
 	      break;
 
 	    case DT_RELASZ:
@@ -3756,7 +3758,9 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 		 linker script arranges for .rela.plt to follow all
 		 other relocation sections, we don't have to worry
 		 about changing the DT_RELA entry.  */
-	      dyn.d_un.d_val -= htab->elf.srelplt->size + htab->elf.irelplt->size;
+	      dyn.d_un.d_val -= htab->elf.srelplt->size;
+	      if (htab->elf.irelplt)
+		dyn.d_un.d_val -= htab->elf.irelplt->size;
 	      break;
 	    }
 
@@ -3809,6 +3813,9 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
       Elf_Internal_Shdr *symtab_hdr;
 
       symtab_hdr = &elf_symtab_hdr (ibfd);
+
+      if (!is_s390_elf (ibfd))
+	continue;
 
       local_plt = elf_s390_local_plt (ibfd);
       if (local_plt != NULL)

@@ -815,9 +815,6 @@ message == an error message without a stack will be printed."),
 			&set_guile_list, &show_guile_list);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_guile;
-
 void
 _initialize_guile (void)
 {

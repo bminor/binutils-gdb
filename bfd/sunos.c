@@ -2314,7 +2314,7 @@ sunos_write_dynamic_symbol (bfd *output_bfd,
 }
 
 /* This is called for each reloc against an external symbol.  If this
-   is a reloc which are are going to copy as a dynamic reloc, then
+   is a reloc which are going to copy as a dynamic reloc, then
    copy it over, and tell the caller to not bother processing this
    reloc.  */
 

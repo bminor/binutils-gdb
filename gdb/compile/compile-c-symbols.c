@@ -107,7 +107,6 @@ error_symbol_once (struct compile_c_instance *context,
 {
   struct symbol_error search;
   struct symbol_error *err;
-  char *message;
 
   if (context->symbol_err_map == NULL)
     return;
@@ -117,10 +116,9 @@ error_symbol_once (struct compile_c_instance *context,
   if (err == NULL || err->message == NULL)
     return;
 
-  message = err->message;
+  gdb::unique_xmalloc_ptr<char> message (err->message);
   err->message = NULL;
-  make_cleanup (xfree, message);
-  error (_("%s"), message);
+  error (_("%s"), message.get ());
 }
 
 
@@ -128,10 +126,11 @@ error_symbol_once (struct compile_c_instance *context,
 /* Compute the name of the pointer representing a local symbol's
    address.  */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 symbol_substitution_name (struct symbol *sym)
 {
-  return concat ("__", SYMBOL_NATURAL_NAME (sym), "_ptr", (char *) NULL);
+  return gdb::unique_xmalloc_ptr<char>
+    (concat ("__", SYMBOL_NATURAL_NAME (sym), "_ptr", (char *) NULL));
 }
 
 /* Convert a given symbol, SYM, to the compiler's representation.
@@ -170,7 +169,7 @@ convert_one_symbol (struct compile_c_instance *context,
       gcc_decl decl;
       enum gcc_c_symbol_kind kind;
       CORE_ADDR addr = 0;
-      char *symbol_name = NULL;
+      gdb::unique_xmalloc_ptr<char> symbol_name;
 
       switch (SYMBOL_CLASS (sym.symbol))
 	{
@@ -290,13 +289,11 @@ convert_one_symbol (struct compile_c_instance *context,
 	     SYMBOL_NATURAL_NAME (sym.symbol),
 	     kind,
 	     sym_type,
-	     symbol_name, addr,
+	     symbol_name.get (), addr,
 	     filename, line);
 
 	  C_CTX (context)->c_ops->bind (C_CTX (context), decl, is_global);
 	}
-
-      xfree (symbol_name);
     }
 }
 
@@ -379,9 +376,7 @@ convert_symbol_bmsym (struct compile_c_instance *context,
       break;
 
     case mst_text_gnu_ifunc:
-      /* nodebug_text_gnu_ifunc_symbol would cause:
-	 function return type cannot be function  */
-      type = objfile_type (objfile)->nodebug_text_symbol;
+      type = objfile_type (objfile)->nodebug_text_gnu_ifunc_symbol;
       kind = GCC_C_SYMBOL_FUNCTION;
       addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
       break;
@@ -604,13 +599,11 @@ generate_vla_size (struct compile_c_instance *compiler,
 	    || TYPE_HIGH_BOUND_KIND (type) == PROP_LOCLIST)
 	  {
 	    const struct dynamic_prop *prop = &TYPE_RANGE_DATA (type)->high;
-	    char *name = c_get_range_decl_name (prop);
-	    struct cleanup *cleanup = make_cleanup (xfree, name);
+	    std::string name = c_get_range_decl_name (prop);
 
-	    dwarf2_compile_property_to_c (stream, name,
+	    dwarf2_compile_property_to_c (stream, name.c_str (),
 					  gdbarch, registers_used,
 					  prop, pc, sym);
-	    do_cleanups (cleanup);
 	  }
       }
       break;
@@ -663,8 +656,8 @@ generate_c_for_for_one_variable (struct compile_c_instance *compiler,
 
       if (SYMBOL_COMPUTED_OPS (sym) != NULL)
 	{
-	  char *generated_name = symbol_substitution_name (sym);
-	  struct cleanup *cleanup = make_cleanup (xfree, generated_name);
+	  gdb::unique_xmalloc_ptr<char> generated_name
+	    = symbol_substitution_name (sym);
 	  /* We need to emit to a temporary buffer in case an error
 	     occurs in the middle.  */
 	  string_file local_file;
@@ -672,10 +665,9 @@ generate_c_for_for_one_variable (struct compile_c_instance *compiler,
 	  SYMBOL_COMPUTED_OPS (sym)->generate_c_location (sym, local_file,
 							  gdbarch,
 							  registers_used,
-							  pc, generated_name);
+							  pc,
+							  generated_name.get ());
 	  stream.write (local_file.c_str (), local_file.size ());
-
-	  do_cleanups (cleanup);
 	}
       else
 	{

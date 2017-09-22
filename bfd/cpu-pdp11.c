@@ -31,7 +31,7 @@ const bfd_arch_info_type bfd_pdp11_arch =
     0,	/* only 1 machine */
     "pdp11",
     "pdp11",
-    1,		/* aligment = 16 bit */
+    1,		/* alignment = 16 bit */
     TRUE, /* the one and only */
     bfd_default_compatible,
     bfd_default_scan,

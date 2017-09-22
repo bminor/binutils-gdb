@@ -10,11 +10,9 @@ static void
 initialize_tdesc_s390_tevx_linux64 (void)
 {
   struct target_desc *result = allocate_target_description ();
-  struct tdesc_feature *feature;
-  struct tdesc_type *field_type;
-  struct tdesc_type *type;
-
   set_tdesc_architecture (result, bfd_scan_arch ("s390:31-bit"));
+
+  struct tdesc_feature *feature;
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.s390.core");
   tdesc_create_reg (feature, "pswm", 0, 1, "psw", 32, "uint32");
@@ -117,6 +115,7 @@ initialize_tdesc_s390_tevx_linux64 (void)
   tdesc_create_reg (feature, "tr15", 89, 1, "tdb", 64, "uint64");
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.s390.vx");
+  struct tdesc_type *field_type;
   field_type = tdesc_named_type (feature, "ieee_single");
   tdesc_create_vector (feature, "v4f", field_type, 4);
 
@@ -135,6 +134,7 @@ initialize_tdesc_s390_tevx_linux64 (void)
   field_type = tdesc_named_type (feature, "int64");
   tdesc_create_vector (feature, "v2i64", field_type, 2);
 
+  struct tdesc_type *type;
   type = tdesc_create_union (feature, "vec128");
   field_type = tdesc_named_type (feature, "v4f");
   tdesc_add_field (type, "v4_float", field_type);

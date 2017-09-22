@@ -888,9 +888,9 @@ arc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  /* Warn if different flags.  */
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: uses different e_flags (0x%lx) fields than "
-	       "previous modules (0x%lx)"),
-	     ibfd, (long) in_flags, (long) out_flags);
+	    (_("%B: uses different e_flags (%#x) fields than "
+	       "previous modules (%#x)"),
+	     ibfd, in_flags, out_flags);
 	  if (in_flags && out_flags)
 	    return FALSE;
 	  /* MWDT doesnt set the eflags hence make sure we choose the
@@ -1116,26 +1116,26 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 	  if (reloc_data.reloc_addend == 0)
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B(%A+0x%lx): CMEM relocation to `%s' is invalid, "
-		 "16 MSB should be 0x%04x (value is 0x%lx)"),
+	      (_("%B(%A+%#Lx): CMEM relocation to `%s' is invalid, "
+		 "16 MSB should be %#x (value is %#Lx)"),
 	       reloc_data.input_section->owner,
 	       reloc_data.input_section,
 	       reloc_data.reloc_offset,
 	       reloc_data.symbol_name,
 	       NPS_CMEM_HIGH_VALUE,
-	       (relocation));
+	       relocation);
 	  else
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B(%A+0x%lx): CMEM relocation to `%s+0x%lx' is invalid, "
-		 "16 MSB should be 0x%04x (value is 0x%lx)"),
+	      (_("%B(%A+%#Lx): CMEM relocation to `%s+%#Lx' is invalid, "
+		 "16 MSB should be %#x (value is %#Lx)"),
 	       reloc_data.input_section->owner,
 	       reloc_data.input_section,
 	       reloc_data.reloc_offset,
 	       reloc_data.symbol_name,
 	       reloc_data.reloc_addend,
 	       NPS_CMEM_HIGH_VALUE,
-	       (relocation));
+	       relocation);
 	  return bfd_reloc_overflow;
 	}
       break;
@@ -1182,7 +1182,7 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 	     + (reloc_data.reloc_offset))))
 #define SECTSTART (bfd_signed_vma) (reloc_data.sym_section->output_section->vma \
 				    + reloc_data.sym_section->output_offset)
-
+#define JLI (bfd_signed_vma) (reloc_data.sym_section->output_section->vma)
 #define _SDA_BASE_ (bfd_signed_vma) (reloc_data.sdata_begin_symbol_vma)
 #define TLS_REL (bfd_signed_vma) \
   ((elf_hash_table (info))->tls_sec->output_section->vma)
@@ -1359,6 +1359,7 @@ arc_do_relocation (bfd_byte * contents,
 #undef P
 #undef SECTSTAR
 #undef SECTSTART
+#undef JLI
 #undef _SDA_BASE_
 #undef none
 

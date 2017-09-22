@@ -14,6 +14,7 @@ SECTIONS
      treated as notes...   */
   
   .hash : { *(.hash) }
+  .gnu.hash : { *(.gnu.hash) }
   
   .dynstr : { *(.dynstr) }
   .dynsym : { *(.dynsym) }

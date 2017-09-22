@@ -251,6 +251,17 @@ if ![info exists LDFLAGS] then {
     set LDFLAGS {}
 }
 
+# Set LD_CLASS to "64bit" for 64-bit LD.
+if { ![info exists LD_CLASS] } then {
+    set REAL_LD [findfile $base_dir/.libs/ld-new .libs/ld-new $LD [transform ld]]
+    set readelf_output [run_host_cmd "$READELF" "-h $REAL_LD"]
+    if { [regexp {[ \t]+Class:[ \t]+ELF64} $readelf_output] } then {
+	set LD_CLASS "64bit"
+    } else {
+	set LD_CLASS "32bit"
+    }
+}
+
 # Set PLT_CFLAGS to "-fplt" if target compiler supports it.
 
 if { ![info exists PLT_CFLAGS] } then {

@@ -351,7 +351,9 @@ nlm_swap_auxiliary_headers_in (bfd *abfd)
 	      bfd_byte *contents;
 	      bfd_byte *p, *pend;
 
-	      BFD_ASSERT (hdrLength == 0 && hdr == NULL);
+	      /* See PR 21840 for a reproducer.  */
+	      if (hdrLength != 0 || hdr != NULL)
+		return FALSE;
 
 	      pos = bfd_tell (abfd);
 	      if (bfd_seek (abfd, dataOffset, SEEK_SET) != 0)

@@ -384,20 +384,20 @@ static const struct quick_symbol_functions debug_sym_quick_functions =
 
 /* Debugging version of struct sym_probe_fns.  */
 
-static VEC (probe_p) *
+static const std::vector<probe *> &
 debug_sym_get_probes (struct objfile *objfile)
 {
   const struct debug_sym_fns_data *debug_data
     = ((const struct debug_sym_fns_data *)
        objfile_data (objfile, symfile_debug_objfile_data_key));
-  VEC (probe_p) *retval;
 
-  retval = debug_data->real_sf->sym_probe_fns->sym_get_probes (objfile);
+  const std::vector<probe *> &retval
+    = debug_data->real_sf->sym_probe_fns->sym_get_probes (objfile);
 
   fprintf_filtered (gdb_stdlog,
 		    "probes->sym_get_probes (%s) = %s\n",
 		    objfile_debug_name (objfile),
-		    host_address_to_string (retval));
+		    host_address_to_string (retval.data ()));
 
   return retval;
 }
@@ -672,8 +672,6 @@ show_debug_symfile (struct ui_file *file, int from_tty,
 {
   fprintf_filtered (file, _("Symfile debugging is %s.\n"), value);
 }
-
-initialize_file_ftype _initialize_symfile_debug;
 
 void
 _initialize_symfile_debug (void)

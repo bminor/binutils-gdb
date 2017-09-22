@@ -39,7 +39,8 @@
 
 /* Number of registers in `struct fpreg' from <machine/reg.h>.  The
    first 32 hold floating point registers.  33 holds the FSR.  The
-   34th is a dummy for padding.  */
+   34th holds FIR on FreeBSD 12.0 and newer kernels.  On older kernels
+   it was a zero-filled dummy for padding.  */
 #define MIPS_FBSD_NUM_FPREGS	34
 
 /* Supply a single register.  The register size might not match, so use
@@ -72,14 +73,23 @@ mips_fbsd_supply_fpregs (struct regcache *regcache, int regnum,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const gdb_byte *regs = (const gdb_byte *) fpregs;
-  int i, fp0num, fsrnum;
+  int i, fp0num;
 
   fp0num = mips_regnum (gdbarch)->fp0;
-  fsrnum = mips_regnum (gdbarch)->fp_control_status;
-  for (i = fp0num; i <= fsrnum; i++)
-    if (regnum == i || regnum == -1)
-      mips_fbsd_supply_reg (regcache, i,
-			    regs + (i - fp0num) * regsize, regsize);
+  for (i = 0; i <= 32; i++)
+    if (regnum == fp0num + i || regnum == -1)
+      mips_fbsd_supply_reg (regcache, fp0num + i,
+			    regs + i * regsize, regsize);
+  if (regnum == mips_regnum (gdbarch)->fp_control_status || regnum == -1)
+    mips_fbsd_supply_reg (regcache, mips_regnum (gdbarch)->fp_control_status,
+			  regs + 32 * regsize, regsize);
+  if ((regnum == mips_regnum (gdbarch)->fp_implementation_revision
+       || regnum == -1)
+      && extract_unsigned_integer (regs + 33 * regsize, regsize,
+				   gdbarch_byte_order (gdbarch)) != 0)
+    mips_fbsd_supply_reg (regcache,
+			  mips_regnum (gdbarch)->fp_implementation_revision,
+			  regs + 33 * regsize, regsize);
 }
 
 /* Supply the general-purpose registers stored in GREGS to REGCACHE.
@@ -109,14 +119,21 @@ mips_fbsd_collect_fpregs (const struct regcache *regcache, int regnum,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   gdb_byte *regs = (gdb_byte *) fpregs;
-  int i, fp0num, fsrnum;
+  int i, fp0num;
 
   fp0num = mips_regnum (gdbarch)->fp0;
-  fsrnum = mips_regnum (gdbarch)->fp_control_status;
-  for (i = fp0num; i <= fsrnum; i++)
-    if (regnum == i || regnum == -1)
-      mips_fbsd_collect_reg (regcache, i,
-			     regs + (i - fp0num) * regsize, regsize);
+  for (i = 0; i < 32; i++)
+    if (regnum == fp0num + i || regnum == -1)
+      mips_fbsd_collect_reg (regcache, fp0num + i,
+			     regs + i * regsize, regsize);
+  if (regnum == mips_regnum (gdbarch)->fp_control_status || regnum == -1)
+    mips_fbsd_collect_reg (regcache, mips_regnum (gdbarch)->fp_control_status,
+			   regs + 32 * regsize, regsize);
+  if (regnum == mips_regnum (gdbarch)->fp_implementation_revision
+      || regnum == -1)
+    mips_fbsd_collect_reg (regcache,
+			   mips_regnum (gdbarch)->fp_implementation_revision,
+			   regs + 33 * regsize, regsize);
 }
 
 /* Collect the general-purpose registers from REGCACHE and store them
@@ -517,10 +534,6 @@ mips_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	       mips_fbsd_ilp32_fetch_link_map_offsets :
 	       mips_fbsd_lp64_fetch_link_map_offsets));
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_mips_fbsd_tdep (void);
 
 void
 _initialize_mips_fbsd_tdep (void)

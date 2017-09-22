@@ -177,12 +177,12 @@ stdio_file::open (const char *name, const char *mode)
       m_close_p = false;
     }
 
-  FILE *f = gdb_fopen_cloexec (name, mode);
+  gdb_file_up f = gdb_fopen_cloexec (name, mode);
 
   if (f == NULL)
     return false;
 
-  set_stream (f);
+  set_stream (f.release ());
   m_close_p = true;
 
   return true;

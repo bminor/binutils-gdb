@@ -2,7 +2,7 @@
 #source: tls128.s
 #source: tls-hx.s
 #as: --no-underscore --em=criself
-#ld: -m crislinux --shared
+#ld: -m crislinux --shared --hash-style=sysv
 #readelf: -a -x 6 -x 8 -x 5
 
 # A R_CRIS_16_GOT_TPREL in a DSO against a hidden symbol, at an offset

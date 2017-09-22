@@ -52,12 +52,20 @@ extern char *unpack_varlen_hex (char *buff, ULONGEST *result);
 
 extern int hex2bin (const char *hex, gdb_byte *bin, int count);
 
+/* Like hex2bin, but return a std::string.  */
+
+extern std::string hex2str (const char *hex);
+
 /* Convert some bytes to a hexadecimal representation.  BIN holds the
    bytes to convert.  COUNT says how many bytes to convert.  The
    resulting characters are stored in HEX, followed by a NUL
    character.  Returns the number of bytes actually converted.  */
 
 extern int bin2hex (const gdb_byte *bin, char *hex, int count);
+
+/* Overloaded version of bin2hex that returns a std::string.  */
+
+extern std::string bin2hex (const gdb_byte *bin, int count);
 
 /* Convert BUFFER, binary data at least LEN_UNITS addressable memory units
    long, into escaped binary data in OUT_BUF.  Only copy memory units that fit

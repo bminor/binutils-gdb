@@ -119,9 +119,6 @@ arm_symbian_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_SYMBIAN;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_arm_symbian_tdep;
-
 void
 _initialize_arm_symbian_tdep (void)
 {

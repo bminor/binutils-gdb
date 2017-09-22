@@ -22,13 +22,12 @@
 void
 init_target_desc (struct target_desc *tdesc)
 {
-  int offset, i;
+  int offset = 0;
 
-  offset = 0;
-  for (i = 0; i < tdesc->num_registers; i++)
+  for (reg *reg : tdesc->reg_defs)
     {
-      tdesc->reg_defs[i].offset = offset;
-      offset += tdesc->reg_defs[i].size;
+      reg->offset = offset;
+      offset += reg->size;
     }
 
   tdesc->registers_size = offset / 8;
@@ -38,16 +37,21 @@ init_target_desc (struct target_desc *tdesc)
   gdb_assert (2 * tdesc->registers_size + 32 <= PBUFSIZ);
 }
 
+struct target_desc *
+allocate_target_description (void)
+{
+  return new target_desc ();
+}
+
 #ifndef IN_PROCESS_AGENT
 
-static const struct target_desc default_description = { 0 };
+static const struct target_desc default_description {};
 
 void
 copy_target_description (struct target_desc *dest,
 			 const struct target_desc *src)
 {
   dest->reg_defs = src->reg_defs;
-  dest->num_registers = src->num_registers;
   dest->expedite_regs = src->expedite_regs;
   dest->registers_size = src->registers_size;
   dest->xmltarget = src->xmltarget;
@@ -62,4 +66,174 @@ current_target_desc (void)
   return current_process ()->tdesc;
 }
 
+/* See arch/tdesc.h.  */
+
+void
+set_tdesc_architecture (struct target_desc *target_desc,
+			const char *name)
+{
+  target_desc->arch = xstrdup (name);
+}
+
+/* See arch/tdesc.h.  */
+
+void
+set_tdesc_osabi (struct target_desc *target_desc, const char *name)
+{
+  target_desc->osabi = xstrdup (name);
+}
+
+/* Return a string which is of XML format, including XML target
+   description to be sent to GDB.  */
+
+const char *
+tdesc_get_features_xml (target_desc *tdesc)
+{
+  /* Either .xmltarget or .features is not NULL.  */
+  gdb_assert (tdesc->xmltarget != NULL
+	      || (tdesc->features != NULL
+		  && tdesc->arch != NULL
+		  && tdesc->osabi != NULL));
+
+  if (tdesc->xmltarget == NULL)
+    {
+      std::string buffer ("@<?xml version=\"1.0\"?>");
+
+      buffer += "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">";
+      buffer += "<target>";
+      buffer += "<architecture>";
+      buffer += tdesc->arch;
+      buffer += "</architecture>";
+
+      buffer += "<osabi>";
+      buffer += tdesc->osabi;
+      buffer += "</osabi>";
+
+      char *xml;
+
+      for (int i = 0; VEC_iterate (char_ptr, tdesc->features, i, xml); i++)
+	{
+	  buffer += "<xi:include href=\"";
+	  buffer += xml;
+	  buffer += "\"/>";
+	}
+
+      buffer += "</target>";
+
+      tdesc->xmltarget = xstrdup (buffer.c_str ());
+    }
+
+  return tdesc->xmltarget;
+}
 #endif
+
+struct tdesc_type
+{};
+
+/* See arch/tdesc.h.  */
+
+struct tdesc_feature *
+tdesc_create_feature (struct target_desc *tdesc, const char *name,
+		      const char *xml)
+{
+#ifndef IN_PROCESS_AGENT
+  VEC_safe_push (char_ptr, tdesc->features, xstrdup (xml));
+#endif
+  return tdesc;
+}
+
+/* See arch/tdesc.h.  */
+
+struct tdesc_type *
+tdesc_create_flags (struct tdesc_feature *feature, const char *name,
+		    int size)
+{
+  return NULL;
+}
+
+/* See arch/tdesc.h.  */
+
+void
+tdesc_add_flag (struct tdesc_type *type, int start,
+		const char *flag_name)
+{}
+
+/* See arch/tdesc.h.  */
+
+struct tdesc_type *
+tdesc_named_type (const struct tdesc_feature *feature, const char *id)
+{
+  return NULL;
+}
+
+/* See arch/tdesc.h.  */
+
+struct tdesc_type *
+tdesc_create_union (struct tdesc_feature *feature, const char *id)
+{
+  return NULL;
+}
+
+/* See arch/tdesc.h.  */
+
+struct tdesc_type *
+tdesc_create_struct (struct tdesc_feature *feature, const char *id)
+{
+  return NULL;
+}
+
+/* See arch/tdesc.h.  */
+
+void
+tdesc_create_reg (struct tdesc_feature *feature, const char *name,
+		  int regnum, int save_restore, const char *group,
+		  int bitsize, const char *type)
+{
+  struct target_desc *tdesc = (struct target_desc *) feature;
+
+  while (tdesc->reg_defs.size () < regnum)
+    {
+      struct reg *reg = XCNEW (struct reg);
+
+      reg->name = "";
+      reg->size = 0;
+      tdesc->reg_defs.push_back (reg);
+    }
+
+  gdb_assert (regnum == 0
+	      || regnum == tdesc->reg_defs.size ());
+
+  struct reg *reg = XCNEW (struct reg);
+
+  reg->name = name;
+  reg->size = bitsize;
+  tdesc->reg_defs.push_back (reg);
+}
+
+/* See arch/tdesc.h.  */
+
+struct tdesc_type *
+tdesc_create_vector (struct tdesc_feature *feature, const char *name,
+		     struct tdesc_type *field_type, int count)
+{
+  return NULL;
+}
+
+void
+tdesc_add_bitfield (struct tdesc_type *type, const char *field_name,
+		    int start, int end)
+{}
+
+/* See arch/tdesc.h.  */
+
+void
+tdesc_add_field (struct tdesc_type *type, const char *field_name,
+		 struct tdesc_type *field_type)
+{}
+
+/* See arch/tdesc.h.  */
+
+void
+tdesc_set_struct_size (struct tdesc_type *type, int size)
+{
+}

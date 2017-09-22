@@ -1279,8 +1279,6 @@ m68k_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
     return;
 }
 
-extern initialize_file_ftype _initialize_m68k_tdep; /* -Wmissing-prototypes */
-
 void
 _initialize_m68k_tdep (void)
 {

@@ -1,6 +1,6 @@
 #source: tls-local-54.s
 #as: --pic --no-underscore --em=criself -I$srcdir/$subdir
-#ld: --shared -m crislinux
+#ld: --shared -m crislinux --hash-style=sysv
 #objdump: -s -t -R -p -T
 
 # A DSO with a R_CRIS_32_GOT_GD against a local symbol.

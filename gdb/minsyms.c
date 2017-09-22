@@ -52,6 +52,23 @@
 #include "cli/cli-utils.h"
 #include "symbol.h"
 
+/* See minsyms.h.  */
+
+bool
+msymbol_is_text (minimal_symbol *msymbol)
+{
+  switch (MSYMBOL_TYPE (msymbol))
+    {
+    case mst_text:
+    case mst_text_gnu_ifunc:
+    case mst_solib_trampoline:
+    case mst_file_text:
+      return true;
+    default:
+      return false;
+    }
+}
+
 /* Accumulate the minimal symbols for each objfile in bunches of BUNCH_SIZE.
    At the end, copy them all into one newly allocated location on an objfile's
    per-BFD storage obstack.  */
@@ -73,7 +90,7 @@ msymbol_hash_iw (const char *string)
 
   while (*string && *string != '(')
     {
-      string = skip_spaces_const (string);
+      string = skip_spaces (string);
       if (*string && *string != '(')
 	{
 	  hash = SYMBOL_HASH_NEXT (hash, *string);

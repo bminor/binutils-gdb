@@ -695,7 +695,7 @@ try_thread_db_load (const char *library, int check_auto_load_safe)
 
   /* Do not save system library name, that one is always trusted.  */
   if (strchr (library, '/') != NULL)
-    info->filename = gdb_realpath (library);
+    info->filename = gdb_realpath (library).release ();
 
   if (try_thread_db_load_1 (info))
     return 1;
@@ -1410,6 +1410,37 @@ thread_db_extra_thread_info (struct target_ops *self,
   return NULL;
 }
 
+/* Return pointer to the thread_info struct which corresponds to
+   THREAD_HANDLE (having length HANDLE_LEN).  */
+
+static struct thread_info *
+thread_db_thread_handle_to_thread_info (struct target_ops *ops,
+					const gdb_byte *thread_handle,
+					int handle_len,
+					struct inferior *inf)
+{
+  struct thread_info *tp;
+  thread_t handle_tid;
+
+  /* Thread handle sizes must match in order to proceed.  We don't use an
+     assert here because the resulting internal error will cause GDB to
+     exit.  This isn't necessarily an internal error due to the possibility
+     of garbage being passed as the thread handle via the python interface.  */
+  if (handle_len != sizeof (handle_tid))
+    error (_("Thread handle size mismatch: %d vs %zu (from libthread_db)"),
+	   handle_len, sizeof (handle_tid));
+
+  handle_tid = * (const thread_t *) thread_handle;
+
+  ALL_NON_EXITED_THREADS (tp)
+    {
+      if (tp->inf == inf && tp->priv != NULL && handle_tid == tp->priv->tid)
+        return tp;
+    }
+
+  return NULL;
+}
+
 /* Get the address of the thread local variable in load module LM which
    is stored at OFFSET within the thread local storage for thread PTID.  */
 
@@ -1560,7 +1591,7 @@ info_auto_load_libthread_db (char *args, int from_tty)
   char *pids;
   int i;
 
-  cs = skip_spaces_const (cs);
+  cs = skip_spaces (cs);
   if (*cs)
     error (_("'info auto-load libthread-db' does not accept any parameters"));
 
@@ -1623,45 +1654,49 @@ info_auto_load_libthread_db (char *args, int from_tty)
   if (info_count > 0 && args == auto_load_info_scripts_pattern_nl)
     uiout->text ("\n");
 
-  make_cleanup_ui_out_table_begin_end (uiout, 2, unique_filenames,
-				       "LinuxThreadDbTable");
+  {
+    ui_out_emit_table table_emitter (uiout, 2, unique_filenames,
+				     "LinuxThreadDbTable");
 
-  uiout->table_header (max_filename_len, ui_left, "filename", "Filename");
-  uiout->table_header (pids_len, ui_left, "PIDs", "Pids");
-  uiout->table_body ();
+    uiout->table_header (max_filename_len, ui_left, "filename", "Filename");
+    uiout->table_header (pids_len, ui_left, "PIDs", "Pids");
+    uiout->table_body ();
 
-  pids = (char *) xmalloc (max_pids_len + 1);
-  make_cleanup (xfree, pids);
+    pids = (char *) xmalloc (max_pids_len + 1);
+    make_cleanup (xfree, pids);
 
-  /* Note I is incremented inside the cycle, not at its end.  */
-  for (i = 0; i < info_count;)
-    {
-      ui_out_emit_tuple tuple_emitter (uiout, NULL);
-      char *pids_end;
+    /* Note I is incremented inside the cycle, not at its end.  */
+    for (i = 0; i < info_count;)
+      {
+	ui_out_emit_tuple tuple_emitter (uiout, NULL);
+	char *pids_end;
 
-      info = array[i];
-      uiout->field_string ("filename", info->filename);
-      pids_end = pids;
+	info = array[i];
+	uiout->field_string ("filename", info->filename);
+	pids_end = pids;
 
-      while (i < info_count && strcmp (info->filename, array[i]->filename) == 0)
-	{
-	  if (pids_end != pids)
-	    {
-	      *pids_end++ = ',';
-	      *pids_end++ = ' ';
-	    }
-	  pids_end += xsnprintf (pids_end, &pids[max_pids_len + 1] - pids_end,
-				 "%u", array[i]->pid);
-	  gdb_assert (pids_end < &pids[max_pids_len + 1]);
+	while (i < info_count && strcmp (info->filename,
+					 array[i]->filename) == 0)
+	  {
+	    if (pids_end != pids)
+	      {
+		*pids_end++ = ',';
+		*pids_end++ = ' ';
+	      }
+	    pids_end += xsnprintf (pids_end,
+				   &pids[max_pids_len + 1] - pids_end,
+				   "%u", array[i]->pid);
+	    gdb_assert (pids_end < &pids[max_pids_len + 1]);
 
-	  i++;
-	}
-      *pids_end = '\0';
+	    i++;
+	  }
+	*pids_end = '\0';
 
-      uiout->field_string ("pids", pids);
+	uiout->field_string ("pids", pids);
 
-      uiout->text ("\n");
-    }
+	uiout->text ("\n");
+      }
+  }
 
   do_cleanups (back_to);
 
@@ -1687,13 +1722,11 @@ init_thread_db_ops (void)
     = thread_db_get_thread_local_address;
   thread_db_ops.to_extra_thread_info = thread_db_extra_thread_info;
   thread_db_ops.to_get_ada_task_ptid = thread_db_get_ada_task_ptid;
+  thread_db_ops.to_thread_handle_to_thread_info = thread_db_thread_handle_to_thread_info;
   thread_db_ops.to_magic = OPS_MAGIC;
 
   complete_target_initialization (&thread_db_ops);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_thread_db;
 
 void
 _initialize_thread_db (void)

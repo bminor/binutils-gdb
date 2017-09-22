@@ -1285,7 +1285,7 @@ procfs_create_inferior (struct target_ops *ops, const char *exec_file,
     }
   if (!target_is_pushed (ops))
     push_target (ops);
-  target_terminal_init ();
+  target_terminal::init ();
 
   if (exec_bfd != NULL
       || (symfile_objfile != NULL && symfile_objfile->obfd != NULL))
@@ -1532,8 +1532,6 @@ init_procfs_targets (void)
 }
 
 #define OSTYPE_NTO 1
-
-extern initialize_file_ftype _initialize_procfs;
 
 void
 _initialize_procfs (void)

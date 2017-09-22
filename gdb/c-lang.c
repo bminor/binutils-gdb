@@ -35,8 +35,6 @@
 #include <ctype.h>
 #include "gdbcore.h"
 
-extern void _initialize_c_language (void);
-
 /* Given a C string type, STR_TYPE, return the corresponding target
    character set name.  */
 
@@ -831,7 +829,7 @@ static const char *c_extensions[] =
   ".c", NULL
 };
 
-const struct language_defn c_language_defn =
+extern const struct language_defn c_language_defn =
 {
   "c",				/* Language name */
   "C",
@@ -865,7 +863,7 @@ const struct language_defn c_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   c_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
@@ -975,7 +973,7 @@ static const char *cplus_extensions[] =
   ".C", ".cc", ".cp", ".cpp", ".cxx", ".c++", NULL
 };
 
-const struct language_defn cplus_language_defn =
+extern const struct language_defn cplus_language_defn =
 {
   "c++",			/* Language name */
   "C++",
@@ -1009,7 +1007,7 @@ const struct language_defn cplus_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   cplus_language_arch_info,
   default_print_array_index,
   cp_pass_by_reference,
@@ -1028,7 +1026,7 @@ static const char *asm_extensions[] =
   ".s", ".sx", ".S", NULL
 };
 
-const struct language_defn asm_language_defn =
+extern const struct language_defn asm_language_defn =
 {
   "asm",			/* Language name */
   "assembly",
@@ -1062,7 +1060,7 @@ const struct language_defn asm_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   c_language_arch_info, 	/* FIXME: la_language_arch_info.  */
   default_print_array_index,
   default_pass_by_reference,
@@ -1081,7 +1079,7 @@ const struct language_defn asm_language_defn =
    to do some simple operations when debugging applications that use
    a language currently not supported by GDB.  */
 
-const struct language_defn minimal_language_defn =
+extern const struct language_defn minimal_language_defn =
 {
   "minimal",			/* Language name */
   "Minimal",
@@ -1115,7 +1113,7 @@ const struct language_defn minimal_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   c_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
@@ -1128,12 +1126,3 @@ const struct language_defn minimal_language_defn =
   NULL,
   LANG_MAGIC
 };
-
-void
-_initialize_c_language (void)
-{
-  add_language (&c_language_defn);
-  add_language (&cplus_language_defn);
-  add_language (&asm_language_defn);
-  add_language (&minimal_language_defn);
-}

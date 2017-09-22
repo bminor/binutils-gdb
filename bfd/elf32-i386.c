@@ -18,16 +18,9 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-#include "sysdep.h"
-#include "bfd.h"
-#include "bfdlink.h"
-#include "libbfd.h"
-#include "elf-bfd.h"
+#include "elfxx-x86.h"
 #include "elf-nacl.h"
 #include "elf-vxworks.h"
-#include "bfd_stdint.h"
-#include "objalloc.h"
-#include "hashtab.h"
 #include "dwarf2.h"
 #include "opcode/i386.h"
 
@@ -529,18 +522,6 @@ elf_i386_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
    early in the link process, elf_i386_finish_dynamic_sections is
    one of the last functions.  */
 
-
-/* The name of the dynamic interpreter.  This is put in the .interp
-   section.  */
-
-#define ELF_DYNAMIC_INTERPRETER "/usr/lib/libc.so.1"
-
-/* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
-   copying dynamic variables from a shared lib into an app's dynbss
-   section, and instead use a dynamic relocation to point into the
-   shared lib.  */
-#define ELIMINATE_COPY_RELOCS 1
-
 /* The size in bytes of an entry in the lazy procedure linkage table.  */
 
 #define LAZY_PLT_ENTRY_SIZE 16
@@ -675,10 +656,6 @@ static const bfd_byte elf_i386_pic_non_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
 
 static const bfd_byte elf_i386_eh_frame_lazy_plt[] =
 {
-#define PLT_CIE_LENGTH		20
-#define PLT_FDE_LENGTH		36
-#define PLT_FDE_START_OFFSET	4 + PLT_CIE_LENGTH + 8
-#define PLT_FDE_LEN_OFFSET	4 + PLT_CIE_LENGTH + 12
   PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
   0, 0, 0, 0,			/* CIE ID */
   1,				/* CIE version */
@@ -771,94 +748,21 @@ static const bfd_byte elf_i386_eh_frame_non_lazy_plt[] =
   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
 };
 
-struct elf_i386_lazy_plt_layout
-{
-  /* The first entry in an absolute lazy procedure linkage table looks
-     like this.  */
-  const bfd_byte *plt0_entry;
-  unsigned int plt0_entry_size;
-
-  /* Offsets into plt0_entry that are to be replaced with GOT[1] and
-     GOT[2].  */
-  unsigned int plt0_got1_offset;
-  unsigned int plt0_got2_offset;
-
-  /* Later entries in an absolute lazy procedure linkage table look
-     like this.  */
-  const bfd_byte *plt_entry;
-  unsigned int plt_entry_size;
-
-  /* Offsets into plt_entry that are to be replaced with...  */
-  unsigned int plt_got_offset;    /* ... address of this symbol in .got. */
-  unsigned int plt_reloc_offset;  /* ... offset into relocation table. */
-  unsigned int plt_plt_offset;    /* ... offset to start of .plt. */
-
-  /* Offset into plt_entry where the initial value of the GOT entry
-     points.  */
-  unsigned int plt_lazy_offset;
-
-  /* The first entry in a PIC lazy procedure linkage table looks like
-     this.  */
-  const bfd_byte *pic_plt0_entry;
-
-  /* Subsequent entries in a PIC lazy procedure linkage table look
-     like this.  */
-  const bfd_byte *pic_plt_entry;
-
-  /* .eh_frame covering the lazy .plt section.  */
-  const bfd_byte *eh_frame_plt;
-  unsigned int eh_frame_plt_size;
-};
-
-struct elf_i386_non_lazy_plt_layout
-{
-  /* Entries in an absolute non-lazy procedure linkage table look like
-     this.  */
-  const bfd_byte *plt_entry;
-  /* Entries in a PIC non-lazy procedure linkage table look like this.  */
-  const bfd_byte *pic_plt_entry;
-
-  unsigned int plt_entry_size;
-
-  /* Offsets into plt_entry that are to be replaced with...  */
-  unsigned int plt_got_offset;    /* ... address of this symbol in .got. */
-
-  /* .eh_frame covering the non-lazy .plt section.  */
-  const bfd_byte *eh_frame_plt;
-  unsigned int eh_frame_plt_size;
-};
-
-struct elf_i386_plt_layout
-{
-  /* The first entry in a lazy procedure linkage table looks like this.  */
-  const bfd_byte *plt0_entry;
-  /* Entries in a procedure linkage table look like this.  */
-  const bfd_byte *plt_entry;
-  unsigned int plt_entry_size;
-
-  /* 1 has PLT0.  */
-  unsigned int has_plt0;
-
-  /* Offsets into plt_entry that are to be replaced with...  */
-  unsigned int plt_got_offset;    /* ... address of this symbol in .got. */
-
-  /* .eh_frame covering the .plt section.  */
-  const bfd_byte *eh_frame_plt;
-  unsigned int eh_frame_plt_size;
-};
-
 /* These are the standard parameters.  */
-static const struct elf_i386_lazy_plt_layout elf_i386_lazy_plt =
+static const struct elf_x86_lazy_plt_layout elf_i386_lazy_plt =
   {
     elf_i386_lazy_plt0_entry,           /* plt0_entry */
     sizeof (elf_i386_lazy_plt0_entry),  /* plt0_entry_size */
-    2,                                  /* plt0_got1_offset */
-    8,                                  /* plt0_got2_offset */
     elf_i386_lazy_plt_entry,            /* plt_entry */
     LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
+    2,                                  /* plt0_got1_offset */
+    8,                                  /* plt0_got2_offset */
+    0,                                  /* plt0_got2_insn_end */
     2,                                  /* plt_got_offset */
     7,                                  /* plt_reloc_offset */
     12,                                 /* plt_plt_offset */
+    0,                                  /* plt_got_insn_size */
+    0,                                  /* plt_plt_insn_end */
     6,                                  /* plt_lazy_offset */
     elf_i386_pic_lazy_plt0_entry,       /* pic_plt0_entry */
     elf_i386_pic_lazy_plt_entry,        /* pic_plt_entry */
@@ -866,27 +770,31 @@ static const struct elf_i386_lazy_plt_layout elf_i386_lazy_plt =
     sizeof (elf_i386_eh_frame_lazy_plt) /* eh_frame_plt_size */
   };
 
-static const struct elf_i386_non_lazy_plt_layout elf_i386_non_lazy_plt =
+static const struct elf_x86_non_lazy_plt_layout elf_i386_non_lazy_plt =
   {
     elf_i386_non_lazy_plt_entry,        /* plt_entry */
     elf_i386_pic_non_lazy_plt_entry,    /* pic_plt_entry */
     NON_LAZY_PLT_ENTRY_SIZE,            /* plt_entry_size */
     2,                                  /* plt_got_offset */
+    0,                                  /* plt_got_insn_size */
     elf_i386_eh_frame_non_lazy_plt,     /* eh_frame_plt */
     sizeof (elf_i386_eh_frame_non_lazy_plt) /* eh_frame_plt_size */
   };
 
-static const struct elf_i386_lazy_plt_layout elf_i386_lazy_ibt_plt =
+static const struct elf_x86_lazy_plt_layout elf_i386_lazy_ibt_plt =
   {
     elf_i386_lazy_ibt_plt0_entry,       /* plt0_entry */
     sizeof (elf_i386_lazy_ibt_plt0_entry), /* plt0_entry_size */
-    2,                                  /* plt0_got1_offset */
-    8,                                  /* plt0_got2_offset */
     elf_i386_lazy_ibt_plt_entry,        /* plt_entry */
     LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
+    2,                                  /* plt0_got1_offset */
+    8,                                  /* plt0_got2_offset */
+    0,                                  /* plt0_got2_insn_end */
     4+2,                                /* plt_got_offset */
     4+1,                                /* plt_reloc_offset */
     4+6,                                /* plt_plt_offset */
+    0,                                  /* plt_got_insn_size */
+    0,                                  /* plt_plt_insn_end */
     0,                                  /* plt_lazy_offset */
     elf_i386_pic_lazy_ibt_plt0_entry,   /* pic_plt0_entry */
     elf_i386_lazy_ibt_plt_entry,        /* pic_plt_entry */
@@ -894,12 +802,13 @@ static const struct elf_i386_lazy_plt_layout elf_i386_lazy_ibt_plt =
     sizeof (elf_i386_eh_frame_lazy_ibt_plt) /* eh_frame_plt_size */
   };
 
-static const struct elf_i386_non_lazy_plt_layout elf_i386_non_lazy_ibt_plt =
+static const struct elf_x86_non_lazy_plt_layout elf_i386_non_lazy_ibt_plt =
   {
     elf_i386_non_lazy_ibt_plt_entry,    /* plt_entry */
     elf_i386_pic_non_lazy_ibt_plt_entry,/* pic_plt_entry */
     LAZY_PLT_ENTRY_SIZE,                /* plt_entry_size */
     4+2,                                /* plt_got_offset */
+    0,                                  /* plt_got_insn_size */
     elf_i386_eh_frame_non_lazy_plt,     /* eh_frame_plt */
     sizeof (elf_i386_eh_frame_non_lazy_plt) /* eh_frame_plt_size */
   };
@@ -940,427 +849,6 @@ static const struct elf_i386_backend_data elf_i386_arch_bed =
 
 #define	elf_backend_arch_data	&elf_i386_arch_bed
 
-/* Is a undefined weak symbol which is resolved to 0.  Reference to an
-   undefined weak symbol is resolved to 0 when building executable if
-   it isn't dynamic and
-   1. Has non-GOT/non-PLT relocations in text section.  Or
-   2. Has no GOT/PLT relocation.
-   Local undefined weak symbol is always resolved to 0.
- */
-#define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, GOT_RELOC, EH)	\
-  ((EH)->elf.root.type == bfd_link_hash_undefweak		\
-   && ((EH)->elf.forced_local					\
-       || (bfd_link_executable (INFO)				\
-	   && (elf_i386_hash_table (INFO)->interp == NULL 	\
-	       || !(GOT_RELOC)					\
-	       || (EH)->has_non_got_reloc			\
-	       || !(INFO)->dynamic_undefined_weak))))
-
-/* i386 ELF linker hash entry.  */
-
-struct elf_i386_link_hash_entry
-{
-  struct elf_link_hash_entry elf;
-
-  /* Track dynamic relocs copied for this symbol.  */
-  struct elf_dyn_relocs *dyn_relocs;
-
-#define GOT_UNKNOWN	0
-#define GOT_NORMAL	1
-#define GOT_TLS_GD	2
-#define GOT_TLS_IE	4
-#define GOT_TLS_IE_POS	5
-#define GOT_TLS_IE_NEG	6
-#define GOT_TLS_IE_BOTH 7
-#define GOT_TLS_GDESC	8
-#define GOT_TLS_GD_BOTH_P(type)						\
-  ((type) == (GOT_TLS_GD | GOT_TLS_GDESC))
-#define GOT_TLS_GD_P(type)						\
-  ((type) == GOT_TLS_GD || GOT_TLS_GD_BOTH_P (type))
-#define GOT_TLS_GDESC_P(type)						\
-  ((type) == GOT_TLS_GDESC || GOT_TLS_GD_BOTH_P (type))
-#define GOT_TLS_GD_ANY_P(type)						\
-  (GOT_TLS_GD_P (type) || GOT_TLS_GDESC_P (type))
-  unsigned char tls_type;
-
-  /* Symbol is referenced by R_386_GOTOFF relocation.  */
-  unsigned int gotoff_ref : 1;
-
-  /* Symbol has GOT or PLT relocations.  */
-  unsigned int has_got_reloc : 1;
-
-  /* Symbol has non-GOT/non-PLT relocations in text sections.  */
-  unsigned int has_non_got_reloc : 1;
-
-  /* Don't call finish_dynamic_symbol on this symbol.  */
-  unsigned int no_finish_dynamic_symbol : 1;
-
-  /* 0: symbol isn't ___tls_get_addr.
-     1: symbol is ___tls_get_addr.
-     2: symbol is unknown.  */
-  unsigned int tls_get_addr : 2;
-
-  /* Reference count of C/C++ function pointer relocations in read-write
-     section which can be resolved at run-time.  */
-  bfd_signed_vma func_pointer_refcount;
-
-  /* Information about the GOT PLT entry. Filled when there are both
-     GOT and PLT relocations against the same function.  */
-  union gotplt_union plt_got;
-
-  /* Information about the second PLT entry.   */
-  union gotplt_union plt_second;
-
-  /* Offset of the GOTPLT entry reserved for the TLS descriptor,
-     starting at the end of the jump table.  */
-  bfd_vma tlsdesc_got;
-};
-
-#define elf_i386_hash_entry(ent) ((struct elf_i386_link_hash_entry *)(ent))
-
-struct elf_i386_obj_tdata
-{
-  struct elf_obj_tdata root;
-
-  /* tls_type for each local got entry.  */
-  char *local_got_tls_type;
-
-  /* GOTPLT entries for TLS descriptors.  */
-  bfd_vma *local_tlsdesc_gotent;
-};
-
-#define elf_i386_tdata(abfd) \
-  ((struct elf_i386_obj_tdata *) (abfd)->tdata.any)
-
-#define elf_i386_local_got_tls_type(abfd) \
-  (elf_i386_tdata (abfd)->local_got_tls_type)
-
-#define elf_i386_local_tlsdesc_gotent(abfd) \
-  (elf_i386_tdata (abfd)->local_tlsdesc_gotent)
-
-#define is_i386_elf(bfd)				\
-  (bfd_get_flavour (bfd) == bfd_target_elf_flavour	\
-   && elf_tdata (bfd) != NULL				\
-   && elf_object_id (bfd) == I386_ELF_DATA)
-
-static bfd_boolean
-elf_i386_mkobject (bfd *abfd)
-{
-  return bfd_elf_allocate_object (abfd, sizeof (struct elf_i386_obj_tdata),
-				  I386_ELF_DATA);
-}
-
-/* i386 ELF linker hash table.  */
-
-struct elf_i386_link_hash_table
-{
-  struct elf_link_hash_table elf;
-
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *interp;
-  asection *plt_eh_frame;
-  asection *plt_second;
-  asection *plt_second_eh_frame;
-  asection *plt_got;
-  asection *plt_got_eh_frame;
-
-  /* Parameters describing PLT generation.  */
-  struct elf_i386_plt_layout plt;
-
-  /* Parameters describing lazy PLT generation.  */
-  const struct elf_i386_lazy_plt_layout *lazy_plt;
-
-  /* Parameters describing non-lazy PLT generation.  */
-  const struct elf_i386_non_lazy_plt_layout *non_lazy_plt;
-
-  union
-  {
-    bfd_signed_vma refcount;
-    bfd_vma offset;
-  } tls_ldm_got;
-
-  /* The amount of space used by the reserved portion of the sgotplt
-     section, plus whatever space is used by the jump slots.  */
-  bfd_vma sgotplt_jump_table_size;
-
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
-  /* _TLS_MODULE_BASE_ symbol.  */
-  struct bfd_link_hash_entry *tls_module_base;
-
-  /* Used by local STT_GNU_IFUNC symbols.  */
-  htab_t loc_hash_table;
-  void * loc_hash_memory;
-
-  /* The (unloaded but important) .rel.plt.unloaded section on VxWorks.  */
-  asection *srelplt2;
-
-  /* The index of the next unused R_386_TLS_DESC slot in .rel.plt.  */
-  bfd_vma next_tls_desc_index;
-
-  /* The index of the next unused R_386_JUMP_SLOT slot in .rel.plt.  */
-  bfd_vma next_jump_slot_index;
-
-  /* The index of the next unused R_386_IRELATIVE slot in .rel.plt.  */
-  bfd_vma next_irelative_index;
-
-  /* TRUE if there are dynamic relocs against IFUNC symbols that apply
-     to read-only sections.  */
-  bfd_boolean readonly_dynrelocs_against_ifunc;
-};
-
-/* Get the i386 ELF linker hash table from a link_info structure.  */
-
-#define elf_i386_hash_table(p) \
-  (elf_hash_table_id  ((struct elf_link_hash_table *) ((p)->hash)) \
-  == I386_ELF_DATA ? ((struct elf_i386_link_hash_table *) ((p)->hash)) : NULL)
-
-#define elf_i386_compute_jump_table_size(htab) \
-  ((htab)->elf.srelplt->reloc_count * 4)
-
-/* Create an entry in an i386 ELF linker hash table.  */
-
-static struct bfd_hash_entry *
-elf_i386_link_hash_newfunc (struct bfd_hash_entry *entry,
-			    struct bfd_hash_table *table,
-			    const char *string)
-{
-  /* Allocate the structure if it has not already been allocated by a
-     subclass.  */
-  if (entry == NULL)
-    {
-      entry = (struct bfd_hash_entry *)
-          bfd_hash_allocate (table, sizeof (struct elf_i386_link_hash_entry));
-      if (entry == NULL)
-	return entry;
-    }
-
-  /* Call the allocation method of the superclass.  */
-  entry = _bfd_elf_link_hash_newfunc (entry, table, string);
-  if (entry != NULL)
-    {
-      struct elf_i386_link_hash_entry *eh;
-
-      eh = (struct elf_i386_link_hash_entry *) entry;
-      eh->dyn_relocs = NULL;
-      eh->tls_type = GOT_UNKNOWN;
-      eh->gotoff_ref = 0;
-      eh->has_got_reloc = 0;
-      eh->has_non_got_reloc = 0;
-      eh->no_finish_dynamic_symbol = 0;
-      eh->tls_get_addr = 2;
-      eh->func_pointer_refcount = 0;
-      eh->plt_got.offset = (bfd_vma) -1;
-      eh->tlsdesc_got = (bfd_vma) -1;
-    }
-
-  return entry;
-}
-
-/* Compute a hash of a local hash entry.  We use elf_link_hash_entry
-  for local symbol so that we can handle local STT_GNU_IFUNC symbols
-  as global symbol.  We reuse indx and dynstr_index for local symbol
-  hash since they aren't used by global symbols in this backend.  */
-
-static hashval_t
-elf_i386_local_htab_hash (const void *ptr)
-{
-  struct elf_link_hash_entry *h
-    = (struct elf_link_hash_entry *) ptr;
-  return ELF_LOCAL_SYMBOL_HASH (h->indx, h->dynstr_index);
-}
-
-/* Compare local hash entries.  */
-
-static int
-elf_i386_local_htab_eq (const void *ptr1, const void *ptr2)
-{
-  struct elf_link_hash_entry *h1
-     = (struct elf_link_hash_entry *) ptr1;
-  struct elf_link_hash_entry *h2
-    = (struct elf_link_hash_entry *) ptr2;
-
-  return h1->indx == h2->indx && h1->dynstr_index == h2->dynstr_index;
-}
-
-/* Find and/or create a hash entry for local symbol.  */
-
-static struct elf_link_hash_entry *
-elf_i386_get_local_sym_hash (struct elf_i386_link_hash_table *htab,
-			     bfd *abfd, const Elf_Internal_Rela *rel,
-			     bfd_boolean create)
-{
-  struct elf_i386_link_hash_entry e, *ret;
-  asection *sec = abfd->sections;
-  hashval_t h = ELF_LOCAL_SYMBOL_HASH (sec->id,
-				       ELF32_R_SYM (rel->r_info));
-  void **slot;
-
-  e.elf.indx = sec->id;
-  e.elf.dynstr_index = ELF32_R_SYM (rel->r_info);
-  slot = htab_find_slot_with_hash (htab->loc_hash_table, &e, h,
-				   create ? INSERT : NO_INSERT);
-
-  if (!slot)
-    return NULL;
-
-  if (*slot)
-    {
-      ret = (struct elf_i386_link_hash_entry *) *slot;
-      return &ret->elf;
-    }
-
-  ret = (struct elf_i386_link_hash_entry *)
-	objalloc_alloc ((struct objalloc *) htab->loc_hash_memory,
-			sizeof (struct elf_i386_link_hash_entry));
-  if (ret)
-    {
-      memset (ret, 0, sizeof (*ret));
-      ret->elf.indx = sec->id;
-      ret->elf.dynstr_index = ELF32_R_SYM (rel->r_info);
-      ret->elf.dynindx = -1;
-      ret->func_pointer_refcount = 0;
-      ret->plt_got.offset = (bfd_vma) -1;
-      *slot = ret;
-    }
-  return &ret->elf;
-}
-
-/* Destroy an i386 ELF linker hash table.  */
-
-static void
-elf_i386_link_hash_table_free (bfd *obfd)
-{
-  struct elf_i386_link_hash_table *htab
-    = (struct elf_i386_link_hash_table *) obfd->link.hash;
-
-  if (htab->loc_hash_table)
-    htab_delete (htab->loc_hash_table);
-  if (htab->loc_hash_memory)
-    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
-  _bfd_elf_link_hash_table_free (obfd);
-}
-
-/* Create an i386 ELF linker hash table.  */
-
-static struct bfd_link_hash_table *
-elf_i386_link_hash_table_create (bfd *abfd)
-{
-  struct elf_i386_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct elf_i386_link_hash_table);
-
-  ret = (struct elf_i386_link_hash_table *) bfd_zmalloc (amt);
-  if (ret == NULL)
-    return NULL;
-
-  if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd,
-				      elf_i386_link_hash_newfunc,
-				      sizeof (struct elf_i386_link_hash_entry),
-				      I386_ELF_DATA))
-    {
-      free (ret);
-      return NULL;
-    }
-
-  ret->loc_hash_table = htab_try_create (1024,
-					 elf_i386_local_htab_hash,
-					 elf_i386_local_htab_eq,
-					 NULL);
-  ret->loc_hash_memory = objalloc_create ();
-  if (!ret->loc_hash_table || !ret->loc_hash_memory)
-    {
-      elf_i386_link_hash_table_free (abfd);
-      return NULL;
-    }
-  ret->elf.root.hash_table_free = elf_i386_link_hash_table_free;
-
-  return &ret->elf.root;
-}
-
-/* Copy the extra info we tack onto an elf_link_hash_entry.  */
-
-static void
-elf_i386_copy_indirect_symbol (struct bfd_link_info *info,
-			       struct elf_link_hash_entry *dir,
-			       struct elf_link_hash_entry *ind)
-{
-  struct elf_i386_link_hash_entry *edir, *eind;
-
-  edir = (struct elf_i386_link_hash_entry *) dir;
-  eind = (struct elf_i386_link_hash_entry *) ind;
-
-  if (eind->dyn_relocs != NULL)
-    {
-      if (edir->dyn_relocs != NULL)
-	{
-	  struct elf_dyn_relocs **pp;
-	  struct elf_dyn_relocs *p;
-
-	  /* Add reloc counts against the indirect sym to the direct sym
-	     list.  Merge any entries against the same section.  */
-	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
-	    {
-	      struct elf_dyn_relocs *q;
-
-	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
-		if (q->sec == p->sec)
-		  {
-		    q->pc_count += p->pc_count;
-		    q->count += p->count;
-		    *pp = p->next;
-		    break;
-		  }
-	      if (q == NULL)
-		pp = &p->next;
-	    }
-	  *pp = edir->dyn_relocs;
-	}
-
-      edir->dyn_relocs = eind->dyn_relocs;
-      eind->dyn_relocs = NULL;
-    }
-
-  if (ind->root.type == bfd_link_hash_indirect
-      && dir->got.refcount <= 0)
-    {
-      edir->tls_type = eind->tls_type;
-      eind->tls_type = GOT_UNKNOWN;
-    }
-
-  /* Copy gotoff_ref so that elf_i386_adjust_dynamic_symbol will
-     generate a R_386_COPY reloc.  */
-  edir->gotoff_ref |= eind->gotoff_ref;
-
-  edir->has_got_reloc |= eind->has_got_reloc;
-  edir->has_non_got_reloc |= eind->has_non_got_reloc;
-
-  if (ELIMINATE_COPY_RELOCS
-      && ind->root.type != bfd_link_hash_indirect
-      && dir->dynamic_adjusted)
-    {
-      /* If called to transfer flags for a weakdef during processing
-	 of elf_adjust_dynamic_symbol, don't copy non_got_ref.
-	 We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
-      if (dir->versioned != versioned_hidden)
-	dir->ref_dynamic |= ind->ref_dynamic;
-      dir->ref_regular |= ind->ref_regular;
-      dir->ref_regular_nonweak |= ind->ref_regular_nonweak;
-      dir->needs_plt |= ind->needs_plt;
-      dir->pointer_equality_needed |= ind->pointer_equality_needed;
-    }
-  else
-    {
-      if (eind->func_pointer_refcount > 0)
-	{
-	  edir->func_pointer_refcount += eind->func_pointer_refcount;
-	  eind->func_pointer_refcount = 0;
-	}
-
-      _bfd_elf_link_hash_copy_indirect (info, dir, ind);
-    }
-}
-
 /* Return TRUE if the TLS access code sequence support transition
    from R_TYPE.  */
 
@@ -1378,7 +866,7 @@ elf_i386_check_tls_transition (asection *sec,
   struct elf_link_hash_entry *h;
   bfd_vma offset;
   bfd_byte *call;
-  bfd_boolean indirect_call, tls_get_addr;
+  bfd_boolean indirect_call;
 
   offset = rel->r_offset;
   switch (r_type)
@@ -1483,29 +971,9 @@ elf_i386_check_tls_transition (asection *sec,
       if (r_symndx < symtab_hdr->sh_info)
 	return FALSE;
 
-      tls_get_addr = FALSE;
       h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-      if (h != NULL && h->root.root.string != NULL)
-	{
-	  struct elf_i386_link_hash_entry *eh
-	    = (struct elf_i386_link_hash_entry *) h;
-	  tls_get_addr = eh->tls_get_addr == 1;
-	  if (eh->tls_get_addr > 1)
-	    {
-	      /* Use strncmp to check ___tls_get_addr since
-		 ___tls_get_addr may be versioned.  */
-	      if (strncmp (h->root.root.string, "___tls_get_addr", 15)
-		  == 0)
-		{
-		  eh->tls_get_addr = 1;
-		  tls_get_addr = TRUE;
-		}
-	      else
-		eh->tls_get_addr = 0;
-	    }
-	}
-
-      if (!tls_get_addr)
+      if (h == NULL
+	  || !((struct elf_x86_link_hash_entry *) h)->tls_get_addr)
 	return FALSE;
       else if (indirect_call)
 	return (ELF32_R_TYPE (rel[1].r_info) == R_386_GOT32X);
@@ -1691,9 +1159,9 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	name = h->root.root.string;
       else
 	{
-	  struct elf_i386_link_hash_table *htab;
+	  struct elf_x86_link_hash_table *htab;
 
-	  htab = elf_i386_hash_table (info);
+	  htab = elf_x86_hash_table (info, I386_ELF_DATA);
 	  if (htab == NULL)
 	    name = "*unknown*";
 	  else
@@ -1708,10 +1176,10 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
       _bfd_error_handler
 	/* xgettext:c-format */
-	(_("%B: TLS transition from %s to %s against `%s' at 0x%lx "
+	(_("%B: TLS transition from %s to %s against `%s' at %#Lx "
 	   "in section `%A' failed"),
 	 abfd, from->name, to->name, name,
-	 (unsigned long) rel->r_offset, sec);
+	 rel->r_offset, sec);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -1743,12 +1211,13 @@ static
 bfd_boolean
 elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 			     bfd_byte *contents,
+			     unsigned int *r_type_p,
 			     Elf_Internal_Rela *irel,
 			     struct elf_link_hash_entry *h,
 			     bfd_boolean *converted,
 			     struct bfd_link_info *link_info)
 {
-  struct elf_i386_link_hash_table *htab;
+  struct elf_x86_link_hash_table *htab;
   unsigned int opcode;
   unsigned int modrm;
   bfd_boolean baseless;
@@ -1761,6 +1230,8 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
   unsigned int r_type;
   unsigned int r_symndx;
   bfd_vma roff = irel->r_offset;
+  bfd_boolean local_ref;
+  struct elf_x86_link_hash_entry *eh;
 
   if (roff < 2)
     return TRUE;
@@ -1770,10 +1241,10 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
   if (addend != 0)
     return TRUE;
 
-  htab = elf_i386_hash_table (link_info);
+  htab = elf_x86_hash_table (link_info, I386_ELF_DATA);
   is_pic = bfd_link_pic (link_info);
 
-  r_type = ELF32_R_TYPE (irel->r_info);
+  r_type = *r_type_p;
   r_symndx = ELF32_R_SYM (irel->r_info);
 
   modrm = bfd_get_8 (abfd, contents + roff - 1);
@@ -1808,6 +1279,8 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
      register.  */
   to_reloc_32 = !is_pic || baseless;
 
+  eh = elf_x86_hash_entry (h);
+
   /* Try to convert R_386_GOT32X.  Get the symbol referred to by the
      reloc.  */
   if (h == NULL)
@@ -1822,10 +1295,14 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 	goto convert_load;
     }
 
+  /* NB: Also set linker_def via SYMBOL_REFERENCES_LOCAL_P.  */
+  local_ref = SYMBOL_REFERENCES_LOCAL_P (link_info, h);
+
   /* Undefined weak symbol is only bound locally in executable
      and its reference is resolved as 0.  */
-  if (UNDEFINED_WEAK_RESOLVED_TO_ZERO (link_info, TRUE,
-				       elf_i386_hash_entry (h)))
+  if (h->root.type == bfd_link_hash_undefweak
+      && !eh->linker_def
+      && local_ref)
     {
       if (opcode == 0xff)
 	{
@@ -1848,22 +1325,19 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
       /* We have "call/jmp *foo@GOT[(%reg)]".  */
       if ((h->root.type == bfd_link_hash_defined
 	   || h->root.type == bfd_link_hash_defweak)
-	  && SYMBOL_REFERENCES_LOCAL (link_info, h))
+	  && local_ref)
 	{
 	  /* The function is locally defined.   */
 convert_branch:
 	  /* Convert R_386_GOT32X to R_386_PC32.  */
 	  if (modrm == 0x15 || (modrm & 0xf8) == 0x90)
 	    {
-	      struct elf_i386_link_hash_entry *eh
-		= (struct elf_i386_link_hash_entry *) h;
-
 	      /* Convert to "nop call foo".  ADDR_PREFIX_OPCODE
 		 is a nop prefix.  */
 	      modrm = 0xe8;
 	      /* To support TLS optimization, always use addr32 prefix
 		 for "call *___tls_get_addr@GOT(%reg)".  */
-	      if (eh && eh->tls_get_addr == 1)
+	      if (eh && eh->tls_get_addr)
 		{
 		  nop = 0x67;
 		  nop_offset = irel->r_offset - 2;
@@ -1895,7 +1369,7 @@ convert_branch:
 	     need to adjust addend by -4.  */
 	  bfd_put_32 (abfd, -4, contents + irel->r_offset);
 	  irel->r_info = ELF32_R_INFO (r_symndx, R_386_PC32);
-
+	  *r_type_p = R_386_PC32;
 	  *converted = TRUE;
 	}
     }
@@ -1914,10 +1388,11 @@ convert_branch:
 	 bfd_elf_record_link_assignment.  start_stop is set on
 	 __start_SECNAME/__stop_SECNAME which mark section SECNAME.  */
       if (h->start_stop
+	  || eh->linker_def
 	  || ((h->def_regular
 	       || h->root.type == bfd_link_hash_defined
 	       || h->root.type == bfd_link_hash_defweak)
-	      && SYMBOL_REFERENCES_LOCAL (link_info, h)))
+	      && local_ref))
 	{
 convert_load:
 	  if (opcode == 0x8b)
@@ -1967,7 +1442,7 @@ convert_load:
 
 	  bfd_put_8 (abfd, opcode, contents + roff - 2);
 	  irel->r_info = ELF32_R_INFO (r_symndx, r_type);
-
+	  *r_type_p = r_type;
 	  *converted = TRUE;
 	}
     }
@@ -1977,8 +1452,7 @@ convert_load:
 
 /* Rename some of the generic section flags to better document how they
    are used here.  */
-#define need_convert_load	sec_flg0
-#define check_relocs_failed	sec_flg1
+#define check_relocs_failed	sec_flg0
 
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure linkage
@@ -1990,13 +1464,14 @@ elf_i386_check_relocs (bfd *abfd,
 		       asection *sec,
 		       const Elf_Internal_Rela *relocs)
 {
-  struct elf_i386_link_hash_table *htab;
+  struct elf_x86_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
   bfd_byte *contents;
+  bfd_boolean converted;
 
   if (bfd_link_relocatable (info))
     return TRUE;
@@ -2010,14 +1485,14 @@ elf_i386_check_relocs (bfd *abfd,
   if ((sec->flags & SEC_ALLOC) == 0)
     return TRUE;
 
-  BFD_ASSERT (is_i386_elf (abfd));
-
-  htab = elf_i386_hash_table (info);
+  htab = elf_x86_hash_table (info, I386_ELF_DATA);
   if (htab == NULL)
     {
       sec->check_relocs_failed = 1;
       return FALSE;
     }
+
+  BFD_ASSERT (is_x86_elf (abfd, htab));
 
   /* Get the section contents.  */
   if (elf_section_data (sec)->this_hdr.contents != NULL)
@@ -2031,15 +1506,17 @@ elf_i386_check_relocs (bfd *abfd,
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
 
+  converted = FALSE;
+
   sreloc = NULL;
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
     {
       unsigned int r_type;
-      unsigned long r_symndx;
+      unsigned int r_symndx;
       struct elf_link_hash_entry *h;
-      struct elf_i386_link_hash_entry *eh;
+      struct elf_x86_link_hash_entry *eh;
       Elf_Internal_Sym *isym;
       const char *name;
       bfd_boolean size_reloc;
@@ -2066,7 +1543,7 @@ elf_i386_check_relocs (bfd *abfd,
 	  /* Check relocation against local STT_GNU_IFUNC symbol.  */
 	  if (ELF32_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
 	    {
-	      h = elf_i386_get_local_sym_hash (htab, abfd, rel, TRUE);
+	      h = _bfd_elf_x86_get_local_sym_hash (htab, abfd, rel, TRUE);
 	      if (h == NULL)
 		goto error_return;
 
@@ -2091,7 +1568,7 @@ elf_i386_check_relocs (bfd *abfd,
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	}
 
-      eh = (struct elf_i386_link_hash_entry *) h;
+      eh = (struct elf_x86_link_hash_entry *) h;
       if (h != NULL)
 	{
 	  if (r_type == R_386_GOTOFF)
@@ -2106,6 +1583,16 @@ elf_i386_check_relocs (bfd *abfd,
 	      |= elf_gnu_symbol_ifunc;
 	}
 
+      if (r_type == R_386_GOT32X
+	  && (h == NULL || h->type != STT_GNU_IFUNC))
+	{
+	  Elf_Internal_Rela *irel = (Elf_Internal_Rela *) rel;
+	  if (!elf_i386_convert_load_reloc (abfd, symtab_hdr, contents,
+					    &r_type, irel, h,
+					    &converted, info))
+	    goto error_return;
+	}
+
       if (! elf_i386_tls_transition (info, abfd, sec, contents,
 				     symtab_hdr, sym_hashes,
 				     &r_type, GOT_UNKNOWN,
@@ -2115,7 +1602,7 @@ elf_i386_check_relocs (bfd *abfd,
       switch (r_type)
 	{
 	case R_386_TLS_LDM:
-	  htab->tls_ldm_got.refcount += 1;
+	  htab->tls_ld_or_ldm_got.refcount += 1;
 	  goto create_got;
 
 	case R_386_PLT32:
@@ -2183,7 +1670,7 @@ elf_i386_check_relocs (bfd *abfd,
 	    if (h != NULL)
 	      {
 		h->got.refcount += 1;
-		old_tls_type = elf_i386_hash_entry(h)->tls_type;
+		old_tls_type = elf_x86_hash_entry (h)->tls_type;
 	      }
 	    else
 	      {
@@ -2203,13 +1690,13 @@ elf_i386_check_relocs (bfd *abfd,
 		    if (local_got_refcounts == NULL)
 		      goto error_return;
 		    elf_local_got_refcounts (abfd) = local_got_refcounts;
-		    elf_i386_local_tlsdesc_gotent (abfd)
+		    elf_x86_local_tlsdesc_gotent (abfd)
 		      = (bfd_vma *) (local_got_refcounts + symtab_hdr->sh_info);
-		    elf_i386_local_got_tls_type (abfd)
+		    elf_x86_local_got_tls_type (abfd)
 		      = (char *) (local_got_refcounts + 2 * symtab_hdr->sh_info);
 		  }
 		local_got_refcounts[r_symndx] += 1;
-		old_tls_type = elf_i386_local_got_tls_type (abfd) [r_symndx];
+		old_tls_type = elf_x86_local_got_tls_type (abfd) [r_symndx];
 	      }
 
 	    if ((old_tls_type & GOT_TLS_IE) && (tls_type & GOT_TLS_IE))
@@ -2245,9 +1732,9 @@ elf_i386_check_relocs (bfd *abfd,
 	    if (old_tls_type != tls_type)
 	      {
 		if (h != NULL)
-		  elf_i386_hash_entry (h)->tls_type = tls_type;
+		  elf_x86_hash_entry (h)->tls_type = tls_type;
 		else
-		  elf_i386_local_got_tls_type (abfd) [r_symndx] = tls_type;
+		  elf_x86_local_got_tls_type (abfd) [r_symndx] = tls_type;
 	      }
 	  }
 	  /* Fall through */
@@ -2453,22 +1940,23 @@ do_size:
 	default:
 	  break;
 	}
-
-      if (r_type == R_386_GOT32X
-	  && (h == NULL || h->type != STT_GNU_IFUNC))
-	sec->need_convert_load = 1;
     }
 
   if (elf_section_data (sec)->this_hdr.contents != contents)
     {
-      if (!info->keep_memory)
+      if (!converted && !info->keep_memory)
 	free (contents);
       else
 	{
-	  /* Cache the section contents for elf_link_input_bfd.  */
+	  /* Cache the section contents for elf_link_input_bfd if any
+	     load is converted or --no-keep-memory isn't used.  */
 	  elf_section_data (sec)->this_hdr.contents = contents;
 	}
     }
+
+  /* Cache relocations if any load is converted.  */
+  if (elf_section_data (sec)->relocs != relocs && converted)
+    elf_section_data (sec)->relocs = (Elf_Internal_Rela *) relocs;
 
   return TRUE;
 
@@ -2477,1291 +1965,6 @@ error_return:
     free (contents);
   sec->check_relocs_failed = 1;
   return FALSE;
-}
-
-/* Return the section that should be marked against GC for a given
-   relocation.  */
-
-static asection *
-elf_i386_gc_mark_hook (asection *sec,
-		       struct bfd_link_info *info,
-		       Elf_Internal_Rela *rel,
-		       struct elf_link_hash_entry *h,
-		       Elf_Internal_Sym *sym)
-{
-  if (h != NULL)
-    switch (ELF32_R_TYPE (rel->r_info))
-      {
-      case R_386_GNU_VTINHERIT:
-      case R_386_GNU_VTENTRY:
-	return NULL;
-      }
-
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
-}
-
-/* Remove undefined weak symbol from the dynamic symbol table if it
-   is resolved to 0.   */
-
-static bfd_boolean
-elf_i386_fixup_symbol (struct bfd_link_info *info,
-		       struct elf_link_hash_entry *h)
-{
-  if (h->dynindx != -1
-      && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
-					  elf_i386_hash_entry (h)->has_got_reloc,
-					  elf_i386_hash_entry (h)))
-    {
-      h->dynindx = -1;
-      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
-			      h->dynstr_index);
-    }
-  return TRUE;
-}
-
-/* Adjust a symbol defined by a dynamic object and referenced by a
-   regular object.  The current definition is in some section of the
-   dynamic object, but we're not including those sections.  We have to
-   change the definition to something the rest of the link can
-   understand.  */
-
-static bfd_boolean
-elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
-				struct elf_link_hash_entry *h)
-{
-  struct elf_i386_link_hash_table *htab;
-  asection *s, *srel;
-  struct elf_i386_link_hash_entry *eh;
-  struct elf_dyn_relocs *p;
-
-  /* STT_GNU_IFUNC symbol must go through PLT. */
-  if (h->type == STT_GNU_IFUNC)
-    {
-      /* All local STT_GNU_IFUNC references must be treate as local
-	 calls via local PLT.  */
-      if (h->ref_regular
-	  && SYMBOL_CALLS_LOCAL (info, h))
-	{
-	  bfd_size_type pc_count = 0, count = 0;
-	  struct elf_dyn_relocs **pp;
-
-	  eh = (struct elf_i386_link_hash_entry *) h;
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
-	    {
-	      pc_count += p->pc_count;
-	      p->count -= p->pc_count;
-	      p->pc_count = 0;
-	      count += p->count;
-	      if (p->count == 0)
-		*pp = p->next;
-	      else
-		pp = &p->next;
-	    }
-
-	  if (pc_count || count)
-	    {
-	      h->non_got_ref = 1;
-	      if (pc_count)
-		{
-		  /* Increment PLT reference count only for PC-relative
-		     references.  */
-		  h->needs_plt = 1;
-		  if (h->plt.refcount <= 0)
-		    h->plt.refcount = 1;
-		  else
-		    h->plt.refcount += 1;
-		}
-	    }
-	}
-
-      if (h->plt.refcount <= 0)
-	{
-	  h->plt.offset = (bfd_vma) -1;
-	  h->needs_plt = 0;
-	}
-      return TRUE;
-    }
-
-  /* If this is a function, put it in the procedure linkage table.  We
-     will fill in the contents of the procedure linkage table later,
-     when we know the address of the .got section.  */
-  if (h->type == STT_FUNC
-      || h->needs_plt)
-    {
-      if (h->plt.refcount <= 0
-	  || SYMBOL_CALLS_LOCAL (info, h)
-	  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-	      && h->root.type == bfd_link_hash_undefweak))
-	{
-	  /* This case can occur if we saw a PLT32 reloc in an input
-	     file, but the symbol was never referred to by a dynamic
-	     object, or if all references were garbage collected.  In
-	     such a case, we don't actually need to build a procedure
-	     linkage table, and we can just do a PC32 reloc instead.  */
-	  h->plt.offset = (bfd_vma) -1;
-	  h->needs_plt = 0;
-	}
-
-      return TRUE;
-    }
-  else
-    /* It's possible that we incorrectly decided a .plt reloc was
-       needed for an R_386_PC32 reloc to a non-function sym in
-       check_relocs.  We can't decide accurately between function and
-       non-function syms in check-relocs;  Objects loaded later in
-       the link may change h->type.  So fix it now.  */
-    h->plt.offset = (bfd_vma) -1;
-
-  /* If this is a weak symbol, and there is a real definition, the
-     processor independent code will have arranged for us to see the
-     real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
-    {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
-      if (ELIMINATE_COPY_RELOCS || info->nocopyreloc)
-	h->non_got_ref = h->u.weakdef->non_got_ref;
-      return TRUE;
-    }
-
-  /* This is a reference to a symbol defined by a dynamic object which
-     is not a function.  */
-
-  /* If we are creating a shared library, we must presume that the
-     only references to the symbol are via the global offset table.
-     For such cases we need not do anything here; the relocations will
-     be handled correctly by relocate_section.  */
-  if (!bfd_link_executable (info))
-    return TRUE;
-
-  /* If there are no references to this symbol that do not use the
-     GOT nor R_386_GOTOFF relocation, we don't need to generate a copy
-     reloc.  */
-  eh = (struct elf_i386_link_hash_entry *) h;
-  if (!h->non_got_ref && !eh->gotoff_ref)
-    return TRUE;
-
-  /* If -z nocopyreloc was given, we won't generate them either.  */
-  if (info->nocopyreloc)
-    {
-      h->non_got_ref = 0;
-      return TRUE;
-    }
-
-  htab = elf_i386_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  /* If there aren't any dynamic relocs in read-only sections nor
-     R_386_GOTOFF relocation, then we can keep the dynamic relocs and
-     avoid the copy reloc.  This doesn't work on VxWorks, where we can
-     not have dynamic relocations (other than copy and jump slot
-     relocations) in an executable.  */
-  if (ELIMINATE_COPY_RELOCS
-      && !eh->gotoff_ref
-      && get_elf_i386_backend_data (info->output_bfd)->os != is_vxworks)
-    {
-      for (p = eh->dyn_relocs; p != NULL; p = p->next)
-	{
-	  s = p->sec->output_section;
-	  if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	    break;
-	}
-
-      if (p == NULL)
-	{
-	  h->non_got_ref = 0;
-	  return TRUE;
-	}
-    }
-
-  /* We must allocate the symbol in our .dynbss section, which will
-     become part of the .bss section of the executable.  There will be
-     an entry for this symbol in the .dynsym section.  The dynamic
-     object will contain position independent code, so all references
-     from the dynamic object to this symbol will go through the global
-     offset table.  The dynamic linker will use the .dynsym entry to
-     determine the address it must put in the global offset table, so
-     both the dynamic object and the regular object will refer to the
-     same memory location for the variable.  */
-
-  /* We must generate a R_386_COPY reloc to tell the dynamic linker to
-     copy the initial value out of the dynamic object and into the
-     runtime process image.  */
-  if ((h->root.u.def.section->flags & SEC_READONLY) != 0)
-    {
-      s = htab->elf.sdynrelro;
-      srel = htab->elf.sreldynrelro;
-    }
-  else
-    {
-      s = htab->elf.sdynbss;
-      srel = htab->elf.srelbss;
-    }
-  if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
-    {
-      srel->size += sizeof (Elf32_External_Rel);
-      h->needs_copy = 1;
-    }
-
-  return _bfd_elf_adjust_dynamic_copy (info, h, s);
-}
-
-/* Allocate space in .plt, .got and associated reloc sections for
-   dynamic relocs.  */
-
-static bfd_boolean
-elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
-{
-  struct bfd_link_info *info;
-  struct elf_i386_link_hash_table *htab;
-  struct elf_i386_link_hash_entry *eh;
-  struct elf_dyn_relocs *p;
-  unsigned plt_entry_size;
-  bfd_boolean resolved_to_zero;
-  const struct elf_i386_backend_data *bed;
-
-  if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
-
-  eh = (struct elf_i386_link_hash_entry *) h;
-
-  info = (struct bfd_link_info *) inf;
-  htab = elf_i386_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  bed = get_elf_i386_backend_data (info->output_bfd);
-
-  plt_entry_size = htab->plt.plt_entry_size;
-
-  resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
-						      eh->has_got_reloc,
-						      eh);
-
-  /* Clear the reference count of function pointer relocations if
-     symbol isn't a normal function.  */
-  if (h->type != STT_FUNC)
-    eh->func_pointer_refcount = 0;
-
-  /* We can't use the GOT PLT if pointer equality is needed since
-     finish_dynamic_symbol won't clear symbol value and the dynamic
-     linker won't update the GOT slot.  We will get into an infinite
-     loop at run-time.  */
-  if (htab->plt_got != NULL
-      && h->type != STT_GNU_IFUNC
-      && !h->pointer_equality_needed
-      && h->plt.refcount > 0
-      && h->got.refcount > 0)
-    {
-      /* Don't use the regular PLT if there are both GOT and GOTPLT
-         reloctions.  */
-      h->plt.offset = (bfd_vma) -1;
-
-      /* Use the GOT PLT.  */
-      eh->plt_got.refcount = 1;
-    }
-
-  /* Since STT_GNU_IFUNC symbol must go through PLT, we handle it
-     here if it is defined and referenced in a non-shared object.  */
-  if (h->type == STT_GNU_IFUNC
-      && h->def_regular)
-    {
-      if (_bfd_elf_allocate_ifunc_dyn_relocs (info, h, &eh->dyn_relocs,
-					      &htab->readonly_dynrelocs_against_ifunc,
-					      plt_entry_size,
-					      (htab->plt.has_plt0 *
-						plt_entry_size),
-					       4, TRUE))
-	{
-	  asection *s = htab->plt_second;
-	  if (h->plt.offset != (bfd_vma) -1 && s != NULL)
-	    {
-	      /* Use the second PLT section if it is created.  */
-	      eh->plt_second.offset = s->size;
-
-	      /* Make room for this entry in the second PLT section.  */
-	      s->size += htab->non_lazy_plt->plt_entry_size;
-	    }
-
-	  return TRUE;
-	}
-      else
-	return FALSE;
-    }
-  /* Don't create the PLT entry if there are only function pointer
-     relocations which can be resolved at run-time.  */
-  else if (htab->elf.dynamic_sections_created
-	   && (h->plt.refcount > eh->func_pointer_refcount
-	       || eh->plt_got.refcount > 0))
-    {
-      bfd_boolean use_plt_got = eh->plt_got.refcount > 0;
-
-      /* Clear the reference count of function pointer relocations
-	 if PLT is used.  */
-      eh->func_pointer_refcount = 0;
-
-      /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (h->dynindx == -1
-	  && !h->forced_local
-	  && !resolved_to_zero
-	  && h->root.type == bfd_link_hash_undefweak)
-	{
-	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
-	    return FALSE;
-	}
-
-      if (bfd_link_pic (info)
-	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
-	{
-	  asection *s = htab->elf.splt;
-	  asection *second_s = htab->plt_second;
-	  asection *got_s = htab->plt_got;
-
-	  /* If this is the first .plt entry, make room for the special
-	     first entry.  The .plt section is used by prelink to undo
-	     prelinking for dynamic relocations.  */
-	  if (s->size == 0)
-	    s->size = htab->plt.has_plt0 * plt_entry_size;
-
-	  if (use_plt_got)
-	    eh->plt_got.offset = got_s->size;
-	  else
-	    {
-	      h->plt.offset = s->size;
-	      if (second_s)
-		eh->plt_second.offset = second_s->size;
-	    }
-
-	  /* If this symbol is not defined in a regular file, and we are
-	     not generating a shared library, then set the symbol to this
-	     location in the .plt.  This is required to make function
-	     pointers compare as equal between the normal executable and
-	     the shared library.  */
-	  if (! bfd_link_pic (info)
-	      && !h->def_regular)
-	    {
-	      if (use_plt_got)
-		{
-		  /* We need to make a call to the entry of the GOT PLT
-		     instead of regular PLT entry.  */
-		  h->root.u.def.section = got_s;
-		  h->root.u.def.value = eh->plt_got.offset;
-		}
-	      else
-		{
-		  if (second_s)
-		    {
-		      /* We need to make a call to the entry of the
-			 second PLT instead of regular PLT entry.  */
-		      h->root.u.def.section = second_s;
-		      h->root.u.def.value = eh->plt_second.offset;
-		    }
-		  else
-		    {
-		      h->root.u.def.section = s;
-		      h->root.u.def.value = h->plt.offset;
-		    }
-		}
-	    }
-
-	  /* Make room for this entry.  */
-	  if (use_plt_got)
-	    got_s->size += htab->non_lazy_plt->plt_entry_size;
-	  else
-	    {
-	      s->size += plt_entry_size;
-	      if (second_s)
-		second_s->size += htab->non_lazy_plt->plt_entry_size;
-
-	      /* We also need to make an entry in the .got.plt section,
-		 which will be placed in the .got section by the linker
-		 script.  */
-	      htab->elf.sgotplt->size += 4;
-
-	      /* There should be no PLT relocation against resolved
-		 undefined weak symbol in executable.  */
-	      if (!resolved_to_zero)
-		{
-		  /* We also need to make an entry in the .rel.plt
-		     section.  */
-		  htab->elf.srelplt->size += sizeof (Elf32_External_Rel);
-		  htab->elf.srelplt->reloc_count++;
-		}
-	    }
-
-	  if (bed->os == is_vxworks && !bfd_link_pic (info))
-	    {
-	      /* VxWorks has a second set of relocations for each PLT entry
-		 in executables.  They go in a separate relocation section,
-		 which is processed by the kernel loader.  */
-
-	      /* There are two relocations for the initial PLT entry: an
-		 R_386_32 relocation for _GLOBAL_OFFSET_TABLE_ + 4 and an
-		 R_386_32 relocation for _GLOBAL_OFFSET_TABLE_ + 8.  */
-
-	      if (h->plt.offset == plt_entry_size)
-		htab->srelplt2->size += (sizeof (Elf32_External_Rel) * 2);
-
-	      /* There are two extra relocations for each subsequent PLT entry:
-		 an R_386_32 relocation for the GOT entry, and an R_386_32
-		 relocation for the PLT entry.  */
-
-	      htab->srelplt2->size += (sizeof (Elf32_External_Rel) * 2);
-	    }
-	}
-      else
-	{
-	  eh->plt_got.offset = (bfd_vma) -1;
-	  h->plt.offset = (bfd_vma) -1;
-	  h->needs_plt = 0;
-	}
-    }
-  else
-    {
-      eh->plt_got.offset = (bfd_vma) -1;
-      h->plt.offset = (bfd_vma) -1;
-      h->needs_plt = 0;
-    }
-
-  eh->tlsdesc_got = (bfd_vma) -1;
-
-  /* If R_386_TLS_{IE_32,IE,GOTIE} symbol is now local to the binary,
-     make it a R_386_TLS_LE_32 requiring no TLS entry.  */
-  if (h->got.refcount > 0
-      && bfd_link_executable (info)
-      && h->dynindx == -1
-      && (elf_i386_hash_entry(h)->tls_type & GOT_TLS_IE))
-    h->got.offset = (bfd_vma) -1;
-  else if (h->got.refcount > 0)
-    {
-      asection *s;
-      bfd_boolean dyn;
-      int tls_type = elf_i386_hash_entry(h)->tls_type;
-
-      /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (h->dynindx == -1
-	  && !h->forced_local
-	  && !resolved_to_zero
-	  && h->root.type == bfd_link_hash_undefweak)
-	{
-	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
-	    return FALSE;
-	}
-
-      s = htab->elf.sgot;
-      if (GOT_TLS_GDESC_P (tls_type))
-	{
-	  eh->tlsdesc_got = htab->elf.sgotplt->size
-	    - elf_i386_compute_jump_table_size (htab);
-	  htab->elf.sgotplt->size += 8;
-	  h->got.offset = (bfd_vma) -2;
-	}
-      if (! GOT_TLS_GDESC_P (tls_type)
-	  || GOT_TLS_GD_P (tls_type))
-	{
-	  h->got.offset = s->size;
-	  s->size += 4;
-	  /* R_386_TLS_GD needs 2 consecutive GOT slots.  */
-	  if (GOT_TLS_GD_P (tls_type) || tls_type == GOT_TLS_IE_BOTH)
-	    s->size += 4;
-	}
-      dyn = htab->elf.dynamic_sections_created;
-      /* R_386_TLS_IE_32 needs one dynamic relocation,
-	 R_386_TLS_IE resp. R_386_TLS_GOTIE needs one dynamic relocation,
-	 (but if both R_386_TLS_IE_32 and R_386_TLS_IE is present, we
-	 need two), R_386_TLS_GD needs one if local symbol and two if
-	 global.  No dynamic relocation against resolved undefined weak
-	 symbol in executable.  */
-      if (tls_type == GOT_TLS_IE_BOTH)
-	htab->elf.srelgot->size += 2 * sizeof (Elf32_External_Rel);
-      else if ((GOT_TLS_GD_P (tls_type) && h->dynindx == -1)
-	       || (tls_type & GOT_TLS_IE))
-	htab->elf.srelgot->size += sizeof (Elf32_External_Rel);
-      else if (GOT_TLS_GD_P (tls_type))
-	htab->elf.srelgot->size += 2 * sizeof (Elf32_External_Rel);
-      else if (! GOT_TLS_GDESC_P (tls_type)
-	       && ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-		    && !resolved_to_zero)
-		   || h->root.type != bfd_link_hash_undefweak)
-	       && (bfd_link_pic (info)
-		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
-	htab->elf.srelgot->size += sizeof (Elf32_External_Rel);
-      if (GOT_TLS_GDESC_P (tls_type))
-	htab->elf.srelplt->size += sizeof (Elf32_External_Rel);
-    }
-  else
-    h->got.offset = (bfd_vma) -1;
-
-  if (eh->dyn_relocs == NULL)
-    return TRUE;
-
-  /* In the shared -Bsymbolic case, discard space allocated for
-     dynamic pc-relative relocs against symbols which turn out to be
-     defined in regular objects.  For the normal shared case, discard
-     space for pc-relative relocs that have become local due to symbol
-     visibility changes.  */
-
-  if (bfd_link_pic (info))
-    {
-      /* The only reloc that uses pc_count is R_386_PC32, which will
-	 appear on a call or on something like ".long foo - .".  We
-	 want calls to protected symbols to resolve directly to the
-	 function rather than going via the plt.  If people want
-	 function pointer comparisons to work as expected then they
-	 should avoid writing assembly like ".long foo - .".  */
-      if (SYMBOL_CALLS_LOCAL (info, h))
-	{
-	  struct elf_dyn_relocs **pp;
-
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
-	    {
-	      p->count -= p->pc_count;
-	      p->pc_count = 0;
-	      if (p->count == 0)
-		*pp = p->next;
-	      else
-		pp = &p->next;
-	    }
-	}
-
-      if (bed->os == is_vxworks)
-	{
-	  struct elf_dyn_relocs **pp;
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
-	    {
-	      if (strcmp (p->sec->output_section->name, ".tls_vars") == 0)
-		*pp = p->next;
-	      else
-		pp = &p->next;
-	    }
-	}
-
-      /* Also discard relocs on undefined weak syms with non-default
-	 visibility or in PIE.  */
-      if (eh->dyn_relocs != NULL
-	  && h->root.type == bfd_link_hash_undefweak)
-	{
-	  /* Undefined weak symbol is never bound locally in shared
-	     library.  */
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-	      || resolved_to_zero)
-	    {
-	      if (h->non_got_ref)
-		{
-		  /* Keep dynamic non-GOT/non-PLT relocation so that we
-		     can branch to 0 without PLT.  */
-		  struct elf_dyn_relocs **pp;
-
-		  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
-		    if (p->pc_count == 0)
-		      *pp = p->next;
-		    else
-		      {
-			/* Remove non-R_386_PC32 relocation.  */
-			p->count = p->pc_count;
-			pp = &p->next;
-		      }
-
-		  if (eh->dyn_relocs != NULL)
-		    {
-		      /* Make sure undefined weak symbols are output
-			 as dynamic symbols in PIEs for dynamic non-GOT
-			 non-PLT reloations.  */
-		      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-			return FALSE;
-		    }
-		}
-	      else
-		eh->dyn_relocs = NULL;
-	    }
-	  else if (h->dynindx == -1
-		   && !h->forced_local)
-	    {
-	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-		return FALSE;
-	    }
-	}
-    }
-  else if (ELIMINATE_COPY_RELOCS)
-    {
-      /* For the non-shared case, discard space for relocs against
-	 symbols which turn out to need copy relocs or are not
-	 dynamic.  Keep dynamic relocations for run-time function
-	 pointer initialization.  */
-
-      if ((!h->non_got_ref
-	   || eh->func_pointer_refcount > 0
-	   || (h->root.type == bfd_link_hash_undefweak
-	       && !resolved_to_zero))
-	  && ((h->def_dynamic
-	       && !h->def_regular)
-	      || (htab->elf.dynamic_sections_created
-		  && (h->root.type == bfd_link_hash_undefweak
-		      || h->root.type == bfd_link_hash_undefined))))
-	{
-	  /* Make sure this symbol is output as a dynamic symbol.
-	     Undefined weak syms won't yet be marked as dynamic.  */
-	  if (h->dynindx == -1
-	      && !h->forced_local
-	      && !resolved_to_zero
-	      && h->root.type == bfd_link_hash_undefweak)
-	    {
-	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-		return FALSE;
-	    }
-
-	  /* If that succeeded, we know we'll be keeping all the
-	     relocs.  */
-	  if (h->dynindx != -1)
-	    goto keep;
-	}
-
-      eh->dyn_relocs = NULL;
-      eh->func_pointer_refcount = 0;
-
-    keep: ;
-    }
-
-  /* Finally, allocate space.  */
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
-    {
-      asection *sreloc;
-
-      sreloc = elf_section_data (p->sec)->sreloc;
-
-      BFD_ASSERT (sreloc != NULL);
-      sreloc->size += p->count * sizeof (Elf32_External_Rel);
-    }
-
-  return TRUE;
-}
-
-/* Allocate space in .plt, .got and associated reloc sections for
-   local dynamic relocs.  */
-
-static bfd_boolean
-elf_i386_allocate_local_dynrelocs (void **slot, void *inf)
-{
-  struct elf_link_hash_entry *h
-    = (struct elf_link_hash_entry *) *slot;
-
-  if (h->type != STT_GNU_IFUNC
-      || !h->def_regular
-      || !h->ref_regular
-      || !h->forced_local
-      || h->root.type != bfd_link_hash_defined)
-    abort ();
-
-  return elf_i386_allocate_dynrelocs (h, inf);
-}
-
-/* Find any dynamic relocs that apply to read-only sections.  */
-
-static bfd_boolean
-elf_i386_readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
-{
-  struct elf_i386_link_hash_entry *eh;
-  struct elf_dyn_relocs *p;
-
-  /* Skip local IFUNC symbols. */
-  if (h->forced_local && h->type == STT_GNU_IFUNC)
-    return TRUE;
-
-  eh = (struct elf_i386_link_hash_entry *) h;
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
-    {
-      asection *s = p->sec->output_section;
-
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	{
-	  struct bfd_link_info *info = (struct bfd_link_info *) inf;
-
-	  info->flags |= DF_TEXTREL;
-
-	  if ((info->warn_shared_textrel && bfd_link_pic (info))
-	      || info->error_textrel)
-	    /* xgettext:c-format */
-	    info->callbacks->einfo (_("%P: %B: warning: relocation against `%s' in readonly section `%A'\n"),
-				    p->sec->owner, h->root.root.string,
-				    p->sec);
-
-	  /* Not an error, just cut short the traversal.  */
-	  return FALSE;
-	}
-    }
-  return TRUE;
-}
-
-/* Convert load via the GOT slot to load immediate.  */
-
-static bfd_boolean
-elf_i386_convert_load (bfd *abfd, asection *sec,
-		       struct bfd_link_info *link_info)
-{
-  struct elf_i386_link_hash_table *htab;
-  Elf_Internal_Shdr *symtab_hdr;
-  Elf_Internal_Rela *internal_relocs;
-  Elf_Internal_Rela *irel, *irelend;
-  bfd_byte *contents;
-  bfd_boolean changed;
-  bfd_signed_vma *local_got_refcounts;
-
-  /* Don't even try to convert non-ELF outputs.  */
-  if (!is_elf_hash_table (link_info->hash))
-    return FALSE;
-
-  /* Nothing to do if there is no need or no output.  */
-  if ((sec->flags & (SEC_CODE | SEC_RELOC)) != (SEC_CODE | SEC_RELOC)
-      || sec->need_convert_load == 0
-      || bfd_is_abs_section (sec->output_section))
-    return TRUE;
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-
-  /* Load the relocations for this section.  */
-  internal_relocs = (_bfd_elf_link_read_relocs
-		     (abfd, sec, NULL, (Elf_Internal_Rela *) NULL,
-		      link_info->keep_memory));
-  if (internal_relocs == NULL)
-    return FALSE;
-
-  changed = FALSE;
-  htab = elf_i386_hash_table (link_info);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  /* Get the section contents.  */
-  if (elf_section_data (sec)->this_hdr.contents != NULL)
-    contents = elf_section_data (sec)->this_hdr.contents;
-  else
-    {
-      if (!bfd_malloc_and_get_section (abfd, sec, &contents))
-	goto error_return;
-    }
-
-  irelend = internal_relocs + sec->reloc_count;
-  for (irel = internal_relocs; irel < irelend; irel++)
-    {
-      unsigned int r_type = ELF32_R_TYPE (irel->r_info);
-      unsigned int r_symndx;
-      struct elf_link_hash_entry *h;
-      bfd_boolean converted;
-
-      /* Don't convert R_386_GOT32 since we can't tell if it is applied
-	 to "mov $foo@GOT, %reg" which isn't a load via GOT.  */
-      if (r_type != R_386_GOT32X)
-	continue;
-
-      r_symndx = ELF32_R_SYM (irel->r_info);
-      if (r_symndx < symtab_hdr->sh_info)
-	h = elf_i386_get_local_sym_hash (htab, sec->owner,
-					 (const Elf_Internal_Rela *) irel,
-					 FALSE);
-      else
-	{
-	  h = elf_sym_hashes (abfd)[r_symndx - symtab_hdr->sh_info];
-	   while (h->root.type == bfd_link_hash_indirect
-		  || h->root.type == bfd_link_hash_warning)
-	     h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	}
-
-      /* STT_GNU_IFUNC must keep GOT32 relocations.  */
-      if (h != NULL && h->type == STT_GNU_IFUNC)
-	continue;
-
-      converted = FALSE;
-      if (!elf_i386_convert_load_reloc (abfd, symtab_hdr, contents,
-					irel, h, &converted, link_info))
-	goto error_return;
-
-      if (converted)
-	{
-	  changed = converted;
-	  if (h)
-	    {
-	      if (h->got.refcount > 0)
-		h->got.refcount -= 1;
-	    }
-	  else
-	    {
-	      if (local_got_refcounts != NULL
-		  && local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx] -= 1;
-	    }
-	}
-    }
-
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
-    {
-      if (!changed && !link_info->keep_memory)
-	free (contents);
-      else
-	{
-	  /* Cache the section contents for elf_link_input_bfd.  */
-	  elf_section_data (sec)->this_hdr.contents = contents;
-	}
-    }
-
-  if (elf_section_data (sec)->relocs != internal_relocs)
-    {
-      if (!changed)
-	free (internal_relocs);
-      else
-	elf_section_data (sec)->relocs = internal_relocs;
-    }
-
-  return TRUE;
-
- error_return:
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
-    free (contents);
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
-    free (internal_relocs);
-  return FALSE;
-}
-
-/* Set the sizes of the dynamic sections.  */
-
-static bfd_boolean
-elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
-{
-  struct elf_i386_link_hash_table *htab;
-  bfd *dynobj;
-  asection *s;
-  bfd_boolean relocs;
-  bfd *ibfd;
-
-  htab = elf_i386_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-  dynobj = htab->elf.dynobj;
-  if (dynobj == NULL)
-    abort ();
-
-  /* Set up .got offsets for local syms, and space for local dynamic
-     relocs.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
-    {
-      bfd_signed_vma *local_got;
-      bfd_signed_vma *end_local_got;
-      char *local_tls_type;
-      bfd_vma *local_tlsdesc_gotent;
-      bfd_size_type locsymcount;
-      Elf_Internal_Shdr *symtab_hdr;
-      asection *srel;
-
-      if (! is_i386_elf (ibfd))
-	continue;
-
-      for (s = ibfd->sections; s != NULL; s = s->next)
-	{
-	  struct elf_dyn_relocs *p;
-
-	  if (!elf_i386_convert_load (ibfd, s, info))
-	    return FALSE;
-
-	  for (p = ((struct elf_dyn_relocs *)
-		     elf_section_data (s)->local_dynrel);
-	       p != NULL;
-	       p = p->next)
-	    {
-	      if (!bfd_is_abs_section (p->sec)
-		  && bfd_is_abs_section (p->sec->output_section))
-		{
-		  /* Input section has been discarded, either because
-		     it is a copy of a linkonce section or due to
-		     linker script /DISCARD/, so we'll be discarding
-		     the relocs too.  */
-		}
-	      else if ((get_elf_i386_backend_data (output_bfd)->os
-			== is_vxworks)
-		       && strcmp (p->sec->output_section->name,
-				  ".tls_vars") == 0)
-		{
-		  /* Relocations in vxworks .tls_vars sections are
-		     handled specially by the loader.  */
-		}
-	      else if (p->count != 0)
-		{
-		  srel = elf_section_data (p->sec)->sreloc;
-		  srel->size += p->count * sizeof (Elf32_External_Rel);
-		  if ((p->sec->output_section->flags & SEC_READONLY) != 0
-		      && (info->flags & DF_TEXTREL) == 0)
-		    {
-		      info->flags |= DF_TEXTREL;
-		      if ((info->warn_shared_textrel && bfd_link_pic (info))
-			  || info->error_textrel)
-			/* xgettext:c-format */
-			info->callbacks->einfo (_("%P: %B: warning: relocation in readonly section `%A'\n"),
-						p->sec->owner, p->sec);
-		    }
-		}
-	    }
-	}
-
-      local_got = elf_local_got_refcounts (ibfd);
-      if (!local_got)
-	continue;
-
-      symtab_hdr = &elf_symtab_hdr (ibfd);
-      locsymcount = symtab_hdr->sh_info;
-      end_local_got = local_got + locsymcount;
-      local_tls_type = elf_i386_local_got_tls_type (ibfd);
-      local_tlsdesc_gotent = elf_i386_local_tlsdesc_gotent (ibfd);
-      s = htab->elf.sgot;
-      srel = htab->elf.srelgot;
-      for (; local_got < end_local_got;
-	   ++local_got, ++local_tls_type, ++local_tlsdesc_gotent)
-	{
-	  *local_tlsdesc_gotent = (bfd_vma) -1;
-	  if (*local_got > 0)
-	    {
-	      if (GOT_TLS_GDESC_P (*local_tls_type))
-		{
-		  *local_tlsdesc_gotent = htab->elf.sgotplt->size
-		    - elf_i386_compute_jump_table_size (htab);
-		  htab->elf.sgotplt->size += 8;
-		  *local_got = (bfd_vma) -2;
-		}
-	      if (! GOT_TLS_GDESC_P (*local_tls_type)
-		  || GOT_TLS_GD_P (*local_tls_type))
-		{
-		  *local_got = s->size;
-		  s->size += 4;
-		  if (GOT_TLS_GD_P (*local_tls_type)
-		      || *local_tls_type == GOT_TLS_IE_BOTH)
-		    s->size += 4;
-		}
-	      if (bfd_link_pic (info)
-		  || GOT_TLS_GD_ANY_P (*local_tls_type)
-		  || (*local_tls_type & GOT_TLS_IE))
-		{
-		  if (*local_tls_type == GOT_TLS_IE_BOTH)
-		    srel->size += 2 * sizeof (Elf32_External_Rel);
-		  else if (GOT_TLS_GD_P (*local_tls_type)
-			   || ! GOT_TLS_GDESC_P (*local_tls_type))
-		    srel->size += sizeof (Elf32_External_Rel);
-		  if (GOT_TLS_GDESC_P (*local_tls_type))
-		    htab->elf.srelplt->size += sizeof (Elf32_External_Rel);
-		}
-	    }
-	  else
-	    *local_got = (bfd_vma) -1;
-	}
-    }
-
-  if (htab->tls_ldm_got.refcount > 0)
-    {
-      /* Allocate 2 got entries and 1 dynamic reloc for R_386_TLS_LDM
-	 relocs.  */
-      htab->tls_ldm_got.offset = htab->elf.sgot->size;
-      htab->elf.sgot->size += 8;
-      htab->elf.srelgot->size += sizeof (Elf32_External_Rel);
-    }
-  else
-    htab->tls_ldm_got.offset = -1;
-
-  /* Allocate global sym .plt and .got entries, and space for global
-     sym dynamic relocs.  */
-  elf_link_hash_traverse (&htab->elf, elf_i386_allocate_dynrelocs, info);
-
-  /* Allocate .plt and .got entries, and space for local symbols.  */
-  htab_traverse (htab->loc_hash_table,
-		 elf_i386_allocate_local_dynrelocs,
-		 info);
-
-  /* For every jump slot reserved in the sgotplt, reloc_count is
-     incremented.  However, when we reserve space for TLS descriptors,
-     it's not incremented, so in order to compute the space reserved
-     for them, it suffices to multiply the reloc count by the jump
-     slot size.
-
-     PR ld/13302: We start next_irelative_index at the end of .rela.plt
-     so that R_386_IRELATIVE entries come last.  */
-  if (htab->elf.srelplt)
-    {
-      htab->next_tls_desc_index = htab->elf.srelplt->reloc_count;
-      htab->sgotplt_jump_table_size = htab->next_tls_desc_index * 4;
-      htab->next_irelative_index = htab->elf.srelplt->reloc_count - 1;
-    }
-  else if (htab->elf.irelplt)
-    htab->next_irelative_index = htab->elf.irelplt->reloc_count - 1;
-
-
-  if (htab->elf.sgotplt)
-    {
-      /* Don't allocate .got.plt section if there are no GOT nor PLT
-         entries and there is no reference to _GLOBAL_OFFSET_TABLE_.  */
-      if ((htab->elf.hgot == NULL
-	   || !htab->elf.hgot->ref_regular_nonweak)
-	  && (htab->elf.sgotplt->size
-	      == get_elf_backend_data (output_bfd)->got_header_size)
-	  && (htab->elf.splt == NULL
-	      || htab->elf.splt->size == 0)
-	  && (htab->elf.sgot == NULL
-	      || htab->elf.sgot->size == 0)
-	  && (htab->elf.iplt == NULL
-	      || htab->elf.iplt->size == 0)
-	  && (htab->elf.igotplt == NULL
-	      || htab->elf.igotplt->size == 0))
-	htab->elf.sgotplt->size = 0;
-    }
-
-  if (_bfd_elf_eh_frame_present (info))
-    {
-      if (htab->plt_eh_frame != NULL
-	  && htab->elf.splt != NULL
-	  && htab->elf.splt->size != 0
-	  && !bfd_is_abs_section (htab->elf.splt->output_section))
-	htab->plt_eh_frame->size = htab->plt.eh_frame_plt_size;
-
-      if (htab->plt_got_eh_frame != NULL
-	  && htab->plt_got != NULL
-	  && htab->plt_got->size != 0
-	  && !bfd_is_abs_section (htab->plt_got->output_section))
-	htab->plt_got_eh_frame->size
-	  = htab->non_lazy_plt->eh_frame_plt_size;
-
-      /* Unwind info for the second PLT and .plt.got sections are
-	 identical.  */
-      if (htab->plt_second_eh_frame != NULL
-	  && htab->plt_second != NULL
-	  && htab->plt_second->size != 0
-	  && !bfd_is_abs_section (htab->plt_second->output_section))
-	htab->plt_second_eh_frame->size
-	  = htab->non_lazy_plt->eh_frame_plt_size;
-    }
-
-  /* We now have determined the sizes of the various dynamic sections.
-     Allocate memory for them.  */
-  relocs = FALSE;
-  for (s = dynobj->sections; s != NULL; s = s->next)
-    {
-      bfd_boolean strip_section = TRUE;
-
-      if ((s->flags & SEC_LINKER_CREATED) == 0)
-	continue;
-
-      if (s == htab->elf.splt
-	  || s == htab->elf.sgot)
-	{
-	  /* Strip this section if we don't need it; see the
-	     comment below.  */
-	  /* We'd like to strip these sections if they aren't needed, but if
-	     we've exported dynamic symbols from them we must leave them.
-	     It's too late to tell BFD to get rid of the symbols.  */
-
-	  if (htab->elf.hplt != NULL)
-	    strip_section = FALSE;
-	}
-      else if (s == htab->elf.sgotplt
-	       || s == htab->elf.iplt
-	       || s == htab->elf.igotplt
-	       || s == htab->plt_second
-	       || s == htab->plt_got
-	       || s == htab->plt_eh_frame
-	       || s == htab->plt_got_eh_frame
-	       || s == htab->plt_second_eh_frame
-	       || s == htab->elf.sdynbss
-	       || s == htab->elf.sdynrelro)
-	{
-	  /* Strip these too.  */
-	}
-      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rel"))
-	{
-	  if (s->size != 0
-	      && s != htab->elf.srelplt
-	      && s != htab->srelplt2)
-	    relocs = TRUE;
-
-	  /* We use the reloc_count field as a counter if we need
-	     to copy relocs into the output file.  */
-	  s->reloc_count = 0;
-	}
-      else
-	{
-	  /* It's not one of our sections, so don't allocate space.  */
-	  continue;
-	}
-
-      if (s->size == 0)
-	{
-	  /* If we don't need this section, strip it from the
-	     output file.  This is mostly to handle .rel.bss and
-	     .rel.plt.  We must create both sections in
-	     create_dynamic_sections, because they must be created
-	     before the linker maps input sections to output
-	     sections.  The linker does that before
-	     adjust_dynamic_symbol is called, and it is that
-	     function which decides whether anything needs to go
-	     into these sections.  */
-	  if (strip_section)
-	    s->flags |= SEC_EXCLUDE;
-	  continue;
-	}
-
-      if ((s->flags & SEC_HAS_CONTENTS) == 0)
-	continue;
-
-      /* Allocate memory for the section contents.  We use bfd_zalloc
-	 here in case unused entries are not reclaimed before the
-	 section's contents are written out.  This should not happen,
-	 but this way if it does, we get a R_386_NONE reloc instead
-	 of garbage.  */
-      s->contents = (unsigned char *) bfd_zalloc (dynobj, s->size);
-      if (s->contents == NULL)
-	return FALSE;
-    }
-
-  if (htab->plt_eh_frame != NULL
-      && htab->plt_eh_frame->contents != NULL)
-    {
-      memcpy (htab->plt_eh_frame->contents,
-	      htab->plt.eh_frame_plt,
-	      htab->plt_eh_frame->size);
-      bfd_put_32 (dynobj, htab->elf.splt->size,
-		  htab->plt_eh_frame->contents + PLT_FDE_LEN_OFFSET);
-    }
-
-  if (htab->plt_got_eh_frame != NULL
-      && htab->plt_got_eh_frame->contents != NULL)
-    {
-      memcpy (htab->plt_got_eh_frame->contents,
-	      htab->non_lazy_plt->eh_frame_plt,
-	      htab->plt_got_eh_frame->size);
-      bfd_put_32 (dynobj, htab->plt_got->size,
-		  (htab->plt_got_eh_frame->contents
-		   + PLT_FDE_LEN_OFFSET));
-    }
-
-  if (htab->plt_second_eh_frame != NULL
-      && htab->plt_second_eh_frame->contents != NULL)
-    {
-      memcpy (htab->plt_second_eh_frame->contents,
-	      htab->non_lazy_plt->eh_frame_plt,
-	      htab->plt_second_eh_frame->size);
-      bfd_put_32 (dynobj, htab->plt_second->size,
-		  (htab->plt_second_eh_frame->contents
-		   + PLT_FDE_LEN_OFFSET));
-    }
-
-  if (htab->elf.dynamic_sections_created)
-    {
-      /* Add some entries to the .dynamic section.  We fill in the
-	 values later, in elf_i386_finish_dynamic_sections, but we
-	 must add the entries now so that we get the correct size for
-	 the .dynamic section.  The DT_DEBUG entry is filled in by the
-	 dynamic linker and used by the debugger.  */
-#define add_dynamic_entry(TAG, VAL) \
-  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
-
-      if (bfd_link_executable (info))
-	{
-	  if (!add_dynamic_entry (DT_DEBUG, 0))
-	    return FALSE;
-	}
-
-      if (htab->elf.splt->size != 0)
-	{
-	  /* DT_PLTGOT is used by prelink even if there is no PLT
-	     relocation.  */
-	  if (!add_dynamic_entry (DT_PLTGOT, 0))
-	    return FALSE;
-	}
-
-      if (htab->elf.srelplt->size != 0)
-	{
-	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_REL)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
-	}
-
-      if (relocs)
-	{
-	  if (!add_dynamic_entry (DT_REL, 0)
-	      || !add_dynamic_entry (DT_RELSZ, 0)
-	      || !add_dynamic_entry (DT_RELENT, sizeof (Elf32_External_Rel)))
-	    return FALSE;
-
-	  /* If any dynamic relocs apply to a read-only section,
-	     then we need a DT_TEXTREL entry.  */
-	  if ((info->flags & DF_TEXTREL) == 0)
-	    elf_link_hash_traverse (&htab->elf,
-				    elf_i386_readonly_dynrelocs, info);
-
-	  if ((info->flags & DF_TEXTREL) != 0)
-	    {
-	      if (htab->readonly_dynrelocs_against_ifunc)
-		{
-		  info->callbacks->einfo
-		    (_("%P%X: read-only segment has dynamic IFUNC relocations; recompile with -fPIC\n"));
-		  bfd_set_error (bfd_error_bad_value);
-		  return FALSE;
-		}
-
-	      if (!add_dynamic_entry (DT_TEXTREL, 0))
-		return FALSE;
-	    }
-	}
-      if (get_elf_i386_backend_data (output_bfd)->os == is_vxworks
-	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
-	return FALSE;
-    }
-#undef add_dynamic_entry
-
-  return TRUE;
-}
-
-static bfd_boolean
-elf_i386_always_size_sections (bfd *output_bfd,
-			       struct bfd_link_info *info)
-{
-  asection *tls_sec = elf_hash_table (info)->tls_sec;
-
-  if (tls_sec)
-    {
-      struct elf_link_hash_entry *tlsbase;
-
-      tlsbase = elf_link_hash_lookup (elf_hash_table (info),
-				      "_TLS_MODULE_BASE_",
-				      FALSE, FALSE, FALSE);
-
-      if (tlsbase && tlsbase->type == STT_TLS)
-	{
-	  struct elf_i386_link_hash_table *htab;
-	  struct bfd_link_hash_entry *bh = NULL;
-	  const struct elf_backend_data *bed
-	    = get_elf_backend_data (output_bfd);
-
-	  htab = elf_i386_hash_table (info);
-	  if (htab == NULL)
-	    return FALSE;
-
-	  if (!(_bfd_generic_link_add_one_symbol
-		(info, output_bfd, "_TLS_MODULE_BASE_", BSF_LOCAL,
-		 tls_sec, 0, NULL, FALSE,
-		 bed->collect, &bh)))
-	    return FALSE;
-
-	  htab->tls_module_base = bh;
-
-	  tlsbase = (struct elf_link_hash_entry *)bh;
-	  tlsbase->def_regular = 1;
-	  tlsbase->other = STV_HIDDEN;
-	  tlsbase->root.linker_def = 1;
-	  (*bed->elf_backend_hide_symbol) (info, tlsbase, TRUE);
-	}
-    }
-
-  return TRUE;
 }
 
 /* Set the correct type for an x86 ELF section.  We do this by the
@@ -3798,44 +2001,6 @@ elf_i386_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
-/* _TLS_MODULE_BASE_ needs to be treated especially when linking
-   executables.  Rather than setting it to the beginning of the TLS
-   section, we have to set it to the end.    This function may be called
-   multiple times, it is idempotent.  */
-
-static void
-elf_i386_set_tls_module_base (struct bfd_link_info *info)
-{
-  struct elf_i386_link_hash_table *htab;
-  struct bfd_link_hash_entry *base;
-
-  if (!bfd_link_executable (info))
-    return;
-
-  htab = elf_i386_hash_table (info);
-  if (htab == NULL)
-    return;
-
-  base = htab->tls_module_base;
-  if (base == NULL)
-    return;
-
-  base->u.def.value = htab->elf.tls_size;
-}
-
-/* Return the base VMA address which should be subtracted from real addresses
-   when resolving @dtpoff relocation.
-   This is PT_TLS segment p_vaddr.  */
-
-static bfd_vma
-elf_i386_dtpoff_base (struct bfd_link_info *info)
-{
-  /* If tls_sec is NULL, we should have signalled an error already.  */
-  if (elf_hash_table (info)->tls_sec == NULL)
-    return 0;
-  return elf_hash_table (info)->tls_sec->vma;
-}
-
 /* Return the relocation value for @tpoff relocation
    if STT_TLS virtual address is ADDRESS.  */
 
@@ -3867,7 +2032,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 			   Elf_Internal_Sym *local_syms,
 			   asection **local_sections)
 {
-  struct elf_i386_link_hash_table *htab;
+  struct elf_x86_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   bfd_vma *local_got_offsets;
@@ -3878,28 +2043,28 @@ elf_i386_relocate_section (bfd *output_bfd,
   bfd_boolean is_vxworks_tls;
   unsigned plt_entry_size;
 
-  BFD_ASSERT (is_i386_elf (input_bfd));
-
   /* Skip if check_relocs failed.  */
   if (input_section->check_relocs_failed)
     return FALSE;
 
-  htab = elf_i386_hash_table (info);
+  htab = elf_x86_hash_table (info, I386_ELF_DATA);
   if (htab == NULL)
     return FALSE;
+
+  BFD_ASSERT (is_x86_elf (input_bfd, htab));
+
   symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
   local_got_offsets = elf_local_got_offsets (input_bfd);
-  local_tlsdesc_gotents = elf_i386_local_tlsdesc_gotent (input_bfd);
+  local_tlsdesc_gotents = elf_x86_local_tlsdesc_gotent (input_bfd);
   /* We have to handle relocations in vxworks .tls_vars sections
      specially, because the dynamic loader is 'weird'.  */
-  is_vxworks_tls = ((get_elf_i386_backend_data (output_bfd)->os
-		     == is_vxworks)
+  is_vxworks_tls = (htab->is_vxworks
                     && bfd_link_pic (info)
 		    && !strcmp (input_section->output_section->name,
 				".tls_vars"));
 
-  elf_i386_set_tls_module_base (info);
+  _bfd_x86_elf_set_tls_module_base (info);
 
   plt_entry_size = htab->plt.plt_entry_size;
 
@@ -3907,11 +2072,11 @@ elf_i386_relocate_section (bfd *output_bfd,
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; wrel++, rel++)
     {
-      unsigned int r_type;
+      unsigned int r_type, r_type_tls;
       reloc_howto_type *howto;
       unsigned long r_symndx;
       struct elf_link_hash_entry *h;
-      struct elf_i386_link_hash_entry *eh;
+      struct elf_x86_link_hash_entry *eh;
       Elf_Internal_Sym *sym;
       asection *sec;
       bfd_vma off, offplt, plt_offset;
@@ -3939,14 +2104,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      >= R_386_ext - R_386_standard)
 	  && ((indx = r_type - R_386_tls_offset) - R_386_ext
 	      >= R_386_ext2 - R_386_ext))
-	{
-	  _bfd_error_handler
-	    /* xgettext:c-format */
-	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
-	     input_bfd, r_type, input_section);
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
-	}
+	return _bfd_unrecognized_reloc (input_bfd, input_section, r_type);
+
       howto = elf_howto_table + indx;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
@@ -4036,8 +2195,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 		   && ELF32_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
 	    {
 	      /* Relocate against local STT_GNU_IFUNC symbol.  */
-	      h = elf_i386_get_local_sym_hash (htab, input_bfd, rel,
-					       FALSE);
+	      h = _bfd_elf_x86_get_local_sym_hash (htab, input_bfd, rel,
+						   FALSE);
 	      if (h == NULL)
 		abort ();
 
@@ -4083,7 +2242,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  continue;
 	}
 
-      eh = (struct elf_i386_link_hash_entry *) h;
+      eh = (struct elf_x86_link_hash_entry *) h;
 
       /* Since STT_GNU_IFUNC symbol must go through PLT, we handle
 	 it here if it is defined in a non-shared object.  */
@@ -4319,9 +2478,7 @@ do_ifunc_pointer:
 	}
 
       resolved_to_zero = (eh != NULL
-			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
-							      eh->has_got_reloc,
-							      eh));
+			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh));
 
       switch (r_type)
 	{
@@ -4402,7 +2559,7 @@ r_386_got32:
 						     bfd_link_pic (info),
 						     h)
 		  || (bfd_link_pic (info)
-		      && SYMBOL_REFERENCES_LOCAL (info, h))
+		      && SYMBOL_REFERENCES_LOCAL_P (info, h))
 		  || (ELF_ST_VISIBILITY (h->other)
 		      && h->root.type == bfd_link_hash_undefweak))
 		{
@@ -4561,7 +2718,7 @@ disallow_got32:
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
-	      else if (!SYMBOL_REFERENCES_LOCAL (info, h)
+	      else if (!SYMBOL_REFERENCES_LOCAL_P (info, h)
 		       && (h->type == STT_FUNC
 			   || h->type == STT_OBJECT)
 		       && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
@@ -4753,23 +2910,24 @@ disallow_got32:
 	case R_386_TLS_GOTIE:
 	  tls_type = GOT_UNKNOWN;
 	  if (h == NULL && local_got_offsets)
-	    tls_type = elf_i386_local_got_tls_type (input_bfd) [r_symndx];
+	    tls_type = elf_x86_local_got_tls_type (input_bfd) [r_symndx];
 	  else if (h != NULL)
-	    tls_type = elf_i386_hash_entry(h)->tls_type;
+	    tls_type = elf_x86_hash_entry(h)->tls_type;
 	  if (tls_type == GOT_TLS_IE)
 	    tls_type = GOT_TLS_IE_NEG;
 
+	   r_type_tls = r_type;
 	  if (! elf_i386_tls_transition (info, input_bfd,
 					 input_section, contents,
 					 symtab_hdr, sym_hashes,
-					 &r_type, tls_type, rel,
+					 &r_type_tls, tls_type, rel,
 					 relend, h, r_symndx, TRUE))
 	    return FALSE;
 
-	  if (r_type == R_386_TLS_LE_32)
+	  if (r_type_tls == R_386_TLS_LE_32)
 	    {
 	      BFD_ASSERT (! unresolved_reloc);
-	      if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GD)
+	      if (r_type == R_386_TLS_GD)
 		{
 		  unsigned int type;
 		  bfd_vma roff;
@@ -4812,7 +2970,7 @@ disallow_got32:
 		  wrel++;
 		  continue;
 		}
-	      else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GOTDESC)
+	      else if (r_type == R_386_TLS_GOTDESC)
 		{
 		  /* GDesc -> LE transition.
 		     It's originally something like:
@@ -4837,7 +2995,7 @@ disallow_got32:
 			      contents + roff);
 		  continue;
 		}
-	      else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_DESC_CALL)
+	      else if (r_type == R_386_TLS_DESC_CALL)
 		{
 		  /* GDesc -> LE transition.
 		     It's originally:
@@ -4852,7 +3010,7 @@ disallow_got32:
 		  bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
 		  continue;
 		}
-	      else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_IE)
+	      else if (r_type == R_386_TLS_IE)
 		{
 		  unsigned int val;
 
@@ -4946,7 +3104,7 @@ disallow_got32:
 		    }
 		  else
 		    BFD_FAIL ();
-		  if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GOTIE)
+		  if (r_type == R_386_TLS_GOTIE)
 		    bfd_put_32 (output_bfd, -elf_i386_tpoff (info, relocation),
 				contents + rel->r_offset);
 		  else
@@ -4962,7 +3120,7 @@ disallow_got32:
 	  if (h != NULL)
 	    {
 	      off = h->got.offset;
-	      offplt = elf_i386_hash_entry (h)->tlsdesc_got;
+	      offplt = elf_x86_hash_entry (h)->tlsdesc_got;
 	    }
 	  else
 	    {
@@ -5007,7 +3165,7 @@ disallow_got32:
 		    {
 		      BFD_ASSERT (! unresolved_reloc);
 		      bfd_put_32 (output_bfd,
-				  relocation - elf_i386_dtpoff_base (info),
+				  relocation - _bfd_x86_elf_dtpoff_base (info),
 				  htab->elf.sgotplt->contents + offplt
 				  + htab->sgotplt_jump_table_size + 4);
 		    }
@@ -5035,11 +3193,11 @@ disallow_got32:
 
 	      if (dr_type == R_386_TLS_TPOFF && indx == 0)
 		bfd_put_32 (output_bfd,
-			    relocation - elf_i386_dtpoff_base (info),
+			    relocation - _bfd_x86_elf_dtpoff_base (info),
 			    htab->elf.sgot->contents + off);
 	      else if (dr_type == R_386_TLS_TPOFF32 && indx == 0)
 		bfd_put_32 (output_bfd,
-			    elf_i386_dtpoff_base (info) - relocation,
+			    _bfd_x86_elf_dtpoff_base (info) - relocation,
 			    htab->elf.sgot->contents + off);
 	      else if (dr_type != R_386_TLS_DESC)
 		bfd_put_32 (output_bfd, 0,
@@ -5054,7 +3212,7 @@ disallow_got32:
 		    {
 	    	      BFD_ASSERT (! unresolved_reloc);
 		      bfd_put_32 (output_bfd,
-				  relocation - elf_i386_dtpoff_base (info),
+				  relocation - _bfd_x86_elf_dtpoff_base (info),
 				  htab->elf.sgot->contents + off + 4);
 		    }
 		  else
@@ -5071,7 +3229,7 @@ disallow_got32:
 		{
 		  bfd_put_32 (output_bfd,
 			      (indx == 0
-			       ? relocation - elf_i386_dtpoff_base (info)
+			       ? relocation - _bfd_x86_elf_dtpoff_base (info)
 			       : 0),
 			      htab->elf.sgot->contents + off + 4);
 		  outrel.r_info = ELF32_R_INFO (indx, R_386_TLS_TPOFF);
@@ -5089,13 +3247,13 @@ disallow_got32:
 	  if (off >= (bfd_vma) -2
 	      && ! GOT_TLS_GDESC_P (tls_type))
 	    abort ();
-	  if (r_type == R_386_TLS_GOTDESC
-	      || r_type == R_386_TLS_DESC_CALL)
+	  if (r_type_tls == R_386_TLS_GOTDESC
+	      || r_type_tls == R_386_TLS_DESC_CALL)
 	    {
 	      relocation = htab->sgotplt_jump_table_size + offplt;
 	      unresolved_reloc = FALSE;
 	    }
-	  else if (r_type == ELF32_R_TYPE (rel->r_info))
+	  else if (r_type_tls == r_type)
 	    {
 	      bfd_vma g_o_t = htab->elf.sgotplt->output_section->vma
 			      + htab->elf.sgotplt->output_offset;
@@ -5108,7 +3266,7 @@ disallow_got32:
 		relocation += g_o_t;
 	      unresolved_reloc = FALSE;
 	    }
-	  else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GD)
+	  else if (r_type == R_386_TLS_GD)
 	    {
 	      unsigned int val, type;
 	      bfd_vma roff;
@@ -5164,7 +3322,7 @@ disallow_got32:
 	      wrel++;
 	      continue;
 	    }
-	  else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GOTDESC)
+	  else if (r_type == R_386_TLS_GOTDESC)
 	    {
 	      /* GDesc -> IE transition.
 		 It's originally something like:
@@ -5203,7 +3361,7 @@ disallow_got32:
 			  contents + roff);
 	      continue;
 	    }
-	  else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_DESC_CALL)
+	  else if (r_type == R_386_TLS_DESC_CALL)
 	    {
 	      /* GDesc -> IE transition.
 		 It's originally:
@@ -5282,7 +3440,7 @@ disallow_got32:
 	  if (htab->elf.sgot == NULL)
 	    abort ();
 
-	  off = htab->tls_ldm_got.offset;
+	  off = htab->tls_ld_or_ldm_got.offset;
 	  if (off & 1)
 	    off &= ~1;
 	  else
@@ -5301,7 +3459,7 @@ disallow_got32:
 			  htab->elf.sgot->contents + off + 4);
 	      outrel.r_info = ELF32_R_INFO (0, R_386_TLS_DTPMOD32);
 	      elf_append_rel (output_bfd, htab->elf.srelgot, &outrel);
-	      htab->tls_ldm_got.offset |= 1;
+	      htab->tls_ld_or_ldm_got.offset |= 1;
 	    }
 	  relocation = htab->elf.sgot->output_section->vma
 		       + htab->elf.sgot->output_offset + off
@@ -5313,7 +3471,7 @@ disallow_got32:
 	case R_386_TLS_LDO_32:
 	  if (!bfd_link_executable (info)
 	      || (input_section->flags & SEC_CODE) == 0)
-	    relocation -= elf_i386_dtpoff_base (info);
+	    relocation -= _bfd_x86_elf_dtpoff_base (info);
 	  else
 	    /* When converting LDO to LE, we must negate.  */
 	    relocation = -elf_i386_tpoff (info, relocation);
@@ -5344,9 +3502,9 @@ disallow_got32:
 	      if (indx)
 		continue;
 	      else if (r_type == R_386_TLS_LE_32)
-		relocation = elf_i386_dtpoff_base (info) - relocation;
+		relocation = _bfd_x86_elf_dtpoff_base (info) - relocation;
 	      else
-		relocation -= elf_i386_dtpoff_base (info);
+		relocation -= _bfd_x86_elf_dtpoff_base (info);
 	    }
 	  else if (r_type == R_386_TLS_LE_32)
 	    relocation = elf_i386_tpoff (info, relocation);
@@ -5369,10 +3527,10 @@ disallow_got32:
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
-	     (long) rel->r_offset,
+	     rel->r_offset,
 	     howto->name,
 	     h->root.root.string);
 	  return FALSE;
@@ -5409,9 +3567,9 @@ check_relocation_error:
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
+		(_("%B(%A+%#Lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
-		 (long) rel->r_offset, name, (int) r);
+		 rel->r_offset, name, (int) r);
 	      return FALSE;
 	    }
 	}
@@ -5452,33 +3610,29 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 				struct elf_link_hash_entry *h,
 				Elf_Internal_Sym *sym)
 {
-  struct elf_i386_link_hash_table *htab;
+  struct elf_x86_link_hash_table *htab;
   unsigned plt_entry_size;
-  const struct elf_i386_backend_data *abed;
-  struct elf_i386_link_hash_entry *eh;
+  struct elf_x86_link_hash_entry *eh;
   bfd_boolean local_undefweak;
   bfd_boolean use_plt_second;
 
-  htab = elf_i386_hash_table (info);
+  htab = elf_x86_hash_table (info, I386_ELF_DATA);
   if (htab == NULL)
     return FALSE;
 
-  abed = get_elf_i386_backend_data (output_bfd);
   plt_entry_size = htab->plt.plt_entry_size;
 
   /* Use the second PLT section only if there is .plt section.  */
   use_plt_second = htab->elf.splt != NULL && htab->plt_second != NULL;
 
-  eh = (struct elf_i386_link_hash_entry *) h;
+  eh = (struct elf_x86_link_hash_entry *) h;
   if (eh->no_finish_dynamic_symbol)
     abort ();
 
   /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
      resolved undefined weak symbols in executable so that their
      references have value 0 at run-time.  */
-  local_undefweak = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
-						     eh->has_got_reloc,
-						     eh);
+  local_undefweak = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -5572,7 +3726,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 		      resolved_plt->contents + plt_offset
                       + htab->plt.plt_got_offset);
 
-	  if (abed->os == is_vxworks)
+	  if (htab->is_vxworks)
 	    {
 	      int s, k, reloc_index;
 
@@ -5742,8 +3896,8 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
   /* Don't generate dynamic GOT relocation against undefined weak
      symbol in executable.  */
   if (h->got.offset != (bfd_vma) -1
-      && ! GOT_TLS_GD_ANY_P (elf_i386_hash_entry(h)->tls_type)
-      && (elf_i386_hash_entry(h)->tls_type & GOT_TLS_IE) == 0
+      && ! GOT_TLS_GD_ANY_P (elf_x86_hash_entry(h)->tls_type)
+      && (elf_x86_hash_entry(h)->tls_type & GOT_TLS_IE) == 0
       && !local_undefweak)
     {
       Elf_Internal_Rela rel;
@@ -5776,7 +3930,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 		     in static executable.  */
 		  relgot = htab->elf.irelplt;
 		}
-	      if (SYMBOL_REFERENCES_LOCAL (info, h))
+	      if (SYMBOL_REFERENCES_LOCAL_P (info, h))
 		{
 		  info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
 					  h->root.root.string,
@@ -5826,7 +3980,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 	    }
 	}
       else if (bfd_link_pic (info)
-	       && SYMBOL_REFERENCES_LOCAL (info, h))
+	       && SYMBOL_REFERENCES_LOCAL_P (info, h))
 	{
 	  BFD_ASSERT((h->got.offset & 1) != 0);
 	  rel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
@@ -5902,7 +4056,7 @@ elf_i386_pie_finish_undefweak_symbol (struct bfd_hash_entry *bh,
     return TRUE;
 
   return elf_i386_finish_dynamic_symbol (info->output_bfd,
-					     info, h, NULL);
+					 info, h, NULL);
 }
 
 /* Used to decide how to sort relocs in an optimal manner for the
@@ -5958,12 +4112,12 @@ static bfd_boolean
 elf_i386_finish_dynamic_sections (bfd *output_bfd,
 				  struct bfd_link_info *info)
 {
-  struct elf_i386_link_hash_table *htab;
+  struct elf_x86_link_hash_table *htab;
   bfd *dynobj;
   asection *sdyn;
   const struct elf_i386_backend_data *abed;
 
-  htab = elf_i386_hash_table (info);
+  htab = elf_x86_hash_table (info, I386_ELF_DATA);
   if (htab == NULL)
     return FALSE;
 
@@ -5990,7 +4144,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	  switch (dyn.d_tag)
 	    {
 	    default:
-	      if (abed->os == is_vxworks
+	      if (htab->is_vxworks
                   && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
 		break;
 	      continue;
@@ -6045,12 +4199,13 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 			      htab->elf.splt->contents
 			      + htab->lazy_plt->plt0_got2_offset);
 
-		  if (abed->os == is_vxworks)
+		  if (htab->is_vxworks)
 		    {
 		      Elf_Internal_Rela rel;
 		      int num_plts = (htab->elf.splt->size
 				      / htab->plt.plt_entry_size) - 1;
 		      unsigned char *p;
+		      asection *srelplt2 = htab->srelplt2;
 
 		      /* Generate a relocation for _GLOBAL_OFFSET_TABLE_
 			 + 4.  On IA32 we use REL relocations so the
@@ -6061,7 +4216,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 		      rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx,
 						 R_386_32);
 		      bfd_elf32_swap_reloc_out (output_bfd, &rel,
-						htab->srelplt2->contents);
+						srelplt2->contents);
 		      /* Generate a relocation for _GLOBAL_OFFSET_TABLE_
 			 + 8.  */
 		      rel.r_offset = (htab->elf.splt->output_section->vma
@@ -6070,10 +4225,10 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 		      rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx,
 						 R_386_32);
 		      bfd_elf32_swap_reloc_out (output_bfd, &rel,
-						htab->srelplt2->contents +
+						srelplt2->contents +
 						sizeof (Elf32_External_Rel));
 		      /* Correct the .rel.plt.unloaded relocations.  */
-		      p = htab->srelplt2->contents;
+		      p = srelplt2->contents;
 		      if (bfd_link_pic (info))
 			p += PLTRESOLVE_RELOCS_SHLIB * sizeof (Elf32_External_Rel);
 		      else
@@ -6238,7 +4393,8 @@ elf_i386_output_arch_local_syms
 		asection *,
 		struct elf_link_hash_entry *) ATTRIBUTE_UNUSED)
 {
-  struct elf_i386_link_hash_table *htab = elf_i386_hash_table (info);
+  struct elf_x86_link_hash_table *htab
+    = elf_x86_hash_table (info, I386_ELF_DATA);
   if (htab == NULL)
     return FALSE;
 
@@ -6250,44 +4406,8 @@ elf_i386_output_arch_local_syms
   return TRUE;
 }
 
-/* Sort relocs into address order.  */
-
-static int
-compare_relocs (const void *ap, const void *bp)
-{
-  const arelent *a = * (const arelent **) ap;
-  const arelent *b = * (const arelent **) bp;
-
-  if (a->address > b->address)
-    return 1;
-  else if (a->address < b->address)
-    return -1;
-  else
-    return 0;
-}
-
-enum elf_i386_plt_type
-{
-  plt_non_lazy = 0,
-  plt_lazy = 1 << 0,
-  plt_pic = 1 << 1,
-  plt_second = 1 << 2,
-  plt_unknown = -1
-};
-
-struct elf_i386_plt
-{
-  const char *name;
-  asection *sec;
-  bfd_byte *contents;
-  enum elf_i386_plt_type type;
-  unsigned int plt_got_offset;
-  unsigned int plt_entry_size;
-  long count;
-};
-
 /* Forward declaration.  */
-static const struct elf_i386_lazy_plt_layout elf_i386_nacl_plt;
+static const struct elf_x86_lazy_plt_layout elf_i386_nacl_plt;
 
 /* Similar to _bfd_elf_get_synthetic_symtab.  Support PLTs with all
    dynamic relocations.   */
@@ -6300,27 +4420,23 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 			       asymbol **dynsyms,
 			       asymbol **ret)
 {
-  long size, count, i, n;
+  long count, i, n;
   int j;
-  unsigned int plt_got_offset, plt_entry_size;
-  asymbol *s;
   bfd_byte *plt_contents;
-  long dynrelcount, relsize;
-  arelent **dynrelbuf;
-  const struct elf_i386_lazy_plt_layout *lazy_plt;
-  const struct elf_i386_non_lazy_plt_layout *non_lazy_plt;
-  const struct elf_i386_lazy_plt_layout *lazy_ibt_plt;
-  const struct elf_i386_non_lazy_plt_layout *non_lazy_ibt_plt;
+  long relsize;
+  const struct elf_x86_lazy_plt_layout *lazy_plt;
+  const struct elf_x86_non_lazy_plt_layout *non_lazy_plt;
+  const struct elf_x86_lazy_plt_layout *lazy_ibt_plt;
+  const struct elf_x86_non_lazy_plt_layout *non_lazy_ibt_plt;
   asection *plt;
   bfd_vma got_addr;
-  char *names;
-  enum elf_i386_plt_type plt_type;
-  struct elf_i386_plt plts[] =
+  enum elf_x86_plt_type plt_type;
+  struct elf_x86_plt plts[] =
     {
-      { ".plt", NULL, NULL, plt_unknown, 0, 0, 0 },
-      { ".plt.got", NULL, NULL, plt_non_lazy, 0, 0, 0 },
-      { ".plt.sec", NULL, NULL, plt_second, 0, 0, 0 },
-      { NULL, NULL, NULL, plt_non_lazy, 0, 0, 0 }
+      { ".plt", NULL, NULL, plt_unknown, 0, 0, 0, 0 },
+      { ".plt.got", NULL, NULL, plt_non_lazy, 0, 0, 0, 0 },
+      { ".plt.sec", NULL, NULL, plt_second, 0, 0, 0, 0 },
+      { NULL, NULL, NULL, plt_non_lazy, 0, 0, 0, 0 }
     };
 
   *ret = NULL;
@@ -6334,16 +4450,6 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
   relsize = bfd_get_dynamic_reloc_upper_bound (abfd);
   if (relsize <= 0)
     return -1;
-
-  dynrelbuf = (arelent **) bfd_malloc (relsize);
-  if (dynrelbuf == NULL)
-    return -1;
-
-  dynrelcount = bfd_canonicalize_dynamic_reloc (abfd, dynrelbuf,
-						dynsyms);
-
-  /* Sort the relocs by address.  */
-  qsort (dynrelbuf, dynrelcount, sizeof (arelent *), compare_relocs);
 
   non_lazy_plt = NULL;
   /* Silence GCC 6.  */
@@ -6371,7 +4477,7 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
   for (j = 0; plts[j].name != NULL; j++)
     {
       plt = bfd_get_section_by_name (abfd, plts[j].name);
-      if (plt == NULL)
+      if (plt == NULL || plt->size == 0)
 	continue;
 
       /* Get the PLT section contents.  */
@@ -6387,7 +4493,9 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 
       /* Check what kind of PLT it is.  */
       plt_type = plt_unknown;
-      if (plts[j].type == plt_unknown)
+      if (plts[j].type == plt_unknown
+	  && (plt->size >= (lazy_plt->plt0_entry_size
+			    + lazy_plt->plt_entry_size)))
 	{
 	  /* Match lazy PLT first.  */
 	  if (memcmp (plt_contents, lazy_plt->plt0_entry,
@@ -6396,7 +4504,7 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 	      /* The fist entry in the lazy IBT PLT is the same as the
 		 normal lazy PLT.  */
 	      if (lazy_ibt_plt != NULL
-		  && (memcmp (plt_contents + lazy_ibt_plt->plt_entry_size,
+		  && (memcmp (plt_contents + lazy_ibt_plt->plt0_entry_size,
 			      lazy_ibt_plt->plt_entry,
 			      lazy_ibt_plt->plt_got_offset) == 0))
 		plt_type = plt_lazy | plt_second;
@@ -6409,7 +4517,7 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 	      /* The fist entry in the PIC lazy IBT PLT is the same as
 		 the normal PIC lazy PLT.  */
 	      if (lazy_ibt_plt != NULL
-		  && (memcmp (plt_contents + lazy_ibt_plt->plt_entry_size,
+		  && (memcmp (plt_contents + lazy_ibt_plt->plt0_entry_size,
 			      lazy_ibt_plt->pic_plt_entry,
 			      lazy_ibt_plt->plt_got_offset) == 0))
 		plt_type = plt_lazy | plt_pic | plt_second;
@@ -6419,7 +4527,8 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 	}
 
       if (non_lazy_plt != NULL
-	  && (plt_type == plt_unknown || plt_type == plt_non_lazy))
+	  && (plt_type == plt_unknown || plt_type == plt_non_lazy)
+	  && plt->size >= non_lazy_plt->plt_entry_size)
 	{
 	  /* Match non-lazy PLT.  */
 	  if (memcmp (plt_contents, non_lazy_plt->plt_entry,
@@ -6431,7 +4540,8 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 	}
 
       if ((non_lazy_ibt_plt != NULL)
-	  && (plt_type == plt_unknown || plt_type == plt_second))
+	  && (plt_type == plt_unknown || plt_type == plt_second)
+	  && plt->size >= non_lazy_ibt_plt->plt_entry_size)
 	{
 	  if (memcmp (plt_contents,
 		      non_lazy_ibt_plt->plt_entry,
@@ -6452,7 +4562,10 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 	}
 
       if (plt_type == plt_unknown)
-	continue;
+	{
+	  free (plt_contents);
+	  continue;
+	}
 
       plts[j].sec = plt;
       plts[j].type = plt_type;
@@ -6489,318 +4602,9 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 	got_addr = (bfd_vma) -1;
     }
 
-  size = count * sizeof (asymbol);
-  s = *ret = (asymbol *) bfd_zmalloc (size);
-  if (s == NULL)
-    {
-bad_return:
-      for (j = 0; plts[j].name != NULL; j++)
-	if (plts[j].contents != NULL)
-	  free (plts[j].contents);
-      free (dynrelbuf);
-      return -1;
-    }
-
-  if (got_addr)
-    {
-      /* Check .got.plt and then .got to get the _GLOBAL_OFFSET_TABLE_
-	 address.  */
-      asection *sec = bfd_get_section_by_name (abfd, ".got.plt");
-      if (sec != NULL)
-	got_addr = sec->vma;
-      else
-	{
-	  sec = bfd_get_section_by_name (abfd, ".got");
-	  if (sec != NULL)
-	    got_addr = sec->vma;
-	}
-
-      if (got_addr == (bfd_vma) -1)
-	goto bad_return;
-    }
-
-  /* Check for each PLT section.  */
-  size = 0;
-  n = 0;
-  for (j = 0; plts[j].name != NULL; j++)
-    if ((plt_contents = plts[j].contents) != NULL)
-      {
-	long k;
-	bfd_vma offset;
-
-	plt_got_offset = plts[j].plt_got_offset;
-	plt_entry_size = plts[j].plt_entry_size;
-
-	plt = plts[j].sec;
-
-	if ((plts[j].type & plt_lazy))
-	  {
-	    /* Skip PLT0 in lazy PLT.  */
-	    k = 1;
-	    offset = plt_entry_size;
-	  }
-	else
-	  {
-	    k = 0;
-	    offset = 0;
-	  }
-
-	/* Check each PLT entry against dynamic relocations.  */
-	for (; k < plts[j].count; k++)
-	  {
-	    int off;
-	    bfd_vma got_vma;
-	    long min, max, mid;
-	    arelent *p;
-
-	    /* Get the GOT offset, a signed 32-bit integer.  */
-	    off = H_GET_32 (abfd, (plt_contents + offset
-				   + plt_got_offset));
-	    got_vma = got_addr + off;
-
-	    /* Binary search.  */
-	    p = dynrelbuf[0];
-	    min = 0;
-	    max = dynrelcount;
-	    while ((min + 1) < max)
-	      {
-		arelent *r;
-
-		mid = (min + max) / 2;
-		r = dynrelbuf[mid];
-		if (got_vma > r->address)
-		  min = mid;
-		else if (got_vma < r->address)
-		  max = mid;
-		else
-		  {
-		    p = r;
-		    break;
-		  }
-	      }
-
-	    /* Skip unknown relocation.  PR 17512: file: bc9d6cf5.  */
-	    if (got_vma == p->address
-		&& p->howto != NULL
-		&& (p->howto->type == R_386_JUMP_SLOT
-		    || p->howto->type == R_386_GLOB_DAT
-		    || p->howto->type == R_386_IRELATIVE))
-	      {
-		*s = **p->sym_ptr_ptr;
-		/* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL
-		   set.  Since we are defining a symbol, ensure one
-		   of them is set.  */
-		if ((s->flags & BSF_LOCAL) == 0)
-		  s->flags |= BSF_GLOBAL;
-		s->flags |= BSF_SYNTHETIC;
-		/* This is no longer a section symbol.  */
-		s->flags &= ~BSF_SECTION_SYM;
-		s->section = plt;
-		s->the_bfd = plt->owner;
-		s->value = offset;
-		/* Store relocation for later use.  */
-		s->udata.p = p;
-		/* Add @plt to function name later.  */
-		size += strlen (s->name) + sizeof ("@plt");
-		if (p->addend != 0)
-		  size += sizeof ("+0x") - 1 + 8;
-		n++;
-		s++;
-	      }
-	    offset += plt_entry_size;
-	  }
-      }
-
-  /* PLT entries with R_386_TLS_DESC relocations are skipped.  */
-  if (n == 0)
-    goto bad_return;
-
-  count = n;
-
-  /* Allocate space for @plt suffixes.  */
-  names = (char *) bfd_malloc (size);
-  if (s == NULL)
-    goto bad_return;
-
-  s = *ret;
-  for (i = 0; i < count; i++)
-    {
-      /* Add @plt to function name.  */
-      arelent *p = (arelent *) s->udata.p;
-      /* Clear it now.  */
-      s->udata.p = NULL;
-      size = strlen (s->name);
-      memcpy (names, s->name, size);
-      s->name = names;
-      names += size;
-      if (p->addend != 0)
-	{
-	  char buf[30], *a;
-
-	  memcpy (names, "+0x", sizeof ("+0x") - 1);
-	  names += sizeof ("+0x") - 1;
-	  bfd_sprintf_vma (abfd, buf, p->addend);
-	  for (a = buf; *a == '0'; ++a)
-	    ;
-	  size = strlen (a);
-	  memcpy (names, a, size);
-	  names += size;
-	}
-      memcpy (names, "@plt", sizeof ("@plt"));
-      names += sizeof ("@plt");
-      s++;
-    }
-
-  for (j = 0; plts[j].name != NULL; j++)
-    if (plts[j].contents != NULL)
-      free (plts[j].contents);
-
-  free (dynrelbuf);
-
-  return count;
-}
-
-/* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */
-
-static bfd_boolean
-elf_i386_hash_symbol (struct elf_link_hash_entry *h)
-{
-  if (h->plt.offset != (bfd_vma) -1
-      && !h->def_regular
-      && !h->pointer_equality_needed)
-    return FALSE;
-
-  return _bfd_elf_hash_symbol (h);
-}
-
-/* Parse i386 GNU properties.  */
-
-static enum elf_property_kind
-elf_i386_parse_gnu_properties (bfd *abfd, unsigned int type,
-			       bfd_byte *ptr, unsigned int datasz)
-{
-  elf_property *prop;
-
-  switch (type)
-    {
-    case GNU_PROPERTY_X86_ISA_1_USED:
-    case GNU_PROPERTY_X86_ISA_1_NEEDED:
-    case GNU_PROPERTY_X86_FEATURE_1_AND:
-      if (datasz != 4)
-	{
-	  _bfd_error_handler
-	    ((type == GNU_PROPERTY_X86_ISA_1_USED
-	      ? _("error: %B: <corrupt x86 ISA used size: 0x%x>")
-	      : (type == GNU_PROPERTY_X86_ISA_1_NEEDED
-		 ? _("error: %B: <corrupt x86 ISA needed size: 0x%x>")
-		 : _("error: %B: <corrupt x86 feature size: 0x%x>"))),
-	     abfd, datasz);
-	  return property_corrupt;
-	}
-      prop = _bfd_elf_get_property (abfd, type, datasz);
-      /* Combine properties of the same type.  */
-      prop->u.number |= bfd_h_get_32 (abfd, ptr);
-      prop->pr_kind = property_number;
-      break;
-
-    default:
-      return property_ignored;
-    }
-
-  return property_number;
-}
-
-/* Merge i386 GNU property BPROP with APROP.  If APROP isn't NULL,
-   return TRUE if APROP is updated.  Otherwise, return TRUE if BPROP
-   should be merged with ABFD.  */
-
-static bfd_boolean
-elf_i386_merge_gnu_properties (struct bfd_link_info *info,
-			       bfd *abfd ATTRIBUTE_UNUSED,
-			       elf_property *aprop,
-			       elf_property *bprop)
-{
-  unsigned int number, features;
-  bfd_boolean updated = FALSE;
-  unsigned int pr_type = aprop != NULL ? aprop->pr_type : bprop->pr_type;
-
-  switch (pr_type)
-    {
-    case GNU_PROPERTY_X86_ISA_1_USED:
-    case GNU_PROPERTY_X86_ISA_1_NEEDED:
-      if (aprop != NULL && bprop != NULL)
-	{
-	  number = aprop->u.number;
-	  aprop->u.number = number | bprop->u.number;
-	  updated = number != (unsigned int) aprop->u.number;
-	}
-      else
-	{
-	  /* Return TRUE if APROP is NULL to indicate that BPROP should
-	     be added to ABFD.  */
-	  updated = aprop == NULL;
-	}
-      break;
-
-    case GNU_PROPERTY_X86_FEATURE_1_AND:
-      /* Only one of APROP and BPROP can be NULL:
-	 1. APROP & BPROP when both APROP and BPROP aren't NULL.
-	 2. If APROP is NULL, remove x86 feature.
-	 3. Otherwise, do nothing.
-       */
-      if (aprop != NULL && bprop != NULL)
-	{
-	  features = 0;
-	  if (info->ibt)
-	    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
-	  if (info->shstk)
-	    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
-	  number = aprop->u.number;
-	  /* Add GNU_PROPERTY_X86_FEATURE_1_IBT and
-	     GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
-	  aprop->u.number = (number & bprop->u.number) | features;
-	  updated = number != (unsigned int) aprop->u.number;
-	  /* Remove the property if all feature bits are cleared.  */
-	  if (aprop->u.number == 0)
-	    aprop->pr_kind = property_remove;
-	}
-      else
-	{
-	  features = 0;
-	  if (info->ibt)
-	    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
-	  if (info->shstk)
-	    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
-	  if (features)
-	    {
-	      /* Add GNU_PROPERTY_X86_FEATURE_1_IBT and
-		 GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
-	      if (aprop != NULL)
-		{
-		  number = aprop->u.number;
-		  aprop->u.number = number | features;
-		  updated = number != (unsigned int) aprop->u.number;
-		}
-	      else
-		{
-		  bprop->u.number |= features;
-		  updated = TRUE;
-		}
-	    }
-	  else if (aprop != NULL)
-	    {
-	      aprop->pr_kind = property_remove;
-	      updated = TRUE;
-	    }
-	}
-      break;
-
-    default:
-      /* Never should happen.  */
-      abort ();
-    }
-
-  return updated;
+  return _bfd_x86_elf_get_synthetic_symtab (abfd, count, relsize,
+					    got_addr, plts, dynsyms,
+					    ret);
 }
 
 /* Set up i386 GNU properties.  Return the first relocatable ELF input
@@ -6809,349 +4613,38 @@ elf_i386_merge_gnu_properties (struct bfd_link_info *info,
 static bfd *
 elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 {
-  bfd_boolean normal_target;
-  bfd_boolean lazy_plt;
-  asection *sec, *pltsec;
-  bfd *dynobj;
-  bfd_boolean use_ibt_plt;
-  unsigned int plt_alignment, features;
-  struct elf_i386_link_hash_table *htab;
-  bfd *pbfd;
+  struct elf_x86_init_table init_table;
 
-  features = 0;
-  if (info->ibt)
-    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
-  if (info->shstk)
-    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
-  if (features)
-    {
-      /* Turn on GNU_PROPERTY_X86_FEATURE_1_IBT and
-	 GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
-      bfd *ebfd = NULL;
-      elf_property *prop;
-
-      for (pbfd = info->input_bfds;
-	   pbfd != NULL;
-	   pbfd = pbfd->link.next)
-	if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
-	    && bfd_count_sections (pbfd) != 0)
-	  {
-	    ebfd = pbfd;
-
-	    if (elf_properties (pbfd) != NULL)
-	      {
-		/* Find a normal input file with GNU property note.  */
-		prop = _bfd_elf_get_property (pbfd,
-					      GNU_PROPERTY_X86_FEATURE_1_AND,
-					      4);
-		/* Add GNU_PROPERTY_X86_FEATURE_1_IBT and
-		   GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
-		prop->u.number |= features;
-		prop->pr_kind = property_number;
-		break;
-	      }
-	  }
-
-      if (pbfd == NULL && ebfd != NULL)
-	{
-	  /* Create GNU_PROPERTY_X86_FEATURE_1_IBT if needed.  */
-	  prop = _bfd_elf_get_property (ebfd,
-					GNU_PROPERTY_X86_FEATURE_1_AND,
-					4);
-	  prop->u.number = features;
-	  prop->pr_kind = property_number;
-
-	  sec = bfd_make_section_with_flags (ebfd,
-					     NOTE_GNU_PROPERTY_SECTION_NAME,
-					     (SEC_ALLOC
-					      | SEC_LOAD
-					      | SEC_IN_MEMORY
-					      | SEC_READONLY
-					      | SEC_HAS_CONTENTS
-					      | SEC_DATA));
-	  if (sec == NULL)
-	    info->callbacks->einfo (_("%F: failed to create GNU property section\n"));
-
-	  if (!bfd_set_section_alignment (ebfd, sec, 2))
-	    goto error_alignment;
-
-	  elf_section_type (sec) = SHT_NOTE;
-	}
-    }
-
-  pbfd = _bfd_elf_link_setup_gnu_properties (info);
-
-  if (bfd_link_relocatable (info))
-    return pbfd;
-
-  htab = elf_i386_hash_table (info);
-  if (htab == NULL)
-    return pbfd;
-
-  use_ibt_plt = info->ibtplt || info->ibt;
-  if (!use_ibt_plt && pbfd != NULL)
-    {
-      /* Check if GNU_PROPERTY_X86_FEATURE_1_IBT is on.  */
-      elf_property_list *p;
-
-      /* The property list is sorted in order of type.  */
-      for (p = elf_properties (pbfd); p; p = p->next)
-	{
-	  if (GNU_PROPERTY_X86_FEATURE_1_AND == p->property.pr_type)
-	    {
-	      use_ibt_plt = !!(p->property.u.number
-			       & GNU_PROPERTY_X86_FEATURE_1_IBT);
-	      break;
-	    }
-	  else if (GNU_PROPERTY_X86_FEATURE_1_AND < p->property.pr_type)
-	    break;
-	}
-    }
-
-  dynobj = htab->elf.dynobj;
-
-  /* Set htab->elf.dynobj here so that there is no need to check and
-     set it in check_relocs.  */
-  if (dynobj == NULL)
-    {
-      bfd *abfd;
-
-      /* Find a normal input file to hold linker created
-	 sections.  */
-      for (abfd = info->input_bfds;
-	   abfd != NULL;
-	   abfd = abfd->link.next)
-	if ((abfd->flags
-	     & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0)
-	  {
-	    htab->elf.dynobj = abfd;
-	    dynobj = abfd;
-	    break;
-	  }
-    }
-
-  /* Even when lazy binding is disabled by "-z now", the PLT0 entry may
-     still be used with LD_AUDIT or LD_PROFILE if PLT entry is used for
-     canonical function address.  */
-  htab->plt.has_plt0 = 1;
-  normal_target = FALSE;
-
+  init_table.normal_target = FALSE;
+  init_table.is_vxworks = FALSE;
   switch (get_elf_i386_backend_data (info->output_bfd)->os)
     {
     case is_normal:
-      if (use_ibt_plt)
-	{
-	  htab->lazy_plt = &elf_i386_lazy_ibt_plt;
-	  htab->non_lazy_plt = &elf_i386_non_lazy_ibt_plt;
-	}
-      else
-	{
-	  htab->lazy_plt = &elf_i386_lazy_plt;
-	  htab->non_lazy_plt = &elf_i386_non_lazy_plt;
-	}
-      normal_target = TRUE;
+      init_table.lazy_plt = &elf_i386_lazy_plt;
+      init_table.non_lazy_plt = &elf_i386_non_lazy_plt;
+      init_table.lazy_ibt_plt = &elf_i386_lazy_ibt_plt;
+      init_table.non_lazy_ibt_plt = &elf_i386_non_lazy_ibt_plt;
+      init_table.normal_target = TRUE;
       break;
     case is_vxworks:
-      htab->lazy_plt = &elf_i386_lazy_plt;
-      htab->non_lazy_plt = NULL;
-      if (!elf_vxworks_create_dynamic_sections (dynobj, info,
-						&htab->srelplt2))
-	info->callbacks->einfo (_("%F: failed to create VxWorks dynamic sections\n"));
+      init_table.lazy_plt = &elf_i386_lazy_plt;
+      init_table.non_lazy_plt = NULL;
+      init_table.lazy_ibt_plt = NULL;
+      init_table.non_lazy_ibt_plt = NULL;
+      init_table.is_vxworks = TRUE;
       break;
     case is_nacl:
-      htab->lazy_plt = &elf_i386_nacl_plt;
-      htab->non_lazy_plt = NULL;
+      init_table.lazy_plt = &elf_i386_nacl_plt;
+      init_table.non_lazy_plt = NULL;
+      init_table.lazy_ibt_plt = NULL;
+      init_table.non_lazy_ibt_plt = NULL;
       break;
     }
 
-  pltsec = htab->elf.splt;
+  init_table.r_info = elf32_r_info;
+  init_table.r_sym = elf32_r_sym;
 
-  /* If the non-lazy PLT is available, use it for all PLT entries if
-     there are no PLT0 or no .plt section.  */
-  if (htab->non_lazy_plt != NULL
-      && (!htab->plt.has_plt0 || pltsec == NULL))
-    {
-      lazy_plt = FALSE;
-      if (bfd_link_pic (info))
-	htab->plt.plt_entry
-	  = htab->non_lazy_plt->pic_plt_entry;
-      else
-	htab->plt.plt_entry
-	  = htab->non_lazy_plt->plt_entry;
-      htab->plt.plt_entry_size
-	= htab->non_lazy_plt->plt_entry_size;
-      htab->plt.plt_got_offset
-	= htab->non_lazy_plt->plt_got_offset;
-      htab->plt.eh_frame_plt_size
-	= htab->non_lazy_plt->eh_frame_plt_size;
-      htab->plt.eh_frame_plt
-	= htab->non_lazy_plt->eh_frame_plt;
-    }
-  else
-    {
-      lazy_plt = TRUE;
-      if (bfd_link_pic (info))
-	{
-	  htab->plt.plt0_entry
-	    = htab->lazy_plt->pic_plt0_entry;
-	  htab->plt.plt_entry
-	    = htab->lazy_plt->pic_plt_entry;
-	}
-      else
-	{
-	  htab->plt.plt0_entry
-	    = htab->lazy_plt->plt0_entry;
-	  htab->plt.plt_entry
-	    = htab->lazy_plt->plt_entry;
-	}
-      htab->plt.plt_entry_size
-	= htab->lazy_plt->plt_entry_size;
-      htab->plt.plt_got_offset
-	= htab->lazy_plt->plt_got_offset;
-      htab->plt.eh_frame_plt_size
-	= htab->lazy_plt->eh_frame_plt_size;
-      htab->plt.eh_frame_plt
-	= htab->lazy_plt->eh_frame_plt;
-    }
-
-  /* Return if there are no normal input files.  */
-  if (dynobj == NULL)
-    return pbfd;
-
-  /* Since create_dynamic_sections isn't always called, but GOT
-     relocations need GOT relocations, create them here so that we
-     don't need to do it in check_relocs.  */
-  if (htab->elf.sgot == NULL
-      && !_bfd_elf_create_got_section (dynobj, info))
-    info->callbacks->einfo (_("%F: failed to create GOT sections\n"));
-
-  /* Create the ifunc sections here so that check_relocs can be
-     simplified.  */
-  if (!_bfd_elf_create_ifunc_sections (dynobj, info))
-    info->callbacks->einfo (_("%F: failed to create ifunc sections\n"));
-
-  plt_alignment = bfd_log2 (htab->plt.plt_entry_size);
-
-  if (pltsec != NULL)
-    {
-      /* Whe creating executable, set the contents of the .interp
-	 section to the interpreter.  */
-      if (bfd_link_executable (info) && !info->nointerp)
-	{
-	  asection *s = bfd_get_linker_section (dynobj, ".interp");
-	  if (s == NULL)
-	    abort ();
-	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
-	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
-	  htab->interp = s;
-	}
-
-      /* Don't change PLT section alignment for NaCl since it uses
-	 64-byte PLT entry and sets PLT section alignment to 32
-	 bytes.  */
-      if (normal_target)
-	{
-	  const struct elf_backend_data *bed
-	    = get_elf_backend_data (dynobj);
-	  flagword pltflags = (bed->dynamic_sec_flags
-			       | SEC_ALLOC
-			       | SEC_CODE
-			       | SEC_LOAD
-			       | SEC_READONLY);
-	  unsigned int non_lazy_plt_alignment
-	    = bfd_log2 (htab->non_lazy_plt->plt_entry_size);
-
-	  sec = pltsec;
-	  if (!bfd_set_section_alignment (sec->owner, sec,
-					  plt_alignment))
-	    goto error_alignment;
-
-	  /* Create the GOT procedure linkage table.  */
-	  sec = bfd_make_section_anyway_with_flags (dynobj,
-						    ".plt.got",
-						    pltflags);
-	  if (sec == NULL)
-	    info->callbacks->einfo (_("%F: failed to create GOT PLT section\n"));
-
-	  if (!bfd_set_section_alignment (dynobj, sec,
-					  non_lazy_plt_alignment))
-	    goto error_alignment;
-
-	  htab->plt_got = sec;
-
-	  if (lazy_plt)
-	    {
-	      sec = NULL;
-
-	      if (use_ibt_plt)
-		{
-		  /* Create the second PLT for Intel IBT support.  IBT
-		     PLT is supported only for non-NaCl target and is
-		     is needed only for lazy binding.  */
-		  sec = bfd_make_section_anyway_with_flags (dynobj,
-							    ".plt.sec",
-							    pltflags);
-		  if (sec == NULL)
-		    info->callbacks->einfo (_("%F: failed to create IBT-enabled PLT section\n"));
-
-		  if (!bfd_set_section_alignment (dynobj, sec,
-						  plt_alignment))
-		    goto error_alignment;
-		}
-
-	      htab->plt_second = sec;
-	    }
-	}
-
-      if (!info->no_ld_generated_unwind_info)
-	{
-	  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
-			    | SEC_HAS_CONTENTS | SEC_IN_MEMORY
-			    | SEC_LINKER_CREATED);
-
-	  sec = bfd_make_section_anyway_with_flags (dynobj,
-						    ".eh_frame",
-						    flags);
-	  if (sec == NULL)
-	    info->callbacks->einfo (_("%F: failed to create PLT .eh_frame section\n"));
-
-	  if (!bfd_set_section_alignment (dynobj, sec, 2))
-	    goto error_alignment;
-
-	  htab->plt_eh_frame = sec;
-
-	  if (htab->plt_got != NULL)
-	    {
-	      sec = bfd_make_section_anyway_with_flags (dynobj,
-							".eh_frame",
-							flags);
-	      if (sec == NULL)
-		info->callbacks->einfo (_("%F: failed to create GOT PLT .eh_frame section\n"));
-
-	      if (!bfd_set_section_alignment (dynobj, sec, 2))
-		goto error_alignment;
-
-	      htab->plt_got_eh_frame = sec;
-	    }
-	}
-    }
-
-  if (normal_target)
-    {
-      /* The .iplt section is used for IFUNC symbols in static
-	 executables.  */
-      sec = htab->elf.iplt;
-      if (sec != NULL
-	  && !bfd_set_section_alignment (sec->owner, sec,
-					 plt_alignment))
-	{
-error_alignment:
-	  info->callbacks->einfo (_("%F%A: failed to align section\n"),
-				  sec);
-	}
-    }
-
-  return pbfd;
+  return _bfd_x86_elf_link_setup_gnu_properties (info, &init_table);
 }
 
 #define TARGET_LITTLE_SYM		i386_elf32_vec
@@ -7177,36 +4670,22 @@ error_alignment:
 #define elf_info_to_howto		      elf_i386_info_to_howto_rel
 #define elf_info_to_howto_rel		      elf_i386_info_to_howto_rel
 
-#define bfd_elf32_mkobject		      elf_i386_mkobject
-
 #define bfd_elf32_bfd_is_local_label_name     elf_i386_is_local_label_name
-#define bfd_elf32_bfd_link_hash_table_create  elf_i386_link_hash_table_create
 #define bfd_elf32_bfd_reloc_type_lookup	      elf_i386_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	      elf_i386_reloc_name_lookup
 #define bfd_elf32_get_synthetic_symtab	      elf_i386_get_synthetic_symtab
 
-#define elf_backend_adjust_dynamic_symbol     elf_i386_adjust_dynamic_symbol
 #define elf_backend_relocs_compatible	      _bfd_elf_relocs_compatible
 #define elf_backend_check_relocs	      elf_i386_check_relocs
-#define elf_backend_copy_indirect_symbol      elf_i386_copy_indirect_symbol
 #define elf_backend_create_dynamic_sections   _bfd_elf_create_dynamic_sections
 #define elf_backend_fake_sections	      elf_i386_fake_sections
 #define elf_backend_finish_dynamic_sections   elf_i386_finish_dynamic_sections
 #define elf_backend_finish_dynamic_symbol     elf_i386_finish_dynamic_symbol
 #define elf_backend_output_arch_local_syms     elf_i386_output_arch_local_syms
-#define elf_backend_gc_mark_hook	      elf_i386_gc_mark_hook
 #define elf_backend_grok_prstatus	      elf_i386_grok_prstatus
 #define elf_backend_grok_psinfo		      elf_i386_grok_psinfo
 #define elf_backend_reloc_type_class	      elf_i386_reloc_type_class
 #define elf_backend_relocate_section	      elf_i386_relocate_section
-#define elf_backend_size_dynamic_sections     elf_i386_size_dynamic_sections
-#define elf_backend_always_size_sections      elf_i386_always_size_sections
-#define elf_backend_omit_section_dynsym \
-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
-#define elf_backend_hash_symbol		      elf_i386_hash_symbol
-#define elf_backend_fixup_symbol	      elf_i386_fixup_symbol
-#define elf_backend_parse_gnu_properties      elf_i386_parse_gnu_properties
-#define elf_backend_merge_gnu_properties      elf_i386_merge_gnu_properties
 #define elf_backend_setup_gnu_properties      elf_i386_link_setup_gnu_properties
 
 #include "elf32-target.h"
@@ -7540,17 +5019,20 @@ static const bfd_byte elf_i386_nacl_eh_frame_plt[] =
     DW_CFA_nop, DW_CFA_nop
   };
 
-static const struct elf_i386_lazy_plt_layout elf_i386_nacl_plt =
+static const struct elf_x86_lazy_plt_layout elf_i386_nacl_plt =
   {
     elf_i386_nacl_plt0_entry,		/* plt0_entry */
     sizeof (elf_i386_nacl_plt0_entry),	/* plt0_entry_size */
-    2,					/* plt0_got1_offset */
-    8,					/* plt0_got2_offset */
     elf_i386_nacl_plt_entry,		/* plt_entry */
     NACL_PLT_ENTRY_SIZE,		/* plt_entry_size */
+    2,					/* plt0_got1_offset */
+    8,					/* plt0_got2_offset */
+    0,					/* plt0_got2_insn_end */
     2,					/* plt_got_offset */
     33,					/* plt_reloc_offset */
     38,					/* plt_plt_offset */
+    0,					/* plt_got_insn_size */
+    0,					/* plt_plt_insn_end */
     32,					/* plt_lazy_offset */
     elf_i386_nacl_pic_plt0_entry,	/* pic_plt0_entry */
     elf_i386_nacl_pic_plt_entry,	/* pic_plt_entry */

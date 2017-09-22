@@ -147,8 +147,8 @@ riscv_add_subset (const char *subset)
 static void
 riscv_set_arch (const char *s)
 {
-  const char *all_subsets = "imafdc";
-  const char *extension = NULL;
+  const char *all_subsets = "imafdqc";
+  char *extension = NULL;
   const char *p = s;
 
   riscv_clear_subsets();
@@ -173,7 +173,7 @@ riscv_set_arch (const char *s)
 
       case 'g':
 	p++;
-	for ( ; *all_subsets != 'c'; all_subsets++)
+	for ( ; *all_subsets != 'q'; all_subsets++)
 	  {
 	    const char subset[] = {*all_subsets, '\0'};
 	    riscv_add_subset (subset);
@@ -188,7 +188,8 @@ riscv_set_arch (const char *s)
     {
       if (*p == 'x')
 	{
-	  char *subset = xstrdup (p), *q = subset;
+	  char *subset = xstrdup (p);
+	  char *q = subset;
 
 	  while (*++q != '\0' && *q != '_')
 	    ;
@@ -200,7 +201,6 @@ riscv_set_arch (const char *s)
 	  extension = subset;
 	  riscv_add_subset (subset);
 	  p += strlen (subset);
-	  free (subset);
 	}
       else if (*p == '_')
 	p++;
@@ -211,15 +211,11 @@ riscv_set_arch (const char *s)
 	  all_subsets++;
 	  p++;
 	}
-      else if (*p == 'q')
-	{
-	  const char subset[] = {*p, 0};
-	  riscv_add_subset (subset);
-	  p++;
-	}
       else
 	as_fatal ("-march=%s: unsupported ISA subset `%c'", s, *p);
     }
+
+  free (extension);
 }
 
 /* Handle of the OPCODE hash table.  */
@@ -2278,30 +2274,21 @@ bfd_boolean
 riscv_frag_align_code (int n)
 {
   bfd_vma bytes = (bfd_vma) 1 << n;
-  bfd_vma min_text_alignment_order = riscv_opts.rvc ? 1 : 2;
-  bfd_vma min_text_alignment = (bfd_vma) 1 << min_text_alignment_order;
-
-  /* First, get back to minimal alignment.  */
-  frag_align_code (min_text_alignment_order, 0);
+  bfd_vma worst_case_bytes = bytes - 2;
+  char *nops = frag_more (worst_case_bytes);
+  expressionS ex;
 
   /* When not relaxing, riscv_handle_align handles code alignment.  */
   if (!riscv_opts.relax)
     return FALSE;
 
-  if (bytes > min_text_alignment)
-    {
-      bfd_vma worst_case_bytes = bytes - min_text_alignment;
-      char *nops = frag_more (worst_case_bytes);
-      expressionS ex;
+  ex.X_op = O_constant;
+  ex.X_add_number = worst_case_bytes;
 
-      ex.X_op = O_constant;
-      ex.X_add_number = worst_case_bytes;
+  riscv_make_nops (nops, worst_case_bytes);
 
-      riscv_make_nops (nops, worst_case_bytes);
-
-      fix_new_exp (frag_now, nops - frag_now->fr_literal, 0,
-		   &ex, FALSE, BFD_RELOC_RISCV_ALIGN);
-    }
+  fix_new_exp (frag_now, nops - frag_now->fr_literal, 0,
+	       &ex, FALSE, BFD_RELOC_RISCV_ALIGN);
 
   return TRUE;
 }

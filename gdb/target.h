@@ -42,6 +42,7 @@ struct inferior;
 
 #include "infrun.h" /* For enum exec_direction_kind.  */
 #include "breakpoint.h" /* For enum bptype.  */
+#include "common/scoped_restore.h"
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -74,6 +75,7 @@ struct inferior;
 #include "btrace.h"
 #include "record.h"
 #include "command.h"
+#include "disasm.h"
 
 #include "break-common.h" /* For enum target_hw_bp_type.  */
 
@@ -107,10 +109,6 @@ struct syscall
     /* The syscall name.  */
     const char *name;
   };
-
-/* Return a pretty printed form of target_waitstatus.
-   Space for the result is malloc'd, caller must free.  */
-extern char *target_waitstatus_to_string (const struct target_waitstatus *);
 
 /* Return a pretty printed form of TARGET_OPTIONS.
    Space for the result is malloc'd, caller must free.  */
@@ -645,6 +643,11 @@ struct target_ops
     const char *(*to_extra_thread_info) (struct target_ops *, struct thread_info *)
       TARGET_DEFAULT_RETURN (NULL);
     const char *(*to_thread_name) (struct target_ops *, struct thread_info *)
+      TARGET_DEFAULT_RETURN (NULL);
+    struct thread_info *(*to_thread_handle_to_thread_info) (struct target_ops *,
+                                                            const gdb_byte *,
+							    int,
+							    struct inferior *inf)
       TARGET_DEFAULT_RETURN (NULL);
     void (*to_stop) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
@@ -1204,7 +1207,8 @@ struct target_ops
        the current position.
        If SIZE < 0, disassemble abs (SIZE) preceding instructions; otherwise,
        disassemble SIZE succeeding instructions.  */
-    void (*to_insn_history) (struct target_ops *, int size, int flags)
+    void (*to_insn_history) (struct target_ops *, int size,
+			     gdb_disassembly_flags flags)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Disassemble SIZE instructions in the recorded execution trace around
@@ -1212,13 +1216,15 @@ struct target_ops
        If SIZE < 0, disassemble abs (SIZE) instructions before FROM; otherwise,
        disassemble SIZE instructions after FROM.  */
     void (*to_insn_history_from) (struct target_ops *,
-				  ULONGEST from, int size, int flags)
+				  ULONGEST from, int size,
+				  gdb_disassembly_flags flags)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Disassemble a section of the recorded execution trace from instruction
        BEGIN (inclusive) to instruction END (inclusive).  */
     void (*to_insn_history_range) (struct target_ops *,
-				   ULONGEST begin, ULONGEST end, int flags)
+				   ULONGEST begin, ULONGEST end,
+				   gdb_disassembly_flags flags)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Print a function trace of the recorded execution trace.
@@ -1532,40 +1538,10 @@ extern int target_remove_breakpoint (struct gdbarch *gdbarch,
 				     struct bp_target_info *bp_tgt,
 				     enum remove_bp_reason reason);
 
-/* Returns true if the terminal settings of the inferior are in
-   effect.  */
-
-extern int target_terminal_is_inferior (void);
-
-/* Returns true if our terminal settings are in effect.  */
-
-extern int target_terminal_is_ours (void);
-
-/* For target_terminal_init, target_terminal_inferior and
-   target_terminal_ours, see target/target.h.  */
-
-/* Put some of our terminal settings into effect, enough to get proper
-   results from our output, but do not change into or out of RAW mode
-   so that no input is discarded.  This is a no-op if terminal_ours
-   was most recently called.  This is a no-op unless called with the main
-   UI as current UI.  */
-
-extern void target_terminal_ours_for_output (void);
-
 /* Return true if the target stack has a non-default
   "to_terminal_ours" method.  */
 
 extern int target_supports_terminal_ours (void);
-
-/* Make a cleanup that restores the state of the terminal to the current
-   state.  */
-extern struct cleanup *make_cleanup_restore_target_terminal (void);
-
-/* Print useful information about our terminal status, if such a thing
-   exists.  */
-
-#define target_terminal_info(arg, from_tty) \
-     (*current_target.to_terminal_info) (&current_target, arg, from_tty)
 
 /* Kill the inferior process.   Make it go away.  */
 
@@ -1856,6 +1832,12 @@ extern const char *normal_pid_to_str (ptid_t ptid);
    The returned value must not be freed by the caller.  */
 
 extern const char *target_thread_name (struct thread_info *);
+
+/* Given a pointer to a thread library specific thread handle and
+   its length, return a pointer to the corresponding thread_info struct.  */
+
+extern struct thread_info *target_thread_handle_to_thread_info
+  (const gdb_byte *thread_handle, int handle_len, struct inferior *inf);
 
 /* Attempts to find the pathname of the executable file
    that was run to create a specified process.
@@ -2441,9 +2423,10 @@ extern int remote_timeout;
 
 
 
-/* Set the show memory breakpoints mode to show, and installs a cleanup
-   to restore it back to the current value.  */
-extern struct cleanup *make_show_memory_breakpoints_cleanup (int show);
+/* Set the show memory breakpoints mode to show, and return a
+   scoped_restore to restore it back to the current value.  */
+extern scoped_restore_tmpl<int>
+    make_scoped_restore_show_memory_breakpoints (int show);
 
 extern int may_write_registers;
 extern int may_write_memory;
@@ -2513,13 +2496,15 @@ extern void target_goto_record_end (void);
 extern void target_goto_record (ULONGEST insn);
 
 /* See to_insn_history.  */
-extern void target_insn_history (int size, int flags);
+extern void target_insn_history (int size, gdb_disassembly_flags flags);
 
 /* See to_insn_history_from.  */
-extern void target_insn_history_from (ULONGEST from, int size, int flags);
+extern void target_insn_history_from (ULONGEST from, int size,
+				      gdb_disassembly_flags flags);
 
 /* See to_insn_history_range.  */
-extern void target_insn_history_range (ULONGEST begin, ULONGEST end, int flags);
+extern void target_insn_history_range (ULONGEST begin, ULONGEST end,
+				       gdb_disassembly_flags flags);
 
 /* See to_call_history.  */
 extern void target_call_history (int size, int flags);

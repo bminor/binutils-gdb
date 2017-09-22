@@ -801,9 +801,6 @@ triggers a breakpoint or watchpoint."),
 			   &maintenance_show_cmdlist);
 }
 
-/* -Wmissing-prototypes.  */
-void _initialize_aarch64_linux_nat (void);
-
 void
 _initialize_aarch64_linux_nat (void)
 {

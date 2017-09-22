@@ -252,9 +252,6 @@ i386_cygwin_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_UNKNOWN;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_i386_cygwin_tdep (void);
-
 void
 _initialize_i386_cygwin_tdep (void)
 {

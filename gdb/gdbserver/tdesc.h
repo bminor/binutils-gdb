@@ -19,19 +19,22 @@
 #ifndef TDESC_H
 #define TDESC_H
 
-struct reg;
+#include "arch/tdesc.h"
 
-/* A target description.  */
+#include "regdef.h"
+#include <vector>
 
-struct target_desc
+struct tdesc_feature
+{};
+
+/* A target description.  Inherit from tdesc_feature so that target_desc
+   can be used as tdesc_feature.  */
+
+struct target_desc : tdesc_feature
 {
-  /* An array of NUM_REGISTERS elements of register definitions that
+  /* A vector of elements of register definitions that
      describe the inferior's register set.  */
-  struct reg *reg_defs;
-
-  /* The number of registers in inferior's register set (and thus in
-     the regcache).  */
-  int num_registers;
+  std::vector<struct reg *> reg_defs;
 
   /* The register cache size, in bytes.  */
   int registers_size;
@@ -39,13 +42,79 @@ struct target_desc
 #ifndef IN_PROCESS_AGENT
   /* An array of register names.  These are the "expedite" registers:
      registers whose values are sent along with stop replies.  */
-  const char **expedite_regs;
+  const char **expedite_regs = NULL;
 
   /* Defines what to return when looking for the "target.xml" file in
      response to qXfer:features:read.  Its contents can either be
      verbatim XML code (prefixed with a '@') or else the name of the
-     actual XML file to be used in place of "target.xml".  */
-  const char *xmltarget;
+     actual XML file to be used in place of "target.xml".
+
+     It can be NULL, then, its content is got from the following three
+     fields features, arch, and osabi in tdesc_get_features_xml.  */
+  const char *xmltarget = NULL;
+
+  /* XML features in this target description.  */
+  VEC (char_ptr) *features = NULL;
+
+  /* The value of <architecture> element in the XML, replying GDB.  */
+  const char *arch = NULL;
+
+  /* The value of <osabi> element in the XML, replying GDB.  */
+  const char *osabi = NULL;
+
+public:
+  target_desc ()
+    : registers_size (0)
+  {}
+
+  ~target_desc ()
+  {
+    int i;
+
+    for (reg *reg : reg_defs)
+      xfree (reg);
+
+    xfree ((char *) arch);
+    xfree ((char *) osabi);
+
+    char *f;
+
+    for (i = 0; VEC_iterate (char_ptr, features, i, f); i++)
+      xfree (f);
+    VEC_free (char_ptr, features);
+  }
+
+  bool operator== (const target_desc &other) const
+  {
+    if (reg_defs.size () != other.reg_defs.size ())
+      return false;
+
+    for (int i = 0; i < reg_defs.size (); ++i)
+      {
+	struct reg *reg = reg_defs[i];
+	struct reg *reg2 = other.reg_defs[i];
+
+	if (reg != reg2 && *reg != *reg2)
+	  return false;
+      }
+
+    /* Compare expedite_regs.  */
+    int i = 0;
+    for (; expedite_regs[i] != NULL; i++)
+      {
+	if (strcmp (expedite_regs[i], other.expedite_regs[i]) != 0)
+	  return false;
+      }
+    if (other.expedite_regs[i] != NULL)
+      return false;
+
+    return true;
+  }
+
+  bool operator!= (const target_desc &other) const
+  {
+    return !(*this == other);
+  }
 #endif
 };
 
@@ -62,5 +131,9 @@ void init_target_desc (struct target_desc *tdesc);
    NULL.  */
 
 const struct target_desc *current_target_desc (void);
+
+#ifndef IN_PROCESS_AGENT
+const char *tdesc_get_features_xml (struct target_desc *tdesc);
+#endif
 
 #endif /* TDESC_H */

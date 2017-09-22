@@ -1,3 +1,8 @@
+2017-09-05  John Baldwin  <jhb@FreeBSD.org>
+
+	PR sim/20863
+	* sim_calls.c (error): New function.
+
 2017-02-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* cpu.h: Include libiberty.h.

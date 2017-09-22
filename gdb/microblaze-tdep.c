@@ -82,7 +82,7 @@ static const char *microblaze_register_names[] =
 
 static unsigned int microblaze_debug_flag = 0;
 
-static void
+static void ATTRIBUTE_PRINTF (1, 2)
 microblaze_debug (const char *fmt, ...)
 { 
   if (microblaze_debug_flag)
@@ -758,9 +758,6 @@ microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_microblaze_tdep (void);
 
 void
 _initialize_microblaze_tdep (void)

@@ -1,3 +1,4 @@
+/* DO NOT EDIT!  -*- buffer-read-only: t -*- vi:set ro:  */
 /* Semantic operand instances for m32r.
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.

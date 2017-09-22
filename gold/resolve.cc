@@ -92,9 +92,9 @@ Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
 		      Object* object, const char* version)
 {
   gold_assert(this->source_ == FROM_OBJECT);
-  this->u_.from_object.object = object;
+  this->u1_.object = object;
   this->override_version(version);
-  this->u_.from_object.shndx = st_shndx;
+  this->u2_.shndx = st_shndx;
   this->is_ordinary_shndx_ = is_ordinary;
   // Don't override st_type from plugin placeholder symbols.
   if (object->pluginobj() == NULL)
@@ -266,8 +266,8 @@ Symbol_table::resolve(Sized_symbol<size>* to,
     {
       Sized_target<size, big_endian>* sized_target;
       sized_target = parameters->sized_target<size, big_endian>();
-      sized_target->resolve(to, sym, object, version);
-      return;
+      if (sized_target->resolve(to, sym, object, version))
+	return;
     }
 
   if (!object->is_dynamic())
@@ -917,6 +917,61 @@ Symbol_table::report_resolve_problem(bool is_error, const char* msg,
   gold_info("%s: %s: previous definition here", program_name, objname);
 }
 
+// Completely override existing symbol.  Everything bar name_,
+// version_, and is_forced_local_ flag are copied.  version_ is
+// cleared if from->version_ is clear.  Returns true if this symbol
+// should be forced local.
+bool
+Symbol::clone(const Symbol* from)
+{
+  // Don't allow cloning after dynamic linking info is attached to symbols.
+  // We aren't prepared to merge such.
+  gold_assert(!this->has_symtab_index() && !from->has_symtab_index());
+  gold_assert(!this->has_dynsym_index() && !from->has_dynsym_index());
+  gold_assert(this->got_offset_list() == NULL
+	      && from->got_offset_list() == NULL);
+  gold_assert(!this->has_plt_offset() && !from->has_plt_offset());
+
+  if (!from->version_)
+    this->version_ = from->version_;
+  this->u1_ = from->u1_;
+  this->u2_ = from->u2_;
+  this->type_ = from->type_;
+  this->binding_ = from->binding_;
+  this->visibility_ = from->visibility_;
+  this->nonvis_ = from->nonvis_;
+  this->source_ = from->source_;
+  this->is_def_ = from->is_def_;
+  this->is_forwarder_ = from->is_forwarder_;
+  this->has_alias_ = from->has_alias_;
+  this->needs_dynsym_entry_ = from->needs_dynsym_entry_;
+  this->in_reg_ = from->in_reg_;
+  this->in_dyn_ = from->in_dyn_;
+  this->needs_dynsym_value_ = from->needs_dynsym_value_;
+  this->has_warning_ = from->has_warning_;
+  this->is_copied_from_dynobj_ = from->is_copied_from_dynobj_;
+  this->is_ordinary_shndx_ = from->is_ordinary_shndx_;
+  this->in_real_elf_ = from->in_real_elf_;
+  this->is_defined_in_discarded_section_
+    = from->is_defined_in_discarded_section_;
+  this->undef_binding_set_ = from->undef_binding_set_;
+  this->undef_binding_weak_ = from->undef_binding_weak_;
+  this->is_predefined_ = from->is_predefined_;
+  this->is_protected_ = from->is_protected_;
+  this->non_zero_localentry_ = from->non_zero_localentry_;
+
+  return !this->is_forced_local_ && from->is_forced_local_;
+}
+
+template <int size>
+bool
+Sized_symbol<size>::clone(const Sized_symbol<size>* from)
+{
+  this->value_ = from->value_;
+  this->symsize_ = from->symsize_;
+  return Symbol::clone(from);
+}
+
 // A special case of should_override which is only called for a strong
 // defined symbol from a regular object file.  This is used when
 // defining special symbols.
@@ -952,13 +1007,10 @@ Symbol::override_base_with_special(const Symbol* from)
   switch (from->source_)
     {
     case FROM_OBJECT:
-      this->u_.from_object = from->u_.from_object;
-      break;
     case IN_OUTPUT_DATA:
-      this->u_.in_output_data = from->u_.in_output_data;
-      break;
     case IN_OUTPUT_SEGMENT:
-      this->u_.in_output_segment = from->u_.in_output_segment;
+      this->u1_ = from->u1_;
+      this->u2_ = from->u2_;
       break;
     case IS_CONSTANT:
     case IS_UNDEFINED:
@@ -1119,4 +1171,11 @@ Symbol_table::override_with_special<64>(Sized_symbol<64>*,
 					const Sized_symbol<64>*);
 #endif
 
+template
+bool
+Sized_symbol<32>::clone(const Sized_symbol<32>*);
+
+template
+bool
+Sized_symbol<64>::clone(const Sized_symbol<64>*);
 } // End namespace gold.

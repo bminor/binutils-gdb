@@ -1,3 +1,23 @@
+2017-09-15  Nick Clifton  <nickc@redhat.com>
+
+	* src-release.sh (LZIPPROG): New define.  Provides the name of the
+	lzip program.
+	(do_lz): New function.  Compresses a tarball using the lzip
+	program.
+	(do_compress): Add support for lzip compression.
+	(usage): Mention -l option.
+	(build_release): Support -l option to invoke lzip compression.
+
+2017-09-15  Alan Modra  <amodra@gmail.com>
+
+	* src-release.sh (do_proto_toplev): Revert last patch.  Enable or
+	disable binutils, gas, gdb, gold, gprof, ld, libdecnumber, readline,
+	and sim depending on $tool and $support_files.  Echo configure line.
+
+2017-09-14  Matt Rice <ratmice@gmail.com>
+
+	* src-release.sh (do_proto_toplev): Enable gold during release process.
+
 2017-04-13  Andrew Jenner  <andrew@codesourcery.com>
 
 	* config.sub: Sync with master version in config project.

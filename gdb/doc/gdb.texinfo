@@ -2117,10 +2117,20 @@ reused if no argument is provided during subsequent calls to
 @samp{start} or @samp{run}.
 
 It is sometimes necessary to debug the program during elaboration.  In
-these cases, using the @code{start} command would stop the execution of
-your program too late, as the program would have already completed the
-elaboration phase.  Under these circumstances, insert breakpoints in your
-elaboration code before running your program.
+these cases, using the @code{start} command would stop the execution
+of your program too late, as the program would have already completed
+the elaboration phase.  Under these circumstances, either insert
+breakpoints in your elaboration code before running your program or
+use the @code{starti} command.
+
+@kindex starti
+@item starti
+@cindex run to first instruction
+The @samp{starti} command does the equivalent of setting a temporary
+breakpoint at the first instruction of a program's execution and then
+invoking the @samp{run} command.  For programs containing an
+elaboration phase, the @code{starti} command will stop execution at
+the start of the elaboration phase.
 
 @anchor{set exec-wrapper}
 @kindex set exec-wrapper
@@ -2157,7 +2167,7 @@ This command is available when debugging locally on most targets, excluding
 @item set startup-with-shell
 @itemx set startup-with-shell on
 @itemx set startup-with-shell off
-@itemx show set startup-with-shell
+@itemx show startup-with-shell
 On Unix systems, by default, if a shell is available on your target,
 @value{GDBN}) uses it to start your program.  Arguments of the
 @code{run} command are passed to the shell, which does variable
@@ -2363,6 +2373,7 @@ print the names and values of all environment variables to be given to
 your program.  You can abbreviate @code{environment} as @code{env}.
 
 @kindex set environment
+@anchor{set environment}
 @item set environment @var{varname} @r{[}=@var{value}@r{]}
 Set environment variable @var{varname} to @var{value}.  The value
 changes for your program (and the shell @value{GDBN} uses to launch
@@ -2391,12 +2402,21 @@ If necessary, you can avoid that by using the @samp{env} program as a
 wrapper instead of using @code{set environment}.  @xref{set
 exec-wrapper}, for an example doing just that.
 
+Environment variables that are set by the user are also transmitted to
+@command{gdbserver} to be used when starting the remote inferior.
+@pxref{QEnvironmentHexEncoded}.
+
 @kindex unset environment
+@anchor{unset environment}
 @item unset environment @var{varname}
 Remove variable @var{varname} from the environment to be passed to your
 program.  This is different from @samp{set env @var{varname} =};
 @code{unset environment} removes the variable from the environment,
 rather than assigning it an empty value.
+
+Environment variables that are unset by the user are also unset on
+@command{gdbserver} when starting the remote inferior.
+@pxref{QEnvironmentUnset}.
 @end table
 
 @emph{Warning:} On Unix systems, @value{GDBN} runs your program using
@@ -9113,6 +9133,22 @@ If you ask to print an object whose contents are unknown to
 @value{GDBN}, e.g., because its data type is not completely specified
 by the debug information, @value{GDBN} will say @samp{<incomplete
 type>}.  @xref{Symbols, incomplete type}, for more about this.
+
+@cindex no debug info variables
+If you try to examine or use the value of a (global) variable for
+which @value{GDBN} has no type information, e.g., because the program
+includes no debug information, @value{GDBN} displays an error message.
+@xref{Symbols, unknown type}, for more about unknown types.  If you
+cast the variable to its declared type, @value{GDBN} gets the
+variable's value using the cast-to type as the variable's type.  For
+example, in a C program:
+
+@smallexample
+  (@value{GDBP}) p var
+  'var' has unknown type; cast it to its declared type
+  (@value{GDBP}) p (float) var
+  $1 = 3.14
+@end smallexample
 
 If you append @kbd{@@entry} string to a function parameter name you get its
 value at the time the function got called.  If the value is not available an
@@ -17083,6 +17119,24 @@ but no definition for @code{struct foo} itself, @value{GDBN} will say:
 ``Incomplete type'' is C terminology for data types that are not
 completely specified.
 
+@cindex unknown type
+Othertimes, information about a variable's type is completely absent
+from the debug information included in the program.  This most often
+happens when the program or library where the variable is defined
+includes no debug information at all.  @value{GDBN} knows the variable
+exists from inspecting the linker/loader symbol table (e.g., the ELF
+dynamic symbol table), but such symbols do not contain type
+information.  Inspecting the type of a (global) variable for which
+@value{GDBN} has no type information shows:
+
+@smallexample
+  (@value{GDBP}) ptype var
+  type = <data variable, no debug info>
+@end smallexample
+
+@xref{Variables, no debug info variables}, for how to print the values
+of such variables.
+
 @kindex info types
 @item info types @var{regexp}
 @itemx info types
@@ -17798,14 +17852,73 @@ Show the current setting of stack unwinding in the functions called by
 
 @end table
 
-@cindex weak alias functions
-Sometimes, a function you wish to call is actually a @dfn{weak alias}
-for another function.  In such case, @value{GDBN} might not pick up
-the type information, including the types of the function arguments,
-which causes @value{GDBN} to call the inferior function incorrectly.
-As a result, the called function will function erroneously and may
-even crash.  A solution to that is to use the name of the aliased
-function instead.
+@subsection Calling functions with no debug info
+
+@cindex no debug info functions
+Sometimes, a function you wish to call is missing debug information.
+In such case, @value{GDBN} does not know the type of the function,
+including the types of the function's parameters.  To avoid calling
+the inferior function incorrectly, which could result in the called
+function functioning erroneously and even crash, @value{GDBN} refuses
+to call the function unless you tell it the type of the function.
+
+For prototyped (i.e.@: ANSI/ISO style) functions, there are two ways
+to do that.  The simplest is to cast the call to the function's
+declared return type.  For example:
+
+@smallexample
+(@value{GDBP}) p getenv ("PATH")
+'getenv' has unknown return type; cast the call to its declared return type
+(@value{GDBP}) p (char *) getenv ("PATH")
+$1 = 0x7fffffffe7ba "/usr/local/bin:/"...
+@end smallexample
+
+Casting the return type of a no-debug function is equivalent to
+casting the function to a pointer to a prototyped function that has a
+prototype that matches the types of the passed-in arguments, and
+calling that.  I.e., the call above is equivalent to:
+
+@smallexample
+(@value{GDBP}) p ((char * (*) (const char *)) getenv) ("PATH")
+@end smallexample
+
+@noindent
+and given this prototyped C or C++ function with float parameters:
+
+@smallexample
+float multiply (float v1, float v2) @{ return v1 * v2; @}
+@end smallexample
+
+@noindent
+these calls are equivalent:
+
+@smallexample
+(@value{GDBP}) p (float) multiply (2.0f, 3.0f)
+(@value{GDBP}) p ((float (*) (float, float)) multiply) (2.0f, 3.0f)
+@end smallexample
+
+If the function you wish to call is declared as unprototyped (i.e.@:
+old K&R style), you must use the cast-to-function-pointer syntax, so
+that @value{GDBN} knows that it needs to apply default argument
+promotions (promote float arguments to double).  @xref{ABI, float
+promotion}.  For example, given this unprototyped C function with
+float parameters, and no debug info:
+
+@smallexample
+float
+multiply_noproto (v1, v2)
+  float v1, v2;
+@{
+  return v1 * v2;
+@}
+@end smallexample
+
+@noindent
+you call it like this:
+
+@smallexample
+  (@value{GDBP}) p ((float (*) ()) multiply_noproto) (2.0f, 3.0f)
+@end smallexample
 
 @node Patching
 @section Patching Programs
@@ -18154,13 +18267,15 @@ will print to the console.
 
 @subsection Compiler search for the @code{compile} command
 
-@value{GDBN} needs to find @value{NGCC} for the inferior being debugged which
-may not be obvious for remote targets of different architecture than where
-@value{GDBN} is running.  Environment variable @code{PATH} (@code{PATH} from
-shell that executed @value{GDBN}, not the one set by @value{GDBN}
-command @code{set environment}).  @xref{Environment}.  @code{PATH} on
+@value{GDBN} needs to find @value{NGCC} for the inferior being debugged
+which may not be obvious for remote targets of different architecture
+than where @value{GDBN} is running.  Environment variable @code{PATH} on
 @value{GDBN} host is searched for @value{NGCC} binary matching the
-target architecture and operating system.
+target architecture and operating system.  This search can be overriden
+by @code{set compile-gcc} @value{GDBN} command below.  @code{PATH} is
+taken from shell that executed @value{GDBN}, it is not the value set by
+@value{GDBN} command @code{set environment}).  @xref{Environment}.
+
 
 Specifically @code{PATH} is searched for binaries matching regular expression
 @code{@var{arch}(-[^-]*)?-@var{os}-gcc} according to the inferior target being
@@ -18169,6 +18284,28 @@ example both @code{i386} and @code{x86_64} targets look for pattern
 @code{(x86_64|i.86)} and both @code{s390} and @code{s390x} targets look
 for pattern @code{s390x?}.  @var{os} is currently supported only for
 pattern @code{linux(-gnu)?}.
+
+On Posix hosts the compiler driver @value{GDBN} needs to find also
+shared library @file{libcc1.so} from the compiler.  It is searched in
+default shared library search path (overridable with usual environment
+variable @code{LD_LIBRARY_PATH}), unrelated to @code{PATH} or @code{set
+compile-gcc} settings.  Contrary to it @file{libcc1plugin.so} is found
+according to the installation of the found compiler --- as possibly
+specified by the @code{set compile-gcc} command.
+
+@table @code
+@item set compile-gcc
+@cindex compile command driver filename override
+Set compilation command used for compiling and injecting code with the
+@code{compile} commands.  If this option is not set (it is set to
+an empty string), the search described above will occur --- that is the
+default.
+
+@item show compile-gcc
+Displays the current compile command @value{NGCC} driver filename.
+If set, it is the main command @command{gcc}, found usually for example
+under name @file{x86_64-linux-gnu-gcc}.
+@end table
 
 @node GDB Files
 @chapter @value{GDBN} Files
@@ -20253,6 +20390,15 @@ environment:
 $ gdbserver --wrapper env LD_PRELOAD=libtest.so -- :2222 ./testprog
 @end smallexample
 
+@cindex @option{--selftest}
+The @option{--selftest} option runs the self tests in @code{gdbserver}:
+
+@smallexample
+$ gdbserver --selftest
+Ran 2 unit tests, 0 failed
+@end smallexample
+
+These tests are disabled in release.
 @subsection Connecting to @code{gdbserver}
 
 The basic procedure for connecting to the remote target is:
@@ -20815,6 +20961,18 @@ are:
 @item @code{startup-with-shell}
 @tab @code{QStartupWithShell}
 @tab @code{set startup-with-shell}
+
+@item @code{environment-hex-encoded}
+@tab @code{QEnvironmentHexEncoded}
+@tab @code{set environment}
+
+@item @code{environment-unset}
+@tab @code{QEnvironmentUnset}
+@tab @code{unset environment}
+
+@item @code{environment-reset}
+@tab @code{QEnvironmentReset}
+@tab @code{Reset the inferior environment (i.e., unset user-set variables)}
 
 @item @code{conditional-breakpoints-packet}
 @tab @code{Z0 and Z1}
@@ -21792,12 +21950,12 @@ problem:
 
 @smallexample
 (@value{GDBP}) print 'cygwin1!__argv'
-$1 = 268572168
+'cygwin1!__argv' has unknown type; cast it to its declared type
 @end smallexample
 
 @smallexample
 (@value{GDBP}) x 'cygwin1!__argv'
-0x10021610:      "\230y\""
+'cygwin1!__argv' has unknown type; cast it to its declared type
 @end smallexample
 
 And two possible solutions:
@@ -22465,6 +22623,7 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 * SPU::                Cell Broadband Engine SPU architecture
 * PowerPC::
 * Nios II::
+* Sparc64::
 @end menu
 
 @node AArch64
@@ -22847,6 +23006,78 @@ target code in @value{GDBN}.
 @item show debug nios2
 @kindex show debug nios2
 Show the current setting of Nios II debugging messages.
+@end table
+
+@node Sparc64
+@subsection Sparc64
+@cindex Sparc64 support
+@cindex Application Data Integrity
+@subsubsection ADI Support
+
+The M7 processor supports an Application Data Integrity (ADI) feature that 
+detects invalid data accesses.  When software allocates memory and enables 
+ADI on the allocated memory, it chooses a 4-bit version number, sets the 
+version in the upper 4 bits of the 64-bit pointer to that data, and stores 
+the 4-bit version in every cacheline of that data.  Hardware saves the latter 
+in spare bits in the cache and memory hierarchy.  On each load and store, 
+the processor compares the upper 4 VA (virtual address) bits to the 
+cacheline's version.  If there is a mismatch, the processor generates a 
+version mismatch trap which can be either precise or disrupting.  The trap 
+is an error condition which the kernel delivers to the process as a SIGSEGV 
+signal.
+
+Note that only 64-bit applications can use ADI and need to be built with
+ADI-enabled.
+
+Values of the ADI version tags, which are in granularity of a 
+cacheline (64 bytes), can be viewed or modified. 
+
+
+@table @code
+@kindex adi examine
+@item adi (examine | x) [ / @var{n} ] @var{addr}
+
+The @code{adi examine} command displays the value of one ADI version tag per 
+cacheline. 
+
+@var{n} is a decimal integer specifying the number in bytes; the default 
+is 1.  It specifies how much ADI version information, at the ratio of 1:ADI 
+block size, to display. 
+
+@var{addr} is the address in user address space where you want @value{GDBN} 
+to begin displaying the ADI version tags. 
+
+Below is an example of displaying ADI versions of variable "shmaddr".
+
+@smallexample
+(@value{GDBP}) adi x/100 shmaddr
+   0xfff800010002c000:     0 0
+@end smallexample
+
+@kindex adi assign
+@item adi (assign | a) [ / @var{n} ] @var{addr} = @var{tag}
+
+The @code{adi assign} command is used to assign new ADI version tag 
+to an address. 
+
+@var{n} is a decimal integer specifying the number in bytes; 
+the default is 1.  It specifies how much ADI version information, at the 
+ratio of 1:ADI block size, to modify. 
+
+@var{addr} is the address in user address space where you want @value{GDBN} 
+to begin modifying the ADI version tags. 
+
+@var{tag} is the new ADI version tag.
+
+For example, do the following to modify then verify ADI versions of 
+variable "shmaddr":
+
+@smallexample
+(@value{GDBP}) adi a/100 shmaddr = 7
+(@value{GDBP}) adi x/100 shmaddr
+   0xfff800010002c000:     7 7
+@end smallexample
+
 @end table
 
 @node Controlling GDB
@@ -25415,6 +25646,10 @@ finish
 @item n
 next
 
+@kindex o @r{(SingleKey TUI key)}
+@item o
+nexti.  The shortcut letter @samp{o} stands for ``step Over''.
+
 @kindex q @r{(SingleKey TUI key)}
 @item q
 exit the SingleKey mode.
@@ -25426,6 +25661,10 @@ run
 @kindex s @r{(SingleKey TUI key)}
 @item s
 step
+
+@kindex i @r{(SingleKey TUI key)}
+@item i
+stepi.  The shortcut letter @samp{i} stands for ``step Into''.
 
 @kindex u @r{(SingleKey TUI key)}
 @item u
@@ -34687,11 +34926,21 @@ checksum.
 Print the entire architecture configuration.  The optional argument
 @var{file} names the file where the output goes.
 
-@kindex maint print c-tdesc
+@kindex maint print c-tdesc @r{[}@var{file}@r{]}
 @item maint print c-tdesc
-Print the current target description (@pxref{Target Descriptions}) as
-a C source file.  The created source file can be used in @value{GDBN}
-when an XML parser is not available to parse the description.
+Print the target description (@pxref{Target Descriptions}) as
+a C source file.  By default, the target description is for the current
+target, but if the optional argument @var{file} is provided, that file
+is used to produce the description.  The @var{file} should be an XML
+document, of the form described in @ref{Target Description Format}.
+The created source file is built into @value{GDBN} when @value{GDBN} is
+built again.  This command is used by developers after they add or
+modify XML target descriptions.
+
+@kindex maint check xml-descriptions
+@item maint check xml-descriptions @var{dir}
+Check that the target descriptions dynamically created by @value{GDBN}
+equal the descriptions created from XML files found in @var{dir}.
 
 @kindex maint print dummy-frames
 @item maint print dummy-frames
@@ -34828,8 +35077,16 @@ data structures, including its flags and contained types.
 
 @kindex maint selftest
 @cindex self tests
+@item maint selftest @r{[}@var{filter}@r{]}
 Run any self tests that were compiled in to @value{GDBN}.  This will
 print a message showing how many tests were run, and how many failed.
+If a @var{filter} is passed, only the tests with @var{filter} in their
+name will by ran.
+
+@kindex "maint info selftests"
+@cindex self tests
+@item maint info selftests
+List the selftests compiled in to @value{GDBN}.
 
 @kindex maint set dwarf always-disassemble
 @kindex maint show dwarf always-disassemble
@@ -35956,7 +36213,7 @@ separators.  Each expression has the following form:
 
 @item X @var{len},@var{expr}
 @var{len} is the length of the bytecode expression and @var{expr} is the
-actual conditional expression in bytecode form.
+actual commands expression in bytecode form.
 
 @end table
 
@@ -36479,6 +36736,100 @@ actually support starting the inferior using a shell.
 
 Use of this packet is controlled by the @code{set startup-with-shell}
 command; @pxref{set startup-with-shell}.
+
+@item QEnvironmentHexEncoded:@var{hex-value}
+@anchor{QEnvironmentHexEncoded}
+@cindex set environment variable, remote request
+@cindex @samp{QEnvironmentHexEncoded} packet
+On UNIX-like targets, it is possible to set environment variables that
+will be passed to the inferior during the startup process.  This
+packet is used to inform @command{gdbserver} of an environment
+variable that has been defined by the user on @value{GDBN} (@pxref{set
+environment}).
+
+The packet is composed by @var{hex-value}, an hex encoded
+representation of the @var{name=value} format representing an
+environment variable.  The name of the environment variable is
+represented by @var{name}, and the value to be assigned to the
+environment variable is represented by @var{value}.  If the variable
+has no value (i.e., the value is @code{null}), then @var{value} will
+not be present.
+
+This packet is only available in extended mode (@pxref{extended
+mode}).
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+@end table
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).  This should only be done on targets that
+actually support passing environment variables to the starting
+inferior.
+
+This packet is related to the @code{set environment} command;
+@pxref{set environment}.
+
+@item QEnvironmentUnset:@var{hex-value}
+@anchor{QEnvironmentUnset}
+@cindex unset environment variable, remote request
+@cindex @samp{QEnvironmentUnset} packet
+On UNIX-like targets, it is possible to unset environment variables
+before starting the inferior in the remote target.  This packet is
+used to inform @command{gdbserver} of an environment variable that has
+been unset by the user on @value{GDBN} (@pxref{unset environment}).
+
+The packet is composed by @var{hex-value}, an hex encoded
+representation of the name of the environment variable to be unset.
+
+This packet is only available in extended mode (@pxref{extended
+mode}).
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+@end table
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).  This should only be done on targets that
+actually support passing environment variables to the starting
+inferior.
+
+This packet is related to the @code{unset environment} command;
+@pxref{unset environment}.
+
+@item QEnvironmentReset
+@anchor{QEnvironmentReset}
+@cindex reset environment, remote request
+@cindex @samp{QEnvironmentReset} packet
+On UNIX-like targets, this packet is used to reset the state of
+environment variables in the remote target before starting the
+inferior.  In this context, reset means unsetting all environment
+variables that were previously set by the user (i.e., were not
+initially present in the environment).  It is sent to
+@command{gdbserver} before the @samp{QEnvironmentHexEncoded}
+(@pxref{QEnvironmentHexEncoded}) and the @samp{QEnvironmentUnset}
+(@pxref{QEnvironmentUnset}) packets.
+
+This packet is only available in extended mode (@pxref{extended
+mode}).
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+@end table
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).  This should only be done on targets that
+actually support passing environment variables to the starting
+inferior.
 
 @item qfThreadInfo
 @itemx qsThreadInfo
@@ -40433,7 +40784,9 @@ identifies the thread (@pxref{thread-id syntax}).  The
 the thread was last executing on.  The @samp{name} attribute, if
 present, specifies the human-readable name of the thread.  The content
 of the of @samp{thread} element is interpreted as human-readable
-auxiliary information.
+auxiliary information.  The @samp{handle} attribute, if present,
+is a hex encoded representation of the thread handle.
+
 
 @node Traceframe Info Format
 @section Traceframe Info Format

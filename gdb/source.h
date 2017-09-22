@@ -48,7 +48,7 @@ extern int find_and_open_source (const char *filename,
    negative number for error.  */
 extern int open_source_file (struct symtab *s);
 
-extern char *rewrite_source_path (const char *path);
+extern gdb::unique_xmalloc_ptr<char> rewrite_source_path (const char *path);
 
 extern const char *symtab_to_fullname (struct symtab *s);
 
@@ -91,7 +91,8 @@ extern void set_default_source_symtab_and_line (void);
    (the returned sal pc and end fields are not valid.)
    and set the current default to whatever is in SAL.
    NOTE: The returned sal pc and end fields are not valid.  */
-extern struct symtab_and_line set_current_source_symtab_and_line (const struct symtab_and_line *);
+extern symtab_and_line set_current_source_symtab_and_line
+  (const symtab_and_line &sal);
 
 /* Reset any information stored about a default file and line to print.  */
 extern void clear_current_source_symtab_and_line (void);

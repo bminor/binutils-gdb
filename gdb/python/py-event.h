@@ -26,74 +26,12 @@
 #include "inferior.h"
 #include "py-ref.h"
 
-/* This macro creates the following functions:
-
-     gdbpy_initialize_{NAME}_event
-     Used to add the newly created event type to the gdb module.
-
-   and the python type data structure for the event:
-
-     struct PyTypeObject {NAME}_event_object_type
-
-  NAME is the name of the event.
-  PY_PATH is a string representing the module and python name of
-    the event.
-  PY_NAME a string representing what the event should be called in
-    python.
-  DOC Python documentation for the new event type
-  BASE the base event for this event usually just event_object_type.
-*/
-
-#define GDBPY_NEW_EVENT_TYPE(name, py_path, py_name, doc, base) \
-\
-  PyTypeObject name##_event_object_type		    \
-        CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object") \
-    = { \
-      PyVarObject_HEAD_INIT (NULL, 0)				\
-      py_path,                                    /* tp_name */ \
-      sizeof (event_object),                      /* tp_basicsize */ \
-      0,                                          /* tp_itemsize */ \
-      evpy_dealloc,                               /* tp_dealloc */ \
-      0,                                          /* tp_print */ \
-      0,                                          /* tp_getattr */ \
-      0,                                          /* tp_setattr */ \
-      0,                                          /* tp_compare */ \
-      0,                                          /* tp_repr */ \
-      0,                                          /* tp_as_number */ \
-      0,                                          /* tp_as_sequence */ \
-      0,                                          /* tp_as_mapping */ \
-      0,                                          /* tp_hash  */ \
-      0,                                          /* tp_call */ \
-      0,                                          /* tp_str */ \
-      0,                                          /* tp_getattro */ \
-      0,                                          /* tp_setattro */ \
-      0,                                          /* tp_as_buffer */ \
-      Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   /* tp_flags */ \
-      doc,                                        /* tp_doc */ \
-      0,                                          /* tp_traverse */ \
-      0,                                          /* tp_clear */ \
-      0,                                          /* tp_richcompare */ \
-      0,                                          /* tp_weaklistoffset */ \
-      0,                                          /* tp_iter */ \
-      0,                                          /* tp_iternext */ \
-      0,                                          /* tp_methods */ \
-      0,                                          /* tp_members */ \
-      0,                                          /* tp_getset */ \
-      &base,                                      /* tp_base */ \
-      0,                                          /* tp_dict */ \
-      0,                                          /* tp_descr_get */ \
-      0,                                          /* tp_descr_set */ \
-      0,                                          /* tp_dictoffset */ \
-      0,                                          /* tp_init */ \
-      0                                           /* tp_alloc */ \
-    }; \
-\
-int \
-gdbpy_initialize_##name##_event (void) \
-{ \
-  return gdbpy_initialize_event_generic (&name##_event_object_type, \
-					 py_name);		    \
-}
+/* Declare all event types.  */
+#define GDB_PY_DEFINE_EVENT_TYPE(name, py_name, doc, base) \
+  extern PyTypeObject name##_event_object_type		    \
+        CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
+#include "py-event-types.def"
+#undef GDB_PY_DEFINE_EVENT_TYPE
 
 typedef struct
 {
@@ -124,8 +62,9 @@ extern int emit_memory_changed_event (CORE_ADDR addr, ssize_t len);
 extern int evpy_emit_event (PyObject *event,
                             eventregistry_object *registry);
 
-extern PyObject *create_event_object (PyTypeObject *py_type);
-extern PyObject *create_thread_event_object (PyTypeObject *py_type);
+extern gdbpy_ref<> create_event_object (PyTypeObject *py_type);
+extern gdbpy_ref<> create_thread_event_object (PyTypeObject *py_type,
+					       PyObject *thread = nullptr);
 extern int emit_new_objfile_event (struct objfile *objfile);
 extern int emit_clear_objfiles_event (void);
 

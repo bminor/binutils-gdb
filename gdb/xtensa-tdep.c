@@ -740,17 +740,13 @@ static void
 xtensa_init_reggroups (void)
 {
   int i;
-  char cpname[] = "cp0";
 
   xtensa_ar_reggroup = reggroup_new ("ar", USER_REGGROUP);
   xtensa_user_reggroup = reggroup_new ("user", USER_REGGROUP);
   xtensa_vectra_reggroup = reggroup_new ("vectra", USER_REGGROUP);
 
   for (i = 0; i < XTENSA_MAX_COPROCESSOR; i++)
-    {
-      cpname[2] = '0' + i;
-      xtensa_cp[i] = reggroup_new (cpname, USER_REGGROUP);
-    }
+    xtensa_cp[i] = reggroup_new (xstrprintf ("cp%d", i), USER_REGGROUP);
 }
 
 static void
@@ -3281,9 +3277,6 @@ xtensa_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
   error (_("xtensa_dump_tdep(): not implemented"));
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_xtensa_tdep;
 
 void
 _initialize_xtensa_tdep (void)

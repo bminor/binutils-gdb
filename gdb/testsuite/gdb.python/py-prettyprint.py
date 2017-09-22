@@ -227,6 +227,13 @@ class pp_eval_type (object):
         gdb.execute("bt", to_string=True)
         return "eval=<" + str(gdb.parse_and_eval("eval_func (123456789, 2, 3, 4, 5, 6, 7, 8)")) + ">"
 
+class pp_int_typedef (object):
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return "type=%s, val=%s" % (self.val.type, int(self.val))
+
 def lookup_function (val):
     "Look-up and return a pretty-printer that can print val."
 
@@ -262,6 +269,26 @@ def disable_lookup_function ():
 
 def enable_lookup_function ():
     lookup_function.enabled = True
+
+# Lookup a printer for VAL in the typedefs dict.
+def lookup_typedefs_function (val):
+    "Look-up and return a pretty-printer that can print val (typedefs)."
+
+    # Get the type.
+    type = val.type
+
+    if type == None or type.name == None or type.code != gdb.TYPE_CODE_TYPEDEF:
+        return None
+
+    # Iterate over local dictionary of typedef types to determine if a
+    # printer is registered for that type.  Return an instantiation of
+    # the printer if found.
+    for function in typedefs_pretty_printers_dict:
+        if function.match (type.name):
+            return typedefs_pretty_printers_dict[function] (val)
+
+    # Cannot find a pretty printer.
+    return None
 
 def register_pretty_printers ():
     pretty_printers_dict[re.compile ('^struct s$')]   = pp_s
@@ -309,7 +336,14 @@ def register_pretty_printers ():
 
     pretty_printers_dict[re.compile ('^eval_type_s$')] = pp_eval_type
 
+    typedefs_pretty_printers_dict[re.compile ('^int_type$')] = pp_int_typedef
+    typedefs_pretty_printers_dict[re.compile ('^int_type2$')] = pp_int_typedef
+
+# Dict for struct types with typedefs fully stripped.
 pretty_printers_dict = {}
+# Dict for typedef types.
+typedefs_pretty_printers_dict = {}
 
 register_pretty_printers ()
 gdb.pretty_printers.append (lookup_function)
+gdb.pretty_printers.append (lookup_typedefs_function)

@@ -3800,6 +3800,7 @@ pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_ARC_S25W_PCREL_PLT,
   BFD_RELOC_ARC_S21H_PCREL_PLT,
   BFD_RELOC_ARC_NPS_CMEM16,
+  BFD_RELOC_ARC_JLI_SECTOFF,
 
 /* ADI Blackfin 16 bit immediate absolute reloc.  */
   BFD_RELOC_BFIN_16_IMM,

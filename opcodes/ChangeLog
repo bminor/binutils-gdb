@@ -1,3 +1,362 @@
+2017-09-09  Kamil Rytarowski  <n54@gmx.com>
+
+	* nds32-asm.c: Rename __BIT() to N32_BIT().
+	* nds32-asm.h: Likewise.
+	* nds32-dis.c: Likewise.
+
+2017-09-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (last_active_prefix): Removed.
+	(ckprefix): Don't set last_active_prefix.
+	(NOTRACK_Fixup): Don't check last_active_prefix.
+
+2017-08-31  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
+2017-08-31  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32-dis.c (print_insn_ft32): Correct display of non-address
+	fields.
+
+2017-08-23  Alexander Fedotov <alexander.fedotov@nxp.com>
+	    Edmar Wienskoski <edmar.wienskoski@nxp.com>
+
+	* ppc-dis.c (ppc_mopt): Add PPC_OPCODE_SPE2 and
+	PPC_OPCODE_EFS2 flag to "e200z4" entry.
+	New entries efs2 and spe2.
+	Add PPC_OPCODE_SPE2 and PPC_OPCODE_EFS2 flag to "vle" entry.
+	(SPE2_OPCD_SEGS): New macro.
+	(spe2_opcd_indices): New.
+	(disassemble_init_powerpc): Handle SPE2 opcodes.
+	(lookup_spe2): New function.
+	(print_insn_powerpc): call lookup_spe2.
+	* ppc-opc.c (insert_evuimm1_ex0): New function.
+	(extract_evuimm1_ex0): Likewise.
+	(insert_evuimm_lt8): Likewise.
+	(extract_evuimm_lt8): Likewise.
+	(insert_off_spe2): Likewise.
+	(extract_off_spe2): Likewise.
+	(insert_Ddd): Likewise.
+	(extract_Ddd): Likewise.
+	(DD): New operand.
+	(EVUIMM_LT8): Likewise.
+	(EVUIMM_LT16): Adjust.
+	(MMMM): New operand.
+	(EVUIMM_1): Likewise.
+	(EVUIMM_1_EX0): Likewise.
+	(EVUIMM_2): Adjust.
+	(NNN): New operand.
+	(VX_OFF_SPE2): Likewise.
+	(BBB): Likewise.
+	(DDD): Likewise.
+	(VX_MASK_DDD): New mask.
+	(HH): New operand.
+	(VX_RA_CONST): New macro.
+	(VX_RA_CONST_MASK): Likewise.
+	(VX_RB_CONST): Likewise.
+	(VX_RB_CONST_MASK): Likewise.
+	(VX_OFF_SPE2_MASK): Likewise.
+	(VX_SPE_CRFD): Likewise.
+	(VX_SPE_CRFD_MASK VX): Likewise.
+	(VX_SPE2_CLR): Likewise.
+	(VX_SPE2_CLR_MASK): Likewise.
+	(VX_SPE2_SPLATB): Likewise.
+	(VX_SPE2_SPLATB_MASK): Likewise.
+	(VX_SPE2_OCTET): Likewise.
+	(VX_SPE2_OCTET_MASK): Likewise.
+	(VX_SPE2_DDHH): Likewise.
+	(VX_SPE2_DDHH_MASK): Likewise.
+	(VX_SPE2_HH): Likewise.
+	(VX_SPE2_HH_MASK): Likewise.
+	(VX_SPE2_EVMAR): Likewise.
+	(VX_SPE2_EVMAR_MASK): Likewise.
+	(PPCSPE2): Likewise.
+	(PPCEFS2): Likewise.
+	(vle_opcodes): Add EFS2 and some missing SPE opcodes.
+	(powerpc_macros): Map old SPE instructions have new names
+	with the same opcodes. Add SPE2 instructions which just are
+	mapped to SPE2.
+	(spe2_opcodes): Add SPE2 opcodes.
+
+2017-08-23  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c: Formatting and comment fixes.  Move insert and
+	extract functions earlier, deleting forward declarations.
+	(insert_nbi, insert_raq, insert_rbx): Expand use of RT_MASK and
+	RA_MASK.
+
+2017-08-22  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* riscv-opc.c (riscv_opcodes): Mark "c.nop" as an alias.
+
+2017-08-21  Alexander Fedotov <alexander.fedotov@nxp.com>
+	    Edmar Wienskoski <edmar.wienskoski@nxp.com>
+
+	* ppc-opc.c (insert_evuimm2_ex0): New function.
+	(extract_evuimm2_ex0): Likewise.
+	(insert_evuimm4_ex0): Likewise.
+	(extract_evuimm4_ex0): Likewise.
+	(insert_evuimm8_ex0): Likewise.
+	(extract_evuimm8_ex0): Likewise.
+	(insert_evuimm_lt16): Likewise.
+	(extract_evuimm_lt16): Likewise.
+	(insert_rD_rS_even): Likewise.
+	(extract_rD_rS_even): Likewise.
+	(insert_off_lsp): Likewise.
+	(extract_off_lsp): Likewise.
+	(RD_EVEN): New operand.
+	(RS_EVEN): Likewise.
+	(RSQ): Adjust.
+	(EVUIMM_LT16): New operand.
+	(HTM_SI): Adjust.
+	(EVUIMM_2_EX0): New operand.
+	(EVUIMM_4): Adjust.
+	(EVUIMM_4_EX0): New operand.
+	(EVUIMM_8): Adjust.
+	(EVUIMM_8_EX0): New operand.
+	(WS): Adjust.
+	(VX_OFF): New operand.
+	(VX_LSP): New macro.
+	(VX_LSP_MASK): Likewise.
+	(VX_LSP_OFF_MASK): Likewise.
+	(PPC_OPCODE_LSP): Likewise.
+	(vle_opcodes): Add LSP opcodes.
+	* ppc-dis.c (ppc_mopt): Add PPC_OPCODE_LSP flag to "vle" entry.
+
+2017-08-09  Jiong Wang  <jiong.wang@arm.com>
+
+	* arm-dis.c (thumb32_opcodes): Use format 'R' instead of 'S' for
+	register operands in CRC instructions.
+	(print_insn_thumb32): Remove "<bitfield>S" support.  Updated the
+	comments.
+
+2017-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* disassemble.c (disassembler): Mark big and mach with
+	ATTRIBUTE_UNUSED.
+
+2017-08-07  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* disassemble.c (disassembler): Remove arch/mach/endian
+	assertions.
+
+2017-07-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 21739
+	* arc-opc.c (insert_rhv2): Use lower case first letter in error
+	message.
+	(insert_r0): Likewise.
+	(insert_r1): Likewise.
+	(insert_r2): Likewise.
+	(insert_r3): Likewise.
+	(insert_sp): Likewise.
+	(insert_gp): Likewise.
+	(insert_pcl): Likewise.
+	(insert_blink): Likewise.
+	(insert_ilink1): Likewise.
+	(insert_ilink2): Likewise.
+	(insert_ras): Likewise.
+	(insert_rbs): Likewise.
+	(insert_rcs): Likewise.
+	(insert_simm3s): Likewise.
+	(insert_rrange): Likewise.
+	(insert_r13el): Likewise.
+	(insert_fpel): Likewise.
+	(insert_blinkel): Likewise.
+	(insert_pclel): Likewise.
+	(insert_nps_bitop_size_2b): Likewise.
+	(insert_nps_imm_offset): Likewise.
+	(insert_nps_imm_entry): Likewise.
+	(insert_nps_size_16bit): Likewise.
+	(insert_nps_##NAME##_pos): Likewise.
+	(insert_nps_##NAME): Likewise.
+	(insert_nps_bitop_ins_ext): Likewise.
+	(insert_nps_##NAME): Likewise.
+	(insert_nps_min_hofs): Likewise.
+	(insert_nps_##NAME): Likewise.
+	(insert_nps_rbdouble_64): Likewise.
+	(insert_nps_misc_imm_offset): Likewise.
+	* riscv-dis.c (print_riscv_disassembler_options): Fix typo in
+	option description.
+
+2017-07-24  Laurent Desnogues  <laurent.desnogues@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64-gen.c (print_decision_tree_1): Reverse the index of PATTERN to
+	correct the print.
+	* aarch64-dis-2.c: Regenerated.
+
+2017-07-21  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-mkopc.c (main): Enable z14 as CPU string in the opcode
+	table.
+
+2017-07-20  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: Updated German translation.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-regs.h (sec_stat): New aux register.
+	(aux_kernel_sp): Likewise.
+	(aux_sec_u_sp): Likewise.
+	(aux_sec_k_sp): Likewise.
+	(sec_vecbase_build): Likewise.
+	(nsc_table_top): Likewise.
+	(nsc_table_base): Likewise.
+	(ersec_stat): Likewise.
+	(aux_sec_except): Likewise.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-opc.c (extract_uimm12_20): New function.
+	(UIMM12_20): New operand.
+	(SIMM3_5_S): Adjust.
+	* arc-tbl.h (sjli): Add new instruction.
+
+2017-07-19  Claudiu Zissulescu  <claziss@synopsys.com>
+	    John Eric Martin  <John.Martin@emmicro-us.com>
+
+	* arc-opc.c (UIMM10_6_S_JLIOFF): Define.
+	(UIMM3_23): Adjust accordingly.
+	* arc-regs.h: Add/correct jli_base register.
+	* arc-tbl.h (jli_s): Likewise.
+
+2017-07-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 21775
+	* aarch64-opc.c: Fix spelling typos.
+	* i386-dis.c: Likewise.
+
+2017-07-14  Ravi Bangoria  <ravi.bangoria@linux.vnet.ibm.com>
+
+	* dis-buf.c (buffer_read_memory): Change type of end_addr_offset,
+	max_addr_offset and octets variables to size_t.
+
+2017-07-12  Alan Modra  <amodra@gmail.com>
+
+	* po/da.po: Update from translationproject.org/latest/opcodes/.
+	* po/de.po: Likewise.
+	* po/es.po: Likewise.
+	* po/fi.po: Likewise.
+	* po/fr.po: Likewise.
+	* po/id.po: Likewise.
+	* po/it.po: Likewise.
+	* po/nl.po: Likewise.
+	* po/pt_BR.po: Likewise.
+	* po/ro.po: Likewise.
+	* po/sv.po: Likewise.
+	* po/tr.po: Likewise.
+	* po/uk.po: Likewise.
+	* po/vi.po: Likewise.
+	* po/zh_CN.po: Likewise.
+
+2017-07-11  Yao Qi  <yao.qi@linaro.org>
+	    Alan Modra  <amodra@gmail.com>
+
+	* cgen.sh: Mark generated files read-only.
+	* epiphany-asm.c: Regenerate.
+	* epiphany-desc.c: Regenerate.
+	* epiphany-desc.h: Regenerate.
+	* epiphany-dis.c: Regenerate.
+	* epiphany-ibld.c: Regenerate.
+	* epiphany-opc.c: Regenerate.
+	* epiphany-opc.h: Regenerate.
+	* fr30-asm.c: Regenerate.
+	* fr30-desc.c: Regenerate.
+	* fr30-desc.h: Regenerate.
+	* fr30-dis.c: Regenerate.
+	* fr30-ibld.c: Regenerate.
+	* fr30-opc.c: Regenerate.
+	* fr30-opc.h: Regenerate.
+	* frv-asm.c: Regenerate.
+	* frv-desc.c: Regenerate.
+	* frv-desc.h: Regenerate.
+	* frv-dis.c: Regenerate.
+	* frv-ibld.c: Regenerate.
+	* frv-opc.c: Regenerate.
+	* frv-opc.h: Regenerate.
+	* ip2k-asm.c: Regenerate.
+	* ip2k-desc.c: Regenerate.
+	* ip2k-desc.h: Regenerate.
+	* ip2k-dis.c: Regenerate.
+	* ip2k-ibld.c: Regenerate.
+	* ip2k-opc.c: Regenerate.
+	* ip2k-opc.h: Regenerate.
+	* iq2000-asm.c: Regenerate.
+	* iq2000-desc.c: Regenerate.
+	* iq2000-desc.h: Regenerate.
+	* iq2000-dis.c: Regenerate.
+	* iq2000-ibld.c: Regenerate.
+	* iq2000-opc.c: Regenerate.
+	* iq2000-opc.h: Regenerate.
+	* lm32-asm.c: Regenerate.
+	* lm32-desc.c: Regenerate.
+	* lm32-desc.h: Regenerate.
+	* lm32-dis.c: Regenerate.
+	* lm32-ibld.c: Regenerate.
+	* lm32-opc.c: Regenerate.
+	* lm32-opc.h: Regenerate.
+	* lm32-opinst.c: Regenerate.
+	* m32c-asm.c: Regenerate.
+	* m32c-desc.c: Regenerate.
+	* m32c-desc.h: Regenerate.
+	* m32c-dis.c: Regenerate.
+	* m32c-ibld.c: Regenerate.
+	* m32c-opc.c: Regenerate.
+	* m32c-opc.h: Regenerate.
+	* m32r-asm.c: Regenerate.
+	* m32r-desc.c: Regenerate.
+	* m32r-desc.h: Regenerate.
+	* m32r-dis.c: Regenerate.
+	* m32r-ibld.c: Regenerate.
+	* m32r-opc.c: Regenerate.
+	* m32r-opc.h: Regenerate.
+	* m32r-opinst.c: Regenerate.
+	* mep-asm.c: Regenerate.
+	* mep-desc.c: Regenerate.
+	* mep-desc.h: Regenerate.
+	* mep-dis.c: Regenerate.
+	* mep-ibld.c: Regenerate.
+	* mep-opc.c: Regenerate.
+	* mep-opc.h: Regenerate.
+	* mt-asm.c: Regenerate.
+	* mt-desc.c: Regenerate.
+	* mt-desc.h: Regenerate.
+	* mt-dis.c: Regenerate.
+	* mt-ibld.c: Regenerate.
+	* mt-opc.c: Regenerate.
+	* mt-opc.h: Regenerate.
+	* or1k-asm.c: Regenerate.
+	* or1k-desc.c: Regenerate.
+	* or1k-desc.h: Regenerate.
+	* or1k-dis.c: Regenerate.
+	* or1k-ibld.c: Regenerate.
+	* or1k-opc.c: Regenerate.
+	* or1k-opc.h: Regenerate.
+	* or1k-opinst.c: Regenerate.
+	* xc16x-asm.c: Regenerate.
+	* xc16x-desc.c: Regenerate.
+	* xc16x-desc.h: Regenerate.
+	* xc16x-dis.c: Regenerate.
+	* xc16x-ibld.c: Regenerate.
+	* xc16x-opc.c: Regenerate.
+	* xc16x-opc.h: Regenerate.
+	* xstormy16-asm.c: Regenerate.
+	* xstormy16-desc.c: Regenerate.
+	* xstormy16-desc.h: Regenerate.
+	* xstormy16-dis.c: Regenerate.
+	* xstormy16-ibld.c: Regenerate.
+	* xstormy16-opc.c: Regenerate.
+	* xstormy16-opc.h: Regenerate.
+
+2017-07-07  Alan Modra  <amodra@gmail.com>
+
+	* cgen-dis.in: Include disassemble.h, not dis-asm.h.
+	* m32c-dis.c: Regenerate.
+	* mep-dis.c: Regenerate.
+
 2017-07-05  Borislav Petkov  <bp@suse.de>
 
 	* i386-dis.c: Enable ModRM.reg /6 aliases.

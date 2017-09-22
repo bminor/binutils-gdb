@@ -23,12 +23,8 @@
 #include "regcache.h"
 
 #include <x86/context.h>
-
-
-/* Defined in auto-generated build-time file gdb/gdbserver/i386.c.  */
-extern void init_registers_i386 ();
-extern struct reg *regs_i386;
-extern const struct target_desc *tdesc_i386;
+#include "x86-xstate.h"
+#include "arch/i386.h"
 
 const unsigned char x86_breakpoint[] = { 0xCC };
 #define x86_breakpoint_len 1
@@ -90,9 +86,8 @@ nto_x86_register_offset (int gdbregno)
 static void
 nto_x86_arch_setup (void)
 {
-  init_registers_i386 ();
   the_low_target.num_regs = 16;
-  nto_tdesc = tdesc_i386;
+  nto_tdesc = i386_create_target_description (X86_XSTATE_SSE_MASK, false);
 }
 
 struct nto_target_ops the_low_target =

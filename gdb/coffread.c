@@ -43,8 +43,6 @@
 #include "psymtab.h"
 #include "build-id.h"
 
-extern void _initialize_coffread (void);
-
 /* Key for COFF-associated data.  */
 
 static const struct objfile_data *coff_objfile_data_key;

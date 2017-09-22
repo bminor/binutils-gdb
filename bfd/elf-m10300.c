@@ -2094,10 +2094,10 @@ mn10300_elf_relocate_section (bfd *output_bfd,
 
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	      (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	       input_bfd,
 	       input_section,
-	       (long) rel->r_offset,
+	       rel->r_offset,
 	       howto->name,
 	       h->root.root.root.string);
 	}
@@ -2416,7 +2416,7 @@ mn10300_elf_relax_delete_bytes (bfd *abfd,
       if (ELF32_R_TYPE ((irelend - 1)->r_info) == (int) R_MN10300_ALIGN)
 	--irelend;
 
-      /* The deletion must stop at the next ALIGN reloc for an aligment
+      /* The deletion must stop at the next ALIGN reloc for an alignment
 	 power larger than, or not a multiple of, the number of bytes we
 	 are deleting.  */
       for (; irel < irelend; irel++)

@@ -834,7 +834,12 @@ bfd_generic_archive_p (bfd *abfd)
   if (strncmp (armag, ARMAG, SARMAG) != 0
       && strncmp (armag, ARMAGB, SARMAG) != 0
       && ! bfd_is_thin_archive (abfd))
-    return NULL;
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      if (abfd->format == bfd_archive)
+	abfd->format = bfd_unknown;
+      return NULL;
+    }
 
   tdata_hold = bfd_ardata (abfd);
 
@@ -1975,6 +1980,12 @@ bfd_ar_hdr_from_filesystem (bfd *abfd, const char *filename, bfd *member)
 		      status.st_gid);
   _bfd_ar_spacepad (hdr->ar_mode, sizeof (hdr->ar_mode), "%-8lo",
 		    status.st_mode);
+  if (status.st_size - (bfd_size_type) status.st_size != 0)
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      free (ared);
+      return NULL;
+    }
   if (!_bfd_ar_sizepad (hdr->ar_size, sizeof (hdr->ar_size), status.st_size))
     {
       free (ared);

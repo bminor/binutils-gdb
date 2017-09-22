@@ -162,14 +162,15 @@
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_enum_remove_bp_reason(X) \
   target_debug_do_print (plongest (X))
+#define target_debug_print_gdb_disassembly_flags(X) \
+  target_debug_do_print (plongest (X))
 
 static void
 target_debug_print_struct_target_waitstatus_p (struct target_waitstatus *status)
 {
-  char *str = target_waitstatus_to_string (status);
+  std::string str = target_waitstatus_to_string (status);
 
-  fputs_unfiltered (str, gdb_stdlog);
-  xfree (str);
+  fputs_unfiltered (str.c_str (), gdb_stdlog);
 }
 
 

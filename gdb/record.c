@@ -431,7 +431,7 @@ get_insn_number (char **arg)
   const char *begin, *end, *pos;
 
   begin = *arg;
-  pos = skip_spaces_const (begin);
+  pos = skip_spaces (begin);
 
   if (!isdigit (*pos))
     error (_("Expected positive number, got: %s."), pos);
@@ -470,10 +470,10 @@ no_chunk (char *arg)
 
 /* Read instruction-history modifiers from an argument string.  */
 
-static int
+static gdb_disassembly_flags
 get_insn_history_modifiers (char **arg)
 {
-  int modifiers;
+  gdb_disassembly_flags modifiers;
   char *args;
 
   modifiers = 0;
@@ -551,13 +551,11 @@ command_size_to_target_size (unsigned int size)
 static void
 cmd_record_insn_history (char *arg, int from_tty)
 {
-  int flags, size;
-
   require_record_target ();
 
-  flags = get_insn_history_modifiers (&arg);
+  gdb_disassembly_flags flags = get_insn_history_modifiers (&arg);
 
-  size = command_size_to_target_size (record_insn_history_size);
+  int size = command_size_to_target_size (record_insn_history_size);
 
   if (arg == NULL || *arg == 0 || strcmp (arg, "+") == 0)
     target_insn_history (size, flags);
@@ -774,9 +772,6 @@ set_record_call_history_size (char *args, int from_tty,
   validate_history_size (&record_call_history_size_setshow_var,
 			 &record_call_history_size);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_record;
 
 void
 _initialize_record (void)

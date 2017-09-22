@@ -104,6 +104,32 @@ extern struct ui_out *interp_ui_out (struct interp *interp);
 extern const char *interp_name (struct interp *interp);
 extern struct interp *interp_set_temp (const char *name);
 
+/* Temporarily set the current interpreter, and reset it on
+   destruction.  */
+class scoped_restore_interp
+{
+public:
+
+  scoped_restore_interp (const char *name)
+    : m_interp (set_interp (name))
+  {
+  }
+
+  ~scoped_restore_interp ()
+  {
+    set_interp (interp_name (m_interp));
+  }
+
+  scoped_restore_interp (const scoped_restore_interp &) = delete;
+  scoped_restore_interp &operator= (const scoped_restore_interp &) = delete;
+
+private:
+
+  struct interp *set_interp (const char *name);
+
+  struct interp *m_interp;
+};
+
 extern int current_interp_named_p (const char *name);
 
 /* Call this function to give the current interpreter an opportunity
@@ -138,9 +164,10 @@ extern void interp_pre_command_loop (struct interp *interp);
 
 /* List the possible interpreters which could complete the given
    text.  */
-extern VEC (char_ptr) *interpreter_completer (struct cmd_list_element *ignore,
-					      const char *text,
-					      const char *word);
+extern void interpreter_completer (struct cmd_list_element *ignore,
+				   completion_tracker &tracker,
+				   const char *text,
+				   const char *word);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

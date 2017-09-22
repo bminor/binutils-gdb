@@ -1,3 +1,4 @@
+/* DO NOT EDIT!  -*- buffer-read-only: t -*- vi:set ro:  */
 /* CPU data header for ip2k.
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.

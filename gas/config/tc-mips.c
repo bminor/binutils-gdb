@@ -4897,7 +4897,7 @@ match_expression (struct mips_arg_info *arg, expressionS *value,
 }
 
 /* Try to get a constant expression from the next tokens in ARG.  Consume
-   the tokens and return return true on success, storing the constant value
+   the tokens and return true on success, storing the constant value
    in *VALUE.  */
 
 static bfd_boolean
@@ -15314,7 +15314,7 @@ fix_bad_misaligned_jump_p (fixS *fixP, int shift)
    We accept BFD_RELOC_16_PCREL_S2 relocations against MIPS16 and microMIPS
    symbols or BFD_RELOC_MICROMIPS_16_PCREL_S1 relocations against regular
    MIPS symbols and associated with BAL instructions as these instructions
-   may be be converted to JALX by the linker.  */
+   may be converted to JALX by the linker.  */
 
 static bfd_boolean
 fix_bad_cross_mode_branch_p (fixS *fixP)
@@ -17149,6 +17149,7 @@ s_nan (int ignore ATTRIBUTE_UNUSED)
 static void
 s_mips_stab (int type)
 {
+  file_mips_check_options ();
   mips_mark_labels ();
   s_stab (type);
 }
@@ -18630,7 +18631,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 
 	  if (pcrel_op->include_isa_bit && !need_reloc)
 	    {
-	      if (!ELF_ST_IS_MIPS16 (S_GET_OTHER (fragp->fr_symbol)))
+	      if (!mips_ignore_branch_isa
+		  && !ELF_ST_IS_MIPS16 (S_GET_OTHER (fragp->fr_symbol)))
 		as_bad_where (fragp->fr_file, fragp->fr_line,
 			      _("branch to a symbol in another ISA mode"));
 	      else if ((fragp->fr_offset & 0x1) != 0)

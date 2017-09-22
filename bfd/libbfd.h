@@ -1752,6 +1752,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ARC_S25W_PCREL_PLT",
   "BFD_RELOC_ARC_S21H_PCREL_PLT",
   "BFD_RELOC_ARC_NPS_CMEM16",
+  "BFD_RELOC_ARC_JLI_SECTOFF",
   "BFD_RELOC_BFIN_16_IMM",
   "BFD_RELOC_BFIN_16_HIGH",
   "BFD_RELOC_BFIN_4_PCREL",
@@ -3217,6 +3218,11 @@ void _bfd_generic_set_reloc
     sec_ptr section,
     arelent **relptr,
     unsigned int count);
+
+bfd_boolean _bfd_unrecognized_reloc
+   (bfd * abfd,
+    sec_ptr section,
+    unsigned int r_type);
 
 /* Extracted from archures.c.  */
 extern const bfd_arch_info_type bfd_default_arch_struct;

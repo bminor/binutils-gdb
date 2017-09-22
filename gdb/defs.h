@@ -203,7 +203,8 @@ extern void quit_serial_event_clear (void);
    several languages.  For that reason, the constants here are sorted
    in the order we'll attempt demangling them.  For example: Rust uses
    C++ mangling, so must come after C++; Ada must come last (see
-   ada_sniff_from_mangled_name).  */
+   ada_sniff_from_mangled_name).  (Keep this order in sync with the
+   'languages' array in language.c.)  */
 
 enum language
   {
@@ -398,80 +399,6 @@ enum lval_type
        by its creator.  */
     lval_computed
   };
-
-/* * Control types for commands.  */
-
-enum misc_command_type
-  {
-    ok_command,
-    end_command,
-    else_command,
-    nop_command
-  };
-
-enum command_control_type
-  {
-    simple_control,
-    break_control,
-    continue_control,
-    while_control,
-    if_control,
-    commands_control,
-    python_control,
-    compile_control,
-    guile_control,
-    while_stepping_control,
-    invalid_control
-  };
-
-/* * Structure for saved commands lines (for breakpoints, defined
-   commands, etc).  */
-
-struct command_line
-  {
-    struct command_line *next;
-    char *line;
-    enum command_control_type control_type;
-    union
-      {
-	struct
-	  {
-	    enum compile_i_scope_types scope;
-	    void *scope_data;
-	  }
-	compile;
-      }
-    control_u;
-    /* * The number of elements in body_list.  */
-    int body_count;
-    /* * For composite commands, the nested lists of commands.  For
-       example, for "if" command this will contain the then branch and
-       the else branch, if that is available.  */
-    struct command_line **body_list;
-  };
-
-extern void free_command_lines (struct command_line **);
-
-/* A deleter for command_line that calls free_command_lines.  */
-
-struct command_lines_deleter
-{
-  void operator() (command_line *lines) const
-  {
-    free_command_lines (&lines);
-  }
-};
-
-/* A unique pointer to a command_line.  */
-
-typedef std::unique_ptr<command_line, command_lines_deleter> command_line_up;
-
-extern command_line_up read_command_lines (char *, int, int,
-					   void (*)(char *, void *),
-					   void *);
-extern command_line_up read_command_lines_1 (char * (*) (void), int,
-					     void (*)(char *, void *),
-					     void *);
 
 /* * Parameters of the "info proc" command.  */
 

@@ -1536,9 +1536,9 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B(%A+0x%lx): %s relocation against SEC_MERGE section"),
+		    (_("%B(%A+%#Lx): %s relocation against SEC_MERGE section"),
 		     input_bfd, input_section,
-		     (long) rel->r_offset, howto->name);
+		     rel->r_offset, howto->name);
 		  return FALSE;
 		}
 
@@ -1633,10 +1633,10 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+		    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
 		     input_bfd,
 		     input_section,
-		     (long) rel->r_offset,
+		     rel->r_offset,
 		     howto->name,
 		     h->root.root.string);
 		}
@@ -1677,9 +1677,9 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B: error: unaligned relocation type %d at %08x reloc %08x\n"),
-	     input_bfd, (int) r_type, (unsigned) rel->r_offset,
-	     (unsigned) relocation);
+	    (_("%B: error: unaligned relocation type %d at %08Lx reloc %08Lx"),
+	     input_bfd, (int) r_type, rel->r_offset,
+	     relocation);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}

@@ -307,7 +307,7 @@ getsym (char *dstp, char **srcp, unsigned int *lenp, char * endp)
   len = hex_value (*src++);
   if (len == 0)
     len = 16;
-  for (i = 0; i < len && src < endp; i++)
+  for (i = 0; i < len && (src + i) < endp; i++)
     dstp[i] = src[i];
   dstp[i] = 0;
   *srcp = src + i;

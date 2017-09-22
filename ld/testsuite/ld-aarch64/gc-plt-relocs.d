@@ -2,7 +2,7 @@
 #source: gc-plt-main.s
 #source: gc-plt-hidden.s
 #source: gc-plt2.s
-#ld: --gc-sections -T aarch64.ld --shared
+#ld: --gc-sections -T aarch64.ld --shared --hash-style=sysv
 #objdump: -dT
 
 # Shared object with plt related relocs against global symbol

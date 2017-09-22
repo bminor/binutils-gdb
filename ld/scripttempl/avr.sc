@@ -128,7 +128,7 @@ SECTIONS
     ${RELOCATING+ *libprintf_flt.a:*(.progmem.data)}
     ${RELOCATING+ *libc.a:*(.progmem.data)}
 
-    ${RELOCATING+ *(.progmem*)}
+    ${RELOCATING+ *(.progmem.*)}
     
     ${RELOCATING+. = ALIGN(2);}
 
@@ -195,6 +195,8 @@ SECTIONS
     /* For code that needs not to reside in the lower progmem.  */
     *(.hightext)
     ${RELOCATING+ *(.hightext*)}
+
+    ${RELOCATING+ *(.progmemx.*)}
 
     ${RELOCATING+. = ALIGN(2);}
 

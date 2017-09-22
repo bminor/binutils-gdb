@@ -3030,7 +3030,7 @@ sh64_target_mach (void)
   return (sh64_abi == sh64_abi_64) ? bfd_mach_sh5 : 0;
 }
 
-/* This is MD_PCREL_FROM_SECTION, we we define so it is called instead of
+/* This is MD_PCREL_FROM_SECTION, we define so it is called instead of
    md_pcrel_from (in tc-sh.c).  */
 
 valueT

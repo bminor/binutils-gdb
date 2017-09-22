@@ -24,9 +24,6 @@
 #include "python-internal.h"
 #include "inferior.h"
 
-extern PyTypeObject thread_event_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
-
 /* Stores a list of objects to be notified when the event for which this
    registry tracks occurs.  */
 
@@ -42,18 +39,10 @@ typedef struct
 
 typedef struct
 {
-  eventregistry_object *stop;
-  eventregistry_object *cont;
-  eventregistry_object *exited;
-  eventregistry_object *new_objfile;
-  eventregistry_object *clear_objfiles;
-  eventregistry_object *inferior_call;
-  eventregistry_object *memory_changed;
-  eventregistry_object *register_changed;
-  eventregistry_object *breakpoint_created;
-  eventregistry_object *breakpoint_deleted;
-  eventregistry_object *breakpoint_modified;
-  eventregistry_object *before_prompt;
+#define GDB_PY_DEFINE_EVENT(name)		\
+  eventregistry_object *name;
+#include "py-all-events.def"
+#undef GDB_PY_DEFINE_EVENT
 
   PyObject *module;
 

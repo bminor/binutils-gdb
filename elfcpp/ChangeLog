@@ -1,3 +1,19 @@
+2017-09-18  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.h (elfcpp): Add definition of DW_CFA_DUP.
+
+2017-08-29  Alan Modra  <amodra@gmail.com>
+
+	* elfcpp.h (DT_PPC_OPT): Define.
+	* powerpc.h (PPC_OPT_TLS): Define.
+
+2017-07-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/21857
+	* elfcpp.h (Chdr_write): Add put_ch_reserved.
+	(Chdr_write<64, true>::put_ch_reserved): New.
+	(Chdr_write<64, false>::put_ch_reserved): Likewise.
+
 2017-07-03  Alan Modra  <amodra@gmail.com>
 
 	* dwarf.h (DW_FIRST_IDX, DW_IDX, DW_IDX_DUP, DW_END_IDX): Define,

@@ -547,7 +547,7 @@ is_type_conversion_operator (struct type *type, int i, int j)
      some other way, feel free to rewrite this function.  */
   const char *name = TYPE_FN_FIELDLIST_NAME (type, i);
 
-  if (!startswith (name, "operator"))
+  if (!startswith (name, CP_OPERATOR_STR))
     return 0;
 
   name += 8;
@@ -893,13 +893,19 @@ c_type_print_base (struct type *type, struct ui_file *stream,
       fprintf_filtered (stream, _("<unnamed typedef>"));
       break;
 
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_METHOD:
+      if (TYPE_TARGET_TYPE (type) == NULL)
+	type_print_unknown_return_type (stream);
+      else
+	c_type_print_base (TYPE_TARGET_TYPE (type),
+			   stream, show, level, flags);
+      break;
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_PTR:
     case TYPE_CODE_MEMBERPTR:
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
-    case TYPE_CODE_FUNC:
-    case TYPE_CODE_METHOD:
     case TYPE_CODE_METHODPTR:
       c_type_print_base (TYPE_TARGET_TYPE (type),
 			 stream, show, level, flags);

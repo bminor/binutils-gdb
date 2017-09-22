@@ -50,13 +50,8 @@
 
 #include "record.h"
 #include "record-full.h"
-#include "features/i386/i386.c"
-#include "features/i386/i386-avx.c"
-#include "features/i386/i386-mpx.c"
-#include "features/i386/i386-avx-mpx.c"
-#include "features/i386/i386-avx-avx512.c"
-#include "features/i386/i386-avx-mpx-avx512-pku.c"
-#include "features/i386/i386-mmx.c"
+#include "target-descriptions.h"
+#include "arch/i386.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -8549,7 +8544,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Get the x86 target description from INFO.  */
   tdesc = info.target_desc;
   if (! tdesc_has_registers (tdesc))
-    tdesc = tdesc_i386;
+    tdesc = i386_target_description (X86_XSTATE_SSE_MASK);
   tdep->tdesc = tdesc;
 
   tdep->num_core_regs = I386_NUM_GREGS + I387_NUM_REGS;
@@ -8604,7 +8599,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Hook in ABI-specific overrides, if they have been registered.
      Note: If INFO specifies a 64 bit arch, this is where we turn
      a 32-bit i386 into a 64-bit amd64.  */
-  info.tdep_info = tdesc_data;
+  info.tdesc_data = tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 
   if (!i386_validate_tdesc_p (tdep, tdesc_data))
@@ -8718,21 +8713,20 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 const struct target_desc *
 i386_target_description (uint64_t xcr0)
 {
-  switch (xcr0 & X86_XSTATE_ALL_MASK)
-    {
-    case X86_XSTATE_AVX_MPX_AVX512_PKU_MASK:
-      return tdesc_i386_avx_mpx_avx512_pku;
-    case X86_XSTATE_AVX_AVX512_MASK:
-      return tdesc_i386_avx_avx512;
-    case X86_XSTATE_AVX_MPX_MASK:
-      return tdesc_i386_avx_mpx;
-    case X86_XSTATE_MPX_MASK:
-      return tdesc_i386_mpx;
-    case X86_XSTATE_AVX_MASK:
-      return tdesc_i386_avx;
-    default:
-      return tdesc_i386;
-    }
+  static target_desc *i386_tdescs \
+    [2/*SSE*/][2/*AVX*/][2/*MPX*/][2/*AVX512*/][2/*PKRU*/] = {};
+  target_desc **tdesc;
+
+  tdesc = &i386_tdescs[(xcr0 & X86_XSTATE_SSE) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_AVX) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_MPX) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_AVX512) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_PKRU) ? 1 : 0];
+
+  if (*tdesc == NULL)
+    *tdesc = i386_create_target_description (xcr0, false);
+
+  return *tdesc;
 }
 
 #define MPX_BASE_MASK (~(ULONGEST) 0xfff)
@@ -8990,9 +8984,6 @@ show_mpx_cmd (char *args, int from_tty)
   cmd_show_list (mpx_show_cmdlist, from_tty, "");
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_i386_tdep (void);
-
 void
 _initialize_i386_tdep (void)
 {
@@ -9054,15 +9045,30 @@ Show Intel Memory Protection Extensions specific variables."),
   /* Initialize the i386-specific register groups.  */
   i386_init_reggroups ();
 
-  /* Initialize the standard target descriptions.  */
-  initialize_tdesc_i386 ();
-  initialize_tdesc_i386_mmx ();
-  initialize_tdesc_i386_avx ();
-  initialize_tdesc_i386_mpx ();
-  initialize_tdesc_i386_avx_mpx ();
-  initialize_tdesc_i386_avx_avx512 ();
-  initialize_tdesc_i386_avx_mpx_avx512_pku ();
-
   /* Tell remote stub that we support XML target description.  */
   register_remote_support_xml ("i386");
+
+#if GDB_SELF_TEST
+  struct
+  {
+    const char *xml;
+    uint64_t mask;
+  } xml_masks[] = {
+    { "i386/i386.xml", X86_XSTATE_SSE_MASK },
+    { "i386/i386-mmx.xml", X86_XSTATE_X87_MASK },
+    { "i386/i386-avx.xml", X86_XSTATE_AVX_MASK },
+    { "i386/i386-mpx.xml", X86_XSTATE_MPX_MASK },
+    { "i386/i386-avx-mpx.xml", X86_XSTATE_AVX_MPX_MASK },
+    { "i386/i386-avx-avx512.xml", X86_XSTATE_AVX_AVX512_MASK },
+    { "i386/i386-avx-mpx-avx512-pku.xml",
+      X86_XSTATE_AVX_MPX_AVX512_PKU_MASK },
+  };
+
+  for (auto &a : xml_masks)
+    {
+      auto tdesc = i386_target_description (a.mask);
+
+      selftests::record_xml_tdesc (a.xml, tdesc);
+    }
+#endif /* GDB_SELF_TEST */
 }

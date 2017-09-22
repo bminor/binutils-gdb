@@ -260,10 +260,6 @@ ppcobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   frame_unwind_append_unwinder (gdbarch, &ppcobsd_sigtramp_frame_unwind);
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_ppcobsd_tdep (void);
 
 void
 _initialize_ppcobsd_tdep (void)

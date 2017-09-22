@@ -249,8 +249,6 @@ static int bincls_allocated;
 
 /* Local function prototypes.  */
 
-extern void _initialize_dbxread (void);
-
 static void read_ofile_symtab (struct objfile *, struct partial_symtab *);
 
 static void dbx_read_symtab (struct partial_symtab *self,

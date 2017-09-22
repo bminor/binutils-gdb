@@ -10,11 +10,9 @@ static void
 initialize_tdesc_arm_with_iwmmxt (void)
 {
   struct target_desc *result = allocate_target_description ();
-  struct tdesc_feature *feature;
-  struct tdesc_type *field_type;
-  struct tdesc_type *type;
-
   set_tdesc_architecture (result, bfd_scan_arch ("iwmmxt"));
+
+  struct tdesc_feature *feature;
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.arm.core");
   tdesc_create_reg (feature, "r0", 0, 1, NULL, 32, "uint32");
@@ -36,6 +34,7 @@ initialize_tdesc_arm_with_iwmmxt (void)
   tdesc_create_reg (feature, "cpsr", 25, 1, NULL, 32, "int");
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.xscale.iwmmxt");
+  struct tdesc_type *field_type;
   field_type = tdesc_named_type (feature, "uint8");
   tdesc_create_vector (feature, "iwmmxt_v8u8", field_type, 8);
 
@@ -45,6 +44,7 @@ initialize_tdesc_arm_with_iwmmxt (void)
   field_type = tdesc_named_type (feature, "uint32");
   tdesc_create_vector (feature, "iwmmxt_v2u32", field_type, 2);
 
+  struct tdesc_type *type;
   type = tdesc_create_union (feature, "iwmmxt_vec64i");
   field_type = tdesc_named_type (feature, "iwmmxt_v8u8");
   tdesc_add_field (type, "u8", field_type);

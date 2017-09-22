@@ -5813,6 +5813,12 @@ fi
   fi
 
 
+if $development; then
+
+$as_echo "#define GDB_SELF_TEST 1" >>confdefs.h
+
+fi
+
  case ${build_alias} in
   "") build_noncanonical=${build} ;;
   *) build_noncanonical=${build_alias} ;;

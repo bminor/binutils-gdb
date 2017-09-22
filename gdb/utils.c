@@ -66,6 +66,8 @@
 #include "interps.h"
 #include "gdb_regex.h"
 #include "job-control.h"
+#include "common/selftest.h"
+#include "common/gdb_optional.h"
 
 #if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* ARI: PTR */
@@ -135,55 +137,6 @@ show_pagination_enabled (struct ui_file *file, int from_tty,
    These are not defined in cleanups.c (nor declared in cleanups.h)
    because while they use the "cleanup API" they are not part of the
    "cleanup API".  */
-
-static void
-do_freeargv (void *arg)
-{
-  freeargv ((char **) arg);
-}
-
-struct cleanup *
-make_cleanup_freeargv (char **arg)
-{
-  return make_cleanup (do_freeargv, arg);
-}
-
-/* Helper function which does the work for make_cleanup_fclose.  */
-
-static void
-do_fclose_cleanup (void *arg)
-{
-  FILE *file = (FILE *) arg;
-
-  fclose (file);
-}
-
-/* Return a new cleanup that closes FILE.  */
-
-struct cleanup *
-make_cleanup_fclose (FILE *file)
-{
-  return make_cleanup (do_fclose_cleanup, file);
-}
-
-/* Helper function for make_cleanup_ui_out_redirect_pop.  */
-
-static void
-do_ui_out_redirect_pop (void *arg)
-{
-  struct ui_out *uiout = (struct ui_out *) arg;
-
-  uiout->redirect (NULL);
-}
-
-/* Return a new cleanup that pops the last redirection by ui_out_redirect
-   with NULL parameter.  */
-
-struct cleanup *
-make_cleanup_ui_out_redirect_pop (struct ui_out *uiout)
-{
-  return make_cleanup (do_ui_out_redirect_pop, uiout);
-}
 
 static void
 do_free_section_addr_info (void *arg)
@@ -286,64 +239,6 @@ make_cleanup_value_free (struct value *value)
   return make_cleanup (do_value_free, value);
 }
 
-/* Helper for make_cleanup_free_so.  */
-
-static void
-do_free_so (void *arg)
-{
-  struct so_list *so = (struct so_list *) arg;
-
-  free_so (so);
-}
-
-/* Make cleanup handler calling free_so for SO.  */
-
-struct cleanup *
-make_cleanup_free_so (struct so_list *so)
-{
-  return make_cleanup (do_free_so, so);
-}
-
-/* Helper for make_cleanup_restore_current_language.  */
-
-static void
-do_restore_current_language (void *p)
-{
-  enum language saved_lang = (enum language) (uintptr_t) p;
-
-  set_language (saved_lang);
-}
-
-/* Remember the current value of CURRENT_LANGUAGE and make it restored when
-   the cleanup is run.  */
-
-struct cleanup *
-make_cleanup_restore_current_language (void)
-{
-  enum language saved_lang = current_language->la_language;
-
-  return make_cleanup (do_restore_current_language,
-		       (void *) (uintptr_t) saved_lang);
-}
-
-/* Helper function for make_cleanup_clear_parser_state.  */
-
-static void
-do_clear_parser_state (void *ptr)
-{
-  struct parser_state **p = (struct parser_state **) ptr;
-
-  *p = NULL;
-}
-
-/* Clean (i.e., set to NULL) the parser state variable P.  */
-
-struct cleanup *
-make_cleanup_clear_parser_state (struct parser_state **p)
-{
-  return make_cleanup (do_clear_parser_state, (void *) p);
-}
-
 /* This function is useful for cleanups.
    Do
 
@@ -382,12 +277,11 @@ vwarning (const char *string, va_list args)
     (*deprecated_warning_hook) (string, args);
   else
     {
-      struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-
+      gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
       if (target_supports_terminal_ours ())
 	{
-	  make_cleanup_restore_target_terminal ();
-	  target_terminal_ours_for_output ();
+	  term_state.emplace ();
+	  target_terminal::ours_for_output ();
 	}
       if (filtered_printing_initialized ())
 	wrap_here ("");		/* Force out any buffered output.  */
@@ -396,8 +290,6 @@ vwarning (const char *string, va_list args)
 	fputs_unfiltered (warning_pre_print, gdb_stderr);
       vfprintf_unfiltered (gdb_stderr, string, args);
       fprintf_unfiltered (gdb_stderr, "\n");
-
-      do_cleanups (old_chain);
     }
 }
 
@@ -422,7 +314,7 @@ error_stream (const string_file &stream)
 static void ATTRIBUTE_NORETURN
 abort_with_message (const char *msg)
 {
-  if (gdb_stderr == NULL)
+  if (current_ui == NULL)
     fputs (msg, stderr);
   else
     fputs_unfiltered (msg, gdb_stderr);
@@ -584,17 +476,18 @@ internal_vproblem (struct internal_problem *problem,
   }
 
   /* Fall back to abort_with_message if gdb_stderr is not set up.  */
-  if (gdb_stderr == NULL)
+  if (current_ui == NULL)
     {
       fputs (reason, stderr);
       abort_with_message ("\n");
     }
 
   /* Try to get the message out and at the start of a new line.  */
+  gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
   if (target_supports_terminal_ours ())
     {
-      make_cleanup_restore_target_terminal ();
-      target_terminal_ours_for_output ();
+      term_state.emplace ();
+      target_terminal::ours_for_output ();
     }
   if (filtered_printing_initialized ())
     begin_line ();
@@ -820,23 +713,15 @@ add_internal_problem_command (struct internal_problem *problem)
 }
 
 /* Return a newly allocated string, containing the PREFIX followed
-   by the system error message for errno (separated by a colon).
+   by the system error message for errno (separated by a colon).  */
 
-   The result must be deallocated after use.  */
-
-static char *
+static std::string
 perror_string (const char *prefix)
 {
   char *err;
-  char *combined;
 
   err = safe_strerror (errno);
-  combined = (char *) xmalloc (strlen (err) + strlen (prefix) + 3);
-  strcpy (combined, prefix);
-  strcat (combined, ": ");
-  strcat (combined, err);
-
-  return combined;
+  return std::string (prefix) + ": " + err;
 }
 
 /* Print the system error message for errno, and also mention STRING
@@ -846,10 +731,7 @@ perror_string (const char *prefix)
 void
 throw_perror_with_name (enum errors errcode, const char *string)
 {
-  char *combined;
-
-  combined = perror_string (string);
-  make_cleanup (xfree, combined);
+  std::string combined = perror_string (string);
 
   /* I understand setting these is a matter of taste.  Still, some people
      may clear errno but not know about bfd_error.  Doing this here is not
@@ -857,7 +739,7 @@ throw_perror_with_name (enum errors errcode, const char *string)
   bfd_set_error (bfd_error_no_error);
   errno = 0;
 
-  throw_error (errcode, _("%s."), combined);
+  throw_error (errcode, _("%s."), combined.c_str ());
 }
 
 /* See throw_perror_with_name, ERRCODE defaults here to GENERIC_ERROR.  */
@@ -874,11 +756,8 @@ perror_with_name (const char *string)
 void
 perror_warning_with_name (const char *string)
 {
-  char *combined;
-
-  combined = perror_string (string);
-  warning (_("%s"), combined);
-  xfree (combined);
+  std::string combined = perror_string (string);
+  warning (_("%s"), combined.c_str ());
 }
 
 /* Print the system error message for ERRCODE, and also mention STRING
@@ -1017,32 +896,43 @@ make_hex_string (const gdb_byte *data, size_t length)
 
 
 
-/* A cleanup that simply calls ui_unregister_input_event_handler.  */
+/* An RAII class that sets up to handle input and then tears down
+   during destruction.  */
 
-static void
-ui_unregister_input_event_handler_cleanup (void *ui)
+class scoped_input_handler
 {
-  ui_unregister_input_event_handler ((struct ui *) ui);
-}
+public:
 
-/* Set up to handle input.  */
+  scoped_input_handler ()
+    : m_quit_handler (make_scoped_restore (&quit_handler,
+					   default_quit_handler)),
+      m_ui (NULL)
+  {
+    target_terminal::ours ();
+    ui_register_input_event_handler (current_ui);
+    if (current_ui->prompt_state == PROMPT_BLOCKED)
+      m_ui = current_ui;
+  }
 
-static struct cleanup *
-prepare_to_handle_input (void)
-{
-  struct cleanup *old_chain;
+  ~scoped_input_handler ()
+  {
+    if (m_ui != NULL)
+      ui_unregister_input_event_handler (m_ui);
+  }
 
-  old_chain = make_cleanup_restore_target_terminal ();
-  target_terminal_ours ();
+  DISABLE_COPY_AND_ASSIGN (scoped_input_handler);
 
-  ui_register_input_event_handler (current_ui);
-  if (current_ui->prompt_state == PROMPT_BLOCKED)
-    make_cleanup (ui_unregister_input_event_handler_cleanup, current_ui);
+private:
 
-  make_cleanup_override_quit_handler (default_quit_handler);
+  /* Save and restore the terminal state.  */
+  target_terminal::scoped_restore_terminal_state m_term_state;
 
-  return old_chain;
-}
+  /* Save and restore the quit handler.  */
+  scoped_restore m_quit_handler;
+
+  /* The saved UI, if non-NULL.  */
+  struct ui *m_ui;
+};
 
 
 
@@ -1107,9 +997,8 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       /* Restrict queries to the main UI.  */
       || current_ui != main_ui)
     {
-      old_chain = make_cleanup_restore_target_terminal ();
-
-      target_terminal_ours_for_output ();
+      target_terminal::scoped_restore_terminal_state term_state;
+      target_terminal::ours_for_output ();
       wrap_here ("");
       vfprintf_filtered (gdb_stdout, ctlstr, args);
 
@@ -1118,18 +1007,13 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 		       y_string, n_string, def_answer);
       gdb_flush (gdb_stdout);
 
-      do_cleanups (old_chain);
       return def_value;
     }
 
   if (deprecated_query_hook)
     {
-      int res;
-
-      old_chain = make_cleanup_restore_target_terminal ();
-      res = deprecated_query_hook (ctlstr, args);
-      do_cleanups (old_chain);
-      return res;
+      target_terminal::scoped_restore_terminal_state term_state;
+      return deprecated_query_hook (ctlstr, args);
     }
 
   /* Format the question outside of the loop, to avoid reusing args.  */
@@ -1146,7 +1030,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   using namespace std::chrono;
   steady_clock::time_point prompt_started = steady_clock::now ();
 
-  prepare_to_handle_input ();
+  scoped_input_handler prepare_input;
 
   while (1)
     {
@@ -1710,7 +1594,7 @@ prompt_for_continue (void)
      beyond the end of the screen.  */
   reinitialize_more_filter ();
 
-  prepare_to_handle_input ();
+  scoped_input_handler prepare_input;
 
   /* Call gdb_readline_wrapper, not readline, in order to keep an
      event loop running.  */
@@ -2363,41 +2247,72 @@ fprintf_symbol_filtered (struct ui_file *stream, const char *name,
     }
 }
 
-/* Do a strcmp() type operation on STRING1 and STRING2, ignoring any
-   differences in whitespace.  Returns 0 if they match, non-zero if they
-   don't (slightly different than strcmp()'s range of return values).
+/* Modes of operation for strncmp_iw_with_mode.  */
 
-   As an extra hack, string1=="FOO(ARGS)" matches string2=="FOO".
-   This "feature" is useful when searching for matching C++ function names
-   (such as if the user types 'break FOO', where FOO is a mangled C++
-   function).  */
-
-int
-strcmp_iw (const char *string1, const char *string2)
+enum class strncmp_iw_mode
 {
-  while ((*string1 != '\0') && (*string2 != '\0'))
+  /* Work like strncmp, while ignoring whitespace.  */
+  NORMAL,
+
+  /* Like NORMAL, but also apply the strcmp_iw hack.  I.e.,
+     string1=="FOO(PARAMS)" matches string2=="FOO".  */
+  MATCH_PARAMS,
+};
+
+/* Helper for strncmp_iw and strcmp_iw.  */
+
+static int
+strncmp_iw_with_mode (const char *string1, const char *string2,
+		      size_t string2_len, strncmp_iw_mode mode)
+{
+  const char *end_str2 = string2 + string2_len;
+
+  while (1)
     {
       while (isspace (*string1))
-	{
-	  string1++;
-	}
-      while (isspace (*string2))
-	{
-	  string2++;
-	}
+	string1++;
+      while (string2 < end_str2 && isspace (*string2))
+	string2++;
+      if (*string1 == '\0' || string2 == end_str2)
+	break;
       if (case_sensitivity == case_sensitive_on && *string1 != *string2)
 	break;
       if (case_sensitivity == case_sensitive_off
 	  && (tolower ((unsigned char) *string1)
 	      != tolower ((unsigned char) *string2)))
 	break;
-      if (*string1 != '\0')
-	{
-	  string1++;
-	  string2++;
-	}
+
+      string1++;
+      string2++;
     }
-  return (*string1 != '\0' && *string1 != '(') || (*string2 != '\0');
+
+  if (string2 == end_str2)
+    {
+      if (mode == strncmp_iw_mode::NORMAL)
+	return 0;
+      else
+	return (*string1 != '\0' && *string1 != '(');
+    }
+  else
+    return 1;
+}
+
+/* See utils.h.  */
+
+int
+strncmp_iw (const char *string1, const char *string2, size_t string2_len)
+{
+  return strncmp_iw_with_mode (string1, string2, string2_len,
+			       strncmp_iw_mode::NORMAL);
+}
+
+/* See utils.h.  */
+
+int
+strcmp_iw (const char *string1, const char *string2)
+{
+  return strncmp_iw_with_mode (string1, string2, strlen (string2),
+			       strncmp_iw_mode::MATCH_PARAMS);
 }
 
 /* This is like strcmp except that it ignores whitespace and treats
@@ -2701,7 +2616,7 @@ string_to_core_addr (const char *my_string)
   return addr;
 }
 
-char *
+gdb::unique_xmalloc_ptr<char>
 gdb_realpath (const char *filename)
 {
 /* On most hosts, we rely on canonicalize_file_name to compute
@@ -2737,36 +2652,71 @@ gdb_realpath (const char *filename)
        we might not be able to display the original casing in a given
        path.  */
     if (len > 0 && len < MAX_PATH)
-      return xstrdup (buf);
+      return gdb::unique_xmalloc_ptr<char> (xstrdup (buf));
   }
 #else
   {
     char *rp = canonicalize_file_name (filename);
 
     if (rp != NULL)
-      return rp;
+      return gdb::unique_xmalloc_ptr<char> (rp);
   }
 #endif
 
   /* This system is a lost cause, just dup the buffer.  */
-  return xstrdup (filename);
+  return gdb::unique_xmalloc_ptr<char> (xstrdup (filename));
 }
+
+#if GDB_SELF_TEST
+
+static void
+gdb_realpath_check_trailer (const char *input, const char *trailer)
+{
+  gdb::unique_xmalloc_ptr<char> result = gdb_realpath (input);
+
+  size_t len = strlen (result.get ());
+  size_t trail_len = strlen (trailer);
+
+  SELF_CHECK (len >= trail_len
+	      && strcmp (result.get () + len - trail_len, trailer) == 0);
+}
+
+static void
+gdb_realpath_tests ()
+{
+  /* A file which contains a directory prefix.  */
+  gdb_realpath_check_trailer ("./xfullpath.exp", "/xfullpath.exp");
+  /* A file which contains a directory prefix.  */
+  gdb_realpath_check_trailer ("../../defs.h", "/defs.h");
+  /* A one-character filename.  */
+  gdb_realpath_check_trailer ("./a", "/a");
+  /* A file in the root directory.  */
+  gdb_realpath_check_trailer ("/root_file_which_should_exist",
+			      "/root_file_which_should_exist");
+  /* A file which does not have a directory prefix.  */
+  gdb_realpath_check_trailer ("xfullpath.exp", "xfullpath.exp");
+  /* A one-char filename without any directory prefix.  */
+  gdb_realpath_check_trailer ("a", "a");
+  /* An empty filename.  */
+  gdb_realpath_check_trailer ("", "");
+}
+
+#endif /* GDB_SELF_TEST */
 
 /* Return a copy of FILENAME, with its directory prefix canonicalized
    by gdb_realpath.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 gdb_realpath_keepfile (const char *filename)
 {
   const char *base_name = lbasename (filename);
   char *dir_name;
-  char *real_path;
   char *result;
 
   /* Extract the basename of filename, and return immediately 
      a copy of filename if it does not contain any directory prefix.  */
   if (base_name == filename)
-    return xstrdup (filename);
+    return gdb::unique_xmalloc_ptr<char> (xstrdup (filename));
 
   dir_name = (char *) alloca ((size_t) (base_name - filename + 2));
   /* Allocate enough space to store the dir_name + plus one extra
@@ -2788,40 +2738,37 @@ gdb_realpath_keepfile (const char *filename)
   /* Canonicalize the directory prefix, and build the resulting
      filename.  If the dirname realpath already contains an ending
      directory separator, avoid doubling it.  */
-  real_path = gdb_realpath (dir_name);
+  gdb::unique_xmalloc_ptr<char> path_storage = gdb_realpath (dir_name);
+  const char *real_path = path_storage.get ();
   if (IS_DIR_SEPARATOR (real_path[strlen (real_path) - 1]))
     result = concat (real_path, base_name, (char *) NULL);
   else
     result = concat (real_path, SLASH_STRING, base_name, (char *) NULL);
 
-  xfree (real_path);
-  return result;
+  return gdb::unique_xmalloc_ptr<char> (result);
 }
 
 /* Return PATH in absolute form, performing tilde-expansion if necessary.
    PATH cannot be NULL or the empty string.
-   This does not resolve symlinks however, use gdb_realpath for that.
-   Space for the result is allocated with malloc.
-   If the path is already absolute, it is strdup'd.
-   If there is a problem computing the absolute path, the path is returned
-   unchanged (still strdup'd).  */
+   This does not resolve symlinks however, use gdb_realpath for that.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 gdb_abspath (const char *path)
 {
   gdb_assert (path != NULL && path[0] != '\0');
 
   if (path[0] == '~')
-    return tilde_expand (path);
+    return gdb::unique_xmalloc_ptr<char> (tilde_expand (path));
 
   if (IS_ABSOLUTE_PATH (path))
-    return xstrdup (path);
+    return gdb::unique_xmalloc_ptr<char> (xstrdup (path));
 
   /* Beware the // my son, the Emacs barfs, the botch that catch...  */
-  return concat (current_directory,
-	    IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
-		 ? "" : SLASH_STRING,
-		 path, (char *) NULL);
+  return gdb::unique_xmalloc_ptr<char>
+    (concat (current_directory,
+	     IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
+	     ? "" : SLASH_STRING,
+	     path, (char *) NULL));
 }
 
 ULONGEST
@@ -2890,19 +2837,18 @@ ldirname (const char *filename)
   return dirname;
 }
 
-/* Call libiberty's buildargv, and return the result.
-   If buildargv fails due to out-of-memory, call nomem.
-   Therefore, the returned value is guaranteed to be non-NULL,
-   unless the parameter itself is NULL.  */
+/* See utils.h.  */
 
-char **
-gdb_buildargv (const char *s)
+void
+gdb_argv::reset (const char *s)
 {
   char **argv = buildargv (s);
 
   if (s != NULL && argv == NULL)
     malloc_failure (0);
-  return argv;
+
+  freeargv (m_argv);
+  m_argv = argv;
 }
 
 int
@@ -3317,13 +3263,14 @@ strip_leading_path_elements (const char *path, int n)
   return p;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_utils;
-
 void
 _initialize_utils (void)
 {
   add_internal_problem_command (&internal_error_problem);
   add_internal_problem_command (&internal_warning_problem);
   add_internal_problem_command (&demangler_warning_problem);
+
+#if GDB_SELF_TEST
+  selftests::register_test ("gdb_realpath", gdb_realpath_tests);
+#endif
 }

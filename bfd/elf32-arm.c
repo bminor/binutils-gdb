@@ -4140,7 +4140,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      _bfd_error_handler
 		(_("%B(%s): warning: interworking not enabled.\n"
 		   "  first occurrence: %B: ARM call to Thumb"),
-		 sym_sec->owner, input_bfd, name);
+		 sym_sec->owner, name, input_bfd);
 	    }
 
 	  /* We have an extra 2-bytes reach because of
@@ -8615,12 +8615,12 @@ bfd_elf32_arm_stm32l4xx_erratum_scan (bfd *abfd,
 			  {
 			    _bfd_error_handler
 			      /* xgettext:c-format */
-			      (_("%B(%A+0x%lx): error: multiple load detected"
+			      (_("%B(%A+%#x): error: multiple load detected"
 				 " in non-last IT block instruction :"
 				 " STM32L4XX veneer cannot be generated.\n"
 				 "Use gcc option -mrestrict-it to generate"
 				 " only one instruction per IT block.\n"),
-			       abfd, sec, (long) i);
+			       abfd, sec, i);
 			  }
 			else
 			  {
@@ -9720,8 +9720,8 @@ elf32_arm_tls_relax (struct elf32_arm_link_hash_table *globals,
 	      | bfd_get_16 (input_bfd, contents + rel->r_offset + 2);
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+0x%lx): unexpected Thumb instruction '0x%x' in TLS trampoline"),
-	     input_bfd, input_sec, (unsigned long)rel->r_offset, insn);
+	    (_("%B(%A+%#Lx): unexpected Thumb instruction '%#lx' in TLS trampoline"),
+	     input_bfd, input_sec, rel->r_offset, insn);
 	  return bfd_reloc_notsupported;
 	}
       break;
@@ -9760,8 +9760,8 @@ elf32_arm_tls_relax (struct elf32_arm_link_hash_table *globals,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+0x%lx): unexpected ARM instruction '0x%x' in TLS trampoline"),
-	     input_bfd, input_sec, (unsigned long)rel->r_offset, insn);
+	    (_("%B(%A+%#Lx): unexpected ARM instruction '%#lx' in TLS trampoline"),
+	     input_bfd, input_sec, rel->r_offset, insn);
 	  return bfd_reloc_notsupported;
 	}
       break;
@@ -9906,6 +9906,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
     return bfd_reloc_notsupported;
 
   BFD_ASSERT (is_arm_elf (input_bfd));
+  BFD_ASSERT (howto != NULL);
 
   /* Some relocation types map to different relocations depending on the
      target.  We pick the right one here.  */
@@ -11524,9 +11525,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		  {
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B(%A+0x%lx): unexpected Thumb instruction '0x%x' referenced by TLS_GOTDESC"),
-		       input_bfd, input_section,
-		       (unsigned long)rel->r_offset, insn);
+		      (_("%B(%A+%#Lx): unexpected Thumb instruction '%#lx' referenced by TLS_GOTDESC"),
+		       input_bfd, input_section, rel->r_offset, insn);
 		    return bfd_reloc_notsupported;
 		  }
 	      }
@@ -11548,9 +11548,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		  default:
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("%B(%A+0x%lx): unexpected ARM instruction '0x%x' referenced by TLS_GOTDESC"),
-		       input_bfd, input_section,
-		       (unsigned long)rel->r_offset, insn);
+		      (_("%B(%A+%#Lx): unexpected ARM instruction '%#lx' referenced by TLS_GOTDESC"),
+		       input_bfd, input_section, rel->r_offset, insn);
 		    return bfd_reloc_notsupported;
 		  }
 	      }
@@ -11578,9 +11577,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+0x%lx): R_ARM_TLS_LE32 relocation not permitted in shared object"),
-	     input_bfd, input_section,
-	     (long) rel->r_offset, howto->name);
+	    (_("%B(%A+%#Lx): %s relocation not permitted in shared object"),
+	     input_bfd, input_section, rel->r_offset, howto->name);
 	  return bfd_reloc_notsupported;
 	}
       else
@@ -11792,9 +11790,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	      {
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%B(%A+0x%lx): Only ADD or SUB instructions are allowed for ALU group relocations"),
-		  input_bfd, input_section,
-		  (long) rel->r_offset, howto->name);
+		  (_("%B(%A+%#Lx): Only ADD or SUB instructions are allowed for ALU group relocations"),
+		  input_bfd, input_section, rel->r_offset);
 		return bfd_reloc_overflow;
 	      }
 
@@ -11833,10 +11830,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
-	      input_bfd, input_section,
-	       (long) rel->r_offset, signed_value < 0 ? - signed_value : signed_value,
-	       howto->name);
+	      (_("%B(%A+%#Lx): Overflow whilst splitting %#Lx for group relocation %s"),
+	       input_bfd, input_section, rel->r_offset,
+	       signed_value < 0 ? -signed_value : signed_value, howto->name);
 	    return bfd_reloc_overflow;
 	  }
 
@@ -11924,9 +11920,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
-	       input_bfd, input_section,
-	       (long) rel->r_offset, labs (signed_value), howto->name);
+	      (_("%B(%A+%#Lx): Overflow whilst splitting %#Lx for group relocation %s"),
+	       input_bfd, input_section, rel->r_offset,
+	       signed_value < 0 ? -signed_value : signed_value, howto->name);
 	    return bfd_reloc_overflow;
 	  }
 
@@ -12010,9 +12006,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
-	       input_bfd, input_section,
-	       (long) rel->r_offset, labs (signed_value), howto->name);
+	      (_("%B(%A+%#Lx): Overflow whilst splitting %#Lx for group relocation %s"),
+	       input_bfd, input_section, rel->r_offset,
+	       signed_value < 0 ? -signed_value : signed_value, howto->name);
 	    return bfd_reloc_overflow;
 	  }
 
@@ -12098,9 +12094,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  {
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
-	      input_bfd, input_section,
-	      (long) rel->r_offset, labs (signed_value), howto->name);
+	      (_("%B(%A+%#Lx): Overflow whilst splitting %#Lx for group relocation %s"),
+	       input_bfd, input_section, rel->r_offset,
+	       signed_value < 0 ? -signed_value : signed_value, howto->name);
 	    return bfd_reloc_overflow;
 	  }
 
@@ -12294,8 +12290,10 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	  || r_type == R_ARM_GNU_VTINHERIT)
 	continue;
 
-      bfd_reloc.howto = elf32_arm_howto_from_type (r_type);
-      howto = bfd_reloc.howto;
+      howto = bfd_reloc.howto = elf32_arm_howto_from_type (r_type);
+
+      if (howto == NULL)
+	return _bfd_unrecognized_reloc (input_bfd, input_section, r_type);
 
       h = NULL;
       sym = NULL;
@@ -12362,9 +12360,9 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 			{
 			  _bfd_error_handler
 			    /* xgettext:c-format */
-			    (_("%B(%A+0x%lx): %s relocation against SEC_MERGE section"),
+			    (_("%B(%A+%#Lx): %s relocation against SEC_MERGE section"),
 			     input_bfd, input_section,
-			     (long) rel->r_offset, howto->name);
+			     rel->r_offset, howto->name);
 			  return FALSE;
 			}
 
@@ -12474,12 +12472,12 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	  _bfd_error_handler
 	    ((sym_type == STT_TLS
 	      /* xgettext:c-format */
-	      ? _("%B(%A+0x%lx): %s used with TLS symbol %s")
+	      ? _("%B(%A+%#Lx): %s used with TLS symbol %s")
 	      /* xgettext:c-format */
-	      : _("%B(%A+0x%lx): %s used with non-TLS symbol %s")),
+	      : _("%B(%A+%#Lx): %s used with non-TLS symbol %s")),
 	     input_bfd,
 	     input_section,
-	     (long) rel->r_offset,
+	     rel->r_offset,
 	     howto->name,
 	     name);
 	}
@@ -12529,10 +12527,10 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
-	     (long) rel->r_offset,
+	     rel->r_offset,
 	     howto->name,
 	     h->root.root.string);
 	  return FALSE;
@@ -14042,7 +14040,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      if (in_attr[Tag_MPextension_use].i != in_attr[i].i)
 		{
 		  _bfd_error_handler
-		    (_("%B has has both the current and legacy "
+		    (_("%B has both the current and legacy "
 		       "Tag_MPextension_use attributes"),
 		     ibfd);
 		  result = FALSE;
@@ -14541,7 +14539,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
       Elf_Internal_Sym *isym;
       struct elf_link_hash_entry *h;
       struct elf32_arm_link_hash_entry *eh;
-      unsigned long r_symndx;
+      unsigned int r_symndx;
       int r_type;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
@@ -18593,11 +18591,11 @@ elf32_arm_write_section (bfd *output_bfd,
 		      branch_to_veneer - (1 << 24) : 0;
 
 		    _bfd_error_handler
-		      (_("%B(%#x): error: Cannot create STM32L4XX veneer. "
-			 "Jump out of range by %ld bytes. "
+		      (_("%B(%#Lx): error: Cannot create STM32L4XX veneer. "
+			 "Jump out of range by %Ld bytes. "
 			 "Cannot encode branch instruction. "),
 		       output_bfd,
-		       (long) (stm32l4xx_errnode->vma - 4),
+		       stm32l4xx_errnode->vma - 4,
 		       out_of_range);
 		    continue;
 		  }

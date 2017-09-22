@@ -72,6 +72,9 @@
 #include "btrace.h"
 #include "record-btrace.h"
 #include <algorithm>
+#include "common/scoped_restore.h"
+#include "environ.h"
+#include "common/byte-vector.h"
 
 /* Temp hacks for tracepoint encoding migration.  */
 static char *target_buf;
@@ -206,8 +209,6 @@ static int remote_upload_trace_state_variables (struct target_ops *self,
 static void remote_query_supported (void);
 
 static void remote_check_symbols (void);
-
-void _initialize_remote (void);
 
 struct stop_reply;
 static void stop_reply_xfree (struct stop_reply *);
@@ -451,6 +452,10 @@ struct private_thread_info
   char *name;
   int core;
 
+  /* Thread handle, perhaps a pthread_t or thread_t value, stored as a
+     sequence of bytes.  */
+  gdb::byte_vector *thread_handle;
+
   /* Whether the target stopped for a breakpoint/watchpoint.  */
   enum target_stop_reason stop_reason;
 
@@ -482,6 +487,7 @@ free_private_thread_info (struct private_thread_info *info)
 {
   xfree (info->extra);
   xfree (info->name);
+  delete info->thread_handle;
   xfree (info);
 }
 
@@ -1429,6 +1435,9 @@ enum {
   PACKET_QCatchSyscalls,
   PACKET_QProgramSignals,
   PACKET_QStartupWithShell,
+  PACKET_QEnvironmentHexEncoded,
+  PACKET_QEnvironmentReset,
+  PACKET_QEnvironmentUnset,
   PACKET_qCRC,
   PACKET_qSearch_memory,
   PACKET_vAttach,
@@ -1968,6 +1977,7 @@ get_private_info_thread (struct thread_info *thread)
       priv->last_resume_step = 0;
       priv->last_resume_sig = GDB_SIGNAL_0;
       priv->vcont_resumed = 0;
+      priv->thread_handle = nullptr;
     }
 
   return thread->priv;
@@ -2994,6 +3004,10 @@ typedef struct thread_item
 
   /* The core the thread was running on.  -1 if not known.  */
   int core;
+
+  /* The thread handle associated with the thread.  */
+  gdb::byte_vector *thread_handle;
+
 } thread_item_t;
 DEF_VEC_O(thread_item_t);
 
@@ -3021,6 +3035,7 @@ clear_threads_listing_context (void *p)
     {
       xfree (item->extra);
       xfree (item->name);
+      delete item->thread_handle;
     }
 
   VEC_free (thread_item_t, context->items);
@@ -3059,6 +3074,7 @@ remote_newthread_step (threadref *ref, void *data)
   item.core = -1;
   item.name = NULL;
   item.extra = NULL;
+  item.thread_handle = nullptr;
 
   VEC_safe_push (thread_item_t, context->items, &item);
 
@@ -3129,6 +3145,17 @@ start_thread (struct gdb_xml_parser *parser,
   attr = xml_find_attribute (attributes, "name");
   item.name = attr != NULL ? xstrdup ((const char *) attr->value) : NULL;
 
+  attr = xml_find_attribute (attributes, "handle");
+  if (attr != NULL)
+    {
+      item.thread_handle = new gdb::byte_vector
+                             (strlen ((const char *) attr->value) / 2);
+      hex2bin ((const char *) attr->value, item.thread_handle->data (),
+               item.thread_handle->size ());
+    }
+  else
+    item.thread_handle = nullptr;
+
   item.extra = 0;
 
   VEC_safe_push (thread_item_t, data->items, &item);
@@ -3150,6 +3177,7 @@ const struct gdb_xml_attribute thread_attributes[] = {
   { "id", GDB_XML_AF_NONE, NULL, NULL },
   { "core", GDB_XML_AF_OPTIONAL, gdb_xml_parse_attr_ulongest, NULL },
   { "name", GDB_XML_AF_OPTIONAL, NULL, NULL },
+  { "handle", GDB_XML_AF_OPTIONAL, NULL, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
 
@@ -3225,6 +3253,7 @@ remote_get_threads_with_qthreadinfo (struct target_ops *ops,
 		  item.core = -1;
 		  item.name = NULL;
 		  item.extra = NULL;
+		  item.thread_handle = nullptr;
 
 		  VEC_safe_push (thread_item_t, context->items, &item);
 		}
@@ -3330,6 +3359,8 @@ remote_update_thread_list (struct target_ops *ops)
 	      item->extra = NULL;
 	      info->name = item->name;
 	      item->name = NULL;
+	      info->thread_handle = item->thread_handle;
+	      item->thread_handle = nullptr;
 	    }
 	}
     }
@@ -3830,19 +3861,16 @@ add_current_inferior_and_thread (char *wait_status)
 {
   struct remote_state *rs = get_remote_state ();
   int fake_pid_p = 0;
-  ptid_t ptid;
 
   inferior_ptid = null_ptid;
 
   /* Now, if we have thread information, update inferior_ptid.  */
-  ptid = get_current_thread (wait_status);
+  ptid_t curr_ptid = get_current_thread (wait_status);
 
-  if (!ptid_equal (ptid, null_ptid))
+  if (curr_ptid != null_ptid)
     {
       if (!remote_multi_process_p (rs))
 	fake_pid_p = 1;
-
-      inferior_ptid = ptid;
     }
   else
     {
@@ -3850,14 +3878,17 @@ add_current_inferior_and_thread (char *wait_status)
 	 (such as kill) won't work.  This variable serves (at least)
 	 double duty as both the pid of the target process (if it has
 	 such), and as a flag indicating that a target is active.  */
-      inferior_ptid = magic_null_ptid;
+      curr_ptid = magic_null_ptid;
       fake_pid_p = 1;
     }
 
-  remote_add_inferior (fake_pid_p, ptid_get_pid (inferior_ptid), -1, 1);
+  remote_add_inferior (fake_pid_p, ptid_get_pid (curr_ptid), -1, 1);
 
-  /* Add the main thread.  */
-  add_thread_silent (inferior_ptid);
+  /* Add the main thread and switch to it.  Don't try reading
+     registers yet, since we haven't fetched the target description
+     yet.  */
+  thread_info *tp = add_thread_silent (curr_ptid);
+  switch_to_thread_no_regs (tp);
 }
 
 /* Print info about a thread that was found already stopped on
@@ -4636,6 +4667,12 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_QProgramSignals },
   { "QStartupWithShell", PACKET_DISABLE, remote_supported_packet,
     PACKET_QStartupWithShell },
+  { "QEnvironmentHexEncoded", PACKET_DISABLE, remote_supported_packet,
+    PACKET_QEnvironmentHexEncoded },
+  { "QEnvironmentReset", PACKET_DISABLE, remote_supported_packet,
+    PACKET_QEnvironmentReset },
+  { "QEnvironmentUnset", PACKET_DISABLE, remote_supported_packet,
+    PACKET_QEnvironmentUnset },
   { "QStartNoAckMode", PACKET_DISABLE, remote_supported_packet,
     PACKET_QStartNoAckMode },
   { "multiprocess", PACKET_DISABLE, remote_supported_packet,
@@ -4924,7 +4961,7 @@ remote_query_supported (void)
      instead.
 
    - The target has been resumed in the foreground
-     (target_terminal_is_ours is false) with a synchronous resume
+     (target_terminal::is_ours is false) with a synchronous resume
      packet, and we're blocked waiting for the stop reply, thus a
      Ctrl-C should be immediately sent to the target.
 
@@ -4955,11 +4992,11 @@ remote_serial_quit_handler (void)
 	    remote_unpush_and_throw ();
 	}
       /* If ^C has already been sent once, offer to disconnect.  */
-      else if (!target_terminal_is_ours () && rs->ctrlc_pending_p)
+      else if (!target_terminal::is_ours () && rs->ctrlc_pending_p)
 	interrupt_query ();
       /* All-stop protocol, and blocked waiting for stop reply.  Send
 	 an interrupt request.  */
-      else if (!target_terminal_is_ours () && rs->waiting_for_stop_reply)
+      else if (!target_terminal::is_ours () && rs->waiting_for_stop_reply)
 	target_interrupt (inferior_ptid);
       else
 	rs->got_ctrlc_during_io = 1;
@@ -6271,7 +6308,7 @@ interrupt_query (void)
 static void
 remote_terminal_inferior (struct target_ops *self)
 {
-  /* FIXME: cagney/1999-09-27: Make calls to target_terminal_*()
+  /* FIXME: cagney/1999-09-27: Make calls to target_terminal::*()
      idempotent.  The event-loop GDB talking to an asynchronous target
      with a synchronous command calls this function from both
      event-top.c and infrun.c/infcmd.c.  Once GDB stops trying to
@@ -7403,12 +7440,12 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 	{
 	  /* Zero length reply means that we tried 'S' or 'C' and the
 	     remote system doesn't support it.  */
-	  target_terminal_ours_for_output ();
+	  target_terminal::ours_for_output ();
 	  printf_filtered
 	    ("Can't send signals to this remote system.  %s not sent.\n",
 	     gdb_signal_to_name (rs->last_sent_signal));
 	  rs->last_sent_signal = GDB_SIGNAL_0;
-	  target_terminal_inferior ();
+	  target_terminal::inferior ();
 
 	  strcpy (buf, rs->last_sent_step ? "s" : "c");
 	  putpkt (buf);
@@ -7580,7 +7617,8 @@ process_g_packet (struct regcache *regcache)
 
   /* Further sanity checks, with knowledge of the architecture.  */
   if (buf_len > 2 * rsa->sizeof_g_packet)
-    error (_("Remote 'g' packet reply is too long: %s"), rs->buf);
+    error (_("Remote 'g' packet reply is too long (expected %ld bytes, got %d "
+	     "bytes): %s"), rsa->sizeof_g_packet, buf_len / 2, rs->buf);
 
   /* Save the size of the packet sent to us by the target.  It is used
      as a heuristic when determining the max size of packets that the
@@ -7844,8 +7882,6 @@ store_registers_using_G (const struct regcache *regcache)
      each byte encoded as two hex characters.  */
   p = rs->buf;
   *p++ = 'G';
-  /* remote_prepare_to_store insures that rsa->sizeof_g_packet gets
-     updated.  */
   bin2hex (regs, p, rsa->sizeof_g_packet);
   putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
@@ -8471,14 +8507,6 @@ remote_send_printf (const char *format, ...)
   return packet_check_result (rs->buf);
 }
 
-static void
-restore_remote_timeout (void *p)
-{
-  int value = *(int *)p;
-
-  remote_timeout = value;
-}
-
 /* Flash writing can take quite some time.  We'll set
    effectively infinite timeout for flash operations.
    In future, we'll need to decide on a better approach.  */
@@ -8489,12 +8517,9 @@ remote_flash_erase (struct target_ops *ops,
                     ULONGEST address, LONGEST length)
 {
   int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
-  int saved_remote_timeout = remote_timeout;
   enum packet_result ret;
-  struct cleanup *back_to = make_cleanup (restore_remote_timeout,
-                                          &saved_remote_timeout);
-
-  remote_timeout = remote_flash_timeout;
+  scoped_restore restore_timeout
+    = make_scoped_restore (&remote_timeout, remote_flash_timeout);
 
   ret = remote_send_printf ("vFlashErase:%s,%s",
 			    phex (address, addr_size),
@@ -8508,8 +8533,6 @@ remote_flash_erase (struct target_ops *ops,
     default:
       break;
     }
-
-  do_cleanups (back_to);
 }
 
 static enum target_xfer_status
@@ -8517,30 +8540,21 @@ remote_flash_write (struct target_ops *ops, ULONGEST address,
 		    ULONGEST length, ULONGEST *xfered_len,
 		    const gdb_byte *data)
 {
-  int saved_remote_timeout = remote_timeout;
-  enum target_xfer_status ret;
-  struct cleanup *back_to = make_cleanup (restore_remote_timeout,
-					  &saved_remote_timeout);
-
-  remote_timeout = remote_flash_timeout;
-  ret = remote_write_bytes_aux ("vFlashWrite:", address, data, length, 1,
-				xfered_len,'X', 0);
-  do_cleanups (back_to);
-
-  return ret;
+  scoped_restore restore_timeout
+    = make_scoped_restore (&remote_timeout, remote_flash_timeout);
+  return remote_write_bytes_aux ("vFlashWrite:", address, data, length, 1,
+				 xfered_len,'X', 0);
 }
 
 static void
 remote_flash_done (struct target_ops *ops)
 {
-  int saved_remote_timeout = remote_timeout;
   int ret;
-  struct cleanup *back_to = make_cleanup (restore_remote_timeout,
-                                          &saved_remote_timeout);
 
-  remote_timeout = remote_flash_timeout;
+  scoped_restore restore_timeout
+    = make_scoped_restore (&remote_timeout, remote_flash_timeout);
+
   ret = remote_send_printf ("vFlashDone");
-  do_cleanups (back_to);
 
   switch (ret)
     {
@@ -8588,18 +8602,18 @@ readchar (int timeout)
 {
   int ch;
   struct remote_state *rs = get_remote_state ();
-  struct cleanup *old_chain;
 
-  old_chain = make_cleanup_override_quit_handler (remote_serial_quit_handler);
+  {
+    scoped_restore restore_quit
+      = make_scoped_restore (&quit_handler, remote_serial_quit_handler);
 
-  rs->got_ctrlc_during_io = 0;
+    rs->got_ctrlc_during_io = 0;
 
-  ch = serial_readchar (rs->remote_desc, timeout);
+    ch = serial_readchar (rs->remote_desc, timeout);
 
-  if (rs->got_ctrlc_during_io)
-    set_quit_flag ();
-
-  do_cleanups (old_chain);
+    if (rs->got_ctrlc_during_io)
+      set_quit_flag ();
+  }
 
   if (ch >= 0)
     return ch;
@@ -8630,9 +8644,9 @@ static void
 remote_serial_write (const char *str, int len)
 {
   struct remote_state *rs = get_remote_state ();
-  struct cleanup *old_chain;
 
-  old_chain = make_cleanup_override_quit_handler (remote_serial_quit_handler);
+  scoped_restore restore_quit
+    = make_scoped_restore (&quit_handler, remote_serial_quit_handler);
 
   rs->got_ctrlc_during_io = 0;
 
@@ -8644,8 +8658,6 @@ remote_serial_write (const char *str, int len)
 
   if (rs->got_ctrlc_during_io)
     set_quit_flag ();
-
-  do_cleanups (old_chain);
 }
 
 /* Send the command in *BUF to the remote machine, and read the reply
@@ -9544,12 +9556,9 @@ extended_remote_run (const std::string &args)
 
   if (!args.empty ())
     {
-      struct cleanup *back_to;
       int i;
-      char **argv;
 
-      argv = gdb_buildargv (args.c_str ());
-      back_to = make_cleanup_freeargv (argv);
+      gdb_argv argv (args.c_str ());
       for (i = 0; argv[i] != NULL; i++)
 	{
 	  if (strlen (argv[i]) * 2 + 1 + len >= get_remote_packet_size ())
@@ -9558,7 +9567,6 @@ extended_remote_run (const std::string &args)
 	  len += 2 * bin2hex ((gdb_byte *) argv[i], rs->buf + len,
 			      strlen (argv[i]));
 	}
-      do_cleanups (back_to);
     }
 
   rs->buf[len++] = '\0';
@@ -9583,6 +9591,57 @@ extended_remote_run (const std::string &args)
     default:
       gdb_assert_not_reached (_("bad switch"));
     }
+}
+
+/* Helper function to send set/unset environment packets.  ACTION is
+   either "set" or "unset".  PACKET is either "QEnvironmentHexEncoded"
+   or "QEnvironmentUnsetVariable".  VALUE is the variable to be
+   sent.  */
+
+static void
+send_environment_packet (struct remote_state *rs,
+			 const char *action,
+			 const char *packet,
+			 const char *value)
+{
+  /* Convert the environment variable to an hex string, which
+     is the best format to be transmitted over the wire.  */
+  std::string encoded_value = bin2hex ((const gdb_byte *) value,
+					 strlen (value));
+
+  xsnprintf (rs->buf, get_remote_packet_size (),
+	     "%s:%s", packet, encoded_value.c_str ());
+
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+  if (strcmp (rs->buf, "OK") != 0)
+    warning (_("Unable to %s environment variable '%s' on remote."),
+	     action, value);
+}
+
+/* Helper function to handle the QEnvironment* packets.  */
+
+static void
+extended_remote_environment_support (struct remote_state *rs)
+{
+  if (packet_support (PACKET_QEnvironmentReset) != PACKET_DISABLE)
+    {
+      putpkt ("QEnvironmentReset");
+      getpkt (&rs->buf, &rs->buf_size, 0);
+      if (strcmp (rs->buf, "OK") != 0)
+	warning (_("Unable to reset environment on remote."));
+    }
+
+  gdb_environ *e = &current_inferior ()->environment;
+
+  if (packet_support (PACKET_QEnvironmentHexEncoded) != PACKET_DISABLE)
+    for (const std::string &el : e->user_set_env ())
+      send_environment_packet (rs, "set", "QEnvironmentHexEncoded",
+			       el.c_str ());
+
+  if (packet_support (PACKET_QEnvironmentUnset) != PACKET_DISABLE)
+    for (const std::string &el : e->user_unset_env ())
+      send_environment_packet (rs, "unset", "QEnvironmentUnset", el.c_str ());
 }
 
 /* In the extended protocol we want to be able to do things like
@@ -9624,6 +9683,8 @@ extended_remote_create_inferior (struct target_ops *ops,
 Remote replied unexpectedly while setting startup-with-shell: %s"),
 	       rs->buf);
     }
+
+  extended_remote_environment_support (rs);
 
   /* Now restart the remote server.  */
   run_worked = extended_remote_run (args) != -1;
@@ -11904,7 +11965,6 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
 {
   struct cleanup *back_to, *close_cleanup;
   int retcode, fd, remote_errno, bytes, io_size;
-  FILE *file;
   gdb_byte *buffer;
   int bytes_in_buffer;
   int saw_eof;
@@ -11914,10 +11974,9 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
   if (!rs->remote_desc)
     error (_("command can only be used with remote target"));
 
-  file = gdb_fopen_cloexec (local_file, "rb");
+  gdb_file_up file = gdb_fopen_cloexec (local_file, "rb");
   if (file == NULL)
     perror_with_name (local_file);
-  back_to = make_cleanup_fclose (file);
 
   fd = remote_hostio_open (find_target_at (process_stratum), NULL,
 			   remote_file, (FILEIO_O_WRONLY | FILEIO_O_CREAT
@@ -11930,7 +11989,7 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
      remote packet limit, so we'll transfer slightly fewer.  */
   io_size = get_remote_packet_size ();
   buffer = (gdb_byte *) xmalloc (io_size);
-  make_cleanup (xfree, buffer);
+  back_to = make_cleanup (xfree, buffer);
 
   close_cleanup = make_cleanup (remote_hostio_close_cleanup, &fd);
 
@@ -11943,10 +12002,10 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
 	{
 	  bytes = fread (buffer + bytes_in_buffer, 1,
 			 io_size - bytes_in_buffer,
-			 file);
+			 file.get ());
 	  if (bytes == 0)
 	    {
-	      if (ferror (file))
+	      if (ferror (file.get ()))
 		error (_("Error reading %s."), local_file);
 	      else
 		{
@@ -11997,7 +12056,6 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
 {
   struct cleanup *back_to, *close_cleanup;
   int fd, remote_errno, bytes, io_size;
-  FILE *file;
   gdb_byte *buffer;
   ULONGEST offset;
   struct remote_state *rs = get_remote_state ();
@@ -12011,16 +12069,15 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
   if (fd == -1)
     remote_hostio_error (remote_errno);
 
-  file = gdb_fopen_cloexec (local_file, "wb");
+  gdb_file_up file = gdb_fopen_cloexec (local_file, "wb");
   if (file == NULL)
     perror_with_name (local_file);
-  back_to = make_cleanup_fclose (file);
 
   /* Send up to this many bytes at once.  They won't all fit in the
      remote packet limit, so we'll transfer slightly fewer.  */
   io_size = get_remote_packet_size ();
   buffer = (gdb_byte *) xmalloc (io_size);
-  make_cleanup (xfree, buffer);
+  back_to = make_cleanup (xfree, buffer);
 
   close_cleanup = make_cleanup (remote_hostio_close_cleanup, &fd);
 
@@ -12037,7 +12094,7 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
 
       offset += bytes;
 
-      bytes = fwrite (buffer, 1, bytes, file);
+      bytes = fwrite (buffer, 1, bytes, file.get ());
       if (bytes == 0)
 	perror_with_name (local_file);
     }
@@ -12072,58 +12129,40 @@ remote_file_delete (const char *remote_file, int from_tty)
 static void
 remote_put_command (char *args, int from_tty)
 {
-  struct cleanup *back_to;
-  char **argv;
-
   if (args == NULL)
     error_no_arg (_("file to put"));
 
-  argv = gdb_buildargv (args);
-  back_to = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
   if (argv[0] == NULL || argv[1] == NULL || argv[2] != NULL)
     error (_("Invalid parameters to remote put"));
 
   remote_file_put (argv[0], argv[1], from_tty);
-
-  do_cleanups (back_to);
 }
 
 static void
 remote_get_command (char *args, int from_tty)
 {
-  struct cleanup *back_to;
-  char **argv;
-
   if (args == NULL)
     error_no_arg (_("file to get"));
 
-  argv = gdb_buildargv (args);
-  back_to = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
   if (argv[0] == NULL || argv[1] == NULL || argv[2] != NULL)
     error (_("Invalid parameters to remote get"));
 
   remote_file_get (argv[0], argv[1], from_tty);
-
-  do_cleanups (back_to);
 }
 
 static void
 remote_delete_command (char *args, int from_tty)
 {
-  struct cleanup *back_to;
-  char **argv;
-
   if (args == NULL)
     error_no_arg (_("file to delete"));
 
-  argv = gdb_buildargv (args);
-  back_to = make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
   if (argv[0] == NULL || argv[1] != NULL)
     error (_("Invalid parameters to remote delete"));
 
   remote_file_delete (argv[0], from_tty);
-
-  do_cleanups (back_to);
 }
 
 static void
@@ -13515,6 +13554,35 @@ remote_execution_direction (struct target_ops *self)
   return rs->last_resume_exec_dir;
 }
 
+/* Return pointer to the thread_info struct which corresponds to
+   THREAD_HANDLE (having length HANDLE_LEN).  */
+
+static struct thread_info *
+remote_thread_handle_to_thread_info (struct target_ops *ops,
+				     const gdb_byte *thread_handle,
+				     int handle_len,
+				     struct inferior *inf)
+{
+  struct thread_info *tp;
+
+  ALL_NON_EXITED_THREADS (tp)
+    {
+      struct private_thread_info *priv = get_private_info_thread (tp);
+
+      if (tp->inf == inf && priv != NULL)
+        {
+	  if (handle_len != priv->thread_handle->size ())
+	    error (_("Thread handle size mismatch: %d vs %zu (from remote)"),
+	           handle_len, priv->thread_handle->size ());
+	  if (memcmp (thread_handle, priv->thread_handle->data (),
+	              handle_len) == 0)
+	    return tp;
+	}
+    }
+
+  return NULL;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -13663,6 +13731,8 @@ Specify the serial device it is connected to\n\
   remote_ops.to_insert_exec_catchpoint = remote_insert_exec_catchpoint;
   remote_ops.to_remove_exec_catchpoint = remote_remove_exec_catchpoint;
   remote_ops.to_execution_direction = remote_execution_direction;
+  remote_ops.to_thread_handle_to_thread_info =
+    remote_thread_handle_to_thread_info;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
@@ -14117,6 +14187,19 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_QStartupWithShell],
 			 "QStartupWithShell", "startup-with-shell", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets
+			 [PACKET_QEnvironmentHexEncoded],
+			 "QEnvironmentHexEncoded", "environment-hex-encoded",
+			 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_QEnvironmentReset],
+			 "QEnvironmentReset", "environment-reset",
+			 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_QEnvironmentUnset],
+			 "QEnvironmentUnset", "environment-unset",
+			 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qSymbol],
 			 "qSymbol", "symbol-lookup", 0);

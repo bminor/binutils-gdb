@@ -750,7 +750,7 @@ set_active_ext_lang (const struct extension_language_defn *now_active)
   previous->sigint_handler.handler_saved = 0;
   active_ext_lang = now_active;
 
-  if (target_terminal_is_ours ())
+  if (target_terminal::is_ours ())
     {
       /* If the newly active extension language uses cooperative SIGINT
 	 handling then ensure GDB's SIGINT handler is installed.  */
@@ -776,7 +776,7 @@ restore_active_ext_lang (struct active_ext_lang_state *previous)
 {
   active_ext_lang = previous->ext_lang;
 
-  if (target_terminal_is_ours ())
+  if (target_terminal::is_ours ())
     {
       /* Restore the previous SIGINT handler if one was saved.  */
       if (previous->sigint_handler.handler_saved)
@@ -1060,8 +1060,6 @@ ext_lang_before_prompt (const char *current_gdb_prompt)
 	}
     }
 }
-
-extern initialize_file_ftype _initialize_extension;
 
 void
 _initialize_extension (void)

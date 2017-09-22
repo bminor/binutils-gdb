@@ -400,22 +400,6 @@ ui_out::table_end ()
   m_table_up = nullptr;
 }
 
-static void
-do_cleanup_table_end (void *data)
-{
-  ui_out *uiout = (ui_out *) data;
-
-  uiout->table_end ();
-}
-
-struct cleanup *
-make_cleanup_ui_out_table_begin_end (ui_out *uiout, int nr_cols, int nr_rows,
-				     const char *tblid)
-{
-  uiout->table_begin (nr_cols, nr_rows, tblid);
-  return make_cleanup (do_cleanup_table_end, uiout);
-}
-
 void
 ui_out::begin (ui_out_type type, const char *id)
 {

@@ -1136,6 +1136,14 @@ This option is only meaningful when building a shared object.  It makes
 the symbols defined by this shared object available for symbol resolution
 of subsequently loaded libraries.
 
+@item globalaudit
+This option is only meaningful when building a dynamic executable.
+This option marks the executable as requiring global auditing by
+setting the @code{DF_1_GLOBAUDIT} bit in the @code{DT_FLAGS_1} dynamic
+tag.  Global auditing requires that any auditing library defined via
+the @option{--depaudit} or @option{-P} command line options be run for
+all dynamic objects loaded by the application. 
+
 @item initfirst
 This option is only meaningful when building a shared object.
 It marks the object so that its runtime initialization will occur
@@ -7252,6 +7260,29 @@ Denotes a portion of RAM located above @samp{.bss} section.
 The last two sections are used by gcc.
 @end table
 
+@table @option
+@cindex MSP430 Options
+@kindex --code-region
+@item --code-region=[either,lower,upper,none]
+This will transform .text* sections to [either,lower,upper].text* sections. The
+argument passed to GCC for -mcode-region is propagated to the linker
+using this option.
+
+@kindex --data-region
+@item --data-region=[either,lower,upper,none]
+This will transform .data*, .bss* and .rodata* sections to
+[either,lower,upper].[data,bss,rodata]* sections. The argument passed to GCC
+for -mdata-region is propagated to the linker using this option.
+
+@kindex --disable-sec-transformation
+@item --disable-sec-transformation
+Prevent the transformation of sections as specified by the @code{--code-region}
+and @code{--data-region} options.
+This is useful if you are compiling and linking using a single call to the GCC
+wrapper, and want to compile the source files using -m[code,data]-region but
+not transform the sections for prebuilt libraries and objects.
+@end table
+
 @ifclear GENERIC
 @lowersections
 @end ifclear
@@ -7572,10 +7603,12 @@ off this feature.
 @item --plt-align
 @itemx --no-plt-align
 Use these options to control whether individual PLT call stubs are
-padded so that they don't cross a 32-byte boundary, or to the
-specified power of two boundary when using @code{--plt-align=}.  Note
-that this isn't alignment in the usual sense.  By default PLT call
-stubs are packed tightly.
+aligned to a 32-byte boundary, or to the specified power of two
+boundary when using @code{--plt-align=}.  A negative value may be
+specified to pad PLT call stubs so that they do not cross the
+specified power of two boundary (or the minimum number of boundaries
+if a PLT stub is so large that it must cross a boundary).  By default
+PLT call stubs are aligned to 32-byte boundaries.
 
 @cindex PowerPC64 PLT call stub static chain
 @kindex --plt-static-chain
@@ -7600,6 +7633,24 @@ barrier in the call stub, or use LD_BIND_NOW=1.  By default, @code{ld}
 looks for calls to commonly used functions that create threads, and if
 seen, adds the necessary barriers.  Use these options to change the
 default behaviour.
+
+@cindex PowerPC64 ELFv2 PLT localentry optimization
+@kindex --plt-localentry
+@kindex --no-plt-localentry
+@item --plt-localentry
+@itemx --no-localentry
+ELFv2 functions with localentry:0 are those with a single entry point,
+ie. global entry == local entry, and that have no requirement on r2
+(the TOC/GOT pointer) or r12, and guarantee r2 is unchanged on return.
+Such an external function can be called via the PLT without saving r2
+or restoring it on return, avoiding a common load-hit-store for small
+functions.   The optimization is attractive, with up to 40% reduction
+in execution time for a small function, but can result in symbol
+interposition failures.  Also, minor changes in a shared library,
+including system libraries, can cause a function that was localentry:0
+to become localentry:8.  This will result in a dynamic loader
+complaint and failure to run.  The option is experimental, use with
+care.  @option{--no-plt-localentry} is the default.
 @end table
 
 @ifclear GENERIC
@@ -7888,7 +7939,7 @@ application will behave unexpectedly.
 @code{PRIVATE}: Put the symbol in the DLL's export table, but do not put
 it into the static import library used to resolve imports at link time. The
 symbol can still be imported using the @code{LoadLibrary/GetProcAddress}
-API at runtime or by by using the GNU ld extension of linking directly to
+API at runtime or by using the GNU ld extension of linking directly to
 the DLL without an import library.
 
 See ld/deffilep.y in the binutils sources for the full specification of

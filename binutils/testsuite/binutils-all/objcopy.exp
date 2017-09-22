@@ -842,7 +842,7 @@ proc keep_debug_symbols_and_test_copy { prog1 flags1 test1 prog2 flags2 test2 } 
 }
 
 # Tests that in a debug only copy of a file the sections
-# headers whoes types have been changed to NOBITS still
+# headers whose types have been changed to NOBITS still
 # retain their sh_link fields.
 
 proc keep_debug_symbols_and_check_links { prog flags test } {
@@ -1056,8 +1056,10 @@ if [is_elf_format] {
     run_dump_test "note-1"
     if [is_elf64 tmpdir/bintest.o] {
 	run_dump_test "note-2-64"
+	run_dump_test "note-3-64"
     } else {
 	run_dump_test "note-2-32"
+	run_dump_test "note-3-32"
     }
 }
 

@@ -418,7 +418,7 @@ static SCM
 gdbscm_frame_name (SCM self)
 {
   frame_smob *f_smob;
-  char *name = NULL;
+  gdb::unique_xmalloc_ptr<char> name;
   enum language lang = language_minimal;
   struct frame_info *frame = NULL;
   SCM result;
@@ -429,11 +429,10 @@ gdbscm_frame_name (SCM self)
     {
       frame = frscm_frame_smob_to_frame (f_smob);
       if (frame != NULL)
-	find_frame_funname (frame, &name, &lang, NULL);
+	name = find_frame_funname (frame, &lang, NULL);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
-      xfree (name);
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
   END_CATCH
@@ -445,10 +444,7 @@ gdbscm_frame_name (SCM self)
     }
 
   if (name != NULL)
-    {
-      result = gdbscm_scm_from_c_string (name);
-      xfree (name);
-    }
+    result = gdbscm_scm_from_c_string (name.get ());
   else
     result = SCM_BOOL_F;
 
@@ -761,7 +757,7 @@ gdbscm_frame_sal (SCM self)
     {
       frame = frscm_frame_smob_to_frame (f_smob);
       if (frame != NULL)
-	find_frame_sal (frame, &sal);
+	sal = find_frame_sal (frame);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

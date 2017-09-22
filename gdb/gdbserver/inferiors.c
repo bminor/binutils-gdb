@@ -121,12 +121,6 @@ add_thread (ptid_t thread_id, void *target_data)
   return new_thread;
 }
 
-ptid_t
-thread_to_gdb_id (struct thread_info *thread)
-{
-  return thread->entry.id;
-}
-
 /* Wrapper around get_first_inferior to return a struct thread_info *.  */
 
 struct thread_info *
@@ -141,25 +135,13 @@ find_thread_ptid (ptid_t ptid)
   return (struct thread_info *) find_inferior_id (&all_threads, ptid);
 }
 
-/* Predicate function for matching thread entry's pid to the given
-   pid value passed by address in ARGS.  */
-
-static int
-thread_pid_matches_callback (struct inferior_list_entry *entry, void *args)
-{
-  return (ptid_get_pid (entry->id) == *(pid_t *)args);
-}
-
 /* Find a thread associated with the given PROCESS, or NULL if no
    such thread exists.  */
 
 static struct thread_info *
 find_thread_process (const struct process_info *const process)
 {
-  pid_t pid = ptid_get_pid (ptid_of (process));
-
-  return (struct thread_info *)
-    find_inferior (&all_threads, thread_pid_matches_callback, &pid);
+  return find_any_thread_of_pid (process->entry.id.pid ());
 }
 
 /* Helper for find_any_thread_of_pid.  Returns true if a thread
@@ -185,19 +167,11 @@ find_any_thread_of_pid (int pid)
   return (struct thread_info *) entry;
 }
 
-ptid_t
-gdb_id_to_thread_id (ptid_t gdb_id)
-{
-  struct thread_info *thread = find_thread_ptid (gdb_id);
-
-  return thread ? thread->entry.id : null_ptid;
-}
-
 static void
 free_one_thread (struct inferior_list_entry *inf)
 {
   struct thread_info *thread = get_thread (inf);
-  free_register_cache (inferior_regcache_data (thread));
+  free_register_cache (thread_regcache_data (thread));
   free (thread);
 }
 
@@ -309,27 +283,21 @@ find_inferior_id (struct inferior_list *list, ptid_t id)
 }
 
 void *
-inferior_target_data (struct thread_info *inferior)
+thread_target_data (struct thread_info *thread)
 {
-  return inferior->target_data;
-}
-
-void
-set_inferior_target_data (struct thread_info *inferior, void *data)
-{
-  inferior->target_data = data;
+  return thread->target_data;
 }
 
 struct regcache *
-inferior_regcache_data (struct thread_info *inferior)
+thread_regcache_data (struct thread_info *thread)
 {
-  return inferior->regcache_data;
+  return thread->regcache_data;
 }
 
 void
-set_inferior_regcache_data (struct thread_info *inferior, struct regcache *data)
+set_thread_regcache_data (struct thread_info *thread, struct regcache *data)
 {
-  inferior->regcache_data = data;
+  thread->regcache_data = data;
 }
 
 /* Return true if LIST has exactly one entry.  */

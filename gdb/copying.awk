@@ -14,8 +14,6 @@ BEGIN	{
 	  print ""
 	  print "static void show_warranty_command (char *, int);"
 	  print ""
-	  print "void _initialize_copying (void);"
-	  print ""
 	  print "static void";
 	  print "show_copying_command (char *ignore, int from_tty)";
 	  print "{";

@@ -15,11 +15,10 @@ Relocation section .* contains 1 entries:
 .* R_PPC64_JMP_SLOT .* my_func \+ 0
 
 Symbol table '\.dynsym' contains 5 entries:
-.*
-     0: .*
-     1: 0+100002b8     0 FUNC    GLOBAL DEFAULT  UND my_func
 #...
-Symbol table '\.symtab' contains 21 entries:
+.*: 0*[1-9a-f][0-9a-f]*     0 FUNC    GLOBAL DEFAULT  UND my_func
 #...
-    16: 0+100002b8     0 FUNC    GLOBAL DEFAULT  UND my_func
+Symbol table '\.symtab' contains .* entries:
+#...
+.*: 0*[1-9a-f][0-9a-f]*     0 FUNC    GLOBAL DEFAULT  UND my_func
 #pass

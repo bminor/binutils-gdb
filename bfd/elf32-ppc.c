@@ -134,7 +134,7 @@ static const bfd_vma ppc_elf_vxworks_pic_plt0_entry
 #define VXWORKS_PLT_NON_JMP_SLOT_RELOCS 3
 /* The number of relocations in the PLTResolve slot. */
 #define VXWORKS_PLTRESOLVE_RELOCS 2
-/* The number of relocations in the PLTResolve slot when when creating
+/* The number of relocations in the PLTResolve slot when creating
    a shared library. */
 #define VXWORKS_PLTRESOLVE_RELOCS_SHLIB 0
 
@@ -1654,6 +1654,21 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x3e007ff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* e_li split20 format.  */
+  HOWTO (R_PPC_VLE_ADDR20,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 20,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_PPC_VLE_ADDR20",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x1f07ff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_PPC_IRELATIVE,	/* type */
@@ -3192,9 +3207,9 @@ struct plt_entry
   bfd_vma glink_offset;
 };
 
-/* Of those relocs that might be copied as dynamic relocs, this function
-   selects those that must be copied when linking a shared library,
-   even when the symbol is local.  */
+/* Of those relocs that might be copied as dynamic relocs, this
+   function selects those that must be copied when linking a shared
+   library or PIE, even when the symbol is local.  */
 
 static int
 must_be_dyn_reloc (struct bfd_link_info *info,
@@ -3203,6 +3218,10 @@ must_be_dyn_reloc (struct bfd_link_info *info,
   switch (r_type)
     {
     default:
+      /* Only relative relocs can be resolved when the object load
+	 address isn't fixed.  DTPREL32 is excluded because the
+	 dynamic linker needs to differentiate global dynamic from
+	 local dynamic __tls_index pairs when PPC_OPT_TLS is set.  */
       return 1;
 
     case R_PPC_REL24:
@@ -3217,7 +3236,9 @@ must_be_dyn_reloc (struct bfd_link_info *info,
     case R_PPC_TPREL16_LO:
     case R_PPC_TPREL16_HI:
     case R_PPC_TPREL16_HA:
-      return !bfd_link_executable (info);
+      /* These relocations are relative but in a shared library the
+	 linker doesn't know the thread pointer base.  */
+      return bfd_link_dll (info);
     }
 }
 
@@ -3338,6 +3359,9 @@ struct ppc_elf_link_hash_table
      referenced by dynamic relocations.  */
   unsigned int local_ifunc_resolver:1;
   unsigned int maybe_local_ifunc_resolver:1;
+
+  /* Set if tls optimization is enabled.  */
+  unsigned int do_tls_opt:1;
 
   /* The size of PLT entries.  */
   int plt_entry_size;
@@ -4151,7 +4175,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_GOT_TPREL16_LO:
 	case R_PPC_GOT_TPREL16_HI:
 	case R_PPC_GOT_TPREL16_HA:
-	  if (bfd_link_pic (info))
+	  if (bfd_link_dll (info))
 	    info->flags |= DF_STATIC_TLS;
 	  tls_type = TLS_TLS | TLS_TPREL;
 	  goto dogottls;
@@ -4259,6 +4283,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_VLE_HI16D:
 	case R_PPC_VLE_HA16A:
 	case R_PPC_VLE_HA16D:
+	case R_PPC_VLE_ADDR20:
 	  break;
 
 	case R_PPC_EMB_SDA2REL:
@@ -4430,13 +4455,13 @@ ppc_elf_check_relocs (bfd *abfd,
 	    return FALSE;
 	  break;
 
-	  /* We shouldn't really be seeing these.  */
+	  /* We shouldn't really be seeing TPREL32.  */
 	case R_PPC_TPREL32:
 	case R_PPC_TPREL16:
 	case R_PPC_TPREL16_LO:
 	case R_PPC_TPREL16_HI:
 	case R_PPC_TPREL16_HA:
-	  if (bfd_link_pic (info))
+	  if (bfd_link_dll (info))
 	    info->flags |= DF_STATIC_TLS;
 	  goto dodyn;
 
@@ -4977,6 +5002,23 @@ ppc_elf_vle_split16 (bfd *input_bfd,
   insn |= value & 0x7ff;
   bfd_put_32 (input_bfd, insn, loc);
 }
+
+static void
+ppc_elf_vle_split20 (bfd *output_bfd, bfd_byte *loc, bfd_vma value)
+{
+  unsigned int insn;
+
+  insn = bfd_get_32 (output_bfd, loc);
+  /* We have an li20 field, bits 17..20, 11..15, 21..31.  */
+  /* Top 4 bits of value to 17..20.  */
+  insn |= (value & 0xf0000) >> 5;
+  /* Next 5 bits of the value to 11..15.  */
+  insn |= (value & 0xf800) << 5;
+  /* And the final 11 bits of the value to bits 21 to 31.  */
+  insn |= value & 0x7ff;
+  bfd_put_32 (output_bfd, insn, loc);
+}
+
 
 /* Choose which PLT scheme to use, and set .plt flags appropriately.
    Returns -1 on error, 0 for old PLT, 1 for new PLT.  */
@@ -5625,6 +5667,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 	      symtab_hdr->contents = (unsigned char *) locsyms;
 	  }
       }
+  htab->do_tls_opt = 1;
   return TRUE;
 }
 
@@ -5942,17 +5985,18 @@ allocate_got (struct ppc_elf_link_hash_table *htab, unsigned int need)
   return where;
 }
 
-/* If H is undefined weak, make it dynamic if that makes sense.  */
+/* If H is undefined, make it dynamic if that makes sense.  */
 
 static bfd_boolean
-ensure_undefweak_dynamic (struct bfd_link_info *info,
-			  struct elf_link_hash_entry *h)
+ensure_undef_dynamic (struct bfd_link_info *info,
+		      struct elf_link_hash_entry *h)
 {
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   if (htab->dynamic_sections_created
-      && info->dynamic_undefined_weak != 0
-      && h->root.type == bfd_link_hash_undefweak
+      && ((info->dynamic_undefined_weak != 0
+	   && h->root.type == bfd_link_hash_undefweak)
+	  || h->root.type == bfd_link_hash_undefined)
       && h->dynindx == -1
       && !h->forced_local
       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
@@ -5986,9 +6030,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     {
       unsigned int need;
 
-      /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (!ensure_undefweak_dynamic (info, &eh->elf))
+      /* Make sure this symbol is output as a dynamic symbol.  */
+      if (!ensure_undef_dynamic (info, &eh->elf))
 	return FALSE;
 
       need = 0;
@@ -6102,9 +6145,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       if (eh->dyn_relocs != NULL)
 	{
-	  /* Make sure undefined weak symbols are output as a dynamic
-	     symbol in PIEs.  */
-	  if (!ensure_undefweak_dynamic (info, h))
+	  /* Make sure this symbol is output as a dynamic symbol.  */
+	  if (!ensure_undef_dynamic (info, h))
 	    return FALSE;
 	}
     }
@@ -6120,9 +6162,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	       && eh->has_addr16_lo
 	       && htab->params->pic_fixup > 0))
 	{
-	  /* Make sure this symbol is output as a dynamic symbol.
-	     Undefined weak syms won't yet be marked as dynamic.  */
-	  if (!ensure_undefweak_dynamic (info, h))
+	  /* Make sure this symbol is output as a dynamic symbol.  */
+	  if (!ensure_undef_dynamic (info, h))
 	    return FALSE;
 
 	  if (h->dynindx == -1)
@@ -8284,9 +8325,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  r_type = R_PPC_GOT16_LO;
 		}
 	      else
-		info->callbacks->einfo
+		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%H: error: %s with unexpected instruction %x\n"),
+		  (_("%B(%A+%#Lx): error: %s with unexpected instruction %#x"),
 		   input_bfd, input_section, rel->r_offset,
 		   "R_PPC_ADDR16_HA", insn);
 	    }
@@ -8319,9 +8360,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  rel->r_info = ELF32_R_INFO (0, r_type);
 		}
 	      else
-		info->callbacks->einfo
+		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%H: error: %s with unexpected instruction %x\n"),
+		  (_("%B(%A+%#Lx): error: %s with unexpected instruction %#x"),
 		   input_bfd, input_section, rel->r_offset,
 		   "R_PPC_ADDR16_LO", insn);
 	    }
@@ -8422,10 +8463,44 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	}
 
       addend = rel->r_addend;
-      tls_type = 0;
       howto = NULL;
       if (r_type < R_PPC_max)
 	howto = ppc_elf_howto_table[r_type];
+
+      switch (r_type)
+	{
+	default:
+	  break;
+
+	case R_PPC_TPREL16_HA:
+	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
+	    {
+	      bfd_byte *p = contents + (rel->r_offset & ~3);
+	      unsigned int insn = bfd_get_32 (input_bfd, p);
+	      if ((insn & ((0x3f << 26) | 0x1f << 16))
+		  != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */)
+		/* xgettext:c-format */
+		info->callbacks->minfo
+		  (_("%H: warning: %s unexpected insn %#x.\n"),
+		   input_bfd, input_section, rel->r_offset, howto->name, insn);
+	      else
+		bfd_put_32 (input_bfd, NOP, p);
+	    }
+	  break;
+
+	case R_PPC_TPREL16_LO:
+	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
+	    {
+	      bfd_byte *p = contents + (rel->r_offset & ~3);
+	      unsigned int insn = bfd_get_32 (input_bfd, p);
+	      insn &= ~(0x1f << 16);
+	      insn |= 2 << 16;
+	      bfd_put_32 (input_bfd, insn, p);
+	    }
+	  break;
+	}
+
+      tls_type = 0;
       switch (r_type)
 	{
 	default:
@@ -8639,10 +8714,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		    else
 		      {
 			bfd_vma value = relocation;
-			int tlsopt = (htab->plt_type == PLT_NEW
-				      && !htab->params->no_tls_get_addr_opt
-				      && htab->tls_get_addr != NULL
-				      && htab->tls_get_addr->plt.plist != NULL);
 
 			if (tls_ty != 0)
 			  {
@@ -8654,8 +8725,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 				  value = 0;
 				else
 				  value -= htab->elf.tls_sec->vma + DTP_OFFSET;
-				if ((tls_ty & TLS_TPREL)
-				    || (tlsopt && !(tls_ty & TLS_DTPREL)))
+				if (tls_ty & TLS_TPREL)
 				  value += DTP_OFFSET - TP_OFFSET;
 			      }
 
@@ -8663,7 +8733,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			      {
 				bfd_put_32 (input_bfd, value,
 					    htab->elf.sgot->contents + off + 4);
-				value = !tlsopt;
+				value = 1;
 			      }
 			  }
 			bfd_put_32 (input_bfd, value,
@@ -8790,8 +8860,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  if (htab->elf.tls_sec != NULL)
 	    addend -= htab->elf.tls_sec->vma + TP_OFFSET;
 	  /* The TPREL16 relocs shouldn't really be used in shared
-	     libs as they will result in DT_TEXTREL being set, but
-	     support them anyway.  */
+	     libs or with non-local symbols as that will result in
+	     DT_TEXTREL being set, but support them anyway.  */
 	  goto dodyn;
 
 	case R_PPC_TPREL32:
@@ -9007,34 +9077,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  addend = 0;
 		  break;
 		}
-	    }
-	  else if (r_type == R_PPC_DTPMOD32
-		   && htab->plt_type == PLT_NEW
-		   && !htab->params->no_tls_get_addr_opt
-		   && htab->tls_get_addr != NULL
-		   && htab->tls_get_addr->plt.plist != NULL)
-	    {
-	      /* Set up for __tls_get_addr_opt stub when this entry
-		 does not have dynamic relocs.  */
-	      relocation = 0;
-	      /* Set up the next word for local dynamic.  If it turns
-		 out to be global dynamic, the reloc will overwrite
-		 this value.  */
-	      if (rel->r_offset + 8 <= input_section->size)
-		bfd_put_32 (input_bfd, DTP_OFFSET - TP_OFFSET,
-			    contents + rel->r_offset + 4);
-	    }
-	  else if (r_type == R_PPC_DTPREL32
-		   && htab->plt_type == PLT_NEW
-		   && !htab->params->no_tls_get_addr_opt
-		   && htab->tls_get_addr != NULL
-		   && htab->tls_get_addr->plt.plist != NULL
-		   && rel > relocs
-		   && rel[-1].r_info == ELF32_R_INFO (r_symndx, R_PPC_DTPMOD32)
-		   && rel[-1].r_offset + 4 == rel->r_offset)
-	    {
-	      /* __tls_get_addr_opt stub value.  */
-	      addend += DTP_OFFSET - TP_OFFSET;
 	    }
 	  break;
 
@@ -9502,6 +9544,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      }
 	  }
 	  goto copy_reloc;
+
+	case R_PPC_VLE_ADDR20:
+	  ppc_elf_vle_split20 (output_bfd, contents + rel->r_offset, relocation);
+	  continue;
 
 	  /* Relocate against the beginning of the section.  */
 	case R_PPC_SECTOFF:

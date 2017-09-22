@@ -112,9 +112,6 @@ xtensa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                              svr4_fetch_objfile_link_map);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_xtensa_linux_tdep;
-
 void
 _initialize_xtensa_linux_tdep (void)
 {

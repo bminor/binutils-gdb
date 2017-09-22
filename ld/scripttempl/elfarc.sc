@@ -262,6 +262,12 @@ cat <<EOF
   } =${NOP-0}
 
   ${DATA_PLT-${BSS_PLT-${PLT}}}
+  .jlitab       ${RELOCATING-0} :
+  {
+    ${RELOCATING+${JLI_START_TABLE}}
+    jlitab*.o(.jlitab*)
+    *(.jlitab*)
+  } =${NOP-0}
   .text         ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}

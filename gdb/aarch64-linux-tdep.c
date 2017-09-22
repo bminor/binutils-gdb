@@ -45,6 +45,8 @@
 
 #include "record-full.h"
 #include "linux-record.h"
+#include "auxv.h"
+#include "elf/common.h"
 
 /* Signal frame handling.
 
@@ -231,6 +233,20 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
       NULL, cb_data);
 }
 
+/* Implement the "core_read_description" gdbarch method.  */
+
+static const struct target_desc *
+aarch64_linux_core_read_description (struct gdbarch *gdbarch,
+				     struct target_ops *target, bfd *abfd)
+{
+  CORE_ADDR aarch64_hwcap = 0;
+
+  if (target_auxv_search (target, AT_HWCAP, &aarch64_hwcap) != 1)
+    return NULL;
+
+  return tdesc_aarch64;
+}
+
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
    gdbarch.h.  */
 
@@ -289,7 +305,7 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
 	       regname, p->saved_arg);
 
       ++tmp;
-      tmp = skip_spaces_const (tmp);
+      tmp = skip_spaces (tmp);
       /* Now we expect a number.  It can begin with '#' or simply
 	 a digit.  */
       if (*tmp == '#')
@@ -1018,6 +1034,8 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, aarch64_linux_iterate_over_regset_sections);
+  set_gdbarch_core_read_description
+    (gdbarch, aarch64_linux_core_read_description);
 
   /* SystemTap related.  */
   set_gdbarch_stap_integer_prefixes (gdbarch, stap_integer_prefixes);
@@ -1208,9 +1226,6 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_displaced_step_hw_singlestep (gdbarch,
 					    aarch64_displaced_step_hw_singlestep);
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_aarch64_linux_tdep;
 
 void
 _initialize_aarch64_linux_tdep (void)

@@ -498,7 +498,7 @@ The following RISC-V-specific disassembler options are supported for use\n\
 with the -M switch (multiple options should be separated by commas):\n"));
 
   fprintf (stream, _("\n\
-  numeric       Print numeric reigster names, rather than ABI names.\n"));
+  numeric       Print numeric register names, rather than ABI names.\n"));
 
   fprintf (stream, _("\n\
   no-aliases    Disassemble only into canonical instructions, rather\n\

@@ -3,7 +3,7 @@
 #source: gotrel1.s
 #source: dso-1.s
 #as: --pic --no-underscore --em=criself
-#ld: -shared -m crislinux -z nocombreloc
+#ld: -shared -m crislinux -z nocombreloc --hash-style=sysv
 #objdump: -sR
 
 # Like gotplt2, but make sure we merge right when we have a

@@ -1,6 +1,6 @@
 #source: bnd-branch-1.s
 #as: --64
-#ld: -z now -shared -melf_x86_64 -z bndplt
+#ld: -z now -shared -melf_x86_64 -z bndplt --hash-style=sysv
 #objdump: -dw
 
 .*: +file format .*

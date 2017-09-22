@@ -1616,8 +1616,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum mips_abi abi = mips_abi (gdbarch);
-  struct tdesc_arch_data *tdesc_data
-    = (struct tdesc_arch_data *) info.tdep_info;
+  struct tdesc_arch_data *tdesc_data = info.tdesc_data;
 
   linux_init_abi (info, gdbarch);
 
@@ -1727,9 +1726,6 @@ mips_linux_init_abi (struct gdbarch_info info,
 				 "restart");
     }
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_mips_linux_tdep;
 
 void
 _initialize_mips_linux_tdep (void)

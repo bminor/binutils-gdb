@@ -57,6 +57,33 @@ amd64bsd_fetch_inferior_registers (struct target_ops *ops,
 	return;
     }
 
+#ifdef PT_GETFSBASE
+  if (regnum == -1 || regnum == AMD64_FSBASE_REGNUM)
+    {
+      register_t base;
+
+      if (ptrace (PT_GETFSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
+	perror_with_name (_("Couldn't get segment register fs_base"));
+
+      regcache_raw_supply (regcache, AMD64_FSBASE_REGNUM, &base);
+      if (regnum != -1)
+	return;
+    }
+#endif
+#ifdef PT_GETGSBASE
+  if (regnum == -1 || regnum == AMD64_GSBASE_REGNUM)
+    {
+      register_t base;
+
+      if (ptrace (PT_GETGSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
+	perror_with_name (_("Couldn't get segment register gs_base"));
+
+      regcache_raw_supply (regcache, AMD64_GSBASE_REGNUM, &base);
+      if (regnum != -1)
+	return;
+    }
+#endif
+
   if (regnum == -1 || !amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
       struct fpreg fpregs;
@@ -107,6 +134,33 @@ amd64bsd_store_inferior_registers (struct target_ops *ops,
       if (regnum != -1)
 	return;
     }
+
+#ifdef PT_SETFSBASE
+  if (regnum == -1 || regnum == AMD64_FSBASE_REGNUM)
+    {
+      register_t base;
+
+      regcache_raw_collect (regcache, AMD64_FSBASE_REGNUM, &base);
+
+      if (ptrace (PT_SETFSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
+	perror_with_name (_("Couldn't write segment register fs_base"));
+      if (regnum != -1)
+	return;
+    }
+#endif
+#ifdef PT_SETGSBASE
+  if (regnum == -1 || regnum == AMD64_GSBASE_REGNUM)
+    {
+      register_t base;
+
+      regcache_raw_collect (regcache, AMD64_GSBASE_REGNUM, &base);
+
+      if (ptrace (PT_SETGSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
+	perror_with_name (_("Couldn't write segment register gs_base"));
+      if (regnum != -1)
+	return;
+    }
+#endif
 
   if (regnum == -1 || !amd64_native_gregset_supplies_p (gdbarch, regnum))
     {

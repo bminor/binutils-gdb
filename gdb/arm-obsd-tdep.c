@@ -114,10 +114,6 @@ armobsd_init_abi (struct gdbarch_info info,
       break;
     }
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_armobsd_tdep;
 
 void
 _initialize_armobsd_tdep (void)

@@ -17,6 +17,9 @@
 #if !defined (CLI_CMDS_H)
 #define CLI_CMDS_H 1
 
+#include "common/filestuff.h"
+#include "common/gdb_optional.h"
+
 /* Chain containing all defined commands.  */
 
 extern struct cmd_list_element *cmdlist;
@@ -117,8 +120,22 @@ extern void source_script (const char *, int);
 
 /* Exported to objfiles.c.  */
 
-extern int find_and_open_script (const char *file, int search_path,
-				 FILE **streamp, char **full_path);
+/* The script that was opened.  */
+struct open_script
+{
+  gdb_file_up stream;
+  gdb::unique_xmalloc_ptr<char> full_path;
+
+  open_script (gdb_file_up &&stream_,
+	       gdb::unique_xmalloc_ptr<char> &&full_path_)
+    : stream (std::move (stream_)),
+      full_path (std::move (full_path_))
+  {
+  }
+};
+
+extern gdb::optional<open_script>
+    find_and_open_script (const char *file, int search_path);
 
 /* Command tracing state.  */
 

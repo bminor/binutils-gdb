@@ -1808,15 +1808,21 @@ obj_mach_o_set_indirect_symbols (bfd *abfd, asection *sec,
 	    {
 	      unsigned n;
 	      bfd_mach_o_asymbol *sym;
+
+	      /* FIXME: It seems that there can be more indirect symbols
+		 than is computed by the loop above.  So be paranoid and
+		 allocate enough space for every symbol to be indirect.
+		 See PR 21939 for an example of where this is needed.  */
+	      if (nactual < bfd_get_symcount (abfd))
+		nactual = bfd_get_symcount (abfd);
+
 	      ms->indirect_syms =
 			bfd_zalloc (abfd,
 				    nactual * sizeof (bfd_mach_o_asymbol *));
 
 	      if (ms->indirect_syms == NULL)
-		{
-		  as_fatal (_("internal error: failed to allocate %d indirect"
-			      "symbol pointers"), nactual);
-		}
+		as_fatal (_("internal error: failed to allocate %d indirect"
+			    "symbol pointers"), nactual);
 
 	      for (isym = list, n = 0; isym != NULL; isym = isym->next, n++)
 		{
@@ -1827,7 +1833,11 @@ obj_mach_o_set_indirect_symbols (bfd *abfd, asection *sec,
 
 		     Absolute symbols are handled specially.  */
 		  if (sym->symbol.section == bfd_abs_section_ptr)
-		    ms->indirect_syms[n] = sym;
+		    {
+		      if (n >= nactual)
+			as_fatal (_("internal error: more indirect mach-o symbols than expected"));
+		      ms->indirect_syms[n] = sym;
+		    }
 		  else if (S_IS_LOCAL (isym->sym) && ! lazy)
 		    ;
 		  else
@@ -1847,6 +1857,8 @@ obj_mach_o_set_indirect_symbols (bfd *abfd, asection *sec,
 			      && ! (sym->n_type & BFD_MACH_O_N_PEXT)
 			      && (sym->n_type & BFD_MACH_O_N_EXT))
 			    sym->n_desc |= lazy;
+			  if (n >= nactual)
+			    as_fatal (_("internal error: more indirect mach-o symbols than expected"));
 			  ms->indirect_syms[n] = sym;
 		        }
 		    }

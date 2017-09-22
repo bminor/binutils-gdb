@@ -30,6 +30,7 @@
 #include "gdbthread.h"
 #include "regcache.h"
 #include "inf-child.h"
+#include "nat/fork-inferior.h"
 #include "filestuff.h"
 
 #if defined (NEW_PROC_API)
@@ -5100,7 +5101,6 @@ procfs_info_proc (struct target_ops *ops, const char *args,
   struct cleanup *old_chain;
   procinfo *process  = NULL;
   procinfo *thread   = NULL;
-  char    **argv     = NULL;
   char     *tmp      = NULL;
   int       pid      = 0;
   int       tid      = 0;
@@ -5121,24 +5121,19 @@ procfs_info_proc (struct target_ops *ops, const char *args,
     }
 
   old_chain = make_cleanup (null_cleanup, 0);
-  if (args)
+  gdb_argv built_argv (args);
+  for (char *arg : built_argv)
     {
-      argv = gdb_buildargv (args);
-      make_cleanup_freeargv (argv);
-    }
-  while (argv != NULL && *argv != NULL)
-    {
-      if (isdigit (argv[0][0]))
+      if (isdigit (arg[0]))
 	{
-	  pid = strtoul (argv[0], &tmp, 10);
+	  pid = strtoul (arg, &tmp, 10);
 	  if (*tmp == '/')
 	    tid = strtoul (++tmp, NULL, 10);
 	}
-      else if (argv[0][0] == '/')
+      else if (arg[0] == '/')
 	{
-	  tid = strtoul (argv[0] + 1, NULL, 10);
+	  tid = strtoul (arg + 1, NULL, 10);
 	}
-      argv++;
     }
   if (pid == 0)
     pid = ptid_get_pid (inferior_ptid);
@@ -5272,10 +5267,6 @@ proc_untrace_sysexit_cmd (char *args, int from_tty)
   proc_trace_syscalls (args, from_tty, PR_SYSEXIT, FLAG_RESET);
 }
 
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_procfs (void);
-
 void
 _initialize_procfs (void)
 {
@@ -5322,7 +5313,6 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
   gdb_gregset_t gregs;
   gdb_fpregset_t fpregs;
   unsigned long merged_pid;
-  struct cleanup *old_chain;
 
   merged_pid = ptid_get_lwp (ptid) << 16 | ptid_get_pid (ptid);
 
@@ -5331,7 +5321,7 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
      once it is implemented in this platform:
      gdbarch_iterate_over_regset_sections().  */
 
-  old_chain = save_inferior_ptid ();
+  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
   inferior_ptid = ptid;
   target_fetch_registers (regcache, -1);
 
@@ -5357,8 +5347,6 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
 					      note_size,
 					      &fpregs,
 					      sizeof (fpregs));
-
-  do_cleanups (old_chain);
 
   return note_data;
 }

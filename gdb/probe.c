@@ -38,11 +38,6 @@
 #include <algorithm>
 #include "common/gdb_optional.h"
 
-typedef struct bound_probe bound_probe_s;
-DEF_VEC_O (bound_probe_s);
-
-
-
 /* A helper for parse_probes that decodes a probe specification in
    SEARCH_PSPACE.  It appends matching SALs to RESULT.  */
 
@@ -52,16 +47,12 @@ parse_probes_in_pspace (const struct probe_ops *probe_ops,
 			const char *objfile_namestr,
 			const char *provider,
 			const char *name,
-			struct symtabs_and_lines *result)
+			std::vector<symtab_and_line> *result)
 {
   struct objfile *objfile;
 
   ALL_PSPACE_OBJFILES (search_pspace, objfile)
     {
-      VEC (probe_p) *probes;
-      struct probe *probe;
-      int ix;
-
       if (!objfile->sf || !objfile->sf->sym_probe_fns)
 	continue;
 
@@ -71,12 +62,11 @@ parse_probes_in_pspace (const struct probe_ops *probe_ops,
 			   objfile_namestr) != 0)
 	continue;
 
-      probes = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
+      const std::vector<probe *> &probes
+	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
 
-      for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)
+      for (struct probe *probe : probes)
 	{
-	  struct symtab_and_line *sal;
-
 	  if (probe_ops != &probe_ops_any && probe->pops != probe_ops)
 	    continue;
 
@@ -86,26 +76,22 @@ parse_probes_in_pspace (const struct probe_ops *probe_ops,
 	  if (strcmp (probe->name, name) != 0)
 	    continue;
 
-	  ++result->nelts;
-	  result->sals = XRESIZEVEC (struct symtab_and_line, result->sals,
-				     result->nelts);
-	  sal = &result->sals[result->nelts - 1];
+	  symtab_and_line sal;
+	  sal.pc = get_probe_address (probe, objfile);
+	  sal.explicit_pc = 1;
+	  sal.section = find_pc_overlay (sal.pc);
+	  sal.pspace = search_pspace;
+	  sal.probe = probe;
+	  sal.objfile = objfile;
 
-	  init_sal (sal);
-
-	  sal->pc = get_probe_address (probe, objfile);
-	  sal->explicit_pc = 1;
-	  sal->section = find_pc_overlay (sal->pc);
-	  sal->pspace = search_pspace;
-	  sal->probe = probe;
-	  sal->objfile = objfile;
+	  result->push_back (std::move (sal));
 	}
     }
 }
 
 /* See definition in probe.h.  */
 
-struct symtabs_and_lines
+std::vector<symtab_and_line>
 parse_probes (const struct event_location *location,
 	      struct program_space *search_pspace,
 	      struct linespec_result *canonical)
@@ -113,12 +99,8 @@ parse_probes (const struct event_location *location,
   char *arg_end, *arg;
   char *objfile_namestr = NULL, *provider = NULL, *name, *p;
   struct cleanup *cleanup;
-  struct symtabs_and_lines result;
   const struct probe_ops *probe_ops;
   const char *arg_start, *cs;
-
-  result.sals = NULL;
-  result.nelts = 0;
 
   gdb_assert (event_location_type (location) == PROBE_LOCATION);
   arg_start = get_probe_location (location);
@@ -175,6 +157,7 @@ parse_probes (const struct event_location *location,
   if (objfile_namestr && *objfile_namestr == '\0')
     error (_("invalid objfile name"));
 
+  std::vector<symtab_and_line> result;
   if (search_pspace != NULL)
     {
       parse_probes_in_pspace (probe_ops, search_pspace, objfile_namestr,
@@ -189,7 +172,7 @@ parse_probes (const struct event_location *location,
 				provider, name, &result);
     }
 
-  if (result.nelts == 0)
+  if (result.empty ())
     {
       throw_error (NOT_FOUND_ERROR,
 		   _("No probe matching objfile=`%s', provider=`%s', name=`%s'"),
@@ -220,15 +203,14 @@ VEC (probe_p) *
 find_probes_in_objfile (struct objfile *objfile, const char *provider,
 			const char *name)
 {
-  VEC (probe_p) *probes, *result = NULL;
-  int ix;
-  struct probe *probe;
+  VEC (probe_p) *result = NULL;
 
   if (!objfile->sf || !objfile->sf->sym_probe_fns)
     return NULL;
 
-  probes = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
-  for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)
+  const std::vector<probe *> &probes
+    = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
+  for (struct probe *probe : probes)
     {
       if (strcmp (probe->provider, provider) != 0)
 	continue;
@@ -255,17 +237,14 @@ find_probe_by_pc (CORE_ADDR pc)
 
   ALL_OBJFILES (objfile)
   {
-    VEC (probe_p) *probes;
-    int ix;
-    struct probe *probe;
-
     if (!objfile->sf || !objfile->sf->sym_probe_fns
 	|| objfile->sect_index_text == -1)
       continue;
 
     /* If this proves too inefficient, we can replace with a hash.  */
-    probes = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
-    for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)
+    const std::vector<probe *> &probes
+      = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
+    for (struct probe *probe : probes)
       if (get_probe_address (probe, objfile) == pc)
 	{
 	  result.objfile = objfile;
@@ -283,96 +262,84 @@ find_probe_by_pc (CORE_ADDR pc)
    If POPS is not NULL, only probes of this certain probe_ops will match.
    Each argument is a regexp, or NULL, which matches anything.  */
 
-static VEC (bound_probe_s) *
-collect_probes (char *objname, char *provider, char *probe_name,
-		const struct probe_ops *pops)
+static std::vector<bound_probe>
+collect_probes (const std::string &objname, const std::string &provider,
+		const std::string &probe_name, const struct probe_ops *pops)
 {
   struct objfile *objfile;
-  VEC (bound_probe_s) *result = NULL;
-  struct cleanup *cleanup;
+  std::vector<bound_probe> result;
   gdb::optional<compiled_regex> obj_pat, prov_pat, probe_pat;
 
-  cleanup = make_cleanup (VEC_cleanup (bound_probe_s), &result);
-
-  if (provider != NULL)
-    prov_pat.emplace (provider, REG_NOSUB, _("Invalid provider regexp"));
-  if (probe_name != NULL)
-    probe_pat.emplace (probe_name, REG_NOSUB, _("Invalid probe regexp"));
-  if (objname != NULL)
-    obj_pat.emplace (objname, REG_NOSUB, _("Invalid object file regexp"));
+  if (!provider.empty ())
+    prov_pat.emplace (provider.c_str (), REG_NOSUB,
+		      _("Invalid provider regexp"));
+  if (!probe_name.empty ())
+    probe_pat.emplace (probe_name.c_str (), REG_NOSUB,
+		       _("Invalid probe regexp"));
+  if (!objname.empty ())
+    obj_pat.emplace (objname.c_str (), REG_NOSUB,
+		     _("Invalid object file regexp"));
 
   ALL_OBJFILES (objfile)
     {
-      VEC (probe_p) *probes;
-      struct probe *probe;
-      int ix;
-
       if (! objfile->sf || ! objfile->sf->sym_probe_fns)
 	continue;
 
-      if (objname)
+      if (obj_pat)
 	{
 	  if (obj_pat->exec (objfile_name (objfile), 0, NULL, 0) != 0)
 	    continue;
 	}
 
-      probes = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
+      const std::vector<probe *> &probes
+	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
 
-      for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)
+      for (struct probe *probe : probes)
 	{
-	  struct bound_probe bound;
-
 	  if (pops != NULL && probe->pops != pops)
 	    continue;
 
-	  if (provider
+	  if (prov_pat
 	      && prov_pat->exec (probe->provider, 0, NULL, 0) != 0)
 	    continue;
 
-	  if (probe_name
+	  if (probe_pat
 	      && probe_pat->exec (probe->name, 0, NULL, 0) != 0)
 	    continue;
 
-	  bound.objfile = objfile;
-	  bound.probe = probe;
-	  VEC_safe_push (bound_probe_s, result, &bound);
+	  result.emplace_back (probe, objfile);
 	}
     }
 
-  discard_cleanups (cleanup);
   return result;
 }
 
 /* A qsort comparison function for bound_probe_s objects.  */
 
-static int
-compare_probes (const void *a, const void *b)
+static bool
+compare_probes (const bound_probe &a, const bound_probe &b)
 {
-  const struct bound_probe *pa = (const struct bound_probe *) a;
-  const struct bound_probe *pb = (const struct bound_probe *) b;
   int v;
 
-  v = strcmp (pa->probe->provider, pb->probe->provider);
-  if (v)
-    return v;
+  v = strcmp (a.probe->provider, b.probe->provider);
+  if (v != 0)
+    return v < 0;
 
-  v = strcmp (pa->probe->name, pb->probe->name);
-  if (v)
-    return v;
+  v = strcmp (a.probe->name, b.probe->name);
+  if (v != 0)
+    return v < 0;
 
-  if (pa->probe->address < pb->probe->address)
-    return -1;
-  if (pa->probe->address > pb->probe->address)
-    return 1;
+  if (a.probe->address != b.probe->address)
+    return a.probe->address < b.probe->address;
 
-  return strcmp (objfile_name (pa->objfile), objfile_name (pb->objfile));
+  return strcmp (objfile_name (a.objfile), objfile_name (b.objfile)) < 0;
 }
 
 /* Helper function that generate entries in the ui_out table being
    crafted by `info_probes_for_ops'.  */
 
 static void
-gen_ui_out_table_header_info (VEC (bound_probe_s) *probes,
+gen_ui_out_table_header_info (const std::vector<bound_probe> &probes,
 			      const struct probe_ops *p)
 {
   /* `headings' refers to the names of the columns when printing `info
@@ -401,11 +368,9 @@ gen_ui_out_table_header_info (VEC (bound_probe_s) *probes,
        VEC_iterate (info_probe_column_s, headings, ix, column);
        ++ix)
     {
-      struct bound_probe *probe;
-      int jx;
       size_t size_max = strlen (column->print_name);
 
-      for (jx = 0; VEC_iterate (bound_probe_s, probes, jx, probe); ++jx)
+      for (const bound_probe &probe : probes)
 	{
 	  /* `probe_fields' refers to the values of each new field that this
 	     probe will display.  */
@@ -414,11 +379,11 @@ gen_ui_out_table_header_info (VEC (bound_probe_s) *probes,
 	  const char *val;
 	  int kx;
 
-	  if (probe->probe->pops != p)
+	  if (probe.probe->pops != p)
 	    continue;
 
 	  c2 = make_cleanup (VEC_cleanup (const_char_ptr), &probe_fields);
-	  p->gen_info_probes_table_values (probe->probe, &probe_fields);
+	  p->gen_info_probes_table_values (probe.probe, &probe_fields);
 
 	  gdb_assert (VEC_length (const_char_ptr, probe_fields)
 		      == headings_size);
@@ -545,14 +510,14 @@ get_number_extra_fields (const struct probe_ops *pops)
    featuring the given POPS.  It returns 0 otherwise.  */
 
 static int
-exists_probe_with_pops (VEC (bound_probe_s) *probes,
+exists_probe_with_pops (const std::vector<bound_probe> &probes,
 			const struct probe_ops *pops)
 {
   struct bound_probe *probe;
   int ix;
 
-  for (ix = 0; VEC_iterate (bound_probe_s, probes, ix, probe); ++ix)
-    if (probe->probe->pops == pops)
+  for (const bound_probe &probe : probes)
+    if (probe.probe->pops == pops)
       return 1;
 
   return 0;
@@ -562,17 +527,17 @@ exists_probe_with_pops (VEC (bound_probe_s) *probes,
    [PROBE [OBJNAME]]] from the provided string STR.  */
 
 static void
-parse_probe_linespec (const char *str, char **provider,
-		      char **probe_name, char **objname)
+parse_probe_linespec (const char *str, std::string *provider,
+		      std::string *probe_name, std::string *objname)
 {
-  *probe_name = *objname = NULL;
+  *probe_name = *objname = "";
 
-  *provider = extract_arg_const (&str);
-  if (*provider != NULL)
+  *provider = extract_arg (&str);
+  if (!provider->empty ())
     {
-      *probe_name = extract_arg_const (&str);
-      if (*probe_name != NULL)
-	*objname = extract_arg_const (&str);
+      *probe_name = extract_arg (&str);
+      if (!probe_name->empty ())
+	*objname = extract_arg (&str);
     }
 }
 
@@ -582,32 +547,24 @@ void
 info_probes_for_ops (const char *arg, int from_tty,
 		     const struct probe_ops *pops)
 {
-  char *provider, *probe_name = NULL, *objname = NULL;
+  std::string provider, probe_name, objname;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
-  VEC (bound_probe_s) *probes;
-  int i, any_found;
+  int any_found;
   int ui_out_extra_fields = 0;
   size_t size_addr;
   size_t size_name = strlen ("Name");
   size_t size_objname = strlen ("Object");
   size_t size_provider = strlen ("Provider");
   size_t size_type = strlen ("Type");
-  struct bound_probe *probe;
   struct gdbarch *gdbarch = get_current_arch ();
 
   parse_probe_linespec (arg, &provider, &probe_name, &objname);
-  make_cleanup (xfree, provider);
-  make_cleanup (xfree, probe_name);
-  make_cleanup (xfree, objname);
 
-  probes = collect_probes (objname, provider, probe_name, pops);
-  make_cleanup (VEC_cleanup (probe_p), &probes);
+  std::vector<bound_probe> probes
+    = collect_probes (objname, provider, probe_name, pops);
 
   if (pops == NULL)
     {
-      const struct probe_ops *po;
-      int ix;
-
       /* If the probe_ops is NULL, it means the user has requested a "simple"
 	 `info probes', i.e., she wants to print all information about all
 	 probes.  For that, we have to identify how many extra fields we will
@@ -618,97 +575,88 @@ info_probes_for_ops (const char *arg, int from_tty,
 	 that number.  But note that we ignore the probe_ops for which no probes
 	 are defined with the given search criteria.  */
 
-      for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, po); ++ix)
+      for (const probe_ops *po : all_probe_ops)
 	if (exists_probe_with_pops (probes, po))
 	  ui_out_extra_fields += get_number_extra_fields (po);
     }
   else
     ui_out_extra_fields = get_number_extra_fields (pops);
 
-  make_cleanup_ui_out_table_begin_end (current_uiout,
-				       5 + ui_out_extra_fields,
-				       VEC_length (bound_probe_s, probes),
-				       "StaticProbes");
+  {
+    ui_out_emit_table table_emitter (current_uiout,
+				     5 + ui_out_extra_fields,
+				     probes.size (), "StaticProbes");
 
-  if (!VEC_empty (bound_probe_s, probes))
-    qsort (VEC_address (bound_probe_s, probes),
-	   VEC_length (bound_probe_s, probes),
-	   sizeof (bound_probe_s), compare_probes);
+    std::sort (probes.begin (), probes.end (), compare_probes);
 
-  /* What's the size of an address in our architecture?  */
-  size_addr = gdbarch_addr_bit (gdbarch) == 64 ? 18 : 10;
+    /* What's the size of an address in our architecture?  */
+    size_addr = gdbarch_addr_bit (gdbarch) == 64 ? 18 : 10;
 
-  /* Determining the maximum size of each field (`type', `provider',
-     `name' and `objname').  */
-  for (i = 0; VEC_iterate (bound_probe_s, probes, i, probe); ++i)
-    {
-      const char *probe_type = probe->probe->pops->type_name (probe->probe);
+    /* Determining the maximum size of each field (`type', `provider',
+       `name' and `objname').  */
+    for (const bound_probe &probe : probes)
+      {
+	const char *probe_type = probe.probe->pops->type_name (probe.probe);
 
-      size_type = std::max (strlen (probe_type), size_type);
-      size_name = std::max (strlen (probe->probe->name), size_name);
-      size_provider = std::max (strlen (probe->probe->provider), size_provider);
-      size_objname = std::max (strlen (objfile_name (probe->objfile)),
-			       size_objname);
-    }
+	size_type = std::max (strlen (probe_type), size_type);
+	size_name = std::max (strlen (probe.probe->name), size_name);
+	size_provider = std::max (strlen (probe.probe->provider), size_provider);
+	size_objname = std::max (strlen (objfile_name (probe.objfile)),
+				 size_objname);
+      }
 
-  current_uiout->table_header (size_type, ui_left, "type", _("Type"));
-  current_uiout->table_header (size_provider, ui_left, "provider",
-			       _("Provider"));
-  current_uiout->table_header (size_name, ui_left, "name", _("Name"));
-  current_uiout->table_header (size_addr, ui_left, "addr", _("Where"));
+    current_uiout->table_header (size_type, ui_left, "type", _("Type"));
+    current_uiout->table_header (size_provider, ui_left, "provider",
+				 _("Provider"));
+    current_uiout->table_header (size_name, ui_left, "name", _("Name"));
+    current_uiout->table_header (size_addr, ui_left, "addr", _("Where"));
 
-  if (pops == NULL)
-    {
-      const struct probe_ops *po;
-      int ix;
+    if (pops == NULL)
+      {
+	/* We have to generate the table header for each new probe type
+	   that we will print.  Note that this excludes probe types not
+	   having any defined probe with the search criteria.  */
+	for (const probe_ops *po : all_probe_ops)
+	  if (exists_probe_with_pops (probes, po))
+	    gen_ui_out_table_header_info (probes, po);
+      }
+    else
+      gen_ui_out_table_header_info (probes, pops);
 
-      /* We have to generate the table header for each new probe type
-	 that we will print.  Note that this excludes probe types not
-	 having any defined probe with the search criteria.  */
-      for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, po); ++ix)
-	if (exists_probe_with_pops (probes, po))
-	  gen_ui_out_table_header_info (probes, po);
-    }
-  else
-    gen_ui_out_table_header_info (probes, pops);
+    current_uiout->table_header (size_objname, ui_left, "object", _("Object"));
+    current_uiout->table_body ();
 
-  current_uiout->table_header (size_objname, ui_left, "object", _("Object"));
-  current_uiout->table_body ();
+    for (const bound_probe &probe : probes)
+      {
+	const char *probe_type = probe.probe->pops->type_name (probe.probe);
 
-  for (i = 0; VEC_iterate (bound_probe_s, probes, i, probe); ++i)
-    {
-      const char *probe_type = probe->probe->pops->type_name (probe->probe);
+	ui_out_emit_tuple tuple_emitter (current_uiout, "probe");
 
-      ui_out_emit_tuple tuple_emitter (current_uiout, "probe");
+	current_uiout->field_string ("type",probe_type);
+	current_uiout->field_string ("provider", probe.probe->provider);
+	current_uiout->field_string ("name", probe.probe->name);
+	current_uiout->field_core_addr ("addr", probe.probe->arch,
+					get_probe_address (probe.probe,
+							   probe.objfile));
 
-      current_uiout->field_string ("type",probe_type);
-      current_uiout->field_string ("provider", probe->probe->provider);
-      current_uiout->field_string ("name", probe->probe->name);
-      current_uiout->field_core_addr (
-	"addr", probe->probe->arch,
-	get_probe_address (probe->probe, probe->objfile));
+	if (pops == NULL)
+	  {
+	    for (const probe_ops *po : all_probe_ops)
+	      if (probe.probe->pops == po)
+		print_ui_out_info (probe.probe);
+	      else if (exists_probe_with_pops (probes, po))
+		print_ui_out_not_applicables (po);
+	  }
+	else
+	  print_ui_out_info (probe.probe);
 
-      if (pops == NULL)
-	{
-	  const struct probe_ops *po;
-	  int ix;
+	current_uiout->field_string ("object",
+				     objfile_name (probe.objfile));
+	current_uiout->text ("\n");
+      }
 
-	  for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, po);
-	       ++ix)
-	    if (probe->probe->pops == po)
-	      print_ui_out_info (probe->probe);
-	    else if (exists_probe_with_pops (probes, po))
-	      print_ui_out_not_applicables (po);
-	}
-      else
-	print_ui_out_info (probe->probe);
-
-      current_uiout->field_string ("object",
-			   objfile_name (probe->objfile));
-      current_uiout->text ("\n");
-    }
-
-  any_found = !VEC_empty (bound_probe_s, probes);
+    any_found = !probes.empty ();
+  }
   do_cleanups (cleanup);
 
   if (!any_found)
@@ -728,19 +676,14 @@ info_probes_command (char *arg, int from_tty)
 static void
 enable_probes_command (char *arg, int from_tty)
 {
-  char *provider, *probe_name = NULL, *objname = NULL;
+  std::string provider, probe_name, objname;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
-  VEC (bound_probe_s) *probes;
-  struct bound_probe *probe;
-  int i;
 
   parse_probe_linespec ((const char *) arg, &provider, &probe_name, &objname);
-  make_cleanup (xfree, provider);
-  make_cleanup (xfree, probe_name);
-  make_cleanup (xfree, objname);
 
-  probes = collect_probes (objname, provider, probe_name, NULL);
-  if (VEC_empty (bound_probe_s, probes))
+  std::vector<bound_probe> probes
+    = collect_probes (objname, provider, probe_name, NULL);
+  if (probes.empty ())
     {
       current_uiout->message (_("No probes matched.\n"));
       do_cleanups (cleanup);
@@ -749,19 +692,19 @@ enable_probes_command (char *arg, int from_tty)
 
   /* Enable the selected probes, provided their backends support the
      notion of enabling a probe.  */
-  for (i = 0; VEC_iterate (bound_probe_s, probes, i, probe); ++i)
+  for (const bound_probe &probe: probes)
     {
-      const struct probe_ops *pops = probe->probe->pops;
+      const struct probe_ops *pops = probe.probe->pops;
 
       if (pops->enable_probe != NULL)
 	{
-	  pops->enable_probe (probe->probe);
+	  pops->enable_probe (probe.probe);
 	  current_uiout->message (_("Probe %s:%s enabled.\n"),
-				  probe->probe->provider, probe->probe->name);
+				  probe.probe->provider, probe.probe->name);
 	}
       else
 	current_uiout->message (_("Probe %s:%s cannot be enabled.\n"),
-				probe->probe->provider, probe->probe->name);
+				probe.probe->provider, probe.probe->name);
     }
 
   do_cleanups (cleanup);
@@ -772,19 +715,14 @@ enable_probes_command (char *arg, int from_tty)
 static void
 disable_probes_command (char *arg, int from_tty)
 {
-  char *provider, *probe_name = NULL, *objname = NULL;
+  std::string provider, probe_name, objname;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
-  VEC (bound_probe_s) *probes;
-  struct bound_probe *probe;
-  int i;
 
   parse_probe_linespec ((const char *) arg, &provider, &probe_name, &objname);
-  make_cleanup (xfree, provider);
-  make_cleanup (xfree, probe_name);
-  make_cleanup (xfree, objname);
 
-  probes = collect_probes (objname, provider, probe_name, NULL /* pops */);
-  if (VEC_empty (bound_probe_s, probes))
+  std::vector<bound_probe> probes
+    = collect_probes (objname, provider, probe_name, NULL /* pops */);
+  if (probes.empty ())
     {
       current_uiout->message (_("No probes matched.\n"));
       do_cleanups (cleanup);
@@ -793,19 +731,19 @@ disable_probes_command (char *arg, int from_tty)
 
   /* Disable the selected probes, provided their backends support the
      notion of enabling a probe.  */
-  for (i = 0; VEC_iterate (bound_probe_s, probes, i, probe); ++i)
+  for (const bound_probe &probe : probes)
     {
-      const struct probe_ops *pops = probe->probe->pops;
+      const struct probe_ops *pops = probe.probe->pops;
 
       if (pops->disable_probe != NULL)
 	{
-	  pops->disable_probe (probe->probe);
+	  pops->disable_probe (probe.probe);
 	  current_uiout->message (_("Probe %s:%s disabled.\n"),
-				  probe->probe->provider, probe->probe->name);
+				  probe.probe->provider, probe.probe->name);
 	}
       else
 	current_uiout->message (_("Probe %s:%s cannot be disabled.\n"),
-				probe->probe->provider, probe->probe->name);
+				probe.probe->provider, probe.probe->name);
     }
 
   do_cleanups (cleanup);
@@ -868,12 +806,9 @@ probe_safe_evaluate_at_pc (struct frame_info *frame, unsigned n)
 const struct probe_ops *
 probe_linespec_to_ops (const char **linespecp)
 {
-  int ix;
-  const struct probe_ops *probe_ops;
-
-  for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, probe_ops); ix++)
-    if (probe_ops->is_linespec (linespecp))
-      return probe_ops;
+  for (const probe_ops *ops : all_probe_ops)
+    if (ops->is_linespec (linespecp))
+      return ops;
 
   return NULL;
 }
@@ -914,7 +849,7 @@ probe_any_is_linespec (const char **linespecp)
 /* Dummy method used for `probe_ops_any'.  */
 
 static void
-probe_any_get_probes (VEC (probe_p) **probesp, struct objfile *objfile)
+probe_any_get_probes (std::vector<probe *> *probesp, struct objfile *objfile)
 {
   /* No probes can be provided by this dummy backend.  */
 }
@@ -1032,14 +967,12 @@ static const struct internalvar_funcs probe_funcs =
 };
 
 
-VEC (probe_ops_cp) *all_probe_ops;
-
-void _initialize_probe (void);
+std::vector<const probe_ops *> all_probe_ops;
 
 void
 _initialize_probe (void)
 {
-  VEC_safe_push (probe_ops_cp, all_probe_ops, &probe_ops_any);
+  all_probe_ops.push_back (&probe_ops_any);
 
   create_internalvar_type_lazy ("_probe_argc", &probe_funcs,
 				(void *) (uintptr_t) -1);

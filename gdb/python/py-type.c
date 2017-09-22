@@ -761,7 +761,6 @@ typy_lookup_type (struct demangle_component *demangled,
 		  const struct block *block)
 {
   struct type *type, *rtype = NULL;
-  char *type_name = NULL;
   enum demangle_component_type demangled_type;
 
   /* Save the type: typy_lookup_type() may (indirectly) overwrite
@@ -816,11 +815,8 @@ typy_lookup_type (struct demangle_component *demangled,
     return rtype;
 
   /* We don't have a type, so lookup the type.  */
-  type_name = cp_comp_to_string (demangled, 10);
-  type = typy_lookup_typename (type_name, block);
-  xfree (type_name);
-
-  return type;
+  gdb::unique_xmalloc_ptr<char> type_name = cp_comp_to_string (demangled, 10);
+  return typy_lookup_typename (type_name.get (), block);
 }
 
 /* This is a helper function for typy_template_argument that is used

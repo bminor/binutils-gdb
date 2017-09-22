@@ -138,4 +138,6 @@ extern struct trad_frame_saved_reg *
 
 extern const struct sparc_fpregmap sparc64_bsd_fpregmap;
 
+extern void sparc64_forget_process (pid_t pid);
+
 #endif /* sparc64-tdep.h */

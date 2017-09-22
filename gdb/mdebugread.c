@@ -68,8 +68,6 @@
 
 #include "expression.h"
 
-extern void _initialize_mdebugread (void);
-
 /* Provide a way to test if we have both ECOFF and ELF symbol tables.
    We use this define in order to know whether we should override a 
    symbol's ECOFF section with its ELF section.  This is necessary in 

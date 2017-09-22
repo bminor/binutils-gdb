@@ -618,7 +618,7 @@
     #26             48  0x00000030  struct no name { ifd = -1, index = 1048575 }
 */
 
-/* Redefinition of of storage classes as an enumeration for better
+/* Redefinition of storage classes as an enumeration for better
    debugging.  */
 
 typedef enum sc {

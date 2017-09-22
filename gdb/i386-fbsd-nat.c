@@ -30,6 +30,7 @@
 #include "fbsd-nat.h"
 #include "i386-tdep.h"
 #include "x86-nat.h"
+#include "x86-xstate.h"
 #include "x86-bsd-nat.h"
 #include "i386-bsd-nat.h"
 
@@ -139,17 +140,12 @@ i386fbsd_read_description (struct target_ops *ops)
       xsave_probed = 1;
     }
 
-  if (x86bsd_xsave_len != 0)
-    {
-      return i386_target_description (xcr0);
-    }
-  else
-    return tdesc_i386;
+  if (x86bsd_xsave_len == 0)
+    xcr0 = X86_XSTATE_SSE_MASK;
+
+  return i386_target_description (xcr0);
 }
 #endif
-
-/* Prevent warning from -Wmissing-prototypes.  */
-void _initialize_i386fbsd_nat (void);
 
 void
 _initialize_i386fbsd_nat (void)

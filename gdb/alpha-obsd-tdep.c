@@ -126,9 +126,6 @@ alphaobsd_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_alphaobsd_tdep (void);
-
 void
 _initialize_alphaobsd_tdep (void)
 {

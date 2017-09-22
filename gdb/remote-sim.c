@@ -44,8 +44,6 @@
 
 /* Prototypes */
 
-extern void _initialize_remote_sim (void);
-
 static void init_callbacks (void);
 
 static void end_callbacks (void);
@@ -562,7 +560,6 @@ gdbsim_kill (struct target_ops *ops)
 static void
 gdbsim_load (struct target_ops *self, const char *args, int fromtty)
 {
-  char **argv;
   const char *prog;
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NEEDED);
@@ -570,8 +567,7 @@ gdbsim_load (struct target_ops *self, const char *args, int fromtty)
   if (args == NULL)
       error_no_arg (_("program to load"));
 
-  argv = gdb_buildargv (args);
-  make_cleanup_freeargv (argv);
+  gdb_argv argv (args);
 
   prog = tilde_expand (argv[0]);
 
@@ -609,7 +605,7 @@ gdbsim_create_inferior (struct target_ops *target, const char *exec_file,
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NEEDED);
   int len;
-  char *arg_buf, **argv;
+  char *arg_buf;
   const char *args = allargs.c_str ();
 
   if (exec_file == 0 || exec_bfd == 0)
@@ -628,6 +624,7 @@ gdbsim_create_inferior (struct target_ops *target, const char *exec_file,
   remove_breakpoints ();
   init_wait_for_inferior ();
 
+  gdb_argv built_argv;
   if (exec_file != NULL)
     {
       len = strlen (exec_file) + 1 + allargs.size () + 1 + /*slop */ 10;
@@ -636,16 +633,14 @@ gdbsim_create_inferior (struct target_ops *target, const char *exec_file,
       strcat (arg_buf, exec_file);
       strcat (arg_buf, " ");
       strcat (arg_buf, args);
-      argv = gdb_buildargv (arg_buf);
-      make_cleanup_freeargv (argv);
+      built_argv.reset (arg_buf);
     }
-  else
-    argv = NULL;
 
   if (!have_inferiors ())
     init_thread_list ();
 
-  if (sim_create_inferior (sim_data->gdbsim_desc, exec_bfd, argv, env)
+  if (sim_create_inferior (sim_data->gdbsim_desc, exec_bfd,
+			   built_argv.get (), env)
       != SIM_RC_OK)
     error (_("Unable to create sim inferior."));
 
@@ -728,17 +723,20 @@ gdbsim_open (const char *args, int from_tty)
       strcat (arg_buf, " ");	/* 1 */
       strcat (arg_buf, args);
     }
-  sim_argv = gdb_buildargv (arg_buf);
+
+  gdb_argv argv (arg_buf);
+  sim_argv = argv.get ();
 
   init_callbacks ();
   gdbsim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback, exec_bfd, sim_argv);
 
   if (gdbsim_desc == 0)
     {
-      freeargv (sim_argv);
       sim_argv = NULL;
       error (_("unable to create simulator instance"));
     }
+
+  argv.release ();
 
   /* Reset the pid numberings for this batch of sim instances.  */
   next_pid = INITIAL_PID;
@@ -1220,30 +1218,48 @@ simulator_command (char *args, int from_tty)
   registers_changed ();
 }
 
-static VEC (char_ptr) *
-sim_command_completer (struct cmd_list_element *ignore, const char *text,
-		       const char *word)
+static void
+sim_command_completer (struct cmd_list_element *ignore,
+		       completion_tracker &tracker,
+		       const char *text, const char *word)
 {
   struct sim_inferior_data *sim_data;
-  char **tmp;
-  int i;
-  VEC (char_ptr) *result = NULL;
 
   sim_data = ((struct sim_inferior_data *)
 	      inferior_data (current_inferior (), sim_inferior_data_key));
   if (sim_data == NULL || sim_data->gdbsim_desc == NULL)
-    return NULL;
+    return;
 
-  tmp = sim_complete_command (sim_data->gdbsim_desc, text, word);
-  if (tmp == NULL)
-    return NULL;
+  /* sim_complete_command returns a NULL-terminated malloc'ed array of
+     malloc'ed strings.  */
+  struct sim_completions_deleter
+  {
+    void operator() (char **ptr) const
+    {
+      for (size_t i = 0; ptr[i] != NULL; i++)
+	xfree (ptr[i]);
+      xfree (ptr);
+    }
+  };
 
-  /* Transform the array into a VEC, and then free the array.  */
-  for (i = 0; tmp[i] != NULL; i++)
-    VEC_safe_push (char_ptr, result, tmp[i]);
-  xfree (tmp);
+  std::unique_ptr<char *[], sim_completions_deleter> sim_completions
+    (sim_complete_command (sim_data->gdbsim_desc, text, word));
+  if (sim_completions == NULL)
+    return;
 
-  return result;
+  /* Count the elements and add completions from tail to head because
+     below we'll swap elements out of the array in case add_completion
+     throws and the deleter deletes until it finds a NULL element.  */
+  size_t count = 0;
+  while (sim_completions[count] != NULL)
+    count++;
+
+  for (size_t i = count; i > 0; i--)
+    {
+      gdb::unique_xmalloc_ptr<char> match (sim_completions[i - 1]);
+      sim_completions[i - 1] = NULL;
+      tracker.add_completion (std::move (match));
+    }
 }
 
 /* Check to see if a thread is still alive.  */

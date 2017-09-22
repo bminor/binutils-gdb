@@ -3184,9 +3184,6 @@ xcoff_free_info (struct objfile *objfile, void *arg)
   xfree (arg);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_xcoffread;
-
 void
 _initialize_xcoffread (void)
 {

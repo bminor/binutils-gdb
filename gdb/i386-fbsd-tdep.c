@@ -248,14 +248,14 @@ i386fbsd_core_read_xcr0 (bfd *abfd)
 	    {
 	      warning (_("Couldn't read `xcr0' bytes from "
 			 "`.reg-xstate' section in core file."));
-	      return 0;
+	      return X86_XSTATE_SSE_MASK;
 	    }
 
 	  xcr0 = bfd_get_64 (abfd, contents);
 	}
     }
   else
-    xcr0 = 0;
+    xcr0 = X86_XSTATE_SSE_MASK;
 
   return xcr0;
 }
@@ -416,10 +416,6 @@ i386fbsd4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_core_read_description (gdbarch,
 				     i386fbsd_core_read_description);
 }
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_i386fbsd_tdep (void);
 
 void
 _initialize_i386fbsd_tdep (void)

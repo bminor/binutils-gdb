@@ -448,6 +448,10 @@ extern struct thread_info *find_thread_ptid (ptid_t ptid);
 /* Find thread by GDB global thread ID.  */
 struct thread_info *find_thread_global_id (int global_id);
 
+/* Find thread by thread library specific handle in inferior INF.  */
+struct thread_info *find_thread_by_handle (struct value *thread_handle,
+					   struct inferior *inf);
+
 /* Finds the first thread of the inferior given by PID.  If PID is -1,
    returns the first thread in the list.  */
 struct thread_info *first_thread_of_process (int pid);
@@ -597,11 +601,7 @@ public:
   scoped_restore_current_thread ();
   ~scoped_restore_current_thread ();
 
-  /* Disable copy.  */
-  scoped_restore_current_thread
-    (const scoped_restore_current_thread &) = delete;
-  void operator=
-    (const scoped_restore_current_thread &) = delete;
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_current_thread);
 
 private:
   thread_info *m_thread;

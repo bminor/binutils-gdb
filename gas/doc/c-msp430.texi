@@ -107,6 +107,19 @@ disables warnings about missing NOP instructions.
 mark the object file as one that requires data to copied from ROM to
 RAM at execution startup.  Disabled by default.
 
+@item -mdata-region=@var{region}
+Select the region data will be placed in.
+Region placement is performed by the compiler and linker.  The only effect this
+option will have on the assembler is that if @var{upper} or @var{either} is
+selected, then the symbols to initialise high data and bss will be defined.
+Valid @var{region} values are:
+@table @code
+@item none
+@item lower
+@item upper
+@item either
+@end table
+
 @end table
 
 @node MSP430 Syntax

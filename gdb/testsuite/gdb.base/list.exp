@@ -361,7 +361,7 @@ proc test_list_range {} {
 
     gdb_test "list ${past_end},${much_past_end}" "Line number ${past_end} out of range; .*list0.c has ${last_line} lines." "list range; both bounds past EOF"
 
-    gdb_test "list list0.c:2,list1.c:17" "Specified start and end are in different files." "list range, must be same files"
+    gdb_test "list list0.c:2,list1.c:17" "Specified first and last lines are in different files." "list range, must be same files"
 }
 
 #

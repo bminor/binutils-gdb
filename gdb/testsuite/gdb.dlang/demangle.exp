@@ -146,7 +146,7 @@ proc test_d_demangling {} {
     test_demangling "_D8demangle4testFPFNdNfNaZaZv" "demangle.test(char() @property @safe pure function)"
 
     test_demangling "_D8demangle4test6__vtblZ" "vtable for demangle.test"
-    test_demangling "_D8demangle4test6__initZ" "demangle.test.init$"
+    test_demangling "_D8demangle4test6__initZ" "initializer for demangle.test"
     test_demangling "_D8demangle4test12__ModuleInfoZ" "ModuleInfo for demangle.test"
     test_demangling "_D8demangle4test7__ClassZ" "ClassInfo for demangle.test"
     test_demangling "_D8demangle4test11__InterfaceZ" "Interface for demangle.test"

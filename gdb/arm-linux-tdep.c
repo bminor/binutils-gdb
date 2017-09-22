@@ -1211,7 +1211,7 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
 	       regname, p->saved_arg);
 
       ++tmp;
-      tmp = skip_spaces_const (tmp);
+      tmp = skip_spaces (tmp);
       if (*tmp == '#' || *tmp == '$')
 	++tmp;
 
@@ -1995,9 +1995,6 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.arg6 = ARM_A1_REGNUM + 5;
   arm_linux_record_tdep.arg7 = ARM_A1_REGNUM + 6;
 }
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_arm_linux_tdep;
 
 void
 _initialize_arm_linux_tdep (void)

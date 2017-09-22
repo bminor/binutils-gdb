@@ -1153,9 +1153,6 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
 
 struct target_so_ops frv_so_ops;
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_frv_solib;
-
 void
 _initialize_frv_solib (void)
 {

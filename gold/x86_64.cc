@@ -4211,7 +4211,7 @@ Target_x86_64<size>::Relocate::relocate(
 
     case elfcpp::R_X86_64_GOT64:
     case elfcpp::R_X86_64_GOTPLT64:
-      // R_X86_64_GOTPLT64 is obsolete and treated the the same as
+      // R_X86_64_GOTPLT64 is obsolete and treated the same as
       // GOT64.
       gold_assert(have_got_offset);
       Reloc_funcs::rela64(view, got_offset, addend);

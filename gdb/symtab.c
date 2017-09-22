@@ -63,6 +63,8 @@
 #include "completer.h"
 #include "progspace-and-thread.h"
 #include "common/gdb_optional.h"
+#include "filename-seen-cache.h"
+#include "arch-utils.h"
 
 /* Forward declarations for local functions.  */
 
@@ -89,8 +91,6 @@ static struct block_symbol
 
 /* See symtab.h.  */
 const struct block_symbol null_block_symbol = { NULL, NULL };
-
-extern initialize_file_ftype _initialize_symtab;
 
 /* Program space key for finding name and language of "main".  */
 
@@ -466,7 +466,7 @@ iterate_over_symtabs (const char *name,
      absolutizing a relative path.  */
   if (IS_ABSOLUTE_PATH (name))
     {
-      real_path.reset (gdb_realpath (name));
+      real_path = gdb_realpath (name);
       gdb_assert (IS_ABSOLUTE_PATH (real_path.get ()));
     }
 
@@ -944,14 +944,6 @@ symbol_search_name (const struct general_symbol_info *gsymbol)
     return gsymbol->name;
   else
     return symbol_natural_name (gsymbol);
-}
-
-/* Initialize the structure fields to zero values.  */
-
-void
-init_sal (struct symtab_and_line *sal)
-{
-  memset (sal, 0, sizeof (*sal));
 }
 
 
@@ -2625,7 +2617,8 @@ symbol_matches_domain (enum language symbol_language,
      Similarly, any Ada type declaration implicitly defines a typedef.  */
   if (symbol_language == language_cplus
       || symbol_language == language_d
-      || symbol_language == language_ada)
+      || symbol_language == language_ada
+      || symbol_language == language_rust)
     {
       if ((domain == VAR_DOMAIN || domain == STRUCT_DOMAIN)
 	  && symbol_domain == STRUCT_DOMAIN)
@@ -2935,7 +2928,6 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   int len;
   int i;
   struct linetable_entry *item;
-  struct symtab_and_line val;
   const struct blockvector *bv;
   struct bound_minimal_symbol msymbol;
 
@@ -2961,10 +2953,6 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
      Quite likely that is the start of the following statement.
      But what we want is the statement containing the instruction.
      Fudge the pc to make sure we get that.  */
-
-  init_sal (&val);		/* initialize to zeroes */
-
-  val.pspace = current_program_space;
 
   /* It's tempting to assume that, if we can't find debugging info for
      any function enclosing PC, that we shouldn't search for line
@@ -3054,6 +3042,8 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	  return find_pc_line (BMSYMBOL_VALUE_ADDRESS (mfunsym), 0);
       }
 
+  symtab_and_line val;
+  val.pspace = current_program_space;
 
   cust = find_pc_sect_compunit_symtab (pc, section);
   if (cust == NULL)
@@ -3466,12 +3456,12 @@ find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
 struct symtab_and_line
 find_function_start_sal (struct symbol *sym, int funfirstline)
 {
-  struct symtab_and_line sal;
-  struct obj_section *section;
-
   fixup_symbol_section (sym, NULL);
-  section = SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym);
-  sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)), section, 0);
+
+  obj_section *section = SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym);
+  symtab_and_line sal
+    = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)), section, 0);
+  sal.symbol = sym;
 
   if (funfirstline && sal.symtab != NULL
       && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
@@ -3491,10 +3481,11 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
      can find a line number for after the prologue.  */
   if (sal.pc < BLOCK_START (SYMBOL_BLOCK_VALUE (sym)))
     {
-      init_sal (&sal);
+      sal = {};
       sal.pspace = current_program_space;
       sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
       sal.section = section;
+      sal.symbol = sym;
     }
 
   if (funfirstline)
@@ -3625,7 +3616,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       if (gdbarch_skip_entrypoint_p (gdbarch))
         pc = gdbarch_skip_entrypoint (gdbarch, pc);
       if (skip)
-	pc = gdbarch_skip_prologue (gdbarch, pc);
+	pc = gdbarch_skip_prologue_noexcept (gdbarch, pc);
 
       /* For overlays, map pc back into its mapped VMA range.  */
       pc = overlay_mapped_address (pc, section);
@@ -3827,6 +3818,25 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
     /* Don't return END_PC, which is past the end of the function.  */
     return prologue_sal.pc;
 }
+
+/* See symtab.h.  */
+
+symbol *
+find_function_alias_target (bound_minimal_symbol msymbol)
+{
+  if (!msymbol_is_text (msymbol.minsym))
+    return NULL;
+
+  CORE_ADDR addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
+  symbol *sym = find_pc_function (addr);
+  if (sym != NULL
+      && SYMBOL_CLASS (sym) == LOC_BLOCK
+      && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) == addr)
+    return sym;
+
+  return NULL;
+}
+
 
 /* If P is of the form "operator[ \t]+..." where `...' is
    some legitimate operator text, return a pointer to the
@@ -3837,9 +3847,9 @@ static const char *
 operator_chars (const char *p, const char **end)
 {
   *end = "";
-  if (!startswith (p, "operator"))
+  if (!startswith (p, CP_OPERATOR_STR))
     return *end;
-  p += 8;
+  p += CP_OPERATOR_LEN;
 
   /* Don't get faked out by `operator' being part of a longer
      identifier.  */
@@ -3967,74 +3977,6 @@ operator_chars (const char *p, const char **end)
 }
 
 
-/* Cache to watch for file names already seen by filename_seen.  */
-
-struct filename_seen_cache
-{
-  /* Table of files seen so far.  */
-  htab_t tab;
-  /* Initial size of the table.  It automagically grows from here.  */
-#define INITIAL_FILENAME_SEEN_CACHE_SIZE 100
-};
-
-/* filename_seen_cache constructor.  */
-
-static struct filename_seen_cache *
-create_filename_seen_cache (void)
-{
-  struct filename_seen_cache *cache = XNEW (struct filename_seen_cache);
-
-  cache->tab = htab_create_alloc (INITIAL_FILENAME_SEEN_CACHE_SIZE,
-				  filename_hash, filename_eq,
-				  NULL, xcalloc, xfree);
-
-  return cache;
-}
-
-/* Empty the cache, but do not delete it.  */
-
-static void
-clear_filename_seen_cache (struct filename_seen_cache *cache)
-{
-  htab_empty (cache->tab);
-}
-
-/* filename_seen_cache destructor.
-   This takes a void * argument as it is generally used as a cleanup.  */
-
-static void
-delete_filename_seen_cache (void *ptr)
-{
-  struct filename_seen_cache *cache = (struct filename_seen_cache *) ptr;
-
-  htab_delete (cache->tab);
-  xfree (cache);
-}
-
-/* If FILE is not already in the table of files in CACHE, return zero;
-   otherwise return non-zero.  Optionally add FILE to the table if ADD
-   is non-zero.
-
-   NOTE: We don't manage space for FILE, we assume FILE lives as long
-   as the caller needs.  */
-
-static int
-filename_seen (struct filename_seen_cache *cache, const char *file, int add)
-{
-  void **slot;
-
-  /* Is FILE in tab?  */
-  slot = htab_find_slot (cache->tab, file, add ? INSERT : NO_INSERT);
-  if (*slot != NULL)
-    return 1;
-
-  /* No; maybe add it to tab.  */
-  if (add)
-    *slot = (char *) file;
-
-  return 0;
-}
-
 /* Data structure to maintain printing state for output_source_filename.  */
 
 struct output_source_filename_data
@@ -4064,7 +4006,7 @@ output_source_filename (const char *name,
      symtabs; it doesn't hurt to check.  */
 
   /* Was NAME already seen?  */
-  if (filename_seen (data->filename_seen_cache, name, 1))
+  if (data->filename_seen_cache->seen (name))
     {
       /* Yes; don't print it again.  */
       return;
@@ -4090,22 +4032,21 @@ output_partial_symbol_filename (const char *filename, const char *fullname,
 }
 
 static void
-sources_info (char *ignore, int from_tty)
+info_sources_command (char *ignore, int from_tty)
 {
   struct compunit_symtab *cu;
   struct symtab *s;
   struct objfile *objfile;
   struct output_source_filename_data data;
-  struct cleanup *cleanups;
 
   if (!have_full_symbols () && !have_partial_symbols ())
     {
       error (_("No symbol table is loaded.  Use the \"file\" command."));
     }
 
-  data.filename_seen_cache = create_filename_seen_cache ();
-  cleanups = make_cleanup (delete_filename_seen_cache,
-			   data.filename_seen_cache);
+  filename_seen_cache filenames_seen;
+
+  data.filename_seen_cache = &filenames_seen;
 
   printf_filtered ("Source files for which symbols have been read in:\n\n");
 
@@ -4121,13 +4062,11 @@ sources_info (char *ignore, int from_tty)
   printf_filtered ("Source files for which symbols "
 		   "will be read in on demand:\n\n");
 
-  clear_filename_seen_cache (data.filename_seen_cache);
+  filenames_seen.clear ();
   data.first = 1;
   map_symbol_filenames (output_partial_symbol_filename, &data,
 			1 /*need_fullname*/);
   printf_filtered ("\n");
-
-  do_cleanups (cleanups);
 }
 
 /* Compare FILE against all the NFILES entries of FILES.  If BASENAMES is
@@ -4659,20 +4598,20 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
 }
 
 static void
-variables_info (char *regexp, int from_tty)
+info_variables_command (char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, VARIABLES_DOMAIN, from_tty);
 }
 
 static void
-functions_info (char *regexp, int from_tty)
+info_functions_command (char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, FUNCTIONS_DOMAIN, from_tty);
 }
 
 
 static void
-types_info (char *regexp, int from_tty)
+info_types_command (char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, TYPES_DOMAIN, from_tty);
 }
@@ -4816,44 +4755,13 @@ compare_symbol_name (const char *name, const char *sym_text, int sym_text_len)
   return 1;
 }
 
-/* Free any memory associated with a completion list.  */
-
-static void
-free_completion_list (VEC (char_ptr) **list_ptr)
-{
-  int i;
-  char *p;
-
-  for (i = 0; VEC_iterate (char_ptr, *list_ptr, i, p); ++i)
-    xfree (p);
-  VEC_free (char_ptr, *list_ptr);
-}
-
-/* Callback for make_cleanup.  */
-
-static void
-do_free_completion_list (void *list)
-{
-  free_completion_list ((VEC (char_ptr) **) list);
-}
-
-static VEC (char_ptr) *return_val;
-
-/* Tracker for how many unique completions have been generated.  Used
-   to terminate completion list generation early if the list has grown
-   to a size so large as to be useless.  This helps avoid GDB seeming
-   to lock up in the event the user requests to complete on something
-   vague that necessitates the time consuming expansion of many symbol
-   tables.  */
-
-static completion_tracker_t completion_tracker;
-
 /*  Test to see if the symbol specified by SYMNAME (which is already
    demangled for C++ symbols) matches SYM_TEXT in the first SYM_TEXT_LEN
    characters.  If so, add it to the current completion list.  */
 
 static void
-completion_list_add_name (const char *symname,
+completion_list_add_name (completion_tracker &tracker,
+			  const char *symname,
 			  const char *sym_text, int sym_text_len,
 			  const char *text, const char *word)
 {
@@ -4866,7 +4774,6 @@ completion_list_add_name (const char *symname,
 
   {
     char *newobj;
-    enum maybe_add_completion_enum add_status;
 
     if (word == sym_text)
       {
@@ -4888,45 +4795,33 @@ completion_list_add_name (const char *symname,
 	strcat (newobj, symname);
       }
 
-    add_status = maybe_add_completion (completion_tracker, newobj);
+    gdb::unique_xmalloc_ptr<char> completion (newobj);
 
-    switch (add_status)
-      {
-      case MAYBE_ADD_COMPLETION_OK:
-	VEC_safe_push (char_ptr, return_val, newobj);
-	break;
-      case MAYBE_ADD_COMPLETION_OK_MAX_REACHED:
-	VEC_safe_push (char_ptr, return_val, newobj);
-	throw_max_completions_reached_error ();
-      case MAYBE_ADD_COMPLETION_MAX_REACHED:
-	xfree (newobj);
-	throw_max_completions_reached_error ();
-      case MAYBE_ADD_COMPLETION_DUPLICATE:
-	xfree (newobj);
-	break;
-      }
+    tracker.add_completion (std::move (completion));
   }
 }
 
 /* completion_list_add_name wrapper for struct symbol.  */
 
 static void
-completion_list_add_symbol (symbol *sym,
+completion_list_add_symbol (completion_tracker &tracker,
+			    symbol *sym,
 			    const char *sym_text, int sym_text_len,
 			    const char *text, const char *word)
 {
-  completion_list_add_name (SYMBOL_NATURAL_NAME (sym),
+  completion_list_add_name (tracker, SYMBOL_NATURAL_NAME (sym),
 			    sym_text, sym_text_len, text, word);
 }
 
 /* completion_list_add_name wrapper for struct minimal_symbol.  */
 
 static void
-completion_list_add_msymbol (minimal_symbol *sym,
+completion_list_add_msymbol (completion_tracker &tracker,
+			     minimal_symbol *sym,
 			     const char *sym_text, int sym_text_len,
 			     const char *text, const char *word)
 {
-  completion_list_add_name (MSYMBOL_NATURAL_NAME (sym),
+  completion_list_add_name (tracker, MSYMBOL_NATURAL_NAME (sym),
 			    sym_text, sym_text_len, text, word);
 }
 
@@ -4934,7 +4829,8 @@ completion_list_add_msymbol (minimal_symbol *sym,
    again and feed all the selectors into the mill.  */
 
 static void
-completion_list_objc_symbol (struct minimal_symbol *msymbol,
+completion_list_objc_symbol (completion_tracker &tracker,
+			     struct minimal_symbol *msymbol,
 			     const char *sym_text, int sym_text_len,
 			     const char *text, const char *word)
 {
@@ -4952,7 +4848,8 @@ completion_list_objc_symbol (struct minimal_symbol *msymbol,
 
   if (sym_text[0] == '[')
     /* Complete on shortened method method.  */
-    completion_list_add_name (method + 1, sym_text, sym_text_len, text, word);
+    completion_list_add_name (tracker, method + 1,
+			      sym_text, sym_text_len, text, word);
 
   while ((strlen (method) + 1) >= tmplen)
     {
@@ -4973,9 +4870,11 @@ completion_list_objc_symbol (struct minimal_symbol *msymbol,
       memcpy (tmp, method, (category - method));
       tmp[category - method] = ' ';
       memcpy (tmp + (category - method) + 1, selector, strlen (selector) + 1);
-      completion_list_add_name (tmp, sym_text, sym_text_len, text, word);
+      completion_list_add_name (tracker, tmp,
+				sym_text, sym_text_len, text, word);
       if (sym_text[0] == '[')
-	completion_list_add_name (tmp + 1, sym_text, sym_text_len, text, word);
+	completion_list_add_name (tracker, tmp + 1,
+				  sym_text, sym_text_len, text, word);
     }
 
   if (selector != NULL)
@@ -4986,7 +4885,8 @@ completion_list_objc_symbol (struct minimal_symbol *msymbol,
       if (tmp2 != NULL)
 	*tmp2 = '\0';
 
-      completion_list_add_name (tmp, sym_text, sym_text_len, text, word);
+      completion_list_add_name (tracker, tmp,
+				sym_text, sym_text_len, text, word);
     }
 }
 
@@ -5037,9 +4937,10 @@ language_search_unquoted_string (const char *text, const char *p)
 }
 
 static void
-completion_list_add_fields (struct symbol *sym, const char *sym_text,
-			    int sym_text_len, const char *text,
-			    const char *word)
+completion_list_add_fields (completion_tracker &tracker,
+			    struct symbol *sym,
+			    const char *sym_text, int sym_text_len,
+			    const char *text, const char *word)
 {
   if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
     {
@@ -5050,7 +4951,7 @@ completion_list_add_fields (struct symbol *sym, const char *sym_text,
       if (c == TYPE_CODE_UNION || c == TYPE_CODE_STRUCT)
 	for (j = TYPE_N_BASECLASSES (t); j < TYPE_NFIELDS (t); j++)
 	  if (TYPE_FIELD_NAME (t, j))
-	    completion_list_add_name (TYPE_FIELD_NAME (t, j),
+	    completion_list_add_name (tracker, TYPE_FIELD_NAME (t, j),
 				      sym_text, sym_text_len, text, word);
     }
 }
@@ -5059,6 +4960,7 @@ completion_list_add_fields (struct symbol *sym, const char *sym_text,
 
 static void
 add_symtab_completions (struct compunit_symtab *cust,
+			completion_tracker &tracker,
 			const char *sym_text, int sym_text_len,
 			const char *text, const char *word,
 			enum type_code code)
@@ -5080,18 +4982,19 @@ add_symtab_completions (struct compunit_symtab *cust,
 	  if (code == TYPE_CODE_UNDEF
 	      || (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 		  && TYPE_CODE (SYMBOL_TYPE (sym)) == code))
-	    completion_list_add_symbol (sym,
+	    completion_list_add_symbol (tracker, sym,
 					sym_text, sym_text_len,
 					text, word);
 	}
     }
 }
 
-static void
-default_make_symbol_completion_list_break_on_1 (const char *text,
-						const char *word,
-						const char *break_on,
-						enum type_code code)
+void
+default_collect_symbol_completion_matches_break_on
+  (completion_tracker &tracker,
+   complete_symbol_mode mode,
+   const char *text, const char *word,
+   const char *break_on, enum type_code code)
 {
   /* Problem: All of the symbols have to be copied because readline
      frees them.  I'm not going to worry about this; hopefully there
@@ -5108,9 +5011,11 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
   const char *sym_text;
   /* Length of sym_text.  */
   int sym_text_len;
-  struct cleanup *cleanups;
 
   /* Now look for the symbol we are supposed to complete on.  */
+  if (mode == complete_symbol_mode::LINESPEC)
+    sym_text = text;
+  else
   {
     const char *p;
     char quote_found;
@@ -5178,9 +5083,6 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
     }
   gdb_assert (sym_text[sym_text_len] == '\0' || sym_text[sym_text_len] == '(');
 
-  completion_tracker = new_completion_tracker ();
-  cleanups = make_cleanup_free_completion_tracker (&completion_tracker);
-
   /* At this point scan through the misc symbol vectors and add each
      symbol you find to the list.  Eventually we want to ignore
      anything that isn't a text symbol (everything else will be
@@ -5191,18 +5093,21 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
       ALL_MSYMBOLS (objfile, msymbol)
 	{
 	  QUIT;
-	  completion_list_add_msymbol (msymbol, sym_text, sym_text_len, text,
-				       word);
 
-	  completion_list_objc_symbol (msymbol, sym_text, sym_text_len, text,
-				       word);
+	  completion_list_add_msymbol (tracker,
+				       msymbol, sym_text, sym_text_len,
+				       text, word);
+
+	  completion_list_objc_symbol (tracker,
+				       msymbol, sym_text, sym_text_len,
+				       text, word);
 	}
     }
 
   /* Add completions for all currently loaded symbol tables.  */
   ALL_COMPUNITS (objfile, cust)
-    add_symtab_completions (cust, sym_text, sym_text_len, text, word,
-			    code);
+    add_symtab_completions (cust, tracker,
+			    sym_text, sym_text_len, text, word, code);
 
   /* Look through the partial symtabs for all symbols which begin by
      matching SYM_TEXT.  Expand all CUs that you find to the list.  */
@@ -5216,6 +5121,7 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
 			   [&] (compunit_symtab *symtab) /* expansion notify */
 			     {
 			       add_symtab_completions (symtab,
+						       tracker,
 						       sym_text, sym_text_len,
 						       text, word, code);
 			     },
@@ -5238,14 +5144,17 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
 	  {
 	    if (code == TYPE_CODE_UNDEF)
 	      {
-		completion_list_add_symbol (sym, sym_text, sym_text_len, text,
+		completion_list_add_symbol (tracker, sym,
+					    sym_text, sym_text_len, text,
 					    word);
-		completion_list_add_fields (sym, sym_text, sym_text_len, text,
+		completion_list_add_fields (tracker, sym,
+					    sym_text, sym_text_len, text,
 					    word);
 	      }
 	    else if (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 		     && TYPE_CODE (SYMBOL_TYPE (sym)) == code)
-	      completion_list_add_symbol (sym, sym_text, sym_text_len, text,
+	      completion_list_add_symbol (tracker, sym,
+					  sym_text, sym_text_len, text,
 					  word);
 	  }
 
@@ -5263,11 +5172,13 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
     {
       if (surrounding_static_block != NULL)
 	ALL_BLOCK_SYMBOLS (surrounding_static_block, iter, sym)
-	  completion_list_add_fields (sym, sym_text, sym_text_len, text, word);
+	  completion_list_add_fields (tracker, sym,
+				      sym_text, sym_text_len, text, word);
 
       if (surrounding_global_block != NULL)
 	ALL_BLOCK_SYMBOLS (surrounding_global_block, iter, sym)
-	  completion_list_add_fields (sym, sym_text, sym_text_len, text, word);
+	  completion_list_add_fields (tracker, sym,
+				      sym_text, sym_text_len, text, word);
     }
 
   /* Skip macros if we are completing a struct tag -- arguable but
@@ -5283,7 +5194,7 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
 				 macro_source_file *,
 				 int)
 	{
-	  completion_list_add_name (macro_name,
+	  completion_list_add_name (tracker, macro_name,
 				    sym_text, sym_text_len,
 				    text, word);
 	};
@@ -5306,86 +5217,58 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
       /* User-defined macros are always visible.  */
       macro_for_each (macro_user_macros, add_macro_name);
     }
-
-  do_cleanups (cleanups);
 }
 
-VEC (char_ptr) *
-default_make_symbol_completion_list_break_on (const char *text,
-					      const char *word,
-					      const char *break_on,
-					      enum type_code code)
+void
+default_collect_symbol_completion_matches (completion_tracker &tracker,
+					   complete_symbol_mode mode,
+					   const char *text, const char *word,
+					   enum type_code code)
 {
-  struct cleanup *back_to;
-
-  return_val = NULL;
-  back_to = make_cleanup (do_free_completion_list, &return_val);
-
-  TRY
-    {
-      default_make_symbol_completion_list_break_on_1 (text, word,
-						      break_on, code);
-    }
-  CATCH (except, RETURN_MASK_ERROR)
-    {
-      if (except.error != MAX_COMPLETIONS_REACHED_ERROR)
-	throw_exception (except);
-    }
-  END_CATCH
-
-  discard_cleanups (back_to);
-  return return_val;
+  return default_collect_symbol_completion_matches_break_on (tracker, mode,
+							     text, word, "",
+							     code);
 }
 
-VEC (char_ptr) *
-default_make_symbol_completion_list (const char *text, const char *word,
-				     enum type_code code)
+/* Collect all symbols (regardless of class) which begin by matching
+   TEXT.  */
+
+void
+collect_symbol_completion_matches (completion_tracker &tracker,
+				   complete_symbol_mode mode,
+				   const char *text, const char *word)
 {
-  return default_make_symbol_completion_list_break_on (text, word, "", code);
+  current_language->la_collect_symbol_completion_matches (tracker, mode,
+							  text, word,
+							  TYPE_CODE_UNDEF);
 }
 
-/* Return a vector of all symbols (regardless of class) which begin by
-   matching TEXT.  If the answer is no symbols, then the return value
-   is NULL.  */
+/* Like collect_symbol_completion_matches, but only collect
+   STRUCT_DOMAIN symbols whose type code is CODE.  */
 
-VEC (char_ptr) *
-make_symbol_completion_list (const char *text, const char *word)
+void
+collect_symbol_completion_matches_type (completion_tracker &tracker,
+					const char *text, const char *word,
+					enum type_code code)
 {
-  return current_language->la_make_symbol_completion_list (text, word,
-							   TYPE_CODE_UNDEF);
-}
+  complete_symbol_mode mode = complete_symbol_mode::EXPRESSION;
 
-/* Like make_symbol_completion_list, but only return STRUCT_DOMAIN
-   symbols whose type code is CODE.  */
-
-VEC (char_ptr) *
-make_symbol_completion_type (const char *text, const char *word,
-			     enum type_code code)
-{
   gdb_assert (code == TYPE_CODE_UNION
 	      || code == TYPE_CODE_STRUCT
 	      || code == TYPE_CODE_ENUM);
-  return current_language->la_make_symbol_completion_list (text, word, code);
+  current_language->la_collect_symbol_completion_matches (tracker, mode,
+							  text, word, code);
 }
 
-/* Like make_symbol_completion_list, but suitable for use as a
-   completion function.  */
+/* Like collect_symbol_completion_matches, but collects a list of
+   symbols defined in all source files named SRCFILE.  */
 
-VEC (char_ptr) *
-make_symbol_completion_list_fn (struct cmd_list_element *ignore,
-				const char *text, const char *word)
+void
+collect_file_symbol_completion_matches (completion_tracker &tracker,
+					complete_symbol_mode mode,
+					const char *text, const char *word,
+					const char *srcfile)
 {
-  return make_symbol_completion_list (text, word);
-}
-
-/* Like make_symbol_completion_list, but returns a list of symbols
-   defined in a source file FILE.  */
-
-static VEC (char_ptr) *
-make_file_symbol_completion_list_1 (const char *text, const char *word,
-				    const char *srcfile)
-{
-  struct symtab *s;
   /* The symbol we are completing on.  Points in same buffer as text.  */
   const char *sym_text;
   /* Length of sym_text.  */
@@ -5393,6 +5276,9 @@ make_file_symbol_completion_list_1 (const char *text, const char *word,
 
   /* Now look for the symbol we are supposed to complete on.
      FIXME: This should be language-specific.  */
+  if (mode == complete_symbol_mode::LINESPEC)
+    sym_text = text;
+  else
   {
     const char *p;
     char quote_found;
@@ -5425,7 +5311,7 @@ make_file_symbol_completion_list_1 (const char *text, const char *word,
       /* A double-quoted string is never a symbol, nor does it make sense
          to complete it any other way.  */
       {
-	return NULL;
+	return;
       }
     else
       {
@@ -5436,60 +5322,16 @@ make_file_symbol_completion_list_1 (const char *text, const char *word,
 
   sym_text_len = strlen (sym_text);
 
-  /* Find the symtab for SRCFILE (this loads it if it was not yet read
-     in).  */
-  s = lookup_symtab (srcfile);
-  if (s == NULL)
+  /* Go through symtabs for SRCFILE and check the externs and statics
+     for symbols which match.  */
+  iterate_over_symtabs (srcfile, [&] (symtab *s)
     {
-      /* Maybe they typed the file with leading directories, while the
-	 symbol tables record only its basename.  */
-      const char *tail = lbasename (srcfile);
-
-      if (tail > srcfile)
-	s = lookup_symtab (tail);
-    }
-
-  /* If we have no symtab for that file, return an empty list.  */
-  if (s == NULL)
-    return (return_val);
-
-  /* Go through this symtab and check the externs and statics for
-     symbols which match.  */
-  add_symtab_completions (SYMTAB_COMPUNIT (s),
-			  sym_text, sym_text_len,
-			  text, word, TYPE_CODE_UNDEF);
-
-  return (return_val);
-}
-
-/* Wrapper around make_file_symbol_completion_list_1
-   to handle MAX_COMPLETIONS_REACHED_ERROR.  */
-
-VEC (char_ptr) *
-make_file_symbol_completion_list (const char *text, const char *word,
-				  const char *srcfile)
-{
-  struct cleanup *back_to, *cleanups;
-
-  completion_tracker = new_completion_tracker ();
-  cleanups = make_cleanup_free_completion_tracker (&completion_tracker);
-  return_val = NULL;
-  back_to = make_cleanup (do_free_completion_list, &return_val);
-
-  TRY
-    {
-      make_file_symbol_completion_list_1 (text, word, srcfile);
-    }
-  CATCH (except, RETURN_MASK_ERROR)
-    {
-      if (except.error != MAX_COMPLETIONS_REACHED_ERROR)
-	throw_exception (except);
-    }
-  END_CATCH
-
-  discard_cleanups (back_to);
-  do_cleanups (cleanups);
-  return return_val;
+      add_symtab_completions (SYMTAB_COMPUNIT (s),
+			      tracker,
+			      sym_text, sym_text_len,
+			      text, word, TYPE_CODE_UNDEF);
+      return false;
+    });
 }
 
 /* A helper function for make_source_files_completion_list.  It adds
@@ -5498,7 +5340,7 @@ make_file_symbol_completion_list (const char *text, const char *word,
 
 static void
 add_filename_to_list (const char *fname, const char *text, const char *word,
-		      VEC (char_ptr) **list)
+		      completion_list *list)
 {
   char *newobj;
   size_t fnlen = strlen (fname);
@@ -5523,7 +5365,7 @@ add_filename_to_list (const char *fname, const char *text, const char *word,
       newobj[text - word] = '\0';
       strcat (newobj, fname);
     }
-  VEC_safe_push (char_ptr, *list, newobj);
+  list->emplace_back (newobj);
 }
 
 static int
@@ -5551,7 +5393,7 @@ struct add_partial_filename_data
   const char *text;
   const char *word;
   int text_len;
-  VEC (char_ptr) **list;
+  completion_list *list;
 };
 
 /* A callback for map_partial_symbol_filenames.  */
@@ -5565,7 +5407,7 @@ maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
 
   if (not_interesting_fname (filename))
     return;
-  if (!filename_seen (data->filename_seen_cache, filename, 1)
+  if (!data->filename_seen_cache->seen (filename)
       && filename_ncmp (filename, data->text, data->text_len) == 0)
     {
       /* This file matches for a completion; add it to the
@@ -5577,44 +5419,38 @@ maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
       const char *base_name = lbasename (filename);
 
       if (base_name != filename
-	  && !filename_seen (data->filename_seen_cache, base_name, 1)
+	  && !data->filename_seen_cache->seen (base_name)
 	  && filename_ncmp (base_name, data->text, data->text_len) == 0)
 	add_filename_to_list (base_name, data->text, data->word, data->list);
     }
 }
 
-/* Return a vector of all source files whose names begin with matching
+/* Return a list of all source files whose names begin with matching
    TEXT.  The file names are looked up in the symbol tables of this
-   program.  If the answer is no matchess, then the return value is
-   NULL.  */
+   program.  */
 
-VEC (char_ptr) *
+completion_list
 make_source_files_completion_list (const char *text, const char *word)
 {
   struct compunit_symtab *cu;
   struct symtab *s;
   struct objfile *objfile;
   size_t text_len = strlen (text);
-  VEC (char_ptr) *list = NULL;
+  completion_list list;
   const char *base_name;
   struct add_partial_filename_data datum;
-  struct filename_seen_cache *filename_seen_cache;
-  struct cleanup *back_to, *cache_cleanup;
+  struct cleanup *back_to;
 
   if (!have_full_symbols () && !have_partial_symbols ())
     return list;
 
-  back_to = make_cleanup (do_free_completion_list, &list);
-
-  filename_seen_cache = create_filename_seen_cache ();
-  cache_cleanup = make_cleanup (delete_filename_seen_cache,
-				filename_seen_cache);
+  filename_seen_cache filenames_seen;
 
   ALL_FILETABS (objfile, cu, s)
     {
       if (not_interesting_fname (s->filename))
 	continue;
-      if (!filename_seen (filename_seen_cache, s->filename, 1)
+      if (!filenames_seen.seen (s->filename)
 	  && filename_ncmp (s->filename, text, text_len) == 0)
 	{
 	  /* This file matches for a completion; add it to the current
@@ -5629,22 +5465,19 @@ make_source_files_completion_list (const char *text, const char *word)
 	     command do when they parse file names.  */
 	  base_name = lbasename (s->filename);
 	  if (base_name != s->filename
-	      && !filename_seen (filename_seen_cache, base_name, 1)
+	      && !filenames_seen.seen (base_name)
 	      && filename_ncmp (base_name, text, text_len) == 0)
 	    add_filename_to_list (base_name, text, word, &list);
 	}
     }
 
-  datum.filename_seen_cache = filename_seen_cache;
+  datum.filename_seen_cache = &filenames_seen;
   datum.text = text;
   datum.word = word;
   datum.text_len = text_len;
   datum.list = &list;
   map_symbol_filenames (maybe_add_partial_symtab_filename, &datum,
 			0 /*need_fullname*/);
-
-  do_cleanups (cache_cleanup);
-  discard_cleanups (back_to);
 
   return list;
 }
@@ -6048,13 +5881,13 @@ _initialize_symtab (void)
   symbol_cache_key
     = register_program_space_data_with_cleanup (NULL, symbol_cache_cleanup);
 
-  add_info ("variables", variables_info, _("\
+  add_info ("variables", info_variables_command, _("\
 All global and static variable names, or those matching REGEXP."));
   if (dbx_commands)
-    add_com ("whereis", class_info, variables_info, _("\
+    add_com ("whereis", class_info, info_variables_command, _("\
 All global and static variable names, or those matching REGEXP."));
 
-  add_info ("functions", functions_info,
+  add_info ("functions", info_functions_command,
 	    _("All function names, or those matching REGEXP."));
 
   /* FIXME:  This command has at least the following problems:
@@ -6065,10 +5898,10 @@ All global and static variable names, or those matching REGEXP."));
      print "struct foo *".
      I also think "ptype" or "whatis" is more likely to be useful (but if
      there is much disagreement "info types" can be fixed).  */
-  add_info ("types", types_info,
+  add_info ("types", info_types_command,
 	    _("All type names, or those matching REGEXP."));
 
-  add_info ("sources", sources_info,
+  add_info ("sources", info_sources_command,
 	    _("Source files in the program."));
 
   add_com ("rbreak", class_breakpoint, rbreak_command,

@@ -292,7 +292,8 @@ xtensa_isa_init (xtensa_isa_status *errno_p, char **error_msg_p)
       xtensa_sysreg_internal *sreg = &isa->sysregs[n];
       is_user = sreg->is_user;
 
-      isa->sysreg_table[is_user][sreg->number] = n;
+      if (sreg->number >= 0)
+	isa->sysreg_table[is_user][sreg->number] = n;
     }
 
   /* Set up the interface lookup table.  */

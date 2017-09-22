@@ -42,8 +42,6 @@
 #define O_NOCTTY 0
 #endif
 
-extern void _initialize_inflow (void);
-
 static void pass_signal (int);
 
 static void child_terminal_ours_1 (int);
@@ -228,7 +226,7 @@ child_terminal_init (struct target_ops *self)
 {
 #ifdef PROCESS_GROUP_TYPE
   /* This is for Lynx, and should be cleaned up by having Lynx be a
-     separate debugging target with a version of target_terminal_init
+     separate debugging target with a version of target_terminal::init
      which passes in the process group to a generic routine which does
      all the work (and the non-threaded child_terminal_init can just
      pass in inferior_ptid to the same routine).  */
@@ -536,9 +534,9 @@ copy_terminal_info (struct inferior *to, struct inferior *from)
 }
 
 void
-term_info (char *arg, int from_tty)
+info_terminal_command (char *arg, int from_tty)
 {
-  target_terminal_info (arg, from_tty);
+  target_terminal::info (arg, from_tty);
 }
 
 void
@@ -820,7 +818,7 @@ initialize_stdin_serial (void)
 void
 _initialize_inflow (void)
 {
-  add_info ("terminal", term_info,
+  add_info ("terminal", info_terminal_command,
 	    _("Print inferior's saved terminal status."));
 
   terminal_is_ours = 1;

@@ -76,16 +76,14 @@ static struct breakpoint_ops gnu_v3_exception_catchpoint_ops;
 
 struct exception_catchpoint : public breakpoint
 {
-  ~exception_catchpoint () override;
-
   /* The kind of exception catchpoint.  */
 
   enum exception_event_kind kind;
 
-  /* If non-NULL, an xmalloc'd string holding the source form of the
-     regular expression to match against.  */
+  /* If not empty, a string holding the source form of the regular
+     expression to match against.  */
 
-  char *exception_rx;
+  std::string exception_rx;
 
   /* If non-NULL, a compiled regular expression which is used to
      determine which exceptions to stop on.  */
@@ -140,13 +138,6 @@ classify_exception_breakpoint (struct breakpoint *b)
   return cp->kind;
 }
 
-/* exception_catchpoint destructor.  */
-
-exception_catchpoint::~exception_catchpoint ()
-{
-  xfree (this->exception_rx);
-}
-
 /* Implement the 'check_status' method.  */
 
 static void
@@ -193,9 +184,7 @@ check_status_exception_catchpoint (struct bpstats *bs)
 static void
 re_set_exception_catchpoint (struct breakpoint *self)
 {
-  struct symtabs_and_lines sals = {0};
-  struct symtabs_and_lines sals_end = {0};
-  struct cleanup *cleanup;
+  std::vector<symtab_and_line> sals;
   enum exception_event_kind kind = classify_exception_breakpoint (self);
   struct program_space *filter_pspace = current_program_space;
 
@@ -218,8 +207,8 @@ re_set_exception_catchpoint (struct breakpoint *self)
 	  explicit_loc.function_name
 	    = ASTRDUP (exception_functions[kind].function);
 	  event_location_up location = new_explicit_location (&explicit_loc);
-	  self->ops->decode_location (self, location.get (), filter_pspace,
-				      &sals);
+	  sals = self->ops->decode_location (self, location.get (),
+					     filter_pspace);
 	}
       CATCH (ex, RETURN_MASK_ERROR)
 	{
@@ -232,9 +221,7 @@ re_set_exception_catchpoint (struct breakpoint *self)
     }
   END_CATCH
 
-  cleanup = make_cleanup (xfree, sals.sals);
-  update_breakpoint_locations (self, filter_pspace, sals, sals_end);
-  do_cleanups (cleanup);
+  update_breakpoint_locations (self, filter_pspace, sals, {});
 }
 
 static enum print_stop_action
@@ -319,10 +306,10 @@ print_one_detail_exception_catchpoint (const struct breakpoint *b,
   const struct exception_catchpoint *cp
     = (const struct exception_catchpoint *) b;
 
-  if (cp->exception_rx != NULL)
+  if (!cp->exception_rx.empty ())
     {
       uiout->text (_("\tmatching: "));
-      uiout->field_string ("regexp", cp->exception_rx);
+      uiout->field_string ("regexp", cp->exception_rx.c_str ());
       uiout->text ("\n");
     }
 }
@@ -371,15 +358,15 @@ print_recreate_exception_catchpoint (struct breakpoint *b,
 }
 
 static void
-handle_gnu_v3_exceptions (int tempflag, char *except_rx,
+handle_gnu_v3_exceptions (int tempflag, std::string &&except_rx,
 			  const char *cond_string,
 			  enum exception_event_kind ex_event, int from_tty)
 {
   std::unique_ptr<compiled_regex> pattern;
 
-  if (except_rx != NULL)
+  if (!except_rx.empty ())
     {
-      pattern.reset (new compiled_regex (except_rx, REG_NOSUB,
+      pattern.reset (new compiled_regex (except_rx.c_str (), REG_NOSUB,
 					 _("invalid type-matching regexp")));
     }
 
@@ -391,13 +378,12 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx,
      the right thing.  */
   cp->type = bp_breakpoint;
   cp->kind = ex_event;
-  cp->exception_rx = except_rx;
+  cp->exception_rx = std::move (except_rx);
   cp->pattern = std::move (pattern);
 
   re_set_exception_catchpoint (cp.get ());
 
-  install_breakpoint (0, cp.get (), 1);
-  cp.release ();
+  install_breakpoint (0, std::move (cp), 1);
 }
 
 /* Look for an "if" token in *STRING.  The "if" token must be preceded
@@ -410,13 +396,13 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx,
    STRING is updated to point to the "if" token, if it exists, or to
    the end of the string.  */
 
-static char *
+static std::string
 extract_exception_regexp (const char **string)
 {
   const char *start;
   const char *last, *last_space;
 
-  start = skip_spaces_const (*string);
+  start = skip_spaces (*string);
 
   last = start;
   last_space = start;
@@ -430,13 +416,13 @@ extract_exception_regexp (const char **string)
 
       /* No "if" token here.  Skip to the next word start.  */
       last_space = skip_to_space (last);
-      last = skip_spaces_const (last_space);
+      last = skip_spaces (last_space);
     }
 
   *string = last;
   if (last_space > start)
-    return savestring (start, last_space - start);
-  return NULL;
+    return std::string (start, last_space - start);
+  return std::string ();
 }
 
 /* Deal with "catch catch", "catch throw", and "catch rethrow"
@@ -447,17 +433,14 @@ catch_exception_command_1 (enum exception_event_kind ex_event,
 			   char *arg_entry,
 			   int tempflag, int from_tty)
 {
-  char *except_rx;
   const char *cond_string = NULL;
-  struct cleanup *cleanup;
   const char *arg = arg_entry;
 
   if (!arg)
     arg = "";
-  arg = skip_spaces_const (arg);
+  arg = skip_spaces (arg);
 
-  except_rx = extract_exception_regexp (&arg);
-  cleanup = make_cleanup (xfree, except_rx);
+  std::string except_rx = extract_exception_regexp (&arg);
 
   cond_string = ep_parse_optional_if_clause (&arg);
 
@@ -469,10 +452,8 @@ catch_exception_command_1 (enum exception_event_kind ex_event,
       && ex_event != EX_EVENT_RETHROW)
     error (_("Unsupported or unknown exception event; cannot catch it"));
 
-  handle_gnu_v3_exceptions (tempflag, except_rx, cond_string,
+  handle_gnu_v3_exceptions (tempflag, std::move (except_rx), cond_string,
 			    ex_event, from_tty);
-
-  discard_cleanups (cleanup);
 }
 
 /* Implementation of "catch catch" command.  */
@@ -555,8 +536,6 @@ initialize_throw_catchpoint_ops (void)
   ops->print_one_detail = print_one_detail_exception_catchpoint;
   ops->check_status = check_status_exception_catchpoint;
 }
-
-initialize_file_ftype _initialize_break_catch_throw;
 
 void
 _initialize_break_catch_throw (void)

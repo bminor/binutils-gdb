@@ -119,7 +119,7 @@ static PyObject *
 frapy_name (PyObject *self, PyObject *args)
 {
   struct frame_info *frame;
-  char *name = NULL;
+  gdb::unique_xmalloc_ptr<char> name;
   enum language lang;
   PyObject *result;
 
@@ -127,19 +127,18 @@ frapy_name (PyObject *self, PyObject *args)
     {
       FRAPY_REQUIRE_VALID (self, frame);
 
-      find_frame_funname (frame, &name, &lang, NULL);
+      name = find_frame_funname (frame, &lang, NULL);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
-      xfree (name);
       GDB_PY_HANDLE_EXCEPTION (except);
     }
   END_CATCH
 
   if (name)
     {
-      result = PyUnicode_Decode (name, strlen (name), host_charset (), NULL);
-      xfree (name);
+      result = PyUnicode_Decode (name.get (), strlen (name.get ()),
+				 host_charset (), NULL);
     }
   else
     {
@@ -334,13 +333,12 @@ frapy_function (PyObject *self, PyObject *args)
 
   TRY
     {
-      char *funname;
       enum language funlang;
 
       FRAPY_REQUIRE_VALID (self, frame);
 
-      find_frame_funname (frame, &funname, &funlang, &sym);
-      xfree (funname);
+      gdb::unique_xmalloc_ptr<char> funname
+	= find_frame_funname (frame, &funlang, &sym);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -468,14 +466,13 @@ static PyObject *
 frapy_find_sal (PyObject *self, PyObject *args)
 {
   struct frame_info *frame;
-  struct symtab_and_line sal;
   PyObject *sal_obj = NULL;   /* Initialize to appease gcc warning.  */
 
   TRY
     {
       FRAPY_REQUIRE_VALID (self, frame);
 
-      find_frame_sal (frame, &sal);
+      symtab_and_line sal = find_frame_sal (frame);
       sal_obj = symtab_and_line_to_sal_object (sal);
     }
   CATCH (except, RETURN_MASK_ALL)

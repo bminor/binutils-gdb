@@ -1,6 +1,6 @@
 #source: weakhid.s
 #as: --pic --no-underscore --em=criself
-#ld: --shared -m crislinux -z nocombreloc
+#ld: --shared -m crislinux -z nocombreloc --hash-style=sysv
 #objdump: -s -R -T
 
 # Check that .weak and .weak .hidden object references are handled

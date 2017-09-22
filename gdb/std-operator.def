@@ -132,6 +132,12 @@ OP (OP_VAR_VALUE)
    current function.  Implemented via DW_OP_entry_value.  */
 OP (OP_VAR_ENTRY_VALUE)
 
+/* OP_VAR_MSYM_VALUE takes one struct objfile * in the following
+   element, and one struct minimal_symbol * in the following
+   exp_element, followed by another OP_VAR_MSYM_VALUE, making four
+   exp_elements.  */
+OP (OP_VAR_MSYM_VALUE)
+
 /* OP_LAST is followed by an integer in the next exp_element.
    The integer is zero for the last value printed,
    or it is the absolute number of a history element.
@@ -212,13 +218,6 @@ OP (UNOP_REINTERPRET_CAST)
    following subexpression.  */
 OP (UNOP_MEMVAL)
 
-/* UNOP_MEMVAL_TLS is followed by a `struct objfile' pointer in the next
-   exp_element and a type pointer in the following exp_element.
-   With another UNOP_MEMVAL_TLS at the end, this makes four exp_elements.
-   It casts the contents of the word offsetted by the value of the
-   following subexpression from the TLS specified by `struct objfile'.  */
-OP (UNOP_MEMVAL_TLS)
-
 /* Like UNOP_MEMVAL, but the type is supplied as a subexpression.  */
 OP (UNOP_MEMVAL_TYPE)
 
@@ -280,6 +279,36 @@ OP (OP_OBJC_SELECTOR)
    name is encoded as one element, but the field name stays as
    a string, which, of course, is variable length.  */
 OP (OP_SCOPE)
+
+/* OP_FUNC_STATIC_VAR refers to a function local static variable.  The
+   function is taken from the following subexpression.  The length of
+   the variable name as a string follows the opcode, followed by
+   BYTES_TO_EXP_ELEM(length) elements containing the data of the
+   string, followed by the length again and the opcode again.
+
+   Note this is used by C++, but not C.  The C parser handles local
+   static variables in the parser directly.  Also, this is only used
+   in C++ if the function/method name is not quoted, like e.g.:
+
+     p S:method()::var
+     p S:method() const::var
+
+   If the function/method is quoted like instead:
+
+     p 'S:method() const'::var
+
+   then the C-specific handling directly in the parser takes over (see
+   "block/variable productions).
+
+   Also, if the whole function+var is quoted like this:
+
+     p 'S:method() const::var'
+
+   then the whole quoted expression is interpreted as a single symbol
+   name and we don't use OP_FUNC_STATIC_VAR either.  In that case, the
+   C++-specific symbol lookup routines take care of the
+   function-local-static search.  */
+OP (OP_FUNC_STATIC_VAR)
 
 /* OP_TYPE is for parsing types, and used with the "ptype" command
    so we can look up types that are qualified by scope, either with

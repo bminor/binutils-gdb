@@ -393,6 +393,9 @@ print_decision_tree_1 (unsigned int indent, struct bittree* bittree)
 {
   /* PATTERN is only used to generate comment in the code.  */
   static char pattern[33] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+  /* Low bits in PATTERN will be printed first which then look as the high
+     bits in comment.  We need to reverse the index to get correct print.  */
+  unsigned int msb = sizeof (pattern) - 2;
   assert (bittree != NULL);
 
   /* Leaf node located.  */
@@ -412,15 +415,15 @@ print_decision_tree_1 (unsigned int indent, struct bittree* bittree)
   /* Walk down the decoder tree.  */
   indented_print (indent, "if (((word >> %d) & 0x1) == 0)\n", bittree->bitno);
   indented_print (indent, "  {\n");
-  pattern[bittree->bitno] = '0';
+  pattern[msb - bittree->bitno] = '0';
   print_decision_tree_1 (indent + 4, bittree->bits[0]);
   indented_print (indent, "  }\n");
   indented_print (indent, "else\n");
   indented_print (indent, "  {\n");
-  pattern[bittree->bitno] = '1';
+  pattern[msb - bittree->bitno] = '1';
   print_decision_tree_1 (indent + 4, bittree->bits[1]);
   indented_print (indent, "  }\n");
-  pattern[bittree->bitno] = 'x';
+  pattern[msb - bittree->bitno] = 'x';
 }
 
 /* Generate aarch64_opcode_lookup in C code to the standard output.  */

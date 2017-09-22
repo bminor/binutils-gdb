@@ -1,7 +1,7 @@
 #source: dso-1.s
 #source: dso-2.s
 #as: --pic --no-underscore --em=criself
-#ld: --shared -m crislinux --version-script $srcdir/$subdir/hide1
+#ld: --shared -m crislinux --hash-style=sysv --version-script $srcdir/$subdir/hide1
 #readelf: -S -s -r
 
 # Use "dsofn" from dso-1 in a GOTPLT reloc, but hide it in a

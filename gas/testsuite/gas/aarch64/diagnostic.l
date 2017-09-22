@@ -172,3 +172,7 @@
 [^:]*:295: Error: invalid use of 'MUL' at operand 4 -- `orr x0,x0,#0xff,mul#1'
 [^:]*:296: Error: invalid use of 'MUL' at operand 4 -- `orr x0,x0,#0xfe,mul#255'
 [^:]*:297: Error: invalid use of 'MUL' at operand 4 -- `orr x0,x0,#0xfc,mul#256'
+[^:]*:299: Warning: ignoring redefinition of register alias 'ip0'
+[^:]*:300: Warning: ignoring redefinition of register alias 'ip1'
+[^:]*:301: Warning: ignoring redefinition of register alias 'lr'
+[^:]*:302: Warning: ignoring redefinition of register alias 'fp'

@@ -98,18 +98,24 @@ SECTIONS
     ${RELOCATING+*(.glue_7t)}
     ${RELOCATING+*(.glue_7)}
     ${CONSTRUCTING+. = ALIGN(8);}
-    ${CONSTRUCTING+ ___CTOR_LIST__ = .; __CTOR_LIST__ = . ;
-			LONG (-1); LONG (-1);
-			KEEP (*(.ctors));
-			KEEP (*(.ctor));
-			KEEP (*(SORT(.ctors.*)));
-			LONG (0); LONG (0); }
-    ${CONSTRUCTING+ ___DTOR_LIST__ = .; __DTOR_LIST__ = . ;
-			LONG (-1); LONG (-1);
-			KEEP (*(.dtors));
-			KEEP (*(.dtor));
-			KEEP (*(SORT(.dtors.*)));
-			LONG (0); LONG (0); }
+    ${CONSTRUCTING+
+       PROVIDE(___CTOR_LIST__ = .);
+       PROVIDE(__CTOR_LIST__ = .);
+       LONG (-1); LONG (-1);
+       KEEP (*(.ctors));
+       KEEP (*(.ctor));
+       KEEP (*(SORT_BY_NAME(.ctors.*)));
+       LONG (0); LONG (0);
+     }
+    ${CONSTRUCTING+
+       PROVIDE(___DTOR_LIST__ = .);
+       PROVIDE(__DTOR_LIST__ = .);
+       LONG (-1); LONG (-1);
+       KEEP (*(.dtors));
+       KEEP (*(.dtor));
+       KEEP (*(SORT_BY_NAME(.dtors.*)));
+       LONG (0); LONG (0);
+     }
     ${RELOCATING+ KEEP (*(.fini))}
     /* ??? Why is .gcc_exc here?  */
     ${RELOCATING+ *(.gcc_exc)}

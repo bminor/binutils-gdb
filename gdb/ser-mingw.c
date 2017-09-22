@@ -31,8 +31,6 @@
 
 #include "command.h"
 
-void _initialize_ser_windows (void);
-
 struct ser_windows_state
 {
   int in_progress;
@@ -863,20 +861,18 @@ pipe_windows_open (struct serial *scb, const char *name)
 {
   struct pipe_state *ps;
   FILE *pex_stderr;
-  char **argv;
   struct cleanup *back_to;
 
   if (name == NULL)
     error_no_arg (_("child command"));
 
-  argv = gdb_buildargv (name);
-  back_to = make_cleanup_freeargv (argv);
+  gdb_argv argv (name);
 
   if (! argv[0] || argv[0][0] == '\0')
     error (_("missing child command"));
 
   ps = make_pipe_state ();
-  make_cleanup (cleanup_pipe_state, ps);
+  back_to = make_cleanup (cleanup_pipe_state, ps);
 
   ps->pex = pex_init (PEX_USE_PIPES, "target remote pipe", NULL);
   if (! ps->pex)
@@ -890,7 +886,7 @@ pipe_windows_open (struct serial *scb, const char *name)
     const char *err_msg
       = pex_run (ps->pex, PEX_SEARCH | PEX_BINARY_INPUT | PEX_BINARY_OUTPUT
 		 | PEX_STDERR_TO_PIPE,
-                 argv[0], argv, NULL, NULL,
+                 argv[0], argv.get (), NULL, NULL,
                  &err);
 
     if (err_msg)
@@ -920,6 +916,7 @@ pipe_windows_open (struct serial *scb, const char *name)
 
   scb->state = (void *) ps;
 
+  argv.release ();
   discard_cleanups (back_to);
   return 0;
 

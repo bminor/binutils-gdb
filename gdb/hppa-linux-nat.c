@@ -377,8 +377,6 @@ fill_fpregset (const struct regcache *regcache,
    }
 }
 
-void _initialize_hppa_linux_nat (void);
-
 void
 _initialize_hppa_linux_nat (void)
 {

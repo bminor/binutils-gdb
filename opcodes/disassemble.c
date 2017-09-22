@@ -110,21 +110,12 @@
 #endif
 
 disassembler_ftype
-disassembler (enum bfd_architecture a, bfd_boolean big, unsigned long mach,
-	      bfd *abfd)
+disassembler (enum bfd_architecture a,
+	      bfd_boolean big ATTRIBUTE_UNUSED,
+	      unsigned long mach ATTRIBUTE_UNUSED,
+	      bfd *abfd ATTRIBUTE_UNUSED)
 {
   disassembler_ftype disassemble;
-
-  if (abfd != NULL)
-    {
-      /* Do some asserts that the first three parameters should equal
-	 to what we can get from ABFD.  On the other hand, these
-	 asserts help removing some compiler errors on unused
-	 parameter.  */
-      assert (a == bfd_get_arch (abfd));
-      assert (big == bfd_big_endian (abfd));
-      assert (mach == bfd_get_mach (abfd));
-    }
 
   switch (a)
     {

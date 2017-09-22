@@ -410,14 +410,15 @@ mi_cmd_var_list_children (const char *command, char **argv, int argc)
 
   if (from < to)
     {
-      struct cleanup *cleanup_children;
+      /* For historical reasons this might emit a list or a tuple, so
+	 we construct one or the other.  */
+      gdb::optional<ui_out_emit_tuple> tuple_emitter;
+      gdb::optional<ui_out_emit_list> list_emitter;
 
       if (mi_version (uiout) == 1)
-	cleanup_children
-	  = make_cleanup_ui_out_tuple_begin_end (uiout, "children");
+	tuple_emitter.emplace (uiout, "children");
       else
-	cleanup_children
-	  = make_cleanup_ui_out_list_begin_end (uiout, "children");
+	list_emitter.emplace (uiout, "children");
       for (ix = from;
 	   ix < to && VEC_iterate (varobj_p, children, ix, child);
 	   ++ix)
@@ -426,7 +427,6 @@ mi_cmd_var_list_children (const char *command, char **argv, int argc)
 
 	  print_varobj (child, print_values, 1 /* print expression */);
 	}
-      do_cleanups (cleanup_children);
     }
 
   uiout->field_int ("has_more", varobj_has_more (var, to));
@@ -648,7 +648,6 @@ void
 mi_cmd_var_update (const char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
-  struct cleanup *cleanup;
   char *name;
   enum print_values print_values;
 
@@ -665,10 +664,15 @@ mi_cmd_var_update (const char *command, char **argv, int argc)
   else
     print_values = PRINT_NO_VALUES;
 
+  /* For historical reasons this might emit a list or a tuple, so we
+     construct one or the other.  */
+  gdb::optional<ui_out_emit_tuple> tuple_emitter;
+  gdb::optional<ui_out_emit_list> list_emitter;
+
   if (mi_version (uiout) <= 1)
-    cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, "changelist");
+    tuple_emitter.emplace (uiout, "changelist");
   else
-    cleanup = make_cleanup_ui_out_list_begin_end (uiout, "changelist");
+    list_emitter.emplace (uiout, "changelist");
 
   /* Check if the parameter is a "*", which means that we want to
      update all variables.  */
@@ -693,8 +697,6 @@ mi_cmd_var_update (const char *command, char **argv, int argc)
 
       varobj_update_one (var, print_values, 1 /* explicit */);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Helper for mi_cmd_var_update().  */

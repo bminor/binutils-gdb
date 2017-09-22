@@ -350,7 +350,7 @@ lynx_resume (struct thread_resume *resume_info, size_t n)
      the moment we resume its execution for the first time.  It is
      fine to use the current_thread's ptid in those cases.  */
   if (ptid_equal (ptid, minus_one_ptid))
-    ptid = thread_to_gdb_id (current_thread);
+    ptid = ptid_of (current_thread);
 
   regcache_invalidate_pid (ptid_get_pid (ptid));
 
@@ -423,7 +423,7 @@ lynx_wait_1 (ptid_t ptid, struct target_waitstatus *status, int options)
   ptid_t new_ptid;
 
   if (ptid_equal (ptid, minus_one_ptid))
-    pid = lynx_ptid_get_pid (thread_to_gdb_id (current_thread));
+    pid = lynx_ptid_get_pid (ptid_of (current_thread));
   else
     pid = BUILDPID (lynx_ptid_get_pid (ptid), lynx_ptid_get_tid (ptid));
 
@@ -612,7 +612,7 @@ static void
 lynx_fetch_registers (struct regcache *regcache, int regno)
 {
   struct lynx_regset_info *regset = lynx_target_regsets;
-  ptid_t inferior_ptid = thread_to_gdb_id (current_thread);
+  ptid_t inferior_ptid = ptid_of (current_thread);
 
   lynx_debug ("lynx_fetch_registers (regno = %d)", regno);
 
@@ -637,7 +637,7 @@ static void
 lynx_store_registers (struct regcache *regcache, int regno)
 {
   struct lynx_regset_info *regset = lynx_target_regsets;
-  ptid_t inferior_ptid = thread_to_gdb_id (current_thread);
+  ptid_t inferior_ptid = ptid_of (current_thread);
 
   lynx_debug ("lynx_store_registers (regno = %d)", regno);
 
@@ -673,7 +673,7 @@ lynx_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
   int buf;
   const int xfer_size = sizeof (buf);
   CORE_ADDR addr = memaddr & -(CORE_ADDR) xfer_size;
-  ptid_t inferior_ptid = thread_to_gdb_id (current_thread);
+  ptid_t inferior_ptid = ptid_of (current_thread);
 
   while (addr < memaddr + len)
     {
@@ -706,7 +706,7 @@ lynx_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
   int buf;
   const int xfer_size = sizeof (buf);
   CORE_ADDR addr = memaddr & -(CORE_ADDR) xfer_size;
-  ptid_t inferior_ptid = thread_to_gdb_id (current_thread);
+  ptid_t inferior_ptid = ptid_of (current_thread);
 
   while (addr < memaddr + len)
     {
@@ -742,7 +742,7 @@ lynx_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 static void
 lynx_request_interrupt (void)
 {
-  ptid_t inferior_ptid = thread_to_gdb_id (get_first_thread ());
+  ptid_t inferior_ptid = ptid_of (get_first_thread ());
 
   kill (lynx_ptid_get_pid (inferior_ptid), SIGINT);
 }

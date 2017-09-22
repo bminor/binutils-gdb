@@ -2295,6 +2295,18 @@ plugin_test_thin.a: two_file_test_1.o two_file_test_1b.o two_file_test_2.o
 	rm -f $@
 	$(TEST_AR) crT $@ $^
 
+check_PROGRAMS += plugin_test_12
+check_SCRIPTS += plugin_test_12.sh
+check_DATA += plugin_test_12.err
+MOSTLYCLEANFILES += plugin_test_12.err
+export_dynamic_plugin.o.syms: export_dynamic_plugin.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+export_dynamic_plugin.o: export_dynamic_plugin.cc
+	$(COMPILE) -c -o $@ $<
+plugin_test_12: export_dynamic_plugin.o gcctestdir/ld plugin_test.so export_dynamic_plugin.o.syms
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z3foov" -Wl,--export-dynamic-symbol,"_Z3foov" export_dynamic_plugin.o.syms 2>plugin_test_12.err
+plugin_test_12.err: plugin_test_12
+	@touch plugin_test_12.err
 
 check_PROGRAMS += plugin_test_start_lib
 check_SCRIPTS += plugin_test_start_lib.sh
@@ -3828,6 +3840,17 @@ pr21430.stdout: pr21430
 	$(TEST_NM) -S $< > $@
 
 MOSTLYCLEANFILES += pr21430
+
+check_SCRIPTS += aarch64_tlsdesc.sh
+check_DATA += aarch64_tlsdesc.stdout
+aarch64_tlsdesc.o: aarch64_tlsdesc.s
+	$(TEST_AS) -o $@ $<
+aarch64_tlsdesc: aarch64_tlsdesc.o $(srcdir)/aarch64_tlsdesc.t ../ld-new
+	../ld-new $< -shared -T $(srcdir)/aarch64_tlsdesc.t -o $@
+aarch64_tlsdesc.stdout: aarch64_tlsdesc
+	$(TEST_OBJDUMP) -dR -j.text -j.got.plt $< > $@
+
+MOSTLYCLEANFILES += aarch64_tlsdesc
 
 endif DEFAULT_TARGET_AARCH64
 

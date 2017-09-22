@@ -36,9 +36,6 @@ aarch64_newlib_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->jb_pc = 11;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_aarch64_newlib_tdep;
-
 void
 _initialize_aarch64_newlib_tdep (void)
 {

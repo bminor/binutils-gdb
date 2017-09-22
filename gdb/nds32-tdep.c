@@ -55,8 +55,6 @@
 #define N32_FLDI_SP \
 	N32_TYPE2 (LDC, 0, REG_SP, 0)
 
-extern void _initialize_nds32_tdep (void);
-
 /* Use an invalid address value as 'not available' marker.  */
 enum { REG_UNAVAIL = (CORE_ADDR) -1 };
 
@@ -2134,7 +2132,7 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   nds32_add_reggroups (gdbarch);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  info.tdep_info = (void *) tdesc_data;
+  info.tdesc_data = tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 
   /* Override tdesc_register callbacks for system registers.  */

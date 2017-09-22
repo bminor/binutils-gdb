@@ -30,8 +30,12 @@ gdb_environ::operator= (gdb_environ &&e)
     return *this;
 
   m_environ_vector = std::move (e.m_environ_vector);
+  m_user_set_env = std::move (e.m_user_set_env);
+  m_user_unset_env = std::move (e.m_user_unset_env);
   e.m_environ_vector.clear ();
   e.m_environ_vector.push_back (NULL);
+  e.m_user_set_env.clear ();
+  e.m_user_unset_env.clear ();
   return *this;
 }
 
@@ -65,6 +69,8 @@ gdb_environ::clear ()
   m_environ_vector.clear ();
   /* Always add the NULL element.  */
   m_environ_vector.push_back (NULL);
+  m_user_set_env.clear ();
+  m_user_unset_env.clear ();
 }
 
 /* Helper function to check if STRING contains an environment variable
@@ -72,7 +78,7 @@ gdb_environ::clear ()
    if it contains, false otherwise.  */
 
 static bool
-match_var_in_string (char *string, const char *var, size_t var_len)
+match_var_in_string (const char *string, const char *var, size_t var_len)
 {
   if (strncmp (string, var, var_len) == 0 && string[var_len] == '=')
     return true;
@@ -99,12 +105,51 @@ gdb_environ::get (const char *var) const
 void
 gdb_environ::set (const char *var, const char *value)
 {
+  char *fullvar = concat (var, "=", value, NULL);
+
   /* We have to unset the variable in the vector if it exists.  */
-  unset (var);
+  unset (var, false);
 
   /* Insert the element before the last one, which is always NULL.  */
-  m_environ_vector.insert (m_environ_vector.end () - 1,
-			   concat (var, "=", value, NULL));
+  m_environ_vector.insert (m_environ_vector.end () - 1, fullvar);
+
+  /* Mark this environment variable as having been set by the user.
+     This will be useful when we deal with setting environment
+     variables on the remote target.  */
+  m_user_set_env.insert (std::string (fullvar));
+
+  /* If this environment variable is marked as unset by the user, then
+     remove it from the list, because now the user wants to set
+     it.  */
+  m_user_unset_env.erase (std::string (var));
+}
+
+/* See common/environ.h.  */
+
+void
+gdb_environ::unset (const char *var, bool update_unset_list)
+{
+  size_t len = strlen (var);
+  std::vector<char *>::iterator it_env;
+
+  /* We iterate until '.end () - 1' because the last element is
+     always NULL.  */
+  for (it_env = m_environ_vector.begin ();
+       it_env != m_environ_vector.end () - 1;
+       ++it_env)
+    if (match_var_in_string (*it_env, var, len))
+      break;
+
+  if (it_env != m_environ_vector.end () - 1)
+    {
+      m_user_set_env.erase (std::string (*it_env));
+      xfree (*it_env);
+
+      m_environ_vector.erase (it_env);
+    }
+
+  if (update_unset_list)
+    m_user_unset_env.insert (std::string (var));
 }
 
 /* See common/environ.h.  */
@@ -112,19 +157,7 @@ gdb_environ::set (const char *var, const char *value)
 void
 gdb_environ::unset (const char *var)
 {
-  size_t len = strlen (var);
-
-  /* We iterate until '.end () - 1' because the last element is
-     always NULL.  */
-  for (std::vector<char *>::iterator el = m_environ_vector.begin ();
-       el != m_environ_vector.end () - 1;
-       ++el)
-    if (match_var_in_string (*el, var, len))
-      {
-	xfree (*el);
-	m_environ_vector.erase (el);
-	break;
-      }
+  unset (var, true);
 }
 
 /* See common/environ.h.  */
@@ -133,4 +166,18 @@ char **
 gdb_environ::envp () const
 {
   return const_cast<char **> (&m_environ_vector[0]);
+}
+
+/* See common/environ.h.  */
+
+const std::set<std::string> &
+gdb_environ::user_set_env () const
+{
+  return m_user_set_env;
+}
+
+const std::set<std::string> &
+gdb_environ::user_unset_env () const
+{
+  return m_user_unset_env;
 }

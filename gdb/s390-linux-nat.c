@@ -1002,8 +1002,6 @@ s390_read_description (struct target_ops *ops)
 	  tdesc_s390_linux32);
 }
 
-void _initialize_s390_nat (void);
-
 void
 _initialize_s390_nat (void)
 {

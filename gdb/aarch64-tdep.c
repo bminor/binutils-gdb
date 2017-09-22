@@ -2997,7 +2997,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in the ABI-specific overrides, if they have been registered.  */
   info.target_desc = tdesc;
-  info.tdep_info = (void *) tdesc_data;
+  info.tdesc_data = tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 
   dwarf2_frame_set_init_reg (gdbarch, aarch64_dwarf2_frame_init_reg);
@@ -3047,9 +3047,6 @@ static void aarch64_process_record_test (void);
 }
 #endif
 
-/* Suppress warning from -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_aarch64_tdep;
-
 void
 _initialize_aarch64_tdep (void)
 {
@@ -3068,8 +3065,10 @@ When on, AArch64 specific debugging is enabled."),
 			    &setdebuglist, &showdebuglist);
 
 #if GDB_SELF_TEST
-  register_self_test (selftests::aarch64_analyze_prologue_test);
-  register_self_test (selftests::aarch64_process_record_test);
+  selftests::register_test ("aarch64-analyze-prologue",
+			    selftests::aarch64_analyze_prologue_test);
+  selftests::register_test ("aarch64-process-record",
+			    selftests::aarch64_process_record_test);
 #endif
 }
 

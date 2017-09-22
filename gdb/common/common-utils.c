@@ -298,7 +298,7 @@ skip_spaces (char *chp)
 /* A const-correct version of the above.  */
 
 const char *
-skip_spaces_const (const char *chp)
+skip_spaces (const char *chp)
 {
   if (chp == NULL)
     return NULL;
@@ -310,13 +310,21 @@ skip_spaces_const (const char *chp)
 /* See documentation in common-utils.h.  */
 
 const char *
-skip_to_space_const (const char *chp)
+skip_to_space (const char *chp)
 {
   if (chp == NULL)
     return NULL;
   while (*chp && !isspace (*chp))
     chp++;
   return chp;
+}
+
+/* See documentation in common-utils.h.  */
+
+char *
+skip_to_space (char *chp)
+{
+  return (char *) skip_to_space ((const char *) chp);
 }
 
 /* See common/common-utils.h.  */

@@ -62,7 +62,7 @@
 
 /* Local functions: */
 
-static void nofp_registers_info (char *, int);
+static void info_registers_command (char *, int);
 
 static void until_next_command (int);
 
@@ -74,7 +74,7 @@ static void path_command (char *, int);
 
 static void unset_command (char *, int);
 
-static void float_info (char *, int);
+static void info_float_command (char *, int);
 
 static void disconnect_command (char *, int);
 
@@ -84,7 +84,7 @@ static void set_environment_command (char *, int);
 
 static void environment_info (char *, int);
 
-static void program_info (char *, int);
+static void info_program_command (char *, int);
 
 static void finish_command (char *, int);
 
@@ -99,8 +99,6 @@ static void next_command (char *, int);
 static void step_command (char *, int);
 
 static void run_command (char *, int);
-
-void _initialize_infcmd (void);
 
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution) error (_("The program is not being run."));
@@ -413,7 +411,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
 {
 
   /* Be sure we own the terminal in case write operations are performed.  */ 
-  target_terminal_ours_for_output ();
+  target_terminal::ours_for_output ();
 
   /* If the target hasn't taken care of this already, do it now.
      Targets which need to access registers during to_open,
@@ -520,12 +518,25 @@ prepare_execution_command (struct target_ops *target, int background)
     }
 }
 
-/* Implement the "run" command.  If TBREAK_AT_MAIN is set, then insert
-   a temporary breakpoint at the begining of the main program before
-   running the program.  */
+/* Determine how the new inferior will behave.  */
+
+enum run_how
+  {
+    /* Run program without any explicit stop during startup.  */
+    RUN_NORMAL,
+
+    /* Stop at the beginning of the program's main function.  */
+    RUN_STOP_AT_MAIN,
+
+    /* Stop at the first instruction of the program.  */
+    RUN_STOP_AT_FIRST_INSN
+  };
+
+/* Implement the "run" command.  Force a stop during program start if
+   requested by RUN_HOW.  */
 
 static void
-run_command_1 (char *args, int from_tty, int tbreak_at_main)
+run_command_1 (char *args, int from_tty, enum run_how run_how)
 {
   const char *exec_file;
   struct cleanup *old_chain;
@@ -534,6 +545,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
   struct target_ops *run_target;
   int async_exec;
   struct cleanup *args_chain;
+  CORE_ADDR pc;
 
   dont_repeat ();
 
@@ -571,8 +583,8 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   /* Done.  Can now set breakpoints, change inferior args, etc.  */
 
-  /* Insert the temporary breakpoint if a location was specified.  */
-  if (tbreak_at_main)
+  /* Insert temporary breakpoint in main function if requested.  */
+  if (run_how == RUN_STOP_AT_MAIN)
     tbreak_command (main_name (), 0);
 
   exec_file = get_exec_file (0);
@@ -632,6 +644,15 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
      has done its thing; now we are setting up the running program.  */
   post_create_inferior (&current_target, 0);
 
+  /* Queue a pending event so that the program stops immediately.  */
+  if (run_how == RUN_STOP_AT_FIRST_INSN)
+    {
+      thread_info *thr = inferior_thread ();
+      thr->suspend.waitstatus_pending_p = 1;
+      thr->suspend.waitstatus.kind = TARGET_WAITKIND_STOPPED;
+      thr->suspend.waitstatus.value.sig = GDB_SIGNAL_0;
+    }
+
   /* Start the target running.  Do not use -1 continuation as it would skip
      breakpoint right at the entry point.  */
   proceed (regcache_read_pc (get_current_regcache ()), GDB_SIGNAL_0);
@@ -644,7 +665,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 static void
 run_command (char *args, int from_tty)
 {
-  run_command_1 (args, from_tty, 0);
+  run_command_1 (args, from_tty, RUN_NORMAL);
 }
 
 /* Start the execution of the program up until the beginning of the main
@@ -660,7 +681,16 @@ start_command (char *args, int from_tty)
     error (_("No symbol table loaded.  Use the \"file\" command."));
 
   /* Run the program until reaching the main procedure...  */
-  run_command_1 (args, from_tty, 1);
+  run_command_1 (args, from_tty, RUN_STOP_AT_MAIN);
+}
+
+/* Start the execution of the program stopping at the first
+   instruction.  */
+
+static void
+starti_command (char *args, int from_tty)
+{
+  run_command_1 (args, from_tty, RUN_STOP_AT_FIRST_INSN);
 } 
 
 static int
@@ -753,7 +783,7 @@ continue_1 (int all_threads)
 	      Continuing.
 	      <no thread was resumed, but the inferior now owns the terminal>
 	  */
-	  target_terminal_inferior ();
+	  target_terminal::inferior ();
 	}
     }
   else
@@ -865,14 +895,13 @@ continue_command (char *args, int from_tty)
 static void
 set_step_frame (void)
 {
-  struct symtab_and_line sal;
-  CORE_ADDR pc;
-  struct frame_info *frame = get_current_frame ();
-  struct thread_info *tp = inferior_thread ();
+  frame_info *frame = get_current_frame ();
 
-  find_frame_sal (frame, &sal);
+  symtab_and_line sal = find_frame_sal (frame);
   set_step_info (frame, sal);
-  pc = get_frame_pc (frame);
+
+  CORE_ADDR pc = get_frame_pc (frame);
+  thread_info *tp = inferior_thread ();
   tp->control.step_start_function = find_pc_function (pc);
 }
 
@@ -1143,7 +1172,7 @@ prepare_one_step (struct step_command_fsm *sm)
 					    &tp->control.step_range_end) == 0)
 		error (_("Cannot find bounds of current function"));
 
-	      target_terminal_ours_for_output ();
+	      target_terminal::ours_for_output ();
 	      printf_filtered (_("Single stepping until exit from function %s,"
 				 "\nwhich has no line number information.\n"),
 			       name);
@@ -1179,8 +1208,6 @@ jump_command (char *arg, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   CORE_ADDR addr;
-  struct symtabs_and_lines sals;
-  struct symtab_and_line sal;
   struct symbol *fn;
   struct symbol *sfn;
   int async_exec;
@@ -1200,17 +1227,15 @@ jump_command (char *arg, int from_tty)
   if (!arg)
     error_no_arg (_("starting address"));
 
-  sals = decode_line_with_last_displayed (arg, DECODE_LINE_FUNFIRSTLINE);
-  if (sals.nelts != 1)
-    {
-      error (_("Unreasonable jump request"));
-    }
-
-  sal = sals.sals[0];
-  xfree (sals.sals);
+  std::vector<symtab_and_line> sals
+    = decode_line_with_last_displayed (arg, DECODE_LINE_FUNFIRSTLINE);
+  if (sals.size () != 1)
+    error (_("Unreasonable jump request"));
 
   /* Done with ARGS.  */
   do_cleanups (args_chain);
+
+  symtab_and_line &sal = sals[0];
 
   if (sal.symtab == 0 && sal.pc == 0)
     error (_("No source file has been specified."));
@@ -1877,11 +1902,10 @@ finish_backward (struct finish_command_fsm *sm)
     {
       struct frame_info *frame = get_selected_frame (NULL);
       struct gdbarch *gdbarch = get_frame_arch (frame);
-      struct symtab_and_line sr_sal;
 
       /* Set a step-resume at the function's entry point.  Once that's
 	 hit, we'll do one more step backwards.  */
-      init_sal (&sr_sal);
+      symtab_and_line sr_sal;
       sr_sal.pc = sal.pc;
       sr_sal.pspace = get_frame_program_space (frame);
       insert_step_resume_breakpoint_at_sal (gdbarch,
@@ -2002,10 +2026,7 @@ finish_command (char *arg, int from_tty)
 	 called by that frame.  We don't use the magic "1" value for
 	 step_range_end, because then infrun will think this is nexti,
 	 and not step over the rest of this inlined function call.  */
-      struct symtab_and_line empty_sal;
-
-      init_sal (&empty_sal);
-      set_step_info (frame, empty_sal);
+      set_step_info (frame, {});
       tp->control.step_range_start = get_frame_pc (frame);
       tp->control.step_range_end = tp->control.step_range_start;
       tp->control.step_over_calls = STEP_OVER_ALL;
@@ -2060,7 +2081,7 @@ finish_command (char *arg, int from_tty)
 
 
 static void
-program_info (char *args, int from_tty)
+info_program_command (char *args, int from_tty)
 {
   bpstat bs;
   int num, stat;
@@ -2230,7 +2251,7 @@ unset_environment_command (char *var, int from_tty)
       /* If there is no argument, delete all environment variables.
          Ask for confirmation if reading from the terminal.  */
       if (!from_tty || query (_("Delete all environment variables? ")))
-	current_inferior ()->environment = gdb_environ::from_host_environ ();
+	current_inferior ()->environment.clear ();
     }
   else
     current_inferior ()->environment.unset (var);
@@ -2502,13 +2523,13 @@ registers_info (char *addr_exp, int fpregs)
 }
 
 static void
-all_registers_info (char *addr_exp, int from_tty)
+info_all_registers_command (char *addr_exp, int from_tty)
 {
   registers_info (addr_exp, 1);
 }
 
 static void
-nofp_registers_info (char *addr_exp, int from_tty)
+info_registers_command (char *addr_exp, int from_tty)
 {
   registers_info (addr_exp, 0);
 }
@@ -2543,7 +2564,7 @@ print_vector_info (struct ui_file *file,
 }
 
 static void
-vector_info (char *args, int from_tty)
+info_vector_command (char *args, int from_tty)
 {
   if (!target_has_registers)
     error (_("The program has no registers now."));
@@ -2818,7 +2839,7 @@ attach_command (char *args, int from_tty)
 
   /* Set up the "saved terminal modes" of the inferior
      based on what modes we are starting it with.  */
-  target_terminal_init ();
+  target_terminal::init ();
 
   /* Install inferior's terminal modes.  This may look like a no-op,
      as we've just saved them above, however, this does more than
@@ -2834,7 +2855,7 @@ attach_command (char *args, int from_tty)
        while we're in the event loop waiting for that stop.  That is,
        before the attach continuation runs and the command is really
        finished.  */
-  target_terminal_inferior ();
+  target_terminal::inferior ();
 
   /* Set up execution context to know that we should return from
      wait_for_inferior as soon as the target reports a stop.  */
@@ -3090,7 +3111,7 @@ default_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 }
 
 static void
-float_info (char *args, int from_tty)
+info_float_command (char *args, int from_tty)
 {
   struct frame_info *frame;
 
@@ -3188,6 +3209,22 @@ info_proc_cmd_all (char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_ALL, from_tty);
 }
+
+/* This help string is used for the run, start, and starti commands.
+   It is defined as a macro to prevent duplication.  */
+
+#define RUN_ARGS_HELP \
+"You may specify arguments to give it.\n\
+Args may include \"*\", or \"[...]\"; they are expanded using the\n\
+shell that will start the program (specified by the \"$SHELL\" environment\n\
+variable).  Input and output redirection with \">\", \"<\", or \">>\"\n\
+are also allowed.\n\
+\n\
+With no arguments, uses arguments last specified (with \"run\" or \n\
+\"set args\").  To cancel previous arguments and run with no arguments,\n\
+use \"set args\" without arguments.\n\
+\n\
+To start the inferior without using a shell, use \"set startup-with-shell off\"."
 
 void
 _initialize_infcmd (void)
@@ -3395,24 +3432,19 @@ Specifying -a and an ignore count simultaneously is an error."));
   add_com_alias ("fg", "cont", class_run, 1);
 
   c = add_com ("run", class_run, run_command, _("\
-Start debugged program.  You may specify arguments to give it.\n\
-Args may include \"*\", or \"[...]\"; they are expanded using the\n\
-shell that will start the program (specified by the \"$SHELL\"\
-environment\nvariable).  Input and output redirection with \">\",\
-\"<\", or \">>\"\nare also allowed.\n\n\
-With no arguments, uses arguments last specified (with \"run\" \
-or \"set args\").\n\
-To cancel previous arguments and run with no arguments,\n\
-use \"set args\" without arguments.\n\
-To start the inferior without using a shell, use \"set \
-startup-with-shell off\"."));
+Start debugged program.\n"
+RUN_ARGS_HELP));
   set_cmd_completer (c, filename_completer);
   add_com_alias ("r", "run", class_run, 1);
 
   c = add_com ("start", class_run, start_command, _("\
-Run the debugged program until the beginning of the main procedure.\n\
-You may specify arguments to give to your program, just as with the\n\
-\"run\" command."));
+Start the debugged program stopping at the beginning of the main procedure.\n"
+RUN_ARGS_HELP));
+  set_cmd_completer (c, filename_completer);
+
+  c = add_com ("starti", class_run, starti_command, _("\
+Start the debugged program stopping at the first instruction.\n"
+RUN_ARGS_HELP));
   set_cmd_completer (c, filename_completer);
 
   add_com ("interrupt", class_run, interrupt_command,
@@ -3421,24 +3453,24 @@ If non-stop mode is enabled, interrupt only the current thread,\n\
 otherwise all the threads in the program are stopped.  To \n\
 interrupt all running threads in non-stop mode, use the -a option."));
 
-  c = add_info ("registers", nofp_registers_info, _("\
+  c = add_info ("registers", info_registers_command, _("\
 List of integer registers and their contents, for selected stack frame.\n\
 Register name as argument means describe only that register."));
   add_info_alias ("r", "registers", 1);
   set_cmd_completer (c, reg_or_group_completer);
 
-  c = add_info ("all-registers", all_registers_info, _("\
+  c = add_info ("all-registers", info_all_registers_command, _("\
 List of all registers and their contents, for selected stack frame.\n\
 Register name as argument means describe only that register."));
   set_cmd_completer (c, reg_or_group_completer);
 
-  add_info ("program", program_info,
+  add_info ("program", info_program_command,
 	    _("Execution status of the program."));
 
-  add_info ("float", float_info,
+  add_info ("float", info_float_command,
 	    _("Print the status of the floating point unit\n"));
 
-  add_info ("vector", vector_info,
+  add_info ("vector", info_vector_command,
 	    _("Print the status of the vector unit\n"));
 
   add_prefix_cmd ("proc", class_info, info_proc_cmd,

@@ -475,6 +475,11 @@ struct target_ops
 
   /* Return tdesc index for IPA.  */
   int (*get_ipa_tdesc_idx) (void);
+
+  /* Thread ID to (numeric) thread handle: Return true on success and
+     false for failure.  Return pointer to thread handle via HANDLE
+     and the handle's length via HANDLE_LEN.  */
+  bool (*thread_handle) (ptid_t ptid, gdb_byte **handle, int *handle_len);
 };
 
 extern struct target_ops *the_target;
@@ -693,12 +698,17 @@ void done_accessing_memory (void);
   (the_target->thread_name ? (*the_target->thread_name) (ptid)  \
    : NULL)
 
+#define target_thread_handle(ptid, handle, handle_len) \
+   (the_target->thread_handle ? (*the_target->thread_handle) \
+                                  (ptid, handle, handle_len) \
+   : false)
+
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 
 int write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 			   int len);
 
-int set_desired_thread (int id);
+int set_desired_thread ();
 
 const char *target_pid_to_str (ptid_t);
 
