@@ -241,19 +241,10 @@ regcache_get_ptid (const struct regcache *regcache)
   return regcache->ptid ();
 }
 
-void
-regcache_xfree (struct regcache *regcache)
-{
-  if (regcache == NULL)
-    return;
-
-  delete regcache;
-}
-
 static void
 do_regcache_xfree (void *data)
 {
-  regcache_xfree ((struct regcache *) data);
+  delete (struct regcache *) data;
 }
 
 struct cleanup *

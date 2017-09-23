@@ -1,5 +1,17 @@
 2017-09-25  Tom Tromey  <tom@tromey.com>
 
+	* spu-tdep.c (spu2ppu_dealloc_cache): Use delete.
+	* regcache.h (regcache_xfree): Don't declare.
+	* regcache.c (regcache_xfree): Remove.
+	(do_regcache_xfree): Use delete.
+	* ppc-linux-tdep.c (ppu2spu_dealloc_cache): Use delete.
+	* linux-fork.c (free_fork): Use delete.
+	(fork_save_infrun_state): Likewise.
+	* jit.c (jit_dealloc_cache): Use delete.
+	* infrun.c (discard_infcall_suspend_state): Use delete.
+
+2017-09-25  Tom Tromey  <tom@tromey.com>
+
 	* regcache.h (regcache_xmalloc): Don't declare.
 	(regcache_raw_set_cached_value): Update comment.
 	* regcache.c (regcache_xmalloc): Remove.

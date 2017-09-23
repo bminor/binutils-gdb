@@ -1288,7 +1288,7 @@ static void
 spu2ppu_dealloc_cache (struct frame_info *self, void *this_cache)
 {
   struct spu2ppu_cache *cache = (struct spu2ppu_cache *) this_cache;
-  regcache_xfree (cache->regcache);
+  delete cache->regcache;
 }
 
 static const struct frame_unwind spu2ppu_unwind = {
