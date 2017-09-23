@@ -1506,12 +1506,8 @@ mi_cmd_data_read_memory_bytes (const char *command, char **argv, int argc)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   struct ui_out *uiout = current_uiout;
-  struct cleanup *cleanups;
   CORE_ADDR addr;
   LONGEST length;
-  memory_read_result_s *read_result;
-  int ix;
-  VEC(memory_read_result_s) *result;
   long offset = 0;
   int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
   int oind = 0;
@@ -1548,40 +1544,26 @@ mi_cmd_data_read_memory_bytes (const char *command, char **argv, int argc)
   addr = parse_and_eval_address (argv[0]) + offset;
   length = atol (argv[1]);
 
-  result = read_memory_robust (current_target.beneath, addr, length);
+  std::vector<memory_read_result> result
+    = read_memory_robust (current_target.beneath, addr, length);
 
-  cleanups = make_cleanup (free_memory_read_result_vector, &result);
-
-  if (VEC_length (memory_read_result_s, result) == 0)
+  if (result.size () == 0)
     error (_("Unable to read memory."));
 
   ui_out_emit_list list_emitter (uiout, "memory");
-  for (ix = 0;
-       VEC_iterate (memory_read_result_s, result, ix, read_result);
-       ++ix)
+  for (const memory_read_result &read_result : result)
     {
       ui_out_emit_tuple tuple_emitter (uiout, NULL);
-      char *data, *p;
-      int i;
-      int alloc_len;
 
-      uiout->field_core_addr ("begin", gdbarch, read_result->begin);
-      uiout->field_core_addr ("offset", gdbarch, read_result->begin - addr);
-      uiout->field_core_addr ("end", gdbarch, read_result->end);
+      uiout->field_core_addr ("begin", gdbarch, read_result.begin);
+      uiout->field_core_addr ("offset", gdbarch, read_result.begin - addr);
+      uiout->field_core_addr ("end", gdbarch, read_result.end);
 
-      alloc_len = (read_result->end - read_result->begin) * 2 * unit_size + 1;
-      data = (char *) xmalloc (alloc_len);
-
-      for (i = 0, p = data;
-	   i < ((read_result->end - read_result->begin) * unit_size);
-	   ++i, p += 2)
-	{
-	  sprintf (p, "%02x", read_result->data[i]);
-	}
-      uiout->field_string ("contents", data);
-      xfree (data);
+      std::string data = bin2hex (read_result.data.get (),
+				  (read_result.end - read_result.begin)
+				  * unit_size);
+      uiout->field_string ("contents", data.c_str ());
     }
-  do_cleanups (cleanups);
 }
 
 /* Implementation of the -data-write_memory command.

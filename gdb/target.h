@@ -287,22 +287,31 @@ extern LONGEST target_read (struct target_ops *ops,
 			    ULONGEST offset, LONGEST len);
 
 struct memory_read_result
+{
+  memory_read_result (ULONGEST begin_, ULONGEST end_,
+		      gdb::unique_xmalloc_ptr<gdb_byte> &&data_)
+    : begin (begin_),
+      end (end_),
+      data (std::move (data_))
   {
-    /* First address that was read.  */
-    ULONGEST begin;
-    /* Past-the-end address.  */
-    ULONGEST end;
-    /* The data.  */
-    gdb_byte *data;
+  }
+
+  ~memory_read_result () = default;
+
+  memory_read_result (memory_read_result &&other) = default;
+
+  DISABLE_COPY_AND_ASSIGN (memory_read_result);
+
+  /* First address that was read.  */
+  ULONGEST begin;
+  /* Past-the-end address.  */
+  ULONGEST end;
+  /* The data.  */
+  gdb::unique_xmalloc_ptr<gdb_byte> data;
 };
-typedef struct memory_read_result memory_read_result_s;
-DEF_VEC_O(memory_read_result_s);
 
-extern void free_memory_read_result_vector (void *);
-
-extern VEC(memory_read_result_s)* read_memory_robust (struct target_ops *ops,
-						      const ULONGEST offset,
-						      const LONGEST len);
+extern std::vector<memory_read_result> read_memory_robust
+    (struct target_ops *ops, const ULONGEST offset, const LONGEST len);
 
 /* Request that OPS transfer up to LEN addressable units from BUF to the
    target's OBJECT.  When writing to a memory object, the addressable unit

@@ -1630,43 +1630,37 @@ static void
 read_whatever_is_readable (struct target_ops *ops,
 			   const ULONGEST begin, const ULONGEST end,
 			   int unit_size,
-			   VEC(memory_read_result_s) **result)
+			   std::vector<memory_read_result> *result)
 {
-  gdb_byte *buf = (gdb_byte *) xmalloc (end - begin);
   ULONGEST current_begin = begin;
   ULONGEST current_end = end;
   int forward;
-  memory_read_result_s r;
   ULONGEST xfered_len;
 
   /* If we previously failed to read 1 byte, nothing can be done here.  */
   if (end - begin <= 1)
-    {
-      xfree (buf);
-      return;
-    }
+    return;
+
+  gdb::unique_xmalloc_ptr<gdb_byte> buf ((gdb_byte *) xmalloc (end - begin));
 
   /* Check that either first or the last byte is readable, and give up
      if not.  This heuristic is meant to permit reading accessible memory
      at the boundary of accessible region.  */
   if (target_read_partial (ops, TARGET_OBJECT_MEMORY, NULL,
-			   buf, begin, 1, &xfered_len) == TARGET_XFER_OK)
+			   buf.get (), begin, 1, &xfered_len) == TARGET_XFER_OK)
     {
       forward = 1;
       ++current_begin;
     }
   else if (target_read_partial (ops, TARGET_OBJECT_MEMORY, NULL,
-				buf + (end - begin) - 1, end - 1, 1,
+				buf.get () + (end - begin) - 1, end - 1, 1,
 				&xfered_len) == TARGET_XFER_OK)
     {
       forward = 0;
       --current_end;
     }
   else
-    {
-      xfree (buf);
-      return;
-    }
+    return;
 
   /* Loop invariant is that the [current_begin, current_end) was previously
      found to be not readable as a whole.
@@ -1696,7 +1690,7 @@ read_whatever_is_readable (struct target_ops *ops,
 	}
 
       xfer = target_read (ops, TARGET_OBJECT_MEMORY, NULL,
-			  buf + (first_half_begin - begin) * unit_size,
+			  buf.get () + (first_half_begin - begin) * unit_size,
 			  first_half_begin,
 			  first_half_end - first_half_begin);
 
@@ -1723,47 +1717,27 @@ read_whatever_is_readable (struct target_ops *ops,
   if (forward)
     {
       /* The [begin, current_begin) range has been read.  */
-      r.begin = begin;
-      r.end = current_begin;
-      r.data = buf;
+      result->emplace_back (begin, current_end, std::move (buf));
     }
   else
     {
       /* The [current_end, end) range has been read.  */
       LONGEST region_len = end - current_end;
 
-      r.data = (gdb_byte *) xmalloc (region_len * unit_size);
-      memcpy (r.data, buf + (current_end - begin) * unit_size,
+      gdb::unique_xmalloc_ptr<gdb_byte> data
+	((gdb_byte *) xmalloc (region_len * unit_size));
+      memcpy (data.get (), buf.get () + (current_end - begin) * unit_size,
 	      region_len * unit_size);
-      r.begin = current_end;
-      r.end = end;
-      xfree (buf);
+      result->emplace_back (current_end, end, std::move (data));
     }
-  VEC_safe_push(memory_read_result_s, (*result), &r);
 }
 
-void
-free_memory_read_result_vector (void *x)
-{
-  VEC(memory_read_result_s) **v = (VEC(memory_read_result_s) **) x;
-  memory_read_result_s *current;
-  int ix;
-
-  for (ix = 0; VEC_iterate (memory_read_result_s, *v, ix, current); ++ix)
-    {
-      xfree (current->data);
-    }
-  VEC_free (memory_read_result_s, *v);
-}
-
-VEC(memory_read_result_s) *
+std::vector<memory_read_result>
 read_memory_robust (struct target_ops *ops,
 		    const ULONGEST offset, const LONGEST len)
 {
-  VEC(memory_read_result_s) *result = 0;
+  std::vector<memory_read_result> result;
   int unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
-  struct cleanup *cleanup = make_cleanup (free_memory_read_result_vector,
-					  &result);
 
   LONGEST xfered_total = 0;
   while (xfered_total < len)
@@ -1789,19 +1763,17 @@ read_memory_robust (struct target_ops *ops,
       else
 	{
 	  LONGEST to_read = std::min (len - xfered_total, region_len);
-	  gdb_byte *buffer = (gdb_byte *) xmalloc (to_read * unit_size);
-	  struct cleanup *inner_cleanup = make_cleanup (xfree, buffer);
+	  gdb::unique_xmalloc_ptr<gdb_byte> buffer
+	    ((gdb_byte *) xmalloc (to_read * unit_size));
 
 	  LONGEST xfered_partial =
-	      target_read (ops, TARGET_OBJECT_MEMORY, NULL,
-			   (gdb_byte *) buffer,
+	      target_read (ops, TARGET_OBJECT_MEMORY, NULL, buffer.get (),
 			   offset + xfered_total, to_read);
 	  /* Call an observer, notifying them of the xfer progress?  */
 	  if (xfered_partial <= 0)
 	    {
 	      /* Got an error reading full chunk.  See if maybe we can read
 		 some subrange.  */
-	      do_cleanups (inner_cleanup);
 	      read_whatever_is_readable (ops, offset + xfered_total,
 					 offset + xfered_total + to_read,
 					 unit_size, &result);
@@ -1809,20 +1781,15 @@ read_memory_robust (struct target_ops *ops,
 	    }
 	  else
 	    {
-	      struct memory_read_result r;
-
-	      discard_cleanups (inner_cleanup);
-	      r.data = buffer;
-	      r.begin = offset + xfered_total;
-	      r.end = r.begin + xfered_partial;
-	      VEC_safe_push (memory_read_result_s, result, &r);
+	      result.emplace_back (offset + xfered_total,
+				   offset + xfered_total + xfered_partial,
+				   std::move (buffer));
 	      xfered_total += xfered_partial;
 	    }
 	  QUIT;
 	}
     }
 
-  discard_cleanups (cleanup);
   return result;
 }
 

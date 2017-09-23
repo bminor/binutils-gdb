@@ -1,5 +1,17 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* target.c (read_whatever_is_readable): Change type of "result".
+	Update.
+	(free_memory_read_result_vector): Remove.
+	(read_memory_robust): Change return type.  Update.
+	* mi/mi-main.c (mi_cmd_data_read_memory_bytes): Update.  Use
+	bin2hex, std::string.
+	* target.h (memory_read_result_s): Remove typedef.
+	(free_memory_read_result_vector): Remove.
+	(read_memory_robust): Return std::vector.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-main.c (captured_mi_execute_command): Use scope_restore.
 
 2017-09-29  Tom Tromey  <tom@tromey.com>
