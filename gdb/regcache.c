@@ -241,18 +241,6 @@ regcache_get_ptid (const struct regcache *regcache)
   return regcache->ptid ();
 }
 
-static void
-do_regcache_xfree (void *data)
-{
-  delete (struct regcache *) data;
-}
-
-struct cleanup *
-make_cleanup_regcache_xfree (struct regcache *regcache)
-{
-  return make_cleanup (do_regcache_xfree, regcache);
-}
-
 /* Cleanup routines for invalidating a register.  */
 
 struct register_to_invalidate

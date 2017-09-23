@@ -1267,7 +1267,7 @@ spu2ppu_sniffer (const struct frame_unwind *self,
 
       if (fi)
 	{
-	  cache->regcache = frame_save_as_regcache (fi);
+	  cache->regcache = frame_save_as_regcache (fi).release ();
 	  *this_prologue_cache = cache;
 	  return 1;
 	}

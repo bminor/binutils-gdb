@@ -1,5 +1,17 @@
 2017-09-25  Tom Tromey  <tom@tromey.com>
 
+	* spu-tdep.c (spu2ppu_sniffer): Update.
+	* regcache.h (make_cleanup_regcache_xfree): Don't declare.
+	* regcache.c (do_regcache_xfree, make_cleanup_regcache_xfree):
+	Remove.
+	* ppc-linux-tdep.c (ppu2spu_sniffer): Update.
+	* mi/mi-main.c (mi_cmd_data_list_changed_registers): Update.
+	* frame.h (frame_save_as_regcache): Return std::unique_ptr.
+	* frame.c (frame_save_as_regcache): Return std::unique_ptr.
+	(frame_pop): Update.
+
+2017-09-25  Tom Tromey  <tom@tromey.com>
+
 	* spu-tdep.c (spu2ppu_dealloc_cache): Use delete.
 	* regcache.h (regcache_xfree): Don't declare.
 	* regcache.c (regcache_xfree): Remove.

@@ -35,8 +35,6 @@ extern struct regcache *get_thread_arch_aspace_regcache (ptid_t,
 							 struct gdbarch *,
 							 struct address_space *);
 
-struct cleanup *make_cleanup_regcache_xfree (struct regcache *regcache);
-
 /* Return REGCACHE's ptid.  */
 
 extern ptid_t regcache_get_ptid (const struct regcache *regcache);

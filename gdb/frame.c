@@ -1017,16 +1017,14 @@ do_frame_register_read (void *src, int regnum, gdb_byte *buf)
     return REG_VALID;
 }
 
-struct regcache *
+std::unique_ptr<struct regcache>
 frame_save_as_regcache (struct frame_info *this_frame)
 {
   struct address_space *aspace = get_frame_address_space (this_frame);
-  struct regcache *regcache = new regcache (get_frame_arch (this_frame),
-					    aspace);
-  struct cleanup *cleanups = make_cleanup_regcache_xfree (regcache);
+  std::unique_ptr<struct regcache> regcache
+    (new struct regcache (get_frame_arch (this_frame), aspace));
 
-  regcache_save (regcache, do_frame_register_read, this_frame);
-  discard_cleanups (cleanups);
+  regcache_save (regcache.get (), do_frame_register_read, this_frame);
   return regcache;
 }
 
@@ -1034,8 +1032,6 @@ void
 frame_pop (struct frame_info *this_frame)
 {
   struct frame_info *prev_frame;
-  struct regcache *scratch;
-  struct cleanup *cleanups;
 
   if (get_frame_type (this_frame) == DUMMY_FRAME)
     {
@@ -1062,8 +1058,8 @@ frame_pop (struct frame_info *this_frame)
      Save them in a scratch buffer so that there isn't a race between
      trying to extract the old values from the current regcache while
      at the same time writing new values into that same cache.  */
-  scratch = frame_save_as_regcache (prev_frame);
-  cleanups = make_cleanup_regcache_xfree (scratch);
+  std::unique_ptr<struct regcache> scratch
+    = frame_save_as_regcache (prev_frame);
 
   /* FIXME: cagney/2003-03-16: It should be possible to tell the
      target's register cache that it is about to be hit with a burst
@@ -1075,8 +1071,7 @@ frame_pop (struct frame_info *this_frame)
      (arguably a bug in the target code mind).  */
   /* Now copy those saved registers into the current regcache.
      Here, regcache_cpy() calls regcache_restore().  */
-  regcache_cpy (get_current_regcache (), scratch);
-  do_cleanups (cleanups);
+  regcache_cpy (get_current_regcache (), scratch.get ());
 
   /* We've made right mess of GDB's local state, just discard
      everything.  */

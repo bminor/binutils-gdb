@@ -679,7 +679,8 @@ extern void *frame_obstack_zalloc (unsigned long size);
   ((TYPE *) frame_obstack_zalloc ((NUMBER) * sizeof (TYPE)))
 
 /* Create a regcache, and copy the frame's registers into it.  */
-struct regcache *frame_save_as_regcache (struct frame_info *this_frame);
+std::unique_ptr<struct regcache> frame_save_as_regcache
+    (struct frame_info *this_frame);
 
 extern const struct block *get_frame_block (struct frame_info *,
 					    CORE_ADDR *addr_in_block);

@@ -1031,22 +1031,20 @@ mi_cmd_data_list_register_names (const char *command, char **argv, int argc)
 void
 mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
 {
-  static struct regcache *this_regs = NULL;
+  static std::unique_ptr<struct regcache> this_regs;
   struct ui_out *uiout = current_uiout;
-  struct regcache *prev_regs;
+  std::unique_ptr<struct regcache> prev_regs;
   struct gdbarch *gdbarch;
   int regnum, numregs, changed;
   int i;
-  struct cleanup *cleanup;
 
   /* The last time we visited this function, the current frame's
      register contents were saved in THIS_REGS.  Move THIS_REGS over
      to PREV_REGS, and refresh THIS_REGS with the now-current register
      contents.  */
 
-  prev_regs = this_regs;
+  prev_regs = std::move (this_regs);
   this_regs = frame_save_as_regcache (get_selected_frame (NULL));
-  cleanup = make_cleanup_regcache_xfree (prev_regs);
 
   /* Note that the test for a valid register must include checking the
      gdbarch_register_name because gdbarch_num_regs may be allocated
@@ -1055,7 +1053,7 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
      will change depending upon the particular processor being
      debugged.  */
 
-  gdbarch = get_regcache_arch (this_regs);
+  gdbarch = get_regcache_arch (this_regs.get ());
   numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
   ui_out_emit_list list_emitter (uiout, "changed-registers");
@@ -1070,7 +1068,8 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
 	  if (gdbarch_register_name (gdbarch, regnum) == NULL
 	      || *(gdbarch_register_name (gdbarch, regnum)) == '\0')
 	    continue;
-	  changed = register_changed_p (regnum, prev_regs, this_regs);
+	  changed = register_changed_p (regnum, prev_regs.get (),
+					this_regs.get ());
 	  if (changed < 0)
 	    error (_("-data-list-changed-registers: "
 		     "Unable to read register contents."));
@@ -1089,7 +1088,8 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
 	  && gdbarch_register_name (gdbarch, regnum) != NULL
 	  && *gdbarch_register_name (gdbarch, regnum) != '\000')
 	{
-	  changed = register_changed_p (regnum, prev_regs, this_regs);
+	  changed = register_changed_p (regnum, prev_regs.get (),
+					this_regs.get ());
 	  if (changed < 0)
 	    error (_("-data-list-changed-registers: "
 		     "Unable to read register contents."));
@@ -1099,7 +1099,6 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
       else
 	error (_("bad register number"));
     }
-  do_cleanups (cleanup);
 }
 
 static int
