@@ -1,5 +1,12 @@
 2017-09-25  Tom Tromey  <tom@tromey.com>
 
+	* regcache.c (class regcache_invalidator): New.
+	(struct register_to_invalidate): Remove.
+	(make_cleanup_regcache_invalidate): Remove.
+	(regcache::raw_write): Use regcache_invalidator.
+
+2017-09-25  Tom Tromey  <tom@tromey.com>
+
 	* spu-tdep.c (spu2ppu_sniffer): Update.
 	* regcache.h (make_cleanup_regcache_xfree): Don't declare.
 	* regcache.c (do_regcache_xfree, make_cleanup_regcache_xfree):

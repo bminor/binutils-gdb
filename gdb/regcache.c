@@ -241,31 +241,36 @@ regcache_get_ptid (const struct regcache *regcache)
   return regcache->ptid ();
 }
 
-/* Cleanup routines for invalidating a register.  */
+/* Cleanup class for invalidating a register.  */
 
-struct register_to_invalidate
+class regcache_invalidator
 {
-  struct regcache *regcache;
-  int regnum;
+public:
+
+  regcache_invalidator (struct regcache *regcache, int regnum)
+    : m_regcache (regcache),
+      m_regnum (regnum)
+  {
+  }
+
+  ~regcache_invalidator ()
+  {
+    if (m_regcache != nullptr)
+      regcache_invalidate (m_regcache, m_regnum);
+  }
+
+  DISABLE_COPY_AND_ASSIGN (regcache_invalidator);
+
+  void release ()
+  {
+    m_regcache = nullptr;
+  }
+
+private:
+
+  struct regcache *m_regcache;
+  int m_regnum;
 };
-
-static void
-do_regcache_invalidate (void *data)
-{
-  struct register_to_invalidate *reg = (struct register_to_invalidate *) data;
-
-  regcache_invalidate (reg->regcache, reg->regnum);
-}
-
-static struct cleanup *
-make_cleanup_regcache_invalidate (struct regcache *regcache, int regnum)
-{
-  struct register_to_invalidate* reg = XNEW (struct register_to_invalidate);
-
-  reg->regcache = regcache;
-  reg->regnum = regnum;
-  return make_cleanup_dtor (do_regcache_invalidate, (void *) reg, xfree);
-}
 
 /* Return REGCACHE's architecture.  */
 
@@ -860,7 +865,6 @@ regcache_raw_write (struct regcache *regcache, int regnum,
 void
 regcache::raw_write (int regnum, const gdb_byte *buf)
 {
-  struct cleanup *old_chain;
 
   gdb_assert (buf != NULL);
   gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
@@ -881,15 +885,15 @@ regcache::raw_write (int regnum, const gdb_byte *buf)
   target_prepare_to_store (this);
   raw_set_cached_value (regnum, buf);
 
-  /* Register a cleanup function for invalidating the register after it is
-     written, in case of a failure.  */
-  old_chain = make_cleanup_regcache_invalidate (this, regnum);
+  /* Invalidate the register after it is written, in case of a
+     failure.  */
+  regcache_invalidator invalidator (this, regnum);
 
   target_store_registers (this, regnum);
 
-  /* The target did not throw an error so we can discard invalidating the
-     register and restore the cleanup chain to what it was.  */
-  discard_cleanups (old_chain);
+  /* The target did not throw an error so we can discard invalidating
+     the register.  */
+  invalidator.release ();
 }
 
 void
