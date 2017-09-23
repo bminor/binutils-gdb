@@ -241,12 +241,6 @@ regcache_get_ptid (const struct regcache *regcache)
   return regcache->ptid ();
 }
 
-struct regcache *
-regcache_xmalloc (struct gdbarch *gdbarch, struct address_space *aspace)
-{
-  return new regcache (gdbarch, aspace);
-}
-
 void
 regcache_xfree (struct regcache *regcache)
 {

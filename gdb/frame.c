@@ -1021,8 +1021,8 @@ struct regcache *
 frame_save_as_regcache (struct frame_info *this_frame)
 {
   struct address_space *aspace = get_frame_address_space (this_frame);
-  struct regcache *regcache = regcache_xmalloc (get_frame_arch (this_frame),
-						aspace);
+  struct regcache *regcache = new regcache (get_frame_arch (this_frame),
+					    aspace);
   struct cleanup *cleanups = make_cleanup_regcache_xfree (regcache);
 
   regcache_save (regcache, do_frame_register_read, this_frame);

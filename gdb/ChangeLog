@@ -1,3 +1,12 @@
+2017-09-25  Tom Tromey  <tom@tromey.com>
+
+	* regcache.h (regcache_xmalloc): Don't declare.
+	(regcache_raw_set_cached_value): Update comment.
+	* regcache.c (regcache_xmalloc): Remove.
+	* ppc-linux-tdep.c (ppu2spu_sniffer): Use new.
+	* jit.c (jit_frame_sniffer): Use new.
+	* frame.c (frame_save_as_regcache): Use new.
+
 2017-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* NEWS: Advertise support for guarded-storage registers on IBM z.
