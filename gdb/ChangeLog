@@ -1,3 +1,7 @@
+2017-09-23  Tom Tromey  <tom@tromey.com>
+
+	* defs.h (make_cleanup_override_quit_handler): Don't declare.
+
 2017-09-22  Tom Tromey  <tom@tromey.com>
 
 	* utils.c (class scoped_input_handler) <m_quit_handler>: Change
