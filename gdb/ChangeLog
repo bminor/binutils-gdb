@@ -1,5 +1,9 @@
 2017-09-25  Tom Tromey  <tom@tromey.com>
 
+	* regcache.c (regcache::dump): Use string_printf.
+
+2017-09-25  Tom Tromey  <tom@tromey.com>
+
 	* regcache.c (class regcache_invalidator): New.
 	(struct register_to_invalidate): Remove.
 	(make_cleanup_regcache_invalidate): Remove.

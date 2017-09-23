@@ -1350,7 +1350,6 @@ reg_flush_command (char *command, int from_tty)
 void
 regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 {
-  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   struct gdbarch *gdbarch = m_descr->gdbarch;
   int regnum;
   int footnote_nr = 0;
@@ -1442,6 +1441,7 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
       /* Type.  */
       {
 	const char *t;
+	std::string name_holder;
 
 	if (regnum < 0)
 	  t = "Type";
@@ -1452,13 +1452,11 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 	    t = TYPE_NAME (register_type (arch (), regnum));
 	    if (t == NULL)
 	      {
-		char *n;
-
 		if (!footnote_register_type_name_null)
 		  footnote_register_type_name_null = ++footnote_nr;
-		n = xstrprintf ("*%d", footnote_register_type_name_null);
-		make_cleanup (xfree, n);
-		t = n;
+		name_holder = string_printf ("*%d",
+					     footnote_register_type_name_null);
+		t = name_holder.c_str ();
 	      }
 	    /* Chop a leading builtin_type.  */
 	    if (startswith (t, blt))
@@ -1592,7 +1590,6 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
     fprintf_unfiltered (file, 
 			"*%d: Register type's name NULL.\n",
 			footnote_register_type_name_null);
-  do_cleanups (cleanups);
 }
 
 static void
