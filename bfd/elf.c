@@ -8198,7 +8198,8 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bfd_boolean default_imported_symver)
 
       hdr = &elf_tdata (abfd)->dynverref_hdr;
 
-      if (hdr->sh_info == 0 || hdr->sh_size < sizeof (Elf_External_Verneed))
+      if (hdr->sh_info == 0
+	  || hdr->sh_info > hdr->sh_size / sizeof (Elf_External_Verneed))
 	{
 error_return_bad_verref:
 	  _bfd_error_handler
@@ -8219,7 +8220,7 @@ error_return_verref:
 	goto error_return_verref;
 
       elf_tdata (abfd)->verref = (Elf_Internal_Verneed *)
-	bfd_zalloc2 (abfd, hdr->sh_info, sizeof (Elf_Internal_Verneed));
+	bfd_alloc2 (abfd, hdr->sh_info, sizeof (Elf_Internal_Verneed));
 
       if (elf_tdata (abfd)->verref == NULL)
 	goto error_return_verref;

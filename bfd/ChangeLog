@@ -1,3 +1,10 @@
+2017-09-24  Alan Modra  <amodra@gmail.com>
+
+	PR 22166
+	* elf.c (_bfd_elf_slurp_version_tables): Test sh_info on
+	SHT_GNU_verneed section for sanity.  Don't zalloc memory for
+	verref.
+
 2017-09-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/22170
