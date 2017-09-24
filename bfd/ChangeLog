@@ -1,5 +1,10 @@
 2017-09-24  Alan Modra  <amodra@gmail.com>
 
+	PR 22191
+	* dwarf2.c (decode_line_info): Properly free line sequences on error.
+
+2017-09-24  Alan Modra  <amodra@gmail.com>
+
 	PR 22187
 	* dwarf2.c (find_abstract_instance_name): Add orig_info_ptr and
 	pname param.  Return status.  Make name const.  Don't abort,

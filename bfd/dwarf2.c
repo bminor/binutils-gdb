@@ -2476,8 +2476,12 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
     return table;
 
  fail:
-  if (table->sequences != NULL)
-    free (table->sequences);
+  while (table->sequences != NULL)
+    {
+      struct line_sequence* seq = table->sequences;
+      table->sequences = table->sequences->prev_sequence;
+      free (seq);
+    }
   if (table->files != NULL)
     free (table->files);
   if (table->dirs != NULL)
