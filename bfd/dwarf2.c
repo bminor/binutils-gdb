@@ -2826,9 +2826,11 @@ lookup_symbol_in_variable_table (struct comp_unit *unit,
   return FALSE;
 }
 
-static char *
+static bfd_boolean
 find_abstract_instance_name (struct comp_unit *unit,
+			     bfd_byte *orig_info_ptr,
 			     struct attribute *attr_ptr,
+			     const char **pname,
 			     bfd_boolean *is_linkage)
 {
   bfd *abfd = unit->abfd;
@@ -2838,7 +2840,7 @@ find_abstract_instance_name (struct comp_unit *unit,
   struct abbrev_info *abbrev;
   bfd_uint64_t die_ref = attr_ptr->u.val;
   struct attribute attr;
-  char *name = NULL;
+  const char *name = NULL;
 
   /* DW_FORM_ref_addr can reference an entry in a different CU. It
      is an offset from the .debug_info section, not the current CU.  */
@@ -2847,7 +2849,12 @@ find_abstract_instance_name (struct comp_unit *unit,
       /* We only support DW_FORM_ref_addr within the same file, so
 	 any relocations should be resolved already.  */
       if (!die_ref)
-	abort ();
+	{
+	  _bfd_error_handler
+	    (_("Dwarf Error: Abstract instance DIE ref zero."));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
 
       info_ptr = unit->sec_info_ptr + die_ref;
       info_ptr_end = unit->end_ptr;
@@ -2883,9 +2890,10 @@ find_abstract_instance_name (struct comp_unit *unit,
 	    (_("Dwarf Error: Unable to read alt ref %llu."),
 	     (long long) die_ref);
 	  bfd_set_error (bfd_error_bad_value);
-	  return NULL;
+	  return FALSE;
 	}
-      info_ptr_end = unit->stash->alt_dwarf_info_buffer + unit->stash->alt_dwarf_info_size;
+      info_ptr_end = (unit->stash->alt_dwarf_info_buffer
+		      + unit->stash->alt_dwarf_info_size);
 
       /* FIXME: Do we need to locate the correct CU, in a similar
 	 fashion to the code in the DW_FORM_ref_addr case above ?  */
@@ -2908,6 +2916,7 @@ find_abstract_instance_name (struct comp_unit *unit,
 	  _bfd_error_handler
 	    (_("Dwarf Error: Could not find abbrev number %u."), abbrev_number);
 	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
 	}
       else
 	{
@@ -2917,6 +2926,15 @@ find_abstract_instance_name (struct comp_unit *unit,
 					 info_ptr, info_ptr_end);
 	      if (info_ptr == NULL)
 		break;
+	      /* It doesn't ever make sense for DW_AT_specification to
+		 refer to the same DIE.  Stop simple recursion.  */
+	      if (info_ptr == orig_info_ptr)
+		{
+		  _bfd_error_handler
+		    (_("Dwarf Error: Abstract instance recursion detected."));
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
 	      switch (attr.name)
 		{
 		case DW_AT_name:
@@ -2930,7 +2948,9 @@ find_abstract_instance_name (struct comp_unit *unit,
 		    }
 		  break;
 		case DW_AT_specification:
-		  name = find_abstract_instance_name (unit, &attr, is_linkage);
+		  if (!find_abstract_instance_name (unit, info_ptr, &attr,
+						    pname, is_linkage))
+		    return FALSE;
 		  break;
 		case DW_AT_linkage_name:
 		case DW_AT_MIPS_linkage_name:
@@ -2948,7 +2968,8 @@ find_abstract_instance_name (struct comp_unit *unit,
 	    }
 	}
     }
-  return name;
+  *pname = name;
+  return TRUE;
 }
 
 static bfd_boolean
@@ -3009,20 +3030,22 @@ scan_unit_for_symbols (struct comp_unit *unit)
   bfd *abfd = unit->abfd;
   bfd_byte *info_ptr = unit->first_child_die_ptr;
   bfd_byte *info_ptr_end = unit->stash->info_ptr_end;
-  int nesting_level = 1;
-  struct funcinfo **nested_funcs;
+  int nesting_level = 0;
+  struct nest_funcinfo {
+    struct funcinfo *func;
+  } *nested_funcs;
   int nested_funcs_size;
 
   /* Maintain a stack of in-scope functions and inlined functions, which we
      can use to set the caller_func field.  */
   nested_funcs_size = 32;
-  nested_funcs = (struct funcinfo **)
-    bfd_malloc (nested_funcs_size * sizeof (struct funcinfo *));
+  nested_funcs = (struct nest_funcinfo *)
+    bfd_malloc (nested_funcs_size * sizeof (*nested_funcs));
   if (nested_funcs == NULL)
     return FALSE;
-  nested_funcs[nesting_level] = 0;
+  nested_funcs[nesting_level].func = 0;
 
-  while (nesting_level)
+  while (nesting_level >= 0)
     {
       unsigned int abbrev_number, bytes_read, i;
       struct abbrev_info *abbrev;
@@ -3080,13 +3103,13 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	  BFD_ASSERT (!unit->cached);
 
 	  if (func->tag == DW_TAG_inlined_subroutine)
-	    for (i = nesting_level - 1; i >= 1; i--)
-	      if (nested_funcs[i])
+	    for (i = nesting_level; i-- != 0; )
+	      if (nested_funcs[i].func)
 		{
-		  func->caller_func = nested_funcs[i];
+		  func->caller_func = nested_funcs[i].func;
 		  break;
 		}
-	  nested_funcs[nesting_level] = func;
+	  nested_funcs[nesting_level].func = func;
 	}
       else
 	{
@@ -3106,12 +3129,13 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	    }
 
 	  /* No inline function in scope at this nesting level.  */
-	  nested_funcs[nesting_level] = 0;
+	  nested_funcs[nesting_level].func = 0;
 	}
 
       for (i = 0; i < abbrev->num_attrs; ++i)
 	{
-	  info_ptr = read_attribute (&attr, &abbrev->attrs[i], unit, info_ptr, info_ptr_end);
+	  info_ptr = read_attribute (&attr, &abbrev->attrs[i],
+				     unit, info_ptr, info_ptr_end);
 	  if (info_ptr == NULL)
 	    goto fail;
 
@@ -3130,8 +3154,10 @@ scan_unit_for_symbols (struct comp_unit *unit)
 
 		case DW_AT_abstract_origin:
 		case DW_AT_specification:
-		  func->name = find_abstract_instance_name (unit, &attr,
-							    &func->is_linkage);
+		  if (!find_abstract_instance_name (unit, info_ptr, &attr,
+						    &func->name,
+						    &func->is_linkage))
+		    goto fail;
 		  break;
 
 		case DW_AT_name:
@@ -3257,17 +3283,17 @@ scan_unit_for_symbols (struct comp_unit *unit)
 
 	  if (nesting_level >= nested_funcs_size)
 	    {
-	      struct funcinfo **tmp;
+	      struct nest_funcinfo *tmp;
 
 	      nested_funcs_size *= 2;
-	      tmp = (struct funcinfo **)
+	      tmp = (struct nest_funcinfo *)
 		bfd_realloc (nested_funcs,
-			     nested_funcs_size * sizeof (struct funcinfo *));
+			     nested_funcs_size * sizeof (*nested_funcs));
 	      if (tmp == NULL)
 		goto fail;
 	      nested_funcs = tmp;
 	    }
-	  nested_funcs[nesting_level] = 0;
+	  nested_funcs[nesting_level].func = 0;
 	}
     }
 
