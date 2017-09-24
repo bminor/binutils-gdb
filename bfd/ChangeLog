@@ -1,5 +1,10 @@
 2017-09-24  Alan Modra  <amodra@gmail.com>
 
+	PR 22169
+	* dwarf2.c (decode_line_info): Correct .debug_line unit_length check.
+
+2017-09-24  Alan Modra  <amodra@gmail.com>
+
 	PR 22167
 	* dwarf2.c (scan_unit_for_symbols): Check u.blk->data is non-NULL.
 
