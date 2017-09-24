@@ -1,5 +1,5 @@
-# Expect script for RISC-V assembler tests.
-#   Copyright (C) 2011-2017 Free Software Foundation, Inc.
+# Expect script for RISC-V ELF linker tests
+#   Copyright (C) 2017 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -17,9 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
+#
 
-if [istarget riscv*-*-*] {
-    run_dump_test "t_insns"
-    run_dump_test "fmv.x"
-    run_dump_test "c-lui-fail"
+if [is_target "riscv-*-*"] {
+    run_dump_test "c-lui"
 }

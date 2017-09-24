@@ -1,3 +1,8 @@
+2017-10-24  Andrew Waterman  <andrew@sifive.com>
+
+	* opcode/riscv.h (VALID_RVC_LUI_IMM): c.lui can't load the
+	immediate 0.
+
 2017-10-12  James Bowman  <james.bowman@ftdichip.com>
 
 	* elf/ft32.h: Add R_FT32_15.

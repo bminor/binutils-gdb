@@ -1,3 +1,10 @@
+2017-10-24  Andrew Waterman  <andrew@sifive.com>
+
+	* testsuite/gas/riscv/c-lui-fail.d: New testcase.
+	gas/testsuite/gas/riscv/c-lui-fail.l: Likewise.
+	gas/testsuite/gas/riscv/c-lui-fail.s: Likewise.
+	gas/testsuite/gas/riscv/riscv.exp: Likewise.
+
 2017-10-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_pseudo_table): Add .code64 directive
