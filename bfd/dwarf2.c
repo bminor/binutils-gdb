@@ -3210,7 +3210,8 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		    case DW_FORM_block2:
 		    case DW_FORM_block4:
 		    case DW_FORM_exprloc:
-		      if (*attr.u.blk->data == DW_OP_addr)
+		      if (attr.u.blk->data != NULL
+			  && *attr.u.blk->data == DW_OP_addr)
 			{
 			  var->stack = 0;
 
