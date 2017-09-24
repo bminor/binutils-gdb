@@ -1,5 +1,11 @@
 2017-09-24  Alan Modra  <amodra@gmail.com>
 
+	PR 22197
+	* opncls.c (bfd_get_debug_link_info_1): Properly check that crc is
+	within section bounds.
+
+2017-09-24  Alan Modra  <amodra@gmail.com>
+
 	PR 22191
 	* dwarf2.c (decode_line_info): Properly free line sequences on error.
 
