@@ -1,5 +1,11 @@
 2017-09-24  Alan Modra  <amodra@gmail.com>
 
+	PR 22186
+	* dwarf2.c (decode_line_info): Fail on lh.line_range of zero
+	rather than dividing by zero.
+
+2017-09-24  Alan Modra  <amodra@gmail.com>
+
 	PR 22169
 	* dwarf2.c (decode_line_info): Correct .debug_line unit_length check.
 

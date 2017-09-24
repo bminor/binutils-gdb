@@ -2437,6 +2437,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	    case DW_LNS_set_basic_block:
 	      break;
 	    case DW_LNS_const_add_pc:
+	      if (lh.line_range == 0)
+		goto line_fail;
 	      if (lh.maximum_ops_per_insn == 1)
 		address += (lh.minimum_instruction_length
 			    * ((255 - lh.opcode_base) / lh.line_range));
