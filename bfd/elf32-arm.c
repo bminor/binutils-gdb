@@ -15443,8 +15443,8 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
     {
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (h->dynindx == -1
-	  && !h->forced_local)
+      if (h->dynindx == -1 && !h->forced_local
+	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -15531,8 +15531,8 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (h->dynindx == -1
-	  && !h->forced_local)
+      if (h->dynindx == -1 && !h->forced_local
+	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -15755,8 +15755,8 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 	{
 	  /* Make sure this symbol is output as a dynamic symbol.
 	     Undefined weak syms won't yet be marked as dynamic.  */
-	  if (h->dynindx == -1
-	      && !h->forced_local)
+	  if (h->dynindx == -1 && !h->forced_local
+	      && h->root.type == bfd_link_hash_undefweak)
 	    {
 	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		return FALSE;

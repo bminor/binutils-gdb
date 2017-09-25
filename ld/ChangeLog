@@ -1,3 +1,10 @@
+2017-10-10  Renlin Li  <renlin.li@arm.com>
+
+	PR ld/21402
+	* testsuite/ld-arm/tls-app.d: Update address.
+	* testsuite/ld-arm/tls-app.r: Remove relocations.
+	* testsuite/ld-arm/unresolved-1-dyn.d: Update.
+
 2017-10-10  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (earmelfb_fuchsia.c): Rename rule from earmelf_fuchsia.c.
