@@ -1,3 +1,9 @@
+2017-09-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/22203
+	* nm.c (display_rel_file): Free memory returned from
+	bfd_get_synthetic_symtab.
+
 2017-09-22  Alexandre Oliva <aoliva@redhat.com>
 
 	* dwarf.h (debug_info): Add loc_views and num_loc_views.
