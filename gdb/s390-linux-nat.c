@@ -54,6 +54,7 @@ static int have_regset_last_break = 0;
 static int have_regset_system_call = 0;
 static int have_regset_tdb = 0;
 static int have_regset_vxrs = 0;
+static int have_regset_gs = 0;
 
 /* Register map for 32-bit executables running under a 64-bit
    kernel.  */
@@ -405,6 +406,18 @@ s390_linux_fetch_inferior_registers (struct target_ops *ops,
 			   && regnum <= S390_V31_REGNUM))
 	fetch_regset (regcache, tid, NT_S390_VXRS_HIGH, 16 * 16,
 		      &s390_vxrs_high_regset);
+    }
+
+  if (have_regset_gs)
+    {
+      if (regnum == -1 || (regnum >= S390_GSD_REGNUM
+			   && regnum <= S390_GSEPLA_REGNUM))
+	fetch_regset (regcache, tid, NT_S390_GS_CB, 4 * 8,
+		      &s390_gs_regset);
+      if (regnum == -1 || (regnum >= S390_BC_GSD_REGNUM
+			   && regnum <= S390_BC_GSEPLA_REGNUM))
+	fetch_regset (regcache, tid, NT_S390_GS_BC, 4 * 8,
+		      &s390_gsbc_regset);
     }
 }
 
@@ -974,8 +987,13 @@ s390_read_description (struct target_ops *ops)
       && check_regset (tid, NT_S390_VXRS_LOW, 16 * 8)
       && check_regset (tid, NT_S390_VXRS_HIGH, 16 * 16);
 
+    have_regset_gs = (hwcap & HWCAP_S390_GS)
+      && check_regset (tid, NT_S390_GS_CB, 4 * 8)
+      && check_regset (tid, NT_S390_GS_BC, 4 * 8);
+
     if (s390_target_wordsize () == 8)
-      return (have_regset_vxrs ?
+      return (have_regset_gs ? tdesc_s390x_gs_linux64 :
+	      have_regset_vxrs ?
 	      (have_regset_tdb ? tdesc_s390x_tevx_linux64 :
 	       tdesc_s390x_vx_linux64) :
 	      have_regset_tdb ? tdesc_s390x_te_linux64 :
@@ -984,7 +1002,8 @@ s390_read_description (struct target_ops *ops)
 	      tdesc_s390x_linux64);
 
     if (hwcap & HWCAP_S390_HIGH_GPRS)
-      return (have_regset_vxrs ?
+      return (have_regset_gs ? tdesc_s390_gs_linux64 :
+	      have_regset_vxrs ?
 	      (have_regset_tdb ? tdesc_s390_tevx_linux64 :
 	       tdesc_s390_vx_linux64) :
 	      have_regset_tdb ? tdesc_s390_te_linux64 :

@@ -1,5 +1,31 @@
 2017-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* s390-linux-nat.c (have_regset_gs): New static variable.
+	(s390_linux_fetch_inferior_registers): Handle guarded-storage
+	control block and guarded-storage broadcast control regsets.
+	(s390_read_description): Detect whether the target has
+	guarded-storage support, return appropriate tdesc.
+	* s390-linux-tdep.c (features/s390-gs-linux64.c): New include.
+	(features/s390x-gs-linux64.c): Likewise.
+	(struct gdbarch_tdep) <have_gs>: New field.
+	(s390_regmap_gs, s390_regmap_gsbc, s390_gs_regset)
+	(s390_gsbc_regset): New variables.
+	(s390_iterate_over_regset_sections): Iterate over s390_gs_regset
+	and s390_gsbc_regset, if applicable.
+	(s390_core_read_description): Check whether core file was from a
+	target with guarded-storage support; include appropriate regsets.
+	(s390_gdbarch_init): Add registers for guarded-storage support.
+	(_initialize_s390_tdep): Initialize new target descriptions that
+	include registers for guarded-storage support.
+	* s390-linux-tdep.h (HWCAP_S390_GS, S390_GSD_REGNUM)
+	(S390_GSSM_REGNUM, S390_GSEPLA_REGNUM)
+	(S390_BC_GSD_REGNUM, S390_BC_GSSM_REGNUM): New defines.
+	(S390_NUM_REGS): Adjust macro definition.
+	(s390_gs_regset, s390_gsbc_regset, tdesc_s390_gs_linux64)
+	(tdesc_s390x_gs_linux64): New declarations.
+
+2017-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* features/s390-gs-linux64.xml: New file.
 	* features/s390-gs.xml: New file.
 	* features/s390-gsbc.xml: New file.
