@@ -1,3 +1,23 @@
+2017-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* configure.srv (s390*-*-linux*): Add s390-gs-linux64.o and
+	s390x-gs-linux64.o to srv_regobj.  Add s390-gs-linux64.xml,
+	s390x-gs-linux64.xml, s390-gs.xml, and s390-gsbc.xml to
+	srv_xmlfiles.  Add s390-gs-linux64-ipa.o and
+	s390x-gs-linux64-ipa.o to ipa_obj.
+	* linux-s390-low.c (HWCAP_S390_GS): New define.
+	(s390_fill_gs, s390_store_gs, s390_fill_gsbc, s390_store_gsbc):
+	New functions.
+	(s390_regsets): Add regsets for NT_S390_GS_CB and NT_S390_GS_BC.
+	(s390_arch_setup): Check for guarded-storage support and choose
+	appropriate tdesc.
+	(initialize_low_arch): Invoke init_registers_s390_gs_linux64 and
+	init_registers_s390x_gs_linux64.
+	* linux-s390-tdesc.h (enum s390_linux_tdesc) <S390_TDESC_GS>: New
+	enum value.
+	(init_registers_s390x_gs_linux64, tdesc_s390x_gs_linux64)
+	(init_registers_s390_gs_linux64, tdesc_s390_gs_linux64): Declare.
+
 2017-09-22  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* win32-i386-low.c (i386_arch_setup): Call init_target_desc.
