@@ -1,5 +1,12 @@
 2017-09-25  Alan Modra  <amodra@gmail.com>
 
+	PR 22201
+	* dwarf2.c (scan_unit_for_symbols): Ignore DW_AT_name unless it
+	has string form.
+	(parse_comp_unit): Likewise.
+
+2017-09-25  Alan Modra  <amodra@gmail.com>
+
 	PR 22200
 	* dwarf2.c (read_formatted_entries): Error on format_count zero.
 

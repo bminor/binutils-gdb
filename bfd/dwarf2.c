@@ -3225,7 +3225,8 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	      switch (attr.name)
 		{
 		case DW_AT_name:
-		  var->name = attr.u.str;
+		  if (is_str_attr (attr.form))
+		    var->name = attr.u.str;
 		  break;
 
 		case DW_AT_decl_file:
@@ -3477,7 +3478,8 @@ parse_comp_unit (struct dwarf2_debug *stash,
 	  break;
 
 	case DW_AT_name:
-	  unit->name = attr.u.str;
+	  if (is_str_attr (attr.form))
+	    unit->name = attr.u.str;
 	  break;
 
 	case DW_AT_low_pc:
