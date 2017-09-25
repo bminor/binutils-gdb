@@ -3,6 +3,9 @@
 
 *** Changes since GDB 8.0
 
+* GDB now supports access to the guarded-storage-control registers and the
+  software-based guarded-storage broadcast control registers on IBM z14.
+
 * On Unix systems, GDB now supports transmitting environment variables
   that are to be set or unset to GDBserver.  These variables will
   affect the environment to be passed to the remote inferior.

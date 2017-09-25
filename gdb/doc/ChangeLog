@@ -1,3 +1,8 @@
+2017-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.texinfo (S/390 and System z Features): Document the new
+	features org.gnu.gdb.s390.gs and org.gnu.gdb.s390.gsbc.
+
 2017-09-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.texinfo (qXfer:threads:read): Add documentation for handle

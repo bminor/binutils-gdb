@@ -1,5 +1,9 @@
 2017-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* NEWS: Advertise support for guarded-storage registers on IBM z.
+
+2017-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* s390-linux-nat.c (have_regset_gs): New static variable.
 	(s390_linux_fetch_inferior_registers): Handle guarded-storage
 	control block and guarded-storage broadcast control regsets.

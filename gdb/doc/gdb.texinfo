@@ -41857,6 +41857,14 @@ through @samp{f15} to present the 128-bit wide vector registers
 contain the 128-bit wide vector registers @samp{v16} through
 @samp{v31}.
 
+The @samp{org.gnu.gdb.s390.gs} feature is optional.  It should contain
+the 64-bit wide guarded-storage-control registers @samp{gsd},
+@samp{gssm}, and @samp{gsepla}.
+
+The @samp{org.gnu.gdb.s390.gsbc} feature is optional.  It should contain
+the 64-bit wide guarded-storage broadcast control registers
+@samp{bc_gsd}, @samp{bc_gssm}, and @samp{bc_gsepla}.
+
 @node Sparc Features
 @subsection Sparc Features
 @cindex target descriptions, sparc32 features
