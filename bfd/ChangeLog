@@ -1,5 +1,12 @@
 2017-09-25  Alan Modra  <amodra@gmail.com>
 
+	PR 22202
+	* dwarf1.c (parse_die): Sanity check pointer against section limit
+	before dereferencing.
+	(parse_line_table): Likewise.
+
+2017-09-25  Alan Modra  <amodra@gmail.com>
+
 	PR 22201
 	* dwarf2.c (scan_unit_for_symbols): Ignore DW_AT_name unless it
 	has string form.
