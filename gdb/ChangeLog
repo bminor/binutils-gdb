@@ -1,3 +1,18 @@
+2017-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* features/s390-gs-linux64.xml: New file.
+	* features/s390-gs.xml: New file.
+	* features/s390-gsbc.xml: New file.
+	* features/s390x-gs-linux64.xml: New file.
+	* features/Makefile (WHICH): Add s390-gs-linux64 and
+	s390x-gs-linux64.
+	(s390-gs-linux64-expedite, s390x-gs-linux64-expedite): New macros.
+	(XMLTOC): Add s390-gs-linux64.xml and s390x-linux64.xml.
+	* features/s390-gs-linux64.c: New generated file.
+	* features/s390x-gs-linux64.c: New file.
+	* regformats/s390-gs-linux64.dat: New file.
+	* regformats/s390x-gs-linux64.dat: New file.
+
 2017-09-23  Tom Tromey  <tom@tromey.com>
 
 	* defs.h (make_cleanup_override_quit_handler): Don't declare.
