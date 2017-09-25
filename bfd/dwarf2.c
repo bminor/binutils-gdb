@@ -1933,6 +1933,13 @@ read_formatted_entries (struct comp_unit *unit, bfd_byte **bufp,
 
   data_count = _bfd_safe_read_leb128 (abfd, buf, &bytes_read, FALSE, buf_end);
   buf += bytes_read;
+  if (format_count == 0 && data_count != 0)
+    {
+      _bfd_error_handler (_("Dwarf Error: Zero format count."));
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
   for (datai = 0; datai < data_count; datai++)
     {
       bfd_byte *format = format_header_data;
