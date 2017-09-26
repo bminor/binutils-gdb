@@ -4274,7 +4274,6 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	      if (SYMBOL_REFERENCES_LOCAL_P (info, h))
 		{
 		  info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
-					  output_bfd,
 					  h->root.root.string,
 					  h->root.u.def.section->owner);
 
