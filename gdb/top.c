@@ -1758,7 +1758,7 @@ set_history_size_command (char *args, int from_tty, struct cmd_list_element *c)
 }
 
 void
-set_history (char *args, int from_tty)
+set_history (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"set history\" must be followed "
 		       "by the name of a history subcommand.\n"));
@@ -1766,7 +1766,7 @@ set_history (char *args, int from_tty)
 }
 
 void
-show_history (char *args, int from_tty)
+show_history (const char *args, int from_tty)
 {
   cmd_show_list (showhistlist, from_tty, "");
 }

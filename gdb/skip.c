@@ -226,7 +226,7 @@ skip_function_command (const char *arg, int from_tty)
 /* Process "skip ..." that does not match "skip file" or "skip function".  */
 
 static void
-skip_command (char *arg, int from_tty)
+skip_command (const char *arg, int from_tty)
 {
   const char *file = NULL;
   const char *gfile = NULL;

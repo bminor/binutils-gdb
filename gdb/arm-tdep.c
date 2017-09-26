@@ -8365,7 +8365,7 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
 }
 
 static void
-set_arm_command (char *args, int from_tty)
+set_arm_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\
 \"set arm\" must be followed by an apporpriate subcommand.\n"));
@@ -8373,7 +8373,7 @@ set_arm_command (char *args, int from_tty)
 }
 
 static void
-show_arm_command (char *args, int from_tty)
+show_arm_command (const char *args, int from_tty)
 {
   cmd_show_list (showarmcmdlist, from_tty, "");
 }

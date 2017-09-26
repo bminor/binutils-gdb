@@ -6618,7 +6618,7 @@ rs6000_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 /* PowerPC-specific commands.  */
 
 static void
-set_powerpc_command (char *args, int from_tty)
+set_powerpc_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\
 \"set powerpc\" must be followed by an appropriate subcommand.\n"));
@@ -6626,7 +6626,7 @@ set_powerpc_command (char *args, int from_tty)
 }
 
 static void
-show_powerpc_command (char *args, int from_tty)
+show_powerpc_command (const char *args, int from_tty)
 {
   cmd_show_list (showpowerpccmdlist, from_tty, "");
 }

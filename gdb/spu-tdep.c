@@ -2596,7 +2596,7 @@ info_spu_proxydma_command (const char *args, int from_tty)
 }
 
 static void
-info_spu_command (char *args, int from_tty)
+info_spu_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"info spu\" must be followed by "
 		       "the name of an SPU facility.\n"));
@@ -2607,13 +2607,13 @@ info_spu_command (char *args, int from_tty)
 /* Root of all "set spu "/"show spu " commands.  */
 
 static void
-show_spu_command (char *args, int from_tty)
+show_spu_command (const char *args, int from_tty)
 {
   help_list (showspucmdlist, "show spu ", all_commands, gdb_stdout);
 }
 
 static void
-set_spu_command (char *args, int from_tty)
+set_spu_command (const char *args, int from_tty)
 {
   help_list (setspucmdlist, "set spu ", all_commands, gdb_stdout);
 }

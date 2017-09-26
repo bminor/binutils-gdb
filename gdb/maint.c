@@ -44,15 +44,9 @@
 #include "cli/cli-utils.h"
 #include "cli/cli-setshow.h"
 
-static void maintenance_command (char *, int);
-
 static void maintenance_internal_error (char *args, int from_tty);
 
 static void maintenance_space_display (char *, int);
-
-static void maintenance_info_command (char *, int);
-
-static void maintenance_print_command (char *, int);
 
 static void maintenance_do_deprecate (const char *, int);
 
@@ -73,7 +67,7 @@ show_watchdog (struct ui_file *file, int from_tty,
 /* Access the maintenance subcommands.  */
 
 static void
-maintenance_command (char *args, int from_tty)
+maintenance_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"maintenance\" must be followed by "
 		       "the name of a maintenance command.\n"));
@@ -162,7 +156,7 @@ maintenance_space_display (char *args, int from_tty)
    "maintenance info" with no args.  */
 
 static void
-maintenance_info_command (char *arg, int from_tty)
+maintenance_info_command (const char *arg, int from_tty)
 {
   printf_unfiltered (_("\"maintenance info\" must be followed "
 		       "by the name of an info command.\n"));
@@ -175,7 +169,7 @@ maintenance_info_command (char *arg, int from_tty)
    "maintenance check" with no args.  */
 
 static void
-maintenance_check_command (char *arg, int from_tty)
+maintenance_check_command (const char *arg, int from_tty)
 {
   printf_unfiltered (_("\"maintenance check\" must be followed "
 		       "by the name of a check command.\n"));
@@ -421,7 +415,7 @@ maintenance_print_architecture (char *args, int from_tty)
    "maintenance print" with no args.  */
 
 static void
-maintenance_print_command (char *arg, int from_tty)
+maintenance_print_command (const char *arg, int from_tty)
 {
   printf_unfiltered (_("\"maintenance print\" must be followed "
 		       "by the name of a print command.\n"));
@@ -644,7 +638,7 @@ struct cmd_list_element *maintenance_set_cmdlist;
 struct cmd_list_element *maintenance_show_cmdlist;
 
 static void
-maintenance_set_cmd (char *args, int from_tty)
+maintenance_set_cmd (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"maintenance set\" must be followed "
 		       "by the name of a set command.\n"));
@@ -653,7 +647,7 @@ maintenance_set_cmd (char *args, int from_tty)
 }
 
 static void
-maintenance_show_cmd (char *args, int from_tty)
+maintenance_show_cmd (const char *args, int from_tty)
 {
   cmd_show_list (maintenance_show_cmdlist, from_tty, "");
 }
@@ -916,7 +910,7 @@ scoped_command_stats::scoped_command_stats (bool msg_type)
    In this case have "mt set per-command on|off" affect every setting.  */
 
 static void
-set_per_command_cmd (char *args, int from_tty)
+set_per_command_cmd (const char *args, int from_tty)
 {
   struct cmd_list_element *list;
   int val;
@@ -937,7 +931,7 @@ set_per_command_cmd (char *args, int from_tty)
    "show per-command " settings.  */
 
 static void
-show_per_command_cmd (char *args, int from_tty)
+show_per_command_cmd (const char *args, int from_tty)
 {
   cmd_show_list (per_command_showlist, from_tty, "");
 }

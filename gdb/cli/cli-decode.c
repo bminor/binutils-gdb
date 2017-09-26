@@ -396,7 +396,7 @@ add_alias_cmd (const char *name, const char *oldname,
 
 struct cmd_list_element *
 add_prefix_cmd (const char *name, enum command_class theclass,
-		cmd_cfunc_ftype *fun,
+		cmd_const_cfunc_ftype *fun,
 		const char *doc, struct cmd_list_element **prefixlist,
 		const char *prefixname, int allow_unknown,
 		struct cmd_list_element **list)

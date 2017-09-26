@@ -92,8 +92,6 @@ static const struct sym_fns *find_sym_fns (bfd *);
 
 static void overlay_invalidate_all (void);
 
-static void overlay_command (char *, int);
-
 static void simple_free_overlay_table (void);
 
 static void read_target_long_array (CORE_ADDR, unsigned int *, int, int,
@@ -3388,7 +3386,7 @@ overlay_load_command (const char *args, int from_tty)
 static struct cmd_list_element *overlaylist;
 
 static void
-overlay_command (char *args, int from_tty)
+overlay_command (const char *args, int from_tty)
 {
   printf_unfiltered
     ("\"overlay\" must be followed by the name of an overlay command.\n");

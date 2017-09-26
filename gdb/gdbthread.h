@@ -577,7 +577,7 @@ extern void finish_thread_state_cleanup (void *ptid_p);
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;
 
-extern void thread_command (char *tidstr, int from_tty);
+extern void thread_command (const char *tidstr, int from_tty);
 
 /* Print notices on thread events (attach, detach, etc.), set with
    `set print thread-events'.  */

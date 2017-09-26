@@ -391,7 +391,7 @@ static struct cmd_list_element *show_ravenscar_list;
 /* Implement the "set ravenscar" prefix command.  */
 
 static void
-set_ravenscar_command (char *arg, int from_tty)
+set_ravenscar_command (const char *arg, int from_tty)
 {
   printf_unfiltered (_(\
 "\"set ravenscar\" must be followed by the name of a setting.\n"));
@@ -401,7 +401,7 @@ set_ravenscar_command (char *arg, int from_tty)
 /* Implement the "show ravenscar" prefix command.  */
 
 static void
-show_ravenscar_command (char *args, int from_tty)
+show_ravenscar_command (const char *args, int from_tty)
 {
   cmd_show_list (show_ravenscar_list, from_tty, "");
 }

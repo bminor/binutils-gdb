@@ -90,8 +90,6 @@ static int return_zero (struct target_ops *);
 
 static int return_zero_has_execution (struct target_ops *, ptid_t);
 
-static void target_command (char *, int);
-
 static struct target_ops *find_default_run_target (const char *);
 
 static struct gdbarch *default_thread_architecture (struct target_ops *ops,
@@ -188,7 +186,7 @@ static void setup_target_debug (void);
 /* The user just typed 'target' without the name of a target.  */
 
 static void
-target_command (char *arg, int from_tty)
+target_command (const char *arg, int from_tty)
 {
   fputs_filtered ("Argument required (target name).  Try `help target'\n",
 		  gdb_stdout);

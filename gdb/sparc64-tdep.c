@@ -187,7 +187,7 @@ sparc64_forget_process (pid_t pid)
 }
 
 static void
-info_adi_command (char *args, int from_tty)
+info_adi_command (const char *args, int from_tty)
 {
   printf_unfiltered ("\"adi\" must be followed by \"examine\" "
                      "or \"assign\".\n");

@@ -8971,7 +8971,7 @@ static struct cmd_list_element *mpx_set_cmdlist, *mpx_show_cmdlist;
 /* Helper function for the CLI commands.  */
 
 static void
-set_mpx_cmd (char *args, int from_tty)
+set_mpx_cmd (const char *args, int from_tty)
 {
   help_list (mpx_set_cmdlist, "set mpx ", all_commands, gdb_stdout);
 }
@@ -8979,7 +8979,7 @@ set_mpx_cmd (char *args, int from_tty)
 /* Helper function for the CLI commands.  */
 
 static void
-show_mpx_cmd (char *args, int from_tty)
+show_mpx_cmd (const char *args, int from_tty)
 {
   cmd_show_list (mpx_show_cmdlist, from_tty, "");
 }

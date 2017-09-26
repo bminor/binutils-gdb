@@ -672,7 +672,7 @@ set_dcache_line_size (char *args, int from_tty,
 }
 
 static void
-set_dcache_command (char *arg, int from_tty)
+set_dcache_command (const char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set dcache\" must be followed by the name of a subcommand.\n");
@@ -680,7 +680,7 @@ set_dcache_command (char *arg, int from_tty)
 }
 
 static void
-show_dcache_command (char *args, int from_tty)
+show_dcache_command (const char *args, int from_tty)
 {
   cmd_show_list (dcache_show_list, from_tty, "");
 }

@@ -1,5 +1,103 @@
 2017-10-11  Tom Tromey  <tom@tromey.com>
 
+	* gdbthread.h (thread_command): Constify.
+	* inferior.h (detach_command): Constify.
+	* top.h (set_history, show_history): Constify.
+	* arm-tdep.c (set_arm_command, show_arm_command): Constify.
+	* serial.c (serial_set_cmd, serial_show_cmd): Constify.
+	* bsd-kvm.c (bsd_kvm_cmd): Constify.
+	* printcmd.c (set_command): Constify.
+	(non_const_set_command): New function.
+	* dcache.c (set_dcache_command, show_dcache_command): Constify.
+	* breakpoint.c (enable_command, disable_command, delete_command)
+	(catch_command, tcatch_command, set_breakpoint_cmd)
+	(show_breakpoint_cmd): Constify.
+	* macrocmd.c (macro_command): Constify.
+	* infcmd.c (unset_command, kill_command, detach_command)
+	(info_proc_cmd): Constify.
+	* i386-tdep.c (set_mpx_cmd, show_mpx_cmd): Constify.
+	* auto-load.c (show_auto_load_cmd, set_auto_load_cmd)
+	(info_auto_load_cmd): Constify.
+	* target-descriptions.c (set_tdesc_cmd, show_tdesc_cmd)
+	(unset_tdesc_cmd): Constify.
+	* ada-lang.c (set_ada_command, show_ada_command)
+	(maint_set_ada_cmd, maint_show_ada_cmd): Constify.
+	* guile/guile.c (set_guile_command, show_guile_command)
+	(info_guile_command): Constify.
+	* tui/tui-win.c (tui_command, set_tui_cmd, show_tui_cmd):
+	Constify.
+	* skip.c (skip_command): Constify.
+	* compile/compile.c (_initialize_compile): Constify.
+	* dwarf2read.c (set_dwarf_cmd, show_dwarf_cmd): Constify.
+	* btrace.c (maint_btrace_cmd, maint_btrace_set_cmd)
+	(maint_btrace_show_cmd, maint_btrace_pt_set_cmd)
+	(maint_btrace_pt_show_cmd): Constify.
+	* remote.c (set_remote_cmd, show_remote_cmd, remote_command):
+	Constify.
+	* python/python.c (user_show_python, user_set_python): Constify.
+	* mips-tdep.c (set_mips_command, show_mips_command)
+	(set_mipsfpu_command): Constify.
+	* record-btrace.c (cmd_record_btrace_start)
+	(cmd_set_record_btrace, cmd_show_record_btrace)
+	(cmd_set_record_btrace_bts, cmd_show_record_btrace_bts)
+	(cmd_set_record_btrace_pt, cmd_show_record_btrace_pt): Constify.
+	* rs6000-tdep.c (set_powerpc_command, show_powerpc_command):
+	Constify.
+	* symfile.c (overlay_command): Constify.
+	* spu-tdep.c (set_spu_command, show_spu_command): Constify.
+	* cli/cli-logging.c (set_logging_command, show_logging_command):
+	Constify.
+	* cli/cli-dump.c (dump_command, append_command)
+	(srec_dump_command, ihex_dump_command, verilog_dump_command)
+	(tekhex_dump_command, binary_dump_command)
+	(binary_append_command): Constify.
+	* cli/cli-decode.c (struct cmd_list_element): Change type of
+	"fun".
+	* cli/cli-cmds.c (info_command, show_command, set_debug)
+	(show_debug): Constify.
+	(show_command): Add non-const overload.
+	* top.c (set_history, show_history): Constify.
+	* sh-tdep.c (set_sh_command, show_sh_command): Constify.
+	* command.h (add_prefix_cmd): Accept a cmd_const_cfunc_ftype.
+	* target.c (target_command): Constify.
+	* sparc64-tdep.c (info_adi_command): Constify.
+	* record-full.c (cmd_record_full_start): Constify.
+	(set_record_full_command): Constify.  Fix typo.
+	(show_record_full_command): Constify.
+	* thread.c (thread_command, thread_apply_command): Constify.
+	* memattr.c (dummy_cmd): Constify.
+	* value.c (function_command): Constify.
+	* frame.c (set_backtrace_cmd, show_backtrace_cmd): Constify.
+	* probe.c (info_probes_command): Constify.
+	* ser-tcp.c (set_tcp_cmd, show_tcp_cmd): Constify.
+	* gnu-nat.c (set_task_cmd, show_task_cmd, set_thread_cmd)
+	(show_thread_cmd, set_thread_default_cmd)
+	(show_thread_default_cmd): Constify.
+	(check_empty): Constify.
+	* tracepoint.c (tfind_command): Constify.
+	* cp-support.c (maint_cplus_command): Constify.
+	* windows-tdep.c (info_w32_command): Constify.
+	* record.c (cmd_record_start, set_record_command)
+	(show_record_command, info_record_command, cmd_record_goto):
+	Constify.
+	* ravenscar-thread.c (set_ravenscar_command)
+	(show_ravenscar_command): Constify.
+	* utils.c (set_internal_problem_cmd, show_internal_problem_cmd):
+	Constify.
+	(add_internal_problem_command): Remove casts.
+	* arc-tdep.c (maintenance_print_arc_command): Constify.
+	* valprint.c (set_print, show_print, set_print_raw)
+	(show_print_raw): Constify.
+	* maint.c (maintenance_command, maintenance_info_command)
+	(maintenance_print_command, maintenance_set_cmd)
+	(maintenance_show_cmd, set_per_command_cmd)
+	(show_per_command_cmd, maintenance_check_command): Constify.
+	* language.c (set_check, show_check): Constify.
+	* typeprint.c (show_print_type, set_print_type): Constify.
+	* go32-nat.c (go32_info_dos_command): Constify.
+
+2017-10-11  Tom Tromey  <tom@tromey.com>
+
 	* breakpoint.c (prepare_re_set_context): Remove.
 	(breakpoint_re_set_one): Update.  Don't use cleanups.
 	(breakpoint_re_set): Use scoped_restore, std::string, and

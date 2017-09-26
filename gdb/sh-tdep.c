@@ -2436,13 +2436,13 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 static void
-show_sh_command (char *args, int from_tty)
+show_sh_command (const char *args, int from_tty)
 {
   help_list (showshcmdlist, "show sh ", all_commands, gdb_stdout);
 }
 
 static void
-set_sh_command (char *args, int from_tty)
+set_sh_command (const char *args, int from_tty)
 {
   printf_unfiltered
     ("\"set sh\" must be followed by an appropriate subcommand.\n");

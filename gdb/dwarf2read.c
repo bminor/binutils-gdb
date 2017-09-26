@@ -23212,14 +23212,14 @@ static struct cmd_list_element *set_dwarf_cmdlist;
 static struct cmd_list_element *show_dwarf_cmdlist;
 
 static void
-set_dwarf_cmd (char *args, int from_tty)
+set_dwarf_cmd (const char *args, int from_tty)
 {
   help_list (set_dwarf_cmdlist, "maintenance set dwarf ", all_commands,
 	     gdb_stdout);
 }
 
 static void
-show_dwarf_cmd (char *args, int from_tty)
+show_dwarf_cmd (const char *args, int from_tty)
 {
   cmd_show_list (show_dwarf_cmdlist, from_tty, "");
 }

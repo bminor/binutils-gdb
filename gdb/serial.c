@@ -627,7 +627,7 @@ static struct cmd_list_element *serial_set_cmdlist;
 static struct cmd_list_element *serial_show_cmdlist;
 
 static void
-serial_set_cmd (char *args, int from_tty)
+serial_set_cmd (const char *args, int from_tty)
 {
   printf_unfiltered ("\"set serial\" must be followed "
 		     "by the name of a command.\n");
@@ -635,7 +635,7 @@ serial_set_cmd (char *args, int from_tty)
 }
 
 static void
-serial_show_cmd (char *args, int from_tty)
+serial_show_cmd (const char *args, int from_tty)
 {
   cmd_show_list (serial_show_cmdlist, from_tty, "");
 }

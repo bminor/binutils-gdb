@@ -63,7 +63,6 @@ static int threads_executing;
 static void thread_apply_all_command (char *, int);
 static int thread_alive (struct thread_info *);
 static void info_threads_command (char *, int);
-static void thread_apply_command (char *, int);
 
 /* RAII type used to increase / decrease the refcount of each thread
    in a given list of threads.  */
@@ -1721,7 +1720,7 @@ thread_apply_all_command (char *cmd, int from_tty)
 /* Implementation of the "thread apply" command.  */
 
 static void
-thread_apply_command (char *tidlist, int from_tty)
+thread_apply_command (const char *tidlist, int from_tty)
 {
   char *cmd = NULL;
   tid_range_parser parser;
@@ -1814,7 +1813,7 @@ thread_apply_command (char *tidlist, int from_tty)
    if prefix of arg is `apply'.  */
 
 void
-thread_command (char *tidstr, int from_tty)
+thread_command (const char *tidstr, int from_tty)
 {
   if (tidstr == NULL)
     {

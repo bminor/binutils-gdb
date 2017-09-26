@@ -684,7 +684,7 @@ delete_mem_command (const char *args, int from_tty)
 }
 
 static void
-dummy_cmd (char *args, int from_tty)
+dummy_cmd (const char *args, int from_tty)
 {
 }
 

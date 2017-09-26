@@ -129,14 +129,14 @@ static struct cmd_list_element *binary_dump_cmdlist;
 static struct cmd_list_element *binary_append_cmdlist;
 
 static void
-dump_command (char *cmd, int from_tty)
+dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"dump\" must be followed by a subcommand.\n\n"));
   help_list (dump_cmdlist, "dump ", all_commands, gdb_stdout);
 }
 
 static void
-append_command (char *cmd, int from_tty)
+append_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"append\" must be followed by a subcommand.\n\n"));
   help_list (dump_cmdlist, "append ", all_commands, gdb_stdout);
@@ -581,42 +581,42 @@ restore_command (char *args_in, int from_tty)
 }
 
 static void
-srec_dump_command (char *cmd, int from_tty)
+srec_dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"dump srec\" must be followed by a subcommand.\n"));
   help_list (srec_cmdlist, "dump srec ", all_commands, gdb_stdout);
 }
 
 static void
-ihex_dump_command (char *cmd, int from_tty)
+ihex_dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"dump ihex\" must be followed by a subcommand.\n"));
   help_list (ihex_cmdlist, "dump ihex ", all_commands, gdb_stdout);
 }
 
 static void
-verilog_dump_command (char *cmd, int from_tty)
+verilog_dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"dump verilog\" must be followed by a subcommand.\n"));
   help_list (verilog_cmdlist, "dump verilog ", all_commands, gdb_stdout);
 }
 
 static void
-tekhex_dump_command (char *cmd, int from_tty)
+tekhex_dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"dump tekhex\" must be followed by a subcommand.\n"));
   help_list (tekhex_cmdlist, "dump tekhex ", all_commands, gdb_stdout);
 }
 
 static void
-binary_dump_command (char *cmd, int from_tty)
+binary_dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"dump binary\" must be followed by a subcommand.\n"));
   help_list (binary_dump_cmdlist, "dump binary ", all_commands, gdb_stdout);
 }
 
 static void
-binary_append_command (char *cmd, int from_tty)
+binary_append_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"append binary\" must be followed by a subcommand.\n"));
   help_list (binary_append_cmdlist, "append binary ", all_commands,

@@ -263,7 +263,7 @@ show_record_debug (struct ui_file *file, int from_tty,
 /* Alias for "target record".  */
 
 static void
-cmd_record_start (char *args, int from_tty)
+cmd_record_start (const char *args, int from_tty)
 {
   execute_command ((char *) "target record-full", from_tty);
 }
@@ -316,7 +316,7 @@ cmd_record_stop (const char *args, int from_tty)
 /* The "set record" command.  */
 
 static void
-set_record_command (char *args, int from_tty)
+set_record_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"set record\" must be followed "
 		       "by an apporpriate subcommand.\n"));
@@ -326,7 +326,7 @@ set_record_command (char *args, int from_tty)
 /* The "show record" command.  */
 
 static void
-show_record_command (char *args, int from_tty)
+show_record_command (const char *args, int from_tty)
 {
   cmd_show_list (show_record_cmdlist, from_tty, "");
 }
@@ -334,7 +334,7 @@ show_record_command (char *args, int from_tty)
 /* The "info record" command.  */
 
 static void
-info_record_command (char *args, int from_tty)
+info_record_command (const char *args, int from_tty)
 {
   struct target_ops *t;
 
@@ -394,7 +394,7 @@ record_goto (const char *arg)
    Rewinds the recording (forward or backward) to the given instruction.  */
 
 static void
-cmd_record_goto (char *arg, int from_tty)
+cmd_record_goto (const char *arg, int from_tty)
 {
   record_goto (arg);
 }

@@ -444,7 +444,7 @@ show_maint_show_all_tib (struct ui_file *file, int from_tty,
 }
 
 static void
-info_w32_command (char *args, int from_tty)
+info_w32_command (const char *args, int from_tty)
 {
   help_list (info_w32_cmdlist, "info w32 ", class_info, gdb_stdout);
 }

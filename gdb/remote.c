@@ -12252,7 +12252,7 @@ remote_delete_command (const char *args, int from_tty)
 }
 
 static void
-remote_command (char *args, int from_tty)
+remote_command (const char *args, int from_tty)
 {
   help_list (remote_cmdlist, "remote ", all_commands, gdb_stdout);
 }
@@ -13964,13 +13964,13 @@ remote_thread_events (struct target_ops *ops, int enable)
 }
 
 static void
-set_remote_cmd (char *args, int from_tty)
+set_remote_cmd (const char *args, int from_tty)
 {
   help_list (remote_set_cmdlist, "set remote ", all_commands, gdb_stdout);
 }
 
 static void
-show_remote_cmd (char *args, int from_tty)
+show_remote_cmd (const char *args, int from_tty)
 {
   /* We can't just use cmd_show_list here, because we want to skip
      the redundant "show remote Z-packet" and the legacy aliases.  */

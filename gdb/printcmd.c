@@ -1262,7 +1262,7 @@ output_command_const (const char *exp, int from_tty)
 }
 
 static void
-set_command (char *exp, int from_tty)
+set_command (const char *exp, int from_tty)
 {
   expression_up expr = parse_expression (exp);
 
@@ -1283,6 +1283,14 @@ set_command (char *exp, int from_tty)
       }
 
   evaluate_expression (expr.get ());
+}
+
+/* Temporary non-const version of set_command.  */
+
+static void
+non_const_set_command (char *exp, int from_tty)
+{
+  set_command (exp, from_tty);
 }
 
 static void
@@ -2749,7 +2757,7 @@ With a subcommand, this command modifies parts of the gdb environment.\n\
 You can see these environment settings with the \"show\" command."),
 		  &setlist, "set ", 1, &cmdlist);
   if (dbx_commands)
-    add_com ("assign", class_vars, set_command, _("\
+    add_com ("assign", class_vars, non_const_set_command, _("\
 Evaluate expression EXP and assign result to variable VAR, using assignment\n\
 syntax appropriate for the current language (VAR = EXP or VAR := EXP for\n\
 example).  VAR may be a debugger \"convenience\" variable (names starting\n\

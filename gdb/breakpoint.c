@@ -93,10 +93,6 @@ enum exception_event_kind
 
 /* Prototypes for local functions.  */
 
-static void disable_command (char *, int);
-
-static void enable_command (char *, int);
-
 static void map_breakpoint_numbers (const char *,
 				    gdb::function_view<void (breakpoint *)>);
 
@@ -124,8 +120,6 @@ static std::vector<symtab_and_line> decode_location_default
    struct program_space *search_pspace);
 
 static void clear_command (char *, int);
-
-static void catch_command (char *, int);
 
 static int can_use_hardware_watchpoint (struct value *);
 
@@ -200,8 +194,6 @@ static void enable_breakpoint_disp (struct breakpoint *, enum bpdisp,
 				    int count);
 
 static void stop_command (char *arg, int from_tty);
-
-static void tcatch_command (char *arg, int from_tty);
 
 static void free_bp_location (struct bp_location *loc);
 static void incref_bp_location (struct bp_location *loc);
@@ -11496,14 +11488,14 @@ init_ada_exception_breakpoint (struct breakpoint *b,
 }
 
 static void
-catch_command (char *arg, int from_tty)
+catch_command (const char *arg, int from_tty)
 {
   error (_("Catch requires an event name."));
 }
 
 
 static void
-tcatch_command (char *arg, int from_tty)
+tcatch_command (const char *arg, int from_tty)
 {
   error (_("Catch requires an event name."));
 }
@@ -13439,7 +13431,7 @@ iterate_over_related_breakpoints (struct breakpoint *b,
 }
 
 static void
-delete_command (char *arg, int from_tty)
+delete_command (const char *arg, int from_tty)
 {
   struct breakpoint *b, *b_tmp;
 
@@ -14283,7 +14275,7 @@ disable_breakpoint (struct breakpoint *bpt)
 }
 
 static void
-disable_command (char *args, int from_tty)
+disable_command (const char *args, int from_tty)
 {
   if (args == 0)
     {
@@ -14403,7 +14395,7 @@ enable_breakpoint (struct breakpoint *bpt)
    in stopping the inferior.  */
 
 static void
-enable_command (char *args, int from_tty)
+enable_command (const char *args, int from_tty)
 {
   if (args == 0)
     {
@@ -14498,12 +14490,12 @@ enable_delete_command (const char *args, int from_tty)
 }
 
 static void
-set_breakpoint_cmd (char *args, int from_tty)
+set_breakpoint_cmd (const char *args, int from_tty)
 {
 }
 
 static void
-show_breakpoint_cmd (char *args, int from_tty)
+show_breakpoint_cmd (const char *args, int from_tty)
 {
 }
 
@@ -15282,7 +15274,7 @@ add_catch_command (const char *name, const char *docstring,
 }
 
 static void
-save_command (char *arg, int from_tty)
+save_command (const char *arg, int from_tty)
 {
   printf_unfiltered (_("\"save\" must be followed by "
 		       "the name of a save subcommand.\n"));

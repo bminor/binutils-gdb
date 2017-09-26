@@ -84,10 +84,6 @@ struct cmd_list_element *showprintrawlist;
 static int partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
 				int len, int *errptr);
 
-static void show_print (char *, int);
-
-static void set_print (char *, int);
-
 static void set_input_radix (char *, int, struct cmd_list_element *);
 
 static void set_input_radix_1 (int, unsigned);
@@ -3129,7 +3125,7 @@ show_radix (const char *arg, int from_tty)
 
 
 static void
-set_print (char *arg, int from_tty)
+set_print (const char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set print\" must be followed by the name of a print subcommand.\n");
@@ -3137,13 +3133,13 @@ set_print (char *arg, int from_tty)
 }
 
 static void
-show_print (char *args, int from_tty)
+show_print (const char *args, int from_tty)
 {
   cmd_show_list (showprintlist, from_tty, "");
 }
 
 static void
-set_print_raw (char *arg, int from_tty)
+set_print_raw (const char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set print raw\" must be followed by the name of a \"print raw\" subcommand.\n");
@@ -3151,7 +3147,7 @@ set_print_raw (char *arg, int from_tty)
 }
 
 static void
-show_print_raw (char *args, int from_tty)
+show_print_raw (const char *args, int from_tty)
 {
   cmd_show_list (showprintrawlist, from_tty, "");
 }

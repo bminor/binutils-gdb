@@ -65,10 +65,6 @@ static void make_symbol_overload_list_qualified (const char *func_name);
 
 struct cmd_list_element *maint_cplus_cmd_list = NULL;
 
-/* The actual commands.  */
-
-static void maint_cplus_command (char *arg, int from_tty);
-
 /* A list of typedefs which should not be substituted by replace_typedefs.  */
 static const char * const ignore_typedefs[] =
   {
@@ -1586,7 +1582,7 @@ gdb_sniff_from_mangled_name (const char *mangled, char **demangled)
 /* Don't allow just "maintenance cplus".  */
 
 static  void
-maint_cplus_command (char *arg, int from_tty)
+maint_cplus_command (const char *arg, int from_tty)
 {
   printf_unfiltered (_("\"maintenance cplus\" must be followed "
 		       "by the name of a command.\n"));

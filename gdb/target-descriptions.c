@@ -1856,19 +1856,19 @@ static struct cmd_list_element *tdesc_unset_cmdlist;
 /* Helper functions for the CLI commands.  */
 
 static void
-set_tdesc_cmd (char *args, int from_tty)
+set_tdesc_cmd (const char *args, int from_tty)
 {
   help_list (tdesc_set_cmdlist, "set tdesc ", all_commands, gdb_stdout);
 }
 
 static void
-show_tdesc_cmd (char *args, int from_tty)
+show_tdesc_cmd (const char *args, int from_tty)
 {
   cmd_show_list (tdesc_show_cmdlist, from_tty, "");
 }
 
 static void
-unset_tdesc_cmd (char *args, int from_tty)
+unset_tdesc_cmd (const char *args, int from_tty)
 {
   help_list (tdesc_unset_cmdlist, "unset tdesc ", all_commands, gdb_stdout);
 }

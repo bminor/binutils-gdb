@@ -2558,7 +2558,7 @@ call_internal_function (struct gdbarch *gdbarch,
    the implementation of the sub-command that is created when
    registering an internal function.  */
 static void
-function_command (char *command, int from_tty)
+function_command (const char *command, int from_tty)
 {
   /* Do nothing.  */
 }

@@ -316,19 +316,19 @@ tui_update_variables (void)
 }
 
 static void
-set_tui_cmd (char *args, int from_tty)
+set_tui_cmd (const char *args, int from_tty)
 {
 }
 
 static void
-show_tui_cmd (char *args, int from_tty)
+show_tui_cmd (const char *args, int from_tty)
 {
 }
 
 static struct cmd_list_element *tuilist;
 
 static void
-tui_command (char *args, int from_tty)
+tui_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"tui\" must be followed by the name of a "
                      "tui command.\n"));

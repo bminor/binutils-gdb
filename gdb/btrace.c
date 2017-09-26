@@ -3374,7 +3374,7 @@ maint_btrace_clear_cmd (const char *args, int from_tty)
 /* The "maintenance btrace" command.  */
 
 static void
-maint_btrace_cmd (char *args, int from_tty)
+maint_btrace_cmd (const char *args, int from_tty)
 {
   help_list (maint_btrace_cmdlist, "maintenance btrace ", all_commands,
 	     gdb_stdout);
@@ -3383,7 +3383,7 @@ maint_btrace_cmd (char *args, int from_tty)
 /* The "maintenance set btrace" command.  */
 
 static void
-maint_btrace_set_cmd (char *args, int from_tty)
+maint_btrace_set_cmd (const char *args, int from_tty)
 {
   help_list (maint_btrace_set_cmdlist, "maintenance set btrace ", all_commands,
 	     gdb_stdout);
@@ -3392,7 +3392,7 @@ maint_btrace_set_cmd (char *args, int from_tty)
 /* The "maintenance show btrace" command.  */
 
 static void
-maint_btrace_show_cmd (char *args, int from_tty)
+maint_btrace_show_cmd (const char *args, int from_tty)
 {
   help_list (maint_btrace_show_cmdlist, "maintenance show btrace ",
 	     all_commands, gdb_stdout);
@@ -3401,7 +3401,7 @@ maint_btrace_show_cmd (char *args, int from_tty)
 /* The "maintenance set btrace pt" command.  */
 
 static void
-maint_btrace_pt_set_cmd (char *args, int from_tty)
+maint_btrace_pt_set_cmd (const char *args, int from_tty)
 {
   help_list (maint_btrace_pt_set_cmdlist, "maintenance set btrace pt ",
 	     all_commands, gdb_stdout);
@@ -3410,7 +3410,7 @@ maint_btrace_pt_set_cmd (char *args, int from_tty)
 /* The "maintenance show btrace pt" command.  */
 
 static void
-maint_btrace_pt_show_cmd (char *args, int from_tty)
+maint_btrace_pt_show_cmd (const char *args, int from_tty)
 {
   help_list (maint_btrace_pt_show_cmdlist, "maintenance show btrace pt ",
 	     all_commands, gdb_stdout);

@@ -609,7 +609,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 /* The "compile" prefix command.  */
 
 static void
-compile_command (char *args, int from_tty)
+compile_command (const char *args, int from_tty)
 {
   /* If a sub-command is not specified to the compile prefix command,
      assume it is a direct code compilation.  */

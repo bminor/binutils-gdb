@@ -282,9 +282,9 @@ extern void gdb_add_history (const char *);
 
 extern void show_commands (char *args, int from_tty);
 
-extern void set_history (char *, int);
+extern void set_history (const char *, int);
 
-extern void show_history (char *, int);
+extern void show_history (const char *, int);
 
 extern void set_verbose (char *, int, struct cmd_list_element *);
 

@@ -2140,7 +2140,7 @@ arc_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 /* Wrapper for "maintenance print arc" list of commands.  */
 
 static void
-maintenance_print_arc_command (char *args, int from_tty)
+maintenance_print_arc_command (const char *args, int from_tty)
 {
   cmd_show_list (maintenance_print_arc_list, from_tty, "");
 }

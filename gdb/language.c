@@ -50,10 +50,6 @@ static void unk_lang_error (const char *);
 
 static int unk_lang_parser (struct parser_state *);
 
-static void show_check (char *, int);
-
-static void set_check (char *, int);
-
 static void set_range_case (void);
 
 static void unk_lang_emit_char (int c, struct type *type,
@@ -507,7 +503,7 @@ language_str (enum language lang)
 }
 
 static void
-set_check (char *ignore, int from_tty)
+set_check (const char *ignore, int from_tty)
 {
   printf_unfiltered (
      "\"set check\" must be followed by the name of a check subcommand.\n");
@@ -515,7 +511,7 @@ set_check (char *ignore, int from_tty)
 }
 
 static void
-show_check (char *ignore, int from_tty)
+show_check (const char *ignore, int from_tty)
 {
   cmd_show_list (showchecklist, from_tty, "");
 }

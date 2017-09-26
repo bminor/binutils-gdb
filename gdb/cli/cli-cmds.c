@@ -68,14 +68,6 @@ static void pwd_command (char *, int);
 
 static void help_command (char *, int);
 
-static void show_command (char *, int);
-
-static void info_command (char *, int);
-
-static void show_debug (char *, int);
-
-static void set_debug (char *, int);
-
 static void make_command (char *, int);
 
 static void shell_escape (const char *, int);
@@ -218,7 +210,7 @@ error_no_arg (const char *why)
    args.  */
 
 static void
-info_command (char *arg, int from_tty)
+info_command (const char *arg, int from_tty)
 {
   printf_unfiltered (_("\"info\" must be followed by "
 		       "the name of an info command.\n"));
@@ -228,10 +220,19 @@ info_command (char *arg, int from_tty)
 /* The "show" command with no arguments shows all the settings.  */
 
 static void
+show_command (const char *arg, int from_tty)
+{
+  cmd_show_list (showlist, from_tty, "");
+}
+
+/* A temporary non-const overload of show_command.  */
+
+static void
 show_command (char *arg, int from_tty)
 {
   cmd_show_list (showlist, from_tty, "");
 }
+
 
 /* Provide documentation on command or list given by COMMAND.  FROM_TTY
    is ignored.  */
@@ -1616,7 +1617,7 @@ filter_sals (std::vector<symtab_and_line> &sals)
 }
 
 static void
-set_debug (char *arg, int from_tty)
+set_debug (const char *arg, int from_tty)
 {
   printf_unfiltered (_("\"set debug\" must be followed by "
 		       "the name of a debug subcommand.\n"));
@@ -1624,7 +1625,7 @@ set_debug (char *arg, int from_tty)
 }
 
 static void
-show_debug (char *args, int from_tty)
+show_debug (const char *args, int from_tty)
 {
   cmd_show_list (showdebuglist, from_tty, "");
 }

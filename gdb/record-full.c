@@ -2755,7 +2755,7 @@ record_full_goto_insn (struct record_full_entry *entry,
 /* Alias for "target record-full".  */
 
 static void
-cmd_record_full_start (char *args, int from_tty)
+cmd_record_full_start (const char *args, int from_tty)
 {
   execute_command ((char *) "target record-full", from_tty);
 }
@@ -2778,10 +2778,10 @@ set_record_full_insn_max_num (char *args, int from_tty,
 /* The "set record full" command.  */
 
 static void
-set_record_full_command (char *args, int from_tty)
+set_record_full_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"set record full\" must be followed "
-		       "by an apporpriate subcommand.\n"));
+		       "by an appropriate subcommand.\n"));
   help_list (set_record_full_cmdlist, "set record full ", all_commands,
 	     gdb_stdout);
 }
@@ -2789,7 +2789,7 @@ set_record_full_command (char *args, int from_tty)
 /* The "show record full" command.  */
 
 static void
-show_record_full_command (char *args, int from_tty)
+show_record_full_command (const char *args, int from_tty)
 {
   cmd_show_list (show_record_full_cmdlist, from_tty, "");
 }

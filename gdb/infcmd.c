@@ -70,8 +70,6 @@ static void until_command (char *, int);
 
 static void path_command (char *, int);
 
-static void unset_command (char *, int);
-
 static void info_float_command (char *, int);
 
 static void disconnect_command (char *, int);
@@ -2624,7 +2622,7 @@ info_vector_command (char *args, int from_tty)
 /* Kill the inferior process.  Make us have no inferior.  */
 
 static void
-kill_command (char *arg, int from_tty)
+kill_command (const char *arg, int from_tty)
 {
   /* FIXME:  This should not really be inferior_ptid (or target_has_execution).
      It should be a distinct flag that indicates that a target is active, cuz
@@ -3028,7 +3026,7 @@ notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
  */
 
 void
-detach_command (char *args, int from_tty)
+detach_command (const char *args, int from_tty)
 {
   dont_repeat ();		/* Not for the faint of heart.  */
 
@@ -3172,7 +3170,7 @@ info_float_command (char *args, int from_tty)
 }
 
 static void
-unset_command (char *args, int from_tty)
+unset_command (const char *args, int from_tty)
 {
   printf_filtered (_("\"unset\" must be followed by the "
 		     "name of an unset subcommand.\n"));
@@ -3198,7 +3196,7 @@ info_proc_cmd_1 (const char *args, enum info_proc_what what, int from_tty)
 /* Implement `info proc' when given without any futher parameters.  */
 
 static void
-info_proc_cmd (char *args, int from_tty)
+info_proc_cmd (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_MINIMAL, from_tty);
 }
