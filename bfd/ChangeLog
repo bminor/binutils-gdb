@@ -1,3 +1,9 @@
+2017-09-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22199
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Don't pass
+	output_bfd to info->callbacks->minfo.
+
 2017-09-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/22170
