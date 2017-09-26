@@ -1960,6 +1960,7 @@ read_formatted_entries (struct comp_unit *unit, bfd_byte **bufp,
 	  char *string_trash;
 	  char **stringp = &string_trash;
 	  unsigned int uint_trash, *uintp = &uint_trash;
+	  struct attribute attr;
 
 	  content_type = _bfd_safe_read_leb128 (abfd, format, &bytes_read,
 						FALSE, buf_end);
@@ -1991,47 +1992,23 @@ read_formatted_entries (struct comp_unit *unit, bfd_byte **bufp,
 	  form = _bfd_safe_read_leb128 (abfd, format, &bytes_read, FALSE,
 					buf_end);
 	  format += bytes_read;
+
+	  buf = read_attribute_value (&attr, form, 0, unit, buf, buf_end);
+	  if (buf == NULL)
+	    return FALSE;
 	  switch (form)
 	    {
 	    case DW_FORM_string:
-	      *stringp = read_string (abfd, buf, buf_end, &bytes_read);
-	      buf += bytes_read;
-	      break;
-
 	    case DW_FORM_line_strp:
-	      *stringp = read_indirect_line_string (unit, buf, buf_end, &bytes_read);
-	      buf += bytes_read;
+	      *stringp = attr.u.str;
 	      break;
 
 	    case DW_FORM_data1:
-	      *uintp = read_1_byte (abfd, buf, buf_end);
-	      buf += 1;
-	      break;
-
 	    case DW_FORM_data2:
-	      *uintp = read_2_bytes (abfd, buf, buf_end);
-	      buf += 2;
-	      break;
-
 	    case DW_FORM_data4:
-	      *uintp = read_4_bytes (abfd, buf, buf_end);
-	      buf += 4;
-	      break;
-
 	    case DW_FORM_data8:
-	      *uintp = read_8_bytes (abfd, buf, buf_end);
-	      buf += 8;
-	      break;
-
 	    case DW_FORM_udata:
-	      *uintp = _bfd_safe_read_leb128 (abfd, buf, &bytes_read, FALSE,
-					      buf_end);
-	      buf += bytes_read;
-	      break;
-
-	    case DW_FORM_block:
-	      /* It is valid only for DW_LNCT_timestamp which is ignored by
-		 current GDB.  */
+	      *uintp = attr.u.val;
 	      break;
 	    }
 	}
