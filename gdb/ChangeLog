@@ -1,5 +1,37 @@
 2017-09-26  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
+	PR gdb/22185
+	* configure.host <*-*-solaris2.[01], *-*-solaris2.[2-9]*>: Mark as
+	obsolete.
+	Use gdb_host sol2 for i[34567]86-*-solaris2*, x86_64-*-solaris2*.
+	Remove i386sol2 support.
+	* configure.nat <i386sol2>: Remove.
+	<sol2-64>: Fold into ...
+	<sol2>: ... this.
+	Move common settings to default section.
+	Add sol-thread.o.
+	* configure.tgt <i[34567]86-*-solaris2.1[0-9]*,
+	x86_64-*-solaris2.1[0-9]*>: Rename to ...
+	<i[34567]86-*-solaris2*, x86_64-*-solaris2*>: ... this.
+	<i[34567]86-*-solaris*>: Remove.
+	<sparc-*-solaris2.[0-6], sparc-*-solaris2.[0-6].*>: Remove.
+
+	* configure.ac: Remove wctype in libw check.
+	(_MSE_INT_H): Don't define on Solaris 7-9.
+	<solaris*>: Remove libthread_db.so.1 check.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+	* proc-service.c: Remove PROC_SERVICE_IS_OLD handling.
+	(gdb_ps_prochandle_t, gdb_ps_read_buf_t, gdb_ps_write_buf_t)
+	(gdb_ps_size_t): Remove.
+	Use base types in users.
+	* sol-thread.c: Likewise, also for gdb_ps_addr_t.
+
+	* NEWS (Changes since GDB 8.0): Document Solaris 2.0-9 removal.
+
+2017-09-26  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
 	PR build/22206
 	* sparc64-tdep.c (adi_tag_fd): Print pid as long.
 	(adi_is_addr_mapped): Likewise.
