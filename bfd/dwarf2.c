@@ -2277,7 +2277,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
       bfd_vma high_pc = 0;
 
       /* Decode the table.  */
-      while (! end_sequence)
+      while (!end_sequence && line_ptr < line_end)
 	{
 	  op_code = read_1_byte (abfd, line_ptr, line_end);
 	  line_ptr += 1;
