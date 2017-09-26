@@ -344,7 +344,8 @@ elf_x86_64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
       && r_type != (unsigned int) R_X86_64_GNU_VTENTRY)
     r_type &= ~R_X86_64_converted_reloc_bit;
   cache_ptr->howto = elf_x86_64_rtype_to_howto (abfd, r_type);
-  BFD_ASSERT (r_type == cache_ptr->howto->type);
+
+  BFD_ASSERT (r_type == cache_ptr->howto->type || cache_ptr->howto->type == R_X86_64_NONE);
 }
 
 /* Support for core dump NOTE sections.  */
