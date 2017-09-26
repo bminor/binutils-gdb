@@ -1,3 +1,11 @@
+2017-09-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/compare-sections.exp (get value of read-only section): Read
+	as unsigned value.
+	(corrupt read-only section): Likewise and don't set written if patching
+	failed.
+
 2017-09-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.python/py-thrhandle.c, gdb.python/py-thrhandle.exp: New
