@@ -1,3 +1,16 @@
+2017-09-26  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* Makefile.in (SFILES): Add producer.c.
+	(COMMON_OBS): Add producer.o
+	* amd64-tdep.c (producer.h): Add new include.
+	* dwarf2read.c (producer.h): Add new include.
+	* producer.c: New file.
+	* producer.h: New file.
+	* utils.c (producer_is_gcc, producer_is_gcc_ge_4): Move to
+	producer.c.
+	* utils.h (producer_is_gcc, producer_is_gcc_ge_4): Move to
+	producer.h.
+
 2017-09-26  Matthias Klose  <doko@ubuntu.com>
 
 	* configure.ac: Search ncursesw before ncurses.

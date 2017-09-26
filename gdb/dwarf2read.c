@@ -75,6 +75,7 @@
 #include "common/underlying.h"
 #include "common/byte-vector.h"
 #include "filename-seen-cache.h"
+#include "producer.h"
 #include <fcntl.h>
 #include <sys/types.h>
 #include <algorithm>

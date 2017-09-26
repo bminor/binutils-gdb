@@ -1170,6 +1170,7 @@ SFILES = \
 	parse.c \
 	printcmd.c \
 	probe.c \
+	producer.c \
 	proc-service.list \
 	progspace.c \
 	progspace-and-thread.c \
@@ -1792,6 +1793,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	print-utils.o \
 	printcmd.o \
 	probe.o \
+	producer.o \
 	progspace.o \
 	progspace-and-thread.o \
 	prologue-value.o \
