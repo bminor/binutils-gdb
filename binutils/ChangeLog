@@ -1,5 +1,11 @@
 2017-09-26  Nick Clifton  <nickc@redhat.com>
 
+	PR 22154
+	* dwarf.c (get_line_filename_and_dirname): Add extra checks for
+	buffer overruns.
+
+2017-09-26  Nick Clifton  <nickc@redhat.com>
+
 	* README-how-to-make-a-release: New file.
 
 2017-09-26  Alan Modra  <amodra@gmail.com>

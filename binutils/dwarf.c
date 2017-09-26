@@ -4742,13 +4742,21 @@ get_line_filename_and_dirname (dwarf_vma line_offset,
     return NULL;
 
   hdrptr += opcode_base - 1;
+  if (hdrptr >= end)
+    return NULL;
+
   dirtable = hdrptr;
   /* Skip over dirname table.  */
   while (*hdrptr != '\0')
-    hdrptr += strnlen ((char *) hdrptr, end - hdrptr) + 1;
+    {
+      hdrptr += strnlen ((char *) hdrptr, end - hdrptr) + 1;
+      if (hdrptr >= end)
+	return NULL;
+    }
   hdrptr++;		    /* Skip the NUL at the end of the table.  */
+
   /* Now skip over preceding filename table entries.  */
-  for (; *hdrptr != '\0' && fileidx > 1; fileidx--)
+  for (; hdrptr < end && *hdrptr != '\0' && fileidx > 1; fileidx--)
     {
       hdrptr += strnlen ((char *) hdrptr, end - hdrptr) + 1;
       read_uleb128 (hdrptr, &bytes_read, end);
@@ -4758,16 +4766,19 @@ get_line_filename_and_dirname (dwarf_vma line_offset,
       read_uleb128 (hdrptr, &bytes_read, end);
       hdrptr += bytes_read;
     }
-  if (hdrptr == end || *hdrptr == '\0')
+  if (hdrptr >= end || *hdrptr == '\0')
     return NULL;
+
   file_name = hdrptr;
   hdrptr += strnlen ((char *) hdrptr, end - hdrptr) + 1;
+  if (hdrptr >= end)
+    return NULL;
   diridx = read_uleb128 (hdrptr, &bytes_read, end);
   if (diridx == 0)
     return file_name;
-  for (; *dirtable != '\0' && diridx > 1; diridx--)
+  for (; dirtable < end && *dirtable != '\0' && diridx > 1; diridx--)
     dirtable += strnlen ((char *) dirtable, end - dirtable) + 1;
-  if (*dirtable == '\0')
+  if (dirtable >= end || *dirtable == '\0')
     return NULL;
   *dir_name = dirtable;
   return file_name;
