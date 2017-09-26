@@ -8746,7 +8746,7 @@ return waddstr ();
   return 0;
 }
 _ACEOF
-for ac_lib in '' ncurses cursesX curses; do
+for ac_lib in '' ncursesw ncurses cursesX curses; do
   if test -z "$ac_lib"; then
     ac_res="none required"
   else
@@ -8844,7 +8844,7 @@ return tgetent ();
   return 0;
 }
 _ACEOF
-for ac_lib in '' termcap tinfo curses ncurses; do
+for ac_lib in '' termcap tinfo curses ncursesw ncurses; do
   if test -z "$ac_lib"; then
     ac_res="none required"
   else
@@ -11595,7 +11595,7 @@ fi
 done
 
 
-for ac_header in curses.h cursesX.h ncurses.h ncurses/ncurses.h ncurses/term.h
+for ac_header in curses.h cursesX.h ncurses.h ncursesw/ncurses.h ncurses/ncurses.h ncurses/term.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"

@@ -294,6 +294,9 @@
 /* Define to 1 if you have the `monstartup' function. */
 #undef HAVE_MONSTARTUP
 
+/* Define to 1 if you have the <ncursesw/ncurses.h> header file. */
+#undef HAVE_NCURSESW_NCURSES_H
+
 /* Define to 1 if you have the <ncurses.h> header file. */
 #undef HAVE_NCURSES_H
 

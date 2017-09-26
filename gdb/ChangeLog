@@ -1,3 +1,10 @@
+2017-09-26  Matthias Klose  <doko@ubuntu.com>
+
+	* configure.ac: Search ncursesw before ncurses.
+	Check ncursesw/ncurses.h before ncurses/ncurses.h.
+	* gdb_curses.h: Include <ncursesw/ncurses.h>
+	* config.in, configure: Regenerate.
+
 2017-09-26  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR gdb/22185
