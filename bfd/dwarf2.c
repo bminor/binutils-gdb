@@ -125,8 +125,7 @@ struct dwarf2_debug
 
   /* A pointer to the memory block allocated for info_ptr.  Neither
      info_ptr nor sec_info_ptr are guaranteed to stay pointing to the
-     beginning of the malloc block.  This is used only to free the
-     memory later.  */
+     beginning of the malloc block.  */
   bfd_byte *info_ptr_memory;
 
   /* Pointer to the symbol table.  */
@@ -249,9 +248,6 @@ struct comp_unit
   /* Pointer to the current comp_unit so that we can find a given entry
      by its reference.  */
   bfd_byte *info_ptr_unit;
-
-  /* Pointer to the start of the debug section, for DW_FORM_ref_addr.  */
-  bfd_byte *sec_info_ptr;
 
   /* The offset into .debug_line of the line number table.  */
   unsigned long line_offset;
@@ -2849,21 +2845,37 @@ find_abstract_instance_name (struct comp_unit *unit,
   if (attr_ptr->form == DW_FORM_ref_addr)
     {
       /* We only support DW_FORM_ref_addr within the same file, so
-	 any relocations should be resolved already.  */
-      if (!die_ref)
+	 any relocations should be resolved already.  Check this by
+	 testing for a zero die_ref;  There can't be a valid reference
+	 to the header of a .debug_info section.
+	 DW_FORM_ref_addr is an offset relative to .debug_info.
+	 Normally when using the GNU linker this is accomplished by
+	 emitting a symbolic reference to a label, because .debug_info
+	 sections are linked at zero.  When there are multiple section
+	 groups containing .debug_info, as there might be in a
+	 relocatable object file, it would be reasonable to assume that
+	 a symbolic reference to a label in any .debug_info section
+	 might be used.  Since we lay out multiple .debug_info
+	 sections at non-zero VMAs (see place_sections), and read
+	 them contiguously into stash->info_ptr_memory, that means
+	 the reference is relative to stash->info_ptr_memory.  */
+      size_t total;
+
+      info_ptr = unit->stash->info_ptr_memory;
+      info_ptr_end = unit->stash->info_ptr_end;
+      total = info_ptr_end - info_ptr;
+      if (!die_ref || die_ref >= total)
 	{
 	  _bfd_error_handler
-	    (_("Dwarf Error: Abstract instance DIE ref zero."));
+	    (_("Dwarf Error: Invalid abstract instance DIE ref."));
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
-
-      info_ptr = unit->sec_info_ptr + die_ref;
-      info_ptr_end = unit->end_ptr;
+      info_ptr += die_ref;
 
       /* Now find the CU containing this pointer.  */
       if (info_ptr >= unit->info_ptr_unit && info_ptr < unit->end_ptr)
-	;
+	info_ptr_end = unit->end_ptr;
       else
 	{
 	  /* Check other CUs to see if they contain the abbrev.  */
@@ -2879,7 +2891,10 @@ find_abstract_instance_name (struct comp_unit *unit,
 		break;
 
 	  if (u)
-	    unit = u;
+	    {
+	      unit = u;
+	      info_ptr_end = unit->end_ptr;
+	    }
 	  /* else FIXME: What do we do now ?  */
 	}
     }
@@ -2902,8 +2917,22 @@ find_abstract_instance_name (struct comp_unit *unit,
     }
   else
     {
-      info_ptr = unit->info_ptr_unit + die_ref;
+      /* DW_FORM_ref1, DW_FORM_ref2, DW_FORM_ref4, DW_FORM_ref8 or
+	 DW_FORM_ref_udata.  These are all references relative to the
+	 start of the current CU.  */
+      size_t total;
+
+      info_ptr = unit->info_ptr_unit;
       info_ptr_end = unit->end_ptr;
+      total = info_ptr_end - info_ptr;
+      if (!die_ref || die_ref >= total)
+	{
+	  _bfd_error_handler
+	    (_("Dwarf Error: Invalid abstract instance DIE ref."));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+      info_ptr += die_ref;
     }
 
   abbrev_number = _bfd_safe_read_leb128 (abfd, info_ptr, &bytes_read,
@@ -3451,7 +3480,6 @@ parse_comp_unit (struct dwarf2_debug *stash,
   unit->end_ptr = end_ptr;
   unit->stash = stash;
   unit->info_ptr_unit = info_ptr_unit;
-  unit->sec_info_ptr = stash->sec_info_ptr;
 
   for (i = 0; i < abbrev->num_attrs; ++i)
     {

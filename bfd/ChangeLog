@@ -1,5 +1,14 @@
 2017-09-26  Alan Modra  <amodra@gmail.com>
 
+	PR 22209
+	* dwarf2.c (struct comp_unit): Delete sec_info_ptr field.
+	(find_abstract_instance_name): Calculate DW_FORM_ref_addr relative
+	to stash->info_ptr_memory, and check die_ref is within that memory.
+	Set info_ptr_end correctly when another CU is refd.  Check die_ref
+	for DW_FORM_ref4 etc. is within CU.
+
+2017-09-26  Alan Modra  <amodra@gmail.com>
+
 	PR 22205
 	* dwarf2.c (concat_filename): Return "<unknown>" on NULL filename.
 	(read_formatted_entries): Init "fe".
