@@ -1,3 +1,7 @@
+2017-09-26  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: New file.
+
 2017-09-26  Alan Modra  <amodra@gmail.com>
 
 	PR 21732
