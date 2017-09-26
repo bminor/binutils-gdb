@@ -1,4 +1,18 @@
 2017-09-26  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+	    Pedro Alves <palves@redhat.com>
+
+	* dwarf2read.c (dwarf2_cu): Remove field producer_is_icc and add
+	producer_is_icc_lt_14.
+	(producer_is_icc_lt_14): New function.
+	(check_producer): Add code for checking version of ICC.
+	(producer_is_icc): Move to producer.c.
+	(read_structure_type): Restrict ICC workaround to ICC<14.
+	* producer.c: Include selftest.h.
+	(producer_is_icc, producer_parsing_tests, _initialize_producer):
+	New functions.
+	* producer.h (producer_is_icc): New declaration.
+
+2017-09-26  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* Makefile.in (SFILES): Add producer.c.
 	(COMMON_OBS): Add producer.o

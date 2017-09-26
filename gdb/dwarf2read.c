@@ -603,7 +603,7 @@ struct dwarf2_cu
   unsigned int checked_producer : 1;
   unsigned int producer_is_gxx_lt_4_6 : 1;
   unsigned int producer_is_gcc_lt_4_3 : 1;
-  unsigned int producer_is_icc : 1;
+  unsigned int producer_is_icc_lt_14 : 1;
 
   /* When set, the file that we're processing is known to have
      debugging info for C++ namespaces.  GCC 3.3.x did not produce
@@ -9348,6 +9348,19 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
 		       &objfile->objfile_obstack);
 }
 
+/* ICC<14 does not output the required DW_AT_declaration on incomplete
+   types, but gives them a size of zero.  Starting with version 14,
+   ICC is compatible with GCC.  */
+
+static int
+producer_is_icc_lt_14 (struct dwarf2_cu *cu)
+{
+  if (!cu->checked_producer)
+    check_producer (cu);
+
+  return cu->producer_is_icc_lt_14;
+}
+
 /* Check for possibly missing DW_AT_comp_dir with relative .debug_line
    directory paths.  GCC SVN r127613 (new option -fdebug-prefix-map) fixed
    this, it was first present in GCC release 4.3.0.  */
@@ -12853,8 +12866,8 @@ check_producer (struct dwarf2_cu *cu)
       cu->producer_is_gxx_lt_4_6 = major < 4 || (major == 4 && minor < 6);
       cu->producer_is_gcc_lt_4_3 = major < 4 || (major == 4 && minor < 3);
     }
-  else if (startswith (cu->producer, "Intel(R) C"))
-    cu->producer_is_icc = 1;
+  else if (producer_is_icc (cu->producer, &major, &minor))
+    cu->producer_is_icc_lt_14 = major < 14;
   else
     {
       /* For other non-GCC compilers, expect their behavior is DWARF version
@@ -13595,17 +13608,6 @@ quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
   smash_to_methodptr_type (type, new_type);
 }
 
-/* Return non-zero if the CU's PRODUCER string matches the Intel C/C++ compiler
-   (icc).  */
-
-static int
-producer_is_icc (struct dwarf2_cu *cu)
-{
-  if (!cu->checked_producer)
-    check_producer (cu);
-
-  return cu->producer_is_icc;
-}
 
 /* Called when we find the DIE that starts a structure or union scope
    (definition) to create a type for the structure or union.  Fill in
@@ -13711,10 +13713,10 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_LENGTH (type) = 0;
     }
 
-  if (producer_is_icc (cu) && (TYPE_LENGTH (type) == 0))
+  if (producer_is_icc_lt_14 (cu) && (TYPE_LENGTH (type) == 0))
     {
-      /* ICC does not output the required DW_AT_declaration
-	 on incomplete types, but gives them a size of zero.  */
+      /* ICC<14 does not output the required DW_AT_declaration on
+	 incomplete types, but gives them a size of zero.  */
       TYPE_STUB (type) = 1;
     }
   else
