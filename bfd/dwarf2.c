@@ -1938,6 +1938,16 @@ read_formatted_entries (struct comp_unit *unit, bfd_byte **bufp,
       return FALSE;
     }
 
+  /* PR 22210.  Paranoia check.  Don't bother running the loop
+     if we know that we are going to run out of buffer.  */
+  if (data_count > (bfd_vma) (buf_end - buf))
+    {
+      _bfd_error_handler (_("Dwarf Error: data count (%Lx) larger than buffer size."),
+			  data_count);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
   for (datai = 0; datai < data_count; datai++)
     {
       bfd_byte *format = format_header_data;
