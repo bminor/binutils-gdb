@@ -1,3 +1,9 @@
+2017-09-26  do  <do@nerilex.org>
+
+	PR 22123
+	* m68k-opc.c (m68k_opcodes): Allow macw and macl instructions to
+	be used on CPUs that have emacs support.
+
 2017-09-21  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* aarch64-opc.c (expand_fp_imm): Initialize 'imm'.
