@@ -1,3 +1,11 @@
+2017-09-26  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR build/22206
+	* sparc64-tdep.c (adi_tag_fd): Print pid as long.
+	(adi_is_addr_mapped): Likewise.
+	(PSR_ICC): Don't redefine.
+	(PSR_IMPL): Likewise.
+
 2017-09-25  Tom Tromey  <tom@tromey.com>
 
 	* regcache.c (regcache::dump): Use string_printf.

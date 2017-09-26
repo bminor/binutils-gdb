@@ -293,7 +293,7 @@ adi_tag_fd (void)
     return proc->stat.tag_fd;
 
   char cl_name[MAX_PROC_NAME_SIZE];
-  snprintf (cl_name, sizeof(cl_name), "/proc/%d/adi/tags", pid);
+  snprintf (cl_name, sizeof(cl_name), "/proc/%ld/adi/tags", (long) pid);
   int target_errno;
   proc->stat.tag_fd = target_fileio_open (NULL, cl_name, O_RDWR|O_EXCL, 
                                           0, &target_errno);
@@ -311,7 +311,7 @@ adi_is_addr_mapped (CORE_ADDR vaddr, size_t cnt)
   size_t i = 0;
 
   pid_t pid = ptid_get_pid (inferior_ptid);
-  snprintf (filename, sizeof filename, "/proc/%d/adi/maps", pid);
+  snprintf (filename, sizeof filename, "/proc/%ld/adi/maps", (long) pid);
   char *data = target_fileio_read_stralloc (NULL, filename);
   if (data)
     {
@@ -1873,9 +1873,13 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 #define TSTATE_XCC	0x000000f000000000ULL
 
 #define PSR_S		0x00000080
+#ifndef PSR_ICC
 #define PSR_ICC		0x00f00000
+#endif
 #define PSR_VERS	0x0f000000
+#ifndef PSR_IMPL
 #define PSR_IMPL	0xf0000000
+#endif
 #define PSR_V8PLUS	0xff000000
 #define PSR_XCC		0x000f0000
 
