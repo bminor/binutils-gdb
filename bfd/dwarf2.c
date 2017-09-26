@@ -1597,6 +1597,8 @@ concat_filename (struct line_info_table *table, unsigned int file)
     }
 
   filename = table->files[file - 1].name;
+  if (filename == NULL)
+    return strdup ("<unknown>");
 
   if (!IS_ABSOLUTE_PATH (filename))
     {
@@ -1945,6 +1947,7 @@ read_formatted_entries (struct comp_unit *unit, bfd_byte **bufp,
       bfd_byte *format = format_header_data;
       struct fileinfo fe;
 
+      memset (&fe, 0, sizeof fe);
       for (formati = 0; formati < format_count; formati++)
 	{
 	  bfd_vma content_type, form;
@@ -2268,6 +2271,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
       unsigned int discriminator = 0;
       int is_stmt = lh.default_is_stmt;
       int end_sequence = 0;
+      unsigned int dir, xtime, size;
       /* eraxxon@alumni.rice.edu: Against the DWARF2 specs, some
 	 compilers generate address sequences that are wildly out of
 	 order using DW_LNE_set_address (e.g. Intel C++ 6.0 compiler
@@ -2342,31 +2346,18 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		case DW_LNE_define_file:
 		  cur_file = read_string (abfd, line_ptr, line_end, &bytes_read);
 		  line_ptr += bytes_read;
-		  if ((table->num_files % FILE_ALLOC_CHUNK) == 0)
-		    {
-		      struct fileinfo *tmp;
-
-		      amt = table->num_files + FILE_ALLOC_CHUNK;
-		      amt *= sizeof (struct fileinfo);
-		      tmp = (struct fileinfo *) bfd_realloc (table->files, amt);
-		      if (tmp == NULL)
-			goto line_fail;
-		      table->files = tmp;
-		    }
-		  table->files[table->num_files].name = cur_file;
-		  table->files[table->num_files].dir =
-		    _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
-					   FALSE, line_end);
+		  dir = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
+					       FALSE, line_end);
 		  line_ptr += bytes_read;
-		  table->files[table->num_files].time =
-		    _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
-					   FALSE, line_end);
+		  xtime = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
+						 FALSE, line_end);
 		  line_ptr += bytes_read;
-		  table->files[table->num_files].size =
-		    _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
-					   FALSE, line_end);
+		  size = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
+						FALSE, line_end);
 		  line_ptr += bytes_read;
-		  table->num_files++;
+		  if (!line_info_add_file_name (table, cur_file, dir,
+						xtime, size))
+		    goto line_fail;
 		  break;
 		case DW_LNE_set_discriminator:
 		  discriminator =

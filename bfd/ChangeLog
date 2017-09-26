@@ -1,5 +1,12 @@
 2017-09-26  Alan Modra  <amodra@gmail.com>
 
+	PR 22205
+	* dwarf2.c (concat_filename): Return "<unknown>" on NULL filename.
+	(read_formatted_entries): Init "fe".
+	(decode_line_info <DW_LNE_define_file>): Use line_info_add_file_name.
+
+2017-09-26  Alan Modra  <amodra@gmail.com>
+
 	PR 22204
 	* dwarf2.c (decode_line_info): Ensure line_ptr stays within
 	bounds in inner loop.
