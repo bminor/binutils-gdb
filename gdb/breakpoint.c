@@ -5189,8 +5189,11 @@ bpstat_check_watchpoint (bpstat bs)
 	    = xstrprintf ("Error evaluating expression for watchpoint %d\n",
 			  b->number);
 	  struct cleanup *cleanups = make_cleanup (xfree, message);
-	  int e = catch_errors (watchpoint_check, bs, message,
-				RETURN_MASK_ALL);
+	  int e = catch_errors ([&] ()
+				  {
+				    return watchpoint_check (bs);
+				  },
+	                        message, RETURN_MASK_ALL);
 	  do_cleanups (cleanups);
 	  switch (e)
 	    {
@@ -5421,7 +5424,10 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 	}
       if (within_current_scope)
 	value_is_zero
-	  = catch_errors (breakpoint_cond_eval, cond,
+	  = catch_errors ([&] ()
+			    {
+			      return breakpoint_cond_eval (cond);
+			    },
 			  "Error in testing breakpoint condition:\n",
 			  RETURN_MASK_ALL);
       else
@@ -6597,22 +6603,15 @@ breakpoint_address_bits (struct breakpoint *b)
   return print_address_bits;
 }
 
-struct captured_breakpoint_query_args
-  {
-    int bnum;
-  };
-
 static int
-do_captured_breakpoint_query (struct ui_out *uiout, void *data)
+do_captured_breakpoint_query (int bnum)
 {
-  struct captured_breakpoint_query_args *args
-    = (struct captured_breakpoint_query_args *) data;
   struct breakpoint *b;
   struct bp_location *dummy_loc = NULL;
 
   ALL_BREAKPOINTS (b)
     {
-      if (args->bnum == b->number)
+      if (bnum == b->number)
 	{
 	  print_one_breakpoint (b, &dummy_loc, 0);
 	  return GDB_RC_OK;
@@ -6625,13 +6624,15 @@ enum gdb_rc
 gdb_breakpoint_query (struct ui_out *uiout, int bnum, 
 		      char **error_message)
 {
-  struct captured_breakpoint_query_args args;
-
-  args.bnum = bnum;
   /* For the moment we don't trust print_one_breakpoint() to not throw
      an error.  */
-  if (catch_exceptions_with_msg (uiout, do_captured_breakpoint_query, &args,
-				 error_message, RETURN_MASK_ALL) < 0)
+  if (catch_exceptions_with_msg
+      (uiout,
+       [&] (struct ui_out *)
+         {
+	   return do_captured_breakpoint_query (bnum);
+	 },
+       error_message, RETURN_MASK_ALL) < 0)
     return GDB_RC_FAIL;
   else
     return GDB_RC_OK;
@@ -14192,7 +14193,11 @@ breakpoint_re_set (void)
 	char *message = xstrprintf ("Error in re-setting breakpoint %d: ",
 				    b->number);
 	struct cleanup *cleanups = make_cleanup (xfree, message);
-	catch_errors (breakpoint_re_set_one, b, message, RETURN_MASK_ALL);
+	catch_errors ([&] ()
+		        {
+			  return breakpoint_re_set_one (b);
+			},
+	              message, RETURN_MASK_ALL);
 	do_cleanups (cleanups);
       }
     set_language (save_language);

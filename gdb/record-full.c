@@ -637,32 +637,15 @@ record_full_message (struct regcache *regcache, enum gdb_signal signal)
   return 1;
 }
 
-struct record_full_message_args {
-  struct regcache *regcache;
-  enum gdb_signal signal;
-};
-
-static int
-record_full_message_wrapper (void *args)
-{
-  struct record_full_message_args *record_full_args
-    = (struct record_full_message_args *) args;
-
-  return record_full_message (record_full_args->regcache,
-			      record_full_args->signal);
-}
-
 static int
 record_full_message_wrapper_safe (struct regcache *regcache,
 				  enum gdb_signal signal)
 {
-  struct record_full_message_args args;
-
-  args.regcache = regcache;
-  args.signal = signal;
-
-  return catch_errors (record_full_message_wrapper, &args, "",
-		       RETURN_MASK_ALL);
+  return catch_errors ([&] ()
+		         {
+			   return record_full_message (regcache, signal);
+			 },
+		       "", RETURN_MASK_ALL);
 }
 
 /* Set to 1 if record_full_store_registers and record_full_xfer_partial

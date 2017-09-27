@@ -723,7 +723,7 @@ any_live_thread_of_process (int pid)
 /* Print a list of thread ids currently known, and the total number of
    threads.  To be used from within catch_errors.  */
 static int
-do_captured_list_thread_ids (struct ui_out *uiout, void *arg)
+do_captured_list_thread_ids (struct ui_out *uiout)
 {
   struct thread_info *tp;
   int num = 0;
@@ -758,7 +758,7 @@ do_captured_list_thread_ids (struct ui_out *uiout, void *arg)
 enum gdb_rc
 gdb_list_thread_ids (struct ui_out *uiout, char **error_message)
 {
-  if (catch_exceptions_with_msg (uiout, do_captured_list_thread_ids, NULL,
+  if (catch_exceptions_with_msg (uiout, do_captured_list_thread_ids,
 				 error_message, RETURN_MASK_ALL) < 0)
     return GDB_RC_FAIL;
   return GDB_RC_OK;
@@ -1992,9 +1992,8 @@ show_print_thread_events (struct ui_file *file, int from_tty,
 }
 
 static int
-do_captured_thread_select (struct ui_out *uiout, void *tidstr_v)
+do_captured_thread_select (struct ui_out *uiout, const char *tidstr)
 {
-  const char *tidstr = (const char *) tidstr_v;
   struct thread_info *tp;
 
   if (uiout->is_mi_like_p ())
@@ -2070,8 +2069,13 @@ print_selected_thread_frame (struct ui_out *uiout,
 enum gdb_rc
 gdb_thread_select (struct ui_out *uiout, char *tidstr, char **error_message)
 {
-  if (catch_exceptions_with_msg (uiout, do_captured_thread_select, tidstr,
-				 error_message, RETURN_MASK_ALL) < 0)
+  if (catch_exceptions_with_msg
+      (uiout,
+       [&] (struct ui_out *inner_uiout)
+         {
+	   return do_captured_thread_select (inner_uiout, tidstr);
+	 },
+       error_message, RETURN_MASK_ALL) < 0)
     return GDB_RC_FAIL;
   return GDB_RC_OK;
 }

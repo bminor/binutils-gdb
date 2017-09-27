@@ -984,20 +984,14 @@ svr4_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
   return (name_lm >= vaddr && name_lm < vaddr + size);
 }
 
-/* Implement the "open_symbol_file_object" target_so_ops method.
-
-   If no open symbol file, attempt to locate and open the main symbol
-   file.  On SVR4 systems, this is the first link map entry.  If its
-   name is here, we can open it.  Useful when attaching to a process
-   without first loading its symbol file.  */
+/* See solist.h.  */
 
 static int
-open_symbol_file_object (void *from_ttyp)
+open_symbol_file_object (int from_tty)
 {
   CORE_ADDR lm, l_name;
   char *filename;
   int errcode;
-  int from_tty = *(int *)from_ttyp;
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   int l_name_size = TYPE_LENGTH (ptr_type);

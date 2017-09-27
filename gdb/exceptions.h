@@ -65,16 +65,15 @@ extern void exception_fprintf (struct ui_file *file, struct gdb_exception e,
    This function uses SETJMP() and LONGJUMP().  */
 
 struct ui_out;
-typedef int (catch_exceptions_ftype) (struct ui_out *ui_out, void *args);
+typedef int (catch_exceptions_ftype) (struct ui_out *ui_out);
 extern int catch_exceptions (struct ui_out *uiout,
-			     catch_exceptions_ftype *func, void *func_args,
+			     gdb::function_view<catch_exceptions_ftype> func,
 			     return_mask mask);
-typedef void (catch_exception_ftype) (struct ui_out *ui_out, void *args);
-extern int catch_exceptions_with_msg (struct ui_out *uiout,
-			     	      catch_exceptions_ftype *func, 
-			     	      void *func_args,
-			     	      char **gdberrmsg,
-				      return_mask mask);
+extern int catch_exceptions_with_msg
+    (struct ui_out *uiout,
+     gdb::function_view<catch_exceptions_ftype> func, 
+     char **gdberrmsg,
+     return_mask mask);
 
 /* If CATCH_ERRORS_FTYPE throws an error, catch_errors() returns zero
    otherwize the result from CATCH_ERRORS_FTYPE is returned.  It is
@@ -85,8 +84,8 @@ extern int catch_exceptions_with_msg (struct ui_out *uiout,
 
    This function is superseded by catch_exceptions().  */
 
-typedef int (catch_errors_ftype) (void *);
-extern int catch_errors (catch_errors_ftype *, void *,
+typedef int (catch_errors_ftype) ();
+extern int catch_errors (gdb::function_view<catch_errors_ftype>,
 			 const char *, return_mask);
 
 /* Compare two exception objects for print equality.  */

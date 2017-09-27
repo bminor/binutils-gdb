@@ -760,7 +760,10 @@ update_solib_list (int from_tty)
 	 have not opened a symbol file, we may be able to get its
 	 symbols now!  */
       if (inf->attach_flag && symfile_objfile == NULL)
-	catch_errors (ops->open_symbol_file_object, &from_tty,
+	catch_errors ([&] ()
+		        {
+			  return ops->open_symbol_file_object (from_tty);
+			},
 		      "Error reading attached process's symbol file.\n",
 		      RETURN_MASK_ALL);
     }

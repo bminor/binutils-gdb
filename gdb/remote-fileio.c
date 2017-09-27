@@ -1189,7 +1189,10 @@ remote_fileio_request (char *buf, int ctrlc_pending_p)
   else
     {
       ex = catch_exceptions (current_uiout,
-			     do_remote_fileio_request, (void *)buf,
+			     [&] (ui_out *uiout)
+			       {
+				 return do_remote_fileio_request (uiout, buf);
+			       },
 			     RETURN_MASK_ALL);
       switch (ex)
 	{

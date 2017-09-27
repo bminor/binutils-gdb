@@ -755,7 +755,7 @@ get_image_name (HANDLE h, void *address, int unicode)
    on how we handle DLL loading during that phase).  */
 
 static int
-handle_load_dll (void *dummy)
+handle_load_dll ()
 {
   LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
   char *dll_name;
@@ -1540,7 +1540,7 @@ get_windows_debug_event (struct target_ops *ops,
       CloseHandle (current_event.u.LoadDll.hFile);
       if (saw_create != 1 || ! windows_initialization_done)
 	break;
-      catch_errors (handle_load_dll, NULL, (char *) "", RETURN_MASK_ALL);
+      catch_errors (handle_load_dll, (char *) "", RETURN_MASK_ALL);
       ourstatus->kind = TARGET_WAITKIND_LOADED;
       ourstatus->value.integer = 0;
       thread_id = main_thread_id;
@@ -1553,7 +1553,7 @@ get_windows_debug_event (struct target_ops *ops,
 		     "UNLOAD_DLL_DEBUG_EVENT"));
       if (saw_create != 1 || ! windows_initialization_done)
 	break;
-      catch_errors (handle_unload_dll, NULL, (char *) "", RETURN_MASK_ALL);
+      catch_errors (handle_unload_dll, (char *) "", RETURN_MASK_ALL);
       ourstatus->kind = TARGET_WAITKIND_LOADED;
       ourstatus->value.integer = 0;
       thread_id = main_thread_id;

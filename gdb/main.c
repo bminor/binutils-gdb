@@ -309,7 +309,7 @@ setup_alternate_signal_stack (void)
    non-zero return status.  */
 
 static int
-captured_command_loop (void *data)
+captured_command_loop ()
 {
   struct ui *ui = current_ui;
 
@@ -1147,7 +1147,7 @@ captured_main (void *data)
      change - SET_TOP_LEVEL() - has been eliminated.  */
   while (1)
     {
-      catch_errors (captured_command_loop, 0, "", RETURN_MASK_ALL);
+      catch_errors (captured_command_loop, "", RETURN_MASK_ALL);
     }
   /* No exit -- exit is through quit_command.  */
 }

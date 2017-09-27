@@ -155,17 +155,15 @@ exception_fprintf (struct ui_file *file, struct gdb_exception e,
 
 int
 catch_exceptions (struct ui_out *uiout,
-		  catch_exceptions_ftype *func,
-		  void *func_args,
+		  gdb::function_view<catch_exceptions_ftype> func,
 		  return_mask mask)
 {
-  return catch_exceptions_with_msg (uiout, func, func_args, NULL, mask);
+  return catch_exceptions_with_msg (uiout, func, NULL, mask);
 }
 
 int
 catch_exceptions_with_msg (struct ui_out *func_uiout,
-		  	   catch_exceptions_ftype *func,
-		  	   void *func_args,
+			   gdb::function_view<catch_exceptions_ftype> func,
 			   char **gdberrmsg,
 		  	   return_mask mask)
 {
@@ -179,7 +177,7 @@ catch_exceptions_with_msg (struct ui_out *func_uiout,
 
   TRY
     {
-      val = (*func) (current_uiout, func_args);
+      val = func (current_uiout);
     }
   CATCH (ex, RETURN_MASK_ALL)
     {
@@ -220,7 +218,7 @@ catch_exceptions_with_msg (struct ui_out *func_uiout,
 /* This function is superseded by catch_exceptions().  */
 
 int
-catch_errors (catch_errors_ftype *func, void *func_args,
+catch_errors (gdb::function_view<catch_errors_ftype> func,
 	      const char *errstring, return_mask mask)
 {
   struct gdb_exception exception = exception_none;
@@ -232,7 +230,7 @@ catch_errors (catch_errors_ftype *func, void *func_args,
 
   TRY
     {
-      val = func (func_args);
+      val = func ();
     }
   CATCH (ex, RETURN_MASK_ALL)
     {

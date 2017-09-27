@@ -231,8 +231,13 @@ add_vsyscall_page (struct target_ops *target, int from_tty)
 	 vsyscall DSO was not triggered by the user, even if the user
 	 typed "run" at the TTY.  */
       args.from_tty = 0;
-      catch_exceptions (current_uiout, symbol_file_add_from_memory_wrapper,
-			&args, RETURN_MASK_ALL);
+      catch_exceptions (current_uiout,
+			[&] (ui_out *uiout)
+			  {
+			    return symbol_file_add_from_memory_wrapper (uiout,
+									&args);
+			  },
+			RETURN_MASK_ALL);
     }
 }
 
