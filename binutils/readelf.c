@@ -11436,6 +11436,7 @@ process_symbol_table (FILE * file)
       if (dynamic_info[DT_HASH])
 	{
 	  bfd_vma si;
+	  char *visited;
 
 	  printf (_("\nSymbol table for image:\n"));
 	  if (is_32bit_elf)
@@ -11443,14 +11444,22 @@ process_symbol_table (FILE * file)
 	  else
 	    printf (_("  Num Buc:    Value          Size   Type   Bind Vis      Ndx Name\n"));
 
+	  visited = xcmalloc (nchains, 1);
+	  memset (visited, 0, nchains);
 	  for (hn = 0; hn < nbuckets; hn++)
 	    {
-	      if (! buckets[hn])
-		continue;
-
-	      for (si = buckets[hn]; si < nchains && si > 0; si = chains[si])
-		print_dynamic_symbol (si, hn);
+	      for (si = buckets[hn]; si > 0; si = chains[si])
+		{
+		  print_dynamic_symbol (si, hn);
+		  if (si >= nchains || visited[si])
+		    {
+		      error (_("histogram chain is corrupt\n"));
+		      break;
+		    }
+		  visited[si] = 1;
+		}
 	    }
+	  free (visited);
 	}
 
       if (dynamic_info_DT_GNU_HASH)
@@ -11609,7 +11618,7 @@ process_symbol_table (FILE * file)
       unsigned long maxlength = 0;
       unsigned long nzero_counts = 0;
       unsigned long nsyms = 0;
-      unsigned long chained;
+      char *visited;
 
       printf (_("\nHistogram for bucket list length (total of %lu buckets):\n"),
 	      (unsigned long) nbuckets);
@@ -11620,28 +11629,26 @@ process_symbol_table (FILE * file)
 	  error (_("Out of memory allocating space for histogram buckets\n"));
 	  return FALSE;
 	}
+      visited = xcmalloc (nchains, 1);
+      memset (visited, 0, nchains);
 
       printf (_(" Length  Number     %% of total  Coverage\n"));
       for (hn = 0; hn < nbuckets; ++hn)
 	{
-	  for (si = buckets[hn], chained = 0;
-	       si > 0 && si < nchains && si < nbuckets && chained <= nchains;
-	       si = chains[si], ++chained)
+	  for (si = buckets[hn]; si > 0; si = chains[si])
 	    {
 	      ++nsyms;
 	      if (maxlength < ++lengths[hn])
 		++maxlength;
+	      if (si >= nchains || visited[si])
+		{
+		  error (_("histogram chain is corrupt\n"));
+		  break;
+		}
+	      visited[si] = 1;
 	    }
-
-	    /* PR binutils/17531: A corrupt binary could contain broken
-	       histogram data.  Do not go into an infinite loop trying
-	       to process it.  */
-	    if (chained > nchains)
-	      {
-		error (_("histogram chain is corrupt\n"));
-		break;
-	      }
 	}
+      free (visited);
 
       counts = (unsigned long *) calloc (maxlength + 1, sizeof (*counts));
       if (counts == NULL)

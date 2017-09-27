@@ -1,3 +1,12 @@
+2017-09-27  Alan Modra  <amodra@gmail.com>
+
+	PR 22216
+	* readelf.c (process_symbol_table): Check that DT_HASH symbol
+	chains are only visited once, and report an error if not.  Display
+	invalid symbol index if chain is out of range.  Use the same logic
+	when calculating histograms rather than the PR 17531 fix.  Delete
+	bogus check that chained index is less than number of buckets.
+
 2017-09-26  Nick Clifton  <nickc@redhat.com>
 
 	PR 22154
