@@ -1,3 +1,9 @@
+2017-09-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 22179
+	* riscv-opc.c (riscv_opcodes): Add fmv.x.w and fmv.w.x as the new
+	names for the fmv.x.s and fmv.s.x instructions respectively.
+
 2017-09-26  do  <do@nerilex.org>
 
 	PR 22123

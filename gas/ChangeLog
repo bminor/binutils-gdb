@@ -1,3 +1,10 @@
+2017-09-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 22179
+	* testsuite/gas/riscv/fmv.x.s: New file: Tests the support for the
+	renamed fmv.x.s and fmv.s.x instructions.
+	* testsuite/gas/riscv/fmv.x.d: New file: Test driver.
+
 2017-09-21  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/gas/mips/elf_mach_5900.d: New test.

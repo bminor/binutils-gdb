@@ -20,4 +20,5 @@
 
 if [istarget riscv*-*-*] {
     run_dump_test "t_insns"
+    run_dump_test "fmv.x"
 }
