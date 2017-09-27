@@ -13859,7 +13859,8 @@ ada_language_arch_info (struct gdbarch *gdbarch,
     = builtin->builtin_void;
 
   lai->primitive_type_vector [ada_primitive_type_system_address]
-    = lookup_pointer_type (arch_type (gdbarch, TYPE_CODE_VOID, 1, "void"));
+    = lookup_pointer_type (arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT,
+				      "void"));
   TYPE_NAME (lai->primitive_type_vector [ada_primitive_type_system_address])
     = "system__address";
 

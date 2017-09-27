@@ -1067,7 +1067,7 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 	int ix;
 
 	type = arch_flags_type (gdbarch, tdesc_type->name,
-				tdesc_type->u.u.size);
+				tdesc_type->u.u.size * TARGET_CHAR_BIT);
 	for (ix = 0;
 	     VEC_iterate (tdesc_type_field, tdesc_type->u.u.fields, ix, f);
 	     ix++)
@@ -1090,7 +1090,8 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 	int ix;
 
 	type = arch_type (gdbarch, TYPE_CODE_ENUM,
-			  tdesc_type->u.u.size, tdesc_type->name);
+			  tdesc_type->u.u.size * TARGET_CHAR_BIT,
+			  tdesc_type->name);
 	TYPE_UNSIGNED (type) = 1;
 	for (ix = 0;
 	     VEC_iterate (tdesc_type_field, tdesc_type->u.u.fields, ix, f);

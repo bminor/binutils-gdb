@@ -697,7 +697,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       struct symbol *block_name = allocate_symbol (objfile);
       struct type *block_type = arch_type (get_objfile_arch (objfile),
 					   TYPE_CODE_VOID,
-					   1,
+					   TARGET_CHAR_BIT,
 					   "void");
 
       BLOCK_DICT (new_block) = dict_create_linear (&objfile->objfile_obstack,

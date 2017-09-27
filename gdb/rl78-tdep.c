@@ -271,7 +271,7 @@ rl78_psw_type (struct gdbarch *gdbarch)
   if (tdep->rl78_psw_type == NULL)
     {
       tdep->rl78_psw_type = arch_flags_type (gdbarch,
-					     "builtin_type_rl78_psw", 1);
+					     "builtin_type_rl78_psw", 8);
       append_flags_type_flag (tdep->rl78_psw_type, 0, "CY");
       append_flags_type_flag (tdep->rl78_psw_type, 1, "ISP0");
       append_flags_type_flag (tdep->rl78_psw_type, 2, "ISP1");
@@ -1417,7 +1417,8 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->elf_flags = elf_flags;
 
   /* Initialize types.  */
-  tdep->rl78_void = arch_type (gdbarch, TYPE_CODE_VOID, 1, "void");
+  tdep->rl78_void = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT,
+			       "void");
   tdep->rl78_uint8 = arch_integer_type (gdbarch, 8, 1, "uint8_t");
   tdep->rl78_int8 = arch_integer_type (gdbarch, 8, 0, "int8_t");
   tdep->rl78_uint16 = arch_integer_type (gdbarch, 16, 1, "uint16_t");

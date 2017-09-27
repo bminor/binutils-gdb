@@ -2757,14 +2757,15 @@ verify_floatformat (int bit, const struct floatformat **floatformats)
    least as long as OBJFILE.  */
 
 struct type *
-init_type (struct objfile *objfile, enum type_code code, int length,
+init_type (struct objfile *objfile, enum type_code code, int bit,
 	   const char *name)
 {
   struct type *type;
 
   type = alloc_type (objfile);
   set_type_code (type, code);
-  TYPE_LENGTH (type) = length;
+  gdb_assert ((bit % TARGET_CHAR_BIT) == 0);
+  TYPE_LENGTH (type) = bit / TARGET_CHAR_BIT;
   TYPE_NAME (type) = name;
 
   return type;
@@ -2790,7 +2791,7 @@ init_integer_type (struct objfile *objfile,
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_INT, bit / TARGET_CHAR_BIT, name);
+  t = init_type (objfile, TYPE_CODE_INT, bit, name);
   if (unsigned_p)
     TYPE_UNSIGNED (t) = 1;
 
@@ -2807,7 +2808,7 @@ init_character_type (struct objfile *objfile,
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_CHAR, bit / TARGET_CHAR_BIT, name);
+  t = init_type (objfile, TYPE_CODE_CHAR, bit, name);
   if (unsigned_p)
     TYPE_UNSIGNED (t) = 1;
 
@@ -2824,7 +2825,7 @@ init_boolean_type (struct objfile *objfile,
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_BOOL, bit / TARGET_CHAR_BIT, name);
+  t = init_type (objfile, TYPE_CODE_BOOL, bit, name);
   if (unsigned_p)
     TYPE_UNSIGNED (t) = 1;
 
@@ -2844,7 +2845,7 @@ init_float_type (struct objfile *objfile,
   struct type *t;
 
   bit = verify_floatformat (bit, floatformats);
-  t = init_type (objfile, TYPE_CODE_FLT, bit / TARGET_CHAR_BIT, name);
+  t = init_type (objfile, TYPE_CODE_FLT, bit, name);
   TYPE_FLOATFORMAT (t) = floatformats;
 
   return t;
@@ -2858,7 +2859,7 @@ init_decfloat_type (struct objfile *objfile, int bit, const char *name)
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_DECFLOAT, bit / TARGET_CHAR_BIT, name);
+  t = init_type (objfile, TYPE_CODE_DECFLOAT, bit, name);
   return t;
 }
 
@@ -2872,7 +2873,7 @@ init_complex_type (struct objfile *objfile,
   struct type *t;
 
   t = init_type (objfile, TYPE_CODE_COMPLEX,
-		 2 * TYPE_LENGTH (target_type), name);
+		 2 * TYPE_LENGTH (target_type) * TARGET_CHAR_BIT, name);
   TYPE_TARGET_TYPE (t) = target_type;
   return t;
 }
@@ -2888,7 +2889,7 @@ init_pointer_type (struct objfile *objfile,
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_PTR, bit / TARGET_CHAR_BIT, name);
+  t = init_type (objfile, TYPE_CODE_PTR, bit, name);
   TYPE_TARGET_TYPE (t) = target_type;
   TYPE_UNSIGNED (t) = 1;
   return t;
@@ -4831,13 +4832,14 @@ copy_type (const struct type *type)
 
 struct type *
 arch_type (struct gdbarch *gdbarch,
-	   enum type_code code, int length, const char *name)
+	   enum type_code code, int bit, const char *name)
 {
   struct type *type;
 
   type = alloc_type_arch (gdbarch);
   set_type_code (type, code);
-  TYPE_LENGTH (type) = length;
+  gdb_assert ((bit % TARGET_CHAR_BIT) == 0);
+  TYPE_LENGTH (type) = bit / TARGET_CHAR_BIT;
 
   if (name)
     TYPE_NAME (type) = gdbarch_obstack_strdup (gdbarch, name);
@@ -4855,7 +4857,7 @@ arch_integer_type (struct gdbarch *gdbarch,
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_INT, bit / TARGET_CHAR_BIT, name);
+  t = arch_type (gdbarch, TYPE_CODE_INT, bit, name);
   if (unsigned_p)
     TYPE_UNSIGNED (t) = 1;
 
@@ -4872,7 +4874,7 @@ arch_character_type (struct gdbarch *gdbarch,
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_CHAR, bit / TARGET_CHAR_BIT, name);
+  t = arch_type (gdbarch, TYPE_CODE_CHAR, bit, name);
   if (unsigned_p)
     TYPE_UNSIGNED (t) = 1;
 
@@ -4889,7 +4891,7 @@ arch_boolean_type (struct gdbarch *gdbarch,
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_BOOL, bit / TARGET_CHAR_BIT, name);
+  t = arch_type (gdbarch, TYPE_CODE_BOOL, bit, name);
   if (unsigned_p)
     TYPE_UNSIGNED (t) = 1;
 
@@ -4909,7 +4911,7 @@ arch_float_type (struct gdbarch *gdbarch,
   struct type *t;
 
   bit = verify_floatformat (bit, floatformats);
-  t = arch_type (gdbarch, TYPE_CODE_FLT, bit / TARGET_CHAR_BIT, name);
+  t = arch_type (gdbarch, TYPE_CODE_FLT, bit, name);
   TYPE_FLOATFORMAT (t) = floatformats;
 
   return t;
@@ -4923,7 +4925,7 @@ arch_decfloat_type (struct gdbarch *gdbarch, int bit, const char *name)
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_DECFLOAT, bit / TARGET_CHAR_BIT, name);
+  t = arch_type (gdbarch, TYPE_CODE_DECFLOAT, bit, name);
   return t;
 }
 
@@ -4937,7 +4939,7 @@ arch_complex_type (struct gdbarch *gdbarch,
   struct type *t;
 
   t = arch_type (gdbarch, TYPE_CODE_COMPLEX,
-		 2 * TYPE_LENGTH (target_type), name);
+		 2 * TYPE_LENGTH (target_type) * TARGET_CHAR_BIT, name);
   TYPE_TARGET_TYPE (t) = target_type;
   return t;
 }
@@ -4953,27 +4955,26 @@ arch_pointer_type (struct gdbarch *gdbarch,
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_PTR, bit / TARGET_CHAR_BIT, name);
+  t = arch_type (gdbarch, TYPE_CODE_PTR, bit, name);
   TYPE_TARGET_TYPE (t) = target_type;
   TYPE_UNSIGNED (t) = 1;
   return t;
 }
 
 /* Allocate a TYPE_CODE_FLAGS type structure associated with GDBARCH.
-   NAME is the type name.  LENGTH is the size of the flag word in bytes.  */
+   NAME is the type name.  BIT is the size of the flag word in bits.  */
 
 struct type *
-arch_flags_type (struct gdbarch *gdbarch, const char *name, int length)
+arch_flags_type (struct gdbarch *gdbarch, const char *name, int bit)
 {
-  int max_nfields = length * TARGET_CHAR_BIT;
   struct type *type;
 
-  type = arch_type (gdbarch, TYPE_CODE_FLAGS, length, name);
+  type = arch_type (gdbarch, TYPE_CODE_FLAGS, bit, name);
   TYPE_UNSIGNED (type) = 1;
   TYPE_NFIELDS (type) = 0;
   /* Pre-allocate enough space assuming every field is one bit.  */
   TYPE_FIELDS (type)
-    = (struct field *) TYPE_ZALLOC (type, max_nfields * sizeof (struct field));
+    = (struct field *) TYPE_ZALLOC (type, bit * sizeof (struct field));
 
   return type;
 }
@@ -5118,7 +5119,7 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 
   /* Basic types.  */
   builtin_type->builtin_void
-    = arch_type (gdbarch, TYPE_CODE_VOID, 1, "void");
+    = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
   builtin_type->builtin_char
     = arch_integer_type (gdbarch, TARGET_CHAR_BIT,
 			 !gdbarch_char_signed (gdbarch), "char");
@@ -5169,9 +5170,9 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
     = arch_complex_type (gdbarch, "double complex",
 			 builtin_type->builtin_double);
   builtin_type->builtin_string
-    = arch_type (gdbarch, TYPE_CODE_STRING, 1, "string");
+    = arch_type (gdbarch, TYPE_CODE_STRING, TARGET_CHAR_BIT, "string");
   builtin_type->builtin_bool
-    = arch_type (gdbarch, TYPE_CODE_BOOL, 1, "bool");
+    = arch_type (gdbarch, TYPE_CODE_BOOL, TARGET_CHAR_BIT, "bool");
 
   /* The following three are about decimal floating point types, which
      are 32-bits, 64-bits and 128-bits respectively.  */
@@ -5268,7 +5269,7 @@ objfile_type (struct objfile *objfile)
 
   /* Basic types.  */
   objfile_type->builtin_void
-    = init_type (objfile, TYPE_CODE_VOID, 1, "void");
+    = init_type (objfile, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
   objfile_type->builtin_char
     = init_integer_type (objfile, TARGET_CHAR_BIT,
 			 !gdbarch_char_signed (gdbarch), "char");
@@ -5320,10 +5321,10 @@ objfile_type (struct objfile *objfile)
   /* The following set of types is used for symbols with no
      debug information.  */
   objfile_type->nodebug_text_symbol
-    = init_type (objfile, TYPE_CODE_FUNC, 1,
+    = init_type (objfile, TYPE_CODE_FUNC, TARGET_CHAR_BIT,
 		 "<text variable, no debug info>");
   objfile_type->nodebug_text_gnu_ifunc_symbol
-    = init_type (objfile, TYPE_CODE_FUNC, 1,
+    = init_type (objfile, TYPE_CODE_FUNC, TARGET_CHAR_BIT,
 		 "<text gnu-indirect-function variable, no debug info>");
   /* Ifunc resolvers return a function address.  */
   TYPE_TARGET_TYPE (objfile_type->nodebug_text_gnu_ifunc_symbol)

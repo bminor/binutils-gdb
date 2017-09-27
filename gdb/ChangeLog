@@ -1,3 +1,65 @@
+2017-09-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbtypes.c (init_type): Change incoming argument from
+	length-in-bytes to length-in-bits.  Assert length is a
+	multiple of TARGET_CHAR_BITS.
+	(arch_type, arch_flags_type): Likewise.
+	(init_integer_type): Update call to init_type.
+	(init_character_type): Likewise.
+	(init_boolean_type): Likewise.
+	(init_float_type): Likewise.
+	(init_decfloat_type): Likewise.
+	(init_complex_type): Likewise.
+	(init_pointer_type): Likewise.
+	(objfile_type): Likewise.
+	(arch_integer_type): Update call to arch_type.
+	(arch_character_type): Likewise.
+	(arch_boolean_type): Likewise.
+	(arch_float_type): Likewise.
+	(arch_decfloat_type): Likewise.
+	(arch_complex_type): Likewise.
+	(arch_pointer_type): Likewise.
+	(gdbtypes_post_init): Likewise.
+
+	* dwarf2read.c (dwarf2_init_float_type): Update call to init_type.
+	(read_base_type): Likewise.
+	* mdebugread.c (basic_type): Likewise.
+	* stabsread.c (dbx_init_float_type): Likewise.
+	(rs6000_builtin_type): Likewise.
+	(read_range_type): Likewise.  Also, fix call to init_integer_type
+	with erroneous length argument.
+
+	* ada-lang.c (ada_language_arch_info): Update call to arch_type.
+	* d-lang.c (build_d_types): Likewise.
+	* f-lang.c (build_fortran_types): Likewise.
+	* go-lang.c (build_go_types): Likewise.
+	* opencl-lang.c (build_opencl_types): Likewise.
+	* jit.c (finalize_symtab): Likewise.
+	* gnu-v3-abi.c (build_gdb_vtable_type): Likewise.
+	(build_std_type_info_type): Likewise.
+	* target-descriptions.c (tdesc_gdb_type): Likewise.  Also,
+	update call to arch_flags_type.
+
+	* linux-tdep.c (linux_get_siginfo_type_with_fields): Update call to
+	arch_type.
+	* fbsd-tdep.c (fbsd_get_siginfo_type): Likewise.
+	* windows-tdep.c (windows_get_tlb_type): Likewise.
+
+	* avr-tdep.c (avr_gdbarch_init): Update call to arch_type.
+	* ft32-tdep.c (ft32_gdbarch_init): Likewise.
+	* m32c-tdep.c (make_types): Likewise.
+	* rl78-tdep.c (rl78_gdbarch_init): Likewise.
+	(rl78_psw_type): Update call to arch_flags_type.
+	* m68k-tdep.c (m68k_ps_type): Update call to arch_flags_type.
+	* rx-tdep.c (rx_psw_type): Likewise.
+	(rx_fpsw_type): Likewise.
+	* sparc-tdep.c (sparc_psr_type): Likewise.
+	(sparc_fsr_type): Likewise.
+	* sparc64-tdep.c (sparc64_pstate_type): Likewise.
+	(sparc64_ccr_type): Likewise.
+	(sparc64_fsr_type): Likewise.
+	(sparc64_fprs_type): Likewise.
+
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
 	* findcmd.c (find_command): Constify.

@@ -15212,7 +15212,7 @@ dwarf2_init_float_type (struct objfile *objfile, int bits, const char *name,
   if (format)
     type = init_float_type (objfile, bits, name, format);
   else
-    type = init_type (objfile, TYPE_CODE_ERROR, bits / TARGET_CHAR_BIT, name);
+    type = init_type (objfile, TYPE_CODE_ERROR, bits, name);
 
   return type;
 }
@@ -15250,7 +15250,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       case DW_ATE_address:
 	/* Turn DW_ATE_address into a void * pointer.  */
-	type = init_type (objfile, TYPE_CODE_VOID, 1, NULL);
+	type = init_type (objfile, TYPE_CODE_VOID, TARGET_CHAR_BIT, NULL);
 	type = init_pointer_type (objfile, bits, name, type);
 	break;
       case DW_ATE_boolean:
@@ -15316,8 +15316,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
       default:
 	complaint (&symfile_complaints, _("unsupported DW_AT_encoding: '%s'"),
 		   dwarf_type_encoding_name (encoding));
-	type = init_type (objfile, TYPE_CODE_ERROR,
-			  bits / TARGET_CHAR_BIT, name);
+	type = init_type (objfile, TYPE_CODE_ERROR, bits, name);
 	break;
     }
 

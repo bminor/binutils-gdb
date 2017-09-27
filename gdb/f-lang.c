@@ -304,7 +304,7 @@ build_fortran_types (struct gdbarch *gdbarch)
     = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_f_type);
 
   builtin_f_type->builtin_void
-    = arch_type (gdbarch, TYPE_CODE_VOID, 1, "VOID");
+    = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "VOID");
 
   builtin_f_type->builtin_character
     = arch_integer_type (gdbarch, TARGET_CHAR_BIT, 0, "character");

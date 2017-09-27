@@ -143,7 +143,8 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   TYPE_NAME (seh_type) = xstrdup ("seh");
 
   seh_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
-			    TYPE_LENGTH (void_ptr_type), NULL);
+			    TYPE_LENGTH (void_ptr_type) * TARGET_CHAR_BIT,
+			    NULL);
   TYPE_TARGET_TYPE (seh_ptr_type) = seh_type;
 
   append_composite_type_field (seh_type, "next_seh", seh_ptr_type);
@@ -163,7 +164,8 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   append_composite_type_field (peb_ldr_type, "entry_in_progress",
 			       void_ptr_type);
   peb_ldr_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
-			    TYPE_LENGTH (void_ptr_type), NULL);
+				TYPE_LENGTH (void_ptr_type) * TARGET_CHAR_BIT,
+				NULL);
   TYPE_TARGET_TYPE (peb_ldr_ptr_type) = peb_ldr_type;
 
 
@@ -181,7 +183,8 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   append_composite_type_field (peb_type, "process_heap", void_ptr_type);
   append_composite_type_field (peb_type, "fast_peb_lock", void_ptr_type);
   peb_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
-			    TYPE_LENGTH (void_ptr_type), NULL);
+			    TYPE_LENGTH (void_ptr_type) * TARGET_CHAR_BIT,
+			    NULL);
   TYPE_TARGET_TYPE (peb_ptr_type) = peb_type;
 
 
@@ -224,7 +227,8 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   append_composite_type_field (tib_type, "last_error_number", dword_ptr_type);
 
   tib_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
-			    TYPE_LENGTH (void_ptr_type), NULL);
+			    TYPE_LENGTH (void_ptr_type) * TARGET_CHAR_BIT,
+			    NULL);
   TYPE_TARGET_TYPE (tib_ptr_type) = tib_type;
 
   last_tlb_type = tib_ptr_type;

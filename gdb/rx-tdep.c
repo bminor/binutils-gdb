@@ -159,7 +159,7 @@ rx_psw_type (struct gdbarch *gdbarch)
 
   if (tdep->rx_psw_type == NULL)
     {
-      tdep->rx_psw_type = arch_flags_type (gdbarch, "rx_psw_type", 4);
+      tdep->rx_psw_type = arch_flags_type (gdbarch, "rx_psw_type", 32);
       append_flags_type_flag (tdep->rx_psw_type, 0, "C");
       append_flags_type_flag (tdep->rx_psw_type, 1, "Z");
       append_flags_type_flag (tdep->rx_psw_type, 2, "S");
@@ -184,7 +184,7 @@ rx_fpsw_type (struct gdbarch *gdbarch)
 
   if (tdep->rx_fpsw_type == NULL)
     {
-      tdep->rx_fpsw_type = arch_flags_type (gdbarch, "rx_fpsw_type", 4);
+      tdep->rx_fpsw_type = arch_flags_type (gdbarch, "rx_fpsw_type", 32);
       append_flags_type_flag (tdep->rx_fpsw_type, 0, "RM0");
       append_flags_type_flag (tdep->rx_fpsw_type, 1, "RM1");
       append_flags_type_flag (tdep->rx_fpsw_type, 2, "CV");
