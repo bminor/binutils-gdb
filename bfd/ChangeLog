@@ -1,3 +1,8 @@
+2017-09-27  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* elf32-nds32.c (nds32_elf_relax_section): Fix a tautological
+	comparison.
+
 2017-09-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22199
