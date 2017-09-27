@@ -1,3 +1,9 @@
+2017-09-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 22219
+	* dwarf.c (process_debug_info): Add a check for a negative
+	cu_length field.
+
 2017-09-27  Alan Modra  <amodra@gmail.com>
 
 	PR 22216

@@ -2591,7 +2591,7 @@ process_debug_info (struct dwarf_section *section,
       int level, last_level, saved_level;
       dwarf_vma cu_offset;
       unsigned int offset_size;
-      int initial_length_size;
+      unsigned int initial_length_size;
       dwarf_vma signature_high = 0;
       dwarf_vma signature_low = 0;
       dwarf_vma type_offset = 0;
@@ -2739,6 +2739,15 @@ process_debug_info (struct dwarf_section *section,
 	  num_units = unit;
 	  break;
 	}
+      else if (compunit.cu_length + initial_length_size < initial_length_size)
+	{
+	  warn (_("Debug info is corrupted, length of CU at %s is negative (%s)\n"),
+		dwarf_vmatoa ("x", cu_offset),
+		dwarf_vmatoa ("x", compunit.cu_length));
+	  num_units = unit;
+	  break;
+	}
+
       tags = hdrptr;
       start += compunit.cu_length + initial_length_size;
 
