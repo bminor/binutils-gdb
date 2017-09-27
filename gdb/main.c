@@ -1147,7 +1147,15 @@ captured_main (void *data)
      change - SET_TOP_LEVEL() - has been eliminated.  */
   while (1)
     {
-      catch_errors (captured_command_loop, "", RETURN_MASK_ALL);
+      TRY
+	{
+	  captured_command_loop ();
+	}
+      CATCH (ex, RETURN_MASK_ALL)
+	{
+	  exception_print (gdb_stderr, ex);
+	}
+      END_CATCH
     }
   /* No exit -- exit is through quit_command.  */
 }

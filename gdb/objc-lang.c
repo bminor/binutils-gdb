@@ -1315,19 +1315,19 @@ find_objc_msgcall_submethod (int (*f) (CORE_ADDR, CORE_ADDR *),
 			     CORE_ADDR pc, 
 			     CORE_ADDR *new_pc)
 {
-  if (catch_errors ([&] ()
-		      {
-			if (f (pc, new_pc) == 0)
-			  return 1;
-			else
-			  return 0;
-		      },
-		    "Unable to determine target of "
-		    "Objective-C method call (ignoring):\n",
-		    RETURN_MASK_ALL) == 0) 
-    return 1;
-  else 
-    return 0;
+  TRY
+    {
+      if (f (pc, new_pc) == 0)
+	return 1;
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      exception_fprintf (gdb_stderr, ex,
+			 "Unable to determine target of "
+			 "Objective-C method call (ignoring):\n");
+    }
+
+  return 0;
 }
 
 int 

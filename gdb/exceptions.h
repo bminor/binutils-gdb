@@ -48,21 +48,16 @@ extern void exception_fprintf (struct ui_file *file, struct gdb_exception e,
    copy of the gdb error message.  This is used when a silent error is 
    issued and the caller wants to manually issue the error message.
 
-   MASK specifies what to catch; it is normally set to
-   RETURN_MASK_ALL, if for no other reason than that the code which
-   calls catch_errors might not be set up to deal with a quit which
-   isn't caught.  But if the code can deal with it, it generally
-   should be RETURN_MASK_ERROR, unless for some reason it is more
-   useful to abort only the portion of the operation inside the
-   catch_errors.  Note that quit should return to the command line
+   MASK specifies what to catch; it is normally set to RETURN_MASK_ALL
+   if the code which calls catch_exceptions is not set up to deal with
+   a quit which isn't caught.  But if the code can deal with it, it
+   generally should be RETURN_MASK_ERROR, unless for some reason it is
+   more useful to abort only the portion of the operation inside the
+   catch_exceptions.  Note that quit should return to the command line
    fairly quickly, even if some further processing is being done.
 
    FIXME; cagney/2001-08-13: The need to override the global UIOUT
-   builder variable should just go away.
-
-   This function supersedes catch_errors().
-
-   This function uses SETJMP() and LONGJUMP().  */
+   builder variable should just go away.  */
 
 struct ui_out;
 typedef int (catch_exceptions_ftype) (struct ui_out *ui_out);
@@ -74,19 +69,6 @@ extern int catch_exceptions_with_msg
      gdb::function_view<catch_exceptions_ftype> func, 
      char **gdberrmsg,
      return_mask mask);
-
-/* If CATCH_ERRORS_FTYPE throws an error, catch_errors() returns zero
-   otherwize the result from CATCH_ERRORS_FTYPE is returned.  It is
-   probably useful for CATCH_ERRORS_FTYPE to always return a non-zero
-   value.  It's unfortunate that, catch_errors() does not return an
-   indication of the exact exception that it caught - quit_flag might
-   help.
-
-   This function is superseded by catch_exceptions().  */
-
-typedef int (catch_errors_ftype) ();
-extern int catch_errors (gdb::function_view<catch_errors_ftype>,
-			 const char *, return_mask);
 
 /* Compare two exception objects for print equality.  */
 extern int exception_print_same (struct gdb_exception e1,

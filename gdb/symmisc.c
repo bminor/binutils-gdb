@@ -54,16 +54,9 @@ FILE *std_err;
 
 static int block_depth (struct block *);
 
-struct print_symbol_args
-  {
-    struct gdbarch *gdbarch;
-    struct symbol *symbol;
-    int depth;
-    struct ui_file *outfile;
-  };
+static void print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
+			  int depth, struct ui_file *outfile);
 
-static int print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
-			 int depth, struct ui_file *outfile);
 
 
 void
@@ -358,13 +351,16 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	     block, not any blocks from included symtabs.  */
 	  ALL_DICT_SYMBOLS (BLOCK_DICT (b), iter, sym)
 	    {
-	      catch_errors ([&] ()
-			      {
-				return print_symbol (gdbarch, sym, depth + 1,
-						     outfile);
-			      },
-		            "Error printing symbol:\n",
-			    RETURN_MASK_ERROR);
+	      TRY
+		{
+		  print_symbol (gdbarch, sym, depth + 1, outfile);
+		}
+	      CATCH (ex, RETURN_MASK_ERROR)
+		{
+		  exception_fprintf (gdb_stderr, ex,
+				     "Error printing symbol:\n");
+		}
+	      END_CATCH
 	    }
 	}
       fprintf_filtered (outfile, "\n");
@@ -515,10 +511,9 @@ maintenance_print_symbols (const char *args, int from_tty)
     }
 }
 
-/* Print symbol SYMBOL on OUTFILE.  DEPTH says how far to indent.
-   Returns 0 for error, 1 for success.  */
+/* Print symbol SYMBOL on OUTFILE.  DEPTH says how far to indent.  */
 
-static int
+static void
 print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	      int depth, struct ui_file *outfile)
 {
@@ -541,7 +536,6 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 					    section->the_bfd_section));
       else
 	fprintf_filtered (outfile, "\n");
-      return 1;
     }
   if (SYMBOL_DOMAIN (symbol) == STRUCT_DOMAIN)
     {
@@ -689,7 +683,6 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	}
     }
   fprintf_filtered (outfile, "\n");
-  return 1;
 }
 
 static void

@@ -8308,12 +8308,16 @@ normal_stop (void)
       struct cleanup *old_chain
 	= make_cleanup (release_stop_context_cleanup, saved_context);
 
-      catch_errors ([&] ()
-		      {
-			execute_cmd_pre_hook (stop_command);
-			return 0;
-		      },
-		    "Error while running hook_stop:\n", RETURN_MASK_ALL);
+      TRY
+	{
+	  execute_cmd_pre_hook (stop_command);
+	}
+      CATCH (ex, RETURN_MASK_ALL)
+	{
+	  exception_fprintf (gdb_stderr, ex,
+			     "Error while running hook_stop:\n");
+	}
+      END_CATCH
 
       /* If the stop hook resumes the target, then there's no point in
 	 trying to notify about the previous stop; its context is
@@ -9021,19 +9025,22 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
 
   if (target_has_stack)
     {
-      /* The point of catch_errors is that if the stack is clobbered,
+      /* The point of the try/catch is that if the stack is clobbered,
          walking the stack might encounter a garbage pointer and
          error() trying to dereference it.  */
-      if (catch_errors
-	  ([&] ()
-	     {
-	       return restore_selected_frame (&inf_status->selected_frame_id);
-	     },
-	   "Unable to restore previously selected frame:\n",
-	   RETURN_MASK_ERROR) == 0)
-	/* Error in restoring the selected frame.  Select the innermost
-	   frame.  */
-	select_frame (get_current_frame ());
+      TRY
+	{
+	  restore_selected_frame (&inf_status->selected_frame_id);
+	}
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  exception_fprintf (gdb_stderr, ex,
+			     "Unable to restore previously selected frame:\n");
+	  /* Error in restoring the selected frame.  Select the
+	     innermost frame.  */
+	  select_frame (get_current_frame ());
+	}
+      END_CATCH
     }
 
   xfree (inf_status);
