@@ -33,7 +33,6 @@
 #include "dis-asm.h"
 #include "inferior.h"
 #include "arch-utils.h"
-#include "floatformat.h"
 #include "regcache.h"
 #include "doublest.h"
 #include "osabi.h"
@@ -1552,6 +1551,19 @@ sh_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
    The other pseudo registers (the FVs) also don't pose a problem
    because they are stored as 4 individual FP elements.  */
 
+static struct type *
+sh_littlebyte_bigword_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (tdep->sh_littlebyte_bigword_type == NULL)
+    tdep->sh_littlebyte_bigword_type
+      = arch_float_type (gdbarch, -1, "builtin_type_sh_littlebyte_bigword",
+                         floatformats_ieee_double_littlebyte_bigword);
+
+  return tdep->sh_littlebyte_bigword_type;
+}
+
 static void
 sh_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum,
 				struct type *type, gdb_byte *from, gdb_byte *to)
@@ -1564,12 +1576,8 @@ sh_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum,
     }
 
   if (regnum >= DR0_REGNUM && regnum <= DR_LAST_REGNUM)
-    {
-      DOUBLEST val;
-      floatformat_to_doublest (&floatformat_ieee_double_littlebyte_bigword,
-			       from, &val);
-      store_typed_floating (to, type, val);
-    }
+    convert_typed_floating (from, sh_littlebyte_bigword_type (gdbarch),
+			    to, type);
   else
     error
       ("sh_register_convert_to_virtual called with non DR register number");
@@ -1587,11 +1595,8 @@ sh_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type,
     }
 
   if (regnum >= DR0_REGNUM && regnum <= DR_LAST_REGNUM)
-    {
-      DOUBLEST val = extract_typed_floating (from, type);
-      floatformat_from_doublest (&floatformat_ieee_double_littlebyte_bigword,
-				 &val, to);
-    }
+    convert_typed_floating (from, type,
+			    to, sh_littlebyte_bigword_type (gdbarch));
   else
     error (_("sh_register_convert_to_raw called with non DR register number"));
 }

@@ -226,11 +226,6 @@ static void show_disassembly_style_sfunc (struct ui_file *, int,
 					  struct cmd_list_element *,
 					  const char *);
 
-static void convert_from_extended (const struct floatformat *, const void *,
-				   void *, int);
-static void convert_to_extended (const struct floatformat *, void *,
-				 const void *, int);
-
 static enum register_status arm_neon_quad_read (struct gdbarch *gdbarch,
 						struct regcache *regcache,
 						int regnum, gdb_byte *buf);
@@ -4211,39 +4206,6 @@ arm_register_sim_regno (struct gdbarch *gdbarch, int regnum)
   internal_error (__FILE__, __LINE__, _("Bad REGNUM %d"), regnum);
 }
 
-/* NOTE: cagney/2001-08-20: Both convert_from_extended() and
-   convert_to_extended() use floatformat_arm_ext_littlebyte_bigword.
-   It is thought that this is is the floating-point register format on
-   little-endian systems.  */
-
-static void
-convert_from_extended (const struct floatformat *fmt, const void *ptr,
-		       void *dbl, int endianess)
-{
-  DOUBLEST d;
-
-  if (endianess == BFD_ENDIAN_BIG)
-    floatformat_to_doublest (&floatformat_arm_ext_big, ptr, &d);
-  else
-    floatformat_to_doublest (&floatformat_arm_ext_littlebyte_bigword,
-			     ptr, &d);
-  floatformat_from_doublest (fmt, &d, dbl);
-}
-
-static void
-convert_to_extended (const struct floatformat *fmt, void *dbl, const void *ptr,
-		     int endianess)
-{
-  DOUBLEST d;
-
-  floatformat_to_doublest (fmt, ptr, &d);
-  if (endianess == BFD_ENDIAN_BIG)
-    floatformat_from_doublest (&floatformat_arm_ext_big, &d, dbl);
-  else
-    floatformat_from_doublest (&floatformat_arm_ext_littlebyte_bigword,
-			       &d, dbl);
-}
-
 /* Given BUF, which is OLD_LEN bytes ending at ENDADDR, expand
    the buffer to be NEW_LEN bytes ending at ENDADDR.  Return
    NULL if an error occurs.  BUF is freed.  */
@@ -7948,8 +7910,8 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 	    bfd_byte tmpbuf[FP_REGISTER_SIZE];
 
 	    regcache_cooked_read (regs, ARM_F0_REGNUM, tmpbuf);
-	    convert_from_extended (floatformat_from_type (type), tmpbuf,
-				   valbuf, gdbarch_byte_order (gdbarch));
+	    convert_typed_floating (tmpbuf, arm_ext_type (gdbarch),
+				    valbuf, type);
 	  }
 	  break;
 
@@ -8153,8 +8115,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	{
 	case ARM_FLOAT_FPA:
 
-	  convert_to_extended (floatformat_from_type (type), buf, valbuf,
-			       gdbarch_byte_order (gdbarch));
+	  convert_typed_floating (valbuf, type, buf, arm_ext_type (gdbarch));
 	  regcache_cooked_write (regs, ARM_F0_REGNUM, buf);
 	  break;
 

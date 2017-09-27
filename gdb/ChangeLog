@@ -1,5 +1,23 @@
 2017-09-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* arm-tdep.c: (convert_from_extended): Remove.
+	(convert_to_extended): Likewise.
+	(arm_extract_return_value): Use convert_typed_floating.
+	(arm_store_return_value): Likewise.
+
+	* sh-tdep.h (struct gdbarch_tdep): Add sh_littlebyte_bigword_type.
+	* sh-tdep.c: Do not include "floatformat.h".
+	(sh_littlebyte_bigword_type): New function.
+	(sh_register_convert_to_virtual): Use convert_typed_floating.
+	(sh_register_convert_to_raw): Likewise.
+	* sh64-tdep.c: (struct gdbarch_tdep): Add sh_littlebyte_bigword_type.
+	(sh64_littlebyte_bigword_type): New function.
+	(sh64_extract_return_value): Use convert_typed_floating.
+	(sh64_register_convert_to_virtual): Likewise.
+	(sh64_register_convert_to_raw): Likewise.
+
+2017-09-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* doublest.h (floatformat_from_type): Move to gdbtypes.h.
 	* doublest.c (floatformat_from_type): Move to gdbtypes.c.
 
