@@ -83,12 +83,6 @@ extern enum float_kind floatformat_classify (const struct floatformat *,
 extern const char *floatformat_mantissa (const struct floatformat *,
 					 const bfd_byte *);
 
-/* Given TYPE, return its floatformat.  TYPE_FLOATFORMAT() may return
-   NULL.  type_floatformat() detects that and returns a floatformat
-   based on the type size when FLOATFORMAT is NULL.  */
-
-const struct floatformat *floatformat_from_type (const struct type *type);
-
 /* Return the floatformat's total size in host bytes.  */
 
 extern size_t floatformat_totalsize_bytes (const struct floatformat *fmt);

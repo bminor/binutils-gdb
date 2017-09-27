@@ -1,5 +1,20 @@
 2017-09-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* doublest.h (floatformat_from_type): Move to gdbtypes.h.
+	* doublest.c (floatformat_from_type): Move to gdbtypes.c.
+
+	* gdbtypes.h (union type_specific): Make field floatformat hold
+	just a single struct floatformat, not an array.
+	(floatformat_from_type): Move here.
+	* gdbtypes.c (floatformat_from_type): Move here.  Update to
+	changed TYPE_FLOATFORMAT definition.
+	(verify_floatformat): Update to changed TYPE_FLOATFORMAT.
+	(recursive_dump_type): Likewise.
+	(init_float_type): Install correct floatformat for byte order.
+	(arch_float_type): Likewise.
+
+2017-09-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.c (init_type): Change incoming argument from
 	length-in-bytes to length-in-bits.  Assert length is a
 	multiple of TARGET_CHAR_BITS.

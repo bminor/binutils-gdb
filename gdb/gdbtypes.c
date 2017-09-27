@@ -2734,20 +2734,28 @@ set_type_code (struct type *type, enum type_code code)
    determined by the floatformat.  Returns size to be used.  */
 
 static int
-verify_floatformat (int bit, const struct floatformat **floatformats)
+verify_floatformat (int bit, const struct floatformat *floatformat)
 {
-  gdb_assert (floatformats != NULL);
-  gdb_assert (floatformats[0] != NULL && floatformats[1] != NULL);
+  gdb_assert (floatformat != NULL);
 
   if (bit == -1)
-    bit = floatformats[0]->totalsize;
-  gdb_assert (bit >= 0);
+    bit = floatformat->totalsize;
 
-  size_t len = bit / TARGET_CHAR_BIT;
-  gdb_assert (len >= floatformat_totalsize_bytes (floatformats[0]));
-  gdb_assert (len >= floatformat_totalsize_bytes (floatformats[1]));
+  gdb_assert (bit >= 0);
+  gdb_assert (bit >= floatformat->totalsize);
 
   return bit;
+}
+
+/* Return the floating-point format for a floating-point variable of
+   type TYPE.  */
+
+const struct floatformat *
+floatformat_from_type (const struct type *type)
+{
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
+  gdb_assert (TYPE_FLOATFORMAT (type));
+  return TYPE_FLOATFORMAT (type);
 }
 
 /* Helper function to initialize the standard scalar types.
@@ -2842,11 +2850,13 @@ init_float_type (struct objfile *objfile,
 		 int bit, const char *name,
 		 const struct floatformat **floatformats)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  const struct floatformat *fmt = floatformats[gdbarch_byte_order (gdbarch)];
   struct type *t;
 
-  bit = verify_floatformat (bit, floatformats);
+  bit = verify_floatformat (bit, fmt);
   t = init_type (objfile, TYPE_CODE_FLT, bit, name);
-  TYPE_FLOATFORMAT (t) = floatformats;
+  TYPE_FLOATFORMAT (t) = fmt;
 
   return t;
 }
@@ -4544,26 +4554,11 @@ recursive_dump_type (struct type *type, int spaces)
 
       case TYPE_SPECIFIC_FLOATFORMAT:
 	printfi_filtered (spaces, "floatformat ");
-	if (TYPE_FLOATFORMAT (type) == NULL)
+	if (TYPE_FLOATFORMAT (type) == NULL
+	    || TYPE_FLOATFORMAT (type)->name == NULL)
 	  puts_filtered ("(null)");
 	else
-	  {
-	    puts_filtered ("{ ");
-	    if (TYPE_FLOATFORMAT (type)[0] == NULL
-		|| TYPE_FLOATFORMAT (type)[0]->name == NULL)
-	      puts_filtered ("(null)");
-	    else
-	      puts_filtered (TYPE_FLOATFORMAT (type)[0]->name);
-
-	    puts_filtered (", ");
-	    if (TYPE_FLOATFORMAT (type)[1] == NULL
-		|| TYPE_FLOATFORMAT (type)[1]->name == NULL)
-	      puts_filtered ("(null)");
-	    else
-	      puts_filtered (TYPE_FLOATFORMAT (type)[1]->name);
-
-	    puts_filtered (" }");
-	  }
+	  puts_filtered (TYPE_FLOATFORMAT (type)->name);
 	puts_filtered ("\n");
 	break;
 
@@ -4908,11 +4903,12 @@ arch_float_type (struct gdbarch *gdbarch,
 		 int bit, const char *name,
 		 const struct floatformat **floatformats)
 {
+  const struct floatformat *fmt = floatformats[gdbarch_byte_order (gdbarch)];
   struct type *t;
 
-  bit = verify_floatformat (bit, floatformats);
+  bit = verify_floatformat (bit, fmt);
   t = arch_type (gdbarch, TYPE_CODE_FLT, bit, name);
-  TYPE_FLOATFORMAT (t) = floatformats;
+  TYPE_FLOATFORMAT (t) = fmt;
 
   return t;
 }

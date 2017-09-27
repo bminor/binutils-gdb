@@ -571,12 +571,11 @@ union type_specific
 
   struct gnat_aux_type *gnat_stuff;
 
-  /* * FLOATFORMAT is for TYPE_CODE_FLT.  It is a pointer to two
-     floatformat objects that describe the floating-point value
-     that resides within the type.  The first is for big endian
-     targets and the second is for little endian targets.  */
+  /* * FLOATFORMAT is for TYPE_CODE_FLT.  It is a pointer to a
+     floatformat object that describes the floating-point value
+     that resides within the type.  */
 
-  const struct floatformat **floatformat;
+  const struct floatformat *floatformat;
 
   /* * For TYPE_CODE_FUNC and TYPE_CODE_METHOD types.  */
 
@@ -1433,6 +1432,9 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 
 #define TYPE_ERROR_NAME(type) \
   (TYPE_NAME (type) ? TYPE_NAME (type) : _("<error type>"))
+
+/* Given TYPE, return its floatformat.  */
+const struct floatformat *floatformat_from_type (const struct type *type);
 
 struct builtin_type
 {
