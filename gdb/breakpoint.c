@@ -44,7 +44,6 @@
 #include "source.h"
 #include "linespec.h"
 #include "completer.h"
-#include "gdb.h"
 #include "ui-out.h"
 #include "cli/cli-script.h"
 #include "block.h"
@@ -6596,39 +6595,11 @@ breakpoint_address_bits (struct breakpoint *b)
   return print_address_bits;
 }
 
-static int
-do_captured_breakpoint_query (int bnum)
+void
+print_breakpoint (breakpoint *b)
 {
-  struct breakpoint *b;
   struct bp_location *dummy_loc = NULL;
-
-  ALL_BREAKPOINTS (b)
-    {
-      if (bnum == b->number)
-	{
-	  print_one_breakpoint (b, &dummy_loc, 0);
-	  return GDB_RC_OK;
-	}
-    }
-  return GDB_RC_NONE;
-}
-
-enum gdb_rc
-gdb_breakpoint_query (struct ui_out *uiout, int bnum, 
-		      char **error_message)
-{
-  /* For the moment we don't trust print_one_breakpoint() to not throw
-     an error.  */
-  if (catch_exceptions_with_msg
-      (uiout,
-       [&] (struct ui_out *)
-         {
-	   return do_captured_breakpoint_query (bnum);
-	 },
-       error_message, RETURN_MASK_ALL) < 0)
-    return GDB_RC_FAIL;
-  else
-    return GDB_RC_OK;
+  print_one_breakpoint (b, &dummy_loc, 0);
 }
 
 /* Return true if this breakpoint was set by the user, false if it is

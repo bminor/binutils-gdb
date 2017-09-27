@@ -679,6 +679,8 @@ extern int show_thread_that_caused_stop (void);
 extern void print_selected_thread_frame (struct ui_out *uiout,
 					 user_selected_what selection);
 
+extern void thread_select (const char *tidstr, thread_info *thr);
+
 extern struct thread_info *thread_list;
 
 #endif /* GDBTHREAD_H */
