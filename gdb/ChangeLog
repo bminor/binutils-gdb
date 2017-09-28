@@ -1,5 +1,9 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* cp-support.c (gdb_demangle): Use std::string.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* stack.c (parse_frame_specification): Use std::string
 	(info_frame_command): Use gdb::unique_xmalloc_ptr.
 

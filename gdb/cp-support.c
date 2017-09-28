@@ -1546,17 +1546,14 @@ gdb_demangle (const char *name, int options)
 
 	  if (!error_reported)
 	    {
-	      char *short_msg, *long_msg;
-	      struct cleanup *back_to;
+	      std::string short_msg
+		= string_printf (_("unable to demangle '%s' "
+				   "(demangler failed with signal %d)"),
+				 name, crash_signal);
 
-	      short_msg = xstrprintf (_("unable to demangle '%s' "
-				      "(demangler failed with signal %d)"),
-				    name, crash_signal);
-	      back_to = make_cleanup (xfree, short_msg);
-
-	      long_msg = xstrprintf ("%s:%d: %s: %s", __FILE__, __LINE__,
-				    "demangler-warning", short_msg);
-	      make_cleanup (xfree, long_msg);
+	      std::string long_msg
+		= string_printf ("%s:%d: %s: %s", __FILE__, __LINE__,
+				 "demangler-warning", short_msg.c_str ());
 
 	      target_terminal::scoped_restore_terminal_state term_state;
 	      target_terminal::ours_for_output ();
@@ -1565,13 +1562,11 @@ gdb_demangle (const char *name, int options)
 	      if (core_dump_allowed)
 		fprintf_unfiltered (gdb_stderr,
 				    _("%s\nAttempting to dump core.\n"),
-				    long_msg);
+				    long_msg.c_str ());
 	      else
-		warn_cant_dump_core (long_msg);
+		warn_cant_dump_core (long_msg.c_str ());
 
-	      demangler_warning (__FILE__, __LINE__, "%s", short_msg);
-
-	      do_cleanups (back_to);
+	      demangler_warning (__FILE__, __LINE__, "%s", short_msg.c_str ());
 
 	      error_reported = 1;
 	    }
