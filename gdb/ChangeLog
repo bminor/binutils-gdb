@@ -1,5 +1,9 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* complaints.c (vcomplaint): Use std::string.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* tracepoint.c (trace_variable_command): Use std::string.
 	(encode_actions_1): Remove unused declarations.
 	(create_tsv_from_upload): Use std::string.

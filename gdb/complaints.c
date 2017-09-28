@@ -192,16 +192,14 @@ vcomplaint (struct complaints **c, const char *file,
 	vwarning (fmt, args);
       else
 	{
-	  char *msg;
-	  struct cleanup *cleanups;
-	  msg = xstrvprintf (fmt, args);
-	  cleanups = make_cleanup (xfree, msg);
+	  std::string msg = string_vprintf (fmt, args);
 	  wrap_here ("");
 	  if (series != SUBSEQUENT_MESSAGE)
 	    begin_line ();
 	  /* XXX: i18n */
 	  fprintf_filtered (gdb_stderr, "%s%s%s",
-			    complaints->explanation[series].prefix, msg,
+			    complaints->explanation[series].prefix,
+			    msg.c_str (),
 			    complaints->explanation[series].postfix);
 	  /* Force a line-break after any isolated message.  For the
              other cases, clear_complaints() takes care of any missing
@@ -214,7 +212,6 @@ vcomplaint (struct complaints **c, const char *file,
 	    fputs_filtered ("\n", gdb_stderr);
 	  else
 	    wrap_here ("");
-	  do_cleanups (cleanups);
 	}
     }
 
