@@ -1,5 +1,10 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* main.c (captured_main_1): Remove unused declaration.
+	* spu-multiarch.c (parse_spufs_run): Remove unused declaration.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (search_symbols): Remove unused outer cleanup.
 	(make_source_files_completion_list): Remove unused declaration.
 

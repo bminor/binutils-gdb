@@ -56,7 +56,6 @@ static int
 parse_spufs_run (ptid_t ptid, int *fd, CORE_ADDR *addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  struct cleanup *old_chain;
   struct gdbarch_tdep *tdep;
   struct regcache *regcache;
   gdb_byte buf[4];

@@ -498,8 +498,6 @@ captured_main_1 (struct captured_main_args *context)
   int save_auto_load;
   struct objfile *objfile;
 
-  struct cleanup *chain;
-
 #ifdef HAVE_SBRK
   /* Set this before constructing scoped_command_stats.  */
   lim_at_start = (char *) sbrk (0);
