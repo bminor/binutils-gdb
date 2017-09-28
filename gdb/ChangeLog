@@ -1,5 +1,10 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* utils.c (vfprintf_maybe_filtered): Use std::string.
+	(vfprintf_unfiltered): Likewise.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* event-top.c (top_level_prompt): Return std::string.
 	(display_gdb_prompt): Update.
 

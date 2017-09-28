@@ -2036,13 +2036,8 @@ static void
 vfprintf_maybe_filtered (struct ui_file *stream, const char *format,
 			 va_list args, int filter)
 {
-  char *linebuffer;
-  struct cleanup *old_cleanups;
-
-  linebuffer = xstrvprintf (format, args);
-  old_cleanups = make_cleanup (xfree, linebuffer);
-  fputs_maybe_filtered (linebuffer, stream, filter);
-  do_cleanups (old_cleanups);
+  std::string linebuffer = string_vprintf (format, args);
+  fputs_maybe_filtered (linebuffer.c_str (), stream, filter);
 }
 
 
@@ -2055,11 +2050,7 @@ vfprintf_filtered (struct ui_file *stream, const char *format, va_list args)
 void
 vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
 {
-  char *linebuffer;
-  struct cleanup *old_cleanups;
-
-  linebuffer = xstrvprintf (format, args);
-  old_cleanups = make_cleanup (xfree, linebuffer);
+  std::string linebuffer = string_vprintf (format, args);
   if (debug_timestamp && stream == gdb_stdlog)
     {
       using namespace std::chrono;
@@ -2069,18 +2060,18 @@ vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
       seconds s = duration_cast<seconds> (now.time_since_epoch ());
       microseconds us = duration_cast<microseconds> (now.time_since_epoch () - s);
 
-      len = strlen (linebuffer);
+      len = linebuffer.size ();
       need_nl = (len > 0 && linebuffer[len - 1] != '\n');
 
       std::string timestamp = string_printf ("%ld.%06ld %s%s",
 					     (long) s.count (),
 					     (long) us.count (),
-					     linebuffer, need_nl ? "\n": "");
+					     linebuffer.c_str (),
+					     need_nl ? "\n": "");
       fputs_unfiltered (timestamp.c_str (), stream);
     }
   else
-    fputs_unfiltered (linebuffer, stream);
-  do_cleanups (old_cleanups);
+    fputs_unfiltered (linebuffer.c_str (), stream);
 }
 
 void
