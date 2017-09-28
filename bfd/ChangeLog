@@ -1,3 +1,9 @@
+2017-09-28  Alan Modra  <amodra@gmail.com>
+
+	PR 22220
+	* elflink.c (_bfd_elf_merge_symbol): Set non_ir_ref_dynamic in
+	a case where plugin_notice isn't called.
+
 2017-09-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22199

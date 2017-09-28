@@ -1,3 +1,11 @@
+2017-09-28  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-plugin/pr22220.h,
+	* testsuite/ld-plugin/pr22220lib.cc,
+	* testsuite/ld-plugin/pr22220lib.ver,
+	* testsuite/ld-plugin/pr22220main.cc: New test.
+	* testsuite/ld-plugin/lto.exp: Run it.
+
 2017-09-19  Nick Clifton  <nickc@redhat.com>
 
 	2.29.1 Release
