@@ -1,5 +1,10 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* event-top.c (top_level_prompt): Return std::string.
+	(display_gdb_prompt): Update.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* unittests/common-utils-selftests.c (format): New function.
 	(string_vprintf_tests): New function.
 	(_initialize_common_utils_selftests): Register new tests.

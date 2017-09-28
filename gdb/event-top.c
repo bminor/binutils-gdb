@@ -48,7 +48,7 @@
 /* readline defines this.  */
 #undef savestring
 
-static char *top_level_prompt (void);
+static std::string top_level_prompt ();
 
 /* Signal handlers.  */
 #ifdef SIGQUIT
@@ -352,15 +352,12 @@ gdb_rl_callback_handler_reinstall (void)
 void
 display_gdb_prompt (const char *new_prompt)
 {
-  char *actual_gdb_prompt = NULL;
-  struct cleanup *old_chain;
+  std::string actual_gdb_prompt;
 
   annotate_display_prompt ();
 
   /* Reset the nesting depth used when trace-commands is set.  */
   reset_command_nest_depth ();
-
-  old_chain = make_cleanup (free_current_contents, &actual_gdb_prompt);
 
   /* Do not call the python hook on an explicit prompt change as
      passed to this function, as this forms a secondary/local prompt,
@@ -391,7 +388,6 @@ display_gdb_prompt (const char *new_prompt)
 
 	  if (current_ui->command_editing)
 	    gdb_rl_callback_handler_remove ();
-	  do_cleanups (old_chain);
 	  return;
 	}
       else if (ui->prompt_state == PROMPT_NEEDED)
@@ -402,12 +398,12 @@ display_gdb_prompt (const char *new_prompt)
 	}
     }
   else
-    actual_gdb_prompt = xstrdup (new_prompt);
+    actual_gdb_prompt = new_prompt;
 
   if (current_ui->command_editing)
     {
       gdb_rl_callback_handler_remove ();
-      gdb_rl_callback_handler_install (actual_gdb_prompt);
+      gdb_rl_callback_handler_install (actual_gdb_prompt.c_str ());
     }
   /* new_prompt at this point can be the top of the stack or the one
      passed in.  It can't be NULL.  */
@@ -416,19 +412,16 @@ display_gdb_prompt (const char *new_prompt)
       /* Don't use a _filtered function here.  It causes the assumed
          character position to be off, since the newline we read from
          the user is not accounted for.  */
-      fputs_unfiltered (actual_gdb_prompt, gdb_stdout);
+      fputs_unfiltered (actual_gdb_prompt.c_str (), gdb_stdout);
       gdb_flush (gdb_stdout);
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Return the top level prompt, as specified by "set prompt", possibly
    overriden by the python gdb.prompt_hook hook, and then composed
-   with the prompt prefix and suffix (annotations).  The caller is
-   responsible for freeing the returned string.  */
+   with the prompt prefix and suffix (annotations).  */
 
-static char *
+static std::string
 top_level_prompt (void)
 {
   char *prompt;
@@ -448,10 +441,10 @@ top_level_prompt (void)
 	 beginning.  */
       const char suffix[] = "\n\032\032prompt\n";
 
-      return concat (prefix, prompt, suffix, (char *) NULL);
+      return std::string (prefix) + prompt + suffix;
     }
 
-  return xstrdup (prompt);
+  return prompt;
 }
 
 /* See top.h.  */
