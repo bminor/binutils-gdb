@@ -4241,11 +4241,6 @@ search_symbols (const char *regexp, enum search_domain kind,
   int nfound;
   gdb::optional<compiled_regex> preg;
 
-  /* OLD_CHAIN .. RETVAL_CHAIN is always freed, RETVAL_CHAIN .. current
-     CLEANUP_CHAIN is freed only in the case of an error.  */
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-  struct cleanup *retval_chain;
-
   gdb_assert (kind <= TYPES_DOMAIN);
 
   ourtype = types[kind];
@@ -4365,7 +4360,7 @@ search_symbols (const char *regexp, enum search_domain kind,
   found = NULL;
   tail = NULL;
   nfound = 0;
-  retval_chain = make_cleanup_free_search_symbols (&found);
+  struct cleanup *retval_chain = make_cleanup_free_search_symbols (&found);
 
   ALL_COMPUNITS (objfile, cust)
   {
@@ -4478,7 +4473,6 @@ search_symbols (const char *regexp, enum search_domain kind,
     }
 
   discard_cleanups (retval_chain);
-  do_cleanups (old_chain);
   *matches = found;
 }
 
@@ -5439,7 +5433,6 @@ make_source_files_completion_list (const char *text, const char *word)
   completion_list list;
   const char *base_name;
   struct add_partial_filename_data datum;
-  struct cleanup *back_to;
 
   if (!have_full_symbols () && !have_partial_symbols ())
     return list;
