@@ -1,3 +1,13 @@
+2017-09-28  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/common-utils-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add common-utils-selftests.o.
+	(COMMON_OBS): Remove utils-selftests.o.
+	* utils-selftests.c: Move to ...
+	* unittests/common-utils-selftests.c: ... here and rename self
+	test to "string_printf".
+
 2017-09-28  Alexander Shaposhnikov <alexander.v.shaposhnikov@gmail.com> (tiny patch)
 
 	* dwarf2read.c (open_and_init_dwp_file): Protect against dwp_file

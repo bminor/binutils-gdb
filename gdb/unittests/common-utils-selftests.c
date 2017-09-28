@@ -17,19 +17,13 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "defs.h"
+#include "common-defs.h"
 #include "selftest.h"
-
-#if GDB_SELF_TEST
 
 namespace selftests {
 
-/* common-utils self tests.  Defined here instead of in
-   common/common-utils.c because that file is shared with
-   gdbserver.  */
-
 static void
-common_utils_tests (void)
+string_printf_tests ()
 {
   SELF_CHECK (string_printf ("%s", "") == "");
   SELF_CHECK (string_printf ("%d comes before 2", 1) == "1 comes before 2");
@@ -49,12 +43,8 @@ common_utils_tests (void)
 
 } /* namespace selftests */
 
-#endif
-
 void
-_initialize_utils_selftests (void)
+_initialize_common_utils_selftests ()
 {
-#if GDB_SELF_TEST
-  selftests::register_test ("common-utils", selftests::common_utils_tests);
-#endif
+  selftests::register_test ("string_printf", selftests::string_printf_tests);
 }

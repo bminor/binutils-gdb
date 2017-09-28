@@ -527,6 +527,7 @@ SUBDIR_PYTHON_CFLAGS =
 
 SUBDIR_UNITTESTS_SRCS = \
 	unittests/array-view-selftests.c \
+	unittests/common-utils-selftests.c \
 	unittests/environ-selftests.c \
 	unittests/function-view-selftests.c \
 	unittests/offset-type-selftests.c \
@@ -537,6 +538,7 @@ SUBDIR_UNITTESTS_SRCS = \
 
 SUBDIR_UNITTESTS_OBS = \
 	array-view-selftests.o \
+	common-utils-selftests.o \
 	environ-selftests.o \
 	function-view-selftests.o \
 	offset-type-selftests.o \
@@ -1842,7 +1844,6 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	ui-out.o \
 	user-regs.o \
 	utils.o \
-	utils-selftests.o \
 	valarith.o \
 	valops.o \
 	valprint.o \
