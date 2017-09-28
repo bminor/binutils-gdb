@@ -1,3 +1,9 @@
+2017-09-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 14918
+	* testsuite/ld-plugin/lto.exp (link_elf_tests): Skip the pr14918
+	test for ARM targets as they always link with libgcc.
+
 2017-09-28  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-plugin/pr22220.h,
