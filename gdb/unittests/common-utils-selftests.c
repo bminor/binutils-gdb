@@ -41,10 +41,33 @@ string_printf_tests ()
   SELF_CHECK (string_printf ("%s", X100000) == X100000);
 }
 
+static std::string
+format (const char *fmt, ...)
+{
+  va_list vp;
+
+  va_start (vp, fmt);
+  std::string result = string_vprintf (fmt, vp);
+  va_end (vp);
+  return result;
+}
+
+static void
+string_vprintf_tests ()
+{
+  /* Basic smoke tests.  */
+  SELF_CHECK (format ("%s", "test") == "test");
+  SELF_CHECK (format ("%d", 23) == "23");
+  SELF_CHECK (format ("%s %d %s", "test", 23, "done")
+	      == "test 23 done");
+  SELF_CHECK (format ("nothing") == "nothing");
+}
+
 } /* namespace selftests */
 
 void
 _initialize_common_utils_selftests ()
 {
   selftests::register_test ("string_printf", selftests::string_printf_tests);
+  selftests::register_test ("string_vprintf", selftests::string_vprintf_tests);
 }

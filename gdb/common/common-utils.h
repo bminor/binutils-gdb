@@ -63,6 +63,10 @@ int xsnprintf (char *str, size_t size, const char *format, ...)
 std::string string_printf (const char* fmt, ...)
   ATTRIBUTE_PRINTF (1, 2);
 
+/* Like string_printf, but takes a va_list.  */
+std::string string_vprintf (const char* fmt, va_list args)
+  ATTRIBUTE_PRINTF (1, 0);
+
 /* Make a copy of the string at PTR with LEN characters
    (and add a null character at the end in the copy).
    Uses malloc to get the space.  Returns the address of the copy.  */

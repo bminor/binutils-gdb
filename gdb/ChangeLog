@@ -1,3 +1,11 @@
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
+	* unittests/common-utils-selftests.c (format): New function.
+	(string_vprintf_tests): New function.
+	(_initialize_common_utils_selftests): Register new tests.
+	* common/common-utils.c (string_vprintf): New function.
+	* common/common-utils.h (string_vprintf): Declare.
+
 2017-09-29  Pedro Alves  <palves@redhat.com>
 
 	* common/rsp-low.c (unpack_varlen_hex): Constify.

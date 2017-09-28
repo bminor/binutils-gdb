@@ -174,6 +174,27 @@ string_printf (const char* fmt, ...)
   return str;
 }
 
+/* See documentation in common-utils.h.  */
+
+std::string
+string_vprintf (const char* fmt, va_list args)
+{
+  va_list vp;
+  size_t size;
+
+  va_copy (vp, args);
+  size = vsnprintf (NULL, 0, fmt, vp);
+  va_end (vp);
+
+  std::string str (size, '\0');
+
+  /* C++11 and later guarantee std::string uses contiguous memory and
+     always includes the terminating '\0'.  */
+  vsprintf (&str[0], fmt, args);
+
+  return str;
+}
+
 char *
 savestring (const char *ptr, size_t len)
 {
