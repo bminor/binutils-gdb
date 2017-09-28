@@ -1,5 +1,10 @@
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
+	* xstormy16-tdep.c (xstormy16_push_dummy_call): Use
+	gdb::byte_vector.
+
+2017-09-29  Tom Tromey  <tom@tromey.com>
+
 	* complaints.c (vcomplaint): Use std::string.
 
 2017-09-29  Tom Tromey  <tom@tromey.com>

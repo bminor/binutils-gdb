@@ -35,6 +35,7 @@
 #include "doublest.h"
 #include "osabi.h"
 #include "objfiles.h"
+#include "common/byte-vector.h"
 
 enum gdb_regnum
 {
@@ -276,21 +277,17 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
      wordaligned.  */
   for (j = nargs - 1; j >= i; j--)
     {
-      gdb_byte *val;
-      struct cleanup *back_to;
       const gdb_byte *bytes = value_contents (args[j]);
 
       typelen = TYPE_LENGTH (value_enclosing_type (args[j]));
       slacklen = typelen & 1;
-      val = (gdb_byte *) xmalloc (typelen + slacklen);
-      back_to = make_cleanup (xfree, val);
-      memcpy (val, bytes, typelen);
-      memset (val + typelen, 0, slacklen);
+      gdb::byte_vector val (typelen + slacklen);
+      memcpy (val.data (), bytes, typelen);
+      memset (val.data () + typelen, 0, slacklen);
 
       /* Now write this data to the stack.  The stack grows upwards.  */
-      write_memory (stack_dest, val, typelen + slacklen);
+      write_memory (stack_dest, val.data (), typelen + slacklen);
       stack_dest += typelen + slacklen;
-      do_cleanups (back_to);
     }
 
   store_unsigned_integer (buf, xstormy16_pc_size, byte_order, bp_addr);
