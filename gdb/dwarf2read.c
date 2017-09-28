@@ -11199,7 +11199,8 @@ open_and_init_dwp_file (void)
   dwp_file->tus = create_dwp_hash_table (dwp_file, 1);
 
   /* The DWP file version is stored in the hash table.  Oh well.  */
-  if (dwp_file->cus->version != dwp_file->tus->version)
+  if (dwp_file->cus && dwp_file->tus
+      && dwp_file->cus->version != dwp_file->tus->version)
     {
       /* Technically speaking, we should try to limp along, but this is
 	 pretty bizarre.  We use pulongest here because that's the established
@@ -11209,7 +11210,13 @@ open_and_init_dwp_file (void)
 	     pulongest (dwp_file->cus->version),
 	     pulongest (dwp_file->tus->version), dwp_name.c_str ());
     }
-  dwp_file->version = dwp_file->cus->version;
+
+  if (dwp_file->cus)
+    dwp_file->version = dwp_file->cus->version;
+  else if (dwp_file->tus)
+    dwp_file->version = dwp_file->tus->version;
+  else
+    dwp_file->version = 2;
 
   if (dwp_file->version == 2)
     bfd_map_over_sections (dwp_file->dbfd, dwarf2_locate_v2_dwp_sections,

@@ -1,3 +1,8 @@
+2017-09-28  Alexander Shaposhnikov <alexander.v.shaposhnikov@gmail.com> (tiny patch)
+
+	* dwarf2read.c (open_and_init_dwp_file): Protect against dwp_file
+	having NULL cus or tus.
+
 2017-09-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* arm-tdep.c: (convert_from_extended): Remove.
