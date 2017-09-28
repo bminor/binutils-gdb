@@ -371,10 +371,9 @@ validate_trace_state_variable_name (const char *name)
 static void
 trace_variable_command (char *args, int from_tty)
 {
-  struct cleanup *old_chain;
   LONGEST initval = 0;
   struct trace_state_variable *tsv;
-  char *name, *p;
+  char *name_start, *p;
 
   if (!args || !*args)
     error_no_arg (_("Syntax is $NAME [ = EXPR ]"));
@@ -385,23 +384,22 @@ trace_variable_command (char *args, int from_tty)
   if (*p++ != '$')
     error (_("Name of trace variable should start with '$'"));
 
-  name = p;
+  name_start = p;
   while (isalnum (*p) || *p == '_')
     p++;
-  name = savestring (name, p - name);
-  old_chain = make_cleanup (xfree, name);
+  std::string name (name_start, p - name_start);
 
   p = skip_spaces (p);
   if (*p != '=' && *p != '\0')
     error (_("Syntax must be $NAME [ = EXPR ]"));
 
-  validate_trace_state_variable_name (name);
+  validate_trace_state_variable_name (name.c_str ());
 
   if (*p == '=')
     initval = value_as_long (parse_and_eval (++p));
 
   /* If the variable already exists, just change its initial value.  */
-  tsv = find_trace_state_variable (name);
+  tsv = find_trace_state_variable (name.c_str ());
   if (tsv)
     {
       if (tsv->initial_value != initval)
@@ -412,12 +410,11 @@ trace_variable_command (char *args, int from_tty)
       printf_filtered (_("Trace state variable $%s "
 			 "now has initial value %s.\n"),
 		       tsv->name, plongest (tsv->initial_value));
-      do_cleanups (old_chain);
       return;
     }
 
   /* Create a new variable.  */
-  tsv = create_trace_state_variable (name);
+  tsv = create_trace_state_variable (name.c_str ());
   tsv->initial_value = initval;
 
   observer_notify_tsv_created (tsv);
@@ -425,8 +422,6 @@ trace_variable_command (char *args, int from_tty)
   printf_filtered (_("Trace state variable $%s "
 		     "created, with initial value %s.\n"),
 		   tsv->name, plongest (tsv->initial_value));
-
-  do_cleanups (old_chain);
 }
 
 static void
@@ -663,7 +658,6 @@ void
 validate_actionline (const char *line, struct breakpoint *b)
 {
   struct cmd_list_element *c;
-  struct cleanup *old_chain = NULL;
   const char *tmp_p;
   const char *p;
   struct bp_location *loc;
@@ -999,8 +993,6 @@ collection_list::collect_symbol (struct symbol *sym,
   /* Expressions are the most general case.  */
   if (treat_as_expr)
     {
-      struct cleanup *old_chain1 = NULL;
-
       agent_expr_up aexpr = gen_trace_for_var (scope, gdbarch,
 					       sym, trace_string);
 
@@ -1383,7 +1375,6 @@ encode_actions_1 (struct command_line *action,
 	      else
 		{
 		  unsigned long addr;
-		  struct cleanup *old_chain1 = NULL;
 
 		  expression_up exp = parse_exp_1 (&action_exp, tloc->address,
 						   block_for_pc (tloc->address),
@@ -1478,8 +1469,6 @@ encode_actions_1 (struct command_line *action,
 	      action_exp = skip_spaces (action_exp);
 
 		{
-		  struct cleanup *old_chain1 = NULL;
-
 		  expression_up exp = parse_exp_1 (&action_exp, tloc->address,
 						   block_for_pc (tloc->address),
 						   1);
@@ -3310,7 +3299,7 @@ static struct trace_state_variable *
 create_tsv_from_upload (struct uploaded_tsv *utsv)
 {
   const char *namebase;
-  char *buf;
+  std::string buf;
   int try_num = 0;
   struct trace_state_variable *tsv;
   struct cleanup *old_chain;
@@ -3318,32 +3307,25 @@ create_tsv_from_upload (struct uploaded_tsv *utsv)
   if (utsv->name)
     {
       namebase = utsv->name;
-      buf = xstrprintf ("%s", namebase);
+      buf = namebase;
     }
   else
     {
       namebase = "__tsv";
-      buf = xstrprintf ("%s_%d", namebase, try_num++);
+      buf = string_printf ("%s_%d", namebase, try_num++);
     }
 
   /* Fish for a name that is not in use.  */
   /* (should check against all internal vars?)  */
-  while (find_trace_state_variable (buf))
-    {
-      xfree (buf);
-      buf = xstrprintf ("%s_%d", namebase, try_num++);
-    }
-
-  old_chain = make_cleanup (xfree, buf);
+  while (find_trace_state_variable (buf.c_str ()))
+    buf = string_printf ("%s_%d", namebase, try_num++);
 
   /* We have an available name, create the variable.  */
-  tsv = create_trace_state_variable (buf);
+  tsv = create_trace_state_variable (buf.c_str ());
   tsv->initial_value = utsv->initial_value;
   tsv->builtin = utsv->builtin;
 
   observer_notify_tsv_created (tsv);
-
-  do_cleanups (old_chain);
 
   return tsv;
 }
