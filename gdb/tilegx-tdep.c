@@ -42,6 +42,7 @@
 #include "tilegx-tdep.h"
 #include "opcode/tilegx.h"
 #include <algorithm>
+#include "common/byte-vector.h"
 
 struct tilegx_frame_cache
 {
@@ -328,21 +329,17 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
      the stack, word aligned.  */
   for (j = nargs - 1; j >= i; j--)
     {
-      gdb_byte *val;
-      struct cleanup *back_to;
       const gdb_byte *contents = value_contents (args[j]);
 
       typelen = TYPE_LENGTH (value_enclosing_type (args[j]));
       slacklen = align_up (typelen, 8) - typelen;
-      val = (gdb_byte *) xmalloc (typelen + slacklen);
-      back_to = make_cleanup (xfree, val);
-      memcpy (val, contents, typelen);
-      memset (val + typelen, 0, slacklen);
+      gdb::byte_vector val (typelen + slacklen);
+      memcpy (val.data (), contents, typelen);
+      memset (val.data () + typelen, 0, slacklen);
 
       /* Now write data to the stack.  The stack grows downwards.  */
       stack_dest -= typelen + slacklen;
-      write_memory (stack_dest, val, typelen + slacklen);
-      do_cleanups (back_to);
+      write_memory (stack_dest, val.data (), typelen + slacklen);
     }
 
   /* Add 16 bytes for linkage space to the stack.  */
