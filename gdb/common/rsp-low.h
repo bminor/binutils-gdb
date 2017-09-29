@@ -41,7 +41,7 @@ extern char *pack_hex_byte (char *pkt, int byte);
    in RESULT.  Reads until a non-hex digit is seen.  Returns a pointer
    to the terminating character.  */
 
-extern char *unpack_varlen_hex (char *buff, ULONGEST *result);
+extern const char *unpack_varlen_hex (const char *buff, ULONGEST *result);
 
 /* HEX is a string of characters representing hexadecimal digits.
    Convert pairs of hex digits to bytes and store sequentially into

@@ -1,5 +1,23 @@
 2017-09-29  Pedro Alves  <palves@redhat.com>
 
+	* common/rsp-low.c (unpack_varlen_hex): Constify.
+	* common/rsp-low.h (unpack_varlen_hex): Constify.
+	* linux-nat.c (linux_child_static_tracepoint_markers_by_strid):
+	Constify.
+	* remote.c (remote_set_permissions, read_ptid)
+	(remote_current_thread, remote_get_threads_with_qthreadinfo)
+	(remote_static_tracepoint_marker_at)
+	(remote_static_tracepoint_markers_by_strid)
+	(stop_reply_extract_thread, remote_parse_stop_reply): Constify.
+	* tracepoint.c (parse_trace_status, parse_tracepoint_status)
+	(parse_tracepoint_definition, parse_tsv_definition)
+	(parse_static_tracepoint_marker_definition): Constify.
+	* tracepoint.h (parse_static_tracepoint_marker_definition)
+	(parse_trace_status, parse_tracepoint_status)
+	(parse_tracepoint_definition, parse_tsv_definition): Constify.
+
+2017-09-29  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (target_buf, target_buf_size): Delete.
 	(remote_get_noisy_reply): Remove buf_p and sizeof_buf parameters.
 	Use the connection's packet buffer instead.

@@ -1,5 +1,20 @@
 2017-09-29  Pedro Alves  <palves@redhat.com>
 
+	* ax.c (gdb_parse_agent_expr): Constify.
+	* ax.h (gdb_parse_agent_expr): Constify.
+	* mem-break.c (add_breakpoint_condition, add_breakpoint_commands):
+	Constify.
+	* mem-break.h (add_breakpoint_condition, add_breakpoint_commands): Constify.
+	* remote-utils.c (hex_or_minus_one, read_ptid): Constify.
+	* remote-utils.h (read_ptid): Constify.
+	* server.c (handle_qxfer_exec_file, handle_query, handle_v_cont)
+	(process_point_options, process_serial_event): Constify.
+	* tracepoint.c (add_tracepoint_action, cmd_qtdp, cmd_qtdpsrc)
+	(cmd_qtdv, cmd_qtenable_disable, cmd_qtro, cmd_qtframe, cmd_qtp)
+	(cmd_qtbuffer): Constify.
+
+2017-09-29  Pedro Alves  <palves@redhat.com>
+
 	* proc-service.c (ps_pdread): Return PS_ERR if reading memory
 	fails.
 

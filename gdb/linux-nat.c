@@ -4291,7 +4291,7 @@ linux_child_static_tracepoint_markers_by_strid (struct target_ops *self,
   int pid = ptid_get_pid (inferior_ptid);
   VEC(static_tracepoint_marker_p) *markers = NULL;
   struct static_tracepoint_marker *marker = NULL;
-  char *p = s;
+  const char *p = s;
   ptid_t ptid = ptid_build (pid, 0, 0);
 
   /* Pause all */

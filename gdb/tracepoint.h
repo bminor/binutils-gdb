@@ -295,7 +295,7 @@ private:
 };
 
 extern void parse_static_tracepoint_marker_definition
-  (char *line, char **pp,
+  (const char *line, const char **pp,
    struct static_tracepoint_marker *marker);
 extern void release_static_tracepoint_marker (struct static_tracepoint_marker *);
 extern void free_current_marker (void *arg);
@@ -342,14 +342,14 @@ extern int encode_source_string (int num, ULONGEST addr,
 				 const char *srctype, const char *src,
 				 char *buf, int buf_size);
 
-extern void parse_trace_status (char *line, struct trace_status *ts);
+extern void parse_trace_status (const char *line, struct trace_status *ts);
 
-extern void parse_tracepoint_status (char *p, struct breakpoint *tp,
+extern void parse_tracepoint_status (const char *p, struct breakpoint *tp,
 				     struct uploaded_tp *utp);
 
-extern void parse_tracepoint_definition (char *line,
+extern void parse_tracepoint_definition (const char *line,
 					 struct uploaded_tp **utpp);
-extern void parse_tsv_definition (char *line, struct uploaded_tsv **utsvp);
+extern void parse_tsv_definition (const char *line, struct uploaded_tsv **utsvp);
 
 extern struct uploaded_tp *get_uploaded_tp (int num, ULONGEST addr,
 					    struct uploaded_tp **utpp);

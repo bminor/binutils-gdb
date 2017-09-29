@@ -3405,9 +3405,9 @@ merge_uploaded_trace_state_variables (struct uploaded_tsv **uploaded_tsvs)
    the remote protocol and the trace file reader.  */
 
 void
-parse_trace_status (char *line, struct trace_status *ts)
+parse_trace_status (const char *line, struct trace_status *ts)
 {
-  char *p = line, *p1, *p2, *p3, *p_temp;
+  const char *p = line, *p1, *p2, *p3, *p_temp;
   int end;
   ULONGEST val;
 
@@ -3565,7 +3565,7 @@ Status line: '%s'\n"), p, line);
 }
 
 void
-parse_tracepoint_status (char *p, struct breakpoint *bp,
+parse_tracepoint_status (const char *p, struct breakpoint *bp,
 			 struct uploaded_tp *utp)
 {
   ULONGEST uval;
@@ -3588,14 +3588,15 @@ parse_tracepoint_status (char *p, struct breakpoint *bp,
    an "uploaded tracepoint".  */
 
 void
-parse_tracepoint_definition (char *line, struct uploaded_tp **utpp)
+parse_tracepoint_definition (const char *line, struct uploaded_tp **utpp)
 {
-  char *p;
+  const char *p;
   char piece;
   ULONGEST num, addr, step, pass, orig_size, xlen, start;
   int enabled, end;
   enum bptype type;
-  char *cond, *srctype, *buf;
+  const char *srctype;
+  char *cond, *buf;
   struct uploaded_tp *utp = NULL;
 
   p = line;
@@ -3703,9 +3704,10 @@ parse_tracepoint_definition (char *line, struct uploaded_tp **utpp)
    uploaded object.  */
 
 void
-parse_tsv_definition (char *line, struct uploaded_tsv **utsvp)
+parse_tsv_definition (const char *line, struct uploaded_tsv **utsvp)
 {
-  char *p, *buf;
+  const char *p;
+  char *buf;
   ULONGEST num, initval, builtin;
   int end;
   struct uploaded_tsv *utsv = NULL;
@@ -3749,10 +3751,10 @@ free_current_marker (void *arg)
    the parsed marker definition.  */
 
 void
-parse_static_tracepoint_marker_definition (char *line, char **pp,
+parse_static_tracepoint_marker_definition (const char *line, const char **pp,
 					   struct static_tracepoint_marker *marker)
 {
-  char *p, *endp;
+  const char *p, *endp;
   ULONGEST addr;
   int end;
 

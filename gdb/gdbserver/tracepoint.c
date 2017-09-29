@@ -1910,9 +1910,9 @@ find_next_tracepoint_by_number (struct tracepoint *prev_tp, int num)
 /* Append another action to perform when the tracepoint triggers.  */
 
 static void
-add_tracepoint_action (struct tracepoint *tpoint, char *packet)
+add_tracepoint_action (struct tracepoint *tpoint, const char *packet)
 {
-  char *act;
+  const char *act;
 
   if (*packet == 'S')
     {
@@ -1924,7 +1924,7 @@ add_tracepoint_action (struct tracepoint *tpoint, char *packet)
 
   while (*act)
     {
-      char *act_start = act;
+      const char *act_start = act;
       struct tracepoint_action *action = NULL;
 
       switch (*act)
@@ -2485,8 +2485,7 @@ cmd_qtdp (char *own_buf)
   ULONGEST addr;
   ULONGEST count;
   struct tracepoint *tpoint;
-  char *actparm;
-  char *packet = own_buf;
+  const char *packet = own_buf;
 
   packet += strlen ("QTDP:");
 
@@ -2546,9 +2545,7 @@ cmd_qtdp (char *own_buf)
 	    }
 	  else if (*packet == 'X')
 	    {
-	      actparm = (char *) packet;
-	      tpoint->cond = gdb_parse_agent_expr (&actparm);
-	      packet = actparm;
+	      tpoint->cond = gdb_parse_agent_expr (&packet);
 	    }
 	  else if (*packet == '-')
 	    break;
@@ -2657,8 +2654,9 @@ cmd_qtdpsrc (char *own_buf)
 {
   ULONGEST num, addr, start, slen;
   struct tracepoint *tpoint;
-  char *packet = own_buf;
-  char *saved, *srctype, *src;
+  const char *packet = own_buf;
+  const char *saved;
+  char *srctype, *src;
   size_t nbytes;
   struct source_string *last, *newlast;
 
@@ -2720,7 +2718,7 @@ cmd_qtdv (char *own_buf)
   char *varname;
   size_t nbytes;
   struct trace_state_variable *tsv;
-  char *packet = own_buf;
+  const char *packet = own_buf;
 
   packet += strlen ("QTDV:");
 
@@ -2748,7 +2746,7 @@ cmd_qtdv (char *own_buf)
 static void
 cmd_qtenable_disable (char *own_buf, int enable)
 {
-  char *packet = own_buf;
+  const char *packet = own_buf;
   ULONGEST num, addr;
   struct tracepoint *tp;
 
@@ -2870,7 +2868,7 @@ cmd_qtro (char *own_buf)
 {
   ULONGEST start, end;
   struct readonly_region *roreg;
-  char *packet = own_buf;
+  const char *packet = own_buf;
 
   trace_debug ("Want to mark readonly regions");
 
@@ -3557,7 +3555,7 @@ cmd_qtframe (char *own_buf)
   ULONGEST frame, pc, lo, hi, num;
   int tfnum, tpnum;
   struct traceframe *tframe;
-  char *packet = own_buf;
+  const char *packet = own_buf;
 
   packet += strlen ("QTFrame:");
 
@@ -3712,7 +3710,7 @@ cmd_qtp (char *own_buf)
 {
   ULONGEST num, addr;
   struct tracepoint *tpoint;
-  char *packet = own_buf;
+  const char *packet = own_buf;
 
   packet += strlen ("qTP:");
 
@@ -4005,7 +4003,7 @@ cmd_qtbuffer (char *own_buf)
 {
   ULONGEST offset, num, tot;
   unsigned char *tbp;
-  char *packet = own_buf;
+  const char *packet = own_buf;
 
   packet += strlen ("qTBuffer:");
 

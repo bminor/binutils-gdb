@@ -185,7 +185,7 @@ static void show_remote_protocol_packet_cmd (struct ui_file *file,
 					     const char *value);
 
 static char *write_ptid (char *buf, const char *endbuf, ptid_t ptid);
-static ptid_t read_ptid (char *buf, char **obuf);
+static ptid_t read_ptid (const char *buf, const char **obuf);
 
 static void remote_set_permissions (struct target_ops *self);
 
@@ -592,7 +592,7 @@ remote_get_noisy_reply ()
 	{
 	  ULONGEST ul;
 	  CORE_ADDR from, to, org_to;
-	  char *p, *pp;
+	  const char *p, *pp;
 	  int adjusted_size = 0;
 	  int relocated = 0;
 
@@ -2445,14 +2445,15 @@ write_ptid (char *buf, const char *endbuf, ptid_t ptid)
   return buf;
 }
 
-/* Extract a PTID from BUF.  If non-null, OBUF is set to the to one
-   passed the last parsed char.  Returns null_ptid on error.  */
+/* Extract a PTID from BUF.  If non-null, OBUF is set to one past the
+   last parsed char.  Returns null_ptid if no thread id is found, and
+   throws an error if the thread id has an invalid format.  */
 
 static ptid_t
-read_ptid (char *buf, char **obuf)
+read_ptid (const char *buf, const char **obuf)
 {
-  char *p = buf;
-  char *pp;
+  const char *p = buf;
+  const char *pp;
   ULONGEST pid = 0, tid = 0;
 
   if (*p == 'p')
@@ -3088,7 +3089,7 @@ remote_current_thread (ptid_t oldpid)
   getpkt (&rs->buf, &rs->buf_size, 0);
   if (rs->buf[0] == 'Q' && rs->buf[1] == 'C')
     {
-      char *obuf;
+      const char *obuf;
       ptid_t result;
 
       result = read_ptid (&rs->buf[2], &obuf);
@@ -3232,7 +3233,7 @@ remote_get_threads_with_qthreadinfo (struct target_ops *ops,
 
   if (rs->use_threadinfo_query)
     {
-      char *bufp;
+      const char *bufp;
 
       putpkt ("qfThreadInfo");
       getpkt (&rs->buf, &rs->buf_size, 0);
@@ -3482,7 +3483,7 @@ remote_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR addr,
 
   if (*p++ == 'm')
     {
-      parse_static_tracepoint_marker_definition (p, &p, marker);
+      parse_static_tracepoint_marker_definition (p, NULL, marker);
       return 1;
     }
 
@@ -3497,7 +3498,7 @@ remote_static_tracepoint_markers_by_strid (struct target_ops *self,
   VEC(static_tracepoint_marker_p) *markers = NULL;
   struct static_tracepoint_marker *marker = NULL;
   struct cleanup *old_chain;
-  char *p;
+  const char *p;
 
   /* Ask for a first packet of static tracepoint marker
      definition.  */
@@ -3790,7 +3791,7 @@ stop_reply_extract_thread (char *stop_reply)
 {
   if (stop_reply[0] == 'T' && strlen (stop_reply) > 3)
     {
-      char *p;
+      const char *p;
 
       /* Txx r:val ; r:val (...)  */
       p = &stop_reply[3];
@@ -3798,7 +3799,7 @@ stop_reply_extract_thread (char *stop_reply)
       /* Look for "register" named "thread".  */
       while (*p != '\0')
 	{
-	  char *p1;
+	  const char *p1;
 
 	  p1 = strchr (p, ':');
 	  if (p1 == NULL)
@@ -6836,7 +6837,7 @@ remote_parse_stop_reply (char *buf, struct stop_reply *event)
 {
   struct remote_arch_state *rsa = get_remote_arch_state ();
   ULONGEST addr;
-  char *p;
+  const char *p;
   int skipregs = 0;
 
   event->ptid = null_ptid;
@@ -6860,7 +6861,7 @@ remote_parse_stop_reply (char *buf, struct stop_reply *event)
       p = &buf[3];	/* after Txx */
       while (*p)
 	{
-	  char *p1;
+	  const char *p1;
 	  int fieldsize;
 
 	  p1 = strchr (p, ':');
@@ -6998,7 +6999,7 @@ Packet: '%s'\n"),
 	  else
 	    {
 	      ULONGEST pnum;
-	      char *p_temp;
+	      const char *p_temp;
 
 	      if (skipregs)
 		{
@@ -7068,7 +7069,7 @@ Packet: '%s'\n"),
       break;
     case 'w':		/* Thread exited.  */
       {
-	char *p;
+	const char *p;
 	ULONGEST value;
 
 	event->ws.kind = TARGET_WAITKIND_THREAD_EXITED;
@@ -7082,7 +7083,7 @@ Packet: '%s'\n"),
     case 'W':		/* Target exited.  */
     case 'X':
       {
-	char *p;
+	const char *p;
 	int pid;
 	ULONGEST value;
 

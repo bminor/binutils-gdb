@@ -1427,7 +1427,7 @@ handle_qxfer_auxv (const char *annex,
 /* Handle qXfer:exec-file:read.  */
 
 static int
-handle_qxfer_exec_file (const char *const_annex,
+handle_qxfer_exec_file (const char *annex,
 			gdb_byte *readbuf, const gdb_byte *writebuf,
 			ULONGEST offset, LONGEST len)
 {
@@ -1438,7 +1438,7 @@ handle_qxfer_exec_file (const char *const_annex,
   if (the_target->pid_to_exec_file == NULL || writebuf != NULL)
     return -2;
 
-  if (const_annex[0] == '\0')
+  if (annex[0] == '\0')
     {
       if (current_thread == NULL)
 	return -1;
@@ -1447,11 +1447,7 @@ handle_qxfer_exec_file (const char *const_annex,
     }
   else
     {
-      char *annex = (char *) alloca (strlen (const_annex) + 1);
-
-      strcpy (annex, const_annex);
       annex = unpack_varlen_hex (annex, &pid);
-
       if (annex[0] != '\0')
 	return -1;
     }
@@ -2535,7 +2531,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
   if (the_target->get_tib_address != NULL
       && startswith (own_buf, "qGetTIBAddr:"))
     {
-      char *annex;
+      const char *annex;
       int n;
       CORE_ADDR tlb;
       ptid_t ptid = read_ptid (own_buf + 12, &annex);
@@ -2623,7 +2619,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
   if (startswith (own_buf, "qCRC:"))
     {
       /* CRC check (compare-section).  */
-      char *comma;
+      const char *comma;
       ULONGEST base;
       int len;
       unsigned long long crc;
@@ -2732,7 +2728,7 @@ handle_pending_status (const struct thread_resume *resumption,
 static void
 handle_v_cont (char *own_buf)
 {
-  char *p, *q;
+  const char *p;
   int n = 0, i = 0;
   struct thread_resume *resume_info;
   struct thread_resume default_action { null_ptid };
@@ -2771,8 +2767,8 @@ handle_v_cont (char *own_buf)
 
       if (p[0] == 'S' || p[0] == 'C')
 	{
-	  int sig;
-	  sig = strtol (p + 1, &q, 16);
+	  char *q;
+	  int sig = strtol (p + 1, &q, 16);
 	  if (p == q)
 	    goto err;
 	  p = q;
@@ -2809,6 +2805,7 @@ handle_v_cont (char *own_buf)
 	}
       else if (p[0] == ':')
 	{
+	  const char *q;
 	  ptid_t ptid = read_ptid (p + 1, &q);
 
 	  if (p == q)
@@ -4009,9 +4006,9 @@ main (int argc, char *argv[])
    after the last processed option.  */
 
 static void
-process_point_options (struct gdb_breakpoint *bp, char **packet)
+process_point_options (struct gdb_breakpoint *bp, const char **packet)
 {
-  char *dataptr = *packet;
+  const char *dataptr = *packet;
   int persist;
 
   /* Check if data has the correct format.  */
@@ -4273,7 +4270,7 @@ process_serial_event (void)
 	char type = own_buf[1];
 	int res;
 	const int insert = ch == 'Z';
-	char *p = &own_buf[3];
+	const char *p = &own_buf[3];
 
 	p = unpack_varlen_hex (p, &addr);
 	kind = strtol (p + 1, &dataptr, 16);
@@ -4293,7 +4290,8 @@ process_serial_event (void)
 		   is telling us to drop that list and use this one
 		   instead.  */
 		clear_breakpoint_conditions_and_commands (bp);
-		process_point_options (bp, &dataptr);
+		const char *options = dataptr;
+		process_point_options (bp, &options);
 	      }
 	  }
 	else

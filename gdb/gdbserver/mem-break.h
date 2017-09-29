@@ -114,14 +114,15 @@ void clear_breakpoint_conditions_and_commands (struct gdb_breakpoint *bp);
    Returns false on failure.  On success, advances CONDITION pointer
    past the condition and returns true.  */
 
-int add_breakpoint_condition (struct gdb_breakpoint *bp, char **condition);
+int add_breakpoint_condition (struct gdb_breakpoint *bp,
+			      const char **condition);
 
 /* Set target-side commands COMMANDS to the breakpoint at ADDR.
    Returns false on failure.  On success, advances COMMANDS past the
    commands and returns true.  If PERSIST, the commands should run
    even while GDB is disconnected.  */
 
-int add_breakpoint_commands (struct gdb_breakpoint *bp, char **commands,
+int add_breakpoint_commands (struct gdb_breakpoint *bp, const char **commands,
 			     int persist);
 
 int any_persistent_commands (void);

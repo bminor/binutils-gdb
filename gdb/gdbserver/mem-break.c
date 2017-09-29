@@ -1269,9 +1269,9 @@ add_condition_to_breakpoint (struct gdb_breakpoint *bp,
 /* Add a target-side condition CONDITION to a breakpoint.  */
 
 int
-add_breakpoint_condition (struct gdb_breakpoint *bp, char **condition)
+add_breakpoint_condition (struct gdb_breakpoint *bp, const char **condition)
 {
-  char *actparm = *condition;
+  const char *actparm = *condition;
   struct agent_expr *cond;
 
   if (condition == NULL)
@@ -1367,10 +1367,10 @@ add_commands_to_breakpoint (struct gdb_breakpoint *bp,
 /* Add a target-side command COMMAND to the breakpoint at ADDR.  */
 
 int
-add_breakpoint_commands (struct gdb_breakpoint *bp, char **command,
+add_breakpoint_commands (struct gdb_breakpoint *bp, const char **command,
 			 int persist)
 {
-  char *actparm = *command;
+  const char *actparm = *command;
   struct agent_expr *cmd;
 
   if (command == NULL)
