@@ -609,7 +609,7 @@ is_suffix (const struct sec_merge_hash_entry *A,
 
 /* This is a helper function for _bfd_merge_sections.  It attempts to
    merge strings matching suffixes of longer strings.  */
-static void
+static bfd_boolean
 merge_strings (struct sec_merge_info *sinfo)
 {
   struct sec_merge_hash_entry **array, **a, *e;
@@ -621,7 +621,7 @@ merge_strings (struct sec_merge_info *sinfo)
   amt = sinfo->htab->size * sizeof (struct sec_merge_hash_entry *);
   array = (struct sec_merge_hash_entry **) bfd_malloc (amt);
   if (array == NULL)
-    goto alloc_failure;
+    return FALSE;
 
   for (e = sinfo->htab->first, a = array; e; e = e->next)
     if (e->alignment)
@@ -666,9 +666,7 @@ merge_strings (struct sec_merge_info *sinfo)
 	}
     }
 
-alloc_failure:
-  if (array)
-    free (array);
+  free (array);
 
   /* Now assign positions to the strings we want to keep.  */
   size = 0;
@@ -714,6 +712,7 @@ alloc_failure:
 	    e->u.index = e->u.suffix->u.index + (e->u.suffix->len - e->len);
 	  }
       }
+  return TRUE;
 }
 
 /* This function is called once after all SEC_MERGE sections are registered
@@ -748,7 +747,7 @@ _bfd_merge_sections (bfd *abfd,
 	      (*remove_hook) (abfd, secinfo->sec);
 	  }
 	else if (! record_section (sinfo, secinfo))
-	  break;
+	  return FALSE;
 
       if (secinfo)
 	continue;
@@ -757,7 +756,10 @@ _bfd_merge_sections (bfd *abfd,
 	continue;
 
       if (sinfo->htab->strings)
-	merge_strings (sinfo);
+	{
+	  if (!merge_strings (sinfo))
+	    return FALSE;
+	}
       else
 	{
 	  struct sec_merge_hash_entry *e;
