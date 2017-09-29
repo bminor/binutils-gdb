@@ -80,7 +80,8 @@ ps_err_e
 ps_pdread (gdb_ps_prochandle_t ph, psaddr_t addr,
 	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
 {
-  read_inferior_memory ((uintptr_t) addr, (gdb_byte *) buf, size);
+  if (read_inferior_memory ((uintptr_t) addr, (gdb_byte *) buf, size) != 0)
+    return PS_ERR;
   return PS_OK;
 }
 

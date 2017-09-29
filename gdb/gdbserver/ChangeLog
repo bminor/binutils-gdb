@@ -1,5 +1,10 @@
 2017-09-29  Pedro Alves  <palves@redhat.com>
 
+	* proc-service.c (ps_pdread): Return PS_ERR if reading memory
+	fails.
+
+2017-09-29  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (handle_extended_wait): Pass parent thread instead
 	of process to thread_db_notice_clone.
 	* linux-low.h (thread_db_notice_clone): Replace parent process
