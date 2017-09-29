@@ -1,3 +1,12 @@
+2017-09-29  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (target_buf, target_buf_size): Delete.
+	(remote_get_noisy_reply): Remove buf_p and sizeof_buf parameters.
+	Use the connection's packet buffer instead.
+	All callers adjusted.
+	(_initialize_remote): Remove references to target_buf and
+	target_buf_size.
+
 2017-09-28  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add

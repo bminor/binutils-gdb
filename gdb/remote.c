@@ -76,10 +76,6 @@
 #include "environ.h"
 #include "common/byte-vector.h"
 
-/* Temp hacks for tracepoint encoding migration.  */
-static char *target_buf;
-static long target_buf_size;
-
 /* Per-program-space data key.  */
 static const struct program_space_data *remote_pspace_data;
 
@@ -237,6 +233,8 @@ static int stop_reply_queue_length (void);
 static void readahead_cache_invalidate (void);
 
 static void remote_unpush_and_throw (void);
+
+static struct remote_state *get_remote_state (void);
 
 /* For "remote".  */
 
@@ -575,17 +573,19 @@ trace_error (char *buf)
 }
 
 /* Utility: wait for reply from stub, while accepting "O" packets.  */
+
 static char *
-remote_get_noisy_reply (char **buf_p,
-			long *sizeof_buf)
+remote_get_noisy_reply ()
 {
+  struct remote_state *rs = get_remote_state ();
+
   do				/* Loop on reply from remote stub.  */
     {
       char *buf;
 
       QUIT;			/* Allow user to bail out with ^C.  */
-      getpkt (buf_p, sizeof_buf, 0);
-      buf = *buf_p;
+      getpkt (&rs->buf, &rs->buf_size, 0);
+      buf = rs->buf;
       if (buf[0] == 'E')
 	trace_error (buf);
       else if (startswith (buf, "qRelocInsn:"))
@@ -638,7 +638,7 @@ remote_get_noisy_reply (char **buf_p,
 	    {
 	      adjusted_size = to - org_to;
 
-	      xsnprintf (buf, *sizeof_buf, "qRelocInsn:%x", adjusted_size);
+	      xsnprintf (buf, rs->buf_size, "qRelocInsn:%x", adjusted_size);
 	      putpkt (buf);
 	    }
 	}
@@ -9523,7 +9523,7 @@ extended_remote_disable_randomization (int val)
   xsnprintf (rs->buf, get_remote_packet_size (), "QDisableRandomization:%x",
 	     val);
   putpkt (rs->buf);
-  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+  reply = remote_get_noisy_reply ();
   if (*reply == '\0')
     error (_("Target does not support QDisableRandomization."));
   if (strcmp (reply, "OK") != 0)
@@ -12250,9 +12250,11 @@ remote_can_run_breakpoint_commands (struct target_ops *self)
 static void
 remote_trace_init (struct target_ops *self)
 {
+  struct remote_state *rs = get_remote_state ();
+
   putpkt ("QTinit");
-  remote_get_noisy_reply (&target_buf, &target_buf_size);
-  if (strcmp (target_buf, "OK") != 0)
+  remote_get_noisy_reply ();
+  if (strcmp (rs->buf, "OK") != 0)
     error (_("Target does not support this command."));
 }
 
@@ -12296,8 +12298,8 @@ remote_download_command_source (int num, ULONGEST addr,
 			    rs->buf + strlen (rs->buf),
 			    rs->buf_size - strlen (rs->buf));
       putpkt (rs->buf);
-      remote_get_noisy_reply (&target_buf, &target_buf_size);
-      if (strcmp (target_buf, "OK"))
+      remote_get_noisy_reply ();
+      if (strcmp (rs->buf, "OK"))
 	warning (_("Target does not support source download."));
 
       if (cmd->control_type == while_control
@@ -12311,8 +12313,8 @@ remote_download_command_source (int num, ULONGEST addr,
 				rs->buf + strlen (rs->buf),
 				rs->buf_size - strlen (rs->buf));
 	  putpkt (rs->buf);
-	  remote_get_noisy_reply (&target_buf, &target_buf_size);
-	  if (strcmp (target_buf, "OK"))
+	  remote_get_noisy_reply ();
+	  if (strcmp (rs->buf, "OK"))
 	    warning (_("Target does not support source download."));
 	}
     }
@@ -12333,6 +12335,7 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
   char *pkt;
   struct breakpoint *b = loc->owner;
   struct tracepoint *t = (struct tracepoint *) b;
+  struct remote_state *rs = get_remote_state ();
 
   encode_actions_rsp (loc, &tdp_actions, &stepping_actions);
   old_chain = make_cleanup (free_actions_list_cleanup_wrapper,
@@ -12416,8 +12419,8 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
   if (b->commands || *default_collect)
     strcat (buf, "-");
   putpkt (buf);
-  remote_get_noisy_reply (&target_buf, &target_buf_size);
-  if (strcmp (target_buf, "OK"))
+  remote_get_noisy_reply ();
+  if (strcmp (rs->buf, "OK"))
     error (_("Target does not support tracepoints."));
 
   /* do_single_steps (t); */
@@ -12432,9 +12435,8 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
 		     ((tdp_actions[ndx + 1] || stepping_actions)
 		      ? '-' : 0));
 	  putpkt (buf);
-	  remote_get_noisy_reply (&target_buf,
-				  &target_buf_size);
-	  if (strcmp (target_buf, "OK"))
+	  remote_get_noisy_reply ();
+	  if (strcmp (rs->buf, "OK"))
 	    error (_("Error on target while setting tracepoints."));
 	}
     }
@@ -12449,9 +12451,8 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
 		     stepping_actions[ndx],
 		     (stepping_actions[ndx + 1] ? "-" : ""));
 	  putpkt (buf);
-	  remote_get_noisy_reply (&target_buf,
-				  &target_buf_size);
-	  if (strcmp (target_buf, "OK"))
+	  remote_get_noisy_reply ();
+	  if (strcmp (rs->buf, "OK"))
 	    error (_("Error on target while setting tracepoints."));
 	}
     }
@@ -12465,8 +12466,8 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
 				event_location_to_string (b->location.get ()),
 				buf + strlen (buf), 2048 - strlen (buf));
 	  putpkt (buf);
-	  remote_get_noisy_reply (&target_buf, &target_buf_size);
-	  if (strcmp (target_buf, "OK"))
+	  remote_get_noisy_reply ();
+	  if (strcmp (rs->buf, "OK"))
 	    warning (_("Target does not support source download."));
 	}
       if (b->cond_string)
@@ -12476,8 +12477,8 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
 				"cond", b->cond_string, buf + strlen (buf),
 				2048 - strlen (buf));
 	  putpkt (buf);
-	  remote_get_noisy_reply (&target_buf, &target_buf_size);
-	  if (strcmp (target_buf, "OK"))
+	  remote_get_noisy_reply ();
+	  if (strcmp (rs->buf, "OK"))
 	    warning (_("Target does not support source download."));
 	}
       remote_download_command_source (b->number, loc->address,
@@ -12531,10 +12532,10 @@ remote_download_trace_state_variable (struct target_ops *self,
   p += 2 * bin2hex ((gdb_byte *) (tsv->name), p, strlen (tsv->name));
   *p++ = '\0';
   putpkt (rs->buf);
-  remote_get_noisy_reply (&target_buf, &target_buf_size);
-  if (*target_buf == '\0')
+  remote_get_noisy_reply ();
+  if (*rs->buf == '\0')
     error (_("Target does not support this command."));
-  if (strcmp (target_buf, "OK") != 0)
+  if (strcmp (rs->buf, "OK") != 0)
     error (_("Error on target while downloading trace state variable."));
 }
 
@@ -12549,7 +12550,7 @@ remote_enable_tracepoint (struct target_ops *self,
   xsnprintf (rs->buf, get_remote_packet_size (), "QTEnable:%x:%s",
 	     location->owner->number, addr_buf);
   putpkt (rs->buf);
-  remote_get_noisy_reply (&rs->buf, &rs->buf_size);
+  remote_get_noisy_reply ();
   if (*rs->buf == '\0')
     error (_("Target does not support enabling tracepoints while a trace run is ongoing."));
   if (strcmp (rs->buf, "OK") != 0)
@@ -12567,7 +12568,7 @@ remote_disable_tracepoint (struct target_ops *self,
   xsnprintf (rs->buf, get_remote_packet_size (), "QTDisable:%x:%s",
 	     location->owner->number, addr_buf);
   putpkt (rs->buf);
-  remote_get_noisy_reply (&rs->buf, &rs->buf_size);
+  remote_get_noisy_reply ();
   if (*rs->buf == '\0')
     error (_("Target does not support disabling tracepoints while a trace run is ongoing."));
   if (strcmp (rs->buf, "OK") != 0)
@@ -12587,8 +12588,10 @@ remote_trace_set_readonly_regions (struct target_ops *self)
   if (!exec_bfd)
     return;			/* No information to give.  */
 
-  strcpy (target_buf, "QTro");
-  offset = strlen (target_buf);
+  struct remote_state *rs = get_remote_state ();
+
+  strcpy (rs->buf, "QTro");
+  offset = strlen (rs->buf);
   for (s = exec_bfd->sections; s; s = s->next)
     {
       char tmp1[40], tmp2[40];
@@ -12605,33 +12608,35 @@ remote_trace_set_readonly_regions (struct target_ops *self)
       sprintf_vma (tmp1, vma);
       sprintf_vma (tmp2, vma + size);
       sec_length = 1 + strlen (tmp1) + 1 + strlen (tmp2);
-      if (offset + sec_length + 1 > target_buf_size)
+      if (offset + sec_length + 1 > rs->buf_size)
 	{
 	  if (packet_support (PACKET_qXfer_traceframe_info) != PACKET_ENABLE)
 	    warning (_("\
 Too many sections for read-only sections definition packet."));
 	  break;
 	}
-      xsnprintf (target_buf + offset, target_buf_size - offset, ":%s,%s",
+      xsnprintf (rs->buf + offset, rs->buf_size - offset, ":%s,%s",
 		 tmp1, tmp2);
       offset += sec_length;
     }
   if (anysecs)
     {
-      putpkt (target_buf);
-      getpkt (&target_buf, &target_buf_size, 0);
+      putpkt (rs->buf);
+      getpkt (&rs->buf, &rs->buf_size, 0);
     }
 }
 
 static void
 remote_trace_start (struct target_ops *self)
 {
+  struct remote_state *rs = get_remote_state ();
+
   putpkt ("QTStart");
-  remote_get_noisy_reply (&target_buf, &target_buf_size);
-  if (*target_buf == '\0')
+  remote_get_noisy_reply ();
+  if (*rs->buf == '\0')
     error (_("Target does not support this command."));
-  if (strcmp (target_buf, "OK") != 0)
-    error (_("Bogus reply from target: %s"), target_buf);
+  if (strcmp (rs->buf, "OK") != 0)
+    error (_("Bogus reply from target: %s"), rs->buf);
 }
 
 static int
@@ -12642,6 +12647,7 @@ remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
   /* FIXME we need to get register block size some other way.  */
   extern int trace_regblock_size;
   enum packet_result result;
+  struct remote_state *rs = get_remote_state ();
 
   if (packet_support (PACKET_qTStatus) == PACKET_DISABLE)
     return -1;
@@ -12652,7 +12658,7 @@ remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
 
   TRY
     {
-      p = remote_get_noisy_reply (&target_buf, &target_buf_size);
+      p = remote_get_noisy_reply ();
     }
   CATCH (ex, RETURN_MASK_ERROR)
     {
@@ -12675,7 +12681,7 @@ remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
   ts->filename = NULL;
 
   if (*p++ != 'T')
-    error (_("Bogus trace status reply from target: %s"), target_buf);
+    error (_("Bogus trace status reply from target: %s"), rs->buf);
 
   /* Function 'parse_trace_status' sets default value of each field of
      'ts' at first, so we don't have to do it here.  */
@@ -12707,7 +12713,7 @@ remote_get_tracepoint_status (struct target_ops *self, struct breakpoint *bp,
 	  xsnprintf (rs->buf, size, "qTP:%x:%s", tp->number_on_target,
 		     phex_nz (loc->address, 0));
 	  putpkt (rs->buf);
-	  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+	  reply = remote_get_noisy_reply ();
 	  if (reply && *reply)
 	    {
 	      if (*reply == 'V')
@@ -12722,7 +12728,7 @@ remote_get_tracepoint_status (struct target_ops *self, struct breakpoint *bp,
       xsnprintf (rs->buf, size, "qTP:%x:%s", utp->number,
 		 phex_nz (utp->addr, 0));
       putpkt (rs->buf);
-      reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+      reply = remote_get_noisy_reply ();
       if (reply && *reply)
 	{
 	  if (*reply == 'V')
@@ -12734,12 +12740,14 @@ remote_get_tracepoint_status (struct target_ops *self, struct breakpoint *bp,
 static void
 remote_trace_stop (struct target_ops *self)
 {
+  struct remote_state *rs = get_remote_state ();
+
   putpkt ("QTStop");
-  remote_get_noisy_reply (&target_buf, &target_buf_size);
-  if (*target_buf == '\0')
+  remote_get_noisy_reply ();
+  if (*rs->buf == '\0')
     error (_("Target does not support this command."));
-  if (strcmp (target_buf, "OK") != 0)
-    error (_("Bogus reply from target: %s"), target_buf);
+  if (strcmp (rs->buf, "OK") != 0)
+    error (_("Bogus reply from target: %s"), rs->buf);
 }
 
 static int
@@ -12786,7 +12794,7 @@ remote_trace_find (struct target_ops *self,
     }
 
   putpkt (rs->buf);
-  reply = remote_get_noisy_reply (&(rs->buf), &rs->buf_size);
+  reply = remote_get_noisy_reply ();
   if (*reply == '\0')
     error (_("Target does not support this command."));
 
@@ -12837,7 +12845,7 @@ remote_get_trace_state_variable_value (struct target_ops *self,
 
   xsnprintf (rs->buf, get_remote_packet_size (), "qTV:%x", tsvnum);
   putpkt (rs->buf);
-  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+  reply = remote_get_noisy_reply ();
   if (reply && *reply)
     {
       if (*reply == 'V')
@@ -12864,7 +12872,7 @@ remote_save_trace_data (struct target_ops *self, const char *filename)
   p += 2 * bin2hex ((gdb_byte *) filename, p, strlen (filename));
   *p++ = '\0';
   putpkt (rs->buf);
-  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+  reply = remote_get_noisy_reply ();
   if (*reply == '\0')
     error (_("Target does not support this command."));
   if (strcmp (reply, "OK") != 0)
@@ -12895,7 +12903,7 @@ remote_get_raw_trace_data (struct target_ops *self,
   *p++ = '\0';
 
   putpkt (rs->buf);
-  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+  reply = remote_get_noisy_reply ();
   if (reply && *reply)
     {
       /* 'l' by itself means we're at the end of the buffer and
@@ -12908,7 +12916,7 @@ remote_get_raw_trace_data (struct target_ops *self,
 	 what was returned in the packet; if the target is
 	 unexpectedly generous and gives us a bigger reply than we
 	 asked for, we don't want to crash.  */
-      rslt = hex2bin (target_buf, buf, len);
+      rslt = hex2bin (reply, buf, len);
       return rslt;
     }
 
@@ -12927,7 +12935,7 @@ remote_set_disconnected_tracing (struct target_ops *self, int val)
 
       xsnprintf (rs->buf, get_remote_packet_size (), "QTDisconnected:%x", val);
       putpkt (rs->buf);
-      reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+      reply = remote_get_noisy_reply ();
       if (*reply == '\0')
 	error (_("Target does not support this command."));
       if (strcmp (reply, "OK") != 0)
@@ -12955,7 +12963,7 @@ remote_set_circular_trace_buffer (struct target_ops *self, int val)
 
   xsnprintf (rs->buf, get_remote_packet_size (), "QTBuffer:circular:%x", val);
   putpkt (rs->buf);
-  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+  reply = remote_get_noisy_reply ();
   if (*reply == '\0')
     error (_("Target does not support this command."));
   if (strcmp (reply, "OK") != 0)
@@ -13003,7 +13011,7 @@ remote_get_min_fast_tracepoint_insn_len (struct target_ops *self)
 
   xsnprintf (rs->buf, get_remote_packet_size (), "qTMinFTPILen");
   putpkt (rs->buf);
-  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+  reply = remote_get_noisy_reply ();
   if (*reply == '\0')
     return -1;
   else
@@ -13038,7 +13046,7 @@ remote_set_trace_buffer_size (struct target_ops *self, LONGEST val)
 	buf += hexnumstr (buf, (ULONGEST) val);
 
       putpkt (rs->buf);
-      remote_get_noisy_reply (&rs->buf, &rs->buf_size);
+      remote_get_noisy_reply ();
       result = packet_ok (rs->buf,
 		  &remote_protocol_packets[PACKET_QTBuffer_size]);
 
@@ -13084,7 +13092,7 @@ remote_set_trace_notes (struct target_ops *self,
   *buf = '\0';
 
   putpkt (rs->buf);
-  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+  reply = remote_get_noisy_reply ();
   if (*reply == '\0')
     return 0;
 
@@ -14518,8 +14526,4 @@ stepping is supported by the target.  The default is on."),
   magic_null_ptid = ptid_build (42000, -1, 1);
   not_sent_ptid = ptid_build (42000, -2, 1);
   any_thread_ptid = ptid_build (42000, 0, 1);
-
-  target_buf_size = 2048;
-  target_buf = (char *) xmalloc (target_buf_size);
 }
-
