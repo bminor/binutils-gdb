@@ -1,3 +1,13 @@
+2017-09-29  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (handle_extended_wait): Pass parent thread instead
+	of process to thread_db_notice_clone.
+	* linux-low.h (thread_db_notice_clone): Replace parent process
+	parameter with parent thread parameter.
+	* thread-db.c (find_one_thread): Add comment.
+	(thread_db_notice_clone): Replace parent process parameter with
+	parent thread parameter.  Temporarily switch to the parent thread.
+
 2017-09-26  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdbthread.h: Include "common-gdbthread.h".

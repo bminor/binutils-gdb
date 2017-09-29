@@ -28,6 +28,7 @@ extern int debug_threads;
 #include "nat/gdb_thread_db.h"
 #include "gdb_vecs.h"
 #include "nat/linux-procfs.h"
+#include "common/scoped_restore.h"
 
 #ifndef USE_LIBTHREAD_DB_DIRECTLY
 #include <dlfcn.h>
@@ -154,6 +155,9 @@ thread_db_state_str (td_thr_state_e state)
     }
 }
 #endif
+
+/* Get thread info about PTID, accessing memory via the current
+   thread.  */
 
 static int
 find_one_thread (ptid_t ptid)
@@ -887,15 +891,22 @@ thread_db_handle_monitor_command (char *mon)
 /* See linux-low.h.  */
 
 void
-thread_db_notice_clone (struct process_info *proc, ptid_t ptid)
+thread_db_notice_clone (struct thread_info *parent_thr, ptid_t child_ptid)
 {
-  struct thread_db *thread_db = proc->priv->thread_db;
+  process_info *parent_proc = get_thread_process (parent_thr);
+  struct thread_db *thread_db = parent_proc->priv->thread_db;
 
   /* If the thread layer isn't initialized, return.  It may just
      be that the program uses clone, but does not use libthread_db.  */
   if (thread_db == NULL || !thread_db->all_symbols_looked_up)
     return;
 
-  if (!find_one_thread (ptid))
+  /* find_one_thread calls into libthread_db which accesses memory via
+     the current thread.  Temporarily switch to a thread we know is
+     stopped.  */
+  scoped_restore restore_current_thread
+    = make_scoped_restore (&current_thread, parent_thr);
+
+  if (!find_one_thread (child_ptid))
     warning ("Cannot find thread after clone.\n");
 }
