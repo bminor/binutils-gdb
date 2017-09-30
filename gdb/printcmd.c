@@ -1314,7 +1314,7 @@ info_symbol_command (char *arg, int from_tty)
 	    = lookup_minimal_symbol_by_pc_section (sect_addr, osect).minsym))
       {
 	const char *obj_name, *mapped, *sec_name, *msym_name;
-	char *loc_string;
+	const char *loc_string;
 	struct cleanup *old_chain;
 
 	matches = 1;
@@ -1325,14 +1325,14 @@ info_symbol_command (char *arg, int from_tty)
 
 	/* Don't print the offset if it is zero.
 	   We assume there's no need to handle i18n of "sym + offset".  */
+	std::string string_holder;
 	if (offset)
-	  loc_string = xstrprintf ("%s + %u", msym_name, offset);
+	  {
+	    string_holder = string_printf ("%s + %u", msym_name, offset);
+	    loc_string = string_holder.c_str ();
+	  }
 	else
-	  loc_string = xstrprintf ("%s", msym_name);
-
-	/* Use a cleanup to free loc_string in case the user quits
-	   a pagination request inside printf_filtered.  */
-	old_chain = make_cleanup (xfree, loc_string);
+	  loc_string = msym_name;
 
 	gdb_assert (osect->objfile && objfile_name (osect->objfile));
 	obj_name = objfile_name (osect->objfile);
@@ -1370,8 +1370,6 @@ info_symbol_command (char *arg, int from_tty)
 	    else
 	      printf_filtered (_("%s in section %s\n"),
 			       loc_string, sec_name);
-
-	do_cleanups (old_chain);
       }
   }
   if (matches == 0)
