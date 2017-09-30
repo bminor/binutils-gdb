@@ -4178,10 +4178,11 @@ adjust_pc_after_break (struct thread_info *thread,
       || (target_is_non_stop_p ()
 	  && moribund_breakpoint_here_p (aspace, breakpoint_pc)))
     {
-      struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);
+      gdb::optional<scoped_restore_tmpl<int>> restore_operation_disable;
 
       if (record_full_is_used ())
-	record_full_gdb_operation_disable_set ();
+	restore_operation_disable.emplace
+	  (record_full_gdb_operation_disable_set ());
 
       /* When using hardware single-step, a SIGTRAP is reported for both
 	 a completed single-step and a software breakpoint.  Need to
@@ -4205,8 +4206,6 @@ adjust_pc_after_break (struct thread_info *thread,
 	  || (thread->stepped_breakpoint
 	      && thread->prev_pc == breakpoint_pc))
 	regcache_write_pc (regcache, breakpoint_pc);
-
-      do_cleanups (old_cleanups);
     }
 }
 
@@ -6008,14 +6007,14 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  decr_pc = gdbarch_decr_pc_after_break (gdbarch);
 	  if (decr_pc != 0)
 	    {
-	      struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);
+	      gdb::optional<scoped_restore_tmpl<int>>
+		restore_operation_disable;
 
 	      if (record_full_is_used ())
-		record_full_gdb_operation_disable_set ();
+		restore_operation_disable.emplace
+		  (record_full_gdb_operation_disable_set ());
 
 	      regcache_write_pc (regcache, stop_pc + decr_pc);
-
-	      do_cleanups (old_cleanups);
 	    }
 	}
       else

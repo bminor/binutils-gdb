@@ -670,16 +670,10 @@ record_full_message_wrapper_safe (struct regcache *regcache,
 
 static int record_full_gdb_operation_disable = 0;
 
-struct cleanup *
+scoped_restore_tmpl<int>
 record_full_gdb_operation_disable_set (void)
 {
-  struct cleanup *old_cleanups = NULL;
-
-  old_cleanups =
-    make_cleanup_restore_integer (&record_full_gdb_operation_disable);
-  record_full_gdb_operation_disable = 1;
-
-  return old_cleanups;
+  return make_scoped_restore (&record_full_gdb_operation_disable, 1);
 }
 
 /* Flag set to TRUE for target_stopped_by_watchpoint.  */
@@ -1051,7 +1045,8 @@ record_full_wait_1 (struct target_ops *ops,
 		    ptid_t ptid, struct target_waitstatus *status,
 		    int options)
 {
-  struct cleanup *set_cleanups = record_full_gdb_operation_disable_set ();
+  scoped_restore restore_operation_disable
+    = record_full_gdb_operation_disable_set ();
 
   if (record_debug)
     fprintf_unfiltered (gdb_stdlog,
@@ -1334,7 +1329,6 @@ replay_out:
 
   signal (SIGINT, handle_sigint);
 
-  do_cleanups (set_cleanups);
   return inferior_ptid;
 }
 
@@ -1653,12 +1647,11 @@ record_full_insert_breakpoint (struct target_ops *ops,
 	 However, we do have to insert software single-step
 	 breakpoints, in case the target can't hardware step.  To keep
 	 things simple, we always insert.  */
-      struct cleanup *old_cleanups;
       int ret;
 
-      old_cleanups = record_full_gdb_operation_disable_set ();
+      scoped_restore restore_operation_disable
+	= record_full_gdb_operation_disable_set ();
       ret = ops->beneath->to_insert_breakpoint (ops->beneath, gdbarch, bp_tgt);
-      do_cleanups (old_cleanups);
 
       if (ret != 0)
 	return ret;
@@ -1711,14 +1704,12 @@ record_full_remove_breakpoint (struct target_ops *ops,
 	{
 	  if (bp->in_target_beneath)
 	    {
-	      struct cleanup *old_cleanups;
 	      int ret;
 
-	      old_cleanups = record_full_gdb_operation_disable_set ();
+	      scoped_restore restore_operation_disable
+		= record_full_gdb_operation_disable_set ();
 	      ret = ops->beneath->to_remove_breakpoint (ops->beneath, gdbarch,
 							bp_tgt, reason);
-	      do_cleanups (old_cleanups);
-
 	      if (ret != 0)
 		return ret;
 	    }
@@ -2549,7 +2540,6 @@ record_full_save (struct target_ops *self, const char *recfilename)
   uint32_t magic;
   struct regcache *regcache;
   struct gdbarch *gdbarch;
-  struct cleanup *set_cleanups;
   int save_size = 0;
   asection *osec = NULL;
   int bfd_offset = 0;
@@ -2573,7 +2563,8 @@ record_full_save (struct target_ops *self, const char *recfilename)
   gdbarch = get_regcache_arch (regcache);
 
   /* Disable the GDB operation record.  */
-  set_cleanups = record_full_gdb_operation_disable_set ();
+  scoped_restore restore_operation_disable
+    = record_full_gdb_operation_disable_set ();
 
   /* Reverse execute to the begin of record list.  */
   while (1)
@@ -2737,7 +2728,6 @@ record_full_save (struct target_ops *self, const char *recfilename)
         record_full_list = record_full_list->prev;
     }
 
-  do_cleanups (set_cleanups);
   unlink_file.keep ();
 
   /* Succeeded.  */
@@ -2753,7 +2743,8 @@ static void
 record_full_goto_insn (struct record_full_entry *entry,
 		       enum exec_direction_kind dir)
 {
-  struct cleanup *set_cleanups = record_full_gdb_operation_disable_set ();
+  scoped_restore restore_operation_disable
+    = record_full_gdb_operation_disable_set ();
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
@@ -2771,7 +2762,6 @@ record_full_goto_insn (struct record_full_entry *entry,
       else
 	record_full_list = record_full_list->next;
     } while (record_full_list != entry);
-  do_cleanups (set_cleanups);
 }
 
 /* Alias for "target record-full".  */

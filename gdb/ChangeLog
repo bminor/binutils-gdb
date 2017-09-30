@@ -1,3 +1,15 @@
+2017-10-03  Tom Tromey  <tom@tromey.com>
+
+	* record-full.h (record_full_gdb_operation_disable_set): Return
+	scoped_restore_tmpl<int>.
+	* infrun.c (adjust_pc_after_break): Update.
+	(handle_signal_stop): Update.
+	* record-full.c (record_full_gdb_operation_disable_set): Return
+	scoped_restore_tmpl<int>.
+	(record_full_wait_1, record_full_insert_breakpoint)
+	(record_full_remove_breakpoint, record_full_save)
+	(record_full_goto_insn): Update.
+
 2017-10-02  Tom Tromey  <tom@tromey.com>
 
 	PR rust/22236:
