@@ -1,3 +1,11 @@
+2017-10-01  Alexander Fedotov  <alfedotov@gmail.com>
+
+	* ppc-opc.c (vle_opcodes): Add e_lmvsprw, e_lmvgprw,
+	e_lmvsrrw, e_lmvcsrrw and e_lmvcsrrw as official mnemonics for
+	VLE multimple load/store instructions. Old e_ldm* variants are
+	kept as aliases.
+	Add missing e_lmvmcsrrw and e_stmvmcsrrw.
+
 2017-09-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 22179
