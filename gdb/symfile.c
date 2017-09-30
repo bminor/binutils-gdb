@@ -56,6 +56,7 @@
 #include "stack.h"
 #include "gdb_bfd.h"
 #include "cli/cli-utils.h"
+#include "common/byte-vector.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -1942,16 +1943,14 @@ load_progress (ULONGEST bytes, void *untyped_arg)
 	 might add a verify_memory() method to the target vector and
 	 then use that.  remote.c could implement that method using
 	 the ``qCRC'' packet.  */
-      gdb_byte *check = (gdb_byte *) xmalloc (bytes);
-      struct cleanup *verify_cleanups = make_cleanup (xfree, check);
+      gdb::byte_vector check (bytes);
 
-      if (target_read_memory (args->lma, check, bytes) != 0)
+      if (target_read_memory (args->lma, check.data (), bytes) != 0)
 	error (_("Download verify read failed at %s"),
 	       paddress (target_gdbarch (), args->lma));
-      if (memcmp (args->buffer, check, bytes) != 0)
+      if (memcmp (args->buffer, check.data (), bytes) != 0)
 	error (_("Download verify compare failed at %s"),
 	       paddress (target_gdbarch (), args->lma));
-      do_cleanups (verify_cleanups);
     }
   totals->data_count += bytes;
   args->lma += bytes;
