@@ -1,5 +1,10 @@
 2017-10-03  Tom Tromey  <tom@tromey.com>
 
+	* utils.c (internal_vproblem): Use std::string.
+	(defaulted_query): Likewise.
+
+2017-10-03  Tom Tromey  <tom@tromey.com>
+
 	* guile/scm-ports.c (ioscm_with_output_to_port_worker): Update.
 	* top.c (execute_command_to_string): Update.
 	* utils.c (make_cleanup_restore_page_info): Remove.

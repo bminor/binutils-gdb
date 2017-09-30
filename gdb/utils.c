@@ -392,8 +392,7 @@ internal_vproblem (struct internal_problem *problem,
   static int dejavu;
   int quit_p;
   int dump_core_p;
-  char *reason;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
+  std::string reason;
 
   /* Don't allow infinite error/warning recursion.  */
   {
@@ -426,21 +425,17 @@ internal_vproblem (struct internal_problem *problem,
      style similar to a compiler error message.  Include extra detail
      so that the user knows that they are living on the edge.  */
   {
-    char *msg;
-
-    msg = xstrvprintf (fmt, ap);
-    reason = xstrprintf ("%s:%d: %s: %s\n"
-			 "A problem internal to GDB has been detected,\n"
-			 "further debugging may prove unreliable.",
-			 file, line, problem->name, msg);
-    xfree (msg);
-    make_cleanup (xfree, reason);
+    std::string msg = string_printf (fmt, ap);
+    reason = string_printf ("%s:%d: %s: %s\n"
+			    "A problem internal to GDB has been detected,\n"
+			    "further debugging may prove unreliable.",
+			    file, line, problem->name, msg.c_str ());
   }
 
   /* Fall back to abort_with_message if gdb_stderr is not set up.  */
   if (current_ui == NULL)
     {
-      fputs (reason, stderr);
+      fputs (reason.c_str (), stderr);
       abort_with_message ("\n");
     }
 
@@ -458,7 +453,7 @@ internal_vproblem (struct internal_problem *problem,
   if (problem->should_quit != internal_problem_ask
       || !confirm
       || !filtered_printing_initialized ())
-    fprintf_unfiltered (gdb_stderr, "%s\n", reason);
+    fprintf_unfiltered (gdb_stderr, "%s\n", reason.c_str ());
 
   if (problem->should_quit == internal_problem_ask)
     {
@@ -468,7 +463,8 @@ internal_vproblem (struct internal_problem *problem,
       if (!confirm || !filtered_printing_initialized ())
 	quit_p = 1;
       else
-        quit_p = query (_("%s\nQuit this debugging session? "), reason);
+        quit_p = query (_("%s\nQuit this debugging session? "),
+			reason.c_str ());
     }
   else if (problem->should_quit == internal_problem_yes)
     quit_p = 1;
@@ -485,7 +481,7 @@ internal_vproblem (struct internal_problem *problem,
 
   if (problem->should_dump_core == internal_problem_ask)
     {
-      if (!can_dump_core_warn (LIMIT_MAX, reason))
+      if (!can_dump_core_warn (LIMIT_MAX, reason.c_str ()))
 	dump_core_p = 0;
       else if (!filtered_printing_initialized ())
 	dump_core_p = 1;
@@ -494,11 +490,12 @@ internal_vproblem (struct internal_problem *problem,
 	  /* Default (yes/batch case) is to dump core.  This leaves a GDB
 	     `dropping' so that it is easier to see that something went
 	     wrong in GDB.  */
-	  dump_core_p = query (_("%s\nCreate a core file of GDB? "), reason);
+	  dump_core_p = query (_("%s\nCreate a core file of GDB? "),
+			       reason.c_str ());
 	}
     }
   else if (problem->should_dump_core == internal_problem_yes)
-    dump_core_p = can_dump_core_warn (LIMIT_MAX, reason);
+    dump_core_p = can_dump_core_warn (LIMIT_MAX, reason.c_str ());
   else if (problem->should_dump_core == internal_problem_no)
     dump_core_p = 0;
   else
@@ -523,7 +520,6 @@ internal_vproblem (struct internal_problem *problem,
     }
 
   dejavu = 0;
-  do_cleanups (cleanup);
 }
 
 static struct internal_problem internal_error_problem = {
@@ -915,8 +911,6 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   int def_value;
   char def_answer, not_def_answer;
   const char *y_string, *n_string;
-  char *question, *prompt;
-  struct cleanup *old_chain;
 
   /* Set up according to which answer is the default.  */
   if (defchar == '\0')
@@ -978,13 +972,12 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
     }
 
   /* Format the question outside of the loop, to avoid reusing args.  */
-  question = xstrvprintf (ctlstr, args);
-  old_chain = make_cleanup (xfree, question);
-  prompt = xstrprintf (_("%s%s(%s or %s) %s"),
-		      annotation_level > 1 ? "\n\032\032pre-query\n" : "",
-		      question, y_string, n_string,
-		      annotation_level > 1 ? "\n\032\032query\n" : "");
-  make_cleanup (xfree, prompt);
+  std::string question = string_vprintf (ctlstr, args);
+  std::string prompt
+    = string_printf (_("%s%s(%s or %s) %s"),
+		     annotation_level > 1 ? "\n\032\032pre-query\n" : "",
+		     question.c_str (), y_string, n_string,
+		     annotation_level > 1 ? "\n\032\032query\n" : "");
 
   /* Used to add duration we waited for user to respond to
      prompt_for_continue_wait_time.  */
@@ -998,7 +991,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       char *response, answer;
 
       gdb_flush (gdb_stdout);
-      response = gdb_readline_wrapper (prompt);
+      response = gdb_readline_wrapper (prompt.c_str ());
 
       if (response == NULL)	/* C-d  */
 	{
@@ -1038,7 +1031,6 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 
   if (annotation_level > 1)
     printf_filtered (("\n\032\032post-query\n"));
-  do_cleanups (old_chain);
   return retval;
 }
 
