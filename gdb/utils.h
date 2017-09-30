@@ -211,9 +211,6 @@ extern struct cleanup *(make_cleanup_free_section_addr_info
 
 /* For make_cleanup_close see common/filestuff.h.  */
 
-extern struct cleanup *make_cleanup_restore_integer (int *variable);
-extern struct cleanup *make_cleanup_restore_uinteger (unsigned int *variable);
-
 struct target_ops;
 extern struct cleanup *make_cleanup_unpush_target (struct target_ops *ops);
 
@@ -236,9 +233,27 @@ extern void free_current_contents (void *);
 
 extern void init_page_info (void);
 
-extern struct cleanup *make_cleanup_restore_page_info (void);
-extern struct cleanup *
-  set_batch_flag_and_make_cleanup_restore_page_info (void);
+/* Temporarily set BATCH_FLAG and the associated unlimited terminal size.
+   Restore when destroyed.  */
+
+struct set_batch_flag_and_restore_page_info
+{
+public:
+
+  set_batch_flag_and_restore_page_info ();
+  ~set_batch_flag_and_restore_page_info ();
+
+  DISABLE_COPY_AND_ASSIGN (set_batch_flag_and_restore_page_info);
+
+private:
+
+  /* Note that this doesn't use scoped_restore, because it's important
+     to control the ordering of operations in the destruction, and it
+     was simpler to avoid introducing a new ad hoc class.  */
+  unsigned m_save_lines_per_page;
+  unsigned m_save_chars_per_line;
+  int m_save_batch_flag;
+};
 
 extern struct cleanup *make_bpstat_clear_actions_cleanup (void);
 

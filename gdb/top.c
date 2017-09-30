@@ -666,11 +666,9 @@ execute_command (char *p, int from_tty)
 std::string
 execute_command_to_string (char *p, int from_tty)
 {
-  struct cleanup *cleanup;
-
   /* GDB_STDOUT should be better already restored during these
      restoration callbacks.  */
-  cleanup = set_batch_flag_and_make_cleanup_restore_page_info ();
+  set_batch_flag_and_restore_page_info save_page_info;
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
@@ -693,8 +691,6 @@ execute_command_to_string (char *p, int from_tty)
 
     execute_command (p, from_tty);
   }
-
-  do_cleanups (cleanup);
 
   return std::move (str_file.string ());
 }

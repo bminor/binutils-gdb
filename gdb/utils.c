@@ -150,44 +150,6 @@ make_cleanup_free_section_addr_info (struct section_addr_info *addrs)
   return make_cleanup (do_free_section_addr_info, addrs);
 }
 
-struct restore_integer_closure
-{
-  int *variable;
-  int value;
-};
-
-static void
-restore_integer (void *p)
-{
-  struct restore_integer_closure *closure
-    = (struct restore_integer_closure *) p;
-
-  *(closure->variable) = closure->value;
-}
-
-/* Remember the current value of *VARIABLE and make it restored when
-   the cleanup is run.  */
-
-struct cleanup *
-make_cleanup_restore_integer (int *variable)
-{
-  struct restore_integer_closure *c = XNEW (struct restore_integer_closure);
-
-  c->variable = variable;
-  c->value = *variable;
-
-  return make_cleanup_dtor (restore_integer, (void *) c, xfree);
-}
-
-/* Remember the current value of *VARIABLE and make it restored when
-   the cleanup is run.  */
-
-struct cleanup *
-make_cleanup_restore_uinteger (unsigned int *variable)
-{
-  return make_cleanup_restore_integer ((int *) variable);
-}
-
 /* Helper for make_cleanup_unpush_target.  */
 
 static void
@@ -1464,42 +1426,23 @@ filtered_printing_initialized (void)
   return wrap_buffer != NULL;
 }
 
-/* Helper for make_cleanup_restore_page_info.  */
-
-static void
-do_restore_page_info_cleanup (void *arg)
+set_batch_flag_and_restore_page_info::set_batch_flag_and_restore_page_info ()
+  : m_save_lines_per_page (lines_per_page),
+    m_save_chars_per_line (chars_per_line),
+    m_save_batch_flag (batch_flag)
 {
-  set_screen_size ();
-  set_width ();
-}
-
-/* Provide cleanup for restoring the terminal size.  */
-
-struct cleanup *
-make_cleanup_restore_page_info (void)
-{
-  struct cleanup *back_to;
-
-  back_to = make_cleanup (do_restore_page_info_cleanup, NULL);
-  make_cleanup_restore_uinteger (&lines_per_page);
-  make_cleanup_restore_uinteger (&chars_per_line);
-
-  return back_to;
-}
-
-/* Temporarily set BATCH_FLAG and the associated unlimited terminal size.
-   Provide cleanup for restoring the original state.  */
-
-struct cleanup *
-set_batch_flag_and_make_cleanup_restore_page_info (void)
-{
-  struct cleanup *back_to = make_cleanup_restore_page_info ();
-  
-  make_cleanup_restore_integer (&batch_flag);
   batch_flag = 1;
   init_page_info ();
+}
 
-  return back_to;
+set_batch_flag_and_restore_page_info::~set_batch_flag_and_restore_page_info ()
+{
+  batch_flag = m_save_batch_flag;
+  chars_per_line = m_save_chars_per_line;
+  lines_per_page = m_save_lines_per_page;
+
+  set_screen_size ();
+  set_width ();
 }
 
 /* Set the screen size based on LINES_PER_PAGE and CHARS_PER_LINE.  */

@@ -1,5 +1,27 @@
 2017-10-03  Tom Tromey  <tom@tromey.com>
 
+	* guile/scm-ports.c (ioscm_with_output_to_port_worker): Update.
+	* top.c (execute_command_to_string): Update.
+	* utils.c (make_cleanup_restore_page_info): Remove.
+	(do_restore_page_info_cleanup): Remove.
+	(set_batch_flag_and_restore_page_info):
+	New.
+	(make_cleanup_restore_page_info): Remove.
+	(set_batch_flag_and_make_cleanup_restore_page_info): Remove.
+	(~set_batch_flag_and_restore_page_info): New
+	(make_cleanup_restore_uinteger): Remove.
+	(make_cleanup_restore_integer): Remove.
+	(struct restore_integer_closure): Remove.
+	(restore_integer): Remove.
+	* utils.h (struct set_batch_flag_and_restore_page_info): New
+	class.
+	(set_batch_flag_and_make_cleanup_restore_page_info): Remove.
+	(make_cleanup_restore_page_info): Remove.
+	(make_cleanup_restore_uinteger) Remove.
+	(make_cleanup_restore_integer) Remove.
+
+2017-10-03  Tom Tromey  <tom@tromey.com>
+
 	* record-full.h (record_full_gdb_operation_disable_set): Return
 	scoped_restore_tmpl<int>.
 	* infrun.c (adjust_pc_after_break): Update.
