@@ -2730,7 +2730,6 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
   /* Trace state variables.  */
   {
-    struct cleanup *cleanups;
     int tvar;
     int i;
 

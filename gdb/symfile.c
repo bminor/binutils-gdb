@@ -1629,7 +1629,6 @@ symbol_file_command (const char *args, int from_tty)
     {
       objfile_flags flags = OBJF_USERLOADED;
       symfile_add_flags add_flags = 0;
-      struct cleanup *cleanups;
       char *name = NULL;
 
       if (from_tty)

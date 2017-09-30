@@ -1,5 +1,12 @@
 2017-10-03  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-main.c (mi_cmd_trace_frame_collected): Remove unused
+	declaration.
+	* printcmd.c (x_command): Remove unused declaration.
+	* symfile.c (symbol_file_command): Remove unused declaration.
+
+2017-10-03  Tom Tromey  <tom@tromey.com>
+
 	* utils.c (internal_vproblem): Use std::string.
 	(defaulted_query): Likewise.
 

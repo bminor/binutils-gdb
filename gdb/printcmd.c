@@ -1606,7 +1606,6 @@ static void
 x_command (char *exp, int from_tty)
 {
   struct format_data fmt;
-  struct cleanup *old_chain;
   struct value *val;
 
   fmt.format = last_format ? last_format : 'x';
