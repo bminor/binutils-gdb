@@ -1094,19 +1094,16 @@ static void
 gdb_safe_append_history (void)
 {
   int ret, saved_errno;
-  char *local_history_filename;
-  struct cleanup *old_chain;
 
-  local_history_filename
-    = xstrprintf ("%s-gdb%ld~", history_filename, (long) getpid ());
-  old_chain = make_cleanup (xfree, local_history_filename);
+  std::string local_history_filename
+    = string_printf ("%s-gdb%ld~", history_filename, (long) getpid ());
 
-  ret = rename (history_filename, local_history_filename);
+  ret = rename (history_filename, local_history_filename.c_str ());
   saved_errno = errno;
   if (ret < 0 && saved_errno != ENOENT)
     {
       warning (_("Could not rename %s to %s: %s"),
-	       history_filename, local_history_filename,
+	       history_filename, local_history_filename.c_str (),
 	       safe_strerror (saved_errno));
     }
   else
@@ -1122,24 +1119,23 @@ gdb_safe_append_history (void)
 	     to move it back anyway.  Otherwise a global history file would
 	     never get created!  */
 	   gdb_assert (saved_errno == ENOENT);
-	   write_history (local_history_filename);
+	   write_history (local_history_filename.c_str ());
 	}
       else
 	{
-	  append_history (command_count, local_history_filename);
+	  append_history (command_count, local_history_filename.c_str ());
 	  if (history_is_stifled ())
-	    history_truncate_file (local_history_filename, history_max_entries);
+	    history_truncate_file (local_history_filename.c_str (),
+				   history_max_entries);
 	}
 
-      ret = rename (local_history_filename, history_filename);
+      ret = rename (local_history_filename.c_str (), history_filename);
       saved_errno = errno;
       if (ret < 0 && saved_errno != EEXIST)
         warning (_("Could not rename %s to %s: %s"),
-		 local_history_filename, history_filename,
+		 local_history_filename.c_str (), history_filename,
 		 safe_strerror (saved_errno));
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Read one line from the command input stream `instream' into a local

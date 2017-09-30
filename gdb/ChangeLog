@@ -1,5 +1,9 @@
 2017-10-03  Tom Tromey  <tom@tromey.com>
 
+	* top.c (gdb_safe_append_history): Use std::string.
+
+2017-10-03  Tom Tromey  <tom@tromey.com>
+
 	* event-top.c (stdin_event_handler): Update.
 	* main.c (captured_main_1): Update.
 	* top.h (make_delete_ui_cleanup): Remove.
