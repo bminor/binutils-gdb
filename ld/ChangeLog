@@ -1,3 +1,11 @@
+2017-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/21978
+	* testsuite/ld-elf/pr21978.od: New file.
+	* testsuite/ld-elf/pr21978a.c: Likewise.
+	* testsuite/ld-elf/pr21978b.c: Likewise.
+	* testsuite/ld-elf/shared.exp: Run PR binutils/21978 test.
+
 2017-09-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 14918

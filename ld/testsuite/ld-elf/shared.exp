@@ -458,6 +458,9 @@ set build_tests {
   {"Build pr21964-2b.so"
    "-shared" "-fPIC"
    {pr21964-2b.c} {} "pr21964-2b.so"}
+  {"Dump pr21978.so"
+   "-shared" "-fPIC -g -O2"
+   {pr21978a.c pr21978b.c} {{objdump {-Sl} pr21978.od}} "pr21978.so"}
 }
 
 run_cc_link_tests $build_tests
