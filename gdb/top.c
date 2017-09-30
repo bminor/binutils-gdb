@@ -249,91 +249,62 @@ static int highest_ui_num;
 
 /* See top.h.  */
 
-struct ui *
-new_ui (FILE *instream, FILE *outstream, FILE *errstream)
+ui::ui (FILE *instream_, FILE *outstream_, FILE *errstream_)
+  : next (nullptr),
+    num (++highest_ui_num),
+    call_readline (nullptr),
+    input_handler (nullptr),
+    command_editing (0),
+    interp_info (nullptr),
+    async (0),
+    secondary_prompt_depth (0),
+    stdin_stream (instream_),
+    instream (instream_),
+    outstream (outstream_),
+    errstream (errstream_),
+    input_fd (fileno (instream)),
+    input_interactive_p (ISATTY (instream)),
+    prompt_state (PROMPT_NEEDED),
+    m_gdb_stdout (new stdio_file (outstream)),
+    m_gdb_stdin (new stdio_file (instream)),
+    m_gdb_stderr (new stderr_file (errstream)),
+    m_gdb_stdlog (m_gdb_stderr),
+    m_current_uiout (nullptr)
 {
-  struct ui *ui;
-
-  ui = XCNEW (struct ui);
-
-  ui->num = ++highest_ui_num;
-  ui->stdin_stream = instream;
-  ui->instream = instream;
-  ui->outstream = outstream;
-  ui->errstream = errstream;
-
-  ui->input_fd = fileno (ui->instream);
-
-  ui->input_interactive_p = ISATTY (ui->instream);
-
-  ui->m_gdb_stdin = new stdio_file (ui->instream);
-  ui->m_gdb_stdout = new stdio_file (ui->outstream);
-  ui->m_gdb_stderr = new stderr_file (ui->errstream);
-  ui->m_gdb_stdlog = ui->m_gdb_stderr;
-
-  ui->prompt_state = PROMPT_NEEDED;
+  buffer_init (&line_buffer);
 
   if (ui_list == NULL)
-    ui_list = ui;
+    ui_list = this;
   else
     {
       struct ui *last;
 
       for (last = ui_list; last->next != NULL; last = last->next)
 	;
-      last->next = ui;
+      last->next = this;
     }
-
-  return ui;
 }
 
-static void
-free_ui (struct ui *ui)
-{
-  delete ui->m_gdb_stdin;
-  delete ui->m_gdb_stdout;
-  delete ui->m_gdb_stderr;
-
-  xfree (ui);
-}
-
-void
-delete_ui (struct ui *todel)
+ui::~ui ()
 {
   struct ui *ui, *uiprev;
 
   uiprev = NULL;
 
   for (ui = ui_list; ui != NULL; uiprev = ui, ui = ui->next)
-    if (ui == todel)
+    if (ui == this)
       break;
 
   gdb_assert (ui != NULL);
 
   if (uiprev != NULL)
-    uiprev->next = ui->next;
+    uiprev->next = next;
   else
-    ui_list = ui->next;
+    ui_list = next;
 
-  free_ui (ui);
-}
-
-/* Cleanup that deletes a UI.  */
-
-static void
-delete_ui_cleanup (void *void_ui)
-{
-  struct ui *ui = (struct ui *) void_ui;
-
-  delete_ui (ui);
-}
-
-/* See top.h.  */
-
-struct cleanup *
-make_delete_ui_cleanup (struct ui *ui)
-{
-  return make_cleanup (delete_ui_cleanup, ui);
+  delete m_gdb_stdin;
+  delete m_gdb_stdout;
+  delete m_gdb_stderr;
 }
 
 /* Open file named NAME for read/write, making sure not to make it the
@@ -356,7 +327,6 @@ open_terminal_stream (const char *name)
 static void
 new_ui_command (const char *args, int from_tty)
 {
-  struct ui *ui;
   struct interp *interp;
   gdb_file_up stream[3];
   int i;
@@ -364,7 +334,6 @@ new_ui_command (const char *args, int from_tty)
   int argc;
   const char *interpreter_name;
   const char *tty_name;
-  struct cleanup *failure_chain;
 
   dont_repeat ();
 
@@ -385,12 +354,12 @@ new_ui_command (const char *args, int from_tty)
     for (i = 0; i < 3; i++)
       stream[i] = open_terminal_stream (tty_name);
 
-    ui = new_ui (stream[0].get (), stream[1].get (), stream[2].get ());
-    failure_chain = make_cleanup (delete_ui_cleanup, ui);
+    std::unique_ptr<ui> ui
+      (new struct ui (stream[0].get (), stream[1].get (), stream[2].get ()));
 
     ui->async = 1;
 
-    current_ui = ui;
+    current_ui = ui.get ();
 
     set_top_level_interpreter (interpreter_name);
 
@@ -401,7 +370,7 @@ new_ui_command (const char *args, int from_tty)
     stream[1].release ();
     stream[2].release ();
 
-    discard_cleanups (failure_chain);
+    ui.release ();
   }
 
   printf_unfiltered ("New UI allocated\n");

@@ -54,6 +54,12 @@ enum prompt_state
 
 struct ui
 {
+  /* Create a new UI.  */
+  ui (FILE *instream, FILE *outstream, FILE *errstream);
+  ~ui ();
+
+  DISABLE_COPY_AND_ASSIGN (ui);
+
   /* Pointer to next in singly-linked list.  */
   struct ui *next;
 
@@ -202,13 +208,6 @@ public:
 /* Traverse over all UIs.  */
 #define ALL_UIS(UI)				\
   for (UI = ui_list; UI; UI = UI->next)		\
-
-/* Create a new UI.  */
-extern struct ui *new_ui (FILE *instream, FILE *outstream, FILE *errstream);
-extern void delete_ui (struct ui *todel);
-
-/* Cleanup that deletes a UI.  */
-extern struct cleanup *make_delete_ui_cleanup (struct ui *ui);
 
 /* Register the UI's input file descriptor in the event loop.  */
 extern void ui_register_input_event_handler (struct ui *ui);

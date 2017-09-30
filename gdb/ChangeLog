@@ -1,5 +1,19 @@
 2017-10-03  Tom Tromey  <tom@tromey.com>
 
+	* event-top.c (stdin_event_handler): Update.
+	* main.c (captured_main_1): Update.
+	* top.h (make_delete_ui_cleanup): Remove.
+	(struct ui): Add constructor and destructor.
+	(new_ui, delete_ui): Remove.
+	* top.c (make_delete_ui_cleanup): Remove.
+	(new_ui_command): Use std::unique_ptr.
+	(delete_ui_cleanup): Remove.
+	(ui::ui): Rename from new_ui.  Update.
+	(free_ui): Remove.
+	(ui::~ui): Rename from delete_ui.  Update.
+
+2017-10-03  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (load_progress): Use gdb::byte_vector.
 
 2017-10-03  Tom Tromey  <tom@tromey.com>

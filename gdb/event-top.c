@@ -487,7 +487,7 @@ stdin_event_handler (int error, gdb_client_data client_data)
       else
 	{
 	  /* Simply delete the UI.  */
-	  delete_ui (ui);
+	  delete ui;
 	}
     }
   else
