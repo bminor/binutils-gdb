@@ -1,5 +1,12 @@
 2017-10-01  Alan Modra  <amodra@gmail.com>
 
+	PR 22232
+	PR 22230
+	* objdump.c (load_specific_debug_section): Introduce a temp to
+	stop bfd_get_full_section_contents NULLing out section->start.
+
+2017-10-01  Alan Modra  <amodra@gmail.com>
+
 	PR 22230
 	* objdump.c (load_specific_debug_section): Allocate an extra byte
 	for a terminating NUL.
