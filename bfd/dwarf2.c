@@ -1420,9 +1420,7 @@ new_line_sorts_after (struct line_info *new_line, struct line_info *line)
 {
   return (new_line->address > line->address
 	  || (new_line->address == line->address
-	      && (new_line->op_index > line->op_index
-		  || (new_line->op_index == line->op_index
-		      && new_line->end_sequence < line->end_sequence))));
+	      && new_line->op_index > line->op_index));
 }
 
 
@@ -1508,7 +1506,8 @@ add_line_info (struct line_info_table *table,
       table->sequences = seq;
       table->num_sequences++;
     }
-  else if (new_line_sorts_after (info, seq->last_line))
+  else if (info->end_sequence
+	   || new_line_sorts_after (info, seq->last_line))
     {
       /* Normal case: add 'info' to the beginning of the current sequence.  */
       info->prev_line = seq->last_line;

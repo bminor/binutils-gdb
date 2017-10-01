@@ -1,5 +1,11 @@
 2017-10-01  Alan Modra  <amodra@gmail.com>
 
+	PR 21957
+	* dwarf2.c (new_line_sorts_after): Remove end_sequence comparison.
+	(add_line_info): Always put end_sequence last.
+
+2017-10-01  Alan Modra  <amodra@gmail.com>
+
 	PR 22047
 	* dwarf2.c (read_section): Allocate buffer with extra byte for
 	bfd_simple_get_relocated_section_contents rather than copying
