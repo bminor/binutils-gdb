@@ -526,9 +526,10 @@ read_section (bfd *           abfd,
 {
   asection *msec;
   const char *section_name = sec->uncompressed_name;
+  bfd_byte *contents = *section_buffer;
 
   /* The section may have already been read.  */
-  if (*section_buffer == NULL)
+  if (contents == NULL)
     {
       msec = bfd_get_section_by_name (abfd, section_name);
       if (! msec)
@@ -546,45 +547,21 @@ read_section (bfd *           abfd,
 	}
 
       *section_size = msec->rawsize ? msec->rawsize : msec->size;
-      if (syms)
+      /* Paranoia - alloc one extra so that we can make sure a string
+	 section is NUL terminated.  */
+      contents = (bfd_byte *) bfd_malloc (*section_size + 1);
+      if (contents == NULL)
+	return FALSE;
+      if (syms
+	  ? !bfd_simple_get_relocated_section_contents (abfd, msec, contents,
+							syms)
+	  : !bfd_get_section_contents (abfd, msec, contents, 0, *section_size))
 	{
-	  *section_buffer
-	    = bfd_simple_get_relocated_section_contents (abfd, msec, NULL, syms);
-	  if (! *section_buffer)
-	    return FALSE;
+	  free (contents);
+	  return FALSE;
 	}
-      else
-	{
-	  *section_buffer = (bfd_byte *) bfd_malloc (*section_size);
-	  if (! *section_buffer)
-	    return FALSE;
-	  if (! bfd_get_section_contents (abfd, msec, *section_buffer,
-					  0, *section_size))
-	    return FALSE;
-	}
-
-      /* Paranoia - if we are reading in a string section, make sure that it
-	 is NUL terminated.  This is to prevent string functions from running
-	 off the end of the buffer.  Note - knowing the size of the buffer is
-	 not enough as some functions, eg strchr, do not have a range limited
-	 equivalent.
-
-	 FIXME: We ought to use a flag in the dwarf_debug_sections[] table to
-	 determine the nature of a debug section, rather than checking the
-	 section name as we do here.  */
-      if (*section_size > 0
-	  && (*section_buffer)[*section_size - 1] != 0
-	  && (strstr (section_name, "_str") || strstr (section_name, "names")))
-	{
-	  bfd_byte * new_buffer = malloc (*section_size + 1);
-
-	  _bfd_error_handler (_("warning: dwarf string section '%s' is not NUL terminated"),
-			      section_name);
-	  memcpy (new_buffer, *section_buffer, *section_size);
-	  new_buffer[*section_size] = 0;
-	  free (*section_buffer);
-	  *section_buffer = new_buffer;
-	}
+      contents[*section_size] = 0;
+      *section_buffer = contents;
     }
 
   /* It is possible to get a bad value for the offset into the section

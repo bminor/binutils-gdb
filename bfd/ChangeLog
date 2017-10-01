@@ -1,3 +1,10 @@
+2017-10-01  Alan Modra  <amodra@gmail.com>
+
+	PR 22047
+	* dwarf2.c (read_section): Allocate buffer with extra byte for
+	bfd_simple_get_relocated_section_contents rather than copying
+	afterwards.
+
 2017-09-29  Alan Modra  <amodra@gmail.com>
 
 	* merge.c (merge_strings): Return FALSE on malloc failure.
