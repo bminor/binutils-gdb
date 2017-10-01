@@ -8035,6 +8035,7 @@ lang_leave_overlay (etree_type *lma_expr,
   overlay_vma = NULL;
   overlay_list = NULL;
   overlay_max = NULL;
+  overlay_subalign = NULL;
 }
 
 /* Version handling.  This is only useful for ELF.  */

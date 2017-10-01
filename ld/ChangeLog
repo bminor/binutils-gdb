@@ -1,3 +1,8 @@
+2017-10-01  Alan Modra  <amodra@gmail.com>
+
+	PR 21970
+	* ldlang.c (lang_leave_overlay): Reset overlay_subalign.
+
 2017-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/21978
