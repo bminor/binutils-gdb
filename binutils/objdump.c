@@ -2475,17 +2475,18 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   section->num_relocs = 0;
   section->address = bfd_get_section_vma (abfd, sec);
   section->size = bfd_get_section_size (sec);
-  section->start = NULL;
+  section->start = malloc (section->size + 1);
   section->user_data = sec;
-  ret = bfd_get_full_section_contents (abfd, sec, &section->start);
-
-  if (! ret)
+  if (section->start == NULL
+      || !bfd_get_full_section_contents (abfd, sec, &section->start))
     {
       free_debug_section (debug);
       printf (_("\nCan't get contents for section '%s'.\n"),
 	      section->name);
       return 0;
     }
+  /* Ensure any string section has a terminating NUL.  */
+  section->start[section->size] = 0;
 
   if (is_relocatable && debug_displays [debug].relocate)
     {
