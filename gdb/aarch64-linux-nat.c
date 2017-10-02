@@ -383,23 +383,23 @@ aarch64_linux_store_inferior_registers (struct target_ops *ops,
    do this for all registers.  */
 
 void
-fill_gregset (const struct regcache *regcache,
+fill_gregset (const reg_buffer *regcache,
 	      gdb_gregset_t *gregsetp, int regno)
 {
-  regcache_collect_regset (&aarch64_linux_gregset, regcache,
-			   regno, (gdb_byte *) gregsetp,
-			   AARCH64_LINUX_SIZEOF_GREGSET);
+  regcache->collect_regset (&aarch64_linux_gregset, regno,
+			    (gdb_byte *) gregsetp,
+			    AARCH64_LINUX_SIZEOF_GREGSET);
 }
 
 /* Fill GDB's register array with the general-purpose register values
    in *GREGSETP.  */
 
 void
-supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
+supply_gregset (reg_buffer *regcache, const gdb_gregset_t *gregsetp)
 {
-  regcache_supply_regset (&aarch64_linux_gregset, regcache, -1,
-			  (const gdb_byte *) gregsetp,
-			  AARCH64_LINUX_SIZEOF_GREGSET);
+  regcache->supply_regset (&aarch64_linux_gregset, -1,
+			   (const gdb_byte *) gregsetp,
+			   AARCH64_LINUX_SIZEOF_GREGSET);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -407,23 +407,23 @@ supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
    do this for all registers.  */
 
 void
-fill_fpregset (const struct regcache *regcache,
+fill_fpregset (const reg_buffer *regcache,
 	       gdb_fpregset_t *fpregsetp, int regno)
 {
-  regcache_collect_regset (&aarch64_linux_fpregset, regcache,
-			   regno, (gdb_byte *) fpregsetp,
-			   AARCH64_LINUX_SIZEOF_FPREGSET);
+  regcache->collect_regset (&aarch64_linux_fpregset, regno,
+			    (gdb_byte *) fpregsetp,
+			    AARCH64_LINUX_SIZEOF_FPREGSET);
 }
 
 /* Fill GDB's register array with the floating-point register values
    in *FPREGSETP.  */
 
 void
-supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
+supply_fpregset (reg_buffer *regcache, const gdb_fpregset_t *fpregsetp)
 {
-  regcache_supply_regset (&aarch64_linux_fpregset, regcache, -1,
-			  (const gdb_byte *) fpregsetp,
-			  AARCH64_LINUX_SIZEOF_FPREGSET);
+  regcache->supply_regset (&aarch64_linux_fpregset, -1,
+			   (const gdb_byte *) fpregsetp,
+			   AARCH64_LINUX_SIZEOF_FPREGSET);
 }
 
 /* linux_nat_new_fork hook.   */
