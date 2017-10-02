@@ -7951,7 +7951,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  wrel->r_addend = 0;
 
 	  /* For ld -r, remove relocations in debug sections against
-	     sections defined in discarded sections.  Not done for
+	     symbols defined in discarded sections.  Not done for
 	     non-debug to preserve relocs in .eh_frame which the
 	     eh_frame editing code expects to be present.  */
 	  if (bfd_link_relocatable (info)
