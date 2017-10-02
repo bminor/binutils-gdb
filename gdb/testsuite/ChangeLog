@@ -1,5 +1,9 @@
 2017-10-02  Tom Tromey  <tom@tromey.com>
 
+	* gdb.rust/simple.exp: Test ptype of a slice.
+
+2017-10-02  Tom Tromey  <tom@tromey.com>
+
 	* gdb.rust/simple.exp: Test index of slice.
 
 2017-09-27  Tom Tromey  <tom@tromey.com>

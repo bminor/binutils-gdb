@@ -85,6 +85,25 @@ gdb_test "print fromslice" " = 3"
 gdb_test "print slice\[0\]" " = 3"
 gdb_test "print slice as &\[i32\]\[0\]" " = 3"
 
+gdb_test_sequence "ptype slice" "" {
+    " = struct &\\\[i32\\\] \\{"
+    "  data_ptr: i32 \\*,"
+    "  length: usize,"
+    "\\}"
+}
+gdb_test_sequence "ptype &slice\[..\]" "" {
+    " = struct &\\\[i32\\\] \\{"
+    "  data_ptr: i32 \\*,"
+    "  length: usize,"
+    "\\}"
+}
+gdb_test_sequence "ptype &b\[..\]" "" {
+    " = struct &\\\[\\*gdb\\*\\\] \\{"
+    "  data_ptr: i32 \\*,"
+    "  length: usize,"
+    "\\}"
+}
+
 gdb_test "print x" " = \\(23, 25\\.5\\)"
 gdb_test "ptype x" " = \\(i32, f64\\)"
 gdb_test "print x as (i32,f64)" " = \\(23, 25\\.5\\)"

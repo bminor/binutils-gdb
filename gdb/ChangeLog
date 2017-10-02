@@ -1,5 +1,10 @@
 2017-10-02  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (rust_subscript): Handle slices in
+	EVAL_AVOID_SIDE_EFFECTS case.
+
+2017-10-02  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (rust_slice_type_p): Recognize &str as a slice type.
 
 2017-10-02  Tom Tromey  <tom@tromey.com>
