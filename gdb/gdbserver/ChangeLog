@@ -1,3 +1,8 @@
+2017-10-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lynx-i386-low.c (lynx_i386_arch_setup): Call init_target_desc.
+	* nto-x86-low.c (nto_x86_arch_setup): Likewise.
+
 2017-09-29  Pedro Alves  <palves@redhat.com>
 
 	* ax.c (gdb_parse_agent_expr): Constify.
