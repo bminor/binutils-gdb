@@ -95,6 +95,8 @@ fn main () {
     let g = b"hi bob";
     let h = b'9';
 
+    let fslice = &f[3..];
+
     let i = ["whatever"; 8];
 
     let j = Unit;

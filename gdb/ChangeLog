@@ -1,5 +1,12 @@
 2017-10-02  Tom Tromey  <tom@tromey.com>
 
+	PR rust/22236:
+	* rust-lang.c (rust_val_print_str): New function.
+	(val_print_struct): Call it.
+	(rust_subscript): Preserve name of slice type.
+
+2017-10-02  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (rust_subscript): Handle slices in
 	EVAL_AVOID_SIDE_EFFECTS case.
 

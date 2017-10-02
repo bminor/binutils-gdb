@@ -1,5 +1,11 @@
 2017-10-02  Tom Tromey  <tom@tromey.com>
 
+	PR rust/22236:
+	* gdb.rust/simple.rs (main): New variable "fslice".
+	* gdb.rust/simple.exp: Add slice tests.  Update string tests.
+
+2017-10-02  Tom Tromey  <tom@tromey.com>
+
 	* gdb.rust/simple.exp: Test ptype of a slice.
 
 2017-10-02  Tom Tromey  <tom@tromey.com>

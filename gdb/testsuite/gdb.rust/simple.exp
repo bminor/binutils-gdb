@@ -64,6 +64,10 @@ gdb_test "ptype j2" " = struct simple::Unit"
 gdb_test "print simple::Unit" " = simple::Unit"
 gdb_test "print simple::Unit{}" " = simple::Unit"
 
+gdb_test "print f" " = \"hi bob\""
+gdb_test "print fslice" " = \"bob\""
+gdb_test "print &f\[3..\]" " = \"bob\""
+
 gdb_test "print g" " = \\(u8 \\(\\*\\)\\\[6\\\]\\) $hex b\"hi bob\""
 gdb_test "ptype g" " = u8 \\(\\*\\)\\\[6\\\]"
 
@@ -200,13 +204,9 @@ gdb_test "ptype empty" "fn \\(\\)"
 
 gdb_test "print (diff2 as fn(i32, i32) -> i32)(19, -2)" " = 21"
 
-# We need the ".*" because currently we don't extract the length and
-# use it to intelligently print the string data.
-gdb_test "print \"hello rust\"" \
-    " = &str \\{data_ptr: $hex \"hello rust.*\", length: 10\\}"
+gdb_test "print \"hello rust\"" " = \"hello rust.*\""
 gdb_test "print \"hello" "Unexpected EOF in string"
-gdb_test "print r##\"hello \" rust\"##" \
-    " = &str \\{data_ptr: $hex \"hello \\\\\" rust.*\", length: 12\\}"
+gdb_test "print r##\"hello \" rust\"##" " = \"hello \\\\\" rust.*\""
 gdb_test "print r\"hello" "Unexpected EOF in string"
 gdb_test "print r###\"###hello\"" "Unexpected EOF in string"
 gdb_test "print r###\"###hello\"##" "Unexpected EOF in string"
