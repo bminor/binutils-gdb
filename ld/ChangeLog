@@ -1,3 +1,10 @@
+2017-10-03  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (-z relro): Expand description.
+	(DATA_SEGMENT_ALIGN): Note that -z relro is not effective when
+	running with system page size larger than commonpagesize.
+	(DATA_SEGMENT_RELRO_END): Be explicit about the alignment.
+
 2017-10-01  Alan Modra  <amodra@gmail.com>
 
 	PR 21970

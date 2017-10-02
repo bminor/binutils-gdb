@@ -1219,7 +1219,10 @@ first called.
 Marks the object may contain $ORIGIN.
 
 @item relro
-Create an ELF @code{PT_GNU_RELRO} segment header in the object.
+Create an ELF @code{PT_GNU_RELRO} segment header in the object.  This
+specifies a memory segment that should be made read-only after
+relocation, if supported.  Specifying @samp{common-page-size} smaller
+than the system page size will render this protection ineffective.
 
 @item max-page-size=@var{value}
 Set the emulation maximum page size to @var{value}.
@@ -6363,8 +6366,10 @@ bytes in the on-disk file.
 This expression can only be used directly in @code{SECTIONS} commands, not in
 any output section descriptions and only once in the linker script.
 @var{commonpagesize} should be less or equal to @var{maxpagesize} and should
-be the system page size the object wants to be optimized for (while still
-working on system page sizes up to @var{maxpagesize}).
+be the system page size the object wants to be optimized for while still
+running on system page sizes up to @var{maxpagesize}.  Note however
+that @samp{-z relro} protection will not be effective if the system
+page size is larger than @var{commonpagesize}.
 
 @noindent
 Example:
@@ -6387,9 +6392,9 @@ This defines the end of the @code{PT_GNU_RELRO} segment when
 @samp{-z relro} option is used.
 When @samp{-z relro} option is not present, @code{DATA_SEGMENT_RELRO_END}
 does nothing, otherwise @code{DATA_SEGMENT_ALIGN} is padded so that
-@var{exp} + @var{offset} is aligned to the most commonly used page
-boundary for particular target.  If present in the linker script,
-it must always come in between @code{DATA_SEGMENT_ALIGN} and
+@var{exp} + @var{offset} is aligned to the @var{commonpagesize}
+argument given to @code{DATA_SEGMENT_ALIGN}.  If present in the linker
+script, it must be placed between @code{DATA_SEGMENT_ALIGN} and
 @code{DATA_SEGMENT_END}.  Evaluates to the second argument plus any
 padding needed at the end of the @code{PT_GNU_RELRO} segment due to
 section alignment.
