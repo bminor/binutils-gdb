@@ -1,3 +1,7 @@
+2017-10-02  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.exp: Test index of slice.
+
 2017-09-27  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/macscp.exp: Add __VA_OPT__ tests.

@@ -1,5 +1,9 @@
 2017-10-02  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (rust_slice_type_p): Recognize &str as a slice type.
+
+2017-10-02  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.h (rust_slice_type): Add "extern".
 
 2017-10-02  Tom Tromey  <tom@tromey.com>

@@ -340,7 +340,8 @@ rust_slice_type_p (struct type *type)
 {
   return (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	  && TYPE_TAG_NAME (type) != NULL
-	  && strncmp (TYPE_TAG_NAME (type), "&[", 2) == 0);
+	  && (strncmp (TYPE_TAG_NAME (type), "&[", 2) == 0
+	      || strcmp (TYPE_TAG_NAME (type), "&str") == 0));
 }
 
 /* Return true if TYPE is a range type, otherwise false.  */

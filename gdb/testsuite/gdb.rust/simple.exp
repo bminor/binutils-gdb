@@ -55,6 +55,8 @@ gdb_test "print *(&c as &i32)" " = 0"
 gdb_test "print *(&c as *const i32)" " = 0"
 gdb_test "print *(&c as *mut i32)" " = 0"
 
+gdb_test "print/c f\[0\]" " = 104 'h'"
+
 gdb_test "print j" " = simple::Unit"
 gdb_test "ptype j" " = struct simple::Unit"
 gdb_test "print j2" " = simple::Unit"
