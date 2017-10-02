@@ -1,3 +1,11 @@
+2017-10-02  Tom Tromey  <tom@tromey.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.h (ada_exc_info::operator<): Make const.
+	(ada_exc_info::operator==): Make const.
+	* ada-lang.c (ada_exc_info::operator<, ada_exc_info::operator==):
+	Make const.
+
 2017-09-29  Tom Tromey  <tom@tromey.com>
 
 	* target.c (read_whatever_is_readable): Change type of "result".

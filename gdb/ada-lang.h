@@ -387,8 +387,8 @@ struct ada_exc_info
   /* The address of the symbol corresponding to that exception.  */
   CORE_ADDR addr;
 
-  bool operator< (const ada_exc_info &);
-  bool operator== (const ada_exc_info &);
+  bool operator< (const ada_exc_info &) const;
+  bool operator== (const ada_exc_info &) const;
 };
 
 extern std::vector<ada_exc_info> ada_exceptions_list (const char *regexp);

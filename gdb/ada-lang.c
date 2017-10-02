@@ -13123,7 +13123,7 @@ ada_is_non_standard_exception_sym (struct symbol *sym)
    by exception address.  */
 
 bool
-ada_exc_info::operator< (const ada_exc_info &other)
+ada_exc_info::operator< (const ada_exc_info &other) const
 {
   int result;
 
@@ -13136,7 +13136,7 @@ ada_exc_info::operator< (const ada_exc_info &other)
 }
 
 bool
-ada_exc_info::operator== (const ada_exc_info &other)
+ada_exc_info::operator== (const ada_exc_info &other) const
 {
   return addr == other.addr && strcmp (name, other.name) == 0;
 }
