@@ -1,5 +1,11 @@
 2017-10-03  Alan Modra  <amodra@gmail.com>
 
+	PR 21294
+	* NEWS: Note that defaulting to -z relro results in increased
+	memory and disk size.
+
+2017-10-03  Alan Modra  <amodra@gmail.com>
+
 	* ld.texinfo (-z relro): Expand description.
 	(DATA_SEGMENT_ALIGN): Note that -z relro is not effective when
 	running with system page size larger than commonpagesize.
