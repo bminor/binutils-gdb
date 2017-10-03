@@ -3270,77 +3270,86 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	return 0;
     }
 
-  symcount = static_count;
-  if (!relocatable)
-    symcount += dyn_count;
-  if (symcount == 0)
-    return 0;
-
-  syms = bfd_malloc ((symcount + 1) * sizeof (*syms));
-  if (syms == NULL)
-    return -1;
-
-  if (!relocatable && static_count != 0 && dyn_count != 0)
-    {
-      /* Use both symbol tables.  */
-      memcpy (syms, static_syms, static_count * sizeof (*syms));
-      memcpy (syms + static_count, dyn_syms, (dyn_count + 1) * sizeof (*syms));
-    }
-  else if (!relocatable && static_count == 0)
-    memcpy (syms, dyn_syms, (symcount + 1) * sizeof (*syms));
-  else
-    memcpy (syms, static_syms, (symcount + 1) * sizeof (*syms));
-
-  synthetic_relocatable = relocatable;
-  synthetic_opd = opd;
-  qsort (syms, symcount, sizeof (*syms), compare_symbols);
-
-  if (!relocatable && symcount > 1)
-    {
-      long j;
-      /* Trim duplicate syms, since we may have merged the normal and
-	 dynamic symbols.  Actually, we only care about syms that have
-	 different values, so trim any with the same value.  */
-      for (i = 1, j = 1; i < symcount; ++i)
-	if (syms[i - 1]->value + syms[i - 1]->section->vma
-	    != syms[i]->value + syms[i]->section->vma)
-	  syms[j++] = syms[i];
-      symcount = j;
-    }
-
-  i = 0;
-  /* Note that here and in compare_symbols we can't compare opd and
-     sym->section directly.  With separate debug info files, the
-     symbols will be extracted from the debug file while abfd passed
-     to this function is the real binary.  */
-  if (opd != NULL && strcmp (syms[i]->section->name, ".opd") == 0)
-    ++i;
-  codesecsym = i;
-
-  for (; i < symcount; ++i)
-    if (((syms[i]->section->flags & (SEC_CODE | SEC_ALLOC | SEC_THREAD_LOCAL))
-	 != (SEC_CODE | SEC_ALLOC))
-	|| (syms[i]->flags & BSF_SECTION_SYM) == 0)
-      break;
-  codesecsymend = i;
-
-  for (; i < symcount; ++i)
-    if ((syms[i]->flags & BSF_SECTION_SYM) == 0)
-      break;
-  secsymend = i;
-
+  syms = NULL;
+  codesecsym = 0;
+  codesecsymend = 0;
+  secsymend = 0;
+  opdsymend = 0;
+  symcount = 0;
   if (opd != NULL)
-    for (; i < symcount; ++i)
-      if (strcmp (syms[i]->section->name, ".opd") != 0)
-	break;
-  opdsymend = i;
+    {
+      symcount = static_count;
+      if (!relocatable)
+	symcount += dyn_count;
+      if (symcount == 0)
+	return 0;
 
-  for (; i < symcount; ++i)
-    if ((syms[i]->section->flags & (SEC_CODE | SEC_ALLOC | SEC_THREAD_LOCAL))
-	!= (SEC_CODE | SEC_ALLOC))
-      break;
-  symcount = i;
+      syms = bfd_malloc ((symcount + 1) * sizeof (*syms));
+      if (syms == NULL)
+	return -1;
 
+      if (!relocatable && static_count != 0 && dyn_count != 0)
+	{
+	  /* Use both symbol tables.  */
+	  memcpy (syms, static_syms, static_count * sizeof (*syms));
+	  memcpy (syms + static_count, dyn_syms,
+		  (dyn_count + 1) * sizeof (*syms));
+	}
+      else if (!relocatable && static_count == 0)
+	memcpy (syms, dyn_syms, (symcount + 1) * sizeof (*syms));
+      else
+	memcpy (syms, static_syms, (symcount + 1) * sizeof (*syms));
+
+      synthetic_relocatable = relocatable;
+      synthetic_opd = opd;
+      qsort (syms, symcount, sizeof (*syms), compare_symbols);
+
+      if (!relocatable && symcount > 1)
+	{
+	  long j;
+	  /* Trim duplicate syms, since we may have merged the normal and
+	     dynamic symbols.  Actually, we only care about syms that have
+	     different values, so trim any with the same value.  */
+	  for (i = 1, j = 1; i < symcount; ++i)
+	    if (syms[i - 1]->value + syms[i - 1]->section->vma
+		!= syms[i]->value + syms[i]->section->vma)
+	      syms[j++] = syms[i];
+	  symcount = j;
+	}
+
+      i = 0;
+      /* Note that here and in compare_symbols we can't compare opd and
+	 sym->section directly.  With separate debug info files, the
+	 symbols will be extracted from the debug file while abfd passed
+	 to this function is the real binary.  */
+      if (opd != NULL && strcmp (syms[i]->section->name, ".opd") == 0)
+	++i;
+      codesecsym = i;
+
+      for (; i < symcount; ++i)
+	if (((syms[i]->section->flags & (SEC_CODE | SEC_ALLOC
+					 | SEC_THREAD_LOCAL))
+	     != (SEC_CODE | SEC_ALLOC))
+	    || (syms[i]->flags & BSF_SECTION_SYM) == 0)
+	  break;
+      codesecsymend = i;
+
+      for (; i < symcount; ++i)
+	if ((syms[i]->flags & BSF_SECTION_SYM) == 0)
+	  break;
+      secsymend = i;
+
+      for (; i < symcount; ++i)
+	if (strcmp (syms[i]->section->name, ".opd") != 0)
+	  break;
+      opdsymend = i;
+
+      for (; i < symcount; ++i)
+	if ((syms[i]->section->flags & (SEC_CODE | SEC_ALLOC | SEC_THREAD_LOCAL))
+	    != (SEC_CODE | SEC_ALLOC))
+	  break;
+      symcount = i;
+    }
   count = 0;
 
   if (relocatable)
