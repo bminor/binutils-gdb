@@ -1,3 +1,10 @@
+2017-10-04  Pavel I. Kryukov <kryukov@frtk.ru>
+
+	PR 22245
+	* bfd.c (bfd_set_error): Avoid UB on passing arg to va_start that
+	undergoes default promotion.
+	* bfd-in2.h: Regenerate.
+
 2017-10-02  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Fix comment typo.

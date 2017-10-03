@@ -497,7 +497,7 @@ FUNCTION
 	bfd_set_error
 
 SYNOPSIS
-	void bfd_set_error (bfd_error_type error_tag, ...);
+	void bfd_set_error (int error_tag, ...);
 
 DESCRIPTION
 	Set the BFD error condition to be @var{error_tag}.
@@ -507,7 +507,7 @@ DESCRIPTION
 */
 
 void
-bfd_set_error (bfd_error_type error_tag, ...)
+bfd_set_error (int error_tag, ...)
 {
   bfd_error = error_tag;
   if (error_tag == bfd_error_on_input)
