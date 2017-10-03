@@ -1,3 +1,14 @@
+2017-10-05  Alan Modra  <amodra@gmail.com>
+
+	PR 21167
+	* elf.c (_bfd_elf_setup_sections): Don't trim reloc sections from
+	groups.
+	(_bfd_elf_init_reloc_shdr): Pass sec_hdr, use it to copy SHF_GROUP
+	flag from section.
+	(elf_fake_sections): Adjust calls.  Exit immediately on failure.
+	(bfd_elf_set_group_contents): Add associated reloc section indices
+	to group contents.
+
 2017-10-04  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Don't sort or

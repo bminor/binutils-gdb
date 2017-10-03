@@ -1,3 +1,20 @@
+2017-10-05  Alan Modra  <amodra@gmail.com>
+
+	PR 21167
+	* config/obj-elf.c (struct group_list): Delete elt_count.
+	(groups): New static.
+	(build_group_lists): Don't count elements.
+	(elf_adjust_symtab): Use "groups" rather than auto "list".  Set up
+	pointer from group member to SHT_GROUP section.  Don't size
+	SHT_GROUP section or clean up here..
+	(elf_frob_file_after_relocs): ..do so here instead.
+	* testsuite/gas/arc/jli-1.d,
+	* testsuite/gas/elf/groupautob.d,
+	* testsuite/gas/mips/compact-eh-eb-2.d,
+	* testsuite/gas/mips/compact-eh-eb-5.d,
+	* testsuite/gas/mips/compact-eh-el-2.d,
+	* testsuite/gas/mips/compact-eh-el-5.d: Adjust.
+
 2017-10-01  Alexander Fedotov  <alfedotov@gmail.com>
 
 	* testsuite/gas/ppc/vle-mult-ld-st-insns.s: New file: Tests the

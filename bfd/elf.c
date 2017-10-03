@@ -913,15 +913,8 @@ _bfd_elf_setup_sections (bfd *abfd)
 	    continue;
 	  else if (idx->shdr->bfd_section)
 	    elf_sec_group (idx->shdr->bfd_section) = shdr->bfd_section;
-	  else if (idx->shdr->sh_type == SHT_RELA
-		   || idx->shdr->sh_type == SHT_REL)
-	    /* We won't include relocation sections in section groups in
-	       output object files. We adjust the group section size here
-	       so that relocatable link will work correctly when
-	       relocation sections are in section group in input object
-	       files.  */
-	    shdr->bfd_section->size -= 4;
-	  else
+	  else if (idx->shdr->sh_type != SHT_RELA
+		   && idx->shdr->sh_type != SHT_REL)
 	    {
 	      /* There are some unknown sections in the group.  */
 	      _bfd_error_handler
@@ -3068,6 +3061,7 @@ _bfd_elf_set_reloc_sh_name (bfd *abfd,
 static bfd_boolean
 _bfd_elf_init_reloc_shdr (bfd *abfd,
 			  struct bfd_elf_section_reloc_data *reldata,
+			  const Elf_Internal_Shdr *sec_hdr,
 			  const char *sec_name,
 			  bfd_boolean use_rela_p,
 			  bfd_boolean delay_st_name_p)
@@ -3089,7 +3083,7 @@ _bfd_elf_init_reloc_shdr (bfd *abfd,
 			 ? bed->s->sizeof_rela
 			 : bed->s->sizeof_rel);
   rel_hdr->sh_addralign = (bfd_vma) 1 << bed->s->log_file_align;
-  rel_hdr->sh_flags = 0;
+  rel_hdr->sh_flags = sec_hdr->sh_flags & SHF_GROUP;
   rel_hdr->sh_addr = 0;
   rel_hdr->sh_size = 0;
   rel_hdr->sh_offset = 0;
@@ -3380,15 +3374,15 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 	      || arg->link_info->emitrelocations))
 	{
 	  if (esd->rel.count && esd->rel.hdr == NULL
-	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rel, name, FALSE,
-					    delay_st_name_p))
+	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rel, this_hdr, name,
+					    FALSE, delay_st_name_p))
 	    {
 	      arg->failed = TRUE;
 	      return;
 	    }
 	  if (esd->rela.count && esd->rela.hdr == NULL
-	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rela, name, TRUE,
-					    delay_st_name_p))
+	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rela, this_hdr, name,
+					    TRUE, delay_st_name_p))
 	    {
 	      arg->failed = TRUE;
 	      return;
@@ -3397,17 +3391,24 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
       else if (!_bfd_elf_init_reloc_shdr (abfd,
 					  (asect->use_rela_p
 					   ? &esd->rela : &esd->rel),
+					  this_hdr,
 					  name,
 					  asect->use_rela_p,
 					  delay_st_name_p))
+	{
 	  arg->failed = TRUE;
+	  return;
+	}
     }
 
   /* Check for processor-specific section types.  */
   sh_type = this_hdr->sh_type;
   if (bed->elf_backend_fake_sections
       && !(*bed->elf_backend_fake_sections) (abfd, this_hdr, asect))
-    arg->failed = TRUE;
+    {
+      arg->failed = TRUE;
+      return;
+    }
 
   if (sh_type == SHT_NOBITS && asect->size != 0)
     {
@@ -3524,10 +3525,19 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
       if (s != NULL
 	  && !bfd_is_abs_section (s))
 	{
-	  unsigned int idx = elf_section_data (s)->this_idx;
-
+	  struct bfd_elf_section_data *elf_sec = elf_section_data (s);
+	  if (elf_sec->rel.hdr != NULL)
+	    {
+	      loc -= 4;
+	      H_PUT_32 (abfd, elf_sec->rel.idx, loc);
+	    }
+	  if (elf_sec->rela.hdr != NULL)
+	    {
+	      loc -= 4;
+	      H_PUT_32 (abfd, elf_sec->rela.idx, loc);
+	    }
 	  loc -= 4;
-	  H_PUT_32 (abfd, idx, loc);
+	  H_PUT_32 (abfd, elf_sec->this_idx, loc);
 	}
       elt = elf_next_in_group (elt);
       if (elt == first)

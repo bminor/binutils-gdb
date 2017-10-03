@@ -1,3 +1,8 @@
+2017-10-05  Alan Modra  <amodra@gmail.com>
+
+	PR 21167
+	* testsuite/ld-elf/group9b.d: Adjust for relocs included in group.
+
 2017-10-03  Alan Modra  <amodra@gmail.com>
 
 	PR 21294

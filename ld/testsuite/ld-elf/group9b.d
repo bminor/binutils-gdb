@@ -10,9 +10,10 @@
 
 COMDAT group section \[[ 0-9]+\] `.group' \[foo\] contains 2 sections:
    \[Index\]    Name
-   \[[ 0-9]+\]   .text.foo
-   \[[ 0-9]+\]   .data.foo
+   \[[ 0-9]+\]   \.text\.foo
+   \[[ 0-9]+\]   \.data\.foo
 
-COMDAT group section \[[ 0-9]+\] `.group' \[bar\] contains 1 sections:
+COMDAT group section \[[ 0-9]+\] `.group' \[bar\] contains 2 sections:
    \[Index\]    Name
-   \[[ 0-9]+\]   .text.bar
+   \[[ 0-9]+\]   \.text\.bar
+   \[[ 0-9]+\]   \.rela?\.text\.bar
