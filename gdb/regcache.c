@@ -915,12 +915,7 @@ typedef void (regcache_write_ftype) (struct regcache *regcache, int regnum,
 
 enum register_status
 regcache::xfer_part (int regnum, int offset, int len, void *in,
-		     const void *out,
-		     enum register_status (*read) (struct regcache *regcache,
-						   int regnum,
-						   gdb_byte *buf),
-		     void (*write) (struct regcache *regcache, int regnum,
-				    const gdb_byte *buf))
+		     const void *out, bool is_raw)
 {
   struct gdbarch *gdbarch = arch ();
   gdb_byte *reg = (gdb_byte *) alloca (register_size (gdbarch, regnum));
@@ -938,7 +933,10 @@ regcache::xfer_part (int regnum, int offset, int len, void *in,
       enum register_status status;
 
       gdb_assert (read != NULL);
-      status = read (this, regnum, reg);
+      if (is_raw)
+	status = raw_read (regnum, reg);
+      else
+	status = cooked_read (regnum, reg);
       if (status != REG_VALID)
 	return status;
     }
@@ -950,8 +948,10 @@ regcache::xfer_part (int regnum, int offset, int len, void *in,
   /* ... write (when needed).  */
   if (out != NULL)
     {
-      gdb_assert (write != NULL);
-      write (this, regnum, reg);
+      if (is_raw)
+	raw_write (regnum, reg);
+      else
+	raw_write (regnum, reg);
     }
 
   return REG_VALID;
@@ -968,8 +968,7 @@ enum register_status
 regcache::raw_read_part (int regnum, int offset, int len, gdb_byte *buf)
 {
   gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
-  return xfer_part (regnum, offset, len, buf, NULL,
-		    regcache_raw_read, regcache_raw_write);
+  return xfer_part (regnum, offset, len, buf, NULL, true);
 }
 
 void
@@ -984,8 +983,7 @@ regcache::raw_write_part (int regnum, int offset, int len,
 			  const gdb_byte *buf)
 {
   gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
-  xfer_part (regnum, offset, len, NULL, buf, regcache_raw_read,
-	     regcache_raw_write);
+  xfer_part (regnum, offset, len, NULL, buf, true);
 }
 
 enum register_status
@@ -1000,8 +998,7 @@ enum register_status
 regcache::cooked_read_part (int regnum, int offset, int len, gdb_byte *buf)
 {
   gdb_assert (regnum >= 0 && regnum < m_descr->nr_cooked_registers);
-  return xfer_part (regnum, offset, len, buf, NULL,
-		    regcache_cooked_read, regcache_cooked_write);
+  return xfer_part (regnum, offset, len, buf, NULL, false);
 }
 
 void
@@ -1016,8 +1013,7 @@ regcache::cooked_write_part (int regnum, int offset, int len,
 			     const gdb_byte *buf)
 {
   gdb_assert (regnum >= 0 && regnum < m_descr->nr_cooked_registers);
-  xfer_part (regnum, offset, len, NULL, buf,
-	     regcache_cooked_read, regcache_cooked_write);
+  xfer_part (regnum, offset, len, NULL, buf, false);
 }
 
 /* Supply register REGNUM, whose contents are stored in BUF, to REGCACHE.  */

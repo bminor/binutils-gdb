@@ -354,9 +354,7 @@ private:
   void restore (struct regcache *src);
 
   enum register_status xfer_part (int regnum, int offset, int len, void *in,
-				  const void *out,
-				  decltype (regcache_raw_read) read,
-				  decltype (regcache_raw_write) write);
+				  const void *out, bool is_raw);
 
   void transfer_regset (const struct regset *regset,
 			struct regcache *out_regcache,
