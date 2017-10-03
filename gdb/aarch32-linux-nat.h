@@ -20,15 +20,15 @@
    VFPv3D16 target.  */
 #define VFP_REGS_SIZE (32 * 8 + 4)
 
-void aarch32_gp_regcache_supply (struct regcache *regcache, uint32_t *regs,
+void aarch32_gp_regcache_supply (regcache_raw *regcache, uint32_t *regs,
 				 int arm_apcs_32);
 
-void aarch32_gp_regcache_collect (const struct regcache *regcache,
+void aarch32_gp_regcache_collect (const regcache_raw *regcache,
 				  uint32_t *regs, int arm_apcs_32);
 
-void aarch32_vfp_regcache_supply (struct regcache *regcache, gdb_byte *regs,
+void aarch32_vfp_regcache_supply (regcache_raw *regcache, gdb_byte *regs,
 				  const int vfp_register_count);
 
-void aarch32_vfp_regcache_collect (const struct regcache *regcache,
+void aarch32_vfp_regcache_collect (const regcache_raw *regcache,
 				   gdb_byte *regs,
 				   const int vfp_register_count);

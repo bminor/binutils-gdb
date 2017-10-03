@@ -22,7 +22,7 @@
 
 extern int record_full_memory_query;
 
-extern int record_full_arch_list_add_reg (struct regcache *regcache, int num);
+extern int record_full_arch_list_add_reg (regcache_raw *regcache, int num);
 extern int record_full_arch_list_add_mem (CORE_ADDR addr, int len);
 extern int record_full_arch_list_add_end (void);
 

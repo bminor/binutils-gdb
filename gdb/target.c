@@ -3443,7 +3443,7 @@ target_options_to_string (int target_options)
 }
 
 void
-target_fetch_registers (struct regcache *regcache, int regno)
+target_fetch_registers (regcache_raw *regcache, int regno)
 {
   current_target.to_fetch_registers (&current_target, regcache, regno);
   if (targetdebug)
@@ -3451,7 +3451,7 @@ target_fetch_registers (struct regcache *regcache, int regno)
 }
 
 void
-target_store_registers (struct regcache *regcache, int regno)
+target_store_registers (regcache_raw *regcache, int regno)
 {
   if (!may_write_registers)
     error (_("Writing to registers is not allowed (regno %d)"), regno);

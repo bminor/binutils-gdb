@@ -493,7 +493,7 @@ core_detach (struct target_ops *ops, const char *args, int from_tty)
    nothing.  */
 
 static void
-get_core_register_section (struct regcache *regcache,
+get_core_register_section (regcache_raw *regcache,
 			   const struct regset *regset,
 			   const char *name,
 			   int min_size,
@@ -590,7 +590,7 @@ get_core_registers_cb (const char *sect_name, int size,
 
 static void
 get_core_registers (struct target_ops *ops,
-		    struct regcache *regcache, int regno)
+		    regcache_raw *regcache, int regno)
 {
   int i;
   struct gdbarch *gdbarch;

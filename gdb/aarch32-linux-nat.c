@@ -28,7 +28,7 @@
    is true if the 32-bit mode is in use, otherwise, it is false.  */
 
 void
-aarch32_gp_regcache_supply (struct regcache *regcache, uint32_t *regs,
+aarch32_gp_regcache_supply (regcache_raw *regcache, uint32_t *regs,
 			    int arm_apcs_32)
 {
   int regno;
@@ -54,7 +54,7 @@ aarch32_gp_regcache_supply (struct regcache *regcache, uint32_t *regs,
    true if the 32-bit mode is in use, otherwise, it is false.  */
 
 void
-aarch32_gp_regcache_collect (const struct regcache *regcache, uint32_t *regs,
+aarch32_gp_regcache_collect (const regcache_raw *regcache, uint32_t *regs,
 			     int arm_apcs_32)
 {
   int regno;
@@ -82,7 +82,7 @@ aarch32_gp_regcache_collect (const struct regcache *regcache, uint32_t *regs,
    VFP_REGISTER_COUNT is the number of VFP registers.  */
 
 void
-aarch32_vfp_regcache_supply (struct regcache *regcache, gdb_byte *regs,
+aarch32_vfp_regcache_supply (regcache_raw *regcache, gdb_byte *regs,
 			     const int vfp_register_count)
 {
   int regno;
@@ -99,7 +99,7 @@ aarch32_vfp_regcache_supply (struct regcache *regcache, gdb_byte *regs,
    VFP_REGISTER_COUNT is the number VFP registers.  */
 
 void
-aarch32_vfp_regcache_collect (const struct regcache *regcache, gdb_byte *regs,
+aarch32_vfp_regcache_collect (const regcache_raw *regcache, gdb_byte *regs,
 			      const int vfp_register_count)
 {
   int regno;

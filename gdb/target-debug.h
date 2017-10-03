@@ -98,7 +98,7 @@
   target_debug_do_print (core_addr_to_string (*(X)))
 #define target_debug_print_int_p(X)		\
   target_debug_do_print (plongest (*(X)))
-#define target_debug_print_struct_regcache_p(X) \
+#define target_debug_print_regcache_raw_p(X) \
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_struct_thread_info_p(X)	\
   target_debug_do_print (host_address_to_string (X))

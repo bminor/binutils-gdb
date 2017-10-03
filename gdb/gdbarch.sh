@@ -1056,7 +1056,7 @@ m;int;fast_tracepoint_valid_at;CORE_ADDR addr, char **msg;addr, msg;;default_fas
 # where no registers have been collected, but there's only one location,
 # allowing us to guess the PC value, and perhaps some other registers.
 # On entry, regcache has all registers marked as unavailable.
-m;void;guess_tracepoint_registers;struct regcache *regcache, CORE_ADDR addr;regcache, addr;;default_guess_tracepoint_registers;;0
+m;void;guess_tracepoint_registers;regcache_raw *regcache, CORE_ADDR addr;regcache, addr;;default_guess_tracepoint_registers;;0
 
 # Return the "auto" target charset.
 f;const char *;auto_charset;void;;default_auto_charset;default_auto_charset;;0

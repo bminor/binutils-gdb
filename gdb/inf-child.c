@@ -72,7 +72,7 @@ store_waitstatus (struct target_waitstatus *ourstatus, int hoststatus)
 
 static void
 inf_child_fetch_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regnum)
+				    regcache_raw *regcache, int regnum)
 {
   if (regnum == -1)
     {
@@ -90,7 +90,7 @@ inf_child_fetch_inferior_registers (struct target_ops *ops,
 
 static void
 inf_child_store_inferior_registers (struct target_ops *ops,
-				    struct regcache *regcache, int regnum)
+				    regcache_raw *regcache, int regnum)
 {
 }
 
@@ -109,7 +109,7 @@ inf_child_post_attach (struct target_ops *self, int pid)
 
 static void
 inf_child_prepare_to_store (struct target_ops *self,
-			    struct regcache *regcache)
+			    regcache_raw *regcache)
 {
 }
 

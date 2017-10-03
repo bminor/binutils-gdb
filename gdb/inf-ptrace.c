@@ -711,9 +711,9 @@ static CORE_ADDR (*inf_ptrace_register_u_offset)(struct gdbarch *, int, int);
 /* Fetch register REGNUM from the inferior.  */
 
 static void
-inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
+inf_ptrace_fetch_register (regcache_raw *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR addr;
   size_t size;
   PTRACE_TYPE_RET *buf;
@@ -755,11 +755,11 @@ inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
 
 static void
 inf_ptrace_fetch_registers (struct target_ops *ops,
-			    struct regcache *regcache, int regnum)
+			    regcache_raw *regcache, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0;
-	 regnum < gdbarch_num_regs (get_regcache_arch (regcache));
+	 regnum < gdbarch_num_regs (regcache->arch ());
 	 regnum++)
       inf_ptrace_fetch_register (regcache, regnum);
   else
@@ -769,7 +769,7 @@ inf_ptrace_fetch_registers (struct target_ops *ops,
 /* Store register REGNUM into the inferior.  */
 
 static void
-inf_ptrace_store_register (const struct regcache *regcache, int regnum)
+inf_ptrace_store_register (const regcache_raw *regcache, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR addr;
@@ -810,7 +810,7 @@ inf_ptrace_store_register (const struct regcache *regcache, int regnum)
 
 static void
 inf_ptrace_store_registers (struct target_ops *ops,
-			    struct regcache *regcache, int regnum)
+			    regcache_raw *regcache, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0;

@@ -475,7 +475,7 @@ static struct tramp_frame arm_kernel_linux_restart_syscall_tramp_frame = {
 
 void
 arm_linux_supply_gregset (const struct regset *regset,
-			  struct regcache *regcache,
+			  regcache_raw *regcache,
 			  int regnum, const void *gregs_buf, size_t len)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -513,7 +513,7 @@ arm_linux_supply_gregset (const struct regset *regset,
 
 void
 arm_linux_collect_gregset (const struct regset *regset,
-			   const struct regcache *regcache,
+			   const regcache_raw *regcache,
 			   int regnum, void *gregs_buf, size_t len)
 {
   gdb_byte *gregs = (gdb_byte *) gregs_buf;
@@ -547,7 +547,7 @@ arm_linux_collect_gregset (const struct regset *regset,
 #define typeExtended		0x03
 
 void
-supply_nwfpe_register (struct regcache *regcache, int regno,
+supply_nwfpe_register (regcache_raw *regcache, int regno,
 		       const gdb_byte *regs)
 {
   const gdb_byte *reg_data;
@@ -582,7 +582,7 @@ supply_nwfpe_register (struct regcache *regcache, int regno,
 }
 
 void
-collect_nwfpe_register (const struct regcache *regcache, int regno,
+collect_nwfpe_register (const regcache_raw *regcache, int regno,
 			gdb_byte *regs)
 {
   gdb_byte *reg_data;
@@ -620,7 +620,7 @@ collect_nwfpe_register (const struct regcache *regcache, int regno,
 
 void
 arm_linux_supply_nwfpe (const struct regset *regset,
-			struct regcache *regcache,
+			regcache_raw *regcache,
 			int regnum, const void *regs_buf, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) regs_buf;
@@ -637,7 +637,7 @@ arm_linux_supply_nwfpe (const struct regset *regset,
 
 void
 arm_linux_collect_nwfpe (const struct regset *regset,
-			 const struct regcache *regcache,
+			 const regcache_raw *regcache,
 			 int regnum, void *regs_buf, size_t len)
 {
   gdb_byte *regs = (gdb_byte *) regs_buf;
@@ -658,7 +658,7 @@ arm_linux_collect_nwfpe (const struct regset *regset,
 
 static void
 arm_linux_supply_vfp (const struct regset *regset,
-		      struct regcache *regcache,
+		      regcache_raw *regcache,
 		      int regnum, const void *regs_buf, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) regs_buf;
@@ -675,7 +675,7 @@ arm_linux_supply_vfp (const struct regset *regset,
 
 static void
 arm_linux_collect_vfp (const struct regset *regset,
-			 const struct regcache *regcache,
+		       const regcache_raw *regcache,
 			 int regnum, void *regs_buf, size_t len)
 {
   gdb_byte *regs = (gdb_byte *) regs_buf;

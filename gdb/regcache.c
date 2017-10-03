@@ -232,16 +232,19 @@ regcache_register_size (const struct regcache *regcache, int n)
   return register_size (get_regcache_arch (regcache), n);
 }
 
-regcache::regcache (gdbarch *gdbarch, address_space *aspace_,
-		    bool readonly_p_)
+regcache_raw::regcache_raw (gdbarch *gdbarch, bool readonly_p_)
   /* The register buffers.  A read-only register cache can hold the
      full [0 .. gdbarch_num_regs + gdbarch_num_pseudo_regs) while a
      read/write register cache can only hold [0 .. gdbarch_num_regs).  */
-  : reg_buffer (gdbarch, readonly_p_),
-    m_aspace (aspace_), m_readonly_p (readonly_p_)
+  : reg_buffer (gdbarch, readonly_p_), m_readonly_p (readonly_p_)
 {
   m_ptid = minus_one_ptid;
 }
+
+regcache::regcache (gdbarch *gdbarch, address_space *aspace_,
+		    bool readonly_p_)
+  : regcache_raw (gdbarch, readonly_p_), m_aspace (aspace_)
+{}
 
 static enum register_status
 do_cooked_read (void *src, int regnum, gdb_byte *buf)
@@ -259,7 +262,7 @@ regcache::regcache (readonly_t, const regcache &src)
 }
 
 gdbarch *
-regcache::arch () const
+regcache_raw::arch () const
 {
   return m_descr->gdbarch;
 }
@@ -267,7 +270,7 @@ regcache::arch () const
 /* See regcache.h.  */
 
 ptid_t
-regcache_get_ptid (const struct regcache *regcache)
+regcache_get_ptid (const regcache_raw *regcache)
 {
   gdb_assert (!ptid_equal (regcache->ptid (), minus_one_ptid));
 
@@ -280,7 +283,7 @@ class regcache_invalidator
 {
 public:
 
-  regcache_invalidator (struct regcache *regcache, int regnum)
+  regcache_invalidator (regcache_raw *regcache, int regnum)
     : m_regcache (regcache),
       m_regnum (regnum)
   {
@@ -289,7 +292,7 @@ public:
   ~regcache_invalidator ()
   {
     if (m_regcache != nullptr)
-      regcache_invalidate (m_regcache, m_regnum);
+      m_regcache->invalidate (m_regnum);
   }
 
   DISABLE_COPY_AND_ASSIGN (regcache_invalidator);
@@ -301,14 +304,14 @@ public:
 
 private:
 
-  struct regcache *m_regcache;
+  regcache_raw *m_regcache;
   int m_regnum;
 };
 
 /* Return REGCACHE's architecture.  */
 
 struct gdbarch *
-get_regcache_arch (const struct regcache *regcache)
+get_regcache_arch (const regcache_raw *regcache)
 {
   return regcache->arch ();
 }
@@ -411,7 +414,7 @@ regcache_dup (struct regcache *src)
 }
 
 enum register_status
-regcache_register_status (const struct regcache *regcache, int regnum)
+regcache_register_status (const reg_buffer *regcache, int regnum)
 {
   gdb_assert (regcache != NULL);
   return regcache->get_register_status (regnum);
@@ -432,14 +435,14 @@ reg_buffer::set_register_status (int regnum, enum register_status status)
 }
 
 void
-regcache_invalidate (struct regcache *regcache, int regnum)
+regcache_invalidate (regcache_raw *regcache, int regnum)
 {
   gdb_assert (regcache != NULL);
   regcache->invalidate (regnum);
 }
 
 void
-regcache::invalidate (int regnum)
+regcache_raw::invalidate (int regnum)
 {
   gdb_assert (regnum >= 0);
   gdb_assert (!m_readonly_p);
@@ -584,7 +587,7 @@ registers_changed (void)
 }
 
 void
-regcache_raw_update (struct regcache *regcache, int regnum)
+regcache_raw_update (regcache_raw *regcache, int regnum)
 {
   gdb_assert (regcache != NULL);
 
@@ -592,7 +595,7 @@ regcache_raw_update (struct regcache *regcache, int regnum)
 }
 
 void
-regcache::raw_update (int regnum)
+regcache_raw::raw_update (int regnum)
 {
   gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
 
@@ -614,13 +617,13 @@ regcache::raw_update (int regnum)
 }
 
 enum register_status
-regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
+regcache_raw_read (regcache_raw *regcache, int regnum, gdb_byte *buf)
 {
   return regcache->raw_read (regnum, buf);
 }
 
 enum register_status
-regcache::raw_read (int regnum, gdb_byte *buf)
+regcache_raw::raw_read (int regnum, gdb_byte *buf)
 {
   gdb_assert (buf != NULL);
   raw_update (regnum);
@@ -643,7 +646,7 @@ regcache_raw_read_signed (struct regcache *regcache, int regnum, LONGEST *val)
 
 template<typename T, typename>
 enum register_status
-regcache::raw_read (int regnum, T *val)
+regcache_raw::raw_read (int regnum, T *val)
 {
   gdb_byte *buf;
   enum register_status status;
@@ -677,7 +680,7 @@ regcache_raw_write_signed (struct regcache *regcache, int regnum, LONGEST val)
 
 template<typename T, typename>
 void
-regcache::raw_write (int regnum, T val)
+regcache_raw::raw_write (int regnum, T val)
 {
   gdb_byte *buf;
 
@@ -890,7 +893,7 @@ regcache_raw_write (struct regcache *regcache, int regnum,
 }
 
 void
-regcache::raw_write (int regnum, const gdb_byte *buf)
+regcache_raw::raw_write (int regnum, const gdb_byte *buf)
 {
 
   gdb_assert (buf != NULL);
@@ -1056,7 +1059,7 @@ regcache::cooked_write_part (int regnum, int offset, int len,
 /* Supply register REGNUM, whose contents are stored in BUF, to REGCACHE.  */
 
 void
-regcache_raw_supply (struct regcache *regcache, int regnum, const void *buf)
+regcache_raw_supply (regcache_raw *regcache, int regnum, const void *buf)
 {
   gdb_assert (regcache != NULL);
   regcache->raw_supply (regnum, buf);
@@ -1134,7 +1137,7 @@ reg_buffer::raw_supply_zeroed (int regnum)
 /* Collect register REGNUM from REGCACHE and store its contents in BUF.  */
 
 void
-regcache_raw_collect (const struct regcache *regcache, int regnum, void *buf)
+regcache_raw_collect (const regcache_raw *regcache, int regnum, void *buf)
 {
   gdb_assert (regcache != NULL && buf != NULL);
   regcache->raw_collect (regnum, buf);
@@ -1242,7 +1245,7 @@ reg_buffer::transfer_regset (const struct regset *regset,
 
 void
 regcache_supply_regset (const struct regset *regset,
-			struct regcache *regcache,
+			regcache_raw *regcache,
 			int regnum, const void *buf, size_t size)
 {
   regcache->supply_regset (regset, regnum, buf, size);
@@ -1261,7 +1264,7 @@ reg_buffer::supply_regset (const struct regset *regset,
 
 void
 regcache_collect_regset (const struct regset *regset,
-			 const struct regcache *regcache,
+			 const regcache_raw *regcache,
 			 int regnum, void *buf, size_t size)
 {
   regcache->collect_regset (regset, regnum, buf, size);
@@ -1324,7 +1327,7 @@ regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
 }
 
 void
-regcache::debug_print_register (const char *func,  int regno)
+regcache_raw::debug_print_register (const char *func,  int regno)
 {
   struct gdbarch *gdbarch = arch ();
 

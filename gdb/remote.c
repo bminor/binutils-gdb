@@ -105,7 +105,7 @@ static int getpkt_or_notif_sane (char **buf, long *sizeof_buf,
 static void remote_files_info (struct target_ops *ignore);
 
 static void remote_prepare_to_store (struct target_ops *self,
-				     struct regcache *regcache);
+				     regcache_raw *regcache);
 
 static void remote_open_1 (const char *, int, struct target_ops *,
 			   int extended_p);
@@ -7554,7 +7554,7 @@ remote_wait (struct target_ops *ops,
 /* Fetch a single register using a 'p' packet.  */
 
 static int
-fetch_register_using_p (struct regcache *regcache, struct packet_reg *reg)
+fetch_register_using_p (regcache_raw *regcache, struct packet_reg *reg)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct remote_state *rs = get_remote_state ();
@@ -7647,7 +7647,7 @@ send_g_packet (void)
 }
 
 static void
-process_g_packet (struct regcache *regcache)
+process_g_packet (regcache_raw *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct remote_state *rs = get_remote_state ();
@@ -7752,7 +7752,7 @@ process_g_packet (struct regcache *regcache)
 }
 
 static void
-fetch_registers_using_g (struct regcache *regcache)
+fetch_registers_using_g (regcache_raw *regcache)
 {
   send_g_packet ();
   process_g_packet (regcache);
@@ -7783,7 +7783,7 @@ set_remote_traceframe (void)
 
 static void
 remote_fetch_registers (struct target_ops *ops,
-			struct regcache *regcache, int regnum)
+			regcache_raw *regcache, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   remote_arch_state *rsa = get_remote_arch_state (gdbarch);
@@ -7834,7 +7834,7 @@ remote_fetch_registers (struct target_ops *ops,
    first.  */
 
 static void
-remote_prepare_to_store (struct target_ops *self, struct regcache *regcache)
+remote_prepare_to_store (struct target_ops *self, regcache_raw *regcache)
 {
   remote_arch_state *rsa = get_remote_arch_state (regcache->arch ());
   int i;
@@ -7858,7 +7858,7 @@ remote_prepare_to_store (struct target_ops *self, struct regcache *regcache)
    packet was not recognized.  */
 
 static int
-store_register_using_P (const struct regcache *regcache, 
+store_register_using_P (const regcache_raw *regcache,
 			struct packet_reg *reg)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -7899,7 +7899,7 @@ store_register_using_P (const struct regcache *regcache,
    contents of the register cache buffer.  FIXME: ignores errors.  */
 
 static void
-store_registers_using_G (const struct regcache *regcache)
+store_registers_using_G (const regcache_raw *regcache)
 {
   struct remote_state *rs = get_remote_state ();
   remote_arch_state *rsa = get_remote_arch_state (regcache->arch ());
@@ -7939,7 +7939,7 @@ store_registers_using_G (const struct regcache *regcache)
 
 static void
 remote_store_registers (struct target_ops *ops,
-			struct regcache *regcache, int regnum)
+			regcache_raw *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   remote_arch_state *rsa = get_remote_arch_state (gdbarch);

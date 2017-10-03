@@ -241,7 +241,7 @@ static void record_full_save (struct target_ops *self,
 /* Alloc a record_full_reg record entry.  */
 
 static inline struct record_full_entry *
-record_full_reg_alloc (struct regcache *regcache, int regnum)
+record_full_reg_alloc (regcache_raw *regcache, int regnum)
 {
   struct record_full_entry *rec;
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -465,7 +465,7 @@ record_full_get_loc (struct record_full_entry *rec)
 /* Record the value of a register NUM to record_full_arch_list.  */
 
 int
-record_full_arch_list_add_reg (struct regcache *regcache, int regnum)
+record_full_arch_list_add_reg (regcache_raw *regcache, int regnum)
 {
   struct record_full_entry *rec;
 
@@ -1393,7 +1393,7 @@ record_full_supports_stopped_by_hw_breakpoint (struct target_ops *ops)
 /* Record registers change (by user or by GDB) to list as an instruction.  */
 
 static void
-record_full_registers_change (struct regcache *regcache, int regnum)
+record_full_registers_change (regcache_raw *regcache, int regnum)
 {
   /* Check record_full_insn_num.  */
   record_full_check_insn_num ();
@@ -1441,7 +1441,7 @@ record_full_registers_change (struct regcache *regcache, int regnum)
 
 static void
 record_full_store_registers (struct target_ops *ops,
-			     struct regcache *regcache,
+			     regcache_raw *regcache,
 			     int regno)
 {
   if (!record_full_gdb_operation_disable)
@@ -2024,7 +2024,7 @@ record_full_core_kill (struct target_ops *ops)
 
 static void
 record_full_core_fetch_registers (struct target_ops *ops,
-				  struct regcache *regcache,
+				  regcache_raw *regcache,
 				  int regno)
 {
   if (regno < 0)
@@ -2045,7 +2045,7 @@ record_full_core_fetch_registers (struct target_ops *ops,
 
 static void
 record_full_core_prepare_to_store (struct target_ops *self,
-				   struct regcache *regcache)
+				   regcache_raw *regcache)
 {
 }
 
@@ -2053,8 +2053,8 @@ record_full_core_prepare_to_store (struct target_ops *self,
 
 static void
 record_full_core_store_registers (struct target_ops *ops,
-                             struct regcache *regcache,
-                             int regno)
+				  regcache_raw *regcache,
+				  int regno)
 {
   if (record_full_gdb_operation_disable)
     record_full_core_regbuf->raw_supply (regno,

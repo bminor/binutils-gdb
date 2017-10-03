@@ -49,12 +49,12 @@ test_target_has_memory (target_ops *self)
 }
 
 static void
-test_target_prepare_to_store (target_ops *self, regcache *regs)
+test_target_prepare_to_store (target_ops *self, regcache_raw *regs)
 {
 }
 
 static void
-test_target_store_registers (target_ops *self, regcache *regs, int regno)
+test_target_store_registers (target_ops *self, regcache_raw *regs, int regno)
 {
 }
 

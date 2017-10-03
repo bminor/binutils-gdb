@@ -945,7 +945,7 @@ default_addressable_memory_unit_size (struct gdbarch *gdbarch)
 
 void
 default_guess_tracepoint_registers (struct gdbarch *gdbarch,
-				    struct regcache *regcache,
+				    regcache_raw *regcache,
 				    CORE_ADDR addr)
 {
   int pc_regno = gdbarch_pc_regnum (gdbarch);

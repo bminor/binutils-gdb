@@ -177,7 +177,7 @@ s390_write_pc (struct regcache *regcache, CORE_ADDR pc)
 
 static void
 s390_guess_tracepoint_registers (struct gdbarch *gdbarch,
-				 struct regcache *regcache,
+				 regcache_raw *regcache,
 				 CORE_ADDR addr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);

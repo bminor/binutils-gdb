@@ -841,7 +841,7 @@ traceframe_find_block_type (char type_wanted, int pos)
 
 static void
 tfile_fetch_registers (struct target_ops *ops,
-		       struct regcache *regcache, int regno)
+		       regcache_raw *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int offset, regn, regsize, dummy;

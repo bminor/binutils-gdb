@@ -25,10 +25,10 @@ struct regcache;
 
 /* Data structure describing a register set.  */
 
-typedef void (supply_regset_ftype) (const struct regset *, struct regcache *,
+typedef void (supply_regset_ftype) (const struct regset *, regcache_raw *,
                                     int, const void *, size_t);
-typedef void (collect_regset_ftype) (const struct regset *, 
-                                     const struct regcache *,
+typedef void (collect_regset_ftype) (const struct regset *,
+                                     const regcache_raw *,
                                      int, void *, size_t);
 
 struct regset

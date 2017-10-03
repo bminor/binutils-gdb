@@ -152,7 +152,7 @@ aarch64_get_debug_reg_state (pid_t pid)
    from the current thread.  */
 
 static void
-fetch_gregs_from_thread (struct regcache *regcache)
+fetch_gregs_from_thread (regcache_raw *regcache)
 {
   int ret, tid;
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -190,7 +190,7 @@ fetch_gregs_from_thread (struct regcache *regcache)
    values in the GDB's register array.  */
 
 static void
-store_gregs_to_thread (const struct regcache *regcache)
+store_gregs_to_thread (const regcache_raw *regcache)
 {
   int ret, tid;
   elf_gregset_t regs;
@@ -233,7 +233,7 @@ store_gregs_to_thread (const struct regcache *regcache)
    from the current thread.  */
 
 static void
-fetch_fpregs_from_thread (struct regcache *regcache)
+fetch_fpregs_from_thread (regcache_raw *regcache)
 {
   int ret, tid;
   elf_fpregset_t regs;
@@ -281,7 +281,7 @@ fetch_fpregs_from_thread (struct regcache *regcache)
    values in the GDB's register array.  */
 
 static void
-store_fpregs_to_thread (const struct regcache *regcache)
+store_fpregs_to_thread (const regcache_raw *regcache)
 {
   int ret, tid;
   elf_fpregset_t regs;
@@ -346,7 +346,7 @@ store_fpregs_to_thread (const struct regcache *regcache)
 
 static void
 aarch64_linux_fetch_inferior_registers (struct target_ops *ops,
-					struct regcache *regcache,
+					regcache_raw *regcache,
 					int regno)
 {
   if (regno == -1)
@@ -364,7 +364,7 @@ aarch64_linux_fetch_inferior_registers (struct target_ops *ops,
 
 static void
 aarch64_linux_store_inferior_registers (struct target_ops *ops,
-					struct regcache *regcache,
+					regcache_raw *regcache,
 					int regno)
 {
   if (regno == -1)

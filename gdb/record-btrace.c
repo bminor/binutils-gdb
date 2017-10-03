@@ -1408,7 +1408,7 @@ record_btrace_remove_breakpoint (struct target_ops *ops,
 
 static void
 record_btrace_fetch_registers (struct target_ops *ops,
-			       struct regcache *regcache, int regno)
+			       regcache_raw *regcache, int regno)
 {
   struct btrace_insn_iterator *replay;
   struct thread_info *tp;
@@ -1449,7 +1449,7 @@ record_btrace_fetch_registers (struct target_ops *ops,
 
 static void
 record_btrace_store_registers (struct target_ops *ops,
-			       struct regcache *regcache, int regno)
+			       regcache_raw *regcache, int regno)
 {
   struct target_ops *t;
 
@@ -1467,7 +1467,7 @@ record_btrace_store_registers (struct target_ops *ops,
 
 static void
 record_btrace_prepare_to_store (struct target_ops *ops,
-				struct regcache *regcache)
+				regcache_raw *regcache)
 {
   struct target_ops *t;
 

@@ -27,6 +27,8 @@ struct regcache;
 struct regset;
 struct gdbarch;
 struct address_space;
+class regcache_raw;
+class reg_buffer;
 
 extern struct regcache *get_current_regcache (void);
 extern struct regcache *get_thread_regcache (ptid_t ptid);
@@ -37,27 +39,27 @@ extern struct regcache *get_thread_arch_aspace_regcache (ptid_t,
 
 /* Return REGCACHE's ptid.  */
 
-extern ptid_t regcache_get_ptid (const struct regcache *regcache);
+extern ptid_t regcache_get_ptid (const regcache_raw *regcache);
 
 /* Return REGCACHE's architecture.  */
 
-extern struct gdbarch *get_regcache_arch (const struct regcache *regcache);
+extern struct gdbarch *get_regcache_arch (const regcache_raw *regcache);
 
 /* Return REGCACHE's address space.  */
 
 extern struct address_space *get_regcache_aspace (const struct regcache *);
 
-enum register_status regcache_register_status (const struct regcache *regcache,
+enum register_status regcache_register_status (const reg_buffer *regcache,
 					       int regnum);
 
 /* Make certain that the register REGNUM in REGCACHE is up-to-date.  */
 
-void regcache_raw_update (struct regcache *regcache, int regnum);
+void regcache_raw_update (regcache_raw *regcache, int regnum);
 
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache.  The read variants return the status of the register.  */
 
-enum register_status regcache_raw_read (struct regcache *regcache,
+enum register_status regcache_raw_read (regcache_raw *regcache,
 					int rawnum, gdb_byte *buf);
 void regcache_raw_write (struct regcache *regcache, int rawnum,
 			 const gdb_byte *buf);
@@ -94,7 +96,7 @@ extern enum register_status
 void regcache_raw_write_part (struct regcache *regcache, int regnum,
 			      int offset, int len, const gdb_byte *buf);
 
-void regcache_invalidate (struct regcache *regcache, int regnum);
+void regcache_invalidate (regcache_raw *regcache, int regnum);
 
 /* Transfer of pseudo-registers.  The read variants return a register
    status, as an indication of when a ``cooked'' register was
@@ -143,9 +145,9 @@ extern void regcache_write_pc (struct regcache *regcache, CORE_ADDR pc);
    target.  These functions are called by the target in response to a
    target_fetch_registers() or target_store_registers().  */
 
-extern void regcache_raw_supply (struct regcache *regcache,
+extern void regcache_raw_supply (regcache_raw *regcache,
 				 int regnum, const void *buf);
-extern void regcache_raw_collect (const struct regcache *regcache,
+extern void regcache_raw_collect (const regcache_raw *regcache,
 				  int regnum, void *buf);
 
 /* Mapping between register numbers and offsets in a buffer, for use
@@ -186,11 +188,11 @@ enum
    'regset_collect' fields in a regset structure.  */
 
 extern void regcache_supply_regset (const struct regset *regset,
-				    struct regcache *regcache,
+				    regcache_raw *regcache,
 				    int regnum, const void *buf,
 				    size_t size);
 extern void regcache_collect_regset (const struct regset *regset,
-				     const struct regcache *regcache,
+				     const regcache_raw *regcache,
 				     int regnum, void *buf, size_t size);
 
 
@@ -297,9 +299,60 @@ private:
   signed char *m_register_status;
 };
 
+class regcache_raw : public reg_buffer
+{
+public:
+  regcache_raw () = delete;
+
+  enum register_status raw_read (int regnum, gdb_byte *buf);
+  void raw_write (int regnum, const gdb_byte *buf);
+
+  template<typename T, typename = RequireLongest<T>>
+  enum register_status raw_read (int regnum, T *val);
+
+  template<typename T, typename = RequireLongest<T>>
+  void raw_write (int regnum, T val);
+
+  void raw_update (int regnum);
+
+  void invalidate (int regnum);
+
+  ptid_t ptid () const
+  {
+    return m_ptid;
+  }
+
+  void set_ptid (const ptid_t ptid)
+  {
+    this->m_ptid = ptid;
+  }
+
+  gdbarch *arch () const;
+
+/* Dump the contents of a register from the register cache to the target
+   debug.  */
+  void debug_print_register (const char *func, int regno);
+
+protected:
+  regcache_raw (gdbarch *gdbarch, bool readonly_p_);
+
+  /* Is this a read-only cache?  A read-only cache is used for saving
+     the target's register state (e.g, across an inferior function
+     call or just before forcing a function return).  A read-only
+     cache can only be updated via the methods regcache_dup() and
+     regcache_cpy().  The actual contents are determined by the
+     reggroup_save and reggroup_restore methods.  */
+  bool m_readonly_p;
+
+private:
+  /* If this is a read-write cache, which thread's registers is
+     it connected to?  */
+  ptid_t m_ptid;
+};
+
 /* The register cache for storing raw register values.  */
 
-class regcache : public reg_buffer
+class regcache : public regcache_raw
 {
 public:
   regcache (gdbarch *gdbarch, address_space *aspace_)
@@ -314,8 +367,6 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (regcache);
 
-  gdbarch *arch () const;
-
   address_space *aspace () const
   {
     return m_aspace;
@@ -326,16 +377,6 @@ public:
   enum register_status cooked_read (int regnum, gdb_byte *buf);
   void cooked_write (int regnum, const gdb_byte *buf);
 
-  enum register_status raw_read (int regnum, gdb_byte *buf);
-
-  void raw_write (int regnum, const gdb_byte *buf);
-
-  template<typename T, typename = RequireLongest<T>>
-  enum register_status raw_read (int regnum, T *val);
-
-  template<typename T, typename = RequireLongest<T>>
-  void raw_write (int regnum, T val);
-
   struct value *cooked_read_value (int regnum);
 
   template<typename T, typename = RequireLongest<T>>
@@ -343,10 +384,6 @@ public:
 
   template<typename T, typename = RequireLongest<T>>
   void cooked_write (int regnum, T val);
-
-  void raw_update (int regnum);
-
-  void invalidate (int regnum);
 
   enum register_status raw_read_part (int regnum, int offset, int len,
 				      gdb_byte *buf);
@@ -360,20 +397,6 @@ public:
 			  const gdb_byte *buf);
 
   void dump (ui_file *file, enum regcache_dump_what what_to_dump);
-
-  ptid_t ptid () const
-  {
-    return m_ptid;
-  }
-
-  void set_ptid (const ptid_t ptid)
-  {
-    this->m_ptid = ptid;
-  }
-
-/* Dump the contents of a register from the register cache to the target
-   debug.  */
-  void debug_print_register (const char *func, int regno);
 
   static void regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid);
 protected:
@@ -390,17 +413,6 @@ private:
   /* The address space of this register cache (for registers where it
      makes sense, like PC or SP).  */
   struct address_space *m_aspace;
-
-  /* Is this a read-only cache?  A read-only cache is used for saving
-     the target's register state (e.g, across an inferior function
-     call or just before forcing a function return).  A read-only
-     cache can only be updated via the methods regcache_dup() and
-     regcache_cpy().  The actual contents are determined by the
-     reggroup_save and reggroup_restore methods.  */
-  bool m_readonly_p;
-  /* If this is a read-write cache, which thread's registers is
-     it connected to?  */
-  ptid_t m_ptid;
 
   friend struct regcache *
   get_thread_arch_aspace_regcache (ptid_t ptid, struct gdbarch *gdbarch,
