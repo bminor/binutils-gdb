@@ -1,5 +1,9 @@
 2017-10-03  Tom Tromey  <tom@tromey.com>
 
+	* utils.c (internal_vproblem): Use string_vprintf.
+
+2017-10-03  Tom Tromey  <tom@tromey.com>
+
 	* printcmd.c (info_symbol_command): Use std::string.
 
 2017-10-03  Tom Tromey  <tom@tromey.com>

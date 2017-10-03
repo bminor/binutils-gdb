@@ -425,7 +425,7 @@ internal_vproblem (struct internal_problem *problem,
      style similar to a compiler error message.  Include extra detail
      so that the user knows that they are living on the edge.  */
   {
-    std::string msg = string_printf (fmt, ap);
+    std::string msg = string_vprintf (fmt, ap);
     reason = string_printf ("%s:%d: %s: %s\n"
 			    "A problem internal to GDB has been detected,\n"
 			    "further debugging may prove unreliable.",
