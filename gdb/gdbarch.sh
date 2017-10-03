@@ -1278,7 +1278,6 @@ struct target_ops;
 struct obstack;
 struct bp_target_info;
 struct target_desc;
-struct objfile;
 struct symbol;
 struct displaced_step_closure;
 struct syscall;

@@ -1,3 +1,8 @@
+2017-10-03  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* gdbarch.sh (objfile): Remove duplicate declaration.
+	* gdbarch.h: Regenerate.
+
 2017-10-03  Tom Tromey  <tom@tromey.com>
 
 	* utils.c (internal_vproblem): Use string_vprintf.
