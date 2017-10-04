@@ -439,17 +439,7 @@ get_thread_arch_aspace_regcache (ptid_t ptid, struct gdbarch *gdbarch,
 struct regcache *
 get_thread_arch_regcache (ptid_t ptid, struct gdbarch *gdbarch)
 {
-  struct address_space *aspace;
-
-  /* For the benefit of "maint print registers" & co when debugging an
-     executable, allow dumping the regcache even when there is no
-     thread selected (target_thread_address_space internal-errors if
-     no address space is found).  Note that normal user commands will
-     fail higher up on the call stack due to no
-     target_has_registers.  */
-  aspace = (ptid_equal (null_ptid, ptid)
-	    ? NULL
-	    : target_thread_address_space (ptid));
+  address_space *aspace = target_thread_address_space (ptid);
 
   return get_thread_arch_aspace_regcache  (ptid, gdbarch, aspace);
 }
@@ -1595,15 +1585,28 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 static void
 regcache_print (const char *args, enum regcache_dump_what what_to_dump)
 {
+  /* Where to send output.  */
+  stdio_file file;
+  ui_file *out;
+
   if (args == NULL)
-    get_current_regcache ()->dump (gdb_stdout, what_to_dump);
+    out = gdb_stdout;
   else
     {
-      stdio_file file;
-
       if (!file.open (args, "w"))
 	perror_with_name (_("maintenance print architecture"));
-      get_current_regcache ()->dump (&file, what_to_dump);
+      out = &file;
+    }
+
+  if (target_has_registers)
+    get_current_regcache ()->dump (out, what_to_dump);
+  else
+    {
+      /* For the benefit of "maint print registers" & co when
+	 debugging an executable, allow dumping a regcache even when
+	 there is no thread selected / no registers.  */
+      regcache dummy_regs (target_gdbarch (), nullptr);
+      dummy_regs.dump (out, what_to_dump);
     }
 }
 

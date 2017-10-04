@@ -1,5 +1,11 @@
 2017-10-04  Pedro Alves  <palves@redhat.com>
 
+	* regcache.c (get_thread_arch_regcache): Remove null_ptid special
+	case.
+	(regcache_print): Handle !target_has_registers here instead.
+
+2017-10-04  Pedro Alves  <palves@redhat.com>
+
 	* frame.c (create_test_frame): Delete.
 	* frame.h (create_test_frame): Delete.
 	* gdbarch-selftests.c: Include gdbthread.h and target.h.
