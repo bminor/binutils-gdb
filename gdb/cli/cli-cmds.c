@@ -296,6 +296,7 @@ complete_command (char *arg_entry, int from_tty)
     {
       return;
     }
+  END_CATCH
 
   std::string arg_prefix (arg, word - arg);
 

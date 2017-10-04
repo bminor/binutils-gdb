@@ -231,25 +231,38 @@ struct exception_try_scope
 #if GDB_XCPT == GDB_XCPT_TRY
 
 /* We still need to wrap TRY/CATCH in C++ so that cleanups and C++
-   exceptions can coexist.  The TRY blocked is wrapped in a
-   do/while(0) so that break/continue within the block works the same
-   as in C.  */
+   exceptions can coexist.
+
+   The TRY blocked is wrapped in a do/while(0) so that break/continue
+   within the block works the same as in C.
+
+   END_CATCH makes sure that even if the CATCH block doesn't want to
+   catch the exception, we stop at every frame in the unwind chain to
+   run its cleanups, which may e.g., have pointers to stack variables
+   that are going to be destroyed.
+
+   There's an outer scope around the whole TRY/END_CATCH in order to
+   cause a compilation error if you forget to add the END_CATCH at the
+   end a TRY/CATCH construct.  */
+
 #define TRY								\
-  try									\
-    {									\
-      exception_try_scope exception_try_scope_instance;			\
-      do								\
-	{
+  {									\
+    try									\
+      {									\
+	exception_try_scope exception_try_scope_instance;		\
+	do								\
+	  {
 
 #define CATCH(EXCEPTION, MASK)						\
-	} while (0);							\
-    }								        \
-  catch (struct gdb_exception ## _ ## MASK &EXCEPTION)
+	  } while (0);							\
+	}								\
+    catch (struct gdb_exception ## _ ## MASK &EXCEPTION)
 
 #define END_CATCH				\
-  catch (...)					\
-  {						\
-    exception_rethrow ();			\
+    catch (...)					\
+      {						\
+	exception_rethrow ();			\
+      }						\
   }
 
 #else

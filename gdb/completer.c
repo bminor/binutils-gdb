@@ -1447,6 +1447,7 @@ complete_line_internal (completion_tracker &tracker,
       if (except.error != MAX_COMPLETIONS_REACHED_ERROR)
 	throw_exception (except);
     }
+  END_CATCH
 }
 
 /* See completer.h.  */
