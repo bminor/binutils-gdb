@@ -1,3 +1,8 @@
+2017-10-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.mi/list-thread-groups-available.exp: New file.
+	* gdb.mi/list-thread-groups-available.c: New file.
+
 2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/set-cwd.exp: Make it available on

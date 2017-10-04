@@ -801,7 +801,7 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
       /* At present, the target will return all available processes
 	 and if information about specific ones was required, we filter
 	 undesired processes here.  */
-      if (!ids.empty () && ids.find (pid_i) != ids.end ())
+      if (!ids.empty () && ids.find (pid_i) == ids.end ())
 	continue;
 
       ui_out_emit_tuple tuple_emitter (uiout, NULL);
