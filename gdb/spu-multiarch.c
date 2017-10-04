@@ -121,7 +121,8 @@ spu_thread_architecture (struct target_ops *ops, ptid_t ptid)
   if (parse_spufs_run (ptid, &spufs_fd, &spufs_addr))
     return spu_gdbarch (spufs_fd);
 
-  return target_gdbarch ();
+  target_ops *beneath = find_target_beneath (ops);
+  return beneath->to_thread_architecture (beneath, ptid);
 }
 
 /* Override the to_region_ok_for_hw_watchpoint routine.  */

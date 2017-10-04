@@ -654,11 +654,11 @@ remote_get_noisy_reply ()
 static struct gdbarch_data *remote_gdbarch_data_handle;
 
 static struct remote_arch_state *
-get_remote_arch_state (void)
+get_remote_arch_state (struct gdbarch *gdbarch)
 {
-  gdb_assert (target_gdbarch () != NULL);
+  gdb_assert (gdbarch != NULL);
   return ((struct remote_arch_state *)
-	  gdbarch_data (target_gdbarch (), remote_gdbarch_data_handle));
+	  gdbarch_data (gdbarch, remote_gdbarch_data_handle));
 }
 
 /* Fetch the global remote target state.  */
@@ -671,7 +671,7 @@ get_remote_state (void)
      function which calls getpkt also needs to be mindful of changes
      to rs->buf, but this call limits the number of places which run
      into trouble.  */
-  get_remote_arch_state ();
+  get_remote_arch_state (target_gdbarch ());
 
   return get_remote_state_raw ();
 }
@@ -878,7 +878,7 @@ static long
 get_remote_packet_size (void)
 {
   struct remote_state *rs = get_remote_state ();
-  struct remote_arch_state *rsa = get_remote_arch_state ();
+  remote_arch_state *rsa = get_remote_arch_state (target_gdbarch ());
 
   if (rs->explicit_packet_size)
     return rs->explicit_packet_size;
@@ -887,9 +887,10 @@ get_remote_packet_size (void)
 }
 
 static struct packet_reg *
-packet_reg_from_regnum (struct remote_arch_state *rsa, long regnum)
+packet_reg_from_regnum (struct gdbarch *gdbarch, struct remote_arch_state *rsa,
+			long regnum)
 {
-  if (regnum < 0 && regnum >= gdbarch_num_regs (target_gdbarch ()))
+  if (regnum < 0 && regnum >= gdbarch_num_regs (gdbarch))
     return NULL;
   else
     {
@@ -901,11 +902,12 @@ packet_reg_from_regnum (struct remote_arch_state *rsa, long regnum)
 }
 
 static struct packet_reg *
-packet_reg_from_pnum (struct remote_arch_state *rsa, LONGEST pnum)
+packet_reg_from_pnum (struct gdbarch *gdbarch, struct remote_arch_state *rsa,
+		      LONGEST pnum)
 {
   int i;
 
-  for (i = 0; i < gdbarch_num_regs (target_gdbarch ()); i++)
+  for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
     {
       struct packet_reg *r = &rsa->regs[i];
 
@@ -1049,7 +1051,7 @@ static long
 get_memory_packet_size (struct memory_packet_config *config)
 {
   struct remote_state *rs = get_remote_state ();
-  struct remote_arch_state *rsa = get_remote_arch_state ();
+  remote_arch_state *rsa = get_remote_arch_state (target_gdbarch ());
 
   long what_they_get;
   if (config->fixed_p)
@@ -6364,6 +6366,9 @@ typedef struct stop_reply
 
   struct target_waitstatus ws;
 
+  /* The architecture associated with the expedited registers.  */
+  gdbarch *arch;
+
   /* Expedited registers.  This makes remote debugging a bit more
      efficient for those targets that provide critical registers as
      part of their normal status mechanism (as another roundtrip to
@@ -6838,7 +6843,7 @@ strprefix (const char *p, const char *pend, const char *prefix)
 static void
 remote_parse_stop_reply (char *buf, struct stop_reply *event)
 {
-  struct remote_arch_state *rsa = get_remote_arch_state ();
+  remote_arch_state *rsa = NULL;
   ULONGEST addr;
   const char *p;
   int skipregs = 0;
@@ -7018,9 +7023,47 @@ Packet: '%s'\n"),
 		 reason.  */
 	      if (p_temp == p1)
 		{
-		  struct packet_reg *reg = packet_reg_from_pnum (rsa, pnum);
+		  /* If we haven't parsed the event's thread yet, find
+		     it now, in order to find the architecture of the
+		     reported expedited registers.  */
+		  if (event->ptid == null_ptid)
+		    {
+		      const char *thr = strstr (p1 + 1, ";thread:");
+		      if (thr != NULL)
+			event->ptid = read_ptid (thr + strlen (";thread:"),
+						 NULL);
+		      else
+			event->ptid = magic_null_ptid;
+		    }
+
+		  if (rsa == NULL)
+		    {
+		      inferior *inf = (event->ptid == null_ptid
+				       ? NULL
+				       : find_inferior_ptid (event->ptid));
+		      /* If this is the first time we learn anything
+			 about this process, skip the registers
+			 included in this packet, since we don't yet
+			 know which architecture to use to parse them.
+			 We'll determine the architecture later when
+			 we process the stop reply and retrieve the
+			 target description, via
+			 remote_notice_new_inferior ->
+			 post_create_inferior.  */
+		      if (inf == NULL)
+			{
+			  p = strchrnul (p1 + 1, ';');
+			  p++;
+			  continue;
+			}
+
+		      event->arch = inf->gdbarch;
+		      rsa = get_remote_arch_state (event->arch);
+		    }
+
+		  packet_reg *reg
+		    = packet_reg_from_pnum (event->arch, rsa, pnum);
 		  cached_reg_t cached_reg;
-		  struct gdbarch *gdbarch = target_gdbarch ();
 
 		  if (reg == NULL)
 		    error (_("Remote sent bad register number %s: %s\n\
@@ -7029,13 +7072,13 @@ Packet: '%s'\n"),
 
 		  cached_reg.num = reg->regnum;
 		  cached_reg.data = (gdb_byte *)
-		    xmalloc (register_size (gdbarch, reg->regnum));
+		    xmalloc (register_size (event->arch, reg->regnum));
 
 		  p = p1 + 1;
 		  fieldsize = hex2bin (p, cached_reg.data,
-				       register_size (gdbarch, reg->regnum));
+				       register_size (event->arch, reg->regnum));
 		  p += 2 * fieldsize;
-		  if (fieldsize < register_size (gdbarch, reg->regnum))
+		  if (fieldsize < register_size (event->arch, reg->regnum))
 		    warning (_("Remote reply is too short: %s"), buf);
 
 		  VEC_safe_push (cached_reg_t, event->regcache, &cached_reg);
@@ -7251,7 +7294,7 @@ process_stop_reply (struct stop_reply *stop_reply,
       if (stop_reply->regcache)
 	{
 	  struct regcache *regcache
-	    = get_thread_arch_regcache (ptid, target_gdbarch ());
+	    = get_thread_arch_regcache (ptid, stop_reply->arch);
 	  cached_reg_t *reg;
 	  int ix;
 
@@ -7608,7 +7651,7 @@ process_g_packet (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct remote_state *rs = get_remote_state ();
-  struct remote_arch_state *rsa = get_remote_arch_state ();
+  remote_arch_state *rsa = get_remote_arch_state (gdbarch);
   int i, buf_len;
   char *p;
   char *regs;
@@ -7742,7 +7785,8 @@ static void
 remote_fetch_registers (struct target_ops *ops,
 			struct regcache *regcache, int regnum)
 {
-  struct remote_arch_state *rsa = get_remote_arch_state ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  remote_arch_state *rsa = get_remote_arch_state (gdbarch);
   int i;
 
   set_remote_traceframe ();
@@ -7750,7 +7794,7 @@ remote_fetch_registers (struct target_ops *ops,
 
   if (regnum >= 0)
     {
-      struct packet_reg *reg = packet_reg_from_regnum (rsa, regnum);
+      packet_reg *reg = packet_reg_from_regnum (gdbarch, rsa, regnum);
 
       gdb_assert (reg != NULL);
 
@@ -7776,7 +7820,7 @@ remote_fetch_registers (struct target_ops *ops,
 
   fetch_registers_using_g (regcache);
 
-  for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
+  for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
     if (!rsa->regs[i].in_g_packet)
       if (!fetch_register_using_p (regcache, &rsa->regs[i]))
 	{
@@ -7792,7 +7836,7 @@ remote_fetch_registers (struct target_ops *ops,
 static void
 remote_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 {
-  struct remote_arch_state *rsa = get_remote_arch_state ();
+  remote_arch_state *rsa = get_remote_arch_state (regcache->arch ());
   int i;
 
   /* Make sure the entire registers array is valid.  */
@@ -7858,7 +7902,7 @@ static void
 store_registers_using_G (const struct regcache *regcache)
 {
   struct remote_state *rs = get_remote_state ();
-  struct remote_arch_state *rsa = get_remote_arch_state ();
+  remote_arch_state *rsa = get_remote_arch_state (regcache->arch ());
   gdb_byte *regs;
   char *p;
 
@@ -7897,7 +7941,8 @@ static void
 remote_store_registers (struct target_ops *ops,
 			struct regcache *regcache, int regnum)
 {
-  struct remote_arch_state *rsa = get_remote_arch_state ();
+  struct gdbarch *gdbarch = regcache->arch ();
+  remote_arch_state *rsa = get_remote_arch_state (gdbarch);
   int i;
 
   set_remote_traceframe ();
@@ -7905,7 +7950,7 @@ remote_store_registers (struct target_ops *ops,
 
   if (regnum >= 0)
     {
-      struct packet_reg *reg = packet_reg_from_regnum (rsa, regnum);
+      packet_reg *reg = packet_reg_from_regnum (gdbarch, rsa, regnum);
 
       gdb_assert (reg != NULL);
 
@@ -7929,7 +7974,7 @@ remote_store_registers (struct target_ops *ops,
 
   store_registers_using_G (regcache);
 
-  for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
+  for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
     if (!rsa->regs[i].in_g_packet)
       if (!store_register_using_P (regcache, &rsa->regs[i]))
 	/* See above for why we do not issue an error here.  */
@@ -12697,7 +12742,8 @@ remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
   if (packet_support (PACKET_qTStatus) == PACKET_DISABLE)
     return -1;
 
-  trace_regblock_size = get_remote_arch_state ()->sizeof_g_packet;
+  trace_regblock_size
+    = get_remote_arch_state (target_gdbarch ())->sizeof_g_packet;
 
   putpkt ("qTStatus");
 

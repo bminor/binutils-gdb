@@ -3137,7 +3137,9 @@ default_watchpoint_addr_within_range (struct target_ops *target,
 static struct gdbarch *
 default_thread_architecture (struct target_ops *ops, ptid_t ptid)
 {
-  return target_gdbarch ();
+  inferior *inf = find_inferior_ptid (ptid);
+  gdb_assert (inf != NULL);
+  return inf->gdbarch;
 }
 
 static int

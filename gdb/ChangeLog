@@ -1,5 +1,33 @@
 2017-10-04  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (get_remote_arch_state): New 'gdbarch' parameter.  Use
+	it instead of target_gdbarch.
+	(get_remote_state, get_remote_packet_size): Adjust
+	get_remote_arch_state calls, passing down target_gdbarch
+	explicitly.
+	(packet_reg_from_regnum, packet_reg_from_pnum): New parameter
+	'gdbarch' and use it instead of target_gdbarch.
+	(get_memory_packet_size): Adjust get_remote_arch_state calls,
+	passing down target_gdbarch explicitly.
+	(struct stop_reply) <arch>: New field.
+	(remote_parse_stop_reply): Use the stopped thread's architecture,
+	not the current inferior's.  Save the architecture in the
+	stop_reply.
+	(process_stop_reply): Use the stop reply's architecture.
+	(process_g_packet, remote_fetch_registers)
+	(remote_prepare_to_store, store_registers_using_G)
+	(remote_store_registers): Adjust get_remote_arch_state calls,
+	using the regcache's architecture.
+	(remote_get_trace_status): Adjust get_remote_arch_state calls,
+	passing down target_gdbarch explicitly.
+	* spu-multiarch.c (spu_thread_architecture): Defer to the target
+	beneath instead of calling target_gdbarch.
+	* target.c (default_thread_architecture): Use the specified
+	inferior's architecture, instead of the current inferior's
+	architecture (via target_gdbarch).
+
+2017-10-04  Pedro Alves  <palves@redhat.com>
+
 	* regcache.c (get_thread_arch_regcache): Remove null_ptid special
 	case.
 	(regcache_print): Handle !target_has_registers here instead.
