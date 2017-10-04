@@ -7054,7 +7054,9 @@ bfd_error_type;
 
 bfd_error_type bfd_get_error (void);
 
-void bfd_set_error (int error_tag, ...);
+void bfd_set_error (bfd_error_type error_tag);
+
+void bfd_set_input_error (bfd *input, bfd_error_type error_tag);
 
 const char *bfd_errmsg (bfd_error_type error_tag);
 

@@ -1,3 +1,13 @@
+2017-10-05  Pedro Alves  <palves@redhat.com>
+
+	PR 22245
+	* bfd.c (bfd_set_error): Revert 2017-10-04 change.  Remove
+	ellipsis parameter.  Split out bfd_error_on_input code to..
+	(bfd_set_input_error): .. New function.
+	* archive.c (_bfd_write_archive_contents): Use bfd_set_input_error.
+	* vms-lib.c (_bfd_vms_lib_write_archive_contents): Likewise.
+	* bfd-in2.h: Regenerate.
+
 2017-10-05  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (elf_link_input_bfd): Correct ctor/dtor in init_array/

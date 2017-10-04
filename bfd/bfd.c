@@ -497,32 +497,47 @@ FUNCTION
 	bfd_set_error
 
 SYNOPSIS
-	void bfd_set_error (int error_tag, ...);
+	void bfd_set_error (bfd_error_type error_tag);
 
 DESCRIPTION
 	Set the BFD error condition to be @var{error_tag}.
-	If @var{error_tag} is bfd_error_on_input, then this function
-	takes two more parameters, the input bfd where the error
-	occurred, and the bfd_error_type error.
+
+	@var{error_tag} must not be bfd_error_on_input.  Use
+	bfd_set_input_error for input errors instead.
 */
 
 void
-bfd_set_error (int error_tag, ...)
+bfd_set_error (bfd_error_type error_tag)
 {
   bfd_error = error_tag;
-  if (error_tag == bfd_error_on_input)
-    {
-      /* This is an error that occurred during bfd_close when
-	 writing an archive, but on one of the input files.  */
-      va_list ap;
+  if (bfd_error >= bfd_error_on_input)
+    abort ();
+}
 
-      va_start (ap, error_tag);
-      input_bfd = va_arg (ap, bfd *);
-      input_error = (bfd_error_type) va_arg (ap, int);
-      if (input_error >= bfd_error_on_input)
-	abort ();
-      va_end (ap);
-    }
+/*
+FUNCTION
+	bfd_set_input_error
+
+SYNOPSIS
+	void bfd_set_input_error (bfd *input, bfd_error_type error_tag);
+
+DESCRIPTION
+
+	Set the BFD error condition to be bfd_error_on_input.
+	@var{input} is the input bfd where the error occurred, and
+	@var{error_tag} the bfd_error_type error.
+*/
+
+void
+bfd_set_input_error (bfd *input, bfd_error_type error_tag)
+{
+  /* This is an error that occurred during bfd_close when writing an
+     archive, but on one of the input files.  */
+  bfd_error = bfd_error_on_input;
+  input_bfd = input;
+  input_error = error_tag;
+  if (input_error >= bfd_error_on_input)
+    abort ();
 }
 
 /*
