@@ -210,6 +210,17 @@ struct program_space
     REGISTRY_FIELDS;
   };
 
+/* An address space.  It is used for comparing if
+   pspaces/inferior/threads see the same address space and for
+   associating caches to each address space.  */
+struct address_space
+{
+  int num;
+
+  /* Per aspace data-pointers required by other GDB modules.  */
+  REGISTRY_FIELDS;
+};
+
 /* The object file that the main symbol table was loaded from (e.g. the
    argument to the "symbol-file" or "file" command).  */
 

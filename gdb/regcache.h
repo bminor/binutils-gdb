@@ -252,11 +252,6 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (regcache);
 
-  /* class regcache is only extended in unit test, so only mark it
-     virtual when selftest is enabled.  */
-#if GDB_SELF_TEST
-  virtual
-#endif
   ~regcache ()
   {
     xfree (m_registers);
@@ -277,11 +272,6 @@ public:
 
   enum register_status raw_read (int regnum, gdb_byte *buf);
 
-  /* class regcache is only extended in unit test, so only mark it
-     virtual when selftest is enabled.  */
-#if GDB_SELF_TEST
-  virtual
-#endif
   void raw_write (int regnum, const gdb_byte *buf);
 
   template<typename T, typename = RequireLongest<T>>

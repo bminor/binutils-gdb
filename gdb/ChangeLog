@@ -1,3 +1,22 @@
+2017-10-04  Pedro Alves  <palves@redhat.com>
+
+	* frame.c (create_test_frame): Delete.
+	* frame.h (create_test_frame): Delete.
+	* gdbarch-selftests.c: Include gdbthread.h and target.h.
+	(class regcache_test): Delete.
+	(test_target_has_registers, test_target_has_stack)
+	(test_target_has_memory, test_target_prepare_to_store)
+	(test_target_store_registers): New functions.
+	(test_target_ops): New class.
+	(register_to_value_test): Error out if there's already a
+	process_stratum (or higher) target pushed.  Create a fuller mock
+	environment, with mock target_ops, inferior, address space, thread
+	and inferior_ptid.
+	* progspace.c (struct address_space): Move to ...
+	* progspace.h (struct address_space): ... here.
+	* regcache.h (regcache::~regcache, regcache::raw_write)
+	[GDB_SELF_TEST]: No longer virtual.
+
 2017-10-04  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* mi/mi-main.c (list_available_thread_groups): Reverse filter logic.
