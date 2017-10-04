@@ -988,13 +988,14 @@ gdbscm_breakpoint_commands (SCM self)
     {
       print_command_lines (current_uiout, breakpoint_commands (bp), 0);
     }
-  current_uiout->redirect (NULL);
   CATCH (except, RETURN_MASK_ALL)
     {
+      current_uiout->redirect (NULL);
       gdbscm_throw_gdb_exception (except);
     }
   END_CATCH
 
+  current_uiout->redirect (NULL);
   result = gdbscm_scm_from_c_string (buf.c_str ());
 
   return result;

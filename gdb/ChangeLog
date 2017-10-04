@@ -1,5 +1,10 @@
 2017-10-04  Pedro Alves  <palves@redhat.com>
 
+	* guile/scm-breakpoint.c (gdbscm_breakpoint_commands): Move code
+	out of 'between TRY and CATCH'.
+
+2017-10-04  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-cmds.c (complete_command): Add missing END_CATCH.
 	* common/common-exceptions.h (TRY): Open an outermost scope.
 	Expand intro comment.
