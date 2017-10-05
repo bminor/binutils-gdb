@@ -1,5 +1,36 @@
 2017-10-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* dfp.h (MAX_DECIMAL_STRING): Move to dfp.c.
+	(decimal_to_string): Return std::string object.
+	(decimal_from_string): Accept std::string object.  Return bool.
+	(decimal_from_integral, decimal_from_doublest): Remove.
+	(decimal_from_longest): Add prototype.
+	(decimal_from_ulongest): Likewise.
+	(decimal_to_longest): Likewise.
+	(decimal_from_doublest): Likewise.
+	* dfp.c: Do not include "gdbtypes.h" or "value.h".
+	(MAX_DECIMAL_STRING): Move here.
+	(decimal_to_string): Return std::string object.
+	(decimal_from_string): Accept std::string object.  Return bool.
+	(decimal_from_integral): Remove, replace by ...
+	(decimal_from_longest, decimal_from_ulongest): ... these new functions.
+	(decimal_to_longest): New function.
+	(decimal_from_floating): Remove, replace by ...
+	(decimal_from_doublest): ... this new function.
+	(decimal_to_doublest): Update to new decimal_to_string interface.
+
+	* value.c (unpack_long): Use decimal_to_longest.
+	* valops.c (value_cast): Use decimal_from_doublest instead of
+	decimal_from_floating.  Use decimal_from_[u]longest isntead of
+	decimal_from_integral.
+	* valarith.c (value_args_as_decimal): Likewise.
+	* valprint.c (print_decimal_floating): Update to new
+	decimal_to_string interface.
+	* printcmd.c (printf_decfloat): Likewise.
+	* c-exp.y (parse_number): Update to new decimal_from_string interface.
+
+2017-10-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* doublest.h: Do not include "floatformat.h".  Remove stale comments.
 	* gdbtypes.c: Include "floatformat.h".
 	* value.c: Likewise.

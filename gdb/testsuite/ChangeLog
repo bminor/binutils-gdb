@@ -1,3 +1,9 @@
+2017-10-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.base/dfp-exprs.exp: Update tests to larger range of supported
+	integer-to-dfp conversion.
+	* gdb.base/dfp-test.exp: Likewise.
+
 2017-10-04  Pedro Alves  <palves@redhat.com>
 
 	* gdb.multi/hangout.c: Include <unistd.h>.

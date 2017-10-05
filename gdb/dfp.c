@@ -19,8 +19,6 @@
 
 #include "defs.h"
 #include "expression.h"
-#include "gdbtypes.h"
-#include "value.h"
 #include "dfp.h"
 
 /* The order of the following headers is important for making sure
@@ -29,6 +27,10 @@
 #include "dpd/decimal128.h"
 #include "dpd/decimal64.h"
 #include "dpd/decimal32.h"
+
+/* When using decimal128, this is the maximum string length + 1
+   (value comes from libdecnumber's DECIMAL128_String constant).  */
+#define MAX_DECIMAL_STRING  43
 
 /* In GDB, we are using an array of gdb_byte to represent decimal values.
    They are stored in host byte order.  This routine does the conversion if
@@ -142,37 +144,42 @@ decimal_to_number (const gdb_byte *from, int len, decNumber *to)
 /* Convert decimal type to its string representation.  LEN is the length
    of the decimal type, 4 bytes for decimal32, 8 bytes for decimal64 and
    16 bytes for decimal128.  */
-void
+std::string
 decimal_to_string (const gdb_byte *decbytes, int len,
-		   enum bfd_endian byte_order, char *s)
+		   enum bfd_endian byte_order)
 {
   gdb_byte dec[16];
 
   match_endianness (decbytes, len, byte_order, dec);
 
+  std::string result;
+  result.resize (MAX_DECIMAL_STRING);
+
   switch (len)
     {
       case 4:
-	decimal32ToString ((decimal32 *) dec, s);
+	decimal32ToString ((decimal32 *) dec, &result[0]);
 	break;
       case 8:
-	decimal64ToString ((decimal64 *) dec, s);
+	decimal64ToString ((decimal64 *) dec, &result[0]);
 	break;
       case 16:
-	decimal128ToString ((decimal128 *) dec, s);
+	decimal128ToString ((decimal128 *) dec, &result[0]);
 	break;
       default:
 	error (_("Unknown decimal floating point type."));
 	break;
     }
+
+  return result;
 }
 
 /* Convert the string form of a decimal value to its decimal representation.
    LEN is the length of the decimal type, 4 bytes for decimal32, 8 bytes for
    decimal64 and 16 bytes for decimal128.  */
-int
+bool
 decimal_from_string (gdb_byte *decbytes, int len, enum bfd_endian byte_order,
-		     const char *string)
+		     std::string string)
 {
   decContext set;
   gdb_byte dec[16];
@@ -182,13 +189,13 @@ decimal_from_string (gdb_byte *decbytes, int len, enum bfd_endian byte_order,
   switch (len)
     {
       case 4:
-	decimal32FromString ((decimal32 *) dec, string, &set);
+	decimal32FromString ((decimal32 *) dec, string.c_str (), &set);
 	break;
       case 8:
-	decimal64FromString ((decimal64 *) dec, string, &set);
+	decimal64FromString ((decimal64 *) dec, string.c_str (), &set);
 	break;
       case 16:
-	decimal128FromString ((decimal128 *) dec, string, &set);
+	decimal128FromString ((decimal128 *) dec, string.c_str (), &set);
 	break;
       default:
 	error (_("Unknown decimal floating point type."));
@@ -200,36 +207,54 @@ decimal_from_string (gdb_byte *decbytes, int len, enum bfd_endian byte_order,
   /* Check for errors in the DFP operation.  */
   decimal_check_errors (&set);
 
-  return 1;
+  return true;
 }
 
-/* Converts a value of an integral type to a decimal float of
-   specified LEN bytes.  */
+/* Converts a LONGEST to a decimal float of specified LEN bytes.  */
 void
-decimal_from_integral (struct value *from,
-		       gdb_byte *to, int len, enum bfd_endian byte_order)
+decimal_from_longest (LONGEST from,
+		      gdb_byte *to, int len, enum bfd_endian byte_order)
 {
-  LONGEST l;
   gdb_byte dec[16];
   decNumber number;
-  struct type *type;
-
-  type = check_typedef (value_type (from));
-
-  if (TYPE_LENGTH (type) > 4)
+  if ((int32_t) from != from)
     /* libdecnumber can convert only 32-bit integers.  */
     error (_("Conversion of large integer to a "
 	     "decimal floating type is not supported."));
 
-  l = value_as_long (from);
-
-  if (TYPE_UNSIGNED (type))
-    decNumberFromUInt32 (&number, (unsigned int) l);
-  else
-    decNumberFromInt32 (&number, (int) l);
+  decNumberFromInt32 (&number, (int32_t) from);
 
   decimal_from_number (&number, dec, len);
   match_endianness (dec, len, byte_order, to);
+}
+
+/* Converts a ULONGEST to a decimal float of specified LEN bytes.  */
+void
+decimal_from_ulongest (ULONGEST from,
+		       gdb_byte *to, int len, enum bfd_endian byte_order)
+{
+  gdb_byte dec[16];
+  decNumber number;
+
+  if ((uint32_t) from != from)
+    /* libdecnumber can convert only 32-bit integers.  */
+    error (_("Conversion of large integer to a "
+	     "decimal floating type is not supported."));
+
+  decNumberFromUInt32 (&number, (uint32_t) from);
+
+  decimal_from_number (&number, dec, len);
+  match_endianness (dec, len, byte_order, to);
+}
+
+/* Converts a decimal float of LEN bytes to a LONGEST.  */
+LONGEST
+decimal_to_longest (const gdb_byte *from, int len, enum bfd_endian byte_order)
+{
+  /* libdecnumber has a function to convert from decimal to integer, but
+     it doesn't work when the decimal number has a fractional part.  */
+  std::string str = decimal_to_string (from, len, byte_order);
+  return strtoll (str.c_str (), NULL, 10);
 }
 
 /* Converts a value of a float type to a decimal float of
@@ -238,28 +263,21 @@ decimal_from_integral (struct value *from,
    This is an ugly way to do the conversion, but libdecnumber does
    not offer a direct way to do it.  */
 void
-decimal_from_floating (struct value *from,
+decimal_from_doublest (DOUBLEST from,
 		       gdb_byte *to, int len, enum bfd_endian byte_order)
 {
-  char *buffer;
-
-  buffer = xstrprintf ("%.30" DOUBLEST_PRINT_FORMAT, value_as_double (from));
-
-  decimal_from_string (to, len, byte_order, buffer);
-
-  xfree (buffer);
+  std::string str = string_printf ("%.30" DOUBLEST_PRINT_FORMAT, from);
+  decimal_from_string (to, len, byte_order, str);
 }
 
 /* Converts a decimal float of LEN bytes to a double value.  */
 DOUBLEST
 decimal_to_doublest (const gdb_byte *from, int len, enum bfd_endian byte_order)
 {
-  char buffer[MAX_DECIMAL_STRING];
-
   /* This is an ugly way to do the conversion, but libdecnumber does
      not offer a direct way to do it.  */
-  decimal_to_string (from, len, byte_order, buffer);
-  return strtod (buffer, NULL);
+  std::string str = decimal_to_string (from, len, byte_order);
+  return strtod (str.c_str (), NULL);
 }
 
 /* Perform operation OP with operands X and Y with sizes LEN_X and LEN_Y

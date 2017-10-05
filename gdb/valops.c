@@ -471,13 +471,18 @@ value_cast (struct type *type, struct value *arg2)
       gdb_byte dec[16];
 
       if (code2 == TYPE_CODE_FLT)
-	decimal_from_floating (arg2, dec, dec_len, byte_order);
+	decimal_from_doublest (value_as_double (arg2),
+			       dec, dec_len, byte_order);
       else if (code2 == TYPE_CODE_DECFLOAT)
 	decimal_convert (value_contents (arg2), TYPE_LENGTH (type2),
 			 byte_order, dec, dec_len, byte_order);
+      /* The only option left is an integral type.  */
+      else if (TYPE_UNSIGNED (type2))
+	decimal_from_ulongest (value_as_long (arg2),
+			       dec, dec_len, byte_order);
       else
-	/* The only option left is an integral type.  */
-	decimal_from_integral (arg2, dec, dec_len, byte_order);
+	decimal_from_longest (value_as_long (arg2),
+			      dec, dec_len, byte_order);
 
       return value_from_decfloat (to_type, dec);
     }

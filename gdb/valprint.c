@@ -1472,12 +1472,10 @@ print_decimal_floating (const gdb_byte *valaddr, struct type *type,
 			struct ui_file *stream)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
-  char decstr[MAX_DECIMAL_STRING];
   unsigned len = TYPE_LENGTH (type);
 
-  decimal_to_string (valaddr, len, byte_order, decstr);
-  fputs_filtered (decstr, stream);
-  return;
+  std::string str = decimal_to_string (valaddr, len, byte_order);
+  fputs_filtered (str.c_str (), stream);
 }
 
 void

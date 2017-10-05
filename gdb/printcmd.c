@@ -2307,7 +2307,6 @@ printf_decfloat (struct ui_file *stream, const char *format,
   int dfp_len = 16;
   gdb_byte dec[16];
   struct type *dfp_type = NULL;
-  char decstr[MAX_DECIMAL_STRING];
 
   /* Points to the end of the string so that we can go back
      and check for DFP length modifiers.  */
@@ -2355,10 +2354,9 @@ printf_decfloat (struct ui_file *stream, const char *format,
 
   dfp_ptr = (gdb_byte *) value_contents (dfp_value);
 
-  decimal_to_string (dfp_ptr, dfp_len, byte_order, decstr);
-
-  /* Print the DFP value.  */
-  fprintf_filtered (stream, "%s", decstr);
+  /* Convert the value to a string and print it.  */
+  std::string str = decimal_to_string (dfp_ptr, dfp_len, byte_order);
+  fputs_filtered (str.c_str (), stream);
 #endif
 }
 
