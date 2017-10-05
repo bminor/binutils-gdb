@@ -1,3 +1,8 @@
+2017-10-05  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_print_auxv_entry): Handle AT_EHDRFLAGS and
+	AT_HWCAP.
+
 2017-10-05  Tristan Gingold  <tgingold@free.fr>
 
 	* MAINTAINERS (Misc): Update my email address.

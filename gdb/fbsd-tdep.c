@@ -392,6 +392,8 @@ fbsd_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
       TAG (PAGESIZESLEN, _("Number of pagesizes"), AUXV_FORMAT_DEC);
       TAG (TIMEKEEP, _("Pointer to timehands"), AUXV_FORMAT_HEX);
       TAG (STACKPROT, _("Initial stack protection"), AUXV_FORMAT_HEX);
+      TAG (EHDRFLAGS, _("ELF header e_flags"), AUXV_FORMAT_HEX);
+      TAG (HWCAP, _("Machine-dependent CPU capability hints"), AUXV_FORMAT_HEX);
     default:
       default_print_auxv_entry (gdbarch, file, type, val);
       return;

@@ -1144,6 +1144,8 @@
 #define AT_FREEBSD_PAGESIZESLEN 21      /* Number of pagesizes. */
 #define AT_FREEBSD_TIMEKEEP     22      /* Pointer to timehands. */
 #define AT_FREEBSD_STACKPROT    23      /* Initial stack protection. */
+#define AT_FREEBSD_EHDRFLAGS    24      /* e_flags field from ELF header. */
+#define AT_FREEBSD_HWCAP        25      /* CPU feature flags. */
 
 #define AT_SUN_UID      2000    /* Effective user ID.  */
 #define AT_SUN_RUID     2001    /* Real user ID.  */

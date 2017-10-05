@@ -1,3 +1,7 @@
+2017-10-05  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf/common.h (AT_FREEBSD_EHDRFLAGS, AT_FREEBSD_HWCAP): Define.
+
 2017-09-22  Alexandre Oliva <aoliva@redhat.com>
 
 	* dwarf2.def (DW_AT_GNU_locviews): New.
