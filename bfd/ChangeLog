@@ -1,5 +1,10 @@
 2017-10-05  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (elf_link_input_bfd): Correct ctor/dtor in init_array/
+	fini_array error value.
+
+2017-10-05  Alan Modra  <amodra@gmail.com>
+
 	PR 21167
 	* elf.c (_bfd_elf_setup_sections): Don't trim reloc sections from
 	groups.
