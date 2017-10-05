@@ -1,3 +1,16 @@
+2017-10-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 22133
+	* config/tc-msp430.c (parse_exp): Skip an 'h' suffix to constant
+	expressions.
+	(msp430_srcoperand): Check that the entire text was parsed by
+	parse_exp.
+	(msp430_operands): Likewise.
+	* testsuite/gas/msp430/pr22133.s: New test file.
+	* testsuite/gas/msp430/pr22133.d: New test driver.
+	* testsuite/gas/msp430/pr22133.s: Expected error output.
+	* testsuite/gas/msp430/msp430.exp: Run the new test.
+
 2017-10-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/21167

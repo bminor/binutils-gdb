@@ -415,6 +415,13 @@ parse_exp (char * s, expressionS * op)
   expression (op);
   if (op->X_op == O_absent)
     as_bad (_("missing operand"));
+  /* Our caller is likely to check that the entire expression was parsed.
+     If we have found a hex constant with an 'h' suffix, ilp will be left
+     pointing at the 'h', so skip it here.  */
+  if (input_line_pointer != NULL
+      && op->X_op == O_constant
+      && (*input_line_pointer == 'h' || *input_line_pointer == 'H'))
+    ++ input_line_pointer;
   return input_line_pointer;
 }
 
@@ -625,7 +632,7 @@ msp430_profiler (int dummy ATTRIBUTE_UNUSED)
       /* Now get profiling info.  */
       halt = extract_operand (input_line_pointer, str, 1024);
       /* Process like ".word xxx" directive.  */
-      parse_exp (str, & exp);
+      (void) parse_exp (str, & exp);
       emit_expr (& exp, 2);
       input_line_pointer = halt;
     }
@@ -1709,6 +1716,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
 		   bfd_boolean allow_20bit_values,
 		   bfd_boolean constants_allowed)
 {
+  char * end;
   char *__tl = l;
 
   /* Check if an immediate #VALUE.  The hash sign should be only at the beginning!  */
@@ -1765,7 +1773,12 @@ msp430_srcoperand (struct msp430_operand_s * op,
       op->mode = OP_EXP;
       op->vshift = vshift;
 
-      parse_exp (__tl, &(op->exp));
+      end = parse_exp (__tl, &(op->exp));
+      if (end != NULL && *end != 0 && *end != ')' )
+	{
+	  as_bad (_("extra characters '%s' at end of immediate expression '%s'"), end, l);
+	  return 1;
+	}
       if (op->exp.X_op == O_constant)
 	{
 	  int x = op->exp.X_add_number;
@@ -1962,7 +1975,12 @@ msp430_srcoperand (struct msp430_operand_s * op,
       op->am = 1;		/* mode As == 01 bin.  */
       op->ol = 1;		/* Immediate value followed by instruction.  */
       __tl = h + 1;
-      parse_exp (__tl, &(op->exp));
+      end = parse_exp (__tl, &(op->exp));
+      if (end != NULL && *end != 0)
+	{
+	  as_bad (_("extra characters '%s' at the end of absolute operand '%s'"), end, l);
+	  return 1;
+	}
       op->mode = OP_EXP;
       op->vshift = 0;
       if (op->exp.X_op == O_constant)
@@ -2073,7 +2091,12 @@ msp430_srcoperand (struct msp430_operand_s * op,
       *h = 0;
       op->mode = OP_EXP;
       op->vshift = 0;
-      parse_exp (__tl, &(op->exp));
+      end = parse_exp (__tl, &(op->exp));
+      if (end != NULL && *end != 0)
+	{
+	  as_bad (_("extra characters '%s' at end of operand '%s'"), end, l);
+	  return 1;
+	}
       if (op->exp.X_op == O_constant)
 	{
 	  int x = op->exp.X_add_number;
@@ -2135,23 +2158,20 @@ msp430_srcoperand (struct msp430_operand_s * op,
     }
 
   /* Symbolic mode 'mov a, b' == 'mov x(pc), y(pc)'.  */
-  do
+  op->mode = OP_EXP;
+  op->reg = 0;		/* PC relative... be careful.  */
+  /* An expression starting with a minus sign is a constant, not an address.  */
+  op->am = (*l == '-' ? 3 : 1);
+  op->ol = 1;
+  op->vshift = 0;
+  __tl = l;
+  end = parse_exp (__tl, &(op->exp));
+  if (end != NULL && * end != 0)
     {
-      op->mode = OP_EXP;
-      op->reg = 0;		/* PC relative... be careful.  */
-      /* An expression starting with a minus sign is a constant, not an address.  */
-      op->am = (*l == '-' ? 3 : 1);
-      op->ol = 1;
-      op->vshift = 0;
-      __tl = l;
-      parse_exp (__tl, &(op->exp));
-      return 0;
+      as_bad (_("extra characters '%s' at end of operand '%s'"), end, l);
+      return 1;
     }
-  while (0);
-
-  /* Unreachable.  */
-  as_bad (_("unknown addressing mode for operand %s"), l);
-  return 1;
+  return 0;
 }
 
 
@@ -2178,7 +2198,7 @@ msp430_dstoperand (struct msp430_operand_s * op,
       op->am = 1;
       op->ol = 1;
       op->vshift = 0;
-      parse_exp (__tl, &(op->exp));
+      (void) parse_exp (__tl, &(op->exp));
 
       if (op->exp.X_op != O_constant || op->exp.X_add_number != 0)
 	{
@@ -2475,6 +2495,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
   int insn_length = 0;
   char l1[MAX_OP_LEN], l2[MAX_OP_LEN];
   char *frag;
+  char *end;
   int where;
   struct msp430_operand_s op1, op2;
   int res = 0;
@@ -3106,7 +3127,12 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		as_bad (_("expected #n as first argument of %s"), opcode->name);
 		break;
 	      }
-	    parse_exp (l1 + 1, &(op1.exp));
+	    end = parse_exp (l1 + 1, &(op1.exp));
+	    if (end != NULL && *end != 0)
+	      {
+		as_bad (_("extra characters '%s' at end of constant expression '%s'"), end, l1);
+		break;
+	      }
 	    if (op1.exp.X_op != O_constant)
 	      {
 		as_bad (_("expected constant expression as first argument of %s"),
@@ -3177,7 +3203,12 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		as_bad (_("expected #n as first argument of %s"), opcode->name);
 		break;
 	      }
-	    parse_exp (l1 + 1, &(op1.exp));
+	    end = parse_exp (l1 + 1, &(op1.exp));
+	    if (end != NULL && *end != 0)
+	      {
+		as_bad (_("extra characters '%s' at end of operand '%s'"), end, l1);
+		break;
+	      }
 	    if (op1.exp.X_op != O_constant)
 	      {
 		as_bad (_("expected constant expression as first argument of %s"),
@@ -3240,7 +3271,12 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 	    if (*l1 == '#')
 	      {
-		parse_exp (l1 + 1, &(op1.exp));
+		end = parse_exp (l1 + 1, &(op1.exp));
+		if (end != NULL && *end != 0)
+		  {
+		    as_bad (_("extra characters '%s' at end of operand '%s'"), end, l1);
+		    break;
+		  }
 
 		if (op1.exp.X_op == O_constant)
 		  {
@@ -3352,7 +3388,12 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  /* The RPT instruction only accepted immediates and registers.  */
 	  if (*l1 == '#')
 	    {
-	      parse_exp (l1 + 1, &(op1.exp));
+	      end = parse_exp (l1 + 1, &(op1.exp));
+	      if (end != NULL && *end != 0)
+		{
+		  as_bad (_("extra characters '%s' at end of operand '%s'"), end, l1);
+		  break;
+		}
 	      if (op1.exp.X_op != O_constant)
 		{
 		  as_bad (_("expected constant value as argument to RPT"));
@@ -3720,7 +3761,12 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  if (*m == '$')
 	    m++;
 
-	  parse_exp (m, &exp);
+	  end = parse_exp (m, &exp);
+	  if (end != NULL && *end != 0)
+	    {
+	      as_bad (_("extra characters '%s' at end of operand '%s'"), end, l1);
+	      break;
+	    }
 
 	  /* In order to handle something like:
 
@@ -3814,7 +3860,12 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  if (*m == '#' || *m == '$')
 	    m++;
 
-	  parse_exp (m, & exp);
+	  end = parse_exp (m, & exp);
+	  if (end != NULL && *end != 0)
+	    {
+	      as_bad (_("extra characters '%s' at end of operand '%s'"), end, l1);
+	      break;
+	    }
 	  if (exp.X_op == O_symbol)
 	    {
 	      /* Relaxation required.  */
@@ -3860,7 +3911,12 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  if (*m == '#' || *m == '$')
 	    m++;
 
-	  parse_exp (m, & exp);
+	  end = parse_exp (m, & exp);
+	  if (end != NULL && *end != 0)
+	    {
+	      as_bad (_("extra characters '%s' at end of operand '%s'"), end, l1);
+	      break;
+	    }
 	  if (exp.X_op == O_symbol)
 	    {
 	      /* Relaxation required.  */
