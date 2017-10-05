@@ -1,3 +1,11 @@
+2017-10-05  Alan Modra  <amodra@gmail.com>
+
+	PR 22239
+	* dwarf.c (read_cie): Don't compare "start" and "end" pointers
+	after adding a possibly wild length to "start", compare the length
+	to the difference of the pointers instead.  Remove now redundant
+	"negative" length test.
+
 2017-10-05  Tristan Gingold  <tgingold@free.fr>
 
 	* MAINTAINERS: Update email address.  Redirect release maintainer

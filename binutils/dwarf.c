@@ -7001,14 +7001,14 @@ read_cie (unsigned char *start, unsigned char *end,
     {
       READ_ULEB (augmentation_data_len);
       augmentation_data = start;
-      start += augmentation_data_len;
       /* PR 17512: file: 11042-2589-0.004.  */
-      if (start > end)
+      if (augmentation_data_len > (size_t) (end - start))
 	{
 	  warn (_("Augmentation data too long: %#lx, expected at most %#lx\n"),
-		augmentation_data_len, (long)((end - start) + augmentation_data_len));
+		augmentation_data_len, (unsigned long) (end - start));
 	  return end;
 	}
+      start += augmentation_data_len;
     }
 
   if (augmentation_data_len)
@@ -7021,14 +7021,7 @@ read_cie (unsigned char *start, unsigned char *end,
       q = augmentation_data;
       qend = q + augmentation_data_len;
 
-      /* PR 17531: file: 015adfaa.  */
-      if (qend < q)
-	{
-	  warn (_("Negative augmentation data length: 0x%lx"), augmentation_data_len);
-	  augmentation_data_len = 0;
-	}
-
-      while (p < end && q < augmentation_data + augmentation_data_len)
+      while (p < end && q < qend)
 	{
 	  if (*p == 'L')
 	    q++;
