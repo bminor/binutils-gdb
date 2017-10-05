@@ -2512,26 +2512,13 @@ r_386_got32:
 	  relative_reloc = FALSE;
 	  if (h != NULL)
 	    {
-	      bfd_boolean dyn;
-
 	      off = h->got.offset;
-	      dyn = htab->elf.dynamic_sections_created;
-	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn,
-						     bfd_link_pic (info),
-						     h)
-		  || (bfd_link_pic (info)
-		      && SYMBOL_REFERENCES_LOCAL_P (info, h))
-		  || (ELF_ST_VISIBILITY (h->other)
-		      && h->root.type == bfd_link_hash_undefweak))
+	      if (RESOLVED_LOCALLY_P (info, h, htab))
 		{
-		  /* This is actually a static link, or it is a
-		     -Bsymbolic link and the symbol is defined
-		     locally, or the symbol was forced to be local
-		     because of a version file.  We must initialize
-		     this entry in the global offset table.  Since the
-		     offset must always be a multiple of 4, we use the
-		     least significant bit to record whether we have
-		     initialized it already.
+		  /* We must initialize this entry in the global offset
+		     table.  Since the offset must always be a multiple
+		     of 4, we use the least significant bit to record
+		     whether we have initialized it already.
 
 		     When doing a dynamic link, we create a .rel.got
 		     relocation entry to initialize the value.  This

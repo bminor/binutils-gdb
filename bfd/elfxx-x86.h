@@ -113,6 +113,17 @@
 			&& ((H)->root.type == bfd_link_hash_defweak \
 			    || !(H)->def_regular)))
 
+/* TRUE if this is actually a static link, or it is a -Bsymbolic link
+   and the symbol is defined locally, or the symbol was forced to be
+   local because of a version file.  */
+#define RESOLVED_LOCALLY_P(INFO, H, HTAB) \
+  (!WILL_CALL_FINISH_DYNAMIC_SYMBOL ((HTAB)->elf.dynamic_sections_created, \
+				     bfd_link_pic (INFO), (H)) \
+   || (bfd_link_pic (INFO) \
+       && SYMBOL_REFERENCES_LOCAL_P ((INFO), (H))) \
+       || (ELF_ST_VISIBILITY ((H)->other) \
+	   && (H)->root.type == bfd_link_hash_undefweak))
+
 /* TRUE if TLS IE->LE transition is OK.  */
 #define TLS_TRANSITION_IE_TO_LE_P(INFO, H, TLS_TYPE) \
   (bfd_link_executable (INFO) \
