@@ -8731,7 +8731,7 @@ decode_arm_unwind (struct arm_unw_aux_info *  aux,
   unsigned int more_words = 0;
   struct absaddr addr;
   bfd_vma sym_name = (bfd_vma) -1;
-  bfd_boolean res = FALSE;
+  bfd_boolean res = TRUE;
 
   if (remaining == 0)
     {

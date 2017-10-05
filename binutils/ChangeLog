@@ -1,3 +1,7 @@
+2017-10-05  Joseph Myers  <joseph@codesourcery.com>
+
+	* readelf.c (decode_arm_unwind): Initialize res to TRUE.
+
 2017-10-05  Nick Clifton  <nickc@redhat.com>
 
 	PR 22260
