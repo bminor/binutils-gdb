@@ -1,5 +1,10 @@
 2017-10-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ax.h: Do not include "doublest.h".
+	(union agent_val): Remove.
+
+2017-10-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* dfp.h (MAX_DECIMAL_STRING): Move to dfp.c.
 	(decimal_to_string): Return std::string object.
 	(decimal_from_string): Accept std::string object.  Return bool.
