@@ -1,5 +1,9 @@
 2017-10-05  Nick Clifton  <nickc@redhat.com>
 
+	* po/tr.po: Updated Turkish translation.
+
+2017-10-05  Nick Clifton  <nickc@redhat.com>
+
 	PR 22262
 	* testsuite/ld-powerpc/relocsort.d: Update expected output (for
 	longer reloc names).
