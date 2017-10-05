@@ -510,8 +510,11 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
 	     To work around this, single step the child process
 	     once before detaching to clear the flags.  */
 
+	  /* Note that we consult the parent's architecture instead of
+	     the child's because there's no inferior for the child at
+	     this point.  */
 	  if (!gdbarch_software_single_step_p (target_thread_architecture
-					       (child_lp->ptid)))
+					       (parent_ptid)))
 	    {
 	      linux_disable_event_reporting (child_pid);
 	      if (ptrace (PTRACE_SINGLESTEP, child_pid, 0, 0) < 0)

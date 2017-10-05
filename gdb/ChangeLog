@@ -1,3 +1,9 @@
+2017-10-05  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_child_follow_fork): When following the parent
+	and detaching the child, consult the parent thread's architecture
+	instead of the child's.
+
 2017-10-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ax.h: Do not include "doublest.h".
