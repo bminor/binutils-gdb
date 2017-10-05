@@ -1,5 +1,12 @@
 2017-10-05  John Baldwin  <jhb@FreeBSD.org>
 
+	* mips-fbsd-tdep.c (MIPS_INST_ADDIU_A0_SP_N32): Define.
+	(mipsn32_fbsd_sigframe): Define.
+	(mips_fbsd_init_abi): Install mipsn32_fbsd_sigframe unwinder
+	for FreeBSD/mipsn32.
+
+2017-10-05  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-tdep.c (fbsd_print_auxv_entry): Handle AT_EHDRFLAGS and
 	AT_HWCAP.
 
