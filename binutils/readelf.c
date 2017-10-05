@@ -1542,7 +1542,7 @@ dump_relocations (FILE * file,
       if (rtype == NULL)
 	printf (_("unrecognized: %-7lx"), (unsigned long) type & 0xffffffff);
       else
-	printf (do_wide ? "%-22.22s" : "%-17.17s", rtype);
+	printf (do_wide ? "%-22s" : "%-17.17s", rtype);
 
       if (elf_header.e_machine == EM_ALPHA
 	  && rtype != NULL

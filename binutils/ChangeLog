@@ -1,5 +1,11 @@
 2017-10-05  Nick Clifton  <nickc@redhat.com>
 
+	PR 22262
+	* readelf.c (dump_relocations): Do not truncate reloc names when
+	displaying output in wide mode.
+
+2017-10-05  Nick Clifton  <nickc@redhat.com>
+
 	* README-how-to-make-a-release: Merge steps 3, 4 and 5, and insert
 	the git tag operation at the correct location.
 
