@@ -45,46 +45,39 @@ looks like this:
   2. Make sure that the branch sources build, test and install
      correctly.
 
-  3. In the branch sources...
+  3. In the branch sources:
   
-       Update the minor release number in bfd/version.m4.
-       Regenerate the configure files.
-       Commit the updates along with a "this-is-the-2.XX.X-release" note
-       in the changelogs.
-     
-  4. Tag the branch with the new release number:
+       a. Update the minor release number in bfd/version.m4.
+       b. Edit bfd/development.sh and set "development=false".
+       c. Regenerate the configure files.
+       d. Commit the updates along with a "this-is-the-2.XX.X-release"
+          note in all of the changelogs.
+       e. Tag the branch with the new release number:
 
-        git tag -a binutils-2_XX_X
-	  [optional -u XXXXX to sign with a gpg key]
-	  [optional -f to move an already created tag]
-	  
-	git push origin
+            git tag -a binutils-2_XX_X
+	      [optional: add "-u XXXXX" to sign with a gpg key]
+	    git push origin binutils-2_XX_X
 
-  5. Create the release tarballs:
-
-       a. Edit bfd/development.sh and set "development=false".
-       b. ./src-release -b -g -l -x binutils
-       c. Edit bfd/development.sh and set "development=true".
-
-     FIXME: Really the development.sh file should be changed by the
-     src-release script on the fly.  The development=false flag only
-     wants to be set in the release tarballs however, not the branch
-     sources as the branch will continue to have (development) patches
-     checked in to it.
+       f. Create the release tarballs:
+            ./src-release -b -g -l -x binutils
+       g. Edit bfd/development.sh and set "development=true".
+       h. Commit this change into the git repository.
+       i. Clean up the source tree.  (Use "git status" to find new
+           files, and remove them).
 
      FIXME: The tarballs will contain spurious autom4te.cache
      directories which could be removed to reduce their size.
 
-  6. [If paranoid - upload the tarballs to one of the FTP servers and
-      ask people to test it before going on to step 7].
+  4. [If paranoid - upload the tarballs to one of the FTP servers and
+      ask people to test it before going on to step 5].
       
-  7. Upload the tarballs to ftp.gnu.org.
+  5. Upload the tarballs to ftp.gnu.org.
 
        gnupload --to ftp.gnu.org:binutils binutils-X.XX.X.tar.*
 
-     gnupload is in the gnulib/build-aux directory.
+     The gnupload script is in the gnulib/build-aux directory.
 
-  8. Upload the tarballs to sourceware.org:
+  6. Upload the tarballs to sourceware.org:
 
        sftp sourceware.org
          cd /ftp/pub/binutils/releases
@@ -93,12 +86,9 @@ looks like this:
 	 quit
 
     FIXME: Should the signatures (created by the gnupload script in
-    step 7) be uploaded as well ?
+    step 5) be uploaded as well ?
 
-  9. Clean up the source tree.  (Use "git status" to find new files,
-     and remove them).
-  
-  10. Update web pages.  For sourceware.org:
+  7. Update web pages.  For sourceware.org:
 
       * Log on to sourceware.org
       * Go /www/htdocs/binutils
@@ -107,10 +97,10 @@ looks like this:
       For the www.gnu.org site you have to email webmasters@gnu.org
       and ask them to make the change(s).
 
-  11. Send an emails to the binutils list, info-gnu@gnu.org and
-      David Edelsohn <dje.gcc@gmail.com> announcing the new release.
-      (The email to Davis is so that he can update the GNU Toolchain
-      social media).  Something like this:
+  8. Send an emails to the binutils list, info-gnu@gnu.org and
+     David Edelsohn <dje.gcc@gmail.com> announcing the new release.
+     (The email to Davis is so that he can update the GNU Toolchain
+     social media).  Something like this:
 ------------------------------------------------------------------------
 Hi Everyone,
 
