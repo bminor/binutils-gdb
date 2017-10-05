@@ -38,6 +38,7 @@
 #include "bcache.h"
 #include "dwarf2loc.h"
 #include "gdbcore.h"
+#include "floatformat.h"
 
 /* Initialize BADNESS constants.  */
 

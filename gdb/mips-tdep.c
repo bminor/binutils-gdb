@@ -49,7 +49,6 @@
 #include "frame-base.h"
 #include "trad-frame.h"
 #include "infcall.h"
-#include "floatformat.h"
 #include "remote.h"
 #include "target-descriptions.h"
 #include "dwarf2-frame.h"

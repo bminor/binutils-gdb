@@ -30,7 +30,6 @@
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
-#include "floatformat.h"
 #include "regcache.h"
 #include "trad-frame.h"
 #include "frame-base.h"

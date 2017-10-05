@@ -19,8 +19,6 @@
 
 #include "defs.h"
 #include "gdbcore.h"
-#include "doublest.h"
-#include "floatformat.h"
 #include "frame.h"
 #include "target.h"
 #include "gdbtypes.h"

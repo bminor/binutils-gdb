@@ -32,6 +32,7 @@
 #include "osabi.h"
 #include "dis-asm.h"
 #include "target-descriptions.h"
+#include "floatformat.h"
 
 #include "m68k-tdep.h"
 

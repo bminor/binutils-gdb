@@ -36,7 +36,6 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "remote.h"
-#include "floatformat.h"
 #include "sim-regno.h"
 #include "disasm.h"
 #include "trad-frame.h"

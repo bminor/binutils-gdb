@@ -23,18 +23,6 @@
 struct type;
 struct floatformat;
 
-/* Setup definitions for host and target floating point formats.  We need to
-   consider the format for `float', `double', and `long double' for both target
-   and host.  We need to do this so that we know what kind of conversions need
-   to be done when converting target numbers to and from the hosts DOUBLEST
-   data type.  */
-
-/* This is used to indicate that we don't know the format of the floating point
-   number.  Typically, this is useful for native ports, where the actual format
-   is irrelevant, since no conversions will be taking place.  */
-
-#include "floatformat.h"	/* For struct floatformat */
-
 /* Use `long double' if the host compiler supports it.  (Note that this is not
    necessarily any longer than `double'.  On SunOS/gcc, it's the same as
    double.)  This is necessary because GDB internally converts all floating

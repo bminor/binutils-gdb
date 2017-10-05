@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "dwarf2-frame.h"
-#include "floatformat.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"

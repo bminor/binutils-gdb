@@ -27,7 +27,6 @@
 #include "dis-asm.h"
 #include "regcache.h"
 #include "reggroups.h"
-#include "doublest.h"
 #include "value.h"
 #include "arch-utils.h"
 #include "osabi.h"

@@ -25,7 +25,6 @@
 #include "gdbcore.h"
 #include "inferior.h"
 #include "target.h"
-#include "floatformat.h"
 #include "symfile.h"		/* for overlay functions */
 #include "regcache.h"
 #include "user-regs.h"

@@ -1,3 +1,38 @@
+2017-10-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* doublest.h: Do not include "floatformat.h".  Remove stale comments.
+	* gdbtypes.c: Include "floatformat.h".
+	* value.c: Likewise.
+	* m68k-tdep.c: Likewise.
+
+	* findvar.c: Do not include "floatformat.h".
+	* amd64-darwin-tdep.c: Likewise.
+	* arm-linux-tdep.c: Likewise.
+	* i386-darwin-tdep.c: Likewise.
+	* i387-tdep.c: Likewise.
+	* m68k-linux-tdep.c: Likewise.
+	* mep-tdep.c: Likewise.
+	* mips-tdep.c: Likewise.
+	* nios2-tdep.c: Likewise.
+	* s390-linux-tdep.c: Likewise.
+	* sparc-obsd-tdep.c: Likewise.
+	* sparc-tdep.c: Likewise.
+	* sparc64-tdep.c: Likewise.
+	* spu-tdep.c: Likewise.
+	* tic6x-tdep.c: Likewise.
+	* tilegx-tdep.c: Likewise.
+	* vax-tdep.c: Likewise.
+	* xstormy16-tdep.c: Likewise.
+	* xtensa-tdep.c: Likewise.
+
+	* top.c: Do not include "doublest.h".
+	* aarch64-tdep.c: Likewise.
+	* alpha-tdep.c: Likewise.
+	* arm-linux-tdep.c: Likewise.
+	* m68k-linux-tdep.c: Likewise.
+	* tilegx-tdep.c: Likewise.
+	* xstormy16-tdep.c: Likewise.
+
 2017-10-05  John Baldwin  <jhb@FreeBSD.org>
 
 	* mips-fbsd-tdep.c (MIPS_INST_ADDIU_A0_SP_N32): Define.

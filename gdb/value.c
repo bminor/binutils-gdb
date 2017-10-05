@@ -29,6 +29,7 @@
 #include "language.h"
 #include "demangle.h"
 #include "doublest.h"
+#include "floatformat.h"
 #include "regcache.h"
 #include "block.h"
 #include "dfp.h"

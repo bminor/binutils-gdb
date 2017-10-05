@@ -38,7 +38,6 @@
 #include "language.h"
 #include "regcache.h"
 #include "reggroups.h"
-#include "floatformat.h"
 #include "block.h"
 #include "observer.h"
 #include "infcall.h"

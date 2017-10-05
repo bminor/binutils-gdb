@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "doublest.h"
-#include "floatformat.h"
 #include "frame.h"
 #include "gdbcore.h"
 #include "inferior.h"
