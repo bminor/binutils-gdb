@@ -1,3 +1,11 @@
+2017-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-tilepro.c (readonly_dynrelocs): Dump dynamic relocation
+	in read-only section with minfo.
+	(tilepro_elf_size_dynamic_sections): Likewise.
+	* elfxx-tilegx.c (readonly_dynrelocs): Likewise.
+	(tilegx_elf_size_dynamic_sections): Likewise.
+
 2017-10-05  Pedro Alves  <palves@redhat.com>
 
 	PR 22245

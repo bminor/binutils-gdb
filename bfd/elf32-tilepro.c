@@ -2407,6 +2407,9 @@ readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
 	  info->flags |= DF_TEXTREL;
 
+	  info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+				  p->sec->owner, p->sec);
+
 	  /* Not an error, just cut short the traversal.  */
 	  return FALSE;
 	}
@@ -2496,7 +2499,12 @@ tilepro_elf_size_dynamic_sections (bfd *output_bfd,
 		  srel = elf_section_data (p->sec)->sreloc;
 		  srel->size += p->count * TILEPRO_ELF_RELA_BYTES;
 		  if ((p->sec->output_section->flags & SEC_READONLY) != 0)
-		    info->flags |= DF_TEXTREL;
+		    {
+		      info->flags |= DF_TEXTREL;
+
+		      info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+					      p->sec->owner, p->sec);
+		    }
 		}
 	    }
 	}
