@@ -10022,6 +10022,9 @@ elfcore_grok_freebsd_note (bfd *abfd, Elf_Internal_Note *note)
       return elfcore_make_note_pseudosection (abfd, ".note.freebsdcore.lwpinfo",
 					      note);
 
+    case NT_ARM_VFP:
+      return elfcore_grok_arm_vfp (abfd, note);
+
     default:
       return TRUE;
     }
