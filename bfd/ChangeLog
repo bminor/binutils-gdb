@@ -1,3 +1,8 @@
+2017-10-05  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (elf_link_input_bfd): Correct ctor/dtor in init_array/
+	fini_array error value.
+
 2017-10-04  Pavel I. Kryukov <kryukov@frtk.ru>
 
 	PR 22245
