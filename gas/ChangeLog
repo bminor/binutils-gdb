@@ -1,3 +1,10 @@
+2017-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/21167
+	* testsuite/gas/elf/elf.exp: Run group3.
+	* testsuite/gas/elf/group3.d: New file.
+	* testsuite/gas/elf/group3.s: Likewise.
+
 2017-10-05  Alan Modra  <amodra@gmail.com>
 
 	PR 21167
