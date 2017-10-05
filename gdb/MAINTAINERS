@@ -350,7 +350,7 @@ resolving more generic problems.
 The host maintainer ensures that gdb can be built as a cross debugger on
 their platform.
 
-Darwin			Tristan Gingold		gingold@adacore.com
+Darwin			Tristan Gingold		tgingold@free.fr
 djgpp native		Eli Zaretskii		eliz@gnu.org
 FreeBSD			John Baldwin		jhb@freebsd.org
 GNU Hurd		Alfred M. Szmidt	ams@gnu.org
@@ -527,7 +527,7 @@ Martin Galvan					martingalvan@sourceware.org
 Chen Gang					gang.chen.5i5j@gmail.com
 Mircea Gherzan					mircea.gherzan@intel.com
 Paul Gilliam					pgilliam@us.ibm.com
-Tristan Gingold					gingold@adacore.com
+Tristan Gingold					tgingold@free.fr
 Anton Gorenkov					xgsa@yandex.ru
 Raoul Gough					RaoulGough@yahoo.co.uk
 Anthony Green			 		green@redhat.com

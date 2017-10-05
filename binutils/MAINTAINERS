@@ -95,7 +95,7 @@ responsibility among the other maintainers.
   M68HC11 M68HC12  Stephane Carrez <Stephane.Carrez@gmail.com>
   M68HC11 M68HC12  Sean Keys <skeys@ipdatasys.com>
   M88k		   Mark Kettenis <kettenis@gnu.org>
-  MACH-O           Tristan Gingold <gingold@adacore.com>
+  MACH-O           Tristan Gingold <tgingold@free.fr>
   MAXQ		   Inderpreet Singh <inderpreetb@noida.hcltech.com>
   MEP		   Dave Brolley <brolley@redhat.com>
   METAG            Markos Chandras <markos.chandras@imgtec.com>
@@ -134,7 +134,7 @@ responsibility among the other maintainers.
   TILEPro          Walter Lee <walt@tilera.com>
   VAX		   Matt Thomas <matt@netbsd.org>
   VAX		   Jan-Benedict Glaw <jbglaw@lug-owl.de>
-  VMS		   Tristan Gingold <gingold@adacore.com>
+  VMS		   Tristan Gingold <tgingold@free.fr>
   x86_64	   Jan Hubicka <jh@suse.cz>
   x86_64	   Andreas Jaeger <aj@suse.de>
   x86_64	   H.J. Lu <hjl.tools@gmail.com>
@@ -203,7 +203,7 @@ burden of maintaining the branch in sync with the mainline becomes too
 great).  If you are uncertain as to whether a patch is appropriate for
 the branch, ask the branch maintainer.  This is:
 
-   Tristan Gingold  <gingold@adacore.com>
+   (cf global maintainers)
 
     -------- Testsuites ---------------
 
