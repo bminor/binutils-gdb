@@ -1,5 +1,11 @@
 2017-10-05  Nick Clifton  <nickc@redhat.com>
 
+	PR 22260
+	* objcopy.c (strip_main): Add 'M' character to short options list
+	when calling getopt_long.
+
+2017-10-05  Nick Clifton  <nickc@redhat.com>
+
 	PR 22262
 	* readelf.c (dump_relocations): Do not truncate reloc names when
 	displaying output in wide mode.

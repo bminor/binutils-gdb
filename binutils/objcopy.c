@@ -4131,7 +4131,7 @@ strip_main (int argc, char *argv[])
 
   merge_notes = TRUE;
 
-  while ((c = getopt_long (argc, argv, "I:O:F:K:N:R:o:sSpdgxXHhVvwDU",
+  while ((c = getopt_long (argc, argv, "I:O:F:K:MN:R:o:sSpdgxXHhVvwDU",
 			   strip_options, (int *) 0)) != EOF)
     {
       switch (c)
