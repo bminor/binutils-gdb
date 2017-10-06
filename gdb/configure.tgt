@@ -59,7 +59,7 @@ arc*-*-*)
 	;;
 
 arm*-*-*)
-	cpu_obs="arm.o arm-get-next-pcs.o arm-tdep.o";;
+	cpu_obs="arch/arm.o arch/arm-get-next-pcs.o arm-tdep.o";;
 
 hppa*-*-*)
 	# Target: HP PA-RISC
@@ -115,8 +115,8 @@ aarch64*-*-freebsd*)
 aarch64*-*-linux*)
 	# Target: AArch64 linux
 	gdb_target_obs="aarch64-linux-tdep.o \
-			arm.o arm-linux.o arm-get-next-pcs.o arm-tdep.o \
-			arm-linux-tdep.o \
+			arch/arm.o arch/arm-linux.o arch/arm-get-next-pcs.o \
+			arm-tdep.o arm-linux-tdep.o \
 			glibc-tdep.o linux-tdep.o solib-svr4.o \
 			symfile-mem.o linux-record.o"
 	build_gdbserver=yes
@@ -156,7 +156,7 @@ arm*-wince-pe | arm*-*-mingw32ce*)
 	;;
 arm*-*-linux*)
 	# Target: ARM based machine running GNU/Linux
-	gdb_target_obs="arm-linux.o arm-linux-tdep.o glibc-tdep.o \
+	gdb_target_obs="arch/arm-linux.o arm-linux-tdep.o glibc-tdep.o \
 			solib-svr4.o symfile-mem.o linux-tdep.o linux-record.o"
 	build_gdbserver=yes
 	;;
