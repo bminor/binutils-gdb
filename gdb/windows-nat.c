@@ -42,6 +42,7 @@
 #include <sys/cygwin.h>
 #include <cygwin/version.h>
 #endif
+#include <algorithm>
 
 #include "buildsym.h"
 #include "filenames.h"

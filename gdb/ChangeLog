@@ -1,3 +1,7 @@
+2017-10-06  Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c: Include <algorithm>.
+
 2017-10-06  Yao Qi  <yao.qi@linaro.org>
 
 	* configure.tgt (i386_tobjs): New variable.
