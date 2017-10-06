@@ -49,13 +49,10 @@
 #define SYMBOL_REFERENCES_LOCAL_P(INFO, H) \
   _bfd_x86_elf_link_symbol_references_local ((INFO), (H))
 
-/* Is a undefined weak symbol which is resolved to 0.  Reference to an
-   undefined weak symbol is resolved to 0 when building executable if
-   it isn't dynamic and
-   1. Has non-GOT/non-PLT relocations in text section.  Or
-   2. Has no GOT/PLT relocation.
-   Local undefined weak symbol is always resolved to 0.
- */
+/* TRUE if an undefined weak symbol should be resolved to 0.  Local
+   undefined weak symbol is always resolved to 0.  Reference to an
+   undefined weak symbol is resolved to 0 in executable if undefined
+   weak symbol should be resolved to 0 (zero_undefweak > 0).  */
 #define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, EH) \
   ((EH)->elf.root.type == bfd_link_hash_undefweak		 \
    && (SYMBOL_REFERENCES_LOCAL_P ((INFO), &(EH)->elf)		 \

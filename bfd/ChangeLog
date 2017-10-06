@@ -1,3 +1,8 @@
+2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.h (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Update
+	comments.
+
 2017-10-06  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf-bfd.h (struct elf_backend_data): Add
