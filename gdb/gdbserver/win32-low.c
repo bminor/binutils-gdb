@@ -33,6 +33,7 @@
 #include <psapi.h>
 #include <process.h>
 #include "gdb_tilde_expand.h"
+#include "common-inferior.h"
 
 #ifndef USE_WIN32API
 #include <sys/cygwin.h>
