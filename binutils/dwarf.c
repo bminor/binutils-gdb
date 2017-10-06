@@ -2590,6 +2590,7 @@ process_debug_info (struct dwarf_section *section,
       unsigned char *tags;
       int level, last_level, saved_level;
       dwarf_vma cu_offset;
+      unsigned long sec_off;
       unsigned int offset_size;
       unsigned int initial_length_size;
       dwarf_vma signature_high = 0;
@@ -2729,20 +2730,13 @@ process_debug_info (struct dwarf_section *section,
 	    }
 	}
 
-      if (cu_offset + compunit.cu_length + initial_length_size
-	  > section->size)
+      sec_off = cu_offset + initial_length_size;
+      if (sec_off + compunit.cu_length < sec_off
+	  || sec_off + compunit.cu_length > section->size)
 	{
-	  warn (_("Debug info is corrupted, length of CU at %s"
-		  " extends beyond end of section (length = %s)\n"),
-		dwarf_vmatoa ("x", cu_offset),
-		dwarf_vmatoa ("x", compunit.cu_length));
-	  num_units = unit;
-	  break;
-	}
-      else if (compunit.cu_length + initial_length_size < initial_length_size)
-	{
-	  warn (_("Debug info is corrupted, length of CU at %s is negative (%s)\n"),
-		dwarf_vmatoa ("x", cu_offset),
+	  warn (_("Debug info is corrupted, %s header at %#lx has length %s\n"),
+		section->name,
+		(unsigned long) cu_offset,
 		dwarf_vmatoa ("x", compunit.cu_length));
 	  num_units = unit;
 	  break;
@@ -2750,13 +2744,6 @@ process_debug_info (struct dwarf_section *section,
 
       tags = hdrptr;
       start += compunit.cu_length + initial_length_size;
-
-      if (start > end)
-	{
-	  warn (_("Debug info is corrupt.  CU at %s extends beyond end of section"),
-		dwarf_vmatoa ("x", cu_offset));
-	  start = end;
-	}
 
       if (compunit.cu_version < 2 || compunit.cu_version > 5)
 	{
@@ -4489,16 +4476,13 @@ display_debug_pubnames_worker (struct dwarf_section *section,
   while (start < end)
     {
       unsigned char *data;
-      unsigned char *adr;
-      dwarf_vma offset;
+      unsigned long sec_off;
       unsigned int offset_size, initial_length_size;
 
-      data = start;
-
-      SAFE_BYTE_GET_AND_INC (names.pn_length, data, 4, end);
+      SAFE_BYTE_GET_AND_INC (names.pn_length, start, 4, end);
       if (names.pn_length == 0xffffffff)
 	{
-	  SAFE_BYTE_GET_AND_INC (names.pn_length, data, 8, end);
+	  SAFE_BYTE_GET_AND_INC (names.pn_length, start, 8, end);
 	  offset_size = 8;
 	  initial_length_size = 12;
 	}
@@ -4507,6 +4491,20 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 	  offset_size = 4;
 	  initial_length_size = 4;
 	}
+
+      sec_off = start - section->start;
+      if (sec_off + names.pn_length < sec_off
+	  || sec_off + names.pn_length > section->size)
+	{
+	  warn (_("Debug info is corrupted, %s header at %#lx has length %s\n"),
+		section->name,
+		sec_off - initial_length_size,
+		dwarf_vmatoa ("x", names.pn_length));
+	  break;
+	}
+
+      data = start;
+      start += names.pn_length;
 
       SAFE_BYTE_GET_AND_INC (names.pn_version, data, 2, end);
       SAFE_BYTE_GET_AND_INC (names.pn_offset, data, offset_size, end);
@@ -4518,18 +4516,6 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 	      (unsigned long) names.pn_offset, section->name);
 
       SAFE_BYTE_GET_AND_INC (names.pn_size, data, offset_size, end);
-
-      adr = start + names.pn_length + initial_length_size;
-      /* PR 17531: file: 7615b6b2.  */
-      if ((dwarf_signed_vma) names.pn_length < 0
-	  /* PR 17531: file: a5dbeaa7. */
-	  || adr < start)
-	{
-	  warn (_("Negative length for public name: 0x%lx\n"), (long) names.pn_length);
-	  start = end;
-	}
-      else
-	start = adr;
 
       printf (_("  Length:                              %ld\n"),
 	      (long) names.pn_length);
@@ -4558,51 +4544,51 @@ display_debug_pubnames_worker (struct dwarf_section *section,
       else
 	printf (_("\n    Offset\tName\n"));
 
-      do
+      while (1)
 	{
 	  bfd_size_type maxprint;
+	  dwarf_vma offset;
 
 	  SAFE_BYTE_GET (offset, data, offset_size, end);
 
-	  if (offset != 0)
+	  if (offset == 0)
+	    break;
+
+	  data += offset_size;
+	  if (data >= end)
+	    break;
+	  maxprint = (end - data) - 1;
+
+	  if (is_gnu)
 	    {
-	      data += offset_size;
-	      if (data >= end)
-		break;
-	      maxprint = (end - data) - 1;
+	      unsigned int kind_data;
+	      gdb_index_symbol_kind kind;
+	      const char *kind_name;
+	      int is_static;
 
-	      if (is_gnu)
-		{
-		  unsigned int kind_data;
-		  gdb_index_symbol_kind kind;
-		  const char *kind_name;
-		  int is_static;
-
-		  SAFE_BYTE_GET (kind_data, data, 1, end);
-		  data++;
-		  maxprint --;
-		  /* GCC computes the kind as the upper byte in the CU index
-		     word, and then right shifts it by the CU index size.
-		     Left shift KIND to where the gdb-index.h accessor macros
-		     can use it.  */
-		  kind_data <<= GDB_INDEX_CU_BITSIZE;
-		  kind = GDB_INDEX_SYMBOL_KIND_VALUE (kind_data);
-		  kind_name = get_gdb_index_symbol_kind_name (kind);
-		  is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (kind_data);
-		  printf ("    %-6lx  %s,%-10s  %.*s\n",
-			  (unsigned long) offset, is_static ? _("s") : _("g"),
-			  kind_name, (int) maxprint, data);
-		}
-	      else
-		printf ("    %-6lx\t%.*s\n",
-			(unsigned long) offset, (int) maxprint, data);
-
-	      data += strnlen ((char *) data, maxprint) + 1;
-	      if (data >= end)
-		break;
+	      SAFE_BYTE_GET (kind_data, data, 1, end);
+	      data++;
+	      maxprint --;
+	      /* GCC computes the kind as the upper byte in the CU index
+		 word, and then right shifts it by the CU index size.
+		 Left shift KIND to where the gdb-index.h accessor macros
+		 can use it.  */
+	      kind_data <<= GDB_INDEX_CU_BITSIZE;
+	      kind = GDB_INDEX_SYMBOL_KIND_VALUE (kind_data);
+	      kind_name = get_gdb_index_symbol_kind_name (kind);
+	      is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (kind_data);
+	      printf ("    %-6lx  %s,%-10s  %.*s\n",
+		      (unsigned long) offset, is_static ? _("s") : _("g"),
+		      kind_name, (int) maxprint, data);
 	    }
+	  else
+	    printf ("    %-6lx\t%.*s\n",
+		    (unsigned long) offset, (int) maxprint, data);
+
+	  data += strnlen ((char *) data, maxprint) + 1;
+	  if (data >= end)
+	    break;
 	}
-      while (offset != 0);
     }
 
   printf ("\n");
@@ -4735,7 +4721,8 @@ get_line_filename_and_dirname (dwarf_vma line_offset,
       offset_size = 4;
       initial_length_size = 4;
     }
-  if (length + initial_length_size > section->size)
+  if (length + initial_length_size < length
+      || length + initial_length_size > section->size)
     return NULL;
 
   SAFE_BYTE_GET_AND_INC (version, hdrptr, 2, end);
@@ -6027,6 +6014,7 @@ display_debug_aranges (struct dwarf_section *section,
       unsigned char *addr_ranges;
       dwarf_vma length;
       dwarf_vma address;
+      unsigned long sec_off;
       unsigned char address_size;
       int excess;
       unsigned int offset_size;
@@ -6045,6 +6033,17 @@ display_debug_aranges (struct dwarf_section *section,
 	{
 	  offset_size = 4;
 	  initial_length_size = 4;
+	}
+
+      sec_off = hdrptr - section->start;
+      if (sec_off + arange.ar_length < sec_off
+	  || sec_off + arange.ar_length > section->size)
+	{
+	  warn (_("Debug info is corrupted, %s header at %#lx has length %s\n"),
+		section->name,
+		sec_off - initial_length_size,
+		dwarf_vmatoa ("x", arange.ar_length));
+	  break;
 	}
 
       SAFE_BYTE_GET_AND_INC (arange.ar_version, hdrptr, 2, end);
@@ -6109,13 +6108,7 @@ display_debug_aranges (struct dwarf_section *section,
       if (excess)
 	addr_ranges += (2 * address_size) - excess;
 
-      hdrptr = start + arange.ar_length + initial_length_size;
-      if (hdrptr < start || hdrptr > end)
-	{
-	  error (_("Excessive header length: %lx\n"), (long) arange.ar_length);
-	  break;
-	}
-      start = hdrptr;
+      start += arange.ar_length + initial_length_size;
 
       while (addr_ranges + 2 * address_size <= start)
 	{
@@ -8030,6 +8023,7 @@ display_debug_names (struct dwarf_section *section, void *file)
       uint32_t bucket_count, name_count, abbrev_table_size;
       uint32_t augmentation_string_size;
       unsigned int i;
+      unsigned long sec_off;
 
       unit_start = hdrptr;
 
@@ -8046,11 +8040,14 @@ display_debug_names (struct dwarf_section *section, void *file)
 	offset_size = 4;
       unit_end = hdrptr + unit_length;
 
-      if ((hdrptr - section->start) + unit_length > section->size)
+      sec_off = hdrptr - section->start;
+      if (sec_off + unit_length < sec_off
+	  || sec_off + unit_length > section->size)
 	{
-	  warn (_("The length field (0x%lx) for unit 0x%lx in the debug_names "
-		  "header is wrong - the section is too small\n"),
-		(long) unit_length, (long) (unit_start - section->start));
+	  warn (_("Debug info is corrupted, %s header at %#lx has length %s\n"),
+		section->name,
+		(unsigned long) (unit_start - section->start),
+		dwarf_vmatoa ("x", unit_length));
 	  return 0;
 	}
 

@@ -1,3 +1,15 @@
+2017-10-06  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (process_debug_info): Consolidate header length checks.
+	(display_debug_pubnames_worker): Use "start" to read header.
+	Properly check header length and report errors earlier.
+	Simplify loop printing pubnames.
+	(get_line_filename_and_dirname): Catch small negative "length"
+	values.
+	(display_debug_aranges): Likewise.  Report header errors
+	earlier using standardized message.
+	(display_debug_names): Likewise.
+
 2017-10-05  Joseph Myers  <joseph@codesourcery.com>
 
 	* readelf.c (decode_arm_unwind): Initialize res to TRUE.
