@@ -6406,9 +6406,9 @@ arm_decode_misc_memhint_neon (struct gdbarch *gdbarch, uint32_t insn,
   unsigned int op1 = bits (insn, 20, 26), op2 = bits (insn, 4, 7);
   unsigned int rn = bits (insn, 16, 19);
 
-  if (op1 == 0x10 && (op2 & 0x2) == 0x0 && (rn & 0xe) == 0x0)
+  if (op1 == 0x10 && (op2 & 0x2) == 0x0 && (rn & 0x1) == 0x0)
     return arm_copy_unmodified (gdbarch, insn, "cps", dsc);
-  else if (op1 == 0x10 && op2 == 0x0 && (rn & 0xe) == 0x1)
+  else if (op1 == 0x10 && op2 == 0x0 && (rn & 0x1) == 0x1)
     return arm_copy_unmodified (gdbarch, insn, "setend", dsc);
   else if ((op1 & 0x60) == 0x20)
     return arm_copy_unmodified (gdbarch, insn, "neon dataproc", dsc);

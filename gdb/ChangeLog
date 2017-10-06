@@ -1,3 +1,9 @@
+2017-10-05  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	PR build/22188
+	* arm-tdep.c (arm_decode_misc_memhint_neon): Fix decoding of CPS
+	and SETEND.
+
 2017-10-05  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (linux_child_follow_fork): When following the parent
