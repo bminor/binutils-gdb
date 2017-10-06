@@ -1,3 +1,7 @@
+2017-10-06  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.mi/mi-threads-interrupt.exp: Skip test if nointerrupts.
+
 2017-10-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.base/dfp-exprs.exp: Update tests to larger range of supported
