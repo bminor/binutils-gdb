@@ -74,6 +74,45 @@
    && ((EH)->elf.root.u.def.section->owner->flags & DYNAMIC) != 0 \
    && ((EH)->elf.root.u.def.section->flags & SEC_CODE) == 0)
 
+/* TRUE if dynamic relocation is needed.  If we are creating a shared
+   library, and this is a reloc against a global symbol, or a non PC
+   relative reloc against a local symbol, then we need to copy the reloc
+   into the shared library.  However, if we are linking with -Bsymbolic,
+   we do not need to copy a reloc against a global symbol which is
+   defined in an object we are including in the link (i.e., DEF_REGULAR
+   is set).  At this point we have not seen all the input files, so it
+   is possible that DEF_REGULAR is not set now but will be set later (it
+   is never cleared).  In case of a weak definition, DEF_REGULAR may be
+   cleared later by a strong definition in a shared library.  We account
+   for that possibility below by storing information in the relocs_copied
+   field of the hash table entry.  A similar situation occurs when
+   creating shared libraries and symbol visibility changes render the
+   symbol local.
+
+   If on the other hand, we are creating an executable, we may need to
+   keep relocations for symbols satisfied by a dynamic library if we
+   manage to avoid copy relocs for the symbol.
+
+   We also need to generate dynamic pointer relocation against
+   STT_GNU_IFUNC symbol in the non-code section.  */
+#define NEED_DYNAMIC_RELOCATION_P(INFO, H, SEC, R_TYPE, POINTER_TYPE) \
+  ((bfd_link_pic (INFO) \
+    && (! X86_PCREL_TYPE_P (R_TYPE) \
+	|| ((H) != NULL \
+	    && (! (bfd_link_pie (INFO) \
+		   || SYMBOLIC_BIND ((INFO), (H))) \
+		|| (H)->root.type == bfd_link_hash_defweak \
+		|| !(H)->def_regular)))) \
+		|| ((H) != NULL \
+		    && (H)->type == STT_GNU_IFUNC \
+		    && (R_TYPE) == POINTER_TYPE \
+		    && ((SEC)->flags & SEC_CODE) == 0) \
+		    || (ELIMINATE_COPY_RELOCS \
+			&& !bfd_link_pic (INFO) \
+			&& (H) != NULL \
+			&& ((H)->root.type == bfd_link_hash_defweak \
+			    || !(H)->def_regular)))
+
 /* TRUE if TLS IE->LE transition is OK.  */
 #define TLS_TRANSITION_IE_TO_LE_P(INFO, H, TLS_TYPE) \
   (bfd_link_executable (INFO) \

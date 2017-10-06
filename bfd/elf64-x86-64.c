@@ -199,7 +199,7 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 /* Set if a relocation is converted from a GOTPCREL relocation.  */
 #define R_X86_64_converted_reloc_bit (1 << 7)
 
-#define IS_X86_64_PCREL_TYPE(TYPE)	\
+#define X86_PCREL_TYPE_P(TYPE)		\
   (   ((TYPE) == R_X86_64_PC8)		\
    || ((TYPE) == R_X86_64_PC16)		\
    || ((TYPE) == R_X86_64_PC32)		\
@@ -2180,46 +2180,8 @@ pointer:
 
 	  size_reloc = FALSE;
 do_size:
-	  /* If we are creating a shared library, and this is a reloc
-	     against a global symbol, or a non PC relative reloc
-	     against a local symbol, then we need to copy the reloc
-	     into the shared library.  However, if we are linking with
-	     -Bsymbolic, we do not need to copy a reloc against a
-	     global symbol which is defined in an object we are
-	     including in the link (i.e., DEF_REGULAR is set).	At
-	     this point we have not seen all the input files, so it is
-	     possible that DEF_REGULAR is not set now but will be set
-	     later (it is never cleared).  In case of a weak definition,
-	     DEF_REGULAR may be cleared later by a strong definition in
-	     a shared library.  We account for that possibility below by
-	     storing information in the relocs_copied field of the hash
-	     table entry.  A similar situation occurs when creating
-	     shared libraries and symbol visibility changes render the
-	     symbol local.
-
-	     If on the other hand, we are creating an executable, we
-	     may need to keep relocations for symbols satisfied by a
-	     dynamic library if we manage to avoid copy relocs for the
-	     symbol.
-
-	     Generate dynamic pointer relocation against STT_GNU_IFUNC
-	     symbol in the non-code section.  */
-	  if ((bfd_link_pic (info)
-	       && (! IS_X86_64_PCREL_TYPE (r_type)
-		   || (h != NULL
-		       && (! (bfd_link_pie (info)
-			      || SYMBOLIC_BIND (info, h))
-			   || h->root.type == bfd_link_hash_defweak
-			   || !h->def_regular))))
-	      || (h != NULL
-		  && h->type == STT_GNU_IFUNC
-		  && r_type == htab->pointer_r_type
-		  && (sec->flags & SEC_CODE) == 0)
-	      || (ELIMINATE_COPY_RELOCS
-		  && !bfd_link_pic (info)
-		  && h != NULL
-		  && (h->root.type == bfd_link_hash_defweak
-		      || !h->def_regular)))
+	  if (NEED_DYNAMIC_RELOCATION_P (info, h, sec, r_type,
+					 htab->pointer_r_type))
 	    {
 	      struct elf_dyn_relocs *p;
 	      struct elf_dyn_relocs **head;
@@ -2282,7 +2244,7 @@ do_size:
 
 	      p->count += 1;
 	      /* Count size relocation as PC-relative relocation.  */
-	      if (IS_X86_64_PCREL_TYPE (r_type) || size_reloc)
+	      if (X86_PCREL_TYPE_P (r_type) || size_reloc)
 		p->pc_count += 1;
 	    }
 	  break;
@@ -3150,14 +3112,14 @@ direct:
 		    && (h->needs_copy
 			|| eh->needs_copy
 			|| h->root.type == bfd_link_hash_undefined)
-		    && (IS_X86_64_PCREL_TYPE (r_type)
+		    && (X86_PCREL_TYPE_P (r_type)
 			|| r_type == R_X86_64_SIZE32
 			|| r_type == R_X86_64_SIZE64))
 	       && (h == NULL
 		   || ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 			&& !resolved_to_zero)
 		       || h->root.type != bfd_link_hash_undefweak))
-	       && ((! IS_X86_64_PCREL_TYPE (r_type)
+	       && ((! X86_PCREL_TYPE_P (r_type)
 		      && r_type != R_X86_64_SIZE32
 		      && r_type != R_X86_64_SIZE64)
 		   || ! SYMBOL_CALLS_LOCAL (info, h)))
@@ -3202,7 +3164,7 @@ direct:
 		 become local.  */
 	      else if (h != NULL
 		       && h->dynindx != -1
-		       && (IS_X86_64_PCREL_TYPE (r_type)
+		       && (X86_PCREL_TYPE_P (r_type)
 			   || !(bfd_link_executable (info)
 				|| SYMBOLIC_BIND (info, h))
 			   || ! h->def_regular))

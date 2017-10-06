@@ -1,5 +1,17 @@
 2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (X86_PCREL_TYPE_P): New.
+	(elf_i386_check_relocs): Use NEED_DYNAMIC_RELOCATION_P.
+	* elf64-x86-64.c (IS_X86_64_PCREL_TYPE): Renamed to ...
+	(X86_PCREL_TYPE_P): This.
+	(elf_x86_64_check_relocs): Use NEED_DYNAMIC_RELOCATION_P.
+	Replace IS_X86_64_PCREL_TYPE with X86_PCREL_TYPE_P.
+	(elf_x86_64_relocate_section): Replace IS_X86_64_PCREL_TYPE with
+	X86_PCREL_TYPE_P.
+	* elfxx-x86.h (NEED_DYNAMIC_RELOCATION_P): New.
+
+2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-x86.h (TLS_TRANSITION_IE_TO_LE_P): New.
 	* elf32-i386.c (elf_i386_tls_transition): Use it.
 	* elf64-x86-64.c (elf_x86_64_tls_transition): Likewise.
