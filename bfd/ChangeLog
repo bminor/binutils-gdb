@@ -1,5 +1,11 @@
 2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-x86.h (RESOLVED_LOCALLY_P): New.
+	* elf32-i386.c (elf_i386_relocate_section): Use it.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+
+2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (X86_PCREL_TYPE_P): New.
 	(elf_i386_check_relocs): Use NEED_DYNAMIC_RELOCATION_P.
 	* elf64-x86-64.c (IS_X86_64_PCREL_TYPE): Renamed to ...
