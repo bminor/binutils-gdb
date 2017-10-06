@@ -793,6 +793,7 @@ ALL_64_TARGET_OBS = \
 # All other target-dependent objects files (used with --enable-targets=all).
 ALL_TARGET_OBS = \
 	arc-tdep.o \
+	arch/i386.o \
 	arm.o \
 	arm-bsd-tdep.o \
 	arm-get-next-pcs.o \
@@ -821,7 +822,6 @@ ALL_TARGET_OBS = \
 	hppa-nbsd-tdep.o \
 	hppa-obsd-tdep.o \
 	hppa-tdep.o \
-	i386.o \
 	i386-bsd-tdep.o \
 	i386-cygwin-tdep.o \
 	i386-darwin-tdep.o \
