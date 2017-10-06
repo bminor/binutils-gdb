@@ -141,6 +141,13 @@ A prefix argument means expand all children."
 		    (expand-file-name dwarf-file)))
     (set-buffer-modified-p nil)))
 
+(defvar dwarf-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map special-mode-map)
+    (define-key map [(control ?m)] #'dwarf-insert-substructure)
+    map)
+  "Keymap for dwarf-mode buffers.")
+
 (define-derived-mode dwarf-mode special-mode "DWARF"
   "Major mode for browsing DWARF output.
 
@@ -150,8 +157,6 @@ A prefix argument means expand all children."
   ;; FIXME: we could be smarter and check the file time.
   (set (make-local-variable 'revert-buffer-function) #'dwarf-do-refresh)
   (jit-lock-register #'dwarf-fontify-region))
-
-(define-key dwarf-mode-map [(control ?m)] #'dwarf-insert-substructure)
 
 ;;;###autoload
 (defun dwarf-browse (file)
