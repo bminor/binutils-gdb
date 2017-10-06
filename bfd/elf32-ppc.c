@@ -5674,7 +5674,8 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 /* Return true if we have dynamic relocs that apply to read-only sections.  */
 
 static bfd_boolean
-readonly_dynrelocs (struct elf_link_hash_entry *h)
+readonly_dynrelocs (struct elf_link_hash_entry *h,
+		    struct bfd_link_info *info)
 {
   struct elf_dyn_relocs *p;
 
@@ -5685,7 +5686,13 @@ readonly_dynrelocs (struct elf_link_hash_entry *h)
       if (s != NULL
 	  && ((s->flags & (SEC_READONLY | SEC_ALLOC))
 	      == (SEC_READONLY | SEC_ALLOC)))
-	return TRUE;
+	{
+	  if (info)
+	    info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+				    p->sec->owner, p->sec);
+
+	  return TRUE;
+	}
     }
   return FALSE;
 }
@@ -5763,7 +5770,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	       || (!h->ref_regular_nonweak && h->non_got_ref))
 	      && !htab->is_vxworks
 	      && !ppc_elf_hash_entry (h)->has_sda_refs
-	      && !readonly_dynrelocs (h))
+	      && !readonly_dynrelocs (h, NULL))
 	    {
 	      h->pointer_equality_needed = 0;
 	      /* After adjust_dynamic_symbol, non_got_ref set in the
@@ -5846,7 +5853,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       && !ppc_elf_hash_entry (h)->has_sda_refs
       && !htab->is_vxworks
       && !h->def_regular
-      && !readonly_dynrelocs (h))
+      && !readonly_dynrelocs (h, NULL))
     {
       h->non_got_ref = 0;
       return TRUE;
@@ -6335,14 +6342,17 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
    read-only sections.  */
 
 static bfd_boolean
-maybe_set_textrel (struct elf_link_hash_entry *h, void *info)
+maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 {
+  struct bfd_link_info *info;
+
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  if (readonly_dynrelocs (h))
+  info = (struct bfd_link_info *) info_p;
+  if (readonly_dynrelocs (h, info))
     {
-      ((struct bfd_link_info *) info)->flags |= DF_TEXTREL;
+      info->flags |= DF_TEXTREL;
 
       /* Not an error, just cut short the traversal.  */
       return FALSE;
@@ -6447,7 +6457,11 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 		  if ((p->sec->output_section->flags
 		       & (SEC_READONLY | SEC_ALLOC))
 		      == (SEC_READONLY | SEC_ALLOC))
-		    info->flags |= DF_TEXTREL;
+		    {
+		      info->flags |= DF_TEXTREL;
+		      info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+					      p->sec->owner, p->sec);
+		    }
 		}
 	    }
 	}

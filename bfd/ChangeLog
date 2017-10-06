@@ -1,3 +1,13 @@
+2017-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-ppc.c (readonly_dynrelocs): Add a link_info argument.
+	Dump dynamic relocation in read-only section with minfo if
+	needed.
+	(ppc_elf_adjust_dynamic_symbol): Pass NULL to readonly_dynrelocs.
+	(maybe_set_textrel): Likewise.
+	(ppc_elf_size_dynamic_sections): Dump dynamic relocation in
+	read-only section with minfo.
+
 2017-10-05  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf.c (elfcore_grok_freebsd_note): Handle NT_ARM_VFP.
