@@ -198,24 +198,32 @@
 
 /* Verify that the symbol has an entry in the procedure linkage table.  */
 #define VERIFY_PLT_ENTRY(INFO, H, PLT, GOTPLT, RELPLT, LOCAL_UNDEFWEAK) \
-  if (((H)->dynindx == -1 \
-       && !LOCAL_UNDEFWEAK \
-       && !(((H)->forced_local || bfd_link_executable (INFO)) \
-	    && (H)->def_regular \
-	    && (H)->type == STT_GNU_IFUNC)) \
-      || (PLT) == NULL \
-      || (GOTPLT) == NULL \
-      || (RELPLT) == NULL) \
-    abort ();
+  do \
+    { \
+      if (((H)->dynindx == -1 \
+	   && !LOCAL_UNDEFWEAK \
+	   && !(((H)->forced_local || bfd_link_executable (INFO)) \
+		&& (H)->def_regular \
+		&& (H)->type == STT_GNU_IFUNC)) \
+	  || (PLT) == NULL \
+	  || (GOTPLT) == NULL \
+	  || (RELPLT) == NULL) \
+	abort (); \
+    } \
+  while (0);
 
 /* Verify that the symbol supports copy relocation.  */
 #define VERIFY_COPY_RELOC(H, HTAB) \
-  if ((H)->dynindx == -1 \
-      || ((H)->root.type != bfd_link_hash_defined \
-	  && (H)->root.type != bfd_link_hash_defweak) \
-      || (HTAB)->elf.srelbss == NULL \
-      || (HTAB)->elf.sreldynrelro == NULL) \
-    abort ();
+  do \
+    { \
+      if ((H)->dynindx == -1 \
+	  || ((H)->root.type != bfd_link_hash_defined \
+	      && (H)->root.type != bfd_link_hash_defweak) \
+	  || (HTAB)->elf.srelbss == NULL \
+	  || (HTAB)->elf.sreldynrelro == NULL) \
+	abort (); \
+    } \
+  while (0);
 
 /* x86 ELF linker hash entry.  */
 
