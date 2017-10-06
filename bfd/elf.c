@@ -9981,9 +9981,14 @@ elfcore_grok_freebsd_prstatus (bfd *abfd, Elf_Internal_Note *note)
 static bfd_boolean
 elfcore_grok_freebsd_note (bfd *abfd, Elf_Internal_Note *note)
 {
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
   switch (note->type)
     {
     case NT_PRSTATUS:
+      if (bed->elf_backend_grok_freebsd_prstatus)
+	if ((*bed->elf_backend_grok_freebsd_prstatus) (abfd, note))
+	  return TRUE;
       return elfcore_grok_freebsd_prstatus (abfd, note);
 
     case NT_FPREGSET:

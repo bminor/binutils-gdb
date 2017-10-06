@@ -1270,6 +1270,11 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_grok_psinfo)
     (bfd *, Elf_Internal_Note *);
 
+  /* This function, if defined, is called when a "FreeBSD" NT_PRSTATUS
+     note is found in a core file.  */
+  bfd_boolean (*elf_backend_grok_freebsd_prstatus)
+    (bfd *, Elf_Internal_Note *);
+
   /* This function, if defined, is called to write a note to a corefile.  */
   char *(*elf_backend_write_core_note)
     (bfd *abfd, char *buf, int *bufsiz, int note_type, ...);

@@ -1,3 +1,16 @@
+2017-10-06  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf-bfd.h (struct elf_backend_data): Add
+	`elf_backend_grok_freebsd_prstatus'.
+	* elf.c (elfcore_grok_freebsd_note): Call
+	`elf_backend_grok_freebsd_prstatus' to handle NT_PRSTATUS if
+	present.
+	* elfn32-mips.c (elf_n32_mips_grok_freebsd_prstatus): New
+	function.
+	(elf_backend_grok_freebsd_prstatus): Define.
+	* elfxx-target.h (elf_backend_grok_freebsd_prstatus): Define.
+	(elfNN_bed): Initialize `elf_backend_grok_freebsd_prstatus'.
+
 2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-x86.h (COPY_INPUT_RELOC_P): Add "do/while(0);".
