@@ -1,3 +1,9 @@
+2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.h (TLS_TRANSITION_IE_TO_LE_P): New.
+	* elf32-i386.c (elf_i386_tls_transition): Use it.
+	* elf64-x86-64.c (elf_x86_64_tls_transition): Likewise.
+
 2017-10-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-ppc.c (readonly_dynrelocs): Add a link_info argument.

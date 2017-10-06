@@ -74,6 +74,13 @@
    && ((EH)->elf.root.u.def.section->owner->flags & DYNAMIC) != 0 \
    && ((EH)->elf.root.u.def.section->flags & SEC_CODE) == 0)
 
+/* TRUE if TLS IE->LE transition is OK.  */
+#define TLS_TRANSITION_IE_TO_LE_P(INFO, H, TLS_TYPE) \
+  (bfd_link_executable (INFO) \
+   && (H) != NULL \
+   && (H)->dynindx == -1 \
+   && (TLS_TYPE & GOT_TLS_IE))
+
 /* x86 ELF linker hash entry.  */
 
 struct elf_x86_link_hash_entry

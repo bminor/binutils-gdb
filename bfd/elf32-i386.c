@@ -1105,10 +1105,7 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	{
 	  unsigned int new_to_type = to_type;
 
-	  if (bfd_link_executable (info)
-	      && h != NULL
-	      && h->dynindx == -1
-	      && (tls_type & GOT_TLS_IE))
+	  if (TLS_TRANSITION_IE_TO_LE_P (info, h, tls_type))
 	    new_to_type = R_386_TLS_LE_32;
 
 	  if (to_type == R_386_TLS_GD
