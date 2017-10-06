@@ -2531,10 +2531,7 @@ r_386_got32:
 				  htab->elf.sgot->contents + off);
 		      h->got.offset |= 1;
 
-		      if (h->dynindx == -1
-			  && !h->forced_local
-			  && h->root.type != bfd_link_hash_undefweak
-			  && bfd_link_pic (info))
+		      if (GENERATE_RELATIVE_RELOC_P (info, h))
 			{
 			  /* PR ld/21402: If this symbol isn't dynamic
 			     in PIC, generate R_386_RELATIVE here.  */

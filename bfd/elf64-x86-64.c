@@ -2797,10 +2797,7 @@ do_ifunc_pointer:
 			 as -1 | 1 still is -1.  */
 		      h->got.offset |= 1;
 
-		      if (h->dynindx == -1
-			  && !h->forced_local
-			  && h->root.type != bfd_link_hash_undefweak
-			  && bfd_link_pic (info))
+		      if (GENERATE_RELATIVE_RELOC_P (info, h))
 			{
 			  /* If this symbol isn't dynamic in PIC,
 			     generate R_X86_64_RELATIVE here.  */

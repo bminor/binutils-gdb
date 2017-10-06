@@ -124,6 +124,18 @@
        || (ELF_ST_VISIBILITY ((H)->other) \
 	   && (H)->root.type == bfd_link_hash_undefweak))
 
+/* TRUE if relative relocation should be generated.  GOT reference to
+   global symbol in PIC will lead to dynamic symbol.  It becomes a
+   problem when "time" or "times" is defined as a variable in an
+   executable, clashing with functions of the same name in libc.  If a
+   symbol isn't undefined weak symbol, don't make it dynamic in PIC and
+   generate relative relocation.  */
+#define GENERATE_RELATIVE_RELOC_P(INFO, H) \
+  ((H)->dynindx == -1 \
+   && !(H)->forced_local \
+   && (H)->root.type != bfd_link_hash_undefweak \
+   && bfd_link_pic (INFO))
+
 /* TRUE if TLS IE->LE transition is OK.  */
 #define TLS_TRANSITION_IE_TO_LE_P(INFO, H, TLS_TYPE) \
   (bfd_link_executable (INFO) \
