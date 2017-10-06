@@ -1,5 +1,11 @@
 2017-10-06  Yao Qi  <yao.qi@linaro.org>
 
+	* configure.tgt (i386_tobjs): New variable.
+	(amd64_tobjs): New variable.
+	Set $cpu_obs and $os_obs.
+
+2017-10-06  Yao Qi  <yao.qi@linaro.org>
+
 	* Makefile.in (CONFIG_SRC_SUBDIR): New.
 	(ALL_64_TARGET_OBS): Replace amd64.o with arch/amd64.o.
 	(clean): Remove object files and dependency files.
