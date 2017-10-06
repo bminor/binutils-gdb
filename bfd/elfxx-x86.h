@@ -196,6 +196,18 @@
    && (H)->dynindx == -1 \
    && (TLS_TYPE & GOT_TLS_IE))
 
+/* Verify that the symbol has an entry in the procedure linkage table.  */
+#define VERIFY_PLT_ENTRY(INFO, H, PLT, GOTPLT, RELPLT, LOCAL_UNDEFWEAK) \
+  if (((H)->dynindx == -1 \
+       && !LOCAL_UNDEFWEAK \
+       && !(((H)->forced_local || bfd_link_executable (INFO)) \
+	    && (H)->def_regular \
+	    && (H)->type == STT_GNU_IFUNC)) \
+      || (PLT) == NULL \
+      || (GOTPLT) == NULL \
+      || (RELPLT) == NULL) \
+    abort ();
+
 /* x86 ELF linker hash entry.  */
 
 struct elf_x86_link_hash_entry

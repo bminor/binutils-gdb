@@ -3939,17 +3939,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	  relplt = htab->elf.irelplt;
 	}
 
-      /* This symbol has an entry in the procedure linkage table.  Set
-	 it up.	 */
-      if ((h->dynindx == -1
-	   && !local_undefweak
-	   && !((h->forced_local || bfd_link_executable (info))
-		&& h->def_regular
-		&& h->type == STT_GNU_IFUNC))
-	  || plt == NULL
-	  || gotplt == NULL
-	  || relplt == NULL)
-	abort ();
+      VERIFY_PLT_ENTRY (info, h, plt, gotplt, relplt, local_undefweak)
 
       /* Get the index in the procedure linkage table which
 	 corresponds to this symbol.  This is the index of this symbol
