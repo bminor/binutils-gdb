@@ -1,5 +1,12 @@
 2017-10-06  Yao Qi  <yao.qi@linaro.org>
 
+	* Makefile.in (ALL_64_TARGET_OBS): Replace aarch64-insn.o with
+	arch/aarch64-insn.o.
+	Remove one rule.
+	* configure.tgt: Replace aarch64-insn.o with arch/aarch64-insn.o.
+
+2017-10-06  Yao Qi  <yao.qi@linaro.org>
+
 	* Makefile.in (ALL_TARGET_OBS): Replace arm.o, arm-get-next-pcs.o,
 	and arm-linux.o with arch/arm.o, arch/arm-get-next-pcs.o and
 	arch/arm-linux.o respectively.

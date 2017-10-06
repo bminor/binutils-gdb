@@ -759,7 +759,6 @@ TARGET_OBS = @TARGET_OBS@
 # (used with --enable-targets=all --enable-64-bit-bfd).
 ALL_64_TARGET_OBS = \
 	aarch64-fbsd-tdep.o \
-	aarch64-insn.o \
 	aarch64-linux-tdep.o \
 	aarch64-newlib-tdep.o \
 	aarch64-tdep.o \
@@ -778,6 +777,7 @@ ALL_64_TARGET_OBS = \
 	amd64-sol2-tdep.o \
 	amd64-tdep.o \
 	amd64-windows-tdep.o \
+	arch/aarch64-insn.o \
 	arch/amd64.o \
 	ia64-linux-tdep.o \
 	ia64-tdep.o \
@@ -1926,10 +1926,6 @@ all: gdb$(EXEEXT) $(CONFIG_ALL)
 	$(POSTCOMPILE)
 
 # Rules for compiling .c files in the various source subdirectories.
-%.o: ${srcdir}/arch/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
 %.o: $(srcdir)/cli/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
