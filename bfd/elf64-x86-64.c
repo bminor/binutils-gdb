@@ -3126,14 +3126,7 @@ direct:
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
 
-	      /* h->dynindx may be -1 if this symbol was marked to
-		 become local.  */
-	      else if (h != NULL
-		       && h->dynindx != -1
-		       && (X86_PCREL_TYPE_P (r_type)
-			   || !(bfd_link_executable (info)
-				|| SYMBOLIC_BIND (info, h))
-			   || ! h->def_regular))
+	      else if (COPY_INPUT_RELOC_P (info, h, r_type))
 		{
 		  outrel.r_info = htab->r_info (h->dynindx, r_type);
 		  outrel.r_addend = rel->r_addend;

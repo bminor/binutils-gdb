@@ -1,5 +1,11 @@
 2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-x86.h (COPY_INPUT_RELOC_P): New.
+	* elf32-i386.c (elf_i386_relocate_section): Use it.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+
+2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (X86_SIZE_TYPE_P): New.
 	(elf_i386_relocate_section): Use GENERATE_DYNAMIC_RELOCATION_P.
 	* elf64-x86-64.c (X86_SIZE_TYPE_P): New.

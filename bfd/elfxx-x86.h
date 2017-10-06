@@ -143,6 +143,15 @@
 	       && (((EH)->elf.def_dynamic && !(EH)->elf.def_regular) \
 		   || (EH)->elf.root.type == bfd_link_hash_undefined)))
 
+/* TRUE if this input relocation should be copied to output.  H->dynindx
+   may be -1 if this symbol was marked to become local.  */
+#define COPY_INPUT_RELOC_P(INFO, H, R_TYPE) \
+  ((H) != NULL \
+   && (H)->dynindx != -1 \
+   && (X86_PCREL_TYPE_P (R_TYPE) \
+       || !(bfd_link_executable (INFO) || SYMBOLIC_BIND ((INFO), (H))) \
+       || !(H)->def_regular))
+
 /* TRUE if this is actually a static link, or it is a -Bsymbolic link
    and the symbol is defined locally, or the symbol was forced to be
    local because of a version file.  */

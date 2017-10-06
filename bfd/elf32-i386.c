@@ -2778,12 +2778,7 @@ disallow_got32:
 
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
-	      else if (h != NULL
-		       && h->dynindx != -1
-		       && (r_type == R_386_PC32
-			   || !(bfd_link_executable (info)
-				|| SYMBOLIC_BIND (info, h))
-			   || !h->def_regular))
+	      else if (COPY_INPUT_RELOC_P (info, h, r_type))
 		outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 	      else
 		{
