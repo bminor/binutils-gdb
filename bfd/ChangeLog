@@ -1,5 +1,12 @@
 2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-x86.h (POINTER_LOCAL_IFUNC_P): New.
+	(PLT_LOCAL_IFUNC_P): Likewise.
+	* elf32-i386.c (elf_i386_relocate_section): Use them.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+
+2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-x86.h (GENERATE_RELATIVE_RELOC_P): New.
 	* elf32-i386.c (elf_i386_relocate_section): Use it.
 	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.

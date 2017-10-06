@@ -136,6 +136,20 @@
    && (H)->root.type != bfd_link_hash_undefweak \
    && bfd_link_pic (INFO))
 
+/* TRUE if this is a pointer reference to a local IFUNC.  */
+#define POINTER_LOCAL_IFUNC_P(INFO, H) \
+  ((H)->dynindx == -1 \
+   || (H)->forced_local \
+   || bfd_link_executable (INFO))
+
+/* TRUE if this is a PLT reference to a local IFUNC.  */
+#define PLT_LOCAL_IFUNC_P(INFO, H) \
+  ((H)->dynindx == -1 \
+   || ((bfd_link_executable (INFO) \
+	|| ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT) \
+	&& (H)->def_regular \
+	&& (H)->type == STT_GNU_IFUNC))
+
 /* TRUE if TLS IE->LE transition is OK.  */
 #define TLS_TRANSITION_IE_TO_LE_P(INFO, H, TLS_TYPE) \
   (bfd_link_executable (INFO) \

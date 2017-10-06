@@ -2687,9 +2687,7 @@ do_ifunc_pointer:
 		  outrel.r_offset += (input_section->output_section->vma
 				      + input_section->output_offset);
 
-		  if (h->dynindx == -1
-		      || h->forced_local
-		      || bfd_link_executable (info))
+		  if (POINTER_LOCAL_IFUNC_P (info, h))
 		    {
 		      info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
 					      h->root.root.string,
@@ -4058,11 +4056,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	  rela.r_offset = (gotplt->output_section->vma
 			   + gotplt->output_offset
 			   + got_offset);
-	  if (h->dynindx == -1
-	      || ((bfd_link_executable (info)
-		   || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
-		  && h->def_regular
-		  && h->type == STT_GNU_IFUNC))
+	  if (PLT_LOCAL_IFUNC_P (info, h))
 	    {
 	      info->callbacks->minfo (_("Local IFUNC function `%s' in %B\n"),
 				      h->root.root.string,
