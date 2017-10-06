@@ -1,6 +1,6 @@
 ;;; dwarf-mode.el --- Browser for DWARF information. -*-lexical-binding:t-*-
 
-;; Version: 1.3
+;; Version: 1.4
 
 ;; Copyright (C) 2012-2017 Free Software Foundation, Inc.
 
