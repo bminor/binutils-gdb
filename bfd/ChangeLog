@@ -13,6 +13,19 @@
 
 2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_check_relocs): Replace has_got_reloc
+	and has_non_got_reloc with zero_undefweak.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_newfunc): Initialize
+	zero_undefweak to 1.
+	(_bfd_x86_elf_copy_indirect_symbol): Replace has_got_reloc and
+	has_non_got_reloc with zero_undefweak.
+	* elfxx-x86.h (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Replace
+	has_got_reloc and has_non_got_reloc with zero_undefweak.
+	(elf_x86_link_hash_entry): Likewise.
+
+2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-x86.h (COPY_INPUT_RELOC_P): Add "do/while(0);".
 	(VERIFY_COPY_RELOC): Likewise.
 

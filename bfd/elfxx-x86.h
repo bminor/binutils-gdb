@@ -60,8 +60,7 @@
   ((EH)->elf.root.type == bfd_link_hash_undefweak		 \
    && (SYMBOL_REFERENCES_LOCAL_P ((INFO), &(EH)->elf)		 \
        || (bfd_link_executable (INFO)				 \
-	   && (!(EH)->has_got_reloc				 \
-	       || (EH)->has_non_got_reloc))))
+	   && (EH)->zero_undefweak > 0)))
 
 /* Should copy relocation be generated for a symbol.  Don't generate
    copy relocation against a protected symbol defined in a shared
@@ -236,11 +235,11 @@ struct elf_x86_link_hash_entry
 
   unsigned char tls_type;
 
-  /* TRUE if symbol has GOT or PLT relocations.  */
-  unsigned int has_got_reloc : 1;
-
-  /* TRUE if symbol has non-GOT/non-PLT relocations in text sections.  */
-  unsigned int has_non_got_reloc : 1;
+  /* Bit 0: Symbol has no GOT nor PLT relocations.
+     Bit 1: Symbol has non-GOT/non-PLT relocations in text sections.
+     zero_undefweak is initialized to 1 and undefined weak symbol
+     should be resolved to 0 if zero_undefweak > 0.  */
+  unsigned int zero_undefweak : 2;
 
   /* Don't call finish_dynamic_symbol on this symbol.  */
   unsigned int no_finish_dynamic_symbol : 1;

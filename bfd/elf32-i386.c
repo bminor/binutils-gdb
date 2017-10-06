@@ -1619,7 +1619,7 @@ elf_i386_check_relocs (bfd *abfd,
 	  if (h == NULL)
 	    continue;
 
-	  eh->has_got_reloc = 1;
+	  eh->zero_undefweak &= 0x2;
 	  h->needs_plt = 1;
 	  h->plt.refcount += 1;
 	  break;
@@ -1746,7 +1746,7 @@ elf_i386_check_relocs (bfd *abfd,
 	  if (r_type != R_386_TLS_IE)
 	    {
 	      if (eh != NULL)
-		eh->has_got_reloc = 1;
+		eh->zero_undefweak &= 0x2;
 	      break;
 	    }
 	  /* Fall through */
@@ -1754,7 +1754,7 @@ elf_i386_check_relocs (bfd *abfd,
 	case R_386_TLS_LE_32:
 	case R_386_TLS_LE:
 	  if (eh != NULL)
-	    eh->has_got_reloc = 1;
+	    eh->zero_undefweak &= 0x2;
 	  if (bfd_link_executable (info))
 	    break;
 	  info->flags |= DF_STATIC_TLS;
@@ -1763,7 +1763,7 @@ elf_i386_check_relocs (bfd *abfd,
 	case R_386_32:
 	case R_386_PC32:
 	  if (eh != NULL && (sec->flags & SEC_CODE) != 0)
-	    eh->has_non_got_reloc = 1;
+	    eh->zero_undefweak |= 0x2;
 do_relocation:
 	  /* We are called after all symbols have been resolved.  Only
 	     relocation against STT_GNU_IFUNC symbol must go through

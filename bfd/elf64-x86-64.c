@@ -1958,7 +1958,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    return elf_x86_64_need_pic (info, abfd, sec, h, symtab_hdr, isym,
 					&x86_64_elf_howto_table[r_type]);
 	  if (eh != NULL)
-	    eh->has_got_reloc = 1;
+	    eh->zero_undefweak &= 0x2;
 	  break;
 
 	case R_X86_64_GOTTPOFF:
@@ -2066,7 +2066,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_GOTPC64:
 	create_got:
 	  if (eh != NULL)
-	    eh->has_got_reloc = 1;
+	    eh->zero_undefweak &= 0x2;
 	  break;
 
 	case R_X86_64_PLT32:
@@ -2083,7 +2083,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (h == NULL)
 	    continue;
 
-	  eh->has_got_reloc = 1;
+	  eh->zero_undefweak &= 0x2;
 	  h->needs_plt = 1;
 	  h->plt.refcount += 1;
 	  break;
@@ -2134,7 +2134,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_64:
 pointer:
 	  if (eh != NULL && (sec->flags & SEC_CODE) != 0)
-	    eh->has_non_got_reloc = 1;
+	    eh->zero_undefweak |= 0x2;
 	  /* We are called after all symbols have been resolved.  Only
 	     relocation against STT_GNU_IFUNC symbol must go through
 	     PLT.  */
