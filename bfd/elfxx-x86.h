@@ -113,6 +113,36 @@
 			&& ((H)->root.type == bfd_link_hash_defweak \
 			    || !(H)->def_regular)))
 
+/* TRUE if dynamic relocation should be generated.  Don't copy a
+   pc-relative relocation into the output file if the symbol needs
+   copy reloc or the symbol is undefined when building executable.
+   Copy dynamic function pointer relocations.  Don't generate dynamic
+   relocations against resolved undefined weak symbols in PIE, except
+   when PC32_RELOC is TRUE.  Undefined weak symbol is bound locally
+   when PIC is false.  */
+#define GENERATE_DYNAMIC_RELOCATION_P(INFO, EH, R_TYPE, \
+				      NEED_COPY_RELOC_IN_PIE, \
+				      RESOLVED_TO_ZERO, PC32_RELOC) \
+  ((bfd_link_pic (INFO) \
+    && !(NEED_COPY_RELOC_IN_PIE) \
+    && ((EH) == NULL \
+	|| ((ELF_ST_VISIBILITY ((EH)->elf.other) == STV_DEFAULT \
+	     && (!(RESOLVED_TO_ZERO) || PC32_RELOC)) \
+	    || (EH)->elf.root.type != bfd_link_hash_undefweak)) \
+    && ((!X86_PCREL_TYPE_P (R_TYPE) \
+	 && !X86_SIZE_TYPE_P (R_TYPE)) \
+	 || ! SYMBOL_CALLS_LOCAL ((INFO), &(EH)->elf))) \
+   || (ELIMINATE_COPY_RELOCS \
+       && !bfd_link_pic (INFO) \
+       && (EH) != NULL \
+       && (EH)->elf.dynindx != -1 \
+       && (!(EH)->elf.non_got_ref \
+	   || (EH)->func_pointer_refcount > 0 \
+	   || ((EH)->elf.root.type == bfd_link_hash_undefweak \
+	       && !(RESOLVED_TO_ZERO))) \
+	       && (((EH)->elf.def_dynamic && !(EH)->elf.def_regular) \
+		   || (EH)->elf.root.type == bfd_link_hash_undefined)))
+
 /* TRUE if this is actually a static link, or it is a -Bsymbolic link
    and the symbol is defined locally, or the symbol was forced to be
    local because of a version file.  */

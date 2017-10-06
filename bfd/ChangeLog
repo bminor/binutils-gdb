@@ -1,5 +1,13 @@
 2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (X86_SIZE_TYPE_P): New.
+	(elf_i386_relocate_section): Use GENERATE_DYNAMIC_RELOCATION_P.
+	* elf64-x86-64.c (X86_SIZE_TYPE_P): New.
+	(elf_x86_64_relocate_section): Use GENERATE_DYNAMIC_RELOCATION_P.
+	* elfxx-x86.h (GENERATE_DYNAMIC_RELOCATION_P): New.
+
+2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-x86.h (POINTER_LOCAL_IFUNC_P): New.
 	(PLT_LOCAL_IFUNC_P): Likewise.
 	* elf32-i386.c (elf_i386_relocate_section): Use them.

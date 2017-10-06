@@ -184,6 +184,8 @@ static reloc_howto_type elf_howto_table[]=
 
 #define X86_PCREL_TYPE_P(TYPE) ((TYPE) == R_386_PC32)
 
+#define X86_SIZE_TYPE_P(TYPE) ((TYPE) == R_386_SIZE32)
+
 #ifdef DEBUG_GEN_RELOC
 #define TRACE(str) \
   fprintf (stderr, "i386 bfd reloc lookup %d (%s)\n", code, str)
@@ -2749,29 +2751,9 @@ disallow_got32:
 	      || is_vxworks_tls)
 	    break;
 
-	  /* Copy dynamic function pointer relocations.  Don't generate
-	     dynamic relocations against resolved undefined weak symbols
-	     in PIE, except for R_386_PC32.  */
-	  if ((bfd_link_pic (info)
-	       && (h == NULL
-		   || ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-			&& (!resolved_to_zero
-			    || r_type == R_386_PC32))
-		       || h->root.type != bfd_link_hash_undefweak))
-	       && ((r_type != R_386_PC32 && r_type != R_386_SIZE32)
-		   || !SYMBOL_CALLS_LOCAL (info, h)))
-	      || (ELIMINATE_COPY_RELOCS
-		  && !bfd_link_pic (info)
-		  && h != NULL
-		  && h->dynindx != -1
-		  && (!h->non_got_ref
-		      || eh->func_pointer_refcount > 0
-		      || (h->root.type == bfd_link_hash_undefweak
-			  && !resolved_to_zero))
-		  && ((h->def_dynamic && !h->def_regular)
-		      /* Undefined weak symbol is bound locally when
-			 PIC is false.  */
-		      || h->root.type == bfd_link_hash_undefweak)))
+	  if (GENERATE_DYNAMIC_RELOCATION_P (info, eh, r_type,
+					     FALSE, resolved_to_zero,
+					     (r_type == R_386_PC32)))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_boolean skip, relocate;

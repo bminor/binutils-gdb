@@ -206,6 +206,9 @@ static reloc_howto_type x86_64_elf_howto_table[] =
    || ((TYPE) == R_X86_64_PC32_BND)	\
    || ((TYPE) == R_X86_64_PC64))
 
+#define X86_SIZE_TYPE_P(TYPE)		\
+  ((TYPE) == R_X86_64_SIZE32 || (TYPE) == R_X86_64_SIZE64)
+
 /* Map BFD relocs to the x86_64 elf relocs.  */
 struct elf_reloc_map
 {
@@ -2393,6 +2396,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
       bfd_boolean resolved_to_zero;
       bfd_boolean relative_reloc;
       bfd_boolean converted_reloc;
+      bfd_boolean need_copy_reloc_in_pie;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type == (int) R_X86_64_GNU_VTINHERIT
@@ -3085,40 +3089,18 @@ direct:
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
 
-	   /* Don't copy a pc-relative relocation into the output file
-	      if the symbol needs copy reloc or the symbol is undefined
-	      when building executable.  Copy dynamic function pointer
-	      relocations.  Don't generate dynamic relocations against
-	      resolved undefined weak symbols in PIE.  */
-	  if ((bfd_link_pic (info)
-	       && !(bfd_link_pie (info)
-		    && h != NULL
-		    && (h->needs_copy
-			|| eh->needs_copy
-			|| h->root.type == bfd_link_hash_undefined)
-		    && (X86_PCREL_TYPE_P (r_type)
-			|| r_type == R_X86_64_SIZE32
-			|| r_type == R_X86_64_SIZE64))
-	       && (h == NULL
-		   || ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-			&& !resolved_to_zero)
-		       || h->root.type != bfd_link_hash_undefweak))
-	       && ((! X86_PCREL_TYPE_P (r_type)
-		      && r_type != R_X86_64_SIZE32
-		      && r_type != R_X86_64_SIZE64)
-		   || ! SYMBOL_CALLS_LOCAL (info, h)))
-	      || (ELIMINATE_COPY_RELOCS
-		  && !bfd_link_pic (info)
-		  && h != NULL
-		  && h->dynindx != -1
-		  && (!h->non_got_ref
-		      || eh->func_pointer_refcount > 0
-		      || (h->root.type == bfd_link_hash_undefweak
-			  && !resolved_to_zero))
-		  && ((h->def_dynamic && !h->def_regular)
-		      /* Undefined weak symbol is bound locally when
-			 PIC is false.  */
-		      || h->root.type == bfd_link_hash_undefined)))
+	  need_copy_reloc_in_pie = (bfd_link_pie (info)
+				    && h != NULL
+				    && (h->needs_copy
+					|| eh->needs_copy
+					|| (h->root.type
+					    == bfd_link_hash_undefined))
+				    && (X86_PCREL_TYPE_P (r_type)
+					|| X86_SIZE_TYPE_P (r_type)));
+
+	  if (GENERATE_DYNAMIC_RELOCATION_P (info, eh, r_type,
+					     need_copy_reloc_in_pie,
+					     resolved_to_zero, FALSE))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_boolean skip, relocate;
