@@ -1,5 +1,9 @@
 2017-10-10  Tom Tromey  <tom@tromey.com>
 
+	* dwarf-mode.el: Set lexical-binding.
+
+2017-10-10  Tom Tromey  <tom@tromey.com>
+
 	* dwarf-mode.el (dwarf-mode-map): New defvar.
 
 2017-10-10  Tom Tromey  <tromey@sourceware.org>

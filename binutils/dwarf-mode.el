@@ -1,4 +1,4 @@
-;;; dwarf-mode.el --- Browser for DWARF information.
+;;; dwarf-mode.el --- Browser for DWARF information. -*-lexical-binding:t-*-
 
 ;; Version: 1.3
 
