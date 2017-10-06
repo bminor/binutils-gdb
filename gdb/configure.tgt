@@ -194,7 +194,7 @@ i[34567]86-*-darwin*)
 			i386-darwin-tdep.o solib-darwin.o"
 	if test "x$enable_64_bit_bfd" = "xyes"; then
 	    # Target: GNU/Linux x86-64
-	    gdb_target_obs="amd64-tdep.o amd64.o amd64-darwin-tdep.o ${gdb_target_obs}"
+	    gdb_target_obs="amd64-tdep.o arch/amd64.o amd64-darwin-tdep.o ${gdb_target_obs}"
 	fi
 	;;
 i[34567]86-*-dicos*)
@@ -225,7 +225,7 @@ i[34567]86-*-nto*)
 	;;
 i[34567]86-*-solaris2* | x86_64-*-solaris2*)
 	# Target: Solaris x86_64
-	gdb_target_obs="i386-tdep.o i386.o i387-tdep.o amd64-tdep.o amd64.o \
+	gdb_target_obs="i386-tdep.o i386.o i387-tdep.o amd64-tdep.o arch/amd64.o \
 			 amd64-sol2-tdep.o i386-sol2-tdep.o sol2-tdep.o \
 			 solib-svr4.o"
 	;;
@@ -237,7 +237,7 @@ i[34567]86-*-linux*)
 			linux-tdep.o linux-record.o"
 	if test "x$enable_64_bit_bfd" = "xyes"; then
 	    # Target: GNU/Linux x86-64
-	    gdb_target_obs="amd64-tdep.o amd64.o amd64-linux-tdep.o ${gdb_target_obs}"
+	    gdb_target_obs="amd64-tdep.o arch/amd64.o amd64-linux-tdep.o ${gdb_target_obs}"
 	fi
 	build_gdbserver=yes
 	;;
@@ -660,52 +660,52 @@ vax-*-*)
 
 x86_64-*-darwin*)
 	# Target: Darwin/x86-64
-	gdb_target_obs="amd64-tdep.o amd64.o i386-tdep.o i386.o i387-tdep.o \
+	gdb_target_obs="amd64-tdep.o arch/amd64.o i386-tdep.o i386.o i387-tdep.o \
 			i386-darwin-tdep.o amd64-darwin-tdep.o \
                         solib-darwin.o"
 	;;
 
 x86_64-*-dicos*)
 	# Target: DICOS/x86-64
-	gdb_target_obs="amd64-tdep.o amd64.o i386-tdep.o i386.o i387-tdep.o \
+	gdb_target_obs="amd64-tdep.o arch/amd64.o i386-tdep.o i386.o i387-tdep.o \
 			dicos-tdep.o i386-dicos-tdep.o amd64-dicos-tdep.o"
 	;;
 x86_64-*-elf*)
-	gdb_target_obs="amd64-tdep.o amd64.o i386-tdep.o i386.o i387-tdep.o"
+	gdb_target_obs="amd64-tdep.o arch/amd64.o i386-tdep.o i386.o i387-tdep.o"
 	;;
 x86_64-*-linux*)
 	# Target: GNU/Linux x86-64
-	gdb_target_obs="amd64-tdep.o amd64-linux-tdep.o amd64.o i386-tdep.o \
+	gdb_target_obs="amd64-tdep.o amd64-linux-tdep.o arch/amd64.o i386-tdep.o \
 			i387-tdep.o i386.o i386-linux-tdep.o glibc-tdep.o \
 			solib-svr4.o symfile-mem.o linux-tdep.o linux-record.o"
 	build_gdbserver=yes
 	;;
 x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
 	# Target: FreeBSD/amd64
-	gdb_target_obs="amd64-tdep.o amd64.o amd64-fbsd-tdep.o i386-tdep.o \
+	gdb_target_obs="amd64-tdep.o arch/amd64.o amd64-fbsd-tdep.o i386-tdep.o \
 			i386.o i387-tdep.o i386-bsd-tdep.o i386-fbsd-tdep.o \
 			fbsd-tdep.o solib-svr4.o"
 	;;
 x86_64-*-mingw* | x86_64-*-cygwin*)
         # Target: MingW/amd64
-	gdb_target_obs="amd64-tdep.o amd64.o amd64-windows-tdep.o \
+	gdb_target_obs="amd64-tdep.o arch/amd64.o amd64-windows-tdep.o \
                         i386-tdep.o i386.o i386-cygwin-tdep.o i387-tdep.o \
                         windows-tdep.o"
 	build_gdbserver=yes
         ;;
 x86_64-*-netbsd* | x86_64-*-knetbsd*-gnu)
 	# Target: NetBSD/amd64
-	gdb_target_obs="amd64-tdep.o amd64.o amd64-nbsd-tdep.o i386-tdep.o \
+	gdb_target_obs="amd64-tdep.o arch/amd64.o amd64-nbsd-tdep.o i386-tdep.o \
 			i386.o i387-tdep.o nbsd-tdep.o solib-svr4.o"
 	;;
 x86_64-*-openbsd*)
 	# Target: OpenBSD/amd64
-	gdb_target_obs="amd64-tdep.o amd64.o amd64-obsd-tdep.o i386-tdep.o \
+	gdb_target_obs="amd64-tdep.o arch/amd64.o amd64-obsd-tdep.o i386-tdep.o \
 			i387-tdep.o i386-bsd-tdep.o i386-obsd-tdep.o \
 			i386.o obsd-tdep.o bsd-uthread.o solib-svr4.o"
 	;;
 x86_64-*-rtems*)
-	gdb_target_obs="amd64-tdep.o amd64.o i386-tdep.o i386.o i387-tdep.o \
+	gdb_target_obs="amd64-tdep.o arch/amd64.o i386-tdep.o i386.o i387-tdep.o \
 			i386-bsd-tdep.o"
 	;;
 xtensa*-*-linux*)	gdb_target=linux

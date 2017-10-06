@@ -634,6 +634,7 @@ CONFIG_ALL = @CONFIG_ALL@
 CONFIG_CLEAN = @CONFIG_CLEAN@
 CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
+CONFIG_SRC_SUBDIR = @CONFIG_SRC_SUBDIR@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
 # -I. for config files.
@@ -768,7 +769,6 @@ ALL_64_TARGET_OBS = \
 	alpha-nbsd-tdep.o \
 	alpha-obsd-tdep.o \
 	alpha-tdep.o \
-	amd64.o \
 	amd64-darwin-tdep.o \
 	amd64-dicos-tdep.o \
 	amd64-fbsd-tdep.o \
@@ -778,6 +778,7 @@ ALL_64_TARGET_OBS = \
 	amd64-sol2-tdep.o \
 	amd64-tdep.o \
 	amd64-windows-tdep.o \
+	arch/amd64.o \
 	ia64-linux-tdep.o \
 	ia64-tdep.o \
 	ia64-vms-tdep.o \
@@ -2304,6 +2305,10 @@ clean mostlyclean: $(CONFIG_CLEAN)
 	rm -f test-cp-name-parser$(EXEEXT)
 	rm -f xml-builtin.c stamp-xml
 	rm -f $(DEPDIR)/*
+	for i in $(CONFIG_SRC_SUBDIR); do \
+		rm -f $$i/*.o;	\
+		rm -f $$i/$(DEPDIR)/*; \
+	done
 
 # This used to depend on c-exp.c m2-exp.c TAGS
 # I believe this is wrong; the makefile standards for distclean just
@@ -2322,6 +2327,9 @@ distclean: clean
 	rm -f config.log config.cache
 	rm -f Makefile
 	rm -rf $(DEPDIR)
+	for i in $(CONFIG_SRC_SUBDIR); do \
+		rmdir $$i/$(DEPDIR); \
+	done
 
 maintainer-clean: local-maintainer-clean do-maintainer-clean distclean
 realclean: maintainer-clean
@@ -2948,9 +2956,9 @@ ifeq ($(DEPMODE),depmode=gcc3)
 # into place if the compile succeeds.  We need this because gcc does
 # not atomically write the dependency output file.
 override COMPILE.post = -c -o $@ -MT $@ -MMD -MP \
-	-MF $(DEPDIR)/$(basename $(@F)).Tpo
-override POSTCOMPILE = @mv $(DEPDIR)/$(basename $(@F)).Tpo \
-	$(DEPDIR)/$(basename $(@F)).Po
+	-MF $(@D)/$(DEPDIR)/$(@F).Tpo
+override POSTCOMPILE = @mv $(@D)/$(DEPDIR)/$(@F).Tpo \
+	$(@D)/$(DEPDIR)/$(@F).Po
 else
 override COMPILE.pre = source='$<' object='$@' libtool=no \
 	DEPDIR=$(DEPDIR) $(DEPMODE) $(depcomp) $(CC)

@@ -1,3 +1,13 @@
+2017-10-06  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (CONFIG_SRC_SUBDIR): New.
+	(ALL_64_TARGET_OBS): Replace amd64.o with arch/amd64.o.
+	(clean): Remove object files and dependency files.
+	(distclean): Remove the directory.
+	* configure.ac: Invoke AC_CONFIG_COMMANDS.
+	* configure: Re-generated.
+	* configure.tgt: Replace amd64.o with arch/amd64.o.
+
 2017-10-05  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	PR build/22188
