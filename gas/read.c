@@ -2202,7 +2202,7 @@ s_fill (int ignore ATTRIBUTE_UNUSED)
   md_cons_align (1);
 #endif
 
-  get_known_segmented_expression (&rep_exp);
+  expression (&rep_exp);
   if (*input_line_pointer == ',')
     {
       input_line_pointer++;
