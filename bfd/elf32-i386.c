@@ -3908,13 +3908,7 @@ do_glob_dat:
       asection *s;
 
       /* This symbol needs a copy reloc.  Set it up.  */
-
-      if (h->dynindx == -1
-	  || (h->root.type != bfd_link_hash_defined
-	      && h->root.type != bfd_link_hash_defweak)
-	  || htab->elf.srelbss == NULL
-	  || htab->elf.sreldynrelro == NULL)
-	abort ();
+      VERIFY_COPY_RELOC (h, htab)
 
       rel.r_offset = (h->root.u.def.value
 		      + h->root.u.def.section->output_section->vma

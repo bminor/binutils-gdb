@@ -208,6 +208,15 @@
       || (RELPLT) == NULL) \
     abort ();
 
+/* Verify that the symbol supports copy relocation.  */
+#define VERIFY_COPY_RELOC(H, HTAB) \
+  if ((H)->dynindx == -1 \
+      || ((H)->root.type != bfd_link_hash_defined \
+	  && (H)->root.type != bfd_link_hash_defweak) \
+      || (HTAB)->elf.srelbss == NULL \
+      || (HTAB)->elf.sreldynrelro == NULL) \
+    abort ();
+
 /* x86 ELF linker hash entry.  */
 
 struct elf_x86_link_hash_entry
