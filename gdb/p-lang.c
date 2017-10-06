@@ -230,7 +230,7 @@ pascal_printstr (struct ui_file *stream, struct type *type,
 		 const char *encoding, int force_ellipses,
 		 const struct value_print_options *options)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
+  enum bfd_endian byte_order = type_byte_order (type);
   unsigned int i;
   unsigned int things_printed = 0;
   int in_quotes = 0;

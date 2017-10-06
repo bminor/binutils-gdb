@@ -4546,7 +4546,7 @@ value_pointer (struct value *value, struct type *type)
 
   addr = value_address (value);
   gdbarch_address_to_pointer (gdbarch, type, buf, addr);
-  addr = extract_unsigned_integer (buf, len, gdbarch_byte_order (gdbarch));
+  addr = extract_unsigned_integer (buf, len, type_byte_order (type));
   return addr;
 }
 
@@ -9678,7 +9678,7 @@ ada_value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   val = allocate_value (type1);
   store_unsigned_integer (value_contents_raw (val),
                           TYPE_LENGTH (value_type (val)),
-			  gdbarch_byte_order (get_type_arch (type1)), v);
+			  type_byte_order (type1), v);
   return val;
 }
 

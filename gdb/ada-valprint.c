@@ -476,7 +476,7 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 	  unsigned int length, int force_ellipses, int type_len,
 	  const struct value_print_options *options)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (elttype));
+  enum bfd_endian byte_order = type_byte_order (elttype);
   unsigned int i;
   unsigned int things_printed = 0;
   int in_quotes = 0;
@@ -719,7 +719,7 @@ ada_val_print_string (struct type *type, const gdb_byte *valaddr,
 		      struct value *original_value,
 		      const struct value_print_options *options)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
+  enum bfd_endian byte_order = type_byte_order (type);
   struct type *elttype = TYPE_TARGET_TYPE (type);
   unsigned int eltlen;
   unsigned int len;

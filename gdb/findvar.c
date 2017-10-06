@@ -309,7 +309,7 @@ CORE_ADDR
 unsigned_pointer_to_address (struct gdbarch *gdbarch,
 			     struct type *type, const gdb_byte *buf)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  enum bfd_endian byte_order = type_byte_order (type);
 
   return extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
 }
@@ -318,7 +318,7 @@ CORE_ADDR
 signed_pointer_to_address (struct gdbarch *gdbarch,
 			   struct type *type, const gdb_byte *buf)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  enum bfd_endian byte_order = type_byte_order (type);
 
   return extract_signed_integer (buf, TYPE_LENGTH (type), byte_order);
 }
@@ -329,7 +329,7 @@ void
 unsigned_address_to_pointer (struct gdbarch *gdbarch, struct type *type,
 			     gdb_byte *buf, CORE_ADDR addr)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  enum bfd_endian byte_order = type_byte_order (type);
 
   store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order, addr);
 }
@@ -338,7 +338,7 @@ void
 address_to_signed_pointer (struct gdbarch *gdbarch, struct type *type,
 			   gdb_byte *buf, CORE_ADDR addr)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  enum bfd_endian byte_order = type_byte_order (type);
 
   store_signed_integer (buf, TYPE_LENGTH (type), byte_order, addr);
 }
@@ -620,7 +620,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
       /* Put the constant back in target format. */
       v = allocate_value (type);
       store_signed_integer (value_contents_raw (v), TYPE_LENGTH (type),
-			    gdbarch_byte_order (get_type_arch (type)),
+			    type_byte_order (type),
 			    (LONGEST) SYMBOL_VALUE (var));
       VALUE_LVAL (v) = not_lval;
       return v;
@@ -840,7 +840,7 @@ default_value_from_register (struct gdbarch *gdbarch, struct type *type,
      an integral number of registers.  Otherwise, you need to do
      some fiddling with the last register copied here for little
      endian machines.  */
-  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG
+  if (type_byte_order (type) == BFD_ENDIAN_BIG
       && len < register_size (gdbarch, regnum))
     /* Big-endian, and we want less than full size.  */
     set_value_offset (value, register_size (gdbarch, regnum) - len);

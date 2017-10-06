@@ -2402,7 +2402,7 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
 		   int quoter, const char *encoding)
 {
   enum bfd_endian byte_order
-    = gdbarch_byte_order (get_type_arch (type));
+    = type_byte_order (type);
   gdb_byte *c_buf;
   int need_escape = 0;
 
@@ -2722,7 +2722,7 @@ generic_printstr (struct ui_file *stream, struct type *type,
 		  int quote_char, int c_style_terminator,
 		  const struct value_print_options *options)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
+  enum bfd_endian byte_order = type_byte_order (type);
   unsigned int i;
   int width = TYPE_LENGTH (type);
   int finished = 0;
@@ -2834,7 +2834,7 @@ val_print_string (struct type *elttype, const char *encoding,
   int bytes_read;
   gdb::unique_xmalloc_ptr<gdb_byte> buffer;	/* Dynamically growable fetch buffer.  */
   struct gdbarch *gdbarch = get_type_arch (elttype);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  enum bfd_endian byte_order = type_byte_order (elttype);
   int width = TYPE_LENGTH (elttype);
 
   /* First we need to figure out the limit on the number of characters we are

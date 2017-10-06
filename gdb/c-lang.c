@@ -245,7 +245,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
   struct type *element_type = TYPE_TARGET_TYPE (type);
   int req_length = *length;
   enum bfd_endian byte_order
-    = gdbarch_byte_order (get_type_arch (type));
+    = type_byte_order (type);
 
   if (element_type == NULL)
     goto error;

@@ -3616,6 +3616,7 @@ check_types_equal (struct type *type1, struct type *type2,
       || TYPE_LENGTH (type1) != TYPE_LENGTH (type2)
       || TYPE_UNSIGNED (type1) != TYPE_UNSIGNED (type2)
       || TYPE_NOSIGN (type1) != TYPE_NOSIGN (type2)
+      || TYPE_ENDIANITY_NOT_DEFAULT (type1) != TYPE_ENDIANITY_NOT_DEFAULT (type2)
       || TYPE_VARARGS (type1) != TYPE_VARARGS (type2)
       || TYPE_VECTOR (type1) != TYPE_VECTOR (type2)
       || TYPE_NOTTEXT (type1) != TYPE_NOTTEXT (type2)
@@ -4669,6 +4670,10 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_NOSIGN");
     }
+  if (TYPE_ENDIANITY_NOT_DEFAULT (type))
+    {
+      puts_filtered (" TYPE_ENDIANITY_NOT_DEFAULT");
+    }
   if (TYPE_STUB (type))
     {
       puts_filtered (" TYPE_STUB");
@@ -5616,4 +5621,22 @@ _initialize_gdbtypes (void)
 			   NULL, NULL,
 			   show_strict_type_checking,
 			   &setchecklist, &showchecklist);
+}
+
+/* See gdbtypes.h.  */
+enum bfd_endian
+type_byte_order (const struct type *type)
+{
+  bfd_endian byteorder = gdbarch_byte_order (get_type_arch (type));
+  if (TYPE_ENDIANITY_NOT_DEFAULT (type))
+    {
+      if (byteorder == BFD_ENDIAN_BIG)
+        return BFD_ENDIAN_LITTLE;
+      else if (byteorder == BFD_ENDIAN_LITTLE)
+        return BFD_ENDIAN_BIG;
+      else
+        return BFD_ENDIAN_UNKNOWN;
+    }
+
+  return byteorder;
 }

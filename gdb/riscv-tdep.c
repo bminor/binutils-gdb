@@ -688,7 +688,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
     {
       struct value_print_options opts;
       const gdb_byte *valaddr = value_contents_for_printing (val);
-      enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (regtype));
+      enum bfd_endian byte_order = type_byte_order (regtype);
 
       get_user_print_options (&opts);
       opts.deref_ref = 1;

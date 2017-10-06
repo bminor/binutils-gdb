@@ -1753,7 +1753,7 @@ match_endianness (const gdb_byte *from, const struct type *type, gdb_byte *to)
 #define OPPOSITE_BYTE_ORDER BFD_ENDIAN_BIG
 #endif
 
-  if (gdbarch_byte_order (get_type_arch (type)) == OPPOSITE_BYTE_ORDER)
+  if (type_byte_order (type) == OPPOSITE_BYTE_ORDER)
     for (i = 0; i < len; i++)
       to[i] = from[len - i - 1];
   else
@@ -2160,8 +2160,8 @@ target_float_same_format_p (const struct type *type1,
 
       case TYPE_CODE_DECFLOAT:
 	return (TYPE_LENGTH (type1) == TYPE_LENGTH (type2)
-		&& (gdbarch_byte_order (get_type_arch (type1))
-		    == gdbarch_byte_order (get_type_arch (type2))));
+		&& (type_byte_order (type1)
+		    == type_byte_order (type2)));
 
       default:
 	gdb_assert_not_reached ("unexpected type code");

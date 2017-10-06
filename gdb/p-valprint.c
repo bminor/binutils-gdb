@@ -67,7 +67,7 @@ pascal_val_print (struct type *type,
 		  const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  enum bfd_endian byte_order = type_byte_order (type);
   unsigned int i = 0;	/* Number of characters printed */
   unsigned len;
   struct type *elttype;

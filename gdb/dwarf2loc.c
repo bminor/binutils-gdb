@@ -1601,7 +1601,7 @@ rw_pieced_value (struct value *v, struct value *from)
       bits_to_skip += (8 * value_offset (value_parent (v))
 		       + value_bitpos (v));
       if (from != NULL
-	  && (gdbarch_byte_order (get_type_arch (value_type (from)))
+	  && (type_byte_order (value_type (from))
 	      == BFD_ENDIAN_BIG))
 	{
 	  /* Use the least significant bits of FROM.  */

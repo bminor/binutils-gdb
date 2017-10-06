@@ -988,7 +988,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       val = allocate_value (result_type);
       store_signed_integer (value_contents_raw (val),
 			    TYPE_LENGTH (result_type),
-			    gdbarch_byte_order (get_type_arch (result_type)),
+			    type_byte_order (result_type),
 			    v);
     }
   else
@@ -1136,8 +1136,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  val = allocate_value (result_type);
 	  store_unsigned_integer (value_contents_raw (val),
 				  TYPE_LENGTH (value_type (val)),
-				  gdbarch_byte_order
-				    (get_type_arch (result_type)),
+				  type_byte_order (result_type),
 				  v);
 	}
       else
@@ -1266,8 +1265,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  val = allocate_value (result_type);
 	  store_signed_integer (value_contents_raw (val),
 				TYPE_LENGTH (value_type (val)),
-				gdbarch_byte_order
-				  (get_type_arch (result_type)),
+				type_byte_order (result_type),
 				v);
 	}
     }
@@ -1712,7 +1710,7 @@ value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
     return -1;
   rel_index = index - low_bound;
   word = extract_unsigned_integer (valaddr + (rel_index / TARGET_CHAR_BIT), 1,
-				   gdbarch_byte_order (gdbarch));
+				   type_byte_order (type));
   rel_index %= TARGET_CHAR_BIT;
   if (gdbarch_bits_big_endian (gdbarch))
     rel_index = TARGET_CHAR_BIT - 1 - rel_index;

@@ -223,7 +223,7 @@ static struct so_list *
 darwin_current_sos (void)
 {
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  enum bfd_endian byte_order = type_byte_order (ptr_type);
   int ptr_len = TYPE_LENGTH (ptr_type);
   unsigned int image_info_size;
   struct so_list *head = NULL;

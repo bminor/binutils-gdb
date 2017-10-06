@@ -678,7 +678,7 @@ gnuv3_make_method_ptr (struct type *type, gdb_byte *contents,
 {
   struct gdbarch *gdbarch = get_type_arch (type);
   int size = TYPE_LENGTH (builtin_type (gdbarch)->builtin_data_ptr);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  enum bfd_endian byte_order = type_byte_order (type);
 
   /* FIXME drow/2006-12-24: The adjustment of "this" is currently
      always zero, since the method pointer is of the correct type.

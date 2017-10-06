@@ -17661,24 +17661,24 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *type;
   struct attribute *attr;
   int encoding = 0, bits = 0;
+  int endianity = 0;
   const char *name;
+  gdbarch *arch;
 
   attr = dwarf2_attr (die, DW_AT_encoding, cu);
   if (attr != nullptr)
-    {
-      encoding = DW_UNSND (attr);
-    }
+    encoding = DW_UNSND (attr);
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)
-    {
-      bits = DW_UNSND (attr) * TARGET_CHAR_BIT;
-    }
+    bits = DW_UNSND (attr) * TARGET_CHAR_BIT;
   name = dwarf2_name (die, cu);
   if (!name)
-    {
-      complaint (_("DW_AT_name missing from DW_TAG_base_type"));
-    }
+    complaint (_("DW_AT_name missing from DW_TAG_base_type"));
+  attr = dwarf2_attr (die, DW_AT_endianity, cu);
+  if (attr)
+    endianity = DW_UNSND (attr);
 
+  arch = get_objfile_arch (objfile);
   switch (encoding)
     {
       case DW_ATE_address:
@@ -17729,8 +17729,6 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	break;
       case DW_ATE_UTF:
 	{
-	  gdbarch *arch = get_objfile_arch (objfile);
-
 	  if (bits == 16)
 	    type = builtin_type (arch)->builtin_char16;
 	  else if (bits == 32)
@@ -17756,6 +17754,18 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
     TYPE_NOSIGN (type) = 1;
 
   maybe_set_alignment (cu, die, type);
+
+  switch (endianity)
+    {
+      case DW_END_big:
+        if (gdbarch_byte_order (arch) == BFD_ENDIAN_LITTLE)
+          TYPE_ENDIANITY_NOT_DEFAULT (type) = 1;
+        break;
+      case DW_END_little:
+        if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG)
+          TYPE_ENDIANITY_NOT_DEFAULT (type) = 1;
+        break;
+    }
 
   return set_die_type (die, type, cu);
 }

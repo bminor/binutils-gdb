@@ -1435,8 +1435,8 @@ stap_modify_semaphore (CORE_ADDR address, int set, struct gdbarch *gdbarch)
       return;
     }
 
-  value = extract_unsigned_integer (bytes, TYPE_LENGTH (type),
-				    gdbarch_byte_order (gdbarch));
+  enum bfd_endian byte_order = type_byte_order (type);
+  value = extract_unsigned_integer (bytes, TYPE_LENGTH (type), byte_order);
   /* Note that we explicitly don't worry about overflow or
      underflow.  */
   if (set)
@@ -1444,8 +1444,7 @@ stap_modify_semaphore (CORE_ADDR address, int set, struct gdbarch *gdbarch)
   else
     --value;
 
-  store_unsigned_integer (bytes, TYPE_LENGTH (type),
-			  gdbarch_byte_order (gdbarch), value);
+  store_unsigned_integer (bytes, TYPE_LENGTH (type), byte_order, value);
 
   if (target_write_memory (address, bytes, TYPE_LENGTH (type)) != 0)
     warning (_("Could not write the value of a SystemTap semaphore."));

@@ -59,7 +59,7 @@ f_get_encoding (struct type *type)
       encoding = target_charset (get_type_arch (type));
       break;
     case 4:
-      if (gdbarch_byte_order (get_type_arch (type)) == BFD_ENDIAN_BIG)
+      if (type_byte_order (type) == BFD_ENDIAN_BIG)
 	encoding = "UTF-32BE";
       else
 	encoding = "UTF-32LE";

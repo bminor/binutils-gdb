@@ -1,3 +1,82 @@
+2019-11-21  Peeter Joot  <peeter.joot@lzlabs.com>
+
+	Byte reverse display of variables with DW_END_big, DW_END_little
+	(DW_AT_endianity) dwarf attributes if different than the native
+	byte order.
+	* ada-lang.c (ada_value_binop):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* ada-valprint.c (printstr):
+	(ada_val_print_string):
+	* ada-lang.c (value_pointer):
+	(ada_value_binop):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* c-lang.c (c_get_string):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* c-valprint.c (c_val_print_array):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* cp-valprint.c (cp_print_class_member):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* dwarf2loc.c (rw_pieced_value):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* dwarf2read.c (read_base_type): Handle DW_END_big,
+	DW_END_little
+	* f-lang.c (f_get_encoding):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* findvar.c (default_read_var_value):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* gdbtypes.c (check_types_equal):
+	Require matching TYPE_ENDIANITY_NOT_DEFAULT if set.
+	(recursive_dump_type): Print TYPE_ENDIANITY_BIG,
+	and TYPE_ENDIANITY_LITTLE if set.
+	(type_byte_order): new function.
+	* gdbtypes.h (TYPE_ENDIANITY_NOT_DEFAULT): New macro.
+	(struct main_type) <flag_endianity_not_default>:
+	New field.
+	(type_byte_order): New function.
+	* infcmd.c (default_print_one_register_info):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* p-lang.c (pascal_printstr):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* p-valprint.c (pascal_val_print):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* printcmd.c (print_scalar_formatted):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* solib-darwin.c (darwin_current_sos):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* solib-svr4.c (solib_svr4_r_ldsomap):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* stap-probe.c (stap_modify_semaphore):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* target-float.c (target_float_same_format_p):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* valarith.c (scalar_binop):
+	(value_bit_index):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* valops.c (value_cast):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* valprint.c (generic_emit_char):
+	(generic_printstr):
+	(val_print_string):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* value.c (unpack_long):
+	(unpack_bits_as_long):
+	(unpack_value_bitfield):
+	(modify_field):
+	(pack_long):
+	(pack_unsigned_long):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* findvar.c (unsigned_pointer_to_address):
+	(signed_pointer_to_address):
+	(unsigned_address_to_pointer):
+	(address_to_signed_pointer):
+	(default_read_var_value):
+	(default_value_from_register):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* gnu-v3-abi.c (gnuv3_make_method_ptr):
+	Use type_byte_order instead of gdbarch_byte_order.
+	* riscv-tdep.c (riscv_print_one_register_info):
+	Use type_byte_order instead of gdbarch_byte_order.
+
 2019-11-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* top.c (current_ui_gdb_stdout_ptr): Spell out by hand.

@@ -2737,7 +2737,7 @@ value_as_address (struct value *val)
 LONGEST
 unpack_long (struct type *type, const gdb_byte *valaddr)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
+  enum bfd_endian byte_order = type_byte_order (type);
   enum type_code code = TYPE_CODE (type);
   int len = TYPE_LENGTH (type);
   int nosign = TYPE_UNSIGNED (type);
@@ -3100,7 +3100,7 @@ static LONGEST
 unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
 		     LONGEST bitpos, LONGEST bitsize)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (field_type));
+  enum bfd_endian byte_order = type_byte_order (field_type);
   ULONGEST val;
   ULONGEST valmask;
   int lsbcount;
@@ -3209,7 +3209,7 @@ unpack_value_bitfield (struct value *dest_val,
   int dst_bit_offset;
   struct type *field_type = value_type (dest_val);
 
-  byte_order = gdbarch_byte_order (get_type_arch (field_type));
+  byte_order = type_byte_order (field_type);
 
   /* First, unpack and sign extend the bitfield as if it was wholly
      valid.  Optimized out/unavailable bits are read as zero, but
@@ -3269,7 +3269,7 @@ void
 modify_field (struct type *type, gdb_byte *addr,
 	      LONGEST fieldval, LONGEST bitpos, LONGEST bitsize)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
+  enum bfd_endian byte_order = type_byte_order (type);
   ULONGEST oword;
   ULONGEST mask = (ULONGEST) -1 >> (8 * sizeof (ULONGEST) - bitsize);
   LONGEST bytesize;
@@ -3315,7 +3315,7 @@ modify_field (struct type *type, gdb_byte *addr,
 void
 pack_long (gdb_byte *buf, struct type *type, LONGEST num)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
+  enum bfd_endian byte_order = type_byte_order (type);
   LONGEST len;
 
   type = check_typedef (type);
@@ -3363,7 +3363,7 @@ pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
 
   type = check_typedef (type);
   len = TYPE_LENGTH (type);
-  byte_order = gdbarch_byte_order (get_type_arch (type));
+  byte_order = type_byte_order (type);
 
   switch (TYPE_CODE (type))
     {

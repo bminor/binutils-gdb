@@ -897,7 +897,7 @@ solib_svr4_r_ldsomap (struct svr4_info *info)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  enum bfd_endian byte_order = type_byte_order (ptr_type);
   ULONGEST version = 0;
 
   try

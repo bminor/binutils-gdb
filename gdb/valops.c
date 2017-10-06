@@ -483,7 +483,7 @@ value_cast (struct type *type, struct value *arg2)
       if (code2 == TYPE_CODE_PTR)
         longest = extract_unsigned_integer
 		    (value_contents (arg2), TYPE_LENGTH (type2),
-		     gdbarch_byte_order (get_type_arch (type2)));
+		     type_byte_order (type2));
       else
         longest = value_as_long (arg2);
       return value_from_longest (to_type, convert_to_boolean ?

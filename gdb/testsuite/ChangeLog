@@ -1,3 +1,8 @@
+2019-11-21  Peeter Joot  <peeter.joot@lzlabs.com>
+
+	* gdb.base/endianity.c: New test.
+	* gdb.base/endianity.exp: New file.
+
 2019-11-21  Lukas Durfina  <ldurfina@tachyum.com>
 
 	* gdb.arch/amd64-eval.exp: Skip test if target is not x86-64.

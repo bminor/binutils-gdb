@@ -356,7 +356,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 {
   struct gdbarch *gdbarch = get_type_arch (type);
   unsigned int len = TYPE_LENGTH (type);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  enum bfd_endian byte_order = type_byte_order (type);
 
   /* String printing should go through val_print_scalar_formatted.  */
   gdb_assert (options->format != 's');

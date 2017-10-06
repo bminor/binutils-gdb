@@ -247,8 +247,7 @@ c_val_print_array (struct type *type, const gdb_byte *valaddr,
     {
       LONGEST low_bound, high_bound;
       int eltlen, len;
-      struct gdbarch *gdbarch = get_type_arch (type);
-      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      enum bfd_endian byte_order = type_byte_order (type);
       unsigned int i = 0;	/* Number of characters printed.  */
 
       if (!get_array_bounds (type, &low_bound, &high_bound))
