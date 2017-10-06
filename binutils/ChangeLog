@@ -1,5 +1,15 @@
 2017-10-10  Tom Tromey  <tom@tromey.com>
 
+	* dwarf-mode.el (dwarf--process, dwarf--deletion-region): New
+	defvar.
+	(dwarf--check-running, dwarf--sentinel, dwarf--invoke)
+	(dwarf--filter): New functions.
+	(dwarf-do-insert-substructure, dwarf-do-refresh): Call
+	dwarf--check-running, dwarf--invoke.
+	(dwarf-browse): Initialize new variables.
+
+2017-10-10  Tom Tromey  <tom@tromey.com>
+
 	* dwarf-mode.el: Set lexical-binding.
 
 2017-10-10  Tom Tromey  <tom@tromey.com>
