@@ -1,3 +1,7 @@
+2017-10-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/merge.d: Don't expect to fail for sparc.
+
 2017-10-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/tr.po: Updated Turkish translation.
