@@ -1,5 +1,12 @@
 2017-10-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* PR ld/22269
+	* testsuite/ld-elf/pr22269.s: New file.
+	* testsuite/ld-elf/pr22269a.d: Likewise.
+	* testsuite/ld-elf/pr22269b.d: Likewise.
+
+2017-10-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-i386/i386.exp: Run pr19636-1j, pr19636-1k,
 	pr19636-1l, pr19636-3h and pr19636-3i.
 	* testsuite/ld-i386/pr19636-1j.d: New file.
