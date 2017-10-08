@@ -185,22 +185,6 @@ make_cleanup_value_free_to_mark (struct value *mark)
   return make_cleanup (do_value_free_to_mark, mark);
 }
 
-/* Helper for make_cleanup_value_free.  */
-
-static void
-do_value_free (void *value)
-{
-  value_free ((struct value *) value);
-}
-
-/* Free VALUE.  */
-
-struct cleanup *
-make_cleanup_value_free (struct value *value)
-{
-  return make_cleanup (do_value_free, value);
-}
-
 /* This function is useful for cleanups.
    Do
 
