@@ -1,3 +1,9 @@
+2017-10-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-sparc.c (readonly_dynrelocs): Dump dynamic relocation
+	in read-only section with minfo.
+	(_bfd_sparc_elf_size_dynamic_sections): Likewise.
+
 2017-10-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-x86.h (UNDEFINED_WEAK_RESOLVED_TO_ZERO): Update
