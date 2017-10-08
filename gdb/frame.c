@@ -2864,11 +2864,9 @@ frame_stop_reason_symbol_string (enum unwind_stop_reason reason)
 /* Clean up after a failed (wrong unwinder) attempt to unwind past
    FRAME.  */
 
-static void
-frame_cleanup_after_sniffer (void *arg)
+void
+frame_cleanup_after_sniffer (struct frame_info *frame)
 {
-  struct frame_info *frame = (struct frame_info *) arg;
-
   /* The sniffer should not allocate a prologue cache if it did not
      match this frame.  */
   gdb_assert (frame->prologue_cache == NULL);
@@ -2893,16 +2891,15 @@ frame_cleanup_after_sniffer (void *arg)
 }
 
 /* Set FRAME's unwinder temporarily, so that we can call a sniffer.
-   Return a cleanup which should be called if unwinding fails, and
-   discarded if it succeeds.  */
+   If sniffing fails, the caller should be sure to call
+   frame_cleanup_after_sniffer.  */
 
-struct cleanup *
+void
 frame_prepare_for_sniffer (struct frame_info *frame,
 			   const struct frame_unwind *unwind)
 {
   gdb_assert (frame->unwind == NULL);
   frame->unwind = unwind;
-  return make_cleanup (frame_cleanup_after_sniffer, frame);
 }
 
 static struct cmd_list_element *set_backtrace_cmdlist;

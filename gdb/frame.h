@@ -791,11 +791,16 @@ extern void info_locals_command (char *, int);
 extern void return_command (char *, int);
 
 /* Set FRAME's unwinder temporarily, so that we can call a sniffer.
-   Return a cleanup which should be called if unwinding fails, and
-   discarded if it succeeds.  */
+   If sniffing fails, the caller should be sure to call
+   frame_cleanup_after_sniffer.  */
 
-struct cleanup *frame_prepare_for_sniffer (struct frame_info *frame,
-					   const struct frame_unwind *unwind);
+extern void frame_prepare_for_sniffer (struct frame_info *frame,
+				       const struct frame_unwind *unwind);
+
+/* Clean up after a failed (wrong unwinder) attempt to unwind past
+   FRAME.  */
+
+extern void frame_cleanup_after_sniffer (struct frame_info *frame);
 
 /* Notes (cagney/2002-11-27, drow/2003-09-06):
 

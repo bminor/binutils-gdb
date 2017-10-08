@@ -97,10 +97,9 @@ static int
 frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
                           const struct frame_unwind *unwinder)
 {
-  struct cleanup *old_cleanup;
   int res = 0;
 
-  old_cleanup = frame_prepare_for_sniffer (this_frame, unwinder);
+  frame_prepare_for_sniffer (this_frame, unwinder);
 
   TRY
     {
@@ -117,7 +116,7 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
 	     thus most unwinders aren't able to determine if they're
 	     the best fit.  Keep trying.  Fallback prologue unwinders
 	     should always accept the frame.  */
-	  do_cleanups (old_cleanup);
+	  frame_cleanup_after_sniffer (this_frame);
 	  return 0;
 	}
       throw_exception (ex);
@@ -125,15 +124,12 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
   END_CATCH
 
   if (res)
-    {
-      discard_cleanups (old_cleanup);
-      return 1;
-    }
+    return 1;
   else
     {
       /* Don't set *THIS_CACHE to NULL here, because sniffer has to do
 	 so.  */
-      do_cleanups (old_cleanup);
+      frame_cleanup_after_sniffer (this_frame);
       return 0;
     }
   gdb_assert_not_reached ("frame_unwind_try_unwinder");

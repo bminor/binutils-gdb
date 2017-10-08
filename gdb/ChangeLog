@@ -1,5 +1,14 @@
 2017-10-08  Tom Tromey  <tom@tromey.com>
 
+	* frame-unwind.c (frame_unwind_try_unwinder): Update.
+	* frame.h (frame_cleanup_after_sniffer): Declare.
+	(frame_prepare_for_sniffer): Return void.
+	* frame.c (frame_cleanup_after_sniffer): No longer static.  Change
+	type of argument.
+	(frame_prepare_for_sniffer): Return void.
+
+2017-10-08  Tom Tromey  <tom@tromey.com>
+
 	* utils.h (make_cleanup_value_free): Remove.
 	* utils.c (do_value_free, struct cleanup): Remove.
 	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full) <DWARF_VALUE_STACK>:
