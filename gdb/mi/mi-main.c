@@ -46,7 +46,7 @@
 #include "valprint.h"
 #include "inferior.h"
 #include "osdata.h"
-#include "splay-tree.h"
+#include "common/gdb_splay_tree.h"
 #include "tracepoint.h"
 #include "ctf.h"
 #include "ada-lang.h"
@@ -720,13 +720,6 @@ splay_tree_int_comparator (splay_tree_key xa, splay_tree_key xb)
 }
 
 static void
-free_splay_tree (void *xt)
-{
-  splay_tree t = (splay_tree) xt;
-  splay_tree_delete (t);
-}
-
-static void
 list_available_thread_groups (const std::set<int> &ids, int recurse)
 {
   struct osdata *data;
@@ -739,7 +732,7 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
      The vector contains information about all threads for the given pid.
      This is assigned an initial value to avoid "may be used uninitialized"
      warning from gcc.  */
-  splay_tree tree = NULL;
+  gdb_splay_tree_up tree;
 
   /* get_osdata will throw if it cannot return data.  */
   data = get_osdata ("processes");
@@ -750,10 +743,9 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
       struct osdata *threads = get_osdata ("threads");
 
       make_cleanup_osdata_free (threads);
-      tree = splay_tree_new (splay_tree_int_comparator,
-			     NULL,
-			     free_vector_of_osdata_items);
-      make_cleanup (free_splay_tree, tree);
+      tree.reset (splay_tree_new (splay_tree_int_comparator,
+				  NULL,
+				  free_vector_of_osdata_items));
 
       for (ix_items = 0;
 	   VEC_iterate (osdata_item_s, threads->items,
@@ -764,11 +756,11 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
 	  int pid_i = strtoul (pid, NULL, 0);
 	  VEC (osdata_item_s) *vec = 0;
 
-	  splay_tree_node n = splay_tree_lookup (tree, pid_i);
+	  splay_tree_node n = splay_tree_lookup (tree.get (), pid_i);
 	  if (!n)
 	    {
 	      VEC_safe_push (osdata_item_s, vec, item);
-	      splay_tree_insert (tree, pid_i, (splay_tree_value)vec);
+	      splay_tree_insert (tree.get (), pid_i, (splay_tree_value)vec);
 	    }
 	  else
 	    {
@@ -812,7 +804,7 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
 
       if (recurse)
 	{
-	  splay_tree_node n = splay_tree_lookup (tree, pid_i);
+	  splay_tree_node n = splay_tree_lookup (tree.get (), pid_i);
 	  if (n)
 	    {
 	      VEC (osdata_item_s) *children = (VEC (osdata_item_s) *) n->value;

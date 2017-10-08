@@ -1,5 +1,11 @@
 2017-10-09  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-main.c (free_splay_tree): Remove.
+	(list_available_thread_groups): Use splay_tree_up.
+	* common/gdb_splay_tree.h: New file.
+
+2017-10-09  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-main.c (do_nothing): Remove.
 	(list_available_thread_groups): Update.
 
