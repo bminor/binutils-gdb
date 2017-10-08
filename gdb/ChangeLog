@@ -1,3 +1,18 @@
+2017-10-11  Tom Tromey  <tom@tromey.com>
+
+	* breakpoint.c (commands_command_1): Use std::string.
+	(cleanup_executing_breakpoints): Remove.
+	(bpstat_do_actions_1): Use scoped_restore.
+	(bpstat_check_watchpoint): Use std::string.
+	(decode_static_tracepoint_spec): Likewise.
+	(break_range_command): Likewise.
+	(watch_command_1): Likewise.
+	(compare_breakpoints): Change argument types.
+	(clear_command): Use std::vector.
+	(cleanup_executing_breakpoints): Remove.
+	(update_global_location_list): Use unique_xmalloc_ptr.
+	(strace_command): Remove unused declaration.
+
 2017-10-11  John Baldwin  <jhb@FreeBSD.org>
 
 	* Makefile.in (ALLDEPFILES): Add arm-fbsd-nat.c.
