@@ -1,5 +1,10 @@
 2017-10-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-tilegx.c (tilegx_elf_finish_dynamic_sections): Set
+	this_hdr.sh_entsize only if section size > 0.
+
+2017-10-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Reformat.
 
 2017-10-07  H.J. Lu  <hongjiu.lu@intel.com>
