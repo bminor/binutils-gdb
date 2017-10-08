@@ -2952,12 +2952,13 @@ ifeq ($(DEPMODE),depmode=gcc3)
 # into place if the compile succeeds.  We need this because gcc does
 # not atomically write the dependency output file.
 override COMPILE.post = -c -o $@ -MT $@ -MMD -MP \
-	-MF $(@D)/$(DEPDIR)/$(@F).Tpo
-override POSTCOMPILE = @mv $(@D)/$(DEPDIR)/$(@F).Tpo \
-	$(@D)/$(DEPDIR)/$(@F).Po
+	-MF $(@D)/$(DEPDIR)/$(basename $(@F)).Tpo
+override POSTCOMPILE = @mv $(@D)/$(DEPDIR)/$(basename $(@F)).Tpo \
+	$(@D)/$(DEPDIR)/$(basename $(@F)).Po
 else
 override COMPILE.pre = source='$<' object='$@' libtool=no \
-	DEPDIR=$(DEPDIR) $(DEPMODE) $(depcomp) $(CC)
+	DEPDIR=$(DEPDIR) $(DEPMODE) $(depcomp) \
+	$(CXX) -x c++ $(CXX_DIALECT)
 # depcomp handles atomicity for us, so we don't need a postcompile
 # step.
 override POSTCOMPILE =
