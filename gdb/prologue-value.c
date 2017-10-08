@@ -341,7 +341,7 @@ pv_area::~pv_area ()
 
 /* See prologue-value.h.  */
 
-int
+bool
 pv_area::store_would_trash (pv_t addr)
 {
   /* It may seem odd that pvk_constant appears here --- after all,
@@ -492,7 +492,7 @@ pv_area::fetch (pv_t addr, CORE_ADDR size)
 
 /* See prologue-value.h.  */
 
-int
+bool
 pv_area::find_reg (struct gdbarch *gdbarch, int reg, CORE_ADDR *offset_p)
 {
   struct area_entry *e = m_entry;
@@ -507,14 +507,14 @@ pv_area::find_reg (struct gdbarch *gdbarch, int reg, CORE_ADDR *offset_p)
           {
             if (offset_p)
               *offset_p = e->offset;
-            return 1;
+            return true;
           }
 
         e = e->next;
       }
     while (e != m_entry);
 
-  return 0;
+  return false;
 }
 
 

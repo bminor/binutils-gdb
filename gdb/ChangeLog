@@ -1,5 +1,12 @@
 2017-10-12  Tom Tromey  <tom@tromey.com>
 
+	* prologue-value.h (pv_area::store_would_trash): Return bool.
+	(pv_area::find_reg): Likewise.
+	* prologue-value.c (pv_area::store_would_trash): Return bool.
+	(pv_area::find_reg): Likewise.
+
+2017-10-12  Tom Tromey  <tom@tromey.com>
+
 	* s390-linux-tdep.c (s390_store, s390_load)
 	(s390_check_for_saved, s390_analyze_prologue): Update.
 	* rx-tdep.c (check_for_saved, rx_analyze_prologue): Update.

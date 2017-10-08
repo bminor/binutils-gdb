@@ -269,7 +269,7 @@ public:
      prologue analysis, and return the information you've gathered,
      instead of losing all that information, most of which is probably
      okay.  */
-  int store_would_trash (pv_t addr);
+  bool store_would_trash (pv_t addr);
 
   /* Search AREA for the original value of REGISTER.  If we can't find
      it, return zero; if we can find it, return a non-zero value, and if
@@ -280,7 +280,7 @@ public:
      items stored in AREA.  If you plan to gather a lot of information
      about registers saved in AREA, consider calling pv_area::scan
      instead, and collecting all your information in one pass.  */
-  int find_reg (struct gdbarch *gdbarch, int reg, CORE_ADDR *offset_p);
+  bool find_reg (struct gdbarch *gdbarch, int reg, CORE_ADDR *offset_p);
 
 
   /* For every part of AREA whose value we know, apply FUNC to CLOSURE,
