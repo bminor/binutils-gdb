@@ -1,5 +1,21 @@
 2017-10-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (dwarf2_get_dwz_file): Use
+	gdb::unique_xmalloc_ptr.
+	(find_slot_in_mapped_hash): Likewise.
+	(dwarf2_physname): Likewise.
+	(create_dwo_unit_in_dwp_v1): Use std::string.
+	(create_dwo_unit_in_dwp_v2): Likewise.
+	(lookup_dwo_cutu): Likewise.
+	(inherit_abstract_dies): Use std::vector.
+	(read_array_type): Likewise.
+	(dwarf_decode_macros): Remove unused declaration.
+	(unsigned_int_compar): Remove.
+	(dwarf2_build_psymtabs_hard): Use scoped_restore.
+	(psymtabs_addrmap_cleanup): Remove.
+
+2017-10-08  Tom Tromey  <tom@tromey.com>
+
 	* frame-unwind.c (frame_unwind_try_unwinder): Update.
 	* frame.h (frame_cleanup_after_sniffer): Declare.
 	(frame_prepare_for_sniffer): Return void.
