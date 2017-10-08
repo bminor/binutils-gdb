@@ -1,5 +1,12 @@
 2017-10-11  Tom Tromey  <tom@tromey.com>
 
+	* breakpoint.c (prepare_re_set_context): Remove.
+	(breakpoint_re_set_one): Update.  Don't use cleanups.
+	(breakpoint_re_set): Use scoped_restore, std::string, and
+	scoped_restore_current_language.
+
+2017-10-11  Tom Tromey  <tom@tromey.com>
+
 	* breakpoint.c (commands_command_1): Use std::string.
 	(cleanup_executing_breakpoints): Remove.
 	(bpstat_do_actions_1): Use scoped_restore.

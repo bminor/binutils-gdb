@@ -14024,27 +14024,15 @@ decode_location_default (struct breakpoint *b,
   return {};
 }
 
-/* Prepare the global context for a re-set of breakpoint B.  */
-
-static struct cleanup *
-prepare_re_set_context (struct breakpoint *b)
-{
-  input_radix = b->input_radix;
-  set_language (b->language);
-
-  return make_cleanup (null_cleanup, NULL);
-}
-
 /* Reset a breakpoint.  */
 
 static void
 breakpoint_re_set_one (breakpoint *b)
 {
-  struct cleanup *cleanups;
+  input_radix = b->input_radix;
+  set_language (b->language);
 
-  cleanups = prepare_re_set_context (b);
   b->ops->re_set (b);
-  do_cleanups (cleanups);
 }
 
 /* Re-set breakpoint locations for the current program space.
@@ -14054,13 +14042,10 @@ void
 breakpoint_re_set (void)
 {
   struct breakpoint *b, *b_tmp;
-  enum language save_language;
-  int save_input_radix;
-
-  save_language = current_language->la_language;
-  save_input_radix = input_radix;
 
   {
+    scoped_restore_current_language save_language;
+    scoped_restore save_input_radix = make_scoped_restore (&input_radix);
     scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
     /* Note: we must not try to insert locations until after all
@@ -14082,8 +14067,6 @@ breakpoint_re_set (void)
 	  }
 	END_CATCH
       }
-    set_language (save_language);
-    input_radix = save_input_radix;
 
     jit_breakpoint_re_set ();
   }
