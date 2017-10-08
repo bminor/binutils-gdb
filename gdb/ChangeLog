@@ -1,3 +1,8 @@
+2017-10-09  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-main.c (do_nothing): Remove.
+	(list_available_thread_groups): Update.
+
 2017-10-09  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (handle_inferior_event_1) <TARGET_WAITKIND_EXECD>: Skip

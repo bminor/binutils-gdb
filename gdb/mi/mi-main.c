@@ -702,11 +702,6 @@ output_cores (struct ui_out *uiout, const char *field_name, const char *xcores)
 }
 
 static void
-do_nothing (splay_tree_key k)
-{
-}
-
-static void
 free_vector_of_osdata_items (splay_tree_value xvalue)
 {
   VEC (osdata_item_s) *value = (VEC (osdata_item_s) *) xvalue;
@@ -756,7 +751,7 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
 
       make_cleanup_osdata_free (threads);
       tree = splay_tree_new (splay_tree_int_comparator,
-			     do_nothing,
+			     NULL,
 			     free_vector_of_osdata_items);
       make_cleanup (free_splay_tree, tree);
 
