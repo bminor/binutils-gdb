@@ -1,3 +1,20 @@
+2017-10-08  Tom Tromey  <tom@tromey.com>
+
+	* symtab.c (free_search_symbols, do_free_search_symbols_cleanup)
+	(make_cleanup_free_search_symbols): Remove.
+	(search_symbols): Return std::vector.
+	(symbol_search::compare_search_syms): Now member of
+	symbol_search.  Change arguments.
+	(sort_search_symbols_remove_dups): Change arguments.  Rewrite.
+	(symtab_symbol_info, rbreak_command): Update.
+	* symtab.h (struct symbol_search) <next>: Remove.
+	Add constructors.
+	(symbol_search::operator<): New function.
+	(symbol_search::operator==): New function.
+	(search_symbols): Remove std::vector.
+	(free_search_symbols, make_cleanup_free_search_symbols): Remove.
+	(symbol_search::compare_search_syms): Declare.
+
 2017-10-06  Yao Qi  <yao.qi@linaro.org>
 
 	* Makefile.in (ALL_64_TARGET_OBS): Replace aarch64-insn.o with
