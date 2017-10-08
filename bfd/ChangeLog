@@ -1,3 +1,7 @@
+2017-10-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Reformat.
+
 2017-10-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-sparc.c (readonly_dynrelocs): Dump dynamic relocation

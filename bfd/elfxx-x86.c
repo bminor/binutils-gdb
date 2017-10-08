@@ -83,8 +83,7 @@ _bfd_x86_elf_dtpoff_base (struct bfd_link_info *info)
    dynamic relocs.  */
 
 static bfd_boolean
-elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h,
-				 void *inf)
+elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
   struct elf_x86_link_hash_table *htab;
