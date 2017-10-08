@@ -1375,8 +1375,8 @@ s390_store (struct s390_prologue_data *data,
 
 
   /* Check whether we are storing a register into the stack.  */
-  if (!pv_area_store_would_trash (data->stack, addr))
-    pv_area_store (data->stack, addr, size, value);
+  if (!data->stack->store_would_trash (addr))
+    data->stack->store (addr, size, value);
 
 
   /* Note: If this is some store we cannot identify, you might think we
@@ -1413,11 +1413,11 @@ s390_load (struct s390_prologue_data *data,
     }
 
   /* Check whether we are accessing one of our save slots.  */
-  return pv_area_fetch (data->stack, addr, size);
+  return data->stack->fetch (addr, size);
 }
 
 /* Function for finding saved registers in a 'struct pv_area'; we pass
-   this to pv_area_scan.
+   this to pv_area::scan.
 
    If VALUE is a saved register, ADDR says it was saved at a constant
    offset from the frame base, and SIZE indicates that the whole
@@ -1486,11 +1486,12 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
   /* The address of the next instruction after that.  */
   CORE_ADDR next_pc;
 
+  pv_area stack (S390_SP_REGNUM, gdbarch_addr_bit (gdbarch));
+  scoped_restore restore_stack = make_scoped_restore (&data->stack, &stack);
+
   /* Set up everything's initial value.  */
   {
     int i;
-
-    data->stack = make_pv_area (S390_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
     /* For the purpose of prologue tracking, we consider the GPR size to
        be equal to the ABI word size, even if it is actually larger
@@ -1730,10 +1731,7 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
     }
 
   /* Record where all the registers were saved.  */
-  pv_area_scan (data->stack, s390_check_for_saved, data);
-
-  free_pv_area (data->stack);
-  data->stack = NULL;
+  data->stack->scan (s390_check_for_saved, data);
 
   return result;
 }

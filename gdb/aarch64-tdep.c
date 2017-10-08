@@ -234,13 +234,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
   int i;
   /* Track X registers and D registers in prologue.  */
   pv_t regs[AARCH64_X_REGISTER_COUNT + AARCH64_D_REGISTER_COUNT];
-  struct pv_area *stack;
-  struct cleanup *back_to;
 
   for (i = 0; i < AARCH64_X_REGISTER_COUNT + AARCH64_D_REGISTER_COUNT; i++)
     regs[i] = pv_register (i, 0);
-  stack = make_pv_area (AARCH64_SP_REGNUM, gdbarch_addr_bit (gdbarch));
-  back_to = make_cleanup_free_pv_area (stack);
+  pv_area stack (AARCH64_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
   for (; start < limit; start += 4)
     {
@@ -345,9 +342,9 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  gdb_assert (inst.operands[1].type == AARCH64_OPND_ADDR_SIMM9);
 	  gdb_assert (!inst.operands[1].addr.offset.is_reg);
 
-	  pv_area_store (stack, pv_add_constant (regs[rn],
-						 inst.operands[1].addr.offset.imm),
-			 is64 ? 8 : 4, regs[rt]);
+	  stack.store (pv_add_constant (regs[rn],
+					inst.operands[1].addr.offset.imm),
+		       is64 ? 8 : 4, regs[rt]);
 	}
       else if ((inst.opcode->iclass == ldstpair_off
 		|| (inst.opcode->iclass == ldstpair_indexed
@@ -370,12 +367,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  /* If recording this store would invalidate the store area
 	     (perhaps because rn is not known) then we should abandon
 	     further prologue analysis.  */
-	  if (pv_area_store_would_trash (stack,
-					 pv_add_constant (regs[rn], imm)))
+	  if (stack.store_would_trash (pv_add_constant (regs[rn], imm)))
 	    break;
 
-	  if (pv_area_store_would_trash (stack,
-					 pv_add_constant (regs[rn], imm + 8)))
+	  if (stack.store_would_trash (pv_add_constant (regs[rn], imm + 8)))
 	    break;
 
 	  rt1 = inst.operands[0].reg.regno;
@@ -389,10 +384,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	      rt2 += AARCH64_X_REGISTER_COUNT;
 	    }
 
-	  pv_area_store (stack, pv_add_constant (regs[rn], imm), 8,
-			 regs[rt1]);
-	  pv_area_store (stack, pv_add_constant (regs[rn], imm + 8), 8,
-			 regs[rt2]);
+	  stack.store (pv_add_constant (regs[rn], imm), 8,
+		       regs[rt1]);
+	  stack.store (pv_add_constant (regs[rn], imm + 8), 8,
+		       regs[rt2]);
 
 	  if (inst.operands[2].addr.writeback)
 	    regs[rn] = pv_add_constant (regs[rn], imm);
@@ -422,8 +417,8 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	      rt += AARCH64_X_REGISTER_COUNT;
 	    }
 
-	  pv_area_store (stack, pv_add_constant (regs[rn], imm),
-			 is64 ? 8 : 4, regs[rt]);
+	  stack.store (pv_add_constant (regs[rn], imm),
+		       is64 ? 8 : 4, regs[rt]);
 	  if (inst.operands[1].addr.writeback)
 	    regs[rn] = pv_add_constant (regs[rn], imm);
 	}
@@ -445,10 +440,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
     }
 
   if (cache == NULL)
-    {
-      do_cleanups (back_to);
-      return start;
-    }
+    return start;
 
   if (pv_is_register (regs[AARCH64_FP_REGNUM], AARCH64_SP_REGNUM))
     {
@@ -473,7 +465,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
     {
       CORE_ADDR offset;
 
-      if (pv_area_find_reg (stack, gdbarch, i, &offset))
+      if (stack.find_reg (gdbarch, i, &offset))
 	cache->saved_regs[i].addr = offset;
     }
 
@@ -482,12 +474,11 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
       int regnum = gdbarch_num_regs (gdbarch);
       CORE_ADDR offset;
 
-      if (pv_area_find_reg (stack, gdbarch, i + AARCH64_X_REGISTER_COUNT,
-			    &offset))
+      if (stack.find_reg (gdbarch, i + AARCH64_X_REGISTER_COUNT,
+			  &offset))
 	cache->saved_regs[i + regnum + AARCH64_D0_REGNUM].addr = offset;
     }
 
-  do_cleanups (back_to);
   return start;
 }
 

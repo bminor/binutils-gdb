@@ -230,7 +230,7 @@ rx_register_type (struct gdbarch *gdbarch, int reg_nr)
 
 
 /* Function for finding saved registers in a 'struct pv_area'; this
-   function is passed to pv_area_scan.
+   function is passed to pv_area::scan.
 
    If VALUE is a saved register, ADDR says it was saved at a constant
    offset from the frame base, and SIZE indicates that the whole
@@ -287,8 +287,6 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   CORE_ADDR pc, next_pc;
   int rn;
   pv_t reg[RX_NUM_REGS];
-  struct pv_area *stack;
-  struct cleanup *back_to;
   CORE_ADDR after_last_frame_setup_insn = start_pc;
 
   memset (result, 0, sizeof (*result));
@@ -301,8 +299,7 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       result->reg_offset[rn] = 1;
     }
 
-  stack = make_pv_area (RX_SP_REGNUM, gdbarch_addr_bit (target_gdbarch ()));
-  back_to = make_cleanup_free_pv_area (stack);
+  pv_area stack (RX_SP_REGNUM, gdbarch_addr_bit (target_gdbarch ()));
 
   if (frame_type == RX_FRAME_TYPE_FAST_INTERRUPT)
     {
@@ -318,13 +315,13 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       if (frame_type == RX_FRAME_TYPE_EXCEPTION)
 	{
 	  reg[RX_SP_REGNUM] = pv_add_constant (reg[RX_SP_REGNUM], -4);
-	  pv_area_store (stack, reg[RX_SP_REGNUM], 4, reg[RX_PSW_REGNUM]);
+	  stack.store (reg[RX_SP_REGNUM], 4, reg[RX_PSW_REGNUM]);
 	}
 
       /* The call instruction (or an exception/interrupt) has saved the return
           address on the stack.  */
       reg[RX_SP_REGNUM] = pv_add_constant (reg[RX_SP_REGNUM], -4);
-      pv_area_store (stack, reg[RX_SP_REGNUM], 4, reg[RX_PC_REGNUM]);
+      stack.store (reg[RX_SP_REGNUM], 4, reg[RX_PC_REGNUM]);
 
     }
 
@@ -353,7 +350,7 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 	  for (r = r2; r >= r1; r--)
 	    {
 	      reg[RX_SP_REGNUM] = pv_add_constant (reg[RX_SP_REGNUM], -4);
-	      pv_area_store (stack, reg[RX_SP_REGNUM], 4, reg[r]);
+	      stack.store (reg[RX_SP_REGNUM], 4, reg[r]);
 	    }
 	  after_last_frame_setup_insn = next_pc;
 	}
@@ -380,7 +377,7 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 
 	  rsrc = opc.op[1].reg;
 	  reg[RX_SP_REGNUM] = pv_add_constant (reg[RX_SP_REGNUM], -4);
-	  pv_area_store (stack, reg[RX_SP_REGNUM], 4, reg[rsrc]);
+	  stack.store (reg[RX_SP_REGNUM], 4, reg[rsrc]);
 	  after_last_frame_setup_insn = next_pc;
 	}
       else if (opc.id == RXO_add	/* add #const, rsrc, rdst */
@@ -456,11 +453,9 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
     }
 
   /* Record where all the registers were saved.  */
-  pv_area_scan (stack, check_for_saved, (void *) result);
+  stack.scan (check_for_saved, (void *) result);
 
   result->prologue_end = after_last_frame_setup_insn;
-
-  do_cleanups (back_to);
 }
 
 

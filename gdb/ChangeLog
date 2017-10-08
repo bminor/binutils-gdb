@@ -1,3 +1,38 @@
+2017-10-12  Tom Tromey  <tom@tromey.com>
+
+	* s390-linux-tdep.c (s390_store, s390_load)
+	(s390_check_for_saved, s390_analyze_prologue): Update.
+	* rx-tdep.c (check_for_saved, rx_analyze_prologue): Update.
+	* rl78-tdep.c (rl78_analyze_prologue, check_for_saved): Update.
+	* prologue-value.h (class pv_area): Move from prologue-value.c.
+	Change names of members.  Add constructor, destructor, member
+	functions.
+	(make_pv_area, free_pv_area, make_cleanup_free_pv_area)
+	(pv_area_store, pv_area_fetch, pv_area_store_would_trash)
+	(pv_area_fetch, pv_area_scan): Don't declare.
+	* prologue-value.c (struct pv_area::area_entry): Now member of
+	pv_area.
+	(struct pv_area): Move to prologue-value.h.
+	(pv_area::pv_area): Rename from make_pv_area.
+	(pv_area::~pv_area): Rename from free_pv_area.
+	(do_free_pv_area_cleanup, make_cleanup_free_pv_area): Remove.
+	(clear_entries, find_entry, overlaps, store_would_trash, store)
+	(fetch, find_reg, scan): Now member of pv_area.
+	Remove "area" argument.  Update.
+	* msp430-tdep.c (check_for_saved, msp430_analyze_prologue):
+	Update.
+	* mn10300-tdep.c (push_reg, check_for_saved)
+	(mn10300_analyze_prologue): Update.
+	* mep-tdep.c (is_arg_spill, check_for_saved)
+	(mep_analyze_prologue): Update.
+	* m32c-tdep.c (m32c_pv_push, m32c_srcdest_fetch)
+	(m32c_srcdest_store, m32c_pv_enter, m32c_is_arg_spill)
+	(m32c_is_struct_return, m32c_analyze_prologue): Update.
+	* arm-tdep.c (thumb_analyze_prologue, arm_analyze_prologue):
+	Update.
+	* arc-tdep.c (arc_is_in_prologue, arc_analyze_prologue): Update.
+	* aarch64-tdep.c (aarch64_analyze_prologue): Update.
+
 2017-10-12  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* linux-nat.h (linux_nat_set_delete_thread): New declaration.

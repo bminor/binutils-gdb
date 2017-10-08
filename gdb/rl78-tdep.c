@@ -883,7 +883,7 @@ rl78_get_opcode_byte (void *handle)
 }
 
 /* Function for finding saved registers in a 'struct pv_area'; this
-   function is passed to pv_area_scan.
+   function is passed to pv_area::scan.
 
    If VALUE is a saved register, ADDR says it was saved at a constant
    offset from the frame base, and SIZE indicates that the whole
@@ -912,8 +912,6 @@ rl78_analyze_prologue (CORE_ADDR start_pc,
   CORE_ADDR pc, next_pc;
   int rn;
   pv_t reg[RL78_NUM_TOTAL_REGS];
-  struct pv_area *stack;
-  struct cleanup *back_to;
   CORE_ADDR after_last_frame_setup_insn = start_pc;
   int bank = 0;
 
@@ -925,12 +923,11 @@ rl78_analyze_prologue (CORE_ADDR start_pc,
       result->reg_offset[rn] = 1;
     }
 
-  stack = make_pv_area (RL78_SP_REGNUM, gdbarch_addr_bit (target_gdbarch ()));
-  back_to = make_cleanup_free_pv_area (stack);
+  pv_area stack (RL78_SP_REGNUM, gdbarch_addr_bit (target_gdbarch ()));
 
   /* The call instruction has saved the return address on the stack.  */
   reg[RL78_SP_REGNUM] = pv_add_constant (reg[RL78_SP_REGNUM], -4);
-  pv_area_store (stack, reg[RL78_SP_REGNUM], 4, reg[RL78_PC_REGNUM]);
+  stack.store (reg[RL78_SP_REGNUM], 4, reg[RL78_PC_REGNUM]);
 
   pc = start_pc;
   while (pc < limit_pc)
@@ -954,12 +951,12 @@ rl78_analyze_prologue (CORE_ADDR start_pc,
 	       && opc.op[1].type == RL78_Operand_Register)
 	{
 	  int rsrc = (bank * RL78_REGS_PER_BANK) 
-	           + 2 * (opc.op[1].reg - RL78_Reg_AX);
+	    + 2 * (opc.op[1].reg - RL78_Reg_AX);
 
 	  reg[RL78_SP_REGNUM] = pv_add_constant (reg[RL78_SP_REGNUM], -1);
-	  pv_area_store (stack, reg[RL78_SP_REGNUM], 1, reg[rsrc]);
+	  stack.store (reg[RL78_SP_REGNUM], 1, reg[rsrc]);
 	  reg[RL78_SP_REGNUM] = pv_add_constant (reg[RL78_SP_REGNUM], -1);
-	  pv_area_store (stack, reg[RL78_SP_REGNUM], 1, reg[rsrc + 1]);
+	  stack.store (reg[RL78_SP_REGNUM], 1, reg[rsrc + 1]);
 	  after_last_frame_setup_insn = next_pc;
 	}
       else if (opc.id == RLO_sub
@@ -1016,11 +1013,9 @@ rl78_analyze_prologue (CORE_ADDR start_pc,
     result->frame_size = reg[RL78_SP_REGNUM].k;
 
   /* Record where all the registers were saved.  */
-  pv_area_scan (stack, check_for_saved, (void *) result);
+  stack.scan (check_for_saved, (void *) result);
 
   result->prologue_end = after_last_frame_setup_insn;
-
-  do_cleanups (back_to);
 }
 
 /* Implement the "addr_bits_remove" gdbarch method.  */
