@@ -1,3 +1,8 @@
+2017-10-09  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19874
+	* testsuite/ld-x86-64/pr19784c.c (bar): Change return type to void.
+
 2017-10-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22267
