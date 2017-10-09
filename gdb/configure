@@ -5950,7 +5950,7 @@ DEPDIR="${am__leading_dot}deps"
 ac_config_commands="$ac_config_commands depdir"
 
 
-# Create sub-directories for objects and depedencies.
+# Create sub-directories for objects and dependencies.
 CONFIG_SRC_SUBDIR="arch"
 
 
@@ -10313,7 +10313,7 @@ fi
 
 
 
-try_guile_versions="guile-2.2 guile-2.0"
+try_guile_versions="guile-2.0"
 have_libguile=no
 case "${with_guile}" in
 no)

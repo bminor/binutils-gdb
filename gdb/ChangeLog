@@ -1,3 +1,8 @@
+2017-10-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure.ac (try_guile_versions): Remove guile-2.2.
+	* configure: Regenerate.
+
 2017-10-09  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (COMPILE.post, POSTCOMPILE): Restore $(basename).
