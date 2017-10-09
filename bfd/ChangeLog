@@ -1,5 +1,10 @@
 2017-10-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections): Remove
+	a strayed comment.
+
+2017-10-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-tilegx.c (tilegx_elf_finish_dynamic_sections): Set
 	this_hdr.sh_entsize only if section size > 0.
 

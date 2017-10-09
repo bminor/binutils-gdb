@@ -2735,8 +2735,6 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
 		      info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
 					      p->sec->owner, p->sec);
 		    }
-
-	  /* Not an error, just cut short the traversal.  */
 		}
 	    }
 	}
