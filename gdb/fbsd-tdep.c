@@ -143,7 +143,7 @@ fbsd_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf,
 {
   size_t siginfo_size;
 
-  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+  if (gdbarch_long_bit (gdbarch) == 32)
     siginfo_size = SIZE32_SIGINFO_T;
   else
     siginfo_size = SIZE64_SIGINFO_T;
@@ -168,7 +168,7 @@ fbsd_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf,
     len = siginfo_size - offset;
 
   ULONGEST siginfo_offset;
-  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+  if (gdbarch_long_bit (gdbarch) == 32)
     siginfo_offset = LWPINFO_OFFSET + LWPINFO32_PL_SIGINFO;
   else
     siginfo_offset = LWPINFO_OFFSET + LWPINFO64_PL_SIGINFO;

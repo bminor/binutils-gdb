@@ -279,7 +279,7 @@ fbsd_siginfo_size ()
   struct gdbarch *gdbarch = get_frame_arch (get_current_frame ());
 
   /* Is the inferior 32-bit?  If so, use the 32-bit siginfo size.  */
-  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+  if (gdbarch_long_bit (gdbarch) == 32)
     return sizeof (struct siginfo32);
 #endif
   return sizeof (siginfo_t);
@@ -296,7 +296,7 @@ fbsd_convert_siginfo (siginfo_t *si)
   struct gdbarch *gdbarch = get_frame_arch (get_current_frame ());
 
   /* Is the inferior 32-bit?  If not, nothing to do.  */
-  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word != 32)
+  if (gdbarch_long_bit (gdbarch) != 32)
     return;
 
   struct siginfo32 si32;
