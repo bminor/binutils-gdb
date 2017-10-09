@@ -4927,6 +4927,10 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
 	}
     }
 
+  if (stash->funcinfo_hash_table)
+    bfd_hash_table_free (&stash->funcinfo_hash_table->base);
+  if (stash->varinfo_hash_table)
+    bfd_hash_table_free (&stash->varinfo_hash_table->base);
   if (stash->dwarf_abbrev_buffer)
     free (stash->dwarf_abbrev_buffer);
   if (stash->dwarf_line_buffer)
