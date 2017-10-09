@@ -1,5 +1,18 @@
 2017-10-09  Pedro Alves  <palves@redhat.com>
 
+	Test both arch1=>arch2 and arch2=>arch1.
+
+	* gdb.multi/multi-arch-exec.exp (exec1, srcfile1, binfile1, exec2)
+	(srcfile2, binfile2, march1, march2): Remove globals.  Largely
+	factored out to...
+	(append_arch1_options, append_arch2_options, append_arch_options)
+	(build_executables): New procedures.
+	(do_test): New 'first_arch' parameter.  Use it to define 'from_exec'
+	local.
+	(top level): Add new 'first_arch' testing axis.
+
+2017-10-09  Pedro Alves  <palves@redhat.com>
+
 	* gdb.multi/multi-arch-exec.c: Include <pthread.h> and <assert.h>.
 	(barrier): New.
 	(thread_start, all_started): New functions.
