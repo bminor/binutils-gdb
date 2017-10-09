@@ -1,5 +1,7 @@
 2017-10-09  Nick Clifton  <nickc@redhat.com>
 
+	* testsuite/ld-srec/srec.exp (run_srec_test): Set start address.
+
 	PR ld/19874
 	* testsuite/ld-x86-64/pr19784c.c (bar): Change return type to void.
 
