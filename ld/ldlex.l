@@ -94,6 +94,7 @@ static void lex_warn_invalid (char *where, char *what);
 CMDFILENAMECHAR   [_a-zA-Z0-9\/\.\\_\+\$\:\[\]\\\,\=\&\!\<\>\-\~]
 CMDFILENAMECHAR1  [_a-zA-Z0-9\/\.\\_\+\$\:\[\]\\\,\=\&\!\<\>\~]
 FILENAMECHAR1	[_a-zA-Z\/\.\\\$\_\~]
+SYMBOLNAMECHAR1	[_a-zA-Z\/\.\\\$\_]
 SYMBOLCHARN     [_a-zA-Z\/\.\\\$\_\~0-9]
 FILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\\,\~]
 WILDCHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\\,\~\?\*\^\!]
@@ -136,7 +137,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 
 <DEFSYMEXP>"-"                  { RTOKEN('-');}
 <DEFSYMEXP>"+"                  { RTOKEN('+');}
-<DEFSYMEXP>{FILENAMECHAR1}{SYMBOLCHARN}*   { yylval.name = xstrdup (yytext); return NAME; }
+<DEFSYMEXP>{SYMBOLNAMECHAR1}{SYMBOLCHARN}*   { yylval.name = xstrdup (yytext); return NAME; }
 <DEFSYMEXP>"="                  { RTOKEN('='); }
 
 <MRI,EXPRESSION>"$"([0-9A-Fa-f])+ {
@@ -390,7 +391,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 				  yylval.name = xstrdup (yytext + 2);
 				  return LNAME;
 				}
-<EXPRESSION>{FILENAMECHAR1}{NOCFILENAMECHAR}*	{
+<EXPRESSION>{SYMBOLNAMECHAR1}{NOCFILENAMECHAR}*	{
 				 yylval.name = xstrdup (yytext);
 				  return NAME;
 				}

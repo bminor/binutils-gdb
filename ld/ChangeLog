@@ -1,3 +1,14 @@
+2017-10-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22267
+	* ldlex.l (SYMBOLNAMECHAR1) New.
+	(DEFSYMEXP): Replace FILENAMECHAR1 with SYMBOLNAMECHAR1.
+	(EXPRESSION): Likewise.
+	* testsuite/ld-scripts/expr.exp: Run pr22267.
+	* testsuite/ld-scripts/pr22267.d: New file.
+	* testsuite/ld-scripts/pr22267.s: Likewise.
+	* testsuite/ld-scripts/pr22267.t: Likewise.
+
 2017-10-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/merge.d: Don't expect to fail for sparc.
