@@ -3194,9 +3194,10 @@ mapped_index_string_hash (int index_version, const void *p)
 
 /* Find a slot in the mapped index INDEX for the object named NAME.
    If NAME is found, set *VEC_OUT to point to the CU vector in the
-   constant pool and return 1.  If NAME cannot be found, return 0.  */
+   constant pool and return true.  If NAME cannot be found, return
+   false.  */
 
-static int
+static bool
 find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
 			  offset_type **vec_out)
 {
@@ -3214,7 +3215,7 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
 
       if (strchr (name, '(') != NULL)
 	{
-	  without_params.reset (cp_remove_params (name));
+	  without_params = cp_remove_params (name);
 
 	  if (without_params != NULL)
 	    name = without_params.get ();
@@ -3239,14 +3240,14 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
       offset_type i = 2 * slot;
       const char *str;
       if (index->symbol_table[i] == 0 && index->symbol_table[i + 1] == 0)
-	return 0;
+	return false;
 
       str = index->constant_pool + MAYBE_SWAP (index->symbol_table[i]);
       if (!cmp (name, str))
 	{
 	  *vec_out = (offset_type *) (index->constant_pool
 				      + MAYBE_SWAP (index->symbol_table[i + 1]));
-	  return 1;
+	  return true;
 	}
 
       slot = (slot + step) & (index->symbol_table_slots - 1);

@@ -1101,10 +1101,7 @@ find_frame_funname (struct frame_info *frame, enum language *funlang,
 		 stored in the symbol table, but we stored a version
 		 with DMGL_PARAMS turned on, and here we don't want to
 		 display parameters.  So remove the parameters.  */
-	      char *func_only = cp_remove_params (print_name);
-
-	      if (func_only)
-		funname.reset (func_only);
+	      funname = cp_remove_params (print_name);
 	    }
 
 	  /* If we didn't hit the C++ case above, set *funname
@@ -1434,7 +1431,7 @@ info_frame_command (char *addr_exp, int from_tty)
 	     stored in the symbol table, but we stored a version
 	     with DMGL_PARAMS turned on, and here we don't want to
 	     display parameters.  So remove the parameters.  */
-	  func_only.reset (cp_remove_params (funname));
+	  func_only = cp_remove_params (funname);
 
 	  if (func_only)
 	    funname = func_only.get ();

@@ -838,10 +838,10 @@ cp_func_name (const char *full_name)
    (optionally) a return type.  Return the name of the function without
    parameters or return type, or NULL if we can not parse the name.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 cp_remove_params (const char *demangled_name)
 {
-  int done = 0;
+  bool done = false;
   struct demangle_component *ret_comp;
   std::unique_ptr<demangle_parse_info> info;
   gdb::unique_xmalloc_ptr<char> ret;
@@ -868,7 +868,7 @@ cp_remove_params (const char *demangled_name)
         ret_comp = d_left (ret_comp);
         break;
       default:
-	done = 1;
+	done = true;
 	break;
       }
 
@@ -876,7 +876,7 @@ cp_remove_params (const char *demangled_name)
   if (ret_comp->type == DEMANGLE_COMPONENT_TYPED_NAME)
     ret = cp_comp_to_string (d_left (ret_comp), 10);
 
-  return ret.release ();
+  return ret;
 }
 
 /* Here are some random pieces of trivia to keep in mind while trying
@@ -1103,7 +1103,7 @@ overload_list_add_symbol (struct symbol *sym,
 {
   int newsize;
   int i;
-  char *sym_name;
+  gdb::unique_xmalloc_ptr<char> sym_name;
 
   /* If there is no type information, we can't do anything, so
      skip.  */
@@ -1122,13 +1122,8 @@ overload_list_add_symbol (struct symbol *sym,
     return;
 
   /* skip symbols that cannot match */
-  if (strcmp (sym_name, oload_name) != 0)
-    {
-      xfree (sym_name);
-      return;
-    }
-
-  xfree (sym_name);
+  if (strcmp (sym_name.get (), oload_name) != 0)
+    return;
 
   /* We have a match for an overload instance, so add SYM to the
      current list of overload instances */

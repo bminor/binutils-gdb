@@ -1,3 +1,18 @@
+2017-10-09  Pedro Alves  <palves@redhat.com>
+
+	* cp-support.c (cp_remove_params): Return a gdb::unique_xmalloc_ptr.
+	Use bool.
+	(overload_list_add_symbol): Adjust to use gdb::unique_xmalloc_ptr.
+	* cp-support.h (cp_remove_params): Now returns a
+	gdb::unique_xmalloc_ptr.
+	* dwarf2read.c (find_slot_in_mapped_hash): Now returns bool.
+	Adjust to cp_remove_params returning a gdb::unique_xmalloc_ptr.
+	* psymtab.c (psymtab_search_name): Adjust to cp_remove_params
+	returning a gdb::unique_xmalloc_ptr.
+	(lookup_partial_symbol): Adjust to use gdb::unique_xmalloc_ptr.
+	* stack.c (find_frame_funname): Adjust to cp_remove_params
+	returning a gdb::unique_xmalloc_ptr.
+
 2017-10-08  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2read.c (dwarf2_get_dwz_file): Use
