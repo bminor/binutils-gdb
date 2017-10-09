@@ -1,5 +1,19 @@
 2017-10-09  Pedro Alves  <palves@redhat.com>
 
+	* gdb.multi/multi-arch-exec.c: Include <pthread.h> and <assert.h>.
+	(barrier): New.
+	(thread_start, all_started): New functions.
+	(main): Spawn new thread and wait until it is scheduled.
+	* gdb.multi/multi-arch-exec.exp: Build $srcfile1 with the pthreads
+	option.
+	(do_test): Add 'selected_thread' parameter.  Run to all_started
+	instead of main.  Explicitly set the breakpoint at main.  Switch
+	to the SELECTED_THREAD thread.
+	(top level): Test handling the exec event with either the main
+	thread or the second thread selected.
+
+2017-10-09  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/print-file-var-main.c: Fix get_version_2 value check
 	logic.  Move STOP marker after the value checks.
 	* gdb.base/print-file-var.exp (continue to STOP marker): Tighten

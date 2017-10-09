@@ -53,7 +53,7 @@ if [istarget "s390*-*-*"] {
 }
 
 if { [prepare_for_testing "failed to prepare" ${exec1} "${srcfile1}" \
-	  [list debug \
+	  [list debug pthreads \
 	       additional_flags=${march1}]] } {
     return -1
 }
@@ -76,22 +76,38 @@ if { [prepare_for_testing "failed to prepare" ${exec2} "${srcfile2}" \
     return -1
 }
 
-proc do_test { mode } {
+proc do_test { mode selected_thread } {
 	global exec1
 
 	clean_restart ${exec1}
-	if ![runto_main] then {
-	    fail "couldn't run to main"
+	if ![runto all_started] then {
+	    fail "couldn't run to all_started"
 	    return -1
 	}
+
+	# Delete the breakpoint at 'all_started' otherwise GDB may
+	# switch context back to thread 1 to step over the breakpoint.
+	delete_breakpoints
+
+	# A location for this breakpoint should be found in the new
+	# post-exec image too.
+	gdb_breakpoint main
+
+	gdb_test "thread $selected_thread" "Switching to thread $selected_thread .*"
 
 	gdb_test_no_output "set follow-exec-mode $mode"
 
 	# Test that GDB updates the target description / arch successfuly
 	# after the exec.
-	gdb_test "continue" "Breakpoint 1, main.*" "continue across exec that changes architecture"
+	gdb_test "continue" "Breakpoint 2, main.*" "continue across exec that changes architecture"
 }
 
-foreach follow_exec_mode {"same" "new"} {
-    do_test $follow_exec_mode
+# Test handling the exec event with either the main thread or the
+# second thread selected.  This tries to ensure that GDB doesn't read
+# registers off of the execing thread before figuring out its
+# architecture.
+foreach_with_prefix selected_thread {1 2} {
+    foreach_with_prefix follow_exec_mode {"same" "new"} {
+	do_test $follow_exec_mode $selected_thread
+    }
 }

@@ -5307,8 +5307,11 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_EXECD\n");
 
+      /* Note we can't read registers yet (the stop_pc), because we
+	 don't yet know the inferior's post-exec architecture.
+	 'stop_pc' is explicitly read below instead.  */
       if (!ptid_equal (ecs->ptid, inferior_ptid))
-	context_switch (ecs->ptid);
+	switch_to_thread_no_regs (ecs->event_thread);
 
       /* Do whatever is necessary to the parent branch of the vfork.  */
       handle_vfork_child_exec_or_exit (1);
