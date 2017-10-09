@@ -1,5 +1,11 @@
 2017-10-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-sh.c (readonly_dynrelocs): Dump dynamic relocation
+	in read-only section with minfo.
+	(sh_elf_size_dynamic_sections): Likewise.
+
+2017-10-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections): Remove
 	a strayed comment.
 
