@@ -1,3 +1,10 @@
+2017-10-09  Heiko Carstens  <heiko.carstens@de.ibm.com>
+
+	* s390-opc.c (INSTR_SI_RD): New macro.
+	(INSTR_S_RD): Adjust example instruction.
+	* s390-opc.txt (lpsw, ssm, ts): Change S_RD instruction format to
+	SI_RD.
+
 2017-10-01  Alexander Fedotov  <alfedotov@gmail.com>
 
 	* ppc-opc.c (vle_opcodes): Add e_lmvsprw, e_lmvgprw,
