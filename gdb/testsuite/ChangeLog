@@ -1,3 +1,10 @@
+2017-10-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/print-file-var-main.c: Fix get_version_2 value check
+	logic.  Move STOP marker after the value checks.
+	* gdb.base/print-file-var.exp (continue to STOP marker): Tighten
+	regexp.
+
 2017-10-06  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.mi/mi-threads-interrupt.exp: Skip test if nointerrupts.

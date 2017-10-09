@@ -23,12 +23,12 @@ main (void)
   int v1 = get_version_1 ();
   int v2 = get_version_2 ();
 
-  if (v1 != 104)  /* STOP */
+  if (v1 != 104)
     return 1;
   /* The value returned by get_version_2 depends on the target system.  */
-  if (v2 != 104 || v2 != 203)
+  if (v2 != 104 && v2 != 203)
     return 2;
 
-  return 0;
+  return 0; /* STOP */
 }
 
