@@ -1,3 +1,14 @@
+2017-10-09  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+        * testsuite/gas/all/fill-1.s: Replace nop with .word 42
+
+2017-10-09  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+        * read.c (s_fill): Invoke expression instead of
+        get_known_segmented_expression.
+        * testsuite/gas/all/fill-1.s: New testcase.
+        * testsuite/gas/all/gas.exp: Run fill-1 testcase
+
 2017-10-05  Nick Clifton  <nickc@redhat.com>
 
 	PR 22133
