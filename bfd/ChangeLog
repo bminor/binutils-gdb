@@ -1,3 +1,8 @@
+2017-10-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-bfin.c (bfin_size_dynamic_sections): Don't create the
+	.interp section with "ld --no-dynamic-linker".
+
 2017-10-09  Alan Modra  <amodra@gmail.com>
 
 	PR 22212
