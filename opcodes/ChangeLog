@@ -1,3 +1,7 @@
+2017-10-09  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-opc.txt (prno, tpei, irbm): New instructions added.
+
 2017-10-09  Heiko Carstens  <heiko.carstens@de.ibm.com>
 
 	* s390-opc.c (INSTR_SI_RD): New macro.

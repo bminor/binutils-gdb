@@ -1,5 +1,12 @@
 2017-10-09  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
+	* testsuite/gas/s390/zarch-arch12.d (prno, tpei, irbm): New
+	instructions added.
+	* testsuite/gas/s390/zarch-arch12.s: Likewise.
+	* testsuite/gas/s390/zarch-z13.d: Rename ppno to prno.
+
+2017-10-09  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
         * testsuite/gas/all/fill-1.s: Replace nop with .word 42
 
 2017-10-09  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
