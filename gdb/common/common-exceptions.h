@@ -24,10 +24,8 @@
 #include <new>
 
 /* Reasons for calling throw_exceptions().  NOTE: all reason values
-   must be less than zero.  enum value 0 is reserved for internal use
-   as the return value from an initial setjmp().  The function
-   catch_exceptions() reserves values >= 0 as legal results from its
-   wrapped function.  */
+   must be different from zero.  enum value 0 is reserved for internal
+   use as the return value from an initial setjmp().  */
 
 enum return_reason
   {

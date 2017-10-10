@@ -1,3 +1,44 @@
+2017-10-10  Pedro Alves <palves@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* breakpoint.c (struct captured_breakpoint_query_args)
+	(do_captured_breakpoint_query, gdb_breakpoint_query): Delete.
+	(print_breakpoint): New.
+	* breakpoint.h (print_breakpoint): Declare.
+	* common/common-exceptions.h (enum return_reason): Remove
+	references to catch_exceptions.
+	* exceptions.c (catch_exceptions, catch_exceptions_with_msg):
+	Delete.
+	* exceptions.h (catch_exceptions_ftype, catch_exceptions)
+	(catch_exception_ftype, catch_exceptions_with_msg): Delete.
+	* gdb.h: Delete.
+	* gdbthread.h (thread_select): Declare.
+	* mi/mi-cmd-break.c: Don't include gdb.h.
+	(breakpoint_notify): Use print_breakpoint.
+	* mi/mi-cmd-catch.c: Don't include gdb.h.
+	* mi/mi-interp.c: Don't include gdb.h.
+	(mi_print_breakpoint_for_event): New.
+	(mi_breakpoint_created, mi_breakpoint_modified): Use
+	mi_print_breakpoint_for_event.
+	* mi/mi-main.c: Don't include gdb.h.
+	(mi_cmd_thread_select): Parse the global thread ID here.  Use
+	thread_select instead of gdb_thread_select.
+	(mi_cmd_thread_list_ids): Output "thread-ids" tuple here instead
+	of using gdb_list_thread_ids.
+	* remote-fileio.c (do_remote_fileio_request): Change type.  Reply
+	FILEIO_ENOSYS here.
+	(remote_fileio_request): Use TRY/CATCH instead of
+	catch_exceptions.
+	* symfile-mem.c (struct symbol_file_add_from_memory_args)
+	(symbol_file_add_from_memory_wrapper): Delete.
+	(add_vsyscall_page): Use TRY/CATCH instead of catch_exceptions.
+	* thread.c: Don't include gdb.h.
+	(do_captured_list_thread_ids, gdb_list_thread_ids): Delete.
+	(thread_alive): Use thread_select.
+	(do_captured_thread_select): Delete, parts salvaged as ...
+	(thread_select): ... this new function.
+	(gdb_thread_select): Delete.
+
 2017-10-10  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tom@tromey.com>
 

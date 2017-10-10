@@ -33,7 +33,6 @@
 #include "observer.h"
 #include "gdbthread.h"
 #include "solist.h"
-#include "gdb.h"
 #include "objfiles.h"
 #include "tracepoint.h"
 #include "cli-out.h"
@@ -828,6 +827,38 @@ mi_tsv_modified (const struct trace_state_variable *tsv)
     }
 }
 
+/* Print breakpoint BP on MI's event channel.  */
+
+static void
+mi_print_breakpoint_for_event (struct mi_interp *mi, breakpoint *bp)
+{
+  ui_out *mi_uiout = interp_ui_out (mi);
+
+  /* We want the output from print_breakpoint to go to
+     mi->event_channel.  One approach would be to just call
+     print_breakpoint, and then use mi_out_put to send the current
+     content of mi_uiout into mi->event_channel.  However, that will
+     break if anything is output to mi_uiout prior to calling the
+     breakpoint_created notifications.  So, we use
+     ui_out_redirect.  */
+  mi_uiout->redirect (mi->event_channel);
+
+  TRY
+    {
+      scoped_restore restore_uiout
+	= make_scoped_restore (&current_uiout, mi_uiout);
+
+      print_breakpoint (bp);
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      exception_print (gdb_stderr, ex);
+    }
+  END_CATCH
+
+  mi_uiout->redirect (NULL);
+}
+
 /* Emit notification about a created breakpoint.  */
 
 static void
@@ -842,36 +873,16 @@ mi_breakpoint_created (struct breakpoint *b)
   SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
-      struct ui_out *mi_uiout;
 
       if (mi == NULL)
 	continue;
-
-      mi_uiout = interp_ui_out (top_level_interpreter ());
 
       target_terminal::scoped_restore_terminal_state term_state;
       target_terminal::ours_for_output ();
 
       fprintf_unfiltered (mi->event_channel,
 			  "breakpoint-created");
-      /* We want the output from gdb_breakpoint_query to go to
-	 mi->event_channel.  One approach would be to just call
-	 gdb_breakpoint_query, and then use mi_out_put to send the current
-	 content of mi_uiout into mi->event_channel.  However, that will
-	 break if anything is output to mi_uiout prior to calling the
-	 breakpoint_created notifications.  So, we use
-	 ui_out_redirect.  */
-      mi_uiout->redirect (mi->event_channel);
-      TRY
-	{
-	  gdb_breakpoint_query (mi_uiout, b->number, NULL);
-	}
-      CATCH (e, RETURN_MASK_ERROR)
-	{
-	}
-      END_CATCH
-
-      mi_uiout->redirect (NULL);
+      mi_print_breakpoint_for_event (mi, b);
 
       gdb_flush (mi->event_channel);
     }
@@ -927,24 +938,7 @@ mi_breakpoint_modified (struct breakpoint *b)
       target_terminal::ours_for_output ();
       fprintf_unfiltered (mi->event_channel,
 			  "breakpoint-modified");
-      /* We want the output from gdb_breakpoint_query to go to
-	 mi->event_channel.  One approach would be to just call
-	 gdb_breakpoint_query, and then use mi_out_put to send the current
-	 content of mi_uiout into mi->event_channel.  However, that will
-	 break if anything is output to mi_uiout prior to calling the
-	 breakpoint_created notifications.  So, we use
-	 ui_out_redirect.  */
-      mi->mi_uiout->redirect (mi->event_channel);
-      TRY
-	{
-	  gdb_breakpoint_query (mi->mi_uiout, b->number, NULL);
-	}
-      CATCH (e, RETURN_MASK_ERROR)
-	{
-	}
-      END_CATCH
-
-      mi->mi_uiout->redirect (NULL);
+      mi_print_breakpoint_for_event (mi, b);
 
       gdb_flush (mi->event_channel);
     }

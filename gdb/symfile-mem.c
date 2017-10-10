@@ -167,31 +167,6 @@ add_symbol_file_from_memory_command (const char *args, int from_tty)
   symbol_file_add_from_memory (templ, addr, 0, NULL, from_tty);
 }
 
-/* Arguments for symbol_file_add_from_memory_wrapper.  */
-
-struct symbol_file_add_from_memory_args
-{
-  struct bfd *bfd;
-  CORE_ADDR sysinfo_ehdr;
-  size_t size;
-  char *name;
-  int from_tty;
-};
-
-/* Wrapper function for symbol_file_add_from_memory, for
-   catch_exceptions.  */
-
-static int
-symbol_file_add_from_memory_wrapper (struct ui_out *uiout, void *data)
-{
-  struct symbol_file_add_from_memory_args *args
-    = (struct symbol_file_add_from_memory_args *) data;
-
-  symbol_file_add_from_memory (args->bfd, args->sysinfo_ehdr, args->size,
-			       args->name, args->from_tty);
-  return 0;
-}
-
 /* Try to add the symbols for the vsyscall page, if there is one.
    This function is called via the inferior_created observer.  */
 
@@ -203,7 +178,6 @@ add_vsyscall_page (struct target_ops *target, int from_tty)
   if (gdbarch_vsyscall_range (target_gdbarch (), &vsyscall_range))
     {
       struct bfd *bfd;
-      struct symbol_file_add_from_memory_args args;
 
       if (core_bfd != NULL)
 	bfd = core_bfd;
@@ -221,18 +195,25 @@ add_vsyscall_page (struct target_ops *target, int from_tty)
 		     "because no executable was specified"));
 	  return;
 	}
-      args.bfd = bfd;
-      args.sysinfo_ehdr = vsyscall_range.start;
-      args.size = vsyscall_range.length;
 
-      args.name = xstrprintf ("system-supplied DSO at %s",
-			      paddress (target_gdbarch (), vsyscall_range.start));
-      /* Pass zero for FROM_TTY, because the action of loading the
-	 vsyscall DSO was not triggered by the user, even if the user
-	 typed "run" at the TTY.  */
-      args.from_tty = 0;
-      catch_exceptions (current_uiout, symbol_file_add_from_memory_wrapper,
-			&args, RETURN_MASK_ALL);
+      char *name = xstrprintf ("system-supplied DSO at %s",
+			       paddress (target_gdbarch (), vsyscall_range.start));
+      TRY
+	{
+	  /* Pass zero for FROM_TTY, because the action of loading the
+	     vsyscall DSO was not triggered by the user, even if the
+	     user typed "run" at the TTY.  */
+	  symbol_file_add_from_memory (bfd,
+				       vsyscall_range.start,
+				       vsyscall_range.length,
+				       name,
+				       0 /* from_tty */);
+	}
+      CATCH (ex, RETURN_MASK_ALL)
+	{
+	  exception_print (gdb_stderr, ex);
+	}
+      END_CATCH
     }
 }
 

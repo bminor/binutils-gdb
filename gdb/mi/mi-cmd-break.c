@@ -24,7 +24,6 @@
 #include "mi-out.h"
 #include "breakpoint.h"
 #include "mi-getopt.h"
-#include "gdb.h"
 #include "observer.h"
 #include "mi-main.h"
 #include "mi-cmd-break.h"
@@ -53,7 +52,17 @@ static void
 breakpoint_notify (struct breakpoint *b)
 {
   if (mi_can_breakpoint_notify)
-    gdb_breakpoint_query (current_uiout, b->number, NULL);
+    {
+      TRY
+	{
+	  print_breakpoint (b);
+	}
+      CATCH (ex, RETURN_MASK_ALL)
+	{
+	  exception_print (gdb_stderr, ex);
+	}
+      END_CATCH
+    }
 }
 
 enum bp_type

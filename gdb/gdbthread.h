@@ -679,6 +679,12 @@ extern int show_thread_that_caused_stop (void);
 extern void print_selected_thread_frame (struct ui_out *uiout,
 					 user_selected_what selection);
 
+/* Helper for the CLI's "thread" command and for MI's -thread-select.
+   Selects thread THR.  TIDSTR is the original string the thread ID
+   was parsed from.  This is used in the error message if THR is not
+   alive anymore.  */
+extern void thread_select (const char *tidstr, thread_info *thr);
+
 extern struct thread_info *thread_list;
 
 #endif /* GDBTHREAD_H */

@@ -1,3 +1,8 @@
+2017-10-10  Pedro Alves <palves@redhat.com>
+
+	* gdb.mi/mi-pthreads.exp (check_mi_thread_command_set): Don't
+	expect CLI output.
+
 2017-10-10  Pedro Alves  <palves@redhat.com>
 
 	* lib/selftest-support.exp (selftest_setup): Update for

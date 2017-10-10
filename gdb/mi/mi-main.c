@@ -38,7 +38,6 @@
 #include "gdbcore.h"		/* For write_memory().  */
 #include "value.h"
 #include "regcache.h"
-#include "gdb.h"
 #include "frame.h"
 #include "mi-main.h"
 #include "mi-common.h"
@@ -555,21 +554,17 @@ mi_cmd_target_flash_erase (const char *command, char **argv, int argc)
 void
 mi_cmd_thread_select (const char *command, char **argv, int argc)
 {
-  enum gdb_rc rc;
-  char *mi_error_message;
-  ptid_t previous_ptid = inferior_ptid;
-
   if (argc != 1)
     error (_("-thread-select: USAGE: threadnum."));
 
-  rc = gdb_thread_select (current_uiout, argv[0], &mi_error_message);
+  int num = value_as_long (parse_and_eval (argv[0]));
+  thread_info *thr = find_thread_global_id (num);
+  if (thr == NULL)
+    error (_("Thread ID %d not known."), num);
 
-  /* If thread switch did not succeed don't notify or print.  */
-  if (rc == GDB_RC_FAIL)
-    {
-      make_cleanup (xfree, mi_error_message);
-      error ("%s", mi_error_message);
-    }
+  ptid_t previous_ptid = inferior_ptid;
+
+  thread_select (argv[0], thr);
 
   print_selected_thread_frame (current_uiout,
 			       USER_SELECTED_THREAD | USER_SELECTED_FRAME);
@@ -585,19 +580,31 @@ mi_cmd_thread_select (const char *command, char **argv, int argc)
 void
 mi_cmd_thread_list_ids (const char *command, char **argv, int argc)
 {
-  enum gdb_rc rc;
-  char *mi_error_message;
-
   if (argc != 0)
     error (_("-thread-list-ids: No arguments required."));
 
-  rc = gdb_list_thread_ids (current_uiout, &mi_error_message);
+  int num = 0;
+  int current_thread = -1;
 
-  if (rc == GDB_RC_FAIL)
-    {
-      make_cleanup (xfree, mi_error_message);
-      error ("%s", mi_error_message);
-    }
+  update_thread_list ();
+
+  {
+    ui_out_emit_tuple tuple_emitter (current_uiout, "thread-ids");
+
+    struct thread_info *tp;
+    ALL_NON_EXITED_THREADS (tp)
+      {
+	if (tp->ptid == inferior_ptid)
+	  current_thread = tp->global_num;
+
+	num++;
+	current_uiout->field_int ("thread-id", tp->global_num);
+      }
+  }
+
+  if (current_thread != -1)
+    current_uiout->field_int ("current-thread-id", current_thread);
+  current_uiout->field_int ("number-of-threads", num);
 }
 
 void
