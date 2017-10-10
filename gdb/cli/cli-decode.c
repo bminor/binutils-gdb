@@ -424,7 +424,7 @@ add_prefix_cmd (const char *name, enum command_class theclass,
 
 struct cmd_list_element *
 add_abbrev_prefix_cmd (const char *name, enum command_class theclass,
-		       cmd_cfunc_ftype *fun, const char *doc,
+		       cmd_const_cfunc_ftype *fun, const char *doc,
 		       struct cmd_list_element **prefixlist,
 		       const char *prefixname,
 		       int allow_unknown, struct cmd_list_element **list)

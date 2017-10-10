@@ -173,7 +173,7 @@ extern struct cmd_list_element *add_prefix_cmd (const char *, enum command_class
 
 extern struct cmd_list_element *add_abbrev_prefix_cmd (const char *,
 						       enum command_class,
-						       cmd_cfunc_ftype *fun,
+						       cmd_const_cfunc_ftype *fun,
 						       const char *,
 						       struct cmd_list_element
 						       **, const char *, int,

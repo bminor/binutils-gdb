@@ -193,8 +193,6 @@ static void thbreak_command (char *, int);
 static void enable_breakpoint_disp (struct breakpoint *, enum bpdisp,
 				    int count);
 
-static void stop_command (char *arg, int from_tty);
-
 static void free_bp_location (struct bp_location *loc);
 static void incref_bp_location (struct bp_location *loc);
 static void decref_bp_location (struct bp_location **loc);
@@ -9658,7 +9656,7 @@ thbreak_command (char *arg, int from_tty)
 }
 
 static void
-stop_command (char *arg, int from_tty)
+stop_command (const char *arg, int from_tty)
 {
   printf_filtered (_("Specify the type of breakpoint to set.\n\
 Usage: stop in <function | address>\n\
