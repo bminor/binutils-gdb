@@ -565,7 +565,7 @@ record_full_arch_list_cleanups (void *ignore)
    record the running message of inferior and set them to
    record_full_arch_list, and add it to record_full_list.  */
 
-static int
+static void
 record_full_message (struct regcache *regcache, enum gdb_signal signal)
 {
   int ret;
@@ -633,36 +633,24 @@ record_full_message (struct regcache *regcache, enum gdb_signal signal)
     record_full_list_release_first ();
   else
     record_full_insn_num++;
-
-  return 1;
 }
 
-struct record_full_message_args {
-  struct regcache *regcache;
-  enum gdb_signal signal;
-};
-
-static int
-record_full_message_wrapper (void *args)
-{
-  struct record_full_message_args *record_full_args
-    = (struct record_full_message_args *) args;
-
-  return record_full_message (record_full_args->regcache,
-			      record_full_args->signal);
-}
-
-static int
+static bool
 record_full_message_wrapper_safe (struct regcache *regcache,
 				  enum gdb_signal signal)
 {
-  struct record_full_message_args args;
+  TRY
+    {
+      record_full_message (regcache, signal);
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      exception_print (gdb_stderr, ex);
+      return false;
+    }
+  END_CATCH
 
-  args.regcache = regcache;
-  args.signal = signal;
-
-  return catch_errors (record_full_message_wrapper, &args, "",
-		       RETURN_MASK_ALL);
+  return true;
 }
 
 /* Set to 1 if record_full_store_registers and record_full_xfer_partial

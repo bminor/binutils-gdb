@@ -1,3 +1,8 @@
+2017-10-10  Pedro Alves  <palves@redhat.com>
+
+	* lib/selftest-support.exp (selftest_setup): Update for
+	captured_command_loop's prototype change.
+
 2017-10-09  Pedro Alves  <palves@redhat.com>
 
 	Test both arch1=>arch2 and arch2=>arch1.

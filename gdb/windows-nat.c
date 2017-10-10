@@ -756,8 +756,8 @@ get_image_name (HANDLE h, void *address, int unicode)
    do_initial_windows_stuff and windows_add_all_dlls for more info
    on how we handle DLL loading during that phase).  */
 
-static int
-handle_load_dll (void *dummy)
+static void
+handle_load_dll ()
 {
   LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
   char *dll_name;
@@ -770,7 +770,7 @@ handle_load_dll (void *dummy)
   dll_name = get_image_name (current_process_handle,
 			     event->lpImageName, event->fUnicode);
   if (!dll_name)
-    return 1;
+    return;
 
   solib_end->next = windows_make_so (dll_name, event->lpBaseOfDll);
   solib_end = solib_end->next;
@@ -779,8 +779,6 @@ handle_load_dll (void *dummy)
 
   DEBUG_EVENTS (("gdb: Loading dll \"%s\" at %s.\n", solib_end->so_name,
 		 host_address_to_string (li->load_addr)));
-
-  return 1;
 }
 
 static void
@@ -800,8 +798,8 @@ windows_free_so (struct so_list *so)
    do_initial_windows_stuff and windows_add_all_dlls for more info
    on how we handle DLL loading during that phase).  */
 
-static int
-handle_unload_dll (void *dummy)
+static void
+handle_unload_dll ()
 {
   LPVOID lpBaseOfDll = current_event.u.UnloadDll.lpBaseOfDll;
   struct so_list *so;
@@ -820,7 +818,7 @@ handle_unload_dll (void *dummy)
 	  DEBUG_EVENTS (("gdb: Unloading dll \"%s\".\n", sodel->so_name));
 
 	  windows_free_so (sodel);
-	  return 1;
+	  return;
 	}
     }
 
@@ -833,8 +831,23 @@ handle_unload_dll (void *dummy)
      32bit and 64bit worlds).  */
   complaint (&symfile_complaints, _("dll starting at %s not found."),
 	     host_address_to_string (lpBaseOfDll));
+}
 
-  return 0;
+/* Call FUNC wrapped in a TRY/CATCH that swallows all GDB
+   exceptions.  */
+
+static void
+catch_errors (void (*func) ())
+{
+  TRY
+    {
+      func ();
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      exception_print (gdb_stderr, ex);
+    }
+  END_CATCH
 }
 
 /* Clear list of loaded DLLs.  */
@@ -1542,7 +1555,7 @@ get_windows_debug_event (struct target_ops *ops,
       CloseHandle (current_event.u.LoadDll.hFile);
       if (saw_create != 1 || ! windows_initialization_done)
 	break;
-      catch_errors (handle_load_dll, NULL, (char *) "", RETURN_MASK_ALL);
+      catch_errors (handle_load_dll);
       ourstatus->kind = TARGET_WAITKIND_LOADED;
       ourstatus->value.integer = 0;
       thread_id = main_thread_id;
@@ -1555,7 +1568,7 @@ get_windows_debug_event (struct target_ops *ops,
 		     "UNLOAD_DLL_DEBUG_EVENT"));
       if (saw_create != 1 || ! windows_initialization_done)
 	break;
-      catch_errors (handle_unload_dll, NULL, (char *) "", RETURN_MASK_ALL);
+      catch_errors (handle_unload_dll);
       ourstatus->kind = TARGET_WAITKIND_LOADED;
       ourstatus->value.integer = 0;
       thread_id = main_thread_id;

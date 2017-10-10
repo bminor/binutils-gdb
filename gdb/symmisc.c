@@ -54,15 +54,8 @@ FILE *std_err;
 
 static int block_depth (struct block *);
 
-struct print_symbol_args
-  {
-    struct gdbarch *gdbarch;
-    struct symbol *symbol;
-    int depth;
-    struct ui_file *outfile;
-  };
-
-static int print_symbol (void *);
+static void print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
+			  int depth, ui_file *outfile);
 
 
 void
@@ -357,14 +350,16 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	     block, not any blocks from included symtabs.  */
 	  ALL_DICT_SYMBOLS (BLOCK_DICT (b), iter, sym)
 	    {
-	      struct print_symbol_args s;
-
-	      s.gdbarch = gdbarch;
-	      s.symbol = sym;
-	      s.depth = depth + 1;
-	      s.outfile = outfile;
-	      catch_errors (print_symbol, &s, "Error printing symbol:\n",
-			    RETURN_MASK_ERROR);
+	      TRY
+		{
+		  print_symbol (gdbarch, sym, depth + 1, outfile);
+		}
+	      CATCH (ex, RETURN_MASK_ERROR)
+		{
+		  exception_fprintf (gdb_stderr, ex,
+				     "Error printing symbol:\n");
+		}
+	      END_CATCH
 	    }
 	}
       fprintf_filtered (outfile, "\n");
@@ -515,18 +510,12 @@ maintenance_print_symbols (const char *args, int from_tty)
     }
 }
 
-/* Print symbol ARGS->SYMBOL on ARGS->OUTFILE.  ARGS->DEPTH says how
-   far to indent.  ARGS is really a struct print_symbol_args *, but is
-   declared as char * to get it past catch_errors.  Returns 0 for error,
-   1 for success.  */
+/* Print symbol SYMBOL on OUTFILE.  DEPTH says how far to indent.  */
 
-static int
-print_symbol (void *args)
+static void
+print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
+	      int depth, ui_file *outfile)
 {
-  struct gdbarch *gdbarch = ((struct print_symbol_args *) args)->gdbarch;
-  struct symbol *symbol = ((struct print_symbol_args *) args)->symbol;
-  int depth = ((struct print_symbol_args *) args)->depth;
-  struct ui_file *outfile = ((struct print_symbol_args *) args)->outfile;
   struct obj_section *section;
 
   if (SYMBOL_OBJFILE_OWNED (symbol))
@@ -546,8 +535,9 @@ print_symbol (void *args)
 					    section->the_bfd_section));
       else
 	fprintf_filtered (outfile, "\n");
-      return 1;
+      return;
     }
+
   if (SYMBOL_DOMAIN (symbol) == STRUCT_DOMAIN)
     {
       if (TYPE_TAG_NAME (SYMBOL_TYPE (symbol)))
@@ -694,7 +684,6 @@ print_symbol (void *args)
 	}
     }
   fprintf_filtered (outfile, "\n");
-  return 1;
 }
 
 static void

@@ -305,11 +305,10 @@ setup_alternate_signal_stack (void)
 #endif
 }
 
-/* Call command_loop.  If it happens to return, pass that through as a
-   non-zero return status.  */
+/* Call command_loop.  */
 
-static int
-captured_command_loop (void *data)
+static void
+captured_command_loop ()
 {
   struct ui *ui = current_ui;
 
@@ -333,11 +332,9 @@ captured_command_loop (void *data)
      check to detect bad FUNCs code.  */
   do_cleanups (all_cleanups ());
   /* If the command_loop returned, normally (rather than threw an
-     error) we try to quit.  If the quit is aborted, catch_errors()
-     which called this catch the signal and restart the command
-     loop.  */
+     error) we try to quit.  If the quit is aborted, our caller
+     catches the signal and restarts the command loop.  */
   quit_command (NULL, ui->instream == ui->stdin_stream);
-  return 1;
 }
 
 /* Handle command errors thrown from within catch_command_errors.  */
@@ -1145,7 +1142,15 @@ captured_main (void *data)
      change - SET_TOP_LEVEL() - has been eliminated.  */
   while (1)
     {
-      catch_errors (captured_command_loop, 0, "", RETURN_MASK_ALL);
+      TRY
+	{
+	  captured_command_loop ();
+	}
+      CATCH (ex, RETURN_MASK_ALL)
+	{
+	  exception_print (gdb_stderr, ex);
+	}
+      END_CATCH
     }
   /* No exit -- exit is through quit_command.  */
 }

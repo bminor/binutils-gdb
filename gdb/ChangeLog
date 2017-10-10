@@ -1,3 +1,61 @@
+2017-10-10  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* breakpoint.c (breakpoint_cond_eval): Change return type to bool
+	and reverse logic.
+	(WP_DELETED, WP_VALUE_CHANGED, WP_VALUE_NOT_CHANGED, WP_IGNORE):
+	No longer macros.  Instead ...
+	(enum wp_check_result): They're now values of this new
+	enumeration.
+	(watchpoint_check): Change return type to wp_check_result and
+	parameter type to bpstat.
+	(bpstat_check_watchpoint): Use TRY/CATCH instead of catch_errors.
+	(bpstat_check_breakpoint_conditions): Use TRY/CATCH instead of
+	catch_errors.  Reverse logic of watchpoint_check call.
+	(breakpoint_re_set_one): Now returns void and takes a breakpoint
+	pointer as parameter.
+	(breakpoint_re_set): Use TRY/CATCH instead of catch_errors.
+	* common/common-exceptions.c (throw_exception_sjlj): Update
+	comments to avoid mentioning catch_errors.
+	* exceptions.c (catch_errors): Delete.
+	* exceptions.h: Update comments to avoid mentioning catch_errors.
+	(catch_errors_ftype, catch_errors): Delete.
+	* infrun.c (normal_stop): Use TRY/CATCH instead of catch_errors.
+	(hook_stop_stub): Delete.
+	(restore_selected_frame): Change return type to void, and
+	parameter type to const frame_id &.
+	(restore_infcall_control_state): Use TRY/CATCH instead of
+	catch_errors.
+	* main.c (captured_command_loop): Return void and remove
+	parameter.  Remove references to catch_errors.
+	(captured_main): Use TRY/CATCH instead of catch_errors.
+	* objc-lang.c (objc_submethod_helper_data)
+	(find_objc_msgcall_submethod_helper): Delete.
+	(find_objc_msgcall_submethod): Use TRY/CATCH instead of
+	catch_errors.
+	* record-full.c (record_full_message): Return void.
+	(record_full_message_args, record_full_message_wrapper): Delete.
+	(record_full_message_wrapper_safe): Return bool and use TRY/CATCH
+	instead of catch_errors.
+	* solib-aix.c (solib_aix_open_symbol_file_object): Change
+	parameter type to int.
+	* solib-darwin.c (open_symbol_file_object): Ditto.
+	* solib-dsbt.c (open_symbol_file_object): Ditto.
+	* solib-frv.c (open_symbol_file_object): Ditto.
+	* solib-svr4.c (open_symbol_file_object): Ditto.
+	* solib-target.c (solib_target_open_symbol_file_object): Ditto.
+	* solib.c (update_solib_list): Use TRY/CATCH instead of
+	catch_errors.
+	* solist.h (struct target_so_ops) <open_symbol_file_object>:
+	Change type.
+	* symmisc.c (struct print_symbol_args): Remove.
+	(dump_symtab_1): Use TRY/CATCH instead of catch_errors.
+	(print_symbol): Change type.
+	* windows-nat.c (handle_load_dll, handle_unload_dll): Return void
+	and remove parameters.
+	(catch_errors): New.
+	(get_windows_debug_event): Adjust.
+
 2017-10-09  Tom Tromey  <tom@tromey.com>
 
 	* mi/mi-main.c (free_splay_tree): Remove.

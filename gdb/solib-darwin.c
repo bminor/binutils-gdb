@@ -222,7 +222,7 @@ find_program_interpreter (void)
     Note that darwin-nat.c implements pid_to_exec_file.  */
 
 static int
-open_symbol_file_object (void *from_ttyp)
+open_symbol_file_object (int from_tty)
 {
   return 0;
 }

@@ -452,7 +452,7 @@ Could not relocate shared library \"%s\": bad offsets"), so->so_name);
 }
 
 static int
-solib_target_open_symbol_file_object (void *from_ttyp)
+solib_target_open_symbol_file_object (int from_tty)
 {
   /* We can't locate the main symbol file based on the target's
      knowledge; the user has to specify it.  */

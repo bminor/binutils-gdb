@@ -589,7 +589,7 @@ solib_aix_current_sos (void)
 /* Implement the "open_symbol_file_object" target_so_ops method.  */
 
 static int
-solib_aix_open_symbol_file_object (void *from_ttyp)
+solib_aix_open_symbol_file_object (int from_tty)
 {
   return 0;
 }

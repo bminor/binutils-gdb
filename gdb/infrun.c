@@ -80,10 +80,6 @@ static void sig_print_header (void);
 
 static void resume_cleanups (void *);
 
-static int hook_stop_stub (void *);
-
-static int restore_selected_frame (void *);
-
 static int follow_fork (void);
 
 static int follow_fork_inferior (int follow_child, int detach_fork);
@@ -8314,8 +8310,16 @@ normal_stop (void)
       struct cleanup *old_chain
 	= make_cleanup (release_stop_context_cleanup, saved_context);
 
-      catch_errors (hook_stop_stub, stop_command,
-		    "Error while running hook_stop:\n", RETURN_MASK_ALL);
+      TRY
+	{
+	  execute_cmd_pre_hook (stop_command);
+	}
+      CATCH (ex, RETURN_MASK_ALL)
+	{
+	  exception_fprintf (gdb_stderr, ex,
+			     "Error while running hook_stop:\n");
+	}
+      END_CATCH
 
       /* If the stop hook resumes the target, then there's no point in
 	 trying to notify about the previous stop; its context is
@@ -8355,13 +8359,6 @@ normal_stop (void)
   prune_inferiors ();
 
   return 0;
-}
-
-static int
-hook_stop_stub (void *cmd)
-{
-  execute_cmd_pre_hook ((struct cmd_list_element *) cmd);
-  return (0);
 }
 
 int
@@ -8983,25 +8980,20 @@ save_infcall_control_state (void)
   return inf_status;
 }
 
-static int
-restore_selected_frame (void *args)
+static void
+restore_selected_frame (const frame_id &fid)
 {
-  struct frame_id *fid = (struct frame_id *) args;
-  struct frame_info *frame;
-
-  frame = frame_find_by_id (*fid);
+  frame_info *frame = frame_find_by_id (fid);
 
   /* If inf_status->selected_frame_id is NULL, there was no previously
      selected frame.  */
   if (frame == NULL)
     {
       warning (_("Unable to restore previously selected frame."));
-      return 0;
+      return;
     }
 
   select_frame (frame);
-
-  return (1);
 }
 
 /* Restore inferior session state to INF_STATUS.  */
@@ -9031,16 +9023,22 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
 
   if (target_has_stack)
     {
-      /* The point of catch_errors is that if the stack is clobbered,
+      /* The point of the try/catch is that if the stack is clobbered,
          walking the stack might encounter a garbage pointer and
          error() trying to dereference it.  */
-      if (catch_errors
-	  (restore_selected_frame, &inf_status->selected_frame_id,
-	   "Unable to restore previously selected frame:\n",
-	   RETURN_MASK_ERROR) == 0)
-	/* Error in restoring the selected frame.  Select the innermost
-	   frame.  */
-	select_frame (get_current_frame ());
+      TRY
+	{
+	  restore_selected_frame (inf_status->selected_frame_id);
+	}
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  exception_fprintf (gdb_stderr, ex,
+			     "Unable to restore previously selected frame:\n");
+	  /* Error in restoring the selected frame.  Select the
+	     innermost frame.  */
+	  select_frame (get_current_frame ());
+	}
+      END_CATCH
     }
 
   xfree (inf_status);

@@ -217,45 +217,6 @@ catch_exceptions_with_msg (struct ui_out *func_uiout,
   return val;
 }
 
-/* This function is superseded by catch_exceptions().  */
-
-int
-catch_errors (catch_errors_ftype *func, void *func_args,
-	      const char *errstring, return_mask mask)
-{
-  struct gdb_exception exception = exception_none;
-  volatile int val = 0;
-  struct ui_out *saved_uiout;
-
-  /* Save the global ``struct ui_out'' builder.  */
-  saved_uiout = current_uiout;
-
-  TRY
-    {
-      val = func (func_args);
-    }
-  CATCH (ex, RETURN_MASK_ALL)
-    {
-      exception = ex;
-    }
-  END_CATCH
-
-  /* Restore the global builder.  */
-  current_uiout = saved_uiout;
-
-  if (exception.reason < 0 && (mask & RETURN_MASK (exception.reason)) == 0)
-    {
-      /* The caller didn't request that the event be caught.
-	 Rethrow.  */
-      throw_exception (exception);
-    }
-
-  exception_fprintf (gdb_stderr, exception, "%s", errstring);
-  if (exception.reason != 0)
-    return 0;
-  return val;
-}
-
 /* See exceptions.h.  */
 
 int

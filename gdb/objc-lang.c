@@ -1310,43 +1310,25 @@ find_objc_msgsend (void)
  * dependent modules.
  */
 
-struct objc_submethod_helper_data {
-  int (*f) (CORE_ADDR, CORE_ADDR *);
-  CORE_ADDR pc;
-  CORE_ADDR *new_pc;
-};
-
-static int 
-find_objc_msgcall_submethod_helper (void * arg)
-{
-  struct objc_submethod_helper_data *s = 
-    (struct objc_submethod_helper_data *) arg;
-
-  if (s->f (s->pc, s->new_pc) == 0) 
-    return 1;
-  else 
-    return 0;
-}
-
 static int 
 find_objc_msgcall_submethod (int (*f) (CORE_ADDR, CORE_ADDR *),
 			     CORE_ADDR pc, 
 			     CORE_ADDR *new_pc)
 {
-  struct objc_submethod_helper_data s;
+  TRY
+    {
+      if (f (pc, new_pc) == 0)
+	return 1;
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      exception_fprintf (gdb_stderr, ex,
+			 "Unable to determine target of "
+			 "Objective-C method call (ignoring):\n");
+    }
+  END_CATCH
 
-  s.f = f;
-  s.pc = pc;
-  s.new_pc = new_pc;
-
-  if (catch_errors (find_objc_msgcall_submethod_helper,
-		    (void *) &s,
-		    "Unable to determine target of "
-		    "Objective-C method call (ignoring):\n",
-		    RETURN_MASK_ALL) == 0) 
-    return 1;
-  else 
-    return 0;
+  return 0;
 }
 
 int 

@@ -507,16 +507,10 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
   return 0;
 }
 
-/* If no open symbol file, attempt to locate and open the main symbol
-   file.
-
-   If FROM_TTYP dereferences to a non-zero integer, allow messages to
-   be printed.  This parameter is a pointer rather than an int because
-   open_symbol_file_object is called via catch_errors and
-   catch_errors requires a pointer argument. */
+/* See solist.h. */
 
 static int
-open_symbol_file_object (void *from_ttyp)
+open_symbol_file_object (int from_tty)
 {
   /* Unimplemented.  */
   return 0;

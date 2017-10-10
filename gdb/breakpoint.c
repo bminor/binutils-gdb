@@ -103,8 +103,6 @@ static void map_breakpoint_numbers (const char *,
 
 static void ignore_command (char *, int);
 
-static int breakpoint_re_set_one (void *);
-
 static void breakpoint_re_set_default (struct breakpoint *);
 
 static void
@@ -178,8 +176,6 @@ static void info_breakpoints_command (char *, int);
 
 static void info_watchpoints_command (char *, int);
 
-static int breakpoint_cond_eval (void *);
-
 static void cleanup_executing_breakpoints (void *);
 
 static void commands_command (char *, int);
@@ -190,8 +186,6 @@ static int remove_breakpoint (struct bp_location *);
 static int remove_breakpoint_1 (struct bp_location *, enum remove_bp_reason);
 
 static enum print_stop_action print_bp_stop_message (bpstat bs);
-
-static int watchpoint_check (void *);
 
 static int hw_breakpoint_used_count (void);
 
@@ -4842,21 +4836,16 @@ bpstat_print (bpstat bs, int kind)
   return PRINT_UNKNOWN;
 }
 
-/* Evaluate the expression EXP and return 1 if value is zero.
-   This returns the inverse of the condition because it is called
-   from catch_errors which returns 0 if an exception happened, and if an
-   exception happens we want execution to stop.
-   The argument is a "struct expression *" that has been cast to a
-   "void *" to make it pass through catch_errors.  */
+/* Evaluate the boolean expression EXP and return the result.  */
 
-static int
-breakpoint_cond_eval (void *exp)
+static bool
+breakpoint_cond_eval (expression *exp)
 {
   struct value *mark = value_mark ();
-  int i = !value_true (evaluate_expression ((struct expression *) exp));
+  bool res = value_true (evaluate_expression (exp));
 
   value_free_to_mark (mark);
-  return i;
+  return res;
 }
 
 /* Allocate a new bpstat.  Link it to the FIFO list by BS_LINK_POINTER.  */
@@ -4966,30 +4955,31 @@ watchpoints_triggered (struct target_waitstatus *ws)
   return 1;
 }
 
-/* Possible return values for watchpoint_check (this can't be an enum
-   because of check_errors).  */
-/* The watchpoint has been deleted.  */
-#define WP_DELETED 1
-/* The value has changed.  */
-#define WP_VALUE_CHANGED 2
-/* The value has not changed.  */
-#define WP_VALUE_NOT_CHANGED 3
-/* Ignore this watchpoint, no matter if the value changed or not.  */
-#define WP_IGNORE 4
+/* Possible return values for watchpoint_check.  */
+enum wp_check_result
+  {
+    /* The watchpoint has been deleted.  */
+    WP_DELETED = 1,
+
+    /* The value has changed.  */
+    WP_VALUE_CHANGED = 2,
+
+    /* The value has not changed.  */
+    WP_VALUE_NOT_CHANGED = 3,
+
+    /* Ignore this watchpoint, no matter if the value changed or not.  */
+    WP_IGNORE = 4,
+  };
 
 #define BP_TEMPFLAG 1
 #define BP_HARDWAREFLAG 2
 
 /* Evaluate watchpoint condition expression and check if its value
-   changed.
+   changed.  */
 
-   P should be a pointer to struct bpstat, but is defined as a void *
-   in order for this function to be usable with catch_errors.  */
-
-static int
-watchpoint_check (void *p)
+static wp_check_result
+watchpoint_check (bpstat bs)
 {
-  bpstat bs = (bpstat) p;
   struct watchpoint *b;
   struct frame_info *fr;
   int within_current_scope;
@@ -5185,13 +5175,29 @@ bpstat_check_watchpoint (bpstat bs)
 
       if (must_check_value)
 	{
-	  char *message
-	    = xstrprintf ("Error evaluating expression for watchpoint %d\n",
-			  b->number);
-	  struct cleanup *cleanups = make_cleanup (xfree, message);
-	  int e = catch_errors (watchpoint_check, bs, message,
-				RETURN_MASK_ALL);
-	  do_cleanups (cleanups);
+	  wp_check_result e;
+
+	  TRY
+	    {
+	      e = watchpoint_check (bs);
+	    }
+	  CATCH (ex, RETURN_MASK_ALL)
+	    {
+	      exception_fprintf (gdb_stderr, ex,
+				 "Error evaluating expression "
+				 "for watchpoint %d\n",
+				 b->number);
+
+	      SWITCH_THRU_ALL_UIS ()
+		{
+		  printf_filtered (_("Watchpoint %d deleted.\n"),
+				   b->number);
+		}
+	      watchpoint_del_at_next_stop (b);
+	      e = WP_DELETED;
+	    }
+	  END_CATCH
+
 	  switch (e)
 	    {
 	    case WP_DELETED:
@@ -5287,18 +5293,6 @@ bpstat_check_watchpoint (bpstat bs)
 	      break;
 	    default:
 	      /* Can't happen.  */
-	    case 0:
-	      /* Error from catch_errors.  */
-	      {
-		SWITCH_THRU_ALL_UIS ()
-	          {
-		    printf_filtered (_("Watchpoint %d deleted.\n"),
-				     b->number);
-		  }
-		watchpoint_del_at_next_stop (b);
-		/* We've already printed what needs to be printed.  */
-		bs->print_it = print_it_done;
-	      }
 	      break;
 	    }
 	}
@@ -5324,7 +5318,8 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 {
   const struct bp_location *bl;
   struct breakpoint *b;
-  int value_is_zero = 0;
+  /* Assume stop.  */
+  bool condition_result = true;
   struct expression *cond;
 
   gdb_assert (bs->stop);
@@ -5420,23 +5415,30 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 	    within_current_scope = 0;
 	}
       if (within_current_scope)
-	value_is_zero
-	  = catch_errors (breakpoint_cond_eval, cond,
-			  "Error in testing breakpoint condition:\n",
-			  RETURN_MASK_ALL);
+	{
+	  TRY
+	    {
+	      condition_result = breakpoint_cond_eval (cond);
+	    }
+	  CATCH (ex, RETURN_MASK_ALL)
+	    {
+	      exception_fprintf (gdb_stderr, ex,
+				 "Error in testing breakpoint condition:\n");
+	    }
+	  END_CATCH
+	}
       else
 	{
 	  warning (_("Watchpoint condition cannot be tested "
 		     "in the current scope"));
 	  /* If we failed to set the right context for this
 	     watchpoint, unconditionally report it.  */
-	  value_is_zero = 0;
 	}
       /* FIXME-someday, should give breakpoint #.  */
       value_free_to_mark (mark);
     }
 
-  if (cond && value_is_zero)
+  if (cond && !condition_result)
     {
       bs->stop = 0;
     }
@@ -14148,21 +14150,16 @@ prepare_re_set_context (struct breakpoint *b)
   return make_cleanup (null_cleanup, NULL);
 }
 
-/* Reset a breakpoint given it's struct breakpoint * BINT.
-   The value we return ends up being the return value from catch_errors.
-   Unused in this case.  */
+/* Reset a breakpoint.  */
 
-static int
-breakpoint_re_set_one (void *bint)
+static void
+breakpoint_re_set_one (breakpoint *b)
 {
-  /* Get past catch_errs.  */
-  struct breakpoint *b = (struct breakpoint *) bint;
   struct cleanup *cleanups;
 
   cleanups = prepare_re_set_context (b);
   b->ops->re_set (b);
   do_cleanups (cleanups);
-  return 0;
 }
 
 /* Re-set breakpoint locations for the current program space.
@@ -14188,12 +14185,17 @@ breakpoint_re_set (void)
 
     ALL_BREAKPOINTS_SAFE (b, b_tmp)
       {
-	/* Format possible error msg.  */
-	char *message = xstrprintf ("Error in re-setting breakpoint %d: ",
-				    b->number);
-	struct cleanup *cleanups = make_cleanup (xfree, message);
-	catch_errors (breakpoint_re_set_one, b, message, RETURN_MASK_ALL);
-	do_cleanups (cleanups);
+	TRY
+	  {
+	    breakpoint_re_set_one (b);
+	  }
+	CATCH (ex, RETURN_MASK_ALL)
+	  {
+	    exception_fprintf (gdb_stderr, ex,
+			       "Error in re-setting breakpoint %d: ",
+			       b->number);
+	  }
+	END_CATCH
       }
     set_language (save_language);
     input_radix = save_input_radix;
