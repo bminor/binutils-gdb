@@ -1,3 +1,9 @@
+2017-10-09  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-win.c (tui_set_win_height, parse_scrolling_args): Use
+	std::string.
+	* tui/tui-layout.c (enum tui_status): Use std::string.
+
 2017-10-11  Tom Tromey  <tom@tromey.com>
 
 	* gdbthread.h (thread_command): Constify.
