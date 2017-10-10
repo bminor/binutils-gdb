@@ -1,3 +1,9 @@
+2017-10-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Set GOT refcount to 1
+	instead of incrementing it.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
 2017-10-10  Renlin Li  <renlin.li@arm.com>
 
 	PR ld/21402

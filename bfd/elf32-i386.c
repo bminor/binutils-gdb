@@ -1603,7 +1603,7 @@ elf_i386_check_relocs (bfd *abfd,
       switch (r_type)
 	{
 	case R_386_TLS_LDM:
-	  htab->tls_ld_or_ldm_got.refcount += 1;
+	  htab->tls_ld_or_ldm_got.refcount = 1;
 	  goto create_got;
 
 	case R_386_PLT32:
@@ -1670,7 +1670,7 @@ elf_i386_check_relocs (bfd *abfd,
 
 	    if (h != NULL)
 	      {
-		h->got.refcount += 1;
+		h->got.refcount = 1;
 		old_tls_type = elf_x86_hash_entry (h)->tls_type;
 	      }
 	    else
@@ -1696,7 +1696,7 @@ elf_i386_check_relocs (bfd *abfd,
 		    elf_x86_local_got_tls_type (abfd)
 		      = (char *) (local_got_refcounts + 2 * symtab_hdr->sh_info);
 		  }
-		local_got_refcounts[r_symndx] += 1;
+		local_got_refcounts[r_symndx] = 1;
 		old_tls_type = elf_x86_local_got_tls_type (abfd) [r_symndx];
 	      }
 
