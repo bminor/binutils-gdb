@@ -1,3 +1,14 @@
+2017-10-10  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_before_check_relocs): Set sec_type for
+	.opd whenever .opd is present and non-zero size.  Move code
+	setting abiversion to/from output file earlier.  Only set
+	u.opd.func_sec when --gc-sections.  Read relocs and set up
+	u.opd.func_sec values here..
+	(ppc64_elf_check_relocs): ..rather than here.  Simplify opd
+	section tests.
+	(ppc64_elf_edit_opd): Don't set sec_type for .opd here.
+
 2017-10-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-m10300.c (mn10300_elf_check_relocs): Don't free cached

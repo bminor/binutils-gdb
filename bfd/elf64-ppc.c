@@ -5182,6 +5182,9 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
 
   if (opd != NULL && opd->size != 0)
     {
+      BFD_ASSERT (ppc64_elf_section_data (opd)->sec_type == sec_normal);
+      ppc64_elf_section_data (opd)->sec_type = sec_opd;
+
       if (abiversion (ibfd) == 0)
 	set_abiversion (ibfd, 1);
       else if (abiversion (ibfd) >= 2)
@@ -5193,48 +5196,84 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
-
-      if ((ibfd->flags & DYNAMIC) == 0
-	  && (opd->flags & SEC_RELOC) != 0
-	  && opd->reloc_count != 0
-	  && !bfd_is_abs_section (opd->output_section))
-	{
-	  /* Garbage collection needs some extra help with .opd sections.
-	     We don't want to necessarily keep everything referenced by
-	     relocs in .opd, as that would keep all functions.  Instead,
-	     if we reference an .opd symbol (a function descriptor), we
-	     want to keep the function code symbol's section.  This is
-	     easy for global symbols, but for local syms we need to keep
-	     information about the associated function section.  */
-	  bfd_size_type amt;
-	  asection **opd_sym_map;
-
-	  amt = OPD_NDX (opd->size) * sizeof (*opd_sym_map);
-	  opd_sym_map = bfd_zalloc (ibfd, amt);
-	  if (opd_sym_map == NULL)
-	    return FALSE;
-	  ppc64_elf_section_data (opd)->u.opd.func_sec = opd_sym_map;
-	  BFD_ASSERT (ppc64_elf_section_data (opd)->sec_type == sec_normal);
-	  ppc64_elf_section_data (opd)->sec_type = sec_opd;
-	}
     }
 
-  if (!is_ppc64_elf (info->output_bfd))
-    return TRUE;
+  if (is_ppc64_elf (info->output_bfd))
+    {
+      /* For input files without an explicit abiversion in e_flags
+	 we should have flagged any with symbol st_other bits set
+	 as ELFv1 and above flagged those with .opd as ELFv2.
+	 Set the output abiversion if not yet set, and for any input
+	 still ambiguous, take its abiversion from the output.
+	 Differences in ABI are reported later.  */
+      if (abiversion (info->output_bfd) == 0)
+	set_abiversion (info->output_bfd, abiversion (ibfd));
+      else if (abiversion (ibfd) == 0)
+	set_abiversion (ibfd, abiversion (info->output_bfd));
+    }
+
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return TRUE;
 
-  /* For input files without an explicit abiversion in e_flags
-     we should have flagged any with symbol st_other bits set
-     as ELFv1 and above flagged those with .opd as ELFv2.
-     Set the output abiversion if not yet set, and for any input
-     still ambiguous, take its abiversion from the output.
-     Differences in ABI are reported later.  */
-  if (abiversion (info->output_bfd) == 0)
-    set_abiversion (info->output_bfd, abiversion (ibfd));
-  else if (abiversion (ibfd) == 0)
-    set_abiversion (ibfd, abiversion (info->output_bfd));
+  if (opd != NULL && opd->size != 0
+      && (ibfd->flags & DYNAMIC) == 0
+      && (opd->flags & SEC_RELOC) != 0
+      && opd->reloc_count != 0
+      && !bfd_is_abs_section (opd->output_section)
+      && info->gc_sections)
+    {
+      /* Garbage collection needs some extra help with .opd sections.
+	 We don't want to necessarily keep everything referenced by
+	 relocs in .opd, as that would keep all functions.  Instead,
+	 if we reference an .opd symbol (a function descriptor), we
+	 want to keep the function code symbol's section.  This is
+	 easy for global symbols, but for local syms we need to keep
+	 information about the associated function section.  */
+      bfd_size_type amt;
+      asection **opd_sym_map;
+      Elf_Internal_Shdr *symtab_hdr;
+      Elf_Internal_Rela *relocs, *rel_end, *rel;
+
+      amt = OPD_NDX (opd->size) * sizeof (*opd_sym_map);
+      opd_sym_map = bfd_zalloc (ibfd, amt);
+      if (opd_sym_map == NULL)
+	return FALSE;
+      ppc64_elf_section_data (opd)->u.opd.func_sec = opd_sym_map;
+      relocs = _bfd_elf_link_read_relocs (ibfd, opd, NULL, NULL,
+					  info->keep_memory);
+      if (relocs == NULL)
+	return FALSE;
+      symtab_hdr = &elf_symtab_hdr (ibfd);
+      rel_end = relocs + opd->reloc_count - 1;
+      for (rel = relocs; rel < rel_end; rel++)
+	{
+	  enum elf_ppc64_reloc_type r_type = ELF64_R_TYPE (rel->r_info);
+	  unsigned long r_symndx = ELF64_R_SYM (rel->r_info);
+
+	  if (r_type == R_PPC64_ADDR64
+	      && ELF64_R_TYPE ((rel + 1)->r_info) == R_PPC64_TOC
+	      && r_symndx < symtab_hdr->sh_info)
+	    {
+	      Elf_Internal_Sym *isym;
+	      asection *s;
+
+	      isym = bfd_sym_from_r_symndx (&htab->sym_cache, ibfd, r_symndx);
+	      if (isym == NULL)
+		{
+		  if (elf_section_data (opd)->relocs != relocs)
+		    free (relocs);
+		  return FALSE;
+		}
+
+	      s = bfd_section_from_elf_index (ibfd, isym->st_shndx);
+	      if (s != NULL && s != opd)
+		opd_sym_map[OPD_NDX (rel->r_offset)] = s;
+	    }
+	}
+      if (elf_section_data (opd)->relocs != relocs)
+	free (relocs);
+    }
 
   p = &htab->dot_syms;
   while ((eh = *p) != NULL)
@@ -5397,8 +5436,8 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
-  asection **opd_sym_map;
   struct elf_link_hash_entry *tga, *dottga;
+  bfd_boolean is_opd;
 
   if (bfd_link_relocatable (info))
     return TRUE;
@@ -5425,11 +5464,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
   sreloc = NULL;
-  opd_sym_map = NULL;
-  if (ppc64_elf_section_data (sec) != NULL
-      && ppc64_elf_section_data (sec)->sec_type == sec_opd)
-    opd_sym_map = ppc64_elf_section_data (sec)->u.opd.func_sec;
-
+  is_opd = ppc64_elf_section_data (sec)->sec_type == sec_opd;
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
     {
@@ -5857,26 +5892,12 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  goto dodyn;
 
 	case R_PPC64_ADDR64:
-	  if (opd_sym_map != NULL
+	  if (is_opd
 	      && rel + 1 < rel_end
 	      && ELF64_R_TYPE ((rel + 1)->r_info) == R_PPC64_TOC)
 	    {
 	      if (h != NULL)
 		((struct ppc_link_hash_entry *) h)->is_func = 1;
-	      else
-		{
-		  asection *s;
-		  Elf_Internal_Sym *isym;
-
-		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
-						abfd, r_symndx);
-		  if (isym == NULL)
-		    return FALSE;
-
-		  s = bfd_section_from_elf_index (abfd, isym->st_shndx);
-		  if (s != NULL && s != sec)
-		    opd_sym_map[OPD_NDX (rel->r_offset)] = s;
-		}
 	    }
 	  /* Fall through.  */
 
@@ -5916,7 +5937,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    h->non_got_ref = 1;
 
 	  /* Don't propagate .opd relocs.  */
-	  if (NO_OPD_RELOCS && opd_sym_map != NULL)
+	  if (NO_OPD_RELOCS && is_opd)
 	    break;
 
 	  /* If we are creating a shared library, and this is a reloc
@@ -8116,7 +8137,6 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 	  opd->adjust = bfd_zalloc (sec->owner, amt);
 	  if (opd->adjust == NULL)
 	    return FALSE;
-	  ppc64_elf_section_data (sec)->sec_type = sec_opd;
 
 	  /* This seems a waste of time as input .opd sections are all
 	     zeros as generated by gcc, but I suppose there's no reason
