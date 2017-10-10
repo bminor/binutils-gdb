@@ -1,3 +1,9 @@
+2017-10-10  Tom Tromey  <tromey@sourceware.org>
+
+	PR 22249
+	* dwarf.c (process_debug_info): Skip any comp unit that ends
+	before dwarf_start_die.
+
 2017-10-06  Alan Modra  <amodra@gmail.com>
 
 	* dwarf.c (process_debug_info): Consolidate header length checks.

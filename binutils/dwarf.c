@@ -2667,6 +2667,14 @@ process_debug_info (struct dwarf_section *section,
 	  SAFE_BYTE_GET_AND_INC (type_offset, hdrptr, offset_size, end);
 	}
 
+      if (dwarf_start_die > (cu_offset + compunit.cu_length
+			     + initial_length_size))
+	{
+	  start = section_begin + cu_offset + compunit.cu_length
+	    + initial_length_size;
+	  continue;
+	}
+
       if ((do_loc || do_debug_loc || do_debug_ranges)
 	  && num_debug_info_entries == 0
 	  && ! do_types)
