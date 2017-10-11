@@ -963,13 +963,16 @@ process_abbrev_section (unsigned char *start, unsigned char *end)
 static const char *
 get_TAG_name (unsigned long tag)
 {
-  const char *name = get_DW_TAG_name ((unsigned int)tag);
+  const char *name = get_DW_TAG_name ((unsigned int) tag);
 
   if (name == NULL)
     {
       static char buffer[100];
 
-      snprintf (buffer, sizeof (buffer), _("Unknown TAG value: %lx"), tag);
+      if (tag >= DW_TAG_lo_user && tag <= DW_TAG_hi_user)
+	snprintf (buffer, sizeof (buffer), _("User TAG value: %#lx"), tag);
+      else
+	snprintf (buffer, sizeof (buffer), _("Unknown TAG value: %#lx"), tag);
       return buffer;
     }
 
@@ -2238,6 +2241,12 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_ATE_edited:		printf ("(edited)"); break;
 	case DW_ATE_signed_fixed:	printf ("(signed_fixed)"); break;
 	case DW_ATE_unsigned_fixed:	printf ("(unsigned_fixed)"); break;
+	  /* DWARF 4 values:  */
+	case DW_ATE_UTF:		printf ("(unicode string)"); break;
+	  /* DWARF 5 values:  */
+	case DW_ATE_UCS:		printf ("(UCS)"); break;
+	case DW_ATE_ASCII:		printf ("(ASCII)"); break;
+
 	  /* HP extensions:  */
 	case DW_ATE_HP_float80:		printf ("(HP_float80)"); break;
 	case DW_ATE_HP_complex_float80:	printf ("(HP_complex_float80)"); break;
@@ -2246,8 +2255,6 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_ATE_HP_floathpintel:	printf ("(HP_floathpintel)"); break;
 	case DW_ATE_HP_imaginary_float80:	printf ("(HP_imaginary_float80)"); break;
 	case DW_ATE_HP_imaginary_float128:	printf ("(HP_imaginary_float128)"); break;
-	  /* DWARF 4 values:  */
-	case DW_ATE_UTF:		printf ("(unicode string)"); break;
 
 	default:
 	  if (uvalue >= DW_ATE_lo_user
@@ -2283,6 +2290,22 @@ read_and_display_attr_value (unsigned long attribute,
 	}
       break;
 
+    case DW_AT_endianity:
+      printf ("\t");
+      switch (uvalue)
+	{
+	case DW_END_default:		printf ("(default)"); break;
+	case DW_END_big:		printf ("(big)"); break;
+	case DW_END_little:		printf ("(little)"); break;
+	default:
+	  if (uvalue >= DW_END_lo_user && uvalue <= DW_END_hi_user)
+	    printf (_("(user specified)"));
+	  else
+	    printf (_("(unknown endianity)"));
+	  break;
+	}
+      break;
+
     case DW_AT_virtuality:
       printf ("\t");
       switch (uvalue)
@@ -2313,6 +2336,10 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_CC_normal:	printf ("(normal)"); break;
 	case DW_CC_program:	printf ("(program)"); break;
 	case DW_CC_nocall:	printf ("(nocall)"); break;
+	case DW_CC_pass_by_reference: printf ("(pass by ref)"); break;
+	case DW_CC_pass_by_value: printf ("(pass by value)"); break;
+	case DW_CC_GNU_renesas_sh: printf ("(Rensas SH)"); break;
+	case DW_CC_GNU_borland_fastcall_i386: printf ("(Borland fastcall i386)"); break;
 	default:
 	  if (uvalue >= DW_CC_lo_user
 	      && uvalue <= DW_CC_hi_user)
@@ -2326,12 +2353,47 @@ read_and_display_attr_value (unsigned long attribute,
       printf ("\t");
       switch (uvalue)
 	{
+	case 255:
 	case -1: printf (_("(undefined)")); break;
 	case 0:  printf ("(row major)"); break;
 	case 1:  printf ("(column major)"); break;
 	}
       break;
 
+    case DW_AT_decimal_sign:
+      printf ("\t");
+      switch (uvalue)
+	{
+	case DW_DS_unsigned:            printf (_("(unsigned)")); break;
+	case DW_DS_leading_overpunch:   printf (_("(leading overpunch)")); break;
+	case DW_DS_trailing_overpunch:  printf (_("(trailing overpunch)")); break;
+	case DW_DS_leading_separate:    printf (_("(leading separate)")); break;
+	case DW_DS_trailing_separate:   printf (_("(trailing separate)")); break;
+	default:                        printf (_("(unrecognised)")); break;
+	}
+      break;
+
+    case DW_AT_defaulted:
+      printf ("\t");
+      switch (uvalue)
+	{
+	case DW_DEFAULTED_no:           printf (_("(no)")); break;
+	case DW_DEFAULTED_in_class:     printf (_("(in class)")); break;
+	case DW_DEFAULTED_out_of_class: printf (_("(out of class)")); break;
+	default:                        printf (_("(unrecognised)")); break;
+	}
+      break;
+
+    case DW_AT_discr_list:
+      printf ("\t");
+      switch (uvalue)
+	{
+	case DW_DSC_label:  printf (_("(label)")); break;
+	case DW_DSC_range:  printf (_("(range)")); break;
+	default:            printf (_("(unrecognised)")); break;
+	}
+      break;
+      
     case DW_AT_frame_base:
       have_frame_base = 1;
       /* Fall through.  */

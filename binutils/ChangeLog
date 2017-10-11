@@ -1,3 +1,17 @@
+2017-10-11  Peeter Joot  <peeter.joot@lzlabs.com>
+	Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (read_and_display_attr_value): Handle DW_AT_endianity,
+	DW_END_default, DW_END_big, DW_END_little, DW_ATE_UCS,
+	DW_ATE_ASCII, DW_CC_pass_by_reference, DW_CC_pass_by_value,
+	DW_CC_GNU_renesas_sh, DW_CC_GNU_borland_fastcall_i386,
+	DW_AT_decimal_sign, DW_AT_defaulted, DW_AT_discr_list.
+	(get_TAG_name): Report user generated tag values.
+	* testsuite/binutils-all/dwarf-attributes.S: New test.
+	* testsuite/binutils-all/dwarf-attributes.W. Expected output from
+	readelf.
+	* testsuite/binutils-all/readelf.exp: Run the new test.
+
 2017-10-10  Tom Tromey  <tom@tromey.com>
 
 	* dwarf-mode.el: Bump to version 1.4.
