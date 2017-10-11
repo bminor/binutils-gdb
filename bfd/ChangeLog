@@ -1,3 +1,10 @@
+2017-10-12  Alan Modra  <amodra@gmail.com>
+
+	* elf32-nds32.c (nds32_elf_size_dynamic_sections): Set .interp
+	when executable rather than non-PIC.
+	* elf32-score.c (s3_bfd_score_elf_size_dynamic_sections): Likewise.
+	* elf32-score7.c (s7_bfd_score_elf_size_dynamic_sections): Likewise.
+
 2017-10-11  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elf-bfd.h (elf_backend_data): Add `linux_prpsinfo64_ugid16'
