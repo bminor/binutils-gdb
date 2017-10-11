@@ -87,7 +87,7 @@ do_module_cleanup (void *arg, int registers_valid)
     if ((objfile->flags & OBJF_USERLOADED) == 0
         && (strcmp (objfile_name (objfile), data->objfile_name_string) == 0))
       {
-	free_objfile (objfile);
+	delete objfile;
 
 	/* It may be a bit too pervasive in this dummy_frame dtor callback.  */
 	clear_symtab_users (0);

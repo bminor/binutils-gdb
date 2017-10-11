@@ -1,3 +1,22 @@
+2017-10-13  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile-object-run.c (do_module_cleanup): Use delete.
+	* solib.c (update_solib_list, reload_shared_libraries_1): Use
+	delete.
+	* symfile.c (symbol_file_add_with_addrs): Use new.
+	(symbol_file_add_separate): Update comment.
+	(syms_from_objfile_1, remove_symbol_file_command): Use delete.
+	* jit.c (jit_object_close_impl): Use new.
+	(jit_unregister_code): Use delete.
+	* objfiles.c (objfile::objfile): Rename from allocate_objfile.
+	(~objfile): Rename from free_objfile.
+	(free_objfile_separate_debug, do_free_objfile_cleanup)
+	(free_all_objfiles, objfile_purge_solibs): Use delete.
+	* objfiles.h (struct objfile): Add constructor and destructor.
+	Use DISABLE_COPY_AND_ASSIGN.  Add initializers to data members.
+	(allocate_objfile, free_objfile): Don't declare.
+	(struct objstats): Add initializers.
+
 2017-10-12  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* arch-utils.h (simple_displaced_step_copy_insn): Remove.

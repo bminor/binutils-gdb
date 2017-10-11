@@ -801,8 +801,8 @@ jit_object_close_impl (struct gdb_symbol_callbacks *cb,
 
   priv_data = (jit_dbg_reader_data *) cb->priv_data;
 
-  objfile = allocate_objfile (NULL, "<< JIT compiled code >>",
-			      OBJF_NOT_FILENAME);
+  objfile = new struct objfile (NULL, "<< JIT compiled code >>",
+				OBJF_NOT_FILENAME);
   objfile->per_bfd->gdbarch = target_gdbarch ();
 
   terminate_minimal_symbol_table (objfile);
@@ -983,7 +983,7 @@ jit_register_code (struct gdbarch *gdbarch,
 static void
 jit_unregister_code (struct objfile *objfile)
 {
-  free_objfile (objfile);
+  delete objfile;
 }
 
 /* Look up the objfile with this code entry address.  */

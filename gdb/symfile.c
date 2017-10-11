@@ -1018,7 +1018,7 @@ syms_from_objfile_1 (struct objfile *objfile,
 
       if (symfile_objfile != NULL)
 	{
-	  free_objfile (symfile_objfile);
+	  delete symfile_objfile;
 	  gdb_assert (symfile_objfile == NULL);
 	}
 
@@ -1100,7 +1100,7 @@ finish_new_objfile (struct objfile *objfile, symfile_add_flags add_flags)
    ABFD is a BFD already open on the file, as from symfile_bfd_open.
    A new reference is acquired by this function.
 
-   For NAME description see allocate_objfile's definition.
+   For NAME description see the objfile constructor.
 
    ADD_FLAGS encodes verbosity, whether this is main symbol file or
    extra, such as dynamically loaded code, and what to do with breakpoins.
@@ -1144,7 +1144,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
 
   if (mainline)
     flags |= OBJF_MAINLINE;
-  objfile = allocate_objfile (abfd, name, flags);
+  objfile = new struct objfile (abfd, name, flags);
 
   if (parent)
     add_separate_debug_objfile (objfile, parent);
@@ -1218,7 +1218,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
 }
 
 /* Add BFD as a separate debug file for OBJFILE.  For NAME description
-   see allocate_objfile's definition.  */
+   see the objfile constructor.  */
 
 void
 symbol_file_add_separate (bfd *bfd, const char *name,
@@ -2377,7 +2377,7 @@ remove_symbol_file_command (const char *args, int from_tty)
 		 objfile_name (objf)))
     error (_("Not confirmed."));
 
-  free_objfile (objf);
+  delete objf;
   clear_symtab_users (0);
 }
 
