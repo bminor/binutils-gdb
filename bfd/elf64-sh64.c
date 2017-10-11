@@ -3944,6 +3944,8 @@ static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
 #define elf_backend_got_header_size	24
 #define elf_backend_dtrel_excludes_plt	1
 
+#define elf_backend_linux_prpsinfo64_ugid16	TRUE
+
 #include "elf64-target.h"
 
 /* NetBSD support.  */

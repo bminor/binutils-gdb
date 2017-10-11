@@ -10489,11 +10489,22 @@ elfcore_write_linux_prpsinfo64
   (bfd *abfd, char *buf, int *bufsiz,
    const struct elf_internal_linux_prpsinfo *prpsinfo)
 {
-  struct elf_external_linux_prpsinfo64 data;
+  if (get_elf_backend_data (abfd)->linux_prpsinfo64_ugid16)
+    {
+      struct elf_external_linux_prpsinfo64_ugid16 data;
 
-  swap_linux_prpsinfo64_out (abfd, prpsinfo, &data);
-  return elfcore_write_note (abfd, buf, bufsiz,
-			     "CORE", NT_PRPSINFO, &data, sizeof (data));
+      swap_linux_prpsinfo64_ugid16_out (abfd, prpsinfo, &data);
+      return elfcore_write_note (abfd, buf, bufsiz,
+				 "CORE", NT_PRPSINFO, &data, sizeof (data));
+    }
+  else
+    {
+      struct elf_external_linux_prpsinfo64_ugid32 data;
+
+      swap_linux_prpsinfo64_ugid32_out (abfd, prpsinfo, &data);
+      return elfcore_write_note (abfd, buf, bufsiz,
+				 "CORE", NT_PRPSINFO, &data, sizeof (data));
+    }
 }
 
 char *

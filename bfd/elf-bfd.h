@@ -1561,6 +1561,10 @@ struct elf_backend_data
   /* True if the 32-bit Linux PRPSINFO structure's `pr_uid' and `pr_gid'
      members use a 16-bit data type.  */
   unsigned linux_prpsinfo32_ugid16 : 1;
+
+  /* True if the 64-bit Linux PRPSINFO structure's `pr_uid' and `pr_gid'
+     members use a 16-bit data type.  */
+  unsigned linux_prpsinfo64_ugid16 : 1;
 };
 
 /* Information about reloc sections associated with a bfd_elf_section_data

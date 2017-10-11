@@ -1,5 +1,22 @@
 2017-10-11  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elf-bfd.h (elf_backend_data): Add `linux_prpsinfo64_ugid16'
+	member.
+	* elf-linux-core.h (elf_external_linux_prpsinfo64): Rename to...
+	(elf_external_linux_prpsinfo64_ugid32): ... this.
+	(swap_linux_prpsinfo32_out): Rename to...
+	(swap_linux_prpsinfo32_ugid32_out): ... this.
+	(elf_external_linux_prpsinfo64_ugid16): New structure.
+	(swap_linux_prpsinfo64_ugid16_out): New function.
+	* elfxx-target.h [!elf_backend_linux_prpsinfo64_ugid16]
+	(elf_backend_linux_prpsinfo64_ugid16): Define.
+	(elfNN_bed): Initialize `linux_prpsinfo64_ugid16' member.
+	* elf.c (elfcore_write_linux_prpsinfo64): Handle both variants
+	of the 64-bit Linux core PRPSINFO note.
+	* elf64-sh64.c (elf_backend_linux_prpsinfo64_ugid16): Define.
+
+2017-10-11  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elf-bfd.h (elf_backend_data): Add `linux_prpsinfo32_ugid16'
 	member.
 	(elfcore_write_ppc_linux_prpsinfo32): Remove prototype.
