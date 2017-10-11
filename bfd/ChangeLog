@@ -1,3 +1,9 @@
+2017-10-11  Pedro Alves  <palves@redhat.com>
+
+	* bfd.c (_doprnt): Rename to ...
+	(_bfd_doprnt): ... this.
+	(error_handler_internal): Adjust.
+
 2017-10-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Set GOT refcount to 1
