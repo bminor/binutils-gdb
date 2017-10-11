@@ -44,7 +44,7 @@ mmix_before_allocation (void)
   ENABLE_RELAXATION;
 
   if (!_bfd_mmix_before_linker_allocation (link_info.output_bfd, &link_info))
-    einfo ("%X%P: Internal problems setting up section %s",
+    einfo (_("%X%P: Internal problems setting up section %s"),
 	   MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
 }
 
@@ -88,7 +88,7 @@ mmix_after_allocation (void)
      as an undefined symbol.  */
   if (regvma < 32 * 8)
     {
-      einfo ("%X%P: Too many global registers: %u, max 223\n",
+      einfo (_("%X%P: Too many global registers: %u, max 223\n"),
 	     (unsigned) sec->size / 8);
       regvma = 32 * 8;
     }
@@ -106,7 +106,7 @@ mmix_after_allocation (void)
   if (!_bfd_mmix_after_linker_allocation (link_info.output_bfd, &link_info))
     {
       /* This is a fatal error; make einfo call not return.  */
-      einfo ("%F%P: Can't finalize linker-allocated global registers\n");
+      einfo (_("%F%P: Can't finalize linker-allocated global registers\n"));
     }
 }
 EOF

@@ -228,7 +228,7 @@ mmo_after_open (void)
 	{
 	  if (bfd_get_flavour (is->the_bfd) == bfd_target_elf_flavour
 	      && !_bfd_mmix_check_all_relocs (is->the_bfd, &link_info))
-	    einfo ("%X%P: Internal problems scanning %B after opening it",
+	    einfo (_("%X%P: Internal problems scanning %B after opening it"),
 		   is->the_bfd);
 	}
     }

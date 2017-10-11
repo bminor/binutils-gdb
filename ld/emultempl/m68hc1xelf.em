@@ -79,7 +79,7 @@ m68hc11_elf_${EMULATION_NAME}_before_allocation (void)
     {
       if (ret < 0)
 	{
-	  einfo ("%X%P: can not size stub section: %E\n");
+	  einfo (_("%X%P: can not size stub section: %E\n"));
 	  return;
 	}
 
@@ -89,7 +89,7 @@ m68hc11_elf_${EMULATION_NAME}_before_allocation (void)
 				     &link_info,
 				     &m68hc11elf_add_stub_section))
 	{
-	  einfo ("%X%P: can not size stub section: %E\n");
+	  einfo (_("%X%P: can not size stub section: %E\n"));
 	  return;
 	}
     }
@@ -146,7 +146,8 @@ m68hc11elf_create_output_section_statements (void)
 {
   if (bfd_get_flavour (link_info.output_bfd) != bfd_target_elf_flavour)
     {
-      einfo ("%X%P: changing output format whilst linking is not supported\n");
+      einfo (_("%X%P: changing output format whilst linking "
+	       "is not supported\n"));
       return;
     }
 
@@ -159,7 +160,7 @@ m68hc11elf_create_output_section_statements (void)
 			     bfd_get_arch (link_info.output_bfd),
 			     bfd_get_mach (link_info.output_bfd)))
     {
-      einfo ("%X%P: can not create BFD %E\n");
+      einfo (_("%X%P: can not create BFD %E\n"));
       return;
     }
 
@@ -286,7 +287,7 @@ m68hc11elf_add_stub_section (const char *stub_sec_name,
     return stub_sec;
 
  err_ret:
-  einfo ("%X%P: can not make stub section: %E\n");
+  einfo (_("%X%P: can not make stub section: %E\n"));
   return NULL;
 }
 
@@ -308,11 +309,11 @@ m68hc11elf_after_allocation (void)
 					 stub_file->the_bfd,
 					 &link_info, 0))
 	    {
-	      einfo ("%X%P: can not size stub section: %E\n");
+	      einfo (_("%X%P: can not size stub section: %E\n"));
 	      return;
 	    }
 	  if (!elf32_m68hc11_build_stubs (link_info.output_bfd, &link_info))
-	    einfo ("%X%P: can not build stubs: %E\n");
+	    einfo (_("%X%P: can not build stubs: %E\n"));
 	}
     }
 

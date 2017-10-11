@@ -723,7 +723,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
 	  && blhe->type != bfd_link_hash_common)
 	{
 	  /* We should not have a new, indirect or warning symbol here.  */
-	  einfo ("%P%F: %s: plugin symbol table corrupt (sym type %d)\n",
+	  einfo (_("%P%F: %s: plugin symbol table corrupt (sym type %d)\n"),
 		 called_plugin->name, blhe->type);
 	}
 

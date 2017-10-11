@@ -168,7 +168,7 @@ data_statement_size (lang_data_statement_type *d)
       size = BYTE_SIZE;
       break;
     default:
-      einfo ("%P: error: unhandled data_statement size\n");
+      einfo (_("%P: error: unhandled data_statement size\n"));
       FAIL ();
     }
   return size;
@@ -268,7 +268,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
 
   if (lower == NULL && upper == NULL)
     {
-      einfo ("%P: error: no section named %s or %s in linker script\n",
+      einfo (_("%P: error: no section named %s or %s in linker script\n"),
 	     lower_name, upper_name);
       goto end;
     }
@@ -277,7 +277,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
       lower = lang_output_section_find (name);
       if (lower == NULL)
 	{
-	  einfo ("%P: error: no section named %s in linker script\n", name);
+	  einfo (_("%P: error: no section named %s in linker script\n"), name);
 	  goto end;
 	}
     }
@@ -403,7 +403,7 @@ add_region_prefix (bfd *abfd, asection *s,
 	  move_prefixed_section (s, new_input_sec_name, upper);
 	}
       else
-	einfo ("%P: error: no section named %s in linker script\n",
+	einfo (_("%P: error: no section named %s in linker script\n"),
 	       new_output_sec_name);
       break;
     case REGION_LOWER:
@@ -416,7 +416,7 @@ add_region_prefix (bfd *abfd, asection *s,
 	  move_prefixed_section (s, new_input_sec_name, lower);
 	}
       else
-	einfo ("%P: error: no section named %s in linker script\n",
+	einfo (_("%P: error: no section named %s in linker script\n"),
 	       new_output_sec_name);
       break;
     case REGION_EITHER:

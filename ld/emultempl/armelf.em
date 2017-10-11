@@ -262,7 +262,7 @@ elf32_arm_add_stub_section (const char * stub_sec_name,
     }
 
  err_ret:
-  einfo ("%X%P: can not make stub section: %E\n");
+  einfo (_("%X%P: can not make stub section: %E\n"));
   return NULL;
 }
 
@@ -374,7 +374,7 @@ gld${EMULATION_NAME}_after_allocation (void)
   ret = bfd_elf_discard_info (link_info.output_bfd, & link_info);
   if (ret < 0)
     {
-      einfo ("%X%P: .eh_frame/.stab edit: %E\n");
+      einfo (_("%X%P: .eh_frame/.stab edit: %E\n"));
       return;
     }
   else if (ret > 0)
@@ -389,7 +389,8 @@ gld${EMULATION_NAME}_after_allocation (void)
 	{
 	  if (ret < 0)
 	    {
-	      einfo ("%X%P: could not compute sections lists for stub generation: %E\n");
+	      einfo (_("%X%P: could not compute sections lists "
+		       "for stub generation: %E\n"));
 	      return;
 	    }
 
@@ -403,7 +404,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 				      & elf32_arm_add_stub_section,
 				      & gldarm_layout_sections_again))
 	    {
-	      einfo ("%X%P: cannot size stub section: %E\n");
+	      einfo (_("%X%P: cannot size stub section: %E\n"));
 	      return;
 	    }
 	}
@@ -437,7 +438,7 @@ gld${EMULATION_NAME}_finish (void)
       if (stub_file->the_bfd->sections != NULL)
 	{
 	  if (! elf32_arm_build_stubs (& link_info))
-	    einfo ("%X%P: can not build stubs: %E\n");
+	    einfo (_("%X%P: can not build stubs: %E\n"));
 	}
     }
 
@@ -510,7 +511,8 @@ arm_elf_create_output_section_statements (void)
 	 These will only be created if the output format is an arm format,
 	 hence we do not support linking and changing output formats at the
 	 same time.  Use a link followed by objcopy to change output formats.  */
-      einfo ("%F%X%P: error: Cannot change output format whilst linking ARM binaries.\n");
+      einfo (_("%F%X%P: error: Cannot change output format "
+	       "whilst linking ARM binaries.\n"));
       return;
     }
 
@@ -520,10 +522,10 @@ arm_elf_create_output_section_statements (void)
 					bfd_get_target (link_info.output_bfd));
 
       if (params.in_implib_bfd == NULL)
-	einfo ("%F%s: Can't open: %E\n", in_implib_filename);
+	einfo (_("%F%s: Can't open: %E\n"), in_implib_filename);
 
       if (!bfd_check_format (params.in_implib_bfd, bfd_object))
-	einfo ("%F%s: Not a relocatable file: %E\n", in_implib_filename);
+	einfo (_("%F%s: Not a relocatable file: %E\n"), in_implib_filename);
     }
 
   bfd_elf32_arm_set_target_params (link_info.output_bfd, &link_info, &params);
@@ -537,7 +539,7 @@ arm_elf_create_output_section_statements (void)
  			      bfd_get_arch (link_info.output_bfd),
  			      bfd_get_mach (link_info.output_bfd)))
     {
-      einfo ("%X%P: can not create BFD %E\n");
+      einfo (_("%X%P: can not create BFD %E\n"));
       return;
     }
 

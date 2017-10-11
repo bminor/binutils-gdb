@@ -71,7 +71,7 @@ ppc_after_open (void)
 
       new_plt = ppc_elf_select_plt_layout (link_info.output_bfd, &link_info);
       if (new_plt < 0)
-	einfo ("%X%P: select_plt_layout problem %E\n");
+	einfo (_("%X%P: select_plt_layout problem %E\n"));
 
       num_got = 0;
       num_plt = 0;
@@ -124,7 +124,7 @@ ppc_before_allocation (void)
 	{
 	  if (!ppc_elf_tls_optimize (link_info.output_bfd, &link_info))
 	    {
-	      einfo ("%X%P: TLS problem %E\n");
+	      einfo (_("%X%P: TLS problem %E\n"));
 	      return;
 	    }
 	}

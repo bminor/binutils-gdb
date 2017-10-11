@@ -1374,7 +1374,7 @@ setup_build_id (bfd *ibfd)
 
   if (!validate_build_id_style (emit_build_id))
     {
-      einfo ("%P: warning: unrecognized --build-id style ignored.\n");
+      einfo (_("%P: warning: unrecognized --build-id style ignored.\n"));
       return FALSE;
     }
 
@@ -1398,8 +1398,8 @@ setup_build_id (bfd *ibfd)
       return TRUE;
     }
 
-  einfo ("%P: warning: Cannot create .buildid section,"
-	 " --build-id ignored.\n");
+  einfo (_("%P: warning: Cannot create .buildid section,"
+	   " --build-id ignored.\n"));
   return FALSE;
 }
 
@@ -1574,7 +1574,7 @@ gld_${EMULATION_NAME}_after_open (void)
 		    if (nrelocs < 0)
 		      {
 			free (relocs);
-			einfo ("%X%P: unable to process relocs: %E\n");
+			einfo (_("%X%P: unable to process relocs: %E\n"));
 			return;
 		      }
 

@@ -1013,7 +1013,7 @@ build_filler_bfd (int include_edata)
 			     bfd_get_arch (link_info.output_bfd),
 			     bfd_get_mach (link_info.output_bfd)))
     {
-      einfo ("%X%P: can not create BFD: %E\n");
+      einfo (_("%X%P: can not create BFD: %E\n"));
       return;
     }
 
@@ -1028,7 +1028,7 @@ build_filler_bfd (int include_edata)
 				      | SEC_KEEP
 				      | SEC_IN_MEMORY)))
 	{
-	  einfo ("%X%P: can not create .edata section: %E\n");
+	  einfo (_("%X%P: can not create .edata section: %E\n"));
 	  return;
 	}
       bfd_set_section_size (filler_bfd, edata_s, edata_sz);
@@ -1043,7 +1043,7 @@ build_filler_bfd (int include_edata)
 				  | SEC_KEEP
 				  | SEC_IN_MEMORY)))
     {
-      einfo ("%X%P: can not create .reloc section: %E\n");
+      einfo (_("%X%P: can not create .reloc section: %E\n"));
       return;
     }
 
@@ -1385,7 +1385,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	  if (s->output_section->vma == 0)
 	    {
 	      /* Huh?  Shouldn't happen, but punt if it does.  */
-	      einfo ("DJ: zero vma section reloc detected: `%s' #%d f=%d\n",
+	      einfo (_("zero vma section reloc detected: `%s' #%d f=%d\n"),
 		     s->output_section->name, s->output_section->index,
 		     s->output_section->flags);
 	      continue;
@@ -3047,7 +3047,7 @@ add_bfd_to_link (bfd *abfd, const char *name, struct bfd_link_info *linfo)
   ldlang_add_file (fake_file);
 
   if (!bfd_link_add_symbols (abfd, linfo))
-    einfo ("%P%X: addsym %s: %E\n", name);
+    einfo (_("%P%X: add symbols %s: %E\n"), name);
 }
 
 void
@@ -3233,14 +3233,14 @@ pe_implied_import_dll (const char *filename)
   dll = bfd_openr (filename, pe_details->target_name);
   if (!dll)
     {
-      einfo ("%P%X: open %s: %E\n", filename);
+      einfo (_("%P%X: open %s: %E\n"), filename);
       return FALSE;
     }
 
   /* PEI dlls seem to be bfd_objects.  */
   if (!bfd_check_format (dll, bfd_object))
     {
-      einfo ("%P%X: %s: this doesn't appear to be a DLL\n", filename);
+      einfo (_("%P%X: %s: this doesn't appear to be a DLL\n"), filename);
       return FALSE;
     }
 

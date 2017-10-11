@@ -140,7 +140,8 @@ gld${EMULATION_NAME}_after_open (void)
 	 These will only be created if the output format is an arm format,
 	 hence we do not support linking and changing output formats at the
 	 same time.  Use a link followed by objcopy to change output formats.  */
-      einfo ("%F%X%P: error: cannot change output format whilst linking ARM binaries\n");
+      einfo (_("%F%X%P: error: cannot change output format "
+	       "whilst linking ARM binaries\n"));
       return;
     }
 

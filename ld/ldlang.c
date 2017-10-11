@@ -6419,7 +6419,7 @@ ldlang_place_orphan (asection *s)
       int constraint = 0;
 
       if (config.orphan_handling == orphan_handling_error)
-	einfo ("%X%P: error: unplaced orphan section `%A' from `%B'.\n",
+	einfo (_("%X%P: error: unplaced orphan section `%A' from `%B'.\n"),
 	       s, s->owner);
 
       if (config.unique_orphan_sections || unique_section_p (s, NULL))
@@ -6437,8 +6437,8 @@ ldlang_place_orphan (asection *s)
 	}
 
       if (config.orphan_handling == orphan_handling_warn)
-	einfo ("%P: warning: orphan section `%A' from `%B' being "
-	       "placed in section `%s'.\n",
+	einfo (_("%P: warning: orphan section `%A' from `%B' being "
+		 "placed in section `%s'.\n"),
 	       s, s->owner, os->name);
     }
 }

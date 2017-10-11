@@ -1486,9 +1486,9 @@ notice (struct bfd_link_info *info,
       && bfd_hash_lookup (info->notice_hash, name, FALSE, FALSE) != NULL)
     {
       if (bfd_is_und_section (section))
-	einfo ("%B: reference to %s\n", abfd, name);
+	einfo (_("%B: reference to %s\n"), abfd, name);
       else
-	einfo ("%B: definition of %s\n", abfd, name);
+	einfo (_("%B: definition of %s\n"), abfd, name);
     }
 
   if (command_line.cref || nocrossref_list != NULL)

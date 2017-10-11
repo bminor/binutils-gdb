@@ -1,3 +1,48 @@
+2017-10-11  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/aarch64elf.em: Wrap einfo strings in _().  Formatting.
+	* emultempl/aix.em: Likewise.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/armelf.em: Likewise.
+	* emultempl/avrelf.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/cr16elf.em: Likewise.
+	* emultempl/elf-generic.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/genelf.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/lnk960.em: Likewise.
+	* emultempl/m68hc1xelf.em: Likewise.
+	* emultempl/m68kcoff.em: Likewise.
+	* emultempl/m68kelf.em: Likewise.
+	* emultempl/metagelf.em: Likewise.
+	* emultempl/mipself.em: Likewise.
+	* emultempl/mmix-elfnmmo.em: Likewise.
+	* emultempl/mmo.em: Likewise.
+	* emultempl/msp430.em: Likewise.
+	* emultempl/nds32elf.em: Likewise.
+	* emultempl/nios2elf.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/ppc32elf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/riscvelf.em: Likewise.
+	* emultempl/s390.em: Likewise.
+	* emultempl/scoreelf.em: Likewise.
+	* emultempl/spuelf.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/tic6xdsbt.em: Likewise.
+	* emultempl/v850elf.em: Likewise.
+	* emultempl/vms.em: Likewise.
+	* emultempl/vxworks.em: Likewise.
+	* ldcref.c: Likewise.
+	* ldlang.c: Likewise.
+	* ldlex.l: Likewise.
+	* ldmain.c: Likewise.
+	* pe-dll.c: Likewise.
+	* plugin.c: Likewise.
+
 2017-10-10  Renlin Li  <renlin.li@arm.com>
 
 	PR ld/21402

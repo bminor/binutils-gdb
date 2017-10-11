@@ -495,7 +495,7 @@ lex_push_file (FILE *file, const char *name, unsigned int sysrooted)
 {
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH)
     {
-      einfo ("%F:includes nested too deeply\n");
+      einfo (_("%F:includes nested too deeply\n"));
     }
   file_name_stack[include_stack_ptr] = name;
   lineno_stack[include_stack_ptr] = lineno;
@@ -560,7 +560,7 @@ lex_redirect (const char *string, const char *fake_filename, unsigned int count)
   yy_init = 0;
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH)
     {
-      einfo("%F: macros nested too deeply\n");
+      einfo (_("%F: macros nested too deeply\n"));
     }
   file_name_stack[include_stack_ptr] = fake_filename;
   lineno_stack[include_stack_ptr] = lineno;
@@ -662,7 +662,7 @@ yy_input (char *buf, int max_size)
 	{
 	  result = fread (buf, 1, max_size, yyin);
 	  if (result < max_size && ferror (yyin))
-	    einfo ("%F%P: read in flex scanner failed\n");
+	    einfo (_("%F%P: read in flex scanner failed\n"));
 	}
     }
   return result;
@@ -676,33 +676,33 @@ comment (void)
   int c;
 
   while (1)
-  {
-    c = input();
-    while (c != '*' && c != EOF)
     {
+      c = input();
+      while (c != '*' && c != EOF)
+	{
+	  if (c == '\n')
+	    lineno++;
+	  c = input();
+	}
+
+      if (c == '*')
+	{
+	  c = input();
+	  while (c == '*')
+	    c = input();
+	  if (c == '/')
+	    break;			/* found the end */
+	}
+
       if (c == '\n')
 	lineno++;
-      c = input();
-    }
 
-    if (c == '*')
-    {
-      c = input();
-      while (c == '*')
-       c = input();
-      if (c == '/')
-       break;			/* found the end */
+      if (c == EOF)
+	{
+	  einfo (_("%F%P: EOF in comment\n"));
+	  break;
+	}
     }
-
-    if (c == '\n')
-      lineno++;
-
-    if (c == EOF)
-    {
-      einfo( "%F%P: EOF in comment\n");
-      break;
-    }
-  }
 }
 
 /* Warn the user about a garbage character WHAT in the input
@@ -720,7 +720,7 @@ lex_warn_invalid (char *where, char *what)
   if (ldfile_assumed_script)
     {
       bfd_set_error (bfd_error_file_not_recognized);
-      einfo ("%F%s: file not recognized: %E\n", ldlex_filename ());
+      einfo (_("%F%s: file not recognized: %E\n"), ldlex_filename ());
     }
 
   if (! ISPRINT (*what))
@@ -729,5 +729,5 @@ lex_warn_invalid (char *where, char *what)
       what = buf;
     }
 
-  einfo ("%P:%S: ignoring invalid character `%s'%s\n", NULL, what, where);
+  einfo (_("%P:%S: ignoring invalid character `%s'%s\n"), NULL, what, where);
 }

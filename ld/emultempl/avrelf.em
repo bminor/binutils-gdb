@@ -96,14 +96,14 @@ avr_elf_${EMULATION_NAME}_before_allocation (void)
   ret = elf32_avr_setup_section_lists (link_info.output_bfd, &link_info);
 
   if (ret < 0)
-    einfo ("%X%P: can not setup the input section list: %E\n");
+    einfo (_("%X%P: can not setup the input section list: %E\n"));
 
   if (ret <= 0)
     return;
 
   /* Call into the BFD backend to do the real "stub"-work.  */
   if (! elf32_avr_size_stubs (link_info.output_bfd, &link_info, TRUE))
-    einfo ("%X%P: can not size stub section: %E\n");
+    einfo (_("%X%P: can not size stub section: %E\n"));
 }
 
 /* This is called before the input files are opened.  We create a new
@@ -116,7 +116,8 @@ avr_elf_create_output_section_statements (void)
 
   if (bfd_get_flavour (link_info.output_bfd) != bfd_target_elf_flavour)
     {
-      einfo ("%X%P: changing output format whilst linking is not supported\n");
+      einfo (_("%X%P: changing output format whilst linking "
+	       "is not supported\n"));
       return;
     }
 
@@ -130,7 +131,7 @@ avr_elf_create_output_section_statements (void)
                              bfd_get_arch (link_info.output_bfd),
                              bfd_get_mach (link_info.output_bfd)))
     {
-      einfo ("%X%P: can not create stub BFD %E\n");
+      einfo (_("%X%P: can not create stub BFD %E\n"));
       return;
     }
 
@@ -151,7 +152,7 @@ avr_elf_create_output_section_statements (void)
   return;
 
   err_ret:
-   einfo ("%X%P: can not make stub section: %E\n");
+   einfo (_("%X%P: can not make stub section: %E\n"));
    return;
 }
 
@@ -165,7 +166,7 @@ avr_elf_after_allocation (void)
       /* If relaxing, elf32_avr_size_stubs will be called from
 	 elf32_avr_relax_section.  */
       if (!elf32_avr_size_stubs (link_info.output_bfd, &link_info, TRUE))
-	einfo ("%X%P: can not size stub section: %E\n");
+	einfo (_("%X%P: can not size stub section: %E\n"));
     }
 
   gld${EMULATION_NAME}_after_allocation ();
@@ -174,7 +175,7 @@ avr_elf_after_allocation (void)
   if (!avr_no_stubs)
     {
       if (!elf32_avr_build_stubs (&link_info))
-	einfo ("%X%P: can not build stubs: %E\n");
+	einfo (_("%X%P: can not build stubs: %E\n"));
     }
 }
 
