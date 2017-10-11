@@ -1956,23 +1956,14 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 
   if (linux_fill_prpsinfo (&prpsinfo))
     {
-      if (gdbarch_elfcore_write_linux_prpsinfo_p (gdbarch))
-	{
-	  note_data = gdbarch_elfcore_write_linux_prpsinfo (gdbarch, obfd,
-							    note_data, note_size,
-							    &prpsinfo);
-	}
+      if (gdbarch_ptr_bit (gdbarch) == 64)
+	note_data = elfcore_write_linux_prpsinfo64 (obfd,
+						    note_data, note_size,
+						    &prpsinfo);
       else
-	{
-	  if (gdbarch_ptr_bit (gdbarch) == 64)
-	    note_data = elfcore_write_linux_prpsinfo64 (obfd,
-							note_data, note_size,
-							&prpsinfo);
-	  else
-	    note_data = elfcore_write_linux_prpsinfo32 (obfd,
-							note_data, note_size,
-							&prpsinfo);
-	}
+	note_data = elfcore_write_linux_prpsinfo32 (obfd,
+						    note_data, note_size,
+						    &prpsinfo);
     }
 
   /* Thread register information.  */

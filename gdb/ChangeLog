@@ -1,5 +1,15 @@
 2017-10-11  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* linux-tdep.c (linux_make_corefile_notes): Remove call to
+	`gdbarch_elfcore_write_linux_prpsinfo'.
+	* gdbarch.sh (elfcore_write_linux_prpsinfo): Remove architecture
+	method.
+	(elf_internal_linux_prpsinfo): Remove declaration.
+	* gdbarch.h: Regenerate.
+	* gdbarch.c: Regenerate.
+
+2017-10-11  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* ppc-linux-tdep.c (ppc_linux_init_abi): Remove call to
 	`set_gdbarch_elfcore_write_linux_prpsinfo'.
 
