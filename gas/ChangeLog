@@ -1,3 +1,13 @@
+2017-10-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 21977
+	* listing.c (listing_newline): Use the name of the current
+	physical input file, rather than the current logical input file,
+	unless including high level source in the listing.
+	* input-scrub.c (as_where_physical): New function.  Returns the
+	name of the current physical input file.
+	* as.h: Add prototype for as_where_physical.
+
 2017-10-09  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* testsuite/gas/s390/zarch-arch12.d (prno, tpei, irbm): New

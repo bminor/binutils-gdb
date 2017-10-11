@@ -487,6 +487,23 @@ new_logical_line (const char *fname, int line_number)
 }
 
 
+/* Return the current physical input file name and line number, if known  */
+
+const char *
+as_where_physical (unsigned int *linep)
+{
+  if (physical_input_file != NULL)
+    {
+      if (linep != NULL)
+	*linep = physical_input_line;
+      return physical_input_file;
+    }
+
+  if (linep != NULL)
+    *linep = 0;
+  return NULL;
+}
+
 /* Return the current file name and line number.  */
 
 const char *
@@ -499,16 +516,7 @@ as_where (unsigned int *linep)
 	*linep = logical_input_line;
       return logical_input_file;
     }
-  else if (physical_input_file != NULL)
-    {
-      if (linep != NULL)
-	*linep = physical_input_line;
-      return physical_input_file;
-    }
-  else
-    {
-      if (linep != NULL)
-	*linep = 0;
-      return NULL;
-    }
+
+  return as_where_physical (linep);
 }
+
