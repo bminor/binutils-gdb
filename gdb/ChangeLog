@@ -1,5 +1,10 @@
 2017-11-07  Tom Tromey  <tom@tromey.com>
 
+	* command.h (set_cmd_cfunc): Don't declare.
+	* cli/cli-decode.c (set_cmd_cfunc): Now static.
+
+2017-11-07  Tom Tromey  <tom@tromey.com>
+
 	* stack.c (select_frame_command): Constify.
 	* cli/cli-decode.c (add_com_suppress_notification): Constify.
 	* command.h (add_com_suppress_notification): Constify.

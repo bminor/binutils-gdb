@@ -106,7 +106,7 @@ do_cfunc (struct cmd_list_element *c, char *args, int from_tty)
   c->function.cfunc (args, from_tty);
 }
 
-void
+static void
 set_cmd_cfunc (struct cmd_list_element *cmd, cmd_cfunc_ftype *cfunc)
 {
   if (cfunc == NULL)
@@ -122,7 +122,7 @@ do_const_cfunc (struct cmd_list_element *c, char *args, int from_tty)
   c->function.const_cfunc (args, from_tty);
 }
 
-void
+static void
 set_cmd_cfunc (struct cmd_list_element *cmd, cmd_const_cfunc_ftype *cfunc)
 {
   if (cfunc == NULL)
