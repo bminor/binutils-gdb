@@ -1,5 +1,11 @@
 2017-11-07  Tom Tromey  <tom@tromey.com>
 
+	* source.c (directory_switch, mod_path, add_path): Constify.
+	* defs.h (add_path, mod_path, directory_switch): Constify.
+	* mi/mi-cmd-env.c (env_mod_path): Constify.
+
+2017-11-07  Tom Tromey  <tom@tromey.com>
+
 	* infcmd.c (strip_bg_char): Return gdb::unique_xmalloc_ptr.
 	(run_command_1, continue_command, step_1, jump_command)
 	(signal_command, until_command, advance_command, finish_command)

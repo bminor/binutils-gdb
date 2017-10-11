@@ -32,8 +32,6 @@
 #include "top.h"
 #include <sys/stat.h>
 
-static void env_mod_path (char *dirname, char **which_path);
-
 static const char path_var_name[] = "PATH";
 static char *orig_path = NULL;
 
@@ -94,7 +92,7 @@ mi_cmd_env_cd (const char *command, char **argv, int argc)
 }
 
 static void
-env_mod_path (char *dirname, char **which_path)
+env_mod_path (const char *dirname, char **which_path)
 {
   if (dirname == 0 || dirname[0] == '\0')
     return;

@@ -350,11 +350,11 @@ extern int openp (const char *, int, const char *, int, char **);
 
 extern int source_full_path_of (const char *, char **);
 
-extern void mod_path (char *, char **);
+extern void mod_path (const char *, char **);
 
-extern void add_path (char *, char **, int);
+extern void add_path (const char *, char **, int);
 
-extern void directory_switch (char *, int);
+extern void directory_switch (const char *, int);
 
 extern char *source_path;
 

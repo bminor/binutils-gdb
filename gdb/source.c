@@ -444,7 +444,7 @@ directory_command (char *dirname, int from_tty)
    This will not be quoted so we must not treat spaces as separators.  */
 
 void
-directory_switch (char *dirname, int from_tty)
+directory_switch (const char *dirname, int from_tty)
 {
   add_path (dirname, &source_path, 0);
 }
@@ -452,7 +452,7 @@ directory_switch (char *dirname, int from_tty)
 /* Add zero or more directories to the front of an arbitrary path.  */
 
 void
-mod_path (char *dirname, char **which_path)
+mod_path (const char *dirname, char **which_path)
 {
   add_path (dirname, which_path, 1);
 }
@@ -464,7 +464,7 @@ mod_path (char *dirname, char **which_path)
    as space or tab.  */
 
 void
-add_path (char *dirname, char **which_path, int parse_separators)
+add_path (const char *dirname, char **which_path, int parse_separators)
 {
   char *old = *which_path;
   int prefix = 0;
