@@ -71,7 +71,7 @@ extern int in_solib_dynsym_resolve_code (CORE_ADDR);
 
 /* Discard symbols that were auto-loaded from shared libraries.  */
 
-extern void no_shared_libraries (char *ignored, int from_tty);
+extern void no_shared_libraries (const char *ignored, int from_tty);
 
 /* Set the solib operations for GDBARCH to NEW_OPS.  */
 

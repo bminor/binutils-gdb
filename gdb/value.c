@@ -2090,7 +2090,7 @@ static struct internalvar *internalvars;
 /* If the variable does not already exist create it and give it the
    value given.  If no value is given then the default is zero.  */
 static void
-init_if_undefined_command (char* args, int from_tty)
+init_if_undefined_command (const char* args, int from_tty)
 {
   struct internalvar* intvar;
 

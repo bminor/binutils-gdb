@@ -61,16 +61,16 @@ static void make_invisible_and_set_new_height (struct tui_win_info *,
 static enum tui_status tui_adjust_win_heights (struct tui_win_info *, 
 					       int);
 static int new_height_ok (struct tui_win_info *, int);
-static void tui_set_tab_width_command (char *, int);
-static void tui_refresh_all_command (char *, int);
-static void tui_set_win_height_command (char *, int);
+static void tui_set_tab_width_command (const char *, int);
+static void tui_refresh_all_command (const char *, int);
+static void tui_set_win_height_command (const char *, int);
 static void tui_all_windows_info (char *, int);
-static void tui_set_focus_command (char *, int);
-static void tui_scroll_forward_command (char *, int);
-static void tui_scroll_backward_command (char *, int);
-static void tui_scroll_left_command (char *, int);
-static void tui_scroll_right_command (char *, int);
-static void parse_scrolling_args (char *, 
+static void tui_set_focus_command (const char *, int);
+static void tui_scroll_forward_command (const char *, int);
+static void tui_scroll_backward_command (const char *, int);
+static void tui_scroll_left_command (const char *, int);
+static void tui_scroll_right_command (const char *, int);
+static void parse_scrolling_args (const char *, 
 				  struct tui_win_info **, 
 				  int *);
 
@@ -980,7 +980,7 @@ tui_initialize_win (void)
 
 
 static void
-tui_scroll_forward_command (char *arg, int from_tty)
+tui_scroll_forward_command (const char *arg, int from_tty)
 {
   int num_to_scroll = 1;
   struct tui_win_info *win_to_scroll;
@@ -996,7 +996,7 @@ tui_scroll_forward_command (char *arg, int from_tty)
 
 
 static void
-tui_scroll_backward_command (char *arg, int from_tty)
+tui_scroll_backward_command (const char *arg, int from_tty)
 {
   int num_to_scroll = 1;
   struct tui_win_info *win_to_scroll;
@@ -1012,7 +1012,7 @@ tui_scroll_backward_command (char *arg, int from_tty)
 
 
 static void
-tui_scroll_left_command (char *arg, int from_tty)
+tui_scroll_left_command (const char *arg, int from_tty)
 {
   int num_to_scroll;
   struct tui_win_info *win_to_scroll;
@@ -1025,7 +1025,7 @@ tui_scroll_left_command (char *arg, int from_tty)
 
 
 static void
-tui_scroll_right_command (char *arg, int from_tty)
+tui_scroll_right_command (const char *arg, int from_tty)
 {
   int num_to_scroll;
   struct tui_win_info *win_to_scroll;
@@ -1039,7 +1039,7 @@ tui_scroll_right_command (char *arg, int from_tty)
 
 /* Set focus to the window named by 'arg'.  */
 static void
-tui_set_focus (char *arg, int from_tty)
+tui_set_focus (const char *arg, int from_tty)
 {
   if (arg != (char *) NULL)
     {
@@ -1078,7 +1078,7 @@ The window name specified must be valid and visible.\n"));
 }
 
 static void
-tui_set_focus_command (char *arg, int from_tty)
+tui_set_focus_command (const char *arg, int from_tty)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -1109,7 +1109,7 @@ tui_all_windows_info (char *arg, int from_tty)
 
 
 static void
-tui_refresh_all_command (char *arg, int from_tty)
+tui_refresh_all_command (const char *arg, int from_tty)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -1120,7 +1120,7 @@ tui_refresh_all_command (char *arg, int from_tty)
 
 /* Set the tab width of the specified window.  */
 static void
-tui_set_tab_width_command (char *arg, int from_tty)
+tui_set_tab_width_command (const char *arg, int from_tty)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -1159,7 +1159,7 @@ tui_set_tab_width_command (char *arg, int from_tty)
 
 /* Set the height of the specified window.  */
 static void
-tui_set_win_height (char *arg, int from_tty)
+tui_set_win_height (const char *arg, int from_tty)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -1240,7 +1240,7 @@ The window name specified must be valid and visible.\n"));
 
 /* Set the height of the specified window, with va_list.  */
 static void
-tui_set_win_height_command (char *arg, int from_tty)
+tui_set_win_height_command (const char *arg, int from_tty)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -1646,7 +1646,7 @@ new_height_ok (struct tui_win_info *primary_win_info,
 
 
 static void
-parse_scrolling_args (char *arg, 
+parse_scrolling_args (const char *arg, 
 		      struct tui_win_info **win_to_scroll,
 		      int *num_to_scroll)
 {

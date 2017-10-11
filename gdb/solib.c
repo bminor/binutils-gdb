@@ -1246,7 +1246,7 @@ in_solib_dynsym_resolve_code (CORE_ADDR pc)
 /* Implements the "sharedlibrary" command.  */
 
 static void
-sharedlibrary_command (char *args, int from_tty)
+sharedlibrary_command (const char *args, int from_tty)
 {
   dont_repeat ();
   solib_add (args, from_tty, 1);
@@ -1258,7 +1258,7 @@ sharedlibrary_command (char *args, int from_tty)
    are not discarded.  Also called from remote.c.  */
 
 void
-no_shared_libraries (char *ignored, int from_tty)
+no_shared_libraries (const char *ignored, int from_tty)
 {
   /* The order of the two routines below is important: clear_solib notifies
      the solib_unloaded observers, and some of these observers might need

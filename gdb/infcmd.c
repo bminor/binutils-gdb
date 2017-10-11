@@ -66,29 +66,11 @@ static void info_registers_command (char *, int);
 
 static void until_next_command (int);
 
-static void until_command (char *, int);
-
-static void path_command (char *, int);
-
 static void info_float_command (char *, int);
-
-static void disconnect_command (char *, int);
 
 static void info_program_command (char *, int);
 
-static void finish_command (char *, int);
-
-static void signal_command (char *, int);
-
-static void jump_command (char *, int);
-
-static void step_1 (int, int, char *);
-
-static void next_command (char *, int);
-
-static void step_command (char *, int);
-
-static void run_command (char *, int);
+static void step_1 (int, int, const char *);
 
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution) error (_("The program is not being run."));
@@ -204,7 +186,7 @@ get_inferior_args (void)
    NEWARGS is not transferred.  */
 
 void
-set_inferior_args (char *newargs)
+set_inferior_args (const char *newargs)
 {
   xfree (current_inferior ()->args);
   current_inferior ()->args = newargs ? xstrdup (newargs) : NULL;
@@ -585,7 +567,7 @@ enum run_how
    requested by RUN_HOW.  */
 
 static void
-run_command_1 (char *args, int from_tty, enum run_how run_how)
+run_command_1 (const char *args, int from_tty, enum run_how run_how)
 {
   const char *exec_file;
   struct cleanup *old_chain;
@@ -708,7 +690,7 @@ run_command_1 (char *args, int from_tty, enum run_how run_how)
 }
 
 static void
-run_command (char *args, int from_tty)
+run_command (const char *args, int from_tty)
 {
   run_command_1 (args, from_tty, RUN_NORMAL);
 }
@@ -717,7 +699,7 @@ run_command (char *args, int from_tty)
    program.  */
 
 static void
-start_command (char *args, int from_tty)
+start_command (const char *args, int from_tty)
 {
   /* Some languages such as Ada need to search inside the program
      minimal symbols for the location where to put the temporary
@@ -733,7 +715,7 @@ start_command (char *args, int from_tty)
    instruction.  */
 
 static void
-starti_command (char *args, int from_tty)
+starti_command (const char *args, int from_tty)
 {
   run_command_1 (args, from_tty, RUN_STOP_AT_FIRST_INSN);
 } 
@@ -843,7 +825,7 @@ continue_1 (int all_threads)
 /* continue [-a] [proceed-count] [&]  */
 
 static void
-continue_command (char *args, int from_tty)
+continue_command (const char *args, int from_tty)
 {
   int async_exec;
   int all_threads = 0;
@@ -949,7 +931,7 @@ set_step_frame (void)
 /* Step until outside of current statement.  */
 
 static void
-step_command (char *count_string, int from_tty)
+step_command (const char *count_string, int from_tty)
 {
   step_1 (0, 0, count_string);
 }
@@ -957,7 +939,7 @@ step_command (char *count_string, int from_tty)
 /* Likewise, but skip over subroutine calls as if single instructions.  */
 
 static void
-next_command (char *count_string, int from_tty)
+next_command (const char *count_string, int from_tty)
 {
   step_1 (1, 0, count_string);
 }
@@ -965,13 +947,13 @@ next_command (char *count_string, int from_tty)
 /* Likewise, but step only one instruction.  */
 
 static void
-stepi_command (char *count_string, int from_tty)
+stepi_command (const char *count_string, int from_tty)
 {
   step_1 (0, 1, count_string);
 }
 
 static void
-nexti_command (char *count_string, int from_tty)
+nexti_command (const char *count_string, int from_tty)
 {
   step_1 (1, 1, count_string);
 }
@@ -1054,7 +1036,7 @@ step_command_fsm_prepare (struct step_command_fsm *sm,
 static int prepare_one_step (struct step_command_fsm *sm);
 
 static void
-step_1 (int skip_subroutines, int single_inst, char *count_string)
+step_1 (int skip_subroutines, int single_inst, const char *count_string)
 {
   int count;
   int async_exec;
@@ -1242,7 +1224,7 @@ prepare_one_step (struct step_command_fsm *sm)
 /* Continue program at specified address.  */
 
 static void
-jump_command (char *arg, int from_tty)
+jump_command (const char *arg, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   CORE_ADDR addr;
@@ -1323,7 +1305,7 @@ jump_command (char *arg, int from_tty)
 /* Continue program giving it specified signal.  */
 
 static void
-signal_command (char *signum_exp, int from_tty)
+signal_command (const char *signum_exp, int from_tty)
 {
   enum gdb_signal oursig;
   int async_exec;
@@ -1420,7 +1402,7 @@ signal_command (char *signum_exp, int from_tty)
 /* Queue a signal to be delivered to the current thread.  */
 
 static void
-queue_signal_command (char *signum_exp, int from_tty)
+queue_signal_command (const char *signum_exp, int from_tty)
 {
   enum gdb_signal oursig;
   struct thread_info *tp;
@@ -1601,7 +1583,7 @@ until_next_command (int from_tty)
 }
 
 static void
-until_command (char *arg, int from_tty)
+until_command (const char *arg, int from_tty)
 {
   int async_exec;
 
@@ -1623,7 +1605,7 @@ until_command (char *arg, int from_tty)
 }
 
 static void
-advance_command (char *arg, int from_tty)
+advance_command (const char *arg, int from_tty)
 {
   int async_exec;
 
@@ -2003,7 +1985,7 @@ skip_finish_frames (struct frame_info *frame)
    frame will return to, then continue.  */
 
 static void
-finish_command (char *arg, int from_tty)
+finish_command (const char *arg, int from_tty)
 {
   struct frame_info *frame;
   int async_exec;
@@ -2291,7 +2273,7 @@ path_info (const char *args, int from_tty)
 /* Add zero or more directories to the front of the execution path.  */
 
 static void
-path_command (char *dirname, int from_tty)
+path_command (const char *dirname, int from_tty)
 {
   char *exec_path;
   const char *env;
@@ -2815,7 +2797,7 @@ attach_command_continuation_free_args (void *args)
    and allows us to start debugging it.  */
 
 void
-attach_command (char *args, int from_tty)
+attach_command (const char *args, int from_tty)
 {
   int async_exec;
   struct target_ops *attach_target;
@@ -3035,7 +3017,7 @@ detach_command (const char *args, int from_tty)
    stopped processes on some native platforms (e.g. GNU/Linux).  */
 
 static void
-disconnect_command (char *args, int from_tty)
+disconnect_command (const char *args, int from_tty)
 {
   dont_repeat ();		/* Not for the faint of heart.  */
   query_if_trace_running (from_tty);
@@ -3079,7 +3061,7 @@ interrupt_target_1 (int all_threads)
    if the `-a' switch is used.  */
 
 static void
-interrupt_command (char *args, int from_tty)
+interrupt_command (const char *args, int from_tty)
 {
   if (target_can_async_p ())
     {

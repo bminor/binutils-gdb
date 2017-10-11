@@ -96,8 +96,6 @@ enum exception_event_kind
 static void map_breakpoint_numbers (const char *,
 				    gdb::function_view<void (breakpoint *)>);
 
-static void ignore_command (char *, int);
-
 static void breakpoint_re_set_default (struct breakpoint *);
 
 static void
@@ -118,8 +116,6 @@ static void create_breakpoints_sal_default (struct gdbarch *,
 static std::vector<symtab_and_line> decode_location_default
   (struct breakpoint *b, const struct event_location *location,
    struct program_space *search_pspace);
-
-static void clear_command (char *, int);
 
 static int can_use_hardware_watchpoint (struct value *);
 
@@ -165,13 +161,7 @@ static int breakpoint_location_address_range_overlap (struct bp_location *,
 						      const address_space *,
 						      CORE_ADDR, int);
 
-static void info_breakpoints_command (char *, int);
-
 static void info_watchpoints_command (char *, int);
-
-static void commands_command (char *, int);
-
-static void condition_command (char *, int);
 
 static int remove_breakpoint (struct bp_location *);
 static int remove_breakpoint_1 (struct bp_location *, enum remove_bp_reason);
@@ -185,10 +175,6 @@ static int hw_watchpoint_use_count (struct breakpoint *);
 static int hw_watchpoint_used_count_others (struct breakpoint *except,
 					    enum bptype type,
 					    int *other_type_used);
-
-static void hbreak_command (char *, int);
-
-static void thbreak_command (char *, int);
 
 static void enable_breakpoint_disp (struct breakpoint *, enum bpdisp,
 				    int count);
@@ -248,7 +234,7 @@ static void enable_trace_command (char *, int);
 
 static void disable_trace_command (char *, int);
 
-static void trace_pass_command (char *, int);
+static void trace_pass_command (const char *, int);
 
 static void set_tracepoint_count (int num);
 
@@ -980,10 +966,10 @@ condition_completer (struct cmd_list_element *cmd,
 /* condition N EXP -- set break condition of breakpoint N to EXP.  */
 
 static void
-condition_command (char *arg, int from_tty)
+condition_command (const char *arg, int from_tty)
 {
   struct breakpoint *b;
-  char *p;
+  const char *p;
   int bnum;
 
   if (arg == 0)
@@ -1301,7 +1287,7 @@ commands_command_1 (const char *arg, int from_tty,
 }
 
 static void
-commands_command (char *arg, int from_tty)
+commands_command (const char *arg, int from_tty)
 {
   commands_command_1 (arg, from_tty, NULL);
 }
@@ -6712,11 +6698,19 @@ default_collect_info (void)
 }
   
 static void
-info_breakpoints_command (char *args, int from_tty)
+info_breakpoints_command (const char *args, int from_tty)
 {
   breakpoint_1 (args, 0, NULL);
 
   default_collect_info ();
+}
+
+/* Temporary non-const overload.  */
+
+static void
+info_breakpoints_command (char *args, int from_tty)
+{
+  info_breakpoints_command ((const char *) args, from_tty);
 }
 
 static void
@@ -9632,25 +9626,25 @@ resolve_sal_pc (struct symtab_and_line *sal)
 }
 
 void
-break_command (char *arg, int from_tty)
+break_command (const char *arg, int from_tty)
 {
   break_command_1 (arg, 0, from_tty);
 }
 
 void
-tbreak_command (char *arg, int from_tty)
+tbreak_command (const char *arg, int from_tty)
 {
   break_command_1 (arg, BP_TEMPFLAG, from_tty);
 }
 
 static void
-hbreak_command (char *arg, int from_tty)
+hbreak_command (const char *arg, int from_tty)
 {
   break_command_1 (arg, BP_HARDWAREFLAG, from_tty);
 }
 
 static void
-thbreak_command (char *arg, int from_tty)
+thbreak_command (const char *arg, int from_tty)
 {
   break_command_1 (arg, (BP_TEMPFLAG | BP_HARDWAREFLAG), from_tty);
 }
@@ -9734,9 +9728,8 @@ stopat_command (const char *arg, int from_tty)
    line.  */
 
 static void
-dprintf_command (char *arg_in, int from_tty)
+dprintf_command (const char *arg, int from_tty)
 {
-  const char *arg = arg_in;
   event_location_up location = string_to_event_location (&arg, current_language);
 
   /* If non-NULL, ARG should have been advanced past the location;
@@ -9766,7 +9759,7 @@ dprintf_command (char *arg_in, int from_tty)
 }
 
 static void
-agent_printf_command (char *arg, int from_tty)
+agent_printf_command (const char *arg, int from_tty)
 {
   error (_("May only run agent-printf on the target"));
 }
@@ -9950,9 +9943,8 @@ find_breakpoint_range_end (struct symtab_and_line sal)
 /* Implement the "break-range" CLI command.  */
 
 static void
-break_range_command (char *arg_in, int from_tty)
+break_range_command (const char *arg, int from_tty)
 {
-  const char *arg = arg_in;
   const char *arg_start;
   struct linespec_result canonical_start, canonical_end;
   int bp_count, can_use_bp, length;
@@ -11056,7 +11048,7 @@ watch_command_wrapper (const char *arg, int from_tty, int internal)
    calls watch_command_1.  */
 
 static void
-watch_maybe_just_location (char *arg, int accessflag, int from_tty)
+watch_maybe_just_location (const char *arg, int accessflag, int from_tty)
 {
   int just_location = 0;
 
@@ -11072,7 +11064,7 @@ watch_maybe_just_location (char *arg, int accessflag, int from_tty)
 }
 
 static void
-watch_command (char *arg, int from_tty)
+watch_command (const char *arg, int from_tty)
 {
   watch_maybe_just_location (arg, hw_write, from_tty);
 }
@@ -11084,7 +11076,7 @@ rwatch_command_wrapper (const char *arg, int from_tty, int internal)
 }
 
 static void
-rwatch_command (char *arg, int from_tty)
+rwatch_command (const char *arg, int from_tty)
 {
   watch_maybe_just_location (arg, hw_read, from_tty);
 }
@@ -11096,7 +11088,7 @@ awatch_command_wrapper (const char *arg, int from_tty, int internal)
 }
 
 static void
-awatch_command (char *arg, int from_tty)
+awatch_command (const char *arg, int from_tty)
 {
   watch_maybe_just_location (arg, hw_access, from_tty);
 }
@@ -11503,7 +11495,7 @@ compare_breakpoints (const breakpoint *a, const breakpoint *b)
 /* Delete breakpoints by address or line.  */
 
 static void
-clear_command (char *arg, int from_tty)
+clear_command (const char *arg, int from_tty)
 {
   struct breakpoint *b;
   int default_match;
@@ -14108,9 +14100,9 @@ set_ignore_count (int bptnum, int count, int from_tty)
 /* Command to set ignore-count of breakpoint N to COUNT.  */
 
 static void
-ignore_command (char *args, int from_tty)
+ignore_command (const char *args, int from_tty)
 {
-  char *p = args;
+  const char *p = args;
   int num;
 
   if (p == 0)
@@ -14737,9 +14729,8 @@ set_tracepoint_count (int num)
 }
 
 static void
-trace_command (char *arg_in, int from_tty)
+trace_command (const char *arg, int from_tty)
 {
-  const char *arg = arg_in;
   struct breakpoint_ops *ops;
 
   event_location_up location = string_to_event_location (&arg,
@@ -14764,9 +14755,8 @@ trace_command (char *arg_in, int from_tty)
 }
 
 static void
-ftrace_command (char *arg_in, int from_tty)
+ftrace_command (const char *arg, int from_tty)
 {
-  const char *arg = arg_in;
   event_location_up location = string_to_event_location (&arg,
 							 current_language);
   create_breakpoint (get_current_arch (),
@@ -14785,9 +14775,8 @@ ftrace_command (char *arg_in, int from_tty)
 /* strace command implementation.  Creates a static tracepoint.  */
 
 static void
-strace_command (char *arg_in, int from_tty)
+strace_command (const char *arg, int from_tty)
 {
-  const char *arg = arg_in;
   struct breakpoint_ops *ops;
   event_location_up location;
 
@@ -15023,16 +15012,16 @@ trace_pass_set_count (struct tracepoint *tp, int count, int from_tty)
    Also accepts special argument "all".  */
 
 static void
-trace_pass_command (char *args, int from_tty)
+trace_pass_command (const char *args, int from_tty)
 {
   struct tracepoint *t1;
-  unsigned int count;
+  ULONGEST count;
 
   if (args == 0 || *args == 0)
     error (_("passcount command requires an "
 	     "argument (count + optional TP num)"));
 
-  count = strtoul (args, &args, 10);	/* Count comes first, then TP num.  */
+  count = strtoulst (args, &args, 10);	/* Count comes first, then TP num.  */
 
   args = skip_spaces (args);
   if (*args && strncasecmp (args, "all", 3) == 0)
@@ -15105,12 +15094,12 @@ get_tracepoint_by_number_on_target (int num)
    (tracepoint_count) is returned.  */
 
 struct tracepoint *
-get_tracepoint_by_number (char **arg,
+get_tracepoint_by_number (const char **arg,
 			  number_or_range_parser *parser)
 {
   struct breakpoint *t;
   int tpnum;
-  char *instring = arg == NULL ? NULL : *arg;
+  const char *instring = arg == NULL ? NULL : *arg;
 
   if (parser != NULL)
     {

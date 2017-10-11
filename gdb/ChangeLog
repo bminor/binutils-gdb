@@ -1,5 +1,105 @@
 2017-11-07  Tom Tromey  <tom@tromey.com>
 
+	* solib.h (no_shared_libraries): Constify.
+	* frame.h (return_command): Constify.
+	* cli/cli-cmds.h (quit_command): Constify.
+	* top.h (quit_command, execute_command): Constify.
+	* target.h (flash_erase_command): Constify.
+	* inferior.h (set_inferior_args, attach_command): Constify.
+	* tracepoint.h (start_tracing, stop_tracing): Constify.
+	* breakpoint.h (break_command, tbreak_command)
+	(hbreak_command_wrapper, thbreak_command_wrapper)
+	(rbreak_command_wrapper, watch_command_wrapper)
+	(awatch_command_wrapper, rwatch_command_wrapper)
+	(get_tracepoint_by_number): Constify.
+	* symtab.c (info_variables_command, rbreak_command)
+	(symtab_symbol_info): Constify.
+	(info_variables_command): Add non-const overload.
+	* top.c (dont_repeat_command): Constify.
+	* breakpoint.c (ignore_command, commands_command)
+	(condition_command, tbreak_command, hbreak_command)
+	(thbreak_command, clear_command, break_command)
+	(info_breakpoints_command, watch_command, rwatch_command)
+	(awatch_command, trace_command, ftrace_command, strace_command)
+	(trace_pass_command, break_range_command, dprintf_command)
+	(agent_printf_command, get_tracepoint_by_number)
+	(watch_maybe_just_location, trace_pass_command): Constify.
+	(info_breakpoints_command): Add non-const overload.
+	* tracefile.c (tsave_command): Constify.
+	* infcmd.c (attach_command, disconnect_command, signal_command)
+	(queue_signal_command, stepi_command, nexti_command)
+	(finish_command, next_command, step_command, until_command)
+	(advance_command, jump_command, continue_command, run_command)
+	(start_command, starti_command, interrupt_command)
+	(run_command_1, set_inferior_args, step_1): Constify.
+	* inferior.c (add_inferior_command, remove_inferior_command)
+	(clone_inferior_command): Constify.
+	* linux-fork.c (checkpoint_command, restart_command): Constify.
+	* windows-nat.c (signal_event_command): Constify.
+	* guile/guile.c (guile_repl_command, guile_command): Constify.
+	* printcmd.c (x_command, display_command, printf_command)
+	(output_command, set_command, call_command, print_command)
+	(eval_command): Constify.
+	(non_const_set_command): Remove.
+	(_initialize_printcmd): Update.
+	* source.c (forward_search_command, reverse_search_command):
+	Constify.
+	* jit.c (jit_reader_load_command, jit_reader_unload_command):
+	Constify.
+	* infrun.c (handle_command): Constify.
+	* memattr.c (mem_command): Constify.
+	* stack.c (return_command, up_command, up_silently_command)
+	(down_command, down_silently_command, frame_command)
+	(backtrace_command, func_command, backtrace_command_1): Constify.
+	(backtrace_command): Add non-const overload.
+	* remote-sim.c (simulator_command): Constify.
+	* exec.c (set_section_command): Constify.
+	* tracepoint.c (tdump_command, trace_variable_command)
+	(tstatus_command, tstop_command, tstart_command)
+	(end_actions_pseudocommand, while_stepping_pseudocommand)
+	(collect_pseudocommand, teval_pseudocommand, actions_command)
+	(start_tracing, stop_tracing): Constify.
+	* value.c (init_if_undefined_command): Constify.
+	* tui/tui-stack.c (tui_update_command): Constify.
+	* tui/tui-win.c (tui_refresh_all_command)
+	(tui_set_tab_width_command, tui_set_win_height_command)
+	(tui_set_focus_command, tui_scroll_forward_command)
+	(tui_scroll_backward_command, tui_scroll_left_command)
+	(tui_scroll_right_command, parse_scrolling_args, tui_set_focus)
+	(tui_set_win_height): Constify.
+	* tui/tui-layout.c (tui_layout_command): Constify.
+	* procfs.c (proc_trace_syscalls, proc_trace_sysentry_cmd)
+	(proc_trace_sysexit_cmd, proc_untrace_sysentry_cmd)
+	(proc_untrace_sysexit_cmd): Constify.
+	* remote.c (threadlist_test_cmd, threadinfo_test_cmd)
+	(threadset_test_cmd, threadlist_update_test_cmd)
+	(threadalive_test): Constify.
+	* objc-lang.c (print_object_command): Constify.
+	* command.h (add_com): Constify.
+	* cli/cli-dump.c (restore_command): Constify.
+	* cli/cli-cmds.c (pwd_command, echo_command, quit_command)
+	(help_command, complete_command, shell_command, edit_command)
+	(list_command, disassemble_command, make_command)
+	(apropos_command, alias_command): Constify.
+	* cli/cli-script.c (document_command, define_command)
+	(while_command, if_command, validate_comname): Constify.
+	* cli/cli-decode.c (struct cmd_list_element): Change type of
+	"fun".
+	* target.c (do_monitor_command, flash_erase_command): Constify.
+	* regcache.c (reg_flush_command): Constify.
+	* reverse.c (reverse_step, reverse_next, reverse_stepi)
+	(reverse_nexti, reverse_continue, reverse_finish)
+	(save_bookmark_command, goto_bookmark_command)
+	(exec_reverse_once): Constify.
+	* python/python.c (python_interactive_command, python_command):
+	Constify.
+	* typeprint.c (ptype_command, whatis_command, whatis_exp):
+	Constify.
+	* solib.c (sharedlibrary_command, no_shared_libraries): Constify.
+	* gcore.c (gcore_command): Constify.
+
+2017-11-07  Tom Tromey  <tom@tromey.com>
+
 	* printcmd.c (x_command): Call set_repeat_arguments.
 	* cli/cli-cmds.c (list_command): Call set_repeat_arguments.
 	* top.c (repeat_arguments): New global.

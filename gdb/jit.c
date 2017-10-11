@@ -208,7 +208,7 @@ jit_reader_load (const char *file_name)
 /* Provides the jit-reader-load command.  */
 
 static void
-jit_reader_load_command (char *args, int from_tty)
+jit_reader_load_command (const char *args, int from_tty)
 {
   if (args == NULL)
     error (_("No reader name provided."));
@@ -229,7 +229,7 @@ jit_reader_load_command (char *args, int from_tty)
 /* Provides the jit-reader-unload command.  */
 
 static void
-jit_reader_unload_command (char *args, int from_tty)
+jit_reader_unload_command (const char *args, int from_tty)
 {
   if (!loaded_jit_reader)
     error (_("No JIT reader loaded."));

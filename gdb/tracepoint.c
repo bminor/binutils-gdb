@@ -354,11 +354,11 @@ validate_trace_state_variable_name (const char *name)
    evaluate into an initial value.  */
 
 static void
-trace_variable_command (char *args, int from_tty)
+trace_variable_command (const char *args, int from_tty)
 {
   LONGEST initval = 0;
   struct trace_state_variable *tsv;
-  char *name_start, *p;
+  const char *name_start, *p;
 
   if (!args || !*args)
     error_no_arg (_("Syntax is $NAME [ = EXPR ]"));
@@ -526,25 +526,25 @@ save_trace_state_variables (struct ui_file *fp)
    which is always an error.  */
 
 static void
-end_actions_pseudocommand (char *args, int from_tty)
+end_actions_pseudocommand (const char *args, int from_tty)
 {
   error (_("This command cannot be used at the top level."));
 }
 
 static void
-while_stepping_pseudocommand (char *args, int from_tty)
+while_stepping_pseudocommand (const char *args, int from_tty)
 {
   error (_("This command can only be used in a tracepoint actions list."));
 }
 
 static void
-collect_pseudocommand (char *args, int from_tty)
+collect_pseudocommand (const char *args, int from_tty)
 {
   error (_("This command can only be used in a tracepoint actions list."));
 }
 
 static void
-teval_pseudocommand (char *args, int from_tty)
+teval_pseudocommand (const char *args, int from_tty)
 {
   error (_("This command can only be used in a tracepoint actions list."));
 }
@@ -593,7 +593,7 @@ decode_agent_options (const char *exp, int *trace_string)
 
 /* Enter a list of actions for a tracepoint.  */
 static void
-actions_command (char *args, int from_tty)
+actions_command (const char *args, int from_tty)
 {
   struct tracepoint *t;
 
@@ -1587,7 +1587,7 @@ trace_reset_local_state (void)
 }
 
 void
-start_tracing (char *notes)
+start_tracing (const char *notes)
 {
   VEC(breakpoint_p) *tp_vec = NULL;
   int ix;
@@ -1718,7 +1718,7 @@ start_tracing (char *notes)
    anybody else messing with the target.  */
 
 static void
-tstart_command (char *args, int from_tty)
+tstart_command (const char *args, int from_tty)
 {
   dont_repeat ();	/* Like "run", dangerous to repeat accidentally.  */
 
@@ -1738,7 +1738,7 @@ tstart_command (char *args, int from_tty)
    of the trace run's status.  */
 
 static void
-tstop_command (char *args, int from_tty)
+tstop_command (const char *args, int from_tty)
 {
   if (!current_trace_status ()->running)
     error (_("Trace is not running."));
@@ -1747,7 +1747,7 @@ tstop_command (char *args, int from_tty)
 }
 
 void
-stop_tracing (char *note)
+stop_tracing (const char *note)
 {
   int ret;
   VEC(breakpoint_p) *tp_vec = NULL;
@@ -1795,7 +1795,7 @@ stop_tracing (char *note)
 
 /* tstatus command */
 static void
-tstatus_command (char *args, int from_tty)
+tstatus_command (const char *args, int from_tty)
 {
   struct trace_status *ts = current_trace_status ();
   int status, ix;
@@ -2865,7 +2865,7 @@ all_tracepoint_actions_and_cleanup (struct breakpoint *t)
 /* The tdump command.  */
 
 static void
-tdump_command (char *args, int from_tty)
+tdump_command (const char *args, int from_tty)
 {
   int stepping_frame = 0;
   struct bp_location *loc;

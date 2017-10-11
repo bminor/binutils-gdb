@@ -931,7 +931,8 @@ add_info_alias (const char *name, const char *oldname, int abbrev_flag)
 /* Add an element to the list of commands.  */
 
 struct cmd_list_element *
-add_com (const char *name, enum command_class theclass, cmd_cfunc_ftype *fun,
+add_com (const char *name, enum command_class theclass,
+	 cmd_const_cfunc_ftype *fun,
 	 const char *doc)
 {
   return add_cmd (name, theclass, fun, doc, &cmdlist);

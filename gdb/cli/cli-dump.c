@@ -513,12 +513,11 @@ restore_binary_file (const char *filename, struct callback_data *data)
 }
 
 static void
-restore_command (char *args_in, int from_tty)
+restore_command (const char *args, int from_tty)
 {
   struct callback_data data;
   bfd *ibfd;
   int binary_flag = 0;
-  const char *args = args_in;
 
   if (!target_has_execution)
     noprocess ();

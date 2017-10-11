@@ -1469,7 +1469,7 @@ extern int target_write_raw_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
 std::vector<mem_region> target_memory_map (void);
 
 /* Erases all flash memory regions on the target.  */
-void flash_erase_command (char *cmd, int from_tty);
+void flash_erase_command (const char *cmd, int from_tty);
 
 /* Erase the specified flash region.  */
 void target_flash_erase (ULONGEST address, LONGEST length);

@@ -52,10 +52,6 @@
 
 static int get_filename_and_charpos (struct symtab *, char **);
 
-static void reverse_search_command (char *, int);
-
-static void forward_search_command (char *, int);
-
 static void info_line_command (char *, int);
 
 static void info_source_command (char *, int);
@@ -1591,7 +1587,7 @@ info_line_command (char *arg, int from_tty)
 /* Commands to search the source file for a regexp.  */
 
 static void
-forward_search_command (char *regex, int from_tty)
+forward_search_command (const char *regex, int from_tty)
 {
   int c;
   int desc;
@@ -1676,7 +1672,7 @@ forward_search_command (char *regex, int from_tty)
 }
 
 static void
-reverse_search_command (char *regex, int from_tty)
+reverse_search_command (const char *regex, int from_tty)
 {
   int c;
   int desc;

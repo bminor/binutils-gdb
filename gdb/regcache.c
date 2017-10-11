@@ -1313,7 +1313,7 @@ regcache::debug_print_register (const char *func,  int regno)
 }
 
 static void
-reg_flush_command (char *command, int from_tty)
+reg_flush_command (const char *command, int from_tty)
 {
   /* Force-flush the register cache.  */
   registers_changed ();

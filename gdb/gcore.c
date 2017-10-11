@@ -141,7 +141,7 @@ write_gcore_file (bfd *obfd)
    Generate a core file from the inferior process.  */
 
 static void
-gcore_command (char *args, int from_tty)
+gcore_command (const char *args, int from_tty)
 {
   gdb::unique_xmalloc_ptr<char> corefilename;
 

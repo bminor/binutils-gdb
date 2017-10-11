@@ -5224,7 +5224,7 @@ proc_trace_syscalls_1 (procinfo *pi, int syscallnum, int entry_or_exit,
 }
 
 static void
-proc_trace_syscalls (char *args, int from_tty, int entry_or_exit, int mode)
+proc_trace_syscalls (const char *args, int from_tty, int entry_or_exit, int mode)
 {
   procinfo *pi;
 
@@ -5244,25 +5244,25 @@ proc_trace_syscalls (char *args, int from_tty, int entry_or_exit, int mode)
 }
 
 static void
-proc_trace_sysentry_cmd (char *args, int from_tty)
+proc_trace_sysentry_cmd (const char *args, int from_tty)
 {
   proc_trace_syscalls (args, from_tty, PR_SYSENTRY, FLAG_SET);
 }
 
 static void
-proc_trace_sysexit_cmd (char *args, int from_tty)
+proc_trace_sysexit_cmd (const char *args, int from_tty)
 {
   proc_trace_syscalls (args, from_tty, PR_SYSEXIT, FLAG_SET);
 }
 
 static void
-proc_untrace_sysentry_cmd (char *args, int from_tty)
+proc_untrace_sysentry_cmd (const char *args, int from_tty)
 {
   proc_trace_syscalls (args, from_tty, PR_SYSENTRY, FLAG_RESET);
 }
 
 static void
-proc_untrace_sysexit_cmd (char *args, int from_tty)
+proc_untrace_sysexit_cmd (const char *args, int from_tty)
 {
   proc_trace_syscalls (args, from_tty, PR_SYSEXIT, FLAG_RESET);
 }

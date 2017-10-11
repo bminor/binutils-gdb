@@ -1261,15 +1261,15 @@ extern struct command_line *breakpoint_commands (struct breakpoint *b);
    NOT be deallocated after use.  */
 const char *bpdisp_text (enum bpdisp disp);
 
-extern void break_command (char *, int);
+extern void break_command (const char *, int);
 
-extern void hbreak_command_wrapper (char *, int);
-extern void thbreak_command_wrapper (char *, int);
-extern void rbreak_command_wrapper (char *, int);
+extern void hbreak_command_wrapper (const char *, int);
+extern void thbreak_command_wrapper (const char *, int);
+extern void rbreak_command_wrapper (const char *, int);
 extern void watch_command_wrapper (const char *, int, int);
 extern void awatch_command_wrapper (const char *, int, int);
 extern void rwatch_command_wrapper (const char *, int, int);
-extern void tbreak_command (char *, int);
+extern void tbreak_command (const char *, int);
 
 extern struct breakpoint_ops base_breakpoint_ops;
 extern struct breakpoint_ops bkpt_breakpoint_ops;
@@ -1591,7 +1591,7 @@ extern struct tracepoint *get_tracepoint_by_number_on_target (int num);
 
 /* Find a tracepoint by parsing a number in the supplied string.  */
 extern struct tracepoint *
-  get_tracepoint_by_number (char **arg,
+  get_tracepoint_by_number (const char **arg,
 			    number_or_range_parser *parser);
 
 /* Return a vector of all tracepoints currently defined.  The vector

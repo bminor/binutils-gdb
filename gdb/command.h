@@ -256,7 +256,7 @@ extern int lookup_cmd_composition (const char *text,
 				   struct cmd_list_element **cmd);
 
 extern struct cmd_list_element *add_com (const char *, enum command_class,
-					 cmd_cfunc_ftype *fun,
+					 cmd_const_cfunc_ftype *fun,
 					 const char *);
 
 extern struct cmd_list_element *add_com_alias (const char *, const char *,

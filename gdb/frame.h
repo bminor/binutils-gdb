@@ -790,7 +790,7 @@ extern void info_args_command (char *, int);
 
 extern void info_locals_command (char *, int);
 
-extern void return_command (char *, int);
+extern void return_command (const char *, int);
 
 /* Set FRAME's unwinder temporarily, so that we can call a sniffer.
    If sniffing fails, the caller should be sure to call

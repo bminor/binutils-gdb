@@ -58,24 +58,6 @@
 #include <algorithm>
 #include <string>
 
-/* Prototypes for local command functions */
-
-static void complete_command (char *, int);
-
-static void echo_command (char *, int);
-
-static void pwd_command (char *, int);
-
-static void help_command (char *, int);
-
-static void make_command (char *, int);
-
-static void shell_escape (const char *, int);
-
-static void edit_command (char *, int);
-
-static void list_command (char *, int);
-
 /* Prototypes for local utility functions */
 
 static void print_sal_location (const symtab_and_line &sal);
@@ -238,7 +220,7 @@ show_command (char *arg, int from_tty)
    is ignored.  */
 
 static void
-help_command (char *command, int from_tty)
+help_command (const char *command, int from_tty)
 {
   help_cmd (command, gdb_stdout);
 }
@@ -248,10 +230,8 @@ help_command (char *command, int from_tty)
    [Is that why this function writes output with *_unfiltered?]  */
 
 static void
-complete_command (char *arg_entry, int from_tty)
+complete_command (const char *arg, int from_tty)
 {
-  const char *arg = arg_entry;
-
   dont_repeat ();
 
   if (max_completions == 0)
@@ -356,7 +336,7 @@ show_configuration (const char *args, int from_tty)
 /* Handle the quit command.  */
 
 void
-quit_command (char *args, int from_tty)
+quit_command (const char *args, int from_tty)
 {
   int exit_code = 0;
 
@@ -378,7 +358,7 @@ quit_command (char *args, int from_tty)
 }
 
 static void
-pwd_command (char *args, int from_tty)
+pwd_command (const char *args, int from_tty)
 {
   if (args)
     error (_("The \"pwd\" command does not take an argument: %s"), args);
@@ -693,7 +673,7 @@ source_command (const char *args, int from_tty)
 
 
 static void
-echo_command (char *text, int from_tty)
+echo_command (const char *text, int from_tty)
 {
   const char *p = text;
   int c;
@@ -785,13 +765,13 @@ shell_escape (const char *arg, int from_tty)
 /* Implementation of the "shell" command.  */
 
 static void
-shell_command (char *arg, int from_tty)
+shell_command (const char *arg, int from_tty)
 {
   shell_escape (arg, from_tty);
 }
 
 static void
-edit_command (char *arg, int from_tty)
+edit_command (const char *arg, int from_tty)
 {
   struct symtab_and_line sal;
   struct symbol *sym;
@@ -891,7 +871,7 @@ edit_command (char *arg, int from_tty)
 }
 
 static void
-list_command (char *arg, int from_tty)
+list_command (const char *arg, int from_tty)
 {
   struct symbol *sym;
   const char *arg1;
@@ -899,7 +879,7 @@ list_command (char *arg, int from_tty)
   int dummy_end = 0;
   int dummy_beg = 0;
   int linenum_beg = 0;
-  char *p;
+  const char *p;
 
   /* Pull in the current default source line if necessary.  */
   if (arg == NULL || ((arg[0] == '+' || arg[0] == '-') && arg[1] == '\0'))
@@ -1205,7 +1185,7 @@ disassemble_current_function (gdb_disassembly_flags flags)
    2) File names and contents for all relevant source files are displayed.  */
 
 static void
-disassemble_command (char *arg, int from_tty)
+disassemble_command (const char *arg, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   CORE_ADDR low, high;
@@ -1295,7 +1275,7 @@ disassemble_command (char *arg, int from_tty)
 }
 
 static void
-make_command (char *arg, int from_tty)
+make_command (const char *arg, int from_tty)
 {
   if (arg == 0)
     shell_escape ("make", from_tty);
@@ -1336,7 +1316,7 @@ show_user (const char *args, int from_tty)
    regular expression.  */
 
 static void 
-apropos_command (char *searchstr, int from_tty)
+apropos_command (const char *searchstr, int from_tty)
 {
   if (searchstr == NULL)
     error (_("REGEXP string is empty"));
@@ -1405,11 +1385,11 @@ alias_usage_error (void)
 /* Make an alias of an existing command.  */
 
 static void
-alias_command (char *args, int from_tty)
+alias_command (const char *args, int from_tty)
 {
   int i, alias_argc, command_argc;
   int abbrev_flag = 0;
-  char *equals;
+  const char *equals;
   const char *alias, *command;
 
   if (args == NULL || strchr (args, '=') == NULL)

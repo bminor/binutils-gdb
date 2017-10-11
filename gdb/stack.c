@@ -1844,11 +1844,10 @@ backtrace_command_1 (const char *count_exp, int show_locals, int no_filters,
 }
 
 static void
-backtrace_command (char *arg_in, int from_tty)
+backtrace_command (const char *arg, int from_tty)
 {
   int fulltrace_arg = -1, arglen = 0, argc = 0, no_filters  = -1;
   int user_arg = 0;
-  const char *arg = arg_in;
 
   std::string reconstructed_arg;
   if (arg)
@@ -1902,6 +1901,14 @@ backtrace_command (char *arg_in, int from_tty)
 
   backtrace_command_1 (arg, fulltrace_arg >= 0 /* show_locals */,
 		       no_filters >= 0 /* no frame-filters */, from_tty);
+}
+
+/* Temporary non-const overload.  */
+
+static void
+backtrace_command (char *arg, int from_tty)
+{
+  backtrace_command ((const char *) arg, from_tty);
 }
 
 /* Iterate over the local variables of a block B, calling CB with
@@ -2281,7 +2288,7 @@ select_frame_command (const char *level_exp, int from_tty)
    the selected frame.  */
 
 static void
-frame_command (char *level_exp, int from_tty)
+frame_command (const char *level_exp, int from_tty)
 {
   struct frame_info *prev_frame = get_selected_frame_if_set ();
 
@@ -2311,13 +2318,13 @@ up_silently_base (const char *count_exp)
 }
 
 static void
-up_silently_command (char *count_exp, int from_tty)
+up_silently_command (const char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
 }
 
 static void
-up_command (char *count_exp, int from_tty)
+up_command (const char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
   observer_notify_user_selected_context_changed (USER_SELECTED_FRAME);
@@ -2350,20 +2357,20 @@ down_silently_base (const char *count_exp)
 }
 
 static void
-down_silently_command (char *count_exp, int from_tty)
+down_silently_command (const char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
 }
 
 static void
-down_command (char *count_exp, int from_tty)
+down_command (const char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
   observer_notify_user_selected_context_changed (USER_SELECTED_FRAME);
 }
 
 void
-return_command (char *retval_exp, int from_tty)
+return_command (const char *retval_exp, int from_tty)
 {
   /* Initialize it just to avoid a GCC false warning.  */
   enum return_value_convention rv_conv = RETURN_VALUE_STRUCT_CONVENTION;
@@ -2498,7 +2505,7 @@ struct function_bounds
 };
 
 static void
-func_command (char *arg, int from_tty)
+func_command (const char *arg, int from_tty)
 {
   struct frame_info *frame;
   int found = 0;

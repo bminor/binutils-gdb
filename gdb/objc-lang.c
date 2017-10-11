@@ -1184,7 +1184,7 @@ find_imps (const char *method, VEC (const_char_ptr) **symbol_names)
 }
 
 static void 
-print_object_command (char *args, int from_tty)
+print_object_command (const char *args, int from_tty)
 {
   struct value *object, *function, *description;
   CORE_ADDR string_addr, object_addr;

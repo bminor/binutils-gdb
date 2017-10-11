@@ -69,7 +69,7 @@
 
 /* Forward declarations for local functions.  */
 
-static void rbreak_command (char *, int);
+static void rbreak_command (const char *, int);
 
 static int find_line_common (struct linetable *, int, int *, int);
 
@@ -4436,7 +4436,7 @@ print_msymbol_info (struct bound_minimal_symbol msymbol)
    matches.  */
 
 static void
-symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
+symtab_symbol_info (const char *regexp, enum search_domain kind, int from_tty)
 {
   static const char * const classnames[] =
     {"variable", "function", "type"};
@@ -4480,6 +4480,14 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
 }
 
 static void
+info_variables_command (const char *regexp, int from_tty)
+{
+  symtab_symbol_info (regexp, VARIABLES_DOMAIN, from_tty);
+}
+
+/* Temporary non-const overload.  */
+
+static void
 info_variables_command (char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, VARIABLES_DOMAIN, from_tty);
@@ -4507,7 +4515,7 @@ rbreak_command_wrapper (char *regexp, int from_tty)
 }
 
 static void
-rbreak_command (char *regexp, int from_tty)
+rbreak_command (const char *regexp, int from_tty)
 {
   std::string string;
   const char **files = NULL;
@@ -4516,7 +4524,7 @@ rbreak_command (char *regexp, int from_tty)
 
   if (regexp)
     {
-      char *colon = strchr (regexp, ':');
+      const char *colon = strchr (regexp, ':');
 
       if (colon && *(colon + 1) != ':')
 	{

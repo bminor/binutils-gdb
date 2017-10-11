@@ -369,8 +369,8 @@ extern void trace_reset_local_state (void);
 
 extern void check_trace_running (struct trace_status *);
 
-extern void start_tracing (char *notes);
-extern void stop_tracing (char *notes);
+extern void start_tracing (const char *notes);
+extern void stop_tracing (const char *notes);
 
 extern void trace_status_mi (int on_stop);
 

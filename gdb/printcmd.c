@@ -1214,14 +1214,14 @@ print_command_1 (const char *exp, int voidprint)
 }
 
 static void
-print_command (char *exp, int from_tty)
+print_command (const char *exp, int from_tty)
 {
   print_command_1 (exp, 1);
 }
 
 /* Same as print, except it doesn't print void results.  */
 static void
-call_command (char *exp, int from_tty)
+call_command (const char *exp, int from_tty)
 {
   print_command_1 (exp, 0);
 }
@@ -1229,7 +1229,7 @@ call_command (char *exp, int from_tty)
 /* Implementation of the "output" command.  */
 
 static void
-output_command (char *exp, int from_tty)
+output_command (const char *exp, int from_tty)
 {
   output_command_const (exp, from_tty);
 }
@@ -1293,14 +1293,6 @@ set_command (const char *exp, int from_tty)
       }
 
   evaluate_expression (expr.get ());
-}
-
-/* Temporary non-const version of set_command.  */
-
-static void
-non_const_set_command (char *exp, int from_tty)
-{
-  set_command (exp, from_tty);
 }
 
 static void
@@ -1619,7 +1611,7 @@ info_address_command (char *exp, int from_tty)
 
 
 static void
-x_command (char *exp, int from_tty)
+x_command (const char *exp, int from_tty)
 {
   struct format_data fmt;
   struct value *val;
@@ -1702,7 +1694,7 @@ x_command (char *exp, int from_tty)
    Specify the expression.  */
 
 static void
-display_command (char *arg, int from_tty)
+display_command (const char *arg, int from_tty)
 {
   struct format_data fmt;
   struct display *newobj;
@@ -2608,7 +2600,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 /* Implement the "printf" command.  */
 
 static void
-printf_command (char *arg, int from_tty)
+printf_command (const char *arg, int from_tty)
 {
   ui_printf (arg, gdb_stdout);
   gdb_flush (gdb_stdout);
@@ -2617,7 +2609,7 @@ printf_command (char *arg, int from_tty)
 /* Implement the "eval" command.  */
 
 static void
-eval_command (char *arg, int from_tty)
+eval_command (const char *arg, int from_tty)
 {
   string_file stb;
 
@@ -2722,7 +2714,7 @@ With a subcommand, this command modifies parts of the gdb environment.\n\
 You can see these environment settings with the \"show\" command."),
 		  &setlist, "set ", 1, &cmdlist);
   if (dbx_commands)
-    add_com ("assign", class_vars, non_const_set_command, _("\
+    add_com ("assign", class_vars, set_command, _("\
 Evaluate expression EXP and assign result to variable VAR, using assignment\n\
 syntax appropriate for the current language (VAR = EXP or VAR := EXP for\n\
 example).  VAR may be a debugger \"convenience\" variable (names starting\n\

@@ -668,7 +668,7 @@ inf_has_multiple_threads (void)
 }
 
 static void
-checkpoint_command (char *args, int from_tty)
+checkpoint_command (const char *args, int from_tty)
 {
   struct objfile *fork_objf;
   struct gdbarch *gdbarch;
@@ -761,7 +761,7 @@ linux_fork_context (struct fork_info *newfp, int from_tty)
 
 /* Switch inferior process (checkpoint) context, by checkpoint id.  */
 static void
-restart_command (char *args, int from_tty)
+restart_command (const char *args, int from_tty)
 {
   struct fork_info *fp;
 

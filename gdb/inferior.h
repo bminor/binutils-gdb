@@ -152,11 +152,11 @@ extern void setup_inferior (int from_tty);
 
 extern void post_create_inferior (struct target_ops *, int);
 
-extern void attach_command (char *, int);
+extern void attach_command (const char *, int);
 
 extern char *get_inferior_args (void);
 
-extern void set_inferior_args (char *);
+extern void set_inferior_args (const char *);
 
 extern void set_inferior_args_vector (int, char **);
 

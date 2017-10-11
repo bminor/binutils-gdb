@@ -1179,7 +1179,7 @@ gdbsim_mourn_inferior (struct target_ops *target)
    simulator must do any command interpretation work.  */
 
 void
-simulator_command (char *args, int from_tty)
+simulator_command (const char *args, int from_tty)
 {
   struct sim_inferior_data *sim_data;
 

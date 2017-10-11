@@ -10918,7 +10918,7 @@ static void init_remote_threadtests (void);
 #define SAMPLE_THREAD  0x05060708	/* Truncated 64 bit threadid.  */
 
 static void
-threadset_test_cmd (char *cmd, int tty)
+threadset_test_cmd (const char *cmd, int tty)
 {
   int sample_thread = SAMPLE_THREAD;
 
@@ -10928,7 +10928,7 @@ threadset_test_cmd (char *cmd, int tty)
 
 
 static void
-threadalive_test (char *cmd, int tty)
+threadalive_test (const char *cmd, int tty)
 {
   int sample_thread = SAMPLE_THREAD;
   int pid = ptid_get_pid (inferior_ptid);
@@ -10953,7 +10953,7 @@ output_threadid (char *title, threadref *ref)
 }
 
 static void
-threadlist_test_cmd (char *cmd, int tty)
+threadlist_test_cmd (const char *cmd, int tty)
 {
   int startflag = 1;
   threadref nextthread;
@@ -10998,7 +10998,7 @@ get_and_display_threadinfo (threadref *ref)
 }
 
 static void
-threadinfo_test_cmd (char *cmd, int tty)
+threadinfo_test_cmd (const char *cmd, int tty)
 {
   int athread = SAMPLE_THREAD;
   threadref thread;
@@ -11018,7 +11018,7 @@ thread_display_step (threadref *ref, void *context)
 }
 
 static void
-threadlist_update_test_cmd (char *cmd, int tty)
+threadlist_update_test_cmd (const char *cmd, int tty)
 {
   printf_filtered ("Remote Threadlist update test\n");
   remote_threadlist_iterator (thread_display_step, 0, CRAZY_MAX_THREADS);

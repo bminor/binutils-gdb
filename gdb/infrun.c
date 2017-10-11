@@ -72,8 +72,6 @@
 
 static void info_signals_command (char *, int);
 
-static void handle_command (char *, int);
-
 static void sig_print_info (enum gdb_signal);
 
 static void sig_print_header (void);
@@ -8468,7 +8466,7 @@ sig_print_info (enum gdb_signal oursig)
 /* Specify how various signals in the inferior should be handled.  */
 
 static void
-handle_command (char *args, int from_tty)
+handle_command (const char *args, int from_tty)
 {
   int digits, wordlen;
   int sigfirst, signum, siglast;

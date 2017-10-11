@@ -1677,7 +1677,7 @@ input_interactive_p (struct ui *ui)
 }
 
 static void
-dont_repeat_command (char *ignored, int from_tty)
+dont_repeat_command (const char *ignored, int from_tty)
 {
   /* Can't call dont_repeat here because we're not necessarily reading
      from stdin.  */

@@ -3798,8 +3798,7 @@ default_rcmd (struct target_ops *self, const char *command,
 }
 
 static void
-do_monitor_command (char *cmd,
-		 int from_tty)
+do_monitor_command (const char *cmd, int from_tty)
 {
   target_rcmd (cmd, gdb_stdtarg);
 }
@@ -3808,7 +3807,7 @@ do_monitor_command (char *cmd,
    ignored.  */
 
 void
-flash_erase_command (char *cmd, int from_tty)
+flash_erase_command (const char *cmd, int from_tty)
 {
   /* Used to communicate termination of flash operations to the target.  */
   bool found_flash_region = false;
