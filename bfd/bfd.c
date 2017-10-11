@@ -611,10 +611,11 @@ CODE_FRAGMENT
 
 static const char *_bfd_error_program_name;
 
-/* This macro and _doprnt taken from libiberty _doprnt.c, tidied a
-   little and extended to handle '%A' and '%B'.  'L' as a modifer for
-   integer formats is used for bfd_vma and bfd_size_type args, which
-   vary in size depending on BFD configuration.  */
+/* This macro and _bfd_doprnt (originally _doprint) taken from
+   libiberty _doprnt.c, tidied a little and extended to handle '%A'
+   and '%B'.  'L' as a modifer for integer formats is used for bfd_vma
+   and bfd_size_type args, which vary in size depending on BFD
+   configuration.  */
 
 #define PRINT_TYPE(TYPE) \
   do								\
@@ -624,7 +625,7 @@ static const char *_bfd_error_program_name;
     } while (0)
 
 static int
-_doprnt (FILE *stream, const char *format, va_list ap)
+_bfd_doprnt (FILE *stream, const char *format, va_list ap)
 {
   const char *ptr = format;
   char specifier[128];
@@ -868,7 +869,7 @@ error_handler_internal (const char *fmt, va_list ap)
   else
     fprintf (stderr, "BFD: ");
 
-  _doprnt (stderr, fmt, ap);
+  _bfd_doprnt (stderr, fmt, ap);
 
   /* On AIX, putc is implemented as a macro that triggers a -Wunused-value
      warning, so use the fputc function to avoid it.  */

@@ -1,3 +1,11 @@
+2017-11-05  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2017-10-11  Pedro Alves  <palves@redhat.com>
+	* bfd.c (_doprnt): Rename to ...
+	(_bfd_doprnt): ... this.
+	(error_handler_internal): Adjust.
+
 2017-11-01  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
