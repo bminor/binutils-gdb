@@ -111,18 +111,20 @@ static void symfile_find_segment_sections (struct objfile *objfile);
    calls add_symtab_fns() to register information on each format it is
    prepared to read.  */
 
-typedef struct
+struct registered_sym_fns
 {
+  registered_sym_fns (bfd_flavour sym_flavour_, const struct sym_fns *sym_fns_)
+  : sym_flavour (sym_flavour_), sym_fns (sym_fns_)
+  {}
+
   /* BFD flavour that we handle.  */
   enum bfd_flavour sym_flavour;
 
   /* The "vtable" of symbol functions.  */
   const struct sym_fns *sym_fns;
-} registered_sym_fns;
+};
 
-DEF_VEC_O (registered_sym_fns);
-
-static VEC (registered_sym_fns) *symtab_fns = NULL;
+static std::vector<registered_sym_fns> symtab_fns;
 
 /* Values for "set print symbol-loading".  */
 
@@ -1768,9 +1770,7 @@ get_section_index (struct objfile *objfile, const char *section_name)
 void
 add_symtab_fns (enum bfd_flavour flavour, const struct sym_fns *sf)
 {
-  registered_sym_fns fns = { flavour, sf };
-
-  VEC_safe_push (registered_sym_fns, symtab_fns, &fns);
+  symtab_fns.emplace_back (flavour, sf);
 }
 
 /* Initialize OBJFILE to read symbols from its associated BFD.  It
@@ -1781,18 +1781,16 @@ add_symtab_fns (enum bfd_flavour flavour, const struct sym_fns *sf)
 static const struct sym_fns *
 find_sym_fns (bfd *abfd)
 {
-  registered_sym_fns *rsf;
   enum bfd_flavour our_flavour = bfd_get_flavour (abfd);
-  int i;
 
   if (our_flavour == bfd_target_srec_flavour
       || our_flavour == bfd_target_ihex_flavour
       || our_flavour == bfd_target_tekhex_flavour)
     return NULL;	/* No symbols.  */
 
-  for (i = 0; VEC_iterate (registered_sym_fns, symtab_fns, i, rsf); ++i)
-    if (our_flavour == rsf->sym_flavour)
-      return rsf->sym_fns;
+  for (const registered_sym_fns &rsf : symtab_fns)
+    if (our_flavour == rsf.sym_flavour)
+      return rsf.sym_fns;
 
   error (_("I'm sorry, Dave, I can't do that.  Symbol format `%s' unknown."),
 	 bfd_get_target (abfd));
