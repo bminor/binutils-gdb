@@ -1356,13 +1356,6 @@ extern int remove_breakpoints (void);
 
 extern int remove_breakpoints_pid (int pid);
 
-/* This function can be used to physically insert eventpoints from the
-   specified traced inferior process, without modifying the breakpoint
-   package's state.  This can be useful for those targets which
-   support following the processes of a fork() or vfork() system call,
-   when both of the resulting two processes are to be followed.  */
-extern int reattach_breakpoints (int);
-
 /* This function can be used to update the breakpoint package's state
    after an exec() system call has been executed.
 

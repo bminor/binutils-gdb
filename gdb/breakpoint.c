@@ -3152,42 +3152,6 @@ remove_breakpoints_pid (int pid)
   return 0;
 }
 
-int
-reattach_breakpoints (int pid)
-{
-  struct bp_location *bl, **blp_tmp;
-  int val;
-  int dummy1 = 0, dummy2 = 0, dummy3 = 0;
-  struct inferior *inf;
-  struct thread_info *tp;
-
-  tp = any_live_thread_of_process (pid);
-  if (tp == NULL)
-    return 1;
-
-  inf = find_inferior_pid (pid);
-
-  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
-  inferior_ptid = tp->ptid;
-
-  string_file tmp_error_stream;
-
-  ALL_BP_LOCATIONS (bl, blp_tmp)
-  {
-    if (bl->pspace != inf->pspace)
-      continue;
-
-    if (bl->inserted)
-      {
-	bl->inserted = 0;
-	val = insert_bp_location (bl, &tmp_error_stream, &dummy1, &dummy2, &dummy3);
-	if (val != 0)
-	  return val;
-      }
-  }
-  return 0;
-}
-
 static int internal_breakpoint_number = -1;
 
 /* Set the breakpoint number of B, depending on the value of INTERNAL.

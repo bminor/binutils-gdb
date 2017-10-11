@@ -1,3 +1,8 @@
+2017-10-11  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (reattach_breakpoints): Delete.
+	* breakpoint.h (reattach_breakpoints): Delete.
+
 2017-10-11  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* symfile.c (registered_sym_fns): Make struct, not typedef.
