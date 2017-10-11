@@ -1,3 +1,22 @@
+2017-10-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run pr19636-1j, pr19636-1k,
+	pr19636-1l, pr19636-3h and pr19636-3i.
+	* testsuite/ld-i386/pr19636-1j.d: New file.
+	* testsuite/ld-i386/pr19636-1k.d: Likewise.
+	* testsuite/ld-i386/pr19636-1l.d: Likewise.
+	* testsuite/ld-i386/pr19636-3h.d: Likewise.
+	* testsuite/ld-i386/pr19636-3i.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1h.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1i.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1j.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2j.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2k.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2l.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2m.d: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr19636-1h, pr19636-1i,
+	pr19636-1j, pr19636-2j, pr19636-2k, pr19636-2l and pr19636-2m.
+
 2017-10-11  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/aarch64elf.em: Wrap einfo strings in _().  Formatting.
