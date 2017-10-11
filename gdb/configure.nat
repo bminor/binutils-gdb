@@ -156,6 +156,11 @@ case ${gdb_host} in
 		NATDEPFILES="${NATDEPFILES} aarch64-fbsd-nat.o"
 		LOADLIBES=
 		;;
+	    arm)
+		# Host: FreeBSD/arm
+		NATDEPFILES="${NATDEPFILES} arm-fbsd-nat.o"
+		LOADLIBES=
+		;;
 	    i386)
 		# Host: FreeBSD/i386
 		NATDEPFILES="${NATDEPFILES} x86-nat.o x86-dregs.o \

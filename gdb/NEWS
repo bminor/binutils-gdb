@@ -126,6 +126,7 @@ starti
 * New native configurations
 
 FreeBSD/aarch64			aarch64*-*-freebsd*
+FreeBSD/arm			arm*-*-freebsd*
 
 * New targets
 

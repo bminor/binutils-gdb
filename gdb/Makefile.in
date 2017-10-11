@@ -2542,6 +2542,7 @@ ALLDEPFILES = \
 	arc-tdep.c \
 	arm.c \
 	arm-bsd-tdep.c \
+	arm-fbsd-nat.c \
 	arm-fbsd-tdep.c \
 	arm-get-next-pcs.c \
 	arm-linux.c \
