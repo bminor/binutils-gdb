@@ -160,6 +160,10 @@ arm*-*-linux*)
 			solib-svr4.o symfile-mem.o linux-tdep.o linux-record.o"
 	build_gdbserver=yes
 	;;
+arm*-*-freebsd*)
+	# Target: FreeBSD/arm
+	gdb_target_obs="arm-fbsd-tdep.o"
+	;;
 arm*-*-netbsd* | arm*-*-knetbsd*-gnu)
 	# Target: NetBSD/arm
 	gdb_target_obs="arm-nbsd-tdep.o"

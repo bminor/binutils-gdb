@@ -130,6 +130,7 @@ FreeBSD/aarch64			aarch64*-*-freebsd*
 * New targets
 
 FreeBSD/aarch64			aarch64*-*-freebsd*
+FreeBSD/arm			arm*-*-freebsd*
 
 * Removed targets and native configurations
 
