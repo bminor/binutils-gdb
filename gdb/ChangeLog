@@ -1,5 +1,12 @@
 2017-11-07  Tom Tromey  <tom@tromey.com>
 
+	* infcmd.c (strip_bg_char): Return gdb::unique_xmalloc_ptr.
+	(run_command_1, continue_command, step_1, jump_command)
+	(signal_command, until_command, advance_command, finish_command)
+	(attach_command): Update.
+
+2017-11-07  Tom Tromey  <tom@tromey.com>
+
 	* command.h (set_cmd_cfunc): Don't declare.
 	* cli/cli-decode.c (set_cmd_cfunc): Now static.
 
