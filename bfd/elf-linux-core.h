@@ -85,8 +85,8 @@ struct elf_external_linux_prpsinfo64
     char pr_sname;			/* Char for pr_state.  */
     char pr_zomb;			/* Zombie.  */
     char pr_nice;			/* Nice val.  */
-    char pr_flag[8];			/* Flags.  */
     char gap[4];
+    char pr_flag[8];			/* Flags.  */
     char pr_uid[4];
     char pr_gid[4];
     char pr_pid[4];

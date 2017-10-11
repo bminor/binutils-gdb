@@ -1,3 +1,8 @@
+2017-10-11  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf-linux-core.h (elf_external_linux_prpsinfo64): Move the
+	`gap' member ahead of `pr_flag'.
+
 2017-10-11  Pedro Alves  <palves@redhat.com>
 
 	* bfd.c (_doprnt): Rename to ...
