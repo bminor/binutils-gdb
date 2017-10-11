@@ -1,3 +1,14 @@
+2017-10-11  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
+
+	* macrotab.h (macro_lookup_inclusion): Remove unnecessary
+	parentheses in the declaration.
+	(macro_lookup_inclusion): Likewise.
+	(macro_lookup_definition): Likewise.
+	* p-lang.h (pascal_builtin_types): Likewise.
+	* tui/tui-data.c (tui_win_list): Likewise.
+	* tui/tui-data.h (tui_win_list): Likewise.
+	* utils.h (make_cleanup_free_section_addr_info): Likewise.
+
 2017-10-11  Mark Rages  <markrages@gmail.com>
 
 	* target-memory.c (block_boundaries): Fix for block address not

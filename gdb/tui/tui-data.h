@@ -293,7 +293,7 @@ extern void tui_set_win_highlight (struct tui_win_info *win_info,
 
 
 /* Global Data.  */
-extern struct tui_win_info *(tui_win_list[MAX_MAJOR_WINDOWS]);
+extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
 #define TUI_SRC_WIN     tui_win_list[SRC_WIN]
 #define TUI_DISASM_WIN	tui_win_list[DISASSEM_WIN]

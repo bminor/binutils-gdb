@@ -29,7 +29,7 @@
 /****************************
 ** GLOBAL DECLARATIONS
 ****************************/
-struct tui_win_info *(tui_win_list[MAX_MAJOR_WINDOWS]);
+struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
 /***************************
 ** Private data
