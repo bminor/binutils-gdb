@@ -1,3 +1,8 @@
+2017-10-11  Mark Rages  <markrages@gmail.com>
+
+	* target-memory.c (block_boundaries): Fix for block address not
+	aligned on block size.
+
 2017-10-10  Pedro Alves <palves@redhat.com>
 	    Tom Tromey  <tom@tromey.com>
 
