@@ -2270,7 +2270,7 @@ find_relative_frame (struct frame_info *frame, int *level_offset_ptr)
    expressions.  */
 
 void
-select_frame_command (char *level_exp, int from_tty)
+select_frame_command (const char *level_exp, int from_tty)
 {
   struct frame_info *prev_frame = get_selected_frame_if_set ();
 

@@ -1,5 +1,11 @@
 2017-11-07  Tom Tromey  <tom@tromey.com>
 
+	* stack.c (select_frame_command): Constify.
+	* cli/cli-decode.c (add_com_suppress_notification): Constify.
+	* command.h (add_com_suppress_notification): Constify.
+
+2017-11-07  Tom Tromey  <tom@tromey.com>
+
 	* breakpoint.c (stop_command): Constify.
 	* cli/cli-decode.c (struct cmd_list_element): Constify.
 	* command.h (add_abbrev_prefix_cmd): Constify.

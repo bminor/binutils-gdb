@@ -950,7 +950,7 @@ add_com_alias (const char *name, const char *oldname, enum command_class theclas
 
 struct cmd_list_element *
 add_com_suppress_notification (const char *name, enum command_class theclass,
-			       cmd_cfunc_ftype *fun, const char *doc,
+			       cmd_const_cfunc_ftype *fun, const char *doc,
 			       int *suppress_notification)
 {
   struct cmd_list_element *element;
