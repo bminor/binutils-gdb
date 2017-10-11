@@ -4219,4 +4219,6 @@ elf32_s390_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 #define bfd_elf32_mkobject		elf_s390_mkobject
 #define elf_backend_object_p		elf_s390_object_p
 
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
+
 #include "elf32-target.h"

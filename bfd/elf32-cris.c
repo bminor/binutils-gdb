@@ -4347,6 +4347,8 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_may_use_rela_p 1
 #define elf_backend_rela_normal		1
 
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
+
 #include "elf32-target.h"
 
 #undef TARGET_LITTLE_SYM

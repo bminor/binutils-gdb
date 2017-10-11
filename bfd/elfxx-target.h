@@ -132,6 +132,9 @@
 #ifndef elf_backend_always_renumber_dynsyms
 #define elf_backend_always_renumber_dynsyms FALSE
 #endif
+#ifndef elf_backend_linux_prpsinfo32_ugid16
+#define elf_backend_linux_prpsinfo32_ugid16 FALSE
+#endif
 #ifndef elf_backend_stack_align
 #define elf_backend_stack_align 16
 #endif
@@ -895,7 +898,8 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_default_execstack,
   elf_backend_caches_rawsize,
   elf_backend_extern_protected_data,
-  elf_backend_always_renumber_dynsyms
+  elf_backend_always_renumber_dynsyms,
+  elf_backend_linux_prpsinfo32_ugid16
 };
 
 /* Forward declaration for use when initialising alternative_target field.  */

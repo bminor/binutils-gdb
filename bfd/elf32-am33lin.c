@@ -102,4 +102,6 @@ elf32_am33lin_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 #define elf_backend_grok_prstatus	elf32_am33lin_grok_prstatus
 #define elf_backend_grok_psinfo		elf32_am33lin_grok_psinfo
 
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
+
 #include "elf-m10300.c"

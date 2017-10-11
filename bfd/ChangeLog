@@ -1,5 +1,35 @@
 2017-10-11  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elf-bfd.h (elf_backend_data): Add `linux_prpsinfo32_ugid16'
+	member.
+	(elfcore_write_ppc_linux_prpsinfo32): Remove prototype.
+	* elf32-ppc.c (elfcore_write_ppc_linux_prpsinfo32): Remove.
+	(elf_external_ppc_linux_prpsinfo32)
+	(swap_ppc_linux_prpsinfo32_out): Move to...
+	* elf-linux-core.h (elf_external_linux_prpsinfo32_ugid32)
+	(swap_linux_prpsinfo32_ugid32_out): ... these.
+	(elf_external_linux_prpsinfo32): Rename to...
+	(elf_external_linux_prpsinfo32_ugid16): ... this.
+	(swap_linux_prpsinfo32_out): Rename to...
+	(swap_linux_prpsinfo32_ugid16_out): ... this.
+	* elfxx-target.h [!elf_backend_linux_prpsinfo32_ugid16]
+	(elf_backend_linux_prpsinfo32_ugid16): Define.
+	(elfNN_bed): Initialize `linux_prpsinfo32_ugid16' member.
+	* elf.c (elfcore_write_linux_prpsinfo32): Handle both variants
+	of the 32-bit Linux core PRPSINFO note.
+	* elf32-am33lin.c (elf_backend_linux_prpsinfo32_ugid16): Define.
+	* elf32-arm.c (elf_backend_linux_prpsinfo32_ugid16): Define.
+	* elf32-cris.c (elf_backend_linux_prpsinfo32_ugid16): Define.
+	* elf32-frv.c (elf_backend_linux_prpsinfo32_ugid16): Define.
+	* elf32-i386.c (elf_backend_linux_prpsinfo32_ugid16): Define.
+	* elf32-m32r.c (elf_backend_linux_prpsinfo32_ugid16): Define.
+	* elf32-m68k.c (elf_backend_linux_prpsinfo32_ugid16): Define.
+	* elf32-s390.c (elf_backend_linux_prpsinfo32_ugid16): Define.
+	* elf32-sh.c (elf_backend_linux_prpsinfo32_ugid16): Define.
+	* elf32-sparc.c (elf_backend_linux_prpsinfo32_ugid16): Define.
+
+2017-10-11  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elf-linux-core.h (elf_external_linux_prpsinfo64): Move the
 	`gap' member ahead of `pr_flag'.
 

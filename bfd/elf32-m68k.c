@@ -4841,4 +4841,6 @@ elf_m68k_add_symbol_hook (bfd *abfd,
 #define elf_backend_rela_normal		1
 #define elf_backend_dtrel_excludes_plt	1
 
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
+
 #include "elf32-target.h"

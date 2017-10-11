@@ -4015,6 +4015,8 @@ m32r_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 #define bfd_elf32_bfd_print_private_bfd_data	m32r_elf_print_private_bfd_data
 #define elf_backend_special_sections		m32r_elf_special_sections
 
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
+
 #include "elf32-target.h"
 
 #undef  ELF_MAXPAGESIZE

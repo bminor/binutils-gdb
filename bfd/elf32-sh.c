@@ -7308,6 +7308,8 @@ sh_elf_encode_eh_address (bfd *abfd,
 #define elf_backend_got_header_size	12
 #define elf_backend_dtrel_excludes_plt	1
 
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
+
 #if !defined INCLUDE_SHMEDIA && !defined SH_TARGET_ALREADY_DEFINED
 
 #include "elf32-target.h"

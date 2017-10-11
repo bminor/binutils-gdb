@@ -1821,56 +1821,6 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 };
-
-/* External 32-bit PPC structure for PRPSINFO.  This structure is
-   ABI-defined, thus we choose to use char arrays here in order to
-   avoid dealing with different types in different architectures.
-
-   The PPC 32-bit structure uses int for `pr_uid' and `pr_gid' while
-   most non-PPC architectures use `short int'.
-
-   This structure will ultimately be written in the corefile's note
-   section, as the PRPSINFO.  */
-
-struct elf_external_ppc_linux_prpsinfo32
-  {
-    char pr_state;			/* Numeric process state.  */
-    char pr_sname;			/* Char for pr_state.  */
-    char pr_zomb;			/* Zombie.  */
-    char pr_nice;			/* Nice val.  */
-    char pr_flag[4];			/* Flags.  */
-    char pr_uid[4];
-    char pr_gid[4];
-    char pr_pid[4];
-    char pr_ppid[4];
-    char pr_pgrp[4];
-    char pr_sid[4];
-    char pr_fname[16];			/* Filename of executable.  */
-    char pr_psargs[80];			/* Initial part of arg list.  */
-  };
-
-/* Helper function to copy an elf_internal_linux_prpsinfo in host
-   endian to an elf_external_ppc_linux_prpsinfo32 in target endian.  */
-
-static inline void
-swap_ppc_linux_prpsinfo32_out (bfd *obfd,
-			       const struct elf_internal_linux_prpsinfo *from,
-			       struct elf_external_ppc_linux_prpsinfo32 *to)
-{
-  bfd_put_8 (obfd, from->pr_state, &to->pr_state);
-  bfd_put_8 (obfd, from->pr_sname, &to->pr_sname);
-  bfd_put_8 (obfd, from->pr_zomb, &to->pr_zomb);
-  bfd_put_8 (obfd, from->pr_nice, &to->pr_nice);
-  bfd_put_32 (obfd, from->pr_flag, to->pr_flag);
-  bfd_put_32 (obfd, from->pr_uid, to->pr_uid);
-  bfd_put_32 (obfd, from->pr_gid, to->pr_gid);
-  bfd_put_32 (obfd, from->pr_pid, to->pr_pid);
-  bfd_put_32 (obfd, from->pr_ppid, to->pr_ppid);
-  bfd_put_32 (obfd, from->pr_pgrp, to->pr_pgrp);
-  bfd_put_32 (obfd, from->pr_sid, to->pr_sid);
-  strncpy (to->pr_fname, from->pr_fname, sizeof (to->pr_fname));
-  strncpy (to->pr_psargs, from->pr_psargs, sizeof (to->pr_psargs));
-}
 
 /* Initialize the ppc_elf_howto_table, so that linear accesses can be done.  */
 
@@ -2406,20 +2356,6 @@ ppc_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
   }
 
   return TRUE;
-}
-
-char *
-elfcore_write_ppc_linux_prpsinfo32
-  (bfd *abfd,
-   char *buf,
-   int *bufsiz,
-   const struct elf_internal_linux_prpsinfo *prpsinfo)
-{
-  struct elf_external_ppc_linux_prpsinfo32 data;
-
-  swap_ppc_linux_prpsinfo32_out (abfd, prpsinfo, &data);
-  return elfcore_write_note (abfd, buf, bufsiz,
-			     "CORE", NT_PRPSINFO, &data, sizeof (data));
 }
 
 static char *

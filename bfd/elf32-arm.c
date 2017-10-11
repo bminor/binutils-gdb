@@ -19452,6 +19452,8 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
 #undef  elf_backend_lookup_section_flags_hook
 #define elf_backend_lookup_section_flags_hook   elf32_arm_lookup_section_flags
 
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
+
 #include "elf32-target.h"
 
 /* Native Client targets.  */

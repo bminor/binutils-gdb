@@ -1557,6 +1557,10 @@ struct elf_backend_data
   /* True if `_bfd_elf_link_renumber_dynsyms' must be called even for
      static binaries.  */
   unsigned always_renumber_dynsyms : 1;
+
+  /* True if the 32-bit Linux PRPSINFO structure's `pr_uid' and `pr_gid'
+     members use a 16-bit data type.  */
+  unsigned linux_prpsinfo32_ugid16 : 1;
 };
 
 /* Information about reloc sections associated with a bfd_elf_section_data
@@ -2593,10 +2597,6 @@ extern char *elfcore_write_linux_prpsinfo32
 
 /* Linux/most 64-bit archs.  */
 extern char *elfcore_write_linux_prpsinfo64
-  (bfd *, char *, int *, const struct elf_internal_linux_prpsinfo *);
-
-/* Linux/PPC32 uses different layout compared to most archs.  */
-extern char *elfcore_write_ppc_linux_prpsinfo32
   (bfd *, char *, int *, const struct elf_internal_linux_prpsinfo *);
 
 extern bfd *_bfd_elf32_bfd_from_remote_memory

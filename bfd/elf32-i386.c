@@ -4587,6 +4587,8 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 #define elf_backend_relocate_section	      elf_i386_relocate_section
 #define elf_backend_setup_gnu_properties      elf_i386_link_setup_gnu_properties
 
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
+
 #include "elf32-target.h"
 
 /* FreeBSD support.  */

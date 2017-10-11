@@ -60,7 +60,7 @@
 #include "parser-defs.h"
 #include "user-regs.h"
 #include <ctype.h>
-#include "elf-bfd.h"            /* for elfcore_write_* */
+#include "elf-bfd.h"
 
 #include "features/rs6000/powerpc-32l.c"
 #include "features/rs6000/powerpc-altivec32l.c"
@@ -1771,12 +1771,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
       else
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf64-powerpc");
     }
-
-  /* PPC32 uses a different prpsinfo32 compared to most other Linux
-     archs.  */
-  if (tdep->wordsize == 4)
-    set_gdbarch_elfcore_write_linux_prpsinfo (gdbarch,
-					      elfcore_write_ppc_linux_prpsinfo32);
 
   set_gdbarch_core_read_description (gdbarch, ppc_linux_core_read_description);
   set_gdbarch_iterate_over_regset_sections (gdbarch,
