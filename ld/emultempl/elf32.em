@@ -527,7 +527,7 @@ gld${EMULATION_NAME}_search_needed (const char *path,
 
       /* PR 20535: Support the same pseudo-environment variables that
 	 are supported by ld.so.  Namely, $ORIGIN, $LIB and $PLATFORM.
-         Since there can be more than one occurrence of these tokens in
+	 Since there can be more than one occurrence of these tokens in
 	 the path we loop until no more are found.  Since we might not
 	 be able to substitute some of the tokens we maintain an offset
 	 into the filename for where we should begin our scan.  */
@@ -664,8 +664,8 @@ gld${EMULATION_NAME}_search_needed (const char *path,
 		/* Restore the path separator.  */
 		* end = '/';
 
-	      /* PR 20784: Make sure that we resume the scan
-	         *after* the token that we could not replace.  */
+	      /* PR 20784: Make sure that we resume the scan *after*
+		 the token that we could not replace.  */
 	      offset = (var + 1) - filename;
 	    }
 
@@ -1701,34 +1701,36 @@ gld${EMULATION_NAME}_before_allocation (void)
       /* Make __ehdr_start hidden if it has been referenced, to
 	 prevent the symbol from being dynamic.  */
       if (!bfd_link_relocatable (&link_info))
-       {
-         struct elf_link_hash_entry *h
-           = elf_link_hash_lookup (elf_hash_table (&link_info), "__ehdr_start",
-                                   FALSE, FALSE, TRUE);
+	{
+	  struct elf_link_hash_table *htab = elf_hash_table (&link_info);
+	  struct elf_link_hash_entry *h
+	    = elf_link_hash_lookup (htab, "__ehdr_start", FALSE, FALSE, TRUE);
 
-         /* Only adjust the export class if the symbol was referenced
-            and not defined, otherwise leave it alone.  */
-         if (h != NULL
-             && (h->root.type == bfd_link_hash_new
-                 || h->root.type == bfd_link_hash_undefined
-                 || h->root.type == bfd_link_hash_undefweak
-                 || h->root.type == bfd_link_hash_common))
-           {
-             _bfd_elf_link_hash_hide_symbol (&link_info, h, TRUE);
-             if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
-               h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
-	     /* Don't leave the symbol undefined.  Undefined hidden
-		symbols typically won't have dynamic relocations, but
-		we most likely will need dynamic relocations for
-		__ehdr_start if we are building a PIE or shared
-		library.  */
-	     ehdr_start = h;
-	     ehdr_start_save = h->root;
-	     h->root.type = bfd_link_hash_defined;
-	     h->root.u.def.section = bfd_abs_section_ptr;
-	     h->root.u.def.value = 0;
-           }
-       }
+	  /* Only adjust the export class if the symbol was referenced
+	     and not defined, otherwise leave it alone.  */
+	  if (h != NULL
+	      && (h->root.type == bfd_link_hash_new
+		  || h->root.type == bfd_link_hash_undefined
+		  || h->root.type == bfd_link_hash_undefweak
+		  || h->root.type == bfd_link_hash_common))
+	    {
+	      const struct elf_backend_data *bed;
+	      bed = get_elf_backend_data (link_info.output_bfd);
+	      (*bed->elf_backend_hide_symbol) (&link_info, h, TRUE);
+	      if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
+		h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
+	      /* Don't leave the symbol undefined.  Undefined hidden
+		 symbols typically won't have dynamic relocations, but
+		 we most likely will need dynamic relocations for
+		 __ehdr_start if we are building a PIE or shared
+		 library.  */
+	      ehdr_start = h;
+	      ehdr_start_save = h->root;
+	      h->root.type = bfd_link_hash_defined;
+	      h->root.u.def.section = bfd_abs_section_ptr;
+	      h->root.u.def.value = 0;
+	    }
+	}
 
       /* If we are going to make any variable assignments, we need to
 	 let the ELF backend know about them in case the variables are
@@ -1931,7 +1933,7 @@ gld${EMULATION_NAME}_open_dynamic_archive
 	 filename we recorded earlier.  */
 
       if (!entry->flags.full_name_provided)
-        filename = lbasename (entry->filename);
+	filename = lbasename (entry->filename);
       bfd_elf_set_dt_needed_name (entry->the_bfd, filename);
     }
 

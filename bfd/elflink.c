@@ -2808,7 +2808,7 @@ static bfd_boolean
 _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
 {
   struct elf_info_failed *eif = (struct elf_info_failed *) data;
-  bfd *dynobj;
+  struct elf_link_hash_table *htab;
   const struct elf_backend_data *bed;
 
   if (! is_elf_hash_table (eif->info->hash))
@@ -2822,10 +2822,13 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
   if (! _bfd_elf_fix_symbol_flags (h, eif))
     return FALSE;
 
+  htab = elf_hash_table (eif->info);
+  bed = get_elf_backend_data (htab->dynobj);
+
   if (h->root.type == bfd_link_hash_undefweak)
     {
       if (eif->info->dynamic_undefined_weak == 0)
-	_bfd_elf_link_hash_hide_symbol (eif->info, h, TRUE);
+	(*bed->elf_backend_hide_symbol) (eif->info, h, TRUE);
       else if (eif->info->dynamic_undefined_weak > 0
 	       && h->ref_regular
 	       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
@@ -2920,9 +2923,6 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
     _bfd_error_handler
       (_("warning: type and size of dynamic symbol `%s' are not defined"),
        h->root.root.string);
-
-  dynobj = elf_hash_table (eif->info)->dynobj;
-  bed = get_elf_backend_data (dynobj);
 
   if (! (*bed->elf_backend_adjust_dynamic_symbol) (eif->info, h))
     {
@@ -14284,7 +14284,9 @@ bfd_elf_define_start_stop (struct bfd_link_info *info,
       if (symbol[0] == '.')
 	{
 	  /* .startof. and .sizeof. symbols are local.  */
-	  _bfd_elf_link_hash_hide_symbol (info, h, TRUE);
+	  const struct elf_backend_data *bed;
+	  bed = get_elf_backend_data (info->output_bfd);
+	  (*bed->elf_backend_hide_symbol) (info, h, TRUE);
 	}
       else if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_PROTECTED;

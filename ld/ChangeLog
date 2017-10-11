@@ -1,3 +1,9 @@
+2017-10-12  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (before_allocation): Call
+	elf_backend_hide_symbol, not _bfd_elf_link_hash_hide_symbol.
+	Formatting.
+
 2017-10-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* PR ld/22269
