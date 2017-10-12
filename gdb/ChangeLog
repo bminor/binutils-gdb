@@ -1,3 +1,8 @@
+2017-10-16  Tom Tromey  <tom@tromey.com>
+
+	* buildsym.c (block_compar): Remove.
+	(end_symtab_get_static_block): Use std::vector.
+
 2017-10-16  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* memrange.h (struct mem_range): Define operator< and operator==.

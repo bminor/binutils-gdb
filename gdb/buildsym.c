@@ -86,6 +86,7 @@
 #include "cp-support.h"
 #include "dictionary.h"
 #include "addrmap.h"
+#include <algorithm>
 
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
@@ -1165,19 +1166,6 @@ watch_main_source_file_lossage (void)
     }
 }
 
-/* Helper function for qsort.  Parameters are `struct block *' pointers,
-   function sorts them in descending order by their BLOCK_START.  */
-
-static int
-block_compar (const void *ap, const void *bp)
-{
-  const struct block *a = *(const struct block **) ap;
-  const struct block *b = *(const struct block **) bp;
-
-  return ((BLOCK_START (b) > BLOCK_START (a))
-	  - (BLOCK_START (b) < BLOCK_START (a)));
-}
-
 /* Reset state after a successful building of a symtab.
    This exists because dbxread.c and xcoffread.c can call
    start_symtab+end_symtab multiple times after one call to buildsym_init,
@@ -1254,28 +1242,23 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
 
   if ((objfile->flags & OBJF_REORDERED) && pending_blocks)
     {
-      unsigned count = 0;
       struct pending_block *pb;
-      struct block **barray, **bp;
-      struct cleanup *back_to;
+
+      std::vector<block *> barray;
 
       for (pb = pending_blocks; pb != NULL; pb = pb->next)
-	count++;
+	barray.push_back (pb->block);
 
-      barray = XNEWVEC (struct block *, count);
-      back_to = make_cleanup (xfree, barray);
+      std::sort (barray.begin (), barray.end (),
+		 [] (const block *a, const block *b)
+		 {
+		   /* Sort blocks in descending order.  */
+		   return BLOCK_START (a) > BLOCK_START (b);
+		 });
 
-      bp = barray;
+      int i = 0;
       for (pb = pending_blocks; pb != NULL; pb = pb->next)
-	*bp++ = pb->block;
-
-      qsort (barray, count, sizeof (*barray), block_compar);
-
-      bp = barray;
-      for (pb = pending_blocks; pb != NULL; pb = pb->next)
-	pb->block = *bp++;
-
-      do_cleanups (back_to);
+	pb->block = barray[i++];
     }
 
   /* Cleanup any undefined types that have been left hanging around
