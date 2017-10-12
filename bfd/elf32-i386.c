@@ -4586,6 +4586,7 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 #define elf_backend_reloc_type_class	      elf_i386_reloc_type_class
 #define elf_backend_relocate_section	      elf_i386_relocate_section
 #define elf_backend_setup_gnu_properties      elf_i386_link_setup_gnu_properties
+#define elf_backend_hide_symbol		      _bfd_x86_elf_hide_symbol
 
 #define elf_backend_linux_prpsinfo32_ugid16	TRUE
 

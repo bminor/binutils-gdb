@@ -5187,7 +5187,9 @@ elf_x86_64_special_sections[]=
 #define elf_backend_additional_program_headers \
   elf_x86_64_additional_program_headers
 #define elf_backend_setup_gnu_properties \
- elf_x86_64_link_setup_gnu_properties
+  elf_x86_64_link_setup_gnu_properties
+#define elf_backend_hide_symbol \
+  _bfd_x86_elf_hide_symbol
 
 #include "elf64-target.h"
 

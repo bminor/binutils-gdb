@@ -1668,6 +1668,27 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
+void
+_bfd_x86_elf_hide_symbol (struct bfd_link_info *info,
+			  struct elf_link_hash_entry *h,
+			  bfd_boolean force_local)
+{
+  if (h->root.type == bfd_link_hash_undefweak
+      && info->nointerp
+      && bfd_link_pie (info))
+    {
+      /* When there is no dynamic interpreter in PIE, make the undefined
+	 weak symbol dynamic so that PC relative branch to the undefined
+	 weak symbol will land to address 0.  */
+      struct elf_x86_link_hash_entry *eh = elf_x86_hash_entry (h);
+      if (h->plt.refcount > eh->func_pointer_refcount
+	  || eh->plt_got.refcount > 0)
+	return;
+    }
+
+  _bfd_elf_link_hash_hide_symbol (info, h, force_local);
+}
+
 /* Return TRUE if a symbol is referenced locally.  It is similar to
    SYMBOL_REFERENCES_LOCAL, but it also checks version script.  It
    works in check_relocs.  */

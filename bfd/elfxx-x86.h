@@ -621,6 +621,9 @@ extern bfd_boolean _bfd_x86_elf_hash_symbol
 extern bfd_boolean _bfd_x86_elf_adjust_dynamic_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *);
 
+extern void _bfd_x86_elf_hide_symbol
+  (struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean);
+
 extern bfd_boolean _bfd_x86_elf_link_symbol_references_local
   (struct bfd_link_info *, struct elf_link_hash_entry *);
 
