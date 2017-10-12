@@ -3203,16 +3203,15 @@ remote_get_threads_with_qxfer (struct target_ops *ops,
 #if defined(HAVE_LIBEXPAT)
   if (packet_support (PACKET_qXfer_threads) == PACKET_ENABLE)
     {
-      char *xml = target_read_stralloc (ops, TARGET_OBJECT_THREADS, NULL);
-      struct cleanup *back_to = make_cleanup (xfree, xml);
+      gdb::unique_xmalloc_ptr<char> xml
+	= target_read_stralloc (ops, TARGET_OBJECT_THREADS, NULL);
 
       if (xml != NULL && *xml != '\0')
 	{
 	  gdb_xml_parse_quick (_("threads"), "threads.dtd",
-			       threads_elements, xml, context);
+			       threads_elements, xml.get (), context);
 	}
 
-      do_cleanups (back_to);
       return 1;
     }
 #endif
@@ -10893,16 +10892,11 @@ static VEC(mem_region_s) *
 remote_memory_map (struct target_ops *ops)
 {
   VEC(mem_region_s) *result = NULL;
-  char *text = target_read_stralloc (&current_target,
-				     TARGET_OBJECT_MEMORY_MAP, NULL);
+  gdb::unique_xmalloc_ptr<char> text
+    = target_read_stralloc (&current_target, TARGET_OBJECT_MEMORY_MAP, NULL);
 
   if (text)
-    {
-      struct cleanup *back_to = make_cleanup (xfree, text);
-
-      result = parse_memory_map (text);
-      do_cleanups (back_to);
-    }
+    result = parse_memory_map (text.get ());
 
   return result;
 }
@@ -13040,18 +13034,11 @@ remote_set_circular_trace_buffer (struct target_ops *self, int val)
 static traceframe_info_up
 remote_traceframe_info (struct target_ops *self)
 {
-  char *text;
-
-  text = target_read_stralloc (&current_target,
-			       TARGET_OBJECT_TRACEFRAME_INFO, NULL);
+  gdb::unique_xmalloc_ptr<char> text
+    = target_read_stralloc (&current_target, TARGET_OBJECT_TRACEFRAME_INFO,
+			    NULL);
   if (text != NULL)
-    {
-      struct cleanup *back_to = make_cleanup (xfree, text);
-      traceframe_info_up info = parse_traceframe_info (text);
-
-      do_cleanups (back_to);
-      return info;
-    }
+    return parse_traceframe_info (text.get ());
 
   return NULL;
 }
@@ -13310,18 +13297,10 @@ btrace_sync_conf (const struct btrace_config *conf)
 static void
 btrace_read_config (struct btrace_config *conf)
 {
-  char *xml;
-
-  xml = target_read_stralloc (&current_target,
-			      TARGET_OBJECT_BTRACE_CONF, "");
+  gdb::unique_xmalloc_ptr<char> xml
+    = target_read_stralloc (&current_target, TARGET_OBJECT_BTRACE_CONF, "");
   if (xml != NULL)
-    {
-      struct cleanup *cleanup;
-
-      cleanup = make_cleanup (xfree, xml);
-      parse_xml_btrace_conf (conf, xml);
-      do_cleanups (cleanup);
-    }
+    parse_xml_btrace_conf (conf, xml.get ());
 }
 
 /* Maybe reopen target btrace.  */
@@ -13492,9 +13471,7 @@ remote_read_btrace (struct target_ops *self,
 		    enum btrace_read_type type)
 {
   struct packet_config *packet = &remote_protocol_packets[PACKET_qXfer_btrace];
-  struct cleanup *cleanup;
   const char *annex;
-  char *xml;
 
   if (packet_config_support (packet) != PACKET_ENABLE)
     error (_("Target does not support branch tracing."));
@@ -13520,14 +13497,12 @@ remote_read_btrace (struct target_ops *self,
 		      (unsigned int) type);
     }
 
-  xml = target_read_stralloc (&current_target,
-			      TARGET_OBJECT_BTRACE, annex);
+  gdb::unique_xmalloc_ptr<char> xml
+    = target_read_stralloc (&current_target, TARGET_OBJECT_BTRACE, annex);
   if (xml == NULL)
     return BTRACE_ERR_UNKNOWN;
 
-  cleanup = make_cleanup (xfree, xml);
-  parse_xml_btrace (btrace, xml);
-  do_cleanups (cleanup);
+  parse_xml_btrace (btrace, xml.get ());
 
   return BTRACE_ERR_NONE;
 }
@@ -13561,15 +13536,12 @@ remote_load (struct target_ops *self, const char *name, int from_tty)
 static char *
 remote_pid_to_exec_file (struct target_ops *self, int pid)
 {
-  static char *filename = NULL;
+  static gdb::unique_xmalloc_ptr<char> filename;
   struct inferior *inf;
   char *annex = NULL;
 
   if (packet_support (PACKET_qXfer_exec_file) != PACKET_ENABLE)
     return NULL;
-
-  if (filename != NULL)
-    xfree (filename);
 
   inf = find_inferior_pid (pid);
   if (inf == NULL)
@@ -13587,7 +13559,7 @@ remote_pid_to_exec_file (struct target_ops *self, int pid)
   filename = target_read_stralloc (&current_target,
 				   TARGET_OBJECT_EXEC_FILE, annex);
 
-  return filename;
+  return filename.get ();
 }
 
 /* Implement the to_can_do_single_step target_ops method.  */

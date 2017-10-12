@@ -353,14 +353,13 @@ extern LONGEST target_read_alloc (struct target_ops *ops,
 				  const char *annex, gdb_byte **buf_p);
 
 /* Read OBJECT/ANNEX using OPS.  The result is NUL-terminated and
-   returned as a string, allocated using xmalloc.  If an error occurs
-   or the transfer is unsupported, NULL is returned.  Empty objects
-   are returned as allocated but empty strings.  A warning is issued
-   if the result contains any embedded NUL bytes.  */
+   returned as a string.  If an error occurs or the transfer is
+   unsupported, NULL is returned.  Empty objects are returned as
+   allocated but empty strings.  A warning is issued if the result
+   contains any embedded NUL bytes.  */
 
-extern char *target_read_stralloc (struct target_ops *ops,
-				   enum target_object object,
-				   const char *annex);
+extern gdb::unique_xmalloc_ptr<char> target_read_stralloc
+    (struct target_ops *ops, enum target_object object, const char *annex);
 
 /* See target_ops->to_xfer_partial.  */
 extern target_xfer_partial_ftype target_xfer_partial;
@@ -2396,12 +2395,12 @@ extern struct target_ops *find_target_beneath (struct target_ops *);
 struct target_ops *find_target_at (enum strata stratum);
 
 /* Read OS data object of type TYPE from the target, and return it in
-   XML format.  The result is NUL-terminated and returned as a string,
-   allocated using xmalloc.  If an error occurs or the transfer is
-   unsupported, NULL is returned.  Empty objects are returned as
-   allocated but empty strings.  */
+   XML format.  The result is NUL-terminated and returned as a string.
+   If an error occurs or the transfer is unsupported, NULL is
+   returned.  Empty objects are returned as allocated but empty
+   strings.  */
 
-extern char *target_get_osdata (const char *type);
+extern gdb::unique_xmalloc_ptr<char> target_get_osdata (const char *type);
 
 
 /* Stuff that should be shared among the various remote targets.  */

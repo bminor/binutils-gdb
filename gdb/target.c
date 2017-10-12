@@ -1924,13 +1924,9 @@ target_read_alloc (struct target_ops *ops, enum target_object object,
   return target_read_alloc_1 (ops, object, annex, buf_p, 0);
 }
 
-/* Read OBJECT/ANNEX using OPS.  The result is NUL-terminated and
-   returned as a string, allocated using xmalloc.  If an error occurs
-   or the transfer is unsupported, NULL is returned.  Empty objects
-   are returned as allocated but empty strings.  A warning is issued
-   if the result contains any embedded NUL bytes.  */
+/* See target.h.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 target_read_stralloc (struct target_ops *ops, enum target_object object,
 		      const char *annex)
 {
@@ -1945,7 +1941,7 @@ target_read_stralloc (struct target_ops *ops, enum target_object object,
     return NULL;
 
   if (transferred == 0)
-    return xstrdup ("");
+    return gdb::unique_xmalloc_ptr<char> (xstrdup (""));
 
   bufstr[transferred] = 0;
 
@@ -1959,7 +1955,7 @@ target_read_stralloc (struct target_ops *ops, enum target_object object,
 	break;
       }
 
-  return bufstr;
+  return gdb::unique_xmalloc_ptr<char> (bufstr);
 }
 
 /* Memory transfer methods.  */
@@ -2654,7 +2650,9 @@ target_supports_multi_process (void)
   return (*current_target.to_supports_multi_process) (&current_target);
 }
 
-char *
+/* See target.h.  */
+
+gdb::unique_xmalloc_ptr<char>
 target_get_osdata (const char *type)
 {
   struct target_ops *t;

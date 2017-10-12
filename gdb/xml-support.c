@@ -808,8 +808,6 @@ xinclude_start_include (struct gdb_xml_parser *parser,
   struct xinclude_parsing_data *data
     = (struct xinclude_parsing_data *) user_data;
   char *href = (char *) xml_find_attribute (attributes, "href")->value;
-  struct cleanup *back_to;
-  char *text, *output;
 
   gdb_xml_debug (parser, _("Processing XInclude of \"%s\""), href);
 
@@ -817,18 +815,16 @@ xinclude_start_include (struct gdb_xml_parser *parser,
     gdb_xml_error (parser, _("Maximum XInclude depth (%d) exceeded"),
 		   MAX_XINCLUDE_DEPTH);
 
-  text = data->fetcher (href, data->fetcher_baton);
+  gdb::unique_xmalloc_ptr<char> text = data->fetcher (href,
+						      data->fetcher_baton);
   if (text == NULL)
     gdb_xml_error (parser, _("Could not load XML document \"%s\""), href);
-  back_to = make_cleanup (xfree, text);
 
   if (!xml_process_xincludes (data->output, parser->name (),
-			      text, data->fetcher,
+			      text.get (), data->fetcher,
 			      data->fetcher_baton,
 			      data->include_depth + 1))
     gdb_xml_error (parser, _("Parsing \"%s\" failed"), href);
-
-  do_cleanups (back_to);
 
   data->skip_depth++;
 }
@@ -997,13 +993,11 @@ show_debug_xml (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("XML debugging is %s.\n"), value);
 }
 
-char *
+gdb::unique_xmalloc_ptr<char>
 xml_fetch_content_from_file (const char *filename, void *baton)
 {
   const char *dirname = (const char *) baton;
   gdb_file_up file;
-  struct cleanup *back_to;
-  char *text;
   size_t len, offset;
 
   if (dirname && *dirname)
@@ -1024,19 +1018,18 @@ xml_fetch_content_from_file (const char *filename, void *baton)
   /* Read in the whole file, one chunk at a time.  */
   len = 4096;
   offset = 0;
-  text = (char *) xmalloc (len);
-  back_to = make_cleanup (free_current_contents, &text);
+  gdb::unique_xmalloc_ptr<char> text ((char *) xmalloc (len));
   while (1)
     {
       size_t bytes_read;
 
       /* Continue reading where the last read left off.  Leave at least
 	 one byte so that we can NUL-terminate the result.  */
-      bytes_read = fread (text + offset, 1, len - offset - 1, file.get ());
+      bytes_read = fread (text.get () + offset, 1, len - offset - 1,
+			  file.get ());
       if (ferror (file.get ()))
 	{
 	  warning (_("Read error from \"%s\""), filename);
-	  do_cleanups (back_to);
 	  return NULL;
 	}
 
@@ -1046,12 +1039,10 @@ xml_fetch_content_from_file (const char *filename, void *baton)
 	break;
 
       len = len * 2;
-      text = (char *) xrealloc (text, len);
+      text.reset ((char *) xrealloc (text.get (), len));
     }
 
-  discard_cleanups (back_to);
-
-  text[offset] = '\0';
+  text.get ()[offset] = '\0';
   return text;
 }
 

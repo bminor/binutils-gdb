@@ -1,5 +1,27 @@
 2017-10-16  Tom Tromey  <tom@tromey.com>
 
+	* xml-syscall.c (xml_init_syscalls_info): Update.
+	* xml-support.c (xinclude_start_include): Update.
+	(xml_fetch_content_from_file): Return unique_xmalloc_ptr.
+	* xml-support.h (xml_fetch_another): Return unique_xmalloc_ptr.
+	(xml_fetch_content_from_file): Likewise.
+	* osdata.c (get_osdata): Update.
+	* target.h (target_read_stralloc, target_get_osdata): Return
+	unique_xmalloc_ptr.
+	* solib-aix.c (solib_aix_get_library_list): Update.
+	* solib-target.c (solib_target_current_sos): Update.
+	* solib-svr4.c (svr4_current_sos_via_xfer_libraries): Update.
+	* xml-tdesc.c (fetch_available_features_from_target): Update.
+	(target_fetch_description_xml): Update.
+	(file_read_description_xml): Update.
+	* remote.c (remote_get_threads_with_qxfer, remote_memory_map)
+	(remote_traceframe_info, btrace_read_config, remote_read_btrace)
+	(remote_pid_to_exec_file): Update.
+	* target.c (target_read_stralloc): Return unique_xmalloc_ptr.
+	(target_get_osdata): Likewise.
+
+2017-10-16  Tom Tromey  <tom@tromey.com>
+
 	* remote.c (remote_register_number_and_offset): Use std::vector.
 	(remote_set_syscall_catchpoint): Use gdb::unique_xmalloc_ptr.
 	(putpkt_binary): Use gdb::def_vector.

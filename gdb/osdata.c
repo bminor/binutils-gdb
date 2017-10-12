@@ -245,13 +245,11 @@ struct osdata *
 get_osdata (const char *type)
 {
   struct osdata *osdata = NULL;
-  char *xml = target_get_osdata (type);
+  gdb::unique_xmalloc_ptr<char> xml = target_get_osdata (type);
 
   if (xml)
     {
-      struct cleanup *old_chain = make_cleanup (xfree, xml);
-
-      if (xml[0] == '\0')
+      if (xml.get ()[0] == '\0')
 	{
 	  if (type)
 	    warning (_("Empty data returned by target.  Wrong osdata type?"));
@@ -259,9 +257,7 @@ get_osdata (const char *type)
 	    warning (_("Empty type list returned by target.  No type data?"));
 	}
       else
-	osdata = osdata_parse (xml);
-
-      do_cleanups (old_chain);
+	osdata = osdata_parse (xml.get ());
     }
 
   if (!osdata)

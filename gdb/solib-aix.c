@@ -271,39 +271,34 @@ static VEC (lm_info_aix_p) *
 solib_aix_get_library_list (struct inferior *inf, const char *warning_msg)
 {
   struct solib_aix_inferior_data *data;
-  char *library_document;
-  struct cleanup *cleanup;
 
   /* If already computed, return the cached value.  */
   data = get_solib_aix_inferior_data (inf);
   if (data->library_list != NULL)
     return data->library_list;
 
-  library_document = target_read_stralloc (&current_target,
-                                           TARGET_OBJECT_LIBRARIES_AIX,
-                                           NULL);
+  gdb::unique_xmalloc_ptr<char> library_document
+    = target_read_stralloc (&current_target, TARGET_OBJECT_LIBRARIES_AIX,
+			    NULL);
   if (library_document == NULL && warning_msg != NULL)
     {
       warning (_("%s (failed to read TARGET_OBJECT_LIBRARIES_AIX)"),
 	       warning_msg);
       return NULL;
     }
-  cleanup = make_cleanup (xfree, library_document);
 
   if (solib_aix_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"DEBUG: TARGET_OBJECT_LIBRARIES_AIX = \n%s\n",
-			library_document);
+			library_document.get ());
 
-  data->library_list = solib_aix_parse_libraries (library_document);
+  data->library_list = solib_aix_parse_libraries (library_document.get ());
   if (data->library_list == NULL && warning_msg != NULL)
     {
       warning (_("%s (missing XML support?)"), warning_msg);
-      do_cleanups (cleanup);
       return NULL;
     }
 
-  do_cleanups (cleanup);
   return data->library_list;
 }
 

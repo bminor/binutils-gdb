@@ -52,7 +52,8 @@ extern const char *xml_builtin[][2];
 
 /* Callback to fetch a new XML file, based on the provided HREF.  */
 
-typedef char *(*xml_fetch_another) (const char *href, void *baton);
+typedef gdb::unique_xmalloc_ptr<char> (*xml_fetch_another) (const char *href,
+							    void *baton);
 
 /* Append the expansion of TEXT after processing <xi:include> tags in
    RESULT.  FETCHER will be called (with FETCHER_BATON) to retrieve
@@ -230,7 +231,7 @@ ULONGEST gdb_xml_parse_ulongest (struct gdb_xml_parser *parser,
 /* Open FILENAME, read all its text into memory, close it, and return
    the text.  If something goes wrong, return NULL and warn.  */
 
-extern char *xml_fetch_content_from_file (const char *filename,
-                                          void *baton);
+extern gdb::unique_xmalloc_ptr<char> xml_fetch_content_from_file
+    (const char *filename, void *baton);
 
 #endif
