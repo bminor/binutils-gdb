@@ -1,5 +1,12 @@
 2017-10-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/testenv.exp: Check use_gdb_stub instead of is_remote.
+	(test_num_test_vars, run_and_count_vars, find_env)
+	(test_set_unset_env, test_inherit_env_var): New procedures.
+	(top level): Use them.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
 	* lib/selftest-support.exp (selftest_setup): Extend comments, and
 	also skip on stub-like targets.
 
