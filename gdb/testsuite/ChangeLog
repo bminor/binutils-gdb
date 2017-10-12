@@ -1,5 +1,14 @@
 2017-10-13  Pedro Alves  <palves@redhat.com>
 
+	* lib/gdb.exp (target_can_use_run_cmd): New procedure.
+	* gdb.base/annota1.exp: Use it instead of is_remote.
+	* gdb.base/annota3.exp: Use it instead of is_remote.
+	* gdb.cp/annota2.exp: Use it instead of is_remote.
+	* gdb.cp/annota3.exp: Use it instead of is_remote.
+	* gdb.multi/bkpt-multi-exec.exp: Use it instead of is_remote.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/testenv.exp: Check use_gdb_stub instead of is_remote.
 	(test_num_test_vars, run_and_count_vars, find_env)
 	(test_set_unset_env, test_inherit_env_var): New procedures.
