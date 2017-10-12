@@ -2,7 +2,7 @@
 # patterned after description in TI Assembler Tools PDF, SPRU102C, 7-53
 #
 # Copyright (C) 2014-2017 Free Software Foundation, Inc.
-# 
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
@@ -27,16 +27,16 @@ MEMORY
 
 ${RELOCATING+ENTRY (${ENTRY})}
 
-SECTIONS 				
-{ 					
-	.text : 
+SECTIONS
+{
+	.text :
 	{
 		___text__ = .;
 		*(.text)
 		etext = .;
 		___etext__ = .;
 	} > prog
-	.data : 
+	.data :
 	{
 		___data__ = .;
 		__data = .;
@@ -46,11 +46,11 @@ SECTIONS
 		___edata__ = .;
 	} > prog
 	/* all other initialized sections should be allocated here */
-	.cinit : 
+	.cinit :
 	{
 		*(.cinit)
 	} > prog
-	.bss : 
+	.bss :
 	{
 		___bss__ = .;
 		__bss = .;

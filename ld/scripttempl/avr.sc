@@ -1,5 +1,5 @@
 # Copyright (C) 2014-2017 Free Software Foundation, Inc.
-# 
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
@@ -129,7 +129,7 @@ SECTIONS
     ${RELOCATING+ *libc.a:*(.progmem.data)}
 
     ${RELOCATING+ *(.progmem.*)}
-    
+
     ${RELOCATING+. = ALIGN(2);}
 
     /* For code that needs to reside in the lower 128k progmem.  */
@@ -331,7 +331,7 @@ cat <<EOF
   .stab.exclstr 0 : { *(.stab.exclstr) }
   .stab.index 0 : { *(.stab.index) }
   .stab.indexstr 0 : { *(.stab.indexstr) }
-  .comment 0 : { *(.comment) } 
+  .comment 0 : { *(.comment) }
   .note.gnu.build-id : { *(.note.gnu.build-id) }
 EOF
 

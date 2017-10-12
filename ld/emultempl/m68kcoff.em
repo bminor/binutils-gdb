@@ -72,7 +72,7 @@ gld${EMULATION_NAME}_after_open (void)
       asection *datasec;
 
       /* As first-order business, make sure that each input BFD is COFF. It
-         better be, as we are directly calling a COFF backend function.  */
+	 better be, as we are directly calling a COFF backend function.  */
       if (bfd_get_flavour (abfd) != bfd_target_coff_flavour)
 	einfo (_("%F%B: all input objects must be COFF "
 		 "for --embedded-relocs\n"));
@@ -80,12 +80,12 @@ gld${EMULATION_NAME}_after_open (void)
       datasec = bfd_get_section_by_name (abfd, ".data");
 
       /* Note that we assume that the reloc_count field has already
-         been set up.  We could call bfd_get_reloc_upper_bound, but
-         that returns the size of a memory buffer rather than a reloc
-         count.  We do not want to call bfd_canonicalize_reloc,
-         because although it would always work it would force us to
-         read in the relocs into BFD canonical form, which would waste
-         a significant amount of time and memory.  */
+	 been set up.  We could call bfd_get_reloc_upper_bound, but
+	 that returns the size of a memory buffer rather than a reloc
+	 count.  We do not want to call bfd_canonicalize_reloc,
+	 because although it would always work it would force us to
+	 read in the relocs into BFD canonical form, which would waste
+	 a significant amount of time and memory.  */
       if (datasec != NULL && datasec->reloc_count > 0)
 	{
 	  asection *relsec;
@@ -103,7 +103,7 @@ gld${EMULATION_NAME}_after_open (void)
 	}
 
       /* Double check that all other data sections are empty, as is
-         required for embedded PIC code.  */
+	 required for embedded PIC code.  */
       bfd_map_over_sections (abfd, check_sections, datasec);
     }
 }

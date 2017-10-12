@@ -345,23 +345,23 @@ read_file_list (const char *filename)
     {
       /* Skip empty lines.  */
       while (*b == '\n' || *b == '\r')
-        b++;
+	b++;
 
       /* Stop if end of buffer.  */
       if (b == buffer + len)
-        break;
+	break;
 
       /* Eat any byte until end of line.  */
       for (e = b; *e != '\0'; e++)
-        if (*e == '\n' || *e == '\r')
-          break;
+	if (*e == '\n' || *e == '\r')
+	  break;
 
       /* Replace end of line by nul.  */
       if (*e != '\0')
-        *e++ = '\0';
+	*e++ = '\0';
 
       if (b != e)
-        lang_add_input_file (b, lang_input_file_is_search_file_enum, NULL);
+	lang_add_input_file (b, lang_input_file_is_search_file_enum, NULL);
       b = e;
     }
   return;
@@ -388,7 +388,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
 
     case 'f':
       /* This overrides --auxiliary.  This option specifies a file containing
-         a list of input files.  */
+	 a list of input files.  */
       read_file_list (optarg);
       break;
 

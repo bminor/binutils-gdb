@@ -103,7 +103,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 	 the unwind table index.  */
       unsigned int list_size = 10;
       asection **sec_list = (asection **)
-          xmalloc (list_size * sizeof (asection *));
+	xmalloc (list_size * sizeof (asection *));
       unsigned int sec_count = 0;
 
       LANG_FOR_EACH_INPUT_STATEMENT (is)
@@ -130,7 +130,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 		    {
 		      list_size *= 2;
 		      sec_list = (asection **)
-                          xrealloc (sec_list, list_size * sizeof (asection *));
+			xrealloc (sec_list, list_size * sizeof (asection *));
 		    }
 
 		  sec_list[sec_count++] = sec;

@@ -44,7 +44,7 @@ AC_ARG_ENABLE(targets,
 [  --enable-targets        alternative target configurations],
 [case "${enableval}" in
   yes | "") AC_MSG_ERROR(enable-targets option must specify target names or 'all')
-            ;;
+	    ;;
   no)       enable_targets= ;;
   *)        enable_targets=$enableval ;;
 esac])dnl
@@ -120,7 +120,7 @@ AC_SUBST(installed_linker)
 
 AC_ARG_ENABLE([got],
 AS_HELP_STRING([--enable-got=<type>],
-               [GOT handling scheme (target, single, negative, multigot)]),
+	       [GOT handling scheme (target, single, negative, multigot)]),
 [case "${enableval}" in
   target | single | negative | multigot)  got_handling=$enableval ;;
   *)  AC_MSG_ERROR(bad value ${enableval} for --enable-got option) ;;
@@ -130,16 +130,16 @@ esac],
 case "${got_handling}" in
   target)
     AC_DEFINE([GOT_HANDLING_DEFAULT], [GOT_HANDLING_TARGET_DEFAULT],
-              [Define to choose default GOT handling scheme]) ;;
+	      [Define to choose default GOT handling scheme]) ;;
   single)
     AC_DEFINE([GOT_HANDLING_DEFAULT], [GOT_HANDLING_SINGLE],
-              [Define to choose default GOT handling scheme]) ;;
+	      [Define to choose default GOT handling scheme]) ;;
   negative)
     AC_DEFINE([GOT_HANDLING_DEFAULT], [GOT_HANDLING_NEGATIVE],
-              [Define to choose default GOT handling scheme]) ;;
+	      [Define to choose default GOT handling scheme]) ;;
   multigot)
     AC_DEFINE([GOT_HANDLING_DEFAULT], [GOT_HANDLING_MULTIGOT],
-              [Define to choose default GOT handling scheme]) ;;
+	      [Define to choose default GOT handling scheme]) ;;
   *)  AC_MSG_ERROR(bad value ${got_handling} for --enable-got option) ;;
 esac
 

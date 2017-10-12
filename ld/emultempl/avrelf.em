@@ -51,13 +51,13 @@ static void
 avr_elf_set_global_bfd_parameters (void)
 {
   elf32_avr_setup_params (& link_info,
-                          stub_file->the_bfd,
-                          avr_stub_section,
-                          avr_no_stubs,
-                          avr_debug_stubs,
-                          avr_debug_relax,
-                          avr_pc_wrap_around,
-                          avr_replace_call_ret_sequences);
+			  stub_file->the_bfd,
+			  avr_stub_section,
+			  avr_no_stubs,
+			  avr_debug_stubs,
+			  avr_debug_relax,
+			  avr_pc_wrap_around,
+			  avr_replace_call_ret_sequences);
 }
 
 
@@ -122,14 +122,14 @@ avr_elf_create_output_section_statements (void)
     }
 
   stub_file = lang_add_input_file ("linker stubs",
-                                   lang_input_file_is_fake_enum,
-                                   NULL);
+				   lang_input_file_is_fake_enum,
+				   NULL);
 
   stub_file->the_bfd = bfd_create ("linker stubs", link_info.output_bfd);
   if (stub_file->the_bfd == NULL
       || !bfd_set_arch_mach (stub_file->the_bfd,
-                             bfd_get_arch (link_info.output_bfd),
-                             bfd_get_mach (link_info.output_bfd)))
+			     bfd_get_arch (link_info.output_bfd),
+			     bfd_get_mach (link_info.output_bfd)))
     {
       einfo (_("%X%P: can not create stub BFD %E\n"));
       return;
@@ -138,7 +138,7 @@ avr_elf_create_output_section_statements (void)
   /* Now we add the stub section.  */
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
-           | SEC_HAS_CONTENTS | SEC_RELOC | SEC_IN_MEMORY | SEC_KEEP);
+	   | SEC_HAS_CONTENTS | SEC_RELOC | SEC_IN_MEMORY | SEC_KEEP);
   avr_stub_section = bfd_make_section_anyway_with_flags (stub_file->the_bfd,
 							 ".trampolines",
 							 flags);
@@ -151,9 +151,9 @@ avr_elf_create_output_section_statements (void)
 
   return;
 
-  err_ret:
-   einfo (_("%X%P: can not make stub section: %E\n"));
-   return;
+ err_ret:
+  einfo (_("%X%P: can not make stub section: %E\n"));
+  return;
 }
 
 /* Re-calculates the size of the stubs so that we won't waste space.  */
@@ -199,17 +199,17 @@ avr_finish (void)
     {
       avr_link_relax = TRUE;
       for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link.next)
-        {
-          /* Don't let the linker stubs prevent the final object being
-             marked as link-relax ready.  */
-          if ((elf_elfheader (abfd)->e_flags
-               & EF_AVR_LINKRELAX_PREPARED) == 0
-              && abfd != stub_file->the_bfd)
-            {
-              avr_link_relax = FALSE;
-              break;
-            }
-        }
+	{
+	  /* Don't let the linker stubs prevent the final object being
+	     marked as link-relax ready.  */
+	  if ((elf_elfheader (abfd)->e_flags
+	       & EF_AVR_LINKRELAX_PREPARED) == 0
+	      && abfd != stub_file->the_bfd)
+	    {
+	      avr_link_relax = FALSE;
+	      break;
+	    }
+	}
     }
   else
     {
@@ -234,15 +234,15 @@ EOF
 PARSE_AND_LIST_PROLOGUE='
 
 #define OPTION_NO_CALL_RET_REPLACEMENT 301
-#define OPTION_PMEM_WRAP_AROUND        302
-#define OPTION_NO_STUBS                303
-#define OPTION_DEBUG_STUBS             304
-#define OPTION_DEBUG_RELAX             305
+#define OPTION_PMEM_WRAP_AROUND	       302
+#define OPTION_NO_STUBS		       303
+#define OPTION_DEBUG_STUBS	       304
+#define OPTION_DEBUG_RELAX	       305
 '
 
 PARSE_AND_LIST_LONGOPTS='
   { "no-call-ret-replacement", no_argument,
-     NULL, OPTION_NO_CALL_RET_REPLACEMENT},
+    NULL, OPTION_NO_CALL_RET_REPLACEMENT},
   { "pmem-wrap-around", required_argument,
     NULL, OPTION_PMEM_WRAP_AROUND},
   { "no-stubs", no_argument,
@@ -286,17 +286,17 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_PMEM_WRAP_AROUND:
       {
-        /* This variable is defined in the bfd library.  */
-        if ((!strcmp (optarg,"32k"))      || (!strcmp (optarg,"32K")))
-          avr_pc_wrap_around = 32768;
-        else if ((!strcmp (optarg,"8k")) || (!strcmp (optarg,"8K")))
-          avr_pc_wrap_around = 8192;
-        else if ((!strcmp (optarg,"16k")) || (!strcmp (optarg,"16K")))
-          avr_pc_wrap_around = 16384;
-        else if ((!strcmp (optarg,"64k")) || (!strcmp (optarg,"64K")))
-          avr_pc_wrap_around = 0x10000;
-        else
-          return FALSE;
+	/* This variable is defined in the bfd library.  */
+	if ((!strcmp (optarg,"32k"))      || (!strcmp (optarg,"32K")))
+	  avr_pc_wrap_around = 32768;
+	else if ((!strcmp (optarg,"8k"))  || (!strcmp (optarg,"8K")))
+	  avr_pc_wrap_around = 8192;
+	else if ((!strcmp (optarg,"16k")) || (!strcmp (optarg,"16K")))
+	  avr_pc_wrap_around = 16384;
+	else if ((!strcmp (optarg,"64k")) || (!strcmp (optarg,"64K")))
+	  avr_pc_wrap_around = 0x10000;
+	else
+	  return FALSE;
       }
       break;
 
@@ -314,8 +314,8 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_NO_CALL_RET_REPLACEMENT:
       {
-        /* This variable is defined in the bfd library.  */
-        avr_replace_call_ret_sequences = FALSE;
+	/* This variable is defined in the bfd library.  */
+	avr_replace_call_ret_sequences = FALSE;
       }
       break;
 '

@@ -55,10 +55,10 @@ aarch64_elf_before_allocation (void)
     {
       /* Here we rummage through the found bfds to collect information.  */
       LANG_FOR_EACH_INPUT_STATEMENT (is)
-	{
-          /* Initialise mapping tables for code/data.  */
-          bfd_elf${ELFSIZE}_aarch64_init_maps (is->the_bfd);
-	}
+      {
+	/* Initialise mapping tables for code/data.  */
+	bfd_elf${ELFSIZE}_aarch64_init_maps (is->the_bfd);
+      }
     }
 
   /* Call the standard elf routine.  */
@@ -357,7 +357,7 @@ EOF
 PARSE_AND_LIST_PROLOGUE='
 #define OPTION_NO_ENUM_SIZE_WARNING	309
 #define OPTION_PIC_VENEER		310
-#define OPTION_STUBGROUP_SIZE           311
+#define OPTION_STUBGROUP_SIZE		311
 #define OPTION_NO_WCHAR_SIZE_WARNING	312
 #define OPTION_FIX_ERRATUM_835769	313
 #define OPTION_FIX_ERRATUM_843419	314
@@ -430,8 +430,8 @@ PARSE_AND_LIST_ARGS_CASES='
       {
 	const char *end;
 
-        group_size = bfd_scan_vma (optarg, &end, 0);
-        if (*end)
+	group_size = bfd_scan_vma (optarg, &end, 0);
+	if (*end)
 	  einfo (_("%P%F: invalid number `%s'\''\n"), optarg);
       }
       break;

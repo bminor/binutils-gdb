@@ -1,5 +1,5 @@
 # Copyright (C) 2014-2017 Free Software Foundation, Inc.
-# 
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
@@ -51,7 +51,7 @@ SECTIONS
     ${RELOCATING+ PROVIDE(_edata = .);}
   }
   .bss ${RELOCATING:-0} :
-  { 					
+  {
     ${RELOCATING+ PROVIDE(__bss = .);}
     *(.bss);
     *(zerovars);
@@ -61,7 +61,7 @@ SECTIONS
     ${RELOCATING+ PROVIDE(_end = .);}
     ${RELOCATING+ PROVIDE(_FreeMemStart = .);}
   }
-  .stab 0 ${RELOCATING+(NOLOAD)} : 
+  .stab 0 ${RELOCATING+(NOLOAD)} :
   {
     *(.stab);
   }

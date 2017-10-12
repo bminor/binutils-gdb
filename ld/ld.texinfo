@@ -846,7 +846,7 @@ from the place where the @command{ar}, @command{nm} and
 those commands to make use of a compiler based plugin it must first be
 copied into the @file{$@{libdir@}/bfd-plugins} directory.  All gcc
 based linker plugins are backward compatible, so it is sufficient to
-just copy in the newest one. 
+just copy in the newest one.
 
 @kindex --push-state
 @cindex push state governing input file handling
@@ -1142,7 +1142,7 @@ This option marks the executable as requiring global auditing by
 setting the @code{DF_1_GLOBAUDIT} bit in the @code{DT_FLAGS_1} dynamic
 tag.  Global auditing requires that any auditing library defined via
 the @option{--depaudit} or @option{-P} command line options be run for
-all dynamic objects loaded by the application. 
+all dynamic objects loaded by the application.
 
 @item initfirst
 This option is only meaningful when building a shared object.

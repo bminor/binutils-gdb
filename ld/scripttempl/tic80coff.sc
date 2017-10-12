@@ -1,7 +1,7 @@
 # Linker script for TI TMS320C80 (tic80) COFF.
 #
 # Copyright (C) 2014-2017 Free Software Foundation, Inc.
-# 
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
@@ -67,14 +67,14 @@ SECTIONS
     *(.data)
     ${RELOCATING+ __edata  =  .};
   }
-  .bss : { 					
+  .bss : {
     ${RELOCATING+ __bss_start = .};
     *(.bss)
     *(COMMON)
      ${RELOCATING+ _end = ALIGN(0x8)};
      ${RELOCATING+ __end = ALIGN(0x8)};
   }
-  .stab  0 ${RELOCATING+(NOLOAD)} : 
+  .stab  0 ${RELOCATING+(NOLOAD)} :
   {
     [ .stab ]
   }

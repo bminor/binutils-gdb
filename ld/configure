@@ -15419,7 +15419,7 @@ fi
 if test "${enable_targets+set}" = set; then :
   enableval=$enable_targets; case "${enableval}" in
   yes | "") as_fn_error "enable-targets option must specify target names or 'all'" "$LINENO" 5
-            ;;
+	    ;;
   no)       enable_targets= ;;
   *)        enable_targets=$enableval ;;
 esac

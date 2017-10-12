@@ -101,8 +101,8 @@ arm_elf_before_allocation (void)
       /* Here we rummage through the found bfds to collect glue information.  */
       LANG_FOR_EACH_INPUT_STATEMENT (is)
 	{
-          /* Initialise mapping tables for code/data.  */
-          bfd_elf32_arm_init_maps (is->the_bfd);
+	  /* Initialise mapping tables for code/data.  */
+	  bfd_elf32_arm_init_maps (is->the_bfd);
 
 	  if (!bfd_elf32_arm_process_before_allocation (is->the_bfd,
 							&link_info)
@@ -422,9 +422,9 @@ gld${EMULATION_NAME}_finish (void)
   {
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
-        /* Figure out where VFP11 erratum veneers (and the labels returning
-           from same) have been placed.  */
-        bfd_elf32_arm_vfp11_fix_veneer_locations (is->the_bfd, &link_info);
+	/* Figure out where VFP11 erratum veneers (and the labels returning
+	   from same) have been placed.  */
+	bfd_elf32_arm_vfp11_fix_veneer_locations (is->the_bfd, &link_info);
 
 	 /* Figure out where STM32L4XX erratum veneers (and the labels returning
 	   from them) have been placed.  */
@@ -531,13 +531,13 @@ arm_elf_create_output_section_statements (void)
   bfd_elf32_arm_set_target_params (link_info.output_bfd, &link_info, &params);
 
   stub_file = lang_add_input_file ("linker stubs",
- 				   lang_input_file_is_fake_enum,
- 				   NULL);
+				   lang_input_file_is_fake_enum,
+				   NULL);
   stub_file->the_bfd = bfd_create ("linker stubs", link_info.output_bfd);
   if (stub_file->the_bfd == NULL
       || ! bfd_set_arch_mach (stub_file->the_bfd,
- 			      bfd_get_arch (link_info.output_bfd),
- 			      bfd_get_mach (link_info.output_bfd)))
+			      bfd_get_arch (link_info.output_bfd),
+			      bfd_get_mach (link_info.output_bfd)))
     {
       einfo (_("%X%P: can not create BFD %E\n"));
       return;
@@ -704,26 +704,26 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_VFP11_DENORM_FIX:
       if (strcmp (optarg, "none") == 0)
-        params.vfp11_denorm_fix = BFD_ARM_VFP11_FIX_NONE;
+	params.vfp11_denorm_fix = BFD_ARM_VFP11_FIX_NONE;
       else if (strcmp (optarg, "scalar") == 0)
-        params.vfp11_denorm_fix = BFD_ARM_VFP11_FIX_SCALAR;
+	params.vfp11_denorm_fix = BFD_ARM_VFP11_FIX_SCALAR;
       else if (strcmp (optarg, "vector") == 0)
-        params.vfp11_denorm_fix = BFD_ARM_VFP11_FIX_VECTOR;
+	params.vfp11_denorm_fix = BFD_ARM_VFP11_FIX_VECTOR;
       else
-        einfo (_("Unrecognized VFP11 fix type '\''%s'\''.\n"), optarg);
+	einfo (_("Unrecognized VFP11 fix type '\''%s'\''.\n"), optarg);
       break;
 
     case OPTION_STM32L4XX_FIX:
       if (!optarg)
-        params.stm32l4xx_fix = BFD_ARM_STM32L4XX_FIX_DEFAULT;
+	params.stm32l4xx_fix = BFD_ARM_STM32L4XX_FIX_DEFAULT;
       else if (strcmp (optarg, "none") == 0)
-        params.stm32l4xx_fix = BFD_ARM_STM32L4XX_FIX_NONE;
+	params.stm32l4xx_fix = BFD_ARM_STM32L4XX_FIX_NONE;
       else if (strcmp (optarg, "default") == 0)
-        params.stm32l4xx_fix = BFD_ARM_STM32L4XX_FIX_DEFAULT;
+	params.stm32l4xx_fix = BFD_ARM_STM32L4XX_FIX_DEFAULT;
       else if (strcmp (optarg, "all") == 0)
-        params.stm32l4xx_fix = BFD_ARM_STM32L4XX_FIX_ALL;
+	params.stm32l4xx_fix = BFD_ARM_STM32L4XX_FIX_ALL;
       else
-        einfo (_("Unrecognized STM32L4XX fix type '\''%s'\''.\n"), optarg);
+	einfo (_("Unrecognized STM32L4XX fix type '\''%s'\''.\n"), optarg);
       break;
 
     case OPTION_NO_ENUM_SIZE_WARNING:
@@ -742,8 +742,8 @@ PARSE_AND_LIST_ARGS_CASES='
       {
 	const char *end;
 
-        group_size = bfd_scan_vma (optarg, &end, 0);
-        if (*end)
+	group_size = bfd_scan_vma (optarg, &end, 0);
+	if (*end)
 	  einfo (_("%P%F: invalid number `%s'\''\n"), optarg);
       }
       break;

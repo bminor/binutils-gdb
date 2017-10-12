@@ -55,7 +55,7 @@ hppaelf_after_parse (void)
 
   /* Enable this once we split millicode stuff from libgcc:
      lang_add_input_file ("milli",
-     			  lang_input_file_is_l_enum,
+			  lang_input_file_is_l_enum,
 			  NULL);
   */
 
@@ -370,8 +370,8 @@ PARSE_AND_LIST_ARGS_CASES='
     case OPTION_STUBGROUP_SIZE:
       {
 	const char *end;
-        group_size = bfd_scan_vma (optarg, &end, 0);
-        if (*end)
+	group_size = bfd_scan_vma (optarg, &end, 0);
+	if (*end)
 	  einfo (_("%P%F: invalid number `%s'\''\n"), optarg);
       }
       break;

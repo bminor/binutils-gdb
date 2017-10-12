@@ -235,15 +235,15 @@ PARSE_AND_LIST_OPTIONS='
 PARSE_AND_LIST_ARGS_CASES='
     case OPTION_GOT:
       if (strcmp (optarg, "target") == 0)
-        got_handling = GOT_HANDLING_TARGET_DEFAULT;
+	got_handling = GOT_HANDLING_TARGET_DEFAULT;
       else if (strcmp (optarg, "single") == 0)
-        got_handling = 0;
+	got_handling = 0;
       else if (strcmp (optarg, "negative") == 0)
-        got_handling = 1;
+	got_handling = 1;
       else if (strcmp (optarg, "multigot") == 0)
-        got_handling = 2;
+	got_handling = 2;
       else
-        einfo (_("Unrecognized --got argument '\''%s'\''.\n"), optarg);
+	einfo (_("Unrecognized --got argument '\''%s'\''.\n"), optarg);
       break;
 '
 

@@ -195,7 +195,7 @@ nds32_elf_after_allocation (void)
     {
       /* Initialize ex9 hash table.  */
       if (!nds32_elf_ex9_init ())
-        return;
+	return;
     }
 
   /* Call default after allocation callback.

@@ -1,10 +1,10 @@
 # Copyright (C) 2014-2017 Free Software Foundation, Inc.
-# 
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
 
-CTOR=".ctors ${CONSTRUCTING-0} : 
+CTOR=".ctors ${CONSTRUCTING-0} :
   {
     ${CONSTRUCTING+ __CTOR_LIST__ = .; }
     /* gcc uses crtbegin.o to find the start of
@@ -206,7 +206,7 @@ EOF
 
 . $srcdir/scripttempl/DWARF.sc
 
-cat <<EOF  
+cat <<EOF
   PROVIDE (__stack = ${STACK_START_ADDR});
 }
 EOF

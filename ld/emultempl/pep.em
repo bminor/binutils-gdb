@@ -493,10 +493,10 @@ set_entry_point (void)
   int i;
 
   static const struct
-    {
-      const int value;
-      const char *entry;
-    }
+  {
+    const int value;
+    const char *entry;
+  }
   v[] =
     {
       { 1, "NtProcessStartup"  },
@@ -518,14 +518,14 @@ set_entry_point (void)
   else
     {
       for (i = 0; v[i].entry; i++)
-        if (v[i].value == pep_subsystem)
-          break;
+	if (v[i].value == pep_subsystem)
+	  break;
 
       /* If no match, use the default.  */
       if (v[i].entry != NULL)
-        entry = v[i].entry;
+	entry = v[i].entry;
       else
-        entry = default_entry;
+	entry = default_entry;
     }
 
   /* Now we check target's default for getting proper symbol_char.  */
@@ -1257,9 +1257,9 @@ pecoff_checksum_contents (bfd *abfd,
 
       status = bfd_bread (&b, (bfd_size_type) 1, abfd);
       if (status < 1)
-        {
-          break;
-        }
+	{
+	  break;
+	}
 
       (*process) (&b, 1, arg);
       filepos += 1;
@@ -1284,25 +1284,25 @@ write_build_id (bfd *abfd)
     {
       struct bfd_link_order *l = NULL;
       for (l = asec->map_head.link_order; l != NULL; l = l->next)
-        {
-          if (l->type == bfd_indirect_link_order)
-            {
-              if (l->u.indirect.section == t->build_id.sec)
-                {
-                  link_order = l;
-                  break;
-                }
-            }
-        }
+	{
+	  if (l->type == bfd_indirect_link_order)
+	    {
+	      if (l->u.indirect.section == t->build_id.sec)
+		{
+		  link_order = l;
+		  break;
+		}
+	    }
+	}
 
       if (link_order)
-        break;
+	break;
     }
 
   if (!link_order)
     {
       einfo (_("%P: warning: .buildid section discarded,"
-               " --build-id ignored.\n"));
+	       " --build-id ignored.\n"));
       return TRUE;
     }
 
@@ -2115,8 +2115,8 @@ gld_${EMULATION_NAME}_open_dynamic_archive
       /* Alternate explicit import library for dll's.  */
       { "%s.dll.a", FALSE },
       /* "libfoo.a" could be either an import lib or a static lib.
-          For backwards compatibility, libfoo.a needs to precede
-          libfoo.dll and foo.dll in the search.  */
+	 For backwards compatibility, libfoo.a needs to precede
+	 libfoo.dll and foo.dll in the search.  */
       { "lib%s.a", FALSE },
       /* The 'native' spelling of an import lib name is "foo.lib".  */
       { "%s.lib", FALSE },

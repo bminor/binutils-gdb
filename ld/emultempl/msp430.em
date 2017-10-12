@@ -7,7 +7,7 @@ fragment <<EOF
    Copyright (C) 2014-2017 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
    Extended for the MSP430 by Nick Clifton  nickc@redhat.com
-   
+
    This file is part of the GNU Binutils.
 
    This program is free software; you can redistribute it and/or modify
@@ -197,7 +197,7 @@ scan_children (lang_statement_union_type * l)
 	  break;
 
 	case lang_wild_statement_enum:
-	  amount += scan_children (l->wild_statement.children.head);	  
+	  amount += scan_children (l->wild_statement.children.head);
 	  break;
 
 	case lang_data_statement_enum:
@@ -214,7 +214,7 @@ scan_children (lang_statement_union_type * l)
 
   return amount;
 }
-  
+
 /* Place an orphan section.  We use this to put .either sections
    into either their lower or their upper equivalents.  */
 
@@ -258,7 +258,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
     }
   else
     name = (char *) secname;
-  
+
   lower_name = concat (".lower", name, NULL);
   upper_name = concat (".upper", name, NULL);
 

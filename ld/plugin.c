@@ -1014,7 +1014,7 @@ plugin_load_plugins (void)
       if (!onloadfn)
 	onloadfn = (ld_plugin_onload) dlsym (curplug->dlhandle, "_onload");
       if (!onloadfn)
-        einfo (_("%P%F: %s: error loading plugin: %s\n"),
+	einfo (_("%P%F: %s: error loading plugin: %s\n"),
 	       curplug->name, dlerror ());
       set_tv_plugin_args (curplug, &my_tv[tv_header_size]);
       called_plugin = curplug;

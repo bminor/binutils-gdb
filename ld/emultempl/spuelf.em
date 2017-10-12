@@ -421,7 +421,7 @@ gld${EMULATION_NAME}_finish (void)
   if (is_spu_target ())
     {
       if (params.local_store_lo < params.local_store_hi)
-        {
+	{
 	  asection *s;
 
 	  s = spu_elf_check_vma (&link_info);
