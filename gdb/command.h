@@ -445,6 +445,11 @@ extern void dont_repeat (void);
 
 extern scoped_restore_tmpl<int> prevent_dont_repeat (void);
 
+/* Set the arguments that will be passed if the current command is
+   repeated.  Note that the passed-in string must be a constant.  */
+
+extern void set_repeat_arguments (const char *args);
+
 /* Used to mark commands that don't do anything.  If we just leave the
    function field NULL, the command is interpreted as a help topic, or
    as a class of commands.  */

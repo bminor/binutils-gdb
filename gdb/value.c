@@ -2003,10 +2003,7 @@ show_values (char *num_exp, int from_tty)
      "show values +".  If num_exp is null, this is unnecessary, since
      "show values +" is not useful after "show values".  */
   if (from_tty && num_exp)
-    {
-      num_exp[0] = '+';
-      num_exp[1] = '\0';
-    }
+    set_repeat_arguments ("+");
 }
 
 enum internalvar_kind

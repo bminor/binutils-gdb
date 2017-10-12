@@ -1,5 +1,15 @@
 2017-11-07  Tom Tromey  <tom@tromey.com>
 
+	* printcmd.c (x_command): Call set_repeat_arguments.
+	* cli/cli-cmds.c (list_command): Call set_repeat_arguments.
+	* top.c (repeat_arguments): New global.
+	(set_repeat_arguments): New function.
+	(execute_command): Handle repeat_arguments.
+	(show_commands): Calls set_repeat_arguments.
+	* command.h (set_repeat_arguments): Declare.
+
+2017-11-07  Tom Tromey  <tom@tromey.com>
+
 	* stack.c (backtrace_command): Use std::string.
 	(backtrace_command_1): Make "count_exp" const.
 

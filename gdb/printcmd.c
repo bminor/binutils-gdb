@@ -1646,7 +1646,7 @@ x_command (char *exp, int from_tty)
          repeated with Newline.  But don't clobber a user-defined
          command's definition.  */
       if (from_tty)
-	*exp = 0;
+	set_repeat_arguments ("");
       val = evaluate_expression (expr.get ());
       if (TYPE_IS_REFERENCE (value_type (val)))
 	val = coerce_ref (val);

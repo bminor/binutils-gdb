@@ -522,6 +522,19 @@ maybe_wait_sync_command_done (int was_sync)
     wait_sync_command_done ();
 }
 
+/* If not NULL, the arguments that should be passed if the current
+   command is repeated.  */
+
+static const char *repeat_arguments;
+
+/* See command.h.  */
+
+void
+set_repeat_arguments (const char *args)
+{
+  repeat_arguments = args;
+}
+
 /* Execute the line P as a command, in the current user context.
    Pass FROM_TTY as second argument to the defining function.  */
 
@@ -563,6 +576,10 @@ execute_command (char *p, int from_tty)
 
       c = lookup_cmd (&cmd, cmdlist, "", 0, 1);
       p = (char *) cmd;
+
+      scoped_restore save_repeat_args
+	= make_scoped_restore (&repeat_arguments, nullptr);
+      char *args_pointer = p;
 
       /* Pass null arg rather than an empty one.  */
       arg = *p ? p : 0;
@@ -612,6 +629,11 @@ execute_command (char *p, int from_tty)
       /* If this command has been post-hooked, run the hook last.  */
       execute_cmd_post_hook (c);
 
+      if (repeat_arguments != NULL)
+	{
+	  gdb_assert (strlen (args_pointer) >= strlen (repeat_arguments));
+	  strcpy (args_pointer, repeat_arguments);
+	}
     }
 
   check_frame_language_change ();
@@ -1667,7 +1689,7 @@ dont_repeat_command (char *ignored, int from_tty)
 /* Number of commands to print in each call to show_commands.  */
 #define Hist_print 10
 void
-show_commands (char *args, int from_tty)
+show_commands (const char *args, int from_tty)
 {
   /* Index for history commands.  Relative to history_base.  */
   int offset;
@@ -1721,10 +1743,7 @@ show_commands (char *args, int from_tty)
      "show commands +" does.  This is unnecessary if arg is null,
      because "show commands +" is not useful after "show commands".  */
   if (from_tty && args)
-    {
-      args[0] = '+';
-      args[1] = '\0';
-    }
+    set_repeat_arguments ("+");
 }
 
 /* Update the size of our command history file to HISTORY_SIZE.

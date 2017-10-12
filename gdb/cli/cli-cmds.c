@@ -1082,7 +1082,7 @@ list_command (char *arg, int from_tty)
      turn it into the no-arg variant.  */
 
   if (from_tty)
-    *arg = 0;
+    set_repeat_arguments ("");
 
   if (dummy_beg && sal_end.symtab == 0)
     error (_("No default source file yet.  Do \"help list\"."));
