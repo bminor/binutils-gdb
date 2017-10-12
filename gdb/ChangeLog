@@ -1,5 +1,10 @@
 2017-10-16  Tom Tromey  <tom@tromey.com>
 
+	* ppc-linux-nat.c (hwdebug_insert_point): Use
+	gdb::unique_xmalloc_ptr, XDUP.
+
+2017-10-16  Tom Tromey  <tom@tromey.com>
+
 	* probe.c (parse_probes): Use std::string.
 	(info_probes_for_ops, enable_probes_command)
 	(disable_probes_command): Remove cleanups.

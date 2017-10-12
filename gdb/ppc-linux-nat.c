@@ -1541,16 +1541,13 @@ hwdebug_insert_point (struct ppc_hw_breakpoint *b, int tid)
 {
   int i;
   long slot;
-  struct ppc_hw_breakpoint *p = XNEW (struct ppc_hw_breakpoint);
+  gdb::unique_xmalloc_ptr<ppc_hw_breakpoint> p (XDUP (ppc_hw_breakpoint, b));
   struct hw_break_tuple *hw_breaks;
-  struct cleanup *c = make_cleanup (xfree, p);
   struct thread_points *t;
   struct hw_break_tuple *tuple;
 
-  memcpy (p, b, sizeof (struct ppc_hw_breakpoint));
-
   errno = 0;
-  slot = ptrace (PPC_PTRACE_SETHWDEBUG, tid, 0, p);
+  slot = ptrace (PPC_PTRACE_SETHWDEBUG, tid, 0, p.get ());
   if (slot < 0)
     perror_with_name (_("Unexpected error setting breakpoint or watchpoint"));
 
@@ -1564,13 +1561,11 @@ hwdebug_insert_point (struct ppc_hw_breakpoint *b, int tid)
     if (hw_breaks[i].hw_break == NULL)
       {
 	hw_breaks[i].slot = slot;
-	hw_breaks[i].hw_break = p;
+	hw_breaks[i].hw_break = p.release ();
 	break;
       }
 
   gdb_assert (i != max_slots_number);
-
-  discard_cleanups (c);
 }
 
 /* This function is a generic wrapper that is responsible for removing a
