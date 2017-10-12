@@ -2,6 +2,7 @@
 #source: pr22269.s
 #ld: -pie --no-dynamic-linker -z dynamic-undefined-weak
 #readelf: -r -x .data.rel.ro
+#warning: -z dynamic-undefined-weak ignored
 #target: *-*-linux* *-*-gnu* *-*-nacl*
 
 There are no relocations in this file.

@@ -2,6 +2,7 @@
 #as: --64 -mrelax-relocations=no
 #ld: -pie -E -m elf_x86_64 --no-dynamic-linker -z dynamic-undefined-weak
 #readelf : -r --wide -x .got -x .got.plt --dyn-syms
+#warning: -z dynamic-undefined-weak ignored
 
 There are no relocations in this file.
 

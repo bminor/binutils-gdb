@@ -1,3 +1,15 @@
+2017-10-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr22269b.d: Expect warning of
+	"-z dynamic-undefined-weak ignored".
+	* testsuite/ld-i386/pr19636-1j.d: Likewise.
+	* testsuite/ld-i386/pr19636-1k.d: Likewise.
+	* testsuite/ld-i386/pr19636-1l.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2j.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2k.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2l.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2m.d: Likewise.
+
 2017-10-12  Alan Modra  <amodra@gmail.com>
 
 	PR 22269
