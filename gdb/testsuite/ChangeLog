@@ -1,3 +1,9 @@
+2017-10-12  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/checkpoint.exp: Don't check is_remote or isnative.
+	Instead skip if there's any gdb_protocol set.
+
 2017-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
 	    Pedro Alves  <palves@redhat.com>
 
