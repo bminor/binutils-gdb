@@ -98,7 +98,6 @@ parse_probes (const struct event_location *location,
 {
   char *arg_end, *arg;
   char *objfile_namestr = NULL, *provider = NULL, *name, *p;
-  struct cleanup *cleanup;
   const struct probe_ops *probe_ops;
   const char *arg_start, *cs;
 
@@ -118,8 +117,8 @@ parse_probes (const struct event_location *location,
   arg_end = skip_to_space (arg);
 
   /* We make a copy here so we can write over parts with impunity.  */
-  arg = savestring (arg, arg_end - arg);
-  cleanup = make_cleanup (xfree, arg);
+  std::string copy (arg, arg_end - arg);
+  arg = &copy[0];
 
   /* Extract each word from the argument, separated by ":"s.  */
   p = strchr (arg, ':');
@@ -183,16 +182,11 @@ parse_probes (const struct event_location *location,
 
   if (canonical)
     {
-      char *canon;
-
-      canon = savestring (arg_start, arg_end - arg_start);
-      make_cleanup (xfree, canon);
+      std::string canon (arg_start, arg_end - arg_start);
       canonical->special_display = 1;
       canonical->pre_expanded = 1;
-      canonical->location = new_probe_location (canon);
+      canonical->location = new_probe_location (canon.c_str ());
     }
-
-  do_cleanups (cleanup);
 
   return result;
 }
@@ -548,7 +542,6 @@ info_probes_for_ops (const char *arg, int from_tty,
 		     const struct probe_ops *pops)
 {
   std::string provider, probe_name, objname;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   int any_found;
   int ui_out_extra_fields = 0;
   size_t size_addr;
@@ -657,7 +650,6 @@ info_probes_for_ops (const char *arg, int from_tty,
 
     any_found = !probes.empty ();
   }
-  do_cleanups (cleanup);
 
   if (!any_found)
     current_uiout->message (_("No probes matched.\n"));
@@ -677,7 +669,6 @@ static void
 enable_probes_command (const char *arg, int from_tty)
 {
   std::string provider, probe_name, objname;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
   parse_probe_linespec ((const char *) arg, &provider, &probe_name, &objname);
 
@@ -686,7 +677,6 @@ enable_probes_command (const char *arg, int from_tty)
   if (probes.empty ())
     {
       current_uiout->message (_("No probes matched.\n"));
-      do_cleanups (cleanup);
       return;
     }
 
@@ -706,8 +696,6 @@ enable_probes_command (const char *arg, int from_tty)
 	current_uiout->message (_("Probe %s:%s cannot be enabled.\n"),
 				probe.probe->provider, probe.probe->name);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Implementation of the `disable probes' command.  */
@@ -716,7 +704,6 @@ static void
 disable_probes_command (const char *arg, int from_tty)
 {
   std::string provider, probe_name, objname;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
   parse_probe_linespec ((const char *) arg, &provider, &probe_name, &objname);
 
@@ -725,7 +712,6 @@ disable_probes_command (const char *arg, int from_tty)
   if (probes.empty ())
     {
       current_uiout->message (_("No probes matched.\n"));
-      do_cleanups (cleanup);
       return;
     }
 
@@ -745,8 +731,6 @@ disable_probes_command (const char *arg, int from_tty)
 	current_uiout->message (_("Probe %s:%s cannot be disabled.\n"),
 				probe.probe->provider, probe.probe->name);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* See comments in probe.h.  */

@@ -1,5 +1,11 @@
 2017-10-16  Tom Tromey  <tom@tromey.com>
 
+	* probe.c (parse_probes): Use std::string.
+	(info_probes_for_ops, enable_probes_command)
+	(disable_probes_command): Remove cleanups.
+
+2017-10-16  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.c (block_compar): Remove.
 	(end_symtab_get_static_block): Use std::vector.
 
