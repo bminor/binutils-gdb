@@ -1,5 +1,12 @@
 2017-10-16  Tom Tromey  <tom@tromey.com>
 
+	* remote.c (remote_register_number_and_offset): Use std::vector.
+	(remote_set_syscall_catchpoint): Use gdb::unique_xmalloc_ptr.
+	(putpkt_binary): Use gdb::def_vector.
+	(compare_sections_command): Use gdb::byte_vector.
+
+2017-10-16  Tom Tromey  <tom@tromey.com>
+
 	* ppc-linux-nat.c (hwdebug_insert_point): Use
 	gdb::unique_xmalloc_ptr, XDUP.
 

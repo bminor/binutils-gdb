@@ -803,20 +803,14 @@ int
 remote_register_number_and_offset (struct gdbarch *gdbarch, int regnum,
 				   int *pnum, int *poffset)
 {
-  struct packet_reg *regs;
-  struct cleanup *old_chain;
-
   gdb_assert (regnum < gdbarch_num_regs (gdbarch));
 
-  regs = XCNEWVEC (struct packet_reg, gdbarch_num_regs (gdbarch));
-  old_chain = make_cleanup (xfree, regs);
+  std::vector<packet_reg> regs (gdbarch_num_regs (gdbarch));
 
-  map_regcache_remote_table (gdbarch, regs);
+  map_regcache_remote_table (gdbarch, regs.data ());
 
   *pnum = regs[regnum].pnum;
   *poffset = regs[regnum].offset;
-
-  do_cleanups (old_chain);
 
   return *pnum != -1;
 }
@@ -2062,7 +2056,7 @@ remote_set_syscall_catchpoint (struct target_ops *self,
 			       int pid, int needed, int any_count,
 			       int table_size, int *table)
 {
-  char *catch_packet;
+  const char *catch_packet;
   enum packet_result result;
   int n_sysno = 0;
 
@@ -2092,6 +2086,7 @@ remote_set_syscall_catchpoint (struct target_ops *self,
 			  pid, needed, any_count, n_sysno);
     }
 
+  gdb::unique_xmalloc_ptr<char> built_packet;
   if (needed)
     {
       /* Prepare a packet with the sysno list, assuming max 8+1
@@ -2099,46 +2094,45 @@ remote_set_syscall_catchpoint (struct target_ops *self,
 	 big, fallback on the non-selective packet.  */
       const int maxpktsz = strlen ("QCatchSyscalls:1") + n_sysno * 9 + 1;
 
-      catch_packet = (char *) xmalloc (maxpktsz);
-      strcpy (catch_packet, "QCatchSyscalls:1");
+      built_packet.reset ((char *) xmalloc (maxpktsz));
+      strcpy (built_packet.get (), "QCatchSyscalls:1");
       if (!any_count)
 	{
 	  int i;
 	  char *p;
 
-	  p = catch_packet;
+	  p = built_packet.get ();
 	  p += strlen (p);
 
 	  /* Add in catch_packet each syscall to be caught (table[i] != 0).  */
 	  for (i = 0; i < table_size; i++)
 	    {
 	      if (table[i] != 0)
-		p += xsnprintf (p, catch_packet + maxpktsz - p, ";%x", i);
+		p += xsnprintf (p, built_packet.get () + maxpktsz - p,
+				";%x", i);
 	    }
 	}
-      if (strlen (catch_packet) > get_remote_packet_size ())
+      if (strlen (built_packet.get ()) > get_remote_packet_size ())
 	{
 	  /* catch_packet too big.  Fallback to less efficient
 	     non selective mode, with GDB doing the filtering.  */
-	  catch_packet[sizeof ("QCatchSyscalls:1") - 1] = 0;
+	  catch_packet = "QCatchSyscalls:1";
 	}
+      else
+	catch_packet = built_packet.get ();
     }
   else
-    catch_packet = xstrdup ("QCatchSyscalls:0");
+    catch_packet = "QCatchSyscalls:0";
 
-  {
-    struct cleanup *old_chain = make_cleanup (xfree, catch_packet);
-    struct remote_state *rs = get_remote_state ();
+  struct remote_state *rs = get_remote_state ();
 
-    putpkt (catch_packet);
-    getpkt (&rs->buf, &rs->buf_size, 0);
-    result = packet_ok (rs->buf, &remote_protocol_packets[PACKET_QCatchSyscalls]);
-    do_cleanups (old_chain);
-    if (result == PACKET_OK)
-      return 0;
-    else
-      return -1;
-  }
+  putpkt (catch_packet);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+  result = packet_ok (rs->buf, &remote_protocol_packets[PACKET_QCatchSyscalls]);
+  if (result == PACKET_OK)
+    return 0;
+  else
+    return -1;
 }
 
 /* If 'QProgramSignals' is supported, tell the remote stub what
@@ -8753,8 +8747,8 @@ putpkt_binary (const char *buf, int cnt)
   struct remote_state *rs = get_remote_state ();
   int i;
   unsigned char csum = 0;
-  char *buf2 = (char *) xmalloc (cnt + 6);
-  struct cleanup *old_chain = make_cleanup (xfree, buf2);
+  gdb::def_vector<char> data (cnt + 6);
+  char *buf2 = data.data ();
 
   int ch;
   int tcount = 0;
@@ -8857,7 +8851,6 @@ putpkt_binary (const char *buf, int cnt)
 	    case '+':
 	      if (remote_debug)
 		fprintf_unfiltered (gdb_stdlog, "Ack\n");
-	      do_cleanups (old_chain);
 	      return 1;
 	    case '-':
 	      if (remote_debug)
@@ -8866,10 +8859,7 @@ putpkt_binary (const char *buf, int cnt)
 	    case SERIAL_TIMEOUT:
 	      tcount++;
 	      if (tcount > 3)
-		{
-		  do_cleanups (old_chain);
-		  return 0;
-		}
+		return 0;
 	      break;		/* Retransmit buffer.  */
 	    case '$':
 	      {
@@ -8953,7 +8943,6 @@ putpkt_binary (const char *buf, int cnt)
 #endif
     }
 
-  do_cleanups (old_chain);
   return 0;
 }
 
@@ -10322,7 +10311,6 @@ static void
 compare_sections_command (const char *args, int from_tty)
 {
   asection *s;
-  struct cleanup *old_chain;
   gdb_byte *sectdata;
   const char *sectname;
   bfd_size_type size;
@@ -10363,11 +10351,10 @@ compare_sections_command (const char *args, int from_tty)
       matched = 1;		/* Do this section.  */
       lma = s->lma;
 
-      sectdata = (gdb_byte *) xmalloc (size);
-      old_chain = make_cleanup (xfree, sectdata);
-      bfd_get_section_contents (exec_bfd, s, sectdata, 0, size);
+      gdb::byte_vector sectdata (size);
+      bfd_get_section_contents (exec_bfd, s, sectdata.data (), 0, size);
 
-      res = target_verify_memory (sectdata, lma, size);
+      res = target_verify_memory (sectdata.data (), lma, size);
 
       if (res == -1)
 	error (_("target memory fault, section %s, range %s -- %s"), sectname,
@@ -10384,8 +10371,6 @@ compare_sections_command (const char *args, int from_tty)
 	  printf_filtered ("MIS-MATCHED!\n");
 	  mismatched++;
 	}
-
-      do_cleanups (old_chain);
     }
   if (mismatched > 0)
     warning (_("One or more sections of the target image does not match\n\
