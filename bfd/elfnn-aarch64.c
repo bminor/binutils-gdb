@@ -2610,6 +2610,8 @@ elfNN_aarch64_link_hash_table_create (bfd *abfd)
   return &ret->root.root;
 }
 
+/* Perform relocation R_TYPE.  Returns TRUE upon success, FALSE otherwise.  */
+
 static bfd_boolean
 aarch64_relocate (unsigned int r_type, bfd *input_bfd, asection *input_section,
 		  bfd_vma offset, bfd_vma value)
@@ -2625,7 +2627,7 @@ aarch64_relocate (unsigned int r_type, bfd *input_bfd, asection *input_section,
   value = _bfd_aarch64_elf_resolve_relocation (r_type, place, value, 0, FALSE);
   return _bfd_aarch64_elf_put_addend (input_bfd,
 				      input_section->contents + offset, r_type,
-				      howto, value);
+				      howto, value) == bfd_reloc_ok;
 }
 
 static enum elf_aarch64_stub_type
@@ -2965,22 +2967,22 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
   switch (stub_entry->stub_type)
     {
     case aarch64_stub_adrp_branch:
-      if (aarch64_relocate (AARCH64_R (ADR_PREL_PG_HI21), stub_bfd, stub_sec,
-			    stub_entry->stub_offset, sym_value))
+      if (!aarch64_relocate (AARCH64_R (ADR_PREL_PG_HI21), stub_bfd, stub_sec,
+			     stub_entry->stub_offset, sym_value))
 	/* The stub would not have been relaxed if the offset was out
 	   of range.  */
 	BFD_FAIL ();
 
-      if (aarch64_relocate (AARCH64_R (ADD_ABS_LO12_NC), stub_bfd, stub_sec,
-			    stub_entry->stub_offset + 4, sym_value))
+      if (!aarch64_relocate (AARCH64_R (ADD_ABS_LO12_NC), stub_bfd, stub_sec,
+			     stub_entry->stub_offset + 4, sym_value))
 	BFD_FAIL ();
       break;
 
     case aarch64_stub_long_branch:
       /* We want the value relative to the address 12 bytes back from the
          value itself.  */
-      if (aarch64_relocate (AARCH64_R (PRELNN), stub_bfd, stub_sec,
-			    stub_entry->stub_offset + 16, sym_value + 12))
+      if (!aarch64_relocate (AARCH64_R (PRELNN), stub_bfd, stub_sec,
+			     stub_entry->stub_offset + 16, sym_value + 12))
 	BFD_FAIL ();
       break;
 
@@ -3001,8 +3003,8 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
       break;
 
     case aarch64_stub_erratum_843419_veneer:
-      if (aarch64_relocate (AARCH64_R (JUMP26), stub_bfd, stub_sec,
-			    stub_entry->stub_offset + 4, sym_value + 4))
+      if (!aarch64_relocate (AARCH64_R (JUMP26), stub_bfd, stub_sec,
+			     stub_entry->stub_offset + 4, sym_value + 4))
 	BFD_FAIL ();
       break;
 
@@ -4998,7 +5000,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    (_("%B(%A+%#Lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd, input_section, rel->r_offset, howto->name, name);
 	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
+	  return bfd_reloc_notsupported;
 	}
       else if (h->plt.offset == (bfd_vma) -1)
 	goto bad_ifunc_reloc;
@@ -5022,7 +5024,7 @@ bad_ifunc_reloc:
 	       "symbol `%s' isn't handled by %s"), input_bfd,
 	     howto->name, name, __FUNCTION__);
 	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
+	  return bfd_reloc_notsupported;
 
 	case BFD_RELOC_AARCH64_NN:
 	  if (rel->r_addend != 0)
@@ -5038,7 +5040,7 @@ bad_ifunc_reloc:
 		   "symbol `%s' has non-zero addend: %Ld"),
 		 input_bfd, howto->name, name, rel->r_addend);
 	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
+	      return bfd_reloc_notsupported;
 	    }
 
 	  /* Generate dynamic relocation only when there is a
@@ -5362,7 +5364,7 @@ bad_ifunc_reloc:
 	     input_bfd, elfNN_aarch64_howto_table[howto_index].name,
 	     h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
+	  return bfd_reloc_notsupported;
 	}
       /* Fall through.  */
 
@@ -8766,7 +8768,8 @@ elf_aarch64_update_plt_entry (bfd *output_bfd,
 {
   reloc_howto_type *howto = elfNN_aarch64_howto_from_bfd_reloc (r_type);
 
-  _bfd_aarch64_elf_put_addend (output_bfd, plt_entry, r_type, howto, value);
+  /* FIXME: We should check the return value from this function call.  */
+  (void) _bfd_aarch64_elf_put_addend (output_bfd, plt_entry, r_type, howto, value);
 }
 
 static void

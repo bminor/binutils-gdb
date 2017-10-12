@@ -1,3 +1,16 @@
+2017-10-12  Nick Clifton  <nickc@redhat.com>
+
+	* reloc.c (enum bfd_reloc_status): Start values at 2.
+	* bfd-in2.h: Regenerate.
+	* elfnn-aarch64.c (aarch64_relocate): Invert sense of function, so
+	that a TRUE return indicates success.  Compare the result of
+	calling _bfd_aarch64_elf_put_addend against bfd_reloc_ok.
+	(build_one_stub): Change sense of tests against aarch64_relocate
+	return value.
+	(elfNN_aarch64_tls_relax): Return bfd_reloc_notsupported, rather
+	than FALSE, when an error is detected.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+
 2017-10-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_backend_hide_symbol): New.
