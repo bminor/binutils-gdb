@@ -1,3 +1,8 @@
+2017-10-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/attach.exp: Remove references to gdb64.
+	* gdb.base/dbx.exp: Remove references to gdb64.
+
 2017-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
 	    Pedro Alves  <palves@redhat.com>
 
