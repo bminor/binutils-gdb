@@ -1,3 +1,11 @@
+2017-10-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22263
+	* testsuite/ld-elf/pr22263-1.rd: New file.
+	* testsuite/ld-elf/pr22263-1a.c: Likewise.
+	* testsuite/ld-elf/pr22263-1b.c: Likewise.
+	* testsuite/ld-elf/tls.exp: Likewise.
+
 2017-10-12  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-aarch64/pcrel_pic_defined.d: Expect errors not
