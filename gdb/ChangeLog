@@ -1,5 +1,11 @@
 2017-10-17  Tom Tromey  <tom@tromey.com>
 
+	* disasm.c (do_mixed_source_and_assembly_deprecated): Use
+	gdb::optional, ui_out_emit_list, ui_out_emit_tuple.
+	(do_mixed_source_and_assembly): Likewise.
+
+2017-10-17  Tom Tromey  <tom@tromey.com>
+
 	* regcache.c (regcache::xfer_part): Remove assertion.
 
 2017-10-17  Pedro Alves  <palves@redhat.com>
