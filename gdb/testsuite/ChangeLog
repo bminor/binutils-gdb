@@ -1,4 +1,10 @@
 2017-10-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/auvx.exp (coredir): Update comment.
+	(top level) <core_works>: Use "set cwd" command instead of "cd"
+	command.
+
+2017-10-12  Pedro Alves  <palves@redhat.com>
 	    Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/catch-fork-static.exp: No longer skip on is_remote
