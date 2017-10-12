@@ -2867,6 +2867,7 @@ struct linux_target_ops the_low_target =
   x86_siginfo_fixup,
   x86_linux_new_process,
   x86_linux_new_thread,
+  x86_linux_delete_thread,
   x86_linux_new_fork,
   x86_linux_prepare_to_resume,
   x86_linux_process_qsupported,

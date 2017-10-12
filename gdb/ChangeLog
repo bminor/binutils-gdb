@@ -1,3 +1,23 @@
+2017-10-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-nat.h (linux_nat_set_delete_thread): New declaration.
+	* linux-nat.c (linux_nat_delete_thread): New variable.
+	(lwp_free): Invoke linux_nat_delete_thread if set.
+	(linux_nat_set_delete_thread): New function.
+	* aarch64-linux-nat.c (_initialize_aarch64_linux_nat): Assign
+	thread delete callback.
+	* arm-linux-nat.c (arm_linux_delete_thread): New function.
+	(_initialize_arm_linux_nat): Assign thread delete callback.
+	* s390-linux-nat.c (s390_delete_thread): New function.
+	(_initialize_s390_nat): Assign thread delete callback.
+	* x86-linux-nat.c (x86_linux_add_target): Likewise.
+	* nat/aarch64-linux.c (aarch64_linux_delete_thread): New
+	function.
+	* nat/aarch64-linux.h (aarch64_linux_delete_thread): New
+	declaration.
+	* nat/x86-linux.c (x86_linux_delete_thread): New function.
+	* nat/x86-linux.h (x86_linux_delete_thread): New declaration.
+
 2017-10-09  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-win.c (tui_set_win_height, parse_scrolling_args): Use

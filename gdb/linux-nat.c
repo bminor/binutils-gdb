@@ -197,6 +197,9 @@ static struct target_ops linux_ops_saved;
 /* The method to call, if any, when a new thread is attached.  */
 static void (*linux_nat_new_thread) (struct lwp_info *);
 
+/* The method to call, if any, when a thread is destroyed.  */
+static void (*linux_nat_delete_thread) (struct arch_lwp_info *);
+
 /* The method to call, if any, when a new fork is attached.  */
 static linux_nat_new_fork_ftype *linux_nat_new_fork;
 
@@ -839,7 +842,12 @@ static int check_ptrace_stopped_lwp_gone (struct lwp_info *lp);
 static void
 lwp_free (struct lwp_info *lp)
 {
-  xfree (lp->arch_private);
+  /* Let the arch specific bits release arch_lwp_info.  */
+  if (linux_nat_delete_thread != NULL)
+    linux_nat_delete_thread (lp->arch_private);
+  else
+    gdb_assert (lp->arch_private == NULL);
+
   xfree (lp);
 }
 
@@ -4871,6 +4879,17 @@ linux_nat_set_new_thread (struct target_ops *t,
      of the GNU/Linux native target, so we do not need to map this to
      T.  */
   linux_nat_new_thread = new_thread;
+}
+
+/* Register a method to call whenever a new thread is attached.  */
+void
+linux_nat_set_delete_thread (struct target_ops *t,
+			     void (*delete_thread) (struct arch_lwp_info *))
+{
+  /* Save the pointer.  We only support a single registered instance
+     of the GNU/Linux native target, so we do not need to map this to
+     T.  */
+  linux_nat_delete_thread = delete_thread;
 }
 
 /* See declaration in linux-nat.h.  */

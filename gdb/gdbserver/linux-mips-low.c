@@ -341,6 +341,14 @@ mips_linux_new_thread (struct lwp_info *lwp)
   lwp->arch_private = info;
 }
 
+/* Function to call when a thread is being deleted.  */
+
+static void
+mips_linux_delete_thread (struct arch_lwp_info *arch_lwp)
+{
+  xfree (arch_lwp);
+}
+
 /* Create a new mips_watchpoint and add it to the list.  */
 
 static void
@@ -893,6 +901,7 @@ struct linux_target_ops the_low_target = {
   NULL, /* siginfo_fixup */
   mips_linux_new_process,
   mips_linux_new_thread,
+  mips_linux_delete_thread,
   mips_linux_new_fork,
   mips_linux_prepare_to_resume
 };

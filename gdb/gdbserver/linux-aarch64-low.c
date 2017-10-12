@@ -2991,6 +2991,7 @@ struct linux_target_ops the_low_target =
   aarch64_linux_siginfo_fixup,
   aarch64_linux_new_process,
   aarch64_linux_new_thread,
+  aarch64_linux_delete_thread,
   aarch64_linux_new_fork,
   aarch64_linux_prepare_to_resume,
   NULL, /* process_qsupported */

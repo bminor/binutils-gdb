@@ -1202,6 +1202,14 @@ arm_linux_new_thread (struct lwp_info *lp)
   lp->arch_private = info;
 }
 
+/* Function to call when a thread is being deleted.  */
+
+static void
+arm_linux_delete_thread (struct arch_lwp_info *arch_lwp)
+{
+  xfree (arch_lwp);
+}
+
 /* Called when resuming a thread.
    The hardware debug registers are updated when there is any change.  */
 
@@ -1313,6 +1321,7 @@ _initialize_arm_linux_nat (void)
 
   /* Handle thread creation and exit.  */
   linux_nat_set_new_thread (t, arm_linux_new_thread);
+  linux_nat_set_delete_thread (t, arm_linux_delete_thread);
   linux_nat_set_prepare_to_resume (t, arm_linux_prepare_to_resume);
 
   /* Handle process creation and exit.  */

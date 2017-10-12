@@ -194,6 +194,10 @@ struct linux_target_ops
      allocate it here.  */
   void (*new_thread) (struct lwp_info *);
 
+  /* Hook to call when a thread is being deleted.  If extra per-thread
+     architecture-specific data is needed, delete it here.  */
+  void (*delete_thread) (struct arch_lwp_info *);
+
   /* Hook to call, if any, when a new fork is attached.  */
   void (*new_fork) (struct process_info *parent, struct process_info *child);
 

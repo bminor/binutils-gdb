@@ -68,6 +68,14 @@ x86_linux_new_thread (struct lwp_info *lwp)
 /* See nat/x86-linux.h.  */
 
 void
+x86_linux_delete_thread (struct arch_lwp_info *arch_lwp)
+{
+  xfree (arch_lwp);
+}
+
+/* See nat/x86-linux.h.  */
+
+void
 x86_linux_prepare_to_resume (struct lwp_info *lwp)
 {
   x86_linux_update_debug_registers (lwp);

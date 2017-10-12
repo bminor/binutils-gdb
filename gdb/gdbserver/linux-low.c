@@ -414,7 +414,12 @@ delete_lwp (struct lwp_info *lwp)
     debug_printf ("deleting %ld\n", lwpid_of (thr));
 
   remove_thread (thr);
-  free (lwp->arch_private);
+
+  if (the_low_target.delete_thread != NULL)
+    the_low_target.delete_thread (lwp->arch_private);
+  else
+    gdb_assert (lwp->arch_private == NULL);
+
   free (lwp);
 }
 

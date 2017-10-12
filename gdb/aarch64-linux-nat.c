@@ -837,6 +837,7 @@ _initialize_aarch64_linux_nat (void)
   /* Register the target.  */
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, aarch64_linux_new_thread);
+  linux_nat_set_delete_thread (t, aarch64_linux_delete_thread);
   linux_nat_set_new_fork (t, aarch64_linux_new_fork);
   linux_nat_set_forget_process (t, aarch64_forget_process);
   linux_nat_set_prepare_to_resume (t, aarch64_linux_prepare_to_resume);

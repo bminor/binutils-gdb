@@ -398,6 +398,7 @@ struct linux_target_ops the_low_target = {
   NULL, /* siginfo_fixup */
   NULL, /* new_process */
   NULL, /* new_thread */
+  NULL, /* delete_thread */
   NULL, /* new_fork */
   NULL, /* prepare_to_resume */
   NULL, /* process_qsupported */

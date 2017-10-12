@@ -354,6 +354,7 @@ x86_linux_add_target (struct target_ops *t)
 {
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, x86_linux_new_thread);
+  linux_nat_set_delete_thread (t, x86_linux_delete_thread);
   linux_nat_set_new_fork (t, x86_linux_new_fork);
   linux_nat_set_forget_process (t, x86_forget_process);
   linux_nat_set_prepare_to_resume (t, x86_linux_prepare_to_resume);

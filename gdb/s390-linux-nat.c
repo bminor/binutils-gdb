@@ -789,6 +789,14 @@ s390_new_thread (struct lwp_info *lp)
   s390_mark_per_info_changed (lp);
 }
 
+/* Function to call when a thread is being deleted.  */
+
+static void
+s390_delete_thread (struct arch_lwp_info *arch_lwp)
+{
+  xfree (arch_lwp);
+}
+
 /* Iterator callback for s390_refresh_per_info.  */
 
 static int
@@ -1050,6 +1058,7 @@ _initialize_s390_nat (void)
   /* Register the target.  */
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, s390_new_thread);
+  linux_nat_set_delete_thread (t, s390_delete_thread);
   linux_nat_set_prepare_to_resume (t, s390_prepare_to_resume);
   linux_nat_set_forget_process (t, s390_forget_process);
   linux_nat_set_new_fork (t, s390_linux_new_fork);

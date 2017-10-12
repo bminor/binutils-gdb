@@ -655,6 +655,14 @@ arm_new_thread (struct lwp_info *lwp)
   lwp->arch_private = info;
 }
 
+/* Function to call when a thread is being deleted.  */
+
+static void
+arm_delete_thread (struct arch_lwp_info *arch_lwp)
+{
+  xfree (arch_lwp);
+}
+
 static void
 arm_new_fork (struct process_info *parent, struct process_info *child)
 {
@@ -1053,6 +1061,7 @@ struct linux_target_ops the_low_target = {
   NULL, /* siginfo_fixup */
   arm_new_process,
   arm_new_thread,
+  arm_delete_thread,
   arm_new_fork,
   arm_prepare_to_resume,
   NULL, /* process_qsupported */

@@ -165,6 +165,9 @@ void linux_nat_add_target (struct target_ops *);
 /* Register a method to call whenever a new thread is attached.  */
 void linux_nat_set_new_thread (struct target_ops *, void (*) (struct lwp_info *));
 
+/* Register a method to call whenever a new thread is deleted.  */
+void linux_nat_set_delete_thread (struct target_ops *,
+				  void (*) (struct arch_lwp_info *));
 
 /* Register a method to call whenever a new fork is attached.  */
 typedef void (linux_nat_new_fork_ftype) (struct lwp_info *parent,
