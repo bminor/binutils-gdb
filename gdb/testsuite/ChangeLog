@@ -1,5 +1,10 @@
 2017-10-13  Pedro Alves  <palves@redhat.com>
 
+	* lib/selftest-support.exp (selftest_setup): Extend comments, and
+	also skip on stub-like targets.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/22293
 	* gdb.base/find-unmapped.exp: Don't skip if is_remote target.
 	(top level): Move some tests to ...
