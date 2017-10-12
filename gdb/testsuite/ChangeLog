@@ -1,4 +1,12 @@
 2017-10-12  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi <simon.marchi@polymtl.ca>
+
+	* gdb.base/inferior-died.exp: Remove is_remote and isnative
+	checks.  Use build_executable + clean_restart instead of
+	prepare_for_testing.  Pass "set non-stop on" via GDBFLAGS instead
+	of enabling non-stop after starting gdb.
+
+2017-10-12  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/non-ldr-exc-1.exp: No longer skip if is_remote target.
 	* gdb.threads/non-ldr-exc-2.exp: Ditto.
