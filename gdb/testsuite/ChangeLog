@@ -1,3 +1,10 @@
+2017-10-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/non-ldr-exc-1.exp: No longer skip if is_remote target.
+	* gdb.threads/non-ldr-exc-2.exp: Ditto.
+	* gdb.threads/non-ldr-exc-3.exp: Ditto.
+	* gdb.threads/non-ldr-exc-4.exp: Ditto.
+
 2017-10-11  Anton Kolesov  <Anton.Kolesov@synopsys.com>
 
 	* gdb.arch/arc-tdesc-cpu.exp: New file.
