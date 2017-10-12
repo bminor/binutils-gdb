@@ -640,6 +640,14 @@ arm_new_process (void)
   return info;
 }
 
+/* Called when a process is being deleted.  */
+
+static void
+arm_delete_process (struct arch_process_info *info)
+{
+  xfree (info);
+}
+
 /* Called when a new thread is detected.  */
 static void
 arm_new_thread (struct lwp_info *lwp)
@@ -1060,6 +1068,7 @@ struct linux_target_ops the_low_target = {
   NULL, /* supply_ptrace_register */
   NULL, /* siginfo_fixup */
   arm_new_process,
+  arm_delete_process,
   arm_new_thread,
   arm_delete_thread,
   arm_new_fork,

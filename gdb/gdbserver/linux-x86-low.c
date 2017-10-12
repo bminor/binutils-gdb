@@ -617,6 +617,14 @@ x86_linux_new_process (void)
   return info;
 }
 
+/* Called when a process is being deleted.  */
+
+static void
+x86_linux_delete_process (struct arch_process_info *info)
+{
+  xfree (info);
+}
+
 /* Target routine for linux_new_fork.  */
 
 static void
@@ -2866,6 +2874,7 @@ struct linux_target_ops the_low_target =
   /* need to fix up i386 siginfo if host is amd64 */
   x86_siginfo_fixup,
   x86_linux_new_process,
+  x86_linux_delete_process,
   x86_linux_new_thread,
   x86_linux_delete_thread,
   x86_linux_new_fork,

@@ -2829,6 +2829,7 @@ struct linux_target_ops the_low_target = {
   s390_supply_ptrace_register,
   NULL, /* siginfo_fixup */
   NULL, /* new_process */
+  NULL, /* delete_process */
   NULL, /* new_thread */
   NULL, /* delete_thread */
   NULL, /* new_fork */

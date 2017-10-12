@@ -1687,7 +1687,10 @@ linux_mourn (struct process_info *process)
 
   /* Freeing all private data.  */
   priv = process->priv;
-  free (priv->arch_private);
+  if (the_low_target.delete_process != NULL)
+    the_low_target.delete_process (priv->arch_private);
+  else
+    gdb_assert (priv->arch_private == NULL);
   free (priv);
   process->priv = NULL;
 

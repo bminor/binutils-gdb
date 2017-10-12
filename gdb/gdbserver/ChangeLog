@@ -1,5 +1,28 @@
 2017-10-12  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* linux-low.h (struct linux_target_ops) <delete_process>: New
+	field.
+	* linux-low.c (linux_mourn): Call the_low_target.delete_process.
+	* linux-aarch64-low.c (aarch64_linux_delete_process): New.
+	(struct linux_target_ops): Add delete_process callback.
+	* linux-arm-low.c (arm_delete_process): New.
+	(struct linux_target_ops): Add delete_process callback.
+	* linux-bfin-low.c (struct linux_target_ops): Likewise.
+	* linux-crisv32-low.c (struct linux_target_ops): Likewise.
+	* linux-m32r-low.c (struct linux_target_ops): Likewise.
+	* linux-mips-low.c (mips_linux_delete_process): New.
+	(struct linux_target_ops): Add delete_process callback.
+	* linux-ppc-low.c (struct linux_target_ops): Likewise.
+	* linux-s390-low.c (struct linux_target_ops): Likewise.
+	* linux-sh-low.c (struct linux_target_ops): Likewise.
+	* linux-tic6x-low.c (struct linux_target_ops): Likewise.
+	* linux-tile-low.c (struct linux_target_ops): Likewise.
+	* linux-x86-low.c (x86_linux_delete_process): New.
+	(struct linux_target_ops): Add delete_process callback.
+	* linux-xtensa-low.c (struct linux_target_ops): Likewise.
+
+2017-10-12  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* linux-aarch64-low.c (the_low_target): Add thread delete
 	callback.
 	* linux-arm-low.c (arm_delete_thread): New function.

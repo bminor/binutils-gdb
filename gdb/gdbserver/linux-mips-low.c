@@ -327,6 +327,15 @@ mips_linux_new_process (void)
   return info;
 }
 
+/* This is the implementation of linux_target_ops method
+   delete_process.  */
+
+static void
+mips_linux_delete_process (struct arch_process_info *info)
+{
+  xfree (info);
+}
+
 /* This is the implementation of linux_target_ops method new_thread.
    Mark the watch registers as changed, so the threads' copies will
    be updated.  */
@@ -900,6 +909,7 @@ struct linux_target_ops the_low_target = {
   NULL,
   NULL, /* siginfo_fixup */
   mips_linux_new_process,
+  mips_linux_delete_process,
   mips_linux_new_thread,
   mips_linux_delete_thread,
   mips_linux_new_fork,

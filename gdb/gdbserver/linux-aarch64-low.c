@@ -429,7 +429,7 @@ aarch64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
   return 0;
 }
 
-/* Implementation of linux_target_ops method "linux_new_process".  */
+/* Implementation of linux_target_ops method "new_process".  */
 
 static struct arch_process_info *
 aarch64_linux_new_process (void)
@@ -439,6 +439,14 @@ aarch64_linux_new_process (void)
   aarch64_init_debug_reg_state (&info->debug_reg_state);
 
   return info;
+}
+
+/* Implementation of linux_target_ops method "delete_process".  */
+
+static void
+aarch64_linux_delete_process (struct arch_process_info *info)
+{
+  xfree (info);
 }
 
 /* Implementation of linux_target_ops method "linux_new_fork".  */
@@ -2990,6 +2998,7 @@ struct linux_target_ops the_low_target =
   NULL, /* supply_ptrace_register */
   aarch64_linux_siginfo_fixup,
   aarch64_linux_new_process,
+  aarch64_linux_delete_process,
   aarch64_linux_new_thread,
   aarch64_linux_delete_thread,
   aarch64_linux_new_fork,

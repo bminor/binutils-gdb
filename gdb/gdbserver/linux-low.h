@@ -189,6 +189,10 @@ struct linux_target_ops
      allocate it here.  */
   struct arch_process_info * (*new_process) (void);
 
+  /* Hook to call when a process is being deleted.  If extra per-process
+     architecture-specific data is needed, delete it here.  */
+  void (*delete_process) (struct arch_process_info *info);
+
   /* Hook to call when a new thread is detected.
      If extra per-thread architecture-specific data is needed,
      allocate it here.  */
