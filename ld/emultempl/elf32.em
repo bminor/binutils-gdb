@@ -120,6 +120,13 @@ gld${EMULATION_NAME}_after_parse (void)
   if (bfd_link_pie (&link_info))
     link_info.flags_1 |= (bfd_vma) DF_1_PIE;
 
+  if (bfd_link_executable (&link_info)
+      && link_info.nointerp)
+    {
+      if (link_info.dynamic_undefined_weak > 0)
+	einfo (_("%P: warning: -z dynamic-undefined-weak ignored\n"));
+      link_info.dynamic_undefined_weak = 0;
+    }
   after_parse_default ();
 }
 

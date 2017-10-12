@@ -1,5 +1,12 @@
 2017-10-12  Alan Modra  <amodra@gmail.com>
 
+	PR 22269
+	* emultempl/elf32.em (after_parse): Warn on --no-dynamic-linker
+	-z dynamic-undefined-weak combination.  Set dynamic_undefined_weak
+	to zero when nointerp.
+
+2017-10-12  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/elf32.em (before_allocation): Call
 	elf_backend_hide_symbol, not _bfd_elf_link_hash_hide_symbol.
 	Formatting.
