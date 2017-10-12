@@ -1,5 +1,10 @@
 2017-11-07  Tom Tromey  <tom@tromey.com>
 
+	* stack.c (backtrace_command): Use std::string.
+	(backtrace_command_1): Make "count_exp" const.
+
+2017-11-07  Tom Tromey  <tom@tromey.com>
+
 	* source.c (directory_switch, mod_path, add_path): Constify.
 	* defs.h (add_path, mod_path, directory_switch): Constify.
 	* mi/mi-cmd-env.c (env_mod_path): Constify.

@@ -1692,7 +1692,7 @@ info_frame_command (char *addr_exp, int from_tty)
    frames.  */
 
 static void
-backtrace_command_1 (char *count_exp, int show_locals, int no_filters,
+backtrace_command_1 (const char *count_exp, int show_locals, int no_filters,
 		     int from_tty)
 {
   struct frame_info *fi;
@@ -1844,12 +1844,13 @@ backtrace_command_1 (char *count_exp, int show_locals, int no_filters,
 }
 
 static void
-backtrace_command (char *arg, int from_tty)
+backtrace_command (char *arg_in, int from_tty)
 {
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   int fulltrace_arg = -1, arglen = 0, argc = 0, no_filters  = -1;
   int user_arg = 0;
+  const char *arg = arg_in;
 
+  std::string reconstructed_arg;
   if (arg)
     {
       char **argv;
@@ -1884,17 +1885,15 @@ backtrace_command (char *arg, int from_tty)
 	{
 	  if (arglen > 0)
 	    {
-	      arg = (char *) xmalloc (arglen + 1);
-	      make_cleanup (xfree, arg);
-	      arg[0] = 0;
 	      for (i = 0; i < argc; i++)
 		{
 		  if (i != fulltrace_arg && i != no_filters)
 		    {
-		      strcat (arg, argv[i]);
-		      strcat (arg, " ");
+		      reconstructed_arg += argv[i];
+		      reconstructed_arg += " ";
 		    }
 		}
+	      arg = reconstructed_arg.c_str ();
 	    }
 	  else
 	    arg = NULL;
@@ -1903,8 +1902,6 @@ backtrace_command (char *arg, int from_tty)
 
   backtrace_command_1 (arg, fulltrace_arg >= 0 /* show_locals */,
 		       no_filters >= 0 /* no frame-filters */, from_tty);
-
-  do_cleanups (old_chain);
 }
 
 /* Iterate over the local variables of a block B, calling CB with
