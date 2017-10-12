@@ -1,3 +1,8 @@
+2017-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/label.exp: Remove is_remote target check.
+
 2017-10-12  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/auvx.exp (coredir): Update comment.
