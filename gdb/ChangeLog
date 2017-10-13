@@ -1,3 +1,8 @@
+2017-10-13  Yao Qi  <yao.qi@linaro.org>
+
+	* features/s390-gs-linux64.c: Regenerated.
+	* features/s390x-gs-linux64.c: Regenerated.
+
 2017-10-13  Tom Tromey  <tom@tromey.com>
 
 	* compile/compile-object-run.c (do_module_cleanup): Use delete.
