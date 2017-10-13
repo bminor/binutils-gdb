@@ -1,5 +1,12 @@
 2017-10-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/corefile.exp (corefile_test_run): Skip if gdb_protocol
+	is set.
+	(corefile_test_attach): Likewise.  Check can_spawn_for_attach
+	instead of is_remote.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/remote.exp: Check gdb_protocol instead of is_remote.
 	(top level): Add comment.
 
