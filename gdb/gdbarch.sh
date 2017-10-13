@@ -793,10 +793,6 @@ V;ULONGEST;max_insn_length;;;0;0
 # If you do not provide this function, GDB assumes that the
 # architecture does not support displaced stepping.
 #
-# If your architecture doesn't need to adjust instructions before
-# single-stepping them, consider using simple_displaced_step_copy_insn
-# here.
-#
 # If the instruction cannot execute out of line, return NULL.  The
 # core falls back to stepping past the instruction in-line instead in
 # that case.

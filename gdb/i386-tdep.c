@@ -794,8 +794,7 @@ i386_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr)
   return i386_jmp_p (insn);
 }
 
-/* Some kernels may run one past a syscall insn, so we have to cope.
-   Otherwise this is just simple_displaced_step_copy_insn.  */
+/* Some kernels may run one past a syscall insn, so we have to cope.  */
 
 struct displaced_step_closure *
 i386_displaced_step_copy_insn (struct gdbarch *gdbarch,
@@ -848,8 +847,7 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
      applying it.  */
   ULONGEST insn_offset = to - from;
 
-  /* Since we use simple_displaced_step_copy_insn, our closure is a
-     copy of the instruction.  */
+  /* Our closure is a copy of the instruction.  */
   gdb_byte *insn = (gdb_byte *) closure;
   /* The start of the insn, needed in case we see some prefixes.  */
   gdb_byte *insn_start = insn;

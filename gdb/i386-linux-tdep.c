@@ -803,13 +803,13 @@ i386_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				     struct regcache *regs)
 {
   struct displaced_step_closure *closure;
-  
+
   closure = i386_displaced_step_copy_insn (gdbarch, from, to, regs);
 
   if (i386_linux_get_syscall_number_from_regcache (regs) != -1)
     {
-      /* Since we use simple_displaced_step_copy_insn, our closure is a
-	 copy of the instruction.  */
+      /* The closure returned by i386_displaced_step_copy_insn is simply a
+         buffer with a copy of the instruction. */
       gdb_byte *insn = (gdb_byte *) closure;
 
       /* Fake nop.  */

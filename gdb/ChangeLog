@@ -1,3 +1,15 @@
+2017-10-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* arch-utils.h (simple_displaced_step_copy_insn): Remove.
+	* arch-utils.c (simple_displaced_step_copy_insn): Remove.
+	* gdbarch.sh (displaced_step_copy_insn): Adjust comment.
+	* gdbarch.h: Regenerate.
+	* i386-linux-tdep.c (i386_linux_displaced_step_copy_insn):
+	Adjust comment.
+	* i386-tdep.c (i386_displaced_step_copy_insn): Adjust comment.
+	(i386_displaced_step_fixup): Adjust comment.
+	* rs6000-tdep.c (ppc_displaced_step_copy_insn): Adjust comment.
+
 2017-10-12  Tom Tromey  <tom@tromey.com>
 
 	* prologue-value.h (pv_area::store_would_trash): Return bool.
