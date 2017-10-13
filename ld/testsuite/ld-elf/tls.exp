@@ -40,7 +40,7 @@ if { [which $CC] == 0 } {
 run_ld_link_tests [list \
     [list \
 	"Build pr22263-1" \
-	"-pie -e _start" \
+	"-pie -e _start -z text" \
 	"" \
 	"" \
 	{ pr22263-1a.c pr22263-1b.c } \
