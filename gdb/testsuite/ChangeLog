@@ -1,5 +1,10 @@
 2017-10-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/shlib-call.exp (top level): Use gdb_run_cmd and remove
+	is_remote target check.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/scope.exp: Use build_executable + clean_restart +
 	gdb_file_cmd instead of prepare_for_testing and no longer skip
 	"before run" tests on is_remote target boards.  Update comments.
