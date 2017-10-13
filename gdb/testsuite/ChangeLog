@@ -1,4 +1,10 @@
 2017-10-13  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR python/12966
+	* gdb.python/py-evthreads.exp: Remove is_remote target kfail.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
 
 	* gdb.python/py-evthreads.exp: Start GDB with "set non-stop on"
 	already.
