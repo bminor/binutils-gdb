@@ -117,10 +117,10 @@ proc do_test {lang} {
     foreach x $invalid_offsets {
 	set offset $x
 
-	# Relative offsets are relative to line 16.  Adjust
+	# Relative offsets are relative to the current line.  Adjust
 	# expected offset from error message accordingly.
 	if {[string index $x 0] == "+" || [string index $x 0] == "-"} {
-	    incr offset 24
+	    incr offset $bp_location
 	}
 	test_break $x invalid_offset $offset
 	test_break "-line $x" invalid_offset $offset
