@@ -80,16 +80,11 @@ proc mi_gdb_start { args } {
     return 0
 }
 
-# Overriden in order to set the remote exec-file whenever a file is
-# loaded to gdb.
-#
-proc gdb_load { arg } {
+# Helper that runs "set remote exec-file" with the last loaded file.
+
+proc extended_gdbserver_load_last_file {} {
     global gdb_prompt
     global last_loaded_file
-
-    if { $arg != "" } {
-	if [gdb_file_cmd $arg] then { return -1 }
-    }
 
     send_gdb "set remote exec-file $last_loaded_file\n"
     gdb_expect {
@@ -102,6 +97,37 @@ proc gdb_load { arg } {
 
     return 0
 }
+
+# Overriden in order to set the remote exec-file whenever a file is
+# loaded to gdb.
+#
+if { [info procs extended_gdbserver_gdb_file_cmd] == "" } {
+    rename gdb_file_cmd extended_gdbserver_gdb_file_cmd
+}
+proc gdb_file_cmd { arg } {
+    if [extended_gdbserver_gdb_file_cmd $arg] {
+	return -1
+    }
+    return [extended_gdbserver_load_last_file]
+}
+
+proc gdb_reload { } {
+    return [extended_gdbserver_load_last_file]
+}
+
+# With the two procedure overrides above, it shouldn't be necessary to
+# override this one too.  However, not doing so regresses
+# gdb.base/dbx.exp.  See comments above gdb.base/dbx.exp:gdb_file_cmd.
+# Once testing of the "symbol-file"/"exec-file" commands is moved out
+# to a separate non-dbx testcase, we should be able to remove this.
+proc gdb_load { arg } {
+    if { $arg != "" } {
+	if [gdb_file_cmd $arg] then { return -1 }
+    }
+
+    return [extended_gdbserver_load_last_file]
+}
+
 
 # Likewise, for MI.
 #

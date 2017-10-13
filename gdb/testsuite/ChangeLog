@@ -1,3 +1,13 @@
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/scope.exp: Use build_executable + clean_restart +
+	gdb_file_cmd instead of prepare_for_testing and no longer skip
+	"before run" tests on is_remote target boards.  Update comments.
+	* boards/native-extended-gdbserver.exp
+	(extended_gdbserver_load_last_file): New, factored out from ...
+	(gdb_load): ... this.  Move further below and add comment.
+	(extended_gdbserver_gdb_file_cmd, gdb_file_cmd, gdb_reload): New.
+
 2017-10-12  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/attach.exp: Remove references to gdb64.
