@@ -1,5 +1,10 @@
 2017-10-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/remote.exp: Check gdb_protocol instead of is_remote.
+	(top level): Add comment.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/remote.exp (top level): Fix comment typo and add
 	missing return.
 
