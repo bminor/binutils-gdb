@@ -1,4 +1,10 @@
 2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/term.exp: Don't skip if is_remote target.  Instead,
+	expect different "info terminal" output if testing with a
+	non-native target.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
 	    Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR python/12966
