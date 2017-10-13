@@ -1,5 +1,14 @@
 2017-10-16  Tom Tromey  <tom@tromey.com>
 
+	* linux-tdep.c (linux_info_proc, linux_find_memory_regions_full)
+	(linux_fill_prpsinfo, linux_vsyscall_range_raw): Update.
+	* target.c (target_fileio_read_stralloc): Update.
+	* sparc64-tdep.c (adi_is_addr_mapped): Update.
+	* target.h (target_fileio_read_stralloc): Return
+	unique_xmalloc_ptr.
+
+2017-10-16  Tom Tromey  <tom@tromey.com>
+
 	* xml-syscall.c (xml_init_syscalls_info): Update.
 	* xml-support.c (xinclude_start_include): Update.
 	(xml_fetch_content_from_file): Return unique_xmalloc_ptr.

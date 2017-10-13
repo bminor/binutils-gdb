@@ -2131,8 +2131,8 @@ extern LONGEST target_fileio_read_alloc (struct inferior *inf,
    or the transfer is unsupported, NULL is returned.  Empty objects
    are returned as allocated but empty strings.  A warning is issued
    if the result contains any embedded NUL bytes.  */
-extern char *target_fileio_read_stralloc (struct inferior *inf,
-					  const char *filename);
+extern gdb::unique_xmalloc_ptr<char> target_fileio_read_stralloc
+    (struct inferior *inf, const char *filename);
 
 
 /* Tracepoint-related operations.  */

@@ -3083,7 +3083,7 @@ target_fileio_read_alloc (struct inferior *inf, const char *filename,
 
 /* See target.h.  */
 
-char *
+gdb::unique_xmalloc_ptr<char> 
 target_fileio_read_stralloc (struct inferior *inf, const char *filename)
 {
   gdb_byte *buffer;
@@ -3094,10 +3094,10 @@ target_fileio_read_stralloc (struct inferior *inf, const char *filename)
   bufstr = (char *) buffer;
 
   if (transferred < 0)
-    return NULL;
+    return gdb::unique_xmalloc_ptr<char> (nullptr);
 
   if (transferred == 0)
-    return xstrdup ("");
+    return gdb::unique_xmalloc_ptr<char> (xstrdup (""));
 
   bufstr[transferred] = 0;
 
@@ -3111,7 +3111,7 @@ target_fileio_read_stralloc (struct inferior *inf, const char *filename)
 	break;
       }
 
-  return bufstr;
+  return gdb::unique_xmalloc_ptr<char> (bufstr);
 }
 
 
