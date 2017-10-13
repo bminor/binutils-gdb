@@ -1,5 +1,10 @@
 2017-10-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.python/py-evthreads.exp: Start GDB with "set non-stop on"
+	already.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.python/py-evsignal.exp: Check gdb_protocol instead of
 	is_remote.
 

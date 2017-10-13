@@ -32,14 +32,17 @@ set pyfile ${srcdir}/${subdir}/py-events.py
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     return -1
 }
-clean_restart $testfile
+
+save_vars { GDBFLAGS } {
+    append GDBFLAGS " -ex \"set non-stop on\""
+    clean_restart $testfile
+}
 
 if { [skip_python_tests] } { continue }
 
 gdb_test_no_output "source ${pyfile}" "load python file"
 
 gdb_test "test-events" "Event testers registered."
-gdb_test_no_output "set non-stop on"
 
 gdb_breakpoint "main"
 gdb_breakpoint "thread2"
