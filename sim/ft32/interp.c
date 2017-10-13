@@ -332,7 +332,7 @@ step_once (SIM_DESC sd)
   uint32_t pa;
   uint32_t aa;
   uint32_t k16;
-  uint32_t k8;
+  uint32_t k15;
   uint32_t al;
   uint32_t r_1v;
   uint32_t rimmv;
@@ -372,7 +372,11 @@ step_once (SIM_DESC sd)
   pa   =              (inst >> FT32_FLD_PA_BIT) & LSBS (FT32_FLD_PA_SIZ);
   aa   =              (inst >> FT32_FLD_AA_BIT) & LSBS (FT32_FLD_AA_SIZ);
   k16  =              (inst >> FT32_FLD_K16_BIT) & LSBS (FT32_FLD_K16_SIZ);
-  k8   = nsigned (8,  (inst >> FT32_FLD_K8_BIT) & LSBS (FT32_FLD_K8_SIZ));
+  k15  =              (inst >> FT32_FLD_K15_BIT) & LSBS (FT32_FLD_K15_SIZ);
+  if (k15 & 0x80)
+    k15 ^= 0x7f00;
+  if (k15 & 0x4000)
+    k15 -= 0x8000;
   al   =              (inst >> FT32_FLD_AL_BIT) & LSBS (FT32_FLD_AL_SIZ);
 
   r_1v = cpu->state.regs[r_1];
@@ -499,7 +503,7 @@ step_once (SIM_DESC sd)
       break;
 
     case FT32_PAT_LPMI:
-      cpu->state.regs[r_d] = ft32_read_item (sd, dw, cpu->state.regs[r_1] + k8);
+      cpu->state.regs[r_d] = ft32_read_item (sd, dw, cpu->state.regs[r_1] + k15);
       cpu->state.cycles += 1;
       break;
 
@@ -508,7 +512,7 @@ step_once (SIM_DESC sd)
       break;
 
     case FT32_PAT_STI:
-      cpu_mem_write (sd, dw, cpu->state.regs[r_d] + k8, cpu->state.regs[r_1]);
+      cpu_mem_write (sd, dw, cpu->state.regs[r_d] + k15, cpu->state.regs[r_1]);
       break;
 
     case FT32_PAT_LDA:
@@ -517,7 +521,7 @@ step_once (SIM_DESC sd)
       break;
 
     case FT32_PAT_LDI:
-      cpu->state.regs[r_d] = cpu_mem_read (sd, dw, cpu->state.regs[r_1] + k8);
+      cpu->state.regs[r_d] = cpu_mem_read (sd, dw, cpu->state.regs[r_1] + k15);
       cpu->state.cycles += 1;
       break;
 
@@ -534,8 +538,8 @@ step_once (SIM_DESC sd)
     case FT32_PAT_EXI:
       {
 	uint32_t tmp;
-	tmp = cpu_mem_read (sd, dw, cpu->state.regs[r_1] + k8);
-	cpu_mem_write (sd, dw, cpu->state.regs[r_1] + k8, cpu->state.regs[r_d]);
+	tmp = cpu_mem_read (sd, dw, cpu->state.regs[r_1] + k15);
+	cpu_mem_write (sd, dw, cpu->state.regs[r_1] + k15, cpu->state.regs[r_d]);
 	cpu->state.regs[r_d] = tmp;
 	cpu->state.cycles += 1;
       }

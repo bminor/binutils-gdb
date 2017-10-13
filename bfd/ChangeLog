@@ -1,3 +1,10 @@
+2017-10-12  James Bowman  <james.bowman@ftdichip.com>
+
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elf32-ft32.c: Add HOWTO R_FT32_15.
+	* reloc.c: Add BFD_RELOC_FT32_15.
+
 2017-10-12  Nick Clifton  <nickc@redhat.com>
 
 	* reloc.c (enum bfd_reloc_status): Start values at 2.

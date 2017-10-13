@@ -1,3 +1,9 @@
+2017-10-12  James Bowman  <james.bowman@ftdichip.com>
+
+	* config/tc-ft32.c (md_assemble): Replace FT32_FLD_K8 with
+	K15.
+	(md_apply_fix, tc_gen_reloc): Add BFD_RELOC_FT32_15.
+
 2017-10-11  Nick Clifton  <nickc@redhat.com>
 
 	PR 21977

@@ -3149,6 +3149,7 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_FT32_20,
   BFD_RELOC_FT32_17,
   BFD_RELOC_FT32_18,
+  BFD_RELOC_FT32_15,
 
 
 /* Fujitsu Frv Relocations.  */

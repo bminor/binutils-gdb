@@ -1,3 +1,10 @@
+2017-10-12  James Bowman  <james.bowman@ftdichip.com>
+
+	* elf/ft32.h: Add R_FT32_15.
+	* opcode/ft32.h: Replace FT32_FLD_K8 with K15.
+	(ft32_shortcode, sc_compar, ft32_split_shortcode,
+	ft32_merge_shortcode, ft32_merge_shortcode): New functions.
+
 2017-10-05  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf/common.h (AT_FREEBSD_EHDRFLAGS, AT_FREEBSD_HWCAP): Define.
