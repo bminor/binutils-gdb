@@ -1,5 +1,13 @@
 2017-10-13  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/22293
+	* gdb.base/find-unmapped.exp: Don't skip if is_remote target.
+	(top level): Move some tests to ...
+	(test_not_found): ... this new procedure.
+	(top level): Call it.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/term.exp: Don't skip if is_remote target.  Instead,
 	expect different "info terminal" output if testing with a
 	non-native target.
