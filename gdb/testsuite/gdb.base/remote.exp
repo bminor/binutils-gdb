@@ -54,7 +54,7 @@ gdb_test "show remote memory-write-packet-size" \
 	"set write-packet - very-small"
 
 #
-# Part TWO: Check the download behavour
+# Part TWO: Check the download behavior.
 #
 
 proc gdb_load_timed {executable class writesize} {
@@ -128,6 +128,7 @@ set sizeof_random_data [get_sizeof "random_data" 48*1024]
 #
 if ![runto_main] then {
     fail "cannot run to main"
+    return
 }
 
 # Carefully check memory around each of the most common packet edge

@@ -1,4 +1,9 @@
 2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/remote.exp (top level): Fix comment typo and add
+	missing return.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
 	    Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/solib-nodir.exp: Split is_remote and skip_shlib_tests
