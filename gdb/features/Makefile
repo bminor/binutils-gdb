@@ -107,19 +107,8 @@ s390-te-linux64-expedite = r14l,r15l,pswa
 s390-vx-linux64-expedite = r14l,r15l,pswa
 s390-tevx-linux64-expedite = r14l,r15l,pswa
 s390-gs-linux64-expedite = r14,r15,pswa
-s390x-linux64-expedite = r14,r15,pswa
-s390x-linux64v1-expedite = r14,r15,pswa
-s390x-linux64v2-expedite = r14,r15,pswa
-s390x-te-linux64-expedite = r14,r15,pswa
-s390x-vx-linux64-expedite = r14,r15,pswa
-s390x-tevx-linux64-expedite = r14,r15,pswa
-s390x-gs-linux64-expedite = r14,r15,pswa
-tic6x-c64xp-expedite = A15,PC
-tic6x-c64x-expedite = A15,PC
-tic6x-c62x-expedite = A15,PC
-tic6x-c64xp-linux-expedite = A15,PC
-tic6x-c64x-linux-expedite = A15,PC
-tic6x-c62x-linux-expedite = A15,PC
+s390x-expedite = r14,r15,pswa
+tic6x-expedite = A15,PC
 
 
 XSLTPROC = xsltproc

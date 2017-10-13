@@ -1,5 +1,10 @@
 2017-10-13  Yao Qi  <yao.qi@linaro.org>
 
+	* features/Makefile: Remove tic6x-*-expedite, add tic6x-expedite.
+	Remove s390x-*-expedite, add s390x-expedite.
+
+2017-10-13  Yao Qi  <yao.qi@linaro.org>
+
 	* features/s390-gs-linux64.c: Regenerated.
 	* features/s390x-gs-linux64.c: Regenerated.
 
