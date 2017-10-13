@@ -1,4 +1,11 @@
 2017-10-13  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/solib-nodir.exp: Split is_remote and skip_shlib_tests
+	calls and add comments.  Skip test if use_gdb_stub is set.
+	(top level): Use "set cwd" command instead of "cd" command.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/shlib-call.exp (top level): Use gdb_run_cmd and remove
 	is_remote target check.
