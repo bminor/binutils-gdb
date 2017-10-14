@@ -1,5 +1,17 @@
 2017-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* memrange.h (struct mem_range): Add constructors.
+	* tracepoint.h (struct traceframe_info) <memory>: Change type to
+	std::vector<mem_range>.
+	* tracepoint.c (free_traceframe_info): Don't manually free
+	vector.
+	(traceframe_info_start_memory): Adjust to vector change.
+	(traceframe_available_memory): Likewise.
+	* tracefile-tfile.c (build_traceframe_info): Likewise.
+	* ctf.c (ctf_traceframe_info): Likewise.
+
+2017-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* tracepoint.h (struct traceframe_info) <tvars>: Change type to
 	std::vector<int>.
 	* tracepoint.c (free_traceframe_info): Deallocate with delete.

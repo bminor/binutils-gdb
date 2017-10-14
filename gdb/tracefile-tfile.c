@@ -1050,7 +1050,6 @@ build_traceframe_info (char blocktype, void *data)
     {
     case 'M':
       {
-	struct mem_range *r;
 	ULONGEST maddr;
 	unsigned short mlen;
 
@@ -1064,10 +1063,7 @@ build_traceframe_info (char blocktype, void *data)
 					  2, gdbarch_byte_order
 					  (target_gdbarch ()));
 
-	r = VEC_safe_push (mem_range_s, info->memory, NULL);
-
-	r->start = maddr;
-	r->length = mlen;
+	info->memory.emplace_back (maddr, mlen);
 	break;
       }
     case 'V':

@@ -26,6 +26,12 @@
 
 struct mem_range
 {
+  mem_range () = default;
+
+  mem_range (CORE_ADDR start_, int length_)
+  : start (start_), length (length_)
+  {}
+
   /* Lowest address in the range.  */
   CORE_ADDR start;
 

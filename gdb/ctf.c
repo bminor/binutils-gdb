@@ -1663,14 +1663,14 @@ ctf_traceframe_info (struct target_ops *self)
 	    = bt_ctf_get_top_level_scope (event,
 					  BT_EVENT_FIELDS);
 	  const struct bt_definition *def;
-	  struct mem_range *r;
 
-	  r = VEC_safe_push (mem_range_s, info->memory, NULL);
 	  def = bt_ctf_get_field (event, scope, "address");
-	  r->start = bt_ctf_get_uint64 (def);
+	  CORE_ADDR start = bt_ctf_get_uint64 (def);
 
 	  def = bt_ctf_get_field (event, scope, "length");
-	  r->length = (uint16_t) bt_ctf_get_uint64 (def);
+	  int length = (uint16_t) bt_ctf_get_uint64 (def);
+
+	  info->memory.emplace_back (start, length);
 	}
       else if (strcmp (name, "tsv") == 0)
 	{

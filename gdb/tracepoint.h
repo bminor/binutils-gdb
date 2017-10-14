@@ -32,7 +32,7 @@
 struct traceframe_info
 {
   /* Collected memory.  */
-  VEC(mem_range_s) *memory = NULL;
+  std::vector<mem_range> memory;
 
   /* Collected trace state variables.  */
   std::vector<int> tvars;

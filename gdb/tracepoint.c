@@ -196,12 +196,7 @@ current_trace_status (void)
 static void
 free_traceframe_info (struct traceframe_info *info)
 {
-  if (info != NULL)
-    {
-      VEC_free (mem_range_s, info->memory);
-
-      delete info;
-    }
+  delete info;
 }
 
 /* Free and clear the traceframe info cache of the current
@@ -3999,7 +3994,6 @@ traceframe_info_start_memory (struct gdb_xml_parser *parser,
 			      void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
   struct traceframe_info *info = (struct traceframe_info *) user_data;
-  struct mem_range *r = VEC_safe_push (mem_range_s, info->memory, NULL);
   ULONGEST *start_p, *length_p;
 
   start_p
@@ -4007,8 +4001,7 @@ traceframe_info_start_memory (struct gdb_xml_parser *parser,
   length_p
     = (ULONGEST *) xml_find_attribute (attributes, "length")->value;
 
-  r->start = *start_p;
-  r->length = *length_p;
+  info->memory.emplace_back (*start_p, *length_p);
 }
 
 /* Handle the start of a <tvar> element.  */
@@ -4119,13 +4112,10 @@ traceframe_available_memory (VEC(mem_range_s) **result,
 
   if (info != NULL)
     {
-      struct mem_range *r;
-      int i;
-
       *result = NULL;
 
-      for (i = 0; VEC_iterate (mem_range_s, info->memory, i, r); i++)
-	if (mem_ranges_overlap (r->start, r->length, memaddr, len))
+      for (mem_range &r : info->memory)
+	if (mem_ranges_overlap (r.start, r.length, memaddr, len))
 	  {
 	    ULONGEST lo1, hi1, lo2, hi2;
 	    struct mem_range *nr;
@@ -4133,8 +4123,8 @@ traceframe_available_memory (VEC(mem_range_s) **result,
 	    lo1 = memaddr;
 	    hi1 = memaddr + len;
 
-	    lo2 = r->start;
-	    hi2 = r->start + r->length;
+	    lo2 = r.start;
+	    hi2 = r.start + r.length;
 
 	    nr = VEC_safe_push (mem_range_s, *result, NULL);
 
