@@ -133,7 +133,7 @@ static int tracepoint_number;
    yet attempted to fetch it, or if the target does not support
    fetching this object, or if we're not inspecting a traceframe
    presently.  */
-static struct traceframe_info *traceframe_info;
+static struct traceframe_info *current_traceframe_info;
 
 /* Tracing command lists.  */
 static struct cmd_list_element *tfindlist;
@@ -211,8 +211,8 @@ free_traceframe_info (struct traceframe_info *info)
 static void
 clear_traceframe_info (void)
 {
-  free_traceframe_info (traceframe_info);
-  traceframe_info = NULL;
+  free_traceframe_info (current_traceframe_info);
+  current_traceframe_info = NULL;
 }
 
 /* Set traceframe number to NUM.  */
@@ -4101,10 +4101,10 @@ parse_traceframe_info (const char *tframe_info)
 struct traceframe_info *
 get_traceframe_info (void)
 {
-  if (traceframe_info == NULL)
-    traceframe_info = target_traceframe_info ();
+  if (current_traceframe_info == NULL)
+    current_traceframe_info = target_traceframe_info ();
 
-  return traceframe_info;
+  return current_traceframe_info;
 }
 
 /* If the target supports the query, return in RESULT the set of

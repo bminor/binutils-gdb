@@ -1,3 +1,10 @@
+2017-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* tracepoint.c (traceframe_info): Rename to...
+	(current_traceframe_info): ...this.
+	(clear_traceframe_info): Adjust.
+	(get_traceframe_info): Adjust.
+
 2017-10-14  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* nat/linux-osdata.c: Include algorithm.
