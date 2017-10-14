@@ -94,14 +94,12 @@ regcache_invalidate_thread (struct thread_info *thread)
 }
 
 static int
-regcache_invalidate_one (struct inferior_list_entry *entry,
-			 void *pid_p)
+regcache_invalidate_one (thread_info *thread, void *pid_p)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   int pid = *(int *) pid_p;
 
   /* Only invalidate the regcaches of threads of this process.  */
-  if (ptid_get_pid (entry->id) == pid)
+  if (thread->id.pid () == pid)
     regcache_invalidate_thread (thread);
 
   return 0;
@@ -121,7 +119,7 @@ void
 regcache_invalidate (void)
 {
   /* Only update the threads of the current process.  */
-  int pid = ptid_get_pid (current_thread->entry.id);
+  int pid = current_thread->id.pid ();
 
   regcache_invalidate_pid (pid);
 }
@@ -290,19 +288,11 @@ free_register_cache_thread (struct thread_info *thread)
     }
 }
 
-static void
-free_register_cache_thread_one (struct inferior_list_entry *entry)
-{
-  struct thread_info *thread = (struct thread_info *) entry;
-
-  free_register_cache_thread (thread);
-}
-
 void
 regcache_release (void)
 {
   /* Flush and release all pre-existing register caches.  */
-  for_each_inferior (&all_threads, free_register_cache_thread_one);
+  for_each_inferior (&all_threads, free_register_cache_thread);
 }
 #endif
 

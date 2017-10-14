@@ -231,9 +231,8 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
 
 /* Delete a thread from the list of threads.  */
 static void
-delete_thread_info (struct inferior_list_entry *entry)
+delete_thread_info (thread_info *thread)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
 
   remove_thread (thread);
@@ -245,15 +244,14 @@ delete_thread_info (struct inferior_list_entry *entry)
 static void
 child_delete_thread (DWORD pid, DWORD tid)
 {
-  struct inferior_list_entry *thread;
   ptid_t ptid;
 
   /* If the last thread is exiting, just return.  */
-  if (one_inferior_p (&all_threads))
+  if (all_threads.size () == 1)
     return;
 
   ptid = ptid_build (pid, tid, 0);
-  thread = find_inferior_id (&all_threads, ptid);
+  thread_info *thread = find_inferior_id (&all_threads, ptid);
   if (thread == NULL)
     return;
 
@@ -431,9 +429,8 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 /* Resume all artificially suspended threads if we are continuing
    execution.  */
 static int
-continue_one_thread (struct inferior_list_entry *this_thread, void *id_ptr)
+continue_one_thread (thread_info *thread, void *id_ptr)
 {
-  struct thread_info *thread = (struct thread_info *) this_thread;
   int thread_id = * (int *) id_ptr;
   win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
 
@@ -1347,9 +1344,8 @@ handle_exception (struct target_waitstatus *ourstatus)
 
 
 static void
-suspend_one_thread (struct inferior_list_entry *entry)
+suspend_one_thread (thread_info *thread)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
 
   if (!th->suspended)
@@ -1488,7 +1484,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
       child_delete_thread (current_event.dwProcessId,
 			   current_event.dwThreadId);
 
-      current_thread = (struct thread_info *) all_threads.head;
+      current_thread = get_first_thread ();
       return 1;
 
     case CREATE_PROCESS_DEBUG_EVENT:

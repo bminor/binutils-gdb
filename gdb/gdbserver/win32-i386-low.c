@@ -37,10 +37,8 @@
 static struct x86_debug_reg_state debug_reg_state;
 
 static int
-update_debug_registers_callback (struct inferior_list_entry *entry,
-				 void *pid_p)
+update_debug_registers_callback (thread_info *thr, void *pid_p)
 {
-  struct thread_info *thr = (struct thread_info *) entry;
   win32_thread_info *th = (win32_thread_info *) thread_target_data (thr);
   int pid = *(int *) pid_p;
 

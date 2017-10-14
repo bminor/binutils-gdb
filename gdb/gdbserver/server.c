@@ -387,8 +387,7 @@ handle_btrace_enable_bts (struct thread_info *thread)
     return "E.Btrace already enabled.";
 
   current_btrace_conf.format = BTRACE_FORMAT_BTS;
-  thread->btrace = target_enable_btrace (thread->entry.id,
-					 &current_btrace_conf);
+  thread->btrace = target_enable_btrace (thread->id, &current_btrace_conf);
   if (thread->btrace == NULL)
     return "E.Could not enable btrace.";
 
@@ -404,8 +403,7 @@ handle_btrace_enable_pt (struct thread_info *thread)
     return "E.Btrace already enabled.";
 
   current_btrace_conf.format = BTRACE_FORMAT_PT;
-  thread->btrace = target_enable_btrace (thread->entry.id,
-					 &current_btrace_conf);
+  thread->btrace = target_enable_btrace (thread->id, &current_btrace_conf);
   if (thread->btrace == NULL)
     return "E.Could not enable btrace.";
 
@@ -1652,9 +1650,8 @@ handle_qxfer_statictrace (const char *annex,
    Emit the XML to describe the thread of INF.  */
 
 static void
-handle_qxfer_threads_worker (struct inferior_list_entry *inf, void *arg)
+handle_qxfer_threads_worker (thread_info *thread, void *arg)
 {
-  struct thread_info *thread = (struct thread_info *) inf;
   struct buffer *buffer = (struct buffer *) arg;
   ptid_t ptid = ptid_of (thread);
   char ptid_s[100];
@@ -2145,7 +2142,7 @@ supported_btrace_packets (char *buf)
 static void
 handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 {
-  static struct inferior_list_entry *thread_ptr;
+  static std::list<thread_info *>::const_iterator thread_iter;
 
   /* Reply the current thread id.  */
   if (strcmp ("qC", own_buf) == 0 && !disable_packet_qC)
@@ -2157,8 +2154,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	ptid = general_thread;
       else
 	{
-	  thread_ptr = get_first_inferior (&all_threads);
-	  ptid = thread_ptr->id;
+	  thread_iter = all_threads.begin ();
+	  ptid = (*thread_iter)->id;
 	}
 
       sprintf (own_buf, "QC");
@@ -2220,22 +2217,24 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (strcmp ("qfThreadInfo", own_buf) == 0)
 	{
 	  require_running_or_return (own_buf);
-	  thread_ptr = get_first_inferior (&all_threads);
+	  thread_iter = all_threads.begin ();
 
 	  *own_buf++ = 'm';
-	  write_ptid (own_buf, thread_ptr->id);
-	  thread_ptr = thread_ptr->next;
+	  ptid_t ptid = (*thread_iter)->id;
+	  write_ptid (own_buf, ptid);
+	  thread_iter++;
 	  return;
 	}
 
       if (strcmp ("qsThreadInfo", own_buf) == 0)
 	{
 	  require_running_or_return (own_buf);
-	  if (thread_ptr != NULL)
+	  if (thread_iter != all_threads.end ())
 	    {
 	      *own_buf++ = 'm';
-	      write_ptid (own_buf, thread_ptr->id);
-	      thread_ptr = thread_ptr->next;
+	      ptid_t ptid = (*thread_iter)->id;
+	      write_ptid (own_buf, ptid);
+	      thread_iter++;
 	      return;
 	    }
 	  else
@@ -2693,7 +2692,7 @@ struct visit_actioned_threads_data
    Note: This function is itself a callback for find_inferior.  */
 
 static int
-visit_actioned_threads (struct inferior_list_entry *entry, void *datap)
+visit_actioned_threads (thread_info *thread, void *datap)
 {
   struct visit_actioned_threads_data *data
     = (struct visit_actioned_threads_data *) datap;
@@ -2707,13 +2706,11 @@ visit_actioned_threads (struct inferior_list_entry *entry, void *datap)
       const struct thread_resume *action = &actions[i];
 
       if (ptid_equal (action->thread, minus_one_ptid)
-	  || ptid_equal (action->thread, entry->id)
+	  || ptid_equal (action->thread, thread->id)
 	  || ((ptid_get_pid (action->thread)
-	       == ptid_get_pid (entry->id))
+	       == thread->id.pid ())
 	      && ptid_get_lwp (action->thread) == -1))
 	{
-	  struct thread_info *thread = (struct thread_info *) entry;
-
 	  if ((*callback) (action, thread))
 	    return 1;
 	}
@@ -2734,7 +2731,7 @@ handle_pending_status (const struct thread_resume *resumption,
       thread->status_pending_p = 0;
 
       last_status = thread->last_status;
-      last_ptid = thread->entry.id;
+      last_ptid = thread->id;
       prepare_resume_reply (own_buf, last_ptid, &last_status);
       return 1;
     }
@@ -3234,17 +3231,15 @@ myresume (char *own_buf, int step, int sig)
    stopped thread.  */
 
 static int
-queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
+queue_stop_reply_callback (thread_info *thread, void *arg)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
-
   /* For now, assume targets that don't have this callback also don't
      manage the thread's last_status field.  */
   if (the_target->thread_stopped == NULL)
     {
       struct vstop_notif *new_notif = XNEW (struct vstop_notif);
 
-      new_notif->ptid = entry->id;
+      new_notif->ptid = thread->id;
       new_notif->status = thread->last_status;
       /* Pass the last stop reply back to GDB, but don't notify
 	 yet.  */
@@ -3261,7 +3256,7 @@ queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
 		= target_waitstatus_to_string (&thread->last_status);
 
 	      debug_printf ("Reporting thread %s as already stopped with %s\n",
-			    target_pid_to_str (entry->id),
+			    target_pid_to_str (thread->id),
 			    status_string.c_str ());
 	    }
 
@@ -3269,7 +3264,7 @@ queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
 
 	  /* Pass the last stop reply back to GDB, but don't notify
 	     yet.  */
-	  queue_stop_reply (entry->id, &thread->last_status);
+	  queue_stop_reply (thread->id, &thread->last_status);
 	}
     }
 
@@ -3281,10 +3276,8 @@ queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
    it.  */
 
 static void
-gdb_wants_thread_stopped (struct inferior_list_entry *entry)
+gdb_wants_thread_stopped (thread_info *thread)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
-
   thread->last_resume_kind = resume_stop;
 
   if (thread->last_status.kind == TARGET_WAITKIND_IGNORE)
@@ -3308,10 +3301,8 @@ gdb_wants_all_threads_stopped (void)
    flag.  */
 
 static void
-clear_pending_status_callback (struct inferior_list_entry *entry)
+clear_pending_status_callback (thread_info *thread)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
-
   thread->status_pending_p = 0;
 }
 
@@ -3319,10 +3310,8 @@ clear_pending_status_callback (struct inferior_list_entry *entry)
    interesting event, mark it as having a pending event.  */
 
 static void
-set_pending_status_callback (struct inferior_list_entry *entry)
+set_pending_status_callback (thread_info *thread)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
-
   if (thread->last_status.kind != TARGET_WAITKIND_STOPPED
       || (thread->last_status.value.sig != GDB_SIGNAL_0
 	  /* A breakpoint, watchpoint or finished step from a previous
@@ -3339,10 +3328,8 @@ set_pending_status_callback (struct inferior_list_entry *entry)
    pending status to report to GDB.  */
 
 static int
-find_status_pending_thread_callback (struct inferior_list_entry *entry, void *data)
+find_status_pending_thread_callback (thread_info *thread, void *data)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
-
   return thread->status_pending_p;
 }
 
@@ -3371,7 +3358,7 @@ handle_status (char *own_buf)
     }
   else
     {
-      struct inferior_list_entry *thread = NULL;
+      thread_info *thread = NULL;
 
       pause_all (0);
       stabilize_threads ();
@@ -3401,7 +3388,7 @@ handle_status (char *own_buf)
       /* If we're still out of luck, simply pick the first thread in
 	 the thread list.  */
       if (thread == NULL)
-	thread = get_first_inferior (&all_threads);
+	thread = get_first_thread ();
 
       if (thread != NULL)
 	{
@@ -3417,7 +3404,7 @@ handle_status (char *own_buf)
 	  set_desired_thread ();
 
 	  gdb_assert (tp->last_status.kind != TARGET_WAITKIND_IGNORE);
-	  prepare_resume_reply (own_buf, tp->entry.id, &tp->last_status);
+	  prepare_resume_reply (own_buf, tp->id, &tp->last_status);
 	}
       else
 	strcpy (own_buf, "W00");
@@ -4095,7 +4082,7 @@ process_serial_event (void)
 		  break;
 		}
 
-	      thread_id = thread->entry.id;
+	      thread_id = thread->id;
 	    }
 	  else
 	    {
@@ -4119,7 +4106,7 @@ process_serial_event (void)
 							     general_thread);
 		  if (thread == NULL)
 		    thread = get_first_thread ();
-		  thread_id = thread->entry.id;
+		  thread_id = thread->id;
 		}
 
 	      general_thread = thread_id;

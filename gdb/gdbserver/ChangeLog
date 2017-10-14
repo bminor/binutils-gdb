@@ -1,5 +1,74 @@
 2017-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* inferiors.h: (struct inferior_list): Remove.
+	(struct inferior_list_entry); Remove.
+	(add_inferior_to_list, clear_inferior_list, one_inferior_p,
+	A_I_NEXT, ALL_INFERIORS_TYPE, ALL_INFERIORS, remove_inferior,
+	get_first_inferior): Remove.
+	(for_each_inferior, for_each_inferior_with_data, find_inferior,
+	find_inferior_id, find_inferior_in_random): Change signature.
+	* inferiors.c (all_threads): Change type to
+	std::list<thread_info *>.
+	(get_thread): Remove macro.
+	(find_inferior, find_inferior_id): Change signature, implement
+	using find_thread.
+	(find_inferior_in_random): Change signature, implement using
+	find_thread_in_random.
+	(for_each_inferior, for_each_inferior_with_data): Change
+	signature, implement using for_each_thread.
+	(add_inferior_to_list, remove_inferior): Remove.
+	(add_thread, get_first_thread, thread_of_pid,
+	find_any_thread_of_pid, free_one_thread, remove_thread): Update.
+	(get_first_inferior, one_inferior_p, clear_inferior_list):
+	Remove.
+	(clear_inferiors, get_thread_process): Update.
+	* gdbthread.h: Include <list>.
+	(struct thread_info) <entry>: Remove field.
+	<id>: New field.
+	(all_threads): Change type to std::list<thread_info *>.
+	(get_first_inferior): Add doc.
+	(find_thread, for_each_thread, find_thread_in_random): New
+	functions.
+	(current_ptid, pid_of, ptid_of, lwpid_of): Update.
+	* linux-arm-low.c (update_registers_callback): Update.
+	* linux-low.c (second_thread_of_pid_p): Update.
+	(kill_one_lwp_callback, linux_detach_lwp_callback,
+	delete_lwp_callback, status_pending_p_callback, same_lwp,
+	find_lwp_pid, num_lwps, iterate_over_lwps_filter,
+	iterate_over_lwps, not_stopped_callback,
+	resume_stopped_resumed_lwps, count_events_callback,
+	select_singlestep_lwp_callback, select_event_lwp_callback,
+	unsuspend_one_lwp, linux_wait_1, send_sigstop_callback,
+	suspend_and_send_sigstop_callback, wait_for_sigstop,
+	stuck_in_jump_pad_callback, move_out_of_jump_pad_callback,
+	lwp_running, linux_set_resume_request, resume_status_pending_p,
+	need_step_over_p, start_step_over, linux_resume_one_thread,
+	proceed_one_lwp, unsuspend_and_proceed_one_lwp,
+	reset_lwp_ptrace_options_callback): Update.
+	* linux-mips-low.c (update_watch_registers_callback): Update.
+	* regcache.c (regcache_invalidate_one, regcache_invalidate):
+	Update.
+	(free_register_cache_thread_one): Remove.
+	(regcache_release): Update.
+	* server.c (handle_btrace_enable_bts, handle_btrace_enable_pt,
+	handle_qxfer_threads_worker): Update.
+	(handle_query): Update, use list iterator.
+	(visit_actioned_threads, handle_pending_status,
+	queue_stop_reply_callback, gdb_wants_all_threads_stopped,
+	clear_pending_status_callback, set_pending_status_callback,
+	find_status_pending_thread_callback, handle_status,
+	process_serial_event): Update.
+	* target.c (thread_search_callback): Update.
+	* thread-db.c (thread_db_get_tls_address): Update.
+	* tracepoint.c (tracepoint_finished_step, tracepoint_was_hit):
+	Update.
+	* win32-i386-low.c (update_debug_registers_callback): Update.
+	* win32-low.c (delete_thread_info, child_delete_thread,
+	continue_one_thread, suspend_one_thread,
+	get_child_debug_event): Adjust.
+
+2017-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdbthread.h (ptid_of, pid_of, lwpid_of): New functions.
 	* inferiors.h: Include <list>.
 	(struct process_info) <entry>: Remove field.

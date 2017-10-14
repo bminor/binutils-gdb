@@ -559,16 +559,12 @@ lynx_detach (int pid)
    all threads belonging to process PROC.  */
 
 static int
-lynx_delete_thread_callback (struct inferior_list_entry *entry, void *proc)
+lynx_delete_thread_callback (thread_info *thread, void *proc)
 {
   struct process_info *process = (struct process_info *) proc;
 
-  if (ptid_get_pid (entry->id) == pid_of (process))
-    {
-      struct thread_info *thr = find_thread_ptid (entry->id);
-
-      remove_thread (thr);
-    }
+  if (thread->id.pid () == pid_of (process))
+    remove_thread (thread);
 
   return 0;
 }

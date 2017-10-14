@@ -279,7 +279,7 @@ static void enqueue_pending_signal (struct lwp_info *lwp, int signal, siginfo_t 
 static void complete_ongoing_step_over (void);
 static int linux_low_ptrace_options (int attached);
 static int check_ptrace_stopped_lwp_gone (struct lwp_info *lp);
-static int proceed_one_lwp (struct inferior_list_entry *entry, void *except);
+static int proceed_one_lwp (thread_info *thread, void *except);
 
 /* When the event-loop is doing a step-over, this points at the thread
    being stepped.  */
@@ -1248,11 +1248,11 @@ struct counter
 };
 
 static int
-second_thread_of_pid_p (struct inferior_list_entry *entry, void *args)
+second_thread_of_pid_p (thread_info *thread, void *args)
 {
   struct counter *counter = (struct counter *) args;
 
-  if (ptid_get_pid (entry->id) == counter->pid)
+  if (thread->id.pid () == counter->pid)
     {
       if (++counter->count > 1)
 	return 1;
@@ -1361,13 +1361,12 @@ kill_wait_lwp (struct lwp_info *lwp)
    except the leader.  */
 
 static int
-kill_one_lwp_callback (struct inferior_list_entry *entry, void *args)
+kill_one_lwp_callback (thread_info *thread, void *args)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
   int pid = * (int *) args;
 
-  if (ptid_get_pid (entry->id) != pid)
+  if (thread->id.pid () != pid)
     return 0;
 
   /* We avoid killing the first thread here, because of a Linux kernel (at
@@ -1379,7 +1378,7 @@ kill_one_lwp_callback (struct inferior_list_entry *entry, void *args)
     {
       if (debug_threads)
 	debug_printf ("lkop: is last of process %s\n",
-		      target_pid_to_str (entry->id));
+		      target_pid_to_str (thread->id));
       return 0;
     }
 
@@ -1594,21 +1593,20 @@ linux_detach_one_lwp (struct lwp_info *lwp)
    given process.  */
 
 static int
-linux_detach_lwp_callback (struct inferior_list_entry *entry, void *args)
+linux_detach_lwp_callback (thread_info *thread, void *args)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
   int pid = *(int *) args;
   int lwpid = lwpid_of (thread);
 
   /* Skip other processes.  */
-  if (ptid_get_pid (entry->id) != pid)
+  if (thread->id.pid () != pid)
     return 0;
 
   /* We don't actually detach from the thread group leader just yet.
      If the thread group exits, we must reap the zombie clone lwps
      before we're able to reap the leader.  */
-  if (ptid_get_pid (entry->id) == lwpid)
+  if (thread->id.pid () == lwpid)
     return 0;
 
   linux_detach_one_lwp (lwp);
@@ -1662,9 +1660,8 @@ linux_detach (int pid)
 /* Remove all LWPs that belong to process PROC from the lwp list.  */
 
 static int
-delete_lwp_callback (struct inferior_list_entry *entry, void *proc)
+delete_lwp_callback (thread_info *thread, void *proc)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
   struct process_info *process = (struct process_info *) proc;
 
@@ -1814,9 +1811,8 @@ lwp_resumed (struct lwp_info *lwp)
 
 /* Return 1 if this lwp has an interesting status pending.  */
 static int
-status_pending_p_callback (struct inferior_list_entry *entry, void *arg)
+status_pending_p_callback (thread_info *thread, void *arg)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lp = get_thread_lwp (thread);
   ptid_t ptid = * (ptid_t *) arg;
 
@@ -1839,7 +1835,7 @@ status_pending_p_callback (struct inferior_list_entry *entry, void *arg)
 }
 
 static int
-same_lwp (struct inferior_list_entry *entry, void *data)
+same_lwp (thread_info *thread, void *data)
 {
   ptid_t ptid = *(ptid_t *) data;
   int lwp;
@@ -1849,7 +1845,7 @@ same_lwp (struct inferior_list_entry *entry, void *data)
   else
     lwp = ptid_get_pid (ptid);
 
-  if (ptid_get_lwp (entry->id) == lwp)
+  if (thread->id.lwp () == lwp)
     return 1;
 
   return 0;
@@ -1858,13 +1854,12 @@ same_lwp (struct inferior_list_entry *entry, void *data)
 struct lwp_info *
 find_lwp_pid (ptid_t ptid)
 {
-  struct inferior_list_entry *thread
-    = find_inferior (&all_threads, same_lwp, &ptid);
+  thread_info *thread = find_inferior (&all_threads, same_lwp, &ptid);
 
   if (thread == NULL)
     return NULL;
 
-  return get_thread_lwp ((struct thread_info *) thread);
+  return get_thread_lwp (thread);
 }
 
 /* Return the number of known LWPs in the tgid given by PID.  */
@@ -1872,14 +1867,12 @@ find_lwp_pid (ptid_t ptid)
 static int
 num_lwps (int pid)
 {
-  struct inferior_list_entry *inf, *tmp;
   int count = 0;
 
-  ALL_INFERIORS (&all_threads, inf, tmp)
-    {
-      if (ptid_get_pid (inf->id) == pid)
-	count++;
-    }
+  for_each_thread ([&] (thread_info *thread) {
+    if (thread->id.pid () == pid)
+      count++;
+  });
 
   return count;
 }
@@ -1905,15 +1898,14 @@ struct iterate_over_lwps_args
    find_inferiors should continue iterating.  */
 
 static int
-iterate_over_lwps_filter (struct inferior_list_entry *entry, void *args_p)
+iterate_over_lwps_filter (thread_info *thread, void *args_p)
 {
   struct iterate_over_lwps_args *args
     = (struct iterate_over_lwps_args *) args_p;
 
-  if (ptid_match (entry->id, args->filter))
+  if (thread->id.matches (args->filter))
     {
-      struct thread_info *thr = (struct thread_info *) entry;
-      struct lwp_info *lwp = get_thread_lwp (thr);
+      struct lwp_info *lwp = get_thread_lwp (thread);
 
       return (*args->callback) (lwp, args->data);
     }
@@ -1929,13 +1921,13 @@ iterate_over_lwps (ptid_t filter,
 		   void *data)
 {
   struct iterate_over_lwps_args args = {filter, callback, data};
-  struct inferior_list_entry *entry;
 
-  entry = find_inferior (&all_threads, iterate_over_lwps_filter, &args);
-  if (entry == NULL)
+  thread_info *thread = find_inferior (&all_threads, iterate_over_lwps_filter,
+				       &args);
+  if (thread == NULL)
     return NULL;
 
-  return get_thread_lwp ((struct thread_info *) entry);
+  return get_thread_lwp (thread);
 }
 
 /* Detect zombie thread group leaders, and "exit" them.  We can't reap
@@ -2004,16 +1996,15 @@ check_zombie_leaders (void)
    stopped.  ARG is a PTID filter.  */
 
 static int
-not_stopped_callback (struct inferior_list_entry *entry, void *arg)
+not_stopped_callback (thread_info *thread, void *arg)
 {
-  struct thread_info *thr = (struct thread_info *) entry;
   struct lwp_info *lwp;
   ptid_t filter = *(ptid_t *) arg;
 
-  if (!ptid_match (ptid_of (thr), filter))
+  if (!ptid_match (ptid_of (thread), filter))
     return 0;
 
-  lwp = get_thread_lwp (thr);
+  lwp = get_thread_lwp (thread);
   if (!lwp->stopped)
     return 1;
 
@@ -2659,9 +2650,8 @@ maybe_hw_step (struct thread_info *thread)
    to report, but are resumed from the core's perspective.  */
 
 static void
-resume_stopped_resumed_lwps (struct inferior_list_entry *entry)
+resume_stopped_resumed_lwps (thread_info *thread)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lp = get_thread_lwp (thread);
 
   if (lp->stopped
@@ -2901,9 +2891,8 @@ linux_wait_for_event (ptid_t ptid, int *wstatp, int options)
 /* Count the LWP's that have had events.  */
 
 static int
-count_events_callback (struct inferior_list_entry *entry, void *data)
+count_events_callback (thread_info *thread, void *data)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lp = get_thread_lwp (thread);
   int *count = (int *) data;
 
@@ -2920,9 +2909,8 @@ count_events_callback (struct inferior_list_entry *entry, void *data)
 /* Select the LWP (if any) that is currently being single-stepped.  */
 
 static int
-select_singlestep_lwp_callback (struct inferior_list_entry *entry, void *data)
+select_singlestep_lwp_callback (thread_info *thread, void *data)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lp = get_thread_lwp (thread);
 
   if (thread->last_status.kind == TARGET_WAITKIND_IGNORE
@@ -2936,9 +2924,8 @@ select_singlestep_lwp_callback (struct inferior_list_entry *entry, void *data)
 /* Select the Nth LWP that has had an event.  */
 
 static int
-select_event_lwp_callback (struct inferior_list_entry *entry, void *data)
+select_event_lwp_callback (thread_info *thread, void *data)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lp = get_thread_lwp (thread);
   int *selector = (int *) data;
 
@@ -3019,9 +3006,8 @@ select_event_lwp (struct lwp_info **orig_lp)
 /* Decrement the suspend count of an LWP.  */
 
 static int
-unsuspend_one_lwp (struct inferior_list_entry *entry, void *except)
+unsuspend_one_lwp (thread_info *thread, void *except)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
 
   /* Ignore EXCEPT.  */
@@ -3041,10 +3027,9 @@ unsuspend_all_lwps (struct lwp_info *except)
   find_inferior (&all_threads, unsuspend_one_lwp, except);
 }
 
-static void move_out_of_jump_pad_callback (struct inferior_list_entry *entry);
-static int stuck_in_jump_pad_callback (struct inferior_list_entry *entry,
-				       void *data);
-static int lwp_running (struct inferior_list_entry *entry, void *data);
+static void move_out_of_jump_pad_callback (thread_info *thread);
+static int stuck_in_jump_pad_callback (thread_info *thread, void *data);
+static int lwp_running (thread_info *thread, void *data);
 static ptid_t linux_wait_1 (ptid_t ptid,
 			    struct target_waitstatus *ourstatus,
 			    int target_options);
@@ -3780,18 +3765,16 @@ linux_wait_1 (ptid_t ptid,
 	{
 	  /* In all-stop, a stop reply cancels all previous resume
 	     requests.  Delete all single-step breakpoints.  */
-	  struct inferior_list_entry *inf, *tmp;
 
-	  ALL_INFERIORS (&all_threads, inf, tmp)
-	    {
-	      struct thread_info *thread = (struct thread_info *) inf;
+	  find_thread ([&] (thread_info *thread) {
+	    if (has_single_step_breakpoints (thread))
+	      {
+		remove_single_step_breakpoints_p = 1;
+		return true;
+	      }
 
-	      if (has_single_step_breakpoints (thread))
-		{
-		  remove_single_step_breakpoints_p = 1;
-		  break;
-		}
-	    }
+	    return false;
+	  });
 	}
 
       if (remove_single_step_breakpoints_p)
@@ -3808,15 +3791,10 @@ linux_wait_1 (ptid_t ptid,
 	    }
 	  else
 	    {
-	      struct inferior_list_entry *inf, *tmp;
-
-	      ALL_INFERIORS (&all_threads, inf, tmp)
-		{
-		  struct thread_info *thread = (struct thread_info *) inf;
-
-		  if (has_single_step_breakpoints (thread))
-		    delete_single_step_breakpoints (thread);
-		}
+	      for_each_thread ([] (thread_info *thread){
+		if (has_single_step_breakpoints (thread))
+		  delete_single_step_breakpoints (thread);
+	      });
 	    }
 
 	  unstop_all_lwps (0, event_child);
@@ -4069,9 +4047,8 @@ send_sigstop (struct lwp_info *lwp)
 }
 
 static int
-send_sigstop_callback (struct inferior_list_entry *entry, void *except)
+send_sigstop_callback (thread_info *thread, void *except)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
 
   /* Ignore EXCEPT.  */
@@ -4088,10 +4065,8 @@ send_sigstop_callback (struct inferior_list_entry *entry, void *except)
 /* Increment the suspend count of an LWP, and stop it, if not stopped
    yet.  */
 static int
-suspend_and_send_sigstop_callback (struct inferior_list_entry *entry,
-				   void *except)
+suspend_and_send_sigstop_callback (thread_info *thread, void *except)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
 
   /* Ignore EXCEPT.  */
@@ -4100,7 +4075,7 @@ suspend_and_send_sigstop_callback (struct inferior_list_entry *entry,
 
   lwp_suspended_inc (lwp);
 
-  return send_sigstop_callback (entry, except);
+  return send_sigstop_callback (thread, except);
 }
 
 static void
@@ -4153,7 +4128,7 @@ wait_for_sigstop (void)
 
   saved_thread = current_thread;
   if (saved_thread != NULL)
-    saved_tid = saved_thread->entry.id;
+    saved_tid = saved_thread->id;
   else
     saved_tid = null_ptid; /* avoid bogus unused warning */
 
@@ -4187,9 +4162,8 @@ wait_for_sigstop (void)
    because she wants to debug it.  */
 
 static int
-stuck_in_jump_pad_callback (struct inferior_list_entry *entry, void *data)
+stuck_in_jump_pad_callback (thread_info *thread, void *data)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
 
   if (lwp->suspended != 0)
@@ -4211,9 +4185,8 @@ stuck_in_jump_pad_callback (struct inferior_list_entry *entry, void *data)
 }
 
 static void
-move_out_of_jump_pad_callback (struct inferior_list_entry *entry)
+move_out_of_jump_pad_callback (thread_info *thread)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct thread_info *saved_thread;
   struct lwp_info *lwp = get_thread_lwp (thread);
   int *wstat;
@@ -4262,9 +4235,8 @@ move_out_of_jump_pad_callback (struct inferior_list_entry *entry)
 }
 
 static int
-lwp_running (struct inferior_list_entry *entry, void *data)
+lwp_running (thread_info *thread, void *data)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
 
   if (lwp_is_marked_dead (lwp))
@@ -4665,9 +4637,8 @@ struct thread_resume_array
    suspension).  */
 
 static int
-linux_set_resume_request (struct inferior_list_entry *entry, void *arg)
+linux_set_resume_request (thread_info *thread, void *arg)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
   int ndx;
   struct thread_resume_array *r;
@@ -4678,7 +4649,7 @@ linux_set_resume_request (struct inferior_list_entry *entry, void *arg)
     {
       ptid_t ptid = r->resume[ndx].thread;
       if (ptid_equal (ptid, minus_one_ptid)
-	  || ptid_equal (ptid, entry->id)
+	  || ptid == thread->id
 	  /* Handle both 'pPID' and 'pPID.-1' as meaning 'all threads
 	     of PID'.  */
 	  || (ptid_get_pid (ptid) == pid_of (thread)
@@ -4735,7 +4706,7 @@ linux_set_resume_request (struct inferior_list_entry *entry, void *arg)
 	     reported to GDBserver core, but GDB has not pulled the
 	     event out of the vStopped queue yet, likewise, ignore the
 	     (wildcard) resume request.  */
-	  if (in_queued_stop_replies (entry->id))
+	  if (in_queued_stop_replies (thread->id))
 	    {
 	      if (debug_threads)
 		debug_printf ("not resuming LWP %ld: has queued stop reply\n",
@@ -4779,9 +4750,8 @@ linux_set_resume_request (struct inferior_list_entry *entry, void *arg)
    Set *FLAG_P if this lwp has an interesting status pending.  */
 
 static int
-resume_status_pending_p (struct inferior_list_entry *entry, void *flag_p)
+resume_status_pending_p (thread_info *thread, void *flag_p)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
 
   /* LWPs which will not be resumed are not interesting, because
@@ -4801,9 +4771,8 @@ resume_status_pending_p (struct inferior_list_entry *entry, void *flag_p)
    inferior's regcache.  */
 
 static int
-need_step_over_p (struct inferior_list_entry *entry, void *dummy)
+need_step_over_p (thread_info *thread, void *dummy)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
   struct thread_info *saved_thread;
   CORE_ADDR pc;
@@ -4986,7 +4955,7 @@ start_step_over (struct lwp_info *lwp)
   linux_resume_one_lwp (lwp, step, 0, NULL);
 
   /* Require next event from this LWP.  */
-  step_over_bkpt = thread->entry.id;
+  step_over_bkpt = thread->id;
   return 1;
 }
 
@@ -5079,9 +5048,8 @@ complete_ongoing_step_over (void)
    they should be re-issued if necessary.  */
 
 static int
-linux_resume_one_thread (struct inferior_list_entry *entry, void *arg)
+linux_resume_one_thread (thread_info *thread, void *arg)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
   int leave_all_stopped = * (int *) arg;
   int leave_pending;
@@ -5172,7 +5140,7 @@ linux_resume_one_thread (struct inferior_list_entry *entry, void *arg)
       if (debug_threads)
 	debug_printf ("resuming LWP %ld\n", lwpid_of (thread));
 
-      proceed_one_lwp (entry, NULL);
+      proceed_one_lwp (thread, NULL);
     }
   else
     {
@@ -5264,9 +5232,8 @@ linux_resume (struct thread_resume *resume_info, size_t n)
    on that particular thread, and leave all others stopped.  */
 
 static int
-proceed_one_lwp (struct inferior_list_entry *entry, void *except)
+proceed_one_lwp (thread_info *thread, void *except)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
   int step;
 
@@ -5363,9 +5330,8 @@ proceed_one_lwp (struct inferior_list_entry *entry, void *except)
 }
 
 static int
-unsuspend_and_proceed_one_lwp (struct inferior_list_entry *entry, void *except)
+unsuspend_and_proceed_one_lwp (thread_info *thread, void *except)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
 
   if (lwp == except)
@@ -5373,7 +5339,7 @@ unsuspend_and_proceed_one_lwp (struct inferior_list_entry *entry, void *except)
 
   lwp_suspended_decr (lwp);
 
-  return proceed_one_lwp (entry, except);
+  return proceed_one_lwp (thread, except);
 }
 
 /* When we finish a step-over, set threads running again.  If there's
@@ -6475,10 +6441,8 @@ linux_supports_exec_events (void)
    options for the specified lwp.  */
 
 static int
-reset_lwp_ptrace_options_callback (struct inferior_list_entry *entry,
-				   void *args)
+reset_lwp_ptrace_options_callback (thread_info *thread, void *args)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
 
   if (!lwp->stopped)

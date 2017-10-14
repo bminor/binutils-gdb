@@ -55,12 +55,11 @@ struct thread_search
    when accessing memory.  */
 
 static int
-thread_search_callback (struct inferior_list_entry *entry, void *args)
+thread_search_callback (thread_info *thread, void *args)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct thread_search *s = (struct thread_search *) args;
 
-  if (ptid_get_pid (entry->id) == ptid_get_pid (s->current_gen_ptid)
+  if (thread->id.pid () == ptid_get_pid (s->current_gen_ptid)
       && mythread_alive (ptid_of (thread)))
     {
       if (s->stopped == NULL
@@ -71,7 +70,7 @@ thread_search_callback (struct inferior_list_entry *entry, void *args)
       if (s->first == NULL)
 	s->first = thread;
 
-      if (s->current == NULL && ptid_equal (s->current_gen_ptid, entry->id))
+      if (s->current == NULL && s->current_gen_ptid == thread->id)
 	s->current = thread;
     }
 

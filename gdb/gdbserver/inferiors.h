@@ -22,19 +22,6 @@
 #include "gdb_vecs.h"
 #include <list>
 
-/* Generic information for tracking a list of ``inferiors'' - threads,
-   processes, etc.  */
-struct inferior_list
-{
-  struct inferior_list_entry *head;
-  struct inferior_list_entry *tail;
-};
-struct inferior_list_entry
-{
-  ptid_t id;
-  struct inferior_list_entry *next;
-};
-
 struct thread_info;
 struct regcache;
 struct target_desc;
@@ -96,38 +83,6 @@ struct process_info *get_thread_process (const struct thread_info *);
 
 extern std::list<process_info *> all_processes;
 
-void add_inferior_to_list (struct inferior_list *list,
-			   struct inferior_list_entry *new_inferior);
-void for_each_inferior (struct inferior_list *list,
-			void (*action) (struct inferior_list_entry *));
-
-void for_each_inferior_with_data
-  (struct inferior_list *list,
-   void (*action) (struct inferior_list_entry *, void *),
-   void *data);
-
-void clear_inferior_list (struct inferior_list *list);
-
-int one_inferior_p (struct inferior_list *list);
-
-/* Helper for ALL_INFERIORS_TYPE.  Gets the next element starting at
-   CUR, if CUR is not NULL.  */
-#define A_I_NEXT(type, list, cur)					\
-  ((cur) != NULL							\
-   ? (type *) ((struct inferior_list_entry *) cur)->next		\
-   : NULL)
-
-/* Iterate over all inferiors of type TYPE in LIST, open loop
-   style.  */
-#define ALL_INFERIORS_TYPE(type, list, cur, tmp)				\
-  for ((cur) = (type *) (list)->head, (tmp) = A_I_NEXT (type, list, cur); \
-       (cur) != NULL;							\
-       (cur) = (tmp), (tmp) = A_I_NEXT (type, list, cur))
-
-/* Iterate over all inferiors in LIST, open loop style.  */
-#define ALL_INFERIORS(list, cur, tmp)				\
-  ALL_INFERIORS_TYPE (struct inferior_list_entry, list, cur, tmp)
-
 /* Invoke FUNC for each process.  */
 
 template <typename Func>
@@ -169,10 +124,6 @@ find_process (Func func)
 }
 
 extern struct thread_info *current_thread;
-void remove_inferior (struct inferior_list *list,
-		      struct inferior_list_entry *entry);
-
-struct inferior_list_entry *get_first_inferior (struct inferior_list *list);
 
 /* Return the first process in the processes list.  */
 struct process_info *get_first_process (void);
@@ -184,18 +135,19 @@ int have_started_inferiors_p (void);
 int have_attached_inferiors_p (void);
 
 void clear_inferiors (void);
-struct inferior_list_entry *find_inferior
-     (struct inferior_list *,
-      int (*func) (struct inferior_list_entry *,
-		   void *),
-      void *arg);
-struct inferior_list_entry *find_inferior_id (struct inferior_list *list,
-					      ptid_t id);
-struct inferior_list_entry *
-  find_inferior_in_random (struct inferior_list *,
-			   int (*func) (struct inferior_list_entry *,
-					void *),
-			   void *arg);
+
+thread_info *find_inferior (std::list<thread_info *> *thread_list,
+			    int (*func) (thread_info *, void *), void *arg);
+thread_info *find_inferior_id (std::list<thread_info *> *thread_list,
+			       ptid_t id);
+thread_info *find_inferior_in_random (std::list<thread_info *> *thread_list,
+				      int (*func) (thread_info *, void *),
+				      void *arg);
+void for_each_inferior (std::list<thread_info *> *thread_list,
+			void (*action) (thread_info *));
+void for_each_inferior_with_data (std::list<thread_info *> *thread_list,
+				  void (*action) (thread_info *, void *),
+				  void *data);
 
 void *thread_target_data (struct thread_info *);
 struct regcache *thread_regcache_data (struct thread_info *);

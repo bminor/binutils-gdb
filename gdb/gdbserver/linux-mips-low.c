@@ -293,10 +293,8 @@ mips_breakpoint_at (CORE_ADDR where)
    if the lwp's process id is *PID_P.  */
 
 static int
-update_watch_registers_callback (struct inferior_list_entry *entry,
-				 void *pid_p)
+update_watch_registers_callback (thread_info *thread, void *pid_p)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
   int pid = *(int *) pid_p;
 

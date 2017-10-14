@@ -467,9 +467,8 @@ struct update_registers_data
 };
 
 static int
-update_registers_callback (struct inferior_list_entry *entry, void *arg)
+update_registers_callback (thread_info *thread, void *arg)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
   struct update_registers_data *data = (struct update_registers_data *) arg;
 

@@ -407,7 +407,7 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 
   lwp = get_thread_lwp (thread);
   if (!lwp->thread_known)
-    find_one_thread (thread->entry.id);
+    find_one_thread (thread->id);
   if (!lwp->thread_known)
     return TD_NOTHR;
 
@@ -465,7 +465,7 @@ thread_db_thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len)
 
   lwp = get_thread_lwp (thread);
 
-  if (!lwp->thread_known && !find_one_thread (thread->entry.id))
+  if (!lwp->thread_known && !find_one_thread (thread->id))
     return false;
 
   gdb_assert (lwp->thread_known);
