@@ -4953,6 +4953,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
   bfd_boolean relative_reloc;
   asection *base_got;
   bfd_vma orig_value = value;
+  bfd_boolean resolved_to_zero;
 
   globals = elf_aarch64_hash_table (info);
 
@@ -5178,6 +5179,9 @@ bad_ifunc_reloc:
 	}
     }
 
+  resolved_to_zero = (h != NULL
+		      && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
+
   switch (bfd_r_type)
     {
     case BFD_RELOC_AARCH64_NONE:
@@ -5196,7 +5200,8 @@ bad_ifunc_reloc:
 	    || globals->root.is_relocatable_executable)
 	   && (input_section->flags & SEC_ALLOC)
 	   && (h == NULL
-	       || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	       || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		   && !resolved_to_zero)
 	       || h->root.type != bfd_link_hash_undefweak))
 	  /* Or we are creating an executable, we may need to keep relocations
 	     for symbols satisfied by a dynamic library if we manage to avoid
@@ -8287,7 +8292,8 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
          visibility.  */
       if (eh->dyn_relocs != NULL && h->root.type == bfd_link_hash_undefweak)
 	{
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    eh->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
