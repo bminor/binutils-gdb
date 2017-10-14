@@ -1,5 +1,15 @@
 2017-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_finish_dynamic_sections): Call
+	_bfd_x86_elf_finish_dynamic_sections.
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_sections): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_finish_dynamic_sections): New
+	function.
+	* elfxx-x86.h (_bfd_x86_elf_finish_dynamic_sections): New
+	prototype.
+
+2017-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/21384
 	* elf32-cris.c (elf_cris_discard_excess_program_dynamics): Don't
 	hide symbol which was forced to be dynamic.

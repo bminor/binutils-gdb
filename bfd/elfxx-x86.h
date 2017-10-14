@@ -601,6 +601,9 @@ extern bfd_boolean _bfd_x86_elf_link_check_relocs
 extern bfd_boolean _bfd_x86_elf_size_dynamic_sections
   (bfd *, struct bfd_link_info *);
 
+extern struct elf_x86_link_hash_table *_bfd_x86_elf_finish_dynamic_sections
+  (bfd *, struct bfd_link_info *);
+
 extern bfd_boolean _bfd_x86_elf_always_size_sections
   (bfd *, struct bfd_link_info *);
 

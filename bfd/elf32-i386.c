@@ -4012,261 +4012,101 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 				  struct bfd_link_info *info)
 {
   struct elf_x86_link_hash_table *htab;
-  bfd *dynobj;
-  asection *sdyn;
-  const struct elf_i386_backend_data *abed;
 
-  htab = elf_x86_hash_table (info, I386_ELF_DATA);
+  htab = _bfd_x86_elf_finish_dynamic_sections (output_bfd, info);
   if (htab == NULL)
     return FALSE;
 
-  dynobj = htab->elf.dynobj;
-  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
-  abed = get_elf_i386_backend_data (output_bfd);
+  if (!htab->elf.dynamic_sections_created)
+    return TRUE;
 
-  if (htab->elf.dynamic_sections_created)
+  if (htab->elf.splt && htab->elf.splt->size > 0)
     {
-      Elf32_External_Dyn *dyncon, *dynconend;
+      /* UnixWare sets the entsize of .plt to 4, although that doesn't
+	 really seem like the right value.  */
+      elf_section_data (htab->elf.splt->output_section)
+	->this_hdr.sh_entsize = 4;
 
-      if (sdyn == NULL || htab->elf.sgot == NULL)
-	abort ();
-
-      dyncon = (Elf32_External_Dyn *) sdyn->contents;
-      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->size);
-      for (; dyncon < dynconend; dyncon++)
+      if (htab->plt.has_plt0)
 	{
-	  Elf_Internal_Dyn dyn;
-	  asection *s;
+	  /* Fill in the special first entry in the procedure linkage
+	     table.  */
+	  const struct elf_i386_backend_data *abed
+	    = get_elf_i386_backend_data (output_bfd);
 
-	  bfd_elf32_swap_dyn_in (dynobj, dyncon, &dyn);
-
-	  switch (dyn.d_tag)
+	  memcpy (htab->elf.splt->contents, htab->plt.plt0_entry,
+		  htab->lazy_plt->plt0_entry_size);
+	  memset (htab->elf.splt->contents + htab->lazy_plt->plt0_entry_size,
+		  abed->plt0_pad_byte,
+		  htab->plt.plt_entry_size - htab->lazy_plt->plt0_entry_size);
+	  if (!bfd_link_pic (info))
 	    {
-	    default:
-	      if (htab->is_vxworks
-                  && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
-		break;
-	      continue;
+	      bfd_put_32 (output_bfd,
+			  (htab->elf.sgotplt->output_section->vma
+			   + htab->elf.sgotplt->output_offset
+			   + 4),
+			  htab->elf.splt->contents
+			  + htab->lazy_plt->plt0_got1_offset);
+	      bfd_put_32 (output_bfd,
+			  (htab->elf.sgotplt->output_section->vma
+			   + htab->elf.sgotplt->output_offset
+			   + 8),
+			  htab->elf.splt->contents
+			  + htab->lazy_plt->plt0_got2_offset);
 
-	    case DT_PLTGOT:
-	      s = htab->elf.sgotplt;
-	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
-	      break;
-
-	    case DT_JMPREL:
-	      s = htab->elf.srelplt;
-	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
-	      break;
-
-	    case DT_PLTRELSZ:
-	      s = htab->elf.srelplt;
-	      dyn.d_un.d_val = s->size;
-	      break;
-	    }
-
-	  bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
-	}
-
-      if (htab->elf.splt && htab->elf.splt->size > 0)
-	{
-	  /* UnixWare sets the entsize of .plt to 4, although that doesn't
-	     really seem like the right value.  */
-	  elf_section_data (htab->elf.splt->output_section)
-	    ->this_hdr.sh_entsize = 4;
-
-	  if (htab->plt.has_plt0)
-	    {
-	      /* Fill in the special first entry in the procedure linkage
-		 table.  */
-	      memcpy (htab->elf.splt->contents, htab->plt.plt0_entry,
-		      htab->lazy_plt->plt0_entry_size);
-	      memset (htab->elf.splt->contents + htab->lazy_plt->plt0_entry_size,
-		      abed->plt0_pad_byte,
-		      htab->plt.plt_entry_size - htab->lazy_plt->plt0_entry_size);
-	      if (!bfd_link_pic (info))
+	      if (htab->is_vxworks)
 		{
-		  bfd_put_32 (output_bfd,
-			      (htab->elf.sgotplt->output_section->vma
-			       + htab->elf.sgotplt->output_offset
-			       + 4),
-			      htab->elf.splt->contents
-			      + htab->lazy_plt->plt0_got1_offset);
-		  bfd_put_32 (output_bfd,
-			      (htab->elf.sgotplt->output_section->vma
-			       + htab->elf.sgotplt->output_offset
-			       + 8),
-			      htab->elf.splt->contents
-			      + htab->lazy_plt->plt0_got2_offset);
+		  Elf_Internal_Rela rel;
+		  int num_plts = (htab->elf.splt->size
+				  / htab->plt.plt_entry_size) - 1;
+		  unsigned char *p;
+		  asection *srelplt2 = htab->srelplt2;
 
-		  if (htab->is_vxworks)
+		  /* Generate a relocation for _GLOBAL_OFFSET_TABLE_
+		     + 4.  On IA32 we use REL relocations so the
+		     addend goes in the PLT directly.  */
+		  rel.r_offset = (htab->elf.splt->output_section->vma
+				  + htab->elf.splt->output_offset
+				  + htab->lazy_plt->plt0_got1_offset);
+		  rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx,
+					     R_386_32);
+		  bfd_elf32_swap_reloc_out (output_bfd, &rel,
+					    srelplt2->contents);
+		  /* Generate a relocation for _GLOBAL_OFFSET_TABLE_
+		     + 8.  */
+		  rel.r_offset = (htab->elf.splt->output_section->vma
+				  + htab->elf.splt->output_offset
+				  + htab->lazy_plt->plt0_got2_offset);
+		  rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx,
+					     R_386_32);
+		  bfd_elf32_swap_reloc_out (output_bfd, &rel,
+					    srelplt2->contents +
+					    sizeof (Elf32_External_Rel));
+		  /* Correct the .rel.plt.unloaded relocations.  */
+		  p = srelplt2->contents;
+		  if (bfd_link_pic (info))
+		    p += PLTRESOLVE_RELOCS_SHLIB * sizeof (Elf32_External_Rel);
+		  else
+		    p += PLTRESOLVE_RELOCS * sizeof (Elf32_External_Rel);
+
+		  for (; num_plts; num_plts--)
 		    {
-		      Elf_Internal_Rela rel;
-		      int num_plts = (htab->elf.splt->size
-				      / htab->plt.plt_entry_size) - 1;
-		      unsigned char *p;
-		      asection *srelplt2 = htab->srelplt2;
-
-		      /* Generate a relocation for _GLOBAL_OFFSET_TABLE_
-			 + 4.  On IA32 we use REL relocations so the
-			 addend goes in the PLT directly.  */
-		      rel.r_offset = (htab->elf.splt->output_section->vma
-				      + htab->elf.splt->output_offset
-				      + htab->lazy_plt->plt0_got1_offset);
+		      bfd_elf32_swap_reloc_in (output_bfd, p, &rel);
 		      rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx,
 						 R_386_32);
-		      bfd_elf32_swap_reloc_out (output_bfd, &rel,
-						srelplt2->contents);
-		      /* Generate a relocation for _GLOBAL_OFFSET_TABLE_
-			 + 8.  */
-		      rel.r_offset = (htab->elf.splt->output_section->vma
-				      + htab->elf.splt->output_offset
-				      + htab->lazy_plt->plt0_got2_offset);
-		      rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx,
+		      bfd_elf32_swap_reloc_out (output_bfd, &rel, p);
+		      p += sizeof (Elf32_External_Rel);
+
+		      bfd_elf32_swap_reloc_in (output_bfd, p, &rel);
+		      rel.r_info = ELF32_R_INFO (htab->elf.hplt->indx,
 						 R_386_32);
-		      bfd_elf32_swap_reloc_out (output_bfd, &rel,
-						srelplt2->contents +
-						sizeof (Elf32_External_Rel));
-		      /* Correct the .rel.plt.unloaded relocations.  */
-		      p = srelplt2->contents;
-		      if (bfd_link_pic (info))
-			p += PLTRESOLVE_RELOCS_SHLIB * sizeof (Elf32_External_Rel);
-		      else
-			p += PLTRESOLVE_RELOCS * sizeof (Elf32_External_Rel);
-
-		      for (; num_plts; num_plts--)
-			{
-			  bfd_elf32_swap_reloc_in (output_bfd, p, &rel);
-			  rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx,
-						     R_386_32);
-			  bfd_elf32_swap_reloc_out (output_bfd, &rel, p);
-			  p += sizeof (Elf32_External_Rel);
-
-			  bfd_elf32_swap_reloc_in (output_bfd, p, &rel);
-			  rel.r_info = ELF32_R_INFO (htab->elf.hplt->indx,
-						     R_386_32);
-			  bfd_elf32_swap_reloc_out (output_bfd, &rel, p);
-			  p += sizeof (Elf32_External_Rel);
-			}
+		      bfd_elf32_swap_reloc_out (output_bfd, &rel, p);
+		      p += sizeof (Elf32_External_Rel);
 		    }
 		}
 	    }
 	}
-
-      if (htab->plt_got != NULL && htab->plt_got->size > 0)
-	elf_section_data (htab->plt_got->output_section)
-	  ->this_hdr.sh_entsize = htab->non_lazy_plt->plt_entry_size;
-
-      if (htab->plt_second != NULL && htab->plt_second->size > 0)
-	elf_section_data (htab->plt_second->output_section)
-	  ->this_hdr.sh_entsize = htab->non_lazy_plt->plt_entry_size;
     }
-
-  /* Fill in the first three entries in the global offset table.  */
-  if (htab->elf.sgotplt && htab->elf.sgotplt->size > 0)
-    {
-      if (bfd_is_abs_section (htab->elf.sgotplt->output_section))
-	{
-	  _bfd_error_handler
-	    (_("discarded output section: `%A'"), htab->elf.sgotplt);
-	  return FALSE;
-	}
-
-      bfd_put_32 (output_bfd,
-		  (sdyn == NULL ? 0
-		   : sdyn->output_section->vma + sdyn->output_offset),
-		  htab->elf.sgotplt->contents);
-      bfd_put_32 (output_bfd, 0, htab->elf.sgotplt->contents + 4);
-      bfd_put_32 (output_bfd, 0, htab->elf.sgotplt->contents + 8);
-
-      elf_section_data (htab->elf.sgotplt->output_section)->this_hdr.sh_entsize = 4;
-    }
-
-  /* Adjust .eh_frame for .plt section.  */
-  if (htab->plt_eh_frame != NULL
-      && htab->plt_eh_frame->contents != NULL)
-    {
-      if (htab->elf.splt != NULL
-	  && htab->elf.splt->size != 0
-	  && (htab->elf.splt->flags & SEC_EXCLUDE) == 0
-	  && htab->elf.splt->output_section != NULL
-	  && htab->plt_eh_frame->output_section != NULL)
-	{
-	  bfd_vma plt_start = htab->elf.splt->output_section->vma;
-	  bfd_vma eh_frame_start = htab->plt_eh_frame->output_section->vma
-				   + htab->plt_eh_frame->output_offset
-				   + PLT_FDE_START_OFFSET;
-	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
-			     htab->plt_eh_frame->contents
-			     + PLT_FDE_START_OFFSET);
-	}
-      if (htab->plt_eh_frame->sec_info_type
-	  == SEC_INFO_TYPE_EH_FRAME)
-	{
-	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
-						 htab->plt_eh_frame,
-						 htab->plt_eh_frame->contents))
-	    return FALSE;
-	}
-    }
-
-  /* Adjust .eh_frame for .plt.got section.  */
-  if (htab->plt_got_eh_frame != NULL
-      && htab->plt_got_eh_frame->contents != NULL)
-    {
-      if (htab->plt_got != NULL
-	  && htab->plt_got->size != 0
-	  && (htab->plt_got->flags & SEC_EXCLUDE) == 0
-	  && htab->plt_got->output_section != NULL
-	  && htab->plt_got_eh_frame->output_section != NULL)
-	{
-	  bfd_vma plt_start = htab->plt_got->output_section->vma;
-	  bfd_vma eh_frame_start = htab->plt_got_eh_frame->output_section->vma
-				   + htab->plt_got_eh_frame->output_offset
-				   + PLT_FDE_START_OFFSET;
-	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
-			     htab->plt_got_eh_frame->contents
-			     + PLT_FDE_START_OFFSET);
-	}
-      if (htab->plt_got_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
-	{
-	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
-						 htab->plt_got_eh_frame,
-						 htab->plt_got_eh_frame->contents))
-	    return FALSE;
-	}
-    }
-
-  /* Adjust .eh_frame for the second PLT section.  */
-  if (htab->plt_second_eh_frame != NULL
-      && htab->plt_second_eh_frame->contents != NULL)
-    {
-      if (htab->plt_second != NULL
-	  && htab->plt_second->size != 0
-	  && (htab->plt_second->flags & SEC_EXCLUDE) == 0
-	  && htab->plt_second->output_section != NULL
-	  && htab->plt_second_eh_frame->output_section != NULL)
-	{
-	  bfd_vma plt_start = htab->plt_second->output_section->vma;
-	  bfd_vma eh_frame_start
-	    = (htab->plt_second_eh_frame->output_section->vma
-	       + htab->plt_second_eh_frame->output_offset
-	       + PLT_FDE_START_OFFSET);
-	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
-			     htab->plt_second_eh_frame->contents
-			     + PLT_FDE_START_OFFSET);
-	}
-      if (htab->plt_second_eh_frame->sec_info_type
-	  == SEC_INFO_TYPE_EH_FRAME)
-	{
-	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
-						 htab->plt_second_eh_frame,
-						 htab->plt_second_eh_frame->contents))
-	    return FALSE;
-	}
-    }
-
-  if (htab->elf.sgot && htab->elf.sgot->size > 0)
-    elf_section_data (htab->elf.sgot->output_section)->this_hdr.sh_entsize = 4;
 
   /* Fill PLT entries for undefined weak symbols in PIE.  */
   if (bfd_link_pie (info))

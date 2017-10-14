@@ -4360,272 +4360,90 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 				    struct bfd_link_info *info)
 {
   struct elf_x86_link_hash_table *htab;
-  bfd *dynobj;
-  asection *sdyn;
 
-  htab = elf_x86_hash_table (info, X86_64_ELF_DATA);
+  htab = _bfd_x86_elf_finish_dynamic_sections (output_bfd, info);
   if (htab == NULL)
     return FALSE;
 
-  dynobj = htab->elf.dynobj;
-  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
+  if (! htab->elf.dynamic_sections_created)
+    return TRUE;
 
-  if (htab->elf.dynamic_sections_created)
+  if (htab->elf.splt && htab->elf.splt->size > 0)
     {
-      bfd_byte *dyncon, *dynconend;
-      const struct elf_backend_data *bed;
-      bfd_size_type sizeof_dyn;
+      elf_section_data (htab->elf.splt->output_section)
+	->this_hdr.sh_entsize = htab->plt.plt_entry_size;
 
-      if (sdyn == NULL || htab->elf.sgot == NULL)
-	abort ();
-
-      bed = get_elf_backend_data (dynobj);
-      sizeof_dyn = bed->s->sizeof_dyn;
-      dyncon = sdyn->contents;
-      dynconend = sdyn->contents + sdyn->size;
-      for (; dyncon < dynconend; dyncon += sizeof_dyn)
+      if (htab->plt.has_plt0)
 	{
-	  Elf_Internal_Dyn dyn;
-	  asection *s;
-
-	  (*bed->s->swap_dyn_in) (dynobj, dyncon, &dyn);
-
-	  switch (dyn.d_tag)
-	    {
-	    default:
-	      continue;
-
-	    case DT_PLTGOT:
-	      s = htab->elf.sgotplt;
-	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
-	      break;
-
-	    case DT_JMPREL:
-	      dyn.d_un.d_ptr = htab->elf.srelplt->output_section->vma;
-	      break;
-
-	    case DT_PLTRELSZ:
-	      s = htab->elf.srelplt->output_section;
-	      dyn.d_un.d_val = s->size;
-	      break;
-
-	    case DT_TLSDESC_PLT:
-	      s = htab->elf.splt;
-	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset
-		+ htab->tlsdesc_plt;
-	      break;
-
-	    case DT_TLSDESC_GOT:
-	      s = htab->elf.sgot;
-	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset
-		+ htab->tlsdesc_got;
-	      break;
-	    }
-
-	  (*bed->s->swap_dyn_out) (output_bfd, &dyn, dyncon);
+	  /* Fill in the special first entry in the procedure linkage
+	     table.  */
+	  memcpy (htab->elf.splt->contents,
+		  htab->lazy_plt->plt0_entry,
+		  htab->lazy_plt->plt0_entry_size);
+	  /* Add offset for pushq GOT+8(%rip), since the instruction
+	     uses 6 bytes subtract this value.  */
+	  bfd_put_32 (output_bfd,
+		      (htab->elf.sgotplt->output_section->vma
+		       + htab->elf.sgotplt->output_offset
+		       + 8
+		       - htab->elf.splt->output_section->vma
+		       - htab->elf.splt->output_offset
+		       - 6),
+		      (htab->elf.splt->contents
+		       + htab->lazy_plt->plt0_got1_offset));
+	  /* Add offset for the PC-relative instruction accessing
+	     GOT+16, subtracting the offset to the end of that
+	     instruction.  */
+	  bfd_put_32 (output_bfd,
+		      (htab->elf.sgotplt->output_section->vma
+		       + htab->elf.sgotplt->output_offset
+		       + 16
+		       - htab->elf.splt->output_section->vma
+		       - htab->elf.splt->output_offset
+		       - htab->lazy_plt->plt0_got2_insn_end),
+		      (htab->elf.splt->contents
+		       + htab->lazy_plt->plt0_got2_offset));
 	}
 
-      if (htab->elf.splt && htab->elf.splt->size > 0)
+      if (htab->tlsdesc_plt)
 	{
-	  elf_section_data (htab->elf.splt->output_section)
-	    ->this_hdr.sh_entsize = htab->plt.plt_entry_size;
+	  bfd_put_64 (output_bfd, (bfd_vma) 0,
+		      htab->elf.sgot->contents + htab->tlsdesc_got);
 
-	  if (htab->plt.has_plt0)
-	    {
-	      /* Fill in the special first entry in the procedure linkage
-		 table.  */
-	      memcpy (htab->elf.splt->contents,
-		      htab->lazy_plt->plt0_entry,
-		      htab->lazy_plt->plt0_entry_size);
-	      /* Add offset for pushq GOT+8(%rip), since the instruction
-		 uses 6 bytes subtract this value.  */
-	      bfd_put_32 (output_bfd,
-			  (htab->elf.sgotplt->output_section->vma
-			   + htab->elf.sgotplt->output_offset
-			   + 8
-			   - htab->elf.splt->output_section->vma
-			   - htab->elf.splt->output_offset
-			   - 6),
-			  (htab->elf.splt->contents
-			   + htab->lazy_plt->plt0_got1_offset));
-	      /* Add offset for the PC-relative instruction accessing
-		 GOT+16, subtracting the offset to the end of that
-		 instruction.  */
-	      bfd_put_32 (output_bfd,
-			  (htab->elf.sgotplt->output_section->vma
-			   + htab->elf.sgotplt->output_offset
-			   + 16
-			   - htab->elf.splt->output_section->vma
-			   - htab->elf.splt->output_offset
-			   - htab->lazy_plt->plt0_got2_insn_end),
-			  (htab->elf.splt->contents
-			   + htab->lazy_plt->plt0_got2_offset));
+	  memcpy (htab->elf.splt->contents + htab->tlsdesc_plt,
+		  htab->lazy_plt->plt0_entry,
+		  htab->lazy_plt->plt0_entry_size);
 
-	      if (htab->tlsdesc_plt)
-		{
-		  bfd_put_64 (output_bfd, (bfd_vma) 0,
-			      htab->elf.sgot->contents + htab->tlsdesc_got);
-
-		  memcpy (htab->elf.splt->contents + htab->tlsdesc_plt,
-			  htab->lazy_plt->plt0_entry,
-			  htab->lazy_plt->plt0_entry_size);
-
-		  /* Add offset for pushq GOT+8(%rip), since the
-		     instruction uses 6 bytes subtract this value.  */
-		  bfd_put_32 (output_bfd,
-			      (htab->elf.sgotplt->output_section->vma
-			       + htab->elf.sgotplt->output_offset
-			       + 8
-			       - htab->elf.splt->output_section->vma
-			       - htab->elf.splt->output_offset
-			       - htab->tlsdesc_plt
-			       - 6),
-			      (htab->elf.splt->contents
-			       + htab->tlsdesc_plt
-			       + htab->lazy_plt->plt0_got1_offset));
-		  /* Add offset for the PC-relative instruction accessing
-		     GOT+TDG, where TDG stands for htab->tlsdesc_got,
-		     subtracting the offset to the end of that
-		     instruction.  */
-		  bfd_put_32 (output_bfd,
-			      (htab->elf.sgot->output_section->vma
-			       + htab->elf.sgot->output_offset
-			       + htab->tlsdesc_got
-			       - htab->elf.splt->output_section->vma
-			       - htab->elf.splt->output_offset
-			       - htab->tlsdesc_plt
-			       - htab->lazy_plt->plt0_got2_insn_end),
-			      (htab->elf.splt->contents
-			       + htab->tlsdesc_plt
-			       + htab->lazy_plt->plt0_got2_offset));
-		}
-	    }
-	}
-
-      if (htab->plt_got != NULL && htab->plt_got->size > 0)
-	elf_section_data (htab->plt_got->output_section)
-	  ->this_hdr.sh_entsize = htab->non_lazy_plt->plt_entry_size;
-
-      if (htab->plt_second != NULL && htab->plt_second->size > 0)
-	elf_section_data (htab->plt_second->output_section)
-	  ->this_hdr.sh_entsize = htab->non_lazy_plt->plt_entry_size;
-    }
-
-  /* GOT is always created in setup_gnu_properties.  But it may not be
-     needed.  */
-  if (htab->elf.sgotplt && htab->elf.sgotplt->size > 0)
-    {
-      if (bfd_is_abs_section (htab->elf.sgotplt->output_section))
-	{
-	  _bfd_error_handler
-	    (_("discarded output section: `%A'"), htab->elf.sgotplt);
-	  return FALSE;
-	}
-
-      /* Set the first entry in the global offset table to the address of
-	 the dynamic section.  */
-      if (sdyn == NULL)
-	bfd_put_64 (output_bfd, (bfd_vma) 0, htab->elf.sgotplt->contents);
-      else
-	bfd_put_64 (output_bfd,
-		    sdyn->output_section->vma + sdyn->output_offset,
-		    htab->elf.sgotplt->contents);
-      /* Write GOT[1] and GOT[2], needed for the dynamic linker.  */
-      bfd_put_64 (output_bfd, (bfd_vma) 0,
-		  htab->elf.sgotplt->contents + GOT_ENTRY_SIZE);
-      bfd_put_64 (output_bfd, (bfd_vma) 0,
-		  htab->elf.sgotplt->contents + GOT_ENTRY_SIZE*2);
-
-      elf_section_data (htab->elf.sgotplt->output_section)->this_hdr.sh_entsize
-	= GOT_ENTRY_SIZE;
-    }
-
-  /* Adjust .eh_frame for .plt section.  */
-  if (htab->plt_eh_frame != NULL
-      && htab->plt_eh_frame->contents != NULL)
-    {
-      if (htab->elf.splt != NULL
-	  && htab->elf.splt->size != 0
-	  && (htab->elf.splt->flags & SEC_EXCLUDE) == 0
-	  && htab->elf.splt->output_section != NULL
-	  && htab->plt_eh_frame->output_section != NULL)
-	{
-	  bfd_vma plt_start = htab->elf.splt->output_section->vma;
-	  bfd_vma eh_frame_start = htab->plt_eh_frame->output_section->vma
-				   + htab->plt_eh_frame->output_offset
-				   + PLT_FDE_START_OFFSET;
-	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
-			     htab->plt_eh_frame->contents
-			     + PLT_FDE_START_OFFSET);
-	}
-      if (htab->plt_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
-	{
-	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
-						 htab->plt_eh_frame,
-						 htab->plt_eh_frame->contents))
-	    return FALSE;
+	  /* Add offset for pushq GOT+8(%rip), since the
+	     instruction uses 6 bytes subtract this value.  */
+	  bfd_put_32 (output_bfd,
+		      (htab->elf.sgotplt->output_section->vma
+		       + htab->elf.sgotplt->output_offset
+		       + 8
+		       - htab->elf.splt->output_section->vma
+		       - htab->elf.splt->output_offset
+		       - htab->tlsdesc_plt
+		       - 6),
+		      (htab->elf.splt->contents
+		       + htab->tlsdesc_plt
+		       + htab->lazy_plt->plt0_got1_offset));
+	  /* Add offset for the PC-relative instruction accessing
+	     GOT+TDG, where TDG stands for htab->tlsdesc_got,
+	     subtracting the offset to the end of that
+	     instruction.  */
+	  bfd_put_32 (output_bfd,
+		      (htab->elf.sgot->output_section->vma
+		       + htab->elf.sgot->output_offset
+		       + htab->tlsdesc_got
+		       - htab->elf.splt->output_section->vma
+		       - htab->elf.splt->output_offset
+		       - htab->tlsdesc_plt
+		       - htab->lazy_plt->plt0_got2_insn_end),
+		      (htab->elf.splt->contents
+		       + htab->tlsdesc_plt
+		       + htab->lazy_plt->plt0_got2_offset));
 	}
     }
-
-  /* Adjust .eh_frame for .plt.got section.  */
-  if (htab->plt_got_eh_frame != NULL
-      && htab->plt_got_eh_frame->contents != NULL)
-    {
-      if (htab->plt_got != NULL
-	  && htab->plt_got->size != 0
-	  && (htab->plt_got->flags & SEC_EXCLUDE) == 0
-	  && htab->plt_got->output_section != NULL
-	  && htab->plt_got_eh_frame->output_section != NULL)
-	{
-	  bfd_vma plt_start = htab->plt_got->output_section->vma;
-	  bfd_vma eh_frame_start = htab->plt_got_eh_frame->output_section->vma
-				   + htab->plt_got_eh_frame->output_offset
-				   + PLT_FDE_START_OFFSET;
-	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
-			     htab->plt_got_eh_frame->contents
-			     + PLT_FDE_START_OFFSET);
-	}
-      if (htab->plt_got_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
-	{
-	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
-						 htab->plt_got_eh_frame,
-						 htab->plt_got_eh_frame->contents))
-	    return FALSE;
-	}
-    }
-
-  /* Adjust .eh_frame for the second PLT section.  */
-  if (htab->plt_second_eh_frame != NULL
-      && htab->plt_second_eh_frame->contents != NULL)
-    {
-      if (htab->plt_second != NULL
-	  && htab->plt_second->size != 0
-	  && (htab->plt_second->flags & SEC_EXCLUDE) == 0
-	  && htab->plt_second->output_section != NULL
-	  && htab->plt_second_eh_frame->output_section != NULL)
-	{
-	  bfd_vma plt_start = htab->plt_second->output_section->vma;
-	  bfd_vma eh_frame_start
-	    = (htab->plt_second_eh_frame->output_section->vma
-	       + htab->plt_second_eh_frame->output_offset
-	       + PLT_FDE_START_OFFSET);
-	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
-			     htab->plt_second_eh_frame->contents
-			     + PLT_FDE_START_OFFSET);
-	}
-      if (htab->plt_second_eh_frame->sec_info_type
-	  == SEC_INFO_TYPE_EH_FRAME)
-	{
-	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
-						 htab->plt_second_eh_frame,
-						 htab->plt_second_eh_frame->contents))
-	    return FALSE;
-	}
-    }
-
-  if (htab->elf.sgot && htab->elf.sgot->size > 0)
-    elf_section_data (htab->elf.sgot->output_section)->this_hdr.sh_entsize
-      = GOT_ENTRY_SIZE;
 
   /* Fill PLT entries for undefined weak symbols in PIE.  */
   if (bfd_link_pie (info))
