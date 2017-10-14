@@ -1,5 +1,13 @@
 2017-10-14  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* nat/linux-osdata.c: Include algorithm.
+	(compare_processes): Remove.
+	(struct pid_pgid_entry): New struct.
+	(linux_xfer_osdata_processgroups): Use std::vector instead of
+	XNEWVEC.
+
+2017-10-14  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* objfiles.h: Don't include symfile.h.
 	(struct partial_symbol): Remove forward-declaration.
 	(struct objfile) <global_psymbols, static_psymbols>: Change type
