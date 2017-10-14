@@ -1,6 +1,14 @@
 2017-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22269
+	* elf32-sh.c (allocate_dynrelocs): Discard dynamic relocations
+	if UNDEFWEAK_NO_DYNAMIC_RELOC is true.
+	(sh_elf_relocate_section): Don't generate dynamic relocation if
+	UNDEFWEAK_NO_DYNAMIC_RELOC is true.
+
+2017-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22269
 	* elf32-s390.c (allocate_dynrelocs): Discard dynamic
 	relocations if UNDEFWEAK_NO_DYNAMIC_RELOC is true.
 	(elf_s390_relocate_section): Don't generate dynamic relocation
