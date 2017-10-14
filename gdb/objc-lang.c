@@ -561,7 +561,7 @@ compare_selectors (const void *a, const void *b)
  */
 
 static void
-info_selectors_command (char *regexp, int from_tty)
+info_selectors_command (const char *regexp, int from_tty)
 {
   struct objfile	*objfile;
   struct minimal_symbol *msymbol;
@@ -723,7 +723,7 @@ compare_classes (const void *a, const void *b)
  */
 
 static void
-info_classes_command (char *regexp, int from_tty)
+info_classes_command (const char *regexp, int from_tty)
 {
   struct objfile	*objfile;
   struct minimal_symbol *msymbol;

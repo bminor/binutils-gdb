@@ -70,8 +70,6 @@
 
 /* Prototypes for local functions */
 
-static void info_signals_command (char *, int);
-
 static void sig_print_info (enum gdb_signal);
 
 static void sig_print_header (void);
@@ -8679,7 +8677,7 @@ Use \"info signals\" for a list of symbolic signals."));
    targets, all signals should be in the signal tables).  */
 
 static void
-info_signals_command (char *signum_exp, int from_tty)
+info_signals_command (const char *signum_exp, int from_tty)
 {
   enum gdb_signal oursig;
 

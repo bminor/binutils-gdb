@@ -1546,7 +1546,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    All io registers are 8-bit.  */
 
 static void
-avr_io_reg_read_command (char *args, int from_tty)
+avr_io_reg_read_command (const char *args, int from_tty)
 {
   LONGEST bufsiz = 0;
   gdb_byte *buf;

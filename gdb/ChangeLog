@@ -1,5 +1,79 @@
 2017-11-07  Tom Tromey  <tom@tromey.com>
 
+	* frame.h (info_locals_command, info_args_command): Constify.
+	* auto-load.h (auto_load_info_scripts): Constify.
+	* inferior.h (registers_info): Constify.
+	* copying.c: Rebuild.
+	* copying.awk: Constify generated commands.
+	* auto-load.c (auto_load_info_scripts)
+	(info_auto_load_gdb_scripts): Constify.
+	* cli/cli-decode.c (struct cmd_list_element): Take a
+	cmd_const_cfunc_ftype.
+	* command.h (add_info): Take a cmd_const_cfunc_ftype.
+	* tui/tui-win.c (tui_all_windows_info): Constify.
+	* python/py-auto-load.c (info_auto_load_python_scripts):
+	Constify.
+	* cli/cli-cmds.c (show_command): Remove non-const overload.
+	* tracepoint.c (info_tvariables_command, info_scope_command):
+	Constify.
+	(info_static_tracepoint_markers_command): Constify.
+	* thread.c (info_threads_command): Constify.
+	(print_thread_info_1): Constify.
+	* target.c (info_target_command): Constify.
+	* symtab.c (info_sources_command, info_functions_command)
+	(info_types_command): Constify.
+	(info_variables_command): Remove non-const overload.
+	* symfile.c (info_ext_lang_command): Constify.
+	* stack.c (info_frame_command, info_locals_command)
+	(info_args_command): Constify.
+	(backtrace_command): Remove non-const overload.
+	* source.c (info_source_command, info_line_command): Constify.
+	* solib.c (info_sharedlibrary_command): Constify.
+	* skip.c (info_skip_command): Constify.
+	* ser-go32.c (info_serial_command): Constify.
+	* reverse.c (info_bookmarks_command): Constify.
+	* printcmd.c (info_symbol_command, info_address_command)
+	(info_display_command): Constify.
+	* osdata.c (info_osdata_command): Constify.
+	* objc-lang.c (info_selectors_command, info_classes_command):
+	Constify.
+	* nto-procfs.c (procfs_pidlist, procfs_meminfo): Constify.
+	* memattr.c (info_mem_command): Constify.
+	* macrocmd.c (info_macro_command, info_macros_command): Constify.
+	* linux-fork.c (info_checkpoints_command): Constify.
+	* infrun.c (info_signals_command): Constify.
+	* inflow.c (info_terminal_command): Constify.
+	* inferior.c (info_inferiors_command): Constify.
+	(print_inferior): Constify.
+	* infcmd.c (info_program_command, info_all_registers_command)
+	(info_registers_command, info_vector_command)
+	(info_float_command): Constify.
+	(registers_info): Constify.
+	* gnu-nat.c (info_send_rights_cmd, info_recv_rights_cmd)
+	(info_port_sets_cmd, info_dead_names_cmd, info_port_rights_cmd):
+	Constify.
+	* f-valprint.c (info_common_command): Constify.
+	* dcache.c (info_dcache_command): Constify.
+	(dcache_info_1): Constify.
+	* darwin-nat-info.c (info_mach_tasks_command)
+	(info_mach_task_command, info_mach_ports_command)
+	(info_mach_port_command, info_mach_threads_command)
+	(info_mach_thread_command, info_mach_regions_command)
+	(info_mach_regions_recurse_command, info_mach_region_command)
+	(info_mach_exceptions_command): Constify.
+	(get_task_from_args): Constify.
+	* cp-support.c (info_vtbl_command): Constify.
+	* breakpoint.c (info_watchpoints_command)
+	(info_tracepoints_command): Constify.
+	(info_breakpoints_command): Remove non-const overload.
+	* avr-tdep.c (avr_io_reg_read_command): Constify.
+	* auxv.c (info_auxv_command): Constify.
+	* ada-tasks.c (info_tasks_command): Constify.
+	(info_task): Constify.
+	* ada-lang.c (info_exceptions_command): Constify.
+
+2017-11-07  Tom Tromey  <tom@tromey.com>
+
 	* solib.h (no_shared_libraries): Constify.
 	* frame.h (return_command): Constify.
 	* cli/cli-cmds.h (quit_command): Constify.

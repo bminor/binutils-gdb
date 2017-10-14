@@ -52,10 +52,6 @@
 
 static int get_filename_and_charpos (struct symtab *, char **);
 
-static void info_line_command (char *, int);
-
-static void info_source_command (char *, int);
-
 /* Path of directories to search for source files.
    Same format as the PATH environment variable's value.  */
 
@@ -639,7 +635,7 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 
 
 static void
-info_source_command (char *ignore, int from_tty)
+info_source_command (const char *ignore, int from_tty)
 {
   struct symtab *s = current_source_symtab;
   struct compunit_symtab *cust;
@@ -1480,7 +1476,7 @@ print_source_lines (struct symtab *s, int line, int stopline,
 /* Print info on range of pc's in a specified line.  */
 
 static void
-info_line_command (char *arg, int from_tty)
+info_line_command (const char *arg, int from_tty)
 {
   CORE_ADDR start_pc, end_pc;
 

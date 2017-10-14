@@ -66,7 +66,7 @@
 #define port_type_array_t mach_port_array_t
 
 static void
-info_mach_tasks_command (char *args, int from_tty)
+info_mach_tasks_command (const char *args, int from_tty)
 {
   int sysControl[4];
   int count, index;
@@ -109,7 +109,7 @@ info_mach_tasks_command (char *args, int from_tty)
 }
 
 static task_t
-get_task_from_args (char *args)
+get_task_from_args (const char *args)
 {
   task_t task;
   char *eptr;
@@ -132,7 +132,7 @@ get_task_from_args (char *args)
 }
 
 static void
-info_mach_task_command (char *args, int from_tty)
+info_mach_task_command (const char *args, int from_tty)
 {
   union
   {
@@ -189,7 +189,7 @@ info_mach_task_command (char *args, int from_tty)
 }
 
 static void
-info_mach_ports_command (char *args, int from_tty)
+info_mach_ports_command (const char *args, int from_tty)
 {
   port_name_array_t names;
   port_type_array_t types;
@@ -326,7 +326,7 @@ darwin_debug_port_info (task_t task, mach_port_t port)
 }
 
 static void
-info_mach_port_command (char *args, int from_tty)
+info_mach_port_command (const char *args, int from_tty)
 {
   task_t task;
   mach_port_t port;
@@ -338,7 +338,7 @@ info_mach_port_command (char *args, int from_tty)
 }
 
 static void
-info_mach_threads_command (char *args, int from_tty)
+info_mach_threads_command (const char *args, int from_tty)
 {
   thread_array_t threads;
   unsigned int thread_count;
@@ -365,7 +365,7 @@ info_mach_threads_command (char *args, int from_tty)
 }
 
 static void
-info_mach_thread_command (char *args, int from_tty)
+info_mach_thread_command (const char *args, int from_tty)
 {
   union
   {
@@ -696,7 +696,7 @@ darwin_debug_region (task_t task, mach_vm_address_t address)
 }
 
 static void
-info_mach_regions_command (char *args, int from_tty)
+info_mach_regions_command (const char *args, int from_tty)
 {
   task_t task;
 
@@ -708,7 +708,7 @@ info_mach_regions_command (char *args, int from_tty)
 }
 
 static void
-info_mach_regions_recurse_command (char *args, int from_tty)
+info_mach_regions_recurse_command (const char *args, int from_tty)
 {
   task_t task;
 
@@ -720,7 +720,7 @@ info_mach_regions_recurse_command (char *args, int from_tty)
 }
 
 static void
-info_mach_region_command (char *exp, int from_tty)
+info_mach_region_command (const char *exp, int from_tty)
 {
   struct value *val;
   mach_vm_address_t address;
@@ -792,7 +792,7 @@ disp_exception (const darwin_exception_info *info)
 }
 
 static void
-info_mach_exceptions_command (char *args, int from_tty)
+info_mach_exceptions_command (const char *args, int from_tty)
 {
   int i;
   task_t task;

@@ -102,8 +102,6 @@ static int simple_read_overlay_table (void);
 
 static int simple_overlay_update_1 (struct obj_section *);
 
-static void info_ext_lang_command (char *args, int from_tty);
-
 static void symfile_find_segment_sections (struct objfile *objfile);
 
 /* List of all available sym_fns.  On gdb startup, each object file reader
@@ -2723,7 +2721,7 @@ set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
 }
 
 static void
-info_ext_lang_command (char *args, int from_tty)
+info_ext_lang_command (const char *args, int from_tty)
 {
   printf_filtered (_("Filename extensions and the languages they represent:"));
   printf_filtered ("\n\n");

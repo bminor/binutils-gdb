@@ -161,8 +161,6 @@ static int breakpoint_location_address_range_overlap (struct bp_location *,
 						      const address_space *,
 						      CORE_ADDR, int);
 
-static void info_watchpoints_command (char *, int);
-
 static int remove_breakpoint (struct bp_location *);
 static int remove_breakpoint_1 (struct bp_location *, enum remove_bp_reason);
 
@@ -227,8 +225,6 @@ static void update_global_location_list_nothrow (enum ugll_insert_mode);
 static int is_hardware_watchpoint (const struct breakpoint *bpt);
 
 static void insert_breakpoint_locations (void);
-
-static void info_tracepoints_command (char *, int);
 
 static void enable_trace_command (char *, int);
 
@@ -6705,16 +6701,8 @@ info_breakpoints_command (const char *args, int from_tty)
   default_collect_info ();
 }
 
-/* Temporary non-const overload.  */
-
 static void
-info_breakpoints_command (char *args, int from_tty)
-{
-  info_breakpoints_command ((const char *) args, from_tty);
-}
-
-static void
-info_watchpoints_command (char *args, int from_tty)
+info_watchpoints_command (const char *args, int from_tty)
 {
   int num_printed = breakpoint_1 (args, 0, is_watchpoint);
   struct ui_out *uiout = current_uiout;
@@ -14919,7 +14907,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
    omitted.  */
 
 static void
-info_tracepoints_command (char *args, int from_tty)
+info_tracepoints_command (const char *args, int from_tty)
 {
   struct ui_out *uiout = current_uiout;
   int num_printed;

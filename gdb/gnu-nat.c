@@ -3145,31 +3145,31 @@ info_port_rights (const char *args, mach_port_type_t only)
 }
 
 static void
-info_send_rights_cmd (char *args, int from_tty)
+info_send_rights_cmd (const char *args, int from_tty)
 {
   info_port_rights (args, MACH_PORT_TYPE_SEND);
 }
 
 static void
-info_recv_rights_cmd (char *args, int from_tty)
+info_recv_rights_cmd (const char *args, int from_tty)
 {
   info_port_rights (args, MACH_PORT_TYPE_RECEIVE);
 }
 
 static void
-info_port_sets_cmd (char *args, int from_tty)
+info_port_sets_cmd (const char *args, int from_tty)
 {
   info_port_rights (args, MACH_PORT_TYPE_PORT_SET);
 }
 
 static void
-info_dead_names_cmd (char *args, int from_tty)
+info_dead_names_cmd (const char *args, int from_tty)
 {
   info_port_rights (args, MACH_PORT_TYPE_DEAD_NAME);
 }
 
 static void
-info_port_rights_cmd (char *args, int from_tty)
+info_port_rights_cmd (const char *args, int from_tty)
 {
   info_port_rights (args, ~0);
 }

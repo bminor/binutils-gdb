@@ -207,14 +207,6 @@ show_command (const char *arg, int from_tty)
   cmd_show_list (showlist, from_tty, "");
 }
 
-/* A temporary non-const overload of show_command.  */
-
-static void
-show_command (char *arg, int from_tty)
-{
-  cmd_show_list (showlist, from_tty, "");
-}
-
 
 /* Provide documentation on command or list given by COMMAND.  FROM_TTY
    is ignored.  */

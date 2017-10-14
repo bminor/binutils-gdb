@@ -529,7 +529,7 @@ print_selected_inferior (struct ui_out *uiout)
    printed.  */
 
 static void
-print_inferior (struct ui_out *uiout, char *requested_inferiors)
+print_inferior (struct ui_out *uiout, const char *requested_inferiors)
 {
   struct inferior *inf;
   int inf_count = 0;
@@ -718,7 +718,7 @@ inferior_command (const char *args, int from_tty)
 /* Print information about currently known inferiors.  */
 
 static void
-info_inferiors_command (char *args, int from_tty)
+info_inferiors_command (const char *args, int from_tty)
 {
   print_inferior (current_uiout, args);
 }

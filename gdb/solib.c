@@ -1045,7 +1045,7 @@ solib_add (const char *pattern, int from_tty, int readsyms)
    all.  */
 
 static void
-info_sharedlibrary_command (char *pattern, int from_tty)
+info_sharedlibrary_command (const char *pattern, int from_tty)
 {
   struct so_list *so = NULL;	/* link map state variable */
   int so_missing_debug_info = 0;

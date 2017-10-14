@@ -887,7 +887,7 @@ gdb_pipe (int pdes[2])
 }
 
 static void
-info_serial_command (char *arg, int from_tty)
+info_serial_command (const char *arg, int from_tty)
 {
   struct dos_ttystate *port;
 #ifdef DOS_STATS

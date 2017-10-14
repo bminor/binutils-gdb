@@ -188,19 +188,19 @@ print_macro_definition (const char *name,
 
 /* The implementation of the `info macro' command.  */
 static void
-info_macro_command (char *args, int from_tty)
+info_macro_command (const char *args, int from_tty)
 {
   struct macro_scope *ms = NULL;
   struct cleanup *cleanup_chain;
-  char *name;
+  const char *name;
   int show_all_macros_named = 0;
-  char *arg_start = args;
+  const char *arg_start = args;
   int processing_args = 1;
 
   while (processing_args
 	 && arg_start && *arg_start == '-' && *arg_start != '\0')
     {
-      char *p = skip_to_space (arg_start);
+      const char *p = skip_to_space (arg_start);
 
       if (strncmp (arg_start, "-a", p - arg_start) == 0
 	  || strncmp (arg_start, "-all", p - arg_start) == 0)
@@ -212,10 +212,9 @@ info_macro_command (char *args, int from_tty)
 	processing_args = 0;
       else
 	{
-	  /* Relies on modified 'args' not making it in to history */
-	  *p = '\0';
-	  error (_("Unrecognized option '%s' to info macro command.  "
-		   "Try \"help info macro\"."), arg_start);
+	  error (_("Unrecognized option '%.*s' to info macro command.  "
+		   "Try \"help info macro\"."),
+		 int (p - arg_start), arg_start);
 	}
 
         arg_start = skip_spaces (p);
@@ -270,7 +269,7 @@ info_macro_command (char *args, int from_tty)
 
 /* Implementation of the "info macros" command. */
 static void
-info_macros_command (char *args, int from_tty)
+info_macros_command (const char *args, int from_tty)
 {
   struct macro_scope *ms = NULL;
   struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &ms);

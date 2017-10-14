@@ -353,7 +353,7 @@ skip_command (const char *arg, int from_tty)
 }
 
 static void
-info_skip_command (char *arg, int from_tty)
+info_skip_command (const char *arg, int from_tty)
 {
   int num_printable_entries = 0;
   struct value_print_options opts;

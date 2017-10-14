@@ -467,7 +467,7 @@ copy_terminal_info (struct inferior *to, struct inferior *from)
 }
 
 void
-info_terminal_command (char *arg, int from_tty)
+info_terminal_command (const char *arg, int from_tty)
 {
   target_terminal::info (arg, from_tty);
 }

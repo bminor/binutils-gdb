@@ -1290,7 +1290,7 @@ print_scripts (const std::vector<loaded_script *> &scripts)
    PATTERN.  FROM_TTY is the usual GDB boolean for user interactivity.  */
 
 void
-auto_load_info_scripts (char *pattern, int from_tty,
+auto_load_info_scripts (const char *pattern, int from_tty,
 			const struct extension_language_defn *language)
 {
   struct ui_out *uiout = current_uiout;
@@ -1373,7 +1373,7 @@ auto_load_info_scripts (char *pattern, int from_tty,
 /* Wrapper for "info auto-load gdb-scripts".  */
 
 static void
-info_auto_load_gdb_scripts (char *pattern, int from_tty)
+info_auto_load_gdb_scripts (const char *pattern, int from_tty)
 {
   auto_load_info_scripts (pattern, from_tty, &extension_language_gdb);
 }

@@ -1380,7 +1380,7 @@ parse_frame_specification (const char *frame_exp, int *selected_frame_p)
    ADDR_EXP.  Absolutely all information in the frame is printed.  */
 
 static void
-info_frame_command (char *addr_exp, int from_tty)
+info_frame_command (const char *addr_exp, int from_tty)
 {
   struct frame_info *fi;
   struct symbol *func;
@@ -1903,14 +1903,6 @@ backtrace_command (const char *arg, int from_tty)
 		       no_filters >= 0 /* no frame-filters */, from_tty);
 }
 
-/* Temporary non-const overload.  */
-
-static void
-backtrace_command (char *arg, int from_tty)
-{
-  backtrace_command ((const char *) arg, from_tty);
-}
-
 /* Iterate over the local variables of a block B, calling CB with
    CB_DATA.  */
 
@@ -2114,7 +2106,7 @@ print_frame_local_vars (struct frame_info *frame, int num_tabs,
 }
 
 void
-info_locals_command (char *args, int from_tty)
+info_locals_command (const char *args, int from_tty)
 {
   print_frame_local_vars (get_selected_frame (_("No frame selected.")),
 			  0, gdb_stdout);
@@ -2196,7 +2188,7 @@ print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
 }
 
 void
-info_args_command (char *ignore, int from_tty)
+info_args_command (const char *ignore, int from_tty)
 {
   print_frame_arg_vars (get_selected_frame (_("No frame selected.")),
 			gdb_stdout);

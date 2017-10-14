@@ -915,7 +915,7 @@ delete_cmd (const char *name, struct cmd_list_element **list,
 /* Add an element to the list of info subcommands.  */
 
 struct cmd_list_element *
-add_info (const char *name, cmd_cfunc_ftype *fun, const char *doc)
+add_info (const char *name, cmd_const_cfunc_ftype *fun, const char *doc)
 {
   return add_cmd (name, class_info, fun, doc, &infolist);
 }

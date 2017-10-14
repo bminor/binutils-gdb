@@ -62,7 +62,6 @@ static int threads_executing;
 
 static void thread_apply_all_command (char *, int);
 static int thread_alive (struct thread_info *);
-static void info_threads_command (char *, int);
 
 /* RAII type used to increase / decrease the refcount of each thread
    in a given list of threads.  */
@@ -1197,7 +1196,7 @@ should_print_thread (const char *requested_threads, int default_inf_num,
    thread ids.  */
 
 static void
-print_thread_info_1 (struct ui_out *uiout, char *requested_threads,
+print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 		     int global_ids, int pid,
 		     int show_global_ids)
 {
@@ -1384,7 +1383,7 @@ print_thread_info (struct ui_out *uiout, char *requested_threads, int pid)
 	 effects info-threads command would be nicer.  */
 
 static void
-info_threads_command (char *arg, int from_tty)
+info_threads_command (const char *arg, int from_tty)
 {
   int show_global_ids = 0;
 

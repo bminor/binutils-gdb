@@ -13359,7 +13359,7 @@ ada_exceptions_list (const char *regexp)
 /* Implement the "info exceptions" command.  */
 
 static void
-info_exceptions_command (char *regexp, int from_tty)
+info_exceptions_command (const char *regexp, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
 

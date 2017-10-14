@@ -405,7 +405,7 @@ info_osdata (const char *type)
 }
 
 static void
-info_osdata_command (char *arg, int from_tty)
+info_osdata_command (const char *arg, int from_tty)
 {
   info_osdata (arg);
 }

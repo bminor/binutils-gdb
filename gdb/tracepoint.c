@@ -492,7 +492,7 @@ tvariables_info_1 (void)
 /* List all the trace state variables.  */
 
 static void
-info_tvariables_command (char *args, int from_tty)
+info_tvariables_command (const char *args, int from_tty)
 {
   tvariables_info_1 ();
 }
@@ -2514,7 +2514,7 @@ tfind_outside_command (const char *args, int from_tty)
 
 /* info scope command: list the locals for a scope.  */
 static void
-info_scope_command (char *args_in, int from_tty)
+info_scope_command (const char *args_in, int from_tty)
 {
   struct symbol *sym;
   struct bound_minimal_symbol msym;
@@ -3874,7 +3874,7 @@ print_one_static_tracepoint_marker (int count,
 }
 
 static void
-info_static_tracepoint_markers_command (char *arg, int from_tty)
+info_static_tracepoint_markers_command (const char *arg, int from_tty)
 {
   VEC(static_tracepoint_marker_p) *markers;
   struct cleanup *old_chain;

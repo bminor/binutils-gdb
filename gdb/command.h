@@ -268,7 +268,7 @@ extern struct cmd_list_element *add_com_suppress_notification
 			int *supress_notification);
 
 extern struct cmd_list_element *add_info (const char *,
-					  cmd_cfunc_ftype *fun,
+					  cmd_const_cfunc_ftype *fun,
 					  const char *);
 
 extern struct cmd_list_element *add_info_alias (const char *, const char *,

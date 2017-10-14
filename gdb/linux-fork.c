@@ -571,7 +571,7 @@ Please switch to another checkpoint before detaching the current one"));
 /* Print information about currently known checkpoints.  */
 
 static void
-info_checkpoints_command (char *arg, int from_tty)
+info_checkpoints_command (const char *arg, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   struct symtab_and_line sal;

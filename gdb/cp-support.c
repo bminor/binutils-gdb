@@ -1601,7 +1601,7 @@ first_component_command (const char *arg, int from_tty)
 /* Implement "info vtbl".  */
 
 static void
-info_vtbl_command (char *arg, int from_tty)
+info_vtbl_command (const char *arg, int from_tty)
 {
   struct value *value;
 

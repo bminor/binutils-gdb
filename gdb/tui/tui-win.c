@@ -64,7 +64,7 @@ static int new_height_ok (struct tui_win_info *, int);
 static void tui_set_tab_width_command (const char *, int);
 static void tui_refresh_all_command (const char *, int);
 static void tui_set_win_height_command (const char *, int);
-static void tui_all_windows_info (char *, int);
+static void tui_all_windows_info (const char *, int);
 static void tui_set_focus_command (const char *, int);
 static void tui_scroll_forward_command (const char *, int);
 static void tui_scroll_backward_command (const char *, int);
@@ -1087,7 +1087,7 @@ tui_set_focus_command (const char *arg, int from_tty)
 
 
 static void
-tui_all_windows_info (char *arg, int from_tty)
+tui_all_windows_info (const char *arg, int from_tty)
 {
   int type;
   struct tui_win_info *win_with_focus = tui_win_with_focus ();

@@ -1296,7 +1296,7 @@ set_command (const char *exp, int from_tty)
 }
 
 static void
-info_symbol_command (char *arg, int from_tty)
+info_symbol_command (const char *arg, int from_tty)
 {
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
@@ -1387,7 +1387,7 @@ info_symbol_command (char *arg, int from_tty)
 }
 
 static void
-info_address_command (char *exp, int from_tty)
+info_address_command (const char *exp, int from_tty)
 {
   struct gdbarch *gdbarch;
   int regno;
@@ -2053,7 +2053,7 @@ disable_current_display (void)
 }
 
 static void
-info_display_command (char *ignore, int from_tty)
+info_display_command (const char *ignore, int from_tty)
 {
   struct display *d;
 

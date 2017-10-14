@@ -4033,7 +4033,7 @@ output_partial_symbol_filename (const char *filename, const char *fullname,
 }
 
 static void
-info_sources_command (char *ignore, int from_tty)
+info_sources_command (const char *ignore, int from_tty)
 {
   struct compunit_symtab *cu;
   struct symtab *s;
@@ -4485,23 +4485,15 @@ info_variables_command (const char *regexp, int from_tty)
   symtab_symbol_info (regexp, VARIABLES_DOMAIN, from_tty);
 }
 
-/* Temporary non-const overload.  */
-
 static void
-info_variables_command (char *regexp, int from_tty)
-{
-  symtab_symbol_info (regexp, VARIABLES_DOMAIN, from_tty);
-}
-
-static void
-info_functions_command (char *regexp, int from_tty)
+info_functions_command (const char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, FUNCTIONS_DOMAIN, from_tty);
 }
 
 
 static void
-info_types_command (char *regexp, int from_tty)
+info_types_command (const char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, TYPES_DOMAIN, from_tty);
 }

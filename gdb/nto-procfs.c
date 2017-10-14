@@ -359,7 +359,7 @@ do_closedir_cleanup (void *dir)
 }
 
 static void
-procfs_pidlist (char *args, int from_tty)
+procfs_pidlist (const char *args, int from_tty)
 {
   DIR *dp = NULL;
   struct dirent *dirp = NULL;
@@ -461,7 +461,7 @@ procfs_pidlist (char *args, int from_tty)
 }
 
 static void
-procfs_meminfo (char *args, int from_tty)
+procfs_meminfo (const char *args, int from_tty)
 {
   procfs_mapinfo *mapinfos = NULL;
   static int num_mapinfos = 0;

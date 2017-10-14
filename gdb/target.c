@@ -48,8 +48,6 @@
 #include <algorithm>
 #include "byte-vector.h"
 
-static void info_target_command (char *, int);
-
 static void generic_tls_error (void) ATTRIBUTE_NORETURN;
 
 static void default_terminal_info (struct target_ops *, const char *, int);
@@ -2019,7 +2017,7 @@ target_remove_breakpoint (struct gdbarch *gdbarch,
 }
 
 static void
-info_target_command (char *args, int from_tty)
+info_target_command (const char *args, int from_tty)
 {
   struct target_ops *t;
   int has_all_mem = 0;

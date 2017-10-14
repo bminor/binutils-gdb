@@ -305,7 +305,7 @@ bookmark_1 (int bnum)
 /* Implement "info bookmarks" command.  */
 
 static void
-info_bookmarks_command (char *args, int from_tty)
+info_bookmarks_command (const char *args, int from_tty)
 {
   if (!bookmark_chain)
     printf_filtered (_("No bookmarks.\n"));

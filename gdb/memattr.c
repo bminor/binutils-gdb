@@ -341,7 +341,7 @@ mem_command (const char *args, int from_tty)
 
 
 static void
-info_mem_command (char *args, int from_tty)
+info_mem_command (const char *args, int from_tty)
 {
   if (mem_use_target ())
     printf_filtered (_("Using memory regions provided by the target.\n"));

@@ -160,7 +160,7 @@ extern void set_inferior_args (const char *);
 
 extern void set_inferior_args_vector (int, char **);
 
-extern void registers_info (char *, int);
+extern void registers_info (const char *, int);
 
 extern void continue_1 (int all_threads);
 

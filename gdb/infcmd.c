@@ -62,13 +62,7 @@
 
 /* Local functions: */
 
-static void info_registers_command (char *, int);
-
 static void until_next_command (int);
-
-static void info_float_command (char *, int);
-
-static void info_program_command (char *, int);
 
 static void step_1 (int, int, const char *);
 
@@ -2083,7 +2077,7 @@ finish_command (const char *arg, int from_tty)
 
 
 static void
-info_program_command (char *args, int from_tty)
+info_program_command (const char *args, int from_tty)
 {
   bpstat bs;
   int num, stat;
@@ -2416,7 +2410,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 }
 
 void
-registers_info (char *addr_exp, int fpregs)
+registers_info (const char *addr_exp, int fpregs)
 {
   struct frame_info *frame;
   struct gdbarch *gdbarch;
@@ -2435,7 +2429,7 @@ registers_info (char *addr_exp, int fpregs)
 
   while (*addr_exp != '\0')
     {
-      char *start;
+      const char *start;
       const char *end;
 
       /* Skip leading white space.  */
@@ -2524,13 +2518,13 @@ registers_info (char *addr_exp, int fpregs)
 }
 
 static void
-info_all_registers_command (char *addr_exp, int from_tty)
+info_all_registers_command (const char *addr_exp, int from_tty)
 {
   registers_info (addr_exp, 1);
 }
 
 static void
-info_registers_command (char *addr_exp, int from_tty)
+info_registers_command (const char *addr_exp, int from_tty)
 {
   registers_info (addr_exp, 0);
 }
@@ -2565,7 +2559,7 @@ print_vector_info (struct ui_file *file,
 }
 
 static void
-info_vector_command (char *args, int from_tty)
+info_vector_command (const char *args, int from_tty)
 {
   if (!target_has_registers)
     error (_("The program has no registers now."));
@@ -3106,7 +3100,7 @@ default_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 }
 
 static void
-info_float_command (char *args, int from_tty)
+info_float_command (const char *args, int from_tty)
 {
   struct frame_info *frame;
 
