@@ -54,6 +54,12 @@ enum prompt_state
 
 struct ui
 {
+  /* Create a new UI.  */
+  ui (FILE *instream, FILE *outstream, FILE *errstream);
+  ~ui ();
+
+  DISABLE_COPY_AND_ASSIGN (ui);
+
   /* Pointer to next in singly-linked list.  */
   struct ui *next;
 
@@ -203,13 +209,6 @@ public:
 #define ALL_UIS(UI)				\
   for (UI = ui_list; UI; UI = UI->next)		\
 
-/* Create a new UI.  */
-extern struct ui *new_ui (FILE *instream, FILE *outstream, FILE *errstream);
-extern void delete_ui (struct ui *todel);
-
-/* Cleanup that deletes a UI.  */
-extern struct cleanup *make_delete_ui_cleanup (struct ui *ui);
-
 /* Register the UI's input file descriptor in the event loop.  */
 extern void ui_register_input_event_handler (struct ui *ui);
 
@@ -219,7 +218,6 @@ extern void ui_unregister_input_event_handler (struct ui *ui);
 /* From top.c.  */
 extern char *saved_command_line;
 extern int confirm;
-extern char gdb_dirbuf[1024];
 extern int inhibit_gdbinit;
 extern const char gdbinit[];
 
@@ -284,9 +282,9 @@ extern void gdb_add_history (const char *);
 
 extern void show_commands (char *args, int from_tty);
 
-extern void set_history (char *, int);
+extern void set_history (const char *, int);
 
-extern void show_history (char *, int);
+extern void show_history (const char *, int);
 
 extern void set_verbose (char *, int, struct cmd_list_element *);
 

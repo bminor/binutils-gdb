@@ -27,18 +27,38 @@ typedef void self_test_function (void);
 namespace selftests
 {
 
+/* Interface for the various kinds of selftests.  */
+
+struct selftest
+{
+  virtual void operator() () const = 0;
+};
+
 /* Register a new self-test.  */
 
-extern void register_test (self_test_function *function);
+extern void register_test (const std::string &name, selftest *test);
+
+/* Register a new self-test.  */
+
+extern void register_test (const std::string &name,
+			   self_test_function *function);
 
 /* Run all the self tests.  This print a message describing the number
-   of test and the number of failures.  */
+   of test and the number of failures.
 
-extern void run_tests (void);
+   If FILTER is not NULL and not empty, only tests with names containing FILTER
+   will be ran.  */
+
+extern void run_tests (const char *filter);
 
 /* Reset GDB or GDBserver's internal state.  */
 extern void reset ();
 
+typedef void for_each_selftest_ftype (const std::string &name);
+
+/* Call FUNC for each registered selftest.  */
+
+extern void for_each_selftest (for_each_selftest_ftype func);
 }
 
 /* Check that VALUE is true, and, if not, throw an exception.  */

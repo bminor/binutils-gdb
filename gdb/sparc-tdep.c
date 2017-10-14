@@ -22,7 +22,6 @@
 #include "dis-asm.h"
 #include "dwarf2.h"
 #include "dwarf2-frame.h"
-#include "floatformat.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
@@ -410,7 +409,7 @@ sparc_psr_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = arch_flags_type (gdbarch, "builtin_type_sparc_psr", 4);
+      type = arch_flags_type (gdbarch, "builtin_type_sparc_psr", 32);
       append_flags_type_flag (type, 5, "ET");
       append_flags_type_flag (type, 6, "PS");
       append_flags_type_flag (type, 7, "S");
@@ -432,7 +431,7 @@ sparc_fsr_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = arch_flags_type (gdbarch, "builtin_type_sparc_fsr", 4);
+      type = arch_flags_type (gdbarch, "builtin_type_sparc_fsr", 32);
       append_flags_type_flag (type, 0, "NXA");
       append_flags_type_flag (type, 1, "DZA");
       append_flags_type_flag (type, 2, "UFA");

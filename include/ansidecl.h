@@ -252,7 +252,7 @@ So instead we use the macro below and test it against specific values.  */
 # endif /* GNUC >= 3.0 */
 #endif /* ATTRIBUTE_ALIGNED_ALIGNOF */
 
-/* Useful for structures whose layout must much some binary specification
+/* Useful for structures whose layout must match some binary specification
    regardless of the alignment and padding qualities of the compiler.  */
 #ifndef ATTRIBUTE_PACKED
 # define ATTRIBUTE_PACKED __attribute__ ((packed))
@@ -313,6 +313,12 @@ So instead we use the macro below and test it against specific values.  */
 #define ENUM_BITFIELD(TYPE) unsigned int
 #endif
 
+#if __cpp_constexpr >= 200704
+#define CONSTEXPR constexpr
+#else
+#define CONSTEXPR
+#endif
+
 /* C++11 adds the ability to add "override" after an implementation of a
    virtual function in a subclass, to:
      (A) document that this is an override of a virtual function
@@ -353,6 +359,32 @@ So instead we use the macro below and test it against specific values.  */
 # define OVERRIDE
 # define FINAL
 #endif
+
+/* A macro to disable the copy constructor and assignment operator.
+   When building with C++11 and above, the methods are explicitly
+   deleted, causing a compile-time error if something tries to copy.
+   For C++03, this just declares the methods, causing a link-time
+   error if the methods end up called (assuming you don't
+   define them).  For C++03, for best results, place the macro
+   under the private: access specifier, like this,
+
+   class name_lookup
+   {
+     private:
+       DISABLE_COPY_AND_ASSIGN (name_lookup);
+   };
+
+   so that most attempts at copy are caught at compile-time.  */
+
+#if __cplusplus >= 201103
+#define DISABLE_COPY_AND_ASSIGN(TYPE)		\
+  TYPE (const TYPE&) = delete;			\
+  void operator= (const TYPE &) = delete
+  #else
+#define DISABLE_COPY_AND_ASSIGN(TYPE)		\
+  TYPE (const TYPE&);				\
+  void operator= (const TYPE &)
+#endif /* __cplusplus >= 201103 */
 
 #ifdef __cplusplus
 }

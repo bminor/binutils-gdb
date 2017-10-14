@@ -21,10 +21,6 @@
 # ld.so probes before reaching main, and ptrace flags were set then.  But a
 # static executable would just keep running and never catch the fork.
 
-if { [is_remote target] || ![isnative] } then {
-    continue
-}
-
 # Until "catch fork" is implemented on other targets...
 #
 if { ![istarget "*-*-linux*"] && ![istarget "*-*-openbsd*"] } then {

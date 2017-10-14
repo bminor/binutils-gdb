@@ -201,7 +201,7 @@ delete_all_bookmarks (void)
 }
 
 static void
-delete_bookmark_command (char *args, int from_tty)
+delete_bookmark_command (const char *args, int from_tty)
 {
   if (bookmark_chain == NULL)
     {

@@ -647,7 +647,7 @@ gdbpy_solib_name (PyObject *self, PyObject *args)
 static PyObject *
 gdbpy_decode_line (PyObject *self, PyObject *args)
 {
-  char *arg = NULL;
+  const char *arg = NULL;
   gdbpy_ref<> result;
   gdbpy_ref<> unparsed;
   event_location_up location;
@@ -1428,7 +1428,7 @@ static struct cmd_list_element *user_show_python_list;
 /* Function for use by 'set python' prefix command.  */
 
 static void
-user_set_python (char *args, int from_tty)
+user_set_python (const char *args, int from_tty)
 {
   help_list (user_set_python_list, "set python ", all_commands,
 	     gdb_stdout);
@@ -1437,7 +1437,7 @@ user_set_python (char *args, int from_tty)
 /* Function for use by 'show python' prefix command.  */
 
 static void
-user_show_python (char *args, int from_tty)
+user_show_python (const char *args, int from_tty)
 {
   cmd_show_list (user_show_python_list, from_tty, "");
 }

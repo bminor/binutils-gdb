@@ -2883,7 +2883,7 @@ init_record_btrace_ops (void)
 /* Start recording in BTS format.  */
 
 static void
-cmd_record_btrace_bts_start (char *args, int from_tty)
+cmd_record_btrace_bts_start (const char *args, int from_tty)
 {
   if (args != NULL && *args != 0)
     error (_("Invalid argument."));
@@ -2905,7 +2905,7 @@ cmd_record_btrace_bts_start (char *args, int from_tty)
 /* Start recording in Intel Processor Trace format.  */
 
 static void
-cmd_record_btrace_pt_start (char *args, int from_tty)
+cmd_record_btrace_pt_start (const char *args, int from_tty)
 {
   if (args != NULL && *args != 0)
     error (_("Invalid argument."));
@@ -2927,7 +2927,7 @@ cmd_record_btrace_pt_start (char *args, int from_tty)
 /* Alias for "target record".  */
 
 static void
-cmd_record_btrace_start (char *args, int from_tty)
+cmd_record_btrace_start (const char *args, int from_tty)
 {
   if (args != NULL && *args != 0)
     error (_("Invalid argument."));
@@ -2959,7 +2959,7 @@ cmd_record_btrace_start (char *args, int from_tty)
 /* The "set record btrace" command.  */
 
 static void
-cmd_set_record_btrace (char *args, int from_tty)
+cmd_set_record_btrace (const char *args, int from_tty)
 {
   cmd_show_list (set_record_btrace_cmdlist, from_tty, "");
 }
@@ -2967,7 +2967,7 @@ cmd_set_record_btrace (char *args, int from_tty)
 /* The "show record btrace" command.  */
 
 static void
-cmd_show_record_btrace (char *args, int from_tty)
+cmd_show_record_btrace (const char *args, int from_tty)
 {
   cmd_show_list (show_record_btrace_cmdlist, from_tty, "");
 }
@@ -2985,7 +2985,7 @@ cmd_show_replay_memory_access (struct ui_file *file, int from_tty,
 /* The "set record btrace bts" command.  */
 
 static void
-cmd_set_record_btrace_bts (char *args, int from_tty)
+cmd_set_record_btrace_bts (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"set record btrace bts\" must be followed "
 		       "by an appropriate subcommand.\n"));
@@ -2996,7 +2996,7 @@ cmd_set_record_btrace_bts (char *args, int from_tty)
 /* The "show record btrace bts" command.  */
 
 static void
-cmd_show_record_btrace_bts (char *args, int from_tty)
+cmd_show_record_btrace_bts (const char *args, int from_tty)
 {
   cmd_show_list (show_record_btrace_bts_cmdlist, from_tty, "");
 }
@@ -3004,7 +3004,7 @@ cmd_show_record_btrace_bts (char *args, int from_tty)
 /* The "set record btrace pt" command.  */
 
 static void
-cmd_set_record_btrace_pt (char *args, int from_tty)
+cmd_set_record_btrace_pt (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"set record btrace pt\" must be followed "
 		       "by an appropriate subcommand.\n"));
@@ -3015,7 +3015,7 @@ cmd_set_record_btrace_pt (char *args, int from_tty)
 /* The "show record btrace pt" command.  */
 
 static void
-cmd_show_record_btrace_pt (char *args, int from_tty)
+cmd_show_record_btrace_pt (const char *args, int from_tty)
 {
   cmd_show_list (show_record_btrace_pt_cmdlist, from_tty, "");
 }

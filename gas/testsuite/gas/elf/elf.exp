@@ -122,6 +122,7 @@ if { [is_elf_format] } then {
     run_dump_test "group1a"
     run_dump_test "group1b"
     run_dump_test "group2"
+    run_dump_test "group3"
     case $target_triplet in {
 	{ hppa64*-*-hpux* } { }
 	{ riscv*-*-* } { }

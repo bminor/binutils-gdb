@@ -90,7 +90,7 @@ lnk960_before_parse (void)
     {
       name = getenv("G960BASE");
       if (name == (char *) NULL)
-	einfo ("%P%F I960BASE and G960BASE not set\n");
+	einfo (_("%P%F I960BASE and G960BASE not set\n"));
     }
 
   ldfile_add_library_path (concat (name, "/lib", (const char *) NULL), FALSE);

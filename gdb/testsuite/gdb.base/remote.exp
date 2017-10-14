@@ -13,10 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-# test only on a remote target board
-if {! [is_remote target]} {
+# Test only on boards that actually use the remote protocol.
+if {[target_info gdb_protocol] != "remote"
+    && [target_info gdb_protocol] != "extended-remote"} {
     return
 }
 
@@ -54,7 +53,7 @@ gdb_test "show remote memory-write-packet-size" \
 	"set write-packet - very-small"
 
 #
-# Part TWO: Check the download behavour
+# Part TWO: Check the download behavior.
 #
 
 proc gdb_load_timed {executable class writesize} {
@@ -103,6 +102,10 @@ proc gdb_load_timed {executable class writesize} {
     pass $test
 }
 
+# These download tests won't actually download anything on !is_remote
+# target boards, but we run them anyway because it's simpler, and
+# harmless.
+
 # Typically about 400-1 bytes can be downloaded
 gdb_load_timed $binfile "limit" 398
 gdb_load_timed $binfile "limit" 400
@@ -128,6 +131,7 @@ set sizeof_random_data [get_sizeof "random_data" 48*1024]
 #
 if ![runto_main] then {
     fail "cannot run to main"
+    return
 }
 
 # Carefully check memory around each of the most common packet edge

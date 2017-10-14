@@ -491,5 +491,6 @@ run_tests ()
 void
 _initialize_array_view_selftests ()
 {
-  selftests::register_test (selftests::array_view_tests::run_tests);
+  selftests::register_test ("array_view",
+			    selftests::array_view_tests::run_tests);
 }

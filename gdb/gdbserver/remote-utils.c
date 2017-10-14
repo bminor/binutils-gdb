@@ -23,6 +23,7 @@
 #include "tdesc.h"
 #include "dll.h"
 #include "rsp-low.h"
+#include "gdbthread.h"
 #include <ctype.h>
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -532,7 +533,7 @@ write_ptid (char *buf, ptid_t ptid)
 }
 
 static ULONGEST
-hex_or_minus_one (char *buf, char **obuf)
+hex_or_minus_one (const char *buf, const char **obuf)
 {
   ULONGEST ret;
 
@@ -553,10 +554,10 @@ hex_or_minus_one (char *buf, char **obuf)
 /* Extract a PTID from BUF.  If non-null, OBUF is set to the to one
    passed the last parsed char.  Returns null_ptid on error.  */
 ptid_t
-read_ptid (char *buf, char **obuf)
+read_ptid (const char *buf, const char **obuf)
 {
-  char *p = buf;
-  char *pp;
+  const char *p = buf;
+  const char *pp;
   ULONGEST pid = 0, tid = 0;
 
   if (*p == 'p')
@@ -1188,7 +1189,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 
 	saved_thread = current_thread;
 
-	current_thread = find_thread_ptid (ptid);
+	switch_to_thread (ptid);
 
 	regp = current_target_desc ()->expedite_regs;
 

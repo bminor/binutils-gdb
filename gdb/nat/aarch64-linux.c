@@ -84,6 +84,14 @@ aarch64_linux_new_thread (struct lwp_info *lwp)
   lwp_set_arch_private_info (lwp, info);
 }
 
+/* See nat/aarch64-linux.h.  */
+
+void
+aarch64_linux_delete_thread (struct arch_lwp_info *arch_lwp)
+{
+  xfree (arch_lwp);
+}
+
 /* Convert native siginfo FROM to the siginfo in the layout of the
    inferior's architecture TO.  */
 

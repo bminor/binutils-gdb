@@ -76,6 +76,7 @@ struct inferior;
 #include "record.h"
 #include "command.h"
 #include "disasm.h"
+#include "tracepoint.h"
 
 #include "break-common.h" /* For enum target_hw_bp_type.  */
 
@@ -235,18 +236,6 @@ enum target_xfer_status
 extern const char *
   target_xfer_status_to_string (enum target_xfer_status status);
 
-/* Enumeration of the kinds of traceframe searches that a target may
-   be able to perform.  */
-
-enum trace_find_type
-  {
-    tfind_number,
-    tfind_pc,
-    tfind_tp,
-    tfind_range,
-    tfind_outside,
-  };
-
 typedef struct static_tracepoint_marker *static_tracepoint_marker_p;
 DEF_VEC_P(static_tracepoint_marker_p);
 
@@ -287,22 +276,31 @@ extern LONGEST target_read (struct target_ops *ops,
 			    ULONGEST offset, LONGEST len);
 
 struct memory_read_result
+{
+  memory_read_result (ULONGEST begin_, ULONGEST end_,
+		      gdb::unique_xmalloc_ptr<gdb_byte> &&data_)
+    : begin (begin_),
+      end (end_),
+      data (std::move (data_))
   {
-    /* First address that was read.  */
-    ULONGEST begin;
-    /* Past-the-end address.  */
-    ULONGEST end;
-    /* The data.  */
-    gdb_byte *data;
+  }
+
+  ~memory_read_result () = default;
+
+  memory_read_result (memory_read_result &&other) = default;
+
+  DISABLE_COPY_AND_ASSIGN (memory_read_result);
+
+  /* First address that was read.  */
+  ULONGEST begin;
+  /* Past-the-end address.  */
+  ULONGEST end;
+  /* The data.  */
+  gdb::unique_xmalloc_ptr<gdb_byte> data;
 };
-typedef struct memory_read_result memory_read_result_s;
-DEF_VEC_O(memory_read_result_s);
 
-extern void free_memory_read_result_vector (void *);
-
-extern VEC(memory_read_result_s)* read_memory_robust (struct target_ops *ops,
-						      const ULONGEST offset,
-						      const LONGEST len);
+extern std::vector<memory_read_result> read_memory_robust
+    (struct target_ops *ops, const ULONGEST offset, const LONGEST len);
 
 /* Request that OPS transfer up to LEN addressable units from BUF to the
    target's OBJECT.  When writing to a memory object, the addressable unit
@@ -643,6 +641,11 @@ struct target_ops
     const char *(*to_extra_thread_info) (struct target_ops *, struct thread_info *)
       TARGET_DEFAULT_RETURN (NULL);
     const char *(*to_thread_name) (struct target_ops *, struct thread_info *)
+      TARGET_DEFAULT_RETURN (NULL);
+    struct thread_info *(*to_thread_handle_to_thread_info) (struct target_ops *,
+                                                            const gdb_byte *,
+							    int,
+							    struct inferior *inf)
       TARGET_DEFAULT_RETURN (NULL);
     void (*to_stop) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
@@ -1102,8 +1105,8 @@ struct target_ops
        traceframe's contents.  This method should not cache data;
        higher layers take care of caching, invalidating, and
        re-fetching when necessary.  */
-    struct traceframe_info *(*to_traceframe_info) (struct target_ops *)
-	TARGET_DEFAULT_NORETURN (tcomplain ());
+    traceframe_info_up (*to_traceframe_info) (struct target_ops *)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Ask the target to use or not to use agent according to USE.  Return 1
        successful, 0 otherwise.  */
@@ -1371,10 +1374,10 @@ extern void target_resume (ptid_t ptid, int step, enum gdb_signal signal);
    coalesce multiple resumption requests in a single vCont packet.  */
 extern void target_commit_resume ();
 
-/* Setup to defer target_commit_resume calls, and return a cleanup
-   that reactivates target_commit_resume, if it was previously
+/* Setup to defer target_commit_resume calls, and reactivate
+   target_commit_resume on destruction, if it was previously
    active.  */
-struct cleanup *make_cleanup_defer_target_commit_resume ();
+extern scoped_restore_tmpl<int> make_scoped_defer_target_commit_resume ();
 
 /* For target_read_memory see target/target.h.  */
 
@@ -1533,40 +1536,10 @@ extern int target_remove_breakpoint (struct gdbarch *gdbarch,
 				     struct bp_target_info *bp_tgt,
 				     enum remove_bp_reason reason);
 
-/* Returns true if the terminal settings of the inferior are in
-   effect.  */
-
-extern int target_terminal_is_inferior (void);
-
-/* Returns true if our terminal settings are in effect.  */
-
-extern int target_terminal_is_ours (void);
-
-/* For target_terminal_init, target_terminal_inferior and
-   target_terminal_ours, see target/target.h.  */
-
-/* Put some of our terminal settings into effect, enough to get proper
-   results from our output, but do not change into or out of RAW mode
-   so that no input is discarded.  This is a no-op if terminal_ours
-   was most recently called.  This is a no-op unless called with the main
-   UI as current UI.  */
-
-extern void target_terminal_ours_for_output (void);
-
 /* Return true if the target stack has a non-default
   "to_terminal_ours" method.  */
 
 extern int target_supports_terminal_ours (void);
-
-/* Make a cleanup that restores the state of the terminal to the current
-   state.  */
-extern struct cleanup *make_cleanup_restore_target_terminal (void);
-
-/* Print useful information about our terminal status, if such a thing
-   exists.  */
-
-#define target_terminal_info(arg, from_tty) \
-     (*current_target.to_terminal_info) (&current_target, arg, from_tty)
 
 /* Kill the inferior process.   Make it go away.  */
 
@@ -1857,6 +1830,12 @@ extern const char *normal_pid_to_str (ptid_t ptid);
    The returned value must not be freed by the caller.  */
 
 extern const char *target_thread_name (struct thread_info *);
+
+/* Given a pointer to a thread library specific thread handle and
+   its length, return a pointer to the corresponding thread_info struct.  */
+
+extern struct thread_info *target_thread_handle_to_thread_info
+  (const gdb_byte *thread_handle, int handle_len, struct inferior *inf);
 
 /* Attempts to find the pathname of the executable file
    that was run to create a specified process.

@@ -774,7 +774,7 @@ gdbscm_register_command_x (SCM self)
       else
 	{
 	  cmd = add_cmd (c_smob->cmd_name, c_smob->cmd_class,
-			 NULL, c_smob->doc, cmd_list);
+			 c_smob->doc, cmd_list);
 	}
     }
   CATCH (except, RETURN_MASK_ALL)

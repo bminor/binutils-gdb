@@ -231,9 +231,6 @@
 /* Define if you have the babeltrace library. */
 #undef HAVE_LIBBABELTRACE
 
-/* Define to 1 if you have the `dl' library (-ldl). */
-#undef HAVE_LIBDL
-
 /* Define if you have the expat library. */
 #undef HAVE_LIBEXPAT
 
@@ -267,9 +264,6 @@
 /* Define to 1 if you have the <libunwind-ia64.h> header file. */
 #undef HAVE_LIBUNWIND_IA64_H
 
-/* Define to 1 if you have the `w' library (-lw). */
-#undef HAVE_LIBW
-
 /* Define to 1 if you have the <linux/perf_event.h> header file. */
 #undef HAVE_LINUX_PERF_EVENT_H
 
@@ -299,6 +293,9 @@
 
 /* Define to 1 if you have the `monstartup' function. */
 #undef HAVE_MONSTARTUP
+
+/* Define to 1 if you have the <ncursesw/ncurses.h> header file. */
+#undef HAVE_NCURSESW_NCURSES_H
 
 /* Define to 1 if you have the <ncurses.h> header file. */
 #undef HAVE_NCURSES_H
@@ -567,9 +564,6 @@
 /* Define to 1 if you have the <thread_db.h> header file. */
 #undef HAVE_THREAD_DB_H
 
-/* Define if using Solaris thread debugging. */
-#undef HAVE_THREAD_DB_LIB
-
 /* Define to 1 if you have the `ttrace' function. */
 #undef HAVE_TTRACE
 
@@ -666,10 +660,6 @@
 
 /* Define to 1 if the "%ll" format works to print long longs. */
 #undef PRINTF_HAS_LONG_LONG
-
-/* Define if <proc_service.h> on solaris uses int instead of size_t, and
-   assorted other type changes. */
-#undef PROC_SERVICE_IS_OLD
 
 /* Define to the type of arg 1 for ptrace. */
 #undef PTRACE_TYPE_ARG1
@@ -809,10 +799,6 @@
 
 /* Define to 1 if on MINIX. */
 #undef _MINIX
-
-/* Define to 1 to avoid a clash between <widec.h> and <wchar.h> on Solaris
-   2.[789] when using GCC. */
-#undef _MSE_INT_H
 
 /* Define to 2 if the system does not provide POSIX.1 features except with
    this defined. */

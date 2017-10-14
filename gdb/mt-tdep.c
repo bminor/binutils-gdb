@@ -36,6 +36,7 @@
 #include "infcall.h"
 #include "language.h"
 #include "valprint.h"
+#include "common/byte-vector.h"
 
 enum mt_arch_constants
 {
@@ -849,21 +850,17 @@ mt_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Next, the rest of the arguments go onto the stack, in reverse order.  */
   for (j = nargs - 1; j >= i; j--)
     {
-      gdb_byte *val;
-      struct cleanup *back_to;
       const gdb_byte *contents = value_contents (args[j]);
       
       /* Right-justify the value in an aligned-length buffer.  */
       typelen = TYPE_LENGTH (value_type (args[j]));
       slacklen = (wordsize - (typelen % wordsize)) % wordsize;
-      val = (gdb_byte *) xmalloc (typelen + slacklen);
-      back_to = make_cleanup (xfree, val);
-      memcpy (val, contents, typelen);
-      memset (val + typelen, 0, slacklen);
+      gdb::byte_vector val (typelen + slacklen);
+      memcpy (val.data (), contents, typelen);
+      memset (val.data () + typelen, 0, slacklen);
       /* Now write this data to the stack.  */
       stack_dest -= typelen + slacklen;
-      write_memory (stack_dest, val, typelen + slacklen);
-      do_cleanups (back_to);
+      write_memory (stack_dest, val.data (), typelen + slacklen);
     }
 
   /* Finally, if a param needs to be split between registers and stack, 

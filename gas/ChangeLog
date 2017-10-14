@@ -1,3 +1,109 @@
+2017-10-12  James Bowman  <james.bowman@ftdichip.com>
+
+	* config/tc-ft32.c (md_assemble): Replace FT32_FLD_K8 with
+	K15.
+	(md_apply_fix, tc_gen_reloc): Add BFD_RELOC_FT32_15.
+
+2017-10-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 21977
+	* listing.c (listing_newline): Use the name of the current
+	physical input file, rather than the current logical input file,
+	unless including high level source in the listing.
+	* input-scrub.c (as_where_physical): New function.  Returns the
+	name of the current physical input file.
+	* as.h: Add prototype for as_where_physical.
+
+2017-10-09  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* testsuite/gas/s390/zarch-arch12.d (prno, tpei, irbm): New
+	instructions added.
+	* testsuite/gas/s390/zarch-arch12.s: Likewise.
+	* testsuite/gas/s390/zarch-z13.d: Rename ppno to prno.
+
+2017-10-09  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+        * testsuite/gas/all/fill-1.s: Replace nop with .word 42
+
+2017-10-09  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+        * read.c (s_fill): Invoke expression instead of
+        get_known_segmented_expression.
+        * testsuite/gas/all/fill-1.s: New testcase.
+        * testsuite/gas/all/gas.exp: Run fill-1 testcase
+
+2017-10-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 22133
+	* config/tc-msp430.c (parse_exp): Skip an 'h' suffix to constant
+	expressions.
+	(msp430_srcoperand): Check that the entire text was parsed by
+	parse_exp.
+	(msp430_operands): Likewise.
+	* testsuite/gas/msp430/pr22133.s: New test file.
+	* testsuite/gas/msp430/pr22133.d: New test driver.
+	* testsuite/gas/msp430/pr22133.s: Expected error output.
+	* testsuite/gas/msp430/msp430.exp: Run the new test.
+
+2017-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/21167
+	* testsuite/gas/elf/elf.exp: Run group3.
+	* testsuite/gas/elf/group3.d: New file.
+	* testsuite/gas/elf/group3.s: Likewise.
+
+2017-10-05  Alan Modra  <amodra@gmail.com>
+
+	PR 21167
+	* config/obj-elf.c (struct group_list): Delete elt_count.
+	(groups): New static.
+	(build_group_lists): Don't count elements.
+	(elf_adjust_symtab): Use "groups" rather than auto "list".  Set up
+	pointer from group member to SHT_GROUP section.  Don't size
+	SHT_GROUP section or clean up here..
+	(elf_frob_file_after_relocs): ..do so here instead.
+	* testsuite/gas/arc/jli-1.d,
+	* testsuite/gas/elf/groupautob.d,
+	* testsuite/gas/mips/compact-eh-eb-2.d,
+	* testsuite/gas/mips/compact-eh-eb-5.d,
+	* testsuite/gas/mips/compact-eh-el-2.d,
+	* testsuite/gas/mips/compact-eh-el-5.d: Adjust.
+
+2017-10-01  Alexander Fedotov  <alfedotov@gmail.com>
+
+	* testsuite/gas/ppc/vle-mult-ld-st-insns.s: New file: Tests the
+	support for the VLE multiple load/store instructions.
+	* testsuite/gas/ppc/vle-mult-ld-st-insns.d: New file: Test
+	driver.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2017-09-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 22179
+	* testsuite/gas/riscv/fmv.x.s: New file: Tests the support for the
+	renamed fmv.x.s and fmv.s.x instructions.
+	* testsuite/gas/riscv/fmv.x.d: New file: Test driver.
+
+2017-09-21  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/gas/mips/elf_mach_5900.d: New test.
+	* testsuite/gas/mips/mips.exp: Run it.
+
+2017-09-21  James Cowgill  <James.Cowgill@imgtec.com>
+
+	PR gas/21762
+	* config/tc-mips.c (s_mips_stab): Insert call to
+	file_mips_check_options.
+	* testsuite/gas/mips/micromips@stabs-symbol-type.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+	* testsuite/gas/mips/mips16@stabs-symbol-type.d: New test.
+	* testsuite/gas/mips/stabs-symbol-type.d: New test.
+	* testsuite/gas/mips/stabs-symbol-type.s: New test source.
+
+2017-09-21  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.h (EH_FRAME_ALIGNMENT): Define.
+
 2017-09-14  Alan Modra  <amodra@gmail.com>
 
 	PR 22127

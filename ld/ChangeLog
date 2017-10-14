@@ -1,3 +1,241 @@
+2017-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22269
+	* testsuite/ld-cris/weakhiddso.d: Update and remove R_CRIS_NONE.
+
+2017-10-13  Alan Modra  <amodra@gmail.com>
+
+	PR ld/22263
+	* testsuite/ld-elf/tls.exp: Link with -z text.
+	* testsuite/ld-elf/pr22263-1.rd: Test for tprel relocs.
+
+2017-10-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22263
+	* testsuite/ld-elf/pr22263-1.rd: New file.
+	* testsuite/ld-elf/pr22263-1a.c: Likewise.
+	* testsuite/ld-elf/pr22263-1b.c: Likewise.
+	* testsuite/ld-elf/tls.exp: Likewise.
+
+2017-10-12  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-aarch64/pcrel_pic_defined.d: Expect errors not
+	warnings.  Expect errors about unsupported relocations.
+	* testsuite/ld-aarch64/pcrel_pic_undefined.d: Likewise.
+
+2017-10-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr22269b.d: Expect warning of
+	"-z dynamic-undefined-weak ignored".
+	* testsuite/ld-i386/pr19636-1j.d: Likewise.
+	* testsuite/ld-i386/pr19636-1k.d: Likewise.
+	* testsuite/ld-i386/pr19636-1l.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2j.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2k.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2l.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2m.d: Likewise.
+
+2017-10-12  Alan Modra  <amodra@gmail.com>
+
+	PR 22269
+	* emultempl/elf32.em (after_parse): Warn on --no-dynamic-linker
+	-z dynamic-undefined-weak combination.  Set dynamic_undefined_weak
+	to zero when nointerp.
+
+2017-10-12  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (before_allocation): Call
+	elf_backend_hide_symbol, not _bfd_elf_link_hash_hide_symbol.
+	Formatting.
+
+2017-10-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* PR ld/22269
+	* testsuite/ld-elf/pr22269.s: New file.
+	* testsuite/ld-elf/pr22269a.d: Likewise.
+	* testsuite/ld-elf/pr22269b.d: Likewise.
+
+2017-10-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run pr19636-1j, pr19636-1k,
+	pr19636-1l, pr19636-3h and pr19636-3i.
+	* testsuite/ld-i386/pr19636-1j.d: New file.
+	* testsuite/ld-i386/pr19636-1k.d: Likewise.
+	* testsuite/ld-i386/pr19636-1l.d: Likewise.
+	* testsuite/ld-i386/pr19636-3h.d: Likewise.
+	* testsuite/ld-i386/pr19636-3i.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1h.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1i.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1j.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2j.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2k.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2l.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2m.d: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr19636-1h, pr19636-1i,
+	pr19636-1j, pr19636-2j, pr19636-2k, pr19636-2l and pr19636-2m.
+
+2017-10-11  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/aarch64elf.em: Wrap einfo strings in _().  Formatting.
+	* emultempl/aix.em: Likewise.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/armelf.em: Likewise.
+	* emultempl/avrelf.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/cr16elf.em: Likewise.
+	* emultempl/elf-generic.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/genelf.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/lnk960.em: Likewise.
+	* emultempl/m68hc1xelf.em: Likewise.
+	* emultempl/m68kcoff.em: Likewise.
+	* emultempl/m68kelf.em: Likewise.
+	* emultempl/metagelf.em: Likewise.
+	* emultempl/mipself.em: Likewise.
+	* emultempl/mmix-elfnmmo.em: Likewise.
+	* emultempl/mmo.em: Likewise.
+	* emultempl/msp430.em: Likewise.
+	* emultempl/nds32elf.em: Likewise.
+	* emultempl/nios2elf.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/ppc32elf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/riscvelf.em: Likewise.
+	* emultempl/s390.em: Likewise.
+	* emultempl/scoreelf.em: Likewise.
+	* emultempl/spuelf.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/tic6xdsbt.em: Likewise.
+	* emultempl/v850elf.em: Likewise.
+	* emultempl/vms.em: Likewise.
+	* emultempl/vxworks.em: Likewise.
+	* ldcref.c: Likewise.
+	* ldlang.c: Likewise.
+	* ldlex.l: Likewise.
+	* ldmain.c: Likewise.
+	* pe-dll.c: Likewise.
+	* plugin.c: Likewise.
+
+2017-10-10  Renlin Li  <renlin.li@arm.com>
+
+	PR ld/21402
+	* testsuite/ld-arm/tls-app.d: Update address.
+	* testsuite/ld-arm/tls-app.r: Remove relocations.
+	* testsuite/ld-arm/unresolved-1-dyn.d: Update.
+
+2017-10-10  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (earmelfb_fuchsia.c): Rename rule from earmelf_fuchsia.c.
+	* Makefile.in: Regenerate.
+
+2017-10-09  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-srec/srec.exp (run_srec_test): Set start address.
+
+	PR ld/19874
+	* testsuite/ld-x86-64/pr19784c.c (bar): Change return type to void.
+
+2017-10-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22267
+	* ldlex.l (SYMBOLNAMECHAR1) New.
+	(DEFSYMEXP): Replace FILENAMECHAR1 with SYMBOLNAMECHAR1.
+	(EXPRESSION): Likewise.
+	* testsuite/ld-scripts/expr.exp: Run pr22267.
+	* testsuite/ld-scripts/pr22267.d: New file.
+	* testsuite/ld-scripts/pr22267.s: Likewise.
+	* testsuite/ld-scripts/pr22267.t: Likewise.
+
+2017-10-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/merge.d: Don't expect to fail for sparc.
+
+2017-10-05  Nick Clifton  <nickc@redhat.com>
+
+	* po/tr.po: Updated Turkish translation.
+
+2017-10-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 22262
+	* testsuite/ld-powerpc/relocsort.d: Update expected output (for
+	longer reloc names).
+
+2017-10-05  Alan Modra  <amodra@gmail.com>
+
+	PR 21167
+	* testsuite/ld-elf/group9b.d: Adjust for relocs included in group.
+
+2017-10-03  Alan Modra  <amodra@gmail.com>
+
+	PR 21294
+	* NEWS: Note that defaulting to -z relro results in increased
+	memory and disk size.
+
+2017-10-03  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (-z relro): Expand description.
+	(DATA_SEGMENT_ALIGN): Note that -z relro is not effective when
+	running with system page size larger than commonpagesize.
+	(DATA_SEGMENT_RELRO_END): Be explicit about the alignment.
+
+2017-10-01  Alan Modra  <amodra@gmail.com>
+
+	PR 21970
+	* ldlang.c (lang_leave_overlay): Reset overlay_subalign.
+
+2017-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/21978
+	* testsuite/ld-elf/pr21978.od: New file.
+	* testsuite/ld-elf/pr21978a.c: Likewise.
+	* testsuite/ld-elf/pr21978b.c: Likewise.
+	* testsuite/ld-elf/shared.exp: Run PR binutils/21978 test.
+
+2017-09-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 14918
+	* testsuite/ld-plugin/lto.exp (link_elf_tests): Skip the pr14918
+	test for ARM targets as they always link with libgcc.
+
+2017-09-28  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-plugin/pr22220.h,
+	* testsuite/ld-plugin/pr22220lib.cc,
+	* testsuite/ld-plugin/pr22220lib.ver,
+	* testsuite/ld-plugin/pr22220main.cc: New test.
+	* testsuite/ld-plugin/lto.exp: Run it.
+
+2017-09-26  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-undefined/undefined.exp: Correct the dyn reloc
+	test for MIPS and S+core targets.
+
+2017-09-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22150
+	* testsuite/ld-elf/pr22150.vd: New file.
+	* testsuite/ld-elf/pr22150.ver: Likewise.
+	* testsuite/ld-elf/pr22150a.s: Likewise.
+	* testsuite/ld-elf/pr22150b.s: Likewise.
+	* testsuite/ld-elf/shared.exp: Run PR ld/22150 tests.
+
+2017-09-21  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/tlsopt5.wf: Update for reduced alignment.
+
+2017-09-19  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* configure.tgt <mips64el-*-openbsd*, mips64-*-openbsd*>: New
+	targets.
+
+2017-09-15  Alan Modra  <amodra@gmail.com>
+
+	PR 22118
+	* testsuite/ld-aarch64/erratum843419.d: Correct regexp.
+
 2017-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22139

@@ -1469,14 +1469,13 @@ basic_type (int bt, struct objfile *objfile)
 
     case btFloatDec:
       tp = init_type (objfile, TYPE_CODE_ERROR,
-		      gdbarch_double_bit (gdbarch) / TARGET_CHAR_BIT,
-		      "floating decimal");
+		      gdbarch_double_bit (gdbarch), "floating decimal");
       break;
 
     case btString:
       /* Is a "string" the way btString means it the same as TYPE_CODE_STRING?
 	 FIXME.  */
-      tp = init_type (objfile, TYPE_CODE_STRING, 1, "string");
+      tp = init_type (objfile, TYPE_CODE_STRING, TARGET_CHAR_BIT, "string");
       break;
 
     case btVoid:
@@ -2658,8 +2657,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       pst = start_psymtab_common (objfile,
 				  fdr_name (fh),
 				  textlow,
-				  objfile->global_psymbols.next,
-				  objfile->static_psymbols.next);
+				  objfile->global_psymbols,
+				  objfile->static_psymbols);
       pst->read_symtab_private = obstack_alloc (&objfile->objfile_obstack,
 						sizeof (struct symloc));
       memset (pst->read_symtab_private, 0, sizeof (struct symloc));

@@ -37,7 +37,6 @@
 #include "value.h"
 #include "symfile.h"
 #include "arch-utils.h"
-#include "floatformat.h"
 #include "infcall.h"
 #include "regset.h"
 #include "target-descriptions.h"

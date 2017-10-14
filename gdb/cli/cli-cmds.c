@@ -66,19 +66,7 @@ static void echo_command (char *, int);
 
 static void pwd_command (char *, int);
 
-static void show_version (char *, int);
-
 static void help_command (char *, int);
-
-static void show_command (char *, int);
-
-static void info_command (char *, int);
-
-static void show_debug (char *, int);
-
-static void set_debug (char *, int);
-
-static void show_user (char *, int);
 
 static void make_command (char *, int);
 
@@ -89,6 +77,8 @@ static void edit_command (char *, int);
 static void list_command (char *, int);
 
 /* Prototypes for local utility functions */
+
+static void print_sal_location (const symtab_and_line &sal);
 
 static void ambiguous_line_spec (gdb::array_view<const symtab_and_line> sals,
 				 const char *format, ...)
@@ -220,7 +210,7 @@ error_no_arg (const char *why)
    args.  */
 
 static void
-info_command (char *arg, int from_tty)
+info_command (const char *arg, int from_tty)
 {
   printf_unfiltered (_("\"info\" must be followed by "
 		       "the name of an info command.\n"));
@@ -230,10 +220,19 @@ info_command (char *arg, int from_tty)
 /* The "show" command with no arguments shows all the settings.  */
 
 static void
+show_command (const char *arg, int from_tty)
+{
+  cmd_show_list (showlist, from_tty, "");
+}
+
+/* A temporary non-const overload of show_command.  */
+
+static void
 show_command (char *arg, int from_tty)
 {
   cmd_show_list (showlist, from_tty, "");
 }
+
 
 /* Provide documentation on command or list given by COMMAND.  FROM_TTY
    is ignored.  */
@@ -298,6 +297,7 @@ complete_command (char *arg_entry, int from_tty)
     {
       return;
     }
+  END_CATCH
 
   std::string arg_prefix (arg, word - arg);
 
@@ -341,14 +341,14 @@ is_complete_command (struct cmd_list_element *c)
 }
 
 static void
-show_version (char *args, int from_tty)
+show_version (const char *args, int from_tty)
 {
   print_gdb_version (gdb_stdout);
   printf_filtered ("\n");
 }
 
 static void
-show_configuration (char *args, int from_tty)
+show_configuration (const char *args, int from_tty)
 {
   print_gdb_configuration (gdb_stdout);
 }
@@ -382,19 +382,22 @@ pwd_command (char *args, int from_tty)
 {
   if (args)
     error (_("The \"pwd\" command does not take an argument: %s"), args);
-  if (! getcwd (gdb_dirbuf, sizeof (gdb_dirbuf)))
+
+  gdb::unique_xmalloc_ptr<char> cwd (getcwd (NULL, 0));
+
+  if (cwd == NULL)
     error (_("Error finding name of working directory: %s"),
            safe_strerror (errno));
 
-  if (strcmp (gdb_dirbuf, current_directory) != 0)
+  if (strcmp (cwd.get (), current_directory) != 0)
     printf_unfiltered (_("Working directory %s\n (canonically %s).\n"),
-		       current_directory, gdb_dirbuf);
+		       current_directory, cwd.get ());
   else
     printf_unfiltered (_("Working directory %s.\n"), current_directory);
 }
 
 void
-cd_command (char *dir, int from_tty)
+cd_command (const char *dir, int from_tty)
 {
   int len;
   /* Found something other than leading repetitions of "/..".  */
@@ -416,7 +419,8 @@ cd_command (char *dir, int from_tty)
   /* There's too much mess with DOSish names like "d:", "d:.",
      "d:./foo" etc.  Instead of having lots of special #ifdef'ed code,
      simply get the canonicalized name of the current directory.  */
-  dir = getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
+  gdb::unique_xmalloc_ptr<char> cwd (getcwd (NULL, 0));
+  dir = cwd.get ();
 #endif
 
   len = strlen (dir);
@@ -434,7 +438,10 @@ cd_command (char *dir, int from_tty)
 
   dir_holder.reset (savestring (dir, len));
   if (IS_ABSOLUTE_PATH (dir_holder.get ()))
-    current_directory = dir_holder.release ();
+    {
+      xfree (current_directory);
+      current_directory = dir_holder.release ();
+    }
   else
     {
       if (IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1]))
@@ -636,9 +643,9 @@ source_script (const char *file, int from_tty)
 }
 
 static void
-source_command (char *args, int from_tty)
+source_command (const char *args, int from_tty)
 {
-  char *file = args;
+  const char *file = args;
   int search_path = 0;
 
   scoped_restore save_source_verbose = make_scoped_restore (&source_verbose);
@@ -809,7 +816,7 @@ edit_command (char *arg, int from_tty)
     }
   else
     {
-      char *arg1;
+      const char *arg1;
 
       /* Now should only be one argument -- decode it in SAL.  */
       arg1 = arg;
@@ -887,7 +894,7 @@ static void
 list_command (char *arg, int from_tty)
 {
   struct symbol *sym;
-  char *arg1;
+  const char *arg1;
   int no_end = 1;
   int dummy_end = 0;
   int dummy_beg = 0;
@@ -1094,11 +1101,7 @@ list_command (char *arg, int from_tty)
 	  if (first_line < 1)
 	    first_line = 1;
 	  if (sals.size () > 1)
-	    {
-	      printf_filtered (_("file: \"%s\", line number: %d\n"),
-			       symtab_to_filename_for_display (sal.symtab),
-			       sal.line);
-	    }
+	    print_sal_location (sal);
 	  print_source_lines (sal.symtab,
 			      first_line,
 			      first_line + get_lines_to_list (),
@@ -1305,7 +1308,7 @@ make_command (char *arg, int from_tty)
 }
 
 static void
-show_user (char *args, int from_tty)
+show_user (const char *args, int from_tty)
 {
   struct cmd_list_element *c;
   extern struct cmd_list_element *cmdlist;
@@ -1516,6 +1519,23 @@ alias_command (char *args, int from_tty)
     }
 }
 
+/* Print the file / line number / symbol name of the location
+   specified by SAL.  */
+
+static void
+print_sal_location (const symtab_and_line &sal)
+{
+  scoped_restore_current_program_space restore_pspace;
+  set_current_program_space (sal.pspace);
+
+  const char *sym_name = NULL;
+  if (sal.symbol != NULL)
+    sym_name = SYMBOL_PRINT_NAME (sal.symbol);
+  printf_filtered (_("file: \"%s\", line number: %d, symbol: \"%s\"\n"),
+		   symtab_to_filename_for_display (sal.symtab),
+		   sal.line, sym_name != NULL ? sym_name : "???");
+}
+
 /* Print a list of files and line numbers which a user may choose from
    in order to list a function which was specified ambiguously (as
    with `list classname::overloadedfuncname', for example).  The SALS
@@ -1533,9 +1553,7 @@ ambiguous_line_spec (gdb::array_view<const symtab_and_line> sals,
   va_end (ap);
 
   for (const auto &sal : sals)
-    printf_filtered (_("file: \"%s\", line number: %d\n"),
-		     symtab_to_filename_for_display (sal.symtab),
-		     sal.line);
+    print_sal_location (sal);
 }
 
 /* Comparison function for filter_sals.  Returns a qsort-style
@@ -1599,7 +1617,7 @@ filter_sals (std::vector<symtab_and_line> &sals)
 }
 
 static void
-set_debug (char *arg, int from_tty)
+set_debug (const char *arg, int from_tty)
 {
   printf_unfiltered (_("\"set debug\" must be followed by "
 		       "the name of a debug subcommand.\n"));
@@ -1607,7 +1625,7 @@ set_debug (char *arg, int from_tty)
 }
 
 static void
-show_debug (char *args, int from_tty)
+show_debug (const char *args, int from_tty)
 {
   cmd_show_list (showdebuglist, from_tty, "");
 }
@@ -1673,28 +1691,28 @@ _initialize_cli_cmds (void)
   /* Define the classes of commands.
      They will appear in the help list in alphabetical order.  */
 
-  add_cmd ("internals", class_maintenance, NULL, _("\
+  add_cmd ("internals", class_maintenance, _("\
 Maintenance commands.\n\
 Some gdb commands are provided just for use by gdb maintainers.\n\
 These commands are subject to frequent change, and may not be as\n\
 well documented as user commands."),
 	   &cmdlist);
-  add_cmd ("obscure", class_obscure, NULL, _("Obscure features."), &cmdlist);
-  add_cmd ("aliases", class_alias, NULL,
+  add_cmd ("obscure", class_obscure, _("Obscure features."), &cmdlist);
+  add_cmd ("aliases", class_alias,
 	   _("Aliases of other commands."), &cmdlist);
-  add_cmd ("user-defined", class_user, NULL, _("\
+  add_cmd ("user-defined", class_user, _("\
 User-defined commands.\n\
 The commands in this class are those defined by the user.\n\
 Use the \"define\" command to define a command."), &cmdlist);
-  add_cmd ("support", class_support, NULL, _("Support facilities."), &cmdlist);
+  add_cmd ("support", class_support, _("Support facilities."), &cmdlist);
   if (!dbx_commands)
-    add_cmd ("status", class_info, NULL, _("Status inquiries."), &cmdlist);
-  add_cmd ("files", class_files, NULL, _("Specifying and examining files."),
+    add_cmd ("status", class_info, _("Status inquiries."), &cmdlist);
+  add_cmd ("files", class_files, _("Specifying and examining files."),
 	   &cmdlist);
-  add_cmd ("breakpoints", class_breakpoint, NULL,
+  add_cmd ("breakpoints", class_breakpoint,
 	   _("Making program stop at certain points."), &cmdlist);
-  add_cmd ("data", class_vars, NULL, _("Examining data."), &cmdlist);
-  add_cmd ("stack", class_stack, NULL, _("\
+  add_cmd ("data", class_vars, _("Examining data."), &cmdlist);
+  add_cmd ("stack", class_stack, _("\
 Examining the stack.\n\
 The stack is made up of stack frames.  Gdb assigns numbers to stack frames\n\
 counting from zero for the innermost (currently executing) frame.\n\n\
@@ -1703,7 +1721,7 @@ Variable lookups are done with respect to the selected frame.\n\
 When the program being debugged stops, gdb selects the innermost frame.\n\
 The commands below can be used to select other frames by number or address."),
 	   &cmdlist);
-  add_cmd ("running", class_run, NULL, _("Running the program."), &cmdlist);
+  add_cmd ("running", class_run, _("Running the program."), &cmdlist);
 
   /* Define general commands.  */
 
@@ -1711,9 +1729,11 @@ The commands below can be used to select other frames by number or address."),
 Print working directory.  This is used for your program as well."));
 
   c = add_cmd ("cd", class_files, cd_command, _("\
-Set working directory to DIR for debugger and program being debugged.\n\
-The change does not take effect for the program being debugged\n\
-until the next time it is started."), &cmdlist);
+Set working directory to DIR for debugger.\n\
+The debugger's current working directory specifies where scripts and other\n\
+files that can be loaded by GDB are located.\n\
+In order to change the inferior's current working directory, the recommended\n\
+way is to use the \"set cwd\" command."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   add_com ("echo", class_support, echo_command, _("\

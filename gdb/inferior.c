@@ -596,7 +596,7 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
 }
 
 static void
-detach_inferior_command (char *args, int from_tty)
+detach_inferior_command (const char *args, int from_tty)
 {
   struct thread_info *tp;
 
@@ -635,7 +635,7 @@ detach_inferior_command (char *args, int from_tty)
 }
 
 static void
-kill_inferior_command (char *args, int from_tty)
+kill_inferior_command (const char *args, int from_tty)
 {
   struct thread_info *tp;
 
@@ -676,7 +676,7 @@ kill_inferior_command (char *args, int from_tty)
 }
 
 static void
-inferior_command (char *args, int from_tty)
+inferior_command (const char *args, int from_tty)
 {
   struct inferior *inf;
   int num;

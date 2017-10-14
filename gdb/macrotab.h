@@ -230,9 +230,9 @@ void macro_define_special (struct macro_table *table);
    path.  e.g., `stdio.h', not `/usr/include/stdio.h'.  If NAME
    appears more than once in the inclusion tree, return the
    least-nested inclusion --- the one closest to the main source file.  */
-struct macro_source_file *(macro_lookup_inclusion
-                           (struct macro_source_file *source,
-                            const char *name));
+struct macro_source_file *macro_lookup_inclusion
+                          (struct macro_source_file *source,
+                           const char *name);
 
 
 /* Record an object-like #definition (i.e., one with no parameter list).
@@ -315,9 +315,9 @@ struct macro_definition
    effect at the end of the file.  The macro table owns the structure;
    the caller need not free it.  Return zero if NAME is not #defined
    at that point.  */
-struct macro_definition *(macro_lookup_definition
-                          (struct macro_source_file *source,
-                           int line, const char *name));
+struct macro_definition *macro_lookup_definition
+                         (struct macro_source_file *source,
+                          int line, const char *name);
 
 
 /* Return the source location of the definition for NAME in scope at
@@ -325,11 +325,11 @@ struct macro_definition *(macro_lookup_definition
    number of the definition, and return a source file structure for
    the file.  Return zero if NAME has no definition in scope at that
    point, and leave *DEFINITION_LINE unchanged.  */
-struct macro_source_file *(macro_definition_location
-                           (struct macro_source_file *source,
-                            int line,
-                            const char *name,
-                            int *definition_line));
+struct macro_source_file *macro_definition_location
+                          (struct macro_source_file *source,
+                           int line,
+                           const char *name,
+                           int *definition_line);
 
 /* Prototype for a callback callable when walking a macro table.  NAME
    is the name of the macro, and DEFINITION is the definition.  SOURCE

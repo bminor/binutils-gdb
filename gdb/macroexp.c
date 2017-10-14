@@ -946,6 +946,30 @@ find_parameter (const struct macro_buffer *tok,
   return -1;
 }
  
+/* Helper function for substitute_args that gets the next token and
+   updates the passed-in state variables.  */
+
+static void
+get_next_token_for_substitution (struct macro_buffer *replacement_list,
+				 struct macro_buffer *token,
+				 char **start,
+				 struct macro_buffer *lookahead,
+				 char **lookahead_start,
+				 int *lookahead_valid,
+				 bool *keep_going)
+{
+  if (!*lookahead_valid)
+    *keep_going = false;
+  else
+    {
+      *keep_going = true;
+      *token = *lookahead;
+      *start = *lookahead_start;
+      *lookahead_start = replacement_list->text;
+      *lookahead_valid = get_token (lookahead, replacement_list);
+    }
+}
+
 /* Given the macro definition DEF, being invoked with the actual
    arguments given by ARGC and ARGV, substitute the arguments into the
    replacement list, and store the result in DEST.
@@ -996,8 +1020,64 @@ substitute_args (struct macro_buffer *dest,
   lookahead_rl_start = replacement_list.text;
   lookahead_valid = get_token (&lookahead, &replacement_list);
 
-  for (;;)
+  /* __VA_OPT__ state variable.  The states are:
+     0 - nothing happening
+     1 - saw __VA_OPT__
+     >= 2 in __VA_OPT__, the value encodes the parenthesis depth.  */
+  unsigned vaopt_state = 0;
+
+  for (bool keep_going = true;
+       keep_going;
+       get_next_token_for_substitution (&replacement_list,
+					&tok,
+					&original_rl_start,
+					&lookahead,
+					&lookahead_rl_start,
+					&lookahead_valid,
+					&keep_going))
     {
+      bool token_is_vaopt = (tok.len == 10
+			     && strncmp (tok.text, "__VA_OPT__", 10) == 0);
+
+      if (vaopt_state > 0)
+	{
+	  if (token_is_vaopt)
+	    error (_("__VA_OPT__ cannot appear inside __VA_OPT__"));
+	  else if (tok.len == 1 && tok.text[0] == '(')
+	    {
+	      ++vaopt_state;
+	      /* We just entered __VA_OPT__, so don't emit this
+		 token.  */
+	      continue;
+	    }
+	  else if (vaopt_state == 1)
+	    error (_("__VA_OPT__ must be followed by an open parenthesis"));
+	  else if (tok.len == 1 && tok.text[0] == ')')
+	    {
+	      --vaopt_state;
+	      if (vaopt_state == 1)
+		{
+		  /* Done with __VA_OPT__.  */
+		  vaopt_state = 0;
+		  /* Don't emit.  */
+		  continue;
+		}
+	    }
+
+	  /* If __VA_ARGS__ is empty, then drop the contents of
+	     __VA_OPT__.  */
+	  if (argv[argc - 1].len == 0)
+	    continue;
+	}
+      else if (token_is_vaopt)
+	{
+	  if (!is_varargs)
+	    error (_("__VA_OPT__ is only valid in a variadic macro"));
+	  vaopt_state = 1;
+	  /* Don't emit this token.  */
+	  continue;
+	}
+
       /* Just for aesthetics.  If we skipped some whitespace, copy
          that to DEST.  */
       if (tok.text > original_rl_start)
@@ -1157,16 +1237,10 @@ substitute_args (struct macro_buffer *dest,
 	  if (! substituted)
 	    append_tokens_without_splicing (dest, &tok);
 	}
-
-      if (! lookahead_valid)
-	break;
-
-      tok = lookahead;
-      original_rl_start = lookahead_rl_start;
-
-      lookahead_rl_start = replacement_list.text;
-      lookahead_valid = get_token (&lookahead, &replacement_list);
     }
+
+  if (vaopt_state > 0)
+    error (_("Unterminated __VA_OPT__"));
 }
 
 

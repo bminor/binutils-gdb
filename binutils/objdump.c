@@ -1484,8 +1484,8 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
     return;
 
   if (! bfd_find_nearest_line_discriminator (abfd, section, syms, addr_offset,
-                                             &filename, &functionname,
-                                             &linenumber, &discriminator))
+					     &filename, &functionname,
+					     &linenumber, &discriminator))
     return;
 
   if (filename != NULL && *filename == '\0')
@@ -1537,16 +1537,22 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
       if (functionname != NULL
 	  && (prev_functionname == NULL
 	      || strcmp (functionname, prev_functionname) != 0))
-	printf ("%s():\n", functionname);
-      if (linenumber > 0 && (linenumber != prev_line ||
-                             (discriminator != prev_discriminator)))
-        {
-          if (discriminator > 0)
-            printf ("%s:%u (discriminator %u)\n", filename == NULL ? "???" : filename,
-                    linenumber, discriminator);
-          else
-            printf ("%s:%u\n", filename == NULL ? "???" : filename, linenumber);
-        }
+	{
+	  printf ("%s():\n", functionname);
+	  prev_line = -1;
+	}
+      if (linenumber > 0
+	  && (linenumber != prev_line
+	      || discriminator != prev_discriminator))
+	{
+	  if (discriminator > 0)
+	    printf ("%s:%u (discriminator %u)\n",
+		    filename == NULL ? "???" : filename,
+		    linenumber, discriminator);
+	  else
+	    printf ("%s:%u\n", filename == NULL ? "???" : filename,
+		    linenumber);
+	}
       if (unwind_inlines)
 	{
 	  const char *filename2;
@@ -2459,6 +2465,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 {
   struct dwarf_section *section = &debug_displays [debug].section;
   bfd *abfd = (bfd *) file;
+  bfd_byte *contents;
   bfd_boolean ret;
 
   /* If it is already loaded, do nothing.  */
@@ -2469,17 +2476,18 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   section->num_relocs = 0;
   section->address = bfd_get_section_vma (abfd, sec);
   section->size = bfd_get_section_size (sec);
-  section->start = NULL;
+  section->start = contents = malloc (section->size + 1);
   section->user_data = sec;
-  ret = bfd_get_full_section_contents (abfd, sec, &section->start);
-
-  if (! ret)
+  if (section->start == NULL
+      || !bfd_get_full_section_contents (abfd, sec, &contents))
     {
       free_debug_section (debug);
       printf (_("\nCan't get contents for section '%s'.\n"),
 	      section->name);
       return 0;
     }
+  /* Ensure any string section has a terminating NUL.  */
+  section->start[section->size] = 0;
 
   if (is_relocatable && debug_displays [debug].relocate)
     {

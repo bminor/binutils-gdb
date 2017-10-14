@@ -127,7 +127,7 @@ typedef std::unique_ptr<event_location, event_location_deleter>
 
 /* Create a new linespec location.  */
 
-extern event_location_up new_linespec_location (char **linespec);
+extern event_location_up new_linespec_location (const char **linespec);
 
 /* Return the linespec location (a string) of the given event_location
    (which must be of type LINESPEC_LOCATION).  */
@@ -208,14 +208,14 @@ extern event_location_up
    legacy specifications of probe, address, and linespec locations.  */
 
 extern event_location_up
-  string_to_event_location (char **argp,
+  string_to_event_location (const char **argp,
 			    const struct language_defn *langauge);
 
 /* Like string_to_event_location, but does not attempt to parse explicit
    locations.  */
 
 extern event_location_up
-  string_to_event_location_basic (char **argp,
+  string_to_event_location_basic (const char **argp,
 				  const struct language_defn *language);
 
 /* Structure filled in by string_to_explicit_location to aid the

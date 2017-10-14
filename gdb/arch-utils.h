@@ -73,18 +73,6 @@ struct bp_manipulation_endian
   bp_manipulation_endian<sizeof (BREAK_INSN_LITTLE),		  \
   BREAK_INSN_LITTLE, BREAK_INSN_BIG>
 
-/* An implementation of gdbarch_displaced_step_copy_insn for
-   processors that don't need to modify the instruction before
-   single-stepping the displaced copy.
-
-   Simply copy gdbarch_max_insn_length (ARCH) bytes from FROM to TO.
-   The closure is an array of that many bytes containing the
-   instruction's bytes, allocated with xmalloc.  */
-extern struct displaced_step_closure *
-  simple_displaced_step_copy_insn (struct gdbarch *gdbarch,
-                                   CORE_ADDR from, CORE_ADDR to,
-                                   struct regcache *regs);
-
 /* Default implementation of gdbarch_displaced_hw_singlestep.  */
 extern int
   default_displaced_step_hw_singlestep (struct gdbarch *,

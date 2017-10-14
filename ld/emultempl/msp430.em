@@ -7,7 +7,7 @@ fragment <<EOF
    Copyright (C) 2014-2017 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
    Extended for the MSP430 by Nick Clifton  nickc@redhat.com
-   
+
    This file is part of the GNU Binutils.
 
    This program is free software; you can redistribute it and/or modify
@@ -168,7 +168,7 @@ data_statement_size (lang_data_statement_type *d)
       size = BYTE_SIZE;
       break;
     default:
-      einfo ("%P: error: unhandled data_statement size\n");
+      einfo (_("%P: error: unhandled data_statement size\n"));
       FAIL ();
     }
   return size;
@@ -197,7 +197,7 @@ scan_children (lang_statement_union_type * l)
 	  break;
 
 	case lang_wild_statement_enum:
-	  amount += scan_children (l->wild_statement.children.head);	  
+	  amount += scan_children (l->wild_statement.children.head);
 	  break;
 
 	case lang_data_statement_enum:
@@ -214,7 +214,7 @@ scan_children (lang_statement_union_type * l)
 
   return amount;
 }
-  
+
 /* Place an orphan section.  We use this to put .either sections
    into either their lower or their upper equivalents.  */
 
@@ -258,7 +258,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
     }
   else
     name = (char *) secname;
-  
+
   lower_name = concat (".lower", name, NULL);
   upper_name = concat (".upper", name, NULL);
 
@@ -268,7 +268,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
 
   if (lower == NULL && upper == NULL)
     {
-      einfo ("%P: error: no section named %s or %s in linker script\n",
+      einfo (_("%P: error: no section named %s or %s in linker script\n"),
 	     lower_name, upper_name);
       goto end;
     }
@@ -277,7 +277,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
       lower = lang_output_section_find (name);
       if (lower == NULL)
 	{
-	  einfo ("%P: error: no section named %s in linker script\n", name);
+	  einfo (_("%P: error: no section named %s in linker script\n"), name);
 	  goto end;
 	}
     }
@@ -403,7 +403,7 @@ add_region_prefix (bfd *abfd, asection *s,
 	  move_prefixed_section (s, new_input_sec_name, upper);
 	}
       else
-	einfo ("%P: error: no section named %s in linker script\n",
+	einfo (_("%P: error: no section named %s in linker script\n"),
 	       new_output_sec_name);
       break;
     case REGION_LOWER:
@@ -416,7 +416,7 @@ add_region_prefix (bfd *abfd, asection *s,
 	  move_prefixed_section (s, new_input_sec_name, lower);
 	}
       else
-	einfo ("%P: error: no section named %s in linker script\n",
+	einfo (_("%P: error: no section named %s in linker script\n"),
 	       new_output_sec_name);
       break;
     case REGION_EITHER:

@@ -1,5 +1,5 @@
 # Copyright (C) 2014-2017 Free Software Foundation, Inc.
-# 
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
@@ -22,14 +22,14 @@ MEMORY
 	ramblk1 : ORIGIN = 0x02027000, LENGTH = 0x1000
 }
 
-SECTIONS 				
-{ 					
+SECTIONS
+{
 	.vectors 0x00000000 :
 	{
 		*(vectors)
 	}
 
-	.text : 
+	.text :
 	{
 		*(.text)
 	} > rom

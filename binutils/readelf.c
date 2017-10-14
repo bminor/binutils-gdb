@@ -321,6 +321,30 @@ static const char * get_symbol_version_string
     }						\
   while (0)
 
+/* Print a BFD_VMA to an internal buffer, for use in error messages.
+   BFD_FMA_FMT can't be used in translated strings.  */
+
+static const char *
+bfd_vmatoa (char *fmtch, bfd_vma value)
+{
+  /* bfd_vmatoa is used more then once in a printf call for output.
+     Cycle through an array of buffers.  */
+  static int buf_pos = 0;
+  static struct bfd_vmatoa_buf
+  {
+    char place[64];
+  } buf[4];
+  char *ret;
+  char fmt[32];
+
+  ret = buf[buf_pos++].place;
+  buf_pos %= ARRAY_SIZE (buf);
+
+  sprintf (fmt, "%%%s%s", BFD_VMA_FMT, fmtch);
+  snprintf (ret, sizeof (buf[0].place), fmt, value);
+  return ret;
+}
+
 /* Retrieve NMEMB structures, each SIZE bytes long from FILE starting at OFFSET +
    the offset of the current archive member, if we are examining an archive.
    Put the retrieved data into VAR, if it is not NULL.  Otherwise allocate a buffer
@@ -347,9 +371,9 @@ get_data (void * var, FILE * file, unsigned long offset, bfd_size_type size,
 	  || (bfd_size_type) ((size_t) nmemb) != nmemb))
     {
       if (reason)
-	error (_("Size truncation prevents reading 0x%" BFD_VMA_FMT "x"
-		 " elements of size 0x%" BFD_VMA_FMT "x for %s\n"),
-	       nmemb, size, reason);
+	error (_("Size truncation prevents reading %s"
+		 " elements of size %s for %s\n"),
+	       bfd_vmatoa ("u", nmemb), bfd_vmatoa ("u", size), reason);
       return NULL;
     }
 
@@ -357,9 +381,9 @@ get_data (void * var, FILE * file, unsigned long offset, bfd_size_type size,
   if (amt < nmemb)
     {
       if (reason)
-	error (_("Size overflow prevents reading 0x%" BFD_VMA_FMT "x"
-		 " elements of size 0x%" BFD_VMA_FMT "x for %s\n"),
-	       nmemb, size, reason);
+	error (_("Size overflow prevents reading %s"
+		 " elements of size %s for %s\n"),
+	       bfd_vmatoa ("u", nmemb), bfd_vmatoa ("u", size), reason);
       return NULL;
     }
 
@@ -369,9 +393,8 @@ get_data (void * var, FILE * file, unsigned long offset, bfd_size_type size,
       || offset + archive_file_offset + amt > current_file_size)
     {
       if (reason)
-	error (_("Reading 0x%" BFD_VMA_FMT "x"
-		 " bytes extends past end of file for %s\n"),
-	       amt, reason);
+	error (_("Reading %s bytes extends past end of file for %s\n"),
+	       bfd_vmatoa ("u", amt), reason);
       return NULL;
     }
 
@@ -394,9 +417,8 @@ get_data (void * var, FILE * file, unsigned long offset, bfd_size_type size,
       if (mvar == NULL)
 	{
 	  if (reason)
-	    error (_("Out of memory allocating 0x%" BFD_VMA_FMT "x"
-		     " bytes for %s\n"),
-		   amt, reason);
+	    error (_("Out of memory allocating %s bytes for %s\n"),
+		   bfd_vmatoa ("u", amt), reason);
 	  return NULL;
 	}
 
@@ -406,8 +428,8 @@ get_data (void * var, FILE * file, unsigned long offset, bfd_size_type size,
   if (fread (mvar, (size_t) size, (size_t) nmemb, file) != nmemb)
     {
       if (reason)
-	error (_("Unable to read in 0x%" BFD_VMA_FMT "x bytes of %s\n"),
-	       amt, reason);
+	error (_("Unable to read in %s bytes of %s\n"),
+	       bfd_vmatoa ("u", amt), reason);
       if (mvar != var)
 	free (mvar);
       return NULL;
@@ -1520,7 +1542,7 @@ dump_relocations (FILE * file,
       if (rtype == NULL)
 	printf (_("unrecognized: %-7lx"), (unsigned long) type & 0xffffffff);
       else
-	printf (do_wide ? "%-22.22s" : "%-17.17s", rtype);
+	printf (do_wide ? "%-22s" : "%-17.17s", rtype);
 
       if (elf_header.e_machine == EM_ALPHA
 	  && rtype != NULL
@@ -3325,6 +3347,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case E_MIPS_MACH_4650: strcat (buf, ", 4650"); break;
 	    case E_MIPS_MACH_5400: strcat (buf, ", 5400"); break;
 	    case E_MIPS_MACH_5500: strcat (buf, ", 5500"); break;
+	    case E_MIPS_MACH_5900: strcat (buf, ", 5900"); break;
 	    case E_MIPS_MACH_SB1:  strcat (buf, ", sb1");  break;
 	    case E_MIPS_MACH_9000: strcat (buf, ", 9000"); break;
   	    case E_MIPS_MACH_LS2E: strcat (buf, ", loongson-2e"); break;
@@ -8708,7 +8731,7 @@ decode_arm_unwind (struct arm_unw_aux_info *  aux,
   unsigned int more_words = 0;
   struct absaddr addr;
   bfd_vma sym_name = (bfd_vma) -1;
-  bfd_boolean res = FALSE;
+  bfd_boolean res = TRUE;
 
   if (remaining == 0)
     {
@@ -10956,9 +10979,8 @@ get_dynamic_data (FILE * file, bfd_size_type number, unsigned int ent_size)
   if (sizeof (size_t) < sizeof (bfd_size_type)
       && (bfd_size_type) ((size_t) number) != number)
     {
-      error (_("Size truncation prevents reading %" BFD_VMA_FMT "u"
-	       " elements of size %u\n"),
-	     number, ent_size);
+      error (_("Size truncation prevents reading %s elements of size %u\n"),
+	     bfd_vmatoa ("u", number), ent_size);
       return NULL;
     }
 
@@ -10966,23 +10988,23 @@ get_dynamic_data (FILE * file, bfd_size_type number, unsigned int ent_size)
      attempting to allocate memory when the read is bound to fail.  */
   if (ent_size * number > current_file_size)
     {
-      error (_("Invalid number of dynamic entries: %" BFD_VMA_FMT "u\n"),
-	     number);
+      error (_("Invalid number of dynamic entries: %s\n"),
+	     bfd_vmatoa ("u", number));
       return NULL;
     }
 
   e_data = (unsigned char *) cmalloc ((size_t) number, ent_size);
   if (e_data == NULL)
     {
-      error (_("Out of memory reading %" BFD_VMA_FMT "u dynamic entries\n"),
-	     number);
+      error (_("Out of memory reading %s dynamic entries\n"),
+	     bfd_vmatoa ("u", number));
       return NULL;
     }
 
   if (fread (e_data, ent_size, (size_t) number, file) != number)
     {
-      error (_("Unable to read in %" BFD_VMA_FMT "u bytes of dynamic data\n"),
-	     number * ent_size);
+      error (_("Unable to read in %s bytes of dynamic data\n"),
+	     bfd_vmatoa ("u", number * ent_size));
       free (e_data);
       return NULL;
     }
@@ -10990,9 +11012,8 @@ get_dynamic_data (FILE * file, bfd_size_type number, unsigned int ent_size)
   i_data = (bfd_vma *) cmalloc ((size_t) number, sizeof (*i_data));
   if (i_data == NULL)
     {
-      error (_("Out of memory allocating space for %" BFD_VMA_FMT "u"
-	       " dynamic entries\n"),
-	     number);
+      error (_("Out of memory allocating space for %s dynamic entries\n"),
+	     bfd_vmatoa ("u", number));
       free (e_data);
       return NULL;
     }
@@ -11415,6 +11436,7 @@ process_symbol_table (FILE * file)
       if (dynamic_info[DT_HASH])
 	{
 	  bfd_vma si;
+	  char *visited;
 
 	  printf (_("\nSymbol table for image:\n"));
 	  if (is_32bit_elf)
@@ -11422,14 +11444,22 @@ process_symbol_table (FILE * file)
 	  else
 	    printf (_("  Num Buc:    Value          Size   Type   Bind Vis      Ndx Name\n"));
 
+	  visited = xcmalloc (nchains, 1);
+	  memset (visited, 0, nchains);
 	  for (hn = 0; hn < nbuckets; hn++)
 	    {
-	      if (! buckets[hn])
-		continue;
-
-	      for (si = buckets[hn]; si < nchains && si > 0; si = chains[si])
-		print_dynamic_symbol (si, hn);
+	      for (si = buckets[hn]; si > 0; si = chains[si])
+		{
+		  print_dynamic_symbol (si, hn);
+		  if (si >= nchains || visited[si])
+		    {
+		      error (_("histogram chain is corrupt\n"));
+		      break;
+		    }
+		  visited[si] = 1;
+		}
 	    }
+	  free (visited);
 	}
 
       if (dynamic_info_DT_GNU_HASH)
@@ -11588,7 +11618,7 @@ process_symbol_table (FILE * file)
       unsigned long maxlength = 0;
       unsigned long nzero_counts = 0;
       unsigned long nsyms = 0;
-      unsigned long chained;
+      char *visited;
 
       printf (_("\nHistogram for bucket list length (total of %lu buckets):\n"),
 	      (unsigned long) nbuckets);
@@ -11599,28 +11629,26 @@ process_symbol_table (FILE * file)
 	  error (_("Out of memory allocating space for histogram buckets\n"));
 	  return FALSE;
 	}
+      visited = xcmalloc (nchains, 1);
+      memset (visited, 0, nchains);
 
       printf (_(" Length  Number     %% of total  Coverage\n"));
       for (hn = 0; hn < nbuckets; ++hn)
 	{
-	  for (si = buckets[hn], chained = 0;
-	       si > 0 && si < nchains && si < nbuckets && chained <= nchains;
-	       si = chains[si], ++chained)
+	  for (si = buckets[hn]; si > 0; si = chains[si])
 	    {
 	      ++nsyms;
 	      if (maxlength < ++lengths[hn])
 		++maxlength;
+	      if (si >= nchains || visited[si])
+		{
+		  error (_("histogram chain is corrupt\n"));
+		  break;
+		}
+	      visited[si] = 1;
 	    }
-
-	    /* PR binutils/17531: A corrupt binary could contain broken
-	       histogram data.  Do not go into an infinite loop trying
-	       to process it.  */
-	    if (chained > nchains)
-	      {
-		error (_("histogram chain is corrupt\n"));
-		break;
-	      }
 	}
+      free (visited);
 
       counts = (unsigned long *) calloc (maxlength + 1, sizeof (*counts));
       if (counts == NULL)

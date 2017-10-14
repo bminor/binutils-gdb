@@ -1018,6 +1018,21 @@ extern void value_incref (struct value *val);
 
 extern void value_free (struct value *val);
 
+/* A free policy class to interface std::unique_ptr with
+   value_free.  */
+
+struct value_deleter
+{
+  void operator() (struct value *value) const
+  {
+    value_free (value);
+  }
+};
+
+/* A unique pointer to a struct value.  */
+
+typedef std::unique_ptr<struct value, value_deleter> gdb_value_up;
+
 extern void free_all_values (void);
 
 extern void free_value_chain (struct value *v);

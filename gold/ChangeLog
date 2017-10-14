@@ -1,3 +1,42 @@
+2017-09-26  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/22213
+	* sparc.cc (Target_sparc): Fix incorrect register mask.
+
+2017-09-22  Jim Wilson  <jim.wilson@linaro.org>
+
+	* aarch64.cc (Target_aarch64::aarch64_info): Set
+	is_default_stack_executable to false.
+
+2017-09-22  Alan Modra  <amodra@gmail.com>
+
+	* resolve.cc (clone): Fix got_offset_list test.
+
+2017-09-22  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc<64,*>::powerpc_info): Set
+	is_default_stack_executable false.
+
+2017-09-20  Teresa Johnson  <tejohnson@google.com>
+
+	* plugin.cc (is_visible_from_outside): Check for export dynamic symbol
+        option and list.
+	* testsuite/Makefile.am (plugin_test_12): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/export_dynamic_plugin.cc: New test source.
+	* testsuite/plugin_test_12.sh: New test script.
+
+2017-09-20  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Branch_info::make_stub): Put
+	stubs for ppc32 non-branch relocs in first stub table.
+	(Target_powerpc::Relocate::relocate): Resolve similarly.
+
+2017-09-19  Alan Modra  <amodra@gmail.com>
+
+	* options.h (stub-group-multi): Default to true.  Add
+	--no-stub-group-multi.
+
 2017-08-30  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Relocate::relocate): Nop addis on

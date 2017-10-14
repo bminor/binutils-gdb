@@ -86,7 +86,7 @@ ppc_create_output_section_statements (void)
 			     bfd_get_arch (link_info.output_bfd),
 			     bfd_get_mach (link_info.output_bfd)))
     {
-      einfo ("%F%P: can not create BFD: %E\n");
+      einfo (_("%F%P: can not create BFD: %E\n"));
       return;
     }
 
@@ -96,7 +96,7 @@ ppc_create_output_section_statements (void)
   if (params.save_restore_funcs < 0)
     params.save_restore_funcs = !bfd_link_relocatable (&link_info);
   if (!ppc64_elf_init_stub_bfd (&link_info, &params))
-    einfo ("%F%P: can not init BFD: %E\n");
+    einfo (_("%F%P: can not init BFD: %E\n"));
 }
 
 /* Called after opening files but before mapping sections.  */
@@ -280,7 +280,7 @@ ppc_before_allocation (void)
     {
       if (!no_opd_opt
 	  && !ppc64_elf_edit_opd (&link_info))
-	einfo ("%X%P: can not edit %s: %E\n", "opd");
+	einfo (_("%X%P: can not edit %s: %E\n"), "opd");
 
       if (ppc64_elf_tls_setup (&link_info)
 	  && !no_tls_opt)
@@ -290,7 +290,7 @@ ppc_before_allocation (void)
 	  prelim_size_sections ();
 
 	  if (!ppc64_elf_tls_optimize (&link_info))
-	    einfo ("%X%P: TLS problem %E\n");
+	    einfo (_("%X%P: TLS problem %E\n"));
 	}
 
       if (!no_toc_opt
@@ -299,7 +299,7 @@ ppc_before_allocation (void)
 	  prelim_size_sections ();
 
 	  if (!ppc64_elf_edit_toc (&link_info))
-	    einfo ("%X%P: can not edit %s: %E\n", "toc");
+	    einfo (_("%X%P: can not edit %s: %E\n"), "toc");
 	}
 
       if (!no_toc_sort)
@@ -429,7 +429,7 @@ ppc_add_stub_section (const char *stub_sec_name, asection *input_section)
     return stub_sec;
 
  err_ret:
-  einfo ("%X%P: can not make stub section: %E\n");
+  einfo (_("%X%P: can not make stub section: %E\n"));
   return NULL;
 }
 
@@ -463,7 +463,7 @@ build_toc_list (lang_statement_union_type *statement)
 	  && i->output_section == toc_section)
 	{
 	  if (!ppc64_elf_next_toc_section (&link_info, i))
-	    einfo ("%X%P: linker script separates .got and .toc\n");
+	    einfo (_("%X%P: linker script separates .got and .toc\n"));
 	}
     }
 }
@@ -482,7 +482,7 @@ build_section_lists (lang_statement_union_type *statement)
 	  && i->output_section->owner == link_info.output_bfd)
 	{
 	  if (!ppc64_elf_next_input_section (&link_info, i))
-	    einfo ("%X%P: can not size stub section: %E\n");
+	    einfo (_("%X%P: can not size stub section: %E\n"));
 	}
     }
 }
@@ -501,7 +501,7 @@ gld${EMULATION_NAME}_after_allocation (void)
     {
       ret = ppc64_elf_setup_section_lists (&link_info);
       if (ret < 0)
-	einfo ("%X%P: can not size stub section: %E\n");
+	einfo (_("%X%P: can not size stub section: %E\n"));
       else
 	{
 	  ppc64_elf_start_multitoc_partition (&link_info);
@@ -524,11 +524,11 @@ gld${EMULATION_NAME}_after_allocation (void)
 	  lang_for_each_statement (build_section_lists);
 
 	  if (!ppc64_elf_check_init_fini (&link_info))
-	    einfo ("%P: .init/.fini fragments use differing TOC pointers\n");
+	    einfo (_("%P: .init/.fini fragments use differing TOC pointers\n"));
 
 	  /* Call into the BFD backend to do the real work.  */
 	  if (!ppc64_elf_size_stubs (&link_info))
-	    einfo ("%X%P: can not size stub section: %E\n");
+	    einfo (_("%X%P: can not size stub section: %E\n"));
 	}
     }
 
@@ -539,7 +539,7 @@ gld${EMULATION_NAME}_after_allocation (void)
   ret = bfd_elf_discard_info (link_info.output_bfd, &link_info);
   if (ret < 0)
     {
-      einfo ("%X%P: .eh_frame/.stab edit: %E\n");
+      einfo (_("%X%P: .eh_frame/.stab edit: %E\n"));
       return;
     }
   else if (ret > 0)
@@ -578,7 +578,7 @@ gld${EMULATION_NAME}_finish (void)
   if (stub_file != NULL
       && !bfd_link_relocatable (&link_info)
       && !ppc64_elf_build_stubs (&link_info, config.stats ? &msg : NULL))
-    einfo ("%X%P: can not build stubs: %E\n");
+    einfo (_("%X%P: can not build stubs: %E\n"));
 
   fflush (stdout);
   for (line = msg; line != NULL; line = endline)
@@ -826,8 +826,8 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
     case OPTION_STUBGROUP_SIZE:
       {
 	const char *end;
-        params.group_size = bfd_scan_vma (optarg, &end, 0);
-        if (*end)
+	params.group_size = bfd_scan_vma (optarg, &end, 0);
+	if (*end)
 	  einfo (_("%P%F: invalid number `%s'\''\n"), optarg);
       }
       break;

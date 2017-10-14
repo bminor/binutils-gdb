@@ -163,8 +163,7 @@ struct jit_reader
     functions->destroy (functions);
   }
 
-  jit_reader (const jit_reader &) = delete;
-  jit_reader &operator= (const jit_reader &) = delete;
+  DISABLE_COPY_AND_ASSIGN (jit_reader);
 
   struct gdb_reader_funcs *functions;
   gdb_dlhandle_up handle;
@@ -698,7 +697,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       struct symbol *block_name = allocate_symbol (objfile);
       struct type *block_type = arch_type (get_objfile_arch (objfile),
 					   TYPE_CODE_VOID,
-					   1,
+					   TARGET_CHAR_BIT,
 					   "void");
 
       BLOCK_DICT (new_block) = dict_create_linear (&objfile->objfile_obstack,
@@ -802,8 +801,8 @@ jit_object_close_impl (struct gdb_symbol_callbacks *cb,
 
   priv_data = (jit_dbg_reader_data *) cb->priv_data;
 
-  objfile = allocate_objfile (NULL, "<< JIT compiled code >>",
-			      OBJF_NOT_FILENAME);
+  objfile = new struct objfile (NULL, "<< JIT compiled code >>",
+				OBJF_NOT_FILENAME);
   objfile->per_bfd->gdbarch = target_gdbarch ();
 
   terminate_minimal_symbol_table (objfile);
@@ -984,7 +983,7 @@ jit_register_code (struct gdbarch *gdbarch,
 static void
 jit_unregister_code (struct objfile *objfile)
 {
-  free_objfile (objfile);
+  delete objfile;
 }
 
 /* Look up the objfile with this code entry address.  */
@@ -1168,7 +1167,7 @@ jit_dealloc_cache (struct frame_info *this_frame, void *cache)
   struct jit_unwind_private *priv_data = (struct jit_unwind_private *) cache;
 
   gdb_assert (priv_data->regcache != NULL);
-  regcache_xfree (priv_data->regcache);
+  delete priv_data->regcache;
   xfree (priv_data);
 }
 
@@ -1206,7 +1205,7 @@ jit_frame_sniffer (const struct frame_unwind *self,
 
   *cache = XCNEW (struct jit_unwind_private);
   priv_data = (struct jit_unwind_private *) *cache;
-  priv_data->regcache = regcache_xmalloc (gdbarch, aspace);
+  priv_data->regcache = new regcache (gdbarch, aspace);
   priv_data->this_frame = this_frame;
 
   callbacks.priv_data = priv_data;

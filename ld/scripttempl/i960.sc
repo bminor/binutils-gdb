@@ -1,5 +1,5 @@
 # Copyright (C) 2014-2017 Free Software Foundation, Inc.
-# 
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
@@ -12,26 +12,26 @@ cat <<EOF
    notice and this notice are preserved.  */
 
 SECTIONS
-{ 
-    .text : 
-    { 
+{
+    .text :
+    {
 	${GLD_STYLE+ CREATE_OBJECT_SYMBOLS}
-	*(.text) 
+	*(.text)
 	${RELOCATING+ _etext = .};
 	${CONSTRUCTING+${COFF_CTORS}}
-    }  
+    }
     .data :
-    { 
- 	*(.data) 
+    {
+	*(.data)
 	${CONSTRUCTING+CONSTRUCTORS}
 	${RELOCATING+ _edata = .};
-    }  
+    }
     .bss :
-    { 
+    {
 	${RELOCATING+ _bss_start = .};
-	*(.bss)	 
-	*(COMMON) 
+	*(.bss)
+	*(COMMON)
 	${RELOCATING+ _end = .};
-    } 
-} 
+    }
+}
 EOF

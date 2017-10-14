@@ -1,5 +1,5 @@
 # Copyright (C) 2014-2017 Free Software Foundation, Inc.
-# 
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
@@ -61,7 +61,7 @@ SECTIONS
 	  *(.rodata)
 	  *(.text)
 	  *(.strings)
-   	  ${RELOCATING+ _etext = . ; }
+	  ${RELOCATING+ _etext = . ; }
 	} ${RELOCATING+ > ram}
 
 ${CONSTRUCTING+${TORS}}

@@ -147,6 +147,19 @@ static reloc_howto_type ft32_elf_howto_table [] =
 	 0x0003ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
+  HOWTO (R_FT32_15,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 15,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FT32_15",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0x00000000,		/* src_mask */
+	 0x00007fff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 };
 
 /* Map BFD reloc types to FT32 ELF reloc types.  */
@@ -167,6 +180,7 @@ static const struct ft32_reloc_map ft32_reloc_map [] =
   { BFD_RELOC_FT32_20,           R_FT32_20 },
   { BFD_RELOC_FT32_17,           R_FT32_17 },
   { BFD_RELOC_FT32_18,           R_FT32_18 },
+  { BFD_RELOC_FT32_15,          R_FT32_15 },
 };
 
 static reloc_howto_type *

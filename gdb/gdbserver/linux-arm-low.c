@@ -467,9 +467,8 @@ struct update_registers_data
 };
 
 static int
-update_registers_callback (struct inferior_list_entry *entry, void *arg)
+update_registers_callback (thread_info *thread, void *arg)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
   struct update_registers_data *data = (struct update_registers_data *) arg;
 
@@ -640,6 +639,14 @@ arm_new_process (void)
   return info;
 }
 
+/* Called when a process is being deleted.  */
+
+static void
+arm_delete_process (struct arch_process_info *info)
+{
+  xfree (info);
+}
+
 /* Called when a new thread is detected.  */
 static void
 arm_new_thread (struct lwp_info *lwp)
@@ -653,6 +660,14 @@ arm_new_thread (struct lwp_info *lwp)
     info->wpts_changed[i] = 1;
 
   lwp->arch_private = info;
+}
+
+/* Function to call when a thread is being deleted.  */
+
+static void
+arm_delete_thread (struct arch_lwp_info *arch_lwp)
+{
+  xfree (arch_lwp);
 }
 
 static void
@@ -691,7 +706,7 @@ arm_new_fork (struct process_info *parent, struct process_info *child)
 
   /* Mark all the hardware breakpoints and watchpoints as changed to
      make sure that the registers will be updated.  */
-  child_lwp = find_lwp_pid (ptid_of (child));
+  child_lwp = find_lwp_pid (ptid_t (child->pid));
   child_lwp_info = child_lwp->arch_private;
   for (i = 0; i < MAX_BPTS; i++)
     child_lwp_info->bpts_changed[i] = 1;
@@ -1052,7 +1067,9 @@ struct linux_target_ops the_low_target = {
   NULL, /* supply_ptrace_register */
   NULL, /* siginfo_fixup */
   arm_new_process,
+  arm_delete_process,
   arm_new_thread,
+  arm_delete_thread,
   arm_new_fork,
   arm_prepare_to_resume,
   NULL, /* process_qsupported */

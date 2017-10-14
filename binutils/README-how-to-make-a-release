@@ -1,0 +1,125 @@
+		README for MAKING BINUTILS RELEASES
+	
+This is a collection of notes on how to perform a binutils release.  A
+lot of this information can also be found in the maintain.texi file in
+the gnulib project:
+
+  https://www.gnu.org/software/gnulib/
+
+It is useful to have a cloned copy of the sources of this project as
+it also contains an upload script used to install tarballs on the GNU
+FTP server.
+
+Make sure that you have upload authority on sourceware and fencepost.
+Beware - this is an involved process and can take weeks to complete.
+See the maintain.texi file for details on how to obtain these
+permissions.
+
+-------------------------------------------------
+How to perform a release.
+-------------------------------------------------
+
+xxx -- fill in stuff here -- xxx
+
+-------------------------------------------------
+How to perform a point release.
+-------------------------------------------------
+
+A point release is easier than a normal release since a lot of the
+work has already been done.  The branch has been created, the
+translations updated and the documentation uploaded.  So the procedure
+looks like this:
+
+  0. Decide that a point release is necessary.
+
+     Usually this only happens when a sufficient number of serious
+     bugs have been found and fixed since the previous release, and a
+     new official release is not imminent.
+
+  1. Tell the community that a point release is happening.  Ask
+     maintainers to ensure that their ports are up to date on the
+     release branch.  Ask the community if there are any bug fixes
+     which are missing from the branch.  Allow some time for the
+     responses to this step.
+
+  2. Make sure that the branch sources build, test and install
+     correctly.
+
+  3. In the branch sources:
+  
+       a. Update the minor release number in bfd/version.m4.
+       b. Edit bfd/development.sh and set "development=false".
+       c. Regenerate the configure files.
+       d. Commit the updates along with a "this-is-the-2.XX.X-release"
+          note in all of the changelogs.
+       e. Tag the branch with the new release number:
+
+            git tag -a binutils-2_XX_X
+	      [optional: add "-u XXXXX" to sign with a gpg key]
+	    git push origin binutils-2_XX_X
+
+       f. Create the release tarballs:
+            ./src-release -b -g -l -x binutils
+       g. Edit bfd/development.sh and set "development=true".
+       h. Commit this change into the git repository.
+       i. Clean up the source tree.  (Use "git status" to find new
+           files, and remove them).
+
+     FIXME: The tarballs will contain spurious autom4te.cache
+     directories which could be removed to reduce their size.
+
+  4. [If paranoid - upload the tarballs to one of the FTP servers and
+      ask people to test it before going on to step 5].
+      
+  5. Upload the tarballs to ftp.gnu.org.
+
+       gnupload --to ftp.gnu.org:binutils binutils-X.XX.X.tar.*
+
+     The gnupload script is in the gnulib/build-aux directory.
+
+  6. Upload the tarballs to sourceware.org:
+
+       sftp sourceware.org
+         cd /ftp/pub/binutils/releases
+ 	 put binutils-X.XX.X.tar.*
+ 	 chmod 644 binutils-X.XX.X.tar.*
+	 quit
+
+    FIXME: Should the signatures (created by the gnupload script in
+    step 5) be uploaded as well ?
+
+  7. Update web pages.  For sourceware.org:
+
+      * Log on to sourceware.org
+      * Go /www/htdocs/binutils
+      * Edit index.html
+
+      For the www.gnu.org site you have to email webmasters@gnu.org
+      and ask them to make the change(s).
+
+  8. Send an emails to the binutils list, info-gnu@gnu.org and
+     David Edelsohn <dje.gcc@gmail.com> announcing the new release.
+     (The email to Davis is so that he can update the GNU Toolchain
+     social media).  Something like this:
+------------------------------------------------------------------------
+Hi Everyone,
+
+  We are pleased to announce that version 2.XX.X of the Binutils project
+  sources have been released and are now available for download at:
+  
+    https://ftp.gnu.org/gnu/binutils
+    https://sourceware.org/pub/binutils/releases/
+
+  This is a point release over the previous 2.XX version, containing bug
+  fixes but no new features.
+
+  Our thanks go out to all of the binutils contributors, past and
+  present, for helping to make this release possible.
+--------------------------------------------------------------------------
+
+
+Copyright (C) 2017 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.

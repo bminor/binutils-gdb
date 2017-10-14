@@ -770,22 +770,6 @@ floatformat_from_doublest (const struct floatformat *fmt,
 }
 
 
-/* Return the floating-point format for a floating-point variable of
-   type TYPE.  */
-
-const struct floatformat *
-floatformat_from_type (const struct type *type)
-{
-  struct gdbarch *gdbarch = get_type_arch (type);
-  const struct floatformat *fmt;
-
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
-  gdb_assert (TYPE_FLOATFORMAT (type));
-  fmt = TYPE_FLOATFORMAT (type)[gdbarch_byte_order (gdbarch)];
-  gdb_assert (TYPE_LENGTH (type) >= floatformat_totalsize_bytes (fmt));
-  return fmt;
-}
-
 /* Extract a floating-point number of type TYPE from a target-order
    byte-stream at ADDR.  Returns the value as type DOUBLEST.  */
 

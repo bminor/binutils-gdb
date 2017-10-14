@@ -1708,7 +1708,7 @@ const struct probe_ops stap_probe_ops =
 /* Implementation of the `info probes stap' command.  */
 
 static void
-info_probes_stap_command (char *arg, int from_tty)
+info_probes_stap_command (const char *arg, int from_tty)
 {
   info_probes_for_ops (arg, from_tty, &stap_probe_ops);
 }

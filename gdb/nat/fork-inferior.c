@@ -25,6 +25,7 @@
 #include "common-inferior.h"
 #include "common-gdbthread.h"
 #include "signals-state-save-restore.h"
+#include "gdb_tilde_expand.h"
 #include <vector>
 
 extern char **environ;
@@ -56,9 +57,7 @@ public:
   }
 
 private:
-  /* Disable copying.  */
-  execv_argv (const execv_argv &) = delete;
-  void operator= (const execv_argv &) = delete;
+  DISABLE_COPY_AND_ASSIGN (execv_argv);
 
   /* Helper methods for constructing the argument vector.  */
 
@@ -300,6 +299,8 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
   char **save_our_env;
   int i;
   int save_errno;
+  const char *inferior_cwd;
+  std::string expanded_inferior_cwd;
 
   /* If no exec file handed to us, get it from the exec-file command
      -- with a good, common error message if none is specified.  */
@@ -341,6 +342,18 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
      the parent and child flushing the same data after the fork.  */
   gdb_flush_out_err ();
 
+  /* Check if the user wants to set a different working directory for
+     the inferior.  */
+  inferior_cwd = get_inferior_cwd ();
+
+  if (inferior_cwd != NULL)
+    {
+      /* Expand before forking because between fork and exec, the child
+	 process may only execute async-signal-safe operations.  */
+      expanded_inferior_cwd = gdb_tilde_expand (inferior_cwd);
+      inferior_cwd = expanded_inferior_cwd.c_str ();
+    }
+
   /* If there's any initialization of the target layers that must
      happen to prepare to handle the child we're about fork, do it
      now...  */
@@ -375,6 +388,14 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
 	 that this closes the file descriptors of all secondary
 	 UIs.  */
       close_most_fds ();
+
+      /* Change to the requested working directory if the user
+	 requested it.  */
+      if (inferior_cwd != NULL)
+	{
+	  if (chdir (inferior_cwd) < 0)
+	    trace_start_error_with_name (inferior_cwd);
+	}
 
       if (debug_fork)
 	sleep (debug_fork);
@@ -504,7 +525,7 @@ startup_inferior (pid_t pid, int ntraps,
 	    break;
 
 	  case TARGET_WAITKIND_SIGNALLED:
-	    target_terminal_ours ();
+	    target_terminal::ours ();
 	    target_mourn_inferior (event_ptid);
 	    error (_("During startup program terminated with signal %s, %s."),
 		   gdb_signal_to_name (ws.value.sig),
@@ -512,7 +533,7 @@ startup_inferior (pid_t pid, int ntraps,
 	    return resume_ptid;
 
 	  case TARGET_WAITKIND_EXITED:
-	    target_terminal_ours ();
+	    target_terminal::ours ();
 	    target_mourn_inferior (event_ptid);
 	    if (ws.value.integer)
 	      error (_("During startup program exited with code %d."),
@@ -551,10 +572,10 @@ startup_inferior (pid_t pid, int ntraps,
 
 	      /* Set up the "saved terminal modes" of the inferior
 	         based on what modes we are starting it with.  */
-	      target_terminal_init ();
+	      target_terminal::init ();
 
 	      /* Install inferior's terminal modes.  */
-	      target_terminal_inferior ();
+	      target_terminal::inferior ();
 
 	      terminal_initted = 1;
 	    }

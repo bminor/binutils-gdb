@@ -1171,7 +1171,7 @@ build_opencl_types (struct gdbarch *gdbarch)
   types[opencl_primitive_type_uintptr_t]
     = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 1, "uintptr_t");
   types[opencl_primitive_type_void]
-    = arch_type (gdbarch, TYPE_CODE_VOID, 1, "void");
+    = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
 
   return types;
 }

@@ -20,19 +20,7 @@
 #define INFERIORS_H
 
 #include "gdb_vecs.h"
-
-/* Generic information for tracking a list of ``inferiors'' - threads,
-   processes, etc.  */
-struct inferior_list
-{
-  struct inferior_list_entry *head;
-  struct inferior_list_entry *tail;
-};
-struct inferior_list_entry
-{
-  ptid_t id;
-  struct inferior_list_entry *next;
-};
+#include <list>
 
 struct thread_info;
 struct regcache;
@@ -45,9 +33,8 @@ struct process_info_private;
 
 struct process_info
 {
-  /* This must appear first.
-     The list iterator functions assume it.  */
-  struct inferior_list_entry entry;
+  /* This process' pid.  */
+  int pid;
 
   /* Nonzero if this child process was attached rather than
      spawned.  */
@@ -79,9 +66,13 @@ struct process_info
   struct process_info_private *priv;
 };
 
-#define ptid_of(inf) ((inf)->entry.id)
-#define pid_of(inf) ptid_get_pid ((inf)->entry.id)
-#define lwpid_of(inf) ptid_get_lwp ((inf)->entry.id)
+/* Get the pid of PROC.  */
+
+static inline int
+pid_of (const process_info *proc)
+{
+  return proc->pid;
+}
 
 /* Return a pointer to the process that corresponds to the current
    thread (current_thread).  It is an error to call this if there is
@@ -90,49 +81,49 @@ struct process_info
 struct process_info *current_process (void);
 struct process_info *get_thread_process (const struct thread_info *);
 
-extern struct inferior_list all_processes;
+extern std::list<process_info *> all_processes;
 
-void add_inferior_to_list (struct inferior_list *list,
-			   struct inferior_list_entry *new_inferior);
-void for_each_inferior (struct inferior_list *list,
-			void (*action) (struct inferior_list_entry *));
+/* Invoke FUNC for each process.  */
 
-void for_each_inferior_with_data
-  (struct inferior_list *list,
-   void (*action) (struct inferior_list_entry *, void *),
-   void *data);
+template <typename Func>
+static void
+for_each_process (Func func)
+{
+  std::list<process_info *>::iterator next, cur = all_processes.begin ();
 
-void clear_inferior_list (struct inferior_list *list);
+  while (cur != all_processes.end ())
+    {
+      next = cur;
+      next++;
+      func (*cur);
+      cur = next;
+    }
+}
 
-int one_inferior_p (struct inferior_list *list);
+/* Find the first process for which FUNC returns true.  Return NULL if no
+   process satisfying FUNC is found.  */
 
-/* Helper for ALL_INFERIORS_TYPE.  Gets the next element starting at
-   CUR, if CUR is not NULL.  */
-#define A_I_NEXT(type, list, cur)					\
-  ((cur) != NULL							\
-   ? (type *) ((struct inferior_list_entry *) cur)->next		\
-   : NULL)
+template <typename Func>
+static process_info *
+find_process (Func func)
+{
+  std::list<process_info *>::iterator next, cur = all_processes.begin ();
 
-/* Iterate over all inferiors of type TYPE in LIST, open loop
-   style.  */
-#define ALL_INFERIORS_TYPE(type, list, cur, tmp)				\
-  for ((cur) = (type *) (list)->head, (tmp) = A_I_NEXT (type, list, cur); \
-       (cur) != NULL;							\
-       (cur) = (tmp), (tmp) = A_I_NEXT (type, list, cur))
+  while (cur != all_processes.end ())
+    {
+      next = cur;
+      next++;
 
-/* Iterate over all inferiors in LIST, open loop style.  */
-#define ALL_INFERIORS(list, cur, tmp)				\
-  ALL_INFERIORS_TYPE (struct inferior_list_entry, list, cur, tmp)
+      if (func (*cur))
+        return *cur;
 
-/* Iterate over all processes, open loop style.  */
-#define ALL_PROCESSES(cur, tmp)					\
-  ALL_INFERIORS_TYPE (struct process_info, &all_processes, cur, tmp)
+      cur = next;
+    }
+
+  return NULL;
+}
 
 extern struct thread_info *current_thread;
-void remove_inferior (struct inferior_list *list,
-		      struct inferior_list_entry *entry);
-
-struct inferior_list_entry *get_first_inferior (struct inferior_list *list);
 
 /* Return the first process in the processes list.  */
 struct process_info *get_first_process (void);
@@ -143,22 +134,20 @@ struct process_info *find_process_pid (int pid);
 int have_started_inferiors_p (void);
 int have_attached_inferiors_p (void);
 
-ptid_t thread_to_gdb_id (struct thread_info *);
-ptid_t gdb_id_to_thread_id (ptid_t);
-
 void clear_inferiors (void);
-struct inferior_list_entry *find_inferior
-     (struct inferior_list *,
-      int (*func) (struct inferior_list_entry *,
-		   void *),
-      void *arg);
-struct inferior_list_entry *find_inferior_id (struct inferior_list *list,
-					      ptid_t id);
-struct inferior_list_entry *
-  find_inferior_in_random (struct inferior_list *,
-			   int (*func) (struct inferior_list_entry *,
-					void *),
-			   void *arg);
+
+thread_info *find_inferior (std::list<thread_info *> *thread_list,
+			    int (*func) (thread_info *, void *), void *arg);
+thread_info *find_inferior_id (std::list<thread_info *> *thread_list,
+			       ptid_t id);
+thread_info *find_inferior_in_random (std::list<thread_info *> *thread_list,
+				      int (*func) (thread_info *, void *),
+				      void *arg);
+void for_each_inferior (std::list<thread_info *> *thread_list,
+			void (*action) (thread_info *));
+void for_each_inferior_with_data (std::list<thread_info *> *thread_list,
+				  void (*action) (thread_info *, void *),
+				  void *data);
 
 void *thread_target_data (struct thread_info *);
 struct regcache *thread_regcache_data (struct thread_info *);

@@ -2572,7 +2572,7 @@ hppa_lookup_stub_minimal_symbol (const char *name,
 }
 
 static void
-unwind_command (char *exp, int from_tty)
+unwind_command (const char *exp, int from_tty)
 {
   CORE_ADDR address;
   struct unwind_table_entry *u;

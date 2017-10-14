@@ -36,7 +36,6 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "remote.h"
-#include "floatformat.h"
 #include "sim-regno.h"
 #include "disasm.h"
 #include "trad-frame.h"
@@ -1641,12 +1640,12 @@ is_arg_spill (struct gdbarch *gdbarch, pv_t value, pv_t addr,
 {
   return (is_arg_reg (value)
           && pv_is_register (addr, MEP_SP_REGNUM)
-          && ! pv_area_find_reg (stack, gdbarch, value.reg, 0));
+          && ! stack->find_reg (gdbarch, value.reg, 0));
 }
 
 
 /* Function for finding saved registers in a 'struct pv_area'; we pass
-   this to pv_area_scan.
+   this to pv_area::scan.
 
    If VALUE is a saved register, ADDR says it was saved at a constant
    offset from the frame base, and SIZE indicates that the whole
@@ -1676,8 +1675,6 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
   int rn;
   int found_lp = 0;
   pv_t reg[MEP_NUM_REGS];
-  struct pv_area *stack;
-  struct cleanup *back_to;
   CORE_ADDR after_last_frame_setup_insn = start_pc;
 
   memset (result, 0, sizeof (*result));
@@ -1689,8 +1686,7 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
       result->reg_offset[rn] = 1;
     }
 
-  stack = make_pv_area (MEP_SP_REGNUM, gdbarch_addr_bit (gdbarch));
-  back_to = make_cleanup_free_pv_area (stack);
+  pv_area stack (MEP_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
   pc = start_pc;
   while (pc < limit_pc)
@@ -1742,13 +1738,13 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
           /* If simulating this store would require us to forget
              everything we know about the stack frame in the name of
              accuracy, it would be better to just quit now.  */
-          if (pv_area_store_would_trash (stack, reg[rm]))
+          if (stack.store_would_trash (reg[rm]))
             break;
           
-          if (is_arg_spill (gdbarch, reg[rn], reg[rm], stack))
+          if (is_arg_spill (gdbarch, reg[rn], reg[rm], &stack))
             after_last_frame_setup_insn = next_pc;
 
-          pv_area_store (stack, reg[rm], 4, reg[rn]);
+          stack.store (reg[rm], 4, reg[rn]);
         }
       else if (IS_SW_IMMD (insn))
         {
@@ -1759,13 +1755,13 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
           /* If simulating this store would require us to forget
              everything we know about the stack frame in the name of
              accuracy, it would be better to just quit now.  */
-          if (pv_area_store_would_trash (stack, addr))
+          if (stack.store_would_trash (addr))
             break;
 
-          if (is_arg_spill (gdbarch, reg[rn], addr, stack))
+          if (is_arg_spill (gdbarch, reg[rn], addr, &stack))
             after_last_frame_setup_insn = next_pc;
 
-          pv_area_store (stack, addr, 4, reg[rn]);
+          stack.store (addr, 4, reg[rn]);
         }
       else if (IS_MOV (insn))
 	{
@@ -1787,13 +1783,13 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
                       : (gdb_assert (IS_SW (insn)), 4));
           pv_t addr = pv_add_constant (reg[rm], disp);
 
-          if (pv_area_store_would_trash (stack, addr))
+          if (stack.store_would_trash (addr))
             break;
 
-          if (is_arg_spill (gdbarch, reg[rn], addr, stack))
+          if (is_arg_spill (gdbarch, reg[rn], addr, &stack))
             after_last_frame_setup_insn = next_pc;
 
-          pv_area_store (stack, addr, size, reg[rn]);
+          stack.store (addr, size, reg[rn]);
 	}
       else if (IS_LDC (insn))
 	{
@@ -1809,7 +1805,7 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
           int offset = LW_OFFSET (insn);
           pv_t addr = pv_add_constant (reg[rm], offset);
 
-          reg[rn] = pv_area_fetch (stack, addr, 4);
+          reg[rn] = stack.fetch (addr, 4);
         }
       else if (IS_BRA (insn) && BRA_DISP (insn) > 0)
 	{
@@ -1888,11 +1884,9 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
     }
 
   /* Record where all the registers were saved.  */
-  pv_area_scan (stack, check_for_saved, (void *) result);
+  stack.scan (check_for_saved, (void *) result);
 
   result->prologue_end = after_last_frame_setup_insn;
-
-  do_cleanups (back_to);
 }
 
 

@@ -561,7 +561,7 @@ mem_enable (int num)
 }
 
 static void
-enable_mem_command (char *args, int from_tty)
+enable_mem_command (const char *args, int from_tty)
 {
   int num;
   struct mem_region *m;
@@ -606,7 +606,7 @@ mem_disable (int num)
 }
 
 static void
-disable_mem_command (char *args, int from_tty)
+disable_mem_command (const char *args, int from_tty)
 {
   require_user_regions (from_tty);
 
@@ -659,7 +659,7 @@ mem_delete (int num)
 }
 
 static void
-delete_mem_command (char *args, int from_tty)
+delete_mem_command (const char *args, int from_tty)
 {
   require_user_regions (from_tty);
 
@@ -684,7 +684,7 @@ delete_mem_command (char *args, int from_tty)
 }
 
 static void
-dummy_cmd (char *args, int from_tty)
+dummy_cmd (const char *args, int from_tty)
 {
 }
 

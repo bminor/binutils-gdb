@@ -84,14 +84,6 @@ struct cmd_list_element *showprintrawlist;
 static int partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
 				int len, int *errptr);
 
-static void show_print (char *, int);
-
-static void set_print (char *, int);
-
-static void set_radix (char *, int);
-
-static void show_radix (char *, int);
-
 static void set_input_radix (char *, int, struct cmd_list_element *);
 
 static void set_input_radix_1 (int, unsigned);
@@ -1476,12 +1468,10 @@ print_decimal_floating (const gdb_byte *valaddr, struct type *type,
 			struct ui_file *stream)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
-  char decstr[MAX_DECIMAL_STRING];
   unsigned len = TYPE_LENGTH (type);
 
-  decimal_to_string (valaddr, len, byte_order, decstr);
-  fputs_filtered (decstr, stream);
-  return;
+  std::string str = decimal_to_string (valaddr, len, byte_order);
+  fputs_filtered (str.c_str (), stream);
 }
 
 void
@@ -3093,7 +3083,7 @@ set_output_radix_1 (int from_tty, unsigned radix)
    the 'set input-radix' command.  */
 
 static void
-set_radix (char *arg, int from_tty)
+set_radix (const char *arg, int from_tty)
 {
   unsigned radix;
 
@@ -3111,7 +3101,7 @@ set_radix (char *arg, int from_tty)
 /* Show both the input and output radices.  */
 
 static void
-show_radix (char *arg, int from_tty)
+show_radix (const char *arg, int from_tty)
 {
   if (from_tty)
     {
@@ -3135,7 +3125,7 @@ show_radix (char *arg, int from_tty)
 
 
 static void
-set_print (char *arg, int from_tty)
+set_print (const char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set print\" must be followed by the name of a print subcommand.\n");
@@ -3143,13 +3133,13 @@ set_print (char *arg, int from_tty)
 }
 
 static void
-show_print (char *args, int from_tty)
+show_print (const char *args, int from_tty)
 {
   cmd_show_list (showprintlist, from_tty, "");
 }
 
 static void
-set_print_raw (char *arg, int from_tty)
+set_print_raw (const char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set print raw\" must be followed by the name of a \"print raw\" subcommand.\n");
@@ -3157,7 +3147,7 @@ set_print_raw (char *arg, int from_tty)
 }
 
 static void
-show_print_raw (char *args, int from_tty)
+show_print_raw (const char *args, int from_tty)
 {
   cmd_show_list (showprintrawlist, from_tty, "");
 }

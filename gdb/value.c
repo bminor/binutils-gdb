@@ -29,6 +29,7 @@
 #include "language.h"
 #include "demangle.h"
 #include "doublest.h"
+#include "floatformat.h"
 #include "regcache.h"
 #include "block.h"
 #include "dfp.h"
@@ -884,8 +885,6 @@ value_contents_eq (const struct value *val1, LONGEST offset1,
 /* Prototypes for local functions.  */
 
 static void show_values (char *, int);
-
-static void show_convenience (char *, int);
 
 
 /* The value-history records all the values printed
@@ -2559,7 +2558,7 @@ call_internal_function (struct gdbarch *gdbarch,
    the implementation of the sub-command that is created when
    registering an internal function.  */
 static void
-function_command (char *command, int from_tty)
+function_command (const char *command, int from_tty)
 {
   /* Do nothing.  */
 }
@@ -2661,7 +2660,7 @@ preserve_values (struct objfile *objfile)
 }
 
 static void
-show_convenience (char *ignore, int from_tty)
+show_convenience (const char *ignore, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   struct internalvar *var;
@@ -2926,9 +2925,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
       return (LONGEST) extract_typed_floating (valaddr, type);
 
     case TYPE_CODE_DECFLOAT:
-      /* libdecnumber has a function to convert from decimal to integer, but
-	 it doesn't work when the decimal number has a fractional part.  */
-      return (LONGEST) decimal_to_doublest (valaddr, len, byte_order);
+      return decimal_to_longest (valaddr, len, byte_order);
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:

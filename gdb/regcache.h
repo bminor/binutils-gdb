@@ -35,11 +35,6 @@ extern struct regcache *get_thread_arch_aspace_regcache (ptid_t,
 							 struct gdbarch *,
 							 struct address_space *);
 
-void regcache_xfree (struct regcache *regcache);
-struct cleanup *make_cleanup_regcache_xfree (struct regcache *regcache);
-struct regcache *regcache_xmalloc (struct gdbarch *gdbarch,
-				   struct address_space *aspace);
-
 /* Return REGCACHE's ptid.  */
 
 extern ptid_t regcache_get_ptid (const struct regcache *regcache);
@@ -84,7 +79,7 @@ extern LONGEST regcache_raw_get_signed (struct regcache *regcache,
 /* Set a raw register's value in the regcache's buffer.  Unlike
    regcache_raw_write, this is not write-through.  The intention is
    allowing to change the buffer contents of a read-only regcache
-   allocated with regcache_xmalloc.  */
+   allocated with new.  */
 
 extern void regcache_raw_set_cached_value
   (struct regcache *regcache, int regnum, const gdb_byte *buf);
@@ -255,14 +250,8 @@ public:
   /* Create a readonly regcache from a non-readonly regcache.  */
   regcache (readonly_t, const regcache &src);
 
-  regcache (const regcache &) = delete;
-  void operator= (const regcache &) = delete;
+  DISABLE_COPY_AND_ASSIGN (regcache);
 
-  /* class regcache is only extended in unit test, so only mark it
-     virtual when selftest is enabled.  */
-#if GDB_SELF_TEST
-  virtual
-#endif
   ~regcache ()
   {
     xfree (m_registers);
@@ -283,11 +272,6 @@ public:
 
   enum register_status raw_read (int regnum, gdb_byte *buf);
 
-  /* class regcache is only extended in unit test, so only mark it
-     virtual when selftest is enabled.  */
-#if GDB_SELF_TEST
-  virtual
-#endif
   void raw_write (int regnum, const gdb_byte *buf);
 
   template<typename T, typename = RequireLongest<T>>

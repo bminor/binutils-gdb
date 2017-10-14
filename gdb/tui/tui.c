@@ -545,7 +545,7 @@ tui_disable (void)
 /* Command wrapper for enabling tui mode.  */
 
 static void
-tui_enable_command (char *args, int from_tty)
+tui_enable_command (const char *args, int from_tty)
 {
   tui_enable ();
 }
@@ -553,7 +553,7 @@ tui_enable_command (char *args, int from_tty)
 /* Command wrapper for leaving tui mode.  */
 
 static void
-tui_disable_command (char *args, int from_tty)
+tui_disable_command (const char *args, int from_tty)
 {
   tui_disable ();
 }

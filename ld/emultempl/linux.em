@@ -122,7 +122,7 @@ gld${EMULATION_NAME}_before_allocation (void)
      dynamic linking.  */
   if (! bfd_${EMULATION_NAME}_size_dynamic_sections (link_info.output_bfd,
 						     &link_info))
-    einfo ("%P%F: failed to set dynamic section sizes: %E\n");
+    einfo (_("%P%F: failed to set dynamic section sizes: %E\n"));
 
   before_allocation_default ();
 }

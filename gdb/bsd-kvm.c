@@ -271,7 +271,7 @@ bsd_kvm_fetch_registers (struct target_ops *ops,
 struct cmd_list_element *bsd_kvm_cmdlist;
 
 static void
-bsd_kvm_cmd (char *arg, int fromtty)
+bsd_kvm_cmd (const char *arg, int fromtty)
 {
   /* ??? Should this become an alias for "target kvm"?  */
 }

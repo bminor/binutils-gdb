@@ -1,5 +1,5 @@
 # Copyright (C) 2014-2017 Free Software Foundation, Inc.
-# 
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
@@ -199,7 +199,7 @@ EOF
 
 . $srcdir/scripttempl/DWARF.sc
 
-cat <<EOF  
+cat <<EOF
   ${ATTRS_SECTIONS}
   ${OTHER_SECTIONS}
 }

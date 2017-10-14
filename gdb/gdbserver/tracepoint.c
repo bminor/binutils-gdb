@@ -1910,9 +1910,9 @@ find_next_tracepoint_by_number (struct tracepoint *prev_tp, int num)
 /* Append another action to perform when the tracepoint triggers.  */
 
 static void
-add_tracepoint_action (struct tracepoint *tpoint, char *packet)
+add_tracepoint_action (struct tracepoint *tpoint, const char *packet)
 {
-  char *act;
+  const char *act;
 
   if (*packet == 'S')
     {
@@ -1924,7 +1924,7 @@ add_tracepoint_action (struct tracepoint *tpoint, char *packet)
 
   while (*act)
     {
-      char *act_start = act;
+      const char *act_start = act;
       struct tracepoint_action *action = NULL;
 
       switch (*act)
@@ -2485,8 +2485,7 @@ cmd_qtdp (char *own_buf)
   ULONGEST addr;
   ULONGEST count;
   struct tracepoint *tpoint;
-  char *actparm;
-  char *packet = own_buf;
+  const char *packet = own_buf;
 
   packet += strlen ("QTDP:");
 
@@ -2546,9 +2545,7 @@ cmd_qtdp (char *own_buf)
 	    }
 	  else if (*packet == 'X')
 	    {
-	      actparm = (char *) packet;
-	      tpoint->cond = gdb_parse_agent_expr (&actparm);
-	      packet = actparm;
+	      tpoint->cond = gdb_parse_agent_expr (&packet);
 	    }
 	  else if (*packet == '-')
 	    break;
@@ -2657,8 +2654,9 @@ cmd_qtdpsrc (char *own_buf)
 {
   ULONGEST num, addr, start, slen;
   struct tracepoint *tpoint;
-  char *packet = own_buf;
-  char *saved, *srctype, *src;
+  const char *packet = own_buf;
+  const char *saved;
+  char *srctype, *src;
   size_t nbytes;
   struct source_string *last, *newlast;
 
@@ -2720,7 +2718,7 @@ cmd_qtdv (char *own_buf)
   char *varname;
   size_t nbytes;
   struct trace_state_variable *tsv;
-  char *packet = own_buf;
+  const char *packet = own_buf;
 
   packet += strlen ("QTDV:");
 
@@ -2748,7 +2746,7 @@ cmd_qtdv (char *own_buf)
 static void
 cmd_qtenable_disable (char *own_buf, int enable)
 {
-  char *packet = own_buf;
+  const char *packet = own_buf;
   ULONGEST num, addr;
   struct tracepoint *tp;
 
@@ -2870,7 +2868,7 @@ cmd_qtro (char *own_buf)
 {
   ULONGEST start, end;
   struct readonly_region *roreg;
-  char *packet = own_buf;
+  const char *packet = own_buf;
 
   trace_debug ("Want to mark readonly regions");
 
@@ -3557,7 +3555,7 @@ cmd_qtframe (char *own_buf)
   ULONGEST frame, pc, lo, hi, num;
   int tfnum, tpnum;
   struct traceframe *tframe;
-  char *packet = own_buf;
+  const char *packet = own_buf;
 
   packet += strlen ("QTFrame:");
 
@@ -3712,7 +3710,7 @@ cmd_qtp (char *own_buf)
 {
   ULONGEST num, addr;
   struct tracepoint *tpoint;
-  char *packet = own_buf;
+  const char *packet = own_buf;
 
   packet += strlen ("qTP:");
 
@@ -3956,17 +3954,6 @@ cmd_qtstmat (char *packet)
     run_inferior_command (packet, strlen (packet) + 1);
 }
 
-/* Helper for gdb_agent_about_to_close.
-   Return non-zero if thread ENTRY is in the same process in DATA.  */
-
-static int
-same_process_p (struct inferior_list_entry *entry, void *data)
-{
-  int *pid = (int *) data;
-
-  return ptid_get_pid (entry->id) == *pid;
-}
-
 /* Sent the agent a command to close it.  */
 
 void
@@ -3981,8 +3968,7 @@ gdb_agent_about_to_close (int pid)
       saved_thread = current_thread;
 
       /* Find any thread which belongs to process PID.  */
-      current_thread = (struct thread_info *)
-	find_inferior (&all_threads, same_process_p, &pid);
+      current_thread = find_any_thread_of_pid (pid);
 
       strcpy (buf, "close");
 
@@ -4017,7 +4003,7 @@ cmd_qtbuffer (char *own_buf)
 {
   ULONGEST offset, num, tot;
   unsigned char *tbp;
-  char *packet = own_buf;
+  const char *packet = own_buf;
 
   packet += strlen ("qTBuffer:");
 
@@ -4410,7 +4396,7 @@ tracepoint_finished_step (struct thread_info *tinfo, CORE_ADDR stop_pc)
   wstep_link = &tinfo->while_stepping;
 
   trace_debug ("Thread %s finished a single-step for tracepoint %d at 0x%s",
-	       target_pid_to_str (tinfo->entry.id),
+	       target_pid_to_str (tinfo->id),
 	       wstep->tp_number, paddress (wstep->tp_address));
 
   ctx.base.type = trap_tracepoint;
@@ -4423,7 +4409,7 @@ tracepoint_finished_step (struct thread_info *tinfo, CORE_ADDR stop_pc)
 	{
 	  trace_debug ("NO TRACEPOINT %d at 0x%s FOR THREAD %s!",
 		       wstep->tp_number, paddress (wstep->tp_address),
-		       target_pid_to_str (tinfo->entry.id));
+		       target_pid_to_str (tinfo->id));
 
 	  /* Unlink.  */
 	  *wstep_link = wstep->next;
@@ -4443,7 +4429,7 @@ tracepoint_finished_step (struct thread_info *tinfo, CORE_ADDR stop_pc)
 	{
 	  /* The requested numbers of steps have occurred.  */
 	  trace_debug ("Thread %s done stepping for tracepoint %d at 0x%s",
-		       target_pid_to_str (tinfo->entry.id),
+		       target_pid_to_str (tinfo->id),
 		       wstep->tp_number, paddress (wstep->tp_address));
 
 	  /* Unlink the wstep.  */
@@ -4590,7 +4576,7 @@ tracepoint_was_hit (struct thread_info *tinfo, CORE_ADDR stop_pc)
 	  && tpoint->type != static_tracepoint)
 	{
 	  trace_debug ("Thread %s at address of tracepoint %d at 0x%s",
-		       target_pid_to_str (tinfo->entry.id),
+		       target_pid_to_str (tinfo->id),
 		       tpoint->number, paddress (tpoint->address));
 
 	  /* Test the condition if present, and collect if true.  */

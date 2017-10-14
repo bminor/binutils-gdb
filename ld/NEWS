@@ -1,7 +1,7 @@
 -*- text -*-
 * Add -z globalaudit command line option to force audit libraries to be run
   for every dynamic object loaded by an executable - provided that the loader
-  supports this functionality. 
+  supports this functionality.
 
 * Tighten linker script grammar around file name specifiers to prevent the use
   of SORT_BY_ALIGNMENT and SORT_BY_INIT_PRIORITY on filenames.  These would
@@ -73,7 +73,8 @@ Changes in 2.27:
 
 * Add a configure option --enable-relro to decide whether -z relro should
   be enabled in ELF linker by default.  Default to yes for all Linux
-  targets except FRV, HPPA, IA64 and MIPS.
+  targets except FRV, HPPA, IA64 and MIPS.  Note that -z relro can increase
+  disk and memory size.
 
 * Support for -z noreloc-overflow in the x86-64 ELF linker to disable
   relocation overflow check.

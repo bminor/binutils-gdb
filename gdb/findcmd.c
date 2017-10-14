@@ -209,7 +209,7 @@ parse_find_args (const char *args, ULONGEST *max_countp,
 }
 
 static void
-find_command (char *args, int from_tty)
+find_command (const char *args, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   bfd_boolean big_p = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG;

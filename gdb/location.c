@@ -83,7 +83,7 @@ initialize_explicit_location (struct explicit_location *explicit_loc)
 /* See description in location.h.  */
 
 event_location_up
-new_linespec_location (char **linespec)
+new_linespec_location (const char **linespec)
 {
   struct event_location *location;
 
@@ -91,8 +91,8 @@ new_linespec_location (char **linespec)
   EL_TYPE (location) = LINESPEC_LOCATION;
   if (*linespec != NULL)
     {
-      char *p;
-      char *orig = *linespec;
+      const char *p;
+      const char *orig = *linespec;
 
       linespec_lex_to_end (linespec);
       p = remove_trailing_whitespace (orig, *linespec);
@@ -836,7 +836,7 @@ string_to_explicit_location (const char **argp,
 /* See description in location.h.  */
 
 event_location_up
-string_to_event_location_basic (char **stringp,
+string_to_event_location_basic (const char **stringp,
 				const struct language_defn *language)
 {
   event_location_up location;
@@ -875,7 +875,7 @@ string_to_event_location_basic (char **stringp,
 /* See description in location.h.  */
 
 event_location_up
-string_to_event_location (char **stringp,
+string_to_event_location (const char **stringp,
 			  const struct language_defn *language)
 {
   const char *arg, *orig;

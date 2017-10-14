@@ -657,10 +657,9 @@ enum watchpoint_triggered
 typedef struct bp_location *bp_location_p;
 DEF_VEC_P(bp_location_p);
 
-/* A reference-counted struct command_line.  This lets multiple
-   breakpoints share a single command list.  This is an implementation
+/* A reference-counted struct command_line. This is an implementation
    detail to the breakpoints module.  */
-struct counted_command_line;
+typedef std::shared_ptr<command_line> counted_command_line;
 
 /* Some targets (e.g., embedded PowerPC) need two debug registers to set
    a watchpoint over a memory region.  If this flag is true, GDB will use
@@ -712,7 +711,7 @@ struct breakpoint
 
   /* Chain of command lines to execute when this breakpoint is
      hit.  */
-  counted_command_line *commands = NULL;
+  counted_command_line commands;
   /* Stack depth (address of frame).  If nonzero, break only if fp
      equals this.  */
   struct frame_id frame_id = null_frame_id;
@@ -1082,6 +1081,13 @@ enum bp_print_how
 
 struct bpstats
   {
+    bpstats ();
+    bpstats (struct bp_location *bl, bpstat **bs_link_pointer);
+    ~bpstats ();
+
+    bpstats (const bpstats &);
+    bpstats &operator= (const bpstats &) = delete;
+
     /* Linked list because there can be more than one breakpoint at
        the same place, and a bpstat reflects the fact that all have
        been hit.  */
@@ -1111,7 +1117,7 @@ struct bpstats
     struct breakpoint *breakpoint_at;
 
     /* The associated command list.  */
-    struct counted_command_line *commands;
+    counted_command_line commands;
 
     /* Old value associated with a watchpoint.  */
     struct value *old_val;
@@ -1200,7 +1206,7 @@ extern int breakpoint_address_match (struct address_space *aspace1,
 				     struct address_space *aspace2,
 				     CORE_ADDR addr2);
 
-extern void until_break_command (char *, int, int);
+extern void until_break_command (const char *, int, int);
 
 /* Initialize a struct bp_location.  */
 
@@ -1249,9 +1255,9 @@ extern void break_command (char *, int);
 extern void hbreak_command_wrapper (char *, int);
 extern void thbreak_command_wrapper (char *, int);
 extern void rbreak_command_wrapper (char *, int);
-extern void watch_command_wrapper (char *, int, int);
-extern void awatch_command_wrapper (char *, int, int);
-extern void rwatch_command_wrapper (char *, int, int);
+extern void watch_command_wrapper (const char *, int, int);
+extern void awatch_command_wrapper (const char *, int, int);
+extern void rwatch_command_wrapper (const char *, int, int);
 extern void tbreak_command (char *, int);
 
 extern struct breakpoint_ops base_breakpoint_ops;
@@ -1282,7 +1288,7 @@ extern void
   init_ada_exception_breakpoint (struct breakpoint *b,
 				 struct gdbarch *gdbarch,
 				 struct symtab_and_line sal,
-				 char *addr_string,
+				 const char *addr_string,
 				 const struct breakpoint_ops *ops,
 				 int tempflag,
 				 int enabled,
@@ -1349,13 +1355,6 @@ extern void insert_breakpoints (void);
 extern int remove_breakpoints (void);
 
 extern int remove_breakpoints_pid (int pid);
-
-/* This function can be used to physically insert eventpoints from the
-   specified traced inferior process, without modifying the breakpoint
-   package's state.  This can be useful for those targets which
-   support following the processes of a fork() or vfork() system call,
-   when both of the resulting two processes are to be followed.  */
-extern int reattach_breakpoints (int);
 
 /* This function can be used to update the breakpoint package's state
    after an exec() system call has been executed.
@@ -1515,10 +1514,6 @@ extern int is_catchpoint (struct breakpoint *);
 extern void add_solib_catchpoint (const char *arg, int is_load, int is_temp,
                                   int enabled);
 
-/* Enable breakpoints and delete when hit.  Called with ARG == NULL
-   deletes all breakpoints.  */
-extern void delete_command (char *arg, int from_tty);
-
 /* Create and insert a new software single step breakpoint for the
    current thread.  May be called multiple times; each time will add a
    new location to the set of potential addresses the next instruction
@@ -1641,5 +1636,8 @@ extern const char *ep_parse_optional_if_clause (const char **arg);
 /* Print the "Thread ID hit" part of "Thread ID hit Breakpoint N" to
    UIOUT iff debugging multiple threads.  */
 extern void maybe_print_thread_hit_breakpoint (struct ui_out *uiout);
+
+/* Print the specified breakpoint.  */
+extern void print_breakpoint (breakpoint *bp);
 
 #endif /* !defined (BREAKPOINT_H) */

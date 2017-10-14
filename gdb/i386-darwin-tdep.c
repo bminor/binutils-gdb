@@ -23,7 +23,6 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "target.h"
-#include "floatformat.h"
 #include "symtab.h"
 #include "regcache.h"
 #include "objfiles.h"

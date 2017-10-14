@@ -340,7 +340,8 @@ rust_slice_type_p (struct type *type)
 {
   return (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	  && TYPE_TAG_NAME (type) != NULL
-	  && strncmp (TYPE_TAG_NAME (type), "&[", 2) == 0);
+	  && (strncmp (TYPE_TAG_NAME (type), "&[", 2) == 0
+	      || strcmp (TYPE_TAG_NAME (type), "&str") == 0));
 }
 
 /* Return true if TYPE is a range type, otherwise false.  */
@@ -466,6 +467,21 @@ rust_printstr (struct ui_file *stream, struct type *type,
 
 
 
+/* Helper function to print a string slice.  */
+
+static void
+rust_val_print_str (struct ui_file *stream, struct value *val,
+		    const struct value_print_options *options)
+{
+  struct value *base = value_struct_elt (&val, NULL, "data_ptr", NULL,
+					 "slice");
+  struct value *len = value_struct_elt (&val, NULL, "length", NULL, "slice");
+
+  val_print_string (TYPE_TARGET_TYPE (value_type (base)), "UTF-8",
+		    value_as_address (base), value_as_long (len), stream,
+		    options);
+}
+
 /* rust_print_type branch for structs and untagged unions.  */
 
 static void
@@ -476,6 +492,13 @@ val_print_struct (struct type *type, int embedded_offset,
 {
   int i;
   int first_field;
+
+  if (rust_slice_type_p (type) && strcmp (TYPE_NAME (type), "&str") == 0)
+    {
+      rust_val_print_str (stream, val, options);
+      return;
+    }
+
   bool is_tuple = rust_tuple_type_p (type);
   bool is_tuple_struct = !is_tuple && rust_tuple_struct_type_p (type);
   struct value_print_options opts;
@@ -1455,17 +1478,53 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
   else
     low = value_as_long (rhs);
 
+  struct type *type = check_typedef (value_type (lhs));
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
-      struct type *type = check_typedef (value_type (lhs));
+      struct type *base_type = nullptr;
+      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	base_type = TYPE_TARGET_TYPE (type);
+      else if (rust_slice_type_p (type))
+	{
+	  for (int i = 0; i < TYPE_NFIELDS (type); ++i)
+	    {
+	      if (strcmp (TYPE_FIELD_NAME (type, i), "data_ptr") == 0)
+		{
+		  base_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, i));
+		  break;
+		}
+	    }
+	  if (base_type == nullptr)
+	    error (_("Could not find 'data_ptr' in slice type"));
+	}
+      else if (TYPE_CODE (type) == TYPE_CODE_PTR)
+	base_type = TYPE_TARGET_TYPE (type);
+      else
+	error (_("Cannot subscript non-array type"));
 
-      result = value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (lhs));
+      struct type *new_type;
+      if (want_slice)
+	{
+	  if (rust_slice_type_p (type))
+	    new_type = type;
+	  else
+	    {
+	      struct type *usize
+		= language_lookup_primitive_type (exp->language_defn,
+						  exp->gdbarch,
+						  "usize");
+	      new_type = rust_slice_type ("&[*gdb*]", base_type, usize);
+	    }
+	}
+      else
+	new_type = base_type;
+
+      return value_zero (new_type, VALUE_LVAL (lhs));
     }
   else
     {
       LONGEST low_bound;
       struct value *base;
-      struct type *type = check_typedef (value_type (lhs));
 
       if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
 	{
@@ -1525,8 +1584,11 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
 	  usize = language_lookup_primitive_type (exp->language_defn,
 						  exp->gdbarch,
 						  "usize");
-	  slice = rust_slice_type ("&[*gdb*]", value_type (result),
-				   usize);
+	  const char *new_name = ((type != nullptr
+				   && rust_slice_type_p (type))
+				  ? TYPE_NAME (type) : "&[*gdb*]");
+
+	  slice = rust_slice_type (new_name, value_type (result), usize);
 
 	  addrval = value_allocate_space_in_inferior (TYPE_LENGTH (slice));
 	  addr = value_as_long (addrval);

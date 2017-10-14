@@ -33,6 +33,10 @@
 #define HWCAP_S390_VX 2048
 #endif
 
+#ifndef HWCAP_S390_GS
+#define HWCAP_S390_GS 16384
+#endif
+
 /* Register information.  */
 
 /* Program Status Word.  */
@@ -166,8 +170,14 @@
 #define S390_V29_REGNUM 119
 #define S390_V30_REGNUM 120
 #define S390_V31_REGNUM 121
+#define S390_GSD_REGNUM 122
+#define S390_GSSM_REGNUM 123
+#define S390_GSEPLA_REGNUM 124
+#define S390_BC_GSD_REGNUM 125
+#define S390_BC_GSSM_REGNUM 126
+#define S390_BC_GSEPLA_REGNUM 127
 /* Total.  */
-#define S390_NUM_REGS 122
+#define S390_NUM_REGS 128
 
 /* Special register usage.  */
 #define S390_SP_REGNUM S390_R15_REGNUM
@@ -198,6 +208,8 @@ extern const struct regset s390_tdb_regset;
 #define s390_sizeof_tdbregset 0x100
 extern const struct regset s390_vxrs_low_regset;
 extern const struct regset s390_vxrs_high_regset;
+extern const struct regset s390_gs_regset;
+extern const struct regset s390_gsbc_regset;
 
 /* GNU/Linux target descriptions.  */
 extern struct target_desc *tdesc_s390_linux32;
@@ -209,11 +221,13 @@ extern struct target_desc *tdesc_s390_linux64v2;
 extern struct target_desc *tdesc_s390_te_linux64;
 extern struct target_desc *tdesc_s390_vx_linux64;
 extern struct target_desc *tdesc_s390_tevx_linux64;
+extern struct target_desc *tdesc_s390_gs_linux64;
 extern struct target_desc *tdesc_s390x_linux64;
 extern struct target_desc *tdesc_s390x_linux64v1;
 extern struct target_desc *tdesc_s390x_linux64v2;
 extern struct target_desc *tdesc_s390x_te_linux64;
 extern struct target_desc *tdesc_s390x_vx_linux64;
 extern struct target_desc *tdesc_s390x_tevx_linux64;
+extern struct target_desc *tdesc_s390x_gs_linux64;
 
 #endif

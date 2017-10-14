@@ -36,7 +36,6 @@
 #include "value.h"
 #include "symfile.h"
 #include "arch-utils.h"
-#include "floatformat.h"
 #include "glibc-tdep.h"
 #include "infcall.h"
 #include "regset.h"

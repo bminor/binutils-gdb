@@ -161,7 +161,7 @@ skiplist_entry::add_entry (bool file_is_glob, std::string &&file,
 }
 
 static void
-skip_file_command (char *arg, int from_tty)
+skip_file_command (const char *arg, int from_tty)
 {
   struct symtab *symtab;
   const char *filename = NULL;
@@ -199,7 +199,7 @@ skip_function (const char *name)
 }
 
 static void
-skip_function_command (char *arg, int from_tty)
+skip_function_command (const char *arg, int from_tty)
 {
   /* Default to the current function if no argument is given.  */
   if (arg == NULL)
@@ -226,7 +226,7 @@ skip_function_command (char *arg, int from_tty)
 /* Process "skip ..." that does not match "skip file" or "skip function".  */
 
 static void
-skip_command (char *arg, int from_tty)
+skip_command (const char *arg, int from_tty)
 {
   const char *file = NULL;
   const char *gfile = NULL;
@@ -424,7 +424,7 @@ info_skip_command (char *arg, int from_tty)
 }
 
 static void
-skip_enable_command (char *arg, int from_tty)
+skip_enable_command (const char *arg, int from_tty)
 {
   bool found = false;
 
@@ -440,7 +440,7 @@ skip_enable_command (char *arg, int from_tty)
 }
 
 static void
-skip_disable_command (char *arg, int from_tty)
+skip_disable_command (const char *arg, int from_tty)
 {
   bool found = false;
 
@@ -456,7 +456,7 @@ skip_disable_command (char *arg, int from_tty)
 }
 
 static void
-skip_delete_command (char *arg, int from_tty)
+skip_delete_command (const char *arg, int from_tty)
 {
   bool found = false;
 

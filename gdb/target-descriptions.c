@@ -93,9 +93,7 @@ typedef struct tdesc_reg : tdesc_element
     xfree (group);
   }
 
-  /* Disable copying.  */
-  tdesc_reg (const tdesc_reg &) = delete;
-  tdesc_reg &operator= (const tdesc_reg &) = delete;
+  DISABLE_COPY_AND_ASSIGN (tdesc_reg);
 
   /* The name of this register.  In standard features, it may be
      recognized by the architecture support code, or it may be purely
@@ -229,9 +227,8 @@ typedef struct tdesc_type : tdesc_element
       }
     xfree ((char *) name);
   }
-  /* Disable copying.  */
-  tdesc_type (const tdesc_type &) = delete;
-  tdesc_type &operator= (const tdesc_type &) = delete;
+
+  DISABLE_COPY_AND_ASSIGN (tdesc_type);
 
   /* The name of this type.  If this type is a built-in type, this is
      a pointer to a constant string.  Otherwise, it's a
@@ -302,9 +299,7 @@ typedef struct tdesc_feature : tdesc_element
     xfree (name);
   }
 
-  /* Disable copying.  */
-  tdesc_feature (const tdesc_feature &) = delete;
-  tdesc_feature &operator= (const tdesc_feature &) = delete;
+  DISABLE_COPY_AND_ASSIGN (tdesc_feature);
 
   /* The name of this feature.  It may be recognized by the architecture
      support code.  */
@@ -1072,7 +1067,7 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 	int ix;
 
 	type = arch_flags_type (gdbarch, tdesc_type->name,
-				tdesc_type->u.u.size);
+				tdesc_type->u.u.size * TARGET_CHAR_BIT);
 	for (ix = 0;
 	     VEC_iterate (tdesc_type_field, tdesc_type->u.u.fields, ix, f);
 	     ix++)
@@ -1095,7 +1090,8 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 	int ix;
 
 	type = arch_type (gdbarch, TYPE_CODE_ENUM,
-			  tdesc_type->u.u.size, tdesc_type->name);
+			  tdesc_type->u.u.size * TARGET_CHAR_BIT,
+			  tdesc_type->name);
 	TYPE_UNSIGNED (type) = 1;
 	for (ix = 0;
 	     VEC_iterate (tdesc_type_field, tdesc_type->u.u.fields, ix, f);
@@ -1860,19 +1856,19 @@ static struct cmd_list_element *tdesc_unset_cmdlist;
 /* Helper functions for the CLI commands.  */
 
 static void
-set_tdesc_cmd (char *args, int from_tty)
+set_tdesc_cmd (const char *args, int from_tty)
 {
   help_list (tdesc_set_cmdlist, "set tdesc ", all_commands, gdb_stdout);
 }
 
 static void
-show_tdesc_cmd (char *args, int from_tty)
+show_tdesc_cmd (const char *args, int from_tty)
 {
   cmd_show_list (tdesc_show_cmdlist, from_tty, "");
 }
 
 static void
-unset_tdesc_cmd (char *args, int from_tty)
+unset_tdesc_cmd (const char *args, int from_tty)
 {
   help_list (tdesc_unset_cmdlist, "unset tdesc ", all_commands, gdb_stdout);
 }
@@ -1904,7 +1900,7 @@ show_tdesc_filename_cmd (struct ui_file *file, int from_tty,
 }
 
 static void
-unset_tdesc_filename_cmd (char *args, int from_tty)
+unset_tdesc_filename_cmd (const char *args, int from_tty)
 {
   xfree (target_description_filename);
   target_description_filename = NULL;
@@ -2293,7 +2289,7 @@ private:
 };
 
 static void
-maint_print_c_tdesc_cmd (char *args, int from_tty)
+maint_print_c_tdesc_cmd (const char *args, int from_tty)
 {
   const struct target_desc *tdesc;
   const char *filename;
@@ -2367,7 +2363,7 @@ record_xml_tdesc (const char *xml_file, const struct target_desc *tdesc)
    found in the specified directory DIR.  */
 
 static void
-maintenance_check_xml_descriptions (char *dir, int from_tty)
+maintenance_check_xml_descriptions (const char *dir, int from_tty)
 {
   if (dir == NULL)
     error (_("Missing dir name"));

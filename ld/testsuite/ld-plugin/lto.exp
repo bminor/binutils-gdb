@@ -286,16 +286,32 @@ set lto_link_elf_tests [list \
   [list "PR ld/16746 (2)" \
    "-O2 -flto -fuse-linker-plugin tmpdir/pr16746c.o tmpdir/pr16746a.o" "-O2 -flto" \
    {dummy.c} {} "pr16746b.exe"] \
-  [list "PR ld/14918" \
-   "-flto" "-flto" \
-   {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"] \
   [list "Build pr21382a.o" \
    "" "-O2 -flto" \
    {pr21382a.c} {} "" "c"] \
   [list "Build pr21382.so" \
    "-shared" "-O2 -fpic" \
    {pr21382b.c} {} "pr21382.so" "c"] \
+  [list {Build pr22220lib.so} \
+   {-shared -Wl,--version-script=pr22220lib.ver} {-fPIC} \
+   {pr22220lib.cc} {} {pr22220lib.so} {c++}] \
+  [list {Build pr22220main.o} \
+   {} {-flto} \
+   {pr22220main.cc} {} {} {c++}] \
 ]
+
+# PR 14918 checks that libgcc is not spuriously included in a shared link of
+# an empty program.  The ARM crt1.o startup code however calls __libc_csu_init
+# in /usr/lib/libc_nonshared.a(elf-init.oS).  This in turn needs
+# __aeabi_unwind_cpp_pr0@@GCC_3.5 which is provided by libgcc_s.so.1, so the
+# test fails.  Hence this code to skip the test.
+if { ! [istarget "arm*-*-*"] } {
+    set lto_link_elf_tests [concat $lto_link_elf_tests [list \
+  [list "PR ld/14918" \
+   "-flto" "-flto" \
+   {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"] \
+  ]]
+}
 
 # Check final symbols in executables.
 set lto_link_symbol_tests [list \
@@ -396,6 +412,12 @@ set lto_run_elf_shared_tests [list \
   [list "Run pr21382" \
    "-O2 -flto -fuse-linker-plugin -Wl,--as-needed tmpdir/pr21382a.o tmpdir/pr21382.so" "" \
    {dummy.c} "pr21382.exe" "pass.out" "" "c"] \
+  [list {pr22220a} \
+   {-flto -fuse-linker-plugin tmpdir/pr22220main.o tmpdir/pr22220lib.so} {} \
+   {dummy.c} {pr22220a.exe} {pass.out} {} {c++}] \
+  [list {pr22220b} \
+   {-flto -fuse-linker-plugin -Wl,--no-as-needed tmpdir/pr22220lib.so tmpdir/pr22220main.o} {} \
+   {dummy.c} {pr22220b.exe} {pass.out} {} {c++}] \
 ]
 
 # LTO run-time tests for ELF

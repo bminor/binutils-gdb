@@ -20,7 +20,6 @@
 #define TRACEPOINT_H 1
 
 #include "breakpoint.h"
-#include "target.h"
 #include "memrange.h"
 #include "gdb_vecs.h"
 
@@ -32,11 +31,13 @@
 struct traceframe_info
 {
   /* Collected memory.  */
-  VEC(mem_range_s) *memory;
+  std::vector<mem_range> memory;
 
   /* Collected trace state variables.  */
-  VEC(int) *tvars;
+  std::vector<int> tvars;
 };
+
+typedef std::unique_ptr<traceframe_info> traceframe_info_up;
 
 /* A trace state variable is a value managed by a target being
    traced.  A trace state variable (or tsv for short) can be accessed
@@ -295,7 +296,7 @@ private:
 };
 
 extern void parse_static_tracepoint_marker_definition
-  (char *line, char **pp,
+  (const char *line, const char **pp,
    struct static_tracepoint_marker *marker);
 extern void release_static_tracepoint_marker (struct static_tracepoint_marker *);
 extern void free_current_marker (void *arg);
@@ -342,14 +343,14 @@ extern int encode_source_string (int num, ULONGEST addr,
 				 const char *srctype, const char *src,
 				 char *buf, int buf_size);
 
-extern void parse_trace_status (char *line, struct trace_status *ts);
+extern void parse_trace_status (const char *line, struct trace_status *ts);
 
-extern void parse_tracepoint_status (char *p, struct breakpoint *tp,
+extern void parse_tracepoint_status (const char *p, struct breakpoint *tp,
 				     struct uploaded_tp *utp);
 
-extern void parse_tracepoint_definition (char *line,
+extern void parse_tracepoint_definition (const char *line,
 					 struct uploaded_tp **utpp);
-extern void parse_tsv_definition (char *line, struct uploaded_tsv **utsvp);
+extern void parse_tsv_definition (const char *line, struct uploaded_tsv **utsvp);
 
 extern struct uploaded_tp *get_uploaded_tp (int num, ULONGEST addr,
 					    struct uploaded_tp **utpp);
@@ -376,6 +377,18 @@ extern void trace_status_mi (int on_stop);
 extern void tvariables_info_1 (void);
 extern void save_trace_state_variables (struct ui_file *fp);
 
+/* Enumeration of the kinds of traceframe searches that a target may
+   be able to perform.  */
+
+enum trace_find_type
+{
+  tfind_number,
+  tfind_pc,
+  tfind_tp,
+  tfind_range,
+  tfind_outside,
+};
+
 extern void tfind_1 (enum trace_find_type type, int num,
 		     CORE_ADDR addr1, CORE_ADDR addr2,
 		     int from_tty);
@@ -385,7 +398,7 @@ extern void trace_save_tfile (const char *filename,
 extern void trace_save_ctf (const char *dirname,
 			    int target_does_save);
 
-extern struct traceframe_info *parse_traceframe_info (const char *tframe_info);
+extern traceframe_info_up parse_traceframe_info (const char *tframe_info);
 
 extern int traceframe_available_memory (VEC(mem_range_s) **result,
 					CORE_ADDR memaddr, ULONGEST len);

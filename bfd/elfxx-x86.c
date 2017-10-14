@@ -83,8 +83,7 @@ _bfd_x86_elf_dtpoff_base (struct bfd_link_info *info)
    dynamic relocs.  */
 
 static bfd_boolean
-elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h,
-				 void *inf)
+elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
   struct elf_x86_link_hash_table *htab;
@@ -262,7 +261,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h,
 		}
 	    }
 
-	  if (htab->is_vxworks && !bfd_link_pic (info))
+	  if (htab->target_os == is_vxworks && !bfd_link_pic (info))
 	    {
 	      /* VxWorks has a second set of relocations for each PLT entry
 		 in executables.  They go in a separate relocation section,
@@ -406,7 +405,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h,
 	    }
 	}
 
-      if (htab->is_vxworks)
+      if (htab->target_os == is_vxworks)
 	{
 	  struct elf_dyn_relocs **pp;
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
@@ -676,6 +675,7 @@ _bfd_x86_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->plt_second.offset = (bfd_vma) -1;
       eh->plt_got.offset = (bfd_vma) -1;
       eh->tlsdesc_got = (bfd_vma) -1;
+      eh->zero_undefweak = 1;
     }
 
   return entry;
@@ -799,6 +799,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
 	}
     }
   ret->target_id = bed->target_id;
+  ret->target_os = get_elf_x86_backend_data (abfd)->target_os;
 
   ret->loc_hash_table = htab_try_create (1024,
 					 _bfd_x86_elf_local_htab_hash,
@@ -924,7 +925,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 		     linker script /DISCARD/, so we'll be discarding
 		     the relocs too.  */
 		}
-	      else if (htab->is_vxworks
+	      else if (htab->target_os == is_vxworks
 		       && strcmp (p->sec->output_section->name,
 				  ".tls_vars") == 0)
 		{
@@ -1285,7 +1286,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 		return FALSE;
 	    }
 	}
-      if (htab->is_vxworks
+      if (htab->target_os == is_vxworks
 	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
 	return FALSE;
     }
@@ -1293,6 +1294,224 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 
   return TRUE;
 }
+
+/* Finish up the x86 dynamic sections.  */
+
+struct elf_x86_link_hash_table *
+_bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
+				      struct bfd_link_info *info)
+{
+  struct elf_x86_link_hash_table *htab;
+  const struct elf_backend_data *bed;
+  bfd *dynobj;
+  asection *sdyn;
+  bfd_byte *dyncon, *dynconend;
+  bfd_size_type sizeof_dyn;
+
+  bed = get_elf_backend_data (output_bfd);
+  htab = elf_x86_hash_table (info, bed->target_id);
+  if (htab == NULL)
+    return htab;
+
+  dynobj = htab->elf.dynobj;
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
+
+  /* GOT is always created in setup_gnu_properties.  But it may not be
+     needed.  .got.plt section may be needed for static IFUNC.  */
+  if (htab->elf.sgotplt && htab->elf.sgotplt->size > 0)
+    {
+      bfd_vma dynamic_addr;
+
+      if (bfd_is_abs_section (htab->elf.sgotplt->output_section))
+	{
+	  _bfd_error_handler
+	    (_("discarded output section: `%A'"), htab->elf.sgotplt);
+	  return NULL;
+	}
+
+      elf_section_data (htab->elf.sgotplt->output_section)->this_hdr.sh_entsize
+	= htab->got_entry_size;
+
+      dynamic_addr = (sdyn == NULL
+		      ? (bfd_vma) 0
+		      : sdyn->output_section->vma + sdyn->output_offset);
+
+      /* Set the first entry in the global offset table to the address
+         of the dynamic section.  Write GOT[1] and GOT[2], needed for
+	 the dynamic linker.  */
+      if (htab->got_entry_size == 8)
+	{
+	  bfd_put_64 (output_bfd, dynamic_addr,
+		      htab->elf.sgotplt->contents);
+	  bfd_put_64 (output_bfd, (bfd_vma) 0,
+		      htab->elf.sgotplt->contents + 8);
+	  bfd_put_64 (output_bfd, (bfd_vma) 0,
+		      htab->elf.sgotplt->contents + 8*2);
+	}
+      else
+	{
+	  bfd_put_32 (output_bfd, dynamic_addr,
+		      htab->elf.sgotplt->contents);
+	  bfd_put_32 (output_bfd, 0,
+		      htab->elf.sgotplt->contents + 4);
+	  bfd_put_32 (output_bfd, 0,
+		      htab->elf.sgotplt->contents + 4*2);
+	}
+    }
+
+  if (!htab->elf.dynamic_sections_created)
+    return htab;
+
+  if (sdyn == NULL || htab->elf.sgot == NULL)
+    abort ();
+
+  sizeof_dyn = bed->s->sizeof_dyn;
+  dyncon = sdyn->contents;
+  dynconend = sdyn->contents + sdyn->size;
+  for (; dyncon < dynconend; dyncon += sizeof_dyn)
+    {
+      Elf_Internal_Dyn dyn;
+      asection *s;
+
+      (*bed->s->swap_dyn_in) (dynobj, dyncon, &dyn);
+
+      switch (dyn.d_tag)
+	{
+	default:
+	  if (htab->target_os == is_vxworks
+	      && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
+	    break;
+	  continue;
+
+	case DT_PLTGOT:
+	  s = htab->elf.sgotplt;
+	  dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
+	  break;
+
+	case DT_JMPREL:
+	  dyn.d_un.d_ptr = htab->elf.srelplt->output_section->vma;
+	  break;
+
+	case DT_PLTRELSZ:
+	  s = htab->elf.srelplt->output_section;
+	  dyn.d_un.d_val = s->size;
+	  break;
+
+	case DT_TLSDESC_PLT:
+	  s = htab->elf.splt;
+	  dyn.d_un.d_ptr = s->output_section->vma + s->output_offset
+	    + htab->tlsdesc_plt;
+	  break;
+
+	case DT_TLSDESC_GOT:
+	  s = htab->elf.sgot;
+	  dyn.d_un.d_ptr = s->output_section->vma + s->output_offset
+	    + htab->tlsdesc_got;
+	  break;
+	}
+
+      (*bed->s->swap_dyn_out) (output_bfd, &dyn, dyncon);
+    }
+
+  if (htab->plt_got != NULL && htab->plt_got->size > 0)
+    elf_section_data (htab->plt_got->output_section)
+      ->this_hdr.sh_entsize = htab->non_lazy_plt->plt_entry_size;
+
+  if (htab->plt_second != NULL && htab->plt_second->size > 0)
+    elf_section_data (htab->plt_second->output_section)
+      ->this_hdr.sh_entsize = htab->non_lazy_plt->plt_entry_size;
+
+  /* Adjust .eh_frame for .plt section.  */
+  if (htab->plt_eh_frame != NULL
+      && htab->plt_eh_frame->contents != NULL)
+    {
+      if (htab->elf.splt != NULL
+	  && htab->elf.splt->size != 0
+	  && (htab->elf.splt->flags & SEC_EXCLUDE) == 0
+	  && htab->elf.splt->output_section != NULL
+	  && htab->plt_eh_frame->output_section != NULL)
+	{
+	  bfd_vma plt_start = htab->elf.splt->output_section->vma;
+	  bfd_vma eh_frame_start = htab->plt_eh_frame->output_section->vma
+				   + htab->plt_eh_frame->output_offset
+				   + PLT_FDE_START_OFFSET;
+	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
+			     htab->plt_eh_frame->contents
+			     + PLT_FDE_START_OFFSET);
+	}
+
+      if (htab->plt_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
+	{
+	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
+						 htab->plt_eh_frame,
+						 htab->plt_eh_frame->contents))
+	    return NULL;
+	}
+    }
+
+  /* Adjust .eh_frame for .plt.got section.  */
+  if (htab->plt_got_eh_frame != NULL
+      && htab->plt_got_eh_frame->contents != NULL)
+    {
+      if (htab->plt_got != NULL
+	  && htab->plt_got->size != 0
+	  && (htab->plt_got->flags & SEC_EXCLUDE) == 0
+	  && htab->plt_got->output_section != NULL
+	  && htab->plt_got_eh_frame->output_section != NULL)
+	{
+	  bfd_vma plt_start = htab->plt_got->output_section->vma;
+	  bfd_vma eh_frame_start = htab->plt_got_eh_frame->output_section->vma
+				   + htab->plt_got_eh_frame->output_offset
+				   + PLT_FDE_START_OFFSET;
+	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
+			     htab->plt_got_eh_frame->contents
+			     + PLT_FDE_START_OFFSET);
+	}
+      if (htab->plt_got_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
+	{
+	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
+						 htab->plt_got_eh_frame,
+						 htab->plt_got_eh_frame->contents))
+	    return NULL;
+	}
+    }
+
+  /* Adjust .eh_frame for the second PLT section.  */
+  if (htab->plt_second_eh_frame != NULL
+      && htab->plt_second_eh_frame->contents != NULL)
+    {
+      if (htab->plt_second != NULL
+	  && htab->plt_second->size != 0
+	  && (htab->plt_second->flags & SEC_EXCLUDE) == 0
+	  && htab->plt_second->output_section != NULL
+	  && htab->plt_second_eh_frame->output_section != NULL)
+	{
+	  bfd_vma plt_start = htab->plt_second->output_section->vma;
+	  bfd_vma eh_frame_start
+	    = (htab->plt_second_eh_frame->output_section->vma
+	       + htab->plt_second_eh_frame->output_offset
+	       + PLT_FDE_START_OFFSET);
+	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
+			     htab->plt_second_eh_frame->contents
+			     + PLT_FDE_START_OFFSET);
+	}
+      if (htab->plt_second_eh_frame->sec_info_type
+	  == SEC_INFO_TYPE_EH_FRAME)
+	{
+	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
+						 htab->plt_second_eh_frame,
+						 htab->plt_second_eh_frame->contents))
+	    return NULL;
+	}
+    }
+
+  if (htab->elf.sgot && htab->elf.sgot->size > 0)
+    elf_section_data (htab->elf.sgot->output_section)->this_hdr.sh_entsize
+      = htab->got_entry_size;
+
+  return htab;
+}
+
 
 bfd_boolean
 _bfd_x86_elf_always_size_sections (bfd *output_bfd,
@@ -1407,8 +1626,7 @@ _bfd_x86_elf_copy_indirect_symbol (struct bfd_link_info *info,
      generate a R_386_COPY reloc.  */
   edir->gotoff_ref |= eind->gotoff_ref;
 
-  edir->has_got_reloc |= eind->has_got_reloc;
-  edir->has_non_got_reloc |= eind->has_non_got_reloc;
+  edir->zero_undefweak |= eind->zero_undefweak;
 
   if (ELIMINATE_COPY_RELOCS
       && ind->root.type != bfd_link_hash_indirect
@@ -1618,7 +1836,7 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (ELIMINATE_COPY_RELOCS
       && (bed->target_id == X86_64_ELF_DATA
 	  || (!eh->gotoff_ref
-	      && !htab->is_vxworks)))
+	      && htab->target_os != is_vxworks)))
     {
       for (p = eh->dyn_relocs; p != NULL; p = p->next)
 	{
@@ -1667,6 +1885,27 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     }
 
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
+}
+
+void
+_bfd_x86_elf_hide_symbol (struct bfd_link_info *info,
+			  struct elf_link_hash_entry *h,
+			  bfd_boolean force_local)
+{
+  if (h->root.type == bfd_link_hash_undefweak
+      && info->nointerp
+      && bfd_link_pie (info))
+    {
+      /* When there is no dynamic interpreter in PIE, make the undefined
+	 weak symbol dynamic so that PC relative branch to the undefined
+	 weak symbol will land to address 0.  */
+      struct elf_x86_link_hash_entry *eh = elf_x86_hash_entry (h);
+      if (h->plt.refcount > eh->func_pointer_refcount
+	  || eh->plt_got.refcount > 0)
+	return;
+    }
+
+  _bfd_elf_link_hash_hide_symbol (info, h, force_local);
 }
 
 /* Return TRUE if a symbol is referenced locally.  It is similar to
@@ -1807,6 +2046,8 @@ _bfd_x86_elf_get_synthetic_symtab (bfd *abfd,
 
   dynrelcount = bfd_canonicalize_dynamic_reloc (abfd, dynrelbuf,
 						dynsyms);
+  if (dynrelcount <= 0)
+    return -1;
 
   /* Sort the relocs by address.  */
   qsort (dynrelbuf, dynrelcount, sizeof (arelent *),
@@ -1960,6 +2201,10 @@ _bfd_x86_elf_get_synthetic_symtab (bfd *abfd,
 		names += sizeof ("@plt");
 		n++;
 		s++;
+		/* There should be only one entry in PLT for a given
+		   symbol.  Set howto to NULL after processing a PLT
+		   entry to guard against corrupted PLT.  */
+		p->howto = NULL;
 	      }
 	    offset += plt_entry_size;
 	  }
@@ -2196,12 +2441,13 @@ error_alignment:
   if (htab == NULL)
     return pbfd;
 
-  htab->is_vxworks = init_table->is_vxworks;
   htab->r_info = init_table->r_info;
   htab->r_sym = init_table->r_sym;
 
   if (bfd_link_relocatable (info))
     return pbfd;
+
+  htab->plt0_pad_byte = init_table->plt0_pad_byte;
 
   use_ibt_plt = info->ibtplt || info->ibt;
   if (!use_ibt_plt && pbfd != NULL)
@@ -2254,11 +2500,15 @@ error_alignment:
 	}
     }
 
+  /* Return if there are no normal input files.  */
+  if (dynobj == NULL)
+    return pbfd;
+
   /* Even when lazy binding is disabled by "-z now", the PLT0 entry may
      still be used with LD_AUDIT or LD_PROFILE if PLT entry is used for
      canonical function address.  */
   htab->plt.has_plt0 = 1;
-  normal_target = init_table->normal_target;
+  normal_target = htab->target_os == is_normal;
 
   if (normal_target)
     {
@@ -2321,11 +2571,7 @@ error_alignment:
       htab->plt.eh_frame_plt = htab->lazy_plt->eh_frame_plt;
     }
 
-  /* Return if there are no normal input files.  */
-  if (dynobj == NULL)
-    return pbfd;
-
-  if (htab->is_vxworks
+  if (htab->target_os == is_vxworks
       && !elf_vxworks_create_dynamic_sections (dynobj, info,
 					       &htab->srelplt2))
     {

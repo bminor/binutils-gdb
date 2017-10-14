@@ -1,3 +1,44 @@
+2017-10-12  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32-dis.c (print_insn_ft32): Replace FT32_FLD_K8 with K15.
+	* ft32-opc.c (ft32_opc_info): Replace FT32_FLD_K8 with
+	K15. Add jmpix pattern.
+
+2017-10-09  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-opc.txt (prno, tpei, irbm): New instructions added.
+
+2017-10-09  Heiko Carstens  <heiko.carstens@de.ibm.com>
+
+	* s390-opc.c (INSTR_SI_RD): New macro.
+	(INSTR_S_RD): Adjust example instruction.
+	* s390-opc.txt (lpsw, ssm, ts): Change S_RD instruction format to
+	SI_RD.
+
+2017-10-01  Alexander Fedotov  <alfedotov@gmail.com>
+
+	* ppc-opc.c (vle_opcodes): Add e_lmvsprw, e_lmvgprw,
+	e_lmvsrrw, e_lmvcsrrw and e_lmvcsrrw as official mnemonics for
+	VLE multimple load/store instructions. Old e_ldm* variants are
+	kept as aliases.
+	Add missing e_lmvmcsrrw and e_stmvmcsrrw.
+
+2017-09-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 22179
+	* riscv-opc.c (riscv_opcodes): Add fmv.x.w and fmv.w.x as the new
+	names for the fmv.x.s and fmv.s.x instructions respectively.
+
+2017-09-26  do  <do@nerilex.org>
+
+	PR 22123
+	* m68k-opc.c (m68k_opcodes): Allow macw and macl instructions to
+	be used on CPUs that have emacs support.
+
+2017-09-21  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* aarch64-opc.c (expand_fp_imm): Initialize 'imm'.
+
 2017-09-09  Kamil Rytarowski  <n54@gmx.com>
 
 	* nds32-asm.c: Rename __BIT() to N32_BIT().

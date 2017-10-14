@@ -1,3 +1,300 @@
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (target_can_use_run_cmd): New procedure.
+	* gdb.base/annota1.exp: Use it instead of is_remote.
+	* gdb.base/annota3.exp: Use it instead of is_remote.
+	* gdb.cp/annota2.exp: Use it instead of is_remote.
+	* gdb.cp/annota3.exp: Use it instead of is_remote.
+	* gdb.multi/bkpt-multi-exec.exp: Use it instead of is_remote.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/testenv.exp: Check use_gdb_stub instead of is_remote.
+	(test_num_test_vars, run_and_count_vars, find_env)
+	(test_set_unset_env, test_inherit_env_var): New procedures.
+	(top level): Use them.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* lib/selftest-support.exp (selftest_setup): Extend comments, and
+	also skip on stub-like targets.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22293
+	* gdb.base/find-unmapped.exp: Don't skip if is_remote target.
+	(top level): Move some tests to ...
+	(test_not_found): ... this new procedure.
+	(top level): Call it.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/term.exp: Don't skip if is_remote target.  Instead,
+	expect different "info terminal" output if testing with a
+	non-native target.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR python/12966
+	* gdb.python/py-evthreads.exp: Remove is_remote target kfail.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.python/py-evthreads.exp: Start GDB with "set non-stop on"
+	already.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.python/py-evsignal.exp: Check gdb_protocol instead of
+	is_remote.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/thread_events.exp: Check gdb_protocol instead of
+	is_remote.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/corefile.exp (corefile_test_run): Skip if gdb_protocol
+	is set.
+	(corefile_test_attach): Likewise.  Check can_spawn_for_attach
+	instead of is_remote.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/remote.exp: Check gdb_protocol instead of is_remote.
+	(top level): Add comment.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/remote.exp (top level): Fix comment typo and add
+	missing return.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/solib-nodir.exp: Split is_remote and skip_shlib_tests
+	calls and add comments.  Skip test if use_gdb_stub is set.
+	(top level): Use "set cwd" command instead of "cd" command.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/shlib-call.exp (top level): Use gdb_run_cmd and remove
+	is_remote target check.
+
+2017-10-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/scope.exp: Use build_executable + clean_restart +
+	gdb_file_cmd instead of prepare_for_testing and no longer skip
+	"before run" tests on is_remote target boards.  Update comments.
+	* boards/native-extended-gdbserver.exp
+	(extended_gdbserver_load_last_file): New, factored out from ...
+	(gdb_load): ... this.  Move further below and add comment.
+	(extended_gdbserver_gdb_file_cmd, gdb_file_cmd, gdb_reload): New.
+
+2017-10-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/attach.exp: Remove references to gdb64.
+	* gdb.base/dbx.exp: Remove references to gdb64.
+
+2017-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/label.exp: Remove is_remote target check.
+
+2017-10-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/auvx.exp (coredir): Update comment.
+	(top level) <core_works>: Use "set cwd" command instead of "cd"
+	command.
+
+2017-10-12  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/catch-fork-static.exp: No longer skip on is_remote
+	target boards.
+
+2017-10-12  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/checkpoint.exp: Don't check is_remote or isnative.
+	Instead skip if there's any gdb_protocol set.
+
+2017-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/dprintf-non-stop.exp: Remove is_remote target check.
+
+2017-10-12  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/argv0-symlink.exp: kfail on remote gdbserver,
+	instead of on dejagnu remote boards.
+
+2017-10-12  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi <simon.marchi@polymtl.ca>
+
+	* gdb.base/inferior-died.exp: Remove is_remote and isnative
+	checks.  Use build_executable + clean_restart instead of
+	prepare_for_testing.  Pass "set non-stop on" via GDBFLAGS instead
+	of enabling non-stop after starting gdb.
+
+2017-10-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/non-ldr-exc-1.exp: No longer skip if is_remote target.
+	* gdb.threads/non-ldr-exc-2.exp: Ditto.
+	* gdb.threads/non-ldr-exc-3.exp: Ditto.
+	* gdb.threads/non-ldr-exc-4.exp: Ditto.
+
+2017-10-11  Anton Kolesov  <Anton.Kolesov@synopsys.com>
+
+	* gdb.arch/arc-tdesc-cpu.exp: New file.
+	* gdb.arch/arc-tdesc-cpu.xml: Likewise.
+
+2017-10-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (get_integer_valueof): Don't output read value in test name.
+
+2017-10-10  Pedro Alves <palves@redhat.com>
+
+	* gdb.mi/mi-pthreads.exp (check_mi_thread_command_set): Don't
+	expect CLI output.
+
+2017-10-10  Pedro Alves  <palves@redhat.com>
+
+	* lib/selftest-support.exp (selftest_setup): Update for
+	captured_command_loop's prototype change.
+
+2017-10-09  Pedro Alves  <palves@redhat.com>
+
+	Test both arch1=>arch2 and arch2=>arch1.
+
+	* gdb.multi/multi-arch-exec.exp (exec1, srcfile1, binfile1, exec2)
+	(srcfile2, binfile2, march1, march2): Remove globals.  Largely
+	factored out to...
+	(append_arch1_options, append_arch2_options, append_arch_options)
+	(build_executables): New procedures.
+	(do_test): New 'first_arch' parameter.  Use it to define 'from_exec'
+	local.
+	(top level): Add new 'first_arch' testing axis.
+
+2017-10-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/multi-arch-exec.c: Include <pthread.h> and <assert.h>.
+	(barrier): New.
+	(thread_start, all_started): New functions.
+	(main): Spawn new thread and wait until it is scheduled.
+	* gdb.multi/multi-arch-exec.exp: Build $srcfile1 with the pthreads
+	option.
+	(do_test): Add 'selected_thread' parameter.  Run to all_started
+	instead of main.  Explicitly set the breakpoint at main.  Switch
+	to the SELECTED_THREAD thread.
+	(top level): Test handling the exec event with either the main
+	thread or the second thread selected.
+
+2017-10-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/print-file-var-main.c: Fix get_version_2 value check
+	logic.  Move STOP marker after the value checks.
+	* gdb.base/print-file-var.exp (continue to STOP marker): Tighten
+	regexp.
+
+2017-10-06  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.mi/mi-threads-interrupt.exp: Skip test if nointerrupts.
+
+2017-10-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.base/dfp-exprs.exp: Update tests to larger range of supported
+	integer-to-dfp conversion.
+	* gdb.base/dfp-test.exp: Likewise.
+
+2017-10-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/hangout.c: Include <unistd.h>.
+	(hangout_loop): New function.
+	(main): Call alarm.  Call hangout_loop in a loop.
+	* gdb.multi/hello.c: Include <unistd.h>.
+	(hello_loop): New function.
+	(main): Call alarm.  Call hangout_loop in a loop.
+	* gdb.multi/multi-arch.exp: Test running to a breakpoint one
+	inferior with the other selected.
+
+2017-10-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.mi/list-thread-groups-available.exp: New file.
+	* gdb.mi/list-thread-groups-available.c: New file.
+
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/set-cwd.exp: Make it available on
+	native-extended-gdbserver.
+
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/set-cwd.c: New file.
+	* gdb.base/set-cwd.exp: Likewise.
+
+2017-10-02  Tom Tromey  <tom@tromey.com>
+
+	PR rust/22236:
+	* gdb.rust/simple.rs (main): New variable "fslice".
+	* gdb.rust/simple.exp: Add slice tests.  Update string tests.
+
+2017-10-02  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.exp: Test ptype of a slice.
+
+2017-10-02  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.exp: Test index of slice.
+
+2017-09-27  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/macscp.exp: Add __VA_OPT__ tests.
+
+2017-09-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/compare-sections.exp (get value of read-only section): Read
+	as unsigned value.
+	(corrupt read-only section): Likewise and don't set written if patching
+	failed.
+
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.python/py-thrhandle.c, gdb.python/py-thrhandle.exp: New
+	files.
+
+2017-09-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/list-ambiguous.exp (test_list_ambiguous_symbol): Expect
+	symbol names in gdb's output.
+	* gdb.cp/overload.exp ("list all overloads"): Likewise.
+
+2017-09-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/list-ambiguous.exp (test_list_ambiguous_function):
+	Rename to ...
+	(test_list_ambiguous_symbol): ... this and add a symbol name
+	parameter.  Adjust.
+	(test_list_ambiguous_function): Reimplement on top of
+	test_list_ambiguous_symbol and also test listing ambiguous
+	variables.
+	* gdb.base/list-ambiguous0.c (ambiguous): Rename to ...
+	(ambiguous_fun): ... this.
+	(ambiguous_var): New.
+	* gdb.base/list-ambiguous1.c (ambiguous): Rename to ...
+	(ambiguous_fun): ... this.
+	(ambiguous_var): New.
+
+2017-09-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.base/starti.c: New file.
+	* gdb.base/starti.exp: New file.
+	* lib/gdb.exp (gdb_starti_cmd): New procedure.
+
 2017-09-14  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/nodebug.exp (nodebug_runto): New procedure.

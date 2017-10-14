@@ -1947,7 +1947,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
       if (eh->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefweak)
 	{
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    eh->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
@@ -2357,6 +2358,7 @@ elf_s390_relocate_section (bfd *output_bfd,
       bfd_reloc_status_type r;
       int tls_type;
       asection *base_got = htab->elf.sgot;
+      bfd_boolean resolved_to_zero;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type == (int) R_390_GNU_VTINHERIT
@@ -2447,6 +2449,9 @@ elf_s390_relocate_section (bfd *output_bfd,
 
       if (bfd_link_relocatable (info))
 	continue;
+
+      resolved_to_zero = (h != NULL
+			  && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
 
       switch (r_type)
 	{
@@ -2836,7 +2841,8 @@ elf_s390_relocate_section (bfd *output_bfd,
 
 	  if ((bfd_link_pic (info)
 	       && (h == NULL
-		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		   || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		       && !resolved_to_zero)
 		   || h->root.type != bfd_link_hash_undefweak)
 	       && ((r_type != R_390_PC16
 		    && r_type != R_390_PC12DBL
@@ -4218,5 +4224,7 @@ elf32_s390_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
 #define bfd_elf32_mkobject		elf_s390_mkobject
 #define elf_backend_object_p		elf_s390_object_p
+
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
 
 #include "elf32-target.h"

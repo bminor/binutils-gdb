@@ -435,17 +435,14 @@ varobj_create (const char *objname,
 
 /* Generates an unique name that can be used for a varobj.  */
 
-char *
+std::string
 varobj_gen_name (void)
 {
   static int id = 0;
-  char *obj_name;
 
   /* Generate a name for this object.  */
   id++;
-  obj_name = xstrprintf ("var%d", id);
-
-  return obj_name;
+  return string_printf ("var%d", id);
 }
 
 /* Given an OBJNAME, returns the pointer to the corresponding varobj.  Call

@@ -1,3 +1,15 @@
+2017-10-12  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32/interp.c (step_once): Replace FT32_FLD_K8 with K15.
+
+2017-10-12  James Bowman  <james.bowman@ftdichip.com>
+
+	* MAINTAINERS (ft32): Add myself.
+
+2017-10-03  Jim Wilson  <wilson@tuliptree.org>
+
+	* MAINTAINERS (aarch64): Update my email address.
+
 2017-09-06  John Baldwin  <jhb@FreeBSD.org>
 
 	* configure.ac: Honor existing CC_FOR_BUILD in environment.

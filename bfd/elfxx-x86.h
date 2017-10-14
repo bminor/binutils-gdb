@@ -49,19 +49,15 @@
 #define SYMBOL_REFERENCES_LOCAL_P(INFO, H) \
   _bfd_x86_elf_link_symbol_references_local ((INFO), (H))
 
-/* Is a undefined weak symbol which is resolved to 0.  Reference to an
-   undefined weak symbol is resolved to 0 when building executable if
-   it isn't dynamic and
-   1. Has non-GOT/non-PLT relocations in text section.  Or
-   2. Has no GOT/PLT relocation.
-   Local undefined weak symbol is always resolved to 0.
- */
+/* TRUE if an undefined weak symbol should be resolved to 0.  Local
+   undefined weak symbol is always resolved to 0.  Reference to an
+   undefined weak symbol is resolved to 0 in executable if undefined
+   weak symbol should be resolved to 0 (zero_undefweak > 0).  */
 #define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, EH) \
   ((EH)->elf.root.type == bfd_link_hash_undefweak		 \
    && (SYMBOL_REFERENCES_LOCAL_P ((INFO), &(EH)->elf)		 \
        || (bfd_link_executable (INFO)				 \
-	   && (!(EH)->has_got_reloc				 \
-	       || (EH)->has_non_got_reloc))))
+	   && (EH)->zero_undefweak > 0)))
 
 /* Should copy relocation be generated for a symbol.  Don't generate
    copy relocation against a protected symbol defined in a shared
@@ -74,6 +70,157 @@
    && ((EH)->elf.root.u.def.section->owner->flags & DYNAMIC) != 0 \
    && ((EH)->elf.root.u.def.section->flags & SEC_CODE) == 0)
 
+/* TRUE if dynamic relocation is needed.  If we are creating a shared
+   library, and this is a reloc against a global symbol, or a non PC
+   relative reloc against a local symbol, then we need to copy the reloc
+   into the shared library.  However, if we are linking with -Bsymbolic,
+   we do not need to copy a reloc against a global symbol which is
+   defined in an object we are including in the link (i.e., DEF_REGULAR
+   is set).  At this point we have not seen all the input files, so it
+   is possible that DEF_REGULAR is not set now but will be set later (it
+   is never cleared).  In case of a weak definition, DEF_REGULAR may be
+   cleared later by a strong definition in a shared library.  We account
+   for that possibility below by storing information in the relocs_copied
+   field of the hash table entry.  A similar situation occurs when
+   creating shared libraries and symbol visibility changes render the
+   symbol local.
+
+   If on the other hand, we are creating an executable, we may need to
+   keep relocations for symbols satisfied by a dynamic library if we
+   manage to avoid copy relocs for the symbol.
+
+   We also need to generate dynamic pointer relocation against
+   STT_GNU_IFUNC symbol in the non-code section.  */
+#define NEED_DYNAMIC_RELOCATION_P(INFO, H, SEC, R_TYPE, POINTER_TYPE) \
+  ((bfd_link_pic (INFO) \
+    && (! X86_PCREL_TYPE_P (R_TYPE) \
+	|| ((H) != NULL \
+	    && (! (bfd_link_pie (INFO) \
+		   || SYMBOLIC_BIND ((INFO), (H))) \
+		|| (H)->root.type == bfd_link_hash_defweak \
+		|| !(H)->def_regular)))) \
+		|| ((H) != NULL \
+		    && (H)->type == STT_GNU_IFUNC \
+		    && (R_TYPE) == POINTER_TYPE \
+		    && ((SEC)->flags & SEC_CODE) == 0) \
+		    || (ELIMINATE_COPY_RELOCS \
+			&& !bfd_link_pic (INFO) \
+			&& (H) != NULL \
+			&& ((H)->root.type == bfd_link_hash_defweak \
+			    || !(H)->def_regular)))
+
+/* TRUE if dynamic relocation should be generated.  Don't copy a
+   pc-relative relocation into the output file if the symbol needs
+   copy reloc or the symbol is undefined when building executable.
+   Copy dynamic function pointer relocations.  Don't generate dynamic
+   relocations against resolved undefined weak symbols in PIE, except
+   when PC32_RELOC is TRUE.  Undefined weak symbol is bound locally
+   when PIC is false.  */
+#define GENERATE_DYNAMIC_RELOCATION_P(INFO, EH, R_TYPE, \
+				      NEED_COPY_RELOC_IN_PIE, \
+				      RESOLVED_TO_ZERO, PC32_RELOC) \
+  ((bfd_link_pic (INFO) \
+    && !(NEED_COPY_RELOC_IN_PIE) \
+    && ((EH) == NULL \
+	|| ((ELF_ST_VISIBILITY ((EH)->elf.other) == STV_DEFAULT \
+	     && (!(RESOLVED_TO_ZERO) || PC32_RELOC)) \
+	    || (EH)->elf.root.type != bfd_link_hash_undefweak)) \
+    && ((!X86_PCREL_TYPE_P (R_TYPE) \
+	 && !X86_SIZE_TYPE_P (R_TYPE)) \
+	 || ! SYMBOL_CALLS_LOCAL ((INFO), &(EH)->elf))) \
+   || (ELIMINATE_COPY_RELOCS \
+       && !bfd_link_pic (INFO) \
+       && (EH) != NULL \
+       && (EH)->elf.dynindx != -1 \
+       && (!(EH)->elf.non_got_ref \
+	   || (EH)->func_pointer_refcount > 0 \
+	   || ((EH)->elf.root.type == bfd_link_hash_undefweak \
+	       && !(RESOLVED_TO_ZERO))) \
+	       && (((EH)->elf.def_dynamic && !(EH)->elf.def_regular) \
+		   || (EH)->elf.root.type == bfd_link_hash_undefined)))
+
+/* TRUE if this input relocation should be copied to output.  H->dynindx
+   may be -1 if this symbol was marked to become local.  */
+#define COPY_INPUT_RELOC_P(INFO, H, R_TYPE) \
+  ((H) != NULL \
+   && (H)->dynindx != -1 \
+   && (X86_PCREL_TYPE_P (R_TYPE) \
+       || !(bfd_link_executable (INFO) || SYMBOLIC_BIND ((INFO), (H))) \
+       || !(H)->def_regular))
+
+/* TRUE if this is actually a static link, or it is a -Bsymbolic link
+   and the symbol is defined locally, or the symbol was forced to be
+   local because of a version file.  */
+#define RESOLVED_LOCALLY_P(INFO, H, HTAB) \
+  (!WILL_CALL_FINISH_DYNAMIC_SYMBOL ((HTAB)->elf.dynamic_sections_created, \
+				     bfd_link_pic (INFO), (H)) \
+   || (bfd_link_pic (INFO) \
+       && SYMBOL_REFERENCES_LOCAL_P ((INFO), (H))) \
+       || (ELF_ST_VISIBILITY ((H)->other) \
+	   && (H)->root.type == bfd_link_hash_undefweak))
+
+/* TRUE if relative relocation should be generated.  GOT reference to
+   global symbol in PIC will lead to dynamic symbol.  It becomes a
+   problem when "time" or "times" is defined as a variable in an
+   executable, clashing with functions of the same name in libc.  If a
+   symbol isn't undefined weak symbol, don't make it dynamic in PIC and
+   generate relative relocation.  */
+#define GENERATE_RELATIVE_RELOC_P(INFO, H) \
+  ((H)->dynindx == -1 \
+   && !(H)->forced_local \
+   && (H)->root.type != bfd_link_hash_undefweak \
+   && bfd_link_pic (INFO))
+
+/* TRUE if this is a pointer reference to a local IFUNC.  */
+#define POINTER_LOCAL_IFUNC_P(INFO, H) \
+  ((H)->dynindx == -1 \
+   || (H)->forced_local \
+   || bfd_link_executable (INFO))
+
+/* TRUE if this is a PLT reference to a local IFUNC.  */
+#define PLT_LOCAL_IFUNC_P(INFO, H) \
+  ((H)->dynindx == -1 \
+   || ((bfd_link_executable (INFO) \
+	|| ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT) \
+	&& (H)->def_regular \
+	&& (H)->type == STT_GNU_IFUNC))
+
+/* TRUE if TLS IE->LE transition is OK.  */
+#define TLS_TRANSITION_IE_TO_LE_P(INFO, H, TLS_TYPE) \
+  (bfd_link_executable (INFO) \
+   && (H) != NULL \
+   && (H)->dynindx == -1 \
+   && (TLS_TYPE & GOT_TLS_IE))
+
+/* Verify that the symbol has an entry in the procedure linkage table.  */
+#define VERIFY_PLT_ENTRY(INFO, H, PLT, GOTPLT, RELPLT, LOCAL_UNDEFWEAK) \
+  do \
+    { \
+      if (((H)->dynindx == -1 \
+	   && !LOCAL_UNDEFWEAK \
+	   && !(((H)->forced_local || bfd_link_executable (INFO)) \
+		&& (H)->def_regular \
+		&& (H)->type == STT_GNU_IFUNC)) \
+	  || (PLT) == NULL \
+	  || (GOTPLT) == NULL \
+	  || (RELPLT) == NULL) \
+	abort (); \
+    } \
+  while (0);
+
+/* Verify that the symbol supports copy relocation.  */
+#define VERIFY_COPY_RELOC(H, HTAB) \
+  do \
+    { \
+      if ((H)->dynindx == -1 \
+	  || ((H)->root.type != bfd_link_hash_defined \
+	      && (H)->root.type != bfd_link_hash_defweak) \
+	  || (HTAB)->elf.srelbss == NULL \
+	  || (HTAB)->elf.sreldynrelro == NULL) \
+	abort (); \
+    } \
+  while (0);
+
 /* x86 ELF linker hash entry.  */
 
 struct elf_x86_link_hash_entry
@@ -85,11 +232,11 @@ struct elf_x86_link_hash_entry
 
   unsigned char tls_type;
 
-  /* TRUE if symbol has GOT or PLT relocations.  */
-  unsigned int has_got_reloc : 1;
-
-  /* TRUE if symbol has non-GOT/non-PLT relocations in text sections.  */
-  unsigned int has_non_got_reloc : 1;
+  /* Bit 0: Symbol has no GOT nor PLT relocations.
+     Bit 1: Symbol has non-GOT/non-PLT relocations in text sections.
+     zero_undefweak is initialized to 1 and undefined weak symbol
+     should be resolved to 0 if zero_undefweak > 0.  */
+  unsigned int zero_undefweak : 2;
 
   /* Don't call finish_dynamic_symbol on this symbol.  */
   unsigned int no_finish_dynamic_symbol : 1;
@@ -256,6 +403,13 @@ struct elf_x86_plt_layout
 #define elf_x86_hash_entry(ent) \
   ((struct elf_x86_link_hash_entry *)(ent))
 
+enum elf_x86_target_os
+{
+  is_normal,
+  is_vxworks,
+  is_nacl
+};
+
 /* x86 ELF linker hash table.  */
 
 struct elf_x86_link_hash_table
@@ -311,10 +465,6 @@ struct elf_x86_link_hash_table
      to read-only sections.  */
   bfd_boolean readonly_dynrelocs_against_ifunc;
 
-  /* TRUE if this is a VxWorks x86 target.  This is only used for
-     i386.  */
-  bfd_boolean is_vxworks;
-
   /* The (unloaded but important) .rel.plt.unloaded section on VxWorks.
      This is used for i386 only.  */
   asection *srelplt2;
@@ -329,10 +479,15 @@ struct elf_x86_link_hash_table
      yet.  This is only used for x86-64.  */
   bfd_vma tlsdesc_plt;
 
+   /* Value used to fill the unused bytes of the first PLT entry.  This
+      is only used for i386.  */
+  bfd_byte plt0_pad_byte;
+
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
   bfd_boolean (*is_reloc_section) (const char *);
   enum elf_target_id target_id;
+  enum elf_x86_target_os target_os;
   unsigned int sizeof_reloc;
   unsigned int dt_reloc;
   unsigned int dt_reloc_sz;
@@ -343,6 +498,18 @@ struct elf_x86_link_hash_table
   const char *dynamic_interpreter;
   const char *tls_get_addr;
 };
+
+/* Architecture-specific backend data for x86.  */
+
+struct elf_x86_backend_data
+{
+  /* Target system.  */
+  enum elf_x86_target_os target_os;
+};
+
+#define get_elf_x86_backend_data(abfd) \
+  ((const struct elf_x86_backend_data *) \
+   get_elf_backend_data (abfd)->arch_data)
 
 struct elf_x86_init_table
 {
@@ -358,11 +525,7 @@ struct elf_x86_init_table
   /* The non-lazy PLT layout for IBT.  */
   const struct elf_x86_non_lazy_plt_layout *non_lazy_ibt_plt;
 
-  /* TRUE if this is a normal x86 target.  */
-  bfd_boolean normal_target;
-
-  /* TRUE if this is a VxWorks x86 target.  */
-  bfd_boolean is_vxworks;
+  bfd_byte plt0_pad_byte;
 
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
@@ -454,6 +617,9 @@ extern bfd_boolean _bfd_x86_elf_link_check_relocs
 extern bfd_boolean _bfd_x86_elf_size_dynamic_sections
   (bfd *, struct bfd_link_info *);
 
+extern struct elf_x86_link_hash_table *_bfd_x86_elf_finish_dynamic_sections
+  (bfd *, struct bfd_link_info *);
+
 extern bfd_boolean _bfd_x86_elf_always_size_sections
   (bfd *, struct bfd_link_info *);
 
@@ -473,6 +639,9 @@ extern bfd_boolean _bfd_x86_elf_hash_symbol
 
 extern bfd_boolean _bfd_x86_elf_adjust_dynamic_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *);
+
+extern void _bfd_x86_elf_hide_symbol
+  (struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean);
 
 extern bfd_boolean _bfd_x86_elf_link_symbol_references_local
   (struct bfd_link_info *, struct elf_link_hash_entry *);

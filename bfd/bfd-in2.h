@@ -2466,8 +2466,9 @@ unsigned int bfd_arch_mach_octets_per_byte
 
 typedef enum bfd_reloc_status
 {
-  /* No errors detected.  */
-  bfd_reloc_ok,
+  /* No errors detected.  Note - the value 2 is used so that it
+     will not be mistaken for the boolean TRUE or FALSE values.  */
+  bfd_reloc_ok = 2,
 
   /* The relocation was performed, but there was an overflow.  */
   bfd_reloc_overflow,
@@ -3148,6 +3149,7 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_FT32_20,
   BFD_RELOC_FT32_17,
   BFD_RELOC_FT32_18,
+  BFD_RELOC_FT32_15,
 
 
 /* Fujitsu Frv Relocations.  */
@@ -7054,7 +7056,9 @@ bfd_error_type;
 
 bfd_error_type bfd_get_error (void);
 
-void bfd_set_error (bfd_error_type error_tag, ...);
+void bfd_set_error (bfd_error_type error_tag);
+
+void bfd_set_input_error (bfd *input, bfd_error_type error_tag);
 
 const char *bfd_errmsg (bfd_error_type error_tag);
 

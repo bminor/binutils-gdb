@@ -126,7 +126,7 @@ free_fork (struct fork_info *fp)
   if (fp)
     {
       if (fp->savedregs)
-	regcache_xfree (fp->savedregs);
+	delete fp->savedregs;
       if (fp->filepos)
 	xfree (fp->filepos);
       xfree (fp);
@@ -292,7 +292,7 @@ fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
   DIR *d;
 
   if (fp->savedregs)
-    regcache_xfree (fp->savedregs);
+    delete fp->savedregs;
 
   fp->savedregs = regcache_dup (get_current_regcache ());
   fp->clobber_regs = clobber_regs;
@@ -503,7 +503,7 @@ out:
 /* Fork list <-> user interface.  */
 
 static void
-delete_checkpoint_command (char *args, int from_tty)
+delete_checkpoint_command (const char *args, int from_tty)
 {
   ptid_t ptid, pptid;
   struct fork_info *fi;
@@ -544,7 +544,7 @@ Please switch to another checkpoint before deleting the current one"));
 }
 
 static void
-detach_checkpoint_command (char *args, int from_tty)
+detach_checkpoint_command (const char *args, int from_tty)
 {
   ptid_t ptid;
 

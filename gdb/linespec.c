@@ -2793,7 +2793,7 @@ linespec_parser_delete (void *arg)
 /* See description in linespec.h.  */
 
 void
-linespec_lex_to_end (char **stringp)
+linespec_lex_to_end (const char **stringp)
 {
   linespec_parser parser;
   struct cleanup *cleanup;
@@ -3338,7 +3338,7 @@ decode_line_1 (const struct event_location *location, int flags,
 /* See linespec.h.  */
 
 std::vector<symtab_and_line>
-decode_line_with_current_source (char *string, int flags)
+decode_line_with_current_source (const char *string, int flags)
 {
   if (string == 0)
     error (_("Empty line specification."));
@@ -3361,7 +3361,7 @@ decode_line_with_current_source (char *string, int flags)
 /* See linespec.h.  */
 
 std::vector<symtab_and_line>
-decode_line_with_last_displayed (char *string, int flags)
+decode_line_with_last_displayed (const char *string, int flags)
 {
   if (string == 0)
     error (_("Empty line specification."));
@@ -3472,19 +3472,21 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
 
       if (self->canonical)
 	{
-	  char *str;
+	  std::string holder;
+	  const char *str;
 
 	  self->canonical->pre_expanded = 1;
 
 	  if (ls->explicit_loc.source_filename)
 	    {
-	      str = xstrprintf ("%s:%s",
-				ls->explicit_loc.source_filename, saved_arg);
+	      holder = string_printf ("%s:%s",
+				      ls->explicit_loc.source_filename,
+				      saved_arg);
+	      str = holder.c_str ();
 	    }
 	  else
-	    str = xstrdup (saved_arg);
+	    str = saved_arg;
 
-	  make_cleanup (xfree, str);
 	  self->canonical->location = new_linespec_location (&str);
 	}
     }
@@ -4313,35 +4315,46 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
   CORE_ADDR pc;
   struct symtab_and_line sal;
 
-  sal = find_pc_sect_line (MSYMBOL_VALUE_ADDRESS (objfile, msymbol),
-			   (struct obj_section *) 0, 0);
-  sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
-
-  /* The minimal symbol might point to a function descriptor;
-     resolve it to the actual code address instead.  */
-  pc = gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc, &current_target);
-  if (pc != sal.pc)
-    sal = find_pc_sect_line (pc, NULL, 0);
-
-  if (self->funfirstline)
+  if (msymbol_is_text (msymbol))
     {
-      if (sal.symtab != NULL
-	  && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
-	      || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
+      sal = find_pc_sect_line (MSYMBOL_VALUE_ADDRESS (objfile, msymbol),
+			       (struct obj_section *) 0, 0);
+      sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
+
+      /* The minimal symbol might point to a function descriptor;
+	 resolve it to the actual code address instead.  */
+      pc = gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc,
+					       &current_target);
+      if (pc != sal.pc)
+	sal = find_pc_sect_line (pc, NULL, 0);
+
+      if (self->funfirstline)
 	{
-	  /* If gdbarch_convert_from_func_ptr_addr does not apply then
-	     sal.SECTION, sal.LINE&co. will stay correct from above.
-	     If gdbarch_convert_from_func_ptr_addr applies then
-	     sal.SECTION is cleared from above and sal.LINE&co. will
-	     stay correct from the last find_pc_sect_line above.  */
-	  sal.pc = MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
-	  sal.pc = gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc,
-						       &current_target);
-	  if (gdbarch_skip_entrypoint_p (gdbarch))
-	    sal.pc = gdbarch_skip_entrypoint (gdbarch, sal.pc);
+	  if (sal.symtab != NULL
+	      && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
+		  || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
+	    {
+	      /* If gdbarch_convert_from_func_ptr_addr does not apply then
+		 sal.SECTION, sal.LINE&co. will stay correct from above.
+		 If gdbarch_convert_from_func_ptr_addr applies then
+		 sal.SECTION is cleared from above and sal.LINE&co. will
+		 stay correct from the last find_pc_sect_line above.  */
+	      sal.pc = MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
+	      sal.pc = gdbarch_convert_from_func_ptr_addr (gdbarch, sal.pc,
+							   &current_target);
+	      if (gdbarch_skip_entrypoint_p (gdbarch))
+		sal.pc = gdbarch_skip_entrypoint (gdbarch, sal.pc);
+	    }
+	  else
+	    skip_prologue_sal (&sal);
 	}
-      else
-	skip_prologue_sal (&sal);
+    }
+  else
+    {
+      sal.objfile = objfile;
+      sal.pc = MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
+      sal.pspace = current_program_space;
+      sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
     }
 
   if (maybe_add_address (self->addr_set, objfile->pspace, sal.pc))
@@ -4612,6 +4625,7 @@ symbol_to_sal (struct symtab_and_line *result,
 	{
 	  *result = {};
 	  result->symtab = symbol_symtab (sym);
+	  result->symbol = sym;
 	  result->line = SYMBOL_LINE (sym);
 	  result->pc = SYMBOL_VALUE_ADDRESS (sym);
 	  result->pspace = SYMTAB_PSPACE (result->symtab);
@@ -4627,7 +4641,9 @@ symbol_to_sal (struct symtab_and_line *result,
 	  /* We know its line number.  */
 	  *result = {};
 	  result->symtab = symbol_symtab (sym);
+	  result->symbol = sym;
 	  result->line = SYMBOL_LINE (sym);
+	  result->pc = SYMBOL_VALUE_ADDRESS (sym);
 	  result->pspace = SYMTAB_PSPACE (result->symtab);
 	  return 1;
 	}

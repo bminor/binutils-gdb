@@ -1200,7 +1200,7 @@ bfd_get_debug_link_info_1 (bfd *abfd, void *crc32_out)
   /* PR 17597: avoid reading off the end of the buffer.  */
   crc_offset = strnlen (name, bfd_get_section_size (sect)) + 1;
   crc_offset = (crc_offset + 3) & ~3;
-  if (crc_offset >= bfd_get_section_size (sect))
+  if (crc_offset + 4 > bfd_get_section_size (sect))
     return NULL;
 
   *crc32 = bfd_get_32 (abfd, contents + crc_offset);

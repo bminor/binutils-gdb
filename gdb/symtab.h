@@ -1421,6 +1421,7 @@ struct symtab_and_line
   struct program_space *pspace = NULL;
 
   struct symtab *symtab = NULL;
+  struct symbol *symbol = NULL;
   struct obj_section *section = NULL;
   /* Line number.  Line numbers start at 1 and proceed through symtab->nlines.
      0 is never a valid line number; it is used to indicate that line number
@@ -1560,10 +1561,37 @@ extern symbol *find_function_alias_target (bound_minimal_symbol msymbol);
 /* Note: struct symbol_search, search_symbols, et.al. are declared here,
    instead of making them local to symtab.c, for gdbtk's sake.  */
 
-/* When using search_symbols, a list of the following structs is returned.
-   Callers must free the search list using free_search_symbols!  */
+/* When using search_symbols, a vector of the following structs is
+   returned.  */
 struct symbol_search
 {
+  symbol_search (int block_, struct symbol *symbol_)
+    : block (block_),
+      symbol (symbol_)
+  {
+    msymbol.minsym = nullptr;
+    msymbol.objfile = nullptr;
+  }
+
+  symbol_search (int block_, struct minimal_symbol *minsym,
+		 struct objfile *objfile)
+    : block (block_),
+      symbol (nullptr)
+  {
+    msymbol.minsym = minsym;
+    msymbol.objfile = objfile;
+  }
+
+  bool operator< (const symbol_search &other) const
+  {
+    return compare_search_syms (*this, other) < 0;
+  }
+
+  bool operator== (const symbol_search &other) const
+  {
+    return compare_search_syms (*this, other) == 0;
+  }
+
   /* The block in which the match was found.  Could be, for example,
      STATIC_BLOCK or GLOBAL_BLOCK.  */
   int block;
@@ -1577,15 +1605,15 @@ struct symbol_search
      which only minimal_symbols exist.  */
   struct bound_minimal_symbol msymbol;
 
-  /* A link to the next match, or NULL for the end.  */
-  struct symbol_search *next;
+private:
+
+  static int compare_search_syms (const symbol_search &sym_a,
+				  const symbol_search &sym_b);
 };
 
-extern void search_symbols (const char *, enum search_domain, int,
-			    const char **, struct symbol_search **);
-extern void free_search_symbols (struct symbol_search *);
-extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search
-							 **);
+extern std::vector<symbol_search> search_symbols (const char *,
+						  enum search_domain, int,
+						  const char **);
 
 /* The name of the ``main'' function.
    FIXME: cagney/2001-03-20: Can't make main_name() const since some

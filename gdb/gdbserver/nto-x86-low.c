@@ -87,7 +87,12 @@ static void
 nto_x86_arch_setup (void)
 {
   the_low_target.num_regs = 16;
-  nto_tdesc = i386_create_target_description (X86_XSTATE_SSE_MASK, false);
+  struct target_desc *tdesc
+    = i386_create_target_description (X86_XSTATE_SSE_MASK, false);
+
+  init_target_desc (tdesc);
+
+  nto_tdesc = tdesc;
 }
 
 struct nto_target_ops the_low_target =

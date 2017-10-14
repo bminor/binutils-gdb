@@ -44,8 +44,7 @@ struct mi_parse
     mi_parse ();
     ~mi_parse ();
 
-    mi_parse (const mi_parse &) = delete;
-    mi_parse &operator= (const mi_parse &) = delete;
+    DISABLE_COPY_AND_ASSIGN (mi_parse);
 
     enum mi_command_type op;
     char *command;

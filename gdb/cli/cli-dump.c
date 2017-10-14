@@ -129,14 +129,14 @@ static struct cmd_list_element *binary_dump_cmdlist;
 static struct cmd_list_element *binary_append_cmdlist;
 
 static void
-dump_command (char *cmd, int from_tty)
+dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"dump\" must be followed by a subcommand.\n\n"));
   help_list (dump_cmdlist, "dump ", all_commands, gdb_stdout);
 }
 
 static void
-append_command (char *cmd, int from_tty)
+append_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"append\" must be followed by a subcommand.\n\n"));
   help_list (dump_cmdlist, "append ", all_commands, gdb_stdout);
@@ -215,7 +215,7 @@ dump_memory_to_file (const char *cmd, const char *mode, const char *file_format)
 }
 
 static void
-dump_memory_command (char *cmd, const char *mode)
+dump_memory_command (const char *cmd, const char *mode)
 {
   dump_memory_to_file (cmd, mode, "binary");
 }
@@ -260,86 +260,86 @@ dump_value_to_file (const char *cmd, const char *mode, const char *file_format)
 }
 
 static void
-dump_value_command (char *cmd, const char *mode)
+dump_value_command (const char *cmd, const char *mode)
 {
   dump_value_to_file (cmd, mode, "binary");
 }
 
 static void
-dump_srec_memory (char *args, int from_tty)
+dump_srec_memory (const char *args, int from_tty)
 {
   dump_memory_to_file (args, FOPEN_WB, "srec");
 }
 
 static void
-dump_srec_value (char *args, int from_tty)
+dump_srec_value (const char *args, int from_tty)
 {
   dump_value_to_file (args, FOPEN_WB, "srec");
 }
 
 static void
-dump_ihex_memory (char *args, int from_tty)
+dump_ihex_memory (const char *args, int from_tty)
 {
   dump_memory_to_file (args, FOPEN_WB, "ihex");
 }
 
 static void
-dump_ihex_value (char *args, int from_tty)
+dump_ihex_value (const char *args, int from_tty)
 {
   dump_value_to_file (args, FOPEN_WB, "ihex");
 }
 
 static void
-dump_verilog_memory (char *args, int from_tty)
+dump_verilog_memory (const char *args, int from_tty)
 {
   dump_memory_to_file (args, FOPEN_WB, "verilog");
 }
 
 static void
-dump_verilog_value (char *args, int from_tty)
+dump_verilog_value (const char *args, int from_tty)
 {
   dump_value_to_file (args, FOPEN_WB, "verilog");
 }
 
 static void
-dump_tekhex_memory (char *args, int from_tty)
+dump_tekhex_memory (const char *args, int from_tty)
 {
   dump_memory_to_file (args, FOPEN_WB, "tekhex");
 }
 
 static void
-dump_tekhex_value (char *args, int from_tty)
+dump_tekhex_value (const char *args, int from_tty)
 {
   dump_value_to_file (args, FOPEN_WB, "tekhex");
 }
 
 static void
-dump_binary_memory (char *args, int from_tty)
+dump_binary_memory (const char *args, int from_tty)
 {
   dump_memory_to_file (args, FOPEN_WB, "binary");
 }
 
 static void
-dump_binary_value (char *args, int from_tty)
+dump_binary_value (const char *args, int from_tty)
 {
   dump_value_to_file (args, FOPEN_WB, "binary");
 }
 
 static void
-append_binary_memory (char *args, int from_tty)
+append_binary_memory (const char *args, int from_tty)
 {
   dump_memory_to_file (args, FOPEN_AB, "binary");
 }
 
 static void
-append_binary_value (char *args, int from_tty)
+append_binary_value (const char *args, int from_tty)
 {
   dump_value_to_file (args, FOPEN_AB, "binary");
 }
 
 struct dump_context
 {
-  void (*func) (char *cmd, const char *mode);
+  void (*func) (const char *cmd, const char *mode);
   const char *mode;
 };
 
@@ -353,14 +353,14 @@ call_dump_func (struct cmd_list_element *c, char *args, int from_tty)
 
 static void
 add_dump_command (const char *name,
-		  void (*func) (char *args, const char *mode),
+		  void (*func) (const char *args, const char *mode),
 		  const char *descr)
 
 {
   struct cmd_list_element *c;
   struct dump_context *d;
 
-  c = add_cmd (name, all_commands, NULL, descr, &dump_cmdlist);
+  c = add_cmd (name, all_commands, descr, &dump_cmdlist);
   c->completer =  filename_completer;
   d = XNEW (struct dump_context);
   d->func = func;
@@ -368,7 +368,7 @@ add_dump_command (const char *name,
   set_cmd_context (c, d);
   c->func = call_dump_func;
 
-  c = add_cmd (name, all_commands, NULL, descr, &append_cmdlist);
+  c = add_cmd (name, all_commands, descr, &append_cmdlist);
   c->completer =  filename_completer;
   d = XNEW (struct dump_context);
   d->func = func;
@@ -581,42 +581,42 @@ restore_command (char *args_in, int from_tty)
 }
 
 static void
-srec_dump_command (char *cmd, int from_tty)
+srec_dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"dump srec\" must be followed by a subcommand.\n"));
   help_list (srec_cmdlist, "dump srec ", all_commands, gdb_stdout);
 }
 
 static void
-ihex_dump_command (char *cmd, int from_tty)
+ihex_dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"dump ihex\" must be followed by a subcommand.\n"));
   help_list (ihex_cmdlist, "dump ihex ", all_commands, gdb_stdout);
 }
 
 static void
-verilog_dump_command (char *cmd, int from_tty)
+verilog_dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"dump verilog\" must be followed by a subcommand.\n"));
   help_list (verilog_cmdlist, "dump verilog ", all_commands, gdb_stdout);
 }
 
 static void
-tekhex_dump_command (char *cmd, int from_tty)
+tekhex_dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"dump tekhex\" must be followed by a subcommand.\n"));
   help_list (tekhex_cmdlist, "dump tekhex ", all_commands, gdb_stdout);
 }
 
 static void
-binary_dump_command (char *cmd, int from_tty)
+binary_dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"dump binary\" must be followed by a subcommand.\n"));
   help_list (binary_dump_cmdlist, "dump binary ", all_commands, gdb_stdout);
 }
 
 static void
-binary_append_command (char *cmd, int from_tty)
+binary_append_command (const char *cmd, int from_tty)
 {
   printf_unfiltered (_("\"append binary\" must be followed by a subcommand.\n"));
   help_list (binary_append_cmdlist, "append binary ", all_commands,

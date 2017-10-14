@@ -266,6 +266,13 @@ struct elf_link_hash_entry
 #define SYMBOL_CALLS_LOCAL(INFO, H) \
   _bfd_elf_symbol_refs_local_p (H, INFO, 1)
 
+/* Whether an undefined weak symbol should resolve to its link-time
+   value, even in PIC or PIE objects.  */
+#define UNDEFWEAK_NO_DYNAMIC_RELOC(INFO, H)		\
+  ((H)->root.type == bfd_link_hash_undefweak		\
+   && (ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT	\
+       || (INFO)->dynamic_undefined_weak == 0))
+
 /* Common symbols that are turned into definitions don't have the
    DEF_REGULAR flag set, so they might appear to be undefined.
    Symbols defined in linker scripts also don't have DEF_REGULAR set.  */
@@ -1270,6 +1277,11 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_grok_psinfo)
     (bfd *, Elf_Internal_Note *);
 
+  /* This function, if defined, is called when a "FreeBSD" NT_PRSTATUS
+     note is found in a core file.  */
+  bfd_boolean (*elf_backend_grok_freebsd_prstatus)
+    (bfd *, Elf_Internal_Note *);
+
   /* This function, if defined, is called to write a note to a corefile.  */
   char *(*elf_backend_write_core_note)
     (bfd *abfd, char *buf, int *bufsiz, int note_type, ...);
@@ -1552,6 +1564,14 @@ struct elf_backend_data
   /* True if `_bfd_elf_link_renumber_dynsyms' must be called even for
      static binaries.  */
   unsigned always_renumber_dynsyms : 1;
+
+  /* True if the 32-bit Linux PRPSINFO structure's `pr_uid' and `pr_gid'
+     members use a 16-bit data type.  */
+  unsigned linux_prpsinfo32_ugid16 : 1;
+
+  /* True if the 64-bit Linux PRPSINFO structure's `pr_uid' and `pr_gid'
+     members use a 16-bit data type.  */
+  unsigned linux_prpsinfo64_ugid16 : 1;
 };
 
 /* Information about reloc sections associated with a bfd_elf_section_data
@@ -2588,10 +2608,6 @@ extern char *elfcore_write_linux_prpsinfo32
 
 /* Linux/most 64-bit archs.  */
 extern char *elfcore_write_linux_prpsinfo64
-  (bfd *, char *, int *, const struct elf_internal_linux_prpsinfo *);
-
-/* Linux/PPC32 uses different layout compared to most archs.  */
-extern char *elfcore_write_ppc_linux_prpsinfo32
   (bfd *, char *, int *, const struct elf_internal_linux_prpsinfo *);
 
 extern bfd *_bfd_elf32_bfd_from_remote_memory

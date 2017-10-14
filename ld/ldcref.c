@@ -410,7 +410,7 @@ output_one_cref (FILE *fp, struct cref_hash_entry *h)
   hl = bfd_link_hash_lookup (link_info.hash, h->root.string, FALSE,
 			     FALSE, TRUE);
   if (hl == NULL)
-    einfo ("%P: symbol `%T' missing from main hash table\n",
+    einfo (_("%P: symbol `%T' missing from main hash table\n"),
 	   h->root.string);
   else
     {

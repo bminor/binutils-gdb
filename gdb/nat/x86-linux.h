@@ -39,6 +39,10 @@ extern int lwp_debug_registers_changed (struct lwp_info *lwp);
 
 extern void x86_linux_new_thread (struct lwp_info *lwp);
 
+/* Function to call when a thread is being deleted.  */
+
+extern void x86_linux_delete_thread (struct arch_lwp_info *arch_lwp);
+
 /* Function to call prior to resuming a thread.  */
 
 extern void x86_linux_prepare_to_resume (struct lwp_info *lwp);

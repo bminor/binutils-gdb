@@ -351,8 +351,8 @@ with_test_prefix "list all overloads" {
     set lines2 [line_range_pattern [expr $line_bar_B - 5] [expr $line_bar_B + 4]]
 
     set any "\[^\r\n\]*"
-    set h1_re "file: \"${any}overload.cc\", line number: $line_bar_A"
-    set h2_re "file: \"${any}overload.cc\", line number: $line_bar_B"
+    set h1_re "file: \"${any}overload.cc\", line number: $line_bar_A, symbol: \"bar\\(A\\)\""
+    set h2_re "file: \"${any}overload.cc\", line number: $line_bar_B, symbol: \"bar\\(B\\)\""
     gdb_test "list bar" "${h1_re}${lines1}\r\n${h2_re}${lines2}"
 }
 

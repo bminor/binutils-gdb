@@ -19,7 +19,6 @@
 #ifndef AGENTEXPR_H
 #define AGENTEXPR_H
 
-#include "doublest.h"		/* For DOUBLEST.  */
 #include "vec.h"
 
 /* It's sometimes useful to be able to debug programs that you can't
@@ -79,17 +78,6 @@ enum agent_flaws
   };
 
 /* Agent expression data structures.  */
-
-/* The type of an element of the agent expression stack.
-   The bytecode operation indicates which element we should access;
-   the value itself has no typing information.  GDB generates all
-   bytecode streams, so we don't have to worry about type errors.  */
-
-union agent_val
-  {
-    LONGEST l;
-    DOUBLEST d;
-  };
 
 /* A buffer containing a agent expression.  */
 struct agent_expr

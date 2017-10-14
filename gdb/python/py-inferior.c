@@ -814,6 +814,56 @@ infpy_is_valid (PyObject *self, PyObject *args)
   Py_RETURN_TRUE;
 }
 
+/* Implementation of gdb.Inferior.thread_from_thread_handle (self, handle)
+                        ->  gdb.InferiorThread.  */
+
+PyObject *
+infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
+{
+  PyObject *handle_obj, *result;
+  inferior_object *inf_obj = (inferior_object *) self;
+  static const char *keywords[] = { "thread_handle", NULL };
+
+  INFPY_REQUIRE_VALID (inf_obj);
+
+  if (! gdb_PyArg_ParseTupleAndKeywords (args, kw, "O", keywords, &handle_obj))
+    return NULL;
+
+  result = Py_None;
+
+  if (!gdbpy_is_value_object (handle_obj))
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("Argument 'handle_obj' must be a thread handle object."));
+
+      return NULL;
+    }
+  else
+    {
+      TRY
+	{
+	  struct thread_info *thread_info;
+	  struct value *val = value_object_to_value (handle_obj);
+
+	  thread_info = find_thread_by_handle (val, inf_obj->inferior);
+	  if (thread_info != NULL)
+	    {
+	      result = (PyObject *) find_thread_object (thread_info->ptid);
+	      if (result != NULL)
+		Py_INCREF (result);
+	    }
+	}
+      CATCH (except, RETURN_MASK_ALL)
+	{
+	  GDB_PY_HANDLE_EXCEPTION (except);
+	}
+      END_CATCH
+    }
+
+  return result;
+}
+
+
 static void
 infpy_dealloc (PyObject *obj)
 {
@@ -926,6 +976,10 @@ Write the given buffer object to the inferior's memory." },
     METH_VARARGS | METH_KEYWORDS,
     "search_memory (address, length, pattern) -> long\n\
 Return a long with the address of a match, or None." },
+  { "thread_from_thread_handle", (PyCFunction) infpy_thread_from_thread_handle,
+    METH_VARARGS | METH_KEYWORDS,
+    "thread_from_thread_handle (handle) -> gdb.InferiorThread.\n\
+Return thread object corresponding to thread handle." },
   { NULL }
 };
 

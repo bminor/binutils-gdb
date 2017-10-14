@@ -3943,7 +3943,7 @@ nds32_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (htab->root.dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (!bfd_link_pic (info) && !info->nointerp)
+      if (bfd_link_executable (info) && !info->nointerp)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -11909,7 +11909,7 @@ nds32_elf_relax_section (bfd *abfd, asection *sec,
    * no reloc entry.  */
   if (bfd_link_relocatable (link_info)
       || (sec->flags & SEC_RELOC) == 0
-      || (sec->flags & SEC_EXCLUDE) == 1
+      || (sec->flags & SEC_EXCLUDE) != 0
       || (sec->flags & SEC_CODE) == 0
       || sec->size == 0)
     return TRUE;

@@ -101,6 +101,8 @@ struct gdbarch_tdep
      inside the associated core file section.  */
   struct sh_corefile_regmap *core_fpregmap;
   int sizeof_fpregset;
+  /* ISA-specific data types.  */
+  struct type *sh_littlebyte_bigword_type;
 };
 
 extern const struct regset sh_corefile_gregset;

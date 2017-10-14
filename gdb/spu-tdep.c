@@ -38,7 +38,6 @@
 #include "language.h"
 #include "regcache.h"
 #include "reggroups.h"
-#include "floatformat.h"
 #include "block.h"
 #include "observer.h"
 #include "infcall.h"
@@ -1267,7 +1266,7 @@ spu2ppu_sniffer (const struct frame_unwind *self,
 
       if (fi)
 	{
-	  cache->regcache = frame_save_as_regcache (fi);
+	  cache->regcache = frame_save_as_regcache (fi).release ();
 	  *this_prologue_cache = cache;
 	  return 1;
 	}
@@ -1288,7 +1287,7 @@ static void
 spu2ppu_dealloc_cache (struct frame_info *self, void *this_cache)
 {
   struct spu2ppu_cache *cache = (struct spu2ppu_cache *) this_cache;
-  regcache_xfree (cache->regcache);
+  delete cache->regcache;
 }
 
 static const struct frame_unwind spu2ppu_unwind = {
@@ -2059,7 +2058,7 @@ spu_attach_normal_stop (struct bpstats *bs, int print_frame)
 /* "info spu" commands.  */
 
 static void
-info_spu_event_command (char *args, int from_tty)
+info_spu_event_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   ULONGEST event_status = 0;
@@ -2107,7 +2106,7 @@ info_spu_event_command (char *args, int from_tty)
 }
 
 static void
-info_spu_signal_command (char *args, int from_tty)
+info_spu_signal_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -2228,7 +2227,7 @@ info_spu_mailbox_list (gdb_byte *buf, int nr, enum bfd_endian byte_order,
 }
 
 static void
-info_spu_mailbox_command (char *args, int from_tty)
+info_spu_mailbox_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -2456,7 +2455,7 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
 }
 
 static void
-info_spu_dma_command (char *args, int from_tty)
+info_spu_dma_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -2535,7 +2534,7 @@ info_spu_dma_command (char *args, int from_tty)
 }
 
 static void
-info_spu_proxydma_command (char *args, int from_tty)
+info_spu_proxydma_command (const char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -2597,7 +2596,7 @@ info_spu_proxydma_command (char *args, int from_tty)
 }
 
 static void
-info_spu_command (char *args, int from_tty)
+info_spu_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"info spu\" must be followed by "
 		       "the name of an SPU facility.\n"));
@@ -2608,13 +2607,13 @@ info_spu_command (char *args, int from_tty)
 /* Root of all "set spu "/"show spu " commands.  */
 
 static void
-show_spu_command (char *args, int from_tty)
+show_spu_command (const char *args, int from_tty)
 {
   help_list (showspucmdlist, "show spu ", all_commands, gdb_stdout);
 }
 
 static void
-set_spu_command (char *args, int from_tty)
+set_spu_command (const char *args, int from_tty)
 {
   help_list (setspucmdlist, "set spu ", all_commands, gdb_stdout);
 }

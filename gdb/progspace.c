@@ -44,18 +44,6 @@ static int highest_address_space_num;
 
 DEFINE_REGISTRY (program_space, REGISTRY_ACCESS_FIELD)
 
-/* An address space.  It is used for comparing if pspaces/inferior/threads
-   see the same address space and for associating caches to each address
-   space.  */
-
-struct address_space
-{
-  int num;
-
-  /* Per aspace data-pointers required by other GDB modules.  */
-  REGISTRY_FIELDS;
-};
-
 /* Keep a registry of per-address_space data-pointers required by other GDB
    modules.  */
 
@@ -345,7 +333,7 @@ valid_program_space_id (int num)
    indicating which the program space to print information about.  */
 
 static void
-maintenance_info_program_spaces_command (char *args, int from_tty)
+maintenance_info_program_spaces_command (const char *args, int from_tty)
 {
   int requested = -1;
 

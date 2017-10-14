@@ -2478,7 +2478,6 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    size_t len = TYPE_LENGTH (subobj_type);
 	    size_t max = TYPE_LENGTH (type);
 	    struct gdbarch *objfile_gdbarch = get_objfile_arch (objfile);
-	    struct cleanup *cleanup;
 
 	    if (subobj_byte_offset + len > max)
 	      invalid_synthetic_pointer ();
@@ -2488,7 +2487,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	       below.  */
 	    value_incref (value);
 	    free_values.free_to_mark ();
-	    cleanup = make_cleanup_value_free (value);
+	    gdb_value_up value_holder (value);
 
 	    retval = allocate_value (subobj_type);
 
@@ -2498,8 +2497,6 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
 	    memcpy (value_contents_raw (retval),
 		    value_contents_all (value) + subobj_byte_offset, len);
-
-	    do_cleanups (cleanup);
 	  }
 	  break;
 
@@ -4671,6 +4668,6 @@ _initialize_dwarf2loc (void)
 			     &setdebuglist, &showdebuglist);
 
 #if GDB_SELF_TEST
-  selftests::register_test (selftests::copy_bitwise_tests);
+  selftests::register_test ("copy_bitwise", selftests::copy_bitwise_tests);
 #endif
 }

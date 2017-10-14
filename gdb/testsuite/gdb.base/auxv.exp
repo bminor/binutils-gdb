@@ -38,7 +38,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
 }
 
 # Use a fresh directory to confine the native core dumps.
-# Make it the working directory for gdb and its child.
+# Make it the working directory for the inferior.
 set coredir [standard_output_file coredir.[getpid]]
 file mkdir $coredir
 set core_works [expr [isnative] && ! [is_remote target]]
@@ -50,8 +50,8 @@ gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set width 0"
 
 if {$core_works} {
-    if {[gdb_test "cd $coredir" ".*Working directory .*" \
-	     "cd to temporary directory for core dumps"]} {
+    if {[gdb_test_no_output "set cwd $coredir" \
+	     "set cwd to temporary directory for core dumps"]} {
 	set core_works 0
     }
 }

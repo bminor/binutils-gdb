@@ -1791,37 +1791,31 @@ parse_number (struct parser_state *par_state,
 
       if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'f')
 	{
-	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
 	    = parse_type (par_state)->builtin_decfloat;
 	  decimal_from_string (putithere->typed_val_decfloat.val, 4,
 			       gdbarch_byte_order (parse_gdbarch (par_state)),
-			       p);
-	  p[len - 2] = 'd';
+			       std::string (p, len - 2));
 	  return DECFLOAT;
 	}
 
       if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'd')
 	{
-	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
 	    = parse_type (par_state)->builtin_decdouble;
 	  decimal_from_string (putithere->typed_val_decfloat.val, 8,
 			       gdbarch_byte_order (parse_gdbarch (par_state)),
-			       p);
-	  p[len - 2] = 'd';
+			       std::string (p, len - 2));
 	  return DECFLOAT;
 	}
 
       if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'l')
 	{
-	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
 	    = parse_type (par_state)->builtin_declong;
 	  decimal_from_string (putithere->typed_val_decfloat.val, 16,
 			       gdbarch_byte_order (parse_gdbarch (par_state)),
-			       p);
-	  p[len - 2] = 'd';
+			       std::string (p, len - 2));
 	  return DECFLOAT;
 	}
 

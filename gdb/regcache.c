@@ -241,58 +241,36 @@ regcache_get_ptid (const struct regcache *regcache)
   return regcache->ptid ();
 }
 
-struct regcache *
-regcache_xmalloc (struct gdbarch *gdbarch, struct address_space *aspace)
+/* Cleanup class for invalidating a register.  */
+
+class regcache_invalidator
 {
-  return new regcache (gdbarch, aspace);
-}
+public:
 
-void
-regcache_xfree (struct regcache *regcache)
-{
-  if (regcache == NULL)
-    return;
+  regcache_invalidator (struct regcache *regcache, int regnum)
+    : m_regcache (regcache),
+      m_regnum (regnum)
+  {
+  }
 
-  delete regcache;
-}
+  ~regcache_invalidator ()
+  {
+    if (m_regcache != nullptr)
+      regcache_invalidate (m_regcache, m_regnum);
+  }
 
-static void
-do_regcache_xfree (void *data)
-{
-  regcache_xfree ((struct regcache *) data);
-}
+  DISABLE_COPY_AND_ASSIGN (regcache_invalidator);
 
-struct cleanup *
-make_cleanup_regcache_xfree (struct regcache *regcache)
-{
-  return make_cleanup (do_regcache_xfree, regcache);
-}
+  void release ()
+  {
+    m_regcache = nullptr;
+  }
 
-/* Cleanup routines for invalidating a register.  */
+private:
 
-struct register_to_invalidate
-{
-  struct regcache *regcache;
-  int regnum;
+  struct regcache *m_regcache;
+  int m_regnum;
 };
-
-static void
-do_regcache_invalidate (void *data)
-{
-  struct register_to_invalidate *reg = (struct register_to_invalidate *) data;
-
-  regcache_invalidate (reg->regcache, reg->regnum);
-}
-
-static struct cleanup *
-make_cleanup_regcache_invalidate (struct regcache *regcache, int regnum)
-{
-  struct register_to_invalidate* reg = XNEW (struct register_to_invalidate);
-
-  reg->regcache = regcache;
-  reg->regnum = regnum;
-  return make_cleanup_dtor (do_regcache_invalidate, (void *) reg, xfree);
-}
 
 /* Return REGCACHE's architecture.  */
 
@@ -461,17 +439,7 @@ get_thread_arch_aspace_regcache (ptid_t ptid, struct gdbarch *gdbarch,
 struct regcache *
 get_thread_arch_regcache (ptid_t ptid, struct gdbarch *gdbarch)
 {
-  struct address_space *aspace;
-
-  /* For the benefit of "maint print registers" & co when debugging an
-     executable, allow dumping the regcache even when there is no
-     thread selected (target_thread_address_space internal-errors if
-     no address space is found).  Note that normal user commands will
-     fail higher up on the call stack due to no
-     target_has_registers.  */
-  aspace = (ptid_equal (null_ptid, ptid)
-	    ? NULL
-	    : target_thread_address_space (ptid));
+  address_space *aspace = target_thread_address_space (ptid);
 
   return get_thread_arch_aspace_regcache  (ptid, gdbarch, aspace);
 }
@@ -887,7 +855,6 @@ regcache_raw_write (struct regcache *regcache, int regnum,
 void
 regcache::raw_write (int regnum, const gdb_byte *buf)
 {
-  struct cleanup *old_chain;
 
   gdb_assert (buf != NULL);
   gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
@@ -908,15 +875,15 @@ regcache::raw_write (int regnum, const gdb_byte *buf)
   target_prepare_to_store (this);
   raw_set_cached_value (regnum, buf);
 
-  /* Register a cleanup function for invalidating the register after it is
-     written, in case of a failure.  */
-  old_chain = make_cleanup_regcache_invalidate (this, regnum);
+  /* Invalidate the register after it is written, in case of a
+     failure.  */
+  regcache_invalidator invalidator (this, regnum);
 
   target_store_registers (this, regnum);
 
-  /* The target did not throw an error so we can discard invalidating the
-     register and restore the cleanup chain to what it was.  */
-  discard_cleanups (old_chain);
+  /* The target did not throw an error so we can discard invalidating
+     the register.  */
+  invalidator.release ();
 }
 
 void
@@ -1373,7 +1340,6 @@ reg_flush_command (char *command, int from_tty)
 void
 regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 {
-  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   struct gdbarch *gdbarch = m_descr->gdbarch;
   int regnum;
   int footnote_nr = 0;
@@ -1465,6 +1431,7 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
       /* Type.  */
       {
 	const char *t;
+	std::string name_holder;
 
 	if (regnum < 0)
 	  t = "Type";
@@ -1475,13 +1442,11 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 	    t = TYPE_NAME (register_type (arch (), regnum));
 	    if (t == NULL)
 	      {
-		char *n;
-
 		if (!footnote_register_type_name_null)
 		  footnote_register_type_name_null = ++footnote_nr;
-		n = xstrprintf ("*%d", footnote_register_type_name_null);
-		make_cleanup (xfree, n);
-		t = n;
+		name_holder = string_printf ("*%d",
+					     footnote_register_type_name_null);
+		t = name_holder.c_str ();
 	      }
 	    /* Chop a leading builtin_type.  */
 	    if (startswith (t, blt))
@@ -1615,50 +1580,62 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
     fprintf_unfiltered (file, 
 			"*%d: Register type's name NULL.\n",
 			footnote_register_type_name_null);
-  do_cleanups (cleanups);
 }
 
 static void
-regcache_print (char *args, enum regcache_dump_what what_to_dump)
+regcache_print (const char *args, enum regcache_dump_what what_to_dump)
 {
+  /* Where to send output.  */
+  stdio_file file;
+  ui_file *out;
+
   if (args == NULL)
-    get_current_regcache ()->dump (gdb_stdout, what_to_dump);
+    out = gdb_stdout;
   else
     {
-      stdio_file file;
-
       if (!file.open (args, "w"))
 	perror_with_name (_("maintenance print architecture"));
-      get_current_regcache ()->dump (&file, what_to_dump);
+      out = &file;
+    }
+
+  if (target_has_registers)
+    get_current_regcache ()->dump (out, what_to_dump);
+  else
+    {
+      /* For the benefit of "maint print registers" & co when
+	 debugging an executable, allow dumping a regcache even when
+	 there is no thread selected / no registers.  */
+      regcache dummy_regs (target_gdbarch (), nullptr);
+      dummy_regs.dump (out, what_to_dump);
     }
 }
 
 static void
-maintenance_print_registers (char *args, int from_tty)
+maintenance_print_registers (const char *args, int from_tty)
 {
   regcache_print (args, regcache_dump_none);
 }
 
 static void
-maintenance_print_raw_registers (char *args, int from_tty)
+maintenance_print_raw_registers (const char *args, int from_tty)
 {
   regcache_print (args, regcache_dump_raw);
 }
 
 static void
-maintenance_print_cooked_registers (char *args, int from_tty)
+maintenance_print_cooked_registers (const char *args, int from_tty)
 {
   regcache_print (args, regcache_dump_cooked);
 }
 
 static void
-maintenance_print_register_groups (char *args, int from_tty)
+maintenance_print_register_groups (const char *args, int from_tty)
 {
   regcache_print (args, regcache_dump_groups);
 }
 
 static void
-maintenance_print_remote_registers (char *args, int from_tty)
+maintenance_print_remote_registers (const char *args, int from_tty)
 {
   regcache_print (args, regcache_dump_remote);
 }
@@ -1773,7 +1750,8 @@ Print the internal register configuration including each register's\n\
 remote register number and buffer offset in the g/G packets.\n\
 Takes an optional file parameter."),
 	   &maintenanceprintlist);
+
 #if GDB_SELF_TEST
-  selftests::register_test (selftests::current_regcache_test);
+  selftests::register_test ("current_regcache", selftests::current_regcache_test);
 #endif
 }

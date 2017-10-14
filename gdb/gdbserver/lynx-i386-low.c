@@ -293,7 +293,12 @@ lynx_i386_store_fpregset (struct regcache *regcache, const char *buf)
 static void
 lynx_i386_arch_setup (void)
 {
-  lynx_tdesc = i386_create_target_description (X86_XSTATE_SSE_MASK, false);
+  struct target_desc *tdesc
+    = i386_create_target_description (X86_XSTATE_SSE_MASK, false);
+
+  init_target_desc (tdesc);
+
+  lynx_tdesc = tdesc;
 }
 
 /* Description of all the x86-lynx register sets.  */

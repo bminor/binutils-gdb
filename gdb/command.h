@@ -117,6 +117,7 @@ var_types;
 struct cmd_list_element;
 
 typedef void cmd_cfunc_ftype (char *args, int from_tty);
+typedef void cmd_const_cfunc_ftype (const char *args, int from_tty);
 
 /* This structure specifies notifications to be suppressed by a cli
    command interpreter.  */
@@ -140,6 +141,19 @@ extern struct cmd_list_element *add_cmd (const char *, enum command_class,
 					 const char *,
 					 struct cmd_list_element **);
 
+/* Const-correct variant of the above.  */
+
+extern struct cmd_list_element *add_cmd (const char *, enum command_class,
+					 cmd_const_cfunc_ftype *fun,
+					 const char *,
+					 struct cmd_list_element **);
+
+/* Like add_cmd, but no command function is specified.  */
+
+extern struct cmd_list_element *add_cmd (const char *, enum command_class,
+					 const char *,
+					 struct cmd_list_element **);
+
 extern struct cmd_list_element *add_alias_cmd (const char *, const char *,
 					       enum command_class, int,
 					       struct cmd_list_element **);
@@ -151,7 +165,7 @@ extern struct cmd_list_element *add_alias_cmd (const char *,
 
 
 extern struct cmd_list_element *add_prefix_cmd (const char *, enum command_class,
-						cmd_cfunc_ftype *fun,
+						cmd_const_cfunc_ftype *fun,
 						const char *,
 						struct cmd_list_element **,
 						const char *, int,
@@ -170,6 +184,11 @@ extern struct cmd_list_element *add_abbrev_prefix_cmd (const char *,
 
 extern void set_cmd_cfunc (struct cmd_list_element *cmd,
 			   cmd_cfunc_ftype *cfunc);
+
+/* Const-correct variant of the above.  */
+
+extern void set_cmd_cfunc (struct cmd_list_element *cmd,
+			   cmd_const_cfunc_ftype *cfunc);
 
 typedef void cmd_sfunc_ftype (char *args, int from_tty,
 			      struct cmd_list_element *c);
@@ -205,6 +224,8 @@ extern void set_cmd_completer_handle_brkchars (struct cmd_list_element *,
    around in cmd objects to test the value of the commands sfunc().  */
 extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
 			 cmd_cfunc_ftype *cfun);
+extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
+			 cmd_const_cfunc_ftype *cfun);
 
 /* Each command object has a local context attached to it.  */
 extern void set_cmd_context (struct cmd_list_element *cmd,
@@ -438,7 +459,7 @@ extern scoped_restore_tmpl<int> prevent_dont_repeat (void);
    function field NULL, the command is interpreted as a help topic, or
    as a class of commands.  */
 
-extern void not_just_help_class_command (char *, int);
+extern void not_just_help_class_command (const char *, int);
 
 /* Check function pointer.  */
 extern int cmd_func_p (struct cmd_list_element *cmd);

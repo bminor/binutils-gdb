@@ -1451,7 +1451,7 @@ Use `info auto-load %s-scripts [REGEXP]' to list them."),
 /* The only valid "set auto-load" argument is off|0|no|disable.  */
 
 static void
-set_auto_load_cmd (char *args, int from_tty)
+set_auto_load_cmd (const char *args, int from_tty)
 {
   struct cmd_list_element *list;
   size_t length;
@@ -1500,7 +1500,7 @@ automatic loading of Python scripts."),
    "show auto-load " settings.  */
 
 static void
-show_auto_load_cmd (char *args, int from_tty)
+show_auto_load_cmd (const char *args, int from_tty)
 {
   cmd_show_list (*auto_load_show_cmdlist_get (), from_tty, "");
 }
@@ -1528,7 +1528,7 @@ automatic loading of Python scripts."),
    newlines at proper places.  */
 
 static void
-info_auto_load_cmd (char *args, int from_tty)
+info_auto_load_cmd (const char *args, int from_tty)
 {
   struct cmd_list_element *list;
   struct cleanup *infolist_chain;

@@ -34,7 +34,7 @@ static void
 s390_elf_create_output_section_statements (void)
 {
   if (!bfd_elf_s390_set_options (&link_info, &params))
-    einfo ("%F%P: can not init BFD: %E\n");
+    einfo (_("%F%P: can not init BFD: %E\n"));
 }
 
 EOF

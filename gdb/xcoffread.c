@@ -2030,15 +2030,15 @@ static unsigned int first_fun_line_offset;
 static struct partial_symtab *
 xcoff_start_psymtab (struct objfile *objfile,
 		     const char *filename, int first_symnum,
-		     struct partial_symbol **global_syms,
-		     struct partial_symbol **static_syms)
+		     std::vector<partial_symbol *> &global_psymbols,
+		     std::vector<partial_symbol *> &static_psymbols)
 {
   struct partial_symtab *result =
     start_psymtab_common (objfile,
 			  filename,
 			  /* We fill in textlow later.  */
 			  0,
-			  global_syms, static_syms);
+			  global_psymbols, static_psymbols);
 
   result->read_symtab_private =
     XOBNEW (&objfile->objfile_obstack, struct symloc);
@@ -2332,8 +2332,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 			      (objfile,
 			       filestring,
 			       symnum_before,
-			       objfile->global_psymbols.next,
-			       objfile->static_psymbols.next);
+			       objfile->global_psymbols,
+			       objfile->static_psymbols);
 			  }
 		      }
 		    /* Activate the misc_func_recorded mechanism for
@@ -2515,8 +2515,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 	    pst = xcoff_start_psymtab (objfile,
 				       filestring,
 				       symnum_before,
-				       objfile->global_psymbols.next,
-				       objfile->static_psymbols.next);
+				       objfile->global_psymbols,
+				       objfile->static_psymbols);
 	    last_csect_name = NULL;
 	  }
 	  break;
@@ -3018,7 +3018,8 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
     perror_with_name (_("reading symbol table"));
 
   /* If we are reinitializing, or if we have never loaded syms yet, init.  */
-  if (objfile->global_psymbols.size == 0 && objfile->static_psymbols.size == 0)
+  if (objfile->global_psymbols.capacity () == 0
+      && objfile->static_psymbols.capacity () == 0)
     /* I'm not sure how how good num_symbols is; the rule of thumb in
        init_psymbol_list was developed for a.out.  On the one hand,
        num_symbols includes auxents.  On the other hand, it doesn't

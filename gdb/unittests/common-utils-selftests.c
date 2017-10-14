@@ -17,19 +17,13 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "defs.h"
+#include "common-defs.h"
 #include "selftest.h"
-
-#if GDB_SELF_TEST
 
 namespace selftests {
 
-/* common-utils self tests.  Defined here instead of in
-   common/common-utils.c because that file is shared with
-   gdbserver.  */
-
 static void
-common_utils_tests (void)
+string_printf_tests ()
 {
   SELF_CHECK (string_printf ("%s", "") == "");
   SELF_CHECK (string_printf ("%d comes before 2", 1) == "1 comes before 2");
@@ -47,14 +41,33 @@ common_utils_tests (void)
   SELF_CHECK (string_printf ("%s", X100000) == X100000);
 }
 
+static std::string
+format (const char *fmt, ...)
+{
+  va_list vp;
+
+  va_start (vp, fmt);
+  std::string result = string_vprintf (fmt, vp);
+  va_end (vp);
+  return result;
+}
+
+static void
+string_vprintf_tests ()
+{
+  /* Basic smoke tests.  */
+  SELF_CHECK (format ("%s", "test") == "test");
+  SELF_CHECK (format ("%d", 23) == "23");
+  SELF_CHECK (format ("%s %d %s", "test", 23, "done")
+	      == "test 23 done");
+  SELF_CHECK (format ("nothing") == "nothing");
+}
+
 } /* namespace selftests */
 
-#endif
-
 void
-_initialize_utils_selftests (void)
+_initialize_common_utils_selftests ()
 {
-#if GDB_SELF_TEST
-  selftests::register_test (selftests::common_utils_tests);
-#endif
+  selftests::register_test ("string_printf", selftests::string_printf_tests);
+  selftests::register_test ("string_vprintf", selftests::string_vprintf_tests);
 }

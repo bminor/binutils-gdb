@@ -810,7 +810,7 @@ earmelfb_fbsd.c: $(srcdir)/emulparams/armelfb_fbsd.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
-earmelf_fuchsia.c: $(srcdir)/emulparams/armelfb_fuchsia.sh \
+earmelfb_fuchsia.c: $(srcdir)/emulparams/armelfb_fuchsia.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 

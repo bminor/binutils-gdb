@@ -13,11 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Don't try this for remote targets.
-if [is_remote target] then {
-    continue
-}
-
 if { [prepare_for_testing "failed to prepare" term term.c] } {
     return -1
 }
@@ -33,9 +28,16 @@ if ![runto_main] then {
 }
 
 # Once while the program is running and stopped.
-gdb_test "info terminal" \
-    "Inferior's terminal status .currently saved by GDB.:.*" \
-    "info terminal at breakpoint"
+
+# While only native targets save terminal status, we still test
+# everywhere to make sure that the command doesn't misbehave.
+if {[target_info gdb_protocol] == ""} {
+    set term_re "Inferior's terminal status .currently saved by GDB.:.*"
+} else {
+    set term_re "No saved terminal information\\."
+}
+
+gdb_test "info terminal" $term_re "info terminal at breakpoint"
 
 gdb_continue_to_end
 

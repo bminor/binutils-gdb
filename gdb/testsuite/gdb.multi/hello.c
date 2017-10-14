@@ -16,6 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdlib.h>
+#include <unistd.h>
 
 short hglob = 1;
 
@@ -37,15 +38,27 @@ hello(int x)
   return x + 45;
 }
 
+static void
+hello_loop (void)
+{
+}
+
 int
 main()
 {
   int tmpx;
+
+  alarm (30);
 
   bar();
   tmpx = hello(glob);
   commonfun();
   glob = tmpx;
   commonfun();
-}
 
+  while (1)
+    {
+      hello_loop ();
+      usleep (20);
+    }
+}

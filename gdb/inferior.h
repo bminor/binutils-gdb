@@ -168,7 +168,7 @@ extern void interrupt_target_1 (int all_threads);
 
 extern void delete_longjmp_breakpoint_cleanup (void *arg);
 
-extern void detach_command (char *, int);
+extern void detach_command (const char *, int);
 
 extern void notice_new_inferior (ptid_t, int, int);
 
@@ -355,6 +355,10 @@ public:
      should never be freed.  */
   char **argv = NULL;
 
+  /* The current working directory that will be used when starting
+     this inferior.  */
+  gdb::unique_xmalloc_ptr<char> cwd;
+
   /* The name of terminal device to use for I/O.  */
   char *terminal = NULL;
 
@@ -527,11 +531,7 @@ public:
   ~scoped_restore_current_inferior ()
   { set_current_inferior (m_saved_inf); }
 
-  /* Disable copy.  */
-  scoped_restore_current_inferior
-    (const scoped_restore_current_inferior &) = delete;
-  void operator=
-    (const scoped_restore_current_inferior &) = delete;
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_current_inferior);
 
 private:
   inferior *m_saved_inf;

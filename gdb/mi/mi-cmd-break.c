@@ -24,7 +24,6 @@
 #include "mi-out.h"
 #include "breakpoint.h"
 #include "mi-getopt.h"
-#include "gdb.h"
 #include "observer.h"
 #include "mi-main.h"
 #include "mi-cmd-break.h"
@@ -53,7 +52,17 @@ static void
 breakpoint_notify (struct breakpoint *b)
 {
   if (mi_can_breakpoint_notify)
-    gdb_breakpoint_query (current_uiout, b->number, NULL);
+    {
+      TRY
+	{
+	  print_breakpoint (b);
+	}
+      CATCH (ex, RETURN_MASK_ALL)
+	{
+	  exception_print (gdb_stderr, ex);
+	}
+      END_CATCH
+    }
 }
 
 enum bp_type
@@ -86,76 +95,69 @@ setup_breakpoint_reporting (void)
 /* Convert arguments in ARGV to the string in "format",argv,argv...
    and return it.  */
 
-static char *
+static std::string
 mi_argv_to_format (char **argv, int argc)
 {
   int i;
-  struct obstack obstack;
-  char *ret;
-
-  obstack_init (&obstack);
+  std::string result;
 
   /* Convert ARGV[OIND + 1] to format string and save to FORMAT.  */
-  obstack_1grow (&obstack, '\"');
+  result += '\"';
   for (i = 0; i < strlen (argv[0]); i++)
     {
       switch (argv[0][i])
 	{
 	case '\\':
-	  obstack_grow (&obstack, "\\\\", 2);
+	  result += "\\\\";
 	  break;
 	case '\a':
-	  obstack_grow (&obstack, "\\a", 2);
+	  result += "\\a";
 	  break;
 	case '\b':
-	  obstack_grow (&obstack, "\\b", 2);
+	  result += "\\b";
 	  break;
 	case '\f':
-	  obstack_grow (&obstack, "\\f", 2);
+	  result += "\\f";
 	  break;
 	case '\n':
-	  obstack_grow (&obstack, "\\n", 2);
+	  result += "\\n";
 	  break;
 	case '\r':
-	  obstack_grow (&obstack, "\\r", 2);
+	  result += "\\r";
 	  break;
 	case '\t':
-	  obstack_grow (&obstack, "\\t", 2);
+	  result += "\\t";
 	  break;
 	case '\v':
-	  obstack_grow (&obstack, "\\v", 2);
+	  result += "\\v";
 	  break;
 	case '"':
-	  obstack_grow (&obstack, "\\\"", 2);
+	  result += "\\\"";
 	  break;
 	default:
 	  if (isprint (argv[0][i]))
-	    obstack_grow (&obstack, argv[0] + i, 1);
+	    result += argv[0][i];
 	  else
 	    {
 	      char tmp[5];
 
 	      xsnprintf (tmp, sizeof (tmp), "\\%o",
 			 (unsigned char) argv[0][i]);
-	      obstack_grow_str (&obstack, tmp);
+	      result += tmp;
 	    }
 	  break;
 	}
     }
-  obstack_1grow (&obstack, '\"');
+  result += '\"';
 
   /* Apply other argv to FORMAT.  */
   for (i = 1; i < argc; i++)
     {
-      obstack_1grow (&obstack, ',');
-      obstack_grow_str (&obstack, argv[i]);
+      result += ',';
+      result += argv[i];
     }
-  obstack_1grow (&obstack, '\0');
 
-  ret = xstrdup ((const char *) obstack_finish (&obstack));
-  obstack_free (&obstack, NULL);
-
-  return ret;
+  return result;
 }
 
 /* Insert breakpoint.
@@ -165,7 +167,7 @@ mi_argv_to_format (char **argv, int argc)
 static void
 mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
 {
-  char *address = NULL;
+  const char *address = NULL;
   int hardware = 0;
   int temp_p = 0;
   int thread = -1;
@@ -174,13 +176,12 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
   int pending = 0;
   int enabled = 1;
   int tracepoint = 0;
-  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
   enum bptype type_wanted;
   event_location_up location;
   struct breakpoint_ops *ops;
   int is_explicit = 0;
   struct explicit_location explicit_loc;
-  char *extra_string = NULL;
+  std::string extra_string;
 
   enum opt
     {
@@ -278,7 +279,6 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
 	error (_("-dprintf-insert: Missing <format>"));
 
       extra_string = mi_argv_to_format (argv + format_num, argc - format_num);
-      make_cleanup (xfree, extra_string);
       address = argv[oind];
     }
   else
@@ -343,13 +343,12 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
     }
 
   create_breakpoint (get_current_arch (), location.get (), condition, thread,
-		     extra_string,
+		     extra_string.c_str (),
 		     0 /* condition and thread are valid.  */,
 		     temp_p, type_wanted,
 		     ignore_count,
 		     pending ? AUTO_BOOLEAN_TRUE : AUTO_BOOLEAN_FALSE,
 		     ops, 0, enabled, 0, 0);
-  do_cleanups (back_to);
 }
 
 /* Implements the -break-insert command.

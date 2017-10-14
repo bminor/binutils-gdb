@@ -127,7 +127,7 @@ extern void (*deprecated_exec_file_display_hook) (const char *filename);
 /* Hook for "file_command", which is more useful than above
    (because it is invoked AFTER symbols are read, not before).  */
 
-extern void (*deprecated_file_changed_hook) (char *filename);
+extern void (*deprecated_file_changed_hook) (const char *filename);
 
 extern void specify_exec_file_hook (void (*hook) (const char *filename));
 
@@ -141,7 +141,7 @@ extern struct target_ops *core_target;
 
 extern int write_files;
 
-extern void core_file_command (char *filename, int from_tty);
+extern void core_file_command (const char *filename, int from_tty);
 
 extern void exec_file_attach (const char *filename, int from_tty);
 
@@ -258,9 +258,7 @@ public:
   const char *c_str () const
   { return m_section_name; }
 
-  /* Disable copy.  */
-  thread_section_name (const thread_section_name &) = delete;
-  void operator= (const thread_section_name &) = delete;
+  DISABLE_COPY_AND_ASSIGN (thread_section_name);
 
 private:
   /* Either a pointer into M_STORAGE, or a pointer to the name passed

@@ -348,14 +348,16 @@ md_assemble (char *str)
                          0,
                          BFD_RELOC_16);
             break;
-          case  FT32_FLD_K8:
+          case  FT32_FLD_K15:
             op_end = parse_exp_save_ilp (op_end, &arg);
+            if (arg.X_add_number & 0x80)
+              arg.X_add_number ^= 0x7f00;
             fix_new_exp (frag_now,
                          (output - frag_now->fr_literal),
-                         1,
+                         2,
                          &arg,
                          0,
-                         BFD_RELOC_8);
+                         BFD_RELOC_FT32_15);
             break;
           case  FT32_FLD_R_D_POST:
             b |= parse_register_operand (&op_end) << FT32_FLD_R_D_BIT;
@@ -529,6 +531,14 @@ md_apply_fix (fixS *fixP ATTRIBUTE_UNUSED,
       md_number_to_chars (buf, newval, 3);
       break;
 
+    case BFD_RELOC_FT32_15:
+      if (!val)
+	break;
+      newval = md_chars_to_number (buf, 2);
+      newval |= val & ((1 << 15) - 1);
+      md_number_to_chars (buf, newval, 2);
+      break;
+
     case BFD_RELOC_FT32_17:
       if (!val)
 	break;
@@ -574,6 +584,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
     case BFD_RELOC_8:
     case BFD_RELOC_FT32_10:
     case BFD_RELOC_FT32_20:
+    case BFD_RELOC_FT32_15:
     case BFD_RELOC_FT32_17:
     case BFD_RELOC_FT32_18:
       code = fixP->fx_r_type;

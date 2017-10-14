@@ -20,64 +20,37 @@
 #include "common-defs.h"
 #include "xml-utils.h"
 
-/* Return a malloc allocated string with special characters from TEXT
-   replaced by entity references.  */
+/* Return a string with special characters from TEXT replaced by entity
+   references.  */
 
-char *
+std::string
 xml_escape_text (const char *text)
 {
-  char *result;
-  int i, special;
-
-  /* Compute the length of the result.  */
-  for (i = 0, special = 0; text[i] != '\0'; i++)
-    switch (text[i])
-      {
-      case '\'':
-      case '\"':
-	special += 5;
-	break;
-      case '&':
-	special += 4;
-	break;
-      case '<':
-      case '>':
-	special += 3;
-	break;
-      default:
-	break;
-      }
+  std::string result;
 
   /* Expand the result.  */
-  result = (char *) xmalloc (i + special + 1);
-  for (i = 0, special = 0; text[i] != '\0'; i++)
+  for (int i = 0; text[i] != '\0'; i++)
     switch (text[i])
       {
       case '\'':
-	strcpy (result + i + special, "&apos;");
-	special += 5;
+	result += "&apos;";
 	break;
       case '\"':
-	strcpy (result + i + special, "&quot;");
-	special += 5;
+	result += "&quot;";
 	break;
       case '&':
-	strcpy (result + i + special, "&amp;");
-	special += 4;
+	result += "&amp;";
 	break;
       case '<':
-	strcpy (result + i + special, "&lt;");
-	special += 3;
+	result += "&lt;";
 	break;
       case '>':
-	strcpy (result + i + special, "&gt;");
-	special += 3;
+	result += "&gt;";
 	break;
       default:
-	result[i + special] = text[i];
+	result += text[i];
 	break;
       }
-  result[i + special] = '\0';
 
   return result;
 }

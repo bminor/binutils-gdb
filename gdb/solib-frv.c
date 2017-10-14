@@ -246,7 +246,7 @@ static int enable_break2 (void);
 /* Implement the "open_symbol_file_object" target_so_ops method.  */
 
 static int
-open_symbol_file_object (void *from_ttyp)
+open_symbol_file_object (int from_tty)
 {
   /* Unimplemented.  */
   return 0;

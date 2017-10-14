@@ -252,6 +252,8 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
 
 #define elf_backend_add_symbol_hook		elf32_sparc_add_symbol_hook
 
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
+
 #include "elf32-target.h"
 
 /* Solaris 2.  */

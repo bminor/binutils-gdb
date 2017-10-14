@@ -127,6 +127,9 @@ struct riscv_elf_link_hash_table
 
   /* Small local sym to section mapping cache.  */
   struct sym_cache sym_cache;
+
+  /* The max alignment of output sections.  */
+  bfd_vma max_alignment;
 };
 
 
@@ -274,6 +277,7 @@ riscv_elf_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
+  ret->max_alignment = (bfd_vma) -1;
   return &ret->elf.root;
 }
 
@@ -3070,7 +3074,17 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 						 info->keep_memory)))
     goto fail;
 
-  max_alignment = _bfd_riscv_get_max_alignment (sec);
+  if (htab)
+    {
+      max_alignment = htab->max_alignment;
+      if (max_alignment == (bfd_vma) -1)
+	{
+	  max_alignment = _bfd_riscv_get_max_alignment (sec);
+	  htab->max_alignment = max_alignment;
+	}
+    }
+  else
+    max_alignment = _bfd_riscv_get_max_alignment (sec);
 
   /* Examine and consider relaxing each reloc.  */
   for (i = 0; i < sec->reloc_count; i++)

@@ -6810,6 +6810,8 @@ elf32_frv_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 #define elf_backend_grok_prstatus	elf32_frv_grok_prstatus
 #define elf_backend_grok_psinfo		elf32_frv_grok_psinfo
 
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
+
 #include "elf32-target.h"
 
 #undef ELF_MAXPAGESIZE

@@ -368,7 +368,7 @@ dbx_init_float_type (struct objfile *objfile, int bits)
   if (format)
     type = init_float_type (objfile, bits, NULL, format);
   else
-    type = init_type (objfile, TYPE_CODE_ERROR, bits / TARGET_CHAR_BIT, NULL);
+    type = init_type (objfile, TYPE_CODE_ERROR, bits, NULL);
 
   return type;
 }
@@ -2153,7 +2153,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       rettype = init_integer_type (objfile, 32, 1, "unsigned long");
       break;
     case 11:
-      rettype = init_type (objfile, TYPE_CODE_VOID, 1, "void");
+      rettype = init_type (objfile, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
       break;
     case 12:
       /* IEEE single precision (32 bit).  */
@@ -3835,7 +3835,8 @@ read_sun_builtin_type (const char **pp, int typenums[2], struct objfile *objfile
 
   if (type_bits == 0)
     {
-      struct type *type = init_type (objfile, TYPE_CODE_VOID, 1, NULL);
+      struct type *type = init_type (objfile, TYPE_CODE_VOID,
+				     TARGET_CHAR_BIT, NULL);
       if (unsigned_type)
         TYPE_UNSIGNED (type) = 1;
       return type;
@@ -4147,7 +4148,7 @@ read_range_type (const char **pp, int typenums[2], int type_size,
 
   /* A type defined as a subrange of itself, with bounds both 0, is void.  */
   if (self_subrange && n2 == 0 && n3 == 0)
-    return init_type (objfile, TYPE_CODE_VOID, 1, NULL);
+    return init_type (objfile, TYPE_CODE_VOID, TARGET_CHAR_BIT, NULL);
 
   /* If n3 is zero and n2 is positive, we want a floating type, and n2
      is the width in bytes.
@@ -4193,7 +4194,8 @@ read_range_type (const char **pp, int typenums[2], int type_size,
      itself with range 0-127.  */
   else if (self_subrange && n2 == 0 && n3 == 127)
     {
-      struct type *type = init_integer_type (objfile, 1, 0, NULL);
+      struct type *type = init_integer_type (objfile, TARGET_CHAR_BIT,
+					     0, NULL);
       TYPE_NOSIGN (type) = 1;
       return type;
     }

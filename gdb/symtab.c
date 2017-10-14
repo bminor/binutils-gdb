@@ -65,6 +65,7 @@
 #include "common/gdb_optional.h"
 #include "filename-seen-cache.h"
 #include "arch-utils.h"
+#include <algorithm>
 
 /* Forward declarations for local functions.  */
 
@@ -1500,7 +1501,7 @@ symbol_cache_dump (const struct symbol_cache *cache)
 /* The "mt print symbol-cache" command.  */
 
 static void
-maintenance_print_symbol_cache (char *args, int from_tty)
+maintenance_print_symbol_cache (const char *args, int from_tty)
 {
   struct program_space *pspace;
 
@@ -1527,7 +1528,7 @@ maintenance_print_symbol_cache (char *args, int from_tty)
 /* The "mt flush-symbol-cache" command.  */
 
 static void
-maintenance_flush_symbol_cache (char *args, int from_tty)
+maintenance_flush_symbol_cache (const char *args, int from_tty)
 {
   struct program_space *pspace;
 
@@ -1572,7 +1573,7 @@ symbol_cache_stats (struct symbol_cache *cache)
 /* The "mt print symbol-cache-statistics" command.  */
 
 static void
-maintenance_print_symbol_cache_statistics (char *args, int from_tty)
+maintenance_print_symbol_cache_statistics (const char *args, int from_tty)
 {
   struct program_space *pspace;
 
@@ -3461,6 +3462,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
   obj_section *section = SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym);
   symtab_and_line sal
     = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)), section, 0);
+  sal.symbol = sym;
 
   if (funfirstline && sal.symtab != NULL
       && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
@@ -3484,6 +3486,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
       sal.pspace = current_program_space;
       sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
       sal.section = section;
+      sal.symbol = sym;
     }
 
   if (funfirstline)
@@ -4090,110 +4093,39 @@ file_matches (const char *file, const char *files[], int nfiles, int basenames)
   return 0;
 }
 
-/* Free any memory associated with a search.  */
-
-void
-free_search_symbols (struct symbol_search *symbols)
-{
-  struct symbol_search *p;
-  struct symbol_search *next;
-
-  for (p = symbols; p != NULL; p = next)
-    {
-      next = p->next;
-      xfree (p);
-    }
-}
-
-static void
-do_free_search_symbols_cleanup (void *symbolsp)
-{
-  struct symbol_search *symbols = *(struct symbol_search **) symbolsp;
-
-  free_search_symbols (symbols);
-}
-
-struct cleanup *
-make_cleanup_free_search_symbols (struct symbol_search **symbolsp)
-{
-  return make_cleanup (do_free_search_symbols_cleanup, symbolsp);
-}
-
 /* Helper function for sort_search_symbols_remove_dups and qsort.  Can only
    sort symbols, not minimal symbols.  */
 
-static int
-compare_search_syms (const void *sa, const void *sb)
+int
+symbol_search::compare_search_syms (const symbol_search &sym_a,
+				    const symbol_search &sym_b)
 {
-  struct symbol_search *sym_a = *(struct symbol_search **) sa;
-  struct symbol_search *sym_b = *(struct symbol_search **) sb;
   int c;
 
-  c = FILENAME_CMP (symbol_symtab (sym_a->symbol)->filename,
-		    symbol_symtab (sym_b->symbol)->filename);
+  c = FILENAME_CMP (symbol_symtab (sym_a.symbol)->filename,
+		    symbol_symtab (sym_b.symbol)->filename);
   if (c != 0)
     return c;
 
-  if (sym_a->block != sym_b->block)
-    return sym_a->block - sym_b->block;
+  if (sym_a.block != sym_b.block)
+    return sym_a.block - sym_b.block;
 
-  return strcmp (SYMBOL_PRINT_NAME (sym_a->symbol),
-		 SYMBOL_PRINT_NAME (sym_b->symbol));
+  return strcmp (SYMBOL_PRINT_NAME (sym_a.symbol),
+		 SYMBOL_PRINT_NAME (sym_b.symbol));
 }
 
-/* Sort the NFOUND symbols in list FOUND and remove duplicates.
-   The duplicates are freed, and the new list is returned in
-   *NEW_HEAD, *NEW_TAIL.  */
+/* Sort the symbols in RESULT and remove duplicates.  */
 
 static void
-sort_search_symbols_remove_dups (struct symbol_search *found, int nfound,
-				 struct symbol_search **new_head,
-				 struct symbol_search **new_tail)
+sort_search_symbols_remove_dups (std::vector<symbol_search> *result)
 {
-  struct symbol_search **symbols, *symp;
-  int i, j, nunique;
-
-  gdb_assert (found != NULL && nfound > 0);
-
-  /* Build an array out of the list so we can easily sort them.  */
-  symbols = XNEWVEC (struct symbol_search *, nfound);
-
-  symp = found;
-  for (i = 0; i < nfound; i++)
-    {
-      gdb_assert (symp != NULL);
-      gdb_assert (symp->block >= 0 && symp->block <= 1);
-      symbols[i] = symp;
-      symp = symp->next;
-    }
-  gdb_assert (symp == NULL);
-
-  qsort (symbols, nfound, sizeof (struct symbol_search *),
-	 compare_search_syms);
-
-  /* Collapse out the dups.  */
-  for (i = 1, j = 1; i < nfound; ++i)
-    {
-      if (compare_search_syms (&symbols[j - 1], &symbols[i]) != 0)
-	symbols[j++] = symbols[i];
-      else
-	xfree (symbols[i]);
-    }
-  nunique = j;
-  symbols[j - 1]->next = NULL;
-
-  /* Rebuild the linked list.  */
-  for (i = 0; i < nunique - 1; i++)
-    symbols[i]->next = symbols[i + 1];
-  symbols[nunique - 1]->next = NULL;
-
-  *new_head = symbols[0];
-  *new_tail = symbols[nunique - 1];
-  xfree (symbols);
+  std::sort (result->begin (), result->end ());
+  result->erase (std::unique (result->begin (), result->end ()),
+		 result->end ());
 }
 
 /* Search the symbol table for matches to the regular expression REGEXP,
-   returning the results in *MATCHES.
+   returning the results.
 
    Only symbols of KIND are searched:
    VARIABLES_DOMAIN - search all symbols, excluding functions, type names,
@@ -4202,16 +4134,13 @@ sort_search_symbols_remove_dups (struct symbol_search *found, int nfound,
    TYPES_DOMAIN     - search all type names
    ALL_DOMAIN       - an internal error for this function
 
-   free_search_symbols should be called when *MATCHES is no longer needed.
-
    Within each file the results are sorted locally; each symtab's global and
    static blocks are separately alphabetized.
    Duplicate entries are removed.  */
 
-void
+std::vector<symbol_search>
 search_symbols (const char *regexp, enum search_domain kind,
-		int nfiles, const char *files[],
-		struct symbol_search **matches)
+		int nfiles, const char *files[])
 {
   struct compunit_symtab *cust;
   const struct blockvector *bv;
@@ -4234,15 +4163,8 @@ search_symbols (const char *regexp, enum search_domain kind,
   enum minimal_symbol_type ourtype2;
   enum minimal_symbol_type ourtype3;
   enum minimal_symbol_type ourtype4;
-  struct symbol_search *found;
-  struct symbol_search *tail;
-  int nfound;
+  std::vector<symbol_search> result;
   gdb::optional<compiled_regex> preg;
-
-  /* OLD_CHAIN .. RETVAL_CHAIN is always freed, RETVAL_CHAIN .. current
-     CLEANUP_CHAIN is freed only in the case of an error.  */
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-  struct cleanup *retval_chain;
 
   gdb_assert (kind <= TYPES_DOMAIN);
 
@@ -4250,8 +4172,6 @@ search_symbols (const char *regexp, enum search_domain kind,
   ourtype2 = types2[kind];
   ourtype3 = types3[kind];
   ourtype4 = types4[kind];
-
-  *matches = NULL;
 
   if (regexp != NULL)
     {
@@ -4360,11 +4280,6 @@ search_symbols (const char *regexp, enum search_domain kind,
       }
     }
 
-  found = NULL;
-  tail = NULL;
-  nfound = 0;
-  retval_chain = make_cleanup_free_search_symbols (&found);
-
   ALL_COMPUNITS (objfile, cust)
   {
     bv = COMPUNIT_BLOCKVECTOR (cust);
@@ -4404,27 +4319,14 @@ search_symbols (const char *regexp, enum search_domain kind,
 			    && SYMBOL_CLASS (sym) == LOC_TYPEDEF))))
 	      {
 		/* match */
-		struct symbol_search *psr = XCNEW (struct symbol_search);
-
-		psr->block = i;
-		psr->symbol = sym;
-		psr->next = NULL;
-		if (tail == NULL)
-		  found = psr;
-		else
-		  tail->next = psr;
-		tail = psr;
-		nfound ++;
+		result.emplace_back (i, sym);
 	      }
 	  }
       }
   }
 
-  if (found != NULL)
-    {
-      sort_search_symbols_remove_dups (found, nfound, &found, &tail);
-      /* Note: nfound is no longer useful beyond this point.  */
-    }
+  if (!result.empty ())
+    sort_search_symbols_remove_dups (&result);
 
   /* If there are no eyes, avoid all contact.  I mean, if there are
      no debug symbols, then add matching minsyms.  */
@@ -4457,17 +4359,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 			.symbol == NULL)
 		      {
 			/* match */
-			struct symbol_search *psr = XNEW (struct symbol_search);
-			psr->block = i;
-			psr->msymbol.minsym = msymbol;
-			psr->msymbol.objfile = objfile;
-			psr->symbol = NULL;
-			psr->next = NULL;
-			if (tail == NULL)
-			  found = psr;
-			else
-			  tail->next = psr;
-			tail = psr;
+			result.emplace_back (i, msymbol, objfile);
 		      }
 		  }
 	      }
@@ -4475,9 +4367,7 @@ search_symbols (const char *regexp, enum search_domain kind,
       }
     }
 
-  discard_cleanups (retval_chain);
-  do_cleanups (old_chain);
-  *matches = found;
+  return result;
 }
 
 /* Helper function for symtab_symbol_info, this function uses
@@ -4550,17 +4440,13 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
 {
   static const char * const classnames[] =
     {"variable", "function", "type"};
-  struct symbol_search *symbols;
-  struct symbol_search *p;
-  struct cleanup *old_chain;
   const char *last_filename = NULL;
   int first = 1;
 
   gdb_assert (kind <= TYPES_DOMAIN);
 
   /* Must make sure that if we're interrupted, symbols gets freed.  */
-  search_symbols (regexp, kind, 0, NULL, &symbols);
-  old_chain = make_cleanup_free_search_symbols (&symbols);
+  std::vector<symbol_search> symbols = search_symbols (regexp, kind, 0, NULL);
 
   if (regexp != NULL)
     printf_filtered (_("All %ss matching regular expression \"%s\":\n"),
@@ -4568,31 +4454,29 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
   else
     printf_filtered (_("All defined %ss:\n"), classnames[kind]);
 
-  for (p = symbols; p != NULL; p = p->next)
+  for (const symbol_search &p : symbols)
     {
       QUIT;
 
-      if (p->msymbol.minsym != NULL)
+      if (p.msymbol.minsym != NULL)
 	{
 	  if (first)
 	    {
 	      printf_filtered (_("\nNon-debugging symbols:\n"));
 	      first = 0;
 	    }
-	  print_msymbol_info (p->msymbol);
+	  print_msymbol_info (p.msymbol);
 	}
       else
 	{
 	  print_symbol_info (kind,
-			     p->symbol,
-			     p->block,
+			     p.symbol,
+			     p.block,
 			     last_filename);
 	  last_filename
-	    = symtab_to_filename_for_display (symbol_symtab (p->symbol));
+	    = symtab_to_filename_for_display (symbol_symtab (p.symbol));
 	}
     }
-
-  do_cleanups (old_chain);
 }
 
 static void
@@ -4633,8 +4517,6 @@ do_end_rbreak_breakpoints (void *ignore)
 static void
 rbreak_command (char *regexp, int from_tty)
 {
-  struct symbol_search *ss;
-  struct symbol_search *p;
   struct cleanup *old_chain;
   char *string = NULL;
   int len = 0;
@@ -4664,21 +4546,21 @@ rbreak_command (char *regexp, int from_tty)
 	}
     }
 
-  search_symbols (regexp, FUNCTIONS_DOMAIN, nfiles, files, &ss);
-  old_chain = make_cleanup_free_search_symbols (&ss);
-  make_cleanup (free_current_contents, &string);
+  std::vector<symbol_search> symbols = search_symbols (regexp,
+						       FUNCTIONS_DOMAIN,
+						       nfiles, files);
 
   start_rbreak_breakpoints ();
-  make_cleanup (do_end_rbreak_breakpoints, NULL);
-  for (p = ss; p != NULL; p = p->next)
+  old_chain = make_cleanup (do_end_rbreak_breakpoints, NULL);
+  for (const symbol_search &p : symbols)
     {
-      if (p->msymbol.minsym == NULL)
+      if (p.msymbol.minsym == NULL)
 	{
-	  struct symtab *symtab = symbol_symtab (p->symbol);
+	  struct symtab *symtab = symbol_symtab (p.symbol);
 	  const char *fullname = symtab_to_fullname (symtab);
 
 	  int newlen = (strlen (fullname)
-			+ strlen (SYMBOL_LINKAGE_NAME (p->symbol))
+			+ strlen (SYMBOL_LINKAGE_NAME (p.symbol))
 			+ 4);
 
 	  if (newlen > len)
@@ -4688,17 +4570,17 @@ rbreak_command (char *regexp, int from_tty)
 	    }
 	  strcpy (string, fullname);
 	  strcat (string, ":'");
-	  strcat (string, SYMBOL_LINKAGE_NAME (p->symbol));
+	  strcat (string, SYMBOL_LINKAGE_NAME (p.symbol));
 	  strcat (string, "'");
 	  break_command (string, from_tty);
 	  print_symbol_info (FUNCTIONS_DOMAIN,
-			     p->symbol,
-			     p->block,
+			     p.symbol,
+			     p.block,
 			     symtab_to_filename_for_display (symtab));
 	}
       else
 	{
-	  int newlen = (strlen (MSYMBOL_LINKAGE_NAME (p->msymbol.minsym)) + 3);
+	  int newlen = (strlen (MSYMBOL_LINKAGE_NAME (p.msymbol.minsym)) + 3);
 
 	  if (newlen > len)
 	    {
@@ -4706,12 +4588,12 @@ rbreak_command (char *regexp, int from_tty)
 	      len = newlen;
 	    }
 	  strcpy (string, "'");
-	  strcat (string, MSYMBOL_LINKAGE_NAME (p->msymbol.minsym));
+	  strcat (string, MSYMBOL_LINKAGE_NAME (p.msymbol.minsym));
 	  strcat (string, "'");
 
 	  break_command (string, from_tty);
 	  printf_filtered ("<function, no debug info> %s;\n",
-			   MSYMBOL_PRINT_NAME (p->msymbol.minsym));
+			   MSYMBOL_PRINT_NAME (p.msymbol.minsym));
 	}
     }
 
@@ -5437,7 +5319,6 @@ make_source_files_completion_list (const char *text, const char *word)
   completion_list list;
   const char *base_name;
   struct add_partial_filename_data datum;
-  struct cleanup *back_to;
 
   if (!have_full_symbols () && !have_partial_symbols ())
     return list;

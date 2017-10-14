@@ -316,19 +316,19 @@ tui_update_variables (void)
 }
 
 static void
-set_tui_cmd (char *args, int from_tty)
+set_tui_cmd (const char *args, int from_tty)
 {
 }
 
 static void
-show_tui_cmd (char *args, int from_tty)
+show_tui_cmd (const char *args, int from_tty)
 {
 }
 
 static struct cmd_list_element *tuilist;
 
 static void
-tui_command (char *args, int from_tty)
+tui_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"tui\" must be followed by the name of a "
                      "tui command.\n"));
@@ -1165,14 +1165,13 @@ tui_set_win_height (char *arg, int from_tty)
   tui_enable ();
   if (arg != (char *) NULL)
     {
-      char *buf = xstrdup (arg);
+      std::string copy = arg;
+      char *buf = &copy[0];
       char *buf_ptr = buf;
       char *wname = NULL;
       int new_height, i;
       struct tui_win_info *win_info;
-      struct cleanup *old_chain;
 
-      old_chain = make_cleanup (xfree, buf);
       wname = buf_ptr;
       buf_ptr = strchr (buf_ptr, ' ');
       if (buf_ptr != (char *) NULL)
@@ -1234,8 +1233,6 @@ The window name specified must be valid and visible.\n"));
 	}
       else
 	printf_filtered (WIN_HEIGHT_USAGE);
-
-      do_cleanups (old_chain);
     }
   else
     printf_filtered (WIN_HEIGHT_USAGE);
@@ -1661,12 +1658,11 @@ parse_scrolling_args (char *arg,
      window name arg.  */
   if (arg != (char *) NULL)
     {
-      char *buf, *buf_ptr;
-      struct cleanup *old_chain;
+      char *buf_ptr;
 
       /* Process the number of lines to scroll.  */
-      buf = buf_ptr = xstrdup (arg);
-      old_chain = make_cleanup (xfree, buf);
+      std::string copy = arg;
+      buf_ptr = &copy[0];
       if (isdigit (*buf_ptr))
 	{
 	  char *num_str;
@@ -1713,6 +1709,5 @@ The window name specified must be valid and visible.\n"));
 	  else if (*win_to_scroll == TUI_CMD_WIN)
 	    *win_to_scroll = (tui_source_windows ())->list[0];
 	}
-      do_cleanups (old_chain);
     }
 }

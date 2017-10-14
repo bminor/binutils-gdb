@@ -1377,7 +1377,7 @@ mn10300_elf_check_relocs (bfd *abfd,
 
   result = TRUE;
  fail:
-  if (isymbuf != NULL)
+  if (isymbuf != NULL && symtab_hdr->contents != (unsigned char *) isymbuf)
     free (isymbuf);
 
   return result;

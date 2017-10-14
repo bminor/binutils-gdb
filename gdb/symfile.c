@@ -56,6 +56,7 @@
 #include "stack.h"
 #include "gdb_bfd.h"
 #include "cli/cli-utils.h"
+#include "common/byte-vector.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -87,21 +88,9 @@ static void load_command (char *, int);
 static void symbol_file_add_main_1 (const char *args, symfile_add_flags add_flags,
 				    objfile_flags flags);
 
-static void add_symbol_file_command (char *, int);
-
 static const struct sym_fns *find_sym_fns (bfd *);
 
 static void overlay_invalidate_all (void);
-
-static void overlay_auto_command (char *, int);
-
-static void overlay_manual_command (char *, int);
-
-static void overlay_off_command (char *, int);
-
-static void overlay_load_command (char *, int);
-
-static void overlay_command (char *, int);
 
 static void simple_free_overlay_table (void);
 
@@ -120,18 +109,20 @@ static void symfile_find_segment_sections (struct objfile *objfile);
    calls add_symtab_fns() to register information on each format it is
    prepared to read.  */
 
-typedef struct
+struct registered_sym_fns
 {
+  registered_sym_fns (bfd_flavour sym_flavour_, const struct sym_fns *sym_fns_)
+  : sym_flavour (sym_flavour_), sym_fns (sym_fns_)
+  {}
+
   /* BFD flavour that we handle.  */
   enum bfd_flavour sym_flavour;
 
   /* The "vtable" of symbol functions.  */
   const struct sym_fns *sym_fns;
-} registered_sym_fns;
+};
 
-DEF_VEC_O (registered_sym_fns);
-
-static VEC (registered_sym_fns) *symtab_fns = NULL;
+static std::vector<registered_sym_fns> symtab_fns;
 
 /* Values for "set print symbol-loading".  */
 
@@ -1027,7 +1018,7 @@ syms_from_objfile_1 (struct objfile *objfile,
 
       if (symfile_objfile != NULL)
 	{
-	  free_objfile (symfile_objfile);
+	  delete symfile_objfile;
 	  gdb_assert (symfile_objfile == NULL);
 	}
 
@@ -1109,7 +1100,7 @@ finish_new_objfile (struct objfile *objfile, symfile_add_flags add_flags)
    ABFD is a BFD already open on the file, as from symfile_bfd_open.
    A new reference is acquired by this function.
 
-   For NAME description see allocate_objfile's definition.
+   For NAME description see the objfile constructor.
 
    ADD_FLAGS encodes verbosity, whether this is main symbol file or
    extra, such as dynamically loaded code, and what to do with breakpoins.
@@ -1153,7 +1144,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
 
   if (mainline)
     flags |= OBJF_MAINLINE;
-  objfile = allocate_objfile (abfd, name, flags);
+  objfile = new struct objfile (abfd, name, flags);
 
   if (parent)
     add_separate_debug_objfile (objfile, parent);
@@ -1227,7 +1218,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
 }
 
 /* Add BFD as a separate debug file for OBJFILE.  For NAME description
-   see allocate_objfile's definition.  */
+   see the objfile constructor.  */
 
 void
 symbol_file_add_separate (bfd *bfd, const char *name,
@@ -1627,7 +1618,7 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
    conventions (because it is confusing and inconvenient).  */
 
 void
-symbol_file_command (char *args, int from_tty)
+symbol_file_command (const char *args, int from_tty)
 {
   dont_repeat ();
 
@@ -1639,7 +1630,6 @@ symbol_file_command (char *args, int from_tty)
     {
       objfile_flags flags = OBJF_USERLOADED;
       symfile_add_flags add_flags = 0;
-      struct cleanup *cleanups;
       char *name = NULL;
 
       if (from_tty)
@@ -1778,9 +1768,7 @@ get_section_index (struct objfile *objfile, const char *section_name)
 void
 add_symtab_fns (enum bfd_flavour flavour, const struct sym_fns *sf)
 {
-  registered_sym_fns fns = { flavour, sf };
-
-  VEC_safe_push (registered_sym_fns, symtab_fns, &fns);
+  symtab_fns.emplace_back (flavour, sf);
 }
 
 /* Initialize OBJFILE to read symbols from its associated BFD.  It
@@ -1791,18 +1779,16 @@ add_symtab_fns (enum bfd_flavour flavour, const struct sym_fns *sf)
 static const struct sym_fns *
 find_sym_fns (bfd *abfd)
 {
-  registered_sym_fns *rsf;
   enum bfd_flavour our_flavour = bfd_get_flavour (abfd);
-  int i;
 
   if (our_flavour == bfd_target_srec_flavour
       || our_flavour == bfd_target_ihex_flavour
       || our_flavour == bfd_target_tekhex_flavour)
     return NULL;	/* No symbols.  */
 
-  for (i = 0; VEC_iterate (registered_sym_fns, symtab_fns, i, rsf); ++i)
-    if (our_flavour == rsf->sym_flavour)
-      return rsf->sym_fns;
+  for (const registered_sym_fns &rsf : symtab_fns)
+    if (our_flavour == rsf.sym_flavour)
+      return rsf.sym_fns;
 
   error (_("I'm sorry, Dave, I can't do that.  Symbol format `%s' unknown."),
 	 bfd_get_target (abfd));
@@ -1953,16 +1939,14 @@ load_progress (ULONGEST bytes, void *untyped_arg)
 	 might add a verify_memory() method to the target vector and
 	 then use that.  remote.c could implement that method using
 	 the ``qCRC'' packet.  */
-      gdb_byte *check = (gdb_byte *) xmalloc (bytes);
-      struct cleanup *verify_cleanups = make_cleanup (xfree, check);
+      gdb::byte_vector check (bytes);
 
-      if (target_read_memory (args->lma, check, bytes) != 0)
+      if (target_read_memory (args->lma, check.data (), bytes) != 0)
 	error (_("Download verify read failed at %s"),
 	       paddress (target_gdbarch (), args->lma));
-      if (memcmp (args->buffer, check, bytes) != 0)
+      if (memcmp (args->buffer, check.data (), bytes) != 0)
 	error (_("Download verify compare failed at %s"),
 	       paddress (target_gdbarch (), args->lma));
-      do_cleanups (verify_cleanups);
     }
   totals->data_count += bytes;
   args->lma += bytes;
@@ -2198,7 +2182,7 @@ print_transfer_performance (struct ui_file *stream,
    value to use.  We are now discontinuing this type of ad hoc syntax.  */
 
 static void
-add_symbol_file_command (char *args, int from_tty)
+add_symbol_file_command (const char *args, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   gdb::unique_xmalloc_ptr<char> filename;
@@ -2333,7 +2317,7 @@ add_symbol_file_command (char *args, int from_tty)
 /* This function removes a symbol file that was added via add-symbol-file.  */
 
 static void
-remove_symbol_file_command (char *args, int from_tty)
+remove_symbol_file_command (const char *args, int from_tty)
 {
   struct objfile *objf = NULL;
   struct program_space *pspace = current_program_space;
@@ -2393,7 +2377,7 @@ remove_symbol_file_command (char *args, int from_tty)
 		 objfile_name (objf)))
     error (_("Not confirmed."));
 
-  free_objfile (objf);
+  delete objf;
   clear_symtab_users (0);
 }
 
@@ -2527,14 +2511,8 @@ reread_symbols (void)
 
 	  /* FIXME: Do we have to free a whole linked list, or is this
 	     enough?  */
-	  if (objfile->global_psymbols.list)
-	    xfree (objfile->global_psymbols.list);
-	  memset (&objfile->global_psymbols, 0,
-		  sizeof (objfile->global_psymbols));
-	  if (objfile->static_psymbols.list)
-	    xfree (objfile->static_psymbols.list);
-	  memset (&objfile->static_psymbols, 0,
-		  sizeof (objfile->static_psymbols));
+	  objfile->global_psymbols.clear ();
+	  objfile->static_psymbols.clear ();
 
 	  /* Free the obstacks for non-reusable objfiles.  */
 	  psymbol_bcache_free (objfile->psymbol_cache);
@@ -3233,7 +3211,7 @@ find_pc_mapped_section (CORE_ADDR pc)
    Print a list of mapped sections and their PC ranges.  */
 
 static void
-list_overlays_command (char *args, int from_tty)
+list_overlays_command (const char *args, int from_tty)
 {
   int nmapped = 0;
   struct objfile *objfile;
@@ -3275,7 +3253,7 @@ list_overlays_command (char *args, int from_tty)
    Mark the named section as mapped (ie. residing at its VMA address).  */
 
 static void
-map_overlay_command (char *args, int from_tty)
+map_overlay_command (const char *args, int from_tty)
 {
   struct objfile *objfile, *objfile2;
   struct obj_section *sec, *sec2;
@@ -3320,7 +3298,7 @@ map_overlay_command (char *args, int from_tty)
    (ie. resident in its LMA address range, rather than the VMA range).  */
 
 static void
-unmap_overlay_command (char *args, int from_tty)
+unmap_overlay_command (const char *args, int from_tty)
 {
   struct objfile *objfile;
   struct obj_section *sec = NULL;
@@ -3350,7 +3328,7 @@ unmap_overlay_command (char *args, int from_tty)
    Possibly this should be done via a set/show command.  */
 
 static void
-overlay_auto_command (char *args, int from_tty)
+overlay_auto_command (const char *args, int from_tty)
 {
   overlay_debugging = ovly_auto;
   enable_overlay_breakpoints ();
@@ -3363,7 +3341,7 @@ overlay_auto_command (char *args, int from_tty)
    Possibly this should be done via a set/show command.  */
 
 static void
-overlay_manual_command (char *args, int from_tty)
+overlay_manual_command (const char *args, int from_tty)
 {
   overlay_debugging = ovly_on;
   disable_overlay_breakpoints ();
@@ -3376,7 +3354,7 @@ overlay_manual_command (char *args, int from_tty)
    Possibly this should be done via a set/show command.  */
 
 static void
-overlay_off_command (char *args, int from_tty)
+overlay_off_command (const char *args, int from_tty)
 {
   overlay_debugging = ovly_off;
   disable_overlay_breakpoints ();
@@ -3385,7 +3363,7 @@ overlay_off_command (char *args, int from_tty)
 }
 
 static void
-overlay_load_command (char *args, int from_tty)
+overlay_load_command (const char *args, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
 
@@ -3402,7 +3380,7 @@ overlay_load_command (char *args, int from_tty)
 static struct cmd_list_element *overlaylist;
 
 static void
-overlay_command (char *args, int from_tty)
+overlay_command (const char *args, int from_tty)
 {
   printf_unfiltered
     ("\"overlay\" must be followed by the name of an overlay command.\n");

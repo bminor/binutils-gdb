@@ -1410,6 +1410,37 @@ thread_db_extra_thread_info (struct target_ops *self,
   return NULL;
 }
 
+/* Return pointer to the thread_info struct which corresponds to
+   THREAD_HANDLE (having length HANDLE_LEN).  */
+
+static struct thread_info *
+thread_db_thread_handle_to_thread_info (struct target_ops *ops,
+					const gdb_byte *thread_handle,
+					int handle_len,
+					struct inferior *inf)
+{
+  struct thread_info *tp;
+  thread_t handle_tid;
+
+  /* Thread handle sizes must match in order to proceed.  We don't use an
+     assert here because the resulting internal error will cause GDB to
+     exit.  This isn't necessarily an internal error due to the possibility
+     of garbage being passed as the thread handle via the python interface.  */
+  if (handle_len != sizeof (handle_tid))
+    error (_("Thread handle size mismatch: %d vs %zu (from libthread_db)"),
+	   handle_len, sizeof (handle_tid));
+
+  handle_tid = * (const thread_t *) thread_handle;
+
+  ALL_NON_EXITED_THREADS (tp)
+    {
+      if (tp->inf == inf && tp->priv != NULL && handle_tid == tp->priv->tid)
+        return tp;
+    }
+
+  return NULL;
+}
+
 /* Get the address of the thread local variable in load module LM which
    is stored at OFFSET within the thread local storage for thread PTID.  */
 
@@ -1691,6 +1722,7 @@ init_thread_db_ops (void)
     = thread_db_get_thread_local_address;
   thread_db_ops.to_extra_thread_info = thread_db_extra_thread_info;
   thread_db_ops.to_get_ada_task_ptid = thread_db_get_ada_task_ptid;
+  thread_db_ops.to_thread_handle_to_thread_info = thread_db_thread_handle_to_thread_info;
   thread_db_ops.to_magic = OPS_MAGIC;
 
   complete_target_initialization (&thread_db_ops);

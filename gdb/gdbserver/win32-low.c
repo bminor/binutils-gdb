@@ -32,6 +32,8 @@
 #include <tlhelp32.h>
 #include <psapi.h>
 #include <process.h>
+#include "gdb_tilde_expand.h"
+#include "common-inferior.h"
 
 #ifndef USE_WIN32API
 #include <sys/cygwin.h>
@@ -229,9 +231,8 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
 
 /* Delete a thread from the list of threads.  */
 static void
-delete_thread_info (struct inferior_list_entry *entry)
+delete_thread_info (thread_info *thread)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
 
   remove_thread (thread);
@@ -243,15 +244,14 @@ delete_thread_info (struct inferior_list_entry *entry)
 static void
 child_delete_thread (DWORD pid, DWORD tid)
 {
-  struct inferior_list_entry *thread;
   ptid_t ptid;
 
   /* If the last thread is exiting, just return.  */
-  if (one_inferior_p (&all_threads))
+  if (all_threads.size () == 1)
     return;
 
   ptid = ptid_build (pid, tid, 0);
-  thread = find_inferior_id (&all_threads, ptid);
+  thread_info *thread = find_inferior_id (&all_threads, ptid);
   if (thread == NULL)
     return;
 
@@ -429,9 +429,8 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 /* Resume all artificially suspended threads if we are continuing
    execution.  */
 static int
-continue_one_thread (struct inferior_list_entry *this_thread, void *id_ptr)
+continue_one_thread (thread_info *thread, void *id_ptr)
 {
-  struct thread_info *thread = (struct thread_info *) this_thread;
   int thread_id = * (int *) id_ptr;
   win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
 
@@ -562,10 +561,12 @@ static BOOL
 create_process (const char *program, char *args,
 		DWORD flags, PROCESS_INFORMATION *pi)
 {
+  const char *inferior_cwd = get_inferior_cwd ();
+  std::string expanded_infcwd = gdb_tilde_expand (inferior_cwd);
   BOOL ret;
 
 #ifdef _WIN32_WCE
-  wchar_t *p, *wprogram, *wargs;
+  wchar_t *p, *wprogram, *wargs, *wcwd = NULL;
   size_t argslen;
 
   wprogram = alloca ((strlen (program) + 1) * sizeof (wchar_t));
@@ -579,6 +580,19 @@ create_process (const char *program, char *args,
   wargs = alloca ((argslen + 1) * sizeof (wchar_t));
   mbstowcs (wargs, args, argslen + 1);
 
+  if (inferior_cwd != NULL)
+    {
+      std::replace (expanded_infcwd.begin (), expanded_infcwd.end (),
+		    '/', '\\');
+      wcwd = alloca ((expanded_infcwd.size () + 1) * sizeof (wchar_t));
+      if (mbstowcs (wcwd, expanded_infcwd.c_str (),
+		    expanded_infcwd.size () + 1) == NULL)
+	{
+	  error (_("\
+Could not convert the expanded inferior cwd to wide-char."));
+	}
+    }
+
   ret = CreateProcessW (wprogram, /* image name */
 			wargs,    /* command line */
 			NULL,     /* security, not supported */
@@ -586,7 +600,7 @@ create_process (const char *program, char *args,
 			FALSE,    /* inherit handles, not supported */
 			flags,    /* start flags */
 			NULL,     /* environment, not supported */
-			NULL,     /* current directory, not supported */
+			wcwd,     /* current directory */
 			NULL,     /* start info, not supported */
 			pi);      /* proc info */
 #else
@@ -599,7 +613,7 @@ create_process (const char *program, char *args,
 			TRUE,     /* inherit handles */
 			flags,    /* start flags */
 			NULL,     /* environment */
-			NULL,     /* current directory */
+			expanded_infcwd.c_str (), /* current directory */
 			&si,      /* start info */
 			pi);      /* proc info */
 #endif
@@ -1330,9 +1344,8 @@ handle_exception (struct target_waitstatus *ourstatus)
 
 
 static void
-suspend_one_thread (struct inferior_list_entry *entry)
+suspend_one_thread (thread_info *thread)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
 
   if (!th->suspended)
@@ -1471,7 +1484,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
       child_delete_thread (current_event.dwProcessId,
 			   current_event.dwThreadId);
 
-      current_thread = (struct thread_info *) all_threads.head;
+      current_thread = get_first_thread ();
       return 1;
 
     case CREATE_PROCESS_DEBUG_EVENT:

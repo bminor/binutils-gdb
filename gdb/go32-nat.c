@@ -2053,7 +2053,7 @@ go32_pte_for_address (char *arg, int from_tty)
 static struct cmd_list_element *info_dos_cmdlist = NULL;
 
 static void
-go32_info_dos_command (char *args, int from_tty)
+go32_info_dos_command (const char *args, int from_tty)
 {
   help_list (info_dos_cmdlist, "info dos ", class_info, gdb_stdout);
 }

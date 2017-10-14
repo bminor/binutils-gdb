@@ -9,6 +9,7 @@ Disassembly of section .group:
 00000000 <jlitab.foo>:
    0:	0[10] 00 00 0[01]             	.word	0x00000001
    4:	0[60] 00 00 0[06]             	.word	0x00000006
+   8:	0[70] 00 00 0[07]             	.word	0x00000007
 
 Disassembly of section .text:
 

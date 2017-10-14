@@ -28,9 +28,7 @@ public:
   filename_seen_cache ();
   ~filename_seen_cache ();
 
-  /* Disable copy.  */
-  filename_seen_cache (const filename_seen_cache &) = delete;
-  void operator= (const filename_seen_cache &) = delete;
+  DISABLE_COPY_AND_ASSIGN (filename_seen_cache);
 
   /* Empty the cache, but do not delete it.  */
   void clear ();

@@ -239,7 +239,7 @@ POTFILES: POTFILES.in
 	    posrcprefix="../"; \
 	  fi; \
 	  rm -f $@-t $@ \
-	    && (sed -e '/^#/d' -e '/^[ 	]*$$/d' \
+	    && (sed -e '/^#/d' -e '/^[	 ]*$$/d' \
 		    -e "s@.*@	$$posrcprefix& \\\\@" < $(srcdir)/$@.in \
 		| sed -e '$$s/\\$$//') > $@-t \
 	    && chmod a-w $@-t \

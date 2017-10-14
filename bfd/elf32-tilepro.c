@@ -2332,7 +2332,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       if (eh->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefweak)
 	{
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    eh->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
@@ -2406,6 +2407,9 @@ readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  struct bfd_link_info *info = (struct bfd_link_info *) inf;
 
 	  info->flags |= DF_TEXTREL;
+
+	  info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+				  p->sec->owner, p->sec);
 
 	  /* Not an error, just cut short the traversal.  */
 	  return FALSE;
@@ -2496,7 +2500,12 @@ tilepro_elf_size_dynamic_sections (bfd *output_bfd,
 		  srel = elf_section_data (p->sec)->sreloc;
 		  srel->size += p->count * TILEPRO_ELF_RELA_BYTES;
 		  if ((p->sec->output_section->flags & SEC_READONLY) != 0)
-		    info->flags |= DF_TEXTREL;
+		    {
+		      info->flags |= DF_TEXTREL;
+
+		      info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+					      p->sec->owner, p->sec);
+		    }
 		}
 	    }
 	}
@@ -2852,7 +2861,7 @@ tilepro_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       const char *name;
       bfd_vma off;
       bfd_boolean is_plt = FALSE;
-
+      bfd_boolean resolved_to_zero;
       bfd_boolean unresolved_reloc;
 
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -3027,6 +3036,9 @@ tilepro_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  break;
 	}
 
+      resolved_to_zero = (h != NULL
+			  && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
+
       switch (r_type)
 	{
         case R_TILEPRO_IMM16_X0_GOT:
@@ -3195,7 +3207,8 @@ tilepro_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	  if ((bfd_link_pic (info)
 	       && (h == NULL
-		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		   || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		       && !resolved_to_zero)
 		   || h->root.type != bfd_link_hash_undefweak)
 	       && (! howto->pc_relative
 		   || !SYMBOL_CALLS_LOCAL (info, h)))

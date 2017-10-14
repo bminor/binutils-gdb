@@ -78,6 +78,7 @@ WHICH = aarch64 \
 	s390-linux32v2 s390-linux64v2 s390x-linux64v2 \
 	s390-te-linux64 s390x-te-linux64 s390-vx-linux64 s390x-vx-linux64 \
 	s390-tevx-linux64 s390x-tevx-linux64 \
+	s390-gs-linux64 s390x-gs-linux64 \
 	tic6x-c64xp tic6x-c64x tic6x-c62x \
 	tic6x-c64xp-linux tic6x-c64x-linux tic6x-c62x-linux
 
@@ -105,18 +106,9 @@ s390-linux64v2-expedite = r14l,r15l,pswa
 s390-te-linux64-expedite = r14l,r15l,pswa
 s390-vx-linux64-expedite = r14l,r15l,pswa
 s390-tevx-linux64-expedite = r14l,r15l,pswa
-s390x-linux64-expedite = r14,r15,pswa
-s390x-linux64v1-expedite = r14,r15,pswa
-s390x-linux64v2-expedite = r14,r15,pswa
-s390x-te-linux64-expedite = r14,r15,pswa
-s390x-vx-linux64-expedite = r14,r15,pswa
-s390x-tevx-linux64-expedite = r14,r15,pswa
-tic6x-c64xp-expedite = A15,PC
-tic6x-c64x-expedite = A15,PC
-tic6x-c62x-expedite = A15,PC
-tic6x-c64xp-linux-expedite = A15,PC
-tic6x-c64x-linux-expedite = A15,PC
-tic6x-c62x-linux-expedite = A15,PC
+s390-gs-linux64-expedite = r14,r15,pswa
+s390x-expedite = r14,r15,pswa
+tic6x-expedite = A15,PC
 
 
 XSLTPROC = xsltproc
@@ -196,6 +188,8 @@ XMLTOC = \
 	s390-vx-linux64.xml \
 	s390x-tevx-linux64.xml \
 	s390x-vx-linux64.xml \
+	s390-gs-linux64.xml \
+	s390x-gs-linux64.xml \
 	tic6x-c62x-linux.xml \
 	tic6x-c62x.xml \
 	tic6x-c64x-linux.xml \
@@ -287,7 +281,7 @@ $(outdir)/i386/i386-avx-avx512.dat: i386/32bit-core.xml i386/32bit-avx.xml \
 			       i386/32bit-avx512.xml
 $(outdir)/i386/i386-avx-avx512-linux.dat: i386/32bit-core.xml i386/32bit-avx.xml \
 			       i386/32bit-linux.xml i386/32bit-avx512.xml
-$(outdir)/i386/i386-avx-mpx-avx512-pku.dat: i386/32bit-core.xml
+$(outdir)/i386/i386-avx-mpx-avx512-pku.dat: i386/32bit-core.xml \
 			       i386/32bit-avx.xml i386/32bit-mpx.xml i386/32bit-avx512.xml \
 			       i386/32bit-pkeys.xml
 $(outdir)/i386/i386-avx-mpx-avx512-pku-linux.dat: i386/32bit-core.xml \

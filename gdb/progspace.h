@@ -210,6 +210,17 @@ struct program_space
     REGISTRY_FIELDS;
   };
 
+/* An address space.  It is used for comparing if
+   pspaces/inferior/threads see the same address space and for
+   associating caches to each address space.  */
+struct address_space
+{
+  int num;
+
+  /* Per aspace data-pointers required by other GDB modules.  */
+  REGISTRY_FIELDS;
+};
+
 /* The object file that the main symbol table was loaded from (e.g. the
    argument to the "symbol-file" or "file" command).  */
 
@@ -273,11 +284,7 @@ public:
   ~scoped_restore_current_program_space ()
   { set_current_program_space (m_saved_pspace); }
 
-  /* Disable copy.  */
-  scoped_restore_current_program_space
-    (const scoped_restore_current_program_space &) = delete;
-  void operator=
-    (const scoped_restore_current_program_space &) = delete;
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_current_program_space);
 
 private:
   program_space *m_saved_pspace;

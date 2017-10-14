@@ -43,8 +43,6 @@
 #define DEFAULT_DEMANGLING_STYLE AUTO_DEMANGLING_STYLE_STRING
 #endif
 
-static void demangle_command (char *, int);
-
 /* See documentation in gdb-demangle.h.  */
 int demangle = 1;
 
@@ -159,7 +157,7 @@ is_cplus_marker (int c)
 /* Demangle the given string in the current language.  */
 
 static void
-demangle_command (char *args, int from_tty)
+demangle_command (const char *args, int from_tty)
 {
   char *demangled;
   const char *name;

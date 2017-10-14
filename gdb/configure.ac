@@ -44,6 +44,17 @@ AX_CXX_COMPILE_STDCXX(11, , mandatory)
 
 # Dependency checking.
 ZW_CREATE_DEPDIR
+# Create sub-directories for objects and dependencies.
+CONFIG_SRC_SUBDIR="arch"
+AC_SUBST(CONFIG_SRC_SUBDIR)
+
+AC_CONFIG_COMMANDS([gdbdepdir],[
+  for subdir in ${CONFIG_SRC_SUBDIR}
+  do
+      $SHELL $ac_aux_dir/mkinstalldirs $subdir/$DEPDIR
+  done],
+  [ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR CONFIG_SRC_SUBDIR="$CONFIG_SRC_SUBDIR"])
+
 ZW_PROG_COMPILER_DEPENDENCIES([CC])
 
 gnulib_extra_configure_args=
@@ -508,13 +519,6 @@ esac
 # We might need to link with -lm; most simulators need it.
 AC_CHECK_LIB(m, main)
 
-# We need to link with -lw to get `wctype' on Solaris before Solaris
-# 2.6.  Solaris 2.6 and beyond have this function in libc, and have a
-# libw that some versions of the GNU linker cannot hanle (GNU ld 2.9.1
-# is known to have this problem).  Therefore we avoid libw if we can.
-AC_CHECK_FUNC(wctype, [],
-  [AC_CHECK_LIB(w, wctype)])
-
 # Some systems (e.g. Solaris) have `gethostbyname' in libnsl.
 AC_SEARCH_LIBS(gethostbyname, nsl)
 
@@ -569,7 +573,7 @@ if test x"$prefer_curses" = xyes; then
   # search /usr/local/include, if ncurses is installed in /usr/local.  A
   # default installation of ncurses on alpha*-dec-osf* will lead to such
   # a situation.
-  AC_SEARCH_LIBS(waddstr, [ncurses cursesX curses])
+  AC_SEARCH_LIBS(waddstr, [ncursesw ncurses cursesX curses])
 
   if test "$ac_cv_search_waddstr" != no; then
     curses_found=yes
@@ -611,7 +615,7 @@ case $host_os in
 esac
 
 # These are the libraries checked by Readline.
-AC_SEARCH_LIBS(tgetent, [termcap tinfo curses ncurses])
+AC_SEARCH_LIBS(tgetent, [termcap tinfo curses ncursesw ncurses])
 
 if test "$ac_cv_search_tgetent" = no; then
   CONFIG_OBS="$CONFIG_OBS stub-termcap.o"
@@ -1134,7 +1138,7 @@ AC_MSG_RESULT([$with_guile])
 dnl We check guile with pkg-config.
 AC_PATH_PROG(pkg_config_prog_path, pkg-config, missing)
 
-try_guile_versions="guile-2.2 guile-2.0"
+try_guile_versions="guile-2.0"
 have_libguile=no
 case "${with_guile}" in
 no)
@@ -1308,18 +1312,7 @@ AC_CHECK_HEADERS(sys/user.h, [], [],
 #endif
 ])
 
-# On Solaris 2.[789], we need to define _MSE_INT_H to avoid a clash
-# between <widec.h> and <wchar.h> that would cause AC_CHECK_HEADERS to
-# think that we don't have <curses.h> if we're using GCC.
-case $host_os in
-  solaris2.[[789]])
-    if test "$GCC" = yes; then
-      AC_DEFINE(_MSE_INT_H, 1,
-        [Define to 1 to avoid a clash between <widec.h> and <wchar.h> on
-   Solaris 2.[789] when using GCC. ])
-    fi ;;
-esac
-AC_CHECK_HEADERS(curses.h cursesX.h ncurses.h ncurses/ncurses.h ncurses/term.h)
+AC_CHECK_HEADERS(curses.h cursesX.h ncurses.h ncursesw/ncurses.h ncurses/ncurses.h ncurses/term.h)
 AC_CHECK_HEADERS(term.h, [], [],
 [#if HAVE_CURSES_H
 # include <curses.h>
@@ -1769,41 +1762,6 @@ dnl and not doing a canadian cross build (build == host).
 
 if test ${build} = ${host} -a ${host} = ${target} ; then
    case ${host_os} in
-   solaris*)
-      # See if thread_db library is around for Solaris thread debugging.
-      # Note that we must explicitly test for version 1 of the library
-      # because version 0 (present on Solaris 2.4 or earlier) doesn't have
-      # the same API.
-      AC_MSG_CHECKING(for Solaris thread debugging library)
-      if test -f /usr/lib/libthread_db.so.1 ; then
-         AC_MSG_RESULT(yes)
-         AC_DEFINE(HAVE_THREAD_DB_LIB, 1,
-         [Define if using Solaris thread debugging.])
-         CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
-         CONFIG_SRCS="${CONFIG_SRCS} sol-thread.c"
-         AC_CHECK_LIB(dl, dlopen)
-	 CONFIG_LDFLAGS="${CONFIG_LDFLAGS} $RDYNAMIC"
-	 # Sun randomly tweaked the prototypes in <proc_service.h>
-	 # at one point.
-	 AC_MSG_CHECKING(if <proc_service.h> is old)
-	 AC_CACHE_VAL(gdb_cv_proc_service_is_old,[
-	    AC_TRY_COMPILE([
-		#include <proc_service.h>
-		ps_err_e ps_pdwrite
-		    (struct ps_prochandle*, psaddr_t, const void*, size_t);
-	    ],, gdb_cv_proc_service_is_old=no,
-	        gdb_cv_proc_service_is_old=yes)
-	 ])
-	 AC_MSG_RESULT($gdb_cv_proc_service_is_old)
-	 if test $gdb_cv_proc_service_is_old = yes; then
-	    AC_DEFINE(PROC_SERVICE_IS_OLD, 1,
-            [Define if <proc_service.h> on solaris uses int instead of
-             size_t, and assorted other type changes.])
-	 fi
-      else
-         AC_MSG_RESULT(no)
-      fi
-      ;;
    aix*)
       AC_MSG_CHECKING(for AiX thread debugging library)
       AC_CACHE_VAL(gdb_cv_have_aix_thread_debug,

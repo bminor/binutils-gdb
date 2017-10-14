@@ -760,9 +760,19 @@ update_solib_list (int from_tty)
 	 have not opened a symbol file, we may be able to get its
 	 symbols now!  */
       if (inf->attach_flag && symfile_objfile == NULL)
-	catch_errors (ops->open_symbol_file_object, &from_tty,
-		      "Error reading attached process's symbol file.\n",
-		      RETURN_MASK_ALL);
+	{
+	  TRY
+	    {
+	      ops->open_symbol_file_object (from_tty);
+	    }
+	  CATCH (ex, RETURN_MASK_ALL)
+	    {
+	      exception_fprintf (gdb_stderr, ex,
+				 "Error reading attached "
+				 "process's symbol file.\n");
+	    }
+	  END_CATCH
+	}
     }
 
   /* GDB and the inferior's dynamic linker each maintain their own
@@ -841,7 +851,7 @@ update_solib_list (int from_tty)
 	  /* Unless the user loaded it explicitly, free SO's objfile.  */
 	  if (gdb->objfile && ! (gdb->objfile->flags & OBJF_USERLOADED)
 	      && !solib_used (gdb))
-	    free_objfile (gdb->objfile);
+	    delete gdb->objfile;
 
 	  /* Some targets' section tables might be referring to
 	     sections from so->abfd; remove them.  */
@@ -1285,9 +1295,9 @@ handle_solib_event (void)
   /* Check for any newly added shared libraries if we're supposed to
      be adding them automatically.  Switch terminal for any messages
      produced by breakpoint_re_set.  */
-  target_terminal_ours_for_output ();
+  target_terminal::ours_for_output ();
   solib_add (NULL, 0, auto_solib_add);
-  target_terminal_inferior ();
+  target_terminal::inferior ();
 }
 
 /* Reload shared libraries, but avoid reloading the same symbol file
@@ -1324,7 +1334,7 @@ reload_shared_libraries_1 (int from_tty)
 	{
 	  if (so->objfile && ! (so->objfile->flags & OBJF_USERLOADED)
 	      && !solib_used (so))
-	    free_objfile (so->objfile);
+	    delete so->objfile;
 	  remove_target_sections (so);
 	  clear_so (so);
 	}

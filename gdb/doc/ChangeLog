@@ -1,3 +1,48 @@
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Starting your Program) <The working directory.>:
+	Mention remote debugging.
+	(Working Directory) <Your Program's Working Directory>:
+	Likewise.
+	(Connecting) <Remote Packet>: Add "set-working-dir"
+	and "QSetWorkingDir" to the table.
+	(Remote Protocol) <QSetWorkingDir>: New item, explaining the
+	packet.
+
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Starting your Program) <The working directory.>:
+	Mention new "set cwd" command.
+	(Working Directory) <Your Program's Working Directory>:
+	Rephrase to explain that "set cwd" exists and is the default
+	way to change the inferior's cwd.
+
+2017-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.texinfo (S/390 and System z Features): Document the new
+	features org.gnu.gdb.s390.gs and org.gnu.gdb.s390.gsbc.
+
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.texinfo (qXfer:threads:read): Add documentation for handle
+	attribute.
+
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* python.texi (Inferiors In Python): Add description for method
+	Inferior.thread_from_thread_handle.
+
+2017-09-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Starting your Program): Add description of
+	starti command.  Mention starti command as an alternative for
+	debugging the elaboration phase.
+
+2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Maintenance Commands): Document filter parameter
+	of "maint selftest".  Document "maint info selftests" command.
+
 2017-09-11  Tom Tromey  <tom@tromey.com>
 
 	* python.texi (Events In Python): Document new events.

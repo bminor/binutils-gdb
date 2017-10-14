@@ -90,8 +90,6 @@ static int return_zero (struct target_ops *);
 
 static int return_zero_has_execution (struct target_ops *, ptid_t);
 
-static void target_command (char *, int);
-
 static struct target_ops *find_default_run_target (const char *);
 
 static struct gdbarch *default_thread_architecture (struct target_ops *ops,
@@ -188,7 +186,7 @@ static void setup_target_debug (void);
 /* The user just typed 'target' without the name of a target.  */
 
 static void
-target_command (char *arg, int from_tty)
+target_command (const char *arg, int from_tty)
 {
   fputs_filtered ("Argument required (target name).  Try `help target'\n",
 		  gdb_stdout);
@@ -386,7 +384,7 @@ Remaining arguments are interpreted by the target protocol.  For more\n\
 information on the arguments for a particular protocol, type\n\
 `help target ' followed by the protocol name."),
 		    &targetlist, "target ", 0, &cmdlist);
-  c = add_cmd (t->to_shortname, no_class, NULL, t->to_doc, &targetlist);
+  c = add_cmd (t->to_shortname, no_class, t->to_doc, &targetlist);
   set_cmd_sfunc (c, open_target);
   set_cmd_context (c, t);
   if (completer != NULL)
@@ -411,7 +409,7 @@ add_deprecated_target_alias (struct target_ops *t, const char *alias)
 
   /* If we use add_alias_cmd, here, we do not get the deprecated warning,
      see PR cli/15104.  */
-  c = add_cmd (alias, no_class, NULL, t->to_doc, &targetlist);
+  c = add_cmd (alias, no_class, t->to_doc, &targetlist);
   set_cmd_sfunc (c, open_target);
   set_cmd_context (c, t);
   alt = xstrprintf ("target %s", t->to_shortname);
@@ -433,53 +431,25 @@ target_load (const char *arg, int from_tty)
   (*current_target.to_load) (&current_target, arg, from_tty);
 }
 
-/* Possible terminal states.  */
+/* Define it.  */
 
-enum terminal_state
-  {
-    /* The inferior's terminal settings are in effect.  */
-    terminal_is_inferior = 0,
+enum target_terminal::terminal_state target_terminal::terminal_state
+  = target_terminal::terminal_is_ours;
 
-    /* Some of our terminal settings are in effect, enough to get
-       proper output.  */
-    terminal_is_ours_for_output = 1,
-
-    /* Our terminal settings are in effect, for output and input.  */
-    terminal_is_ours = 2
-  };
-
-static enum terminal_state terminal_state = terminal_is_ours;
-
-/* See target.h.  */
+/* See target/target.h.  */
 
 void
-target_terminal_init (void)
+target_terminal::init (void)
 {
   (*current_target.to_terminal_init) (&current_target);
 
   terminal_state = terminal_is_ours;
 }
 
-/* See target.h.  */
-
-int
-target_terminal_is_inferior (void)
-{
-  return (terminal_state == terminal_is_inferior);
-}
-
-/* See target.h.  */
-
-int
-target_terminal_is_ours (void)
-{
-  return (terminal_state == terminal_is_ours);
-}
-
-/* See target.h.  */
+/* See target/target.h.  */
 
 void
-target_terminal_inferior (void)
+target_terminal::inferior (void)
 {
   struct ui *ui = current_ui;
 
@@ -490,8 +460,8 @@ target_terminal_inferior (void)
 
   /* Since we always run the inferior in the main console (unless "set
      inferior-tty" is in effect), when some UI other than the main one
-     calls target_terminal_inferior/target_terminal_inferior, then we
-     leave the main UI's terminal settings as is.  */
+     calls target_terminal::inferior, then we leave the main UI's
+     terminal settings as is.  */
   if (ui != main_ui)
     return;
 
@@ -509,14 +479,14 @@ target_terminal_inferior (void)
     target_pass_ctrlc ();
 }
 
-/* See target.h.  */
+/* See target/target.h.  */
 
 void
-target_terminal_ours (void)
+target_terminal::ours ()
 {
   struct ui *ui = current_ui;
 
-  /* See target_terminal_inferior.  */
+  /* See target_terminal::inferior.  */
   if (ui != main_ui)
     return;
 
@@ -527,14 +497,14 @@ target_terminal_ours (void)
   terminal_state = terminal_is_ours;
 }
 
-/* See target.h.  */
+/* See target/target.h.  */
 
 void
-target_terminal_ours_for_output (void)
+target_terminal::ours_for_output ()
 {
   struct ui *ui = current_ui;
 
-  /* See target_terminal_inferior.  */
+  /* See target_terminal::inferior.  */
   if (ui != main_ui)
     return;
 
@@ -542,6 +512,14 @@ target_terminal_ours_for_output (void)
     return;
   (*current_target.to_terminal_ours_for_output) (&current_target);
   terminal_state = terminal_is_ours_for_output;
+}
+
+/* See target/target.h.  */
+
+void
+target_terminal::info (const char *arg, int from_tty)
+{
+  (*current_target.to_terminal_info) (&current_target, arg, from_tty);
 }
 
 /* See target.h.  */
@@ -559,40 +537,6 @@ target_supports_terminal_ours (void)
     }
 
   return 0;
-}
-
-/* Restore the terminal to its previous state (helper for
-   make_cleanup_restore_target_terminal). */
-
-static void
-cleanup_restore_target_terminal (void *arg)
-{
-  enum terminal_state *previous_state = (enum terminal_state *) arg;
-
-  switch (*previous_state)
-    {
-    case terminal_is_ours:
-      target_terminal_ours ();
-      break;
-    case terminal_is_ours_for_output:
-      target_terminal_ours_for_output ();
-      break;
-    case terminal_is_inferior:
-      target_terminal_inferior ();
-      break;
-    }
-}
-
-/* See target.h. */
-
-struct cleanup *
-make_cleanup_restore_target_terminal (void)
-{
-  enum terminal_state *ts = XNEW (enum terminal_state);
-
-  *ts = terminal_state;
-
-  return make_cleanup_dtor (cleanup_restore_target_terminal, ts, xfree);
 }
 
 static void
@@ -1684,43 +1628,37 @@ static void
 read_whatever_is_readable (struct target_ops *ops,
 			   const ULONGEST begin, const ULONGEST end,
 			   int unit_size,
-			   VEC(memory_read_result_s) **result)
+			   std::vector<memory_read_result> *result)
 {
-  gdb_byte *buf = (gdb_byte *) xmalloc (end - begin);
   ULONGEST current_begin = begin;
   ULONGEST current_end = end;
   int forward;
-  memory_read_result_s r;
   ULONGEST xfered_len;
 
   /* If we previously failed to read 1 byte, nothing can be done here.  */
   if (end - begin <= 1)
-    {
-      xfree (buf);
-      return;
-    }
+    return;
+
+  gdb::unique_xmalloc_ptr<gdb_byte> buf ((gdb_byte *) xmalloc (end - begin));
 
   /* Check that either first or the last byte is readable, and give up
      if not.  This heuristic is meant to permit reading accessible memory
      at the boundary of accessible region.  */
   if (target_read_partial (ops, TARGET_OBJECT_MEMORY, NULL,
-			   buf, begin, 1, &xfered_len) == TARGET_XFER_OK)
+			   buf.get (), begin, 1, &xfered_len) == TARGET_XFER_OK)
     {
       forward = 1;
       ++current_begin;
     }
   else if (target_read_partial (ops, TARGET_OBJECT_MEMORY, NULL,
-				buf + (end - begin) - 1, end - 1, 1,
+				buf.get () + (end - begin) - 1, end - 1, 1,
 				&xfered_len) == TARGET_XFER_OK)
     {
       forward = 0;
       --current_end;
     }
   else
-    {
-      xfree (buf);
-      return;
-    }
+    return;
 
   /* Loop invariant is that the [current_begin, current_end) was previously
      found to be not readable as a whole.
@@ -1750,7 +1688,7 @@ read_whatever_is_readable (struct target_ops *ops,
 	}
 
       xfer = target_read (ops, TARGET_OBJECT_MEMORY, NULL,
-			  buf + (first_half_begin - begin) * unit_size,
+			  buf.get () + (first_half_begin - begin) * unit_size,
 			  first_half_begin,
 			  first_half_end - first_half_begin);
 
@@ -1777,47 +1715,27 @@ read_whatever_is_readable (struct target_ops *ops,
   if (forward)
     {
       /* The [begin, current_begin) range has been read.  */
-      r.begin = begin;
-      r.end = current_begin;
-      r.data = buf;
+      result->emplace_back (begin, current_end, std::move (buf));
     }
   else
     {
       /* The [current_end, end) range has been read.  */
       LONGEST region_len = end - current_end;
 
-      r.data = (gdb_byte *) xmalloc (region_len * unit_size);
-      memcpy (r.data, buf + (current_end - begin) * unit_size,
+      gdb::unique_xmalloc_ptr<gdb_byte> data
+	((gdb_byte *) xmalloc (region_len * unit_size));
+      memcpy (data.get (), buf.get () + (current_end - begin) * unit_size,
 	      region_len * unit_size);
-      r.begin = current_end;
-      r.end = end;
-      xfree (buf);
+      result->emplace_back (current_end, end, std::move (data));
     }
-  VEC_safe_push(memory_read_result_s, (*result), &r);
 }
 
-void
-free_memory_read_result_vector (void *x)
-{
-  VEC(memory_read_result_s) **v = (VEC(memory_read_result_s) **) x;
-  memory_read_result_s *current;
-  int ix;
-
-  for (ix = 0; VEC_iterate (memory_read_result_s, *v, ix, current); ++ix)
-    {
-      xfree (current->data);
-    }
-  VEC_free (memory_read_result_s, *v);
-}
-
-VEC(memory_read_result_s) *
+std::vector<memory_read_result>
 read_memory_robust (struct target_ops *ops,
 		    const ULONGEST offset, const LONGEST len)
 {
-  VEC(memory_read_result_s) *result = 0;
+  std::vector<memory_read_result> result;
   int unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
-  struct cleanup *cleanup = make_cleanup (free_memory_read_result_vector,
-					  &result);
 
   LONGEST xfered_total = 0;
   while (xfered_total < len)
@@ -1843,19 +1761,17 @@ read_memory_robust (struct target_ops *ops,
       else
 	{
 	  LONGEST to_read = std::min (len - xfered_total, region_len);
-	  gdb_byte *buffer = (gdb_byte *) xmalloc (to_read * unit_size);
-	  struct cleanup *inner_cleanup = make_cleanup (xfree, buffer);
+	  gdb::unique_xmalloc_ptr<gdb_byte> buffer
+	    ((gdb_byte *) xmalloc (to_read * unit_size));
 
 	  LONGEST xfered_partial =
-	      target_read (ops, TARGET_OBJECT_MEMORY, NULL,
-			   (gdb_byte *) buffer,
+	      target_read (ops, TARGET_OBJECT_MEMORY, NULL, buffer.get (),
 			   offset + xfered_total, to_read);
 	  /* Call an observer, notifying them of the xfer progress?  */
 	  if (xfered_partial <= 0)
 	    {
 	      /* Got an error reading full chunk.  See if maybe we can read
 		 some subrange.  */
-	      do_cleanups (inner_cleanup);
 	      read_whatever_is_readable (ops, offset + xfered_total,
 					 offset + xfered_total + to_read,
 					 unit_size, &result);
@@ -1863,20 +1779,15 @@ read_memory_robust (struct target_ops *ops,
 	    }
 	  else
 	    {
-	      struct memory_read_result r;
-
-	      discard_cleanups (inner_cleanup);
-	      r.data = buffer;
-	      r.begin = offset + xfered_total;
-	      r.end = r.begin + xfered_partial;
-	      VEC_safe_push (memory_read_result_s, result, &r);
+	      result.emplace_back (offset + xfered_total,
+				   offset + xfered_total + xfered_partial,
+				   std::move (buffer));
 	      xfered_total += xfered_partial;
 	    }
 	  QUIT;
 	}
     }
 
-  discard_cleanups (cleanup);
   return result;
 }
 
@@ -2298,6 +2209,15 @@ target_thread_name (struct thread_info *info)
   return current_target.to_thread_name (&current_target, info);
 }
 
+struct thread_info *
+target_thread_handle_to_thread_info (const gdb_byte *thread_handle,
+				     int handle_len,
+				     struct inferior *inf)
+{
+  return current_target.to_thread_handle_to_thread_info
+           (&current_target, thread_handle, handle_len, inf);
+}
+
 void
 target_resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
@@ -2330,14 +2250,10 @@ target_commit_resume (void)
 
 /* See target.h.  */
 
-struct cleanup *
-make_cleanup_defer_target_commit_resume (void)
+scoped_restore_tmpl<int>
+make_scoped_defer_target_commit_resume ()
 {
-  struct cleanup *old_chain;
-
-  old_chain = make_cleanup_restore_integer (&defer_target_commit_resume);
-  defer_target_commit_resume = 1;
-  return old_chain;
+  return make_scoped_restore (&defer_target_commit_resume, 1);
 }
 
 void
@@ -3219,7 +3135,9 @@ default_watchpoint_addr_within_range (struct target_ops *target,
 static struct gdbarch *
 default_thread_architecture (struct target_ops *ops, ptid_t ptid)
 {
-  return target_gdbarch ();
+  inferior *inf = find_inferior_ptid (ptid);
+  gdb_assert (inf != NULL);
+  return inf->gdbarch;
 }
 
 static int
@@ -3937,7 +3855,7 @@ flash_erase_command (char *cmd, int from_tty)
 /* Print the name of each layers of our target stack.  */
 
 static void
-maintenance_print_target_stack (char *cmd, int from_tty)
+maintenance_print_target_stack (const char *cmd, int from_tty)
 {
   struct target_ops *t;
 

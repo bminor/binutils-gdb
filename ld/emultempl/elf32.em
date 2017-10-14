@@ -120,6 +120,13 @@ gld${EMULATION_NAME}_after_parse (void)
   if (bfd_link_pie (&link_info))
     link_info.flags_1 |= (bfd_vma) DF_1_PIE;
 
+  if (bfd_link_executable (&link_info)
+      && link_info.nointerp)
+    {
+      if (link_info.dynamic_undefined_weak > 0)
+	einfo (_("%P: warning: -z dynamic-undefined-weak ignored\n"));
+      link_info.dynamic_undefined_weak = 0;
+    }
   after_parse_default ();
 }
 
@@ -272,7 +279,7 @@ gld${EMULATION_NAME}_stat_needed (lang_input_statement_type *s)
 
   if (bfd_stat (s->the_bfd, &st) != 0)
     {
-      einfo ("%P:%B: bfd_stat failed: %E\n", s->the_bfd);
+      einfo (_("%P:%B: bfd_stat failed: %E\n"), s->the_bfd);
       return;
     }
 
@@ -312,7 +319,7 @@ gld${EMULATION_NAME}_stat_needed (lang_input_statement_type *s)
     soname = lbasename (s->filename);
 
   if (filename_ncmp (soname, global_needed->name, suffix - global_needed->name) == 0)
-    einfo ("%P: warning: %s, needed by %B, may conflict with %s\n",
+    einfo (_("%P: warning: %s, needed by %B, may conflict with %s\n"),
 	   global_needed->name, global_needed->by, soname);
 }
 
@@ -374,7 +381,7 @@ gld${EMULATION_NAME}_try_needed (struct dt_needed *needed,
       struct bfd_link_needed_list *needs;
 
       if (! bfd_elf_get_bfd_needed_list (abfd, &needs))
-	einfo ("%F%P:%B: bfd_elf_get_bfd_needed_list failed: %E\n", abfd);
+	einfo (_("%F%P:%B: bfd_elf_get_bfd_needed_list failed: %E\n"), abfd);
 
       if (needs != NULL)
 	{
@@ -431,7 +438,7 @@ fragment <<EOF
      can only check that using stat.  */
 
   if (bfd_stat (abfd, &global_stat) != 0)
-    einfo ("%F%P:%B: bfd_stat failed: %E\n", abfd);
+    einfo (_("%F%P:%B: bfd_stat failed: %E\n"), abfd);
 
   /* First strip off everything before the last '/'.  */
   soname = lbasename (abfd->filename);
@@ -467,7 +474,7 @@ fragment <<EOF
 
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))
-    einfo ("%F%B: error adding symbols: %E\n", abfd);
+    einfo (_("%F%B: error adding symbols: %E\n"), abfd);
 
   return TRUE;
 }
@@ -527,7 +534,7 @@ gld${EMULATION_NAME}_search_needed (const char *path,
 
       /* PR 20535: Support the same pseudo-environment variables that
 	 are supported by ld.so.  Namely, $ORIGIN, $LIB and $PLATFORM.
-         Since there can be more than one occurrence of these tokens in
+	 Since there can be more than one occurrence of these tokens in
 	 the path we loop until no more are found.  Since we might not
 	 be able to substitute some of the tokens we maintain an offset
 	 into the filename for where we should begin our scan.  */
@@ -664,8 +671,8 @@ gld${EMULATION_NAME}_search_needed (const char *path,
 		/* Restore the path separator.  */
 		* end = '/';
 
-	      /* PR 20784: Make sure that we resume the scan
-	         *after* the token that we could not replace.  */
+	      /* PR 20784: Make sure that we resume the scan *after*
+		 the token that we could not replace.  */
 	      offset = (var + 1) - filename;
 	    }
 
@@ -1186,7 +1193,7 @@ setup_build_id (bfd *ibfd)
   size = id_note_section_size (ibfd);
   if (size == 0)
     {
-      einfo ("%P: warning: unrecognized --build-id style ignored.\n");
+      einfo (_("%P: warning: unrecognized --build-id style ignored.\n"));
       return FALSE;
     }
 
@@ -1204,8 +1211,8 @@ setup_build_id (bfd *ibfd)
       return TRUE;
     }
 
-  einfo ("%P: warning: Cannot create .note.gnu.build-id section,"
-	 " --build-id ignored.\n");
+  einfo (_("%P: warning: Cannot create .note.gnu.build-id section,"
+	   " --build-id ignored.\n"));
   return FALSE;
 }
 
@@ -1234,7 +1241,7 @@ gld${EMULATION_NAME}_after_open (void)
 
       if (link_info.out_implib_bfd == NULL)
 	{
-	  einfo ("%F%s: Can't open for writing: %E\n",
+	  einfo (_("%F%s: Can't open for writing: %E\n"),
 		 command_line.out_implib_filename);
 	}
     }
@@ -1311,7 +1318,7 @@ gld${EMULATION_NAME}_after_open (void)
 	      else if (seen_type != type)
 		{
 		  einfo (_("%P%F: compact frame descriptions incompatible with"
-			 " DWARF2 .eh_frame from %B\n"),
+			   " DWARF2 .eh_frame from %B\n"),
 			 type == DWARF2_EH_HDR ? abfd : elfbfd);
 		  break;
 		}
@@ -1345,8 +1352,8 @@ gld${EMULATION_NAME}_after_open (void)
 	    }
 	}
       if (warn_eh_frame)
-	einfo ("%P: warning: Cannot create .eh_frame_hdr section,"
-	       " --eh-frame-hdr ignored.\n");
+	einfo (_("%P: warning: Cannot create .eh_frame_hdr section,"
+		 " --eh-frame-hdr ignored.\n"));
     }
 
   /* Get the list of files which appear in DT_NEEDED entries in
@@ -1534,7 +1541,8 @@ fragment <<EOF
       if (force < 2)
 	continue;
 
-      einfo ("%P: warning: %s, needed by %B, not found (try using -rpath or -rpath-link)\n",
+      einfo (_("%P: warning: %s, needed by %B, not found "
+	       "(try using -rpath or -rpath-link)\n"),
 	     l->name, l->by);
     }
 
@@ -1575,7 +1583,7 @@ gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
 					       &link_info,
 					       exp->assign.dst, provide,
 					       exp->assign.hidden))
-	    einfo ("%P%F: failed to record assignment to %s: %E\n",
+	    einfo (_("%P%F: failed to record assignment to %s: %E\n"),
 		   exp->assign.dst);
 	}
       gld${EMULATION_NAME}_find_exp_assignment (exp->assign.src);
@@ -1700,34 +1708,36 @@ gld${EMULATION_NAME}_before_allocation (void)
       /* Make __ehdr_start hidden if it has been referenced, to
 	 prevent the symbol from being dynamic.  */
       if (!bfd_link_relocatable (&link_info))
-       {
-         struct elf_link_hash_entry *h
-           = elf_link_hash_lookup (elf_hash_table (&link_info), "__ehdr_start",
-                                   FALSE, FALSE, TRUE);
+	{
+	  struct elf_link_hash_table *htab = elf_hash_table (&link_info);
+	  struct elf_link_hash_entry *h
+	    = elf_link_hash_lookup (htab, "__ehdr_start", FALSE, FALSE, TRUE);
 
-         /* Only adjust the export class if the symbol was referenced
-            and not defined, otherwise leave it alone.  */
-         if (h != NULL
-             && (h->root.type == bfd_link_hash_new
-                 || h->root.type == bfd_link_hash_undefined
-                 || h->root.type == bfd_link_hash_undefweak
-                 || h->root.type == bfd_link_hash_common))
-           {
-             _bfd_elf_link_hash_hide_symbol (&link_info, h, TRUE);
-             if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
-               h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
-	     /* Don't leave the symbol undefined.  Undefined hidden
-		symbols typically won't have dynamic relocations, but
-		we most likely will need dynamic relocations for
-		__ehdr_start if we are building a PIE or shared
-		library.  */
-	     ehdr_start = h;
-	     ehdr_start_save = h->root;
-	     h->root.type = bfd_link_hash_defined;
-	     h->root.u.def.section = bfd_abs_section_ptr;
-	     h->root.u.def.value = 0;
-           }
-       }
+	  /* Only adjust the export class if the symbol was referenced
+	     and not defined, otherwise leave it alone.  */
+	  if (h != NULL
+	      && (h->root.type == bfd_link_hash_new
+		  || h->root.type == bfd_link_hash_undefined
+		  || h->root.type == bfd_link_hash_undefweak
+		  || h->root.type == bfd_link_hash_common))
+	    {
+	      const struct elf_backend_data *bed;
+	      bed = get_elf_backend_data (link_info.output_bfd);
+	      (*bed->elf_backend_hide_symbol) (&link_info, h, TRUE);
+	      if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
+		h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
+	      /* Don't leave the symbol undefined.  Undefined hidden
+		 symbols typically won't have dynamic relocations, but
+		 we most likely will need dynamic relocations for
+		 __ehdr_start if we are building a PIE or shared
+		 library.  */
+	      ehdr_start = h;
+	      ehdr_start_save = h->root;
+	      h->root.type = bfd_link_hash_defined;
+	      h->root.u.def.section = bfd_abs_section_ptr;
+	      h->root.u.def.value = 0;
+	    }
+	}
 
       /* If we are going to make any variable assignments, we need to
 	 let the ELF backend know about them in case the variables are
@@ -1776,7 +1786,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 	  command_line.filter_shlib, audit, depaudit,
 	  (const char * const *) command_line.auxiliary_filters,
 	  &link_info, &sinterp)))
-    einfo ("%P%F: failed to set dynamic section sizes: %E\n");
+    einfo (_("%P%F: failed to set dynamic section sizes: %E\n"));
 
 ${ELF_INTERPRETER_SET_DEFAULT}
   /* Let the user override the dynamic linker we are using.  */
@@ -1810,7 +1820,7 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 	msg = (char *) xmalloc ((size_t) (sz + 1));
 	if (! bfd_get_section_contents (is->the_bfd, s,	msg,
 					(file_ptr) 0, sz))
-	  einfo ("%F%B: Can't read contents of section .gnu.warning: %E\n",
+	  einfo (_("%F%B: Can't read contents of section .gnu.warning: %E\n"),
 		 is->the_bfd);
 	msg[sz] = '\0';
 	(*link_info.callbacks->warning) (&link_info, msg,
@@ -1838,7 +1848,7 @@ ${ELF_INTERPRETER_SET_DEFAULT}
   before_allocation_default ();
 
   if (!bfd_elf_size_dynsym_hash_dynstr (link_info.output_bfd, &link_info))
-    einfo ("%P%F: failed to set dynamic section sizes: %E\n");
+    einfo (_("%P%F: failed to set dynamic section sizes: %E\n"));
 
   if (ehdr_start != NULL)
     {
@@ -1930,7 +1940,7 @@ gld${EMULATION_NAME}_open_dynamic_archive
 	 filename we recorded earlier.  */
 
       if (!entry->flags.full_name_provided)
-        filename = lbasename (entry->filename);
+	filename = lbasename (entry->filename);
       bfd_elf_set_dt_needed_name (entry->the_bfd, filename);
     }
 
@@ -2316,7 +2326,7 @@ gld${EMULATION_NAME}_after_allocation (void)
   int need_layout = bfd_elf_discard_info (link_info.output_bfd, &link_info);
 
   if (need_layout < 0)
-    einfo ("%X%P: .eh_frame/.stab edit: %E\n");
+    einfo (_("%X%P: .eh_frame/.stab edit: %E\n"));
   else
     gld${EMULATION_NAME}_map_segments (need_layout);
 }

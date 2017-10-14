@@ -54,6 +54,7 @@ static int have_regset_last_break = 0;
 static int have_regset_system_call = 0;
 static int have_regset_tdb = 0;
 static int have_regset_vxrs = 0;
+static int have_regset_gs = 0;
 
 /* Register map for 32-bit executables running under a 64-bit
    kernel.  */
@@ -405,6 +406,18 @@ s390_linux_fetch_inferior_registers (struct target_ops *ops,
 			   && regnum <= S390_V31_REGNUM))
 	fetch_regset (regcache, tid, NT_S390_VXRS_HIGH, 16 * 16,
 		      &s390_vxrs_high_regset);
+    }
+
+  if (have_regset_gs)
+    {
+      if (regnum == -1 || (regnum >= S390_GSD_REGNUM
+			   && regnum <= S390_GSEPLA_REGNUM))
+	fetch_regset (regcache, tid, NT_S390_GS_CB, 4 * 8,
+		      &s390_gs_regset);
+      if (regnum == -1 || (regnum >= S390_BC_GSD_REGNUM
+			   && regnum <= S390_BC_GSEPLA_REGNUM))
+	fetch_regset (regcache, tid, NT_S390_GS_BC, 4 * 8,
+		      &s390_gsbc_regset);
     }
 }
 
@@ -776,6 +789,14 @@ s390_new_thread (struct lwp_info *lp)
   s390_mark_per_info_changed (lp);
 }
 
+/* Function to call when a thread is being deleted.  */
+
+static void
+s390_delete_thread (struct arch_lwp_info *arch_lwp)
+{
+  xfree (arch_lwp);
+}
+
 /* Iterator callback for s390_refresh_per_info.  */
 
 static int
@@ -974,8 +995,13 @@ s390_read_description (struct target_ops *ops)
       && check_regset (tid, NT_S390_VXRS_LOW, 16 * 8)
       && check_regset (tid, NT_S390_VXRS_HIGH, 16 * 16);
 
+    have_regset_gs = (hwcap & HWCAP_S390_GS)
+      && check_regset (tid, NT_S390_GS_CB, 4 * 8)
+      && check_regset (tid, NT_S390_GS_BC, 4 * 8);
+
     if (s390_target_wordsize () == 8)
-      return (have_regset_vxrs ?
+      return (have_regset_gs ? tdesc_s390x_gs_linux64 :
+	      have_regset_vxrs ?
 	      (have_regset_tdb ? tdesc_s390x_tevx_linux64 :
 	       tdesc_s390x_vx_linux64) :
 	      have_regset_tdb ? tdesc_s390x_te_linux64 :
@@ -984,7 +1010,8 @@ s390_read_description (struct target_ops *ops)
 	      tdesc_s390x_linux64);
 
     if (hwcap & HWCAP_S390_HIGH_GPRS)
-      return (have_regset_vxrs ?
+      return (have_regset_gs ? tdesc_s390_gs_linux64 :
+	      have_regset_vxrs ?
 	      (have_regset_tdb ? tdesc_s390_tevx_linux64 :
 	       tdesc_s390_vx_linux64) :
 	      have_regset_tdb ? tdesc_s390_te_linux64 :
@@ -1031,6 +1058,7 @@ _initialize_s390_nat (void)
   /* Register the target.  */
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, s390_new_thread);
+  linux_nat_set_delete_thread (t, s390_delete_thread);
   linux_nat_set_prepare_to_resume (t, s390_prepare_to_resume);
   linux_nat_set_forget_process (t, s390_forget_process);
   linux_nat_set_new_fork (t, s390_linux_new_fork);

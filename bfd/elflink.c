@@ -1234,6 +1234,16 @@ _bfd_elf_merge_symbol (bfd *abfd,
       olddyn = (oldsec->symbol->flags & BSF_DYNAMIC) != 0;
     }
 
+  /* Handle a case where plugin_notice won't be called and thus won't
+     set the non_ir_ref flags on the first pass over symbols.  */
+  if (oldbfd != NULL
+      && (oldbfd->flags & BFD_PLUGIN) != (abfd->flags & BFD_PLUGIN)
+      && newdyn != olddyn)
+    {
+      h->root.non_ir_ref_dynamic = TRUE;
+      hi->root.non_ir_ref_dynamic = TRUE;
+    }
+
   /* NEWDEF and OLDDEF indicate whether the new or old symbol,
      respectively, appear to be a definition rather than reference.  */
 
@@ -2798,7 +2808,7 @@ static bfd_boolean
 _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
 {
   struct elf_info_failed *eif = (struct elf_info_failed *) data;
-  bfd *dynobj;
+  struct elf_link_hash_table *htab;
   const struct elf_backend_data *bed;
 
   if (! is_elf_hash_table (eif->info->hash))
@@ -2812,10 +2822,13 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
   if (! _bfd_elf_fix_symbol_flags (h, eif))
     return FALSE;
 
+  htab = elf_hash_table (eif->info);
+  bed = get_elf_backend_data (htab->dynobj);
+
   if (h->root.type == bfd_link_hash_undefweak)
     {
       if (eif->info->dynamic_undefined_weak == 0)
-	_bfd_elf_link_hash_hide_symbol (eif->info, h, TRUE);
+	(*bed->elf_backend_hide_symbol) (eif->info, h, TRUE);
       else if (eif->info->dynamic_undefined_weak > 0
 	       && h->ref_regular
 	       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
@@ -2910,9 +2923,6 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
     _bfd_error_handler
       (_("warning: type and size of dynamic symbol `%s' are not defined"),
        h->root.root.string);
-
-  dynobj = elf_hash_table (eif->info)->dynobj;
-  bed = get_elf_backend_data (dynobj);
 
   if (! (*bed->elf_backend_adjust_dynamic_symbol) (eif->info, h))
     {
@@ -6006,19 +6016,18 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       struct elf_info_failed asvinfo;
       struct bfd_elf_version_tree *t;
       struct bfd_elf_version_expr *d;
-      struct elf_info_failed eif;
-      bfd_boolean all_defined;
       asection *s;
       size_t soname_indx;
-
-      eif.info = info;
-      eif.failed = FALSE;
 
       /* If we are supposed to export all symbols into the dynamic symbol
 	 table (this is not the normal case), then do so.  */
       if (info->export_dynamic
 	  || (bfd_link_executable (info) && info->dynamic))
 	{
+	  struct elf_info_failed eif;
+
+	  eif.info = info;
+	  eif.failed = FALSE;
 	  elf_link_hash_traverse (elf_hash_table (info),
 				  _bfd_elf_export_symbol,
 				  &eif);
@@ -6102,7 +6111,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       if (!info->allow_undefined_version)
 	{
 	  /* Check if all global versions have a definition.  */
-	  all_defined = TRUE;
+	  bfd_boolean all_defined = TRUE;
 	  for (t = info->version_info; t != NULL; t = t->next)
 	    for (d = t->globals.list; d != NULL; d = d->next)
 	      if (d->literal && !d->symver && !d->script)
@@ -6355,111 +6364,6 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
 	  elf_tdata (output_bfd)->cverdefs = cdefs;
 	}
-
-      /* Work out the size of the version reference section.  */
-
-      s = bfd_get_linker_section (dynobj, ".gnu.version_r");
-      BFD_ASSERT (s != NULL);
-      {
-	struct elf_find_verdep_info sinfo;
-
-	sinfo.info = info;
-	sinfo.vers = elf_tdata (output_bfd)->cverdefs;
-	if (sinfo.vers == 0)
-	  sinfo.vers = 1;
-	sinfo.failed = FALSE;
-
-	elf_link_hash_traverse (elf_hash_table (info),
-				_bfd_elf_link_find_version_dependencies,
-				&sinfo);
-	if (sinfo.failed)
-	  return FALSE;
-
-	if (elf_tdata (output_bfd)->verref == NULL)
-	  s->flags |= SEC_EXCLUDE;
-	else
-	  {
-	    Elf_Internal_Verneed *vn;
-	    unsigned int size;
-	    unsigned int crefs;
-	    bfd_byte *p;
-
-	    /* Build the version dependency section.  */
-	    size = 0;
-	    crefs = 0;
-	    for (vn = elf_tdata (output_bfd)->verref;
-		 vn != NULL;
-		 vn = vn->vn_nextref)
-	      {
-		Elf_Internal_Vernaux *a;
-
-		size += sizeof (Elf_External_Verneed);
-		++crefs;
-		for (a = vn->vn_auxptr; a != NULL; a = a->vna_nextptr)
-		  size += sizeof (Elf_External_Vernaux);
-	      }
-
-	    s->size = size;
-	    s->contents = (unsigned char *) bfd_alloc (output_bfd, s->size);
-	    if (s->contents == NULL)
-	      return FALSE;
-
-	    p = s->contents;
-	    for (vn = elf_tdata (output_bfd)->verref;
-		 vn != NULL;
-		 vn = vn->vn_nextref)
-	      {
-		unsigned int caux;
-		Elf_Internal_Vernaux *a;
-		size_t indx;
-
-		caux = 0;
-		for (a = vn->vn_auxptr; a != NULL; a = a->vna_nextptr)
-		  ++caux;
-
-		vn->vn_version = VER_NEED_CURRENT;
-		vn->vn_cnt = caux;
-		indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
-					    elf_dt_name (vn->vn_bfd) != NULL
-					    ? elf_dt_name (vn->vn_bfd)
-					    : lbasename (vn->vn_bfd->filename),
-					    FALSE);
-		if (indx == (size_t) -1)
-		  return FALSE;
-		vn->vn_file = indx;
-		vn->vn_aux = sizeof (Elf_External_Verneed);
-		if (vn->vn_nextref == NULL)
-		  vn->vn_next = 0;
-		else
-		  vn->vn_next = (sizeof (Elf_External_Verneed)
-				+ caux * sizeof (Elf_External_Vernaux));
-
-		_bfd_elf_swap_verneed_out (output_bfd, vn,
-					   (Elf_External_Verneed *) p);
-		p += sizeof (Elf_External_Verneed);
-
-		for (a = vn->vn_auxptr; a != NULL; a = a->vna_nextptr)
-		  {
-		    a->vna_hash = bfd_elf_hash (a->vna_nodename);
-		    indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
-						a->vna_nodename, FALSE);
-		    if (indx == (size_t) -1)
-		      return FALSE;
-		    a->vna_name = indx;
-		    if (a->vna_nextptr == NULL)
-		      a->vna_next = 0;
-		    else
-		      a->vna_next = sizeof (Elf_External_Vernaux);
-
-		    _bfd_elf_swap_vernaux_out (output_bfd, a,
-					       (Elf_External_Vernaux *) p);
-		    p += sizeof (Elf_External_Vernaux);
-		  }
-	      }
-
-	    elf_tdata (output_bfd)->cverrefs = crefs;
-	  }
-      }
     }
 
   bed = get_elf_backend_data (output_bfd);
@@ -6467,22 +6371,121 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
   if (info->gc_sections && bed->can_gc_sections)
     {
       struct elf_gc_sweep_symbol_info sweep_info;
-      unsigned long section_sym_count;
 
       /* Remove the symbols that were in the swept sections from the
-	 dynamic symbol table.  GCFIXME: Anyone know how to get them
-	 out of the static symbol table as well?  */
+	 dynamic symbol table.  */
       sweep_info.info = info;
       sweep_info.hide_symbol = bed->elf_backend_hide_symbol;
       elf_link_hash_traverse (elf_hash_table (info), elf_gc_sweep_symbol,
 			      &sweep_info);
+    }
 
-      /* We need to reassign dynsym indices now that symbols may have
-	 been removed.  See the call in `bfd_elf_size_dynsym_hash_dynstr'
-	 for the details of the conditions used here.  */
-      if (elf_hash_table (info)->dynamic_sections_created
-	  || bed->always_renumber_dynsyms)
-	_bfd_elf_link_renumber_dynsyms (output_bfd, info, &section_sym_count);
+  if (dynobj != NULL && elf_hash_table (info)->dynamic_sections_created)
+    {
+      asection *s;
+      struct elf_find_verdep_info sinfo;
+
+      /* Work out the size of the version reference section.  */
+
+      s = bfd_get_linker_section (dynobj, ".gnu.version_r");
+      BFD_ASSERT (s != NULL);
+
+      sinfo.info = info;
+      sinfo.vers = elf_tdata (output_bfd)->cverdefs;
+      if (sinfo.vers == 0)
+	sinfo.vers = 1;
+      sinfo.failed = FALSE;
+
+      elf_link_hash_traverse (elf_hash_table (info),
+			      _bfd_elf_link_find_version_dependencies,
+			      &sinfo);
+      if (sinfo.failed)
+	return FALSE;
+
+      if (elf_tdata (output_bfd)->verref == NULL)
+	s->flags |= SEC_EXCLUDE;
+      else
+	{
+	  Elf_Internal_Verneed *vn;
+	  unsigned int size;
+	  unsigned int crefs;
+	  bfd_byte *p;
+
+	  /* Build the version dependency section.  */
+	  size = 0;
+	  crefs = 0;
+	  for (vn = elf_tdata (output_bfd)->verref;
+	       vn != NULL;
+	       vn = vn->vn_nextref)
+	    {
+	      Elf_Internal_Vernaux *a;
+
+	      size += sizeof (Elf_External_Verneed);
+	      ++crefs;
+	      for (a = vn->vn_auxptr; a != NULL; a = a->vna_nextptr)
+		size += sizeof (Elf_External_Vernaux);
+	    }
+
+	  s->size = size;
+	  s->contents = (unsigned char *) bfd_alloc (output_bfd, s->size);
+	  if (s->contents == NULL)
+	    return FALSE;
+
+	  p = s->contents;
+	  for (vn = elf_tdata (output_bfd)->verref;
+	       vn != NULL;
+	       vn = vn->vn_nextref)
+	    {
+	      unsigned int caux;
+	      Elf_Internal_Vernaux *a;
+	      size_t indx;
+
+	      caux = 0;
+	      for (a = vn->vn_auxptr; a != NULL; a = a->vna_nextptr)
+		++caux;
+
+	      vn->vn_version = VER_NEED_CURRENT;
+	      vn->vn_cnt = caux;
+	      indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+					  elf_dt_name (vn->vn_bfd) != NULL
+					  ? elf_dt_name (vn->vn_bfd)
+					  : lbasename (vn->vn_bfd->filename),
+					  FALSE);
+	      if (indx == (size_t) -1)
+		return FALSE;
+	      vn->vn_file = indx;
+	      vn->vn_aux = sizeof (Elf_External_Verneed);
+	      if (vn->vn_nextref == NULL)
+		vn->vn_next = 0;
+	      else
+		vn->vn_next = (sizeof (Elf_External_Verneed)
+			       + caux * sizeof (Elf_External_Vernaux));
+
+	      _bfd_elf_swap_verneed_out (output_bfd, vn,
+					 (Elf_External_Verneed *) p);
+	      p += sizeof (Elf_External_Verneed);
+
+	      for (a = vn->vn_auxptr; a != NULL; a = a->vna_nextptr)
+		{
+		  a->vna_hash = bfd_elf_hash (a->vna_nodename);
+		  indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+					      a->vna_nodename, FALSE);
+		  if (indx == (size_t) -1)
+		    return FALSE;
+		  a->vna_name = indx;
+		  if (a->vna_nextptr == NULL)
+		    a->vna_next = 0;
+		  else
+		    a->vna_next = sizeof (Elf_External_Vernaux);
+
+		  _bfd_elf_swap_vernaux_out (output_bfd, a,
+					     (Elf_External_Vernaux *) p);
+		  p += sizeof (Elf_External_Vernaux);
+		}
+	    }
+
+	  elf_tdata (output_bfd)->cverrefs = crefs;
+	}
     }
 
   /* Any syms created from now on start with -1 in
@@ -6792,7 +6795,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       if ((elf_tdata (output_bfd)->cverrefs == 0
 	   && elf_tdata (output_bfd)->cverdefs == 0)
 	  || _bfd_elf_link_renumber_dynsyms (output_bfd, info,
-					     &section_sym_count) == 0)
+					     &section_sym_count) <= 1)
 	{
 	  asection *s;
 
@@ -10441,7 +10444,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		    (_("error: %B: size of section %A is not "
 		       "multiple of address size"),
 		     input_bfd, o);
-		  bfd_set_error (bfd_error_on_input);
+		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
 	      o->flags |= SEC_ELF_REVERSE_COPY;
@@ -14281,7 +14284,9 @@ bfd_elf_define_start_stop (struct bfd_link_info *info,
       if (symbol[0] == '.')
 	{
 	  /* .startof. and .sizeof. symbols are local.  */
-	  _bfd_elf_link_hash_hide_symbol (info, h, TRUE);
+	  const struct elf_backend_data *bed;
+	  bed = get_elf_backend_data (info->output_bfd);
+	  (*bed->elf_backend_hide_symbol) (info, h, TRUE);
 	}
       else if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_PROTECTED;

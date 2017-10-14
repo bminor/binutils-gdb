@@ -204,9 +204,7 @@ public:
     m_uiout->end (Type);
   }
 
-  ui_out_emit_type (const ui_out_emit_type<Type> &) = delete;
-  ui_out_emit_type<Type> &operator= (const ui_out_emit_type<Type> &)
-      = delete;
+  DISABLE_COPY_AND_ASSIGN (ui_out_emit_type<Type>);
 
 private:
 

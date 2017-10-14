@@ -174,21 +174,6 @@ proc gdb_file_cmd {arg} {
 
     send_gdb "symbol-file $arg\n"
     gdb_expect {
-	-re "Detected 64-bit symbol file.\r\nInvoking.*gdb64.*$gdb_prompt $" {
-            verbose "\t\tLoaded $arg into the $GDB"
-            send_gdb "exec-file $arg\n" 
-            gdb_expect {
-                -re ".*$gdb_prompt $" {
-                    verbose "\t\tLoaded $arg with new symbol table into $GDB"
-                    return 0
-                }
-                timeout {
-                    perror "(timeout) Couldn't load $arg"
-                    return -1
-                }
-            }
-            return 0
-        }
         -re "Reading symbols from.*done.*$gdb_prompt $" {
             verbose "\t\tLoaded $arg into the $GDB"
             send_gdb "exec-file $arg\n" 

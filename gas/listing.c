@@ -324,7 +324,13 @@ listing_newline (char *ps)
     }
 #endif
 
-  file = as_where (&line);
+  /* PR 21977 - use the physical file name not the logical one unless high
+     level source files are being included in the listing.  */
+  if (listing & LISTING_HLL)
+    file = as_where (&line);
+  else
+    file = as_where_physical (&line);
+
   if (ps == NULL)
     {
       if (line == last_line

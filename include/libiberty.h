@@ -3,7 +3,7 @@
    Copyright (C) 1997-2017 Free Software Foundation, Inc.
    
    Note - certain prototypes declared in this header file are for
-   functions whose implementation copyright does not belong to the
+   functions whoes implementation copyright does not belong to the
    FSF.  Those prototypes are present in this file for reference
    purposes only and their presence in this file should not construed
    as an indication of ownership by the FSF of the implementation of
@@ -724,7 +724,7 @@ extern void *C_alloca (size_t) ATTRIBUTE_MALLOC;
 # define ASTRDUP(X) \
   (__extension__ ({ const char *const libiberty_optr = (X); \
    const unsigned long libiberty_len = strlen (libiberty_optr) + 1; \
-   char *const libiberty_nptr = (char *const) alloca (libiberty_len); \
+   char *const libiberty_nptr = (char *) alloca (libiberty_len); \
    (char *) memcpy (libiberty_nptr, libiberty_optr, libiberty_len); }))
 #else
 # define alloca(x) C_alloca(x)

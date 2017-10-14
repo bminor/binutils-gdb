@@ -1018,6 +1018,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       bfd_reloc_status_type r;
       const char *symname = NULL;
       enum elf_cris_reloc_type r_type;
+      bfd_boolean resolved_to_zero;
 
       r_type = ELF32_R_TYPE (rel->r_info);
 
@@ -1129,6 +1130,9 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       if (bfd_link_relocatable (info))
 	continue;
+
+      resolved_to_zero = (h != NULL
+			  && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
 
       switch (r_type)
 	{
@@ -1432,6 +1436,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	case R_CRIS_16:
 	case R_CRIS_32:
 	  if (bfd_link_pic (info)
+	      && !resolved_to_zero
 	      && r_symndx != STN_UNDEF
 	      && (input_section->flags & SEC_ALLOC) != 0
 	      && ((r_type != R_CRIS_8_PCREL
@@ -3540,7 +3545,8 @@ cris_elf_check_relocs (bfd *abfd,
 	     render the symbol local.  */
 
 	  /* No need to do anything if we're not creating a shared object.  */
-	  if (! bfd_link_pic (info))
+	  if (! bfd_link_pic (info)
+	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    break;
 
 	  /* We may need to create a reloc section in the dynobj and made room
@@ -3982,6 +3988,7 @@ elf_cris_discard_excess_program_dynamics (struct elf_cris_link_hash_entry *h,
       if (! (info->export_dynamic
 	     || (h->root.type != STT_FUNC && info->dynamic_data))
 	  && h->root.dynindx != -1
+	  && !h->root.dynamic
 	  && !h->root.def_dynamic
 	  && !h->root.ref_dynamic)
 	{
@@ -4346,6 +4353,8 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_may_use_rel_p 0
 #define elf_backend_may_use_rela_p 1
 #define elf_backend_rela_normal		1
+
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
 
 #include "elf32-target.h"
 

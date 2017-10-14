@@ -30,7 +30,6 @@
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
-#include "floatformat.h"
 #include "regcache.h"
 #include "trad-frame.h"
 #include "frame-base.h"
@@ -69,12 +68,14 @@
 #include "features/s390-te-linux64.c"
 #include "features/s390-vx-linux64.c"
 #include "features/s390-tevx-linux64.c"
+#include "features/s390-gs-linux64.c"
 #include "features/s390x-linux64.c"
 #include "features/s390x-linux64v1.c"
 #include "features/s390x-linux64v2.c"
 #include "features/s390x-te-linux64.c"
 #include "features/s390x-vx-linux64.c"
 #include "features/s390x-tevx-linux64.c"
+#include "features/s390x-gs-linux64.c"
 
 #define XML_SYSCALL_FILENAME_S390 "syscalls/s390-linux.xml"
 #define XML_SYSCALL_FILENAME_S390X "syscalls/s390x-linux.xml"
@@ -113,6 +114,7 @@ struct gdbarch_tdep
   int have_linux_v1;
   int have_linux_v2;
   int have_tdb;
+  bool have_gs;
 };
 
 
@@ -834,6 +836,24 @@ static const struct regcache_map_entry s390_regmap_vxrs_high[] =
     { 0 }
   };
 
+static const struct regcache_map_entry s390_regmap_gs[] =
+  {
+    { 1, REGCACHE_MAP_SKIP, 8 },
+    { 1, S390_GSD_REGNUM, 8 },
+    { 1, S390_GSSM_REGNUM, 8 },
+    { 1, S390_GSEPLA_REGNUM, 8 },
+    { 0 }
+  };
+
+static const struct regcache_map_entry s390_regmap_gsbc[] =
+  {
+    { 1, REGCACHE_MAP_SKIP, 8 },
+    { 1, S390_BC_GSD_REGNUM, 8 },
+    { 1, S390_BC_GSSM_REGNUM, 8 },
+    { 1, S390_BC_GSEPLA_REGNUM, 8 },
+    { 0 }
+  };
+
 
 /* Supply the TDB regset.  Like regcache_supply_regset, but invalidate
    the TDB registers unless the TDB format field is valid.  */
@@ -905,6 +925,18 @@ const struct regset s390_vxrs_high_regset = {
   regcache_collect_regset
 };
 
+const struct regset s390_gs_regset = {
+  s390_regmap_gs,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+const struct regset s390_gsbc_regset = {
+  s390_regmap_gsbc,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
 /* Iterate over supported core file register note sections. */
 
 static void
@@ -951,6 +983,23 @@ s390_iterate_over_regset_sections (struct gdbarch *gdbarch,
       cb (".reg-s390-vxrs-high", 16 * 16, &s390_vxrs_high_regset,
 	  "s390 vector registers 16-31", cb_data);
     }
+
+  /* Iterate over the guarded-storage regsets if in "read" mode, or if
+     their registers are available.  */
+  if (tdep->have_gs)
+    {
+      if (regcache == NULL
+	  || REG_VALID == regcache_register_status (regcache,
+						    S390_GSD_REGNUM))
+	cb (".reg-s390-gs-cb", 4 * 8, &s390_gs_regset,
+	    "s390 guarded-storage registers", cb_data);
+
+      if (regcache == NULL
+	  || REG_VALID == regcache_register_status (regcache,
+						    S390_BC_GSD_REGNUM))
+	cb (".reg-s390-gs-bc", 4 * 8, &s390_gsbc_regset,
+	    "s390 guarded-storage broadcast control", cb_data);
+    }
 }
 
 static const struct target_desc *
@@ -959,7 +1008,7 @@ s390_core_read_description (struct gdbarch *gdbarch,
 {
   asection *section = bfd_get_section_by_name (abfd, ".reg");
   CORE_ADDR hwcap = 0;
-  int high_gprs, v1, v2, te, vx;
+  bool high_gprs, v1, v2, te, vx, gs;
 
   target_auxv_search (target, AT_HWCAP, &hwcap);
   if (!section)
@@ -971,12 +1020,14 @@ s390_core_read_description (struct gdbarch *gdbarch,
   v2 = (bfd_get_section_by_name (abfd, ".reg-s390-system-call") != NULL);
   vx = (hwcap & HWCAP_S390_VX);
   te = (hwcap & HWCAP_S390_TE);
+  gs = (hwcap & HWCAP_S390_GS);
 
   switch (bfd_section_size (abfd, section))
     {
     case s390_sizeof_gregset:
       if (high_gprs)
-	return (te && vx ? tdesc_s390_tevx_linux64 :
+	return (gs ? tdesc_s390_gs_linux64 :
+		te && vx ? tdesc_s390_tevx_linux64 :
 		vx ? tdesc_s390_vx_linux64 :
 		te ? tdesc_s390_te_linux64 :
 		v2 ? tdesc_s390_linux64v2 :
@@ -986,7 +1037,8 @@ s390_core_read_description (struct gdbarch *gdbarch,
 		v1 ? tdesc_s390_linux32v1 : tdesc_s390_linux32);
 
     case s390x_sizeof_gregset:
-      return (te && vx ? tdesc_s390x_tevx_linux64 :
+      return (gs ? tdesc_s390x_gs_linux64 :
+	      te && vx ? tdesc_s390x_tevx_linux64 :
 	      vx ? tdesc_s390x_vx_linux64 :
 	      te ? tdesc_s390x_te_linux64 :
 	      v2 ? tdesc_s390x_linux64v2 :
@@ -1323,8 +1375,8 @@ s390_store (struct s390_prologue_data *data,
 
 
   /* Check whether we are storing a register into the stack.  */
-  if (!pv_area_store_would_trash (data->stack, addr))
-    pv_area_store (data->stack, addr, size, value);
+  if (!data->stack->store_would_trash (addr))
+    data->stack->store (addr, size, value);
 
 
   /* Note: If this is some store we cannot identify, you might think we
@@ -1361,11 +1413,11 @@ s390_load (struct s390_prologue_data *data,
     }
 
   /* Check whether we are accessing one of our save slots.  */
-  return pv_area_fetch (data->stack, addr, size);
+  return data->stack->fetch (addr, size);
 }
 
 /* Function for finding saved registers in a 'struct pv_area'; we pass
-   this to pv_area_scan.
+   this to pv_area::scan.
 
    If VALUE is a saved register, ADDR says it was saved at a constant
    offset from the frame base, and SIZE indicates that the whole
@@ -1434,11 +1486,12 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
   /* The address of the next instruction after that.  */
   CORE_ADDR next_pc;
 
+  pv_area stack (S390_SP_REGNUM, gdbarch_addr_bit (gdbarch));
+  scoped_restore restore_stack = make_scoped_restore (&data->stack, &stack);
+
   /* Set up everything's initial value.  */
   {
     int i;
-
-    data->stack = make_pv_area (S390_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
     /* For the purpose of prologue tracking, we consider the GPR size to
        be equal to the ABI word size, even if it is actually larger
@@ -1678,10 +1731,7 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
     }
 
   /* Record where all the registers were saved.  */
-  pv_area_scan (data->stack, s390_check_for_saved, data);
-
-  free_pv_area (data->stack);
-  data->stack = NULL;
+  data->stack->scan (s390_check_for_saved, data);
 
   return result;
 }
@@ -7767,6 +7817,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int have_linux_v2 = 0;
   int have_tdb = 0;
   int have_vx = 0;
+  int have_gs = 0;
   int first_pseudo_reg, last_pseudo_reg;
   static const char *const stap_register_prefixes[] = { "%", NULL };
   static const char *const stap_register_indirection_prefixes[] = { "(",
@@ -7833,6 +7884,12 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       static const char *const vxrs_high[] = {
 	"v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24",
 	"v25", "v26", "v27", "v28", "v29", "v30", "v31",
+      };
+      static const char *const gs_cb[] = {
+	"gsd", "gssm", "gsepla",
+      };
+      static const char *const gs_bc[] = {
+	"bc_gsd", "bc_gssm", "bc_gsepla",
       };
       const struct tdesc_feature *feature;
       int i, valid_p = 1;
@@ -7937,6 +7994,29 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  have_vx = 1;
 	}
 
+      /* Guarded-storage registers.  */
+      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.gs");
+      if (feature)
+	{
+	  for (i = 0; i < 3; i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						S390_GSD_REGNUM + i,
+						gs_cb[i]);
+	  have_gs = 1;
+	}
+
+      /* Guarded-storage broadcast control.  */
+      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.gsbc");
+      if (feature)
+	{
+	  valid_p &= have_gs;
+
+	  for (i = 0; i < 3; i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						S390_BC_GSD_REGNUM + i,
+						gs_bc[i]);
+	}
+
       if (!valid_p)
 	{
 	  tdesc_data_cleanup (tdesc_data);
@@ -7970,6 +8050,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	continue;
       if ((tdep->gpr_full_regnum != -1) != have_upper)
 	continue;
+      if (tdep->have_gs != have_gs)
+	continue;
       if (tdesc_data != NULL)
 	tdesc_data_cleanup (tdesc_data);
       return arches->gdbarch;
@@ -7982,6 +8064,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->have_linux_v1 = have_linux_v1;
   tdep->have_linux_v2 = have_linux_v2;
   tdep->have_tdb = have_tdb;
+  tdep->have_gs = have_gs;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 0);
@@ -8157,10 +8240,12 @@ _initialize_s390_tdep (void)
   initialize_tdesc_s390_te_linux64 ();
   initialize_tdesc_s390_vx_linux64 ();
   initialize_tdesc_s390_tevx_linux64 ();
+  initialize_tdesc_s390_gs_linux64 ();
   initialize_tdesc_s390x_linux64 ();
   initialize_tdesc_s390x_linux64v1 ();
   initialize_tdesc_s390x_linux64v2 ();
   initialize_tdesc_s390x_te_linux64 ();
   initialize_tdesc_s390x_vx_linux64 ();
   initialize_tdesc_s390x_tevx_linux64 ();
+  initialize_tdesc_s390x_gs_linux64 ();
 }

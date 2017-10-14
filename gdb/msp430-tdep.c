@@ -311,7 +311,7 @@ msp430_get_opcode_byte (void *handle)
 }
 
 /* Function for finding saved registers in a 'struct pv_area'; this
-   function is passed to pv_area_scan.
+   function is passed to pv_area::scan.
 
    If VALUE is a saved register, ADDR says it was saved at a constant
    offset from the frame base, and SIZE indicates that the whole
@@ -339,8 +339,6 @@ msp430_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
   CORE_ADDR pc, next_pc;
   int rn;
   pv_t reg[MSP430_NUM_TOTAL_REGS];
-  struct pv_area *stack;
-  struct cleanup *back_to;
   CORE_ADDR after_last_frame_setup_insn = start_pc;
   int code_model = gdbarch_tdep (gdbarch)->code_model;
   int sz;
@@ -353,13 +351,12 @@ msp430_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
       result->reg_offset[rn] = 1;
     }
 
-  stack = make_pv_area (MSP430_SP_REGNUM, gdbarch_addr_bit (gdbarch));
-  back_to = make_cleanup_free_pv_area (stack);
+  pv_area stack (MSP430_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
   /* The call instruction has saved the return address on the stack.  */
   sz = code_model == MSP_LARGE_CODE_MODEL ? 4 : 2;
   reg[MSP430_SP_REGNUM] = pv_add_constant (reg[MSP430_SP_REGNUM], -sz);
-  pv_area_store (stack, reg[MSP430_SP_REGNUM], sz, reg[MSP430_PC_REGNUM]);
+  stack.store (reg[MSP430_SP_REGNUM], sz, reg[MSP430_PC_REGNUM]);
 
   pc = start_pc;
   while (pc < limit_pc)
@@ -378,7 +375,7 @@ msp430_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
 	  int rsrc = opc.op[0].reg;
 
 	  reg[MSP430_SP_REGNUM] = pv_add_constant (reg[MSP430_SP_REGNUM], -2);
-	  pv_area_store (stack, reg[MSP430_SP_REGNUM], 2, reg[rsrc]);
+	  stack.store (reg[MSP430_SP_REGNUM], 2, reg[rsrc]);
 	  after_last_frame_setup_insn = next_pc;
 	}
       else if (opc.id == MSO_push	/* PUSHM  */
@@ -393,7 +390,7 @@ msp430_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
 	    {
 	      reg[MSP430_SP_REGNUM]
 		= pv_add_constant (reg[MSP430_SP_REGNUM], -size);
-	      pv_area_store (stack, reg[MSP430_SP_REGNUM], size, reg[rsrc]);
+	      stack.store (reg[MSP430_SP_REGNUM], size, reg[rsrc]);
 	      rsrc--;
 	      count--;
 	    }
@@ -428,11 +425,9 @@ msp430_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
     result->frame_size = reg[MSP430_SP_REGNUM].k;
 
   /* Record where all the registers were saved.  */
-  pv_area_scan (stack, check_for_saved, result);
+  stack.scan (check_for_saved, result);
 
   result->prologue_end = after_last_frame_setup_insn;
-
-  do_cleanups (back_to);
 }
 
 /* Implement the "skip_prologue" gdbarch method.  */

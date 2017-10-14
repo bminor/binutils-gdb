@@ -143,7 +143,7 @@ fbsd_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf,
 {
   size_t siginfo_size;
 
-  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+  if (gdbarch_long_bit (gdbarch) == 32)
     siginfo_size = SIZE32_SIGINFO_T;
   else
     siginfo_size = SIZE64_SIGINFO_T;
@@ -168,7 +168,7 @@ fbsd_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf,
     len = siginfo_size - offset;
 
   ULONGEST siginfo_offset;
-  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+  if (gdbarch_long_bit (gdbarch) == 32)
     siginfo_offset = LWPINFO_OFFSET + LWPINFO32_PL_SIGINFO;
   else
     siginfo_offset = LWPINFO_OFFSET + LWPINFO64_PL_SIGINFO;
@@ -392,6 +392,8 @@ fbsd_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
       TAG (PAGESIZESLEN, _("Number of pagesizes"), AUXV_FORMAT_DEC);
       TAG (TIMEKEEP, _("Pointer to timehands"), AUXV_FORMAT_HEX);
       TAG (STACKPROT, _("Initial stack protection"), AUXV_FORMAT_HEX);
+      TAG (EHDRFLAGS, _("ELF header e_flags"), AUXV_FORMAT_HEX);
+      TAG (HWCAP, _("Machine-dependent CPU capability hints"), AUXV_FORMAT_HEX);
     default:
       default_print_auxv_entry (gdbarch, file, type, val);
       return;
@@ -432,13 +434,14 @@ fbsd_get_siginfo_type (struct gdbarch *gdbarch)
 
   /* __pid_t */
   pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			TYPE_LENGTH (int32_type), "__pid_t");
+			TYPE_LENGTH (int32_type) * TARGET_CHAR_BIT, "__pid_t");
   TYPE_TARGET_TYPE (pid_type) = int32_type;
   TYPE_TARGET_STUB (pid_type) = 1;
 
   /* __uid_t */
   uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			TYPE_LENGTH (uint32_type), "__uid_t");
+			TYPE_LENGTH (uint32_type) * TARGET_CHAR_BIT,
+			"__uid_t");
   TYPE_TARGET_TYPE (uid_type) = uint32_type;
   TYPE_TARGET_STUB (uid_type) = 1;
 

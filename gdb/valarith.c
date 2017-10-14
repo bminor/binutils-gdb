@@ -881,7 +881,10 @@ value_args_as_decimal (struct value *arg1, struct value *arg2,
     {
       *byte_order_x = gdbarch_byte_order (get_type_arch (type2));
       *len_x = TYPE_LENGTH (type2);
-      decimal_from_integral (arg1, x, *len_x, *byte_order_x);
+      if (TYPE_UNSIGNED (type1))
+	decimal_from_ulongest (value_as_long (arg1), x, *len_x, *byte_order_x);
+      else
+	decimal_from_longest (value_as_long (arg1), x, *len_x, *byte_order_x);
     }
   else
     error (_("Don't know how to convert from %s to %s."), TYPE_NAME (type1),
@@ -900,7 +903,10 @@ value_args_as_decimal (struct value *arg1, struct value *arg2,
     {
       *byte_order_y = gdbarch_byte_order (get_type_arch (type1));
       *len_y = TYPE_LENGTH (type1);
-      decimal_from_integral (arg2, y, *len_y, *byte_order_y);
+      if (TYPE_UNSIGNED (type2))
+	decimal_from_ulongest (value_as_long (arg2), y, *len_y, *byte_order_y);
+      else
+	decimal_from_longest (value_as_long (arg2), y, *len_y, *byte_order_y);
     }
   else
     error (_("Don't know how to convert from %s to %s."), TYPE_NAME (type1),

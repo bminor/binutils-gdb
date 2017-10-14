@@ -544,7 +544,7 @@ call_thread_fsm_should_stop (struct thread_fsm *self,
 
       /* Break out of wait_sync_command_done.  */
       scoped_restore save_ui = make_scoped_restore (&current_ui, f->waiting_ui);
-      target_terminal_ours ();
+      target_terminal::ours ();
       f->waiting_ui->prompt_state = PROMPT_NEEDED;
     }
 

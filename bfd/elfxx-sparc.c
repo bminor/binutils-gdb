@@ -2632,6 +2632,9 @@ readonly_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
 	  info->flags |= DF_TEXTREL;
 
+	  info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+				  p->sec->owner, p->sec);
+
 	  /* Not an error, just cut short the traversal.  */
 	  return FALSE;
 	}
@@ -2727,7 +2730,11 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
 		    srel = htab->elf.irelplt;
 		  srel->size += p->count * SPARC_ELF_RELA_BYTES (htab);
 		  if ((p->sec->output_section->flags & SEC_READONLY) != 0)
-		    info->flags |= DF_TEXTREL;
+		    {
+		      info->flags |= DF_TEXTREL;
+		      info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+					      p->sec->owner, p->sec);
+		    }
 		}
 	    }
 	}

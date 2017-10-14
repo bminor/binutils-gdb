@@ -155,12 +155,6 @@ extern void set_quit_flag (void);
 typedef void (quit_handler_ftype) (void);
 extern quit_handler_ftype *quit_handler;
 
-/* Override the current quit handler.  Sets NEW_QUIT_HANDLER as
-   current quit handler, and installs a cleanup that when run restores
-   the previous quit handler.  */
-struct cleanup *
-  make_cleanup_override_quit_handler (quit_handler_ftype *new_quit_handler);
-
 /* The default quit handler.  Checks whether Ctrl-C was pressed, and
    if so:
 
@@ -304,7 +298,7 @@ EXTERN_C char *re_comp (const char *);
 
 /* From symfile.c */
 
-extern void symbol_file_command (char *, int);
+extern void symbol_file_command (const char *, int);
 
 /* * Remote targets may wish to use this as their load function.  */
 extern void generic_load (const char *name, int from_tty);

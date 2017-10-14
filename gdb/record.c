@@ -263,7 +263,7 @@ show_record_debug (struct ui_file *file, int from_tty,
 /* Alias for "target record".  */
 
 static void
-cmd_record_start (char *args, int from_tty)
+cmd_record_start (const char *args, int from_tty)
 {
   execute_command ((char *) "target record-full", from_tty);
 }
@@ -272,7 +272,7 @@ cmd_record_start (char *args, int from_tty)
    of replay until the end.  */
 
 static void
-cmd_record_delete (char *args, int from_tty)
+cmd_record_delete (const char *args, int from_tty)
 {
   require_record_target ();
 
@@ -298,7 +298,7 @@ cmd_record_delete (char *args, int from_tty)
 /* Implement the "stoprecord" or "record stop" command.  */
 
 static void
-cmd_record_stop (char *args, int from_tty)
+cmd_record_stop (const char *args, int from_tty)
 {
   struct target_ops *t;
 
@@ -316,7 +316,7 @@ cmd_record_stop (char *args, int from_tty)
 /* The "set record" command.  */
 
 static void
-set_record_command (char *args, int from_tty)
+set_record_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"set record\" must be followed "
 		       "by an apporpriate subcommand.\n"));
@@ -326,7 +326,7 @@ set_record_command (char *args, int from_tty)
 /* The "show record" command.  */
 
 static void
-show_record_command (char *args, int from_tty)
+show_record_command (const char *args, int from_tty)
 {
   cmd_show_list (show_record_cmdlist, from_tty, "");
 }
@@ -334,7 +334,7 @@ show_record_command (char *args, int from_tty)
 /* The "info record" command.  */
 
 static void
-info_record_command (char *args, int from_tty)
+info_record_command (const char *args, int from_tty)
 {
   struct target_ops *t;
 
@@ -352,9 +352,10 @@ info_record_command (char *args, int from_tty)
 /* The "record save" command.  */
 
 static void
-cmd_record_save (char *args, int from_tty)
+cmd_record_save (const char *args, int from_tty)
 {
-  char *recfilename, recfilename_buffer[40];
+  const char *recfilename;
+  char recfilename_buffer[40];
 
   require_record_target ();
 
@@ -393,7 +394,7 @@ record_goto (const char *arg)
    Rewinds the recording (forward or backward) to the given instruction.  */
 
 static void
-cmd_record_goto (char *arg, int from_tty)
+cmd_record_goto (const char *arg, int from_tty)
 {
   record_goto (arg);
 }
@@ -401,7 +402,7 @@ cmd_record_goto (char *arg, int from_tty)
 /* The "record goto begin" command.  */
 
 static void
-cmd_record_goto_begin (char *arg, int from_tty)
+cmd_record_goto_begin (const char *arg, int from_tty)
 {
   if (arg != NULL && *arg != '\0')
     error (_("Junk after argument: %s."), arg);
@@ -413,7 +414,7 @@ cmd_record_goto_begin (char *arg, int from_tty)
 /* The "record goto end" command.  */
 
 static void
-cmd_record_goto_end (char *arg, int from_tty)
+cmd_record_goto_end (const char *arg, int from_tty)
 {
   if (arg != NULL && *arg != '\0')
     error (_("Junk after argument: %s."), arg);
@@ -425,7 +426,7 @@ cmd_record_goto_end (char *arg, int from_tty)
 /* Read an instruction number from an argument string.  */
 
 static ULONGEST
-get_insn_number (char **arg)
+get_insn_number (const char **arg)
 {
   ULONGEST number;
   const char *begin, *end, *pos;
@@ -446,9 +447,10 @@ get_insn_number (char **arg)
 /* Read a context size from an argument string.  */
 
 static int
-get_context_size (char **arg)
+get_context_size (const char **arg)
 {
-  char *pos;
+  const char *pos;
+  char *end;
   int number;
 
   pos = skip_spaces (*arg);
@@ -456,13 +458,15 @@ get_context_size (char **arg)
   if (!isdigit (*pos))
     error (_("Expected positive number, got: %s."), pos);
 
-  return strtol (pos, arg, 10);
+  long result = strtol (pos, &end, 10);
+  *arg = end;
+  return result;
 }
 
 /* Complain about junk at the end of an argument string.  */
 
 static void
-no_chunk (char *arg)
+no_chunk (const char *arg)
 {
   if (*arg != 0)
     error (_("Junk after argument: %s."), arg);
@@ -471,10 +475,10 @@ no_chunk (char *arg)
 /* Read instruction-history modifiers from an argument string.  */
 
 static gdb_disassembly_flags
-get_insn_history_modifiers (char **arg)
+get_insn_history_modifiers (const char **arg)
 {
   gdb_disassembly_flags modifiers;
-  char *args;
+  const char *args;
 
   modifiers = 0;
   args = *arg;
@@ -549,7 +553,7 @@ command_size_to_target_size (unsigned int size)
 /* The "record instruction-history" command.  */
 
 static void
-cmd_record_insn_history (char *arg, int from_tty)
+cmd_record_insn_history (const char *arg, int from_tty)
 {
   require_record_target ();
 
@@ -612,10 +616,10 @@ cmd_record_insn_history (char *arg, int from_tty)
 /* Read function-call-history modifiers from an argument string.  */
 
 static int
-get_call_history_modifiers (char **arg)
+get_call_history_modifiers (const char **arg)
 {
   int modifiers;
-  char *args;
+  const char *args;
 
   modifiers = 0;
   args = *arg;
@@ -666,7 +670,7 @@ get_call_history_modifiers (char **arg)
 /* The "record function-call-history" command.  */
 
 static void
-cmd_record_call_history (char *arg, int from_tty)
+cmd_record_call_history (const char *arg, int from_tty)
 {
   int flags, size;
 

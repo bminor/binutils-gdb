@@ -733,6 +733,7 @@ LIBINTL_DEP
 LIBINTL
 USE_NLS
 CCDEPMODE
+CONFIG_SRC_SUBDIR
 DEPDIR
 am__leading_dot
 CXX_DIALECT
@@ -5949,6 +5950,13 @@ DEPDIR="${am__leading_dot}deps"
 ac_config_commands="$ac_config_commands depdir"
 
 
+# Create sub-directories for objects and dependencies.
+CONFIG_SRC_SUBDIR="arch"
+
+
+ac_config_commands="$ac_config_commands gdbdepdir"
+
+
 depcc="$CC"   am_compiler_list=
 
 am_depcomp=$ac_aux_dir/depcomp
@@ -7723,62 +7731,6 @@ _ACEOF
 fi
 
 
-# We need to link with -lw to get `wctype' on Solaris before Solaris
-# 2.6.  Solaris 2.6 and beyond have this function in libc, and have a
-# libw that some versions of the GNU linker cannot hanle (GNU ld 2.9.1
-# is known to have this problem).  Therefore we avoid libw if we can.
-ac_fn_c_check_func "$LINENO" "wctype" "ac_cv_func_wctype"
-if test "x$ac_cv_func_wctype" = x""yes; then :
-
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for wctype in -lw" >&5
-$as_echo_n "checking for wctype in -lw... " >&6; }
-if test "${ac_cv_lib_w_wctype+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lw  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char wctype ();
-int
-main ()
-{
-return wctype ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_w_wctype=yes
-else
-  ac_cv_lib_w_wctype=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_w_wctype" >&5
-$as_echo "$ac_cv_lib_w_wctype" >&6; }
-if test "x$ac_cv_lib_w_wctype" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBW 1
-_ACEOF
-
-  LIBS="-lw $LIBS"
-
-fi
-
-fi
-
-
 # Some systems (e.g. Solaris) have `gethostbyname' in libnsl.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing gethostbyname" >&5
 $as_echo_n "checking for library containing gethostbyname... " >&6; }
@@ -8802,7 +8754,7 @@ return waddstr ();
   return 0;
 }
 _ACEOF
-for ac_lib in '' ncurses cursesX curses; do
+for ac_lib in '' ncursesw ncurses cursesX curses; do
   if test -z "$ac_lib"; then
     ac_res="none required"
   else
@@ -8900,7 +8852,7 @@ return tgetent ();
   return 0;
 }
 _ACEOF
-for ac_lib in '' termcap tinfo curses ncurses; do
+for ac_lib in '' termcap tinfo curses ncursesw ncurses; do
   if test -z "$ac_lib"; then
     ac_res="none required"
   else
@@ -10361,7 +10313,7 @@ fi
 
 
 
-try_guile_versions="guile-2.2 guile-2.0"
+try_guile_versions="guile-2.0"
 have_libguile=no
 case "${with_guile}" in
 no)
@@ -11651,18 +11603,7 @@ fi
 done
 
 
-# On Solaris 2.[789], we need to define _MSE_INT_H to avoid a clash
-# between <widec.h> and <wchar.h> that would cause AC_CHECK_HEADERS to
-# think that we don't have <curses.h> if we're using GCC.
-case $host_os in
-  solaris2.[789])
-    if test "$GCC" = yes; then
-
-$as_echo "#define _MSE_INT_H 1" >>confdefs.h
-
-    fi ;;
-esac
-for ac_header in curses.h cursesX.h ncurses.h ncurses/ncurses.h ncurses/term.h
+for ac_header in curses.h cursesX.h ncurses.h ncursesw/ncurses.h ncurses/ncurses.h ncurses/term.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -14681,111 +14622,6 @@ $as_echo "$found" >&6; }
 
 if test ${build} = ${host} -a ${host} = ${target} ; then
    case ${host_os} in
-   solaris*)
-      # See if thread_db library is around for Solaris thread debugging.
-      # Note that we must explicitly test for version 1 of the library
-      # because version 0 (present on Solaris 2.4 or earlier) doesn't have
-      # the same API.
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Solaris thread debugging library" >&5
-$as_echo_n "checking for Solaris thread debugging library... " >&6; }
-      if test -f /usr/lib/libthread_db.so.1 ; then
-         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-$as_echo "#define HAVE_THREAD_DB_LIB 1" >>confdefs.h
-
-         CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
-         CONFIG_SRCS="${CONFIG_SRCS} sol-thread.c"
-         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for dlopen in -ldl" >&5
-$as_echo_n "checking for dlopen in -ldl... " >&6; }
-if test "${ac_cv_lib_dl_dlopen+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-ldl  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char dlopen ();
-int
-main ()
-{
-return dlopen ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_dl_dlopen=yes
-else
-  ac_cv_lib_dl_dlopen=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_dl_dlopen" >&5
-$as_echo "$ac_cv_lib_dl_dlopen" >&6; }
-if test "x$ac_cv_lib_dl_dlopen" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBDL 1
-_ACEOF
-
-  LIBS="-ldl $LIBS"
-
-fi
-
-	 CONFIG_LDFLAGS="${CONFIG_LDFLAGS} $RDYNAMIC"
-	 # Sun randomly tweaked the prototypes in <proc_service.h>
-	 # at one point.
-	 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if <proc_service.h> is old" >&5
-$as_echo_n "checking if <proc_service.h> is old... " >&6; }
-	 if test "${gdb_cv_proc_service_is_old+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-
-	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-		#include <proc_service.h>
-		ps_err_e ps_pdwrite
-		    (struct ps_prochandle*, psaddr_t, const void*, size_t);
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gdb_cv_proc_service_is_old=no
-else
-  gdb_cv_proc_service_is_old=yes
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-
-	 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_proc_service_is_old" >&5
-$as_echo "$gdb_cv_proc_service_is_old" >&6; }
-	 if test $gdb_cv_proc_service_is_old = yes; then
-
-$as_echo "#define PROC_SERVICE_IS_OLD 1" >>confdefs.h
-
-	 fi
-      else
-         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-      fi
-      ;;
    aix*)
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for AiX thread debugging library" >&5
 $as_echo_n "checking for AiX thread debugging library... " >&6; }
@@ -15155,10 +14991,17 @@ build_warnings="-Wall -Wpointer-arith \
 -Wno-sign-compare -Wno-narrowing -Wno-error=maybe-uninitialized \
 -Wno-mismatched-tags"
 
-# Enable -Wno-format by default when using gcc on mingw since many
-# GCC versions complain about %I64.
 case "${host}" in
-  *-*-mingw32*) build_warnings="$build_warnings -Wno-format" ;;
+  *-*-mingw32*)
+    # Enable -Wno-format by default when using gcc on mingw since many
+    # GCC versions complain about %I64.
+    build_warnings="$build_warnings -Wno-format" ;;
+  *-*-solaris*)
+    # Solaris 11.4 <python2.7/ceval.h> uses #pragma no_inline that GCC
+    # doesn't understand.
+    build_warnings="$build_warnings -Wno-unknown-pragmas"
+    # Solaris 11 <unistd.h> marks vfork deprecated.
+    build_warnings="$build_warnings -Wno-deprecated-declarations" ;;
   *) build_warnings="$build_warnings -Wformat-nonliteral" ;;
 esac
 
@@ -18171,6 +18014,7 @@ cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 # INIT-COMMANDS
 #
 ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR CONFIG_SRC_SUBDIR="$CONFIG_SRC_SUBDIR"
 
 _ACEOF
 
@@ -18182,6 +18026,7 @@ do
   case $ac_config_target in
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.in" ;;
     "depdir") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir" ;;
+    "gdbdepdir") CONFIG_COMMANDS="$CONFIG_COMMANDS gdbdepdir" ;;
     "jit-reader.h") CONFIG_FILES="$CONFIG_FILES jit-reader.h:jit-reader.in" ;;
     "$ac_config_links_1") CONFIG_LINKS="$CONFIG_LINKS $ac_config_links_1" ;;
     "gcore") CONFIG_FILES="$CONFIG_FILES gcore" ;;
@@ -18805,6 +18650,11 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
 
   case $ac_file$ac_mode in
     "depdir":C) $SHELL $ac_aux_dir/mkinstalldirs $DEPDIR ;;
+    "gdbdepdir":C)
+  for subdir in ${CONFIG_SRC_SUBDIR}
+  do
+      $SHELL $ac_aux_dir/mkinstalldirs $subdir/$DEPDIR
+  done ;;
     "gcore":F) chmod +x gcore ;;
     "Makefile":F)
 case x$CONFIG_HEADERS in

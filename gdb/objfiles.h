@@ -23,7 +23,7 @@
 #include "hashtab.h"
 #include "gdb_obstack.h"	/* For obstack internals.  */
 #include "objfile-flags.h"
-#include "symfile.h"		/* For struct psymbol_allocation_list.  */
+#include "symfile.h"
 #include "progspace.h"
 #include "registry.h"
 #include "gdb_bfd.h"
@@ -31,6 +31,7 @@
 struct bcache;
 struct htab;
 struct objfile_data;
+struct partial_symbol;
 
 /* This structure maintains information on a per-objfile basis about the
    "entry point" of the objfile, and the scope within which the entry point
@@ -154,19 +155,19 @@ struct obj_section
 struct objstats
 {
   /* Number of partial symbols read.  */
-  int n_psyms;
+  int n_psyms = 0;
 
   /* Number of full symbols read.  */
-  int n_syms;
+  int n_syms = 0;
 
   /* Number of ".stabs" read (if applicable).  */
-  int n_stabs;
+  int n_stabs = 0;
 
   /* Number of types.  */
-  int n_types;
+  int n_types = 0;
 
   /* Size of stringtable, (if applicable).  */
-  int sz_strtab;
+  int sz_strtab = 0;
 };
 
 #define OBJSTAT(objfile, expr) (objfile -> stats.expr)
@@ -277,11 +278,16 @@ struct objfile_per_bfd_storage
 
 struct objfile
 {
+  objfile (bfd *, const char *, objfile_flags);
+  ~objfile ();
+
+  DISABLE_COPY_AND_ASSIGN (objfile);
+
   /* All struct objfile's are chained together by their next pointers.
      The program space field "objfiles"  (frequently referenced via
      the macro "object_files") points to the first link in this chain.  */
 
-  struct objfile *next;
+  struct objfile *next = nullptr;
 
   /* The object file's original name as specified by the user,
      made absolute, and tilde-expanded.  However, it is not canonicalized
@@ -289,9 +295,9 @@ struct objfile
      This pointer is never NULL.  This does not have to be freed; it is
      guaranteed to have a lifetime at least as long as the objfile.  */
 
-  char *original_name;
+  char *original_name = nullptr;
 
-  CORE_ADDR addr_low;
+  CORE_ADDR addr_low = 0;
 
   /* Some flag bits for this objfile.  */
 
@@ -304,24 +310,24 @@ struct objfile
   /* List of compunits.
      These are used to do symbol lookups and file/line-number lookups.  */
 
-  struct compunit_symtab *compunit_symtabs;
+  struct compunit_symtab *compunit_symtabs = nullptr;
 
   /* Each objfile points to a linked list of partial symtabs derived from
      this file, one partial symtab structure for each compilation unit
      (source file).  */
 
-  struct partial_symtab *psymtabs;
+  struct partial_symtab *psymtabs = nullptr;
 
   /* Map addresses to the entries of PSYMTABS.  It would be more efficient to
      have a map per the whole process but ADDRMAP cannot selectively remove
      its items during FREE_OBJFILE.  This mapping is already present even for
      PARTIAL_SYMTABs which still have no corresponding full SYMTABs read.  */
 
-  struct addrmap *psymtabs_addrmap;
+  struct addrmap *psymtabs_addrmap = nullptr;
 
   /* List of freed partial symtabs, available for re-use.  */
 
-  struct partial_symtab *free_psymtabs;
+  struct partial_symtab *free_psymtabs = nullptr;
 
   /* The object file's BFD.  Can be null if the objfile contains only
      minimal symbols, e.g. the run time common symbols for SunOS4.  */
@@ -331,28 +337,28 @@ struct objfile
   /* The per-BFD data.  Note that this is treated specially if OBFD
      is NULL.  */
 
-  struct objfile_per_bfd_storage *per_bfd;
+  struct objfile_per_bfd_storage *per_bfd = nullptr;
 
   /* The modification timestamp of the object file, as of the last time
      we read its symbols.  */
 
-  long mtime;
+  long mtime = 0;
 
   /* Obstack to hold objects that should be freed when we load a new symbol
      table from this object file.  */
 
-  struct obstack objfile_obstack;
+  struct obstack objfile_obstack {};
 
   /* A byte cache where we can stash arbitrary "chunks" of bytes that
      will not change.  */
 
-  struct psymbol_bcache *psymbol_cache; /* Byte cache for partial syms.  */
+  struct psymbol_bcache *psymbol_cache;
 
   /* Vectors of all partial symbols read in from file.  The actual data
      is stored in the objfile_obstack.  */
 
-  struct psymbol_allocation_list global_psymbols;
-  struct psymbol_allocation_list static_psymbols;
+  std::vector<partial_symbol *> global_psymbols;
+  std::vector<partial_symbol *> static_psymbols;
 
   /* Structure which keeps track of functions that manipulate objfile's
      of the same type as this objfile.  I.e. the function to read partial
@@ -360,11 +366,11 @@ struct objfile
      allocated memory, and is shared by all objfiles that use the
      object module reader of this type.  */
 
-  const struct sym_fns *sf;
+  const struct sym_fns *sf = nullptr;
 
   /* Per objfile data-pointers required by other GDB modules.  */
 
-  REGISTRY_FIELDS;
+  REGISTRY_FIELDS {};
 
   /* Set of relocation offsets to apply to each section.
      The table is indexed by the_bfd_section->index, thus it is generally
@@ -375,20 +381,23 @@ struct objfile
      minimal symbols) which have been read have been relocated by this
      much.  Symbols which are yet to be read need to be relocated by it.  */
 
-  struct section_offsets *section_offsets;
-  int num_sections;
+  struct section_offsets *section_offsets = nullptr;
+  int num_sections = 0;
 
   /* Indexes in the section_offsets array.  These are initialized by the
      *_symfile_offsets() family of functions (som_symfile_offsets,
      xcoff_symfile_offsets, default_symfile_offsets).  In theory they
      should correspond to the section indexes used by bfd for the
      current objfile.  The exception to this for the time being is the
-     SOM version.  */
+     SOM version.
 
-  int sect_index_text;
-  int sect_index_data;
-  int sect_index_bss;
-  int sect_index_rodata;
+     These are initialized to -1 so that we can later detect if they
+     are used w/o being properly assigned to.  */
+
+  int sect_index_text = -1;
+  int sect_index_data = -1;
+  int sect_index_bss = -1;
+  int sect_index_rodata = -1;
 
   /* These pointers are used to locate the section table, which
      among other things, is used to map pc addresses into sections.
@@ -399,7 +408,8 @@ struct objfile
      structure data is only valid for certain sections
      (e.g. non-empty, SEC_ALLOC).  */
 
-  struct obj_section *sections, *sections_end;
+  struct obj_section *sections = nullptr;
+  struct obj_section *sections_end = nullptr;
 
   /* GDB allows to have debug symbols in separate object files.  This is
      used by .gnu_debuglink, ELF build id note and Mach-O OSO.
@@ -411,17 +421,17 @@ struct objfile
 
   /* Link to the first separate debug object, if any.  */
 
-  struct objfile *separate_debug_objfile;
+  struct objfile *separate_debug_objfile = nullptr;
 
   /* If this is a separate debug object, this is used as a link to the
      actual executable objfile.  */
 
-  struct objfile *separate_debug_objfile_backlink;
+  struct objfile *separate_debug_objfile_backlink = nullptr;
 
   /* If this is a separate debug object, this is a link to the next one
      for the same executable objfile.  */
 
-  struct objfile *separate_debug_objfile_link;
+  struct objfile *separate_debug_objfile_link = nullptr;
 
   /* Place to stash various statistics about this objfile.  */
 
@@ -432,7 +442,7 @@ struct objfile
      table, so we have to keep them here to relocate them
      properly.  */
 
-  struct symbol *template_symbols;
+  struct symbol *template_symbols = nullptr;
 
   /* Associate a static link (struct dynamic_prop *) to all blocks (struct
      block *) that have one.
@@ -445,13 +455,10 @@ struct objfile
      Very few blocks have a static link, so it's more memory efficient to
      store these here rather than in struct block.  Static links must be
      allocated on the objfile's obstack.  */
-  htab_t static_links;
+  htab_t static_links {};
 };
 
 /* Declarations for functions defined in objfiles.c */
-
-extern struct objfile *allocate_objfile (bfd *, const char *name,
-					 objfile_flags);
 
 extern struct gdbarch *get_objfile_arch (const struct objfile *);
 
@@ -469,8 +476,6 @@ extern void put_objfile_before (struct objfile *, struct objfile *);
 extern void add_separate_debug_objfile (struct objfile *, struct objfile *);
 
 extern void unlink_objfile (struct objfile *);
-
-extern void free_objfile (struct objfile *);
 
 extern void free_objfile_separate_debug (struct objfile *);
 

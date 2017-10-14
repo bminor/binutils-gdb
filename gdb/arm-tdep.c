@@ -226,11 +226,6 @@ static void show_disassembly_style_sfunc (struct ui_file *, int,
 					  struct cmd_list_element *,
 					  const char *);
 
-static void convert_from_extended (const struct floatformat *, const void *,
-				   void *, int);
-static void convert_to_extended (const struct floatformat *, void *,
-				 const void *, int);
-
 static enum register_status arm_neon_quad_read (struct gdbarch *gdbarch,
 						struct regcache *regcache,
 						int regnum, gdb_byte *buf);
@@ -652,15 +647,12 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   int i;
   pv_t regs[16];
-  struct pv_area *stack;
-  struct cleanup *back_to;
   CORE_ADDR offset;
   CORE_ADDR unrecognized_pc = 0;
 
   for (i = 0; i < 16; i++)
     regs[i] = pv_register (i, 0);
-  stack = make_pv_area (ARM_SP_REGNUM, gdbarch_addr_bit (gdbarch));
-  back_to = make_cleanup_free_pv_area (stack);
+  pv_area stack (ARM_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
   while (start < limit)
     {
@@ -673,7 +665,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	  int regno;
 	  int mask;
 
-	  if (pv_area_store_would_trash (stack, regs[ARM_SP_REGNUM]))
+	  if (stack.store_would_trash (regs[ARM_SP_REGNUM]))
 	    break;
 
 	  /* Bits 0-7 contain a mask for registers R0-R7.  Bit 8 says
@@ -686,7 +678,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	      {
 		regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM],
 						       -4);
-		pv_area_store (stack, regs[ARM_SP_REGNUM], 4, regs[regno]);
+		stack.store (regs[ARM_SP_REGNUM], 4, regs[regno]);
 	      }
 	}
       else if ((insn & 0xff80) == 0xb080)	/* sub sp, #imm */
@@ -740,10 +732,10 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	  offset = (insn & 0xff) << 2;
 	  addr = pv_add_constant (regs[ARM_SP_REGNUM], offset);
 
-	  if (pv_area_store_would_trash (stack, addr))
+	  if (stack.store_would_trash (addr))
 	    break;
 
-	  pv_area_store (stack, addr, 4, regs[regno]);
+	  stack.store (addr, 4, regs[regno]);
 	}
       else if ((insn & 0xf800) == 0x6000)	/* str rd, [rn, #off] */
 	{
@@ -754,10 +746,10 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	  offset = bits (insn, 6, 10) << 2;
 	  addr = pv_add_constant (regs[rn], offset);
 
-	  if (pv_area_store_would_trash (stack, addr))
+	  if (stack.store_would_trash (addr))
 	    break;
 
-	  pv_area_store (stack, addr, 4, regs[rd]);
+	  stack.store (addr, 4, regs[rd]);
 	}
       else if (((insn & 0xf800) == 0x7000	/* strb Rd, [Rn, #off] */
 		|| (insn & 0xf800) == 0x8000)	/* strh Rd, [Rn, #off] */
@@ -833,7 +825,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	      pv_t addr = regs[bits (insn, 0, 3)];
 	      int regno;
 
-	      if (pv_area_store_would_trash (stack, addr))
+	      if (stack.store_would_trash (addr))
 		break;
 
 	      /* Calculate offsets of saved registers.  */
@@ -841,7 +833,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 		if (inst2 & (1 << regno))
 		  {
 		    addr = pv_add_constant (addr, -4);
-		    pv_area_store (stack, addr, 4, regs[regno]);
+		    stack.store (addr, 4, regs[regno]);
 		  }
 
 	      if (insn & 0x0020)
@@ -862,12 +854,12 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	      else
 		addr = pv_add_constant (addr, -offset);
 
-	      if (pv_area_store_would_trash (stack, addr))
+	      if (stack.store_would_trash (addr))
 		break;
 
-	      pv_area_store (stack, addr, 4, regs[regno1]);
-	      pv_area_store (stack, pv_add_constant (addr, 4),
-			     4, regs[regno2]);
+	      stack.store (addr, 4, regs[regno1]);
+	      stack.store (pv_add_constant (addr, 4),
+			   4, regs[regno2]);
 
 	      if (insn & 0x0020)
 		regs[bits (insn, 0, 3)] = addr;
@@ -886,10 +878,10 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	      else
 		addr = pv_add_constant (addr, -offset);
 
-	      if (pv_area_store_would_trash (stack, addr))
+	      if (stack.store_would_trash (addr))
 		break;
 
-	      pv_area_store (stack, addr, 4, regs[regno]);
+	      stack.store (addr, 4, regs[regno]);
 
 	      if (inst2 & 0x0100)
 		regs[bits (insn, 0, 3)] = addr;
@@ -904,10 +896,10 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	      offset = inst2 & 0xfff;
 	      addr = pv_add_constant (regs[bits (insn, 0, 3)], offset);
 
-	      if (pv_area_store_would_trash (stack, addr))
+	      if (stack.store_would_trash (addr))
 		break;
 
-	      pv_area_store (stack, addr, 4, regs[regno]);
+	      stack.store (addr, 4, regs[regno]);
 	    }
 
 	  else if ((insn & 0xffd0) == 0xf880	/* str{bh}.w Rt,[Rn,#imm] */
@@ -1090,10 +1082,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
     unrecognized_pc = start;
 
   if (cache == NULL)
-    {
-      do_cleanups (back_to);
-      return unrecognized_pc;
-    }
+    return unrecognized_pc;
 
   if (pv_is_register (regs[ARM_FP_REGNUM], ARM_SP_REGNUM))
     {
@@ -1115,10 +1104,9 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
     }
 
   for (i = 0; i < 16; i++)
-    if (pv_area_find_reg (stack, gdbarch, i, &offset))
+    if (stack.find_reg (gdbarch, i, &offset))
       cache->saved_regs[i].addr = offset;
 
-  do_cleanups (back_to);
   return unrecognized_pc;
 }
 
@@ -1494,8 +1482,6 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
   int regno;
   CORE_ADDR offset, current_pc;
   pv_t regs[ARM_FPS_REGNUM];
-  struct pv_area *stack;
-  struct cleanup *back_to;
   CORE_ADDR unrecognized_pc = 0;
 
   /* Search the prologue looking for instructions that set up the
@@ -1510,8 +1496,7 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 
   for (regno = 0; regno < ARM_FPS_REGNUM; regno++)
     regs[regno] = pv_register (regno, 0);
-  stack = make_pv_area (ARM_SP_REGNUM, gdbarch_addr_bit (gdbarch));
-  back_to = make_cleanup_free_pv_area (stack);
+  pv_area stack (ARM_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
   for (current_pc = prologue_start;
        current_pc < prologue_end;
@@ -1548,11 +1533,11 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
       else if ((insn & 0xffff0fff) == 0xe52d0004)	/* str Rd,
 							   [sp, #-4]! */
 	{
-	  if (pv_area_store_would_trash (stack, regs[ARM_SP_REGNUM]))
+	  if (stack.store_would_trash (regs[ARM_SP_REGNUM]))
 	    break;
 	  regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM], -4);
-	  pv_area_store (stack, regs[ARM_SP_REGNUM], 4,
-			 regs[bits (insn, 12, 15)]);
+	  stack.store (regs[ARM_SP_REGNUM], 4,
+		       regs[bits (insn, 12, 15)]);
 	  continue;
 	}
       else if ((insn & 0xffff0000) == 0xe92d0000)
@@ -1562,7 +1547,7 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	{
 	  int mask = insn & 0xffff;
 
-	  if (pv_area_store_would_trash (stack, regs[ARM_SP_REGNUM]))
+	  if (stack.store_would_trash (regs[ARM_SP_REGNUM]))
 	    break;
 
 	  /* Calculate offsets of saved registers.  */
@@ -1571,7 +1556,7 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	      {
 		regs[ARM_SP_REGNUM]
 		  = pv_add_constant (regs[ARM_SP_REGNUM], -4);
-		pv_area_store (stack, regs[ARM_SP_REGNUM], 4, regs[regno]);
+		stack.store (regs[ARM_SP_REGNUM], 4, regs[regno]);
 	      }
 	}
       else if ((insn & 0xffff0000) == 0xe54b0000	/* strb rx,[r11,#-n] */
@@ -1613,12 +1598,12 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 							   [sp, -#c]! */
 	       && gdbarch_tdep (gdbarch)->have_fpa_registers)
 	{
-	  if (pv_area_store_would_trash (stack, regs[ARM_SP_REGNUM]))
+	  if (stack.store_would_trash (regs[ARM_SP_REGNUM]))
 	    break;
 
 	  regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM], -12);
 	  regno = ARM_F0_REGNUM + ((insn >> 12) & 0x07);
-	  pv_area_store (stack, regs[ARM_SP_REGNUM], 12, regs[regno]);
+	  stack.store (regs[ARM_SP_REGNUM], 12, regs[regno]);
 	}
       else if ((insn & 0xffbf0fff) == 0xec2d0200	/* sfmfd f0, 4,
 							   [sp!] */
@@ -1627,7 +1612,7 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	  int n_saved_fp_regs;
 	  unsigned int fp_start_reg, fp_bound_reg;
 
-	  if (pv_area_store_would_trash (stack, regs[ARM_SP_REGNUM]))
+	  if (stack.store_would_trash (regs[ARM_SP_REGNUM]))
 	    break;
 
 	  if ((insn & 0x800) == 0x800)		/* N0 is set */
@@ -1650,8 +1635,8 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	  for (; fp_start_reg < fp_bound_reg; fp_start_reg++)
 	    {
 	      regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM], -12);
-	      pv_area_store (stack, regs[ARM_SP_REGNUM], 12,
-			     regs[fp_start_reg++]);
+	      stack.store (regs[ARM_SP_REGNUM], 12,
+			   regs[fp_start_reg++]);
 	    }
 	}
       else if ((insn & 0xff000000) == 0xeb000000 && cache == NULL) /* bl */
@@ -1731,7 +1716,7 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
       cache->framesize = framesize;
 
       for (regno = 0; regno < ARM_FPS_REGNUM; regno++)
-	if (pv_area_find_reg (stack, gdbarch, regno, &offset))
+	if (stack.find_reg (gdbarch, regno, &offset))
 	  cache->saved_regs[regno].addr = offset;
     }
 
@@ -1739,7 +1724,6 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
     fprintf_unfiltered (gdb_stdlog, "Prologue scan stopped at %s\n",
 			paddress (gdbarch, unrecognized_pc));
 
-  do_cleanups (back_to);
   return unrecognized_pc;
 }
 
@@ -4211,39 +4195,6 @@ arm_register_sim_regno (struct gdbarch *gdbarch, int regnum)
   internal_error (__FILE__, __LINE__, _("Bad REGNUM %d"), regnum);
 }
 
-/* NOTE: cagney/2001-08-20: Both convert_from_extended() and
-   convert_to_extended() use floatformat_arm_ext_littlebyte_bigword.
-   It is thought that this is is the floating-point register format on
-   little-endian systems.  */
-
-static void
-convert_from_extended (const struct floatformat *fmt, const void *ptr,
-		       void *dbl, int endianess)
-{
-  DOUBLEST d;
-
-  if (endianess == BFD_ENDIAN_BIG)
-    floatformat_to_doublest (&floatformat_arm_ext_big, ptr, &d);
-  else
-    floatformat_to_doublest (&floatformat_arm_ext_littlebyte_bigword,
-			     ptr, &d);
-  floatformat_from_doublest (fmt, &d, dbl);
-}
-
-static void
-convert_to_extended (const struct floatformat *fmt, void *dbl, const void *ptr,
-		     int endianess)
-{
-  DOUBLEST d;
-
-  floatformat_to_doublest (fmt, ptr, &d);
-  if (endianess == BFD_ENDIAN_BIG)
-    floatformat_from_doublest (&floatformat_arm_ext_big, &d, dbl);
-  else
-    floatformat_from_doublest (&floatformat_arm_ext_littlebyte_bigword,
-			       &d, dbl);
-}
-
 /* Given BUF, which is OLD_LEN bytes ending at ENDADDR, expand
    the buffer to be NEW_LEN bytes ending at ENDADDR.  Return
    NULL if an error occurs.  BUF is freed.  */
@@ -6444,9 +6395,9 @@ arm_decode_misc_memhint_neon (struct gdbarch *gdbarch, uint32_t insn,
   unsigned int op1 = bits (insn, 20, 26), op2 = bits (insn, 4, 7);
   unsigned int rn = bits (insn, 16, 19);
 
-  if (op1 == 0x10 && (op2 & 0x2) == 0x0 && (rn & 0xe) == 0x0)
+  if (op1 == 0x10 && (op2 & 0x2) == 0x0 && (rn & 0x1) == 0x0)
     return arm_copy_unmodified (gdbarch, insn, "cps", dsc);
-  else if (op1 == 0x10 && op2 == 0x0 && (rn & 0xe) == 0x1)
+  else if (op1 == 0x10 && op2 == 0x0 && (rn & 0x1) == 0x1)
     return arm_copy_unmodified (gdbarch, insn, "setend", dsc);
   else if ((op1 & 0x60) == 0x20)
     return arm_copy_unmodified (gdbarch, insn, "neon dataproc", dsc);
@@ -7948,8 +7899,8 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 	    bfd_byte tmpbuf[FP_REGISTER_SIZE];
 
 	    regcache_cooked_read (regs, ARM_F0_REGNUM, tmpbuf);
-	    convert_from_extended (floatformat_from_type (type), tmpbuf,
-				   valbuf, gdbarch_byte_order (gdbarch));
+	    convert_typed_floating (tmpbuf, arm_ext_type (gdbarch),
+				    valbuf, type);
 	  }
 	  break;
 
@@ -8153,8 +8104,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	{
 	case ARM_FLOAT_FPA:
 
-	  convert_to_extended (floatformat_from_type (type), buf, valbuf,
-			       gdbarch_byte_order (gdbarch));
+	  convert_typed_floating (valbuf, type, buf, arm_ext_type (gdbarch));
 	  regcache_cooked_write (regs, ARM_F0_REGNUM, buf);
 	  break;
 
@@ -8404,7 +8354,7 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
 }
 
 static void
-set_arm_command (char *args, int from_tty)
+set_arm_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\
 \"set arm\" must be followed by an apporpriate subcommand.\n"));
@@ -8412,7 +8362,7 @@ set_arm_command (char *args, int from_tty)
 }
 
 static void
-show_arm_command (char *args, int from_tty)
+show_arm_command (const char *args, int from_tty)
 {
   cmd_show_list (showarmcmdlist, from_tty, "");
 }
@@ -9725,7 +9675,7 @@ vfp - VFP co-processor."),
 			   &setdebuglist, &showdebuglist);
 
 #if GDB_SELF_TEST
-  selftests::register_test (selftests::arm_record_test);
+  selftests::register_test ("arm-record", selftests::arm_record_test);
 #endif
 
 }

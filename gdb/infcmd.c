@@ -68,21 +68,11 @@ static void until_next_command (int);
 
 static void until_command (char *, int);
 
-static void path_info (char *, int);
-
 static void path_command (char *, int);
-
-static void unset_command (char *, int);
 
 static void info_float_command (char *, int);
 
 static void disconnect_command (char *, int);
-
-static void unset_environment_command (char *, int);
-
-static void set_environment_command (char *, int);
-
-static void environment_info (char *, int);
 
 static void info_program_command (char *, int);
 
@@ -110,6 +100,10 @@ static void run_command (char *, int);
    means no args.  */
 
 static char *inferior_args_scratch;
+
+/* Scratch area where the new cwd will be stored by 'set cwd'.  */
+
+static char *inferior_cwd_scratch;
 
 /* Scratch area where 'set inferior-tty' will store user-provided value.
    We'll immediate copy it into per-inferior storage.  */
@@ -244,6 +238,60 @@ show_args_command (struct ui_file *file, int from_tty,
   /* Note that we ignore the passed-in value in favor of computing it
      directly.  */
   deprecated_show_value_hack (file, from_tty, c, get_inferior_args ());
+}
+
+/* See common/common-inferior.h.  */
+
+void
+set_inferior_cwd (const char *cwd)
+{
+  struct inferior *inf = current_inferior ();
+
+  gdb_assert (inf != NULL);
+
+  if (cwd == NULL)
+    inf->cwd.reset ();
+  else
+    inf->cwd.reset (xstrdup (cwd));
+}
+
+/* See common/common-inferior.h.  */
+
+const char *
+get_inferior_cwd ()
+{
+  return current_inferior ()->cwd.get ();
+}
+
+/* Handle the 'set cwd' command.  */
+
+static void
+set_cwd_command (char *args, int from_tty, struct cmd_list_element *c)
+{
+  if (*inferior_cwd_scratch == '\0')
+    set_inferior_cwd (NULL);
+  else
+    set_inferior_cwd (inferior_cwd_scratch);
+}
+
+/* Handle the 'show cwd' command.  */
+
+static void
+show_cwd_command (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c, const char *value)
+{
+  const char *cwd = get_inferior_cwd ();
+
+  if (cwd == NULL)
+    fprintf_filtered (gdb_stdout,
+		      _("\
+You have not set the inferior's current working directory.\n\
+The inferior will inherit GDB's cwd if native debugging, or the remote\n\
+server's cwd if remote debugging.\n"));
+  else
+    fprintf_filtered (gdb_stdout,
+		      _("Current working directory that will be used "
+			"when starting the inferior is \"%s\".\n"), cwd);
 }
 
 
@@ -411,7 +459,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
 {
 
   /* Be sure we own the terminal in case write operations are performed.  */ 
-  target_terminal_ours_for_output ();
+  target_terminal::ours_for_output ();
 
   /* If the target hasn't taken care of this already, do it now.
      Targets which need to access registers during to_open,
@@ -518,12 +566,25 @@ prepare_execution_command (struct target_ops *target, int background)
     }
 }
 
-/* Implement the "run" command.  If TBREAK_AT_MAIN is set, then insert
-   a temporary breakpoint at the begining of the main program before
-   running the program.  */
+/* Determine how the new inferior will behave.  */
+
+enum run_how
+  {
+    /* Run program without any explicit stop during startup.  */
+    RUN_NORMAL,
+
+    /* Stop at the beginning of the program's main function.  */
+    RUN_STOP_AT_MAIN,
+
+    /* Stop at the first instruction of the program.  */
+    RUN_STOP_AT_FIRST_INSN
+  };
+
+/* Implement the "run" command.  Force a stop during program start if
+   requested by RUN_HOW.  */
 
 static void
-run_command_1 (char *args, int from_tty, int tbreak_at_main)
+run_command_1 (char *args, int from_tty, enum run_how run_how)
 {
   const char *exec_file;
   struct cleanup *old_chain;
@@ -532,6 +593,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
   struct target_ops *run_target;
   int async_exec;
   struct cleanup *args_chain;
+  CORE_ADDR pc;
 
   dont_repeat ();
 
@@ -569,8 +631,8 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   /* Done.  Can now set breakpoints, change inferior args, etc.  */
 
-  /* Insert the temporary breakpoint if a location was specified.  */
-  if (tbreak_at_main)
+  /* Insert temporary breakpoint in main function if requested.  */
+  if (run_how == RUN_STOP_AT_MAIN)
     tbreak_command (main_name (), 0);
 
   exec_file = get_exec_file (0);
@@ -630,6 +692,15 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
      has done its thing; now we are setting up the running program.  */
   post_create_inferior (&current_target, 0);
 
+  /* Queue a pending event so that the program stops immediately.  */
+  if (run_how == RUN_STOP_AT_FIRST_INSN)
+    {
+      thread_info *thr = inferior_thread ();
+      thr->suspend.waitstatus_pending_p = 1;
+      thr->suspend.waitstatus.kind = TARGET_WAITKIND_STOPPED;
+      thr->suspend.waitstatus.value.sig = GDB_SIGNAL_0;
+    }
+
   /* Start the target running.  Do not use -1 continuation as it would skip
      breakpoint right at the entry point.  */
   proceed (regcache_read_pc (get_current_regcache ()), GDB_SIGNAL_0);
@@ -642,7 +713,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 static void
 run_command (char *args, int from_tty)
 {
-  run_command_1 (args, from_tty, 0);
+  run_command_1 (args, from_tty, RUN_NORMAL);
 }
 
 /* Start the execution of the program up until the beginning of the main
@@ -658,7 +729,16 @@ start_command (char *args, int from_tty)
     error (_("No symbol table loaded.  Use the \"file\" command."));
 
   /* Run the program until reaching the main procedure...  */
-  run_command_1 (args, from_tty, 1);
+  run_command_1 (args, from_tty, RUN_STOP_AT_MAIN);
+}
+
+/* Start the execution of the program stopping at the first
+   instruction.  */
+
+static void
+starti_command (char *args, int from_tty)
+{
+  run_command_1 (args, from_tty, RUN_STOP_AT_FIRST_INSN);
 } 
 
 static int
@@ -751,7 +831,7 @@ continue_1 (int all_threads)
 	      Continuing.
 	      <no thread was resumed, but the inferior now owns the terminal>
 	  */
-	  target_terminal_inferior ();
+	  target_terminal::inferior ();
 	}
     }
   else
@@ -1140,7 +1220,7 @@ prepare_one_step (struct step_command_fsm *sm)
 					    &tp->control.step_range_end) == 0)
 		error (_("Cannot find bounds of current function"));
 
-	      target_terminal_ours_for_output ();
+	      target_terminal::ours_for_output ();
 	      printf_filtered (_("Single stepping until exit from function %s,"
 				 "\nwhich has no line number information.\n"),
 			       name);
@@ -2116,7 +2196,7 @@ info_program_command (char *args, int from_tty)
 }
 
 static void
-environment_info (char *var, int from_tty)
+environment_info (const char *var, int from_tty)
 {
   if (var)
     {
@@ -2149,9 +2229,9 @@ environment_info (char *var, int from_tty)
 }
 
 static void
-set_environment_command (char *arg, int from_tty)
+set_environment_command (const char *arg, int from_tty)
 {
-  char *p, *val, *var;
+  const char *p, *val;
   int nullset = 0;
 
   if (arg == 0)
@@ -2198,21 +2278,20 @@ set_environment_command (char *arg, int from_tty)
   while (p != arg && (p[-1] == ' ' || p[-1] == '\t'))
     p--;
 
-  var = savestring (arg, p - arg);
+  std::string var (arg, p - arg);
   if (nullset)
     {
       printf_filtered (_("Setting environment variable "
 			 "\"%s\" to null value.\n"),
-		       var);
-      current_inferior ()->environment.set (var, "");
+		       var.c_str ());
+      current_inferior ()->environment.set (var.c_str (), "");
     }
   else
-    current_inferior ()->environment.set (var, val);
-  xfree (var);
+    current_inferior ()->environment.set (var.c_str (), val);
 }
 
 static void
-unset_environment_command (char *var, int from_tty)
+unset_environment_command (const char *var, int from_tty)
 {
   if (var == 0)
     {
@@ -2230,7 +2309,7 @@ unset_environment_command (char *var, int from_tty)
 static const char path_var_name[] = "PATH";
 
 static void
-path_info (char *args, int from_tty)
+path_info (const char *args, int from_tty)
 {
   puts_filtered ("Executable and object file path: ");
   puts_filtered (current_inferior ()->environment.get (path_var_name));
@@ -2543,7 +2622,7 @@ info_vector_command (char *args, int from_tty)
 /* Kill the inferior process.  Make us have no inferior.  */
 
 static void
-kill_command (char *arg, int from_tty)
+kill_command (const char *arg, int from_tty)
 {
   /* FIXME:  This should not really be inferior_ptid (or target_has_execution).
      It should be a distinct flag that indicates that a target is active, cuz
@@ -2807,7 +2886,7 @@ attach_command (char *args, int from_tty)
 
   /* Set up the "saved terminal modes" of the inferior
      based on what modes we are starting it with.  */
-  target_terminal_init ();
+  target_terminal::init ();
 
   /* Install inferior's terminal modes.  This may look like a no-op,
      as we've just saved them above, however, this does more than
@@ -2823,7 +2902,7 @@ attach_command (char *args, int from_tty)
        while we're in the event loop waiting for that stop.  That is,
        before the attach continuation runs and the command is really
        finished.  */
-  target_terminal_inferior ();
+  target_terminal::inferior ();
 
   /* Set up execution context to know that we should return from
      wait_for_inferior as soon as the target reports a stop.  */
@@ -2947,7 +3026,7 @@ notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
  */
 
 void
-detach_command (char *args, int from_tty)
+detach_command (const char *args, int from_tty)
 {
   dont_repeat ();		/* Not for the faint of heart.  */
 
@@ -3091,7 +3170,7 @@ info_float_command (char *args, int from_tty)
 }
 
 static void
-unset_command (char *args, int from_tty)
+unset_command (const char *args, int from_tty)
 {
   printf_filtered (_("\"unset\" must be followed by the "
 		     "name of an unset subcommand.\n"));
@@ -3101,7 +3180,7 @@ unset_command (char *args, int from_tty)
 /* Implement `info proc' family of commands.  */
 
 static void
-info_proc_cmd_1 (char *args, enum info_proc_what what, int from_tty)
+info_proc_cmd_1 (const char *args, enum info_proc_what what, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
 
@@ -3117,7 +3196,7 @@ info_proc_cmd_1 (char *args, enum info_proc_what what, int from_tty)
 /* Implement `info proc' when given without any futher parameters.  */
 
 static void
-info_proc_cmd (char *args, int from_tty)
+info_proc_cmd (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_MINIMAL, from_tty);
 }
@@ -3125,7 +3204,7 @@ info_proc_cmd (char *args, int from_tty)
 /* Implement `info proc mappings'.  */
 
 static void
-info_proc_cmd_mappings (char *args, int from_tty)
+info_proc_cmd_mappings (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_MAPPINGS, from_tty);
 }
@@ -3133,7 +3212,7 @@ info_proc_cmd_mappings (char *args, int from_tty)
 /* Implement `info proc stat'.  */
 
 static void
-info_proc_cmd_stat (char *args, int from_tty)
+info_proc_cmd_stat (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_STAT, from_tty);
 }
@@ -3141,7 +3220,7 @@ info_proc_cmd_stat (char *args, int from_tty)
 /* Implement `info proc status'.  */
 
 static void
-info_proc_cmd_status (char *args, int from_tty)
+info_proc_cmd_status (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_STATUS, from_tty);
 }
@@ -3149,7 +3228,7 @@ info_proc_cmd_status (char *args, int from_tty)
 /* Implement `info proc cwd'.  */
 
 static void
-info_proc_cmd_cwd (char *args, int from_tty)
+info_proc_cmd_cwd (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_CWD, from_tty);
 }
@@ -3157,7 +3236,7 @@ info_proc_cmd_cwd (char *args, int from_tty)
 /* Implement `info proc cmdline'.  */
 
 static void
-info_proc_cmd_cmdline (char *args, int from_tty)
+info_proc_cmd_cmdline (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_CMDLINE, from_tty);
 }
@@ -3165,7 +3244,7 @@ info_proc_cmd_cmdline (char *args, int from_tty)
 /* Implement `info proc exe'.  */
 
 static void
-info_proc_cmd_exe (char *args, int from_tty)
+info_proc_cmd_exe (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_EXE, from_tty);
 }
@@ -3173,10 +3252,26 @@ info_proc_cmd_exe (char *args, int from_tty)
 /* Implement `info proc all'.  */
 
 static void
-info_proc_cmd_all (char *args, int from_tty)
+info_proc_cmd_all (const char *args, int from_tty)
 {
   info_proc_cmd_1 (args, IP_ALL, from_tty);
 }
+
+/* This help string is used for the run, start, and starti commands.
+   It is defined as a macro to prevent duplication.  */
+
+#define RUN_ARGS_HELP \
+"You may specify arguments to give it.\n\
+Args may include \"*\", or \"[...]\"; they are expanded using the\n\
+shell that will start the program (specified by the \"$SHELL\" environment\n\
+variable).  Input and output redirection with \">\", \"<\", or \">>\"\n\
+are also allowed.\n\
+\n\
+With no arguments, uses arguments last specified (with \"run\" or \n\
+\"set args\").  To cancel previous arguments and run with no arguments,\n\
+use \"set args\" without arguments.\n\
+\n\
+To start the inferior without using a shell, use \"set startup-with-shell off\"."
 
 void
 _initialize_infcmd (void)
@@ -3209,6 +3304,25 @@ Show argument list to give program being debugged when it is started."), _("\
 Follow this command with any number of args, to be passed to the program."),
 				   set_args_command,
 				   show_args_command,
+				   &setlist, &showlist);
+  c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  gdb_assert (c != NULL);
+  set_cmd_completer (c, filename_completer);
+
+  cmd_name = "cwd";
+  add_setshow_string_noescape_cmd (cmd_name, class_run,
+				   &inferior_cwd_scratch, _("\
+Set the current working directory to be used when the inferior is started.\n\
+Changing this setting does not have any effect on inferiors that are\n\
+already running."),
+				   _("\
+Show the current working directory that is used when the inferior is started."),
+				   _("\
+Use this command to change the current working directory that will be used\n\
+when the inferior is started.  This setting does not affect GDB's current\n\
+working directory."),
+				   set_cwd_command,
+				   show_cwd_command,
 				   &setlist, &showlist);
   c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
   gdb_assert (c != NULL);
@@ -3384,24 +3498,19 @@ Specifying -a and an ignore count simultaneously is an error."));
   add_com_alias ("fg", "cont", class_run, 1);
 
   c = add_com ("run", class_run, run_command, _("\
-Start debugged program.  You may specify arguments to give it.\n\
-Args may include \"*\", or \"[...]\"; they are expanded using the\n\
-shell that will start the program (specified by the \"$SHELL\"\
-environment\nvariable).  Input and output redirection with \">\",\
-\"<\", or \">>\"\nare also allowed.\n\n\
-With no arguments, uses arguments last specified (with \"run\" \
-or \"set args\").\n\
-To cancel previous arguments and run with no arguments,\n\
-use \"set args\" without arguments.\n\
-To start the inferior without using a shell, use \"set \
-startup-with-shell off\"."));
+Start debugged program.\n"
+RUN_ARGS_HELP));
   set_cmd_completer (c, filename_completer);
   add_com_alias ("r", "run", class_run, 1);
 
   c = add_com ("start", class_run, start_command, _("\
-Run the debugged program until the beginning of the main procedure.\n\
-You may specify arguments to give to your program, just as with the\n\
-\"run\" command."));
+Start the debugged program stopping at the beginning of the main procedure.\n"
+RUN_ARGS_HELP));
+  set_cmd_completer (c, filename_completer);
+
+  c = add_com ("starti", class_run, starti_command, _("\
+Start the debugged program stopping at the first instruction.\n"
+RUN_ARGS_HELP));
   set_cmd_completer (c, filename_completer);
 
   add_com ("interrupt", class_run, interrupt_command,

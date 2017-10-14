@@ -79,7 +79,7 @@ gdb_test "break $executable.c:$bp_location" \
          "breapoint past v1 & v2 initialization"
 
 gdb_test "continue" \
-         "Breakpoint \[0-9\]+, main \\(\\) at.*" \
+         "Breakpoint \[0-9\]+, main \\(\\) at.*STOP.*" \
          "continue to STOP marker"
 
 # Now check the value of this_version_id in both print-file-var-lib1.c

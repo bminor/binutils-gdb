@@ -42,6 +42,10 @@
 #ifndef ETIMEDOUT
 #define ETIMEDOUT WSAETIMEDOUT
 #endif
+/* Gnulib defines close too, but gnulib's replacement
+   doesn't call closesocket unless we import the
+   socketlib module.  */
+#undef close
 #define close(fd) closesocket (fd)
 #define ioctl ioctlsocket
 #else
@@ -364,13 +368,13 @@ ser_tcp_send_break (struct serial *scb)
 /* Support for "set tcp" and "show tcp" commands.  */
 
 static void
-set_tcp_cmd (char *args, int from_tty)
+set_tcp_cmd (const char *args, int from_tty)
 {
   help_list (tcp_set_cmdlist, "set tcp ", all_commands, gdb_stdout);
 }
 
 static void
-show_tcp_cmd (char *args, int from_tty)
+show_tcp_cmd (const char *args, int from_tty)
 {
   help_list (tcp_show_cmdlist, "show tcp ", all_commands, gdb_stdout);
 }

@@ -164,7 +164,7 @@ initialize_low_tdesc ()
   init_registers_i386_avx_avx512_linux ();
   init_registers_i386_avx_mpx_avx512_pku_linux ();
 
-  selftests::register_test (selftests::tdesc::i386_tdesc_test);
+  selftests::register_test ("i386-tdesc", selftests::tdesc::i386_tdesc_test);
 
 #ifdef __x86_64__
   init_registers_x32_linux ();
@@ -178,6 +178,6 @@ initialize_low_tdesc ()
   init_registers_amd64_avx_avx512_linux ();
   init_registers_amd64_avx_mpx_avx512_pku_linux ();
 
-  selftests::register_test (selftests::tdesc::amd64_tdesc_test);
+  selftests::register_test ("amd64-tdesc", selftests::tdesc::amd64_tdesc_test);
 #endif
 }

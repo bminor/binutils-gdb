@@ -49,7 +49,6 @@
 #include "frame-base.h"
 #include "trad-frame.h"
 #include "infcall.h"
-#include "floatformat.h"
 #include "remote.h"
 #include "target-descriptions.h"
 #include "dwarf2-frame.h"
@@ -6878,13 +6877,13 @@ mips_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
    used for all MIPS-specific commands.  */
 
 static void
-show_mips_command (char *args, int from_tty)
+show_mips_command (const char *args, int from_tty)
 {
   help_list (showmipscmdlist, "show mips ", all_commands, gdb_stdout);
 }
 
 static void
-set_mips_command (char *args, int from_tty)
+set_mips_command (const char *args, int from_tty)
 {
   printf_unfiltered
     ("\"set mips\" must be followed by an appropriate subcommand.\n");
@@ -6894,7 +6893,7 @@ set_mips_command (char *args, int from_tty)
 /* Commands to show/set the MIPS FPU type.  */
 
 static void
-show_mipsfpu_command (char *args, int from_tty)
+show_mipsfpu_command (const char *args, int from_tty)
 {
   const char *fpu;
 
@@ -6931,7 +6930,7 @@ show_mipsfpu_command (char *args, int from_tty)
 
 
 static void
-set_mipsfpu_command (char *args, int from_tty)
+set_mipsfpu_command (const char *args, int from_tty)
 {
   printf_unfiltered ("\"set mipsfpu\" must be followed by \"double\", "
 		     "\"single\",\"none\" or \"auto\".\n");
@@ -6939,7 +6938,7 @@ set_mipsfpu_command (char *args, int from_tty)
 }
 
 static void
-set_mipsfpu_single_command (char *args, int from_tty)
+set_mipsfpu_single_command (const char *args, int from_tty)
 {
   struct gdbarch_info info;
   gdbarch_info_init (&info);
@@ -6953,7 +6952,7 @@ set_mipsfpu_single_command (char *args, int from_tty)
 }
 
 static void
-set_mipsfpu_double_command (char *args, int from_tty)
+set_mipsfpu_double_command (const char *args, int from_tty)
 {
   struct gdbarch_info info;
   gdbarch_info_init (&info);
@@ -6967,7 +6966,7 @@ set_mipsfpu_double_command (char *args, int from_tty)
 }
 
 static void
-set_mipsfpu_none_command (char *args, int from_tty)
+set_mipsfpu_none_command (const char *args, int from_tty)
 {
   struct gdbarch_info info;
   gdbarch_info_init (&info);
@@ -6981,7 +6980,7 @@ set_mipsfpu_none_command (char *args, int from_tty)
 }
 
 static void
-set_mipsfpu_auto_command (char *args, int from_tty)
+set_mipsfpu_auto_command (const char *args, int from_tty)
 {
   mips_fpu_type_auto = 1;
 }

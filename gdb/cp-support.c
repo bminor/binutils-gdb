@@ -65,11 +65,6 @@ static void make_symbol_overload_list_qualified (const char *func_name);
 
 struct cmd_list_element *maint_cplus_cmd_list = NULL;
 
-/* The actual commands.  */
-
-static void maint_cplus_command (char *arg, int from_tty);
-static void first_component_command (char *arg, int from_tty);
-
 /* A list of typedefs which should not be substituted by replace_typedefs.  */
 static const char * const ignore_typedefs[] =
   {
@@ -839,10 +834,10 @@ cp_func_name (const char *full_name)
    (optionally) a return type.  Return the name of the function without
    parameters or return type, or NULL if we can not parse the name.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 cp_remove_params (const char *demangled_name)
 {
-  int done = 0;
+  bool done = false;
   struct demangle_component *ret_comp;
   std::unique_ptr<demangle_parse_info> info;
   gdb::unique_xmalloc_ptr<char> ret;
@@ -869,7 +864,7 @@ cp_remove_params (const char *demangled_name)
         ret_comp = d_left (ret_comp);
         break;
       default:
-	done = 1;
+	done = true;
 	break;
       }
 
@@ -877,7 +872,7 @@ cp_remove_params (const char *demangled_name)
   if (ret_comp->type == DEMANGLE_COMPONENT_TYPED_NAME)
     ret = cp_comp_to_string (d_left (ret_comp), 10);
 
-  return ret.release ();
+  return ret;
 }
 
 /* Here are some random pieces of trivia to keep in mind while trying
@@ -1104,7 +1099,7 @@ overload_list_add_symbol (struct symbol *sym,
 {
   int newsize;
   int i;
-  char *sym_name;
+  gdb::unique_xmalloc_ptr<char> sym_name;
 
   /* If there is no type information, we can't do anything, so
      skip.  */
@@ -1123,13 +1118,8 @@ overload_list_add_symbol (struct symbol *sym,
     return;
 
   /* skip symbols that cannot match */
-  if (strcmp (sym_name, oload_name) != 0)
-    {
-      xfree (sym_name);
-      return;
-    }
-
-  xfree (sym_name);
+  if (strcmp (sym_name.get (), oload_name) != 0)
+    return;
 
   /* We have a match for an overload instance, so add SYM to the
      current list of overload instances */
@@ -1547,32 +1537,27 @@ gdb_demangle (const char *name, int options)
 
 	  if (!error_reported)
 	    {
-	      char *short_msg, *long_msg;
-	      struct cleanup *back_to;
+	      std::string short_msg
+		= string_printf (_("unable to demangle '%s' "
+				   "(demangler failed with signal %d)"),
+				 name, crash_signal);
 
-	      short_msg = xstrprintf (_("unable to demangle '%s' "
-				      "(demangler failed with signal %d)"),
-				    name, crash_signal);
-	      back_to = make_cleanup (xfree, short_msg);
+	      std::string long_msg
+		= string_printf ("%s:%d: %s: %s", __FILE__, __LINE__,
+				 "demangler-warning", short_msg.c_str ());
 
-	      long_msg = xstrprintf ("%s:%d: %s: %s", __FILE__, __LINE__,
-				    "demangler-warning", short_msg);
-	      make_cleanup (xfree, long_msg);
-
-	      make_cleanup_restore_target_terminal ();
-	      target_terminal_ours_for_output ();
+	      target_terminal::scoped_restore_terminal_state term_state;
+	      target_terminal::ours_for_output ();
 
 	      begin_line ();
 	      if (core_dump_allowed)
 		fprintf_unfiltered (gdb_stderr,
 				    _("%s\nAttempting to dump core.\n"),
-				    long_msg);
+				    long_msg.c_str ());
 	      else
-		warn_cant_dump_core (long_msg);
+		warn_cant_dump_core (long_msg.c_str ());
 
-	      demangler_warning (__FILE__, __LINE__, "%s", short_msg);
-
-	      do_cleanups (back_to);
+	      demangler_warning (__FILE__, __LINE__, "%s", short_msg.c_str ());
 
 	      error_reported = 1;
 	    }
@@ -1597,7 +1582,7 @@ gdb_sniff_from_mangled_name (const char *mangled, char **demangled)
 /* Don't allow just "maintenance cplus".  */
 
 static  void
-maint_cplus_command (char *arg, int from_tty)
+maint_cplus_command (const char *arg, int from_tty)
 {
   printf_unfiltered (_("\"maintenance cplus\" must be followed "
 		       "by the name of a command.\n"));
@@ -1611,7 +1596,7 @@ maint_cplus_command (char *arg, int from_tty)
    cp_find_first_component.  */
 
 static void
-first_component_command (char *arg, int from_tty)
+first_component_command (const char *arg, int from_tty)
 {
   int len;  
   char *prefix; 

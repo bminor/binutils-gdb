@@ -30,7 +30,6 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "regcache.h"
-#include "gdb.h"
 #include "btrace.h"
 
 #include <ctype.h>
@@ -64,7 +63,6 @@ static int threads_executing;
 static void thread_apply_all_command (char *, int);
 static int thread_alive (struct thread_info *);
 static void info_threads_command (char *, int);
-static void thread_apply_command (char *, int);
 
 /* RAII type used to increase / decrease the refcount of each thread
    in a given list of threads.  */
@@ -519,6 +517,7 @@ find_thread_id (struct inferior *inf, int thr_num)
 }
 
 /* Find a thread_info by matching PTID.  */
+
 struct thread_info *
 find_thread_ptid (ptid_t ptid)
 {
@@ -529,6 +528,17 @@ find_thread_ptid (ptid_t ptid)
       return tp;
 
   return NULL;
+}
+
+/* See gdbthread.h.  */
+
+struct thread_info *
+find_thread_by_handle (struct value *thread_handle, struct inferior *inf)
+{
+  return target_thread_handle_to_thread_info
+	   (value_contents_all (thread_handle),
+	    TYPE_LENGTH (value_type (thread_handle)),
+	    inf);
 }
 
 /*
@@ -706,50 +716,6 @@ any_live_thread_of_process (int pid)
 
   /* Otherwise, just return an executing thread, if any.  */
   return tp_executing;
-}
-
-/* Print a list of thread ids currently known, and the total number of
-   threads.  To be used from within catch_errors.  */
-static int
-do_captured_list_thread_ids (struct ui_out *uiout, void *arg)
-{
-  struct thread_info *tp;
-  int num = 0;
-  int current_thread = -1;
-
-  update_thread_list ();
-
-  {
-    ui_out_emit_tuple tuple_emitter (uiout, "thread-ids");
-
-    for (tp = thread_list; tp; tp = tp->next)
-      {
-	if (tp->state == THREAD_EXITED)
-	  continue;
-
-	if (tp->ptid == inferior_ptid)
-	  current_thread = tp->global_num;
-
-	num++;
-	uiout->field_int ("thread-id", tp->global_num);
-      }
-  }
-
-  if (current_thread != -1)
-    uiout->field_int ("current-thread-id", current_thread);
-  uiout->field_int ("number-of-threads", num);
-  return GDB_RC_OK;
-}
-
-/* Official gdblib interface function to get a list of thread ids and
-   the total number.  */
-enum gdb_rc
-gdb_list_thread_ids (struct ui_out *uiout, char **error_message)
-{
-  if (catch_exceptions_with_msg (uiout, do_captured_list_thread_ids, NULL,
-				 error_message, RETURN_MASK_ALL) < 0)
-    return GDB_RC_FAIL;
-  return GDB_RC_OK;
 }
 
 /* Return true if TP is an active thread.  */
@@ -1754,7 +1720,7 @@ thread_apply_all_command (char *cmd, int from_tty)
 /* Implementation of the "thread apply" command.  */
 
 static void
-thread_apply_command (char *tidlist, int from_tty)
+thread_apply_command (const char *tidlist, int from_tty)
 {
   char *cmd = NULL;
   tid_range_parser parser;
@@ -1847,7 +1813,7 @@ thread_apply_command (char *tidlist, int from_tty)
    if prefix of arg is `apply'.  */
 
 void
-thread_command (char *tidstr, int from_tty)
+thread_command (const char *tidstr, int from_tty)
 {
   if (tidstr == NULL)
     {
@@ -1873,13 +1839,8 @@ thread_command (char *tidstr, int from_tty)
   else
     {
       ptid_t previous_ptid = inferior_ptid;
-      enum gdb_rc result;
 
-      result = gdb_thread_select (current_uiout, tidstr, NULL);
-
-      /* If thread switch did not succeed don't notify or print.  */
-      if (result == GDB_RC_FAIL)
-	return;
+      thread_select (tidstr, parse_thread_id (tidstr, NULL));
 
       /* Print if the thread has not changed, otherwise an event will
 	 be sent.  */
@@ -1900,7 +1861,7 @@ thread_command (char *tidstr, int from_tty)
 /* Implementation of `thread name'.  */
 
 static void
-thread_name_command (char *arg, int from_tty)
+thread_name_command (const char *arg, int from_tty)
 {
   struct thread_info *info;
 
@@ -1917,7 +1878,7 @@ thread_name_command (char *arg, int from_tty)
 /* Find thread ids with a name, target pid, or extra info matching ARG.  */
 
 static void
-thread_find_command (char *arg, int from_tty)
+thread_find_command (const char *arg, int from_tty)
 {
   struct thread_info *tp;
   const char *tmp;
@@ -1979,26 +1940,11 @@ show_print_thread_events (struct ui_file *file, int from_tty,
 		    value);
 }
 
-static int
-do_captured_thread_select (struct ui_out *uiout, void *tidstr_v)
+/* See gdbthread.h.  */
+
+void
+thread_select (const char *tidstr, thread_info *tp)
 {
-  const char *tidstr = (const char *) tidstr_v;
-  struct thread_info *tp;
-
-  if (uiout->is_mi_like_p ())
-    {
-      int num = value_as_long (parse_and_eval (tidstr));
-
-      tp = find_thread_global_id (num);
-      if (tp == NULL)
-	error (_("Thread ID %d not known."), num);
-    }
-  else
-    {
-      tp = parse_thread_id (tidstr, NULL);
-      gdb_assert (tp != NULL);
-    }
-
   if (!thread_alive (tp))
     error (_("Thread ID %s has terminated."), tidstr);
 
@@ -2009,8 +1955,6 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr_v)
   /* Since the current thread may have changed, see if there is any
      exited thread we can now delete.  */
   prune_threads ();
-
-  return GDB_RC_OK;
 }
 
 /* Print thread and frame switch command response.  */
@@ -2053,15 +1997,6 @@ print_selected_thread_frame (struct ui_out *uiout,
 	print_stack_frame_to_uiout (uiout, get_selected_frame (NULL),
 				    1, SRC_AND_LOC, 1);
     }
-}
-
-enum gdb_rc
-gdb_thread_select (struct ui_out *uiout, char *tidstr, char **error_message)
-{
-  if (catch_exceptions_with_msg (uiout, do_captured_thread_select, tidstr,
-				 error_message, RETURN_MASK_ALL) < 0)
-    return GDB_RC_FAIL;
-  return GDB_RC_OK;
 }
 
 /* Update the 'threads_executing' global based on the threads we know

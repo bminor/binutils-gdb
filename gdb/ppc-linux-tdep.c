@@ -60,7 +60,7 @@
 #include "parser-defs.h"
 #include "user-regs.h"
 #include <ctype.h>
-#include "elf-bfd.h"            /* for elfcore_write_* */
+#include "elf-bfd.h"
 
 #include "features/rs6000/powerpc-32l.c"
 #include "features/rs6000/powerpc-altivec32l.c"
@@ -1363,13 +1363,12 @@ ppu2spu_sniffer (const struct frame_unwind *self,
 	    = FRAME_OBSTACK_CALLOC (1, struct ppu2spu_cache);
 
 	  struct address_space *aspace = get_frame_address_space (this_frame);
-	  struct regcache *regcache = regcache_xmalloc (data.gdbarch, aspace);
-	  struct cleanup *cleanups = make_cleanup_regcache_xfree (regcache);
-	  regcache_save (regcache, ppu2spu_unwind_register, &data);
-	  discard_cleanups (cleanups);
+	  std::unique_ptr<struct regcache> regcache
+	    (new struct regcache (data.gdbarch, aspace));
+	  regcache_save (regcache.get (), ppu2spu_unwind_register, &data);
 
 	  cache->frame_id = frame_id_build (base, func);
-	  cache->regcache = regcache;
+	  cache->regcache = regcache.release ();
 	  *this_prologue_cache = cache;
 	  return 1;
 	}
@@ -1382,7 +1381,7 @@ static void
 ppu2spu_dealloc_cache (struct frame_info *self, void *this_cache)
 {
   struct ppu2spu_cache *cache = (struct ppu2spu_cache *) this_cache;
-  regcache_xfree (cache->regcache);
+  delete cache->regcache;
 }
 
 static const struct frame_unwind ppu2spu_unwind = {
@@ -1772,12 +1771,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
       else
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf64-powerpc");
     }
-
-  /* PPC32 uses a different prpsinfo32 compared to most other Linux
-     archs.  */
-  if (tdep->wordsize == 4)
-    set_gdbarch_elfcore_write_linux_prpsinfo (gdbarch,
-					      elfcore_write_ppc_linux_prpsinfo32);
 
   set_gdbarch_core_read_description (gdbarch, ppc_linux_core_read_description);
   set_gdbarch_iterate_over_regset_sections (gdbarch,

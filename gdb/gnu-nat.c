@@ -2230,7 +2230,7 @@ gnu_attach (struct target_ops *ops, const char *args, int from_tty)
 
   /* We have to initialize the terminal settings now, since the code
      below might try to restore them.  */
-  target_terminal_init ();
+  target_terminal::init ();
 
   /* If the process was stopped before we attached, make it continue the next
      time the user does a continue.  */
@@ -2721,28 +2721,28 @@ struct cmd_list_element *set_thread_default_cmd_list = NULL;
 struct cmd_list_element *show_thread_default_cmd_list = NULL;
 
 static void
-set_thread_cmd (char *args, int from_tty)
+set_thread_cmd (const char *args, int from_tty)
 {
   printf_unfiltered ("\"set thread\" must be followed by the "
 		     "name of a thread property, or \"default\".\n");
 }
 
 static void
-show_thread_cmd (char *args, int from_tty)
+show_thread_cmd (const char *args, int from_tty)
 {
   printf_unfiltered ("\"show thread\" must be followed by the "
 		     "name of a thread property, or \"default\".\n");
 }
 
 static void
-set_thread_default_cmd (char *args, int from_tty)
+set_thread_default_cmd (const char *args, int from_tty)
 {
   printf_unfiltered ("\"set thread default\" must be followed "
 		     "by the name of a thread property.\n");
 }
 
 static void
-show_thread_default_cmd (char *args, int from_tty)
+show_thread_default_cmd (const char *args, int from_tty)
 {
   printf_unfiltered ("\"show thread default\" must be followed "
 		     "by the name of a thread property.\n");
@@ -2780,7 +2780,7 @@ _parse_bool_arg (char *args, char *t_val, char *f_val, char *cmd_prefix)
   _parse_bool_arg (args, "on", "off", cmd_prefix)
 
 static void
-check_empty (char *args, char *cmd_prefix)
+check_empty (const char *args, char *cmd_prefix)
 {
   if (args)
     error (_("Garbage after \"%s\" command: `%s'"), cmd_prefix, args);
@@ -3071,14 +3071,14 @@ show_exceptions_cmd (char *args, int from_tty)
 
 
 static void
-set_task_cmd (char *args, int from_tty)
+set_task_cmd (const char *args, int from_tty)
 {
   printf_unfiltered ("\"set task\" must be followed by the name"
 		     " of a task property.\n");
 }
 
 static void
-show_task_cmd (char *args, int from_tty)
+show_task_cmd (const char *args, int from_tty)
 {
   struct inf *inf = cur_inf ();
 

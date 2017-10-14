@@ -1,3 +1,195 @@
+2017-10-11  Peeter Joot  <peeter.joot@lzlabs.com>
+	Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (read_and_display_attr_value): Handle DW_AT_endianity,
+	DW_END_default, DW_END_big, DW_END_little, DW_ATE_UCS,
+	DW_ATE_ASCII, DW_CC_pass_by_reference, DW_CC_pass_by_value,
+	DW_CC_GNU_renesas_sh, DW_CC_GNU_borland_fastcall_i386,
+	DW_AT_decimal_sign, DW_AT_defaulted, DW_AT_discr_list.
+	(get_TAG_name): Report user generated tag values.
+	* testsuite/binutils-all/dwarf-attributes.S: New test.
+	* testsuite/binutils-all/dwarf-attributes.W. Expected output from
+	readelf.
+	* testsuite/binutils-all/readelf.exp: Run the new test.
+
+2017-10-10  Tom Tromey  <tom@tromey.com>
+
+	* dwarf-mode.el: Bump to version 1.4.
+
+2017-10-10  Tom Tromey  <tom@tromey.com>
+
+	* dwarf-mode.el (dwarf--process, dwarf--deletion-region): New
+	defvar.
+	(dwarf--check-running, dwarf--sentinel, dwarf--invoke)
+	(dwarf--filter): New functions.
+	(dwarf-do-insert-substructure, dwarf-do-refresh): Call
+	dwarf--check-running, dwarf--invoke.
+	(dwarf-browse): Initialize new variables.
+
+2017-10-10  Tom Tromey  <tom@tromey.com>
+
+	* dwarf-mode.el: Set lexical-binding.
+
+2017-10-10  Tom Tromey  <tom@tromey.com>
+
+	* dwarf-mode.el (dwarf-mode-map): New defvar.
+
+2017-10-10  Tom Tromey  <tromey@sourceware.org>
+
+	PR 22249
+	* dwarf.c (process_debug_info): Skip any comp unit that ends
+	before dwarf_start_die.
+
+2017-10-06  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (process_debug_info): Consolidate header length checks.
+	(display_debug_pubnames_worker): Use "start" to read header.
+	Properly check header length and report errors earlier.
+	Simplify loop printing pubnames.
+	(get_line_filename_and_dirname): Catch small negative "length"
+	values.
+	(display_debug_aranges): Likewise.  Report header errors
+	earlier using standardized message.
+	(display_debug_names): Likewise.
+
+2017-10-05  Joseph Myers  <joseph@codesourcery.com>
+
+	* readelf.c (decode_arm_unwind): Initialize res to TRUE.
+
+2017-10-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 22260
+	* objcopy.c (strip_main): Add 'M' character to short options list
+	when calling getopt_long.
+
+2017-10-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 22262
+	* readelf.c (dump_relocations): Do not truncate reloc names when
+	displaying output in wide mode.
+
+2017-10-05  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Merge steps 3, 4 and 5, and insert
+	the git tag operation at the correct location.
+
+2017-10-05  Alan Modra  <amodra@gmail.com>
+
+	PR 22239
+	* dwarf.c (read_cie): Don't compare "start" and "end" pointers
+	after adding a possibly wild length to "start", compare the length
+	to the difference of the pointers instead.  Remove now redundant
+	"negative" length test.
+
+2017-10-05  Tristan Gingold  <tgingold@free.fr>
+
+	* MAINTAINERS: Update email address.  Redirect release maintainer
+	to global maitainers.
+
+2017-10-01  Alan Modra  <amodra@gmail.com>
+
+	PR 22232
+	PR 22230
+	* objdump.c (load_specific_debug_section): Introduce a temp to
+	stop bfd_get_full_section_contents NULLing out section->start.
+
+2017-10-01  Alan Modra  <amodra@gmail.com>
+
+	PR 22230
+	* objdump.c (load_specific_debug_section): Allocate an extra byte
+	for a terminating NUL.
+
+2017-09-30  Alan Modra  <amodra@gmail.com>
+
+	PR 21978
+	* objdump.c: Formatting.
+	(show_line): Reset prev_line when function name changes.
+
+2017-09-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 22219
+	* dwarf.c (process_debug_info): Add a check for a negative
+	cu_length field.
+
+2017-09-27  Alan Modra  <amodra@gmail.com>
+
+	PR 22216
+	* readelf.c (process_symbol_table): Check that DT_HASH symbol
+	chains are only visited once, and report an error if not.  Display
+	invalid symbol index if chain is out of range.  Use the same logic
+	when calculating histograms rather than the PR 17531 fix.  Delete
+	bogus check that chained index is less than number of buckets.
+
+2017-09-26  Nick Clifton  <nickc@redhat.com>
+
+	PR 22154
+	* dwarf.c (get_line_filename_and_dirname): Add extra checks for
+	buffer overruns.
+
+2017-09-26  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: New file.
+
+2017-09-26  Alan Modra  <amodra@gmail.com>
+
+	PR 21732
+	* dwarf.c (READ_ULEB): Don't use DWARF_VMA_FMT in translated string.
+	(READ_SLEB): Likewise.
+	* readelf.c (bfd_vmatoa): New function.
+	(get_data, get_dynamic_data): Use it for printing error messages.
+
+2017-09-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/22203
+	* nm.c (display_rel_file): Free memory returned from
+	bfd_get_synthetic_symtab.
+
+2017-09-22  Alexandre Oliva <aoliva@redhat.com>
+
+	* dwarf.h (debug_info): Add loc_views and num_loc_views.
+	* dwarf.c (vm1): New constant.
+	(print_dwarf_view): New function.
+	(read_and_display_attr_value): Support DW_AT_GNU_locviews.
+	(process_debug_info): Keep num_loc_offsets and num_loc_views
+	in sync.
+	(display_view_pair_list): New function.
+	(display_loc_list_dwo): Take vstart_ptr; update it.  Dump
+	location view pairs before the range they apply to, when a
+	viewlist augments the loc list.
+	(display_loc_list): Likewise.  Check view numbers in range
+	tests.
+	(display_loclists_list): Likewise.  Handle view pair entries,
+	and warn on trailing ones.
+	(loc_views): New variable.
+	(loc_offsets_compar): Compare loc_views if loc_offsets are the
+	same.
+	(display_debug_loc): Check and sort loc_views too.  Accept
+	loc_view as expected_start.  Skip if lists and views are the
+	same.  Dump locview list separately in order, and pass the
+	locview list base to each list dump function.  Warn and skip
+	overlap and hole checking if we find loclists and locviews to
+	not be adjacent.
+	* testsuite/binutils-all/locview-1.s: New.
+	* testsuite/binutils-all/readelf.locview-1: New.
+	* testsuite/binutils-all/locview-2.s: New.
+	* testsuite/binutils-all/readelf.locview-2: New.
+	* testsuite/binutils-all/readelf.exp: Run new tests.  Fix
+	option spelling in pr18374 fail message.  XFAIL dw5 test on
+	nds32*-elf.
+
+2017-09-22  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/readelf.exp: Don't perror and exit on
+	bintest.s assembly failure.  Report tests unresolved instead.
+	Likewise for version note test, pr18374, decompress, and dw5
+	tests.
+	(readelf_test): Set testname to include both option and binary
+	file name.  Use for pass/fail.
+
+2017-09-21  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* readelf.c (get_machine_flags) <E_MIPS_MACH_5900>: New case.
+
 2017-09-05  Nick Clifton  <nickc@redhat.com>
 
 	PR 21995

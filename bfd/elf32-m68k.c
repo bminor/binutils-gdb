@@ -2773,7 +2773,9 @@ elf_m68k_check_relocs (bfd *abfd,
 
 	  /* If we are creating a shared library, we need to copy the
 	     reloc into the shared library.  */
-	  if (bfd_link_pic (info))
+	  if (bfd_link_pic (info)
+	      && (h == NULL
+		  || !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)))
 	    {
 	      /* When creating a shared object, we must copy these
 		 reloc types into the output file.  We create a reloc
@@ -3095,7 +3097,8 @@ elf_m68k_adjust_dynamic_symbol (struct bfd_link_info *info,
     {
       if ((h->plt.refcount <= 0
            || SYMBOL_CALLS_LOCAL (info, h)
-	   || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	   || ((ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+		|| UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	       && h->root.type == bfd_link_hash_undefweak))
 	  /* We must always create the plt entry if it was referenced
 	     by a PLTxxO relocation.  In this case we already recorded
@@ -3622,6 +3625,7 @@ elf_m68k_relocate_section (bfd *output_bfd,
       bfd_vma relocation;
       bfd_boolean unresolved_reloc;
       bfd_reloc_status_type r;
+      bfd_boolean resolved_to_zero;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type < 0 || r_type >= (int) R_68K_max)
@@ -3660,6 +3664,9 @@ elf_m68k_relocate_section (bfd *output_bfd,
 
       if (bfd_link_relocatable (info))
 	continue;
+
+      resolved_to_zero = (h != NULL
+			  && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
 
       switch (r_type)
 	{
@@ -3785,7 +3792,8 @@ elf_m68k_relocate_section (bfd *output_bfd,
 							  h)
 			|| (bfd_link_pic (info)
 			    && SYMBOL_REFERENCES_LOCAL (info, h))
-			|| (ELF_ST_VISIBILITY (h->other)
+			|| ((ELF_ST_VISIBILITY (h->other)
+			     || resolved_to_zero)
 			    && h->root.type == bfd_link_hash_undefweak))
 		      {
 			/* This is actually a static link, or it is a
@@ -3954,7 +3962,8 @@ elf_m68k_relocate_section (bfd *output_bfd,
 	      && r_symndx != STN_UNDEF
 	      && (input_section->flags & SEC_ALLOC) != 0
 	      && (h == NULL
-		  || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		  || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		      && !resolved_to_zero)
 		  || h->root.type != bfd_link_hash_undefweak)
 	      && ((r_type != R_68K_PC8
 		   && r_type != R_68K_PC16
@@ -4840,5 +4849,7 @@ elf_m68k_add_symbol_hook (bfd *abfd,
 #define elf_backend_got_header_size	12
 #define elf_backend_rela_normal		1
 #define elf_backend_dtrel_excludes_plt	1
+
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
 
 #include "elf32-target.h"

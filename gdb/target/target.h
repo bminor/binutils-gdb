@@ -95,18 +95,109 @@ extern void target_mourn_inferior (ptid_t ptid);
 
 extern int target_supports_multi_process (void);
 
-/* Initialize the terminal settings we record for the inferior,
-   before we actually run the inferior.  */
-extern void target_terminal_init ();
+/* Represents the state of the target terminal.  */
+class target_terminal
+{
+public:
 
-/* Put the inferior's terminal settings into effect.  This is
-   preparation for starting or resuming the inferior.  This is a no-op
-   unless called with the main UI as current UI.  */
-extern void target_terminal_inferior ();
+  target_terminal () = delete;
+  ~target_terminal () = delete;
+  DISABLE_COPY_AND_ASSIGN (target_terminal);
 
-/* Put our terminal settings into effect.  First record the inferior's
-   terminal settings so they can be restored properly later.  This is
-   a no-op unless called with the main UI as current UI.  */
-extern void target_terminal_ours ();
+  /* Initialize the terminal settings we record for the inferior,
+     before we actually run the inferior.  */
+  static void init ();
+
+  /* Put the inferior's terminal settings into effect.  This is
+     preparation for starting or resuming the inferior.  This is a no-op
+     unless called with the main UI as current UI.  */
+  static void inferior ();
+
+  /* Put our terminal settings into effect.  First record the inferior's
+     terminal settings so they can be restored properly later.  This is
+     a no-op unless called with the main UI as current UI.  */
+  static void ours ();
+
+  /* Put some of our terminal settings into effect, enough to get proper
+     results from our output, but do not change into or out of RAW mode
+     so that no input is discarded.  This is a no-op if terminal_ours
+     was most recently called.  This is a no-op unless called with the main
+     UI as current UI.  */
+  static void ours_for_output ();
+
+  /* Returns true if the terminal settings of the inferior are in
+     effect.  */
+  static bool is_inferior ()
+  {
+    return terminal_state == terminal_is_inferior;
+  }
+
+  /* Returns true if our terminal settings are in effect.  */
+  static bool is_ours ()
+  {
+    return terminal_state == terminal_is_ours;
+  }
+
+  /* Print useful information about our terminal status, if such a thing
+     exists.  */
+  static void info (const char *arg, int from_tty);
+
+private:
+
+  /* Possible terminal states.  */
+
+  enum terminal_state
+    {
+     /* The inferior's terminal settings are in effect.  */
+     terminal_is_inferior = 0,
+
+     /* Some of our terminal settings are in effect, enough to get
+	proper output.  */
+     terminal_is_ours_for_output = 1,
+
+     /* Our terminal settings are in effect, for output and input.  */
+     terminal_is_ours = 2
+    };
+
+public:
+
+  /* A class that restores the state of the terminal to the current
+     state.  */
+  class scoped_restore_terminal_state
+  {
+  public:
+
+    scoped_restore_terminal_state ()
+      : m_state (terminal_state)
+    {
+    }
+
+    ~scoped_restore_terminal_state ()
+    {
+      switch (m_state)
+	{
+	case terminal_is_ours:
+	  ours ();
+	  break;
+	case terminal_is_ours_for_output:
+	  ours_for_output ();
+	  break;
+	case terminal_is_inferior:
+	  inferior ();
+	  break;
+	}
+    }
+
+    DISABLE_COPY_AND_ASSIGN (scoped_restore_terminal_state);
+
+  private:
+
+    target_terminal::terminal_state m_state;
+  };
+
+private:
+
+  static terminal_state terminal_state;
+};
 
 #endif /* TARGET_COMMON_H */

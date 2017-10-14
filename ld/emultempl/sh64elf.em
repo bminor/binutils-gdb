@@ -170,7 +170,7 @@ sh64_elf_${EMULATION_NAME}_before_allocation (void)
     break_1:
 
       /* Check that all input sections have the same contents-type flags
-         as the first input section.  */
+	 as the first input section.  */
       {
 	LANG_FOR_EACH_INPUT_STATEMENT (f)
 	  {
@@ -302,7 +302,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
     break_1:
 
       /* Check that all input sections have the same contents-type flags
-         as the first input section.  */
+	 as the first input section.  */
       {
 	LANG_FOR_EACH_INPUT_STATEMENT (f)
 	  {

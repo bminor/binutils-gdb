@@ -146,9 +146,9 @@ handle_redirections (int from_tty)
 }
 
 static void
-set_logging_on (char *args, int from_tty)
+set_logging_on (const char *args, int from_tty)
 {
-  char *rest = args;
+  const char *rest = args;
 
   if (rest && *rest)
     {
@@ -159,7 +159,7 @@ set_logging_on (char *args, int from_tty)
 }
 
 static void 
-set_logging_off (char *args, int from_tty)
+set_logging_off (const char *args, int from_tty)
 {
   if (saved_filename == NULL)
     return;
@@ -172,7 +172,7 @@ set_logging_off (char *args, int from_tty)
 }
 
 static void
-set_logging_command (char *args, int from_tty)
+set_logging_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"set logging\" lets you log output to a file.\n"
 		       "Usage: set logging on [FILENAME]\n"
@@ -183,7 +183,7 @@ set_logging_command (char *args, int from_tty)
 }
 
 static void
-show_logging_command (char *args, int from_tty)
+show_logging_command (const char *args, int from_tty)
 {
   if (saved_filename)
     printf_unfiltered (_("Currently logging to \"%s\".\n"), saved_filename);

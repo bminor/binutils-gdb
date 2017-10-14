@@ -1050,7 +1050,6 @@ build_traceframe_info (char blocktype, void *data)
     {
     case 'M':
       {
-	struct mem_range *r;
 	ULONGEST maddr;
 	unsigned short mlen;
 
@@ -1064,10 +1063,7 @@ build_traceframe_info (char blocktype, void *data)
 					  2, gdbarch_byte_order
 					  (target_gdbarch ()));
 
-	r = VEC_safe_push (mem_range_s, info->memory, NULL);
-
-	r->start = maddr;
-	r->length = mlen;
+	info->memory.emplace_back (maddr, mlen);
 	break;
       }
     case 'V':
@@ -1075,7 +1071,7 @@ build_traceframe_info (char blocktype, void *data)
 	int vnum;
 
 	tfile_read ((gdb_byte *) &vnum, 4);
-	VEC_safe_push (int, info->tvars, vnum);
+	info->tvars.push_back (vnum);
       }
     case 'R':
     case 'S':
@@ -1092,12 +1088,13 @@ build_traceframe_info (char blocktype, void *data)
   return 0;
 }
 
-static struct traceframe_info *
+static traceframe_info_up
 tfile_traceframe_info (struct target_ops *self)
 {
-  struct traceframe_info *info = XCNEW (struct traceframe_info);
+  traceframe_info_up info (new traceframe_info);
 
-  traceframe_walk_blocks (build_traceframe_info, 0, info);
+  traceframe_walk_blocks (build_traceframe_info, 0, info.get ());
+
   return info;
 }
 

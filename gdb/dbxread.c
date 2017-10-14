@@ -291,8 +291,8 @@ static void add_this_object_header_file (int);
 
 static struct partial_symtab *start_psymtab (struct objfile *, const char *,
 					     CORE_ADDR, int,
-					     struct partial_symbol **,
-					     struct partial_symbol **);
+					     std::vector<partial_symbol *> &,
+					     std::vector<partial_symbol *> &);
 
 /* Free up old header file tables.  */
 
@@ -531,7 +531,8 @@ dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
     perror_with_name (objfile_name (objfile));
 
   /* Size the symbol table.  */
-  if (objfile->global_psymbols.size == 0 && objfile->static_psymbols.size == 0)
+  if (objfile->global_psymbols.capacity () == 0
+      && objfile->static_psymbols.capacity () == 0)
     init_psymbol_list (objfile, DBX_SYMCOUNT (objfile));
 
   symbol_size = DBX_SYMBOL_SIZE (objfile);
@@ -1358,8 +1359,8 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 		pst = start_psymtab (objfile,
 				     namestring, valu,
 				     first_so_symnum * symbol_size,
-				     objfile->global_psymbols.next,
-				     objfile->static_psymbols.next);
+				     objfile->global_psymbols,
+				     objfile->static_psymbols);
 		pst->dirname = dirname_nso;
 		dirname_nso = NULL;
 	      }
@@ -1997,12 +1998,12 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 
 static struct partial_symtab *
 start_psymtab (struct objfile *objfile, const char *filename, CORE_ADDR textlow,
-	       int ldsymoff, struct partial_symbol **global_syms,
-	       struct partial_symbol **static_syms)
+	       int ldsymoff, std::vector<partial_symbol *> &global_psymbols,
+	       std::vector<partial_symbol *> &static_psymbols)
 {
   struct partial_symtab *result =
     start_psymtab_common (objfile, filename, textlow,
-			  global_syms, static_syms);
+			  global_psymbols, static_psymbols);
 
   result->read_symtab_private =
     XOBNEW (&objfile->objfile_obstack, struct symloc);

@@ -617,6 +617,14 @@ x86_linux_new_process (void)
   return info;
 }
 
+/* Called when a process is being deleted.  */
+
+static void
+x86_linux_delete_process (struct arch_process_info *info)
+{
+  xfree (info);
+}
+
 /* Target routine for linux_new_fork.  */
 
 static void
@@ -846,33 +854,6 @@ x86_linux_read_description (void)
   gdb_assert_not_reached ("failed to return tdesc");
 }
 
-/* Callback for find_inferior.  Stops iteration when a thread with a
-   given PID is found.  */
-
-static int
-same_process_callback (struct inferior_list_entry *entry, void *data)
-{
-  int pid = *(int *) data;
-
-  return (ptid_get_pid (entry->id) == pid);
-}
-
-/* Callback for for_each_inferior.  Calls the arch_setup routine for
-   each process.  */
-
-static void
-x86_arch_setup_process_callback (struct inferior_list_entry *entry)
-{
-  int pid = ptid_get_pid (entry->id);
-
-  /* Look up any thread of this processes.  */
-  current_thread
-    = (struct thread_info *) find_inferior (&all_threads,
-					    same_process_callback, &pid);
-
-  the_low_target.arch_setup ();
-}
-
 /* Update all the target description of all processes; a new GDB
    connected, and it may or not support xml target descriptions.  */
 
@@ -886,7 +867,14 @@ x86_linux_update_xmltarget (void)
      release the current regcache objects.  */
   regcache_release ();
 
-  for_each_inferior (&all_processes, x86_arch_setup_process_callback);
+  for_each_process ([] (process_info *proc) {
+    int pid = proc->pid;
+
+    /* Look up any thread of this process.  */
+    current_thread = find_any_thread_of_pid (pid);
+
+    the_low_target.arch_setup ();
+  });
 
   current_thread = saved_thread;
 }
@@ -2879,7 +2867,9 @@ struct linux_target_ops the_low_target =
   /* need to fix up i386 siginfo if host is amd64 */
   x86_siginfo_fixup,
   x86_linux_new_process,
+  x86_linux_delete_process,
   x86_linux_new_thread,
+  x86_linux_delete_thread,
   x86_linux_new_fork,
   x86_linux_prepare_to_resume,
   x86_linux_process_qsupported,

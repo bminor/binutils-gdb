@@ -620,7 +620,6 @@ nto_fetch_registers (struct regcache *regcache, int regno)
 {
   int regsize;
   procfs_greg greg;
-  ptid_t ptid;
 
   TRACE ("%s (regno=%d)\n", __func__, regno);
   if (regno >= the_low_target.num_regs)
@@ -631,7 +630,7 @@ nto_fetch_registers (struct regcache *regcache, int regno)
       TRACE ("current_thread is NULL\n");
       return;
     }
-  ptid = thread_to_gdb_id (current_thread);
+  ptid_t ptid = ptid_of (current_thread);
   if (!nto_set_thread (ptid))
     return;
 
@@ -669,7 +668,6 @@ nto_store_registers (struct regcache *regcache, int regno)
 {
   procfs_greg greg;
   int err;
-  ptid_t ptid;
 
   TRACE ("%s (regno:%d)\n", __func__, regno);
 
@@ -678,7 +676,7 @@ nto_store_registers (struct regcache *regcache, int regno)
       TRACE ("current_thread is NULL\n");
       return;
     }
-  ptid = thread_to_gdb_id (current_thread);
+  ptid_t ptid = ptid_of (current_thread);
   if (!nto_set_thread (ptid))
     return;
 
@@ -867,9 +865,7 @@ nto_stopped_by_watchpoint (void)
   TRACE ("%s\n", __func__);
   if (nto_inferior.ctl_fd != -1 && current_thread != NULL)
     {
-      ptid_t ptid;
-
-      ptid = thread_to_gdb_id (current_thread);
+      ptid_t ptid = ptid_of (current_thread);
       if (nto_set_thread (ptid))
 	{
 	  const int watchmask = _DEBUG_FLAG_TRACE_RD | _DEBUG_FLAG_TRACE_WR
@@ -899,9 +895,7 @@ nto_stopped_data_address (void)
   TRACE ("%s\n", __func__);
   if (nto_inferior.ctl_fd != -1 && current_thread != NULL)
     {
-      ptid_t ptid;
-
-      ptid = thread_to_gdb_id (current_thread);
+      ptid_t ptid = ptid_of (current_thread);
 
       if (nto_set_thread (ptid))
 	{

@@ -44,7 +44,6 @@
 #include "source.h"
 #include "linespec.h"
 #include "completer.h"
-#include "gdb.h"
 #include "ui-out.h"
 #include "cli/cli-script.h"
 #include "block.h"
@@ -94,24 +93,10 @@ enum exception_event_kind
 
 /* Prototypes for local functions.  */
 
-static void enable_delete_command (char *, int);
-
-static void enable_once_command (char *, int);
-
-static void enable_count_command (char *, int);
-
-static void disable_command (char *, int);
-
-static void enable_command (char *, int);
-
 static void map_breakpoint_numbers (const char *,
-				    void (*) (struct breakpoint *,
-					      void *),
-				    void *);
+				    gdb::function_view<void (breakpoint *)>);
 
 static void ignore_command (char *, int);
-
-static int breakpoint_re_set_one (void *);
 
 static void breakpoint_re_set_default (struct breakpoint *);
 
@@ -136,11 +121,7 @@ static std::vector<symtab_and_line> decode_location_default
 
 static void clear_command (char *, int);
 
-static void catch_command (char *, int);
-
 static int can_use_hardware_watchpoint (struct value *);
-
-static void break_command_1 (char *, int, int);
 
 static void mention (struct breakpoint *);
 
@@ -188,13 +169,6 @@ static void info_breakpoints_command (char *, int);
 
 static void info_watchpoints_command (char *, int);
 
-static int breakpoint_1 (char *, int, 
-			 int (*) (const struct breakpoint *));
-
-static int breakpoint_cond_eval (void *);
-
-static void cleanup_executing_breakpoints (void *);
-
 static void commands_command (char *, int);
 
 static void condition_command (char *, int);
@@ -203,10 +177,6 @@ static int remove_breakpoint (struct bp_location *);
 static int remove_breakpoint_1 (struct bp_location *, enum remove_bp_reason);
 
 static enum print_stop_action print_bp_stop_message (bpstat bs);
-
-static int watchpoint_check (void *);
-
-static void maintenance_info_breakpoints (char *, int);
 
 static int hw_breakpoint_used_count (void);
 
@@ -224,12 +194,6 @@ static void enable_breakpoint_disp (struct breakpoint *, enum bpdisp,
 				    int count);
 
 static void stop_command (char *arg, int from_tty);
-
-static void stopin_command (char *arg, int from_tty);
-
-static void stopat_command (char *arg, int from_tty);
-
-static void tcatch_command (char *arg, int from_tty);
 
 static void free_bp_location (struct bp_location *loc);
 static void incref_bp_location (struct bp_location *loc);
@@ -281,8 +245,6 @@ static int is_hardware_watchpoint (const struct breakpoint *bpt);
 static void insert_breakpoint_locations (void);
 
 static void info_tracepoints_command (char *, int);
-
-static void delete_trace_command (char *, int);
 
 static void enable_trace_command (char *, int);
 
@@ -361,21 +323,10 @@ static char *dprintf_channel;
    has disconnected.  */
 static int disconnected_dprintf = 1;
 
-/* A reference-counted struct command_line.  This lets multiple
-   breakpoints share a single command list.  */
-struct counted_command_line
-{
-  /* The reference count.  */
-  int refc;
-
-  /* The command list.  */
-  struct command_line *commands;
-};
-
 struct command_line *
 breakpoint_commands (struct breakpoint *b)
 {
-  return b->commands ? b->commands->commands : NULL;
+  return b->commands ? b->commands.get () : NULL;
 }
 
 /* Flag indicating that a command has proceeded the inferior past the
@@ -717,64 +668,6 @@ clear_breakpoint_hit_counts (void)
 
   ALL_BREAKPOINTS (b)
     b->hit_count = 0;
-}
-
-/* Allocate a new counted_command_line with reference count of 1.
-   The new structure owns COMMANDS.  */
-
-static struct counted_command_line *
-alloc_counted_command_line (struct command_line *commands)
-{
-  struct counted_command_line *result = XNEW (struct counted_command_line);
-
-  result->refc = 1;
-  result->commands = commands;
-
-  return result;
-}
-
-/* Increment reference count.  This does nothing if CMD is NULL.  */
-
-static void
-incref_counted_command_line (struct counted_command_line *cmd)
-{
-  if (cmd)
-    ++cmd->refc;
-}
-
-/* Decrement reference count.  If the reference count reaches 0,
-   destroy the counted_command_line.  Sets *CMDP to NULL.  This does
-   nothing if *CMDP is NULL.  */
-
-static void
-decref_counted_command_line (struct counted_command_line **cmdp)
-{
-  if (*cmdp)
-    {
-      if (--(*cmdp)->refc == 0)
-	{
-	  free_command_lines (&(*cmdp)->commands);
-	  xfree (*cmdp);
-	}
-      *cmdp = NULL;
-    }
-}
-
-/* A cleanup function that calls decref_counted_command_line.  */
-
-static void
-do_cleanup_counted_command_line (void *arg)
-{
-  decref_counted_command_line ((struct counted_command_line **) arg);
-}
-
-/* Create a cleanup that calls decref_counted_command_line on the
-   argument.  */
-
-static struct cleanup *
-make_cleanup_decref_counted_command_line (struct counted_command_line **cmdp)
-{
-  return make_cleanup (do_cleanup_counted_command_line, cmdp);
 }
 
 
@@ -1305,8 +1198,7 @@ breakpoint_set_commands (struct breakpoint *b,
 {
   validate_commands_for_breakpoint (b, commands.get ());
 
-  decref_counted_command_line (&b->commands);
-  b->commands = alloc_counted_command_line (commands.release ());
+  b->commands = std::move (commands);
   observer_notify_breakpoint_modified (b);
 }
 
@@ -1358,88 +1250,11 @@ check_tracepoint_command (char *line, void *closure)
   validate_actionline (line, b);
 }
 
-/* A structure used to pass information through
-   map_breakpoint_numbers.  */
-
-struct commands_info
-{
-  /* True if the command was typed at a tty.  */
-  int from_tty;
-
-  /* The breakpoint range spec.  */
-  const char *arg;
-
-  /* Non-NULL if the body of the commands are being read from this
-     already-parsed command.  */
-  struct command_line *control;
-
-  /* The command lines read from the user, or NULL if they have not
-     yet been read.  */
-  struct counted_command_line *cmd;
-};
-
-/* A callback for map_breakpoint_numbers that sets the commands for
-   commands_command.  */
-
-static void
-do_map_commands_command (struct breakpoint *b, void *data)
-{
-  struct commands_info *info = (struct commands_info *) data;
-
-  if (info->cmd == NULL)
-    {
-      command_line_up l;
-
-      if (info->control != NULL)
-	l = copy_command_lines (info->control->body_list[0]);
-      else
-	{
-	  struct cleanup *old_chain;
-	  char *str;
-
-	  str = xstrprintf (_("Type commands for breakpoint(s) "
-			      "%s, one per line."),
-			    info->arg);
-
-	  old_chain = make_cleanup (xfree, str);
-
-	  l = read_command_lines (str,
-				  info->from_tty, 1,
-				  (is_tracepoint (b)
-				   ? check_tracepoint_command : 0),
-				  b);
-
-	  do_cleanups (old_chain);
-	}
-
-      info->cmd = alloc_counted_command_line (l.release ());
-    }
-
-  /* If a breakpoint was on the list more than once, we don't need to
-     do anything.  */
-  if (b->commands != info->cmd)
-    {
-      validate_commands_for_breakpoint (b, info->cmd->commands);
-      incref_counted_command_line (info->cmd);
-      decref_counted_command_line (&b->commands);
-      b->commands = info->cmd;
-      observer_notify_breakpoint_modified (b);
-    }
-}
-
 static void
 commands_command_1 (const char *arg, int from_tty,
 		    struct command_line *control)
 {
-  struct cleanup *cleanups;
-  struct commands_info info;
-
-  info.from_tty = from_tty;
-  info.control = control;
-  info.cmd = NULL;
-  /* If we read command lines from the user, then `info' will hold an
-     extra reference to the commands that we must clean up.  */
-  cleanups = make_cleanup_decref_counted_command_line (&info.cmd);
+  counted_command_line cmd;
 
   std::string new_arg;
 
@@ -1450,18 +1265,43 @@ commands_command_1 (const char *arg, int from_tty,
 				 breakpoint_count);
       else if (breakpoint_count > 0)
 	new_arg = string_printf ("%d", breakpoint_count);
+      arg = new_arg.c_str ();
     }
-  else
-    new_arg = arg;
 
-  info.arg = new_arg.c_str ();
+  map_breakpoint_numbers
+    (arg, [&] (breakpoint *b)
+     {
+       if (cmd == NULL)
+	 {
+	   if (control != NULL)
+	     cmd = copy_command_lines (control->body_list[0]);
+	   else
+	     {
+	       std::string str
+		 = string_printf (_("Type commands for breakpoint(s) "
+				    "%s, one per line."),
+				  arg);
 
-  map_breakpoint_numbers (info.arg, do_map_commands_command, &info);
+	       cmd = read_command_lines (&str[0],
+					 from_tty, 1,
+					 (is_tracepoint (b)
+					  ? check_tracepoint_command : 0),
+					 b);
+	     }
+	 }
 
-  if (info.cmd == NULL)
+       /* If a breakpoint was on the list more than once, we don't need to
+	  do anything.  */
+       if (b->commands != cmd)
+	 {
+	   validate_commands_for_breakpoint (b, cmd.get ());
+	   b->commands = cmd;
+	   observer_notify_breakpoint_modified (b);
+	 }
+     });
+
+  if (cmd == NULL)
     error (_("No breakpoints specified."));
-
-  do_cleanups (cleanups);
 }
 
 static void
@@ -3126,7 +2966,7 @@ update_inserted_breakpoint_locations (void)
 
   if (error_flag)
     {
-      target_terminal_ours_for_output ();
+      target_terminal::ours_for_output ();
       error_stream (tmp_error_stream);
     }
 }
@@ -3225,7 +3065,7 @@ insert_breakpoint_locations (void)
 	  tmp_error_stream.printf ("Could not insert hardware breakpoints:\n\
 You may have requested too many hardware breakpoints/watchpoints.\n");
 	}
-      target_terminal_ours_for_output ();
+      target_terminal::ours_for_output ();
       error_stream (tmp_error_stream);
     }
 }
@@ -3289,42 +3129,6 @@ remove_breakpoints_pid (int pid)
     if (bl->inserted && !bl->target_info.persist)
       {
 	val = remove_breakpoint (bl);
-	if (val != 0)
-	  return val;
-      }
-  }
-  return 0;
-}
-
-int
-reattach_breakpoints (int pid)
-{
-  struct bp_location *bl, **blp_tmp;
-  int val;
-  int dummy1 = 0, dummy2 = 0, dummy3 = 0;
-  struct inferior *inf;
-  struct thread_info *tp;
-
-  tp = any_live_thread_of_process (pid);
-  if (tp == NULL)
-    return 1;
-
-  inf = find_inferior_pid (pid);
-
-  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
-  inferior_ptid = tp->ptid;
-
-  string_file tmp_error_stream;
-
-  ALL_BP_LOCATIONS (bl, blp_tmp)
-  {
-    if (bl->pspace != inf->pspace)
-      continue;
-
-    if (bl->inserted)
-      {
-	bl->inserted = 0;
-	val = insert_bp_location (bl, &tmp_error_stream, &dummy1, &dummy2, &dummy3);
 	if (val != 0)
 	  return val;
       }
@@ -4452,14 +4256,12 @@ is_catchpoint (struct breakpoint *ep)
 /* Frees any storage that is part of a bpstat.  Does not walk the
    'next' chain.  */
 
-static void
-bpstat_free (bpstat bs)
+bpstats::~bpstats ()
 {
-  if (bs->old_val != NULL)
-    value_free (bs->old_val);
-  decref_counted_command_line (&bs->commands);
-  decref_bp_location (&bs->bp_location_at);
-  xfree (bs);
+  if (old_val != NULL)
+    value_free (old_val);
+  if (bp_location_at != NULL)
+    decref_bp_location (&bp_location_at);
 }
 
 /* Clear a bpstat so that it says we are not at any breakpoint.
@@ -4477,10 +4279,28 @@ bpstat_clear (bpstat *bsp)
   while (p != NULL)
     {
       q = p->next;
-      bpstat_free (p);
+      delete p;
       p = q;
     }
   *bsp = NULL;
+}
+
+bpstats::bpstats (const bpstats &other)
+  : next (NULL),
+    bp_location_at (other.bp_location_at),
+    breakpoint_at (other.breakpoint_at),
+    commands (other.commands),
+    old_val (other.old_val),
+    print (other.print),
+    stop (other.stop),
+    print_it (other.print_it)
+{
+  if (old_val != NULL)
+    {
+      old_val = value_copy (old_val);
+      release_value (old_val);
+    }
+  incref_bp_location (bp_location_at);
 }
 
 /* Return a copy of a bpstat.  Like "bs1 = bs2" but all storage that
@@ -4498,15 +4318,7 @@ bpstat_copy (bpstat bs)
 
   for (; bs != NULL; bs = bs->next)
     {
-      tmp = (bpstat) xmalloc (sizeof (*tmp));
-      memcpy (tmp, bs, sizeof (*tmp));
-      incref_counted_command_line (tmp->commands);
-      incref_bp_location (tmp->bp_location_at);
-      if (bs->old_val != NULL)
-	{
-	  tmp->old_val = value_copy (bs->old_val);
-	  release_value (tmp->old_val);
-	}
+      tmp = new bpstats (*bs);
 
       if (p == NULL)
 	/* This is the first thing in the chain.  */
@@ -4607,7 +4419,7 @@ bpstat_clear_actions (void)
 
   for (bs = tp->control.stop_bpstat; bs != NULL; bs = bs->next)
     {
-      decref_counted_command_line (&bs->commands);
+      bs->commands = NULL;
 
       if (bs->old_val != NULL)
 	{
@@ -4637,14 +4449,6 @@ breakpoint_about_to_proceed (void)
   breakpoint_proceeded = 1;
 }
 
-/* Stub for cleaning up our state if we error-out of a breakpoint
-   command.  */
-static void
-cleanup_executing_breakpoints (void *ignore)
-{
-  executing_breakpoint_commands = 0;
-}
-
 /* Return non-zero iff CMD as the first line of a command sequence is `silent'
    or its equivalent.  */
 
@@ -4667,7 +4471,6 @@ static int
 bpstat_do_actions_1 (bpstat *bsp)
 {
   bpstat bs;
-  struct cleanup *old_chain;
   int again = 0;
 
   /* Avoid endless recursion if a `source' command is contained
@@ -4675,8 +4478,8 @@ bpstat_do_actions_1 (bpstat *bsp)
   if (executing_breakpoint_commands)
     return 0;
 
-  executing_breakpoint_commands = 1;
-  old_chain = make_cleanup (cleanup_executing_breakpoints, 0);
+  scoped_restore save_executing
+    = make_scoped_restore (&executing_breakpoint_commands, 1);
 
   scoped_restore preventer = prevent_dont_repeat ();
 
@@ -4686,9 +4489,7 @@ bpstat_do_actions_1 (bpstat *bsp)
   breakpoint_proceeded = 0;
   for (; bs != NULL; bs = bs->next)
     {
-      struct counted_command_line *ccmd;
-      struct command_line *cmd;
-      struct cleanup *this_cmd_tree_chain;
+      struct command_line *cmd = NULL;
 
       /* Take ownership of the BSP's command tree, if it has one.
 
@@ -4700,10 +4501,10 @@ bpstat_do_actions_1 (bpstat *bsp)
          commands are only executed once, we don't need to copy it; we
          can clear the pointer in the bpstat, and make sure we free
          the tree when we're done.  */
-      ccmd = bs->commands;
+      counted_command_line ccmd = bs->commands;
       bs->commands = NULL;
-      this_cmd_tree_chain = make_cleanup_decref_counted_command_line (&ccmd);
-      cmd = ccmd ? ccmd->commands : NULL;
+      if (ccmd != NULL)
+	cmd = ccmd.get ();
       if (command_line_is_silent (cmd))
 	{
 	  /* The action has been already done by bpstat_stop_status.  */
@@ -4719,9 +4520,6 @@ bpstat_do_actions_1 (bpstat *bsp)
 	  else
 	    cmd = cmd->next;
 	}
-
-      /* We can free this command tree now.  */
-      do_cleanups (this_cmd_tree_chain);
 
       if (breakpoint_proceeded)
 	{
@@ -4748,7 +4546,6 @@ bpstat_do_actions_1 (bpstat *bsp)
 	  break;
 	}
     }
-  do_cleanups (old_chain);
   return again;
 }
 
@@ -4976,42 +4773,45 @@ bpstat_print (bpstat bs, int kind)
   return PRINT_UNKNOWN;
 }
 
-/* Evaluate the expression EXP and return 1 if value is zero.
-   This returns the inverse of the condition because it is called
-   from catch_errors which returns 0 if an exception happened, and if an
-   exception happens we want execution to stop.
-   The argument is a "struct expression *" that has been cast to a
-   "void *" to make it pass through catch_errors.  */
+/* Evaluate the boolean expression EXP and return the result.  */
 
-static int
-breakpoint_cond_eval (void *exp)
+static bool
+breakpoint_cond_eval (expression *exp)
 {
   struct value *mark = value_mark ();
-  int i = !value_true (evaluate_expression ((struct expression *) exp));
+  bool res = value_true (evaluate_expression (exp));
 
   value_free_to_mark (mark);
-  return i;
+  return res;
 }
 
 /* Allocate a new bpstat.  Link it to the FIFO list by BS_LINK_POINTER.  */
 
-static bpstat
-bpstat_alloc (struct bp_location *bl, bpstat **bs_link_pointer)
+bpstats::bpstats (struct bp_location *bl, bpstat **bs_link_pointer)
+  : next (NULL),
+    bp_location_at (bl),
+    breakpoint_at (bl->owner),
+    commands (NULL),
+    old_val (NULL),
+    print (0),
+    stop (0),
+    print_it (print_it_normal)
 {
-  bpstat bs;
-
-  bs = (bpstat) xmalloc (sizeof (*bs));
-  bs->next = NULL;
-  **bs_link_pointer = bs;
-  *bs_link_pointer = &bs->next;
-  bs->breakpoint_at = bl->owner;
-  bs->bp_location_at = bl;
   incref_bp_location (bl);
-  /* If the condition is false, etc., don't do the commands.  */
-  bs->commands = NULL;
-  bs->old_val = NULL;
-  bs->print_it = print_it_normal;
-  return bs;
+  **bs_link_pointer = this;
+  *bs_link_pointer = &next;
+}
+
+bpstats::bpstats ()
+  : next (NULL),
+    bp_location_at (NULL),
+    breakpoint_at (NULL),
+    commands (NULL),
+    old_val (NULL),
+    print (0),
+    stop (0),
+    print_it (print_it_normal)
+{
 }
 
 /* The target has stopped with waitstatus WS.  Check if any hardware
@@ -5092,30 +4892,31 @@ watchpoints_triggered (struct target_waitstatus *ws)
   return 1;
 }
 
-/* Possible return values for watchpoint_check (this can't be an enum
-   because of check_errors).  */
-/* The watchpoint has been deleted.  */
-#define WP_DELETED 1
-/* The value has changed.  */
-#define WP_VALUE_CHANGED 2
-/* The value has not changed.  */
-#define WP_VALUE_NOT_CHANGED 3
-/* Ignore this watchpoint, no matter if the value changed or not.  */
-#define WP_IGNORE 4
+/* Possible return values for watchpoint_check.  */
+enum wp_check_result
+  {
+    /* The watchpoint has been deleted.  */
+    WP_DELETED = 1,
+
+    /* The value has changed.  */
+    WP_VALUE_CHANGED = 2,
+
+    /* The value has not changed.  */
+    WP_VALUE_NOT_CHANGED = 3,
+
+    /* Ignore this watchpoint, no matter if the value changed or not.  */
+    WP_IGNORE = 4,
+  };
 
 #define BP_TEMPFLAG 1
 #define BP_HARDWAREFLAG 2
 
 /* Evaluate watchpoint condition expression and check if its value
-   changed.
+   changed.  */
 
-   P should be a pointer to struct bpstat, but is defined as a void *
-   in order for this function to be usable with catch_errors.  */
-
-static int
-watchpoint_check (void *p)
+static wp_check_result
+watchpoint_check (bpstat bs)
 {
-  bpstat bs = (bpstat) p;
   struct watchpoint *b;
   struct frame_info *fr;
   int within_current_scope;
@@ -5250,7 +5051,7 @@ watchpoint_check (void *p)
 	}
 
       /* Make sure the watchpoint's commands aren't executed.  */
-      decref_counted_command_line (&b->commands);
+      b->commands = NULL;
       watchpoint_del_at_next_stop (b);
 
       return WP_DELETED;
@@ -5311,13 +5112,29 @@ bpstat_check_watchpoint (bpstat bs)
 
       if (must_check_value)
 	{
-	  char *message
-	    = xstrprintf ("Error evaluating expression for watchpoint %d\n",
-			  b->number);
-	  struct cleanup *cleanups = make_cleanup (xfree, message);
-	  int e = catch_errors (watchpoint_check, bs, message,
-				RETURN_MASK_ALL);
-	  do_cleanups (cleanups);
+	  wp_check_result e;
+
+	  TRY
+	    {
+	      e = watchpoint_check (bs);
+	    }
+	  CATCH (ex, RETURN_MASK_ALL)
+	    {
+	      exception_fprintf (gdb_stderr, ex,
+				 "Error evaluating expression "
+				 "for watchpoint %d\n",
+				 b->number);
+
+	      SWITCH_THRU_ALL_UIS ()
+		{
+		  printf_filtered (_("Watchpoint %d deleted.\n"),
+				   b->number);
+		}
+	      watchpoint_del_at_next_stop (b);
+	      e = WP_DELETED;
+	    }
+	  END_CATCH
+
 	  switch (e)
 	    {
 	    case WP_DELETED:
@@ -5413,18 +5230,6 @@ bpstat_check_watchpoint (bpstat bs)
 	      break;
 	    default:
 	      /* Can't happen.  */
-	    case 0:
-	      /* Error from catch_errors.  */
-	      {
-		SWITCH_THRU_ALL_UIS ()
-	          {
-		    printf_filtered (_("Watchpoint %d deleted.\n"),
-				     b->number);
-		  }
-		watchpoint_del_at_next_stop (b);
-		/* We've already printed what needs to be printed.  */
-		bs->print_it = print_it_done;
-	      }
 	      break;
 	    }
 	}
@@ -5450,7 +5255,8 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 {
   const struct bp_location *bl;
   struct breakpoint *b;
-  int value_is_zero = 0;
+  /* Assume stop.  */
+  bool condition_result = true;
   struct expression *cond;
 
   gdb_assert (bs->stop);
@@ -5546,23 +5352,30 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 	    within_current_scope = 0;
 	}
       if (within_current_scope)
-	value_is_zero
-	  = catch_errors (breakpoint_cond_eval, cond,
-			  "Error in testing breakpoint condition:\n",
-			  RETURN_MASK_ALL);
+	{
+	  TRY
+	    {
+	      condition_result = breakpoint_cond_eval (cond);
+	    }
+	  CATCH (ex, RETURN_MASK_ALL)
+	    {
+	      exception_fprintf (gdb_stderr, ex,
+				 "Error in testing breakpoint condition:\n");
+	    }
+	  END_CATCH
+	}
       else
 	{
 	  warning (_("Watchpoint condition cannot be tested "
 		     "in the current scope"));
 	  /* If we failed to set the right context for this
 	     watchpoint, unconditionally report it.  */
-	  value_is_zero = 0;
 	}
       /* FIXME-someday, should give breakpoint #.  */
       value_free_to_mark (mark);
     }
 
-  if (cond && value_is_zero)
+  if (cond && !condition_result)
     {
       bs->stop = 0;
     }
@@ -5654,7 +5467,7 @@ bpstat_stop_status (struct address_space *aspace,
 	  /* Come here if it's a watchpoint, or if the break address
 	     matches.  */
 
-	  bs = bpstat_alloc (bl, &bs_link);	/* Alloc a bpstat to
+	  bs = new bpstats (bl, &bs_link);	/* Alloc a bpstat to
 						   explain stop.  */
 
 	  /* Assume we stop.  Should we find a watchpoint that is not
@@ -5685,7 +5498,7 @@ bpstat_stop_status (struct address_space *aspace,
 	  if (breakpoint_location_address_match (loc, aspace, bp_addr)
 	      && need_moribund_for_location_type (loc))
 	    {
-	      bs = bpstat_alloc (loc, &bs_link);
+	      bs = new bpstats (loc, &bs_link);
 	      /* For hits of moribund locations, we should just proceed.  */
 	      bs->stop = 0;
 	      bs->print = 0;
@@ -5740,9 +5553,8 @@ bpstat_stop_status (struct address_space *aspace,
 	      if (b->silent)
 		bs->print = 0;
 	      bs->commands = b->commands;
-	      incref_counted_command_line (bs->commands);
 	      if (command_line_is_silent (bs->commands
-					  ? bs->commands->commands : NULL))
+					  ? bs->commands.get () : NULL))
 		bs->print = 0;
 
 	      b->ops->after_condition_true (bs);
@@ -5792,14 +5604,14 @@ handle_jit_event (void)
 
   /* Switch terminal for any messages produced by
      breakpoint_re_set.  */
-  target_terminal_ours_for_output ();
+  target_terminal::ours_for_output ();
 
   frame = get_current_frame ();
   gdbarch = get_frame_arch (frame);
 
   jit_event_handler (gdbarch);
 
-  target_terminal_inferior ();
+  target_terminal::inferior ();
 }
 
 /* Prepare WHAT final decision for infrun.  */
@@ -6605,7 +6417,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	}
     }
 
-  l = b->commands ? b->commands->commands : NULL;
+  l = b->commands ? b->commands.get () : NULL;
   if (!part_of_multiple && l)
     {
       annotate_field (9);
@@ -6724,44 +6536,13 @@ breakpoint_address_bits (struct breakpoint *b)
   return print_address_bits;
 }
 
-struct captured_breakpoint_query_args
-  {
-    int bnum;
-  };
+/* See breakpoint.h.  */
 
-static int
-do_captured_breakpoint_query (struct ui_out *uiout, void *data)
+void
+print_breakpoint (breakpoint *b)
 {
-  struct captured_breakpoint_query_args *args
-    = (struct captured_breakpoint_query_args *) data;
-  struct breakpoint *b;
   struct bp_location *dummy_loc = NULL;
-
-  ALL_BREAKPOINTS (b)
-    {
-      if (args->bnum == b->number)
-	{
-	  print_one_breakpoint (b, &dummy_loc, 0);
-	  return GDB_RC_OK;
-	}
-    }
-  return GDB_RC_NONE;
-}
-
-enum gdb_rc
-gdb_breakpoint_query (struct ui_out *uiout, int bnum, 
-		      char **error_message)
-{
-  struct captured_breakpoint_query_args args;
-
-  args.bnum = bnum;
-  /* For the moment we don't trust print_one_breakpoint() to not throw
-     an error.  */
-  if (catch_exceptions_with_msg (uiout, do_captured_breakpoint_query, &args,
-				 error_message, RETURN_MASK_ALL) < 0)
-    return GDB_RC_FAIL;
-  else
-    return GDB_RC_OK;
+  print_one_breakpoint (b, &dummy_loc, 0);
 }
 
 /* Return true if this breakpoint was set by the user, false if it is
@@ -6789,7 +6570,7 @@ pending_breakpoint_p (struct breakpoint *b)
    breakpoints listed.  */
 
 static int
-breakpoint_1 (char *args, int allflag, 
+breakpoint_1 (const char *args, int allflag, 
 	      int (*filter) (const struct breakpoint *))
 {
   struct breakpoint *b;
@@ -6974,7 +6755,7 @@ info_watchpoints_command (char *args, int from_tty)
 }
 
 static void
-maintenance_info_breakpoints (char *args, int from_tty)
+maintenance_info_breakpoints (const char *args, int from_tty)
 {
   breakpoint_1 (args, 1, NULL);
 
@@ -7925,7 +7706,7 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 
 	if (!disabled_shlib_breaks)
 	  {
-	    target_terminal_ours_for_output ();
+	    target_terminal::ours_for_output ();
 	    warning (_("Temporarily disabling breakpoints "
 		       "for unloaded shared library \"%s\""),
 		     solib->so_name);
@@ -9560,22 +9341,20 @@ static std::vector<symtab_and_line>
 decode_static_tracepoint_spec (const char **arg_p)
 {
   VEC(static_tracepoint_marker_p) *markers = NULL;
-  struct cleanup *old_chain;
   const char *p = &(*arg_p)[3];
   const char *endp;
-  char *marker_str;
   int i;
 
   p = skip_spaces (p);
 
   endp = skip_to_space (p);
 
-  marker_str = savestring (p, endp - p);
-  old_chain = make_cleanup (xfree, marker_str);
+  std::string marker_str (p, endp - p);
 
-  markers = target_static_tracepoint_markers_by_strid (marker_str);
+  markers = target_static_tracepoint_markers_by_strid (marker_str.c_str ());
   if (VEC_empty(static_tracepoint_marker_p, markers))
-    error (_("No known static tracepoint marker named %s"), marker_str);
+    error (_("No known static tracepoint marker named %s"),
+	   marker_str.c_str ());
 
   std::vector<symtab_and_line> sals;
   sals.reserve (VEC_length(static_tracepoint_marker_p, markers));
@@ -9592,8 +9371,6 @@ decode_static_tracepoint_spec (const char **arg_p)
 
       release_static_tracepoint_marker (marker);
     }
-
-  do_cleanups (old_chain);
 
   *arg_p = endp;
   return sals;
@@ -9787,7 +9564,7 @@ create_breakpoint (struct gdbarch *gdbarch,
    and BP_TEMPFLAG.  */
 
 static void
-break_command_1 (char *arg, int flag, int from_tty)
+break_command_1 (const char *arg, int flag, int from_tty)
 {
   int tempflag = flag & BP_TEMPFLAG;
   enum bptype type_wanted = (flag & BP_HARDWAREFLAG
@@ -9905,7 +9682,7 @@ Usage: stop in <function | address>\n\
 }
 
 static void
-stopin_command (char *arg, int from_tty)
+stopin_command (const char *arg, int from_tty)
 {
   int badInput = 0;
 
@@ -9913,7 +9690,7 @@ stopin_command (char *arg, int from_tty)
     badInput = 1;
   else if (*arg != '*')
     {
-      char *argptr = arg;
+      const char *argptr = arg;
       int hasColon = 0;
 
       /* Look for a ':'.  If this is a line number specification, then
@@ -9938,7 +9715,7 @@ stopin_command (char *arg, int from_tty)
 }
 
 static void
-stopat_command (char *arg, int from_tty)
+stopat_command (const char *arg, int from_tty)
 {
   int badInput = 0;
 
@@ -9946,7 +9723,7 @@ stopat_command (char *arg, int from_tty)
     badInput = 1;
   else
     {
-      char *argptr = arg;
+      const char *argptr = arg;
       int hasColon = 0;
 
       /* Look for a ':'.  If there is a '::' then get out, otherwise
@@ -9975,8 +9752,9 @@ stopat_command (char *arg, int from_tty)
    line.  */
 
 static void
-dprintf_command (char *arg, int from_tty)
+dprintf_command (char *arg_in, int from_tty)
 {
+  const char *arg = arg_in;
   event_location_up location = string_to_event_location (&arg, current_language);
 
   /* If non-NULL, ARG should have been advanced past the location;
@@ -10190,14 +9968,14 @@ find_breakpoint_range_end (struct symtab_and_line sal)
 /* Implement the "break-range" CLI command.  */
 
 static void
-break_range_command (char *arg, int from_tty)
+break_range_command (char *arg_in, int from_tty)
 {
-  char *arg_start, *addr_string_start;
+  const char *arg = arg_in;
+  const char *arg_start;
   struct linespec_result canonical_start, canonical_end;
   int bp_count, can_use_bp, length;
   CORE_ADDR end;
   struct breakpoint *b;
-  struct cleanup *cleanup_bkpt;
 
   /* We don't support software ranged breakpoints.  */
   if (target_ranged_break_num_registers () < 0)
@@ -10231,8 +10009,7 @@ break_range_command (char *arg, int from_tty)
     error (_("Cannot create a ranged breakpoint with multiple locations."));
 
   const symtab_and_line &sal_start = lsal_start.sals[0];
-  addr_string_start = savestring (arg_start, arg - arg_start);
-  cleanup_bkpt = make_cleanup (xfree, addr_string_start);
+  std::string addr_string_start (arg_start, arg - arg_start);
 
   arg++;	/* Skip the comma.  */
   arg = skip_spaces (arg);
@@ -10274,9 +10051,7 @@ break_range_command (char *arg, int from_tty)
     {
       /* This range is simple enough to be handled by
 	 the `hbreak' command.  */
-      hbreak_command (addr_string_start, 1);
-
-      do_cleanups (cleanup_bkpt);
+      hbreak_command (&addr_string_start[0], 1);
 
       return;
     }
@@ -10290,8 +10065,6 @@ break_range_command (char *arg, int from_tty)
   b->location = std::move (start_location);
   b->location_range_end = std::move (end_location);
   b->loc->length = length;
-
-  do_cleanups (cleanup_bkpt);
 
   mention (b);
   observer_notify_breakpoint_created (b);
@@ -10917,8 +10690,6 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
      the hardware watchpoint.  */
   int use_mask = 0;
   CORE_ADDR mask = 0;
-  char *expression;
-  struct cleanup *back_to;
 
   /* Make sure that we actually have parameters to parse.  */
   if (arg != NULL && arg[0] != '\0')
@@ -11007,9 +10778,8 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
      is in terms of a newly allocated string instead of the original
      ARG.  */
   innermost_block = NULL;
-  expression = savestring (arg, exp_end - arg);
-  back_to = make_cleanup (xfree, expression);
-  exp_start = arg = expression;
+  std::string expression (arg, exp_end - arg);
+  exp_start = arg = expression.c_str ();
   expression_up exp = parse_exp_1 (&arg, 0, 0, 0);
   exp_end = arg;
   /* Remove trailing whitespace from the expression before saving it.
@@ -11209,7 +10979,6 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   update_watchpoint (w.get (), 1);
 
   install_breakpoint (internal, std::move (w), 1);
-  do_cleanups (back_to);
 }
 
 /* Return count of debug registers needed to watch the given expression.
@@ -11297,7 +11066,7 @@ can_use_hardware_watchpoint (struct value *v)
 }
 
 void
-watch_command_wrapper (char *arg, int from_tty, int internal)
+watch_command_wrapper (const char *arg, int from_tty, int internal)
 {
   watch_command_1 (arg, hw_write, from_tty, 0, internal);
 }
@@ -11328,7 +11097,7 @@ watch_command (char *arg, int from_tty)
 }
 
 void
-rwatch_command_wrapper (char *arg, int from_tty, int internal)
+rwatch_command_wrapper (const char *arg, int from_tty, int internal)
 {
   watch_command_1 (arg, hw_read, from_tty, 0, internal);
 }
@@ -11340,7 +11109,7 @@ rwatch_command (char *arg, int from_tty)
 }
 
 void
-awatch_command_wrapper (char *arg, int from_tty, int internal)
+awatch_command_wrapper (const char *arg, int from_tty, int internal)
 {
   watch_command_1 (arg, hw_access, from_tty, 0, internal);
 }
@@ -11461,7 +11230,7 @@ until_break_fsm_async_reply_reason (struct thread_fsm *self)
 }
 
 void
-until_break_command (char *arg, int from_tty, int anywhere)
+until_break_command (const char *arg, int from_tty, int anywhere)
 {
   struct frame_info *frame;
   struct gdbarch *frame_gdbarch;
@@ -11685,7 +11454,7 @@ void
 init_ada_exception_breakpoint (struct breakpoint *b,
 			       struct gdbarch *gdbarch,
 			       struct symtab_and_line sal,
-			       char *addr_string,
+			       const char *addr_string,
 			       const struct breakpoint_ops *ops,
 			       int tempflag,
 			       int enabled,
@@ -11719,31 +11488,29 @@ init_ada_exception_breakpoint (struct breakpoint *b,
 }
 
 static void
-catch_command (char *arg, int from_tty)
+catch_command (const char *arg, int from_tty)
 {
   error (_("Catch requires an event name."));
 }
 
 
 static void
-tcatch_command (char *arg, int from_tty)
+tcatch_command (const char *arg, int from_tty)
 {
   error (_("Catch requires an event name."));
 }
 
-/* A qsort comparison function that sorts breakpoints in order.  */
+/* Compare two breakpoints and return a strcmp-like result.  */
 
 static int
-compare_breakpoints (const void *a, const void *b)
+compare_breakpoints (const breakpoint *a, const breakpoint *b)
 {
-  const breakpoint_p *ba = (const breakpoint_p *) a;
-  uintptr_t ua = (uintptr_t) *ba;
-  const breakpoint_p *bb = (const breakpoint_p *) b;
-  uintptr_t ub = (uintptr_t) *bb;
+  uintptr_t ua = (uintptr_t) a;
+  uintptr_t ub = (uintptr_t) b;
 
-  if ((*ba)->number < (*bb)->number)
+  if (a->number < b->number)
     return -1;
-  else if ((*ba)->number > (*bb)->number)
+  else if (a->number > b->number)
     return 1;
 
   /* Now sort by address, in case we see, e..g, two breakpoints with
@@ -11758,12 +11525,9 @@ compare_breakpoints (const void *a, const void *b)
 static void
 clear_command (char *arg, int from_tty)
 {
-  struct breakpoint *b, *prev;
-  VEC(breakpoint_p) *found = 0;
-  int ix;
+  struct breakpoint *b;
   int default_match;
   int i;
-  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
 
   std::vector<symtab_and_line> decoded_sals;
   symtab_and_line last_sal;
@@ -11812,8 +11576,7 @@ clear_command (char *arg, int from_tty)
      from_tty is forced true if we delete more than one
      breakpoint.  */
 
-  found = NULL;
-  make_cleanup (VEC_cleanup (breakpoint_p), &found);
+  std::vector<struct breakpoint *> found;
   for (const auto &sal : sals)
     {
       const char *sal_fullname;
@@ -11871,12 +11634,12 @@ clear_command (char *arg, int from_tty)
 	    }
 
 	  if (match)
-	    VEC_safe_push(breakpoint_p, found, b);
+	    found.push_back (b);
 	}
     }
 
   /* Now go thru the 'found' chain and delete them.  */
-  if (VEC_empty(breakpoint_p, found))
+  if (found.empty ())
     {
       if (arg)
 	error (_("No breakpoint at %s."), arg);
@@ -11885,40 +11648,36 @@ clear_command (char *arg, int from_tty)
     }
 
   /* Remove duplicates from the vec.  */
-  qsort (VEC_address (breakpoint_p, found),
-	 VEC_length (breakpoint_p, found),
-	 sizeof (breakpoint_p),
-	 compare_breakpoints);
-  prev = VEC_index (breakpoint_p, found, 0);
-  for (ix = 1; VEC_iterate (breakpoint_p, found, ix, b); ++ix)
-    {
-      if (b == prev)
-	{
-	  VEC_ordered_remove (breakpoint_p, found, ix);
-	  --ix;
-	}
-    }
+  std::sort (found.begin (), found.end (),
+	     [] (const breakpoint *a, const breakpoint *b)
+	     {
+	       return compare_breakpoints (a, b) < 0;
+	     });
+  found.erase (std::unique (found.begin (), found.end (),
+			    [] (const breakpoint *a, const breakpoint *b)
+			    {
+			      return compare_breakpoints (a, b) == 0;
+			    }),
+	       found.end ());
 
-  if (VEC_length(breakpoint_p, found) > 1)
+  if (found.size () > 1)
     from_tty = 1;	/* Always report if deleted more than one.  */
   if (from_tty)
     {
-      if (VEC_length(breakpoint_p, found) == 1)
+      if (found.size () == 1)
 	printf_unfiltered (_("Deleted breakpoint "));
       else
 	printf_unfiltered (_("Deleted breakpoints "));
     }
 
-  for (ix = 0; VEC_iterate(breakpoint_p, found, ix, b); ix++)
+  for (breakpoint *iter : found)
     {
       if (from_tty)
-	printf_unfiltered ("%d ", b->number);
-      delete_breakpoint (b);
+	printf_unfiltered ("%d ", iter->number);
+      delete_breakpoint (iter);
     }
   if (from_tty)
     putchar_unfiltered ('\n');
-
-  do_cleanups (cleanups);
 }
 
 /* Delete breakpoint in BS if they are `delete' breakpoints and
@@ -12159,7 +11918,6 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 {
   struct breakpoint *b;
   struct bp_location **locp, *loc;
-  struct cleanup *cleanups;
   /* Last breakpoint location address that was marked for update.  */
   CORE_ADDR last_addr = 0;
   /* Last breakpoint location program space that was marked for update.  */
@@ -12178,14 +11936,13 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 
   /* Saved former bp_locations array which we compare against the newly
      built bp_locations from the current state of ALL_BREAKPOINTS.  */
-  struct bp_location **old_locations, **old_locp;
+  struct bp_location **old_locp;
   unsigned old_locations_count;
+  gdb::unique_xmalloc_ptr<struct bp_location *> old_locations (bp_locations);
 
-  old_locations = bp_locations;
   old_locations_count = bp_locations_count;
   bp_locations = NULL;
   bp_locations_count = 0;
-  cleanups = make_cleanup (xfree, old_locations);
 
   ALL_BREAKPOINTS (b)
     for (loc = b->loc; loc; loc = loc->next)
@@ -12212,8 +11969,8 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
      and former bp_location array state respectively.  */
 
   locp = bp_locations;
-  for (old_locp = old_locations;
-       old_locp < old_locations + old_locations_count;
+  for (old_locp = old_locations.get ();
+       old_locp < old_locations.get () + old_locations_count;
        old_locp++)
     {
       struct bp_location *old_loc = *old_locp;
@@ -12496,8 +12253,6 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 
   if (insert_mode != UGLL_DONT_INSERT)
     download_tracepoint_locations ();
-
-  do_cleanups (cleanups);
 }
 
 void
@@ -12642,7 +12397,6 @@ static const struct bp_location_ops bp_location_ops =
 
 breakpoint::~breakpoint ()
 {
-  decref_counted_command_line (&this->commands);
   xfree (this->cond_string);
   xfree (this->extra_string);
   xfree (this->filter);
@@ -13413,8 +13167,7 @@ dprintf_print_recreate (struct breakpoint *tp, struct ui_file *fp)
 static void
 dprintf_after_condition_true (struct bpstats *bs)
 {
-  struct cleanup *old_chain;
-  struct bpstats tmp_bs = { NULL };
+  struct bpstats tmp_bs;
   struct bpstats *tmp_bs_p = &tmp_bs;
 
   /* dprintf's never cause a stop.  This wasn't set in the
@@ -13429,14 +13182,12 @@ dprintf_after_condition_true (struct bpstats *bs)
      commands here throws.  */
   tmp_bs.commands = bs->commands;
   bs->commands = NULL;
-  old_chain = make_cleanup_decref_counted_command_line (&tmp_bs.commands);
 
   bpstat_do_actions_1 (&tmp_bs_p);
 
   /* 'tmp_bs.commands' will usually be NULL by now, but
      bpstat_do_actions_1 may return early without processing the whole
      list.  */
-  do_cleanups (old_chain);
 }
 
 /* The breakpoint_ops structure to be used on static tracepoints with
@@ -13449,16 +13200,13 @@ strace_marker_create_sals_from_location (const struct event_location *location,
 {
   struct linespec_sals lsal;
   const char *arg_start, *arg;
-  char *str;
-  struct cleanup *cleanup;
 
   arg = arg_start = get_linespec_location (location);
   lsal.sals = decode_static_tracepoint_spec (&arg);
 
-  str = savestring (arg_start, arg - arg_start);
-  cleanup = make_cleanup (xfree, str);
-  canonical->location = new_linespec_location (&str);
-  do_cleanups (cleanup);
+  std::string str (arg_start, arg - arg_start);
+  const char *ptr = str.c_str ();
+  canonical->location = new_linespec_location (&ptr);
 
   lsal.canonical
     = xstrdup (event_location_to_string (canonical->location.get ()));
@@ -13652,9 +13400,7 @@ make_cleanup_delete_breakpoint (struct breakpoint *b)
 
 static void
 iterate_over_related_breakpoints (struct breakpoint *b,
-				  void (*function) (struct breakpoint *,
-						    void *),
-				  void *data)
+				  gdb::function_view<void (breakpoint *)> function)
 {
   struct breakpoint *related;
 
@@ -13669,7 +13415,7 @@ iterate_over_related_breakpoints (struct breakpoint *b,
       if (next == related)
 	{
 	  /* RELATED is the last ring entry.  */
-	  function (related, data);
+	  function (related);
 
 	  /* FUNCTION may have deleted it, so we'd never reach back to
 	     B.  There's nothing left to do anyway, so just break
@@ -13677,7 +13423,7 @@ iterate_over_related_breakpoints (struct breakpoint *b,
 	  break;
 	}
       else
-	function (related, data);
+	function (related);
 
       related = next;
     }
@@ -13685,22 +13431,7 @@ iterate_over_related_breakpoints (struct breakpoint *b,
 }
 
 static void
-do_delete_breakpoint (struct breakpoint *b, void *ignore)
-{
-  delete_breakpoint (b);
-}
-
-/* A callback for map_breakpoint_numbers that calls
-   delete_breakpoint.  */
-
-static void
-do_map_delete_breakpoint (struct breakpoint *b, void *ignore)
-{
-  iterate_over_related_breakpoints (b, do_delete_breakpoint, NULL);
-}
-
-void
-delete_command (char *arg, int from_tty)
+delete_command (const char *arg, int from_tty)
 {
   struct breakpoint *b, *b_tmp;
 
@@ -13730,7 +13461,11 @@ delete_command (char *arg, int from_tty)
 	}
     }
   else
-    map_breakpoint_numbers (arg, do_map_delete_breakpoint, NULL);
+    map_breakpoint_numbers
+      (arg, [&] (breakpoint *b)
+       {
+	 iterate_over_related_breakpoints (b, delete_breakpoint);
+       });
 }
 
 /* Return true if all locations of B bound to PSPACE are pending.  If
@@ -14281,32 +14016,15 @@ decode_location_default (struct breakpoint *b,
   return {};
 }
 
-/* Prepare the global context for a re-set of breakpoint B.  */
+/* Reset a breakpoint.  */
 
-static struct cleanup *
-prepare_re_set_context (struct breakpoint *b)
+static void
+breakpoint_re_set_one (breakpoint *b)
 {
   input_radix = b->input_radix;
   set_language (b->language);
 
-  return make_cleanup (null_cleanup, NULL);
-}
-
-/* Reset a breakpoint given it's struct breakpoint * BINT.
-   The value we return ends up being the return value from catch_errors.
-   Unused in this case.  */
-
-static int
-breakpoint_re_set_one (void *bint)
-{
-  /* Get past catch_errs.  */
-  struct breakpoint *b = (struct breakpoint *) bint;
-  struct cleanup *cleanups;
-
-  cleanups = prepare_re_set_context (b);
   b->ops->re_set (b);
-  do_cleanups (cleanups);
-  return 0;
 }
 
 /* Re-set breakpoint locations for the current program space.
@@ -14316,13 +14034,10 @@ void
 breakpoint_re_set (void)
 {
   struct breakpoint *b, *b_tmp;
-  enum language save_language;
-  int save_input_radix;
-
-  save_language = current_language->la_language;
-  save_input_radix = input_radix;
 
   {
+    scoped_restore_current_language save_language;
+    scoped_restore save_input_radix = make_scoped_restore (&input_radix);
     scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
     /* Note: we must not try to insert locations until after all
@@ -14332,15 +14047,18 @@ breakpoint_re_set (void)
 
     ALL_BREAKPOINTS_SAFE (b, b_tmp)
       {
-	/* Format possible error msg.  */
-	char *message = xstrprintf ("Error in re-setting breakpoint %d: ",
-				    b->number);
-	struct cleanup *cleanups = make_cleanup (xfree, message);
-	catch_errors (breakpoint_re_set_one, b, message, RETURN_MASK_ALL);
-	do_cleanups (cleanups);
+	TRY
+	  {
+	    breakpoint_re_set_one (b);
+	  }
+	CATCH (ex, RETURN_MASK_ALL)
+	  {
+	    exception_fprintf (gdb_stderr, ex,
+			       "Error in re-setting breakpoint %d: ",
+			       b->number);
+	  }
+	END_CATCH
       }
-    set_language (save_language);
-    input_radix = save_input_radix;
 
     jit_breakpoint_re_set ();
   }
@@ -14448,9 +14166,7 @@ ignore_command (char *args, int from_tty)
 
 static void
 map_breakpoint_numbers (const char *args,
-			void (*function) (struct breakpoint *,
-					  void *),
-			void *data)
+			gdb::function_view<void (breakpoint *)> function)
 {
   int num;
   struct breakpoint *b, *tmp;
@@ -14476,7 +14192,7 @@ map_breakpoint_numbers (const char *args,
 	    if (b->number == num)
 	      {
 		match = true;
-		function (b, data);
+		function (b);
 		break;
 	      }
 	  if (!match)
@@ -14558,25 +14274,8 @@ disable_breakpoint (struct breakpoint *bpt)
   observer_notify_breakpoint_modified (bpt);
 }
 
-/* A callback for iterate_over_related_breakpoints.  */
-
 static void
-do_disable_breakpoint (struct breakpoint *b, void *ignore)
-{
-  disable_breakpoint (b);
-}
-
-/* A callback for map_breakpoint_numbers that calls
-   disable_breakpoint.  */
-
-static void
-do_map_disable_breakpoint (struct breakpoint *b, void *ignore)
-{
-  iterate_over_related_breakpoints (b, do_disable_breakpoint, NULL);
-}
-
-static void
-disable_command (char *args, int from_tty)
+disable_command (const char *args, int from_tty)
 {
   if (args == 0)
     {
@@ -14611,8 +14310,11 @@ disable_command (char *args, int from_tty)
 	      update_global_location_list (UGLL_DONT_INSERT);
 	    }
 	  else
-	    map_breakpoint_numbers (num.c_str (), do_map_disable_breakpoint,
-				    NULL);
+	    map_breakpoint_numbers
+	      (num.c_str (), [&] (breakpoint *b)
+	       {
+		 iterate_over_related_breakpoints (b, disable_breakpoint);
+	       });
 	  num = extract_arg (&args);
 	}
     }
@@ -14688,27 +14390,12 @@ enable_breakpoint (struct breakpoint *bpt)
   enable_breakpoint_disp (bpt, bpt->disposition, 0);
 }
 
-static void
-do_enable_breakpoint (struct breakpoint *bpt, void *arg)
-{
-  enable_breakpoint (bpt);
-}
-
-/* A callback for map_breakpoint_numbers that calls
-   enable_breakpoint.  */
-
-static void
-do_map_enable_breakpoint (struct breakpoint *b, void *ignore)
-{
-  iterate_over_related_breakpoints (b, do_enable_breakpoint, NULL);
-}
-
 /* The enable command enables the specified breakpoints (or all defined
    breakpoints) so they once again become (or continue to be) effective
    in stopping the inferior.  */
 
 static void
-enable_command (char *args, int from_tty)
+enable_command (const char *args, int from_tty)
 {
   if (args == 0)
     {
@@ -14743,54 +14430,32 @@ enable_command (char *args, int from_tty)
 	      update_global_location_list (UGLL_MAY_INSERT);
 	    }
 	  else
-	    map_breakpoint_numbers (num.c_str (), do_map_enable_breakpoint,
-				    NULL);
+	    map_breakpoint_numbers
+	      (num.c_str (), [&] (breakpoint *b)
+	       {
+		 iterate_over_related_breakpoints (b, enable_breakpoint);
+	       });
 	  num = extract_arg (&args);
 	}
     }
 }
 
-/* This struct packages up disposition data for application to multiple
-   breakpoints.  */
-
-struct disp_data
-{
-  enum bpdisp disp;
-  int count;
-};
-
 static void
-do_enable_breakpoint_disp (struct breakpoint *bpt, void *arg)
+enable_once_command (const char *args, int from_tty)
 {
-  struct disp_data disp_data = *(struct disp_data *) arg;
-
-  enable_breakpoint_disp (bpt, disp_data.disp, disp_data.count);
+  map_breakpoint_numbers
+    (args, [&] (breakpoint *b)
+     {
+       iterate_over_related_breakpoints
+	 (b, [&] (breakpoint *bpt)
+	  {
+	    enable_breakpoint_disp (bpt, disp_disable, 1);
+	  });
+     });
 }
 
 static void
-do_map_enable_once_breakpoint (struct breakpoint *bpt, void *ignore)
-{
-  struct disp_data disp = { disp_disable, 1 };
-
-  iterate_over_related_breakpoints (bpt, do_enable_breakpoint_disp, &disp);
-}
-
-static void
-enable_once_command (char *args, int from_tty)
-{
-  map_breakpoint_numbers (args, do_map_enable_once_breakpoint, NULL);
-}
-
-static void
-do_map_enable_count_breakpoint (struct breakpoint *bpt, void *countptr)
-{
-  struct disp_data disp = { disp_disable, *(int *) countptr };
-
-  iterate_over_related_breakpoints (bpt, do_enable_breakpoint_disp, &disp);
-}
-
-static void
-enable_count_command (char *args, int from_tty)
+enable_count_command (const char *args, int from_tty)
 {
   int count;
 
@@ -14799,30 +14464,38 @@ enable_count_command (char *args, int from_tty)
 
   count = get_number (&args);
 
-  map_breakpoint_numbers (args, do_map_enable_count_breakpoint, &count);
+  map_breakpoint_numbers
+    (args, [&] (breakpoint *b)
+     {
+       iterate_over_related_breakpoints
+	 (b, [&] (breakpoint *bpt)
+	  {
+	    enable_breakpoint_disp (bpt, disp_disable, count);
+	  });
+     });
 }
 
 static void
-do_map_enable_delete_breakpoint (struct breakpoint *bpt, void *ignore)
+enable_delete_command (const char *args, int from_tty)
 {
-  struct disp_data disp = { disp_del, 1 };
-
-  iterate_over_related_breakpoints (bpt, do_enable_breakpoint_disp, &disp);
-}
-
-static void
-enable_delete_command (char *args, int from_tty)
-{
-  map_breakpoint_numbers (args, do_map_enable_delete_breakpoint, NULL);
+  map_breakpoint_numbers
+    (args, [&] (breakpoint *b)
+     {
+       iterate_over_related_breakpoints
+	 (b, [&] (breakpoint *bpt)
+	  {
+	    enable_breakpoint_disp (bpt, disp_del, 1);
+	  });
+     });
 }
 
 static void
-set_breakpoint_cmd (char *args, int from_tty)
+set_breakpoint_cmd (const char *args, int from_tty)
 {
 }
 
 static void
-show_breakpoint_cmd (char *args, int from_tty)
+show_breakpoint_cmd (const char *args, int from_tty)
 {
 }
 
@@ -14956,8 +14629,9 @@ set_tracepoint_count (int num)
 }
 
 static void
-trace_command (char *arg, int from_tty)
+trace_command (char *arg_in, int from_tty)
 {
+  const char *arg = arg_in;
   struct breakpoint_ops *ops;
 
   event_location_up location = string_to_event_location (&arg,
@@ -14982,8 +14656,9 @@ trace_command (char *arg, int from_tty)
 }
 
 static void
-ftrace_command (char *arg, int from_tty)
+ftrace_command (char *arg_in, int from_tty)
 {
+  const char *arg = arg_in;
   event_location_up location = string_to_event_location (&arg,
 							 current_language);
   create_breakpoint (get_current_arch (),
@@ -15002,11 +14677,11 @@ ftrace_command (char *arg, int from_tty)
 /* strace command implementation.  Creates a static tracepoint.  */
 
 static void
-strace_command (char *arg, int from_tty)
+strace_command (char *arg_in, int from_tty)
 {
+  const char *arg = arg_in;
   struct breakpoint_ops *ops;
   event_location_up location;
-  struct cleanup *back_to;
 
   /* Decide if we are dealing with a static tracepoint marker (`-m'),
      or with a normal static tracepoint.  */
@@ -15061,7 +14736,8 @@ read_uploaded_action (void)
 struct tracepoint *
 create_tracepoint_from_upload (struct uploaded_tp *utp)
 {
-  char *addr_str, small_buf[100];
+  const char *addr_str;
+  char small_buf[100];
   struct tracepoint *tp;
 
   if (utp->at_string)
@@ -15182,7 +14858,7 @@ disable_trace_command (char *args, int from_tty)
 
 /* Remove a tracepoint (or all if no argument).  */
 static void
-delete_trace_command (char *arg, int from_tty)
+delete_trace_command (const char *arg, int from_tty)
 {
   struct breakpoint *b, *b_tmp;
 
@@ -15213,7 +14889,11 @@ delete_trace_command (char *arg, int from_tty)
 	}
     }
   else
-    map_breakpoint_numbers (arg, do_map_delete_breakpoint, NULL);
+    map_breakpoint_numbers
+      (arg, [&] (breakpoint *b)
+       {
+	 iterate_over_related_breakpoints (b, delete_breakpoint);
+       });
 }
 
 /* Helper function for trace_pass_command.  */
@@ -15372,7 +15052,7 @@ print_recreate_thread (struct breakpoint *b, struct ui_file *fp)
    non-zero.  */
 
 static void
-save_breakpoints (char *filename, int from_tty,
+save_breakpoints (const char *filename, int from_tty,
 		  int (*filter) (const struct breakpoint *))
 {
   struct breakpoint *tp;
@@ -15450,7 +15130,7 @@ save_breakpoints (char *filename, int from_tty,
 	current_uiout->redirect (&fp);
 	TRY
 	  {
-	    print_command_lines (current_uiout, tp->commands->commands, 2);
+	    print_command_lines (current_uiout, tp->commands.get (), 2);
 	  }
 	CATCH (ex, RETURN_MASK_ALL)
 	  {
@@ -15490,7 +15170,7 @@ save_breakpoints (char *filename, int from_tty,
 /* The `save breakpoints' command.  */
 
 static void
-save_breakpoints_command (char *args, int from_tty)
+save_breakpoints_command (const char *args, int from_tty)
 {
   save_breakpoints (args, from_tty, NULL);
 }
@@ -15498,7 +15178,7 @@ save_breakpoints_command (char *args, int from_tty)
 /* The `save tracepoints' command.  */
 
 static void
-save_tracepoints_command (char *args, int from_tty)
+save_tracepoints_command (const char *args, int from_tty)
 {
   save_breakpoints (args, from_tty, is_tracepoint);
 }
@@ -15580,13 +15260,13 @@ add_catch_command (const char *name, const char *docstring,
 {
   struct cmd_list_element *command;
 
-  command = add_cmd (name, class_breakpoint, NULL, docstring,
+  command = add_cmd (name, class_breakpoint, docstring,
 		     &catch_cmdlist);
   set_cmd_sfunc (command, sfunc);
   set_cmd_context (command, user_data_catch);
   set_cmd_completer (command, completer);
 
-  command = add_cmd (name, class_breakpoint, NULL, docstring,
+  command = add_cmd (name, class_breakpoint, docstring,
 		     &tcatch_cmdlist);
   set_cmd_sfunc (command, sfunc);
   set_cmd_context (command, user_data_tcatch);
@@ -15594,7 +15274,7 @@ add_catch_command (const char *name, const char *docstring,
 }
 
 static void
-save_command (char *arg, int from_tty)
+save_command (const char *arg, int from_tty)
 {
   printf_unfiltered (_("\"save\" must be followed by "
 		       "the name of a save subcommand.\n"));

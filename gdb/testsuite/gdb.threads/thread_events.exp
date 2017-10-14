@@ -27,9 +27,10 @@ if ![istarget *-*-linux*] then {
     return
 }
 
-# When using gdbserver, even on Linux, we don't get notifications
-# about new threads.  This is expected, so don't test for that.
-if [is_remote target] then {
+# When using the RSP, we don't get notifications about new threads.
+# This is expected, so don't test for that.
+if {[target_info gdb_protocol] == "remote"
+    || [target_info gdb_protocol] == "extended-remote"} {
     return
 }
 

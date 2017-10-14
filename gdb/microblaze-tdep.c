@@ -82,7 +82,7 @@ static const char *microblaze_register_names[] =
 
 static unsigned int microblaze_debug_flag = 0;
 
-static void
+static void ATTRIBUTE_PRINTF (1, 2)
 microblaze_debug (const char *fmt, ...)
 { 
   if (microblaze_debug_flag)

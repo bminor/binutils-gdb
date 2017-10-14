@@ -565,7 +565,7 @@ record_full_arch_list_cleanups (void *ignore)
    record the running message of inferior and set them to
    record_full_arch_list, and add it to record_full_list.  */
 
-static int
+static void
 record_full_message (struct regcache *regcache, enum gdb_signal signal)
 {
   int ret;
@@ -633,36 +633,24 @@ record_full_message (struct regcache *regcache, enum gdb_signal signal)
     record_full_list_release_first ();
   else
     record_full_insn_num++;
-
-  return 1;
 }
 
-struct record_full_message_args {
-  struct regcache *regcache;
-  enum gdb_signal signal;
-};
-
-static int
-record_full_message_wrapper (void *args)
-{
-  struct record_full_message_args *record_full_args
-    = (struct record_full_message_args *) args;
-
-  return record_full_message (record_full_args->regcache,
-			      record_full_args->signal);
-}
-
-static int
+static bool
 record_full_message_wrapper_safe (struct regcache *regcache,
 				  enum gdb_signal signal)
 {
-  struct record_full_message_args args;
+  TRY
+    {
+      record_full_message (regcache, signal);
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      exception_print (gdb_stderr, ex);
+      return false;
+    }
+  END_CATCH
 
-  args.regcache = regcache;
-  args.signal = signal;
-
-  return catch_errors (record_full_message_wrapper, &args, "",
-		       RETURN_MASK_ALL);
+  return true;
 }
 
 /* Set to 1 if record_full_store_registers and record_full_xfer_partial
@@ -670,16 +658,10 @@ record_full_message_wrapper_safe (struct regcache *regcache,
 
 static int record_full_gdb_operation_disable = 0;
 
-struct cleanup *
+scoped_restore_tmpl<int>
 record_full_gdb_operation_disable_set (void)
 {
-  struct cleanup *old_cleanups = NULL;
-
-  old_cleanups =
-    make_cleanup_restore_integer (&record_full_gdb_operation_disable);
-  record_full_gdb_operation_disable = 1;
-
-  return old_cleanups;
+  return make_scoped_restore (&record_full_gdb_operation_disable, 1);
 }
 
 /* Flag set to TRUE for target_stopped_by_watchpoint.  */
@@ -1051,7 +1033,8 @@ record_full_wait_1 (struct target_ops *ops,
 		    ptid_t ptid, struct target_waitstatus *status,
 		    int options)
 {
-  struct cleanup *set_cleanups = record_full_gdb_operation_disable_set ();
+  scoped_restore restore_operation_disable
+    = record_full_gdb_operation_disable_set ();
 
   if (record_debug)
     fprintf_unfiltered (gdb_stdlog,
@@ -1218,7 +1201,7 @@ record_full_wait_1 (struct target_ops *ops,
          And in GDB replay mode, GDB doesn't need to be in terminal_inferior
          mode, because inferior will not executed.
          Then set it to terminal_ours to make GDB get the signal.  */
-      target_terminal_ours ();
+      target_terminal::ours ();
 
       /* In EXEC_FORWARD mode, record_full_list points to the tail of prev
          instruction.  */
@@ -1334,7 +1317,6 @@ replay_out:
 
   signal (SIGINT, handle_sigint);
 
-  do_cleanups (set_cleanups);
   return inferior_ptid;
 }
 
@@ -1653,12 +1635,11 @@ record_full_insert_breakpoint (struct target_ops *ops,
 	 However, we do have to insert software single-step
 	 breakpoints, in case the target can't hardware step.  To keep
 	 things simple, we always insert.  */
-      struct cleanup *old_cleanups;
       int ret;
 
-      old_cleanups = record_full_gdb_operation_disable_set ();
+      scoped_restore restore_operation_disable
+	= record_full_gdb_operation_disable_set ();
       ret = ops->beneath->to_insert_breakpoint (ops->beneath, gdbarch, bp_tgt);
-      do_cleanups (old_cleanups);
 
       if (ret != 0)
 	return ret;
@@ -1711,14 +1692,12 @@ record_full_remove_breakpoint (struct target_ops *ops,
 	{
 	  if (bp->in_target_beneath)
 	    {
-	      struct cleanup *old_cleanups;
 	      int ret;
 
-	      old_cleanups = record_full_gdb_operation_disable_set ();
+	      scoped_restore restore_operation_disable
+		= record_full_gdb_operation_disable_set ();
 	      ret = ops->beneath->to_remove_breakpoint (ops->beneath, gdbarch,
 							bp_tgt, reason);
-	      do_cleanups (old_cleanups);
-
 	      if (ret != 0)
 		return ret;
 	    }
@@ -2533,7 +2512,7 @@ bfdcore_write (bfd *obfd, asection *osec, void *buf, int len, int *offset)
    corefile format, with an extra section for our data.  */
 
 static void
-cmd_record_full_restore (char *args, int from_tty)
+cmd_record_full_restore (const char *args, int from_tty)
 {
   core_file_command (args, from_tty);
   record_full_open (args, from_tty);
@@ -2549,7 +2528,6 @@ record_full_save (struct target_ops *self, const char *recfilename)
   uint32_t magic;
   struct regcache *regcache;
   struct gdbarch *gdbarch;
-  struct cleanup *set_cleanups;
   int save_size = 0;
   asection *osec = NULL;
   int bfd_offset = 0;
@@ -2573,7 +2551,8 @@ record_full_save (struct target_ops *self, const char *recfilename)
   gdbarch = get_regcache_arch (regcache);
 
   /* Disable the GDB operation record.  */
-  set_cleanups = record_full_gdb_operation_disable_set ();
+  scoped_restore restore_operation_disable
+    = record_full_gdb_operation_disable_set ();
 
   /* Reverse execute to the begin of record list.  */
   while (1)
@@ -2737,7 +2716,6 @@ record_full_save (struct target_ops *self, const char *recfilename)
         record_full_list = record_full_list->prev;
     }
 
-  do_cleanups (set_cleanups);
   unlink_file.keep ();
 
   /* Succeeded.  */
@@ -2753,7 +2731,8 @@ static void
 record_full_goto_insn (struct record_full_entry *entry,
 		       enum exec_direction_kind dir)
 {
-  struct cleanup *set_cleanups = record_full_gdb_operation_disable_set ();
+  scoped_restore restore_operation_disable
+    = record_full_gdb_operation_disable_set ();
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
@@ -2771,13 +2750,12 @@ record_full_goto_insn (struct record_full_entry *entry,
       else
 	record_full_list = record_full_list->next;
     } while (record_full_list != entry);
-  do_cleanups (set_cleanups);
 }
 
 /* Alias for "target record-full".  */
 
 static void
-cmd_record_full_start (char *args, int from_tty)
+cmd_record_full_start (const char *args, int from_tty)
 {
   execute_command ((char *) "target record-full", from_tty);
 }
@@ -2800,10 +2778,10 @@ set_record_full_insn_max_num (char *args, int from_tty,
 /* The "set record full" command.  */
 
 static void
-set_record_full_command (char *args, int from_tty)
+set_record_full_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\"set record full\" must be followed "
-		       "by an apporpriate subcommand.\n"));
+		       "by an appropriate subcommand.\n"));
   help_list (set_record_full_cmdlist, "set record full ", all_commands,
 	     gdb_stdout);
 }
@@ -2811,7 +2789,7 @@ set_record_full_command (char *args, int from_tty)
 /* The "show record full" command.  */
 
 static void
-show_record_full_command (char *args, int from_tty)
+show_record_full_command (const char *args, int from_tty)
 {
   cmd_show_list (show_record_full_cmdlist, from_tty, "");
 }

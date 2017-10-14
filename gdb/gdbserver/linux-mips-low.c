@@ -293,10 +293,8 @@ mips_breakpoint_at (CORE_ADDR where)
    if the lwp's process id is *PID_P.  */
 
 static int
-update_watch_registers_callback (struct inferior_list_entry *entry,
-				 void *pid_p)
+update_watch_registers_callback (thread_info *thread, void *pid_p)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
   int pid = *(int *) pid_p;
 
@@ -327,6 +325,15 @@ mips_linux_new_process (void)
   return info;
 }
 
+/* This is the implementation of linux_target_ops method
+   delete_process.  */
+
+static void
+mips_linux_delete_process (struct arch_process_info *info)
+{
+  xfree (info);
+}
+
 /* This is the implementation of linux_target_ops method new_thread.
    Mark the watch registers as changed, so the threads' copies will
    be updated.  */
@@ -339,6 +346,14 @@ mips_linux_new_thread (struct lwp_info *lwp)
   info->watch_registers_changed = 1;
 
   lwp->arch_private = info;
+}
+
+/* Function to call when a thread is being deleted.  */
+
+static void
+mips_linux_delete_thread (struct arch_lwp_info *arch_lwp)
+{
+  xfree (arch_lwp);
 }
 
 /* Create a new mips_watchpoint and add it to the list.  */
@@ -892,7 +907,9 @@ struct linux_target_ops the_low_target = {
   NULL,
   NULL, /* siginfo_fixup */
   mips_linux_new_process,
+  mips_linux_delete_process,
   mips_linux_new_thread,
+  mips_linux_delete_thread,
   mips_linux_new_fork,
   mips_linux_prepare_to_resume
 };

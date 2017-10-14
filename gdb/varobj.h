@@ -233,7 +233,7 @@ extern struct varobj *varobj_create (const char *objname,
 				     const char *expression, CORE_ADDR frame,
 				     enum varobj_type type);
 
-extern char *varobj_gen_name (void);
+extern std::string varobj_gen_name (void);
 
 extern struct varobj *varobj_get_handle (const char *name);
 

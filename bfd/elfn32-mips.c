@@ -80,6 +80,8 @@ static bfd_boolean elf32_mips_grok_prstatus
   (bfd *, Elf_Internal_Note *);
 static bfd_boolean elf32_mips_grok_psinfo
   (bfd *, Elf_Internal_Note *);
+static bfd_boolean elf_n32_mips_grok_freebsd_prstatus
+  (bfd *, Elf_Internal_Note *);
 static irix_compat_t elf_n32_mips_irix_compat
   (bfd *);
 
@@ -3578,6 +3580,56 @@ elf32_mips_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 
   return TRUE;
 }
+
+static bfd_boolean
+elf_n32_mips_grok_freebsd_prstatus (bfd *abfd, Elf_Internal_Note *note)
+{
+  size_t offset;
+  size_t size;
+  size_t min_size;
+
+  /* Compute offset of pr_getregsz, skipping over pr_statussz.
+     Also compute minimum size of this note.  */
+  offset = 4 + 4;
+  min_size = offset + 4 * 2 + 4 + 4 + 4;
+
+  if (note->descsz < min_size)
+    return FALSE;
+
+  /* Check for version 1 in pr_version.  */
+  if (bfd_h_get_32 (abfd, (bfd_byte *) note->descdata) != 1)
+    return FALSE;
+
+  /* Extract size of pr_reg from pr_gregsetsz.  */
+  /* Skip over pr_gregsetsz and pr_fpregsetsz.  */
+  size = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + offset);
+  offset += 4 * 2;
+
+  /* Skip over pr_osreldate.  */
+  offset += 4;
+
+  /* Read signal from pr_cursig.  */
+  if (elf_tdata (abfd)->core->signal == 0)
+    elf_tdata (abfd)->core->signal
+      = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + offset);
+  offset += 4;
+
+  /* Read TID from pr_pid.  */
+  elf_tdata (abfd)->core->lwpid
+      = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + offset);
+  offset += 4;
+
+  /* Padding before pr_reg.  */
+  offset += 4;
+
+  /* Make sure that there is enough data remaining in the note.  */
+  if (note->descsz - offset < size)
+    return FALSE;
+
+  /* Make a ".reg/999" section and a ".reg" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  size, note->descpos + offset);
+}
 
 /* Depending on the target vector we generate some version of Irix
    executables or "normal" MIPS ELF ABI executables.  */
@@ -3684,6 +3736,8 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 					_bfd_mips_elf_copy_indirect_symbol
 #define elf_backend_grok_prstatus	elf32_mips_grok_prstatus
 #define elf_backend_grok_psinfo		elf32_mips_grok_psinfo
+#define elf_backend_grok_freebsd_prstatus \
+					elf_n32_mips_grok_freebsd_prstatus
 #define elf_backend_ecoff_debug_swap	&mips_elf32_ecoff_debug_swap
 
 #define elf_backend_got_header_size	(4 * MIPS_RESERVED_GOTNO)

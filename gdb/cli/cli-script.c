@@ -1401,7 +1401,7 @@ validate_comname (char **comname)
 
 /* This is just a placeholder in the command data structures.  */
 static void
-user_defined_command (char *ignore, int from_tty)
+user_defined_command (const char *ignore, int from_tty)
 {
 }
 

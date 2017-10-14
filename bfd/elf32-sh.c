@@ -3221,7 +3221,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       if (eh->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefweak)
 	{
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    eh->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
@@ -3299,6 +3300,9 @@ readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  struct bfd_link_info *info = (struct bfd_link_info *) inf;
 
 	  info->flags |= DF_TEXTREL;
+
+	  info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+				  p->sec->owner, p->sec);
 
 	  /* Not an error, just cut short the traversal.  */
 	  return FALSE;
@@ -3399,7 +3403,11 @@ sh_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  srel = elf_section_data (p->sec)->sreloc;
 		  srel->size += p->count * sizeof (Elf32_External_Rela);
 		  if ((p->sec->output_section->flags & SEC_READONLY) != 0)
-		    info->flags |= DF_TEXTREL;
+		    {
+		      info->flags |= DF_TEXTREL;
+		      info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+					      p->sec->owner, p->sec);
+		    }
 
 		  /* If we need relocations, we do not need fixups.  */
 		  if (htab->fdpic_p && !bfd_link_pic (info))
@@ -3887,6 +3895,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       bfd_vma off;
       enum got_type got_type;
       const char *symname = NULL;
+      bfd_boolean resolved_to_zero;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 
@@ -3926,6 +3935,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       if (! howto->partial_inplace)
 	addend = rel->r_addend;
 
+      resolved_to_zero = FALSE;
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -4134,7 +4144,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		}
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
-	    ;
+	    resolved_to_zero = UNDEFWEAK_NO_DYNAMIC_RELOC (info, h);
 	  else if (info->unresolved_syms_in_objects == RM_IGNORE
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    ;
@@ -4302,7 +4312,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 #endif
 	  if (bfd_link_pic (info)
 	      && (h == NULL
-		  || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		  || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		      && !resolved_to_zero)
 		  || h->root.type != bfd_link_hash_undefweak)
 	      && r_symndx != STN_UNDEF
 	      && (input_section->flags & SEC_ALLOC) != 0
@@ -4530,7 +4541,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 						     h)
 		  || (bfd_link_pic (info)
 		      && SYMBOL_REFERENCES_LOCAL (info, h))
-		  || (ELF_ST_VISIBILITY (h->other)
+		  || ((ELF_ST_VISIBILITY (h->other)
+		       || resolved_to_zero)
 		      && h->root.type == bfd_link_hash_undefweak))
 		{
 		  /* This is actually a static link, or it is a
@@ -7300,6 +7312,8 @@ sh_elf_encode_eh_address (bfd *abfd,
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	12
 #define elf_backend_dtrel_excludes_plt	1
+
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
 
 #if !defined INCLUDE_SHMEDIA && !defined SH_TARGET_ALREADY_DEFINED
 

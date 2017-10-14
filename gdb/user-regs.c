@@ -222,7 +222,7 @@ value_of_user_reg (int regnum, struct frame_info *frame)
 }
 
 static void
-maintenance_print_user_registers (char *args, int from_tty)
+maintenance_print_user_registers (const char *args, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   struct gdb_user_regs *regs;

@@ -32,6 +32,7 @@
 #include "osabi.h"
 #include "dis-asm.h"
 #include "target-descriptions.h"
+#include "floatformat.h"
 
 #include "m68k-tdep.h"
 
@@ -72,7 +73,7 @@ m68k_ps_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = arch_flags_type (gdbarch, "builtin_type_m68k_ps", 4);
+      type = arch_flags_type (gdbarch, "builtin_type_m68k_ps", 32);
       append_flags_type_flag (type, 0, "C");
       append_flags_type_flag (type, 1, "V");
       append_flags_type_flag (type, 2, "Z");

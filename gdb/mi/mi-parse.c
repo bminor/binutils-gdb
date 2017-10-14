@@ -237,7 +237,6 @@ std::unique_ptr<struct mi_parse>
 mi_parse (const char *cmd, char **token)
 {
   const char *chp;
-  struct cleanup *cleanup;
 
   std::unique_ptr<struct mi_parse> parse (new struct mi_parse);
 

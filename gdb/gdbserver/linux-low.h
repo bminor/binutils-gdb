@@ -189,10 +189,18 @@ struct linux_target_ops
      allocate it here.  */
   struct arch_process_info * (*new_process) (void);
 
+  /* Hook to call when a process is being deleted.  If extra per-process
+     architecture-specific data is needed, delete it here.  */
+  void (*delete_process) (struct arch_process_info *info);
+
   /* Hook to call when a new thread is detected.
      If extra per-thread architecture-specific data is needed,
      allocate it here.  */
   void (*new_thread) (struct lwp_info *);
+
+  /* Hook to call when a thread is being deleted.  If extra per-thread
+     architecture-specific data is needed, delete it here.  */
+  void (*delete_thread) (struct arch_lwp_info *);
 
   /* Hook to call, if any, when a new fork is attached.  */
   void (*new_fork) (struct process_info *parent, struct process_info *child);
@@ -374,6 +382,9 @@ struct lwp_info
   /* The thread handle, used for e.g. TLS access.  Only valid if
      THREAD_KNOWN is set.  */
   td_thrhandle_t th;
+
+  /* The pthread_t handle.  */
+  thread_t thread_handle;
 #endif
 
   /* Arch-specific additions.  */
@@ -409,5 +420,13 @@ int thread_db_handle_monitor_command (char *);
 int thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 			       CORE_ADDR load_module, CORE_ADDR *address);
 int thread_db_look_up_one_symbol (const char *name, CORE_ADDR *addrp);
+
+/* Called from linux-low.c when a clone event is detected.  Upon entry,
+   both the clone and the parent should be stopped.  This function does
+   whatever is required have the clone under thread_db's control.  */
+
+void thread_db_notice_clone (struct thread_info *parent_thr, ptid_t child_ptid);
+
+bool thread_db_thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len);
 
 extern int have_ptrace_getregset;

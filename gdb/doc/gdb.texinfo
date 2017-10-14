@@ -2057,9 +2057,12 @@ environment} to change parts of the environment that affect
 your program.  @xref{Environment, ,Your Program's Environment}.
 
 @item The @emph{working directory.}
-Your program inherits its working directory from @value{GDBN}.  You can set
-the @value{GDBN} working directory with the @code{cd} command in @value{GDBN}.
-@xref{Working Directory, ,Your Program's Working Directory}.
+You can set your program's working directory with the command
+@kbd{set cwd}.  If you do not set any working directory with this
+command, your program will inherit @value{GDBN}'s working directory if
+native debugging, or the remote server's working directory if remote
+debugging.  @xref{Working Directory, ,Your Program's Working
+Directory}.
 
 @item The @emph{standard input and output.}
 Your program normally uses the same device for standard input and
@@ -2117,10 +2120,20 @@ reused if no argument is provided during subsequent calls to
 @samp{start} or @samp{run}.
 
 It is sometimes necessary to debug the program during elaboration.  In
-these cases, using the @code{start} command would stop the execution of
-your program too late, as the program would have already completed the
-elaboration phase.  Under these circumstances, insert breakpoints in your
-elaboration code before running your program.
+these cases, using the @code{start} command would stop the execution
+of your program too late, as the program would have already completed
+the elaboration phase.  Under these circumstances, either insert
+breakpoints in your elaboration code before running your program or
+use the @code{starti} command.
+
+@kindex starti
+@item starti
+@cindex run to first instruction
+The @samp{starti} command does the equivalent of setting a temporary
+breakpoint at the first instruction of a program's execution and then
+invoking the @samp{run} command.  For programs containing an
+elaboration phase, the @code{starti} command will stop execution at
+the start of the elaboration phase.
 
 @anchor{set exec-wrapper}
 @kindex set exec-wrapper
@@ -2424,22 +2437,52 @@ variables to files that are only run when you sign on, such as
 @section Your Program's Working Directory
 
 @cindex working directory (of your program)
-Each time you start your program with @code{run}, it inherits its
-working directory from the current working directory of @value{GDBN}.
-The @value{GDBN} working directory is initially whatever it inherited
-from its parent process (typically the shell), but you can specify a new
-working directory in @value{GDBN} with the @code{cd} command.
-
-The @value{GDBN} working directory also serves as a default for the commands
-that specify files for @value{GDBN} to operate on.  @xref{Files, ,Commands to
-Specify Files}.
+Each time you start your program with @code{run}, the inferior will be
+initialized with the current working directory specified by the
+@kbd{set cwd} command.  If no directory has been specified by this
+command, then the inferior will inherit @value{GDBN}'s current working
+directory as its working directory if native debugging, or it will
+inherit the remote server's current working directory if remote
+debugging.
 
 @table @code
+@kindex set cwd
+@cindex change inferior's working directory
+@anchor{set cwd command}
+@item set cwd @r{[}@var{directory}@r{]}
+Set the inferior's working directory to @var{directory}, which will be
+@code{glob}-expanded in order to resolve tildes (@file{~}).  If no
+argument has been specified, the command clears the setting and resets
+it to an empty state.  This setting has no effect on @value{GDBN}'s
+working directory, and it only takes effect the next time you start
+the inferior.  The @file{~} in @var{directory} is a short for the
+@dfn{home directory}, usually pointed to by the @env{HOME} environment
+variable.  On MS-Windows, if @env{HOME} is not defined, @value{GDBN}
+uses the concatenation of @env{HOMEDRIVE} and @env{HOMEPATH} as
+fallback.
+
+You can also change @value{GDBN}'s current working directory by using
+the @code{cd} command.
+@xref{cd command}
+
+@kindex show cwd
+@cindex show inferior's working directory
+@item show cwd
+Show the inferior's working directory.  If no directory has been
+specified by @kbd{set cwd}, then the default inferior's working
+directory is the same as @value{GDBN}'s working directory.
+
 @kindex cd
-@cindex change working directory
+@cindex change @value{GDBN}'s working directory
+@anchor{cd command}
 @item cd @r{[}@var{directory}@r{]}
 Set the @value{GDBN} working directory to @var{directory}.  If not
 given, @var{directory} uses @file{'~'}.
+
+The @value{GDBN} working directory serves as a default for the
+commands that specify files for @value{GDBN} to operate on.
+@xref{Files, ,Commands to Specify Files}.
+@xref{set cwd command}
 
 @kindex pwd
 @item pwd
@@ -20964,6 +21007,10 @@ are:
 @tab @code{QEnvironmentReset}
 @tab @code{Reset the inferior environment (i.e., unset user-set variables)}
 
+@item @code{set-working-dir}
+@tab @code{QSetWorkingDir}
+@tab @code{set cwd}
+
 @item @code{conditional-breakpoints-packet}
 @tab @code{Z0 and Z1}
 @tab @code{Support for target-side breakpoint condition evaluation}
@@ -35067,8 +35114,16 @@ data structures, including its flags and contained types.
 
 @kindex maint selftest
 @cindex self tests
+@item maint selftest @r{[}@var{filter}@r{]}
 Run any self tests that were compiled in to @value{GDBN}.  This will
 print a message showing how many tests were run, and how many failed.
+If a @var{filter} is passed, only the tests with @var{filter} in their
+name will by ran.
+
+@kindex "maint info selftests"
+@cindex self tests
+@item maint info selftests
+List the selftests compiled in to @value{GDBN}.
 
 @kindex maint set dwarf always-disassemble
 @kindex maint show dwarf always-disassemble
@@ -36812,6 +36867,28 @@ by supplying an appropriate @samp{qSupported} response
 (@pxref{qSupported}).  This should only be done on targets that
 actually support passing environment variables to the starting
 inferior.
+
+@item QSetWorkingDir:@r{[}@var{directory}@r{]}
+@anchor{QSetWorkingDir packet}
+@cindex set working directory, remote request
+@cindex @samp{QSetWorkingDir} packet
+This packet is used to inform the remote server of the intended
+current working directory for programs that are going to be executed.
+
+The packet is composed by @var{directory}, an hex encoded
+representation of the directory that the remote inferior will use as
+its current working directory.  If @var{directory} is an empty string,
+the remote server should reset the inferior's current working
+directory to its original, empty value.
+
+This packet is only available in extended mode (@pxref{extended
+mode}).
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+@end table
 
 @item qfThreadInfo
 @itemx qsThreadInfo
@@ -40766,7 +40843,9 @@ identifies the thread (@pxref{thread-id syntax}).  The
 the thread was last executing on.  The @samp{name} attribute, if
 present, specifies the human-readable name of the thread.  The content
 of the of @samp{thread} element is interpreted as human-readable
-auxiliary information.
+auxiliary information.  The @samp{handle} attribute, if present,
+is a hex encoded representation of the thread handle.
+
 
 @node Traceframe Info Format
 @section Traceframe Info Format
@@ -41836,6 +41915,14 @@ through @samp{f15} to present the 128-bit wide vector registers
 @samp{v0} through @samp{v15}.  In addition, this feature should
 contain the 128-bit wide vector registers @samp{v16} through
 @samp{v31}.
+
+The @samp{org.gnu.gdb.s390.gs} feature is optional.  It should contain
+the 64-bit wide guarded-storage-control registers @samp{gsd},
+@samp{gssm}, and @samp{gsepla}.
+
+The @samp{org.gnu.gdb.s390.gsbc} feature is optional.  It should contain
+the 64-bit wide guarded-storage broadcast control registers
+@samp{bc_gsd}, @samp{bc_gssm}, and @samp{bc_gsepla}.
 
 @node Sparc Features
 @subsection Sparc Features

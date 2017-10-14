@@ -45,11 +45,9 @@
 #include "solist.h"
 #include <algorithm>
 
-void (*deprecated_file_changed_hook) (char *);
+void (*deprecated_file_changed_hook) (const char *);
 
 /* Prototypes for local functions */
-
-static void file_command (char *, int);
 
 static void set_section_command (char *, int);
 
@@ -398,7 +396,7 @@ exec_file_attach (const char *filename, int from_tty)
    If ARGS is NULL, we just want to close the exec file.  */
 
 static void
-exec_file_command (char *args, int from_tty)
+exec_file_command (const char *args, int from_tty)
 {
   char *filename;
 
@@ -433,7 +431,7 @@ exec_file_command (char *args, int from_tty)
    command was added?  */
 
 static void
-file_command (char *arg, int from_tty)
+file_command (const char *arg, int from_tty)
 {
   /* FIXME, if we lose on reading the symbol file, we should revert
      the exec file, but that's rough.  */

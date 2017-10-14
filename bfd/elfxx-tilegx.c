@@ -2599,7 +2599,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       if (eh->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefweak)
 	{
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    eh->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
@@ -2673,6 +2674,9 @@ readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  struct bfd_link_info *info = (struct bfd_link_info *) inf;
 
 	  info->flags |= DF_TEXTREL;
+
+	  info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+				  p->sec->owner, p->sec);
 
 	  /* Not an error, just cut short the traversal.  */
 	  return FALSE;
@@ -2757,7 +2761,12 @@ tilegx_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  srel = elf_section_data (p->sec)->sreloc;
 		  srel->size += p->count * TILEGX_ELF_RELA_BYTES (htab);
 		  if ((p->sec->output_section->flags & SEC_READONLY) != 0)
-		    info->flags |= DF_TEXTREL;
+		    {
+		      info->flags |= DF_TEXTREL;
+
+		      info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+					      p->sec->owner, p->sec);
+		    }
 		}
 	    }
 	}
@@ -3151,7 +3160,7 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       const char *name;
       bfd_vma off;
       bfd_boolean is_plt = FALSE;
-
+      bfd_boolean resolved_to_zero;
       bfd_boolean unresolved_reloc;
 
       r_type = TILEGX_ELF_R_TYPE (rel->r_info);
@@ -3405,6 +3414,9 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  break;
 	}
 
+      resolved_to_zero = (h != NULL
+			  && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
+
       switch (r_type)
 	{
 	case R_TILEGX_IMM16_X0_HW0_GOT:
@@ -3602,7 +3614,8 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	  if ((bfd_link_pic (info)
 	       && (h == NULL
-		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		   || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		       && !resolved_to_zero)
 		   || h->root.type != bfd_link_hash_undefweak)
 	       && (! howto->pc_relative
 		   || !SYMBOL_CALLS_LOCAL (info, h)))
@@ -4305,10 +4318,10 @@ tilegx_elf_finish_dynamic_sections (bfd *output_bfd,
 	     entry size.  */
 	  pad_size = PLT_ENTRY_SIZE - PLT_HEADER_SIZE - PLT_TAIL_SIZE;
 	  memset (splt->contents + splt->size - pad_size, 0, pad_size);
-	}
 
-      elf_section_data (splt->output_section)->this_hdr.sh_entsize
-	= PLT_ENTRY_SIZE;
+	  elf_section_data (splt->output_section)->this_hdr.sh_entsize
+	    = PLT_ENTRY_SIZE;
+	}
     }
 
   if (htab->elf.sgotplt)
@@ -4329,10 +4342,10 @@ tilegx_elf_finish_dynamic_sections (bfd *output_bfd,
 	  TILEGX_ELF_PUT_WORD (htab, output_bfd, (bfd_vma) 0,
 			       htab->elf.sgotplt->contents
 			       + GOT_ENTRY_SIZE (htab));
-	}
 
-      elf_section_data (htab->elf.sgotplt->output_section)->this_hdr.sh_entsize =
-	GOT_ENTRY_SIZE (htab);
+	  elf_section_data (htab->elf.sgotplt->output_section)->this_hdr.sh_entsize =
+	    GOT_ENTRY_SIZE (htab);
+	}
     }
 
   if (htab->elf.sgot)
@@ -4346,10 +4359,10 @@ tilegx_elf_finish_dynamic_sections (bfd *output_bfd,
 			 0);
 	  TILEGX_ELF_PUT_WORD (htab, output_bfd, val,
 			       htab->elf.sgot->contents);
-	}
 
-      elf_section_data (htab->elf.sgot->output_section)->this_hdr.sh_entsize =
-	GOT_ENTRY_SIZE (htab);
+	  elf_section_data (htab->elf.sgot->output_section)->this_hdr.sh_entsize =
+	    GOT_ENTRY_SIZE (htab);
+	}
     }
 
   return TRUE;

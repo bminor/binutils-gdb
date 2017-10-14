@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "dwarf2-frame.h"
-#include "floatformat.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
@@ -188,7 +187,7 @@ sparc64_forget_process (pid_t pid)
 }
 
 static void
-info_adi_command (char *args, int from_tty)
+info_adi_command (const char *args, int from_tty)
 {
   printf_unfiltered ("\"adi\" must be followed by \"examine\" "
                      "or \"assign\".\n");
@@ -293,7 +292,7 @@ adi_tag_fd (void)
     return proc->stat.tag_fd;
 
   char cl_name[MAX_PROC_NAME_SIZE];
-  snprintf (cl_name, sizeof(cl_name), "/proc/%d/adi/tags", pid);
+  snprintf (cl_name, sizeof(cl_name), "/proc/%ld/adi/tags", (long) pid);
   int target_errno;
   proc->stat.tag_fd = target_fileio_open (NULL, cl_name, O_RDWR|O_EXCL, 
                                           0, &target_errno);
@@ -311,7 +310,7 @@ adi_is_addr_mapped (CORE_ADDR vaddr, size_t cnt)
   size_t i = 0;
 
   pid_t pid = ptid_get_pid (inferior_ptid);
-  snprintf (filename, sizeof filename, "/proc/%d/adi/maps", pid);
+  snprintf (filename, sizeof filename, "/proc/%ld/adi/maps", (long) pid);
   char *data = target_fileio_read_stralloc (NULL, filename);
   if (data)
     {
@@ -666,7 +665,7 @@ sparc64_pstate_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = arch_flags_type (gdbarch, "builtin_type_sparc64_pstate", 8);
+      type = arch_flags_type (gdbarch, "builtin_type_sparc64_pstate", 64);
       append_flags_type_flag (type, 0, "AG");
       append_flags_type_flag (type, 1, "IE");
       append_flags_type_flag (type, 2, "PRIV");
@@ -693,7 +692,7 @@ sparc64_ccr_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = arch_flags_type (gdbarch, "builtin_type_sparc64_ccr", 8);
+      type = arch_flags_type (gdbarch, "builtin_type_sparc64_ccr", 64);
       append_flags_type_flag (type, 0, "icc.c");
       append_flags_type_flag (type, 1, "icc.v");
       append_flags_type_flag (type, 2, "icc.z");
@@ -718,7 +717,7 @@ sparc64_fsr_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = arch_flags_type (gdbarch, "builtin_type_sparc64_fsr", 8);
+      type = arch_flags_type (gdbarch, "builtin_type_sparc64_fsr", 64);
       append_flags_type_flag (type, 0, "NXC");
       append_flags_type_flag (type, 1, "DZC");
       append_flags_type_flag (type, 2, "UFC");
@@ -751,7 +750,7 @@ sparc64_fprs_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = arch_flags_type (gdbarch, "builtin_type_sparc64_fprs", 8);
+      type = arch_flags_type (gdbarch, "builtin_type_sparc64_fprs", 64);
       append_flags_type_flag (type, 0, "DL");
       append_flags_type_flag (type, 1, "DU");
       append_flags_type_flag (type, 2, "FEF");
@@ -1873,9 +1872,13 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 #define TSTATE_XCC	0x000000f000000000ULL
 
 #define PSR_S		0x00000080
+#ifndef PSR_ICC
 #define PSR_ICC		0x00f00000
+#endif
 #define PSR_VERS	0x0f000000
+#ifndef PSR_IMPL
 #define PSR_IMPL	0xf0000000
+#endif
 #define PSR_V8PLUS	0xff000000
 #define PSR_XCC		0x000f0000
 

@@ -1101,10 +1101,7 @@ find_frame_funname (struct frame_info *frame, enum language *funlang,
 		 stored in the symbol table, but we stored a version
 		 with DMGL_PARAMS turned on, and here we don't want to
 		 display parameters.  So remove the parameters.  */
-	      char *func_only = cp_remove_params (print_name);
-
-	      if (func_only)
-		funname.reset (func_only);
+	      funname = cp_remove_params (print_name);
 	    }
 
 	  /* If we didn't hit the C++ case above, set *funname
@@ -1277,8 +1274,6 @@ parse_frame_specification (const char *frame_exp, int *selected_frame_p)
       numargs = 0;
       while (1)
 	{
-	  char *addr_string;
-	  struct cleanup *cleanup;
 	  const char *p;
 
 	  /* Skip leading white space, bail of EOL.  */
@@ -1290,9 +1285,8 @@ parse_frame_specification (const char *frame_exp, int *selected_frame_p)
 	  for (p = frame_exp;
 	       *p && !ISSPACE (*p);
 	       p++);
-	  addr_string = savestring (frame_exp, p - frame_exp);
+	  std::string addr_string (frame_exp, p - frame_exp);
 	  frame_exp = p;
-	  cleanup = make_cleanup (xfree, addr_string);
 	  
 	  /* NOTE: Parse and evaluate expression, but do not use
 	     functions such as parse_and_eval_long or
@@ -1302,9 +1296,7 @@ parse_frame_specification (const char *frame_exp, int *selected_frame_p)
 	     side-effects.  */
 	  if (numargs >= ARRAY_SIZE (args))
 	    error (_("Too many args in frame specification"));
-	  args[numargs++] = parse_and_eval (addr_string);
-
-	  do_cleanups (cleanup);
+	  args[numargs++] = parse_and_eval (addr_string.c_str ());
 	}
     }
 
@@ -1400,7 +1392,6 @@ info_frame_command (char *addr_exp, int from_tty)
   const char *pc_regname;
   int selected_frame_p;
   struct gdbarch *gdbarch;
-  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
   CORE_ADDR frame_pc;
   int frame_pc_p;
   /* Initialize it to avoid "may be used uninitialized" warning.  */
@@ -1428,6 +1419,7 @@ info_frame_command (char *addr_exp, int from_tty)
   func = get_frame_function (fi);
   symtab_and_line sal = find_frame_sal (fi);
   s = sal.symtab;
+  gdb::unique_xmalloc_ptr<char> func_only;
   if (func)
     {
       funname = SYMBOL_PRINT_NAME (func);
@@ -1439,13 +1431,10 @@ info_frame_command (char *addr_exp, int from_tty)
 	     stored in the symbol table, but we stored a version
 	     with DMGL_PARAMS turned on, and here we don't want to
 	     display parameters.  So remove the parameters.  */
-	  char *func_only = cp_remove_params (funname);
+	  func_only = cp_remove_params (funname);
 
 	  if (func_only)
-	    {
-	      funname = func_only;
-	      make_cleanup (xfree, func_only);
-	    }
+	    funname = func_only.get ();
 	}
     }
   else if (frame_pc_p)
@@ -1697,8 +1686,6 @@ info_frame_command (char *addr_exp, int from_tty)
     if (count || need_nl)
       puts_filtered ("\n");
   }
-
-  do_cleanups (back_to);
 }
 
 /* Print briefly all stack frames or just the innermost COUNT_EXP

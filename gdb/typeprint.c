@@ -629,7 +629,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
    and whatis_command().  */
 
 void
-maintenance_print_type (char *type_name, int from_tty)
+maintenance_print_type (const char *type_name, int from_tty)
 {
   struct value *val;
   struct type *type;
@@ -662,7 +662,7 @@ struct cmd_list_element *setprinttypelist;
 struct cmd_list_element *showprinttypelist;
 
 static void
-set_print_type (char *arg, int from_tty)
+set_print_type (const char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set print type\" must be followed by the name of a subcommand.\n");
@@ -670,7 +670,7 @@ set_print_type (char *arg, int from_tty)
 }
 
 static void
-show_print_type (char *args, int from_tty)
+show_print_type (const char *args, int from_tty)
 {
   cmd_show_list (showprinttypelist, from_tty, "");
 }

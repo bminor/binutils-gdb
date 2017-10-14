@@ -53,7 +53,6 @@ struct target_ops;
 struct obstack;
 struct bp_target_info;
 struct target_desc;
-struct objfile;
 struct symbol;
 struct displaced_step_closure;
 struct syscall;
@@ -62,7 +61,6 @@ struct axs_value;
 struct stap_parse_info;
 struct parser_state;
 struct ravenscar_arch_ops;
-struct elf_internal_linux_prpsinfo;
 struct mem_range;
 struct syscalls_info;
 struct thread_info;
@@ -876,18 +874,6 @@ typedef char * (gdbarch_make_corefile_notes_ftype) (struct gdbarch *gdbarch, bfd
 extern char * gdbarch_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size);
 extern void set_gdbarch_make_corefile_notes (struct gdbarch *gdbarch, gdbarch_make_corefile_notes_ftype *make_corefile_notes);
 
-/* The elfcore writer hook to use to write Linux prpsinfo notes to core
-   files.  Most Linux architectures use the same prpsinfo32 or
-   prpsinfo64 layouts, and so won't need to provide this hook, as we
-   call the Linux generic routines in bfd to write prpsinfo notes by
-   default. */
-
-extern int gdbarch_elfcore_write_linux_prpsinfo_p (struct gdbarch *gdbarch);
-
-typedef char * (gdbarch_elfcore_write_linux_prpsinfo_ftype) (bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info);
-extern char * gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch, bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info);
-extern void set_gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch, gdbarch_elfcore_write_linux_prpsinfo_ftype *elfcore_write_linux_prpsinfo);
-
 /* Find core file memory regions */
 
 extern int gdbarch_find_memory_regions_p (struct gdbarch *gdbarch);
@@ -997,10 +983,6 @@ extern void set_gdbarch_max_insn_length (struct gdbarch *gdbarch, ULONGEST max_i
   
    If you do not provide this function, GDB assumes that the
    architecture does not support displaced stepping.
-  
-   If your architecture doesn't need to adjust instructions before
-   single-stepping them, consider using simple_displaced_step_copy_insn
-   here.
   
    If the instruction cannot execute out of line, return NULL.  The
    core falls back to stepping past the instruction in-line instead in

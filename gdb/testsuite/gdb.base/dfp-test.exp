@@ -282,6 +282,7 @@ gdb_test "whatis d128 + ds.dec64" " = volatile _Decimal128"
 gdb_test "p d32 + 1" " = 1.1"
 gdb_test "p 2 + d64" " = 2.1"
 gdb_test "p ds.int4 + d128" " = 1.1"
+gdb_test "p d32 + ds.long8" " = 2.1"
 gdb_test "ptype d32 + 1" " = volatile _Decimal32"
 gdb_test "ptype ds.int4 + d128" " = volatile _Decimal128"
 
@@ -307,11 +308,6 @@ gdb_test "p ds.int4 > d32" " = 1"
 gdb_test "p ds.dec32 < ds.int4" " = 0"
 gdb_test "p ds.int4 > ds.dec64" " = 0"
 gdb_test "p ds.dec128 > ds.int4" " = 1"
-
-# Reject operation with integral larger than 32-bits
-if { ${sizeof_long} > 4 } {
-  gdb_test "p d32 + ds.long8" "Conversion of large integer to a decimal floating type is not supported."
-}
 
 # Reject operation with DFP and Binary FP
 gdb_test "p d64 + ds.float4" "Mixing decimal floating types with other floating types is not allowed."

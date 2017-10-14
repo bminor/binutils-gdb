@@ -197,6 +197,9 @@ static struct target_ops linux_ops_saved;
 /* The method to call, if any, when a new thread is attached.  */
 static void (*linux_nat_new_thread) (struct lwp_info *);
 
+/* The method to call, if any, when a thread is destroyed.  */
+static void (*linux_nat_delete_thread) (struct arch_lwp_info *);
+
 /* The method to call, if any, when a new fork is attached.  */
 static linux_nat_new_fork_ftype *linux_nat_new_fork;
 
@@ -510,8 +513,11 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child,
 	     To work around this, single step the child process
 	     once before detaching to clear the flags.  */
 
+	  /* Note that we consult the parent's architecture instead of
+	     the child's because there's no inferior for the child at
+	     this point.  */
 	  if (!gdbarch_software_single_step_p (target_thread_architecture
-					       (child_lp->ptid)))
+					       (parent_ptid)))
 	    {
 	      linux_disable_event_reporting (child_pid);
 	      if (ptrace (PTRACE_SINGLESTEP, child_pid, 0, 0) < 0)
@@ -836,7 +842,12 @@ static int check_ptrace_stopped_lwp_gone (struct lwp_info *lp);
 static void
 lwp_free (struct lwp_info *lp)
 {
-  xfree (lp->arch_private);
+  /* Let the arch specific bits release arch_lwp_info.  */
+  if (linux_nat_delete_thread != NULL)
+    linux_nat_delete_thread (lp->arch_private);
+  else
+    gdb_assert (lp->arch_private == NULL);
+
   xfree (lp);
 }
 
@@ -1251,7 +1262,7 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
 	{
 	  int exit_code = WEXITSTATUS (status);
 
-	  target_terminal_ours ();
+	  target_terminal::ours ();
 	  target_mourn_inferior (inferior_ptid);
 	  if (exit_code == 0)
 	    error (_("Unable to attach: program exited normally."));
@@ -1263,7 +1274,7 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
 	{
 	  enum gdb_signal signo;
 
-	  target_terminal_ours ();
+	  target_terminal::ours ();
 	  target_mourn_inferior (inferior_ptid);
 
 	  signo = gdb_signal_from_host (WTERMSIG (status));
@@ -4291,7 +4302,7 @@ linux_child_static_tracepoint_markers_by_strid (struct target_ops *self,
   int pid = ptid_get_pid (inferior_ptid);
   VEC(static_tracepoint_marker_p) *markers = NULL;
   struct static_tracepoint_marker *marker = NULL;
-  char *p = s;
+  const char *p = s;
   ptid_t ptid = ptid_build (pid, 0, 0);
 
   /* Pause all */
@@ -4458,13 +4469,13 @@ linux_nat_terminal_inferior (struct target_ops *self)
   set_sigint_trap ();
 }
 
-/* target_terminal_ours implementation.
+/* target_terminal::ours implementation.
 
    This is a wrapper around child_terminal_ours to add async support (and
-   implement the target_terminal_ours vs target_terminal_ours_for_output
+   implement the target_terminal::ours vs target_terminal::ours_for_output
    distinction).  child_terminal_ours is currently no different than
    child_terminal_ours_for_output.
-   We leave target_terminal_ours_for_output alone, leaving it to
+   We leave target_terminal::ours_for_output alone, leaving it to
    child_terminal_ours_for_output.  */
 
 static void
@@ -4868,6 +4879,17 @@ linux_nat_set_new_thread (struct target_ops *t,
      of the GNU/Linux native target, so we do not need to map this to
      T.  */
   linux_nat_new_thread = new_thread;
+}
+
+/* Register a method to call whenever a new thread is attached.  */
+void
+linux_nat_set_delete_thread (struct target_ops *t,
+			     void (*delete_thread) (struct arch_lwp_info *))
+{
+  /* Save the pointer.  We only support a single registered instance
+     of the GNU/Linux native target, so we do not need to map this to
+     T.  */
+  linux_nat_delete_thread = delete_thread;
 }
 
 /* See declaration in linux-nat.h.  */

@@ -674,7 +674,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
     {
       gdb::unique_xmalloc_ptr<char>
 	copy_holder (xstrdup (skip_spaces (spec)));
-      char *copy = copy_holder.get ();
+      const char *copy = copy_holder.get ();
 
       switch (type)
 	{

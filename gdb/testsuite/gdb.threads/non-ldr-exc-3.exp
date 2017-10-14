@@ -19,11 +19,6 @@
 # non-ldr-exc-2.exp in that we have more than two threads in the
 # program when the exec happens.
 
-# No exec event support in the remote protocol.
-if { [is_remote target] } then {
-    continue
-}
-
 standard_testfile
 set executable ${testfile}
 

@@ -39,27 +39,6 @@
 
 #include "dis-asm.h"
 
-struct displaced_step_closure *
-simple_displaced_step_copy_insn (struct gdbarch *gdbarch,
-                                 CORE_ADDR from, CORE_ADDR to,
-                                 struct regcache *regs)
-{
-  size_t len = gdbarch_max_insn_length (gdbarch);
-  gdb_byte *buf = (gdb_byte *) xmalloc (len);
-
-  read_memory (from, buf, len);
-  write_memory (to, buf, len);
-
-  if (debug_displaced)
-    {
-      fprintf_unfiltered (gdb_stdlog, "displaced: copy %s->%s: ",
-                          paddress (gdbarch, from), paddress (gdbarch, to));
-      displaced_step_dump_bytes (gdb_stdlog, buf, len);
-    }
-
-  return (struct displaced_step_closure *) buf;
-}
-
 int
 default_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
 				      struct displaced_step_closure *closure)

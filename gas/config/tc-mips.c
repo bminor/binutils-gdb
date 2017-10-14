@@ -17149,6 +17149,7 @@ s_nan (int ignore ATTRIBUTE_UNUSED)
 static void
 s_mips_stab (int type)
 {
+  file_mips_check_options ();
   mips_mark_labels ();
   s_stab (type);
 }

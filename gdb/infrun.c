@@ -80,10 +80,6 @@ static void sig_print_header (void);
 
 static void resume_cleanups (void *);
 
-static int hook_stop_stub (void *);
-
-static int restore_selected_frame (void *);
-
 static int follow_fork (void);
 
 static int follow_fork_inferior (int follow_child, int detach_fork);
@@ -478,7 +474,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	      /* Ensure that we have a process ptid.  */
 	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (child_ptid));
 
-	      target_terminal_ours_for_output ();
+	      target_terminal::ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
 				_("Detaching after %s from child %s.\n"),
 				has_vforked ? "vfork" : "fork",
@@ -563,7 +559,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
       if (info_verbose || debug_infrun)
 	{
-	  target_terminal_ours_for_output ();
+	  target_terminal::ours_for_output ();
 	  fprintf_filtered (gdb_stdlog,
 			    _("Attaching after %s %s to child %s.\n"),
 			    target_pid_to_str (parent_ptid),
@@ -611,7 +607,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	      /* Ensure that we have a process ptid.  */
 	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (child_ptid));
 
-	      target_terminal_ours_for_output ();
+	      target_terminal::ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
 				_("Detaching after fork from "
 				  "child %s.\n"),
@@ -970,7 +966,7 @@ handle_vfork_child_exec_or_exit (int exec)
 
 	  if (debug_infrun || info_verbose)
 	    {
-	      target_terminal_ours_for_output ();
+	      target_terminal::ours_for_output ();
 
 	      if (exec)
 		{
@@ -2339,7 +2335,7 @@ do_target_resume (ptid_t resume_ptid, int step, enum gdb_signal sig)
   gdb_assert (!tp->stop_requested);
 
   /* Install inferior's terminal modes.  */
-  target_terminal_inferior ();
+  target_terminal::inferior ();
 
   /* Avoid confusing the next resume, if the next stop/resume
      happens to apply to another thread.  */
@@ -2990,7 +2986,6 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
   struct cleanup *old_chain;
-  struct cleanup *defer_resume_cleanup;
   int started;
 
   /* If we're stopped at a fork/vfork, follow the branch set by the
@@ -3132,26 +3127,27 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
      until the target stops again.  */
   tp->prev_pc = regcache_read_pc (regcache);
 
-  defer_resume_cleanup = make_cleanup_defer_target_commit_resume ();
+  {
+    scoped_restore save_defer_tc = make_scoped_defer_target_commit_resume ();
 
-  started = start_step_over ();
+    started = start_step_over ();
 
-  if (step_over_info_valid_p ())
-    {
-      /* Either this thread started a new in-line step over, or some
-	 other thread was already doing one.  In either case, don't
-	 resume anything else until the step-over is finished.  */
-    }
-  else if (started && !target_is_non_stop_p ())
-    {
-      /* A new displaced stepping sequence was started.  In all-stop,
-	 we can't talk to the target anymore until it next stops.  */
-    }
-  else if (!non_stop && target_is_non_stop_p ())
-    {
-      /* In all-stop, but the target is always in non-stop mode.
-	 Start all other threads that are implicitly resumed too.  */
-      ALL_NON_EXITED_THREADS (tp)
+    if (step_over_info_valid_p ())
+      {
+	/* Either this thread started a new in-line step over, or some
+	   other thread was already doing one.  In either case, don't
+	   resume anything else until the step-over is finished.  */
+      }
+    else if (started && !target_is_non_stop_p ())
+      {
+	/* A new displaced stepping sequence was started.  In all-stop,
+	   we can't talk to the target anymore until it next stops.  */
+      }
+    else if (!non_stop && target_is_non_stop_p ())
+      {
+	/* In all-stop, but the target is always in non-stop mode.
+	   Start all other threads that are implicitly resumed too.  */
+	ALL_NON_EXITED_THREADS (tp)
         {
 	  /* Ignore threads of processes we're not resuming.  */
 	  if (!ptid_match (tp->ptid, resume_ptid))
@@ -3187,18 +3183,18 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	  if (!ecs->wait_some_more)
 	    error (_("Command aborted."));
 	}
-    }
-  else if (!tp->resumed && !thread_is_in_step_over_chain (tp))
-    {
-      /* The thread wasn't started, and isn't queued, run it now.  */
-      reset_ecs (ecs, tp);
-      switch_to_thread (tp->ptid);
-      keep_going_pass_signal (ecs);
-      if (!ecs->wait_some_more)
-	error (_("Command aborted."));
-    }
+      }
+    else if (!tp->resumed && !thread_is_in_step_over_chain (tp))
+      {
+	/* The thread wasn't started, and isn't queued, run it now.  */
+	reset_ecs (ecs, tp);
+	switch_to_thread (tp->ptid);
+	keep_going_pass_signal (ecs);
+	if (!ecs->wait_some_more)
+	  error (_("Command aborted."));
+      }
+  }
 
-  do_cleanups (defer_resume_cleanup);
   target_commit_resume ();
 
   discard_cleanups (old_chain);
@@ -3818,7 +3814,7 @@ check_curr_ui_sync_execution_done (void)
       && ui->async
       && !gdb_in_secondary_prompt_p (ui))
     {
-      target_terminal_ours ();
+      target_terminal::ours ();
       observer_notify_sync_execution_done ();
       ui_register_input_event_handler (ui);
     }
@@ -4178,10 +4174,11 @@ adjust_pc_after_break (struct thread_info *thread,
       || (target_is_non_stop_p ()
 	  && moribund_breakpoint_here_p (aspace, breakpoint_pc)))
     {
-      struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);
+      gdb::optional<scoped_restore_tmpl<int>> restore_operation_disable;
 
       if (record_full_is_used ())
-	record_full_gdb_operation_disable_set ();
+	restore_operation_disable.emplace
+	  (record_full_gdb_operation_disable_set ());
 
       /* When using hardware single-step, a SIGTRAP is reported for both
 	 a completed single-step and a software breakpoint.  Need to
@@ -4205,8 +4202,6 @@ adjust_pc_after_break (struct thread_info *thread,
 	  || (thread->stepped_breakpoint
 	      && thread->prev_pc == breakpoint_pc))
 	regcache_write_pc (regcache, breakpoint_pc);
-
-      do_cleanups (old_cleanups);
     }
 }
 
@@ -5056,7 +5051,7 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
       set_current_inferior (find_inferior_ptid (ecs->ptid));
       set_current_program_space (current_inferior ()->pspace);
       handle_vfork_child_exec_or_exit (0);
-      target_terminal_ours ();	/* Must do this before mourn anyway.  */
+      target_terminal::ours ();	/* Must do this before mourn anyway.  */
 
       /* Clearing any previous state of convenience variables.  */
       clear_exit_convenience_vars ();
@@ -5308,8 +5303,11 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_EXECD\n");
 
+      /* Note we can't read registers yet (the stop_pc), because we
+	 don't yet know the inferior's post-exec architecture.
+	 'stop_pc' is explicitly read below instead.  */
       if (!ptid_equal (ecs->ptid, inferior_ptid))
-	context_switch (ecs->ptid);
+	switch_to_thread_no_regs (ecs->event_thread);
 
       /* Do whatever is necessary to the parent branch of the vfork.  */
       handle_vfork_child_exec_or_exit (1);
@@ -6008,14 +6006,14 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  decr_pc = gdbarch_decr_pc_after_break (gdbarch);
 	  if (decr_pc != 0)
 	    {
-	      struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);
+	      gdb::optional<scoped_restore_tmpl<int>>
+		restore_operation_disable;
 
 	      if (record_full_is_used ())
-		record_full_gdb_operation_disable_set ();
+		restore_operation_disable.emplace
+		  (record_full_gdb_operation_disable_set ());
 
 	      regcache_write_pc (regcache, stop_pc + decr_pc);
-
-	      do_cleanups (old_cleanups);
 	    }
 	}
       else
@@ -6098,9 +6096,9 @@ handle_signal_stop (struct execution_control_state *ecs)
       if (signal_print[ecs->event_thread->suspend.stop_signal])
 	{
 	  /* The signal table tells us to print about this signal.  */
-	  target_terminal_ours_for_output ();
+	  target_terminal::ours_for_output ();
 	  observer_notify_signal_received (ecs->event_thread->suspend.stop_signal);
-	  target_terminal_inferior ();
+	  target_terminal::inferior ();
 	}
 
       /* Clear the signal if it should not be passed.  */
@@ -8084,7 +8082,7 @@ maybe_remove_breakpoints (void)
     {
       if (remove_breakpoints ())
 	{
-	  target_terminal_ours_for_output ();
+	  target_terminal::ours_for_output ();
 	  printf_filtered (_("Cannot remove breakpoints because "
 			     "program is no longer writable.\nFurther "
 			     "execution is probably impossible.\n"));
@@ -8241,7 +8239,7 @@ normal_stop (void)
     {
       SWITCH_THRU_ALL_UIS ()
 	{
-	  target_terminal_ours_for_output ();
+	  target_terminal::ours_for_output ();
 	  printf_filtered (_("[Switching to %s]\n"),
 			   target_pid_to_str (inferior_ptid));
 	  annotate_thread_changed ();
@@ -8254,7 +8252,7 @@ normal_stop (void)
       SWITCH_THRU_ALL_UIS ()
 	if (current_ui->prompt_state == PROMPT_BLOCKED)
 	  {
-	    target_terminal_ours_for_output ();
+	    target_terminal::ours_for_output ();
 	    printf_filtered (_("No unwaited-for children left.\n"));
 	  }
     }
@@ -8312,8 +8310,16 @@ normal_stop (void)
       struct cleanup *old_chain
 	= make_cleanup (release_stop_context_cleanup, saved_context);
 
-      catch_errors (hook_stop_stub, stop_command,
-		    "Error while running hook_stop:\n", RETURN_MASK_ALL);
+      TRY
+	{
+	  execute_cmd_pre_hook (stop_command);
+	}
+      CATCH (ex, RETURN_MASK_ALL)
+	{
+	  exception_fprintf (gdb_stderr, ex,
+			     "Error while running hook_stop:\n");
+	}
+      END_CATCH
 
       /* If the stop hook resumes the target, then there's no point in
 	 trying to notify about the previous stop; its context is
@@ -8353,13 +8359,6 @@ normal_stop (void)
   prune_inferiors ();
 
   return 0;
-}
-
-static int
-hook_stop_stub (void *cmd)
-{
-  execute_cmd_pre_hook ((struct cmd_list_element *) cmd);
-  return (0);
 }
 
 int
@@ -8921,7 +8920,7 @@ make_cleanup_restore_infcall_suspend_state
 void
 discard_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 {
-  regcache_xfree (inf_state->registers);
+  delete inf_state->registers;
   xfree (inf_state->siginfo_data);
   xfree (inf_state);
 }
@@ -8981,25 +8980,20 @@ save_infcall_control_state (void)
   return inf_status;
 }
 
-static int
-restore_selected_frame (void *args)
+static void
+restore_selected_frame (const frame_id &fid)
 {
-  struct frame_id *fid = (struct frame_id *) args;
-  struct frame_info *frame;
-
-  frame = frame_find_by_id (*fid);
+  frame_info *frame = frame_find_by_id (fid);
 
   /* If inf_status->selected_frame_id is NULL, there was no previously
      selected frame.  */
   if (frame == NULL)
     {
       warning (_("Unable to restore previously selected frame."));
-      return 0;
+      return;
     }
 
   select_frame (frame);
-
-  return (1);
 }
 
 /* Restore inferior session state to INF_STATUS.  */
@@ -9029,16 +9023,22 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
 
   if (target_has_stack)
     {
-      /* The point of catch_errors is that if the stack is clobbered,
+      /* The point of the try/catch is that if the stack is clobbered,
          walking the stack might encounter a garbage pointer and
          error() trying to dereference it.  */
-      if (catch_errors
-	  (restore_selected_frame, &inf_status->selected_frame_id,
-	   "Unable to restore previously selected frame:\n",
-	   RETURN_MASK_ERROR) == 0)
-	/* Error in restoring the selected frame.  Select the innermost
-	   frame.  */
-	select_frame (get_current_frame ());
+      TRY
+	{
+	  restore_selected_frame (inf_status->selected_frame_id);
+	}
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  exception_fprintf (gdb_stderr, ex,
+			     "Unable to restore previously selected frame:\n");
+	  /* Error in restoring the selected frame.  Select the
+	     innermost frame.  */
+	  select_frame (get_current_frame ());
+	}
+      END_CATCH
     }
 
   xfree (inf_status);

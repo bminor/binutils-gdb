@@ -1014,8 +1014,7 @@ typedef BP_MANIPULATION_ENDIAN (little_breakpoint, big_breakpoint)
 					 || (insn & STORE_CONDITIONAL_MASK) == STHCX_INSTRUCTION \
 					 || (insn & STORE_CONDITIONAL_MASK) == STQCX_INSTRUCTION)
 
-/* We can't displaced step atomic sequences.  Otherwise this is just
-   like simple_displaced_step_copy_insn.  */
+/* We can't displaced step atomic sequences.  */
 
 static struct displaced_step_closure *
 ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
@@ -6618,7 +6617,7 @@ rs6000_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 /* PowerPC-specific commands.  */
 
 static void
-set_powerpc_command (char *args, int from_tty)
+set_powerpc_command (const char *args, int from_tty)
 {
   printf_unfiltered (_("\
 \"set powerpc\" must be followed by an appropriate subcommand.\n"));
@@ -6626,7 +6625,7 @@ set_powerpc_command (char *args, int from_tty)
 }
 
 static void
-show_powerpc_command (char *args, int from_tty)
+show_powerpc_command (const char *args, int from_tty)
 {
   cmd_show_list (showpowerpccmdlist, from_tty, "");
 }

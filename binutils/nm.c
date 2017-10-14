@@ -1094,6 +1094,7 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
   void *minisyms;
   unsigned int size;
   struct size_sym *symsizes;
+  asymbol *synthsyms = NULL;
 
   if (! dynamic)
     {
@@ -1124,7 +1125,6 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
 
   if (show_synthetic && size == sizeof (asymbol *))
     {
-      asymbol *synthsyms;
       asymbol **static_syms = NULL;
       asymbol **dyn_syms = NULL;
       long static_count = 0;
@@ -1201,6 +1201,8 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
   else
     print_size_symbols (abfd, dynamic, symsizes, symcount, archive_bfd);
 
+  if (synthsyms)
+    free (synthsyms);
   free (minisyms);
   free (symsizes);
 }

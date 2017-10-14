@@ -170,6 +170,29 @@ if { [check_gc_sections_available] } {
 	    "pr21233-3"]]
 }
 
+if { [check_gc_sections_available] } {
+    run_ld_link_tests [list \
+	[list \
+	    "Build pr22150.so" \
+	    "$LFLAGS -shared --version-script pr22150.ver" \
+	    "" \
+	    "$AFLAGS_PIC" \
+	    {pr22150a.s} \
+	    {} \
+	    "pr22150.so" \
+	] \
+	[list \
+	    "Build pr22150" \
+	    "$LFLAGS -e _start --gc-sections" \
+	    "tmpdir/pr22150.so" \
+	    "" \
+	    {pr22150b.s} \
+	    {{readelf -V pr22150.vd}} \
+	    "pr22150" \
+	] \
+    ]
+}
+
 # Check to see if the C compiler works
 if { [which $CC] == 0 } {
     return
@@ -435,6 +458,9 @@ set build_tests {
   {"Build pr21964-2b.so"
    "-shared" "-fPIC"
    {pr21964-2b.c} {} "pr21964-2b.so"}
+  {"Dump pr21978.so"
+   "-shared" "-fPIC -g -O2"
+   {pr21978a.c pr21978b.c} {{objdump {-Sl} pr21978.od}} "pr21978.so"}
 }
 
 run_cc_link_tests $build_tests

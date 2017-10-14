@@ -5310,6 +5310,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
   bfd_boolean target_is_micromips_code_p = FALSE;
   struct mips_elf_link_hash_table *htab;
   bfd *dynobj;
+  bfd_boolean resolved_to_zero;
 
   dynobj = elf_hash_table (info)->dynobj;
   htab = mips_elf_hash_table (info);
@@ -5665,6 +5666,10 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       addend = 0;
     }
 
+  resolved_to_zero = (h != NULL
+		      && UNDEFWEAK_NO_DYNAMIC_RELOC (info,
+							  &h->root));
+
   /* If we haven't already determined the GOT offset, and we're going
      to need it, get it now.  */
   switch (r_type)
@@ -5796,7 +5801,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  && r_symndx != STN_UNDEF
 	  && (h == NULL
 	      || h->root.root.type != bfd_link_hash_undefweak
-	      || ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT)
+	      || (ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT
+		  && !resolved_to_zero))
 	  && (input_section->flags & SEC_ALLOC) != 0)
 	{
 	  /* If we're creating a shared library, then we can't know
@@ -8940,7 +8946,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	{
 	  /* Do not copy relocations for undefined weak symbols with
 	     non-default visibility.  */
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    do_copy = FALSE;
 
 	  /* Make sure undefined weak symbols are output as a dynamic

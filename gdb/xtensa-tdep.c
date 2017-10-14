@@ -29,7 +29,6 @@
 #include "dis-asm.h"
 #include "inferior.h"
 #include "osabi.h"
-#include "floatformat.h"
 #include "regcache.h"
 #include "reggroups.h"
 #include "regset.h"

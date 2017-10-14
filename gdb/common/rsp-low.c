@@ -92,8 +92,8 @@ pack_hex_byte (char *pkt, int byte)
 
 /* See rsp-low.h.  */
 
-char *
-unpack_varlen_hex (char *buff,	/* packet to parse */
+const char *
+unpack_varlen_hex (const char *buff,	/* packet to parse */
 		   ULONGEST *result)
 {
   int nibble;

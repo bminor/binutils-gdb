@@ -37,6 +37,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include "filestuff.h"
+#include <algorithm>
 
 #define NAMELEN(dirent) strlen ((dirent)->d_name)
 
@@ -391,41 +392,40 @@ linux_xfer_osdata_processes (gdb_byte *readbuf,
   return len;
 }
 
-/* Auxiliary function used by qsort to sort processes by process
-   group.  Compares two processes with ids PROCESS1 and PROCESS2.
-   PROCESS1 comes before PROCESS2 if it has a lower process group id.
-   If they belong to the same process group, PROCESS1 comes before
-   PROCESS2 if it has a lower process id or is the process group
-   leader.  */
+/* A simple PID/PGID pair.  */
 
-static int
-compare_processes (const void *process1, const void *process2)
+struct pid_pgid_entry
 {
-  PID_T pid1 = *((PID_T *) process1);
-  PID_T pid2 = *((PID_T *) process2);
-  PID_T pgid1 = *((PID_T *) process1 + 1);
-  PID_T pgid2 = *((PID_T *) process2 + 1);
+  pid_pgid_entry (PID_T pid_, PID_T pgid_)
+  : pid (pid_), pgid (pgid_)
+  {}
 
-  /* Sort by PGID.  */
-  if (pgid1 < pgid2)
-    return -1;
-  else if (pgid1 > pgid2)
-    return 1;
-  else
-    {
-      /* Process group leaders always come first, else sort by PID.  */
-      if (pid1 == pgid1)
-	return -1;
-      else if (pid2 == pgid2)
-	return 1;
-      else if (pid1 < pid2)
-	return -1;
-      else if (pid1 > pid2)
-	return 1;
-      else
-	return 0;
-    }
-}
+  /* Return true if this pid is the leader of its process group.  */
+
+  bool is_leader () const
+  {
+    return pid == pgid;
+  }
+
+  bool operator< (const pid_pgid_entry &other) const
+  {
+    /* Sort by PGID.  */
+    if (this->pgid != other.pgid)
+      return this->pgid < other.pgid;
+
+    /* Process group leaders always come first...  */
+    if (this->is_leader ())
+      return true;
+
+    if (other.is_leader ())
+      return false;
+
+    /* ...else sort by PID.  */
+    return this->pid < other.pid;
+  }
+
+  PID_T pid, pgid;
+};
 
 /* Collect all process groups from /proc.  */
 
@@ -452,11 +452,10 @@ linux_xfer_osdata_processgroups (gdb_byte *readbuf,
       dirp = opendir ("/proc");
       if (dirp)
 	{
+	  std::vector<pid_pgid_entry> process_list;
 	  struct dirent *dp;
-	  const size_t list_block_size = 512;
-	  PID_T *process_list = XNEWVEC (PID_T, list_block_size * 2);
-	  size_t process_count = 0;
-	  size_t i;
+
+	  process_list.reserve (512);
 
 	  /* Build list consisting of PIDs followed by their
 	     associated PGID.  */
@@ -472,30 +471,18 @@ linux_xfer_osdata_processgroups (gdb_byte *readbuf,
 	      pgid = getpgid (pid);
 
 	      if (pgid > 0)
-		{
-		  process_list[2 * process_count] = pid;
-		  process_list[2 * process_count + 1] = pgid;
-		  ++process_count;
-
-		  /* Increase the size of the list if necessary.  */
-		  if (process_count % list_block_size == 0)
-		    process_list = (PID_T *) xrealloc (
-			process_list,
-			(process_count + list_block_size)
-			* 2 * sizeof (PID_T));
-		}
+		process_list.emplace_back (pid, pgid);
 	    }
 
 	  closedir (dirp);
 
 	  /* Sort the process list.  */
-	  qsort (process_list, process_count, 2 * sizeof (PID_T),
-		 compare_processes);
+	  std::sort (process_list.begin (), process_list.end ());
 
-	  for (i = 0; i < process_count; ++i)
+	  for (const pid_pgid_entry &entry : process_list)
 	    {
-	      PID_T pid = process_list[2 * i];
-	      PID_T pgid = process_list[2 * i + 1];
+	      PID_T pid = entry.pid;
+	      PID_T pgid = entry.pgid;
 	      char leader_command[32];
 	      char *command_line;
 
@@ -517,8 +504,6 @@ linux_xfer_osdata_processgroups (gdb_byte *readbuf,
 
 	      xfree (command_line);
 	    }
-
-	  xfree (process_list);
 	}   
 
       buffer_grow_str0 (&buffer, "</osdata>\n");
@@ -1697,4 +1682,3 @@ linux_common_xfer_osdata (const char *annex, gdb_byte *readbuf,
       return 0;
     }
 }
-

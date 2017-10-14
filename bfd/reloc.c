@@ -65,8 +65,9 @@ CODE_FRAGMENT
 .
 .typedef enum bfd_reloc_status
 .{
-.  {* No errors detected.  *}
-.  bfd_reloc_ok,
+.  {* No errors detected.  Note - the value 2 is used so that it
+.     will not be mistaken for the boolean TRUE or FALSE values.  *}
+.  bfd_reloc_ok = 2,
 .
 .  {* The relocation was performed, but there was an overflow.  *}
 .  bfd_reloc_overflow,
@@ -2486,6 +2487,8 @@ ENUMX
   BFD_RELOC_FT32_17
 ENUMX
   BFD_RELOC_FT32_18
+ENUMX
+  BFD_RELOC_FT32_15
 ENUMDOC
   FT32 ELF relocations.
 COMMENT

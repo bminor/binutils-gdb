@@ -930,7 +930,9 @@ is_visible_from_outside(Symbol* lsym)
 {
   if (lsym->in_dyn())
     return true;
-  if (parameters->options().export_dynamic() || parameters->options().shared())
+  if (parameters->options().export_dynamic() || parameters->options().shared()
+      || parameters->options().in_dynamic_list(lsym->name())
+      || parameters->options().is_export_dynamic_symbol(lsym->name()))
     return lsym->is_externally_visible();
   return false;
 }

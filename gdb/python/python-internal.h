@@ -377,6 +377,8 @@ extern PyTypeObject breakpoint_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("breakpoint_object");
 extern PyTypeObject frame_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("frame_object");
+extern PyTypeObject thread_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("thread_object");
 
 typedef struct gdbpy_breakpoint_object
 {
@@ -624,8 +626,7 @@ class gdbpy_enter
 
   ~gdbpy_enter ();
 
-  gdbpy_enter (const gdbpy_enter &) = delete;
-  gdbpy_enter &operator= (const gdbpy_enter &) = delete;
+  DISABLE_COPY_AND_ASSIGN (gdbpy_enter);
 
  private:
 

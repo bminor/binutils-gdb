@@ -9900,6 +9900,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
   bfd_vma                       plt_offset;
   bfd_vma                       gotplt_offset;
   bfd_boolean                   has_iplt_entry;
+  bfd_boolean                   resolved_to_zero;
 
   globals = elf32_arm_hash_table (info);
   if (globals == NULL)
@@ -10017,6 +10018,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       gotplt_offset = (bfd_vma) -1;
     }
 
+  resolved_to_zero = (h != NULL
+		      && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
+
   switch (r_type)
     {
     case R_ARM_NONE:
@@ -10081,7 +10085,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  && !(input_bfd == globals->stub_bfd
 	       && strstr (input_section->name, STUB_SUFFIX))
 	  && (h == NULL
-	      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	      || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		  && !resolved_to_zero)
 	      || h->root.type != bfd_link_hash_undefweak)
 	  && r_type != R_ARM_PC24
 	  && r_type != R_ARM_CALL
@@ -11284,7 +11289,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	    if ((bfd_link_pic (info) || indx != 0)
 		&& (h == NULL
-		    || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		    || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+			&& !resolved_to_zero)
 		    || h->root.type != bfd_link_hash_undefweak))
 	      {
 		need_relocs = TRUE;
@@ -15443,8 +15449,8 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
     {
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (h->dynindx == -1
-	  && !h->forced_local)
+      if (h->dynindx == -1 && !h->forced_local
+	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -15531,8 +15537,8 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (h->dynindx == -1
-	  && !h->forced_local)
+      if (h->dynindx == -1 && !h->forced_local
+	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -15716,7 +15722,8 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
       if (eh->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefweak)
 	{
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    eh->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
@@ -15755,8 +15762,8 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 	{
 	  /* Make sure this symbol is output as a dynamic symbol.
 	     Undefined weak syms won't yet be marked as dynamic.  */
-	  if (h->dynindx == -1
-	      && !h->forced_local)
+	  if (h->dynindx == -1 && !h->forced_local
+	      && h->root.type == bfd_link_hash_undefweak)
 	    {
 	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		return FALSE;
@@ -19451,6 +19458,8 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
 #define elf_backend_section_flags		elf32_arm_section_flags
 #undef  elf_backend_lookup_section_flags_hook
 #define elf_backend_lookup_section_flags_hook   elf32_arm_lookup_section_flags
+
+#define elf_backend_linux_prpsinfo32_ugid16	TRUE
 
 #include "elf32-target.h"
 

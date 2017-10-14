@@ -71,7 +71,7 @@ show_compile_debug (struct ui_file *file, int from_tty,
    Return 1 if seen and update *ARG.  */
 
 static int
-check_raw_argument (char **arg)
+check_raw_argument (const char **arg)
 {
   *arg = skip_spaces (*arg);
 
@@ -87,7 +87,7 @@ check_raw_argument (char **arg)
    that may contain calls to the GCC compiler.  */
 
 static void
-compile_file_command (char *arg, int from_tty)
+compile_file_command (const char *arg, int from_tty)
 {
   enum compile_i_scope_types scope = COMPILE_I_SIMPLE_SCOPE;
 
@@ -124,7 +124,7 @@ compile_file_command (char *arg, int from_tty)
    compile command is the language currently set in GDB.  */
 
 static void
-compile_code_command (char *arg, int from_tty)
+compile_code_command (const char *arg, int from_tty)
 {
   enum compile_i_scope_types scope = COMPILE_I_SIMPLE_SCOPE;
 
@@ -171,9 +171,8 @@ compile_print_value (struct value *val, void *data_voidp)
    compile command is the language currently set in GDB.  */
 
 static void
-compile_print_command (char *arg_param, int from_tty)
+compile_print_command (const char *arg, int from_tty)
 {
-  const char *arg = arg_param;
   enum compile_i_scope_types scope = COMPILE_I_PRINT_ADDRESS_SCOPE;
   struct format_data fmt;
 
@@ -610,7 +609,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 /* The "compile" prefix command.  */
 
 static void
-compile_command (char *args, int from_tty)
+compile_command (const char *args, int from_tty)
 {
   /* If a sub-command is not specified to the compile prefix command,
      assume it is a direct code compilation.  */

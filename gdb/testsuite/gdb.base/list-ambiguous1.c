@@ -23,11 +23,12 @@
 
 
 
-/* This function is defined in both
+/* These symbols are defined in both
    list-ambiguous0.c/list-ambiguous1.c files, in order to test
    "list"'s behavior with ambiguous linespecs.  */
-static void __attribute__ ((used)) ambiguous (void) {}
+static void __attribute__ ((used)) ambiguous_fun (void) {}
 
+static int ambiguous_var;
 
 
 

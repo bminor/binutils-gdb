@@ -227,7 +227,7 @@ unique_section_p (const asection *sec,
 
 static bfd_boolean
 walk_wild_file_in_exclude_list (struct name_list *exclude_list,
-                                lang_input_statement_type *file)
+				lang_input_statement_type *file)
 {
   struct name_list *list_tmp;
 
@@ -2367,9 +2367,9 @@ lang_add_section (lang_statement_list_type *ptr,
   if ((flags & (SEC_LINK_ONCE | SEC_GROUP)) == (SEC_LINK_ONCE | SEC_GROUP))
     {
       if (link_info.resolve_section_groups)
-        flags &= ~(SEC_LINK_ONCE | SEC_LINK_DUPLICATES | SEC_RELOC);
+	flags &= ~(SEC_LINK_ONCE | SEC_LINK_DUPLICATES | SEC_RELOC);
       else
-        flags &= ~(SEC_LINK_DUPLICATES | SEC_RELOC);
+	flags &= ~(SEC_LINK_DUPLICATES | SEC_RELOC);
     }
   else if (!bfd_link_relocatable (&link_info))
     flags &= ~(SEC_LINK_ONCE | SEC_LINK_DUPLICATES | SEC_RELOC);
@@ -4425,7 +4425,7 @@ print_wild_statement (lang_wild_statement_type *w,
       name_list *tmp;
       minfo ("EXCLUDE_FILE(%s", w->exclude_name_list->name);
       for (tmp = w->exclude_name_list->next; tmp; tmp = tmp->next)
-        minfo (" %s", tmp->name);
+	minfo (" %s", tmp->name);
       minfo (") ");
     }
 
@@ -4444,40 +4444,40 @@ print_wild_statement (lang_wild_statement_type *w,
       int closing_paren = 0;
 
       switch (sec->spec.sorted)
-        {
-        case none:
-          break;
+	{
+	case none:
+	  break;
 
-        case by_name:
-          minfo ("SORT_BY_NAME(");
-          closing_paren = 1;
-          break;
+	case by_name:
+	  minfo ("SORT_BY_NAME(");
+	  closing_paren = 1;
+	  break;
 
-        case by_alignment:
-          minfo ("SORT_BY_ALIGNMENT(");
-          closing_paren = 1;
-          break;
+	case by_alignment:
+	  minfo ("SORT_BY_ALIGNMENT(");
+	  closing_paren = 1;
+	  break;
 
-        case by_name_alignment:
-          minfo ("SORT_BY_NAME(SORT_BY_ALIGNMENT(");
-          closing_paren = 2;
-          break;
+	case by_name_alignment:
+	  minfo ("SORT_BY_NAME(SORT_BY_ALIGNMENT(");
+	  closing_paren = 2;
+	  break;
 
-        case by_alignment_name:
-          minfo ("SORT_BY_ALIGNMENT(SORT_BY_NAME(");
-          closing_paren = 2;
-          break;
+	case by_alignment_name:
+	  minfo ("SORT_BY_ALIGNMENT(SORT_BY_NAME(");
+	  closing_paren = 2;
+	  break;
 
-        case by_none:
-          minfo ("SORT_NONE(");
-          closing_paren = 1;
-          break;
+	case by_none:
+	  minfo ("SORT_NONE(");
+	  closing_paren = 1;
+	  break;
 
-        case by_init_priority:
-          minfo ("SORT_BY_INIT_PRIORITY(");
-          closing_paren = 1;
-          break;
-        }
+	case by_init_priority:
+	  minfo ("SORT_BY_INIT_PRIORITY(");
+	  closing_paren = 1;
+	  break;
+	}
 
       if (sec->spec.exclude_name_list != NULL)
 	{
@@ -4492,7 +4492,7 @@ print_wild_statement (lang_wild_statement_type *w,
       else
 	minfo ("*");
       for (;closing_paren > 0; closing_paren--)
-        minfo (")");
+	minfo (")");
       if (sec->next)
 	minfo (" ");
     }
@@ -6419,7 +6419,7 @@ ldlang_place_orphan (asection *s)
       int constraint = 0;
 
       if (config.orphan_handling == orphan_handling_error)
-	einfo ("%X%P: error: unplaced orphan section `%A' from `%B'.\n",
+	einfo (_("%X%P: error: unplaced orphan section `%A' from `%B'.\n"),
 	       s, s->owner);
 
       if (config.unique_orphan_sections || unique_section_p (s, NULL))
@@ -6437,8 +6437,8 @@ ldlang_place_orphan (asection *s)
 	}
 
       if (config.orphan_handling == orphan_handling_warn)
-	einfo ("%P: warning: orphan section `%A' from `%B' being "
-	       "placed in section `%s'.\n",
+	einfo (_("%P: warning: orphan section `%A' from `%B' being "
+		 "placed in section `%s'.\n"),
 	       s, s->owner, os->name);
     }
 }
@@ -8035,6 +8035,7 @@ lang_leave_overlay (etree_type *lma_expr,
   overlay_vma = NULL;
   overlay_list = NULL;
   overlay_max = NULL;
+  overlay_subalign = NULL;
 }
 
 /* Version handling.  This is only useful for ELF.  */

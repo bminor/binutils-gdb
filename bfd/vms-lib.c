@@ -2305,7 +2305,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
   return TRUE;
 
  input_err:
-  bfd_set_error (bfd_error_on_input, current, bfd_get_error ());
+  bfd_set_input_error (current, bfd_get_error ());
   return FALSE;
 }
 

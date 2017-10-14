@@ -114,6 +114,8 @@ struct cmd_list_element
       {
 	/* If type is not_set_cmd, call it like this: */
 	cmd_cfunc_ftype *cfunc;
+	/* ... or like this.  */
+	cmd_const_cfunc_ftype *const_cfunc;
 	/* If type is set_cmd or show_cmd, first set the variables,
 	   and then call this: */
 	cmd_sfunc_ftype *sfunc;
@@ -226,7 +228,7 @@ extern void apropos_cmd (struct ui_file *, struct cmd_list_element *,
    function field NULL, the command is interpreted as a help topic, or
    as a class of commands.  */
 
-extern void not_just_help_class_command (char *arg, int from_tty);
+extern void not_just_help_class_command (const char *arg, int from_tty);
 
 /* Exported to cli/cli-setshow.c */
 

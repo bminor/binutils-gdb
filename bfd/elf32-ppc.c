@@ -1821,56 +1821,6 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 };
-
-/* External 32-bit PPC structure for PRPSINFO.  This structure is
-   ABI-defined, thus we choose to use char arrays here in order to
-   avoid dealing with different types in different architectures.
-
-   The PPC 32-bit structure uses int for `pr_uid' and `pr_gid' while
-   most non-PPC architectures use `short int'.
-
-   This structure will ultimately be written in the corefile's note
-   section, as the PRPSINFO.  */
-
-struct elf_external_ppc_linux_prpsinfo32
-  {
-    char pr_state;			/* Numeric process state.  */
-    char pr_sname;			/* Char for pr_state.  */
-    char pr_zomb;			/* Zombie.  */
-    char pr_nice;			/* Nice val.  */
-    char pr_flag[4];			/* Flags.  */
-    char pr_uid[4];
-    char pr_gid[4];
-    char pr_pid[4];
-    char pr_ppid[4];
-    char pr_pgrp[4];
-    char pr_sid[4];
-    char pr_fname[16];			/* Filename of executable.  */
-    char pr_psargs[80];			/* Initial part of arg list.  */
-  };
-
-/* Helper function to copy an elf_internal_linux_prpsinfo in host
-   endian to an elf_external_ppc_linux_prpsinfo32 in target endian.  */
-
-static inline void
-swap_ppc_linux_prpsinfo32_out (bfd *obfd,
-			       const struct elf_internal_linux_prpsinfo *from,
-			       struct elf_external_ppc_linux_prpsinfo32 *to)
-{
-  bfd_put_8 (obfd, from->pr_state, &to->pr_state);
-  bfd_put_8 (obfd, from->pr_sname, &to->pr_sname);
-  bfd_put_8 (obfd, from->pr_zomb, &to->pr_zomb);
-  bfd_put_8 (obfd, from->pr_nice, &to->pr_nice);
-  bfd_put_32 (obfd, from->pr_flag, to->pr_flag);
-  bfd_put_32 (obfd, from->pr_uid, to->pr_uid);
-  bfd_put_32 (obfd, from->pr_gid, to->pr_gid);
-  bfd_put_32 (obfd, from->pr_pid, to->pr_pid);
-  bfd_put_32 (obfd, from->pr_ppid, to->pr_ppid);
-  bfd_put_32 (obfd, from->pr_pgrp, to->pr_pgrp);
-  bfd_put_32 (obfd, from->pr_sid, to->pr_sid);
-  strncpy (to->pr_fname, from->pr_fname, sizeof (to->pr_fname));
-  strncpy (to->pr_psargs, from->pr_psargs, sizeof (to->pr_psargs));
-}
 
 /* Initialize the ppc_elf_howto_table, so that linear accesses can be done.  */
 
@@ -2406,20 +2356,6 @@ ppc_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
   }
 
   return TRUE;
-}
-
-char *
-elfcore_write_ppc_linux_prpsinfo32
-  (bfd *abfd,
-   char *buf,
-   int *bufsiz,
-   const struct elf_internal_linux_prpsinfo *prpsinfo)
-{
-  struct elf_external_ppc_linux_prpsinfo32 data;
-
-  swap_ppc_linux_prpsinfo32_out (abfd, prpsinfo, &data);
-  return elfcore_write_note (abfd, buf, bufsiz,
-			     "CORE", NT_PRPSINFO, &data, sizeof (data));
 }
 
 static char *
@@ -3241,13 +3177,6 @@ must_be_dyn_reloc (struct bfd_link_info *info,
       return bfd_link_dll (info);
     }
 }
-
-/* Whether an undefined weak symbol should resolve to its link-time
-   value, even in PIC or PIE objects.  */
-#define UNDEFWEAK_NO_DYNAMIC_RELOC(INFO, H)		\
-  ((H)->root.type == bfd_link_hash_undefweak		\
-   && (ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT	\
-       || (INFO)->dynamic_undefined_weak == 0))
 
 /* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
    copying dynamic variables from a shared lib into an app's dynbss
@@ -5674,7 +5603,8 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 /* Return true if we have dynamic relocs that apply to read-only sections.  */
 
 static bfd_boolean
-readonly_dynrelocs (struct elf_link_hash_entry *h)
+readonly_dynrelocs (struct elf_link_hash_entry *h,
+		    struct bfd_link_info *info)
 {
   struct elf_dyn_relocs *p;
 
@@ -5685,7 +5615,13 @@ readonly_dynrelocs (struct elf_link_hash_entry *h)
       if (s != NULL
 	  && ((s->flags & (SEC_READONLY | SEC_ALLOC))
 	      == (SEC_READONLY | SEC_ALLOC)))
-	return TRUE;
+	{
+	  if (info)
+	    info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+				    p->sec->owner, p->sec);
+
+	  return TRUE;
+	}
     }
   return FALSE;
 }
@@ -5763,7 +5699,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	       || (!h->ref_regular_nonweak && h->non_got_ref))
 	      && !htab->is_vxworks
 	      && !ppc_elf_hash_entry (h)->has_sda_refs
-	      && !readonly_dynrelocs (h))
+	      && !readonly_dynrelocs (h, NULL))
 	    {
 	      h->pointer_equality_needed = 0;
 	      /* After adjust_dynamic_symbol, non_got_ref set in the
@@ -5846,7 +5782,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       && !ppc_elf_hash_entry (h)->has_sda_refs
       && !htab->is_vxworks
       && !h->def_regular
-      && !readonly_dynrelocs (h))
+      && !readonly_dynrelocs (h, NULL))
     {
       h->non_got_ref = 0;
       return TRUE;
@@ -6335,14 +6271,17 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
    read-only sections.  */
 
 static bfd_boolean
-maybe_set_textrel (struct elf_link_hash_entry *h, void *info)
+maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 {
+  struct bfd_link_info *info;
+
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  if (readonly_dynrelocs (h))
+  info = (struct bfd_link_info *) info_p;
+  if (readonly_dynrelocs (h, info))
     {
-      ((struct bfd_link_info *) info)->flags |= DF_TEXTREL;
+      info->flags |= DF_TEXTREL;
 
       /* Not an error, just cut short the traversal.  */
       return FALSE;
@@ -6447,7 +6386,11 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 		  if ((p->sec->output_section->flags
 		       & (SEC_READONLY | SEC_ALLOC))
 		      == (SEC_READONLY | SEC_ALLOC))
-		    info->flags |= DF_TEXTREL;
+		    {
+		      info->flags |= DF_TEXTREL;
+		      info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
+					      p->sec->owner, p->sec);
+		    }
 		}
 	    }
 	}
@@ -7951,7 +7894,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  wrel->r_addend = 0;
 
 	  /* For ld -r, remove relocations in debug sections against
-	     sections defined in discarded sections.  Not done for
+	     symbols defined in discarded sections.  Not done for
 	     non-debug to preserve relocs in .eh_frame which the
 	     eh_frame editing code expects to be present.  */
 	  if (bfd_link_relocatable (info)

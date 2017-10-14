@@ -54,7 +54,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 {
   if (bfd_link_relocatable (&link_info)
       && !_bfd_elf_size_group_sections (&link_info))
-    einfo ("%X%P: can not size group sections: %E\n");
+    einfo (_("%X%P: can not size group sections: %E\n"));
   before_allocation_default ();
 }
 

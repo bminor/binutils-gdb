@@ -2,7 +2,7 @@
 # Based on i386coff.sc by Ian Taylor <ian@cygnus.com>.
 #
 # Copyright (C) 2014-2017 Free Software Foundation, Inc.
-# 
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
@@ -45,12 +45,12 @@ SECTIONS
     ${RELOCATING+ edata  =  .};
   }
   .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
-  { 					
+  {
     *(.bss)
     *(COMMON)
     ${RELOCATING+ end = .};
   }
-  .stab  0 ${RELOCATING+(NOLOAD)} : 
+  .stab  0 ${RELOCATING+(NOLOAD)} :
   {
     [ .stab ]
   }
