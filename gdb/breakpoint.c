@@ -226,10 +226,6 @@ static int is_hardware_watchpoint (const struct breakpoint *bpt);
 
 static void insert_breakpoint_locations (void);
 
-static void enable_trace_command (char *, int);
-
-static void disable_trace_command (char *, int);
-
 static void trace_pass_command (const char *, int);
 
 static void set_tracepoint_count (int num);
@@ -14928,7 +14924,7 @@ info_tracepoints_command (const char *args, int from_tty)
 /* The 'enable trace' command enables tracepoints.
    Not supported by all targets.  */
 static void
-enable_trace_command (char *args, int from_tty)
+enable_trace_command (const char *args, int from_tty)
 {
   enable_command (args, from_tty);
 }
@@ -14936,7 +14932,7 @@ enable_trace_command (char *args, int from_tty)
 /* The 'disable trace' command disables tracepoints.
    Not supported by all targets.  */
 static void
-disable_trace_command (char *args, int from_tty)
+disable_trace_command (const char *args, int from_tty)
 {
   disable_command (args, from_tty);
 }

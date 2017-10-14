@@ -880,10 +880,6 @@ value_contents_eq (const struct value *val1, LONGEST offset1,
 				 length * TARGET_CHAR_BIT);
 }
 
-/* Prototypes for local functions.  */
-
-static void show_values (char *, int);
-
 
 /* The value-history records all the values printed
    by print commands during this session.  Each chunk
@@ -1963,7 +1959,7 @@ access_value_history (int num)
 }
 
 static void
-show_values (char *num_exp, int from_tty)
+show_values (const char *num_exp, int from_tty)
 {
   int i;
   struct value *val;

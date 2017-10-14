@@ -44,10 +44,6 @@
 #include "cli/cli-utils.h"
 #include "cli/cli-setshow.h"
 
-static void maintenance_internal_error (char *args, int from_tty);
-
-static void maintenance_space_display (char *, int);
-
 static void maintenance_do_deprecate (const char *, int);
 
 /* Set this to the maximum number of seconds to wait instead of waiting forever
@@ -98,7 +94,7 @@ maintenance_dump_me (const char *args, int from_tty)
    GDB.  */
 
 static void
-maintenance_internal_error (char *args, int from_tty)
+maintenance_internal_error (const char *args, int from_tty)
 {
   internal_error (__FILE__, __LINE__, "%s", (args == NULL ? "" : args));
 }
@@ -109,7 +105,7 @@ maintenance_internal_error (char *args, int from_tty)
    GDB.  */
 
 static void
-maintenance_internal_warning (char *args, int from_tty)
+maintenance_internal_warning (const char *args, int from_tty)
 {
   internal_warning (__FILE__, __LINE__, "%s", (args == NULL ? "" : args));
 }
@@ -118,7 +114,7 @@ maintenance_internal_warning (char *args, int from_tty)
    demangler problem is detected.  Allows testing of the mechanism.  */
 
 static void
-maintenance_demangler_warning (char *args, int from_tty)
+maintenance_demangler_warning (const char *args, int from_tty)
 {
   demangler_warning (__FILE__, __LINE__, "%s", (args == NULL ? "" : args));
 }
@@ -143,7 +139,7 @@ maintenance_time_display (const char *args, int from_tty)
 }
 
 static void
-maintenance_space_display (char *args, int from_tty)
+maintenance_space_display (const char *args, int from_tty)
 {
   if (args == NULL || *args == '\0')
     printf_unfiltered ("\"maintenance space\" takes a numeric argument.\n");
@@ -394,7 +390,7 @@ maintenance_print_statistics (const char *args, int from_tty)
 }
 
 static void
-maintenance_print_architecture (char *args, int from_tty)
+maintenance_print_architecture (const char *args, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
 
@@ -429,11 +425,11 @@ maintenance_print_command (const char *arg, int from_tty)
    or   maintenance translate-address <addr>.  */
 
 static void
-maintenance_translate_address (char *arg, int from_tty)
+maintenance_translate_address (const char *arg, int from_tty)
 {
   CORE_ADDR address;
   struct obj_section *sect;
-  char *p;
+  const char *p;
   struct bound_minimal_symbol sym;
   struct objfile *objfile;
 
@@ -449,12 +445,13 @@ maintenance_translate_address (char *arg, int from_tty)
 	p++;
       if (*p == '\000')		/* End of command?  */
 	error (_("Need to specify <section-name> and <address>"));
-      *p++ = '\000';
-      p = skip_spaces (p);
+
+      int arg_len = p - arg;
+      p = skip_spaces (p + 1);
 
       ALL_OBJSECTIONS (objfile, sect)
       {
-	if (strcmp (sect->the_bfd_section->name, arg) == 0)
+	if (strncmp (sect->the_bfd_section->name, arg, arg_len) == 0)
 	  break;
       }
 
@@ -946,7 +943,7 @@ maintenance_selftest (const char *args, int from_tty)
 }
 
 static void
-maintenance_info_selftests (char *arg, int from_tty)
+maintenance_info_selftests (const char *arg, int from_tty)
 {
   printf_filtered ("Registered selftests:\n");
   selftests::for_each_selftest ([] (const std::string &name) {

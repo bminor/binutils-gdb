@@ -452,7 +452,7 @@ do_assign (CORE_ADDR start, size_t bcnt, int version)
      adi (examine|x)/count <addr> */
 
 static void
-adi_examine_command (char *args, int from_tty)
+adi_examine_command (const char *args, int from_tty)
 {
   /* make sure program is active and adi is available */
   if (!target_has_execution)
@@ -464,7 +464,7 @@ adi_examine_command (char *args, int from_tty)
   pid_t pid = ptid_get_pid (inferior_ptid);
   sparc64_adi_info *proc = get_adi_info_proc (pid);
   int cnt = 1;
-  char *p = args;
+  const char *p = args;
   if (p && *p == '/')
     {
       p++;
@@ -487,7 +487,7 @@ adi_examine_command (char *args, int from_tty)
      adi (assign|a)/count <addr> = <version>  */
 
 static void
-adi_assign_command (char *args, int from_tty)
+adi_assign_command (const char *args, int from_tty)
 {
   /* make sure program is active and adi is available */
   if (!target_has_execution)
@@ -496,7 +496,7 @@ adi_assign_command (char *args, int from_tty)
   if (!adi_available ())
     error (_("No ADI information"));
 
-  char *exp = args;
+  const char *exp = args;
   if (exp == 0)
     error_no_arg (_("Usage: adi assign|a[/count] <addr> = <version>"));
 
@@ -507,7 +507,7 @@ adi_assign_command (char *args, int from_tty)
     error (_("Usage: adi assign|a[/count] <addr> = <version>"));
 
   size_t cnt = 1;
-  char *p = args;
+  const char *p = args;
   if (exp && *exp == '/')
     {
       p = exp + 1;

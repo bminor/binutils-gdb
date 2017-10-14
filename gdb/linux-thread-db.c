@@ -1580,7 +1580,7 @@ info_auto_load_libthread_db_compare (const void *ap, const void *bp)
 /* Implement 'info auto-load libthread-db'.  */
 
 static void
-info_auto_load_libthread_db (char *args, int from_tty)
+info_auto_load_libthread_db (const char *args, int from_tty)
 {
   struct ui_out *uiout = current_uiout;
   const char *cs = args ? args : "";

@@ -1020,7 +1020,7 @@ display_selector (HANDLE thread, DWORD sel)
 }
 
 static void
-display_selectors (char * args, int from_tty)
+display_selectors (const char * args, int from_tty)
 {
   if (!current_thread)
     {

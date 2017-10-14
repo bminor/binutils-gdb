@@ -113,8 +113,6 @@ struct cmd_list_element
     union
       {
 	/* If type is not_set_cmd, call it like this: */
-	cmd_cfunc_ftype *cfunc;
-	/* ... or like this.  */
 	cmd_const_cfunc_ftype *const_cfunc;
 	/* If type is set_cmd or show_cmd, first set the variables,
 	   and then call this: */

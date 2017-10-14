@@ -101,22 +101,6 @@ print_help_for_command (struct cmd_list_element *c, const char *prefix,
    bounce function (unless cfunc / sfunc is NULL that is).  */
 
 static void
-do_cfunc (struct cmd_list_element *c, char *args, int from_tty)
-{
-  c->function.cfunc (args, from_tty);
-}
-
-static void
-set_cmd_cfunc (struct cmd_list_element *cmd, cmd_cfunc_ftype *cfunc)
-{
-  if (cfunc == NULL)
-    cmd->func = NULL;
-  else
-    cmd->func = do_cfunc;
-  cmd->function.cfunc = cfunc;
-}
-
-static void
 do_const_cfunc (struct cmd_list_element *c, char *args, int from_tty)
 {
   c->function.const_cfunc (args, from_tty);
@@ -146,12 +130,6 @@ set_cmd_sfunc (struct cmd_list_element *cmd, cmd_sfunc_ftype *sfunc)
   else
     cmd->func = do_sfunc;
   cmd->function.sfunc = sfunc;
-}
-
-int
-cmd_cfunc_eq (struct cmd_list_element *cmd, cmd_cfunc_ftype *cfunc)
-{
-  return cmd->func == do_cfunc && cmd->function.cfunc == cfunc;
 }
 
 int
@@ -281,21 +259,12 @@ do_add_cmd (const char *name, enum command_class theclass,
 }
 
 struct cmd_list_element *
-add_cmd (const char *name, enum command_class theclass, cmd_cfunc_ftype *fun,
-	 const char *doc, struct cmd_list_element **list)
-{
-  cmd_list_element *result = do_add_cmd (name, theclass, doc, list);
-  set_cmd_cfunc (result, fun);
-  return result;
-}
-
-struct cmd_list_element *
 add_cmd (const char *name, enum command_class theclass,
 	 const char *doc, struct cmd_list_element **list)
 {
   cmd_list_element *result = do_add_cmd (name, theclass, doc, list);
   result->func = NULL;
-  result->function.cfunc = NULL; /* Ok.  */
+  result->function.const_cfunc = NULL;
   return result;
 }
 
@@ -1960,6 +1929,5 @@ int
 cli_user_command_p (struct cmd_list_element *cmd)
 {
   return (cmd->theclass == class_user
-	  && (cmd->func == do_cfunc || cmd->func == do_sfunc
-	      || cmd->func == do_const_cfunc));
+	  && (cmd->func == do_const_cfunc || cmd->func == do_sfunc));
 }

@@ -411,7 +411,7 @@ init_source_path (void)
 /* Add zero or more directories to the front of the source path.  */
 
 static void
-directory_command (char *dirname, int from_tty)
+directory_command (const char *dirname, int from_tty)
 {
   dont_repeat ();
   /* FIXME, this goes to "delete dir"...  */

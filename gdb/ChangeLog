@@ -1,5 +1,53 @@
 2017-11-07  Tom Tromey  <tom@tromey.com>
 
+	* go32-nat.c (go32_sysinfo, go32_sldt, go32_sgdt, go32_sidt)
+	(go32_pde, go32_pte, go32_pte_for_address): Constify.
+	* gnu-nat.c (_parse_bool_arg, show_thread_default_pause_cmd)
+	(set_thread_default_pause_cmd, set_thread_default_run_cmd)
+	(show_thread_default_run_cmd, set_thread_default_detach_sc_cmd)
+	(parse_int_arg, show_thread_default_detach_sc_cmd)
+	(set_signals_cmd, show_signals_cmd, set_sig_thread_cmd)
+	(show_sig_thread_cmd, set_stopped_cmd, show_stopped_cmd)
+	(set_exceptions_cmd, show_exceptions_cmd, set_task_pause_cmd)
+	(show_task_pause_cmd, set_task_detach_sc_cmd)
+	(show_task_detach_sc_cmd, set_task_exc_port_cmd)
+	(set_noninvasive_cmd, set_thread_pause_cmd)
+	(show_thread_pause_cmd, set_thread_run_cmd, show_thread_run_cmd)
+	(set_thread_detach_sc_cmd, show_thread_detach_sc_cmd)
+	(set_thread_exc_port_cmd, thread_takeover_sc_cmd): Constify.
+	* windows-nat.c (display_selectors): Constify.
+	* cli/cli-decode.h (struct cmd_list_element) <function>: Remove
+	non-const "cfunc".
+	* cli/cli-decode.c (set_cmd_cfunc): Remove non-const overload.
+	(cmd_cfunc_eq): Likewise.
+	(struct cmd_list_element): Likewise.
+	(do_cfunc): Remove.
+	(cli_user_command_p): Update.
+	* command.h (add_cmd): Remove non-const overload.
+	(cmd_cfunc_ftype): Remove typedef.
+	(cmd_cfunc_eq): Remove non-const overload.
+	* value.c (show_values): Constify.
+	* thread.c (thread_apply_all_command): Constify.
+	* symfile.c (load_command): Constify.
+	* source.c (directory_command): Constify.
+	* maint.c (maintenance_internal_error)
+	(maintenance_demangler_warning, maintenance_space_display)
+	(maintenance_print_architecture, maintenance_translate_address)
+	(maintenance_info_selftests, maintenance_internal_warning):
+	Constify.
+	* breakpoint.c (disable_trace_command, enable_trace_command):
+	Constify.
+	* auto-load.c (info_auto_load_local_gdbinit, add_auto_load_dir):
+	Constify.
+	(add_auto_load_safe_path): Constify.
+	* guile/scm-auto-load.c (info_auto_load_guile_scripts): Constify.
+	* top.h (show_commands): Constify.
+	* linux-thread-db.c (info_auto_load_libthread_db): Constify.
+	* sparc64-tdep.c (adi_examine_command): Constify.
+	(adi_assign_command): Constify.
+
+2017-11-07  Tom Tromey  <tom@tromey.com>
+
 	* frame.h (info_locals_command, info_args_command): Constify.
 	* auto-load.h (auto_load_info_scripts): Constify.
 	* inferior.h (registers_info): Constify.

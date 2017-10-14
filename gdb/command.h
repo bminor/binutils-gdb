@@ -116,7 +116,6 @@ var_types;
 /* This structure records one command'd definition.  */
 struct cmd_list_element;
 
-typedef void cmd_cfunc_ftype (char *args, int from_tty);
 typedef void cmd_const_cfunc_ftype (const char *args, int from_tty);
 
 /* This structure specifies notifications to be suppressed by a cli
@@ -135,11 +134,6 @@ extern struct cli_suppress_notification cli_suppress_notification;
 /* API to the manipulation of command lists.  */
 
 extern int valid_user_defined_cmd_name_p (const char *name);
-
-extern struct cmd_list_element *add_cmd (const char *, enum command_class,
-					 cmd_cfunc_ftype *fun,
-					 const char *,
-					 struct cmd_list_element **);
 
 /* Const-correct variant of the above.  */
 
@@ -212,8 +206,6 @@ extern void set_cmd_completer_handle_brkchars (struct cmd_list_element *,
 
 /* HACK: cagney/2002-02-23: Code, mostly in tracepoints.c, grubs
    around in cmd objects to test the value of the commands sfunc().  */
-extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
-			 cmd_cfunc_ftype *cfun);
 extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
 			 cmd_const_cfunc_ftype *cfun);
 

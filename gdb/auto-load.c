@@ -301,7 +301,7 @@ show_auto_load_safe_path (struct ui_file *file, int from_tty,
    variable.  */
 
 static void
-add_auto_load_safe_path (char *args, int from_tty)
+add_auto_load_safe_path (const char *args, int from_tty)
 {
   char *s;
 
@@ -322,7 +322,7 @@ Use 'set auto-load safe-path /' for disabling the auto-load safe-path security.\
    variable.  */
 
 static void
-add_auto_load_dir (char *args, int from_tty)
+add_auto_load_dir (const char *args, int from_tty)
 {
   char *s;
 
@@ -1381,7 +1381,7 @@ info_auto_load_gdb_scripts (const char *pattern, int from_tty)
 /* Implement 'info auto-load local-gdbinit'.  */
 
 static void
-info_auto_load_local_gdbinit (char *args, int from_tty)
+info_auto_load_local_gdbinit (const char *args, int from_tty)
 {
   if (auto_load_local_gdbinit_pathname == NULL)
     printf_filtered (_("Local .gdbinit file was not found.\n"));

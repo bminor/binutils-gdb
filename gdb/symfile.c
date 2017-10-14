@@ -84,8 +84,6 @@ int readnow_symbol_files;	/* Read full symbols immediately.  */
 
 /* Functions this file defines.  */
 
-static void load_command (char *, int);
-
 static void symbol_file_add_main_1 (const char *args, symfile_add_flags add_flags,
 				    objfile_flags flags);
 
@@ -1791,7 +1789,7 @@ find_sym_fns (bfd *abfd)
 /* This function runs the load command of our current target.  */
 
 static void
-load_command (char *arg, int from_tty)
+load_command (const char *arg, int from_tty)
 {
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
@@ -1804,7 +1802,7 @@ load_command (char *arg, int from_tty)
 
   if (arg == NULL)
     {
-      char *parg;
+      const char *parg;
       int count = 0;
 
       parg = arg = get_exec_file (1);
@@ -1821,7 +1819,7 @@ load_command (char *arg, int from_tty)
 	  /* We need to quote this string so buildargv can pull it apart.  */
 	  char *temp = (char *) xmalloc (strlen (arg) + count + 1 );
 	  char *ptemp = temp;
-	  char *prev;
+	  const char *prev;
 
 	  make_cleanup (xfree, temp);
 
