@@ -1,0 +1,5445 @@
+From 6b39df0fd4db096b15d2d9e0aa1778dd545b15f9 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Sun, 8 Oct 2017 20:54:44 -0700
+Subject: [PATCH] ELF: Call check_relocs after opening all inputs
+
+For all ELF targers, call check_relocs after opening all inputs and
+garbage collection.  Since the symbol resolution is known, check_relocs
+can be simplified.  Also garbage collection doesn't need to undo what
+check_relocs has done for symbols which have been garbage collected.
+Since ELF targets never see the removed sections, gc_sweep_hook can be
+removed from elf_backend_data and we can avoid GOT/PLT with garbage
+collection now.
+
+Set link_info.check_relocs_after_open_input to TRUE for all linker
+targets which use ELF linker and update garbage collection tests to
+remove unused GOT section.
+
+ldemul_after_check_relocs is added for powerpc to support --secure-plt,
+--bss-plt and --sdata-got.
+
+Tested natively without regressions on i686, x86-64 and x32.  Tested
+cross binutils on x86-64 without regressions for aarch64-linux,
+alpha-linux, arm-linux, bfin-elf, cr16-elf, cris-elf, crx-elf, frv-linux,
+hppa64-linux, hppa-linux, ia64-linux, lm32-elf, m32r-elf, m68k-linux,
+mcore-elf, metag-elf, microblaze-linux, mips-linux, mmix, mn10300-elf,
+nds32le-linux, nios2-linux, or1k-elf, powerpc64-linux, powerpc-linux,
+riscv32-linux, riscv64-linux, s390-linux, s390x-linux, score-elf,
+sh3-linux, sparc64-linux, sparc-linux, tic6x-elf, tilegx-linux,
+tilepro-linux, vax-linux, x86_64-mingw32 and xtensa-linux.
+
+bfd/
+
+	* elf-bfd.h (elf_backend_data): Remove gc_sweep_hook.
+	* elf32-arm.c (elf32_arm_gc_sweep_hook): Removed.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-bfin.c (bfin_gc_sweep_hook): Likewise.
+	(bfinfdpic_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-cr16.c (elf32_cr16_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-cris.c (cris_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-hppa.c (elf32_hppa_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-lm32.c (lm32_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-m32r.c (m32r_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-m68k.c (elf_m68k_got_entry): Remove elf_m68k_gc_sweep_hook
+	from comments.
+	(elf_m68k_remove_got_entry_type): Removed.
+	(elf_m68k_find_got_entry_ptr): Likewise.
+	(elf_m68k_remove_got_entry): Likewise.
+	(elf_m68k_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-mcore.c (mcore_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-metag.c (elf_metag_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-microblaze.c (elf_backend_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-mips.c (elf_backend_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-nds32.c (nds32_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-nios2.c (nios2_elf32_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-or1k.c (or1k_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-ppc.c (ppc_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-s390.c (elf_s390_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-sparc.c (elf_backend_gc_sweep_hook): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-tilegx.c (elf_backend_gc_sweep_hook): Likewise.
+	* elf32-tilepro.c (tilepro_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-vax.c (elf_vax_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-xtensa.c (elf_xtensa_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf64-alpha.c (elf64_alpha_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf64-mips.c (elf_backend_gc_sweep_hook): Likewise.
+	* elf64-mmix.c (mmix_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf64-ppc.c (elf_backend_gc_sweep_hook): Likewise.
+	(ppc64_elf_gc_sweep_hook): Likewise.
+	* elf64-s390.c (elf_s390_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf64-sparc.c (elf_backend_gc_sweep_hook): Likewise.
+	* elf64-tilegx.c (elf_backend_gc_sweep_hook): Likewise.
+	* elflink.c (elf_link_add_object_symbols): Don't call
+	_bfd_elf_link_check_relocs here.
+	(gc_sweep_hook_fn): Removed.
+	(elf_gc_sweep): Remove gc_sweep_hook.
+	* elfnn-aarch64.c (elfNN_aarch64_gc_sweep_hook): Removed.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elfnn-riscv.c (riscv_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_gc_sweep_hook): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_gc_sweep_hook): Likewise.
+	* elfxx-sparc.h (_bfd_sparc_elf_gc_sweep_hook): Likewise.
+	* elfxx-target.h (elf_backend_gc_sweep_hook): Likewise.
+	(elfNN_bed): Remove elf_backend_gc_sweep_hook.
+	* elfxx-tilegx.c (tilegx_elf_gc_sweep_hook): Removed.
+	* elfxx-tilegx.h (tilegx_elf_gc_sweep_hook): Removed.
+
+ld/
+
+	* emulparams/elf32_x86_64.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Removed.
+	* emulparams/elf_i386_be.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_i386_chaos.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_i386_ldso.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_i386_vxworks.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_iamcu.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_k1om.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_l1om.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_x86_64.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/i386lynx.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/i386moss.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/i386nto.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/i386nw.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/shelf.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/shelf32.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/shelf_nto.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/shelf_vxworks.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/shlelf32_linux.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/shlelf_linux.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/shlelf_nto.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emultempl/aarch64elf.em (gld${EMULATION_NAME}_before_parse):
+	Set link_info.check_relocs_after_open_input to TRUE.
+	* emultempl/armelf.em (gld${EMULATION_NAME}_before_parse):
+	Likewise.
+	* emultempl/scoreelf.em (gld${EMULATION_NAME}_before_parse):
+	Likewise.
+	* emultempl/aix.em (ld_${EMULATION_NAME}_emulation): Add
+	after_parse_default.
+	* emultempl/armcoff.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/beos.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/generic.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/gld960.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/gld960c.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/lnk960.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/m68kcoff.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/msp430.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/pe.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/pep.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/sunos.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/ticoff.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/vanilla.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Always
+	set link_info.check_relocs_after_open_input to TRUE.
+	(ld_${EMULATION_NAME}_emulation): Add $LDEMUL_AFTER_CHECK_RELOCS.
+	* emultempl/linux.em (gld${EMULATION_NAME}_before_parse):
+	Set link_info.check_relocs_after_open_input to TRUE.
+	(ld_${EMULATION_NAME}_emulation): Add after_check_relocs_default.
+	* emultempl/mmix-elfnmmo.em (mmix_before_parse): New function.
+	(LDEMUL_BEFORE_PARSE): New.
+	* emultempl/mmixelf.em (elfmmix_before_parse): Replace
+	gld${EMULATION_NAME}_before_parse with mmix_before_parse.
+	* emultempl/ppc32elf.em (ppc_after_open): Renamed to ...
+	(ppc_after_check_relocs): This.  Call after_check_relocs_default
+	instead of gld${EMULATION_NAME}_after_open.
+	(LDEMUL_AFTER_OPEN): Removed.
+	(LDEMUL_AFTER_CHECK_RELOCS): New.
+	* ldemul.c (ldemul_after_check_relocs): New.
+	(after_check_relocs_default): Likewise.
+	* ldemul.h (ldemul_after_check_relocs): Likewise.
+	(after_check_relocs_default): Likewise.
+	(ld_emulation_xfer_struct): Add after_check_relocs.
+	* ldlang.c (lang_process): Call ldemul_after_check_relocs after
+	lang_check_relocs.
+	* testsuite/ld-aarch64/gc-got-relocs.d: Don't expect GOT section.
+	* testsuite/ld-aarch64/gc-tls-relocs.d: Likewise.
+	* testsuite/ld-cris/tls-gc-68.d: Likewise.
+	* testsuite/ld-cris/tls-gc-69.d: Likewise.
+	* testsuite/ld-cris/tls-gc-70.d: Likewise.
+	* testsuite/ld-cris/tls-gc-75.d: Likewise.
+	* testsuite/ld-cris/tls-gc-79.d: Likewise.
+	* testsuite/ld-mmix/bpo-10.d: Don't expect .MMIX.reg_contents
+	section.
+---
+ bfd/elf-bfd.h                           |   6 -
+ bfd/elf32-arm.c                         | 194 -------------------------------
+ bfd/elf32-bfin.c                        | 189 ------------------------------
+ bfd/elf32-cr16.c                        |  13 ---
+ bfd/elf32-cris.c                        | 188 ------------------------------
+ bfd/elf32-hppa.c                        | 125 --------------------
+ bfd/elf32-lm32.c                        |  56 ---------
+ bfd/elf32-m32r.c                        | 117 -------------------
+ bfd/elf32-m68k.c                        | 196 +-------------------------------
+ bfd/elf32-mcore.c                       |  12 --
+ bfd/elf32-metag.c                       | 126 --------------------
+ bfd/elf32-microblaze.c                  |  12 --
+ bfd/elf32-mips.c                        |   1 -
+ bfd/elf32-nds32.c                       | 133 ----------------------
+ bfd/elf32-nios2.c                       | 105 -----------------
+ bfd/elf32-or1k.c                        |  56 ---------
+ bfd/elf32-ppc.c                         | 177 ----------------------------
+ bfd/elf32-s390.c                        | 175 ----------------------------
+ bfd/elf32-sparc.c                       |   1 -
+ bfd/elf32-tic6x.c                       |  85 --------------
+ bfd/elf32-tilegx.c                      |   1 -
+ bfd/elf32-tilepro.c                     | 165 ---------------------------
+ bfd/elf32-vax.c                         |  63 ----------
+ bfd/elf32-xtensa.c                      | 132 ---------------------
+ bfd/elf64-alpha.c                       |  67 -----------
+ bfd/elf64-mips.c                        |   1 -
+ bfd/elf64-mmix.c                        |  28 -----
+ bfd/elf64-ppc.c                         | 176 ----------------------------
+ bfd/elf64-s390.c                        | 181 -----------------------------
+ bfd/elf64-sparc.c                       |   2 -
+ bfd/elf64-tilegx.c                      |   1 -
+ bfd/elflink.c                           |  37 ------
+ bfd/elfnn-aarch64.c                     | 177 ----------------------------
+ bfd/elfnn-riscv.c                       |  95 ----------------
+ bfd/elfxx-mips.c                        |  60 ----------
+ bfd/elfxx-mips.h                        |   2 -
+ bfd/elfxx-sparc.c                       | 160 --------------------------
+ bfd/elfxx-sparc.h                       |   3 -
+ bfd/elfxx-target.h                      |   4 -
+ bfd/elfxx-tilegx.c                      | 189 ------------------------------
+ bfd/elfxx-tilegx.h                      |   4 -
+ ld/emulparams/elf32_x86_64.sh           |   1 -
+ ld/emulparams/elf_i386.sh               |   1 -
+ ld/emulparams/elf_i386_be.sh            |   1 -
+ ld/emulparams/elf_i386_chaos.sh         |   1 -
+ ld/emulparams/elf_i386_ldso.sh          |   1 -
+ ld/emulparams/elf_i386_vxworks.sh       |   1 -
+ ld/emulparams/elf_iamcu.sh              |   1 -
+ ld/emulparams/elf_k1om.sh               |   1 -
+ ld/emulparams/elf_l1om.sh               |   1 -
+ ld/emulparams/elf_x86_64.sh             |   1 -
+ ld/emulparams/i386lynx.sh               |   1 -
+ ld/emulparams/i386moss.sh               |   1 -
+ ld/emulparams/i386nto.sh                |   1 -
+ ld/emulparams/i386nw.sh                 |   1 -
+ ld/emulparams/shelf.sh                  |   4 -
+ ld/emulparams/shelf32.sh                |   3 -
+ ld/emulparams/shelf_nto.sh              |   3 -
+ ld/emulparams/shelf_vxworks.sh          |   3 -
+ ld/emulparams/shlelf32_linux.sh         |   3 -
+ ld/emulparams/shlelf_linux.sh           |   3 -
+ ld/emulparams/shlelf_nto.sh             |   3 -
+ ld/emultempl/aarch64elf.em              |   1 +
+ ld/emultempl/aix.em                     |   1 +
+ ld/emultempl/armcoff.em                 |   1 +
+ ld/emultempl/armelf.em                  |   1 +
+ ld/emultempl/beos.em                    |   1 +
+ ld/emultempl/elf32.em                   |   3 +-
+ ld/emultempl/generic.em                 |   1 +
+ ld/emultempl/gld960.em                  |   1 +
+ ld/emultempl/gld960c.em                 |   1 +
+ ld/emultempl/linux.em                   |   2 +
+ ld/emultempl/lnk960.em                  |   1 +
+ ld/emultempl/m68kcoff.em                |   1 +
+ ld/emultempl/mmix-elfnmmo.em            |  10 ++
+ ld/emultempl/mmixelf.em                 |   2 +-
+ ld/emultempl/msp430.em                  |   1 +
+ ld/emultempl/pe.em                      |   1 +
+ ld/emultempl/pep.em                     |   1 +
+ ld/emultempl/ppc32elf.em                |   6 +-
+ ld/emultempl/scoreelf.em                |   1 +
+ ld/emultempl/sunos.em                   |   1 +
+ ld/emultempl/ticoff.em                  |   1 +
+ ld/emultempl/vanilla.em                 |   1 +
+ ld/ldemul.c                             |  11 ++
+ ld/ldemul.h                             |   7 ++
+ ld/ldlang.c                             |   2 +
+ ld/testsuite/ld-aarch64/gc-got-relocs.d |  10 +-
+ ld/testsuite/ld-aarch64/gc-tls-relocs.d |  10 +-
+ ld/testsuite/ld-cris/tls-gc-68.d        |  22 ++--
+ ld/testsuite/ld-cris/tls-gc-69.d        |  22 ++--
+ ld/testsuite/ld-cris/tls-gc-70.d        |  23 ++--
+ ld/testsuite/ld-cris/tls-gc-75.d        |  22 ++--
+ ld/testsuite/ld-cris/tls-gc-79.d        |  23 ++--
+ ld/testsuite/ld-mmix/bpo-10.d           |   1 -
+ 95 files changed, 100 insertions(+), 3644 deletions(-)
+
+diff --git a/bfd/elf-bfd.h b/bfd/elf-bfd.h
+index f0229d49d4..99e13e00f3 100644
+--- a/bfd/elf-bfd.h
++++ b/bfd/elf-bfd.h
+@@ -1167,12 +1167,6 @@ struct elf_backend_data
+   bfd_boolean (*gc_mark_extra_sections)
+     (struct bfd_link_info *, elf_gc_mark_hook_fn);
+ 
+-  /* This function, if defined, is called during the sweep phase of gc
+-     in order that a backend might update any data structures it might
+-     be maintaining.  */
+-  bfd_boolean (*gc_sweep_hook)
+-    (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
+-
+   /* This function, if defined, is called after the ELF headers have
+      been created.  This allows for things like the OS and ABI versions
+      to be changed.  */
+diff --git a/bfd/elf32-arm.c b/bfd/elf32-arm.c
+index 1e78c7a721..23c7664481 100644
+--- a/bfd/elf32-arm.c
++++ b/bfd/elf32-arm.c
+@@ -14297,199 +14297,6 @@ elf32_arm_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-static bfd_boolean
+-elf32_arm_gc_sweep_hook (bfd *                     abfd,
+-			 struct bfd_link_info *    info,
+-			 asection *                sec,
+-			 const Elf_Internal_Rela * relocs)
+-{
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-  struct elf32_arm_link_hash_table * globals;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  globals = elf32_arm_hash_table (info);
+-  if (globals == NULL)
+-    return FALSE;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  symtab_hdr = & elf_symtab_hdr (abfd);
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  check_use_blx (globals);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      struct elf_link_hash_entry *h = NULL;
+-      struct elf32_arm_link_hash_entry *eh;
+-      int r_type;
+-      bfd_boolean call_reloc_p;
+-      bfd_boolean may_become_dynamic_p;
+-      bfd_boolean may_need_local_target_p;
+-      union gotplt_union *root_plt;
+-      struct arm_plt_info *arm_plt;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	}
+-      eh = (struct elf32_arm_link_hash_entry *) h;
+-
+-      call_reloc_p = FALSE;
+-      may_become_dynamic_p = FALSE;
+-      may_need_local_target_p = FALSE;
+-
+-      r_type = ELF32_R_TYPE (rel->r_info);
+-      r_type = arm_real_reloc_type (globals, r_type);
+-      switch (r_type)
+-	{
+-	case R_ARM_GOT32:
+-	case R_ARM_GOT_PREL:
+-	case R_ARM_TLS_GD32:
+-	case R_ARM_TLS_IE32:
+-	  if (h != NULL)
+-	    {
+-	      if (h->got.refcount > 0)
+-		h->got.refcount -= 1;
+-	    }
+-	  else if (local_got_refcounts != NULL)
+-	    {
+-	      if (local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx] -= 1;
+-	    }
+-	  break;
+-
+-	case R_ARM_TLS_LDM32:
+-	  globals->tls_ldm_got.refcount -= 1;
+-	  break;
+-
+-	case R_ARM_PC24:
+-	case R_ARM_PLT32:
+-	case R_ARM_CALL:
+-	case R_ARM_JUMP24:
+-	case R_ARM_PREL31:
+-	case R_ARM_THM_CALL:
+-	case R_ARM_THM_JUMP24:
+-	case R_ARM_THM_JUMP19:
+-	  call_reloc_p = TRUE;
+-	  may_need_local_target_p = TRUE;
+-	  break;
+-
+-	case R_ARM_ABS12:
+-	  if (!globals->vxworks_p)
+-	    {
+-	      may_need_local_target_p = TRUE;
+-	      break;
+-	    }
+-	  /* Fall through.  */
+-	case R_ARM_ABS32:
+-	case R_ARM_ABS32_NOI:
+-	case R_ARM_REL32:
+-	case R_ARM_REL32_NOI:
+-	case R_ARM_MOVW_ABS_NC:
+-	case R_ARM_MOVT_ABS:
+-	case R_ARM_MOVW_PREL_NC:
+-	case R_ARM_MOVT_PREL:
+-	case R_ARM_THM_MOVW_ABS_NC:
+-	case R_ARM_THM_MOVT_ABS:
+-	case R_ARM_THM_MOVW_PREL_NC:
+-	case R_ARM_THM_MOVT_PREL:
+-	  /* Should the interworking branches be here also?  */
+-	  if ((bfd_link_pic (info) || globals->root.is_relocatable_executable)
+-	      && (sec->flags & SEC_ALLOC) != 0)
+-	    {
+-	      if (h == NULL
+-		  && elf32_arm_howto_from_type (r_type)->pc_relative)
+-		{
+-		  call_reloc_p = TRUE;
+-		  may_need_local_target_p = TRUE;
+-		}
+-	      else
+-		may_become_dynamic_p = TRUE;
+-	    }
+-	  else
+-	    may_need_local_target_p = TRUE;
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-
+-      if (may_need_local_target_p
+-	  && elf32_arm_get_plt_info (abfd, globals, eh, r_symndx, &root_plt,
+-				     &arm_plt))
+-	{
+-	  /* If PLT refcount book-keeping is wrong and too low, we'll
+-	     see a zero value (going to -1) for the root PLT reference
+-	     count.  */
+-	  if (root_plt->refcount >= 0)
+-	    {
+-	      BFD_ASSERT (root_plt->refcount != 0);
+-	      root_plt->refcount -= 1;
+-	    }
+-	  else
+-	    /* A value of -1 means the symbol has become local, forced
+-	       or seeing a hidden definition.  Any other negative value
+-	       is an error.  */
+-	    BFD_ASSERT (root_plt->refcount == -1);
+-
+-	  if (!call_reloc_p)
+-	    arm_plt->noncall_refcount--;
+-
+-	  if (r_type == R_ARM_THM_CALL)
+-	    arm_plt->maybe_thumb_refcount--;
+-
+-	  if (r_type == R_ARM_THM_JUMP24
+-	      || r_type == R_ARM_THM_JUMP19)
+-	    arm_plt->thumb_refcount--;
+-	}
+-
+-      if (may_become_dynamic_p)
+-	{
+-	  struct elf_dyn_relocs **pp;
+-	  struct elf_dyn_relocs *p;
+-
+-	  if (h != NULL)
+-	    pp = &(eh->dyn_relocs);
+-	  else
+-	    {
+-	      Elf_Internal_Sym *isym;
+-
+-	      isym = bfd_sym_from_r_symndx (&globals->sym_cache,
+-					    abfd, r_symndx);
+-	      if (isym == NULL)
+-		return FALSE;
+-	      pp = elf32_arm_get_local_dynreloc_list (abfd, r_symndx, isym);
+-	      if (pp == NULL)
+-		return FALSE;
+-	    }
+-	  for (; (p = *pp) != NULL; pp = &p->next)
+-	    if (p->sec == sec)
+-	      {
+-		/* Everything must go for SEC.  */
+-		*pp = p->next;
+-		break;
+-	      }
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Look through the relocs for a section during the first phase.  */
+ 
+ static bfd_boolean
+@@ -19400,7 +19207,6 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
+ #define elf_backend_get_symbol_type             elf32_arm_get_symbol_type
+ #define elf_backend_gc_mark_hook                elf32_arm_gc_mark_hook
+ #define elf_backend_gc_mark_extra_sections	elf32_arm_gc_mark_extra_sections
+-#define elf_backend_gc_sweep_hook               elf32_arm_gc_sweep_hook
+ #define elf_backend_check_relocs                elf32_arm_check_relocs
+ #define elf_backend_update_relocs		elf32_arm_update_relocs
+ #define elf_backend_relocate_section		elf32_arm_relocate_section
+diff --git a/bfd/elf32-bfin.c b/bfd/elf32-bfin.c
+index 94c7c2a900..9e66a77ac9 100644
+--- a/bfd/elf32-bfin.c
++++ b/bfd/elf32-bfin.c
+@@ -1636,79 +1636,6 @@ bfin_gc_mark_hook (asection * sec,
+ 
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+-
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-static bfd_boolean
+-bfin_gc_sweep_hook (bfd * abfd,
+-		    struct bfd_link_info *info,
+-		    asection * sec,
+-                    const Elf_Internal_Rela * relocs)
+-{
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-  bfd *dynobj;
+-  asection *sgot;
+-  asection *srelgot;
+-
+-  dynobj = elf_hash_table (info)->dynobj;
+-  if (dynobj == NULL)
+-    return TRUE;
+-
+-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  sgot = elf_hash_table (info)->sgot;
+-  srelgot = elf_hash_table (info)->srelgot;
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      struct elf_link_hash_entry *h;
+-
+-      switch (ELF32_R_TYPE (rel->r_info))
+-	{
+-	case R_BFIN_GOT:
+-	  r_symndx = ELF32_R_SYM (rel->r_info);
+-	  if (r_symndx >= symtab_hdr->sh_info)
+-	    {
+-	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	      if (h->got.refcount > 0)
+-		{
+-		  --h->got.refcount;
+-		  if (h->got.refcount == 0)
+-		    {
+-		      /* We don't need the .got entry any more.  */
+-		      sgot->size -= 4;
+-		      srelgot->size -= sizeof (Elf32_External_Rela);
+-		    }
+-		}
+-	    }
+-	  else if (local_got_refcounts != NULL)
+-	    {
+-	      if (local_got_refcounts[r_symndx] > 0)
+-		{
+-		  --local_got_refcounts[r_symndx];
+-		  if (local_got_refcounts[r_symndx] == 0)
+-		    {
+-		      /* We don't need the .got entry any more.  */
+-		      sgot->size -= 4;
+-		      if (bfd_link_pic (info))
+-			srelgot->size -= sizeof (Elf32_External_Rela);
+-		    }
+-		}
+-	    }
+-	  break;
+-	default:
+-	  break;
+-	}
+-    }
+-  return TRUE;
+-}
+ 
+ extern const bfd_target bfin_elf32_fdpic_vec;
+ #define IS_FDPIC(bfd) ((bfd)->xvec == &bfin_elf32_fdpic_vec)
+@@ -3215,118 +3142,6 @@ bfinfdpic_relocate_section (bfd * output_bfd,
+   return TRUE;
+ }
+ 
+-/* Update the relocation information for the relocations of the section
+-   being removed.  */
+-
+-static bfd_boolean
+-bfinfdpic_gc_sweep_hook (bfd *abfd,
+-			 struct bfd_link_info *info,
+-			 asection *sec,
+-			 const Elf_Internal_Rela *relocs)
+-{
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
+-  const Elf_Internal_Rela *rel;
+-  const Elf_Internal_Rela *rel_end;
+-  struct bfinfdpic_relocs_info *picrel;
+-
+-  BFD_ASSERT (IS_FDPIC (abfd));
+-
+-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+-  sym_hashes = elf_sym_hashes (abfd);
+-  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf32_External_Sym);
+-  if (!elf_bad_symtab (abfd))
+-    sym_hashes_end -= symtab_hdr->sh_info;
+-
+-  rel_end = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < rel_end; rel++)
+-    {
+-      struct elf_link_hash_entry *h;
+-      unsigned long r_symndx;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx < symtab_hdr->sh_info)
+-        h = NULL;
+-      else
+-        h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-
+-      if (h != NULL)
+-	picrel = bfinfdpic_relocs_info_for_global (bfinfdpic_relocs_info (info),
+-						   abfd, h,
+-						   rel->r_addend, NO_INSERT);
+-      else
+-	picrel = bfinfdpic_relocs_info_for_local (bfinfdpic_relocs_info
+-						  (info), abfd, r_symndx,
+-						  rel->r_addend, NO_INSERT);
+-
+-      if (!picrel)
+-	return TRUE;
+-
+-      switch (ELF32_R_TYPE (rel->r_info))
+-        {
+-	case R_BFIN_PCREL24:
+-	case R_BFIN_PCREL24_JUMP_L:
+-	  picrel->call--;
+-	  break;
+-
+-	case R_BFIN_FUNCDESC_VALUE:
+-	  picrel->relocsfdv--;
+-	  if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
+-	    picrel->relocs32++;
+-	  /* Fall through.  */
+-
+-	case R_BFIN_BYTE4_DATA:
+-	  picrel->sym--;
+-	  if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
+-	    picrel->relocs32--;
+-	  break;
+-
+-	case R_BFIN_GOT17M4:
+-	  picrel->got17m4--;
+-	  break;
+-
+-	case R_BFIN_GOTHI:
+-	case R_BFIN_GOTLO:
+-	  picrel->gothilo--;
+-	  break;
+-
+-	case R_BFIN_FUNCDESC_GOT17M4:
+-	  picrel->fdgot17m4--;
+-	  break;
+-
+-	case R_BFIN_FUNCDESC_GOTHI:
+-	case R_BFIN_FUNCDESC_GOTLO:
+-	  picrel->fdgothilo--;
+-	  break;
+-
+-	case R_BFIN_GOTOFF17M4:
+-	case R_BFIN_GOTOFFHI:
+-	case R_BFIN_GOTOFFLO:
+-	  picrel->gotoff--;
+-	  break;
+-
+-	case R_BFIN_FUNCDESC_GOTOFF17M4:
+-	  picrel->fdgoff17m4--;
+-	  break;
+-
+-	case R_BFIN_FUNCDESC_GOTOFFHI:
+-	case R_BFIN_FUNCDESC_GOTOFFLO:
+-	  picrel->fdgoffhilo--;
+-	  break;
+-
+-	case R_BFIN_FUNCDESC:
+-	  picrel->fd--;
+-	  picrel->relocsfd--;
+-	  break;
+-
+-	default:
+-	  break;
+-        }
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* We need dynamic symbols for every section, since segments can
+    relocate independently.  */
+ static bfd_boolean
+@@ -5637,7 +5452,6 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
+ #define elf_backend_finish_dynamic_sections \
+                                         bfin_finish_dynamic_sections
+ #define elf_backend_gc_mark_hook        bfin_gc_mark_hook
+-#define elf_backend_gc_sweep_hook       bfin_gc_sweep_hook
+ #define bfd_elf32_bfd_merge_private_bfd_data \
+                                         elf32_bfin_merge_private_bfd_data
+ #define bfd_elf32_bfd_set_private_flags \
+@@ -5666,9 +5480,6 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
+ #undef	elf32_bed
+ #define	elf32_bed		elf32_bfinfdpic_bed
+ 
+-#undef elf_backend_gc_sweep_hook
+-#define elf_backend_gc_sweep_hook       bfinfdpic_gc_sweep_hook
+-
+ #undef elf_backend_got_header_size
+ #define elf_backend_got_header_size     0
+ 
+diff --git a/bfd/elf32-cr16.c b/bfd/elf32-cr16.c
+index c36388eb76..0f09102d03 100644
+--- a/bfd/elf32-cr16.c
++++ b/bfd/elf32-cr16.c
+@@ -2207,18 +2207,6 @@ elf32_cr16_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-static bfd_boolean
+-elf32_cr16_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
+-                          struct bfd_link_info *info ATTRIBUTE_UNUSED,
+-                          asection *sec ATTRIBUTE_UNUSED,
+-                          const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
+-{
+-  /* We don't support garbage collection of GOT and PLT relocs yet.  */
+-  return TRUE;
+-}
+-
+ /* Create dynamic sections when linking against a dynamic object.  */
+ 
+ static bfd_boolean
+@@ -2916,7 +2904,6 @@ _bfd_cr16_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
+ #define bfd_elf32_bfd_get_relocated_section_contents \
+                                 elf32_cr16_get_relocated_section_contents
+ #define elf_backend_gc_mark_hook          elf32_cr16_gc_mark_hook
+-#define elf_backend_gc_sweep_hook         elf32_cr16_gc_sweep_hook
+ #define elf_backend_can_gc_sections       1
+ #define elf_backend_rela_normal           1
+ #define elf_backend_check_relocs          cr16_elf_check_relocs
+diff --git a/bfd/elf32-cris.c b/bfd/elf32-cris.c
+index 4c80d002cc..2cd5f28bdb 100644
+--- a/bfd/elf32-cris.c
++++ b/bfd/elf32-cris.c
+@@ -2456,193 +2456,6 @@ cris_elf_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-static bfd_boolean
+-cris_elf_gc_sweep_hook (bfd *abfd,
+-			struct bfd_link_info *info,
+-			asection *sec,
+-			const Elf_Internal_Rela *relocs)
+-{
+-  struct elf_cris_link_hash_table * htab;
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-  bfd *dynobj;
+-  asection *sgot;
+-  asection *srelgot;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  dynobj = elf_hash_table (info)->dynobj;
+-  if (dynobj == NULL)
+-    return TRUE;
+-
+-  htab = elf_cris_hash_table (info);
+-  if (htab == NULL)
+-    return FALSE;
+-
+-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  sgot = htab->root.sgot;
+-  srelgot = htab->root.srelgot;
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      struct elf_link_hash_entry *h = NULL;
+-      bfd_signed_vma got_element_size = 4;
+-      bfd_signed_vma *specific_refcount = NULL;
+-      enum elf_cris_reloc_type r_type;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	}
+-
+-      r_type = ELF32_R_TYPE (rel->r_info);
+-      switch (r_type)
+-	{
+-	case R_CRIS_32_GOT:
+-	case R_CRIS_16_GOT:
+-	case R_CRIS_16_GOTPLT:
+-	case R_CRIS_32_GOTPLT:
+-	  specific_refcount = h != NULL
+-	    ? &((struct elf_cris_link_hash_entry *) h)->reg_got_refcount
+-	    : &local_got_refcounts[LGOT_REG_NDX (r_symndx)];
+-	  break;
+-
+-	case R_CRIS_32_GD:
+-	case R_CRIS_32_GOT_GD:
+-	case R_CRIS_16_GOT_GD:
+-	  got_element_size = 8;
+-	  specific_refcount = h != NULL
+-	    ? &((struct elf_cris_link_hash_entry *) h)->dtp_refcount
+-	    : &local_got_refcounts[LGOT_DTP_NDX (r_symndx)];
+-	  break;
+-
+-	case R_CRIS_32_IE:
+-	case R_CRIS_16_GOT_TPREL:
+-	case R_CRIS_32_GOT_TPREL:
+-	  specific_refcount = h != NULL
+-	    ? &((struct elf_cris_link_hash_entry *) h)->tprel_refcount
+-	    : &local_got_refcounts[LGOT_TPREL_NDX (r_symndx)];
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-
+-      switch (r_type)
+-	{
+-	case R_CRIS_32_IE:
+-	case R_CRIS_32_GD:
+-	case R_CRIS_16_GOT_TPREL:
+-	case R_CRIS_32_GOT_TPREL:
+-	case R_CRIS_32_GOT_GD:
+-	case R_CRIS_16_GOT_GD:
+-	case R_CRIS_16_GOT:
+-	case R_CRIS_32_GOT:
+-	  if (h != NULL)
+-	    {
+-	      /* If the counters are 0 when we got here, we've
+-		 miscounted somehow somewhere, an internal error.  */
+-	      BFD_ASSERT (h->got.refcount > 0);
+-	      --h->got.refcount;
+-
+-	      BFD_ASSERT (*specific_refcount > 0);
+-	      --*specific_refcount;
+-	      if (*specific_refcount == 0)
+-		{
+-		  /* We don't need the .got entry any more.  */
+-		  sgot->size -= got_element_size;
+-		  srelgot->size -= sizeof (Elf32_External_Rela);
+-		}
+-	      break;
+-	    }
+-
+-	local_got_reloc:
+-	  if (local_got_refcounts != NULL)
+-	    {
+-	      /* If the counters are 0 when we got here, we've
+-		 miscounted somehow somewhere, an internal error.  */
+-	      BFD_ASSERT (local_got_refcounts[r_symndx] > 0);
+-	      --local_got_refcounts[r_symndx];
+-
+-	      BFD_ASSERT (*specific_refcount > 0);
+-	      --*specific_refcount;
+-	      if (*specific_refcount == 0)
+-		{
+-		  /* We don't need the .got entry any more.  */
+-		  sgot->size -= got_element_size;
+-		  if (bfd_link_pic (info))
+-		    srelgot->size -= sizeof (Elf32_External_Rela);
+-		}
+-	    }
+-	  break;
+-
+-	case R_CRIS_16_GOTPLT:
+-	case R_CRIS_32_GOTPLT:
+-	  /* For local symbols, treat these like GOT relocs.  */
+-	  if (h == NULL)
+-	    goto local_got_reloc;
+-	  else
+-	    /* For global symbols, adjust the reloc-specific refcount.  */
+-	    elf_cris_hash_entry (h)->gotplt_refcount--;
+-	  /* Fall through.  */
+-
+-	case R_CRIS_32_PLT_GOTREL:
+-	  /* FIXME: We don't garbage-collect away the .got section.  */
+-	  if (local_got_refcounts != NULL)
+-	    local_got_refcounts[-1]--;
+-	  /* Fall through.  */
+-
+-	case R_CRIS_8:
+-	case R_CRIS_16:
+-	case R_CRIS_32:
+-	case R_CRIS_8_PCREL:
+-	case R_CRIS_16_PCREL:
+-	case R_CRIS_32_PCREL:
+-	case R_CRIS_32_PLT_PCREL:
+-	  /* Negate the increment we did in cris_elf_check_relocs.  */
+-	  if (h != NULL)
+-	    {
+-	      if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+-		  && h->plt.refcount > 0)
+-		--h->plt.refcount;
+-	    }
+-	  break;
+-
+-	case R_CRIS_32_DTPREL:
+-	  /* This'd be a .dtpreld entry in e.g. debug info.  */
+-	  if ((sec->flags & SEC_ALLOC) == 0)
+-	    break;
+-	  /* Fall through.  */
+-	case R_CRIS_16_DTPREL:
+-	  htab->dtpmod_refcount--;
+-	  if (htab->dtpmod_refcount == 0)
+-	    htab->next_gotplt_entry -= 8;
+-	  BFD_ASSERT (local_got_refcounts != NULL);
+-	  local_got_refcounts[-1]--;
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* The elf_backend_plt_sym_val hook function.  */
+ 
+ static bfd_vma
+@@ -4296,7 +4109,6 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
+ #define elf_info_to_howto			cris_info_to_howto_rela
+ #define elf_backend_relocate_section		cris_elf_relocate_section
+ #define elf_backend_gc_mark_hook		cris_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook		cris_elf_gc_sweep_hook
+ #define elf_backend_plt_sym_val			cris_elf_plt_sym_val
+ #define elf_backend_check_relocs                cris_elf_check_relocs
+ #define elf_backend_grok_prstatus		cris_elf_grok_prstatus
+diff --git a/bfd/elf32-hppa.c b/bfd/elf32-hppa.c
+index 9a195be429..9d94603661 100644
+--- a/bfd/elf32-hppa.c
++++ b/bfd/elf32-hppa.c
+@@ -1566,130 +1566,6 @@ elf32_hppa_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rela, hh, sym);
+ }
+ 
+-/* Update the got and plt entry reference counts for the section being
+-   removed.  */
+-
+-static bfd_boolean
+-elf32_hppa_gc_sweep_hook (bfd *abfd,
+-			  struct bfd_link_info *info ATTRIBUTE_UNUSED,
+-			  asection *sec,
+-			  const Elf_Internal_Rela *relocs)
+-{
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **eh_syms;
+-  bfd_signed_vma *local_got_refcounts;
+-  bfd_signed_vma *local_plt_refcounts;
+-  const Elf_Internal_Rela *rela, *relend;
+-  struct elf32_hppa_link_hash_table *htab;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  htab = hppa_link_hash_table (info);
+-  if (htab == NULL)
+-    return FALSE;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+-  eh_syms = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-  local_plt_refcounts = local_got_refcounts;
+-  if (local_plt_refcounts != NULL)
+-    local_plt_refcounts += symtab_hdr->sh_info;
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rela = relocs; rela < relend; rela++)
+-    {
+-      unsigned long r_symndx;
+-      unsigned int r_type;
+-      struct elf_link_hash_entry *eh = NULL;
+-
+-      r_symndx = ELF32_R_SYM (rela->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  struct elf32_hppa_link_hash_entry *hh;
+-	  struct elf32_hppa_dyn_reloc_entry **hdh_pp;
+-	  struct elf32_hppa_dyn_reloc_entry *hdh_p;
+-
+-	  eh = eh_syms[r_symndx - symtab_hdr->sh_info];
+-	  while (eh->root.type == bfd_link_hash_indirect
+-		 || eh->root.type == bfd_link_hash_warning)
+-	    eh = (struct elf_link_hash_entry *) eh->root.u.i.link;
+-	  hh = hppa_elf_hash_entry (eh);
+-
+-	  for (hdh_pp = &hh->dyn_relocs; (hdh_p = *hdh_pp) != NULL; hdh_pp = &hdh_p->hdh_next)
+-	    if (hdh_p->sec == sec)
+-	      {
+-		/* Everything must go for SEC.  */
+-		*hdh_pp = hdh_p->hdh_next;
+-		break;
+-	      }
+-	}
+-
+-      r_type = ELF32_R_TYPE (rela->r_info);
+-      r_type = elf32_hppa_optimized_tls_reloc (info, r_type, eh != NULL);
+-
+-      switch (r_type)
+-	{
+-	case R_PARISC_DLTIND14F:
+-	case R_PARISC_DLTIND14R:
+-	case R_PARISC_DLTIND21L:
+-	case R_PARISC_TLS_GD21L:
+-	case R_PARISC_TLS_GD14R:
+-	case R_PARISC_TLS_IE21L:
+-	case R_PARISC_TLS_IE14R:
+-	  if (eh != NULL)
+-	    {
+-	      if (eh->got.refcount > 0)
+-		eh->got.refcount -= 1;
+-	    }
+-	  else if (local_got_refcounts != NULL)
+-	    {
+-	      if (local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx] -= 1;
+-	    }
+-	  break;
+-
+-	case R_PARISC_TLS_LDM21L:
+-	case R_PARISC_TLS_LDM14R:
+-	  htab->tls_ldm_got.refcount -= 1;
+-	  break;
+-
+-	case R_PARISC_PCREL12F:
+-	case R_PARISC_PCREL17C:
+-	case R_PARISC_PCREL17F:
+-	case R_PARISC_PCREL22F:
+-	  if (eh != NULL)
+-	    {
+-	      if (eh->plt.refcount > 0)
+-		eh->plt.refcount -= 1;
+-	    }
+-	  break;
+-
+-	case R_PARISC_PLABEL14R:
+-	case R_PARISC_PLABEL21L:
+-	case R_PARISC_PLABEL32:
+-	  if (eh != NULL)
+-	    {
+-	      if (eh->plt.refcount > 0)
+-		eh->plt.refcount -= 1;
+-	    }
+-	  else if (local_plt_refcounts != NULL)
+-	    {
+-	      if (local_plt_refcounts[r_symndx] > 0)
+-		local_plt_refcounts[r_symndx] -= 1;
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Support for core dump NOTE sections.  */
+ 
+ static bfd_boolean
+@@ -4631,7 +4507,6 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
+ #define elf_backend_size_dynamic_sections    elf32_hppa_size_dynamic_sections
+ #define elf_backend_init_index_section	     _bfd_elf_init_1_index_section
+ #define elf_backend_gc_mark_hook	     elf32_hppa_gc_mark_hook
+-#define elf_backend_gc_sweep_hook	     elf32_hppa_gc_sweep_hook
+ #define elf_backend_grok_prstatus	     elf32_hppa_grok_prstatus
+ #define elf_backend_grok_psinfo		     elf32_hppa_grok_psinfo
+ #define elf_backend_object_p		     elf32_hppa_object_p
+diff --git a/bfd/elf32-lm32.c b/bfd/elf32-lm32.c
+index 656f48b43c..f0b46c9085 100644
+--- a/bfd/elf32-lm32.c
++++ b/bfd/elf32-lm32.c
+@@ -1167,61 +1167,6 @@ lm32_elf_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-static bfd_boolean
+-lm32_elf_gc_sweep_hook (bfd *abfd,
+-                        struct bfd_link_info *info ATTRIBUTE_UNUSED,
+-                        asection *sec,
+-                        const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
+-{
+-  /* Update the got entry reference counts for the section being removed.  */
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	}
+-
+-      switch (ELF32_R_TYPE (rel->r_info))
+-	{
+-	case R_LM32_16_GOT:
+-	  if (h != NULL)
+-	    {
+-	      if (h->got.refcount > 0)
+-		h->got.refcount--;
+-	    }
+-	  else
+-	    {
+-	      if (local_got_refcounts && local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx]--;
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-  return TRUE;
+-}
+-
+ /* Look through the relocs for a section during the first phase.  */
+ 
+ static bfd_boolean
+@@ -2633,7 +2578,6 @@ lm32_elf_fdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
+ #define elf_backend_can_gc_sections             1
+ #define elf_backend_can_refcount                1
+ #define elf_backend_gc_mark_hook                lm32_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook               lm32_elf_gc_sweep_hook
+ #define elf_backend_plt_readonly                1
+ #define elf_backend_want_got_plt                1
+ #define elf_backend_want_plt_sym                0
+diff --git a/bfd/elf32-m32r.c b/bfd/elf32-m32r.c
+index 78f9ac30d6..6d83aff3d4 100644
+--- a/bfd/elf32-m32r.c
++++ b/bfd/elf32-m32r.c
+@@ -3540,122 +3540,6 @@ m32r_elf_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-static bfd_boolean
+-m32r_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
+-			struct bfd_link_info *info ATTRIBUTE_UNUSED,
+-			asection *sec ATTRIBUTE_UNUSED,
+-			const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
+-{
+-  /* Update the got entry reference counts for the section being removed.  */
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	}
+-
+-      switch (ELF32_R_TYPE (rel->r_info))
+-	{
+-	case R_M32R_GOT16_HI_ULO:
+-	case R_M32R_GOT16_HI_SLO:
+-	case R_M32R_GOT16_LO:
+-	case R_M32R_GOTOFF:
+-	case R_M32R_GOTOFF_HI_ULO:
+-	case R_M32R_GOTOFF_HI_SLO:
+-	case R_M32R_GOTOFF_LO:
+-	case R_M32R_GOT24:
+-	case R_M32R_GOTPC_HI_ULO:
+-	case R_M32R_GOTPC_HI_SLO:
+-	case R_M32R_GOTPC_LO:
+-	case R_M32R_GOTPC24:
+-	  if (h != NULL)
+-	    {
+-	      if (h->got.refcount > 0)
+-		h->got.refcount--;
+-	    }
+-	  else
+-	    {
+-	      if (local_got_refcounts && local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx]--;
+-	    }
+-	  break;
+-
+-	case R_M32R_16_RELA:
+-	case R_M32R_24_RELA:
+-	case R_M32R_32_RELA:
+-	case R_M32R_REL32:
+-	case R_M32R_HI16_ULO_RELA:
+-	case R_M32R_HI16_SLO_RELA:
+-	case R_M32R_LO16_RELA:
+-	case R_M32R_SDA16_RELA:
+-	case R_M32R_10_PCREL_RELA:
+-	case R_M32R_18_PCREL_RELA:
+-	case R_M32R_26_PCREL_RELA:
+-	  if (h != NULL)
+-	    {
+-	      struct elf_m32r_link_hash_entry *eh;
+-	      struct elf_m32r_dyn_relocs **pp;
+-	      struct elf_m32r_dyn_relocs *p;
+-
+-	      if (!bfd_link_pic (info) && h->plt.refcount > 0)
+-		h->plt.refcount -= 1;
+-
+-	      eh = (struct elf_m32r_link_hash_entry *) h;
+-
+-	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+-		if (p->sec == sec)
+-		  {
+-		    if (   ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA
+-			|| ELF32_R_TYPE (rel->r_info) == R_M32R_18_PCREL_RELA
+-			|| ELF32_R_TYPE (rel->r_info) == R_M32R_10_PCREL_RELA
+-			|| ELF32_R_TYPE (rel->r_info) == R_M32R_REL32)
+-		      p->pc_count -= 1;
+-		    p->count -= 1;
+-		    if (p->count == 0)
+-		      *pp = p->next;
+-		    break;
+-		  }
+-	    }
+-	  break;
+-
+-	case R_M32R_26_PLTREL:
+-	  if (h != NULL)
+-	    {
+-	      if (h->plt.refcount > 0)
+-		h->plt.refcount--;
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Look through the relocs for a section during the first phase.
+    Since we don't do .gots or .plts, we just need to consider the
+    virtual table relocs for gc.  */
+@@ -3974,7 +3858,6 @@ m32r_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+ #define elf_backend_add_symbol_hook		m32r_elf_add_symbol_hook
+ #define elf_backend_relocate_section		m32r_elf_relocate_section
+ #define elf_backend_gc_mark_hook                m32r_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook               m32r_elf_gc_sweep_hook
+ #define elf_backend_check_relocs                m32r_elf_check_relocs
+ 
+ #define elf_backend_create_dynamic_sections     m32r_elf_create_dynamic_sections
+diff --git a/bfd/elf32-m68k.c b/bfd/elf32-m68k.c
+index 501190db12..d9a2cb8488 100644
+--- a/bfd/elf32-m68k.c
++++ b/bfd/elf32-m68k.c
+@@ -695,8 +695,7 @@ struct elf_m68k_got_entry
+   {
+     struct
+     {
+-      /* Number of times this entry is referenced.  It is used to
+-	 filter out unnecessary GOT slots in elf_m68k_gc_sweep_hook.  */
++      /* Number of times this entry is referenced.  */
+       bfd_vma refcount;
+     } s1;
+ 
+@@ -1606,27 +1605,6 @@ elf_m68k_update_got_entry_type (struct elf_m68k_got *got,
+   return was;
+ }
+ 
+-/* Update GOT counters when removing an entry of type TYPE.  */
+-
+-static void
+-elf_m68k_remove_got_entry_type (struct elf_m68k_got *got,
+-				enum elf_m68k_reloc_type type)
+-{
+-  enum elf_m68k_got_offset_size os;
+-  bfd_vma n_slots;
+-
+-  n_slots = elf_m68k_reloc_got_n_slots (type);
+-
+-  /* Decrese counter of slots with offset size corresponding to TYPE
+-     and all greater offset sizes.  */
+-  for (os = elf_m68k_reloc_got_offset_size (type); os <= R_32; ++os)
+-    {
+-      BFD_ASSERT (got->n_slots[os] >= n_slots);
+-
+-      got->n_slots[os] -= n_slots;
+-    }
+-}
+-
+ /* Add new or update existing entry to GOT.
+    H, ABFD, TYPE and SYMNDX is data for the entry.
+    INFO is a context where memory should be allocated.  */
+@@ -2455,52 +2433,6 @@ elf_m68k_partition_multi_got (struct bfd_link_info *info)
+   return TRUE;
+ }
+ 
+-/* Specialized version of elf_m68k_get_got_entry that returns pointer
+-   to hashtable slot, thus allowing removal of entry via
+-   elf_m68k_remove_got_entry.  */
+-
+-static struct elf_m68k_got_entry **
+-elf_m68k_find_got_entry_ptr (struct elf_m68k_got *got,
+-			     struct elf_m68k_got_entry_key *key)
+-{
+-  void **ptr;
+-  struct elf_m68k_got_entry entry_;
+-  struct elf_m68k_got_entry **entry_ptr;
+-
+-  entry_.key_ = *key;
+-  ptr = htab_find_slot (got->entries, &entry_, NO_INSERT);
+-  BFD_ASSERT (ptr != NULL);
+-
+-  entry_ptr = (struct elf_m68k_got_entry **) ptr;
+-
+-  return entry_ptr;
+-}
+-
+-/* Remove entry pointed to by ENTRY_PTR from GOT.  */
+-
+-static void
+-elf_m68k_remove_got_entry (struct elf_m68k_got *got,
+-			   struct elf_m68k_got_entry **entry_ptr)
+-{
+-  struct elf_m68k_got_entry *entry;
+-
+-  entry = *entry_ptr;
+-
+-  /* Check that offsets have not been finalized yet.  */
+-  BFD_ASSERT (got->offset == (bfd_vma) -1);
+-  /* Check that this entry is indeed unused.  */
+-  BFD_ASSERT (entry->u.s1.refcount == 0);
+-
+-  elf_m68k_remove_got_entry_type (got, entry->key_.type);
+-
+-  if (entry->key_.bfd != NULL)
+-    got->local_n_slots -= elf_m68k_reloc_got_n_slots (entry->key_.type);
+-
+-  BFD_ASSERT (got->n_slots[R_32] >= got->local_n_slots);
+-
+-  htab_clear_slot (got->entries, (void **) entry_ptr);
+-}
+-
+ /* Copy any information related to dynamic linking from a pre-existing
+    symbol to a newly created symbol.  Also called to copy flags and
+    other back-end info to a weakdef, in which case the symbol is not
+@@ -2905,131 +2837,6 @@ elf_m68k_gc_mark_hook (asection *sec,
+ 
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+-
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-static bfd_boolean
+-elf_m68k_gc_sweep_hook (bfd *abfd,
+-			struct bfd_link_info *info,
+-			asection *sec,
+-			const Elf_Internal_Rela *relocs)
+-{
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  const Elf_Internal_Rela *rel, *relend;
+-  bfd *dynobj;
+-  struct elf_m68k_got *got;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  dynobj = elf_hash_table (info)->dynobj;
+-  if (dynobj == NULL)
+-    return TRUE;
+-
+-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+-  sym_hashes = elf_sym_hashes (abfd);
+-  got = NULL;
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	}
+-
+-      switch (ELF32_R_TYPE (rel->r_info))
+-	{
+-	case R_68K_GOT8:
+-	case R_68K_GOT16:
+-	case R_68K_GOT32:
+-	  if (h != NULL
+-	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+-	    break;
+-
+-	  /* FALLTHRU */
+-	case R_68K_GOT8O:
+-	case R_68K_GOT16O:
+-	case R_68K_GOT32O:
+-	  /* Fall through.  */
+-
+-	  /* TLS relocations.  */
+-	case R_68K_TLS_GD8:
+-	case R_68K_TLS_GD16:
+-	case R_68K_TLS_GD32:
+-	case R_68K_TLS_LDM8:
+-	case R_68K_TLS_LDM16:
+-	case R_68K_TLS_LDM32:
+-	case R_68K_TLS_IE8:
+-	case R_68K_TLS_IE16:
+-	case R_68K_TLS_IE32:
+-
+-	case R_68K_TLS_TPREL32:
+-	case R_68K_TLS_DTPREL32:
+-
+-	  if (got == NULL)
+-	    {
+-	      got = elf_m68k_get_bfd2got_entry (elf_m68k_multi_got (info),
+-						abfd, MUST_FIND, NULL)->got;
+-	      BFD_ASSERT (got != NULL);
+-	    }
+-
+-	  {
+-	    struct elf_m68k_got_entry_key key_;
+-	    struct elf_m68k_got_entry **got_entry_ptr;
+-	    struct elf_m68k_got_entry *got_entry;
+-
+-	    elf_m68k_init_got_entry_key (&key_, h, abfd, r_symndx,
+-					 ELF32_R_TYPE (rel->r_info));
+-	    got_entry_ptr = elf_m68k_find_got_entry_ptr (got, &key_);
+-
+-	    got_entry = *got_entry_ptr;
+-
+-	    if (got_entry->u.s1.refcount > 0)
+-	      {
+-		--got_entry->u.s1.refcount;
+-
+-		if (got_entry->u.s1.refcount == 0)
+-		  /* We don't need the .got entry any more.  */
+-		  elf_m68k_remove_got_entry (got, got_entry_ptr);
+-	      }
+-	  }
+-	  break;
+-
+-	case R_68K_PLT8:
+-	case R_68K_PLT16:
+-	case R_68K_PLT32:
+-	case R_68K_PLT8O:
+-	case R_68K_PLT16O:
+-	case R_68K_PLT32O:
+-	case R_68K_PC8:
+-	case R_68K_PC16:
+-	case R_68K_PC32:
+-	case R_68K_8:
+-	case R_68K_16:
+-	case R_68K_32:
+-	  if (h != NULL)
+-	    {
+-	      if (h->plt.refcount > 0)
+-		--h->plt.refcount;
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+ 
+ /* Return the type of PLT associated with OUTPUT_BFD.  */
+ 
+@@ -4826,7 +4633,6 @@ elf_m68k_add_symbol_hook (bfd *abfd,
+ #define elf_backend_finish_dynamic_sections \
+ 					elf_m68k_finish_dynamic_sections
+ #define elf_backend_gc_mark_hook	elf_m68k_gc_mark_hook
+-#define elf_backend_gc_sweep_hook	elf_m68k_gc_sweep_hook
+ #define elf_backend_copy_indirect_symbol elf_m68k_copy_indirect_symbol
+ #define bfd_elf32_bfd_merge_private_bfd_data \
+                                         elf32_m68k_merge_private_bfd_data
+diff --git a/bfd/elf32-mcore.c b/bfd/elf32-mcore.c
+index 5ecf1c63e7..44cd1eebd3 100644
+--- a/bfd/elf32-mcore.c
++++ b/bfd/elf32-mcore.c
+@@ -577,17 +577,6 @@ mcore_elf_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-static bfd_boolean
+-mcore_elf_gc_sweep_hook (bfd * abfd ATTRIBUTE_UNUSED,
+-			 struct bfd_link_info * info ATTRIBUTE_UNUSED,
+-			 asection * sec ATTRIBUTE_UNUSED,
+-			 const Elf_Internal_Rela * relocs ATTRIBUTE_UNUSED)
+-{
+-  return TRUE;
+-}
+-
+ /* Look through the relocs for a section during the first phase.
+    Since we don't do .gots or .plts, we just need to consider the
+    virtual table relocs for gc.  */
+@@ -679,7 +668,6 @@ static const struct bfd_elf_special_section mcore_elf_special_sections[]=
+ #define bfd_elf32_bfd_reloc_name_lookup	mcore_elf_reloc_name_lookup
+ #define elf_backend_relocate_section		mcore_elf_relocate_section
+ #define elf_backend_gc_mark_hook		mcore_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook		mcore_elf_gc_sweep_hook
+ #define elf_backend_check_relocs                mcore_elf_check_relocs
+ #define elf_backend_special_sections		mcore_elf_special_sections
+ 
+diff --git a/bfd/elf32-metag.c b/bfd/elf32-metag.c
+index a62cfa0558..c901aa99c2 100644
+--- a/bfd/elf32-metag.c
++++ b/bfd/elf32-metag.c
+@@ -3417,131 +3417,6 @@ elf_metag_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rela, hh, sym);
+ }
+ 
+-/* Update the got and plt entry reference counts for the section being
+-   removed.  */
+-
+-static bfd_boolean
+-elf_metag_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
+-			 struct bfd_link_info *info ATTRIBUTE_UNUSED,
+-			 asection *sec ATTRIBUTE_UNUSED,
+-			 const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
+-{
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **eh_syms;
+-  bfd_signed_vma *local_got_refcounts;
+-  bfd_signed_vma *local_plt_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+-  eh_syms = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-  local_plt_refcounts = local_got_refcounts;
+-  if (local_plt_refcounts != NULL)
+-    local_plt_refcounts += symtab_hdr->sh_info;
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      unsigned int r_type;
+-      struct elf_link_hash_entry *eh = NULL;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  struct elf_metag_link_hash_entry *hh;
+-	  struct elf_metag_dyn_reloc_entry **hdh_pp;
+-	  struct elf_metag_dyn_reloc_entry *hdh_p;
+-
+-	  eh = eh_syms[r_symndx - symtab_hdr->sh_info];
+-	  while (eh->root.type == bfd_link_hash_indirect
+-		 || eh->root.type == bfd_link_hash_warning)
+-	    eh = (struct elf_link_hash_entry *) eh->root.u.i.link;
+-	  hh = (struct elf_metag_link_hash_entry *) eh;
+-
+-	  for (hdh_pp = &hh->dyn_relocs; (hdh_p = *hdh_pp) != NULL;
+-	       hdh_pp = &hdh_p->hdh_next)
+-	    if (hdh_p->sec == sec)
+-	      {
+-		/* Everything must go for SEC.  */
+-		*hdh_pp = hdh_p->hdh_next;
+-		break;
+-	      }
+-	}
+-
+-      r_type = ELF32_R_TYPE (rel->r_info);
+-      switch (r_type)
+-	{
+-	case R_METAG_TLS_LDM:
+-	  if (metag_link_hash_table (info)->tls_ldm_got.refcount > 0)
+-	    metag_link_hash_table (info)->tls_ldm_got.refcount -= 1;
+-	  break;
+-	case R_METAG_TLS_IE:
+-	case R_METAG_TLS_GD:
+-	case R_METAG_GETSET_GOT:
+-	  if (eh != NULL)
+-	    {
+-	      if (eh->got.refcount > 0)
+-		eh->got.refcount -= 1;
+-	    }
+-	  else if (local_got_refcounts != NULL)
+-	    {
+-	      if (local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx] -= 1;
+-	    }
+-	  break;
+-
+-	case R_METAG_RELBRANCH_PLT:
+-	  if (eh != NULL)
+-	    {
+-	      if (eh->plt.refcount > 0)
+-		eh->plt.refcount -= 1;
+-	    }
+-	  break;
+-
+-	case R_METAG_ADDR32:
+-	case R_METAG_HIADDR16:
+-	case R_METAG_LOADDR16:
+-	case R_METAG_GETSETOFF:
+-	case R_METAG_RELBRANCH:
+-	  if (eh != NULL)
+-	    {
+-	      struct elf_metag_link_hash_entry *hh;
+-	      struct elf_metag_dyn_reloc_entry **hdh_pp;
+-	      struct elf_metag_dyn_reloc_entry *hdh_p;
+-
+-	      if (!bfd_link_pic (info) && eh->plt.refcount > 0)
+-		eh->plt.refcount -= 1;
+-
+-	      hh = (struct elf_metag_link_hash_entry *) eh;
+-
+-	      for (hdh_pp = &hh->dyn_relocs; (hdh_p = *hdh_pp) != NULL;
+-		   hdh_pp = &hdh_p->hdh_next)
+-		if (hdh_p->sec == sec)
+-		  {
+-		    if (ELF32_R_TYPE (rel->r_info) == R_METAG_RELBRANCH)
+-		      hdh_p->relative_count -= 1;
+-		    hdh_p->count -= 1;
+-		    if (hdh_p->count == 0)
+-		      *hdh_pp = hdh_p->hdh_next;
+-		    break;
+-		  }
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Determine the type of stub needed, if any, for a call.  */
+ 
+ static enum elf_metag_stub_type
+@@ -4274,7 +4149,6 @@ elf_metag_plt_sym_val (bfd_vma i, const asection *plt,
+ 	elf_metag_link_hash_table_create
+ #define elf_backend_relocate_section		elf_metag_relocate_section
+ #define elf_backend_gc_mark_hook		elf_metag_gc_mark_hook
+-#define elf_backend_gc_sweep_hook		elf_metag_gc_sweep_hook
+ #define elf_backend_check_relocs		elf_metag_check_relocs
+ #define elf_backend_create_dynamic_sections	elf_metag_create_dynamic_sections
+ #define elf_backend_adjust_dynamic_symbol	elf_metag_adjust_dynamic_symbol
+diff --git a/bfd/elf32-microblaze.c b/bfd/elf32-microblaze.c
+index 494b6368c9..1a69b6da72 100644
+--- a/bfd/elf32-microblaze.c
++++ b/bfd/elf32-microblaze.c
+@@ -2224,17 +2224,6 @@ microblaze_elf_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-static bfd_boolean
+-microblaze_elf_gc_sweep_hook (bfd * abfd ATTRIBUTE_UNUSED,
+-     			      struct bfd_link_info * info ATTRIBUTE_UNUSED,
+-     			      asection * sec ATTRIBUTE_UNUSED,
+-     			      const Elf_Internal_Rela * relocs ATTRIBUTE_UNUSED)
+-{
+-  return TRUE;
+-}
+-
+ /* PIC support.  */
+ 
+ #define PLT_ENTRY_SIZE 16
+@@ -3465,7 +3454,6 @@ microblaze_elf_add_symbol_hook (bfd *abfd,
+ #define bfd_elf32_bfd_reloc_name_lookup		microblaze_elf_reloc_name_lookup
+ 
+ #define elf_backend_gc_mark_hook		microblaze_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook		microblaze_elf_gc_sweep_hook
+ #define elf_backend_check_relocs                microblaze_elf_check_relocs
+ #define elf_backend_copy_indirect_symbol        microblaze_elf_copy_indirect_symbol
+ #define bfd_elf32_bfd_link_hash_table_create    microblaze_elf_link_hash_table_create
+diff --git a/bfd/elf32-mips.c b/bfd/elf32-mips.c
+index 8c1a68eba0..17ca43284d 100644
+--- a/bfd/elf32-mips.c
++++ b/bfd/elf32-mips.c
+@@ -2474,7 +2474,6 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
+ 					_bfd_mips_elf_additional_program_headers
+ #define elf_backend_modify_segment_map	_bfd_mips_elf_modify_segment_map
+ #define elf_backend_gc_mark_hook	_bfd_mips_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook	_bfd_mips_elf_gc_sweep_hook
+ #define elf_backend_copy_indirect_symbol \
+ 					_bfd_mips_elf_copy_indirect_symbol
+ #define elf_backend_grok_prstatus	elf32_mips_grok_prstatus
+diff --git a/bfd/elf32-nds32.c b/bfd/elf32-nds32.c
+index 4341007a08..42de10a013 100644
+--- a/bfd/elf32-nds32.c
++++ b/bfd/elf32-nds32.c
+@@ -80,8 +80,6 @@ static bfd_boolean nds32_elf_set_private_flags (bfd *, flagword);
+ static bfd_boolean nds32_elf_merge_private_bfd_data
+   (bfd *, struct bfd_link_info *);
+ static bfd_boolean nds32_elf_print_private_bfd_data (bfd *, void *);
+-static bfd_boolean nds32_elf_gc_sweep_hook
+-  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
+ static bfd_boolean nds32_elf_check_relocs
+   (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
+ static asection *nds32_elf_gc_mark_hook
+@@ -6155,136 +6153,6 @@ nds32_elf_gc_mark_hook (asection *sec, struct bfd_link_info *info,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-static bfd_boolean
+-nds32_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info, asection *sec,
+-			 const Elf_Internal_Rela *relocs)
+-{
+-  /* Update the got entry reference counts for the section being removed.  */
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  /* External symbol.  */
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	}
+-
+-      switch (ELF32_R_TYPE (rel->r_info))
+-	{
+-	case R_NDS32_GOT_HI20:
+-	case R_NDS32_GOT_LO12:
+-	case R_NDS32_GOT_LO15:
+-	case R_NDS32_GOT_LO19:
+-	case R_NDS32_GOT17S2_RELA:
+-	case R_NDS32_GOT15S2_RELA:
+-	case R_NDS32_GOTOFF:
+-	case R_NDS32_GOTOFF_HI20:
+-	case R_NDS32_GOTOFF_LO12:
+-	case R_NDS32_GOTOFF_LO15:
+-	case R_NDS32_GOTOFF_LO19:
+-	case R_NDS32_GOT20:
+-	case R_NDS32_GOTPC_HI20:
+-	case R_NDS32_GOTPC_LO12:
+-	case R_NDS32_GOTPC20:
+-	  if (h != NULL)
+-	    {
+-	      if (h->got.refcount > 0)
+-		h->got.refcount--;
+-	    }
+-	  else
+-	    {
+-	      if (local_got_refcounts && local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx]--;
+-	    }
+-	  break;
+-
+-	case R_NDS32_16_RELA:
+-	case R_NDS32_20_RELA:
+-	case R_NDS32_5_RELA:
+-	case R_NDS32_32_RELA:
+-	case R_NDS32_HI20_RELA:
+-	case R_NDS32_LO12S3_RELA:
+-	case R_NDS32_LO12S2_RELA:
+-	case R_NDS32_LO12S2_DP_RELA:
+-	case R_NDS32_LO12S2_SP_RELA:
+-	case R_NDS32_LO12S1_RELA:
+-	case R_NDS32_LO12S0_RELA:
+-	case R_NDS32_LO12S0_ORI_RELA:
+-	case R_NDS32_SDA16S3_RELA:
+-	case R_NDS32_SDA17S2_RELA:
+-	case R_NDS32_SDA18S1_RELA:
+-	case R_NDS32_SDA19S0_RELA:
+-	case R_NDS32_SDA15S3_RELA:
+-	case R_NDS32_SDA15S2_RELA:
+-	case R_NDS32_SDA12S2_DP_RELA:
+-	case R_NDS32_SDA12S2_SP_RELA:
+-	case R_NDS32_SDA15S1_RELA:
+-	case R_NDS32_SDA15S0_RELA:
+-	case R_NDS32_SDA_FP7U2_RELA:
+-	case R_NDS32_15_PCREL_RELA:
+-	case R_NDS32_17_PCREL_RELA:
+-	case R_NDS32_25_PCREL_RELA:
+-	  if (h != NULL)
+-	    {
+-	      struct elf_nds32_link_hash_entry *eh;
+-	      struct elf_nds32_dyn_relocs **pp;
+-	      struct elf_nds32_dyn_relocs *p;
+-
+-	      if (!bfd_link_pic (info) && h->plt.refcount > 0)
+-		h->plt.refcount -= 1;
+-
+-	      eh = (struct elf_nds32_link_hash_entry *) h;
+-
+-	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+-		if (p->sec == sec)
+-		  {
+-		    if (ELF32_R_TYPE (rel->r_info) == R_NDS32_15_PCREL_RELA
+-			|| ELF32_R_TYPE (rel->r_info) == R_NDS32_17_PCREL_RELA
+-			|| ELF32_R_TYPE (rel->r_info) == R_NDS32_25_PCREL_RELA)
+-		      p->pc_count -= 1;
+-		    p->count -= 1;
+-		    if (p->count == 0)
+-		      *pp = p->next;
+-		    break;
+-		  }
+-	    }
+-	  break;
+-
+-	case R_NDS32_9_PLTREL:
+-	case R_NDS32_25_PLTREL:
+-	  if (h != NULL)
+-	    {
+-	      if (h->plt.refcount > 0)
+-		h->plt.refcount--;
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Look through the relocs for a section during the first phase.
+    Since we don't do .gots or .plts, we just need to consider the
+    virtual table relocs for gc.  */
+@@ -15654,7 +15522,6 @@ nds32_elf_ex9_itb_base (struct bfd_link_info *link_info)
+ #define elf_backend_size_dynamic_sections	nds32_elf_size_dynamic_sections
+ #define elf_backend_relocate_section		nds32_elf_relocate_section
+ #define elf_backend_gc_mark_hook		nds32_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook		nds32_elf_gc_sweep_hook
+ #define elf_backend_grok_prstatus		nds32_elf_grok_prstatus
+ #define elf_backend_grok_psinfo			nds32_elf_grok_psinfo
+ #define elf_backend_reloc_type_class		nds32_elf_reloc_type_class
+diff --git a/bfd/elf32-nios2.c b/bfd/elf32-nios2.c
+index 64e40efbee..5456c07d29 100644
+--- a/bfd/elf32-nios2.c
++++ b/bfd/elf32-nios2.c
+@@ -4988,110 +4988,6 @@ nios2_elf32_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-/* Implement elf_backend_gc_sweep_hook:
+-   Update the got entry reference counts for the section being removed.  */
+-static bfd_boolean
+-nios2_elf32_gc_sweep_hook (bfd *abfd,
+-			   struct bfd_link_info *info,
+-			   asection *sec,
+-			   const Elf_Internal_Rela *relocs)
+-{
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-  bfd *dynobj;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  dynobj = elf_hash_table (info)->dynobj;
+-  if (dynobj == NULL)
+-    return TRUE;
+-
+-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      struct elf_link_hash_entry *h = NULL;
+-      int r_type;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	}
+-
+-      r_type = ELF32_R_TYPE (rel->r_info);
+-      switch (r_type)
+-	{
+-	case R_NIOS2_GOT16:
+-	case R_NIOS2_GOT_LO:
+-	case R_NIOS2_GOT_HA:
+-	case R_NIOS2_CALL16:
+-	case R_NIOS2_CALL_LO:
+-	case R_NIOS2_CALL_HA:
+-	  if (h != NULL)
+-	    {
+-	      if (h->got.refcount > 0)
+-		--h->got.refcount;
+-	    }
+-	  else if (local_got_refcounts != NULL)
+-	    {
+-	      if (local_got_refcounts[r_symndx] > 0)
+-		--local_got_refcounts[r_symndx];
+-	    }
+-	  break;
+-
+-	case R_NIOS2_PCREL_LO:
+-	case R_NIOS2_PCREL_HA:
+-	case R_NIOS2_BFD_RELOC_32:
+-	case R_NIOS2_CALL26:
+-	case R_NIOS2_CALL26_NOAT:
+-	  if (h != NULL)
+-	    {
+-	      struct elf32_nios2_link_hash_entry *eh;
+-	      struct elf32_nios2_dyn_relocs **pp;
+-	      struct elf32_nios2_dyn_relocs *p;
+-
+-	      eh = (struct elf32_nios2_link_hash_entry *) h;
+-
+-	      if (h->plt.refcount > 0)
+-		--h->plt.refcount;
+-
+-	      if (r_type == R_NIOS2_PCREL_LO || r_type == R_NIOS2_PCREL_HA
+-		  || r_type == R_NIOS2_BFD_RELOC_32)
+-		{
+-		  for (pp = &eh->dyn_relocs; (p = *pp) != NULL;
+-		       pp = &p->next)
+-		    if (p->sec == sec)
+-		      {
+-			p->count -= 1;
+-			if (p->count == 0)
+-			  *pp = p->next;
+-			break;
+-		      }
+-		}
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Implement elf_backend_finish_dynamic_symbols:
+    Finish up dynamic symbol handling.  We set the contents of various
+    dynamic sections here.  */
+@@ -6229,7 +6125,6 @@ const struct bfd_elf_special_section elf32_nios2_special_sections[] =
+ #define elf_backend_check_relocs	  nios2_elf32_check_relocs
+ 
+ #define elf_backend_gc_mark_hook	  nios2_elf32_gc_mark_hook
+-#define elf_backend_gc_sweep_hook	  nios2_elf32_gc_sweep_hook
+ #define elf_backend_create_dynamic_sections \
+ 					  nios2_elf32_create_dynamic_sections
+ #define elf_backend_finish_dynamic_symbol nios2_elf32_finish_dynamic_symbol
+diff --git a/bfd/elf32-or1k.c b/bfd/elf32-or1k.c
+index 583f2d49ae..6673d4f563 100644
+--- a/bfd/elf32-or1k.c
++++ b/bfd/elf32-or1k.c
+@@ -1301,61 +1301,6 @@ or1k_elf_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-static bfd_boolean
+-or1k_elf_gc_sweep_hook (bfd *abfd,
+-                        struct bfd_link_info *info ATTRIBUTE_UNUSED,
+-                        asection *sec,
+-                        const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
+-{
+-  /* Update the got entry reference counts for the section being removed.  */
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-        {
+-          h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-          while (h->root.type == bfd_link_hash_indirect
+-                 || h->root.type == bfd_link_hash_warning)
+-            h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-        }
+-
+-      switch (ELF32_R_TYPE (rel->r_info))
+-        {
+-        case R_OR1K_GOT16:
+-          if (h != NULL)
+-            {
+-              if (h->got.refcount > 0)
+-                h->got.refcount--;
+-            }
+-          else
+-            {
+-              if (local_got_refcounts && local_got_refcounts[r_symndx] > 0)
+-                local_got_refcounts[r_symndx]--;
+-            }
+-          break;
+-
+-        default:
+-          break;
+-        }
+-    }
+-  return TRUE;
+-}
+-
+ /* Look through the relocs for a section during the first phase.  */
+ 
+ static bfd_boolean
+@@ -2723,7 +2668,6 @@ elf32_or1k_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
+ #define elf_info_to_howto               or1k_info_to_howto_rela
+ #define elf_backend_relocate_section    or1k_elf_relocate_section
+ #define elf_backend_gc_mark_hook        or1k_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook       or1k_elf_gc_sweep_hook
+ #define elf_backend_check_relocs        or1k_elf_check_relocs
+ #define elf_backend_reloc_type_class    or1k_elf_reloc_type_class
+ #define elf_backend_can_gc_sections     1
+diff --git a/bfd/elf32-ppc.c b/bfd/elf32-ppc.c
+index 8b32b970cc..bd29377fe6 100644
+--- a/bfd/elf32-ppc.c
++++ b/bfd/elf32-ppc.c
+@@ -5064,182 +5064,6 @@ ppc_elf_gc_mark_hook (asection *sec,
+ 
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+-
+-/* Update the got, plt and dynamic reloc reference counts for the
+-   section being removed.  */
+-
+-static bfd_boolean
+-ppc_elf_gc_sweep_hook (bfd *abfd,
+-		       struct bfd_link_info *info,
+-		       asection *sec,
+-		       const Elf_Internal_Rela *relocs)
+-{
+-  struct ppc_elf_link_hash_table *htab;
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-  asection *got2;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  if ((sec->flags & SEC_ALLOC) == 0)
+-    return TRUE;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  htab = ppc_elf_hash_table (info);
+-  symtab_hdr = &elf_symtab_hdr (abfd);
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-  got2 = bfd_get_section_by_name (abfd, ".got2");
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      enum elf_ppc_reloc_type r_type;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  struct elf_dyn_relocs **pp, *p;
+-	  struct ppc_elf_link_hash_entry *eh;
+-
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	  eh = (struct ppc_elf_link_hash_entry *) h;
+-
+-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+-	    if (p->sec == sec)
+-	      {
+-		/* Everything must go for SEC.  */
+-		*pp = p->next;
+-		break;
+-	      }
+-	}
+-
+-      r_type = ELF32_R_TYPE (rel->r_info);
+-      if (!htab->is_vxworks
+-	  && h == NULL
+-	  && local_got_refcounts != NULL
+-	  && (!bfd_link_pic (info)
+-	      || is_branch_reloc (r_type)))
+-	{
+-	  struct plt_entry **local_plt = (struct plt_entry **)
+-	    (local_got_refcounts + symtab_hdr->sh_info);
+-	  char *local_got_tls_masks = (char *)
+-	    (local_plt + symtab_hdr->sh_info);
+-	  if ((local_got_tls_masks[r_symndx] & PLT_IFUNC) != 0)
+-	    {
+-	      struct plt_entry **ifunc = local_plt + r_symndx;
+-	      bfd_vma addend = 0;
+-	      struct plt_entry *ent;
+-
+-	      if (r_type == R_PPC_PLTREL24 && bfd_link_pic (info))
+-		addend = rel->r_addend;
+-	      ent = find_plt_ent (ifunc, got2, addend);
+-	      if (ent->plt.refcount > 0)
+-		ent->plt.refcount -= 1;
+-	      continue;
+-	    }
+-	}
+-
+-      switch (r_type)
+-	{
+-	case R_PPC_GOT_TLSLD16:
+-	case R_PPC_GOT_TLSLD16_LO:
+-	case R_PPC_GOT_TLSLD16_HI:
+-	case R_PPC_GOT_TLSLD16_HA:
+-	case R_PPC_GOT_TLSGD16:
+-	case R_PPC_GOT_TLSGD16_LO:
+-	case R_PPC_GOT_TLSGD16_HI:
+-	case R_PPC_GOT_TLSGD16_HA:
+-	case R_PPC_GOT_TPREL16:
+-	case R_PPC_GOT_TPREL16_LO:
+-	case R_PPC_GOT_TPREL16_HI:
+-	case R_PPC_GOT_TPREL16_HA:
+-	case R_PPC_GOT_DTPREL16:
+-	case R_PPC_GOT_DTPREL16_LO:
+-	case R_PPC_GOT_DTPREL16_HI:
+-	case R_PPC_GOT_DTPREL16_HA:
+-	case R_PPC_GOT16:
+-	case R_PPC_GOT16_LO:
+-	case R_PPC_GOT16_HI:
+-	case R_PPC_GOT16_HA:
+-	  if (h != NULL)
+-	    {
+-	      if (h->got.refcount > 0)
+-		h->got.refcount--;
+-	      if (!bfd_link_pic (info))
+-		{
+-		  struct plt_entry *ent;
+-
+-		  ent = find_plt_ent (&h->plt.plist, NULL, 0);
+-		  if (ent != NULL && ent->plt.refcount > 0)
+-		    ent->plt.refcount -= 1;
+-		}
+-	    }
+-	  else if (local_got_refcounts != NULL)
+-	    {
+-	      if (local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx]--;
+-	    }
+-	  break;
+-
+-	case R_PPC_REL24:
+-	case R_PPC_REL14:
+-	case R_PPC_REL14_BRTAKEN:
+-	case R_PPC_REL14_BRNTAKEN:
+-	case R_PPC_REL32:
+-	  if (h == NULL || h == htab->elf.hgot)
+-	    break;
+-	  /* Fall through.  */
+-
+-	case R_PPC_ADDR32:
+-	case R_PPC_ADDR24:
+-	case R_PPC_ADDR16:
+-	case R_PPC_ADDR16_LO:
+-	case R_PPC_ADDR16_HI:
+-	case R_PPC_ADDR16_HA:
+-	case R_PPC_ADDR14:
+-	case R_PPC_ADDR14_BRTAKEN:
+-	case R_PPC_ADDR14_BRNTAKEN:
+-	case R_PPC_UADDR32:
+-	case R_PPC_UADDR16:
+-	  if (bfd_link_pic (info))
+-	    break;
+-	  /* Fall through.  */
+-
+-	case R_PPC_PLT32:
+-	case R_PPC_PLTREL24:
+-	case R_PPC_PLTREL32:
+-	case R_PPC_PLT16_LO:
+-	case R_PPC_PLT16_HI:
+-	case R_PPC_PLT16_HA:
+-	  if (h != NULL)
+-	    {
+-	      bfd_vma addend = 0;
+-	      struct plt_entry *ent;
+-
+-	      if (r_type == R_PPC_PLTREL24 && bfd_link_pic (info))
+-		addend = rel->r_addend;
+-	      ent = find_plt_ent (&h->plt.plist, got2, addend);
+-	      if (ent != NULL && ent->plt.refcount > 0)
+-		ent->plt.refcount -= 1;
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-  return TRUE;
+-}
+ 
+ /* Set plt output section type, htab->tls_get_addr, and call the
+    generic ELF tls_setup function.  */
+@@ -10950,7 +10774,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
+ 
+ #define elf_backend_object_p			ppc_elf_object_p
+ #define elf_backend_gc_mark_hook		ppc_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook		ppc_elf_gc_sweep_hook
+ #define elf_backend_section_from_shdr		ppc_elf_section_from_shdr
+ #define elf_backend_relocate_section		ppc_elf_relocate_section
+ #define elf_backend_create_dynamic_sections	ppc_elf_create_dynamic_sections
+diff --git a/bfd/elf32-s390.c b/bfd/elf32-s390.c
+index eaf2bf14c0..ce5c98be86 100644
+--- a/bfd/elf32-s390.c
++++ b/bfd/elf32-s390.c
+@@ -1401,180 +1401,6 @@ elf_s390_gc_mark_hook (asection *sec,
+ 
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-static bfd_boolean
+-elf_s390_gc_sweep_hook (bfd *abfd,
+-			struct bfd_link_info *info,
+-			asection *sec,
+-			const Elf_Internal_Rela *relocs)
+-{
+-  struct elf_s390_link_hash_table *htab;
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  htab = elf_s390_hash_table (info);
+-  if (htab == NULL)
+-    return FALSE;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  symtab_hdr = &elf_symtab_hdr (abfd);
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      unsigned int r_type;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  struct elf_s390_link_hash_entry *eh;
+-	  struct elf_dyn_relocs **pp;
+-	  struct elf_dyn_relocs *p;
+-
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	  eh = (struct elf_s390_link_hash_entry *) h;
+-
+-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+-	    if (p->sec == sec)
+-	      {
+-		/* Everything must go for SEC.  */
+-		*pp = p->next;
+-		break;
+-	      }
+-	}
+-      else
+-	{
+-	  Elf_Internal_Sym *isym;
+-
+-	  /* A local symbol.  */
+-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+-					abfd, r_symndx);
+-	  if (isym == NULL)
+-	    return FALSE;
+-
+-	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
+-	    {
+-	      struct plt_entry *plt = elf_s390_local_plt (abfd);
+-	      if (plt[r_symndx].plt.refcount > 0)
+-		plt[r_symndx].plt.refcount--;
+-	    }
+-	}
+-
+-      r_type = ELF32_R_TYPE (rel->r_info);
+-      r_type = elf_s390_tls_transition (info, r_type, h != NULL);
+-      switch (r_type)
+-	{
+-	case R_390_TLS_LDM32:
+-	  if (elf_s390_hash_table (info)->tls_ldm_got.refcount > 0)
+-	    elf_s390_hash_table (info)->tls_ldm_got.refcount -= 1;
+-	  break;
+-
+-	case R_390_GOTOFF16:
+-	case R_390_GOTOFF32:
+-	  if (h != NULL && s390_is_ifunc_symbol_p (h) && h->def_regular)
+-	    {
+-	      h->plt.refcount--;
+-	      break;
+-	    }
+-
+-	case R_390_GOTPC:
+-	case R_390_GOTPCDBL:
+-	  break;
+-
+-	case R_390_TLS_GD32:
+-	case R_390_TLS_IE32:
+-	case R_390_TLS_GOTIE12:
+-	case R_390_TLS_GOTIE20:
+-	case R_390_TLS_GOTIE32:
+-	case R_390_TLS_IEENT:
+-	case R_390_GOT12:
+-	case R_390_GOT16:
+-	case R_390_GOT20:
+-	case R_390_GOT32:
+-	case R_390_GOTENT:
+-	  if (h != NULL)
+-	    {
+-	      if (h->got.refcount > 0)
+-		h->got.refcount -= 1;
+-	    }
+-	  else if (local_got_refcounts != NULL)
+-	    {
+-	      if (local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx] -= 1;
+-	    }
+-	  break;
+-
+-	case R_390_8:
+-	case R_390_12:
+-	case R_390_16:
+-	case R_390_20:
+-	case R_390_32:
+-	case R_390_PC16:
+-	case R_390_PC12DBL:
+-	case R_390_PC16DBL:
+-	case R_390_PC24DBL:
+-	case R_390_PC32DBL:
+-	case R_390_PC32:
+-	  if (bfd_link_pic (info))
+-	    break;
+-	  /* Fall through.  */
+-
+-	case R_390_PLT12DBL:
+-	case R_390_PLT16DBL:
+-	case R_390_PLT24DBL:
+-	case R_390_PLT32DBL:
+-	case R_390_PLT32:
+-	case R_390_PLTOFF16:
+-	case R_390_PLTOFF32:
+-	  if (h != NULL)
+-	    {
+-	      if (h->plt.refcount > 0)
+-		h->plt.refcount -= 1;
+-	    }
+-	  break;
+-
+-	case R_390_GOTPLT12:
+-	case R_390_GOTPLT16:
+-	case R_390_GOTPLT20:
+-	case R_390_GOTPLT32:
+-	case R_390_GOTPLTENT:
+-	  if (h != NULL)
+-	    {
+-	      if (h->plt.refcount > 0)
+-		{
+-		  ((struct elf_s390_link_hash_entry *) h)->gotplt_refcount--;
+-		  h->plt.refcount -= 1;
+-		}
+-	    }
+-	  else if (local_got_refcounts != NULL)
+-	    {
+-	      if (local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx] -= 1;
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Make sure we emit a GOT entry if the symbol was supposed to have a PLT
+    entry but we found we will not create any.  Called when we find we will
+    not have any PLT for this symbol, by for example
+@@ -4210,7 +4036,6 @@ elf32_s390_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
+ #define elf_backend_finish_dynamic_sections   elf_s390_finish_dynamic_sections
+ #define elf_backend_finish_dynamic_symbol     elf_s390_finish_dynamic_symbol
+ #define elf_backend_gc_mark_hook	      elf_s390_gc_mark_hook
+-#define elf_backend_gc_sweep_hook	      elf_s390_gc_sweep_hook
+ #define elf_backend_reloc_type_class	      elf_s390_reloc_type_class
+ #define elf_backend_relocate_section	      elf_s390_relocate_section
+ #define elf_backend_size_dynamic_sections     elf_s390_size_dynamic_sections
+diff --git a/bfd/elf32-sparc.c b/bfd/elf32-sparc.c
+index 5baaf64e72..c812f4b7cd 100644
+--- a/bfd/elf32-sparc.c
++++ b/bfd/elf32-sparc.c
+@@ -236,7 +236,6 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
+ #define bfd_elf32_mkobject		_bfd_sparc_elf_mkobject
+ #define elf_backend_object_p		_bfd_sparc_elf_object_p
+ #define elf_backend_gc_mark_hook	_bfd_sparc_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook       _bfd_sparc_elf_gc_sweep_hook
+ #define elf_backend_plt_sym_val		_bfd_sparc_elf_plt_sym_val
+ #define elf_backend_init_index_section	_bfd_elf_init_1_index_section
+ #define elf_backend_fixup_symbol        _bfd_sparc_elf_fixup_symbol
+diff --git a/bfd/elf32-tic6x.c b/bfd/elf32-tic6x.c
+index bcce800370..ef6f1c1bf7 100644
+--- a/bfd/elf32-tic6x.c
++++ b/bfd/elf32-tic6x.c
+@@ -1971,90 +1971,6 @@ elf32_tic6x_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
+   return TRUE;
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-static bfd_boolean
+-elf32_tic6x_gc_sweep_hook (bfd *abfd,
+-			   struct bfd_link_info *info,
+-			   asection *sec,
+-			   const Elf_Internal_Rela *relocs)
+-{
+-  struct elf32_tic6x_link_hash_table *htab;
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  htab = elf32_tic6x_hash_table (info);
+-  if (htab == NULL)
+-    return FALSE;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  symtab_hdr = &elf_symtab_hdr (abfd);
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      unsigned int r_type;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  struct elf32_tic6x_link_hash_entry *eh;
+-	  struct elf_dyn_relocs **pp;
+-	  struct elf_dyn_relocs *p;
+-
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	  eh = (struct elf32_tic6x_link_hash_entry *) h;
+-
+-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+-	    if (p->sec == sec)
+-	      {
+-		/* Everything must go for SEC.  */
+-		*pp = p->next;
+-		break;
+-	      }
+-	}
+-
+-      r_type = ELF32_R_TYPE (rel->r_info);
+-
+-      switch (r_type)
+-	{
+-	case R_C6000_SBR_GOT_U15_W:
+-	case R_C6000_SBR_GOT_L16_W:
+-	case R_C6000_SBR_GOT_H16_W:
+-	case R_C6000_EHTYPE:
+-	  if (h != NULL)
+-	    {
+-	      if (h->got.refcount > 0)
+-		h->got.refcount -= 1;
+-	    }
+-	  else if (local_got_refcounts != NULL)
+-	    {
+-	      if (local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx] -= 1;
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Adjust a symbol defined by a dynamic object and referenced by a
+    regular object.  The current definition is in some section of the
+    dynamic object, but we're not including those sections.  We have to
+@@ -4389,7 +4305,6 @@ elf32_tic6x_write_section (bfd *output_bfd,
+ #define elf_backend_rela_normal		1
+ #define elf_backend_got_header_size     8
+ #define elf_backend_fake_sections       elf32_tic6x_fake_sections
+-#define elf_backend_gc_sweep_hook	elf32_tic6x_gc_sweep_hook
+ #define elf_backend_gc_mark_extra_sections elf32_tic6x_gc_mark_extra_sections
+ #define elf_backend_create_dynamic_sections \
+   elf32_tic6x_create_dynamic_sections
+diff --git a/bfd/elf32-tilegx.c b/bfd/elf32-tilegx.c
+index bb92ad6e13..4e4611f634 100644
+--- a/bfd/elf32-tilegx.c
++++ b/bfd/elf32-tilegx.c
+@@ -110,7 +110,6 @@ tilegx_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
+ #define elf_backend_finish_dynamic_symbol    tilegx_elf_finish_dynamic_symbol
+ #define elf_backend_finish_dynamic_sections  tilegx_elf_finish_dynamic_sections
+ #define elf_backend_gc_mark_hook	     tilegx_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook            tilegx_elf_gc_sweep_hook
+ #define elf_backend_plt_sym_val		     tilegx_elf_plt_sym_val
+ #define elf_info_to_howto_rel                NULL
+ #define elf_info_to_howto                    tilegx_info_to_howto_rela
+diff --git a/bfd/elf32-tilepro.c b/bfd/elf32-tilepro.c
+index ad223352c7..7ab60bbaca 100644
+--- a/bfd/elf32-tilepro.c
++++ b/bfd/elf32-tilepro.c
+@@ -1885,170 +1885,6 @@ tilepro_elf_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-static bfd_boolean
+-tilepro_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
+-			   asection *sec, const Elf_Internal_Rela *relocs)
+-{
+-  struct tilepro_elf_link_hash_table *htab;
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  BFD_ASSERT (is_tilepro_elf (abfd) || sec->reloc_count == 0);
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  htab = tilepro_elf_hash_table (info);
+-  BFD_ASSERT (htab != NULL);
+-  symtab_hdr = &elf_symtab_hdr (abfd);
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      unsigned int r_type;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  struct tilepro_elf_link_hash_entry *eh;
+-	  struct tilepro_elf_dyn_relocs **pp;
+-	  struct tilepro_elf_dyn_relocs *p;
+-
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	  eh = (struct tilepro_elf_link_hash_entry *) h;
+-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+-	    if (p->sec == sec)
+-	      {
+-		/* Everything must go for SEC.  */
+-		*pp = p->next;
+-		break;
+-	      }
+-	}
+-
+-      r_type = ELF32_R_TYPE (rel->r_info);
+-      r_type = tilepro_elf_tls_transition (info, r_type, h != NULL);
+-      switch (r_type)
+-	{
+-        case R_TILEPRO_IMM16_X0_GOT:
+-        case R_TILEPRO_IMM16_X1_GOT:
+-        case R_TILEPRO_IMM16_X0_GOT_LO:
+-        case R_TILEPRO_IMM16_X1_GOT_LO:
+-        case R_TILEPRO_IMM16_X0_GOT_HI:
+-        case R_TILEPRO_IMM16_X1_GOT_HI:
+-        case R_TILEPRO_IMM16_X0_GOT_HA:
+-        case R_TILEPRO_IMM16_X1_GOT_HA:
+-        case R_TILEPRO_IMM16_X0_TLS_GD:
+-        case R_TILEPRO_IMM16_X1_TLS_GD:
+-        case R_TILEPRO_IMM16_X0_TLS_GD_LO:
+-        case R_TILEPRO_IMM16_X1_TLS_GD_LO:
+-        case R_TILEPRO_IMM16_X0_TLS_GD_HI:
+-        case R_TILEPRO_IMM16_X1_TLS_GD_HI:
+-        case R_TILEPRO_IMM16_X0_TLS_GD_HA:
+-        case R_TILEPRO_IMM16_X1_TLS_GD_HA:
+-        case R_TILEPRO_IMM16_X0_TLS_IE:
+-        case R_TILEPRO_IMM16_X1_TLS_IE:
+-        case R_TILEPRO_IMM16_X0_TLS_IE_LO:
+-        case R_TILEPRO_IMM16_X1_TLS_IE_LO:
+-        case R_TILEPRO_IMM16_X0_TLS_IE_HI:
+-        case R_TILEPRO_IMM16_X1_TLS_IE_HI:
+-        case R_TILEPRO_IMM16_X0_TLS_IE_HA:
+-        case R_TILEPRO_IMM16_X1_TLS_IE_HA:
+-	  if (h != NULL)
+-	    {
+-	      if (h->got.refcount > 0)
+-		h->got.refcount--;
+-	    }
+-	  else
+-	    {
+-	      if (local_got_refcounts &&
+-		  local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx]--;
+-	    }
+-	  break;
+-
+-        case R_TILEPRO_32_PCREL:
+-        case R_TILEPRO_16_PCREL:
+-        case R_TILEPRO_8_PCREL:
+-        case R_TILEPRO_IMM16_X0_PCREL:
+-        case R_TILEPRO_IMM16_X1_PCREL:
+-        case R_TILEPRO_IMM16_X0_LO_PCREL:
+-        case R_TILEPRO_IMM16_X1_LO_PCREL:
+-        case R_TILEPRO_IMM16_X0_HI_PCREL:
+-        case R_TILEPRO_IMM16_X1_HI_PCREL:
+-        case R_TILEPRO_IMM16_X0_HA_PCREL:
+-        case R_TILEPRO_IMM16_X1_HA_PCREL:
+-	  if (h != NULL
+-	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+-	    break;
+-	  /* Fall through.  */
+-
+-        case R_TILEPRO_32:
+-        case R_TILEPRO_16:
+-        case R_TILEPRO_8:
+-        case R_TILEPRO_LO16:
+-        case R_TILEPRO_HI16:
+-        case R_TILEPRO_HA16:
+-        case R_TILEPRO_COPY:
+-        case R_TILEPRO_GLOB_DAT:
+-        case R_TILEPRO_JMP_SLOT:
+-        case R_TILEPRO_RELATIVE:
+-        case R_TILEPRO_BROFF_X1:
+-        case R_TILEPRO_JOFFLONG_X1:
+-        case R_TILEPRO_IMM8_X0:
+-        case R_TILEPRO_IMM8_Y0:
+-        case R_TILEPRO_IMM8_X1:
+-        case R_TILEPRO_IMM8_Y1:
+-        case R_TILEPRO_DEST_IMM8_X1:
+-        case R_TILEPRO_MT_IMM15_X1:
+-        case R_TILEPRO_MF_IMM15_X1:
+-        case R_TILEPRO_IMM16_X0:
+-        case R_TILEPRO_IMM16_X1:
+-        case R_TILEPRO_IMM16_X0_LO:
+-        case R_TILEPRO_IMM16_X1_LO:
+-        case R_TILEPRO_IMM16_X0_HI:
+-        case R_TILEPRO_IMM16_X1_HI:
+-        case R_TILEPRO_IMM16_X0_HA:
+-        case R_TILEPRO_IMM16_X1_HA:
+-        case R_TILEPRO_MMSTART_X0:
+-        case R_TILEPRO_MMEND_X0:
+-        case R_TILEPRO_MMSTART_X1:
+-        case R_TILEPRO_MMEND_X1:
+-        case R_TILEPRO_SHAMT_X0:
+-        case R_TILEPRO_SHAMT_X1:
+-        case R_TILEPRO_SHAMT_Y0:
+-        case R_TILEPRO_SHAMT_Y1:
+-	  if (bfd_link_pic (info))
+-	    break;
+-	  /* Fall through.  */
+-
+-        case R_TILEPRO_JOFFLONG_X1_PLT:
+-	  if (h != NULL)
+-	    {
+-	      if (h->plt.refcount > 0)
+-		h->plt.refcount--;
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Adjust a symbol defined by a dynamic object and referenced by a
+    regular object.  The current definition is in some section of the
+    dynamic object, but we're not including those sections.  We have to
+@@ -4042,7 +3878,6 @@ tilepro_additional_program_headers (bfd *abfd,
+ #define elf_backend_finish_dynamic_symbol    tilepro_elf_finish_dynamic_symbol
+ #define elf_backend_finish_dynamic_sections  tilepro_elf_finish_dynamic_sections
+ #define elf_backend_gc_mark_hook	     tilepro_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook            tilepro_elf_gc_sweep_hook
+ #define elf_backend_plt_sym_val		     tilepro_elf_plt_sym_val
+ #define elf_info_to_howto_rel                NULL
+ #define elf_info_to_howto                    tilepro_info_to_howto_rela
+diff --git a/bfd/elf32-vax.c b/bfd/elf32-vax.c
+index 368de9cf7f..eb5bd9e0b3 100644
+--- a/bfd/elf32-vax.c
++++ b/bfd/elf32-vax.c
+@@ -821,68 +821,6 @@ elf_vax_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-static bfd_boolean
+-elf_vax_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info, asection *sec,
+-		       const Elf_Internal_Rela *relocs)
+-{
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  const Elf_Internal_Rela *rel, *relend;
+-  bfd *dynobj;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  dynobj = elf_hash_table (info)->dynobj;
+-  if (dynobj == NULL)
+-    return TRUE;
+-
+-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+-  sym_hashes = elf_sym_hashes (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	}
+-
+-      switch (ELF32_R_TYPE (rel->r_info))
+-	{
+-	case R_VAX_GOT32:
+-	  if (h != NULL && h->got.refcount > 0)
+-	    --h->got.refcount;
+-	  break;
+-
+-	case R_VAX_PLT32:
+-	case R_VAX_PC8:
+-	case R_VAX_PC16:
+-	case R_VAX_PC32:
+-	case R_VAX_8:
+-	case R_VAX_16:
+-	case R_VAX_32:
+-	  if (h != NULL && h->plt.refcount > 0)
+-	    --h->plt.refcount;
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Adjust a symbol defined by a dynamic object and referenced by a
+    regular object.  The current definition is in some section of the
+    dynamic object, but we're not including those sections.  We have to
+@@ -1994,7 +1932,6 @@ elf_vax_plt_sym_val (bfd_vma i, const asection *plt,
+ 					elf_vax_finish_dynamic_sections
+ #define elf_backend_reloc_type_class	elf_vax_reloc_type_class
+ #define elf_backend_gc_mark_hook	elf_vax_gc_mark_hook
+-#define elf_backend_gc_sweep_hook	elf_vax_gc_sweep_hook
+ #define elf_backend_plt_sym_val		elf_vax_plt_sym_val
+ #define bfd_elf32_bfd_merge_private_bfd_data \
+                                         elf32_vax_merge_private_bfd_data
+diff --git a/bfd/elf32-xtensa.c b/bfd/elf32-xtensa.c
+index 19a162eebb..e320e20c88 100644
+--- a/bfd/elf32-xtensa.c
++++ b/bfd/elf32-xtensa.c
+@@ -1286,137 +1286,6 @@ elf_xtensa_gc_mark_hook (asection *sec,
+ }
+ 
+ 
+-/* Update the GOT & PLT entry reference counts
+-   for the section being removed.  */
+-
+-static bfd_boolean
+-elf_xtensa_gc_sweep_hook (bfd *abfd,
+-			  struct bfd_link_info *info,
+-			  asection *sec,
+-			  const Elf_Internal_Rela *relocs)
+-{
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  const Elf_Internal_Rela *rel, *relend;
+-  struct elf_xtensa_link_hash_table *htab;
+-
+-  htab = elf_xtensa_hash_table (info);
+-  if (htab == NULL)
+-    return FALSE;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  if ((sec->flags & SEC_ALLOC) == 0)
+-    return TRUE;
+-
+-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+-  sym_hashes = elf_sym_hashes (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      unsigned int r_type;
+-      struct elf_link_hash_entry *h = NULL;
+-      struct elf_xtensa_link_hash_entry *eh;
+-      bfd_boolean is_got = FALSE;
+-      bfd_boolean is_plt = FALSE;
+-      bfd_boolean is_tlsfunc = FALSE;
+-
+-      r_symndx = ELF32_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	}
+-      eh = elf_xtensa_hash_entry (h);
+-
+-      r_type = ELF32_R_TYPE (rel->r_info);
+-      switch (r_type)
+-	{
+-	case R_XTENSA_TLSDESC_FN:
+-	  if (bfd_link_pic (info))
+-	    {
+-	      is_got = TRUE;
+-	      is_tlsfunc = TRUE;
+-	    }
+-	  break;
+-
+-	case R_XTENSA_TLSDESC_ARG:
+-	  if (bfd_link_pic (info))
+-	    is_got = TRUE;
+-	  else
+-	    {
+-	      if (h && elf_xtensa_hash_entry (h) != htab->tlsbase)
+-		is_got = TRUE;
+-	    }
+-	  break;
+-
+-	case R_XTENSA_TLS_TPOFF:
+-	  if (bfd_link_pic (info) || h)
+-	    is_got = TRUE;
+-	  break;
+-
+-	case R_XTENSA_32:
+-	  is_got = TRUE;
+-	  break;
+-
+-	case R_XTENSA_PLT:
+-	  is_plt = TRUE;
+-	  break;
+-
+-	default:
+-	  continue;
+-	}
+-
+-      if (h)
+-	{
+-	  if (is_plt)
+-	    {
+-	      /* If the symbol has been localized its plt.refcount got moved
+-	         to got.refcount.  Handle it as GOT.  */
+-	      if (h->plt.refcount > 0)
+-		h->plt.refcount--;
+-	      else
+-		is_got = TRUE;
+-	    }
+-	  if (is_got)
+-	    {
+-	      if (h->got.refcount > 0)
+-		h->got.refcount--;
+-	    }
+-	  if (is_tlsfunc)
+-	    {
+-	      if (eh->tlsfunc_refcount > 0)
+-		eh->tlsfunc_refcount--;
+-	    }
+-	}
+-      else
+-	{
+-	  if (is_got || is_plt)
+-	    {
+-	      bfd_signed_vma *got_refcount
+-		= &elf_local_got_refcounts (abfd) [r_symndx];
+-	      if (*got_refcount > 0)
+-		*got_refcount -= 1;
+-	    }
+-	  if (is_tlsfunc)
+-	    {
+-	      bfd_signed_vma *tlsfunc_refcount
+-		= &elf_xtensa_local_tlsfunc_refcounts (abfd) [r_symndx];
+-	      if (*tlsfunc_refcount > 0)
+-		*tlsfunc_refcount -= 1;
+-	    }
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+-
+ /* Create all the dynamic sections.  */
+ 
+ static bfd_boolean
+@@ -11370,7 +11239,6 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
+ #define elf_backend_finish_dynamic_sections  elf_xtensa_finish_dynamic_sections
+ #define elf_backend_finish_dynamic_symbol    elf_xtensa_finish_dynamic_symbol
+ #define elf_backend_gc_mark_hook	     elf_xtensa_gc_mark_hook
+-#define elf_backend_gc_sweep_hook	     elf_xtensa_gc_sweep_hook
+ #define elf_backend_grok_prstatus	     elf_xtensa_grok_prstatus
+ #define elf_backend_grok_psinfo		     elf_xtensa_grok_psinfo
+ #define elf_backend_hide_symbol		     elf_xtensa_hide_symbol
+diff --git a/bfd/elf64-alpha.c b/bfd/elf64-alpha.c
+index 3e88787c17..d90c0168af 100644
+--- a/bfd/elf64-alpha.c
++++ b/bfd/elf64-alpha.c
+@@ -2040,72 +2040,6 @@ elf64_alpha_gc_mark_hook (asection *sec, struct bfd_link_info *info,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-static bfd_boolean
+-elf64_alpha_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
+-			   asection *sec, const Elf_Internal_Rela *relocs)
+-{
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct alpha_elf_link_hash_entry **sym_hashes;
+-  const Elf_Internal_Rela *rel, *relend;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  symtab_hdr = &elf_symtab_hdr (abfd);
+-  sym_hashes = alpha_elf_sym_hashes (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx, r_type;
+-      struct alpha_elf_link_hash_entry *h = NULL;
+-      struct alpha_elf_got_entry *gotent;
+-
+-      r_symndx = ELF64_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.root.type == bfd_link_hash_indirect
+-		 || h->root.root.type == bfd_link_hash_warning)
+-	    h = (struct alpha_elf_link_hash_entry *) h->root.root.u.i.link;
+-	}
+-
+-      r_type = ELF64_R_TYPE (rel->r_info);
+-      switch (r_type)
+-	{
+-	case R_ALPHA_LITERAL:
+-	  /* ??? Ignore re-computation of gotent_flags.  We're not
+-	     carrying a use-count for each bit in that mask.  */
+-
+-	case R_ALPHA_TLSGD:
+-	case R_ALPHA_GOTDTPREL:
+-	case R_ALPHA_GOTTPREL:
+-	  /* Fetch the got entry from the tables.  */
+-	  gotent = get_got_entry (abfd, h, r_type, r_symndx, rel->r_addend);
+-
+-	  /* The got entry *must* exist, since we should have created it
+-	     before during check_relocs.  Also note that get_got_entry
+-	     assumed this was going to be another use, and so incremented
+-	     the use count again.  Thus the use count must be at least the
+-	     one real use and the "use" we just added.  */
+-	  if (gotent == NULL || gotent->use_count < 2)
+-	    {
+-	      abort ();
+-	      return FALSE;
+-	    }
+-	  gotent->use_count -= 2;
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Adjust a symbol defined by a dynamic object and referenced by a
+    regular object.  The current definition is in some section of the
+    dynamic object, but we're not including those sections.  We have to
+@@ -5576,7 +5510,6 @@ static const struct elf_size_info alpha_elf_size_info =
+ 
+ #define elf_backend_can_gc_sections	1
+ #define elf_backend_gc_mark_hook	elf64_alpha_gc_mark_hook
+-#define elf_backend_gc_sweep_hook	elf64_alpha_gc_sweep_hook
+ 
+ #define elf_backend_ecoff_debug_swap \
+   &elf64_alpha_ecoff_debug_swap
+diff --git a/bfd/elf64-mips.c b/bfd/elf64-mips.c
+index 84f2a3f8fc..d51124b309 100644
+--- a/bfd/elf64-mips.c
++++ b/bfd/elf64-mips.c
+@@ -4373,7 +4373,6 @@ const struct elf_size_info mips_elf64_size_info =
+ 				_bfd_mips_elf_additional_program_headers
+ #define elf_backend_modify_segment_map	_bfd_mips_elf_modify_segment_map
+ #define elf_backend_gc_mark_hook	_bfd_mips_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook	_bfd_mips_elf_gc_sweep_hook
+ #define elf_backend_copy_indirect_symbol \
+ 					_bfd_mips_elf_copy_indirect_symbol
+ #define elf_backend_ignore_discarded_relocs \
+diff --git a/bfd/elf64-mmix.c b/bfd/elf64-mmix.c
+index 8d79d39d8f..c057d34904 100644
+--- a/bfd/elf64-mmix.c
++++ b/bfd/elf64-mmix.c
+@@ -1777,33 +1777,6 @@ mmix_elf_gc_mark_hook (asection *sec,
+ 
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+-
+-/* Update relocation info for a GC-excluded section.  We could supposedly
+-   perform the allocation after GC, but there's no suitable hook between
+-   GC (or section merge) and the point when all input sections must be
+-   present.  Better to waste some memory and (perhaps) a little time.  */
+-
+-static bfd_boolean
+-mmix_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
+-			struct bfd_link_info *info ATTRIBUTE_UNUSED,
+-			asection *sec,
+-			const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
+-{
+-  struct bpo_reloc_section_info *bpodata
+-    = mmix_elf_section_data (sec)->bpo.reloc;
+-  asection *allocated_gregs_section;
+-
+-  /* If no bpodata here, we have nothing to do.  */
+-  if (bpodata == NULL)
+-    return TRUE;
+-
+-  allocated_gregs_section = bpodata->bpo_greg_section;
+-
+-  mmix_elf_section_data (allocated_gregs_section)->bpo.greg->n_bpo_relocs
+-    -= bpodata->n_bpo_relocs_this_section;
+-
+-  return TRUE;
+-}
+ 
+ /* Sort register relocs to come before expanding relocs.  */
+ 
+@@ -2925,7 +2898,6 @@ mmix_elf_relax_section (bfd *abfd,
+ #define elf_info_to_howto		mmix_info_to_howto_rela
+ #define elf_backend_relocate_section	mmix_elf_relocate_section
+ #define elf_backend_gc_mark_hook	mmix_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook	mmix_elf_gc_sweep_hook
+ 
+ #define elf_backend_link_output_symbol_hook \
+ 	mmix_elf_link_output_symbol_hook
+diff --git a/bfd/elf64-ppc.c b/bfd/elf64-ppc.c
+index 3f6bff9c7a..10f895d73b 100644
+--- a/bfd/elf64-ppc.c
++++ b/bfd/elf64-ppc.c
+@@ -104,7 +104,6 @@ static bfd_vma opd_entry_value
+ #define elf_backend_gc_keep		      ppc64_elf_gc_keep
+ #define elf_backend_gc_mark_dynamic_ref       ppc64_elf_gc_mark_dynamic_ref
+ #define elf_backend_gc_mark_hook	      ppc64_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook	      ppc64_elf_gc_sweep_hook
+ #define elf_backend_adjust_dynamic_symbol     ppc64_elf_adjust_dynamic_symbol
+ #define elf_backend_hide_symbol		      ppc64_elf_hide_symbol
+ #define elf_backend_maybe_function_sym	      ppc64_elf_maybe_function_sym
+@@ -6626,181 +6625,6 @@ ppc64_elf_gc_mark_hook (asection *sec,
+   return rsec;
+ }
+ 
+-/* Update the .got, .plt. and dynamic reloc reference counts for the
+-   section being removed.  */
+-
+-static bfd_boolean
+-ppc64_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
+-			 asection *sec, const Elf_Internal_Rela *relocs)
+-{
+-  struct ppc_link_hash_table *htab;
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  struct got_entry **local_got_ents;
+-  const Elf_Internal_Rela *rel, *relend;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  if ((sec->flags & SEC_ALLOC) == 0)
+-    return TRUE;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  htab = ppc_hash_table (info);
+-  if (htab == NULL)
+-    return FALSE;
+-
+-  symtab_hdr = &elf_symtab_hdr (abfd);
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_ents = elf_local_got_ents (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      enum elf_ppc64_reloc_type r_type;
+-      struct elf_link_hash_entry *h = NULL;
+-      struct plt_entry **plt_list = NULL;
+-      unsigned char tls_type = 0;
+-
+-      r_symndx = ELF64_R_SYM (rel->r_info);
+-      r_type = ELF64_R_TYPE (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  struct ppc_link_hash_entry *eh;
+-	  struct elf_dyn_relocs **pp;
+-	  struct elf_dyn_relocs *p;
+-
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  h = elf_follow_link (h);
+-	  eh = (struct ppc_link_hash_entry *) h;
+-
+-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+-	    if (p->sec == sec)
+-	      {
+-		/* Everything must go for SEC.  */
+-		*pp = p->next;
+-		break;
+-	      }
+-	}
+-
+-      switch (r_type)
+-	{
+-	case R_PPC64_GOT_TLSLD16:
+-	case R_PPC64_GOT_TLSLD16_LO:
+-	case R_PPC64_GOT_TLSLD16_HI:
+-	case R_PPC64_GOT_TLSLD16_HA:
+-	  tls_type = TLS_TLS | TLS_LD;
+-	  goto dogot;
+-
+-	case R_PPC64_GOT_TLSGD16:
+-	case R_PPC64_GOT_TLSGD16_LO:
+-	case R_PPC64_GOT_TLSGD16_HI:
+-	case R_PPC64_GOT_TLSGD16_HA:
+-	  tls_type = TLS_TLS | TLS_GD;
+-	  goto dogot;
+-
+-	case R_PPC64_GOT_TPREL16_DS:
+-	case R_PPC64_GOT_TPREL16_LO_DS:
+-	case R_PPC64_GOT_TPREL16_HI:
+-	case R_PPC64_GOT_TPREL16_HA:
+-	  tls_type = TLS_TLS | TLS_TPREL;
+-	  goto dogot;
+-
+-	case R_PPC64_GOT_DTPREL16_DS:
+-	case R_PPC64_GOT_DTPREL16_LO_DS:
+-	case R_PPC64_GOT_DTPREL16_HI:
+-	case R_PPC64_GOT_DTPREL16_HA:
+-	  tls_type = TLS_TLS | TLS_DTPREL;
+-	  goto dogot;
+-
+-	case R_PPC64_GOT16:
+-	case R_PPC64_GOT16_DS:
+-	case R_PPC64_GOT16_HA:
+-	case R_PPC64_GOT16_HI:
+-	case R_PPC64_GOT16_LO:
+-	case R_PPC64_GOT16_LO_DS:
+-	dogot:
+-	  {
+-	    struct got_entry *ent;
+-
+-	    if (h != NULL)
+-	      ent = h->got.glist;
+-	    else
+-	      ent = local_got_ents[r_symndx];
+-
+-	    for (; ent != NULL; ent = ent->next)
+-	      if (ent->addend == rel->r_addend
+-		  && ent->owner == abfd
+-		  && ent->tls_type == tls_type)
+-		break;
+-	    if (ent == NULL)
+-	      abort ();
+-	    if (ent->got.refcount > 0)
+-	      ent->got.refcount -= 1;
+-	  }
+-	  if (h != NULL && !bfd_link_pic (info) && abiversion (abfd) != 1)
+-	    plt_list = &h->plt.plist;
+-	  break;
+-
+-	case R_PPC64_PLT16_HA:
+-	case R_PPC64_PLT16_HI:
+-	case R_PPC64_PLT16_LO:
+-	case R_PPC64_PLT32:
+-	case R_PPC64_PLT64:
+-	case R_PPC64_REL14:
+-	case R_PPC64_REL14_BRNTAKEN:
+-	case R_PPC64_REL14_BRTAKEN:
+-	case R_PPC64_REL24:
+-	  if (h != NULL)
+-	    plt_list = &h->plt.plist;
+-	  else if (local_got_ents != NULL)
+-	    {
+-	      struct plt_entry **local_plt = (struct plt_entry **)
+-		(local_got_ents + symtab_hdr->sh_info);
+-	      unsigned char *local_got_tls_masks = (unsigned char *)
+-		(local_plt + symtab_hdr->sh_info);
+-	      if ((local_got_tls_masks[r_symndx] & PLT_IFUNC) != 0)
+-		plt_list = local_plt + r_symndx;
+-	    }
+-	  break;
+-
+-	case R_PPC64_ADDR64:
+-	case R_PPC64_ADDR16:
+-	case R_PPC64_ADDR16_DS:
+-	case R_PPC64_ADDR16_HA:
+-	case R_PPC64_ADDR16_HI:
+-	case R_PPC64_ADDR16_HIGH:
+-	case R_PPC64_ADDR16_HIGHA:
+-	case R_PPC64_ADDR16_HIGHER:
+-	case R_PPC64_ADDR16_HIGHERA:
+-	case R_PPC64_ADDR16_HIGHEST:
+-	case R_PPC64_ADDR16_HIGHESTA:
+-	case R_PPC64_ADDR16_LO:
+-	case R_PPC64_ADDR16_LO_DS:
+-	  if (h != NULL && !bfd_link_pic (info) && abiversion (abfd) != 1
+-	      && rel->r_addend == 0)
+-	    plt_list = &h->plt.plist;
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-      if (plt_list != NULL)
+-	{
+-	  struct plt_entry *ent;
+-
+-	  for (ent = *plt_list; ent != NULL; ent = ent->next)
+-	    if (ent->addend == rel->r_addend)
+-	      break;
+-	  if (ent != NULL && ent->plt.refcount > 0)
+-	    ent->plt.refcount -= 1;
+-	}
+-    }
+-  return TRUE;
+-}
+-
+ /* The maximum size of .sfpr.  */
+ #define SFPR_MAX (218*4)
+ 
+diff --git a/bfd/elf64-s390.c b/bfd/elf64-s390.c
+index c12688027b..08cc19c5ee 100644
+--- a/bfd/elf64-s390.c
++++ b/bfd/elf64-s390.c
+@@ -1333,186 +1333,6 @@ elf_s390_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-static bfd_boolean
+-elf_s390_gc_sweep_hook (bfd *abfd,
+-			struct bfd_link_info *info,
+-			asection *sec,
+-			const Elf_Internal_Rela *relocs)
+-{
+-  struct elf_s390_link_hash_table *htab;
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  htab = elf_s390_hash_table (info);
+-  if (htab == NULL)
+-    return FALSE;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  symtab_hdr = &elf_symtab_hdr (abfd);
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      unsigned int r_type;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = ELF64_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  struct elf_s390_link_hash_entry *eh;
+-	  struct elf_dyn_relocs **pp;
+-	  struct elf_dyn_relocs *p;
+-
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	  eh = (struct elf_s390_link_hash_entry *) h;
+-
+-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+-	    if (p->sec == sec)
+-	      {
+-		/* Everything must go for SEC.  */
+-		*pp = p->next;
+-		break;
+-	      }
+-	}
+-      else
+-	{
+-	  Elf_Internal_Sym *isym;
+-
+-	  /* A local symbol.  */
+-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+-					abfd, r_symndx);
+-	  if (isym == NULL)
+-	    return FALSE;
+-
+-	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
+-	    {
+-	      struct plt_entry *plt = elf_s390_local_plt (abfd);
+-	      if (plt[r_symndx].plt.refcount > 0)
+-		plt[r_symndx].plt.refcount--;
+-	    }
+-	}
+-
+-      r_type = ELF64_R_TYPE (rel->r_info);
+-      r_type = elf_s390_tls_transition (info, r_type, h != NULL);
+-      switch (r_type)
+-	{
+-	case R_390_TLS_LDM64:
+-	  if (htab->tls_ldm_got.refcount > 0)
+-	    htab->tls_ldm_got.refcount -= 1;
+-	  break;
+-	case R_390_GOTOFF16:
+-	case R_390_GOTOFF32:
+-	case R_390_GOTOFF64:
+-	  if (h != NULL && s390_is_ifunc_symbol_p (h) && h->def_regular)
+-	    {
+-	      h->plt.refcount--;
+-	      break;
+-	    }
+-
+-	case R_390_GOTPC:
+-	case R_390_GOTPCDBL:
+-	  break;
+-
+-	case R_390_TLS_GD64:
+-	case R_390_TLS_IE64:
+-	case R_390_TLS_GOTIE12:
+-	case R_390_TLS_GOTIE20:
+-	case R_390_TLS_GOTIE64:
+-	case R_390_TLS_IEENT:
+-	case R_390_GOT12:
+-	case R_390_GOT16:
+-	case R_390_GOT20:
+-	case R_390_GOT32:
+-	case R_390_GOT64:
+-	case R_390_GOTENT:
+-	  if (h != NULL)
+-	    {
+-	      if (h->got.refcount > 0)
+-		h->got.refcount -= 1;
+-	    }
+-	  else if (local_got_refcounts != NULL)
+-	    {
+-	      if (local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx] -= 1;
+-	    }
+-	  break;
+-
+-	case R_390_8:
+-	case R_390_12:
+-	case R_390_16:
+-	case R_390_20:
+-	case R_390_32:
+-	case R_390_64:
+-	case R_390_PC16:
+-	case R_390_PC12DBL:
+-	case R_390_PC16DBL:
+-	case R_390_PC24DBL:
+-	case R_390_PC32:
+-	case R_390_PC32DBL:
+-	case R_390_PC64:
+-	  if (bfd_link_pic (info))
+-	    break;
+-	  /* Fall through */
+-
+-	case R_390_PLT12DBL:
+-	case R_390_PLT16DBL:
+-	case R_390_PLT24DBL:
+-	case R_390_PLT32:
+-	case R_390_PLT32DBL:
+-	case R_390_PLT64:
+-	case R_390_PLTOFF16:
+-	case R_390_PLTOFF32:
+-	case R_390_PLTOFF64:
+-	  if (h != NULL)
+-	    {
+-	      if (h->plt.refcount > 0)
+-		h->plt.refcount -= 1;
+-	    }
+-	  break;
+-
+-	case R_390_GOTPLT12:
+-	case R_390_GOTPLT16:
+-	case R_390_GOTPLT20:
+-	case R_390_GOTPLT32:
+-	case R_390_GOTPLT64:
+-	case R_390_GOTPLTENT:
+-	  if (h != NULL)
+-	    {
+-	      if (h->plt.refcount > 0)
+-		{
+-		  ((struct elf_s390_link_hash_entry *) h)->gotplt_refcount--;
+-		  h->plt.refcount -= 1;
+-		}
+-	    }
+-	  else if (local_got_refcounts != NULL)
+-	    {
+-	      if (local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx] -= 1;
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Make sure we emit a GOT entry if the symbol was supposed to have a PLT
+    entry but we found we will not create any.  Called when we find we will
+    not have any PLT for this symbol, by for example
+@@ -4127,7 +3947,6 @@ const struct elf_size_info s390_elf64_size_info =
+ #define elf_backend_finish_dynamic_sections   elf_s390_finish_dynamic_sections
+ #define elf_backend_finish_dynamic_symbol     elf_s390_finish_dynamic_symbol
+ #define elf_backend_gc_mark_hook	      elf_s390_gc_mark_hook
+-#define elf_backend_gc_sweep_hook	      elf_s390_gc_sweep_hook
+ #define elf_backend_reloc_type_class	      elf_s390_reloc_type_class
+ #define elf_backend_relocate_section	      elf_s390_relocate_section
+ #define elf_backend_size_dynamic_sections     elf_s390_size_dynamic_sections
+diff --git a/bfd/elf64-sparc.c b/bfd/elf64-sparc.c
+index a7ad2bcd92..7696d0296d 100644
+--- a/bfd/elf64-sparc.c
++++ b/bfd/elf64-sparc.c
+@@ -929,8 +929,6 @@ const struct elf_size_info elf64_sparc_size_info =
+   _bfd_sparc_elf_object_p
+ #define elf_backend_gc_mark_hook \
+   _bfd_sparc_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook \
+-  _bfd_sparc_elf_gc_sweep_hook
+ #define elf_backend_init_index_section \
+   _bfd_elf_init_1_index_section
+ 
+diff --git a/bfd/elf64-tilegx.c b/bfd/elf64-tilegx.c
+index d17efc96fb..40d2527cbd 100644
+--- a/bfd/elf64-tilegx.c
++++ b/bfd/elf64-tilegx.c
+@@ -111,7 +111,6 @@ tilegx_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
+ #define elf_backend_finish_dynamic_symbol    tilegx_elf_finish_dynamic_symbol
+ #define elf_backend_finish_dynamic_sections  tilegx_elf_finish_dynamic_sections
+ #define elf_backend_gc_mark_hook	     tilegx_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook            tilegx_elf_gc_sweep_hook
+ #define elf_backend_plt_sym_val		     tilegx_elf_plt_sym_val
+ #define elf_info_to_howto_rel                NULL
+ #define elf_info_to_howto                    tilegx_info_to_howto_rela
+diff --git a/bfd/elflink.c b/bfd/elflink.c
+index b1b5ca7376..b401e68df6 100644
+--- a/bfd/elflink.c
++++ b/bfd/elflink.c
+@@ -5234,10 +5234,6 @@ error_free_dyn:
+       && !(*bed->check_directives) (abfd, info))
+     return FALSE;
+ 
+-  if (!info->check_relocs_after_open_input
+-      && !_bfd_elf_link_check_relocs (abfd, info))
+-    return FALSE;
+-
+   /* If this is a non-traditional link, try to optimize the handling
+      of the .stab/.stabstr sections.  */
+   if (! dynamic
+@@ -13016,17 +13012,11 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
+   return TRUE;
+ }
+ 
+-/* The sweep phase of garbage collection.  Remove all garbage sections.  */
+-
+-typedef bfd_boolean (*gc_sweep_hook_fn)
+-  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
+-
+ static bfd_boolean
+ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
+ {
+   bfd *sub;
+   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+-  gc_sweep_hook_fn gc_sweep_hook = bed->gc_sweep_hook;
+ 
+   for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
+     {
+@@ -13066,33 +13056,6 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
+ 	    /* xgettext:c-format */
+ 	    _bfd_error_handler (_("Removing unused section '%A' in file '%B'"),
+ 				o, sub);
+-
+-	  /* But we also have to update some of the relocation
+-	     info we collected before.  */
+-	  if (gc_sweep_hook
+-	      && (o->flags & SEC_RELOC) != 0
+-	      && o->reloc_count != 0
+-	      && !((info->strip == strip_all || info->strip == strip_debugger)
+-		   && (o->flags & SEC_DEBUGGING) != 0)
+-	      && !bfd_is_abs_section (o->output_section))
+-	    {
+-	      Elf_Internal_Rela *internal_relocs;
+-	      bfd_boolean r;
+-
+-	      internal_relocs
+-		= _bfd_elf_link_read_relocs (o->owner, o, NULL, NULL,
+-					     info->keep_memory);
+-	      if (internal_relocs == NULL)
+-		return FALSE;
+-
+-	      r = (*gc_sweep_hook) (o->owner, info, o, internal_relocs);
+-
+-	      if (elf_section_data (o)->relocs != internal_relocs)
+-		free (internal_relocs);
+-
+-	      if (!r)
+-		return FALSE;
+-	    }
+ 	}
+     }
+ 
+diff --git a/bfd/elfnn-aarch64.c b/bfd/elfnn-aarch64.c
+index 3083f3b0ad..23c881c51d 100644
+--- a/bfd/elfnn-aarch64.c
++++ b/bfd/elfnn-aarch64.c
+@@ -6693,180 +6693,6 @@ elfNN_aarch64_print_private_bfd_data (bfd *abfd, void *ptr)
+   return TRUE;
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-static bfd_boolean
+-elfNN_aarch64_gc_sweep_hook (bfd *abfd,
+-			     struct bfd_link_info *info,
+-			     asection *sec,
+-			     const Elf_Internal_Rela * relocs)
+-{
+-  struct elf_aarch64_link_hash_table *htab;
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  struct elf_aarch64_local_symbol *locals;
+-  const Elf_Internal_Rela *rel, *relend;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  htab = elf_aarch64_hash_table (info);
+-
+-  if (htab == NULL)
+-    return FALSE;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  symtab_hdr = &elf_symtab_hdr (abfd);
+-  sym_hashes = elf_sym_hashes (abfd);
+-
+-  locals = elf_aarch64_locals (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      unsigned int r_type;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = ELFNN_R_SYM (rel->r_info);
+-
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-        }
+-      else
+-	{
+-	  Elf_Internal_Sym *isym;
+-
+-	  /* A local symbol.  */
+-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+-					abfd, r_symndx);
+-
+-	  /* Check relocation against local STT_GNU_IFUNC symbol.  */
+-	  if (isym != NULL
+-	      && ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
+-	    {
+-	      h = elfNN_aarch64_get_local_sym_hash (htab, abfd, rel, FALSE);
+-	      if (h == NULL)
+-		abort ();
+-	    }
+-	}
+-
+-      if (h)
+-	{
+-	  struct elf_aarch64_link_hash_entry *eh;
+-	  struct elf_dyn_relocs **pp;
+-	  struct elf_dyn_relocs *p;
+-
+-	  eh = (struct elf_aarch64_link_hash_entry *) h;
+-
+-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+-	    if (p->sec == sec)
+-	      {
+-		/* Everything must go for SEC.  */
+-		*pp = p->next;
+-		break;
+-	      }
+-	}
+-
+-      r_type = ELFNN_R_TYPE (rel->r_info);
+-      switch (aarch64_tls_transition (abfd,info, r_type, h ,r_symndx))
+-	{
+-	case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
+-	case BFD_RELOC_AARCH64_GOT_LD_PREL19:
+-	case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
+-	case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
+-	case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
+-	case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
+-	case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+-	case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
+-	case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
+-	case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
+-	case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
+-	case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
+-	case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
+-	case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12:
+-	case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
+-	case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
+-	case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
+-	case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
+-	case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
+-	case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+-	case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
+-	case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
+-	case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
+-	case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
+-	case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+-	case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+-	case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
+-	case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
+-	case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
+-	case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
+-	case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
+-	  if (h != NULL)
+-	    {
+-	      if (h->got.refcount > 0)
+-		h->got.refcount -= 1;
+-
+-	      if (h->type == STT_GNU_IFUNC)
+-		{
+-		  if (h->plt.refcount > 0)
+-		    h->plt.refcount -= 1;
+-		}
+-	    }
+-	  else if (locals != NULL)
+-	    {
+-	      if (locals[r_symndx].got_refcount > 0)
+-		locals[r_symndx].got_refcount -= 1;
+-	    }
+-	  break;
+-
+-	case BFD_RELOC_AARCH64_CALL26:
+-	case BFD_RELOC_AARCH64_JUMP26:
+-	  /* If this is a local symbol then we resolve it
+-	     directly without creating a PLT entry.  */
+-	  if (h == NULL)
+-	    continue;
+-
+-	  if (h->plt.refcount > 0)
+-	    h->plt.refcount -= 1;
+-	  break;
+-
+-	case BFD_RELOC_AARCH64_ADD_LO12:
+-	case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
+-	case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
+-	case BFD_RELOC_AARCH64_ADR_LO21_PCREL:
+-	case BFD_RELOC_AARCH64_LDST128_LO12:
+-	case BFD_RELOC_AARCH64_LDST16_LO12:
+-	case BFD_RELOC_AARCH64_LDST32_LO12:
+-	case BFD_RELOC_AARCH64_LDST64_LO12:
+-	case BFD_RELOC_AARCH64_LDST8_LO12:
+-	case BFD_RELOC_AARCH64_LD_LO19_PCREL:
+-	case BFD_RELOC_AARCH64_MOVW_G0_NC:
+-	case BFD_RELOC_AARCH64_MOVW_G1_NC:
+-	case BFD_RELOC_AARCH64_MOVW_G2_NC:
+-	case BFD_RELOC_AARCH64_MOVW_G3:
+-	case BFD_RELOC_AARCH64_NN:
+-	  if (h != NULL && !bfd_link_pic (info))
+-	    {
+-	      if (h->plt.refcount > 0)
+-		h->plt.refcount -= 1;
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Return true if we need copy relocation against EH.  */
+ 
+ static bfd_boolean
+@@ -9498,9 +9324,6 @@ const struct elf_size_info elfNN_aarch64_size_info =
+ #define elf_backend_finish_dynamic_symbol	\
+   elfNN_aarch64_finish_dynamic_symbol
+ 
+-#define elf_backend_gc_sweep_hook		\
+-  elfNN_aarch64_gc_sweep_hook
+-
+ #define elf_backend_object_p			\
+   elfNN_aarch64_object_p
+ 
+diff --git a/bfd/elfnn-riscv.c b/bfd/elfnn-riscv.c
+index 52c461d20a..d28cabded5 100644
+--- a/bfd/elfnn-riscv.c
++++ b/bfd/elfnn-riscv.c
+@@ -758,100 +758,6 @@ riscv_elf_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-static bfd_boolean
+-riscv_elf_gc_sweep_hook (bfd *abfd,
+-			 struct bfd_link_info *info,
+-			 asection *sec,
+-			 const Elf_Internal_Rela *relocs)
+-{
+-  const Elf_Internal_Rela *rel, *relend;
+-  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (abfd);
+-  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (abfd);
+-  bfd_signed_vma *local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  for (rel = relocs, relend = relocs + sec->reloc_count; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = ELFNN_R_SYM (rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  struct riscv_elf_link_hash_entry *eh;
+-	  struct riscv_elf_dyn_relocs **pp;
+-	  struct riscv_elf_dyn_relocs *p;
+-
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	  eh = (struct riscv_elf_link_hash_entry *) h;
+-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+-	    if (p->sec == sec)
+-	      {
+-		/* Everything must go for SEC.  */
+-		*pp = p->next;
+-		break;
+-	      }
+-	}
+-
+-      switch (ELFNN_R_TYPE (rel->r_info))
+-	{
+-	case R_RISCV_GOT_HI20:
+-	case R_RISCV_TLS_GOT_HI20:
+-	case R_RISCV_TLS_GD_HI20:
+-	  if (h != NULL)
+-	    {
+-	      if (h->got.refcount > 0)
+-		h->got.refcount--;
+-	    }
+-	  else
+-	    {
+-	      if (local_got_refcounts &&
+-		  local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx]--;
+-	    }
+-	  break;
+-
+-	case R_RISCV_HI20:
+-	case R_RISCV_PCREL_HI20:
+-	case R_RISCV_COPY:
+-	case R_RISCV_JUMP_SLOT:
+-	case R_RISCV_RELATIVE:
+-	case R_RISCV_64:
+-	case R_RISCV_32:
+-	case R_RISCV_BRANCH:
+-	case R_RISCV_CALL:
+-	case R_RISCV_JAL:
+-	case R_RISCV_RVC_BRANCH:
+-	case R_RISCV_RVC_JUMP:
+-	  if (bfd_link_pic (info))
+-	    break;
+-	  /* Fall through.  */
+-
+-	case R_RISCV_CALL_PLT:
+-	  if (h != NULL)
+-	    {
+-	      if (h->plt.refcount > 0)
+-		h->plt.refcount--;
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Adjust a symbol defined by a dynamic object and referenced by a
+    regular object.  The current definition is in some section of the
+    dynamic object, but we're not including those sections.  We have to
+@@ -3324,7 +3230,6 @@ riscv_elf_object_p (bfd *abfd)
+ #define elf_backend_finish_dynamic_symbol    riscv_elf_finish_dynamic_symbol
+ #define elf_backend_finish_dynamic_sections  riscv_elf_finish_dynamic_sections
+ #define elf_backend_gc_mark_hook	     riscv_elf_gc_mark_hook
+-#define elf_backend_gc_sweep_hook	     riscv_elf_gc_sweep_hook
+ #define elf_backend_plt_sym_val		     riscv_elf_plt_sym_val
+ #define elf_backend_grok_prstatus            riscv_elf_grok_prstatus
+ #define elf_backend_grok_psinfo              riscv_elf_grok_psinfo
+diff --git a/bfd/elfxx-mips.c b/bfd/elfxx-mips.c
+index 23fba1bbe0..d279e0b94c 100644
+--- a/bfd/elfxx-mips.c
++++ b/bfd/elfxx-mips.c
+@@ -12439,66 +12439,6 @@ _bfd_mips_elf_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-
+-bfd_boolean
+-_bfd_mips_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
+-			     struct bfd_link_info *info ATTRIBUTE_UNUSED,
+-			     asection *sec ATTRIBUTE_UNUSED,
+-			     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
+-{
+-#if 0
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-  unsigned long r_symndx;
+-  struct elf_link_hash_entry *h;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    switch (ELF_R_TYPE (abfd, rel->r_info))
+-      {
+-      case R_MIPS16_GOT16:
+-      case R_MIPS16_CALL16:
+-      case R_MIPS_GOT16:
+-      case R_MIPS_CALL16:
+-      case R_MIPS_CALL_HI16:
+-      case R_MIPS_CALL_LO16:
+-      case R_MIPS_GOT_HI16:
+-      case R_MIPS_GOT_LO16:
+-      case R_MIPS_GOT_DISP:
+-      case R_MIPS_GOT_PAGE:
+-      case R_MIPS_GOT_OFST:
+-      case R_MICROMIPS_GOT16:
+-      case R_MICROMIPS_CALL16:
+-      case R_MICROMIPS_CALL_HI16:
+-      case R_MICROMIPS_CALL_LO16:
+-      case R_MICROMIPS_GOT_HI16:
+-      case R_MICROMIPS_GOT_LO16:
+-      case R_MICROMIPS_GOT_DISP:
+-      case R_MICROMIPS_GOT_PAGE:
+-      case R_MICROMIPS_GOT_OFST:
+-	/* ??? It would seem that the existing MIPS code does no sort
+-	   of reference counting or whatnot on its GOT and PLT entries,
+-	   so it is not possible to garbage collect them at this time.  */
+-	break;
+-
+-      default:
+-	break;
+-      }
+-#endif
+-
+-  return TRUE;
+-}
+-
+ /* Prevent .MIPS.abiflags from being discarded with --gc-sections.  */
+ 
+ bfd_boolean
+diff --git a/bfd/elfxx-mips.h b/bfd/elfxx-mips.h
+index 44ad789371..3fc4020e44 100644
+--- a/bfd/elfxx-mips.h
++++ b/bfd/elfxx-mips.h
+@@ -78,8 +78,6 @@ extern bfd_boolean _bfd_mips_elf_modify_segment_map
+ extern asection * _bfd_mips_elf_gc_mark_hook
+   (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
+    struct elf_link_hash_entry *, Elf_Internal_Sym *);
+-extern bfd_boolean _bfd_mips_elf_gc_sweep_hook
+-  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
+ extern void _bfd_mips_elf_copy_indirect_symbol
+   (struct bfd_link_info *, struct elf_link_hash_entry *,
+    struct elf_link_hash_entry *);
+diff --git a/bfd/elfxx-sparc.c b/bfd/elfxx-sparc.c
+index 9989f49639..54dea7b450 100644
+--- a/bfd/elfxx-sparc.c
++++ b/bfd/elfxx-sparc.c
+@@ -1955,166 +1955,6 @@ sparc_elf_find_reloc_at_ofs (Elf_Internal_Rela *rel,
+   return NULL;
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-bfd_boolean
+-_bfd_sparc_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
+-			      asection *sec, const Elf_Internal_Rela *relocs)
+-{
+-  struct _bfd_sparc_elf_link_hash_table *htab;
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  BFD_ASSERT (is_sparc_elf (abfd) || sec->reloc_count == 0);
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  htab = _bfd_sparc_elf_hash_table (info);
+-  BFD_ASSERT (htab != NULL);
+-  symtab_hdr = &elf_symtab_hdr (abfd);
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      unsigned int r_type;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = SPARC_ELF_R_SYMNDX (htab, rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  struct _bfd_sparc_elf_link_hash_entry *eh;
+-	  struct _bfd_sparc_elf_dyn_relocs **pp;
+-	  struct _bfd_sparc_elf_dyn_relocs *p;
+-
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	  eh = (struct _bfd_sparc_elf_link_hash_entry *) h;
+-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+-	    if (p->sec == sec)
+-	      {
+-		/* Everything must go for SEC.  */
+-		*pp = p->next;
+-		break;
+-	      }
+-	}
+-
+-      r_type = SPARC_ELF_R_TYPE (rel->r_info);
+-      r_type = sparc_elf_tls_transition (info, abfd, r_type, h == NULL);
+-      switch (r_type)
+-	{
+-	case R_SPARC_TLS_LDM_HI22:
+-	case R_SPARC_TLS_LDM_LO10:
+-	  if (_bfd_sparc_elf_hash_table (info)->tls_ldm_got.refcount > 0)
+-	    _bfd_sparc_elf_hash_table (info)->tls_ldm_got.refcount -= 1;
+-	  break;
+-
+-	case R_SPARC_TLS_GD_HI22:
+-	case R_SPARC_TLS_GD_LO10:
+-	case R_SPARC_TLS_IE_HI22:
+-	case R_SPARC_TLS_IE_LO10:
+-	case R_SPARC_GOT10:
+-	case R_SPARC_GOT13:
+-	case R_SPARC_GOT22:
+-	case R_SPARC_GOTDATA_HIX22:
+-	case R_SPARC_GOTDATA_LOX10:
+-	case R_SPARC_GOTDATA_OP_HIX22:
+-	case R_SPARC_GOTDATA_OP_LOX10:
+-	  if (h != NULL)
+-	    {
+-	      if (h->got.refcount > 0)
+-		h->got.refcount--;
+-	    }
+-	  else
+-	    {
+-	      switch (r_type)
+-		{
+-		case R_SPARC_GOTDATA_OP_HIX22:
+-		case R_SPARC_GOTDATA_OP_LOX10:
+-		  break;
+-
+-		default:
+-		  if (local_got_refcounts[r_symndx] > 0)
+-		    local_got_refcounts[r_symndx]--;
+-		  break;
+-		}
+-	    }
+-	  break;
+-
+-	case R_SPARC_PC10:
+-	case R_SPARC_PC22:
+-	case R_SPARC_PC_HH22:
+-	case R_SPARC_PC_HM10:
+-	case R_SPARC_PC_LM22:
+-	  if (h != NULL
+-	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+-	    break;
+-	  /* Fall through.  */
+-
+-	case R_SPARC_DISP8:
+-	case R_SPARC_DISP16:
+-	case R_SPARC_DISP32:
+-	case R_SPARC_DISP64:
+-	case R_SPARC_WDISP30:
+-	case R_SPARC_WDISP22:
+-	case R_SPARC_WDISP19:
+-	case R_SPARC_WDISP16:
+-	case R_SPARC_WDISP10:
+-	case R_SPARC_8:
+-	case R_SPARC_16:
+-	case R_SPARC_32:
+-	case R_SPARC_HI22:
+-	case R_SPARC_22:
+-	case R_SPARC_13:
+-	case R_SPARC_LO10:
+-	case R_SPARC_UA16:
+-	case R_SPARC_UA32:
+-	case R_SPARC_PLT32:
+-	case R_SPARC_10:
+-	case R_SPARC_11:
+-	case R_SPARC_64:
+-	case R_SPARC_OLO10:
+-	case R_SPARC_HH22:
+-	case R_SPARC_HM10:
+-	case R_SPARC_LM22:
+-	case R_SPARC_7:
+-	case R_SPARC_5:
+-	case R_SPARC_6:
+-	case R_SPARC_HIX22:
+-	case R_SPARC_LOX10:
+-	case R_SPARC_H44:
+-	case R_SPARC_M44:
+-	case R_SPARC_L44:
+-	case R_SPARC_H34:
+-	case R_SPARC_UA64:
+-	  if (bfd_link_pic (info))
+-	    break;
+-	  /* Fall through.  */
+-
+-	case R_SPARC_WPLT30:
+-	  if (h != NULL)
+-	    {
+-	      if (h->plt.refcount > 0)
+-		h->plt.refcount--;
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Remove undefined weak symbol from the dynamic symbol table if it
+    is resolved to 0.   */
+ 
+diff --git a/bfd/elfxx-sparc.h b/bfd/elfxx-sparc.h
+index bf8709be63..f378c9a9d1 100644
+--- a/bfd/elfxx-sparc.h
++++ b/bfd/elfxx-sparc.h
+@@ -118,9 +118,6 @@ extern asection *_bfd_sparc_elf_gc_mark_hook
+   (asection *, struct bfd_link_info *,
+    Elf_Internal_Rela *, struct elf_link_hash_entry *,
+    Elf_Internal_Sym *);
+-extern bfd_boolean _bfd_sparc_elf_gc_sweep_hook
+-  (bfd *, struct bfd_link_info *,
+-   asection *, const Elf_Internal_Rela *);
+ extern bfd_boolean _bfd_sparc_elf_adjust_dynamic_symbol
+   (struct bfd_link_info *, struct elf_link_hash_entry *);
+ extern bfd_boolean _bfd_sparc_elf_omit_section_dynsym
+diff --git a/bfd/elfxx-target.h b/bfd/elfxx-target.h
+index ed185e77d2..4a81316b51 100644
+--- a/bfd/elfxx-target.h
++++ b/bfd/elfxx-target.h
+@@ -180,9 +180,6 @@
+ #ifndef elf_backend_gc_mark_extra_sections
+ #define elf_backend_gc_mark_extra_sections _bfd_elf_gc_mark_extra_sections
+ #endif
+-#ifndef elf_backend_gc_sweep_hook
+-#define elf_backend_gc_sweep_hook	NULL
+-#endif
+ #ifndef bfd_elfNN_bfd_gc_sections
+ #define bfd_elfNN_bfd_gc_sections bfd_elf_gc_sections
+ #endif
+@@ -810,7 +807,6 @@ static struct elf_backend_data elfNN_bed =
+   elf_backend_gc_mark_dynamic_ref,
+   elf_backend_gc_mark_hook,
+   elf_backend_gc_mark_extra_sections,
+-  elf_backend_gc_sweep_hook,
+   elf_backend_post_process_headers,
+   elf_backend_print_symbol_all,
+   elf_backend_output_arch_local_syms,
+diff --git a/bfd/elfxx-tilegx.c b/bfd/elfxx-tilegx.c
+index a14451b4ce..c9e860a70c 100644
+--- a/bfd/elfxx-tilegx.c
++++ b/bfd/elfxx-tilegx.c
+@@ -2124,195 +2124,6 @@ tilegx_elf_gc_mark_hook (asection *sec,
+   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+ }
+ 
+-/* Update the got entry reference counts for the section being removed.  */
+-bfd_boolean
+-tilegx_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
+-			  asection *sec, const Elf_Internal_Rela *relocs)
+-{
+-  struct tilegx_elf_link_hash_table *htab;
+-  Elf_Internal_Shdr *symtab_hdr;
+-  struct elf_link_hash_entry **sym_hashes;
+-  bfd_signed_vma *local_got_refcounts;
+-  const Elf_Internal_Rela *rel, *relend;
+-
+-  if (bfd_link_relocatable (info))
+-    return TRUE;
+-
+-  BFD_ASSERT (is_tilegx_elf (abfd) || sec->reloc_count == 0);
+-
+-  elf_section_data (sec)->local_dynrel = NULL;
+-
+-  htab = tilegx_elf_hash_table (info);
+-  BFD_ASSERT (htab != NULL);
+-  symtab_hdr = &elf_symtab_hdr (abfd);
+-  sym_hashes = elf_sym_hashes (abfd);
+-  local_got_refcounts = elf_local_got_refcounts (abfd);
+-
+-  relend = relocs + sec->reloc_count;
+-  for (rel = relocs; rel < relend; rel++)
+-    {
+-      unsigned long r_symndx;
+-      unsigned int r_type;
+-      struct elf_link_hash_entry *h = NULL;
+-
+-      r_symndx = TILEGX_ELF_R_SYMNDX (htab, rel->r_info);
+-      if (r_symndx >= symtab_hdr->sh_info)
+-	{
+-	  struct tilegx_elf_link_hash_entry *eh;
+-	  struct tilegx_elf_dyn_relocs **pp;
+-	  struct tilegx_elf_dyn_relocs *p;
+-
+-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+-	  while (h->root.type == bfd_link_hash_indirect
+-		 || h->root.type == bfd_link_hash_warning)
+-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+-	  eh = (struct tilegx_elf_link_hash_entry *) h;
+-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+-	    if (p->sec == sec)
+-	      {
+-		/* Everything must go for SEC.  */
+-		*pp = p->next;
+-		break;
+-	      }
+-	}
+-
+-      r_type = TILEGX_ELF_R_TYPE (rel->r_info);
+-      r_type = tilegx_elf_tls_transition (info, r_type, h != NULL,
+-					  sec->sec_flg0);
+-      switch (r_type)
+-	{
+-	case R_TILEGX_IMM16_X0_HW0_GOT:
+-	case R_TILEGX_IMM16_X1_HW0_GOT:
+-	case R_TILEGX_IMM16_X0_HW0_LAST_GOT:
+-	case R_TILEGX_IMM16_X1_HW0_LAST_GOT:
+-	case R_TILEGX_IMM16_X0_HW1_LAST_GOT:
+-	case R_TILEGX_IMM16_X1_HW1_LAST_GOT:
+-	case R_TILEGX_IMM16_X0_HW0_TLS_GD:
+-	case R_TILEGX_IMM16_X1_HW0_TLS_GD:
+-	case R_TILEGX_IMM16_X0_HW0_LAST_TLS_GD:
+-	case R_TILEGX_IMM16_X1_HW0_LAST_TLS_GD:
+-	case R_TILEGX_IMM16_X0_HW1_LAST_TLS_GD:
+-	case R_TILEGX_IMM16_X1_HW1_LAST_TLS_GD:
+-	case R_TILEGX_IMM16_X0_HW0_TLS_IE:
+-	case R_TILEGX_IMM16_X1_HW0_TLS_IE:
+-	case R_TILEGX_IMM16_X0_HW0_LAST_TLS_IE:
+-	case R_TILEGX_IMM16_X1_HW0_LAST_TLS_IE:
+-	case R_TILEGX_IMM16_X0_HW1_LAST_TLS_IE:
+-	case R_TILEGX_IMM16_X1_HW1_LAST_TLS_IE:
+-	  if (h != NULL)
+-	    {
+-	      if (h->got.refcount > 0)
+-		h->got.refcount--;
+-	    }
+-	  else
+-	    {
+-	      if (local_got_refcounts &&
+-		  local_got_refcounts[r_symndx] > 0)
+-		local_got_refcounts[r_symndx]--;
+-	    }
+-	  break;
+-
+-        case R_TILEGX_64_PCREL:
+-        case R_TILEGX_32_PCREL:
+-        case R_TILEGX_16_PCREL:
+-        case R_TILEGX_8_PCREL:
+-	case R_TILEGX_IMM16_X0_HW0_PCREL:
+-	case R_TILEGX_IMM16_X1_HW0_PCREL:
+-	case R_TILEGX_IMM16_X0_HW1_PCREL:
+-	case R_TILEGX_IMM16_X1_HW1_PCREL:
+-	case R_TILEGX_IMM16_X0_HW2_PCREL:
+-	case R_TILEGX_IMM16_X1_HW2_PCREL:
+-	case R_TILEGX_IMM16_X0_HW3_PCREL:
+-	case R_TILEGX_IMM16_X1_HW3_PCREL:
+-	case R_TILEGX_IMM16_X0_HW0_LAST_PCREL:
+-	case R_TILEGX_IMM16_X1_HW0_LAST_PCREL:
+-	case R_TILEGX_IMM16_X0_HW1_LAST_PCREL:
+-	case R_TILEGX_IMM16_X1_HW1_LAST_PCREL:
+-	case R_TILEGX_IMM16_X0_HW2_LAST_PCREL:
+-	case R_TILEGX_IMM16_X1_HW2_LAST_PCREL:
+-	  if (h != NULL
+-	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+-	    break;
+-	  /* Fall through.  */
+-
+-        case R_TILEGX_64:
+-        case R_TILEGX_32:
+-        case R_TILEGX_16:
+-        case R_TILEGX_8:
+-	case R_TILEGX_HW0:
+-	case R_TILEGX_HW1:
+-	case R_TILEGX_HW2:
+-	case R_TILEGX_HW3:
+-	case R_TILEGX_HW0_LAST:
+-	case R_TILEGX_HW1_LAST:
+-	case R_TILEGX_HW2_LAST:
+-        case R_TILEGX_COPY:
+-        case R_TILEGX_GLOB_DAT:
+-        case R_TILEGX_JMP_SLOT:
+-        case R_TILEGX_RELATIVE:
+-        case R_TILEGX_BROFF_X1:
+-        case R_TILEGX_JUMPOFF_X1:
+-        case R_TILEGX_IMM8_X0:
+-        case R_TILEGX_IMM8_Y0:
+-        case R_TILEGX_IMM8_X1:
+-        case R_TILEGX_IMM8_Y1:
+-        case R_TILEGX_DEST_IMM8_X1:
+-        case R_TILEGX_MT_IMM14_X1:
+-        case R_TILEGX_MF_IMM14_X1:
+-        case R_TILEGX_MMSTART_X0:
+-        case R_TILEGX_MMEND_X0:
+-        case R_TILEGX_SHAMT_X0:
+-        case R_TILEGX_SHAMT_X1:
+-        case R_TILEGX_SHAMT_Y0:
+-        case R_TILEGX_SHAMT_Y1:
+-	case R_TILEGX_IMM16_X0_HW0:
+-	case R_TILEGX_IMM16_X1_HW0:
+-	case R_TILEGX_IMM16_X0_HW1:
+-	case R_TILEGX_IMM16_X1_HW1:
+-	case R_TILEGX_IMM16_X0_HW2:
+-	case R_TILEGX_IMM16_X1_HW2:
+-	case R_TILEGX_IMM16_X0_HW3:
+-	case R_TILEGX_IMM16_X1_HW3:
+-	case R_TILEGX_IMM16_X0_HW0_LAST:
+-	case R_TILEGX_IMM16_X1_HW0_LAST:
+-	case R_TILEGX_IMM16_X0_HW1_LAST:
+-	case R_TILEGX_IMM16_X1_HW1_LAST:
+-	case R_TILEGX_IMM16_X0_HW2_LAST:
+-	case R_TILEGX_IMM16_X1_HW2_LAST:
+-	  if (bfd_link_pic (info))
+-	    break;
+-	  /* Fall through.  */
+-
+-        case R_TILEGX_JUMPOFF_X1_PLT:
+-	case R_TILEGX_IMM16_X0_HW0_PLT_PCREL:
+-	case R_TILEGX_IMM16_X1_HW0_PLT_PCREL:
+-	case R_TILEGX_IMM16_X0_HW1_PLT_PCREL:
+-	case R_TILEGX_IMM16_X1_HW1_PLT_PCREL:
+-	case R_TILEGX_IMM16_X0_HW2_PLT_PCREL:
+-	case R_TILEGX_IMM16_X1_HW2_PLT_PCREL:
+-	case R_TILEGX_IMM16_X0_HW3_PLT_PCREL:
+-	case R_TILEGX_IMM16_X1_HW3_PLT_PCREL:
+-	case R_TILEGX_IMM16_X0_HW0_LAST_PLT_PCREL:
+-	case R_TILEGX_IMM16_X1_HW0_LAST_PLT_PCREL:
+-	case R_TILEGX_IMM16_X0_HW1_LAST_PLT_PCREL:
+-	case R_TILEGX_IMM16_X1_HW1_LAST_PLT_PCREL:
+-	case R_TILEGX_IMM16_X0_HW2_LAST_PLT_PCREL:
+-	case R_TILEGX_IMM16_X1_HW2_LAST_PLT_PCREL:
+-	  if (h != NULL)
+-	    {
+-	      if (h->plt.refcount > 0)
+-		h->plt.refcount--;
+-	    }
+-	  break;
+-
+-	default:
+-	  break;
+-	}
+-    }
+-
+-  return TRUE;
+-}
+-
+ /* Adjust a symbol defined by a dynamic object and referenced by a
+    regular object.  The current definition is in some section of the
+    dynamic object, but we're not including those sections.  We have to
+diff --git a/bfd/elfxx-tilegx.h b/bfd/elfxx-tilegx.h
+index e310170753..c364ab2fb7 100644
+--- a/bfd/elfxx-tilegx.h
++++ b/bfd/elfxx-tilegx.h
+@@ -73,10 +73,6 @@ tilegx_elf_gc_mark_hook (asection *,
+ 			 struct elf_link_hash_entry *,
+ 			 Elf_Internal_Sym *);
+ 
+-extern bfd_boolean
+-tilegx_elf_gc_sweep_hook (bfd *, struct bfd_link_info *,
+-			  asection *, const Elf_Internal_Rela *);
+-
+ extern bfd_vma
+ tilegx_elf_plt_sym_val (bfd_vma, const asection *, const arelent *);
+ 
+diff --git a/ld/emulparams/elf32_x86_64.sh b/ld/emulparams/elf32_x86_64.sh
+index a7f16b1d32..03f9d83056 100644
+--- a/ld/emulparams/elf32_x86_64.sh
++++ b/ld/emulparams/elf32_x86_64.sh
+@@ -7,7 +7,6 @@
+ SCRIPT_NAME=elf
+ ELFSIZE=32
+ OUTPUT_FORMAT="elf32-x86-64"
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ NO_REL_RELOCS=yes
+ TEXT_START_ADDR=0x400000
+ MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
+diff --git a/ld/emulparams/elf_i386.sh b/ld/emulparams/elf_i386.sh
+index 6997d40ba1..084497c230 100644
+--- a/ld/emulparams/elf_i386.sh
++++ b/ld/emulparams/elf_i386.sh
+@@ -5,7 +5,6 @@
+ . ${srcdir}/emulparams/cet.sh
+ SCRIPT_NAME=elf
+ OUTPUT_FORMAT="elf32-i386"
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ NO_RELA_RELOCS=yes
+ TEXT_START_ADDR=0x08048000
+ MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
+diff --git a/ld/emulparams/elf_i386_be.sh b/ld/emulparams/elf_i386_be.sh
+index 4a24b02012..70db443239 100644
+--- a/ld/emulparams/elf_i386_be.sh
++++ b/ld/emulparams/elf_i386_be.sh
+@@ -3,7 +3,6 @@
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf
+ OUTPUT_FORMAT="elf32-i386"
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ NO_RELA_RELOCS=yes
+ TEXT_START_ADDR=0x80000000
+ MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
+diff --git a/ld/emulparams/elf_i386_chaos.sh b/ld/emulparams/elf_i386_chaos.sh
+index 5349108174..aa36cb51c2 100644
+--- a/ld/emulparams/elf_i386_chaos.sh
++++ b/ld/emulparams/elf_i386_chaos.sh
+@@ -4,7 +4,6 @@
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf_chaos
+ OUTPUT_FORMAT="elf32-i386"
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ TEXT_START_ADDR=0x40000000
+ MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
+ ARCH=i386
+diff --git a/ld/emulparams/elf_i386_ldso.sh b/ld/emulparams/elf_i386_ldso.sh
+index dc4eef4889..1328520c57 100644
+--- a/ld/emulparams/elf_i386_ldso.sh
++++ b/ld/emulparams/elf_i386_ldso.sh
+@@ -4,7 +4,6 @@
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf
+ OUTPUT_FORMAT="elf32-i386"
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ NO_RELA_RELOCS=yes
+ TEXT_START_ADDR=0x08048000
+ MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
+diff --git a/ld/emulparams/elf_i386_vxworks.sh b/ld/emulparams/elf_i386_vxworks.sh
+index ac1bbeb4e3..aaea8c4874 100644
+--- a/ld/emulparams/elf_i386_vxworks.sh
++++ b/ld/emulparams/elf_i386_vxworks.sh
+@@ -1,6 +1,5 @@
+ SCRIPT_NAME=elf
+ OUTPUT_FORMAT="elf32-i386-vxworks"
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ NO_RELA_RELOCS=yes
+ TEXT_START_ADDR=0x08048000
+ MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
+diff --git a/ld/emulparams/elf_iamcu.sh b/ld/emulparams/elf_iamcu.sh
+index 45953e76d3..863027b57b 100644
+--- a/ld/emulparams/elf_iamcu.sh
++++ b/ld/emulparams/elf_iamcu.sh
+@@ -4,7 +4,6 @@
+ . ${srcdir}/emulparams/call_nop.sh
+ SCRIPT_NAME=elf
+ OUTPUT_FORMAT="elf32-iamcu"
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ NO_RELA_RELOCS=yes
+ TEXT_START_ADDR=0x08048000
+ MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
+diff --git a/ld/emulparams/elf_k1om.sh b/ld/emulparams/elf_k1om.sh
+index 828c10efc9..494efcc6c9 100644
+--- a/ld/emulparams/elf_k1om.sh
++++ b/ld/emulparams/elf_k1om.sh
+@@ -5,7 +5,6 @@
+ SCRIPT_NAME=elf
+ ELFSIZE=64
+ OUTPUT_FORMAT="elf64-k1om"
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ NO_REL_RELOCS=yes
+ TEXT_START_ADDR=0x400000
+ MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
+diff --git a/ld/emulparams/elf_l1om.sh b/ld/emulparams/elf_l1om.sh
+index 9c59dc07a5..b1158791f4 100644
+--- a/ld/emulparams/elf_l1om.sh
++++ b/ld/emulparams/elf_l1om.sh
+@@ -5,7 +5,6 @@
+ SCRIPT_NAME=elf
+ ELFSIZE=64
+ OUTPUT_FORMAT="elf64-l1om"
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ NO_REL_RELOCS=yes
+ TEXT_START_ADDR=0x400000
+ MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
+diff --git a/ld/emulparams/elf_x86_64.sh b/ld/emulparams/elf_x86_64.sh
+index c678479d24..09f3cdac07 100644
+--- a/ld/emulparams/elf_x86_64.sh
++++ b/ld/emulparams/elf_x86_64.sh
+@@ -7,7 +7,6 @@
+ SCRIPT_NAME=elf
+ ELFSIZE=64
+ OUTPUT_FORMAT="elf64-x86-64"
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ NO_REL_RELOCS=yes
+ TEXT_START_ADDR=0x400000
+ MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
+diff --git a/ld/emulparams/i386lynx.sh b/ld/emulparams/i386lynx.sh
+index 12bc7daa6a..93afb3d7f3 100644
+--- a/ld/emulparams/i386lynx.sh
++++ b/ld/emulparams/i386lynx.sh
+@@ -1,6 +1,5 @@
+ SCRIPT_NAME=elf
+ OUTPUT_FORMAT="elf32-i386"
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ NO_RELA_RELOCS=yes
+ ENTRY=_main
+ TEXT_BASE=0x0
+diff --git a/ld/emulparams/i386moss.sh b/ld/emulparams/i386moss.sh
+index bffef867a7..095d85ab92 100644
+--- a/ld/emulparams/i386moss.sh
++++ b/ld/emulparams/i386moss.sh
+@@ -1,6 +1,5 @@
+ SCRIPT_NAME=elf
+ OUTPUT_FORMAT="elf32-i386"
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ NO_RELA_RELOCS=yes
+ TEXT_START_ADDR=0x00002000
+ MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
+diff --git a/ld/emulparams/i386nto.sh b/ld/emulparams/i386nto.sh
+index 51284be2bd..626f9c13aa 100644
+--- a/ld/emulparams/i386nto.sh
++++ b/ld/emulparams/i386nto.sh
+@@ -1,6 +1,5 @@
+ SCRIPT_NAME=elf
+ OUTPUT_FORMAT="elf32-i386"
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ NO_RELA_RELOCS=yes
+ TEXT_START_ADDR=0x08048000
+ TEXT_START_SYMBOLS='_btext = .;'
+diff --git a/ld/emulparams/i386nw.sh b/ld/emulparams/i386nw.sh
+index e6397f6879..e1897bef95 100644
+--- a/ld/emulparams/i386nw.sh
++++ b/ld/emulparams/i386nw.sh
+@@ -1,6 +1,5 @@
+ SCRIPT_NAME=nw
+ OUTPUT_FORMAT="elf32-i386"
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ TEXT_START_ADDR=0x08000000
+ MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
+ ARCH=i386
+diff --git a/ld/emulparams/shelf.sh b/ld/emulparams/shelf.sh
+index 8d79b8d86c..5b34319490 100644
+--- a/ld/emulparams/shelf.sh
++++ b/ld/emulparams/shelf.sh
+@@ -11,10 +11,6 @@ MACHINE=
+ TEMPLATE_NAME=elf32
+ GENERATE_SHLIB_SCRIPT=yes
+ EMBEDDED=yes
+-# PR 17739.  Delay checking relocs until after all files have
+-# been opened and linker garbage collection has taken place.
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+-
+ # These are for compatibility with the COFF toolchain.
+ ENTRY=start
+ CTOR_START='___ctors = .;'
+diff --git a/ld/emulparams/shelf32.sh b/ld/emulparams/shelf32.sh
+index 7f4640730d..3fc9a3e518 100644
+--- a/ld/emulparams/shelf32.sh
++++ b/ld/emulparams/shelf32.sh
+@@ -11,9 +11,6 @@ ALIGNMENT=8
+ TEMPLATE_NAME=elf32
+ GENERATE_SHLIB_SCRIPT=yes
+ EMBEDDED=yes
+-# PR 17739.  Delay checking relocs until after all files have
+-# been opened and linker garbage collection has taken place.
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ 
+ DATA_START_SYMBOLS='PROVIDE (___data = .);'
+ 
+diff --git a/ld/emulparams/shelf_nto.sh b/ld/emulparams/shelf_nto.sh
+index 46efd87896..c4d71aa999 100644
+--- a/ld/emulparams/shelf_nto.sh
++++ b/ld/emulparams/shelf_nto.sh
+@@ -9,6 +9,3 @@ TEMPLATE_NAME=elf32
+ GENERATE_SHLIB_SCRIPT=yes
+ TEXT_START_SYMBOLS='_btext = .;'
+ ENTRY=_start
+-# PR 17739.  Delay checking relocs until after all files have
+-# been opened and linker garbage collection has taken place.
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+diff --git a/ld/emulparams/shelf_vxworks.sh b/ld/emulparams/shelf_vxworks.sh
+index 759ffac288..c45099046e 100644
+--- a/ld/emulparams/shelf_vxworks.sh
++++ b/ld/emulparams/shelf_vxworks.sh
+@@ -14,9 +14,6 @@ TEMPLATE_NAME=elf32
+ GENERATE_SHLIB_SCRIPT=yes
+ ENTRY=__start
+ SYMPREFIX=_
+-# PR 17739.  Delay checking relocs until after all files have
+-# been opened and linker garbage collection has taken place.
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ 
+ GOT=".got          ${RELOCATING-0} : {
+   PROVIDE(__GLOBAL_OFFSET_TABLE_ = .);
+diff --git a/ld/emulparams/shlelf32_linux.sh b/ld/emulparams/shlelf32_linux.sh
+index 0327e57ad6..03f6d9a7e4 100644
+--- a/ld/emulparams/shlelf32_linux.sh
++++ b/ld/emulparams/shlelf32_linux.sh
+@@ -13,9 +13,6 @@ ALIGNMENT=8
+ TEMPLATE_NAME=elf32
+ GENERATE_SHLIB_SCRIPT=yes
+ GENERATE_PIE_SCRIPT=yes
+-# PR 17739.  Delay checking relocs until after all files have
+-# been opened and linker garbage collection has taken place.
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ 
+ DATA_START_SYMBOLS='PROVIDE (___data = .);'
+ 
+diff --git a/ld/emulparams/shlelf_linux.sh b/ld/emulparams/shlelf_linux.sh
+index 4e2a5813f2..c14aae228d 100644
+--- a/ld/emulparams/shlelf_linux.sh
++++ b/ld/emulparams/shlelf_linux.sh
+@@ -12,9 +12,6 @@ MACHINE=
+ TEMPLATE_NAME=elf32
+ GENERATE_SHLIB_SCRIPT=yes
+ GENERATE_PIE_SCRIPT=yes
+-# PR 17739.  Delay checking relocs until after all files have
+-# been opened and linker garbage collection has taken place.
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+ 
+ DATA_START_SYMBOLS='PROVIDE (__data_start = .);';
+ 
+diff --git a/ld/emulparams/shlelf_nto.sh b/ld/emulparams/shlelf_nto.sh
+index f8ffc13b36..16f65087eb 100644
+--- a/ld/emulparams/shlelf_nto.sh
++++ b/ld/emulparams/shlelf_nto.sh
+@@ -9,6 +9,3 @@ TEMPLATE_NAME=elf32
+ GENERATE_SHLIB_SCRIPT=yes
+ TEXT_START_SYMBOLS='_btext = .;'
+ ENTRY=_start
+-# PR 17739.  Delay checking relocs until after all files have
+-# been opened and linker garbage collection has taken place.
+-CHECK_RELOCS_AFTER_OPEN_INPUT=yes
+diff --git a/ld/emultempl/aarch64elf.em b/ld/emultempl/aarch64elf.em
+index 3007e4d581..f1a3a480d8 100644
+--- a/ld/emultempl/aarch64elf.em
++++ b/ld/emultempl/aarch64elf.em
+@@ -43,6 +43,7 @@ gld${EMULATION_NAME}_before_parse (void)
+   input_flags.dynamic = ${DYNAMIC_LINK-TRUE};
+   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
+   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
++  link_info.check_relocs_after_open_input = TRUE;
+   link_info.relro = DEFAULT_LD_Z_RELRO;
+ }
+ 
+diff --git a/ld/emultempl/aix.em b/ld/emultempl/aix.em
+index 480bbbce10..4965ad2f2f 100644
+--- a/ld/emultempl/aix.em
++++ b/ld/emultempl/aix.em
+@@ -1539,6 +1539,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
+   hll_default,
+   after_parse_default,
+   gld${EMULATION_NAME}_after_open,
++  after_check_relocs_default,
+   after_allocation_default,
+   gld${EMULATION_NAME}_set_output_arch,
+   gld${EMULATION_NAME}_choose_target,
+diff --git a/ld/emultempl/armcoff.em b/ld/emultempl/armcoff.em
+index de2847bdc5..bccf35306b 100644
+--- a/ld/emultempl/armcoff.em
++++ b/ld/emultempl/armcoff.em
+@@ -261,6 +261,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+   hll_default,
+   after_parse_default,
+   gld${EMULATION_NAME}_after_open,
++  after_check_relocs_default,
+   after_allocation_default,
+   set_output_arch_default,
+   ldemul_default_target,
+diff --git a/ld/emultempl/armelf.em b/ld/emultempl/armelf.em
+index 34ff993cc7..8fb92e46c2 100644
+--- a/ld/emultempl/armelf.em
++++ b/ld/emultempl/armelf.em
+@@ -58,6 +58,7 @@ gld${EMULATION_NAME}_before_parse (void)
+   input_flags.dynamic = ${DYNAMIC_LINK-TRUE};
+   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
+   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
++  link_info.check_relocs_after_open_input = TRUE;
+   link_info.relro = DEFAULT_LD_Z_RELRO;
+ }
+ 
+diff --git a/ld/emultempl/beos.em b/ld/emultempl/beos.em
+index 3128e2037b..8b7d5a53fa 100644
+--- a/ld/emultempl/beos.em
++++ b/ld/emultempl/beos.em
+@@ -764,6 +764,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+   hll_default,
+   after_parse_default,
+   gld_${EMULATION_NAME}_after_open,
++  after_check_relocs_default,
+   after_allocation_default,
+   set_output_arch_default,
+   ldemul_default_target,
+diff --git a/ld/emultempl/elf32.em b/ld/emultempl/elf32.em
+index 8737376804..ff4d565a21 100644
+--- a/ld/emultempl/elf32.em
++++ b/ld/emultempl/elf32.em
+@@ -104,7 +104,7 @@ gld${EMULATION_NAME}_before_parse (void)
+   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
+   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
+   `if test -n "$CALL_NOP_BYTE" ; then echo link_info.call_nop_byte = $CALL_NOP_BYTE; fi`;
+-  link_info.check_relocs_after_open_input = `if test "x${CHECK_RELOCS_AFTER_OPEN_INPUT}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
++  link_info.check_relocs_after_open_input = TRUE;
+   link_info.relro = DEFAULT_LD_Z_RELRO;
+ }
+ 
+@@ -2813,6 +2813,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+   ${LDEMUL_HLL-hll_default},
+   ${LDEMUL_AFTER_PARSE-gld${EMULATION_NAME}_after_parse},
+   ${LDEMUL_AFTER_OPEN-gld${EMULATION_NAME}_after_open},
++  ${LDEMUL_AFTER_CHECK_RELOCS-after_check_relocs_default},
+   ${LDEMUL_AFTER_ALLOCATION-gld${EMULATION_NAME}_after_allocation},
+   ${LDEMUL_SET_OUTPUT_ARCH-set_output_arch_default},
+   ${LDEMUL_CHOOSE_TARGET-ldemul_default_target},
+diff --git a/ld/emultempl/generic.em b/ld/emultempl/generic.em
+index 55a19a8168..9a54ba2acb 100644
+--- a/ld/emultempl/generic.em
++++ b/ld/emultempl/generic.em
+@@ -136,6 +136,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+   ${LDEMUL_HLL-hll_default},
+   ${LDEMUL_AFTER_PARSE-after_parse_default},
+   ${LDEMUL_AFTER_OPEN-after_open_default},
++  ${LDEMUL_AFTER_CHECK_RELOCS-after_check_relocs_default},
+   ${LDEMUL_AFTER_ALLOCATION-after_allocation_default},
+   ${LDEMUL_SET_OUTPUT_ARCH-set_output_arch_default},
+   ${LDEMUL_CHOOSE_TARGET-ldemul_default_target},
+diff --git a/ld/emultempl/gld960.em b/ld/emultempl/gld960.em
+index 683bb819f8..9489462ef1 100644
+--- a/ld/emultempl/gld960.em
++++ b/ld/emultempl/gld960.em
+@@ -129,6 +129,7 @@ struct ld_emulation_xfer_struct ld_gld960_emulation =
+   hll_default,
+   after_parse_default,
+   after_open_default,
++  after_check_relocs_default,
+   after_allocation_default,
+   gld960_set_output_arch,
+   gld960_choose_target,
+diff --git a/ld/emultempl/gld960c.em b/ld/emultempl/gld960c.em
+index 7bbb83a8d5..1b4d09abcc 100644
+--- a/ld/emultempl/gld960c.em
++++ b/ld/emultempl/gld960c.em
+@@ -142,6 +142,7 @@ struct ld_emulation_xfer_struct ld_gld960coff_emulation =
+   hll_default,
+   after_parse_default,
+   after_open_default,
++  after_check_relocs_default,
+   after_allocation_default,
+   gld960_set_output_arch,
+   gld960_choose_target,
+diff --git a/ld/emultempl/linux.em b/ld/emultempl/linux.em
+index b79537df01..0befb26025 100644
+--- a/ld/emultempl/linux.em
++++ b/ld/emultempl/linux.em
+@@ -50,6 +50,7 @@ gld${EMULATION_NAME}_before_parse (void)
+   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
+   input_flags.dynamic = TRUE;
+   config.has_shared = TRUE;
++  link_info.check_relocs_after_open_input = TRUE;
+   link_info.relro = DEFAULT_LD_Z_RELRO;
+ }
+ 
+@@ -187,6 +188,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+   hll_default,
+   after_parse_default,
+   after_open_default,
++  after_check_relocs_default,
+   after_allocation_default,
+   set_output_arch_default,
+   ldemul_default_target,
+diff --git a/ld/emultempl/lnk960.em b/ld/emultempl/lnk960.em
+index b30acb6de6..35fbae3971 100644
+--- a/ld/emultempl/lnk960.em
++++ b/ld/emultempl/lnk960.em
+@@ -323,6 +323,7 @@ struct ld_emulation_xfer_struct ld_lnk960_emulation =
+   lnk960_hll,
+   lnk960_after_parse,
+   after_open_default,
++  after_check_relocs_default,
+   lnk960_after_allocation,
+   lnk960_set_output_arch,
+   lnk960_choose_target,
+diff --git a/ld/emultempl/m68kcoff.em b/ld/emultempl/m68kcoff.em
+index 359f0e0f6d..424520ef9d 100644
+--- a/ld/emultempl/m68kcoff.em
++++ b/ld/emultempl/m68kcoff.em
+@@ -220,6 +220,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+   syslib_default,
+   hll_default,
+   after_parse_default,
++  after_check_relocs_default,
+   gld${EMULATION_NAME}_after_open,
+   gld${EMULATION_NAME}_after_allocation,
+   set_output_arch_default,
+diff --git a/ld/emultempl/mmix-elfnmmo.em b/ld/emultempl/mmix-elfnmmo.em
+index d703eac566..39f532bfa7 100644
+--- a/ld/emultempl/mmix-elfnmmo.em
++++ b/ld/emultempl/mmix-elfnmmo.em
+@@ -25,6 +25,15 @@
+ fragment <<EOF
+ #include "elf/mmix.h"
+ 
++static void gld${EMULATION_NAME}_before_parse (void);
++
++static void
++mmix_before_parse (void)
++{
++  link_info.check_relocs_after_open_input = TRUE;
++  gld${EMULATION_NAME}_before_parse ();
++}
++
+ /* Set up handling of linker-allocated global registers.  */
+ 
+ static void
+@@ -111,5 +120,6 @@ mmix_after_allocation (void)
+ }
+ EOF
+ 
++LDEMUL_BEFORE_PARSE=mmix_before_parse
+ LDEMUL_AFTER_ALLOCATION=mmix_after_allocation
+ LDEMUL_BEFORE_ALLOCATION=mmix_before_allocation
+diff --git a/ld/emultempl/mmixelf.em b/ld/emultempl/mmixelf.em
+index 8123d40785..d9a2ba1869 100644
+--- a/ld/emultempl/mmixelf.em
++++ b/ld/emultempl/mmixelf.em
+@@ -29,7 +29,7 @@ fragment <<EOF
+ static void
+ elfmmix_before_parse (void)
+ {
+-  gld${EMULATION_NAME}_before_parse ();
++  mmix_before_parse ();
+ 
+   /* Make sure we don't create a demand-paged executable.  Unfortunately
+      this isn't changeable with a command-line option.  It makes no
+diff --git a/ld/emultempl/msp430.em b/ld/emultempl/msp430.em
+index 0792e3cc75..65e6fb2324 100644
+--- a/ld/emultempl/msp430.em
++++ b/ld/emultempl/msp430.em
+@@ -838,6 +838,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+   ${LDEMUL_HLL-hll_default},
+   ${LDEMUL_AFTER_PARSE-after_parse_default},
+   msp430_elf_after_open,
++  after_check_relocs_default,
+   msp430_elf_after_allocation,
+   ${LDEMUL_SET_OUTPUT_ARCH-set_output_arch_default},
+   ${LDEMUL_CHOOSE_TARGET-ldemul_default_target},
+diff --git a/ld/emultempl/pe.em b/ld/emultempl/pe.em
+index 06934831dd..039602aa6c 100644
+--- a/ld/emultempl/pe.em
++++ b/ld/emultempl/pe.em
+@@ -2474,6 +2474,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+   hll_default,
+   gld_${EMULATION_NAME}_after_parse,
+   gld_${EMULATION_NAME}_after_open,
++  after_check_relocs_default,
+   after_allocation_default,
+   set_output_arch_default,
+   ldemul_default_target,
+diff --git a/ld/emultempl/pep.em b/ld/emultempl/pep.em
+index 1446e046f7..f76738cf49 100644
+--- a/ld/emultempl/pep.em
++++ b/ld/emultempl/pep.em
+@@ -2247,6 +2247,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+   hll_default,
+   gld_${EMULATION_NAME}_after_parse,
+   gld_${EMULATION_NAME}_after_open,
++  after_check_relocs_default,
+   after_allocation_default,
+   set_output_arch_default,
+   ldemul_default_target,
+diff --git a/ld/emultempl/ppc32elf.em b/ld/emultempl/ppc32elf.em
+index 374459c47d..b1ea04dd91 100644
+--- a/ld/emultempl/ppc32elf.em
++++ b/ld/emultempl/ppc32elf.em
+@@ -57,7 +57,7 @@ EOF
+ if test -z "$VXWORKS_BASE_EM_FILE" ; then
+   fragment <<EOF
+ static void
+-ppc_after_open (void)
++ppc_after_check_relocs (void)
+ {
+   if (is_ppc_elf (link_info.output_bfd))
+     {
+@@ -108,7 +108,7 @@ ppc_after_open (void)
+ 	}
+     }
+ 
+-  gld${EMULATION_NAME}_after_open ();
++  after_check_relocs_default ();
+ }
+ 
+ EOF
+@@ -355,7 +355,7 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
+ #
+ LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_after_open_output
+ if test -z "$VXWORKS_BASE_EM_FILE" ; then
+-  LDEMUL_AFTER_OPEN=ppc_after_open
++  LDEMUL_AFTER_CHECK_RELOCS=ppc_after_check_relocs
+ fi
+ LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
+ LDEMUL_FINISH=ppc_finish
+diff --git a/ld/emultempl/scoreelf.em b/ld/emultempl/scoreelf.em
+index 9560ff23f0..367f75868e 100644
+--- a/ld/emultempl/scoreelf.em
++++ b/ld/emultempl/scoreelf.em
+@@ -39,6 +39,7 @@ gld${EMULATION_NAME}_before_parse (void)
+   input_flags.dynamic = ${DYNAMIC_LINK-TRUE};
+   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
+   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
++  link_info.check_relocs_after_open_input = TRUE;
+   link_info.relro = DEFAULT_LD_Z_RELRO;
+ }
+ 
+diff --git a/ld/emultempl/sunos.em b/ld/emultempl/sunos.em
+index 44e6e512bc..51e46ddf78 100644
+--- a/ld/emultempl/sunos.em
++++ b/ld/emultempl/sunos.em
+@@ -1016,6 +1016,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+   hll_default,
+   after_parse_default,
+   gld${EMULATION_NAME}_after_open,
++  after_check_relocs_default,
+   after_allocation_default,
+   set_output_arch_default,
+   ldemul_default_target,
+diff --git a/ld/emultempl/ticoff.em b/ld/emultempl/ticoff.em
+index d394e12465..b2552db2e6 100644
+--- a/ld/emultempl/ticoff.em
++++ b/ld/emultempl/ticoff.em
+@@ -161,6 +161,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
+   hll_default,
+   after_parse_default,
+   after_open_default,
++  after_check_relocs_default,
+   after_allocation_default,
+   set_output_arch_default,
+   ldemul_default_target,
+diff --git a/ld/emultempl/vanilla.em b/ld/emultempl/vanilla.em
+index 3d8dc44f06..83837b9bac 100644
+--- a/ld/emultempl/vanilla.em
++++ b/ld/emultempl/vanilla.em
+@@ -62,6 +62,7 @@ struct ld_emulation_xfer_struct ld_vanilla_emulation =
+   hll_default,
+   after_parse_default,
+   after_open_default,
++  after_check_relocs_default,
+   after_allocation_default,
+   vanilla_set_output_arch,
+   ldemul_default_target,
+diff --git a/ld/ldemul.c b/ld/ldemul.c
+index cebf012e78..96c4b8bc33 100644
+--- a/ld/ldemul.c
++++ b/ld/ldemul.c
+@@ -65,6 +65,12 @@ ldemul_after_open (void)
+ }
+ 
+ void
++ldemul_after_check_relocs (void)
++{
++  ld_emulation->after_check_relocs ();
++}
++
++void
+ ldemul_after_allocation (void)
+ {
+   ld_emulation->after_allocation ();
+@@ -227,6 +233,11 @@ after_open_default (void)
+ }
+ 
+ void
++after_check_relocs_default (void)
++{
++}
++
++void
+ after_allocation_default (void)
+ {
+   lang_relax_sections (FALSE);
+diff --git a/ld/ldemul.h b/ld/ldemul.h
+index 8e9bd2e952..631a038767 100644
+--- a/ld/ldemul.h
++++ b/ld/ldemul.h
+@@ -34,6 +34,8 @@ extern void ldemul_before_parse
+   (void);
+ extern void ldemul_after_open
+   (void);
++extern void ldemul_after_check_relocs
++  (void);
+ extern void ldemul_after_allocation
+   (void);
+ extern void ldemul_before_allocation
+@@ -76,6 +78,8 @@ extern void after_parse_default
+   (void);
+ extern void after_open_default
+   (void);
++extern void after_check_relocs_default
++  (void);
+ extern void after_allocation_default
+   (void);
+ extern void before_allocation_default
+@@ -114,6 +118,9 @@ typedef struct ld_emulation_xfer_struct {
+   /* Run after opening all input files, and loading the symbols.  */
+   void   (*after_open) (void);
+ 
++  /* Run after checking relocations.  */
++  void   (*after_check_relocs)  (void);
++
+   /* Run after allocating output sections.  */
+   void   (*after_allocation)  (void);
+ 
+diff --git a/ld/ldlang.c b/ld/ldlang.c
+index 0018188205..3ed707865e 100644
+--- a/ld/ldlang.c
++++ b/ld/ldlang.c
+@@ -7259,6 +7259,8 @@ lang_process (void)
+   /* Check relocations.  */
+   lang_check_relocs ();
+ 
++  ldemul_after_check_relocs ();
++
+   /* Update wild statements.  */
+   update_wild_statements (statement_list.head);
+ 
+diff --git a/ld/testsuite/ld-aarch64/gc-got-relocs.d b/ld/testsuite/ld-aarch64/gc-got-relocs.d
+index bb982414e4..6525d10119 100644
+--- a/ld/testsuite/ld-aarch64/gc-got-relocs.d
++++ b/ld/testsuite/ld-aarch64/gc-got-relocs.d
+@@ -6,24 +6,18 @@
+ #objdump: -s -t -d
+ 
+ # Executable with got related relocs against global sysmbol gced.
+-# After gc-section removal we are cheking that symbol does not exit
+-# got section is empty and text section contains only start function.
++# After gc-section removal we are cheking that symbol and got section
++# do not exist and text section contains only start function.
+ 
+ .*:     file format elf64-(little|big)aarch64
+ 
+ SYMBOL TABLE:
+ 0+8000 l    d  \.text	0+ \.text
+-0+9000 l    d  \.got	0+ \.got
+ 0+0000 l    df \*ABS\*	0+ .*
+-0+0000 l    df \*ABS\*	0+ 
+-0+9000 l     O \.got	0+ _GLOBAL_OFFSET_TABLE_
+ 0+8000 g       \.text	0+ _start
+ 
+ Contents of section .text:
+  8000 1f2003d5                             .*
+-Contents of section .got:
+- 9000 0+ 0+ 0+ 0+  .*
+- 9010 0+ 0+ 0+ 0+  .*
+ 
+ Disassembly of section .text:
+ 
+diff --git a/ld/testsuite/ld-aarch64/gc-tls-relocs.d b/ld/testsuite/ld-aarch64/gc-tls-relocs.d
+index 480d869917..38637dce07 100644
+--- a/ld/testsuite/ld-aarch64/gc-tls-relocs.d
++++ b/ld/testsuite/ld-aarch64/gc-tls-relocs.d
+@@ -7,24 +7,18 @@
+ #objdump: -s -t -d
+ 
+ # Executable with tls related relocs against global and local symbol gced.
+-# After gc-section removal we are cheking that symbols does not exit
+-# got section is empty and text section contains only start function.
++# After gc-section removal we are cheking that symbols and got section do
++# not exist and text section contains only start function.
+ 
+ .*:     file format elf64-(little|big)aarch64
+ 
+ SYMBOL TABLE:
+ 0+8000 l    d  \.text	0+ \.text
+-0+9000 l    d  \.got	0+ \.got
+ 0+0000 l    df \*ABS\*	0+ .*
+-0+0000 l    df \*ABS\*	0+ 
+-0+9000 l     O \.got	0+ _GLOBAL_OFFSET_TABLE_
+ 0+8000 g       \.text	0+ _start
+ 
+ Contents of section .text:
+  8000 1f2003d5                             .*
+-Contents of section .got:
+- 9000 0+ 0+ 0+ 0+  .*
+- 9010 0+ 0+ 0+ 0+  .*
+ 
+ Disassembly of section .text:
+ 
+diff --git a/ld/testsuite/ld-cris/tls-gc-68.d b/ld/testsuite/ld-cris/tls-gc-68.d
+index b7fc3743a5..c1a7d25c80 100644
+--- a/ld/testsuite/ld-cris/tls-gc-68.d
++++ b/ld/testsuite/ld-cris/tls-gc-68.d
+@@ -7,27 +7,21 @@
+ 
+ # An executable with a R_CRIS_32_GOT_GD and a R_CRIS_16_GOT_GD against
+ # the same local symbol, gc:ed.  Check that we have nothing left but
+-# the start symbol and its code.  Can't get rid of the GOT just yet.
++# the start symbol and its code.
+ 
+ .*:     file format elf32-cris
+ 
+ Program Header:
+     LOAD off    0x0+ vaddr 0x0+80000 paddr 0x0+80000 align 2\*\*13
+-         filesz 0x0+78 memsz 0x0+78 flags r-x
+-    LOAD off    0x0+78 vaddr 0x0+82078 paddr 0x0+82078 align 2\*\*13
+-         filesz 0x0+c memsz 0x0+c flags rw-
++         filesz 0x0+58 memsz 0x0+58 flags r-x
+ private flags = 0:
+ 
+ SYMBOL TABLE:
+-0+80074 l    d  \.text	0+ \.text
+-0+82078 l    d  \.got	0+ \.got
+-0+82078 l     O \.got	0+ _GLOBAL_OFFSET_TABLE_
+-0+80074 g       \.text	0+ _start
+-0+82084 g       \.got	0+ __bss_start
+-0+82084 g       \.got	0+ _edata
+-0+820a0 g       \.got	0+ _end
++0+80054 l    d  \.text	0+ \.text
++0+80054 g       \.text	0+ _start
++0+82058 g       \.text	0+ __bss_start
++0+82058 g       \.text	0+ _edata
++0+82060 g       \.text	0+ _end
+ 
+ Contents of section \.text:
+- 80074 41b20+                             .*
+-Contents of section \.got:
+- 82078 0+ 0+ 0+           .*
++ 80054 41b20+                             .*
+diff --git a/ld/testsuite/ld-cris/tls-gc-69.d b/ld/testsuite/ld-cris/tls-gc-69.d
+index c4c51b7128..ef02437a7d 100644
+--- a/ld/testsuite/ld-cris/tls-gc-69.d
++++ b/ld/testsuite/ld-cris/tls-gc-69.d
+@@ -8,27 +8,21 @@
+ # An executable with a R_CRIS_32_GOT_GD, a R_CRIS_16_GOT_GD, a
+ # R_CRIS_32_GOT_TPREL and a R_CRIS_16_GOT_TPREL against the same local
+ # symbol, gc:ed.  Check that we have nothing left but the start symbol
+-# and its code.  Can't get rid of the GOT just yet.
++# and its code.
+ 
+ .*:     file format elf32-cris
+ 
+ Program Header:
+     LOAD off    0x0+ vaddr 0x0+80000 paddr 0x0+80000 align 2\*\*13
+-         filesz 0x0+78 memsz 0x0+78 flags r-x
+-    LOAD off    0x0+78 vaddr 0x0+82078 paddr 0x0+82078 align 2\*\*13
+-         filesz 0x0+c memsz 0x0+c flags rw-
++         filesz 0x0+58 memsz 0x0+58 flags r-x
+ private flags = 0:
+ 
+ SYMBOL TABLE:
+-0+80074 l    d  \.text	0+ \.text
+-0+82078 l    d  \.got	0+ \.got
+-0+82078 l     O \.got	0+ _GLOBAL_OFFSET_TABLE_
+-0+80074 g       \.text	0+ _start
+-0+82084 g       \.got	0+ __bss_start
+-0+82084 g       \.got	0+ _edata
+-0+820a0 g       \.got	0+ _end
++0+80054 l    d  \.text	0+ \.text
++0+80054 g       \.text	0+ _start
++0+82058 g       \.text	0+ __bss_start
++0+82058 g       \.text	0+ _edata
++0+82060 g       \.text	0+ _end
+ 
+ Contents of section .text:
+- 80074 41b20+                             .*
+-Contents of section .got:
+- 82078 0+ 0+ 0+           .*
++ 80054 41b20+                             .*
+diff --git a/ld/testsuite/ld-cris/tls-gc-70.d b/ld/testsuite/ld-cris/tls-gc-70.d
+index 6ab8f24231..74d0d1373f 100644
+--- a/ld/testsuite/ld-cris/tls-gc-70.d
++++ b/ld/testsuite/ld-cris/tls-gc-70.d
+@@ -7,28 +7,21 @@
+ #objdump: -s -t -r -p
+ 
+ # An executable with a single R_CRIS_32_GD, with gc.  Check that we
+-# have nothing left but the start symbol and its code.  Can't get rid
+-# of the GOT just yet.
++# have nothing left but the start symbol and its code.
+ 
+ .*:     file format elf32-cris
+ 
+ Program Header:
+     LOAD off    0x0+ vaddr 0x0+80000 paddr 0x0+80000 align 2\*\*13
+-         filesz 0x0+78 memsz 0x0+78 flags r-x
+-    LOAD off    0x0+78 vaddr 0x0+82078 paddr 0x0+82078 align 2\*\*13
+-         filesz 0x0+c memsz 0x0+c flags rw-
++         filesz 0x0+58 memsz 0x0+58 flags r-x
+ private flags = 0:
+ 
+ SYMBOL TABLE:
+-0+80074 l    d  \.text	0+ \.text
+-0+82078 l    d  \.got	0+ \.got
+-0+82078 l     O \.got	0+ _GLOBAL_OFFSET_TABLE_
+-0+80074 g       \.text	0+ _start
+-0+82084 g       \.got	0+ __bss_start
+-0+82084 g       \.got	0+ _edata
+-0+820a0 g       \.got	0+ _end
++0+80054 l    d  \.text	0+ \.text
++0+80054 g       \.text	0+ _start
++0+82058 g       \.text	0+ __bss_start
++0+82058 g       \.text	0+ _edata
++0+82060 g       \.text	0+ _end
+ 
+ Contents of section \.text:
+- 80074 41b20+                             .*
+-Contents of section \.got:
+- 82078 0+ 0+ 0+           .*
++ 80054 41b20+                             .*
+diff --git a/ld/testsuite/ld-cris/tls-gc-75.d b/ld/testsuite/ld-cris/tls-gc-75.d
+index c2d5df4730..f377dc263e 100644
+--- a/ld/testsuite/ld-cris/tls-gc-75.d
++++ b/ld/testsuite/ld-cris/tls-gc-75.d
+@@ -10,27 +10,21 @@
+ 
+ # An executable with a R_CRIS_32_GOT_GD, a R_CRIS_16_GOT_GD, a
+ # R_CRIS_32_GOT_TPREL and a R_CRIS_16_GOT_TPREL against the same
+-# symbol, gc:ed.  Check that we have proper NPTL/TLS markings and GOT.
++# symbol, gc:ed.  Check that we have proper NPTL/TLS markings.
+ 
+ .*:     file format elf32-cris
+ 
+ Program Header:
+     LOAD off    0x0+ vaddr 0x0+80000 paddr 0x0+80000 align 2\*\*13
+-         filesz 0x0+78 memsz 0x0+78 flags r-x
+-    LOAD off    0x0+78 vaddr 0x0+82078 paddr 0x0+82078 align 2\*\*13
+-         filesz 0x0+c memsz 0x0+c flags rw-
++         filesz 0x0+58 memsz 0x0+58 flags r-x
+ private flags = 0:
+ 
+ SYMBOL TABLE:
+-0+80074 l    d  \.text	0+ \.text
+-0+82078 l    d  \.got	0+ \.got
+-0+82078 l     O \.got	0+ _GLOBAL_OFFSET_TABLE_
+-0+80074 g       \.text	0+ _start
+-0+82084 g       \.got	0+ __bss_start
+-0+82084 g       \.got	0+ _edata
+-0+820a0 g       \.got	0+ _end
++0+80054 l    d  \.text	0+ \.text
++0+80054 g       \.text	0+ _start
++0+82058 g       \.text	0+ __bss_start
++0+82058 g       \.text	0+ _edata
++0+82060 g       \.text	0+ _end
+ 
+ Contents of section \.text:
+- 80074 41b20+                             .*
+-Contents of section \.got:
+- 82078 0+ 0+ 0+           .*
++ 80054 41b20+                             .*
+diff --git a/ld/testsuite/ld-cris/tls-gc-79.d b/ld/testsuite/ld-cris/tls-gc-79.d
+index f4916d3f35..a5bd7ffe37 100644
+--- a/ld/testsuite/ld-cris/tls-gc-79.d
++++ b/ld/testsuite/ld-cris/tls-gc-79.d
+@@ -7,28 +7,21 @@
+ #objdump: -s -t -r -p
+ 
+ # An executable with a single R_CRIS_32_IE, with gc.  Check that we
+-# have nothing left but the start symbol and its code.  Can't get rid
+-# of the GOT just yet.
++# have nothing left but the start symbol and its code.
+ 
+ .*:     file format elf32-cris
+ 
+ Program Header:
+     LOAD off    0x0+ vaddr 0x0+80000 paddr 0x0+80000 align 2\*\*13
+-         filesz 0x0+78 memsz 0x0+78 flags r-x
+-    LOAD off    0x0+78 vaddr 0x0+82078 paddr 0x0+82078 align 2\*\*13
+-         filesz 0x0+c memsz 0x0+c flags rw-
++         filesz 0x0+58 memsz 0x0+58 flags r-x
+ private flags = 0:
+ 
+ SYMBOL TABLE:
+-0+80074 l    d  \.text	0+ \.text
+-0+82078 l    d  \.got	0+ \.got
+-0+82078 l     O \.got	0+ _GLOBAL_OFFSET_TABLE_
+-0+80074 g       \.text	0+ _start
+-0+82084 g       \.got	0+ __bss_start
+-0+82084 g       \.got	0+ _edata
+-0+820a0 g       \.got	0+ _end
++0+80054 l    d  \.text	0+ \.text
++0+80054 g       \.text	0+ _start
++0+82058 g       \.text	0+ __bss_start
++0+82058 g       \.text	0+ _edata
++0+82060 g       \.text	0+ _end
+ 
+ Contents of section \.text:
+- 80074 41b20+                             .*
+-Contents of section \.got:
+- 82078 0+ 0+ 0+           .*
++ 80054 41b20+                             .*
+diff --git a/ld/testsuite/ld-mmix/bpo-10.d b/ld/testsuite/ld-mmix/bpo-10.d
+index 6f49287e58..06c2656200 100644
+--- a/ld/testsuite/ld-mmix/bpo-10.d
++++ b/ld/testsuite/ld-mmix/bpo-10.d
+@@ -11,7 +11,6 @@
+ 
+ SYMBOL TABLE:
+ 0+ l    d  \.init	0+ (|\.init)
+-0+7f8 l +d  \.MMIX.reg_contents	0+ (|\.MMIX\.reg_contents)
+ 0+ l    df \*ABS\*	0+ .*
+ 0+ l       \.init	0+ _start
+ 2000000000000000 g       \.init	0+ __bss_start
+-- 
+2.13.5
+
