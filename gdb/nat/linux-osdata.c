@@ -407,7 +407,7 @@ struct pid_pgid_entry
     return pid == pgid;
   }
 
-  bool operator< (const pid_pgid_entry &other)
+  bool operator< (const pid_pgid_entry &other) const
   {
     /* Sort by PGID.  */
     if (this->pgid != other.pgid)
