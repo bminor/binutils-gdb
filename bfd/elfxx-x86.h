@@ -403,6 +403,13 @@ struct elf_x86_plt_layout
 #define elf_x86_hash_entry(ent) \
   ((struct elf_x86_link_hash_entry *)(ent))
 
+enum elf_x86_target_os
+{
+  is_normal,
+  is_vxworks,
+  is_nacl
+};
+
 /* x86 ELF linker hash table.  */
 
 struct elf_x86_link_hash_table
@@ -458,10 +465,6 @@ struct elf_x86_link_hash_table
      to read-only sections.  */
   bfd_boolean readonly_dynrelocs_against_ifunc;
 
-  /* TRUE if this is a VxWorks x86 target.  This is only used for
-     i386.  */
-  bfd_boolean is_vxworks;
-
   /* The (unloaded but important) .rel.plt.unloaded section on VxWorks.
      This is used for i386 only.  */
   asection *srelplt2;
@@ -476,10 +479,15 @@ struct elf_x86_link_hash_table
      yet.  This is only used for x86-64.  */
   bfd_vma tlsdesc_plt;
 
+   /* Value used to fill the unused bytes of the first PLT entry.  This
+      is only used for i386.  */
+  bfd_byte plt0_pad_byte;
+
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
   bfd_boolean (*is_reloc_section) (const char *);
   enum elf_target_id target_id;
+  enum elf_x86_target_os target_os;
   unsigned int sizeof_reloc;
   unsigned int dt_reloc;
   unsigned int dt_reloc_sz;
@@ -490,6 +498,18 @@ struct elf_x86_link_hash_table
   const char *dynamic_interpreter;
   const char *tls_get_addr;
 };
+
+/* Architecture-specific backend data for x86.  */
+
+struct elf_x86_backend_data
+{
+  /* Target system.  */
+  enum elf_x86_target_os target_os;
+};
+
+#define get_elf_x86_backend_data(abfd) \
+  ((const struct elf_x86_backend_data *) \
+   get_elf_backend_data (abfd)->arch_data)
 
 struct elf_x86_init_table
 {
@@ -505,11 +525,7 @@ struct elf_x86_init_table
   /* The non-lazy PLT layout for IBT.  */
   const struct elf_x86_non_lazy_plt_layout *non_lazy_ibt_plt;
 
-  /* TRUE if this is a normal x86 target.  */
-  bfd_boolean normal_target;
-
-  /* TRUE if this is a VxWorks x86 target.  */
-  bfd_boolean is_vxworks;
+  bfd_byte plt0_pad_byte;
 
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);

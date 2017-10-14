@@ -261,7 +261,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		}
 	    }
 
-	  if (htab->is_vxworks && !bfd_link_pic (info))
+	  if (htab->target_os == is_vxworks && !bfd_link_pic (info))
 	    {
 	      /* VxWorks has a second set of relocations for each PLT entry
 		 in executables.  They go in a separate relocation section,
@@ -405,7 +405,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 	}
 
-      if (htab->is_vxworks)
+      if (htab->target_os == is_vxworks)
 	{
 	  struct elf_dyn_relocs **pp;
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
@@ -799,6 +799,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
 	}
     }
   ret->target_id = bed->target_id;
+  ret->target_os = get_elf_x86_backend_data (abfd)->target_os;
 
   ret->loc_hash_table = htab_try_create (1024,
 					 _bfd_x86_elf_local_htab_hash,
@@ -924,7 +925,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 		     linker script /DISCARD/, so we'll be discarding
 		     the relocs too.  */
 		}
-	      else if (htab->is_vxworks
+	      else if (htab->target_os == is_vxworks
 		       && strcmp (p->sec->output_section->name,
 				  ".tls_vars") == 0)
 		{
@@ -1285,7 +1286,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 		return FALSE;
 	    }
 	}
-      if (htab->is_vxworks
+      if (htab->target_os == is_vxworks
 	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
 	return FALSE;
     }
@@ -1377,7 +1378,7 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
       switch (dyn.d_tag)
 	{
 	default:
-	  if (htab->is_vxworks
+	  if (htab->target_os == is_vxworks
 	      && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
 	    break;
 	  continue;
@@ -1835,7 +1836,7 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (ELIMINATE_COPY_RELOCS
       && (bed->target_id == X86_64_ELF_DATA
 	  || (!eh->gotoff_ref
-	      && !htab->is_vxworks)))
+	      && htab->target_os != is_vxworks)))
     {
       for (p = eh->dyn_relocs; p != NULL; p = p->next)
 	{
@@ -2440,12 +2441,13 @@ error_alignment:
   if (htab == NULL)
     return pbfd;
 
-  htab->is_vxworks = init_table->is_vxworks;
   htab->r_info = init_table->r_info;
   htab->r_sym = init_table->r_sym;
 
   if (bfd_link_relocatable (info))
     return pbfd;
+
+  htab->plt0_pad_byte = init_table->plt0_pad_byte;
 
   use_ibt_plt = info->ibtplt || info->ibt;
   if (!use_ibt_plt && pbfd != NULL)
@@ -2498,11 +2500,15 @@ error_alignment:
 	}
     }
 
+  /* Return if there are no normal input files.  */
+  if (dynobj == NULL)
+    return pbfd;
+
   /* Even when lazy binding is disabled by "-z now", the PLT0 entry may
      still be used with LD_AUDIT or LD_PROFILE if PLT entry is used for
      canonical function address.  */
   htab->plt.has_plt0 = 1;
-  normal_target = init_table->normal_target;
+  normal_target = htab->target_os == is_normal;
 
   if (normal_target)
     {
@@ -2565,11 +2571,7 @@ error_alignment:
       htab->plt.eh_frame_plt = htab->lazy_plt->eh_frame_plt;
     }
 
-  /* Return if there are no normal input files.  */
-  if (dynobj == NULL)
-    return pbfd;
-
-  if (htab->is_vxworks
+  if (htab->target_os == is_vxworks
       && !elf_vxworks_create_dynamic_sections (dynobj, info,
 					       &htab->srelplt2))
     {

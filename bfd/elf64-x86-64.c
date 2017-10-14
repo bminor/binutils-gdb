@@ -820,24 +820,6 @@ static const bfd_byte elf_x86_64_eh_frame_non_lazy_plt[] =
   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
 };
 
-/* Architecture-specific backend data for x86-64.  */
-
-struct elf_x86_64_backend_data
-{
-  /* Target system.  */
-  enum
-    {
-      is_normal,
-      is_nacl
-    } os;
-};
-
-#define get_elf_x86_64_arch_data(bed) \
-  ((const struct elf_x86_64_backend_data *) (bed)->arch_data)
-
-#define get_elf_x86_64_backend_data(abfd) \
-  get_elf_x86_64_arch_data (get_elf_backend_data (abfd))
-
 /* These are the standard parameters.  */
 static const struct elf_x86_lazy_plt_layout elf_x86_64_lazy_plt =
   {
@@ -967,7 +949,7 @@ static const struct elf_x86_non_lazy_plt_layout elf_x32_non_lazy_ibt_plt =
     sizeof (elf_x86_64_eh_frame_non_lazy_plt) /* eh_frame_plt_size */
   };
 
-static const struct elf_x86_64_backend_data elf_x86_64_arch_bed =
+static const struct elf_x86_backend_data elf_x86_64_arch_bed =
   {
     is_normal                            /* os */
   };
@@ -4529,7 +4511,7 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
   if (relsize <= 0)
     return -1;
 
-  if (get_elf_x86_64_backend_data (abfd)->os == is_normal)
+  if (get_elf_x86_backend_data (abfd)->target_os == is_normal)
     {
       lazy_plt = &elf_x86_64_lazy_plt;
       non_lazy_plt = &elf_x86_64_non_lazy_plt;
@@ -4877,8 +4859,11 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
 	  != (int) R_X86_64_GNU_VTENTRY))
     abort ();
 
-  init_table.is_vxworks = FALSE;
-  if (get_elf_x86_64_backend_data (info->output_bfd)->os == is_normal)
+  /* This is unused for x86-64.  */
+  init_table.plt0_pad_byte = 0x90;
+
+  if (get_elf_x86_backend_data (info->output_bfd)->target_os
+      == is_normal)
     {
       if (info->bndplt)
 	{
@@ -4901,7 +4886,6 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
 	  init_table.lazy_ibt_plt = &elf_x32_lazy_ibt_plt;
 	  init_table.non_lazy_ibt_plt = &elf_x32_non_lazy_ibt_plt;
 	}
-      init_table.normal_target = TRUE;
     }
   else
     {
@@ -4909,7 +4893,6 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
       init_table.non_lazy_plt = NULL;
       init_table.lazy_ibt_plt = NULL;
       init_table.non_lazy_ibt_plt = NULL;
-      init_table.normal_target = FALSE;
     }
 
   if (ABI_64_P (info->output_bfd))
@@ -5176,7 +5159,7 @@ static const bfd_byte elf_x86_64_nacl_eh_frame_plt[] =
      || PLT_FDE_LENGTH != 36                            \
      || PLT_FDE_START_OFFSET != 4 + PLT_CIE_LENGTH + 8  \
      || PLT_FDE_LEN_OFFSET != 4 + PLT_CIE_LENGTH + 12)
-# error "Need elf_x86_64_backend_data parameters for eh_frame_plt offsets!"
+# error "Need elf_x86_backend_data parameters for eh_frame_plt offsets!"
 #endif
     PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
     0, 0, 0, 0,			/* CIE ID */
@@ -5230,7 +5213,7 @@ static const struct elf_x86_lazy_plt_layout elf_x86_64_nacl_plt =
     sizeof (elf_x86_64_nacl_eh_frame_plt)    /* eh_frame_plt_size */
   };
 
-static const struct elf_x86_64_backend_data elf_x86_64_nacl_arch_bed =
+static const struct elf_x86_backend_data elf_x86_64_nacl_arch_bed =
   {
     is_nacl                                  /* os */
   };

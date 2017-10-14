@@ -1,5 +1,47 @@
 2017-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_backend_data): Removed.
+	(get_elf_i386_backend_data): Likewise.
+	(elf_i386_arch_bed): Replace elf_i386_backend_data with
+	elf_x86_backend_data.
+	(elf_i386_get_synthetic_symtab): Likewise.
+	(elf_i386_nacl_arch_bed): Likewise.
+	(elf_i386_vxworks_arch_bed): Likewise.
+	(elf_i386_relocate_section): Check target_os instead of
+	is_vxworks.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	(elf_i386_finish_dynamic_sections): Use htab->plt0_pad_byte.
+	Check target_os instead of is_vxworks.
+	(elf_i386_link_setup_gnu_properties): Remove normal_target and
+	is_vxworks.  Initialize plt0_pad_byte.
+	* elf64-x86-64.c (elf_x86_64_backend_data); Removed.
+	(get_elf_x86_64_arch_data): Likewise.
+	(get_elf_x86_64_backend_data): Likewise.
+	(elf_x86_64_arch_bed): Replace elf_x86_64_backend_data with
+	elf_x86_backend_data.
+	(elf_x86_64_get_synthetic_symtab): Likewise.
+	(elf_x86_64_nacl_arch_bed): Likewise.
+	(elf_x86_64_link_setup_gnu_properties): Remove is_vxworks and
+	normal_target.  Initialize plt0_pad_byte.
+	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Check target_os
+	instead of is_vxworks.
+	(_bfd_x86_elf_size_dynamic_sections): Likewise.
+	(_bfd_x86_elf_finish_dynamic_sections): Likewise.
+	(_bfd_x86_elf_adjust_dynamic_symbol): Likewise.
+	(_bfd_x86_elf_link_hash_table_create): Initialize target_os.
+	(_bfd_x86_elf_link_setup_gnu_properties): Remove is_vxworks.
+	Update normal_target.  Set up plt0_pad_byte.  Check target_os
+	instead of is_vxworks.
+	* elfxx-x86.h (elf_x86_target_os): New.
+	(elf_x86_backend_data): Likewise.
+	(get_elf_x86_backend_data): Likewise.
+	(elf_x86_link_hash_table): Remove is_vxworks.  Add plt0_pad_byte
+	and target_os.
+	(elf_x86_init_table): Remove normal_target and is_vxworks.  Add
+	plt0_pad_byte.
+
+2017-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_finish_dynamic_sections): Call
 	_bfd_x86_elf_finish_dynamic_sections.
 	* elf64-x86-64.c (elf_x86_64_finish_dynamic_sections): Likewise.
