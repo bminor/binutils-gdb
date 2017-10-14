@@ -1,3 +1,9 @@
+2017-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-ppc.c (UNDEFWEAK_NO_DYNAMIC_RELOC): Moved to ...
+	* elf-bfd.h (UNDEFWEAK_NO_DYNAMIC_RELOC): Here.
+	* elf64-ppc.c (UNDEFWEAK_NO_DYNAMIC_RELOC): Removed.
+
 2017-10-12  James Bowman  <james.bowman@ftdichip.com>
 
 	* bfd-in2.h: Regenerate.

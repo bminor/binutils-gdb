@@ -3178,13 +3178,6 @@ must_be_dyn_reloc (struct bfd_link_info *info,
     }
 }
 
-/* Whether an undefined weak symbol should resolve to its link-time
-   value, even in PIC or PIE objects.  */
-#define UNDEFWEAK_NO_DYNAMIC_RELOC(INFO, H)		\
-  ((H)->root.type == bfd_link_hash_undefweak		\
-   && (ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT	\
-       || (INFO)->dynamic_undefined_weak == 0))
-
 /* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
    copying dynamic variables from a shared lib into an app's dynbss
    section, and instead use a dynamic relocation to point into the

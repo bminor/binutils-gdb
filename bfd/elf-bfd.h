@@ -266,6 +266,13 @@ struct elf_link_hash_entry
 #define SYMBOL_CALLS_LOCAL(INFO, H) \
   _bfd_elf_symbol_refs_local_p (H, INFO, 1)
 
+/* Whether an undefined weak symbol should resolve to its link-time
+   value, even in PIC or PIE objects.  */
+#define UNDEFWEAK_NO_DYNAMIC_RELOC(INFO, H)		\
+  ((H)->root.type == bfd_link_hash_undefweak		\
+   && (ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT	\
+       || (INFO)->dynamic_undefined_weak == 0))
+
 /* Common symbols that are turned into definitions don't have the
    DEF_REGULAR flag set, so they might appear to be undefined.
    Symbols defined in linker scripts also don't have DEF_REGULAR set.  */
