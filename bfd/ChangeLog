@@ -1,6 +1,16 @@
 2017-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22269
+	* elf32-m68k.c (elf_m68k_check_relocs): Don't allocate dynamic
+	relocations if UNDEFWEAK_NO_DYNAMIC_RELOC is true.
+	(elf_m68k_adjust_dynamic_symbol): Don't make symbol dynamic if
+	UNDEFWEAK_NO_DYNAMIC_RELOC is true.
+	(elf_m68k_relocate_section): Don't generate dynamic relocation
+	if UNDEFWEAK_NO_DYNAMIC_RELOC is true.
+
+2017-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22269
 	* elf32-hppa.c (ensure_undef_dynamic): Don't make undefined
 	symbol dynamic if UNDEFWEAK_NO_DYNAMIC_RELOC is true.
 	(allocate_dynrelocs): Discard dynamic relocations if
