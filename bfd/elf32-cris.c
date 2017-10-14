@@ -3988,6 +3988,7 @@ elf_cris_discard_excess_program_dynamics (struct elf_cris_link_hash_entry *h,
       if (! (info->export_dynamic
 	     || (h->root.type != STT_FUNC && info->dynamic_data))
 	  && h->root.dynindx != -1
+	  && !h->root.dynamic
 	  && !h->root.def_dynamic
 	  && !h->root.ref_dynamic)
 	{
