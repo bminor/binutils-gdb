@@ -13061,7 +13061,7 @@ remote_set_circular_trace_buffer (struct target_ops *self, int val)
     error (_("Bogus reply from target: %s"), reply);
 }
 
-static struct traceframe_info *
+static traceframe_info_up
 remote_traceframe_info (struct target_ops *self)
 {
   char *text;
@@ -13070,10 +13070,9 @@ remote_traceframe_info (struct target_ops *self)
 			       TARGET_OBJECT_TRACEFRAME_INFO, NULL);
   if (text != NULL)
     {
-      struct traceframe_info *info;
       struct cleanup *back_to = make_cleanup (xfree, text);
+      traceframe_info_up info = parse_traceframe_info (text);
 
-      info = parse_traceframe_info (text);
       do_cleanups (back_to);
       return info;
     }

@@ -1088,12 +1088,13 @@ build_traceframe_info (char blocktype, void *data)
   return 0;
 }
 
-static struct traceframe_info *
+static traceframe_info_up
 tfile_traceframe_info (struct target_ops *self)
 {
-  traceframe_info *info = new traceframe_info;
+  traceframe_info_up info (new traceframe_info);
 
-  traceframe_walk_blocks (build_traceframe_info, 0, info);
+  traceframe_walk_blocks (build_traceframe_info, 0, info.get ());
+
   return info;
 }
 

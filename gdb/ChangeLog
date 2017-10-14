@@ -1,5 +1,29 @@
 2017-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* target.h: Include tracepoint.h.
+	(enum trace_find_type): Move to tracepoint.h.
+	(struct target_ops) <to_traceframe_info>: Return a unique ptr.
+	* tracepoint.h: Don't include target.h
+	(enum trace_find_type): Move from target.h.
+	(parse_traceframe_info): Return a unique ptr.
+	* tracepoint.c (current_traceframe_info): Change type to unique
+	ptr.
+	(free_traceframe_info): Remove.
+	(clear_traceframe_info): Don't manually free
+	current_traceframe_info.
+	(free_result): Remove.
+	(parse_traceframe_info): Return a unique ptr.
+	(get_traceframe_info): Adjust to unique ptr.
+	* ctf.c (ctf_traceframe_info): Return a unique ptr.
+	* remote.c (remote_traceframe_info): Return a unique ptr.
+	* tracefile-tfile.c (tfile_traceframe_info): Return a unique
+	ptr.
+	* target-debug.h (target_debug_print_traceframe_info_up): New
+	macro.
+	* target-delegates.c: Regenerate.
+
+2017-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* memrange.h (struct mem_range): Add constructors.
 	* tracepoint.h (struct traceframe_info) <memory>: Change type to
 	std::vector<mem_range>.

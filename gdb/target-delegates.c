@@ -3357,29 +3357,29 @@ debug_static_tracepoint_markers_by_strid (struct target_ops *self, const char *a
   return result;
 }
 
-static struct traceframe_info *
+static traceframe_info_up
 delegate_traceframe_info (struct target_ops *self)
 {
   self = self->beneath;
   return self->to_traceframe_info (self);
 }
 
-static struct traceframe_info *
+static traceframe_info_up
 tdefault_traceframe_info (struct target_ops *self)
 {
   tcomplain ();
 }
 
-static struct traceframe_info *
+static traceframe_info_up
 debug_traceframe_info (struct target_ops *self)
 {
-  struct traceframe_info * result;
+  traceframe_info_up result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_traceframe_info (...)\n", debug_target.to_shortname);
   result = debug_target.to_traceframe_info (&debug_target);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_traceframe_info (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_struct_traceframe_info_p (result);
+  target_debug_print_traceframe_info_up (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }

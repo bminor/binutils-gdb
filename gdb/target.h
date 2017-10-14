@@ -76,6 +76,7 @@ struct inferior;
 #include "record.h"
 #include "command.h"
 #include "disasm.h"
+#include "tracepoint.h"
 
 #include "break-common.h" /* For enum target_hw_bp_type.  */
 
@@ -234,18 +235,6 @@ enum target_xfer_status
 
 extern const char *
   target_xfer_status_to_string (enum target_xfer_status status);
-
-/* Enumeration of the kinds of traceframe searches that a target may
-   be able to perform.  */
-
-enum trace_find_type
-  {
-    tfind_number,
-    tfind_pc,
-    tfind_tp,
-    tfind_range,
-    tfind_outside,
-  };
 
 typedef struct static_tracepoint_marker *static_tracepoint_marker_p;
 DEF_VEC_P(static_tracepoint_marker_p);
@@ -1116,8 +1105,8 @@ struct target_ops
        traceframe's contents.  This method should not cache data;
        higher layers take care of caching, invalidating, and
        re-fetching when necessary.  */
-    struct traceframe_info *(*to_traceframe_info) (struct target_ops *)
-	TARGET_DEFAULT_NORETURN (tcomplain ());
+    traceframe_info_up (*to_traceframe_info) (struct target_ops *)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Ask the target to use or not to use agent according to USE.  Return 1
        successful, 0 otherwise.  */

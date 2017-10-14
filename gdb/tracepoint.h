@@ -20,7 +20,6 @@
 #define TRACEPOINT_H 1
 
 #include "breakpoint.h"
-#include "target.h"
 #include "memrange.h"
 #include "gdb_vecs.h"
 
@@ -37,6 +36,8 @@ struct traceframe_info
   /* Collected trace state variables.  */
   std::vector<int> tvars;
 };
+
+typedef std::unique_ptr<traceframe_info> traceframe_info_up;
 
 /* A trace state variable is a value managed by a target being
    traced.  A trace state variable (or tsv for short) can be accessed
@@ -376,6 +377,18 @@ extern void trace_status_mi (int on_stop);
 extern void tvariables_info_1 (void);
 extern void save_trace_state_variables (struct ui_file *fp);
 
+/* Enumeration of the kinds of traceframe searches that a target may
+   be able to perform.  */
+
+enum trace_find_type
+{
+  tfind_number,
+  tfind_pc,
+  tfind_tp,
+  tfind_range,
+  tfind_outside,
+};
+
 extern void tfind_1 (enum trace_find_type type, int num,
 		     CORE_ADDR addr1, CORE_ADDR addr2,
 		     int from_tty);
@@ -385,7 +398,7 @@ extern void trace_save_tfile (const char *filename,
 extern void trace_save_ctf (const char *dirname,
 			    int target_does_save);
 
-extern struct traceframe_info *parse_traceframe_info (const char *tframe_info);
+extern traceframe_info_up parse_traceframe_info (const char *tframe_info);
 
 extern int traceframe_available_memory (VEC(mem_range_s) **result,
 					CORE_ADDR memaddr, ULONGEST len);

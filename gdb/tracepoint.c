@@ -133,7 +133,7 @@ static int tracepoint_number;
    yet attempted to fetch it, or if the target does not support
    fetching this object, or if we're not inspecting a traceframe
    presently.  */
-static struct traceframe_info *current_traceframe_info;
+static traceframe_info_up current_traceframe_info;
 
 /* Tracing command lists.  */
 static struct cmd_list_element *tfindlist;
@@ -191,21 +191,12 @@ current_trace_status (void)
   return &trace_status;
 }
 
-/* Destroy INFO.  */
-
-static void
-free_traceframe_info (struct traceframe_info *info)
-{
-  delete info;
-}
-
 /* Free and clear the traceframe info cache of the current
    traceframe.  */
 
 static void
 clear_traceframe_info (void)
 {
-  free_traceframe_info (current_traceframe_info);
   current_traceframe_info = NULL;
 }
 
@@ -4020,16 +4011,6 @@ traceframe_info_start_tvar (struct gdb_xml_parser *parser,
   info->tvars.push_back (id);
 }
 
-/* Discard the constructed trace frame info (if an error occurs).  */
-
-static void
-free_result (void *p)
-{
-  struct traceframe_info *result = (struct traceframe_info *) p;
-
-  free_traceframe_info (result);
-}
-
 /* The allowed elements and attributes for an XML memory map.  */
 
 static const struct gdb_xml_attribute memory_attributes[] = {
@@ -4061,25 +4042,16 @@ static const struct gdb_xml_element traceframe_info_elements[] = {
 
 /* Parse a traceframe-info XML document.  */
 
-struct traceframe_info *
+traceframe_info_up
 parse_traceframe_info (const char *tframe_info)
 {
-  traceframe_info *result = new traceframe_info;
-  struct cleanup *back_to;
-
-  back_to = make_cleanup (free_result, result);
+  traceframe_info_up result (new traceframe_info);
 
   if (gdb_xml_parse_quick (_("trace frame info"),
 			   "traceframe-info.dtd", traceframe_info_elements,
-			   tframe_info, result) == 0)
-    {
-      /* Parsed successfully, keep the result.  */
-      discard_cleanups (back_to);
+			   tframe_info, result.get ()) == 0)
+    return result;
 
-      return result;
-    }
-
-  do_cleanups (back_to);
   return NULL;
 }
 
@@ -4095,7 +4067,7 @@ get_traceframe_info (void)
   if (current_traceframe_info == NULL)
     current_traceframe_info = target_traceframe_info ();
 
-  return current_traceframe_info;
+  return current_traceframe_info.get ();
 }
 
 /* If the target supports the query, return in RESULT the set of

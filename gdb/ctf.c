@@ -1635,10 +1635,10 @@ ctf_trace_find (struct target_ops *self, enum trace_find_type type, int num,
    frame, extract memory range information, and return them in
    traceframe_info.  */
 
-static struct traceframe_info *
+static traceframe_info_up
 ctf_traceframe_info (struct target_ops *self)
 {
-  traceframe_info *info = new traceframe_info;
+  traceframe_info_up info (new traceframe_info);
   const char *name;
   struct bt_iter_pos *pos;
 
