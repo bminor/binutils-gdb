@@ -287,7 +287,7 @@ extern void set_history (const char *, int);
 
 extern void show_history (const char *, int);
 
-extern void set_verbose (char *, int, struct cmd_list_element *);
+extern void set_verbose (const char *, int, struct cmd_list_element *);
 
 extern char *handle_line_of_input (struct buffer *cmd_line_buffer,
 				   char *rl, int repeat,

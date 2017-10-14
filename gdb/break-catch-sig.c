@@ -332,7 +332,7 @@ create_signal_catchpoint (int tempflag, std::vector<gdb_signal> &&filter,
    list, which is empty if no filtering is required.  */
 
 static std::vector<gdb_signal>
-catch_signal_split_args (char *arg, bool *catch_all)
+catch_signal_split_args (const char *arg, bool *catch_all)
 {
   std::vector<gdb_signal> result;
   bool first = true;
@@ -381,7 +381,7 @@ catch_signal_split_args (char *arg, bool *catch_all)
 /* Implement the "catch signal" command.  */
 
 static void
-catch_signal_command (char *arg, int from_tty,
+catch_signal_command (const char *arg, int from_tty,
 		      struct cmd_list_element *command)
 {
   int tempflag;

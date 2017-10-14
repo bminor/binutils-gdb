@@ -104,7 +104,8 @@ show_demangling_style_names(struct ui_file *file, int from_tty,
    a malloc'd string, even if it is a null-string.  */
 
 static void
-set_demangling_command (char *ignore, int from_tty, struct cmd_list_element *c)
+set_demangling_command (const char *ignore,
+			int from_tty, struct cmd_list_element *c)
 {
   const struct demangler_engine *dem;
   int i;

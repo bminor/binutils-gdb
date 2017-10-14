@@ -1763,7 +1763,8 @@ set_readline_history_size (int history_size)
 
 /* Called by do_setshow_command.  */
 static void
-set_history_size_command (char *args, int from_tty, struct cmd_list_element *c)
+set_history_size_command (const char *args,
+			  int from_tty, struct cmd_list_element *c)
 {
   set_readline_history_size (history_size_setshow_var);
 }
@@ -1786,7 +1787,7 @@ int info_verbose = 0;		/* Default verbose msgs off.  */
 
 /* Called by do_setshow_command.  An elaborate joke.  */
 void
-set_verbose (char *args, int from_tty, struct cmd_list_element *c)
+set_verbose (const char *args, int from_tty, struct cmd_list_element *c)
 {
   const char *cmdname = "verbose";
   struct cmd_list_element *showcmd;
@@ -1886,7 +1887,7 @@ show_prompt (struct ui_file *file, int from_tty,
 /* "set editing" command.  */
 
 static void
-set_editing (char *args, int from_tty, struct cmd_list_element *c)
+set_editing (const char *args, int from_tty, struct cmd_list_element *c)
 {
   change_line_handler (set_editing_cmd_var);
   /* Update the control variable so that MI's =cmd-param-changed event
@@ -1925,7 +1926,7 @@ static char *staged_gdb_datadir;
 /* "set" command for the gdb_datadir configuration variable.  */
 
 static void
-set_gdb_datadir (char *args, int from_tty, struct cmd_list_element *c)
+set_gdb_datadir (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_gdb_data_directory (staged_gdb_datadir);
   observer_notify_gdb_datadir_changed ();
@@ -1942,7 +1943,8 @@ show_gdb_datadir (struct ui_file *file, int from_tty,
 }
 
 static void
-set_history_filename (char *args, int from_tty, struct cmd_list_element *c)
+set_history_filename (const char *args,
+		      int from_tty, struct cmd_list_element *c)
 {
   /* We include the current directory so that if the user changes
      directories the file written will be the same as the one

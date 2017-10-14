@@ -1369,7 +1369,7 @@ reload_shared_libraries_1 (int from_tty)
 }
 
 static void
-reload_shared_libraries (char *ignored, int from_tty,
+reload_shared_libraries (const char *ignored, int from_tty,
 			 struct cmd_list_element *e)
 {
   const struct target_so_ops *ops;
@@ -1424,7 +1424,7 @@ reload_shared_libraries (char *ignored, int from_tty,
    at the start of gdb_sysroot with "target:".  */
 
 static void
-gdb_sysroot_changed (char *ignored, int from_tty,
+gdb_sysroot_changed (const char *ignored, int from_tty,
 		     struct cmd_list_element *e)
 {
   const char *old_prefix = "remote:";

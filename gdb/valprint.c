@@ -82,11 +82,7 @@ struct cmd_list_element *showprintrawlist;
 static int partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
 				int len, int *errptr);
 
-static void set_input_radix (char *, int, struct cmd_list_element *);
-
 static void set_input_radix_1 (int, unsigned);
-
-static void set_output_radix (char *, int, struct cmd_list_element *);
 
 static void set_output_radix_1 (int, unsigned);
 
@@ -2896,7 +2892,7 @@ static unsigned input_radix_1 = 10;
    setting the input radix to "10" never changes it!  */
 
 static void
-set_input_radix (char *args, int from_tty, struct cmd_list_element *c)
+set_input_radix (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_input_radix_1 (from_tty, input_radix_1);
 }
@@ -2933,7 +2929,7 @@ set_input_radix_1 (int from_tty, unsigned radix)
 static unsigned output_radix_1 = 10;
 
 static void
-set_output_radix (char *args, int from_tty, struct cmd_list_element *c)
+set_output_radix (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_output_radix_1 (from_tty, output_radix_1);
 }

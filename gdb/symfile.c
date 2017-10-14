@@ -2661,7 +2661,8 @@ show_ext_args (struct ui_file *file, int from_tty,
 }
 
 static void
-set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
+set_ext_lang_command (const char *args,
+		      int from_tty, struct cmd_list_element *e)
 {
   char *cp = ext_args;
   enum language lang;

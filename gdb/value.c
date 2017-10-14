@@ -969,7 +969,7 @@ gdb_static_assert (sizeof (LONGEST) <= MIN_VALUE_FOR_MAX_VALUE_SIZE);
 /* Implement the "set max-value-size" command.  */
 
 static void
-set_max_value_size (char *args, int from_tty,
+set_max_value_size (const char *args, int from_tty,
 		    struct cmd_list_element *c)
 {
   gdb_assert (max_value_size == -1 || max_value_size >= 0);

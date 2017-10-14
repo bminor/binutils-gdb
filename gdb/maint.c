@@ -684,7 +684,7 @@ EXTERN_C void monstartup (unsigned long, unsigned long);
 extern int main ();
 
 static void
-maintenance_set_profile_cmd (char *args, int from_tty,
+maintenance_set_profile_cmd (const char *args, int from_tty,
 			     struct cmd_list_element *c)
 {
   if (maintenance_profile_p == profiling_state)
@@ -715,7 +715,7 @@ maintenance_set_profile_cmd (char *args, int from_tty,
 }
 #else
 static void
-maintenance_set_profile_cmd (char *args, int from_tty,
+maintenance_set_profile_cmd (const char *args, int from_tty,
 			     struct cmd_list_element *c)
 {
   error (_("Profiling support is not available on this system."));

@@ -314,7 +314,8 @@ select_source_symtab (struct symtab *s)
    path list.  The theory is that set(show(dir)) should be a no-op.  */
 
 static void
-set_directories_command (char *args, int from_tty, struct cmd_list_element *c)
+set_directories_command (const char *args,
+			 int from_tty, struct cmd_list_element *c)
 {
   /* This is the value that was set.
      It needs to be processed to maintain $cdir:$cwd and remove dups.  */

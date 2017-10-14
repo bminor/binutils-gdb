@@ -661,7 +661,7 @@ static const char *parity = parity_none;
 /* Set serial_parity value.  */
 
 static void
-set_parity (char *ignore_args, int from_tty, struct cmd_list_element *c)
+set_parity (const char *ignore_args, int from_tty, struct cmd_list_element *c)
 {
   if (parity == parity_odd)
     serial_parity = GDBPARITY_ODD;

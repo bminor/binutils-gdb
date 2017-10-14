@@ -592,7 +592,7 @@ generic_elf_osabi_sniffer (bfd *abfd)
 }
 
 static void
-set_osabi (char *args, int from_tty, struct cmd_list_element *c)
+set_osabi (const char *args, int from_tty, struct cmd_list_element *c)
 {
   struct gdbarch_info info;
 

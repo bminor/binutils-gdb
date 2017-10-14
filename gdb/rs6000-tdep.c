@@ -6634,7 +6634,7 @@ show_powerpc_command (const char *args, int from_tty)
 }
 
 static void
-powerpc_set_soft_float (char *args, int from_tty,
+powerpc_set_soft_float (const char *args, int from_tty,
 			struct cmd_list_element *c)
 {
   struct gdbarch_info info;
@@ -6646,7 +6646,7 @@ powerpc_set_soft_float (char *args, int from_tty,
 }
 
 static void
-powerpc_set_vector_abi (char *args, int from_tty,
+powerpc_set_vector_abi (const char *args, int from_tty,
 			struct cmd_list_element *c)
 {
   struct gdbarch_info info;

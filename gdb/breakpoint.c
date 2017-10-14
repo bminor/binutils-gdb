@@ -710,7 +710,7 @@ mark_breakpoint_location_modified (struct bp_location *loc)
    condition_evaluation_mode.  */
 
 static void
-set_condition_evaluation_mode (char *args, int from_tty,
+set_condition_evaluation_mode (const char *args, int from_tty,
 			       struct cmd_list_element *c)
 {
   const char *old_mode, *new_mode;
@@ -8224,7 +8224,7 @@ add_solib_catchpoint (const char *arg, int is_load, int is_temp, int enabled)
    "catch unload".  */
 
 static void
-catch_load_or_unload (char *arg, int from_tty, int is_load,
+catch_load_or_unload (const char *arg, int from_tty, int is_load,
 		      struct cmd_list_element *command)
 {
   int tempflag;
@@ -8236,14 +8236,14 @@ catch_load_or_unload (char *arg, int from_tty, int is_load,
 }
 
 static void
-catch_load_command_1 (char *arg, int from_tty,
+catch_load_command_1 (const char *arg, int from_tty,
 		      struct cmd_list_element *command)
 {
   catch_load_or_unload (arg, from_tty, 1, command);
 }
 
 static void
-catch_unload_command_1 (char *arg, int from_tty,
+catch_unload_command_1 (const char *arg, int from_tty,
 			struct cmd_list_element *command)
 {
   catch_load_or_unload (arg, from_tty, 0, command);
@@ -8851,7 +8851,7 @@ update_dprintf_command_list (struct breakpoint *b)
    current style settings.  */
 
 static void
-update_dprintf_commands (char *args, int from_tty,
+update_dprintf_commands (const char *args, int from_tty,
 			 struct cmd_list_element *c)
 {
   struct breakpoint *b;
@@ -11326,10 +11326,9 @@ typedef enum
 catch_fork_kind;
 
 static void
-catch_fork_command_1 (char *arg_entry, int from_tty,
+catch_fork_command_1 (const char *arg, int from_tty,
 		      struct cmd_list_element *command)
 {
-  const char *arg = arg_entry;
   struct gdbarch *gdbarch = get_current_arch ();
   const char *cond_string = NULL;
   catch_fork_kind fork_kind;
@@ -11374,10 +11373,9 @@ catch_fork_command_1 (char *arg_entry, int from_tty,
 }
 
 static void
-catch_exec_command_1 (char *arg_entry, int from_tty,
+catch_exec_command_1 (const char *arg, int from_tty,
 		      struct cmd_list_element *command)
 {
-  const char *arg = arg_entry;
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
   const char *cond_string = NULL;
@@ -15334,7 +15332,7 @@ static struct cmd_list_element *tcatch_cmdlist;
 
 void
 add_catch_command (const char *name, const char *docstring,
-		   cmd_sfunc_ftype *sfunc,
+		   cmd_const_sfunc_ftype *sfunc,
 		   completer_ftype *completer,
 		   void *user_data_catch,
 		   void *user_data_tcatch)

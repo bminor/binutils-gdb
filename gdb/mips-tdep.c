@@ -556,8 +556,6 @@ mips2_fp_compat (struct frame_info *frame)
 
 static CORE_ADDR heuristic_proc_start (struct gdbarch *, CORE_ADDR);
 
-static void reinit_frame_cache_sfunc (char *, int, struct cmd_list_element *);
-
 /* The list of available "set mips " and "show mips " commands.  */
 
 static struct cmd_list_element *setmipscmdlist = NULL;
@@ -855,7 +853,7 @@ static int heuristic_fence_post = 0;
 static int mips64_transfers_32bit_regs_p = 0;
 
 static void
-set_mips64_transfers_32bit_regs (char *args, int from_tty,
+set_mips64_transfers_32bit_regs (const char *args, int from_tty,
 				 struct cmd_list_element *c)
 {
   struct gdbarch_info info;
@@ -6972,7 +6970,7 @@ set_mipsfpu_auto_command (const char *args, int from_tty)
    callable as an sfunc.  */
 
 static void
-reinit_frame_cache_sfunc (char *args, int from_tty,
+reinit_frame_cache_sfunc (const char *args, int from_tty,
 			  struct cmd_list_element *c)
 {
   reinit_frame_cache ();
@@ -8829,7 +8827,8 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 static void
-mips_abi_update (char *ignore_args, int from_tty, struct cmd_list_element *c)
+mips_abi_update (const char *ignore_args,
+		 int from_tty, struct cmd_list_element *c)
 {
   struct gdbarch_info info;
 

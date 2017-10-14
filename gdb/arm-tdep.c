@@ -220,7 +220,7 @@ static const char *disassembly_style;
 
 /* This is used to keep the bfd arch_info in sync with the disassembly
    style.  */
-static void set_disassembly_style_sfunc(char *, int,
+static void set_disassembly_style_sfunc (const char *, int,
 					 struct cmd_list_element *);
 static void show_disassembly_style_sfunc (struct ui_file *, int,
 					  struct cmd_list_element *,
@@ -8387,7 +8387,7 @@ arm_update_current_architecture (void)
 }
 
 static void
-set_fp_model_sfunc (char *args, int from_tty,
+set_fp_model_sfunc (const char *args, int from_tty,
 		    struct cmd_list_element *c)
 {
   int fp_model;
@@ -8424,7 +8424,7 @@ The current ARM floating point model is \"%s\".\n"),
 }
 
 static void
-arm_set_abi (char *args, int from_tty,
+arm_set_abi (const char *args, int from_tty,
 	     struct cmd_list_element *c)
 {
   int arm_abi;
@@ -8485,7 +8485,7 @@ arm_show_force_mode (struct ui_file *file, int from_tty,
    arm disassembly" command, and does that.  */
 
 static void
-set_disassembly_style_sfunc (char *args, int from_tty,
+set_disassembly_style_sfunc (const char *args, int from_tty,
 			     struct cmd_list_element *c)
 {
   /* Convert the short style name into the long style name (eg, reg-names-*)

@@ -139,7 +139,7 @@ static char *auto_load_dir;
 /* "set" command for the auto_load_dir configuration variable.  */
 
 static void
-set_auto_load_dir (char *args, int from_tty, struct cmd_list_element *c)
+set_auto_load_dir (const char *args, int from_tty, struct cmd_list_element *c)
 {
   /* Setting the variable to "" resets it to the compile time defaults.  */
   if (auto_load_dir[0] == '\0')
@@ -262,7 +262,8 @@ auto_load_gdb_datadir_changed (void)
 /* "set" command for the auto_load_safe_path configuration variable.  */
 
 static void
-set_auto_load_safe_path (char *args, int from_tty, struct cmd_list_element *c)
+set_auto_load_safe_path (const char *args,
+			 int from_tty, struct cmd_list_element *c)
 {
   /* Setting the variable to "" resets it to the compile time defaults.  */
   if (auto_load_safe_path[0] == '\0')

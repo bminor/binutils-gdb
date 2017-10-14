@@ -672,7 +672,8 @@ show_print_type (const char *args, int from_tty)
 static int print_methods = 1;
 
 static void
-set_print_type_methods (char *args, int from_tty, struct cmd_list_element *c)
+set_print_type_methods (const char *args,
+			int from_tty, struct cmd_list_element *c)
 {
   default_ptype_flags.print_methods = print_methods;
 }
@@ -688,7 +689,8 @@ show_print_type_methods (struct ui_file *file, int from_tty,
 static int print_typedefs = 1;
 
 static void
-set_print_type_typedefs (char *args, int from_tty, struct cmd_list_element *c)
+set_print_type_typedefs (const char *args,
+			 int from_tty, struct cmd_list_element *c)
 {
   default_ptype_flags.print_typedefs = print_typedefs;
 }

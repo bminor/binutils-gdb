@@ -1,5 +1,109 @@
 2017-11-07  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (catch_ada_exception_command): Constify.
+	(catch_assert_command): Constify.
+	* break-catch-throw.c (catch_catch_command, catch_throw_command)
+	(catch_rethrow_command): Constify.
+	(catch_exception_command_1): Constify.
+	* breakpoint.h (add_catch_command): Constify.
+	* break-catch-syscall.c (catch_syscall_command_1): Constify.
+	(catch_syscall_split_args): Constify.
+	* break-catch-sig.c (catch_signal_command): Constify.
+	(catch_signal_split_args): Constify.
+	* cli/cli-decode.h (struct cmd_list_element) <function>: Use
+	cmd_const_sfunc_ftype.
+	* cli/cli-decode.c (add_setshow_cmd_full): Constify.
+	(add_setshow_enum_cmd, add_setshow_auto_boolean_cmd)
+	(add_setshow_boolean_cmd, add_setshow_filename_cmd)
+	(add_setshow_string_cmd, struct cmd_list_element)
+	(add_setshow_optional_filename_cmd, add_setshow_integer_cmd)
+	(add_setshow_uinteger_cmd, add_setshow_zinteger_cmd)
+	(add_setshow_zuinteger_unlimited_cmd, add_setshow_zuinteger_cmd):
+	Constify.
+	(set_cmd_sfunc): Constify.
+	(empty_sfunc): Constify.
+	* command.h (add_setshow_enum_cmd, add_setshow_auto_boolean_cmd)
+	(add_setshow_boolean_cmd, add_setshow_filename_cmd)
+	(add_setshow_string_cmd, add_setshow_string_noescape_cmd)
+	(add_setshow_optional_filename_cmd, add_setshow_integer_cmd)
+	(add_setshow_uinteger_cmd, add_setshow_zinteger_cmd)
+	(add_setshow_zuinteger_cmd, add_setshow_zuinteger_unlimited_cmd):
+	Constify.
+	(set_cmd_sfunc): Constify.
+	(cmd_sfunc_ftype): Remove.
+	* compile/compile.c (set_compile_args): Constify.
+	* infrun.c (set_disable_randomization): Constify.
+	* infcmd.c (set_args_command, set_cwd_command): Constify.
+	* breakpoint.c (set_condition_evaluation_mode): Constify.
+	(add_catch_command): Constify.
+	(catch_fork_command_1, catch_exec_command_1)
+	(catch_load_command_1, catch_unload_command_1): Constify.
+	(catch_load_or_unload): Constify.
+	* guile/scm-param.c (pascm_set_func): Constify.
+	(add_setshow_generic): Constify.
+	* python/py-param.c (get_set_value): Constify.
+	* top.h (set_verbose): Constify.
+	* tui/tui-win.c (tui_set_var_cmd): Constify.
+	* mi/mi-main.c (set_mi_async_command): Constify.
+	* cli/cli-logging.c (set_logging_overwrite)
+	(set_logging_redirect): Constify.
+	* value.c (set_max_value_size): Constify.
+	* valprint.c (set_input_radix, set_output_radix): Constify.
+	* utils.c (set_width_command, set_height_command): Constify.
+	* typeprint.c (set_print_type_methods, set_print_type_typedefs): Constify.
+	* tracepoint.c (set_disconnected_tracing)
+	(set_circular_trace_buffer, set_trace_buffer_size)
+	(set_trace_user, set_trace_notes, set_trace_stop_notes): Constify.
+	* top.c (set_history_size_command, set_verbose, set_editing)
+	(set_gdb_datadir, set_history_filename): Constify.
+	* target.c (set_targetdebug, maint_set_target_async_command)
+	(maint_set_target_non_stop_command, set_target_permissions)
+	(set_write_memory_permission): Constify.
+	(open_target): Constify.
+	* target-descriptions.c (set_tdesc_filename_cmd): Constify.
+	* target-dcache.c (set_stack_cache, set_code_cache): Constify.
+	* symtab.c (set_symbol_cache_size_handler): Constify.
+	* symfile.c (set_ext_lang_command): Constify.
+	* symfile-debug.c (set_debug_symfile): Constify.
+	* source.c (set_directories_command): Constify.
+	* solib.c (reload_shared_libraries, gdb_sysroot_changed): Constify.
+	* serial.c (set_parity): Constify.
+	* rs6000-tdep.c (powerpc_set_soft_float, powerpc_set_vector_abi): Constify.
+	* remote.c (set_remote_exec_file, set_remotebreak)
+	(set_remote_protocol_Z_packet_cmd, set_range_stepping): Constify.
+	* record.c (set_record_insn_history_size)
+	(set_record_call_history_size): Constify.
+	* record-full.c (set_record_full_insn_max_num): Constify.
+	* proc-api.c (set_procfs_trace_cmd, set_procfs_file_cmd): Constify.
+	* osabi.c (set_osabi): Constify.
+	* mips-tdep.c (set_mips64_transfers_32bit_regs)
+	(reinit_frame_cache_sfunc, mips_abi_update): Constify.
+	* maint.c (maintenance_set_profile_cmd): Constify.
+	* linux-thread-db.c (set_libthread_db_search_path): Constify.
+	* language.c (set_language_command, set_range_command)
+	(set_case_command): Constify.
+	* infrun.c (set_non_stop, set_observer_mode)
+	(set_stop_on_solib_events, set_schedlock_func)
+	(set_exec_direction_func): Constify.
+	* infcmd.c (set_inferior_tty_command): Constify.
+	* disasm.c (set_disassembler_options_sfunc): Constify.
+	* demangle.c (set_demangling_command): Constify.
+	* dcache.c (set_dcache_size, set_dcache_line_size): Constify.
+	* cris-tdep.c (set_cris_version, set_cris_mode)
+	(set_cris_dwarf2_cfi): Constify.
+	* corefile.c (set_gnutarget_command): Constify.
+	* charset.c (set_host_charset_sfunc, set_target_charset_sfunc)
+	(set_target_wide_charset_sfunc): Constify.
+	* breakpoint.c (update_dprintf_commands): Constify.
+	* auto-load.c (set_auto_load_dir, set_auto_load_safe_path): Constify.
+	* arm-tdep.c (set_fp_model_sfunc, arm_set_abi)
+	(set_disassembly_style_sfunc): Constify.
+	* arch-utils.c (set_endian, set_architecture): Constify.
+	* alpha-tdep.c (reinit_frame_cache_sfunc): Constify.
+	* agent.c (set_can_use_agent): Constify.
+
+2017-11-07  Tom Tromey  <tom@tromey.com>
+
 	* go32-nat.c (go32_sysinfo, go32_sldt, go32_sgdt, go32_sidt)
 	(go32_pde, go32_pte, go32_pte_for_address): Constify.
 	* gnu-nat.c (_parse_bool_arg, show_thread_default_pause_cmd)

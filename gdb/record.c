@@ -759,7 +759,7 @@ validate_history_size (unsigned int *command_var, unsigned int *setting)
    [0..UINT_MAX].  See command_size_to_target_size.  */
 
 static void
-set_record_insn_history_size (char *args, int from_tty,
+set_record_insn_history_size (const char *args, int from_tty,
 			      struct cmd_list_element *c)
 {
   validate_history_size (&record_insn_history_size_setshow_var,
@@ -771,7 +771,7 @@ set_record_insn_history_size (char *args, int from_tty,
    [0..UINT_MAX].  See command_size_to_target_size.  */
 
 static void
-set_record_call_history_size (char *args, int from_tty,
+set_record_call_history_size (const char *args, int from_tty,
 			      struct cmd_list_element *c)
 {
   validate_history_size (&record_call_history_size_setshow_var,

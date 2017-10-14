@@ -2760,7 +2760,7 @@ cmd_record_full_start (const char *args, int from_tty)
 }
 
 static void
-set_record_full_insn_max_num (char *args, int from_tty,
+set_record_full_insn_max_num (const char *args, int from_tty,
 			      struct cmd_list_element *c)
 {
   if (record_full_insn_num > record_full_insn_max_num)

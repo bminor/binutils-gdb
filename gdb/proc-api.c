@@ -71,7 +71,8 @@ prepare_to_trace (void)
 }
 
 static void
-set_procfs_trace_cmd (char *args, int from_tty, struct cmd_list_element *c)
+set_procfs_trace_cmd (const char *args,
+		      int from_tty, struct cmd_list_element *c)
 {
 #if 0	/* not sure what I might actually need to do here, if anything */
   if (procfs_file)
@@ -80,7 +81,8 @@ set_procfs_trace_cmd (char *args, int from_tty, struct cmd_list_element *c)
 }
 
 static void
-set_procfs_file_cmd (char *args, int from_tty, struct cmd_list_element *c)
+set_procfs_file_cmd (const char *args,
+		     int from_tty, struct cmd_list_element *c)
 {
   /* Just changed the filename for procfs tracing.
      If a file was already open, close it.  */

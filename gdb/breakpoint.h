@@ -1288,7 +1288,7 @@ extern void initialize_breakpoint_ops (void);
 
 extern void
   add_catch_command (const char *name, const char *docstring,
-		     cmd_sfunc_ftype *sfunc,
+		     cmd_const_sfunc_ftype *sfunc,
 		     completer_ftype *completer,
 		     void *user_data_catch,
 		     void *user_data_tcatch);

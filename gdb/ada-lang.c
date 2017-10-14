@@ -12988,7 +12988,7 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 /* Implement the "catch exception" command.  */
 
 static void
-catch_ada_exception_command (char *arg_entry, int from_tty,
+catch_ada_exception_command (const char *arg_entry, int from_tty,
 			     struct cmd_list_element *command)
 {
   const char *arg = arg_entry;
@@ -13043,7 +13043,7 @@ catch_ada_assert_command_split (const char *args, char **cond_string)
 /* Implement the "catch assert" command.  */
 
 static void
-catch_assert_command (char *arg_entry, int from_tty,
+catch_assert_command (const char *arg_entry, int from_tty,
 		      struct cmd_list_element *command)
 {
   const char *arg = arg_entry;

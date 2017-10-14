@@ -155,7 +155,8 @@ show_language_command (struct ui_file *file, int from_tty,
 
 /* Set command.  Change the current working language.  */
 static void
-set_language_command (char *ignore, int from_tty, struct cmd_list_element *c)
+set_language_command (const char *ignore,
+		      int from_tty, struct cmd_list_element *c)
 {
   enum language flang = language_unknown;
 
@@ -252,7 +253,8 @@ show_range_command (struct ui_file *file, int from_tty,
 
 /* Set command.  Change the setting for range checking.  */
 static void
-set_range_command (char *ignore, int from_tty, struct cmd_list_element *c)
+set_range_command (const char *ignore,
+		   int from_tty, struct cmd_list_element *c)
 {
   if (strcmp (range, "on") == 0)
     {
@@ -326,7 +328,7 @@ show_case_command (struct ui_file *file, int from_tty,
 /* Set command.  Change the setting for case sensitivity.  */
 
 static void
-set_case_command (char *ignore, int from_tty, struct cmd_list_element *c)
+set_case_command (const char *ignore, int from_tty, struct cmd_list_element *c)
 {
    if (strcmp (case_sensitive, "on") == 0)
      {

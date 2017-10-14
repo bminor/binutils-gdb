@@ -92,7 +92,7 @@ show_auto_load_thread_db (struct ui_file *file, int from_tty,
 }
 
 static void
-set_libthread_db_search_path (char *ignored, int from_tty,
+set_libthread_db_search_path (const char *ignored, int from_tty,
 			      struct cmd_list_element *c)
 {
   if (*libthread_db_search_path == '\0')

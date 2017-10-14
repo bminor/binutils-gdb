@@ -116,7 +116,7 @@ struct cmd_list_element
 	cmd_const_cfunc_ftype *const_cfunc;
 	/* If type is set_cmd or show_cmd, first set the variables,
 	   and then call this: */
-	cmd_sfunc_ftype *sfunc;
+	cmd_const_sfunc_ftype *sfunc;
       }
     function;
 

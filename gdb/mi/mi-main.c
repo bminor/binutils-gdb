@@ -108,7 +108,7 @@ static int mi_async = 0;
 static int mi_async_1 = 0;
 
 static void
-set_mi_async_command (char *args, int from_tty,
+set_mi_async_command (const char *args, int from_tty,
 		      struct cmd_list_element *c)
 {
   if (have_live_inferiors ())

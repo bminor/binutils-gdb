@@ -2913,28 +2913,28 @@ encode_source_string (int tpnum, ULONGEST addr,
    disconnects for some reason.  */
 
 static void
-set_disconnected_tracing (char *args, int from_tty,
+set_disconnected_tracing (const char *args, int from_tty,
 			  struct cmd_list_element *c)
 {
   target_set_disconnected_tracing (disconnected_tracing);
 }
 
 static void
-set_circular_trace_buffer (char *args, int from_tty,
+set_circular_trace_buffer (const char *args, int from_tty,
 			   struct cmd_list_element *c)
 {
   target_set_circular_trace_buffer (circular_trace_buffer);
 }
 
 static void
-set_trace_buffer_size (char *args, int from_tty,
+set_trace_buffer_size (const char *args, int from_tty,
 			   struct cmd_list_element *c)
 {
   target_set_trace_buffer_size (trace_buffer_size);
 }
 
 static void
-set_trace_user (char *args, int from_tty,
+set_trace_user (const char *args, int from_tty,
 		struct cmd_list_element *c)
 {
   int ret;
@@ -2946,7 +2946,7 @@ set_trace_user (char *args, int from_tty,
 }
 
 static void
-set_trace_notes (char *args, int from_tty,
+set_trace_notes (const char *args, int from_tty,
 		 struct cmd_list_element *c)
 {
   int ret;
@@ -2958,7 +2958,7 @@ set_trace_notes (char *args, int from_tty,
 }
 
 static void
-set_trace_stop_notes (char *args, int from_tty,
+set_trace_stop_notes (const char *args, int from_tty,
 		      struct cmd_list_element *c)
 {
   int ret;

@@ -645,7 +645,7 @@ objfile_set_sym_fns (struct objfile *objfile, const struct sym_fns *sf)
 }
 
 static void
-set_debug_symfile (char *args, int from_tty, struct cmd_list_element *c)
+set_debug_symfile (const char *args, int from_tty, struct cmd_list_element *c)
 {
   struct program_space *pspace;
   struct objfile *objfile;

@@ -134,7 +134,7 @@ get_inferior_io_terminal (void)
 }
 
 static void
-set_inferior_tty_command (char *args, int from_tty,
+set_inferior_tty_command (const char *args, int from_tty,
 			  struct cmd_list_element *c)
 {
   /* CLI has assigned the user-provided value to inferior_io_terminal_scratch.
@@ -198,7 +198,7 @@ set_inferior_args_vector (int argc, char **argv)
 /* Notice when `set args' is run.  */
 
 static void
-set_args_command (char *args, int from_tty, struct cmd_list_element *c)
+set_args_command (const char *args, int from_tty, struct cmd_list_element *c)
 {
   /* CLI has assigned the user-provided value to inferior_args_scratch.
      Now route it to current inferior.  */
@@ -242,7 +242,7 @@ get_inferior_cwd ()
 /* Handle the 'set cwd' command.  */
 
 static void
-set_cwd_command (char *args, int from_tty, struct cmd_list_element *c)
+set_cwd_command (const char *args, int from_tty, struct cmd_list_element *c)
 {
   if (*inferior_cwd_scratch == '\0')
     set_inferior_cwd (NULL);

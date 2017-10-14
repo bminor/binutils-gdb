@@ -348,7 +348,8 @@ tui_get_cmd_list (void)
 /* The set_func hook of "set tui ..." commands that affect the window
    borders on the TUI display.  */
 void
-tui_set_var_cmd (char *null_args, int from_tty, struct cmd_list_element *c)
+tui_set_var_cmd (const char *null_args,
+		 int from_tty, struct cmd_list_element *c)
 {
   if (tui_update_variables () && tui_active)
     tui_rehighlight_all ();

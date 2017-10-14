@@ -167,7 +167,7 @@ int may_stop = 1;
 static unsigned int targetdebug = 0;
 
 static void
-set_targetdebug  (char *args, int from_tty, struct cmd_list_element *c)
+set_targetdebug  (const char *args, int from_tty, struct cmd_list_element *c)
 {
   update_current_target ();
 }
@@ -345,7 +345,7 @@ complete_target_initialization (struct target_ops *t)
 /* This is used to implement the various target commands.  */
 
 static void
-open_target (char *args, int from_tty, struct cmd_list_element *command)
+open_target (const char *args, int from_tty, struct cmd_list_element *command)
 {
   struct target_ops *ops = (struct target_ops *) get_cmd_context (command);
 
@@ -3880,7 +3880,7 @@ int target_async_permitted = 1;
 static int target_async_permitted_1 = 1;
 
 static void
-maint_set_target_async_command (char *args, int from_tty,
+maint_set_target_async_command (const char *args, int from_tty,
 				struct cmd_list_element *c)
 {
   if (have_live_inferiors ())
@@ -3933,7 +3933,7 @@ static enum auto_boolean target_non_stop_enabled_1 = AUTO_BOOLEAN_AUTO;
 /* Implementation of "maint set target-non-stop".  */
 
 static void
-maint_set_target_non_stop_command (char *args, int from_tty,
+maint_set_target_non_stop_command (const char *args, int from_tty,
 				   struct cmd_list_element *c)
 {
   if (have_live_inferiors ())
@@ -3989,7 +3989,7 @@ update_target_permissions (void)
    way.  */
 
 static void
-set_target_permissions (char *args, int from_tty,
+set_target_permissions (const char *args, int from_tty,
 			struct cmd_list_element *c)
 {
   if (target_has_execution)
@@ -4010,7 +4010,7 @@ set_target_permissions (char *args, int from_tty,
 /* Set memory write permission independently of observer mode.  */
 
 static void
-set_write_memory_permission (char *args, int from_tty,
+set_write_memory_permission (const char *args, int from_tty,
 			struct cmd_list_element *c)
 {
   /* Make the real values match the user-changed values.  */

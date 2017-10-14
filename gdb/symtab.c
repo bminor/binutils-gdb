@@ -1256,7 +1256,7 @@ set_symbol_cache_size (unsigned int new_size)
 /* Called when symbol-cache-size is set.  */
 
 static void
-set_symbol_cache_size_handler (char *args, int from_tty,
+set_symbol_cache_size_handler (const char *args, int from_tty,
 			       struct cmd_list_element *c)
 {
   if (new_symbol_cache_size > MAX_SYMBOL_CACHE_SIZE)

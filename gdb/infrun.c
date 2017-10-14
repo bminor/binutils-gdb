@@ -82,9 +82,6 @@ static int follow_fork_inferior (int follow_child, int detach_fork);
 
 static void follow_inferior_reset_breakpoints (void);
 
-static void set_schedlock_func (char *args, int from_tty,
-				struct cmd_list_element *c);
-
 static int currently_stepping (struct thread_info *tp);
 
 void nullify_last_target_wait_ptid (void);
@@ -195,7 +192,7 @@ show_disable_randomization (struct ui_file *file, int from_tty,
 }
 
 static void
-set_disable_randomization (char *args, int from_tty,
+set_disable_randomization (const char *args, int from_tty,
 			   struct cmd_list_element *c)
 {
   if (!target_supports_disable_randomization ())
@@ -210,7 +207,7 @@ int non_stop = 0;
 static int non_stop_1 = 0;
 
 static void
-set_non_stop (char *args, int from_tty,
+set_non_stop (const char *args, int from_tty,
 	      struct cmd_list_element *c)
 {
   if (target_has_execution)
@@ -239,7 +236,7 @@ int observer_mode = 0;
 static int observer_mode_1 = 0;
 
 static void
-set_observer_mode (char *args, int from_tty,
+set_observer_mode (const char *args, int from_tty,
 		   struct cmd_list_element *c)
 {
   if (target_has_execution)
@@ -364,7 +361,8 @@ int stop_on_solib_events;
    as appropriate when the above flag is changed.  */
 
 static void
-set_stop_on_solib_events (char *args, int from_tty, struct cmd_list_element *c)
+set_stop_on_solib_events (const char *args,
+			  int from_tty, struct cmd_list_element *c)
 {
   update_solib_breakpoints ();
 }
@@ -2229,7 +2227,7 @@ show_scheduler_mode (struct ui_file *file, int from_tty,
 }
 
 static void
-set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
+set_schedlock_func (const char *args, int from_tty, struct cmd_list_element *c)
 {
   if (!target_can_lock_scheduler)
     {
@@ -9096,7 +9094,7 @@ static const char *const exec_direction_names[] = {
 };
 
 static void
-set_exec_direction_func (char *args, int from_tty,
+set_exec_direction_func (const char *args, int from_tty,
 			 struct cmd_list_element *cmd)
 {
   if (target_can_execute_reverse)

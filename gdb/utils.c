@@ -1459,14 +1459,14 @@ set_width (void)
 }
 
 static void
-set_width_command (char *args, int from_tty, struct cmd_list_element *c)
+set_width_command (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_screen_size ();
   set_width ();
 }
 
 static void
-set_height_command (char *args, int from_tty, struct cmd_list_element *c)
+set_height_command (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_screen_size ();
 }

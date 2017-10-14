@@ -718,7 +718,7 @@ set_pspace_remote_exec_file (struct program_space *pspace,
 /* The "set/show remote exec-file" set command hook.  */
 
 static void
-set_remote_exec_file (char *ignored, int from_tty,
+set_remote_exec_file (const char *ignored, int from_tty,
 		      struct cmd_list_element *c)
 {
   gdb_assert (remote_exec_file_var != NULL);
@@ -979,7 +979,7 @@ static int interrupt_on_connect = 0;
 static int remote_break;
 
 static void
-set_remotebreak (char *args, int from_tty, struct cmd_list_element *c)
+set_remotebreak (const char *args, int from_tty, struct cmd_list_element *c)
 {
   if (remote_break)
     interrupt_sequence_mode = interrupt_sequence_break;
@@ -1608,7 +1608,7 @@ enum Z_packet_type
 static enum auto_boolean remote_Z_packet_detect;
 
 static void
-set_remote_protocol_Z_packet_cmd (char *args, int from_tty,
+set_remote_protocol_Z_packet_cmd (const char *args, int from_tty,
 				  struct cmd_list_element *c)
 {
   int i;
@@ -13990,7 +13990,7 @@ show_range_stepping (struct ui_file *file, int from_tty,
 /* The "set/show range-stepping" set hook.  */
 
 static void
-set_range_stepping (char *ignore_args, int from_tty,
+set_range_stepping (const char *ignore_args, int from_tty,
 		    struct cmd_list_element *c)
 {
   struct remote_state *rs = get_remote_state ();

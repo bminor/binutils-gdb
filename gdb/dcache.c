@@ -644,7 +644,7 @@ info_dcache_command (const char *exp, int tty)
 }
 
 static void
-set_dcache_size (char *args, int from_tty,
+set_dcache_size (const char *args, int from_tty,
 		 struct cmd_list_element *c)
 {
   if (dcache_size == 0)
@@ -656,7 +656,7 @@ set_dcache_size (char *args, int from_tty,
 }
 
 static void
-set_dcache_line_size (char *args, int from_tty,
+set_dcache_line_size (const char *args, int from_tty,
 		      struct cmd_list_element *c)
 {
   if (dcache_line_size < 2
