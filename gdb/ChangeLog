@@ -1,3 +1,7 @@
+2017-10-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ada-typeprint.c (print_dynamic_range_bound): Use std::string.
+
 2017-10-13  Yao Qi  <yao.qi@linaro.org>
 
 	* features/Makefile: Remove tic6x-*-expedite, add tic6x-expedite.
