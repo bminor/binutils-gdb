@@ -199,9 +199,8 @@ free_traceframe_info (struct traceframe_info *info)
   if (info != NULL)
     {
       VEC_free (mem_range_s, info->memory);
-      VEC_free (int, info->tvars);
 
-      xfree (info);
+      delete info;
     }
 }
 
@@ -4025,7 +4024,7 @@ traceframe_info_start_tvar (struct gdb_xml_parser *parser,
     = (const char *) xml_find_attribute (attributes, "id")->value;
   int id = gdb_xml_parse_ulongest (parser, id_attrib);
 
-  VEC_safe_push (int, info->tvars, id);
+  info->tvars.push_back (id);
 }
 
 /* Discard the constructed trace frame info (if an error occurs).  */
@@ -4072,10 +4071,9 @@ static const struct gdb_xml_element traceframe_info_elements[] = {
 struct traceframe_info *
 parse_traceframe_info (const char *tframe_info)
 {
-  struct traceframe_info *result;
+  traceframe_info *result = new traceframe_info;
   struct cleanup *back_to;
 
-  result = XCNEW (struct traceframe_info);
   back_to = make_cleanup (free_result, result);
 
   if (gdb_xml_parse_quick (_("trace frame info"),

@@ -1,5 +1,20 @@
 2017-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* tracepoint.h (struct traceframe_info) <tvars>: Change type to
+	std::vector<int>.
+	* tracepoint.c (free_traceframe_info): Deallocate with delete.
+	(traceframe_info_start_tvar): Adjust to vector change.
+	(parse_traceframe_info): Allocate with new.
+	* ctf.c (ctf_traceframe_info): Allocate with new, adjust to
+	vector change.
+	* tracefile-tfile.c (build_traceframe_info): Adjust to vector
+	change.
+	tfile_traceframe_info): Allocate with new.
+	* mi/mi-main.c (mi_cmd_trace_frame_collected): Adjust to vector
+	change.
+
+2017-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* tracepoint.c (traceframe_info): Rename to...
 	(current_traceframe_info): ...this.
 	(clear_traceframe_info): Adjust.

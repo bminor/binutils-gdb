@@ -1638,7 +1638,7 @@ ctf_trace_find (struct target_ops *self, enum trace_find_type type, int num,
 static struct traceframe_info *
 ctf_traceframe_info (struct target_ops *self)
 {
-  struct traceframe_info *info = XCNEW (struct traceframe_info);
+  traceframe_info *info = new traceframe_info;
   const char *name;
   struct bt_iter_pos *pos;
 
@@ -1682,7 +1682,7 @@ ctf_traceframe_info (struct target_ops *self)
 
 	  def = bt_ctf_get_field (event, scope, "num");
 	  vnum = (int) bt_ctf_get_uint64 (def);
-	  VEC_safe_push (int, info->tvars, vnum);
+	  info->tvars.push_back (vnum);
 	}
       else
 	{

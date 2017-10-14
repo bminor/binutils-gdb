@@ -2724,12 +2724,9 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
   /* Trace state variables.  */
   {
-    int tvar;
-    int i;
-
     ui_out_emit_list list_emitter (uiout, "tvars");
 
-    for (i = 0; VEC_iterate (int, tinfo->tvars, i, tvar); i++)
+    for (int tvar : tinfo->tvars)
       {
 	struct trace_state_variable *tsv;
 

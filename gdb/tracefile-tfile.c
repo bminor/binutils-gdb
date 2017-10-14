@@ -1075,7 +1075,7 @@ build_traceframe_info (char blocktype, void *data)
 	int vnum;
 
 	tfile_read ((gdb_byte *) &vnum, 4);
-	VEC_safe_push (int, info->tvars, vnum);
+	info->tvars.push_back (vnum);
       }
     case 'R':
     case 'S':
@@ -1095,7 +1095,7 @@ build_traceframe_info (char blocktype, void *data)
 static struct traceframe_info *
 tfile_traceframe_info (struct target_ops *self)
 {
-  struct traceframe_info *info = XCNEW (struct traceframe_info);
+  traceframe_info *info = new traceframe_info;
 
   traceframe_walk_blocks (build_traceframe_info, 0, info);
   return info;
