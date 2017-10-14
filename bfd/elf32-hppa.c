@@ -1933,6 +1933,7 @@ ensure_undef_dynamic (struct bfd_link_info *info,
       && eh->dynindx == -1
       && !eh->forced_local
       && eh->type != STT_PARISC_MILLI
+      && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, eh)
       && ELF_ST_VISIBILITY (eh->other) == STV_DEFAULT)
     return bfd_elf_link_record_dynamic_symbol (info, eh);
   return TRUE;
@@ -2077,7 +2078,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
       /* Discard relocs on undefined syms with non-default visibility.  */
       if ((eh->root.type == bfd_link_hash_undefined
 	   || eh->root.type == bfd_link_hash_undefweak)
-	  && ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT)
+	  && (ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT
+	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, eh)))
 	hh->dyn_relocs = NULL;
 
 #if RELATIVE_DYNRELOCS
@@ -3672,6 +3674,7 @@ elf32_hppa_relocate_section (bfd *output_bfd,
       const char *sym_name;
       bfd_boolean plabel;
       bfd_boolean warned_undef;
+      bfd_boolean resolved_to_zero;
 
       r_type = ELF32_R_TYPE (rela->r_info);
       if (r_type >= (unsigned int) R_PARISC_UNIMPLEMENTED)
@@ -3734,6 +3737,9 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 
       if (bfd_link_relocatable (info))
 	continue;
+
+      resolved_to_zero = (hh != NULL
+			  && UNDEFWEAK_NO_DYNAMIC_RELOC (info, &hh->eh));
 
       /* Do any required modifications to the relocation value, and
 	 determine what types of dynamic info we need to output, if
@@ -3965,7 +3971,8 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	     there all files have not been loaded.  */
 	  if ((bfd_link_pic (info)
 	       && (hh == NULL
-		   || ELF_ST_VISIBILITY (hh->eh.other) == STV_DEFAULT
+		   || (ELF_ST_VISIBILITY (hh->eh.other) == STV_DEFAULT
+		       && !resolved_to_zero)
 		   || hh->eh.root.type != bfd_link_hash_undefweak)
 	       && (IS_ABSOLUTE_RELOC (r_type)
 		   || !SYMBOL_CALLS_LOCAL (info, &hh->eh)))
