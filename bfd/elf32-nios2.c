@@ -3772,6 +3772,10 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 
       if (howto)
 	{
+	  bfd_boolean resolved_to_zero;
+
+	  resolved_to_zero = (h != NULL
+			      && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
 	  switch (howto->type)
 	    {
 	    case R_NIOS2_HI16:
@@ -4004,7 +4008,8 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 							 h)
 		      || (bfd_link_pic (info)
 			  && SYMBOL_REFERENCES_LOCAL (info, h))
-		      || (ELF_ST_VISIBILITY (h->other)
+		      || ((ELF_ST_VISIBILITY (h->other)
+			   || resolved_to_zero)
 			  && h->root.type == bfd_link_hash_undefweak))
 		    {
 		      /* This is actually a static link, or it is a -Bsymbolic
@@ -4258,7 +4263,8 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 
 		    if ((bfd_link_pic (info) || indx != 0)
 			&& (h == NULL
-			    || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+			    || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+				&& !resolved_to_zero)
 			    || h->root.type != bfd_link_hash_undefweak))
 		      {
 			need_relocs = TRUE;
@@ -4387,7 +4393,8 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 	      if (bfd_link_pic (info)
 		  && (input_section->flags & SEC_ALLOC) != 0
 		  && (h == NULL
-		      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		      || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+			  && !resolved_to_zero)
 		      || h->root.type != bfd_link_hash_undefweak))
 		{
 		  Elf_Internal_Rela outrel;
@@ -5752,7 +5759,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
       if (eh->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefweak)
 	{
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    eh->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
