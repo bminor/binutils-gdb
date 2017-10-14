@@ -1,6 +1,22 @@
 2017-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22269
+	* elfnn-ia64.c (elfNN_ia64_check_relocs): Don't allocate
+	dynamic relocation if UNDEFWEAK_NO_DYNAMIC_RELOC is true.
+	(allocate_fptr): Don't allocate function pointer if
+	UNDEFWEAK_NO_DYNAMIC_RELOC is true.
+	(allocate_dynrel_entries): Don't allocate dynamic relocation
+	if UNDEFWEAK_NO_DYNAMIC_RELOC is true.
+	(set_got_entry): Don't set GOT entry if
+	UNDEFWEAK_NO_DYNAMIC_RELOC is true.
+	(set_pltoff_entry): Don't set PLTOFF entry if
+	UNDEFWEAK_NO_DYNAMIC_RELOC is true.
+	(elfNN_ia64_relocate_section): Don't install dynamic relocation
+	UNDEFWEAK_NO_DYNAMIC_RELOC is true.
+
+2017-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22269
 	* elfxx-mips.c (mips_elf_calculate_relocation): Don't generate
 	dynamic relocation if UNDEFWEAK_NO_DYNAMIC_RELOC is true.
 	(allocate_dynrelocs): Don't allocate dynamic relocations if
