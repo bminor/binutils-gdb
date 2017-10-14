@@ -2657,8 +2657,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       pst = start_psymtab_common (objfile,
 				  fdr_name (fh),
 				  textlow,
-				  objfile->global_psymbols.next,
-				  objfile->static_psymbols.next);
+				  objfile->global_psymbols,
+				  objfile->static_psymbols);
       pst->read_symtab_private = obstack_alloc (&objfile->objfile_obstack,
 						sizeof (struct symloc));
       memset (pst->read_symtab_private, 0, sizeof (struct symloc));

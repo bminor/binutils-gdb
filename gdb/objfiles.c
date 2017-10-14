@@ -716,10 +716,6 @@ objfile::~objfile ()
       clear_current_source_symtab_and_line ();
   }
 
-  if (global_psymbols.list)
-    xfree (global_psymbols.list);
-  if (static_psymbols.list)
-    xfree (static_psymbols.list);
   /* Free the obstacks for non-reusable objfiles.  */
   psymbol_bcache_free (psymbol_cache);
   obstack_free (&objfile_obstack, 0);

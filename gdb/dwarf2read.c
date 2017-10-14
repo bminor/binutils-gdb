@@ -4456,10 +4456,9 @@ void
 dwarf2_build_psymtabs (struct objfile *objfile)
 {
 
-  if (objfile->global_psymbols.size == 0 && objfile->static_psymbols.size == 0)
-    {
-      init_psymbol_list (objfile, 1024);
-    }
+  if (objfile->global_psymbols.capacity () == 0
+      && objfile->static_psymbols.capacity () == 0)
+    init_psymbol_list (objfile, 1024);
 
   TRY
     {
@@ -6143,8 +6142,8 @@ create_partial_symtab (struct dwarf2_per_cu_data *per_cu, const char *name)
   struct partial_symtab *pst;
 
   pst = start_psymtab_common (objfile, name, 0,
-			      objfile->global_psymbols.next,
-			      objfile->static_psymbols.next);
+			      objfile->global_psymbols,
+			      objfile->static_psymbols);
 
   pst->psymtabs_addrmap_supported = 1;
 
@@ -7166,7 +7165,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
       break;
     case DW_TAG_constant:
       {
-        struct psymbol_allocation_list *list;
+	std::vector<partial_symbol *> *list;
 
 	if (pdi->is_external)
 	  list = &objfile->global_psymbols;
@@ -23732,14 +23731,12 @@ write_one_signatured_type (void **slot, void *d)
 
   write_psymbols (info->symtab,
 		  info->psyms_seen,
-		  info->objfile->global_psymbols.list
-		  + psymtab->globals_offset,
+		  &info->objfile->global_psymbols[psymtab->globals_offset],
 		  psymtab->n_global_syms, info->cu_index,
 		  0);
   write_psymbols (info->symtab,
 		  info->psyms_seen,
-		  info->objfile->static_psymbols.list
-		  + psymtab->statics_offset,
+		  &info->objfile->static_psymbols[psymtab->statics_offset],
 		  psymtab->n_static_syms, info->cu_index,
 		  1);
 
@@ -23789,12 +23786,12 @@ recursively_write_psymbols (struct objfile *objfile,
 
   write_psymbols (symtab,
 		  psyms_seen,
-		  objfile->global_psymbols.list + psymtab->globals_offset,
+		  &objfile->global_psymbols[psymtab->globals_offset],
 		  psymtab->n_global_syms, cu_index,
 		  0);
   write_psymbols (symtab,
 		  psyms_seen,
-		  objfile->static_psymbols.list + psymtab->statics_offset,
+		  &objfile->static_psymbols[psymtab->statics_offset],
 		  psymtab->n_static_syms, cu_index,
 		  1);
 }

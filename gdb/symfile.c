@@ -2511,14 +2511,8 @@ reread_symbols (void)
 
 	  /* FIXME: Do we have to free a whole linked list, or is this
 	     enough?  */
-	  if (objfile->global_psymbols.list)
-	    xfree (objfile->global_psymbols.list);
-	  memset (&objfile->global_psymbols, 0,
-		  sizeof (objfile->global_psymbols));
-	  if (objfile->static_psymbols.list)
-	    xfree (objfile->static_psymbols.list);
-	  memset (&objfile->static_psymbols, 0,
-		  sizeof (objfile->static_psymbols));
+	  objfile->global_psymbols.clear ();
+	  objfile->static_psymbols.clear ();
 
 	  /* Free the obstacks for non-reusable objfiles.  */
 	  psymbol_bcache_free (objfile->psymbol_cache);

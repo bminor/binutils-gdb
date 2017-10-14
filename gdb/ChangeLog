@@ -1,3 +1,52 @@
+2017-10-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* objfiles.h: Don't include symfile.h.
+	(struct partial_symbol): Remove forward-declaration.
+	(struct objfile) <global_psymbols, static_psymbols>: Change type
+	to std::vector<partial_symbol *>.
+	* objfiles.c (objfile::objfile): Don't memset those fields.
+	(objfile::~objfile): Don't free those fields.
+	* psympriv.h (struct psymbol_allocation_list): Remove
+	forward-declaration.
+	(add_psymbol_to_list): Change psymbol_allocation_list parameter
+	to std::vector.
+	(start_psymtab_common): Change parameters to std::vector.
+	* psymtab.c: Include algorithm.
+	(require_partial_symbols): Call shrink_to_fit.
+	(find_pc_sect_psymbol): Adjust to vector change.
+	(match_partial_symbol): Likewise.
+	(lookup_partial_symbol): Likewise.
+	(psym_relocate): Likewise.
+	(dump_psymtab): Likewise.
+	(recursively_search_psymtabs): Likewise.
+	(compare_psymbols): Remove.
+	(sort_pst_symbols): Adjust to vector change.
+	(start_psymtab_common): Likewise.
+	(end_psymtab_common): Likewise.
+	(psymbol_bcache_full): De-constify return value.
+	(add_psymbol_to_bcache): Likewise.
+	(extend_psymbol_list): Remove.
+	(append_psymbol_to_list): Adjust to vector change.
+	(add_psymbol_to_list): Likewise.
+	(init_psymbol_list): Likewise.
+	(maintenance_info_psymtabs): Likewise.
+	(maintenance_check_psymtabs): Likewise.
+	* symfile.h (struct psymbol_allocation_list): Remove.
+	* symfile.c (reread_symbols): Adjust to vector change.
+	* dbxread.c (start_psymtab): Change type of parameters.
+	(dbx_symfile_read): Adjust to vector change.
+	(read_dbx_symtab): Likewise.
+	(start_psymtab): Change type of parameters.
+	* dwarf2read.c (dwarf2_build_psymtabs): Adjust to vector change.
+	(create_partial_symtab): Likewise.
+	(add_partial_symbol): Likewise.
+	(write_one_signatured_type): Likewise.
+	(recursively_write_psymbols): Likewise.
+	* mdebugread.c (parse_partial_symbols): Likewise.
+	* xcoffread.c (xcoff_start_psymtab): Change type of parameters.
+	(scan_xcoff_symtab): Adjust to vector change.
+	(xcoff_initial_scan): Likewise.
+
 2017-10-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* ada-typeprint.c (print_dynamic_range_bound): Use std::string.

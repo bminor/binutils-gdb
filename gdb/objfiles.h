@@ -23,7 +23,7 @@
 #include "hashtab.h"
 #include "gdb_obstack.h"	/* For obstack internals.  */
 #include "objfile-flags.h"
-#include "symfile.h"		/* For struct psymbol_allocation_list.  */
+#include "symfile.h"
 #include "progspace.h"
 #include "registry.h"
 #include "gdb_bfd.h"
@@ -31,6 +31,7 @@
 struct bcache;
 struct htab;
 struct objfile_data;
+struct partial_symbol;
 
 /* This structure maintains information on a per-objfile basis about the
    "entry point" of the objfile, and the scope within which the entry point
@@ -356,8 +357,8 @@ struct objfile
   /* Vectors of all partial symbols read in from file.  The actual data
      is stored in the objfile_obstack.  */
 
-  struct psymbol_allocation_list global_psymbols {};
-  struct psymbol_allocation_list static_psymbols {};
+  std::vector<partial_symbol *> global_psymbols;
+  std::vector<partial_symbol *> static_psymbols;
 
   /* Structure which keeps track of functions that manipulate objfile's
      of the same type as this objfile.  I.e. the function to read partial
