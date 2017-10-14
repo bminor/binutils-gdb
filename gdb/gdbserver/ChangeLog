@@ -1,3 +1,22 @@
+2017-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dll.h: Include <list>.
+	(struct dll_info): Add constructor.
+	<entry>: Remove field.
+	(all_dlls): Change type to std::list<dll_info>.
+	* dll.c: Include <algorithm>.
+	(get_dll): Remove macro.
+	(all_dlls): Change type to std::list<dll_info *>.
+	(free_one_dll): Remove.
+	(match_dll): Likewise.
+	(loaded_dll): Adjust.
+	(unloaded_dll): Adjust to all_dlls type change, use
+	std::find_if.  Inline code from match_dll.
+	(clear_dlls): Adjust to all_dlls type change.
+	* server.c (emit_dll_description): Remove.
+	(handle_qxfer_libraries): Adjust to all_dlls type change,
+	integrate emit_dll_description's functionality.
+
 2017-10-12  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* linux-low.h (struct linux_target_ops) <delete_process>: New

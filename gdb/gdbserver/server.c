@@ -1533,21 +1533,6 @@ handle_qxfer_features (const char *annex,
   return len;
 }
 
-/* Worker routine for handle_qxfer_libraries.
-   Emit the XML to describe the library in INF.  */
-
-static void
-emit_dll_description (struct inferior_list_entry *inf, void *arg)
-{
-  struct dll_info *dll = (struct dll_info *) inf;
-  std::string *document = (std::string *) arg;
-  std::string name = xml_escape_text (dll->name);
-
-  *document += string_printf
-    ("  <library name=\"%s\"><segment address=\"0x%lx\"/></library>\n",
-     name.c_str (), (long) dll->base_addr);
-}
-
 /* Handle qXfer:libraries:read.  */
 
 static int
@@ -1563,7 +1548,10 @@ handle_qxfer_libraries (const char *annex,
 
   std::string document = "<library-list version=\"1.0\">\n";
 
-  for_each_inferior_with_data (&all_dlls, emit_dll_description, &document);
+  for (const dll_info &dll : all_dlls)
+    document += string_printf
+      ("  <library name=\"%s\"><segment address=\"0x%lx\"/></library>\n",
+       dll.name.c_str (), (long) dll.base_addr);
 
   document += "</library-list>\n";
 

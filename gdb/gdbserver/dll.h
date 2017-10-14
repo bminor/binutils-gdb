@@ -18,17 +18,19 @@
 #ifndef DLL_H
 #define DLL_H
 
+#include <list>
+
 struct dll_info
 {
-  /* This must appear first.  See inferiors.h.
-     The list iterator functions assume it.  */
-  struct inferior_list_entry entry;
+  dll_info (const std::string &name_, CORE_ADDR base_addr_)
+  : name (name_), base_addr (base_addr_)
+  {}
 
-  char *name;
+  std::string name;
   CORE_ADDR base_addr;
 };
 
-extern struct inferior_list all_dlls;
+extern std::list<dll_info> all_dlls;
 extern int dlls_changed;
 
 extern void clear_dlls (void);
