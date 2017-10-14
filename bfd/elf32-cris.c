@@ -1018,6 +1018,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       bfd_reloc_status_type r;
       const char *symname = NULL;
       enum elf_cris_reloc_type r_type;
+      bfd_boolean resolved_to_zero;
 
       r_type = ELF32_R_TYPE (rel->r_info);
 
@@ -1129,6 +1130,9 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       if (bfd_link_relocatable (info))
 	continue;
+
+      resolved_to_zero = (h != NULL
+			  && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
 
       switch (r_type)
 	{
@@ -1432,6 +1436,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	case R_CRIS_16:
 	case R_CRIS_32:
 	  if (bfd_link_pic (info)
+	      && !resolved_to_zero
 	      && r_symndx != STN_UNDEF
 	      && (input_section->flags & SEC_ALLOC) != 0
 	      && ((r_type != R_CRIS_8_PCREL
@@ -3540,7 +3545,8 @@ cris_elf_check_relocs (bfd *abfd,
 	     render the symbol local.  */
 
 	  /* No need to do anything if we're not creating a shared object.  */
-	  if (! bfd_link_pic (info))
+	  if (! bfd_link_pic (info)
+	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    break;
 
 	  /* We may need to create a reloc section in the dynobj and made room
