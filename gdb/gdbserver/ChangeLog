@@ -1,5 +1,41 @@
 2017-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdbthread.h (ptid_of, pid_of, lwpid_of): New functions.
+	* inferiors.h: Include <list>.
+	(struct process_info) <entry>: Remove field.
+	<pid>: New field.
+	(pid_of): Change macro to function.
+	(ptid_of, lwpid_of): Remove macro.
+	(all_processes): Change type to std::list<process_info *>.
+	(ALL_PROCESSES): Remove macro.
+	(for_each_process, find_process): New function.
+	* inferiors.c (all_processes): Change type to
+	std::list<process_info *>.
+	(find_thread_process): Adjust.
+	(add_process): Likewise.
+	(remove_process): Likewise.
+	(find_process_pid): Likewise.
+	(get_first_process): Likewise.
+	(started_inferior_callback): Remove.
+	(have_started_inferiors_p): Adjust.
+	(attached_inferior_callback): Remove.
+	(have_attached_inferiors_p): Adjust.
+	* linux-low.c (check_zombie_leaders): Likewise.
+	* linux-x86-low.c (x86_arch_setup_process_callback): Remove.
+	(x86_linux_update_xmltarget): Adjust.
+	* server.c (handle_query): Likewise.
+	(gdb_reattached_process): Remove.
+	(handle_status): Adjust.
+	(kill_inferior_callback): Likewise.
+	(detach_or_kill_inferior): Remove.
+	(print_started_pid): Likewise.
+	(print_attached_pid): Likewise.
+	(detach_or_kill_for_exit): Update.
+	(process_serial_event): Likewise.
+	* linux-arm-low.c (arm_new_fork): Likewise.
+
+2017-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dll.h: Include <list>.
 	(struct dll_info): Add constructor.
 	<entry>: Remove field.

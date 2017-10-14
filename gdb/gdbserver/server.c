@@ -2615,8 +2615,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (own_buf[sizeof ("qAttached") - 1])
 	{
 	  int pid = strtoul (own_buf + sizeof ("qAttached:") - 1, NULL, 16);
-	  process = (struct process_info *)
-	    find_inferior_id (&all_processes, pid_to_ptid (pid));
+	  process = find_process_pid (pid);
 	}
       else
 	{
@@ -3305,16 +3304,6 @@ gdb_wants_all_threads_stopped (void)
   for_each_inferior (&all_threads, gdb_wants_thread_stopped);
 }
 
-/* Clear the gdb_detached flag of every process.  */
-
-static void
-gdb_reattached_process (struct inferior_list_entry *entry)
-{
-  struct process_info *process = (struct process_info *) entry;
-
-  process->gdb_detached = 0;
-}
-
 /* Callback for for_each_inferior.  Clear the thread's pending status
    flag.  */
 
@@ -3363,7 +3352,9 @@ static void
 handle_status (char *own_buf)
 {
   /* GDB is connected, don't forward events to the target anymore.  */
-  for_each_inferior (&all_processes, gdb_reattached_process);
+  for_each_process ([] (process_info *process) {
+    process->gdb_detached = 0;
+  });
 
   /* In non-stop mode, we must send a stop reply for each stopped
      thread.  In all-stop mode, just send one for the first stopped
@@ -3517,62 +3508,12 @@ gdbserver_show_disableable (FILE *stream)
 }
 
 static void
-kill_inferior_callback (struct inferior_list_entry *entry)
+kill_inferior_callback (process_info *process)
 {
-  struct process_info *process = (struct process_info *) entry;
-  int pid = ptid_get_pid (process->entry.id);
+  int pid = process->pid;
 
   kill_inferior (pid);
   discard_queued_stop_replies (pid_to_ptid (pid));
-}
-
-/* Callback for for_each_inferior to detach or kill the inferior,
-   depending on whether we attached to it or not.
-   We inform the user whether we're detaching or killing the process
-   as this is only called when gdbserver is about to exit.  */
-
-static void
-detach_or_kill_inferior_callback (struct inferior_list_entry *entry)
-{
-  struct process_info *process = (struct process_info *) entry;
-  int pid = ptid_get_pid (process->entry.id);
-
-  if (process->attached)
-    detach_inferior (pid);
-  else
-    kill_inferior (pid);
-
-  discard_queued_stop_replies (pid_to_ptid (pid));
-}
-
-/* for_each_inferior callback for detach_or_kill_for_exit to print
-   the pids of started inferiors.  */
-
-static void
-print_started_pid (struct inferior_list_entry *entry)
-{
-  struct process_info *process = (struct process_info *) entry;
-
-  if (! process->attached)
-    {
-      int pid = ptid_get_pid (process->entry.id);
-      fprintf (stderr, " %d", pid);
-    }
-}
-
-/* for_each_inferior callback for detach_or_kill_for_exit to print
-   the pids of attached inferiors.  */
-
-static void
-print_attached_pid (struct inferior_list_entry *entry)
-{
-  struct process_info *process = (struct process_info *) entry;
-
-  if (process->attached)
-    {
-      int pid = ptid_get_pid (process->entry.id);
-      fprintf (stderr, " %d", pid);
-    }
 }
 
 /* Call this when exiting gdbserver with possible inferiors that need
@@ -3589,19 +3530,37 @@ detach_or_kill_for_exit (void)
   if (have_started_inferiors_p ())
     {
       fprintf (stderr, "Killing process(es):");
-      for_each_inferior (&all_processes, print_started_pid);
+
+      for_each_process ([] (process_info *process) {
+	if (!process->attached)
+	  fprintf (stderr, " %d", process->pid);
+      });
+
       fprintf (stderr, "\n");
     }
   if (have_attached_inferiors_p ())
     {
       fprintf (stderr, "Detaching process(es):");
-      for_each_inferior (&all_processes, print_attached_pid);
+
+      for_each_process ([] (process_info *process) {
+	if (process->attached)
+	  fprintf (stderr, " %d", process->pid);
+      });
+
       fprintf (stderr, "\n");
     }
 
   /* Now we can kill or detach the inferiors.  */
+  for_each_process ([] (process_info *process) {
+    int pid = process->pid;
 
-  for_each_inferior (&all_processes, detach_or_kill_inferior_callback);
+    if (process->attached)
+      detach_inferior (pid);
+    else
+      kill_inferior (pid);
+
+    discard_queued_stop_replies (pid_to_ptid (pid));
+  });
 }
 
 /* Value that will be passed to exit(3) when gdbserver exits.  */
@@ -4332,7 +4291,8 @@ process_serial_event (void)
 	return 0;
 
       fprintf (stderr, "Killing all inferiors\n");
-      for_each_inferior (&all_processes, kill_inferior_callback);
+
+      for_each_process (kill_inferior_callback);
 
       /* When using the extended protocol, we wait with no program
 	 running.  The traditional protocol will exit instead.  */
@@ -4370,8 +4330,8 @@ process_serial_event (void)
       if (extended_protocol)
 	{
 	  if (target_running ())
-	    for_each_inferior (&all_processes,
-			       kill_inferior_callback);
+	    for_each_process (kill_inferior_callback);
+
 	  fprintf (stderr, "GDBserver restarting\n");
 
 	  /* Wait till we are at 1st instruction in prog.  */

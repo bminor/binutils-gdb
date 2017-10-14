@@ -20,6 +20,7 @@
 #define INFERIORS_H
 
 #include "gdb_vecs.h"
+#include <list>
 
 /* Generic information for tracking a list of ``inferiors'' - threads,
    processes, etc.  */
@@ -45,9 +46,8 @@ struct process_info_private;
 
 struct process_info
 {
-  /* This must appear first.
-     The list iterator functions assume it.  */
-  struct inferior_list_entry entry;
+  /* This process' pid.  */
+  int pid;
 
   /* Nonzero if this child process was attached rather than
      spawned.  */
@@ -79,9 +79,13 @@ struct process_info
   struct process_info_private *priv;
 };
 
-#define ptid_of(inf) ((inf)->entry.id)
-#define pid_of(inf) ptid_get_pid ((inf)->entry.id)
-#define lwpid_of(inf) ptid_get_lwp ((inf)->entry.id)
+/* Get the pid of PROC.  */
+
+static inline int
+pid_of (const process_info *proc)
+{
+  return proc->pid;
+}
 
 /* Return a pointer to the process that corresponds to the current
    thread (current_thread).  It is an error to call this if there is
@@ -90,7 +94,7 @@ struct process_info
 struct process_info *current_process (void);
 struct process_info *get_thread_process (const struct thread_info *);
 
-extern struct inferior_list all_processes;
+extern std::list<process_info *> all_processes;
 
 void add_inferior_to_list (struct inferior_list *list,
 			   struct inferior_list_entry *new_inferior);
@@ -124,9 +128,45 @@ int one_inferior_p (struct inferior_list *list);
 #define ALL_INFERIORS(list, cur, tmp)				\
   ALL_INFERIORS_TYPE (struct inferior_list_entry, list, cur, tmp)
 
-/* Iterate over all processes, open loop style.  */
-#define ALL_PROCESSES(cur, tmp)					\
-  ALL_INFERIORS_TYPE (struct process_info, &all_processes, cur, tmp)
+/* Invoke FUNC for each process.  */
+
+template <typename Func>
+static void
+for_each_process (Func func)
+{
+  std::list<process_info *>::iterator next, cur = all_processes.begin ();
+
+  while (cur != all_processes.end ())
+    {
+      next = cur;
+      next++;
+      func (*cur);
+      cur = next;
+    }
+}
+
+/* Find the first process for which FUNC returns true.  Return NULL if no
+   process satisfying FUNC is found.  */
+
+template <typename Func>
+static process_info *
+find_process (Func func)
+{
+  std::list<process_info *>::iterator next, cur = all_processes.begin ();
+
+  while (cur != all_processes.end ())
+    {
+      next = cur;
+      next++;
+
+      if (func (*cur))
+        return *cur;
+
+      cur = next;
+    }
+
+  return NULL;
+}
 
 extern struct thread_info *current_thread;
 void remove_inferior (struct inferior_list *list,

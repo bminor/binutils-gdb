@@ -854,20 +854,6 @@ x86_linux_read_description (void)
   gdb_assert_not_reached ("failed to return tdesc");
 }
 
-/* Callback for for_each_inferior.  Calls the arch_setup routine for
-   each process.  */
-
-static void
-x86_arch_setup_process_callback (struct inferior_list_entry *entry)
-{
-  int pid = ptid_get_pid (entry->id);
-
-  /* Look up any thread of this processes.  */
-  current_thread = find_any_thread_of_pid (pid);
-
-  the_low_target.arch_setup ();
-}
-
 /* Update all the target description of all processes; a new GDB
    connected, and it may or not support xml target descriptions.  */
 
@@ -881,7 +867,14 @@ x86_linux_update_xmltarget (void)
      release the current regcache objects.  */
   regcache_release ();
 
-  for_each_inferior (&all_processes, x86_arch_setup_process_callback);
+  for_each_process ([] (process_info *proc) {
+    int pid = proc->pid;
+
+    /* Look up any thread of this process.  */
+    current_thread = find_any_thread_of_pid (pid);
+
+    the_low_target.arch_setup ();
+  });
 
   current_thread = saved_thread;
 }

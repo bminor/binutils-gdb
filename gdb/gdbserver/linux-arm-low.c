@@ -707,7 +707,7 @@ arm_new_fork (struct process_info *parent, struct process_info *child)
 
   /* Mark all the hardware breakpoints and watchpoints as changed to
      make sure that the registers will be updated.  */
-  child_lwp = find_lwp_pid (ptid_of (child));
+  child_lwp = find_lwp_pid (ptid_t (child->pid));
   child_lwp_info = child_lwp->arch_private;
   for (i = 0; i < MAX_BPTS; i++)
     child_lwp_info->bpts_changed[i] = 1;

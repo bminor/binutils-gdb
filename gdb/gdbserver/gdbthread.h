@@ -88,6 +88,30 @@ struct thread_info *find_any_thread_of_pid (int pid);
 /* Get current thread ID (Linux task ID).  */
 #define current_ptid (current_thread->entry.id)
 
+/* Get the ptid of THREAD.  */
+
+static inline ptid_t
+ptid_of (const thread_info *thread)
+{
+  return thread->entry.id;
+}
+
+/* Get the pid of THREAD.  */
+
+static inline int
+pid_of (const thread_info *thread)
+{
+  return thread->entry.id.pid ();
+}
+
+/* Get the lwp of THREAD.  */
+
+static inline long
+lwpid_of (const thread_info *thread)
+{
+  return thread->entry.id.lwp ();
+}
+
 /* Create a cleanup to restore current_thread.  */
 struct cleanup *make_cleanup_restore_current_thread (void);
 

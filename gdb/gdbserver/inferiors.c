@@ -22,7 +22,7 @@
 #include "gdbthread.h"
 #include "dll.h"
 
-struct inferior_list all_processes;
+std::list<process_info *> all_processes;
 struct inferior_list all_threads;
 
 struct thread_info *current_thread;
@@ -144,7 +144,7 @@ find_thread_ptid (ptid_t ptid)
 static struct thread_info *
 find_thread_process (const struct process_info *const process)
 {
-  return find_any_thread_of_pid (process->entry.id.pid ());
+  return find_any_thread_of_pid (process->pid);
 }
 
 /* Helper for find_any_thread_of_pid.  Returns true if a thread
@@ -336,10 +336,10 @@ add_process (int pid, int attached)
 {
   struct process_info *process = XCNEW (struct process_info);
 
-  process->entry.id = pid_to_ptid (pid);
+  process->pid = pid;
   process->attached = attached;
 
-  add_inferior_to_list (&all_processes, &process->entry);
+  all_processes.push_back (process);
 
   return process;
 }
@@ -354,35 +354,28 @@ remove_process (struct process_info *process)
   clear_symbol_cache (&process->symbol_cache);
   free_all_breakpoints (process);
   gdb_assert (find_thread_process (process) == NULL);
-  remove_inferior (&all_processes, &process->entry);
+  all_processes.remove (process);
   VEC_free (int, process->syscalls_to_catch);
   free (process);
 }
 
-struct process_info *
+process_info *
 find_process_pid (int pid)
 {
-  return (struct process_info *)
-    find_inferior_id (&all_processes, pid_to_ptid (pid));
+  return find_process ([&] (process_info *process) {
+    return process->pid == pid;
+  });
 }
 
-/* Wrapper around get_first_inferior to return a struct process_info *.  */
+/* Get the first process in the process list, or NULL if the list is empty.  */
 
-struct process_info *
+process_info *
 get_first_process (void)
 {
-  return (struct process_info *) get_first_inferior (&all_processes);
-}
-
-/* Return non-zero if INF, a struct process_info, was started by us,
-   i.e. not attached to.  */
-
-static int
-started_inferior_callback (struct inferior_list_entry *entry, void *args)
-{
-  struct process_info *process = (struct process_info *) entry;
-
-  return ! process->attached;
+  if (!all_processes.empty ())
+    return all_processes.front ();
+  else
+    return NULL;
 }
 
 /* Return non-zero if there are any inferiors that we have created
@@ -391,18 +384,9 @@ started_inferior_callback (struct inferior_list_entry *entry, void *args)
 int
 have_started_inferiors_p (void)
 {
-  return (find_inferior (&all_processes, started_inferior_callback, NULL)
-	  != NULL);
-}
-
-/* Return non-zero if INF, a struct process_info, was attached to.  */
-
-static int
-attached_inferior_callback (struct inferior_list_entry *entry, void *args)
-{
-  struct process_info *process = (struct process_info *) entry;
-
-  return process->attached;
+  return find_process ([] (process_info *process) {
+    return !process->attached;
+  }) != NULL;
 }
 
 /* Return non-zero if there are any inferiors that we have attached to.  */
@@ -410,8 +394,9 @@ attached_inferior_callback (struct inferior_list_entry *entry, void *args)
 int
 have_attached_inferiors_p (void)
 {
-  return (find_inferior (&all_processes, attached_inferior_callback, NULL)
-	  != NULL);
+  return find_process ([] (process_info *process) {
+    return process->attached;
+  }) != NULL;
 }
 
 struct process_info *
