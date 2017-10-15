@@ -63,8 +63,42 @@ static htab_t all_bfds;
 
 struct gdb_bfd_data
 {
+  gdb_bfd_data (bfd *abfd)
+    : mtime (bfd_get_mtime (abfd)),
+      size (bfd_get_size (abfd)),
+      relocation_computed (0),
+      needs_relocations (0),
+      crc_computed (0)
+  {
+    struct stat buf;
+
+    if (bfd_stat (abfd, &buf) == 0)
+      {
+	inode = buf.st_ino;
+	device_id = buf.st_dev;
+      }
+    else
+      {
+	/* The stat failed.  */
+	inode = 0;
+	device_id = 0;
+      }
+  }
+
+  ~gdb_bfd_data ()
+  {
+    int ix;
+    bfd *included_bfd;
+
+    for (ix = 0;
+	 VEC_iterate (bfdp, included_bfds, ix, included_bfd);
+	 ++ix)
+      gdb_bfd_unref (included_bfd);
+    VEC_free (bfdp, included_bfds);
+  }
+
   /* The reference count.  */
-  int refc;
+  int refc = 1;
 
   /* The mtime of the BFD at the point the cache entry was made.  */
   time_t mtime;
@@ -89,17 +123,17 @@ struct gdb_bfd_data
   unsigned int crc_computed : 1;
 
   /* The file's CRC.  */
-  unsigned long crc;
+  unsigned long crc = 0;
 
   /* If the BFD comes from an archive, this points to the archive's
      BFD.  Otherwise, this is NULL.  */
-  bfd *archive_bfd;
+  bfd *archive_bfd = nullptr;
 
   /* Table of all the bfds this bfd has included.  */
-  VEC (bfdp) *included_bfds;
+  VEC (bfdp) *included_bfds = nullptr;
 
   /* The registry.  */
-  REGISTRY_FIELDS;
+  REGISTRY_FIELDS = {};
 };
 
 #define GDB_BFD_DATA_ACCESSOR(ABFD) \
@@ -499,7 +533,6 @@ gdb_bfd_close_or_warn (struct bfd *abfd)
 void
 gdb_bfd_ref (struct bfd *abfd)
 {
-  struct stat buf;
   struct gdb_bfd_data *gdata;
   void **slot;
 
@@ -523,25 +556,8 @@ gdb_bfd_ref (struct bfd *abfd)
   /* Ask BFD to decompress sections in bfd_get_full_section_contents.  */
   abfd->flags |= BFD_DECOMPRESS;
 
-  gdata
-    = (struct gdb_bfd_data *) bfd_zalloc (abfd, sizeof (struct gdb_bfd_data));
-  gdata->refc = 1;
-  gdata->mtime = bfd_get_mtime (abfd);
-  gdata->size = bfd_get_size (abfd);
-  gdata->archive_bfd = NULL;
-  if (bfd_stat (abfd, &buf) == 0)
-    {
-      gdata->inode = buf.st_ino;
-      gdata->device_id = buf.st_dev;
-    }
-  else
-    {
-      /* The stat failed.  */
-      gdata->inode = 0;
-      gdata->device_id = 0;
-    }
+  gdata = new gdb_bfd_data (abfd);
   bfd_usrdata (abfd) = gdata;
-
   bfd_alloc_data (abfd);
 
   /* This is the first we've seen it, so add it to the hash table.  */
@@ -555,10 +571,9 @@ gdb_bfd_ref (struct bfd *abfd)
 void
 gdb_bfd_unref (struct bfd *abfd)
 {
-  int ix;
   struct gdb_bfd_data *gdata;
   struct gdb_bfd_cache_search search;
-  bfd *archive_bfd, *included_bfd;
+  bfd *archive_bfd;
 
   if (abfd == NULL)
     return;
@@ -602,13 +617,8 @@ gdb_bfd_unref (struct bfd *abfd)
 	htab_clear_slot (gdb_bfd_cache, slot);
     }
 
-  for (ix = 0;
-       VEC_iterate (bfdp, gdata->included_bfds, ix, included_bfd);
-       ++ix)
-    gdb_bfd_unref (included_bfd);
-  VEC_free (bfdp, gdata->included_bfds);
-
   bfd_free_data (abfd);
+  delete gdata;
   bfd_usrdata (abfd) = NULL;  /* Paranoia.  */
 
   htab_remove_elt (all_bfds, abfd);

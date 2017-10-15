@@ -1,5 +1,12 @@
 2017-10-20  Tom Tromey  <tom@tromey.com>
 
+	* gdb_bfd.c (gdb_bfd_ref): Use new.
+	(struct gdb_bfd_data): Add constructor, destructor, and member
+	initializers.
+	(gdb_bfd_unref): Use delete.
+
+2017-10-20  Tom Tromey  <tom@tromey.com>
+
 	* exec.c (exec_file_attach): Use new_bfd_ref.
 	* symfile-mem.c (symbol_file_add_from_memory): Use new_bfd_ref.
 	* gdb_bfd.c (gdb_bfd_open, gdb_bfd_fopen, gdb_bfd_openr)
