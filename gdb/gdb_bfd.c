@@ -427,8 +427,7 @@ gdb_bfd_open (const char *name, const char *target, int fd)
 			    host_address_to_string (abfd),
 			    bfd_get_filename (abfd));
       close (fd);
-      gdb_bfd_ref (abfd);
-      return gdb_bfd_ref_ptr (abfd);
+      return new_bfd_ref (abfd);
     }
 
   abfd = bfd_fopen (name, target, FOPEN_RB, fd);
@@ -448,8 +447,7 @@ gdb_bfd_open (const char *name, const char *target, int fd)
       *slot = abfd;
     }
 
-  gdb_bfd_ref (abfd);
-  return gdb_bfd_ref_ptr (abfd);
+  return new_bfd_ref (abfd);
 }
 
 /* A helper function that releases any section data attached to the
@@ -778,10 +776,7 @@ gdb_bfd_fopen (const char *filename, const char *target, const char *mode,
 {
   bfd *result = bfd_fopen (filename, target, mode, fd);
 
-  if (result)
-    gdb_bfd_ref (result);
-
-  return gdb_bfd_ref_ptr (result);
+  return new_bfd_ref (result);
 }
 
 /* See gdb_bfd.h.  */
@@ -791,10 +786,7 @@ gdb_bfd_openr (const char *filename, const char *target)
 {
   bfd *result = bfd_openr (filename, target);
 
-  if (result)
-    gdb_bfd_ref (result);
-
-  return gdb_bfd_ref_ptr (result);
+  return new_bfd_ref (result);
 }
 
 /* See gdb_bfd.h.  */
@@ -804,10 +796,7 @@ gdb_bfd_openw (const char *filename, const char *target)
 {
   bfd *result = bfd_openw (filename, target);
 
-  if (result)
-    gdb_bfd_ref (result);
-
-  return gdb_bfd_ref_ptr (result);
+  return new_bfd_ref (result);
 }
 
 /* See gdb_bfd.h.  */
@@ -832,10 +821,7 @@ gdb_bfd_openr_iovec (const char *filename, const char *target,
 				 open_func, open_closure,
 				 pread_func, close_func, stat_func);
 
-  if (result)
-    gdb_bfd_ref (result);
-
-  return gdb_bfd_ref_ptr (result);
+  return new_bfd_ref (result);
 }
 
 /* See gdb_bfd.h.  */
@@ -891,10 +877,7 @@ gdb_bfd_fdopenr (const char *filename, const char *target, int fd)
 {
   bfd *result = bfd_fdopenr (filename, target, fd);
 
-  if (result)
-    gdb_bfd_ref (result);
-
-  return gdb_bfd_ref_ptr (result);
+  return new_bfd_ref (result);
 }
 
 
