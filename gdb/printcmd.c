@@ -2617,7 +2617,7 @@ eval_command (const char *arg, int from_tty)
 
   std::string expanded = insert_user_defined_cmd_args (stb.c_str ());
 
-  execute_command (&expanded[0], from_tty);
+  execute_command (expanded.c_str (), from_tty);
 }
 
 void

@@ -36,7 +36,7 @@ extern void async_init_signals (void);
 extern void change_line_handler (int);
 
 extern void command_line_handler (char *rl);
-extern void command_handler (char *command);
+extern void command_handler (const char *command);
 
 #ifdef SIGTSTP
 extern void handle_sigtstp (int sig);

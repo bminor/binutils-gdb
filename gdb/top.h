@@ -232,7 +232,7 @@ extern int quit_confirm (void);
 extern void quit_force (int *, int);
 extern void quit_command (const char *, int);
 extern void quit_cover (void);
-extern void execute_command (char *, int);
+extern void execute_command (const char *, int);
 
 /* If the interpreter is in sync mode (we're running a user command's
    list, running command hooks or similars), and we just ran a

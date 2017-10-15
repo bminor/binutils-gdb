@@ -237,7 +237,7 @@ ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
    things like enabling/disabling buttons, etc...  */
 
 void (*deprecated_call_command_hook) (struct cmd_list_element * c, 
-				      char *cmd, int from_tty);
+				      const char *cmd, int from_tty);
 
 /* Called when the current thread changes.  Argument is thread id.  */
 
@@ -539,11 +539,12 @@ set_repeat_arguments (const char *args)
    Pass FROM_TTY as second argument to the defining function.  */
 
 void
-execute_command (char *p, int from_tty)
+execute_command (const char *p, int from_tty)
 {
   struct cleanup *cleanup_if_error;
   struct cmd_list_element *c;
-  char *line;
+  const char *line;
+  const char *cmd_start = p;
 
   cleanup_if_error = make_bpstat_clear_actions_cleanup ();
   scoped_value_mark cleanup = prepare_execute_command ();
@@ -566,7 +567,7 @@ execute_command (char *p, int from_tty)
   if (*p)
     {
       const char *cmd = p;
-      char *arg;
+      const char *arg;
       int was_sync = current_ui->prompt_state == PROMPT_BLOCKED;
 
       line = p;
@@ -575,11 +576,11 @@ execute_command (char *p, int from_tty)
       print_command_trace (p);
 
       c = lookup_cmd (&cmd, cmdlist, "", 0, 1);
-      p = (char *) cmd;
+      p = cmd;
 
       scoped_restore save_repeat_args
 	= make_scoped_restore (&repeat_arguments, nullptr);
-      char *args_pointer = p;
+      const char *args_pointer = p;
 
       /* Pass null arg rather than an empty one.  */
       arg = *p ? p : 0;
@@ -594,14 +595,20 @@ execute_command (char *p, int from_tty)
          is_complete_command hack is testing for.  */
       /* Clear off trailing whitespace, except for set and complete
          command.  */
+      std::string without_whitespace;
       if (arg
 	  && c->type != set_cmd
 	  && !is_complete_command (c))
 	{
-	  p = arg + strlen (arg) - 1;
+	  const char *old_end = arg + strlen (arg) - 1;
+	  p = old_end;
 	  while (p >= arg && (*p == ' ' || *p == '\t'))
 	    p--;
-	  *(p + 1) = '\0';
+	  if (p != old_end)
+	    {
+	      without_whitespace = std::string (arg, p + 1);
+	      arg = without_whitespace.c_str ();
+	    }
 	}
 
       /* If this command has been pre-hooked, run the hook first.  */
@@ -629,10 +636,11 @@ execute_command (char *p, int from_tty)
       /* If this command has been post-hooked, run the hook last.  */
       execute_cmd_post_hook (c);
 
-      if (repeat_arguments != NULL)
+      if (repeat_arguments != NULL && cmd_start == saved_command_line)
 	{
 	  gdb_assert (strlen (args_pointer) >= strlen (repeat_arguments));
-	  strcpy (args_pointer, repeat_arguments);
+	  strcpy (saved_command_line + (args_pointer - cmd_start),
+		  repeat_arguments);
 	}
     }
 
@@ -646,7 +654,7 @@ execute_command (char *p, int from_tty)
    temporarily set to true.  */
 
 std::string
-execute_command_to_string (char *p, int from_tty)
+execute_command_to_string (const char *p, int from_tty)
 {
   /* GDB_STDOUT should be better already restored during these
      restoration callbacks.  */

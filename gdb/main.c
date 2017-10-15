@@ -360,39 +360,12 @@ handle_command_errors (struct gdb_exception e)
   return 1;
 }
 
-/* Type of the command callback passed to catch_command_errors.  */
-
-typedef void (catch_command_errors_ftype) (char *, int);
-
-/* Wrap calls to commands run before the event loop is started.  */
-
-static int
-catch_command_errors (catch_command_errors_ftype *command,
-		      char *arg, int from_tty)
-{
-  TRY
-    {
-      int was_sync = current_ui->prompt_state == PROMPT_BLOCKED;
-
-      command (arg, from_tty);
-
-      maybe_wait_sync_command_done (was_sync);
-    }
-  CATCH (e, RETURN_MASK_ALL)
-    {
-      return handle_command_errors (e);
-    }
-  END_CATCH
-
-  return 1;
-}
-
 /* Type of the command callback passed to the const
    catch_command_errors.  */
 
 typedef void (catch_command_errors_const_ftype) (const char *, int);
 
-/* Const-correct catch_command_errors.  */
+/* Wrap calls to commands run before the event loop is started.  */
 
 static int
 catch_command_errors (catch_command_errors_const_ftype command,

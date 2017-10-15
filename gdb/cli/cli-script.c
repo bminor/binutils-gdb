@@ -369,7 +369,7 @@ execute_cmd_pre_hook (struct cmd_list_element *c)
     {
       scoped_restore_hook_in restore_hook (c);
       c->hook_in = 1; /* Prevent recursive hooking.  */
-      execute_user_command (c->hook_pre, (char *) 0);
+      execute_user_command (c->hook_pre, nullptr);
     }
 }
 
@@ -380,12 +380,12 @@ execute_cmd_post_hook (struct cmd_list_element *c)
     {
       scoped_restore_hook_in restore_hook (c);
       c->hook_in = 1; /* Prevent recursive hooking.  */
-      execute_user_command (c->hook_post, (char *) 0);
+      execute_user_command (c->hook_post, nullptr);
     }
 }
 
 void
-execute_user_command (struct cmd_list_element *c, char *args)
+execute_user_command (struct cmd_list_element *c, const char *args)
 {
   struct ui *ui = current_ui;
   struct command_line *cmdlines;
@@ -484,7 +484,7 @@ execute_control_command_1 (struct command_line *cmd)
       {
 	/* A simple command, execute it and return.  */
 	std::string new_line = insert_user_defined_cmd_args (cmd->line);
-	execute_command (&new_line[0], 0);
+	execute_command (new_line.c_str (), 0);
 	ret = cmd->control_type;
 	break;
       }

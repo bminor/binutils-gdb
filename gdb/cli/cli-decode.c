@@ -101,7 +101,7 @@ print_help_for_command (struct cmd_list_element *c, const char *prefix,
    bounce function (unless cfunc / sfunc is NULL that is).  */
 
 static void
-do_const_cfunc (struct cmd_list_element *c, char *args, int from_tty)
+do_const_cfunc (struct cmd_list_element *c, const char *args, int from_tty)
 {
   c->function.const_cfunc (args, from_tty);
 }
@@ -117,7 +117,7 @@ set_cmd_cfunc (struct cmd_list_element *cmd, cmd_const_cfunc_ftype *cfunc)
 }
 
 static void
-do_sfunc (struct cmd_list_element *c, char *args, int from_tty)
+do_sfunc (struct cmd_list_element *c, const char *args, int from_tty)
 {
   c->function.sfunc (args, from_tty, c);
 }
@@ -1909,7 +1909,7 @@ cmd_func_p (struct cmd_list_element *cmd)
 
 /* Call the command function.  */
 void
-cmd_func (struct cmd_list_element *cmd, char *args, int from_tty)
+cmd_func (struct cmd_list_element *cmd, const char *args, int from_tty)
 {
   if (cmd_func_p (cmd))
     {

@@ -499,8 +499,5 @@ _initialize_tui_stack (void)
 static void
 tui_update_command (const char *arg, int from_tty)
 {
-  char cmd[sizeof("frame 0")];
-
-  strcpy (cmd, "frame 0");
-  execute_command (cmd, from_tty);
+  execute_command ("frame 0", from_tty);
 }

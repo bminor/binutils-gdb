@@ -107,7 +107,7 @@ struct cmd_list_element
        cagney/2002-02-02: This function signature is evolving.  For
        the moment suggest sticking with either set_cmd_cfunc() or
        set_cmd_sfunc().  */
-    void (*func) (struct cmd_list_element *c, char *args, int from_tty);
+    void (*func) (struct cmd_list_element *c, const char *args, int from_tty);
     /* The command's real callback.  At present func() bounces through
        to one of the below.  */
     union

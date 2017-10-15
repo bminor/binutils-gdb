@@ -50,7 +50,7 @@ exec_reverse_once (const char *cmd, const char *args, int from_tty)
   std::string reverse_command = string_printf ("%s %s", cmd, args ? args : "");
   scoped_restore restore_exec_dir
     = make_scoped_restore (&execution_direction, EXEC_REVERSE);
-  execute_command (&reverse_command[0], from_tty);
+  execute_command (reverse_command.c_str (), from_tty);
 }
 
 static void

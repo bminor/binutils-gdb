@@ -1704,10 +1704,7 @@ thread_apply_all_command (const char *cmd, int from_tty)
 			     print_thread_id (thr),
 			     target_pid_to_str (inferior_ptid));
 
-	    /* Use a copy of the command in case it is clobbered by
-	       execute_command.  */
-	    std::string copy = cmd;
-	    execute_command (&copy[0], from_tty);
+	    execute_command (cmd, from_tty);
 	  }
     }
 }
@@ -1717,7 +1714,7 @@ thread_apply_all_command (const char *cmd, int from_tty)
 static void
 thread_apply_command (const char *tidlist, int from_tty)
 {
-  char *cmd = NULL;
+  const char *cmd = NULL;
   tid_range_parser parser;
 
   if (tidlist == NULL || *tidlist == '\000')
@@ -1730,7 +1727,7 @@ thread_apply_command (const char *tidlist, int from_tty)
 
       if (!parser.get_tid_range (&inf_num, &thr_start, &thr_end))
 	{
-	  cmd = (char *) parser.cur_tok ();
+	  cmd = parser.cur_tok ();
 	  break;
 	}
     }
@@ -1740,10 +1737,6 @@ thread_apply_command (const char *tidlist, int from_tty)
 
   if (tidlist == cmd || !isalpha (cmd[0]))
     invalid_thread_id_error (cmd);
-
-  /* Save a copy of the command in case it is clobbered by
-     execute_command.  */
-  std::string saved_cmd = cmd;
 
   scoped_restore_current_thread restore_thread;
 
@@ -1798,9 +1791,6 @@ thread_apply_command (const char *tidlist, int from_tty)
       printf_filtered (_("\nThread %s (%s):\n"), print_thread_id (tp),
 		       target_pid_to_str (inferior_ptid));
       execute_command (cmd, from_tty);
-
-      /* Restore exact command used previously.  */
-      strcpy (cmd, saved_cmd.c_str ());
     }
 }
 

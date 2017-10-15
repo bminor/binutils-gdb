@@ -2756,7 +2756,7 @@ record_full_goto_insn (struct record_full_entry *entry,
 static void
 cmd_record_full_start (const char *args, int from_tty)
 {
-  execute_command ((char *) "target record-full", from_tty);
+  execute_command ("target record-full", from_tty);
 }
 
 static void

@@ -122,7 +122,7 @@ extern command_line_up copy_command_lines (struct command_line *cmds);
 
 /* Exported to gdb/infrun.c */
 
-extern void execute_user_command (struct cmd_list_element *c, char *args);
+extern void execute_user_command (struct cmd_list_element *c, const char *args);
 
 /* If we're in a user-defined command, replace any $argc/$argN
    reference found in LINE with the arguments that were passed to the

@@ -1,5 +1,46 @@
 2017-11-07  Tom Tromey  <tom@tromey.com>
 
+	* event-top.h (command_handler): Constify.
+	* record-full.c (cmd_record_full_start): Update.
+	* thread.c (thread_apply_all_command): Update.
+	* printcmd.c (eval_command): Update.
+	* mi/mi-main.c (mi_execute_cli_command): Update.
+	(mi_execute_async_cli_command): Update.
+	* tui/tui-stack.c (tui_update_command): Update.
+	* cli/cli-interp.c (safe_execute_command): Constify.
+	* record.c (record_start): Update.
+	(record_start, record_stop, cmd_record_start): Update.
+	* record-btrace.c (cmd_record_btrace_bts_start): Update.
+	(cmd_record_btrace_pt_start): Update.
+	(cmd_record_btrace_start): Update.
+	(cmd_record_btrace_start): Update.
+	* reverse.c (exec_reverse_once): Update.
+	* python/python.c (execute_gdb_command): Don't copy the command.
+	* event-top.c (command_line_handler): Update.
+	(command_handler): Constify.
+	* defs.h (deprecated_call_command_hook): Constify.
+	* cli/cli-script.h (execute_user_command): Constify.
+	* cli/cli-script.c (execute_user_command): Constify.
+	(execute_cmd_pre_hook, execute_cmd_post_hook): Constify.
+	(enum command_control_type): Update.
+	* main.c (catch_command_errors): Remove non-const overload.
+	(catch_command_errors_ftype): Remove.
+	* python/py-cmd.c (cmdpy_function): Constify.
+	* guile/scm-cmd.c (cmdscm_function): Constify.
+	* cli/cli-dump.c (call_dump_func): Constify.
+	* cli/cli-decode.c (do_const_cfunc): Constify.
+	(do_sfunc): Constify.
+	(cmd_func): Constify.
+	* gdbcmd.h (execute_command, execute_command_to_string): Constify.
+	* top.h (execute_command): Constify.
+	* top.c (execute_command): Constify.
+	(execute_command_to_string): Constify.
+	(deprecated_call_command_hook): Constify.
+	* command.h (cmd_func): Constify.
+	* cli/cli-decode.h (struct cmd_list_element) <func>: Constify.
+
+2017-11-07  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (catch_ada_exception_command): Constify.
 	(catch_assert_command): Constify.
 	* break-catch-throw.c (catch_catch_command, catch_throw_command)
