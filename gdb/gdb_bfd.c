@@ -34,9 +34,6 @@
 #include "gdb/fileio.h"
 #include "inferior.h"
 
-typedef bfd *bfdp;
-DEF_VEC_P (bfdp);
-
 /* An object of this type is stored in the section's user data when
    mapping a section.  */
 
@@ -87,14 +84,6 @@ struct gdb_bfd_data
 
   ~gdb_bfd_data ()
   {
-    int ix;
-    bfd *included_bfd;
-
-    for (ix = 0;
-	 VEC_iterate (bfdp, included_bfds, ix, included_bfd);
-	 ++ix)
-      gdb_bfd_unref (included_bfd);
-    VEC_free (bfdp, included_bfds);
   }
 
   /* The reference count.  */
@@ -130,7 +119,7 @@ struct gdb_bfd_data
   bfd *archive_bfd = nullptr;
 
   /* Table of all the bfds this bfd has included.  */
-  VEC (bfdp) *included_bfds = nullptr;
+  std::vector<gdb_bfd_ref_ptr> included_bfds;
 
   /* The registry.  */
   REGISTRY_FIELDS = {};
@@ -875,9 +864,8 @@ gdb_bfd_record_inclusion (bfd *includer, bfd *includee)
 {
   struct gdb_bfd_data *gdata;
 
-  gdb_bfd_ref (includee);
   gdata = (struct gdb_bfd_data *) bfd_usrdata (includer);
-  VEC_safe_push (bfdp, gdata->included_bfds, includee);
+  gdata->included_bfds.push_back (new_bfd_ref (includee));
 }
 
 /* See gdb_bfd.h.  */
