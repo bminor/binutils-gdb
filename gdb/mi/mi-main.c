@@ -2095,9 +2095,7 @@ mi_execute_command (const char *cmd, int from_tty)
 static void
 mi_cmd_execute (struct mi_parse *parse)
 {
-  struct cleanup *cleanup;
-
-  cleanup = prepare_execute_command ();
+  scoped_value_mark cleanup = prepare_execute_command ();
 
   if (parse->all && parse->thread_group != -1)
     error (_("Cannot specify --thread-group together with --all"));
@@ -2189,7 +2187,6 @@ mi_cmd_execute (struct mi_parse *parse)
 
       error_stream (stb);
     }
-  do_cleanups (cleanup);
 }
 
 /* FIXME: This is just a hack so we can get some extra commands going.

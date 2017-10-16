@@ -438,15 +438,9 @@ do_chdir_cleanup (void *old_dir)
 }
 #endif
 
-struct cleanup *
-prepare_execute_command (void)
+scoped_value_mark
+prepare_execute_command ()
 {
-  struct value *mark;
-  struct cleanup *cleanup;
-
-  mark = value_mark ();
-  cleanup = make_cleanup_value_free_to_mark (mark);
-
   /* With multiple threads running while the one we're examining is
      stopped, the dcache can get stale without us being able to detect
      it.  For the duration of the command, though, use the dcache to
@@ -454,7 +448,7 @@ prepare_execute_command (void)
   if (non_stop)
     target_dcache_invalidate ();
 
-  return cleanup;
+  return scoped_value_mark ();
 }
 
 /* Tell the user if the language has changed (except first time) after
@@ -534,12 +528,12 @@ maybe_wait_sync_command_done (int was_sync)
 void
 execute_command (char *p, int from_tty)
 {
-  struct cleanup *cleanup_if_error, *cleanup;
+  struct cleanup *cleanup_if_error;
   struct cmd_list_element *c;
   char *line;
 
   cleanup_if_error = make_bpstat_clear_actions_cleanup ();
-  cleanup = prepare_execute_command ();
+  scoped_value_mark cleanup = prepare_execute_command ();
 
   /* Force cleanup of any alloca areas if using C alloca instead of
      a builtin alloca.  */
@@ -548,7 +542,6 @@ execute_command (char *p, int from_tty)
   /* This can happen when command_line_input hits end of file.  */
   if (p == NULL)
     {
-      do_cleanups (cleanup);
       discard_cleanups (cleanup_if_error);
       return;
     }
@@ -623,7 +616,6 @@ execute_command (char *p, int from_tty)
 
   check_frame_language_change ();
 
-  do_cleanups (cleanup);
   discard_cleanups (cleanup_if_error);
 }
 

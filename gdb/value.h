@@ -730,6 +730,10 @@ class scoped_value_mark
     free_to_mark ();
   }
 
+  scoped_value_mark (scoped_value_mark &&other) = default;
+
+  DISABLE_COPY_AND_ASSIGN (scoped_value_mark);
+
   /* Free the values currently on the value stack.  */
   void free_to_mark ()
   {

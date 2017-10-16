@@ -22,6 +22,7 @@
 
 #include "buffer.h"
 #include "event-loop.h"
+#include "value.h"
 
 struct tl_interp_info;
 
@@ -249,7 +250,7 @@ extern void check_frame_language_change (void);
 /* Prepare for execution of a command.
    Call this before every command, CLI or MI.
    Returns a cleanup to be run after the command is completed.  */
-extern struct cleanup *prepare_execute_command (void);
+extern scoped_value_mark prepare_execute_command (void);
 
 /* This function returns a pointer to the string that is used
    by gdb for its command prompt.  */
