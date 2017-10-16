@@ -1167,12 +1167,6 @@ struct elf_backend_data
   bfd_boolean (*gc_mark_extra_sections)
     (struct bfd_link_info *, elf_gc_mark_hook_fn);
 
-  /* This function, if defined, is called during the sweep phase of gc
-     in order that a backend might update any data structures it might
-     be maintaining.  */
-  bfd_boolean (*gc_sweep_hook)
-    (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
-
   /* This function, if defined, is called after the ELF headers have
      been created.  This allows for things like the OS and ABI versions
      to be changed.  */

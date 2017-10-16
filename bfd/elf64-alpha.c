@@ -2040,72 +2040,6 @@ elf64_alpha_gc_mark_hook (asection *sec, struct bfd_link_info *info,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
-/* Update the got entry reference counts for the section being removed.  */
-
-static bfd_boolean
-elf64_alpha_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
-			   asection *sec, const Elf_Internal_Rela *relocs)
-{
-  Elf_Internal_Shdr *symtab_hdr;
-  struct alpha_elf_link_hash_entry **sym_hashes;
-  const Elf_Internal_Rela *rel, *relend;
-
-  if (bfd_link_relocatable (info))
-    return TRUE;
-
-  symtab_hdr = &elf_symtab_hdr (abfd);
-  sym_hashes = alpha_elf_sym_hashes (abfd);
-
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    {
-      unsigned long r_symndx, r_type;
-      struct alpha_elf_link_hash_entry *h = NULL;
-      struct alpha_elf_got_entry *gotent;
-
-      r_symndx = ELF64_R_SYM (rel->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.root.type == bfd_link_hash_indirect
-		 || h->root.root.type == bfd_link_hash_warning)
-	    h = (struct alpha_elf_link_hash_entry *) h->root.root.u.i.link;
-	}
-
-      r_type = ELF64_R_TYPE (rel->r_info);
-      switch (r_type)
-	{
-	case R_ALPHA_LITERAL:
-	  /* ??? Ignore re-computation of gotent_flags.  We're not
-	     carrying a use-count for each bit in that mask.  */
-
-	case R_ALPHA_TLSGD:
-	case R_ALPHA_GOTDTPREL:
-	case R_ALPHA_GOTTPREL:
-	  /* Fetch the got entry from the tables.  */
-	  gotent = get_got_entry (abfd, h, r_type, r_symndx, rel->r_addend);
-
-	  /* The got entry *must* exist, since we should have created it
-	     before during check_relocs.  Also note that get_got_entry
-	     assumed this was going to be another use, and so incremented
-	     the use count again.  Thus the use count must be at least the
-	     one real use and the "use" we just added.  */
-	  if (gotent == NULL || gotent->use_count < 2)
-	    {
-	      abort ();
-	      return FALSE;
-	    }
-	  gotent->use_count -= 2;
-	  break;
-
-	default:
-	  break;
-	}
-    }
-
-  return TRUE;
-}
-
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -5576,7 +5510,6 @@ static const struct elf_size_info alpha_elf_size_info =
 
 #define elf_backend_can_gc_sections	1
 #define elf_backend_gc_mark_hook	elf64_alpha_gc_mark_hook
-#define elf_backend_gc_sweep_hook	elf64_alpha_gc_sweep_hook
 
 #define elf_backend_ecoff_debug_swap \
   &elf64_alpha_ecoff_debug_swap

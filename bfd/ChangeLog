@@ -1,3 +1,85 @@
+2017-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_backend_data): Remove gc_sweep_hook.
+	* elf32-arm.c (elf32_arm_gc_sweep_hook): Removed.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-bfin.c (bfin_gc_sweep_hook): Likewise.
+	(bfinfdpic_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-cr16.c (elf32_cr16_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-cris.c (cris_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-hppa.c (elf32_hppa_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-lm32.c (lm32_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-m32r.c (m32r_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-m68k.c (elf_m68k_got_entry): Remove elf_m68k_gc_sweep_hook
+	from comments.
+	(elf_m68k_remove_got_entry_type): Removed.
+	(elf_m68k_find_got_entry_ptr): Likewise.
+	(elf_m68k_remove_got_entry): Likewise.
+	(elf_m68k_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-mcore.c (mcore_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-metag.c (elf_metag_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-microblaze.c (elf_backend_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-mips.c (elf_backend_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-nds32.c (nds32_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-nios2.c (nios2_elf32_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-or1k.c (or1k_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-ppc.c (ppc_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-s390.c (elf_s390_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-sparc.c (elf_backend_gc_sweep_hook): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-tilegx.c (elf_backend_gc_sweep_hook): Likewise.
+	* elf32-tilepro.c (tilepro_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-vax.c (elf_vax_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf32-xtensa.c (elf_xtensa_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf64-alpha.c (elf64_alpha_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf64-mips.c (elf_backend_gc_sweep_hook): Likewise.
+	* elf64-mmix.c (mmix_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf64-ppc.c (elf_backend_gc_sweep_hook): Likewise.
+	(ppc64_elf_gc_sweep_hook): Likewise.
+	* elf64-s390.c (elf_s390_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elf64-sparc.c (elf_backend_gc_sweep_hook): Likewise.
+	* elf64-tilegx.c (elf_backend_gc_sweep_hook): Likewise.
+	* elflink.c (elf_link_add_object_symbols): Don't call
+	_bfd_elf_link_check_relocs here.
+	(gc_sweep_hook_fn): Removed.
+	(elf_gc_sweep): Remove gc_sweep_hook.
+	* elfnn-aarch64.c (elfNN_aarch64_gc_sweep_hook): Removed.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elfnn-riscv.c (riscv_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_gc_sweep_hook): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_gc_sweep_hook): Likewise.
+	(elf_backend_gc_sweep_hook): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_gc_sweep_hook): Likewise.
+	* elfxx-sparc.h (_bfd_sparc_elf_gc_sweep_hook): Likewise.
+	* elfxx-target.h (elf_backend_gc_sweep_hook): Likewise.
+	(elfNN_bed): Remove elf_backend_gc_sweep_hook.
+	* elfxx-tilegx.c (tilegx_elf_gc_sweep_hook): Removed.
+	* elfxx-tilegx.h (tilegx_elf_gc_sweep_hook): Likewise.
+
 2017-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_backend_data): Removed.

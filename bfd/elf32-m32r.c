@@ -3540,122 +3540,6 @@ m32r_elf_gc_mark_hook (asection *sec,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
-static bfd_boolean
-m32r_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
-			struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			asection *sec ATTRIBUTE_UNUSED,
-			const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
-{
-  /* Update the got entry reference counts for the section being removed.  */
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
-  const Elf_Internal_Rela *rel, *relend;
-
-  if (bfd_link_relocatable (info))
-    return TRUE;
-
-  elf_section_data (sec)->local_dynrel = NULL;
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  sym_hashes = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    {
-      unsigned long r_symndx;
-      struct elf_link_hash_entry *h = NULL;
-
-      r_symndx = ELF32_R_SYM (rel->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	}
-
-      switch (ELF32_R_TYPE (rel->r_info))
-	{
-	case R_M32R_GOT16_HI_ULO:
-	case R_M32R_GOT16_HI_SLO:
-	case R_M32R_GOT16_LO:
-	case R_M32R_GOTOFF:
-	case R_M32R_GOTOFF_HI_ULO:
-	case R_M32R_GOTOFF_HI_SLO:
-	case R_M32R_GOTOFF_LO:
-	case R_M32R_GOT24:
-	case R_M32R_GOTPC_HI_ULO:
-	case R_M32R_GOTPC_HI_SLO:
-	case R_M32R_GOTPC_LO:
-	case R_M32R_GOTPC24:
-	  if (h != NULL)
-	    {
-	      if (h->got.refcount > 0)
-		h->got.refcount--;
-	    }
-	  else
-	    {
-	      if (local_got_refcounts && local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx]--;
-	    }
-	  break;
-
-	case R_M32R_16_RELA:
-	case R_M32R_24_RELA:
-	case R_M32R_32_RELA:
-	case R_M32R_REL32:
-	case R_M32R_HI16_ULO_RELA:
-	case R_M32R_HI16_SLO_RELA:
-	case R_M32R_LO16_RELA:
-	case R_M32R_SDA16_RELA:
-	case R_M32R_10_PCREL_RELA:
-	case R_M32R_18_PCREL_RELA:
-	case R_M32R_26_PCREL_RELA:
-	  if (h != NULL)
-	    {
-	      struct elf_m32r_link_hash_entry *eh;
-	      struct elf_m32r_dyn_relocs **pp;
-	      struct elf_m32r_dyn_relocs *p;
-
-	      if (!bfd_link_pic (info) && h->plt.refcount > 0)
-		h->plt.refcount -= 1;
-
-	      eh = (struct elf_m32r_link_hash_entry *) h;
-
-	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-		if (p->sec == sec)
-		  {
-		    if (   ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA
-			|| ELF32_R_TYPE (rel->r_info) == R_M32R_18_PCREL_RELA
-			|| ELF32_R_TYPE (rel->r_info) == R_M32R_10_PCREL_RELA
-			|| ELF32_R_TYPE (rel->r_info) == R_M32R_REL32)
-		      p->pc_count -= 1;
-		    p->count -= 1;
-		    if (p->count == 0)
-		      *pp = p->next;
-		    break;
-		  }
-	    }
-	  break;
-
-	case R_M32R_26_PLTREL:
-	  if (h != NULL)
-	    {
-	      if (h->plt.refcount > 0)
-		h->plt.refcount--;
-	    }
-	  break;
-
-	default:
-	  break;
-	}
-    }
-
-  return TRUE;
-}
-
 /* Look through the relocs for a section during the first phase.
    Since we don't do .gots or .plts, we just need to consider the
    virtual table relocs for gc.  */
@@ -3974,7 +3858,6 @@ m32r_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 #define elf_backend_add_symbol_hook		m32r_elf_add_symbol_hook
 #define elf_backend_relocate_section		m32r_elf_relocate_section
 #define elf_backend_gc_mark_hook                m32r_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook               m32r_elf_gc_sweep_hook
 #define elf_backend_check_relocs                m32r_elf_check_relocs
 
 #define elf_backend_create_dynamic_sections     m32r_elf_create_dynamic_sections

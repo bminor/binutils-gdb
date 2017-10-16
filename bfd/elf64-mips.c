@@ -4373,7 +4373,6 @@ const struct elf_size_info mips_elf64_size_info =
 				_bfd_mips_elf_additional_program_headers
 #define elf_backend_modify_segment_map	_bfd_mips_elf_modify_segment_map
 #define elf_backend_gc_mark_hook	_bfd_mips_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook	_bfd_mips_elf_gc_sweep_hook
 #define elf_backend_copy_indirect_symbol \
 					_bfd_mips_elf_copy_indirect_symbol
 #define elf_backend_ignore_discarded_relocs \

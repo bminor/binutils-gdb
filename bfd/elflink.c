@@ -5234,10 +5234,6 @@ error_free_dyn:
       && !(*bed->check_directives) (abfd, info))
     return FALSE;
 
-  if (!info->check_relocs_after_open_input
-      && !_bfd_elf_link_check_relocs (abfd, info))
-    return FALSE;
-
   /* If this is a non-traditional link, try to optimize the handling
      of the .stab/.stabstr sections.  */
   if (! dynamic
@@ -13016,17 +13012,11 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
   return TRUE;
 }
 
-/* The sweep phase of garbage collection.  Remove all garbage sections.  */
-
-typedef bfd_boolean (*gc_sweep_hook_fn)
-  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
-
 static bfd_boolean
 elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 {
   bfd *sub;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  gc_sweep_hook_fn gc_sweep_hook = bed->gc_sweep_hook;
 
   for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
     {
@@ -13066,33 +13056,6 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    _bfd_error_handler (_("Removing unused section '%A' in file '%B'"),
 				o, sub);
-
-	  /* But we also have to update some of the relocation
-	     info we collected before.  */
-	  if (gc_sweep_hook
-	      && (o->flags & SEC_RELOC) != 0
-	      && o->reloc_count != 0
-	      && !((info->strip == strip_all || info->strip == strip_debugger)
-		   && (o->flags & SEC_DEBUGGING) != 0)
-	      && !bfd_is_abs_section (o->output_section))
-	    {
-	      Elf_Internal_Rela *internal_relocs;
-	      bfd_boolean r;
-
-	      internal_relocs
-		= _bfd_elf_link_read_relocs (o->owner, o, NULL, NULL,
-					     info->keep_memory);
-	      if (internal_relocs == NULL)
-		return FALSE;
-
-	      r = (*gc_sweep_hook) (o->owner, info, o, internal_relocs);
-
-	      if (elf_section_data (o)->relocs != internal_relocs)
-		free (internal_relocs);
-
-	      if (!r)
-		return FALSE;
-	    }
 	}
     }
 

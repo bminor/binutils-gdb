@@ -2207,18 +2207,6 @@ elf32_cr16_gc_mark_hook (asection *sec,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
-/* Update the got entry reference counts for the section being removed.  */
-
-static bfd_boolean
-elf32_cr16_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
-                          struct bfd_link_info *info ATTRIBUTE_UNUSED,
-                          asection *sec ATTRIBUTE_UNUSED,
-                          const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
-{
-  /* We don't support garbage collection of GOT and PLT relocs yet.  */
-  return TRUE;
-}
-
 /* Create dynamic sections when linking against a dynamic object.  */
 
 static bfd_boolean
@@ -2916,7 +2904,6 @@ _bfd_cr16_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
 #define bfd_elf32_bfd_get_relocated_section_contents \
                                 elf32_cr16_get_relocated_section_contents
 #define elf_backend_gc_mark_hook          elf32_cr16_gc_mark_hook
-#define elf_backend_gc_sweep_hook         elf32_cr16_gc_sweep_hook
 #define elf_backend_can_gc_sections       1
 #define elf_backend_rela_normal           1
 #define elf_backend_check_relocs          cr16_elf_check_relocs

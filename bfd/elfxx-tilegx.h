@@ -73,10 +73,6 @@ tilegx_elf_gc_mark_hook (asection *,
 			 struct elf_link_hash_entry *,
 			 Elf_Internal_Sym *);
 
-extern bfd_boolean
-tilegx_elf_gc_sweep_hook (bfd *, struct bfd_link_info *,
-			  asection *, const Elf_Internal_Rela *);
-
 extern bfd_vma
 tilegx_elf_plt_sym_val (bfd_vma, const asection *, const arelent *);
 

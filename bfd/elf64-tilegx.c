@@ -111,7 +111,6 @@ tilegx_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 #define elf_backend_finish_dynamic_symbol    tilegx_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections  tilegx_elf_finish_dynamic_sections
 #define elf_backend_gc_mark_hook	     tilegx_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook            tilegx_elf_gc_sweep_hook
 #define elf_backend_plt_sym_val		     tilegx_elf_plt_sym_val
 #define elf_info_to_howto_rel                NULL
 #define elf_info_to_howto                    tilegx_info_to_howto_rela

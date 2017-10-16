@@ -758,100 +758,6 @@ riscv_elf_gc_mark_hook (asection *sec,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
-/* Update the got entry reference counts for the section being removed.  */
-
-static bfd_boolean
-riscv_elf_gc_sweep_hook (bfd *abfd,
-			 struct bfd_link_info *info,
-			 asection *sec,
-			 const Elf_Internal_Rela *relocs)
-{
-  const Elf_Internal_Rela *rel, *relend;
-  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (abfd);
-  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (abfd);
-  bfd_signed_vma *local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  if (bfd_link_relocatable (info))
-    return TRUE;
-
-  elf_section_data (sec)->local_dynrel = NULL;
-
-  for (rel = relocs, relend = relocs + sec->reloc_count; rel < relend; rel++)
-    {
-      unsigned long r_symndx;
-      struct elf_link_hash_entry *h = NULL;
-
-      r_symndx = ELFNN_R_SYM (rel->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-	{
-	  struct riscv_elf_link_hash_entry *eh;
-	  struct riscv_elf_dyn_relocs **pp;
-	  struct riscv_elf_dyn_relocs *p;
-
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	  eh = (struct riscv_elf_link_hash_entry *) h;
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	    if (p->sec == sec)
-	      {
-		/* Everything must go for SEC.  */
-		*pp = p->next;
-		break;
-	      }
-	}
-
-      switch (ELFNN_R_TYPE (rel->r_info))
-	{
-	case R_RISCV_GOT_HI20:
-	case R_RISCV_TLS_GOT_HI20:
-	case R_RISCV_TLS_GD_HI20:
-	  if (h != NULL)
-	    {
-	      if (h->got.refcount > 0)
-		h->got.refcount--;
-	    }
-	  else
-	    {
-	      if (local_got_refcounts &&
-		  local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx]--;
-	    }
-	  break;
-
-	case R_RISCV_HI20:
-	case R_RISCV_PCREL_HI20:
-	case R_RISCV_COPY:
-	case R_RISCV_JUMP_SLOT:
-	case R_RISCV_RELATIVE:
-	case R_RISCV_64:
-	case R_RISCV_32:
-	case R_RISCV_BRANCH:
-	case R_RISCV_CALL:
-	case R_RISCV_JAL:
-	case R_RISCV_RVC_BRANCH:
-	case R_RISCV_RVC_JUMP:
-	  if (bfd_link_pic (info))
-	    break;
-	  /* Fall through.  */
-
-	case R_RISCV_CALL_PLT:
-	  if (h != NULL)
-	    {
-	      if (h->plt.refcount > 0)
-		h->plt.refcount--;
-	    }
-	  break;
-
-	default:
-	  break;
-	}
-    }
-
-  return TRUE;
-}
-
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -3324,7 +3230,6 @@ riscv_elf_object_p (bfd *abfd)
 #define elf_backend_finish_dynamic_symbol    riscv_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections  riscv_elf_finish_dynamic_sections
 #define elf_backend_gc_mark_hook	     riscv_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook	     riscv_elf_gc_sweep_hook
 #define elf_backend_plt_sym_val		     riscv_elf_plt_sym_val
 #define elf_backend_grok_prstatus            riscv_elf_grok_prstatus
 #define elf_backend_grok_psinfo              riscv_elf_grok_psinfo

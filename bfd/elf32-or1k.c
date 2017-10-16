@@ -1301,61 +1301,6 @@ or1k_elf_gc_mark_hook (asection *sec,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
-static bfd_boolean
-or1k_elf_gc_sweep_hook (bfd *abfd,
-                        struct bfd_link_info *info ATTRIBUTE_UNUSED,
-                        asection *sec,
-                        const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
-{
-  /* Update the got entry reference counts for the section being removed.  */
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
-  const Elf_Internal_Rela *rel, *relend;
-
-  elf_section_data (sec)->local_dynrel = NULL;
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  sym_hashes = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    {
-      unsigned long r_symndx;
-      struct elf_link_hash_entry *h = NULL;
-
-      r_symndx = ELF32_R_SYM (rel->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-        {
-          h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-          while (h->root.type == bfd_link_hash_indirect
-                 || h->root.type == bfd_link_hash_warning)
-            h = (struct elf_link_hash_entry *) h->root.u.i.link;
-        }
-
-      switch (ELF32_R_TYPE (rel->r_info))
-        {
-        case R_OR1K_GOT16:
-          if (h != NULL)
-            {
-              if (h->got.refcount > 0)
-                h->got.refcount--;
-            }
-          else
-            {
-              if (local_got_refcounts && local_got_refcounts[r_symndx] > 0)
-                local_got_refcounts[r_symndx]--;
-            }
-          break;
-
-        default:
-          break;
-        }
-    }
-  return TRUE;
-}
-
 /* Look through the relocs for a section during the first phase.  */
 
 static bfd_boolean
@@ -2723,7 +2668,6 @@ elf32_or1k_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 #define elf_info_to_howto               or1k_info_to_howto_rela
 #define elf_backend_relocate_section    or1k_elf_relocate_section
 #define elf_backend_gc_mark_hook        or1k_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook       or1k_elf_gc_sweep_hook
 #define elf_backend_check_relocs        or1k_elf_check_relocs
 #define elf_backend_reloc_type_class    or1k_elf_reloc_type_class
 #define elf_backend_can_gc_sections     1

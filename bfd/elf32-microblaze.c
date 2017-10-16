@@ -2224,17 +2224,6 @@ microblaze_elf_gc_mark_hook (asection *sec,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
-/* Update the got entry reference counts for the section being removed.  */
-
-static bfd_boolean
-microblaze_elf_gc_sweep_hook (bfd * abfd ATTRIBUTE_UNUSED,
-     			      struct bfd_link_info * info ATTRIBUTE_UNUSED,
-     			      asection * sec ATTRIBUTE_UNUSED,
-     			      const Elf_Internal_Rela * relocs ATTRIBUTE_UNUSED)
-{
-  return TRUE;
-}
-
 /* PIC support.  */
 
 #define PLT_ENTRY_SIZE 16
@@ -3465,7 +3454,6 @@ microblaze_elf_add_symbol_hook (bfd *abfd,
 #define bfd_elf32_bfd_reloc_name_lookup		microblaze_elf_reloc_name_lookup
 
 #define elf_backend_gc_mark_hook		microblaze_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook		microblaze_elf_gc_sweep_hook
 #define elf_backend_check_relocs                microblaze_elf_check_relocs
 #define elf_backend_copy_indirect_symbol        microblaze_elf_copy_indirect_symbol
 #define bfd_elf32_bfd_link_hash_table_create    microblaze_elf_link_hash_table_create

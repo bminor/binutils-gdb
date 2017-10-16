@@ -78,8 +78,6 @@ extern bfd_boolean _bfd_mips_elf_modify_segment_map
 extern asection * _bfd_mips_elf_gc_mark_hook
   (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
    struct elf_link_hash_entry *, Elf_Internal_Sym *);
-extern bfd_boolean _bfd_mips_elf_gc_sweep_hook
-  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
 extern void _bfd_mips_elf_copy_indirect_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *,
    struct elf_link_hash_entry *);

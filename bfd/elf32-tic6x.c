@@ -1971,90 +1971,6 @@ elf32_tic6x_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
-/* Update the got entry reference counts for the section being removed.  */
-
-static bfd_boolean
-elf32_tic6x_gc_sweep_hook (bfd *abfd,
-			   struct bfd_link_info *info,
-			   asection *sec,
-			   const Elf_Internal_Rela *relocs)
-{
-  struct elf32_tic6x_link_hash_table *htab;
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
-  const Elf_Internal_Rela *rel, *relend;
-
-  if (bfd_link_relocatable (info))
-    return TRUE;
-
-  htab = elf32_tic6x_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  elf_section_data (sec)->local_dynrel = NULL;
-
-  symtab_hdr = &elf_symtab_hdr (abfd);
-  sym_hashes = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    {
-      unsigned long r_symndx;
-      unsigned int r_type;
-      struct elf_link_hash_entry *h = NULL;
-
-      r_symndx = ELF32_R_SYM (rel->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-	{
-	  struct elf32_tic6x_link_hash_entry *eh;
-	  struct elf_dyn_relocs **pp;
-	  struct elf_dyn_relocs *p;
-
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	  eh = (struct elf32_tic6x_link_hash_entry *) h;
-
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	    if (p->sec == sec)
-	      {
-		/* Everything must go for SEC.  */
-		*pp = p->next;
-		break;
-	      }
-	}
-
-      r_type = ELF32_R_TYPE (rel->r_info);
-
-      switch (r_type)
-	{
-	case R_C6000_SBR_GOT_U15_W:
-	case R_C6000_SBR_GOT_L16_W:
-	case R_C6000_SBR_GOT_H16_W:
-	case R_C6000_EHTYPE:
-	  if (h != NULL)
-	    {
-	      if (h->got.refcount > 0)
-		h->got.refcount -= 1;
-	    }
-	  else if (local_got_refcounts != NULL)
-	    {
-	      if (local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx] -= 1;
-	    }
-	  break;
-
-	default:
-	  break;
-	}
-    }
-
-  return TRUE;
-}
-
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -4389,7 +4305,6 @@ elf32_tic6x_write_section (bfd *output_bfd,
 #define elf_backend_rela_normal		1
 #define elf_backend_got_header_size     8
 #define elf_backend_fake_sections       elf32_tic6x_fake_sections
-#define elf_backend_gc_sweep_hook	elf32_tic6x_gc_sweep_hook
 #define elf_backend_gc_mark_extra_sections elf32_tic6x_gc_mark_extra_sections
 #define elf_backend_create_dynamic_sections \
   elf32_tic6x_create_dynamic_sections

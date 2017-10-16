@@ -65,6 +65,12 @@ ldemul_after_open (void)
 }
 
 void
+ldemul_after_check_relocs (void)
+{
+  ld_emulation->after_check_relocs ();
+}
+
+void
 ldemul_after_allocation (void)
 {
   ld_emulation->after_allocation ();
@@ -223,6 +229,11 @@ after_parse_default (void)
 
 void
 after_open_default (void)
+{
+}
+
+void
+after_check_relocs_default (void)
 {
 }
 

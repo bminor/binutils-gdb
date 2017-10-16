@@ -1777,33 +1777,6 @@ mmix_elf_gc_mark_hook (asection *sec,
 
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
-
-/* Update relocation info for a GC-excluded section.  We could supposedly
-   perform the allocation after GC, but there's no suitable hook between
-   GC (or section merge) and the point when all input sections must be
-   present.  Better to waste some memory and (perhaps) a little time.  */
-
-static bfd_boolean
-mmix_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
-			struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			asection *sec,
-			const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
-{
-  struct bpo_reloc_section_info *bpodata
-    = mmix_elf_section_data (sec)->bpo.reloc;
-  asection *allocated_gregs_section;
-
-  /* If no bpodata here, we have nothing to do.  */
-  if (bpodata == NULL)
-    return TRUE;
-
-  allocated_gregs_section = bpodata->bpo_greg_section;
-
-  mmix_elf_section_data (allocated_gregs_section)->bpo.greg->n_bpo_relocs
-    -= bpodata->n_bpo_relocs_this_section;
-
-  return TRUE;
-}
 
 /* Sort register relocs to come before expanding relocs.  */
 
@@ -2925,7 +2898,6 @@ mmix_elf_relax_section (bfd *abfd,
 #define elf_info_to_howto		mmix_info_to_howto_rela
 #define elf_backend_relocate_section	mmix_elf_relocate_section
 #define elf_backend_gc_mark_hook	mmix_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook	mmix_elf_gc_sweep_hook
 
 #define elf_backend_link_output_symbol_hook \
 	mmix_elf_link_output_symbol_hook

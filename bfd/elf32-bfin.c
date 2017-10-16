@@ -1636,79 +1636,6 @@ bfin_gc_mark_hook (asection * sec,
 
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
-
-/* Update the got entry reference counts for the section being removed.  */
-
-static bfd_boolean
-bfin_gc_sweep_hook (bfd * abfd,
-		    struct bfd_link_info *info,
-		    asection * sec,
-                    const Elf_Internal_Rela * relocs)
-{
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
-  const Elf_Internal_Rela *rel, *relend;
-  bfd *dynobj;
-  asection *sgot;
-  asection *srelgot;
-
-  dynobj = elf_hash_table (info)->dynobj;
-  if (dynobj == NULL)
-    return TRUE;
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  sym_hashes = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  sgot = elf_hash_table (info)->sgot;
-  srelgot = elf_hash_table (info)->srelgot;
-
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    {
-      unsigned long r_symndx;
-      struct elf_link_hash_entry *h;
-
-      switch (ELF32_R_TYPE (rel->r_info))
-	{
-	case R_BFIN_GOT:
-	  r_symndx = ELF32_R_SYM (rel->r_info);
-	  if (r_symndx >= symtab_hdr->sh_info)
-	    {
-	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	      if (h->got.refcount > 0)
-		{
-		  --h->got.refcount;
-		  if (h->got.refcount == 0)
-		    {
-		      /* We don't need the .got entry any more.  */
-		      sgot->size -= 4;
-		      srelgot->size -= sizeof (Elf32_External_Rela);
-		    }
-		}
-	    }
-	  else if (local_got_refcounts != NULL)
-	    {
-	      if (local_got_refcounts[r_symndx] > 0)
-		{
-		  --local_got_refcounts[r_symndx];
-		  if (local_got_refcounts[r_symndx] == 0)
-		    {
-		      /* We don't need the .got entry any more.  */
-		      sgot->size -= 4;
-		      if (bfd_link_pic (info))
-			srelgot->size -= sizeof (Elf32_External_Rela);
-		    }
-		}
-	    }
-	  break;
-	default:
-	  break;
-	}
-    }
-  return TRUE;
-}
 
 extern const bfd_target bfin_elf32_fdpic_vec;
 #define IS_FDPIC(bfd) ((bfd)->xvec == &bfin_elf32_fdpic_vec)
@@ -3210,118 +3137,6 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 	    (*info->callbacks->warning) (info, msg, name, input_bfd,
 					 input_section, rel->r_offset);
 	}
-    }
-
-  return TRUE;
-}
-
-/* Update the relocation information for the relocations of the section
-   being removed.  */
-
-static bfd_boolean
-bfinfdpic_gc_sweep_hook (bfd *abfd,
-			 struct bfd_link_info *info,
-			 asection *sec,
-			 const Elf_Internal_Rela *relocs)
-{
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
-  const Elf_Internal_Rela *rel;
-  const Elf_Internal_Rela *rel_end;
-  struct bfinfdpic_relocs_info *picrel;
-
-  BFD_ASSERT (IS_FDPIC (abfd));
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  sym_hashes = elf_sym_hashes (abfd);
-  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf32_External_Sym);
-  if (!elf_bad_symtab (abfd))
-    sym_hashes_end -= symtab_hdr->sh_info;
-
-  rel_end = relocs + sec->reloc_count;
-  for (rel = relocs; rel < rel_end; rel++)
-    {
-      struct elf_link_hash_entry *h;
-      unsigned long r_symndx;
-
-      r_symndx = ELF32_R_SYM (rel->r_info);
-      if (r_symndx < symtab_hdr->sh_info)
-        h = NULL;
-      else
-        h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-
-      if (h != NULL)
-	picrel = bfinfdpic_relocs_info_for_global (bfinfdpic_relocs_info (info),
-						   abfd, h,
-						   rel->r_addend, NO_INSERT);
-      else
-	picrel = bfinfdpic_relocs_info_for_local (bfinfdpic_relocs_info
-						  (info), abfd, r_symndx,
-						  rel->r_addend, NO_INSERT);
-
-      if (!picrel)
-	return TRUE;
-
-      switch (ELF32_R_TYPE (rel->r_info))
-        {
-	case R_BFIN_PCREL24:
-	case R_BFIN_PCREL24_JUMP_L:
-	  picrel->call--;
-	  break;
-
-	case R_BFIN_FUNCDESC_VALUE:
-	  picrel->relocsfdv--;
-	  if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
-	    picrel->relocs32++;
-	  /* Fall through.  */
-
-	case R_BFIN_BYTE4_DATA:
-	  picrel->sym--;
-	  if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
-	    picrel->relocs32--;
-	  break;
-
-	case R_BFIN_GOT17M4:
-	  picrel->got17m4--;
-	  break;
-
-	case R_BFIN_GOTHI:
-	case R_BFIN_GOTLO:
-	  picrel->gothilo--;
-	  break;
-
-	case R_BFIN_FUNCDESC_GOT17M4:
-	  picrel->fdgot17m4--;
-	  break;
-
-	case R_BFIN_FUNCDESC_GOTHI:
-	case R_BFIN_FUNCDESC_GOTLO:
-	  picrel->fdgothilo--;
-	  break;
-
-	case R_BFIN_GOTOFF17M4:
-	case R_BFIN_GOTOFFHI:
-	case R_BFIN_GOTOFFLO:
-	  picrel->gotoff--;
-	  break;
-
-	case R_BFIN_FUNCDESC_GOTOFF17M4:
-	  picrel->fdgoff17m4--;
-	  break;
-
-	case R_BFIN_FUNCDESC_GOTOFFHI:
-	case R_BFIN_FUNCDESC_GOTOFFLO:
-	  picrel->fdgoffhilo--;
-	  break;
-
-	case R_BFIN_FUNCDESC:
-	  picrel->fd--;
-	  picrel->relocsfd--;
-	  break;
-
-	default:
-	  break;
-        }
     }
 
   return TRUE;
@@ -5637,7 +5452,6 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 #define elf_backend_finish_dynamic_sections \
                                         bfin_finish_dynamic_sections
 #define elf_backend_gc_mark_hook        bfin_gc_mark_hook
-#define elf_backend_gc_sweep_hook       bfin_gc_sweep_hook
 #define bfd_elf32_bfd_merge_private_bfd_data \
                                         elf32_bfin_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags \
@@ -5665,9 +5479,6 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 #define TARGET_LITTLE_NAME		"elf32-bfinfdpic"
 #undef	elf32_bed
 #define	elf32_bed		elf32_bfinfdpic_bed
-
-#undef elf_backend_gc_sweep_hook
-#define elf_backend_gc_sweep_hook       bfinfdpic_gc_sweep_hook
 
 #undef elf_backend_got_header_size
 #define elf_backend_got_header_size     0
