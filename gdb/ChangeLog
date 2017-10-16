@@ -1,5 +1,9 @@
 2017-10-19  Tom Tromey  <tom@tromey.com>
 
+	* infcall.c (call_function_by_hand_dummy): Use std::string.
+
+2017-10-19  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-main.c (mi_cmd_execute): Update.
 	* top.h (prepare_execute_command): Return scoped_value_mark.
 	* value.h (class scoped_value_mark): Use DISABLE_COPY_AND_ASSIGN.

@@ -1308,10 +1308,8 @@ When the function is done executing, GDB will silently stop."),
 
     {
       /* Make a copy as NAME may be in an objfile freed by dummy_frame_pop.  */
-      char *name = xstrdup (get_function_name (funaddr,
-					       name_buf, sizeof (name_buf)));
-      make_cleanup (xfree, name);
-
+      std::string name = get_function_name (funaddr, name_buf,
+					    sizeof (name_buf));
 
       if (stopped_by_random_signal)
 	{
@@ -1339,7 +1337,7 @@ GDB has restored the context to what it was before the call.\n\
 To change this behavior use \"set unwindonsignal off\".\n\
 Evaluation of the expression containing the function\n\
 (%s) will be abandoned."),
-		     name);
+		     name.c_str ());
 	    }
 	  else
 	    {
@@ -1358,7 +1356,7 @@ To change this behavior use \"set unwindonsignal on\".\n\
 Evaluation of the expression containing the function\n\
 (%s) will be abandoned.\n\
 When the function is done executing, GDB will silently stop."),
-		     name);
+		     name.c_str ());
 	    }
 	}
 
@@ -1380,7 +1378,7 @@ context to its original state before the call.\n\
 To change this behaviour use \"set unwind-on-terminating-exception off\".\n\
 Evaluation of the expression containing the function (%s)\n\
 will be abandoned."),
-		 name);
+		 name.c_str ());
 	}
       else if (stop_stack_dummy == STOP_NONE)
 	{
@@ -1404,7 +1402,7 @@ The program being debugged stopped while in a function called from GDB.\n\
 Evaluation of the expression containing the function\n\
 (%s) will be abandoned.\n\
 When the function is done executing, GDB will silently stop."),
-		 name);
+		 name.c_str ());
 	}
 
     }
