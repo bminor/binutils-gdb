@@ -1,3 +1,12 @@
+2017-10-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-breakpoint.exp (test_bkpt_basic,
+	test_bkpt_deletion, test_bkpt_cond_and_cmds,
+	test_bkpt_invisible, test_watchpoints, test_bkpt_internal,
+	test_bkpt_eval_funcs, test_bkpt_temporary, test_bkpt_address,
+	test_bkpt_pending, test_bkpt_events): Use proc_with_prefix,
+	remove with_test_prefix.
+
 2017-10-13  Pedro Alves  <palves@redhat.com>
 
 	* lib/gdb.exp (target_can_use_run_cmd): New procedure.
