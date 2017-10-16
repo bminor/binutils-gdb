@@ -1,3 +1,29 @@
+2017-10-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* memrange.h (struct mem_range): Define operator< and operator==.
+	(mem_range_s): Remove.
+	(DEF_VEC_O (mem_range_s)): Remove.
+	(normalize_mem_ranges): Change parameter type to std::vector.
+	* memrange.c (compare_mem_ranges): Remove.
+	(normalize_mem_ranges): Change parameter type to std::vector,
+	adjust to vector change.
+	* exec.c (section_table_available_memory): Return vector, remove
+	parameter.
+	(section_table_read_available_memory): Adjust to std::vector
+	change.
+	* remote.c (remote_read_bytes): Adjust to std::vector
+	change.
+	* tracepoint.h (traceframe_available_memory): Change parameter
+	type to std::vector.
+	* tracepoint.c (traceframe_available_memory): Change parameter
+	type to std::vector, adjust.
+	* gdb/mi/mi-main.c (mi_cmd_trace_frame_collected): Adjust to
+	std::vector change.
+	* gdb/Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/memrange-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add memrange-selftests.o.
+	* gdb/unittests/memrange-selftests.c: New file.
+
 2017-10-16  Pedro Alves  <palves@redhat.com>
 
 	* elfread.c (probe_key_free): Rename range-for variable.

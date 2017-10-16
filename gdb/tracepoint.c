@@ -4077,20 +4077,19 @@ get_traceframe_info (void)
    undefined.  */
 
 int
-traceframe_available_memory (VEC(mem_range_s) **result,
+traceframe_available_memory (std::vector<mem_range> *result,
 			     CORE_ADDR memaddr, ULONGEST len)
 {
   struct traceframe_info *info = get_traceframe_info ();
 
   if (info != NULL)
     {
-      *result = NULL;
+      result->clear ();
 
       for (mem_range &r : info->memory)
 	if (mem_ranges_overlap (r.start, r.length, memaddr, len))
 	  {
 	    ULONGEST lo1, hi1, lo2, hi2;
-	    struct mem_range *nr;
 
 	    lo1 = memaddr;
 	    hi1 = memaddr + len;
@@ -4098,13 +4097,13 @@ traceframe_available_memory (VEC(mem_range_s) **result,
 	    lo2 = r.start;
 	    hi2 = r.start + r.length;
 
-	    nr = VEC_safe_push (mem_range_s, *result, NULL);
+	    CORE_ADDR start = std::max (lo1, lo2);
+	    int length = std::min (hi1, hi2) - start;
 
-	    nr->start = std::max (lo1, lo2);
-	    nr->length = std::min (hi1, hi2) - nr->start;
+	    result->emplace_back (start, length);
 	  }
 
-      normalize_mem_ranges (*result);
+      normalize_mem_ranges (result);
       return 1;
     }
 

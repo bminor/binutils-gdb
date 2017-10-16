@@ -8465,7 +8465,7 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 
   if (get_traceframe_number () != -1)
     {
-      VEC(mem_range_s) *available;
+      std::vector<mem_range> available;
 
       /* If we fail to get the set of available memory, then the
 	 target does not support querying traceframe info, and so we
@@ -8473,26 +8473,19 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 	 target implements the old QTro packet then).  */
       if (traceframe_available_memory (&available, memaddr, len))
 	{
-	  struct cleanup *old_chain;
-
-	  old_chain = make_cleanup (VEC_cleanup(mem_range_s), &available);
-
-	  if (VEC_empty (mem_range_s, available)
-	      || VEC_index (mem_range_s, available, 0)->start != memaddr)
+	  if (available.empty () || available[0].start != memaddr)
 	    {
 	      enum target_xfer_status res;
 
 	      /* Don't read into the traceframe's available
 		 memory.  */
-	      if (!VEC_empty (mem_range_s, available))
+	      if (!available.empty ())
 		{
 		  LONGEST oldlen = len;
 
-		  len = VEC_index (mem_range_s, available, 0)->start - memaddr;
+		  len = available[0].start - memaddr;
 		  gdb_assert (len <= oldlen);
 		}
-
-	      do_cleanups (old_chain);
 
 	      /* This goes through the topmost target again.  */
 	      res = remote_xfer_live_readonly_partial (ops, myaddr, memaddr,
@@ -8512,9 +8505,7 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 	     case the target implements the deprecated QTro packet to
 	     cater for older GDBs (the target's knowledge of read-only
 	     sections may be outdated by now).  */
-	  len = VEC_index (mem_range_s, available, 0)->length;
-
-	  do_cleanups (old_chain);
+	  len = available[0].length;
 	}
     }
 

@@ -400,7 +400,7 @@ extern void trace_save_ctf (const char *dirname,
 
 extern traceframe_info_up parse_traceframe_info (const char *tframe_info);
 
-extern int traceframe_available_memory (VEC(mem_range_s) **result,
+extern int traceframe_available_memory (std::vector<mem_range> *result,
 					CORE_ADDR memaddr, ULONGEST len);
 
 extern struct traceframe_info *get_traceframe_info (void);

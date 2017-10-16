@@ -530,6 +530,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/common-utils-selftests.c \
 	unittests/environ-selftests.c \
 	unittests/function-view-selftests.c \
+	unittests/memrange-selftests.c \
 	unittests/offset-type-selftests.c \
 	unittests/optional-selftests.c \
 	unittests/ptid-selftests.c \
@@ -541,6 +542,7 @@ SUBDIR_UNITTESTS_OBS = \
 	common-utils-selftests.o \
 	environ-selftests.o \
 	function-view-selftests.o \
+	memrange-selftests.o \
 	offset-type-selftests.o \
 	optional-selftests.o \
 	ptid-selftests.o \
