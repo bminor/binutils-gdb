@@ -22,14 +22,7 @@
 
 load_generic_config "extended-gdbserver"
 load_board_description "gdbserver-base"
-
-# By default, dejagnu makes the board remote unless the board name
-# matches localhost.  Force it to be NOT remote.
-global board
-global board_info
-# Remove any target variant specifications from the name.
-set baseboard [lindex [split $board "/"] 0]
-set board_info($baseboard,isremote) 0
+load_board_description "local-board"
 
 set_board_info sockethost "localhost:"
 

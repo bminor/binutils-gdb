@@ -13,17 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This file is a dejagnu "board file" and is used to run the testsuite
-# natively with gdbserver using stdio for comms.
-#
-# To use this file:
-# bash$ cd ${build_dir}/gdb
-# bash$ make check RUNTESTFLAGS="--target_board=native-stdio-gdbserver"
+# By default, DejaGnu makes the board remote unless the board name
+# matches localhost.  Sourcing this script from a board file forces
+# the board to be NOT remote.
 
-load_board_description "stdio-gdbserver-base"
-
-proc get_target_remote_pipe_cmd {} {
-    global last_loaded_file
-    set gdbserver [find_gdbserver]
-    return "$gdbserver --once stdio $last_loaded_file"
-}
+global board
+global board_info
+# Remove any target variant specifications from the name.
+set baseboard [lindex [split $board "/"] 0]
+set board_info($baseboard,isremote) 0

@@ -1,3 +1,26 @@
+2017-10-16  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* README (Local vs Remote vs Native): New section.
+	* boards/local-board.exp: New file, with bits factored out from
+	...
+	* boards/native-extended-gdbserver.exp: ... here.  Load
+	"local-board".
+	* boards/native-gdbserver.exp: Load "local-board".
+	(${board}_spawn, ${board}_exec): Delete.
+	* boards/native-stdio-gdbserver.exp: Most contents factored out to
+	...
+	* boards/stdio-gdbserver-base.exp: ... this new file.
+	* boards/native-stdio-gdbserver.exp: Reimplement, by loading
+	"stdio-gdbserver-base" and defining a get_target_remote_pipe_cmd
+	procedure.
+	* boards/remote-stdio-gdbserver.exp: Load stdio-gdbserver-base
+	instead of native-stdio-gdbserver.  Don't set gdb_server_prog nor
+	stdio_gdbserver_command.
+	(${board}_get_remote_address, ${board}_get_comm_port)
+	(${board}_download, ${board}_upload): Delete.
+	(get_target_remote_pipe_cmd): New.
+
 2017-10-16  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.python/py-breakpoint.exp (test_bkpt_basic,
