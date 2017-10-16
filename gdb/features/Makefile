@@ -188,13 +188,7 @@ XMLTOC = \
 	s390x-tevx-linux64.xml \
 	s390x-vx-linux64.xml \
 	s390-gs-linux64.xml \
-	s390x-gs-linux64.xml \
-	tic6x-c62x-linux.xml \
-	tic6x-c62x.xml \
-	tic6x-c64x-linux.xml \
-	tic6x-c64x.xml \
-	tic6x-c64xp-linux.xml \
-	tic6x-c64xp.xml
+	s390x-gs-linux64.xml
 
 TDESC_CFILES = $(patsubst %.xml,%.c,$(XMLTOC))
 GDB = false

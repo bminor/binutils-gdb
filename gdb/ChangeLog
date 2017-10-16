@@ -1,5 +1,18 @@
 2017-10-16  Yao Qi  <yao.qi@linaro.org>
 
+	* features/Makefile (XMLTOC): Remove tic6x-*.xml.
+	* features/tic6x-c62x.c: Remove.
+	* features/tic6x-c64x-linux.c: Remove.
+	* features/tic6x-c64x.c: Remove.
+	* features/tic6x-c64xp-linux.c: Remove.
+	* features/tic6x-c64xp.c: Remove.
+	* tic6x-linux-tdep.c (_initialize_tic6x_linux_tdep): Don't call
+	initialize_tdesc_tic6x_*_linux functions.
+	* tic6x-tdep.c (_initialize_tic6x_tdep): Don't call
+	initialize_tdesc_tic6x_* functions.
+
+2017-10-16  Yao Qi  <yao.qi@linaro.org>
+
 	* features/Makefile (WHICH): Remove tic6x-c64xp, tic6x-c64x
 	tic6x-c62x.
 	* regformats/tic6x-c62x.dat: Remove.
