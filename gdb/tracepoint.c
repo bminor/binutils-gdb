@@ -3958,7 +3958,7 @@ sdata_make_value (struct gdbarch *gdbarch, struct internalvar *var,
 
 #if !defined(HAVE_LIBEXPAT)
 
-struct traceframe_info *
+struct std::unique_ptr<traceframe_info>
 parse_traceframe_info (const char *tframe_info)
 {
   static int have_warned;

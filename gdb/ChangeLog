@@ -1,3 +1,8 @@
+2017-10-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* tracepoint.c (parse_traceframe_info): Return a unique_ptr
+	(the !HAVE_LIBEXPAT version).
+
 2017-10-14  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* nat/linux-osdata.c (struct pid_pgid_entry) <operator<>: Make
