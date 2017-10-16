@@ -1,3 +1,9 @@
+2017-10-16  Pedro Alves  <palves@redhat.com>
+
+	* elfread.c (probe_key_free): Rename range-for variable.
+	* probe.c (parse_probes_in_pspace, find_probes_in_objfile)
+	(find_probe_by_pc, collect_probes): Rename range-for variable.
+
 2017-10-16  Yao Qi  <yao.qi@linaro.org>
 
 	* features/Makefile (XMLTOC): Remove tic6x-*.xml.

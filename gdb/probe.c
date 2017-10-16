@@ -65,23 +65,23 @@ parse_probes_in_pspace (const struct probe_ops *probe_ops,
       const std::vector<probe *> &probes
 	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
 
-      for (struct probe *probe : probes)
+      for (probe *p : probes)
 	{
-	  if (probe_ops != &probe_ops_any && probe->pops != probe_ops)
+	  if (probe_ops != &probe_ops_any && p->pops != probe_ops)
 	    continue;
 
-	  if (provider && strcmp (probe->provider, provider) != 0)
+	  if (provider && strcmp (p->provider, provider) != 0)
 	    continue;
 
-	  if (strcmp (probe->name, name) != 0)
+	  if (strcmp (p->name, name) != 0)
 	    continue;
 
 	  symtab_and_line sal;
-	  sal.pc = get_probe_address (probe, objfile);
+	  sal.pc = get_probe_address (p, objfile);
 	  sal.explicit_pc = 1;
 	  sal.section = find_pc_overlay (sal.pc);
 	  sal.pspace = search_pspace;
-	  sal.probe = probe;
+	  sal.probe = p;
 	  sal.objfile = objfile;
 
 	  result->push_back (std::move (sal));
@@ -210,15 +210,15 @@ find_probes_in_objfile (struct objfile *objfile, const char *provider,
 
   const std::vector<probe *> &probes
     = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
-  for (struct probe *probe : probes)
+  for (probe *p : probes)
     {
-      if (strcmp (probe->provider, provider) != 0)
+      if (strcmp (p->provider, provider) != 0)
 	continue;
 
-      if (strcmp (probe->name, name) != 0)
+      if (strcmp (p->name, name) != 0)
 	continue;
 
-      VEC_safe_push (probe_p, result, probe);
+      VEC_safe_push (probe_p, result, p);
     }
 
   return result;
@@ -244,11 +244,11 @@ find_probe_by_pc (CORE_ADDR pc)
     /* If this proves too inefficient, we can replace with a hash.  */
     const std::vector<probe *> &probes
       = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
-    for (struct probe *probe : probes)
-      if (get_probe_address (probe, objfile) == pc)
+    for (probe *p : probes)
+      if (get_probe_address (p, objfile) == pc)
 	{
 	  result.objfile = objfile;
-	  result.probe = probe;
+	  result.probe = p;
 	  return result;
 	}
   }
@@ -294,20 +294,20 @@ collect_probes (const std::string &objname, const std::string &provider,
       const std::vector<probe *> &probes
 	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
 
-      for (struct probe *probe : probes)
+      for (probe *p : probes)
 	{
-	  if (pops != NULL && probe->pops != pops)
+	  if (pops != NULL && p->pops != pops)
 	    continue;
 
 	  if (prov_pat
-	      && prov_pat->exec (probe->provider, 0, NULL, 0) != 0)
+	      && prov_pat->exec (p->provider, 0, NULL, 0) != 0)
 	    continue;
 
 	  if (probe_pat
-	      && probe_pat->exec (probe->name, 0, NULL, 0) != 0)
+	      && probe_pat->exec (p->name, 0, NULL, 0) != 0)
 	    continue;
 
-	  result.emplace_back (probe, objfile);
+	  result.emplace_back (p, objfile);
 	}
     }
 
