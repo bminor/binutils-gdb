@@ -281,7 +281,7 @@ $(outdir)/i386/i386-avx-avx512.dat: i386/32bit-core.xml i386/32bit-avx.xml \
 			       i386/32bit-avx512.xml
 $(outdir)/i386/i386-avx-avx512-linux.dat: i386/32bit-core.xml i386/32bit-avx.xml \
 			       i386/32bit-linux.xml i386/32bit-avx512.xml
-$(outdir)/i386/i386-avx-mpx-avx512-pku.dat: i386/32bit-core.xml
+$(outdir)/i386/i386-avx-mpx-avx512-pku.dat: i386/32bit-core.xml \
 			       i386/32bit-avx.xml i386/32bit-mpx.xml i386/32bit-avx512.xml \
 			       i386/32bit-pkeys.xml
 $(outdir)/i386/i386-avx-mpx-avx512-pku-linux.dat: i386/32bit-core.xml \

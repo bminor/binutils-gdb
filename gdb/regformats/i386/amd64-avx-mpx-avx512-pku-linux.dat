@@ -157,3 +157,4 @@ expedite:rbp,rsp,rip
 256:zmm29h
 256:zmm30h
 256:zmm31h
+32:pkru

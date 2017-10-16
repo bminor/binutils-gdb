@@ -1,3 +1,10 @@
+2017-10-16  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* features/Makefile (i386-avx-mpx-avx512-pku.dat): Add backslash 
+	at the end of the line.
+	* regformats/i386/amd64-avx-mpx-avx512-pku-linux.dat: Regenerate.
+	* regformats/i386/amd64-avx-mpx-avx512-pku.dat: Regenerate.
+
 2017-09-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 8.0.1.DATE-git.
