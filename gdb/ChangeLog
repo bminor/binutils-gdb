@@ -1,3 +1,11 @@
+2017-10-16  Yao Qi  <yao.qi@linaro.org>
+
+	* features/Makefile (WHICH): Remove tic6x-c64xp, tic6x-c64x
+	tic6x-c62x.
+	* regformats/tic6x-c62x.dat: Remove.
+	* regformats/tic6x-c64x.dat: Remove.
+	* regformats/tic6x-c64xp.dat: Remove.
+
 2017-10-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* tracepoint.c (parse_traceframe_info): Return a unique_ptr
