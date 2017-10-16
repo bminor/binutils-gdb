@@ -1,5 +1,10 @@
 2017-10-19  Tom Tromey  <tom@tromey.com>
 
+	* break-catch-syscall.c (catch_syscall_completer): Use
+	std::string, gdb::unique_xmalloc_ptr.
+
+2017-10-19  Tom Tromey  <tom@tromey.com>
+
 	* infcall.c (call_function_by_hand_dummy): Use std::string.
 
 2017-10-19  Tom Tromey  <tom@tromey.com>

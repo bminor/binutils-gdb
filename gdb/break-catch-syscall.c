@@ -560,9 +560,7 @@ catch_syscall_completer (struct cmd_list_element *cmd,
                          const char *text, const char *word)
 {
   struct gdbarch *gdbarch = get_current_arch ();
-  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
-  const char **group_list = NULL;
-  const char **syscall_list = NULL;
+  gdb::unique_xmalloc_ptr<const char *> group_list;
   const char *prefix;
   int i;
 
@@ -575,34 +573,37 @@ catch_syscall_completer (struct cmd_list_element *cmd,
   if (startswith (prefix, "g:") || startswith (prefix, "group:"))
     {
       /* Perform completion inside 'group:' namespace only.  */
-      group_list = get_syscall_group_names (gdbarch);
+      group_list.reset (get_syscall_group_names (gdbarch));
       if (group_list != NULL)
-	complete_on_enum (tracker, group_list, word, word);
+	complete_on_enum (tracker, group_list.get (), word, word);
     }
   else
     {
       /* Complete with both, syscall names and groups.  */
-      syscall_list = get_syscall_names (gdbarch);
-      group_list = get_syscall_group_names (gdbarch);
+      gdb::unique_xmalloc_ptr<const char *> syscall_list
+	(get_syscall_names (gdbarch));
+      group_list.reset (get_syscall_group_names (gdbarch));
+
+      const char **group_ptr = group_list.get ();
+
+      /* Hold on to strings while we're using them.  */
+      std::vector<std::string> holders;
 
       /* Append "group:" prefix to syscall groups.  */
-      for (i = 0; group_list[i] != NULL; i++)
+      for (i = 0; group_ptr[i] != NULL; i++)
 	{
-	  char *prefixed_group = xstrprintf ("group:%s", group_list[i]);
+	  std::string prefixed_group = string_printf ("group:%s",
+						      group_ptr[i]);
 
-	  group_list[i] = prefixed_group;
-	  make_cleanup (xfree, prefixed_group);
+	  group_ptr[i] = prefixed_group.c_str ();
+	  holders.push_back (std::move (prefixed_group));
 	}
 
       if (syscall_list != NULL)
-	complete_on_enum (tracker, syscall_list, word, word);
+	complete_on_enum (tracker, syscall_list.get (), word, word);
       if (group_list != NULL)
-	complete_on_enum (tracker, group_list, word, word);
+	complete_on_enum (tracker, group_ptr, word, word);
     }
-
-  xfree (syscall_list);
-  xfree (group_list);
-  do_cleanups (cleanups);
 }
 
 static void
