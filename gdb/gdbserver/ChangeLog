@@ -1,5 +1,10 @@
 2017-10-17  Yao Qi  <yao.qi@linaro.org>
 
+	* Makefile.in: Remove one rule.
+	* configure.srv: Rename aarch64-insn.o with arch/aarch64-insn.o.
+
+2017-10-17  Yao Qi  <yao.qi@linaro.org>
+
 	* configure.srv: Rename arm-linux.o with arch/arm-linux.o.
 	Rename arm-get-next-pcs.o with arch/arm-get-next-pcs.o.
 

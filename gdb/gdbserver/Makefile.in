@@ -581,10 +581,6 @@ arch/%.o: ../arch/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-%.o: ../arch/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
 %.o: ../common/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
