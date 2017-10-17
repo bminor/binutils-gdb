@@ -21,6 +21,7 @@
 # bash$ make check RUNTESTFLAGS="--target_board=native-stdio-gdbserver"
 
 load_board_description "stdio-gdbserver-base"
+load_board_description "local-board"
 
 proc get_target_remote_pipe_cmd {} {
     global last_loaded_file

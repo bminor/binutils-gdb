@@ -1,5 +1,9 @@
 2017-10-17  Pedro Alves  <palves@redhat.com>
 
+	* boards/native-stdio-gdbserver.exp: Load "local-board".
+
+2017-10-17  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/quit-live.c: New file.
 	* gdb.base/quit-live.exp: New file.
 
