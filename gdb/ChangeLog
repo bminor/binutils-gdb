@@ -1,3 +1,18 @@
+2017-10-16  Keith Seitz  <keiths@redhat.com>
+
+        * c-typeprint.c (enum access_specifier): Moved here from
+        c_type_print_base.
+        (output_access_specifier): New function.
+        (c_type_print_base): Consider typedefs when assessing
+        whether access labels are needed.
+        Use output_access_specifier as needed.
+        Output access specifier for typedefs, if needed.
+        * dwarf2read.c (dwarf2_add_typedef): Record DW_AT_accessibility.
+        * gdbtypes.h (struct typedef_field) <is_protected, is_private>: New
+        fields.
+        (TYPE_TYPEDEF_FIELD_PROTECTED, TYPE_TYPEDEF_FIELD_PRIVATE): New
+        accessor macros.
+
 2017-10-16  Tom Tromey  <tom@tromey.com>
 
 	* linux-tdep.c (linux_info_proc, linux_find_memory_regions_full)

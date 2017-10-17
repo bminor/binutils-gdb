@@ -1,3 +1,12 @@
+2017-10-16  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/classes.cc (class_with_typedefs, class_with_public_typedef)
+	(class_with_protected_typedef, class_with_private_typedef)
+	(struct_with_public_typedef, struct_with_protected_typedef)
+	(struct_with_private_typedef): New classes/structs.
+	* gdb.cp/classes.exp (test_ptype_class_objects): Add tests for
+	typedefs and access specifiers.
+
 2017-10-16  Pedro Alves  <palves@redhat.com>
 	    Simon Marchi  <simon.marchi@polymtl.ca>
 
