@@ -1,3 +1,16 @@
+2017-10-17  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (CONFIG_SRC_SUBDIR): New variable.
+	(clean): Remove .o files in CONFIG_SRC_SUBDIR.
+	(distclean): Remove DEPDIR in CONFIG_SRC_SUBDIR.
+	(arch-i386.o, arch-amd64.o): Remove rules.
+	(arch/%.o): New rule.
+	Update POSTCOMPILE and COMPILE.pre.
+	* configure.ac: Invoke AC_CONFIG_COMMANDS.
+	* configure: Re-generated.
+	* configure.srv: Replace arch-i386.o with arch/i386.o.
+	Replace arch-amd64.o with arch/amd64.o.
+
 2017-10-16  Yao Qi  <yao.qi@linaro.org>
 
 	* configure: Regenerated.
