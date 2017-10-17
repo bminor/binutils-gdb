@@ -1,3 +1,7 @@
+2017-10-17  Tom Tromey  <tom@tromey.com>
+
+	* MAINTAINERS: Add myself as dwarf-mode.el maintainer.
+
 2017-10-11  Peeter Joot  <peeter.joot@lzlabs.com>
 	Nick Clifton  <nickc@redhat.com>
 

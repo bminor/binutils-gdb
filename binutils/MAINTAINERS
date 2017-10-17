@@ -72,6 +72,7 @@ responsibility among the other maintainers.
   DLX              Nikolaos Kavvadias <nkavv@physics.auth.gr>
   DWARF2	   Jason Merrill <jason@redhat.com>
   DWARF2	   Jakub Jelinek <jakub@redhat.com>
+  dwarf-mode.el    Tom Tromey <tom@tromey.com>
   EPIPHANY	   Joern Rennecke <joern.rennecke@embecosm.com>
   FR30		   Dave Brolley <brolley@redhat.com>
   FRV		   Dave Brolley <brolley@redhat.com>
