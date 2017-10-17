@@ -13112,6 +13112,28 @@ dwarf2_add_typedef (struct field_info *fip, struct die_info *die,
 
   fp->type = read_type_die (die, cu);
 
+  /* Save accessibility.  */
+  enum dwarf_access_attribute accessibility;
+  struct attribute *attr = dwarf2_attr (die, DW_AT_accessibility, cu);
+  if (attr != NULL)
+    accessibility = (enum dwarf_access_attribute) DW_UNSND (attr);
+  else
+    accessibility = dwarf2_default_access_attribute (die, cu);
+  switch (accessibility)
+    {
+    case DW_ACCESS_public:
+      /* The assumed value if neither private nor protected.  */
+      break;
+    case DW_ACCESS_private:
+      fp->is_private = 1;
+      break;
+    case DW_ACCESS_protected:
+      fp->is_protected = 1;
+      break;
+    default:
+      gdb_assert_not_reached ("unexpected accessibility attribute");
+    }
+
   new_field->next = fip->typedef_field_list;
   fip->typedef_field_list = new_field;
   fip->typedef_field_list_count++;

@@ -873,6 +873,12 @@ struct typedef_field
   /* * Type this typedef named NAME represents.  */
 
   struct type *type;
+
+  /* * True if this field was declared protected, false otherwise.  */
+  unsigned int is_protected : 1;
+
+  /* * True if this field was declared private, false otherwise.  */
+  unsigned int is_private : 1;
 };
 
 /* * C++ language-specific information for TYPE_CODE_STRUCT and
@@ -1402,6 +1408,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_FN_FIELD_VIRTUAL_P(thisfn, n) ((thisfn)[n].voffset > 1)
 #define TYPE_FN_FIELD_STATIC_P(thisfn, n) ((thisfn)[n].voffset == VOFFSET_STATIC)
 
+/* Accessors for typedefs defined by a class.  */
 #define TYPE_TYPEDEF_FIELD_ARRAY(thistype) \
   TYPE_CPLUS_SPECIFIC (thistype)->typedef_field
 #define TYPE_TYPEDEF_FIELD(thistype, n) \
@@ -1412,6 +1419,10 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
   TYPE_TYPEDEF_FIELD (thistype, n).type
 #define TYPE_TYPEDEF_FIELD_COUNT(thistype) \
   TYPE_CPLUS_SPECIFIC (thistype)->typedef_field_count
+#define TYPE_TYPEDEF_FIELD_PROTECTED(thistype, n) \
+  TYPE_TYPEDEF_FIELD (thistype, n).is_protected
+#define TYPE_TYPEDEF_FIELD_PRIVATE(thistype, n)        \
+  TYPE_TYPEDEF_FIELD (thistype, n).is_private
 
 #define TYPE_IS_OPAQUE(thistype) \
   (((TYPE_CODE (thistype) == TYPE_CODE_STRUCT) \
