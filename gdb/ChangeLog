@@ -1,3 +1,8 @@
+2017-10-17  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache::xfer_part): Remove parameters read and
+	write, add parameter is_raw.  All callers are updated.
+
 2017-10-16  Keith Seitz  <keiths@redhat.com>
 
         * c-typeprint.c (enum access_specifier): Moved here from
