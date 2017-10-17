@@ -13131,7 +13131,8 @@ dwarf2_add_typedef (struct field_info *fip, struct die_info *die,
       fp->is_protected = 1;
       break;
     default:
-      gdb_assert_not_reached ("unexpected accessibility attribute");
+      complaint (&symfile_complaints,
+		 _("Unhandled DW_AT_accessibility value (%x)"), accessibility);
     }
 
   new_field->next = fip->typedef_field_list;
