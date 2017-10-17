@@ -1039,7 +1039,7 @@ xml_fetch_content_from_file (const char *filename, void *baton)
 	break;
 
       len = len * 2;
-      text.reset ((char *) xrealloc (text.get (), len));
+      text.reset ((char *) xrealloc (text.release (), len));
     }
 
   text.get ()[offset] = '\0';

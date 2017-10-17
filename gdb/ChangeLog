@@ -1,3 +1,9 @@
+2017-10-17  Pedro Alves  <palves@redhat.com>
+
+	* xml-support.c (xml_fetch_content_from_file): Call
+	unique_ptr::release() instead unique_ptr::get() when passing
+	through xrealloc.
+
 2017-10-17  Yao Qi  <yao.qi@linaro.org>
 
 	* regcache.c (regcache::xfer_part): Remove parameters read and
