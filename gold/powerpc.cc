@@ -6649,7 +6649,7 @@ Target_powerpc<size, big_endian>::Scan::local(
 	  shndx = ppc_object->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
 	  if (is_ordinary && shndx == ppc_object->toc_shndx())
 	    {
-	      Address dst_off = lsym.get_st_value() + reloc.get_r_offset();
+	      Address dst_off = lsym.get_st_value() + reloc.get_r_addend();
 	      if (dst_off < ppc_object->section_size(shndx))
 		{
 		  bool ok = false;
@@ -7317,7 +7317,7 @@ Target_powerpc<size, big_endian>::Scan::global(
 	      if (shndx == sym_object->toc_shndx())
 		{
 		  Sized_symbol<size>* sym = symtab->get_sized_symbol<size>(gsym);
-		  Address dst_off = sym->value() + reloc.get_r_offset();
+		  Address dst_off = sym->value() + reloc.get_r_addend();
 		  if (dst_off < sym_object->section_size(shndx))
 		    {
 		      bool ok = false;

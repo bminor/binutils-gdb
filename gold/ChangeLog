@@ -1,3 +1,10 @@
+2017-10-18  Kyle Butt  <iteratee@google.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Scan::local): Correct dst_off
+	calculation for TOC16 relocs.
+	(Target_powerpc::Scan::global): Likewise.
+
 2017-09-28  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc<64,*>::powerpc_info): Set
