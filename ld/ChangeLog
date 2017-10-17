@@ -1,3 +1,11 @@
+2017-10-17  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (-z): Combine negative options with corresponding
+	positive option.  Sort the table.  Expand and correct "combreloc",
+	"common", "common-page-size", "interpose", "loadfltr",
+	"max-page-size", "muldefs", "nodefaultlib", "nodelete", "nodlopen",
+	"nodump", "noextern-protected-data", "now", "origin", and "text".
+
 2017-10-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emulparams/elf32_x86_64.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):

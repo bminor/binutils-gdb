@@ -1116,17 +1116,49 @@ for Solaris compatibility.
 The recognized keywords are:
 @table @samp
 
+@item bndplt
+Always generate BND prefix in PLT entries. Supported for Linux/x86_64.
+
+@item call-nop=prefix-addr
+@itemx call-nop=suffix-nop
+@itemx call-nop=prefix-@var{byte}
+@itemx call-nop=suffix-@var{byte}
+Specify the 1-byte @code{NOP} padding when transforming indirect call
+to a locally defined function, foo, via its GOT slot.
+@option{call-nop=prefix-addr} generates @code{0x67 call foo}.
+@option{call-nop=suffix-nop} generates @code{call foo 0x90}.
+@option{call-nop=prefix-@var{byte}} generates @code{@var{byte} call foo}.
+@option{call-nop=suffix-@var{byte}} generates @code{call foo @var{byte}}.
+Supported for i386 and x86_64.
+
 @item combreloc
-Combines multiple reloc sections and sorts them to make dynamic symbol
-lookup caching possible.
+@itemx nocombreloc
+Combine multiple dynamic relocation sections and sort to improve
+dynamic symbol lookup caching.  Do not do this if @samp{nocombreloc}.
 
 @item common
-Generate common symbols with the STT_COMMON type druing a relocatable
-link.
+@itemx nocommon
+Generate common symbols with STT_COMMON type during a relocatable
+link.  Use STT_OBJECT type if @samp{nocommon}.
+
+@item common-page-size=@var{value}
+Set the page size most commonly used to @var{value}.  Memory image
+layout will be optimized to minimize memory pages if the system is
+using pages of this size.
 
 @item defs
 Disallows undefined symbols in object files.  Undefined symbols in
 shared libraries are still allowed.
+
+@item dynamic-undefined-weak
+@itemx nodynamic-undefined-weak
+Make undefined weak symbols dynamic when building a dynamic object,
+if they are referenced from a regular object file and not forced local
+by symbol visibility or versioning.  Do not make them dynamic if
+@samp{nodynamic-undefined-weak}.  If neither option is given, a target
+may default to either option being in force, or make some other
+selection of undefined weak symbols dynamic.  Not all targets support
+these options.
 
 @item execstack
 Marks the object as requiring executable stack.
@@ -1144,138 +1176,6 @@ tag.  Global auditing requires that any auditing library defined via
 the @option{--depaudit} or @option{-P} command line options be run for
 all dynamic objects loaded by the application.
 
-@item initfirst
-This option is only meaningful when building a shared object.
-It marks the object so that its runtime initialization will occur
-before the runtime initialization of any other objects brought into
-the process at the same time.  Similarly the runtime finalization of
-the object will occur after the runtime finalization of any other
-objects.
-
-@item interpose
-Marks the object that its symbol table interposes before all symbols
-but the primary executable.
-
-@item lazy
-When generating an executable or shared library, mark it to tell the
-dynamic linker to defer function call resolution to the point when
-the function is called (lazy binding), rather than at load time.
-Lazy binding is the default.
-
-@item loadfltr
-Marks  the object that its filters be processed immediately at
-runtime.
-
-@item muldefs
-Allows multiple definitions.
-
-@item nocombreloc
-Disables multiple reloc sections combining.
-
-@item nocommon
-Generate common symbols with the STT_OBJECT type druing a relocatable
-link.
-
-@item nocopyreloc
-Disable linker generated .dynbss variables used in place of variables
-defined in shared libraries.  May result in dynamic text relocations.
-
-@item nodefaultlib
-Marks the object that the search for dependencies of this object will
-ignore any default library search paths.
-
-@item nodelete
-Marks the object shouldn't be unloaded at runtime.
-
-@item nodlopen
-Marks the object not available to @code{dlopen}.
-
-@item nodump
-Marks the object can not be dumped by @code{dldump}.
-
-@item noexecstack
-Marks the object as not requiring executable stack.
-
-@item text
-Treat DT_TEXTREL in shared object as error.
-
-@item notext
-Don't treat DT_TEXTREL in shared object as error.
-
-@item textoff
-Don't treat DT_TEXTREL in shared object as error.
-
-@item norelro
-Don't create an ELF @code{PT_GNU_RELRO} segment header in the object.
-
-@item now
-When generating an executable or shared library, mark it to tell the
-dynamic linker to resolve all symbols when the program is started, or
-when the shared library is linked to using dlopen, instead of
-deferring function call resolution to the point when the function is
-first called.
-
-@item origin
-Marks the object may contain $ORIGIN.
-
-@item relro
-Create an ELF @code{PT_GNU_RELRO} segment header in the object.  This
-specifies a memory segment that should be made read-only after
-relocation, if supported.  Specifying @samp{common-page-size} smaller
-than the system page size will render this protection ineffective.
-
-@item max-page-size=@var{value}
-Set the emulation maximum page size to @var{value}.
-
-@item common-page-size=@var{value}
-Set the emulation common page size to @var{value}.
-
-@item stack-size=@var{value}
-Specify a stack size for in an ELF @code{PT_GNU_STACK} segment.
-Specifying zero will override any default non-zero sized
-@code{PT_GNU_STACK} segment creation.
-
-@item bndplt
-Always generate BND prefix in PLT entries. Supported for Linux/x86_64.
-
-@item noextern-protected-data
-Don't treat protected data symbol as external when building shared
-library.  This option overrides linker backend default.  It can be used
-to workaround incorrect relocations against protected data symbols
-generated by compiler.  Updates on protected data symbols by another
-module aren't visible to the resulting shared library.  Supported for
-i386 and x86-64.
-
-@item dynamic-undefined-weak
-Make undefined weak symbols dynamic when building a dynamic object,
-if they are referenced from a regular object file and not forced local
-by symbol visibility or versioning.  Not all targets support this
-option.
-
-@item nodynamic-undefined-weak
-Do not make undefined weak symbols dynamic when building a dynamic
-object.  Not all targets support this option.  If neither
-@option{-z nodynamic-undefined-weak} nor @option{-z dynamic-undefined-weak}
-are given, a target may default to either option being in force, or
-make some other selection of undefined weak symbols dynamic.
-
-@item noreloc-overflow
-Disable relocation overflow check.  This can be used to disable
-relocation overflow check if there will be no dynamic relocation
-overflow at run-time.  Supported for x86_64.
-
-@item call-nop=prefix-addr
-@itemx call-nop=suffix-nop
-@itemx call-nop=prefix-@var{byte}
-@itemx call-nop=suffix-@var{byte}
-Specify the 1-byte @code{NOP} padding when transforming indirect call
-to a locally defined function, foo, via its GOT slot.
-@option{call-nop=prefix-addr} generates @code{0x67 call foo}.
-@option{call-nop=suffix-nop} generates @code{call foo 0x90}.
-@option{call-nop=prefix-@var{byte}} generates @code{@var{byte} call foo}.
-@option{call-nop=suffix-@var{byte}} generates @code{call foo @var{byte}}.
-Supported for i386 and x86_64.
-
 @item ibtplt
 Generate Intel Indirect Branch Tracking (IBT) enabled PLT entries.
 Supported for Linux/i386 and Linux/x86_64.
@@ -1285,10 +1185,101 @@ Generate GNU_PROPERTY_X86_FEATURE_1_IBT in .note.gnu.property section
 to indicate compatibility with IBT.  This also implies @option{ibtplt}.
 Supported for Linux/i386 and Linux/x86_64.
 
+@item initfirst
+This option is only meaningful when building a shared object.
+It marks the object so that its runtime initialization will occur
+before the runtime initialization of any other objects brought into
+the process at the same time.  Similarly the runtime finalization of
+the object will occur after the runtime finalization of any other
+objects.
+
+@item interpose
+Specify that the dynamic loader should modify its symbol search order
+so that symbols in this shared library interpose all other shared
+libraries not so marked.
+
+@item lazy
+When generating an executable or shared library, mark it to tell the
+dynamic linker to defer function call resolution to the point when
+the function is called (lazy binding), rather than at load time.
+Lazy binding is the default.
+
+@item loadfltr
+Specify that the object's filters be processed immediately at runtime.
+
+@item max-page-size=@var{value}
+Set the maximum memory page size supported to @var{value}.
+
+@item muldefs
+Allow multiple definitions.
+
+@item nocopyreloc
+Disable linker generated .dynbss variables used in place of variables
+defined in shared libraries.  May result in dynamic text relocations.
+
+@item nodefaultlib
+Specify that the dynamic loader search for dependencies of this object
+should ignore any default library search paths.
+
+@item nodelete
+Specify that the object shouldn't be unloaded at runtime.
+
+@item nodlopen
+Specify that the object is not available to @code{dlopen}.
+
+@item nodump
+Specify that the object can not be dumped by @code{dldump}.
+
+@item noexecstack
+Marks the object as not requiring executable stack.
+
+@item noextern-protected-data
+Don't treat protected data symbols as external when building a shared
+library.  This option overrides the linker backend default.  It can be
+used to work around incorrect relocations against protected data symbols
+generated by compiler.  Updates on protected data symbols by another
+module aren't visible to the resulting shared library.  Supported for
+i386 and x86-64.
+
+@item noreloc-overflow
+Disable relocation overflow check.  This can be used to disable
+relocation overflow check if there will be no dynamic relocation
+overflow at run-time.  Supported for x86_64.
+
+@item now
+When generating an executable or shared library, mark it to tell the
+dynamic linker to resolve all symbols when the program is started, or
+when the shared library is loaded by dlopen, instead of deferring
+function call resolution to the point when the function is first
+called.
+
+@item origin
+Specify that the object requires @samp{$ORIGIN} handling in paths.
+
+@item relro
+@itemx norelro
+Create an ELF @code{PT_GNU_RELRO} segment header in the object.  This
+specifies a memory segment that should be made read-only after
+relocation, if supported.  Specifying @samp{common-page-size} smaller
+than the system page size will render this protection ineffective.
+Don't create an ELF @code{PT_GNU_RELRO} segment if @samp{norelro}.
+
 @item shstk
 Generate GNU_PROPERTY_X86_FEATURE_1_SHSTK in .note.gnu.property section
 to indicate compatibility with Intel Shadow Stack.  Supported for
 Linux/i386 and Linux/x86_64.
+
+@item stack-size=@var{value}
+Specify a stack size for an ELF @code{PT_GNU_STACK} segment.
+Specifying zero will override any default non-zero sized
+@code{PT_GNU_STACK} segment creation.
+
+@item text
+@itemx notext
+@itemx textoff
+Report an error if DT_TEXTREL is set, i.e., if the binary has dynamic
+relocations in read-only sections.  Don't report an error if
+@samp{notext} or @samp{textoff}.
 
 @end table
 
