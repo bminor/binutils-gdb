@@ -1,3 +1,14 @@
+2017-10-18  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* testsuite/gas/all/align.d: Mark as unsupported on RISC-V.
+	testsuite/gas/all/relax.d: Likewise.
+	testsuite/gas/all/sleb128-2.d: Likewise.
+	testsuite/gas/all/sleb128-4.d: Likewise.
+	testsuite/gas/all/sleb128-5.d: Likewise.
+	testsuite/gas/all/sleb128-7.d: Likewise.
+	testsuite/gas/elf/section11.d: Likewise.
+	testsuite/gas/all/gas.exp (diff1.s): Likewise.
+
 2017-10-18  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/22304
