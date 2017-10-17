@@ -1,5 +1,11 @@
 2017-10-17  Alan Modra  <amodra@gmail.com>
 
+	PR 22307
+	* elf-properties.c (_bfd_elf_parse_gnu_properties): Compare datasz
+	against size left rather than comparing pointers.  Reorganise loop.
+
+2017-10-17  Alan Modra  <amodra@gmail.com>
+
 	PR 22306
 	* aoutx.h (aout_get_external_symbols): Handle stringsize of zero,
 	and error for any other size that doesn't cover the header word.
