@@ -1,3 +1,9 @@
+2017-10-17  Alan Modra  <amodra@gmail.com>
+
+	PR 22306
+	* aoutx.h (aout_get_external_symbols): Handle stringsize of zero,
+	and error for any other size that doesn't cover the header word.
+
 2017-10-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (elf_backend_data): Remove gc_sweep_hook.
