@@ -22,6 +22,7 @@ if { [istarget nios2-*-*] } {
     run_dump_tests [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
     
     run_list_test "illegal" ""
+    run_list_test "illegal_pseudoinst" ""
     run_list_test "warn_nobreak" ""
     run_list_test "warn_noat" ""
     run_list_test "movi" ""

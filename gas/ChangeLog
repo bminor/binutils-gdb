@@ -1,3 +1,13 @@
+2017-10-16  Sandra Loosemore  <sandra@codesourcery.com>
+	    Henry Wong  <henry@stuffedcow.net>
+
+	* config/tc-nios2.c (nios2_translate_pseudo_insn): Check for
+	correct number of arguments.
+	(md_assemble): Handle failure of nios2_translate_pseudo_insn.
+	* testsuite/gas/nios2/illegal_pseudoinst.l: New file.
+	* testsuite/gas/nios2/illegal_pseudoinst.s: New file.
+	* testsuite/gas/nios2/nios2.exp: Add illegal_pseudoinst test.
+
 2017-10-12  James Bowman  <james.bowman@ftdichip.com>
 
 	* config/tc-ft32.c (md_assemble): Replace FT32_FLD_K8 with
