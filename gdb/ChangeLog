@@ -1,3 +1,7 @@
+2017-10-17  Tom Tromey  <tom@tromey.com>
+
+	* regcache.c (regcache::xfer_part): Remove assertion.
+
 2017-10-17  Pedro Alves  <palves@redhat.com>
 
 	* xml-support.c (xml_fetch_content_from_file): Call

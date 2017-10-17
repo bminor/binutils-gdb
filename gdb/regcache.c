@@ -932,7 +932,6 @@ regcache::xfer_part (int regnum, int offset, int len, void *in,
     {
       enum register_status status;
 
-      gdb_assert (read != NULL);
       if (is_raw)
 	status = raw_read (regnum, reg);
       else
