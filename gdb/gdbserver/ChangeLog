@@ -1,5 +1,9 @@
 2017-10-17  Yao Qi  <yao.qi@linaro.org>
 
+	* configure.srv: Rename arm.o with arch/arm.o.
+
+2017-10-17  Yao Qi  <yao.qi@linaro.org>
+
 	* Makefile.in (CONFIG_SRC_SUBDIR): New variable.
 	(clean): Remove .o files in CONFIG_SRC_SUBDIR.
 	(distclean): Remove DEPDIR in CONFIG_SRC_SUBDIR.
