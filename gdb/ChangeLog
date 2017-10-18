@@ -1,3 +1,8 @@
+2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* expression.h (innermost_block): Remove declaration.
+	* varobj.c: Add 'parser-defs.h' include.
+
 2018-01-19  Tom Tromey  <tom@tromey.com>
 
 	* rust-lang.c (rust_lookup_symbol_nonlocal): Look up qualified

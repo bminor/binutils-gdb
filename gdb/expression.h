@@ -111,11 +111,6 @@ extern expression_up parse_exp_1 (const char **, CORE_ADDR pc,
    attempt completion.  */
 extern int parse_completion;
 
-/* The innermost context required by the stack and register variables
-   we've encountered so far.  To use this, set it to NULL, then call
-   parse_<whatever>, then look at it.  */
-extern const struct block *innermost_block;
-
 /* From eval.c */
 
 /* Values of NOSIDE argument to eval_subexp.  */
