@@ -1,3 +1,7 @@
+2017-10-18  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* MAINTAINERS: Add myself as Visium maintainer.
+
 2017-10-18  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: A note about checking file and
