@@ -1864,6 +1864,8 @@ tilepro_elf_gc_mark_hook (asection *sec,
      dealing with TLS optimization, ought to be !bfd_link_executable (info).  */
   if (bfd_link_pic (info))
     {
+      struct bfd_link_hash_entry *bh;
+
       switch (ELF32_R_TYPE (rel->r_info))
 	{
 	case R_TILEPRO_TLS_GD_CALL:
@@ -1872,8 +1874,14 @@ tilepro_elf_gc_mark_hook (asection *sec,
 	     on this reloc, so the real symbol and section will be
 	     gc marked when processing the other reloc.  That lets
 	     us handle __tls_get_addr here.  */
-	  h = elf_link_hash_lookup (elf_hash_table (info), "__tls_get_addr",
-				    FALSE, FALSE, TRUE);
+	  bh = NULL;
+	  if (! _bfd_generic_link_add_one_symbol (info, sec->owner,
+						  "__tls_get_addr", 0,
+						  bfd_und_section_ptr,
+						  0, NULL, FALSE,
+						  FALSE, &bh))
+	    return NULL;
+	  h = (struct elf_link_hash_entry *) bh;
 	  BFD_ASSERT (h != NULL);
 	  h->mark = 1;
 	  if (h->u.weakdef != NULL)
