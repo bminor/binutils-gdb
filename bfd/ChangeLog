@@ -1,3 +1,8 @@
+2017-10-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-microblaze.c (microblaze_elf_check_relocs): Check for
+	indirect and warning symbols.
+
 2017-10-17  Alan Modra  <amodra@gmail.com>
 
 	PR 22307
