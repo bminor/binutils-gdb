@@ -3507,9 +3507,7 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
 
           exp->elts[pc + 1].block = candidates[i].block;
           exp->elts[pc + 2].symbol = candidates[i].symbol;
-          if (innermost_block == NULL
-              || contained_in (candidates[i].block, innermost_block))
-            innermost_block = candidates[i].block;
+	  innermost_block.update (candidates[i]);
         }
 
       if (deprocedure_p
@@ -3554,9 +3552,7 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
 
             exp->elts[pc + 4].block = candidates[i].block;
             exp->elts[pc + 5].symbol = candidates[i].symbol;
-            if (innermost_block == NULL
-                || contained_in (candidates[i].block, innermost_block))
-              innermost_block = candidates[i].block;
+	    innermost_block.update (candidates[i]);
           }
       }
       break;

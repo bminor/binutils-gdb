@@ -1044,15 +1044,13 @@ super_name (const struct rust_op *ident, unsigned int n_supers)
 		   ident->right.params);
 }
 
-/* A helper that updates innermost_block as appropriate.  */
+/* A helper that updates the innermost block as appropriate.  */
 
 static void
 update_innermost_block (struct block_symbol sym)
 {
-  if (symbol_read_needs_frame (sym.symbol)
-      && (innermost_block == NULL
-	  || contained_in (sym.block, innermost_block)))
-    innermost_block = sym.block;
+  if (symbol_read_needs_frame (sym.symbol))
+    innermost_block.update (sym);
 }
 
 /* A helper to look up a Rust type, or fail.  This only works for

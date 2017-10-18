@@ -68,7 +68,7 @@ const struct exp_descriptor exp_descriptor_standard =
 /* Global variables declared in parser-defs.h (and commented there).  */
 const struct block *expression_context_block;
 CORE_ADDR expression_context_pc;
-const struct block *innermost_block;
+innermost_block_tracker innermost_block;
 int arglist_len;
 static struct type_stack type_stack;
 const char *lexptr;
@@ -120,6 +120,15 @@ static expression_up parse_exp_in_context (const char **, CORE_ADDR,
 static expression_up parse_exp_in_context_1 (const char **, CORE_ADDR,
 					     const struct block *, int,
 					     int, int *);
+
+/* Documented at it's declaration.  */
+
+void
+innermost_block_tracker::update (const struct block *b)
+{
+  if (m_innermost_block == NULL || contained_in (b, m_innermost_block))
+    m_innermost_block = b;
+}
 
 /* Data structure for saving values of arglist_len for function calls whose
    arguments contain other function calls.  */

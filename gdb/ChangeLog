@@ -1,5 +1,28 @@
 2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-exp.y (write_var_from_sym): Switch to innermost_block API.
+	* ada-lang.c (resolve_subexp): Likewise.
+	* breakpoint.c (set_breakpoint_condition) Likewise.
+	(watch_command_1) Likewise.
+	* c-exp.y (variable): Likewise.
+	* d-exp.y (PrimaryExpression): Likewise.
+	* f-exp.y (variable): Likewise.
+	* go-exp.y (variable): Likewise.
+	* m2-exp.y (variable): Likewise.
+	* objfiles.c (objfile::~objfile): Likewise.
+	* p-exp.y (variable): Likewise.
+	* parse.c (innermost_block): Change type.
+	* parser-defs.h (class innermost_block_tracker): New.
+	(innermost_block): Change to innermost_block_tracker.
+	* printcmd.c (display_command): Switch to innermost_block API.
+	(do_one_display): Likewise.
+	* rust-exp.y (do_one_display): Likewise.
+	* symfile.c (clear_symtab_users): Likewise.
+	* varobj.c (varobj_create): Switch to innermost_block API, replace
+	use of innermost_block with block stored on varobj object.
+
+2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* expression.h (innermost_block): Remove declaration.
 	* varobj.c: Add 'parser-defs.h' include.
 

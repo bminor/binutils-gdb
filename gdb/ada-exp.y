@@ -757,11 +757,7 @@ write_var_from_sym (struct parser_state *par_state,
 		    struct symbol *sym)
 {
   if (symbol_read_needs_frame (sym))
-    {
-      if (innermost_block == 0
-	  || contained_in (block, innermost_block))
-	innermost_block = block;
-    }
+    innermost_block.update (block);
 
   write_exp_elt_opcode (par_state, OP_VAR_VALUE);
   write_exp_elt_block (par_state, block);

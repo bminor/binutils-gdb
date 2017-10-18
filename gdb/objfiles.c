@@ -704,7 +704,7 @@ objfile::~objfile ()
      FIXME: It's not clear which of these are supposed to persist
      between expressions and which ought to be reset each time.  */
   expression_context_block = NULL;
-  innermost_block = NULL;
+  innermost_block.reset ();
 
   /* Check to see if the current_source_symtab belongs to this objfile,
      and if so, call clear_current_source_symtab_and_line.  */

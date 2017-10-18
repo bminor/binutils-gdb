@@ -75,9 +75,51 @@ extern const struct block *expression_context_block;
    then look up the macro definitions active at that point.  */
 extern CORE_ADDR expression_context_pc;
 
-/* The innermost context required by the stack and register variables
-   we've encountered so far.  */
-extern const struct block *innermost_block;
+/* When parsing expressions we track the innermost block that was
+   referenced.  */
+
+class innermost_block_tracker
+{
+public:
+  innermost_block_tracker ()
+    : m_innermost_block (NULL)
+  { /* Nothing.  */ }
+
+  /* Reset the currently stored innermost block.  Usually called before
+     parsing a new expression.  */
+  void reset ()
+  {
+    m_innermost_block = nullptr;
+  }
+
+  /* Update the stored innermost block if the new block B is more inner
+     than the currently stored block, or if no block is stored yet.  */
+  void update (const struct block *b);
+
+  /* Overload of main UPDATE method which extracts the block from BS.  */
+  void update (const struct block_symbol &bs)
+  {
+    update (bs.block);
+  }
+
+  /* Return the stored innermost block.  Can be nullptr if no symbols or
+     registers were found during an expression parse, and so no innermost
+     block was defined.  */
+  const struct block *block () const
+  {
+    return m_innermost_block;
+  }
+
+private:
+  /* The currently stored innermost block found while parsing an
+     expression.  */
+  const struct block *m_innermost_block;
+};
+
+/* The innermost context required by the stack and register variables we've
+   encountered so far.  This should be cleared before parsing an
+   expression, and queried once the parse is complete.  */
+extern innermost_block_tracker innermost_block;
 
 /* Number of arguments seen so far in innermost function call.  */
 extern int arglist_len;
