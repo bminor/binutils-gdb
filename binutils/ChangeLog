@@ -1,6 +1,9 @@
 2017-10-18  Nick Clifton  <nickc@redhat.com>
 
-	* MAINTAINERS: Moev Svein Seldal to Past Maintainers section.
+	* README-how-to-make-a-release: A note about checking file and
+	directory permissions.
+
+	* MAINTAINERS: Move Svein Seldal to Past Maintainers section.
 
 2017-10-18  Alan Modra  <amodra@gmail.com>
 
