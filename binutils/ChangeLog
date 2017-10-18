@@ -1,3 +1,14 @@
+2017-10-18  Alan Modra  <amodra@gmail.com>
+
+	PR 22303
+	* readelf.c (print_core_note): Ensure "count" sanity check
+	calculation doesn't overflow.
+	(process_notes_at): Perform note namesz and descsz checks
+	using unsigned comparisons against data remaining.  Catch
+	alignment overflow of namesz and descsz too.  Don't allocate a
+	temp for terminating "name" when there is space available
+	before descdata.
+
 2017-10-17  Tom Tromey  <tom@tromey.com>
 
 	* MAINTAINERS: Add myself as dwarf-mode.el maintainer.
