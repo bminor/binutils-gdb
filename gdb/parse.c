@@ -124,9 +124,12 @@ static expression_up parse_exp_in_context_1 (const char **, CORE_ADDR,
 /* Documented at it's declaration.  */
 
 void
-innermost_block_tracker::update (const struct block *b)
+innermost_block_tracker::update (const struct block *b,
+				 innermost_block_tracker_types t)
 {
-  if (m_innermost_block == NULL || contained_in (b, m_innermost_block))
+  if ((m_types & t) != 0
+      && (m_innermost_block == NULL
+	  || contained_in (b, m_innermost_block)))
     m_innermost_block = b;
 }
 
@@ -691,6 +694,8 @@ handle_register:
   str.ptr++;
   write_exp_string (ps, str);
   write_exp_elt_opcode (ps, OP_REGISTER);
+  innermost_block.update (expression_context_block,
+			  INNERMOST_BLOCK_FOR_REGISTERS);
   return;
 }
 

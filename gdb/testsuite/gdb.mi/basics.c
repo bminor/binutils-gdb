@@ -20,6 +20,8 @@
  *      on function calls.  Useful to test printing frames, stepping, etc.
  */
 
+unsigned long long global_zero = 0;
+
 int callee4 (void)
 {
   int A=1;

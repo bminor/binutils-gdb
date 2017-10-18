@@ -1,5 +1,23 @@
 2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	PR mi/20395
+	* ada-exp.y (write_var_from_sym): Pass extra parameter when
+	updating innermost block.
+	* parse.c (innermost_block_tracker::update): Take extra type
+	parameter, and check types match before updating innermost block.
+	(write_dollar_variable): Update innermost block for registers.
+	* parser-defs.h (enum innermost_block_tracker_type): New enum.
+	(innermost_block_tracker::innermost_block_tracker): Initialise
+	m_types member.
+	(innermost_block_tracker::reset): Take type parameter.
+	(innermost_block_tracker::update): Take type parameter, and pass
+	type through as needed.
+	(innermost_block_tracker::m_types): New member.
+	* varobj.c (varobj_create): Pass type when reseting innermost
+	block.
+
+2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-exp.y (write_var_from_sym): Switch to innermost_block API.
 	* ada-lang.c (resolve_subexp): Likewise.
 	* breakpoint.c (set_breakpoint_condition) Likewise.

@@ -75,6 +75,24 @@ extern const struct block *expression_context_block;
    then look up the macro definitions active at that point.  */
 extern CORE_ADDR expression_context_pc;
 
+/* While parsing expressions we need to track the innermost lexical block
+   that we encounter.  In some situations we need to track the innermost
+   block just for symbols, and in other situations we want to track the
+   innermost block for symbols and registers.  These flags are used by the
+   innermost block tracker to control which blocks we consider for the
+   innermost block.  These flags can be combined together as needed.  */
+
+enum innermost_block_tracker_type
+{
+  /* Track the innermost block for symbols within an expression.  */
+  INNERMOST_BLOCK_FOR_SYMBOLS = (1 << 0),
+
+  /* Track the innermost block for registers within an expression.  */
+  INNERMOST_BLOCK_FOR_REGISTERS = (1 << 1)
+};
+DEF_ENUM_FLAGS_TYPE (enum innermost_block_tracker_type,
+		     innermost_block_tracker_types);
+
 /* When parsing expressions we track the innermost block that was
    referenced.  */
 
@@ -82,24 +100,32 @@ class innermost_block_tracker
 {
 public:
   innermost_block_tracker ()
-    : m_innermost_block (NULL)
+    : m_types (INNERMOST_BLOCK_FOR_SYMBOLS),
+      m_innermost_block (NULL)
   { /* Nothing.  */ }
 
   /* Reset the currently stored innermost block.  Usually called before
-     parsing a new expression.  */
-  void reset ()
+     parsing a new expression.  As the most common case is that we only
+     want to gather the innermost block for symbols in an expression, this
+     becomes the default block tracker type.  */
+  void reset (innermost_block_tracker_types t = INNERMOST_BLOCK_FOR_SYMBOLS)
   {
-    m_innermost_block = nullptr;
+    m_types = t;
+    m_innermost_block = NULL;
   }
 
   /* Update the stored innermost block if the new block B is more inner
-     than the currently stored block, or if no block is stored yet.  */
-  void update (const struct block *b);
+     than the currently stored block, or if no block is stored yet.  The
+     type T tells us whether the block B was for a symbol or for a
+     register.  The stored innermost block is only updated if the type T is
+     a type we are interested in, the types we are interested in are held
+     in M_TYPES and set during RESET.  */
+  void update (const struct block *b, innermost_block_tracker_types t);
 
   /* Overload of main UPDATE method which extracts the block from BS.  */
   void update (const struct block_symbol &bs)
   {
-    update (bs.block);
+    update (bs.block, INNERMOST_BLOCK_FOR_SYMBOLS);
   }
 
   /* Return the stored innermost block.  Can be nullptr if no symbols or
@@ -111,13 +137,16 @@ public:
   }
 
 private:
+  /* The type of innermost block being looked for.  */
+  innermost_block_tracker_types m_types;
+
   /* The currently stored innermost block found while parsing an
      expression.  */
   const struct block *m_innermost_block;
 };
 
-/* The innermost context required by the stack and register variables we've
-   encountered so far.  This should be cleared before parsing an
+/* The innermost context required by the stack and register variables
+   we've encountered so far.  This should be cleared before parsing an
    expression, and queried once the parse is complete.  */
 extern innermost_block_tracker innermost_block;
 

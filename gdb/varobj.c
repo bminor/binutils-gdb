@@ -311,7 +311,8 @@ varobj_create (const char *objname,
 	}
 
       p = expression;
-      innermost_block.reset ();
+      innermost_block.reset (INNERMOST_BLOCK_FOR_SYMBOLS
+			     | INNERMOST_BLOCK_FOR_REGISTERS);
       /* Wrap the call to parse expression, so we can 
          return a sensible error.  */
       TRY

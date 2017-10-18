@@ -1,3 +1,11 @@
+2018-01-21  Don Breazeal  <donb@codesourcery.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.mi/basics.c: Add new global.
+	* gdb.mi/mi-frame-regs.exp: New file.
+	* gdb.mi/mi-var-create-rtti.exp: Update expected results, add new
+	case.
+
 2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.arch/amd64-entry-value.exp: Test using @entry on a
