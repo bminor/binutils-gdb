@@ -1,3 +1,7 @@
+2017-10-18  Yao Qi  <yao.qi@linaro.org>
+
+	* features/tic6x-c62x-linux.c: Remove.
+
 2017-10-17  Tom Tromey  <tom@tromey.com>
 
 	* disasm.c (do_mixed_source_and_assembly_deprecated): Use
