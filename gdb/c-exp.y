@@ -1554,7 +1554,7 @@ oper:	OPERATOR NEW
 	|	OPERATOR '>'
 			{ $$ = operator_stoken (">"); }
 	|	OPERATOR ASSIGN_MODIFY
-			{ const char *op = "unknown";
+			{ const char *op = " unknown";
 			  switch ($2)
 			    {
 			    case BINOP_RSH:
@@ -1630,7 +1630,13 @@ oper:	OPERATOR NEW
 
 			  c_print_type ($2, NULL, &buf, -1, 0,
 					&type_print_raw_options);
-			  $$ = operator_stoken (buf.c_str ());
+
+			  /* This also needs canonicalization.  */
+			  std::string canon
+			    = cp_canonicalize_string (buf.c_str ());
+			  if (canon.empty ())
+			    canon = std::move (buf.string ());
+			  $$ = operator_stoken ((" " + canon).c_str ());
 			}
 	;
 

@@ -1,3 +1,11 @@
+2017-11-18  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/cpexprs.cc (base) <operator fluff const* const*>: New
+	method.
+	(main): Call it.
+	* gdb.cp/cpexprs.exp: Add new conversion operator to test matrix.
+	Add additional user-defined conversion operator tests.
+
 2017-10-17  Pedro Alves  <palves@redhat.com>
 
 	* boards/native-stdio-gdbserver.exp: Load "local-board".
