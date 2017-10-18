@@ -1,5 +1,11 @@
 2017-10-18  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/22304
+	* testsuite/gas/cris/range-err-1.s: Remove spurious xfails.
+	* testsuite/gas/cris/cris.exp: Expect the shexpr-1 test to pass.
+
+2017-10-18  Nick Clifton  <nickc@redhat.com>
+
 	* po/sv.po: Updated Swedish translation.
 
 2017-10-16  Sandra Loosemore  <sandra@codesourcery.com>
