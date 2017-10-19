@@ -1622,7 +1622,7 @@ static int
 tilegx_elf_tls_transition (struct bfd_link_info *info, int r_type,
 			   int is_local, bfd_boolean disable_le_transition)
 {
-  if (bfd_link_pic (info))
+  if (!bfd_link_executable (info))
     return r_type;
 
   if (is_local && !disable_le_transition)
@@ -1734,7 +1734,7 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_TILEGX_IMM16_X1_HW0_LAST_TLS_LE:
 	case R_TILEGX_IMM16_X0_HW1_LAST_TLS_LE:
 	case R_TILEGX_IMM16_X1_HW1_LAST_TLS_LE:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    goto r_tilegx_plt32;
 	  break;
 
@@ -1755,7 +1755,7 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_TILEGX_IMM16_X0_HW1_LAST_TLS_IE:
 	case R_TILEGX_IMM16_X1_HW1_LAST_TLS_IE:
           tls_type = GOT_TLS_IE;
-          if (bfd_link_pic (info))
+          if (!bfd_link_executable (info))
             info->flags |= DF_STATIC_TLS;
           goto have_got_reference;
 
@@ -1837,7 +1837,7 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case R_TILEGX_TLS_GD_CALL:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    {
 	      /* These are basically R_TILEGX_JUMPOFF_X1_PLT relocs
 		 against __tls_get_addr.  */
@@ -2348,7 +2348,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
      requiring no TLS entry.  */
   if (h->got.refcount > 0
       && !htab->disable_le_transition
-      && !bfd_link_pic (info)
+      && bfd_link_executable (info)
       && h->dynindx == -1
       && tilegx_elf_hash_entry(h)->tls_type == GOT_TLS_IE)
     h->got.offset = (bfd_vma) -1;
@@ -3060,9 +3060,9 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else if (h != NULL)
 	    tls_type = tilegx_elf_hash_entry(h)->tls_type;
 
-	  is_tls_iele = (! bfd_link_pic (info) || tls_type == GOT_TLS_IE);
+	  is_tls_iele = (bfd_link_executable (info) || tls_type == GOT_TLS_IE);
 	  is_tls_le = is_tls_iele && (!input_section->sec_flg0
-				      && !bfd_link_pic (info)
+				      && bfd_link_executable (info)
 				      && (h == NULL || h->dynindx == -1));
 
 	  if (r_type == R_TILEGX_TLS_GD_CALL)
@@ -3207,7 +3207,7 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  break;
 	case R_TILEGX_TLS_IE_LOAD:
 	  if (!input_section->sec_flg0
-	      && !bfd_link_pic (info)
+	      && bfd_link_executable (info)
 	      && (h == NULL || h->dynindx == -1))
 	    {
 	      /* IE -> LE */
@@ -3574,7 +3574,7 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
         case R_TILEGX_IMM16_X1_HW0_LAST_TLS_LE:
         case R_TILEGX_IMM16_X0_HW1_LAST_TLS_LE:
         case R_TILEGX_IMM16_X1_HW1_LAST_TLS_LE:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_boolean skip;
@@ -3626,7 +3626,7 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else if (h != NULL)
 	    {
 	      tls_type = tilegx_elf_hash_entry(h)->tls_type;
-	      if (!bfd_link_pic (info)
+	      if (bfd_link_executable (info)
 		  && h->dynindx == -1
 		  && tls_type == GOT_TLS_IE)
 		r_type = (!input_section->sec_flg0
