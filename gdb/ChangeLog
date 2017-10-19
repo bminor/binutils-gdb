@@ -1,3 +1,16 @@
+2018-06-07  Alan Hayward  <alan.hayward@arm.com>
+
+        * aarch64-tdep.c (AARCH64_SVE_V0_REGNUM): Add define.
+        (aarch64_vnv_type): Add function.
+        (aarch64_pseudo_register_name): Add V regs for SVE.
+        (aarch64_pseudo_register_type): Likewise.
+        (aarch64_pseudo_register_reggroup_p): Likewise.
+        (aarch64_pseudo_read_value_2): Use V0 offset for SVE
+        (aarch64_pseudo_read_value): Add V regs for SVE.
+        (aarch64_pseudo_write_2): Use V0 offset for SVE
+        (aarch64_pseudo_write): Add V regs for SVE.
+        * aarch64-tdep.h (struct gdbarch_tdep): Add vnv_type.
+
 2018-06-05  Tom Tromey  <tom@tromey.com>
 
 	* cli/cli-cmds.c (show_version): Update.
