@@ -1,3 +1,11 @@
+2017-10-19  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* testsuite/gas/all/fill-1.s: Use normal labels.  Change .text to
+	.data. Pick different values.  Use .dc.w instead of .word.
+	* testsuite/gas/all/fill-1.d: New objdump output check.
+	* testsuite/gas/all/gas.exp: Use run_dump_test to execute fill-1
+	testcase.
+
 2017-10-18  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* testsuite/gas/all/align.d: Mark as unsupported on RISC-V.

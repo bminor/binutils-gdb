@@ -488,4 +488,4 @@ run_dump_test "org-4"
 run_dump_test "org-5"
 run_dump_test "org-6"
 
-gas_test "fill-1.s" "" "" "test .fill forward label references"
+run_dump_test "fill-1"
