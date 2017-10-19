@@ -1,3 +1,16 @@
+2017-10-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 21621
+	* config/tc-avr.h (struct avr_frag_data): Add prev_opcode field.
+	(TC_FRAG_INIT): Define.
+	(avr_frag_init): Add prototype.
+	* config/tc-avr.c (avr_frag_init): New function.
+	(avr_operands): Replace static local 'prev' variable with
+	prev_opcode field in current frag.
+	* testsuite/gas/avr/pr21621.s: New test source file.
+	* testsuite/gas/avr/pr21621.d: New test driver file.
+	* testsuite/gas/avr/pr21621.s: New test error output file.
+
 2017-10-19  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* testsuite/gas/all/fill-1.s: Use normal labels.  Change .text to
