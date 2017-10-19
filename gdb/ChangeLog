@@ -1,5 +1,13 @@
 2017-10-19  Pedro Alves  <palves@redhat.com>
 
+	* ser-base.c (ser_base_read_error_fd): Delete the file handler if
+	async.
+	(handle_error_fd): New function.
+	(ser_base_async): Add/delete an event loop file handler for
+	error_fd.
+
+2017-10-19  Pedro Alves  <palves@redhat.com>
+
 	* xml-support.c (xml_fetch_content_from_file): Don't read in
 	chunks.  Instead use fseek to determine the file's size, and read
 	it in one go.

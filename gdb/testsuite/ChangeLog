@@ -1,3 +1,8 @@
+2017-10-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/long-inferior-output.c: New file.
+	* gdb.base/long-inferior-output.exp: New file.
+
 2017-11-18  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.cp/cpexprs.cc (base) <operator fluff const* const*>: New

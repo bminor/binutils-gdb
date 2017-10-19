@@ -288,6 +288,8 @@ ser_base_read_error_fd (struct serial *scb, int close_fd)
 	  if (s == 0 && close_fd)
 	    {
 	      /* End of file.  */
+	      if (serial_is_async_p (scb))
+		delete_file_handler (scb->error_fd);
 	      close (scb->error_fd);
 	      scb->error_fd = -1;
 	      break;
@@ -311,6 +313,17 @@ ser_base_read_error_fd (struct serial *scb, int close_fd)
 	  fputs_unfiltered (current, gdb_stderr);
        }
     }
+}
+
+/* Event-loop callback for a serial's error_fd.  Flushes any error
+   output we might have.  */
+
+static void
+handle_error_fd (int error, gdb_client_data client_data)
+{
+  serial *scb = (serial *) client_data;
+
+  ser_base_read_error_fd (scb, 0);
 }
 
 /* Read a character with user-specified timeout.  TIMEOUT is number of
@@ -589,6 +602,9 @@ ser_base_async (struct serial *scb,
 	fprintf_unfiltered (gdb_stdlog, "[fd%d->asynchronous]\n",
 			    scb->fd);
       reschedule (scb);
+
+      if (scb->error_fd != -1)
+	add_file_handler (scb->error_fd, handle_error_fd, scb);
     }
   else
     {
@@ -607,5 +623,8 @@ ser_base_async (struct serial *scb,
 	  delete_timer (scb->async_state);
 	  break;
 	}
+
+      if (scb->error_fd != -1)
+	delete_file_handler (scb->error_fd);
     }
 }
