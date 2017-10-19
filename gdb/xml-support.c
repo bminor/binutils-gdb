@@ -998,7 +998,6 @@ xml_fetch_content_from_file (const char *filename, void *baton)
 {
   const char *dirname = (const char *) baton;
   gdb_file_up file;
-  size_t len, offset;
 
   if (dirname && *dirname)
     {
@@ -1015,34 +1014,25 @@ xml_fetch_content_from_file (const char *filename, void *baton)
   if (file == NULL)
     return NULL;
 
-  /* Read in the whole file, one chunk at a time.  */
-  len = 4096;
-  offset = 0;
-  gdb::unique_xmalloc_ptr<char> text ((char *) xmalloc (len));
-  while (1)
+  /* Read in the whole file.  */
+
+  size_t len;
+
+  if (fseek (file.get (), 0, SEEK_END) == -1)
+    perror_with_name (_("seek to end of file"));
+  len = ftell (file.get ());
+  rewind (file.get ());
+
+  gdb::unique_xmalloc_ptr<char> text ((char *) xmalloc (len + 1));
+
+  fread (text.get (), 1, len, file.get ());
+  if (ferror (file.get ()))
     {
-      size_t bytes_read;
-
-      /* Continue reading where the last read left off.  Leave at least
-	 one byte so that we can NUL-terminate the result.  */
-      bytes_read = fread (text.get () + offset, 1, len - offset - 1,
-			  file.get ());
-      if (ferror (file.get ()))
-	{
-	  warning (_("Read error from \"%s\""), filename);
-	  return NULL;
-	}
-
-      offset += bytes_read;
-
-      if (feof (file.get ()))
-	break;
-
-      len = len * 2;
-      text.reset ((char *) xrealloc (text.release (), len));
+      warning (_("Read error from \"%s\""), filename);
+      return NULL;
     }
 
-  text.get ()[offset] = '\0';
+  text.get ()[len] = '\0';
   return text;
 }
 
