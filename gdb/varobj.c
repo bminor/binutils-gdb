@@ -298,7 +298,6 @@ varobj_create (const char *objname,
       else
 	fi = NULL;
 
-      /* frame = -2 means always use selected frame.  */
       if (type == USE_SELECTED_FRAME)
 	var->root->floating = true;
 

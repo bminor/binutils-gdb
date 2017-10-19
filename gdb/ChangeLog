@@ -1,5 +1,9 @@
 2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* varobj.c (varobj_create): Remove out of date comment.
+
+2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	PR mi/20395
 	* ada-exp.y (write_var_from_sym): Pass extra parameter when
 	updating innermost block.
