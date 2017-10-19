@@ -1,5 +1,10 @@
 2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* varobj.c (varobj_create): Don't set valid_block when creating a
+	floating varobj.
+
+2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* varobj.c (varobj_create): Remove out of date comment.
 
 2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>

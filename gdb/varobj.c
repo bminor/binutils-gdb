@@ -336,7 +336,8 @@ varobj_create (const char *objname,
 	}
 
       var->format = variable_default_display (var.get ());
-      var->root->valid_block = innermost_block.block ();
+      var->root->valid_block =
+	var->root->floating ? NULL : innermost_block.block ();
       var->name = expression;
       /* For a root var, the name and the expr are the same.  */
       var->path_expr = expression;

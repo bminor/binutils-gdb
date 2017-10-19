@@ -1,3 +1,9 @@
+2018-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-mi.exp: Don't expect a thread-id for floating
+	varobj.
+	* gdb.mi/mi-var-create-rtti.exp: Likewise.
+
 2018-01-21  Don Breazeal  <donb@codesourcery.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 

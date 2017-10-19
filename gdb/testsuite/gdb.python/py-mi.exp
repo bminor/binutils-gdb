@@ -101,7 +101,7 @@ mi_varobj_update_dynamic container "varobj update 1" {
     type_changed false new_num_children 1 dynamic 1 has_more 0
 } {
 } {
-    { name {container.\[0\]} exp {\[0\]} numchild 0 type int thread-id 1 }
+    { name {container.\[0\]} exp {\[0\]} numchild 0 type int }
 }
 
 mi_next "next over update 2"
@@ -110,7 +110,7 @@ mi_varobj_update_dynamic container "varobj update 2" {
     type_changed false new_num_children 2 dynamic 1 has_more 0
 } {
 } {
-    { name {container.\[1\]} exp {\[1\]} numchild 0 type int thread-id 1 }
+    { name {container.\[1\]} exp {\[1\]} numchild 0 type int }
 }
 
 mi_gdb_test "-var-set-visualizer container None" \
@@ -129,8 +129,8 @@ mi_varobj_update_dynamic container "varobj update after choosing default" {
     type_changed false new_num_children 2 dynamic 1 has_more 0
 } {
 } {
-    { name {container.\[0\]} exp {\[0\]} numchild 0 type int thread-id 1 }
-    { name {container.\[1\]} exp {\[1\]} numchild 0 type int thread-id 1 }
+    { name {container.\[0\]} exp {\[0\]} numchild 0 type int }
+    { name {container.\[1\]} exp {\[1\]} numchild 0 type int }
 }
 
 mi_gdb_test "-var-set-visualizer container ContainerPrinter" \
@@ -142,8 +142,8 @@ mi_varobj_update_dynamic container \
       type_changed false new_num_children 2 dynamic 1 has_more 0
   } {
   } {
-      { name {container.\[0\]} exp {\[0\]} numchild 0 type int thread-id 1 }
-      { name {container.\[1\]} exp {\[1\]} numchild 0 type int thread-id 1 }
+      { name {container.\[0\]} exp {\[0\]} numchild 0 type int }
+      { name {container.\[1\]} exp {\[1\]} numchild 0 type int }
   }
 
 mi_list_varobj_children_range container 1 2 2 {
