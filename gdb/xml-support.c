@@ -1025,8 +1025,8 @@ xml_fetch_content_from_file (const char *filename, void *baton)
 
   gdb::unique_xmalloc_ptr<char> text ((char *) xmalloc (len + 1));
 
-  fread (text.get (), 1, len, file.get ());
-  if (ferror (file.get ()))
+  if (fread (text.get (), 1, len, file.get ()) != len
+      || ferror (file.get ()))
     {
       warning (_("Read error from \"%s\""), filename);
       return NULL;

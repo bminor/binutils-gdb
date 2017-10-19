@@ -1,5 +1,10 @@
 2017-10-19  Pedro Alves  <palves@redhat.com>
 
+	* xml-support.c (xml_fetch_content_from_file): Check fread's
+	return.
+
+2017-10-19  Pedro Alves  <palves@redhat.com>
+
 	* ser-base.c (ser_base_read_error_fd): Delete the file handler if
 	async.
 	(handle_error_fd): New function.
