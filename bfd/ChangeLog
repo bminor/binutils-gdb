@@ -1,5 +1,15 @@
 2017-10-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/22263
+	* elfxx-sparc.c (sparc_elf_tls_transition): Replace
+	bfd_link_pic with !bfd_link_executable, !bfd_link_pic with
+	bfd_link_executable for TLS check.
+	(_bfd_sparc_elf_check_relocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(_bfd_sparc_elf_relocate_section): Likewise.
+
+2017-10-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-tilepro.c (tilepro_elf_gc_mark_hook): Call
 	_bfd_generic_link_add_one_symbol to mark __tls_get_addr.
 	* elfxx-tilegx.c (tilegx_elf_gc_mark_hook): Likewise.
