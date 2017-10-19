@@ -1,3 +1,13 @@
+2017-10-24  Andrew Waterman  <andrew@sifive.com>
+
+	* riscv-opc.c (match_c_addi16sp) : New function.
+	(match_c_addi4spn): New function.
+	(match_c_lui): Don't allow 0-immediate encodings.
+	(riscv_opcodes) <addi>: Use the above functions.
+	<add>: Likewise.
+	<c.addi4spn>: Likewise.
+	<c.addi16sp>: Likewise.
+
 2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* i386-init.h: Regenerate

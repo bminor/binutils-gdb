@@ -1,5 +1,15 @@
 2017-10-24  Andrew Waterman  <andrew@sifive.com>
 
+	* testsuite/gas/riscv/c-addi16sp-fail.d: New test.
+	testsuite/gas/riscv/c-addi16sp-fail.l: Likewise.
+	testsuite/gas/riscv/c-addi16sp-fail.s: Likewise.
+	testsuite/gas/riscv/c-addi4spn-fail.d: Likewise.
+	testsuite/gas/riscv/c-addi4spn-fail.l: Likewise.
+	testsuite/gas/riscv/c-addi4spn-fail.s: Likewise.
+	testsuite/gas/riscv/riscv.exp: Add new tests.
+
+2017-10-24  Andrew Waterman  <andrew@sifive.com>
+
 	* testsuite/gas/riscv/c-lui-fail.d: New testcase.
 	gas/testsuite/gas/riscv/c-lui-fail.l: Likewise.
 	gas/testsuite/gas/riscv/c-lui-fail.s: Likewise.
