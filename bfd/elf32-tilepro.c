@@ -1433,7 +1433,7 @@ static int
 tilepro_elf_tls_transition (struct bfd_link_info *info, int r_type,
 			    int is_local)
 {
-  if (bfd_link_pic (info))
+  if (!bfd_link_executable (info))
     return r_type;
 
   if (is_local)
@@ -1518,7 +1518,7 @@ tilepro_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
         case R_TILEPRO_IMM16_X1_TLS_LE_HI:
         case R_TILEPRO_IMM16_X0_TLS_LE_HA:
         case R_TILEPRO_IMM16_X1_TLS_LE_HA:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    goto r_tilepro_plt32;
 	  break;
 
@@ -1543,7 +1543,7 @@ tilepro_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
         case R_TILEPRO_IMM16_X0_TLS_IE_HA:
         case R_TILEPRO_IMM16_X1_TLS_IE_HA:
           tls_type = GOT_TLS_IE;
-          if (bfd_link_pic (info))
+          if (!bfd_link_executable (info))
             info->flags |= DF_STATIC_TLS;
           goto have_got_reference;
 
@@ -1629,7 +1629,7 @@ tilepro_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case R_TILEPRO_TLS_GD_CALL:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    {
 	      /* These are basically R_TILEPRO_JOFFLONG_X1_PLT relocs
 		 against __tls_get_addr.  */
@@ -2105,7 +2105,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   /* If a TLS_IE symbol is now local to the binary, make it a TLS_LE
      requiring no TLS entry.  */
   if (h->got.refcount > 0
-      && !bfd_link_pic (info)
+      && bfd_link_executable (info)
       && h->dynindx == -1
       && tilepro_elf_hash_entry(h)->tls_type == GOT_TLS_IE)
     h->got.offset = (bfd_vma) -1;
@@ -2786,8 +2786,8 @@ tilepro_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else if (h != NULL)
 	    tls_type = tilepro_elf_hash_entry(h)->tls_type;
 
-	  is_tls_iele = (! bfd_link_pic (info) || tls_type == GOT_TLS_IE);
-	  is_tls_le = is_tls_iele && (!bfd_link_pic (info)
+	  is_tls_iele = (bfd_link_executable (info) || tls_type == GOT_TLS_IE);
+	  is_tls_le = is_tls_iele && (bfd_link_executable (info)
 				      && (h == NULL || h->dynindx == -1));
 
 	  if (r_type == R_TILEPRO_TLS_GD_CALL)
@@ -2864,7 +2864,7 @@ tilepro_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    }
 	  break;
 	case R_TILEPRO_TLS_IE_LOAD:
-	  if (!bfd_link_pic (info) && (h == NULL || h->dynindx == -1))
+	  if (bfd_link_executable (info) && (h == NULL || h->dynindx == -1))
 	    /* IE -> LE */
 	    tilepro_replace_insn (contents + rel->r_offset,
 				  insn_mask_X1_no_dest_no_srca,
@@ -3191,7 +3191,7 @@ tilepro_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
         case R_TILEPRO_IMM16_X1_TLS_LE_HI:
         case R_TILEPRO_IMM16_X0_TLS_LE_HA:
         case R_TILEPRO_IMM16_X1_TLS_LE_HA:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_boolean skip;
@@ -3246,7 +3246,9 @@ tilepro_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else if (h != NULL)
 	    {
 	      tls_type = tilepro_elf_hash_entry(h)->tls_type;
-	      if (!bfd_link_pic (info) && h->dynindx == -1 && tls_type == GOT_TLS_IE)
+	      if (bfd_link_executable (info)
+		  && h->dynindx == -1
+		  && tls_type == GOT_TLS_IE)
 		r_type = tilepro_tls_translate_to_le (r_type);
 	    }
 	  if (tls_type == GOT_TLS_IE)

@@ -1,4 +1,14 @@
-2017-10-18  H.J. Lu  <hongjiu.lu@intel.com>
+2017-10-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22263
+	* elf32-tilepro.c (tilepro_elf_tls_transition): Replace
+	bfd_link_pic with !bfd_link_executable, !bfd_link_pic with
+	bfd_link_executable for TLS check.
+	(tilepro_elf_check_relocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(tilepro_elf_relocate_section): Likewise.
+
+2017-10-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22263
 	* elfxx-sparc.c (sparc_elf_tls_transition): Replace
