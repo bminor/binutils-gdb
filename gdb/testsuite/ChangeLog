@@ -1,3 +1,8 @@
+2017-10-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/quit.exp: Use gdb_test_multiple and expect 'eof' before
+	'wait -i'.  Use gdb_assert and remote_close.
+
 2017-10-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.linespec/ls-errs.exp (do_test): Update comment, use line
