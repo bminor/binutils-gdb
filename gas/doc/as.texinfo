@@ -6392,6 +6392,9 @@ is equivalent to assembling
         .long   0
 @end example
 
+A count of zero is allowed, but nothing is generated.  Negative counts are not
+allowed and if encountered will be treated as if they were zero.
+
 @node Sbttl
 @section @code{.sbttl "@var{subheading}"}
 

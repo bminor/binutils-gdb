@@ -1,3 +1,21 @@
+2017-10-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 22324
+	* read.c (s_rept): Use size_t type for count parameter.
+	(do_repeat): Change type of count parameter to size_t.
+	Issue an error is the count parameter is negative.
+	(do_repeat_with_expression): Likewise.
+	* read.h: Update prototypes for do_repeat and
+	do_repeat_with_expression.
+	* doc/as.texinfo (Rept): Document that a zero count is allowed but
+	negative counts are not.
+	* config/tc-rx.c (rx_rept): Use size_t type for count parameter.
+	* config/tc-tic54x.c (tic54x_loop): Cast count parameter to size_t
+	type.
+	* testsuite/gas/macros/end.s: Add a test using a negative repeat
+	count.
+	* testsuite/gas/macros/end.l: Add expected error message.
+
 2017-10-19  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* config/tc-riscv.c (md_apply_fix): Mark
