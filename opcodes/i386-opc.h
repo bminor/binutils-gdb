@@ -200,6 +200,8 @@ enum
   CpuAVX512_VPOPCNTDQ,
   /* Intel AVX-512 VBMI2 Instructions support required.  */
   CpuAVX512_VBMI2,
+  /* Intel AVX-512 VNNI Instructions support required.  */
+  CpuAVX512_VNNI,
   /* mwaitx instruction required */
   CpuMWAITX,
   /* Clzero instruction required */
@@ -243,7 +245,7 @@ enum
 
 /* If you get a compiler error for zero width of the unused field,
    comment it out.  */
- #define CpuUnused	(CpuMax + 1)
+#define CpuUnused	(CpuMax + 1)
 
 /* We can check if an instruction is available with array instead
    of bitfield. */
@@ -335,6 +337,7 @@ typedef union i386_cpu_flags
       unsigned int cpuavx512_4vnniw:1;
       unsigned int cpuavx512_vpopcntdq:1;
       unsigned int cpuavx512_vbmi2:1;
+      unsigned int cpuavx512_vnni:1;
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;

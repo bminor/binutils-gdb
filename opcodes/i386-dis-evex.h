@@ -385,8 +385,8 @@ static const struct dis386 evex_table[][256] = {
     { PREFIX_TABLE (PREFIX_EVEX_0F384E) },
     { PREFIX_TABLE (PREFIX_EVEX_0F384F) },
     /* 50 */
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_EVEX_0F3850) },
+    { PREFIX_TABLE (PREFIX_EVEX_0F3851) },
     { PREFIX_TABLE (PREFIX_EVEX_0F3852) },
     { PREFIX_TABLE (PREFIX_EVEX_0F3853) },
     { Bad_Opcode },
@@ -2005,18 +2005,30 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { "vrsqrt14s%XW",	{ XMScalar, VexScalar, EXxmm_mdq }, 0 },
   },
+  /* PREFIX_EVEX_0F3850 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vpdpbusd",	{ XM, Vex, EXx }, 0 },
+  },
+  /* PREFIX_EVEX_0F3851 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vpdpbusds",	{ XM, Vex, EXx }, 0 },
+  },
   /* PREFIX_EVEX_0F3852 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
+    { "vpdpwssd",	{ XM, Vex, EXx }, 0 },
     { "vp4dpwssd",	{ XM, Vex, EXxmm }, 0 },
   },
   /* PREFIX_EVEX_0F3853 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
+    { "vpdpwssds",	{ XM, Vex, EXx }, 0 },
     { "vp4dpwssds",	{ XM, Vex, EXxmm }, 0 },
   },
   /* PREFIX_EVEX_0F3855 */
