@@ -307,6 +307,11 @@ setup_alternate_signal_stack (void)
 
 /* Call command_loop.  */
 
+/* Prevent inlining this function for the benefit of GDB's selftests
+   in the testsuite.  Those tests want to run GDB under GDB and stop
+   here.  */
+static void captured_command_loop () __attribute__((noinline));
+
 static void
 captured_command_loop ()
 {

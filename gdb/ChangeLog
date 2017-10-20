@@ -1,3 +1,7 @@
+2017-10-20  Pedro Alves  <palves@redhat.com>
+
+	* main.c (captured_command_loop): Add attribute noinline.
+
 2017-10-19  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* interps.c (struct interp_factory): Add constructor.
