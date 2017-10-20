@@ -465,6 +465,19 @@ set build_tests {
 
 run_cc_link_tests $build_tests
 
+run_ld_link_tests [list \
+    [list \
+	"Build pr22269-1" \
+	"-pie -e _start --no-dynamic-linker -z text" \
+	"" \
+	"" \
+	{ pr22269-1.c } \
+	{{readelf -rW pr22269-1.rd}} \
+	"pr22269-1" \
+	"-fPIE -O2" \
+    ] \
+]
+
 set run_tests [list \
     [list "Run normal with libfoo.so" \
      "-Wl,--no-as-needed tmpdir/begin.o tmpdir/libfoo.so tmpdir/end.o" "" \

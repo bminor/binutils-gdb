@@ -1,3 +1,10 @@
+2017-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22269
+	* testsuite/ld-elf/pr22269-1.rd: New file.
+	* testsuite/ld-elf/pr22269-1.c: Likewise.
+	* testsuite/ld-elf/shared.exp: Run pr22269-1.
+
 2017-10-19  Palmer Dabbelt  <palmer@dabbelt.com>
 
 	* emultempl/riscvelf.em (riscv_elf_before_allocation): Add a
