@@ -3722,6 +3722,38 @@ arm_farcall_thumb_thumb_6m.o: arm_farcall_thumb_thumb.s
 MOSTLYCLEANFILES += arm_farcall_thumb_thumb arm_farcall_thumb_thumb_5t \
 		    arm_farcall_thumb_thumb_7m arm_farcall_thumb_thumb_6m
 
+#Check ARM to ARM farcall veneers in the be8 mode addressing
+
+check_SCRIPTS += arm_farcall_arm_arm_be8.sh
+check_DATA += arm_farcall_arm_arm_be8.stdout
+
+arm_farcall_arm_arm_be8.stdout: arm_farcall_arm_arm_be8
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_arm_arm_be8: arm_farcall_arm_arm_be8.o ../ld-new
+	../ld-new --no-fix-arm1176 --section-start .text=0x1000 --section-start .foo=0x2001020 -EB --be8 -o $@ $<
+
+arm_farcall_arm_arm_be8.o: arm_farcall_arm_arm.s
+	$(TEST_AS) -EB -o $@ $<
+
+MOSTLYCLEANFILES += arm_farcall_arm_arm_be8
+
+#Check THUMB  to  THUMB farcall veneers in the be8 mode addressing
+
+check_SCRIPTS += arm_farcall_thumb_thumb_be8.sh
+check_DATA += arm_farcall_thumb_thumb_be8.stdout
+
+arm_farcall_thumb_thumb_be8.stdout: arm_farcall_thumb_thumb_be8
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_thumb_be8: arm_farcall_thumb_thumb_be8.o ../ld-new
+	../ld-new --section-start .text=0x1000 --section-start .foo=0x2001014 -EB --be8 -o $@ $<
+
+arm_farcall_thumb_thumb_be8.o: arm_farcall_thumb_thumb.s
+	$(TEST_AS) -march=armv7-m -EB -o $@ $<
+
+MOSTLYCLEANFILES += arm_farcall_thumb_thumb_be8
+
 # Check Thumb to ARM farcall veneers
 
 check_SCRIPTS += arm_farcall_thumb_arm.sh

@@ -711,7 +711,7 @@ class General_options
   DEFINE_string(format, options::TWO_DASHES, 'b', "elf",
 		N_("Set input format"), ("[elf,binary]"));
 
-  DEFINE_bool(be8,options::TWO_DASHES, '\0', false,
+  DEFINE_bool(be8, options::TWO_DASHES, '\0', false,
 	      N_("Output BE8 format image"), NULL);
 
   DEFINE_optional_string(build_id, options::TWO_DASHES, '\0', "tree",

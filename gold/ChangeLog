@@ -1,3 +1,14 @@
+2017-10-19  Umesh Kalappa  <ukalappa@cisco.com>
+
+	* arm.cc (Stub::do_fixed_endian_write):Far call stubs support for arm
+	in the be8 mode.
+	* testsuite/Makefile.am: New test cases.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/arm_farcall_arm_arm_be8.sh: New script for arm to arm far
+	call stubs.
+	* testsuite/arm_farcall_thumb_thumb_be8.sh: New script for thumb to
+	thumb far call stubs.
+
 2017-10-18  Kyle Butt  <iteratee@google.com>
 	    Alan Modra  <amodra@gmail.com>
 
