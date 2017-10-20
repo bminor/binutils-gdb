@@ -1701,6 +1701,7 @@ enum
   PREFIX_EVEX_0F3A3F,
   PREFIX_EVEX_0F3A42,
   PREFIX_EVEX_0F3A43,
+  PREFIX_EVEX_0F3A44,
   PREFIX_EVEX_0F3A50,
   PREFIX_EVEX_0F3A51,
   PREFIX_EVEX_0F3A54,
@@ -1902,7 +1903,6 @@ enum
   VEX_LEN_0F3A38_P_2,
   VEX_LEN_0F3A39_P_2,
   VEX_LEN_0F3A41_P_2,
-  VEX_LEN_0F3A44_P_2,
   VEX_LEN_0F3A46_P_2,
   VEX_LEN_0F3A60_P_2,
   VEX_LEN_0F3A61_P_2,
@@ -2220,7 +2220,6 @@ enum
   VEX_W_0F3A40_P_2,
   VEX_W_0F3A41_P_2,
   VEX_W_0F3A42_P_2,
-  VEX_W_0F3A44_P_2,
   VEX_W_0F3A46_P_2,
   VEX_W_0F3A48_P_2,
   VEX_W_0F3A49_P_2,
@@ -6693,7 +6692,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F3A44_P_2) },
+    { "vpclmulqdq",	{ XM, Vex, EXx, PCLMUL }, 0 },
   },
 
   /* PREFIX_VEX_0F3A46 */
@@ -10110,11 +10109,6 @@ static const struct dis386 vex_len_table[][2] = {
     { VEX_W_TABLE (VEX_W_0F3A41_P_2) },
   },
 
-  /* VEX_LEN_0F3A44_P_2 */
-  {
-    { VEX_W_TABLE (VEX_W_0F3A44_P_2) },
-  },
-
   /* VEX_LEN_0F3A46_P_2 */
   {
     { Bad_Opcode },
@@ -11427,10 +11421,6 @@ static const struct dis386 vex_w_table[][2] = {
   {
     /* VEX_W_0F3A42_P_2 */
     { "vmpsadbw",	{ XM, Vex, EXx, Ib }, 0 },
-  },
-  {
-    /* VEX_W_0F3A44_P_2 */
-    { "vpclmulqdq",	{ XM, Vex128, EXx, PCLMUL }, 0 },
   },
   {
     /* VEX_W_0F3A46_P_2 */

@@ -216,6 +216,8 @@ enum
   CpuGFNI,
   /* VAES instructions required */
   CpuVAES,
+  /* VPCLMULQDQ instructions required */
+  CpuVPCLMULQDQ,
   /* MMX register support required */
   CpuRegMMX,
   /* XMM register support required */
@@ -241,7 +243,7 @@ enum
 
 /* If you get a compiler error for zero width of the unused field,
    comment it out.  */
-#define CpuUnused	(CpuMax + 1)
+ #define CpuUnused	(CpuMax + 1)
 
 /* We can check if an instruction is available with array instead
    of bitfield. */
@@ -341,6 +343,7 @@ typedef union i386_cpu_flags
       unsigned int cpucet:1;
       unsigned int cpugfni:1;
       unsigned int cpuvaes:1;
+      unsigned int cpuvpclmulqdq:1;
       unsigned int cpuregmmx:1;
       unsigned int cpuregxmm:1;
       unsigned int cpuregymm:1;

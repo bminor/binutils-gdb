@@ -3122,6 +3122,12 @@ sha256rnds2, 2, 0xf38cb, None, 3, CpuSHA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lS
 sha256msg1, 2, 0xf38cc, None, 3, CpuSHA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegXMM }
 sha256msg2, 2, 0xf38cd, None, 3, CpuSHA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegXMM }
 
+// VPCLMULQDQ instructions
+
+vpclmulqdq, 4, 0x6644, None, 1, CpuVPCLMULQDQ, Modrm|Vex=2|VexOpcode=2|VexVVVV=1|VecESize=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, Ymmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegYMM, RegYMM, RegYMM }
+
+// VPCLMULQDQ instructions end
+
 // AVX512F instructions.
 
 kandnw, 3, 0x42, None, 1, CpuAVX512F, Modrm|Vex=2|VexOpcode=0|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegMask, RegMask, RegMask }
@@ -6101,6 +6107,14 @@ vaesenclast, 3, 0x66dd, None, 1, CpuVAES|CpuAVX512VL, Modrm|EVex=2|VexOpcode=1|V
 vaesenclast, 3, 0x66dd, None, 1, CpuVAES|CpuAVX512VL, Modrm|EVex=3|VexOpcode=1|VexVVVV=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegYMM|YMMword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|Vec_Disp8, RegYMM, RegYMM }
 
 // AVX512 + VAES instructions end
+
+// AVX512 + VPCLMULQDQ instructions
+
+vpclmulqdq, 4, 0x6644, None, 1, CpuVPCLMULQDQ|CpuAVX512F, Modrm|EVex=1|VexOpcode=2|VexVVVV=1|VecESize=1|Disp8MemShift=6|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegZMM|ZMMword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|Vec_Disp8, RegZMM, RegZMM }
+vpclmulqdq, 4, 0x6644, None, 1, CpuVPCLMULQDQ|CpuAVX512VL, Modrm|EVex=2|VexOpcode=2|VexVVVV=1|VecESize=1|Disp8MemShift=4|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegXMM|XMMword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|Vec_Disp8, RegXMM, RegXMM }
+vpclmulqdq, 4, 0x6644, None, 1, CpuVPCLMULQDQ|CpuAVX512VL, Modrm|EVex=3|VexOpcode=2|VexVVVV=1|VecESize=1|Disp8MemShift=5|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegYMM|YMMword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|Vec_Disp8, RegYMM, RegYMM }
+
+// AVX512 + VPCLMULQDQ instructions end
 
 // CLZERO instructions
 
