@@ -1,3 +1,13 @@
+2017-10-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* interps.c (struct interp_factory): Add constructor.
+	(interp_factory_p): Remove typedef.
+	(DEF_VEC_P(interp_factory_p)): Remove.
+	(interpreter_factories): Change type to std::vector.
+	(interp_factory_register): Adjust.
+	(interp_lookup): Adjust.
+	(interpreter_completer): Adjust.
+
 2017-10-19  Tom Tromey  <tom@tromey.com>
 
 	* break-catch-syscall.c (catch_syscall_completer): Use
