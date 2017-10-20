@@ -982,6 +982,8 @@ static const arch_entry cpu_arch[] =
     CPU_AVX512_4VNNIW_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512_vpopcntdq"), PROCESSOR_UNKNOWN,
     CPU_AVX512_VPOPCNTDQ_FLAGS, 0 },
+  { STRING_COMMA_LEN (".avx512_vbmi2"), PROCESSOR_UNKNOWN,
+    CPU_AVX512_VBMI2_FLAGS, 0 },
   { STRING_COMMA_LEN (".clzero"), PROCESSOR_UNKNOWN,
     CPU_CLZERO_FLAGS, 0 },
   { STRING_COMMA_LEN (".mwaitx"), PROCESSOR_UNKNOWN,
@@ -1024,6 +1026,7 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("noavx512_4fmaps"), CPU_ANY_AVX512_4FMAPS_FLAGS },
   { STRING_COMMA_LEN ("noavx512_4vnniw"), CPU_ANY_AVX512_4VNNIW_FLAGS },
   { STRING_COMMA_LEN ("noavx512_vpopcntdq"), CPU_ANY_AVX512_VPOPCNTDQ_FLAGS },
+  { STRING_COMMA_LEN ("noavx512_vbmi2"), CPU_ANY_AVX512_VBMI2_FLAGS },
 };
 
 #ifdef I386COFF
@@ -1456,6 +1459,10 @@ cpu_flags_all_zero (const union i386_cpu_flags *x)
 {
   switch (ARRAY_SIZE(x->array))
     {
+    case 4:
+      if (x->array[3])
+	return 0;
+      /* Fall through.  */
     case 3:
       if (x->array[2])
 	return 0;
@@ -1477,6 +1484,10 @@ cpu_flags_equal (const union i386_cpu_flags *x,
 {
   switch (ARRAY_SIZE(x->array))
     {
+    case 4:
+      if (x->array[3] != y->array[3])
+	return 0;
+      /* Fall through.  */
     case 3:
       if (x->array[2] != y->array[2])
 	return 0;
@@ -1505,6 +1516,9 @@ cpu_flags_and (i386_cpu_flags x, i386_cpu_flags y)
 {
   switch (ARRAY_SIZE (x.array))
     {
+    case 4:
+      x.array [3] &= y.array [3];
+      /* Fall through.  */
     case 3:
       x.array [2] &= y.array [2];
       /* Fall through.  */
@@ -1525,6 +1539,9 @@ cpu_flags_or (i386_cpu_flags x, i386_cpu_flags y)
 {
   switch (ARRAY_SIZE (x.array))
     {
+    case 4:
+      x.array [3] |= y.array [3];
+      /* Fall through.  */
     case 3:
       x.array [2] |= y.array [2];
       /* Fall through.  */
@@ -1545,6 +1562,9 @@ cpu_flags_and_not (i386_cpu_flags x, i386_cpu_flags y)
 {
   switch (ARRAY_SIZE (x.array))
     {
+    case 4:
+      x.array [3] &= ~y.array [3];
+      /* Fall through.  */
     case 3:
       x.array [2] &= ~y.array [2];
       /* Fall through.  */

@@ -376,7 +376,9 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EMS { OP_EM, v_swap_mode }
 #define EMd { OP_EM, d_mode }
 #define EMx { OP_EM, x_mode }
+#define EXbScalar { OP_EX, b_scalar_mode }
 #define EXw { OP_EX, w_mode }
+#define EXwScalar { OP_EX, w_scalar_mode }
 #define EXd { OP_EX, d_mode }
 #define EXdScalar { OP_EX, d_scalar_mode }
 #define EXdS { OP_EX, d_swap_mode }
@@ -598,6 +600,10 @@ enum
 
   /* scalar, ignore vector length.  */
   scalar_mode,
+  /* like b_mode, ignore vector length.  */
+  b_scalar_mode,
+  /* like w_mode, ignore vector length.  */
+  w_scalar_mode,
   /* like d_mode, ignore vector length.  */
   d_scalar_mode,
   /* like d_swap_mode, ignore vector length.  */
@@ -1567,9 +1573,15 @@ enum
   PREFIX_EVEX_0F3859,
   PREFIX_EVEX_0F385A,
   PREFIX_EVEX_0F385B,
+  PREFIX_EVEX_0F3862,
+  PREFIX_EVEX_0F3863,
   PREFIX_EVEX_0F3864,
   PREFIX_EVEX_0F3865,
   PREFIX_EVEX_0F3866,
+  PREFIX_EVEX_0F3870,
+  PREFIX_EVEX_0F3871,
+  PREFIX_EVEX_0F3872,
+  PREFIX_EVEX_0F3873,
   PREFIX_EVEX_0F3875,
   PREFIX_EVEX_0F3876,
   PREFIX_EVEX_0F3877,
@@ -1685,7 +1697,11 @@ enum
   PREFIX_EVEX_0F3A56,
   PREFIX_EVEX_0F3A57,
   PREFIX_EVEX_0F3A66,
-  PREFIX_EVEX_0F3A67
+  PREFIX_EVEX_0F3A67,
+  PREFIX_EVEX_0F3A70,
+  PREFIX_EVEX_0F3A71,
+  PREFIX_EVEX_0F3A72,
+  PREFIX_EVEX_0F3A73
 };
 
 enum
@@ -2395,7 +2411,13 @@ enum
   EVEX_W_0F3859_P_2,
   EVEX_W_0F385A_P_2,
   EVEX_W_0F385B_P_2,
+  EVEX_W_0F3862_P_2,
+  EVEX_W_0F3863_P_2,
   EVEX_W_0F3866_P_2,
+  EVEX_W_0F3870_P_2,
+  EVEX_W_0F3871_P_2,
+  EVEX_W_0F3872_P_2,
+  EVEX_W_0F3873_P_2,
   EVEX_W_0F3875_P_2,
   EVEX_W_0F3878_P_2,
   EVEX_W_0F3879_P_2,
@@ -2443,7 +2465,11 @@ enum
   EVEX_W_0F3A56_P_2,
   EVEX_W_0F3A57_P_2,
   EVEX_W_0F3A66_P_2,
-  EVEX_W_0F3A67_P_2
+  EVEX_W_0F3A67_P_2,
+  EVEX_W_0F3A70_P_2,
+  EVEX_W_0F3A71_P_2,
+  EVEX_W_0F3A72_P_2,
+  EVEX_W_0F3A73_P_2
 };
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
@@ -14716,6 +14742,8 @@ intel_operand_size (int bytemode, int sizeflag)
     case x_swap_mode:
     case evex_x_gscat_mode:
     case evex_x_nobcst_mode:
+    case b_scalar_mode:
+    case w_scalar_mode:
       if (need_vex)
 	{
 	  switch (vex.length)
@@ -15168,9 +15196,11 @@ OP_E_memory (int bytemode, int sizeflag)
 	case d_scalar_swap_mode:
 	  shift = 2;
 	  break;
+    case w_scalar_mode:
 	case xmm_mw_mode:
 	  shift = 1;
 	  break;
+    case b_scalar_mode:
 	case xmm_mb_mode:
 	  shift = 0;
 	  break;
