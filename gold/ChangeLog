@@ -1,4 +1,4 @@
-2017-10-04  Sriraman Tallam  <tmsriram@google.com>
+2017-10-20  Sriraman Tallam  <tmsriram@google.com>
 
 	* options.h (-z,text_unlikely_segment): New option.
 	* layout.cc (Layout::layout): Create new output section
