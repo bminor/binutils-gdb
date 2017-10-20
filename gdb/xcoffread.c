@@ -1833,7 +1833,6 @@ find_linenos (struct bfd *abfd, struct bfd_section *asect, void *vpinfo)
 static void
 xcoff_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
 {
-  struct cleanup *old_chain;
   int i;
 
   if (!pst)
@@ -1870,11 +1869,9 @@ xcoff_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
       /* Init stuff necessary for reading in symbols.  */
       stabsread_init ();
       buildsym_init ();
-      old_chain = make_cleanup (really_free_pendings, 0);
 
+      scoped_free_pendings free_pending;
       read_xcoff_symtab (objfile, pst);
-
-      do_cleanups (old_chain);
     }
 
   pst->readin = 1;
@@ -2950,7 +2947,6 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
   bfd *abfd;
   int val;
-  struct cleanup *back_to;
   int num_symbols;		/* # of symbols */
   file_ptr symtab_offset;	/* symbol table and */
   file_ptr stringtab_offset;	/* string table file offsets */
@@ -3027,8 +3023,8 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
     init_psymbol_list (objfile, num_symbols);
 
   free_pending_blocks ();
-  back_to = make_cleanup (really_free_pendings, 0);
 
+  scoped_free_pendings free_pending;
   minimal_symbol_reader reader (objfile);
 
   /* Now that the symbol table data of the executable file are all in core,
@@ -3047,8 +3043,6 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
     dwarf2_build_psymtabs (objfile);
 
   dwarf2_build_frame_info (objfile);
-
-  do_cleanups (back_to);
 }
 
 static void

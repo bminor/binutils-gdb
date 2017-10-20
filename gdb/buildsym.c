@@ -26,11 +26,10 @@
    The basic way this module is used is as follows:
 
    buildsym_init ();
-   cleanups = make_cleanup (really_free_pendings, NULL);
+   scoped_free_pendings free_pending;
    cust = start_symtab (...);
    ... read debug info ...
    cust = end_symtab (...);
-   do_cleanups (cleanups);
 
    The compunit symtab pointer ("cust") is returned from both start_symtab
    and end_symtab to simplify the debug info readers.
@@ -42,31 +41,28 @@
    Reading DWARF Type Units is another variation:
 
    buildsym_init ();
-   cleanups = make_cleanup (really_free_pendings, NULL);
+   scoped_free_pendings free_pending;
    cust = start_symtab (...);
    ... read debug info ...
    cust = end_expandable_symtab (...);
-   do_cleanups (cleanups);
 
    And then reading subsequent Type Units within the containing "Comp Unit"
    will use a second flow:
 
    buildsym_init ();
-   cleanups = make_cleanup (really_free_pendings, NULL);
+   scoped_free_pendings free_pending;
    cust = restart_symtab (...);
    ... read debug info ...
    cust = augment_type_symtab (...);
-   do_cleanups (cleanups);
 
    dbxread.c and xcoffread.c use another variation:
 
    buildsym_init ();
-   cleanups = make_cleanup (really_free_pendings, NULL);
+   scoped_free_pendings free_pending;
    cust = start_symtab (...);
    ... read debug info ...
    cust = end_symtab (...);
    ... start_symtab + read + end_symtab repeated ...
-   do_cleanups (cleanups);
 */
 
 #include "defs.h"
@@ -269,15 +265,13 @@ find_symbol_in_list (struct pending *list, char *name, int length)
   return (NULL);
 }
 
-/* At end of reading syms, or in case of quit, ensure everything associated
-   with building symtabs is freed.  This is intended to be registered as a
-   cleanup before doing psymtab->symtab expansion.
+/* At end of reading syms, or in case of quit, ensure everything
+   associated with building symtabs is freed.
 
    N.B. This is *not* intended to be used when building psymtabs.  Some debug
    info readers call this anyway, which is harmless if confusing.  */
 
-void
-really_free_pendings (void *dummy)
+scoped_free_pendings::~scoped_free_pendings ()
 {
   struct pending *next, *next1;
 
@@ -1028,7 +1022,7 @@ prepare_for_building (const char *name, CORE_ADDR start_addr)
   context_stack_depth = 0;
 
   /* These should have been reset either by successful completion of building
-     a symtab, or by the really_free_pendings cleanup.  */
+     a symtab, or by the scoped_free_pendings destructor.  */
   gdb_assert (file_symbols == NULL);
   gdb_assert (global_symbols == NULL);
   gdb_assert (global_using_directives == NULL);
@@ -1169,7 +1163,7 @@ watch_main_source_file_lossage (void)
 /* Reset state after a successful building of a symtab.
    This exists because dbxread.c and xcoffread.c can call
    start_symtab+end_symtab multiple times after one call to buildsym_init,
-   and before the really_free_pendings cleanup is called.
+   and before the scoped_free_pendings destructor is called.
    We keep the free_pendings list around for dbx/xcoff sake.  */
 
 static void
@@ -1753,7 +1747,7 @@ buildsym_init (void)
       context_stack = XNEWVEC (struct context_stack, context_stack_size);
     }
 
-  /* Ensure the really_free_pendings cleanup was called after
+  /* Ensure the scoped_free_pendings destructor was called after
      the last time.  */
   gdb_assert (free_pendings == NULL);
   gdb_assert (pending_blocks == NULL);

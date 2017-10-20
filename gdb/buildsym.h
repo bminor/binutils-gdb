@@ -212,7 +212,15 @@ extern struct block *finish_block (struct symbol *symbol,
 extern void record_block_range (struct block *,
                                 CORE_ADDR start, CORE_ADDR end_inclusive);
 
-extern void really_free_pendings (void *dummy);
+class scoped_free_pendings
+{
+public:
+
+  scoped_free_pendings () = default;
+  ~scoped_free_pendings ();
+
+  DISABLE_COPY_AND_ASSIGN (scoped_free_pendings);
+};
 
 extern void start_subfile (const char *name);
 

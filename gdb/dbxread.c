@@ -516,7 +516,6 @@ dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
   bfd *sym_bfd;
   int val;
-  struct cleanup *back_to;
 
   sym_bfd = objfile->obfd;
 
@@ -539,7 +538,7 @@ dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   symbol_table_offset = DBX_SYMTAB_OFFSET (objfile);
 
   free_pending_blocks ();
-  back_to = make_cleanup (really_free_pendings, 0);
+  scoped_free_pendings free_pending;
 
   minimal_symbol_reader reader (objfile);
 
@@ -551,8 +550,6 @@ dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
      minimal symbols for this objfile.  */
 
   reader.install ();
-
-  do_cleanups (back_to);
 }
 
 /* Initialize anything that needs initializing when a completely new
@@ -2186,7 +2183,6 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
 static void
 dbx_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
 {
-  struct cleanup *old_chain;
   int i;
 
   if (pst->readin)
@@ -2220,15 +2216,13 @@ dbx_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
       /* Init stuff necessary for reading in symbols */
       stabsread_init ();
       buildsym_init ();
-      old_chain = make_cleanup (really_free_pendings, 0);
+      scoped_free_pendings free_pending;
       file_string_table_offset = FILE_STRING_OFFSET (pst);
       symbol_size = SYMBOL_SIZE (pst);
 
       /* Read in this file's symbols.  */
       bfd_seek (objfile->obfd, SYMBOL_OFFSET (pst), SEEK_SET);
       read_ofile_symtab (objfile, pst);
-
-      do_cleanups (old_chain);
     }
 
   pst->readin = 1;

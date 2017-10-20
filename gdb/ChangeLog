@@ -1,3 +1,18 @@
+2017-11-04  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.c (process_full_comp_unit, process_full_type_unit):
+	Use scoped_free_pendings.
+	* dbxread.c (dbx_symfile_read, dbx_psymtab_to_symtab_1): Use
+	scoped_free_pendings.
+	* xcoffread.c (xcoff_psymtab_to_symtab_1): Use scoped_free_pendings.
+	(xcoff_initial_scan): Likewise.
+	* buildsym.c (reset_symtab_globals): Update comment.
+	(scoped_free_pendings): Rename from really_free_pendings.
+	(prepare_for_building): Update comment.
+	(buildsym_init): Likewise.
+	* buildsym.h (class scoped_free_pendings): New class.
+	(really_free_pendings): Don't declare.
+
 2017-11-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* doublest.c (convert_doublest_to_floatformat): Fix uninitialized

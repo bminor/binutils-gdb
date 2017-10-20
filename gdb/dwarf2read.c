@@ -8317,7 +8317,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   CORE_ADDR lowpc, highpc;
   struct compunit_symtab *cust;
-  struct cleanup *back_to, *delayed_list_cleanup;
+  struct cleanup *delayed_list_cleanup;
   CORE_ADDR baseaddr;
   struct block *static_block;
   CORE_ADDR addr;
@@ -8325,7 +8325,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
   buildsym_init ();
-  back_to = make_cleanup (really_free_pendings, NULL);
+  scoped_free_pendings free_pending;
   delayed_list_cleanup = make_cleanup (free_delayed_list, cu);
 
   cu->list_in_scope = &file_symbols;
@@ -8407,8 +8407,6 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
 
   /* Push it for inclusion processing later.  */
   VEC_safe_push (dwarf2_per_cu_ptr, dwarf2_per_objfile->just_read_cus, per_cu);
-
-  do_cleanups (back_to);
 }
 
 /* Generate full symbol information for type unit PER_CU, whose DIEs have
@@ -8421,14 +8419,14 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
   struct dwarf2_cu *cu = per_cu->cu;
   struct objfile *objfile = per_cu->objfile;
   struct compunit_symtab *cust;
-  struct cleanup *back_to, *delayed_list_cleanup;
+  struct cleanup *delayed_list_cleanup;
   struct signatured_type *sig_type;
 
   gdb_assert (per_cu->is_debug_types);
   sig_type = (struct signatured_type *) per_cu;
 
   buildsym_init ();
-  back_to = make_cleanup (really_free_pendings, NULL);
+  scoped_free_pendings free_pending;
   delayed_list_cleanup = make_cleanup (free_delayed_list, cu);
 
   cu->list_in_scope = &file_symbols;
@@ -8483,8 +8481,6 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
       pst->compunit_symtab = cust;
       pst->readin = 1;
     }
-
-  do_cleanups (back_to);
 }
 
 /* Process an imported unit DIE.  */
