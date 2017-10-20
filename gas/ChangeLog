@@ -1,3 +1,9 @@
+2017-11-27  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xg_relax_trampoline): New function.
+	(xtensa_relax_frag): Replace trampoline relaxation code with a
+	call to xg_relax_trampoline.
+
 2017-11-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 22492
