@@ -1492,6 +1492,11 @@ class General_options
   DEFINE_bool_alias(textoff, text, options::DASH_Z, '\0',
 		    N_("Permit relocations in read-only segments"),
 		    NULL, true);
+  DEFINE_bool(text_unlikely_segment, options::DASH_Z, '\0', false,
+	      N_("Move .text.unlikely sections to a separate segment."),
+	      N_("Do not move .text.unlikely sections to a separate "
+		 "segment."));
+
 
  public:
   typedef options::Dir_list Dir_list;

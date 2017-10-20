@@ -1,3 +1,15 @@
+2017-10-04  Sriraman Tallam  <tmsriram@google.com>
+
+	* options.h (-z,text_unlikely_segment): New option.
+	* layout.cc (Layout::layout): Create new output section
+	for .text.unlikely sections with the new option.
+	(Layout::segment_precedes): Check for the new option
+	when segment flags match.
+	* testsuite/text_unlikely_segment.cc: New test source.
+	* testsuite/text_unlikely_segment.sh: New test script.
+	* testsuite/Makefile.am (text_unlikely_segment): New test.
+	* testsuite/Makefile.in: Regenerate.
+
 2017-10-19  Umesh Kalappa  <ukalappa@cisco.com>
 
 	* arm.cc (Stub::do_fixed_endian_write):Far call stubs support for arm

@@ -1178,38 +1178,62 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
     }
   else
     {
-      // Plugins can choose to place one or more subsets of sections in
-      // unique segments and this is done by mapping these section subsets
-      // to unique output sections.  Check if this section needs to be
-      // remapped to a unique output section.
-      Section_segment_map::iterator it
-	  = this->section_segment_map_.find(Const_section_id(object, shndx));
-      if (it == this->section_segment_map_.end())
-	{
-	  os = this->choose_output_section(object, name, sh_type,
-					   shdr.get_sh_flags(), true,
-					   ORDER_INVALID, false, false,
-					   true);
-	}
-      else
-	{
-	  // We know the name of the output section, directly call
-	  // get_output_section here by-passing choose_output_section.
+      // All ".text.unlikely.*" sections can be moved to a unique
+      // segment with --text-unlikely-segment option.
+      bool text_unlikely_segment
+          = (parameters->options().text_unlikely_segment()
+             && is_prefix_of(".text.unlikely",
+                             object->section_name(shndx).c_str()));
+      if (text_unlikely_segment)
+        {
 	  elfcpp::Elf_Xword flags
 	    = this->get_output_section_flags(shdr.get_sh_flags());
 
-	  const char* os_name = it->second->name;
 	  Stringpool::Key name_key;
-	  os_name = this->namepool_.add(os_name, true, &name_key);
+	  const char* os_name = this->namepool_.add(".text.unlikely", true,
+						    &name_key);
 	  os = this->get_output_section(os_name, name_key, sh_type, flags,
 					ORDER_INVALID, false);
-	  if (!os->is_unique_segment())
+          // Map this output section to a unique segment.  This is done to
+          // separate "text" that is not likely to be executed from "text"
+          // that is likely executed.
+	  os->set_is_unique_segment();
+        }
+      else
+	{
+	  // Plugins can choose to place one or more subsets of sections in
+	  // unique segments and this is done by mapping these section subsets
+	  // to unique output sections.  Check if this section needs to be
+	  // remapped to a unique output section.
+	  Section_segment_map::iterator it
+	    = this->section_segment_map_.find(Const_section_id(object, shndx));
+	  if (it == this->section_segment_map_.end())
 	    {
-	      os->set_is_unique_segment();
-	      os->set_extra_segment_flags(it->second->flags);
-	      os->set_segment_alignment(it->second->align);
+	      os = this->choose_output_section(object, name, sh_type,
+					       shdr.get_sh_flags(), true,
+					       ORDER_INVALID, false, false,
+					       true);
 	    }
-	}
+	  else
+	    {
+	      // We know the name of the output section, directly call
+	      // get_output_section here by-passing choose_output_section.
+	      elfcpp::Elf_Xword flags
+	        = this->get_output_section_flags(shdr.get_sh_flags());
+
+	      const char* os_name = it->second->name;
+	      Stringpool::Key name_key;
+	      os_name = this->namepool_.add(os_name, true, &name_key);
+	      os = this->get_output_section(os_name, name_key, sh_type, flags,
+					ORDER_INVALID, false);
+	      if (!os->is_unique_segment())
+	        {
+	          os->set_is_unique_segment();
+	          os->set_extra_segment_flags(it->second->flags);
+	          os->set_segment_alignment(it->second->align);
+	        }
+	    }
+	  }
       if (os == NULL)
 	return NULL;
     }
@@ -3449,7 +3473,8 @@ Layout::segment_precedes(const Output_segment* seg1,
   // here if plugins want unique segments for subsets of sections.
   gold_assert(this->script_options_->saw_phdrs_clause()
 	      || parameters->options().any_section_start()
-	      || this->is_unique_segment_for_sections_specified());
+	      || this->is_unique_segment_for_sections_specified()
+	      || parameters->options().text_unlikely_segment());
   return false;
 }
 
