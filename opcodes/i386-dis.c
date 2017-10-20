@@ -1660,6 +1660,10 @@ enum
   PREFIX_EVEX_0F38CC,
   PREFIX_EVEX_0F38CD,
   PREFIX_EVEX_0F38CF,
+  PREFIX_EVEX_0F38DC,
+  PREFIX_EVEX_0F38DD,
+  PREFIX_EVEX_0F38DE,
+  PREFIX_EVEX_0F38DF,
 
   PREFIX_EVEX_0F3A00,
   PREFIX_EVEX_0F3A01,
@@ -1865,10 +1869,6 @@ enum
   VEX_LEN_0F3841_P_2,
   VEX_LEN_0F385A_P_2_M_0,
   VEX_LEN_0F38DB_P_2,
-  VEX_LEN_0F38DC_P_2,
-  VEX_LEN_0F38DD_P_2,
-  VEX_LEN_0F38DE_P_2,
-  VEX_LEN_0F38DF_P_2,
   VEX_LEN_0F38F2_P_0,
   VEX_LEN_0F38F3_R_1_P_0,
   VEX_LEN_0F38F3_R_2_P_0,
@@ -2191,10 +2191,6 @@ enum
   VEX_W_0F3879_P_2,
   VEX_W_0F38CF_P_2,
   VEX_W_0F38DB_P_2,
-  VEX_W_0F38DC_P_2,
-  VEX_W_0F38DD_P_2,
-  VEX_W_0F38DE_P_2,
-  VEX_W_0F38DF_P_2,
   VEX_W_0F3A00_P_2,
   VEX_W_0F3A01_P_2,
   VEX_W_0F3A02_P_2,
@@ -6394,28 +6390,28 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F38DC_P_2) },
+    { "vaesenc",	{ XM, Vex, EXx }, 0 },
   },
 
   /* PREFIX_VEX_0F38DD */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F38DD_P_2) },
+    { "vaesenclast",	{ XM, Vex, EXx }, 0 },
   },
 
   /* PREFIX_VEX_0F38DE */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F38DE_P_2) },
+    { "vaesdec",	{ XM, Vex, EXx }, 0 },
   },
 
   /* PREFIX_VEX_0F38DF */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F38DF_P_2) },
+    { "vaesdeclast",	{ XM, Vex, EXx }, 0 },
   },
 
   /* PREFIX_VEX_0F38F2 */
@@ -9940,26 +9936,6 @@ static const struct dis386 vex_len_table[][2] = {
     { VEX_W_TABLE (VEX_W_0F38DB_P_2) },
   },
 
-  /* VEX_LEN_0F38DC_P_2 */
-  {
-    { VEX_W_TABLE (VEX_W_0F38DC_P_2) },
-  },
-
-  /* VEX_LEN_0F38DD_P_2 */
-  {
-    { VEX_W_TABLE (VEX_W_0F38DD_P_2) },
-  },
-
-  /* VEX_LEN_0F38DE_P_2 */
-  {
-    { VEX_W_TABLE (VEX_W_0F38DE_P_2) },
-  },
-
-  /* VEX_LEN_0F38DF_P_2 */
-  {
-    { VEX_W_TABLE (VEX_W_0F38DF_P_2) },
-  },
-
   /* VEX_LEN_0F38F2_P_0 */
   {
     { "andnS",		{ Gdq, VexGdq, Edq }, 0 },
@@ -11329,22 +11305,6 @@ static const struct dis386 vex_w_table[][2] = {
   {
     /* VEX_W_0F38DB_P_2 */
     { "vaesimc",	{ XM, EXx }, 0 },
-  },
-  {
-    /* VEX_W_0F38DC_P_2 */
-    { "vaesenc",	{ XM, Vex128, EXx }, 0 },
-  },
-  {
-    /* VEX_W_0F38DD_P_2 */
-    { "vaesenclast",	{ XM, Vex128, EXx }, 0 },
-  },
-  {
-    /* VEX_W_0F38DE_P_2 */
-    { "vaesdec",	{ XM, Vex128, EXx }, 0 },
-  },
-  {
-    /* VEX_W_0F38DF_P_2 */
-    { "vaesdeclast",	{ XM, Vex128, EXx }, 0 },
   },
   {
     /* VEX_W_0F3A00_P_2 */

@@ -169,6 +169,7 @@ accept various extension mnemonics.  For example,
 @code{ptwrite},
 @code{cet},
 @code{gfni},
+@code{vaes},
 @code{prefetchwt1},
 @code{clflushopt},
 @code{se1},
@@ -1227,6 +1228,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
 @item @samp{.padlock} @tab @samp{.clzero} @tab @samp{.mwaitx} @tab @samp{.gfni}
+@item @samp{.vaes}
 @end multitable
 
 Apart from the warning, there are only two other effects on

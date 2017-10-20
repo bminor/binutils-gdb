@@ -998,6 +998,8 @@ static const arch_entry cpu_arch[] =
     CPU_CET_FLAGS, 0 },
   { STRING_COMMA_LEN (".gfni"), PROCESSOR_UNKNOWN,
     CPU_GFNI_FLAGS, 0 },
+  { STRING_COMMA_LEN (".vaes"), PROCESSOR_UNKNOWN,
+    CPU_VAES_FLAGS, 0 },
 };
 
 static const noarch_entry cpu_noarch[] =
