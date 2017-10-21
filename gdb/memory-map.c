@@ -43,10 +43,11 @@ parse_memory_map (const char *memory_map)
 
 /* Internal parsing data passed to all XML callbacks.  */
 struct memory_map_parsing_data
-  {
-    VEC(mem_region_s) **memory_map;
-    char property_name[32];
-  };
+{
+  VEC(mem_region_s) **memory_map;
+
+  std::string property_name;
+};
 
 /* Handle the start of a <memory> element.  */
 
@@ -103,7 +104,7 @@ memory_map_start_property (struct gdb_xml_parser *parser,
   char *name;
 
   name = (char *) xml_find_attribute (attributes, "name")->value;
-  snprintf (data->property_name, sizeof (data->property_name), "%s", name);
+  data->property_name.assign (name);
 }
 
 /* Handle the end of a <property> element and its value.  */
@@ -115,16 +116,16 @@ memory_map_end_property (struct gdb_xml_parser *parser,
 {
   struct memory_map_parsing_data *data
     = (struct memory_map_parsing_data *) user_data;
-  char *name = data->property_name;
 
-  if (strcmp (name, "blocksize") == 0)
+  if (data->property_name == "blocksize")
     {
       struct mem_region *r = VEC_last (mem_region_s, *data->memory_map);
 
       r->attrib.blocksize = gdb_xml_parse_ulongest (parser, body_text);
     }
   else
-    gdb_xml_debug (parser, _("Unknown property \"%s\""), name);
+    gdb_xml_debug (parser, _("Unknown property \"%s\""),
+		   data->property_name.c_str ());
 }
 
 /* Discard the constructed memory map (if an error occurs).  */

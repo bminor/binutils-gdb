@@ -1,3 +1,10 @@
+2017-10-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* memory-map.c (struct memory_map_parsing_data) <property_name>:
+	Change type to std::string.
+	(memory_map_start_property): Adjust.
+	(memory_map_end_property): Adjust.
+
 2017-10-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* infrun.h: Include common/byte-vector.h.
