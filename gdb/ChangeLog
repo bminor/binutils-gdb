@@ -1,5 +1,52 @@
 2017-10-21  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* memattr.h: Don't include vec.h.
+	(struct mem_attrib): Initialize fields.
+	<unknown>: New static method.
+	(struct mem_region): Add constructors, operator<, initialize
+	fields.
+	* memattr.c: Include algorithm.
+	(default_mem_attrib, unknown_mem_attrib): Remove.
+	(user_mem_region_list): New global.
+	(target_mem_region_list, mem_region_list): Change type to
+	std::vector<mem_region>.
+	(mem_use_target): Now a function.
+	(target_mem_regions_valid): Change type to bool.
+	(mem_region_lessthan, mem_region_cmp, mem_region_init): Remove.
+	(require_user_regions): Adjust.
+	(require_target_regions): Adjust.
+	(create_mem_region): Adjust.
+	(lookup_mem_region): Adjust.
+	(invalidate_target_mem_regions): Adjust.
+	(mem_clear): Rename to...
+	(user_mem_clear): ... this, and adjust.
+	(mem_command): Adjust.
+	(info_mem_command): Adjust.
+	(mem_enable, enable_mem_command, mem_disable,
+	disable_mem_command): Adjust.
+	(mem_delete): Adjust.
+	(delete_mem_command): Adjust.
+	* memory-map.h (parse_memory_map): Return an std::vector.
+	* memory-map.c (parse_memory_map): Likewise.
+	(struct memory_map_parsing_data): Add constructor.
+	<memory_map>: Point to std::vector.
+	(memory_map_start_memory): Adjust.
+	(memory_map_end_memory): Adjust.
+	(memory_map_end_property): Adjust.
+	(clear_result): Remove.
+	* remote.c (remote_memory_map): Return an std::vector.
+	* target-debug.h (target_debug_print_VEC_mem_region_s__p):
+	Remove.
+	(target_debug_print_mem_region_vector): New.
+	* target-delegates.c: Regenerate.
+	* target.h (mem_region_vector): New typedef.
+	(to_memory_map): Return mem_region_vector.
+	(target_memory_map): Return an std::vector.
+	* target.c (target_memory_map): Return an std::vector.
+	(flash_erase_command): Adjust.
+
+2017-10-21  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* memory-map.c (struct memory_map_parsing_data) <property_name>:
 	Change type to std::string.
 	(memory_map_start_property): Adjust.

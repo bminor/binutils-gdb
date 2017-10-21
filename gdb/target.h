@@ -418,6 +418,11 @@ typedef void async_callback_ftype (enum inferior_event_type event_type,
 #define TARGET_DEFAULT_RETURN(ARG)
 #define TARGET_DEFAULT_FUNC(ARG)
 
+/* Define a typedef, because make-target-delegates doesn't currently handle type
+   names with templates.  */
+
+typedef std::vector<mem_region> mem_region_vector;
+
 struct target_ops
   {
     struct target_ops *beneath;	/* To the target under this one.  */
@@ -772,8 +777,8 @@ struct target_ops
        This method should not cache data; if the memory map could
        change unexpectedly, it should be invalidated, and higher
        layers will re-fetch it.  */
-    VEC(mem_region_s) *(*to_memory_map) (struct target_ops *)
-      TARGET_DEFAULT_RETURN (NULL);
+    mem_region_vector (*to_memory_map) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (std::vector<mem_region> ());
 
     /* Erases the region of flash memory starting at ADDRESS, of
        length LENGTH.
@@ -1461,7 +1466,7 @@ extern int target_write_raw_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
 /* Fetches the target's memory map.  If one is found it is sorted
    and returned, after some consistency checking.  Otherwise, NULL
    is returned.  */
-VEC(mem_region_s) *target_memory_map (void);
+std::vector<mem_region> target_memory_map (void);
 
 /* Erases all flash memory regions on the target.  */
 void flash_erase_command (char *cmd, int from_tty);

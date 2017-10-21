@@ -10888,10 +10888,10 @@ remote_rcmd (struct target_ops *self, const char *command,
     }
 }
 
-static VEC(mem_region_s) *
+static std::vector<mem_region>
 remote_memory_map (struct target_ops *ops)
 {
-  VEC(mem_region_s) *result = NULL;
+  std::vector<mem_region> result;
   gdb::unique_xmalloc_ptr<char> text
     = target_read_stralloc (&current_target, TARGET_OBJECT_MEMORY_MAP, NULL);
 

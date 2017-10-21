@@ -28,40 +28,26 @@
 #include "vec.h"
 #include "breakpoint.h"
 #include "cli/cli-utils.h"
+#include <algorithm>
 
-const struct mem_attrib default_mem_attrib =
-{
-  MEM_RW,			/* mode */
-  MEM_WIDTH_UNSPECIFIED,
-  0,				/* hwbreak */
-  0,				/* cache */
-  0,				/* verify */
-  -1 /* Flash blocksize not specified.  */
-};
-
-const struct mem_attrib unknown_mem_attrib =
-{
-  MEM_NONE,			/* mode */
-  MEM_WIDTH_UNSPECIFIED,
-  0,				/* hwbreak */
-  0,				/* cache */
-  0,				/* verify */
-  -1 /* Flash blocksize not specified.  */
-};
-
-
-VEC(mem_region_s) *mem_region_list, *target_mem_region_list;
+static std::vector<mem_region> user_mem_region_list, target_mem_region_list;
+static std::vector<mem_region> *mem_region_list = &target_mem_region_list;
 static int mem_number = 0;
 
 /* If this flag is set, the memory region list should be automatically
    updated from the target.  If it is clear, the list is user-controlled
    and should be left alone.  */
-static int mem_use_target = 1;
+
+static bool
+mem_use_target ()
+{
+  return mem_region_list == &target_mem_region_list;
+}
 
 /* If this flag is set, we have tried to fetch the target memory regions
    since the last time it was invalidated.  If that list is still
    empty, then the target can't supply memory regions.  */
-static int target_mem_regions_valid;
+static bool target_mem_regions_valid;
 
 /* If this flag is set, gdb will assume that memory ranges not
    specified by the memory map have type MEM_NONE, and will
@@ -81,44 +67,6 @@ show_inaccessible_by_default (struct ui_file *file, int from_tty,
 			      "will be treated as RAM.\n"));          
 }
 
-
-/* Predicate function which returns true if LHS should sort before RHS
-   in a list of memory regions, useful for VEC_lower_bound.  */
-
-static int
-mem_region_lessthan (const struct mem_region *lhs,
-		     const struct mem_region *rhs)
-{
-  return lhs->lo < rhs->lo;
-}
-
-/* A helper function suitable for qsort, used to sort a
-   VEC(mem_region_s) by starting address.  */
-
-int
-mem_region_cmp (const void *untyped_lhs, const void *untyped_rhs)
-{
-  const struct mem_region *lhs = (const struct mem_region *) untyped_lhs;
-  const struct mem_region *rhs = (const struct mem_region *) untyped_rhs;
-
-  if (lhs->lo < rhs->lo)
-    return -1;
-  else if (lhs->lo == rhs->lo)
-    return 0;
-  else
-    return 1;
-}
-
-/* Allocate a new memory region, with default settings.  */
-
-void
-mem_region_init (struct mem_region *newobj)
-{
-  memset (newobj, 0, sizeof (struct mem_region));
-  newobj->enabled_p = 1;
-  newobj->attrib = default_mem_attrib;
-}
-
 /* This function should be called before any command which would
    modify the memory region list.  It will handle switching from
    a target-provided list to a local list, if necessary.  */
@@ -130,16 +78,16 @@ require_user_regions (int from_tty)
   int ix, length;
 
   /* If we're already using a user-provided list, nothing to do.  */
-  if (!mem_use_target)
+  if (!mem_use_target ())
     return;
 
   /* Switch to a user-provided list (possibly a copy of the current
      one).  */
-  mem_use_target = 0;
+  mem_region_list = &user_mem_region_list;
 
   /* If we don't have a target-provided region list yet, then
      no need to warn.  */
-  if (mem_region_list == NULL)
+  if (target_mem_region_list.empty ())
     return;
 
   /* Otherwise, let the user know how to get back.  */
@@ -147,11 +95,9 @@ require_user_regions (int from_tty)
     warning (_("Switching to manual control of memory regions; use "
 	       "\"mem auto\" to fetch regions from the target again."));
 
-  /* And create a new list for the user to modify.  */
-  length = VEC_length (mem_region_s, target_mem_region_list);
-  mem_region_list = VEC_alloc (mem_region_s, length);
-  for (ix = 0; VEC_iterate (mem_region_s, target_mem_region_list, ix, m); ix++)
-    VEC_quick_push (mem_region_s, mem_region_list, m);
+  /* And create a new list (copy of the target-supplied regions) for the user
+     to modify.  */
+  user_mem_region_list = target_mem_region_list;
 }
 
 /* This function should be called before any command which would
@@ -162,21 +108,19 @@ require_user_regions (int from_tty)
 static void
 require_target_regions (void)
 {
-  if (mem_use_target && !target_mem_regions_valid)
+  if (mem_use_target () && !target_mem_regions_valid)
     {
-      target_mem_regions_valid = 1;
+      target_mem_regions_valid = true;
       target_mem_region_list = target_memory_map ();
-      mem_region_list = target_mem_region_list;
     }
 }
 
-static void
-create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
-		   const struct mem_attrib *attrib)
-{
-  struct mem_region newobj;
-  int i, ix;
+/* Create a new user-defined memory region.  */
 
+static void
+create_user_mem_region (CORE_ADDR lo, CORE_ADDR hi,
+			const mem_attrib &attrib)
+{
   /* lo == hi is a useless empty region.  */
   if (lo >= hi && hi != 0)
     {
@@ -184,30 +128,28 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
       return;
     }
 
-  mem_region_init (&newobj);
-  newobj.lo = lo;
-  newobj.hi = hi;
+  mem_region newobj (lo, hi, attrib);
 
-  ix = VEC_lower_bound (mem_region_s, mem_region_list, &newobj,
-			mem_region_lessthan);
+  auto it = std::lower_bound (user_mem_region_list.begin (),
+			      user_mem_region_list.end (),
+			      newobj);
+  int ix = std::distance (user_mem_region_list.begin (), it);
 
   /* Check for an overlapping memory region.  We only need to check
      in the vicinity - at most one before and one after the
      insertion point.  */
-  for (i = ix - 1; i < ix + 1; i++)
+  for (int i = ix - 1; i < ix + 1; i++)
     {
-      struct mem_region *n;
-
       if (i < 0)
 	continue;
-      if (i >= VEC_length (mem_region_s, mem_region_list))
+      if (i >= user_mem_region_list.size ())
 	continue;
 
-      n = VEC_index (mem_region_s, mem_region_list, i);
+      mem_region &n = user_mem_region_list[i];
 
-      if ((lo >= n->lo && (lo < n->hi || n->hi == 0)) 
-	  || (hi > n->lo && (hi <= n->hi || n->hi == 0))
-	  || (lo <= n->lo && ((hi >= n->hi && n->hi != 0) || hi == 0)))
+      if ((lo >= n.lo && (lo < n.hi || n.hi == 0))
+	  || (hi > n.lo && (hi <= n.hi || n.hi == 0))
+	  || (lo <= n.lo && ((hi >= n.hi && n.hi != 0) || hi == 0)))
 	{
 	  printf_unfiltered (_("overlapping memory region\n"));
 	  return;
@@ -215,17 +157,15 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
     }
 
   newobj.number = ++mem_number;
-  newobj.attrib = *attrib;
-  VEC_safe_insert (mem_region_s, mem_region_list, ix, &newobj);
+  user_mem_region_list.insert (it, newobj);
 }
 
-/*
- * Look up the memory region cooresponding to ADDR.
- */
+/* Look up the memory region corresponding to ADDR.  */
+
 struct mem_region *
 lookup_mem_region (CORE_ADDR addr)
 {
-  static struct mem_region region;
+  static struct mem_region region (0, 0);
   struct mem_region *m;
   CORE_ADDR lo;
   CORE_ADDR hi;
@@ -244,32 +184,32 @@ lookup_mem_region (CORE_ADDR addr)
   lo = 0;
   hi = 0;
 
-  /* Either find memory range containing ADDRESS, or set LO and HI
+  /* Either find memory range containing ADDR, or set LO and HI
      to the nearest boundaries of an existing memory range.
      
      If we ever want to support a huge list of memory regions, this
      check should be replaced with a binary search (probably using
      VEC_lower_bound).  */
-  for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
+  for (mem_region &m : *mem_region_list)
     {
-      if (m->enabled_p == 1)
+      if (m.enabled_p == 1)
 	{
 	  /* If the address is in the memory region, return that
 	     memory range.  */
-	  if (addr >= m->lo && (addr < m->hi || m->hi == 0))
-	    return m;
+	  if (addr >= m.lo && (addr < m.hi || m.hi == 0))
+	    return &m;
 
 	  /* This (correctly) won't match if m->hi == 0, representing
 	     the top of the address space, because CORE_ADDR is unsigned;
 	     no value of LO is less than zero.  */
-	  if (addr >= m->hi && lo < m->hi)
-	    lo = m->hi;
+	  if (addr >= m.hi && lo < m.hi)
+	    lo = m.hi;
 
 	  /* This will never set HI to zero; if we're here and ADDR
 	     is at or below M, and the region starts at zero, then ADDR
 	     would have been in the region.  */
-	  if (addr <= m->lo && (hi == 0 || hi > m->lo))
-	    hi = m->lo;
+	  if (addr <= m.lo && (hi == 0 || hi > m.lo))
+	    hi = m.lo;
 	}
     }
 
@@ -281,10 +221,10 @@ lookup_mem_region (CORE_ADDR addr)
   /* When no memory map is defined at all, we always return 
      'default_mem_attrib', so that we do not make all memory 
      inaccessible for targets that don't provide a memory map.  */
-  if (inaccessible_by_default && !VEC_empty (mem_region_s, mem_region_list))
-    region.attrib = unknown_mem_attrib;
+  if (inaccessible_by_default && !mem_region_list->empty ())
+    region.attrib = mem_attrib::unknown ();
   else
-    region.attrib = default_mem_attrib;
+    region.attrib = mem_attrib ();
 
   return &region;
 }
@@ -297,18 +237,16 @@ invalidate_target_mem_regions (void)
   if (!target_mem_regions_valid)
     return;
 
-  target_mem_regions_valid = 0;
-  VEC_free (mem_region_s, target_mem_region_list);
-  if (mem_use_target)
-    mem_region_list = NULL;
+  target_mem_regions_valid = false;
+  target_mem_region_list.clear ();
 }
 
-/* Clear memory region list.  */
+/* Clear user-defined memory region list.  */
 
 static void
-mem_clear (void)
+user_mem_clear (void)
 {
-  VEC_free (mem_region_s, mem_region_list);
+  user_mem_region_list.clear ();
 }
 
 
@@ -317,7 +255,6 @@ mem_command (char *args, int from_tty)
 {
   CORE_ADDR lo, hi;
   char *tok;
-  struct mem_attrib attrib;
 
   if (!args)
     error_no_arg (_("No mem"));
@@ -325,16 +262,12 @@ mem_command (char *args, int from_tty)
   /* For "mem auto", switch back to using a target provided list.  */
   if (strcmp (args, "auto") == 0)
     {
-      if (mem_use_target)
+      if (mem_use_target ())
 	return;
 
-      if (mem_region_list != target_mem_region_list)
-	{
-	  mem_clear ();
-	  mem_region_list = target_mem_region_list;
-	}
+      user_mem_clear ();
+      mem_region_list = &target_mem_region_list;
 
-      mem_use_target = 1;
       return;
     }
 
@@ -350,7 +283,7 @@ mem_command (char *args, int from_tty)
     error (_("no hi address"));
   hi = parse_and_eval_address (tok);
 
-  attrib = default_mem_attrib;
+  mem_attrib attrib;
   while ((tok = strtok (NULL, " \t")) != NULL)
     {
       if (strcmp (tok, "rw") == 0)
@@ -404,25 +337,21 @@ mem_command (char *args, int from_tty)
 	error (_("unknown attribute: %s"), tok);
     }
 
-  create_mem_region (lo, hi, &attrib);
+  create_user_mem_region (lo, hi, attrib);
 }
 
 
 static void
 info_mem_command (char *args, int from_tty)
 {
-  struct mem_region *m;
-  struct mem_attrib *attrib;
-  int ix;
-
-  if (mem_use_target)
+  if (mem_use_target ())
     printf_filtered (_("Using memory regions provided by the target.\n"));
   else
     printf_filtered (_("Using user-defined memory regions.\n"));
 
   require_target_regions ();
 
-  if (!mem_region_list)
+  if (mem_region_list->empty ())
     {
       printf_unfiltered (_("There are no memory regions defined.\n"));
       return;
@@ -439,33 +368,33 @@ info_mem_command (char *args, int from_tty)
   printf_filtered ("Attrs ");
   printf_filtered ("\n");
 
-  for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
+  for (const mem_region &m : *mem_region_list)
     {
       const char *tmp;
 
       printf_filtered ("%-3d %-3c\t",
-		       m->number,
-		       m->enabled_p ? 'y' : 'n');
+		       m.number,
+		       m.enabled_p ? 'y' : 'n');
       if (gdbarch_addr_bit (target_gdbarch ()) <= 32)
-	tmp = hex_string_custom (m->lo, 8);
+	tmp = hex_string_custom (m.lo, 8);
       else
-	tmp = hex_string_custom (m->lo, 16);
+	tmp = hex_string_custom (m.lo, 16);
       
       printf_filtered ("%s ", tmp);
 
       if (gdbarch_addr_bit (target_gdbarch ()) <= 32)
 	{
-	  if (m->hi == 0)
+	  if (m.hi == 0)
 	    tmp = "0x100000000";
 	  else
-	    tmp = hex_string_custom (m->hi, 8);
+	    tmp = hex_string_custom (m.hi, 8);
 	}
       else
 	{
-	  if (m->hi == 0)
+	  if (m.hi == 0)
 	    tmp = "0x10000000000000000";
 	  else
-	    tmp = hex_string_custom (m->hi, 16);
+	    tmp = hex_string_custom (m.hi, 16);
 	}
 
       printf_filtered ("%s ", tmp);
@@ -482,8 +411,7 @@ info_mem_command (char *args, int from_tty)
        * time, we may want to consider printing tokens only if they
        * are different from the default attribute.  */
 
-      attrib = &m->attrib;
-      switch (attrib->mode)
+      switch (m.attrib.mode)
 	{
 	case MEM_RW:
 	  printf_filtered ("rw ");
@@ -495,11 +423,11 @@ info_mem_command (char *args, int from_tty)
 	  printf_filtered ("wo ");
 	  break;
 	case MEM_FLASH:
-	  printf_filtered ("flash blocksize 0x%x ", attrib->blocksize);
+	  printf_filtered ("flash blocksize 0x%x ", m.attrib.blocksize);
 	  break;
 	}
 
-      switch (attrib->width)
+      switch (m.attrib.width)
 	{
 	case MEM_WIDTH_8:
 	  printf_filtered ("8 ");
@@ -524,7 +452,7 @@ info_mem_command (char *args, int from_tty)
 	printf_filtered ("swbreak");
 #endif
 
-      if (attrib->cache)
+      if (m.attrib.cache)
 	printf_filtered ("cache ");
       else
 	printf_filtered ("nocache ");
@@ -548,13 +476,10 @@ info_mem_command (char *args, int from_tty)
 static void
 mem_enable (int num)
 {
-  struct mem_region *m;
-  int ix;
-
-  for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
-    if (m->number == num)
+  for (mem_region &m : *mem_region_list)
+    if (m.number == num)
       {
-	m->enabled_p = 1;
+	m.enabled_p = 1;
 	return;
       }
   printf_unfiltered (_("No memory region number %d.\n"), num);
@@ -563,25 +488,21 @@ mem_enable (int num)
 static void
 enable_mem_command (const char *args, int from_tty)
 {
-  int num;
-  struct mem_region *m;
-  int ix;
-
   require_user_regions (from_tty);
 
   target_dcache_invalidate ();
 
   if (args == NULL || *args == '\0')
     { /* Enable all mem regions.  */
-      for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
-	m->enabled_p = 1;
+      for (mem_region &m : *mem_region_list)
+	m.enabled_p = 1;
     }
   else
     {
       number_or_range_parser parser (args);
       while (!parser.finished ())
 	{
-	  num = parser.get_number ();
+	  int num = parser.get_number ();
 	  mem_enable (num);
 	}
     }
@@ -593,13 +514,10 @@ enable_mem_command (const char *args, int from_tty)
 static void
 mem_disable (int num)
 {
-  struct mem_region *m;
-  int ix;
-
-  for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
-    if (m->number == num)
+  for (mem_region &m : *mem_region_list)
+    if (m.number == num)
       {
-	m->enabled_p = 0;
+	m.enabled_p = 0;
 	return;
       }
   printf_unfiltered (_("No memory region number %d.\n"), num);
@@ -617,8 +535,8 @@ disable_mem_command (const char *args, int from_tty)
       struct mem_region *m;
       int ix;
 
-      for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
-	m->enabled_p = 0;
+      for (mem_region &m : *mem_region_list)
+	m.enabled_p = false;
     }
   else
     {
@@ -645,17 +563,16 @@ mem_delete (int num)
       return;
     }
 
-  for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
-    if (m->number == num)
-      break;
-
-  if (m == NULL)
+  auto it = std::remove_if (mem_region_list->begin (), mem_region_list->end (),
+			    [num] (const mem_region &m)
     {
-      printf_unfiltered (_("No memory region number %d.\n"), num);
-      return;
-    }
+      return m.number == num;
+    });
 
-  VEC_ordered_remove (mem_region_s, mem_region_list, ix);
+  if (it != mem_region_list->end ())
+    mem_region_list->erase (it);
+  else
+    printf_unfiltered (_("No memory region number %d.\n"), num);
 }
 
 static void
@@ -668,7 +585,7 @@ delete_mem_command (const char *args, int from_tty)
   if (args == NULL || *args == '\0')
     {
       if (query (_("Delete all memory regions? ")))
-	mem_clear ();
+	user_mem_clear ();
       dont_repeat ();
       return;
     }

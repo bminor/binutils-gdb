@@ -25,8 +25,7 @@
 
 /* Parses XML memory map passed as argument and returns the memory
    regions it describes.  On any error, emits error message and
-   returns 0.  Does not throw.  Ownership of result is passed to the
-   caller.  */
-VEC(mem_region_s) *parse_memory_map (const char *memory_map);
+   return an empty vector.  Does not throw.  */
+std::vector<mem_region> parse_memory_map (const char *memory_map);
 
 #endif
