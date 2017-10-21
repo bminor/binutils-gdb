@@ -20,6 +20,8 @@
 #ifndef I386_TDEP_H
 #define I386_TDEP_H
 
+#include "infrun.h"
+
 struct frame_info;
 struct gdbarch;
 struct reggroup;
@@ -415,6 +417,8 @@ extern void
 				     iterate_over_regset_sections_cb *cb,
 				     void *cb_data,
 				     const struct regcache *regcache);
+
+typedef buf_displaced_step_closure i386_displaced_step_closure;
 
 extern struct displaced_step_closure *i386_displaced_step_copy_insn
   (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to,

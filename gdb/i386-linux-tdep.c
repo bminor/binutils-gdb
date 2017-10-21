@@ -802,21 +802,21 @@ i386_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				     CORE_ADDR from, CORE_ADDR to,
 				     struct regcache *regs)
 {
-  struct displaced_step_closure *closure;
-
-  closure = i386_displaced_step_copy_insn (gdbarch, from, to, regs);
+  displaced_step_closure *closure_
+    =  i386_displaced_step_copy_insn (gdbarch, from, to, regs);
 
   if (i386_linux_get_syscall_number_from_regcache (regs) != -1)
     {
       /* The closure returned by i386_displaced_step_copy_insn is simply a
-         buffer with a copy of the instruction. */
-      gdb_byte *insn = (gdb_byte *) closure;
+	 buffer with a copy of the instruction. */
+      i386_displaced_step_closure *closure
+	= (i386_displaced_step_closure *) closure_;
 
       /* Fake nop.  */
-      insn[0] = 0x90;
+      closure->buf[0] = 0x90;
     }
 
-  return closure;
+  return closure_;
 }
 
 static void
