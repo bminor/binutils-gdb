@@ -135,8 +135,6 @@ if { [check_gc_sections_available] } {
 	    {{readelf --dyn-syms pr21233-l.sd}} \
 	    "libpr21233.so"]]
 
-    setup_kfail "cris*-*-*" "ld/21233"
-
     run_ld_link_tests [list \
 	[list \
 	    "PR ld/21233 dynamic symbols with section GC (--undefined)" \
@@ -145,8 +143,6 @@ if { [check_gc_sections_available] } {
 	    {pr21233.s} \
 	    {{readelf --dyn-syms pr21233.sd}} \
 	    "pr21233-1"]]
-
-    setup_kfail "cris*-*-*" "ld/21233"
 
     run_ld_link_tests [list \
 	[list \
@@ -157,8 +153,6 @@ if { [check_gc_sections_available] } {
 	    {pr21233.s} \
 	    {{readelf --dyn-syms pr21233.sd}} \
 	    "pr21233-2"]]
-
-    setup_kfail "cris*-*-*" "ld/21233"
 
     run_ld_link_tests [list \
 	[list \

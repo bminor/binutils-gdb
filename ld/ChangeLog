@@ -1,3 +1,8 @@
+2017-10-21  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/21233
+	* testsuite/ld-elf/shared.exp: Remove kfails.
+
 2017-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22269
