@@ -1,3 +1,8 @@
+2017-10-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* interps.h (interp_resume, interp_suspend, interp_set_temp):
+	Remove declarations.
+
 2017-10-20  Tom Tromey  <tom@tromey.com>
 
 	* gdb_bfd.c (struct gdb_bfd_data) <included_bfds>: Now a

@@ -35,8 +35,6 @@ typedef struct interp *(*interp_factory_func) (const char *name);
 extern void interp_factory_register (const char *name,
 				     interp_factory_func func);
 
-extern int interp_resume (struct interp *interp);
-extern int interp_suspend (struct interp *interp);
 extern struct gdb_exception interp_exec (struct interp *interp,
 					 const char *command);
 
@@ -102,7 +100,6 @@ extern void set_top_level_interpreter (const char *name);
 
 extern struct ui_out *interp_ui_out (struct interp *interp);
 extern const char *interp_name (struct interp *interp);
-extern struct interp *interp_set_temp (const char *name);
 
 /* Temporarily set the current interpreter, and reset it on
    destruction.  */
