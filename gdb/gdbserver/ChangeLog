@@ -1,3 +1,10 @@
+2017-10-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdbthread.h (find_thread, for_each_thread): New functions.
+	* inferiors.c (thread_of_pid): Remove.
+	(find_any_thread_of_pid): Use find_thread.
+	* linux-low.c (num_lwps): Use for_each_thread.
+
 2017-10-17  Yao Qi  <yao.qi@linaro.org>
 
 	* Makefile.in: Remove one rule.

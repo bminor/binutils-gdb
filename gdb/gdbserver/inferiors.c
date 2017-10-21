@@ -132,23 +132,14 @@ find_thread_process (const struct process_info *const process)
   return find_any_thread_of_pid (process->pid);
 }
 
-/* Helper for find_any_thread_of_pid.  Returns true if a thread
-   matches a PID.  */
-
-static int
-thread_of_pid (thread_info *entry, void *pid_p)
-{
-  int pid = *(int *) pid_p;
-
-  return (ptid_get_pid (entry->id) == pid);
-}
-
 /* See gdbthread.h.  */
 
 struct thread_info *
 find_any_thread_of_pid (int pid)
 {
-  return find_inferior (&all_threads, thread_of_pid, &pid);
+  return find_thread (pid, [] (thread_info *thread) {
+    return true;
+  });
 }
 
 static void

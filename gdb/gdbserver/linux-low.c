@@ -1869,10 +1869,10 @@ num_lwps (int pid)
 {
   int count = 0;
 
-  for_each_thread ([&] (thread_info *thread) {
-    if (thread->id.pid () == pid)
+  for_each_thread (pid, [&] (thread_info *thread)
+    {
       count++;
-  });
+    });
 
   return count;
 }
