@@ -1,3 +1,8 @@
+2017-10-22  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR gas/22304
+	* testsuite/gas/cris/range-err-1.s: Remove quotes left from last edit.
+
 2017-10-20  Nick Clifton  <nickc@redhat.com>
 
 	PR 22324
