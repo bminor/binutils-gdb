@@ -1,3 +1,8 @@
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-init.h: Regenerate
+	* i386-tbl.h: Likewise
+
 2017-10-18  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* visium-dis.c (disassem_class1) <case 0>: Print the operands.
