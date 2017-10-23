@@ -2086,6 +2086,22 @@ aarch64_gen_return_address (struct gdbarch *gdbarch,
 }
 
 
+/* Implement the "register_type" gdbarch method.
+   Adjust the register type of $PC and $SP on ILP32.  */
+
+static struct type *
+aarch64_ilp32_register_type (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  gdb_assert (tdep->ilp32);
+
+  if (regnum == AARCH64_SP_REGNUM || regnum == AARCH64_PC_REGNUM)
+    return builtin_type (gdbarch)->builtin_uint64;
+  else
+    return tdesc_register_type (gdbarch, regnum);
+}
+
 /* Return the pseudo register name corresponding to register regnum.  */
 
 static const char *
@@ -2848,6 +2864,10 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   const struct tdesc_feature *feature;
   int num_regs = 0;
   int num_pseudo_regs = 0;
+  bool ilp32 = false;
+
+  if (info.bfd_arch_info->mach == bfd_mach_aarch64_ilp32)
+    ilp32 = true;
 
   /* Ensure we always have a target descriptor.  */
   if (!tdesc_has_registers (tdesc))
@@ -2905,6 +2925,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        best_arch != NULL;
        best_arch = gdbarch_list_lookup_by_info (best_arch->next, &info))
     {
+      /* ILP32 and LP64 are incompatible. */
+      if (gdbarch_tdep (arches->gdbarch)->ilp32 != ilp32)
+	continue;
       /* Found a match.  */
       break;
     }
@@ -2923,6 +2946,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->lowest_pc = 0x20;
   tdep->jb_pc = -1;		/* Longjump support not enabled by default.  */
   tdep->jb_elt_size = 8;
+  tdep->ilp32 = ilp32;
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);
@@ -2965,9 +2989,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_float_bit (gdbarch, 32);
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 128);
-  set_gdbarch_long_bit (gdbarch, 64);
+  set_gdbarch_long_bit (gdbarch, ilp32 ? 32 : 64);
   set_gdbarch_long_long_bit (gdbarch, 64);
-  set_gdbarch_ptr_bit (gdbarch, 64);
+  set_gdbarch_ptr_bit (gdbarch, ilp32 ? 32 : 64);
   set_gdbarch_char_signed (gdbarch, 0);
   set_gdbarch_wchar_signed (gdbarch, 0);
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
@@ -3009,6 +3033,13 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_gen_return_address (gdbarch, aarch64_gen_return_address);
 
   tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+
+  if (ilp32)
+    {
+      /* Override tdesc_register_type to adjust the types of $PC and
+	 $SP in ILP32.  */
+      set_gdbarch_register_type (gdbarch, aarch64_ilp32_register_type);
+    }
 
   /* Add standard register aliases.  */
   for (i = 0; i < ARRAY_SIZE (aarch64_register_aliases); i++)

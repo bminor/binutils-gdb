@@ -131,13 +131,13 @@
   ucontext.uc_mcontext.  */
 
 /* These magic numbers need to reflect the layout of the kernel
-   defined struct rt_sigframe and ucontext.  */
+   defined struct rt_sigframe and ucontext in LP64 mode.  */
 #define AARCH64_SIGCONTEXT_REG_SIZE             8
 #define AARCH64_RT_SIGFRAME_UCONTEXT_OFFSET     128
 #define AARCH64_UCONTEXT_SIGCONTEXT_OFFSET      176
 #define AARCH64_SIGCONTEXT_XO_OFFSET            8
 
-/* Implement the "init" method of struct tramp_frame.  */
+/* Implement the "init" method of struct tramp_frame for LP64.  */
 
 static void
 aarch64_linux_sigframe_init (const struct tramp_frame *self,
@@ -184,6 +184,62 @@ static const struct tramp_frame aarch64_linux_rt_sigframe =
     {TRAMP_SENTINEL_INSN, -1}
   },
   aarch64_linux_sigframe_init
+};
+
+/* These magic numbers need to reflect the layout of the kernel
+   defined struct rt_sigframe and ucontext in LP64 mode.  */
+#define AARCH64_ILP32_SIGCONTEXT_REG_SIZE             8
+#define AARCH64_ILP32_RT_SIGFRAME_UCONTEXT_OFFSET     128
+#define AARCH64_ILP32_UCONTEXT_SIGCONTEXT_OFFSET      160
+#define AARCH64_ILP32_SIGCONTEXT_XO_OFFSET            8
+
+/* Implement the "init" method of struct tramp_frame for ILP32.  */
+
+static void
+aarch64_ilp32_linux_sigframe_init (const struct tramp_frame *self,
+				   struct frame_info *this_frame,
+				   struct trad_frame_cache *this_cache,
+				   CORE_ADDR func)
+{
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, AARCH64_SP_REGNUM);
+  CORE_ADDR sigcontext_addr =
+    sp
+    + AARCH64_RT_SIGFRAME_UCONTEXT_OFFSET
+    + AARCH64_ILP32_UCONTEXT_SIGCONTEXT_OFFSET;
+  int i;
+
+  for (i = 0; i < 31; i++)
+    {
+      trad_frame_set_reg_addr (this_cache,
+			       AARCH64_X0_REGNUM + i,
+			       sigcontext_addr + AARCH64_SIGCONTEXT_XO_OFFSET
+			       + i * AARCH64_SIGCONTEXT_REG_SIZE);
+    }
+  trad_frame_set_reg_addr (this_cache, AARCH64_SP_REGNUM,
+			   sigcontext_addr + AARCH64_SIGCONTEXT_XO_OFFSET
+			     + 31 * AARCH64_SIGCONTEXT_REG_SIZE);
+  trad_frame_set_reg_addr (this_cache, AARCH64_PC_REGNUM,
+			   sigcontext_addr + AARCH64_SIGCONTEXT_XO_OFFSET
+			     + 32 * AARCH64_SIGCONTEXT_REG_SIZE);
+
+  trad_frame_set_id (this_cache, frame_id_build (sp, func));
+}
+
+static const struct tramp_frame aarch64_ilp32_linux_rt_sigframe =
+{
+  SIGTRAMP_FRAME,
+  4,
+  {
+    /* movz x8, 0x8b (S=1,o=10,h=0,i=0x8b,r=8)
+       Soo1 0010 1hhi iiii iiii iiii iiir rrrr  */
+    {0xd2801168, -1},
+
+    /* svc  0x0      (o=0, l=1)
+       1101 0100 oooi iiii iiii iiii iii0 00ll  */
+    {0xd4000001, -1},
+    {TRAMP_SENTINEL_INSN, -1}
+  },
+  aarch64_ilp32_linux_sigframe_init
 };
 
 /* Register maps.  */
@@ -1016,8 +1072,12 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   linux_init_abi (info, gdbarch);
 
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					 svr4_lp64_fetch_link_map_offsets);
+  if (tdep->ilp32)
+    set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					   svr4_ilp32_fetch_link_map_offsets);
+  else
+    set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					   svr4_lp64_fetch_link_map_offsets);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
@@ -1027,7 +1087,10 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 
-  tramp_frame_prepend_unwinder (gdbarch, &aarch64_linux_rt_sigframe);
+  if (tdep->ilp32)
+    tramp_frame_prepend_unwinder (gdbarch, &aarch64_ilp32_linux_rt_sigframe);
+  else
+    tramp_frame_prepend_unwinder (gdbarch, &aarch64_linux_rt_sigframe);
 
   /* Enable longjmp.  */
   tdep->jb_pc = 11;

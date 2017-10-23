@@ -492,7 +492,12 @@ aarch64_linux_read_description (void)
 
   is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
 
-  if (is_elf64)
+  /* There are problems with ptrace when gdbserver is 32 bits and the
+     program being debugged is 64 bits.  */
+  if (sizeof (void *) == 4 && is_elf64)
+    error (_("Can't debug 64-bit process with 32-bit GDBserver"));
+
+  if (machine == EM_AARCH64)
     return tdesc_aarch64;
   else
     return tdesc_arm_with_neon;
