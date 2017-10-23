@@ -1,3 +1,8 @@
+2017-10-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.tgt (i[3-7]86-*-linux-*): Move elf32_x86_64 from
+	targ_extra_libpath to targ64_extra_libpath.
+
 2017-10-23  Nick Clifton  <nickc@redhat.com>
 
 	PR 22310
