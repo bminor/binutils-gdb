@@ -62,6 +62,7 @@ struct ld_emulation_xfer_struct ld_vanilla_emulation =
   hll_default,
   after_parse_default,
   after_open_default,
+  after_check_relocs_default,
   after_allocation_default,
   vanilla_set_output_arch,
   ldemul_default_target,

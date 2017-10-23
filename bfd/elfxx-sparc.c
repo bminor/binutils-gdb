@@ -1353,7 +1353,7 @@ sparc_elf_tls_transition (struct bfd_link_info *info, bfd *abfd,
       && ! _bfd_sparc_elf_tdata (abfd)->has_tlsgd)
     r_type = R_SPARC_REV32;
 
-  if (bfd_link_pic (info))
+  if (!bfd_link_executable (info))
     return r_type;
 
   switch (r_type)
@@ -1529,13 +1529,13 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_SPARC_TLS_LE_HIX22:
 	case R_SPARC_TLS_LE_LOX10:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    goto r_sparc_plt32;
 	  break;
 
 	case R_SPARC_TLS_IE_HI22:
 	case R_SPARC_TLS_IE_LO10:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
 
@@ -1649,7 +1649,7 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_SPARC_TLS_GD_CALL:
 	case R_SPARC_TLS_LDM_CALL:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    {
 	      /* These are basically R_SPARC_TLS_WPLT30 relocs against
 		 __tls_get_addr.  */
@@ -1955,166 +1955,6 @@ sparc_elf_find_reloc_at_ofs (Elf_Internal_Rela *rel,
   return NULL;
 }
 
-/* Update the got entry reference counts for the section being removed.  */
-bfd_boolean
-_bfd_sparc_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
-			      asection *sec, const Elf_Internal_Rela *relocs)
-{
-  struct _bfd_sparc_elf_link_hash_table *htab;
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
-  const Elf_Internal_Rela *rel, *relend;
-
-  if (bfd_link_relocatable (info))
-    return TRUE;
-
-  BFD_ASSERT (is_sparc_elf (abfd) || sec->reloc_count == 0);
-
-  elf_section_data (sec)->local_dynrel = NULL;
-
-  htab = _bfd_sparc_elf_hash_table (info);
-  BFD_ASSERT (htab != NULL);
-  symtab_hdr = &elf_symtab_hdr (abfd);
-  sym_hashes = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    {
-      unsigned long r_symndx;
-      unsigned int r_type;
-      struct elf_link_hash_entry *h = NULL;
-
-      r_symndx = SPARC_ELF_R_SYMNDX (htab, rel->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-	{
-	  struct _bfd_sparc_elf_link_hash_entry *eh;
-	  struct _bfd_sparc_elf_dyn_relocs **pp;
-	  struct _bfd_sparc_elf_dyn_relocs *p;
-
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	  eh = (struct _bfd_sparc_elf_link_hash_entry *) h;
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	    if (p->sec == sec)
-	      {
-		/* Everything must go for SEC.  */
-		*pp = p->next;
-		break;
-	      }
-	}
-
-      r_type = SPARC_ELF_R_TYPE (rel->r_info);
-      r_type = sparc_elf_tls_transition (info, abfd, r_type, h == NULL);
-      switch (r_type)
-	{
-	case R_SPARC_TLS_LDM_HI22:
-	case R_SPARC_TLS_LDM_LO10:
-	  if (_bfd_sparc_elf_hash_table (info)->tls_ldm_got.refcount > 0)
-	    _bfd_sparc_elf_hash_table (info)->tls_ldm_got.refcount -= 1;
-	  break;
-
-	case R_SPARC_TLS_GD_HI22:
-	case R_SPARC_TLS_GD_LO10:
-	case R_SPARC_TLS_IE_HI22:
-	case R_SPARC_TLS_IE_LO10:
-	case R_SPARC_GOT10:
-	case R_SPARC_GOT13:
-	case R_SPARC_GOT22:
-	case R_SPARC_GOTDATA_HIX22:
-	case R_SPARC_GOTDATA_LOX10:
-	case R_SPARC_GOTDATA_OP_HIX22:
-	case R_SPARC_GOTDATA_OP_LOX10:
-	  if (h != NULL)
-	    {
-	      if (h->got.refcount > 0)
-		h->got.refcount--;
-	    }
-	  else
-	    {
-	      switch (r_type)
-		{
-		case R_SPARC_GOTDATA_OP_HIX22:
-		case R_SPARC_GOTDATA_OP_LOX10:
-		  break;
-
-		default:
-		  if (local_got_refcounts[r_symndx] > 0)
-		    local_got_refcounts[r_symndx]--;
-		  break;
-		}
-	    }
-	  break;
-
-	case R_SPARC_PC10:
-	case R_SPARC_PC22:
-	case R_SPARC_PC_HH22:
-	case R_SPARC_PC_HM10:
-	case R_SPARC_PC_LM22:
-	  if (h != NULL
-	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
-	    break;
-	  /* Fall through.  */
-
-	case R_SPARC_DISP8:
-	case R_SPARC_DISP16:
-	case R_SPARC_DISP32:
-	case R_SPARC_DISP64:
-	case R_SPARC_WDISP30:
-	case R_SPARC_WDISP22:
-	case R_SPARC_WDISP19:
-	case R_SPARC_WDISP16:
-	case R_SPARC_WDISP10:
-	case R_SPARC_8:
-	case R_SPARC_16:
-	case R_SPARC_32:
-	case R_SPARC_HI22:
-	case R_SPARC_22:
-	case R_SPARC_13:
-	case R_SPARC_LO10:
-	case R_SPARC_UA16:
-	case R_SPARC_UA32:
-	case R_SPARC_PLT32:
-	case R_SPARC_10:
-	case R_SPARC_11:
-	case R_SPARC_64:
-	case R_SPARC_OLO10:
-	case R_SPARC_HH22:
-	case R_SPARC_HM10:
-	case R_SPARC_LM22:
-	case R_SPARC_7:
-	case R_SPARC_5:
-	case R_SPARC_6:
-	case R_SPARC_HIX22:
-	case R_SPARC_LOX10:
-	case R_SPARC_H44:
-	case R_SPARC_M44:
-	case R_SPARC_L44:
-	case R_SPARC_H34:
-	case R_SPARC_UA64:
-	  if (bfd_link_pic (info))
-	    break;
-	  /* Fall through.  */
-
-	case R_SPARC_WPLT30:
-	  if (h != NULL)
-	    {
-	      if (h->plt.refcount > 0)
-		h->plt.refcount--;
-	    }
-	  break;
-
-	default:
-	  break;
-	}
-    }
-
-  return TRUE;
-}
-
 /* Remove undefined weak symbol from the dynamic symbol table if it
    is resolved to 0.   */
 
@@ -2409,7 +2249,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   /* If R_SPARC_TLS_IE_{HI22,LO10} symbol is now local to the binary,
      make it a R_SPARC_TLS_LE_{HI22,LO10} requiring no TLS entry.  */
   if (h->got.refcount > 0
-      && !bfd_link_pic (info)
+      && bfd_link_executable (info)
       && h->dynindx == -1
       && _bfd_sparc_elf_hash_entry(h)->tls_type == GOT_TLS_IE)
     h->got.offset = (bfd_vma) -1;
@@ -3751,7 +3591,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	  else if (h != NULL)
 	    {
 	      tls_type = _bfd_sparc_elf_hash_entry(h)->tls_type;
-	      if (!bfd_link_pic (info)
+	      if (bfd_link_executable (info)
 		  && h->dynindx == -1
 		  && tls_type == GOT_TLS_IE)
 		switch (SPARC_ELF_R_TYPE (rel->r_info))
@@ -3898,7 +3738,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 
 	case R_SPARC_TLS_LE_HIX22:
 	case R_SPARC_TLS_LE_LOX10:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_boolean skip;
@@ -3930,7 +3770,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_SPARC_TLS_LDM_CALL:
-	  if (! bfd_link_pic (info))
+	  if (bfd_link_executable (info))
 	    {
 	      /* mov %g0, %o0 */
 	      bfd_put_32 (output_bfd, 0x90100000, contents + rel->r_offset);
@@ -3944,7 +3784,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	    tls_type = _bfd_sparc_elf_local_got_tls_type (input_bfd) [r_symndx];
 	  else if (h != NULL)
 	    tls_type = _bfd_sparc_elf_hash_entry(h)->tls_type;
-	  if (! bfd_link_pic (info)
+	  if (bfd_link_executable (info)
 	      || (r_type == R_SPARC_TLS_GD_CALL && tls_type == GOT_TLS_IE))
 	    {
 	      Elf_Internal_Rela *rel2;
@@ -4053,7 +3893,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 
 	case R_SPARC_TLS_IE_LD:
 	case R_SPARC_TLS_IE_LDX:
-	  if (! bfd_link_pic (info) && (h == NULL || h->dynindx == -1))
+	  if (bfd_link_executable (info) && (h == NULL || h->dynindx == -1))
 	    {
 	      bfd_vma insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	      int rs2 = insn & 0x1f;

@@ -220,6 +220,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   syslib_default,
   hll_default,
   after_parse_default,
+  after_check_relocs_default,
   gld${EMULATION_NAME}_after_open,
   gld${EMULATION_NAME}_after_allocation,
   set_output_arch_default,

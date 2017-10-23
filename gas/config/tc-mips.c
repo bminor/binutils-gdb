@@ -19140,10 +19140,8 @@ mips_elf_final_processing (void)
       else
 	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI32;
     }
-  else if (mips_abi == N32_ABI)
-    elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ABI2;
 
-  /* Nothing to do for N64_ABI.  */
+  /* Nothing to do for N32_ABI or N64_ABI.  */
 
   if (mips_32bitmode)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_32BITMODE;

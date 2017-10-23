@@ -79,7 +79,6 @@ WHICH = aarch64 \
 	s390-te-linux64 s390x-te-linux64 s390-vx-linux64 s390x-vx-linux64 \
 	s390-tevx-linux64 s390x-tevx-linux64 \
 	s390-gs-linux64 s390x-gs-linux64 \
-	tic6x-c64xp tic6x-c64x tic6x-c62x \
 	tic6x-c64xp-linux tic6x-c64x-linux tic6x-c62x-linux
 
 # Record which registers should be sent to GDB by default after stop.
@@ -189,13 +188,7 @@ XMLTOC = \
 	s390x-tevx-linux64.xml \
 	s390x-vx-linux64.xml \
 	s390-gs-linux64.xml \
-	s390x-gs-linux64.xml \
-	tic6x-c62x-linux.xml \
-	tic6x-c62x.xml \
-	tic6x-c64x-linux.xml \
-	tic6x-c64x.xml \
-	tic6x-c64xp-linux.xml \
-	tic6x-c64xp.xml
+	s390x-gs-linux64.xml
 
 TDESC_CFILES = $(patsubst %.xml,%.c,$(XMLTOC))
 GDB = false

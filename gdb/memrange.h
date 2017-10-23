@@ -32,16 +32,23 @@ struct mem_range
   : start (start_), length (length_)
   {}
 
+  bool operator< (const mem_range &other) const
+  {
+    return this->start < other.start;
+  }
+
+  bool operator== (const mem_range &other) const
+  {
+    return (this->start == other.start
+	    && this->length == other.length);
+  }
+
   /* Lowest address in the range.  */
   CORE_ADDR start;
 
   /* Length of the range.  */
   int length;
 };
-
-typedef struct mem_range mem_range_s;
-
-DEF_VEC_O(mem_range_s);
 
 /* Returns true if the ranges defined by [start1, start1+len1) and
    [start2, start2+len2) overlap.  */
@@ -57,6 +64,6 @@ extern int address_in_mem_range (CORE_ADDR addr,
 /* Sort ranges by start address, then coalesce contiguous or
    overlapping ranges.  */
 
-extern void normalize_mem_ranges (VEC(mem_range_s) *memory);
+extern void normalize_mem_ranges (std::vector<mem_range> *memory);
 
 #endif

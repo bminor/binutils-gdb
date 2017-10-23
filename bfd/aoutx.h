@@ -1351,27 +1351,42 @@ aout_get_external_symbols (bfd *abfd)
 	  || bfd_bread ((void *) string_chars, amt, abfd) != amt)
 	return FALSE;
       stringsize = GET_WORD (abfd, string_chars);
-
-#ifdef USE_MMAP
-      if (! bfd_get_file_window (abfd, obj_str_filepos (abfd), stringsize,
-				 &obj_aout_string_window (abfd), TRUE))
-	return FALSE;
-      strings = (char *) obj_aout_string_window (abfd).data;
-#else
-      strings = (char *) bfd_malloc (stringsize + 1);
-      if (strings == NULL)
-	return FALSE;
-
-      /* Skip space for the string count in the buffer for convenience
-	 when using indexes.  */
-      amt = stringsize - BYTES_IN_WORD;
-      if (bfd_bread (strings + BYTES_IN_WORD, amt, abfd) != amt)
+      if (stringsize == 0)
+	stringsize = 1;
+      else if (stringsize < BYTES_IN_WORD
+	       || (size_t) stringsize != stringsize)
 	{
-	  free (strings);
+	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
-#endif
 
+#ifdef USE_MMAP
+      if (stringsize >= BYTES_IN_WORD)
+	{
+	  if (! bfd_get_file_window (abfd, obj_str_filepos (abfd), stringsize,
+				     &obj_aout_string_window (abfd), TRUE))
+	    return FALSE;
+	  strings = (char *) obj_aout_string_window (abfd).data;
+	}
+      else
+#endif
+	{
+	  strings = (char *) bfd_malloc (stringsize);
+	  if (strings == NULL)
+	    return FALSE;
+
+	  if (stringsize >= BYTES_IN_WORD)
+	    {
+	      /* Keep the string count in the buffer for convenience
+		 when indexing with e_strx.  */
+	      amt = stringsize - BYTES_IN_WORD;
+	      if (bfd_bread (strings + BYTES_IN_WORD, amt, abfd) != amt)
+		{
+		  free (strings);
+		  return FALSE;
+		}
+	    }
+	}
       /* Ensure that a zero index yields an empty string.  */
       strings[0] = '\0';
 

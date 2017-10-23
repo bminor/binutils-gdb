@@ -1014,6 +1014,8 @@ typedef BP_MANIPULATION_ENDIAN (little_breakpoint, big_breakpoint)
 					 || (insn & STORE_CONDITIONAL_MASK) == STHCX_INSTRUCTION \
 					 || (insn & STORE_CONDITIONAL_MASK) == STQCX_INSTRUCTION)
 
+typedef buf_displaced_step_closure ppc_displaced_step_closure;
+
 /* We can't displaced step atomic sequences.  */
 
 static struct displaced_step_closure *
@@ -1022,8 +1024,9 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			      struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  gdb_byte *buf = (gdb_byte *) xmalloc (len);
-  struct cleanup *old_chain = make_cleanup (xfree, buf);
+  std::unique_ptr<ppc_displaced_step_closure> closure
+    (new ppc_displaced_step_closure (len));
+  gdb_byte *buf = closure->buf.data ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int insn;
 
@@ -1041,7 +1044,7 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			      "atomic sequence at %s\n",
 			      paddress (gdbarch, from));
 	}
-      do_cleanups (old_chain);
+
       return NULL;
     }
 
@@ -1054,22 +1057,22 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
       displaced_step_dump_bytes (gdb_stdlog, buf, len);
     }
 
-  discard_cleanups (old_chain);
-  return (struct displaced_step_closure *) buf;
+  return closure.release ();
 }
 
 /* Fix up the state of registers and memory after having single-stepped
    a displaced instruction.  */
 static void
 ppc_displaced_step_fixup (struct gdbarch *gdbarch,
-			  struct displaced_step_closure *closure,
+			  struct displaced_step_closure *closure_,
 			  CORE_ADDR from, CORE_ADDR to,
 			  struct regcache *regs)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   /* Our closure is a copy of the instruction.  */
-  ULONGEST insn  = extract_unsigned_integer ((gdb_byte *) closure,
-					      PPC_INSN_SIZE, byte_order);
+  ppc_displaced_step_closure *closure = (ppc_displaced_step_closure *) closure_;
+  ULONGEST insn  = extract_unsigned_integer (closure->buf.data (),
+					     PPC_INSN_SIZE, byte_order);
   ULONGEST opcode = 0;
   /* Offset for non PC-relative instructions.  */
   LONGEST offset = PPC_INSN_SIZE;

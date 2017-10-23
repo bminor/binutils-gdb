@@ -1445,8 +1445,6 @@ step_over_info_valid_p (void)
      same effect the instruction would have had if we had executed it
      at its original address.  We use this in step n3.
 
-   - gdbarch_displaced_step_free_closure provides cleanup.
-
    The gdbarch_displaced_step_copy_insn and
    gdbarch_displaced_step_fixup functions must be written so that
    copying an instruction with gdbarch_displaced_step_copy_insn,
@@ -1483,6 +1481,10 @@ step_over_info_valid_p (void)
    step finishes, we pick the next thread in the queue and start a new
    displaced step operation on it.  See displaced_step_prepare and
    displaced_step_fixup for details.  */
+
+/* Default destructor for displaced_step_closure.  */
+
+displaced_step_closure::~displaced_step_closure () = default;
 
 /* Per-inferior displaced stepping state.  */
 struct displaced_step_inferior_state
@@ -1709,7 +1711,7 @@ displaced_step_clear (struct displaced_step_inferior_state *displaced)
   /* Indicate that there is no cleanup pending.  */
   displaced->step_ptid = null_ptid;
 
-  xfree (displaced->step_closure);
+  delete displaced->step_closure;
   displaced->step_closure = NULL;
 }
 

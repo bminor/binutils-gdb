@@ -950,7 +950,7 @@ arm_linux_software_single_step (struct regcache *regcache)
 static void
 arm_linux_cleanup_svc (struct gdbarch *gdbarch,
 		       struct regcache *regs,
-		       struct displaced_step_closure *dsc)
+		       arm_displaced_step_closure *dsc)
 {
   ULONGEST apparent_pc;
   int within_scratch;
@@ -978,7 +978,7 @@ arm_linux_cleanup_svc (struct gdbarch *gdbarch,
 
 static int
 arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
-		    struct displaced_step_closure *dsc)
+		    arm_displaced_step_closure *dsc)
 {
   CORE_ADDR return_to = 0;
 
@@ -1069,7 +1069,7 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
 static void
 cleanup_kernel_helper_return (struct gdbarch *gdbarch,
 			      struct regcache *regs,
-			      struct displaced_step_closure *dsc)
+			      arm_displaced_step_closure *dsc)
 {
   displaced_write_reg (regs, dsc, ARM_LR_REGNUM, dsc->tmp[0], CANNOT_WRITE_PC);
   displaced_write_reg (regs, dsc, ARM_PC_REGNUM, dsc->tmp[0], BRANCH_WRITE_PC);
@@ -1078,7 +1078,7 @@ cleanup_kernel_helper_return (struct gdbarch *gdbarch,
 static void
 arm_catch_kernel_helper_return (struct gdbarch *gdbarch, CORE_ADDR from,
 				CORE_ADDR to, struct regcache *regs,
-				struct displaced_step_closure *dsc)
+				arm_displaced_step_closure *dsc)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
@@ -1112,7 +1112,7 @@ arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				    CORE_ADDR from, CORE_ADDR to,
 				    struct regcache *regs)
 {
-  struct displaced_step_closure *dsc = XNEW (struct displaced_step_closure);
+  arm_displaced_step_closure *dsc = new arm_displaced_step_closure;
 
   /* Detect when we enter an (inaccessible by GDB) Linux kernel helper, and
      stop at the return location.  */

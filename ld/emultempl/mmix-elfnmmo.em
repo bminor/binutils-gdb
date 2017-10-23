@@ -25,6 +25,15 @@
 fragment <<EOF
 #include "elf/mmix.h"
 
+static void gld${EMULATION_NAME}_before_parse (void);
+
+static void
+mmix_before_parse (void)
+{
+  link_info.check_relocs_after_open_input = TRUE;
+  gld${EMULATION_NAME}_before_parse ();
+}
+
 /* Set up handling of linker-allocated global registers.  */
 
 static void
@@ -111,5 +120,6 @@ mmix_after_allocation (void)
 }
 EOF
 
+LDEMUL_BEFORE_PARSE=mmix_before_parse
 LDEMUL_AFTER_ALLOCATION=mmix_after_allocation
 LDEMUL_BEFORE_ALLOCATION=mmix_before_allocation

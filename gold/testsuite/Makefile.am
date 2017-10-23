@@ -340,6 +340,16 @@ section_sorting_name: section_sorting_name.o gcctestdir/ld
 section_sorting_name.stdout: section_sorting_name
 	$(TEST_NM) -n --synthetic section_sorting_name > section_sorting_name.stdout
 
+check_SCRIPTS += text_unlikely_segment.sh
+check_DATA += text_unlikely_segment_readelf.stdout
+MOSTLYCLEANFILES += text_unlikely_segment
+text_unlikely_segment.o: text_unlikely_segment.cc
+	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+text_unlikely_segment: text_unlikely_segment.o gcctestdir/ld
+	$(CXXLINK)  -Bgcctestdir/ -Wl,-z,text-unlikely-segment text_unlikely_segment.o
+text_unlikely_segment_readelf.stdout: text_unlikely_segment
+	$(TEST_READELF) -Wl $< >$@
+
 check_PROGRAMS += icf_virtual_function_folding_test
 MOSTLYCLEANFILES += icf_virtual_function_folding_test icf_virtual_function_folding_test.map
 icf_virtual_function_folding_test.o: icf_virtual_function_folding_test.cc
@@ -3721,6 +3731,38 @@ arm_farcall_thumb_thumb_6m.o: arm_farcall_thumb_thumb.s
 
 MOSTLYCLEANFILES += arm_farcall_thumb_thumb arm_farcall_thumb_thumb_5t \
 		    arm_farcall_thumb_thumb_7m arm_farcall_thumb_thumb_6m
+
+#Check ARM to ARM farcall veneers in the be8 mode addressing
+
+check_SCRIPTS += arm_farcall_arm_arm_be8.sh
+check_DATA += arm_farcall_arm_arm_be8.stdout
+
+arm_farcall_arm_arm_be8.stdout: arm_farcall_arm_arm_be8
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_arm_arm_be8: arm_farcall_arm_arm_be8.o ../ld-new
+	../ld-new --no-fix-arm1176 --section-start .text=0x1000 --section-start .foo=0x2001020 -EB --be8 -o $@ $<
+
+arm_farcall_arm_arm_be8.o: arm_farcall_arm_arm.s
+	$(TEST_AS) -EB -o $@ $<
+
+MOSTLYCLEANFILES += arm_farcall_arm_arm_be8
+
+#Check THUMB  to  THUMB farcall veneers in the be8 mode addressing
+
+check_SCRIPTS += arm_farcall_thumb_thumb_be8.sh
+check_DATA += arm_farcall_thumb_thumb_be8.stdout
+
+arm_farcall_thumb_thumb_be8.stdout: arm_farcall_thumb_thumb_be8
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_thumb_be8: arm_farcall_thumb_thumb_be8.o ../ld-new
+	../ld-new --section-start .text=0x1000 --section-start .foo=0x2001014 -EB --be8 -o $@ $<
+
+arm_farcall_thumb_thumb_be8.o: arm_farcall_thumb_thumb.s
+	$(TEST_AS) -march=armv7-m -EB -o $@ $<
+
+MOSTLYCLEANFILES += arm_farcall_thumb_thumb_be8
 
 # Check Thumb to ARM farcall veneers
 

@@ -1269,24 +1269,16 @@ static int
 svr4_current_sos_via_xfer_libraries (struct svr4_library_list *list,
 				     const char *annex)
 {
-  char *svr4_library_document;
-  int result;
-  struct cleanup *back_to;
-
   gdb_assert (annex == NULL || target_augmented_libraries_svr4_read ());
 
   /* Fetch the list of shared libraries.  */
-  svr4_library_document = target_read_stralloc (&current_target,
-						TARGET_OBJECT_LIBRARIES_SVR4,
-						annex);
+  gdb::unique_xmalloc_ptr<char> svr4_library_document
+    = target_read_stralloc (&current_target, TARGET_OBJECT_LIBRARIES_SVR4,
+			    annex);
   if (svr4_library_document == NULL)
     return 0;
 
-  back_to = make_cleanup (xfree, svr4_library_document);
-  result = svr4_parse_libraries (svr4_library_document, list);
-  do_cleanups (back_to);
-
-  return result;
+  return svr4_parse_libraries (svr4_library_document.get (), list);
 }
 
 #else

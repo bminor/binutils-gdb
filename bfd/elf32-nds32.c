@@ -80,8 +80,6 @@ static bfd_boolean nds32_elf_set_private_flags (bfd *, flagword);
 static bfd_boolean nds32_elf_merge_private_bfd_data
   (bfd *, struct bfd_link_info *);
 static bfd_boolean nds32_elf_print_private_bfd_data (bfd *, void *);
-static bfd_boolean nds32_elf_gc_sweep_hook
-  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
 static bfd_boolean nds32_elf_check_relocs
   (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
 static asection *nds32_elf_gc_mark_hook
@@ -6153,136 +6151,6 @@ nds32_elf_gc_mark_hook (asection *sec, struct bfd_link_info *info,
       }
 
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
-}
-
-static bfd_boolean
-nds32_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info, asection *sec,
-			 const Elf_Internal_Rela *relocs)
-{
-  /* Update the got entry reference counts for the section being removed.  */
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
-  const Elf_Internal_Rela *rel, *relend;
-
-  elf_section_data (sec)->local_dynrel = NULL;
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  sym_hashes = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    {
-      unsigned long r_symndx;
-      struct elf_link_hash_entry *h = NULL;
-
-      r_symndx = ELF32_R_SYM (rel->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-	{
-	  /* External symbol.  */
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	}
-
-      switch (ELF32_R_TYPE (rel->r_info))
-	{
-	case R_NDS32_GOT_HI20:
-	case R_NDS32_GOT_LO12:
-	case R_NDS32_GOT_LO15:
-	case R_NDS32_GOT_LO19:
-	case R_NDS32_GOT17S2_RELA:
-	case R_NDS32_GOT15S2_RELA:
-	case R_NDS32_GOTOFF:
-	case R_NDS32_GOTOFF_HI20:
-	case R_NDS32_GOTOFF_LO12:
-	case R_NDS32_GOTOFF_LO15:
-	case R_NDS32_GOTOFF_LO19:
-	case R_NDS32_GOT20:
-	case R_NDS32_GOTPC_HI20:
-	case R_NDS32_GOTPC_LO12:
-	case R_NDS32_GOTPC20:
-	  if (h != NULL)
-	    {
-	      if (h->got.refcount > 0)
-		h->got.refcount--;
-	    }
-	  else
-	    {
-	      if (local_got_refcounts && local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx]--;
-	    }
-	  break;
-
-	case R_NDS32_16_RELA:
-	case R_NDS32_20_RELA:
-	case R_NDS32_5_RELA:
-	case R_NDS32_32_RELA:
-	case R_NDS32_HI20_RELA:
-	case R_NDS32_LO12S3_RELA:
-	case R_NDS32_LO12S2_RELA:
-	case R_NDS32_LO12S2_DP_RELA:
-	case R_NDS32_LO12S2_SP_RELA:
-	case R_NDS32_LO12S1_RELA:
-	case R_NDS32_LO12S0_RELA:
-	case R_NDS32_LO12S0_ORI_RELA:
-	case R_NDS32_SDA16S3_RELA:
-	case R_NDS32_SDA17S2_RELA:
-	case R_NDS32_SDA18S1_RELA:
-	case R_NDS32_SDA19S0_RELA:
-	case R_NDS32_SDA15S3_RELA:
-	case R_NDS32_SDA15S2_RELA:
-	case R_NDS32_SDA12S2_DP_RELA:
-	case R_NDS32_SDA12S2_SP_RELA:
-	case R_NDS32_SDA15S1_RELA:
-	case R_NDS32_SDA15S0_RELA:
-	case R_NDS32_SDA_FP7U2_RELA:
-	case R_NDS32_15_PCREL_RELA:
-	case R_NDS32_17_PCREL_RELA:
-	case R_NDS32_25_PCREL_RELA:
-	  if (h != NULL)
-	    {
-	      struct elf_nds32_link_hash_entry *eh;
-	      struct elf_nds32_dyn_relocs **pp;
-	      struct elf_nds32_dyn_relocs *p;
-
-	      if (!bfd_link_pic (info) && h->plt.refcount > 0)
-		h->plt.refcount -= 1;
-
-	      eh = (struct elf_nds32_link_hash_entry *) h;
-
-	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-		if (p->sec == sec)
-		  {
-		    if (ELF32_R_TYPE (rel->r_info) == R_NDS32_15_PCREL_RELA
-			|| ELF32_R_TYPE (rel->r_info) == R_NDS32_17_PCREL_RELA
-			|| ELF32_R_TYPE (rel->r_info) == R_NDS32_25_PCREL_RELA)
-		      p->pc_count -= 1;
-		    p->count -= 1;
-		    if (p->count == 0)
-		      *pp = p->next;
-		    break;
-		  }
-	    }
-	  break;
-
-	case R_NDS32_9_PLTREL:
-	case R_NDS32_25_PLTREL:
-	  if (h != NULL)
-	    {
-	      if (h->plt.refcount > 0)
-		h->plt.refcount--;
-	    }
-	  break;
-
-	default:
-	  break;
-	}
-    }
-
-  return TRUE;
 }
 
 /* Look through the relocs for a section during the first phase.
@@ -15654,7 +15522,6 @@ nds32_elf_ex9_itb_base (struct bfd_link_info *link_info)
 #define elf_backend_size_dynamic_sections	nds32_elf_size_dynamic_sections
 #define elf_backend_relocate_section		nds32_elf_relocate_section
 #define elf_backend_gc_mark_hook		nds32_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook		nds32_elf_gc_sweep_hook
 #define elf_backend_grok_prstatus		nds32_elf_grok_prstatus
 #define elf_backend_grok_psinfo			nds32_elf_grok_psinfo
 #define elf_backend_reloc_type_class		nds32_elf_reloc_type_class

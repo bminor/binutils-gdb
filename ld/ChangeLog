@@ -1,3 +1,130 @@
+2017-10-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 22310
+	* testsuite/ld-elf/pr22310.s: New test source file.
+	* testsuite/ld-elf/pr22310.d: New test driver.
+	* testsuite/ld-mmix/undef-3.d: Update expected output from readelf.
+
+2017-10-21  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/21233
+	* testsuite/ld-elf/shared.exp: Remove kfails.
+
+2017-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22269
+	* testsuite/ld-elf/pr22269-1.rd: New file.
+	* testsuite/ld-elf/pr22269-1.c: Likewise.
+	* testsuite/ld-elf/shared.exp: Run pr22269-1.
+
+2017-10-19  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* emultempl/riscvelf.em (riscv_elf_before_allocation): Add a
+	third relaxation pass.
+
+2017-10-17  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (-z): Combine negative options with corresponding
+	positive option.  Sort the table.  Expand and correct "combreloc",
+	"common", "common-page-size", "interpose", "loadfltr",
+	"max-page-size", "muldefs", "nodefaultlib", "nodelete", "nodlopen",
+	"nodump", "noextern-protected-data", "now", "origin", and "text".
+
+2017-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf32_x86_64.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Removed.
+	* emulparams/elf_i386_be.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_i386_chaos.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_i386_ldso.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_i386_vxworks.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_iamcu.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_k1om.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_l1om.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/elf_x86_64.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/i386lynx.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/i386moss.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/i386nto.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/i386nw.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/shelf.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/shelf32.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/shelf_nto.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/shelf_vxworks.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/shlelf32_linux.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/shlelf_linux.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emulparams/shlelf_nto.sh (CHECK_RELOCS_AFTER_OPEN_INPUT):
+	Likewise.
+	* emultempl/aarch64elf.em (gld${EMULATION_NAME}_before_parse):
+	Set link_info.check_relocs_after_open_input to TRUE.
+	* emultempl/armelf.em (gld${EMULATION_NAME}_before_parse):
+	Likewise.
+	* emultempl/scoreelf.em (gld${EMULATION_NAME}_before_parse):
+	Likewise.
+	* emultempl/aix.em (ld_${EMULATION_NAME}_emulation): Add
+	after_parse_default.
+	* emultempl/armcoff.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/beos.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/generic.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/gld960.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/gld960c.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/lnk960.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/m68kcoff.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/msp430.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/pe.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/pep.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/sunos.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/ticoff.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/vanilla.em (ld_${EMULATION_NAME}_emulation): Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Always
+	set link_info.check_relocs_after_open_input to TRUE.
+	(ld_${EMULATION_NAME}_emulation): Add $LDEMUL_AFTER_CHECK_RELOCS.
+	* emultempl/linux.em (gld${EMULATION_NAME}_before_parse):
+	Set link_info.check_relocs_after_open_input to TRUE.
+	(ld_${EMULATION_NAME}_emulation): Add after_check_relocs_default.
+	* emultempl/mmix-elfnmmo.em (mmix_before_parse): New function.
+	(LDEMUL_BEFORE_PARSE): New.
+	* emultempl/mmixelf.em (elfmmix_before_parse): Replace
+	gld${EMULATION_NAME}_before_parse with mmix_before_parse.
+	* emultempl/ppc32elf.em (ppc_after_open): Renamed to ...
+	(ppc_after_check_relocs): This.  Call after_check_relocs_default
+	instead of gld${EMULATION_NAME}_after_open.
+	(LDEMUL_AFTER_OPEN): Removed.
+	(LDEMUL_AFTER_CHECK_RELOCS): New.
+	* ldemul.c (ldemul_after_check_relocs): New.
+	(after_check_relocs_default): Likewise.
+	* ldemul.h (ldemul_after_check_relocs): Likewise.
+	(after_check_relocs_default): Likewise.
+	(ld_emulation_xfer_struct): Add after_check_relocs.
+	* ldlang.c (lang_process): Call ldemul_after_check_relocs after
+	lang_check_relocs.
+	* testsuite/ld-aarch64/gc-got-relocs.d: Don't expect GOT section.
+	* testsuite/ld-aarch64/gc-tls-relocs.d: Likewise.
+	* testsuite/ld-cris/tls-gc-68.d: Likewise.
+	* testsuite/ld-cris/tls-gc-69.d: Likewise.
+	* testsuite/ld-cris/tls-gc-70.d: Likewise.
+	* testsuite/ld-cris/tls-gc-75.d: Likewise.
+	* testsuite/ld-cris/tls-gc-79.d: Likewise.
+	* testsuite/ld-mmix/bpo-10.d: Don't expect .MMIX.reg_contents
+	section.
+
 2017-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22269

@@ -29,6 +29,7 @@
 #include "source.h"
 #include "safe-ctype.h"
 #include <algorithm>
+#include "common/gdb_optional.h"
 
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
@@ -350,9 +351,6 @@ do_mixed_source_and_assembly_deprecated
   int next_line = 0;
   int num_displayed = 0;
   print_source_lines_flags psl_flags = 0;
-  struct cleanup *ui_out_chain;
-  struct cleanup *ui_out_tuple_chain = make_cleanup (null_cleanup, 0);
-  struct cleanup *ui_out_list_chain = make_cleanup (null_cleanup, 0);
 
   gdb_assert (symtab != NULL && SYMTAB_LINETABLE (symtab) != NULL);
 
@@ -414,7 +412,10 @@ do_mixed_source_and_assembly_deprecated
      they have been emitted before), followed by the assembly code
      for that line.  */
 
-  ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
+  ui_out_emit_list asm_insns_list (uiout, "asm_insns");
+
+  gdb::optional<ui_out_emit_tuple> outer_tuple_emitter;
+  gdb::optional<ui_out_emit_list> inner_list_emitter;
 
   for (i = 0; i < newlines; i++)
     {
@@ -426,9 +427,7 @@ do_mixed_source_and_assembly_deprecated
 	      /* Just one line to print.  */
 	      if (next_line == mle[i].line)
 		{
-		  ui_out_tuple_chain
-		    = make_cleanup_ui_out_tuple_begin_end (uiout,
-							   "src_and_asm_line");
+		  outer_tuple_emitter.emplace (uiout, "src_and_asm_line");
 		  print_source_lines (symtab, next_line, mle[i].line + 1, psl_flags);
 		}
 	      else
@@ -436,36 +435,27 @@ do_mixed_source_and_assembly_deprecated
 		  /* Several source lines w/o asm instructions associated.  */
 		  for (; next_line < mle[i].line; next_line++)
 		    {
-		      struct cleanup *ui_out_list_chain_line;
-		      
 		      ui_out_emit_tuple tuple_emitter (uiout,
 						       "src_and_asm_line");
 		      print_source_lines (symtab, next_line, next_line + 1,
 					  psl_flags);
-		      ui_out_list_chain_line
-			= make_cleanup_ui_out_list_begin_end (uiout,
-							      "line_asm_insn");
-		      do_cleanups (ui_out_list_chain_line);
+		      ui_out_emit_list inner_list_emitter (uiout,
+							   "line_asm_insn");
 		    }
 		  /* Print the last line and leave list open for
 		     asm instructions to be added.  */
-		  ui_out_tuple_chain
-		    = make_cleanup_ui_out_tuple_begin_end (uiout,
-							   "src_and_asm_line");
+		  outer_tuple_emitter.emplace (uiout, "src_and_asm_line");
 		  print_source_lines (symtab, next_line, mle[i].line + 1, psl_flags);
 		}
 	    }
 	  else
 	    {
-	      ui_out_tuple_chain
-		= make_cleanup_ui_out_tuple_begin_end (uiout,
-						       "src_and_asm_line");
+	      outer_tuple_emitter.emplace (uiout, "src_and_asm_line");
 	      print_source_lines (symtab, mle[i].line, mle[i].line + 1, psl_flags);
 	    }
 
 	  next_line = mle[i].line + 1;
-	  ui_out_list_chain
-	    = make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
+	  inner_list_emitter.emplace (uiout, "line_asm_insn");
 	}
 
       num_displayed += dump_insns (gdbarch, uiout,
@@ -476,16 +466,13 @@ do_mixed_source_and_assembly_deprecated
          assembly range for this source line, close out the list/tuple.  */
       if (i == (newlines - 1) || mle[i + 1].line > mle[i].line)
 	{
-	  do_cleanups (ui_out_list_chain);
-	  do_cleanups (ui_out_tuple_chain);
-	  ui_out_tuple_chain = make_cleanup (null_cleanup, 0);
-	  ui_out_list_chain = make_cleanup (null_cleanup, 0);
+	  inner_list_emitter.reset ();
+	  outer_tuple_emitter.reset ();
 	  uiout->text ("\n");
 	}
       if (how_many >= 0 && num_displayed >= how_many)
 	break;
     }
-  do_cleanups (ui_out_chain);
 }
 
 /* The idea here is to present a source-O-centric view of a
@@ -504,9 +491,6 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
   int i, nlines;
   int num_displayed = 0;
   print_source_lines_flags psl_flags = 0;
-  struct cleanup *ui_out_chain;
-  struct cleanup *ui_out_tuple_chain;
-  struct cleanup *ui_out_list_chain;
   CORE_ADDR pc;
   struct symtab *last_symtab;
   int last_line;
@@ -567,21 +551,21 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
      CLI output works on top of this because MI ignores ui_out_text output,
      which is where we put file name and source line contents output.
 
-     Cleanup usage:
-     ui_out_chain
+     Emitter usage:
+     asm_insns_emitter
        Handles the outer "asm_insns" list.
-     ui_out_tuple_chain
+     tuple_emitter
        The tuples for each group of consecutive disassemblies.
-     ui_out_list_chain
+     list_emitter
        List of consecutive source lines or disassembled insns.  */
 
   if (flags & DISASSEMBLY_FILENAME)
     psl_flags |= PRINT_SOURCE_LINES_FILENAME;
 
-  ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
+  ui_out_emit_list asm_insns_emitter (uiout, "asm_insns");
 
-  ui_out_tuple_chain = NULL;
-  ui_out_list_chain = NULL;
+  gdb::optional<ui_out_emit_tuple> tuple_emitter;
+  gdb::optional<ui_out_emit_list> list_emitter;
 
   last_symtab = NULL;
   last_line = 0;
@@ -650,11 +634,11 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 	  /* Skip the newline if this is the first instruction.  */
 	  if (pc > low)
 	    uiout->text ("\n");
-	  if (ui_out_tuple_chain != NULL)
+	  if (tuple_emitter.has_value ())
 	    {
-	      gdb_assert (ui_out_list_chain != NULL);
-	      do_cleanups (ui_out_list_chain);
-	      do_cleanups (ui_out_tuple_chain);
+	      gdb_assert (list_emitter.has_value ());
+	      list_emitter.reset ();
+	      tuple_emitter.reset ();
 	    }
 	  if (sal.symtab != last_symtab
 	      && !(flags & DISASSEMBLY_FILENAME))
@@ -676,7 +660,6 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 		 We need to preserve the structure of the output, so output
 		 a bunch of line tuples with no asm entries.  */
 	      int l;
-	      struct cleanup *ui_out_list_chain_line;
 
 	      gdb_assert (sal.symtab != NULL);
 	      for (l = start_preceding_line_to_display;
@@ -685,28 +668,23 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 		{
 		  ui_out_emit_tuple tuple_emitter (uiout, "src_and_asm_line");
 		  print_source_lines (sal.symtab, l, l + 1, psl_flags);
-		  ui_out_list_chain_line
-		    = make_cleanup_ui_out_list_begin_end (uiout,
-							  "line_asm_insn");
-		  do_cleanups (ui_out_list_chain_line);
+		  ui_out_emit_list chain_line_emitter (uiout, "line_asm_insn");
 		}
 	    }
-	  ui_out_tuple_chain
-	    = make_cleanup_ui_out_tuple_begin_end (uiout, "src_and_asm_line");
+	  tuple_emitter.emplace (uiout, "src_and_asm_line");
 	  if (sal.symtab != NULL)
 	    print_source_lines (sal.symtab, sal.line, sal.line + 1, psl_flags);
 	  else
 	    uiout->text (_("--- no source info for this pc ---\n"));
-	  ui_out_list_chain
-	    = make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
+	  list_emitter.emplace (uiout, "line_asm_insn");
 	}
       else
 	{
 	  /* Here we're appending instructions to an existing line.
 	     By construction the very first insn will have a symtab
 	     and follow the new_source_line path above.  */
-	  gdb_assert (ui_out_tuple_chain != NULL);
-	  gdb_assert (ui_out_list_chain != NULL);
+	  gdb_assert (tuple_emitter.has_value ());
+	  gdb_assert (list_emitter.has_value ());
 	}
 
       if (sal.end != 0)
@@ -723,8 +701,6 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
       last_symtab = sal.symtab;
       last_line = sal.line;
     }
-
-  do_cleanups (ui_out_chain);
 }
 
 static void

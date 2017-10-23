@@ -353,14 +353,13 @@ extern LONGEST target_read_alloc (struct target_ops *ops,
 				  const char *annex, gdb_byte **buf_p);
 
 /* Read OBJECT/ANNEX using OPS.  The result is NUL-terminated and
-   returned as a string, allocated using xmalloc.  If an error occurs
-   or the transfer is unsupported, NULL is returned.  Empty objects
-   are returned as allocated but empty strings.  A warning is issued
-   if the result contains any embedded NUL bytes.  */
+   returned as a string.  If an error occurs or the transfer is
+   unsupported, NULL is returned.  Empty objects are returned as
+   allocated but empty strings.  A warning is issued if the result
+   contains any embedded NUL bytes.  */
 
-extern char *target_read_stralloc (struct target_ops *ops,
-				   enum target_object object,
-				   const char *annex);
+extern gdb::unique_xmalloc_ptr<char> target_read_stralloc
+    (struct target_ops *ops, enum target_object object, const char *annex);
 
 /* See target_ops->to_xfer_partial.  */
 extern target_xfer_partial_ftype target_xfer_partial;
@@ -418,6 +417,11 @@ typedef void async_callback_ftype (enum inferior_event_type event_type,
 #define TARGET_DEFAULT_NORETURN(ARG)
 #define TARGET_DEFAULT_RETURN(ARG)
 #define TARGET_DEFAULT_FUNC(ARG)
+
+/* Define a typedef, because make-target-delegates doesn't currently handle type
+   names with templates.  */
+
+typedef std::vector<mem_region> mem_region_vector;
 
 struct target_ops
   {
@@ -773,8 +777,8 @@ struct target_ops
        This method should not cache data; if the memory map could
        change unexpectedly, it should be invalidated, and higher
        layers will re-fetch it.  */
-    VEC(mem_region_s) *(*to_memory_map) (struct target_ops *)
-      TARGET_DEFAULT_RETURN (NULL);
+    mem_region_vector (*to_memory_map) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (std::vector<mem_region> ());
 
     /* Erases the region of flash memory starting at ADDRESS, of
        length LENGTH.
@@ -1462,7 +1466,7 @@ extern int target_write_raw_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
 /* Fetches the target's memory map.  If one is found it is sorted
    and returned, after some consistency checking.  Otherwise, NULL
    is returned.  */
-VEC(mem_region_s) *target_memory_map (void);
+std::vector<mem_region> target_memory_map (void);
 
 /* Erases all flash memory regions on the target.  */
 void flash_erase_command (char *cmd, int from_tty);
@@ -2132,8 +2136,8 @@ extern LONGEST target_fileio_read_alloc (struct inferior *inf,
    or the transfer is unsupported, NULL is returned.  Empty objects
    are returned as allocated but empty strings.  A warning is issued
    if the result contains any embedded NUL bytes.  */
-extern char *target_fileio_read_stralloc (struct inferior *inf,
-					  const char *filename);
+extern gdb::unique_xmalloc_ptr<char> target_fileio_read_stralloc
+    (struct inferior *inf, const char *filename);
 
 
 /* Tracepoint-related operations.  */
@@ -2396,12 +2400,12 @@ extern struct target_ops *find_target_beneath (struct target_ops *);
 struct target_ops *find_target_at (enum strata stratum);
 
 /* Read OS data object of type TYPE from the target, and return it in
-   XML format.  The result is NUL-terminated and returned as a string,
-   allocated using xmalloc.  If an error occurs or the transfer is
-   unsupported, NULL is returned.  Empty objects are returned as
-   allocated but empty strings.  */
+   XML format.  The result is NUL-terminated and returned as a string.
+   If an error occurs or the transfer is unsupported, NULL is
+   returned.  Empty objects are returned as allocated but empty
+   strings.  */
 
-extern char *target_get_osdata (const char *type);
+extern gdb::unique_xmalloc_ptr<char> target_get_osdata (const char *type);
 
 
 /* Stuff that should be shared among the various remote targets.  */

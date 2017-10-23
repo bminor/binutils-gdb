@@ -12439,66 +12439,6 @@ _bfd_mips_elf_gc_mark_hook (asection *sec,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
-/* Update the got entry reference counts for the section being removed.  */
-
-bfd_boolean
-_bfd_mips_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
-			     struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			     asection *sec ATTRIBUTE_UNUSED,
-			     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
-{
-#if 0
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
-  const Elf_Internal_Rela *rel, *relend;
-  unsigned long r_symndx;
-  struct elf_link_hash_entry *h;
-
-  if (bfd_link_relocatable (info))
-    return TRUE;
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  sym_hashes = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    switch (ELF_R_TYPE (abfd, rel->r_info))
-      {
-      case R_MIPS16_GOT16:
-      case R_MIPS16_CALL16:
-      case R_MIPS_GOT16:
-      case R_MIPS_CALL16:
-      case R_MIPS_CALL_HI16:
-      case R_MIPS_CALL_LO16:
-      case R_MIPS_GOT_HI16:
-      case R_MIPS_GOT_LO16:
-      case R_MIPS_GOT_DISP:
-      case R_MIPS_GOT_PAGE:
-      case R_MIPS_GOT_OFST:
-      case R_MICROMIPS_GOT16:
-      case R_MICROMIPS_CALL16:
-      case R_MICROMIPS_CALL_HI16:
-      case R_MICROMIPS_CALL_LO16:
-      case R_MICROMIPS_GOT_HI16:
-      case R_MICROMIPS_GOT_LO16:
-      case R_MICROMIPS_GOT_DISP:
-      case R_MICROMIPS_GOT_PAGE:
-      case R_MICROMIPS_GOT_OFST:
-	/* ??? It would seem that the existing MIPS code does no sort
-	   of reference counting or whatnot on its GOT and PLT entries,
-	   so it is not possible to garbage collect them at this time.  */
-	break;
-
-      default:
-	break;
-      }
-#endif
-
-  return TRUE;
-}
-
 /* Prevent .MIPS.abiflags from being discarded with --gc-sections.  */
 
 bfd_boolean

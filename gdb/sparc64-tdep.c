@@ -311,13 +311,13 @@ adi_is_addr_mapped (CORE_ADDR vaddr, size_t cnt)
 
   pid_t pid = ptid_get_pid (inferior_ptid);
   snprintf (filename, sizeof filename, "/proc/%ld/adi/maps", (long) pid);
-  char *data = target_fileio_read_stralloc (NULL, filename);
+  gdb::unique_xmalloc_ptr<char> data
+    = target_fileio_read_stralloc (NULL, filename);
   if (data)
     {
-      struct cleanup *cleanup = make_cleanup (xfree, data);
       adi_stat_t adi_stat = get_adi_info (pid);
       char *line;
-      for (line = strtok (data, "\n"); line; line = strtok (NULL, "\n"))
+      for (line = strtok (data.get (), "\n"); line; line = strtok (NULL, "\n"))
         {
           ULONGEST addr, endaddr;
 
@@ -327,13 +327,9 @@ adi_is_addr_mapped (CORE_ADDR vaddr, size_t cnt)
                  && ((vaddr + i) * adi_stat.blksize) < endaddr)
             {
               if (++i == cnt)
-                {
-                  do_cleanups (cleanup);
-                  return true;
-                }
+		return true;
             }
         }
-        do_cleanups (cleanup);
       }
     else
       warning (_("unable to open /proc file '%s'"), filename);

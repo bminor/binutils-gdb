@@ -91,6 +91,10 @@ interp::~interp ()
 
 struct interp_factory
 {
+  interp_factory (const char *name_, interp_factory_func func_)
+  : name (name_), func (func_)
+  {}
+
   /* This is the name in "-i=INTERP" and "interpreter-exec INTERP".  */
   const char *name;
 
@@ -98,35 +102,24 @@ struct interp_factory
   interp_factory_func func;
 };
 
-typedef struct interp_factory *interp_factory_p;
-DEF_VEC_P(interp_factory_p);
-
 /* The registered interpreter factories.  */
-static VEC(interp_factory_p) *interpreter_factories = NULL;
+static std::vector<interp_factory> interpreter_factories;
 
 /* See interps.h.  */
 
 void
 interp_factory_register (const char *name, interp_factory_func func)
 {
-  struct interp_factory *f;
-  int ix;
-
   /* Assert that no factory for NAME is already registered.  */
-  for (ix = 0;
-       VEC_iterate (interp_factory_p, interpreter_factories, ix, f);
-       ++ix)
-    if (strcmp (f->name, name) == 0)
+  for (const interp_factory &f : interpreter_factories)
+    if (strcmp (f.name, name) == 0)
       {
 	internal_error (__FILE__, __LINE__,
 			_("interpreter factory already registered: \"%s\"\n"),
 			name);
       }
 
-  f = XNEW (struct interp_factory);
-  f->name = name;
-  f->func = func;
-  VEC_safe_push (interp_factory_p, interpreter_factories, f);
+  interpreter_factories.emplace_back (name, func);
 }
 
 /* Add interpreter INTERP to the gdb interpreter list.  The
@@ -225,24 +218,18 @@ interp_lookup_existing (struct ui *ui, const char *name)
 struct interp *
 interp_lookup (struct ui *ui, const char *name)
 {
-  struct interp_factory *factory;
-  struct interp *interp;
-  int ix;
-
   if (name == NULL || strlen (name) == 0)
     return NULL;
 
   /* Only create each interpreter once per top level.  */
-  interp = interp_lookup_existing (ui, name);
+  struct interp *interp = interp_lookup_existing (ui, name);
   if (interp != NULL)
     return interp;
 
-  for (ix = 0;
-       VEC_iterate (interp_factory_p, interpreter_factories, ix, factory);
-       ++ix)
-    if (strcmp (factory->name, name) == 0)
+  for (const interp_factory &factory : interpreter_factories)
+    if (strcmp (factory.name, name) == 0)
       {
-	interp = factory->func (name);
+	interp = factory.func (name);
 	interp_add (ui, interp);
 	return interp;
       }
@@ -446,33 +433,28 @@ interpreter_completer (struct cmd_list_element *ignore,
 		       completion_tracker &tracker,
 		       const char *text, const char *word)
 {
-  struct interp_factory *interp;
-  int textlen;
-  int ix;
+  int textlen = strlen (text);
 
-  textlen = strlen (text);
-  for (ix = 0;
-       VEC_iterate (interp_factory_p, interpreter_factories, ix, interp);
-       ++ix)
+  for (const interp_factory &interp : interpreter_factories)
     {
-      if (strncmp (interp->name, text, textlen) == 0)
+      if (strncmp (interp.name, text, textlen) == 0)
 	{
 	  char *match;
 
-	  match = (char *) xmalloc (strlen (word) + strlen (interp->name) + 1);
+	  match = (char *) xmalloc (strlen (word) + strlen (interp.name) + 1);
 	  if (word == text)
-	    strcpy (match, interp->name);
+	    strcpy (match, interp.name);
 	  else if (word > text)
 	    {
 	      /* Return some portion of interp->name.  */
-	      strcpy (match, interp->name + (word - text));
+	      strcpy (match, interp.name + (word - text));
 	    }
 	  else
 	    {
 	      /* Return some of text plus interp->name.  */
 	      strncpy (match, word, text - word);
 	      match[text - word] = '\0';
-	      strcat (match, interp->name);
+	      strcat (match, interp.name);
 	    }
 	  tracker.add_completion (gdb::unique_xmalloc_ptr<char> (match));
 	}

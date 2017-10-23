@@ -1,3 +1,89 @@
+2017-10-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (mips_elf_final_processing): Don't set
+	EF_MIPS_ABI2 in `e_flags'.
+
+2017-10-22  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR gas/22304
+	* testsuite/gas/cris/range-err-1.s: Remove quotes left from last edit.
+
+2017-10-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 22324
+	* read.c (s_rept): Use size_t type for count parameter.
+	(do_repeat): Change type of count parameter to size_t.
+	Issue an error is the count parameter is negative.
+	(do_repeat_with_expression): Likewise.
+	* read.h: Update prototypes for do_repeat and
+	do_repeat_with_expression.
+	* doc/as.texinfo (Rept): Document that a zero count is allowed but
+	negative counts are not.
+	* config/tc-rx.c (rx_rept): Use size_t type for count parameter.
+	* config/tc-tic54x.c (tic54x_loop): Cast count parameter to size_t
+	type.
+	* testsuite/gas/macros/end.s: Add a test using a negative repeat
+	count.
+	* testsuite/gas/macros/end.l: Add expected error message.
+
+2017-10-19  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* config/tc-riscv.c (md_apply_fix): Mark
+	BFD_RELOC_RISCV_PCREL_HI20 as relaxable when relaxations are
+	enabled.
+
+2017-10-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 21621
+	* config/tc-avr.h (struct avr_frag_data): Add prev_opcode field.
+	(TC_FRAG_INIT): Define.
+	(avr_frag_init): Add prototype.
+	* config/tc-avr.c (avr_frag_init): New function.
+	(avr_operands): Replace static local 'prev' variable with
+	prev_opcode field in current frag.
+	* testsuite/gas/avr/pr21621.s: New test source file.
+	* testsuite/gas/avr/pr21621.d: New test driver file.
+	* testsuite/gas/avr/pr21621.s: New test error output file.
+
+2017-10-19  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* testsuite/gas/all/fill-1.s: Use normal labels.  Change .text to
+	.data. Pick different values.  Use .dc.w instead of .word.
+	* testsuite/gas/all/fill-1.d: New objdump output check.
+	* testsuite/gas/all/gas.exp: Use run_dump_test to execute fill-1
+	testcase.
+
+2017-10-18  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* testsuite/gas/all/align.d: Mark as unsupported on RISC-V.
+	testsuite/gas/all/relax.d: Likewise.
+	testsuite/gas/all/sleb128-2.d: Likewise.
+	testsuite/gas/all/sleb128-4.d: Likewise.
+	testsuite/gas/all/sleb128-5.d: Likewise.
+	testsuite/gas/all/sleb128-7.d: Likewise.
+	testsuite/gas/elf/section11.d: Likewise.
+	testsuite/gas/all/gas.exp (diff1.s): Likewise.
+
+2017-10-18  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/22304
+	* testsuite/gas/cris/range-err-1.s: Remove spurious xfails.
+	* testsuite/gas/cris/cris.exp: Expect the shexpr-1 test to pass.
+
+2017-10-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
+2017-10-16  Sandra Loosemore  <sandra@codesourcery.com>
+	    Henry Wong  <henry@stuffedcow.net>
+
+	* config/tc-nios2.c (nios2_translate_pseudo_insn): Check for
+	correct number of arguments.
+	(md_assemble): Handle failure of nios2_translate_pseudo_insn.
+	* testsuite/gas/nios2/illegal_pseudoinst.l: New file.
+	* testsuite/gas/nios2/illegal_pseudoinst.s: New file.
+	* testsuite/gas/nios2/nios2.exp: Add illegal_pseudoinst test.
+
 2017-10-12  James Bowman  <james.bowman@ftdichip.com>
 
 	* config/tc-ft32.c (md_assemble): Replace FT32_FLD_K8 with

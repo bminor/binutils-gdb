@@ -577,17 +577,6 @@ mcore_elf_gc_mark_hook (asection *sec,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
-/* Update the got entry reference counts for the section being removed.  */
-
-static bfd_boolean
-mcore_elf_gc_sweep_hook (bfd * abfd ATTRIBUTE_UNUSED,
-			 struct bfd_link_info * info ATTRIBUTE_UNUSED,
-			 asection * sec ATTRIBUTE_UNUSED,
-			 const Elf_Internal_Rela * relocs ATTRIBUTE_UNUSED)
-{
-  return TRUE;
-}
-
 /* Look through the relocs for a section during the first phase.
    Since we don't do .gots or .plts, we just need to consider the
    virtual table relocs for gc.  */
@@ -679,7 +668,6 @@ static const struct bfd_elf_special_section mcore_elf_special_sections[]=
 #define bfd_elf32_bfd_reloc_name_lookup	mcore_elf_reloc_name_lookup
 #define elf_backend_relocate_section		mcore_elf_relocate_section
 #define elf_backend_gc_mark_hook		mcore_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook		mcore_elf_gc_sweep_hook
 #define elf_backend_check_relocs                mcore_elf_check_relocs
 #define elf_backend_special_sections		mcore_elf_special_sections
 

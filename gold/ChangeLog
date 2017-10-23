@@ -1,3 +1,33 @@
+2017-10-20  Sriraman Tallam  <tmsriram@google.com>
+
+	* options.h (-z,text_unlikely_segment): New option.
+	* layout.cc (Layout::layout): Create new output section
+	for .text.unlikely sections with the new option.
+	(Layout::segment_precedes): Check for the new option
+	when segment flags match.
+	* testsuite/text_unlikely_segment.cc: New test source.
+	* testsuite/text_unlikely_segment.sh: New test script.
+	* testsuite/Makefile.am (text_unlikely_segment): New test.
+	* testsuite/Makefile.in: Regenerate.
+
+2017-10-19  Umesh Kalappa  <ukalappa@cisco.com>
+
+	* arm.cc (Stub::do_fixed_endian_write):Far call stubs support for arm
+	in the be8 mode.
+	* testsuite/Makefile.am: New test cases.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/arm_farcall_arm_arm_be8.sh: New script for arm to arm far
+	call stubs.
+	* testsuite/arm_farcall_thumb_thumb_be8.sh: New script for thumb to
+	thumb far call stubs.
+
+2017-10-18  Kyle Butt  <iteratee@google.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Scan::local): Correct dst_off
+	calculation for TOC16 relocs.
+	(Target_powerpc::Scan::global): Likewise.
+
 2017-09-26  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/22213

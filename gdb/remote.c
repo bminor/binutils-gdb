@@ -803,20 +803,14 @@ int
 remote_register_number_and_offset (struct gdbarch *gdbarch, int regnum,
 				   int *pnum, int *poffset)
 {
-  struct packet_reg *regs;
-  struct cleanup *old_chain;
-
   gdb_assert (regnum < gdbarch_num_regs (gdbarch));
 
-  regs = XCNEWVEC (struct packet_reg, gdbarch_num_regs (gdbarch));
-  old_chain = make_cleanup (xfree, regs);
+  std::vector<packet_reg> regs (gdbarch_num_regs (gdbarch));
 
-  map_regcache_remote_table (gdbarch, regs);
+  map_regcache_remote_table (gdbarch, regs.data ());
 
   *pnum = regs[regnum].pnum;
   *poffset = regs[regnum].offset;
-
-  do_cleanups (old_chain);
 
   return *pnum != -1;
 }
@@ -2062,7 +2056,7 @@ remote_set_syscall_catchpoint (struct target_ops *self,
 			       int pid, int needed, int any_count,
 			       int table_size, int *table)
 {
-  char *catch_packet;
+  const char *catch_packet;
   enum packet_result result;
   int n_sysno = 0;
 
@@ -2092,6 +2086,7 @@ remote_set_syscall_catchpoint (struct target_ops *self,
 			  pid, needed, any_count, n_sysno);
     }
 
+  gdb::unique_xmalloc_ptr<char> built_packet;
   if (needed)
     {
       /* Prepare a packet with the sysno list, assuming max 8+1
@@ -2099,46 +2094,45 @@ remote_set_syscall_catchpoint (struct target_ops *self,
 	 big, fallback on the non-selective packet.  */
       const int maxpktsz = strlen ("QCatchSyscalls:1") + n_sysno * 9 + 1;
 
-      catch_packet = (char *) xmalloc (maxpktsz);
-      strcpy (catch_packet, "QCatchSyscalls:1");
+      built_packet.reset ((char *) xmalloc (maxpktsz));
+      strcpy (built_packet.get (), "QCatchSyscalls:1");
       if (!any_count)
 	{
 	  int i;
 	  char *p;
 
-	  p = catch_packet;
+	  p = built_packet.get ();
 	  p += strlen (p);
 
 	  /* Add in catch_packet each syscall to be caught (table[i] != 0).  */
 	  for (i = 0; i < table_size; i++)
 	    {
 	      if (table[i] != 0)
-		p += xsnprintf (p, catch_packet + maxpktsz - p, ";%x", i);
+		p += xsnprintf (p, built_packet.get () + maxpktsz - p,
+				";%x", i);
 	    }
 	}
-      if (strlen (catch_packet) > get_remote_packet_size ())
+      if (strlen (built_packet.get ()) > get_remote_packet_size ())
 	{
 	  /* catch_packet too big.  Fallback to less efficient
 	     non selective mode, with GDB doing the filtering.  */
-	  catch_packet[sizeof ("QCatchSyscalls:1") - 1] = 0;
+	  catch_packet = "QCatchSyscalls:1";
 	}
+      else
+	catch_packet = built_packet.get ();
     }
   else
-    catch_packet = xstrdup ("QCatchSyscalls:0");
+    catch_packet = "QCatchSyscalls:0";
 
-  {
-    struct cleanup *old_chain = make_cleanup (xfree, catch_packet);
-    struct remote_state *rs = get_remote_state ();
+  struct remote_state *rs = get_remote_state ();
 
-    putpkt (catch_packet);
-    getpkt (&rs->buf, &rs->buf_size, 0);
-    result = packet_ok (rs->buf, &remote_protocol_packets[PACKET_QCatchSyscalls]);
-    do_cleanups (old_chain);
-    if (result == PACKET_OK)
-      return 0;
-    else
-      return -1;
-  }
+  putpkt (catch_packet);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+  result = packet_ok (rs->buf, &remote_protocol_packets[PACKET_QCatchSyscalls]);
+  if (result == PACKET_OK)
+    return 0;
+  else
+    return -1;
 }
 
 /* If 'QProgramSignals' is supported, tell the remote stub what
@@ -3209,16 +3203,15 @@ remote_get_threads_with_qxfer (struct target_ops *ops,
 #if defined(HAVE_LIBEXPAT)
   if (packet_support (PACKET_qXfer_threads) == PACKET_ENABLE)
     {
-      char *xml = target_read_stralloc (ops, TARGET_OBJECT_THREADS, NULL);
-      struct cleanup *back_to = make_cleanup (xfree, xml);
+      gdb::unique_xmalloc_ptr<char> xml
+	= target_read_stralloc (ops, TARGET_OBJECT_THREADS, NULL);
 
       if (xml != NULL && *xml != '\0')
 	{
 	  gdb_xml_parse_quick (_("threads"), "threads.dtd",
-			       threads_elements, xml, context);
+			       threads_elements, xml.get (), context);
 	}
 
-      do_cleanups (back_to);
       return 1;
     }
 #endif
@@ -8465,7 +8458,7 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 
   if (get_traceframe_number () != -1)
     {
-      VEC(mem_range_s) *available;
+      std::vector<mem_range> available;
 
       /* If we fail to get the set of available memory, then the
 	 target does not support querying traceframe info, and so we
@@ -8473,26 +8466,19 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 	 target implements the old QTro packet then).  */
       if (traceframe_available_memory (&available, memaddr, len))
 	{
-	  struct cleanup *old_chain;
-
-	  old_chain = make_cleanup (VEC_cleanup(mem_range_s), &available);
-
-	  if (VEC_empty (mem_range_s, available)
-	      || VEC_index (mem_range_s, available, 0)->start != memaddr)
+	  if (available.empty () || available[0].start != memaddr)
 	    {
 	      enum target_xfer_status res;
 
 	      /* Don't read into the traceframe's available
 		 memory.  */
-	      if (!VEC_empty (mem_range_s, available))
+	      if (!available.empty ())
 		{
 		  LONGEST oldlen = len;
 
-		  len = VEC_index (mem_range_s, available, 0)->start - memaddr;
+		  len = available[0].start - memaddr;
 		  gdb_assert (len <= oldlen);
 		}
-
-	      do_cleanups (old_chain);
 
 	      /* This goes through the topmost target again.  */
 	      res = remote_xfer_live_readonly_partial (ops, myaddr, memaddr,
@@ -8512,9 +8498,7 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 	     case the target implements the deprecated QTro packet to
 	     cater for older GDBs (the target's knowledge of read-only
 	     sections may be outdated by now).  */
-	  len = VEC_index (mem_range_s, available, 0)->length;
-
-	  do_cleanups (old_chain);
+	  len = available[0].length;
 	}
     }
 
@@ -8762,8 +8746,8 @@ putpkt_binary (const char *buf, int cnt)
   struct remote_state *rs = get_remote_state ();
   int i;
   unsigned char csum = 0;
-  char *buf2 = (char *) xmalloc (cnt + 6);
-  struct cleanup *old_chain = make_cleanup (xfree, buf2);
+  gdb::def_vector<char> data (cnt + 6);
+  char *buf2 = data.data ();
 
   int ch;
   int tcount = 0;
@@ -8866,7 +8850,6 @@ putpkt_binary (const char *buf, int cnt)
 	    case '+':
 	      if (remote_debug)
 		fprintf_unfiltered (gdb_stdlog, "Ack\n");
-	      do_cleanups (old_chain);
 	      return 1;
 	    case '-':
 	      if (remote_debug)
@@ -8875,10 +8858,7 @@ putpkt_binary (const char *buf, int cnt)
 	    case SERIAL_TIMEOUT:
 	      tcount++;
 	      if (tcount > 3)
-		{
-		  do_cleanups (old_chain);
-		  return 0;
-		}
+		return 0;
 	      break;		/* Retransmit buffer.  */
 	    case '$':
 	      {
@@ -8962,7 +8942,6 @@ putpkt_binary (const char *buf, int cnt)
 #endif
     }
 
-  do_cleanups (old_chain);
   return 0;
 }
 
@@ -10331,7 +10310,6 @@ static void
 compare_sections_command (const char *args, int from_tty)
 {
   asection *s;
-  struct cleanup *old_chain;
   gdb_byte *sectdata;
   const char *sectname;
   bfd_size_type size;
@@ -10372,11 +10350,10 @@ compare_sections_command (const char *args, int from_tty)
       matched = 1;		/* Do this section.  */
       lma = s->lma;
 
-      sectdata = (gdb_byte *) xmalloc (size);
-      old_chain = make_cleanup (xfree, sectdata);
-      bfd_get_section_contents (exec_bfd, s, sectdata, 0, size);
+      gdb::byte_vector sectdata (size);
+      bfd_get_section_contents (exec_bfd, s, sectdata.data (), 0, size);
 
-      res = target_verify_memory (sectdata, lma, size);
+      res = target_verify_memory (sectdata.data (), lma, size);
 
       if (res == -1)
 	error (_("target memory fault, section %s, range %s -- %s"), sectname,
@@ -10393,8 +10370,6 @@ compare_sections_command (const char *args, int from_tty)
 	  printf_filtered ("MIS-MATCHED!\n");
 	  mismatched++;
 	}
-
-      do_cleanups (old_chain);
     }
   if (mismatched > 0)
     warning (_("One or more sections of the target image does not match\n\
@@ -10913,20 +10888,15 @@ remote_rcmd (struct target_ops *self, const char *command,
     }
 }
 
-static VEC(mem_region_s) *
+static std::vector<mem_region>
 remote_memory_map (struct target_ops *ops)
 {
-  VEC(mem_region_s) *result = NULL;
-  char *text = target_read_stralloc (&current_target,
-				     TARGET_OBJECT_MEMORY_MAP, NULL);
+  std::vector<mem_region> result;
+  gdb::unique_xmalloc_ptr<char> text
+    = target_read_stralloc (&current_target, TARGET_OBJECT_MEMORY_MAP, NULL);
 
   if (text)
-    {
-      struct cleanup *back_to = make_cleanup (xfree, text);
-
-      result = parse_memory_map (text);
-      do_cleanups (back_to);
-    }
+    result = parse_memory_map (text.get ());
 
   return result;
 }
@@ -13064,18 +13034,11 @@ remote_set_circular_trace_buffer (struct target_ops *self, int val)
 static traceframe_info_up
 remote_traceframe_info (struct target_ops *self)
 {
-  char *text;
-
-  text = target_read_stralloc (&current_target,
-			       TARGET_OBJECT_TRACEFRAME_INFO, NULL);
+  gdb::unique_xmalloc_ptr<char> text
+    = target_read_stralloc (&current_target, TARGET_OBJECT_TRACEFRAME_INFO,
+			    NULL);
   if (text != NULL)
-    {
-      struct cleanup *back_to = make_cleanup (xfree, text);
-      traceframe_info_up info = parse_traceframe_info (text);
-
-      do_cleanups (back_to);
-      return info;
-    }
+    return parse_traceframe_info (text.get ());
 
   return NULL;
 }
@@ -13334,18 +13297,10 @@ btrace_sync_conf (const struct btrace_config *conf)
 static void
 btrace_read_config (struct btrace_config *conf)
 {
-  char *xml;
-
-  xml = target_read_stralloc (&current_target,
-			      TARGET_OBJECT_BTRACE_CONF, "");
+  gdb::unique_xmalloc_ptr<char> xml
+    = target_read_stralloc (&current_target, TARGET_OBJECT_BTRACE_CONF, "");
   if (xml != NULL)
-    {
-      struct cleanup *cleanup;
-
-      cleanup = make_cleanup (xfree, xml);
-      parse_xml_btrace_conf (conf, xml);
-      do_cleanups (cleanup);
-    }
+    parse_xml_btrace_conf (conf, xml.get ());
 }
 
 /* Maybe reopen target btrace.  */
@@ -13516,9 +13471,7 @@ remote_read_btrace (struct target_ops *self,
 		    enum btrace_read_type type)
 {
   struct packet_config *packet = &remote_protocol_packets[PACKET_qXfer_btrace];
-  struct cleanup *cleanup;
   const char *annex;
-  char *xml;
 
   if (packet_config_support (packet) != PACKET_ENABLE)
     error (_("Target does not support branch tracing."));
@@ -13544,14 +13497,12 @@ remote_read_btrace (struct target_ops *self,
 		      (unsigned int) type);
     }
 
-  xml = target_read_stralloc (&current_target,
-			      TARGET_OBJECT_BTRACE, annex);
+  gdb::unique_xmalloc_ptr<char> xml
+    = target_read_stralloc (&current_target, TARGET_OBJECT_BTRACE, annex);
   if (xml == NULL)
     return BTRACE_ERR_UNKNOWN;
 
-  cleanup = make_cleanup (xfree, xml);
-  parse_xml_btrace (btrace, xml);
-  do_cleanups (cleanup);
+  parse_xml_btrace (btrace, xml.get ());
 
   return BTRACE_ERR_NONE;
 }
@@ -13585,15 +13536,12 @@ remote_load (struct target_ops *self, const char *name, int from_tty)
 static char *
 remote_pid_to_exec_file (struct target_ops *self, int pid)
 {
-  static char *filename = NULL;
+  static gdb::unique_xmalloc_ptr<char> filename;
   struct inferior *inf;
   char *annex = NULL;
 
   if (packet_support (PACKET_qXfer_exec_file) != PACKET_ENABLE)
     return NULL;
-
-  if (filename != NULL)
-    xfree (filename);
 
   inf = find_inferior_pid (pid);
   if (inf == NULL)
@@ -13611,7 +13559,7 @@ remote_pid_to_exec_file (struct target_ops *self, int pid)
   filename = target_read_stralloc (&current_target,
 				   TARGET_OBJECT_EXEC_FILE, annex);
 
-  return filename;
+  return filename.get ();
 }
 
 /* Implement the to_can_do_single_step target_ops method.  */

@@ -3417,131 +3417,6 @@ elf_metag_gc_mark_hook (asection *sec,
   return _bfd_elf_gc_mark_hook (sec, info, rela, hh, sym);
 }
 
-/* Update the got and plt entry reference counts for the section being
-   removed.  */
-
-static bfd_boolean
-elf_metag_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
-			 struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			 asection *sec ATTRIBUTE_UNUSED,
-			 const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
-{
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **eh_syms;
-  bfd_signed_vma *local_got_refcounts;
-  bfd_signed_vma *local_plt_refcounts;
-  const Elf_Internal_Rela *rel, *relend;
-
-  if (bfd_link_relocatable (info))
-    return TRUE;
-
-  elf_section_data (sec)->local_dynrel = NULL;
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  eh_syms = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-  local_plt_refcounts = local_got_refcounts;
-  if (local_plt_refcounts != NULL)
-    local_plt_refcounts += symtab_hdr->sh_info;
-
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    {
-      unsigned long r_symndx;
-      unsigned int r_type;
-      struct elf_link_hash_entry *eh = NULL;
-
-      r_symndx = ELF32_R_SYM (rel->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-	{
-	  struct elf_metag_link_hash_entry *hh;
-	  struct elf_metag_dyn_reloc_entry **hdh_pp;
-	  struct elf_metag_dyn_reloc_entry *hdh_p;
-
-	  eh = eh_syms[r_symndx - symtab_hdr->sh_info];
-	  while (eh->root.type == bfd_link_hash_indirect
-		 || eh->root.type == bfd_link_hash_warning)
-	    eh = (struct elf_link_hash_entry *) eh->root.u.i.link;
-	  hh = (struct elf_metag_link_hash_entry *) eh;
-
-	  for (hdh_pp = &hh->dyn_relocs; (hdh_p = *hdh_pp) != NULL;
-	       hdh_pp = &hdh_p->hdh_next)
-	    if (hdh_p->sec == sec)
-	      {
-		/* Everything must go for SEC.  */
-		*hdh_pp = hdh_p->hdh_next;
-		break;
-	      }
-	}
-
-      r_type = ELF32_R_TYPE (rel->r_info);
-      switch (r_type)
-	{
-	case R_METAG_TLS_LDM:
-	  if (metag_link_hash_table (info)->tls_ldm_got.refcount > 0)
-	    metag_link_hash_table (info)->tls_ldm_got.refcount -= 1;
-	  break;
-	case R_METAG_TLS_IE:
-	case R_METAG_TLS_GD:
-	case R_METAG_GETSET_GOT:
-	  if (eh != NULL)
-	    {
-	      if (eh->got.refcount > 0)
-		eh->got.refcount -= 1;
-	    }
-	  else if (local_got_refcounts != NULL)
-	    {
-	      if (local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx] -= 1;
-	    }
-	  break;
-
-	case R_METAG_RELBRANCH_PLT:
-	  if (eh != NULL)
-	    {
-	      if (eh->plt.refcount > 0)
-		eh->plt.refcount -= 1;
-	    }
-	  break;
-
-	case R_METAG_ADDR32:
-	case R_METAG_HIADDR16:
-	case R_METAG_LOADDR16:
-	case R_METAG_GETSETOFF:
-	case R_METAG_RELBRANCH:
-	  if (eh != NULL)
-	    {
-	      struct elf_metag_link_hash_entry *hh;
-	      struct elf_metag_dyn_reloc_entry **hdh_pp;
-	      struct elf_metag_dyn_reloc_entry *hdh_p;
-
-	      if (!bfd_link_pic (info) && eh->plt.refcount > 0)
-		eh->plt.refcount -= 1;
-
-	      hh = (struct elf_metag_link_hash_entry *) eh;
-
-	      for (hdh_pp = &hh->dyn_relocs; (hdh_p = *hdh_pp) != NULL;
-		   hdh_pp = &hdh_p->hdh_next)
-		if (hdh_p->sec == sec)
-		  {
-		    if (ELF32_R_TYPE (rel->r_info) == R_METAG_RELBRANCH)
-		      hdh_p->relative_count -= 1;
-		    hdh_p->count -= 1;
-		    if (hdh_p->count == 0)
-		      *hdh_pp = hdh_p->hdh_next;
-		    break;
-		  }
-	    }
-	  break;
-
-	default:
-	  break;
-	}
-    }
-
-  return TRUE;
-}
-
 /* Determine the type of stub needed, if any, for a call.  */
 
 static enum elf_metag_stub_type
@@ -4274,7 +4149,6 @@ elf_metag_plt_sym_val (bfd_vma i, const asection *plt,
 	elf_metag_link_hash_table_create
 #define elf_backend_relocate_section		elf_metag_relocate_section
 #define elf_backend_gc_mark_hook		elf_metag_gc_mark_hook
-#define elf_backend_gc_sweep_hook		elf_metag_gc_sweep_hook
 #define elf_backend_check_relocs		elf_metag_check_relocs
 #define elf_backend_create_dynamic_sections	elf_metag_create_dynamic_sections
 #define elf_backend_adjust_dynamic_symbol	elf_metag_adjust_dynamic_symbol

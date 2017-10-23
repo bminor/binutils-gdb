@@ -1167,61 +1167,6 @@ lm32_elf_gc_mark_hook (asection *sec,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
-static bfd_boolean
-lm32_elf_gc_sweep_hook (bfd *abfd,
-                        struct bfd_link_info *info ATTRIBUTE_UNUSED,
-                        asection *sec,
-                        const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
-{
-  /* Update the got entry reference counts for the section being removed.  */
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
-  const Elf_Internal_Rela *rel, *relend;
-
-  elf_section_data (sec)->local_dynrel = NULL;
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  sym_hashes = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    {
-      unsigned long r_symndx;
-      struct elf_link_hash_entry *h = NULL;
-
-      r_symndx = ELF32_R_SYM (rel->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	}
-
-      switch (ELF32_R_TYPE (rel->r_info))
-	{
-	case R_LM32_16_GOT:
-	  if (h != NULL)
-	    {
-	      if (h->got.refcount > 0)
-		h->got.refcount--;
-	    }
-	  else
-	    {
-	      if (local_got_refcounts && local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx]--;
-	    }
-	  break;
-
-	default:
-	  break;
-	}
-    }
-  return TRUE;
-}
-
 /* Look through the relocs for a section during the first phase.  */
 
 static bfd_boolean
@@ -2633,7 +2578,6 @@ lm32_elf_fdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define elf_backend_can_gc_sections             1
 #define elf_backend_can_refcount                1
 #define elf_backend_gc_mark_hook                lm32_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook               lm32_elf_gc_sweep_hook
 #define elf_backend_plt_readonly                1
 #define elf_backend_want_got_plt                1
 #define elf_backend_want_plt_sym                0

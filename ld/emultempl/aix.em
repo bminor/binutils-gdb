@@ -1539,6 +1539,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
   hll_default,
   after_parse_default,
   gld${EMULATION_NAME}_after_open,
+  after_check_relocs_default,
   after_allocation_default,
   gld${EMULATION_NAME}_set_output_arch,
   gld${EMULATION_NAME}_choose_target,

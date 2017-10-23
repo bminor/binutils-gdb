@@ -111,6 +111,18 @@ find_thread (Func func)
   return NULL;
 }
 
+/* Like the above, but only consider threads with pid PID.  */
+
+template <typename Func>
+static thread_info *
+find_thread (int pid, Func func)
+{
+  return find_thread ([&] (thread_info *thread)
+    {
+      return thread->id.pid () == pid && func (thread);
+    });
+}
+
 /* Invoke FUNC for each thread.  */
 
 template <typename Func>
@@ -126,6 +138,19 @@ for_each_thread (Func func)
       func (*cur);
       cur = next;
     }
+}
+
+/* Like the above, but only consider threads with pid PID.  */
+
+template <typename Func>
+static void
+for_each_thread (int pid, Func func)
+{
+  for_each_thread ([&] (thread_info *thread)
+    {
+      if (pid == thread->id.pid ())
+	func (thread);
+    });
 }
 
 /* Find the a random thread for which FUNC (THREAD) returns true.  If

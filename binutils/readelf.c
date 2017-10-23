@@ -16335,7 +16335,8 @@ print_core_note (Elf_Internal_Note *pnote)
   page_size = byte_get (descdata, addr_size);
   descdata += addr_size;
 
-  if (pnote->descsz < 2 * addr_size + count * 3 * addr_size)
+  if (count > ((bfd_vma) -1 - 2 * addr_size) / (3 * addr_size)
+      || pnote->descsz < 2 * addr_size + count * 3 * addr_size)
     {
       error (_("    Malformed note - too short for supplied file count\n"));
       return FALSE;
@@ -17658,20 +17659,13 @@ process_notes_at (FILE *              file,
 		    (int) data_remaining);
 	      break;
 	    }
+	  data_remaining -= min_notesz;
+
 	  inote.type     = BYTE_GET (external->type);
 	  inote.namesz   = BYTE_GET (external->namesz);
 	  inote.namedata = external->name;
 	  inote.descsz   = BYTE_GET (external->descsz);
 	  inote.descdata = inote.namedata + align_power (inote.namesz, 2);
-	  /* PR 17531: file: 3443835e.  */
-	  if (inote.descdata < (char *) pnotes || inote.descdata > end)
-	    {
-	      warn (_("Corrupt note: name size is too big: (got: %lx, expected no more than: %lx)\n"),
-		    inote.namesz, (long)(end - inote.namedata));
-	      inote.descdata = inote.namedata;
-	      inote.namesz   = 0;
-	    }
-
 	  inote.descpos  = offset + (inote.descdata - (char *) pnotes);
 	  next = inote.descdata + align_power (inote.descsz, 2);
 	}
@@ -17688,6 +17682,7 @@ process_notes_at (FILE *              file,
 		    (int) data_remaining);
 	      break;
 	    }
+	  data_remaining -= min_notesz;
 
 	  vms_external = (Elf64_External_VMS_Note *) external;
 	  inote.type     = BYTE_GET (vms_external->type);
@@ -17699,12 +17694,13 @@ process_notes_at (FILE *              file,
 	  next = inote.descdata + align_power (inote.descsz, 3);
 	}
 
-      if (inote.descdata < (char *) external + min_notesz
-	  || next < (char *) external + min_notesz
-	  /* PR binutils/17531: file: id:000000,sig:11,src:006986,op:havoc,rep:4.  */
-	  || inote.namedata + inote.namesz < inote.namedata
-	  || inote.descdata + inote.descsz < inote.descdata
-	  || data_remaining < (size_t)(next - (char *) external))
+      /* PR 17531: file: 3443835e.  */
+      /* PR 17531: file: id:000000,sig:11,src:006986,op:havoc,rep:4.  */
+      if ((size_t) (inote.descdata - inote.namedata) < inote.namesz
+	  || (size_t) (inote.descdata - inote.namedata) > data_remaining
+	  || (size_t) (next - inote.descdata) < inote.descsz
+	  || ((size_t) (next - inote.descdata)
+	      > data_remaining - (size_t) (inote.descdata - inote.namedata)))
 	{
 	  warn (_("note with invalid namesz and/or descsz found at offset 0x%lx\n"),
 		(unsigned long) ((char *) external - (char *) pnotes));
@@ -17721,19 +17717,20 @@ process_notes_at (FILE *              file,
 	 namesz.  */
       if (inote.namedata[inote.namesz - 1] != '\0')
 	{
-	  temp = (char *) malloc (inote.namesz + 1);
-	  if (temp == NULL)
+	  if ((size_t) (inote.descdata - inote.namedata) == inote.namesz)
 	    {
-	      error (_("Out of memory allocating space for inote name\n"));
-	      res = FALSE;
-	      break;
+	      temp = (char *) malloc (inote.namesz + 1);
+	      if (temp == NULL)
+		{
+		  error (_("Out of memory allocating space for inote name\n"));
+		  res = FALSE;
+		  break;
+		}
+
+	      memcpy (temp, inote.namedata, inote.namesz);
+	      inote.namedata = temp;
 	    }
-
-	  memcpy (temp, inote.namedata, inote.namesz);
-	  temp[inote.namesz] = 0;
-
-	  /* warn (_("'%s' NOTE name not properly null terminated\n"), temp);  */
-	  inote.namedata = temp;
+	  inote.namedata[inote.namesz] = 0;
 	}
 
       if (! process_note (& inote, file))

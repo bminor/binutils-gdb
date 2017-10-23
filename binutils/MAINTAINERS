@@ -72,6 +72,7 @@ responsibility among the other maintainers.
   DLX              Nikolaos Kavvadias <nkavv@physics.auth.gr>
   DWARF2	   Jason Merrill <jason@redhat.com>
   DWARF2	   Jakub Jelinek <jakub@redhat.com>
+  dwarf-mode.el    Tom Tromey <tom@tromey.com>
   EPIPHANY	   Joern Rennecke <joern.rennecke@embecosm.com>
   FR30		   Dave Brolley <brolley@redhat.com>
   FRV		   Dave Brolley <brolley@redhat.com>
@@ -127,13 +128,13 @@ responsibility among the other maintainers.
   SPARC		   David S. Miller <davem@davemloft.net>
   SPARC		   Jose E. Marchesi <jose.marchesi@oracle.com>
   SPU		   Alan Modra <amodra@gmail.com>
-  TIC4X            Svein Seldal <svein@dev.seldal.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
   TIC6X            Joseph Myers <joseph@codesourcery.com>
   TILE-Gx          Walter Lee <walt@tilera.com>
   TILEPro          Walter Lee <walt@tilera.com>
   VAX		   Matt Thomas <matt@netbsd.org>
   VAX		   Jan-Benedict Glaw <jbglaw@lug-owl.de>
+  Visium	   Eric Botcazou <ebotcazou@libertysurf.fr>
   VMS		   Tristan Gingold <tgingold@free.fr>
   x86_64	   Jan Hubicka <jh@suse.cz>
   x86_64	   Andreas Jaeger <aj@suse.de>
@@ -155,6 +156,7 @@ goes with them.
   Mei Ligang
   Mark Mitchell
   Bernd Schmidt
+  Svein Seldal
 
       --------- CGEN Maintainers -------------
 

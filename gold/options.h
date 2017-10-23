@@ -711,7 +711,7 @@ class General_options
   DEFINE_string(format, options::TWO_DASHES, 'b', "elf",
 		N_("Set input format"), ("[elf,binary]"));
 
-  DEFINE_bool(be8,options::TWO_DASHES, '\0', false,
+  DEFINE_bool(be8, options::TWO_DASHES, '\0', false,
 	      N_("Output BE8 format image"), NULL);
 
   DEFINE_optional_string(build_id, options::TWO_DASHES, '\0', "tree",
@@ -1492,6 +1492,11 @@ class General_options
   DEFINE_bool_alias(textoff, text, options::DASH_Z, '\0',
 		    N_("Permit relocations in read-only segments"),
 		    NULL, true);
+  DEFINE_bool(text_unlikely_segment, options::DASH_Z, '\0', false,
+	      N_("Move .text.unlikely sections to a separate segment."),
+	      N_("Do not move .text.unlikely sections to a separate "
+		 "segment."));
+
 
  public:
   typedef options::Dir_list Dir_list;

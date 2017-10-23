@@ -362,22 +362,14 @@ syscall_parse_xml (const char *document, xml_fetch_another fetcher,
 static struct syscalls_info *
 xml_init_syscalls_info (const char *filename)
 {
-  char *full_file;
-  struct syscalls_info *syscalls_info;
-  struct cleanup *back_to;
-
-  full_file = xml_fetch_content_from_file (filename, gdb_datadir);
+  gdb::unique_xmalloc_ptr<char> full_file
+    = xml_fetch_content_from_file (filename, gdb_datadir);
   if (full_file == NULL)
     return NULL;
 
-  back_to = make_cleanup (xfree, full_file);
-
-  syscalls_info = syscall_parse_xml (full_file,
-				     xml_fetch_content_from_file,
-				     (void *) ldirname (filename).c_str ());
-  do_cleanups (back_to);
-
-  return syscalls_info;
+  return syscall_parse_xml (full_file.get (),
+			    xml_fetch_content_from_file,
+			    (void *) ldirname (filename).c_str ());
 }
 
 /* Initializes the syscalls_info structure according to the

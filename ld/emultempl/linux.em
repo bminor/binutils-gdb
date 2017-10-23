@@ -50,6 +50,7 @@ gld${EMULATION_NAME}_before_parse (void)
   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
   input_flags.dynamic = TRUE;
   config.has_shared = TRUE;
+  link_info.check_relocs_after_open_input = TRUE;
   link_info.relro = DEFAULT_LD_Z_RELRO;
 }
 
@@ -187,6 +188,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   hll_default,
   after_parse_default,
   after_open_default,
+  after_check_relocs_default,
   after_allocation_default,
   set_output_arch_default,
   ldemul_default_target,

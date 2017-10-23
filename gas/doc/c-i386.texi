@@ -168,6 +168,9 @@ accept various extension mnemonics.  For example,
 @code{rdpid},
 @code{ptwrite},
 @code{cet},
+@code{gfni},
+@code{vaes},
+@code{vpclmulqdq},
 @code{prefetchwt1},
 @code{clflushopt},
 @code{se1},
@@ -184,6 +187,9 @@ accept various extension mnemonics.  For example,
 @code{avx512_4fmaps},
 @code{avx512_4vnniw},
 @code{avx512_vpopcntdq},
+@code{avx512_vbmi2},
+@code{avx512_vnni},
+@code{avx512_bitalg},
 @code{noavx512f},
 @code{noavx512cd},
 @code{noavx512er},
@@ -196,6 +202,9 @@ accept various extension mnemonics.  For example,
 @code{noavx512_4fmaps},
 @code{noavx512_4vnniw},
 @code{noavx512_vpopcntdq},
+@code{noavx512_vbmi2},
+@code{noavx512_vnni},
+@code{noavx512_bitalg},
 @code{vmx},
 @code{vmfunc},
 @code{smx},
@@ -1218,12 +1227,14 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.avx512f} @tab @samp{.avx512cd} @tab @samp{.avx512er} @tab @samp{.avx512pf}
 @item @samp{.avx512vl} @tab @samp{.avx512bw} @tab @samp{.avx512dq} @tab @samp{.avx512ifma}
 @item @samp{.avx512vbmi} @tab @samp{.avx512_4fmaps} @tab @samp{.avx512_4vnniw}
-@item @samp{.avx512_vpopcntdq} @tab @samp{.clwb} @tab @samp{.rdpid} @tab @samp{.ptwrite}
-@item @samp{.cet}
+@item @samp{.avx512_vpopcntdq} @tab @samp{.avx512_vbmi2} @tab @samp{.avx512_vnni}
+@item @samp{.avx512_bitalg}
+@item @samp{.clwb} @tab @samp{.rdpid} @tab @samp{.ptwrite} @tab @item @samp{.cet}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
-@item @samp{.padlock} @tab @samp{.clzero} @tab @samp{.mwaitx}
+@item @samp{.padlock} @tab @samp{.clzero} @tab @samp{.mwaitx} @tab @samp{.gfni}
+@item @samp{.vaes} @tab @samp{.vpclmulqdq}
 @end multitable
 
 Apart from the warning, there are only two other effects on

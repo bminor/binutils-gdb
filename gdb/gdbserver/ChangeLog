@@ -1,3 +1,41 @@
+2017-10-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdbthread.h (find_thread, for_each_thread): New functions.
+	* inferiors.c (thread_of_pid): Remove.
+	(find_any_thread_of_pid): Use find_thread.
+	* linux-low.c (num_lwps): Use for_each_thread.
+
+2017-10-17  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in: Remove one rule.
+	* configure.srv: Rename aarch64-insn.o with arch/aarch64-insn.o.
+
+2017-10-17  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv: Rename arm-linux.o with arch/arm-linux.o.
+	Rename arm-get-next-pcs.o with arch/arm-get-next-pcs.o.
+
+2017-10-17  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv: Rename arm.o with arch/arm.o.
+
+2017-10-17  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (CONFIG_SRC_SUBDIR): New variable.
+	(clean): Remove .o files in CONFIG_SRC_SUBDIR.
+	(distclean): Remove DEPDIR in CONFIG_SRC_SUBDIR.
+	(arch-i386.o, arch-amd64.o): Remove rules.
+	(arch/%.o): New rule.
+	Update POSTCOMPILE and COMPILE.pre.
+	* configure.ac: Invoke AC_CONFIG_COMMANDS.
+	* configure: Re-generated.
+	* configure.srv: Replace arch-i386.o with arch/i386.o.
+	Replace arch-amd64.o with arch/amd64.o.
+
+2017-10-16  Yao Qi  <yao.qi@linaro.org>
+
+	* configure: Regenerated.
+
 2017-10-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* inferiors.h: (struct inferior_list): Remove.

@@ -1479,34 +1479,31 @@ target_write_raw_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
 
 /* Fetch the target's memory map.  */
 
-VEC(mem_region_s) *
+std::vector<mem_region>
 target_memory_map (void)
 {
-  VEC(mem_region_s) *result;
-  struct mem_region *last_one, *this_one;
-  int ix;
-  result = current_target.to_memory_map (&current_target);
-  if (result == NULL)
-    return NULL;
+  std::vector<mem_region> result
+    = current_target.to_memory_map (&current_target);
+  if (result.empty ())
+    return result;
 
-  qsort (VEC_address (mem_region_s, result),
-	 VEC_length (mem_region_s, result),
-	 sizeof (struct mem_region), mem_region_cmp);
+  std::sort (result.begin (), result.end ());
 
   /* Check that regions do not overlap.  Simultaneously assign
      a numbering for the "mem" commands to use to refer to
      each region.  */
-  last_one = NULL;
-  for (ix = 0; VEC_iterate (mem_region_s, result, ix, this_one); ix++)
+  mem_region *last_one = NULL;
+  for (size_t ix = 0; ix < result.size (); ix++)
     {
+      mem_region *this_one = &result[ix];
       this_one->number = ix;
 
-      if (last_one && last_one->hi > this_one->lo)
+      if (last_one != NULL && last_one->hi > this_one->lo)
 	{
 	  warning (_("Overlapping regions in memory map: ignoring"));
-	  VEC_free (mem_region_s, result);
-	  return NULL;
+	  return std::vector<mem_region> ();
 	}
+
       last_one = this_one;
     }
 
@@ -1924,13 +1921,9 @@ target_read_alloc (struct target_ops *ops, enum target_object object,
   return target_read_alloc_1 (ops, object, annex, buf_p, 0);
 }
 
-/* Read OBJECT/ANNEX using OPS.  The result is NUL-terminated and
-   returned as a string, allocated using xmalloc.  If an error occurs
-   or the transfer is unsupported, NULL is returned.  Empty objects
-   are returned as allocated but empty strings.  A warning is issued
-   if the result contains any embedded NUL bytes.  */
+/* See target.h.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 target_read_stralloc (struct target_ops *ops, enum target_object object,
 		      const char *annex)
 {
@@ -1945,7 +1938,7 @@ target_read_stralloc (struct target_ops *ops, enum target_object object,
     return NULL;
 
   if (transferred == 0)
-    return xstrdup ("");
+    return gdb::unique_xmalloc_ptr<char> (xstrdup (""));
 
   bufstr[transferred] = 0;
 
@@ -1959,7 +1952,7 @@ target_read_stralloc (struct target_ops *ops, enum target_object object,
 	break;
       }
 
-  return bufstr;
+  return gdb::unique_xmalloc_ptr<char> (bufstr);
 }
 
 /* Memory transfer methods.  */
@@ -2654,7 +2647,9 @@ target_supports_multi_process (void)
   return (*current_target.to_supports_multi_process) (&current_target);
 }
 
-char *
+/* See target.h.  */
+
+gdb::unique_xmalloc_ptr<char>
 target_get_osdata (const char *type)
 {
   struct target_ops *t;
@@ -3085,7 +3080,7 @@ target_fileio_read_alloc (struct inferior *inf, const char *filename,
 
 /* See target.h.  */
 
-char *
+gdb::unique_xmalloc_ptr<char> 
 target_fileio_read_stralloc (struct inferior *inf, const char *filename)
 {
   gdb_byte *buffer;
@@ -3096,10 +3091,10 @@ target_fileio_read_stralloc (struct inferior *inf, const char *filename)
   bufstr = (char *) buffer;
 
   if (transferred < 0)
-    return NULL;
+    return gdb::unique_xmalloc_ptr<char> (nullptr);
 
   if (transferred == 0)
-    return xstrdup ("");
+    return gdb::unique_xmalloc_ptr<char> (xstrdup (""));
 
   bufstr[transferred] = 0;
 
@@ -3113,7 +3108,7 @@ target_fileio_read_stralloc (struct inferior *inf, const char *filename)
 	break;
       }
 
-  return bufstr;
+  return gdb::unique_xmalloc_ptr<char> (bufstr);
 }
 
 
@@ -3817,30 +3812,25 @@ flash_erase_command (char *cmd, int from_tty)
 {
   /* Used to communicate termination of flash operations to the target.  */
   bool found_flash_region = false;
-  struct mem_region *m;
   struct gdbarch *gdbarch = target_gdbarch ();
 
-  VEC(mem_region_s) *mem_regions = target_memory_map ();
+  std::vector<mem_region> mem_regions = target_memory_map ();
 
   /* Iterate over all memory regions.  */
-  for (int i = 0; VEC_iterate (mem_region_s, mem_regions, i, m); i++)
+  for (const mem_region &m : mem_regions)
     {
-      /* Fetch the memory attribute.  */
-      struct mem_attrib *attrib = &m->attrib;
-
       /* Is this a flash memory region?  */
-      if (attrib->mode == MEM_FLASH)
+      if (m.attrib.mode == MEM_FLASH)
         {
           found_flash_region = true;
-          target_flash_erase (m->lo, m->hi - m->lo);
+          target_flash_erase (m.lo, m.hi - m.lo);
 
 	  ui_out_emit_tuple tuple_emitter (current_uiout, "erased-regions");
 
           current_uiout->message (_("Erasing flash memory region at address "));
-          current_uiout->field_fmt ("address", "%s", paddress (gdbarch,
-								 m->lo));
+          current_uiout->field_fmt ("address", "%s", paddress (gdbarch, m.lo));
           current_uiout->message (", size = ");
-          current_uiout->field_fmt ("size", "%s", hex_string (m->hi - m->lo));
+          current_uiout->field_fmt ("size", "%s", hex_string (m.hi - m.lo));
           current_uiout->message ("\n");
         }
     }

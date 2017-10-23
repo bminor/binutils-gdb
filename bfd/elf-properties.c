@@ -93,15 +93,20 @@ bad_size:
       return FALSE;
     }
 
-  while (1)
+  while (ptr != ptr_end)
     {
-      unsigned int type = bfd_h_get_32 (abfd, ptr);
-      unsigned int datasz = bfd_h_get_32 (abfd, ptr + 4);
+      unsigned int type;
+      unsigned int datasz;
       elf_property *prop;
 
+      if ((size_t) (ptr_end - ptr) < 8)
+	goto bad_size;
+
+      type = bfd_h_get_32 (abfd, ptr);
+      datasz = bfd_h_get_32 (abfd, ptr + 4);
       ptr += 8;
 
-      if ((ptr + datasz) > ptr_end)
+      if (datasz > (size_t) (ptr_end - ptr))
 	{
 	  _bfd_error_handler
 	    (_("warning: %B: corrupt GNU_PROPERTY_TYPE (%ld) type (0x%x) datasz: 0x%x"),
@@ -183,11 +188,6 @@ bad_size:
 
 next:
       ptr += (datasz + (align_size - 1)) & ~ (align_size - 1);
-      if (ptr == ptr_end)
-	break;
-
-      if (ptr > (ptr_end - 8))
-	goto bad_size;
     }
 
   return TRUE;

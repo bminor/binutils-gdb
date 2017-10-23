@@ -27,10 +27,6 @@
 #include "elf-bfd.h"
 #include "elf/tic6x.h"
 
-#include "features/tic6x-c64xp-linux.c"
-#include "features/tic6x-c64x-linux.c"
-#include "features/tic6x-c62x-linux.c"
-
 /* The offset from rt_sigframe pointer to SP register.  */
 #define TIC6X_SP_RT_SIGFRAME 8
 /* Size of struct siginfo info.  */
@@ -212,8 +208,4 @@ _initialize_tic6x_linux_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_tic6x, 0, GDB_OSABI_LINUX,
 			  tic6x_uclinux_init_abi);
-
-  initialize_tdesc_tic6x_c64xp_linux ();
-  initialize_tdesc_tic6x_c64x_linux ();
-  initialize_tdesc_tic6x_c62x_linux ();
 }

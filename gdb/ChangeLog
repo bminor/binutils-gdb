@@ -1,3 +1,445 @@
+2017-10-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* memattr.h: Don't include vec.h.
+	(struct mem_attrib): Initialize fields.
+	<unknown>: New static method.
+	(struct mem_region): Add constructors, operator<, initialize
+	fields.
+	* memattr.c: Include algorithm.
+	(default_mem_attrib, unknown_mem_attrib): Remove.
+	(user_mem_region_list): New global.
+	(target_mem_region_list, mem_region_list): Change type to
+	std::vector<mem_region>.
+	(mem_use_target): Now a function.
+	(target_mem_regions_valid): Change type to bool.
+	(mem_region_lessthan, mem_region_cmp, mem_region_init): Remove.
+	(require_user_regions): Adjust.
+	(require_target_regions): Adjust.
+	(create_mem_region): Adjust.
+	(lookup_mem_region): Adjust.
+	(invalidate_target_mem_regions): Adjust.
+	(mem_clear): Rename to...
+	(user_mem_clear): ... this, and adjust.
+	(mem_command): Adjust.
+	(info_mem_command): Adjust.
+	(mem_enable, enable_mem_command, mem_disable,
+	disable_mem_command): Adjust.
+	(mem_delete): Adjust.
+	(delete_mem_command): Adjust.
+	* memory-map.h (parse_memory_map): Return an std::vector.
+	* memory-map.c (parse_memory_map): Likewise.
+	(struct memory_map_parsing_data): Add constructor.
+	<memory_map>: Point to std::vector.
+	(memory_map_start_memory): Adjust.
+	(memory_map_end_memory): Adjust.
+	(memory_map_end_property): Adjust.
+	(clear_result): Remove.
+	* remote.c (remote_memory_map): Return an std::vector.
+	* target-debug.h (target_debug_print_VEC_mem_region_s__p):
+	Remove.
+	(target_debug_print_mem_region_vector): New.
+	* target-delegates.c: Regenerate.
+	* target.h (mem_region_vector): New typedef.
+	(to_memory_map): Return mem_region_vector.
+	(target_memory_map): Return an std::vector.
+	* target.c (target_memory_map): Return an std::vector.
+	(flash_erase_command): Adjust.
+
+2017-10-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* memory-map.c (struct memory_map_parsing_data) <property_name>:
+	Change type to std::string.
+	(memory_map_start_property): Adjust.
+	(memory_map_end_property): Adjust.
+
+2017-10-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* infrun.h: Include common/byte-vector.h.
+	(struct displaced_step_closure): New struct.
+	(struct buf_displaced_step_closure): New struct.
+	* infrun.c (displaced_step_closure::~displaced_step_closure):
+	Provide default implementation.
+	(displaced_step_clear): Deallocate step closure with delete.
+	* aarch64-tdep.c (displaced_step_closure): Rename to ...
+	(aarch64_displaced_step_closure): ... this, extend
+	displaced_step_closure.
+	(aarch64_displaced_step_data) <dsc>: Change type to
+	aarch64_displaced_step_closure.
+	(aarch64_displaced_step_copy_insn): Adjust to type change, use
+	unique_ptr.
+	(aarch64_displaced_step_fixup): Add cast for displaced step
+	closure.
+	* amd64-tdep.c (displaced_step_closure): Rename to ...
+	(amd64_displaced_step_closure): ... this, extend
+	displaced_step_closure.
+	<insn_buf>: Change type to std::vector<gdb_byte>.
+	<max_len>: Remove.
+	(fixup_riprel): Change type of DSC parameter, adjust to type
+	change of insn_buf.
+	(fixup_displaced_copy): Change type of DSC parameter.
+	(amd64_displaced_step_copy_insn): Instantiate
+	amd64_displaced_step_closure.
+	(amd64_displaced_step_fixup): Add cast for closure type, adjust
+	to type change of insn_buf.
+	* arm-linux-tdep.c (arm_linux_cleanup_svc): Change type of
+	parameter DSC.
+	(arm_linux_copy_svc): Likewise.
+	(cleanup_kernel_helper_return): Likewise.
+	(arm_catch_kernel_helper_return): Likewise.
+	(arm_linux_displaced_step_copy_insn): Instantiate
+	arm_displaced_step_closure.
+	* arm-tdep.c (arm_pc_is_thumb): Add cast for closure.
+	(displaced_read_reg): Change type of parameter DSC.
+	(branch_write_pc): Likewise.
+	(load_write_pc): Likewise.
+	(alu_write_pc): Likewise.
+	(displaced_write_reg): Likewise.
+	(arm_copy_unmodified): Likewise.
+	(thumb_copy_unmodified_32bit): Likewise.
+	(thumb_copy_unmodified_16bit): Likewise.
+	(cleanup_preload): Likewise.
+	(install_preload): Likewise.
+	(arm_copy_preload): Likewise.
+	(thumb2_copy_preload): Likewise.
+	(install_preload_reg): Likewise.
+	(arm_copy_preload_reg): Likewise.
+	(cleanup_copro_load_store): Likewise.
+	(install_copro_load_store): Likewise.
+	(arm_copy_copro_load_store) Likewise.
+	(thumb2_copy_copro_load_store): Likewise.
+	(cleanup_branch): Likewise.
+	(install_b_bl_blx): Likewise.
+	(arm_copy_b_bl_blx): Likewise.
+	(thumb2_copy_b_bl_blx): Likewise.
+	(thumb_copy_b): Likewise.
+	(install_bx_blx_reg): Likewise.
+	(arm_copy_bx_blx_reg): Likewise.
+	(thumb_copy_bx_blx_reg): Likewise.
+	(cleanup_alu_imm): Likewise.
+	(arm_copy_alu_imm): Likewise.
+	(thumb2_copy_alu_imm): Likewise.
+	(cleanup_alu_reg): Likewise.
+	(install_alu_reg): Likewise.
+	(arm_copy_alu_reg): Likewise.
+	(thumb_copy_alu_reg): Likewise.
+	(cleanup_alu_shifted_reg): Likewise.
+	(install_alu_shifted_reg): Likewise.
+	(arm_copy_alu_shifted_reg): Likewise.
+	(cleanup_load): Likewise.
+	(cleanup_store): Likewise.
+	(arm_copy_extra_ld_st): Likewise.
+	(install_load_store): Likewise.
+	(thumb2_copy_load_literal): Likewise.
+	(thumb2_copy_load_reg_imm): Likewise.
+	(arm_copy_ldr_str_ldrb_strb): Likewise.
+	(cleanup_block_load_all): Likewise.
+	(cleanup_block_store_pc): Likewise.
+	(cleanup_block_load_pc): Likewise.
+	(arm_copy_block_xfer): Likewise.
+	(thumb2_copy_block_xfer): Likewise.
+	(cleanup_svc): Likewise.
+	(install_svc): Likewise.
+	(arm_copy_svc): Likewise.
+	(thumb_copy_svc): Likewise.
+	(arm_copy_undef): Likewise.
+	(thumb_32bit_copy_undef): Likewise.
+	(arm_copy_unpred): Likewise.
+	(arm_decode_misc_memhint_neon): Likewise.
+	(arm_decode_unconditional): Likewise.
+	(arm_decode_miscellaneous): Likewise.
+	(arm_decode_dp_misc): Likewise.
+	(arm_decode_ld_st_word_ubyte): Likewise.
+	(arm_decode_media): Likewise.
+	(arm_decode_b_bl_ldmstm): Likewise.
+	(arm_decode_ext_reg_ld_st): Likewise.
+	(thumb2_decode_dp_shift_reg): Likewise.
+	(thumb2_decode_ext_reg_ld_st): Likewise.
+	(arm_decode_svc_copro): Likewise.
+	(thumb2_decode_svc_copro): Likewise.
+	(install_pc_relative): Likewise.
+	(thumb_copy_pc_relative_16bit): Likewise.
+	(thumb_decode_pc_relative_16bit): Likewise.
+	(thumb_copy_pc_relative_32bit): Likewise.
+	(thumb_copy_16bit_ldr_literal): Likewise.
+	(thumb_copy_cbnz_cbz): Likewise.
+	(thumb2_copy_table_branch): Likewise.
+	(cleanup_pop_pc_16bit_all): Likewise.
+	(thumb_copy_pop_pc_16bit): Likewise.
+	(thumb_process_displaced_16bit_insn): Likewise.
+	(decode_thumb_32bit_ld_mem_hints): Likewise.
+	(thumb_process_displaced_32bit_insn): Likewise.
+	(thumb_process_displaced_insn): Likewise.
+	(arm_process_displaced_insn): Likewise.
+	(arm_displaced_init_closure): Likewise.
+	(arm_displaced_step_fixup): Add cast for closure.
+	* arm-tdep.h: Include infrun.h.
+	(displaced_step_closure): Rename to ...
+	(arm_displaced_step_closure): ... this, extend
+	displaced_step_closure.
+	<u::svc::copy_svc_os>: Change type of parameter DSC.
+	<cleanup>: Likewise.
+	(arm_process_displaced_insn): Likewise.
+	(arm_displaced_init_closure): Likewise.
+	(displaced_read_reg): Likewise.
+	(displaced_write_reg): Likewise.
+	* i386-linux-tdep.c (i386_linux_displaced_step_copy_insn):
+	Adjust.
+	* i386-tdep.h: Include infrun.h.
+	(i386_displaced_step_closure): New typedef.
+	* i386-tdep.c (i386_displaced_step_copy_insn): Use
+	i386_displaced_step_closure.
+	(i386_displaced_step_fixup): Adjust.
+	* rs6000-tdep.c (ppc_displaced_step_closure): New typedef.
+	(ppc_displaced_step_copy_insn): Use ppc_displaced_step_closure
+	and unique_ptr.
+	(ppc_displaced_step_fixup): Adjust.
+	* s390-linux-tdep.c (s390_displaced_step_closure): New typedef.
+	(s390_displaced_step_copy_insn): Use s390_displaced_step_closure
+	and unique_ptr.
+	(s390_displaced_step_fixup): Adjust.
+
+2017-10-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* interps.h (interp_resume, interp_suspend, interp_set_temp):
+	Remove declarations.
+
+2017-10-20  Tom Tromey  <tom@tromey.com>
+
+	* gdb_bfd.c (struct gdb_bfd_data) <included_bfds>: Now a
+	std::vector.
+	(gdb_bfd_record_inclusion): Update.
+	(bfdp): Remove typedef.
+
+2017-10-20  Tom Tromey  <tom@tromey.com>
+
+	* gdb_bfd.c (gdb_bfd_ref): Use new.
+	(struct gdb_bfd_data): Add constructor, destructor, and member
+	initializers.
+	(gdb_bfd_unref): Use delete.
+
+2017-10-20  Tom Tromey  <tom@tromey.com>
+
+	* exec.c (exec_file_attach): Use new_bfd_ref.
+	* symfile-mem.c (symbol_file_add_from_memory): Use new_bfd_ref.
+	* gdb_bfd.c (gdb_bfd_open, gdb_bfd_fopen, gdb_bfd_openr)
+	(gdb_bfd_openw, gdb_bfd_openr_iovec, gdb_bfd_fdopenr): Use
+	new_bfd_ref.
+	* gdb_bfd.h (new_bfd_ref): New function.
+
+2017-10-20  Pedro Alves  <palves@redhat.com>
+
+	* main.c (captured_command_loop): Add attribute noinline.
+
+2017-10-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* interps.c (struct interp_factory): Add constructor.
+	(interp_factory_p): Remove typedef.
+	(DEF_VEC_P(interp_factory_p)): Remove.
+	(interpreter_factories): Change type to std::vector.
+	(interp_factory_register): Adjust.
+	(interp_lookup): Adjust.
+	(interpreter_completer): Adjust.
+
+2017-10-19  Tom Tromey  <tom@tromey.com>
+
+	* break-catch-syscall.c (catch_syscall_completer): Use
+	std::string, gdb::unique_xmalloc_ptr.
+
+2017-10-19  Tom Tromey  <tom@tromey.com>
+
+	* infcall.c (call_function_by_hand_dummy): Use std::string.
+
+2017-10-19  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-main.c (mi_cmd_execute): Update.
+	* top.h (prepare_execute_command): Return scoped_value_mark.
+	* value.h (class scoped_value_mark): Use DISABLE_COPY_AND_ASSIGN.
+	Add move constructor.
+	* top.c (prepare_execute_command): Return scoped_value_mark.
+	(execute_command): Update.
+
+2017-10-19  Pedro Alves  <palves@redhat.com>
+
+	* xml-support.c (xml_fetch_content_from_file): Check fread's
+	return.
+
+2017-10-19  Pedro Alves  <palves@redhat.com>
+
+	* ser-base.c (ser_base_read_error_fd): Delete the file handler if
+	async.
+	(handle_error_fd): New function.
+	(ser_base_async): Add/delete an event loop file handler for
+	error_fd.
+
+2017-10-19  Pedro Alves  <palves@redhat.com>
+
+	* xml-support.c (xml_fetch_content_from_file): Don't read in
+	chunks.  Instead use fseek to determine the file's size, and read
+	it in one go.
+
+2017-11-18  Keith Seitz  <keiths@redhat.com>
+
+	* c-exp.y (oper): Canonicalize conversion operators of user-defined
+	types.
+	Add whitespace to front of type name.
+
+2017-10-18  Keith Seitz  <keiths@redhat.com>
+
+	* dwarf2read.c (dwarf2_add_typedef): Issue a complaint on unhandled
+	DW_AT_accessibility.
+
+2017-10-18  Yao Qi  <yao.qi@linaro.org>
+
+	* features/tic6x-c62x-linux.c: Remove.
+
+2017-10-17  Tom Tromey  <tom@tromey.com>
+
+	* disasm.c (do_mixed_source_and_assembly_deprecated): Use
+	gdb::optional, ui_out_emit_list, ui_out_emit_tuple.
+	(do_mixed_source_and_assembly): Likewise.
+
+2017-10-17  Tom Tromey  <tom@tromey.com>
+
+	* regcache.c (regcache::xfer_part): Remove assertion.
+
+2017-10-17  Pedro Alves  <palves@redhat.com>
+
+	* xml-support.c (xml_fetch_content_from_file): Call
+	unique_ptr::release() instead unique_ptr::get() when passing
+	through xrealloc.
+
+2017-10-17  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache::xfer_part): Remove parameters read and
+	write, add parameter is_raw.  All callers are updated.
+
+2017-10-16  Keith Seitz  <keiths@redhat.com>
+
+        * c-typeprint.c (enum access_specifier): Moved here from
+        c_type_print_base.
+        (output_access_specifier): New function.
+        (c_type_print_base): Consider typedefs when assessing
+        whether access labels are needed.
+        Use output_access_specifier as needed.
+        Output access specifier for typedefs, if needed.
+        * dwarf2read.c (dwarf2_add_typedef): Record DW_AT_accessibility.
+        * gdbtypes.h (struct typedef_field) <is_protected, is_private>: New
+        fields.
+        (TYPE_TYPEDEF_FIELD_PROTECTED, TYPE_TYPEDEF_FIELD_PRIVATE): New
+        accessor macros.
+
+2017-10-16  Tom Tromey  <tom@tromey.com>
+
+	* linux-tdep.c (linux_info_proc, linux_find_memory_regions_full)
+	(linux_fill_prpsinfo, linux_vsyscall_range_raw): Update.
+	* target.c (target_fileio_read_stralloc): Update.
+	* sparc64-tdep.c (adi_is_addr_mapped): Update.
+	* target.h (target_fileio_read_stralloc): Return
+	unique_xmalloc_ptr.
+
+2017-10-16  Tom Tromey  <tom@tromey.com>
+
+	* xml-syscall.c (xml_init_syscalls_info): Update.
+	* xml-support.c (xinclude_start_include): Update.
+	(xml_fetch_content_from_file): Return unique_xmalloc_ptr.
+	* xml-support.h (xml_fetch_another): Return unique_xmalloc_ptr.
+	(xml_fetch_content_from_file): Likewise.
+	* osdata.c (get_osdata): Update.
+	* target.h (target_read_stralloc, target_get_osdata): Return
+	unique_xmalloc_ptr.
+	* solib-aix.c (solib_aix_get_library_list): Update.
+	* solib-target.c (solib_target_current_sos): Update.
+	* solib-svr4.c (svr4_current_sos_via_xfer_libraries): Update.
+	* xml-tdesc.c (fetch_available_features_from_target): Update.
+	(target_fetch_description_xml): Update.
+	(file_read_description_xml): Update.
+	* remote.c (remote_get_threads_with_qxfer, remote_memory_map)
+	(remote_traceframe_info, btrace_read_config, remote_read_btrace)
+	(remote_pid_to_exec_file): Update.
+	* target.c (target_read_stralloc): Return unique_xmalloc_ptr.
+	(target_get_osdata): Likewise.
+
+2017-10-16  Tom Tromey  <tom@tromey.com>
+
+	* remote.c (remote_register_number_and_offset): Use std::vector.
+	(remote_set_syscall_catchpoint): Use gdb::unique_xmalloc_ptr.
+	(putpkt_binary): Use gdb::def_vector.
+	(compare_sections_command): Use gdb::byte_vector.
+
+2017-10-16  Tom Tromey  <tom@tromey.com>
+
+	* ppc-linux-nat.c (hwdebug_insert_point): Use
+	gdb::unique_xmalloc_ptr, XDUP.
+
+2017-10-16  Tom Tromey  <tom@tromey.com>
+
+	* probe.c (parse_probes): Use std::string.
+	(info_probes_for_ops, enable_probes_command)
+	(disable_probes_command): Remove cleanups.
+
+2017-10-16  Tom Tromey  <tom@tromey.com>
+
+	* buildsym.c (block_compar): Remove.
+	(end_symtab_get_static_block): Use std::vector.
+
+2017-10-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* memrange.h (struct mem_range): Define operator< and operator==.
+	(mem_range_s): Remove.
+	(DEF_VEC_O (mem_range_s)): Remove.
+	(normalize_mem_ranges): Change parameter type to std::vector.
+	* memrange.c (compare_mem_ranges): Remove.
+	(normalize_mem_ranges): Change parameter type to std::vector,
+	adjust to vector change.
+	* exec.c (section_table_available_memory): Return vector, remove
+	parameter.
+	(section_table_read_available_memory): Adjust to std::vector
+	change.
+	* remote.c (remote_read_bytes): Adjust to std::vector
+	change.
+	* tracepoint.h (traceframe_available_memory): Change parameter
+	type to std::vector.
+	* tracepoint.c (traceframe_available_memory): Change parameter
+	type to std::vector, adjust.
+	* gdb/mi/mi-main.c (mi_cmd_trace_frame_collected): Adjust to
+	std::vector change.
+	* gdb/Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/memrange-selftests.c.
+	(SUBDIR_UNITTESTS_OBS): Add memrange-selftests.o.
+	* gdb/unittests/memrange-selftests.c: New file.
+
+2017-10-16  Pedro Alves  <palves@redhat.com>
+
+	* elfread.c (probe_key_free): Rename range-for variable.
+	* probe.c (parse_probes_in_pspace, find_probes_in_objfile)
+	(find_probe_by_pc, collect_probes): Rename range-for variable.
+
+2017-10-16  Yao Qi  <yao.qi@linaro.org>
+
+	* features/Makefile (XMLTOC): Remove tic6x-*.xml.
+	* features/tic6x-c62x.c: Remove.
+	* features/tic6x-c64x-linux.c: Remove.
+	* features/tic6x-c64x.c: Remove.
+	* features/tic6x-c64xp-linux.c: Remove.
+	* features/tic6x-c64xp.c: Remove.
+	* tic6x-linux-tdep.c (_initialize_tic6x_linux_tdep): Don't call
+	initialize_tdesc_tic6x_*_linux functions.
+	* tic6x-tdep.c (_initialize_tic6x_tdep): Don't call
+	initialize_tdesc_tic6x_* functions.
+
+2017-10-16  Yao Qi  <yao.qi@linaro.org>
+
+	* features/Makefile (WHICH): Remove tic6x-c64xp, tic6x-c64x
+	tic6x-c62x.
+	* regformats/tic6x-c62x.dat: Remove.
+	* regformats/tic6x-c64x.dat: Remove.
+	* regformats/tic6x-c64xp.dat: Remove.
+
+2017-10-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* tracepoint.c (parse_traceframe_info): Return a unique_ptr
+	(the !HAVE_LIBEXPAT version).
+
 2017-10-14  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* nat/linux-osdata.c (struct pid_pgid_entry) <operator<>: Make

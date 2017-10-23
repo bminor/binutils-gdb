@@ -4516,30 +4516,49 @@ Stub::do_fixed_endian_write(unsigned char* view, section_size_type view_size)
 {
   const Stub_template* stub_template = this->stub_template();
   const Insn_template* insns = stub_template->insns();
+  const bool enable_be8 = parameters->options().be8();
 
-  // FIXME:  We do not handle BE8 encoding yet.
   unsigned char* pov = view;
   for (size_t i = 0; i < stub_template->insn_count(); i++)
     {
       switch (insns[i].type())
 	{
 	case Insn_template::THUMB16_TYPE:
-	  elfcpp::Swap<16, big_endian>::writeval(pov, insns[i].data() & 0xffff);
+	  if (enable_be8)
+	    elfcpp::Swap<16, false>::writeval(pov, insns[i].data() & 0xffff);
+	  else
+	    elfcpp::Swap<16, big_endian>::writeval(pov,
+						   insns[i].data() & 0xffff);
 	  break;
 	case Insn_template::THUMB16_SPECIAL_TYPE:
-	  elfcpp::Swap<16, big_endian>::writeval(
-	      pov,
-	      this->thumb16_special(i));
+	  if (enable_be8)
+	    elfcpp::Swap<16, false>::writeval(pov, this->thumb16_special(i));
+	  else
+	    elfcpp::Swap<16, big_endian>::writeval(pov,
+						   this->thumb16_special(i));
 	  break;
 	case Insn_template::THUMB32_TYPE:
 	  {
 	    uint32_t hi = (insns[i].data() >> 16) & 0xffff;
 	    uint32_t lo = insns[i].data() & 0xffff;
-	    elfcpp::Swap<16, big_endian>::writeval(pov, hi);
-	    elfcpp::Swap<16, big_endian>::writeval(pov + 2, lo);
+	    if (enable_be8)
+	      {
+	        elfcpp::Swap<16, false>::writeval(pov, hi);
+	        elfcpp::Swap<16, false>::writeval(pov + 2, lo);
+	      }
+	    else
+	      {
+		elfcpp::Swap<16, big_endian>::writeval(pov, hi);
+		elfcpp::Swap<16, big_endian>::writeval(pov + 2, lo);
+	      }
 	  }
 	  break;
 	case Insn_template::ARM_TYPE:
+	  if (enable_be8)
+	    elfcpp::Swap<32, false>::writeval(pov, insns[i].data());
+	  else
+	    elfcpp::Swap<32, big_endian>::writeval(pov, insns[i].data());
+	  break;
 	case Insn_template::DATA_TYPE:
 	  elfcpp::Swap<32, big_endian>::writeval(pov, insns[i].data());
 	  break;

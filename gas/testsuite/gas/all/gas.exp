@@ -63,6 +63,7 @@ if {    ![istarget alpha*-*-*vms*]
      && ![istarget microblaze-*-*]
      && ![istarget mn10300-*-*]
      && ![istarget msp430*-*-*]
+     && ![istarget riscv*-*-*]
      && ![istarget rl78-*-*]
      && ![istarget rx-*-*] } then {
     gas_test_error "diff1.s" "" "difference of two undefined symbols"
@@ -487,4 +488,4 @@ run_dump_test "org-4"
 run_dump_test "org-5"
 run_dump_test "org-6"
 
-gas_test "fill-1.s" "" "" "test .fill forward label references"
+run_dump_test "fill-1"

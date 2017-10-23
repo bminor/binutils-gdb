@@ -43,6 +43,7 @@ man9dir = $(mandir)/man9
 infodir = @infodir@
 htmldir = $(prefix)/html
 includedir = @includedir@
+CONFIG_SRC_SUBDIR = @CONFIG_SRC_SUBDIR@
 
 SHELL = @SHELL@
 EXEEXT = @EXEEXT@
@@ -434,6 +435,10 @@ clean:
 	rm -f *-generated.c
 	rm -f stamp-xml
 	rm -f $(DEPDIR)/*.Po
+	for i in $(CONFIG_SRC_SUBDIR); do \
+		rm -f $$i/*.o;	\
+		rm -f $$i/$(DEPDIR)/*; \
+	done
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 maintainer-clean realclean distclean: clean
@@ -441,6 +446,9 @@ maintainer-clean realclean distclean: clean
 	rm -rf $(GNULIB_BUILDDIR)
 	rm -f Makefile config.status config.h stamp-h config.log
 	rm -f Makefile
+	for i in $(CONFIG_SRC_SUBDIR); do \
+		rmdir $$i/$(DEPDIR); \
+	done
 
 subdir_do: force
 	@for i in $(DODIRS); do \
@@ -530,11 +538,7 @@ ax.o: ax.c
 	$(COMPILE) $(WARN_CFLAGS_NO_FORMAT) $<
 	$(POSTCOMPILE)
 
-arch-i386.o: ../arch/i386.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
-arch-amd64.o: ../arch/amd64.c
+arch/%.o: ../arch/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
@@ -577,10 +581,6 @@ arch-amd64.o: ../arch/amd64.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-%.o: ../arch/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
 %.o: ../common/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
@@ -617,12 +617,13 @@ ifeq ($(DEPMODE),depmode=gcc3)
 # into place if the compile succeeds.  We need this because gcc does
 # not atomically write the dependency output file.
 override COMPILE.post = -c -o $@ -MT $@ -MMD -MP \
-	-MF $(DEPDIR)/$(basename $(@F)).Tpo
-override POSTCOMPILE = @mv $(DEPDIR)/$(basename $(@F)).Tpo \
-	$(DEPDIR)/$(basename $(@F)).Po
+	-MF $(@D)/$(DEPDIR)/$(basename $(@F)).Tpo
+override POSTCOMPILE = @mv $(@D)/$(DEPDIR)/$(basename $(@F)).Tpo \
+	$(@D)/$(DEPDIR)/$(basename $(@F)).Po
 else
 override COMPILE.pre = source='$<' object='$@' libtool=no \
-	DEPDIR=$(DEPDIR) $(DEPMODE) $(depcomp) $(CC)
+	DEPDIR=$(DEPDIR) $(DEPMODE) $(depcomp) \
+	$(CXX) -x c++ $(CXX_DIALECT)
 # depcomp handles atomicity for us, so we don't need a postcompile
 # step.
 override POSTCOMPILE =

@@ -695,8 +695,7 @@ struct elf_m68k_got_entry
   {
     struct
     {
-      /* Number of times this entry is referenced.  It is used to
-	 filter out unnecessary GOT slots in elf_m68k_gc_sweep_hook.  */
+      /* Number of times this entry is referenced.  */
       bfd_vma refcount;
     } s1;
 
@@ -1606,27 +1605,6 @@ elf_m68k_update_got_entry_type (struct elf_m68k_got *got,
   return was;
 }
 
-/* Update GOT counters when removing an entry of type TYPE.  */
-
-static void
-elf_m68k_remove_got_entry_type (struct elf_m68k_got *got,
-				enum elf_m68k_reloc_type type)
-{
-  enum elf_m68k_got_offset_size os;
-  bfd_vma n_slots;
-
-  n_slots = elf_m68k_reloc_got_n_slots (type);
-
-  /* Decrese counter of slots with offset size corresponding to TYPE
-     and all greater offset sizes.  */
-  for (os = elf_m68k_reloc_got_offset_size (type); os <= R_32; ++os)
-    {
-      BFD_ASSERT (got->n_slots[os] >= n_slots);
-
-      got->n_slots[os] -= n_slots;
-    }
-}
-
 /* Add new or update existing entry to GOT.
    H, ABFD, TYPE and SYMNDX is data for the entry.
    INFO is a context where memory should be allocated.  */
@@ -2455,52 +2433,6 @@ elf_m68k_partition_multi_got (struct bfd_link_info *info)
   return TRUE;
 }
 
-/* Specialized version of elf_m68k_get_got_entry that returns pointer
-   to hashtable slot, thus allowing removal of entry via
-   elf_m68k_remove_got_entry.  */
-
-static struct elf_m68k_got_entry **
-elf_m68k_find_got_entry_ptr (struct elf_m68k_got *got,
-			     struct elf_m68k_got_entry_key *key)
-{
-  void **ptr;
-  struct elf_m68k_got_entry entry_;
-  struct elf_m68k_got_entry **entry_ptr;
-
-  entry_.key_ = *key;
-  ptr = htab_find_slot (got->entries, &entry_, NO_INSERT);
-  BFD_ASSERT (ptr != NULL);
-
-  entry_ptr = (struct elf_m68k_got_entry **) ptr;
-
-  return entry_ptr;
-}
-
-/* Remove entry pointed to by ENTRY_PTR from GOT.  */
-
-static void
-elf_m68k_remove_got_entry (struct elf_m68k_got *got,
-			   struct elf_m68k_got_entry **entry_ptr)
-{
-  struct elf_m68k_got_entry *entry;
-
-  entry = *entry_ptr;
-
-  /* Check that offsets have not been finalized yet.  */
-  BFD_ASSERT (got->offset == (bfd_vma) -1);
-  /* Check that this entry is indeed unused.  */
-  BFD_ASSERT (entry->u.s1.refcount == 0);
-
-  elf_m68k_remove_got_entry_type (got, entry->key_.type);
-
-  if (entry->key_.bfd != NULL)
-    got->local_n_slots -= elf_m68k_reloc_got_n_slots (entry->key_.type);
-
-  BFD_ASSERT (got->n_slots[R_32] >= got->local_n_slots);
-
-  htab_clear_slot (got->entries, (void **) entry_ptr);
-}
-
 /* Copy any information related to dynamic linking from a pre-existing
    symbol to a newly created symbol.  Also called to copy flags and
    other back-end info to a weakdef, in which case the symbol is not
@@ -2904,131 +2836,6 @@ elf_m68k_gc_mark_hook (asection *sec,
       }
 
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
-}
-
-/* Update the got entry reference counts for the section being removed.  */
-
-static bfd_boolean
-elf_m68k_gc_sweep_hook (bfd *abfd,
-			struct bfd_link_info *info,
-			asection *sec,
-			const Elf_Internal_Rela *relocs)
-{
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
-  const Elf_Internal_Rela *rel, *relend;
-  bfd *dynobj;
-  struct elf_m68k_got *got;
-
-  if (bfd_link_relocatable (info))
-    return TRUE;
-
-  dynobj = elf_hash_table (info)->dynobj;
-  if (dynobj == NULL)
-    return TRUE;
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  sym_hashes = elf_sym_hashes (abfd);
-  got = NULL;
-
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    {
-      unsigned long r_symndx;
-      struct elf_link_hash_entry *h = NULL;
-
-      r_symndx = ELF32_R_SYM (rel->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	}
-
-      switch (ELF32_R_TYPE (rel->r_info))
-	{
-	case R_68K_GOT8:
-	case R_68K_GOT16:
-	case R_68K_GOT32:
-	  if (h != NULL
-	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
-	    break;
-
-	  /* FALLTHRU */
-	case R_68K_GOT8O:
-	case R_68K_GOT16O:
-	case R_68K_GOT32O:
-	  /* Fall through.  */
-
-	  /* TLS relocations.  */
-	case R_68K_TLS_GD8:
-	case R_68K_TLS_GD16:
-	case R_68K_TLS_GD32:
-	case R_68K_TLS_LDM8:
-	case R_68K_TLS_LDM16:
-	case R_68K_TLS_LDM32:
-	case R_68K_TLS_IE8:
-	case R_68K_TLS_IE16:
-	case R_68K_TLS_IE32:
-
-	case R_68K_TLS_TPREL32:
-	case R_68K_TLS_DTPREL32:
-
-	  if (got == NULL)
-	    {
-	      got = elf_m68k_get_bfd2got_entry (elf_m68k_multi_got (info),
-						abfd, MUST_FIND, NULL)->got;
-	      BFD_ASSERT (got != NULL);
-	    }
-
-	  {
-	    struct elf_m68k_got_entry_key key_;
-	    struct elf_m68k_got_entry **got_entry_ptr;
-	    struct elf_m68k_got_entry *got_entry;
-
-	    elf_m68k_init_got_entry_key (&key_, h, abfd, r_symndx,
-					 ELF32_R_TYPE (rel->r_info));
-	    got_entry_ptr = elf_m68k_find_got_entry_ptr (got, &key_);
-
-	    got_entry = *got_entry_ptr;
-
-	    if (got_entry->u.s1.refcount > 0)
-	      {
-		--got_entry->u.s1.refcount;
-
-		if (got_entry->u.s1.refcount == 0)
-		  /* We don't need the .got entry any more.  */
-		  elf_m68k_remove_got_entry (got, got_entry_ptr);
-	      }
-	  }
-	  break;
-
-	case R_68K_PLT8:
-	case R_68K_PLT16:
-	case R_68K_PLT32:
-	case R_68K_PLT8O:
-	case R_68K_PLT16O:
-	case R_68K_PLT32O:
-	case R_68K_PC8:
-	case R_68K_PC16:
-	case R_68K_PC32:
-	case R_68K_8:
-	case R_68K_16:
-	case R_68K_32:
-	  if (h != NULL)
-	    {
-	      if (h->plt.refcount > 0)
-		--h->plt.refcount;
-	    }
-	  break;
-
-	default:
-	  break;
-	}
-    }
-
-  return TRUE;
 }
 
 /* Return the type of PLT associated with OUTPUT_BFD.  */
@@ -4826,7 +4633,6 @@ elf_m68k_add_symbol_hook (bfd *abfd,
 #define elf_backend_finish_dynamic_sections \
 					elf_m68k_finish_dynamic_sections
 #define elf_backend_gc_mark_hook	elf_m68k_gc_mark_hook
-#define elf_backend_gc_sweep_hook	elf_m68k_gc_sweep_hook
 #define elf_backend_copy_indirect_symbol elf_m68k_copy_indirect_symbol
 #define bfd_elf32_bfd_merge_private_bfd_data \
                                         elf32_m68k_merge_private_bfd_data

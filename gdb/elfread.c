@@ -1340,8 +1340,8 @@ probe_key_free (bfd *abfd, void *d)
 {
   std::vector<probe *> *probes = (std::vector<probe *> *) d;
 
-  for (struct probe *probe : *probes)
-    probe->pops->destroy (probe);
+  for (probe *p : *probes)
+    p->pops->destroy (p);
 
   delete probes;
 }

@@ -2095,9 +2095,7 @@ mi_execute_command (const char *cmd, int from_tty)
 static void
 mi_cmd_execute (struct mi_parse *parse)
 {
-  struct cleanup *cleanup;
-
-  cleanup = prepare_execute_command ();
+  scoped_value_mark cleanup = prepare_execute_command ();
 
   if (parse->all && parse->thread_group != -1)
     error (_("Cannot specify --thread-group together with --all"));
@@ -2189,7 +2187,6 @@ mi_cmd_execute (struct mi_parse *parse)
 
       error_stream (stb);
     }
-  do_cleanups (cleanup);
 }
 
 /* FIXME: This is just a hack so we can get some extra commands going.
@@ -2752,40 +2749,34 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
   /* Memory.  */
   {
-    struct cleanup *cleanups;
-    VEC(mem_range_s) *available_memory = NULL;
-    struct mem_range *r;
-    int i;
+    std::vector<mem_range> available_memory;
 
     traceframe_available_memory (&available_memory, 0, ULONGEST_MAX);
-    cleanups = make_cleanup (VEC_cleanup(mem_range_s), &available_memory);
 
     ui_out_emit_list list_emitter (uiout, "memory");
 
-    for (i = 0; VEC_iterate (mem_range_s, available_memory, i, r); i++)
+    for (const mem_range &r : available_memory)
       {
 	struct gdbarch *gdbarch = target_gdbarch ();
 
 	ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
-	uiout->field_core_addr ("address", gdbarch, r->start);
-	uiout->field_int ("length", r->length);
+	uiout->field_core_addr ("address", gdbarch, r.start);
+	uiout->field_int ("length", r.length);
 
-	gdb::byte_vector data (r->length);
+	gdb::byte_vector data (r.length);
 
 	if (memory_contents)
 	  {
-	    if (target_read_memory (r->start, data.data (), r->length) == 0)
+	    if (target_read_memory (r.start, data.data (), r.length) == 0)
 	      {
-		std::string data_str = bin2hex (data.data (), r->length);
+		std::string data_str = bin2hex (data.data (), r.length);
 		uiout->field_string ("contents", data_str.c_str ());
 	      }
 	    else
 	      uiout->field_skip ("contents");
 	  }
       }
-
-    do_cleanups (cleanups);
   }
 }
 

@@ -607,6 +607,7 @@ ustinc
 ustlibs
 ALLOCA
 CCDEPMODE
+CONFIG_SRC_SUBDIR
 DEPDIR
 am__leading_dot
 host_noncanonical
@@ -5854,6 +5855,14 @@ DEPDIR="${am__leading_dot}deps"
 ac_config_commands="$ac_config_commands depdir"
 
 
+
+# Create sub-directories for objects and dependencies.
+CONFIG_SRC_SUBDIR="arch"
+
+
+ac_config_commands="$ac_config_commands gdbdepdir"
+
+
 depcc="$CC"   am_compiler_list=
 
 am_depcomp=$ac_aux_dir/depcomp
@@ -7157,10 +7166,17 @@ build_warnings="-Wall -Wpointer-arith \
 -Wno-sign-compare -Wno-narrowing -Wno-error=maybe-uninitialized \
 -Wno-mismatched-tags"
 
-# Enable -Wno-format by default when using gcc on mingw since many
-# GCC versions complain about %I64.
 case "${host}" in
-  *-*-mingw32*) build_warnings="$build_warnings -Wno-format" ;;
+  *-*-mingw32*)
+    # Enable -Wno-format by default when using gcc on mingw since many
+    # GCC versions complain about %I64.
+    build_warnings="$build_warnings -Wno-format" ;;
+  *-*-solaris*)
+    # Solaris 11.4 <python2.7/ceval.h> uses #pragma no_inline that GCC
+    # doesn't understand.
+    build_warnings="$build_warnings -Wno-unknown-pragmas"
+    # Solaris 11 <unistd.h> marks vfork deprecated.
+    build_warnings="$build_warnings -Wno-deprecated-declarations" ;;
   *) build_warnings="$build_warnings -Wformat-nonliteral" ;;
 esac
 
@@ -9137,6 +9153,7 @@ cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 # INIT-COMMANDS
 #
 ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR CONFIG_SRC_SUBDIR="$CONFIG_SRC_SUBDIR"
 
 _ACEOF
 
@@ -9148,6 +9165,7 @@ do
   case $ac_config_target in
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.in" ;;
     "depdir") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir" ;;
+    "gdbdepdir") CONFIG_COMMANDS="$CONFIG_COMMANDS gdbdepdir" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
@@ -9694,6 +9712,11 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
 
   case $ac_file$ac_mode in
     "depdir":C) $SHELL $ac_aux_dir/mkinstalldirs $DEPDIR ;;
+    "gdbdepdir":C)
+  for subdir in ${CONFIG_SRC_SUBDIR}
+  do
+      $SHELL $ac_aux_dir/mkinstalldirs $subdir/$DEPDIR
+  done ;;
     "Makefile":F) case x$CONFIG_HEADERS in
 xconfig.h:config.in)
 echo > stamp-h ;;

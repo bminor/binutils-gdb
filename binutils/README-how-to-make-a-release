@@ -58,11 +58,20 @@ looks like this:
 	      [optional: add "-u XXXXX" to sign with a gpg key]
 	    git push origin binutils-2_XX_X
 
-       f. Create the release tarballs:
+       f. Check that your file creation mask will create the
+          correct file permissions.  Eg:
+
+	    umask 022
+       
+       g. Create the release tarballs:
             ./src-release -b -g -l -x binutils
-       g. Edit bfd/development.sh and set "development=true".
-       h. Commit this change into the git repository.
-       i. Clean up the source tree.  (Use "git status" to find new
+
+       h. Check that the files in the tarballs have the correct
+          permissions.
+       
+       i. Edit bfd/development.sh and set "development=true".
+       j. Commit this change into the git repository.
+       k. Clean up the source tree.  (Use "git status" to find new
            files, and remove them).
 
      FIXME: The tarballs will contain spurious autom4te.cache

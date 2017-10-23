@@ -57,7 +57,7 @@ EOF
 if test -z "$VXWORKS_BASE_EM_FILE" ; then
   fragment <<EOF
 static void
-ppc_after_open (void)
+ppc_after_check_relocs (void)
 {
   if (is_ppc_elf (link_info.output_bfd))
     {
@@ -108,7 +108,7 @@ ppc_after_open (void)
 	}
     }
 
-  gld${EMULATION_NAME}_after_open ();
+  after_check_relocs_default ();
 }
 
 EOF
@@ -355,7 +355,7 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 #
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_after_open_output
 if test -z "$VXWORKS_BASE_EM_FILE" ; then
-  LDEMUL_AFTER_OPEN=ppc_after_open
+  LDEMUL_AFTER_CHECK_RELOCS=ppc_after_check_relocs
 fi
 LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
 LDEMUL_FINISH=ppc_finish

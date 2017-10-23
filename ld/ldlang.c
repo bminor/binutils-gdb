@@ -7259,6 +7259,8 @@ lang_process (void)
   /* Check relocations.  */
   lang_check_relocs ();
 
+  ldemul_after_check_relocs ();
+
   /* Update wild statements.  */
   update_wild_statements (statement_list.head);
 

@@ -1566,130 +1566,6 @@ elf32_hppa_gc_mark_hook (asection *sec,
   return _bfd_elf_gc_mark_hook (sec, info, rela, hh, sym);
 }
 
-/* Update the got and plt entry reference counts for the section being
-   removed.  */
-
-static bfd_boolean
-elf32_hppa_gc_sweep_hook (bfd *abfd,
-			  struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			  asection *sec,
-			  const Elf_Internal_Rela *relocs)
-{
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **eh_syms;
-  bfd_signed_vma *local_got_refcounts;
-  bfd_signed_vma *local_plt_refcounts;
-  const Elf_Internal_Rela *rela, *relend;
-  struct elf32_hppa_link_hash_table *htab;
-
-  if (bfd_link_relocatable (info))
-    return TRUE;
-
-  htab = hppa_link_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
-
-  elf_section_data (sec)->local_dynrel = NULL;
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  eh_syms = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-  local_plt_refcounts = local_got_refcounts;
-  if (local_plt_refcounts != NULL)
-    local_plt_refcounts += symtab_hdr->sh_info;
-
-  relend = relocs + sec->reloc_count;
-  for (rela = relocs; rela < relend; rela++)
-    {
-      unsigned long r_symndx;
-      unsigned int r_type;
-      struct elf_link_hash_entry *eh = NULL;
-
-      r_symndx = ELF32_R_SYM (rela->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-	{
-	  struct elf32_hppa_link_hash_entry *hh;
-	  struct elf32_hppa_dyn_reloc_entry **hdh_pp;
-	  struct elf32_hppa_dyn_reloc_entry *hdh_p;
-
-	  eh = eh_syms[r_symndx - symtab_hdr->sh_info];
-	  while (eh->root.type == bfd_link_hash_indirect
-		 || eh->root.type == bfd_link_hash_warning)
-	    eh = (struct elf_link_hash_entry *) eh->root.u.i.link;
-	  hh = hppa_elf_hash_entry (eh);
-
-	  for (hdh_pp = &hh->dyn_relocs; (hdh_p = *hdh_pp) != NULL; hdh_pp = &hdh_p->hdh_next)
-	    if (hdh_p->sec == sec)
-	      {
-		/* Everything must go for SEC.  */
-		*hdh_pp = hdh_p->hdh_next;
-		break;
-	      }
-	}
-
-      r_type = ELF32_R_TYPE (rela->r_info);
-      r_type = elf32_hppa_optimized_tls_reloc (info, r_type, eh != NULL);
-
-      switch (r_type)
-	{
-	case R_PARISC_DLTIND14F:
-	case R_PARISC_DLTIND14R:
-	case R_PARISC_DLTIND21L:
-	case R_PARISC_TLS_GD21L:
-	case R_PARISC_TLS_GD14R:
-	case R_PARISC_TLS_IE21L:
-	case R_PARISC_TLS_IE14R:
-	  if (eh != NULL)
-	    {
-	      if (eh->got.refcount > 0)
-		eh->got.refcount -= 1;
-	    }
-	  else if (local_got_refcounts != NULL)
-	    {
-	      if (local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx] -= 1;
-	    }
-	  break;
-
-	case R_PARISC_TLS_LDM21L:
-	case R_PARISC_TLS_LDM14R:
-	  htab->tls_ldm_got.refcount -= 1;
-	  break;
-
-	case R_PARISC_PCREL12F:
-	case R_PARISC_PCREL17C:
-	case R_PARISC_PCREL17F:
-	case R_PARISC_PCREL22F:
-	  if (eh != NULL)
-	    {
-	      if (eh->plt.refcount > 0)
-		eh->plt.refcount -= 1;
-	    }
-	  break;
-
-	case R_PARISC_PLABEL14R:
-	case R_PARISC_PLABEL21L:
-	case R_PARISC_PLABEL32:
-	  if (eh != NULL)
-	    {
-	      if (eh->plt.refcount > 0)
-		eh->plt.refcount -= 1;
-	    }
-	  else if (local_plt_refcounts != NULL)
-	    {
-	      if (local_plt_refcounts[r_symndx] > 0)
-		local_plt_refcounts[r_symndx] -= 1;
-	    }
-	  break;
-
-	default:
-	  break;
-	}
-    }
-
-  return TRUE;
-}
-
 /* Support for core dump NOTE sections.  */
 
 static bfd_boolean
@@ -4631,7 +4507,6 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define elf_backend_size_dynamic_sections    elf32_hppa_size_dynamic_sections
 #define elf_backend_init_index_section	     _bfd_elf_init_1_index_section
 #define elf_backend_gc_mark_hook	     elf32_hppa_gc_mark_hook
-#define elf_backend_gc_sweep_hook	     elf32_hppa_gc_sweep_hook
 #define elf_backend_grok_prstatus	     elf32_hppa_grok_prstatus
 #define elf_backend_grok_psinfo		     elf32_hppa_grok_psinfo
 #define elf_backend_object_p		     elf32_hppa_object_p

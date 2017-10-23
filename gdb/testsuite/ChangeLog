@@ -1,3 +1,76 @@
+2017-10-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/quit.exp: Use gdb_test_multiple and expect 'eof' before
+	'wait -i'.  Use gdb_assert and remote_close.
+
+2017-10-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.linespec/ls-errs.exp (do_test): Update comment, use line
+	number from variable rather than hard-coded.
+
+2017-10-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/long-inferior-output.c: New file.
+	* gdb.base/long-inferior-output.exp: New file.
+
+2017-11-18  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/cpexprs.cc (base) <operator fluff const* const*>: New
+	method.
+	(main): Call it.
+	* gdb.cp/cpexprs.exp: Add new conversion operator to test matrix.
+	Add additional user-defined conversion operator tests.
+
+2017-10-17  Pedro Alves  <palves@redhat.com>
+
+	* boards/native-stdio-gdbserver.exp: Load "local-board".
+
+2017-10-17  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/quit-live.c: New file.
+	* gdb.base/quit-live.exp: New file.
+
+2017-10-16  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/classes.cc (class_with_typedefs, class_with_public_typedef)
+	(class_with_protected_typedef, class_with_private_typedef)
+	(struct_with_public_typedef, struct_with_protected_typedef)
+	(struct_with_private_typedef): New classes/structs.
+	* gdb.cp/classes.exp (test_ptype_class_objects): Add tests for
+	typedefs and access specifiers.
+
+2017-10-16  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* README (Local vs Remote vs Native): New section.
+	* boards/local-board.exp: New file, with bits factored out from
+	...
+	* boards/native-extended-gdbserver.exp: ... here.  Load
+	"local-board".
+	* boards/native-gdbserver.exp: Load "local-board".
+	(${board}_spawn, ${board}_exec): Delete.
+	* boards/native-stdio-gdbserver.exp: Most contents factored out to
+	...
+	* boards/stdio-gdbserver-base.exp: ... this new file.
+	* boards/native-stdio-gdbserver.exp: Reimplement, by loading
+	"stdio-gdbserver-base" and defining a get_target_remote_pipe_cmd
+	procedure.
+	* boards/remote-stdio-gdbserver.exp: Load stdio-gdbserver-base
+	instead of native-stdio-gdbserver.  Don't set gdb_server_prog nor
+	stdio_gdbserver_command.
+	(${board}_get_remote_address, ${board}_get_comm_port)
+	(${board}_download, ${board}_upload): Delete.
+	(get_target_remote_pipe_cmd): New.
+
+2017-10-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-breakpoint.exp (test_bkpt_basic,
+	test_bkpt_deletion, test_bkpt_cond_and_cmds,
+	test_bkpt_invisible, test_watchpoints, test_bkpt_internal,
+	test_bkpt_eval_funcs, test_bkpt_temporary, test_bkpt_address,
+	test_bkpt_pending, test_bkpt_events): Use proc_with_prefix,
+	remove with_test_prefix.
+
 2017-10-13  Pedro Alves  <palves@redhat.com>
 
 	* lib/gdb.exp (target_can_use_run_cmd): New procedure.

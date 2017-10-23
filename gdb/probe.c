@@ -65,23 +65,23 @@ parse_probes_in_pspace (const struct probe_ops *probe_ops,
       const std::vector<probe *> &probes
 	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
 
-      for (struct probe *probe : probes)
+      for (probe *p : probes)
 	{
-	  if (probe_ops != &probe_ops_any && probe->pops != probe_ops)
+	  if (probe_ops != &probe_ops_any && p->pops != probe_ops)
 	    continue;
 
-	  if (provider && strcmp (probe->provider, provider) != 0)
+	  if (provider && strcmp (p->provider, provider) != 0)
 	    continue;
 
-	  if (strcmp (probe->name, name) != 0)
+	  if (strcmp (p->name, name) != 0)
 	    continue;
 
 	  symtab_and_line sal;
-	  sal.pc = get_probe_address (probe, objfile);
+	  sal.pc = get_probe_address (p, objfile);
 	  sal.explicit_pc = 1;
 	  sal.section = find_pc_overlay (sal.pc);
 	  sal.pspace = search_pspace;
-	  sal.probe = probe;
+	  sal.probe = p;
 	  sal.objfile = objfile;
 
 	  result->push_back (std::move (sal));
@@ -98,7 +98,6 @@ parse_probes (const struct event_location *location,
 {
   char *arg_end, *arg;
   char *objfile_namestr = NULL, *provider = NULL, *name, *p;
-  struct cleanup *cleanup;
   const struct probe_ops *probe_ops;
   const char *arg_start, *cs;
 
@@ -118,8 +117,8 @@ parse_probes (const struct event_location *location,
   arg_end = skip_to_space (arg);
 
   /* We make a copy here so we can write over parts with impunity.  */
-  arg = savestring (arg, arg_end - arg);
-  cleanup = make_cleanup (xfree, arg);
+  std::string copy (arg, arg_end - arg);
+  arg = &copy[0];
 
   /* Extract each word from the argument, separated by ":"s.  */
   p = strchr (arg, ':');
@@ -183,16 +182,11 @@ parse_probes (const struct event_location *location,
 
   if (canonical)
     {
-      char *canon;
-
-      canon = savestring (arg_start, arg_end - arg_start);
-      make_cleanup (xfree, canon);
+      std::string canon (arg_start, arg_end - arg_start);
       canonical->special_display = 1;
       canonical->pre_expanded = 1;
-      canonical->location = new_probe_location (canon);
+      canonical->location = new_probe_location (canon.c_str ());
     }
-
-  do_cleanups (cleanup);
 
   return result;
 }
@@ -210,15 +204,15 @@ find_probes_in_objfile (struct objfile *objfile, const char *provider,
 
   const std::vector<probe *> &probes
     = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
-  for (struct probe *probe : probes)
+  for (probe *p : probes)
     {
-      if (strcmp (probe->provider, provider) != 0)
+      if (strcmp (p->provider, provider) != 0)
 	continue;
 
-      if (strcmp (probe->name, name) != 0)
+      if (strcmp (p->name, name) != 0)
 	continue;
 
-      VEC_safe_push (probe_p, result, probe);
+      VEC_safe_push (probe_p, result, p);
     }
 
   return result;
@@ -244,11 +238,11 @@ find_probe_by_pc (CORE_ADDR pc)
     /* If this proves too inefficient, we can replace with a hash.  */
     const std::vector<probe *> &probes
       = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
-    for (struct probe *probe : probes)
-      if (get_probe_address (probe, objfile) == pc)
+    for (probe *p : probes)
+      if (get_probe_address (p, objfile) == pc)
 	{
 	  result.objfile = objfile;
-	  result.probe = probe;
+	  result.probe = p;
 	  return result;
 	}
   }
@@ -294,20 +288,20 @@ collect_probes (const std::string &objname, const std::string &provider,
       const std::vector<probe *> &probes
 	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
 
-      for (struct probe *probe : probes)
+      for (probe *p : probes)
 	{
-	  if (pops != NULL && probe->pops != pops)
+	  if (pops != NULL && p->pops != pops)
 	    continue;
 
 	  if (prov_pat
-	      && prov_pat->exec (probe->provider, 0, NULL, 0) != 0)
+	      && prov_pat->exec (p->provider, 0, NULL, 0) != 0)
 	    continue;
 
 	  if (probe_pat
-	      && probe_pat->exec (probe->name, 0, NULL, 0) != 0)
+	      && probe_pat->exec (p->name, 0, NULL, 0) != 0)
 	    continue;
 
-	  result.emplace_back (probe, objfile);
+	  result.emplace_back (p, objfile);
 	}
     }
 
@@ -548,7 +542,6 @@ info_probes_for_ops (const char *arg, int from_tty,
 		     const struct probe_ops *pops)
 {
   std::string provider, probe_name, objname;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   int any_found;
   int ui_out_extra_fields = 0;
   size_t size_addr;
@@ -657,7 +650,6 @@ info_probes_for_ops (const char *arg, int from_tty,
 
     any_found = !probes.empty ();
   }
-  do_cleanups (cleanup);
 
   if (!any_found)
     current_uiout->message (_("No probes matched.\n"));
@@ -677,7 +669,6 @@ static void
 enable_probes_command (const char *arg, int from_tty)
 {
   std::string provider, probe_name, objname;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
   parse_probe_linespec ((const char *) arg, &provider, &probe_name, &objname);
 
@@ -686,7 +677,6 @@ enable_probes_command (const char *arg, int from_tty)
   if (probes.empty ())
     {
       current_uiout->message (_("No probes matched.\n"));
-      do_cleanups (cleanup);
       return;
     }
 
@@ -706,8 +696,6 @@ enable_probes_command (const char *arg, int from_tty)
 	current_uiout->message (_("Probe %s:%s cannot be enabled.\n"),
 				probe.probe->provider, probe.probe->name);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Implementation of the `disable probes' command.  */
@@ -716,7 +704,6 @@ static void
 disable_probes_command (const char *arg, int from_tty)
 {
   std::string provider, probe_name, objname;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
   parse_probe_linespec ((const char *) arg, &provider, &probe_name, &objname);
 
@@ -725,7 +712,6 @@ disable_probes_command (const char *arg, int from_tty)
   if (probes.empty ())
     {
       current_uiout->message (_("No probes matched.\n"));
-      do_cleanups (cleanup);
       return;
     }
 
@@ -745,8 +731,6 @@ disable_probes_command (const char *arg, int from_tty)
 	current_uiout->message (_("Probe %s:%s cannot be disabled.\n"),
 				probe.probe->provider, probe.probe->name);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* See comments in probe.h.  */

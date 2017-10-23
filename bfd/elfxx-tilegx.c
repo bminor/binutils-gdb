@@ -1622,7 +1622,7 @@ static int
 tilegx_elf_tls_transition (struct bfd_link_info *info, int r_type,
 			   int is_local, bfd_boolean disable_le_transition)
 {
-  if (bfd_link_pic (info))
+  if (!bfd_link_executable (info))
     return r_type;
 
   if (is_local && !disable_le_transition)
@@ -1734,7 +1734,7 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_TILEGX_IMM16_X1_HW0_LAST_TLS_LE:
 	case R_TILEGX_IMM16_X0_HW1_LAST_TLS_LE:
 	case R_TILEGX_IMM16_X1_HW1_LAST_TLS_LE:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    goto r_tilegx_plt32;
 	  break;
 
@@ -1755,7 +1755,7 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_TILEGX_IMM16_X0_HW1_LAST_TLS_IE:
 	case R_TILEGX_IMM16_X1_HW1_LAST_TLS_IE:
           tls_type = GOT_TLS_IE;
-          if (bfd_link_pic (info))
+          if (!bfd_link_executable (info))
             info->flags |= DF_STATIC_TLS;
           goto have_got_reference;
 
@@ -1837,7 +1837,7 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case R_TILEGX_TLS_GD_CALL:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    {
 	      /* These are basically R_TILEGX_JUMPOFF_X1_PLT relocs
 		 against __tls_get_addr.  */
@@ -2103,6 +2103,8 @@ tilegx_elf_gc_mark_hook (asection *sec,
      dealing with TLS optimization, ought to be !bfd_link_executable (info).  */
   if (bfd_link_pic (info))
     {
+      struct bfd_link_hash_entry *bh;
+
       switch (TILEGX_ELF_R_TYPE (rel->r_info))
 	{
 	case R_TILEGX_TLS_GD_CALL:
@@ -2111,8 +2113,14 @@ tilegx_elf_gc_mark_hook (asection *sec,
 	     on this reloc, so the real symbol and section will be
 	     gc marked when processing the other reloc.  That lets
 	     us handle __tls_get_addr here.  */
-	  h = elf_link_hash_lookup (elf_hash_table (info), "__tls_get_addr",
-				    FALSE, FALSE, TRUE);
+	  bh = NULL;
+	  if (! _bfd_generic_link_add_one_symbol (info, sec->owner,
+						  "__tls_get_addr", 0,
+						  bfd_und_section_ptr,
+						  0, NULL, FALSE,
+						  FALSE, &bh))
+	    return NULL;
+	  h = (struct elf_link_hash_entry *) bh;
 	  BFD_ASSERT (h != NULL);
 	  h->mark = 1;
 	  if (h->u.weakdef != NULL)
@@ -2122,195 +2130,6 @@ tilegx_elf_gc_mark_hook (asection *sec,
     }
 
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
-}
-
-/* Update the got entry reference counts for the section being removed.  */
-bfd_boolean
-tilegx_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
-			  asection *sec, const Elf_Internal_Rela *relocs)
-{
-  struct tilegx_elf_link_hash_table *htab;
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
-  const Elf_Internal_Rela *rel, *relend;
-
-  if (bfd_link_relocatable (info))
-    return TRUE;
-
-  BFD_ASSERT (is_tilegx_elf (abfd) || sec->reloc_count == 0);
-
-  elf_section_data (sec)->local_dynrel = NULL;
-
-  htab = tilegx_elf_hash_table (info);
-  BFD_ASSERT (htab != NULL);
-  symtab_hdr = &elf_symtab_hdr (abfd);
-  sym_hashes = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
-
-  relend = relocs + sec->reloc_count;
-  for (rel = relocs; rel < relend; rel++)
-    {
-      unsigned long r_symndx;
-      unsigned int r_type;
-      struct elf_link_hash_entry *h = NULL;
-
-      r_symndx = TILEGX_ELF_R_SYMNDX (htab, rel->r_info);
-      if (r_symndx >= symtab_hdr->sh_info)
-	{
-	  struct tilegx_elf_link_hash_entry *eh;
-	  struct tilegx_elf_dyn_relocs **pp;
-	  struct tilegx_elf_dyn_relocs *p;
-
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	  eh = (struct tilegx_elf_link_hash_entry *) h;
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	    if (p->sec == sec)
-	      {
-		/* Everything must go for SEC.  */
-		*pp = p->next;
-		break;
-	      }
-	}
-
-      r_type = TILEGX_ELF_R_TYPE (rel->r_info);
-      r_type = tilegx_elf_tls_transition (info, r_type, h != NULL,
-					  sec->sec_flg0);
-      switch (r_type)
-	{
-	case R_TILEGX_IMM16_X0_HW0_GOT:
-	case R_TILEGX_IMM16_X1_HW0_GOT:
-	case R_TILEGX_IMM16_X0_HW0_LAST_GOT:
-	case R_TILEGX_IMM16_X1_HW0_LAST_GOT:
-	case R_TILEGX_IMM16_X0_HW1_LAST_GOT:
-	case R_TILEGX_IMM16_X1_HW1_LAST_GOT:
-	case R_TILEGX_IMM16_X0_HW0_TLS_GD:
-	case R_TILEGX_IMM16_X1_HW0_TLS_GD:
-	case R_TILEGX_IMM16_X0_HW0_LAST_TLS_GD:
-	case R_TILEGX_IMM16_X1_HW0_LAST_TLS_GD:
-	case R_TILEGX_IMM16_X0_HW1_LAST_TLS_GD:
-	case R_TILEGX_IMM16_X1_HW1_LAST_TLS_GD:
-	case R_TILEGX_IMM16_X0_HW0_TLS_IE:
-	case R_TILEGX_IMM16_X1_HW0_TLS_IE:
-	case R_TILEGX_IMM16_X0_HW0_LAST_TLS_IE:
-	case R_TILEGX_IMM16_X1_HW0_LAST_TLS_IE:
-	case R_TILEGX_IMM16_X0_HW1_LAST_TLS_IE:
-	case R_TILEGX_IMM16_X1_HW1_LAST_TLS_IE:
-	  if (h != NULL)
-	    {
-	      if (h->got.refcount > 0)
-		h->got.refcount--;
-	    }
-	  else
-	    {
-	      if (local_got_refcounts &&
-		  local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx]--;
-	    }
-	  break;
-
-        case R_TILEGX_64_PCREL:
-        case R_TILEGX_32_PCREL:
-        case R_TILEGX_16_PCREL:
-        case R_TILEGX_8_PCREL:
-	case R_TILEGX_IMM16_X0_HW0_PCREL:
-	case R_TILEGX_IMM16_X1_HW0_PCREL:
-	case R_TILEGX_IMM16_X0_HW1_PCREL:
-	case R_TILEGX_IMM16_X1_HW1_PCREL:
-	case R_TILEGX_IMM16_X0_HW2_PCREL:
-	case R_TILEGX_IMM16_X1_HW2_PCREL:
-	case R_TILEGX_IMM16_X0_HW3_PCREL:
-	case R_TILEGX_IMM16_X1_HW3_PCREL:
-	case R_TILEGX_IMM16_X0_HW0_LAST_PCREL:
-	case R_TILEGX_IMM16_X1_HW0_LAST_PCREL:
-	case R_TILEGX_IMM16_X0_HW1_LAST_PCREL:
-	case R_TILEGX_IMM16_X1_HW1_LAST_PCREL:
-	case R_TILEGX_IMM16_X0_HW2_LAST_PCREL:
-	case R_TILEGX_IMM16_X1_HW2_LAST_PCREL:
-	  if (h != NULL
-	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
-	    break;
-	  /* Fall through.  */
-
-        case R_TILEGX_64:
-        case R_TILEGX_32:
-        case R_TILEGX_16:
-        case R_TILEGX_8:
-	case R_TILEGX_HW0:
-	case R_TILEGX_HW1:
-	case R_TILEGX_HW2:
-	case R_TILEGX_HW3:
-	case R_TILEGX_HW0_LAST:
-	case R_TILEGX_HW1_LAST:
-	case R_TILEGX_HW2_LAST:
-        case R_TILEGX_COPY:
-        case R_TILEGX_GLOB_DAT:
-        case R_TILEGX_JMP_SLOT:
-        case R_TILEGX_RELATIVE:
-        case R_TILEGX_BROFF_X1:
-        case R_TILEGX_JUMPOFF_X1:
-        case R_TILEGX_IMM8_X0:
-        case R_TILEGX_IMM8_Y0:
-        case R_TILEGX_IMM8_X1:
-        case R_TILEGX_IMM8_Y1:
-        case R_TILEGX_DEST_IMM8_X1:
-        case R_TILEGX_MT_IMM14_X1:
-        case R_TILEGX_MF_IMM14_X1:
-        case R_TILEGX_MMSTART_X0:
-        case R_TILEGX_MMEND_X0:
-        case R_TILEGX_SHAMT_X0:
-        case R_TILEGX_SHAMT_X1:
-        case R_TILEGX_SHAMT_Y0:
-        case R_TILEGX_SHAMT_Y1:
-	case R_TILEGX_IMM16_X0_HW0:
-	case R_TILEGX_IMM16_X1_HW0:
-	case R_TILEGX_IMM16_X0_HW1:
-	case R_TILEGX_IMM16_X1_HW1:
-	case R_TILEGX_IMM16_X0_HW2:
-	case R_TILEGX_IMM16_X1_HW2:
-	case R_TILEGX_IMM16_X0_HW3:
-	case R_TILEGX_IMM16_X1_HW3:
-	case R_TILEGX_IMM16_X0_HW0_LAST:
-	case R_TILEGX_IMM16_X1_HW0_LAST:
-	case R_TILEGX_IMM16_X0_HW1_LAST:
-	case R_TILEGX_IMM16_X1_HW1_LAST:
-	case R_TILEGX_IMM16_X0_HW2_LAST:
-	case R_TILEGX_IMM16_X1_HW2_LAST:
-	  if (bfd_link_pic (info))
-	    break;
-	  /* Fall through.  */
-
-        case R_TILEGX_JUMPOFF_X1_PLT:
-	case R_TILEGX_IMM16_X0_HW0_PLT_PCREL:
-	case R_TILEGX_IMM16_X1_HW0_PLT_PCREL:
-	case R_TILEGX_IMM16_X0_HW1_PLT_PCREL:
-	case R_TILEGX_IMM16_X1_HW1_PLT_PCREL:
-	case R_TILEGX_IMM16_X0_HW2_PLT_PCREL:
-	case R_TILEGX_IMM16_X1_HW2_PLT_PCREL:
-	case R_TILEGX_IMM16_X0_HW3_PLT_PCREL:
-	case R_TILEGX_IMM16_X1_HW3_PLT_PCREL:
-	case R_TILEGX_IMM16_X0_HW0_LAST_PLT_PCREL:
-	case R_TILEGX_IMM16_X1_HW0_LAST_PLT_PCREL:
-	case R_TILEGX_IMM16_X0_HW1_LAST_PLT_PCREL:
-	case R_TILEGX_IMM16_X1_HW1_LAST_PLT_PCREL:
-	case R_TILEGX_IMM16_X0_HW2_LAST_PLT_PCREL:
-	case R_TILEGX_IMM16_X1_HW2_LAST_PLT_PCREL:
-	  if (h != NULL)
-	    {
-	      if (h->plt.refcount > 0)
-		h->plt.refcount--;
-	    }
-	  break;
-
-	default:
-	  break;
-	}
-    }
-
-  return TRUE;
 }
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
@@ -2529,7 +2348,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
      requiring no TLS entry.  */
   if (h->got.refcount > 0
       && !htab->disable_le_transition
-      && !bfd_link_pic (info)
+      && bfd_link_executable (info)
       && h->dynindx == -1
       && tilegx_elf_hash_entry(h)->tls_type == GOT_TLS_IE)
     h->got.offset = (bfd_vma) -1;
@@ -3241,9 +3060,9 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else if (h != NULL)
 	    tls_type = tilegx_elf_hash_entry(h)->tls_type;
 
-	  is_tls_iele = (! bfd_link_pic (info) || tls_type == GOT_TLS_IE);
+	  is_tls_iele = (bfd_link_executable (info) || tls_type == GOT_TLS_IE);
 	  is_tls_le = is_tls_iele && (!input_section->sec_flg0
-				      && !bfd_link_pic (info)
+				      && bfd_link_executable (info)
 				      && (h == NULL || h->dynindx == -1));
 
 	  if (r_type == R_TILEGX_TLS_GD_CALL)
@@ -3388,7 +3207,7 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  break;
 	case R_TILEGX_TLS_IE_LOAD:
 	  if (!input_section->sec_flg0
-	      && !bfd_link_pic (info)
+	      && bfd_link_executable (info)
 	      && (h == NULL || h->dynindx == -1))
 	    {
 	      /* IE -> LE */
@@ -3755,7 +3574,7 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
         case R_TILEGX_IMM16_X1_HW0_LAST_TLS_LE:
         case R_TILEGX_IMM16_X0_HW1_LAST_TLS_LE:
         case R_TILEGX_IMM16_X1_HW1_LAST_TLS_LE:
-	  if (bfd_link_pic (info))
+	  if (!bfd_link_executable (info))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_boolean skip;
@@ -3807,7 +3626,7 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else if (h != NULL)
 	    {
 	      tls_type = tilegx_elf_hash_entry(h)->tls_type;
-	      if (!bfd_link_pic (info)
+	      if (bfd_link_executable (info)
 		  && h->dynindx == -1
 		  && tls_type == GOT_TLS_IE)
 		r_type = (!input_section->sec_flg0

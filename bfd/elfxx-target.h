@@ -180,9 +180,6 @@
 #ifndef elf_backend_gc_mark_extra_sections
 #define elf_backend_gc_mark_extra_sections _bfd_elf_gc_mark_extra_sections
 #endif
-#ifndef elf_backend_gc_sweep_hook
-#define elf_backend_gc_sweep_hook	NULL
-#endif
 #ifndef bfd_elfNN_bfd_gc_sections
 #define bfd_elfNN_bfd_gc_sections bfd_elf_gc_sections
 #endif
@@ -810,7 +807,6 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_gc_mark_dynamic_ref,
   elf_backend_gc_mark_hook,
   elf_backend_gc_mark_extra_sections,
-  elf_backend_gc_sweep_hook,
   elf_backend_post_process_headers,
   elf_backend_print_symbol_all,
   elf_backend_output_arch_local_syms,
