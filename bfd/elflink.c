@@ -9910,8 +9910,11 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
      relocatable output or when needed for --emit-relocs.  */
   else if (input_sec == bfd_und_section_ptr
 	   && h->indx != -2
+	   /* PR 22319 Do not strip global undefined symbols marked as being needed.  */
+	   && (h->mark != 1 || ELF_ST_BIND (sym.st_info) != STB_GLOBAL)
 	   && !bfd_link_relocatable (flinfo->info))
     return TRUE;
+
   /* Also strip others that we couldn't earlier due to dynamic symbol
      processing.  */
   if (strip)
