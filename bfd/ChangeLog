@@ -1,3 +1,10 @@
+2017-10-23  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfn32-mips.c (mips_elf_n32_mkobject): New prototype and
+	function.
+	(bfd_elf32_mkobject): Use `mips_elf_n32_mkobject' rather than
+	`_bfd_mips_elf_mkobject'.
+
 2017-10-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR gas/22304

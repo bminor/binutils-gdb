@@ -84,6 +84,8 @@ static bfd_boolean elf_n32_mips_grok_freebsd_prstatus
   (bfd *, Elf_Internal_Note *);
 static irix_compat_t elf_n32_mips_irix_compat
   (bfd *);
+static bfd_boolean mips_elf_n32_mkobject
+  (bfd *);
 
 extern const bfd_target mips_elf32_n_be_vec;
 extern const bfd_target mips_elf32_n_le_vec;
@@ -3643,6 +3645,21 @@ elf_n32_mips_irix_compat (bfd *abfd)
     return ict_none;
 }
 
+/* Make an n32 MIPS object.  We need to set the n32 ABI flag in
+   `e_flags' to tell the object apart from an o32 object.  */
+
+static bfd_boolean
+mips_elf_n32_mkobject (bfd *abfd)
+{
+  bfd_boolean ret;
+
+  ret = _bfd_mips_elf_mkobject (abfd);
+  if (ret)
+    elf_elfheader (abfd)->e_flags |= EF_MIPS_ABI2;
+
+  return ret;
+}
+
 /* ECOFF swapping routines.  These are used when dealing with the
    .mdebug section, which is in the ECOFF debugging format.  */
 static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
@@ -3775,7 +3792,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define bfd_elf32_bfd_set_private_flags	_bfd_mips_elf_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data \
 					_bfd_mips_elf_print_private_bfd_data
-#define bfd_elf32_mkobject		_bfd_mips_elf_mkobject
+#define bfd_elf32_mkobject		mips_elf_n32_mkobject
 
 /* Support for SGI-ish mips targets using n32 ABI.  */
 
