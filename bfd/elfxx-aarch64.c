@@ -548,7 +548,18 @@ _bfd_aarch64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
   return TRUE;
 }
 
-/* Support for core dump NOTE sections.  */
+/* Support for core dump NOTE sections.
+
+   note->descsz should be the size of elf_prstatus, defined in 
+   usr/include/linux/elfcore.h.  The size is 352 in ILP32 mode
+   and 392 in LP64 mode. elf_tdata (abfd)->core->signal is set from the
+   pr_cursig field of elf_prstatus which is at an offset of 12 in the
+   elf_prstatus structure in both ILP32 and LP64 modes.
+
+   elf_tdata (abfd)->core->lwpid is set from the pr_pid field of the
+   elf_prstatus structure.  It has an offset of 24 in ILP32 mode and
+   32 in LP64 mode due to two long fields in the structure that are in
+   front of the pr_pid field.  */
 
 bfd_boolean
 _bfd_aarch64_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
@@ -561,14 +572,27 @@ _bfd_aarch64_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
       default:
 	return FALSE;
 
-      case 392:		/* sizeof(struct elf_prstatus) on Linux/arm64.  */
+      case 352:	/* sizeof(struct elf_prstatus) on Linux/aarch64 ilp32.  */
 	/* pr_cursig */
 	elf_tdata (abfd)->core->signal
 	  = bfd_get_16 (abfd, note->descdata + 12);
 
 	/* pr_pid */
-	elf_tdata (abfd)->core->lwpid
-	  = bfd_get_32 (abfd, note->descdata + 32);
+	elf_tdata (abfd)->core->lwpid = bfd_get_32 (abfd, note->descdata + 24);
+
+	/* pr_reg */
+	offset = 72;
+	size = 272;
+
+	break;
+
+      case 392:	/* sizeof(struct elf_prstatus) on Linux/aarch64.  */
+	/* pr_cursig */
+	elf_tdata (abfd)->core->signal
+	  = bfd_get_16 (abfd, note->descdata + 12);
+
+	/* pr_pid */
+	elf_tdata (abfd)->core->lwpid = bfd_get_32 (abfd, note->descdata + 32);
 
 	/* pr_reg */
 	offset = 112;
@@ -590,12 +614,21 @@ _bfd_aarch64_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
     default:
       return FALSE;
 
-    case 136:        /* This is sizeof(struct elf_prpsinfo) on Linux/aarch64.  */
+    case 124:         /* sizeof(struct elf_prpsinfo) on Linux/aarch64 ilp32.  */
+      elf_tdata (abfd)->core->pid = bfd_get_32 (abfd, note->descdata + 12);
+      elf_tdata (abfd)->core->program
+	= _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
+      elf_tdata (abfd)->core->command
+	= _bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
+      break;
+
+    case 136:        /* sizeof(struct elf_prpsinfo) on Linux/aarch64.  */
       elf_tdata (abfd)->core->pid = bfd_get_32 (abfd, note->descdata + 24);
       elf_tdata (abfd)->core->program
 	= _bfd_elfcore_strndup (abfd, note->descdata + 40, 16);
       elf_tdata (abfd)->core->command
 	= _bfd_elfcore_strndup (abfd, note->descdata + 56, 80);
+      break;
     }
 
   /* Note that for some reason, a spurious space is tacked

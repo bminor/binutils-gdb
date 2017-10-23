@@ -25,7 +25,8 @@
 
 /* This routine is provided two arch_infos and works out which Aarch64
    machine which would be compatible with both and returns a pointer
-   to its info structure.  */
+   to its info structure.  ABI (ilp32 vs. lp64) and endianness compatibility
+   are checked in elfNN_aarch64_merge_private_bfd_data.  */
 
 static const bfd_arch_info_type *
 compatible (const bfd_arch_info_type * a, const bfd_arch_info_type * b)
@@ -37,10 +38,6 @@ compatible (const bfd_arch_info_type * a, const bfd_arch_info_type * b)
   /* If a & b are for the same machine then all is well.  */
   if (a->mach == b->mach)
     return a;
-
-  /* Don't allow mixing ilp32 with lp64.  */
-  if ((a->mach & bfd_mach_aarch64_ilp32) != (b->mach & bfd_mach_aarch64_ilp32))
-    return NULL;
 
   /* Otherwise if either a or b is the 'default' machine
      then it can be polymorphed into the other.  */
