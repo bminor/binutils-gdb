@@ -3,6 +3,168 @@
 	* config/tc-mips.c (mips_elf_final_processing): Don't set
 	EF_MIPS_ABI2 in `e_flags'.
 
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512_bitalg.
+	(cpu_noarch): noavx512_bitalg.
+	* doc/c-i386.texi: Document .avx512_bitalg, noavx512_bitalg.
+	* testsuite/gas/i386/i386.exp: Add AVX512_BITALG tests.
+	* testsuite/gas/i386/avx512f_bitalg-intel.d: New test.
+	* testsuite/gas/i386/avx512f_bitalg.d: Likewise.
+	* testsuite/gas/i386/avx512f_bitalg.s: Likewise.
+	* testsuite/gas/i386/avx512vl_bitalg-intel.d: Likewise.
+	* testsuite/gas/i386/avx512vl_bitalg.d: Likewise.
+	* testsuite/gas/i386/avx512vl_bitalg.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512f_bitalg-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512f_bitalg.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512f_bitalg.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl_bitalg-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl_bitalg.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl_bitalg.s: Likewise.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512_vnni.
+	(cpu_noarch): Add noavx512_vnni.
+	* doc/c-i386.texi: Document .avx512_vnni.
+	* testsuite/gas/i386/i386.exp: Add AVX512_VNNI tests.
+	* testsuite/gas/i386/avx512vnni-intel.d: New test.
+	* testsuite/gas/i386/avx512vnni.d: Likewise.
+	* testsuite/gas/i386/avx512vnni.s: Likewise.
+	* testsuite/gas/i386/avx512vnni_vl-intel.d: Likewise.
+	* testsuite/gas/i386/avx512vnni_vl.d: Likewise.
+	* testsuite/gas/i386/avx512vnni_vl.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vnni-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vnni.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vnni.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vnni_vl-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vnni_vl.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vnni_vl.s: Likewise.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add VPCLMULQDQ.
+	* doc/c-i386.texi: Document VPCLMULQDQ.
+	* testsuite/gas/i386/i386.exp: Run VPCLMULQDQ tests.
+	* testsuite/gas/i386/avx512f_vpclmulqdq-intel.d: New test.
+	* testsuite/gas/i386/avx512f_vpclmulqdq-wig.s: Ditto.
+	* testsuite/gas/i386/avx512f_vpclmulqdq-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/avx512f_vpclmulqdq-wig1.d: Ditto.
+	* testsuite/gas/i386/avx512f_vpclmulqdq.d: Ditto.
+	* testsuite/gas/i386/avx512f_vpclmulqdq.s: Ditto.
+	* testsuite/gas/i386/avx512vl_vpclmulqdq-intel.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vpclmulqdq-wig.s: Ditto.
+	* testsuite/gas/i386/avx512vl_vpclmulqdq-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vpclmulqdq-wig1.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vpclmulqdq.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vpclmulqdq.s: Ditto.
+	* testsuite/gas/i386/vpclmulqdq-intel.d: Ditto.
+	* testsuite/gas/i386/vpclmulqdq.d: Ditto.
+	* testsuite/gas/i386/vpclmulqdq.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vpclmulqdq-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vpclmulqdq-wig.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vpclmulqdq-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vpclmulqdq-wig1.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vpclmulqdq.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vpclmulqdq.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vpclmulqdq-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vpclmulqdq-wig.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vpclmulqdq-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vpclmulqdq-wig1.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vpclmulqdq.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vpclmulqdq.s: Ditto.
+	* testsuite/gas/i386/x86-64-vpclmulqdq-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-vpclmulqdq.d: Ditto.
+	* testsuite/gas/i386/x86-64-vpclmulqdq.s: Ditto.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add VAES.
+	* doc/c-i386.texi: Document VAES.
+	* testsuite/gas/i386/i386.exp: Run VAES tests.
+	* testsuite/gas/i386/avx512f_vaes-intel.d: New test.
+	* testsuite/gas/i386/avx512f_vaes-wig.s: Ditto.
+	* testsuite/gas/i386/avx512f_vaes-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/avx512f_vaes-wig1.d: Ditto.
+	* testsuite/gas/i386/avx512f_vaes.d: Ditto.
+	* testsuite/gas/i386/avx512f_vaes.s: Ditto.
+	* testsuite/gas/i386/avx512vl_vaes-intel.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vaes-wig.s: Ditto.
+	* testsuite/gas/i386/avx512vl_vaes-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vaes-wig1.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vaes.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vaes.s: Ditto.
+	* testsuite/gas/i386/vaes-intel.d: Ditto.
+	* testsuite/gas/i386/vaes.d: Ditto.
+	* testsuite/gas/i386/vaes.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vaes-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vaes-wig.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vaes-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vaes-wig1.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vaes.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vaes.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes-wig.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes-wig1.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes.s: Ditto.
+	* testsuite/gas/i386/x86-64-vaes-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-vaes.d: Ditto.
+	* testsuite/gas/i386/x86-64-vaes.s: Ditto.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .gfni.
+	* doc/c-i386.texi: Document .gfni.
+	* testsuite/gas/i386/i386.exp: Add GFNI tests.
+	* testsuite/gas/i386/avx.s: New GFNI test.
+	* testsuite/gas/i386/x86-64-avx.s: Likewise.
+	* testsuite/gas/i386/avx.d: Adjust.
+	* testsuite/gas/i386/avx-intel.d: Likewise
+	* testsuite/gas/i386/ilp32/x86-64-avx-intel.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-avx.d: Likewise.
+	* testsuite/gas/i386/avx512f_gfni-intel.d: New test.
+	* testsuite/gas/i386/avx512f_gfni.d: Likewise.
+	* testsuite/gas/i386/avx512f_gfni.s: Likewise.
+	* testsuite/gas/i386/avx512vl_gfni-intel.d: Likewise.
+	* testsuite/gas/i386/avx512vl_gfni.d: Likewise.
+	* testsuite/gas/i386/avx512vl_gfni.s: Likewise.
+	* testsuite/gas/i386/gfni-intel.d: Likewise.
+	* testsuite/gas/i386/gfni.d: Likewise.
+	* testsuite/gas/i386/gfni.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512f_gfni-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512f_gfni.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512f_gfni.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl_gfni-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl_gfni.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl_gfni.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx_gfni-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx_gfni.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx_gfni.s: Likewise.
+	* testsuite/gas/i386/x86-64-gfni-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-gfni.d: Likewise.
+	* testsuite/gas/i386/x86-64-gfni.s: Likewise.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512_vbmi2.
+	(cpu_noarch): noavx512_vbmi2.
+	* doc/c-i386.texi: Document .avx512_vbmi2, noavx512_vbmi2.
+	* testsuite/gas/i386/i386.exp: Add AVX512_VBMI2 tests.
+	* testsuite/gas/i386/avx512vbmi2-intel.d: New test.
+	* testsuite/gas/i386/avx512vbmi2.d: Likewise.
+	* testsuite/gas/i386/avx512vbmi2.s: Likewise.
+	* testsuite/gas/i386/avx512vbmi2_vl-intel.d: Likewise.
+	* testsuite/gas/i386/avx512vbmi2_vl.d: Likewise.
+	* testsuite/gas/i386/avx512vbmi2_vl.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vbmi2-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vbmi2.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vbmi2.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vbmi2_vl-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vbmi2_vl.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vbmi2_vl.s: Likewise.
+
 2017-10-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR gas/22304
