@@ -36,23 +36,14 @@ static void
 print_i387_value (struct gdbarch *gdbarch,
 		  const gdb_byte *raw, struct ui_file *file)
 {
-  DOUBLEST value;
-
-  /* Using extract_typed_floating here might affect the representation
-     of certain numbers such as NaNs, even if GDB is running natively.
-     This is fine since our caller already detects such special
-     numbers and we print the hexadecimal representation anyway.  */
-  value = extract_typed_floating (raw, i387_ext_type (gdbarch));
-
   /* We try to print 19 digits.  The last digit may or may not contain
      garbage, but we'd better print one too many.  We need enough room
      to print the value, 1 position for the sign, 1 for the decimal
      point, 19 for the digits and 6 for the exponent adds up to 27.  */
-#ifdef PRINTF_HAS_LONG_DOUBLE
-  fprintf_filtered (file, " %-+27.19Lg", (long double) value);
-#else
-  fprintf_filtered (file, " %-+27.19g", (double) value);
-#endif
+  const struct floatformat *fmt
+    = floatformat_from_type (i387_ext_type (gdbarch));
+  std::string str = floatformat_to_string (fmt, raw, " %-+27.19g");
+  fprintf_filtered (file, "%s", str.c_str ());
 }
 
 /* Print the classification for the register contents RAW.  */

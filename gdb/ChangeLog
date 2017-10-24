@@ -1,5 +1,11 @@
 2017-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* i387-tdep.c (print_i387_value): Use floatformat_to_string.
+	* sh64-tdep.c (sh64_do_fp_register): Likewise.
+	* mips-tdep.c (mips_print_fp_register): Likewise.
+
+2017-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* common/format.h (enum argclass): Replace decfloat_arg by
 	dec32float_arg, dec64float_arg, and dec128float_arg.
 	* common/format.c (parse_format_string): Update to return
