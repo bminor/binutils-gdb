@@ -1,3 +1,8 @@
+2017-10-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.arch/arc-tdesc-cpu.exp ('set tdesc filename'): Use gdb_test
+	with explicit test name.
+
 2017-10-20  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/quit.exp: Use gdb_test_multiple and expect 'eof' before
