@@ -2296,86 +2296,78 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
 }
 
 /* Subroutine of ui_printf to simplify it.
-   Print VALUE, a decimal floating point value, to STREAM using FORMAT.  */
+   Print VALUE, a floating point value, to STREAM using FORMAT.  */
 
 static void
-printf_decfloat (struct ui_file *stream, const char *format,
-		 struct value *value)
+printf_floating (struct ui_file *stream, const char *format,
+		 struct value *value, enum argclass argclass)
 {
-  const gdb_byte *param_ptr = value_contents (value);
-
-#if defined (PRINTF_HAS_DECFLOAT)
-  /* If we have native support for Decimal floating
-     printing, handle it here.  */
-  fprintf_filtered (stream, format, param_ptr);
-#else
-  /* As a workaround until vasprintf has native support for DFP
-     we convert the DFP values to string and print them using
-     the %s format specifier.  */
-  const char *p;
-
   /* Parameter data.  */
   struct type *param_type = value_type (value);
   struct gdbarch *gdbarch = get_type_arch (param_type);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
-  /* DFP output data.  */
-  struct value *dfp_value = NULL;
-  gdb_byte *dfp_ptr;
-  int dfp_len = 16;
-  gdb_byte dec[16];
-  struct type *dfp_type = NULL;
-
-  /* Points to the end of the string so that we can go back
-     and check for DFP length modifiers.  */
-  p = format + strlen (format);
-
-  /* Look for the float/double format specifier.  */
-  while (*p != 'f' && *p != 'e' && *p != 'E'
-	 && *p != 'g' && *p != 'G')
-    p--;
-
-  /* Search for the '%' char and extract the size and type of
-     the output decimal value based on its modifiers
-     (%Hf, %Df, %DDf).  */
-  while (*--p != '%')
+  /* Determine target type corresponding to the format string.  */
+  struct type *fmt_type;
+  switch (argclass)
     {
-      if (*p == 'H')
-	{
-	  dfp_len = 4;
-	  dfp_type = builtin_type (gdbarch)->builtin_decfloat;
-	}
-      else if (*p == 'D' && *(p - 1) == 'D')
-	{
-	  dfp_len = 16;
-	  dfp_type = builtin_type (gdbarch)->builtin_declong;
-	  p--;
-	}
-      else
-	{
-	  dfp_len = 8;
-	  dfp_type = builtin_type (gdbarch)->builtin_decdouble;
-	}
+      case double_arg:
+	fmt_type = builtin_type (gdbarch)->builtin_double;
+	break;
+      case long_double_arg:
+	fmt_type = builtin_type (gdbarch)->builtin_long_double;
+	break;
+      case dec32float_arg:
+	fmt_type = builtin_type (gdbarch)->builtin_decfloat;
+	break;
+      case dec64float_arg:
+	fmt_type = builtin_type (gdbarch)->builtin_decdouble;
+	break;
+      case dec128float_arg:
+	fmt_type = builtin_type (gdbarch)->builtin_declong;
+	break;
+      default:
+	gdb_assert_not_reached ("unexpected argument class");
     }
 
-  /* Conversion between different DFP types.  */
-  if (TYPE_CODE (param_type) == TYPE_CODE_DECFLOAT)
-    decimal_convert (param_ptr, TYPE_LENGTH (param_type),
-		     byte_order, dec, dfp_len, byte_order);
-  else
-    /* If this is a non-trivial conversion, just output 0.
-       A correct converted value can be displayed by explicitly
-       casting to a DFP type.  */
-    decimal_from_string (dec, dfp_len, byte_order, "0");
+  /* To match the traditional GDB behavior, the conversion is
+     done differently depending on the type of the parameter:
 
-  dfp_value = value_from_decfloat (dfp_type, dec);
+     - if the parameter has floating-point type, it's value
+       is converted to the target type;
 
-  dfp_ptr = (gdb_byte *) value_contents (dfp_value);
+     - otherwise, if the parameter has a type that is of the
+       same size as a built-in floating-point type, the value
+       bytes are interpreted as if they were of that type, and
+       then converted to the target type (this is not done for
+       decimal floating-point argument classes);
+
+     - otherwise, if the source value has an integer value,
+       it's value is converted to the target type;
+
+     - otherwise, an error is raised.
+
+     In either case, the result of the conversion is a byte buffer
+     formatted in the target format for the target type.  */
+
+  if (TYPE_CODE (fmt_type) == TYPE_CODE_FLT)
+    {
+      param_type = float_type_from_length (param_type);
+      if (param_type != value_type (value))
+	value = value_from_contents (param_type, value_contents (value));
+    }
+
+  value = value_cast (fmt_type, value);
 
   /* Convert the value to a string and print it.  */
-  std::string str = decimal_to_string (dfp_ptr, dfp_len, byte_order);
+  std::string str;
+  if (TYPE_CODE (fmt_type) == TYPE_CODE_FLT)
+    str = floatformat_to_string (floatformat_from_type (fmt_type),
+				 value_contents (value), format);
+  else
+    str = decimal_to_string (value_contents (value),
+			     TYPE_LENGTH (fmt_type), byte_order, format);
   fputs_filtered (str.c_str (), stream);
-#endif
 }
 
 /* Subroutine of ui_printf to simplify it.
@@ -2558,43 +2550,6 @@ ui_printf (const char *arg, struct ui_file *stream)
                                 obstack_base (&output));
 	    }
 	    break;
-	  case double_arg:
-	    {
-	      struct type *type = value_type (val_args[i]);
-	      DOUBLEST val;
-	      int inv;
-
-	      /* If format string wants a float, unchecked-convert the value
-		 to floating point of the same size.  */
-	      type = float_type_from_length (type);
-	      val = unpack_double (type, value_contents (val_args[i]), &inv);
-	      if (inv)
-		error (_("Invalid floating value found in program."));
-
-              fprintf_filtered (stream, current_substring, (double) val);
-	      break;
-	    }
-	  case long_double_arg:
-#ifdef HAVE_LONG_DOUBLE
-	    {
-	      struct type *type = value_type (val_args[i]);
-	      DOUBLEST val;
-	      int inv;
-
-	      /* If format string wants a float, unchecked-convert the value
-		 to floating point of the same size.  */
-	      type = float_type_from_length (type);
-	      val = unpack_double (type, value_contents (val_args[i]), &inv);
-	      if (inv)
-		error (_("Invalid floating value found in program."));
-
-	      fprintf_filtered (stream, current_substring,
-                                (long double) val);
-	      break;
-	    }
-#else
-	    error (_("long double not supported in printf"));
-#endif
 	  case long_long_arg:
 #ifdef PRINTF_HAS_LONG_LONG
 	    {
@@ -2620,9 +2575,14 @@ ui_printf (const char *arg, struct ui_file *stream)
               fprintf_filtered (stream, current_substring, val);
 	      break;
 	    }
-	  /* Handles decimal floating values.  */
-	  case decfloat_arg:
-	    printf_decfloat (stream, current_substring, val_args[i]);
+	  /* Handles floating-point values.  */
+	  case double_arg:
+	  case long_double_arg:
+	  case dec32float_arg:
+	  case dec64float_arg:
+	  case dec128float_arg:
+	    printf_floating (stream, current_substring, val_args[i],
+			     fpieces[fr].argclass);
 	    break;
 	  case ptr_arg:
 	    printf_pointer (stream, current_substring, val_args[i]);

@@ -1,5 +1,26 @@
 2017-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* common/format.h (enum argclass): Replace decfloat_arg by
+	dec32float_arg, dec64float_arg, and dec128float_arg.
+	* common/format.c (parse_format_string): Update to return
+	new decimal float argument classes.
+
+	* printcmd.c (printf_decfloat): Rename to ...
+	(printf_floating): ... this.  Add argclass argument, and use it
+	instead of parsing the format string again.  Add support for
+	binary floating-point values, using floatformat_to_string.
+	Convert value to the target format if it doesn't already match.
+	(ui_printf): Call printf_floating instead of printf_decfloat,
+	also for double_arg / long_double_arg.  Pass argclass.
+
+	* dfp.c (decimal_to_string): Add format string argument.
+	* dfp.h (decimal_to_string): Likewise.
+
+	* doublest.c (floatformat_to_string): Add format string argument.
+	* doublest.h (floatformat_to_string): Likewise.
+
+2017-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* doublest.c (floatformat_precision): New routine.
 	(floatformat_to_string): Likewise.
 	* doublest.c (floatformat_to_string): Add prototype.
