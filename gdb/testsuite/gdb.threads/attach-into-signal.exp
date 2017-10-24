@@ -56,50 +56,50 @@ proc corefunc { threadtype executable } {
 	set attempt 1
 	set passes 1
 	while { $passes < 3 && $attempt <= $attempts } {
-		set test "attach (pass $passes), pending signal catch"
-		if {[gdb_test_multiple "attach $testpid" $test {
-		    -re "Attaching to program.*`?$escapedbinfile'?, process $testpid.* received signal SIGALRM.*$gdb_prompt $" {
-			# nonthreaded:
+	    set test "attach (pass $passes), pending signal catch"
+	    if {[gdb_test_multiple "attach $testpid" $test {
+		-re "Attaching to program.*`?$escapedbinfile'?, process $testpid.* received signal SIGALRM.*$gdb_prompt $" {
+		    # nonthreaded:
+		    pass $test
+		    verbose -log "$test succeeded on the attempt # $attempt of $attempts"
+		    set passes [expr $passes + 1]
+		}
+		-re "Attaching to program.*`?$escapedbinfile'?, process $testpid.*$gdb_prompt $" {
+		    set ok 0
+
+		    if { $threadtype == "threaded" } {
+			# In the threaded case, the signal is left
+			# pending on the second thread.  Check for
+			# that by peeking at the thread's siginfo.
+			# SIGALRM is 14, SIGSTOP is 19.
+
+			set test2 "thread apply 2 print \$_siginfo.si_signo"
+			gdb_test_multiple $test2 $test2 {
+			    -re " = 14\r\n$gdb_prompt $" {
+				set ok 1
+			    }
+			    -re " = 19\r\n$gdb_prompt $" {
+			    }
+			}
+		    } else {
+			# In the nonthreaded case, GDB should tell the
+			# user about having seen a signal.
+		    }
+
+		    if { $ok == 0} {
+			# We just lack the luck, we should try it again.
+			set attempt [expr $attempt + 1]
+		    } else {
 			pass $test
 			verbose -log "$test succeeded on the attempt # $attempt of $attempts"
 			set passes [expr $passes + 1]
 		    }
-		    -re "Attaching to program.*`?$escapedbinfile'?, process $testpid.*$gdb_prompt $" {
-			set ok 0
-
-			if { $threadtype == "threaded" } {
-			    # In the threaded case, the signal is left
-			    # pending on the second thread.  Check for
-			    # that by peeking at the thread's siginfo.
-			    # SIGALRM is 14, SIGSTOP is 19.
-
-			    set test2 "thread apply 2 print \$_siginfo.si_signo"
-			    gdb_test_multiple $test2 $test2 {
-				-re " = 14\r\n$gdb_prompt $" {
-				    set ok 1
-				}
-				-re " = 19\r\n$gdb_prompt $" {
-				}
-			    }
-			} else {
-			    # In the nonthreaded case, GDB should tell the
-			    # user about having seen a signal.
-			}
-
-			if { $ok == 0} {
-			    # We just lack the luck, we should try it again.
-			    set attempt [expr $attempt + 1]
-			} else {
-			    pass $test
-			    verbose -log "$test succeeded on the attempt # $attempt of $attempts"
-			    set passes [expr $passes + 1]
-			}
-		    }
-		}] != 0 } {
-		    break
 		}
+	    }] != 0 } {
+		break
+	    }
 
-		gdb_test "detach" "Detaching from.*" ""
+	    gdb_test "detach" "Detaching from.*" ""
 	}
 
 	if {$passes < 3} {

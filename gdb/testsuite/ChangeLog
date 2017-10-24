@@ -1,5 +1,9 @@
 2017-10-24  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/attach-into-signal.exp (corefunc): Reindent.
+
+2017-10-24  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/attach-into-signal.exp: Remove whole "stoppedtry"
 	loop.
 
