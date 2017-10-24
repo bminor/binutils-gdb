@@ -1,5 +1,10 @@
 2017-10-24  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/new-ui.exp (do_test): Split "delete all breakpoints on
+	extra console" test in two stages.
+
+2017-10-24  Pedro Alves  <palves@redhat.com>
+
 	* gdb.threads/attach-into-signal.exp (corefunc): Reindent.
 
 2017-10-24  Pedro Alves  <palves@redhat.com>
