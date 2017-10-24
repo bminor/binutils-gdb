@@ -56,7 +56,6 @@ proc corefunc { threadtype executable } {
 	set attempt 1
 	set passes 1
 	while { $passes < 3 && $attempt <= $attempts } {
-	    with_test_prefix "attempt $attempt" {
 		set stoppedtry 0
 		while { $stoppedtry < 10 } {
 		    with_test_prefix "stoppedtry $stoppedtry" {
@@ -128,7 +127,6 @@ proc corefunc { threadtype executable } {
 		}
 
 		gdb_test "detach" "Detaching from.*" ""
-	    }
 	}
 
 	if {$passes < 3} {

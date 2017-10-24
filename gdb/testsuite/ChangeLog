@@ -1,5 +1,10 @@
 2017-10-24  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/attach-into-signal.exp (corefunc): Remove "attach
+	$attempt" and "stoppedtry $stoppedtry" test prefixes.
+
+2017-10-24  Pedro Alves  <palves@redhat.com>
+
 	* lib/gdb-python.exp (get_python_valueof): Add 'test' optional
 	parameter and handle it.  Don't output read value in test name.
 
