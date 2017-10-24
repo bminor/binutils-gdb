@@ -4,9 +4,9 @@
 
 2017-10-24  Andrew Waterman  <andrew@sifive.com>
 
-	* ld/testsuite/ld-riscv-elf/c-lui.d: New testcase.
-	ld/testsuite/ld-riscv-elf/c-lui.s: Likewise.
-	ld/testsuite/ld-riscv-elf/ld-riscv-elf.exp: New test suite.
+	* testsuite/ld-riscv-elf/c-lui.d: New testcase.
+	* testsuite/ld-riscv-elf/c-lui.s: Likewise.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: New test suite.
 
 2017-10-24  Renlin Li  <renlin.li@arm.com>
 
