@@ -1,5 +1,10 @@
 2017-10-24  Pedro Alves  <palves@redhat.com>
 
+	* gdb.gdb/unittest.exp ('maintenance check xml-descriptions'): Use
+	custom test name.
+
+2017-10-24  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/startup-with-shell.exp ('touch $unique_file'): Don't
 	include the unstable output directory name in the test's name.
 	(initial_setup_simple) <'set args'>: Use custom test name.
