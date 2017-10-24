@@ -1,3 +1,15 @@
+2017-10-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (md_pseudo_table): Add .code64 directive
+	only if BFD64 is defined.
+	* testsuite/gas/i386/code64-inval.l: New file.
+	* gas/testsuite/gas/i386/code64-inval.s: Likewise.
+	* gas/testsuite/gas/i386/code64.d: Likewise.
+	* gas/testsuite/gas/i386/code64.s: Likewise.
+	* testsuite/gas/i386/i386.exp: Run mixed-mode-reloc32,
+	att-regs, intel-regs, intel-expr and string-ok tests only if
+	assembler supports x86-64.  Run code64 and code64-inval.
+
 2017-10-23  Palmer Dabbelt  <palmer@dabbelt.com>
 
         * config/tc-riscv.c (riscv_frag_align_code): Align code by 4
