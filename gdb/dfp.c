@@ -190,7 +190,7 @@ decimal_to_string (const gdb_byte *decbytes, int len,
    decimal64 and 16 bytes for decimal128.  */
 bool
 decimal_from_string (gdb_byte *decbytes, int len, enum bfd_endian byte_order,
-		     std::string string)
+		     const std::string &string)
 {
   decContext set;
   gdb_byte dec[16];
