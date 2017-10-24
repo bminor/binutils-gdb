@@ -1,3 +1,8 @@
+2017-10-24  Renlin Li  <renlin.li@arm.com>
+
+	PR ld/21703
+	* elflink.c (_bfd_elf_merge_symbol): Handle multiple definition case.
+
 2017-10-23  Nick Clifton  <nickc@redhat.com>
 
 	PR 22319

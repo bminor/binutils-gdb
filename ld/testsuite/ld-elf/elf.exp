@@ -70,6 +70,18 @@ run_ld_link_tests [list \
 	{symbol3w.s} {} "symbol3w.a" ] \
 ]
 
+run_ld_link_tests [list \
+    [list "PR ld/21703" \
+	"--allow-multiple-definition tmpdir/pr21703-1.o tmpdir/pr21703-2.o" "" "" \
+	{pr21703-1.s pr21703-2.s} {{readelf {-s} pr21703.sd}} "pr21703" ] \
+    [list "PR ld/21703 -r" \
+	"-r --allow-multiple-definition tmpdir/pr21703-3.o tmpdir/pr21703-4.o" "" "" \
+	{pr21703-3.s pr21703-4.s} {{readelf {-s} pr21703-r.sd}} "pr21703.o" ] \
+    [list "PR ld/21703 shared" \
+	"-shared --allow-multiple-definition --version-script pr21703.ver tmpdir/pr21703-3.o tmpdir/pr21703-4.o" "" "" \
+	{pr21703-3.s pr21703-4.s} {{readelf {--dyn-syms} pr21703-shared.sd}} "pr21703.so" ] \
+]
+
 if { [check_shared_lib_support] } then {
     run_ld_link_tests {
 	{"Build pr14170a.o" "" "" "" {pr14170a.s} {} "pr14170.a" }

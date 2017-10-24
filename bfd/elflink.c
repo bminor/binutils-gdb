@@ -1036,6 +1036,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   bfd_boolean newweak, oldweak, newfunc, oldfunc;
   const struct elf_backend_data *bed;
   char *new_version;
+  bfd_boolean default_sym = *matched;
 
   *skip = FALSE;
   *override = FALSE;
@@ -1555,6 +1556,18 @@ _bfd_elf_merge_symbol (bfd *abfd,
       if (!bed->merge_symbol (h, sym, psec, newdef, olddef, oldbfd, oldsec))
 	return FALSE;
       sec = *psec;
+    }
+
+  /* There are multiple definitions of a normal symbol.
+     Skip the default symbol as well.  */
+  if (olddef && !olddyn && !oldweak && newdef && !newdyn && !newweak
+      && !default_sym && h->def_regular)
+    {
+      /* Handle a multiple definition.  */
+      (*info->callbacks->multiple_definition) (info, &h->root,
+					       abfd, sec, *pvalue);
+      *skip = TRUE;
+      return TRUE;
     }
 
   /* If both the old and the new symbols look like common symbols in a
