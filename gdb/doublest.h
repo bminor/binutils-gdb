@@ -71,6 +71,9 @@ extern enum float_kind floatformat_classify (const struct floatformat *,
 extern const char *floatformat_mantissa (const struct floatformat *,
 					 const bfd_byte *);
 
+extern std::string floatformat_to_string (const struct floatformat *fmt,
+					  const gdb_byte *in);
+
 /* Return the floatformat's total size in host bytes.  */
 
 extern size_t floatformat_totalsize_bytes (const struct floatformat *fmt);

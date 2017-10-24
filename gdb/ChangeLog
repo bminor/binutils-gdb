@@ -1,5 +1,23 @@
 2017-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* doublest.c (floatformat_precision): New routine.
+	(floatformat_to_string): Likewise.
+	* doublest.c (floatformat_to_string): Add prototype.
+
+	* printcmd.c (print_scalar_formatted): Only call print_floating
+	on floating-point types.
+	* valprint.c: Do not include "floatformat.h".
+	(generic_val_print_decfloat): Remove.
+	(generic_val_print): Call generic_val_print_float for both
+	TYPE_CODE_FLT and TYPE_CODE_DECFLOAT.
+	(print_floating): Use floatformat_to_string.  Handle decimal float.
+	(print_decimal_floating): Remove, merge into floatformat_to_string.
+	* value.h (print_decimal_floating): Remove.
+
+	* Makefile.in: Do not build doublest.c with -Wformat-nonliteral.
+
+2017-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* buildsym.c (end_symtab_get_static_block): Use std::stable_sort.
 
 2017-10-21  Simon Marchi  <simon.marchi@ericsson.com>

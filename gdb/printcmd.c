@@ -420,7 +420,18 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       valaddr = converted_float_bytes.data ();
     }
 
-  switch (options->format)
+  /* Printing a non-float type as 'f' will interpret the data as if it were
+     of a floating-point type of the same length, if that exists.  Otherwise,
+     the data is printed as integer.  */
+  char format = options->format;
+  if (format == 'f' && TYPE_CODE (type) != TYPE_CODE_FLT)
+    {
+      type = float_type_from_length (type);
+      if (TYPE_CODE (type) != TYPE_CODE_FLT)
+        format = 0;
+    }
+
+  switch (format)
     {
     case 'o':
       print_octal_chars (stream, valaddr, len, byte_order);
@@ -440,7 +451,6 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 	}
       /* FALLTHROUGH */
     case 'f':
-      type = float_type_from_length (type);
       print_floating (valaddr, type, stream);
       break;
 
@@ -478,7 +488,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       break;
 
     default:
-      error (_("Undefined output format \"%c\"."), options->format);
+      error (_("Undefined output format \"%c\"."), format);
     }
 }
 

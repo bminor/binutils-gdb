@@ -2733,6 +2733,11 @@ printcmd.o: $(srcdir)/printcmd.c
 		$(COMPILE.post) $(srcdir)/printcmd.c
 	$(POSTCOMPILE)
 
+# Same for "doublest.c".
+doublest.o: $(srcdir)/doublest.c
+	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_FORMAT) \
+		$(COMPILE.post) $(srcdir)/doublest.c
+
 # ada-exp.c can appear in srcdir, for releases; or in ., for
 # development builds.
 ADA_EXP_C = `if test -f ada-exp.c; then echo ada-exp.c; else echo $(srcdir)/ada-exp.c; fi`

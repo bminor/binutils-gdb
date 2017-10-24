@@ -680,6 +680,25 @@ floatformat_mantissa (const struct floatformat *fmt,
   return res;
 }
 
+/* Return the precision of the floating point format FMT.  */
+
+static int
+floatformat_precision (const struct floatformat *fmt)
+{
+  /* Assume the precision of and IBM long double is twice the precision
+     of the underlying double.  This matches what GCC does.  */
+  if (fmt->split_half)
+    return 2 * floatformat_precision (fmt->split_half);
+
+  /* Otherwise, the precision is the size of mantissa in bits,
+     including the implicit bit if present.  */
+  int prec = fmt->man_len;
+  if (fmt->intbit == floatformat_intbit_no)
+    prec++;
+
+  return prec;
+}
+
 
 /* Convert TO/FROM target to the hosts DOUBLEST floating-point format.
 
@@ -769,6 +788,51 @@ floatformat_from_doublest (const struct floatformat *fmt,
     convert_doublest_to_floatformat (fmt, in, out);
 }
 
+/* Convert the byte-stream ADDR, interpreted as floating-point format FMT,
+   to a string.  */
+std::string
+floatformat_to_string (const struct floatformat *fmt,
+		       const gdb_byte *in)
+{
+  /* Detect invalid representations.  */
+  if (!floatformat_is_valid (fmt, in))
+    return "<invalid float value>";
+
+  /* Handle NaN and Inf.  */
+  enum float_kind kind = floatformat_classify (fmt, in);
+  if (kind == float_nan)
+    {
+      const char *sign = floatformat_is_negative (fmt, in)? "-" : "";
+      const char *mantissa = floatformat_mantissa (fmt, in);
+      return string_printf ("%snan(0x%s)", sign, mantissa);
+    }
+  else if (kind == float_infinite)
+    {
+      const char *sign = floatformat_is_negative (fmt, in)? "-" : "";
+      return string_printf ("%sinf", sign);
+    }
+
+  /* Print the number using a format string where the precision is set
+     to the DECIMAL_DIG value for the given floating-point format.
+     This value is computed as
+
+		ceil(1 + p * log10(b)),
+
+     where p is the precision of the floating-point format in bits, and
+     b is the base (which is always 2 for the formats we support).  */
+  const double log10_2 = .30102999566398119521;
+  double d_decimal_dig = 1 + floatformat_precision (fmt) * log10_2;
+  int decimal_dig = d_decimal_dig;
+  if (decimal_dig < d_decimal_dig)
+    decimal_dig++;
+
+  std::string host_format
+    = string_printf ("%%.%d" DOUBLEST_PRINT_FORMAT, decimal_dig);
+
+  DOUBLEST doub;
+  floatformat_to_doublest (fmt, in, &doub);
+  return string_printf (host_format.c_str (), doub);
+}
 
 /* Extract a floating-point number of type TYPE from a target-order
    byte-stream at ADDR.  Returns the value as type DOUBLEST.  */
