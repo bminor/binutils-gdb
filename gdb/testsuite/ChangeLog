@@ -1,5 +1,10 @@
 2017-10-24  Pedro Alves  <palves@redhat.com>
 
+	* lib/gdb-python.exp (get_python_valueof): Add 'test' optional
+	parameter and handle it.  Don't output read value in test name.
+
+2017-10-24  Pedro Alves  <palves@redhat.com>
+
 	* gdb.gdb/unittest.exp ('maintenance check xml-descriptions'): Use
 	custom test name.
 
