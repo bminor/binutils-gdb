@@ -12,8 +12,8 @@
 
 2017-10-23  Palmer Dabbelt  <palmer@dabbelt.com>
 
-        * config/tc-riscv.c (riscv_frag_align_code): Align code by 4
-        bytes on non-RVC systems.
+	* config/tc-riscv.c (riscv_frag_align_code): Align code by 4
+	bytes on non-RVC systems.
 
 2017-10-23  Maciej W. Rozycki  <macro@imgtec.com>
 
