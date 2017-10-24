@@ -1,3 +1,7 @@
+2017-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* buildsym.c (end_symtab_get_static_block): Use std::stable_sort.
+
 2017-10-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* memattr.h: Don't include vec.h.
