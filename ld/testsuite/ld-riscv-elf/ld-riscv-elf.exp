@@ -19,6 +19,6 @@
 # MA 02110-1301, USA.
 #
 
-if [is_target "riscv-*-*"] {
+if [istarget "riscv-*-*"] {
     run_dump_test "c-lui"
 }

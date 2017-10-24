@@ -1,3 +1,7 @@
+2017-10-25  Hans-Peter Nilsson  <hp@axis.com>
+
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Fix typo for istarget.
+
 2017-10-24  Andrew Waterman  <andrew@sifive.com>
 
 	* ld/testsuite/ld-riscv-elf/c-lui.d: New testcase.
