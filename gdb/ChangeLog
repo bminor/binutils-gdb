@@ -1,3 +1,9 @@
+2018-02-28  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_resume): Use PT_SETSTEP for stepping and a
+	wildcard process pid for super_resume for kernels with a
+	specific bug.
+
 2018-02-27  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* compile/compile.c (get_args): Add additional comments

@@ -1143,6 +1143,38 @@ fbsd_resume (struct target_ops *ops,
 	}
       ptid = inferior_ptid;
     }
+
+#if __FreeBSD_version < 1200052
+  /* When multiple threads within a process wish to report STOPPED
+     events from wait(), the kernel picks one thread event as the
+     thread event to report.  The chosen thread event is retrieved via
+     PT_LWPINFO by passing the process ID as the request pid.  If
+     multiple events are pending, then the subsequent wait() after
+     resuming a process will report another STOPPED event after
+     resuming the process to handle the next thread event and so on.
+
+     A single thread event is cleared as a side effect of resuming the
+     process with PT_CONTINUE, PT_STEP, etc.  In older kernels,
+     however, the request pid was used to select which thread's event
+     was cleared rather than always clearing the event that was just
+     reported.  To avoid clearing the event of the wrong LWP, always
+     pass the process ID instead of an LWP ID to PT_CONTINUE or
+     PT_SYSCALL.
+
+     In the case of stepping, the process ID cannot be used with
+     PT_STEP since it would step the thread that reported an event
+     which may not be the thread indicated by PTID.  For stepping, use
+     PT_SETSTEP to enable stepping on the desired thread before
+     resuming the process via PT_CONTINUE instead of using
+     PT_STEP.  */
+  if (step)
+    {
+      if (ptrace (PT_SETSTEP, get_ptrace_pid (ptid), NULL, 0) == -1)
+	perror_with_name (("ptrace"));
+      step = 0;
+    }
+  ptid = ptid_t (ptid.pid ());
+#endif
   super_resume (ops, ptid, step, signo);
 }
 
