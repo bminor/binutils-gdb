@@ -2553,7 +2553,7 @@ ia64_access_rse_reg (unw_addr_space_t as, unw_regnum_t uw_regnum,
   int regnum = ia64_uw2gdb_regnum (uw_regnum);
   unw_word_t bsp, sof, cfm, psr, ip;
   struct regcache *regcache = (struct regcache *) arg;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   long new_sof, old_sof;
   
@@ -3195,7 +3195,7 @@ static void
 ia64_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct type *float_elt_type;
 
   float_elt_type = is_float_or_hfa_type (type);
@@ -3260,7 +3260,7 @@ static void
 ia64_store_return_value (struct type *type, struct regcache *regcache, 
 			 const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct type *float_elt_type;
 
   float_elt_type = is_float_or_hfa_type (type);
@@ -3560,7 +3560,7 @@ find_extant_func_descr (struct gdbarch *gdbarch, CORE_ADDR faddr)
 static CORE_ADDR
 find_func_descr (struct regcache *regcache, CORE_ADDR faddr, CORE_ADDR *fdaptr)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR fdesc;
 

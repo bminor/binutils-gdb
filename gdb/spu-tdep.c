@@ -185,7 +185,7 @@ static enum register_status
 spu_pseudo_register_read_spu (struct regcache *regcache, const char *regname,
 			      gdb_byte *buf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum register_status status;
   gdb_byte reg[32];
@@ -253,7 +253,7 @@ static void
 spu_pseudo_register_write_spu (struct regcache *regcache, const char *regname,
 			       const gdb_byte *buf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   char reg[32];
   char annex[32];
@@ -1178,7 +1178,7 @@ spu_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 static CORE_ADDR
 spu_read_pc (struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
   ULONGEST pc;
   regcache_cooked_read_unsigned (regcache, SPU_PC_REGNUM, &pc);
   /* Mask off interrupt enable bit.  */
@@ -1209,7 +1209,7 @@ static struct gdbarch *
 spu2ppu_prev_arch (struct frame_info *this_frame, void **this_cache)
 {
   struct spu2ppu_cache *cache = (struct spu2ppu_cache *) *this_cache;
-  return get_regcache_arch (cache->regcache);
+  return cache->regcache->arch ();
 }
 
 static void
@@ -1225,7 +1225,7 @@ spu2ppu_prev_register (struct frame_info *this_frame,
 		       void **this_cache, int regnum)
 {
   struct spu2ppu_cache *cache = (struct spu2ppu_cache *) *this_cache;
-  struct gdbarch *gdbarch = get_regcache_arch (cache->regcache);
+  struct gdbarch *gdbarch = cache->regcache->arch ();
   gdb_byte *buf;
 
   buf = (gdb_byte *) alloca (register_size (gdbarch, regnum));
@@ -1614,7 +1614,7 @@ spu_memory_remove_breakpoint (struct gdbarch *gdbarch,
 static std::vector<CORE_ADDR>
 spu_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc, next_pc;
   unsigned int insn;

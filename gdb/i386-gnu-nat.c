@@ -127,7 +127,7 @@ gnu_fetch_registers (struct target_ops *ops,
       else
 	{
 	  proc_debug (thread, "fetching register %s",
-		      gdbarch_register_name (get_regcache_arch (regcache),
+		      gdbarch_register_name (regcache->arch (),
 					     regno));
 
 	  regcache_raw_supply (regcache, regno,
@@ -183,7 +183,7 @@ gnu_store_registers (struct target_ops *ops,
 		     struct regcache *regcache, int regno)
 {
   struct proc *thread;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   ptid_t ptid = regcache_get_ptid (regcache);
 
   /* Make sure we know about new threads.  */

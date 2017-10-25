@@ -2922,7 +2922,7 @@ static void
 amd64_supply_fpregset (const struct regset *regset, struct regcache *regcache,
 		       int regnum, const void *fpregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   gdb_assert (len >= tdep->sizeof_fpregset);
@@ -2939,7 +2939,7 @@ amd64_collect_fpregset (const struct regset *regset,
 			const struct regcache *regcache,
 			int regnum, void *fpregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   gdb_assert (len >= tdep->sizeof_fpregset);
@@ -3264,7 +3264,7 @@ void
 amd64_supply_fxsave (struct regcache *regcache, int regnum,
 		     const void *fxsave)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   i387_supply_fxsave (regcache, regnum, fxsave);
@@ -3287,7 +3287,7 @@ void
 amd64_supply_xsave (struct regcache *regcache, int regnum,
 		    const void *xsave)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   i387_supply_xsave (regcache, regnum, xsave);
@@ -3315,7 +3315,7 @@ void
 amd64_collect_fxsave (const struct regcache *regcache, int regnum,
 		      void *fxsave)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   gdb_byte *regs = (gdb_byte *) fxsave;
 
@@ -3336,7 +3336,7 @@ void
 amd64_collect_xsave (const struct regcache *regcache, int regnum,
 		     void *xsave, int gcore)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   gdb_byte *regs = (gdb_byte *) xsave;
 

@@ -447,7 +447,7 @@ arc_insn_get_linear_next_pc (const struct arc_instruction &insn)
 static void
 arc_write_pc (struct regcache *regcache, CORE_ADDR new_pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   if (arc_debug)
     debug_printf ("arc: Writing PC, new value=%s\n",

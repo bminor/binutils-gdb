@@ -47,7 +47,7 @@ shnbsd_fetch_inferior_registers (struct target_ops *ops,
 {
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
-  if (regno == -1 || GETREGS_SUPPLIES (get_regcache_arch (regcache), regno))
+  if (regno == -1 || GETREGS_SUPPLIES (regcache->arch (), regno))
     {
       struct reg inferior_registers;
 
@@ -70,7 +70,7 @@ shnbsd_store_inferior_registers (struct target_ops *ops,
 {
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
-  if (regno == -1 || GETREGS_SUPPLIES (get_regcache_arch (regcache), regno))
+  if (regno == -1 || GETREGS_SUPPLIES (regcache->arch (), regno))
     {
       struct reg inferior_registers;
 

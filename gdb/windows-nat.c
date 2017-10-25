@@ -466,7 +466,7 @@ do_windows_fetch_inferior_registers (struct regcache *regcache,
 				     windows_thread_info *th, int r)
 {
   char *context_offset = ((char *) &th->context) + mappings[r];
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   long l;
 
@@ -553,7 +553,7 @@ do_windows_store_inferior_registers (const struct regcache *regcache,
 			  ((char *) &th->context) + mappings[r]);
   else
     {
-      for (r = 0; r < gdbarch_num_regs (get_regcache_arch (regcache)); r++)
+      for (r = 0; r < gdbarch_num_regs (regcache->arch ()); r++)
 	do_windows_store_inferior_registers (regcache, th, r);
     }
 }
@@ -1376,7 +1376,7 @@ windows_resume (struct target_ops *ops,
 	{
 	  /* Single step by setting t bit.  */
 	  struct regcache *regcache = get_current_regcache ();
-	  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+	  struct gdbarch *gdbarch = regcache->arch ();
 	  windows_fetch_inferior_registers (ops, regcache,
 					    gdbarch_ps_regnum (gdbarch));
 	  th->context.EFlags |= FLAG_TRACE_BIT;

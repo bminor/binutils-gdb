@@ -127,7 +127,7 @@ ppcfbsd_fetch_inferior_registers (struct target_ops *ops,
 
   supply_gregset (regcache, &regs);
 
-  if (regno == -1 || getfpregs_supplies (get_regcache_arch (regcache), regno))
+  if (regno == -1 || getfpregs_supplies (regcache->arch (), regno))
     {
       const struct regset *fpregset = ppc_fbsd_fpregset ();
       gdb_fpregset_t fpregs;
@@ -157,7 +157,7 @@ ppcfbsd_store_inferior_registers (struct target_ops *ops,
   if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't write registers"));
 
-  if (regno == -1 || getfpregs_supplies (get_regcache_arch (regcache), regno))
+  if (regno == -1 || getfpregs_supplies (regcache->arch (), regno))
     {
       gdb_fpregset_t fpregs;
 
@@ -178,7 +178,7 @@ ppcfbsd_store_inferior_registers (struct target_ops *ops,
 static int
 ppcfbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int i, regnum;
 

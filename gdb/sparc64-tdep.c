@@ -1211,7 +1211,7 @@ static void
 sparc64_store_floating_fields (struct regcache *regcache, struct type *type,
 			       const gdb_byte *valbuf, int element, int bitpos)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int len = TYPE_LENGTH (type);
 
   gdb_assert (element < 16);
@@ -1303,7 +1303,7 @@ static void
 sparc64_extract_floating_fields (struct regcache *regcache, struct type *type,
 				 gdb_byte *valbuf, int bitpos)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
     {
@@ -1372,7 +1372,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 			 struct value **args, CORE_ADDR sp,
 			 int struct_return, CORE_ADDR struct_addr)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   /* Number of extended words in the "parameter array".  */
   int num_elements = 0;
   int element = 0;
@@ -1883,7 +1883,7 @@ sparc64_supply_gregset (const struct sparc_gregmap *gregmap,
 			struct regcache *regcache,
 			int regnum, const void *gregs)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int sparc32 = (gdbarch_ptr_bit (gdbarch) == 32);
   const gdb_byte *regs = (const gdb_byte *) gregs;
@@ -2000,7 +2000,7 @@ sparc64_collect_gregset (const struct sparc_gregmap *gregmap,
 			 const struct regcache *regcache,
 			 int regnum, void *gregs)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int sparc32 = (gdbarch_ptr_bit (gdbarch) == 32);
   gdb_byte *regs = (gdb_byte *) gregs;
@@ -2110,7 +2110,7 @@ sparc64_supply_fpregset (const struct sparc_fpregmap *fpregmap,
 			 struct regcache *regcache,
 			 int regnum, const void *fpregs)
 {
-  int sparc32 = (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32);
+  int sparc32 = (gdbarch_ptr_bit (regcache->arch ()) == 32);
   const gdb_byte *regs = (const gdb_byte *) fpregs;
   int i;
 
@@ -2148,7 +2148,7 @@ sparc64_collect_fpregset (const struct sparc_fpregmap *fpregmap,
 			  const struct regcache *regcache,
 			  int regnum, void *fpregs)
 {
-  int sparc32 = (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32);
+  int sparc32 = (gdbarch_ptr_bit (regcache->arch ()) == 32);
   gdb_byte *regs = (gdb_byte *) fpregs;
   int i;
 

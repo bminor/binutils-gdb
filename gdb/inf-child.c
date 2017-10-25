@@ -77,7 +77,7 @@ inf_child_fetch_inferior_registers (struct target_ops *ops,
   if (regnum == -1)
     {
       for (regnum = 0;
-	   regnum < gdbarch_num_regs (get_regcache_arch (regcache));
+	   regnum < gdbarch_num_regs (regcache->arch ());
 	   regnum++)
 	regcache_raw_supply (regcache, regnum, NULL);
     }

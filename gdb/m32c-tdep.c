@@ -331,7 +331,7 @@ m32c_raw_write (struct m32c_reg *reg, struct regcache *cache,
 static int
 m32c_read_flg (struct regcache *cache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (cache));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (cache->arch ());
   ULONGEST flg;
   regcache_raw_read_unsigned (cache, tdep->flg->num, &flg);
   return flg & 0xffff;
@@ -598,7 +598,7 @@ m32c_pseudo_register_read (struct gdbarch *arch,
   struct m32c_reg *reg;
 
   gdb_assert (0 <= cookednum && cookednum < tdep->num_regs);
-  gdb_assert (arch == get_regcache_arch (cache));
+  gdb_assert (arch == cache->arch ());
   gdb_assert (arch == tdep->regs[cookednum].arch);
   reg = &tdep->regs[cookednum];
 
@@ -616,7 +616,7 @@ m32c_pseudo_register_write (struct gdbarch *arch,
   struct m32c_reg *reg;
 
   gdb_assert (0 <= cookednum && cookednum < tdep->num_regs);
-  gdb_assert (arch == get_regcache_arch (cache));
+  gdb_assert (arch == cache->arch ());
   gdb_assert (arch == tdep->regs[cookednum].arch);
   reg = &tdep->regs[cookednum];
 

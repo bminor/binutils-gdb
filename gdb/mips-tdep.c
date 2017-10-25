@@ -1365,7 +1365,7 @@ mips_in_frame_stub (CORE_ADDR pc)
 static CORE_ADDR
 mips_read_pc (struct regcache *regcache)
 {
-  int regnum = gdbarch_pc_regnum (get_regcache_arch (regcache));
+  int regnum = gdbarch_pc_regnum (regcache->arch ());
   LONGEST pc;
 
   regcache_cooked_read_signed (regcache, regnum, &pc);
@@ -1421,7 +1421,7 @@ mips_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 void
 mips_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  int regnum = gdbarch_pc_regnum (get_regcache_arch (regcache));
+  int regnum = gdbarch_pc_regnum (regcache->arch ());
 
   regcache_cooked_write_unsigned (regcache, regnum, pc);
 }
@@ -1607,7 +1607,7 @@ is_octeon_bbit_op (int op, struct gdbarch *gdbarch)
 static CORE_ADDR
 mips32_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   unsigned long inst;
   int op;
   inst = mips_fetch_instruction (gdbarch, ISA_MIPS, pc, NULL);
@@ -1874,7 +1874,7 @@ micromips_bc1_pc (struct gdbarch *gdbarch, struct regcache *regcache,
 static CORE_ADDR
 micromips_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   ULONGEST insn;
 
   insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, pc, NULL);
@@ -2228,7 +2228,7 @@ static CORE_ADDR
 extended_mips16_next_pc (regcache *regcache, CORE_ADDR pc,
 			 unsigned int extension, unsigned int insn)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int op = (insn >> 11);
   switch (op)
     {
@@ -2332,7 +2332,7 @@ extended_mips16_next_pc (regcache *regcache, CORE_ADDR pc,
 static CORE_ADDR
 mips16_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   unsigned int insn = fetch_mips_16 (gdbarch, pc);
   return extended_mips16_next_pc (regcache, pc, 0, insn);
 }
@@ -2345,7 +2345,7 @@ mips16_next_pc (struct regcache *regcache, CORE_ADDR pc)
 static CORE_ADDR
 mips_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   if (mips_pc_is_mips16 (gdbarch, pc))
     return mips16_next_pc (regcache, pc);
@@ -4156,7 +4156,7 @@ deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
 std::vector<CORE_ADDR>
 mips_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR pc, next_pc;
 
   pc = regcache_read_pc (regcache);

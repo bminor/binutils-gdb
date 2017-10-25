@@ -2750,7 +2750,7 @@ save_stop_reason (struct lwp_info *lp)
     return;
 
   regcache = get_thread_regcache (lp->ptid);
-  gdbarch = get_regcache_arch (regcache);
+  gdbarch = regcache->arch ();
 
   pc = regcache_read_pc (regcache);
   sw_bp_pc = pc - gdbarch_decr_pc_after_break (gdbarch);
@@ -3460,7 +3460,7 @@ linux_nat_wait_1 (struct target_ops *ops,
       && !USE_SIGTRAP_SIGINFO)
     {
       struct regcache *regcache = get_thread_regcache (lp->ptid);
-      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct gdbarch *gdbarch = regcache->arch ();
       int decr_pc = gdbarch_decr_pc_after_break (gdbarch);
 
       if (decr_pc != 0)
@@ -3563,7 +3563,7 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, void *data)
   else
     {
       struct regcache *regcache = get_thread_regcache (lp->ptid);
-      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct gdbarch *gdbarch = regcache->arch ();
 
       TRY
 	{

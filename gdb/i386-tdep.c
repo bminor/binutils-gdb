@@ -3250,7 +3250,7 @@ i386_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 static int
 i386_mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
   int mmxreg, fpreg;
   ULONGEST fstat;
   int tos;
@@ -3839,7 +3839,7 @@ void
 i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *gregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const gdb_byte *regs = (const gdb_byte *) gregs;
   int i;
@@ -3864,7 +3864,7 @@ i386_collect_gregset (const struct regset *regset,
 		      const struct regcache *regcache,
 		      int regnum, void *gregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   gdb_byte *regs = (gdb_byte *) gregs;
   int i;
@@ -3887,7 +3887,7 @@ static void
 i386_supply_fpregset (const struct regset *regset, struct regcache *regcache,
 		      int regnum, const void *fpregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (len == I387_SIZEOF_FXSAVE)
@@ -3910,7 +3910,7 @@ i386_collect_fpregset (const struct regset *regset,
 		       const struct regcache *regcache,
 		       int regnum, void *fpregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (len == I387_SIZEOF_FXSAVE)
@@ -8742,7 +8742,7 @@ i386_mpx_bd_base (void)
   enum register_status regstatus;
 
   rcache = get_current_regcache ();
-  tdep = gdbarch_tdep (get_regcache_arch (rcache));
+  tdep = gdbarch_tdep (rcache->arch ());
 
   regstatus = regcache_raw_read_unsigned (rcache, tdep->bndcfgu_regnum, &ret);
 

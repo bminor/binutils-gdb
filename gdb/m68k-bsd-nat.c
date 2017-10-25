@@ -58,7 +58,7 @@ m68kbsd_supply_gregset (struct regcache *regcache, const void *gregs)
 static void
 m68kbsd_supply_fpregset (struct regcache *regcache, const void *fpregs)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   const char *regs = fpregs;
   int regnum;
 
@@ -91,7 +91,7 @@ static void
 m68kbsd_collect_fpregset (struct regcache *regcache,
 			  void *fpregs, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   char *regs = fpregs;
   int i;
 

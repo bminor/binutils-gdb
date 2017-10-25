@@ -213,7 +213,7 @@ static const int greg_map[] =
 static void
 fetch_register (struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   pid_t tid;
   int val;
 
@@ -240,7 +240,7 @@ fetch_register (struct regcache *regcache, int regno)
 static void
 store_register (const struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   pid_t tid;
   int val;
 
@@ -269,7 +269,7 @@ hppa_linux_fetch_inferior_registers (struct target_ops *ops,
   if (-1 == regno)
     {
       for (regno = 0;
-	   regno < gdbarch_num_regs (get_regcache_arch (regcache));
+	   regno < gdbarch_num_regs (regcache->arch ());
 	   regno++)
         fetch_register (regcache, regno);
     }
@@ -290,7 +290,7 @@ hppa_linux_store_inferior_registers (struct target_ops *ops,
   if (-1 == regno)
     {
       for (regno = 0;
-	   regno < gdbarch_num_regs (get_regcache_arch (regcache));
+	   regno < gdbarch_num_regs (regcache->arch ());
 	   regno++)
 	store_register (regcache, regno);
     }

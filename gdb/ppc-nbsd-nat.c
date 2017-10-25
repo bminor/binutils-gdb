@@ -80,7 +80,7 @@ static void
 ppcnbsd_fetch_inferior_registers (struct target_ops *ops,
 				  struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
   if (regnum == -1 || getregs_supplies (gdbarch, regnum))
@@ -110,7 +110,7 @@ static void
 ppcnbsd_store_inferior_registers (struct target_ops *ops,
 				  struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
 
   if (regnum == -1 || getregs_supplies (gdbarch, regnum))
@@ -147,7 +147,7 @@ ppcnbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 {
   struct switchframe sf;
   struct callframe cf;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int i;
 

@@ -1,3 +1,336 @@
+2017-10-25  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch32-linux-nat.c (aarch32_gp_regcache_supply): Use
+	regcache->arch () instead get_regcache_arch.
+	* aarch64-fbsd-nat.c (aarch64_fbsd_fetch_inferior_registers):
+	Likewise.
+	(aarch64_fbsd_store_inferior_registers): Likewise.
+	* aarch64-linux-nat.c (fetch_gregs_from_thread): Likewise.
+	(store_gregs_to_thread): Likewise.
+	(fetch_fpregs_from_thread): Likewise.
+	(store_fpregs_to_thread): Likewise.
+	* aarch64-tdep.c (aarch64_extract_return_value): Likewise.
+	(aarch64_store_return_value): Likewise.
+	(aarch64_software_single_step): Likewise.
+	* aix-thread.c (aix_thread_wait): Likewise.
+	(supply_reg32): Likewise.
+	(supply_sprs64): Likewise.
+	(supply_sprs32): Likewise.
+	(fill_gprs64): Likewise.
+	(fill_gprs32): Likewise.
+	(fill_sprs64): Likewise.
+	(fill_sprs32): Likewise.
+	(store_regs_user_thread): Likewise.
+	(store_regs_kernel_thread): Likewise.
+	* alpha-bsd-nat.c (alphabsd_fetch_inferior_registers): Likewise.
+	(alphabsd_store_inferior_registers): Likewise.
+	* alpha-tdep.c (alpha_extract_return_value): Likewise.
+	(alpha_store_return_value): Likewise.
+	(alpha_deal_with_atomic_sequence): Likewise.
+	(alpha_next_pc): Likewise.
+	(alpha_software_single_step): Likewise.
+	* amd64-bsd-nat.c (amd64bsd_fetch_inferior_registers): Likewise.
+	(amd64bsd_store_inferior_registers): Likewise.
+	* amd64-linux-nat.c (amd64_linux_fetch_inferior_registers):
+	Likewise.
+	(amd64_linux_store_inferior_registers): Likewise.
+	* amd64-nat.c (amd64_supply_native_gregset): Likewise.
+	(amd64_collect_native_gregset): Likewise.
+	* amd64-obsd-tdep.c (amd64obsd_supply_uthread): Likewise.
+	(amd64obsd_collect_uthread): Likewise.
+	* amd64-tdep.c (amd64_supply_fpregset): Likewise.
+	(amd64_collect_fpregset): Likewise.
+	(amd64_supply_fxsave): Likewise.
+	(amd64_supply_xsave): Likewise.
+	(amd64_collect_fxsave): Likewise.
+	(amd64_collect_xsave): Likewise.
+	* arc-tdep.c (arc_write_pc): Likewise.
+	* arch-utils.c (default_skip_permanent_breakpoint): Likewise.
+	* arm-fbsd-nat.c (arm_fbsd_fetch_inferior_registers): Likewise.
+	(arm_fbsd_store_inferior_registers): Likewise.
+	* arm-linux-nat.c (fetch_vfp_regs): Likewise.
+	(store_vfp_regs): Likewise.
+	(arm_linux_fetch_inferior_registers): Likewise.
+	(arm_linux_store_inferior_registers): Likewise.
+	* arm-linux-tdep.c (arm_linux_supply_gregset): Likewise.
+	(arm_linux_sigreturn_next_pc): Likewise.
+	(arm_linux_get_next_pcs_syscall_next_pc): Likewise.
+	* arm-nbsd-nat.c (arm_supply_gregset): Likewise.
+	(fetch_register): Likewise.
+	(store_register): Likewise.
+	* arm-tdep.c (arm_is_thumb): Likewise.
+	(displaced_in_arm_mode): Likewise.
+	(bx_write_pc): Likewise.
+	(arm_get_next_pcs_addr_bits_remove): Likewise.
+	(arm_software_single_step): Likewise.
+	(arm_extract_return_value): Likewise.
+	(arm_store_return_value): Likewise.
+	(arm_write_pc): Likewise.
+	* bfin-tdep.c (bfin_extract_return_value): Likewise.
+	* bsd-uthread.c (bsd_uthread_fetch_registers): Likewise.
+	(bsd_uthread_store_registers): Likewise.
+	* core-regset.c (fetch_core_registers): Likewise.
+	* corelow.c (get_core_registers): Likewise.
+	* cris-tdep.c (cris_store_return_value): Likewise.
+	(cris_extract_return_value): Likewise.
+	(find_step_target): Likewise.
+	(find_step_target): Likewise.
+	(cris_software_single_step): Likewise.
+	* ctf.c (ctf_fetch_registers): Likewise.
+	* darwin-nat.c (cancel_breakpoint): Likewise.
+	* fbsd-tdep.c (fbsd_collect_thread_registers): Likewise.
+	* frv-tdep.c (frv_extract_return_value): Likewise.
+	* ft32-tdep.c (ft32_store_return_value): Likewise.
+	(ft32_extract_return_value): Likewise.
+	* go32-nat.c (fetch_register): Likewise.
+	(go32_fetch_registers): Likewise.
+	(go32_store_registers): Likewise.
+	(store_register): Likewise.
+	* h8300-tdep.c (h8300_extract_return_value): Likewise.
+	(h8300_store_return_value): Likewise.
+	* hppa-linux-nat.c (fetch_register): Likewise.
+	(store_register): Likewise.
+	(hppa_linux_fetch_inferior_registers): Likewise.
+	(hppa_linux_store_inferior_registers): Likewise.
+	* i386-darwin-nat.c (i386_darwin_fetch_inferior_registers): Likewise.
+	(i386_darwin_store_inferior_registers): Likewise.
+	* i386-gnu-nat.c (gnu_fetch_registers): Likewise.
+	(gnu_store_registers): Likewise.
+	* i386-linux-nat.c (fetch_register): Likewise.
+	(store_register): Likewise.
+	(supply_gregset): Likewise.
+	(fill_gregset): Likewise.
+	(i386_linux_fetch_inferior_registers): Likewise.
+	(i386_linux_store_inferior_registers): Likewise.
+	(i386_linux_resume): Likewise.
+	* i386-linux-tdep.c (i386_linux_get_syscall_number_from_regcache):
+	Likewise.
+	* i386-nto-tdep.c (i386nto_supply_gregset): Likewise.
+	* i386-obsd-nat.c (i386obsd_supply_pcb): Likewise.
+	* i386-obsd-tdep.c (i386obsd_supply_uthread): Likewise.
+	(i386obsd_collect_uthread): Likewise.
+	* i386-tdep.c (i386_mmx_regnum_to_fp_regnum): Likewise.
+	(i386_supply_gregset): Likewise.
+	(i386_collect_gregset): Likewise.
+	(i386_supply_fpregset): Likewise.
+	(i386_collect_fpregset): Likewise.
+	(i386_mpx_bd_base): Likewise.
+	* i386-v4-nat.c	(supply_fpregset): Likewise.
+	(fill_fpregset): Likewise.
+	* i387-tdep.c (i387_supply_fsave): Likewise.
+	(i387_collect_fsave): Likewise.
+	(i387_supply_fxsave): Likewise.
+	(i387_collect_fxsave): Likewise.
+	(i387_supply_xsave): Likewise.
+	(i387_collect_xsave): Likewise.
+	* ia64-linux-nat.c (ia64_linux_fetch_registers): Likewise.
+	(ia64_linux_store_registers): Likewise.
+	* ia64-tdep.c (ia64_access_rse_reg): Likewise.
+	(ia64_extract_return_value): Likewise.
+	(ia64_store_return_value): Likewise.
+	(find_func_descr): Likewise.
+	* inf-child.c (inf_child_fetch_inferior_registers): Likewise.
+	* inf-ptrace.c (inf_ptrace_fetch_registers): Likewise.
+	(inf_ptrace_store_registers): Likewise.
+	* infrun.c (use_displaced_stepping): Likewise.
+	(displaced_step_prepare_throw): Likewise.
+	(resume): Likewise.
+	(proceed): Likewise.
+	(do_target_wait): Likewise.
+	(adjust_pc_after_break): Likewise.
+	(handle_inferior_event_1): Likewise.
+	(handle_signal_stop): Likewise.
+	(save_infcall_suspend_state): Likewise.
+	(restore_infcall_suspend_state): Likewise.
+	* iq2000-tdep.c (iq2000_extract_return_value): Likewise.
+	* jit.c (jit_frame_prev_register): Likewise.
+	* linux-nat.c (save_stop_reason): Likewise.
+	(linux_nat_wait_1): Likewise.
+	(resume_stopped_resumed_lwps): Likewise.
+	* linux-record.c (record_linux_sockaddr): Likewise.
+	(record_linux_msghdr): Likewise.
+	(record_linux_system_call): Likewise.
+	* linux-tdep.c (linux_collect_thread_registers): Likewise.
+	* lm32-tdep.c (lm32_extract_return_value): Likewise.
+	(lm32_store_return_value): Likewise.
+	* m32c-tdep.c (m32c_read_flg): Likewise.
+	(m32c_pseudo_register_read): Likewise.
+	(m32c_pseudo_register_write): Likewise.
+	* m32r-linux-tdep.c (m32r_linux_supply_gregset): Likewise.
+	(m32r_linux_collect_gregset): Likewise.
+	* m32r-tdep.c (m32r_store_return_value): Likewise.
+	(m32r_extract_return_value): Likewise.
+	* m68k-bsd-nat.c (m68kbsd_supply_fpregset): Likewise.
+	(m68kbsd_collect_fpregset): Likewise.
+	* m68k-bsd-tdep.c (m68kbsd_supply_fpregset): Likewise.
+	* m68k-linux-nat.c (fetch_register): Likewise.
+	(old_fetch_inferior_registers): Likewise.
+	(old_store_inferior_registers): Likewise.
+	(store_regs): Likewise.
+	* m68k-tdep.c (m68k_svr4_extract_return_value): Likewise.
+	(m68k_svr4_store_return_value): Likewise.
+	* m88k-tdep.c (m88k_store_arguments): Likewise.
+	* mi/mi-main.c (mi_cmd_data_list_changed_registers): Likewise.
+	(mi_cmd_data_write_register_values): Likewise.
+	* mips-fbsd-nat.c (mips_fbsd_fetch_inferior_registers): Likewise.
+	(mips_fbsd_store_inferior_registers): Likewise.
+	* mips-fbsd-tdep.c (mips_fbsd_supply_fpregs): Likewise.
+	(mips_fbsd_supply_gregs): Likewise.
+	(mips_fbsd_collect_fpregs): Likewise.
+	(mips_fbsd_collect_gregs): Likewise.
+	(mips_fbsd_supply_fpregset): Likewise.
+	(mips_fbsd_collect_fpregset): Likewise.
+	(mips_fbsd_supply_gregset): Likewise.
+	(mips_fbsd_collect_gregset): Likewise.
+	* mips-linux-nat.c (supply_gregset): Likewise.
+	(fill_gregset): Likewise.
+	(supply_fpregset): Likewise.
+	(fill_fpregset): Likewise.
+	* mips-linux-tdep.c (mips_supply_gregset): Likewise.
+	(mips_fill_gregset): Likewise.
+	(mips_supply_fpregset): Likewise.
+	(mips_fill_fpregset): Likewise.
+	(mips64_supply_gregset): Likewise.
+	(micromips_linux_sigframe_validate): Likewise.
+	* mips-nbsd-nat.c (mipsnbsd_fetch_inferior_registers): Likewise.
+	(mipsnbsd_fetch_inferior_registers): Likewise.
+	(mipsnbsd_store_inferior_registers): Likewise.
+	* mips-nbsd-tdep.c (mipsnbsd_supply_fpregset): Likewise.
+	(mipsnbsd_supply_gregset): Likewise.
+	(mipsnbsd_iterate_over_regset_sections): Likewise.
+	(mipsnbsd_supply_reg): Likewise.
+	(mipsnbsd_supply_fpreg): Likewise.
+	* mips-tdep.c (mips_in_frame_stub): Likewise.
+	(mips_dummy_id): Likewise.
+	(is_octeon_bbit_op): Likewise.
+	(micromips_bc1_pc): Likewise.
+	(extended_mips16_next_pc): Likewise.
+	(mips16_next_pc): Likewise.
+	(deal_with_atomic_sequence): Likewise.
+	* moxie-tdep.c (moxie_process_readu): Likewise.
+	* nios2-tdep.c (nios2_get_next_pc): Likewise.
+	* nto-procfs.c (procfs_store_registers): Likewise.
+	* ppc-fbsd-nat.c (ppcfbsd_fetch_inferior_registers): Likewise.
+	(ppcfbsd_store_inferior_registers): Likewise.
+	* ppc-linux-nat.c (fetch_vsx_register): Likewise.
+	(fetch_altivec_register): Likewise.
+	(get_spe_registers): Likewise.
+	(fetch_spe_register): Likewise.
+	(fetch_altivec_registers): Likewise.
+	(fetch_all_gp_regs): Likewise.
+	(fetch_all_fp_regs): Likewise.
+	(store_vsx_register): Likewise.
+	(store_altivec_register): Likewise.
+	(set_spe_registers): Likewise.
+	(store_spe_register): Likewise.
+	(store_altivec_registers): Likewise.
+	(store_all_gp_regs): Likewise.
+	(store_all_fp_regs): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_supply_gregset): Likewise.
+	(ppc_linux_collect_gregset): Likewise.
+	(ppc_canonicalize_syscall): Likewise.
+	(ppc_linux_record_signal): Likewise.
+	(ppu2spu_prev_register): Likewise.
+	* ppc-nbsd-nat.c (ppcnbsd_supply_pcb): Likewise.
+	* ppc-obsd-nat.c (ppcobsd_fetch_registers): Likewise.
+	(ppcobsd_store_registers): Likewise.
+	* ppc-ravenscar-thread.c (ppc_ravenscar_generic_fetch_registers):
+	Likewise.
+	(ppc_ravenscar_generic_store_registers): Likewise.
+	* procfs.c (procfs_fetch_registers): Likewise.
+	(procfs_store_registers): Likewise.
+	* ravenscar-thread.c (ravenscar_fetch_registers): Likewise.
+	(ravenscar_store_registers): Likewise.
+	(ravenscar_prepare_to_store): Likewise.
+	* record-btrace.c (record_btrace_fetch_registers): Likewise.
+	* record-full.c (record_full_wait_1): Likewise.
+	(record_full_registers_change): Likewise.
+	(record_full_store_registers): Likewise.
+	(record_full_core_fetch_registers): Likewise.
+	(record_full_save): Likewise.
+	(record_full_goto_insn): Likewise.
+	* regcache.c (regcache_register_size): Likewise.
+	(get_regcache_arch): Remove.
+	(regcache_read_pc): Likewise.
+	* regcache.h (get_regcache_arch): Remove.
+	* remote-sim.c (gdbsim_fetch_register): Likewise.
+	(gdbsim_store_register): Likewise.
+	* remote.c (fetch_register_using_p): Likewise.
+	(send_g_packet): Likewise.
+	(remote_prepare_to_store): Likewise.
+	(store_registers_using_G): Likewise.
+	* reverse.c (save_bookmark_command): Likewise.
+	(goto_bookmark_command): Likewise.
+	* rs6000-aix-tdep.c (branch_dest): Likewise.
+	* rs6000-nat.c (rs6000_ptrace64): Likewise.
+	(fetch_register): Likewise.
+	* rs6000-tdep.c (ppc_supply_reg): Likewise.
+	(ppc_collect_reg): Likewise.
+	(ppc_collect_gregset): Likewise.
+	(ppc_collect_fpregset): Likewise.
+	(ppc_collect_vsxregset): Likewise.
+	(ppc_collect_vrregset): Likewise.
+	(ppc_displaced_step_hw_singlestep): Likewise.
+	(rs6000_pseudo_register_read): Likewise.
+	(rs6000_pseudo_register_write): Likewise.
+	* s390-linux-nat.c (supply_gregset): Likewise.
+	(fill_gregset): Likewise.
+	(s390_linux_fetch_inferior_registers): Likewise.
+	* s390-linux-tdep.c (s390_write_pc): Likewise.
+	(s390_software_single_step): Likewise.
+	(s390_all_but_pc_registers_record): Likewise.
+	(s390_linux_syscall_record): Likewise.
+	* sentinel-frame.c (sentinel_frame_prev_arch): Likewise.
+	* sh-nbsd-nat.c (shnbsd_fetch_inferior_registers): Likewise.
+	(shnbsd_store_inferior_registers): Likewise.
+	* sh-tdep.c (sh_extract_return_value_nofpu): Likewise.
+	(sh_extract_return_value_fpu): Likewise.
+	(sh_store_return_value_nofpu): Likewise.
+	(sh_corefile_supply_regset): Likewise.
+	(sh_corefile_collect_regset): Likewise.
+	* sh64-tdep.c (sh64_extract_return_value): Likewise.
+	(sh64_store_return_value): Likewise.
+	* sparc-linux-tdep.c (sparc32_linux_collect_core_fpregset): Likewise.
+	* sparc-nat.c (sparc_fetch_inferior_registers): Likewise.
+	(sparc_store_inferior_registers): Likewise.
+	* sparc-ravenscar-thread.c (register_in_thread_descriptor_p): Likewise.
+	(sparc_ravenscar_prepare_to_store): Likewise.
+	* sparc-tdep.c (sparc32_store_arguments): Likewise.
+	(sparc_analyze_control_transfer): Likewise.
+	(sparc_step_trap): Likewise.
+	(sparc_software_single_step): Likewise.
+	(sparc32_gdbarch_init): Likewise.
+	(sparc_supply_rwindow): Likewise.
+	(sparc_collect_rwindow): Likewise.
+	* sparc64-linux-tdep.c (sparc64_linux_collect_core_fpregset): Likewise.
+	* sparc64-nbsd-nat.c (sparc64nbsd_supply_gregset): Likewise.
+	(sparc64nbsd_collect_gregset): Likewise.
+	(sparc64nbsd_supply_fpregset): Likewise.
+	(sparc64nbsd_collect_fpregset): Likewise.
+	* sparc64-tdep.c (sparc64_store_arguments): Likewise.
+	(sparc64_supply_gregset): Likewise.
+	(sparc64_collect_gregset): Likewise.
+	(sparc64_supply_fpregset): Likewise.
+	(sparc64_collect_fpregset): Likewise.
+	* spu-linux-nat.c (spu_fetch_inferior_registers): Likewise.
+	* spu-tdep.c (spu_unwind_sp): Likewise.
+	(spu2ppu_prev_register): Likewise.
+	(spu_memory_remove_breakpoint): Likewise.
+	* stack.c (return_command): Likewise.
+	* tic6x-tdep.c (tic6x_extract_signed_field): Likewise.
+	* tracefile-tfile.c (tfile_fetch_registers): Likewise.
+	* tracefile.c (trace_save_ctf): Likewise.
+	* windows-nat.c (do_windows_fetch_inferior_registers): Likewise.
+	(do_windows_store_inferior_registers): Likewise.
+	(windows_resume): Likewise.
+	* xtensa-linux-nat.c (fill_gregset): Likewise.
+	(supply_gregset_reg): Likewise.
+	* xtensa-tdep.c (xtensa_register_write_masked): Likewise.
+	(xtensa_register_read_masked): Likewise.
+	(xtensa_supply_gregset): Likewise.
+	(xtensa_extract_return_value): Likewise.
+	(xtensa_store_return_value): Likewise.
+
 2017-10-25  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* doublest.c (floatformat_from_string): New function.

@@ -76,7 +76,7 @@ nto_reg_offset (int regnum)
 static void
 i386nto_supply_gregset (struct regcache *regcache, char *gpregs)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   gdb_assert (tdep->gregset_reg_offset == i386nto_gregset_reg_offset);

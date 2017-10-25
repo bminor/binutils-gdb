@@ -51,7 +51,7 @@ fill_gregset (const struct regcache *regcache,
 {
   int i;
   xtensa_elf_gregset_t *regs = (xtensa_elf_gregset_t *) gregsetp;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   if (regnum == gdbarch_pc_regnum (gdbarch) || regnum == -1)
     regcache_raw_collect (regcache, gdbarch_pc_regnum (gdbarch), &regs->pc);
@@ -121,7 +121,7 @@ supply_gregset_reg (struct regcache *regcache,
   int i;
   xtensa_elf_gregset_t *regs = (xtensa_elf_gregset_t *) gregsetp;
 
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   if (regnum == gdbarch_pc_regnum (gdbarch) || regnum == -1)
     regcache_raw_supply (regcache, gdbarch_pc_regnum (gdbarch), &regs->pc);

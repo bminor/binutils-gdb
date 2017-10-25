@@ -539,7 +539,7 @@ static void
 iq2000_extract_return_value (struct type *type, struct regcache *regcache,
 			     gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* If the function's return value is 8 bytes or less, it is

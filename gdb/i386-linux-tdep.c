@@ -537,7 +537,7 @@ i386_linux_record_signal (struct gdbarch *gdbarch,
 static LONGEST
 i386_linux_get_syscall_number_from_regcache (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   /* The content of a register.  */
   gdb_byte buf[4];

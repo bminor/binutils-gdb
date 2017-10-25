@@ -58,7 +58,7 @@ arm_fbsd_fetch_inferior_registers (struct target_ops *ops,
 {
   pid_t pid = get_ptrace_pid (regcache_get_ptid (regcache));
 
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   if (regnum == -1 || getregs_supplies (gdbarch, regnum))
     {
       struct reg regs;
@@ -93,7 +93,7 @@ arm_fbsd_store_inferior_registers (struct target_ops *ops,
 {
   pid_t pid = get_ptrace_pid (regcache_get_ptid (regcache));
 
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   if (regnum == -1 || getregs_supplies (gdbarch, regnum))
     {
       struct reg regs;

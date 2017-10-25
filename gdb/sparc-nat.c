@@ -137,7 +137,7 @@ void
 sparc_fetch_inferior_registers (struct target_ops *ops,
 				struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   pid_t pid;
 
   /* NOTE: cagney/2002-12-03: This code assumes that the currently
@@ -190,7 +190,7 @@ void
 sparc_store_inferior_registers (struct target_ops *ops,
 				struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   pid_t pid;
 
   /* NOTE: cagney/2002-12-02: See comment in fetch_inferior_registers

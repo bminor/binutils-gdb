@@ -3223,7 +3223,7 @@ procfs_fetch_registers (struct target_ops *ops,
   ptid_t ptid = regcache_get_ptid (regcache);
   int pid = ptid_get_pid (ptid);
   int tid = ptid_get_lwp (ptid);
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   pi = find_procinfo_or_die (pid, tid);
 
@@ -3273,7 +3273,7 @@ procfs_store_registers (struct target_ops *ops,
   ptid_t ptid = regcache_get_ptid (regcache);
   int pid = ptid_get_pid (ptid);
   int tid = ptid_get_lwp (ptid);
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   pi = find_procinfo_or_die (pid, tid);
 

@@ -600,7 +600,7 @@ static CORE_ADDR
 branch_dest (struct regcache *regcache, int opcode, int instr,
 	     CORE_ADDR pc, CORE_ADDR safety)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR dest;
@@ -676,7 +676,7 @@ branch_dest (struct regcache *regcache, int opcode, int instr,
 static std::vector<CORE_ADDR>
 rs6000_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int ii, insn;
   CORE_ADDR loc;

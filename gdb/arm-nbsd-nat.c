@@ -47,7 +47,7 @@ arm_supply_gregset (struct regcache *regcache, struct reg *gregset)
   regcache_raw_supply (regcache, ARM_LR_REGNUM,
 		       (char *) &gregset->r_lr);
   /* This is ok: we're running native...  */
-  r_pc = gdbarch_addr_bits_remove (get_regcache_arch (regcache), gregset->r_pc);
+  r_pc = gdbarch_addr_bits_remove (regcache->arch (), gregset->r_pc);
   regcache_raw_supply (regcache, ARM_PC_REGNUM, (char *) &r_pc);
 
   if (arm_apcs_32)
@@ -101,7 +101,7 @@ fetch_register (struct regcache *regcache, int regno)
     case ARM_PC_REGNUM:
       /* This is ok: we're running native...  */
       inferior_registers.r_pc = gdbarch_addr_bits_remove
-				  (get_regcache_arch (regcache),
+				  (regcache->arch (),
 				   inferior_registers.r_pc);
       regcache_raw_supply (regcache, ARM_PC_REGNUM,
 			   (char *) &inferior_registers.r_pc);
@@ -212,7 +212,7 @@ armnbsd_fetch_registers (struct target_ops *ops,
 static void
 store_register (const struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct reg inferior_registers;
   int ret;
 
@@ -289,7 +289,7 @@ store_register (const struct regcache *regcache, int regno)
 static void
 store_regs (const struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct reg inferior_registers;
   int ret;
   int regno;

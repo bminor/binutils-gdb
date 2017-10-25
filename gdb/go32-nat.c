@@ -493,7 +493,7 @@ go32_wait (struct target_ops *ops,
 static void
 fetch_register (struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   if (regno < gdbarch_fp0_regnum (gdbarch))
     regcache_raw_supply (regcache, regno,
 			 (char *) &a_tss + regno_mapping[regno].tss_ofs);
@@ -514,7 +514,7 @@ go32_fetch_registers (struct target_ops *ops,
   else
     {
       for (regno = 0;
-	   regno < gdbarch_fp0_regnum (get_regcache_arch (regcache));
+	   regno < gdbarch_fp0_regnum (regcache->arch ());
 	   regno++)
 	fetch_register (regcache, regno);
       i387_supply_fsave (regcache, -1, &npx);
@@ -524,7 +524,7 @@ go32_fetch_registers (struct target_ops *ops,
 static void
 store_register (const struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   if (regno < gdbarch_fp0_regnum (gdbarch))
     regcache_raw_collect (regcache, regno,
 			  (char *) &a_tss + regno_mapping[regno].tss_ofs);
@@ -546,7 +546,7 @@ go32_store_registers (struct target_ops *ops,
     store_register (regcache, regno);
   else
     {
-      for (r = 0; r < gdbarch_fp0_regnum (get_regcache_arch (regcache)); r++)
+      for (r = 0; r < gdbarch_fp0_regnum (regcache->arch ()); r++)
 	store_register (regcache, r);
       i387_collect_fsave (regcache, -1, &npx);
     }

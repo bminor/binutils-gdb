@@ -276,7 +276,7 @@ ravenscar_fetch_registers (struct target_ops *ops,
     beneath->to_fetch_registers (beneath, regcache, regnum);
   else
     {
-      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct gdbarch *gdbarch = regcache->arch ();
       struct ravenscar_arch_ops *arch_ops
 	= gdbarch_ravenscar_ops (gdbarch);
 
@@ -297,7 +297,7 @@ ravenscar_store_registers (struct target_ops *ops,
     beneath->to_store_registers (beneath, regcache, regnum);
   else
     {
-      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct gdbarch *gdbarch = regcache->arch ();
       struct ravenscar_arch_ops *arch_ops
 	= gdbarch_ravenscar_ops (gdbarch);
 
@@ -318,7 +318,7 @@ ravenscar_prepare_to_store (struct target_ops *self,
     beneath->to_prepare_to_store (beneath, regcache);
   else
     {
-      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct gdbarch *gdbarch = regcache->arch ();
       struct ravenscar_arch_ops *arch_ops
 	= gdbarch_ravenscar_ops (gdbarch);
 

@@ -96,7 +96,7 @@ amd64_supply_native_gregset (struct regcache *regcache,
 			     const void *gregs, int regnum)
 {
   const char *regs = (const char *) gregs;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int num_regs = amd64_native_gregset64_num_regs;
   int i;
 
@@ -127,7 +127,7 @@ amd64_collect_native_gregset (const struct regcache *regcache,
 			      void *gregs, int regnum)
 {
   char *regs = (char *) gregs;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int num_regs = amd64_native_gregset64_num_regs;
   int i;
 

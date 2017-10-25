@@ -7549,7 +7549,7 @@ remote_wait (struct target_ops *ops,
 static int
 fetch_register_using_p (struct regcache *regcache, struct packet_reg *reg)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct remote_state *rs = get_remote_state ();
   char *buf, *p;
   gdb_byte *regp = (gdb_byte *) alloca (register_size (gdbarch, reg->regnum));
@@ -7578,7 +7578,7 @@ fetch_register_using_p (struct regcache *regcache, struct packet_reg *reg)
       return 0;
     case PACKET_ERROR:
       error (_("Could not fetch register \"%s\"; remote failure reply '%s'"),
-	     gdbarch_register_name (get_regcache_arch (regcache), 
+	     gdbarch_register_name (regcache->arch (), 
 				    reg->regnum), 
 	     buf);
     }
@@ -7642,7 +7642,7 @@ send_g_packet (void)
 static void
 process_g_packet (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct remote_state *rs = get_remote_state ();
   remote_arch_state *rsa = get_remote_arch_state (gdbarch);
   int i, buf_len;
@@ -7778,7 +7778,7 @@ static void
 remote_fetch_registers (struct target_ops *ops,
 			struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   remote_arch_state *rsa = get_remote_arch_state (gdbarch);
   int i;
 
@@ -7838,7 +7838,7 @@ remote_prepare_to_store (struct target_ops *self, struct regcache *regcache)
     case PACKET_DISABLE:
     case PACKET_SUPPORT_UNKNOWN:
       /* Make sure all the necessary registers are cached.  */
-      for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
+      for (i = 0; i < gdbarch_num_regs (regcache->arch ()); i++)
 	if (rsa->regs[i].in_g_packet)
 	  regcache_raw_update (regcache, rsa->regs[i].regnum);
       break;
@@ -7854,7 +7854,7 @@ static int
 store_register_using_P (const struct regcache *regcache, 
 			struct packet_reg *reg)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct remote_state *rs = get_remote_state ();
   /* Try storing a single register.  */
   char *buf = rs->buf;
@@ -7906,7 +7906,7 @@ store_registers_using_G (const struct regcache *regcache)
 
     regs = (gdb_byte *) alloca (rsa->sizeof_g_packet);
     memset (regs, 0, rsa->sizeof_g_packet);
-    for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
+    for (i = 0; i < gdbarch_num_regs (regcache->arch ()); i++)
       {
 	struct packet_reg *r = &rsa->regs[i];
 

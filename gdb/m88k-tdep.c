@@ -252,7 +252,7 @@ static CORE_ADDR
 m88k_store_arguments (struct regcache *regcache, int nargs,
 		      struct value **args, CORE_ADDR sp)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int num_register_words = 0;
   int num_stack_words = 0;
   int i;

@@ -874,7 +874,7 @@ int default_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr)
 void
 default_skip_permanent_breakpoint (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR current_pc = regcache_read_pc (regcache);
   int bp_len;
 

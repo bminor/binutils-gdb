@@ -375,7 +375,7 @@ ppc_linux_supply_gregset (const struct regset *regset,
 
   ppc_supply_gregset (regset, regcache, regnum, gregs, len);
 
-  if (ppc_linux_trap_reg_p (get_regcache_arch (regcache)))
+  if (ppc_linux_trap_reg_p (regcache->arch ()))
     {
       /* "orig_r3" is stored 2 slots after "pc".  */
       if (regnum == -1 || regnum == PPC_ORIG_R3_REGNUM)
@@ -405,7 +405,7 @@ ppc_linux_collect_gregset (const struct regset *regset,
 
   ppc_collect_gregset (regset, regcache, regnum, gregs, len);
 
-  if (ppc_linux_trap_reg_p (get_regcache_arch (regcache)))
+  if (ppc_linux_trap_reg_p (regcache->arch ()))
     {
       /* "orig_r3" is stored 2 slots after "pc".  */
       if (regnum == -1 || regnum == PPC_ORIG_R3_REGNUM)
@@ -798,7 +798,7 @@ ppc_canonicalize_syscall (int syscall)
 static int
 ppc_linux_syscall_record (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   ULONGEST scnum;
   enum gdb_syscall syscall_gdb;
@@ -927,7 +927,7 @@ ppc_linux_record_signal (struct gdbarch *gdbarch, struct regcache *regcache,
 static void
 ppc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   regcache_cooked_write_unsigned (regcache, gdbarch_pc_regnum (gdbarch), pc);
 
@@ -1257,7 +1257,7 @@ static struct gdbarch *
 ppu2spu_prev_arch (struct frame_info *this_frame, void **this_cache)
 {
   struct ppu2spu_cache *cache = (struct ppu2spu_cache *) *this_cache;
-  return get_regcache_arch (cache->regcache);
+  return cache->regcache->arch ();
 }
 
 static void
@@ -1273,7 +1273,7 @@ ppu2spu_prev_register (struct frame_info *this_frame,
 		       void **this_cache, int regnum)
 {
   struct ppu2spu_cache *cache = (struct ppu2spu_cache *) *this_cache;
-  struct gdbarch *gdbarch = get_regcache_arch (cache->regcache);
+  struct gdbarch *gdbarch = cache->regcache->arch ();
   gdb_byte *buf;
 
   buf = (gdb_byte *) alloca (register_size (gdbarch, regnum));

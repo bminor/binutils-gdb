@@ -121,7 +121,7 @@ save_bookmark_command (char *args, int from_tty)
 {
   /* Get target's idea of a bookmark.  */
   gdb_byte *bookmark_id = target_get_bookmark (args, from_tty);
-  struct gdbarch *gdbarch = get_regcache_arch (get_current_regcache ());
+  struct gdbarch *gdbarch = get_current_regcache ()->arch ();
 
   /* CR should not cause another identical bookmark.  */
   dont_repeat ();
@@ -280,7 +280,7 @@ goto_bookmark_command (char *args, int from_tty)
 static int
 bookmark_1 (int bnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (get_current_regcache ());
+  struct gdbarch *gdbarch = get_current_regcache ()->arch ();
   struct bookmark *b;
   int matched = 0;
 

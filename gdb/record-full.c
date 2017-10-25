@@ -244,7 +244,7 @@ static inline struct record_full_entry *
 record_full_reg_alloc (struct regcache *regcache, int regnum)
 {
   struct record_full_entry *rec;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   rec = XCNEW (struct record_full_entry);
   rec->type = record_full_reg;
@@ -569,7 +569,7 @@ static void
 record_full_message (struct regcache *regcache, enum gdb_signal signal)
 {
   int ret;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct cleanup *old_cleanups
     = make_cleanup (record_full_arch_list_cleanups, 0);
 
@@ -775,7 +775,7 @@ static void
 record_full_core_open_1 (const char *name, int from_tty)
 {
   struct regcache *regcache = get_current_regcache ();
-  int regnum = gdbarch_num_regs (get_regcache_arch (regcache));
+  int regnum = gdbarch_num_regs (regcache->arch ());
   int i;
 
   /* Get record_full_core_regbuf.  */
@@ -1171,7 +1171,7 @@ record_full_wait_1 (struct target_ops *ops,
   else
     {
       struct regcache *regcache = get_current_regcache ();
-      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct gdbarch *gdbarch = regcache->arch ();
       struct address_space *aspace = get_regcache_aspace (regcache);
       int continue_flag = 1;
       int first_record_full_end = 1;
@@ -1405,7 +1405,7 @@ record_full_registers_change (struct regcache *regcache, int regnum)
     {
       int i;
 
-      for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
+      for (i = 0; i < gdbarch_num_regs (regcache->arch ()); i++)
 	{
 	  if (record_full_arch_list_add_reg (regcache, i))
 	    {
@@ -1462,7 +1462,7 @@ record_full_store_registers (struct target_ops *ops,
 	      query (_("Because GDB is in replay mode, changing the value "
 		       "of a register will make the execution log unusable "
 		       "from this point onward.  Change register %s?"),
-		      gdbarch_register_name (get_regcache_arch (regcache),
+		      gdbarch_register_name (regcache->arch (),
 					       regno));
 
 	  if (!n)
@@ -1474,7 +1474,7 @@ record_full_store_registers (struct target_ops *ops,
 		  int i;
 
 		  for (i = 0;
-		       i < gdbarch_num_regs (get_regcache_arch (regcache));
+		       i < gdbarch_num_regs (regcache->arch ());
 		       i++)
 		    regcache_invalidate (regcache, i);
 		}
@@ -2029,7 +2029,7 @@ record_full_core_fetch_registers (struct target_ops *ops,
 {
   if (regno < 0)
     {
-      int num = gdbarch_num_regs (get_regcache_arch (regcache));
+      int num = gdbarch_num_regs (regcache->arch ());
       int i;
 
       for (i = 0; i < num; i ++)
@@ -2548,7 +2548,7 @@ record_full_save (struct target_ops *self, const char *recfilename)
 
   /* Get the values of regcache and gdbarch.  */
   regcache = get_current_regcache ();
-  gdbarch = get_regcache_arch (regcache);
+  gdbarch = regcache->arch ();
 
   /* Disable the GDB operation record.  */
   scoped_restore restore_operation_disable
@@ -2734,7 +2734,7 @@ record_full_goto_insn (struct record_full_entry *entry,
   scoped_restore restore_operation_disable
     = record_full_gdb_operation_disable_set ();
   struct regcache *regcache = get_current_regcache ();
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   /* Assume everything is valid: we will hit the entry,
      and we will not hit the end of the recording.  */

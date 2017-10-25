@@ -1241,7 +1241,7 @@ static void
 sh64_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int len = TYPE_LENGTH (type);
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -1295,7 +1295,7 @@ static void
 sh64_store_return_value (struct type *type, struct regcache *regcache,
 			 const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   gdb_byte buf[64];	/* more than enough...  */
   int len = TYPE_LENGTH (type);
 

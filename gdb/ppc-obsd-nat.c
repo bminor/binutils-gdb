@@ -89,7 +89,7 @@ ppcobsd_fetch_registers (struct target_ops *ops,
 
 #ifdef PT_GETFPREGS
   if (regnum == -1
-      || getfpregs_supplies (get_regcache_arch (regcache), regnum))
+      || getfpregs_supplies (regcache->arch (), regnum))
     {
       struct fpreg fpregs;
 
@@ -127,7 +127,7 @@ ppcobsd_store_registers (struct target_ops *ops,
 
 #ifdef PT_GETFPREGS
   if (regnum == -1
-      || getfpregs_supplies (get_regcache_arch (regcache), regnum))
+      || getfpregs_supplies (regcache->arch (), regnum))
     {
       struct fpreg fpregs;
 
@@ -147,7 +147,7 @@ ppcobsd_store_registers (struct target_ops *ops,
 static int
 ppcobsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct switchframe sf;
   struct callframe cf;

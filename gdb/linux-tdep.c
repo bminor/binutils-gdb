@@ -1618,7 +1618,7 @@ linux_collect_thread_registers (const struct regcache *regcache,
 				char *note_data, int *note_size,
 				enum gdb_signal stop_signal)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct linux_collect_regset_section_cb_data data;
 
   data.gdbarch = gdbarch;

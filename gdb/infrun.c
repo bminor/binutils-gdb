@@ -1690,7 +1690,7 @@ static int
 use_displaced_stepping (struct thread_info *tp)
 {
   struct regcache *regcache = get_thread_regcache (tp->ptid);
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct displaced_step_inferior_state *displaced_state;
 
   displaced_state = get_displaced_stepping_state (ptid_get_pid (tp->ptid));
@@ -1759,7 +1759,7 @@ displaced_step_prepare_throw (ptid_t ptid)
   struct cleanup *ignore_cleanups;
   struct thread_info *tp = find_thread_ptid (ptid);
   struct regcache *regcache = get_thread_regcache (ptid);
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct address_space *aspace = get_regcache_aspace (regcache);
   CORE_ADDR original, copy;
   ULONGEST len;
@@ -2385,7 +2385,7 @@ resume (enum gdb_signal sig)
 {
   struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
   struct regcache *regcache = get_current_regcache ();
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct thread_info *tp = inferior_thread ();
   CORE_ADDR pc = regcache_read_pc (regcache);
   struct address_space *aspace = get_regcache_aspace (regcache);
@@ -2736,7 +2736,7 @@ resume (enum gdb_signal sig)
       && !step_over_info_valid_p ())
     {
       struct regcache *resume_regcache = get_thread_regcache (tp->ptid);
-      struct gdbarch *resume_gdbarch = get_regcache_arch (resume_regcache);
+      struct gdbarch *resume_gdbarch = resume_regcache->arch ();
       CORE_ADDR actual_pc = regcache_read_pc (resume_regcache);
       gdb_byte buf[4];
 
@@ -3006,7 +3006,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   previous_inferior_ptid = inferior_ptid;
 
   regcache = get_current_regcache ();
-  gdbarch = get_regcache_arch (regcache);
+  gdbarch = regcache->arch ();
   aspace = get_regcache_aspace (regcache);
   pc = regcache_read_pc (regcache);
   tp = inferior_thread ();
@@ -3519,7 +3519,7 @@ do_target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 	  || tp->suspend.stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT))
     {
       struct regcache *regcache = get_thread_regcache (tp->ptid);
-      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct gdbarch *gdbarch = regcache->arch ();
       CORE_ADDR pc;
       int discard = 0;
 
@@ -3582,7 +3582,7 @@ do_target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 	  int decr_pc;
 
 	  regcache = get_thread_regcache (tp->ptid);
-	  gdbarch = get_regcache_arch (regcache);
+	  gdbarch = regcache->arch ();
 
 	  decr_pc = gdbarch_decr_pc_after_break (gdbarch);
 	  if (decr_pc != 0)
@@ -4144,7 +4144,7 @@ adjust_pc_after_break (struct thread_info *thread,
   /* If this target does not decrement the PC after breakpoints, then
      we have nothing to do.  */
   regcache = get_thread_regcache (thread->ptid);
-  gdbarch = get_regcache_arch (regcache);
+  gdbarch = regcache->arch ();
 
   decr_pc = gdbarch_decr_pc_after_break (gdbarch);
   if (decr_pc == 0)
@@ -5077,7 +5077,7 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
       else
 	{
 	  struct regcache *regcache = get_thread_regcache (ecs->ptid);
-	  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+	  struct gdbarch *gdbarch = regcache->arch ();
 
 	  if (gdbarch_gdb_signal_to_target_p (gdbarch))
 	    {
@@ -5125,7 +5125,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       /* Check whether the inferior is displaced stepping.  */
       {
 	struct regcache *regcache = get_thread_regcache (ecs->ptid);
-	struct gdbarch *gdbarch = get_regcache_arch (regcache);
+	struct gdbarch *gdbarch = regcache->arch ();
 
 	/* If checking displaced stepping is supported, and thread
 	   ecs->ptid is displaced stepping.  */
@@ -5687,7 +5687,7 @@ handle_signal_stop (struct execution_control_state *ecs)
   if (debug_infrun)
     {
       struct regcache *regcache = get_thread_regcache (ecs->ptid);
-      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct gdbarch *gdbarch = regcache->arch ();
       scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
       inferior_ptid = ecs->ptid;
@@ -7922,7 +7922,7 @@ static void
 handle_segmentation_fault (struct ui_out *uiout)
 {
   struct regcache *regcache = get_current_regcache ();
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   if (gdbarch_handle_segmentation_fault_p (gdbarch))
     gdbarch_handle_segmentation_fault (gdbarch, uiout);
@@ -8831,7 +8831,7 @@ save_infcall_suspend_state (void)
   struct infcall_suspend_state *inf_state;
   struct thread_info *tp = inferior_thread ();
   struct regcache *regcache = get_current_regcache ();
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   gdb_byte *siginfo_data = NULL;
 
   if (gdbarch_get_siginfo_type_p (gdbarch))
@@ -8882,7 +8882,7 @@ restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 {
   struct thread_info *tp = inferior_thread ();
   struct regcache *regcache = get_current_regcache ();
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   tp->suspend = inf_state->thread_suspend;
 

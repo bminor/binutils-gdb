@@ -123,7 +123,7 @@ static void
 ft32_store_return_value (struct type *type, struct regcache *regcache,
 			 const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR regval;
   int len = TYPE_LENGTH (type);
@@ -400,7 +400,7 @@ static void
 ft32_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *dst)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   bfd_byte *valbuf = dst;
   int len = TYPE_LENGTH (type);

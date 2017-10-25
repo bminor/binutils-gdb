@@ -303,7 +303,7 @@ static void
 lm32_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST l;
   CORE_ADDR return_buffer;
@@ -340,7 +340,7 @@ static void
 lm32_store_return_value (struct type *type, struct regcache *regcache,
 			 const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
   int len = TYPE_LENGTH (type);

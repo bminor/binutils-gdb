@@ -1423,7 +1423,7 @@ record_btrace_fetch_registers (struct target_ops *ops,
       struct gdbarch *gdbarch;
       int pcreg;
 
-      gdbarch = get_regcache_arch (regcache);
+      gdbarch = regcache->arch ();
       pcreg = gdbarch_pc_regnum (gdbarch);
       if (pcreg < 0)
 	return;

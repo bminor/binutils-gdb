@@ -438,7 +438,7 @@ static int fsave_offset[] =
 void
 i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   const gdb_byte *regs = (const gdb_byte *) fsave;
@@ -493,7 +493,7 @@ i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
 void
 i387_collect_fsave (const struct regcache *regcache, int regnum, void *fsave)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
   gdb_byte *regs = (gdb_byte *) fsave;
   int i;
 
@@ -586,7 +586,7 @@ static int i387_tag (const gdb_byte *raw);
 void
 i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
   const gdb_byte *regs = (const gdb_byte *) fxsave;
   int i;
 
@@ -669,7 +669,7 @@ i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 void
 i387_collect_fxsave (const struct regcache *regcache, int regnum, void *fxsave)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
   gdb_byte *regs = (gdb_byte *) fxsave;
   int i;
 
@@ -899,7 +899,7 @@ void
 i387_supply_xsave (struct regcache *regcache, int regnum,
 		   const void *xsave)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const gdb_byte *regs = (const gdb_byte *) xsave;
   int i;
@@ -1307,7 +1307,7 @@ void
 i387_collect_xsave (const struct regcache *regcache, int regnum,
 		    void *xsave, int gcore)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   gdb_byte *regs = (gdb_byte *) xsave;
   int i;

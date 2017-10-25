@@ -1643,7 +1643,7 @@ static void
 cris_store_return_value (struct type *type, struct regcache *regcache,
 			 const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
   int len = TYPE_LENGTH (type);
@@ -1811,7 +1811,7 @@ static void
 cris_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
   int len = TYPE_LENGTH (type);
@@ -1994,7 +1994,7 @@ find_step_target (struct regcache *regcache, inst_env_type *inst_env)
   int i;
   int offset;
   unsigned short insn;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* Create a local register image and set the initial state.  */
@@ -2063,7 +2063,7 @@ find_step_target (struct regcache *regcache, inst_env_type *inst_env)
 static std::vector<CORE_ADDR>
 cris_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   inst_env_type inst_env;
   std::vector<CORE_ADDR> next_pcs;
 
@@ -3800,7 +3800,7 @@ typedef cris_elf_greg_t crisv32_elf_gregset_t[CRISV32_ELF_NGREG];
 static void 
 cris_supply_gregset (struct regcache *regcache, cris_elf_gregset_t *gregsetp)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int i;
   cris_elf_greg_t *regp = *gregsetp;

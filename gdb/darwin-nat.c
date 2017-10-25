@@ -1191,7 +1191,7 @@ cancel_breakpoint (ptid_t ptid)
      tripped on it.  */
 
   struct regcache *regcache = get_thread_regcache (ptid);
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR pc;
 
   pc = regcache_read_pc (regcache) - gdbarch_decr_pc_after_break (gdbarch);

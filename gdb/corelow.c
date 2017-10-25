@@ -603,7 +603,7 @@ get_core_registers (struct target_ops *ops,
       return;
     }
 
-  gdbarch = get_regcache_arch (regcache);
+  gdbarch = regcache->arch ();
   if (gdbarch_iterate_over_regset_sections_p (gdbarch))
     gdbarch_iterate_over_regset_sections (gdbarch,
 					  get_core_registers_cb,
@@ -617,7 +617,7 @@ get_core_registers (struct target_ops *ops,
     }
 
   /* Mark all registers not found in the core as unavailable.  */
-  for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
+  for (i = 0; i < gdbarch_num_regs (regcache->arch ()); i++)
     if (regcache_register_status (regcache, i) == REG_UNKNOWN)
       regcache_raw_supply (regcache, i, NULL);
 }
