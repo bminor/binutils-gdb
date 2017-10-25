@@ -480,7 +480,9 @@ filter_symbols (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
 
-      if (strcmp (sym->name, "__gnu_lto_slim") == 0)
+      if (sym->name[0] == '_'
+	  && sym->name[1] == '_'
+	  && strcmp (sym->name + (sym->name[2] == '_'), "__gnu_lto_slim") == 0)
 	non_fatal (_("%s: plugin needed to handle lto object"),
 		   bfd_get_filename (abfd));
 

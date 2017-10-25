@@ -1,3 +1,10 @@
+2017-11-01  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2017-10-25  Alan Modra  <amodra@gmail.com>
+	* symtab.cc (Symbol_table::add_from_relobj): Match "__gnu_lto_slim"
+	optionally prefixed with "_".
+
 2017-10-18  Kyle Butt  <iteratee@google.com>
 	    Alan Modra  <amodra@gmail.com>
 

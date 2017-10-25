@@ -2405,7 +2405,11 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 			  map = new_map;
 			}
 
-		      if (strcmp (syms[src_count]->name, "__gnu_lto_slim") == 0)
+		      if (syms[src_count]->name[0] == '_'
+			  && syms[src_count]->name[1] == '_'
+			  && strcmp (syms[src_count]->name
+				     + (syms[src_count]->name[2] == '_'),
+				     "__gnu_lto_slim") == 0)
 			_bfd_error_handler
 			  (_("%B: plugin needed to handle lto object"),
 			   current);

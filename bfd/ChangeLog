@@ -1,3 +1,11 @@
+2017-11-01  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2017-10-25  Alan Modra  <amodra@gmail.com>
+	* archive.c (_bfd_compute_and_write_armap): Match "__gnu_lto_slim"
+	optionally prefixed with "_".
+	* linker.c (_bfd_generic_link_add_one_symbol): Likewise.
+
 2017-10-05  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (elf_link_input_bfd): Correct ctor/dtor in init_array/
