@@ -1,3 +1,7 @@
+2017-10-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.texinfo: Correct -z ibt.
+
 2017-10-25  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-plugin/lto-3r.d: Match "__gnu_lto_v" optionally
