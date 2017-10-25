@@ -1,5 +1,13 @@
 2017-10-25  Alan Modra  <amodra@gmail.com>
 
+	PR 22348
+	* config/tc-crx.c (instruction, output_opcode): Make static.
+	(relocatable, ins_parse, cur_arg_num): Likewise.
+	(parse_insn): Adjust for renamed opcodes globals.
+	(check_range): Likewise
+
+2017-10-25  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/all/fill-1.d: Exclude tic4x and tic54x.
 	* testsuite/gas/all/fill-1.s: Use L1 rather than .L1.
 

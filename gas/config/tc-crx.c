@@ -69,21 +69,21 @@ static struct hash_control *reg_hash;
 /* CRX coprocessor registers hash table.  */
 static struct hash_control *copreg_hash;
 /* Current instruction we're assembling.  */
-const inst *instruction;
+static const inst *instruction;
 
 /* Global variables.  */
 
 /* Array to hold an instruction encoding.  */
-long output_opcode[2];
+static long output_opcode[2];
 
 /* Nonzero means a relocatable symbol.  */
-int relocatable;
+static int relocatable;
 
 /* A copy of the original instruction (used in error messages).  */
-char ins_parse[MAX_INST_LEN];
+static char ins_parse[MAX_INST_LEN];
 
 /* The current processed argument number.  */
-int cur_arg_num;
+static int cur_arg_num;
 
 /* Generic assembler global variables which must be defined by all targets.  */
 
@@ -1043,9 +1043,9 @@ parse_insn (ins *insn, char *operands)
   int i;
 
   /* Handle instructions with no operands.  */
-  for (i = 0; no_op_insn[i] != NULL; i++)
+  for (i = 0; crx_no_op_insn[i] != NULL; i++)
   {
-    if (streq (no_op_insn[i], instruction->mnemonic))
+    if (streq (crx_no_op_insn[i], instruction->mnemonic))
     {
       insn->nargs = 0;
       return;
@@ -1387,7 +1387,7 @@ check_range (long *num, int bits, int unsigned flags, int update)
 		      : instruction->flags & DISPUD4 ? 4
 		      : 0);
 
-      for (bin = 0; bin < cst4_maps; bin++)
+      for (bin = 0; bin < crx_cst4_maps; bin++)
 	{
 	  if (value == mul * bin)
 	    {
@@ -1404,9 +1404,9 @@ check_range (long *num, int bits, int unsigned flags, int update)
     {
       int is_cst4 = 0;
 
-      for (bin = 0; bin < cst4_maps; bin++)
+      for (bin = 0; bin < crx_cst4_maps; bin++)
 	{
-	  if (value == (uint32_t) cst4_map[bin])
+	  if (value == (uint32_t) crx_cst4_map[bin])
 	    {
 	      is_cst4 = 1;
 	      if (update)
