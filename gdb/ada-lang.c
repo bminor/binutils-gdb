@@ -3384,7 +3384,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
       break;
 
     case OP_LONG:
-    case OP_DOUBLE:
+    case OP_FLOAT:
     case OP_VAR_VALUE:
     case OP_VAR_MSYM_VALUE:
       *pos += 4;
@@ -10421,7 +10421,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_NORMAL)
 	arg1 = unwrap_value (arg1);
 
-      /* If evaluating an OP_DOUBLE and an EXPECT_TYPE was provided,
+      /* If evaluating an OP_FLOAT and an EXPECT_TYPE was provided,
          then we need to perform the conversion manually, because
          evaluate_subexp_standard doesn't do it.  This conversion is
          necessary in Ada because the different kinds of float/fixed
@@ -10429,7 +10429,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
          Similarly, we need to perform the conversion from OP_LONG
          ourselves.  */
-      if ((op == OP_DOUBLE || op == OP_LONG) && expect_type != NULL)
+      if ((op == OP_FLOAT || op == OP_LONG) && expect_type != NULL)
         arg1 = ada_value_cast (expect_type, arg1, noside);
 
       return arg1;

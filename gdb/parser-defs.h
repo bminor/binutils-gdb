@@ -23,7 +23,6 @@
 #if !defined (PARSER_DEFS_H)
 #define PARSER_DEFS_H 1
 
-#include "doublest.h"
 #include "vec.h"
 #include "expression.h"
 
@@ -189,9 +188,7 @@ extern void write_exp_elt_sym (struct parser_state *, struct symbol *);
 
 extern void write_exp_elt_longcst (struct parser_state *, LONGEST);
 
-extern void write_exp_elt_dblcst (struct parser_state *, DOUBLEST);
-
-extern void write_exp_elt_decfloatcst (struct parser_state *, gdb_byte *);
+extern void write_exp_elt_floatcst (struct parser_state *, const gdb_byte *);
 
 extern void write_exp_elt_type (struct parser_state *, struct type *);
 
@@ -270,11 +267,8 @@ extern type_instance_flags follow_type_instance_flags ();
 
 extern void null_post_parser (struct expression **, int);
 
-extern int parse_float (const char *p, int len, DOUBLEST *d,
-			const char **suffix);
-
-extern int parse_c_float (struct gdbarch *gdbarch, const char *p, int len,
-			  DOUBLEST *d, struct type **t);
+extern bool parse_float (const char *p, int len,
+			 const struct type *type, gdb_byte *data);
 
 /* During parsing of a C expression, the pointer to the next character
    is in this variable.  */

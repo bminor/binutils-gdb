@@ -1277,15 +1277,10 @@ evaluate_subexp_standard (struct type *expect_type,
       return value_from_longest (exp->elts[pc + 1].type,
 				 exp->elts[pc + 2].longconst);
 
-    case OP_DOUBLE:
+    case OP_FLOAT:
       (*pos) += 3;
-      return value_from_double (exp->elts[pc + 1].type,
-				exp->elts[pc + 2].doubleconst);
-
-    case OP_DECFLOAT:
-      (*pos) += 3;
-      return value_from_decfloat (exp->elts[pc + 1].type,
-				  exp->elts[pc + 2].decfloatconst);
+      return value_from_contents (exp->elts[pc + 1].type,
+				  exp->elts[pc + 2].floatconst);
 
     case OP_ADL_FUNC:
     case OP_VAR_VALUE:

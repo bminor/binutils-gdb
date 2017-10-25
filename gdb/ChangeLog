@@ -1,3 +1,85 @@
+2017-10-25  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* doublest.c (floatformat_from_string): New function.
+	* doublest.h (floatformat_from_string): Add prototype.
+
+	* std-operator.def (OP_DOUBLE, OP_DECFLOAT): Remove, replace by ...
+	(OP_FLOAT): ... this.
+	* expression.h: Do not include "doublest.h".
+	(union exp_element): Replace doubleconst and decfloatconst by
+	new element floatconst.
+	* ada-lang.c (resolve_subexp): Handle OP_FLOAT instead of OP_DOUBLE.
+	(ada_evaluate_subexp): Likewise.
+	* eval.c (evaluate_subexp_standard): Handle OP_FLOAT instead of
+	OP_DOUBLE and OP_DECFLOAT.
+	* expprint.c (print_subexp_standard): Likewise.
+	(dump_subexp_body_standard): Likewise.
+	* breakpoint.c (watchpoint_exp_is_const): Likewise.
+
+	* parse.c: Include "dfp.h".
+	(write_exp_elt_dblcst, write_exp_elt_decfloatcst): Remove.
+	(write_exp_elt_floatcst): New function.
+	(operator_length_standard): Handle OP_FLOAT instead of OP_DOUBLE
+	and OP_DECFLOAT.
+	(operator_check_standard): Likewise.
+	(parse_float): Do not accept suffix.  Take type as input.  Return bool.
+	Return target format buffer instead of host DOUBLEST.
+	Use floatformat_from_string and decimal_from_string to parse
+	either binary or decimal floating-point types.
+	(parse_c_float): Remove.
+	* parser-defs.h: Do not include "doublest.h".
+	(write_exp_elt_dblcst, write_exp_elt_decfloatcst): Remove.
+	(write_exp_elt_floatcst): Add prototype.
+	(parse_float): Update prototype.
+	(parse_c_float): Remove.
+
+	* c-exp.y: Do not include "dfp.h".
+	(typed_val_float): Use byte buffer instead of DOUBLEST.
+	(typed_val_decfloat): Remove.
+	(DECFLOAT): Remove.
+	(FLOAT): Use OP_FLOAT and write_exp_elt_floatcst.
+	(parse_number): Update to new parse_float interface.
+	Parse suffixes and determine type before calling parse_float.
+	Handle decimal and binary FP types the same way.
+
+	* d-exp.y (typed_val_float): Use byte buffer instead of DOUBLEST.
+	(FLOAT_LITERAL): Use OP_FLOAT and write_exp_elt_floatcst.
+	(parse_number): Update to new parse_float interface.
+	Parse suffixes and determine type before calling parse_float.
+
+	* f-exp.y: Replace dval by typed_val_float.
+	(FLOAT): Use OP_FLOAT and write_exp_elt_floatcst.
+	(parse_number): Use parse_float instead of atof.
+
+	* go-exp.y (typed_val_float): Use byte buffer instead of DOUBLEST.
+	(parse_go_float): Remove.
+	(FLOAT): Use OP_FLOAT and write_exp_elt_floatcst.
+	(parse_number): Call parse_float instead of parse_go_float.
+	Parse suffixes and determine type before calling parse_float.
+
+	* p-exp.y (typed_val_float): Use byte buffer instead of DOUBLEST.
+	(FLOAT): Use OP_FLOAT and write_exp_elt_floatcst.
+	(parse_number): Update to new parse_float interface.
+	Parse suffixes and determine type before calling parse_float.
+
+	* m2-exp.y: Replace dval by byte buffer val.
+	(FLOAT): Use OP_FLOAT and write_exp_elt_floatcst.
+	(parse_number): Call parse_float instead of atof.
+
+	* rust-exp.y (typed_val_float): Use byte buffer instead of DOUBLEST.
+	(lex_number): Call parse_float instead of strtod.
+	(ast_dliteral): Use OP_FLOAT instead of OP_DOUBLE.
+	(convert_ast_to_expression): Handle OP_FLOAT instead of OP_DOUBLE.
+	Use write_exp_elt_floatcst.
+	(unit_testing): Remove static variable.
+	(rust_type): Do not check unit_testing.
+	(rust_lex_tests): Do not set uint_testing.  Set up dummy rust_parser.
+
+	* ada-exp.y (type_float, type_double): Remove.
+	(typed_val_float): Use byte buffer instead of DOUBLEST.
+	(FLOAT): Use OP_FLOAT and write_exp_elt_floatcst.
+	* ada-lex.l (processReal): Use parse_float instead of sscanf.
+
 2017-10-25  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.h (enum aarch64_regnum): Remove.

@@ -97,7 +97,7 @@ void yyerror (const char *);
       struct type *type;
     } typed_val_int;
     struct {
-      DOUBLEST dval;
+      gdb_byte val[16];
       struct type *type;
     } typed_val_float;
     struct stoken sval;
@@ -115,8 +115,6 @@ void yyerror (const char *);
 /* YYSTYPE gets defined by %union.  */
 static int parse_number (struct parser_state *,
 			 const char *, int, int, YYSTYPE *);
-static int parse_go_float (struct gdbarch *gdbarch, const char *p, int len,
-			   DOUBLEST *d, struct type **t);
 %}
 
 %type <voidval> exp exp1 type_exp start variable lcurly
@@ -436,10 +434,10 @@ exp	:	NAME_OR_INT
 
 
 exp	:	FLOAT
-			{ write_exp_elt_opcode (pstate, OP_DOUBLE);
+			{ write_exp_elt_opcode (pstate, OP_FLOAT);
 			  write_exp_elt_type (pstate, $1.type);
-			  write_exp_elt_dblcst (pstate, $1.dval);
-			  write_exp_elt_opcode (pstate, OP_DOUBLE); }
+			  write_exp_elt_floatcst (pstate, $1.val);
+			  write_exp_elt_opcode (pstate, OP_FLOAT); }
 	;
 
 exp	:	variable
@@ -634,24 +632,6 @@ name_not_typename
 
 %%
 
-/* Wrapper on parse_c_float to get the type right for Go.  */
-
-static int
-parse_go_float (struct gdbarch *gdbarch, const char *p, int len,
-		DOUBLEST *d, struct type **t)
-{
-  int result = parse_c_float (gdbarch, p, len, d, t);
-  const struct builtin_type *builtin_types = builtin_type (gdbarch);
-  const struct builtin_go_type *builtin_go_types = builtin_go_type (gdbarch);
-
-  if (*t == builtin_types->builtin_float)
-    *t = builtin_go_types->builtin_float32;
-  else if (*t == builtin_types->builtin_double)
-    *t = builtin_go_types->builtin_float64;
-
-  return result;
-}
-
 /* Take care of parsing a number (anything that starts with a digit).
    Set yylval and return the token type; update lexptr.
    LEN is the number of characters in it.  */
@@ -688,10 +668,34 @@ parse_number (struct parser_state *par_state,
 
   if (parsed_float)
     {
-      if (! parse_go_float (parse_gdbarch (par_state), p, len,
-			    &putithere->typed_val_float.dval,
-			    &putithere->typed_val_float.type))
-	return ERROR;
+      const struct builtin_go_type *builtin_go_types
+	= builtin_go_type (parse_gdbarch (par_state));
+
+      /* Handle suffixes: 'f' for float32, 'l' for long double.
+	 FIXME: This appears to be an extension -- do we want this?  */
+      if (len >= 1 && tolower (p[len - 1]) == 'f')
+	{
+	  putithere->typed_val_float.type
+	    = builtin_go_types->builtin_float32;
+	  len--;
+	}
+      else if (len >= 1 && tolower (p[len - 1]) == 'l')
+	{
+	  putithere->typed_val_float.type
+	    = parse_type (par_state)->builtin_long_double;
+	  len--;
+	}
+      /* Default type for floating-point literals is float64.  */
+      else
+        {
+	  putithere->typed_val_float.type
+	    = builtin_go_types->builtin_float64;
+        }
+
+      if (!parse_float (p, len,
+			putithere->typed_val_float.type,
+			putithere->typed_val_float.val))
+        return ERROR;
       return FLOAT;
     }
 

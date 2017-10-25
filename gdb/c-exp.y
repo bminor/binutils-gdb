@@ -48,7 +48,6 @@
 #include "charset.h"
 #include "block.h"
 #include "cp-support.h"
-#include "dfp.h"
 #include "macroscope.h"
 #include "objc-lang.h"
 #include "typeprint.h"
@@ -88,13 +87,9 @@ static int type_aggregate_p (struct type *);
       struct type *type;
     } typed_val_int;
     struct {
-      DOUBLEST dval;
-      struct type *type;
-    } typed_val_float;
-    struct {
       gdb_byte val[16];
       struct type *type;
-    } typed_val_decfloat;
+    } typed_val_float;
     struct type *tval;
     struct stoken sval;
     struct typed_stoken tsval;
@@ -142,7 +137,6 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
 
 %token <typed_val_int> INT
 %token <typed_val_float> FLOAT
-%token <typed_val_decfloat> DECFLOAT
 
 /* Both NAME and TYPENAME tokens represent symbols in the input,
    and both convey their data as strings.
@@ -749,17 +743,10 @@ exp	:	NAME_OR_INT
 
 
 exp	:	FLOAT
-			{ write_exp_elt_opcode (pstate, OP_DOUBLE);
+			{ write_exp_elt_opcode (pstate, OP_FLOAT);
 			  write_exp_elt_type (pstate, $1.type);
-			  write_exp_elt_dblcst (pstate, $1.dval);
-			  write_exp_elt_opcode (pstate, OP_DOUBLE); }
-	;
-
-exp	:	DECFLOAT
-			{ write_exp_elt_opcode (pstate, OP_DECFLOAT);
-			  write_exp_elt_type (pstate, $1.type);
-			  write_exp_elt_decfloatcst (pstate, $1.val);
-			  write_exp_elt_opcode (pstate, OP_DECFLOAT); }
+			  write_exp_elt_floatcst (pstate, $1.val);
+			  write_exp_elt_opcode (pstate, OP_FLOAT); }
 	;
 
 exp	:	variable
@@ -1792,43 +1779,49 @@ parse_number (struct parser_state *par_state,
 
   if (parsed_float)
     {
-      /* If it ends at "df", "dd" or "dl", take it as type of decimal floating
-         point.  Return DECFLOAT.  */
-
+      /* Handle suffixes for decimal floating-point: "df", "dd" or "dl".  */
       if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'f')
 	{
-	  putithere->typed_val_decfloat.type
+	  putithere->typed_val_float.type
 	    = parse_type (par_state)->builtin_decfloat;
-	  decimal_from_string (putithere->typed_val_decfloat.val, 4,
-			       gdbarch_byte_order (parse_gdbarch (par_state)),
-			       std::string (p, len - 2));
-	  return DECFLOAT;
+	  len -= 2;
 	}
-
-      if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'd')
+      else if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'd')
 	{
-	  putithere->typed_val_decfloat.type
+	  putithere->typed_val_float.type
 	    = parse_type (par_state)->builtin_decdouble;
-	  decimal_from_string (putithere->typed_val_decfloat.val, 8,
-			       gdbarch_byte_order (parse_gdbarch (par_state)),
-			       std::string (p, len - 2));
-	  return DECFLOAT;
+	  len -= 2;
 	}
-
-      if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'l')
+      else if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'l')
 	{
-	  putithere->typed_val_decfloat.type
+	  putithere->typed_val_float.type
 	    = parse_type (par_state)->builtin_declong;
-	  decimal_from_string (putithere->typed_val_decfloat.val, 16,
-			       gdbarch_byte_order (parse_gdbarch (par_state)),
-			       std::string (p, len - 2));
-	  return DECFLOAT;
+	  len -= 2;
+	}
+      /* Handle suffixes: 'f' for float, 'l' for long double.  */
+      else if (len >= 1 && tolower (p[len - 1]) == 'f')
+	{
+	  putithere->typed_val_float.type
+	    = parse_type (par_state)->builtin_float;
+	  len -= 1;
+	}
+      else if (len >= 1 && tolower (p[len - 1]) == 'l')
+	{
+	  putithere->typed_val_float.type
+	    = parse_type (par_state)->builtin_long_double;
+	  len -= 1;
+	}
+      /* Default type for floating-point literals is double.  */
+      else
+	{
+	  putithere->typed_val_float.type
+	    = parse_type (par_state)->builtin_double;
 	}
 
-      if (! parse_c_float (parse_gdbarch (par_state), p, len,
-			   &putithere->typed_val_float.dval,
-			   &putithere->typed_val_float.type))
-	return ERROR;
+      if (!parse_float (p, len,
+			putithere->typed_val_float.type,
+			putithere->typed_val_float.val))
+        return ERROR;
       return FLOAT;
     }
 

@@ -45,6 +45,7 @@
 #include "symfile.h"		/* for overlay functions */
 #include "inferior.h"
 #include "doublest.h"
+#include "dfp.h"
 #include "block.h"
 #include "source.h"
 #include "objfiles.h"
@@ -264,23 +265,13 @@ write_exp_elt_longcst (struct parser_state *ps, LONGEST expelt)
 }
 
 void
-write_exp_elt_dblcst (struct parser_state *ps, DOUBLEST expelt)
-{
-  union exp_element tmp;
-
-  memset (&tmp, 0, sizeof (union exp_element));
-  tmp.doubleconst = expelt;
-  write_exp_elt (ps, &tmp);
-}
-
-void
-write_exp_elt_decfloatcst (struct parser_state *ps, gdb_byte expelt[16])
+write_exp_elt_floatcst (struct parser_state *ps, const gdb_byte expelt[16])
 {
   union exp_element tmp;
   int index;
 
   for (index = 0; index < 16; index++)
-    tmp.decfloatconst[index] = expelt[index];
+    tmp.floatconst[index] = expelt[index];
 
   write_exp_elt (ps, &tmp);
 }
@@ -870,8 +861,7 @@ operator_length_standard (const struct expression *expr, int endpos,
       break;
 
     case OP_LONG:
-    case OP_DOUBLE:
-    case OP_DECFLOAT:
+    case OP_FLOAT:
     case OP_VAR_VALUE:
     case OP_VAR_MSYM_VALUE:
       oplen = 4;
@@ -1338,69 +1328,23 @@ null_post_parser (struct expression **exp, int void_context_p)
 }
 
 /* Parse floating point value P of length LEN.
-   Return 0 (false) if invalid, 1 (true) if valid.
-   The successfully parsed number is stored in D.
-   *SUFFIX points to the suffix of the number in P.
+   Return false if invalid, true if valid.
+   The successfully parsed number is stored in DATA in
+   target format for floating-point type TYPE.
 
    NOTE: This accepts the floating point syntax that sscanf accepts.  */
 
-int
-parse_float (const char *p, int len, DOUBLEST *d, const char **suffix)
+bool
+parse_float (const char *p, int len,
+	     const struct type *type, gdb_byte *data)
 {
-  char *copy;
-  int n, num;
-
-  copy = (char *) xmalloc (len + 1);
-  memcpy (copy, p, len);
-  copy[len] = 0;
-
-  num = sscanf (copy, "%" DOUBLEST_SCAN_FORMAT "%n", d, &n);
-  xfree (copy);
-
-  /* The sscanf man page suggests not making any assumptions on the effect
-     of %n on the result, so we don't.
-     That is why we simply test num == 0.  */
-  if (num == 0)
-    return 0;
-
-  *suffix = p + n;
-  return 1;
-}
-
-/* Parse floating point value P of length LEN, using the C syntax for floats.
-   Return 0 (false) if invalid, 1 (true) if valid.
-   The successfully parsed number is stored in *D.
-   Its type is taken from builtin_type (gdbarch) and is stored in *T.  */
-
-int
-parse_c_float (struct gdbarch *gdbarch, const char *p, int len,
-	       DOUBLEST *d, struct type **t)
-{
-  const char *suffix;
-  int suffix_len;
-  const struct builtin_type *builtin_types = builtin_type (gdbarch);
-
-  if (! parse_float (p, len, d, &suffix))
-    return 0;
-
-  suffix_len = p + len - suffix;
-
-  if (suffix_len == 0)
-    *t = builtin_types->builtin_double;
-  else if (suffix_len == 1)
-    {
-      /* Handle suffixes: 'f' for float, 'l' for long double.  */
-      if (tolower (*suffix) == 'f')
-	*t = builtin_types->builtin_float;
-      else if (tolower (*suffix) == 'l')
-	*t = builtin_types->builtin_long_double;
-      else
-	return 0;
-    }
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    return floatformat_from_string (floatformat_from_type (type),
+				    data, std::string (p, len));
   else
-    return 0;
-
-  return 1;
+    return decimal_from_string (data, TYPE_LENGTH (type),
+				gdbarch_byte_order (get_type_arch (type)),
+				std::string (p, len));
 }
 
 /* Stuff for maintaining a stack of types.  Currently just used by C, but
@@ -1808,8 +1752,7 @@ operator_check_standard (struct expression *exp, int pos,
     {
     case BINOP_VAL:
     case OP_COMPLEX:
-    case OP_DECFLOAT:
-    case OP_DOUBLE:
+    case OP_FLOAT:
     case OP_LONG:
     case OP_SCOPE:
     case OP_TYPE:

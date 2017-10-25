@@ -74,6 +74,8 @@ extern const char *floatformat_mantissa (const struct floatformat *,
 extern std::string floatformat_to_string (const struct floatformat *fmt,
 					  const gdb_byte *in,
 					  const char *format = nullptr);
+extern bool floatformat_from_string (const struct floatformat *fmt,
+				     gdb_byte *out, const std::string &in);
 
 /* Return the floatformat's total size in host bytes.  */
 

@@ -866,6 +866,35 @@ floatformat_to_string (const struct floatformat *fmt,
   floatformat_to_doublest (fmt, in, &doub);
   return string_printf (host_format.c_str (), doub);
 }
+
+/* Parse string STRING into a target floating-number of format FMT and
+   store it as byte-stream ADDR.  Return whether parsing succeeded.  */
+bool
+floatformat_from_string (const struct floatformat *fmt, gdb_byte *out,
+			 const std::string &in)
+{
+  DOUBLEST doub;
+  int n, num;
+#ifdef HAVE_LONG_DOUBLE
+  const char *scan_format = "%Lg%n";
+#else
+  const char *scan_format = "%lg%n";
+#endif
+  num = sscanf (in.c_str (), scan_format, &doub, &n);
+
+  /* The sscanf man page suggests not making any assumptions on the effect
+     of %n on the result, so we don't.
+     That is why we simply test num == 0.  */
+  if (num == 0)
+    return false;
+
+  /* We only accept the whole string.  */
+  if (in[n])
+    return false;
+
+  floatformat_from_doublest (fmt, &doub, out);
+  return true;
+}
 
 /* Extract a floating-point number of type TYPE from a target-order
    byte-stream at ADDR.  Returns the value as type DOUBLEST.  */

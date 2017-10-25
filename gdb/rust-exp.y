@@ -54,7 +54,7 @@ struct typed_val_int
 
 struct typed_val_float
 {
-  DOUBLEST dval;
+  gdb_byte val[16];
   struct type *type;
 };
 
@@ -172,10 +172,6 @@ static const char *number_regex_text =
 /* The compiled number-matching regex.  */
 
 static regex_t number_regex;
-
-/* True if we're running unit tests.  */
-
-static int unit_testing;
 
 /* Obstack for data temporarily allocated during parsing.  Points to
    the obstack in the rust_parser, or to a temporary obstack during
@@ -1068,11 +1064,6 @@ rust_type (const char *name)
 {
   struct type *type;
 
-  /* When unit testing, we don't bother checking the types, so avoid a
-     possibly-failing lookup here.  */
-  if (unit_testing)
-    return NULL;
-
   type = language_lookup_primitive_type (current_parser->language (),
 					 current_parser->arch (),
 					 name);
@@ -1586,8 +1577,11 @@ lex_number (void)
     }
   else
     {
-      rustyylval.typed_val_float.dval = strtod (number.c_str (), NULL);
       rustyylval.typed_val_float.type = type;
+      bool parsed = parse_float (number.c_str (), number.length (),
+				 rustyylval.typed_val_float.type,
+				 rustyylval.typed_val_float.val);
+      gdb_assert (parsed);
     }
 
   return is_integer ? (could_be_decimal ? DECIMAL_INTEGER : INTEGER) : FLOAT;
@@ -1716,7 +1710,7 @@ ast_dliteral (struct typed_val_float val)
 {
   struct rust_op *result = OBSTACK_ZALLOC (work_obstack, struct rust_op);
 
-  result->opcode = OP_DOUBLE;
+  result->opcode = OP_FLOAT;
   result->left.typed_val_float = val;
 
   return result;
@@ -2181,11 +2175,11 @@ convert_ast_to_expression (struct parser_state *state,
       write_exp_elt_opcode (state, OP_LONG);
       break;
 
-    case OP_DOUBLE:
-      write_exp_elt_opcode (state, OP_DOUBLE);
+    case OP_FLOAT:
+      write_exp_elt_opcode (state, OP_FLOAT);
       write_exp_elt_type (state, operation->left.typed_val_float.type);
-      write_exp_elt_dblcst (state, operation->left.typed_val_float.dval);
-      write_exp_elt_opcode (state, OP_DOUBLE);
+      write_exp_elt_floatcst (state, operation->left.typed_val_float.val);
+      write_exp_elt_opcode (state, OP_FLOAT);
       break;
 
     case STRUCTOP_STRUCT:
@@ -2675,7 +2669,10 @@ rust_lex_tests (void)
   scoped_restore obstack_holder = make_scoped_restore (&work_obstack,
 						       &test_obstack);
 
-  unit_testing = 1;
+  // Set up dummy "parser", so that rust_type works.
+  struct parser_state ps;
+  initialize_expout (&ps, 0, &rust_language_defn, target_gdbarch ());
+  rust_parser parser (&ps);
 
   rust_lex_test_one ("", 0);
   rust_lex_test_one ("    \t  \n \r  ", 0);
@@ -2764,8 +2761,6 @@ rust_lex_tests (void)
 
   rust_lex_test_completion ();
   rust_lex_test_push_back ();
-
-  unit_testing = 0;
 }
 
 #endif /* GDB_SELF_TEST */

@@ -10121,8 +10121,7 @@ watchpoint_exp_is_const (const struct expression *exp)
 	case TERNOP_SLICE:
 
 	case OP_LONG:
-	case OP_DOUBLE:
-	case OP_DECFLOAT:
+	case OP_FLOAT:
 	case OP_LAST:
 	case OP_COMPLEX:
 	case OP_STRING:

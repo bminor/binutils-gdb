@@ -105,14 +105,14 @@ print_subexp_standard (struct expression *exp, int *pos,
       }
       return;
 
-    case OP_DOUBLE:
+    case OP_FLOAT:
       {
 	struct value_print_options opts;
 
 	get_no_prettyformat_print_options (&opts);
 	(*pos) += 3;
-	value_print (value_from_double (exp->elts[pc + 1].type,
-					exp->elts[pc + 2].doubleconst),
+	value_print (value_from_contents (exp->elts[pc + 1].type,
+					  exp->elts[pc + 2].floatconst),
 		     stream, &opts);
       }
       return;
@@ -871,13 +871,14 @@ dump_subexp_body_standard (struct expression *exp,
 			(long) exp->elts[elt + 1].longconst);
       elt += 3;
       break;
-    case OP_DOUBLE:
+    case OP_FLOAT:
       fprintf_filtered (stream, "Type @");
       gdb_print_host_address (exp->elts[elt].type, stream);
       fprintf_filtered (stream, " (");
       type_print (exp->elts[elt].type, NULL, stream, 0);
-      fprintf_filtered (stream, "), value %g",
-			(double) exp->elts[elt + 1].doubleconst);
+      fprintf_filtered (stream, "), value ");
+      print_floating (exp->elts[elt + 1].floatconst,
+		      exp->elts[elt].type, stream);
       elt += 3;
       break;
     case OP_VAR_VALUE:
