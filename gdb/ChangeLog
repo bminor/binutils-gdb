@@ -1,5 +1,10 @@
 2017-11-04  Tom Tromey  <tom@tromey.com>
 
+	* compile/compile-object-load.c (link_callbacks_einfo): Use
+	std::string.
+
+2017-11-04  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (process_full_comp_unit, process_full_type_unit):
 	Use scoped_free_pendings.
 	* dbxread.c (dbx_symfile_read, dbx_psymtab_to_symtab_1): Use

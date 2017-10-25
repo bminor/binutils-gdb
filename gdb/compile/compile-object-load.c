@@ -281,18 +281,13 @@ static void link_callbacks_einfo (const char *fmt, ...)
 static void
 link_callbacks_einfo (const char *fmt, ...)
 {
-  struct cleanup *cleanups;
   va_list ap;
-  char *str;
 
   va_start (ap, fmt);
-  str = xstrvprintf (fmt, ap);
+  std::string str = string_vprintf (fmt, ap);
   va_end (ap);
-  cleanups = make_cleanup (xfree, str);
 
-  warning (_("Compile module: warning: %s"), str);
-
-  do_cleanups (cleanups);
+  warning (_("Compile module: warning: %s"), str.c_str ());
 }
 
 /* Helper for bfd_get_relocated_section_contents.
