@@ -1,3 +1,8 @@
+2017-10-25  Alan Modra  <amodra@gmail.com>
+
+	* nm.c (filter_symbols): Match "__gnu_lto_slim" optionally prefixed
+	with "_".
+
 2017-10-18  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* MAINTAINERS: Add myself as Visium maintainer.

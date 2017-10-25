@@ -1,3 +1,9 @@
+2017-10-25  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-plugin/lto-3r.d: Match "__gnu_lto_v" optionally
+	prefixed with "_".
+	* testsuite/ld-plugin/lto-5r.d: Likewise.
+
 2017-10-25  Hans-Peter Nilsson  <hp@axis.com>
 
 	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Fix typo for istarget.
