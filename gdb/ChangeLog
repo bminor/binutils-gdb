@@ -1,3 +1,29 @@
+2020-03-16  Anton Kolesov  <anton.kolesov@synopsys.com>
+	    Shahab Vahedi  <shahab@synopsys.com>
+
+	* Makefile.in: Add arch/arc.o
+	* configure.tgt: Likewise.
+	* arc-tdep.c (arc_tdesc_init): Use arc_read_description.
+	(_initialize_arc_tdep): Don't initialize old target descriptions.
+        (arc_read_description): New function to cache target descriptions.
+	* arc-tdep.h (arc_read_description): Add proto type.
+	* arch/arc.c: New file.
+	* arch/arc.h: Likewise.
+	* features/Makefile: Replace old target descriptions with new.
+	* features/arc-arcompact.c: Remove.
+	* features/arc-arcompact.xml: Likewise.
+	* features/arc-v2.c: Likewise
+	* features/arc-v2.xml: Likewise
+	* features/arc/aux-arcompact.xml: New file.
+	* features/arc/aux-v2.xml: Likewise.
+	* features/arc/core-arcompact.xml: Likewise.
+	* features/arc/core-v2.xml: Likewise.
+	* features/arc/aux-arcompact.c: Generate.
+	* features/arc/aux-v2.c: Likewise.
+	* features/arc/core-arcompact.c: Likewise.
+	* features/arc/core-v2.c: Likewise.
+	* target-descriptions (maint_print_c_tdesc_cmd): Support ARC features.
+
 2020-03-16  Tom Tromey  <tromey@adacore.com>
 
 	PR gdb/25663:

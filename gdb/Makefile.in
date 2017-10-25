@@ -697,6 +697,7 @@ ALL_TARGET_OBS = \
 	aarch32-tdep.o \
 	arc-tdep.o \
 	arch/aarch32.o \
+	arch/arc.o \
 	arch/arm.o \
 	arch/arm-get-next-pcs.o \
 	arch/arm-linux.o \
@@ -1440,6 +1441,7 @@ HFILES_NO_SRCDIR = \
 	arch/aarch32.h \
 	arch/aarch64.h \
 	arch/aarch64-insn.h \
+	arch/arc.h \
 	arch/arm.h \
 	arch/i386.h \
 	arch/ppc-linux-common.h \

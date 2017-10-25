@@ -59,7 +59,7 @@ alpha*-*-*)
 
 arc*-*-*)
 	# Target: Unidentified ARC target
-	cpu_obs="arc-tdep.o"
+	cpu_obs="arc-tdep.o arch/arc.o"
 	;;
 
 arm*-*-*)

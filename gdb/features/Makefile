@@ -108,8 +108,6 @@ OUTPUTS = $(patsubst %,$(outdir)/%.dat,$(WHICH))
 # --enable-targets=all GDB.  You can override this by passing XMLTOC
 # to make on the command line.
 XMLTOC = \
-	arc-v2.xml \
-	arc-arcompact.xml \
 	microblaze-with-stack-protect.xml \
 	microblaze.xml \
 	mips-dsp-linux.xml \
@@ -206,6 +204,10 @@ $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 FEATURE_XMLFILES = aarch64-core.xml \
 	aarch64-fpu.xml \
 	aarch64-pauth.xml \
+	arc/core-v2.xml \
+	arc/aux-v2.xml \
+	arc/core-arcompact.xml \
+	arc/aux-arcompact.xml \
 	arm/arm-core.xml \
 	arm/arm-fpa.xml \
 	arm/arm-m-profile.xml \

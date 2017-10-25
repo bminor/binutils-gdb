@@ -1715,7 +1715,8 @@ maint_print_c_tdesc_cmd (const char *args, int from_tty)
       || startswith (filename_after_features.c_str (), "riscv/")
       || startswith (filename_after_features.c_str (), "tic6x-")
       || startswith (filename_after_features.c_str (), "aarch64")
-      || startswith (filename_after_features.c_str (), "arm/"))
+      || startswith (filename_after_features.c_str (), "arm/")
+      || startswith (filename_after_features.c_str (), "arc/"))
     {
       print_c_feature v (filename_after_features);
 
