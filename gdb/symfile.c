@@ -1545,13 +1545,11 @@ terminate_after_last_dir_separator (char *path)
 char *
 find_separate_debug_file_by_debuglink (struct objfile *objfile)
 {
-  char *debuglink;
-  char *dir, *canon_dir;
   char *debugfile;
   unsigned long crc32;
-  struct cleanup *cleanups;
 
-  debuglink = bfd_get_debug_link_info (objfile->obfd, &crc32);
+  gdb::unique_xmalloc_ptr<char> debuglink
+    (bfd_get_debug_link_info (objfile->obfd, &crc32));
 
   if (debuglink == NULL)
     {
@@ -1560,15 +1558,12 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
       return NULL;
     }
 
-  cleanups = make_cleanup (xfree, debuglink);
-  dir = xstrdup (objfile_name (objfile));
-  make_cleanup (xfree, dir);
-  terminate_after_last_dir_separator (dir);
-  canon_dir = lrealpath (dir);
+  std::string dir = objfile_name (objfile);
+  terminate_after_last_dir_separator (&dir[0]);
+  gdb::unique_xmalloc_ptr<char> canon_dir (lrealpath (dir.c_str ()));
 
-  debugfile = find_separate_debug_file (dir, canon_dir, debuglink,
-					crc32, objfile);
-  xfree (canon_dir);
+  debugfile = find_separate_debug_file (dir.c_str (), canon_dir.get (),
+					debuglink.get (), crc32, objfile);
 
   if (debugfile == NULL)
     {
@@ -1580,19 +1575,17 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
       if (lstat (objfile_name (objfile), &st_buf) == 0
 	  && S_ISLNK (st_buf.st_mode))
 	{
-	  char *symlink_dir;
-
-	  symlink_dir = lrealpath (objfile_name (objfile));
+	  gdb::unique_xmalloc_ptr<char> symlink_dir
+	    (lrealpath (objfile_name (objfile)));
 	  if (symlink_dir != NULL)
 	    {
-	      make_cleanup (xfree, symlink_dir);
-	      terminate_after_last_dir_separator (symlink_dir);
-	      if (strcmp (dir, symlink_dir) != 0)
+	      terminate_after_last_dir_separator (symlink_dir.get ());
+	      if (dir != symlink_dir.get ())
 		{
 		  /* Different directory, so try using it.  */
-		  debugfile = find_separate_debug_file (symlink_dir,
-							symlink_dir,
-							debuglink,
+		  debugfile = find_separate_debug_file (symlink_dir.get (),
+							symlink_dir.get (),
+							debuglink.get (),
 							crc32,
 							objfile);
 		}
@@ -1600,7 +1593,6 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
 	}
     }
 
-  do_cleanups (cleanups);
   return debugfile;
 }
 
