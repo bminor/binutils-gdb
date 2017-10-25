@@ -1,5 +1,12 @@
 2017-11-04  Tom Tromey  <tom@tromey.com>
 
+	* compile/compile-loc2c.c (compute_stack_depth_worker): Change
+	type of "info".
+	(compute_stack_depth): Likewise.
+	(do_compile_dwarf_expr_to_c): Use std::vector.
+
+2017-11-04  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile-object-load.c (link_callbacks_einfo): Use
 	std::string.
 
