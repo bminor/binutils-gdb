@@ -1,3 +1,13 @@
+2017-11-01  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2017-10-25  Alan Modra  <amodra@gmail.com>
+	PR 22348
+	* config/tc-crx.c (instruction, output_opcode): Make static.
+	(relocatable, ins_parse, cur_arg_num): Likewise.
+	(parse_insn): Adjust for renamed opcodes globals.
+	(check_range): Likewise
+
 2017-09-21  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* testsuite/gas/mips/elf_mach_5900.d: New test.

@@ -1,3 +1,18 @@
+2017-11-01  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2017-10-25  Alan Modra  <amodra@gmail.com>
+	PR 22348
+	* cr16-dis.c (cr16_cinvs, instruction, cr16_currInsn): Make static.
+	(cr16_words, cr16_allWords, processing_argument_number): Likewise.
+	(imm4flag, size_changed): Likewise.
+	* crx-dis.c (crx_cinvs, NUMCINVS, instruction, currInsn): Likewise.
+	(words, allWords, processing_argument_number): Likewise.
+	(cst4flag, size_changed): Likewise.
+	* crx-opc.c (crx_cst4_map): Rename from cst4_map.
+	(crx_cst4_maps): Rename from cst4_maps.
+	(crx_no_op_insn): Rename from no_op_insn.
+
 2017-09-15  Nick Clifton  <nickc@redhat.com>
 
 	2.29.1 Release
