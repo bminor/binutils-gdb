@@ -38,6 +38,7 @@
 #include <sys/uio.h>
 
 #include "gdb_proc_service.h"
+#include "arch/aarch64.h"
 
 /* Defined in auto-generated files.  */
 void init_registers_aarch64 (void);
@@ -46,18 +47,6 @@ extern const struct target_desc *tdesc_aarch64;
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
-
-#define AARCH64_X_REGS_NUM 31
-#define AARCH64_V_REGS_NUM 32
-#define AARCH64_X0_REGNO    0
-#define AARCH64_SP_REGNO   31
-#define AARCH64_PC_REGNO   32
-#define AARCH64_CPSR_REGNO 33
-#define AARCH64_V0_REGNO   34
-#define AARCH64_FPSR_REGNO (AARCH64_V0_REGNO + AARCH64_V_REGS_NUM)
-#define AARCH64_FPCR_REGNO (AARCH64_V0_REGNO + AARCH64_V_REGS_NUM + 1)
-
-#define AARCH64_NUM_REGS (AARCH64_V0_REGNO + AARCH64_V_REGS_NUM + 2)
 
 /* Per-process arch-specific data we want to keep.  */
 
@@ -109,10 +98,10 @@ aarch64_fill_gregset (struct regcache *regcache, void *buf)
   int i;
 
   for (i = 0; i < AARCH64_X_REGS_NUM; i++)
-    collect_register (regcache, AARCH64_X0_REGNO + i, &regset->regs[i]);
-  collect_register (regcache, AARCH64_SP_REGNO, &regset->sp);
-  collect_register (regcache, AARCH64_PC_REGNO, &regset->pc);
-  collect_register (regcache, AARCH64_CPSR_REGNO, &regset->pstate);
+    collect_register (regcache, AARCH64_X0_REGNUM + i, &regset->regs[i]);
+  collect_register (regcache, AARCH64_SP_REGNUM, &regset->sp);
+  collect_register (regcache, AARCH64_PC_REGNUM, &regset->pc);
+  collect_register (regcache, AARCH64_CPSR_REGNUM, &regset->pstate);
 }
 
 static void
@@ -122,10 +111,10 @@ aarch64_store_gregset (struct regcache *regcache, const void *buf)
   int i;
 
   for (i = 0; i < AARCH64_X_REGS_NUM; i++)
-    supply_register (regcache, AARCH64_X0_REGNO + i, &regset->regs[i]);
-  supply_register (regcache, AARCH64_SP_REGNO, &regset->sp);
-  supply_register (regcache, AARCH64_PC_REGNO, &regset->pc);
-  supply_register (regcache, AARCH64_CPSR_REGNO, &regset->pstate);
+    supply_register (regcache, AARCH64_X0_REGNUM + i, &regset->regs[i]);
+  supply_register (regcache, AARCH64_SP_REGNUM, &regset->sp);
+  supply_register (regcache, AARCH64_PC_REGNUM, &regset->pc);
+  supply_register (regcache, AARCH64_CPSR_REGNUM, &regset->pstate);
 }
 
 static void
@@ -135,9 +124,9 @@ aarch64_fill_fpregset (struct regcache *regcache, void *buf)
   int i;
 
   for (i = 0; i < AARCH64_V_REGS_NUM; i++)
-    collect_register (regcache, AARCH64_V0_REGNO + i, &regset->vregs[i]);
-  collect_register (regcache, AARCH64_FPSR_REGNO, &regset->fpsr);
-  collect_register (regcache, AARCH64_FPCR_REGNO, &regset->fpcr);
+    collect_register (regcache, AARCH64_V0_REGNUM + i, &regset->vregs[i]);
+  collect_register (regcache, AARCH64_FPSR_REGNUM, &regset->fpsr);
+  collect_register (regcache, AARCH64_FPCR_REGNUM, &regset->fpcr);
 }
 
 static void
@@ -148,9 +137,9 @@ aarch64_store_fpregset (struct regcache *regcache, const void *buf)
   int i;
 
   for (i = 0; i < AARCH64_V_REGS_NUM; i++)
-    supply_register (regcache, AARCH64_V0_REGNO + i, &regset->vregs[i]);
-  supply_register (regcache, AARCH64_FPSR_REGNO, &regset->fpsr);
-  supply_register (regcache, AARCH64_FPCR_REGNO, &regset->fpcr);
+    supply_register (regcache, AARCH64_V0_REGNUM + i, &regset->vregs[i]);
+  supply_register (regcache, AARCH64_FPSR_REGNUM, &regset->fpsr);
+  supply_register (regcache, AARCH64_FPCR_REGNUM, &regset->fpcr);
 }
 
 /* Enable miscellaneous debugging output.  The name is historical - it

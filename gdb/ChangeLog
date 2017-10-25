@@ -1,3 +1,8 @@
+2017-10-25  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.h (enum aarch64_regnum): Remove.
+	* arch/aarch64.h: New file.
+
 2017-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* dfp.h (decimal_from_string): Use const reference for argument.
