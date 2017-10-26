@@ -17577,7 +17577,9 @@ dwarf2_string_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *c
   if (attr != NULL)
     {
       if (attr->form == DW_FORM_strp || attr->form == DW_FORM_line_strp
-	  || attr->form == DW_FORM_string || attr->form == DW_FORM_GNU_strp_alt)
+	  || attr->form == DW_FORM_string
+	  || attr->form == DW_FORM_GNU_str_index
+	  || attr->form == DW_FORM_GNU_strp_alt)
 	str = DW_STRING (attr);
       else
         complaint (&symfile_complaints,

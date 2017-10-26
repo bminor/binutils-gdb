@@ -1,3 +1,7 @@
+2017-10-25  Leszek Swirski  <leszeks@google.com>
+
+	* dwarf2read.c (dwarf2_string_attr): Allow DW_FORM_GNU_str_index.
+
 2017-10-16  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* features/Makefile (i386-avx-mpx-avx512-pku.dat): Add backslash 
