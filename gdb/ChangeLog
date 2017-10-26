@@ -1,5 +1,9 @@
 2017-10-26  Yao Qi  <yao.qi@linaro.org>
 
+	* breakpoint.h (regular_breakpoint_inserted_here_p): Remove.
+
+2017-10-26  Yao Qi  <yao.qi@linaro.org>
+
 	* break-catch-sig.c (signal_catchpoint_breakpoint_hit): Make
 	aspace const.
 	* break-catch-syscall.c (breakpoint_hit_catch_syscall):

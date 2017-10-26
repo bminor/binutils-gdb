@@ -1171,9 +1171,6 @@ extern int moribund_breakpoint_here_p (const address_space *, CORE_ADDR);
 extern int breakpoint_inserted_here_p (const address_space *,
 				       CORE_ADDR);
 
-extern int regular_breakpoint_inserted_here_p (struct address_space *, 
-					       CORE_ADDR);
-
 extern int software_breakpoint_inserted_here_p (const address_space *,
 						CORE_ADDR);
 
