@@ -1,3 +1,10 @@
+2017-10-26  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/ld-elf/elf.exp: xfail pr21703 tests on specific targets.
+	Only run shared lib test for targets which support it.
+	* testsuite/ld-elf/pr21703-r.sd: Adjust the expected output.
+	* testsuite/ld-elf/pr21703-shared.sd: Likewise.
+
 2017-10-26  James Greenhalgh  <james.greenhalgh@arm.com>
 
 	* testsuite/ld-arm/cortex-a8-far.d: Update expected disassembly.
