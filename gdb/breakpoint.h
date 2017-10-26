@@ -540,7 +540,7 @@ struct breakpoint_ops
      which the inferior stopped, and WS is the target_waitstatus
      describing the event.  */
   int (*breakpoint_hit) (const struct bp_location *bl,
-			 struct address_space *aspace,
+			 const address_space *aspace,
 			 CORE_ADDR bp_addr,
 			 const struct target_waitstatus *ws);
 

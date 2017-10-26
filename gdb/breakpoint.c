@@ -5072,8 +5072,7 @@ bpstat_check_location (const struct bp_location *bl,
   /* BL is from an existing breakpoint.  */
   gdb_assert (b != NULL);
 
-  return b->ops->breakpoint_hit (bl, const_cast<address_space *> (aspace),
-				 bp_addr, ws);
+  return b->ops->breakpoint_hit (bl, aspace, bp_addr, ws);
 }
 
 /* Determine if the watched values have actually changed, and we
@@ -7828,7 +7827,7 @@ remove_catch_fork (struct bp_location *bl, enum remove_bp_reason reason)
 
 static int
 breakpoint_hit_catch_fork (const struct bp_location *bl,
-			   struct address_space *aspace, CORE_ADDR bp_addr,
+			   const address_space *aspace, CORE_ADDR bp_addr,
 			   const struct target_waitstatus *ws)
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
@@ -7944,7 +7943,7 @@ remove_catch_vfork (struct bp_location *bl, enum remove_bp_reason reason)
 
 static int
 breakpoint_hit_catch_vfork (const struct bp_location *bl,
-			    struct address_space *aspace, CORE_ADDR bp_addr,
+			    const address_space *aspace, CORE_ADDR bp_addr,
 			    const struct target_waitstatus *ws)
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
@@ -8072,7 +8071,7 @@ remove_catch_solib (struct bp_location *ignore, enum remove_bp_reason reason)
 
 static int
 breakpoint_hit_catch_solib (const struct bp_location *bl,
-			    struct address_space *aspace,
+			    const address_space *aspace,
 			    CORE_ADDR bp_addr,
 			    const struct target_waitstatus *ws)
 {
@@ -8378,7 +8377,7 @@ remove_catch_exec (struct bp_location *bl, enum remove_bp_reason reason)
 
 static int
 breakpoint_hit_catch_exec (const struct bp_location *bl,
-			   struct address_space *aspace, CORE_ADDR bp_addr,
+			   const address_space *aspace, CORE_ADDR bp_addr,
 			   const struct target_waitstatus *ws)
 {
   struct exec_catchpoint *c = (struct exec_catchpoint *) bl->owner;
@@ -9796,7 +9795,7 @@ agent_printf_command (char *arg, int from_tty)
 
 static int
 breakpoint_hit_ranged_breakpoint (const struct bp_location *bl,
-				  struct address_space *aspace,
+				  const address_space *aspace,
 				  CORE_ADDR bp_addr,
 				  const struct target_waitstatus *ws)
 {
@@ -10256,7 +10255,7 @@ remove_watchpoint (struct bp_location *bl, enum remove_bp_reason reason)
 
 static int
 breakpoint_hit_watchpoint (const struct bp_location *bl,
-			   struct address_space *aspace, CORE_ADDR bp_addr,
+			   const address_space *aspace, CORE_ADDR bp_addr,
 			   const struct target_waitstatus *ws)
 {
   struct breakpoint *b = bl->owner;
@@ -12433,7 +12432,7 @@ base_breakpoint_remove_location (struct bp_location *bl,
 
 static int
 base_breakpoint_breakpoint_hit (const struct bp_location *bl,
-				struct address_space *aspace,
+				const address_space *aspace,
 				CORE_ADDR bp_addr,
 				const struct target_waitstatus *ws)
 {
@@ -12601,7 +12600,7 @@ bkpt_remove_location (struct bp_location *bl, enum remove_bp_reason reason)
 
 static int
 bkpt_breakpoint_hit (const struct bp_location *bl,
-		     struct address_space *aspace, CORE_ADDR bp_addr,
+		     const address_space *aspace, CORE_ADDR bp_addr,
 		     const struct target_waitstatus *ws)
 {
   if (ws->kind != TARGET_WAITKIND_STOPPED
@@ -12622,7 +12621,7 @@ bkpt_breakpoint_hit (const struct bp_location *bl,
 
 static int
 dprintf_breakpoint_hit (const struct bp_location *bl,
-			struct address_space *aspace, CORE_ADDR bp_addr,
+			const address_space *aspace, CORE_ADDR bp_addr,
 			const struct target_waitstatus *ws)
 {
   if (dprintf_style == dprintf_style_agent
@@ -12982,7 +12981,7 @@ tracepoint_re_set (struct breakpoint *b)
 
 static int
 tracepoint_breakpoint_hit (const struct bp_location *bl,
-			   struct address_space *aspace, CORE_ADDR bp_addr,
+			   const address_space *aspace, CORE_ADDR bp_addr,
 			   const struct target_waitstatus *ws)
 {
   /* By definition, the inferior does not report stops at

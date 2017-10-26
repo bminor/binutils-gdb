@@ -1,5 +1,23 @@
 2017-10-26  Yao Qi  <yao.qi@linaro.org>
 
+	* break-catch-sig.c (signal_catchpoint_breakpoint_hit): Make
+	aspace const.
+	* break-catch-syscall.c (breakpoint_hit_catch_syscall):
+	Likewise.
+	* breakpoint.c (bpstat_check_location): Remove cast.
+	(breakpoint_hit_catch_fork): Make aspce const.
+	(breakpoint_hit_catch_solib): Likewise.
+	(breakpoint_hit_catch_exec): Likewise.
+	(breakpoint_hit_ranged_breakpoint): Likewise.
+	(breakpoint_hit_watchpoint): Likewise.
+	(base_breakpoint_breakpoint_hit): Likewise.
+	(bkpt_breakpoint_hit): Likewise.
+	(dprintf_breakpoint_hit): Likewise.
+	(tracepoint_breakpoint_hit): Likewise.
+	* breakpoint.h (breakpoint_ops) <breakpoint_hit>: Likewise.
+
+2017-10-26  Yao Qi  <yao.qi@linaro.org>
+
 	* breakpoint.c (breakpoint_location_address_match): Change
 	"struct address_space *" to "const address_space".
 	(breakpoint_location_address_range_overlap): Likewise.

@@ -145,7 +145,7 @@ signal_catchpoint_remove_location (struct bp_location *bl,
 
 static int
 signal_catchpoint_breakpoint_hit (const struct bp_location *bl,
-				  struct address_space *aspace,
+				  const address_space *aspace,
 				  CORE_ADDR bp_addr,
 				  const struct target_waitstatus *ws)
 {
