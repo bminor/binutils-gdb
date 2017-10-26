@@ -1,3 +1,9 @@
+2017-10-26  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* testsuite/ld-arm/cortex-a8-far.d: Update expected disassembly.
+	* testsuite/ld-arm/farcall-group-size2: Likewise.
+	* testsuite/ld-arm/farcall-group.d: Likewise.
+
 2017-10-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld.texinfo: Correct -z ibt.
