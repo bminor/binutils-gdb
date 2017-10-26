@@ -158,11 +158,11 @@ static int watchpoint_locations_match (struct bp_location *loc1,
 				       struct bp_location *loc2);
 
 static int breakpoint_location_address_match (struct bp_location *bl,
-					      struct address_space *aspace,
+					      const struct address_space *aspace,
 					      CORE_ADDR addr);
 
 static int breakpoint_location_address_range_overlap (struct bp_location *,
-						      struct address_space *,
+						      const address_space *,
 						      CORE_ADDR, int);
 
 static void info_breakpoints_command (char *, int);
@@ -4045,7 +4045,7 @@ breakpoint_init_inferior (enum inf_context context)
      the target, to advance the PC past the breakpoint.  */
 
 enum breakpoint_here
-breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
+breakpoint_here_p (const address_space *aspace, CORE_ADDR pc)
 {
   struct bp_location *bl, **blp_tmp;
   int any_breakpoint_here = 0;
@@ -4078,7 +4078,7 @@ breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
 /* See breakpoint.h.  */
 
 int
-breakpoint_in_range_p (struct address_space *aspace,
+breakpoint_in_range_p (const address_space *aspace,
 		       CORE_ADDR addr, ULONGEST len)
 {
   struct bp_location *bl, **blp_tmp;
@@ -4112,7 +4112,7 @@ breakpoint_in_range_p (struct address_space *aspace,
 /* Return true if there's a moribund breakpoint at PC.  */
 
 int
-moribund_breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
+moribund_breakpoint_here_p (const address_space *aspace, CORE_ADDR pc)
 {
   struct bp_location *loc;
   int ix;
@@ -4129,7 +4129,7 @@ moribund_breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
 
 static int
 bp_location_inserted_here_p (struct bp_location *bl,
-			     struct address_space *aspace, CORE_ADDR pc)
+			     const address_space *aspace, CORE_ADDR pc)
 {
   if (bl->inserted
       && breakpoint_address_match (bl->pspace->aspace, bl->address,
@@ -4148,7 +4148,7 @@ bp_location_inserted_here_p (struct bp_location *bl,
 /* Returns non-zero iff there's a breakpoint inserted at PC.  */
 
 int
-breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
+breakpoint_inserted_here_p (const address_space *aspace, CORE_ADDR pc)
 {
   struct bp_location **blp, **blp_tmp = NULL;
 
@@ -4170,7 +4170,7 @@ breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
    inserted at PC.  */
 
 int
-software_breakpoint_inserted_here_p (struct address_space *aspace,
+software_breakpoint_inserted_here_p (const address_space *aspace,
 				     CORE_ADDR pc)
 {
   struct bp_location **blp, **blp_tmp = NULL;
@@ -4192,7 +4192,7 @@ software_breakpoint_inserted_here_p (struct address_space *aspace,
 /* See breakpoint.h.  */
 
 int
-hardware_breakpoint_inserted_here_p (struct address_space *aspace,
+hardware_breakpoint_inserted_here_p (const address_space *aspace,
 				     CORE_ADDR pc)
 {
   struct bp_location **blp, **blp_tmp = NULL;
@@ -4212,7 +4212,7 @@ hardware_breakpoint_inserted_here_p (struct address_space *aspace,
 }
 
 int
-hardware_watchpoint_inserted_in_range (struct address_space *aspace,
+hardware_watchpoint_inserted_in_range (const address_space *aspace,
 				       CORE_ADDR addr, ULONGEST len)
 {
   struct breakpoint *bpt;
@@ -5064,7 +5064,7 @@ watchpoint_check (bpstat bs)
 
 static int
 bpstat_check_location (const struct bp_location *bl,
-		       struct address_space *aspace, CORE_ADDR bp_addr,
+		       const address_space *aspace, CORE_ADDR bp_addr,
 		       const struct target_waitstatus *ws)
 {
   struct breakpoint *b = bl->owner;
@@ -5072,7 +5072,8 @@ bpstat_check_location (const struct bp_location *bl,
   /* BL is from an existing breakpoint.  */
   gdb_assert (b != NULL);
 
-  return b->ops->breakpoint_hit (bl, aspace, bp_addr, ws);
+  return b->ops->breakpoint_hit (bl, const_cast<address_space *> (aspace),
+				 bp_addr, ws);
 }
 
 /* Determine if the watched values have actually changed, and we
@@ -5421,7 +5422,7 @@ need_moribund_for_location_type (struct bp_location *loc)
    commands, FIXME??? fields.  */
 
 bpstat
-bpstat_stop_status (struct address_space *aspace,
+bpstat_stop_status (const address_space *aspace,
 		    CORE_ADDR bp_addr, ptid_t ptid,
 		    const struct target_waitstatus *ws)
 {
@@ -6894,8 +6895,8 @@ watchpoint_locations_match (struct bp_location *loc1,
 /* See breakpoint.h.  */
 
 int
-breakpoint_address_match (struct address_space *aspace1, CORE_ADDR addr1,
-			  struct address_space *aspace2, CORE_ADDR addr2)
+breakpoint_address_match (const address_space *aspace1, CORE_ADDR addr1,
+			  const address_space *aspace2, CORE_ADDR addr2)
 {
   return ((gdbarch_has_global_breakpoints (target_gdbarch ())
 	   || aspace1 == aspace2)
@@ -6908,8 +6909,9 @@ breakpoint_address_match (struct address_space *aspace1, CORE_ADDR addr1,
    space doesn't really matter.  */
 
 static int
-breakpoint_address_match_range (struct address_space *aspace1, CORE_ADDR addr1,
-				int len1, struct address_space *aspace2,
+breakpoint_address_match_range (const address_space *aspace1,
+				CORE_ADDR addr1,
+				int len1, const address_space *aspace2,
 				CORE_ADDR addr2)
 {
   return ((gdbarch_has_global_breakpoints (target_gdbarch ())
@@ -6924,7 +6926,7 @@ breakpoint_address_match_range (struct address_space *aspace1, CORE_ADDR addr1,
 
 static int
 breakpoint_location_address_match (struct bp_location *bl,
-				   struct address_space *aspace,
+				   const address_space *aspace,
 				   CORE_ADDR addr)
 {
   return (breakpoint_address_match (bl->pspace->aspace, bl->address,
@@ -6943,7 +6945,7 @@ breakpoint_location_address_match (struct bp_location *bl,
 
 static int
 breakpoint_location_address_range_overlap (struct bp_location *bl,
-					   struct address_space *aspace,
+					   const address_space *aspace,
 					   CORE_ADDR addr, int len)
 {
   if (gdbarch_has_global_breakpoints (target_gdbarch ())
@@ -14536,7 +14538,7 @@ invalidate_bp_value_on_memory_change (struct inferior *inferior,
 
 void
 insert_single_step_breakpoint (struct gdbarch *gdbarch,
-			       struct address_space *aspace, 
+			       const address_space *aspace,
 			       CORE_ADDR next_pc)
 {
   struct thread_info *tp = inferior_thread ();
@@ -14586,7 +14588,7 @@ insert_single_step_breakpoints (struct gdbarch *gdbarch)
 
 int
 breakpoint_has_location_inserted_here (struct breakpoint *bp,
-				       struct address_space *aspace,
+				       const address_space *aspace,
 				       CORE_ADDR pc)
 {
   struct bp_location *loc;
@@ -14603,7 +14605,7 @@ breakpoint_has_location_inserted_here (struct breakpoint *bp,
    PC.  */
 
 int
-single_step_breakpoint_inserted_here_p (struct address_space *aspace,
+single_step_breakpoint_inserted_here_p (const address_space *aspace,
 					CORE_ADDR pc)
 {
   struct breakpoint *bpt;
@@ -15313,7 +15315,7 @@ is_non_inline_function (struct breakpoint *b)
    have been inlined.  */
 
 int
-pc_at_non_inline_function (struct address_space *aspace, CORE_ADDR pc,
+pc_at_non_inline_function (const address_space *aspace, CORE_ADDR pc,
 			   const struct target_waitstatus *ws)
 {
   struct breakpoint *b;

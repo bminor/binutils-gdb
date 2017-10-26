@@ -71,7 +71,7 @@ DEF_ENUM_FLAGS_TYPE (enum record_print_flag, record_print_flags);
    otherwise.  */
 
 extern int
-  record_check_stopped_by_breakpoint (struct address_space *aspace,
+  record_check_stopped_by_breakpoint (const address_space *aspace,
 				      CORE_ADDR pc,
 				      enum target_stop_reason *reason);
 

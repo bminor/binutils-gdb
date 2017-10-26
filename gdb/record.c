@@ -234,7 +234,8 @@ record_kill (struct target_ops *t)
 /* See record.h.  */
 
 int
-record_check_stopped_by_breakpoint (struct address_space *aspace, CORE_ADDR pc,
+record_check_stopped_by_breakpoint (const address_space *aspace,
+				    CORE_ADDR pc,
 				    enum target_stop_reason *reason)
 {
   if (breakpoint_inserted_here_p (aspace, pc))

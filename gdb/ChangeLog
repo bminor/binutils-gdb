@@ -1,3 +1,43 @@
+2017-10-26  Yao Qi  <yao.qi@linaro.org>
+
+	* breakpoint.c (breakpoint_location_address_match): Change
+	"struct address_space *" to "const address_space".
+	(breakpoint_location_address_range_overlap): Likewise.
+	(breakpoint_here_p): Likewise.
+	(breakpoint_in_range_p): Likewise.
+	(moribund_breakpoint_here_p): Likewise.
+	(bp_location_inserted_here_p): Likewise.
+	(software_breakpoint_inserted_here_p): Likewise.
+	(hardware_breakpoint_inserted_here_p): Likewise.
+	(hardware_watchpoint_inserted_in_range): Likewise.
+	(bpstat_check_location): Likewise.
+	(bpstat_stop_status): Likewise.
+	(breakpoint_address_match): Likewise.
+	(breakpoint_address_match_range): Likewise.
+	(breakpoint_location_address_match): Likewise.
+	(breakpoint_location_address_range_overlap): Likewise.
+	(insert_single_step_breakpoint): Likewise.
+	(breakpoint_has_location_inserted_here): Likewise.
+	(single_step_breakpoint_inserted_here_p): Likewise.
+	(pc_at_non_inline_function): Likewise.
+	* breakpoint.h (bpstat_stop_status): Update declaration.
+	(breakpoint_here_p): Likewise.
+	(breakpoint_in_range_p): Likewise.
+	(moribund_breakpoint_here_p): Likewise.
+	(breakpoint_inserted_here_p): Likewise.
+	(software_breakpoint_inserted_here_p): Likewise.
+	(hardware_breakpoint_inserted_here_p): Likewise.
+	(breakpoint_has_location_inserted_here): Likewise.
+	(single_step_breakpoint_inserted_here_p): Likewise.
+	(hardware_watchpoint_inserted_in_range): Likewise.
+	(breakpoint_address_match): Likewise.
+	(insert_single_step_breakpoint): Likewise.
+	(pc_at_non_inline_function): Likewise.
+	* gdbthread.h (thread_has_single_step_breakpoint_here): Likewise.
+	* record.c (record_check_stopped_by_breakpoint): Likewise.
+	* record.h (record_check_stopped_by_breakpoint): Likewise.
+	* thread.c (thread_has_single_step_breakpoint_here): Likewise.
+
 2017-10-25  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch32-linux-nat.c (aarch32_gp_regcache_supply): Use
