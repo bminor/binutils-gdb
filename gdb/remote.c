@@ -1007,11 +1007,6 @@ show_remotebreak (struct ui_file *file, int from_tty,
 
 static unsigned int remote_address_size;
 
-/* Temporary to track who currently owns the terminal.  See
-   remote_terminal_* for more details.  */
-
-static int remote_async_terminal_ours_p;
-
 
 /* User configurable variables for the number of characters in a
    memory read/write packet.  MIN (rsa->remote_packet_size,
@@ -5117,9 +5112,6 @@ remote_open_1 (const char *name, int from_tty,
 
   readahead_cache_invalidate ();
 
-  /* Start out by owning the terminal.  */
-  remote_async_terminal_ours_p = 1;
-
   if (target_async_permitted)
     {
       /* FIXME: cagney/1999-09-23: During the initial connection it is
@@ -6303,15 +6295,6 @@ interrupt_query (void)
 static void
 remote_terminal_inferior (struct target_ops *self)
 {
-  /* FIXME: cagney/1999-09-27: Make calls to target_terminal::*()
-     idempotent.  The event-loop GDB talking to an asynchronous target
-     with a synchronous command calls this function from both
-     event-top.c and infrun.c/infcmd.c.  Once GDB stops trying to
-     transfer the terminal to the target when it shouldn't this guard
-     can go away.  */
-  if (!remote_async_terminal_ours_p)
-    return;
-  remote_async_terminal_ours_p = 0;
   /* NOTE: At this point we could also register our selves as the
      recipient of all input.  Any characters typed could then be
      passed on down to the target.  */
@@ -6320,10 +6303,6 @@ remote_terminal_inferior (struct target_ops *self)
 static void
 remote_terminal_ours (struct target_ops *self)
 {
-  /* See FIXME in remote_terminal_inferior.  */
-  if (remote_async_terminal_ours_p)
-    return;
-  remote_async_terminal_ours_p = 1;
 }
 
 static void

@@ -1,3 +1,9 @@
+2017-10-26  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_async_terminal_ours_p): Delete.
+	(remote_open_1, remote_terminal_inferior, remote_terminal_ours):
+	Remove references to 'remote_async_terminal_ours_p'.
+
 2017-10-26  Yao Qi  <yao.qi@linaro.org>
 
 	* breakpoint.h (regular_breakpoint_inserted_here_p): Remove.
