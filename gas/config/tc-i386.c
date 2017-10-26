@@ -4658,7 +4658,8 @@ check_VecOperands (const insn_template *t)
 	}
       else if (i.reg_operands == 1 && i.mask)
 	{
-	  if ((i.types[1].bitfield.regymm
+	  if ((i.types[1].bitfield.regxmm
+	       || i.types[1].bitfield.regymm
 	       || i.types[1].bitfield.regzmm)
 	      && (register_number (i.op[1].regs)
 		  == register_number (i.index_reg)))

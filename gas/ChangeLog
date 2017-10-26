@@ -1,3 +1,22 @@
+2017-10-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/22352
+	* config/tc-i386.c (check_VecOperands): Also check XMM register
+	for invalid register in AVX512 gathers.
+	* testsuite/gas/i386/vgather-check.s: Add tests for AVX512
+	gathers with XMM register.
+	* testsuite/gas/i386/x86-64-vgather-check.s: Likewise.
+	* testsuite/gas/i386/vgather-check-error.l: Updated.
+	* testsuite/gas/i386/vgather-check-none.d: Likewise.
+	* testsuite/gas/i386/vgather-check-warn.d: Likewise.
+	* testsuite/gas/i386/vgather-check-warn.e: Likewise.
+	* testsuite/gas/i386/vgather-check.d: Likewise.
+	* testsuite/gas/i386/x86-64-vgather-check-error.l: Likewise.
+	* testsuite/gas/i386/x86-64-vgather-check-none.d: Likewise.
+	* testsuite/gas/i386/x86-64-vgather-check-warn.d: Likewise.
+	* testsuite/gas/i386/x86-64-vgather-check-warn.e: Likewise.
+	* testsuite/gas/i386/x86-64-vgather-check.d: Likewise.
+
 2017-10-26  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* testsuite/gas/all/fill-1.s: Use L2 rather than .L2.
