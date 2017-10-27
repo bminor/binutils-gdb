@@ -5956,8 +5956,11 @@ print_breakpoint_location (struct breakpoint *b,
     uiout->field_string ("what", event_location_to_string (b->location.get ()));
   else if (loc && loc->symtab)
     {
-      struct symbol *sym 
-	= find_pc_sect_function (loc->address, loc->section);
+      const struct symbol *sym = loc->symbol;
+
+      if (sym == NULL)
+	sym = find_pc_sect_function (loc->address, loc->section);
+
       if (sym)
 	{
 	  uiout->text ("in ");
@@ -8743,6 +8746,7 @@ add_location_to_breakpoint (struct breakpoint *b,
   loc->gdbarch = loc_gdbarch;
   loc->line_number = sal->line;
   loc->symtab = sal->symtab;
+  loc->symbol = sal->symbol;
 
   set_breakpoint_location_function (loc,
 				    sal->explicit_pc || sal->explicit_line);

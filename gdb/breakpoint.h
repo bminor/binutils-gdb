@@ -486,6 +486,11 @@ public:
      to find the corresponding source file name.  */
 
   struct symtab *symtab = NULL;
+
+  /* The symbol found by the location parser, if any.  This may be used to
+     ascertain when an event location was set at a different location than
+     the one originally selected by parsing, e.g., inlined symbols.  */
+  const struct symbol *symbol = NULL;
 };
 
 /* The possible return values for print_bpstat, print_it_normal,

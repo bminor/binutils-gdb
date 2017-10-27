@@ -1,3 +1,13 @@
+2017-10-27  Keith Seitz  <keiths@redhat.com>
+
+	* breakpoint.c (print_breakpoint_location): Use the symbol saved
+	in the bp_location, falling back to find_pc_sect_function when
+	needed.
+	(add_location_to_breakpoint): Save sal->symbol.
+	* breakpoint.h (struct bp_location) <symbol>: New field.
+	* symtab.c (find_function_start_sal): Save the symbol into the SaL.
+	* symtab.h (struct symtab_and_line) <symbol>: New field.
+
 2017-10-26  Patrick Frants  <osscontribute@gmail.com>
 
 	PR gdb/13669
