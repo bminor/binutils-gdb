@@ -6646,7 +6646,7 @@ typedef struct Frame_Chunk
   int data_factor;
   dwarf_vma pc_begin;
   dwarf_vma pc_range;
-  int cfa_reg;
+  unsigned int cfa_reg;
   dwarf_vma cfa_offset;
   unsigned int ra;
   unsigned char fde_encoding;
@@ -7863,7 +7863,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_def_cfa:
-	      READ_SLEB (fc->cfa_reg);
+	      READ_ULEB (fc->cfa_reg);
 	      READ_ULEB (fc->cfa_offset);
 	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
@@ -7872,7 +7872,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_def_cfa_register:
-	      READ_SLEB (fc->cfa_reg);
+	      READ_ULEB (fc->cfa_reg);
 	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa_register: %s\n",
@@ -7991,7 +7991,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_def_cfa_sf:
-	      READ_SLEB (fc->cfa_reg);
+	      READ_ULEB (fc->cfa_reg);
 	      READ_ULEB (fc->cfa_offset);
 	      fc->cfa_offset = fc->cfa_offset * fc->data_factor;
 	      fc->cfa_exp = 0;

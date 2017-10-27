@@ -1,3 +1,9 @@
+2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf.c (struct Frame_Chunk) <cfa_reg>: Change type to
+	unsigned int.
+	(display_debug_frames): Read CFA reg as an unsigned number.
+
 2017-10-25  Alan Modra  <amodra@gmail.com>
 
 	* nm.c (filter_symbols): Match "__gnu_lto_slim" optionally prefixed
