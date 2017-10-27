@@ -1,3 +1,7 @@
+2017-10-27  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/insn-reloc.c (can_relocate_bl): Mark "x30" clobbered.
+
 2017-10-26  Patrick Frants  <osscontribute@gmail.com>
 
 	* gdb.cp/classes.exp (test_static_members): Test printing
