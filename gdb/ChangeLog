@@ -1,3 +1,8 @@
+2017-10-26  Patrick Frants  <osscontribute@gmail.com>
+
+	* cp-valprint.c (cp_print_value_fields): Use obstack_blank_fast
+	to rewind obstack.
+
 2017-10-26  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (remote_async_terminal_ours_p): Delete.

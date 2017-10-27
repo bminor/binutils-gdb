@@ -665,6 +665,19 @@ void use_methods ()
   base1 b (3);
 }
 
+struct Inner
+{
+  static Inner instance;
+};
+
+struct Outer
+{
+  Inner inner;
+  static Outer instance;
+};
+
+Inner Inner::instance;
+Outer Outer::instance;
 
 int
 main()

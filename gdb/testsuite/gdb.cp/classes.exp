@@ -602,6 +602,11 @@ proc test_static_members {} {
     gdb_test "print cnsi" \
 	"{x = 30, y = 40, static null = {x = 0, y = 0, static null = <same as static member of an already seen type>, static yy = {z = 5, static xx = {x = 1, y = 2, static null = <same as static member of an already seen type>, static yy = <same as static member of an already seen type>}}}, static yy = <same as static member of an already seen type>}" \
 	"print cnsi with static members"
+
+    # Another case of infinite recursion.
+    gdb_test "print Outer::instance" \
+	"{inner = {static instance = {static instance = <same as static member of an already seen type>}}, static instance = {inner = {static instance = {static instance = <same as static member of an already seen type>}}, static instance = <same as static member of an already seen type>}}" \
+	"print recursive static member"
 }
 
 proc do_tests {} {

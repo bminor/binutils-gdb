@@ -1,3 +1,10 @@
+2017-10-26  Patrick Frants  <osscontribute@gmail.com>
+
+	* gdb.cp/classes.exp (test_static_members): Test printing
+	Outer::instance.
+	* gdb.cp/classes.c (struct Inner, struct Outer): New.
+	(Inner::instance, Outer::instance): New.
+
 2017-10-24  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/new-ui.exp (do_test): Split "delete all breakpoints on
