@@ -1,5 +1,6 @@
 2017-10-26  Patrick Frants  <osscontribute@gmail.com>
 
+	PR gdb/13669
 	* cp-valprint.c (cp_print_value_fields): Use obstack_blank_fast
 	to rewind obstack.
 
