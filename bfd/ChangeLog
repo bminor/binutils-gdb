@@ -1,3 +1,19 @@
+2017-10-30  Alan Modra  <amodra@gmail.com>
+
+	PR 22269
+	* elf32-hppa.c (elf32_hppa_check_relocs): Move SEC_ALLOC test to
+	ensure non_got_ref is not set due to debug references.
+	(elf32_hppa_adjust_dynamic_symbol): Tidy plabel handling.  Use
+	SYMBOL_CALLS_LOCAL and UNDEFWEAK_NO_DYNAMIC_RELOC when determining
+	need for a plt entry.
+	(allocate_dynrelocs): Similarly for got entries.  Tidy code discarding
+	dynamic relocs when pic.  Remove bogus code attempting to handle
+	commons.
+	(elf32_hppa_relocate_section): Similarly.  Delete resolved_to_zero
+	and simplify.
+	(elf32_hppa_finish_dynamic_symbol): Use UNDEFWEAK_NO_DYNAMIC_RELOC
+	and SYMBOL_REFERENCES_LOCAL in GOT handling.
+
 2017-10-28  Alan Modra  <amodra@gmail.com>
 
 	PR 22300

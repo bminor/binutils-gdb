@@ -1423,7 +1423,8 @@ elf32_hppa_check_relocs (bfd *abfd,
 	    }
 	}
 
-      if (need_entry & NEED_DYNREL)
+      if ((need_entry & NEED_DYNREL) != 0
+	  && (sec->flags & SEC_ALLOC) != 0)
 	{
 	  /* Flag this symbol as having a non-got, non-plt reference
 	     so that we generate copy relocs if it turns out to be
@@ -1460,7 +1461,6 @@ elf32_hppa_check_relocs (bfd *abfd,
 	     dynamic library if we manage to avoid copy relocs for the
 	     symbol.  */
 	  if ((bfd_link_pic (info)
-	       && (sec->flags & SEC_ALLOC) != 0
 	       && (IS_ABSOLUTE_RELOC (r_type)
 		   || (hh != NULL
 		       && (!SYMBOLIC_BIND (info, &hh->eh)
@@ -1468,7 +1468,6 @@ elf32_hppa_check_relocs (bfd *abfd,
 			   || !hh->eh.def_regular))))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !bfd_link_pic (info)
-		  && (sec->flags & SEC_ALLOC) != 0
 		  && hh != NULL
 		  && (hh->eh.root.type == bfd_link_hash_defweak
 		      || !hh->eh.def_regular)))
@@ -1680,15 +1679,12 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
       /* If the symbol is used by a plabel, we must allocate a PLT slot.
 	 The refcounts are not reliable when it has been hidden since
 	 hide_symbol can be called before the plabel flag is set.  */
-      if (hppa_elf_hash_entry (eh)->plabel
-	  && eh->plt.refcount <= 0)
+      if (hppa_elf_hash_entry (eh)->plabel)
 	eh->plt.refcount = 1;
 
-      if (eh->plt.refcount <= 0
-	  || (eh->def_regular
-	      && eh->root.type != bfd_link_hash_defweak
-	      && ! hppa_elf_hash_entry (eh)->plabel
-	      && (!bfd_link_pic (info) || SYMBOLIC_BIND (info, eh))))
+      else if (eh->plt.refcount <= 0
+	       || SYMBOL_CALLS_LOCAL (info, eh)
+	       || UNDEFWEAK_NO_DYNAMIC_RELOC (info, eh))
 	{
 	  /* The .plt entry is not needed when:
 	     a) Garbage collection has removed all references to the
@@ -1929,7 +1925,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
       if (htab->etab.dynamic_sections_created
 	  && (bfd_link_pic (info)
 	      || (eh->dynindx != -1
-		  && !eh->forced_local)))
+		  && !SYMBOL_REFERENCES_LOCAL (info, eh)))
+	  && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, eh))
 	{
 	  htab->etab.srelgot->size += sizeof (Elf32_External_Rela);
 	  if ((hh->tls_type & (GOT_TLS_GD | GOT_TLS_IE)) == (GOT_TLS_GD | GOT_TLS_IE))
@@ -1940,6 +1937,10 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
     }
   else
     eh->got.offset = (bfd_vma) -1;
+
+  /* If no dynamic sections we can't have dynamic relocs.  */
+  if (!htab->etab.dynamic_sections_created)
+    hh->dyn_relocs = NULL;
 
   if (hh->dyn_relocs == NULL)
     return TRUE;
@@ -1953,9 +1954,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
     {
       /* Discard relocs on undefined syms with non-default visibility.  */
       if ((eh->root.type == bfd_link_hash_undefined
-	   || eh->root.type == bfd_link_hash_undefweak)
-	  && (ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT
-	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, eh)))
+	   && ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT)
+	  || UNDEFWEAK_NO_DYNAMIC_RELOC (info, eh))
 	hh->dyn_relocs = NULL;
 
 #if RELATIVE_DYNRELOCS
@@ -1981,19 +1981,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 	    return FALSE;
 	}
     }
-  else
+  else if (ELIMINATE_COPY_RELOCS)
     {
       /* For the non-shared case, discard space for relocs against
 	 symbols which turn out to need copy relocs or are not
 	 dynamic.  */
 
       if (!eh->non_got_ref
-	  && ((ELIMINATE_COPY_RELOCS
-	       && eh->def_dynamic
-	       && !eh->def_regular)
-	       || (htab->etab.dynamic_sections_created
-		   && (eh->root.type == bfd_link_hash_undefweak
-		       || eh->root.type == bfd_link_hash_undefined))))
+	  && !eh->def_regular)
 	{
 	  if (!ensure_undef_dynamic (info, eh))
 	    return FALSE;
@@ -3550,7 +3545,6 @@ elf32_hppa_relocate_section (bfd *output_bfd,
       const char *sym_name;
       bfd_boolean plabel;
       bfd_boolean warned_undef;
-      bfd_boolean resolved_to_zero;
 
       r_type = ELF32_R_TYPE (rela->r_info);
       if (r_type >= (unsigned int) R_PARISC_UNIMPLEMENTED)
@@ -3614,9 +3608,6 @@ elf32_hppa_relocate_section (bfd *output_bfd,
       if (bfd_link_relocatable (info))
 	continue;
 
-      resolved_to_zero = (hh != NULL
-			  && UNDEFWEAK_NO_DYNAMIC_RELOC (info, &hh->eh));
-
       /* Do any required modifications to the relocation value, and
 	 determine what types of dynamic info we need to output, if
 	 any.  */
@@ -3628,7 +3619,8 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	case R_PARISC_DLTIND21L:
 	  {
 	    bfd_vma off;
-	    bfd_boolean do_got = 0;
+	    bfd_boolean do_got = FALSE;
+	    bfd_boolean reloc = bfd_link_pic (info);
 
 	    /* Relocation is to the entry for this symbol in the
 	       global offset table.  */
@@ -3638,9 +3630,14 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 
 		off = hh->eh.got.offset;
 		dyn = htab->etab.dynamic_sections_created;
-		if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn,
-						       bfd_link_pic (info),
-						       &hh->eh))
+		reloc = (!UNDEFWEAK_NO_DYNAMIC_RELOC (info, &hh->eh)
+			 && (reloc
+			     || (hh->eh.dynindx != -1
+				 && !SYMBOL_REFERENCES_LOCAL (info, &hh->eh))));
+		if (!reloc
+		    || !WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn,
+							 bfd_link_pic (info),
+							 &hh->eh))
 		  {
 		    /* If we aren't going to call finish_dynamic_symbol,
 		       then we need to handle initialisation of the .got
@@ -3653,7 +3650,7 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 		    else
 		      {
 			hh->eh.got.offset |= 1;
-			do_got = 1;
+			do_got = TRUE;
 		      }
 		  }
 	      }
@@ -3673,13 +3670,13 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 		else
 		  {
 		    local_got_offsets[r_symndx] |= 1;
-		    do_got = 1;
+		    do_got = TRUE;
 		  }
 	      }
 
 	    if (do_got)
 	      {
-		if (bfd_link_pic (info))
+		if (reloc)
 		  {
 		    /* Output a dynamic relocation for this GOT entry.
 		       In this case it is relative to the base of the
@@ -3838,29 +3835,20 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	     allocate_dynrelocs.  ie. We need exactly the same condition
 	     as in ..check_relocs, with some extra conditions (dynindx
 	     test in this case) to cater for relocs removed by
-	     allocate_dynrelocs.  If you squint, the non-shared test
-	     here does indeed match the one in ..check_relocs, the
-	     difference being that here we test DEF_DYNAMIC as well as
-	     !DEF_REGULAR.  All common syms end up with !DEF_REGULAR,
-	     which is why we can't use just that test here.
-	     Conversely, DEF_DYNAMIC can't be used in check_relocs as
-	     there all files have not been loaded.  */
+	     allocate_dynrelocs.  */
 	  if ((bfd_link_pic (info)
-	       && (hh == NULL
-		   || (ELF_ST_VISIBILITY (hh->eh.other) == STV_DEFAULT
-		       && !resolved_to_zero)
-		   || hh->eh.root.type != bfd_link_hash_undefweak)
+	       && !(hh != NULL
+		    && ((hh->eh.root.type == bfd_link_hash_undefined
+			 && ELF_ST_VISIBILITY (hh->eh.other) != STV_DEFAULT)
+			|| UNDEFWEAK_NO_DYNAMIC_RELOC (info, &hh->eh)))
 	       && (IS_ABSOLUTE_RELOC (r_type)
 		   || !SYMBOL_CALLS_LOCAL (info, &hh->eh)))
-	      || (!bfd_link_pic (info)
+	      || (ELIMINATE_COPY_RELOCS
+		  && !bfd_link_pic (info)
 		  && hh != NULL
 		  && hh->eh.dynindx != -1
 		  && !hh->eh.non_got_ref
-		  && ((ELIMINATE_COPY_RELOCS
-		       && hh->eh.def_dynamic
-		       && !hh->eh.def_regular)
-		      || hh->eh.root.type == bfd_link_hash_undefweak
-		      || hh->eh.root.type == bfd_link_hash_undefined)))
+		  && !hh->eh.def_regular))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_boolean skip;
@@ -4258,42 +4246,49 @@ elf32_hppa_finish_dynamic_symbol (bfd *output_bfd,
 
   if (eh->got.offset != (bfd_vma) -1
       && (hppa_elf_hash_entry (eh)->tls_type & GOT_TLS_GD) == 0
-      && (hppa_elf_hash_entry (eh)->tls_type & GOT_TLS_IE) == 0)
+      && (hppa_elf_hash_entry (eh)->tls_type & GOT_TLS_IE) == 0
+      && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, eh))
     {
-      /* This symbol has an entry in the global offset table.  Set it
-	 up.  */
+      bfd_boolean is_dyn = (eh->dynindx != -1
+			    && !SYMBOL_REFERENCES_LOCAL (info, eh));
 
-      rela.r_offset = ((eh->got.offset &~ (bfd_vma) 1)
-		      + htab->etab.sgot->output_offset
-		      + htab->etab.sgot->output_section->vma);
-
-      /* If this is a -Bsymbolic link and the symbol is defined
-	 locally or was forced to be local because of a version file,
-	 we just want to emit a RELATIVE reloc.  The entry in the
-	 global offset table will already have been initialized in the
-	 relocate_section function.  */
-      if (bfd_link_pic (info)
-	  && (SYMBOLIC_BIND (info, eh) || eh->dynindx == -1)
-	  && eh->def_regular)
+      if (is_dyn || bfd_link_pic (info))
 	{
-	  rela.r_info = ELF32_R_INFO (0, R_PARISC_DIR32);
-	  rela.r_addend = (eh->root.u.def.value
-			  + eh->root.u.def.section->output_offset
-			  + eh->root.u.def.section->output_section->vma);
-	}
-      else
-	{
-	  if ((eh->got.offset & 1) != 0)
-	    abort ();
+	  /* This symbol has an entry in the global offset table.  Set
+	     it up.  */
 
-	  bfd_put_32 (output_bfd, 0, htab->etab.sgot->contents + (eh->got.offset & ~1));
-	  rela.r_info = ELF32_R_INFO (eh->dynindx, R_PARISC_DIR32);
-	  rela.r_addend = 0;
-	}
+	  rela.r_offset = ((eh->got.offset &~ (bfd_vma) 1)
+			   + htab->etab.sgot->output_offset
+			   + htab->etab.sgot->output_section->vma);
 
-      loc = htab->etab.srelgot->contents;
-      loc += htab->etab.srelgot->reloc_count++ * sizeof (Elf32_External_Rela);
-      bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
+	  /* If this is a -Bsymbolic link and the symbol is defined
+	     locally or was forced to be local because of a version
+	     file, we just want to emit a RELATIVE reloc.  The entry
+	     in the global offset table will already have been
+	     initialized in the relocate_section function.  */
+	  if (!is_dyn)
+	    {
+	      rela.r_info = ELF32_R_INFO (0, R_PARISC_DIR32);
+	      rela.r_addend = (eh->root.u.def.value
+			       + eh->root.u.def.section->output_offset
+			       + eh->root.u.def.section->output_section->vma);
+	    }
+	  else
+	    {
+	      if ((eh->got.offset & 1) != 0)
+		abort ();
+
+	      bfd_put_32 (output_bfd, 0,
+			  htab->etab.sgot->contents + (eh->got.offset & ~1));
+	      rela.r_info = ELF32_R_INFO (eh->dynindx, R_PARISC_DIR32);
+	      rela.r_addend = 0;
+	    }
+
+	  loc = htab->etab.srelgot->contents;
+	  loc += (htab->etab.srelgot->reloc_count++
+		  * sizeof (Elf32_External_Rela));
+	  bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
+	}
     }
 
   if (eh->needs_copy)
