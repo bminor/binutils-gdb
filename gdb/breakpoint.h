@@ -917,17 +917,9 @@ extern void bpstat_clear (bpstat *);
    is part of the bpstat is copied as well.  */
 extern bpstat bpstat_copy (bpstat);
 
-/* Build the bstat chain for the stop information given by ASPACE,
-   BP_ADDR, and WS.  Returns the head of the bpstat chain.  */
-
-extern bpstat build_bpstat_chain (const address_space *aspace,
-				  CORE_ADDR bp_addr,
-				  const struct target_waitstatus *ws);
-
 extern bpstat bpstat_stop_status (const address_space *aspace,
 				  CORE_ADDR pc, ptid_t ptid,
-				  const struct target_waitstatus *ws,
-				  bpstat stop_chain = NULL);
+				  const struct target_waitstatus *ws);
 
 /* Return true iff it is meaningful to use the address member of
    BPT locations.  For some breakpoint types, the locations' address members
@@ -943,7 +935,6 @@ extern bpstat bpstat_stop_status (const address_space *aspace,
       bp_catchpoint
 
 */
-
 extern bool breakpoint_address_is_meaningful (struct breakpoint *bpt);
 
 

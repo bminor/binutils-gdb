@@ -5839,7 +5839,12 @@ handle_signal_stop (struct execution_control_state *ecs)
   ecs->event_thread->control.stop_step = 0;
   stop_print_frame = 1;
   stopped_by_random_signal = 0;
-  bpstat stop_chain = NULL;
+
+  /* See if there is a breakpoint/watchpoint/catchpoint/etc. that
+     handles this event.  */
+  ecs->event_thread->control.stop_bpstat
+    = bpstat_stop_status (get_current_regcache ()->aspace (),
+			  stop_pc, ecs->ptid, &ecs->ws);
 
   /* Hide inlined functions starting here, unless we just performed stepi or
      nexti.  After stepi and nexti, always show the innermost frame (not any
@@ -5873,9 +5878,8 @@ handle_signal_stop (struct execution_control_state *ecs)
 	{
 	  struct breakpoint *bpt = NULL;
 
-	  stop_chain = build_bpstat_chain (aspace, stop_pc, &ecs->ws);
-	  if (stop_chain != NULL)
-	    bpt = stop_chain->breakpoint_at;
+	  if (ecs->event_thread->control.stop_bpstat != NULL)
+	    bpt = ecs->event_thread->control.stop_bpstat->breakpoint_at;
 
 	  skip_inline_frames (ecs->ptid, bpt);
 
@@ -5921,12 +5925,6 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  ecs->event_thread->stepping_over_breakpoint = 1;
 	}
     }
-
-  /* See if there is a breakpoint/watchpoint/catchpoint/etc. that
-     handles this event.  */
-  ecs->event_thread->control.stop_bpstat
-    = bpstat_stop_status (get_current_regcache ()->aspace (),
-			  stop_pc, ecs->ptid, &ecs->ws, stop_chain);
 
   /* Following in case break condition called a
      function.  */

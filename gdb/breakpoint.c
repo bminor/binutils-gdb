@@ -68,6 +68,7 @@
 #include "format.h"
 #include "thread-fsm.h"
 #include "tid-parse.h"
+#include "inline-frame.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -5315,6 +5316,7 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 	    }
 	  CATCH (ex, RETURN_MASK_ALL)
 	    {
+	      clear_inline_frame_state (ptid);
 	      exception_fprintf (gdb_stderr, ex,
 				 "Error in testing breakpoint condition:\n");
 	    }
@@ -5357,25 +5359,58 @@ need_moribund_for_location_type (struct bp_location *loc)
 	      && !target_supports_stopped_by_hw_breakpoint ()));
 }
 
-/* See breakpoint.h.  */
+
+/* Get a bpstat associated with having just stopped at address
+   BP_ADDR in thread PTID.
+
+   Determine whether we stopped at a breakpoint, etc, or whether we
+   don't understand this stop.  Result is a chain of bpstat's such
+   that:
+
+   if we don't understand the stop, the result is a null pointer.
+
+   if we understand why we stopped, the result is not null.
+
+   Each element of the chain refers to a particular breakpoint or
+   watchpoint at which we have stopped.  (We may have stopped for
+   several reasons concurrently.)
+
+   Each element of the chain has valid next, breakpoint_at,
+   commands, FIXME??? fields.  */
 
 bpstat
-build_bpstat_chain (const address_space *aspace, CORE_ADDR bp_addr,
+bpstat_stop_status (const address_space *aspace,
+		    CORE_ADDR bp_addr, ptid_t ptid,
 		    const struct target_waitstatus *ws)
 {
-  struct breakpoint *b;
+  struct breakpoint *b = NULL;
+  struct bp_location *bl;
+  struct bp_location *loc;
+  /* First item of allocated bpstat's.  */
   bpstat bs_head = NULL, *bs_link = &bs_head;
+  /* Pointer to the last thing in the chain currently.  */
+  bpstat bs;
+  int ix;
+  int need_remove_insert;
+  int removed_any;
+
+  /* First, build the bpstat chain with locations that explain a
+     target stop, while being careful to not set the target running,
+     as that may invalidate locations (in particular watchpoint
+     locations are recreated).  Resuming will happen here with
+     breakpoint conditions or watchpoint expressions that include
+     inferior function calls.  */
 
   ALL_BREAKPOINTS (b)
     {
       if (!breakpoint_enabled (b))
 	continue;
 
-      for (bp_location *bl = b->loc; bl != NULL; bl = bl->next)
+      for (bl = b->loc; bl != NULL; bl = bl->next)
 	{
 	  /* For hardware watchpoints, we look only at the first
 	     location.  The watchpoint_check function will work on the
-
+	     entire expression, not the individual locations.  For
 	     read watchpoints, the watchpoints_triggered function has
 	     checked all locations already.  */
 	  if (b->type == bp_hardware_watchpoint && bl != b->loc)
@@ -5390,8 +5425,8 @@ build_bpstat_chain (const address_space *aspace, CORE_ADDR bp_addr,
 	  /* Come here if it's a watchpoint, or if the break address
 	     matches.  */
 
-	  bpstat bs = new bpstats (bl, &bs_link);	/* Alloc a bpstat to
-							   explain stop.  */
+	  bs = new bpstats (bl, &bs_link);	/* Alloc a bpstat to
+						   explain stop.  */
 
 	  /* Assume we stop.  Should we find a watchpoint that is not
 	     actually triggered, or if the condition of the breakpoint
@@ -5416,15 +5451,12 @@ build_bpstat_chain (const address_space *aspace, CORE_ADDR bp_addr,
   if (!target_supports_stopped_by_sw_breakpoint ()
       || !target_supports_stopped_by_hw_breakpoint ())
     {
-      struct bp_location *loc;
-
-      for (int ix = 0;
-	   VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
+      for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
 	{
 	  if (breakpoint_location_address_match (loc, aspace, bp_addr)
 	      && need_moribund_for_location_type (loc))
 	    {
-	      bpstat bs = new bpstats (loc, &bs_link);
+	      bs = new bpstats (loc, &bs_link);
 	      /* For hits of moribund locations, we should just proceed.  */
 	      bs->stop = 0;
 	      bs->print = 0;
@@ -5432,49 +5464,6 @@ build_bpstat_chain (const address_space *aspace, CORE_ADDR bp_addr,
 	    }
 	}
     }
-
-  return bs_head;
-}
-
-/* Get a bpstat associated with having just stopped at address
-   BP_ADDR in thread PTID.
-
-   Determine whether we stopped at a breakpoint, etc, or whether we
-   don't understand this stop.  Result is a chain of bpstat's such
-   that:
-
-   if we don't understand the stop, the result is a null pointer.
-
-   if we understand why we stopped, the result is not null.
-
-   Each element of the chain refers to a particular breakpoint or
-   watchpoint at which we have stopped.  (We may have stopped for
-   several reasons concurrently.)
-
-   Each element of the chain has valid next, breakpoint_at,
-   commands, FIXME??? fields.  */
-
-bpstat
-bpstat_stop_status (const address_space *aspace,
-		    CORE_ADDR bp_addr, ptid_t ptid,
-		    const struct target_waitstatus *ws,
-		    bpstat stop_chain)
-{
-  struct breakpoint *b = NULL;
-  /* First item of allocated bpstat's.  */
-  bpstat bs_head = stop_chain;
-  bpstat bs;
-  int need_remove_insert;
-  int removed_any;
-
-  /* First, build the bpstat chain with locations that explain a
-     target stop, while being careful to not set the target running,
-     as that may invalidate locations (in particular watchpoint
-     locations are recreated).  Resuming will happen here with
-     breakpoint conditions or watchpoint expressions that include
-     inferior function calls.  */
-  if (bs_head == NULL)
-    bs_head = build_bpstat_chain (aspace, bp_addr, ws);
 
   /* A bit of special processing for shlib breakpoints.  We need to
      process solib loading here, so that the lists of loaded and
