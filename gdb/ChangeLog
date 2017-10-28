@@ -1,3 +1,12 @@
+2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* breakpoint.c (breakpoint_objfile_data): Initialize fields.
+	(get_breakpoint_objfile_data): Allocate breakpoint_objfile_data
+	with new.
+	(free_breakpoint_probes): Rename to ...
+	(free_breakpoint_objfile_data): ... this, and call delete on
+	bp_objfile_data..
+
 2017-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* auto-load.c: Don't include gdb_vecs.h, include algorithm.

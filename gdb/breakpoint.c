@@ -3183,28 +3183,28 @@ static const char *const longjmp_names[] =
 struct breakpoint_objfile_data
 {
   /* Minimal symbol for "_ovly_debug_event" (if any).  */
-  struct bound_minimal_symbol overlay_msym;
+  struct bound_minimal_symbol overlay_msym {};
 
   /* Minimal symbol(s) for "longjmp", "siglongjmp", etc. (if any).  */
-  struct bound_minimal_symbol longjmp_msym[NUM_LONGJMP_NAMES];
+  struct bound_minimal_symbol longjmp_msym[NUM_LONGJMP_NAMES] {};
 
   /* True if we have looked for longjmp probes.  */
-  int longjmp_searched;
+  int longjmp_searched = 0;
 
   /* SystemTap probe points for longjmp (if any).  */
-  VEC (probe_p) *longjmp_probes;
+  VEC (probe_p) *longjmp_probes = NULL;
 
   /* Minimal symbol for "std::terminate()" (if any).  */
-  struct bound_minimal_symbol terminate_msym;
+  struct bound_minimal_symbol terminate_msym {};
 
   /* Minimal symbol for "_Unwind_DebugHook" (if any).  */
-  struct bound_minimal_symbol exception_msym;
+  struct bound_minimal_symbol exception_msym {};
 
   /* True if we have looked for exception probes.  */
-  int exception_searched;
+  int exception_searched = 0;
 
   /* SystemTap probe points for unwinding (if any).  */
-  VEC (probe_p) *exception_probes;
+  VEC (probe_p) *exception_probes = NULL;
 };
 
 static const struct objfile_data *breakpoint_objfile_key;
@@ -3232,23 +3232,22 @@ get_breakpoint_objfile_data (struct objfile *objfile)
 		     objfile_data (objfile, breakpoint_objfile_key));
   if (bp_objfile_data == NULL)
     {
-      bp_objfile_data =
-	XOBNEW (&objfile->objfile_obstack, struct breakpoint_objfile_data);
-
-      memset (bp_objfile_data, 0, sizeof (*bp_objfile_data));
+      bp_objfile_data = new breakpoint_objfile_data ();
       set_objfile_data (objfile, breakpoint_objfile_key, bp_objfile_data);
     }
   return bp_objfile_data;
 }
 
 static void
-free_breakpoint_probes (struct objfile *obj, void *data)
+free_breakpoint_objfile_data (struct objfile *obj, void *data)
 {
   struct breakpoint_objfile_data *bp_objfile_data
     = (struct breakpoint_objfile_data *) data;
 
   VEC_free (probe_p, bp_objfile_data->longjmp_probes);
   VEC_free (probe_p, bp_objfile_data->exception_probes);
+
+  delete bp_objfile_data;
 }
 
 static void
@@ -15544,7 +15543,7 @@ _initialize_breakpoint (void)
   observer_attach_memory_changed (invalidate_bp_value_on_memory_change);
 
   breakpoint_objfile_key
-    = register_objfile_data_with_cleanup (NULL, free_breakpoint_probes);
+    = register_objfile_data_with_cleanup (NULL, free_breakpoint_objfile_data);
 
   breakpoint_chain = 0;
   /* Don't bother to call set_breakpoint_count.  $bpnum isn't useful
