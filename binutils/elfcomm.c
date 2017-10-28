@@ -466,8 +466,12 @@ process_archive_index_and_symbols (struct archive_info *  arch,
 {
   size_t got;
   unsigned long size;
+  char fmag_save;
 
+  fmag_save = arch->arhdr.ar_fmag[0];
+  arch->arhdr.ar_fmag[0] = 0;
   size = strtoul (arch->arhdr.ar_size, NULL, 10);
+  arch->arhdr.ar_fmag[0] = fmag_save;
   /* PR 17531: file: 912bd7de.  */
   if ((signed long) size < 0)
     {
@@ -655,7 +659,10 @@ setup_archive (struct archive_info *arch, const char *file_name,
   if (const_strneq (arch->arhdr.ar_name, "//              "))
     {
       /* This is the archive string table holding long member names.  */
+      char fmag_save = arch->arhdr.ar_fmag[0];
+      arch->arhdr.ar_fmag[0] = 0;
       arch->longnames_size = strtoul (arch->arhdr.ar_size, NULL, 10);
+      arch->arhdr.ar_fmag[0] = fmag_save;
       /* PR 17531: file: 01068045.  */
       if (arch->longnames_size < 8)
 	{
@@ -758,6 +765,7 @@ get_archive_member_name (struct archive_info *arch,
       char *endp;
       char *member_file_name;
       char *member_name;
+      char fmag_save;
 
       if (arch->longnames == NULL || arch->longnames_size == 0)
 	{
@@ -766,9 +774,12 @@ get_archive_member_name (struct archive_info *arch,
 	}
 
       arch->nested_member_origin = 0;
+      fmag_save = arch->arhdr.ar_fmag[0];
+      arch->arhdr.ar_fmag[0] = 0;
       k = j = strtoul (arch->arhdr.ar_name + 1, &endp, 10);
       if (arch->is_thin_archive && endp != NULL && * endp == ':')
         arch->nested_member_origin = strtoul (endp + 1, NULL, 10);
+      arch->arhdr.ar_fmag[0] = fmag_save;
 
       if (j > arch->longnames_size)
 	{

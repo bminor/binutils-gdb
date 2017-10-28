@@ -1,3 +1,10 @@
+2017-10-28  Alan Modra  <amodra@gmail.com>
+
+	PR 22361
+	* readelf.c (process_archive_index_and_symbols): Ensure ar_size
+	field is zero terminated for strtoul.
+	(setup_archive, get_archive_member_name): Likewise.
+
 2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* dwarf.c (struct Frame_Chunk) <cfa_reg>: Change type to
