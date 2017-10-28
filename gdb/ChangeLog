@@ -1,3 +1,38 @@
+2017-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* xml-syscall.c (struct syscall_desc): Add constructor.
+	<name>: Change type to std::string.
+	(syscall_desc_up): New typedef.
+	(syscall_desc_p): Remove typeder.
+	(DEF_VEC_P(syscall_desc_p)): Remove.
+	(struct syscall_group_desc): Add constructor.
+	<name>: Change type to std::string.
+	<syscalls>: Change type to std::vector.
+	(syscall_group_desc_up): New typedef.
+	(syscall_group_desc_p): Remove typedef.
+	(DEF_VEC_P(syscall_group_desc_p)): Remove.
+	(struct syscalls_info) <syscalls>: Change type to std::vector of
+	unique_ptr.
+	<groups>: Likewise.
+	<my_gdb_datadir>: Change type to std::string.
+	(syscalls_info_up): New typedef.
+	(allocate_syscalls_info): Remove.
+	(syscalls_info_free_syscalls_desc): Remove.
+	(syscalls_info_free_syscall_group_desc): Remove.
+	(free_syscalls_info): Remove.
+	(make_cleanup_free_syscalls_info): Remove.
+	(syscall_group_create_syscall_group_desc): Adjust.
+	(syscall_group_add_syscall): Adjust.
+	(syscall_create_syscall_desc): Adjust.
+	(syscall_parse_xml): Adjust, use unique_ptr instead of cleanup.
+	(init_syscalls_info): Adjust.
+	(syscall_group_get_group_by_name): Adjust.
+	(xml_get_syscall_number): Adjust.
+	(xml_get_syscall_name): Adjust.
+	(xml_list_of_syscalls): Adjust.
+	(xml_list_syscalls_by_group): Adjust.
+	(xml_list_of_groups): Adjust.
+
 2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* probe.h: Don't include gdb_vecs.h.
