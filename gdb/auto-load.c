@@ -32,7 +32,6 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-setshow.h"
-#include "gdb_vecs.h"
 #include "readline/tilde.h"
 #include "completer.h"
 #include "fnmatch.h"
@@ -40,6 +39,7 @@
 #include "filestuff.h"
 #include "extension.h"
 #include "gdb/section-scripts.h"
+#include <algorithm>
 
 /* The section to look in for auto-loaded scripts (in file formats that
    support sections).
@@ -1212,13 +1212,14 @@ auto_load_new_objfile (struct objfile *objfile)
 
 /* Collect scripts to be printed in a vec.  */
 
-typedef struct loaded_script *loaded_script_ptr;
-DEF_VEC_P (loaded_script_ptr);
-
 struct collect_matching_scripts_data
 {
-  VEC (loaded_script_ptr) **scripts_p;
+  collect_matching_scripts_data (std::vector<loaded_script *> *scripts_p_,
+				 const extension_language_defn *language_)
+  : scripts_p (scripts_p_), language (language_)
+  {}
 
+  std::vector<loaded_script *> *scripts_p;
   const struct extension_language_defn *language;
 };
 
@@ -1233,7 +1234,7 @@ collect_matching_scripts (void **slot, void *info)
     = (struct collect_matching_scripts_data *) info;
 
   if (script->language == data->language && re_exec (script->name))
-    VEC_safe_push (loaded_script_ptr, *data->scripts_p, script);
+    data->scripts_p->push_back (script);
 
   return 1;
 }
@@ -1263,13 +1264,10 @@ print_script (struct loaded_script *script)
 
 /* Helper for info_auto_load_scripts to sort the scripts by name.  */
 
-static int
-sort_scripts_by_name (const void *ap, const void *bp)
+static bool
+sort_scripts_by_name (loaded_script *a, loaded_script *b)
 {
-  const struct loaded_script *a = *(const struct loaded_script **) ap;
-  const struct loaded_script *b = *(const struct loaded_script **) bp;
-
-  return FILENAME_CMP (a->name, b->name);
+  return FILENAME_CMP (a->name, b->name) < 0;
 }
 
 /* Special internal GDB value of auto_load_info_scripts's PATTERN identify
@@ -1281,15 +1279,9 @@ char auto_load_info_scripts_pattern_nl[] = "";
    Print SCRIPTS.  */
 
 static void
-print_scripts (VEC (loaded_script_ptr) *scripts)
+print_scripts (const std::vector<loaded_script *> &scripts)
 {
-  int i;
-  loaded_script_ptr script;
-
-  qsort (VEC_address (loaded_script_ptr, scripts),
-	 VEC_length (loaded_script_ptr, scripts),
-	 sizeof (loaded_script_ptr), sort_scripts_by_name);
-  for (i = 0; VEC_iterate (loaded_script_ptr, scripts, i, script); ++i)
+  for (loaded_script *script : scripts)
     print_script (script);
 }
 
@@ -1303,9 +1295,6 @@ auto_load_info_scripts (char *pattern, int from_tty,
 {
   struct ui_out *uiout = current_uiout;
   struct auto_load_pspace_info *pspace_info;
-  struct cleanup *script_chain;
-  VEC (loaded_script_ptr) *script_files, *script_texts;
-  int nr_scripts;
 
   dont_repeat ();
 
@@ -1327,31 +1316,33 @@ auto_load_info_scripts (char *pattern, int from_tty,
      Plus we want to sort the scripts by name.
      So first traverse the hash table collecting the matching scripts.  */
 
-  script_files = VEC_alloc (loaded_script_ptr, 10);
-  script_texts = VEC_alloc (loaded_script_ptr, 10);
-  script_chain = make_cleanup (VEC_cleanup (loaded_script_ptr), &script_files);
-  make_cleanup (VEC_cleanup (loaded_script_ptr), &script_texts);
+  std::vector<loaded_script *> script_files, script_texts;
 
   if (pspace_info != NULL && pspace_info->loaded_script_files != NULL)
     {
-      struct collect_matching_scripts_data data = { &script_files, language };
+      collect_matching_scripts_data data (&script_files, language);
 
       /* Pass a pointer to scripts as VEC_safe_push can realloc space.  */
       htab_traverse_noresize (pspace_info->loaded_script_files,
 			      collect_matching_scripts, &data);
+
+      std::sort (script_files.begin (), script_files.end (),
+		 sort_scripts_by_name);
     }
 
   if (pspace_info != NULL && pspace_info->loaded_script_texts != NULL)
     {
-      struct collect_matching_scripts_data data = { &script_texts, language };
+      collect_matching_scripts_data data (&script_texts, language);
 
       /* Pass a pointer to scripts as VEC_safe_push can realloc space.  */
       htab_traverse_noresize (pspace_info->loaded_script_texts,
 			      collect_matching_scripts, &data);
+
+      std::sort (script_texts.begin (), script_texts.end (),
+		 sort_scripts_by_name);
     }
 
-  nr_scripts = (VEC_length (loaded_script_ptr, script_files)
-		+ VEC_length (loaded_script_ptr, script_texts));
+  int nr_scripts = script_files.size () + script_texts.size ();
 
   /* Table header shifted right by preceding "gdb-scripts:  " would not match
      its columns.  */
@@ -1369,8 +1360,6 @@ auto_load_info_scripts (char *pattern, int from_tty,
     print_scripts (script_files);
     print_scripts (script_texts);
   }
-
-  do_cleanups (script_chain);
 
   if (nr_scripts == 0)
     {

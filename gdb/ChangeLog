@@ -1,3 +1,15 @@
+2017-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* auto-load.c: Don't include gdb_vecs.h, include algorithm.
+	(loaded_script_ptr): Remove typedef.
+	(DEF_VEC_P (loaded_script_ptr)): Remove.
+	(struct collect_matching_scripts_data): Add constructor.
+	<scripts_p>: Change type to (pointer to) std::vector.
+	(collect_matching_scripts_data): Adjust.
+	(sort_scripts_by_name): Make suitable for std::sort.
+	(print_scripts): Don't sort vector, adjust to std::vector.
+	(auto_load_info_scripts): Sort vectors, adjust to std::vector.
+
 2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* symfile.c (filename_language): Make struct, not typedef.  Add
