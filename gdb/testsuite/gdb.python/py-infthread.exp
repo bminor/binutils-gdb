@@ -51,6 +51,15 @@ gdb_test "python print(seen_a_thread)" "True"
 
 # Test basic gdb.Inferior attributes and methods.
 
+# Make sure that InferiorThread.inferior returns a new reference (see PR 21213).
+
+gdb_py_test_silent_cmd "python gdb.selected_thread ().inferior" "test InferiorThread.inferior 1" 1
+gdb_py_test_silent_cmd "python gdb.selected_thread ().inferior" "test InferiorThread.inferior 2" 1
+gdb_test_no_output "python import gc; gc.collect()" "call Python garbage collection"
+gdb_py_test_silent_cmd "python gdb.selected_thread ().inferior" "test InferiorThread.inferior 3" 1
+gdb_py_test_silent_cmd "python gdb.selected_thread ().inferior" "test InferiorThread.inferior 4" 1
+
+
 gdb_py_test_silent_cmd "python t0 = gdb.selected_thread ()" "test gdb.selected_thread" 1
 gdb_test "python print (t0)" "\\<gdb.InferiorThread object at 0x\[\[:xdigit:\]\]+>" "verify InferiorThread object"
 gdb_test "python print ('result = %s' % t0.num)" " = 1" "test InferiorThread.num"
