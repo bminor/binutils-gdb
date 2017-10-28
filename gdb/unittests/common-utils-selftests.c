@@ -41,7 +41,7 @@ string_printf_tests ()
   SELF_CHECK (string_printf ("%s", X100000) == X100000);
 }
 
-static std::string
+static std::string ATTRIBUTE_PRINTF (1, 2)
 format (const char *fmt, ...)
 {
   va_list vp;
