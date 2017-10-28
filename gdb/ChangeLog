@@ -1,5 +1,21 @@
 2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* probe.h: Don't include gdb_vecs.h.
+	(DEF_VEC_P (probe_p)): Remove.
+	(find_probes_in_objfile): Return an std::vector.
+	* probe.c (find_probes_in_objfile): Likewise.
+	* breakpoint.c (breakpoint_objfile_data)
+	<longjmp_probes>: Change type to std::vector.
+	<exception_probes>: Likewise.
+	(free_breakpoint_probes): Don't manually free vectors.
+	(create_longjmp_master_breakpoint): Adjust.
+	(create_exception_master_breakpoint): Adjust.
+	* solib-svr4.c (svr4_create_probe_breakpoints): Change
+	parameter type, adjust.
+	(svr4_create_solib_event_breakpoints): Adjust.
+
+2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* breakpoint.c (breakpoint_objfile_data): Initialize fields.
 	(get_breakpoint_objfile_data): Allocate breakpoint_objfile_data
 	with new.

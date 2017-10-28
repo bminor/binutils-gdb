@@ -3191,8 +3191,9 @@ struct breakpoint_objfile_data
   /* True if we have looked for longjmp probes.  */
   int longjmp_searched = 0;
 
-  /* SystemTap probe points for longjmp (if any).  */
-  VEC (probe_p) *longjmp_probes = NULL;
+  /* SystemTap probe points for longjmp (if any).  These are non-owning
+     references.  */
+  std::vector<probe *> longjmp_probes;
 
   /* Minimal symbol for "std::terminate()" (if any).  */
   struct bound_minimal_symbol terminate_msym {};
@@ -3203,8 +3204,9 @@ struct breakpoint_objfile_data
   /* True if we have looked for exception probes.  */
   int exception_searched = 0;
 
-  /* SystemTap probe points for unwinding (if any).  */
-  VEC (probe_p) *exception_probes = NULL;
+  /* SystemTap probe points for unwinding (if any).  These are non-owning
+     references.  */
+  std::vector<probe *> exception_probes;
 };
 
 static const struct objfile_data *breakpoint_objfile_key;
@@ -3243,9 +3245,6 @@ free_breakpoint_objfile_data (struct objfile *obj, void *data)
 {
   struct breakpoint_objfile_data *bp_objfile_data
     = (struct breakpoint_objfile_data *) data;
-
-  VEC_free (probe_p, bp_objfile_data->longjmp_probes);
-  VEC_free (probe_p, bp_objfile_data->exception_probes);
 
   delete bp_objfile_data;
 }
@@ -3328,43 +3327,35 @@ create_longjmp_master_breakpoint (void)
 
       if (!bp_objfile_data->longjmp_searched)
 	{
-	  VEC (probe_p) *ret;
+	  std::vector<probe *> ret
+	    = find_probes_in_objfile (objfile, "libc", "longjmp");
 
-	  ret = find_probes_in_objfile (objfile, "libc", "longjmp");
-	  if (ret != NULL)
+	  if (!ret.empty ())
 	    {
 	      /* We are only interested in checking one element.  */
-	      struct probe *p = VEC_index (probe_p, ret, 0);
+	      probe *p = ret[0];
 
 	      if (!can_evaluate_probe_arguments (p))
 		{
 		  /* We cannot use the probe interface here, because it does
 		     not know how to evaluate arguments.  */
-		  VEC_free (probe_p, ret);
-		  ret = NULL;
+		  ret.clear ();
 		}
 	    }
 	  bp_objfile_data->longjmp_probes = ret;
 	  bp_objfile_data->longjmp_searched = 1;
 	}
 
-      if (bp_objfile_data->longjmp_probes != NULL)
+      if (!bp_objfile_data->longjmp_probes.empty ())
 	{
-	  int i;
-	  struct probe *probe;
 	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
-	  for (i = 0;
-	       VEC_iterate (probe_p,
-			    bp_objfile_data->longjmp_probes,
-			    i, probe);
-	       ++i)
+	  for (probe *p : bp_objfile_data->longjmp_probes)
 	    {
 	      struct breakpoint *b;
 
 	      b = create_internal_breakpoint (gdbarch,
-					      get_probe_address (probe,
-								 objfile),
+					      get_probe_address (p, objfile),
 					      bp_longjmp_master,
 					      &internal_breakpoint_ops);
 	      b->location = new_probe_location ("-probe-stap libc:longjmp");
@@ -3489,44 +3480,35 @@ create_exception_master_breakpoint (void)
       /* We prefer the SystemTap probe point if it exists.  */
       if (!bp_objfile_data->exception_searched)
 	{
-	  VEC (probe_p) *ret;
+	  std::vector<probe *> ret
+	    = find_probes_in_objfile (objfile, "libgcc", "unwind");
 
-	  ret = find_probes_in_objfile (objfile, "libgcc", "unwind");
-
-	  if (ret != NULL)
+	  if (!ret.empty ())
 	    {
 	      /* We are only interested in checking one element.  */
-	      struct probe *p = VEC_index (probe_p, ret, 0);
+	      probe *p = ret[0];
 
 	      if (!can_evaluate_probe_arguments (p))
 		{
 		  /* We cannot use the probe interface here, because it does
 		     not know how to evaluate arguments.  */
-		  VEC_free (probe_p, ret);
-		  ret = NULL;
+		  ret.clear ();
 		}
 	    }
 	  bp_objfile_data->exception_probes = ret;
 	  bp_objfile_data->exception_searched = 1;
 	}
 
-      if (bp_objfile_data->exception_probes != NULL)
+      if (!bp_objfile_data->exception_probes.empty ())
 	{
 	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
-	  int i;
-	  struct probe *probe;
 
-	  for (i = 0;
-	       VEC_iterate (probe_p,
-			    bp_objfile_data->exception_probes,
-			    i, probe);
-	       ++i)
+	  for (probe *p : bp_objfile_data->exception_probes)
 	    {
 	      struct breakpoint *b;
 
 	      b = create_internal_breakpoint (gdbarch,
-					      get_probe_address (probe,
-								 objfile),
+					      get_probe_address (p, objfile),
 					      bp_exception_master,
 					      &internal_breakpoint_ops);
 	      b->location = new_probe_location ("-probe-stap libgcc:unwind");

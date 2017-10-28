@@ -193,14 +193,14 @@ parse_probes (const struct event_location *location,
 
 /* See definition in probe.h.  */
 
-VEC (probe_p) *
+std::vector<probe *>
 find_probes_in_objfile (struct objfile *objfile, const char *provider,
 			const char *name)
 {
-  VEC (probe_p) *result = NULL;
+  std::vector<probe *> result;
 
   if (!objfile->sf || !objfile->sf->sym_probe_fns)
-    return NULL;
+    return result;
 
   const std::vector<probe *> &probes
     = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
@@ -212,7 +212,7 @@ find_probes_in_objfile (struct objfile *objfile, const char *provider,
       if (strcmp (p->name, name) != 0)
 	continue;
 
-      VEC_safe_push (probe_p, result, p);
+      result.push_back (p);
     }
 
   return result;
