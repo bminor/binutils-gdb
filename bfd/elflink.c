@@ -1161,11 +1161,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
   if (pold_weak)
     *pold_weak = oldweak;
 
-  /* This code is for coping with dynamic objects, and is only useful
-     if we are doing an ELF link.  */
-  if (!(*bed->relocs_compatible) (abfd->xvec, info->output_bfd->xvec))
-    return TRUE;
-
   /* We have to check it for every instance since the first few may be
      references and not all compilers emit symbol type for undefined
      symbols.  */

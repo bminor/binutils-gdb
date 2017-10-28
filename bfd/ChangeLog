@@ -1,6 +1,13 @@
 2017-11-01  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2017-10-28  Alan Modra  <amodra@gmail.com>
+	PR 22300
+	* elflink.c (_bfd_elf_merge_symbol): Remove relocs_compatible check.
+	* elf32-hppa.c (elf_backend_relocs_compatible): Define.
+	* elf32-ppc.c (elf_backend_relocs_compatible): Define.
+	* elf64-ppc.c (elf_backend_relocs_compatible): Define.
+
 	2017-10-25  Alan Modra  <amodra@gmail.com>
 	* archive.c (_bfd_compute_and_write_armap): Match "__gnu_lto_slim"
 	optionally prefixed with "_".

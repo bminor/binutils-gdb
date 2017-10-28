@@ -4615,6 +4615,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define elf_backend_adjust_dynamic_symbol    elf32_hppa_adjust_dynamic_symbol
 #define elf_backend_copy_indirect_symbol     elf32_hppa_copy_indirect_symbol
 #define elf_backend_check_relocs	     elf32_hppa_check_relocs
+#define elf_backend_relocs_compatible	     _bfd_elf_relocs_compatible
 #define elf_backend_create_dynamic_sections  elf32_hppa_create_dynamic_sections
 #define elf_backend_fake_sections	     elf_hppa_fake_sections
 #define elf_backend_relocate_section	     elf32_hppa_relocate_section

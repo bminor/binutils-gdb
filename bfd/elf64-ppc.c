@@ -101,6 +101,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_notice_as_needed	      ppc64_elf_notice_as_needed
 #define elf_backend_archive_symbol_lookup     ppc64_elf_archive_symbol_lookup
 #define elf_backend_check_relocs	      ppc64_elf_check_relocs
+#define elf_backend_relocs_compatible	      _bfd_elf_relocs_compatible
 #define elf_backend_gc_keep		      ppc64_elf_gc_keep
 #define elf_backend_gc_mark_dynamic_ref       ppc64_elf_gc_mark_dynamic_ref
 #define elf_backend_gc_mark_hook	      ppc64_elf_gc_mark_hook
