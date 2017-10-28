@@ -1,5 +1,12 @@
 2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* target.c (struct thread_search): Remove.
+	(thread_search_callback): Remove.
+	(prepare_to_access_memory): Use for_each_thread instead of
+	find_inferior.  Inline code from thread_search_callback.
+
+2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* server.c (struct visit_actioned_threads_data): Remove.
 	(visit_actioned_threads): Change prototype to take arguments
 	directly.
