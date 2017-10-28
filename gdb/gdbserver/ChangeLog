@@ -1,5 +1,12 @@
 2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* server.c (struct visit_actioned_threads_data): Remove.
+	(visit_actioned_threads): Change prototype to take arguments
+	directly.
+	(resume): Use find_thread instead of find_inferior.
+
+2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* server.c (queue_stop_reply_callback): Change prototype, return
 	void.
 	(find_status_pending_thread_callback): Remove.
