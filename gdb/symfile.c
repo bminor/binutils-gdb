@@ -2637,27 +2637,24 @@ reread_symbols (void)
 }
 
 
-typedef struct
+struct filename_language
 {
-  char *ext;
+  filename_language (const std::string &ext_, enum language lang_)
+  : ext (ext_), lang (lang_)
+  {}
+
+  std::string ext;
   enum language lang;
-} filename_language;
+};
 
-DEF_VEC_O (filename_language);
-
-static VEC (filename_language) *filename_language_table;
+static std::vector<filename_language> filename_language_table;
 
 /* See symfile.h.  */
 
 void
 add_filename_language (const char *ext, enum language lang)
 {
-  filename_language entry;
-
-  entry.ext = xstrdup (ext);
-  entry.lang = lang;
-
-  VEC_safe_push (filename_language, filename_language_table, &entry);
+  filename_language_table.emplace_back (ext, lang);
 }
 
 static char *ext_args;
@@ -2674,10 +2671,8 @@ show_ext_args (struct ui_file *file, int from_tty,
 static void
 set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
 {
-  int i;
   char *cp = ext_args;
   enum language lang;
-  filename_language *entry;
 
   /* First arg is filename extension, starting with '.'  */
   if (*cp != '.')
@@ -2706,16 +2701,15 @@ set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
   /* Lookup the language from among those we know.  */
   lang = language_enum (cp);
 
+  auto it = filename_language_table.begin ();
   /* Now lookup the filename extension: do we already know it?  */
-  for (i = 0;
-       VEC_iterate (filename_language, filename_language_table, i, entry);
-       ++i)
+  for (; it != filename_language_table.end (); it++)
     {
-      if (0 == strcmp (ext_args, entry->ext))
+      if (it->ext == ext_args)
 	break;
     }
 
-  if (entry == NULL)
+  if (it == filename_language_table.end ())
     {
       /* New file extension.  */
       add_filename_language (ext_args, lang);
@@ -2728,42 +2722,31 @@ set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
       /*   query ("Really make files of type %s '%s'?", */
       /*          ext_args, language_str (lang));           */
 
-      xfree (entry->ext);
-      entry->ext = xstrdup (ext_args);
-      entry->lang = lang;
+      it->lang = lang;
     }
 }
 
 static void
 info_ext_lang_command (char *args, int from_tty)
 {
-  int i;
-  filename_language *entry;
-
   printf_filtered (_("Filename extensions and the languages they represent:"));
   printf_filtered ("\n\n");
-  for (i = 0;
-       VEC_iterate (filename_language, filename_language_table, i, entry);
-       ++i)
-    printf_filtered ("\t%s\t- %s\n", entry->ext, language_str (entry->lang));
+  for (const filename_language &entry : filename_language_table)
+    printf_filtered ("\t%s\t- %s\n", entry.ext.c_str (),
+		     language_str (entry.lang));
 }
 
 enum language
 deduce_language_from_filename (const char *filename)
 {
-  int i;
   const char *cp;
 
   if (filename != NULL)
     if ((cp = strrchr (filename, '.')) != NULL)
       {
-	filename_language *entry;
-
-	for (i = 0;
-	     VEC_iterate (filename_language, filename_language_table, i, entry);
-	     ++i)
-	  if (strcmp (cp, entry->ext) == 0)
-	    return entry->lang;
+	for (const filename_language &entry : filename_language_table)
+	  if (entry.ext == cp)
+	    return entry.lang;
       }
 
   return language_unknown;
@@ -3835,31 +3818,10 @@ map_symbol_filenames (symbol_filename_ftype *fun, void *data,
 namespace selftests {
 namespace filename_language {
 
-/* Save the content of the filename_language_table global and restore it when
-   going out of scope.  */
-
-class scoped_restore_filename_language_table
-{
-public:
-  scoped_restore_filename_language_table ()
-  {
-    m_saved_table = VEC_copy (filename_language, filename_language_table);
-  }
-
-  ~scoped_restore_filename_language_table ()
-  {
-    VEC_free (filename_language, filename_language_table);
-    filename_language_table = VEC_copy (filename_language, m_saved_table);
-  }
-
-private:
-  VEC(filename_language) *m_saved_table;
-};
-
 static void test_filename_language ()
 {
   /* This test messes up the filename_language_table global.  */
-  scoped_restore_filename_language_table restore_flt;
+  scoped_restore restore_flt = make_scoped_restore (&filename_language_table);
 
   /* Test deducing an unknown extension.  */
   language lang = deduce_language_from_filename ("myfile.blah");
@@ -3879,7 +3841,7 @@ static void
 test_set_ext_lang_command ()
 {
   /* This test messes up the filename_language_table global.  */
-  scoped_restore_filename_language_table restore_flt;
+  scoped_restore restore_flt = make_scoped_restore (&filename_language_table);
 
   /* Confirm that the .hello extension is not known.  */
   language lang = deduce_language_from_filename ("cake.hello");
@@ -3894,11 +3856,11 @@ test_set_ext_lang_command ()
   SELF_CHECK (lang == language_rust);
 
   /* Test overriding an existing extension using the CLI command.  */
-  int size_before = VEC_length (filename_language, filename_language_table);
+  int size_before = filename_language_table.size ();
   args_holder.reset (xstrdup (".hello pascal"));
   ext_args = args_holder.get ();
   set_ext_lang_command (NULL, 1, NULL);
-  int size_after = VEC_length (filename_language, filename_language_table);
+  int size_after = filename_language_table.size ();
 
   lang = deduce_language_from_filename ("cake.hello");
   SELF_CHECK (lang == language_pascal);

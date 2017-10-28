@@ -1,5 +1,21 @@
 2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* symfile.c (filename_language): Make struct, not typedef.  Add
+	constructor.
+	<ext>: Change type to std::string.
+	(DEF_VEC_O (filename_language)): Remove.
+	(filename_language_table): Change type to std::vector.
+	(add_filename_language): Adjust.
+	(set_ext_lang_command): Adjust.
+	(info_ext_lang_command): Adjust.
+	(deduce_language_from_filename): Adjust.
+	(class scoped_restore_filename_language_table): Remove.
+	(test_filename_language): Use scoped_restore.
+	(test_set_ext_lang_command): Use scoped_restore, adjust to
+	std::vector change.
+
+2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* symfile.c: Include selftest.h.
 	(class scoped_restore_filename_language_table): New.
 	(test_filename_language): New test.
