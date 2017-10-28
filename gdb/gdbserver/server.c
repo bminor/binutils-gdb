@@ -3230,8 +3230,8 @@ myresume (char *own_buf, int step, int sig)
 /* Callback for for_each_inferior.  Make a new stop reply for each
    stopped thread.  */
 
-static int
-queue_stop_reply_callback (thread_info *thread, void *arg)
+static void
+queue_stop_reply_callback (thread_info *thread)
 {
   /* For now, assume targets that don't have this callback also don't
      manage the thread's last_status field.  */
@@ -3267,8 +3267,6 @@ queue_stop_reply_callback (thread_info *thread, void *arg)
 	  queue_stop_reply (thread->id, &thread->last_status);
 	}
     }
-
-  return 0;
 }
 
 /* Set this inferior threads's state as "want-stopped".  We won't
@@ -3324,15 +3322,6 @@ set_pending_status_callback (thread_info *thread)
     thread->status_pending_p = 1;
 }
 
-/* Callback for find_inferior.  Return true if ENTRY (a thread) has a
-   pending status to report to GDB.  */
-
-static int
-find_status_pending_thread_callback (thread_info *thread, void *data)
-{
-  return thread->status_pending_p;
-}
-
 /* Status handler for the '?' packet.  */
 
 static void
@@ -3349,7 +3338,7 @@ handle_status (char *own_buf)
 
   if (non_stop)
     {
-      find_inferior (&all_threads, queue_stop_reply_callback, NULL);
+      for_each_thread (queue_stop_reply_callback);
 
       /* The first is sent immediatly.  OK is sent if there is no
 	 stopped thread, which is the same handling of the vStopped
@@ -3382,8 +3371,10 @@ handle_status (char *own_buf)
       /* If the last event thread is not found for some reason, look
 	 for some other thread that might have an event to report.  */
       if (thread == NULL)
-	thread = find_inferior (&all_threads,
-				find_status_pending_thread_callback, NULL);
+	thread = find_thread ([] (thread_info *thread)
+	  {
+	    return thread->status_pending_p;
+	  });
 
       /* If we're still out of luck, simply pick the first thread in
 	 the thread list.  */
