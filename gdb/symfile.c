@@ -57,6 +57,7 @@
 #include "gdb_bfd.h"
 #include "cli/cli-utils.h"
 #include "common/byte-vector.h"
+#include "selftest.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -3829,6 +3830,86 @@ map_symbol_filenames (symbol_filename_ftype *fun, void *data,
   }
 }
 
+#if GDB_SELF_TEST
+
+namespace selftests {
+namespace filename_language {
+
+/* Save the content of the filename_language_table global and restore it when
+   going out of scope.  */
+
+class scoped_restore_filename_language_table
+{
+public:
+  scoped_restore_filename_language_table ()
+  {
+    m_saved_table = VEC_copy (filename_language, filename_language_table);
+  }
+
+  ~scoped_restore_filename_language_table ()
+  {
+    VEC_free (filename_language, filename_language_table);
+    filename_language_table = VEC_copy (filename_language, m_saved_table);
+  }
+
+private:
+  VEC(filename_language) *m_saved_table;
+};
+
+static void test_filename_language ()
+{
+  /* This test messes up the filename_language_table global.  */
+  scoped_restore_filename_language_table restore_flt;
+
+  /* Test deducing an unknown extension.  */
+  language lang = deduce_language_from_filename ("myfile.blah");
+  SELF_CHECK (lang == language_unknown);
+
+  /* Test deducing a known extension.  */
+  lang = deduce_language_from_filename ("myfile.c");
+  SELF_CHECK (lang == language_c);
+
+  /* Test adding a new extension using the internal API.  */
+  add_filename_language (".blah", language_pascal);
+  lang = deduce_language_from_filename ("myfile.blah");
+  SELF_CHECK (lang == language_pascal);
+}
+
+static void
+test_set_ext_lang_command ()
+{
+  /* This test messes up the filename_language_table global.  */
+  scoped_restore_filename_language_table restore_flt;
+
+  /* Confirm that the .hello extension is not known.  */
+  language lang = deduce_language_from_filename ("cake.hello");
+  SELF_CHECK (lang == language_unknown);
+
+  /* Test adding a new extension using the CLI command.  */
+  gdb::unique_xmalloc_ptr<char> args_holder (xstrdup (".hello rust"));
+  ext_args = args_holder.get ();
+  set_ext_lang_command (NULL, 1, NULL);
+
+  lang = deduce_language_from_filename ("cake.hello");
+  SELF_CHECK (lang == language_rust);
+
+  /* Test overriding an existing extension using the CLI command.  */
+  int size_before = VEC_length (filename_language, filename_language_table);
+  args_holder.reset (xstrdup (".hello pascal"));
+  ext_args = args_holder.get ();
+  set_ext_lang_command (NULL, 1, NULL);
+  int size_after = VEC_length (filename_language, filename_language_table);
+
+  lang = deduce_language_from_filename ("cake.hello");
+  SELF_CHECK (lang == language_pascal);
+  SELF_CHECK (size_before == size_after);
+}
+
+} /* namespace filename_language */
+} /* namespace selftests */
+
+#endif /* GDB_SELF_TEST */
+
 void
 _initialize_symfile (void)
 {
@@ -3940,4 +4021,12 @@ Set printing of separate debug info file search debug."), _("\
 Show printing of separate debug info file search debug."), _("\
 When on, GDB prints the searched locations while looking for separate debug \
 info files."), NULL, NULL, &setdebuglist, &showdebuglist);
+
+#if GDB_SELF_TEST
+  selftests::register_test
+    ("filename_language", selftests::filename_language::test_filename_language);
+  selftests::register_test
+    ("set_ext_lang_command",
+     selftests::filename_language::test_set_ext_lang_command);
+#endif
 }

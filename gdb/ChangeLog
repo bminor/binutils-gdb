@@ -1,3 +1,11 @@
+2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* symfile.c: Include selftest.h.
+	(class scoped_restore_filename_language_table): New.
+	(test_filename_language): New test.
+	(test_set_ext_lang_command): New test.
+	(_initialize_symfile): Register tests.
+
 2017-10-27  Keith Seitz  <keiths@redhat.com>
 
 	* breakpoint.c (print_breakpoint_location): Use the symbol saved
