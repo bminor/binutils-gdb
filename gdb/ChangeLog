@@ -1,3 +1,7 @@
+2017-10-29  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* xtensa-xtregs.c (xtensa_regtable_t) <name>: Constify.
+
 2017-10-28  Maksim Dzabraev  <dzabraew@gmail.com>
 
 	PR python/21213

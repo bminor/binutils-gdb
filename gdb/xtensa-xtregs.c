@@ -25,7 +25,7 @@ typedef struct {
   int   size;
   int   coproc;
   int   dbnum;
-  char* name
+  const char* name
 ;} xtensa_regtable_t;
 
 #define XTENSA_ELF_XTREG_SIZE	4
