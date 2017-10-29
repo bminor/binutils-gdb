@@ -13034,6 +13034,7 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
       asection *o;
 
       if (bfd_get_flavour (sub) != bfd_target_elf_flavour
+	  || elf_object_id (sub) != elf_hash_table_id (elf_hash_table (info))
 	  || !(*bed->relocs_compatible) (sub->xvec, abfd->xvec))
 	continue;
       o = sub->sections;
@@ -13335,6 +13336,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       asection *o;
 
       if (bfd_get_flavour (sub) != bfd_target_elf_flavour
+	  || elf_object_id (sub) != elf_hash_table_id (htab)
 	  || !(*bed->relocs_compatible) (sub->xvec, abfd->xvec))
 	continue;
 
