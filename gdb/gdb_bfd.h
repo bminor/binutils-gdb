@@ -115,15 +115,14 @@ void gdb_bfd_mark_parent (bfd *child, bfd *parent);
 
 void gdb_bfd_record_inclusion (bfd *includer, bfd *includee);
 
-/* Try to read or map the contents of the section SECT.  If
-   successful, the section data is returned and *SIZE is set to the
-   size of the section data; this may not be the same as the size
-   according to bfd_get_section_size if the section was compressed.
-   The returned section data is associated with the BFD and will be
-   destroyed when the BFD is destroyed.  There is no other way to free
-   it; for temporary uses of section data, see
-   bfd_malloc_and_get_section.  SECT may not have relocations.  This
-   function will throw on error.  */
+/* Try to read or map the contents of the section SECT.  If successful, the
+   section data is returned and *SIZE is set to the size of the section data;
+   this may not be the same as the size according to bfd_get_section_size if the
+   section was compressed.  The returned section data is associated with the BFD
+   and will be destroyed when the BFD is destroyed.  There is no other way to
+   free it; for temporary uses of section data, see bfd_malloc_and_get_section.
+   SECT may not have relocations.  If there is an error reading the section,
+   this issues a warning, sets *SIZE to 0, and returns NULL.  */
 
 const gdb_byte *gdb_bfd_map_section (asection *section, bfd_size_type *size);
 

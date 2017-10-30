@@ -1,3 +1,11 @@
+2017-10-30  Mike Gulick  <mgulick@mathworks.com>
+
+	PR gdb/16577
+	* gdb.base/solib-vanish.exp: New.
+	* gdb.base/solib-vanish-main.c: New.
+	* gdb.base/solib-vanish-lib1.c: New.
+	* gdb.base/solib-vanish-lib2.c: New.
+
 2018-01-17  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.compile/compile.exp: Match the address printed for

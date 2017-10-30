@@ -702,9 +702,15 @@ gdb_bfd_map_section (asection *sectp, bfd_size_type *size)
 
   data = NULL;
   if (!bfd_get_full_section_contents (abfd, sectp, &data))
-    error (_("Can't read data for section '%s' in file '%s'"),
-	   bfd_get_section_name (abfd, sectp),
-	   bfd_get_filename (abfd));
+    {
+      warning (_("Can't read data for section '%s' in file '%s'"),
+	       bfd_get_section_name (abfd, sectp),
+	       bfd_get_filename (abfd));
+      /* Set size to 0 to prevent further attempts to read the invalid
+	 section.  */
+      *size = 0;
+      return (const gdb_byte *) NULL;
+    }
   descriptor->data = data;
 
  done:
