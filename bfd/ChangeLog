@@ -2,6 +2,10 @@
 
 	Apply from master
 	2017-10-30  Alan Modra  <amodra@gmail.com>
+	* elf32-frv.c (ELF_TARGET_ID): Don't define for generic
+	elf target.
+
+	2017-10-30  Alan Modra  <amodra@gmail.com>
 	* elflink.c (elf_gc_sweep): Test elf_object_id in addition to
 	relocs_compatible.
 	(bfd_elf_gc_sections): Likewise.
