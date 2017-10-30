@@ -1,5 +1,17 @@
 2017-10-30  Pedro Alves  <palves@redhat.com>
 
+	* common/common-utils.c (string_appendf, string_vappendf): New
+	functions.
+	* common/common-utils.h (string_appendf, string_vappendf): New
+	declarations.
+	* unittests/common-utils-selftests.c (string_appendf_func)
+	(test_appendf_func, string_vappendf_wrapper, string_appendf_tests)
+	(string_vappendf_tests): New functions.
+	(_initialize_common_utils_selftests): Register "string_appendf" and
+	"string_vappendf tests".
+
+2017-10-30  Pedro Alves  <palves@redhat.com>
+
 	* unittests/common-utils-selftests.c (format_func): New typedef.
 	(string_printf_tests, string_vprintf_tests): Tests factored out
 	and merged to ...

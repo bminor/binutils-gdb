@@ -77,6 +77,52 @@ string_vprintf_tests ()
   test_format_func (format);
 }
 
+/* Type of both 'string_appendf' and the 'string_vappendf_wrapper'
+   function below.  Used to run the same tests against both
+   string_appendf and string_vappendf.  */
+typedef void (string_appendf_func) (std::string &str, const char *fmt, ...)
+  ATTRIBUTE_PRINTF (2, 3);
+
+static void
+test_appendf_func (string_appendf_func *func)
+{
+  std::string str;
+
+  func (str, "%s", "");
+  SELF_CHECK (str == "");
+
+  func (str, "%s", "test");
+  SELF_CHECK (str == "test");
+
+  func (str, "%d", 23);
+  SELF_CHECK (str == "test23");
+
+  func (str, "%s %d %s", "foo", 45, "bar");
+  SELF_CHECK (str == "test23foo 45 bar");
+}
+
+static void ATTRIBUTE_PRINTF (2, 3)
+string_vappendf_wrapper (std::string &str, const char *fmt, ...)
+{
+  va_list vp;
+
+  va_start (vp, fmt);
+  string_vappendf (str, fmt, vp);
+  va_end (vp);
+}
+
+static void
+string_appendf_tests ()
+{
+  test_appendf_func (string_appendf);
+}
+
+static void
+string_vappendf_tests ()
+{
+  test_appendf_func (string_vappendf_wrapper);
+}
+
 } /* namespace selftests */
 
 void
@@ -84,4 +130,7 @@ _initialize_common_utils_selftests ()
 {
   selftests::register_test ("string_printf", selftests::string_printf_tests);
   selftests::register_test ("string_vprintf", selftests::string_vprintf_tests);
+  selftests::register_test ("string_appendf", selftests::string_appendf_tests);
+  selftests::register_test ("string_vappendf",
+			    selftests::string_vappendf_tests);
 }

@@ -195,6 +195,40 @@ string_vprintf (const char* fmt, va_list args)
   return str;
 }
 
+
+/* See documentation in common-utils.h.  */
+
+void
+string_appendf (std::string &str, const char *fmt, ...)
+{
+  va_list vp;
+
+  va_start (vp, fmt);
+  string_vappendf (str, fmt, vp);
+  va_end (vp);
+}
+
+
+/* See documentation in common-utils.h.  */
+
+void
+string_vappendf (std::string &str, const char *fmt, va_list args)
+{
+  va_list vp;
+  int grow_size;
+
+  va_copy (vp, args);
+  grow_size = vsnprintf (NULL, 0, fmt, vp);
+  va_end (vp);
+
+  size_t curr_size = str.size ();
+  str.resize (curr_size + grow_size);
+
+  /* C++11 and later guarantee std::string uses contiguous memory and
+     always includes the terminating '\0'.  */
+  vsprintf (&str[curr_size], fmt, args);
+}
+
 char *
 savestring (const char *ptr, size_t len)
 {
