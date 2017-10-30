@@ -2081,40 +2081,32 @@ remote_set_syscall_catchpoint (struct target_ops *self,
 			  pid, needed, any_count, n_sysno);
     }
 
-  gdb::unique_xmalloc_ptr<char> built_packet;
+  std::string built_packet;
   if (needed)
     {
       /* Prepare a packet with the sysno list, assuming max 8+1
 	 characters for a sysno.  If the resulting packet size is too
 	 big, fallback on the non-selective packet.  */
       const int maxpktsz = strlen ("QCatchSyscalls:1") + n_sysno * 9 + 1;
-
-      built_packet.reset ((char *) xmalloc (maxpktsz));
-      strcpy (built_packet.get (), "QCatchSyscalls:1");
+      built_packet.reserve (maxpktsz);
+      built_packet = "QCatchSyscalls:1";
       if (!any_count)
 	{
-	  int i;
-	  char *p;
-
-	  p = built_packet.get ();
-	  p += strlen (p);
-
 	  /* Add in catch_packet each syscall to be caught (table[i] != 0).  */
-	  for (i = 0; i < table_size; i++)
+	  for (int i = 0; i < table_size; i++)
 	    {
 	      if (table[i] != 0)
-		p += xsnprintf (p, built_packet.get () + maxpktsz - p,
-				";%x", i);
+		string_appendf (built_packet, ";%x", i);
 	    }
 	}
-      if (strlen (built_packet.get ()) > get_remote_packet_size ())
+      if (built_packet.size () > get_remote_packet_size ())
 	{
 	  /* catch_packet too big.  Fallback to less efficient
 	     non selective mode, with GDB doing the filtering.  */
 	  catch_packet = "QCatchSyscalls:1";
 	}
       else
-	catch_packet = built_packet.get ();
+	catch_packet = built_packet.c_str ();
     }
   else
     catch_packet = "QCatchSyscalls:0";

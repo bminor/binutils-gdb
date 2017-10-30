@@ -1,4 +1,10 @@
 2017-10-30  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi <simon.marchi@ericsson.com>
+
+	* remote.c (remote_set_syscall_catchpoint): Build a std::string
+	instead of a gdb::unique_xmalloc_ptr, using string_appendf.
+
+2017-10-30  Pedro Alves  <palves@redhat.com>
 
 	* common/common-utils.c (string_appendf, string_vappendf): New
 	functions.
