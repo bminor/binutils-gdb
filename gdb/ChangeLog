@@ -1,5 +1,9 @@
 2017-10-29  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* darwin-nat.c: Remove include of gdb.h.
+
+2017-10-29  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* xtensa-xtregs.c: Fix formatting issues.
 
 2017-10-29  Simon Marchi  <simon.marchi@ericsson.com>
