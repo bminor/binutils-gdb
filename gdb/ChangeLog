@@ -1,3 +1,12 @@
+2017-10-30  Pedro Alves  <palves@redhat.com>
+
+	* unittests/common-utils-selftests.c (format_func): New typedef.
+	(string_printf_tests, string_vprintf_tests): Tests factored out
+	and merged to ...
+	(test_format_func): ... this new function.
+	(string_printf_tests, string_vprintf_tests): Reimplement on top of
+	test_format_func.
+
 2017-10-29  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* darwin-nat.c: Remove include of gdb.h.
