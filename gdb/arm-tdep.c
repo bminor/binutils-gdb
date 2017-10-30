@@ -10010,13 +10010,13 @@ arm_record_extension_space (insn_decode_record *arm_insn_r)
       && !INSN_RECORDED(arm_insn_r))
     {
       /* Handle MLA(S) and MUL(S).  */
-      if (0 <= insn_op1 && 3 >= insn_op1)
+      if (in_inclusive_range (insn_op1, 0U, 3U))
       {
         record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
         record_buf[1] = ARM_PS_REGNUM;
         arm_insn_r->reg_rec_count = 2;
       }
-      else if (4 <= insn_op1 && 15 >= insn_op1)
+      else if (in_inclusive_range (insn_op1, 4U, 15U))
       {
         /* Handle SMLAL(S), SMULL(S), UMLAL(S), UMULL(S).  */
         record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
@@ -11712,14 +11712,14 @@ thumb_record_ld_st_reg_offset (insn_decode_record *thumb_insn_r)
       /* Handle load/store register offset.  */
       uint32_t opB = bits (thumb_insn_r->arm_insn, 9, 11);
 
-      if (opB >= 4 && opB <= 7)
+      if (in_inclusive_range (opB, 4U, 7U))
         {
           /* LDR(2), LDRB(2) , LDRH(2), LDRSB, LDRSH.  */
           reg_src1 = bits (thumb_insn_r->arm_insn,0, 2);
           record_buf[0] = reg_src1;
           thumb_insn_r->reg_rec_count = 1;
         }
-      else if (opB >= 0 && opB <= 2)
+      else if (in_inclusive_range (opB, 0U, 2U))
         {
           /* STR(2), STRB(2), STRH(2) .  */
           reg_src1 = bits (thumb_insn_r->arm_insn, 3, 5);

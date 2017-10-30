@@ -1,3 +1,12 @@
+2017-10-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/common-utils.h (in_inclusive_range): New function.
+	* arm-tdep.c (arm_record_extension_space): Use
+	in_inclusive_range.
+	(thumb_record_ld_st_reg_offset): Use in_inclusive_range.
+	* cris-tdep.c (cris_spec_reg_applicable): Use
+	in_inclusive_range.
+
 2017-10-30  Pedro Alves  <palves@redhat.com>
 	    Simon Marchi <simon.marchi@ericsson.com>
 

@@ -125,4 +125,13 @@ extern void free_vector_argv (std::vector<char *> &v);
    joining all the arguments with a whitespace separating them.  */
 extern std::string stringify_argv (const std::vector<char *> &argv);
 
+/* Return true if VALUE is in [LOW, HIGH].  */
+
+template <typename T>
+static bool
+in_inclusive_range (T value, T low, T high)
+{
+  return value >= low && value <= high;
+}
+
 #endif
