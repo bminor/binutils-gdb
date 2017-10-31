@@ -1,3 +1,7 @@
+2017-10-31  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* tracepoint.c (tfind_command): Remove const_cast.
+
 2017-10-30  Mike Gulick  <mgulick@mathworks.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Remove reference to gdb.h.
