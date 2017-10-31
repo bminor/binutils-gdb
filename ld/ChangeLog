@@ -1,5 +1,9 @@
 2017-11-01  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-powerpc/ambiguousv2.d: Remove FIXME.
+
+2017-11-01  Alan Modra  <amodra@gmail.com>
+
 	PR 22374
 	* testsuite/ld-elf/pr22374a.s,
 	* testsuite/ld-elf/pr22374b.s,
