@@ -1,3 +1,9 @@
+2017-10-31  Nick Clifton  <nickc@redhat.com>
+
+	PR 22373
+	* peicode.h (pe_bfd_read_buildid): Check for invalid size and data
+	offset values.
+
 2017-10-30  Alan Modra  <amodra@gmail.com>
 
 	* elf32-frv.c (ELF_TARGET_ID): Don't define for generic
