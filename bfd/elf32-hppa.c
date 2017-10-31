@@ -1210,7 +1210,9 @@ elf32_hppa_check_relocs (bfd *abfd,
 	     functions indirectly or to compare function pointers.
 	     We avoid the mess by always pointing a PLABEL into the
 	     .plt, even for local functions.  */
-	  need_entry = PLT_PLABEL | NEED_PLT | NEED_DYNREL;
+	  need_entry = PLT_PLABEL | NEED_PLT;
+	  if (bfd_link_pic (info))
+	    need_entry |= NEED_DYNREL;
 	  break;
 
 	case R_PARISC_PCREL12F:
@@ -1658,6 +1660,25 @@ elf32_hppa_hide_symbol (struct bfd_link_info *info,
     }
 }
 
+/* Find any dynamic relocs that apply to read-only sections.  */
+
+static asection *
+readonly_dynrelocs (struct elf_link_hash_entry *eh)
+{
+  struct elf32_hppa_link_hash_entry *hh;
+  struct elf32_hppa_dyn_reloc_entry *hdh_p;
+
+  hh = hppa_elf_hash_entry (eh);
+  for (hdh_p = hh->dyn_relocs; hdh_p != NULL; hdh_p = hdh_p->hdh_next)
+    {
+      asection *sec = hdh_p->sec->output_section;
+
+      if (sec != NULL && (sec->flags & SEC_READONLY) != 0)
+	return hdh_p->sec;
+    }
+  return NULL;
+}
+
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -1676,15 +1697,41 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (eh->type == STT_FUNC
       || eh->needs_plt)
     {
+      /* After adjust_dynamic_symbol, non_got_ref set in the non-pic
+	 case means that dyn_relocs for this symbol should be
+	 discarded;  We either want the symbol to remain undefined, or
+	 we have a local definition of some sort.  The "local
+	 definition" for non-function symbols may be due to creating a
+	 local definition in .dynbss.
+	 Unlike other targets, elf32-hppa.c does not define a function
+	 symbol in a non-pic executable on PLT stub code, so we don't
+	 have a local definition in that case.  dyn_relocs therefore
+	 should not be discarded for function symbols, generally.
+	 However we should discard dyn_relocs if we've decided that an
+	 undefined function symbol is local, for example due to
+	 non-default visibility, or UNDEFWEAK_NO_DYNAMIC_RELOC is
+	 true for an undefined weak symbol.  */
+      bfd_boolean local = (SYMBOL_CALLS_LOCAL (info, eh)
+			   || UNDEFWEAK_NO_DYNAMIC_RELOC (info, eh));
+      /* Prior to adjust_dynamic_symbol, non_got_ref set means that
+	 check_relocs set up some dyn_relocs for this symbol.
+	 The !non_got_ref term here is saying that if we didn't have
+	 any dyn_relocs set up by check_relocs, then we don't want
+	 relocate_section looking for them.
+	 FIXME: Get rid of the inversion, so non_got_ref set after
+	 dyn_relocs means we do have dyn_relocs.  */
+      eh->non_got_ref = local || !eh->non_got_ref;
+
       /* If the symbol is used by a plabel, we must allocate a PLT slot.
 	 The refcounts are not reliable when it has been hidden since
 	 hide_symbol can be called before the plabel flag is set.  */
       if (hppa_elf_hash_entry (eh)->plabel)
 	eh->plt.refcount = 1;
 
+      /* Note that unlike some other backends, the refcount is not
+	 incremented for a non-call (and non-plabel) function reference.  */
       else if (eh->plt.refcount <= 0
-	       || SYMBOL_CALLS_LOCAL (info, eh)
-	       || UNDEFWEAK_NO_DYNAMIC_RELOC (info, eh))
+	       || local)
 	{
 	  /* The .plt entry is not needed when:
 	     a) Garbage collection has removed all references to the
@@ -1693,11 +1740,11 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     object, and it's not a weak definition, nor is the symbol
 	     used by a plabel relocation.  Either this object is the
 	     application or we are doing a shared symbolic link.  */
-
 	  eh->plt.offset = (bfd_vma) -1;
 	  eh->needs_plt = 0;
 	}
 
+      /* Function symbols can't have copy relocs.  */
       return TRUE;
     }
   else
@@ -1731,28 +1778,25 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If there are no references to this symbol that do not use the
      GOT, we don't need to generate a copy reloc.  */
   if (!eh->non_got_ref)
-    return TRUE;
-
-  if (ELIMINATE_COPY_RELOCS)
     {
-      struct elf32_hppa_link_hash_entry *hh;
-      struct elf32_hppa_dyn_reloc_entry *hdh_p;
+      eh->non_got_ref = 1;
+      return TRUE;
+    }
 
-      hh = hppa_elf_hash_entry (eh);
-      for (hdh_p = hh->dyn_relocs; hdh_p != NULL; hdh_p = hdh_p->hdh_next)
-	{
-	  sec = hdh_p->sec->output_section;
-	  if (sec != NULL && (sec->flags & SEC_READONLY) != 0)
-	    break;
-	}
+  /* If -z nocopyreloc was given, we won't generate them either.  */
+  if (info->nocopyreloc)
+    {
+      eh->non_got_ref = 0;
+      return TRUE;
+    }
 
+  if (ELIMINATE_COPY_RELOCS
+      && !readonly_dynrelocs (eh))
+    {
       /* If we didn't find any dynamic relocs in read-only sections, then
 	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-      if (hdh_p == NULL)
-	{
-	  eh->non_got_ref = 0;
-	  return TRUE;
-	}
+      eh->non_got_ref = 0;
+      return TRUE;
     }
 
   /* We must allocate the symbol in our .dynbss section, which will
@@ -2029,28 +2073,29 @@ clobber_millicode_symbols (struct elf_link_hash_entry *eh,
   return TRUE;
 }
 
-/* Find any dynamic relocs that apply to read-only sections.  */
+/* Set DF_TEXTREL if we find any dynamic relocs that apply to
+   read-only sections.  */
 
 static bfd_boolean
-readonly_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
+maybe_set_textrel (struct elf_link_hash_entry *eh, void *inf)
 {
-  struct elf32_hppa_link_hash_entry *hh;
-  struct elf32_hppa_dyn_reloc_entry *hdh_p;
+  asection *sec;
 
-  hh = hppa_elf_hash_entry (eh);
-  for (hdh_p = hh->dyn_relocs; hdh_p != NULL; hdh_p = hdh_p->hdh_next)
+  if (eh->root.type == bfd_link_hash_indirect)
+    return TRUE;
+
+  sec = readonly_dynrelocs (eh);
+  if (sec != NULL)
     {
-      asection *sec = hdh_p->sec->output_section;
+      struct bfd_link_info *info = (struct bfd_link_info *) inf;
 
-      if (sec != NULL && (sec->flags & SEC_READONLY) != 0)
-	{
-	  struct bfd_link_info *info = inf;
+      info->flags |= DF_TEXTREL;
+      info->callbacks->minfo
+	(_("%B: dynamic relocation in read-only section `%A'\n"),
+	 sec->owner, sec);
 
-	  info->flags |= DF_TEXTREL;
-
-	  /* Not an error, just cut short the traversal.  */
-	  return FALSE;
-	}
+      /* Not an error, just cut short the traversal.  */
+      return FALSE;
     }
   return TRUE;
 }
@@ -2334,7 +2379,7 @@ elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* If any dynamic relocs apply to a read-only section,
 	     then we need a DT_TEXTREL entry.  */
 	  if ((info->flags & DF_TEXTREL) == 0)
-	    elf_link_hash_traverse (&htab->etab, readonly_dynrelocs, info);
+	    elf_link_hash_traverse (&htab->etab, maybe_set_textrel, info);
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
