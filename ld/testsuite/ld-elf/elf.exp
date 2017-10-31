@@ -70,55 +70,41 @@ run_ld_link_tests [list \
 	{symbol3w.s} {} "symbol3w.a" ] \
 ]
 
-# These targets use _bfd_generic_link_add_symbols instead of
-# bfd_elf_link_add_symbols
-setup_xfail "d30v-*-*" "dlx-*-*" "pj-*-*"
+# Targets that use _bfd_generic_link_add_symbols won't pass pr21703 tests
 run_ld_link_tests {
       {"PR ld/21703"
 	"--allow-multiple-definition tmpdir/pr21703-1.o tmpdir/pr21703-2.o" "" "" \
 	{pr21703-1.s pr21703-2.s} {{readelf {-s} pr21703.sd}} "pr21703" }
-}
-
-# These targets use _bfd_generic_link_add_symbols instead of
-# bfd_elf_link_add_symbols
-setup_xfail "d30v-*-*" "dlx-*-*" "pj-*-*"
-run_ld_link_tests {
       {"PR ld/21703 -r"
 	"-r --allow-multiple-definition tmpdir/pr21703-3.o tmpdir/pr21703-4.o" "" "" \
 	{pr21703-3.s pr21703-4.s} {{readelf {-s} pr21703-r.sd}} "pr21703.o" }
-}
+} "d30v-*-*" "dlx-*-*" "pj-*-*"
 
+# Only run these tests on targets that support creating shared libraries.
 if { [check_shared_lib_support] } then {
     run_ld_link_tests {
 	{"Build pr14170a.o" "" "" "" {pr14170a.s} {} "pr14170.a" }
     }
-    setup_xfail "tic6x-*-*"
     run_ld_link_tests {
 	{"Build shared library for pr14170"
 	    "-shared" "" "" "pr14170b.s" {} "pr14170.so" }
-    }
+    } "tic6x-*-*"
+
     # bfin does not currently support copy relocs.
-    setup_xfail "bfin-*-*"
     run_ld_link_tests [list \
 	[list "PR ld/14170" \
 	    "--no-dynamic-linker tmpdir/pr14170a.o tmpdir/pr14170.so" "" $hpux \
 	     {pr14170c.s} { } "pr14170" ] \
-    ]
+    ] "bfin-*-*"
 
-    # These targets use _bfd_generic_link_add_symbols instead of
-    # bfd_elf_link_add_symbols
-    setup_xfail "d30v-*-*" "dlx-*-*" "pj-*-*"
-    setup_xfail "tic6x-*-*" "hppa64-*-*"
+    # Targets that use _bfd_generic_link_add_symbols won't pass pr21703 tests
+    # Not will tic6x with PIC/PID warning, or hppa64 with dot-symbols
     run_ld_link_tests {
 	{"PR ld/21703 shared"
 	 "-shared --allow-multiple-definition --version-script pr21703.ver tmpdir/pr21703-3.o tmpdir/pr21703-4.o" "" "" \
 	 {pr21703-3.s pr21703-4.s} {{readelf {--dyn-syms} pr21703-shared.sd}} "pr21703.so" }
-    }
+    } "d30v-*-*" "dlx-*-*" "pj-*-*" "tic6x-*-*" "hppa64-*-*"
 
-}
-
-# Only run these tests on targets that support creating shared libraries.
-if { [check_shared_lib_support] } then {
     # This target requires extra GAS options when building non-PIC code
     # for linking with shared libraries.
     set AFLAGS_NONPIC ""
@@ -130,15 +116,17 @@ if { [check_shared_lib_support] } then {
     # script that accidentally marks dynamic sections as notes.  The
     # resulting executable is not expected to work, but the linker
     # should not seg-fault whilst creating the binary.
+    # Note: setup_xfail before run_ld_link_tests xfails only the first test.
     setup_xfail "tic6x-*-*"
     run_ld_link_tests {
-	{"Build shared library for next test"
+	{"Build shared library for broken linker scrip test"
 	    "-shared --hash-style=sysv" "" "" "note-3.s" {} "note-3.so" }
 	{"Link using broken linker script"
 	    "--script note-3.t tmpdir/note-3.so" "" "" ""
 	    { { ld "note-3.l" } }
 	    "a.out" }
     }
+
     setup_xfail "tic6x-*-*"
     run_ld_link_tests {
 	{"Build pr17068.so"
@@ -151,42 +139,40 @@ if { [check_shared_lib_support] } then {
 	    "" "" ""
 	    {pr17068b.s pr17068e.s} {} "pr17068b.a"}
     }
+
     # bfin does not currently support copy relocs.
-    setup_xfail "bfin-*-*"
     run_ld_link_tests {
 	{"pr17068 link --as-needed lib in group"
 	    "--as-needed --no-dynamic-linker" "--start-group tmpdir/pr17068a.a tmpdir/pr17068.so tmpdir/pr17068b.a --end-group" ""
 	    {start.s pr17068.s} {} "pr17068"}
-    }
+    } "bfin-*-*"
+
     # xfail on tic6x due to non-PIC/non-PID warnings
-    setup_xfail "tic6x-*-*"
-    # Fails on MIPS because ABI trickery means that a NULL reloc is also emitted.
-    setup_xfail "mips*-*-*"
+    # Fails on MIPS because ABI trickery means that a NULL reloc is emitted.
     # Fails on bfin because relocations are not created.
-    setup_xfail "bfin-*-*"
     run_ld_link_tests {
 	{"-Bsymbolic-functions"
 	    "-shared -Bsymbolic-functions" "" ""
 	    {symbolic-func.s} {{readelf {-r --wide} symbolic-func.r}}
 	    "symbolic-func.so"}
-    }
+    } "tic6x-*-*" "mips*-*-*" "bfin-*-*"
+
     # xfail on tic6x due to non-PIC/non-PID warnings
-    setup_xfail "tic6x-*-*"
     run_ld_link_tests {
 	{"Build pr20995.so"
 	    "-shared" "" ""
 	    {pr20995b.s} {} "pr20995.so"}
-    }
-    setup_xfail "tic6x-*-*"
+    } "tic6x-*-*"
+
     # xfail on arm*-*-eabi*.  The list can be enlarged to those targets that
     # don't support GNU_RELRO.  For more details, please see discussions at:
     #   https://sourceware.org/ml/binutils/2017-01/msg00441.html
-    setup_xfail "arm*-*-eabi*" "hppa*64*-*-hpux*"
     run_ld_link_tests {
 	{"Build pr20995-2.so"
 	    "-shared -z relro" "" ""
 	    {pr20995c.s} {{readelf {-l --wide} pr20995-2so.r}} "pr20995-2.so"}
-    }
+    } "tic6x-*-*" "arm*-*-eabi*" "hppa*64*-*-hpux*"
+
     # These targets don't copy dynamic variables into .bss.
     setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*"
     # or don't have .data.rel.ro
@@ -196,6 +182,7 @@ if { [check_shared_lib_support] } then {
 	    "pr20995" \
 	    "" "tmpdir/pr20995.so" "$AFLAGS_NONPIC" \
 	    {pr20995a.s} {{readelf {-S --wide} pr20995.r}} "pr20995"]]
+
     # xfail on arm*-*-eabi* is particularly because of no support of GNU_RELRO.
     # Please see the link above for details.
     setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*" "arm*-*-eabi*"
