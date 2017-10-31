@@ -1,5 +1,14 @@
 2017-11-01  Alan Modra  <amodra@gmail.com>
 
+	PR 22374
+	* testsuite/ld-elf/pr22374a.s,
+	* testsuite/ld-elf/pr22374b.s,
+	* testsuite/ld-elf/pr22374-1.r,
+	* testsuite/ld-elf/pr22374-2.r: New test.
+	* testsuite/ld-elf/elf.exp: Run it.
+
+2017-11-01  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/elf.exp: Merge some conditionals, a better
 	name than "shared library for next test", and use xfail arg
 	of run_ld_link_tests in a few places.

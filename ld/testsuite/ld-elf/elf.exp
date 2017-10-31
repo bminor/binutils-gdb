@@ -192,6 +192,17 @@ if { [check_shared_lib_support] } then {
 	    "pr20995-2" \
 	    "" "tmpdir/pr20995-2.so" "$AFLAGS_NONPIC" \
 	    {pr20995a.s} {{readelf {-S --wide} pr20995.r}} "pr20995-2"]]
+
+    setup_xfail "tic6x-*-*"
+    run_ld_link_tests {
+	{"Build pr22374 shared library"
+	    "-shared" "" "" "pr22374b.s" {} "pr22374.so" }
+	{"pr22374 function pointer initialization"
+	    "" "tmpdir/pr22374.so" "" "pr22374a.s"
+	    { {readelf {--wide -r --dyn-syms} "pr22374-1.r"}
+	      {readelf {--wide -r} "pr22374-2.r"} }
+	    "pr22374" }
+    }
 }
 
 if [is_underscore_target] {
