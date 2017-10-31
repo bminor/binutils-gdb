@@ -1,3 +1,9 @@
+2017-10-31  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_relocs): Tell users if no static relocs were
+	found, but if they had added --use-dynamic to the command line
+	then relocs would have been displayed.
+
 2017-10-28  Alan Modra  <amodra@gmail.com>
 
 	PR 22361

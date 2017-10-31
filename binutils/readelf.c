@@ -7150,7 +7150,21 @@ process_relocs (FILE * file)
 	}
 
       if (! found)
-	printf (_("\nThere are no relocations in this file.\n"));
+	{
+	  /* Users sometimes forget the -D option, so try to be helpful.  */
+	  for (i = 0; i < ARRAY_SIZE (dynamic_relocations); i++)
+	    {
+	      if (dynamic_info [dynamic_relocations [i].size])
+		{
+		  printf (_("\nThere are no static relocations in this file."));
+		  printf (_("\nTo see the dynamic relocations add --use-dynamic to the command line.\n"));
+
+		  break;
+		}
+	    }
+	  if (i == ARRAY_SIZE (dynamic_relocations))
+	    printf (_("\nThere are no relocations in this file.\n"));
+	}
     }
 
   return TRUE;
