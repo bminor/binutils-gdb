@@ -1346,7 +1346,6 @@ HFILES_NO_SRCDIR = \
 	frv-tdep.h \
 	ft32-tdep.h \
 	gcore.h \
-	gdb.h \
 	gdb_bfd.h \
 	gdb_curses.h \
 	gdb-dlfcn.h \
