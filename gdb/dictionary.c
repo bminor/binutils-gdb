@@ -790,17 +790,6 @@ default_search_name_hash (const char *string0)
   hash = 0;
   while (*string)
     {
-      /* Ignore "TKB" suffixes.
-
-	 These are used by Ada for subprograms implementing a task body.
-	 For instance for a task T inside package Pck, the name of the
-	 subprogram implementing T's body is `pck__tTKB'.  We need to
-	 ignore the "TKB" suffix because searches for this task body
-	 subprogram are going to be performed using `pck__t' (the encoded
-	 version of the natural name `pck.t').  */
-      if (strcmp (string, "TKB") == 0)
-	return hash;
-
       switch (*string)
 	{
 	case '$':
@@ -822,14 +811,25 @@ default_search_name_hash (const char *string0)
 		return hash;
 	      hash = 0;
 	      string += 2;
-	      break;
+	      continue;
 	    }
-	  /* FALL THROUGH */
-	default:
-	  hash = SYMBOL_HASH_NEXT (hash, *string);
-	  string += 1;
+	  break;
+	case 'T':
+	  /* Ignore "TKB" suffixes.
+
+	     These are used by Ada for subprograms implementing a task body.
+	     For instance for a task T inside package Pck, the name of the
+	     subprogram implementing T's body is `pck__tTKB'.  We need to
+	     ignore the "TKB" suffix because searches for this task body
+	     subprogram are going to be performed using `pck__t' (the encoded
+	     version of the natural name `pck.t').  */
+	  if (strcmp (string, "TKB") == 0)
+	    return hash;
 	  break;
 	}
+
+      hash = SYMBOL_HASH_NEXT (hash, *string);
+      string += 1;
     }
   return hash;
 }
