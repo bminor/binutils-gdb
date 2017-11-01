@@ -1,5 +1,11 @@
 2017-11-01  Nick Clifton  <nickc@redhat.com>
 
+	PR 22376
+	* coffcode.h (coff_slurp_line_table): Check for an excessively
+	large line number count.
+
+2017-11-01  Nick Clifton  <nickc@redhat.com>
+
 	PR 22373
 	* peicode.h (pe_bfd_read_buildid): Revise check for invalid size
 	and offset in light of further possible bogus values.
