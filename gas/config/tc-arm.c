@@ -173,7 +173,7 @@ static const arm_feature_set cpu_default = CPU_DEFAULT;
 #endif
 
 static const arm_feature_set arm_ext_v1 = ARM_FEATURE_CORE_LOW (ARM_EXT_V1);
-static const arm_feature_set arm_ext_v2 = ARM_FEATURE_CORE_LOW (ARM_EXT_V1);
+static const arm_feature_set arm_ext_v2 = ARM_FEATURE_CORE_LOW (ARM_EXT_V2);
 static const arm_feature_set arm_ext_v2s = ARM_FEATURE_CORE_LOW (ARM_EXT_V2S);
 static const arm_feature_set arm_ext_v3 = ARM_FEATURE_CORE_LOW (ARM_EXT_V3);
 static const arm_feature_set arm_ext_v3m = ARM_FEATURE_CORE_LOW (ARM_EXT_V3M);

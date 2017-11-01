@@ -1,3 +1,41 @@
+2017-11-01  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (arm_ext_v2): Define to ARM_EXT_V2 feature bit.
+	* testsuite/gas/arm/copro.s: Split into ...
+	* testsuite/gas/arm/copro-arm_v2plus-thumb_v6t2plus.s: This while
+	changing it to unified syntax and ...
+	* testsuite/gas/arm/copro-arm_v5plus-thumb_v6t2plus.s: this and ...
+	* testsuite/gas/arm/copro-arm_v5teplus-thumb_v6t2plus.s: This and ...
+	* testsuite/gas/arm/copro-arm_v6plus-thumb_v6t2plus.s: This.
+	* testsuite/gas/arm/copro.d: Split into ...
+	* testsuite/gas/arm/copro-arm_v2plus-arm_v2.d: This but target ARMv2
+	and ...
+	* testsuite/gas/arm/copro-arm_v5plus-arm_v5.d: this but target ARMv5
+	and ...
+	* testsuite/gas/arm/copro-arm_v5teplus-arm_v5te.d: This but target
+	ARMv5TE and ...
+	* testsuite/gas/arm/copro-arm_v6plus-arm_v6.d: This but target ARMv6.
+	* testsuite/gas/arm/copro-arm_v2plus-arm_v1.d: New testcase.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v4t-1.d: New testcase.
+	* testsuite/gas/arm/copro-arm_v2plus-thumb_v6t2plus-unavail.l: Expected
+	errors for the above two testcases.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v6t2-1.d: New testcase.
+	* testsuite/gas/arm/copro-arm_v5plus-arm_v4.d: New testcase.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v4t-2.d: New testcase.
+	* testsuite/gas/arm/copro-arm_v5plus-thumb_v6t2plus-unavail.l:
+	Expected errors for the above two testcases.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v6t2-2.d: New testcase.
+	* testsuite/gas/arm/copro-arm_v5teplus-arm_v5.d: New testcase.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v4t-3.d: New testcase.
+	* testsuite/gas/arm/copro-arm_v5teplus-thumb_v6t2plus-unavail.l:
+	Expected errors for the above two testcases.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v6t2-3.d: New testcase.
+	* testsuite/gas/arm/copro-arm_v6plus-arm_v5te.d: New testcase.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v4t-4.d: New testcase.
+	* testsuite/gas/arm/copro-arm_v6plus-thumb_v6t2plus-unavail.l:
+	Expected errors for the above two testcases.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v6t2-4.d: New testcase.
+
 2017-10-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/22352
