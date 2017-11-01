@@ -1,5 +1,14 @@
 2017-11-04  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (readonly_dynrelocs): Delete info param.  Update all
+	callers.  Don't bother with SEC_ALLOC test.  Return section pointer.
+	Move minfo call to..
+	(maybe_set_textrel): ..here.
+	* elf64-ppc.c (readonly_dynrelocs): Return section pointer.
+	(maybe_set_textrel): Call minfo to print textrel warning to map file.
+
+2017-11-04  Alan Modra  <amodra@gmail.com>
+
 	* elf32-hppa.c (enum _tls_type): Move.
 	(struct elf32_hppa_link_hash_entry): Make tls_type a bitfield.
 	(elf32_hppa_check_relocs): Set DF_STATIC_TLS only for shared libraries.

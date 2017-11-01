@@ -5424,11 +5424,10 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
-/* Return true if we have dynamic relocs that apply to read-only sections.  */
+/* Find dynamic relocs for H that apply to read-only sections.  */
 
-static bfd_boolean
-readonly_dynrelocs (struct elf_link_hash_entry *h,
-		    struct bfd_link_info *info)
+static asection *
+readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
   struct elf_dyn_relocs *p;
 
@@ -5436,18 +5435,10 @@ readonly_dynrelocs (struct elf_link_hash_entry *h,
     {
       asection *s = p->sec->output_section;
 
-      if (s != NULL
-	  && ((s->flags & (SEC_READONLY | SEC_ALLOC))
-	      == (SEC_READONLY | SEC_ALLOC)))
-	{
-	  if (info)
-	    info->callbacks->minfo (_("%B: dynamic relocation in read-only section `%A'\n"),
-				    p->sec->owner, p->sec);
-
-	  return TRUE;
-	}
+      if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	return p->sec;
     }
-  return FALSE;
+  return NULL;
 }
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
@@ -5535,7 +5526,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 		   && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)))
 	      && !htab->is_vxworks
 	      && !ppc_elf_hash_entry (h)->has_sda_refs
-	      && !readonly_dynrelocs (h, NULL))
+	      && !readonly_dynrelocs (h))
 	    {
 	      h->pointer_equality_needed = 0;
 	      /* Say that we do want dynamic relocs.  */
@@ -5621,7 +5612,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       && !ppc_elf_hash_entry (h)->has_sda_refs
       && !htab->is_vxworks
       && !h->def_regular
-      && !readonly_dynrelocs (h, NULL))
+      && !readonly_dynrelocs (h))
     {
       h->non_got_ref = 0;
       return TRUE;
@@ -6112,15 +6103,20 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 static bfd_boolean
 maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 {
-  struct bfd_link_info *info;
+  asection *sec;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  info = (struct bfd_link_info *) info_p;
-  if (readonly_dynrelocs (h, info))
+  sec = readonly_dynrelocs (h);
+  if (sec != NULL)
     {
+      struct bfd_link_info *info = (struct bfd_link_info *) info_p;
+
       info->flags |= DF_TEXTREL;
+      info->callbacks->minfo
+	(_("%B: dynamic relocation in read-only section `%A'\n"),
+	 sec->owner, sec);
 
       /* Not an error, just cut short the traversal.  */
       return FALSE;

@@ -7084,10 +7084,9 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
-/* Return true if we have dynamic relocs against H that apply to
-   read-only sections.  */
+/* Find dynamic relocs for H that apply to read-only sections.  */
 
-static bfd_boolean
+static asection *
 readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
   struct ppc_link_hash_entry *eh;
@@ -7099,9 +7098,9 @@ readonly_dynrelocs (struct elf_link_hash_entry *h)
       asection *s = p->sec->output_section;
 
       if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	return TRUE;
+	return p->sec;
     }
-  return FALSE;
+  return NULL;
 }
 
 /* Return true if we have dynamic relocs against H or any of its weak
@@ -9934,14 +9933,22 @@ size_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
    read-only sections.  */
 
 static bfd_boolean
-maybe_set_textrel (struct elf_link_hash_entry *h, void *info)
+maybe_set_textrel (struct elf_link_hash_entry *h, void *inf)
 {
+  asection *sec;
+
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  if (readonly_dynrelocs (h))
+  sec = readonly_dynrelocs (h);
+  if (sec != NULL)
     {
-      ((struct bfd_link_info *) info)->flags |= DF_TEXTREL;
+      struct bfd_link_info *info = (struct bfd_link_info *) inf;
+
+      info->flags |= DF_TEXTREL;
+      info->callbacks->minfo
+	(_("%B: dynamic relocation in read-only section `%A'\n"),
+	 sec->owner, sec);
 
       /* Not an error, just cut short the traversal.  */
       return FALSE;
