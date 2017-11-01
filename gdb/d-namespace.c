@@ -356,16 +356,6 @@ d_lookup_nested_symbol (struct type *parent_type,
     }
 }
 
-/* Used for cleanups to reset the "searched" flag incase
-   of an error.  */
-
-static void
-reset_directive_searched (void *data)
-{
-  struct using_direct *direct = (struct using_direct *) data;
-  direct->searched = 0;
-}
-
 /* Search for NAME by applying all import statements belonging to
    BLOCK which are applicable in SCOPE.  */
 
@@ -376,7 +366,6 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 {
   struct using_direct *current;
   struct block_symbol sym;
-  struct cleanup *searched_cleanup;
 
   /* First, try to find the symbol in the given module.  */
   sym = d_lookup_symbol_in_module (scope, name, block, domain, 1);
@@ -399,9 +388,8 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 	{
 	  /* Mark this import as searched so that the recursive call
 	     does not search it again.  */
-	  current->searched = 1;
-	  searched_cleanup = make_cleanup (reset_directive_searched,
-					   current);
+	  scoped_restore restore_searched
+	    = make_scoped_restore (&current->searched, 1);
 
 	  /* If there is an import of a single declaration, compare the
 	     imported declaration (after optional renaming by its alias)
@@ -419,9 +407,6 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 	     declaration, the search of this import is complete.  */
 	  if (sym.symbol != NULL || current->declaration)
 	    {
-	      current->searched = 0;
-	      discard_cleanups (searched_cleanup);
-
 	      if (sym.symbol != NULL)
 		return sym;
 
@@ -433,10 +418,7 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 	    if (strcmp (name, *excludep) == 0)
 	      break;
 	  if (*excludep)
-	    {
-	      discard_cleanups (searched_cleanup);
-	      continue;
-	    }
+	    continue;
 
 	  /* If the import statement is creating an alias.  */
 	  if (current->alias != NULL)
@@ -476,8 +458,6 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 	      sym = d_lookup_symbol_in_module (current->import_src,
 					       name, block, domain, 1);
 	    }
-	  current->searched = 0;
-	  discard_cleanups (searched_cleanup);
 
 	  if (sym.symbol != NULL)
 	    return sym;

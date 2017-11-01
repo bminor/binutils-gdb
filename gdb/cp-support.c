@@ -1286,16 +1286,6 @@ make_symbol_overload_list_adl (struct type **arg_types, int nargs,
   return sym_return_val;
 }
 
-/* Used for cleanups to reset the "searched" flag in case of an
-   error.  */
-
-static void
-reset_directive_searched (void *data)
-{
-  struct using_direct *direct = (struct using_direct *) data;
-  direct->searched = 0;
-}
-
 /* This applies the using directives to add namespaces to search in,
    and then searches for overloads in all of those namespaces.  It
    adds the symbols found to sym_return_val.  Arguments are as in
@@ -1332,16 +1322,11 @@ make_symbol_overload_list_using (const char *func_name,
 	  {
 	    /* Mark this import as searched so that the recursive call
 	       does not search it again.  */
-	    struct cleanup *old_chain;
-	    current->searched = 1;
-	    old_chain = make_cleanup (reset_directive_searched,
-				      current);
+	    scoped_restore reset_directive_searched
+	      = make_scoped_restore (&current->searched, 1);
 
 	    make_symbol_overload_list_using (func_name,
 					     current->import_src);
-
-	    current->searched = 0;
-	    discard_cleanups (old_chain);
 	  }
       }
 

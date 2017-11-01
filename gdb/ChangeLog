@@ -1,5 +1,14 @@
 2017-11-04  Tom Tromey  <tom@tromey.com>
 
+	* cp-namespace.c (reset_directive_searched): Remove.
+	(cp_lookup_symbol_via_imports): Use scoped_restore.
+	* cp-support.c (reset_directive_searched): Remove.
+	(make_symbol_overload_list_using): Use scoped_restore.
+	* d-namespace.c (d_lookup_symbol_imports): Use scoped_restore.
+	(reset_directive_searched): Remove.
+
+2017-11-04  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (find_separate_debug_file_by_debuglink): Use
 	unique_xmalloc_ptr.
 
