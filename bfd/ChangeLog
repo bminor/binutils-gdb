@@ -1,3 +1,104 @@
+2017-11-01  James Bowman  <james.bowman@ftdichip.com>
+
+	* archures.c: Add bfd_mach_ft32b.
+	* cpu-ft32.c: Add arch_info_struct.
+	* elf32-ft32.c: Add R_FT32_RELAX, SC0, SC1,
+	DIFF32.
+	(ft32_elf_relocate_section): Add clauses for R_FT32_SC0, SC1,
+	DIFF32.
+	(ft32_reloc_shortable, elf32_ft32_is_diff_reloc)
+	(elf32_ft32_adjust_diff_reloc_value)
+	(elf32_ft32_adjust_reloc_if_spans_insn)
+	(elf32_ft32_relax_delete_bytes, elf32_ft32_relax_is_branch_target)
+	(ft32_elf_relax_section): New function.
+	* reloc.c: Add BFD_RELOC_FT32_RELAX, SC0, SC1, DIFF32.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2017-11-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 22376
+	* coffcode.h (coff_slurp_line_table): Check for an excessively
+	large line number count.
+
+2017-11-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 22373
+	* peicode.h (pe_bfd_read_buildid): Revise check for invalid size
+	and offset in light of further possible bogus values.
+
+2017-11-01  Alan Modra  <amodra@gmail.com>
+
+	PR 22374
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Don't create a plt
+	entry when just a dynamic reloc can serve.  Ensure no dynamic
+	relocations when UNDEFWEAK_NO_DYNAMIC_RELOC by setting non_got_ref.
+	Expand and move the non_got_ref comment.
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Likewise.
+
+2017-11-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 22369
+	* coffgen.c (_bfd_coff_free_symbols): Fail if called on a non-COFF
+	file.
+	* cofflink.c (coff_link_check_archive_element): Skip non-COFF
+	members of an archive.
+
+2017-10-31  Nick Clifton  <nickc@redhat.com>
+
+	PR 22373
+	* peicode.h (pe_bfd_read_buildid): Check for invalid size and data
+	offset values.
+
+2017-10-30  Alan Modra  <amodra@gmail.com>
+
+	* elf32-frv.c (ELF_TARGET_ID): Don't define for generic
+	elf target.
+
+	* elflink.c (elf_gc_sweep): Test elf_object_id in addition to
+	relocs_compatible.
+	(bfd_elf_gc_sections): Likewise.
+
+2017-10-30  Alan Modra  <amodra@gmail.com>
+
+	PR 22269
+	* elf32-hppa.c (elf32_hppa_check_relocs): Move SEC_ALLOC test to
+	ensure non_got_ref is not set due to debug references.
+	(elf32_hppa_adjust_dynamic_symbol): Tidy plabel handling.  Use
+	SYMBOL_CALLS_LOCAL and UNDEFWEAK_NO_DYNAMIC_RELOC when determining
+	need for a plt entry.
+	(allocate_dynrelocs): Similarly for got entries.  Tidy code discarding
+	dynamic relocs when pic.  Remove bogus code attempting to handle
+	commons.
+	(elf32_hppa_relocate_section): Similarly.  Delete resolved_to_zero
+	and simplify.
+	(elf32_hppa_finish_dynamic_symbol): Use UNDEFWEAK_NO_DYNAMIC_RELOC
+	and SYMBOL_REFERENCES_LOCAL in GOT handling.
+
+2017-10-28  Alan Modra  <amodra@gmail.com>
+
+	PR 22300
+	* elflink.c (_bfd_elf_merge_symbol): Remove relocs_compatible check.
+	* elf32-hppa.c (elf_backend_relocs_compatible): Define.
+	* elf32-ppc.c (elf_backend_relocs_compatible): Define.
+	* elf64-ppc.c (elf_backend_relocs_compatible): Define.
+
+2017-10-25  Alan Modra  <amodra@gmail.com>
+
+	* archive.c (_bfd_compute_and_write_armap): Match "__gnu_lto_slim"
+	optionally prefixed with "_".
+	* linker.c (_bfd_generic_link_add_one_symbol): Likewise.
+
+2017-10-24  Andrew Waterman  <andrew@sifive.com>
+
+	* elfnn-riscv.c (_bfd_riscv_relax_lui): Don't relax to c.lui
+	when rd is x0.
+
+2017-10-24  Renlin Li  <renlin.li@arm.com>
+
+	PR ld/21703
+	* elflink.c (_bfd_elf_merge_symbol): Handle multiple definition case.
+
 2017-10-23  Nick Clifton  <nickc@redhat.com>
 
 	PR 22319

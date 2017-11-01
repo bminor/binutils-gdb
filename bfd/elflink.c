@@ -1036,6 +1036,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   bfd_boolean newweak, oldweak, newfunc, oldfunc;
   const struct elf_backend_data *bed;
   char *new_version;
+  bfd_boolean default_sym = *matched;
 
   *skip = FALSE;
   *override = FALSE;
@@ -1160,11 +1161,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	     || h->root.type == bfd_link_hash_undefweak);
   if (pold_weak)
     *pold_weak = oldweak;
-
-  /* This code is for coping with dynamic objects, and is only useful
-     if we are doing an ELF link.  */
-  if (!(*bed->relocs_compatible) (abfd->xvec, info->output_bfd->xvec))
-    return TRUE;
 
   /* We have to check it for every instance since the first few may be
      references and not all compilers emit symbol type for undefined
@@ -1555,6 +1551,18 @@ _bfd_elf_merge_symbol (bfd *abfd,
       if (!bed->merge_symbol (h, sym, psec, newdef, olddef, oldbfd, oldsec))
 	return FALSE;
       sec = *psec;
+    }
+
+  /* There are multiple definitions of a normal symbol.
+     Skip the default symbol as well.  */
+  if (olddef && !olddyn && !oldweak && newdef && !newdyn && !newweak
+      && !default_sym && h->def_regular)
+    {
+      /* Handle a multiple definition.  */
+      (*info->callbacks->multiple_definition) (info, &h->root,
+					       abfd, sec, *pvalue);
+      *skip = TRUE;
+      return TRUE;
     }
 
   /* If both the old and the new symbols look like common symbols in a
@@ -13026,6 +13034,7 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
       asection *o;
 
       if (bfd_get_flavour (sub) != bfd_target_elf_flavour
+	  || elf_object_id (sub) != elf_hash_table_id (elf_hash_table (info))
 	  || !(*bed->relocs_compatible) (sub->xvec, abfd->xvec))
 	continue;
       o = sub->sections;
@@ -13327,6 +13336,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       asection *o;
 
       if (bfd_get_flavour (sub) != bfd_target_elf_flavour
+	  || elf_object_id (sub) != elf_hash_table_id (htab)
 	  || !(*bed->relocs_compatible) (sub->xvec, abfd->xvec))
 	continue;
 

@@ -157,7 +157,7 @@ remove_catch_syscall (struct bp_location *bl, enum remove_bp_reason reason)
 
 static int
 breakpoint_hit_catch_syscall (const struct bp_location *bl,
-			      struct address_space *aspace, CORE_ADDR bp_addr,
+			      const address_space *aspace, CORE_ADDR bp_addr,
 			      const struct target_waitstatus *ws)
 {
   /* We must check if we are catching specific syscalls in this

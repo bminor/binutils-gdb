@@ -156,7 +156,7 @@ thread_has_single_step_breakpoints_set (struct thread_info *tp)
 
 int
 thread_has_single_step_breakpoint_here (struct thread_info *tp,
-					struct address_space *aspace,
+					const address_space *aspace,
 					CORE_ADDR addr)
 {
   struct breakpoint *ss_bps = tp->control.single_step_breakpoints;

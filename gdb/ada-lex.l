@@ -403,16 +403,12 @@ processInt (struct parser_state *par_state, const char *base0,
 static int
 processReal (struct parser_state *par_state, const char *num0)
 {
-  sscanf (num0, "%" DOUBLEST_SCAN_FORMAT, &yylval.typed_val_float.dval);
+  yylval.typed_val_float.type = type_long_double (par_state);
 
-  yylval.typed_val_float.type = type_float (par_state);
-  if (sizeof(DOUBLEST) >= gdbarch_double_bit (parse_gdbarch (par_state))
-			    / TARGET_CHAR_BIT)
-    yylval.typed_val_float.type = type_double (par_state);
-  if (sizeof(DOUBLEST) >= gdbarch_long_double_bit (parse_gdbarch (par_state))
-			    / TARGET_CHAR_BIT)
-    yylval.typed_val_float.type = type_long_double (par_state);
-
+  bool parsed = parse_float (num0, strlen (num0),
+			     yylval.typed_val_float.type,
+			     yylval.typed_val_float.val);
+  gdb_assert (parsed);
   return FLOAT;
 }
 

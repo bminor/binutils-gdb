@@ -1249,12 +1249,14 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
       for (pb = pending_blocks; pb != NULL; pb = pb->next)
 	barray.push_back (pb->block);
 
-      std::sort (barray.begin (), barray.end (),
-		 [] (const block *a, const block *b)
-		 {
-		   /* Sort blocks in descending order.  */
-		   return BLOCK_START (a) > BLOCK_START (b);
-		 });
+      /* Sort blocks by start address in descending order.  Blocks with the
+	 same start address must remain in the original order to preserve
+	 inline function caller/callee relationships.  */
+      std::stable_sort (barray.begin (), barray.end (),
+			[] (const block *a, const block *b)
+			{
+			  return BLOCK_START (a) > BLOCK_START (b);
+			});
 
       int i = 0;
       for (pb = pending_blocks; pb != NULL; pb = pb->next)

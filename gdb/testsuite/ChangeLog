@@ -1,3 +1,70 @@
+2017-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.mi/mi-break.exp (test_breakpoint_commands): Test backtrace
+	as a breakpoint command.
+
+2017-10-28  Maksim Dzabraev  <dzabraew@gmail.com>
+
+	PR python/21213
+	* gdb.python/py-infthread.exp: Test calling
+	InferiorThread.inferior () multiple times in a row.
+
+2017-10-27  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.opt/inline-break.exp (break_info_1): New procedure.
+	Test "info break" for every inlined function breakpoint.
+
+2017-10-27  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/insn-reloc.c (can_relocate_bl): Mark "x30" clobbered.
+
+2017-10-26  Patrick Frants  <osscontribute@gmail.com>
+
+	* gdb.cp/classes.exp (test_static_members): Test printing
+	Outer::instance.
+	* gdb.cp/classes.c (struct Inner, struct Outer): New.
+	(Inner::instance, Outer::instance): New.
+
+2017-10-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/new-ui.exp (do_test): Split "delete all breakpoints on
+	extra console" test in two stages.
+
+2017-10-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/attach-into-signal.exp (corefunc): Reindent.
+
+2017-10-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/attach-into-signal.exp: Remove whole "stoppedtry"
+	loop.
+
+2017-10-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/attach-into-signal.exp (corefunc): Remove "attach
+	$attempt" and "stoppedtry $stoppedtry" test prefixes.
+
+2017-10-24  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb-python.exp (get_python_valueof): Add 'test' optional
+	parameter and handle it.  Don't output read value in test name.
+
+2017-10-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.gdb/unittest.exp ('maintenance check xml-descriptions'): Use
+	custom test name.
+
+2017-10-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/startup-with-shell.exp ('touch $unique_file'): Don't
+	include the unstable output directory name in the test's name.
+	(initial_setup_simple) <'set args'>: Use custom test name.
+
+2017-10-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.arch/arc-tdesc-cpu.exp ('set tdesc filename'): Use gdb_test
+	with explicit test name.
+
 2017-10-20  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/quit.exp: Use gdb_test_multiple and expect 'eof' before

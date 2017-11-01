@@ -4578,6 +4578,14 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
   BFD_ASSERT (asect->lineno == NULL);
 
+  if (asect->lineno_count > asect->size)
+    {
+      _bfd_error_handler
+	(_("%B: warning: line number count (%#lx) exceeds section size (%#lx)"),
+	 abfd, (unsigned long) asect->lineno_count, (unsigned long) asect->size);
+      return FALSE;
+    }
+
   amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
   lineno_cache = (alent *) bfd_alloc (abfd, amt);
   if (lineno_cache == NULL)

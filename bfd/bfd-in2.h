@@ -2265,6 +2265,7 @@ enum bfd_architecture
 #define bfd_mach_moxie         1
   bfd_arch_ft32,       /* The ft32 processor */
 #define bfd_mach_ft32          1
+#define bfd_mach_ft32b         2
   bfd_arch_mcore,
   bfd_arch_mep,
 #define bfd_mach_mep           1
@@ -3149,7 +3150,11 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_FT32_20,
   BFD_RELOC_FT32_17,
   BFD_RELOC_FT32_18,
+  BFD_RELOC_FT32_RELAX,
+  BFD_RELOC_FT32_SC0,
+  BFD_RELOC_FT32_SC1,
   BFD_RELOC_FT32_15,
+  BFD_RELOC_FT32_DIFF32,
 
 
 /* Fujitsu Frv Relocations.  */

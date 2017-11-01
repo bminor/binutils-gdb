@@ -119,7 +119,7 @@ static void
 supply_register_at_address (struct regcache *regcache, int regnum,
                             CORE_ADDR register_addr)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int buf_size = register_size (gdbarch, regnum);
   gdb_byte *buf;
 
@@ -147,7 +147,7 @@ ppc_ravenscar_generic_fetch_registers
   (const struct ravenscar_reg_info *reg_info,
    struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   const int num_regs = gdbarch_num_regs (gdbarch);
   int current_regnum;
   CORE_ADDR current_address;
@@ -186,7 +186,7 @@ ppc_ravenscar_generic_store_registers
   (const struct ravenscar_reg_info *reg_info,
    struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int buf_size = register_size (gdbarch, regnum);
   gdb_byte buf[buf_size];
   ULONGEST register_address;

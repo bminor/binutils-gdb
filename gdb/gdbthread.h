@@ -410,7 +410,7 @@ extern int thread_has_single_step_breakpoints_set (struct thread_info *tp);
 /* Check whether the thread has software single stepping breakpoints
    set at PC.  */
 extern int thread_has_single_step_breakpoint_here (struct thread_info *tp,
-						   struct address_space *aspace,
+						   const address_space *aspace,
 						   CORE_ADDR addr);
 
 /* Translate the global integer thread id (GDB's homegrown id, not the

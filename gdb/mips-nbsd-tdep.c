@@ -55,7 +55,7 @@ mipsnbsd_supply_fpregset (const struct regset *regset,
 			  struct regcache *regcache,
 			  int regnum, const void *fpregs, size_t len)
 {
-  size_t regsize = mips_isa_regsize (get_regcache_arch (regcache));
+  size_t regsize = mips_isa_regsize (regcache->arch ());
   const char *regs = (const char *) fpregs;
   int i;
 
@@ -78,7 +78,7 @@ mipsnbsd_supply_gregset (const struct regset *regset,
 			 struct regcache *regcache, int regnum,
 			 const void *gregs, size_t len)
 {
-  size_t regsize = mips_isa_regsize (get_regcache_arch (regcache));
+  size_t regsize = mips_isa_regsize (regcache->arch ());
   const char *regs = (const char *) gregs;
   int i;
 
@@ -137,7 +137,7 @@ mipsnbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 void
 mipsnbsd_supply_reg (struct regcache *regcache, const char *regs, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int i;
 
   for (i = 0; i <= gdbarch_pc_regnum (gdbarch); i++)
@@ -156,7 +156,7 @@ mipsnbsd_supply_reg (struct regcache *regcache, const char *regs, int regno)
 void
 mipsnbsd_fill_reg (const struct regcache *regcache, char *regs, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int i;
 
   for (i = 0; i <= gdbarch_pc_regnum (gdbarch); i++)
@@ -170,7 +170,7 @@ void
 mipsnbsd_supply_fpreg (struct regcache *regcache,
 		       const char *fpregs, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int i;
 
   for (i = gdbarch_fp0_regnum (gdbarch);
@@ -193,7 +193,7 @@ mipsnbsd_supply_fpreg (struct regcache *regcache,
 void
 mipsnbsd_fill_fpreg (const struct regcache *regcache, char *fpregs, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int i;
 
   for (i = gdbarch_fp0_regnum (gdbarch);

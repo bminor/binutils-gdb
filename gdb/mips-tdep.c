@@ -1365,7 +1365,7 @@ mips_in_frame_stub (CORE_ADDR pc)
 static CORE_ADDR
 mips_read_pc (struct regcache *regcache)
 {
-  int regnum = gdbarch_pc_regnum (get_regcache_arch (regcache));
+  int regnum = gdbarch_pc_regnum (regcache->arch ());
   LONGEST pc;
 
   regcache_cooked_read_signed (regcache, regnum, &pc);
@@ -1421,7 +1421,7 @@ mips_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 void
 mips_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  int regnum = gdbarch_pc_regnum (get_regcache_arch (regcache));
+  int regnum = gdbarch_pc_regnum (regcache->arch ());
 
   regcache_cooked_write_unsigned (regcache, regnum, pc);
 }
@@ -1607,7 +1607,7 @@ is_octeon_bbit_op (int op, struct gdbarch *gdbarch)
 static CORE_ADDR
 mips32_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   unsigned long inst;
   int op;
   inst = mips_fetch_instruction (gdbarch, ISA_MIPS, pc, NULL);
@@ -1874,7 +1874,7 @@ micromips_bc1_pc (struct gdbarch *gdbarch, struct regcache *regcache,
 static CORE_ADDR
 micromips_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   ULONGEST insn;
 
   insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, pc, NULL);
@@ -2228,7 +2228,7 @@ static CORE_ADDR
 extended_mips16_next_pc (regcache *regcache, CORE_ADDR pc,
 			 unsigned int extension, unsigned int insn)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int op = (insn >> 11);
   switch (op)
     {
@@ -2332,7 +2332,7 @@ extended_mips16_next_pc (regcache *regcache, CORE_ADDR pc,
 static CORE_ADDR
 mips16_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   unsigned int insn = fetch_mips_16 (gdbarch, pc);
   return extended_mips16_next_pc (regcache, pc, 0, insn);
 }
@@ -2345,7 +2345,7 @@ mips16_next_pc (struct regcache *regcache, CORE_ADDR pc)
 static CORE_ADDR
 mips_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   if (mips_pc_is_mips16 (gdbarch, pc))
     return mips16_next_pc (regcache, pc);
@@ -4156,7 +4156,7 @@ deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
 std::vector<CORE_ADDR>
 mips_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR pc, next_pc;
 
   pc = regcache_read_pc (regcache);
@@ -6256,8 +6256,12 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
 {				/* Do values for FP (float) regs.  */
   struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte *raw_buffer;
-  double doub, flt1;	/* Doubles extracted from raw hex data.  */
-  int inv1, inv2;
+  std::string flt_str, dbl_str;
+
+  const struct floatformat *flt_fmt
+    = floatformat_from_type (builtin_type (gdbarch)->builtin_float);
+  const struct floatformat *dbl_fmt
+    = floatformat_from_type (builtin_type (gdbarch)->builtin_double);
 
   raw_buffer
     = ((gdb_byte *)
@@ -6275,31 +6279,21 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
       /* 4-byte registers: Print hex and floating.  Also print even
          numbered registers as doubles.  */
       mips_read_fp_register_single (frame, regnum, raw_buffer);
-      flt1 = unpack_double (builtin_type (gdbarch)->builtin_float,
-			    raw_buffer, &inv1);
+      flt_str = floatformat_to_string (flt_fmt, raw_buffer, "%-17.9g");
 
       get_formatted_print_options (&opts, 'x');
       print_scalar_formatted (raw_buffer,
 			      builtin_type (gdbarch)->builtin_uint32,
 			      &opts, 'w', file);
 
-      fprintf_filtered (file, " flt: ");
-      if (inv1)
-	fprintf_filtered (file, " <invalid float> ");
-      else
-	fprintf_filtered (file, "%-17.9g", flt1);
+      fprintf_filtered (file, " flt: %s", flt_str.c_str ());
 
       if ((regnum - gdbarch_num_regs (gdbarch)) % 2 == 0)
 	{
 	  mips_read_fp_register_double (frame, regnum, raw_buffer);
-	  doub = unpack_double (builtin_type (gdbarch)->builtin_double,
-				raw_buffer, &inv2);
+	  dbl_str = floatformat_to_string (dbl_fmt, raw_buffer, "%-24.17g");
 
-	  fprintf_filtered (file, " dbl: ");
-	  if (inv2)
-	    fprintf_filtered (file, "<invalid double>");
-	  else
-	    fprintf_filtered (file, "%-24.17g", doub);
+	  fprintf_filtered (file, " dbl: %s", dbl_str.c_str ());
 	}
     }
   else
@@ -6308,29 +6302,18 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
 
       /* Eight byte registers: print each one as hex, float and double.  */
       mips_read_fp_register_single (frame, regnum, raw_buffer);
-      flt1 = unpack_double (builtin_type (gdbarch)->builtin_float,
-			    raw_buffer, &inv1);
+      flt_str = floatformat_to_string (flt_fmt, raw_buffer, "%-17.9g");
 
       mips_read_fp_register_double (frame, regnum, raw_buffer);
-      doub = unpack_double (builtin_type (gdbarch)->builtin_double,
-			    raw_buffer, &inv2);
+      dbl_str = floatformat_to_string (dbl_fmt, raw_buffer, "%-24.17g");
 
       get_formatted_print_options (&opts, 'x');
       print_scalar_formatted (raw_buffer,
 			      builtin_type (gdbarch)->builtin_uint64,
 			      &opts, 'g', file);
 
-      fprintf_filtered (file, " flt: ");
-      if (inv1)
-	fprintf_filtered (file, "<invalid float>");
-      else
-	fprintf_filtered (file, "%-17.9g", flt1);
-
-      fprintf_filtered (file, " dbl: ");
-      if (inv2)
-	fprintf_filtered (file, "<invalid double>");
-      else
-	fprintf_filtered (file, "%-24.17g", doub);
+      fprintf_filtered (file, " flt: %s", flt_str.c_str ());
+      fprintf_filtered (file, " dbl: %s", dbl_str.c_str ());
     }
 }
 

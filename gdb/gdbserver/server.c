@@ -2677,31 +2677,18 @@ static void resume (struct thread_resume *actions, size_t n);
 typedef int (visit_actioned_threads_callback_ftype)
   (const struct thread_resume *, struct thread_info *);
 
-/* Struct to pass data to visit_actioned_threads.  */
-
-struct visit_actioned_threads_data
-{
-  const struct thread_resume *actions;
-  size_t num_actions;
-  visit_actioned_threads_callback_ftype *callback;
-};
-
 /* Call CALLBACK for any thread to which ACTIONS applies to.  Returns
    true if CALLBACK returns true.  Returns false if no matching thread
    is found or CALLBACK results false.
-   Note: This function is itself a callback for find_inferior.  */
+   Note: This function is itself a callback for find_thread.  */
 
-static int
-visit_actioned_threads (thread_info *thread, void *datap)
+static bool
+visit_actioned_threads (thread_info *thread,
+			const struct thread_resume *actions,
+			size_t num_actions,
+			visit_actioned_threads_callback_ftype *callback)
 {
-  struct visit_actioned_threads_data *data
-    = (struct visit_actioned_threads_data *) datap;
-  const struct thread_resume *actions = data->actions;
-  size_t num_actions = data->num_actions;
-  visit_actioned_threads_callback_ftype *callback = data->callback;
-  size_t i;
-
-  for (i = 0; i < num_actions; i++)
+  for (size_t i = 0; i < num_actions; i++)
     {
       const struct thread_resume *action = &actions[i];
 
@@ -2712,11 +2699,11 @@ visit_actioned_threads (thread_info *thread, void *datap)
 	      && ptid_get_lwp (action->thread) == -1))
 	{
 	  if ((*callback) (action, thread))
-	    return 1;
+	    return true;
 	}
     }
 
-  return 0;
+  return false;
 }
 
 /* Callback for visit_actioned_threads.  If the thread has a pending
@@ -2858,12 +2845,14 @@ resume (struct thread_resume *actions, size_t num_actions)
 	 one with a pending status to report.  If so, skip actually
 	 resuming/stopping and report the pending event
 	 immediately.  */
-      struct visit_actioned_threads_data data;
 
-      data.actions = actions;
-      data.num_actions = num_actions;
-      data.callback = handle_pending_status;
-      if (find_inferior (&all_threads, visit_actioned_threads, &data) != NULL)
+      thread_info *thread_with_status = find_thread ([&] (thread_info *thread)
+	{
+	  return visit_actioned_threads (thread, actions, num_actions,
+					 handle_pending_status);
+	});
+
+      if (thread_with_status != NULL)
 	return;
 
       enable_async_io ();
@@ -3230,8 +3219,8 @@ myresume (char *own_buf, int step, int sig)
 /* Callback for for_each_inferior.  Make a new stop reply for each
    stopped thread.  */
 
-static int
-queue_stop_reply_callback (thread_info *thread, void *arg)
+static void
+queue_stop_reply_callback (thread_info *thread)
 {
   /* For now, assume targets that don't have this callback also don't
      manage the thread's last_status field.  */
@@ -3267,8 +3256,6 @@ queue_stop_reply_callback (thread_info *thread, void *arg)
 	  queue_stop_reply (thread->id, &thread->last_status);
 	}
     }
-
-  return 0;
 }
 
 /* Set this inferior threads's state as "want-stopped".  We won't
@@ -3324,15 +3311,6 @@ set_pending_status_callback (thread_info *thread)
     thread->status_pending_p = 1;
 }
 
-/* Callback for find_inferior.  Return true if ENTRY (a thread) has a
-   pending status to report to GDB.  */
-
-static int
-find_status_pending_thread_callback (thread_info *thread, void *data)
-{
-  return thread->status_pending_p;
-}
-
 /* Status handler for the '?' packet.  */
 
 static void
@@ -3349,7 +3327,7 @@ handle_status (char *own_buf)
 
   if (non_stop)
     {
-      find_inferior (&all_threads, queue_stop_reply_callback, NULL);
+      for_each_thread (queue_stop_reply_callback);
 
       /* The first is sent immediatly.  OK is sent if there is no
 	 stopped thread, which is the same handling of the vStopped
@@ -3382,8 +3360,10 @@ handle_status (char *own_buf)
       /* If the last event thread is not found for some reason, look
 	 for some other thread that might have an event to report.  */
       if (thread == NULL)
-	thread = find_inferior (&all_threads,
-				find_status_pending_thread_callback, NULL);
+	thread = find_thread ([] (thread_info *thread)
+	  {
+	    return thread->status_pending_p;
+	  });
 
       /* If we're still out of luck, simply pick the first thread in
 	 the thread list.  */

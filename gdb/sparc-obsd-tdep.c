@@ -152,7 +152,7 @@ static void
 sparc32obsd_supply_uthread (struct regcache *regcache,
 			    int regnum, CORE_ADDR addr)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR fp, fp_addr = addr + SPARC32OBSD_UTHREAD_FP_OFFSET;
   gdb_byte buf[4];
@@ -197,7 +197,7 @@ static void
 sparc32obsd_collect_uthread(const struct regcache *regcache,
 			    int regnum, CORE_ADDR addr)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp;
   gdb_byte buf[4];

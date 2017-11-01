@@ -287,7 +287,7 @@ static void
 bsd_uthread_fetch_registers (struct target_ops *ops,
 			     struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct bsd_uthread_ops *uthread_ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
   ptid_t ptid = regcache_get_ptid (regcache);
@@ -321,7 +321,7 @@ static void
 bsd_uthread_store_registers (struct target_ops *ops,
 			     struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct bsd_uthread_ops *uthread_ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
   struct target_ops *beneath = find_target_beneath (ops);

@@ -101,6 +101,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_notice_as_needed	      ppc64_elf_notice_as_needed
 #define elf_backend_archive_symbol_lookup     ppc64_elf_archive_symbol_lookup
 #define elf_backend_check_relocs	      ppc64_elf_check_relocs
+#define elf_backend_relocs_compatible	      _bfd_elf_relocs_compatible
 #define elf_backend_gc_keep		      ppc64_elf_gc_keep
 #define elf_backend_gc_mark_dynamic_ref       ppc64_elf_gc_mark_dynamic_ref
 #define elf_backend_gc_mark_hook	      ppc64_elf_gc_mark_hook
@@ -7192,6 +7193,16 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  h->plt.plist = NULL;
 	  h->needs_plt = 0;
 	  h->pointer_equality_needed = 0;
+	  /* After adjust_dynamic_symbol, non_got_ref set in the
+	     non-pic case means that dyn_relocs for this symbol should
+	     be discarded.  We either want the symbol to remain
+	     undefined, or we have a local definition of some sort.
+	     The "local definition" for non-function symbols may be
+	     due to creating a local definition in .dynbss, and for
+	     ELFv2 function symbols, defining the symbol on the PLT
+	     call stub code.  Set non_got_ref here to ensure undef
+	     weaks stay undefined.  */
+	  h->non_got_ref = 1;
 	}
       else if (abiversion (info->output_bfd) >= 2)
 	{
@@ -7206,13 +7217,25 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	      && !alias_readonly_dynrelocs (h))
 	    {
 	      h->pointer_equality_needed = 0;
-	      /* After adjust_dynamic_symbol, non_got_ref set in
-		 the non-pic case means that dyn_relocs for this
-		 symbol should be discarded.  */
+	      /* Say that we do want dynamic relocs.  */
 	      h->non_got_ref = 0;
+	      /* If we haven't seen a branch reloc then we don't need
+		 a plt entry.  */
+	      if (!h->needs_plt)
+		h->plt.plist = NULL;
 	    }
 
-	  /* If making a plt entry, then we don't need copy relocs.  */
+	  /* ELFv2 function symbols can't have copy relocs.  */
+	  return TRUE;
+	}
+      else if (!h->needs_plt
+	       && !alias_readonly_dynrelocs (h))
+	{
+	  /* If we haven't seen a branch reloc then we don't need a
+	     plt entry.  */
+	  h->plt.plist = NULL;
+	  h->pointer_equality_needed = 0;
+	  h->non_got_ref = 0;
 	  return TRUE;
 	}
     }

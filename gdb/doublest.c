@@ -680,6 +680,25 @@ floatformat_mantissa (const struct floatformat *fmt,
   return res;
 }
 
+/* Return the precision of the floating point format FMT.  */
+
+static int
+floatformat_precision (const struct floatformat *fmt)
+{
+  /* Assume the precision of and IBM long double is twice the precision
+     of the underlying double.  This matches what GCC does.  */
+  if (fmt->split_half)
+    return 2 * floatformat_precision (fmt->split_half);
+
+  /* Otherwise, the precision is the size of mantissa in bits,
+     including the implicit bit if present.  */
+  int prec = fmt->man_len;
+  if (fmt->intbit == floatformat_intbit_no)
+    prec++;
+
+  return prec;
+}
+
 
 /* Convert TO/FROM target to the hosts DOUBLEST floating-point format.
 
@@ -769,6 +788,113 @@ floatformat_from_doublest (const struct floatformat *fmt,
     convert_doublest_to_floatformat (fmt, in, out);
 }
 
+/* Convert the byte-stream ADDR, interpreted as floating-point format FMT,
+   to a string, optionally using the print format FORMAT.  */
+std::string
+floatformat_to_string (const struct floatformat *fmt,
+		       const gdb_byte *in, const char *format)
+{
+  /* Unless we need to adhere to a specific format, provide special
+     output for certain cases.  */
+  if (format == nullptr)
+    {
+      /* Detect invalid representations.  */
+      if (!floatformat_is_valid (fmt, in))
+	return "<invalid float value>";
+
+      /* Handle NaN and Inf.  */
+      enum float_kind kind = floatformat_classify (fmt, in);
+      if (kind == float_nan)
+	{
+	  const char *sign = floatformat_is_negative (fmt, in)? "-" : "";
+	  const char *mantissa = floatformat_mantissa (fmt, in);
+	  return string_printf ("%snan(0x%s)", sign, mantissa);
+	}
+      else if (kind == float_infinite)
+	{
+	  const char *sign = floatformat_is_negative (fmt, in)? "-" : "";
+	  return string_printf ("%sinf", sign);
+	}
+    }
+
+  /* Determine the format string to use on the host side.  */
+  std::string host_format;
+  char conversion;
+
+  if (format == nullptr)
+    {
+      /* If no format was specified, print the number using a format string
+	 where the precision is set to the DECIMAL_DIG value for the given
+	 floating-point format.  This value is computed as
+
+		ceil(1 + p * log10(b)),
+
+	 where p is the precision of the floating-point format in bits, and
+	 b is the base (which is always 2 for the formats we support).  */
+      const double log10_2 = .30102999566398119521;
+      double d_decimal_dig = 1 + floatformat_precision (fmt) * log10_2;
+      int decimal_dig = d_decimal_dig;
+      if (decimal_dig < d_decimal_dig)
+	decimal_dig++;
+
+      host_format = string_printf ("%%.%d", decimal_dig);
+      conversion = 'g';
+    }
+  else
+    {
+      /* Use the specified format, stripping out the conversion character
+         and length modifier, if present.  */
+      size_t len = strlen (format);
+      gdb_assert (len > 1);
+      conversion = format[--len];
+      gdb_assert (conversion == 'e' || conversion == 'f' || conversion == 'g'
+		  || conversion == 'E' || conversion == 'G');
+      if (format[len - 1] == 'L')
+	len--;
+
+      host_format = std::string (format, len);
+    }
+
+  /* Add the length modifier and conversion character appropriate for
+     handling the host DOUBLEST type.  */
+#ifdef HAVE_LONG_DOUBLE
+  host_format += 'L';
+#endif
+  host_format += conversion;
+
+  DOUBLEST doub;
+  floatformat_to_doublest (fmt, in, &doub);
+  return string_printf (host_format.c_str (), doub);
+}
+
+/* Parse string STRING into a target floating-number of format FMT and
+   store it as byte-stream ADDR.  Return whether parsing succeeded.  */
+bool
+floatformat_from_string (const struct floatformat *fmt, gdb_byte *out,
+			 const std::string &in)
+{
+  DOUBLEST doub;
+  int n, num;
+#ifdef HAVE_LONG_DOUBLE
+  const char *scan_format = "%Lg%n";
+#else
+  const char *scan_format = "%lg%n";
+#endif
+  num = sscanf (in.c_str (), scan_format, &doub, &n);
+
+  /* The sscanf man page suggests not making any assumptions on the effect
+     of %n on the result, so we don't.
+     That is why we simply test num == 0.  */
+  if (num == 0)
+    return false;
+
+  /* We only accept the whole string.  */
+  if (in[n])
+    return false;
+
+  floatformat_from_doublest (fmt, &doub, out);
+  return true;
+}
 
 /* Extract a floating-point number of type TYPE from a target-order
    byte-stream at ADDR.  Returns the value as type DOUBLEST.  */

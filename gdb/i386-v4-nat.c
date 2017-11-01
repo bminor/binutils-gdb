@@ -136,7 +136,7 @@ fill_gregset (const struct regcache *regcache,
 void
 supply_fpregset (struct regcache *regcache, const fpregset_t *fpregsetp)
 {
-  if (gdbarch_fp0_regnum (get_regcache_arch (regcache)) == 0)
+  if (gdbarch_fp0_regnum (regcache->arch ()) == 0)
     return;
 
   i387_supply_fsave (regcache, -1, fpregsetp);
@@ -150,7 +150,7 @@ void
 fill_fpregset (const struct regcache *regcache,
 	       fpregset_t *fpregsetp, int regno)
 {
-  if (gdbarch_fp0_regnum (get_regcache_arch (regcache)) == 0)
+  if (gdbarch_fp0_regnum (regcache->arch ()) == 0)
     return;
 
   i387_collect_fsave (regcache, regno, fpregsetp);

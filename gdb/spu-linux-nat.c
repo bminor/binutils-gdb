@@ -504,7 +504,7 @@ spu_fetch_inferior_registers (struct target_ops *ops,
   /* The ID register holds the spufs file handle.  */
   if (regno == -1 || regno == SPU_ID_REGNUM)
     {
-      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct gdbarch *gdbarch = regcache->arch ();
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       gdb_byte buf[4];
       store_unsigned_integer (buf, 4, byte_order, fd);

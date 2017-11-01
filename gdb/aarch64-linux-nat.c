@@ -155,7 +155,7 @@ static void
 fetch_gregs_from_thread (struct regcache *regcache)
 {
   int ret, tid;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   elf_gregset_t regs;
   struct iovec iovec;
 
@@ -195,7 +195,7 @@ store_gregs_to_thread (const struct regcache *regcache)
   int ret, tid;
   elf_gregset_t regs;
   struct iovec iovec;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   /* Make sure REGS can hold all registers contents on both aarch64
      and arm.  */
@@ -238,7 +238,7 @@ fetch_fpregs_from_thread (struct regcache *regcache)
   int ret, tid;
   elf_fpregset_t regs;
   struct iovec iovec;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   /* Make sure REGS can hold all VFP registers contents on both aarch64
      and arm.  */
@@ -286,7 +286,7 @@ store_fpregs_to_thread (const struct regcache *regcache)
   int ret, tid;
   elf_fpregset_t regs;
   struct iovec iovec;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   /* Make sure REGS can hold all VFP registers contents on both aarch64
      and arm.  */

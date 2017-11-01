@@ -1,7 +1,304 @@
+2017-11-01  James Bowman  <james.bowman@ftdichip.com>
+
+	* config/tc-ft32.c (md_assemble): Add relaxation reloc
+	BFD_RELOC_FT32_RELAX.
+	(md_longopts): Add "norelax" and "no-relax".
+	(md_apply_fix): Add reloc BFD_RELOC_FT32_DIFF32.
+	(relaxable_section, ft32_validate_fix_sub, ft32_force_relocation,
+	ft32_allow_local_subtract): New function.
+	* config/tc-ft32.h: Remove unused MD_PCREL_FROM_SECTION.
+	* testsuite/gas/ft32/insnsc.s: New test exercising all FT32B
+	shortcodes.
+	* testsuite/gas/ft32/insnsc.d: New driver file.
+	* testsuite/gas/all/gas.exp: Update.
+	* testsuite/gas/ft32/ft32.exp: Run the new test.
+	* testsuite/gas/ft32/insn.d: Update.
+	* testsuite/gas/elf/dwarf2-11.d: Update.
+	* testsuite/gas/elf/dwarf2-12.d: Update.
+	* testsuite/gas/elf/dwarf2-13.d: Update.
+	* testsuite/gas/elf/dwarf2-14.d: Update.
+	* testsuite/gas/elf/dwarf2-15.d: Update.
+	* testsuite/gas/elf/dwarf2-16.d: Update.
+	* testsuite/gas/elf/dwarf2-17.d: Update.
+	* testsuite/gas/elf/dwarf2-18.d: Update.
+	* testsuite/gas/elf/dwarf2-3.d: Update.
+	* testsuite/gas/elf/dwarf2-5.d: Update.
+	* testsuite/gas/elf/dwarf2-7.d: Update.
+
+2017-11-01  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (arm_ext_v2): Define to ARM_EXT_V2 feature bit.
+	* testsuite/gas/arm/copro.s: Split into
+	* testsuite/gas/arm/copro-arm_v2plus-thumb_v6t2plus.s: This while
+	changing it to unified syntax and
+	* testsuite/gas/arm/copro-arm_v5plus-thumb_v6t2plus.s: this and ...
+	* testsuite/gas/arm/copro-arm_v5teplus-thumb_v6t2plus.s: This and ...
+	* testsuite/gas/arm/copro-arm_v6plus-thumb_v6t2plus.s: This.
+	* testsuite/gas/arm/copro.d: Split into ...
+	* testsuite/gas/arm/copro-arm_v2plus-arm_v2.d: This but target ARMv2
+	and ...
+	* testsuite/gas/arm/copro-arm_v5plus-arm_v5.d: this but target ARMv5
+	and ...
+	* testsuite/gas/arm/copro-arm_v5teplus-arm_v5te.d: This but target
+	ARMv5TE and ...
+	* testsuite/gas/arm/copro-arm_v6plus-arm_v6.d: This but target ARMv6.
+	* testsuite/gas/arm/copro-arm_v2plus-arm_v1.d: New testcase.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v4t-1.d: New testcase.
+	* testsuite/gas/arm/copro-arm_v2plus-thumb_v6t2plus-unavail.l: Expected
+	errors for the above two testcases.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v6t2-1.d: New testcase.
+	* testsuite/gas/arm/copro-arm_v5plus-arm_v4.d: New testcase.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v4t-2.d: New testcase.
+	* testsuite/gas/arm/copro-arm_v5plus-thumb_v6t2plus-unavail.l:
+	Expected errors for the above two testcases.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v6t2-2.d: New testcase.
+	* testsuite/gas/arm/copro-arm_v5teplus-arm_v5.d: New testcase.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v4t-3.d: New testcase.
+	* testsuite/gas/arm/copro-arm_v5teplus-thumb_v6t2plus-unavail.l:
+	Expected errors for the above two testcases.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v6t2-3.d: New testcase.
+	* testsuite/gas/arm/copro-arm_v6plus-arm_v5te.d: New testcase.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v4t-4.d: New testcase.
+	* testsuite/gas/arm/copro-arm_v6plus-thumb_v6t2plus-unavail.l:
+	Expected errors for the above two testcases.
+	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v6t2-4.d: New testcase.
+
+2017-10-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/22352
+	* config/tc-i386.c (check_VecOperands): Also check XMM register
+	for invalid register in AVX512 gathers.
+	* testsuite/gas/i386/vgather-check.s: Add tests for AVX512
+	gathers with XMM register.
+	* testsuite/gas/i386/x86-64-vgather-check.s: Likewise.
+	* testsuite/gas/i386/vgather-check-error.l: Updated.
+	* testsuite/gas/i386/vgather-check-none.d: Likewise.
+	* testsuite/gas/i386/vgather-check-warn.d: Likewise.
+	* testsuite/gas/i386/vgather-check-warn.e: Likewise.
+	* testsuite/gas/i386/vgather-check.d: Likewise.
+	* testsuite/gas/i386/x86-64-vgather-check-error.l: Likewise.
+	* testsuite/gas/i386/x86-64-vgather-check-none.d: Likewise.
+	* testsuite/gas/i386/x86-64-vgather-check-warn.d: Likewise.
+	* testsuite/gas/i386/x86-64-vgather-check-warn.e: Likewise.
+	* testsuite/gas/i386/x86-64-vgather-check.d: Likewise.
+
+2017-10-26  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* testsuite/gas/all/fill-1.s: Use L2 rather than .L2.
+
+2017-10-25  Alan Modra  <amodra@gmail.com>
+
+	PR 22348
+	* config/tc-crx.c (instruction, output_opcode): Make static.
+	(relocatable, ins_parse, cur_arg_num): Likewise.
+	(parse_insn): Adjust for renamed opcodes globals.
+	(check_range): Likewise
+
+2017-10-25  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/all/fill-1.d: Exclude tic4x and tic54x.
+	* testsuite/gas/all/fill-1.s: Use L1 rather than .L1.
+
+2017-10-24  Andrew Waterman  <andrew@sifive.com>
+
+	* testsuite/gas/riscv/c-addi16sp-fail.d: New test.
+	* testsuite/gas/riscv/c-addi16sp-fail.l: Likewise.
+	* testsuite/gas/riscv/c-addi16sp-fail.s: Likewise.
+	* testsuite/gas/riscv/c-addi4spn-fail.d: Likewise.
+	* testsuite/gas/riscv/c-addi4spn-fail.l: Likewise.
+	* testsuite/gas/riscv/c-addi4spn-fail.s: Likewise.
+	* testsuite/gas/riscv/riscv.exp: Add new tests.
+
+2017-10-24  Andrew Waterman  <andrew@sifive.com>
+
+	* testsuite/gas/riscv/c-lui-fail.d: New testcase.
+	* gas/testsuite/gas/riscv/c-lui-fail.l: Likewise.
+	* gas/testsuite/gas/riscv/c-lui-fail.s: Likewise.
+	* gas/testsuite/gas/riscv/riscv.exp: Likewise.
+
+2017-10-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (md_pseudo_table): Add .code64 directive
+	only if BFD64 is defined.
+	* testsuite/gas/i386/code64-inval.l: New file.
+	* gas/testsuite/gas/i386/code64-inval.s: Likewise.
+	* gas/testsuite/gas/i386/code64.d: Likewise.
+	* gas/testsuite/gas/i386/code64.s: Likewise.
+	* testsuite/gas/i386/i386.exp: Run mixed-mode-reloc32,
+	att-regs, intel-regs, intel-expr and string-ok tests only if
+	assembler supports x86-64.  Run code64 and code64-inval.
+
+2017-10-23  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* config/tc-riscv.c (riscv_frag_align_code): Align code by 4
+	bytes on non-RVC systems.
+
 2017-10-23  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (mips_elf_final_processing): Don't set
 	EF_MIPS_ABI2 in `e_flags'.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512_bitalg.
+	(cpu_noarch): noavx512_bitalg.
+	* doc/c-i386.texi: Document .avx512_bitalg, noavx512_bitalg.
+	* testsuite/gas/i386/i386.exp: Add AVX512_BITALG tests.
+	* testsuite/gas/i386/avx512f_bitalg-intel.d: New test.
+	* testsuite/gas/i386/avx512f_bitalg.d: Likewise.
+	* testsuite/gas/i386/avx512f_bitalg.s: Likewise.
+	* testsuite/gas/i386/avx512vl_bitalg-intel.d: Likewise.
+	* testsuite/gas/i386/avx512vl_bitalg.d: Likewise.
+	* testsuite/gas/i386/avx512vl_bitalg.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512f_bitalg-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512f_bitalg.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512f_bitalg.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl_bitalg-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl_bitalg.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl_bitalg.s: Likewise.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512_vnni.
+	(cpu_noarch): Add noavx512_vnni.
+	* doc/c-i386.texi: Document .avx512_vnni.
+	* testsuite/gas/i386/i386.exp: Add AVX512_VNNI tests.
+	* testsuite/gas/i386/avx512vnni-intel.d: New test.
+	* testsuite/gas/i386/avx512vnni.d: Likewise.
+	* testsuite/gas/i386/avx512vnni.s: Likewise.
+	* testsuite/gas/i386/avx512vnni_vl-intel.d: Likewise.
+	* testsuite/gas/i386/avx512vnni_vl.d: Likewise.
+	* testsuite/gas/i386/avx512vnni_vl.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vnni-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vnni.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vnni.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vnni_vl-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vnni_vl.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vnni_vl.s: Likewise.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add VPCLMULQDQ.
+	* doc/c-i386.texi: Document VPCLMULQDQ.
+	* testsuite/gas/i386/i386.exp: Run VPCLMULQDQ tests.
+	* testsuite/gas/i386/avx512f_vpclmulqdq-intel.d: New test.
+	* testsuite/gas/i386/avx512f_vpclmulqdq-wig.s: Ditto.
+	* testsuite/gas/i386/avx512f_vpclmulqdq-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/avx512f_vpclmulqdq-wig1.d: Ditto.
+	* testsuite/gas/i386/avx512f_vpclmulqdq.d: Ditto.
+	* testsuite/gas/i386/avx512f_vpclmulqdq.s: Ditto.
+	* testsuite/gas/i386/avx512vl_vpclmulqdq-intel.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vpclmulqdq-wig.s: Ditto.
+	* testsuite/gas/i386/avx512vl_vpclmulqdq-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vpclmulqdq-wig1.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vpclmulqdq.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vpclmulqdq.s: Ditto.
+	* testsuite/gas/i386/vpclmulqdq-intel.d: Ditto.
+	* testsuite/gas/i386/vpclmulqdq.d: Ditto.
+	* testsuite/gas/i386/vpclmulqdq.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vpclmulqdq-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vpclmulqdq-wig.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vpclmulqdq-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vpclmulqdq-wig1.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vpclmulqdq.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vpclmulqdq.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vpclmulqdq-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vpclmulqdq-wig.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vpclmulqdq-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vpclmulqdq-wig1.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vpclmulqdq.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vpclmulqdq.s: Ditto.
+	* testsuite/gas/i386/x86-64-vpclmulqdq-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-vpclmulqdq.d: Ditto.
+	* testsuite/gas/i386/x86-64-vpclmulqdq.s: Ditto.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add VAES.
+	* doc/c-i386.texi: Document VAES.
+	* testsuite/gas/i386/i386.exp: Run VAES tests.
+	* testsuite/gas/i386/avx512f_vaes-intel.d: New test.
+	* testsuite/gas/i386/avx512f_vaes-wig.s: Ditto.
+	* testsuite/gas/i386/avx512f_vaes-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/avx512f_vaes-wig1.d: Ditto.
+	* testsuite/gas/i386/avx512f_vaes.d: Ditto.
+	* testsuite/gas/i386/avx512f_vaes.s: Ditto.
+	* testsuite/gas/i386/avx512vl_vaes-intel.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vaes-wig.s: Ditto.
+	* testsuite/gas/i386/avx512vl_vaes-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vaes-wig1.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vaes.d: Ditto.
+	* testsuite/gas/i386/avx512vl_vaes.s: Ditto.
+	* testsuite/gas/i386/vaes-intel.d: Ditto.
+	* testsuite/gas/i386/vaes.d: Ditto.
+	* testsuite/gas/i386/vaes.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vaes-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vaes-wig.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vaes-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vaes-wig1.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vaes.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512f_vaes.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes-wig.s: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes-wig1-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes-wig1.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes.d: Ditto.
+	* testsuite/gas/i386/x86-64-avx512vl_vaes.s: Ditto.
+	* testsuite/gas/i386/x86-64-vaes-intel.d: Ditto.
+	* testsuite/gas/i386/x86-64-vaes.d: Ditto.
+	* testsuite/gas/i386/x86-64-vaes.s: Ditto.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .gfni.
+	* doc/c-i386.texi: Document .gfni.
+	* testsuite/gas/i386/i386.exp: Add GFNI tests.
+	* testsuite/gas/i386/avx.s: New GFNI test.
+	* testsuite/gas/i386/x86-64-avx.s: Likewise.
+	* testsuite/gas/i386/avx.d: Adjust.
+	* testsuite/gas/i386/avx-intel.d: Likewise
+	* testsuite/gas/i386/ilp32/x86-64-avx-intel.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-avx.d: Likewise.
+	* testsuite/gas/i386/avx512f_gfni-intel.d: New test.
+	* testsuite/gas/i386/avx512f_gfni.d: Likewise.
+	* testsuite/gas/i386/avx512f_gfni.s: Likewise.
+	* testsuite/gas/i386/avx512vl_gfni-intel.d: Likewise.
+	* testsuite/gas/i386/avx512vl_gfni.d: Likewise.
+	* testsuite/gas/i386/avx512vl_gfni.s: Likewise.
+	* testsuite/gas/i386/gfni-intel.d: Likewise.
+	* testsuite/gas/i386/gfni.d: Likewise.
+	* testsuite/gas/i386/gfni.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512f_gfni-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512f_gfni.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512f_gfni.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl_gfni-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl_gfni.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vl_gfni.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx_gfni-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx_gfni.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx_gfni.s: Likewise.
+	* testsuite/gas/i386/x86-64-gfni-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-gfni.d: Likewise.
+	* testsuite/gas/i386/x86-64-gfni.s: Likewise.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512_vbmi2.
+	(cpu_noarch): noavx512_vbmi2.
+	* doc/c-i386.texi: Document .avx512_vbmi2, noavx512_vbmi2.
+	* testsuite/gas/i386/i386.exp: Add AVX512_VBMI2 tests.
+	* testsuite/gas/i386/avx512vbmi2-intel.d: New test.
+	* testsuite/gas/i386/avx512vbmi2.d: Likewise.
+	* testsuite/gas/i386/avx512vbmi2.s: Likewise.
+	* testsuite/gas/i386/avx512vbmi2_vl-intel.d: Likewise.
+	* testsuite/gas/i386/avx512vbmi2_vl.d: Likewise.
+	* testsuite/gas/i386/avx512vbmi2_vl.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vbmi2-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vbmi2.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vbmi2.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vbmi2_vl-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vbmi2_vl.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512vbmi2_vl.s: Likewise.
 
 2017-10-22  Hans-Peter Nilsson  <hp@axis.com>
 

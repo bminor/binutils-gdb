@@ -1,3 +1,33 @@
+2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target.c (struct thread_search): Remove.
+	(thread_search_callback): Remove.
+	(prepare_to_access_memory): Use for_each_thread instead of
+	find_inferior.  Inline code from thread_search_callback.
+
+2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* server.c (struct visit_actioned_threads_data): Remove.
+	(visit_actioned_threads): Change prototype to take arguments
+	directly.
+	(resume): Use find_thread instead of find_inferior.
+
+2017-10-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* server.c (queue_stop_reply_callback): Change prototype, return
+	void.
+	(find_status_pending_thread_callback): Remove.
+	(handle_status): Replace find_inferior with find_thread and
+	for_each_thread.
+
+2017-10-25  Alan Hayward  <alan.hayward@arm.com>
+
+	* linux-aarch64-low.c (aarch64_fill_gregset): Replace defines
+	with REGNO.
+	(aarch64_store_gregset): Likewise.
+	(aarch64_fill_fpregset): Likewise.
+	(aarch64_store_fpregset): Likewise.
+
 2017-10-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdbthread.h (find_thread, for_each_thread): New functions.

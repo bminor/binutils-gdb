@@ -1,7 +1,140 @@
+2017-10-25  Alan Modra  <amodra@gmail.com>
+
+	PR 22348
+	* cr16-dis.c (cr16_cinvs, instruction, cr16_currInsn): Make static.
+	(cr16_words, cr16_allWords, processing_argument_number): Likewise.
+	(imm4flag, size_changed): Likewise.
+	* crx-dis.c (crx_cinvs, NUMCINVS, instruction, currInsn): Likewise.
+	(words, allWords, processing_argument_number): Likewise.
+	(cst4flag, size_changed): Likewise.
+	* crx-opc.c (crx_cst4_map): Rename from cst4_map.
+	(crx_cst4_maps): Rename from cst4_maps.
+	(crx_no_op_insn): Rename from no_op_insn.
+
+2017-10-24  Andrew Waterman  <andrew@sifive.com>
+
+	* riscv-opc.c (match_c_addi16sp) : New function.
+	(match_c_addi4spn): New function.
+	(match_c_lui): Don't allow 0-immediate encodings.
+	(riscv_opcodes) <addi>: Use the above functions.
+	<add>: Likewise.
+	<c.addi4spn>: Likewise.
+	<c.addi16sp>: Likewise.
+
 2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
 	* i386-init.h: Regenerate
 	* i386-tbl.h: Likewise
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-dis.c (enum): Add PREFIX_EVEX_0F3854, PREFIX_EVEX_0F388F.
+	(enum): Add EVEX_W_0F3854_P_2.
+	* i386-dis-evex.h (evex_table): Updated.
+	* i386-gen.c (cpu_flag_init): Add CPU_AVX512_BITALG,
+	CPU_ANY_AVX512_BITALG_FLAGS. Update CPU_ANY_AVX512F_FLAGS.
+	(cpu_flags): Add CpuAVX512_BITALG.
+	* i386-opc.h (enum): Add CpuAVX512_BITALG.
+	(i386_cpu_flags): Add cpuavx512_bitalg..
+	* i386-opc.tbl: Add Intel AVX512_BITALG instructions.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Likewise.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-dis.c (enum): Add PREFIX_EVEX_0F3850, PREFIX_EVEX_0F3851.
+	* i386-dis-evex.h (evex_table): Updated.
+	* i386-gen.c (cpu_flag_init): Add CPU_AVX512_VNNI,
+	CPU_ANY_AVX512_VNNI_FLAGS. Update CPU_ANY_AVX512F_FLAGS.
+	(cpu_flags): Add CpuAVX512_VNNI.
+	* i386-opc.h (enum): Add CpuAVX512_VNNI.
+	(i386_cpu_flags): Add cpuavx512_vnni.
+	* i386-opc.tbl Add Intel AVX512_VNNI instructions.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Likewise.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-dis.c (enum): Add PREFIX_EVEX_0F3A44.
+	(enum): Remove VEX_LEN_0F3A44_P_2.
+	(vex_len_table): Ditto.
+	(enum): Remove VEX_W_0F3A44_P_2.
+	(vew_w_table): Ditto.
+	(prefix_table): Adjust instructions (see prefixes above).
+	* i386-dis-evex.h (evex_table):
+	Add new instructions (see prefixes above).
+	* i386-gen.c (cpu_flag_init): Add VPCLMULQDQ.
+	(bitfield_cpu_flags): Ditto.
+	* i386-opc.h (enum): Ditto.
+	(i386_cpu_flags): Ditto.
+	(CpuUnused): Comment out to avoid zero-width field problem.
+	* i386-opc.tbl (vpclmulqdq): New instruction.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Ditto.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-dis.c (enum): Add PREFIX_EVEX_0F38DC, PREFIX_EVEX_0F38DD,
+	PREFIX_EVEX_0F38DE, PREFIX_EVEX_0F38DF.
+	(enum): Remove VEX_LEN_0F38DC_P_2, VEX_LEN_0F38DD_P_2,
+	VEX_LEN_0F38DE_P_2, VEX_LEN_0F38DF_P_2.
+	(vex_len_table): Ditto.
+	(enum): Remove VEX_W_0F38DC_P_2, VEX_W_0F38DD_P_2,
+	VEX_W_0F38DE_P_2, VEX_W_0F38DF_P_2.
+	(vew_w_table): Ditto.
+	(prefix_table): Adjust instructions (see prefixes above).
+	* i386-dis-evex.h (evex_table):
+	Add new instructions (see prefixes above).
+	* i386-gen.c (cpu_flag_init): Add VAES.
+	(bitfield_cpu_flags): Ditto.
+	* i386-opc.h (enum): Ditto.
+	(i386_cpu_flags): Ditto.
+	* i386-opc.tbl (vaes{enc,dec}{last,}): New instructions.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Ditto.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-dis.c (enum): Add PREFIX_0F38CF, PREFIX_0F3ACE, PREFIX_0F3ACF,
+	PREFIX_VEX_0F38CF, PREFIX_VEX_0F3ACE, PREFIX_VEX_0F3ACF,
+	PREFIX_EVEX_0F38CF, PREFIX_EVEX_0F3ACE, PREFIX_EVEX_0F3ACF.
+	(enum): Add VEX_W_0F38CF_P_2, VEX_W_0F3ACE_P_2, VEX_W_0F3ACF_P_2,
+	EVEX_W_0F3ACE_P_2, EVEX_W_0F3ACF_P_2.
+	(prefix_table): Updated (see prefixes above).
+	(three_byte_table): Likewise.
+	(vex_w_table): Likewise.
+	* i386-dis-evex.h: Likewise.
+	* i386-gen.c (cpu_flag_init): Add CPU_GFNI_FLAGS, CpuGFNI.
+	(cpu_flags): Add CpuGFNI.
+	* i386-opc.h (enum): Add CpuGFNI.
+	(i386_cpu_flags): Add cpugfni.
+	* i386-opc.tbl: Add Intel GFNI instructions.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Likewise.
+
+2017-10-23  Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-dis.c (enum): Add b_scalar_mode, w_scalar_mode.
+	Define EXbScalar and EXwScalar for OP_EX.
+	(enum): Add PREFIX_EVEX_0F3862, PREFIX_EVEX_0F3863,
+	PREFIX_EVEX_0F3870, PREFIX_EVEX_0F3871, PREFIX_EVEX_0F3872,
+	PREFIX_EVEX_0F3873, PREFIX_EVEX_0F3A70, PREFIX_EVEX_0F3A71,
+	PREFIX_EVEX_0F3A72, PREFIX_EVEX_0F3A73.
+	(enum): Add EVEX_W_0F3862_P_2, EVEX_W_0F3863_P_2,
+	EVEX_W_0F3870_P_2, EVEX_W_0F3871_P_2, EVEX_W_0F3872_P_2,
+	EVEX_W_0F3873_P_2, EVEX_W_0F3A70_P_2, EVEX_W_0F3A71_P_2,
+	EVEX_W_0F3A72_P_2, EVEX_W_0F3A73_P_2.
+	(intel_operand_size): Handle b_scalar_mode and w_scalar_mode.
+	(OP_E_memory): Likewise.
+	* i386-dis-evex.h: Updated.
+	* i386-gen.c (cpu_flag_init): Add CPU_AVX512_VBMI2,
+	CPU_ANY_AVX512_VBMI2_FLAGS. Update CPU_ANY_AVX512F_FLAGS.
+	(cpu_flags): Add CpuAVX512_VBMI2.
+	* i386-opc.h (enum): Add CpuAVX512_VBMI2.
+	(i386_cpu_flags): Add cpuavx512_vbmi2.
+	* i386-opc.tbl: Add Intel AVX512_VBMI2 instructions.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Likewise.
 
 2017-10-18  Eric Botcazou  <ebotcazou@adacore.com>
 

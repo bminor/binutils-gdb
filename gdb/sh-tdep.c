@@ -1310,7 +1310,7 @@ static void
 sh_extract_return_value_nofpu (struct type *type, struct regcache *regcache,
 			       gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
 
@@ -1335,7 +1335,7 @@ static void
 sh_extract_return_value_fpu (struct type *type, struct regcache *regcache,
 			     gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   if (sh_treat_as_flt_p (type))
     {
       int len = TYPE_LENGTH (type);
@@ -1361,7 +1361,7 @@ static void
 sh_store_return_value_nofpu (struct type *type, struct regcache *regcache,
 			     const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
   int len = TYPE_LENGTH (type);
@@ -1383,7 +1383,7 @@ static void
 sh_store_return_value_fpu (struct type *type, struct regcache *regcache,
 			   const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   if (sh_treat_as_flt_p (type))
     {
       int len = TYPE_LENGTH (type);
@@ -2165,7 +2165,7 @@ sh_corefile_supply_regset (const struct regset *regset,
 			   struct regcache *regcache,
 			   int regnum, const void *regs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const struct sh_corefile_regmap *regmap = (regset == &sh_corefile_gregset
 					     ? tdep->core_gregmap
@@ -2191,7 +2191,7 @@ sh_corefile_collect_regset (const struct regset *regset,
 			    const struct regcache *regcache,
 			    int regnum, void *regs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const struct sh_corefile_regmap *regmap = (regset == &sh_corefile_gregset
 					     ? tdep->core_gregmap

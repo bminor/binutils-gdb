@@ -1785,7 +1785,7 @@ static void
 aarch64_extract_return_value (struct type *type, struct regcache *regs,
 			      gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regs);
+  struct gdbarch *gdbarch = regs->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -1923,7 +1923,7 @@ static void
 aarch64_store_return_value (struct type *type, struct regcache *regs,
 			    const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regs);
+  struct gdbarch *gdbarch = regs->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -2410,7 +2410,7 @@ value_of_aarch64_user_reg (struct frame_info *frame, const void *baton)
 static std::vector<CORE_ADDR>
 aarch64_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   const int insn_size = 4;
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */

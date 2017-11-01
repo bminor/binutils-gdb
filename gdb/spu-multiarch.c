@@ -144,7 +144,7 @@ static void
 spu_fetch_registers (struct target_ops *ops,
 		     struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct target_ops *ops_beneath = find_target_beneath (ops);
   int spufs_fd;
@@ -204,7 +204,7 @@ static void
 spu_store_registers (struct target_ops *ops,
 		     struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct target_ops *ops_beneath = find_target_beneath (ops);
   int spufs_fd;
   CORE_ADDR spufs_addr;

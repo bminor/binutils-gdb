@@ -297,7 +297,7 @@ int
 arm_is_thumb (struct regcache *regcache)
 {
   ULONGEST cpsr;
-  ULONGEST t_bit = arm_psr_thumb_bit (get_regcache_arch (regcache));
+  ULONGEST t_bit = arm_psr_thumb_bit (regcache->arch ());
 
   cpsr = regcache_raw_get_unsigned (regcache, ARM_PS_REGNUM);
 
@@ -4452,7 +4452,7 @@ static int
 displaced_in_arm_mode (struct regcache *regs)
 {
   ULONGEST ps;
-  ULONGEST t_bit = arm_psr_thumb_bit (get_regcache_arch (regs));
+  ULONGEST t_bit = arm_psr_thumb_bit (regs->arch ());
 
   regcache_cooked_read_unsigned (regs, ARM_PS_REGNUM, &ps);
 
@@ -4481,7 +4481,7 @@ static void
 bx_write_pc (struct regcache *regs, ULONGEST val)
 {
   ULONGEST ps;
-  ULONGEST t_bit = arm_psr_thumb_bit (get_regcache_arch (regs));
+  ULONGEST t_bit = arm_psr_thumb_bit (regs->arch ());
 
   regcache_cooked_read_unsigned (regs, ARM_PS_REGNUM, &ps);
 
@@ -6223,7 +6223,7 @@ CORE_ADDR
 arm_get_next_pcs_addr_bits_remove (struct arm_get_next_pcs *self,
 				   CORE_ADDR val)
 {
-  return gdbarch_addr_bits_remove (get_regcache_arch (self->regcache), val);
+  return gdbarch_addr_bits_remove (self->regcache->arch (), val);
 }
 
 /* Wrapper over syscall_next_pc for use in get_next_pcs.  */
@@ -6250,7 +6250,7 @@ arm_get_next_pcs_is_thumb (struct arm_get_next_pcs *self)
 std::vector<CORE_ADDR>
 arm_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct arm_get_next_pcs next_pcs_ctx;
 
   arm_get_next_pcs_ctor (&next_pcs_ctx,
@@ -7887,7 +7887,7 @@ static void
 arm_extract_return_value (struct type *type, struct regcache *regs,
 			  gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regs);
+  struct gdbarch *gdbarch = regs->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   if (TYPE_CODE_FLT == TYPE_CODE (type))
@@ -8096,7 +8096,7 @@ static void
 arm_store_return_value (struct type *type, struct regcache *regs,
 			const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regs);
+  struct gdbarch *gdbarch = regs->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -8652,7 +8652,7 @@ arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
 static void
 arm_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   regcache_cooked_write_unsigned (regcache, ARM_PC_REGNUM, pc);
 
   /* If necessary, set the T bit.  */
@@ -10010,13 +10010,13 @@ arm_record_extension_space (insn_decode_record *arm_insn_r)
       && !INSN_RECORDED(arm_insn_r))
     {
       /* Handle MLA(S) and MUL(S).  */
-      if (0 <= insn_op1 && 3 >= insn_op1)
+      if (in_inclusive_range (insn_op1, 0U, 3U))
       {
         record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
         record_buf[1] = ARM_PS_REGNUM;
         arm_insn_r->reg_rec_count = 2;
       }
-      else if (4 <= insn_op1 && 15 >= insn_op1)
+      else if (in_inclusive_range (insn_op1, 4U, 15U))
       {
         /* Handle SMLAL(S), SMULL(S), UMLAL(S), UMULL(S).  */
         record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
@@ -11712,14 +11712,14 @@ thumb_record_ld_st_reg_offset (insn_decode_record *thumb_insn_r)
       /* Handle load/store register offset.  */
       uint32_t opB = bits (thumb_insn_r->arm_insn, 9, 11);
 
-      if (opB >= 4 && opB <= 7)
+      if (in_inclusive_range (opB, 4U, 7U))
         {
           /* LDR(2), LDRB(2) , LDRH(2), LDRSB, LDRSH.  */
           reg_src1 = bits (thumb_insn_r->arm_insn,0, 2);
           record_buf[0] = reg_src1;
           thumb_insn_r->reg_rec_count = 1;
         }
-      else if (opB >= 0 && opB <= 2)
+      else if (in_inclusive_range (opB, 0U, 2U))
         {
           /* STR(2), STRB(2), STRH(2) .  */
           reg_src1 = bits (thumb_insn_r->arm_insn, 3, 5);

@@ -1,3 +1,73 @@
+2017-11-01  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/ambiguousv2.d: Remove FIXME.
+
+2017-11-01  Alan Modra  <amodra@gmail.com>
+
+	PR 22374
+	* testsuite/ld-elf/pr22374a.s,
+	* testsuite/ld-elf/pr22374b.s,
+	* testsuite/ld-elf/pr22374-1.r,
+	* testsuite/ld-elf/pr22374-2.r: New test.
+	* testsuite/ld-elf/elf.exp: Run it.
+
+2017-11-01  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/elf.exp: Merge some conditionals, a better
+	name than "shared library for next test", and use xfail arg
+	of run_ld_link_tests in a few places.
+
+2017-10-26  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/ld-elf/elf.exp: xfail pr21703 tests on specific targets.
+	Only run shared lib test for targets which support it.
+	* testsuite/ld-elf/pr21703-r.sd: Adjust the expected output.
+	* testsuite/ld-elf/pr21703-shared.sd: Likewise.
+
+2017-10-26  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* testsuite/ld-arm/cortex-a8-far.d: Update expected disassembly.
+	* testsuite/ld-arm/farcall-group-size2: Likewise.
+	* testsuite/ld-arm/farcall-group.d: Likewise.
+
+2017-10-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.texinfo: Correct -z ibt.
+
+2017-10-25  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-plugin/lto-3r.d: Match "__gnu_lto_v" optionally
+	prefixed with "_".
+	* testsuite/ld-plugin/lto-5r.d: Likewise.
+
+2017-10-25  Hans-Peter Nilsson  <hp@axis.com>
+
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Fix typo for istarget.
+
+2017-10-24  Andrew Waterman  <andrew@sifive.com>
+
+	* testsuite/ld-riscv-elf/c-lui.d: New testcase.
+	* testsuite/ld-riscv-elf/c-lui.s: Likewise.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: New test suite.
+
+2017-10-24  Renlin Li  <renlin.li@arm.com>
+
+	PR ld/21703
+	* testsuite/ld-elf/elf.exp: Run new tests.
+	* testsuite/ld-elf/pr21703-1.s: New.
+	* testsuite/ld-elf/pr21703-2.s: New.
+	* testsuite/ld-elf/pr21703-3.s: New.
+	* testsuite/ld-elf/pr21703-4.s: New.
+	* testsuite/ld-elf/pr21703-r.sd: New.
+	* testsuite/ld-elf/pr21703-shared.sd: New.
+	* testsuite/ld-elf/pr21703.sd: New.
+	* testsuite/ld-elf/pr21703.ver: New.
+
+2017-10-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.tgt (i[3-7]86-*-linux-*): Move elf32_x86_64 from
+	targ_extra_libpath to targ64_extra_libpath.
+
 2017-10-23  Nick Clifton  <nickc@redhat.com>
 
 	PR 22310

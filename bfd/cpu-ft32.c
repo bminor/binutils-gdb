@@ -23,6 +23,40 @@
 #include "libbfd.h"
 
 
+static const bfd_arch_info_type arch_info_struct[] =
+  {
+    {
+      32,               /* 32 bits in a word.  */
+      32,               /* 32 bits in an address.  */
+      8,                /*  8 bits in a byte.  */
+      bfd_arch_ft32,   /* enum bfd_architecture arch.  */
+      bfd_mach_ft32,
+      "ft32",          /* Arch name.  */
+      "ft32",          /* Printable name.  */
+      2,                /* Unsigned int section alignment power.  */
+      FALSE,             /* The one and only.  */
+      bfd_default_compatible,
+      bfd_default_scan,
+      bfd_arch_default_fill,
+      &arch_info_struct[1],
+    },
+    {
+      32,               /* 32 bits in a word.  */
+      32,               /* 32 bits in an address.  */
+      8,                /*  8 bits in a byte.  */
+      bfd_arch_ft32,   /* enum bfd_architecture arch.  */
+      bfd_mach_ft32b,
+      "ft32b",          /* Arch name.  */
+      "ft32b",          /* Printable name.  */
+      2,                /* Unsigned int section alignment power.  */
+      FALSE,            /* The one and only.  */
+      bfd_default_compatible,
+      bfd_default_scan,
+      bfd_arch_default_fill,
+      0,
+    },
+  };
+
 const bfd_arch_info_type bfd_ft32_arch =
   {
     32,               /* 32 bits in a word.  */
@@ -37,5 +71,5 @@ const bfd_arch_info_type bfd_ft32_arch =
     bfd_default_compatible,
     bfd_default_scan,
     bfd_arch_default_fill,
-    0,
+    arch_info_struct,
   };

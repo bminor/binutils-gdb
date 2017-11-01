@@ -18,5 +18,6 @@ gdb_test "maintenance selftest" "Ran $decimal unit tests, 0 failed"
 
 if { ![is_remote host] } {
     gdb_test "maintenance check xml-descriptions ${srcdir}/../features" \
-	"Tested $decimal XML files, 0 failed"
+	"Tested $decimal XML files, 0 failed" \
+	"maintenance check xml-descriptions \${srcdir}/../features"
 }

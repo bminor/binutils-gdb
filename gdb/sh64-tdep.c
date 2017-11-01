@@ -1241,7 +1241,7 @@ static void
 sh64_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int len = TYPE_LENGTH (type);
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -1295,7 +1295,7 @@ static void
 sh64_store_return_value (struct type *type, struct regcache *regcache,
 			 const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   gdb_byte buf[64];	/* more than enough...  */
   int len = TYPE_LENGTH (type);
 
@@ -1915,8 +1915,6 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
 		     struct frame_info *frame, int regnum)
 {				/* Do values for FP (float) regs.  */
   unsigned char *raw_buffer;
-  double flt;	/* Double extracted from raw hex data.  */
-  int inv;
 
   /* Allocate space for the float.  */
   raw_buffer = (unsigned char *)
@@ -1927,20 +1925,16 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
     error (_("can't read register %d (%s)"),
 	   regnum, gdbarch_register_name (gdbarch, regnum));
 
-  /* Get the register as a number.  */ 
-  flt = unpack_double (builtin_type (gdbarch)->builtin_float,
-		       raw_buffer, &inv);
-
   /* Print the name and some spaces.  */
   fputs_filtered (gdbarch_register_name (gdbarch, regnum), file);
   print_spaces_filtered (15 - strlen (gdbarch_register_name
 					(gdbarch, regnum)), file);
 
   /* Print the value.  */
-  if (inv)
-    fprintf_filtered (file, "<invalid float>");
-  else
-    fprintf_filtered (file, "%-10.9g", flt);
+  const struct floatformat *fmt
+    = floatformat_from_type (builtin_type (gdbarch)->builtin_float);
+  std::string str = floatformat_to_string (fmt, raw_buffer, "%-10.9g");
+  fprintf_filtered (file, "%s", str.c_str ());
 
   /* Print the fp register as hex.  */
   fprintf_filtered (file, "\t(raw ");

@@ -304,7 +304,7 @@ m68k_svr4_extract_return_value (struct type *type, struct regcache *regcache,
 				gdb_byte *valbuf)
 {
   gdb_byte buf[M68K_MAX_REGISTER_SIZE];
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (tdep->float_return && TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -344,7 +344,7 @@ static void
 m68k_svr4_store_return_value (struct type *type, struct regcache *regcache,
 			      const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (tdep->float_return && TYPE_CODE (type) == TYPE_CODE_FLT)

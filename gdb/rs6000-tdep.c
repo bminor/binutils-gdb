@@ -393,7 +393,7 @@ ppc_supply_reg (struct regcache *regcache, int regnum,
     {
       if (regsize > 4)
 	{
-	  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+	  struct gdbarch *gdbarch = regcache->arch ();
 	  int gdb_regsize = register_size (gdbarch, regnum);
 	  if (gdb_regsize < regsize
 	      && gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
@@ -414,7 +414,7 @@ ppc_collect_reg (const struct regcache *regcache, int regnum,
     {
       if (regsize > 4)
 	{
-	  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+	  struct gdbarch *gdbarch = regcache->arch ();
 	  int gdb_regsize = register_size (gdbarch, regnum);
 	  if (gdb_regsize < regsize)
 	    {
@@ -511,7 +511,7 @@ void
 ppc_supply_gregset (const struct regset *regset, struct regcache *regcache,
 		    int regnum, const void *gregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const struct ppc_reg_offsets *offsets
     = (const struct ppc_reg_offsets *) regset->regmap;
@@ -561,7 +561,7 @@ void
 ppc_supply_fpregset (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *fpregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep;
   const struct ppc_reg_offsets *offsets;
   size_t offset;
@@ -599,7 +599,7 @@ void
 ppc_supply_vsxregset (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *vsxregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep;
 
   if (!ppc_vsx_support_p (gdbarch))
@@ -630,7 +630,7 @@ void
 ppc_supply_vrregset (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *vrregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep;
   const struct ppc_reg_offsets *offsets;
   size_t offset;
@@ -676,7 +676,7 @@ ppc_collect_gregset (const struct regset *regset,
 		     const struct regcache *regcache,
 		     int regnum, void *gregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const struct ppc_reg_offsets *offsets
     = (const struct ppc_reg_offsets *) regset->regmap;
@@ -727,7 +727,7 @@ ppc_collect_fpregset (const struct regset *regset,
 		      const struct regcache *regcache,
 		      int regnum, void *fpregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep;
   const struct ppc_reg_offsets *offsets;
   size_t offset;
@@ -767,7 +767,7 @@ ppc_collect_vsxregset (const struct regset *regset,
 		      const struct regcache *regcache,
 		      int regnum, void *vsxregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep;
 
   if (!ppc_vsx_support_p (gdbarch))
@@ -801,7 +801,7 @@ ppc_collect_vrregset (const struct regset *regset,
 		      const struct regcache *regcache,
 		      int regnum, void *vrregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep;
   const struct ppc_reg_offsets *offsets;
   size_t offset;
@@ -1170,7 +1170,7 @@ ppc_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
 std::vector<CORE_ADDR>
 ppc_deal_with_atomic_sequence (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc = regcache_read_pc (regcache);
   CORE_ADDR breaks[2] = {-1, -1};
@@ -2677,7 +2677,7 @@ static enum register_status
 e500_move_ev_register (move_ev_register_func move,
 		       struct regcache *regcache, int ev_reg, void *buffer)
 {
-  struct gdbarch *arch = get_regcache_arch (regcache);
+  struct gdbarch *arch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (arch); 
   int reg_index;
   gdb_byte *byte_buffer = (gdb_byte *) buffer;
@@ -2891,7 +2891,7 @@ rs6000_pseudo_register_read (struct gdbarch *gdbarch,
 			     struct regcache *regcache,
 			     int reg_nr, gdb_byte *buffer)
 {
-  struct gdbarch *regcache_arch = get_regcache_arch (regcache);
+  struct gdbarch *regcache_arch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   gdb_assert (regcache_arch == gdbarch);
@@ -2916,7 +2916,7 @@ rs6000_pseudo_register_write (struct gdbarch *gdbarch,
 			      struct regcache *regcache,
 			      int reg_nr, const gdb_byte *buffer)
 {
-  struct gdbarch *regcache_arch = get_regcache_arch (regcache);
+  struct gdbarch *regcache_arch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   gdb_assert (regcache_arch == gdbarch);

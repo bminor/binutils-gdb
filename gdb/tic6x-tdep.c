@@ -593,7 +593,7 @@ tic6x_extract_signed_field (int value, int low_bit, int bits)
 static CORE_ADDR
 tic6x_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   unsigned long inst;
   int register_number;
   int last = 0;

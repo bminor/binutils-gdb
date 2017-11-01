@@ -277,7 +277,7 @@ proc test_breakpoint_commands {} {
 	-number 9 -disp keep -func callee2 -file ".*basics.c" \
 	-line $line_callee2_body
 
-    mi_gdb_test "-break-commands 9 \"set \$i=0\" \"while \$i<10\" \"print \$i\" \"set \$i=\$i+1\" \"end\" \"continue\" " \
+    mi_gdb_test "-break-commands 9 \"bt\" \"set \$i=0\" \"while \$i<10\" \"print \$i\" \"set \$i=\$i+1\" \"end\" \"continue\" " \
         "\\^done" \
         "breakpoint commands: set commands"
 
@@ -291,7 +291,7 @@ proc test_breakpoint_commands {} {
     set test "intermediate stop and continue, bp commands"
     gdb_expect {
 	-i $gdb_main_spawn_id
-	-re ".*\\\$1 = 0.*\\\$10 = 9" {
+	-re ".*callee2.*callee1.*main.*\\\$1 = 0.*\\\$10 = 9" {
 	    pass $test
 	}
 	timeout {

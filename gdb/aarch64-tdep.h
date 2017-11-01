@@ -22,6 +22,8 @@
 #ifndef AARCH64_TDEP_H
 #define AARCH64_TDEP_H
 
+#include "arch/aarch64.h"
+
 /* Forward declarations.  */
 struct gdbarch;
 struct regset;
@@ -30,32 +32,6 @@ struct regset;
 #define AARCH64_DWARF_X0   0
 #define AARCH64_DWARF_SP  31
 #define AARCH64_DWARF_V0  64
-
-/* Register numbers of various important registers.  */
-enum aarch64_regnum
-{
-  AARCH64_X0_REGNUM,		/* First integer register */
-
-  /* Frame register in AArch64 code, if used.  */
-  AARCH64_FP_REGNUM = AARCH64_X0_REGNUM + 29,
-  AARCH64_LR_REGNUM = AARCH64_X0_REGNUM + 30,	/* Return address */
-  AARCH64_SP_REGNUM,		/* Stack pointer */
-  AARCH64_PC_REGNUM,		/* Program counter */
-  AARCH64_CPSR_REGNUM,		/* Contains status register */
-  AARCH64_V0_REGNUM,		/* First floating point / vector register */
-
-  /* Last floating point / vector register */
-  AARCH64_V31_REGNUM = AARCH64_V0_REGNUM + 31,
-  AARCH64_FPSR_REGNUM,		/* Floating point status register */
-  AARCH64_FPCR_REGNUM,		/* Floating point control register */
-
-  /* Other useful registers.  */
-
-  /* Last integer-like argument */
-  AARCH64_LAST_X_ARG_REGNUM = AARCH64_X0_REGNUM + 7,
-  AARCH64_STRUCT_RETURN_REGNUM = AARCH64_X0_REGNUM + 8,
-  AARCH64_LAST_V_ARG_REGNUM = AARCH64_V0_REGNUM + 7
-};
 
 /* Size of integer registers.  */
 #define X_REGISTER_SIZE  8

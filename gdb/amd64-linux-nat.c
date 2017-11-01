@@ -134,7 +134,7 @@ static void
 amd64_linux_fetch_inferior_registers (struct target_ops *ops,
 				      struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
@@ -213,7 +213,7 @@ static void
 amd64_linux_store_inferior_registers (struct target_ops *ops,
 				      struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */

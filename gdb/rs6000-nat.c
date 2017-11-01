@@ -161,7 +161,7 @@ rs6000_ptrace64 (int req, int id, long long addr, int data, void *buf)
 static void
 fetch_register (struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int addr[PPC_MAX_REGISTER_SIZE];
   int nr, isfloat;
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
@@ -220,7 +220,7 @@ fetch_register (struct regcache *regcache, int regno)
 static void
 store_register (struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int addr[PPC_MAX_REGISTER_SIZE];
   int nr, isfloat;
   pid_t pid = ptid_get_pid (regcache_get_ptid (regcache));
@@ -281,7 +281,7 @@ static void
 rs6000_fetch_inferior_registers (struct target_ops *ops,
 				 struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   if (regno != -1)
     fetch_register (regcache, regno);
 
@@ -324,7 +324,7 @@ static void
 rs6000_store_inferior_registers (struct target_ops *ops,
 				 struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   if (regno != -1)
     store_register (regcache, regno);
 

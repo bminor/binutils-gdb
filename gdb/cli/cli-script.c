@@ -463,8 +463,10 @@ print_command_trace (const char *cmd)
   printf_filtered ("%s\n", cmd);
 }
 
-enum command_control_type
-execute_control_command (struct command_line *cmd)
+/* Helper for execute_control_command.  */
+
+static enum command_control_type
+execute_control_command_1 (struct command_line *cmd)
 {
   struct command_line *current;
   struct value *val;
@@ -541,7 +543,7 @@ execute_control_command (struct command_line *cmd)
 	      {
 		scoped_restore save_nesting
 		  = make_scoped_restore (&command_nest_depth, command_nest_depth + 1);
-		ret = execute_control_command (current);
+		ret = execute_control_command_1 (current);
 
 		/* If we got an error, or a "break" command, then stop
 		   looping.  */
@@ -600,7 +602,7 @@ execute_control_command (struct command_line *cmd)
 	  {
 	    scoped_restore save_nesting
 	      = make_scoped_restore (&command_nest_depth, command_nest_depth + 1);
-	    ret = execute_control_command (current);
+	    ret = execute_control_command_1 (current);
 
 	    /* If we got an error, get out.  */
 	    if (ret != simple_control)
@@ -642,6 +644,18 @@ execute_control_command (struct command_line *cmd)
     }
 
   return ret;
+}
+
+enum command_control_type
+execute_control_command (struct command_line *cmd)
+{
+  /* Make sure we use the console uiout.  It's possible that we are executing
+     breakpoint commands while running the MI interpreter.  */
+  interp *console = interp_lookup (current_ui, INTERP_CONSOLE);
+  scoped_restore save_uiout
+    = make_scoped_restore (&current_uiout, interp_ui_out (console));
+
+  return execute_control_command_1 (cmd);
 }
 
 /* Like execute_control_command, but first set

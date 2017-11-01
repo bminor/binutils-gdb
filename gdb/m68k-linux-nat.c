@@ -104,7 +104,7 @@ static int have_ptrace_getregs =
 static void
 fetch_register (struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   long regaddr, val;
   int i;
   gdb_byte buf[M68K_MAX_REGISTER_SIZE];
@@ -139,7 +139,7 @@ old_fetch_inferior_registers (struct regcache *regcache, int regno)
   else
     {
       for (regno = 0;
-	   regno < gdbarch_num_regs (get_regcache_arch (regcache));
+	   regno < gdbarch_num_regs (regcache->arch ());
 	   regno++)
 	{
 	  fetch_register (regcache, regno);
@@ -152,7 +152,7 @@ old_fetch_inferior_registers (struct regcache *regcache, int regno)
 static void
 store_register (const struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   long regaddr, val;
   int i;
   gdb_byte buf[M68K_MAX_REGISTER_SIZE];
@@ -191,7 +191,7 @@ old_store_inferior_registers (const struct regcache *regcache, int regno)
   else
     {
       for (regno = 0;
-	   regno < gdbarch_num_regs (get_regcache_arch (regcache));
+	   regno < gdbarch_num_regs (regcache->arch ());
 	   regno++)
 	{
 	  store_register (regcache, regno);
@@ -206,7 +206,7 @@ old_store_inferior_registers (const struct regcache *regcache, int regno)
 void
 supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   const elf_greg_t *regp = (const elf_greg_t *) gregsetp;
   int regi;
 
@@ -302,7 +302,7 @@ static void store_regs (const struct regcache *regcache, int tid, int regno)
 void
 supply_fpregset (struct regcache *regcache, const elf_fpregset_t *fpregsetp)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int regi;
 
   for (regi = gdbarch_fp0_regnum (gdbarch);
@@ -323,7 +323,7 @@ void
 fill_fpregset (const struct regcache *regcache,
 	       elf_fpregset_t *fpregsetp, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int i;
 
   /* Fill in the floating-point registers.  */

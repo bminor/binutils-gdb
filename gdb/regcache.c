@@ -185,7 +185,7 @@ register_size (struct gdbarch *gdbarch, int regnum)
 int
 regcache_register_size (const struct regcache *regcache, int n)
 {
-  return register_size (get_regcache_arch (regcache), n);
+  return register_size (regcache->arch (), n);
 }
 
 regcache::regcache (gdbarch *gdbarch, address_space *aspace_,
@@ -271,14 +271,6 @@ private:
   struct regcache *m_regcache;
   int m_regnum;
 };
-
-/* Return REGCACHE's architecture.  */
-
-struct gdbarch *
-get_regcache_arch (const struct regcache *regcache)
-{
-  return regcache->arch ();
-}
 
 struct address_space *
 get_regcache_aspace (const struct regcache *regcache)
@@ -1245,7 +1237,7 @@ regcache::collect_regset (const struct regset *regset,
 CORE_ADDR
 regcache_read_pc (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   CORE_ADDR pc_val;
 
@@ -1272,7 +1264,7 @@ regcache_read_pc (struct regcache *regcache)
 void
 regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   if (gdbarch_write_pc_p (gdbarch))
     gdbarch_write_pc (gdbarch, regcache, pc);

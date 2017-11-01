@@ -694,7 +694,7 @@ ia64_linux_can_use_hw_breakpoint (struct target_ops *self,
 static void
 ia64_linux_fetch_register (struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR addr;
   size_t size;
   PTRACE_TYPE_RET *buf;
@@ -771,7 +771,7 @@ ia64_linux_fetch_registers (struct target_ops *ops,
 {
   if (regnum == -1)
     for (regnum = 0;
-	 regnum < gdbarch_num_regs (get_regcache_arch (regcache));
+	 regnum < gdbarch_num_regs (regcache->arch ());
 	 regnum++)
       ia64_linux_fetch_register (regcache, regnum);
   else
@@ -783,7 +783,7 @@ ia64_linux_fetch_registers (struct target_ops *ops,
 static void
 ia64_linux_store_register (const struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR addr;
   size_t size;
   PTRACE_TYPE_RET *buf;
@@ -826,7 +826,7 @@ ia64_linux_store_registers (struct target_ops *ops,
 {
   if (regnum == -1)
     for (regnum = 0;
-	 regnum < gdbarch_num_regs (get_regcache_arch (regcache));
+	 regnum < gdbarch_num_regs (regcache->arch ());
 	 regnum++)
       ia64_linux_store_register (regcache, regnum);
   else

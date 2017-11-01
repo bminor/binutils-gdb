@@ -71,7 +71,7 @@ void
 mips_fbsd_supply_fpregs (struct regcache *regcache, int regnum,
 			 const void *fpregs, size_t regsize)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   const gdb_byte *regs = (const gdb_byte *) fpregs;
   int i, fp0num;
 
@@ -100,7 +100,7 @@ void
 mips_fbsd_supply_gregs (struct regcache *regcache, int regnum,
 			const void *gregs, size_t regsize)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   const gdb_byte *regs = (const gdb_byte *) gregs;
   int i;
 
@@ -117,7 +117,7 @@ void
 mips_fbsd_collect_fpregs (const struct regcache *regcache, int regnum,
 			  void *fpregs, size_t regsize)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   gdb_byte *regs = (gdb_byte *) fpregs;
   int i, fp0num;
 
@@ -144,7 +144,7 @@ void
 mips_fbsd_collect_gregs (const struct regcache *regcache, int regnum,
 			 void *gregs, size_t regsize)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   gdb_byte *regs = (gdb_byte *) gregs;
   int i;
 
@@ -162,7 +162,7 @@ mips_fbsd_supply_fpregset (const struct regset *regset,
 			   struct regcache *regcache,
 			   int regnum, const void *fpregs, size_t len)
 {
-  size_t regsize = mips_abi_regsize (get_regcache_arch (regcache));
+  size_t regsize = mips_abi_regsize (regcache->arch ());
 
   gdb_assert (len >= MIPS_FBSD_NUM_FPREGS * regsize);
 
@@ -179,7 +179,7 @@ mips_fbsd_collect_fpregset (const struct regset *regset,
 			    const struct regcache *regcache,
 			    int regnum, void *fpregs, size_t len)
 {
-  size_t regsize = mips_abi_regsize (get_regcache_arch (regcache));
+  size_t regsize = mips_abi_regsize (regcache->arch ());
 
   gdb_assert (len >= MIPS_FBSD_NUM_FPREGS * regsize);
 
@@ -195,7 +195,7 @@ mips_fbsd_supply_gregset (const struct regset *regset,
 			  struct regcache *regcache, int regnum,
 			  const void *gregs, size_t len)
 {
-  size_t regsize = mips_abi_regsize (get_regcache_arch (regcache));
+  size_t regsize = mips_abi_regsize (regcache->arch ());
 
   gdb_assert (len >= MIPS_FBSD_NUM_GREGS * regsize);
 
@@ -212,7 +212,7 @@ mips_fbsd_collect_gregset (const struct regset *regset,
 			   const struct regcache *regcache,
 			   int regnum, void *gregs, size_t len)
 {
-  size_t regsize = mips_abi_regsize (get_regcache_arch (regcache));
+  size_t regsize = mips_abi_regsize (regcache->arch ());
 
   gdb_assert (len >= MIPS_FBSD_NUM_GREGS * regsize);
 

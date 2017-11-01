@@ -371,13 +371,9 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	  if (obstack_final_size > statmem_obstack_initial_size)
 	    {
 	      /* In effect, a pop of the printed-statics stack.  */
-
-	      void *free_to_ptr =
-		(char *) obstack_next_free (&dont_print_statmem_obstack) -
-		(obstack_final_size - statmem_obstack_initial_size);
-
-	      obstack_free (&dont_print_statmem_obstack,
-			    free_to_ptr);
+	      size_t shrink_bytes
+		= statmem_obstack_initial_size - obstack_final_size;
+	      obstack_blank_fast (&dont_print_statmem_obstack, shrink_bytes);
 	    }
 
 	  if (last_set_recurse != recurse)

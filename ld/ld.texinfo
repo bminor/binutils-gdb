@@ -1180,7 +1180,7 @@ all dynamic objects loaded by the application.
 Generate Intel Indirect Branch Tracking (IBT) enabled PLT entries.
 Supported for Linux/i386 and Linux/x86_64.
 
-@item IBT
+@item ibt
 Generate GNU_PROPERTY_X86_FEATURE_1_IBT in .note.gnu.property section
 to indicate compatibility with IBT.  This also implies @option{ibtplt}.
 Supported for Linux/i386 and Linux/x86_64.

@@ -486,6 +486,11 @@ public:
      to find the corresponding source file name.  */
 
   struct symtab *symtab = NULL;
+
+  /* The symbol found by the location parser, if any.  This may be used to
+     ascertain when an event location was set at a different location than
+     the one originally selected by parsing, e.g., inlined symbols.  */
+  const struct symbol *symbol = NULL;
 };
 
 /* The possible return values for print_bpstat, print_it_normal,
@@ -540,7 +545,7 @@ struct breakpoint_ops
      which the inferior stopped, and WS is the target_waitstatus
      describing the event.  */
   int (*breakpoint_hit) (const struct bp_location *bl,
-			 struct address_space *aspace,
+			 const address_space *aspace,
 			 CORE_ADDR bp_addr,
 			 const struct target_waitstatus *ws);
 
@@ -912,7 +917,7 @@ extern void bpstat_clear (bpstat *);
    is part of the bpstat is copied as well.  */
 extern bpstat bpstat_copy (bpstat);
 
-extern bpstat bpstat_stop_status (struct address_space *aspace,
+extern bpstat bpstat_stop_status (const address_space *aspace,
 				  CORE_ADDR pc, ptid_t ptid,
 				  const struct target_waitstatus *ws);
 
@@ -1158,41 +1163,39 @@ enum breakpoint_here
 
 extern int program_breakpoint_here_p (struct gdbarch *gdbarch, CORE_ADDR address);
 
-extern enum breakpoint_here breakpoint_here_p (struct address_space *, 
+extern enum breakpoint_here breakpoint_here_p (const address_space *,
 					       CORE_ADDR);
 
 /* Return true if an enabled breakpoint exists in the range defined by
    ADDR and LEN, in ASPACE.  */
-extern int breakpoint_in_range_p (struct address_space *aspace,
+extern int breakpoint_in_range_p (const address_space *aspace,
 				  CORE_ADDR addr, ULONGEST len);
 
-extern int moribund_breakpoint_here_p (struct address_space *, CORE_ADDR);
+extern int moribund_breakpoint_here_p (const address_space *, CORE_ADDR);
 
-extern int breakpoint_inserted_here_p (struct address_space *, CORE_ADDR);
+extern int breakpoint_inserted_here_p (const address_space *,
+				       CORE_ADDR);
 
-extern int regular_breakpoint_inserted_here_p (struct address_space *, 
-					       CORE_ADDR);
-
-extern int software_breakpoint_inserted_here_p (struct address_space *, 
+extern int software_breakpoint_inserted_here_p (const address_space *,
 						CORE_ADDR);
 
 /* Return non-zero iff there is a hardware breakpoint inserted at
    PC.  */
-extern int hardware_breakpoint_inserted_here_p (struct address_space *,
+extern int hardware_breakpoint_inserted_here_p (const address_space *,
 						CORE_ADDR);
 
 /* Check whether any location of BP is inserted at PC.  */
 
 extern int breakpoint_has_location_inserted_here (struct breakpoint *bp,
-						  struct address_space *aspace,
+						  const address_space *aspace,
 						  CORE_ADDR pc);
 
-extern int single_step_breakpoint_inserted_here_p (struct address_space *,
+extern int single_step_breakpoint_inserted_here_p (const address_space *,
 						   CORE_ADDR);
 
 /* Returns true if there's a hardware watchpoint or access watchpoint
    inserted in the range defined by ADDR and LEN.  */
-extern int hardware_watchpoint_inserted_in_range (struct address_space *,
+extern int hardware_watchpoint_inserted_in_range (const address_space *,
 						  CORE_ADDR addr,
 						  ULONGEST len);
 
@@ -1201,9 +1204,9 @@ extern int hardware_watchpoint_inserted_in_range (struct address_space *,
    if ASPACE1 matches ASPACE2.  On targets that have global
    breakpoints, the address space doesn't really matter.  */
 
-extern int breakpoint_address_match (struct address_space *aspace1,
+extern int breakpoint_address_match (const address_space *aspace1,
 				     CORE_ADDR addr1,
-				     struct address_space *aspace2,
+				     const address_space *aspace2,
 				     CORE_ADDR addr2);
 
 extern void until_break_command (const char *, int, int);
@@ -1519,7 +1522,7 @@ extern void add_solib_catchpoint (const char *arg, int is_load, int is_temp,
    new location to the set of potential addresses the next instruction
    is at.  */
 extern void insert_single_step_breakpoint (struct gdbarch *,
-					   struct address_space *, 
+					   const address_space *,
 					   CORE_ADDR);
 
 /* Insert all software single step breakpoints for the current frame.
@@ -1617,7 +1620,7 @@ extern struct breakpoint *iterate_over_breakpoints (int (*) (struct breakpoint *
 /* Nonzero if the specified PC cannot be a location where functions
    have been inlined.  */
 
-extern int pc_at_non_inline_function (struct address_space *aspace,
+extern int pc_at_non_inline_function (const address_space *aspace,
 				      CORE_ADDR pc,
 				      const struct target_waitstatus *ws);
 

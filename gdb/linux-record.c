@@ -83,7 +83,7 @@
 #define RECORD_Q_XGETQUOTA	(('3' << 8) + 3)
 
 #define OUTPUT_REG(val, num)      phex_nz ((val), \
-    TYPE_LENGTH (gdbarch_register_type (get_regcache_arch (regcache), (num))))
+    TYPE_LENGTH (gdbarch_register_type (regcache->arch (), (num))))
 
 /* Record a memory area of length LEN pointed to by register
    REGNUM.  */
@@ -104,7 +104,7 @@ record_linux_sockaddr (struct regcache *regcache,
 {
   gdb_byte *a;
   int addrlen;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   if (!addr)
@@ -141,7 +141,7 @@ record_linux_msghdr (struct regcache *regcache,
 		     struct linux_record_tdep *tdep, ULONGEST addr)
 {
   gdb_byte *a;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR tmpaddr;
   int tmpint;
@@ -242,7 +242,7 @@ record_linux_system_call (enum gdb_syscall syscall,
 			  struct regcache *regcache,
 			  struct linux_record_tdep *tdep)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST tmpulongest;
   CORE_ADDR tmpaddr;

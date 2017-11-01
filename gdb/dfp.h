@@ -28,9 +28,10 @@
 #include "doublest.h"    /* For DOUBLEST.  */
 #include "expression.h"  /* For enum exp_opcode.  */
 
-extern std::string decimal_to_string (const gdb_byte *, int, enum bfd_endian);
+extern std::string decimal_to_string (const gdb_byte *, int, enum bfd_endian,
+				      const char *format = nullptr);
 extern bool decimal_from_string (gdb_byte *, int, enum bfd_endian,
-				 std::string string);
+				 const std::string &string);
 extern void decimal_from_longest (LONGEST from, gdb_byte *to,
 				  int len, enum bfd_endian byte_order);
 extern void decimal_from_ulongest (ULONGEST from, gdb_byte *to,

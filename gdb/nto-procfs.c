@@ -1386,7 +1386,7 @@ procfs_store_registers (struct target_ops *ops,
       if (dev_set == -1)
 	return;
 
-      len = nto_register_area (get_regcache_arch (regcache),
+      len = nto_register_area (regcache->arch (),
 			       regno, regset, &off);
 
       if (len < 1)

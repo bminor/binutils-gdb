@@ -2277,7 +2277,7 @@ bfd_boolean
 riscv_frag_align_code (int n)
 {
   bfd_vma bytes = (bfd_vma) 1 << n;
-  bfd_vma worst_case_bytes = bytes - 2;
+  bfd_vma worst_case_bytes = bytes - (riscv_opts.rvc ? 2 : 4);
   char *nops = frag_more (worst_case_bytes);
   expressionS ex;
 

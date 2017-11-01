@@ -2472,7 +2472,7 @@ return_command (char *retval_exp, int from_tty)
   if (return_value != NULL)
     {
       struct type *return_type = value_type (return_value);
-      struct gdbarch *gdbarch = get_regcache_arch (get_current_regcache ());
+      struct gdbarch *gdbarch = get_current_regcache ()->arch ();
 
       gdb_assert (rv_conv != RETURN_VALUE_STRUCT_CONVENTION
 		  && rv_conv != RETURN_VALUE_ABI_RETURNS_ADDRESS);

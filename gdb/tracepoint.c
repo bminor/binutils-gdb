@@ -2319,7 +2319,7 @@ tfind_command_1 (const char *args, int from_tty)
 static void
 tfind_command (const char *args, int from_tty)
 {
-  tfind_command_1 (const_cast<char *> (args), from_tty);
+  tfind_command_1 (args, from_tty);
 }
 
 /* tfind end */

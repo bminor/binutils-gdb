@@ -158,11 +158,11 @@ static int watchpoint_locations_match (struct bp_location *loc1,
 				       struct bp_location *loc2);
 
 static int breakpoint_location_address_match (struct bp_location *bl,
-					      struct address_space *aspace,
+					      const struct address_space *aspace,
 					      CORE_ADDR addr);
 
 static int breakpoint_location_address_range_overlap (struct bp_location *,
-						      struct address_space *,
+						      const address_space *,
 						      CORE_ADDR, int);
 
 static void info_breakpoints_command (char *, int);
@@ -3183,28 +3183,30 @@ static const char *const longjmp_names[] =
 struct breakpoint_objfile_data
 {
   /* Minimal symbol for "_ovly_debug_event" (if any).  */
-  struct bound_minimal_symbol overlay_msym;
+  struct bound_minimal_symbol overlay_msym {};
 
   /* Minimal symbol(s) for "longjmp", "siglongjmp", etc. (if any).  */
-  struct bound_minimal_symbol longjmp_msym[NUM_LONGJMP_NAMES];
+  struct bound_minimal_symbol longjmp_msym[NUM_LONGJMP_NAMES] {};
 
   /* True if we have looked for longjmp probes.  */
-  int longjmp_searched;
+  int longjmp_searched = 0;
 
-  /* SystemTap probe points for longjmp (if any).  */
-  VEC (probe_p) *longjmp_probes;
+  /* SystemTap probe points for longjmp (if any).  These are non-owning
+     references.  */
+  std::vector<probe *> longjmp_probes;
 
   /* Minimal symbol for "std::terminate()" (if any).  */
-  struct bound_minimal_symbol terminate_msym;
+  struct bound_minimal_symbol terminate_msym {};
 
   /* Minimal symbol for "_Unwind_DebugHook" (if any).  */
-  struct bound_minimal_symbol exception_msym;
+  struct bound_minimal_symbol exception_msym {};
 
   /* True if we have looked for exception probes.  */
-  int exception_searched;
+  int exception_searched = 0;
 
-  /* SystemTap probe points for unwinding (if any).  */
-  VEC (probe_p) *exception_probes;
+  /* SystemTap probe points for unwinding (if any).  These are non-owning
+     references.  */
+  std::vector<probe *> exception_probes;
 };
 
 static const struct objfile_data *breakpoint_objfile_key;
@@ -3232,23 +3234,19 @@ get_breakpoint_objfile_data (struct objfile *objfile)
 		     objfile_data (objfile, breakpoint_objfile_key));
   if (bp_objfile_data == NULL)
     {
-      bp_objfile_data =
-	XOBNEW (&objfile->objfile_obstack, struct breakpoint_objfile_data);
-
-      memset (bp_objfile_data, 0, sizeof (*bp_objfile_data));
+      bp_objfile_data = new breakpoint_objfile_data ();
       set_objfile_data (objfile, breakpoint_objfile_key, bp_objfile_data);
     }
   return bp_objfile_data;
 }
 
 static void
-free_breakpoint_probes (struct objfile *obj, void *data)
+free_breakpoint_objfile_data (struct objfile *obj, void *data)
 {
   struct breakpoint_objfile_data *bp_objfile_data
     = (struct breakpoint_objfile_data *) data;
 
-  VEC_free (probe_p, bp_objfile_data->longjmp_probes);
-  VEC_free (probe_p, bp_objfile_data->exception_probes);
+  delete bp_objfile_data;
 }
 
 static void
@@ -3329,43 +3327,35 @@ create_longjmp_master_breakpoint (void)
 
       if (!bp_objfile_data->longjmp_searched)
 	{
-	  VEC (probe_p) *ret;
+	  std::vector<probe *> ret
+	    = find_probes_in_objfile (objfile, "libc", "longjmp");
 
-	  ret = find_probes_in_objfile (objfile, "libc", "longjmp");
-	  if (ret != NULL)
+	  if (!ret.empty ())
 	    {
 	      /* We are only interested in checking one element.  */
-	      struct probe *p = VEC_index (probe_p, ret, 0);
+	      probe *p = ret[0];
 
 	      if (!can_evaluate_probe_arguments (p))
 		{
 		  /* We cannot use the probe interface here, because it does
 		     not know how to evaluate arguments.  */
-		  VEC_free (probe_p, ret);
-		  ret = NULL;
+		  ret.clear ();
 		}
 	    }
 	  bp_objfile_data->longjmp_probes = ret;
 	  bp_objfile_data->longjmp_searched = 1;
 	}
 
-      if (bp_objfile_data->longjmp_probes != NULL)
+      if (!bp_objfile_data->longjmp_probes.empty ())
 	{
-	  int i;
-	  struct probe *probe;
 	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
-	  for (i = 0;
-	       VEC_iterate (probe_p,
-			    bp_objfile_data->longjmp_probes,
-			    i, probe);
-	       ++i)
+	  for (probe *p : bp_objfile_data->longjmp_probes)
 	    {
 	      struct breakpoint *b;
 
 	      b = create_internal_breakpoint (gdbarch,
-					      get_probe_address (probe,
-								 objfile),
+					      get_probe_address (p, objfile),
 					      bp_longjmp_master,
 					      &internal_breakpoint_ops);
 	      b->location = new_probe_location ("-probe-stap libc:longjmp");
@@ -3490,44 +3480,35 @@ create_exception_master_breakpoint (void)
       /* We prefer the SystemTap probe point if it exists.  */
       if (!bp_objfile_data->exception_searched)
 	{
-	  VEC (probe_p) *ret;
+	  std::vector<probe *> ret
+	    = find_probes_in_objfile (objfile, "libgcc", "unwind");
 
-	  ret = find_probes_in_objfile (objfile, "libgcc", "unwind");
-
-	  if (ret != NULL)
+	  if (!ret.empty ())
 	    {
 	      /* We are only interested in checking one element.  */
-	      struct probe *p = VEC_index (probe_p, ret, 0);
+	      probe *p = ret[0];
 
 	      if (!can_evaluate_probe_arguments (p))
 		{
 		  /* We cannot use the probe interface here, because it does
 		     not know how to evaluate arguments.  */
-		  VEC_free (probe_p, ret);
-		  ret = NULL;
+		  ret.clear ();
 		}
 	    }
 	  bp_objfile_data->exception_probes = ret;
 	  bp_objfile_data->exception_searched = 1;
 	}
 
-      if (bp_objfile_data->exception_probes != NULL)
+      if (!bp_objfile_data->exception_probes.empty ())
 	{
 	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
-	  int i;
-	  struct probe *probe;
 
-	  for (i = 0;
-	       VEC_iterate (probe_p,
-			    bp_objfile_data->exception_probes,
-			    i, probe);
-	       ++i)
+	  for (probe *p : bp_objfile_data->exception_probes)
 	    {
 	      struct breakpoint *b;
 
 	      b = create_internal_breakpoint (gdbarch,
-					      get_probe_address (probe,
-								 objfile),
+					      get_probe_address (p, objfile),
 					      bp_exception_master,
 					      &internal_breakpoint_ops);
 	      b->location = new_probe_location ("-probe-stap libgcc:unwind");
@@ -4045,7 +4026,7 @@ breakpoint_init_inferior (enum inf_context context)
      the target, to advance the PC past the breakpoint.  */
 
 enum breakpoint_here
-breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
+breakpoint_here_p (const address_space *aspace, CORE_ADDR pc)
 {
   struct bp_location *bl, **blp_tmp;
   int any_breakpoint_here = 0;
@@ -4078,7 +4059,7 @@ breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
 /* See breakpoint.h.  */
 
 int
-breakpoint_in_range_p (struct address_space *aspace,
+breakpoint_in_range_p (const address_space *aspace,
 		       CORE_ADDR addr, ULONGEST len)
 {
   struct bp_location *bl, **blp_tmp;
@@ -4112,7 +4093,7 @@ breakpoint_in_range_p (struct address_space *aspace,
 /* Return true if there's a moribund breakpoint at PC.  */
 
 int
-moribund_breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
+moribund_breakpoint_here_p (const address_space *aspace, CORE_ADDR pc)
 {
   struct bp_location *loc;
   int ix;
@@ -4129,7 +4110,7 @@ moribund_breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
 
 static int
 bp_location_inserted_here_p (struct bp_location *bl,
-			     struct address_space *aspace, CORE_ADDR pc)
+			     const address_space *aspace, CORE_ADDR pc)
 {
   if (bl->inserted
       && breakpoint_address_match (bl->pspace->aspace, bl->address,
@@ -4148,7 +4129,7 @@ bp_location_inserted_here_p (struct bp_location *bl,
 /* Returns non-zero iff there's a breakpoint inserted at PC.  */
 
 int
-breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
+breakpoint_inserted_here_p (const address_space *aspace, CORE_ADDR pc)
 {
   struct bp_location **blp, **blp_tmp = NULL;
 
@@ -4170,7 +4151,7 @@ breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
    inserted at PC.  */
 
 int
-software_breakpoint_inserted_here_p (struct address_space *aspace,
+software_breakpoint_inserted_here_p (const address_space *aspace,
 				     CORE_ADDR pc)
 {
   struct bp_location **blp, **blp_tmp = NULL;
@@ -4192,7 +4173,7 @@ software_breakpoint_inserted_here_p (struct address_space *aspace,
 /* See breakpoint.h.  */
 
 int
-hardware_breakpoint_inserted_here_p (struct address_space *aspace,
+hardware_breakpoint_inserted_here_p (const address_space *aspace,
 				     CORE_ADDR pc)
 {
   struct bp_location **blp, **blp_tmp = NULL;
@@ -4212,7 +4193,7 @@ hardware_breakpoint_inserted_here_p (struct address_space *aspace,
 }
 
 int
-hardware_watchpoint_inserted_in_range (struct address_space *aspace,
+hardware_watchpoint_inserted_in_range (const address_space *aspace,
 				       CORE_ADDR addr, ULONGEST len)
 {
   struct breakpoint *bpt;
@@ -5064,7 +5045,7 @@ watchpoint_check (bpstat bs)
 
 static int
 bpstat_check_location (const struct bp_location *bl,
-		       struct address_space *aspace, CORE_ADDR bp_addr,
+		       const address_space *aspace, CORE_ADDR bp_addr,
 		       const struct target_waitstatus *ws)
 {
   struct breakpoint *b = bl->owner;
@@ -5421,7 +5402,7 @@ need_moribund_for_location_type (struct bp_location *loc)
    commands, FIXME??? fields.  */
 
 bpstat
-bpstat_stop_status (struct address_space *aspace,
+bpstat_stop_status (const address_space *aspace,
 		    CORE_ADDR bp_addr, ptid_t ptid,
 		    const struct target_waitstatus *ws)
 {
@@ -5956,8 +5937,11 @@ print_breakpoint_location (struct breakpoint *b,
     uiout->field_string ("what", event_location_to_string (b->location.get ()));
   else if (loc && loc->symtab)
     {
-      struct symbol *sym 
-	= find_pc_sect_function (loc->address, loc->section);
+      const struct symbol *sym = loc->symbol;
+
+      if (sym == NULL)
+	sym = find_pc_sect_function (loc->address, loc->section);
+
       if (sym)
 	{
 	  uiout->text ("in ");
@@ -6894,8 +6878,8 @@ watchpoint_locations_match (struct bp_location *loc1,
 /* See breakpoint.h.  */
 
 int
-breakpoint_address_match (struct address_space *aspace1, CORE_ADDR addr1,
-			  struct address_space *aspace2, CORE_ADDR addr2)
+breakpoint_address_match (const address_space *aspace1, CORE_ADDR addr1,
+			  const address_space *aspace2, CORE_ADDR addr2)
 {
   return ((gdbarch_has_global_breakpoints (target_gdbarch ())
 	   || aspace1 == aspace2)
@@ -6908,8 +6892,9 @@ breakpoint_address_match (struct address_space *aspace1, CORE_ADDR addr1,
    space doesn't really matter.  */
 
 static int
-breakpoint_address_match_range (struct address_space *aspace1, CORE_ADDR addr1,
-				int len1, struct address_space *aspace2,
+breakpoint_address_match_range (const address_space *aspace1,
+				CORE_ADDR addr1,
+				int len1, const address_space *aspace2,
 				CORE_ADDR addr2)
 {
   return ((gdbarch_has_global_breakpoints (target_gdbarch ())
@@ -6924,7 +6909,7 @@ breakpoint_address_match_range (struct address_space *aspace1, CORE_ADDR addr1,
 
 static int
 breakpoint_location_address_match (struct bp_location *bl,
-				   struct address_space *aspace,
+				   const address_space *aspace,
 				   CORE_ADDR addr)
 {
   return (breakpoint_address_match (bl->pspace->aspace, bl->address,
@@ -6943,7 +6928,7 @@ breakpoint_location_address_match (struct bp_location *bl,
 
 static int
 breakpoint_location_address_range_overlap (struct bp_location *bl,
-					   struct address_space *aspace,
+					   const address_space *aspace,
 					   CORE_ADDR addr, int len)
 {
   if (gdbarch_has_global_breakpoints (target_gdbarch ())
@@ -7826,7 +7811,7 @@ remove_catch_fork (struct bp_location *bl, enum remove_bp_reason reason)
 
 static int
 breakpoint_hit_catch_fork (const struct bp_location *bl,
-			   struct address_space *aspace, CORE_ADDR bp_addr,
+			   const address_space *aspace, CORE_ADDR bp_addr,
 			   const struct target_waitstatus *ws)
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
@@ -7942,7 +7927,7 @@ remove_catch_vfork (struct bp_location *bl, enum remove_bp_reason reason)
 
 static int
 breakpoint_hit_catch_vfork (const struct bp_location *bl,
-			    struct address_space *aspace, CORE_ADDR bp_addr,
+			    const address_space *aspace, CORE_ADDR bp_addr,
 			    const struct target_waitstatus *ws)
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
@@ -8070,7 +8055,7 @@ remove_catch_solib (struct bp_location *ignore, enum remove_bp_reason reason)
 
 static int
 breakpoint_hit_catch_solib (const struct bp_location *bl,
-			    struct address_space *aspace,
+			    const address_space *aspace,
 			    CORE_ADDR bp_addr,
 			    const struct target_waitstatus *ws)
 {
@@ -8376,7 +8361,7 @@ remove_catch_exec (struct bp_location *bl, enum remove_bp_reason reason)
 
 static int
 breakpoint_hit_catch_exec (const struct bp_location *bl,
-			   struct address_space *aspace, CORE_ADDR bp_addr,
+			   const address_space *aspace, CORE_ADDR bp_addr,
 			   const struct target_waitstatus *ws)
 {
   struct exec_catchpoint *c = (struct exec_catchpoint *) bl->owner;
@@ -8742,6 +8727,7 @@ add_location_to_breakpoint (struct breakpoint *b,
   loc->gdbarch = loc_gdbarch;
   loc->line_number = sal->line;
   loc->symtab = sal->symtab;
+  loc->symbol = sal->symbol;
 
   set_breakpoint_location_function (loc,
 				    sal->explicit_pc || sal->explicit_line);
@@ -9794,7 +9780,7 @@ agent_printf_command (char *arg, int from_tty)
 
 static int
 breakpoint_hit_ranged_breakpoint (const struct bp_location *bl,
-				  struct address_space *aspace,
+				  const address_space *aspace,
 				  CORE_ADDR bp_addr,
 				  const struct target_waitstatus *ws)
 {
@@ -10121,8 +10107,7 @@ watchpoint_exp_is_const (const struct expression *exp)
 	case TERNOP_SLICE:
 
 	case OP_LONG:
-	case OP_DOUBLE:
-	case OP_DECFLOAT:
+	case OP_FLOAT:
 	case OP_LAST:
 	case OP_COMPLEX:
 	case OP_STRING:
@@ -10255,7 +10240,7 @@ remove_watchpoint (struct bp_location *bl, enum remove_bp_reason reason)
 
 static int
 breakpoint_hit_watchpoint (const struct bp_location *bl,
-			   struct address_space *aspace, CORE_ADDR bp_addr,
+			   const address_space *aspace, CORE_ADDR bp_addr,
 			   const struct target_waitstatus *ws)
 {
   struct breakpoint *b = bl->owner;
@@ -12432,7 +12417,7 @@ base_breakpoint_remove_location (struct bp_location *bl,
 
 static int
 base_breakpoint_breakpoint_hit (const struct bp_location *bl,
-				struct address_space *aspace,
+				const address_space *aspace,
 				CORE_ADDR bp_addr,
 				const struct target_waitstatus *ws)
 {
@@ -12600,7 +12585,7 @@ bkpt_remove_location (struct bp_location *bl, enum remove_bp_reason reason)
 
 static int
 bkpt_breakpoint_hit (const struct bp_location *bl,
-		     struct address_space *aspace, CORE_ADDR bp_addr,
+		     const address_space *aspace, CORE_ADDR bp_addr,
 		     const struct target_waitstatus *ws)
 {
   if (ws->kind != TARGET_WAITKIND_STOPPED
@@ -12621,7 +12606,7 @@ bkpt_breakpoint_hit (const struct bp_location *bl,
 
 static int
 dprintf_breakpoint_hit (const struct bp_location *bl,
-			struct address_space *aspace, CORE_ADDR bp_addr,
+			const address_space *aspace, CORE_ADDR bp_addr,
 			const struct target_waitstatus *ws)
 {
   if (dprintf_style == dprintf_style_agent
@@ -12981,7 +12966,7 @@ tracepoint_re_set (struct breakpoint *b)
 
 static int
 tracepoint_breakpoint_hit (const struct bp_location *bl,
-			   struct address_space *aspace, CORE_ADDR bp_addr,
+			   const address_space *aspace, CORE_ADDR bp_addr,
 			   const struct target_waitstatus *ws)
 {
   /* By definition, the inferior does not report stops at
@@ -14537,7 +14522,7 @@ invalidate_bp_value_on_memory_change (struct inferior *inferior,
 
 void
 insert_single_step_breakpoint (struct gdbarch *gdbarch,
-			       struct address_space *aspace, 
+			       const address_space *aspace,
 			       CORE_ADDR next_pc)
 {
   struct thread_info *tp = inferior_thread ();
@@ -14587,7 +14572,7 @@ insert_single_step_breakpoints (struct gdbarch *gdbarch)
 
 int
 breakpoint_has_location_inserted_here (struct breakpoint *bp,
-				       struct address_space *aspace,
+				       const address_space *aspace,
 				       CORE_ADDR pc)
 {
   struct bp_location *loc;
@@ -14604,7 +14589,7 @@ breakpoint_has_location_inserted_here (struct breakpoint *bp,
    PC.  */
 
 int
-single_step_breakpoint_inserted_here_p (struct address_space *aspace,
+single_step_breakpoint_inserted_here_p (const address_space *aspace,
 					CORE_ADDR pc)
 {
   struct breakpoint *bpt;
@@ -15314,7 +15299,7 @@ is_non_inline_function (struct breakpoint *b)
    have been inlined.  */
 
 int
-pc_at_non_inline_function (struct address_space *aspace, CORE_ADDR pc,
+pc_at_non_inline_function (const address_space *aspace, CORE_ADDR pc,
 			   const struct target_waitstatus *ws)
 {
   struct breakpoint *b;
@@ -15540,7 +15525,7 @@ _initialize_breakpoint (void)
   observer_attach_memory_changed (invalidate_bp_value_on_memory_change);
 
   breakpoint_objfile_key
-    = register_objfile_data_with_cleanup (NULL, free_breakpoint_probes);
+    = register_objfile_data_with_cleanup (NULL, free_breakpoint_objfile_data);
 
   breakpoint_chain = 0;
   /* Don't bother to call set_breakpoint_count.  $bpnum isn't useful

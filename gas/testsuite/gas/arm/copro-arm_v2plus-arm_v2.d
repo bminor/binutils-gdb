@@ -1,6 +1,7 @@
-#objdump: -dr --prefix-addresses --show-raw-insn 
-#name: ARM CoProcessor Instructions
-#as: -march=armv5te -EL
+#source: copro-arm_v2plus-thumb_v6t2plus.s
+#objdump: -dr --prefix-addresses --show-raw-insn
+#name: ARMv2 ARM CoProcessor Instructions
+#as: -march=armv2 -EL
 
 # Test the standard ARM co-processor instructions:
 
@@ -25,18 +26,10 @@ Disassembly of section .text:
 0+03c <[^>]*> be228519 	mcrlt	5, 1, r8, cr2, cr9, \{0\}
 0+040 <[^>]*> ec907300 	ldc	3, cr7, \[r0\], \{0\}
 0+044 <[^>]*> ec816e01 	stc	14, cr6, \[r1\], \{1\}
-0+048 <[^>]*> fc925502 	ldc2	5, cr5, \[r2\], \{2\}
-0+04c <[^>]*> fc834603 	stc2	6, cr4, \[r3\], \{3\}
-0+050 <[^>]*> ecd43704 	ldcl	7, cr3, \[r4\], \{4\}
-0+054 <[^>]*> ecc52805 	stcl	8, cr2, \[r5\], \{5\}
-0+058 <[^>]*> fcd61c06 	ldc2l	12, cr1, \[r6\], \{6\}
-0+05c <[^>]*> fcc70c07 	stc2l	12, cr0, \[r7\], \{7\}
-0+060 <[^>]*> ecd88cff 	ldcl	12, cr8, \[r8\], \{255\}.*
-0+064 <[^>]*> ecc99cfe 	stcl	12, cr9, \[r9\], \{254\}.*
-0+068 <[^>]*> ec507d04 	mrrc	13, 0, r7, r0, cr4
-0+06c <[^>]*> ec407e05 	mcrr	14, 0, r7, r0, cr5
-0+070 <[^>]*> ec507fff 	mrrc	15, 15, r7, r0, cr15
-0+074 <[^>]*> ec407efe 	mcrr	14, 15, r7, r0, cr14
-0+078 <[^>]*> e1a00000 	nop			; \(mov r0, r0\)
-0+07c <[^>]*> e1a00000 	nop			; \(mov r0, r0\)
-0+080 <[^>]*> aeb1f4f2 	mrcge	4, 5, APSR_nzcv, cr1, cr2, \{7\}
+0+048 <[^>]*> ecd43704 	ldcl	7, cr3, \[r4\], \{4\}
+0+04c <[^>]*> ecc52805 	stcl	8, cr2, \[r5\], \{5\}
+0+050 <[^>]*> ecd88cff 	ldcl	12, cr8, \[r8\], \{255\}.*
+0+054 <[^>]*> ecc99cfe 	stcl	12, cr9, \[r9\], \{254\}.*
+0+058 <[^>]*> e1a00000 	nop			; \(mov r0, r0\)
+0+05c <[^>]*> e1a00000 	nop			; \(mov r0, r0\)
+0+060 <[^>]*> aeb1f4f2 	mrcge	4, 5, APSR_nzcv, cr1, cr2, \{7\}

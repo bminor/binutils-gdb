@@ -106,10 +106,6 @@ static struct type *type_long (struct parser_state *);
 
 static struct type *type_long_long (struct parser_state *);
 
-static struct type *type_float (struct parser_state *);
-
-static struct type *type_double (struct parser_state *);
-
 static struct type *type_long_double (struct parser_state *);
 
 static struct type *type_char (struct parser_state *);
@@ -128,7 +124,7 @@ static struct type *type_system_address (struct parser_state *);
       struct type *type;
     } typed_val;
     struct {
-      DOUBLEST dval;
+      gdb_byte val[16];
       struct type *type;
     } typed_val_float;
     struct type *tval;
@@ -553,10 +549,10 @@ primary	:	CHARLIT
 	;
 
 primary	:	FLOAT
-			{ write_exp_elt_opcode (pstate, OP_DOUBLE);
+			{ write_exp_elt_opcode (pstate, OP_FLOAT);
 			  write_exp_elt_type (pstate, $1.type);
-			  write_exp_elt_dblcst (pstate, $1.dval);
-			  write_exp_elt_opcode (pstate, OP_DOUBLE);
+			  write_exp_elt_floatcst (pstate, $1.val);
+			  write_exp_elt_opcode (pstate, OP_FLOAT);
 			}
 	;
 
@@ -1437,18 +1433,6 @@ static struct type *
 type_long_long (struct parser_state *par_state)
 {
   return parse_type (par_state)->builtin_long_long;
-}
-
-static struct type *
-type_float (struct parser_state *par_state)
-{
-  return parse_type (par_state)->builtin_float;
-}
-
-static struct type *
-type_double (struct parser_state *par_state)
-{
-  return parse_type (par_state)->builtin_double;
 }
 
 static struct type *

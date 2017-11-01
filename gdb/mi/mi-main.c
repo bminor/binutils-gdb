@@ -1006,7 +1006,7 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
      will change depending upon the particular processor being
      debugged.  */
 
-  gdbarch = get_regcache_arch (this_regs.get ());
+  gdbarch = this_regs->arch ();
   numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
   ui_out_emit_list list_emitter (uiout, "changed-registers");
@@ -1058,13 +1058,13 @@ static int
 register_changed_p (int regnum, struct regcache *prev_regs,
 		    struct regcache *this_regs)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (this_regs);
+  struct gdbarch *gdbarch = this_regs->arch ();
   struct value *prev_value, *this_value;
   int ret;
 
   /* First time through or after gdbarch change consider all registers
      as changed.  */
-  if (!prev_regs || get_regcache_arch (prev_regs) != gdbarch)
+  if (!prev_regs || prev_regs->arch () != gdbarch)
     return 1;
 
   /* Get register contents and compare.  */
@@ -1231,7 +1231,7 @@ mi_cmd_data_write_register_values (const char *command, char **argv, int argc)
      debugged.  */
 
   regcache = get_current_regcache ();
-  gdbarch = get_regcache_arch (regcache);
+  gdbarch = regcache->arch ();
   numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
   if (argc == 0)

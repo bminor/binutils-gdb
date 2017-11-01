@@ -2115,7 +2115,7 @@ static const struct frame_unwind nios2_stub_frame_unwind =
 static CORE_ADDR
 nios2_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   unsigned long mach = gdbarch_bfd_arch_info (gdbarch)->mach;
   unsigned int insn;
@@ -2209,7 +2209,7 @@ nios2_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 static std::vector<CORE_ADDR>
 nios2_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR next_pc = nios2_get_next_pc (regcache, regcache_read_pc (regcache));
 
   return {next_pc};

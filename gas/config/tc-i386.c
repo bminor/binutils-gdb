@@ -1106,7 +1106,9 @@ const pseudo_typeS md_pseudo_table[] =
   {"code16gcc", set_16bit_gcc_code_flag, CODE_16BIT},
   {"code16", set_code_flag, CODE_16BIT},
   {"code32", set_code_flag, CODE_32BIT},
+#ifdef BFD64
   {"code64", set_code_flag, CODE_64BIT},
+#endif
   {"intel_syntax", set_intel_syntax, 1},
   {"att_syntax", set_intel_syntax, 0},
   {"intel_mnemonic", set_intel_mnemonic, 1},
@@ -4656,7 +4658,8 @@ check_VecOperands (const insn_template *t)
 	}
       else if (i.reg_operands == 1 && i.mask)
 	{
-	  if ((i.types[1].bitfield.regymm
+	  if ((i.types[1].bitfield.regxmm
+	       || i.types[1].bitfield.regymm
 	       || i.types[1].bitfield.regzmm)
 	      && (register_number (i.op[1].regs)
 		  == register_number (i.index_reg)))

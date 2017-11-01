@@ -5507,6 +5507,16 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  h->plt.plist = NULL;
 	  h->needs_plt = 0;
 	  h->pointer_equality_needed = 0;
+	  /* After adjust_dynamic_symbol, non_got_ref set in the
+	     non-pic case means that dyn_relocs for this symbol should
+	     be discarded.  We either want the symbol to remain
+	     undefined, or we have a local definition of some sort.
+	     The "local definition" for non-function symbols may be
+	     due to creating a local definition in .dynbss, and for
+	     function symbols, defining the symbol on the PLT call
+	     stub code.  Set non_got_ref here to ensure undef weaks
+	     stay undefined.  */
+	  h->non_got_ref = 1;
 	}
       else
 	{
@@ -5520,19 +5530,24 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     resolution of the symbol to be set at load time rather
 	     than link time.  */
 	  if ((h->pointer_equality_needed
-	       || (!h->ref_regular_nonweak && h->non_got_ref))
+	       || (h->non_got_ref
+		   && !h->ref_regular_nonweak
+		   && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)))
 	      && !htab->is_vxworks
 	      && !ppc_elf_hash_entry (h)->has_sda_refs
 	      && !readonly_dynrelocs (h, NULL))
 	    {
 	      h->pointer_equality_needed = 0;
-	      /* After adjust_dynamic_symbol, non_got_ref set in the
-		 non-pic case means that dyn_relocs for this symbol
-		 should be discarded.  */
+	      /* Say that we do want dynamic relocs.  */
 	      h->non_got_ref = 0;
+	      /* If we haven't seen a branch reloc then we don't need
+		 a plt entry.  */
+	      if (!h->needs_plt)
+		h->plt.plist = NULL;
 	    }
 	}
       h->protected_def = 0;
+      /* Function symbols can't have copy relocs.  */
       return TRUE;
     }
   else
@@ -10778,6 +10793,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_relocate_section		ppc_elf_relocate_section
 #define elf_backend_create_dynamic_sections	ppc_elf_create_dynamic_sections
 #define elf_backend_check_relocs		ppc_elf_check_relocs
+#define elf_backend_relocs_compatible		_bfd_elf_relocs_compatible
 #define elf_backend_copy_indirect_symbol	ppc_elf_copy_indirect_symbol
 #define elf_backend_adjust_dynamic_symbol	ppc_elf_adjust_dynamic_symbol
 #define elf_backend_add_symbol_hook		ppc_elf_add_symbol_hook

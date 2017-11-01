@@ -21,14 +21,6 @@
 #define PROBE_H 1
 
 struct event_location;
-
-#include "gdb_vecs.h"
-
-/* Definition of a vector of probes.  */
-
-typedef struct probe *probe_p;
-DEF_VEC_P (probe_p);
-
 struct linespec_result;
 
 /* Structure useful for passing the header names in the method
@@ -255,11 +247,11 @@ extern struct bound_probe find_probe_by_pc (CORE_ADDR pc);
 
 /* Search OBJFILE for a probe with the given PROVIDER, NAME.  Return a
    VEC of all probes that were found.  If no matching probe is found,
-   return NULL.  The caller must free the VEC.  */
+   return an empty vector.  */
 
-extern VEC (probe_p) *find_probes_in_objfile (struct objfile *objfile,
-					      const char *provider,
-					      const char *name);
+extern std::vector<probe *> find_probes_in_objfile (struct objfile *objfile,
+						    const char *provider,
+						    const char *name);
 
 /* Generate a `info probes' command output for probe_ops represented by
    POPS.  If POPS is NULL it considers any probes types.  It is a helper

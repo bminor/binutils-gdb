@@ -167,7 +167,7 @@ ps_get_thread_area (struct ps_prochandle *ph,
 void
 supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
 {
-  if (mips_isa_regsize (get_regcache_arch (regcache)) == 4)
+  if (mips_isa_regsize (regcache->arch ()) == 4)
     mips_supply_gregset (regcache, (const mips_elf_gregset_t *) gregsetp);
   else
     mips64_supply_gregset (regcache, (const mips64_elf_gregset_t *) gregsetp);
@@ -177,7 +177,7 @@ void
 fill_gregset (const struct regcache *regcache,
 	      gdb_gregset_t *gregsetp, int regno)
 {
-  if (mips_isa_regsize (get_regcache_arch (regcache)) == 4)
+  if (mips_isa_regsize (regcache->arch ()) == 4)
     mips_fill_gregset (regcache, (mips_elf_gregset_t *) gregsetp, regno);
   else
     mips64_fill_gregset (regcache, (mips64_elf_gregset_t *) gregsetp, regno);
@@ -186,7 +186,7 @@ fill_gregset (const struct regcache *regcache,
 void
 supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 {
-  if (mips_isa_regsize (get_regcache_arch (regcache)) == 4)
+  if (mips_isa_regsize (regcache->arch ()) == 4)
     mips_supply_fpregset (regcache, (const mips_elf_fpregset_t *) fpregsetp);
   else
     mips64_supply_fpregset (regcache,
@@ -197,7 +197,7 @@ void
 fill_fpregset (const struct regcache *regcache,
 	       gdb_fpregset_t *fpregsetp, int regno)
 {
-  if (mips_isa_regsize (get_regcache_arch (regcache)) == 4)
+  if (mips_isa_regsize (regcache->arch ()) == 4)
     mips_fill_fpregset (regcache, (mips_elf_fpregset_t *) fpregsetp, regno);
   else
     mips64_fill_fpregset (regcache,
@@ -212,7 +212,7 @@ static void
 mips64_linux_regsets_fetch_registers (struct target_ops *ops,
 				      struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int is_fp, is_dsp;
   int have_dsp;
   int regi;
@@ -298,7 +298,7 @@ static void
 mips64_linux_regsets_store_registers (struct target_ops *ops,
 				      struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int is_fp, is_dsp;
   int have_dsp;
   int regi;

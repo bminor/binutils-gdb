@@ -114,9 +114,9 @@ OP (MULTI_SUBSCRIPT)
    Thus, the operation occupies four exp_elements.  */
 OP (OP_LONG)
 
-/* OP_DOUBLE is similar but takes a DOUBLEST constant instead of a
-   long.  */
-OP (OP_DOUBLE)
+/* OP_FLOAT is similar but takes a floating-point constant encoded in
+   the target format for the given type instead of a long.  */
+OP (OP_FLOAT)
 
 /* OP_VAR_VALUE takes one struct block * in the following element,
    and one struct symbol * in the following exp_element, followed
@@ -324,11 +324,6 @@ OP (OP_OBJC_NSSTRING)
 /* An array range operator (in Fortran 90, for "exp:exp", "exp:",
    ":exp" and ":").  */
 OP (OP_RANGE)
-
-/* OP_DECFLOAT is followed by a type pointer in the next exp_element
-   and a dec long constant value in the following exp_element.
-   Then comes another OP_DECFLOAT.  */
-OP (OP_DECFLOAT)
 
 /* OP_ADL_FUNC specifies that the function is to be looked up in an
    Argument Dependent manner (Koenig lookup).  */

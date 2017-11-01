@@ -58,7 +58,7 @@ m68kbsd_supply_fpregset (const struct regset *regset,
 			 struct regcache *regcache,
 			 int regnum, const void *fpregs, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   const gdb_byte *regs = (const gdb_byte *) fpregs;
   int i;
 

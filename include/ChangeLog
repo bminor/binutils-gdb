@@ -1,3 +1,22 @@
+2017-11-01  James Bowman  <james.bowman@ftdichip.com>
+
+	* elf/ft32.h: Add R_FT32_RELAX, SC0, SC1, DIFF32.
+
+2017-10-25  Alan Modra  <amodra@gmail.com>
+
+	PR 22348
+	* opcode/cr16.h (instruction): Delete.
+	(cr16_words, cr16_allWords, cr16_currInsn): Delete.
+	* opcode/crx.h (crx_cst4_map): Rename from cst4_map.
+	(crx_cst4_maps): Rename from cst4_maps.
+	(crx_no_op_insn): Rename from no_op_insn.
+	(instruction): Delete.
+
+2017-10-24  Andrew Waterman  <andrew@sifive.com>
+
+	* opcode/riscv.h (VALID_RVC_LUI_IMM): c.lui can't load the
+	immediate 0.
+
 2017-10-12  James Bowman  <james.bowman@ftdichip.com>
 
 	* elf/ft32.h: Add R_FT32_15.

@@ -303,7 +303,7 @@ fetch_vfp_regs (struct regcache *regcache)
 {
   gdb_byte regbuf[VFP_REGS_SIZE];
   int ret, regno, tid;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* Get the thread id for the ptrace call.  */
@@ -332,7 +332,7 @@ store_vfp_regs (const struct regcache *regcache)
 {
   gdb_byte regbuf[VFP_REGS_SIZE];
   int ret, regno, tid;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* Get the thread id for the ptrace call.  */
@@ -378,7 +378,7 @@ static void
 arm_linux_fetch_inferior_registers (struct target_ops *ops,
 				    struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (-1 == regno)
@@ -416,7 +416,7 @@ static void
 arm_linux_store_inferior_registers (struct target_ops *ops,
 				    struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (-1 == regno)

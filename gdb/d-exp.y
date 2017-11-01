@@ -86,7 +86,7 @@ static int type_aggregate_p (struct type *);
       struct type *type;
     } typed_val_int;
     struct {
-      DOUBLEST dval;
+      gdb_byte val[16];
       struct type *type;
     } typed_val_float;
     struct symbol *sym;
@@ -540,10 +540,10 @@ PrimaryExpression:
 		  write_exp_elt_longcst (pstate, (LONGEST)($1.val));
 		  write_exp_elt_opcode (pstate, OP_LONG); }
 |	FLOAT_LITERAL
-		{ write_exp_elt_opcode (pstate, OP_DOUBLE);
+		{ write_exp_elt_opcode (pstate, OP_FLOAT);
 		  write_exp_elt_type (pstate, $1.type);
-		  write_exp_elt_dblcst (pstate, $1.dval);
-		  write_exp_elt_opcode (pstate, OP_DOUBLE); }
+		  write_exp_elt_floatcst (pstate, $1.val);
+		  write_exp_elt_opcode (pstate, OP_FLOAT); }
 |	CHARACTER_LITERAL
 		{ struct stoken_vector vec;
 		  vec.len = 1;
@@ -682,8 +682,6 @@ parse_number (struct parser_state *ps, const char *p,
 
   if (parsed_float)
     {
-      const char *suffix;
-      int suffix_len;
       char *s, *sp;
 
       /* Strip out all embedded '_' before passing to parse_float.  */
@@ -698,54 +696,51 @@ parse_number (struct parser_state *ps, const char *p,
       *sp = '\0';
       len = strlen (s);
 
-      if (! parse_float (s, len, &putithere->typed_val_float.dval, &suffix))
-	return ERROR;
-
-      suffix_len = s + len - suffix;
-
-      if (suffix_len == 0)
+      /* Check suffix for `i' , `fi' or `li' (idouble, ifloat or ireal).  */
+      if (len >= 1 && tolower (s[len - 1]) == 'i')
+	{
+	  if (len >= 2 && tolower (s[len - 2]) == 'f')
+	    {
+	      putithere->typed_val_float.type
+		= parse_d_type (ps)->builtin_ifloat;
+	      len -= 2;
+	    }
+	  else if (len >= 2 && tolower (s[len - 2]) == 'l')
+	    {
+	      putithere->typed_val_float.type
+		= parse_d_type (ps)->builtin_ireal;
+	      len -= 2;
+	    }
+	  else
+	    {
+	      putithere->typed_val_float.type
+		= parse_d_type (ps)->builtin_idouble;
+	      len -= 1;
+	    }
+	}
+      /* Check suffix for `f' or `l'' (float or real).  */
+      else if (len >= 1 && tolower (s[len - 1]) == 'f')
+	{
+	  putithere->typed_val_float.type
+	    = parse_d_type (ps)->builtin_float;
+	  len -= 1;
+	}
+      else if (len >= 1 && tolower (s[len - 1]) == 'l')
+	{
+	  putithere->typed_val_float.type
+	    = parse_d_type (ps)->builtin_real;
+	  len -= 1;
+	}
+      /* Default type if no suffix.  */
+      else
 	{
 	  putithere->typed_val_float.type
 	    = parse_d_type (ps)->builtin_double;
 	}
-      else if (suffix_len == 1)
-	{
-	  /* Check suffix for `f', `l', or `i' (float, real, or idouble).  */
-	  if (tolower (*suffix) == 'f')
-	    {
-	      putithere->typed_val_float.type
-		= parse_d_type (ps)->builtin_float;
-	    }
-	  else if (tolower (*suffix) == 'l')
-	    {
-	      putithere->typed_val_float.type
-		= parse_d_type (ps)->builtin_real;
-	    }
-	  else if (tolower (*suffix) == 'i')
-	    {
-	      putithere->typed_val_float.type
-		= parse_d_type (ps)->builtin_idouble;
-	    }
-	  else
-	    return ERROR;
-	}
-      else if (suffix_len == 2)
-	{
-	  /* Check suffix for `fi' or `li' (ifloat or ireal).  */
-	  if (tolower (suffix[0]) == 'f' && tolower (suffix[1] == 'i'))
-	    {
-	      putithere->typed_val_float.type
-		= parse_d_type (ps)->builtin_ifloat;
-	    }
-	  else if (tolower (suffix[0]) == 'l' && tolower (suffix[1] == 'i'))
-	    {
-	      putithere->typed_val_float.type
-		= parse_d_type (ps)->builtin_ireal;
-	    }
-	  else
-	    return ERROR;
-	}
-      else
+
+      if (!parse_float (s, len,
+			putithere->typed_val_float.type,
+			putithere->typed_val_float.val))
 	return ERROR;
 
       return FLOAT_LITERAL;

@@ -261,7 +261,7 @@ sparc64_linux_collect_core_fpregset (const struct regset *regset,
 static void
 sparc64_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
   ULONGEST state;
 
   regcache_cooked_write_unsigned (regcache, tdep->pc_regnum, pc);

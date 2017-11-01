@@ -2075,25 +2075,19 @@ svr4_update_solib_event_breakpoints (void)
 
 static void
 svr4_create_probe_breakpoints (struct gdbarch *gdbarch,
-			       VEC (probe_p) **probes,
+			       const std::vector<probe *> *probes,
 			       struct objfile *objfile)
 {
-  int i;
-
-  for (i = 0; i < NUM_PROBES; i++)
+  for (int i = 0; i < NUM_PROBES; i++)
     {
       enum probe_action action = probe_info[i].action;
-      struct probe *probe;
-      int ix;
 
-      for (ix = 0;
-	   VEC_iterate (probe_p, probes[i], ix, probe);
-	   ++ix)
+      for (probe *p : probes[i])
 	{
-	  CORE_ADDR address = get_probe_address (probe, objfile);
+	  CORE_ADDR address = get_probe_address (p, objfile);
 
 	  create_solib_event_breakpoint (gdbarch, address);
-	  register_solib_event_probe (probe, address, action);
+	  register_solib_event_probe (p, address, action);
 	}
     }
 
@@ -2125,13 +2119,11 @@ svr4_create_solib_event_breakpoints (struct gdbarch *gdbarch,
 
       for (with_prefix = 0; with_prefix <= 1; with_prefix++)
 	{
-	  VEC (probe_p) *probes[NUM_PROBES];
+	  std::vector<probe *> probes[NUM_PROBES];
 	  int all_probes_found = 1;
 	  int checked_can_use_probe_arguments = 0;
-	  int i;
 
-	  memset (probes, 0, sizeof (probes));
-	  for (i = 0; i < NUM_PROBES; i++)
+	  for (int i = 0; i < NUM_PROBES; i++)
 	    {
 	      const char *name = probe_info[i].name;
 	      struct probe *p;
@@ -2158,7 +2150,7 @@ svr4_create_solib_event_breakpoints (struct gdbarch *gdbarch,
 	      if (strcmp (name, "rtld_map_failed") == 0)
 		continue;
 
-	      if (VEC_empty (probe_p, probes[i]))
+	      if (probes[i].empty ())
 		{
 		  all_probes_found = 0;
 		  break;
@@ -2167,7 +2159,7 @@ svr4_create_solib_event_breakpoints (struct gdbarch *gdbarch,
 	      /* Ensure probe arguments can be evaluated.  */
 	      if (!checked_can_use_probe_arguments)
 		{
-		  p = VEC_index (probe_p, probes[i], 0);
+		  p = probes[i][0];
 		  if (!can_evaluate_probe_arguments (p))
 		    {
 		      all_probes_found = 0;
@@ -2179,9 +2171,6 @@ svr4_create_solib_event_breakpoints (struct gdbarch *gdbarch,
 
 	  if (all_probes_found)
 	    svr4_create_probe_breakpoints (gdbarch, probes, os->objfile);
-
-	  for (i = 0; i < NUM_PROBES; i++)
-	    VEC_free (probe_p, probes[i]);
 
 	  if (all_probes_found)
 	    return;

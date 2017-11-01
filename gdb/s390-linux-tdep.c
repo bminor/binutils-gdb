@@ -157,7 +157,7 @@ s390_cannot_store_register (struct gdbarch *gdbarch, int regnum)
 static void
 s390_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   regcache_cooked_write_unsigned (regcache, tdep->pc_regnum, pc);
@@ -730,7 +730,7 @@ s390_is_partial_instruction (struct gdbarch *gdbarch, CORE_ADDR loc, int *len)
 static std::vector<CORE_ADDR>
 s390_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   CORE_ADDR loc = regcache_read_pc (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len;
@@ -2697,7 +2697,7 @@ static struct linux_record_tdep s390x_linux_record_tdep;
 static int
 s390_all_but_pc_registers_record (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int i;
 
@@ -2899,7 +2899,7 @@ s390_canonicalize_syscall (int syscall, enum s390_abi_kind abi)
 static int
 s390_linux_syscall_record (struct regcache *regcache, LONGEST syscall_native)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int ret;
   enum gdb_syscall syscall_gdb;

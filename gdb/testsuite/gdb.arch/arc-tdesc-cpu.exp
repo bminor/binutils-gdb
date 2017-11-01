@@ -26,10 +26,10 @@ gdb_start
 # doesn't pass architecture from the target description directly to the
 # disassembler and instead uses one of the valid CPU names.
 
-set filename $srcdir/$subdir/arc-tdesc-cpu.xml
-
-set cmd "set tdesc filename $filename"
-gdb_test $cmd
+gdb_test \
+    "set tdesc filename $srcdir/$subdir/arc-tdesc-cpu.xml" \
+    ".*" \
+    "set tdesc filename \$srcdir/$subdir/arc-tdesc-cpu.xml"
 
 # An error message is emitted by the disassembler, therefore it is not shown
 # unless the disassembler is actually invoked.  Address "0" is not invalid,

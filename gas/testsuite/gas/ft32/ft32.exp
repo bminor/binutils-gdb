@@ -18,4 +18,5 @@
 
 if [istarget ft32-*-*] {
     run_dump_test "insn"
+    run_dump_test "insnsc"
 }

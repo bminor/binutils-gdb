@@ -8,15 +8,10 @@
 # anything to mark it as ELFv1 or ELFv2.  We should get a dynamic
 # reloc on the function address, not have a global entry stub, and
 # my_func should be undefined dynamic with value zero.
-# FIXME someday: No need for a plt entry.
 
 Relocation section .* contains 1 entries:
 .*
 .* R_PPC64_ADDR64 .* my_func \+ 0
-
-Relocation section .* contains 1 entries:
-.*
-.* R_PPC64_JMP_SLOT .* my_func \+ 0
 
 Symbol table '\.dynsym' contains 5 entries:
 .*

@@ -274,8 +274,12 @@ parse_format_string (const char **arg)
 	  case 'g':
 	  case 'E':
 	  case 'G':
-	    if (seen_big_h || seen_big_d || seen_double_big_d)
-	      this_argclass = decfloat_arg;
+	    if (seen_double_big_d)
+	      this_argclass = dec128float_arg;
+	    else if (seen_big_d)
+	      this_argclass = dec64float_arg;
+	    else if (seen_big_h)
+	      this_argclass = dec32float_arg;
 	    else if (seen_big_l)
 	      this_argclass = long_double_arg;
 	    else

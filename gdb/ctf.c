@@ -1186,7 +1186,7 @@ static void
 ctf_fetch_registers (struct target_ops *ops,
 		     struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct bt_ctf_event *event = NULL;
   struct bt_iter_pos *pos;
 

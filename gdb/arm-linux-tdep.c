@@ -478,7 +478,7 @@ arm_linux_supply_gregset (const struct regset *regset,
 			  struct regcache *regcache,
 			  int regnum, const void *gregs_buf, size_t len)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   const gdb_byte *gregs = (const gdb_byte *) gregs_buf;
   int regno;
@@ -790,7 +790,7 @@ arm_linux_sigreturn_next_pc (struct regcache *regcache,
   ULONGEST sp;
   unsigned long sp_data;
   CORE_ADDR next_pc = 0;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int pc_offset = 0;
   int is_sigreturn = 0;
@@ -882,7 +882,7 @@ arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
     }
   else
     {
-      struct gdbarch *gdbarch = get_regcache_arch (self->regcache);
+      struct gdbarch *gdbarch = self->regcache->arch ();
       enum bfd_endian byte_order_for_code = 
 	gdbarch_byte_order_for_code (gdbarch);
       unsigned long this_instr = 
@@ -922,7 +922,7 @@ arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
 static std::vector<CORE_ADDR>
 arm_linux_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct arm_get_next_pcs next_pcs_ctx;
 
   /* If the target does have hardware single step, GDB doesn't have

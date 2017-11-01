@@ -24,6 +24,62 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
     return -1
 }
 
+# Return a string that may be used to match the output of "info break NUM".
+#
+# Optional arguments:
+#
+# source    - the name of the source file
+# func      - the name of the function
+# disp      - the event disposition
+# enabled   - enable state
+# locs      - number of locations
+# line      - source line number (ignored without -source)
+
+proc break_info_1 {num args} {
+    global decimal
+
+    # Column delimiter
+    set c {[\t ]+}
+
+    # Row delimiter
+    set end {[\r\n \t]+}
+
+    # Table header
+    set header "[join [list Num Type Disp Enb Address What] ${c}]"
+
+    # Get/configure any optional parameters.
+    parse_args [list {source ""} {func ".*"} {disp "keep"} \
+		    {enabled "y"} {locs 1} [list line $decimal] \
+		    {type "breakpoint"}]
+
+    if {$source != ""} {
+	set source "$source:$line"
+    }
+
+    # Result starts with the standard header.
+    set result "$header${end}"
+
+    # Set up for multi-location breakpoint marker.
+    if {$locs == 1} {
+	set multi ".*"
+    } else {
+	set multi "<MULTIPLE>${end}"
+    }
+    append result "[join [list $num $type $disp $enabled $multi] $c]"
+
+    # Add location info.
+    for {set i 1} {$i <= $locs} {incr i} {
+	if {$locs > 1} {
+	    append result "[join [list $num.$i $enabled] $c].*"
+	}
+
+	#  Add function/source file info.
+	append result "in $func at .*$source${end}"
+    }
+
+    return $result
+}
+
 #
 # func1 is a static inlined function that is called once.
 # The result should be a single-location breakpoint.
@@ -111,3 +167,22 @@ gdb_test "print func1" \
 #
 gdb_test "print func2" \
     "\\\$.* = {int \\(int\\)} .* <func2>"
+
+# Test that "info break" reports the location of the breakpoints "inside"
+# the inlined functions
+
+set results(1) [break_info_1 1 -source $srcfile -func "func1"]
+set results(2) [break_info_1 2 -locs 2 -source $srcfile -func "func2"]
+set results(3) [break_info_1 3 -source $srcfile -func "func3b"]
+set results(4) [break_info_1 4 -locs 2 -source $srcfile -func "func4b"]
+set results(5) [break_info_1 5 -locs 2 -source $srcfile -func "func5b"]
+set results(6) [break_info_1 6 -locs 3 -source $srcfile -func "func6b"]
+set results(7) [break_info_1 7 -locs 2 -source $srcfile -func "func7b"]
+set results(8) [break_info_1 8 -locs 3 -source $srcfile -func "func8b"]
+
+for {set i 1} {$i <= [array size results]} {incr i} {
+    send_log "Expecting: $results($i)\n"
+    gdb_test "info break $i" $results($i)
+}
+
+unset -nocomplain results

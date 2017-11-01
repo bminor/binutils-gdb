@@ -37,7 +37,9 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile debug] } {
 set unique_file [standard_output_file "unique-file.unique-extension"]
 set unique_file_dir [standard_output_file ""]
 
-run_on_host "touch $unique_file" "touch" "$unique_file"
+run_on_host \
+    "touch OUTPUT_DIR/unique-file.unique-extension" \
+    "touch" "$unique_file"
 
 # Initial setup for simple test (wildcard expansion, variable substitution).
 
@@ -48,7 +50,8 @@ proc initial_setup_simple { startup_with_shell run_args } {
 
     gdb_test_no_output "set startup-with-shell $startup_with_shell"
 
-    gdb_test_no_output "set args $run_args"
+    gdb_test_no_output "set args $run_args" \
+	"set args \$run_args"
 
     set test "inferior started"
     if { [runto_main] } {

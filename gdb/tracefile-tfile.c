@@ -843,7 +843,7 @@ static void
 tfile_fetch_registers (struct target_ops *ops,
 		       struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int offset, regn, regsize, dummy;
 
   /* An uninitialized reg size says we're not going to be
@@ -859,7 +859,7 @@ tfile_fetch_registers (struct target_ops *ops,
 
       for (regn = 0; regn < gdbarch_num_regs (gdbarch); regn++)
 	{
-	  if (!remote_register_number_and_offset (get_regcache_arch (regcache),
+	  if (!remote_register_number_and_offset (regcache->arch (),
 						  regn, &dummy, &offset))
 	    continue;
 

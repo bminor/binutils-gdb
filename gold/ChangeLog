@@ -1,3 +1,8 @@
+2017-10-25  Alan Modra  <amodra@gmail.com>
+
+	* symtab.cc (Symbol_table::add_from_relobj): Match "__gnu_lto_slim"
+	optionally prefixed with "_".
+
 2017-10-20  Sriraman Tallam  <tmsriram@google.com>
 
 	* options.h (-z,text_unlikely_segment): New option.
