@@ -1329,9 +1329,8 @@ pe_bfd_read_buildid (bfd *abfd)
   /* PR 20605 and 22373: Make sure that the data is really there.
      Note - since we are dealing with unsigned quantities we have
      to be careful to check for potential overflows.  */
-  if (dataoff > section->size
-      || size > section->size
-      || dataoff + size > section->size)
+  if (dataoff >= section->size
+      || size > section->size - dataoff)
     {
       _bfd_error_handler (_("%B: Error: Debug Data ends beyond end of debug directory."),
 			  abfd);

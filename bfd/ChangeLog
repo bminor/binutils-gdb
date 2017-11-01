@@ -1,3 +1,9 @@
+2017-11-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 22373
+	* peicode.h (pe_bfd_read_buildid): Revise check for invalid size
+	and offset in light of further possible bogus values.
+
 2017-11-01  Alan Modra  <amodra@gmail.com>
 
 	PR 22374
