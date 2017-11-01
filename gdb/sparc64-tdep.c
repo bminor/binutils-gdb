@@ -341,7 +341,7 @@ adi_is_addr_mapped (CORE_ADDR vaddr, size_t cnt)
    for "SIZE" number of bytes.  */
 
 static int
-adi_read_versions (CORE_ADDR vaddr, size_t size, unsigned char *tags)
+adi_read_versions (CORE_ADDR vaddr, size_t size, gdb_byte *tags)
 {
   int fd = adi_tag_fd ();
   if (fd == -1)
@@ -383,7 +383,7 @@ adi_write_versions (CORE_ADDR vaddr, size_t size, unsigned char *tags)
    at "VADDR" with number of "CNT".  */
 
 static void
-adi_print_versions (CORE_ADDR vaddr, size_t cnt, unsigned char *tags)
+adi_print_versions (CORE_ADDR vaddr, size_t cnt, gdb_byte *tags)
 {
   int v_idx = 0;
   const int maxelts = 8;  /* # of elements per line */
@@ -415,21 +415,17 @@ static void
 do_examine (CORE_ADDR start, int bcnt)
 {
   CORE_ADDR vaddr = adi_normalize_address (start);
-  struct cleanup *cleanup;
 
   CORE_ADDR vstart = adi_align_address (vaddr);
   int cnt = adi_convert_byte_count (vaddr, bcnt, vstart);
-  unsigned char *buf = (unsigned char *) xmalloc (cnt);
-  cleanup = make_cleanup (xfree, buf);
-  int read_cnt = adi_read_versions (vstart, cnt, buf);
+  gdb::def_vector<gdb_byte> buf (cnt);
+  int read_cnt = adi_read_versions (vstart, cnt, buf.data ());
   if (read_cnt == -1)
     error (_("No ADI information"));
   else if (read_cnt < cnt)
     error(_("No ADI information at %s"), paddress (target_gdbarch (), vaddr));
 
-  adi_print_versions (vstart, cnt, buf);
-
-  do_cleanups (cleanup);
+  adi_print_versions (vstart, cnt, buf.data ());
 }
 
 static void

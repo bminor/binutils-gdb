@@ -1,5 +1,11 @@
 2017-11-04  Tom Tromey  <tom@tromey.com>
 
+	* sparc64-tdep.c (do_examine): Use gdb::def_vector.
+	(adi_read_versions): Change "tags" to "gdb_byte *".
+	(adi_print_versions): Likewise.
+
+2017-11-04  Tom Tromey  <tom@tromey.com>
+
 	* breakpoint.c
 	(scoped_rbreak_breakpoints::scoped_rbreak_breakpoints): Rename
 	from start_rbreak_breakpoints.
