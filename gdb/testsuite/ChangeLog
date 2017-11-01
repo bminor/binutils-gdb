@@ -1,3 +1,8 @@
+2017-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.mi/mi-break.exp (test_breakpoint_commands): Test backtrace
+	as a breakpoint command.
+
 2017-10-28  Maksim Dzabraev  <dzabraew@gmail.com>
 
 	PR python/21213

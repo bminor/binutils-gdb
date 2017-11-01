@@ -1,3 +1,9 @@
+2017-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* cli/cli-script.c (execute_control_command): Rename to ...
+	(execute_control_command_1): ... this.
+	(execute_control_command): New function.
+
 2017-10-31  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* tracepoint.c (tfind_command): Remove const_cast.
