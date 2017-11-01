@@ -12,6 +12,6 @@ Raw dump of debug contents of section \.debug_line:
   \[0x.*\]  Advance Line by 1 to 3
   \[0x.*\]  Extended opcode 2: set Address to 0x.*
   \[0x.*\]  Copy
-  \[0x.*\]  Advance PC by fixed size amount . to 0x.*
+  \[0x.*\]  Advance PC by fixed size amount .* to 0x.*
   \[0x.*\]  Extended opcode 1: End of Sequence
 #pass

@@ -12453,6 +12453,8 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     case EM_CYGNUS_D10V:
     case EM_D10V:
       return reloc_type == 3; /* R_D10V_16.  */
+    case EM_FT32:
+      return reloc_type == 2; /* R_FT32_16.  */
     case EM_H8S:
     case EM_H8_300:
     case EM_H8_300H:

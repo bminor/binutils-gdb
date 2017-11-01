@@ -1,3 +1,7 @@
+2017-11-01  James Bowman  <james.bowman@ftdichip.com>
+
+	* readelf.c (is_16bit_abs_reloc): Add entry for FT32.
+
 2017-10-31  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (process_relocs): Tell users if no static relocs were

@@ -1,3 +1,20 @@
+2017-11-01  James Bowman  <james.bowman@ftdichip.com>
+
+	* archures.c: Add bfd_mach_ft32b.
+	* cpu-ft32.c: Add arch_info_struct.
+	* elf32-ft32.c: Add R_FT32_RELAX, SC0, SC1,
+	DIFF32.
+	(ft32_elf_relocate_section): Add clauses for R_FT32_SC0, SC1,
+	DIFF32.
+	(ft32_reloc_shortable, elf32_ft32_is_diff_reloc)
+	(elf32_ft32_adjust_diff_reloc_value)
+	(elf32_ft32_adjust_reloc_if_spans_insn)
+	(elf32_ft32_relax_delete_bytes, elf32_ft32_relax_is_branch_target)
+	(ft32_elf_relax_section): New function.
+	* reloc.c: Add BFD_RELOC_FT32_RELAX, SC0, SC1, DIFF32.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2017-11-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 22376

@@ -1,9 +1,36 @@
+2017-11-01  James Bowman  <james.bowman@ftdichip.com>
+
+	* config/tc-ft32.c (md_assemble): Add relaxation reloc
+	BFD_RELOC_FT32_RELAX.
+	(md_longopts): Add "norelax" and "no-relax".
+	(md_apply_fix): Add reloc BFD_RELOC_FT32_DIFF32.
+	(relaxable_section, ft32_validate_fix_sub, ft32_force_relocation,
+	ft32_allow_local_subtract): New function.
+	* config/tc-ft32.h: Remove unused MD_PCREL_FROM_SECTION.
+	* testsuite/gas/ft32/insnsc.s: New test exercising all FT32B
+	shortcodes.
+	* testsuite/gas/ft32/insnsc.d: New driver file.
+	* testsuite/gas/all/gas.exp: Update.
+	* testsuite/gas/ft32/ft32.exp: Run the new test.
+	* testsuite/gas/ft32/insn.d: Update.
+	* testsuite/gas/elf/dwarf2-11.d: Update.
+	* testsuite/gas/elf/dwarf2-12.d: Update.
+	* testsuite/gas/elf/dwarf2-13.d: Update.
+	* testsuite/gas/elf/dwarf2-14.d: Update.
+	* testsuite/gas/elf/dwarf2-15.d: Update.
+	* testsuite/gas/elf/dwarf2-16.d: Update.
+	* testsuite/gas/elf/dwarf2-17.d: Update.
+	* testsuite/gas/elf/dwarf2-18.d: Update.
+	* testsuite/gas/elf/dwarf2-3.d: Update.
+	* testsuite/gas/elf/dwarf2-5.d: Update.
+	* testsuite/gas/elf/dwarf2-7.d: Update.
+
 2017-11-01  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* config/tc-arm.c (arm_ext_v2): Define to ARM_EXT_V2 feature bit.
-	* testsuite/gas/arm/copro.s: Split into ...
+	* testsuite/gas/arm/copro.s: Split into
 	* testsuite/gas/arm/copro-arm_v2plus-thumb_v6t2plus.s: This while
-	changing it to unified syntax and ...
+	changing it to unified syntax and
 	* testsuite/gas/arm/copro-arm_v5plus-thumb_v6t2plus.s: this and ...
 	* testsuite/gas/arm/copro-arm_v5teplus-thumb_v6t2plus.s: This and ...
 	* testsuite/gas/arm/copro-arm_v6plus-thumb_v6t2plus.s: This.

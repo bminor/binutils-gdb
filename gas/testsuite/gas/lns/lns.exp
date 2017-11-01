@@ -34,6 +34,7 @@ if {
 	 || [istarget avr*-*-*]
 	 || [istarget cr16-*-*]
 	 || [istarget crx-*-*]
+	 || [istarget ft32*-*]
 	 || [istarget mn10*-*-*]
 	 || [istarget msp430-*-*]
 	 || [istarget nds32*-*-*]
