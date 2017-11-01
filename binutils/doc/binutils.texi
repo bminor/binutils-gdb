@@ -4661,8 +4661,13 @@ given.
 @itemx --all
 Equivalent to specifying @option{--file-header},
 @option{--program-headers}, @option{--sections}, @option{--symbols},
-@option{--relocs}, @option{--dynamic}, @option{--notes} and
-@option{--version-info}.
+@option{--relocs}, @option{--dynamic}, @option{--notes},
+@option{--version-info}, @option{--arch-specific}, @option{--unwind},
+@option{--section-groups} and @option{--histogram}.
+
+Note - this option does not enable @option{--use-dynamic} itself, so
+if that option is not present on the command line then dynamic symbols
+and dynamic relocs will not be displayed.
 
 @item -h
 @itemx --file-header
@@ -4757,6 +4762,9 @@ is any.
 When displaying symbols, this option makes @command{readelf} use the
 symbol hash tables in the file's dynamic section, rather than the
 symbol table sections.
+
+When displaying relocations, this option makes @command{readelf}
+display the dynamic relocations rather than the static relocations.
 
 @item -x <number or name>
 @itemx --hex-dump=<number or name>

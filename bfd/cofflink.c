@@ -212,6 +212,10 @@ coff_link_check_archive_element (bfd *abfd,
   if (h->type != bfd_link_hash_undefined)
     return TRUE;
 
+  /* PR 22369 - Skip non COFF objects in the archive.  */
+  if (! bfd_family_coff (abfd))
+    return TRUE;
+
   /* Include this element?  */
   if (!(*info->callbacks->add_archive_element) (info, abfd, name, &abfd))
     return TRUE;

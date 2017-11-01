@@ -1659,7 +1659,6 @@ _bfd_coff_get_external_symbols (bfd *abfd)
     }
 
   obj_coff_external_syms (abfd) = syms;
-
   return TRUE;
 }
 
@@ -1747,12 +1746,16 @@ _bfd_coff_read_string_table (bfd *abfd)
 bfd_boolean
 _bfd_coff_free_symbols (bfd *abfd)
 {
+  if (! bfd_family_coff (abfd))
+    return FALSE;
+
   if (obj_coff_external_syms (abfd) != NULL
       && ! obj_coff_keep_syms (abfd))
     {
       free (obj_coff_external_syms (abfd));
       obj_coff_external_syms (abfd) = NULL;
     }
+
   if (obj_coff_strings (abfd) != NULL
       && ! obj_coff_keep_strings (abfd))
     {
@@ -1760,6 +1763,7 @@ _bfd_coff_free_symbols (bfd *abfd)
       obj_coff_strings (abfd) = NULL;
       obj_coff_strings_len (abfd) = 0;
     }
+
   return TRUE;
 }
 
