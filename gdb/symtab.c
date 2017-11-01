@@ -4506,20 +4506,10 @@ rbreak_command_wrapper (char *regexp, int from_tty)
   rbreak_command (regexp, from_tty);
 }
 
-/* A cleanup function that calls end_rbreak_breakpoints.  */
-
-static void
-do_end_rbreak_breakpoints (void *ignore)
-{
-  end_rbreak_breakpoints ();
-}
-
 static void
 rbreak_command (char *regexp, int from_tty)
 {
-  struct cleanup *old_chain;
-  char *string = NULL;
-  int len = 0;
+  std::string string;
   const char **files = NULL;
   const char *file_name;
   int nfiles = 0;
@@ -4550,8 +4540,7 @@ rbreak_command (char *regexp, int from_tty)
 						       FUNCTIONS_DOMAIN,
 						       nfiles, files);
 
-  start_rbreak_breakpoints ();
-  old_chain = make_cleanup (do_end_rbreak_breakpoints, NULL);
+  scoped_rbreak_breakpoints finalize;
   for (const symbol_search &p : symbols)
     {
       if (p.msymbol.minsym == NULL)
@@ -4559,20 +4548,9 @@ rbreak_command (char *regexp, int from_tty)
 	  struct symtab *symtab = symbol_symtab (p.symbol);
 	  const char *fullname = symtab_to_fullname (symtab);
 
-	  int newlen = (strlen (fullname)
-			+ strlen (SYMBOL_LINKAGE_NAME (p.symbol))
-			+ 4);
-
-	  if (newlen > len)
-	    {
-	      string = (char *) xrealloc (string, newlen);
-	      len = newlen;
-	    }
-	  strcpy (string, fullname);
-	  strcat (string, ":'");
-	  strcat (string, SYMBOL_LINKAGE_NAME (p.symbol));
-	  strcat (string, "'");
-	  break_command (string, from_tty);
+	  string = string_printf ("%s:'%s'", fullname,
+				  SYMBOL_LINKAGE_NAME (p.symbol));
+	  break_command (&string[0], from_tty);
 	  print_symbol_info (FUNCTIONS_DOMAIN,
 			     p.symbol,
 			     p.block,
@@ -4580,24 +4558,14 @@ rbreak_command (char *regexp, int from_tty)
 	}
       else
 	{
-	  int newlen = (strlen (MSYMBOL_LINKAGE_NAME (p.msymbol.minsym)) + 3);
+	  string = string_printf ("'%s'",
+				  MSYMBOL_LINKAGE_NAME (p.msymbol.minsym));
 
-	  if (newlen > len)
-	    {
-	      string = (char *) xrealloc (string, newlen);
-	      len = newlen;
-	    }
-	  strcpy (string, "'");
-	  strcat (string, MSYMBOL_LINKAGE_NAME (p.msymbol.minsym));
-	  strcat (string, "'");
-
-	  break_command (string, from_tty);
+	  break_command (&string[0], from_tty);
 	  printf_filtered ("<function, no debug info> %s;\n",
 			   MSYMBOL_PRINT_NAME (p.msymbol.minsym));
 	}
     }
-
-  do_cleanups (old_chain);
 }
 
 

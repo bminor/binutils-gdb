@@ -1,5 +1,16 @@
 2017-11-04  Tom Tromey  <tom@tromey.com>
 
+	* breakpoint.c
+	(scoped_rbreak_breakpoints::scoped_rbreak_breakpoints): Rename
+	from start_rbreak_breakpoints.
+	(scoped_rbreak_breakpoints): Rename from end_rbreak_breakpoints.
+	* breakpoint.h (class scoped_rbreak_breakpoints): New.
+	(start_rbreak_breakpoints, end_rbreak_breakpoints): Remove.
+	* symtab.c (do_end_rbreak_breakpoints): Remove.
+	(rbreak_command): Use scoped_rbreak_breakpoints, std::string.
+
+2017-11-04  Tom Tromey  <tom@tromey.com>
+
 	* cp-namespace.c (reset_directive_searched): Remove.
 	(cp_lookup_symbol_via_imports): Use scoped_restore.
 	* cp-support.c (reset_directive_searched): Remove.

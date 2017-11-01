@@ -644,8 +644,7 @@ static int rbreak_start_breakpoint_count;
 /* Called at the start an "rbreak" command to record the first
    breakpoint made.  */
 
-void
-start_rbreak_breakpoints (void)
+scoped_rbreak_breakpoints::scoped_rbreak_breakpoints ()
 {
   rbreak_start_breakpoint_count = breakpoint_count;
 }
@@ -653,8 +652,7 @@ start_rbreak_breakpoints (void)
 /* Called at the end of an "rbreak" command to record the last
    breakpoint made.  */
 
-void
-end_rbreak_breakpoints (void)
+scoped_rbreak_breakpoints::~scoped_rbreak_breakpoints ()
 {
   prev_breakpoint_count = rbreak_start_breakpoint_count;
 }

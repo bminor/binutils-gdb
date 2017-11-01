@@ -1601,10 +1601,18 @@ extern VEC(breakpoint_p) *static_tracepoints_here (CORE_ADDR addr);
    that each command is suitable for tracepoint command list.  */
 extern void check_tracepoint_command (char *line, void *closure);
 
-/* Call at the start and end of an "rbreak" command to register
-   breakpoint numbers for a later "commands" command.  */
-extern void start_rbreak_breakpoints (void);
-extern void end_rbreak_breakpoints (void);
+/* Create an instance of this to start registering breakpoint numbers
+   for a later "commands" command.  */
+
+class scoped_rbreak_breakpoints
+{
+public:
+
+  scoped_rbreak_breakpoints ();
+  ~scoped_rbreak_breakpoints ();
+
+  DISABLE_COPY_AND_ASSIGN (scoped_rbreak_breakpoints);
+};
 
 /* Breakpoint iterator function.
 
