@@ -1271,19 +1271,13 @@ jit_frame_prev_register (struct frame_info *this_frame, void **cache, int reg)
     return frame_unwind_got_optimized (this_frame, reg);
 
   gdbarch = priv->regcache->arch ();
-  if (reg < gdbarch_num_regs (gdbarch))
-    {
-      gdb_byte *buf = (gdb_byte *) alloca (register_size (gdbarch, reg));
-      enum register_status status;
+  gdb_byte *buf = (gdb_byte *) alloca (register_size (gdbarch, reg));
+  enum register_status status = priv->regcache->cooked_read (reg, buf);
 
-      status = regcache_raw_read (priv->regcache, reg, buf);
-      if (status == REG_VALID)
-	return frame_unwind_got_bytes (this_frame, reg, buf);
-      else
-	return frame_unwind_got_optimized (this_frame, reg);
-    }
+  if (status == REG_VALID)
+    return frame_unwind_got_bytes (this_frame, reg, buf);
   else
-    return gdbarch_pseudo_register_read_value (gdbarch, priv->regcache, reg);
+    return frame_unwind_got_optimized (this_frame, reg);
 }
 
 /* Relay everything back to the unwinder registered by the JIT debug
