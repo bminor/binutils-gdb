@@ -1,5 +1,10 @@
 2017-11-09  Tom Tromey  <tom@tromey.com>
 
+	* psymtab.c (psymbol_hash): Do not hash string contents.
+	(psymbol_compare): Add comment.
+
+2017-11-09  Tom Tromey  <tom@tromey.com>
+
 	* dictionary.c (dict_hash): Move "TKB" check into the "switch".
 
 2017-11-08  Joel Brobecker  <brobecker@adacore.com>

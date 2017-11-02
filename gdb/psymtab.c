@@ -1548,7 +1548,9 @@ psymbol_hash (const void *addr, int length)
   h = hash_continue (&lang, sizeof (unsigned int), h);
   h = hash_continue (&domain, sizeof (unsigned int), h);
   h = hash_continue (&theclass, sizeof (unsigned int), h);
-  h = hash_continue (psymbol->ginfo.name, strlen (psymbol->ginfo.name), h);
+  /* Note that psymbol names are interned via symbol_set_names, so
+     there's no need to hash the contents of the name here.  */
+  h = hash_continue (&psymbol->ginfo.name, sizeof (psymbol->ginfo.name), h);
 
   return h;
 }
@@ -1568,6 +1570,9 @@ psymbol_compare (const void *addr1, const void *addr2, int length)
 	  && sym1->ginfo.language == sym2->ginfo.language
           && PSYMBOL_DOMAIN (sym1) == PSYMBOL_DOMAIN (sym2)
           && PSYMBOL_CLASS (sym1) == PSYMBOL_CLASS (sym2)
+	  /* Note that psymbol names are interned via
+	     symbol_set_names, so there's no need to compare the
+	     contents of the name here.  */
           && sym1->ginfo.name == sym2->ginfo.name);
 }
 
