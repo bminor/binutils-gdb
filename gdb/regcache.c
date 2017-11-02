@@ -51,7 +51,6 @@ struct regcache_descr
      redundant information - if the PC is constructed from two
      registers then those registers and not the PC lives in the raw
      cache.  */
-  int nr_raw_registers;
   long sizeof_raw_registers;
 
   /* The cooked register space.  Each cooked register in the range
@@ -100,7 +99,6 @@ init_regcache_descr (struct gdbarch *gdbarch)
 
   /* Construct a strictly RAW register cache.  Don't allow pseudo's
      into the register cache.  */
-  descr->nr_raw_registers = gdbarch_num_regs (gdbarch);
 
   /* Lay out the register cache.
 
@@ -116,7 +114,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
       = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
     descr->register_offset
       = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
-    for (i = 0; i < descr->nr_raw_registers; i++)
+    for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
       {
 	descr->sizeof_register[i] = TYPE_LENGTH (descr->register_type[i]);
 	descr->register_offset[i] = offset;
@@ -199,8 +197,7 @@ regcache::regcache (gdbarch *gdbarch, address_space *aspace_,
   else
     {
       m_registers = XCNEWVEC (gdb_byte, m_descr->sizeof_raw_registers);
-      m_register_status = XCNEWVEC (signed char,
-				    m_descr->nr_raw_registers);
+      m_register_status = XCNEWVEC (signed char, gdbarch_num_regs (gdbarch));
     }
   m_ptid = minus_one_ptid;
 }
@@ -378,7 +375,7 @@ regcache::get_register_status (int regnum) const
   if (m_readonly_p)
     gdb_assert (regnum < m_descr->nr_cooked_registers);
   else
-    gdb_assert (regnum < m_descr->nr_raw_registers);
+    gdb_assert (regnum < num_raw_registers ());
 
   return (enum register_status) m_register_status[regnum];
 }
@@ -401,7 +398,7 @@ regcache::invalidate (int regnum)
 void
 regcache::assert_regnum (int regnum) const
 {
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  gdb_assert (regnum >= 0 && regnum < gdbarch_num_regs (arch ()));
 }
 
 /* Global structure containing the current regcache.  */
@@ -677,7 +674,7 @@ regcache::cooked_read (int regnum, gdb_byte *buf)
 {
   gdb_assert (regnum >= 0);
   gdb_assert (regnum < m_descr->nr_cooked_registers);
-  if (regnum < m_descr->nr_raw_registers)
+  if (regnum < num_raw_registers ())
     return raw_read (regnum, buf);
   else if (m_readonly_p
 	   && m_register_status[regnum] != REG_UNKNOWN)
@@ -731,7 +728,7 @@ regcache::cooked_read_value (int regnum)
   gdb_assert (regnum >= 0);
   gdb_assert (regnum < m_descr->nr_cooked_registers);
 
-  if (regnum < m_descr->nr_raw_registers
+  if (regnum < num_raw_registers ()
       || (m_readonly_p && m_register_status[regnum] != REG_UNKNOWN)
       || !gdbarch_pseudo_register_read_value_p (m_descr->gdbarch))
     {
@@ -890,7 +887,7 @@ regcache::cooked_write (int regnum, const gdb_byte *buf)
 {
   gdb_assert (regnum >= 0);
   gdb_assert (regnum < m_descr->nr_cooked_registers);
-  if (regnum < m_descr->nr_raw_registers)
+  if (regnum < num_raw_registers ())
     raw_write (regnum, buf);
   else
     gdbarch_pseudo_register_write (m_descr->gdbarch, this,
@@ -1280,6 +1277,12 @@ regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
   reinit_frame_cache ();
 }
 
+int
+regcache::num_raw_registers () const
+{
+  return gdbarch_num_regs (arch ());
+}
+
 void
 regcache::debug_print_register (const char *func,  int regno)
 {
@@ -1435,7 +1438,7 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 	{
 	  if (regnum < 0)
 	    fprintf_unfiltered (file, "Raw value");
-	  else if (regnum >= m_descr->nr_raw_registers)
+	  else if (regnum >= num_raw_registers ())
 	    fprintf_unfiltered (file, "<cooked>");
 	  else if (get_register_status (regnum) == REG_UNKNOWN)
 	    fprintf_unfiltered (file, "<invalid>");
@@ -1461,7 +1464,7 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 	      enum register_status status;
 	      struct value *value = NULL;
 
-	      if (regnum < m_descr->nr_raw_registers)
+	      if (regnum < num_raw_registers ())
 		{
 		  raw_update (regnum);
 		  status = get_register_status (regnum);
@@ -1529,7 +1532,7 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
 	    {
 	      fprintf_unfiltered (file, "Rmt Nr  g/G Offset");
 	    }
-	  else if (regnum < m_descr->nr_raw_registers)
+	  else if (regnum < num_raw_registers ())
 	    {
 	      int pnum, poffset;
 

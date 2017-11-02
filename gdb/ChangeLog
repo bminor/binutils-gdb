@@ -1,5 +1,19 @@
 2017-11-02  Yao Qi  <yao.qi@linaro.org>
 
+	* regcache.c (struct regcache_descr) <nr_raw_registers>: Remove.
+	(init_regcache_descr): Use gdbarch_num_regs.
+	(regcache::regcache): Likewise.
+	(regcache::get_register_status): Likewise.
+	(regcache::assert_raw_regnum): Likewise.
+	(regcache::cooked_read): Likewise.
+	(regcache::cooked_read_value): Likewise.
+	(regcache::cooked_write): Likewise.
+	(regcache::dump): Likewise.
+	(regcache::num_raw_registers): New method.
+	* regcache.h (class regcache) <num_raw_registers>: New.
+
+2017-11-02  Yao Qi  <yao.qi@linaro.org>
+
 	* regcache.c (regcache::assert_regnum): New method.
 	(regcache::invalidate): Call assert_regnum.
 	(regcache::raw_update): Likewise.

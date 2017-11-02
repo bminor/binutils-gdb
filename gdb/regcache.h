@@ -343,6 +343,8 @@ public:
 protected:
   regcache (gdbarch *gdbarch, address_space *aspace_, bool readonly_p_);
 
+  int num_raw_registers () const;
+
   static std::forward_list<regcache *> current_regcache;
 
 private:
