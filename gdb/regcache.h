@@ -232,8 +232,8 @@ typedef struct cached_reg
 class regcache
 {
 public:
-  regcache (gdbarch *gdbarch, const address_space *aspace_)
-    : regcache (gdbarch, aspace_, true)
+  regcache (gdbarch *gdbarch)
+    : regcache (gdbarch, nullptr, true)
   {}
 
   struct readonly_t {};

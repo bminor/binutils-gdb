@@ -1361,10 +1361,9 @@ ppu2spu_sniffer (const struct frame_unwind *self,
 	{
 	  struct ppu2spu_cache *cache
 	    = FRAME_OBSTACK_CALLOC (1, struct ppu2spu_cache);
-
-	  const address_space *aspace = get_frame_address_space (this_frame);
 	  std::unique_ptr<struct regcache> regcache
-	    (new struct regcache (data.gdbarch, aspace));
+	    (new struct regcache (data.gdbarch));
+
 	  regcache_save (regcache.get (), ppu2spu_unwind_register, &data);
 
 	  cache->frame_id = frame_id_build (base, func);

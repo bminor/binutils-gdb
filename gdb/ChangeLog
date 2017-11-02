@@ -1,5 +1,15 @@
 2017-11-02  Yao Qi  <yao.qi@linaro.org>
 
+	* frame.c (do_frame_register_read): Remove aspace.
+	* jit.c (jit_frame_sniffer): Likwise.
+	* ppc-linux-tdep.c (ppu2spu_sniffer): Likewise.
+	* regcache.c (regcache::regcache): Pass nullptr.
+	(regcache_print): Caller updated.
+	* regcache.h (regcache::regcache): Remove one constructor
+	parameter aspace.
+
+2017-11-02  Yao Qi  <yao.qi@linaro.org>
+
 	* regcache.h (regcache) <m_readonly_p>: Change it to const bool.
 
 2017-11-02  Yao Qi  <yao.qi@linaro.org>

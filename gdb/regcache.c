@@ -211,7 +211,7 @@ do_cooked_read (void *src, int regnum, gdb_byte *buf)
 }
 
 regcache::regcache (readonly_t, const regcache &src)
-  : regcache (src.arch (), src.aspace (), true)
+  : regcache (src.arch (), nullptr, true)
 {
   gdb_assert (!src.m_readonly_p);
   save (do_cooked_read, (void *) &src);
@@ -1574,7 +1574,7 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
       /* For the benefit of "maint print registers" & co when
 	 debugging an executable, allow dumping a regcache even when
 	 there is no thread selected / no registers.  */
-      regcache dummy_regs (target_gdbarch (), nullptr);
+      regcache dummy_regs (target_gdbarch ());
       dummy_regs.dump (out, what_to_dump);
     }
 }

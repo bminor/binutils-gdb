@@ -1020,9 +1020,8 @@ do_frame_register_read (void *src, int regnum, gdb_byte *buf)
 std::unique_ptr<struct regcache>
 frame_save_as_regcache (struct frame_info *this_frame)
 {
-  const address_space *aspace = get_frame_address_space (this_frame);
   std::unique_ptr<struct regcache> regcache
-    (new struct regcache (get_frame_arch (this_frame), aspace));
+    (new struct regcache (get_frame_arch (this_frame)));
 
   regcache_save (regcache.get (), do_frame_register_read, this_frame);
   return regcache;
