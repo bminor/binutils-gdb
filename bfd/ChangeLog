@@ -1,5 +1,18 @@
 2017-11-04  Alan Modra  <amodra@gmail.com>
 
+	* elf32-hppa.c (enum _tls_type): Move.
+	(struct elf32_hppa_link_hash_entry): Make tls_type a bitfield.
+	(elf32_hppa_check_relocs): Set DF_STATIC_TLS only for shared libraries.
+	Tidy tls_type handling.  Set symbol tls_type for GOT_TLS_LDM too.
+	(got_entries_needed, got_relocs_needed): New functions.
+	(allocate_dynrelocs): Use them.
+	(elf32_hppa_size_dynamic_sections): Likewise.
+	(elf32_hppa_relocate_section): Delete bogus FIXME.  Formatting.
+	Correct code emitting relocs on GD/IE got entries.  Report an
+	error when a symbol has both normal and TLS GOT relocs.
+
+2017-11-04  Alan Modra  <amodra@gmail.com>
+
 	PR 22394
 	* elf32-hppa.c (elf32_hppa_check_relocs): Don't create dyn_relocs
 	for plabels when non-pic.
