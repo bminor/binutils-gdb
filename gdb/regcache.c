@@ -53,7 +53,6 @@ struct regcache_descr
      cache.  */
   int nr_raw_registers;
   long sizeof_raw_registers;
-  long sizeof_raw_register_status;
 
   /* The cooked register space.  Each cooked register in the range
      [0..NR_RAW_REGISTERS) is direct-mapped onto the corresponding raw
@@ -63,7 +62,6 @@ struct regcache_descr
      gdbarch_pseudo_register_read and gdbarch_pseudo_register_write.  */
   int nr_cooked_registers;
   long sizeof_cooked_registers;
-  long sizeof_cooked_register_status;
 
   /* Offset and size (in 8 bit bytes), of each register in the
      register cache.  All registers (including those in the range
@@ -92,8 +90,6 @@ init_regcache_descr (struct gdbarch *gdbarch)
      either mapped onto raw-registers or memory.  */
   descr->nr_cooked_registers = gdbarch_num_regs (gdbarch)
 			       + gdbarch_num_pseudo_regs (gdbarch);
-  descr->sizeof_cooked_register_status
-    = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
   /* Fill in a table of register types.  */
   descr->register_type
@@ -105,7 +101,6 @@ init_regcache_descr (struct gdbarch *gdbarch)
   /* Construct a strictly RAW register cache.  Don't allow pseudo's
      into the register cache.  */
   descr->nr_raw_registers = gdbarch_num_regs (gdbarch);
-  descr->sizeof_raw_register_status = gdbarch_num_regs (gdbarch);
 
   /* Lay out the register cache.
 
@@ -199,13 +194,13 @@ regcache::regcache (gdbarch *gdbarch, address_space *aspace_,
     {
       m_registers = XCNEWVEC (gdb_byte, m_descr->sizeof_cooked_registers);
       m_register_status = XCNEWVEC (signed char,
-				    m_descr->sizeof_cooked_register_status);
+				    m_descr->nr_cooked_registers);
     }
   else
     {
       m_registers = XCNEWVEC (gdb_byte, m_descr->sizeof_raw_registers);
       m_register_status = XCNEWVEC (signed char,
-				    m_descr->sizeof_raw_register_status);
+				    m_descr->nr_raw_registers);
     }
   m_ptid = minus_one_ptid;
 }
@@ -306,7 +301,7 @@ regcache::save (regcache_cooked_read_ftype *cooked_read,
   gdb_assert (m_readonly_p);
   /* Clear the dest.  */
   memset (m_registers, 0, m_descr->sizeof_cooked_registers);
-  memset (m_register_status, 0, m_descr->sizeof_cooked_register_status);
+  memset (m_register_status, 0, m_descr->nr_cooked_registers);
   /* Copy over any registers (identified by their membership in the
      save_reggroup) and mark them as valid.  The full [0 .. gdbarch_num_regs +
      gdbarch_num_pseudo_regs) range is checked since some architectures need
@@ -1343,7 +1338,7 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
   fprintf_unfiltered (file, "sizeof_raw_registers %ld\n",
 		      m_descr->sizeof_raw_registers);
   fprintf_unfiltered (file, "sizeof_raw_register_status %ld\n",
-		      m_descr->sizeof_raw_register_status);
+		      m_descr->nr_raw_registers);
   fprintf_unfiltered (file, "gdbarch_num_regs %d\n", 
 		      gdbarch_num_regs (gdbarch));
   fprintf_unfiltered (file, "gdbarch_num_pseudo_regs %d\n",

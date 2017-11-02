@@ -1,3 +1,13 @@
+2017-11-02  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (struct regcache_descr) <sizeof_raw_register_status>:
+	Remove.
+	<sizeof_cooked_register_status>: Remove.
+	(init_regcache_descr): Update.
+	(regcache::regcache): Use nr_cooked_registers and nr_raw_registers.
+	(regcache::save): Likewise.
+	(regcache::dump): Likewise.
+
 2017-11-01  James Bowman  <james.bowman@ftdichip.com>
 
 	* ft32-tdep.c (ft32_fetch_instruction): New function.
