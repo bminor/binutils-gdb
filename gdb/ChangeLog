@@ -1,5 +1,9 @@
 2017-11-02  Yao Qi  <yao.qi@linaro.org>
 
+	* regcache.c (regcache::dump): Remove code.
+
+2017-11-02  Yao Qi  <yao.qi@linaro.org>
+
 	* regcache.c (struct regcache_descr) <sizeof_raw_register_status>:
 	Remove.
 	<sizeof_cooked_register_status>: Remove.

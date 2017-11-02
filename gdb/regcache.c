@@ -1330,21 +1330,6 @@ regcache::dump (ui_file *file, enum regcache_dump_what what_to_dump)
   int footnote_register_type_name_null = 0;
   long register_offset = 0;
 
-#if 0
-  fprintf_unfiltered (file, "nr_raw_registers %d\n",
-		      m_descr->nr_raw_registers);
-  fprintf_unfiltered (file, "nr_cooked_registers %d\n",
-		      m_descr->nr_cooked_registers);
-  fprintf_unfiltered (file, "sizeof_raw_registers %ld\n",
-		      m_descr->sizeof_raw_registers);
-  fprintf_unfiltered (file, "sizeof_raw_register_status %ld\n",
-		      m_descr->nr_raw_registers);
-  fprintf_unfiltered (file, "gdbarch_num_regs %d\n", 
-		      gdbarch_num_regs (gdbarch));
-  fprintf_unfiltered (file, "gdbarch_num_pseudo_regs %d\n",
-		      gdbarch_num_pseudo_regs (gdbarch));
-#endif
-
   gdb_assert (m_descr->nr_cooked_registers
 	      == (gdbarch_num_regs (gdbarch)
 		  + gdbarch_num_pseudo_regs (gdbarch)));
