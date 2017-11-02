@@ -998,10 +998,9 @@ linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
 {
   asection *section;
   ULONGEST count, page_size;
-  unsigned char *descdata, *filenames, *descend, *contents;
+  unsigned char *descdata, *filenames, *descend;
   size_t note_size;
   unsigned int addr_size_bits, addr_size;
-  struct cleanup *cleanup;
   struct gdbarch *core_gdbarch = gdbarch_from_bfd (core_bfd);
   /* We assume this for reading 64-bit core files.  */
   gdb_static_assert (sizeof (ULONGEST) >= 8);
@@ -1020,12 +1019,12 @@ linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
   if (note_size < 2 * addr_size)
     error (_("malformed core note - too short for header"));
 
-  contents = (unsigned char *) xmalloc (note_size);
-  cleanup = make_cleanup (xfree, contents);
-  if (!bfd_get_section_contents (core_bfd, section, contents, 0, note_size))
+  gdb::def_vector<unsigned char> contents (note_size);
+  if (!bfd_get_section_contents (core_bfd, section, contents.data (),
+				 0, note_size))
     error (_("could not get core note contents"));
 
-  descdata = contents;
+  descdata = contents.data ();
   descend = descdata + note_size;
 
   if (descdata[note_size - 1] != '\0')
@@ -1090,8 +1089,6 @@ linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
 
       filenames += 1 + strlen ((char *) filenames);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* Implement "info proc" for a corefile.  */
@@ -1516,7 +1513,6 @@ static char *
 linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
 				    char *note_data, int *note_size)
 {
-  struct cleanup *cleanup;
   struct linux_make_mappings_data mapping_data;
   struct type *long_type
     = arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch), 0, "long");
@@ -1641,43 +1637,29 @@ linux_collect_thread_registers (const struct regcache *regcache,
 }
 
 /* Fetch the siginfo data for the specified thread, if it exists.  If
-   there is no data, or we could not read it, return NULL.  Otherwise,
-   return a newly malloc'd buffer holding the data and fill in *SIZE
-   with the size of the data.  The caller is responsible for freeing
-   the data.  */
+   there is no data, or we could not read it, return an empty
+   buffer.  */
 
-static gdb_byte *
-linux_get_siginfo_data (thread_info *thread, struct gdbarch *gdbarch,
-			LONGEST *size)
+static gdb::byte_vector
+linux_get_siginfo_data (thread_info *thread, struct gdbarch *gdbarch)
 {
   struct type *siginfo_type;
-  gdb_byte *buf;
   LONGEST bytes_read;
-  struct cleanup *cleanups;
 
   if (!gdbarch_get_siginfo_type_p (gdbarch))
-    return NULL;
-  
+    return gdb::byte_vector ();
+
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
   inferior_ptid = thread->ptid;
 
   siginfo_type = gdbarch_get_siginfo_type (gdbarch);
 
-  buf = (gdb_byte *) xmalloc (TYPE_LENGTH (siginfo_type));
-  cleanups = make_cleanup (xfree, buf);
+  gdb::byte_vector buf (TYPE_LENGTH (siginfo_type));
 
   bytes_read = target_read (&current_target, TARGET_OBJECT_SIGNAL_INFO, NULL,
-			    buf, 0, TYPE_LENGTH (siginfo_type));
-  if (bytes_read == TYPE_LENGTH (siginfo_type))
-    {
-      discard_cleanups (cleanups);
-      *size = bytes_read;
-    }
-  else
-    {
-      do_cleanups (cleanups);
-      buf = NULL;
-    }
+			    buf.data (), 0, TYPE_LENGTH (siginfo_type));
+  if (bytes_read != TYPE_LENGTH (siginfo_type))
+    buf.clear ();
 
   return buf;
 }
@@ -1698,17 +1680,12 @@ static void
 linux_corefile_thread (struct thread_info *info,
 		       struct linux_corefile_thread_data *args)
 {
-  struct cleanup *old_chain;
   struct regcache *regcache;
-  gdb_byte *siginfo_data;
-  LONGEST siginfo_size = 0;
 
   regcache = get_thread_arch_regcache (info->ptid, args->gdbarch);
 
   target_fetch_registers (regcache, -1);
-  siginfo_data = linux_get_siginfo_data (info, args->gdbarch, &siginfo_size);
-
-  old_chain = make_cleanup (xfree, siginfo_data);
+  gdb::byte_vector siginfo_data = linux_get_siginfo_data (info, args->gdbarch);
 
   args->note_data = linux_collect_thread_registers
     (regcache, info->ptid, args->obfd, args->note_data,
@@ -1717,14 +1694,13 @@ linux_corefile_thread (struct thread_info *info,
   /* Don't return anything if we got no register information above,
      such a core file is useless.  */
   if (args->note_data != NULL)
-    if (siginfo_data != NULL)
+    if (!siginfo_data.empty ())
       args->note_data = elfcore_write_note (args->obfd,
 					    args->note_data,
 					    args->note_size,
 					    "CORE", NT_SIGINFO,
-					    siginfo_data, siginfo_size);
-
-  do_cleanups (old_chain);
+					    siginfo_data.data (),
+					    siginfo_data.size ());
 }
 
 /* Fill the PRPSINFO structure with information about the process being

@@ -1,5 +1,14 @@
 2017-11-04  Tom Tromey  <tom@tromey.com>
 
+	* linux-tdep.c (linux_core_info_proc_mappings): Use
+	gdb::def_vector.
+	(linux_get_siginfo_data): Return gdb::byte_vector.  Remove
+	"size" argument.
+	(linux_corefile_thread): Update.
+	(linux_make_corefile_notes): Remove unused variable.
+
+2017-11-04  Tom Tromey  <tom@tromey.com>
+
 	* ppc-linux-tdep.c (ppc_linux_get_syscall_number): Use
 	gdb::byte_vector.
 
