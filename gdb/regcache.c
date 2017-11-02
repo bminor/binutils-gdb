@@ -181,7 +181,7 @@ regcache_register_size (const struct regcache *regcache, int n)
   return register_size (regcache->arch (), n);
 }
 
-regcache::regcache (gdbarch *gdbarch, address_space *aspace_,
+regcache::regcache (gdbarch *gdbarch, const address_space *aspace_,
 		    bool readonly_p_)
   : m_aspace (aspace_), m_readonly_p (readonly_p_)
 {

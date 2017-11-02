@@ -1186,7 +1186,6 @@ jit_frame_sniffer (const struct frame_unwind *self,
   struct jit_unwind_private *priv_data;
   struct gdb_unwind_callbacks callbacks;
   struct gdb_reader_funcs *funcs;
-  struct address_space *aspace;
   struct gdbarch *gdbarch;
 
   callbacks.reg_get = jit_unwind_reg_get_impl;
@@ -1200,7 +1199,8 @@ jit_frame_sniffer (const struct frame_unwind *self,
 
   gdb_assert (!*cache);
 
-  aspace = get_frame_address_space (this_frame);
+  const address_space *aspace = get_frame_address_space (this_frame);
+
   gdbarch = get_frame_arch (this_frame);
 
   *cache = XCNEW (struct jit_unwind_private);

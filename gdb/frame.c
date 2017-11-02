@@ -99,7 +99,7 @@ struct frame_info
   struct program_space *pspace;
 
   /* The frame's address space.  */
-  struct address_space *aspace;
+  const address_space *aspace;
 
   /* The frame's low-level unwinder and corresponding cache.  The
      low-level unwinder is responsible for unwinding register values
@@ -1020,7 +1020,7 @@ do_frame_register_read (void *src, int regnum, gdb_byte *buf)
 std::unique_ptr<struct regcache>
 frame_save_as_regcache (struct frame_info *this_frame)
 {
-  struct address_space *aspace = get_frame_address_space (this_frame);
+  const address_space *aspace = get_frame_address_space (this_frame);
   std::unique_ptr<struct regcache> regcache
     (new struct regcache (get_frame_arch (this_frame), aspace));
 
@@ -2643,7 +2643,7 @@ frame_unwind_program_space (struct frame_info *this_frame)
   return this_frame->pspace;
 }
 
-struct address_space *
+const address_space *
 get_frame_address_space (struct frame_info *frame)
 {
   return frame->aspace;

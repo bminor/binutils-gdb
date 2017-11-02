@@ -14557,7 +14557,7 @@ insert_single_step_breakpoints (struct gdbarch *gdbarch)
   if (!next_pcs.empty ())
     {
       struct frame_info *frame = get_current_frame ();
-      struct address_space *aspace = get_frame_address_space (frame);
+      const address_space *aspace = get_frame_address_space (frame);
 
       for (CORE_ADDR pc : next_pcs)
 	insert_single_step_breakpoint (gdbarch, aspace, pc);

@@ -6598,7 +6598,6 @@ mips_single_step_through_delay (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc = get_frame_pc (frame);
-  struct address_space *aspace;
   enum mips_isa isa;
   ULONGEST insn;
   int status;
@@ -6616,7 +6615,9 @@ mips_single_step_through_delay (struct gdbarch *gdbarch,
   /* _has_delay_slot above will have validated the read.  */
   insn = mips_fetch_instruction (gdbarch, isa, pc, NULL);
   size = mips_insn_size (isa, insn);
-  aspace = get_frame_address_space (frame);
+
+  const address_space *aspace = get_frame_address_space (frame);
+
   return breakpoint_here_p (aspace, pc + size) != no_breakpoint_here;
 }
 

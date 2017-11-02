@@ -1289,7 +1289,7 @@ struct step_over_info
      and address of the instruction the breakpoint is set at.  We'll
      skip inserting all breakpoints here.  Valid iff ASPACE is
      non-NULL.  */
-  struct address_space *aspace;
+  const address_space *aspace;
   CORE_ADDR address;
 
   /* The instruction being stepped over triggers a nonsteppable
@@ -1332,7 +1332,7 @@ static struct step_over_info step_over_info;
    because when we need the info later the thread may be running.  */
 
 static void
-set_step_over_info (struct address_space *aspace, CORE_ADDR address,
+set_step_over_info (const address_space *aspace, CORE_ADDR address,
 		    int nonsteppable_watchpoint_p,
 		    int thread)
 {
@@ -1760,7 +1760,7 @@ displaced_step_prepare_throw (ptid_t ptid)
   struct thread_info *tp = find_thread_ptid (ptid);
   struct regcache *regcache = get_thread_regcache (ptid);
   struct gdbarch *gdbarch = regcache->arch ();
-  struct address_space *aspace = regcache->aspace ();
+  const address_space *aspace = regcache->aspace ();
   CORE_ADDR original, copy;
   ULONGEST len;
   struct displaced_step_closure *closure;
@@ -2388,7 +2388,7 @@ resume (enum gdb_signal sig)
   struct gdbarch *gdbarch = regcache->arch ();
   struct thread_info *tp = inferior_thread ();
   CORE_ADDR pc = regcache_read_pc (regcache);
-  struct address_space *aspace = regcache->aspace ();
+  const address_space *aspace = regcache->aspace ();
   ptid_t resume_ptid;
   /* This represents the user's step vs continue request.  When
      deciding whether "set scheduler-locking step" applies, it's the
@@ -2983,7 +2983,6 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   struct gdbarch *gdbarch;
   struct thread_info *tp;
   CORE_ADDR pc;
-  struct address_space *aspace;
   ptid_t resume_ptid;
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
@@ -3007,7 +3006,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 
   regcache = get_current_regcache ();
   gdbarch = regcache->arch ();
-  aspace = regcache->aspace ();
+  const address_space *aspace = regcache->aspace ();
+
   pc = regcache_read_pc (regcache);
   tp = inferior_thread ();
 
@@ -4070,7 +4070,6 @@ adjust_pc_after_break (struct thread_info *thread,
 {
   struct regcache *regcache;
   struct gdbarch *gdbarch;
-  struct address_space *aspace;
   CORE_ADDR breakpoint_pc, decr_pc;
 
   /* If we've hit a breakpoint, we'll normally be stopped with SIGTRAP.  If
@@ -4150,7 +4149,7 @@ adjust_pc_after_break (struct thread_info *thread,
   if (decr_pc == 0)
     return;
 
-  aspace = regcache->aspace ();
+  const address_space *aspace = regcache->aspace ();
 
   /* Find the location where (if we've hit a breakpoint) the
      breakpoint would be.  */
@@ -4385,7 +4384,6 @@ static void
 save_waitstatus (struct thread_info *tp, struct target_waitstatus *ws)
 {
   struct regcache *regcache;
-  struct address_space *aspace;
 
   if (debug_infrun)
     {
@@ -4404,7 +4402,7 @@ save_waitstatus (struct thread_info *tp, struct target_waitstatus *ws)
   tp->suspend.waitstatus_pending_p = 1;
 
   regcache = get_thread_regcache (tp->ptid);
-  aspace = regcache->aspace ();
+  const address_space *aspace = regcache->aspace ();
 
   if (ws->kind == TARGET_WAITKIND_STOPPED
       && ws->value.sig == GDB_SIGNAL_TRAP)
@@ -5776,11 +5774,11 @@ handle_signal_stop (struct execution_control_state *ecs)
   if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
     {
       struct regcache *regcache;
-      struct address_space *aspace;
       CORE_ADDR pc;
 
       regcache = get_thread_regcache (ecs->ptid);
-      aspace = regcache->aspace ();
+      const address_space *aspace = regcache->aspace ();
+
       pc = regcache_read_pc (regcache);
 
       /* However, before doing so, if this single-step breakpoint was
@@ -5871,7 +5869,7 @@ handle_signal_stop (struct execution_control_state *ecs)
      inline function call sites).  */
   if (ecs->event_thread->control.step_range_end != 1)
     {
-      struct address_space *aspace = 
+      const address_space *aspace =
 	get_thread_regcache (ecs->ptid)->aspace ();
 
       /* skip_inline_frames is expensive, so we avoid it if we can

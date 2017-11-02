@@ -232,7 +232,7 @@ typedef struct cached_reg
 class regcache
 {
 public:
-  regcache (gdbarch *gdbarch, address_space *aspace_)
+  regcache (gdbarch *gdbarch, const address_space *aspace_)
     : regcache (gdbarch, aspace_, true)
   {}
 
@@ -254,7 +254,7 @@ public:
   gdbarch *arch () const;
 
   /* Return REGCACHE's address space.  */
-  address_space *aspace () const
+  const address_space *aspace () const
   {
     return m_aspace;
   }
@@ -338,7 +338,7 @@ public:
 
   static void regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid);
 protected:
-  regcache (gdbarch *gdbarch, address_space *aspace_, bool readonly_p_);
+  regcache (gdbarch *gdbarch, const address_space *aspace_, bool readonly_p_);
 
   int num_raw_registers () const;
 
@@ -364,7 +364,7 @@ private:
 
   /* The address space of this register cache (for registers where it
      makes sense, like PC or SP).  */
-  struct address_space *m_aspace;
+  const address_space * const m_aspace;
 
   /* The register buffers.  A read-only register cache can hold the
      full [0 .. gdbarch_num_regs + gdbarch_num_pseudo_regs) while a read/write

@@ -1,5 +1,30 @@
 2017-11-02  Yao Qi  <yao.qi@linaro.org>
 
+	* breakpoint.c (insert_single_step_breakpoints): Update.
+	* frame.c (struct frame_info) <aspace>: Add const.
+	(frame_save_as_regcache): Add const.
+	(get_frame_address_space): Return const address_space *.
+	* frame.h (get_frame_address_space): Update declaration.
+	* infrun.c (struct step_over_info) <aspace>: Add const.
+	(set_step_over_info): Make aspace const.
+	(displaced_step_prepare_throw): Change variable const.
+	(resume): Likewise.
+	(proceed): Likewise.
+	(adjust_pc_after_break): Likewise.
+	(save_waitstatus): Likewise.
+	(handle_signal_stop): Likewise.
+	(keep_going_pass_signal): Likewise.
+	* jit.c (jit_frame_sniffer): Add const.
+	* mips-tdep.c (mips_single_step_through_delay): Likewise.
+	* ppc-linux-tdep.c (ppu2spu_sniffer): Likewise.
+	* record-full.c (record_full_wait_1): Likewise.
+	* regcache.c (regcache::regcache): Change parameter to const.
+	* regcache.h (regcache::regcache): Likewise.
+	(regcache::aspace): Return const address_space *.
+	(regcache) <m_aspace>: Add const.
+
+2017-11-02  Yao Qi  <yao.qi@linaro.org>
+
 	* darwin-nat.c (cancel_breakpoint): Use regcache->aspace ().
 	* frame.c (create_sentinel_frame): Likewise.
 	* infrun.c (displaced_step_prepare_throw): Likewise.
