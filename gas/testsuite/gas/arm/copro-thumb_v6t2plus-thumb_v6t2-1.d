@@ -1,5 +1,5 @@
 #source: copro-arm_v2plus-thumb_v6t2plus.s
-#objdump: -dr --prefix-addresses --show-raw-insn
+#objdump: -dr --prefix-addresses --show-raw-insn --disassembler-options=force-thumb
 #name: ARMv6T2 Thumb CoProcessor Instructions (1)
 #as: -march=armv6t2 -mthumb -mimplicit-it=always -EL
 
