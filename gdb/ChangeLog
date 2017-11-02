@@ -1,5 +1,9 @@
 2017-11-04  Tom Tromey  <tom@tromey.com>
 
+	* h8300-tdep.c (h8300_push_dummy_call): Use std::vector.
+
+2017-11-04  Tom Tromey  <tom@tromey.com>
+
 	* breakpoint.c (set_momentary_breakpoint): Return
 	breakpoint_up.
 	(until_break_command): Update.
