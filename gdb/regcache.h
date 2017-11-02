@@ -358,6 +358,9 @@ private:
 			int regnum, const void *in_buf,
 			void *out_buf, size_t size) const;
 
+  /* Assert on the range of REGNUM.  */
+  void assert_regnum (int regnum) const;
+
   struct regcache_descr *m_descr;
 
   /* The address space of this register cache (for registers where it

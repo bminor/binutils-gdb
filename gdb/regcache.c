@@ -393,10 +393,15 @@ regcache_invalidate (struct regcache *regcache, int regnum)
 void
 regcache::invalidate (int regnum)
 {
-  gdb_assert (regnum >= 0);
   gdb_assert (!m_readonly_p);
-  gdb_assert (regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   m_register_status[regnum] = REG_UNKNOWN;
+}
+
+void
+regcache::assert_regnum (int regnum) const
+{
+  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
 }
 
 /* Global structure containing the current regcache.  */
@@ -546,7 +551,7 @@ regcache_raw_update (struct regcache *regcache, int regnum)
 void
 regcache::raw_update (int regnum)
 {
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
 
   /* Make certain that the register cache is up-to-date with respect
      to the current thread.  This switching shouldn't be necessary
@@ -600,7 +605,7 @@ regcache::raw_read (int regnum, T *val)
   gdb_byte *buf;
   enum register_status status;
 
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   buf = (gdb_byte *) alloca (m_descr->sizeof_register[regnum]);
   status = raw_read (regnum, buf);
   if (status == REG_VALID)
@@ -633,7 +638,7 @@ regcache::raw_write (int regnum, T val)
 {
   gdb_byte *buf;
 
-  gdb_assert (regnum >=0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   buf = (gdb_byte *) alloca (m_descr->sizeof_register[regnum]);
   store_integer (buf, m_descr->sizeof_register[regnum],
 		 gdbarch_byte_order (m_descr->gdbarch), val);
@@ -844,7 +849,7 @@ regcache::raw_write (int regnum, const gdb_byte *buf)
 {
 
   gdb_assert (buf != NULL);
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   gdb_assert (!m_readonly_p);
 
   /* On the sparc, writing %g0 is a no-op, so we don't even want to
@@ -953,7 +958,7 @@ regcache_raw_read_part (struct regcache *regcache, int regnum,
 enum register_status
 regcache::raw_read_part (int regnum, int offset, int len, gdb_byte *buf)
 {
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   return xfer_part (regnum, offset, len, buf, NULL, true);
 }
 
@@ -968,7 +973,7 @@ void
 regcache::raw_write_part (int regnum, int offset, int len,
 			  const gdb_byte *buf)
 {
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   xfer_part (regnum, offset, len, NULL, buf, true);
 }
 
@@ -1017,7 +1022,7 @@ regcache::raw_supply (int regnum, const void *buf)
   void *regbuf;
   size_t size;
 
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   gdb_assert (!m_readonly_p);
 
   regbuf = register_buffer (regnum);
@@ -1052,7 +1057,7 @@ regcache::raw_supply_integer (int regnum, const gdb_byte *addr, int addr_len,
   gdb_byte *regbuf;
   size_t regsize;
 
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   gdb_assert (!m_readonly_p);
 
   regbuf = register_buffer (regnum);
@@ -1073,7 +1078,7 @@ regcache::raw_supply_zeroed (int regnum)
   void *regbuf;
   size_t size;
 
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
   gdb_assert (!m_readonly_p);
 
   regbuf = register_buffer (regnum);
@@ -1099,7 +1104,7 @@ regcache::raw_collect (int regnum, void *buf) const
   size_t size;
 
   gdb_assert (buf != NULL);
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
 
   regbuf = register_buffer (regnum);
   size = m_descr->sizeof_register[regnum];
@@ -1124,7 +1129,7 @@ regcache::raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
   const gdb_byte *regbuf;
   size_t regsize;
 
-  gdb_assert (regnum >= 0 && regnum < m_descr->nr_raw_registers);
+  assert_regnum (regnum);
 
   regbuf = register_buffer (regnum);
   regsize = m_descr->sizeof_register[regnum];
