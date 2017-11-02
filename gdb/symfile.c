@@ -997,7 +997,8 @@ syms_from_objfile_1 (struct objfile *objfile,
 
   /* Make sure that partially constructed symbol tables will be cleaned up
      if an error occurs during symbol reading.  */
-  old_chain = make_cleanup_free_objfile (objfile);
+  old_chain = make_cleanup (null_cleanup, NULL);
+  std::unique_ptr<struct objfile> objfile_holder (objfile);
 
   /* If ADDRS is NULL, put together a dummy address list.
      We now establish the convention that an addr of zero means
@@ -1053,6 +1054,7 @@ syms_from_objfile_1 (struct objfile *objfile,
 
   /* Discard cleanups as symbol reading was successful.  */
 
+  objfile_holder.release ();
   discard_cleanups (old_chain);
   xfree (local_addr);
 }
@@ -2436,9 +2438,10 @@ reread_symbols (void)
 	  /* If we get an error, blow away this objfile (not sure if
 	     that is the correct response for things like shared
 	     libraries).  */
-	  old_cleanups = make_cleanup_free_objfile (objfile);
+	  std::unique_ptr<struct objfile> objfile_holder (objfile);
+
 	  /* We need to do this whenever any symbols go away.  */
-	  make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
+	  old_cleanups = make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
 
 	  if (exec_bfd != NULL
 	      && filename_cmp (bfd_get_filename (objfile->obfd),
@@ -2600,6 +2603,7 @@ reread_symbols (void)
 	  reinit_frame_cache ();
 
 	  /* Discard cleanups as symbol reading was successful.  */
+	  objfile_holder.release ();
 	  discard_cleanups (old_cleanups);
 
 	  /* If the mtime has changed between the time we set new_modtime

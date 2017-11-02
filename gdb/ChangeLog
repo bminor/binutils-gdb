@@ -1,5 +1,11 @@
 2017-11-04  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.c (do_free_objfile_cleanup): Remove.
+	* compile/compile-object-load.c (compile_object_load): Update.
+	* objfiles.h (make_cleanup_free_objfile): Remove.
+
+2017-11-04  Tom Tromey  <tom@tromey.com>
+
 	* sparc64-tdep.c (do_examine): Use gdb::def_vector.
 	(adi_read_versions): Change "tags" to "gdb_byte *".
 	(adi_print_versions): Likewise.

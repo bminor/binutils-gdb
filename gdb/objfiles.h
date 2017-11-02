@@ -479,8 +479,6 @@ extern void unlink_objfile (struct objfile *);
 
 extern void free_objfile_separate_debug (struct objfile *);
 
-extern struct cleanup *make_cleanup_free_objfile (struct objfile *);
-
 extern void free_all_objfiles (void);
 
 extern void objfile_relocate (struct objfile *, const struct section_offsets *);
