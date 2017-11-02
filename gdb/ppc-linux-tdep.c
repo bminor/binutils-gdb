@@ -725,28 +725,19 @@ ppc_linux_get_syscall_number (struct gdbarch *gdbarch,
   struct regcache *regcache = get_thread_regcache (ptid);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct cleanup *cleanbuf;
-  /* The content of a register */
-  gdb_byte *buf;
-  /* The result */
-  LONGEST ret;
 
   /* Make sure we're in a 32- or 64-bit machine */
   gdb_assert (tdep->wordsize == 4 || tdep->wordsize == 8);
 
-  buf = (gdb_byte *) xmalloc (tdep->wordsize * sizeof (gdb_byte));
-
-  cleanbuf = make_cleanup (xfree, buf);
+  /* The content of a register */
+  gdb::byte_vector buf (tdep->wordsize);
 
   /* Getting the system call number from the register.
      When dealing with PowerPC architecture, this information
      is stored at 0th register.  */
-  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum, buf);
+  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum, buf.data ());
 
-  ret = extract_signed_integer (buf, tdep->wordsize, byte_order);
-  do_cleanups (cleanbuf);
-
-  return ret;
+  return extract_signed_integer (buf.data (), tdep->wordsize, byte_order);
 }
 
 /* PPC process record-replay */
