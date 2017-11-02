@@ -1,3 +1,9 @@
+2017-11-02  Mingi Cho  <mgcho.minic@gmail.com>
+
+	PR 22384
+	* readelf.c (print_gnu_property_note): Improve overflow checks so
+	that they will work on a 32-bit host.
+
 2017-11-01  James Bowman  <james.bowman@ftdichip.com>
 
 	* readelf.c (is_16bit_abs_reloc): Add entry for FT32.

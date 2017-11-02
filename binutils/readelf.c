@@ -16519,15 +16519,24 @@ print_gnu_property_note (Elf_Internal_Note * pnote)
       return;
     }
 
-  while (1)
+  while (ptr < ptr_end)
     {
       unsigned int j;
-      unsigned int type = byte_get (ptr, 4);
-      unsigned int datasz = byte_get (ptr + 4, 4);
+      unsigned int type;
+      unsigned int datasz;
+
+      if ((size_t) (ptr_end - ptr) < 8)
+	{
+	  printf (_("<corrupt descsz: %#lx>\n"), pnote->descsz);
+	  break;
+	}
+
+      type = byte_get (ptr, 4);
+      datasz = byte_get (ptr + 4, 4);
 
       ptr += 8;
 
-      if ((ptr + datasz) > ptr_end)
+      if (datasz > (size_t) (ptr_end - ptr))
 	{
 	  printf (_("<corrupt type (%#x) datasz: %#x>\n"),
 		  type, datasz);
@@ -16608,19 +16617,11 @@ next:
       ptr += ((datasz + (size - 1)) & ~ (size - 1));
       if (ptr == ptr_end)
 	break;
-      else
-	{
-	  if (do_wide)
-	    printf (", ");
-	  else
-	    printf ("\n\t");
-	}
 
-      if (ptr > (ptr_end - 8))
-	{
-	  printf (_("<corrupt descsz: %#lx>\n"), pnote->descsz);
-	  break;
-	}
+      if (do_wide)
+	printf (", ");
+      else
+	printf ("\n\t");
     }
 
   printf ("\n");
