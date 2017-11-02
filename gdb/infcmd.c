@@ -1986,7 +1986,7 @@ finish_forward (struct finish_command_fsm *sm, struct frame_info *frame)
 
   sm->breakpoint = set_momentary_breakpoint (gdbarch, sal,
 					     get_stack_frame_id (frame),
-					     bp_finish);
+					     bp_finish).release ();
 
   /* set_momentary_breakpoint invalidates FRAME.  */
   frame = NULL;

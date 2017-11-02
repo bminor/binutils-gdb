@@ -1223,10 +1223,22 @@ extern void breakpoint_re_set (void);
 
 extern void breakpoint_re_set_thread (struct breakpoint *);
 
-extern struct breakpoint *set_momentary_breakpoint
+extern void delete_breakpoint (struct breakpoint *);
+
+struct breakpoint_deleter
+{
+  void operator() (struct breakpoint *b) const
+  {
+    delete_breakpoint (b);
+  }
+};
+
+typedef std::unique_ptr<struct breakpoint, breakpoint_deleter> breakpoint_up;
+
+extern breakpoint_up set_momentary_breakpoint
   (struct gdbarch *, struct symtab_and_line, struct frame_id, enum bptype);
 
-extern struct breakpoint *set_momentary_breakpoint_at_pc
+extern breakpoint_up set_momentary_breakpoint_at_pc
   (struct gdbarch *, CORE_ADDR pc, enum bptype type);
 
 extern struct breakpoint *clone_momentary_breakpoint (struct breakpoint *bpkt);
@@ -1234,10 +1246,6 @@ extern struct breakpoint *clone_momentary_breakpoint (struct breakpoint *bpkt);
 extern void set_ignore_count (int, int, int);
 
 extern void breakpoint_init_inferior (enum inf_context);
-
-extern struct cleanup *make_cleanup_delete_breakpoint (struct breakpoint *);
-
-extern void delete_breakpoint (struct breakpoint *);
 
 extern void breakpoint_auto_delete (bpstat);
 

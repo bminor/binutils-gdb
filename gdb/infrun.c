@@ -7402,7 +7402,7 @@ insert_step_resume_breakpoint_at_sal_1 (struct gdbarch *gdbarch,
 			paddress (gdbarch, sr_sal.pc));
 
   inferior_thread ()->control.step_resume_breakpoint
-    = set_momentary_breakpoint (gdbarch, sr_sal, sr_id, sr_type);
+    = set_momentary_breakpoint (gdbarch, sr_sal, sr_id, sr_type).release ();
 }
 
 void
@@ -7491,7 +7491,7 @@ insert_longjmp_resume_breakpoint (struct gdbarch *gdbarch, CORE_ADDR pc)
 			paddress (gdbarch, pc));
 
   inferior_thread ()->control.exception_resume_breakpoint =
-    set_momentary_breakpoint_at_pc (gdbarch, pc, bp_longjmp_resume);
+    set_momentary_breakpoint_at_pc (gdbarch, pc, bp_longjmp_resume).release ();
 }
 
 /* Insert an exception resume breakpoint.  TP is the thread throwing
@@ -7526,7 +7526,8 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 				(unsigned long) handler);
 
 	  bp = set_momentary_breakpoint_at_pc (get_frame_arch (frame),
-					       handler, bp_exception_resume);
+					       handler,
+					       bp_exception_resume).release ();
 
 	  /* set_momentary_breakpoint_at_pc invalidates FRAME.  */
 	  frame = NULL;
@@ -7567,7 +7568,7 @@ insert_exception_resume_from_probe (struct thread_info *tp,
 				  handler));
 
   bp = set_momentary_breakpoint_at_pc (get_frame_arch (frame),
-				       handler, bp_exception_resume);
+				       handler, bp_exception_resume).release ();
   bp->thread = tp->global_num;
   inferior_thread ()->control.exception_resume_breakpoint = bp;
 }

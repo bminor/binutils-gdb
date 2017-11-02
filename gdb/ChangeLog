@@ -1,5 +1,29 @@
 2017-11-04  Tom Tromey  <tom@tromey.com>
 
+	* breakpoint.c (set_momentary_breakpoint): Return
+	breakpoint_up.
+	(until_break_command): Update.
+	(new_until_break_fsm): Change argument types to
+	breakpoint_up.
+	(set_momentary_breakpoint_at_pc): Return breakpoint_up.
+	(do_delete_breakpoint_cleanup, make_cleanup_delete_breakpoint):
+	Remove.
+	* infcmd.c (finish_forward): Update.
+	* breakpoint.h (set_momentary_breakpoint)
+	(set_momentary_breakpoint_at_pc): Return breakpoint_up.
+	(make_cleanup_delete_breakpoint): Remove.
+	(struct breakpoint_deleter): New.
+	(breakpoint_up): New typedef.
+	* infrun.c (insert_step_resume_breakpoint_at_sal_1): Update.
+	(insert_exception_resume_breakpoint): Update.
+	(insert_exception_resume_from_probe): Update.
+	(insert_longjmp_resume_breakpoint): Update.
+	* arm-linux-tdep.c (arm_linux_copy_svc): Update.
+	* elfread.c (elf_gnu_ifunc_resolver_stop): Update.
+	* infcall.c (call_function_by_hand_dummy): Update
+
+2017-11-04  Tom Tromey  <tom@tromey.com>
+
 	* c-typeprint.c (c_type_print_base): Use gdb::unique_xmalloc_ptr.
 
 2017-11-04  Tom Tromey  <tom@tromey.com>

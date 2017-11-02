@@ -8582,7 +8582,7 @@ new_single_step_breakpoint (int thread, struct gdbarch *gdbarch)
    SAL.  If FRAME_ID is valid, the breakpoint is restricted to that
    frame.  */
 
-struct breakpoint *
+breakpoint_up
 set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
 			  struct frame_id frame_id, enum bptype type)
 {
@@ -8605,7 +8605,7 @@ set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
 
   update_global_location_list_nothrow (UGLL_MAY_INSERT);
 
-  return b;
+  return breakpoint_up (b);
 }
 
 /* Make a momentary breakpoint based on the master breakpoint ORIG.
@@ -8658,7 +8658,7 @@ clone_momentary_breakpoint (struct breakpoint *orig)
   return momentary_breakpoint_from_master (orig, orig->type, orig->ops, 0);
 }
 
-struct breakpoint *
+breakpoint_up
 set_momentary_breakpoint_at_pc (struct gdbarch *gdbarch, CORE_ADDR pc,
 				enum bptype type)
 {
@@ -11146,8 +11146,8 @@ static struct thread_fsm_ops until_break_fsm_ops =
 
 static struct until_break_fsm *
 new_until_break_fsm (struct interp *cmd_interp, int thread,
-		     struct breakpoint *location_breakpoint,
-		     struct breakpoint *caller_breakpoint)
+		     breakpoint_up &&location_breakpoint,
+		     breakpoint_up &&caller_breakpoint)
 {
   struct until_break_fsm *sm;
 
@@ -11155,8 +11155,8 @@ new_until_break_fsm (struct interp *cmd_interp, int thread,
   thread_fsm_ctor (&sm->thread_fsm, &until_break_fsm_ops, cmd_interp);
 
   sm->thread = thread;
-  sm->location_breakpoint = location_breakpoint;
-  sm->caller_breakpoint = caller_breakpoint;
+  sm->location_breakpoint = location_breakpoint.release ();
+  sm->caller_breakpoint = caller_breakpoint.release ();
 
   return sm;
 }
@@ -11219,8 +11219,6 @@ until_break_command (const char *arg, int from_tty, int anywhere)
   struct gdbarch *frame_gdbarch;
   struct frame_id stack_frame_id;
   struct frame_id caller_frame_id;
-  struct breakpoint *location_breakpoint;
-  struct breakpoint *caller_breakpoint = NULL;
   struct cleanup *old_chain;
   int thread;
   struct thread_info *tp;
@@ -11269,6 +11267,7 @@ until_break_command (const char *arg, int from_tty, int anywhere)
   /* Keep within the current frame, or in frames called by the current
      one.  */
 
+  breakpoint_up caller_breakpoint;
   if (frame_id_p (caller_frame_id))
     {
       struct symtab_and_line sal2;
@@ -11281,7 +11280,6 @@ until_break_command (const char *arg, int from_tty, int anywhere)
 						    sal2,
 						    caller_frame_id,
 						    bp_until);
-      make_cleanup_delete_breakpoint (caller_breakpoint);
 
       set_longjmp_breakpoint (tp, caller_frame_id);
       make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
@@ -11290,6 +11288,7 @@ until_break_command (const char *arg, int from_tty, int anywhere)
   /* set_momentary_breakpoint could invalidate FRAME.  */
   frame = NULL;
 
+  breakpoint_up location_breakpoint;
   if (anywhere)
     /* If the user told us to continue until a specified location,
        we don't specify a frame at which we need to stop.  */
@@ -11300,10 +11299,10 @@ until_break_command (const char *arg, int from_tty, int anywhere)
        only at the very same frame.  */
     location_breakpoint = set_momentary_breakpoint (frame_gdbarch, sal,
 						    stack_frame_id, bp_until);
-  make_cleanup_delete_breakpoint (location_breakpoint);
 
   sm = new_until_break_fsm (command_interp (), tp->global_num,
-			    location_breakpoint, caller_breakpoint);
+			    std::move (location_breakpoint),
+			    std::move (caller_breakpoint));
   tp->thread_fsm = &sm->thread_fsm;
 
   discard_cleanups (old_chain);
@@ -13364,18 +13363,6 @@ delete_breakpoint (struct breakpoint *bpt)
      same bp, we mark it as deleted before freeing its storage.  */
   bpt->type = bp_none;
   delete bpt;
-}
-
-static void
-do_delete_breakpoint_cleanup (void *b)
-{
-  delete_breakpoint ((struct breakpoint *) b);
-}
-
-struct cleanup *
-make_cleanup_delete_breakpoint (struct breakpoint *b)
-{
-  return make_cleanup (do_delete_breakpoint_cleanup, b);
 }
 
 /* Iterator function to call a user-provided callback function once
