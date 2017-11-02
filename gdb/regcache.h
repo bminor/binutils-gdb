@@ -39,10 +39,6 @@ extern struct regcache *get_thread_arch_aspace_regcache (ptid_t,
 
 extern ptid_t regcache_get_ptid (const struct regcache *regcache);
 
-/* Return REGCACHE's address space.  */
-
-extern struct address_space *get_regcache_aspace (const struct regcache *);
-
 enum register_status regcache_register_status (const struct regcache *regcache,
 					       int regnum);
 
@@ -257,6 +253,7 @@ public:
   /* Return regcache's architecture.  */
   gdbarch *arch () const;
 
+  /* Return REGCACHE's address space.  */
   address_space *aspace () const
   {
     return m_aspace;

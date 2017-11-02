@@ -1521,7 +1521,7 @@ create_sentinel_frame (struct program_space *pspace, struct regcache *regcache)
 
   frame->level = -1;
   frame->pspace = pspace;
-  frame->aspace = get_regcache_aspace (regcache);
+  frame->aspace = regcache->aspace ();
   /* Explicitly initialize the sentinel frame's cache.  Provide it
      with the underlying regcache.  In the future additional
      information, such as the frame's thread will be added.  */

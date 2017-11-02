@@ -264,12 +264,6 @@ private:
   int m_regnum;
 };
 
-struct address_space *
-get_regcache_aspace (const struct regcache *regcache)
-{
-  return regcache->aspace ();
-}
-
 /* Return  a pointer to register REGNUM's buffer cache.  */
 
 gdb_byte *

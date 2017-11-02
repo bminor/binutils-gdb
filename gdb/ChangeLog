@@ -1,5 +1,28 @@
 2017-11-02  Yao Qi  <yao.qi@linaro.org>
 
+	* darwin-nat.c (cancel_breakpoint): Use regcache->aspace ().
+	* frame.c (create_sentinel_frame): Likewise.
+	* infrun.c (displaced_step_prepare_throw): Likewise.
+	(resume): Likewise.
+	(thread_still_needs_step_over_bp): Likewise.
+	(proceed): Likewise.
+	(do_target_wait): Likewise.
+	(adjust_pc_after_break): Likewise.
+	(handle_syscall_event): Likewise.
+	(save_waitstatus): Likewise.
+	(handle_inferior_event_1): Likewise.
+	(handle_signal_stop): Likewise.
+	(keep_going_pass_signal): Likewise.
+	* linux-nat.c (status_callback): Likewise.
+	(save_stop_reason): Likewise.
+	(resume_stopped_resumed_lwps): Likewise.
+	* record-full.c (record_full_exec_insn): Likewise.
+	(record_full_wait_1): Likewise.
+	* regcache.c (get_regcache_aspace): Remove.
+	* regcache.h (get_regcache_aspace): Remove.
+
+2017-11-02  Yao Qi  <yao.qi@linaro.org>
+
 	* regcache.c (struct regcache_descr) <nr_raw_registers>: Remove.
 	(init_regcache_descr): Use gdbarch_num_regs.
 	(regcache::regcache): Likewise.

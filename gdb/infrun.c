@@ -1760,7 +1760,7 @@ displaced_step_prepare_throw (ptid_t ptid)
   struct thread_info *tp = find_thread_ptid (ptid);
   struct regcache *regcache = get_thread_regcache (ptid);
   struct gdbarch *gdbarch = regcache->arch ();
-  struct address_space *aspace = get_regcache_aspace (regcache);
+  struct address_space *aspace = regcache->aspace ();
   CORE_ADDR original, copy;
   ULONGEST len;
   struct displaced_step_closure *closure;
@@ -2388,7 +2388,7 @@ resume (enum gdb_signal sig)
   struct gdbarch *gdbarch = regcache->arch ();
   struct thread_info *tp = inferior_thread ();
   CORE_ADDR pc = regcache_read_pc (regcache);
-  struct address_space *aspace = get_regcache_aspace (regcache);
+  struct address_space *aspace = regcache->aspace ();
   ptid_t resume_ptid;
   /* This represents the user's step vs continue request.  When
      deciding whether "set scheduler-locking step" applies, it's the
@@ -2591,7 +2591,7 @@ resume (enum gdb_signal sig)
 	  if (target_is_non_stop_p ())
 	    stop_all_threads ();
 
-	  set_step_over_info (get_regcache_aspace (regcache),
+	  set_step_over_info (regcache->aspace (),
 			      regcache_read_pc (regcache), 0, tp->global_num);
 
 	  step = maybe_software_singlestep (gdbarch, pc);
@@ -2920,7 +2920,7 @@ thread_still_needs_step_over_bp (struct thread_info *tp)
     {
       struct regcache *regcache = get_thread_regcache (tp->ptid);
 
-      if (breakpoint_here_p (get_regcache_aspace (regcache),
+      if (breakpoint_here_p (regcache->aspace (),
 			     regcache_read_pc (regcache))
 	  == ordinary_breakpoint_here)
 	return 1;
@@ -3007,7 +3007,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 
   regcache = get_current_regcache ();
   gdbarch = regcache->arch ();
-  aspace = get_regcache_aspace (regcache);
+  aspace = regcache->aspace ();
   pc = regcache_read_pc (regcache);
   tp = inferior_thread ();
 
@@ -3535,7 +3535,7 @@ do_target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 				paddress (gdbarch, pc));
 	  discard = 1;
 	}
-      else if (!breakpoint_inserted_here_p (get_regcache_aspace (regcache), pc))
+      else if (!breakpoint_inserted_here_p (regcache->aspace (), pc))
 	{
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -4150,7 +4150,7 @@ adjust_pc_after_break (struct thread_info *thread,
   if (decr_pc == 0)
     return;
 
-  aspace = get_regcache_aspace (regcache);
+  aspace = regcache->aspace ();
 
   /* Find the location where (if we've hit a breakpoint) the
      breakpoint would be.  */
@@ -4266,7 +4266,7 @@ handle_syscall_event (struct execution_control_state *ecs)
                             syscall_number);
 
       ecs->event_thread->control.stop_bpstat
-	= bpstat_stop_status (get_regcache_aspace (regcache),
+	= bpstat_stop_status (regcache->aspace (),
 			      stop_pc, ecs->ptid, &ecs->ws);
 
       if (handle_stop_requested (ecs))
@@ -4404,7 +4404,7 @@ save_waitstatus (struct thread_info *tp, struct target_waitstatus *ws)
   tp->suspend.waitstatus_pending_p = 1;
 
   regcache = get_thread_regcache (tp->ptid);
-  aspace = get_regcache_aspace (regcache);
+  aspace = regcache->aspace ();
 
   if (ws->kind == TARGET_WAITKIND_STOPPED
       && ws->value.sig == GDB_SIGNAL_TRAP)
@@ -4888,7 +4888,7 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
     {
       struct regcache *regcache = get_thread_regcache (ecs->ptid);
 
-      if (breakpoint_inserted_here_p (get_regcache_aspace (regcache),
+      if (breakpoint_inserted_here_p (regcache->aspace (),
 				      regcache_read_pc (regcache)))
 	{
 	  if (debug_infrun)
@@ -4958,7 +4958,7 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
 	  handle_solib_event ();
 
 	  ecs->event_thread->control.stop_bpstat
-	    = bpstat_stop_status (get_regcache_aspace (regcache),
+	    = bpstat_stop_status (regcache->aspace (),
 				  stop_pc, ecs->ptid, &ecs->ws);
 
 	  if (handle_stop_requested (ecs))
@@ -5212,7 +5212,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
       ecs->event_thread->control.stop_bpstat
-	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
+	= bpstat_stop_status (get_current_regcache ()->aspace (),
 			      stop_pc, ecs->ptid, &ecs->ws);
 
       if (handle_stop_requested (ecs))
@@ -5327,7 +5327,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       ecs->event_thread = inferior_thread ();
 
       ecs->event_thread->control.stop_bpstat
-	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
+	= bpstat_stop_status (get_current_regcache ()->aspace (),
 			      stop_pc, ecs->ptid, &ecs->ws);
 
       /* Note that this may be referenced from inside
@@ -5780,7 +5780,7 @@ handle_signal_stop (struct execution_control_state *ecs)
       CORE_ADDR pc;
 
       regcache = get_thread_regcache (ecs->ptid);
-      aspace = get_regcache_aspace (regcache);
+      aspace = regcache->aspace ();
       pc = regcache_read_pc (regcache);
 
       /* However, before doing so, if this single-step breakpoint was
@@ -5872,7 +5872,7 @@ handle_signal_stop (struct execution_control_state *ecs)
   if (ecs->event_thread->control.step_range_end != 1)
     {
       struct address_space *aspace = 
-	get_regcache_aspace (get_thread_regcache (ecs->ptid));
+	get_thread_regcache (ecs->ptid)->aspace ();
 
       /* skip_inline_frames is expensive, so we avoid it if we can
 	 determine that the address is one where functions cannot have
@@ -5944,7 +5944,7 @@ handle_signal_stop (struct execution_control_state *ecs)
   /* See if there is a breakpoint/watchpoint/catchpoint/etc. that
      handles this event.  */
   ecs->event_thread->control.stop_bpstat
-    = bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
+    = bpstat_stop_status (get_current_regcache ()->aspace (),
 			  stop_pc, ecs->ptid, &ecs->ws);
 
   /* Following in case break condition called a
@@ -7758,7 +7758,7 @@ keep_going_pass_signal (struct execution_control_state *ecs)
       if (remove_bp
 	  && (remove_wps || !use_displaced_stepping (ecs->event_thread)))
 	{
-	  set_step_over_info (get_regcache_aspace (regcache),
+	  set_step_over_info (regcache->aspace (),
 			      regcache_read_pc (regcache), remove_wps,
 			      ecs->event_thread->global_num);
 	}
