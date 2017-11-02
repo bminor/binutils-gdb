@@ -1,3 +1,8 @@
+2017-11-02  Siddhesh Poyarekar  <siddhesh@sourceware.org>
+
+	* include/opcode/aarch64.h (AARCH64_ARCH_V8_2): Drop
+	AARCH64_FEATURE_F16.
+
 2017-11-01  James Bowman  <james.bowman@ftdichip.com>
 
 	* elf/ft32.h: Add R_FT32_RELAX, SC0, SC1, DIFF32.
