@@ -1,5 +1,9 @@
 2017-11-02  Yao Qi  <yao.qi@linaro.org>
 
+	* regcache.h (regcache) <m_readonly_p>: Change it to const bool.
+
+2017-11-02  Yao Qi  <yao.qi@linaro.org>
+
 	* breakpoint.c (insert_single_step_breakpoints): Update.
 	* frame.c (struct frame_info) <aspace>: Add const.
 	(frame_save_as_regcache): Add const.

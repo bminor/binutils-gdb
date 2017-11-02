@@ -378,7 +378,7 @@ private:
      cache can only be updated via the methods regcache_dup() and
      regcache_cpy().  The actual contents are determined by the
      reggroup_save and reggroup_restore methods.  */
-  bool m_readonly_p;
+  const bool m_readonly_p;
   /* If this is a read-write cache, which thread's registers is
      it connected to?  */
   ptid_t m_ptid;
