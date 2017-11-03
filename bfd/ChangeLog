@@ -1,3 +1,11 @@
+2017-11-03  Mingi Cho  <mgcho.minic@gmail.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 22385
+	* coffgen.c (_bfd_coff_get_external_symbols): Check for an
+	overlarge raw syment count.
+	(coff_get_normalized_symtab): Likewise.
+
 2017-11-01  James Bowman  <james.bowman@ftdichip.com>
 
 	* archures.c: Add bfd_mach_ft32b.
