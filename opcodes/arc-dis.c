@@ -186,6 +186,7 @@ skip_this_opcode (const struct arc_opcode *opcode)
     {
     case FLOAT:
     case DSP:
+    case ARITH:
       break;
     default:
       return FALSE;
