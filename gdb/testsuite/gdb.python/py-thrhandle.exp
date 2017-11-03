@@ -27,6 +27,10 @@ if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executab
 }
 
 clean_restart ${binfile}
+
+# Skip all tests if Python scripting is not enabled.
+if { [skip_python_tests] } { continue }
+
 runto_main
 
 gdb_test "break after_mc_barrier" \
