@@ -108,11 +108,6 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
 
-  /* Clear the reference count of function pointer relocations if
-     symbol isn't a normal function.  */
-  if (h->type != STT_FUNC)
-    eh->func_pointer_refcount = 0;
-
   /* We can't use the GOT PLT if pointer equality is needed since
      finish_dynamic_symbol won't clear symbol value and the dynamic
      linker won't update the GOT slot.  We will get into an infinite
@@ -162,14 +157,10 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   /* Don't create the PLT entry if there are only function pointer
      relocations which can be resolved at run-time.  */
   else if (htab->elf.dynamic_sections_created
-	   && (h->plt.refcount > eh->func_pointer_refcount
+	   && (h->plt.refcount > 0
 	       || eh->plt_got.refcount > 0))
     {
       bfd_boolean use_plt_got = eh->plt_got.refcount > 0;
-
-      /* Clear the reference count of function pointer relocations
-	 if PLT is used.  */
-      eh->func_pointer_refcount = 0;
 
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
@@ -488,7 +479,6 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	 pointer initialization.  */
 
       if ((!h->non_got_ref
-	   || eh->func_pointer_refcount > 0
 	   || (h->root.type == bfd_link_hash_undefweak
 	       && !resolved_to_zero))
 	  && ((h->def_dynamic
@@ -513,7 +503,6 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	}
 
       eh->dyn_relocs = NULL;
-      eh->func_pointer_refcount = 0;
 
     keep: ;
     }
@@ -1643,15 +1632,7 @@ _bfd_x86_elf_copy_indirect_symbol (struct bfd_link_info *info,
       dir->pointer_equality_needed |= ind->pointer_equality_needed;
     }
   else
-    {
-      if (eind->func_pointer_refcount > 0)
-	{
-	  edir->func_pointer_refcount += eind->func_pointer_refcount;
-	  eind->func_pointer_refcount = 0;
-	}
-
-      _bfd_elf_link_hash_copy_indirect (info, dir, ind);
-    }
+    _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
 /* Remove undefined weak symbol from the dynamic symbol table if it
@@ -1900,7 +1881,7 @@ _bfd_x86_elf_hide_symbol (struct bfd_link_info *info,
 	 weak symbol dynamic so that PC relative branch to the undefined
 	 weak symbol will land to address 0.  */
       struct elf_x86_link_hash_entry *eh = elf_x86_hash_entry (h);
-      if (h->plt.refcount > eh->func_pointer_refcount
+      if (h->plt.refcount > 0
 	  || eh->plt_got.refcount > 0)
 	return;
     }

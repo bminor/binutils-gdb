@@ -1,3 +1,17 @@
+2017-11-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Set plt.refcount to 1.
+	Don't use func_pointer_refcount.  Don't set plt.refcount nor
+	non_got_ref for function pointer reference.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Don't use
+	func_pointer_refcount.
+	(_bfd_x86_elf_copy_indirect_symbol): Don't copy
+	func_pointer_refcount.
+	(_bfd_x86_elf_hide_symbol): Don't use func_pointer_refcount.
+	* elfxx-x86.h (GENERATE_DYNAMIC_RELOCATION_P): Likewise.
+	(elf_x86_link_hash_entry): Remove func_pointer_refcount.
+
 2017-11-03  Mingi Cho  <mgcho.minic@gmail.com>
 	    Nick Clifton  <nickc@redhat.com>
 

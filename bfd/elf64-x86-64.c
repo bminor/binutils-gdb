@@ -2067,7 +2067,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  eh->zero_undefweak &= 0x2;
 	  h->needs_plt = 1;
-	  h->plt.refcount += 1;
+	  h->plt.refcount = 1;
 	  break;
 
 	case R_X86_64_PLTOFF64:
@@ -2076,7 +2076,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (h != NULL)
 	    {
 	      h->needs_plt = 1;
-	      h->plt.refcount += 1;
+	      h->plt.refcount = 1;
 	    }
 	  goto create_got;
 
@@ -2124,20 +2124,7 @@ pointer:
 	      && (bfd_link_executable (info)
 		  || h->type == STT_GNU_IFUNC))
 	    {
-	      /* If this reloc is in a read-only section, we might
-		 need a copy reloc.  We can't check reliably at this
-		 stage whether the section is read-only, as input
-		 sections have not yet been mapped to output sections.
-		 Tentatively set the flag for now, and correct in
-		 adjust_dynamic_symbol.  */
-	      h->non_got_ref = 1;
-
-	      /* We may need a .plt entry if the symbol is a function
-		 defined in a shared lib or is a STT_GNU_IFUNC function
-		 referenced from the code or read-only section.  */
-	      if (!h->def_regular
-		  || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
-		h->plt.refcount += 1;
+	      bfd_boolean func_pointer_ref = FALSE;
 
 	      if (r_type == R_X86_64_PC32)
 		{
@@ -2159,7 +2146,25 @@ pointer:
 			  || (!ABI_64_P (abfd)
 			      && (r_type == R_X86_64_32
 				  || r_type == R_X86_64_32S))))
-		    eh->func_pointer_refcount += 1;
+		    func_pointer_ref = TRUE;
+		}
+
+	      if (!func_pointer_ref)
+		{
+		  /* If this reloc is in a read-only section, we might
+		     need a copy reloc.  We can't check reliably at this
+		     stage whether the section is read-only, as input
+		     sections have not yet been mapped to output sections.
+		     Tentatively set the flag for now, and correct in
+		     adjust_dynamic_symbol.  */
+		  h->non_got_ref = 1;
+
+		  /* We may need a .plt entry if the symbol is a function
+		     defined in a shared lib or is a function referenced
+		     from the code or read-only section.  */
+		  if (!h->def_regular
+		      || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
+		    h->plt.refcount = 1;
 		}
 	    }
 
