@@ -83,9 +83,6 @@
 #include <unordered_map>
 #include "selftest.h"
 
-typedef struct symbol *symbolp;
-DEF_VEC_P (symbolp);
-
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
    This is in contrast to the low level DIE reading of dwarf_die_debug.  */
@@ -12204,7 +12201,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   CORE_ADDR baseaddr;
   struct block *block;
   int inlined_func = (die->tag == DW_TAG_inlined_subroutine);
-  VEC (symbolp) *template_args = NULL;
+  std::vector<struct symbol *> template_args;
   struct template_symbol *templ_func = NULL;
 
   if (inlined_func)
@@ -12297,7 +12294,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	      struct symbol *arg = new_symbol (child_die, NULL, cu);
 
 	      if (arg != NULL)
-		VEC_safe_push (symbolp, template_args, arg);
+		template_args.push_back (arg);
 	    }
 	  else
 	    process_die (child_die, cu);
@@ -12352,18 +12349,17 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   gdbarch_make_symbol_special (gdbarch, newobj->name, objfile);
 
   /* Attach template arguments to function.  */
-  if (! VEC_empty (symbolp, template_args))
+  if (!template_args.empty ())
     {
       gdb_assert (templ_func != NULL);
 
-      templ_func->n_template_arguments = VEC_length (symbolp, template_args);
+      templ_func->n_template_arguments = template_args.size ();
       templ_func->template_arguments
         = XOBNEWVEC (&objfile->objfile_obstack, struct symbol *,
 		     templ_func->n_template_arguments);
       memcpy (templ_func->template_arguments,
-	      VEC_address (symbolp, template_args),
+	      template_args.data (),
 	      (templ_func->n_template_arguments * sizeof (struct symbol *)));
-      VEC_free (symbolp, template_args);
     }
 
   /* In C++, we can have functions nested inside functions (e.g., when
@@ -14314,7 +14310,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (die->child != NULL && ! die_is_declaration (die, cu))
     {
       struct field_info fi;
-      VEC (symbolp) *template_args = NULL;
+      std::vector<struct symbol *> template_args;
       struct cleanup *back_to = make_cleanup (null_cleanup, 0);
 
       memset (&fi, 0, sizeof (struct field_info));
@@ -14359,27 +14355,25 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	      struct symbol *arg = new_symbol (child_die, NULL, cu);
 
 	      if (arg != NULL)
-		VEC_safe_push (symbolp, template_args, arg);
+		template_args.push_back (arg);
 	    }
 
 	  child_die = sibling_die (child_die);
 	}
 
       /* Attach template arguments to type.  */
-      if (! VEC_empty (symbolp, template_args))
+      if (!template_args.empty ())
 	{
 	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
-	  TYPE_N_TEMPLATE_ARGUMENTS (type)
-	    = VEC_length (symbolp, template_args);
+	  TYPE_N_TEMPLATE_ARGUMENTS (type) = template_args.size ();
 	  TYPE_TEMPLATE_ARGUMENTS (type)
 	    = XOBNEWVEC (&objfile->objfile_obstack,
 			 struct symbol *,
 			 TYPE_N_TEMPLATE_ARGUMENTS (type));
 	  memcpy (TYPE_TEMPLATE_ARGUMENTS (type),
-		  VEC_address (symbolp, template_args),
+		  template_args.data (),
 		  (TYPE_N_TEMPLATE_ARGUMENTS (type)
 		   * sizeof (struct symbol *)));
-	  VEC_free (symbolp, template_args);
 	}
 
       /* Attach fields and member functions to the type.  */
