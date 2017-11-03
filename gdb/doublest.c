@@ -387,7 +387,7 @@ convert_doublest_to_floatformat (const struct floatformat *fmt,
     }
 
   if (dfrom == 0)
-    return;			/* Result is zero */
+    goto finalize_byteorder;	/* Result is zero */
   if (dfrom != dfrom)		/* Result is NaN */
     {
       /* From is NaN */
