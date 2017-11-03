@@ -1,5 +1,10 @@
 2017-11-03  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.mi/list-thread-groups-available.exp: Skip it if XML parsing
+	in GDB is disabled.
+
+2017-11-03  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.python/py-thrhandle.exp: Skip it if python is not
 	enabled.
 
