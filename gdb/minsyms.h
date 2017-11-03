@@ -203,7 +203,7 @@ struct bound_minimal_symbol lookup_minimal_symbol (const char *,
 struct bound_minimal_symbol lookup_bound_minimal_symbol (const char *);
 
 /* Find the minimal symbol named NAME, and return both the minsym
-   struct and its objfile.  This only checks the linkage name.  */
+   struct and its objfile.  */
 
 struct bound_minimal_symbol lookup_minimal_symbol_and_objfile (const char *);
 

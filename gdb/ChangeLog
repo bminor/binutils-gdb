@@ -1,3 +1,9 @@
+2017-11-01  Weimin Pan  <weimin.pan@oracle.com>
+
+	* minsyms.c (lookup_minimal_symbol_and_objfile): Use
+	lookup_minimal_symbol() to find symbol entry.
+	* minsyms.h (lookup_minimal_symbol_and_objfile): Update comment.
+
 2018-03-23  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/22968

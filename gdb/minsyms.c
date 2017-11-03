@@ -1009,23 +1009,12 @@ lookup_minimal_symbol_and_objfile (const char *name)
 {
   struct bound_minimal_symbol result;
   struct objfile *objfile;
-  unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
   ALL_OBJFILES (objfile)
     {
-      struct minimal_symbol *msym;
-
-      for (msym = objfile->per_bfd->msymbol_hash[hash];
-	   msym != NULL;
-	   msym = msym->hash_next)
-	{
-	  if (strcmp (MSYMBOL_LINKAGE_NAME (msym), name) == 0)
-	    {
-	      result.minsym = msym;
-	      result.objfile = objfile;
-	      return result;
-	    }
-	}
+      result = lookup_minimal_symbol (name, NULL, objfile);
+      if (result.minsym != NULL)
+        return result;
     }
 
   memset (&result, 0, sizeof (result));
