@@ -854,3 +854,15 @@ gdb_test_no_output "set \$foo=81.5" \
 gdb_test "break $srcfile:\$foo" \
     "Convenience variables used in line specs must have integer values.*" \
     "set breakpoint via non-integer convenience variable disallowed"
+
+
+#
+# Test that commands can be cleared without error.
+#
+
+gdb_test "commands\nprint 232323\nend" ">end" "set some breakpoint commands"
+gdb_test "commands\nend" ">end" "clear breakpoint commands"
+# We verify that the commands were cleared by ensuring that the last
+# breakpoint's location ends the output -- if there were commands,
+# they would have been printed after the location.
+gdb_test "info break" "$srcfile:$line" "verify that they were cleared"

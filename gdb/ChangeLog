@@ -1,3 +1,9 @@
+2017-12-07  Tom Tromey  <tom@tromey.com>
+
+	PR breakpoints/22511:
+	* breakpoint.c (commands_command_1): Don't throw an exception when
+	no commands have been read.
+
 2017-12-07  Adam Stylinski  <adam.stylinski@etegent.com>
 
 	PR c++/21222

@@ -1272,9 +1272,6 @@ commands_command_1 (const char *arg, int from_tty,
 	   observer_notify_breakpoint_modified (b);
 	 }
      });
-
-  if (cmd == NULL)
-    error (_("No breakpoints specified."));
 }
 
 static void
