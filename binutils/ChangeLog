@@ -1,3 +1,13 @@
+2017-11-03  Mingi Cho  <mgcho.minic@gmail.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 22386
+	* dwarf.c (read_cie): Use bfd_size_type for
+	augmentation_data_len.
+	(display_augmentation_data): New function.
+	(display_debug_frames): Use it.
+	Check for integer overflow when testing augmentation_data_len.
+
 2017-11-02  Mingi Cho  <mgcho.minic@gmail.com>
 
 	PR 22384
