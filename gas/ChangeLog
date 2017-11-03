@@ -1,3 +1,9 @@
+2017-11-03  Siddhesh Poyarekar  <siddhesh.poyarekar@linaro.org>
+	    Jim Wilson  <jim.wilson@linaro.org>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add saphira.
+	* doc/c-aarch64.texi: Likewise.
+
 2017-11-02  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* testsuite/gas/arm/copro-thumb_v6t2plus-thumb_v6t2-1.d: Add

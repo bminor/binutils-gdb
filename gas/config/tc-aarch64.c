@@ -8420,6 +8420,9 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
 			       AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO
 			       | AARCH64_FEATURE_RDMA),
    "Qualcomm QDF24XX"},
+  {"saphira", AARCH64_FEATURE (AARCH64_ARCH_V8_3,
+			       AARCH64_FEATURE_CRYPTO | AARCH64_FEATURE_PROFILE),
+   "Qualcomm Saphira"},
   {"thunderx", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
    "Cavium ThunderX"},
