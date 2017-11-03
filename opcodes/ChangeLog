@@ -1,5 +1,13 @@
 2017-11-03  Claudiu Zissulescu  <claziss@synopsys.com>
 
+	* arc-dis.c (print_hex): New variable.
+	(parse_option): Check for hex option.
+	(print_insn_arc): Use hexadecimal representation for short
+	immediate values when requested.
+	(print_arc_disassembler_options): Add hex option to the list.
+
+2017-11-03  Claudiu Zissulescu  <claziss@synopsys.com>
+
 	* arc-tbl.h (abss, abssh, adc, adcs, adds, aslacc, asls, aslsacc)
 	(asrs, asrsr, cbflyhf0r, cbflyhf1r, cmacchfr, cmacchnfr, cmachfr)
 	(cmachnfr, cmpychfr, cmpychnfr, cmpyhfmr, cmpyhfr, cmpyhnfr, divf)
