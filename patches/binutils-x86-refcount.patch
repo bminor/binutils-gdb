@@ -1,0 +1,262 @@
+From 6d6b51bf943b15776d40fef2c3a48c83f8f09007 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Wed, 1 Nov 2017 09:13:36 -0700
+Subject: [PATCH] x86: Remove func_pointer_refcount
+
+Since check_reloc is running after gc_sections, there is no need for
+reference count.  If a function pointer relocation can be resolved at
+run-time, there is no need for PLT and it doesn't count as non-GOT/PLT
+relocation.  func_pointer_refcount can be removed.
+
+	* elf32-i386.c (elf_i386_check_relocs): Set plt.refcount to 1.
+	Don't use func_pointer_refcount.  Don't set plt.refcount nor
+	non_got_ref for function pointer reference.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Don't use
+	func_pointer_refcount.
+	(_bfd_x86_elf_copy_indirect_symbol): Don't copy
+	func_pointer_refcount.
+	(_bfd_x86_elf_hide_symbol): Don't use func_pointer_refcount.
+	* elfxx-x86.h (GENERATE_DYNAMIC_RELOCATION_P): Likewise.
+	(elf_x86_link_hash_entry): Remove func_pointer_refcount.
+---
+ bfd/elf32-i386.c   | 37 +++++++++++++++++++++----------------
+ bfd/elf64-x86-64.c | 39 ++++++++++++++++++++++-----------------
+ bfd/elfxx-x86.c    | 25 +++----------------------
+ bfd/elfxx-x86.h    |  5 -----
+ 4 files changed, 46 insertions(+), 60 deletions(-)
+
+diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
+index 4b57b652ed..c9ff0c4bbf 100644
+--- a/bfd/elf32-i386.c
++++ b/bfd/elf32-i386.c
+@@ -1600,7 +1600,7 @@ elf_i386_check_relocs (bfd *abfd,
+ 
+ 	  eh->zero_undefweak &= 0x2;
+ 	  h->needs_plt = 1;
+-	  h->plt.refcount += 1;
++	  h->plt.refcount = 1;
+ 	  break;
+ 
+ 	case R_386_SIZE32:
+@@ -1751,20 +1751,7 @@ do_relocation:
+ 	      && (bfd_link_executable (info)
+ 		  || h->type == STT_GNU_IFUNC))
+ 	    {
+-	      /* If this reloc is in a read-only section, we might
+-		 need a copy reloc.  We can't check reliably at this
+-		 stage whether the section is read-only, as input
+-		 sections have not yet been mapped to output sections.
+-		 Tentatively set the flag for now, and correct in
+-		 adjust_dynamic_symbol.  */
+-	      h->non_got_ref = 1;
+-
+-	      /* We may need a .plt entry if the symbol is a function
+-		 defined in a shared lib or is a STT_GNU_IFUNC function
+-		 referenced from the code or read-only section.  */
+-	      if (!h->def_regular
+-		  || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
+-		h->plt.refcount += 1;
++	      bfd_boolean func_pointer_ref = FALSE;
+ 
+ 	      if (r_type == R_386_PC32)
+ 		{
+@@ -1790,7 +1777,25 @@ do_relocation:
+ 		  /* R_386_32 can be resolved at run-time.  */
+ 		  if (r_type == R_386_32
+ 		      && (sec->flags & SEC_READONLY) == 0)
+-		    eh->func_pointer_refcount += 1;
++		    func_pointer_ref = TRUE;
++		}
++
++	      if (!func_pointer_ref)
++		{
++		  /* If this reloc is in a read-only section, we might
++		     need a copy reloc.  We can't check reliably at this
++		     stage whether the section is read-only, as input
++		     sections have not yet been mapped to output sections.
++		     Tentatively set the flag for now, and correct in
++		     adjust_dynamic_symbol.  */
++		  h->non_got_ref = 1;
++
++		  /* We may need a .plt entry if the symbol is a function
++		     defined in a shared lib or is a function referenced
++		     from the code or read-only section.  */
++		  if (!h->def_regular
++		      || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
++		    h->plt.refcount = 1;
+ 		}
+ 	    }
+ 
+diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
+index 6a5159d4b0..d0af4ba4f6 100644
+--- a/bfd/elf64-x86-64.c
++++ b/bfd/elf64-x86-64.c
+@@ -2067,7 +2067,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ 
+ 	  eh->zero_undefweak &= 0x2;
+ 	  h->needs_plt = 1;
+-	  h->plt.refcount += 1;
++	  h->plt.refcount = 1;
+ 	  break;
+ 
+ 	case R_X86_64_PLTOFF64:
+@@ -2076,7 +2076,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ 	  if (h != NULL)
+ 	    {
+ 	      h->needs_plt = 1;
+-	      h->plt.refcount += 1;
++	      h->plt.refcount = 1;
+ 	    }
+ 	  goto create_got;
+ 
+@@ -2124,20 +2124,7 @@ pointer:
+ 	      && (bfd_link_executable (info)
+ 		  || h->type == STT_GNU_IFUNC))
+ 	    {
+-	      /* If this reloc is in a read-only section, we might
+-		 need a copy reloc.  We can't check reliably at this
+-		 stage whether the section is read-only, as input
+-		 sections have not yet been mapped to output sections.
+-		 Tentatively set the flag for now, and correct in
+-		 adjust_dynamic_symbol.  */
+-	      h->non_got_ref = 1;
+-
+-	      /* We may need a .plt entry if the symbol is a function
+-		 defined in a shared lib or is a STT_GNU_IFUNC function
+-		 referenced from the code or read-only section.  */
+-	      if (!h->def_regular
+-		  || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
+-		h->plt.refcount += 1;
++	      bfd_boolean func_pointer_ref = FALSE;
+ 
+ 	      if (r_type == R_X86_64_PC32)
+ 		{
+@@ -2159,7 +2146,25 @@ pointer:
+ 			  || (!ABI_64_P (abfd)
+ 			      && (r_type == R_X86_64_32
+ 				  || r_type == R_X86_64_32S))))
+-		    eh->func_pointer_refcount += 1;
++		    func_pointer_ref = TRUE;
++		}
++
++	      if (!func_pointer_ref)
++		{
++		  /* If this reloc is in a read-only section, we might
++		     need a copy reloc.  We can't check reliably at this
++		     stage whether the section is read-only, as input
++		     sections have not yet been mapped to output sections.
++		     Tentatively set the flag for now, and correct in
++		     adjust_dynamic_symbol.  */
++		  h->non_got_ref = 1;
++
++		  /* We may need a .plt entry if the symbol is a function
++		     defined in a shared lib or is a function referenced
++		     from the code or read-only section.  */
++		  if (!h->def_regular
++		      || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
++		    h->plt.refcount = 1;
+ 		}
+ 	    }
+ 
+diff --git a/bfd/elfxx-x86.c b/bfd/elfxx-x86.c
+index f4466ebd59..df21d4eb86 100644
+--- a/bfd/elfxx-x86.c
++++ b/bfd/elfxx-x86.c
+@@ -108,11 +108,6 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 
+   resolved_to_zero = UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh);
+ 
+-  /* Clear the reference count of function pointer relocations if
+-     symbol isn't a normal function.  */
+-  if (h->type != STT_FUNC)
+-    eh->func_pointer_refcount = 0;
+-
+   /* We can't use the GOT PLT if pointer equality is needed since
+      finish_dynamic_symbol won't clear symbol value and the dynamic
+      linker won't update the GOT slot.  We will get into an infinite
+@@ -162,15 +157,11 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+   /* Don't create the PLT entry if there are only function pointer
+      relocations which can be resolved at run-time.  */
+   else if (htab->elf.dynamic_sections_created
+-	   && (h->plt.refcount > eh->func_pointer_refcount
++	   && (h->plt.refcount > 0
+ 	       || eh->plt_got.refcount > 0))
+     {
+       bfd_boolean use_plt_got = eh->plt_got.refcount > 0;
+ 
+-      /* Clear the reference count of function pointer relocations
+-	 if PLT is used.  */
+-      eh->func_pointer_refcount = 0;
+-
+       /* Make sure this symbol is output as a dynamic symbol.
+ 	 Undefined weak syms won't yet be marked as dynamic.  */
+       if (h->dynindx == -1
+@@ -488,7 +479,6 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 	 pointer initialization.  */
+ 
+       if ((!h->non_got_ref
+-	   || eh->func_pointer_refcount > 0
+ 	   || (h->root.type == bfd_link_hash_undefweak
+ 	       && !resolved_to_zero))
+ 	  && ((h->def_dynamic
+@@ -513,7 +503,6 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 	}
+ 
+       eh->dyn_relocs = NULL;
+-      eh->func_pointer_refcount = 0;
+ 
+     keep: ;
+     }
+@@ -1643,15 +1632,7 @@ _bfd_x86_elf_copy_indirect_symbol (struct bfd_link_info *info,
+       dir->pointer_equality_needed |= ind->pointer_equality_needed;
+     }
+   else
+-    {
+-      if (eind->func_pointer_refcount > 0)
+-	{
+-	  edir->func_pointer_refcount += eind->func_pointer_refcount;
+-	  eind->func_pointer_refcount = 0;
+-	}
+-
+-      _bfd_elf_link_hash_copy_indirect (info, dir, ind);
+-    }
++    _bfd_elf_link_hash_copy_indirect (info, dir, ind);
+ }
+ 
+ /* Remove undefined weak symbol from the dynamic symbol table if it
+@@ -1900,7 +1881,7 @@ _bfd_x86_elf_hide_symbol (struct bfd_link_info *info,
+ 	 weak symbol dynamic so that PC relative branch to the undefined
+ 	 weak symbol will land to address 0.  */
+       struct elf_x86_link_hash_entry *eh = elf_x86_hash_entry (h);
+-      if (h->plt.refcount > eh->func_pointer_refcount
++      if (h->plt.refcount > 0
+ 	  || eh->plt_got.refcount > 0)
+ 	return;
+     }
+diff --git a/bfd/elfxx-x86.h b/bfd/elfxx-x86.h
+index 8d2a7317eb..fb57d4377a 100644
+--- a/bfd/elfxx-x86.h
++++ b/bfd/elfxx-x86.h
+@@ -133,7 +133,6 @@
+        && (EH) != NULL \
+        && (EH)->elf.dynindx != -1 \
+        && (!(EH)->elf.non_got_ref \
+-	   || (EH)->func_pointer_refcount > 0 \
+ 	   || ((EH)->elf.root.type == bfd_link_hash_undefweak \
+ 	       && !(RESOLVED_TO_ZERO))) \
+ 	       && (((EH)->elf.def_dynamic && !(EH)->elf.def_regular) \
+@@ -268,10 +267,6 @@ struct elf_x86_link_hash_entry
+      is only used by x86-64.  */
+   unsigned int needs_copy : 1;
+ 
+-  /* Reference count of C/C++ function pointer relocations in read-write
+-     section which can be resolved at run-time.  */
+-  bfd_signed_vma func_pointer_refcount;
+-
+   /* Information about the GOT PLT entry. Filled when there are both
+      GOT and PLT relocations against the same function.  */
+   union gotplt_union plt_got;
+-- 
+2.13.6
+
