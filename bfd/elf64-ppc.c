@@ -9584,7 +9584,10 @@ allocate_got (struct elf_link_hash_entry *h,
       htab->elf.irelplt->size += rentsize;
       htab->got_reli_size += rentsize;
     }
-  else if ((bfd_link_pic (info)
+  else if (((bfd_link_pic (info)
+	     && !((gent->tls_type & TLS_TPREL) != 0
+		  && bfd_link_executable (info)
+		  && SYMBOL_REFERENCES_LOCAL (info, h)))
 	    || (htab->elf.dynamic_sections_created
 		&& h->dynindx != -1
 		&& !SYMBOL_REFERENCES_LOCAL (info, h)))
@@ -10072,7 +10075,9 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 			htab->elf.irelplt->size += rel_size;
 			htab->got_reli_size += rel_size;
 		      }
-		    else if (bfd_link_pic (info))
+		    else if (bfd_link_pic (info)
+			     && !((ent->tls_type & TLS_TPREL) != 0
+				  && bfd_link_executable (info)))
 		      {
 			asection *srel = ppc64_elf_tdata (ibfd)->relgot;
 			srel->size += rel_size;
@@ -14514,7 +14519,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			     && (h == NULL
 				 || !UNDEFWEAK_NO_DYNAMIC_RELOC (info, &h->elf)
 				 || (tls_type == (TLS_TLS | TLS_LD)
-				     && !h->elf.def_dynamic))))
+				     && !h->elf.def_dynamic))
+			     && !(tls_type == (TLS_TLS | TLS_TPREL)
+				  && bfd_link_executable (info)
+				  && SYMBOL_REFERENCES_LOCAL (info, &h->elf))))
 		  relgot = ppc64_elf_tdata (ent->owner)->relgot;
 		if (relgot != NULL)
 		  {

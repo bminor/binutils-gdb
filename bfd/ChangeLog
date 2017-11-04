@@ -1,5 +1,15 @@
 2017-11-04  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (got_entries_needed, got_relocs_needed): New functions.
+	(allocate_dynrelocs, ppc_elf_size_dynamic_sections): Use them here.
+	(ppc_elf_relocate_section): Don't output a dynamic relocation
+	for IE GOT entries in an executable.
+	* elf64-ppc.c (allocate_got): Trim unnecessary TPREL relocs.
+	(ppc64_elf_size_dynamic_sections): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+
+2017-11-04  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (readonly_dynrelocs): Delete info param.  Update all
 	callers.  Don't bother with SEC_ALLOC test.  Return section pointer.
 	Move minfo call to..
