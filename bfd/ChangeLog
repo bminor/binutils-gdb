@@ -1,3 +1,15 @@
+2017-11-05  Alan Modra  <amodra@gmail.com>
+
+	PR 22397
+	* bfd.c (union _bfd_doprnt_args): New.
+	(PRINT_TYPE): Add FIELD arg.  Take value from args.
+	(_bfd_doprnt): Replace ap parameter with args.  Adjust all
+	PRINT_TYPE invocations and reading of format args to suit.
+	Move "%%" handling out of switch handling args.  Support
+	positional parameters.
+	(_bfd_doprnt_scan): New function.
+	(error_handler_internal): Call _bfd_doprnt_scan and read args.
+
 2017-11-04  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (got_entries_needed, got_relocs_needed): New functions.
