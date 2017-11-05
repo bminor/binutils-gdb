@@ -1,6 +1,12 @@
 2017-11-05  Alan Modra  <amodra@gmail.com>
 
 	PR 22397
+	* bfd.c (_bfd_doprnt_scan): Check args index before storing, not
+	after.
+
+2017-11-05  Alan Modra  <amodra@gmail.com>
+
+	PR 22397
 	* bfd.c (union _bfd_doprnt_args): New.
 	(PRINT_TYPE): Add FIELD arg.  Take value from args.
 	(_bfd_doprnt): Replace ap parameter with args.  Adjust all

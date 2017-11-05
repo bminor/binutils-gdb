@@ -959,10 +959,10 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 		  arg_index = *ptr - '1';
 		  ptr += 2;
 		}
+	      if (arg_index >= 9)
+		abort ();
 	      args[arg_index].type = Int;
 	      arg_count++;
-	      if (arg_count > 9)
-		abort ();
 	    }
 	  else
 	    /* Handle explicit numeric value.  */
@@ -984,10 +984,10 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 		      arg_index = *ptr - '1';
 		      ptr += 2;
 		    }
+		  if (arg_index >= 9)
+		    abort ();
 		  args[arg_index].type = Int;
 		  arg_count++;
-		  if (arg_count > 9)
-		    abort ();
 		}
 	      else
 		/* Handle explicit numeric value.  */
@@ -1017,6 +1017,8 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 	  if ((int) arg_no < 0)
 	    arg_no = arg_count;
 
+	  if (arg_no >= 9)
+	    abort ();
 	  switch (ptr[-1])
 	    {
 	    case 'd':
@@ -1085,8 +1087,6 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 	      abort();
 	    }
 	  arg_count++;
-	  if (arg_count > 9)
-	    abort ();
 	}
     }
 
