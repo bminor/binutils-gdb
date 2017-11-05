@@ -1,5 +1,17 @@
 2017-11-05  Alan Modra  <amodra@gmail.com>
 
+	PR 22397
+	* bfd.c (union _bfd_doprnt_args): New.
+	(PRINT_TYPE): Add FIELD arg.  Take value from args.
+	(_bfd_doprnt): Replace ap parameter with args.  Adjust all
+	PRINT_TYPE invocations and reading of format args to suit.
+	Move "%%" handling out of switch handling args.  Support
+	positional parameters.
+	(_bfd_doprnt_scan): New function.
+	(error_handler_internal): Call _bfd_doprnt_scan and read args.
+
+2017-11-05  Alan Modra  <amodra@gmail.com>
+
 	Apply from master
 	2017-10-11  Pedro Alves  <palves@redhat.com>
 	* bfd.c (_doprnt): Rename to ...

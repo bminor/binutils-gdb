@@ -611,25 +611,47 @@ CODE_FRAGMENT
 
 static const char *_bfd_error_program_name;
 
-/* This macro and _bfd_doprnt (originally _doprint) taken from
-   libiberty _doprnt.c, tidied a little and extended to handle '%A'
-   and '%B'.  'L' as a modifer for integer formats is used for bfd_vma
-   and bfd_size_type args, which vary in size depending on BFD
+/* Support for positional parameters.  */
+
+union _bfd_doprnt_args
+{
+  int i;
+  long l;
+  long long ll;
+  double d;
+  long double ld;
+  void *p;
+  enum
+  {
+    Int,
+    Long,
+    LongLong,
+    Double,
+    LongDouble,
+    Ptr
+  } type;
+};
+
+/* This macro and _bfd_doprnt taken from libiberty _doprnt.c, tidied a
+   little and extended to handle '%A', '%B' and positional parameters.
+   'L' as a modifer for integer formats is used for bfd_vma and
+   bfd_size_type args, which vary in size depending on BFD
    configuration.  */
 
-#define PRINT_TYPE(TYPE) \
+#define PRINT_TYPE(TYPE, FIELD) \
   do								\
     {								\
-      TYPE value = va_arg (ap, TYPE);				\
+      TYPE value = (TYPE) args[arg_no].FIELD;			\
       result = fprintf (stream, specifier, value);		\
     } while (0)
 
 static int
-_bfd_doprnt (FILE *stream, const char *format, va_list ap)
+_bfd_doprnt (FILE *stream, const char *format, union _bfd_doprnt_args *args)
 {
   const char *ptr = format;
   char specifier[128];
   int total_printed = 0;
+  unsigned int arg_count = 0;
 
   while (*ptr != '\0')
     {
@@ -645,14 +667,29 @@ _bfd_doprnt (FILE *stream, const char *format, va_list ap)
 	    result = fprintf (stream, "%s", ptr);
 	  ptr += result;
 	}
+      else if (ptr[1] == '%')
+	{
+	  fputc ('%', stream);
+	  result = 1;
+	  ptr += 2;
+	}
       else
 	{
 	  /* We have a format specifier!  */
 	  char *sptr = specifier;
 	  int wide_width = 0, short_width = 0;
+	  unsigned int arg_no;
 
 	  /* Copy the % and move forward.  */
 	  *sptr++ = *ptr++;
+
+	  /* Check for a positional parameter.  */
+	  arg_no = -1u;
+	  if (*ptr != '0' && ISDIGIT (*ptr) && ptr[1] == '$')
+	    {
+	      arg_no = *ptr - '1';
+	      ptr += 2;
+	    }
 
 	  /* Move past flags.  */
 	  while (strchr ("-+ #0", *ptr))
@@ -660,24 +697,45 @@ _bfd_doprnt (FILE *stream, const char *format, va_list ap)
 
 	  if (*ptr == '*')
 	    {
-	      int value = abs (va_arg (ap, int));
-	      sptr += sprintf (sptr, "%d", value);
+	      int value;
+	      unsigned int arg_index;
+
 	      ptr++;
+	      arg_index = arg_count;
+	      if (*ptr != '0' && ISDIGIT (*ptr) && ptr[1] == '$')
+		{
+		  arg_index = *ptr - '1';
+		  ptr += 2;
+		}
+	      value = abs (args[arg_index].i);
+	      arg_count++;
+	      sptr += sprintf (sptr, "%d", value);
 	    }
 	  else
 	    /* Handle explicit numeric value.  */
 	    while (ISDIGIT (*ptr))
 	      *sptr++ = *ptr++;
 
+	  /* Precision.  */
 	  if (*ptr == '.')
 	    {
 	      /* Copy and go past the period.  */
 	      *sptr++ = *ptr++;
 	      if (*ptr == '*')
 		{
-		  int value = abs (va_arg (ap, int));
-		  sptr += sprintf (sptr, "%d", value);
+		  int value;
+		  unsigned int arg_index;
+
 		  ptr++;
+		  arg_index = arg_count;
+		  if (*ptr != '0' && ISDIGIT (*ptr) && ptr[1] == '$')
+		    {
+		      arg_index = *ptr - '1';
+		      ptr += 2;
+		    }
+		  value = abs (args[arg_index].i);
+		  arg_count++;
+		  sptr += sprintf (sptr, "%d", value);
 		}
 	      else
 		/* Handle explicit numeric value.  */
@@ -706,6 +764,8 @@ _bfd_doprnt (FILE *stream, const char *format, va_list ap)
 	  /* Copy the type specifier, and NULL terminate.  */
 	  *sptr++ = *ptr++;
 	  *sptr = '\0';
+	  if ((int) arg_no < 0)
+	    arg_no = arg_count;
 
 	  switch (ptr[-1])
 	    {
@@ -721,12 +781,12 @@ _bfd_doprnt (FILE *stream, const char *format, va_list ap)
 		   as an int and trust the C library printf to cast it
 		   to the right width.  */
 		if (short_width)
-		  PRINT_TYPE (int);
+		  PRINT_TYPE (int, i);
 		else
 		  {
 		    /* L modifier for bfd_vma or bfd_size_type may be
 		       either long long or long.  */
-		    if (sptr[-2] == 'L')
+		    if (ptr[-2] == 'L')
 		      {
 			sptr[-2] = 'l';
 			if (BFD_ARCH_SIZE < 64 || BFD_HOST_64BIT_LONG)
@@ -742,10 +802,10 @@ _bfd_doprnt (FILE *stream, const char *format, va_list ap)
 		    switch (wide_width)
 		      {
 		      case 0:
-			PRINT_TYPE (int);
+			PRINT_TYPE (int, i);
 			break;
 		      case 1:
-			PRINT_TYPE (long);
+			PRINT_TYPE (long, l);
 			break;
 		      case 2:
 		      default:
@@ -757,10 +817,10 @@ _bfd_doprnt (FILE *stream, const char *format, va_list ap)
 			*sptr = '\0';
 #endif
 #if defined (__GNUC__) || defined (HAVE_LONG_LONG)
-			PRINT_TYPE (long long);
+			PRINT_TYPE (long long, ll);
 #else
 			/* Fake it and hope for the best.  */
-			PRINT_TYPE (long);
+			PRINT_TYPE (long, l);
 #endif
 			break;
 		      }
@@ -774,35 +834,32 @@ _bfd_doprnt (FILE *stream, const char *format, va_list ap)
 	    case 'G':
 	      {
 		if (wide_width == 0)
-		  PRINT_TYPE (double);
+		  PRINT_TYPE (double, d);
 		else
 		  {
 #if defined (__GNUC__) || defined (HAVE_LONG_DOUBLE)
-		    PRINT_TYPE (long double);
+		    PRINT_TYPE (long double, ld);
 #else
 		    /* Fake it and hope for the best.  */
-		    PRINT_TYPE (double);
+		    PRINT_TYPE (double, d);
 #endif
 		  }
 	      }
 	      break;
 	    case 's':
-	      PRINT_TYPE (char *);
+	      PRINT_TYPE (char *, p);
 	      break;
 	    case 'p':
-	      PRINT_TYPE (void *);
-	      break;
-	    case '%':
-	      fputc ('%', stream);
-	      result = 1;
+	      PRINT_TYPE (void *, p);
 	      break;
 	    case 'A':
 	      {
-		asection *sec = va_arg (ap, asection *);
+		asection *sec;
 		bfd *abfd;
 		const char *group = NULL;
 		struct coff_comdat_info *ci;
 
+		sec = (asection *) args[arg_no].p;
 		if (sec == NULL)
 		  /* Invoking %A with a null section pointer is an
 		     internal error.  */
@@ -826,8 +883,9 @@ _bfd_doprnt (FILE *stream, const char *format, va_list ap)
 	      break;
 	    case 'B':
 	      {
-		bfd *abfd = va_arg (ap, bfd *);
+		bfd *abfd;
 
+		abfd = (bfd *) args[arg_no].p;
 		if (abfd == NULL)
 		  /* Invoking %B with a null bfd pointer is an
 		     internal error.  */
@@ -843,6 +901,7 @@ _bfd_doprnt (FILE *stream, const char *format, va_list ap)
 	    default:
 	      abort();
 	    }
+	  arg_count++;
 	}
       if (result == -1)
 	return -1;
@@ -852,15 +911,230 @@ _bfd_doprnt (FILE *stream, const char *format, va_list ap)
   return total_printed;
 }
 
+/* First pass over FORMAT to gather ARGS.  Returns number of args.  */
+
+static unsigned int
+_bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
+{
+  const char *ptr = format;
+  unsigned int arg_count = 0;
+
+  while (*ptr != '\0')
+    {
+      if (*ptr != '%')
+	{
+	  ptr = strchr (ptr, '%');
+	  if (ptr == NULL)
+	    break;
+	}
+      else if (ptr[1] == '%')
+	ptr += 2;
+      else
+	{
+	  int wide_width = 0, short_width = 0;
+	  unsigned int arg_no;
+
+	  ptr++;
+
+	  /* Check for a positional parameter.  */
+	  arg_no = -1u;
+	  if (*ptr != '0' && ISDIGIT (*ptr) && ptr[1] == '$')
+	    {
+	      arg_no = *ptr - '1';
+	      ptr += 2;
+	    }
+
+	  /* Move past flags.  */
+	  while (strchr ("-+ #0", *ptr))
+	    ptr++;
+
+	  if (*ptr == '*')
+	    {
+	      unsigned int arg_index;
+
+	      ptr++;
+	      arg_index = arg_count;
+	      if (*ptr != '0' && ISDIGIT (*ptr) && ptr[1] == '$')
+		{
+		  arg_index = *ptr - '1';
+		  ptr += 2;
+		}
+	      args[arg_index].type = Int;
+	      arg_count++;
+	      if (arg_count > 9)
+		abort ();
+	    }
+	  else
+	    /* Handle explicit numeric value.  */
+	    while (ISDIGIT (*ptr))
+	      ptr++;
+
+	  /* Precision.  */
+	  if (*ptr == '.')
+	    {
+	      ptr++;
+	      if (*ptr == '*')
+		{
+		  unsigned int arg_index;
+
+		  ptr++;
+		  arg_index = arg_count;
+		  if (*ptr != '0' && ISDIGIT (*ptr) && ptr[1] == '$')
+		    {
+		      arg_index = *ptr - '1';
+		      ptr += 2;
+		    }
+		  args[arg_index].type = Int;
+		  arg_count++;
+		  if (arg_count > 9)
+		    abort ();
+		}
+	      else
+		/* Handle explicit numeric value.  */
+		while (ISDIGIT (*ptr))
+		  ptr++;
+	    }
+	  while (strchr ("hlL", *ptr))
+	    {
+	      switch (*ptr)
+		{
+		case 'h':
+		  short_width = 1;
+		  break;
+		case 'l':
+		  wide_width++;
+		  break;
+		case 'L':
+		  wide_width = 2;
+		  break;
+		default:
+		  abort();
+		}
+	      ptr++;
+	    }
+
+	  ptr++;
+	  if ((int) arg_no < 0)
+	    arg_no = arg_count;
+
+	  switch (ptr[-1])
+	    {
+	    case 'd':
+	    case 'i':
+	    case 'o':
+	    case 'u':
+	    case 'x':
+	    case 'X':
+	    case 'c':
+	      {
+		if (short_width)
+		  args[arg_no].type = Int;
+		else
+		  {
+		    if (ptr[-2] == 'L')
+		      {
+			if (BFD_ARCH_SIZE < 64 || BFD_HOST_64BIT_LONG)
+			  wide_width = 1;
+		      }
+
+		    switch (wide_width)
+		      {
+		      case 0:
+			args[arg_no].type = Int;
+			break;
+		      case 1:
+			args[arg_no].type = Long;
+			break;
+		      case 2:
+		      default:
+#if defined (__GNUC__) || defined (HAVE_LONG_LONG)
+			args[arg_no].type = LongLong;
+#else
+			args[arg_no].type = Long;
+#endif
+			break;
+		      }
+		  }
+	      }
+	      break;
+	    case 'f':
+	    case 'e':
+	    case 'E':
+	    case 'g':
+	    case 'G':
+	      {
+		if (wide_width == 0)
+		  args[arg_no].type = Double;
+		else
+		  {
+#if defined (__GNUC__) || defined (HAVE_LONG_DOUBLE)
+		    args[arg_no].type = LongDouble;
+#else
+		    args[arg_no].type = Double;
+#endif
+		  }
+	      }
+	      break;
+	    case 's':
+	    case 'p':
+	    case 'A':
+	    case 'B':
+	      args[arg_no].type = Ptr;
+	      break;
+	    default:
+	      abort();
+	    }
+	  arg_count++;
+	  if (arg_count > 9)
+	    abort ();
+	}
+    }
+
+  return arg_count;
+}
+
 /* This is the default routine to handle BFD error messages.
    Like fprintf (stderr, ...), but also handles some extra format specifiers.
 
-   %A section name from section.  For group components, print group name too.
-   %B file name from bfd.  For archive components, prints archive too.  */
+   %A section name from section.  For group components, prints group name too.
+   %B file name from bfd.  For archive components, prints archive too.
+
+   Beware: Only supports a maximum of 9 format arguments.  */
 
 static void
 error_handler_internal (const char *fmt, va_list ap)
 {
+  int i, arg_count;
+  union _bfd_doprnt_args args[9];
+
+  arg_count = _bfd_doprnt_scan (fmt, args);
+  for (i = 0; i < arg_count; i++)
+    {
+      switch (args[i].type)
+	{
+	case Int:
+	  args[i].i = va_arg (ap, int);
+	  break;
+	case Long:
+	  args[i].l = va_arg (ap, long);
+	  break;
+	case LongLong:
+	  args[i].ll = va_arg (ap, long long);
+	  break;
+	case Double:
+	  args[i].d = va_arg (ap, double);
+	  break;
+	case LongDouble:
+	  args[i].ld = va_arg (ap, long double);
+	  break;
+	case Ptr:
+	  args[i].p = va_arg (ap, void *);
+	  break;
+	default:
+	  abort ();
+	}
+    }
+
   /* PR 4992: Don't interrupt output being sent to stdout.  */
   fflush (stdout);
 
@@ -869,7 +1143,7 @@ error_handler_internal (const char *fmt, va_list ap)
   else
     fprintf (stderr, "BFD: ");
 
-  _bfd_doprnt (stderr, fmt, ap);
+  _bfd_doprnt (stderr, fmt, args);
 
   /* On AIX, putc is implemented as a macro that triggers a -Wunused-value
      warning, so use the fputc function to avoid it.  */
