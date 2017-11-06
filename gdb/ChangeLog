@@ -1,5 +1,25 @@
 2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* target-float.c (floatformat_to_host_double): New function.
+	(floatformat_from_host_double): Likewise.
+	(target_float_to_host_double): Likewise.
+	(target_float_from_host_double): Likewise.
+	* target-float.h (target_float_to_host_double): Add prototype.
+	(target_float_from_host_double): Likewise.
+
+	* guile/scm-value.c: Include "target-float.h".
+	(gdbscm_value_to_real): Use target_float_to_host_double.
+	Handle integer source values via value_as_long.
+	* guile/scm-math.c: Include "target-float.h".  Do not include
+	"doublest.h", "dfp.h", and "expression.h".
+	(vlscm_convert_typed_number): Use target_float_from_host_double.
+	(vlscm_convert_number): Likewise.
+
+	* python/py-value.c (valpy_float): Use target_float_to_host_double.
+	(convert_value_from_python): Use target_float_from_host_double.
+
+2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-lang.c (cast_to_fixed): Reimplement in target arithmetic.
 	(cast_from_fixed): Likewise.
 	(ada_scaling_type): New function.

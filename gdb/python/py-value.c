@@ -1560,10 +1560,10 @@ valpy_float (PyObject *self)
     {
       type = check_typedef (type);
 
-      if (TYPE_CODE (type) != TYPE_CODE_FLT)
+      if (TYPE_CODE (type) != TYPE_CODE_FLT || !is_floating_value (value))
 	error (_("Cannot convert value to float."));
 
-      d = value_as_double (value);
+      d = target_float_to_host_double (value_contents (value), type);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1681,7 +1681,11 @@ convert_value_from_python (PyObject *obj)
 	  double d = PyFloat_AsDouble (obj);
 
 	  if (! PyErr_Occurred ())
-	    value = value_from_double (builtin_type_pyfloat, d);
+	    {
+	      value = allocate_value (builtin_type_pyfloat);
+	      target_float_from_host_double (value_contents_raw (value),
+					     value_type (value), d);
+	    }
 	}
       else if (gdbpy_is_string (obj))
 	{

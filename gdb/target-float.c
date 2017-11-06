@@ -59,6 +59,27 @@ floatformat_from_ulongest (const struct floatformat *fmt, gdb_byte *addr,
   floatformat_from_doublest (fmt, &d, addr);
 }
 
+/* Convert the byte-stream ADDR, interpreted as floating-point format FMT,
+   to a floating-point value in the host "double" format.  */
+static double
+floatformat_to_host_double (const struct floatformat *fmt,
+			    const gdb_byte *addr)
+{
+  DOUBLEST d;
+  floatformat_to_doublest (fmt, addr, &d);
+  return (double) d;
+}
+
+/* Convert floating-point value VAL in the host "double" format to a target
+   floating-number of format FMT and store it as byte-stream ADDR.  */
+static void
+floatformat_from_host_double (const struct floatformat *fmt, gdb_byte *addr,
+			      double val)
+{
+  DOUBLEST d = (DOUBLEST) val;
+  floatformat_from_doublest (fmt, &d, addr);
+}
+
 /* Convert a floating-point number of format FROM_FMT from the target
    byte-stream FROM to a floating-point number of format TO_FMT, and
    store it to the target byte-stream TO.  */
@@ -295,6 +316,42 @@ target_float_from_ulongest (gdb_byte *addr, const struct type *type,
 			     gdbarch_byte_order (get_type_arch (type)));
       return;
     }
+
+  gdb_assert_not_reached ("unexpected type code");
+}
+
+/* Convert the byte-stream ADDR, interpreted as floating-point type TYPE,
+   to a floating-point value in the host "double" format.  */
+double
+target_float_to_host_double (const gdb_byte *addr,
+			     const struct type *type)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    return floatformat_to_host_double (floatformat_from_type (type), addr);
+
+  /* We don't support conversions between target decimal floating-point
+     types and the host double type here.  */
+
+  gdb_assert_not_reached ("unexpected type code");
+}
+
+/* Convert floating-point value VAL in the host "double" format to a target
+   floating-number of type TYPE and store it as byte-stream ADDR.  */
+void
+target_float_from_host_double (gdb_byte *addr, const struct type *type,
+			       double val)
+{
+  /* Ensure possible padding bytes in the target buffer are zeroed out.  */
+  memset (addr, 0, TYPE_LENGTH (type));
+
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    {
+      floatformat_from_host_double (floatformat_from_type (type), addr, val);
+      return;
+    }
+
+  /* We don't support conversions between target decimal floating-point
+     types and the host double type here.  */
 
   gdb_assert_not_reached ("unexpected type code");
 }

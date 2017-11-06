@@ -42,6 +42,11 @@ extern void target_float_from_longest (gdb_byte *addr,
 extern void target_float_from_ulongest (gdb_byte *addr,
 					const struct type *type,
 					ULONGEST val);
+extern double target_float_to_host_double (const gdb_byte *addr,
+					   const struct type *type);
+extern void target_float_from_host_double (gdb_byte *addr,
+					   const struct type *type,
+					   double val);
 extern void target_float_convert (const gdb_byte *from,
 				  const struct type *from_type,
 				  gdb_byte *to, const struct type *to_type);
