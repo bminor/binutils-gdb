@@ -1,3 +1,8 @@
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* asintl.h (textdomain, bindtextdomain): Use safer "do nothing".
+	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
+
 2017-11-03  Siddhesh Poyarekar  <siddhesh.poyarekar@linaro.org>
 	    Jim Wilson  <jim.wilson@linaro.org>
 

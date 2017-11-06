@@ -1,3 +1,13 @@
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* sysdep.h: Formatting, comment fixes.
+	(gettext, ngettext): Redefine when ENABLE_NLS.
+	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
+	(_): Define using gettext.
+	(textdomain, bindtextdomain): Use safer "do nothing".
+	* hosts/alphavms.h (textdomain, bindtextdomain): Likewise.
+	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
+
 2017-11-05  Alan Modra  <amodra@gmail.com>
 
 	PR 22397

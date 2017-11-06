@@ -1,3 +1,8 @@
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* ld.h (textdomain, bindtextdomain): Use safer "do nothing".
+	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
+
 2017-11-01  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/ambiguousv2.d: Remove FIXME.

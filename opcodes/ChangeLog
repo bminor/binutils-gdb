@@ -1,3 +1,11 @@
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* opintl.h: Formatting, comment fixes.
+	(gettext, ngettext): Redefine when ENABLE_NLS.
+	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
+	(_): Define using gettext.
+	(textdomain, bindtextdomain): Use safer "do nothing".
+
 2017-11-03  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* arc-dis.c (print_hex): New variable.

@@ -1,3 +1,8 @@
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* system.h (textdomain, bindtextdomain): Use safer "do nothing".
+	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
+
 2017-10-25  Alan Modra  <amodra@gmail.com>
 
 	* symtab.cc (Symbol_table::add_from_relobj): Match "__gnu_lto_slim"

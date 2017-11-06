@@ -1,3 +1,8 @@
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
+	* sysdep.h (textdomain, bindtextdomain): Use safer "do nothing".
+	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
+
 2017-11-03  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* doc/binutils.texi (ARC): Update disassembler options.
