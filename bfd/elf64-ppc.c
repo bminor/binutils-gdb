@@ -13303,20 +13303,23 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 
   if (stats != NULL)
     {
+      size_t len;
       *stats = bfd_malloc (500);
       if (*stats == NULL)
 	return FALSE;
 
-      sprintf (*stats, _("linker stubs in %u group%s\n"
-			 "  branch       %lu\n"
-			 "  toc adjust   %lu\n"
-			 "  long branch  %lu\n"
-			 "  long toc adj %lu\n"
-			 "  plt call     %lu\n"
-			 "  plt call toc %lu\n"
-			 "  global entry %lu"),
-	       stub_sec_count,
-	       stub_sec_count == 1 ? "" : "s",
+      len = sprintf (*stats,
+		     ngettext ("linker stubs in %u group\n",
+			       "linker stubs in %u groups\n",
+			       stub_sec_count),
+		     stub_sec_count);
+      sprintf (*stats + len, _("  branch       %lu\n"
+			       "  toc adjust   %lu\n"
+			       "  long branch  %lu\n"
+			       "  long toc adj %lu\n"
+			       "  plt call     %lu\n"
+			       "  plt call toc %lu\n"
+			       "  global entry %lu"),
 	       htab->stub_count[ppc_stub_long_branch - 1],
 	       htab->stub_count[ppc_stub_long_branch_r2off - 1],
 	       htab->stub_count[ppc_stub_plt_branch - 1],

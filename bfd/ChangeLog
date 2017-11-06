@@ -1,5 +1,10 @@
 2017-11-07  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc64_elf_build_stubs): Correct pluralization in
+	statistics message.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
 	* sysdep.h: Formatting, comment fixes.
 	(gettext, ngettext): Redefine when ENABLE_NLS.
 	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
