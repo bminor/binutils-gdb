@@ -2922,10 +2922,8 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
 	return extract_signed_integer (valaddr, len, byte_order);
 
     case TYPE_CODE_FLT:
-      return (LONGEST) extract_typed_floating (valaddr, type);
-
     case TYPE_CODE_DECFLOAT:
-      return decimal_to_longest (valaddr, len, byte_order);
+      return target_float_to_longest (valaddr, type);
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
@@ -3539,6 +3537,11 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
       store_typed_address (buf, type, (CORE_ADDR) num);
       break;
 
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_DECFLOAT:
+      target_float_from_longest (buf, type, num);
+      break;
+
     default:
       error (_("Unexpected type (%d) encountered for integer constant."),
 	     TYPE_CODE (type));
@@ -3574,6 +3577,11 @@ pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
     case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_PTR:
       store_typed_address (buf, type, (CORE_ADDR) num);
+      break;
+
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_DECFLOAT:
+      target_float_from_ulongest (buf, type, num);
       break;
 
     default:
