@@ -1106,7 +1106,11 @@ fixup_segment (fixS *fixP, segT this_segment)
 		  else
 		    sprintf (buf2, "%ld", (long) add_number);
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
-				_("value of %s too large for field of %d bytes at %s"),
+				ngettext ("value of %s too large for field "
+					  "of %d byte at %s",
+					  "value of %s too large for field "
+					  "of %d bytes at %s",
+					  fixP->fx_size),
 				buf2, fixP->fx_size, buf);
 		} /* Generic error checking.  */
 	    }
@@ -1458,7 +1462,10 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   if (obstack_room (ob) < header_size)
     first_newf = frag_alloc (ob);
   if (obstack_room (ob) < header_size)
-    as_fatal (_("can't extend frag %u chars"), header_size);
+    as_fatal (ngettext ("can't extend frag %lu char",
+			"can't extend frag %lu chars",
+			(unsigned long) header_size),
+	      (unsigned long) header_size);
   last_newf = first_newf;
   obstack_blank_fast (ob, header_size);
   last_newf->fr_type = rs_fill;
@@ -1593,9 +1600,13 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 					f->fr_literal, (file_ptr) offset,
 					(bfd_size_type) f->fr_fix);
 	  if (!x)
-	    as_fatal (_("can't write %ld bytes to section %s of %s because: '%s'"),
-		      (long) f->fr_fix, sec->name,
-		      stdoutput->filename,
+	    as_fatal (ngettext ("can't write %ld byte "
+				"to section %s of %s: '%s'",
+				"can't write %ld bytes "
+				"to section %s of %s: '%s'",
+				(long) f->fr_fix),
+		      (long) f->fr_fix,
+		      sec->name, stdoutput->filename,
 		      bfd_errmsg (bfd_get_error ()));
 	  offset += f->fr_fix;
 	}
@@ -1616,9 +1627,13 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 						(file_ptr) offset,
 						(bfd_size_type) fill_size);
 		  if (!x)
-		    as_fatal (_("can't fill %ld bytes in section %s of %s because '%s'"),
-			      (long) fill_size, sec->name,
-			      stdoutput->filename,
+		    as_fatal (ngettext ("can't fill %ld byte "
+					"in section %s of %s: '%s'",
+					"can't fill %ld bytes "
+					"in section %s of %s: '%s'",
+					(long) fill_size),
+			      (long) fill_size,
+			      sec->name, stdoutput->filename,
 			      bfd_errmsg (bfd_get_error ()));
 		  offset += fill_size;
 		}
@@ -1648,9 +1663,13 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 		    (stdoutput, sec, buf, (file_ptr) offset,
 		     (bfd_size_type) n_per_buf * fill_size);
 		  if (!x)
-		    as_fatal (_("cannot fill %ld bytes in section %s of %s because: '%s'"),
-			      (long)(n_per_buf * fill_size), sec->name,
-			      stdoutput->filename,
+		    as_fatal (ngettext ("can't fill %ld byte "
+					"in section %s of %s: '%s'",
+					"can't fill %ld bytes "
+					"in section %s of %s: '%s'",
+					(long) (n_per_buf * fill_size)),
+			      (long) (n_per_buf * fill_size),
+			      sec->name, stdoutput->filename,
 			      bfd_errmsg (bfd_get_error ()));
 		  offset += n_per_buf * fill_size;
 		}
@@ -2422,7 +2441,11 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 	    if (offset % fragP->fr_var != 0)
 	      {
 		as_bad_where (fragP->fr_file, fragP->fr_line,
-			      _("alignment padding (%lu bytes) not a multiple of %ld"),
+			      ngettext ("alignment padding (%lu byte) "
+					"not a multiple of %ld",
+					"alignment padding (%lu bytes) "
+					"not a multiple of %ld",
+					(unsigned long) offset),
 			      (unsigned long) offset, (long) fragP->fr_var);
 		offset -= (offset % fragP->fr_var);
 	      }

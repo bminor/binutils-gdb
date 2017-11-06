@@ -1,5 +1,25 @@
 2017-11-07  Alan Modra  <amodra@gmail.com>
 
+	* as.c (main): Properly pluralize messages.
+	* frags.c (frag_grow): Likewise.
+	* read.c (emit_expr_with_reloc, emit_expr_fix): Likewise.
+	(parse_bitfield_cons): Likewise.
+	* write.c (fixup_segment, compress_debug, write_contents): Likewise.
+	(relax_segment): Likewise.
+	* config/tc-arm.c (s_arm_elf_cons): Likewise.
+	* config/tc-cr16.c (l_cons): Likewise.
+	* config/tc-i370.c (i370_elf_cons): Likewise.
+	* config/tc-m68k.c (m68k_elf_cons): Likewise.
+	* config/tc-msp430.c (msp430_operands): Likewise.
+	* config/tc-s390.c (s390_elf_cons, s390_literals): Likewise.
+	* config/tc-mcore.c (md_apply_fix): Likewise.
+	* config/tc-tic54x.c (md_assemble): Likewise.
+	* config/tc-xtensa.c (xtensa_elf_cons): Likewise.
+	(xg_expand_assembly_insn): Likewise.
+	* config/xtensa-relax.c (build_transition): Likewise.
+
+2017-11-07  Alan Modra  <amodra@gmail.com>
+
 	* asintl.h (textdomain, bindtextdomain): Use safer "do nothing".
 	(ngettext, dngettext, dcngettext): Define when !ENABLE_NLS.
 

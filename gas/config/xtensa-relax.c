@@ -1764,7 +1764,9 @@ build_transition (insn_pattern *initial_insn,
 	  /* Check for the right number of ops.  */
 	  if (xtensa_opcode_num_operands (isa, bi->opcode)
 	      != (int) operand_count)
-	    as_fatal (_("opcode '%s': replacement does not have %d ops"),
+	    as_fatal (ngettext ("opcode '%s': replacement does not have %d op",
+				"opcode '%s': replacement does not have %d ops",
+				xtensa_opcode_num_operands (isa, bi->opcode)),
 		      opcode_name,
 		      xtensa_opcode_num_operands (isa, bi->opcode));
 	}

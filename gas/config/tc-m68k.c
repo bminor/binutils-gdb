@@ -8068,7 +8068,9 @@ m68k_elf_cons (int nbytes /* 4=.long */)
 
 	  if (size > nbytes)
 	    {
-	      as_bad (_("%s relocations do not fit in %d bytes\n"),
+	      as_bad (ngettext ("%s relocations do not fit in %u byte",
+				"%s relocations do not fit in %u bytes",
+				nbytes),
 		      reloc_howto->name, nbytes);
 	    }
 	  else

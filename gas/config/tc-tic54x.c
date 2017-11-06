@@ -4843,8 +4843,11 @@ md_assemble (char *line)
 	    {
 	      if (words > delay_slots)
 		{
-		  as_bad (_("Instruction does not fit in available delay "
-			    "slots (%d-word insn, %d slots left)"),
+		  as_bad (ngettext ("Instruction does not fit in available "
+				    "delay slots (%d-word insn, %d slot left)",
+				    "Instruction does not fit in available "
+				    "delay slots (%d-word insn, %d slots left)",
+				    delay_slots),
 			  words, delay_slots);
 		  delay_slots = 0;
 		  return;
@@ -4915,9 +4918,13 @@ md_assemble (char *line)
 	{
 	  if (words > delay_slots)
 	    {
-	      as_warn (_("Instruction does not fit in available delay "
-			 "slots (%d-word insn, %d slots left). "
-			 "Resulting behavior is undefined."),
+	      as_warn (ngettext ("Instruction does not fit in available "
+				 "delay slots (%d-word insn, %d slot left). "
+				 "Resulting behavior is undefined.",
+				 "Instruction does not fit in available "
+				 "delay slots (%d-word insn, %d slots left). "
+				 "Resulting behavior is undefined.",
+				 delay_slots),
 		       words, delay_slots);
 	      delay_slots = 0;
 	      return;

@@ -1660,7 +1660,9 @@ xtensa_elf_cons (int nbytes)
 	    as_bad (_("opcode-specific %s relocation used outside "
 		      "an instruction"), reloc_howto->name);
 	  else if (nbytes != (int) bfd_get_reloc_size (reloc_howto))
-	    as_bad (_("%s relocations do not fit in %d bytes"),
+	    as_bad (ngettext ("%s relocations do not fit in %d byte",
+			      "%s relocations do not fit in %d bytes",
+			      nbytes),
 		    reloc_howto->name, nbytes);
 	  else if (reloc == BFD_RELOC_XTENSA_TLS_FUNC
 		   || reloc == BFD_RELOC_XTENSA_TLS_ARG
@@ -4014,14 +4016,18 @@ xg_expand_assembly_insn (IStack *istack, TInsn *orig_insn)
 					  orig_insn->opcode);
   if (orig_insn->ntok < noperands)
     {
-      as_bad (_("found %d operands for '%s':  Expected %d"),
+      as_bad (ngettext ("found %d operand for '%s':  Expected %d",
+			"found %d operands for '%s':  Expected %d",
+			orig_insn->ntok),
 	      orig_insn->ntok,
 	      xtensa_opcode_name (xtensa_default_isa, orig_insn->opcode),
 	      noperands);
       return TRUE;
     }
   if (orig_insn->ntok > noperands)
-    as_warn (_("found too many (%d) operands for '%s':  Expected %d"),
+    as_warn (ngettext ("found %d operand for '%s':  Expected %d",
+		       "found %d operands for '%s':  Expected %d",
+		       orig_insn->ntok),
 	     orig_insn->ntok,
 	     xtensa_opcode_name (xtensa_default_isa, orig_insn->opcode),
 	     noperands);

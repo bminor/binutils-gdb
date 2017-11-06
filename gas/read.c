@@ -4489,7 +4489,10 @@ emit_expr_with_reloc (expressionS *exp,
 	    }
 
 	  if (i < exp->X_add_number)
-	    as_warn (_("bignum truncated to %d bytes"), nbytes);
+	    as_warn (ngettext ("bignum truncated to %d byte",
+			       "bignum truncated to %d bytes",
+			       nbytes),
+		     nbytes);
 	  size = nbytes;
 	}
 
@@ -4565,7 +4568,9 @@ emit_expr_fix (expressionS *exp, unsigned int nbytes, fragS *frag, char *p,
 
       if (size > nbytes)
 	{
-	  as_bad (_("%s relocations do not fit in %u bytes\n"),
+	  as_bad (ngettext ("%s relocations do not fit in %u byte",
+			    "%s relocations do not fit in %u bytes",
+			    nbytes),
 		  reloc_howto->name, nbytes);
 	  return;
 	}
@@ -4674,7 +4679,11 @@ parse_bitfield_cons (expressionS *exp, unsigned int nbytes)
 
 	  if ((width = exp->X_add_number) > (BITS_PER_CHAR * nbytes))
 	    {
-	      as_warn (_("field width %lu too big to fit in %d bytes: truncated to %d bits"),
+	      as_warn (ngettext ("field width %lu too big to fit in %d byte:"
+				 " truncated to %d bits",
+				 "field width %lu too big to fit in %d bytes:"
+				 " truncated to %d bits",
+				 nbytes),
 		       width, nbytes, (BITS_PER_CHAR * nbytes));
 	      width = BITS_PER_CHAR * nbytes;
 	    }			/* Too big.  */

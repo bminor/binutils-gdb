@@ -1206,7 +1206,9 @@ s390_elf_cons (int nbytes /* 1=.byte, 2=.word, 4=.long */)
 	    {
 	      size = bfd_get_reloc_size (reloc_howto);
 	      if (size > nbytes)
-		as_bad (_("%s relocations do not fit in %d bytes"),
+		as_bad (ngettext ("%s relocations do not fit in %d byte",
+				  "%s relocations do not fit in %d bytes",
+				  nbytes),
 			reloc_howto->name, nbytes);
 	      where = frag_more (nbytes);
 	      md_number_to_chars (where, 0, size);
@@ -1860,7 +1862,9 @@ s390_literals (int ignore ATTRIBUTE_UNUSED)
 	  char *where;
 
 	  if (size > lpe->nbytes)
-	    as_bad (_("%s relocations do not fit in %d bytes"),
+	    as_bad (ngettext ("%s relocations do not fit in %d byte",
+			      "%s relocations do not fit in %d bytes",
+			      lpe->nbytes),
 		    reloc_howto->name, lpe->nbytes);
 	  where = frag_more (lpe->nbytes);
 	  md_number_to_chars (where, 0, size);

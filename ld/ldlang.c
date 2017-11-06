@@ -4929,8 +4929,13 @@ lang_check_section_addresses (void)
      a bfd_vma quantity in decimal.  */
   for (m = lang_memory_region_list; m; m = m->next)
     if (m->had_full_message)
-      einfo (_("%X%P: region `%s' overflowed by %ld bytes\n"),
-	     m->name_list.name, (long)(m->current - (m->origin + m->length)));
+      {
+	unsigned long over = m->current - (m->origin + m->length);
+	einfo (ngettext ("%X%P: region `%s' overflowed by %lu byte\n",
+			 "%X%P: region `%s' overflowed by %lu bytes\n",
+			 over),
+	       m->name_list.name, over);
+      }
 }
 
 /* Make sure the new address is within the region.  We explicitly permit the
@@ -5130,8 +5135,11 @@ lang_size_sections_1
 			&& (config.warn_section_align
 			    || os->addr_tree != NULL)
 			&& expld.phase != lang_mark_phase_enum)
-		      einfo (_("%P: warning: changing start of section"
-			       " %s by %lu bytes\n"),
+		      einfo (ngettext ("%P: warning: changing start of "
+				       "section %s by %lu byte\n",
+				       "%P: warning: changing start of "
+				       "section %s by %lu bytes\n",
+				       (unsigned long) dotdelta),
 			     os->name, (unsigned long) dotdelta);
 		  }
 

@@ -178,7 +178,12 @@ l_cons (int nbytes)
               if ((width = exp.X_add_number) >
                   (unsigned int)(BITS_PER_CHAR * nbytes))
                 {
-                  as_warn (_("field width %lu too big to fit in %d bytes: truncated to %d bits"), width, nbytes, (BITS_PER_CHAR * nbytes));
+		  as_warn (ngettext ("field width %lu too big to fit in %d"
+				     " byte: truncated to %d bits",
+				     "field width %lu too big to fit in %d"
+				     " bytes: truncated to %d bits",
+				     nbytes),
+			   width, nbytes, (BITS_PER_CHAR * nbytes));
                   width = BITS_PER_CHAR * nbytes;
                 }                   /* Too big.  */
 

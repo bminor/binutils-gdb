@@ -3552,7 +3552,9 @@ s_arm_elf_cons (int nbytes)
 		}
 
 	      if (size > nbytes)
-		as_bad (_("%s relocations do not fit in %d bytes"),
+		as_bad (ngettext ("%s relocations do not fit in %d byte",
+				  "%s relocations do not fit in %d bytes",
+				  nbytes),
 			howto->name, nbytes);
 	      else
 		{
