@@ -1,5 +1,48 @@
 2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* i386-tdep.c: Include "target-float.h".  Do not include "doublest.h".
+	(i386_extract_return_value): Use target_float_convert.
+	(i386_store_return_value): Likewise.
+	* i387-tdep.c (i387_register_to_value): Use target_float_convert.
+	(i387_value_to_register): Likewise.
+	* ia64-tdep.c: Include "target-float.h".  Do not include "doublest.h".
+	(ia64_register_to_value): Use target_float_convert.
+	(ia64_value_to_register): Likewise.
+	(ia64_extract_return_value): Likewise.
+	(ia64_store_return_value): Likewise.
+	(ia64_push_dummy_call): Likewise.
+	* m68k-tdep.c: Include "target-float.h".
+	(m68k_register_to_value): Use target_float_convert.
+	(m68k_value_to_register): Likewise.
+	(m68k_svr4_extract_return_value): Likewise.
+	(m68k_svr4_store_return_value): Likewise.
+	* ppc-sysv-tdep.c: Include "target-float.h".
+	(ppc_sysv_abi_push_dummy_call): Use target_float_convert.
+	(do_ppc_sysv_return_value): Likewise.
+	(ppc64_sysv_abi_push_freg): Likewise.
+	(ppc64_sysv_abi_return_value_base): Likewise.
+	* rs6000-aix-tdep.c: Include "target-float.h".
+	(rs6000_push_dummy_call): Use target_float_convert.
+	(rs6000_return_value): Likewise.
+	* rs6000-lynx178-tdep.c: Include "target-float.h".
+	(rs6000_lynx178_push_dummy_call): Use target_float_convert.
+	(rs6000_lynx178_return_value): Likewise.
+	* rs6000-tdep.c: Include "target-float.h".  Do not include "doublest.h".
+	(rs6000_register_to_value): Use target_float_convert.
+	(rs6000_value_to_register): Likewise.
+	* arm-tdep.c: Include "target-float.h".  Do not include "doublest.h".
+	(arm_extract_return_value): Use target_float_convert.
+	(arm_store_return_value): Likewise.
+	* sh-tdep.c: Include "target-float.h".  Do not include "doublest.h".
+	(sh_register_convert_to_virtual): Use target_float_convert.
+	(sh_register_convert_to_raw): Likewise.
+	* sh64-tdep.c: Include "target-float.h".
+	(sh64_extract_return_value): Use target_float_convert.
+	(sh64_register_convert_to_virtual): Likewise.
+	(sh64_register_convert_to_raw): Likewise.  Fix argument types.
+
+2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* target-float.c (floatformat_to_host_double): New function.
 	(floatformat_from_host_double): Likewise.
 	(target_float_to_host_double): Likewise.

@@ -37,6 +37,7 @@
 #include "osabi.h"
 #include "target-float.h"
 #include "valprint.h"
+#include "target-float.h"
 
 #include "elf-bfd.h"
 
@@ -1259,8 +1260,8 @@ sh64_extract_return_value (struct type *type, struct regcache *regcache,
 	  gdb_byte buf[8];
 	  regcache_cooked_read (regcache, DR0_REGNUM, buf);
 	  
-	  convert_typed_floating (buf, sh64_littlebyte_bigword_type (gdbarch),
-				  valbuf, type);
+	  target_float_convert (buf, sh64_littlebyte_bigword_type (gdbarch),
+				valbuf, type);
 	}
     }
   else
@@ -1469,8 +1470,8 @@ sh64_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum,
        && regnum <= DR_LAST_REGNUM)
       || (regnum >= DR0_C_REGNUM 
 	  && regnum <= DR_LAST_C_REGNUM))
-    convert_typed_floating (from, sh64_littlebyte_bigword_type (gdbarch),
-			    to, type);
+    target_float_convert (from, sh64_littlebyte_bigword_type (gdbarch),
+			  to, type);
   else
     error (_("sh64_register_convert_to_virtual "
 	     "called with non DR register number"));
@@ -1478,7 +1479,7 @@ sh64_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum,
 
 static void
 sh64_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type,
-			      int regnum, const void *from, void *to)
+			      int regnum, const gdb_byte *from, gdb_byte *to)
 {
   if (gdbarch_byte_order (gdbarch) != BFD_ENDIAN_LITTLE)
     {
@@ -1491,8 +1492,8 @@ sh64_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type,
        && regnum <= DR_LAST_REGNUM)
       || (regnum >= DR0_C_REGNUM 
 	  && regnum <= DR_LAST_C_REGNUM))
-    convert_typed_floating (from, type,
-			    to, sh64_littlebyte_bigword_type (gdbarch));
+    target_float_convert (from, type,
+			  to, sh64_littlebyte_bigword_type (gdbarch));
   else
     error (_("sh64_register_convert_to_raw called "
 	     "with non DR register number"));

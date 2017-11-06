@@ -34,7 +34,7 @@
 #include "inferior.h"
 #include "arch-utils.h"
 #include "regcache.h"
-#include "doublest.h"
+#include "target-float.h"
 #include "osabi.h"
 #include "reggroups.h"
 #include "regset.h"
@@ -1576,8 +1576,8 @@ sh_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum,
     }
 
   if (regnum >= DR0_REGNUM && regnum <= DR_LAST_REGNUM)
-    convert_typed_floating (from, sh_littlebyte_bigword_type (gdbarch),
-			    to, type);
+    target_float_convert (from, sh_littlebyte_bigword_type (gdbarch),
+			  to, type);
   else
     error
       ("sh_register_convert_to_virtual called with non DR register number");
@@ -1595,8 +1595,8 @@ sh_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type,
     }
 
   if (regnum >= DR0_REGNUM && regnum <= DR_LAST_REGNUM)
-    convert_typed_floating (from, type,
-			    to, sh_littlebyte_bigword_type (gdbarch));
+    target_float_convert (from, type,
+			  to, sh_littlebyte_bigword_type (gdbarch));
   else
     error (_("sh_register_convert_to_raw called with non DR register number"));
 }

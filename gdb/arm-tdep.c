@@ -30,7 +30,7 @@
 #include "disasm.h"
 #include "regcache.h"
 #include "reggroups.h"
-#include "doublest.h"
+#include "target-float.h"
 #include "value.h"
 #include "arch-utils.h"
 #include "osabi.h"
@@ -7902,8 +7902,8 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 	    bfd_byte tmpbuf[FP_REGISTER_SIZE];
 
 	    regcache_cooked_read (regs, ARM_F0_REGNUM, tmpbuf);
-	    convert_typed_floating (tmpbuf, arm_ext_type (gdbarch),
-				    valbuf, type);
+	    target_float_convert (tmpbuf, arm_ext_type (gdbarch),
+				  valbuf, type);
 	  }
 	  break;
 
@@ -8107,7 +8107,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	{
 	case ARM_FLOAT_FPA:
 
-	  convert_typed_floating (valbuf, type, buf, arm_ext_type (gdbarch));
+	  target_float_convert (valbuf, type, buf, arm_ext_type (gdbarch));
 	  regcache_cooked_write (regs, ARM_F0_REGNUM, buf);
 	  break;
 

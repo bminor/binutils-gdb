@@ -369,7 +369,7 @@ i387_register_to_value (struct frame_info *frame, int regnum,
 				 from, optimizedp, unavailablep))
     return 0;
 
-  convert_typed_floating (from, i387_ext_type (gdbarch), to, type);
+  target_float_convert (from, i387_ext_type (gdbarch), to, type);
   *optimizedp = *unavailablep = 0;
   return 1;
 }
@@ -395,7 +395,7 @@ i387_value_to_register (struct frame_info *frame, int regnum,
     }
 
   /* Convert from TYPE.  */
-  convert_typed_floating (from, type, to, i387_ext_type (gdbarch));
+  target_float_convert (from, type, to, i387_ext_type (gdbarch));
   put_frame_register (frame, regnum, to);
 }
 

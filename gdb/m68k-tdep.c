@@ -33,6 +33,7 @@
 #include "dis-asm.h"
 #include "target-descriptions.h"
 #include "floatformat.h"
+#include "target-float.h"
 
 #include "m68k-tdep.h"
 
@@ -214,7 +215,7 @@ m68k_register_to_value (struct frame_info *frame, int regnum,
 				 from, optimizedp, unavailablep))
     return 0;
 
-  convert_typed_floating (from, fpreg_type, to, type);
+  target_float_convert (from, fpreg_type, to, type);
   *optimizedp = *unavailablep = 0;
   return 1;
 }
@@ -239,7 +240,7 @@ m68k_value_to_register (struct frame_info *frame, int regnum,
     }
 
   /* Convert from TYPE.  */
-  convert_typed_floating (from, type, to, fpreg_type);
+  target_float_convert (from, type, to, fpreg_type);
   put_frame_register (frame, regnum, to);
 }
 
@@ -311,7 +312,7 @@ m68k_svr4_extract_return_value (struct type *type, struct regcache *regcache,
     {
       struct type *fpreg_type = register_type (gdbarch, M68K_FP0_REGNUM);
       regcache_raw_read (regcache, M68K_FP0_REGNUM, buf);
-      convert_typed_floating (buf, fpreg_type, valbuf, type);
+      target_float_convert (buf, fpreg_type, valbuf, type);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_PTR && TYPE_LENGTH (type) == 4)
     regcache_raw_read (regcache, M68K_A0_REGNUM, valbuf);
@@ -351,7 +352,7 @@ m68k_svr4_store_return_value (struct type *type, struct regcache *regcache,
     {
       struct type *fpreg_type = register_type (gdbarch, M68K_FP0_REGNUM);
       gdb_byte buf[M68K_MAX_REGISTER_SIZE];
-      convert_typed_floating (valbuf, type, buf, fpreg_type);
+      target_float_convert (valbuf, type, buf, fpreg_type);
       regcache_raw_write (regcache, M68K_FP0_REGNUM, buf);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_PTR && TYPE_LENGTH (type) == 4)
