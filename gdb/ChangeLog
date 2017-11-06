@@ -1,5 +1,20 @@
 2017-11-06  Pedro Alves  <palves@redhat.com>
 
+	* event-top.c: Check SIGTSTP instead of STOP_SIGNAL thoughout.
+	(async_init_signals): Adjust.
+	(handle_stop_sig): Rename to ...
+	(handle_sigtstp): ... this.
+	(async_stop_sig): Rename to ...
+	(async_sigtstp_handler): ... this, and delete STOP_SIGNAL !=
+	SIGTSTP path.
+	* event-top.h: Move signal.h include to the top.  Check SIGTSTP
+	instead of STOP_SIGNAL thoughout.
+	(handle_stop_sig): Rename to ...
+	(handle_sigtstp): ... this.
+	* top.c (command_line_input): Replace STOP_SIGNAL -> SIGTSTP.
+
+2017-11-06  Pedro Alves  <palves@redhat.com>
+
 	* inflow.c (child_terminal_inferior, child_terminal_ours_1): No
 	longer set flags twice in row.
 
