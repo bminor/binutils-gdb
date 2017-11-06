@@ -1,3 +1,55 @@
+2017-11-06  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (SER_HARDWIRE): Update comment.
+	(HFILES_NO_SRCDIR): Remove gdb_termios.h.
+	* common/gdb_termios.h: Delete file.
+	* common/job-control.c: Include termios.h and unistd.h instead of
+	gdb_termios.h.
+	(gdb_setpgid): Remove HAVE_TERMIOS || TIOCGPGRP preprocessor
+	check.
+	(have_job_control): Check HAVE_TERMIOS_H instead of HAVE_TERMIOS.
+	Remove sgtty code.
+	* configure.ac: No longer check for termio.h and sgtty.h.
+	* configure: Regenerate.
+	* inflow.c: Include termios.h instead of gdb_termios.h.  Replace
+	PROCESS_GROUP_TYPE checks with HAVE_TERMIOS_H checks throughout.
+	Replace PROCESS_GROUP_TYPE references with pid_t references
+	throughout.
+	(gdb_getpgrp): Delete.
+	(set_initial_gdb_ttystate): Use tcgetpgrp instead of gdb_getpgrp.
+	(child_terminal_inferior): Remove comment.  Remove sgtty code.
+	(child_terminal_ours_1): Use tcgetpgrp directly instead of
+	gdb_getpgrp.  Use serial_set_tty_state instead aof
+	serial_noflush_set_tty_state.  Remove sgtty code.
+	* inflow.h: Include unistd.h instead of gdb_termios.h.  Replace
+	PROCESS_GROUP_TYPE check with HAVE_TERMIOS_H check.
+	(inferior_process_group): Now returns pid_t.
+	* ser-base.c (ser_base_noflush_set_tty_state): Delete.
+	* ser-base.h (ser_base_noflush_set_tty_state): Delete.
+	* ser-event.c (serial_event_ops): Update.
+	* ser-go32.c (dos_noflush_set_tty_state): Delete.
+	(dos_ops): Update.
+	* ser-mingw.c (hardwire_ops, tty_ops, pipe_ops, tcp_ops): Update.
+	* ser-pipe.c (pipe_ops): Update.
+	* ser-tcp.c (tcp_ops): Update.
+	* ser-unix.c: Include termios.h instead of gdb_termios.h.  Remove
+	HAVE_TERMIOS checks.
+	[HAVE_TERMIO] (struct hardwire_ttystate): Delete.
+	[HAVE_SGTTY] (struct hardwire_ttystate): Delete.
+	(get_tty_state, set_tty_state): Drop termio and sgtty code, and
+	assume termios.
+	(hardwire_noflush_set_tty_state): Delete.
+	(hardwire_print_tty_state, hardwire_drain_output)
+	(hardwire_flush_output, hardwire_flush_input)
+	(hardwire_send_break, hardwire_raw, hardwire_setbaudrate)
+	(hardwire_setstopbits, hardwire_setparity): Drop termio and sgtty
+	code, and assume termios.
+	(hardwire_ops): Update.
+	(_initialize_ser_hardwire): Remove HAVE_TERMIOS check.
+	* serial.c (serial_noflush_set_tty_state): Delete.
+	* serial.h (serial_noflush_set_tty_state): Delete.
+	(serial_ops::noflush_set_tty_state): Delete.
+
 2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* Makefile.in (SFILES): Remove doublest.c and dfp.c.

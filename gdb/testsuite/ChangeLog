@@ -1,3 +1,11 @@
+2017-11-06  Pedro Alves  <palves@redhat.com>
+
+	* configure.ac: No longer check for termio.h and sgtty.h.
+	* configure: Regenerate.
+	* remote-utils.c: Include termios.h instead of gdb_termios.h.
+	(remote_open): Check HAVE_TERMIOS_H instead of HAVE_TERMIOS.
+	Remove termio and sgtty code.
+
 2017-11-03  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.mi/list-thread-groups-available.exp: Skip it if XML parsing

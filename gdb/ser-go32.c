@@ -689,17 +689,6 @@ dos_set_tty_state (struct serial *scb, serial_ttystate ttystate)
 }
 
 static int
-dos_noflush_set_tty_state (struct serial *scb, serial_ttystate new_ttystate,
-			   serial_ttystate old_ttystate)
-{
-  struct dos_ttystate *state;
-
-  state = (struct dos_ttystate *) new_ttystate;
-  dos_setbaudrate (scb, state->baudrate);
-  return 0;
-}
-
-static int
 dos_flush_input (struct serial *scb)
 {
   struct dos_ttystate *port = &ports[scb->fd];
@@ -882,7 +871,6 @@ static const struct serial_ops dos_ops =
   dos_copy_tty_state,
   dos_set_tty_state,
   dos_print_tty_state,
-  dos_noflush_set_tty_state,
   dos_setbaudrate,
   dos_setstopbits,
   dos_setparity,

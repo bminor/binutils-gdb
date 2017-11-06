@@ -729,12 +729,9 @@ XMLFILES = \
 	$(srcdir)/features/traceframe-info.dtd \
 	$(srcdir)/features/xinclude.dtd
 
-# This is ser-unix.o for any system which supports a v7/BSD/SYSV/POSIX
-# interface to the serial port.  Hopefully if get ported to OS/2, VMS,
-# etc., then there will be (as part of the C library or perhaps as
-# part of libiberty) a POSIX interface.  But at least for now the
-# host-dependent makefile fragment might need to use something else
-# besides ser-unix.o
+# Build the ser-*.o files the host supports.  This includes ser-unix.o
+# for any system that supports a POSIX interface to the serial port.
+# See configure.ac.
 SER_HARDWIRE = @SER_HARDWIRE@
 
 # The `remote' debugging target is supported for most architectures,
@@ -1539,7 +1536,6 @@ HFILES_NO_SRCDIR = \
 	common/gdb_setjmp.h \
 	common/gdb_signals.h \
 	common/gdb_sys_time.h \
-	common/gdb_termios.h \
 	common/gdb_vecs.h \
 	common/gdb_wait.h \
 	common/common-inferior.h \

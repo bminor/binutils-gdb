@@ -514,14 +514,6 @@ serial_print_tty_state (struct serial *scb,
 }
 
 int
-serial_noflush_set_tty_state (struct serial *scb,
-			      serial_ttystate new_ttystate,
-			      serial_ttystate old_ttystate)
-{
-  return scb->ops->noflush_set_tty_state (scb, new_ttystate, old_ttystate);
-}
-
-int
 serial_setbaudrate (struct serial *scb, int rate)
 {
   return scb->ops->setbaudrate (scb, rate);
