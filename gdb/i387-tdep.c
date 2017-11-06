@@ -18,12 +18,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "doublest.h"
 #include "frame.h"
 #include "gdbcore.h"
 #include "inferior.h"
 #include "language.h"
 #include "regcache.h"
+#include "target-float.h"
 #include "value.h"
 
 #include "i386-tdep.h"
@@ -40,9 +40,8 @@ print_i387_value (struct gdbarch *gdbarch,
      garbage, but we'd better print one too many.  We need enough room
      to print the value, 1 position for the sign, 1 for the decimal
      point, 19 for the digits and 6 for the exponent adds up to 27.  */
-  const struct floatformat *fmt
-    = floatformat_from_type (i387_ext_type (gdbarch));
-  std::string str = floatformat_to_string (fmt, raw, " %-+27.19g");
+  const struct type *type = i387_ext_type (gdbarch);
+  std::string str = target_float_to_string (raw, type, " %-+27.19g");
   fprintf_filtered (file, "%s", str.c_str ());
 }
 

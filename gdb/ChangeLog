@@ -1,5 +1,32 @@
 2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* target-float.c (target_float_to_string): New function.
+	(target_float_from_string): New function.
+	* target-float.h (target_float_to_string): Add prototype.
+	(target_float_from_string): Add prototype.
+
+	* valprint.c: Include "target-float.h".  Do not include
+	"doublest.h" and "dfp.h".
+	(print_floating): Use target_float_to_string.
+	* printcmd.c: Include "target-float.h".  Do not include "dfp.h".
+	(printf_floating): Use target_float_to_string.
+	* i387-tdep.c: Include "target-float.h".  Do not include "doublest.h".
+	(print_i387_value): Use target_float_to_string.
+	* mips-tdep.c: Include "target-float.h".
+	(mips_print_fp_register): Use target_float_to_string.
+	* sh64-tdep.c: Include "target-float.h".
+	(sh64_do_fp_register): Use target_float_to_string.
+
+	* parse.c: Include "target-float.h".  Do not include
+	"doublest.h" and "dfp.h".
+	(parse_float): Use target_float_from_string.
+	* stabsread.c: Include "target-float.h".  Do not include "doublest.h".
+	(define_symbol): Use target_float_from_string.
+	* gdbarch-selftests.c: Include "target-float.h".
+	(register_to_value_test): Use target_float_from_string.
+
+2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* Makefile.c (SFILES): Add target-float.c.
 	(HFILES_NO_SRCDIR): Add target-float.h.
 	(COMMON_OBS): Add target-float.o.

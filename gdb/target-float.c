@@ -60,3 +60,40 @@ target_float_is_zero (const gdb_byte *addr, const struct type *type)
   gdb_assert_not_reached ("unexpected type code");
 }
 
+/* Convert the byte-stream ADDR, interpreted as floating-point type TYPE,
+   to a string, optionally using the print format FORMAT.  */
+std::string
+target_float_to_string (const gdb_byte *addr, const struct type *type,
+			const char *format)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    return floatformat_to_string (floatformat_from_type (type), addr, format);
+
+  if (TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
+    return decimal_to_string (addr, TYPE_LENGTH (type),
+			      gdbarch_byte_order (get_type_arch (type)),
+			      format);
+
+  gdb_assert_not_reached ("unexpected type code");
+}
+
+/* Parse string STRING into a target floating-number of type TYPE and
+   store it as byte-stream ADDR.  Return whether parsing succeeded.  */
+bool
+target_float_from_string (gdb_byte *addr, const struct type *type,
+			  const std::string &string)
+{
+  /* Ensure possible padding bytes in the target buffer are zeroed out.  */
+  memset (addr, 0, TYPE_LENGTH (type));
+
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    return floatformat_from_string (floatformat_from_type (type), addr,
+				    string);
+
+  if (TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
+    return decimal_from_string (addr, TYPE_LENGTH (type),
+				gdbarch_byte_order (get_type_arch (type)),
+				string);
+
+  gdb_assert_not_reached ("unexpected type code");
+}

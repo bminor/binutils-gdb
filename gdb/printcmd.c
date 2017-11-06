@@ -38,7 +38,7 @@
 #include "ui-out.h"
 #include "block.h"
 #include "disasm.h"
-#include "dfp.h"
+#include "target-float.h"
 #include "observer.h"
 #include "solist.h"
 #include "parser-defs.h"
@@ -2360,13 +2360,8 @@ printf_floating (struct ui_file *stream, const char *format,
   value = value_cast (fmt_type, value);
 
   /* Convert the value to a string and print it.  */
-  std::string str;
-  if (TYPE_CODE (fmt_type) == TYPE_CODE_FLT)
-    str = floatformat_to_string (floatformat_from_type (fmt_type),
-				 value_contents (value), format);
-  else
-    str = decimal_to_string (value_contents (value),
-			     TYPE_LENGTH (fmt_type), byte_order, format);
+  std::string str
+    = target_float_to_string (value_contents (value), fmt_type, format);
   fputs_filtered (str.c_str (), stream);
 }
 

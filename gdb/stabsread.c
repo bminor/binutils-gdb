@@ -41,7 +41,7 @@
 #include "demangle.h"
 #include "gdb-demangle.h"
 #include "language.h"
-#include "doublest.h"
+#include "target-float.h"
 #include "cp-abi.h"
 #include "cp-support.h"
 #include <ctype.h>
@@ -798,19 +798,15 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	{
 	case 'r':
 	  {
-	    double d = atof (p);
 	    gdb_byte *dbl_valu;
 	    struct type *dbl_type;
-
-	    /* FIXME-if-picky-about-floating-accuracy: Should be using
-	       target arithmetic to get the value.  real.c in GCC
-	       probably has the necessary code.  */
 
 	    dbl_type = objfile_type (objfile)->builtin_double;
 	    dbl_valu
 	      = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack,
 					    TYPE_LENGTH (dbl_type));
-	    store_typed_floating (dbl_valu, dbl_type, d);
+
+	    target_float_from_string (dbl_valu, dbl_type, std::string (p));
 
 	    SYMBOL_TYPE (sym) = dbl_type;
 	    SYMBOL_VALUE_BYTES (sym) = dbl_valu;

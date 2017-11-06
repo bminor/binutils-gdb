@@ -55,6 +55,7 @@
 #include "user-regs.h"
 #include "valprint.h"
 #include "ax.h"
+#include "target-float.h"
 #include <algorithm>
 
 static const struct objfile_data *mips_pdr_data;
@@ -6258,10 +6259,8 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
   gdb_byte *raw_buffer;
   std::string flt_str, dbl_str;
 
-  const struct floatformat *flt_fmt
-    = floatformat_from_type (builtin_type (gdbarch)->builtin_float);
-  const struct floatformat *dbl_fmt
-    = floatformat_from_type (builtin_type (gdbarch)->builtin_double);
+  const struct type *flt_type = builtin_type (gdbarch)->builtin_float;
+  const struct type *dbl_type = builtin_type (gdbarch)->builtin_double;
 
   raw_buffer
     = ((gdb_byte *)
@@ -6279,7 +6278,7 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
       /* 4-byte registers: Print hex and floating.  Also print even
          numbered registers as doubles.  */
       mips_read_fp_register_single (frame, regnum, raw_buffer);
-      flt_str = floatformat_to_string (flt_fmt, raw_buffer, "%-17.9g");
+      flt_str = target_float_to_string (raw_buffer, flt_type, "%-17.9g");
 
       get_formatted_print_options (&opts, 'x');
       print_scalar_formatted (raw_buffer,
@@ -6291,7 +6290,7 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
       if ((regnum - gdbarch_num_regs (gdbarch)) % 2 == 0)
 	{
 	  mips_read_fp_register_double (frame, regnum, raw_buffer);
-	  dbl_str = floatformat_to_string (dbl_fmt, raw_buffer, "%-24.17g");
+	  dbl_str = target_float_to_string (raw_buffer, dbl_type, "%-24.17g");
 
 	  fprintf_filtered (file, " dbl: %s", dbl_str.c_str ());
 	}
@@ -6302,10 +6301,10 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
 
       /* Eight byte registers: print each one as hex, float and double.  */
       mips_read_fp_register_single (frame, regnum, raw_buffer);
-      flt_str = floatformat_to_string (flt_fmt, raw_buffer, "%-17.9g");
+      flt_str = target_float_to_string (raw_buffer, flt_type, "%-17.9g");
 
       mips_read_fp_register_double (frame, regnum, raw_buffer);
-      dbl_str = floatformat_to_string (dbl_fmt, raw_buffer, "%-24.17g");
+      dbl_str = target_float_to_string (raw_buffer, dbl_type, "%-24.17g");
 
       get_formatted_print_options (&opts, 'x');
       print_scalar_formatted (raw_buffer,

@@ -27,8 +27,7 @@
 #include "language.h"
 #include "annotate.h"
 #include "valprint.h"
-#include "doublest.h"
-#include "dfp.h"
+#include "target-float.h"
 #include "extension.h"
 #include "ada-lang.h"
 #include "gdb_obstack.h"
@@ -1366,18 +1365,7 @@ void
 print_floating (const gdb_byte *valaddr, struct type *type,
 		struct ui_file *stream)
 {
-  std::string str;
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    {
-      const struct floatformat *fmt = floatformat_from_type (type);
-      str = floatformat_to_string (fmt, valaddr);
-    }
-  else
-    {
-      enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
-      unsigned len = TYPE_LENGTH (type);
-      str = decimal_to_string (valaddr, len, byte_order);
-    }
+  std::string str = target_float_to_string (valaddr, type);
   fputs_filtered (str.c_str (), stream);
 }
 

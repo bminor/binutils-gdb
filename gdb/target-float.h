@@ -25,4 +25,11 @@ extern bool target_float_is_valid (const gdb_byte *addr,
 extern bool target_float_is_zero (const gdb_byte *addr,
 				  const struct type *type);
 
+extern std::string target_float_to_string (const gdb_byte *addr,
+					   const struct type *type,
+					   const char *format = nullptr);
+extern bool target_float_from_string (gdb_byte *addr,
+				      const struct type *type,
+				      const std::string &string);
+
 #endif

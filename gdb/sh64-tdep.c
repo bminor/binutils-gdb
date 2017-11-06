@@ -35,6 +35,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "osabi.h"
+#include "target-float.h"
 #include "valprint.h"
 
 #include "elf-bfd.h"
@@ -1931,9 +1932,8 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
 					(gdbarch, regnum)), file);
 
   /* Print the value.  */
-  const struct floatformat *fmt
-    = floatformat_from_type (builtin_type (gdbarch)->builtin_float);
-  std::string str = floatformat_to_string (fmt, raw_buffer, "%-10.9g");
+  const struct type *flt_type = builtin_type (gdbarch)->builtin_float;
+  std::string str = target_float_to_string (raw_buffer, flt_type, "%-10.9g");
   fprintf_filtered (file, "%s", str.c_str ());
 
   /* Print the fp register as hex.  */
