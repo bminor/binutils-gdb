@@ -1,5 +1,35 @@
 2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* doublest.c: Do not include "gdbtypes.h".
+	(extract_typed_floating): Remove.
+	(store_typed_floating): Remove.
+	(convert_typed_floating): Remove.
+	* doublest.h (struct type): Remove.
+	(DOUBLEST_PRINT_FORMAT): Remove.
+	(DOUBLEST_SCAN_FORMAT): Remove.
+	(extract_typed_floating): Remove.
+	(store_typed_floating): Remove.
+	(convert_typed_floating): Remove.
+
+	* dfp.c (decimal_from_doublest): Remove.
+	(decimal_to_doublest): Remove.
+	* dfp.h: Do not include "doublest.h".
+	(decimal_from_doublest): Remove.
+	(decimal_to_doublest): Remove.
+
+	* value.c: Do not include "doublest.h" and "dfp.h".
+	(value_as_double): Remove.
+	(unpack_double): Remove.
+	(value_from_double): Remove.
+	(value_from_decfloat): Remove.
+	* value.h: Do not include "doublest.h".
+	(value_as_double): Remove.
+	(unpack_double): Remove.
+	(value_from_double): Remove.
+	(value_from_decfloat): Remove.
+
+2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* i386-tdep.c: Include "target-float.h".  Do not include "doublest.h".
 	(i386_extract_return_value): Use target_float_convert.
 	(i386_store_return_value): Likewise.

@@ -20,7 +20,6 @@
 #ifndef DOUBLEST_H
 #define DOUBLEST_H
 
-struct type;
 struct floatformat;
 
 /* Use `long double' if the host compiler supports it.  (Note that this is not
@@ -35,12 +34,8 @@ struct floatformat;
 #if (defined HAVE_LONG_DOUBLE && defined PRINTF_HAS_LONG_DOUBLE \
      && defined SCANF_HAS_LONG_DOUBLE)
 typedef long double DOUBLEST;
-# define DOUBLEST_PRINT_FORMAT "Lg"
-# define DOUBLEST_SCAN_FORMAT "Lg"
 #else
 typedef double DOUBLEST;
-# define DOUBLEST_PRINT_FORMAT "g"
-# define DOUBLEST_SCAN_FORMAT "lg"
 /* If we can't scan or print long double, we don't want to use it
    anywhere.  */
 # undef HAVE_LONG_DOUBLE
@@ -80,13 +75,5 @@ extern bool floatformat_from_string (const struct floatformat *fmt,
 /* Return the floatformat's total size in host bytes.  */
 
 extern size_t floatformat_totalsize_bytes (const struct floatformat *fmt);
-
-extern DOUBLEST extract_typed_floating (const void *addr,
-					const struct type *type);
-extern void store_typed_floating (void *addr, const struct type *type,
-				  DOUBLEST val);
-extern void convert_typed_floating (const void *from,
-				    const struct type *from_type,
-                                    void *to, const struct type *to_type);
 
 #endif

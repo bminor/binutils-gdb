@@ -28,10 +28,8 @@
 #include "target.h"
 #include "language.h"
 #include "demangle.h"
-#include "doublest.h"
 #include "regcache.h"
 #include "block.h"
-#include "dfp.h"
 #include "target-float.h"
 #include "objfiles.h"
 #include "valprint.h"
@@ -2764,18 +2762,6 @@ value_as_long (struct value *val)
   return unpack_long (value_type (val), value_contents (val));
 }
 
-DOUBLEST
-value_as_double (struct value *val)
-{
-  DOUBLEST foo;
-  int inv;
-
-  foo = unpack_double (value_type (val), value_contents (val), &inv);
-  if (inv)
-    error (_("Invalid floating value found in program."));
-  return foo;
-}
-
 /* Extract a value as a C pointer.  Does not deallocate the value.
    Note that val's type may not actually be a pointer; value_as_long
    handles all the cases.  */
@@ -2936,49 +2922,6 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
       error (_("Value can't be converted to integer."));
     }
   return 0;			/* Placate lint.  */
-}
-
-/* Return a double value from the specified type and address.
-   INVP points to an int which is set to 0 for valid value,
-   1 for invalid value (bad float format).  In either case,
-   the returned double is OK to use.  Argument is in target
-   format, result is in host format.  */
-
-DOUBLEST
-unpack_double (struct type *type, const gdb_byte *valaddr, int *invp)
-{
-  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
-  enum type_code code;
-  int len;
-  int nosign;
-
-  *invp = 0;			/* Assume valid.  */
-  type = check_typedef (type);
-  code = TYPE_CODE (type);
-  len = TYPE_LENGTH (type);
-  nosign = TYPE_UNSIGNED (type);
-  if (code == TYPE_CODE_FLT)
-    {
-      if (!target_float_is_valid (valaddr, type))
-	{
-	  *invp = 1;
-	  return 0.0;
-	}
-
-      return extract_typed_floating (valaddr, type);
-    }
-  else if (code == TYPE_CODE_DECFLOAT)
-    return decimal_to_doublest (valaddr, len, byte_order);
-  else if (nosign)
-    {
-      /* Unsigned -- be sure we compensate for signed LONGEST.  */
-      return (ULONGEST) unpack_long (type, valaddr);
-    }
-  else
-    {
-      /* Signed -- we are OK with unpack_long.  */
-      return unpack_long (type, valaddr);
-    }
 }
 
 /* Unpack raw data (copied from debugee, target byte order) at VALADDR
@@ -3691,32 +3634,6 @@ value_from_contents (struct type *type, const gdb_byte *contents)
   result = allocate_value (type);
   memcpy (value_contents_raw (result), contents, TYPE_LENGTH (type));
   return result;
-}
-
-struct value *
-value_from_double (struct type *type, DOUBLEST num)
-{
-  struct value *val = allocate_value (type);
-  struct type *base_type = check_typedef (type);
-  enum type_code code = TYPE_CODE (base_type);
-
-  if (code == TYPE_CODE_FLT)
-    {
-      store_typed_floating (value_contents_raw (val), base_type, num);
-    }
-  else
-    error (_("Unexpected type encountered for floating constant."));
-
-  return val;
-}
-
-struct value *
-value_from_decfloat (struct type *type, const gdb_byte *dec)
-{
-  struct value *val = allocate_value (type);
-
-  memcpy (value_contents_raw (val), dec, TYPE_LENGTH (type));
-  return val;
 }
 
 /* Extract a value from the history file.  Input will be of the form

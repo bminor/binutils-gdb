@@ -268,29 +268,6 @@ decimal_to_longest (const gdb_byte *from, int len, enum bfd_endian byte_order)
   return strtoll (str.c_str (), NULL, 10);
 }
 
-/* Converts a value of a float type to a decimal float of
-   specified LEN bytes.
-
-   This is an ugly way to do the conversion, but libdecnumber does
-   not offer a direct way to do it.  */
-void
-decimal_from_doublest (DOUBLEST from,
-		       gdb_byte *to, int len, enum bfd_endian byte_order)
-{
-  std::string str = string_printf ("%.30" DOUBLEST_PRINT_FORMAT, from);
-  decimal_from_string (to, len, byte_order, str);
-}
-
-/* Converts a decimal float of LEN bytes to a double value.  */
-DOUBLEST
-decimal_to_doublest (const gdb_byte *from, int len, enum bfd_endian byte_order)
-{
-  /* This is an ugly way to do the conversion, but libdecnumber does
-     not offer a direct way to do it.  */
-  std::string str = decimal_to_string (from, len, byte_order);
-  return strtod (str.c_str (), NULL);
-}
-
 /* Perform operation OP with operands X and Y with sizes LEN_X and LEN_Y
    and byte orders BYTE_ORDER_X and BYTE_ORDER_Y, and store value in
    RESULT with size LEN_RESULT and byte order BYTE_ORDER_RESULT.  */

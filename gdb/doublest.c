@@ -26,7 +26,6 @@
 #include "defs.h"
 #include "doublest.h"
 #include "floatformat.h"
-#include "gdbtypes.h"
 #include <math.h>		/* ldexp */
 #include <algorithm>
 
@@ -896,96 +895,4 @@ floatformat_from_string (const struct floatformat *fmt, gdb_byte *out,
 
   floatformat_from_doublest (fmt, &doub, out);
   return true;
-}
-
-/* Extract a floating-point number of type TYPE from a target-order
-   byte-stream at ADDR.  Returns the value as type DOUBLEST.  */
-
-DOUBLEST
-extract_typed_floating (const void *addr, const struct type *type)
-{
-  const struct floatformat *fmt = floatformat_from_type (type);
-  DOUBLEST retval;
-
-  floatformat_to_doublest (fmt, addr, &retval);
-  return retval;
-}
-
-/* Store VAL as a floating-point number of type TYPE to a target-order
-   byte-stream at ADDR.  */
-
-void
-store_typed_floating (void *addr, const struct type *type, DOUBLEST val)
-{
-  const struct floatformat *fmt = floatformat_from_type (type);
-
-  /* FIXME: kettenis/2001-10-28: It is debatable whether we should
-     zero out any remaining bytes in the target buffer when TYPE is
-     longer than the actual underlying floating-point format.  Perhaps
-     we should store a fixed bitpattern in those remaining bytes,
-     instead of zero, or perhaps we shouldn't touch those remaining
-     bytes at all.
-
-     NOTE: cagney/2001-10-28: With the way things currently work, it
-     isn't a good idea to leave the end bits undefined.  This is
-     because GDB writes out the entire sizeof(<floating>) bits of the
-     floating-point type even though the value might only be stored
-     in, and the target processor may only refer to, the first N <
-     TYPE_LENGTH (type) bits.  If the end of the buffer wasn't
-     initialized, GDB would write undefined data to the target.  An
-     errant program, refering to that undefined data, would then
-     become non-deterministic.
-
-     See also the function convert_typed_floating below.  */
-  memset (addr, 0, TYPE_LENGTH (type));
-
-  floatformat_from_doublest (fmt, &val, addr);
-}
-
-/* Convert a floating-point number of type FROM_TYPE from a
-   target-order byte-stream at FROM to a floating-point number of type
-   TO_TYPE, and store it to a target-order byte-stream at TO.  */
-
-void
-convert_typed_floating (const void *from, const struct type *from_type,
-                        void *to, const struct type *to_type)
-{
-  const struct floatformat *from_fmt = floatformat_from_type (from_type);
-  const struct floatformat *to_fmt = floatformat_from_type (to_type);
-
-  if (from_fmt == NULL || to_fmt == NULL)
-    {
-      /* If we don't know the floating-point format of FROM_TYPE or
-         TO_TYPE, there's not much we can do.  We might make the
-         assumption that if the length of FROM_TYPE and TO_TYPE match,
-         their floating-point format would match too, but that
-         assumption might be wrong on targets that support
-         floating-point types that only differ in endianness for
-         example.  So we warn instead, and zero out the target buffer.  */
-      warning (_("Can't convert floating-point number to desired type."));
-      memset (to, 0, TYPE_LENGTH (to_type));
-    }
-  else if (from_fmt == to_fmt)
-    {
-      /* We're in business.  The floating-point format of FROM_TYPE
-         and TO_TYPE match.  However, even though the floating-point
-         format matches, the length of the type might still be
-         different.  Make sure we don't overrun any buffers.  See
-         comment in store_typed_floating for a discussion about
-         zeroing out remaining bytes in the target buffer.  */
-      memset (to, 0, TYPE_LENGTH (to_type));
-      memcpy (to, from, std::min (TYPE_LENGTH (from_type),
-				  TYPE_LENGTH (to_type)));
-    }
-  else
-    {
-      /* The floating-point types don't match.  The best we can do
-         (apart from simulating the target FPU) is converting to the
-         widest floating-point type supported by the host, and then
-         again to the desired type.  */
-      DOUBLEST d;
-
-      floatformat_to_doublest (from_fmt, from, &d);
-      floatformat_from_doublest (to_fmt, &d, to);
-    }
 }

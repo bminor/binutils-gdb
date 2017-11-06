@@ -25,7 +25,6 @@
 #ifndef DFP_H
 #define DFP_H
 
-#include "doublest.h"    /* For DOUBLEST.  */
 #include "expression.h"  /* For enum exp_opcode.  */
 
 extern std::string decimal_to_string (const gdb_byte *, int, enum bfd_endian,
@@ -38,10 +37,6 @@ extern void decimal_from_ulongest (ULONGEST from, gdb_byte *to,
 				   int len, enum bfd_endian byte_order);
 extern LONGEST decimal_to_longest (const gdb_byte *from, int len,
 				   enum bfd_endian byte_order);
-extern void decimal_from_doublest (DOUBLEST from, gdb_byte *to,
-				   int len, enum bfd_endian byte_order);
-extern DOUBLEST decimal_to_doublest (const gdb_byte *from, int len,
-				     enum bfd_endian byte_order);
 extern void decimal_binop (enum exp_opcode,
 			   const gdb_byte *, int, enum bfd_endian,
 			   const gdb_byte *, int, enum bfd_endian,
