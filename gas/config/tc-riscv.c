@@ -643,6 +643,7 @@ md_begin (void)
   hash_reg_names (RCLASS_FPR, riscv_fpr_names_abi, NFPR);
 
 #define DECLARE_CSR(name, num) hash_reg_name (RCLASS_CSR, #name, num);
+#define DECLARE_CSR_ALIAS(name, num) DECLARE_CSR(name, num);
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
 

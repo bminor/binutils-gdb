@@ -1,3 +1,9 @@
+2017-11-07  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* opcode/riscv-opc.h (sptbr): Rename to satp.
+	(CSR_SPTBR): Rename to CSR_SATP.
+	(sptbr): Alias to CSR_SATP.
+
 2017-11-07  Tamar Christina  <tamar.christina@arm.com>
 
 	* opcode/arm.h (FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD):

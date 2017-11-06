@@ -1,3 +1,10 @@
+2017-11-07  Palmer Dabbelt  <palmer@dabbelt.com>
+
+	* testsuite/gas/riscv/satp.d: New test.
+	testsuite/gas/riscv/satp.s: Likewise.
+	testsuite/gas/riscv/riscv.exp: Likewise.
+	config/tc-riscv.c (md_begin): Handle CSR aliases.
+
 2017-11-07  Tamar Christina  <tamar.christina@arm.com>
 
 	* config/tc-arm.c (arm_cpus):
