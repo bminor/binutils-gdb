@@ -1224,6 +1224,7 @@ SFILES = \
 	tracepoint.c \
 	trad-frame.c \
 	tramp-frame.c \
+	target-float.c \
 	typeprint.c \
 	ui-file.c \
 	ui-file.h \
@@ -1492,6 +1493,7 @@ HFILES_NO_SRCDIR = \
 	tracefile.h \
 	tracepoint.h \
 	trad-frame.h \
+	target-float.h \
 	tramp-frame.h \
 	typeprint.h \
 	ui-file.h \
@@ -1845,6 +1847,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	top.o \
 	trad-frame.o \
 	tramp-frame.o \
+	target-float.o \
 	typeprint.o \
 	ui-file.o \
 	ui-out.o \

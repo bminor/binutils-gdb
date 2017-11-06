@@ -26,6 +26,7 @@
 #include "language.h"
 #include "doublest.h"
 #include "dfp.h"
+#include "target-float.h"
 #include <math.h>
 #include "infcall.h"
 
@@ -1514,11 +1515,8 @@ value_logical_not (struct value *arg1)
   arg1 = coerce_array (arg1);
   type1 = check_typedef (value_type (arg1));
 
-  if (TYPE_CODE (type1) == TYPE_CODE_FLT)
-    return 0 == value_as_double (arg1);
-  else if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT)
-    return decimal_is_zero (value_contents (arg1), TYPE_LENGTH (type1),
-			    gdbarch_byte_order (get_type_arch (type1)));
+  if (is_floating_value (arg1))
+    return target_float_is_zero (value_contents (arg1), type1);
 
   len = TYPE_LENGTH (type1);
   p = value_contents (arg1);

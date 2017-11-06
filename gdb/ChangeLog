@@ -1,3 +1,27 @@
+2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* Makefile.c (SFILES): Add target-float.c.
+	(HFILES_NO_SRCDIR): Add target-float.h.
+	(COMMON_OBS): Add target-float.o.
+	* target-float.h: New file.
+	* target-float.c: New file.
+
+	* doublest.c (floatformat_classify): Fix detection of float_zero.
+
+	* gdbtypes.c (is_floating_type): New function.
+	* gdbtypes.h (is_floating_type): Add prototype.
+
+	* value.c: Do not include "floatformat.h".
+	(unpack_double): Use target_float_is_valid.
+	(is_floating_value): New function.
+	* value.h (is_floating_value): Add prototype-
+
+	* valarith.c: Include "target-float.h".
+	(value_logical_not): Use target_float_is_zero.
+
+	* python/py-value.c: Include "target-float.h".
+	(valpy_nonzero): Use target_float_is_zero.
+
 2017-11-04  Tom Tromey  <tom@tromey.com>
 
 	* h8300-tdep.c (h8300_push_dummy_call): Use std::vector.

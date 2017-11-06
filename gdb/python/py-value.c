@@ -21,7 +21,7 @@
 #include "charset.h"
 #include "value.h"
 #include "language.h"
-#include "dfp.h"
+#include "target-float.h"
 #include "valprint.h"
 #include "infcall.h"
 #include "expression.h"
@@ -1317,12 +1317,9 @@ valpy_nonzero (PyObject *self)
 
       if (is_integral_type (type) || TYPE_CODE (type) == TYPE_CODE_PTR)
 	nonzero = !!value_as_long (self_value->value);
-      else if (TYPE_CODE (type) == TYPE_CODE_FLT)
-	nonzero = value_as_double (self_value->value) != 0;
-      else if (TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
-	nonzero = !decimal_is_zero (value_contents (self_value->value),
-				 TYPE_LENGTH (type),
-				 gdbarch_byte_order (get_type_arch (type)));
+      else if (is_floating_value (self_value->value))
+	nonzero = !target_float_is_zero (value_contents (self_value->value),
+					 type);
       else
 	/* All other values are True.  */
 	nonzero = 1;

@@ -594,8 +594,13 @@ floatformat_classify (const struct floatformat *fmt,
 	return float_normal;
     }
 
-  if (exponent == 0 && !mant_zero)
-    return float_subnormal;
+  if (exponent == 0)
+    {
+      if (mant_zero)
+	return float_zero;
+      else
+	return float_subnormal;
+    }
 
   if (exponent == fmt->exp_nan)
     {
@@ -604,9 +609,6 @@ floatformat_classify (const struct floatformat *fmt,
       else
 	return float_nan;
     }
-
-  if (mant_zero)
-    return float_zero;
 
   return float_normal;
 }

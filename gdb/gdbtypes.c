@@ -2935,6 +2935,16 @@ is_integral_type (struct type *t)
 	 || (TYPE_CODE (t) == TYPE_CODE_BOOL)));
 }
 
+int
+is_floating_type (struct type *t)
+{
+  t = check_typedef (t);
+  return
+    ((t != NULL)
+     && ((TYPE_CODE (t) == TYPE_CODE_FLT)
+	 || (TYPE_CODE (t) == TYPE_CODE_DECFLOAT)));
+}
+
 /* Return true if TYPE is scalar.  */
 
 int

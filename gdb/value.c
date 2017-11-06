@@ -29,10 +29,10 @@
 #include "language.h"
 #include "demangle.h"
 #include "doublest.h"
-#include "floatformat.h"
 #include "regcache.h"
 #include "block.h"
 #include "dfp.h"
+#include "target-float.h"
 #include "objfiles.h"
 #include "valprint.h"
 #include "cli/cli-decode.h"
@@ -2961,24 +2961,7 @@ unpack_double (struct type *type, const gdb_byte *valaddr, int *invp)
   nosign = TYPE_UNSIGNED (type);
   if (code == TYPE_CODE_FLT)
     {
-      /* NOTE: cagney/2002-02-19: There was a test here to see if the
-	 floating-point value was valid (using the macro
-	 INVALID_FLOAT).  That test/macro have been removed.
-
-	 It turns out that only the VAX defined this macro and then
-	 only in a non-portable way.  Fixing the portability problem
-	 wouldn't help since the VAX floating-point code is also badly
-	 bit-rotten.  The target needs to add definitions for the
-	 methods gdbarch_float_format and gdbarch_double_format - these
-	 exactly describe the target floating-point format.  The
-	 problem here is that the corresponding floatformat_vax_f and
-	 floatformat_vax_d values these methods should be set to are
-	 also not defined either.  Oops!
-
-         Hopefully someone will add both the missing floatformat
-         definitions and the new cases for floatformat_is_valid ().  */
-
-      if (!floatformat_is_valid (floatformat_from_type (type), valaddr))
+      if (!target_float_is_valid (valaddr, type))
 	{
 	  *invp = 1;
 	  return 0.0;
@@ -3019,6 +3002,21 @@ unpack_pointer (struct type *type, const gdb_byte *valaddr)
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
   return unpack_long (type, valaddr);
+}
+
+bool
+is_floating_value (struct value *val)
+{
+  struct type *type = check_typedef (value_type (val));
+
+  if (is_floating_type (type))
+    {
+      if (!target_float_is_valid (value_contents (val), type))
+	error (_("Invalid floating value found in program."));
+      return true;
+    }
+
+  return false;
 }
 
 

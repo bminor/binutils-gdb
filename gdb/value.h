@@ -608,6 +608,10 @@ extern int print_address_demangle (const struct value_print_options *,
 				   struct gdbarch *, CORE_ADDR,
 				   struct ui_file *, int);
 
+/* Returns true if VAL is of floating-point type.  In addition,
+   throws an error if the value is an invalid floating-point value.  */
+extern bool is_floating_value (struct value *val);
+
 extern LONGEST value_as_long (struct value *val);
 extern DOUBLEST value_as_double (struct value *val);
 extern CORE_ADDR value_as_address (struct value *val);
