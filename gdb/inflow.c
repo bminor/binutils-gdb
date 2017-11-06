@@ -244,10 +244,6 @@ child_terminal_inferior (struct target_ops *self)
       int result;
 
 #ifdef F_GETFL
-      /* Is there a reason this is being done twice?  It happens both
-         places we use F_SETFL, so I'm inclined to think perhaps there
-         is some reason, however perverse.  Perhaps not though...  */
-      result = fcntl (0, F_SETFL, tinfo->tflags);
       result = fcntl (0, F_SETFL, tinfo->tflags);
       OOPSY ("fcntl F_SETFL");
 #endif
@@ -403,11 +399,6 @@ child_terminal_ours_1 (int output_only)
 
 #ifdef F_GETFL
       tinfo->tflags = fcntl (0, F_GETFL, 0);
-
-      /* Is there a reason this is being done twice?  It happens both
-         places we use F_SETFL, so I'm inclined to think perhaps there
-         is some reason, however perverse.  Perhaps not though...  */
-      result = fcntl (0, F_SETFL, our_terminal_info.tflags);
       result = fcntl (0, F_SETFL, our_terminal_info.tflags);
 #endif
     }

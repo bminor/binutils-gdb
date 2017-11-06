@@ -1,5 +1,10 @@
 2017-11-06  Pedro Alves  <palves@redhat.com>
 
+	* inflow.c (child_terminal_inferior, child_terminal_ours_1): No
+	longer set flags twice in row.
+
+2017-11-06  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (SER_HARDWIRE): Update comment.
 	(HFILES_NO_SRCDIR): Remove gdb_termios.h.
 	* common/gdb_termios.h: Delete file.
