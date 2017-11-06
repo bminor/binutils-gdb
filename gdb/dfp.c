@@ -330,9 +330,8 @@ decimal_binop (enum exp_opcode op,
       case BINOP_EXP:
 	decNumberPower (&number3, &number1, &number2, &set);
 	break;
-      default:
-	internal_error (__FILE__, __LINE__,
-			_("Unknown decimal floating point operation."));
+     default:
+	error (_("Operation not valid for decimal floating point number."));
 	break;
     }
 

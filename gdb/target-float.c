@@ -27,6 +27,8 @@
 
 /* Helper routines operating on binary floating-point data.  */
 
+#include <math.h>
+
 /* Convert the byte-stream ADDR, interpreted as floating-point format FMT,
    to an integer value (rounding towards zero).  */
 static LONGEST
@@ -80,6 +82,82 @@ floatformat_convert (const gdb_byte *from, const struct floatformat *from_fmt,
       floatformat_to_doublest (from_fmt, from, &d);
       floatformat_from_doublest (to_fmt, &d, to);
     }
+}
+
+/* Perform the binary operation indicated by OPCODE, using as operands the
+   target byte streams X and Y, interpreted as floating-point numbers of
+   formats FMT_X and FMT_Y, respectively.  Convert the result to format
+   FMT_RES and store it into the byte-stream RES.  */
+static void
+floatformat_binop (enum exp_opcode op,
+		   const struct floatformat *fmt_x, const gdb_byte *x,
+		   const struct floatformat *fmt_y, const gdb_byte *y,
+		   const struct floatformat *fmt_result, gdb_byte *result)
+{
+  DOUBLEST v1, v2, v = 0;
+
+  floatformat_to_doublest (fmt_x, x, &v1);
+  floatformat_to_doublest (fmt_y, y, &v2);
+
+  switch (op)
+    {
+      case BINOP_ADD:
+	v = v1 + v2;
+	break;
+
+      case BINOP_SUB:
+	v = v1 - v2;
+	break;
+
+      case BINOP_MUL:
+	v = v1 * v2;
+	break;
+
+      case BINOP_DIV:
+	v = v1 / v2;
+	break;
+
+      case BINOP_EXP:
+	errno = 0;
+	v = pow (v1, v2);
+	if (errno)
+	  error (_("Cannot perform exponentiation: %s"),
+		 safe_strerror (errno));
+	break;
+
+      case BINOP_MIN:
+	v = v1 < v2 ? v1 : v2;
+	break;
+
+      case BINOP_MAX:
+	v = v1 > v2 ? v1 : v2;
+	break;
+
+      default:
+	error (_("Integer-only operation on floating point number."));
+	break;
+    }
+
+  floatformat_from_doublest (fmt_result, &v, result);
+}
+
+/* Compare the two target byte streams X and Y, interpreted as floating-point
+   numbers of formats FMT_X and FMT_Y, respectively.  Return zero if X and Y
+   are equal, -1 if X is less than Y, and 1 otherwise.  */
+static int
+floatformat_compare (const struct floatformat *fmt_x, const gdb_byte *x,
+		     const struct floatformat *fmt_y, const gdb_byte *y)
+{
+  DOUBLEST v1, v2;
+
+  floatformat_to_doublest (fmt_x, x, &v1);
+  floatformat_to_doublest (fmt_y, y, &v2);
+
+  if (v1 == v2)
+    return 0;
+  if (v1 < v2)
+    return -1;
+  return 1;
 }
 
 
@@ -266,3 +344,77 @@ target_float_convert (const gdb_byte *from, const struct type *from_type,
 
   gdb_assert_not_reached ("unexpected type code");
 }
+
+/* Perform the binary operation indicated by OPCODE, using as operands the
+   target byte streams X and Y, interpreted as floating-point numbers of
+   types TYPE_X and TYPE_Y, respectively.  Convert the result to type
+   TYPE_RES and store it into the byte-stream RES.
+
+   The three types must either be all binary floating-point types, or else
+   all decimal floating-point types.  Binary and decimal floating-point
+   types cannot be mixed within a single operation.  */
+void
+target_float_binop (enum exp_opcode opcode,
+		    const gdb_byte *x, const struct type *type_x,
+		    const gdb_byte *y, const struct type *type_y,
+		    gdb_byte *res, const struct type *type_res)
+{
+  /* Ensure possible padding bytes in the target buffer are zeroed out.  */
+  memset (res, 0, TYPE_LENGTH (type_res));
+
+  if (TYPE_CODE (type_res) == TYPE_CODE_FLT)
+    {
+      gdb_assert (TYPE_CODE (type_x) == TYPE_CODE_FLT);
+      gdb_assert (TYPE_CODE (type_y) == TYPE_CODE_FLT);
+      return floatformat_binop (opcode,
+				floatformat_from_type (type_x), x,
+				floatformat_from_type (type_y), y,
+				floatformat_from_type (type_res), res);
+    }
+
+  if (TYPE_CODE (type_res) == TYPE_CODE_DECFLOAT)
+    {
+      gdb_assert (TYPE_CODE (type_x) == TYPE_CODE_DECFLOAT);
+      gdb_assert (TYPE_CODE (type_y) == TYPE_CODE_DECFLOAT);
+      return decimal_binop (opcode,
+			    x, TYPE_LENGTH (type_x),
+			    gdbarch_byte_order (get_type_arch (type_x)),
+			    y, TYPE_LENGTH (type_y),
+			    gdbarch_byte_order (get_type_arch (type_y)),
+			    res, TYPE_LENGTH (type_res),
+			    gdbarch_byte_order (get_type_arch (type_res)));
+    }
+
+  gdb_assert_not_reached ("unexpected type code");
+}
+
+/* Compare the two target byte streams X and Y, interpreted as floating-point
+   numbers of types TYPE_X and TYPE_Y, respectively.  Return zero if X and Y
+   are equal, -1 if X is less than Y, and 1 otherwise.
+
+   The two types must either both be binary floating-point types, or else
+   both be decimal floating-point types.  Binary and decimal floating-point
+   types cannot compared directly against each other.  */
+int
+target_float_compare (const gdb_byte *x, const struct type *type_x,
+		      const gdb_byte *y, const struct type *type_y)
+{
+  if (TYPE_CODE (type_x) == TYPE_CODE_FLT)
+    {
+      gdb_assert (TYPE_CODE (type_y) == TYPE_CODE_FLT);
+      return floatformat_compare (floatformat_from_type (type_x), x,
+				  floatformat_from_type (type_y), y);
+    }
+
+  if (TYPE_CODE (type_x) == TYPE_CODE_DECFLOAT)
+    {
+      gdb_assert (TYPE_CODE (type_y) == TYPE_CODE_DECFLOAT);
+      return decimal_compare (x, TYPE_LENGTH (type_x),
+			      gdbarch_byte_order (get_type_arch (type_x)),
+			      y, TYPE_LENGTH (type_y),
+			      gdbarch_byte_order (get_type_arch (type_y)));
+    }
+
+  gdb_assert_not_reached ("unexpected type code");
+}
+

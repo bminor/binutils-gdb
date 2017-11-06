@@ -1,5 +1,31 @@
 2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* target-float.c: Include <math.h>.
+	(floatformat_binop): New function.
+	(floatformat_compare): Likewise.
+	(target_float_binop): Likewise.
+	(target_float_compare): Likewise.
+	* target-float.h: Include "expression.h".
+	(target_float_binop): Add prototype.
+	(target_float_compare): Likewise.
+
+	* valarith.c: Do not include "doublest.h" and "dfp.h".
+	Include "common/byte-vector.h".
+	(value_args_as_decimal): Remove, replace by ...
+	(value_args_as_target_float): ... this function.  Handle both
+	binary and decimal target floating-point formats.
+	(scalar_binop): Handle both binary and decimal FP using
+	value_args_as_target_float and target_float_binop.
+	(value_equal): Handle both binary and decimal FP using
+	value_args_as_target_float and target_float_compare.
+	(value_less): Likewise.
+	(value_pos): Handle all scalar types as simple copy.
+	(value_neg): Handle all scalar types via BINOP_SUB from 0.
+	* dfp.c (decimal_binop): Throw error instead of internal_error
+	when called with an unsupported operation code.
+
+2017-11-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* target-float.c (target_float_to_string): New function.
 	(target_float_from_string): New function.
 	* target-float.h (target_float_to_string): Add prototype.

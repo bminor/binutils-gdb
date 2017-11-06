@@ -20,6 +20,8 @@
 #ifndef TYPED_FLOAT_H
 #define TYPED_FLOAT_H
 
+#include "expression.h"
+
 extern bool target_float_is_valid (const gdb_byte *addr,
 				   const struct type *type);
 extern bool target_float_is_zero (const gdb_byte *addr,
@@ -43,5 +45,12 @@ extern void target_float_from_ulongest (gdb_byte *addr,
 extern void target_float_convert (const gdb_byte *from,
 				  const struct type *from_type,
 				  gdb_byte *to, const struct type *to_type);
+
+extern void target_float_binop (enum exp_opcode opcode,
+				const gdb_byte *x, const struct type *type_x,
+				const gdb_byte *y, const struct type *type_y,
+				gdb_byte *res, const struct type *type_res);
+extern int target_float_compare (const gdb_byte *x, const struct type *type_x,
+				 const gdb_byte *y, const struct type *type_y);
 
 #endif
